@@ -1,0 +1,54 @@
+# Configuração central do projeto. Valores vindos da SPEC.md ficam aqui para
+# serem usados por todas as etapas (e "pré-registrados" antes de qualquer teste).
+# Suposições sobre o seu contexto estão em [context] e explicadas no ASSUMPTIONS.md.
+
+[context]
+# MEU CONTEXTO — os campos estavam vazios na SPEC; valores conservadores assumidos.
+# Edite aqui quando decidir os valores reais e registre a mudança no ASSUMPTIONS.md.
+capital_inicial_brl = 10000          # R$
+venue = "indefinido"                 # "corretora_eua" | "bdr_b3" | "indefinido"
+max_drawdown_pct = 20                # kill switch do modelo GOOGL (Etapa 7)
+max_frequencia = "semanal"           # "diaria" | "semanal" | "mensal" (no máx. 1 mudança de posição por semana)
+tempo_diario_min = 10                # minutos por dia após o fechamento
+horizonte_anos = 2
+
+[data]
+start = "2010-01-01"                 # início do histórico (exceto GOOGL)
+googl_start = "max"                  # GOOGL: todo o histórico disponível
+b3_suffix = ".SA"
+min_oos_years = 3                    # abaixo disso: "dados insuficientes"
+# Volume financeiro médio mínimo: definido e documentado na Etapa 2.
+
+[costs]
+stress_multiplier = 2.0              # rodar também com 2x custos
+
+[costs.b3]
+commission = 0.0005                  # 0,05% por lado
+slippage = 0.0005                    # 0,05%
+
+[costs.us]
+commission = 0.0001                  # 0,01% por lado
+slippage = 0.0002                    # 0,02%
+
+[backtest]
+long_flat = true                     # long/flat por padrão
+signal_at = "close_t"                # sinal no fechamento de t
+execute_at = "open_t+1"              # execução na abertura de t+1
+max_adv_participation = 0.01         # ordem <= 1% do volume médio diário
+max_param_combos = 20                # por estratégia
+train_years = 5                      # walk-forward: otimiza 5 anos...
+test_years = 1                       # ...testa 1 ano, rola anualmente
+bootstrap_samples = 2000             # ICs de Sharpe e CAGR
+# IR: regras verificadas em fonte oficial (Receita Federal) na data da execução — Etapa 3.
+
+[validation]
+min_trades = 30
+dsr_threshold = 0.95
+random_strategies = 1000
+random_percentile = 0.95
+
+[googl]
+holdout_months = 24
+max_variants = 50
+benchmarks = ["GOOGL", "QQQ"]
+peers = ["MSFT", "META", "AMZN"]

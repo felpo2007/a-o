@@ -1,0 +1,29 @@
+# Segredos — nunca versionar
+.env
+.env.*
+!.env.example
+
+# Python / ambiente
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+build/
+dist/
+
+# Dados baixados e saídas geradas (reproduzíveis com run.py)
+data/cache/*
+!data/cache/.gitkeep
+site/*
+!site/README.md
+live/*
+!live/README.md
+
+# SO / editores
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.ipynb_checkpoints

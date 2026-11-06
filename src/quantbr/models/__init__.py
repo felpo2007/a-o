@@ -1,0 +1,1 @@
+"""Modelos dedicados por ativo."""
