@@ -29,6 +29,8 @@ Critério "Pronto quando" da Etapa 0: `pytest` roda e o README explica como inst
   `git check-ignore`) e teste que procura chaves escritas no código.
 - README com instalação (macOS/Linux/Windows), testes, uso e mapa da estrutura.
 - ASSUMPTIONS.md com os 6 campos de MEU CONTEXTO e 8 decisões técnicas.
+- `CLAUDE.md` com as regras de trabalho para as próximas sessões do Claude Code (o teste de
+  estrutura passou a exigi-lo: agora **56 passed, 1 skipped**).
 
 ### Resultados-chave
 | Verificação | Resultado |
@@ -61,7 +63,7 @@ e ficou mais de 20% abaixo do pico em algum momento de 14 dos 23 anos-calendári
 
 ### Problemas e riscos
 1. ~~O repositório não tinha remoto no GitHub~~ → **resolvido (2026-11-06):** código publicado em
-   **https://github.com/felpo2007/a-o** (público, escolha do usuário), branch `main`, mesmos 2+ commits.
+   **https://github.com/felpo2007/a-o** (público, escolha do usuário), branch `main`.
    O app Claude do GitHub foi instalado na conta com acesso **só** a esse repositório. Sobrou um
    repositório vazio e privado `felpo2007/acoes-quant`, criado durante o processo e não usado: pode
    ser apagado pelo usuário em Settings → Danger zone. Por ser público, nunca versionar `.env`
