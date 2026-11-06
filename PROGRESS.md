@@ -5,7 +5,7 @@
 - **Próxima: Etapa 1 — Fatia vertical (MVP).**
 
 Critério "Pronto quando" da Etapa 0: `pytest` roda e o README explica como instalar → **cumprido**
-(ver resultados abaixo, inclusive instalação do zero a partir de um clone limpo).
+(55 testes passando; instalação do zero a partir de um clone limpo seguindo o README também passou).
 
 ---
 
@@ -36,7 +36,7 @@ Critério "Pronto quando" da Etapa 0: `pytest` roda e o README explica como inst
 | `uv run pytest` (offline) | **55 passed, 1 skipped** (o teste de rede é opcional) |
 | `RUN_NETWORK_TESTS=1 uv run pytest` | **56 passed** |
 | `uv run ruff check .` | sem erros |
-| Instalação do zero (clone limpo → `uv sync --locked` → `pytest`) | ver seção "Verificação final" |
+| Instalação do zero (clone limpo → `uv sync --locked` → `run.py --check-env` → `pytest`) | **OK**: ambiente criado só com o `uv.lock`, "Ambiente OK.", 55 passed, 1 skipped |
 | Smoke test vectorbt com pandas 3.1.1 | OK (backtest de cruzamento de médias em dados sintéticos rodou) |
 
 Fontes de dados testadas em 2026-11-06 a partir do ambiente de execução:
