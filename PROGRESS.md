@@ -12,7 +12,7 @@ Critério "Pronto quando" da Etapa 0: `pytest` roda e o README explica como inst
 ## Etapa 0 — Setup (2026-11-06)
 
 ### O que foi feito
-- Repositório git `acoes-quant` (branch `main`) com a estrutura da SPEC. Código em `src/quantbr/`
+- Repositório git (branch `main`), publicado em https://github.com/felpo2007/a-o, com a estrutura da SPEC. Código em `src/quantbr/`
   com os módulos `data`, `strategies`, `backtest`, `validation`, `models/googl`, `site`, `live`;
   diretórios de topo `data/`, `models/googl/`, `site/`, `live/` para dados e saídas
   (motivo em ASSUMPTIONS.md, D1).
@@ -60,12 +60,12 @@ e ficou mais de 20% abaixo do pico em algum momento de 14 dos 23 anos-calendári
 - Nenhuma regra de IR codificada ainda (verificação em fonte oficial fica para a Etapa 3).
 
 ### Problemas e riscos
-1. **O repositório não tem remoto no GitHub.** Cada sessão roda num ambiente isolado; sem remoto, o
-   código desta sessão não fica disponível para a próxima. Na conta GitHub conectada só existe
-   `felpo2007/orcamento-coxilha-negra`, e daqui não é possível criar repositórios. Mitigação desta
-   sessão: zip do repositório (com o histórico git) enviado na conversa. **Ação necessária:** criar
-   um repositório vazio no GitHub (ex.: `felpo2007/acoes-quant`). A Etapa 7 (GitHub Actions) também
-   depende disso.
+1. ~~O repositório não tinha remoto no GitHub~~ → **resolvido (2026-11-06):** código publicado em
+   **https://github.com/felpo2007/a-o** (público, escolha do usuário), branch `main`, mesmos 2+ commits.
+   O app Claude do GitHub foi instalado na conta com acesso **só** a esse repositório. Sobrou um
+   repositório vazio e privado `felpo2007/acoes-quant`, criado durante o processo e não usado: pode
+   ser apagado pelo usuário em Settings → Danger zone. Por ser público, nunca versionar `.env`
+   (já garantido por `.gitignore` e teste).
 2. yfinance recebeu HTTP 429 (limite de requisições) ao buscar o "crumb", mas os downloads
    funcionaram. No universo completo (~76 + ~500 tickers) vai precisar de pausa entre requisições,
    retry com backoff e cache Parquet (Etapa 2).
@@ -77,7 +77,7 @@ e ficou mais de 20% abaixo do pico em algum momento de 14 dos 23 anos-calendári
    histórico da GOOGL; vale revisar antes da Etapa 6.
 
 ### Próximos passos (Etapa 1 — MVP)
-0. Antes de começar: recuperar este repositório (GitHub, se criado; senão, o zip desta sessão).
+0. Antes de começar: abrir o Claude Code no repositório `felpo2007/a-o` (o zip da Etapa 0 não é mais necessário).
 1. Universo MVP: 10 ações do IBOV (maiores pesos na carteira do dia da B3) + 10 do S&P 500 (maiores
    valores de mercado) + GOOGL; salvar em `data/reference/` com data de referência.
 2. Download via yfinance com cache Parquet e calendário de pregões (pandas_market_calendars).

@@ -7,7 +7,7 @@ import pytest
 
 from quantbr.paths import ROOT
 
-REQUIRED_FILES = ["README.md", "SPEC.md", "PROGRESS.md", "ASSUMPTIONS.md", "pyproject.toml",
+REQUIRED_FILES = ["README.md", "CLAUDE.md", "SPEC.md", "PROGRESS.md", "ASSUMPTIONS.md", "pyproject.toml",
                   "uv.lock", ".python-version", ".gitignore", ".env.example", "run.py",
                   "config/default.toml"]
 

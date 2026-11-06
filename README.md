@@ -1,4 +1,4 @@
-# acoes-quant
+# a-o — estratégias IBOV + S&P 500 e modelo GOOGL
 
 Estudo educacional de estratégias de trade para as ações do **Ibovespa** e do **S&P 500**, com
 validação fora da amostra, e um **modelo dedicado para GOOGL** (paper trading antes de real).
@@ -15,9 +15,10 @@ Requisitos: **Python 3.11+** (o projeto fixa 3.12 em `.python-version`), **git**
 1. Instale o uv (gerenciador de ambiente e dependências):
    - macOS / Linux: `curl -LsSf https://astral.sh/uv/install.sh | sh`
    - Windows (PowerShell): `powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"`
-2. Entre na pasta do projeto e crie o ambiente com as versões exatas do `uv.lock`:
+2. Baixe o projeto e crie o ambiente com as versões exatas do `uv.lock`:
    ```bash
-   cd acoes-quant
+   git clone https://github.com/felpo2007/a-o.git
+   cd a-o
    uv sync --locked
    ```
    O uv baixa o Python 3.12 sozinho se ele não estiver instalado.
@@ -37,6 +38,14 @@ Requisitos: **Python 3.11+** (o projeto fixa 3.12 em `.python-version`), **git**
 
 **Sem uv (alternativa):** `python -m venv .venv`, ative o ambiente e rode `pip install -e .` e
 `pip install pytest ruff`. Funciona, mas não garante as mesmas versões do `uv.lock`.
+
+## Continuar no Claude Code
+
+Abra o Claude Code (claude.ai/code ou app), escolha o repositório `felpo2007/a-o` e envie:
+
+> Execute a próxima etapa pendente do PROGRESS.md seguindo o CLAUDE.md.
+
+O `CLAUDE.md` traz as regras de trabalho (uma etapa por sessão, testes, commit e push).
 
 ## Uso
 
