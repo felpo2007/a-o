@@ -3,10 +3,6 @@
 -- SÓ RODA NO STUDIO, em modo de edição, pela barra de comando:
 --     require(game.ServerStorage.VT65Build.Build).terrain()
 -- Depois salve o place. Leva minutos (≈17,9 x 12,1 mil studs, voxels de 4 studs).
-local WorldData = (
-	if (script :: any) ~= nil then require((script :: any).Parent.WorldData) else require("./WorldData")
-) :: any
-
 local TerrainBuilder = {}
 
 local VOXEL = 4

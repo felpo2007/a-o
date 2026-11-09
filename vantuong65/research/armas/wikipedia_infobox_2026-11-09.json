@@ -1,0 +1,115 @@
+{
+ "M14 rifle": {
+  "cartridge": "[[7.62×51mm NATO]] (.308&nbsp;in)",
+  "velocity": "{{convert|2800|ft/s|0|abbr=on}}",
+  "rate": "700–750 rounds/min",
+  "weight": "   | {{convert|9.2|lb|kg}} empty   | {{convert|10.7|lb|kg}} with loaded magazine ",
+  "feed": "{{ubl",
+  "range": "{{ubl",
+  "_fonte": "https://en.wikipedia.org/wiki/M14_rifle",
+  "length": "44.3&nbsp;in (1,126&nbsp;mm)"
+ },
+ "M60 machine gun": {
+  "cartridge": "[[7.62×51mm NATO]]",
+  "velocity": "2,800 ft/s (853 m/s)",
+  "rate": "550–650 rounds/min",
+  "weight": "{{convert|10.5|kg|lb|2|abbr=on}}",
+  "feed": "Disintegrating [[Belt (firearm)|belt]] with [[M13 Link]]s",
+  "range": "1,200 yd (1,100 m)",
+  "_fonte": "https://en.wikipedia.org/wiki/M60_machine_gun"
+ },
+ "M79 grenade launcher": {
+  "cartridge": "[[40mm grenade|40×46mm grenade]]",
+  "velocity": "76&nbsp;m/s (247&nbsp;ft/s)",
+  "rate": "Depends on the speed of the operator",
+  "weight": "2.93&nbsp;kg (6.45&nbsp;lb) loaded<br />2.7&nbsp;kg (5.95&nbsp;lb) empty",
+  "feed": "[[Breech-loading weapon|Breech-loaded]]",
+  "length": "73.1&nbsp;cm (28.78&nbsp;in)",
+  "range": "350&nbsp;m (383&nbsp;yd)",
+  "max_range": "400&nbsp;m (437&nbsp;yd)",
+  "action": "[[Break-action]]",
+  "sights": "Blade and leaf type",
+  "_fonte": "https://en.wikipedia.org/wiki/M79_grenade_launcher"
+ },
+ "M1911 pistol": {
+  "cartridge": "[[.45 ACP]], [[.455 Webley]] Auto (British Contract), [[.38 Super]], [[9x19mm Parabellum]], [[7.65mm Parabellum]], [[9mm Steyr]], [[.400 Corbon]], others",
+  "velocity": "{{convert|830|ft/s|0|abbr=on}}",
+  "weight": "{{convert|39|oz|g|abbr=on|lk=on}} empty, with magazine",
+  "feed": "7-, 8-, 9-, 10- or 12-round box magazines",
+  "range": "{{convert|50|m|ft|abbr=on}}",
+  "_fonte": "https://en.wikipedia.org/wiki/M1911_pistol"
+ },
+ "Type 56 assault rifle": {
+  "cartridge": "Type 56 variants -[[7.62×39mm]]",
+  "velocity": "Type 56, Type 56-I, Type 56-II: 735 m/s (2,411 ft/s)<br />QBZ-56C: 665 m/s (2182 ft/s)",
+  "rate": "650 rounds/min",
+  "weight": "Type 56: {{convert|3.8|kg|lb|2|abbr=on}}<br />Type 56-1: {{convert|3.7|kg|lb|2|abbr=on}}<br />Type 56-2/56-4: {{convert|3.9|kg|lb|2|abbr=on}}<br />QBZ-56C: {{convert|2.85|kg|lb|2|abbr=on}}",
+  "feed": "20, 30, or 40-round detachable box magazine",
+  "length": "Type 56: {{convert|882|mm|in|abbr=on}}<br />Type 56-1/56-2: {{convert|874|mm|in|abbr=on}} w/ stock extended, {{convert|654|mm|in|abbr=on}} w/ stock folded.<br />QBZ-56C: {{convert|764|mm|in|abbr=on}} ",
+  "range": "100–800 m sight adjustments. Effective range 300–400 meters",
+  "max_range": "| feed               = 20, 30, or 40-round detachable box magazine",
+  "action": "[[Gas-operated reloading|Gas-operated]], [[rotating bolt]]",
+  "sights": "Adjustable [[Iron sight]]s",
+  "_fonte": "https://en.wikipedia.org/wiki/Type_56_assault_rifle"
+ },
+ "SKS": {
+  "cartridge": "[[7.62×39mm]]",
+  "velocity": "{{convert|735|m/s|ft/s|abbr=on}}",
+  "rate": "35–40 rounds/min",
+  "weight": "{{convert|3.85|kg|lb|abbr=on}}",
+  "feed": "10-round fixed magazine fed by a [[stripper clip]]",
+  "length": "{{convert|1.021|m|in|abbr=on}} <small>(with bayonet folded)</small>",
+  "range": "{{convert|400|m|yd|abbr=on}}",
+  "max_range": "| feed               = 10-round fixed magazine fed by a [[stripper clip]]",
+  "action": "[[Gas-operated reloading|Gas-operated]] (short-stroke, [[tilting bolt]])",
+  "sights": "[[Iron sight]]s graduated from 100 to 1,000 meters",
+  "_fonte": "https://en.wikipedia.org/wiki/SKS"
+ },
+ "RPD": {
+  "_fonte": "https://en.wikipedia.org/wiki/RPD"
+ },
+ "RPG-2": {
+  "cartridge": "PG-2 [[High-explosive anti-tank|HEAT]] round",
+  "velocity": "| range              = {{convert|100|–|150| m|yd|abbr=on}}",
+  "rate": "3–4 rounds per minute",
+  "weight": "{{convert|2.83|kg|lboz|abbr=on}} (unarmed)<br/>{{convert|4.67|kg|lboz|abbr=on}} (ready to fire)",
+  "feed": "| sights             = <!-- Explosive specifications -->",
+  "length": "{{convert|1200|mm|in|1|abbr=on}}",
+  "range": "{{convert|100|–|150| m|yd|abbr=on}}",
+  "max_range": "{{convert|200 |m|yd|abbr=on}}",
+  "action": "| rate               = 3–4 rounds per minute",
+  "sights": "<!-- Explosive specifications -->",
+  "_fonte": "https://en.wikipedia.org/wiki/RPG-2"
+ },
+ "Type 54 pistol": {
+  "cartridge": "[[7.62×25mm]]<br>[[.38 Super]]<br>[[9×19mm Parabellum]]",
+  "velocity": "{{convert|420|m/s|0|abbr=on}}",
+  "rate": "| velocity           = {{convert|420|m/s|0|abbr=on}}",
+  "weight": "{{convert|890|g|abbr=on}}",
+  "feed": "7 and 8 -round detachable [[box magazine]], 14-round box magazine (213A/B)",
+  "length": "{{convert|195|mm|in|abbr=on}}",
+  "range": "50 m",
+  "max_range": "| feed               = 7 and 8 -round detachable [[box magazine]], 14-round box magazine (213A/B)",
+  "action": "[[Recoil operation|Short recoil actuated]], locked breech, single action, semi-auto",
+  "sights": "Front blade, rear notch<br/> {{convert|156|mm|abbr=on|1}} sight radius",
+  "_fonte": "https://en.wikipedia.org/wiki/Type_54_pistol"
+ },
+ "Bazooka": {
+  "cartridge": "|caliber =",
+  "velocity": "|range =",
+  "rate": "|velocity =",
+  "weight": "|length =",
+  "feed": "|sights =",
+  "range": "|max_range =",
+  "_fonte": "https://en.wikipedia.org/wiki/Bazooka"
+ },
+ "RPD machine gun": {
+  "cartridge": "[[7.62×39mm]]<br />[[5.56×45mm NATO]] (Israeli conversion)",
+  "velocity": "{{convert|735|m/s|0|abbr=on}}",
+  "rate": "650–750 rounds/min",
+  "weight": "{{convert|7.4|kg|lb|2|abbr=on}} when empty",
+  "feed": "Non-disintegrating 100-round segmented belt stored in a drum container. Custom 125 round belt (MACVSOG version)",
+  "range": "100–1,000 m sight adjustments",
+  "_fonte": "https://en.wikipedia.org/wiki/RPD_machine_gun"
+ }
+}

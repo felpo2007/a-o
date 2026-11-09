@@ -7,3 +7,4 @@ research/sat/
 __pycache__/
 .pytest_cache/
 .ruff_cache/
+assets/forgegui/models/

@@ -11,11 +11,30 @@ do repositório.
   [`research/F0_GEORREF.md`](research/F0_GEORREF.md),
   [`research/F0_CORONA.md`](research/F0_CORONA.md)
 
-## Abrir o greybox (F1)
-1. Abra `place/VanTuong65_F1.rbxl` no Roblox Studio.
+## Abrir o jogo (F1 greybox + F2 loop central + monetização)
+1. Abra `place/VanTuong65.rbxl` no Roblox Studio.
 2. Barra de comando: `require(game.ServerStorage.VT65Build.Build).terrain()`
 3. Espere a mensagem "terreno pronto" e salve.
-4. Dê Play e aperte F3 para ver o HUD de medição.
+4. Test → Local Server com 2–4 jogadores. Roteiro completo em `PROGRESS.md`.
+
+Controles (placeholder):
+
+| Tecla | Ação |
+|---|---|
+| clique esq. | atirar |
+| clique dir. | mirar |
+| R | recarregar |
+| V | seletor de tiro |
+| G | curativo |
+| T | torniquete |
+| F | curar/reanimar aliado |
+| H | desistir |
+| M | mapa |
+| B | loja |
+| F3 | HUD de medição |
+
+Monetização: `MONETIZATION.md`. Assets do ForgeGUI: `assets/forgegui/`, a importar no Studio
+(modelos com unidade = stud) e com os IDs colados em `src/ReplicatedStorage/Shared/AssetIds.luau`.
 
 ## Estrutura
 ```

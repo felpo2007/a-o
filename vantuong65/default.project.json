@@ -3,18 +3,31 @@
   "tree": {
     "$className": "DataModel",
     "ReplicatedStorage": {
-      "Shared": { "$path": "src/ReplicatedStorage/Shared" }
+      "Shared": {
+        "$path": "src/ReplicatedStorage/Shared"
+      }
     },
     "ServerStorage": {
-      "VT65Build": { "$path": "src/ServerStorage/VT65Build" }
+      "VT65Build": {
+        "$path": "src/ServerStorage/VT65Build"
+      }
     },
     "ServerScriptService": {
-      "Services": { "$path": "src/ServerScriptService/Services" }
+      "Services": {
+        "$path": "src/ServerScriptService/Services"
+      },
+      "Modules": {
+        "$path": "src/ServerScriptService/Modules"
+      }
     },
     "StarterPlayer": {
-      "$properties": { "CharacterWalkSpeed": 11.07 },
+      "$properties": {
+        "CharacterWalkSpeed": 11.07
+      },
       "StarterPlayerScripts": {
-        "Controllers": { "$path": "src/StarterPlayer/StarterPlayerScripts/Controllers" }
+        "Controllers": {
+          "$path": "src/StarterPlayer/StarterPlayerScripts/Controllers"
+        }
       }
     },
     "Workspace": {
@@ -41,21 +54,39 @@
           "Offset": 0.15,
           "Haze": 2.0,
           "Glare": 0.15,
-          "Color": [0.78, 0.81, 0.83],
-          "Decay": [0.56, 0.6, 0.62]
+          "Color": [
+            0.78,
+            0.81,
+            0.83
+          ],
+          "Decay": [
+            0.56,
+            0.6,
+            0.62
+          ]
         }
       },
       "ColorCorrection": {
         "$className": "ColorCorrectionEffect",
-        "$properties": { "Saturation": -0.1, "Contrast": 0.05 }
+        "$properties": {
+          "Saturation": -0.1,
+          "Contrast": 0.05
+        }
       },
       "Bloom": {
         "$className": "BloomEffect",
-        "$properties": { "Intensity": 0.25, "Size": 24, "Threshold": 1.6 }
+        "$properties": {
+          "Intensity": 0.25,
+          "Size": 24,
+          "Threshold": 1.6
+        }
       },
       "SunRays": {
         "$className": "SunRaysEffect",
-        "$properties": { "Intensity": 0.03, "Spread": 0.5 }
+        "$properties": {
+          "Intensity": 0.03,
+          "Spread": 0.5
+        }
       }
     }
   }

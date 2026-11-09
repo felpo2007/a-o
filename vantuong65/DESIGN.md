@@ -175,3 +175,74 @@ O PDF "Binh Son 6739-1" hospedado pela PCL/UT e pelo Wikimedia Commons tem **9.5
 mesmo tamanho do GeoPDF da edição 3-DMA (1983). Não é a edição de 1965. A edição de 1965 continua sem
 fonte acessível, e por isso a CORONA (`research/F0_CORONA.md`) passa a ser o caminho para o uso do
 solo de 1965.
+
+## D-20 — Monetização sem vantagem (firme)
+Detalhes em `MONETIZATION.md`.
+- **O que entra:** passes cosméticos, Passe de Unidade, Apoiador, produtos de apoio, servidores
+  privados, benefício Premium e assinatura opcional.
+- **Neutralidade visual:** nenhuma variação cosmética muda a silhueta ou a cor média em mais de 5% de
+  luminância. Por isso a rede de camuflagem com folhas foi retirada do catálogo.
+- **Preços:** nunca fixos no código, para o Managed Pricing funcionar.
+- **Recibos:** gravados de forma atômica (`UpdateAsync`), para nunca entregar duas vezes.
+- **Rejeitados:** caixas pagas, anúncios no mundo e acesso pago.
+
+## D-21 — Modelo de dano inicial (provisório, calibrar em playtest)
+Vida 100, sem regeneração. Os valores abaixo seguem o princípio de "um ou dois tiros de fuzil matam":
+- **Cabeça:** com energia de 300 J ou mais, mata.
+- **Tronco:** com 1.500 J ou mais, incapacita (dá para reanimar). Abaixo disso, tira 45 + E/50 de
+  vida (máximo 90) e causa sangramento grave.
+- **Membros:** tiram 20 + E/250 (máximo 45). Com 1.500 J ou mais há 20% de chance de sangramento
+  arterial; o membro fica prejudicado.
+- **Fogo amigo:** ligado.
+- **Referência de energia:** a 300 m, a M14 chega com 1.946 J (calculado em `Ballistics.luau`).
+  Portanto ainda incapacita com um tiro no tronco; a Type 56 à mesma distância, não.
+
+## D-22 — Balística (provisória)
+- **Ambiente:** ar a 30 °C, com ρ = 1,16 kg/m³ e som a 349 m/s. O prompt fala em 343 m/s, que é o
+  valor a 20 °C; uso 349 m/s por ser agosto na planície costeira.
+- **Arrasto:** tabela G1 aproximada, com integração em passos de 1/120 s e voo máximo de 2,5 s.
+- **Queda com zeragem a 100 m (calculada, ainda NÃO validada contra tabela de tiro publicada):**
+  - M14: 0,16 m a 200 m e 0,52 m a 300 m;
+  - Type 56: 0,24 m a 200 m e 0,80 m a 300 m.
+- **Valores provisórios:** coeficientes balísticos, massas de projétil e dispersões estão marcados
+  como PLACEHOLDER em `Weapons.luau`. As velocidades de boca, cadências, pesos e carregadores vêm da
+  Wikipedia (fonte secundária, `research/armas/`), ainda sem conferência no FM/TM.
+
+## D-23 — Captura (provisória)
+- **Ritmo:** 1 atacante leva 90 s de neutro a dono; a velocidade é 1 + 0,25 × (vantagem − 1), com
+  máximo de 2×.
+- **Disputa:** com os dois lados presentes, a captura congela.
+- **Defesa:** defensores sozinhos devolvem o ponto ao dono em 120 s.
+- **Setor inimigo:** primeiro é neutralizado, depois capturado.
+- **Alcance:** só se ataca o setor vizinho a um setor próprio.
+- **Modos:** Skirmish usa só o setor central por 20 min; Warfare dura 75 min.
+
+## D-24 — Spawn (provisória)
+- Segue as regras da Parte 10.1.
+- O ponto de reunião fica 100 m atrás do ponto forte: a leste para os EUA, a oeste para o VC.
+- O QG nunca é bloqueado.
+- O primeiro spawn da partida é imediato.
+
+## D-25 — Validação de tiro no servidor (firme)
+- **Na chegada do tiro, o servidor recusa se:**
+  - a defasagem passa de 250 ms (os 200 ms do prompt mais folga);
+  - a origem está a mais de 8 studs da cabeça;
+  - a cadência passa de 85% do mínimo da arma;
+  - não há munição (a contagem é do servidor).
+- **Depois:** o servidor refaz a trajetória com a mesma semente.
+- **Atravessáveis provisórios:** bambu (mantém 85% da velocidade) e palha (80%).
+- **Sem hitmarker:** o servidor não confirma acertos ao atirador.
+- **Traçantes:** por enquanto só nas metralhadoras, 1 a cada 5. A proporção real das fitas ainda
+  precisa ser confirmada.
+
+## D-26 — Uso do crédito do ForgeGUI (registro)
+Não existe consulta de saldo. Gastei em ordem de prioridade e parei antes de itens da F4.
+
+| Tipo | Itens |
+|---|---|
+| Retries de modelo | M14 ✔, Type 56 (3 tentativas), bambu, coqueiro, bunker |
+| Imagens | capa (2 perdidas por interrupção do servidor do ForgeGUI + 1 ✔), 4 ícones de passe ✔ |
+| Sons | tiro de M14 ✔, tiro de Type 56 ✔, ambiência ✔ |
+| Preparação | gratuita |
+
+O UH-34D ficou para a F4.

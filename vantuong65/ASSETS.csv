@@ -1,17 +1,17 @@
 nome,lote,tipo,fonte_referencia,forgegui_job_id,request_id,triangulos,texturas,status,observacao
-M14 (fuzil),L1,modelo_3d,manuais FM 23-8 / fotos USMC 1965 (dossie pendente),f60c2cb7-7144-4ff0-800c-8824906aaf82,vt65-m14-rifle-v1,,,failed (retry com checkpoint),retry ~4000 creditos; saldo 100
-Type 56 (fuzil),L1,modelo_3d,fotos de armas capturadas em Starlite (dossie pendente),6d778185-95f3-4562-92cc-076fdf975855,vt65-type56-rifle-v1,,,failed (retry com checkpoint),retry ~4000 creditos
-Casa de palha (vila de Quang Ngai),L1,modelo_3d,fotos de An Cuong 1965 (dossie pendente),6431342a-d90d-48ac-8846-3e267912185e,vt65-hut-thatch-v1,nao contado,nao conferido,succeeded,GLB no armazenamento do ForgeGUI; host bloqueado pela rede desta sessao: baixar e contar triangulos na F1
-Bunker VC de vila,L1,modelo_3d,H1 PDF p.23/25 (trincheiras cobertas de galhos e toras),f6a47bd7-f1bc-442b-a56a-1e6064b5cc9d,vt65-vc-bunker-v1,,,failed (retry com checkpoint),retry ~4000 creditos
-Touceira de bambu,L1,modelo_3d,H1 PDF p.10 (sebes de bambu e madeira dura),a15f97ec-e881-4dc0-93ee-7f9dff23aa99,vt65-bamboo-clump-v1,,,failed (retry com checkpoint),altura a decidir em DESIGN D-07
-Coqueiro,L1,modelo_3d,fotos de Quang Ngai (dossie pendente),1f9588a4-f340-45da-b472-ca8cabb5e53a,vt65-coconut-palm-v1,,,failed (retry com checkpoint),retry ~4000 creditos
-UH-34D Seahorse,L1,modelo_3d,H1 PDF p.43 (23 UH-34 do HMM-361),727a99a1-ec54-4a0b-b888-55e28069941e,vt65-uh34d-heli-v1,,,failed (retry com checkpoint),retry ~4000 creditos
-Key art (thumbnail),L1,imagem,,671f7065-2f2e-4c63-8d8e-a431f2749806,vt65-thumbnail-keyart-v1,,,outcome_unknown,nao regenerar com o mesmo id (regra do ForgeGUI)
+M14 (fuzil),L1,modelo_3d,manuais FM 23-8 / fotos USMC 1965 (dossie pendente),f60c2cb7-7144-4ff0-800c-8824906aaf82,vt65-m14-rifle-v1,15626,embutidas no GLB,succeeded (retry 2026-11-09); preparado em escala real,"models/m14_studs.glb via manifest.json (1,126 m = 4,02 studs; wiki:M14_rifle); importar com unidade = stud"
+Type 56 (fuzil),L1,modelo_3d,fotos de armas capturadas em Starlite (dossie pendente),6d778185-95f3-4562-92cc-076fdf975855,vt65-type56-rifle-v1,15052,,succeeded (retry 3); preparado em escala real,"models/type56_studs.glb via manifest.json (0,882 m = 3,15 studs)"
+Casa de palha (vila de Quang Ngai),L1,modelo_3d,fotos de An Cuong 1965 (dossie pendente),6431342a-d90d-48ac-8846-3e267912185e,vt65-hut-thatch-v1,13030,nao conferido,succeeded; preparado em escala real,"models/casa_palha_studs.glb via manifest.json (7,0 x 5,7 x 5,2 m)"
+Bunker VC de vila,L1,modelo_3d,H1 PDF p.23/25 (trincheiras cobertas de galhos e toras),f6a47bd7-f1bc-442b-a56a-1e6064b5cc9d,vt65-vc-bunker-v1,,,retry em andamento (2026-11-09),retry ~4000 creditos
+Touceira de bambu,L1,modelo_3d,H1 PDF p.10 (sebes de bambu e madeira dura),a15f97ec-e881-4dc0-93ee-7f9dff23aa99,vt65-bamboo-clump-v1,11456,,succeeded (retry 2); preparado,"models/bambu_touceira_studs.glb via manifest.json (7,7 m alt.)"
+Coqueiro,L1,modelo_3d,fotos de Quang Ngai (dossie pendente),1f9588a4-f340-45da-b472-ca8cabb5e53a,vt65-coconut-palm-v1,13261,,succeeded (retry 2); preparado,models/coqueiro_studs.glb via manifest.json (14 m)
+UH-34D Seahorse,L1,modelo_3d,H1 PDF p.43 (23 UH-34 do HMM-361),727a99a1-ec54-4a0b-b888-55e28069941e,vt65-uh34d-heli-v1,,,failed (retry adiado para a F4 para poupar crédito),retry ~4000 creditos
+Key art (thumbnail),L1,imagem,,671f7065-2f2e-4c63-8d8e-a431f2749806,vt65-thumbnail-keyart-v1,,,v1 outcome_unknown; v2 outcome_unknown; v3 succeeded (job 92eabba1),assets/forgegui/marketing/capa_keyart.jpg (1376x768); capas de capacete sem padrão visível
 Icone do jogo (capacete M1),L1,imagem,,2d48f78b-f89e-4176-9fd5-c1d820ddd1ed,vt65-icon-v1,,2 imagens,succeeded,conferir se a capa do capacete e de 1965 (D-09/Parte 9)
-Tiro de M14,L1,som,,58b243e4-96d3-429d-b163-7752225fc670,vt65-sfx-m14-shot-v1,,,outcome_unknown,nao regenerar com o mesmo id
-Tiro de Type 56,L1,som,,96972d6c-d281-4848-90e3-984f0c8ef1b6,vt65-sfx-type56-shot-v1,,,outcome_unknown,nao regenerar com o mesmo id
+Tiro de M14,L1,som,,58b243e4-96d3-429d-b163-7752225fc670,vt65-sfx-m14-shot-v1,,,v1 outcome_unknown; v2 succeeded (job 4221d9b6),assets/forgegui/audio/tiro_m14.mp3 (3 s); só a camada 'perto' (F3: médio/longe/estalo)
+Tiro de Type 56,L1,som,,96972d6c-d281-4848-90e3-984f0c8ef1b6,vt65-sfx-type56-shot-v1,,,v1 outcome_unknown; v2 succeeded (job 4767c911),assets/forgegui/audio/tiro_type56.mp3 (3 s)
 Loop do rotor do UH-34D,L1,som,,,,,,recusado (insufficient_credits),pedir com request_id novo apos recarga
-Ambiencia de arrozal 06:30,L1,som,,,vt65-amb-paddy-morning-v2,,,recusado (insufficient_credits 2026-11-09),1600 creditos; pedir com request_id novo apos recarga
+Ambiencia de arrozal 06:30,L1,som,,,vt65-amb-paddy-morning-v2,,,succeeded (job e2d62d2c),assets/forgegui/audio/ambiencia_arrozal_0630.mp3 (30 s); loop NÃO verificado pelo ForgeGUI
 Carta AMS L7014 6739 I ed.3,F0,referencia,USGS/NGA GeoPDF (dominio publico),,,,,obtida,research/src (fora do Git; tools/fetch_sources.sh)
 Heightmap area v0,F0,heightmap,Copernicus GLO-30 DSM,,,,16-bit 2232x1518,provisorio,research/heightmap/heightmap_area_v0.png
 Heightmap horizonte v0,F0,heightmap,Copernicus GLO-30 DSM,,,,16-bit 467x467,provisorio,research/heightmap/heightmap_horizonte_v0.png
@@ -19,3 +19,7 @@ Placeholder: casa (paredes + telhado em cunha),F1,greybox,simbolos de casa da ca
 Placeholder: dique de arrozal,F1,greybox,procedural (DESIGN D-17),,,1 peca por segmento,Ground #6E5E44,em uso,18926 segmentos; fundir ou trocar por mesh na F5 (D-14)
 Placeholder: lamina d'agua de arrozal,F1,greybox,procedural (DESIGN D-17),,,1 peca por quadro,SmoothPlastic barrento,em uso,7263 quadros; mesh de agua barrenta na F3/F5
 Placeholder: sebe de arrozal / bambu de vila,F1,greybox,First Fight PDF p.10 + manchas verdes da carta,,,1 peca por segmento,LeafyGrass,em uso,3832 segmentos; touceiras L5 na F3
+Ícone de passe: Uniformes USMC 1965,MON,imagem,MONETIZATION.md,be2fb491-4660-4dde-8c9f-e9b846c00be8,vt65-gamepass-usmc-1965-v1,,1024x1024,succeeded,"FORA DO ESTILO (estilizado, raios de fundo): refazer se sobrar crédito"
+Ícone de passe: Uniformes Força Principal 1965,MON,imagem,MONETIZATION.md,6f754573-1a39-4fd3-a097-693b4d18e71e,vt65-gamepass-vc-1965-v1,,1024x1024,succeeded,assets/forgegui/marketing/gamepass_vc_1965.jpg
+Ícone de passe: Unidade,MON,imagem,MONETIZATION.md,aca87eec-2654-467d-9acc-3f3066ccd8a0,vt65-gamepass-unit-v1,,1024x1024,succeeded,assets/forgegui/marketing/gamepass_unidade.jpg
+Ícone de passe: Apoiador (Dossiê Starlite),MON,imagem,MONETIZATION.md,0a4565d4-3b63-4d36-b660-792b82213897,vt65-gamepass-supporter-v1,,1024x1024,succeeded,assets/forgegui/marketing/gamepass_apoiador.jpg
