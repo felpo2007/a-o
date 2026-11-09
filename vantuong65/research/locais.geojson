@@ -1,0 +1,556 @@
+{
+ "type": "FeatureCollection",
+ "features": [
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     108.83970625074302,
+     15.293985436432052
+    ]
+   },
+   "properties": {
+    "nome": "Colina 43 (cume)",
+    "tipo": "colina",
+    "grade_1965": "BS 685916",
+    "E_ing": 268545,
+    "N_ing": 1691655,
+    "lat": 15.293985,
+    "lon": 108.839706,
+    "E_wgs84_utm49": 268025.0,
+    "N_wgs84_utm49": 1691996.4,
+    "x_local_m": -1655.0,
+    "z_local_m": 745.0,
+    "x_studs": -5910.8,
+    "z_studs": 2660.7,
+    "na_area_jogavel": true,
+    "precisao_m": 15,
+    "fonte": "AMS L7014 6739 I ed.003",
+    "obs": "cota 43; FF p.26: 'small knoll... ~400 m SW' da LZ Blue"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     108.84251788592098,
+     15.296678040870834
+    ]
+   },
+   "properties": {
+    "nome": "LZ Blue",
+    "tipo": "lz",
+    "grade_1965": "BS 688919",
+    "E_ing": 268850,
+    "N_ing": 1691950,
+    "lat": 15.296678,
+    "lon": 108.842518,
+    "E_wgs84_utm49": 268330.0,
+    "N_wgs84_utm49": 1692291.4,
+    "x_local_m": -1350.0,
+    "z_local_m": 450.0,
+    "x_studs": -4821.5,
+    "z_studs": 1607.1,
+    "na_area_jogavel": true,
+    "precisao_m": 120,
+    "fonte": "The First Fight (USMC History Division, 2015), p.26 + mapa p.25",
+    "obs": "estimada: Nam Yên (3) 100-200 m ao N e Colina 43 ~400 m a SW (FF p.26)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     108.84343019901723,
+     15.298493938367058
+    ]
+   },
+   "properties": {
+    "nome": "Nam Yên (3)",
+    "tipo": "vila",
+    "grade_1965": "BS 689921",
+    "E_ing": 268950,
+    "N_ing": 1692150,
+    "lat": 15.298494,
+    "lon": 108.84343,
+    "E_wgs84_utm49": 268430.0,
+    "N_wgs84_utm49": 1692491.4,
+    "x_local_m": -1250.0,
+    "z_local_m": 250.0,
+    "x_studs": -4464.3,
+    "z_studs": 892.9,
+    "na_area_jogavel": true,
+    "precisao_m": 80,
+    "fonte": "AMS L7014 6739 I ed.003",
+    "obs": "bloco de casas a NE da LZ Blue"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     108.83830887309881,
+     15.298625205736538
+    ]
+   },
+   "properties": {
+    "nome": "Athletic field",
+    "tipo": "campo",
+    "grade_1965": "BS 684921",
+    "E_ing": 268400,
+    "N_ing": 1692170,
+    "lat": 15.298625,
+    "lon": 108.838309,
+    "E_wgs84_utm49": 267880.0,
+    "N_wgs84_utm49": 1692511.4,
+    "x_local_m": -1800.0,
+    "z_local_m": 230.0,
+    "x_studs": -6428.6,
+    "z_studs": 821.4,
+    "na_area_jogavel": true,
+    "precisao_m": 30,
+    "fonte": "AMS L7014 6739 I ed.003",
+    "obs": "retângulo tracejado 'Athletic field'"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     108.83855897399116,
+     15.292393146339837
+    ]
+   },
+   "properties": {
+    "nome": "Lạc Sơn (1)",
+    "tipo": "vila",
+    "grade_1965": "BS 684914",
+    "E_ing": 268420,
+    "N_ing": 1691480,
+    "lat": 15.292393,
+    "lon": 108.838559,
+    "E_wgs84_utm49": 267900.0,
+    "N_wgs84_utm49": 1691821.4,
+    "x_local_m": -1780.0,
+    "z_local_m": 920.0,
+    "x_studs": -6357.2,
+    "z_studs": 3285.7,
+    "na_area_jogavel": true,
+    "precisao_m": 80,
+    "fonte": "AMS L7014 6739 I ed.003",
+    "obs": "casas em arco na encosta S/SW da Colina 43"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     108.84708698123492,
+     15.305034739050704
+    ]
+   },
+   "properties": {
+    "nome": "Nam Yên (4)",
+    "tipo": "vila",
+    "grade_1965": "BS 693928",
+    "E_ing": 269350,
+    "N_ing": 1692870,
+    "lat": 15.305035,
+    "lon": 108.847087,
+    "E_wgs84_utm49": 268830.0,
+    "N_wgs84_utm49": 1693211.4,
+    "x_local_m": -850.0,
+    "z_local_m": -470.0,
+    "x_studs": -3035.7,
+    "z_studs": -1678.6,
+    "na_area_jogavel": true,
+    "precisao_m": 80,
+    "fonte": "AMS L7014 6739 I ed.003",
+    "obs": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     108.85341858937478,
+     15.304914912237065
+    ]
+   },
+   "properties": {
+    "nome": "An Cường (2)",
+    "tipo": "vila",
+    "grade_1965": "BS 700928",
+    "E_ing": 270030,
+    "N_ing": 1692850,
+    "lat": 15.304915,
+    "lon": 108.853419,
+    "E_wgs84_utm49": 269510.0,
+    "N_wgs84_utm49": 1693191.4,
+    "x_local_m": -170.0,
+    "z_local_m": -450.0,
+    "x_studs": -607.1,
+    "z_studs": -1607.2,
+    "na_area_jogavel": true,
+    "precisao_m": 60,
+    "fonte": "AMS L7014 6739 I ed.003",
+    "obs": "FF: 'heavily wooded village fortified with trench lines'"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     108.85555494455659,
+     15.305387192226236
+    ]
+   },
+   "properties": {
+    "nome": "Riacho a leste de An Cường (2)",
+    "tipo": "riacho",
+    "grade_1965": "BS 702929",
+    "E_ing": 270260,
+    "N_ing": 1692900,
+    "lat": 15.305387,
+    "lon": 108.855555,
+    "E_wgs84_utm49": 269740.0,
+    "N_wgs84_utm49": 1693241.4,
+    "x_local_m": 60.0,
+    "z_local_m": -500.0,
+    "x_studs": 214.3,
+    "z_studs": -1785.7,
+    "na_area_jogavel": true,
+    "precisao_m": 30,
+    "fonte": "AMS L7014 6739 I ed.003",
+    "obs": "FF p.29: 'the streambed just east of An Cuong (2)'"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     108.85499511759791,
+     15.310080307131978
+    ]
+   },
+   "properties": {
+    "nome": "Colina 30 (cume)",
+    "tipo": "colina",
+    "grade_1965": "BS 702934",
+    "E_ing": 270205,
+    "N_ing": 1693420,
+    "lat": 15.31008,
+    "lon": 108.854995,
+    "E_wgs84_utm49": 269685.0,
+    "N_wgs84_utm49": 1693761.4,
+    "x_local_m": 5.0,
+    "z_local_m": -1020.0,
+    "x_studs": 17.9,
+    "z_studs": -3642.9,
+    "na_area_jogavel": true,
+    "precisao_m": 30,
+    "fonte": "AMS L7014 6739 I ed.003",
+    "obs": "anel interno da curva 30; FF p.26: 'Hill 30, just north of An Cuong (2)'"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     108.84873204713712,
+     15.308032296024358
+    ]
+   },
+   "properties": {
+    "nome": "An Thới (2)",
+    "tipo": "vila",
+    "grade_1965": "BS 695932",
+    "E_ing": 269530,
+    "N_ing": 1693200,
+    "lat": 15.308032,
+    "lon": 108.848732,
+    "E_wgs84_utm49": 269010.0,
+    "N_wgs84_utm49": 1693541.4,
+    "x_local_m": -670.0,
+    "z_local_m": -800.0,
+    "x_studs": -2392.9,
+    "z_studs": -2857.2,
+    "na_area_jogavel": true,
+    "precisao_m": 80,
+    "fonte": "AMS L7014 6739 I ed.003",
+    "obs": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     108.85352739249825,
+     15.31250581145187
+    ]
+   },
+   "properties": {
+    "nome": "An Thới (1)",
+    "tipo": "vila",
+    "grade_1965": "BS 700936",
+    "E_ing": 270050,
+    "N_ing": 1693690,
+    "lat": 15.312506,
+    "lon": 108.853527,
+    "E_wgs84_utm49": 269530.0,
+    "N_wgs84_utm49": 1694031.4,
+    "x_local_m": -150.0,
+    "z_local_m": -1290.0,
+    "x_studs": -535.7,
+    "z_studs": -4607.2,
+    "na_area_jogavel": false,
+    "precisao_m": 100,
+    "fonte": "AMS L7014 6739 I ed.003",
+    "obs": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     108.85846689458073,
+     15.29366886101333
+    ]
+   },
+   "properties": {
+    "nome": "An Phước (1)",
+    "tipo": "vila",
+    "grade_1965": "BS 705916",
+    "E_ing": 270560,
+    "N_ing": 1691600,
+    "lat": 15.293669,
+    "lon": 108.858467,
+    "E_wgs84_utm49": 270040.0,
+    "N_wgs84_utm49": 1691941.4,
+    "x_local_m": 360.0,
+    "z_local_m": 800.0,
+    "x_studs": 1285.7,
+    "z_studs": 2857.2,
+    "na_area_jogavel": true,
+    "precisao_m": 80,
+    "fonte": "AMS L7014 6739 I ed.003",
+    "obs": ""
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     108.86761238652905,
+     15.300623292989954
+    ]
+   },
+   "properties": {
+    "nome": "An Cường (1)",
+    "tipo": "vila",
+    "grade_1965": "BS 715923",
+    "E_ing": 271550,
+    "N_ing": 1692360,
+    "lat": 15.300623,
+    "lon": 108.867612,
+    "E_wgs84_utm49": 271030.0,
+    "N_wgs84_utm49": 1692701.4,
+    "x_local_m": 1350.0,
+    "z_local_m": 40.0,
+    "x_studs": 4821.5,
+    "z_studs": 142.9,
+    "na_area_jogavel": true,
+    "precisao_m": 60,
+    "fonte": "AMS L7014 6739 I ed.003",
+    "obs": "vila de pescadores junto à praia"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     108.86992669623048,
+     15.301910337708117
+    ]
+   },
+   "properties": {
+    "nome": "Green Beach (centro provisório)",
+    "tipo": "praia",
+    "grade_1965": "BS 718925",
+    "E_ing": 271800,
+    "N_ing": 1692500,
+    "lat": 15.30191,
+    "lon": 108.869927,
+    "E_wgs84_utm49": 271280.0,
+    "N_wgs84_utm49": 1692841.4,
+    "x_local_m": 1600.0,
+    "z_local_m": -100.0,
+    "x_studs": 5714.3,
+    "z_studs": -357.1,
+    "na_area_jogavel": true,
+    "precisao_m": 200,
+    "fonte": "AMS L7014 6739 I ed.003 + The First Fight (USMC History Division, 2015), p.25",
+    "obs": "FF: desembarque em 'Green Beach at An Cuong (2)' [sic] / tanques na praia de An Cuong (1); extensão exata pendente do AAR do RLT-7"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     108.86832231461452,
+     15.304063597516063
+    ]
+   },
+   "properties": {
+    "nome": "Cota trigonométrica 22",
+    "tipo": "controle",
+    "grade_1965": "BS 716927",
+    "E_ing": 271630,
+    "N_ing": 1692740,
+    "lat": 15.304064,
+    "lon": 108.868322,
+    "E_wgs84_utm49": 271110.0,
+    "N_wgs84_utm49": 1693081.4,
+    "x_local_m": 1430.0,
+    "z_local_m": -340.0,
+    "x_studs": 5107.2,
+    "z_studs": -1214.3,
+    "na_area_jogavel": true,
+    "precisao_m": 10,
+    "fonte": "AMS L7014 6739 I ed.003",
+    "obs": "△22 ao N de An Cường (1)"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     108.87311796828942,
+     15.291947287052905
+    ]
+   },
+   "properties": {
+    "nome": "Cota trigonométrica 10",
+    "tipo": "controle",
+    "grade_1965": "BS 721913",
+    "E_ing": 272132,
+    "N_ing": 1691394,
+    "lat": 15.291947,
+    "lon": 108.873118,
+    "E_wgs84_utm49": 271612.0,
+    "N_wgs84_utm49": 1691735.4,
+    "x_local_m": 1932.0,
+    "z_local_m": 1006.0,
+    "x_studs": 6900.0,
+    "z_studs": 3592.9,
+    "na_area_jogavel": true,
+    "precisao_m": 10,
+    "fonte": "AMS L7014 6739 I ed.003",
+    "obs": "△10 ao S da praia"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     108.87220120142628,
+     15.313587964894921
+    ]
+   },
+   "properties": {
+    "nome": "Cota trigonométrica 45 (Núi Đầm Tre)",
+    "tipo": "controle",
+    "grade_1965": "BS 720937",
+    "E_ing": 272057,
+    "N_ing": 1693790,
+    "lat": 15.313588,
+    "lon": 108.872201,
+    "E_wgs84_utm49": 271537.0,
+    "N_wgs84_utm49": 1694131.4,
+    "x_local_m": 1857.0,
+    "z_local_m": -1390.0,
+    "x_studs": 6632.2,
+    "z_studs": -4964.3,
+    "na_area_jogavel": false,
+    "precisao_m": 10,
+    "fonte": "AMS L7014 6739 I ed.003",
+    "obs": "fora da área"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     108.84026650635661,
+     15.289274322878667
+    ]
+   },
+   "properties": {
+    "nome": "Marco da Rota 523",
+    "tipo": "estrada",
+    "grade_1965": "BS 686911",
+    "E_ing": 268600,
+    "N_ing": 1691133,
+    "lat": 15.289274,
+    "lon": 108.840267,
+    "E_wgs84_utm49": 268080.0,
+    "N_wgs84_utm49": 1691474.4,
+    "x_local_m": -1600.0,
+    "z_local_m": 1267.0,
+    "x_studs": -5714.3,
+    "z_studs": 4525.0,
+    "na_area_jogavel": false,
+    "precisao_m": 20,
+    "fonte": "AMS L7014 6739 I ed.003",
+    "obs": "círculo '523'"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     108.85473853561578,
+     15.330678873776975
+    ]
+   },
+   "properties": {
+    "nome": "Vạn Tường (1)",
+    "tipo": "vila",
+    "grade_1965": "BS 702957",
+    "E_ing": 270200,
+    "N_ing": 1695700,
+    "lat": 15.330679,
+    "lon": 108.854739,
+    "E_wgs84_utm49": 269680.0,
+    "N_wgs84_utm49": 1696041.5,
+    "x_local_m": 0.0,
+    "z_local_m": -3300.0,
+    "x_studs": 0.0,
+    "z_studs": -11785.8,
+    "na_area_jogavel": false,
+    "precisao_m": 150,
+    "fonte": "AMS L7014 6739 I ed.003",
+    "obs": "fora da área proposta; referência para a trincheira VC (HistoryNet)"
+   }
+  }
+ ]
+}

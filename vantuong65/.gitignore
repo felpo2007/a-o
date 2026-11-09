@@ -1,0 +1,9 @@
+# Fontes e rasters grandes: reproduzíveis com tools/fetch_sources.sh
+research/src/
+research/dem/
+research/carta/
+research/sat/
+.venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
