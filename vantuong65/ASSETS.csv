@@ -15,3 +15,7 @@ Ambiencia de arrozal 06:30,L1,som,,,vt65-amb-paddy-morning-v2,,,recusado (insuff
 Carta AMS L7014 6739 I ed.3,F0,referencia,USGS/NGA GeoPDF (dominio publico),,,,,obtida,research/src (fora do Git; tools/fetch_sources.sh)
 Heightmap area v0,F0,heightmap,Copernicus GLO-30 DSM,,,,16-bit 2232x1518,provisorio,research/heightmap/heightmap_area_v0.png
 Heightmap horizonte v0,F0,heightmap,Copernicus GLO-30 DSM,,,,16-bit 467x467,provisorio,research/heightmap/heightmap_horizonte_v0.png
+Placeholder: casa (paredes + telhado em cunha),F1,greybox,simbolos de casa da carta L7014 ed.3,,,3 pecas por casa,cores lisas,em uso,199 casas; trocar pelo GLB da casa de palha (job 6431342a) na F3
+Placeholder: dique de arrozal,F1,greybox,procedural (DESIGN D-17),,,1 peca por segmento,Ground #6E5E44,em uso,18926 segmentos; fundir ou trocar por mesh na F5 (D-14)
+Placeholder: lamina d'agua de arrozal,F1,greybox,procedural (DESIGN D-17),,,1 peca por quadro,SmoothPlastic barrento,em uso,7263 quadros; mesh de agua barrenta na F3/F5
+Placeholder: sebe de arrozal / bambu de vila,F1,greybox,First Fight PDF p.10 + manchas verdes da carta,,,1 peca por segmento,LeafyGrass,em uso,3832 segmentos; touceiras L5 na F3

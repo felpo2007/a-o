@@ -22,8 +22,8 @@ O jogo fica em `vantuong65/`, dentro do repositório `felpo2007/a-o`, na branch
   convertidas por `geo.ing_to_wgs_utm`; nunca use uma grade de 1965 direto como WGS 84, porque o
   erro chega a cerca de 600 m.
 
-## D-03 — Tamanho da área jogável (PENDENTE, pergunta P1)
-Proposta: **4,0 km (leste–oeste) × 2,4 km (norte–sul) em 1:1**, com limites em grade de 1965 de
+## D-03 — Tamanho da área jogável (FIRME, aprovado pelo usuário em 2026-11-09)
+**4,0 km (leste–oeste) × 2,4 km (norte–sul) em 1:1**, com limites em grade de 1965 de
 E 268,2–272,2 km e N 1691,2–1693,6 km (`geo.PLAY_ING`).
 - Motivo: medido na carta, a Colina 43 fica a **3.255 m** da Green Beach no eixo leste–oeste, e a
   LZ Blue a **2.950 m**. O quadrado de 2 × 2 km do prompt não comporta as duas bordas sem violar a
@@ -65,20 +65,29 @@ divididos por "hedgerows six to eight feet high" (1,8–2,4 m) de bambu e madeir
   3–8 m** (valor do prompt, a confirmar no dossiê de fotos de 1965).
 - O impacto é grande: isso muda as linhas de visão e a ocultação nos arrozais.
 
-## D-08 — Setores (PENDENTE, depende de D-03)
-Com a área de D-03, as 5 faixas norte–sul ficam com fronteiras ajustadas para nenhum local real ser
-cortado (grade de 1965, E em km):
+## D-08 — Setores (firme na F1)
+As 5 faixas norte–sul têm fronteiras em **polilinha**, não retas, para nenhum local real ser cortado.
+Grade de 1965, E em km. Quando a fronteira dobra, o valor está como "sul / norte" (corte em N 1692,45 e
+1692,40). Implementação em `tools/export_roblox.py` (FRONTEIRAS_ING); o teste Luau confere que
+os setores cobrem a área sem buraco nem sobreposição:
 
 | Setor | E (km) | Largura | Locais inteiros |
 |---|---|---|---|
-| S1 (oeste, início do VC) | 268,2–269,3 | 1,10 km | Colina 43, Lạc Sơn (1), Athletic field, LZ Blue, Nam Yên (3) |
-| S2 (início do VC) | 269,3–269,85 | 0,55 km | Nam Yên (4), An Thới (2) |
-| S3 (centro, neutro) | 269,85–270,5 | 0,65 km | An Cường (2), trincheira, riacho, Colina 30 |
-| S4 (início dos EUA) | 270,5–271,3 | 0,80 km | An Phước (1), arrozais abertos |
-| S5 (leste, QG dos EUA) | 271,3–272,2 | 0,90 km | An Cường (1), △22, Green Beach, mar |
+| S1 (oeste, início do VC) | 268,2–269,3 / 269,05 | 0,85–1,10 km | Colina 43, Lạc Sơn (1), Athletic field, LZ Blue, Nam Yên (3) |
+| S2 (início do VC) | 269,3 / 269,05–269,8 | 0,50–0,75 km | Nam Yên (4), An Thới (2) |
+| S3 (centro, neutro) | 269,8–270,42 / 270,5 | 0,62–0,70 km | An Cường (2), trincheira, riacho, Colina 30 |
+| S4 (início dos EUA) | 270,42 / 270,5–271,25 | 0,75–0,83 km | An Phước (1), arrozais abertos |
+| S5 (leste, QG dos EUA) | 271,25–272,2 | 0,95 km | An Cường (1), △22, Green Beach, mar |
 
-As larguras ficam desiguais (0,55–1,10 km). A alternativa é aceitar a fronteira atravessando Nam Yên
-(3), que vai de E 268,85 a 269,26.
+Pontos fortes (3 por setor, um sorteado por partida, raio de 50 m), com posições em `MapConfig.luau`:
+- S1: Colina 43, LZ Blue/Nam Yên (3), Athletic field;
+- S2: Nam Yên (4), An Thới (2), Cemitério (símbolo da carta);
+- S3: An Cường (2), Trincheira sul ("wide, deep trench south of the village"), Colina 30;
+- S4: An Phước (1), Vau do riacho (o riacho é real, o ponto do vau é de design), Túmulos da várzea
+  (**de design**, a confirmar em foto);
+- S5: An Cường (1), Colina 22, Green Beach (dunas).
+
+QGs: EUA na Green Beach sul (S5) e VC na retaguarda oeste (S1).
 
 ## D-09 — Referências visuais enviadas pelo usuário (firme)
 As 10 capturas de tela de um FPS comercial sobre o Vietnã servem **só** como referência de luz
@@ -103,3 +112,66 @@ triângulos.
 ## D-11 — Escopo do jogador (firme)
 A run do Lote 1 descreve "50v50", mas o projeto atual é 30v30 (prompt mestre). Vale o 30v30, e a
 nota foi registrada na run.
+
+## D-12 — Critérios da F1 ajustados à área de 4 km (firme)
+O critério "travessia leste–oeste a pé em 8–12 min" valia para 2 km. Com 4,0 km, a travessia em
+corrida leve (3,1 m/s, a velocidade provisória da F1) leva cerca de **21,5 min**. O critério passa a
+ser: **travessia medida entre 18 e 25 min em corrida leve**. O cronômetro automático do HUD de
+medição (tecla F3) dispara a menos de 50 m da borda leste e para a menos de 50 m da oeste. O piso de
+60 fps continua igual.
+
+## D-13 — Relevo calibrado nas cotas da carta (provisória)
+O DEM de 30 m suaviza os picos. Somamos bolhas gaussianas (sigma de 60 m) para o terreno passar pelas
+cotas da carta de 1983:
+
+| Cota | Correção |
+|---|---|
+| Colina 43 | +10,1 m (32,9 → 43) |
+| △22 | +1,8 m |
+| cota 22 em An Cường (1) | +11,4 m |
+| △10 | +7,7 m |
+| △45 | −4,6 m |
+
+As duas correções grandes ficam nas dunas da costa. Ou as dunas mudaram desde 1983, ou o DEM não
+captou cristas estreitas. Isso será conferido com a CORONA.
+
+## D-14 — Orçamento de peças do greybox (risco)
+O greybox tem **30.635 BaseParts**: 18.926 diques, 7.263 lâminas d'água, 3.832 sebes, 199 casas e
+marcadores. É pesado para o piso de 60 fps. Sombras já estão desligadas em diques, água e sebes
+baixas. Se a medição no Studio reprovar, a ordem de corte é:
+1. fundir os diques colineares de cada linha da grade;
+2. trocar diques e água por MeshParts agrupadas por bloco (F5);
+3. reduzir o detalhe da faixa de 150 m fora da área.
+O teste Python trava o total abaixo de 40 mil.
+
+## D-15 — Streaming (provisória)
+`StreamingEnabled` ligado, com raio-alvo de **2.560 studs (717 m)** para sustentar as linhas de visão
+de 600 m nos arrozais, e raio mínimo de 512 studs. A memória ainda vai ser medida no Studio.
+
+## D-16 — Movimento provisório (F1)
+`CharacterWalkSpeed` = 11,07 studs/s (3,1 m/s, corrida leve), só para medir a travessia. O
+movimento real (ControllerManager, fôlego, posturas, lama) e a escala do avatar para 6,25 studs
+entram na F2.
+
+## D-17 — Uso do solo e feições do greybox (provisória)
+- Classes na grade de 4,48 m, derivadas da carta de 1983 (`tools/landcover.py`): mar 10,8%,
+  arrozal 60,8%, capim/encosta 23,4%, areia 2,9%, vila/mata 2,0% e riachos.
+- Os quadros de arrozal são **procedurais**: grade girada 9° com quadros de 20–60 m, jitter de 3 m e
+  25% divididos ao meio. Cada quadro tem o terraço no percentil 30 da altura e lâmina de 12 cm, e
+  15% das linhas da grade têm sebe (1,8–2,4 m).
+- As casas são os símbolos detectados na carta: 199 na área + 150 m. Como a carta generaliza, há
+  **menos casas que no real** (An Cường 2 tinha 25–30, segundo o prompt). A densidade será corrigida
+  com fotos na F3.
+- O bambu das vilas acompanha o contorno das manchas verdes da carta, com 4–7 m de altura e 15% de
+  brechas (D-07 continua pendente).
+
+## D-18 — Repositório próprio (aprovado; depende do usuário)
+O usuário aprovou mover o jogo para um repositório próprio. Esta sessão **não tem permissão para
+criar repositórios**. Assim que existir um repositório vazio (sugestão: `felpo2007/vantuong65`),
+anexo e envio o histórico desta pasta com `git subtree split`.
+
+## D-19 — A carta "AMS 6739-1" da UT e do Commons é a mesma de 1983 (fato)
+O PDF "Binh Son 6739-1" hospedado pela PCL/UT e pelo Wikimedia Commons tem **9.527.168 bytes**, o
+mesmo tamanho do GeoPDF da edição 3-DMA (1983). Não é a edição de 1965. A edição de 1965 continua sem
+fonte acessível, e por isso a CORONA (`research/F0_CORONA.md`) passa a ser o caminho para o uso do
+solo de 1965.

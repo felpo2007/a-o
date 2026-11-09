@@ -69,3 +69,19 @@ def test_heightmap_metadados():
     meta = json.loads((ROOT / "research/heightmap/heightmap_area_v0.json").read_text("utf-8"))
     assert meta["bits"] == 16 and meta["studs_por_px"] == 8
     assert meta["area_jogavel_m"] == [4000.0, 2400.0]
+
+
+def test_export_roblox_relatorio():
+    rep = json.loads((ROOT / "research/export_report.json").read_text("utf-8"))
+    # relevo calibrado nas cotas da carta: a Colina 43 tem de existir no terreno
+    assert [c[0] for c in rep["calibracao_cotas"]][0] == "Colina 43"
+    assert rep["casas"] > 100 and rep["diques"] > 10000
+    # orçamento de peças do greybox (D-14): alerta se passar de 40 mil
+    total = rep["diques"] + rep["agua_parts"] + rep["sebes"] + 3 * rep["casas"]
+    assert total < 40000
+
+
+def test_mapconfig_gerado_tem_area_de_4_por_2_4_km():
+    txt = (ROOT / "src/ReplicatedStorage/Shared/MapConfig.luau").read_text("utf-8")
+    assert "minX = -7142.9, maxX = 7142.9" in txt
+    assert "minZ = -4285.7, maxZ = 4285.7" in txt

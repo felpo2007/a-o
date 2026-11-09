@@ -1,0 +1,62 @@
+{
+  "name": "VanTuong65",
+  "tree": {
+    "$className": "DataModel",
+    "ReplicatedStorage": {
+      "Shared": { "$path": "src/ReplicatedStorage/Shared" }
+    },
+    "ServerStorage": {
+      "VT65Build": { "$path": "src/ServerStorage/VT65Build" }
+    },
+    "ServerScriptService": {
+      "Services": { "$path": "src/ServerScriptService/Services" }
+    },
+    "StarterPlayer": {
+      "$properties": { "CharacterWalkSpeed": 11.07 },
+      "StarterPlayerScripts": {
+        "Controllers": { "$path": "src/StarterPlayer/StarterPlayerScripts/Controllers" }
+      }
+    },
+    "Workspace": {
+      "$properties": {
+        "StreamingEnabled": true,
+        "StreamingMinRadius": 512,
+        "StreamingTargetRadius": 2560
+      }
+    },
+    "Lighting": {
+      "$properties": {
+        "Technology": "Future",
+        "ClockTime": 6.5,
+        "GeographicLatitude": 15.3,
+        "GlobalShadows": true,
+        "EnvironmentDiffuseScale": 1,
+        "EnvironmentSpecularScale": 1,
+        "Brightness": 2.5
+      },
+      "Atmosphere": {
+        "$className": "Atmosphere",
+        "$properties": {
+          "Density": 0.4,
+          "Offset": 0.15,
+          "Haze": 2.0,
+          "Glare": 0.15,
+          "Color": [0.78, 0.81, 0.83],
+          "Decay": [0.56, 0.6, 0.62]
+        }
+      },
+      "ColorCorrection": {
+        "$className": "ColorCorrectionEffect",
+        "$properties": { "Saturation": -0.1, "Contrast": 0.05 }
+      },
+      "Bloom": {
+        "$className": "BloomEffect",
+        "$properties": { "Intensity": 0.25, "Size": 24, "Threshold": 1.6 }
+      },
+      "SunRays": {
+        "$className": "SunRaysEffect",
+        "$properties": { "Intensity": 0.03, "Spread": 0.5 }
+      }
+    }
+  }
+}
