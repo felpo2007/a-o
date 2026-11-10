@@ -685,3 +685,45 @@ regra num módulo puro testado (`f6.luau`).
 
 **Não verificado aqui:** tudo isso dentro do Roblox. Escavação do terreno, antena, legendas, folha
 do relatório e animais andando precisam do Studio.
+
+## D-49 — Primeiro teste no Studio (2026-11-10) e correções
+Teste feito pelo MCP do Studio numa sessão no seu PC: Play solo com 29 bots, ~30 min, place em
+greybox (IDs de arte em 0). Relatório: `testes/TESTE_STUDIO_2026-11-10.md`.
+
+**Medido:**
+- nenhum erro de script do jogo;
+- 60 fps nos 5 setores, mas p99 de 18,4–18,8 ms (meta ≤ 16,7) igual em todo lugar. Parece o ritmo
+  do teto de 60 do Studio; falta medir no cliente fora do Studio;
+- heartbeat do servidor de 0,12–0,30 ms;
+- terreno gerado em 26 s no início (heartbeat a ~19 fps nesse tempo);
+- captura solo do centro em ~180 s, como manda a regra;
+- espera de spawn de 60 s.
+
+**Corrigido:**
+1. **Mouse preso no centro** no mapa de spawn, na loja e no menu: `LockFirstPerson` prendia o mouse e
+   nenhuma tela soltava. Agora um botão `Modal` invisível aparece em menu, mapa ou morto.
+2. **M abria e fechava o mapa no mesmo quadro**, e o P fazia o mesmo com o menu (bug 7). Na troca de
+   contexto, a tecla apertada era esquecida e a IAS a entregava de novo. Agora ela fica consumida
+   até soltar.
+3. **Deitado = HipHeight negativo** (2,4 − 4,4): queda livre permanente, escorregando a 66 m/s em
+   encosta.
+   - HipHeight mínimo de 0,2.
+   - O servidor deita o corpo (junta Root), para o acerto bater com o que se vê; antes o
+     servidor só "enterrava" o corpo em pé.
+   - A câmera desce por `CameraOffset`.
+4. **Botão direito não mirava:** ao entrar na mira, a troca de contexto soltava o próprio botão e a
+   mira desligava. Agora só é solta a tecla cuja ação não existe no contexto novo
+   (`InputMap.survives`, com teste).
+5. **Raia do campo de tiro:** o servidor limpa peças do greybox entre a linha de tiro e os alvos.
+   - Ressalva: as sebes têm material "Bamboo", que a bala do jogo atravessa. A causa real dos
+     tiros sem acerto pode ter sido outra.
+   - No Studio, o Output agora diz por quanto o tiro errou o alvo.
+6. **Comando de teste sem efeito:** o `require` da barra de comando pega outra cópia do módulo.
+   Agora `workspace:SetAttribute("VT65DevMode", "Offensive")` e `("VT65DevEnd", true)` funcionam
+   (só no Studio).
+7. **Mapa de spawn ficava na tela depois de renascer:** o `CharacterAdded` chega antes do Humanoid.
+   Agora refaz a tela quando ele aparece.
+8. **Output:** progresso do terreno a cada 10% (eram 420 linhas).
+
+**Ainda não testado no Studio:** Local Server com 2–4 jogadores, F4 (veículos), controle, D-48 e
+arte real.

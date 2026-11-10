@@ -268,6 +268,22 @@ function InputMap.layers(ctx: string): { string }
 	return { ctx }
 end
 
+-- Na troca de contexto, uma tecla apertada continua valendo se TODAS as ações dela existem nas
+-- camadas do contexto novo (ex.: o botão direito da mira, da infantaria, vale na mira). Se não,
+-- ela é solta e fica consumida até o jogador soltá-la (o M que abriu o mapa não o fecha).
+function InputMap.survives(actions: { Action }, newCtx: string): boolean
+	local keep: { [string]: boolean } = {}
+	for _, c in InputMap.layers(newCtx) do
+		keep[c] = true
+	end
+	for _, a in actions do
+		if not keep[a.ctx] then
+			return false
+		end
+	end
+	return true
+end
+
 -- Conflitos: dentro de cada pilha de camadas, o mesmo botão (no mesmo assento ou em "qualquer
 -- assento") não pode ter duas ações do mesmo tipo, nem "press" junto com tap/hold. Na mira, a
 -- camada de cima vence de propósito (LB/RB inclinam), então só se compara dentro da camada.

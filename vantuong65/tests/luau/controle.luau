@@ -372,6 +372,25 @@ test("fumaça bloqueia a visão (bots e assistência), não a linha fora dela", 
 	assert(not Smoke.blocks(0, 0, 0, 30, 0, 0, clouds), "termina antes da nuvem")
 end)
 
+test("troca de contexto: mira não desliga sozinha; M e P não fecham o que abriram", function()
+	local function act(id: string, ctx: string): any
+		for _, a in InputMap.ACTIONS do
+			if a.id == id and a.ctx == ctx then
+				return a
+			end
+		end
+		error("ação inexistente " .. id)
+	end
+	-- bug 4 do teste no Studio: o botão direito (aim, infantaria) segue apertado na mira
+	assert(InputMap.survives({ act("aim", "infantry") }, "aim"), "a mira desligava no mesmo quadro")
+	assert(InputMap.survives({ act("fire", "infantry") }, "aim"), "atirar segurando continua ao mirar")
+	-- bugs 2 e 7: a tecla que abriu o mapa/menu é consumida (não chega à ação dela lá dentro)
+	assert(not InputMap.survives({ act("map", "global") }, "map"), "M reabria/fechava o mapa")
+	assert(not InputMap.survives({ act("game_menu", "global") }, "menu"), "P abria e fechava o menu")
+	-- inclinar (só na mira) é solto ao voltar para a infantaria
+	assert(not InputMap.survives({ act("lean_left", "aim") }, "infantry"))
+end)
+
 print(string.format("%d ok, %d falhas", passed, failed))
 if failed > 0 then
 	process.exit(1)

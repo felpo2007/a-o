@@ -3,6 +3,7 @@
 -- Servidor público alterna Warfare e Offensive; o privado fica no modo escolhido pelo dono.
 local Lighting = game:GetService("Lighting")
 local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local AfterAction = require(ReplicatedStorage.Shared.AfterAction)
@@ -170,6 +171,29 @@ end
 
 function MatchService.start()
 	MatchService.newMatch("Warfare")
+	-- Ganchos de teste SÓ no Studio (o require da barra de comando pega outra cópia deste módulo):
+	--   workspace:SetAttribute("VT65DevMode", "Offensive")  -- troca o modo agora (e fixa)
+	--   workspace:SetAttribute("VT65DevEnd", true)          -- encerra a partida (relatório pós-ação)
+	if RunService:IsStudio() then
+		local function devMode()
+			local m = workspace:GetAttribute("VT65DevMode")
+			if m == "Warfare" or m == "Offensive" or m == "Skirmish" then
+				pendingMode = nil
+				fixedMode = true
+				MatchService.newMatch(m)
+			end
+		end
+		workspace:GetAttributeChangedSignal("VT65DevMode"):Connect(devMode)
+		devMode()
+		workspace:GetAttributeChangedSignal("VT65DevEnd"):Connect(function()
+			local st = MatchService.state
+			if workspace:GetAttribute("VT65DevEnd") == true and st and not MatchService.ended then
+				workspace:SetAttribute("VT65DevEnd", nil)
+				local us, vc = Capture.count(st, "US"), Capture.count(st, "VC")
+				endMatch(if us > vc then "US" elseif vc > us then "VC" else "draw")
+			end
+		end)
+	end
 	-- baixas para o relatório: cada morte conta no setor onde aconteceu
 	Combatants.Added:Connect(function(e: any)
 		local hum = Combatants.humanoid(e)

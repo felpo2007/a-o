@@ -132,8 +132,19 @@ function TerrainBuilder.build(world: any, envIn: Env?, opts: Options?): number
 			terrain:WriteVoxels(region, VOXEL, mats, occs)
 			done += 1
 			if done % ((opts and opts.yieldEvery) or 8) == 0 then
-				print(string.format("[VT65] terreno %d/%d blocos (%.0f s)", done, total, os.clock() - t0))
 				env.wait()
+			end
+			-- progresso a cada 10% (antes: uma linha a cada 8 blocos, 420 linhas no Output)
+			if done % math.max(1, total // 10) == 0 then
+				print(
+					string.format(
+						"[VT65] terreno %d%% (%d/%d blocos, %.0f s)",
+						math.floor(100 * done / total + 0.5),
+						done,
+						total,
+						os.clock() - t0
+					)
+				)
 			end
 		end
 	end

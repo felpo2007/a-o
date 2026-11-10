@@ -72,8 +72,9 @@ Features de lançamento (D-48). Confira no Studio:
   - modo daltônico (cor dos traçantes);
   - campo de visão;
   - legendas de som.
-- **Relatório pós-ação:** aparece no fim da partida. Para não esperar 75 min, use na barra de
-  comando do servidor: `require(game.ServerScriptService.Modules.MatchService).newMatch("Skirmish")`.
+- **Relatório pós-ação:** aparece no fim da partida. Para não esperar, rode na barra de comando,
+  no lado do servidor: `workspace:SetAttribute("VT65DevEnd", true)`. Para trocar de modo:
+  `workspace:SetAttribute("VT65DevMode", "Offensive")`. Só funciona no Studio.
 - **Marcação imperfeita:** binóculo (B ou ↑) + marcar (Z ou RB) num inimigo. Aparece um círculo
   que some em 1 min.
 - **Arma do inimigo:** mate um bot e segure F ou X sobre a arma caída.

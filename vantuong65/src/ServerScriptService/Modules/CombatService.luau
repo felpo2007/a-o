@@ -185,6 +185,7 @@ function CombatService.fire(
 			TrainingService.rangeHit(shooter, t, Vector3.new(hit.x, hit.y, hit.z) / M)
 			return
 		end
+		TrainingService.nearMiss(shooter, Vector3.new(hit.x, hit.y, hit.z) / M, t)
 		local model = (hit.target :: Instance):FindFirstAncestorOfClass("Model")
 		local victim = Combatants.get(model)
 		if victim then

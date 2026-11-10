@@ -380,7 +380,10 @@ task.spawn(function()
 		local h = hum()
 		if h then
 			local lean = Input.state.lean
-			h.CameraOffset = h.CameraOffset:Lerp(Vector3.new(lean * 0.35 / M, 0, 0), 0.5)
+			-- deitado: o quadril não desce abaixo de 0,2 stud (PostureService), então a câmera desce
+			-- até o olho de quem está de bruços (~0,3 m do chão)
+			local prone = player.Character and player.Character:GetAttribute("Prone") == true
+			h.CameraOffset = h.CameraOffset:Lerp(Vector3.new(lean * 0.35 / M, if prone then -1.6 else 0, 0), 0.5)
 			local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart") :: BasePart?
 			if root then
 				local params = RaycastParams.new()

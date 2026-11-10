@@ -6,6 +6,7 @@
 -- Tutorial: o perfil guarda os papéis concluídos (ProfileSchema.tutorial).
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 
 local MapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any
 local Net = require(ReplicatedStorage.Shared.Net)
@@ -54,6 +55,54 @@ local function sign(board: BasePart, text: string)
 	l.Parent = g
 end
 
+-- Limpa a raia: raios da linha de tiro até o centro de cada alvo (deitado, ajoelhado e em pé, e
+-- 25 cm para cada lado); peça do greybox no caminho (sebe, dique, casa) sai. O terreno não dá
+-- para tirar: se ele bloquear, avisa no Output. No teste do Studio (2026-11-10) uma sebe de
+-- arrozal a 21 m tapava o alvo de 100 m dos EUA.
+local function clearLane(folder: Instance, from: Vector3, look: CFrame, plates: { BasePart })
+	local map = workspace:FindFirstChild("Map")
+	if not map then
+		return
+	end
+	local removed, blocked = 0, 0
+	for _, plate in plates do
+		for _, h in { 0.4, 1.0, 1.5 } do
+			for _, side in { -0.25, 0, 0.25 } do
+				local o = from + Vector3.new(0, h / M, 0) + look.RightVector * (side / M)
+				local params = RaycastParams.new()
+				params.FilterType = Enum.RaycastFilterType.Exclude
+				local ignore: { Instance } = { folder }
+				params.FilterDescendantsInstances = ignore
+				for _ = 1, 12 do
+					local r = workspace:Raycast(o, plate.Position - o, params)
+					if not r then
+						break
+					end
+					if r.Instance:IsDescendantOf(map) then
+						r.Instance:Destroy()
+						removed += 1
+					else
+						if r.Instance == workspace.Terrain then
+							blocked += 1
+						end
+						break
+					end
+				end
+			end
+		end
+	end
+	if removed > 0 or blocked > 0 then
+		print(
+			string.format(
+				"[VT65] raia %s: %d peças removidas; %d raios barrados pelo terreno",
+				folder.Name,
+				removed,
+				blocked
+			)
+		)
+	end
+end
+
 -- Constrói o campo de tiro de uma facção. Devolve a pasta.
 local function buildRange(faction: string, folder: Folder)
 	local hq = MapConfig.HQ[faction]
@@ -83,6 +132,7 @@ local function buildRange(faction: string, folder: Folder)
 		Color3.fromRGB(214, 203, 170)
 	)
 	sign(board, "LINHA DE TIRO\nalvos a 100, 200 e 300 m")
+	local plates: { BasePart } = {}
 	for _, m in Tutorial.RANGE_M do
 		local x, z = x0 + dx * m / M, z0 + dz * m / M
 		local y = groundY(x, z, ignore)
@@ -104,6 +154,7 @@ local function buildRange(faction: string, folder: Folder)
 		)
 		plate.Material = Enum.Material.Cardboard
 		plate:SetAttribute("RangeTarget", m)
+		table.insert(plates, plate)
 		local dot = part(
 			folder,
 			"Centro" .. m,
@@ -123,6 +174,7 @@ local function buildRange(faction: string, folder: Folder)
 		tag.CanQuery = false
 		sign(tag, m .. " m")
 	end
+	clearLane(folder, Vector3.new(x0, y0, z0), look, plates)
 end
 
 -- Chamado pelo CombatService quando um tiro para numa peça com RangeTarget.
@@ -136,6 +188,34 @@ function TrainingService.rangeHit(shooter: Model, target: BasePart, hitPos: Vect
 	local rel = target.CFrame:PointToObjectSpace(hitPos)
 	-- o alvo olha para o atirador: o +X dele é a esquerda de quem atira
 	Net.event("Range_Hit"):FireClient(player, { dist = dist, right = -rel.X * M * 100, up = rel.Y * M * 100 })
+end
+
+-- Diagnóstico só no Studio: tiro que parou perto de um alvo sem acertar mostra por quanto errou
+-- (horizontal e vertical, em cm, do ponto de vista de quem atira) e no que bateu.
+function TrainingService.nearMiss(shooter: Model, hitPos: Vector3, what: Instance?)
+	if not RunService:IsStudio() or not Players:GetPlayerFromCharacter(shooter) then
+		return
+	end
+	local range = workspace:FindFirstChild("CampoDeTiro")
+	if not range then
+		return
+	end
+	for _, d in range:GetDescendants() do
+		local dist = d:GetAttribute("RangeTarget")
+		if d:IsA("BasePart") and type(dist) == "number" and (d.Position - hitPos).Magnitude < 40 / M then
+			local rel = d.CFrame:PointToObjectSpace(hitPos)
+			print(
+				string.format(
+					"[VT65] campo de tiro: errou o alvo de %d m — %+.0f cm na horizontal, %+.0f cm na vertical; parou em %s",
+					dist,
+					-rel.X * M * 100,
+					rel.Y * M * 100,
+					if what then what:GetFullName() else "?"
+				)
+			)
+			return
+		end
+	end
 end
 
 function TrainingService.start()

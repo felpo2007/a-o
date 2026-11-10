@@ -10,6 +10,26 @@ local MedicalService = require(script.Parent.MedicalService)
 
 local PostureService = {}
 local DROP = { crouch = 2.2, prone = 4.4 } -- studs que o quadril desce (PLACEHOLDER de pose)
+-- HipHeight nunca negativo: com 2,4 − 4,4 = −2 o Humanoid ficava em queda livre o tempo todo e
+-- deitado em encosta virava escorregador (66 m/s no teste do Studio, 2026-11-10).
+local MIN_HIP = 0.2
+-- Deitado: o SERVIDOR deita o corpo (junta Root), para os acertos (raycast no servidor) baterem
+-- com o que se vê. Antes só os clientes posavam e o "deitado" do servidor era o corpo enterrado.
+local PRONE_ROOT = CFrame.new(0, -0.6, 0) * CFrame.Angles(math.rad(-85), 0, 0)
+
+local function setProneJoint(model: Model, prone: boolean)
+	local lower = model:FindFirstChild("LowerTorso")
+	local root = lower and lower:FindFirstChild("Root")
+	if not (root and root:IsA("Motor6D")) then
+		return
+	end
+	local orig = root:GetAttribute("StandC0")
+	if typeof(orig) ~= "CFrame" then
+		orig = root.C0
+		root:SetAttribute("StandC0", orig)
+	end
+	root.C0 = if prone then (orig :: CFrame) * PRONE_ROOT else orig :: CFrame
+end
 
 local function headroom(model: Model, need: number): boolean
 	local params = RaycastParams.new()
@@ -44,7 +64,8 @@ local function setStance(model: Model, stance: string): boolean
 		base = hum.HipHeight
 		model:SetAttribute("BaseHipHeight", base)
 	end
-	hum.HipHeight = (base :: number) - newDrop
+	hum.HipHeight = math.max((base :: number) - newDrop, MIN_HIP)
+	setProneJoint(model, stance == "prone")
 	model:SetAttribute("Crouched", stance == "crouch")
 	model:SetAttribute("Prone", stance == "prone")
 	if stance ~= "stand" then

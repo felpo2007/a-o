@@ -221,6 +221,24 @@ localmente para 3.999 e 2.000 triângulos. Nada disso rodou no Roblox.
   Os modelos e sons estão em `assets/forgegui/`. Os modelos foram preparados em escala real, com a
   M14 em 1,126 m e a Type 56 em 0,882 m.
 
+## Primeiro teste no Studio (2026-11-10, D-49)
+Feito pelo MCP do Studio, em Play solo com 29 bots, no greybox. Relatório em
+`testes/TESTE_STUDIO_2026-11-10.md`.
+- Nenhum erro de script.
+- 60 fps nos 5 setores, com p99 de 18,4–18,8 ms.
+- Heartbeat de 0,12–0,30 ms.
+- Terreno gerado em 26 s.
+
+Os 8 bugs encontrados foram corrigidos e esperam o reteste:
+- mouse preso nas telas;
+- M e P fechando o que abriam;
+- deitado escorregando;
+- mira que não ligava;
+- raia;
+- comando de teste;
+- mapa que ficava na tela;
+- Output poluído.
+
 ## Resultados-chave (medidos aqui)
 | Medida | Valor |
 |---|---|
@@ -229,7 +247,7 @@ localmente para 3.999 e 2.000 triângulos. Nada disso rodou no Roblox.
 | Sol em 18/08/1965 (calculado, UTC+8) | 06:30 → −0,9°; 12:00 → 78,1°; 18:30 → 7,8° |
 | Túneis (gerados) | 64 peças, 474 m de galeria |
 | Testes Lune F4 | `f4.luau` **12 ok** |
-| Testes Lune controle | `controle.luau` **17 ok** (inclui 10.000 eventos aleatórios sem estado preso) |
+| Testes Lune controle | `controle.luau` **18 ok** (inclui 10.000 eventos aleatórios sem estado preso e a troca de contexto do teste no Studio) |
 | Giro de 180° no analógico (quadril) | **0,58 s** (calculado) |
 | Testes Lune F5 | `f5.luau` **8 ok** |
 | Testes Lune F6 | `f6.luau` **27 ok** |
@@ -275,7 +293,9 @@ localmente para 3.999 e 2.000 triângulos. Nada disso rodou no Roblox.
    - tutorial: o painel aparece ao nascer com um papel novo; os alvos do campo de tiro ficam
      ao lado do QG (100/200/300 m) e cada acerto mostra o desvio em cm;
    - Offensive: no Studio não há servidor privado. Na barra de comando, no lado do servidor:
-     `require(game.ServerScriptService.Modules.MatchService).newMatch("Offensive")`.
+     `workspace:SetAttribute("VT65DevMode", "Offensive")`. Para ver o relatório pós-ação:
+     `workspace:SetAttribute("VT65DevEnd", true)`. Esses ganchos só funcionam no Studio; o
+     `require(...)` da barra de comando pega outra cópia do módulo e não muda a partida.
 5. Me mande os erros do Output e os números do HUD.
 
 ## Problemas

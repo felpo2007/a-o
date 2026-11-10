@@ -13,7 +13,6 @@ local CROUCH: { [string]: CFrame } = {
 	LeftKnee = CFrame.Angles(math.rad(-100), 0, 0),
 	RightKnee = CFrame.Angles(math.rad(-100), 0, 0),
 }
-local PRONE_ROOT = CFrame.Angles(math.rad(-85), 0, 0) -- corpo deitado de bruços
 local LEAN_WAIST = math.rad(16) -- inclinação do tronco (PLACEHOLDER)
 
 local function characters(): { Model }
@@ -48,7 +47,6 @@ end
 RunService.Heartbeat:Connect(function()
 	for _, char in characters() do
 		local crouched = char:GetAttribute("Crouched") == true
-		local prone = char:GetAttribute("Prone") == true
 		local lean = char:GetAttribute("Lean")
 		for name, rot in CROUCH do
 			local m = motor(char, name)
@@ -56,10 +54,7 @@ RunService.Heartbeat:Connect(function()
 				m.C0 = if crouched then original[m] * rot else original[m]
 			end
 		end
-		local root = motor(char, "Root")
-		if root then
-			root.C0 = if prone then original[root] * PRONE_ROOT else original[root]
-		end
+		-- deitado: a junta Root é posada pelo SERVIDOR (PostureService), para o acerto bater
 		local waist = motor(char, "Waist")
 		if waist then
 			local l = if type(lean) == "number" then lean else 0

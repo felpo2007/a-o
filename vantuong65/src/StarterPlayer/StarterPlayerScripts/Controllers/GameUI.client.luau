@@ -540,6 +540,7 @@ player.CharacterAdded:Connect(function(char)
 	refresh()
 	local hum = char:WaitForChild("Humanoid") :: Humanoid
 	hum.Died:Connect(refresh)
+	refresh() -- o CharacterAdded chega antes do Humanoid: sem isto o mapa de spawn ficava na tela
 end)
 Input.DeviceChanged:Connect(refresh)
 

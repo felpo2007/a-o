@@ -127,6 +127,10 @@ end
 
 type Pressed = { entry: Entry, t0: number, held: boolean, token: number }
 local pressed: { [string]: Pressed } = {}
+-- Teclas que estavam apertadas na troca de contexto: ficam "consumidas" até soltar. Sem isso, a
+-- segunda fonte (IAS) entregava de novo a tecla que abriu o mapa (M) ou o menu (P), e a ação dela
+-- no contexto novo (fechar) disparava no mesmo quadro (teste no Studio, 2026-11-10).
+local consumed: { [string]: boolean } = {}
 local token = 0
 
 -- Gravador (Parte 12.7): eventos de botão do controle com tempo relativo.
@@ -140,6 +144,12 @@ local function onButton(code: string, down: boolean, isPad: boolean)
 	local id = (if isPad then "pad:" else "key:") .. code
 	if recording and isPad then
 		table.insert(recording, { t = os.clock() - recordT0, code = code, down = down })
+	end
+	if consumed[id] then
+		if not down then
+			consumed[id] = nil -- soltou: o próximo aperto vale
+		end
+		return
 	end
 	if down then
 		if pressed[id] then
@@ -199,10 +209,21 @@ local function onButton(code: string, down: boolean, isPad: boolean)
 	end
 end
 
--- Solta tudo (troca de contexto): quem segurava recebe release/holdEnd.
+-- Troca de contexto: solta (release/holdEnd) e consome as teclas cujas ações NÃO existem nas
+-- camadas do contexto novo. As que continuam válidas ficam apertadas: o botão direito que liga a
+-- mira (infantaria) vale na mira (que tem a infantaria por baixo); soltá-lo aqui desligava a mira
+-- no mesmo quadro (teste no Studio, 2026-11-10).
 local function releaseAll()
+	local ctx = InputMap.activeContext(Input.state)
 	for id, p in pressed do
+		local all = table.clone(p.entry.press)
+		table.move(p.entry.tap, 1, #p.entry.tap, #all + 1, all)
+		table.move(p.entry.hold, 1, #p.entry.hold, #all + 1, all)
+		if InputMap.survives(all, ctx) then
+			continue
+		end
 		pressed[id] = nil
+		consumed[id] = true
 		local function run(a: InputMap.Action, phase: string)
 			local h = handlers[a.id]
 			local list: { Fn } = if h and h[phase] then h[phase] else {}
@@ -488,6 +509,24 @@ task.spawn(function()
 	end
 end)
 
+-- Mouse livre nas telas: em primeira pessoa (LockFirstPerson) o Roblox prende o mouse no centro;
+-- um botão Modal visível solta. Vale no menu, no mapa e morto (mapa de spawn). Sem isso, quem
+-- joga no mouse não escolhia onde renascer (teste no Studio, 2026-11-10).
+local mouseGui = Instance.new("ScreenGui")
+mouseGui.Name = "VT65MouseFree"
+mouseGui.ResetOnSpawn = false
+local modal = Instance.new("TextButton")
+modal.Modal = true
+modal.Text = ""
+modal.BackgroundTransparency = 1
+modal.Size = UDim2.fromOffset(1, 1)
+modal.Selectable = false -- o controle não navega até ele
+modal.Visible = false
+modal.Parent = mouseGui
+task.spawn(function()
+	mouseGui.Parent = player:WaitForChild("PlayerGui")
+end)
+
 local function sinkJump(_: string, _s: Enum.UserInputState, _o: InputObject): Enum.ContextActionResult
 	return Enum.ContextActionResult.Sink
 end
@@ -503,6 +542,7 @@ applyEvent = function(ev: string, arg: any?)
 	-- menus e mapa: personagem parado (A não pula, analógico não anda); em veículo, A e Espaço
 	-- não tiram o jogador do assento (sair = B segurado / Y).
 	local inUi = Input.state.menus > 0 or Input.state.map
+	modal.Visible = inUi or not Input.state.alive
 	if controls then
 		if inUi then
 			controls:Disable()
