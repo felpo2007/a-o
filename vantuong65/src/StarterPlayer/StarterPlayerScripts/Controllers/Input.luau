@@ -543,6 +543,8 @@ applyEvent = function(ev: string, arg: any?)
 	-- não tiram o jogador do assento (sair = B segurado / Y).
 	local inUi = Input.state.menus > 0 or Input.state.map
 	modal.Visible = inUi or not Input.state.alive
+	-- o cursor do sistema (a "mãozinha") ficava no meio da tela durante o jogo: só aparece nas telas
+	UserInputService.MouseIconEnabled = inUi or not Input.state.alive
 	if controls then
 		if inUi then
 			controls:Disable()

@@ -837,3 +837,46 @@ arte real.
   sobrepunham. Agora usa um UH-34D já pousado. A regra do jogo não mudou e passou: evacuado, +25 de
   suprimento.
 - **Autoteste no Studio:** **10 ok, 0 falhas, 1 pulado** (animais: IDs de arte em 0).
+
+## D-54 — Visual da arma e dos tiros (2026-11-10)
+O que o Studio mostrava, com os IDs de arte em 0:
+- ninguém segurava arma;
+- a arma caída era uma tábua de 1,0 × 0,08 × 0,25 m;
+- os tiros não tinham clarão nem marca de impacto;
+- o traçante era uma linha reta do olho até o impacto, acesa por 0,08 s;
+- o cursor do sistema (a "mãozinha") ficava no meio da tela durante o jogo.
+
+O que mudou:
+- **Arma provisória** (`Shared/GunModel`): montada com peças, no comprimento real de cada arma
+  (M14 1,126 m, Type 56 0,882 m etc.). Tem os pontos `Muzzle` (boca do cano) e `Sight` (alça).
+  Some quando o modelo do ForgeGUI for publicado: o `AssetLoader` usa o asset se existir.
+  - Na mão de todos: `AssetLoader.attachWeapon`. Ao pegar a arma do inimigo, o modelo na mão
+    troca junto. No Studio, 29 de 29 bots e o jogador aparecem armados.
+  - No chão: a arma caída é a própria arma, deitada de lado (antes, a tábua).
+- **Braços segurando a arma** (`PostureController`): ombros à frente, o esquerdo vindo para o meio.
+  Medido num bot: a arma aponta (0,00; 0,00; −1,00), reto para a frente. PLACEHOLDER até as
+  animações: a mão esquerda não chega ao guarda-mão.
+- **Arma em primeira pessoa** (`WeaponVisuals`): só quem joga vê. No quadril; mirando, vai ao ombro
+  com a alça no centro da tela. Recua a cada tiro e balança ao andar. Some no menu, no mapa, no
+  binóculo, sentado, caído ou morto. A arma do próprio corpo continua escondida pela câmera.
+- **Tiros:** clarão de boca (luz e chama por 0,05 s) no próprio tiro e no dos outros, saindo da arma
+  de quem atirou (o pacote do servidor agora diz quem foi, `by`). Também há poeira, terra ou
+  respingo onde a bala para, até 150 m; em corpo não há nada, porque o jogo não tem hitmarker. O
+  traçante virou um risco de ~3 m que voa pela trajetória real a partir da boca do cano.
+- **Cursor:** `MouseIconEnabled` só fica ligado nas telas.
+- **Bug de base achado no caminho:** o `PostureController` guardava a pose de repouso das juntas
+  numa tabela com chave fraca. Quando o coletor de lixo levava a entrada, a pose seguinte era lida
+  já posada, e as rotações acumulavam: o cotovelo de um bot foi de −134° a −112° em 3 s. O defeito
+  já existia com `Motor6D`. Agora a pose de repouso fica num atributo da instância
+  (`Joints.rest`), e o valor fica estável.
+
+Medido no Studio:
+- 3 tiros para o chão: 3 clarões e 3 nuvens de impacto, e tudo some em 1 s;
+- nenhum erro no cliente nem no servidor;
+- autoteste: 10 ok, 0 falhas.
+
+**Não verificado:**
+- o traçante em jogo: só sai em metralhadora, 1 tiro em 5;
+- a pose vista por outro jogador (o MCP só roda Play solo);
+- a "mãozinha" que aparece nas capturas: o jogo informa `MouseIconEnabled = false`, então
+  provavelmente é o indicador do mouse virtual do MCP.

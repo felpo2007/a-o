@@ -9,9 +9,11 @@ local AssetIds = require(ReplicatedStorage.Shared.AssetIds) :: any
 local ArtBudget = require(script.Parent.ArtBudget)
 local Animals = require(ReplicatedStorage.Shared.Animals)
 local Geometry = require(ReplicatedStorage.Shared.Geometry)
+local GunModel = require(ReplicatedStorage.Shared.GunModel)
 local MapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any
 local Rng = require(ReplicatedStorage.Shared.Rng)
 local Tunnels = require(ReplicatedStorage.Shared.Tunnels) :: any
+local Weapons = require(ReplicatedStorage.Shared.Weapons)
 
 local AssetLoader = {}
 local cache: { [string]: Model } = {}
@@ -303,14 +305,20 @@ local WEAPON_TURN: { [string]: CFrame } = {
 	rpg2 = CFrame.Angles(0, math.pi / 2, 0),
 }
 
--- Arma visível na mão direita (todos veem). Sem asset publicado, nada acontece.
+-- Arma visível na mão direita (todos veem). Sem asset publicado, usa a provisória (Shared/GunModel):
+-- antes ninguém aparecia armado. Troca a anterior (arma do inimigo pega do chão).
 function AssetLoader.attachWeapon(model: Model, weaponId: string)
-	local tpl = AssetLoader.template(weaponId)
 	local hand = model:FindFirstChild("RightHand") :: BasePart?
-	if not (tpl and hand) then
+	local wp = Weapons.get(weaponId)
+	if not (hand and wp) then
 		return
 	end
-	local w = tpl:Clone()
+	local old = model:FindFirstChild("Weapon")
+	if old then
+		old:Destroy()
+	end
+	local tpl = AssetLoader.template(weaponId)
+	local w = if tpl then tpl:Clone() else GunModel.build(weaponId, wp.kind)
 	for _, d in w:GetDescendants() do
 		if d:IsA("BasePart") then
 			d.Anchored = false

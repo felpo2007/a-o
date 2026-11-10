@@ -26,6 +26,26 @@ function Joints.getC0(j: Instance): CFrame?
 	return nil
 end
 
+-- Pose de repouso, guardada na própria instância (atributo "RestC0" na junta ou no Attachment0).
+-- Um cache em tabela fraca perdia a entrada quando o coletor de lixo levava a referência da junta,
+-- e a pose seguinte era lida já posada: as rotações acumulavam (cotovelo de bot indo de −134° a
+-- −112° em 3 s no Studio, 2026-11-10).
+function Joints.rest(j: Instance): CFrame?
+	local holder: Instance? = if j:IsA("AnimationConstraint") then j.Attachment0 else j
+	if not holder then
+		return nil
+	end
+	local r = holder:GetAttribute("RestC0")
+	if typeof(r) == "CFrame" then
+		return r
+	end
+	local c0 = Joints.getC0(j)
+	if c0 then
+		holder:SetAttribute("RestC0", c0)
+	end
+	return c0
+end
+
 function Joints.setC0(j: Instance, cf: CFrame)
 	if j:IsA("Motor6D") then
 		j.C0 = cf

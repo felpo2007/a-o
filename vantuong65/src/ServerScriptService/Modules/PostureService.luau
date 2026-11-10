@@ -27,15 +27,11 @@ local function setProneJoint(model: Model, prone: boolean)
 	if not root then
 		return
 	end
-	local orig = root:GetAttribute("StandC0")
-	if typeof(orig) ~= "CFrame" then
-		orig = Joints.getC0(root)
-		if not orig then
-			return
-		end
-		root:SetAttribute("StandC0", orig)
+	local orig = Joints.rest(root)
+	if not orig then
+		return
 	end
-	Joints.setC0(root, if prone then (orig :: CFrame) * PRONE_ROOT else orig :: CFrame)
+	Joints.setC0(root, if prone then orig * PRONE_ROOT else orig)
 end
 
 -- Deitado, o corpo encosta no chão. Com a colisão normal o soldado era empurrado e escorregava

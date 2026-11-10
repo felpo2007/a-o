@@ -249,6 +249,14 @@ Os 8 bugs encontrados foram corrigidos. **Reteste no Studio** (mesmo dia, relat�
 - **autoteste:** **10 ok, 0 falhas, 1 pulado** (animais, IDs de arte em 0). Na primeira rodada
   eram 6 ok e 4 falhas.
 
+**Visual da arma e dos tiros (D-54):**
+- todos aparecem armados (arma provisória até a arte ser publicada), com os braços à frente;
+- arma em primeira pessoa, no quadril e no ombro ao mirar;
+- clarão de boca, poeira no impacto e traçante que voa pela trajetória;
+- arma caída com a forma da arma, e a arma na mão troca ao pegar a do inimigo;
+- sem o cursor no meio da tela;
+- corrigido também o acúmulo das rotações nas poses (agachar, inclinar, braços).
+
 **Depois do teste:**
 - **Autoteste no motor:** `workspace:SetAttribute("VT65SelfTest", true)`, só no Studio. Roda
   10 verificações no servidor de verdade e imprime OK ou FALHA.

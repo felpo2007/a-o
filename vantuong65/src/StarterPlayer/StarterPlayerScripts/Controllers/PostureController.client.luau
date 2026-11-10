@@ -10,7 +10,8 @@ local RunService = game:GetService("RunService")
 
 local Joints = require(ReplicatedStorage.Shared.Joints)
 
-local original: { [Instance]: CFrame } = setmetatable({}, { __mode = "k" }) :: any
+-- pose de repouso de cada junta: Joints.rest (atributo na instância; a tabela fraca de antes
+-- perdia entradas e as rotações acumulavam)
 local CROUCH: { [string]: CFrame } = {
 	LeftHip = CFrame.Angles(math.rad(70), 0, 0),
 	RightHip = CFrame.Angles(math.rad(70), 0, 0),
@@ -18,6 +19,15 @@ local CROUCH: { [string]: CFrame } = {
 	RightKnee = CFrame.Angles(math.rad(-100), 0, 0),
 }
 local LEAN_WAIST = math.rad(16) -- inclinação do tronco (PLACEHOLDER)
+-- Braços segurando a arma (quem tem "Weapon"): antes os braços caíam soltos e a arma presa na mão
+-- apontava para o chão. Braços à frente; o esquerdo vem para o meio, sob o guarda-mão. PLACEHOLDER
+-- até as animações próprias.
+local ARMS: { [string]: CFrame } = {
+	RightShoulder = CFrame.Angles(math.rad(78), 0, 0),
+	RightElbow = CFrame.Angles(math.rad(12), 0, 0),
+	LeftShoulder = CFrame.Angles(0, math.rad(-38), 0) * CFrame.Angles(math.rad(82), 0, 0),
+	LeftElbow = CFrame.Angles(math.rad(12), 0, 0),
+}
 
 local function characters(): { Model }
 	local list = {}
@@ -37,16 +47,13 @@ local function characters(): { Model }
 	return list
 end
 
-local function motor(char: Model, name: string): Instance?
+local function motor(char: Model, name: string): (Instance?, CFrame)
 	local m = Joints.find(char, name)
-	if m and not original[m] then
-		local c0 = Joints.getC0(m)
-		if not c0 then
-			return nil
-		end
-		original[m] = c0
+	local rest = m and Joints.rest(m)
+	if not (m and rest) then
+		return nil, CFrame.identity
 	end
-	return m
+	return m, rest
 end
 
 -- só grava quando muda (evita escrever ~5 juntas × 60 personagens a cada quadro)
@@ -61,16 +68,23 @@ RunService.Heartbeat:Connect(function()
 		local crouched = char:GetAttribute("Crouched") == true
 		local lean = char:GetAttribute("Lean")
 		for name, rot in CROUCH do
-			local m = motor(char, name)
+			local m, rest = motor(char, name)
 			if m then
-				pose(m, if crouched then original[m] * rot else original[m])
+				pose(m, if crouched then rest * rot else rest)
+			end
+		end
+		local armed = char:FindFirstChild("Weapon") ~= nil and char:GetAttribute("Downed") ~= true
+		for name, rot in ARMS do
+			local m, rest = motor(char, name)
+			if m then
+				pose(m, if armed then rest * rot else rest)
 			end
 		end
 		-- deitado: a junta Root é posada pelo SERVIDOR (PostureService), para o acerto bater
-		local waist = motor(char, "Waist")
+		local waist, rest = motor(char, "Waist")
 		if waist then
 			local l = if type(lean) == "number" then lean else 0
-			pose(waist, original[waist] * CFrame.Angles(0, 0, -l * LEAN_WAIST))
+			pose(waist, rest * CFrame.Angles(0, 0, -l * LEAN_WAIST))
 		end
 	end
 end)

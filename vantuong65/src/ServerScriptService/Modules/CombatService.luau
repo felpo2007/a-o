@@ -6,10 +6,12 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Ballistics = require(ReplicatedStorage.Shared.Ballistics)
+local GunModel = require(ReplicatedStorage.Shared.GunModel)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Pickup = require(ReplicatedStorage.Shared.Pickup)
 local Rng = require(ReplicatedStorage.Shared.Rng)
 local Weapons = require(ReplicatedStorage.Shared.Weapons)
+local AssetLoader = require(script.Parent.AssetLoader)
 local Combatants = require(script.Parent.Combatants)
 local MedicalService = require(script.Parent.MedicalService)
 local AnimalService = require(script.Parent.AnimalService)
@@ -58,20 +60,25 @@ spawnPickup = function(pos: Vector3, a: Pickup.Ammo)
 	if not wp then
 		return
 	end
-	local p = Instance.new("Part")
-	p.Name = a.weapon
-	p.Size = Vector3.new(1.0 / M, 0.08 / M, 0.25 / M) -- volume de fuzil deitado no chão
-	p.Color = Color3.fromRGB(70, 60, 45)
-	p.Material = Enum.Material.Wood
-	p.CanCollide = false
-	p.Anchored = true
+	-- a própria arma deitada de lado no chão (antes: uma tábua de 1,0 × 0,08 × 0,25 m)
+	local gun = GunModel.build(a.weapon, wp.kind)
+	gun.Name = a.weapon
+	for _, d in gun:GetDescendants() do
+		if d:IsA("BasePart") then
+			d.Anchored = true
+		end
+	end
+	local p = gun.PrimaryPart :: BasePart
 	local params = RaycastParams.new()
 	params.FilterType = Enum.RaycastFilterType.Include
 	params.FilterDescendantsInstances = { workspace.Terrain }
 	local hit = workspace:Raycast(pos + Vector3.new(0, 10, 0), Vector3.new(0, -60, 0), params)
-	p.CFrame = CFrame.new((if hit then hit.Position else pos) + Vector3.new(0, p.Size.Y / 2, 0))
-		* CFrame.Angles(0, math.random() * 2 * math.pi, 0)
-	p.Parent = pickups
+	gun:PivotTo(
+		CFrame.new((if hit then hit.Position else pos) + Vector3.new(0, 0.03 / M, 0))
+			* CFrame.Angles(0, math.random() * 2 * math.pi, 0)
+			* CFrame.Angles(0, 0, math.pi / 2)
+	)
+	gun.Parent = pickups
 	local prompt = Instance.new("ProximityPrompt")
 	prompt.ActionText = "Pegar " .. wp.name
 	prompt.ObjectText = string.format("%d cartucho(s) no carregador", a.mag)
@@ -82,15 +89,16 @@ spawnPickup = function(pos: Vector3, a: Pickup.Ammo)
 	prompt.Triggered:Connect(function(player: Player)
 		local char = player.Character
 		local hum = char and char:FindFirstChildOfClass("Humanoid")
-		if not (char and hum) or hum.Health <= 0 or char:GetAttribute("Downed") or p.Parent ~= pickups then
+		if not (char and hum) or hum.Health <= 0 or char:GetAttribute("Downed") or gun.Parent ~= pickups then
 			return
 		end
-		p:Destroy()
+		gun:Destroy()
 		local cur = ammo[player]
 		local new, dropped =
 			Pickup.swap(if cur then { weapon = cur.weapon, mag = cur.mag, spare = cur.spare } else nil, a)
 		ammo[player] = { weapon = new.weapon, mag = new.mag, spare = new.spare, lastShot = 0, reloadUntil = 0 }
 		player:SetAttribute("CarriedWeapon", new.weapon)
+		AssetLoader.attachWeapon(char, new.weapon) -- a arma na mão troca junto
 		Net.event("Combat_Ammo"):FireClient(player, ammo[player])
 		local root = char:FindFirstChild("HumanoidRootPart") :: BasePart?
 		if dropped and root then
@@ -98,7 +106,7 @@ spawnPickup = function(pos: Vector3, a: Pickup.Ammo)
 		end
 	end)
 	task.delay(Pickup.TTL_S, function()
-		p:Destroy()
+		gun:Destroy()
 	end)
 end
 
@@ -173,6 +181,7 @@ function CombatService.fire(
 		dy = dir.Y,
 		dz = dir.Z,
 		seed = seed,
+		by = shooter, -- o clarão de boca sai da arma de quem atirou (WeaponVisuals)
 	}
 	for _, other in Players:GetPlayers() do
 		if other ~= exceptPlayer then

@@ -14,6 +14,7 @@ local Ballistics = require(ReplicatedStorage.Shared.Ballistics)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Rng = require(ReplicatedStorage.Shared.Rng)
 local Weapons = require(ReplicatedStorage.Shared.Weapons)
+local Bus = require(script.Parent.Bus)
 local Haptics = require(script.Parent.Haptics)
 local Input = require(script.Parent.Input)
 local UiKit = require(script.Parent.UiKit)
@@ -109,57 +110,24 @@ local function equip()
 	local wp = if id and not launcher then Weapons.get(id) else nil
 	weapon = if wp and wp.enabled then wp else nil
 	modeIdx = 1
+	-- local (não replica): a arma em primeira pessoa (WeaponVisuals) segue a arma equipada
+	player:SetAttribute("EquippedWeapon", if launcher then "launcher" elseif weapon then weapon.id else nil)
 end
 
 Net.event("Combat_Ammo").OnClientEvent:Connect(function(a)
 	mag = a.mag
 end)
 
--- traçante visual: refaz a trajetória (mesma semente) e desenha um segmento curto
-local tracerFolder = Instance.new("Folder")
-tracerFolder.Name = "VT65Tracers"
-tracerFolder.Parent = workspace
 -- cor do traçante pela facção da arma e pelo modo daltônico do jogador (Accessibility)
 local function tracerColor(faction: string): Color3
 	local c = Accessibility.tracer(faction, Input.settings.colorblind)
 	return Color3.fromRGB(c[1], c[2], c[3])
 end
 
+-- O traçante é desenhado pelo WeaponVisuals: um risco curto que voa pela trajetória, saindo da
+-- boca do cano. Antes era uma linha reta do olho até o impacto, acesa por 0,08 s.
 local function tracer(shot: any, color: Color3)
-	local pts: { Vector3 } = {}
-	local params = RaycastParams.new()
-	params.FilterType = Enum.RaycastFilterType.Exclude
-	params.FilterDescendantsInstances = { tracerFolder, player.Character :: Model }
-	Ballistics.trace({
-		ox = shot.ox * M,
-		oy = shot.oy * M,
-		oz = shot.oz * M,
-		dx = shot.dx,
-		dy = shot.dy,
-		dz = shot.dz,
-		weaponId = shot.w,
-		seed = shot.seed,
-		maxTime = 1.2,
-	}, function(ax, ay, az, bx, by, bz)
-		table.insert(pts, Vector3.new(ax, ay, az) / M)
-		local r = workspace:Raycast(Vector3.new(ax, ay, az) / M, Vector3.new(bx - ax, by - ay, bz - az) / M, params)
-		return if r then { x = r.Position.X * M, y = r.Position.Y * M, z = r.Position.Z * M } else nil
-	end)
-	if #pts < 2 then
-		return
-	end
-	local a, b = pts[1], pts[#pts]
-	local p = Instance.new("Part")
-	p.Anchored, p.CanCollide, p.CanQuery, p.CanTouch, p.CastShadow = true, false, false, false, false
-	p.Material = Enum.Material.Neon
-	p.Color = color
-	p.Size = Vector3.new(0.08, 0.08, (b - a).Magnitude)
-	p.CFrame = CFrame.lookAt((a + b) / 2, b)
-	p.Transparency = 0.3
-	p.Parent = tracerFolder
-	task.delay(0.08, function()
-		p:Destroy()
-	end)
+	Bus.fire("tracer", shot, color)
 end
 
 Net.unreliable("Combat_Tracer").OnClientEvent:Connect(function(shot)
@@ -199,6 +167,7 @@ local function setAim(on: boolean)
 		return
 	end
 	aiming = on
+	player:SetAttribute("Aiming", on) -- local: a arma vai ao ombro (WeaponVisuals)
 	Input.event("aim", on)
 	if not on then
 		Net.event("Posture_Set"):FireServer({ lean = 0 })
@@ -254,6 +223,7 @@ local function fire()
 		t = workspace:GetServerTimeNow(),
 	}
 	Net.event("Combat_Fire"):FireServer(shot)
+	Bus.fire("shot_fired", shot) -- clarão, recuo da arma e poeira no impacto (WeaponVisuals)
 	playId(SHOT_SOUND[wp.id] or 0, 0.8)
 	if wp.kind == "mg" and seed % 5 == 0 then
 		tracer(shot, tracerColor(wp.faction))
