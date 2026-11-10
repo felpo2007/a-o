@@ -22,7 +22,15 @@ do resto.
      testes no servidor do Roblox.
 
    Ponha data de expiração. Restrição de IP: deixe em branco, porque o IP da sessão muda.
-4. **A chave nunca vai no chat nem no Git.** Quando eu pedir, um formulário seguro aparece. Cole a
+4. **Estado em 2026-11-10:** uma chave foi salva no ambiente (segredo de rede de
+   `apis.roblox.com`), mas a Roblox respondeu **401 "Invalid API Key"** em dois testes, com 1 min de
+   intervalo. Confira três coisas:
+   - a chave foi copiada inteira;
+   - ela está ativa e dentro da validade;
+   - o tipo é chave Open Cloud, não cookie nem token OAuth.
+
+   Para trocar: menu do ambiente na barra de título da sessão → Edit → Network secrets.
+5. **A chave nunca vai no chat nem no Git.** Quando eu pedir, um formulário seguro aparece. Cole a
    chave lá: ela fica no ambiente e o proxy a injeta nas chamadas a apis.roblox.com.
 
 Com isso eu rodo `tools/roblox_cloud.py all`, que faz quatro coisas:
