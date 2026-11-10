@@ -382,5 +382,95 @@
   "file": "assets/clothing/vc_khaki_shirt.png",
   "assetType": "Decal",
   "name": "VT65 vc_khaki_shirt"
+ },
+ {
+  "key": "Sounds.engine_tank",
+  "file": "assets/forgegui/audio/motor_tanque.mp3",
+  "assetType": "Audio",
+  "name": "VT65 motor_tanque"
+ },
+ {
+  "key": "Sounds.engine_amtrac",
+  "file": "assets/forgegui/audio/motor_anfibio.mp3",
+  "assetType": "Audio",
+  "name": "VT65 motor_anfibio"
+ },
+ {
+  "key": "Sounds.gun_90",
+  "file": "assets/forgegui/audio/canhao_90mm.mp3",
+  "assetType": "Audio",
+  "name": "VT65 canhao_90mm"
+ },
+ {
+  "key": "Sounds.rr_106",
+  "file": "assets/forgegui/audio/sem_recuo_106mm.mp3",
+  "assetType": "Audio",
+  "name": "VT65 sem_recuo_106mm"
+ },
+ {
+  "key": "Sounds.mortar_launch",
+  "file": "assets/forgegui/audio/morteiro_disparo.mp3",
+  "assetType": "Audio",
+  "name": "VT65 morteiro_disparo"
+ },
+ {
+  "key": "Sounds.explosion",
+  "file": "assets/forgegui/audio/explosao_granada.mp3",
+  "assetType": "Audio",
+  "name": "VT65 explosao_granada"
+ },
+ {
+  "key": "Sounds.incoming",
+  "file": "assets/forgegui/audio/granada_chegando.mp3",
+  "assetType": "Audio",
+  "name": "VT65 granada_chegando"
+ },
+ {
+  "key": "Sounds.naval_distant",
+  "file": "assets/forgegui/audio/tiro_naval_distante.mp3",
+  "assetType": "Audio",
+  "name": "VT65 tiro_naval_distante"
+ },
+ {
+  "key": "Sounds.radio_squelch",
+  "file": "assets/forgegui/audio/radio_squelch.mp3",
+  "assetType": "Audio",
+  "name": "VT65 radio_squelch"
+ },
+ {
+  "key": "Models.uh34d",
+  "file": "assets/forgegui/models/uh34d_studs.glb",
+  "assetType": "Model",
+  "name": "VT65 uh34d"
+ },
+ {
+  "key": "Models.m48a3",
+  "file": "assets/forgegui/models/m48a3_studs.glb",
+  "assetType": "Model",
+  "name": "VT65 m48a3"
+ },
+ {
+  "key": "Models.lvtp5",
+  "file": "assets/forgegui/models/lvtp5_studs.glb",
+  "assetType": "Model",
+  "name": "VT65 lvtp5"
+ },
+ {
+  "key": "Models.ontos",
+  "file": "assets/forgegui/models/ontos_studs.glb",
+  "assetType": "Model",
+  "name": "VT65 ontos"
+ },
+ {
+  "key": "Models.mortar_82",
+  "file": "assets/forgegui/models/morteiro_82mm_studs.glb",
+  "assetType": "Model",
+  "name": "VT65 mortar_82"
+ },
+ {
+  "key": "Models.vc_bunker",
+  "file": "assets/forgegui/models/bunker_vc_studs.glb",
+  "assetType": "Model",
+  "name": "VT65 vc_bunker"
  }
 ]

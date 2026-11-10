@@ -26,7 +26,7 @@ do resto.
    chave lá: ela fica no ambiente e o proxy a injeta nas chamadas a apis.roblox.com.
 
 Com isso eu rodo `tools/roblox_cloud.py all`, que faz quatro coisas:
-- sobe os 64 assets (sons, modelos e roupas);
+- sobe os 79 assets (sons, modelos e roupas);
 - preenche `AssetIds.luau`;
 - cria os 4 passes e os 2 produtos de apoio;
 - publica o place.
@@ -63,6 +63,8 @@ Roteiro da F4:
    82 mm.
 5. Escolha *Antitanque* (VC) → **Z** dispara o RPG-2 contra o M48. Pela frente não deve furar;
    pelo lado, sim.
+6. Se a arte de um veículo aparecer de ré (o canhão para trás), troque `math.rad(90)` por
+   `math.rad(-90)` em `ART_YAW` (`VehicleService.luau`). O ForgeGUI não informa a frente do modelo.
 
 ## 4. Decisões históricas que precisam de você ou de um consultor
 - Confirmar o fuso de 1965 (**UTC+8**, hora de Saigon), que define a luz do amanhecer (D-27).

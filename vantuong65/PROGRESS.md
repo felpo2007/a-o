@@ -35,7 +35,7 @@
   - `VehicleController`: direção, voo e HUD de potência e torque;
   - `CommanderController`: N fogo, J construir;
   - áudio de explosão, assobio, disparos e motores.
-- **ForgeGUI:** modelos UH-34D, M48A3, LVTP-5, Ontos e dois morteiros; 9 sons da F4.
+- **ForgeGUI:** UH-34D, M48A3, LVTP-5, Ontos, morteiro 82 mm e bunker VC preparados (escala na D-39); 9 sons da F4. Total: 40 GLBs no manifest e 79 itens no plano de upload.
 
 ## F3: o que foi feito (sessão 4)
 - **Luz:**

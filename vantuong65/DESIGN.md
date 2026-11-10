@@ -297,7 +297,7 @@ O UH-34D ficou para a F4.
 
 ## D-32 — Publicação automática pelo Open Cloud (firme)
 `tools/roblox_cloud.py` faz quatro coisas:
-1. Sobe os 64 itens de `assets/upload_plan.json` pela Assets API.
+1. Sobe os itens de `assets/upload_plan.json` (79 na sessão 4) pela Assets API.
 2. Reescreve `AssetIds.luau`.
 3. Cria os 4 passes e os 2 produtos e preenche `Commerce.IDS`.
 4. Publica o place.
@@ -406,3 +406,23 @@ Toda linha PLACEHOLDER deve ser trocada por ficha técnica ou manual antes do la
   Ou seja, o piloto precisa de decolagem corrida no calor, como na vida real.
 - **Peso máximo para pairar a 35 °C:** 5.784 kg fora do efeito solo e 6.355 kg dentro.
 - **Torque:** acima de 92% do torque de decolagem, o nariz gira à direita se faltar pedal.
+
+## D-39 — Escala dos veículos gerados (registro)
+Os modelos do ForgeGUI saem com proporções diferentes das da ficha. Exemplo: o M48 escalado pelo
+comprimento ficaria com 4,2 m de altura, contra 3,1 m reais.
+
+Por isso cada veículo é escalado pela **média geométrica das três razões** ficha/modelo, o que
+distribui o erro. Resultado (m):
+
+| Veículo | Modelo no jogo | Ficha |
+|---|---|---|
+| M48A3 | 7,89 × 3,75 × 3,55 | 9,3 (com canhão) × 3,65 × 3,1 |
+| LVTP-5 | 7,95 × 3,4 × 3,49 | 9,04 × 3,57 × 2,92 |
+| Ontos | 3,39 × 2,17 × 2,87 | 3,83 × 2,59 × 2,13 (os tubos elevam a altura) |
+| UH-34D | rotor 13,5, altura 5,5 | rotor 17,07, altura 4,36 (o mastro do modelo é alto demais) |
+
+A colisão usa o chassi, dimensionado pela **ficha** (`Vehicles.SPECS`), não pela arte. Os modelos
+devem ser refeitos antes do lançamento (F5), com prompt de proporções ou modelagem manual.
+
+A frente dos GLBs dos veículos não é informada (`semantic_front: not_inferred`). A arte gira 90°
+(`ART_YAW`); se no Studio o veículo andar de ré, troque por −90°.

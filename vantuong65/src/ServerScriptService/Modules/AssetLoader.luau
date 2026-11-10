@@ -172,10 +172,14 @@ function AssetLoader.start()
 			cx, cz = l.x, l.z
 		end
 	end
-	for _, n in Tunnels.nodes do
+	for id, n in Tunnels.nodes do
 		if n.entrance then
 			local x, z = Tunnels.toWorld(cx, cz, n.x, n.z)
 			AssetLoader.place("tunnel_entrance", x, z, rng:range(0, 6.28), out)
+			-- bunker de toras ao lado das entradas da vila (não na do arrozal nem na da trincheira)
+			if id == "E1" or id == "E2" or id == "E4" then
+				AssetLoader.place("vc_bunker", x + 9 / M, z + 4 / M, rng:range(0, 6.28), out)
+			end
 		end
 	end
 	if AssetLoader.template("trench_section") then

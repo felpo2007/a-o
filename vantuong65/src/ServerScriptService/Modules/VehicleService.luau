@@ -33,6 +33,15 @@ local DEPOTS = {
 	{ spec = "uh34d", dx = -80, dz = 30 },
 }
 local RESPAWN_S = 180 -- design
+-- Giro da arte em relação ao chassi (frente do chassi = -Z). Os GLBs dos veículos vieram com o eixo
+-- longo em X e o ForgeGUI não infere a frente: 90° é o palpite; se no Studio o veículo andar de
+-- ré, troque por -90° (TODO_USUARIO).
+local ART_YAW: { [string]: number } = {
+	m48a3 = math.rad(90),
+	ontos = math.rad(90),
+	lvtp5 = math.rad(90),
+	uh34d = math.rad(90),
+}
 
 -- Armas de veículo e foguetes de infantaria (projéteis simulados no servidor).
 -- v0: 106 mm M344 HEAT = 503 m/s (wiki:M40_recoilless_rifle); demais PLACEHOLDER (D-36).
@@ -339,7 +348,11 @@ function VehicleService.spawn(specId: string, depot: number): Model?
 		local art = tpl:Clone()
 		art.Name = "Art"
 		local _, size = art:GetBoundingBox()
-		art:PivotTo(chassis.CFrame * CFrame.new(0, -chassis.Size.Y / 2 + size.Y / 2, 0))
+		art:PivotTo(
+			chassis.CFrame
+				* CFrame.new(0, -chassis.Size.Y / 2 + size.Y / 2, 0)
+				* CFrame.Angles(0, ART_YAW[specId] or 0, 0)
+		)
 		for _, p in art:GetDescendants() do
 			if p:IsA("BasePart") then
 				p.Anchored = false

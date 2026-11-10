@@ -505,6 +505,96 @@
    "triangulos": 15388,
    "sha256": "bca00b6ce03c3e2c05cff9d3a815597a82369d7e8dc8fc1254f16882f3ef3415",
    "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/11ecc0b2-2793-4f88-81b2-31c012d10ed9/9a5a2a73-79ab-4197-8b4a-47faf2c98ecd/Model-bca00b6ce03c3e2c05cff9d3a815597a82369d7e8dc8fc1254f16882f3ef3415.glb"
+  },
+  {
+   "arquivo": "models/uh34d_studs.glb",
+   "chave": "uh34d",
+   "job": "f3dd4d6e-5f83-4c97-b2a9-b74e07d15a74",
+   "prep": "ea9d3ec0-a234-413e-b731-cf96ca51b1bb",
+   "escala": "rotor 17,07 m e altura 4,36 m (wiki:Sikorsky_H-34): média geométrica das 3 razões da ficha (proporções do modelo gerado divergem; D-39)",
+   "dim_studs_xyz": [
+    48.09,
+    19.76,
+    47.01
+   ],
+   "triangulos": 15061,
+   "sha256": "edf7f78ba1da25de93e1cf8cd1edc2d1ede59b35adae7ee33ef92a375aab1a06",
+   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/ea9d3ec0-a234-413e-b731-cf96ca51b1bb/691b4008-35d4-4bec-ae08-c1b0f3d3d161/Model-edf7f78ba1da25de93e1cf8cd1edc2d1ede59b35adae7ee33ef92a375aab1a06.glb"
+  },
+  {
+   "arquivo": "models/m48a3_studs.glb",
+   "chave": "m48a3",
+   "job": "ebf03afa-1e02-4f5a-a3e6-895adea6c07c",
+   "prep": "6a5b95e6-5885-452b-bdd2-b5ac37a466fa",
+   "escala": "9,3 x 3,65 x 3,1 m (wiki:M48_Patton): média geométrica das 3 razões da ficha (proporções do modelo gerado divergem; D-39)",
+   "dim_studs_xyz": [
+    28.17,
+    12.67,
+    13.39
+   ],
+   "triangulos": 14684,
+   "sha256": "2033e710dcde3669418d54790bdd75f5bee7e5c0fddc660574dc0d71dd3b98bf",
+   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/6a5b95e6-5885-452b-bdd2-b5ac37a466fa/76c523bf-4175-46c2-af9e-cf96304ab3a1/Model-2033e710dcde3669418d54790bdd75f5bee7e5c0fddc660574dc0d71dd3b98bf.glb"
+  },
+  {
+   "arquivo": "models/lvtp5_studs.glb",
+   "chave": "lvtp5",
+   "job": "1ac68fe5-507e-4c01-9061-7596df8bd286",
+   "prep": "1b31599e-3fb5-4124-8447-99a1c3bec0cf",
+   "escala": "9,04 x 3,57 x 2,92 m (wiki:LVTP-5): média geométrica das 3 razões da ficha (proporções do modelo gerado divergem; D-39)",
+   "dim_studs_xyz": [
+    28.41,
+    12.45,
+    12.14
+   ],
+   "triangulos": 13970,
+   "sha256": "997158b8077a608064d31656ce985ce5617cdbd36b7329413aefe7b607d7d3bd",
+   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/1b31599e-3fb5-4124-8447-99a1c3bec0cf/e2f2597e-605a-4e6c-a369-76ea65d92a23/Model-997158b8077a608064d31656ce985ce5617cdbd36b7329413aefe7b607d7d3bd.glb"
+  },
+  {
+   "arquivo": "models/ontos_studs.glb",
+   "chave": "ontos",
+   "job": "63205ac1-5581-4197-af18-ae4054cbd93c",
+   "prep": "6f4a03ea-bc95-45d4-81b3-eca2829dd8cf",
+   "escala": "3,83 x 2,59 x 2,13 m (wiki:M50_Ontos): média geométrica das 3 razões da ficha (proporções do modelo gerado divergem; D-39)",
+   "dim_studs_xyz": [
+    12.1,
+    10.26,
+    7.75
+   ],
+   "triangulos": 13093,
+   "sha256": "3384526a3198d7623de4d04b31136a266c6b501b14c89f86cd89507b86c888cc",
+   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/6f4a03ea-bc95-45d4-81b3-eca2829dd8cf/0726c964-455c-4d99-9a2f-aedb15c6fad0/Model-3384526a3198d7623de4d04b31136a266c6b501b14c89f86cd89507b86c888cc.glb"
+  },
+  {
+   "arquivo": "models/morteiro_82mm_studs.glb",
+   "chave": "mortar_82",
+   "job": "5dd4815d-6696-4ca5-8497-1ff6f68886ee",
+   "prep": "bb4bd7e0-fca1-4674-8ae6-bf8beb9453c3",
+   "escala": "altura 1,15 m armado (tubo 1,22 m a ~60°; wiki:82-BM-37)",
+   "dim_studs_xyz": [
+    4.09,
+    4.11,
+    3.88
+   ],
+   "triangulos": 14959,
+   "sha256": "f5084d8d893558dc347a84b2ba03f2a19b64b2229c70a5127e13815fe57106fb",
+   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/bb4bd7e0-fca1-4674-8ae6-bf8beb9453c3/8e8c39b8-8a65-4444-aa4e-7f4aca378d75/Model-f5084d8d893558dc347a84b2ba03f2a19b64b2229c70a5127e13815fe57106fb.glb"
+  },
+  {
+   "arquivo": "models/bunker_vc_studs.glb",
+   "chave": "vc_bunker",
+   "job": "f6a47bd7-f1bc-442b-a56a-1e6064b5cc9d",
+   "prep": "ff1e0ab6-aece-4615-99b7-b6c38a72ec97",
+   "escala": "comprimento 4,0 m (projeto)",
+   "dim_studs_xyz": [
+    14.29,
+    4.29,
+    12.63
+   ],
+   "triangulos": 11287,
+   "sha256": "bdbba7d5b03796ffb0e81c7fdedaacaf8ab095aef1f3e22c6438eebf08377b98",
+   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/ff1e0ab6-aece-4615-99b7-b6c38a72ec97/f3a2d728-a055-4967-bc02-b33aef1aed59/Model-bdbba7d5b03796ffb0e81c7fdedaacaf8ab095aef1f3e22c6438eebf08377b98.glb"
   }
  ]
 }
