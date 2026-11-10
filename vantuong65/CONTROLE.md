@@ -82,4 +82,7 @@ O teclado e o mouse continuam funcionando:
 - A legibilidade a 3 m da TV (`IsTenFootInterface` → texto mínimo de 24 px).
 - O critério da Parte 12: 3 partidas inteiras só com controle, sem travar, a 60 fps no console.
 
+- O tutorial por papel (F6) mostra o botão do dispositivo atual, com o ícone de Xbox ou PlayStation,
+  e "(segurar)" quando o dispositivo pede segurar.
+
 Matriz de teste e roteiro: `TODO_USUARIO.md`, item 3.

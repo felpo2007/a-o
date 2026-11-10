@@ -607,3 +607,43 @@ Ver `CONTROLE.md`. Resumo:
   evento no servidor. Agora o menu do jogo tem a aba **Servidor**, visível só para o dono e
   navegável no controle; o servidor revalida dono, modo e horário.
 - **Não verificado aqui:** partida real de Offensive no Roblox (spawn na praia, ritmo, tempo).
+
+## D-47 — F6: tutorial por papel, campo de tiro e página do jogo
+- **Tutorial curto por papel** (Parte 9, "Aprendizado"): `Shared/Tutorial.luau` (puro) e
+  `TutorialController`.
+  - Um painel discreto mostra um passo por vez; nada é bloqueado.
+  - Passos comuns: mirar, atirar, recarregar, deitar e abrir a carta.
+  - Quem usa fuzil passa pelo campo de tiro.
+  - Cada papel tem 1 a 3 passos próprios. Veículos começam pelo "entrar".
+  - De 3 a 12 passos por papel.
+- **Texto sem tecla fixa:** "Ação: {botão}". O cliente põe o botão do dispositivo atual e acrescenta
+  "(segurar)" só quando aquele dispositivo pede segurar. No controle aparece o ícone de Xbox ou
+  PlayStation (`GetImageForKeyCode`).
+- **O texto não promete o que o jogo não faz:**
+  - o teste falha se uma ação citada não existe no InputMap;
+  - o teste falha se o texto diz "Construir" para um papel sem construção na logística.
+
+  Dois textos do primeiro rascunho estavam errados (comandante e sapador não constroem nada) e
+  foram corrigidos por isso.
+- **Campo de tiro** (`TrainingService`):
+  - na retaguarda de cada QG, linha de tiro e silhuetas de 0,5 × 1,0 m a 100, 200 e 300 m, no
+    chão real;
+  - EUA: praia, para o sul. VC: retaguarda oeste, para o norte;
+  - o acerto avisa **só o atirador**, com a distância do centro em cm (acima/abaixo,
+    esquerda/direita). Ensina alça e queda;
+  - é a única exceção ao "sem hitmarker" (Parte 9.5), e só no alvo de treino.
+- **Progresso salvo na conta**, por papel. Refazer ou pular: menu do jogo → Squad e papel.
+- **Bug corrigido no caminho:** `PlayerData.migrate` descartava `settings` desde a Parte 12. As
+  configurações de controle eram salvas e sumiam no login seguinte, e o `applyReceipt` também as
+  apagava ao gravar um recibo.
+  - O esquema foi para `ProfileSchema.luau` (puro).
+  - Um teste de regressão garante que `settings` e `tutorial` sobrevivem a duas migrações.
+- **Página do jogo** (`LANCAMENTO.md`):
+  - descrição em português e inglês (≤ 1.000 caracteres, sem citar outro jogo);
+  - ícone 512×512, sem os cantos brancos que vieram embutidos na arte;
+  - miniatura 16:9 exata, sem ampliar;
+  - guia do questionário de maturidade com o que o código tem hoje (sem sangue visual; sem itens
+    aleatórios pagos; sem símbolos políticos);
+  - roteiro do beta fechado.
+- **Não verificado aqui:** o tutorial e o campo de tiro dentro do Roblox (posição dos alvos no
+  terreno, legibilidade do painel na TV).

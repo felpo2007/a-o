@@ -11,6 +11,7 @@ local Rng = require(ReplicatedStorage.Shared.Rng)
 local Weapons = require(ReplicatedStorage.Shared.Weapons)
 local Combatants = require(script.Parent.Combatants)
 local MedicalService = require(script.Parent.MedicalService)
+local TrainingService = require(script.Parent.TrainingService)
 
 local CombatService = {}
 local M = 0.28
@@ -118,6 +119,11 @@ function CombatService.fire(
 		end
 	end
 	if hit and hit.target then
+		local t = hit.target :: Instance
+		if t:IsA("BasePart") and t:GetAttribute("RangeTarget") ~= nil then
+			TrainingService.rangeHit(shooter, t, Vector3.new(hit.x, hit.y, hit.z) / M)
+			return
+		end
 		local model = (hit.target :: Instance):FindFirstAncestorOfClass("Model")
 		local victim = Combatants.get(model)
 		if victim then

@@ -72,6 +72,7 @@ for t in run f2 f3 f4 controle f5 f6; do lune run tests/luau/$t.luau; done
 lune run tools/art_estimate.luau            # arte estimada por setor (cálculo, não medição)
 # modelos do ForgeGUI (não versionados); os reduzidos localmente precisam de libopengl0
 uv run --group arte python tools/fetch_forgegui_assets.py
+uv run python tools/make_store_images.py    # ícone e miniatura da página (LANCAMENTO.md)
 stylua --check src tests/luau tools
 rojo sourcemap default.project.json -o sourcemap.json
 luau-lsp analyze --definitions=globalTypes.None.d.luau --sourcemap=sourcemap.json \

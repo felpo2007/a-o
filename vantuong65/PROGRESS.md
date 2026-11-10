@@ -11,7 +11,7 @@
 | **F4 Sistemas pesados** | **código entregue**: comandante, logística, morteiros, M48A3, Ontos, LVTP-5, UH-34D. Lógica testada no Lune; critério (30v30 com 6 veículos) **só medível no Roblox** |
 | **Parte 12 Controle** | **código entregue** (vale a partir da F2): layout completo, menus/mapa/comandante sem mouse, mira no analógico, veículos, vibração; 17 testes. **Não testado num controle real** |
 | **F5 Arte total e otimização** | **em andamento**: todos os modelos colocados dentro das metas da Parte 2 (18 por remesh do ForgeGUI e 9 por redução local; o bambu passou pelos dois); arte nos 5 setores com teto, prioridade, desbaste uniforme e streaming; fusão de diques. Critério (60 jogadores a 60 fps em todos os setores) **só medível no Roblox** |
-| **F6 Offensive e lançamento** | **iniciada**: modo Offensive (lógica testada + partida + rotação), aba do servidor privado. Falta tutorial e página do jogo. Critério (beta fechado com 2 sessões cheias sem crash) **só você pode rodar** |
+| **F6 Offensive e lançamento** | **código e página entregues**: modo Offensive, rotação, aba do servidor privado, tutorial por papel, campo de tiro, página do jogo e guia de maturidade (`LANCAMENTO.md`). Critério (beta fechado com 2 sessões cheias sem crash) **só você pode rodar** |
 
 ## F6: o que foi feito (sessão 6)
 - **Modo Offensive** (`Shared/Offensive.luau`, D-46):
@@ -24,6 +24,20 @@
   No mapa, o status mostra a frente e, no fim, o vencedor.
 - **Servidor privado:** a aba "Servidor" no menu do jogo deixa o dono escolher modo e horário.
   Antes não havia tela para isso.
+- **Tutorial por papel e campo de tiro** (D-47):
+  - um passo por vez, avançando quando o jogador faz a ação;
+  - funciona no controle, no teclado e no mouse;
+  - alvos a 100/200/300 m ao lado de cada QG, com o desvio do centro em cm;
+  - progresso salvo por papel;
+  - os textos são testados contra o InputMap e a logística, para não prometer o que o jogo não
+    faz.
+- **Bug corrigido:** as configurações de controle sumiam a cada login, porque o `migrate` do
+  perfil as descartava. Agora há um teste de regressão.
+- **Página do jogo** (`LANCAMENTO.md`):
+  - descrição em português e inglês;
+  - ícone 512×512 e miniatura 16:9 (`tools/make_store_images.py`);
+  - guia do questionário de maturidade conferido no código;
+  - roteiro do beta.
 
 ## F5: o que foi feito (sessões 5 e 6)
 - **Remesh:** 18 modelos de uso repetido reduzidos às metas da Parte 2 pelo ForgeGUI. Números
@@ -202,7 +216,7 @@
 | Testes Lune controle | `controle.luau` **17 ok** (inclui 10.000 eventos aleatórios sem estado preso) |
 | Giro de 180° no analógico (quadril) | **0,58 s** (calculado) |
 | Testes Lune F5 | `f5.luau` **8 ok** |
-| Testes Lune F6 | `f6.luau` **7 ok** |
+| Testes Lune F6 | `f6.luau` **13 ok** |
 | Arte estimada por setor (teto 2,5 mi) | ~1.000 modelos; touceiras de sebe 20/38/24/21/55% nos setores 1–5 (cálculo) |
 | Redução local (Hausdorff, máx.) | capacete 0,8 cm; colete 0,6 cm; fibra 0,3 cm; props da vila 2,5–16 cm |
 | Diques após a fusão | 18.926 → **18.095** (comprimento 2.113.038 → 2.113.037 studs) |
@@ -241,6 +255,10 @@
    - morte: espere 60 s e as ondas de 20 s;
    - loja (L), mapa (M), menu do jogo (P), HUD de medição (F3);
    - o Output mostra arte por setor ("[VT65] arte setor") e a fração de sebes.
+   - tutorial: o painel aparece ao nascer com um papel novo; os alvos do campo de tiro ficam
+     ao lado do QG (100/200/300 m) e cada acerto mostra o desvio em cm;
+   - Offensive: no Studio não há servidor privado. Na barra de comando, no lado do servidor:
+     `require(game.ServerScriptService.Modules.MatchService).newMatch("Offensive")`.
 5. Me mande os erros do Output e os números do HUD.
 
 ## Problemas

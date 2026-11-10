@@ -7,6 +7,11 @@ local S = "../../src/ReplicatedStorage/Shared/"
 local Capture = require(S .. "Capture") :: any
 local Offensive = require(S .. "Offensive") :: any
 local BotBrain = require(S .. "BotBrain") :: any
+local InputMap = require(S .. "InputMap") :: any
+local Logistics = require(S .. "Logistics") :: any
+local Roles = require(S .. "Roles") :: any
+local Tutorial = require(S .. "Tutorial") :: any
+local ProfileSchema = require("../../src/ServerScriptService/Modules/ProfileSchema") :: any
 
 local passed, failed = 0, 0
 local function test(name: string, fn: () -> ())
@@ -125,6 +130,97 @@ test("rotação: servidor público alterna Warfare e Offensive; privado fica no 
 	assert(Capture.nextMode("Offensive", false, rot) == "Warfare")
 	assert(Capture.nextMode("Skirmish", false, rot) == "Warfare")
 	assert(Capture.nextMode("Skirmish", true, rot) == "Skirmish")
+end)
+
+-- ===== tutorial =====
+local ACTION: { [string]: any } = {}
+for _, a in InputMap.ACTIONS do
+	ACTION[a.id] = ACTION[a.id] or a
+end
+
+test("tutorial: todo papel tem passos curtos (3 a 12)", function()
+	for id in Roles.roles do
+		local n = #Tutorial.steps(id)
+		assert(n >= 3 and n <= 12, id .. " com " .. n .. " passos")
+	end
+end)
+
+test("tutorial: toda ação citada existe no InputMap (passo e texto)", function()
+	for id in Roles.roles do
+		for _, st in Tutorial.steps(id) do
+			if st.action then
+				assert(ACTION[st.action], id .. ": ação inexistente " .. st.action)
+			end
+			for _, a in Tutorial.placeholders(st) do
+				assert(ACTION[a], id .. ": texto cita ação inexistente " .. a)
+			end
+			assert(st.action or st.range, id .. ": passo sem ação nem alvo")
+		end
+	end
+end)
+
+test("tutorial: 'Construir' só para papéis que constroem algo na logística", function()
+	for id in Roles.roles do
+		for _, st in Tutorial.steps(id) do
+			if string.find(st.text, "Construir") then
+				local any = false
+				for _, b in Logistics.BUILDS do
+					any = any or b.role[id] == true
+				end
+				assert(any, id .. " não constrói nada, mas o tutorial diz Construir")
+			end
+		end
+	end
+end)
+
+test("tutorial: campo de tiro (100/200/300 m) só para quem usa fuzil", function()
+	for id in Roles.roles do
+		local ranges = {}
+		for _, st in Tutorial.steps(id) do
+			if st.range then
+				table.insert(ranges, st.range)
+			end
+		end
+		if Tutorial.RIFLE_ROLES[id] then
+			assert(#ranges == 3 and ranges[1] == 100 and ranges[2] == 200 and ranges[3] == 300, id)
+		else
+			assert(#ranges == 0, id .. " não usa fuzil e foi ao campo de tiro")
+		end
+	end
+end)
+
+test("tutorial: texto final troca os botões; avanço por ação ou alvo; perfil saneado", function()
+	local st = Tutorial.steps("rifleman")
+	local glyph = function(a: string): string
+		return if ACTION[a].padPress == "hold" then "[" .. a .. "] (segurar)" else "[" .. a .. "]"
+	end
+	for _, s in st do
+		local t = Tutorial.render(s, glyph)
+		assert(not string.find(t, "{"), "sobrou marcador: " .. t)
+	end
+	assert(string.find(Tutorial.render(st[4], glyph), "%(segurar%)"), "deitar é segurar no controle")
+	assert(Tutorial.done(st[1], "action", "aim") and not Tutorial.done(st[1], "action", "fire"))
+	assert(Tutorial.done(st[6], "range", 100) and not Tutorial.done(st[6], "range", 200))
+	local clean = Tutorial.sanitize({ rifleman = true, medic = "sim", hacker = true, [1] = true }, Roles.roles)
+	assert(clean.rifleman and not clean.medic and not clean.hacker)
+end)
+
+test("perfil: configurações e tutorial sobrevivem ao load (antes as configurações sumiam)", function()
+	local raw = {
+		schema = 1,
+		tips = 3,
+		purchases = { a = 1 },
+		settings = { invertY = true, lookInner = 0.2 },
+		tutorial = { rifleman = true, medic = 1, hacker = true },
+	}
+	local p = ProfileSchema.migrate(raw)
+	assert(p.settings and p.settings.invertY == true and p.settings.lookInner == 0.2, "settings perdido")
+	assert(p.tutorial.rifleman and not p.tutorial.medic and not p.tutorial.hacker)
+	assert(p.tips == 3 and p.purchases.a == 1)
+	local again = ProfileSchema.migrate(p)
+	assert(again.settings.invertY == true and again.tutorial.rifleman, "migrar duas vezes perde dados")
+	local d = ProfileSchema.migrate("lixo")
+	assert(d.schema == 1 and d.settings == nil and next(d.tutorial) == nil)
 end)
 
 print(string.format("%d ok, %d falhas", passed, failed))

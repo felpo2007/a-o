@@ -40,6 +40,7 @@ Com isso eu rodo `tools/roblox_cloud.py all`, que faz quatro coisas:
 - publica o place.
 
 ## 2. Configurações que o Roblox só deixa o dono fazer (15 min)
+Textos prontos e imagens: **`LANCAMENTO.md`** (página do jogo, guia do questionário e beta).
 - **Questionário de maturidade:** alvo **Moderate** (Parte 9.10), com violência realista não
   gráfica e sangue leve. Sem isso o jogo não é aprovado para todos os públicos.
 - **Servidores privados:** ligar e definir o preço (sugestão em `MONETIZATION.md`).
@@ -60,6 +61,7 @@ Nada rodou dentro do Roblox. Os critérios abaixo exigem o Studio ou o jogo publ
 | F3 | fps no setor 3 com a arte e comparação lado a lado com fotos de 1965 |
 | F4 | 30v30 com os 6 veículos ativos e heartbeat do servidor estável |
 | F5 | fps no pior setor com a arte. O Output mostra `[VT65] arte setor N` e a fração das sebes |
+| F6 | beta fechado: 2 partidas cheias sem crash (Warfare e Offensive), tutorial e campo de tiro (roteiro em `LANCAMENTO.md`) |
 
 F5: o teto de arte por setor (`ArtBudget.SECTOR_MAX`, 2,5 milhões) é um chute conservador.
 - Se o fps sobrar, diga quanto: eu subo o teto e as sebes ganham touceiras.

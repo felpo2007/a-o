@@ -38,6 +38,8 @@ Net.Events = {
 	"Throw_Request", -- c->s { kind = "frag" | "smoke", dir }
 	"Combat_Melee", -- c->s { dir }: coronhada ou baioneta
 	"Combat_Hit", -- s->c { x, y, z }: origem do tiro que acertou (vibração do lado do impacto)
+	"Tutorial_Done", -- c->s roleId: tutorial do papel concluído (F6)
+	"Range_Hit", -- s->c { dist, right, up }: acerto no campo de tiro, só para o atirador (cm)
 }
 Net.Unreliable = {
 	"Combat_Tracer", -- s->c: traçantes/efeitos de outros jogadores
@@ -48,6 +50,7 @@ Net.Unreliable = {
 Net.Functions = {
 	"Commerce_GetState",
 	"Settings_Get",
+	"Tutorial_Get", -- papéis com o tutorial concluído
 }
 
 local folderName = "VT65Remotes"
