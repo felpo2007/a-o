@@ -10,20 +10,28 @@
 | **F3 Fatia vertical** | **código e arte entregues** (setor 3); critério (60 fps e teste de foto) **só medível no Studio** |
 | **F4 Sistemas pesados** | **código entregue**: comandante, logística, morteiros, M48A3, Ontos, LVTP-5, UH-34D. Lógica testada no Lune; critério (30v30 com 6 veículos) **só medível no Roblox** |
 | **Parte 12 Controle** | **código entregue** (vale a partir da F2): layout completo, menus/mapa/comandante sem mouse, mira no analógico, veículos, vibração; 17 testes. **Não testado num controle real** |
-| **F5 Arte total e otimização** | **em andamento**: 18 modelos reduzidos às metas da Parte 2; arte nos 5 setores com teto, prioridade, desbaste uniforme e streaming; fusão de diques. Critério (60 jogadores a 60 fps em todos os setores) **só medível no Roblox** |
+| **F5 Arte total e otimização** | **em andamento**: todos os modelos colocados dentro das metas da Parte 2 (18 por remesh do ForgeGUI e 9 por redução local; o bambu passou pelos dois); arte nos 5 setores com teto, prioridade, desbaste uniforme e streaming; fusão de diques. Critério (60 jogadores a 60 fps em todos os setores) **só medível no Roblox** |
 | F6 | não iniciada |
 
 ## F5: o que foi feito (sessões 5 e 6)
-- **Remesh:** 18 modelos de uso repetido reduzidos às metas da Parte 2. Números medidos no GLB
-  preparado, em D-45, `manifest.json` e `ASSETS.csv`.
-  - Vegetação: 1.865 a 3.020 triângulos.
+- **Remesh:** 18 modelos de uso repetido reduzidos às metas da Parte 2 pelo ForgeGUI. Números
+  medidos no GLB preparado, em D-45, `manifest.json` e `ASSETS.csv`.
+  - Vegetação: 1.865 a 2.801 triângulos.
   - Casas: 3.054 a 3.135.
   - Props: 2.838 a 3.975.
-  - **Seis remeshes terminaram em `outcome_unknown`** e não foram regenerados (regra do ForgeGUI):
-    cozinha, celeiro, poço, altar, túmulo e uma das tentativas do bambu.
-    - A cozinha saiu do sorteio das casas.
-    - O celeiro não é colocado.
-    - Poço, altar e túmulos ficam acima da meta: 8 cópias, ~113 mil triângulos.
+- **10 remeshes terminaram em `outcome_unknown`** e não foram regenerados (regra do ForgeGUI).
+  - **Redução local sem crédito** (`tools/decimate_glb.py`): preserva UV, texturas e pivô, mede o
+    desvio e é refeita pelo fetch a partir do original conferido por hash.
+  - Resultados:
+    - capacete M1 14.646 → 3.000 (desvio máx. 0,8 cm);
+    - colete 14.307 → 3.999 (0,6 cm);
+    - capacete de fibra 13.793 → 2.999 (0,3 cm);
+    - cozinha, poço, altar e túmulo → ~4.000 (2,5 a 16 cm);
+    - celeiro → 4.900 (11 cm);
+    - bambu 3.020 → 2.800.
+  - Conferidos em render antes/depois.
+  - A cozinha voltou ao sorteio das casas.
+  - Cada fuzileiro americano caiu de ~29 mil para ~7 mil triângulos de equipamento.
 - **`ArtBudget`:** tabela de tipos e triângulos medidos, metas e exceções. O teste falha se divergir
   do manifest ou se algo passar da meta sem motivo.
 - **Arte nos 5 setores:**
@@ -36,7 +44,7 @@
   entraram.
 - **Estimativa offline** (`lune run tools/art_estimate.luau`):
   - ~1.000 modelos por setor (5,2 mil no total, 12,6 milhões de triângulos);
-  - das touceiras de sebe, entram 20%, 37%, 24%, 21% e 54% nos setores 1–5 com o teto provisório
+  - das touceiras de sebe, entram 20%, 38%, 24%, 21% e 55% nos setores 1–5 com o teto provisório
     de 2,5 milhões;
   - **é cálculo, não medição em jogo.**
 - **Diques:** fusão de colineares, 18.926 → 18.095 (−4,4%), comprimento preservado. Uma versão
@@ -175,14 +183,15 @@
 | Medida | Valor |
 |---|---|
 | Testes Lune | `run.luau` **11 ok**; `f2.luau` **17 ok**; `f3.luau` **6 ok** |
-| pytest | **17 passed** |
+| pytest | **19 passed** |
 | Sol em 18/08/1965 (calculado, UTC+8) | 06:30 → −0,9°; 12:00 → 78,1°; 18:30 → 7,8° |
 | Túneis (gerados) | 64 peças, 474 m de galeria |
 | Testes Lune F4 | `f4.luau` **12 ok** |
 | Testes Lune controle | `controle.luau` **17 ok** (inclui 10.000 eventos aleatórios sem estado preso) |
 | Giro de 180° no analógico (quadril) | **0,58 s** (calculado) |
 | Testes Lune F5 | `f5.luau` **8 ok** |
-| Arte estimada por setor (teto 2,5 mi) | ~1.000 modelos; touceiras de sebe 20/37/24/21/54% nos setores 1–5 (cálculo) |
+| Arte estimada por setor (teto 2,5 mi) | ~1.000 modelos; touceiras de sebe 20/38/24/21/55% nos setores 1–5 (cálculo) |
+| Redução local (Hausdorff, máx.) | capacete 0,8 cm; colete 0,6 cm; fibra 0,3 cm; props da vila 2,5–16 cm |
 | Diques após a fusão | 18.926 → **18.095** (comprimento 2.113.038 → 2.113.037 studs) |
 | Morteiro 82 mm (calibrado) | k = 1,512e-4 1/m; a 300/800/1.500/2.500 m: voo de 18,4/14,9/26,9/27,5 s |
 | M29 81 mm (v0 derivada) | **254 m/s** para 3.890 m com o arrasto do 82 mm |

@@ -53,9 +53,10 @@ ArtBudget.KIND = {
 	ontos = "hero",
 } :: { [string]: string }
 
--- triângulos medidos (manifest.json, campo "triangulos"); remesh da F5 onde houve
+-- triângulos medidos (manifest.json, campo "triangulos"): remesh do ForgeGUI ou, quando ele terminou
+-- em outcome_unknown, redução local (tools/decimate_glb.py)
 ArtBudget.TRIS = {
-	bamboo_clump = 3020,
+	bamboo_clump = 2800,
 	shrub = 2801,
 	elephant_grass = 1865,
 	banana = 2136,
@@ -64,12 +65,12 @@ ArtBudget.TRIS = {
 	rice_patch = 13066,
 	hut_thatch = 3127,
 	hut_veranda = 3135,
-	hut_kitchen = 13483,
+	hut_kitchen = 3999,
 	house_tile = 3054,
-	granary = 14106,
-	well = 13615,
-	shrine = 13489,
-	grave_mound = 14278,
+	granary = 4900,
+	well = 3999,
+	shrine = 3999,
+	grave_mound = 4000,
 	tunnel_entrance = 3239,
 	vc_bunker = 3975,
 	trench_section = 3725,
@@ -77,9 +78,9 @@ ArtBudget.TRIS = {
 	sandbags = 2838,
 	spider_hole = 3467,
 	log_bridge = 3676,
-	us_m1_helmet = 14646,
-	us_m1955_vest = 14307,
-	vc_pith_helmet = 13793,
+	us_m1_helmet = 3000,
+	us_m1955_vest = 3999,
+	vc_pith_helmet = 2999,
 	vc_jungle_hat = 2447,
 	m60 = 14933,
 	rpd = 15735,
@@ -99,20 +100,11 @@ ArtBudget.TRIS = {
 -- Acima da meta, com o motivo. O teste falha se um modelo passar da meta sem estar aqui, ou se
 -- uma exceção ficar velha (o modelo já cabe na meta).
 ArtBudget.EXCEPTIONS = {
-	bamboo_clump = "3.020 (0,7% acima): o remesh devolve ~1,8x o alvo pedido",
 	rice_patch = "não é colocado: o arrozal é terreno + diques (D-14)",
-	hut_kitchen = "remesh terminou outcome_unknown; fora do sorteio das casas até ter malha ≤ 5k",
-	granary = "remesh terminou outcome_unknown; não é colocado",
-	well = "remesh terminou outcome_unknown; 1 cópia no mapa",
-	shrine = "remesh terminou outcome_unknown; 1 cópia no mapa",
-	grave_mound = "remesh terminou outcome_unknown; 6 cópias no mapa",
-	us_m1_helmet = "remesh da F5 em andamento",
-	us_m1955_vest = "remesh da F5 em andamento",
-	vc_pith_helmet = "remesh da F5 em andamento",
 } :: { [string]: string }
 
--- variantes sorteadas para as casas (a cozinha fica fora enquanto estiver acima da meta)
-ArtBudget.HOUSE_VARIANTS = { "hut_thatch", "hut_veranda", "hut_thatch", "house_tile" }
+-- variantes sorteadas para as casas (o teste exige que todas caibam na meta)
+ArtBudget.HOUSE_VARIANTS = { "hut_thatch", "hut_veranda", "hut_thatch", "hut_kitchen", "house_tile" }
 
 function ArtBudget.tris(key: string): number
 	return ArtBudget.TRIS[key] or ArtBudget.DEFAULT

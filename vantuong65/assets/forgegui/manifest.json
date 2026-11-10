@@ -66,8 +66,8 @@
    "job": "a15f97ec-e881-4dc0-93ee-7f9dff23aa99",
    "prep": "0ecf3212-2972-48b2-88bb-1057aaddc9a3",
    "escala": "altura 7,7 m, largura 8,0 m (projeto: 6-9 m)",
-   "triangulos": 3020,
-   "sha256": "719e8cb2cf8d5924bff013278666bd9dc4580fcf669ed7353137b3bd5b5e18a9",
+   "triangulos": 2800,
+   "sha256": "cce103fc7b0be61ef2a16ced0c6797699582f5056521726f3706e5dd0a2a29d0",
    "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/0ecf3212-2972-48b2-88bb-1057aaddc9a3/2f86aa0e-9292-4090-aefa-1524a9e57f22/Model-719e8cb2cf8d5924bff013278666bd9dc4580fcf669ed7353137b3bd5b5e18a9.glb",
    "dim_studs_xyz": [
     27.41,
@@ -75,7 +75,16 @@
     28.54
    ],
    "chave": "bamboo_clump",
-   "remesh": "6efb66d7-e0fa-431d-9b9c-edfb1ef8e7d3"
+   "remesh": "6efb66d7-e0fa-431d-9b9c-edfb1ef8e7d3",
+   "reducao_local": {
+    "ferramenta": "tools/decimate_glb.py",
+    "pymeshlab": "2025.7.post1",
+    "faces": 2800,
+    "sha256_origem": "719e8cb2cf8d5924bff013278666bd9dc4580fcf669ed7353137b3bd5b5e18a9",
+    "triangulos_origem": 3020,
+    "desvio_max_m": 0.3064,
+    "desvio_medio_m": 0.00377
+   }
   },
   {
    "arquivo": "models/colete_m1955_studs.glb",
@@ -88,9 +97,18 @@
     1.96,
     1.6
    ],
-   "triangulos": 14307,
-   "sha256": "f107e96e101a73b18fea54b0f18972b9ffd0b51a499763b129fb1c7cd7d917d4",
-   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/69bcf9ad-bfb5-4ac5-9ab5-163a3eca49b5/05c26748-07bb-453b-aabe-9204e3a4aace/Model-f107e96e101a73b18fea54b0f18972b9ffd0b51a499763b129fb1c7cd7d917d4.glb"
+   "triangulos": 3999,
+   "sha256": "c7cea45d44516473d0922674d9fca6b3b4a15bedc21b5ac0fd3c502fe1fdea87",
+   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/69bcf9ad-bfb5-4ac5-9ab5-163a3eca49b5/05c26748-07bb-453b-aabe-9204e3a4aace/Model-f107e96e101a73b18fea54b0f18972b9ffd0b51a499763b129fb1c7cd7d917d4.glb",
+   "reducao_local": {
+    "ferramenta": "tools/decimate_glb.py",
+    "pymeshlab": "2025.7.post1",
+    "faces": 4000,
+    "sha256_origem": "f107e96e101a73b18fea54b0f18972b9ffd0b51a499763b129fb1c7cd7d917d4",
+    "triangulos_origem": 14307,
+    "desvio_max_m": 0.0059,
+    "desvio_medio_m": 0.00085
+   }
   },
   {
    "arquivo": "models/capacete_m1_studs.glb",
@@ -99,13 +117,22 @@
    "prep": "5191d74b-6f17-472c-8562-fcea4c9d02b7",
    "escala": "comprimento 0,29 m (projeto, capacete M1)",
    "dim_studs_xyz": [
-    1.04,
+    1.02,
     0.98,
     0.88
    ],
-   "triangulos": 14646,
-   "sha256": "ca8581cd207a82bb513670fd0f0d3ddcd9a08b4b8648cbaf60480b87ebe6fdc1",
-   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/5191d74b-6f17-472c-8562-fcea4c9d02b7/03a36be3-865d-4a2e-a1d8-e8917ae8f0d6/Model-ca8581cd207a82bb513670fd0f0d3ddcd9a08b4b8648cbaf60480b87ebe6fdc1.glb"
+   "triangulos": 3000,
+   "sha256": "79a8d430701395ee5eef8345d136056f0fd3e1b5442172d20f9bac67ca66951c",
+   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/5191d74b-6f17-472c-8562-fcea4c9d02b7/03a36be3-865d-4a2e-a1d8-e8917ae8f0d6/Model-ca8581cd207a82bb513670fd0f0d3ddcd9a08b4b8648cbaf60480b87ebe6fdc1.glb",
+   "reducao_local": {
+    "ferramenta": "tools/decimate_glb.py",
+    "pymeshlab": "2025.7.post1",
+    "faces": 3000,
+    "sha256_origem": "ca8581cd207a82bb513670fd0f0d3ddcd9a08b4b8648cbaf60480b87ebe6fdc1",
+    "triangulos_origem": 14646,
+    "desvio_max_m": 0.008,
+    "desvio_medio_m": 0.00067
+   }
   },
   {
    "arquivo": "models/arvore_colina_studs.glb",
@@ -319,12 +346,21 @@
    "escala": "comprimento 2,5 m (projeto)",
    "dim_studs_xyz": [
     8.93,
-    4.01,
-    6.95
+    3.96,
+    6.83
    ],
-   "triangulos": 14278,
-   "sha256": "77e60fc1e6f71956f0a433513c0d4cf8eec909fa2e7e8d775077c19264bd04c7",
-   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/74ad9939-aec2-4192-a2fd-160190249562/a6fb3c7f-f4f4-4f34-98df-98de0fa5c6bd/Model-77e60fc1e6f71956f0a433513c0d4cf8eec909fa2e7e8d775077c19264bd04c7.glb"
+   "triangulos": 4000,
+   "sha256": "7d595021caa6c0c2e3c81bc0cffe8406913d5062746e956dd6fef0ca36573613",
+   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/74ad9939-aec2-4192-a2fd-160190249562/a6fb3c7f-f4f4-4f34-98df-98de0fa5c6bd/Model-77e60fc1e6f71956f0a433513c0d4cf8eec909fa2e7e8d775077c19264bd04c7.glb",
+   "reducao_local": {
+    "ferramenta": "tools/decimate_glb.py",
+    "pymeshlab": "2025.7.post1",
+    "faces": 4000,
+    "sha256_origem": "77e60fc1e6f71956f0a433513c0d4cf8eec909fa2e7e8d775077c19264bd04c7",
+    "triangulos_origem": 14278,
+    "desvio_max_m": 0.0608,
+    "desvio_medio_m": 0.0043
+   }
   },
   {
    "arquivo": "models/celeiro_studs.glb",
@@ -333,13 +369,22 @@
    "prep": "8fe0424f-2bdd-4263-a524-e542136574ac",
    "escala": "altura 3,5 m (projeto)",
    "dim_studs_xyz": [
-    11.07,
-    12.5,
+    11.05,
+    12.56,
     10.36
    ],
-   "triangulos": 14106,
-   "sha256": "210b947d8c2963fd25716e4d05d7b938fc762560c274fe618975bf52ce2a9b78",
-   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/8fe0424f-2bdd-4263-a524-e542136574ac/0b480307-c2b4-4e0b-9781-e1d62c64e650/Model-210b947d8c2963fd25716e4d05d7b938fc762560c274fe618975bf52ce2a9b78.glb"
+   "triangulos": 4900,
+   "sha256": "f9b8285e6f6d5f378dfa9b9553744785add736a224b1f6087194513c479473b6",
+   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/8fe0424f-2bdd-4263-a524-e542136574ac/0b480307-c2b4-4e0b-9781-e1d62c64e650/Model-210b947d8c2963fd25716e4d05d7b938fc762560c274fe618975bf52ce2a9b78.glb",
+   "reducao_local": {
+    "ferramenta": "tools/decimate_glb.py",
+    "pymeshlab": "2025.7.post1",
+    "faces": 4900,
+    "sha256_origem": "210b947d8c2963fd25716e4d05d7b938fc762560c274fe618975bf52ce2a9b78",
+    "triangulos_origem": 14106,
+    "desvio_max_m": 0.1085,
+    "desvio_medio_m": 0.0073
+   }
   },
   {
    "arquivo": "models/poco_studs.glb",
@@ -352,9 +397,18 @@
     4.27,
     5.36
    ],
-   "triangulos": 13615,
-   "sha256": "dd139f40a2e7dcae0f0c4dd0e4934aa1b48f316eaed1ce00dc2a730aa29e240c",
-   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/27c5b7a4-e452-4d73-a1bf-e453eeab3f68/c018b1d6-63b5-4a0b-91d4-b954c74a9ce1/Model-dd139f40a2e7dcae0f0c4dd0e4934aa1b48f316eaed1ce00dc2a730aa29e240c.glb"
+   "triangulos": 3999,
+   "sha256": "063adad1eaa9c5ce6b5dc81260fa6db85eb71e87fdb8cadb0a88839e2f00af74",
+   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/27c5b7a4-e452-4d73-a1bf-e453eeab3f68/c018b1d6-63b5-4a0b-91d4-b954c74a9ce1/Model-dd139f40a2e7dcae0f0c4dd0e4934aa1b48f316eaed1ce00dc2a730aa29e240c.glb",
+   "reducao_local": {
+    "ferramenta": "tools/decimate_glb.py",
+    "pymeshlab": "2025.7.post1",
+    "faces": 4000,
+    "sha256_origem": "dd139f40a2e7dcae0f0c4dd0e4934aa1b48f316eaed1ce00dc2a730aa29e240c",
+    "triangulos_origem": 13615,
+    "desvio_max_m": 0.0294,
+    "desvio_medio_m": 0.00327
+   }
   },
   {
    "arquivo": "models/cozinha_studs.glb",
@@ -363,13 +417,22 @@
    "prep": "9a0f00c4-19f4-4019-bcb5-50f72cebd918",
    "escala": "comprimento 4,0 m (projeto)",
    "dim_studs_xyz": [
-    14.29,
-    11.93,
+    14.24,
+    11.92,
     12.6
    ],
-   "triangulos": 13483,
-   "sha256": "bdf006d634caa8e1fdec145d919a1828738b272417b62effcbae70d8c484f45c",
-   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/9a0f00c4-19f4-4019-bcb5-50f72cebd918/b8ed50c8-a72f-4991-ae48-4e34b10f71d2/Model-bdf006d634caa8e1fdec145d919a1828738b272417b62effcbae70d8c484f45c.glb"
+   "triangulos": 3999,
+   "sha256": "1763f35dbbc58fc168092ae80f2861164883dc7c0970a7192dbb106d91894247",
+   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/9a0f00c4-19f4-4019-bcb5-50f72cebd918/b8ed50c8-a72f-4991-ae48-4e34b10f71d2/Model-bdf006d634caa8e1fdec145d919a1828738b272417b62effcbae70d8c484f45c.glb",
+   "reducao_local": {
+    "ferramenta": "tools/decimate_glb.py",
+    "pymeshlab": "2025.7.post1",
+    "faces": 4000,
+    "sha256_origem": "bdf006d634caa8e1fdec145d919a1828738b272417b62effcbae70d8c484f45c",
+    "triangulos_origem": 13483,
+    "desvio_max_m": 0.1631,
+    "desvio_medio_m": 0.0115
+   }
   },
   {
    "arquivo": "models/casa_telha_studs.glb",
@@ -398,9 +461,18 @@
     6.07,
     3.99
    ],
-   "triangulos": 13489,
-   "sha256": "2438c751978a6dac6bad9655265e1e99f1e845721623b51862463b64a21a3e18",
-   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/204978c2-8482-4edb-adc6-c959f4d29e18/9f8461c5-dbc1-47b5-bc23-fa54afe7322b/Model-2438c751978a6dac6bad9655265e1e99f1e845721623b51862463b64a21a3e18.glb"
+   "triangulos": 3999,
+   "sha256": "445cad28123e4acd135477a2ff3453468a640d984f63b402fcfe2bbb0ce576ea",
+   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/204978c2-8482-4edb-adc6-c959f4d29e18/9f8461c5-dbc1-47b5-bc23-fa54afe7322b/Model-2438c751978a6dac6bad9655265e1e99f1e845721623b51862463b64a21a3e18.glb",
+   "reducao_local": {
+    "ferramenta": "tools/decimate_glb.py",
+    "pymeshlab": "2025.7.post1",
+    "faces": 4000,
+    "sha256_origem": "2438c751978a6dac6bad9655265e1e99f1e845721623b51862463b64a21a3e18",
+    "triangulos_origem": 13489,
+    "desvio_max_m": 0.0254,
+    "desvio_medio_m": 0.00201
+   }
   },
   {
    "arquivo": "models/m1911_studs.glb",
@@ -489,9 +561,18 @@
     0.96,
     0.96
    ],
-   "triangulos": 13793,
-   "sha256": "db23f5a340e181027babecbbcd6530facb8362bb9299eec91917ceaf3f5eb8fc",
-   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/dc220f3b-441e-4f7f-8cd9-f5a3ac69fbb7/c953a451-c4bc-47d4-936e-5b1106216eae/Model-db23f5a340e181027babecbbcd6530facb8362bb9299eec91917ceaf3f5eb8fc.glb"
+   "triangulos": 2999,
+   "sha256": "afc1ced786384cfd23b74f7483f2a8d6fcade6539a826a9af2d84dc9148b4a11",
+   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/dc220f3b-441e-4f7f-8cd9-f5a3ac69fbb7/c953a451-c4bc-47d4-936e-5b1106216eae/Model-db23f5a340e181027babecbbcd6530facb8362bb9299eec91917ceaf3f5eb8fc.glb",
+   "reducao_local": {
+    "ferramenta": "tools/decimate_glb.py",
+    "pymeshlab": "2025.7.post1",
+    "faces": 3000,
+    "sha256_origem": "db23f5a340e181027babecbbcd6530facb8362bb9299eec91917ceaf3f5eb8fc",
+    "triangulos_origem": 13793,
+    "desvio_max_m": 0.0026,
+    "desvio_medio_m": 0.00037
+   }
   },
   {
    "arquivo": "models/entrada_tunel_studs.glb",

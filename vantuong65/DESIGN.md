@@ -518,19 +518,42 @@ Ver `CONTROLE.md`. Resumo:
 
   | Grupo | Modelos |
   |---|---|
-  | Vegetação | capim-elefante 1.865, coqueiro 1.988, bananeira 2.136, árvore de colina 2.189, arbusto 2.801, bambu 3.020 |
+  | Vegetação | capim-elefante 1.865, coqueiro 1.988, bananeira 2.136, árvore de colina 2.189, arbusto 2.801, bambu 3.020 (depois 2.800, ver abaixo) |
   | Casas | casa de telha 3.054, palha 3.127, varanda 3.135 |
   | Props | sacos de areia 2.838, cerca 2.851, entrada de túnel 3.239, toca 3.467, ponte 3.676, trincheira 3.725, bunker 3.975 |
   | Equipamento e herói | chapéu de selva 2.447, morteiro M29 2.884 |
 
-  - O bambu ficou 0,7% acima da meta. Aceito e registrado como exceção.
-  - **Sem remesh:** cozinha 13.483, celeiro 14.106, poço 13.615, altar 13.489 e túmulo 14.278. Os
-    remeshes terminaram em `outcome_unknown` e a regra do ForgeGUI é não regenerar.
-    - A cozinha saiu do sorteio das casas: seriam ~40 cópias.
-    - O celeiro não é colocado.
-    - Poço (1), altar (1) e túmulos (6) somam ~113 mil triângulos no setor 3.
-- **`ArtBudget` (módulo puro):** tipo, triângulos medidos e exceções por modelo. O teste da F5
-  falha em três casos:
+- **10 remeshes terminaram em `outcome_unknown`** ("worker interruption" aos 15 min), e a regra do
+  ForgeGUI é não regenerar: cozinha, celeiro, poço, altar, túmulo, capacete M1, colete M1955,
+  capacete de fibra, morteiro 82 mm e uma tentativa do bambu.
+- **Redução local, sem crédito** (`tools/decimate_glb.py`, pymeshlab 2025.7):
+  - colapso de arestas por quádricas preservando as costuras de UV;
+  - mesmas texturas (cor, ORM, normal) e mesmo nó de escala/pivô;
+  - mede o desvio de Hausdorff nos dois sentidos, em metros;
+  - é determinística (mesmo sha256 em duas execuções). O `fetch_forgegui_assets.py` baixa o
+    original, confere o hash e refaz a redução.
+
+  | Modelo | Triângulos | Desvio máx. / médio |
+  |---|---|---|
+  | capacete M1 | 14.646 → 3.000 | 0,8 cm / 0,7 mm |
+  | capacete de fibra | 13.793 → 2.999 | 0,3 cm / 0,4 mm |
+  | colete M1955 | 14.307 → 3.999 | 0,6 cm / 0,9 mm |
+  | altar | 13.489 → 3.999 | 2,5 cm / 2,0 mm |
+  | poço | 13.615 → 3.999 | 2,9 cm / 3,3 mm |
+  | túmulo | 14.278 → 4.000 | 6,1 cm / 4,3 mm |
+  | celeiro | 14.106 → 4.900 | 10,8 cm / 7,3 mm |
+  | cozinha | 13.483 → 3.999 | 16,3 cm / 11,5 mm |
+  | bambu | 3.020 → 2.800 | 30,6 cm (ponta de folha) / 3,8 mm |
+
+  - Conferi cada um em render antes/depois com a cor da textura por face.
+  - Com 4.000 triângulos, as palafitas do celeiro viravam cones; com 4.900, ficaram certas.
+  - O morteiro 82 mm (14.959) já cabe na meta de herói e ficou como estava.
+  - **Equipamento vestido:** um fuzileiro com capacete e colete caiu de ~29 mil para ~7 mil
+    triângulos, cerca de 660 mil a menos com 30 jogadores.
+  - **Não verificado aqui:** a aparência no Roblox (sombreamento com o mapa de normais). Se algum
+    ficar ruim no Studio, a redução é refeita com mais faces.
+- **`ArtBudget` (módulo puro):** tipo, triângulos medidos e exceções por modelo. Sobrou uma
+  exceção: o arrozal (13.066), que não é colocado. O teste da F5 falha em três casos:
   - um número diverge do manifest;
   - um modelo passa da meta sem exceção registrada;
   - uma exceção fica velha.
@@ -538,9 +561,9 @@ Ver `CONTROLE.md`. Resumo:
   - teto por setor de 2,5 milhões de triângulos de arte (PLACEHOLDER até a medição);
   - ordem de prioridade: casas e quintais → vila, túneis, cemitério e vau → bosques das colinas →
     sebes;
-  - as sebes pediriam ~22 mil touceiras e ~47 milhões de triângulos nos 5 setores. O que sobra do
+  - as sebes pediriam ~17 mil touceiras e ~41 milhões de triângulos nos 5 setores. O que sobra do
     teto vira um **desbaste uniforme por setor** (`ArtBudget.factor`), não um corte no meio do
-    mapa. Estimativa offline (`lune run tools/art_estimate.luau`): 20%, 37%, 24%, 21% e 54% das
+    mapa. Estimativa offline (`lune run tools/art_estimate.luau`): 20%, 38%, 24%, 21% e 55% das
     touceiras nos setores 1–5;
   - **a peça da sebe só fica invisível se todas as touceiras dela entraram**. Antes ela sumia
     sempre, e o corte do teto deixaria cobertura invisível;

@@ -118,8 +118,10 @@ O **gerador de imagens** do ForgeGUI está terminando os pedidos em `outcome_unk
 ("worker interruption" aos 15 min). Isso já aconteceu com 6 moldes de roupa, 3 texturas de tecido
 e o som do rotor do UH-34D. Os de modelos 3D e de sons funcionam.
 
-- O **remesh** (redução de malha) também falhou assim 6 vezes na F5: cozinha, celeiro, poço,
-  altar, túmulo e uma tentativa do bambu. Os jobs estão em `ASSETS.csv`.
+- O **remesh** (redução de malha) também falhou assim **10 vezes** na F5: cozinha, celeiro, poço,
+  altar, túmulo, capacete M1, colete, capacete de fibra, morteiro 82 mm e uma tentativa do bambu.
+  - Os jobs estão em `ASSETS.csv`.
+  - Já resolvi por redução local, sem crédito (D-45). O chamado serve para conferir a cobrança.
 - Vale abrir um chamado no suporte do ForgeGUI, com os jobs listados em `ASSETS.csv`, e confirmar
   se houve cobrança.
 - A regra do serviço é **não regenerar** esses jobs.

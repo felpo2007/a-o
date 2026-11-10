@@ -14,6 +14,8 @@ dependencies = [
 
 [dependency-groups]
 dev = ["pytest>=8", "ruff>=0.5"]
+# redução local de malha (tools/decimate_glb.py); precisa de libopengl0 no sistema
+arte = ["pymeshlab==2025.7.post1"]
 
 [tool.uv]
 package = false
