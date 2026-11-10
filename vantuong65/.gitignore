@@ -10,3 +10,6 @@ __pycache__/
 assets/forgegui/models/
 # config por usuário (IDs da experiência)
 cloud.json
+
+# especificação original do dono (prompts): só local, nunca no repositório público
+especificacao/
