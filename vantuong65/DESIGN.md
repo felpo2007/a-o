@@ -899,3 +899,14 @@ Medido no Studio:
 - **Não verificado:** a arma do ForgeGUI, quando publicada, precisa ter os pontos `Grip` e
   `Support`; sem eles o IK fica desligado.
 - O teste da F4 está em `testes/TESTE_F4_STUDIO_2026-11-10.md`.
+
+## D-56 — Mar no terreno e LVTP-5 na água (2026-11-10)
+- **Mar:** o DEM dá 0 m no mar, e o `TerrainBuilder` só põe água onde o fundo fica abaixo de 0.
+  Resultado: o mar a leste virava uma planície de areia, com 1 ponto de água de terreno no mapa
+  todo. Agora, em cada linha da grade, a costa é o início do mar contínuo vindo do leste, e o fundo
+  desce dali numa rampa de 1:40, de 0,4 a 8 m (PLACEHOLDER até haver batimetria). Medido: água a y = 0
+  a leste da praia; o terreno ficou pronto em 39 s.
+- **LVTP-5:** flutuando, o centro do chassi fica abaixo da superfície (y −1,2), e o raio que
+  detecta o piso saía do centro e acertava a areia do fundo, dando velocidade de terra (21 km/h)
+  na água. O raio agora sai do topo do chassi. Medido: 10,8 km/h na água (ficha: 11).
+- **Comandante, morteiro e Ontos:** funcionam no Studio (ver o relatório da F4).

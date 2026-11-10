@@ -31,8 +31,24 @@ máxima. Falta decidir o teto da subida com carga leve a partir de uma fonte. N�
   anda pela trajetória. Com 1 traçante em 5, a média seria ~5; 2 é um resultado possível só pelas
   sementes, mas fica anotado.
 
+## Segunda rodada (até 12:42): comandante, morteiro, Ontos, mar e LVTP-5
+| Item | Resultado | Medido |
+|---|---|---|
+| Tiro naval 5" (comandante), alvo pelo mapa a 800 m | ok | 1 disparo do navio; 4 impactos com 3 s entre eles, a 37–88 m do alvo (média 67 m; CEP de projeto 60 m); aviso de chegada 2,5 s antes |
+| Morteiro 81 mm, alvo a ~900 m | ok | resposta "no alvo em 30 s · elevação 1140 mils"; 6 disparos e 6 impactos a 21–81 m (média 46 m; CEP 35 m) |
+| Ontos, canhão 106 mm | ok | tubos 6 → 5 → 4; 2 impactos |
+| **Mar** | **corrigido** | o terreno não tinha mar: 1 ponto de água no mapa todo. O DEM dá 0 m no mar, e o gerador só põe água abaixo de 0. Agora o fundo desce da costa (D-56); há água a leste da praia |
+| **LVTP-5 na água** | **corrigido** | flutuando, o centro do chassi fica abaixo da superfície, e o raio do piso acertava a areia do fundo: andava a 21 km/h na água. Agora o raio sai do topo: **10,8 km/h** na água (ficha: 11), andou 22 m, flutua |
+| Erros de script | nenhum | |
+
+Para o comandante e o morteiro, o papel e a posição do tubo (`MortarX`/`MortarZ`) foram definidos
+no servidor; o pedido foi o remote do jogo (`Commander_Request`), igual ao do painel.
+
+**Efeito de teste, não do jogo:** mover pelo servidor um veículo parado faz o `AlignOrientation`
+voltar o rumo ao de origem. Por isso, nos testes, os veículos andaram para lados diferentes do
+pedido.
+
 ## Não testado
-- LVTP-5 entrando na água (deve cair para ~11 km/h): não há água a menos de 200 m a leste do
-  depósito.
-- Comandante (tiro naval por grade e correção), morteiros 81/82 mm e Ontos.
+- A construção da posição de morteiro pela tecla J e o painel do comandante (digitar a grade e
+  "mais 100, direita 50"). A conta da correção é testada no Lune (`f4.luau`).
 - Tudo com mais de um jogador (o MCP só roda Play solo).

@@ -106,7 +106,9 @@ local function groundStep(model: Model, chassis: BasePart, spec: any, dt: number
 	if not InputMap.acceptsGame(Input.state) then
 		throttle, steer = 0, 0
 	end
-	local hit = groundRay(chassis.Position, model, chassis.Size.Y + 6)
+	-- do topo do chassi: flutuando, o centro do LVTP-5 fica abaixo da superfície (y −1,2 no Studio) e
+	-- o raio que saía do centro acertava a areia do fundo, dando velocidade de terra na água
+	local hit = groundRay(chassis.Position + Vector3.new(0, chassis.Size.Y / 2, 0), model, chassis.Size.Y * 1.5 + 6)
 	local surface = surfaceOf(hit)
 	if (model:GetAttribute("Engine") :: number) <= 0 or (model:GetAttribute("Tracks") :: number) <= 0 then
 		throttle = 0

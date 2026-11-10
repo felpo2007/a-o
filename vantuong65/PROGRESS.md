@@ -264,7 +264,8 @@ Os 8 bugs encontrados foram corrigidos. **Reteste no Studio** (mesmo dia, relat�
   carga;
 - o RPG-2 não fura o M48A3 de frente e fura de lado;
 - sem erros;
-- não testados: LVTP-5 na água, comandante, morteiros e Ontos;
+- tiro naval, morteiro de 81 mm e Ontos funcionam;
+- o mar não existia no terreno (virava areia): corrigido (D-56). O LVTP-5 nada a 10,8 km/h;
 - no solo do Studio os papéis pesados não aparecem no menu, porque o time não chega a 16.
 
 **Depois do teste:**

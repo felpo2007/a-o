@@ -9,6 +9,13 @@ local VOXEL = 4
 local CHUNK = 64 -- voxels por lado de bloco horizontal (256 studs)
 local STUD_M = 0.28
 local STREAM_DEPTH = 0.6 / STUD_M -- lâmina d'água dos riachos (studs)
+-- Mar: o DEM dá 0 m no mar, e a água só aparece onde o fundo fica abaixo do nível 0. Sem isto o mar
+-- a leste virava uma planície de areia (teste no Studio, 2026-11-10: 1 ponto de água de terreno no
+-- mapa todo, e o LVTP-5 não tinha onde flutuar). O fundo desce a partir da costa (o início do mar
+-- contínuo vindo do leste, em cada linha da grade) numa rampa de 1:40, de 0,4 a 8 m. PLACEHOLDER
+-- de design até haver batimetria de 1965.
+local SEA_SLOPE = 1 / 40
+local SEA_MIN_M, SEA_MAX_M = 0.4, 8
 
 -- classes: 0 mar | 1 areia | 2 arrozal | 3 vila/mata | 4 capim | 5 riacho
 
@@ -54,6 +61,20 @@ function TerrainBuilder.build(world: any, envIn: Env?, opts: Options?): number
 	local nx = math.ceil(g.width * g.cellStuds / VOXEL)
 	local nz = math.ceil(g.height * g.cellStuds / VOXEL)
 	local total = math.ceil(nx / CHUNK) * math.ceil(nz / CHUNK)
+	-- costa por linha da grade: do leste para o oeste, enquanto a célula for mar
+	local coastX: { [number]: number } = {}
+	for row = 0, g.height - 1 do
+		local wz = g.originZ + (row + 0.5) * g.cellStuds
+		local coast = g.originX + g.width * g.cellStuds
+		for col = g.width - 1, 0, -1 do
+			local wx = g.originX + (col + 0.5) * g.cellStuds
+			if world:classAt(wx, wz) ~= 0 then
+				break
+			end
+			coast = wx - g.cellStuds / 2
+		end
+		coastX[row] = coast
+	end
 	local done = 0
 	local t0 = os.clock()
 	for cz = 0, nz - 1, CHUNK do
@@ -82,6 +103,17 @@ function TerrainBuilder.build(world: any, envIn: Env?, opts: Options?): number
 					local wz = z0 + (cz + iz - 0.5) * VOXEL
 					local h = world:heightAt(wx, wz)
 					local c = world:classAt(wx, wz)
+					if c == 0 then
+						local coast = coastX[math.floor((wz - g.originZ) / g.cellStuds)]
+						if coast and wx >= coast then
+							local depthM = math.clamp(
+								SEA_MIN_M + (wx - coast) * STUD_M * SEA_SLOPE,
+								SEA_MIN_M,
+								SEA_MAX_M
+							)
+							h = math.min(h, -depthM / STUD_M)
+						end
+					end
 					local wl = -math.huge
 					if c == 0 or h < 0 then
 						wl = 0 -- nível do mar
