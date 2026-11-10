@@ -239,6 +239,12 @@ Os 8 bugs encontrados foram corrigidos e esperam o reteste:
 - mapa que ficava na tela;
 - Output poluído.
 
+**Depois do teste:**
+- **Autoteste no motor:** `workspace:SetAttribute("VT65SelfTest", true)`, só no Studio. Roda
+  10 verificações no servidor de verdade e imprime OK ou FALHA.
+- **Bots deixam a arma ao morrer:** antes só os jogadores deixavam, e numa partida com bots quase
+  não havia arma do inimigo para pegar.
+
 ## Resultados-chave (medidos aqui)
 | Medida | Valor |
 |---|---|

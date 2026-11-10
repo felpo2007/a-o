@@ -29,6 +29,7 @@ local TrainingService = require(Modules:WaitForChild("TrainingService"))
 local AnimalService = require(Modules:WaitForChild("AnimalService"))
 local RadioService = require(Modules:WaitForChild("RadioService"))
 local FieldWorkService = require(Modules:WaitForChild("FieldWorkService"))
+local SelfTest = require(Modules:WaitForChild("SelfTest"))
 
 task.spawn(TerrainRuntime.start) -- gera o terreno se o place veio sem ele
 PlayerData.start()
@@ -51,6 +52,7 @@ TrainingService.start() -- F6: campo de tiro e tutorial por papel
 AnimalService.start() -- Parte 11: búfalos e galinhas fogem de tiros e explosões
 RadioService.start() -- Parte 11: só o rádio do squad fala com o comandante
 FieldWorkService.start() -- Parte 11: pá de trincheira e medevac pelo UH-34D
+SelfTest.start() -- só no Studio: workspace:SetAttribute("VT65SelfTest", true)
 PrivateServer.start(function(mode: string, clock: number)
 	MatchService.requestMode(mode)
 	LightingService.setStart(clock)

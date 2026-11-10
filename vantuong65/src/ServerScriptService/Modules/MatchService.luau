@@ -29,6 +29,7 @@ MatchService.ended = false
 MatchService.offensive = nil :: Offensive.State?
 MatchService.report = nil :: AfterAction.Report? -- relatório pós-ação da partida em curso
 MatchService.rotation = { "Warfare", "Offensive" }
+MatchService.countsOverride = nil :: (() -> { { US: number, VC: number } })? -- só autoteste (Studio)
 local pendingMode: string? = nil
 local fixedMode = false -- servidor privado: o dono escolheu o modo
 
@@ -214,7 +215,9 @@ function MatchService.start()
 			task.wait(1)
 			local st = MatchService.state
 			if st and not MatchService.ended then
-				lastCounts = counts()
+				-- autoteste no Studio pode simular quem está em cada ponto forte
+				local override = MatchService.countsOverride
+				lastCounts = if override and RunService:IsStudio() then override() else counts()
 				local o = MatchService.offensive
 				local events: { Offensive.Event } = if o
 					then Offensive.step(o, lastCounts, 1)

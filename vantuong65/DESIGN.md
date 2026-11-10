@@ -727,3 +727,19 @@ greybox (IDs de arte em 0). Relatório: `testes/TESTE_STUDIO_2026-11-10.md`.
 
 **Ainda não testado no Studio:** Local Server com 2–4 jogadores, F4 (veículos), controle, D-48 e
 arte real.
+
+**Depois do teste (mesma sessão):**
+- **Autoteste no motor:** `SelfTest.luau`, só no Studio, acionado por
+  `workspace:SetAttribute("VT65SelfTest", true)`. Roda no mesmo servidor do jogo. Verifica:
+  - terreno e bots;
+  - a raia e a balística do campo de tiro, com o tiro de verdade com zeragem, atravessando
+    sebe e palha como no jogo;
+  - deitado: HipHeight ≥ 0,2, sem queda livre, sem deslizar e com o corpo deitado no servidor;
+  - arma caída de bot e rádio;
+  - pá: o chão desce;
+  - medevac: evacuado e suprimento;
+  - Offensive pelo laço real (90 s de captura simulada) e relatório pós-ação com a captura.
+
+  Para simular quem está nos pontos fortes, o MatchService tem `countsOverride`, que só vale no
+  Studio.
+- **Bots deixam a arma ao morrer** (`CombatService.dropWeapon`), com o que tinham no carregador.

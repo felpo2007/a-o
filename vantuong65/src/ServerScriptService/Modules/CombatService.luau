@@ -199,6 +199,14 @@ function CombatService.fire(
 	end
 end
 
+-- Arma caída de quem morreu (jogador ou bot): só com o carregador (Pickup.dropOnDeath).
+function CombatService.dropWeapon(pos: Vector3, weapon: string, mag: number)
+	local drop = Pickup.dropOnDeath({ weapon = weapon, mag = mag, spare = 0 })
+	if drop then
+		spawnPickup(pos, drop)
+	end
+end
+
 -- reabastece a munição (caixa de munição construída pela logística). Arma do outro lado não
 -- reabastece: quem pegou a arma do inimigo fica com o que tem nela.
 function CombatService.refill(player: Player)

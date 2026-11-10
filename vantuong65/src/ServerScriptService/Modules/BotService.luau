@@ -124,6 +124,11 @@ local function spawnModel(bot: Bot)
 		hum.Died:Connect(function()
 			local t = os.clock()
 			bot.readyAt = SpawnRules.readyAt(t, 0, MatchService.waveEpoch)
+			-- a arma do bot cai com o que tinha no carregador (Parte 11: pegar a arma do inimigo)
+			local r = model:FindFirstChild("HumanoidRootPart") :: BasePart?
+			if r then
+				CombatService.dropWeapon(r.Position, bot.weapon.id, bot.mag)
+			end
 			task.delay(5, function()
 				if bot.model == model then
 					bot.model = nil

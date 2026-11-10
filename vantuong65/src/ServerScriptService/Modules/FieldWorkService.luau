@@ -89,6 +89,8 @@ local function onDig(p: Player)
 	end)
 end
 
+FieldWorkService.dig = onDig -- autoteste (SelfTest) chama direto
+
 -- ===== medevac =====
 local boarding: { [Model]: number } = {}
 

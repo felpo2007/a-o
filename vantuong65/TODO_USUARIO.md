@@ -67,6 +67,13 @@ F5: o teto de arte por setor (`ArtBudget.SECTOR_MAX`, 2,5 milhões) é um chute 
 - Se o fps sobrar, diga quanto: eu subo o teto e as sebes ganham touceiras.
 - Se faltar, eu desço o teto.
 
+**Autoteste no motor (mais rápido):** durante o Play, na barra de comando do lado do servidor,
+rode `workspace:SetAttribute("VT65SelfTest", true)`.
+- Em ~2 min, o Output mostra uma linha `[VT65 TESTE] ok/FALHA/pulado` por sistema:
+  terreno, bots, campo de tiro (raia e balística), deitado, arma caída, rádio, animais, pá,
+  medevac, Offensive e relatório pós-ação.
+- Me mande essas linhas. Para o teste da pá, escolha o lado EUA.
+
 Features de lançamento (D-48). Confira no Studio:
 - **Acessibilidade:** menu do jogo (P) → Configurações → Acessibilidade:
   - modo daltônico (cor dos traçantes);
