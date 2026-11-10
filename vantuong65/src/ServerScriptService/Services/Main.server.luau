@@ -24,6 +24,7 @@ local TerrainRuntime = require(Modules:WaitForChild("TerrainRuntime"))
 local LogisticsService = require(Modules:WaitForChild("LogisticsService"))
 local CommanderService = require(Modules:WaitForChild("CommanderService"))
 local VehicleService = require(Modules:WaitForChild("VehicleService"))
+local FieldService = require(Modules:WaitForChild("FieldService"))
 
 task.spawn(TerrainRuntime.start) -- gera o terreno se o place veio sem ele
 PlayerData.start()
@@ -41,6 +42,7 @@ BotService.start()
 LogisticsService.start() -- F4: suprimento, caixotes e construções
 CommanderService.start() -- F4: comandante e missões de fogo por grade
 VehicleService.start() -- F4: M48A3, Ontos, LVTP-5 e UH-34D
+FieldService.start() -- Parte 12: configurações de controle, marcações, mensagens, granadas e corpo a corpo
 PrivateServer.start(function(mode: string, clock: number)
 	MatchService.requestMode(mode)
 	LightingService.setStart(clock)

@@ -15,6 +15,7 @@ export type Profile = {
 	tips: number,
 	unit: { id: string? },
 	stats: { matches: number, playSeconds: number },
+	settings: { [string]: any }?, -- controle e acessibilidade (Parte 12.8), saneado pelo InputMap
 }
 
 local PlayerData = {}

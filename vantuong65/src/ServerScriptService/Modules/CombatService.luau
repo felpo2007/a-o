@@ -124,6 +124,9 @@ function CombatService.fire(
 			local energy = hit.energy * speedFactor * speedFactor
 			local roll = Rng.new(seed + 1):next()
 			MedicalService.hit(victim.model, zoneOf(hit.target), energy, roll)
+			if victim.player then -- vibração do lado do impacto (Parte 12.6)
+				Net.event("Combat_Hit"):FireClient(victim.player, { x = origin.X, y = origin.Y, z = origin.Z })
+			end
 		end
 	end
 end

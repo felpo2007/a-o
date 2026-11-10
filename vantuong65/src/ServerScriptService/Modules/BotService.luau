@@ -8,6 +8,7 @@ local RunService = game:GetService("RunService")
 
 local BotBrain = require(ReplicatedStorage.Shared.BotBrain)
 local Rng = require(ReplicatedStorage.Shared.Rng)
+local Smoke = require(ReplicatedStorage.Shared.Smoke)
 local Roles = require(ReplicatedStorage.Shared.Roles)
 local SpawnRules = require(ReplicatedStorage.Shared.SpawnRules)
 local Weapons = require(ReplicatedStorage.Shared.Weapons)
@@ -175,7 +176,12 @@ local function visible(from: Vector3, target: Model, selfModel: Model): boolean
 	params.FilterType = Enum.RaycastFilterType.Exclude
 	params.FilterDescendantsInstances = { selfModel }
 	local r = workspace:Raycast(from, head.Position - from, params)
-	return r ~= nil and r.Instance:IsDescendantOf(target)
+	if not (r ~= nil and r.Instance:IsDescendantOf(target)) then
+		return false
+	end
+	-- fumaça tapa a visão (não as balas)
+	local h = head.Position
+	return not Smoke.blocks(from.X, from.Y, from.Z, h.X, h.Y, h.Z, Smoke.clouds(workspace:FindFirstChild("Smoke")))
 end
 
 local function perturb(dir: Vector3, sigma: number, rng: Rng.Rng): Vector3

@@ -1,7 +1,7 @@
 --!strict
--- Postura em pé/agachado (Parte 10.5, versão mínima para os túneis da F3). O servidor é a
--- autoridade: muda HipHeight e a velocidade; os clientes dobram as pernas de todo mundo que tem o
--- atributo "Crouched" (PostureController). Não deixa levantar sob teto baixo.
+-- Postura (Parte 10.5 e 12.2): em pé, agachado, deitado, inclinado e correndo. O servidor é a
+-- autoridade: muda HipHeight e velocidade (MedicalService.apply) e grava atributos no modelo; os
+-- clientes posam todo mundo pelos atributos (PostureController). Não deixa levantar sob teto baixo.
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Net = require(ReplicatedStorage.Shared.Net)
@@ -9,46 +9,83 @@ local Combatants = require(script.Parent.Combatants)
 local MedicalService = require(script.Parent.MedicalService)
 
 local PostureService = {}
-local DROP = 2.2 -- studs que o quadril desce ao agachar (6,25 -> ~4,05 studs de altura)
+local DROP = { crouch = 2.2, prone = 4.4 } -- studs que o quadril desce (PLACEHOLDER de pose)
 
-local function setCrouch(model: Model, on: boolean): boolean
-	local hum = model:FindFirstChildOfClass("Humanoid")
+local function headroom(model: Model, need: number): boolean
+	local params = RaycastParams.new()
+	params.FilterType = Enum.RaycastFilterType.Exclude
+	params.FilterDescendantsInstances = { model }
+	local head = model:FindFirstChild("Head") :: BasePart?
 	local root = model:FindFirstChild("HumanoidRootPart") :: BasePart?
-	if not (hum and root) or model:GetAttribute("Downed") then
+	local from = if head then head.Position elseif root then root.Position else nil
+	return from == nil or workspace:Raycast(from, Vector3.new(0, need + 0.3, 0), params) == nil
+end
+
+-- stance: "stand" | "crouch" | "prone"
+local function setStance(model: Model, stance: string): boolean
+	local hum = model:FindFirstChildOfClass("Humanoid")
+	if not hum or model:GetAttribute("Downed") then
 		return false
 	end
-	local was = model:GetAttribute("Crouched") == true
-	if on == was then
+	local cur = if model:GetAttribute("Prone")
+		then "prone"
+		elseif model:GetAttribute("Crouched") then "crouch"
+		else "stand"
+	if cur == stance then
 		return true
 	end
-	if not on then
-		-- só levanta se houver espaço acima da cabeça
-		local params = RaycastParams.new()
-		params.FilterType = Enum.RaycastFilterType.Exclude
-		params.FilterDescendantsInstances = { model }
-		local head = model:FindFirstChild("Head") :: BasePart?
-		local from = if head then head.Position else root.Position
-		if workspace:Raycast(from, Vector3.new(0, DROP + 0.3, 0), params) then
-			return false
-		end
+	local curDrop = if cur == "stand" then 0 else DROP[cur]
+	local newDrop = if stance == "stand" then 0 else DROP[stance]
+	if newDrop < curDrop and not headroom(model, curDrop - newDrop) then
+		return false -- sem espaço para subir (túnel, teto baixo)
 	end
 	local base = model:GetAttribute("BaseHipHeight")
 	if type(base) ~= "number" then
 		base = hum.HipHeight
 		model:SetAttribute("BaseHipHeight", base)
 	end
-	hum.HipHeight = if on then (base :: number) - DROP else base :: number
-	model:SetAttribute("Crouched", on)
-	MedicalService.apply(model) -- recalcula a velocidade
+	hum.HipHeight = (base :: number) - newDrop
+	model:SetAttribute("Crouched", stance == "crouch")
+	model:SetAttribute("Prone", stance == "prone")
+	if stance ~= "stand" then
+		model:SetAttribute("Sprinting", false)
+	end
+	if stance == "prone" then
+		model:SetAttribute("Lean", 0)
+	end
+	MedicalService.apply(model)
 	return true
 end
-PostureService.setCrouch = setCrouch
+PostureService.setStance = setStance
+
+function PostureService.setCrouch(model: Model, on: boolean): boolean
+	return setStance(model, if on then "crouch" else "stand")
+end
 
 function PostureService.start()
-	Net.event("Posture_Set").OnServerEvent:Connect(function(player, crouched)
+	Net.event("Posture_Set").OnServerEvent:Connect(function(player, req: any)
 		local char = player.Character
-		if char and Combatants.get(char) and type(crouched) == "boolean" then
-			setCrouch(char, crouched)
+		if not (char and Combatants.get(char)) then
+			return
+		end
+		if type(req) == "boolean" then -- formato antigo: agachar
+			setStance(char, if req then "crouch" else "stand")
+			return
+		end
+		if type(req) ~= "table" then
+			return
+		end
+		if req.stance == "stand" or req.stance == "crouch" or req.stance == "prone" then
+			setStance(char, req.stance)
+		end
+		if type(req.lean) == "number" then
+			local l = math.clamp(math.round(req.lean), -1, 1)
+			char:SetAttribute("Lean", if char:GetAttribute("Prone") then 0 else l)
+		end
+		if type(req.sprint) == "boolean" then
+			local ok = req.sprint and not char:GetAttribute("Crouched") and not char:GetAttribute("Prone")
+			char:SetAttribute("Sprinting", ok)
+			MedicalService.apply(char)
 		end
 	end)
 end

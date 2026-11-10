@@ -1,35 +1,106 @@
 --!strict
--- Arma placeholder (F2): disparo com semente, mira (zoom de FOV), recarga, recuo com tendência
--- aleatória e traçantes. Sem retícula, sem hitmarker, sem contador de munição na tela (Parte 1).
--- O visual (mira de ferro 3D, IK, animações) entra com os assets do Lote 2.
+-- Arma (F2 + Parte 12): disparo com semente, mira (FOV), recarga, seletor, alça de mira (zeragem
+-- de 100/200/300 m), balanço com "prender a respiração", recuo com tendência aleatória, troca de
+-- arma (o antitanque tem o lançador como 2ª arma), binóculo, corpo a corpo e baioneta.
+-- Sem retícula, sem hitmarker, sem contador de munição na tela (Parte 1). Entradas pela camada
+-- Input: controle e teclado/mouse têm o MESMO balanço, inércia e recuo (Parte 12.4).
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
 
 local AssetIds = require(ReplicatedStorage.Shared.AssetIds)
 local Ballistics = require(ReplicatedStorage.Shared.Ballistics)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Rng = require(ReplicatedStorage.Shared.Rng)
 local Weapons = require(ReplicatedStorage.Shared.Weapons)
+local Haptics = require(script.Parent.Haptics)
+local Input = require(script.Parent.Input)
+local UiKit = require(script.Parent.UiKit)
 
 local player = Players.LocalPlayer
 local camera = workspace.CurrentCamera
 local M = 0.28
 
+local slots: { string } = {}
+local slot = 1
 local weapon: Weapons.Weapon? = nil
+local launcher = false -- slot do foguete (antitanque)
 local modeIdx = 1
 local mag = 0
 local firing = false
 local aiming = false
+local binoculars = false
 local lastShot = 0
 local seedRng = Rng.new(os.time() + player.UserId)
 local recoilPitch, recoilYaw = 0, 0
+local ZEROS = { 100, 200, 300 }
+local zeroIdx = 1
+local breathUntil, breathReady = 0, 0
+local swayT = 0
+
+-- aviso curto na tela (seletor, alça, arma)
+local hud = UiKit.screen("VT65WeaponToast", 15)
+local toast = Instance.new("TextLabel")
+toast.AnchorPoint = Vector2.new(0.5, 1)
+toast.Position = UDim2.new(0.5, 0, 1, -120)
+toast.Size = UDim2.fromOffset(360, 36)
+toast.BackgroundTransparency = 0.4
+toast.BackgroundColor3 = Color3.fromRGB(20, 20, 16)
+toast.TextColor3 = Color3.new(1, 1, 1)
+toast.Font = Enum.Font.GothamMedium
+toast.TextSize = UiKit.text(18)
+toast.Visible = false
+toast.Parent = hud
+local toastId = 0
+local function say(text: string)
+	toastId += 1
+	local my = toastId
+	toast.Text = text
+	toast.Visible = true
+	task.delay(1.6, function()
+		if toastId == my then
+			toast.Visible = false
+		end
+	end)
+end
+
+-- vinheta do binóculo
+local binoc = Instance.new("Frame")
+binoc.Size = UDim2.fromScale(1, 1)
+binoc.BackgroundTransparency = 1
+binoc.Visible = false
+binoc.Parent = hud
+for _, side in { -1, 1 } do
+	local c = Instance.new("Frame")
+	c.AnchorPoint = Vector2.new(0.5, 0.5)
+	c.Position = UDim2.new(0.5, side * 170, 0.5, 0)
+	c.Size = UDim2.fromOffset(380, 380)
+	c.BackgroundTransparency = 1
+	local s = Instance.new("UIStroke")
+	s.Thickness = 900
+	s.Color = Color3.new(0, 0, 0)
+	s.Parent = c
+	local r = Instance.new("UICorner")
+	r.CornerRadius = UDim.new(1, 0)
+	r.Parent = c
+	c.Parent = binoc
+end
+
+local function seated(): boolean
+	local hum = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+	return hum ~= nil and hum.SeatPart ~= nil
+end
 
 local function equip()
 	local s = player:GetAttribute("Loadout")
-	local id = if type(s) == "string" then string.split(s, ",")[1] else nil
-	local wp = id and Weapons.get(id)
+	slots = if type(s) == "string" then string.split(s, ",") else {}
+	if player:GetAttribute("Role") == "anti_tank" then
+		table.insert(slots, "launcher")
+	end
+	slot = math.clamp(slot, 1, math.max(#slots, 1))
+	local id = slots[slot]
+	launcher = id == "launcher"
+	local wp = if id and not launcher then Weapons.get(id) else nil
 	weapon = if wp and wp.enabled then wp else nil
 	modeIdx = 1
 end
@@ -87,7 +158,6 @@ Net.unreliable("Combat_Tracer").OnClientEvent:Connect(function(shot)
 	end
 end)
 
--- som do próprio tiro (camadas perto/médio/longe e o estalo supersônico entram na F3)
 local S = AssetIds.Sounds
 local SHOT_SOUND: { [string]: number } = {
 	m14 = S.shot_m14,
@@ -111,30 +181,35 @@ local function playId(id: number, volume: number)
 		s:Destroy()
 	end)
 end
-local function playShot(id: string)
-	local sid = SHOT_SOUND[id]
-	if not sid or sid == 0 then
+
+local function setAim(on: boolean)
+	if on == aiming then
 		return
 	end
-	local s = Instance.new("Sound")
-	s.SoundId = "rbxassetid://" .. sid
-	s.Volume = 0.8
-	s.Parent = camera
-	s:Play()
-	s.Ended:Once(function()
-		s:Destroy()
-	end)
+	aiming = on
+	Input.event("aim", on)
+	if not on then
+		Net.event("Posture_Set"):FireServer({ lean = 0 })
+	end
 end
 
 local function fire()
 	local wp = weapon
 	local char = player.Character
 	local head = char and char:FindFirstChild("Head") :: BasePart?
-	local hum = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
-	if hum and hum.SeatPart then
-		return -- em veículo: a arma do assento é do VehicleController
+	if seated() or binoculars or not head or player:GetAttribute("Downed") then
+		return
 	end
-	if not (wp and head) or player:GetAttribute("Downed") then
+	if launcher then
+		local now = os.clock()
+		if now - lastShot > 1 then
+			lastShot = now
+			Net.event("Vehicle_Fire"):FireServer({ dir = camera.CFrame.LookVector })
+			Haptics.fire(1.6, false)
+		end
+		return
+	end
+	if not wp then
 		return
 	end
 	if mag <= 0 then
@@ -151,7 +226,9 @@ local function fire()
 	lastShot = now
 	mag -= 1
 	local o = camera.CFrame.Position
-	local d = camera.CFrame.LookVector
+	-- alça zerada: o cano sobe o ângulo de zeragem em relação à linha de visada
+	local zero = Ballistics.zeroAngle(wp.id, ZEROS[zeroIdx])
+	local d = (camera.CFrame * CFrame.Angles(zero, 0, 0)).LookVector
 	local seed = seedRng:nextU32()
 	local shot = {
 		w = wp.id,
@@ -165,7 +242,7 @@ local function fire()
 		t = workspace:GetServerTimeNow(),
 	}
 	Net.event("Combat_Fire"):FireServer(shot)
-	playShot(wp.id)
+	playId(SHOT_SOUND[wp.id] or 0, 0.8)
 	if wp.kind == "mg" and seed % 5 == 0 then
 		tracer(shot, if wp.faction == "US" then Color3.fromRGB(255, 80, 60) else Color3.fromRGB(90, 255, 120))
 	end
@@ -182,31 +259,111 @@ local function fire()
 	local r = Rng.new(seed)
 	recoilPitch += kick
 	recoilYaw += (r:next() - 0.35) * kick * 0.6 -- tendência leve para a direita
+	Haptics.fire(kick, wp.modes[modeIdx] == "auto")
 end
 
-UserInputService.InputBegan:Connect(function(input, processed)
-	if processed then
-		return
-	end
-	if input.UserInputType == Enum.UserInputType.MouseButton1 then
-		firing = true
-		fire()
-	elseif input.UserInputType == Enum.UserInputType.MouseButton2 then
-		aiming = true
-	elseif input.KeyCode == Enum.KeyCode.R then
-		Net.event("Combat_Reload"):FireServer()
-		if weapon then
-			playId(if weapon.faction == "US" then S.reload_m14 else S.reload_type56, 0.7)
-		end
-	elseif input.KeyCode == Enum.KeyCode.V and weapon then
-		modeIdx = modeIdx % #weapon.modes + 1
+-- ===== entradas (camada Input) =====
+Input.on("fire", "press", function()
+	firing = true
+	fire()
+end)
+Input.on("fire", "release", function()
+	firing = false
+end)
+Input.on("aim", "press", function()
+	if Input.settings.aimToggle then
+		setAim(not aiming)
+	else
+		setAim(true)
 	end
 end)
-UserInputService.InputEnded:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 then
-		firing = false
-	elseif input.UserInputType == Enum.UserInputType.MouseButton2 then
+Input.on("aim", "release", function()
+	if not Input.settings.aimToggle then
+		setAim(false)
+	end
+end)
+Input.on("reload", "tap", function()
+	Net.event("Combat_Reload"):FireServer()
+	if weapon then
+		playId(if weapon.faction == "US" then S.reload_m14 else S.reload_type56, 0.7)
+	end
+end)
+Input.on("reload", "press", function() -- R no teclado é "press"
+	Net.event("Combat_Reload"):FireServer()
+	if weapon then
+		playId(if weapon.faction == "US" then S.reload_m14 else S.reload_type56, 0.7)
+	end
+end)
+Input.on("fire_mode", "tap", function()
+	if weapon then
+		modeIdx = modeIdx % #weapon.modes + 1
+		say("Seletor: " .. string.upper(weapon.modes[modeIdx]))
+	end
+end)
+Input.on("zeroing", "holdStart", function()
+	zeroIdx = zeroIdx % #ZEROS + 1
+	say(string.format("Alça de mira: %d m", ZEROS[zeroIdx]))
+end)
+Input.on("swap_weapon", "tap", function()
+	if #slots > 1 then
+		slot = slot % #slots + 1
+		equip()
+		say(if launcher then "Lançador" else (if weapon then weapon.name else "—"))
+	end
+end)
+Input.on("swap_weapon", "press", function() -- tecla 1
+	if #slots > 1 then
+		slot = slot % #slots + 1
+		equip()
+		say(if launcher then "Lançador" else (if weapon then weapon.name else "—"))
+	end
+end)
+Input.on("hold_breath", "press", function()
+	local now = os.clock()
+	if aiming and now >= breathReady then
+		breathUntil = now + 4 -- PLACEHOLDER: 4 s de fôlego, 6 s para recuperar
+		breathReady = now + 10
+	end
+end)
+local function toggleBinoculars()
+	binoculars = not binoculars
+	binoc.Visible = binoculars
+	if binoculars then
+		setAim(false)
+	end
+end
+Input.on("binoculars", "press", toggleBinoculars)
+local function melee()
+	Net.event("Combat_Melee"):FireServer({ dir = camera.CFrame.LookVector })
+	Haptics.fire(1.0, false)
+end
+Input.on("melee", "press", melee)
+local function bayonet()
+	local char = player.Character
+	local on = not (char and char:GetAttribute("Bayonet") == true)
+	Net.event("Posture_Set"):FireServer({ bayonet = on })
+	say(if on then "Baioneta armada" else "Baioneta recolhida")
+end
+Input.on("bayonet", "holdStart", bayonet)
+Input.on("bayonet", "press", bayonet)
+
+-- estado: menus, mapa, morte, veículo cancelam mira e disparo (nada fica preso)
+Input.StateChanged:Connect(function(cancelled: { string }, ctx: string)
+	firing = false
+	if table.find(cancelled, "aim") then
 		aiming = false
+	end
+	if ctx ~= "infantry" and ctx ~= "aim" and binoculars then
+		binoculars = false
+		binoc.Visible = false
+	end
+end)
+
+-- roda de equipamento: binóculo
+local Bus = require(script.Parent.Bus)
+Bus.on("equip_item", function(id: string)
+	if id == "binoculars" then
+		toggleBinoculars()
 	end
 end)
 
@@ -215,10 +372,25 @@ RunService.RenderStepped:Connect(function(dt: number)
 	if firing and wp and wp.modes[modeIdx] == "auto" then
 		fire()
 	end
-	-- mira: levar ao ombro leva tempo proporcional ao peso (Parte 10.4)
-	local target = if aiming then 55 else 70
-	local speed = if wp then 10 / math.max(wp.massLoadedKg, 1) else 4
-	camera.FieldOfView += (target - camera.FieldOfView) * math.min(1, dt * speed)
+	Input.aimMode = if binoculars then "scope" elseif aiming then "ads" else "hip"
+	if not seated() then
+		-- mira: levar ao ombro leva tempo proporcional ao peso (Parte 10.4); binóculo 7x ≈ 10°
+		local target = if binoculars then 10 elseif aiming then 55 else 70
+		local speed = if wp then 10 / math.max(wp.massLoadedKg, 1) else 4
+		camera.FieldOfView += (target - camera.FieldOfView) * math.min(1, dt * speed)
+	end
+	-- balanço da mira (igual para controle e mouse): menor prendendo a respiração.
+	-- Amplitude PLACEHOLDER (0,12° parado; dobra com o braço ferido).
+	if aiming and wp then
+		swayT += dt
+		local amp = 0.12 * (if player:GetAttribute("ArmImpaired") then 2 else 1)
+		if os.clock() < breathUntil then
+			amp *= 0.2
+		end
+		local dp = math.cos(swayT * 1.3) * amp * 1.3 * dt
+		local dyw = math.cos(swayT * 0.9) * amp * 0.9 * dt
+		camera.CFrame *= CFrame.Angles(math.rad(dp), math.rad(dyw), 0)
+	end
 	-- aplica e recupera o recuo
 	if recoilPitch ~= 0 or recoilYaw ~= 0 then
 		local stepP = recoilPitch * math.min(1, dt * 18)
@@ -230,7 +402,11 @@ RunService.RenderStepped:Connect(function(dt: number)
 end)
 
 player:GetAttributeChangedSignal("Loadout"):Connect(equip)
+player:GetAttributeChangedSignal("Role"):Connect(equip)
 player.CharacterAdded:Connect(function()
+	slot = 1
+	aiming, firing, binoculars = false, false, false
+	binoc.Visible = false
 	equip()
 	player.CameraMode = Enum.CameraMode.LockFirstPerson -- primeira pessoa (Parte 10.5)
 end)

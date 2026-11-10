@@ -595,6 +595,21 @@
    "triangulos": 11287,
    "sha256": "bdbba7d5b03796ffb0e81c7fdedaacaf8ab095aef1f3e22c6438eebf08377b98",
    "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/ff1e0ab6-aece-4615-99b7-b6c38a72ec97/f3a2d728-a055-4967-bc02-b33aef1aed59/Model-bdbba7d5b03796ffb0e81c7fdedaacaf8ab095aef1f3e22c6438eebf08377b98.glb"
+  },
+  {
+   "arquivo": "models/morteiro_m29_studs.glb",
+   "chave": "mortar_81",
+   "job": "81d1176f-1700-4805-9e7b-ee2abf2c5d46",
+   "prep": "444f9c11-2568-4e79-b4f1-19fa68e9e063",
+   "escala": "altura 1,2 m armado (tubo de ~1,3 m a ~60°; projeto)",
+   "dim_studs_xyz": [
+    4.08,
+    4.29,
+    2.69
+   ],
+   "triangulos": 15363,
+   "sha256": "d370b3fb96ad357d304913b9298bc5f2993beb21465a34e3317fb65a5b7e6b89",
+   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/444f9c11-2568-4e79-b4f1-19fa68e9e063/86e315a7-526f-4ea4-8c94-b8a62195302a/Model-d370b3fb96ad357d304913b9298bc5f2993beb21465a34e3317fb65a5b7e6b89.glb"
   }
  ]
 }

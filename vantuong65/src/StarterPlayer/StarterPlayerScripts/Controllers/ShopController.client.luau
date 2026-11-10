@@ -1,5 +1,6 @@
 --!strict
--- Loja (tecla B): passes cosméticos, apoio, Premium, assinatura e o armário de cosméticos.
+-- Loja (menu do jogo → Loja, ou tecla L): passes cosméticos, apoio, Premium, assinatura e o armário.
+-- Navegável no controle: abre com foco no 1º item, A compra/equipa, B fecha (Parte 12.5).
 -- Os preços são lidos ao vivo (GetProductInfoAsync) para o Managed Pricing do Roblox valer.
 local MarketplaceService = game:GetService("MarketplaceService")
 local Players = game:GetService("Players")
@@ -8,12 +9,19 @@ local UserInputService = game:GetService("UserInputService")
 
 local Commerce = require(ReplicatedStorage.Shared.Commerce)
 local Net = require(ReplicatedStorage.Shared.Net)
+local Bus = require(script.Parent.Bus)
+local Input = require(script.Parent.Input)
+local UiKit = require(script.Parent.UiKit)
 
 local player = Players.LocalPlayer
 local gui = Instance.new("ScreenGui")
 gui.Name = "VT65Shop"
 gui.ResetOnSpawn = false
 gui.Enabled = false
+gui.DisplayOrder = 30
+pcall(function()
+	gui.ScreenInsets = Enum.ScreenInsets.DeviceSafeInsets
+end)
 gui.Parent = player:WaitForChild("PlayerGui")
 
 local panel = Instance.new("ScrollingFrame")
@@ -51,21 +59,15 @@ local function label(text: string, bold: boolean?)
 	t.TextXAlignment = Enum.TextXAlignment.Left
 	t.TextColor3 = Color3.fromRGB(40, 36, 28)
 	t.Font = if bold then Enum.Font.GothamBold else Enum.Font.Gotham
-	t.TextSize = if bold then 18 else 14
+	t.TextSize = UiKit.text(if bold then 18 else 14)
 	t.Text = text
 	t.Parent = panel
 end
 
 local function button(text: string, onClick: () -> ())
-	local b = Instance.new("TextButton")
-	b.Size = UDim2.new(1, -12, 0, 34)
+	local b = UiKit.button(panel, text, onClick)
+	b.Size = UDim2.new(1, -12, 0, if UiKit.tv() then 48 else 34)
 	b.BackgroundColor3 = Color3.fromRGB(96, 104, 70)
-	b.TextColor3 = Color3.new(1, 1, 1)
-	b.Font = Enum.Font.GothamMedium
-	b.TextSize = 15
-	b.Text = text
-	b.Parent = panel
-	b.Activated:Connect(onClick)
 end
 
 local function render()
@@ -136,20 +138,40 @@ Net.event("Commerce_State").OnClientEvent:Connect(function(s)
 	end
 end)
 
-UserInputService.InputBegan:Connect(function(input, processed)
-	if not processed and input.KeyCode == Enum.KeyCode.B then
-		gui.Enabled = not gui.Enabled
-		if gui.Enabled then
-			Net.event("Commerce_Track"):FireServer("store_open")
-			task.spawn(function()
-				local ok, s = pcall(function()
-					return Net.func("Commerce_GetState"):InvokeServer()
-				end)
-				if ok and s then
-					state = s
-				end
-				render()
+local function setOpen(open: boolean)
+	if open == gui.Enabled then
+		return
+	end
+	gui.Enabled = open
+	if open then
+		Input.openMenu()
+		Net.event("Commerce_Track"):FireServer("store_open")
+		task.spawn(function()
+			local ok, s = pcall(function()
+				return Net.func("Commerce_GetState"):InvokeServer()
 			end)
-		end
+			if ok and s then
+				state = s
+			end
+			render()
+			UiKit.focus(panel)
+		end)
+	else
+		Input.closeMenu()
+	end
+end
+
+Bus.on("shop_open", function()
+	setOpen(true)
+end)
+Input.on("ui_back", "press", function()
+	setOpen(false)
+end)
+UiKit.watch(panel, function()
+	return gui.Enabled
+end)
+UserInputService.InputBegan:Connect(function(input, processed)
+	if not processed and input.KeyCode == Enum.KeyCode.L then
+		setOpen(not gui.Enabled)
 	end
 end)

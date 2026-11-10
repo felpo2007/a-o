@@ -44,7 +44,13 @@ local function apply(model: Model)
 		hum.JumpPower = 0
 	else
 		hum.Health = math.clamp(s.health, 1, 100)
-		local base = if model:GetAttribute("Crouched") then Units.Speed.walk * 0.6 else Units.Speed.jog
+		-- postura e corrida (PostureService): deitado rasteja, agachado anda devagar, correndo só
+		-- de pé e sem perna ferida. Rastejar = 25% do andar (PLACEHOLDER).
+		local base = if model:GetAttribute("Prone")
+			then Units.Speed.walk * 0.25
+			elseif model:GetAttribute("Crouched") then Units.Speed.walk * 0.6
+			elseif model:GetAttribute("Sprinting") then Units.Speed.sprint
+			else Units.Speed.jog
 		hum.WalkSpeed = if s.legImpaired then math.min(base, Units.Speed.walk) else base
 		hum.JumpPower = if s.legImpaired then 0 else 30
 	end

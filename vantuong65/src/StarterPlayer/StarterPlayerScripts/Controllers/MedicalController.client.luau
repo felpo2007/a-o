@@ -1,7 +1,6 @@
 --!strict
 -- Corpo e cura no cliente: sem barra de vida. A visão perde cor e escurece com a vida, borra
--- depois da reanimação e quando caído; teclas: G curativo, T torniquete, F tratar/reanimar
--- aliado à frente (médico) ou fazer curativo nele, H desistir (caído, após 15 s).
+-- depois da reanimação e quando caído. Entradas no fim do arquivo (camada Input, Parte 12).
 local Lighting = game:GetService("Lighting")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -9,6 +8,8 @@ local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 
 local Net = require(ReplicatedStorage.Shared.Net)
+local Bus = require(script.Parent.Bus)
+local Input = require(script.Parent.Input)
 
 local player = Players.LocalPlayer
 local cc = Instance.new("ColorCorrectionEffect")
@@ -60,26 +61,68 @@ local function nearestAlly(): Model?
 	return best
 end
 
-UserInputService.InputBegan:Connect(function(input, processed)
-	if processed then
-		return
+-- Entradas pela camada única (Parte 12): direcional ↓ / G = bandagem rápida (trata o sangramento
+-- mais urgente: arterial pede torniquete); T ou roda = torniquete; X segurado / F = interagir com
+-- aliado (reanimar, tratar, fazer curativo) quando não há outra interação na tela; caído: B
+-- segurado ou H = desistir.
+local function selfOp(op: string)
+	Net.event("Medical_Action"):FireServer({ op = op })
+end
+
+local function quickBandage()
+	local arterial = state and type(state.bleed) == "number" and state.bleed >= 4
+	if arterial and (state.tourniquets or 0) > 0 then
+		selfOp("tourniquet")
+	else
+		selfOp("bandage")
 	end
-	local k = input.KeyCode
-	if k == Enum.KeyCode.G then
-		Net.event("Medical_Action"):FireServer({ op = "bandage" })
-	elseif k == Enum.KeyCode.T then
-		Net.event("Medical_Action"):FireServer({ op = "tourniquet" })
-	elseif k == Enum.KeyCode.H then
-		Net.event("Medical_Action"):FireServer({ op = "giveup" })
-	elseif k == Enum.KeyCode.F then
-		local ally = nearestAlly()
-		if ally then
-			local op = if ally:GetAttribute("Downed")
-				then "revive"
-				elseif player:GetAttribute("Role") == "medic" then "treat"
-				else "bandage"
-			Net.event("Medical_Action"):FireServer({ op = op, target = ally })
-		end
+end
+
+local function interactAlly()
+	if player:GetAttribute("PromptShown") then
+		return -- há uma interação do mundo (caixote, túnel, construção) sob a mira
+	end
+	local ally = nearestAlly()
+	if ally then
+		local op = if ally:GetAttribute("Downed")
+			then "revive"
+			elseif player:GetAttribute("Role") == "medic" then "treat"
+			else "bandage"
+		Net.event("Medical_Action"):FireServer({ op = op, target = ally })
+	end
+end
+
+Input.on("quick_bandage", "press", quickBandage)
+Input.on("tourniquet", "press", function()
+	selfOp("tourniquet")
+end)
+Input.on("give_up", "press", function()
+	selfOp("giveup")
+end)
+Input.on("interact", "holdStart", interactAlly)
+Bus.on("equip_item", function(id: string)
+	if id == "bandage" then
+		quickBandage()
+	elseif id == "tourniquet" then
+		selfOp("tourniquet")
+	end
+end)
+-- caído: B segurado desiste (o B normal agacha/deita, mas caído não há postura)
+local bDown = 0
+UserInputService.InputBegan:Connect(function(input)
+	if input.KeyCode == Enum.KeyCode.ButtonB and player:GetAttribute("Downed") then
+		bDown = os.clock()
+		local t0 = bDown
+		task.delay(1.0, function()
+			if bDown == t0 and player:GetAttribute("Downed") then
+				selfOp("giveup")
+			end
+		end)
+	end
+end)
+UserInputService.InputEnded:Connect(function(input)
+	if input.KeyCode == Enum.KeyCode.ButtonB then
+		bDown = 0
 	end
 end)
 

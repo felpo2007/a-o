@@ -163,7 +163,38 @@ function Ballistics.dropAt(weaponId: string, range: number, zero: number): numbe
 		end
 		return y
 	end
-	-- ângulo de zeragem por bisseção: altura 0 no alcance de zeragem
+	return -((heightAt(Ballistics.zeroAngle(weaponId, zero), range)) or -math.huge)
+end
+
+-- Ângulo de elevação (rad) da alça zerada a `zero` m: bisseção até a altura 0 nessa distância.
+local zeroCache: { [string]: number } = {}
+function Ballistics.zeroAngle(weaponId: string, zero: number): number
+	local key = weaponId .. ":" .. zero
+	if zeroCache[key] then
+		return zeroCache[key]
+	end
+	local wp = Weapons.get(weaponId)
+	assert(wp, "arma desconhecida")
+	local function heightAt(angle: number, dist: number): number?
+		local dt = 1 / 1000
+		local x, y = 0, 0
+		local vx, vy = wp.muzzleVelocity * math.cos(angle), wp.muzzleVelocity * math.sin(angle)
+		while x < dist do
+			local v = math.sqrt(vx * vx + vy * vy)
+			local a = Ballistics.dragDecel(v, wp.bcG1)
+			vx -= a * vx / v * dt
+			vy -= (a * vy / v + Ballistics.G) * dt
+			local nx = x + vx * dt
+			if nx >= dist then
+				return y + vy * dt * (dist - x) / (nx - x)
+			end
+			x, y = nx, y + vy * dt
+			if v < 50 then
+				return nil
+			end
+		end
+		return y
+	end
 	local lo, hi = 0, math.rad(2)
 	for _ = 1, 50 do
 		local mid = (lo + hi) / 2
@@ -173,7 +204,8 @@ function Ballistics.dropAt(weaponId: string, range: number, zero: number): numbe
 			lo = mid
 		end
 	end
-	return -((heightAt((lo + hi) / 2, range)) or -math.huge)
+	zeroCache[key] = (lo + hi) / 2
+	return zeroCache[key]
 end
 
 return Ballistics

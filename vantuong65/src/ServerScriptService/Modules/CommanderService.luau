@@ -83,6 +83,14 @@ local function handle(player: Player, req: any)
 			reply(player, { error = "grade inválida (ex.: BS 7003 9285)" })
 			return
 		end
+	elseif type(req.x) == "number" and type(req.z) == "number" and req.x == req.x and req.z == req.z then
+		-- alvo escolhido no mapa com o cursor (controle, sem digitar): dentro da área de jogo
+		local Bd = MapConfig.Bounds
+		if req.x < Bd.minX or req.x > Bd.maxX or req.z < Bd.minZ or req.z > Bd.maxZ then
+			reply(player, { error = "alvo fora do mapa" })
+			return
+		end
+		x, z = req.x, req.z
 	elseif lastTarget[player] then
 		x, z = lastTarget[player].x, lastTarget[player].z
 	end

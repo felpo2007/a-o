@@ -29,7 +29,15 @@ Net.Events = {
 	"Build_Request", -- c->s: { kind } (logística)
 	"Logistics_State", -- s->c: erro de construção
 	"Vehicle_Fire", -- c->s: { dir } (arma do assento ou foguete antitanque)
-	"Vehicle_Reload", -- c->s: recarga do Ontos (parado)
+	"Vehicle_Reload", -- c->s: recarga do Ontos (parado) / troca de munição do 90 mm
+	"Vehicle_SwitchSeat", -- c->s: próximo assento livre permitido ao papel
+	"Input_Type", -- c->s: "gamepad" | "kbm" | "touch" (equilíbrio controle x mouse)
+	"Settings_Save", -- c->s: configurações de controle (saneadas no servidor)
+	"Squad_Mark", -- c->s { x, y, z } / s->c { x, y, z, from, kind }: marcação para o squad
+	"Squad_Message", -- c->s { id, channel } / s->c { id, from, channel }: mensagens predefinidas
+	"Throw_Request", -- c->s { kind = "frag" | "smoke", dir }
+	"Combat_Melee", -- c->s { dir }: coronhada ou baioneta
+	"Combat_Hit", -- s->c { x, y, z }: origem do tiro que acertou (vibração do lado do impacto)
 }
 Net.Unreliable = {
 	"Combat_Tracer", -- s->c: traçantes/efeitos de outros jogadores
@@ -39,6 +47,7 @@ Net.Unreliable = {
 }
 Net.Functions = {
 	"Commerce_GetState",
+	"Settings_Get",
 }
 
 local folderName = "VT65Remotes"
