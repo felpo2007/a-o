@@ -235,15 +235,16 @@ Feito pelo MCP do Studio, em Play solo com 29 bots, no greybox. Relatório em
 - Heartbeat de 0,12–0,30 ms.
 - Terreno gerado em 26 s.
 
-Os 8 bugs encontrados foram corrigidos e esperam o reteste:
-- mouse preso nas telas;
-- M e P fechando o que abriam;
-- deitado escorregando;
-- mira que não ligava;
-- raia;
-- comando de teste;
-- mapa que ficava na tela;
-- Output poluído.
+Os 8 bugs encontrados foram corrigidos. **Reteste no Studio** (mesmo dia, relatório em
+`testes/RETESTE_STUDIO_2026-11-10.md`):
+- **corrigidos:** mouse preso nas telas, M e P fechando o que abriam, mira, comandos de teste, mapa
+  que ficava na tela e Output poluído;
+- **deitado:** não escorrega mais (0,00 m em 7 s numa encosta de 14°), mas o corpo não deita. As
+  juntas do avatar agora vêm como `AnimationConstraint`, e a pose só mexe em `Motor6D`. O mesmo vale
+  para agachar e inclinar;
+- **raia:** EUA 100 m acerta 5 de 5. Uma elevação do terreno bloqueia EUA 200/300 m e VC 100 m, e
+  VC 200/300 m erram o alvo;
+- **autoteste:** 6 ok, 4 falhas (campo de tiro, deitado, pá e medevac), 1 pulado (animais).
 
 **Depois do teste:**
 - **Autoteste no motor:** `workspace:SetAttribute("VT65SelfTest", true)`, só no Studio. Roda
