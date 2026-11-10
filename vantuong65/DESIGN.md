@@ -359,18 +359,22 @@ imagem com `InsertService:LoadAsset` (`Characters.imageUrl`).
 | M29: v0 | **254 m/s** | **derivado**: arrasto do 82 mm calibrado (k = 1,512e-4 1/m) e alcance de 3.890 m. Suposição: calibre e massa parecidos |
 | Cargas incrementais | 45–100% da v0 | PLACEHOLDER |
 | M48: massa, dimensões, blindagem frontal | 45,0 t; 9,3 × 3,65 × 3,1 m; glacis 110 mm a 60° (220 mm efetivos); torre 178 mm | **fonte** (wiki:M48_Patton) |
-| M48A3: potência | 750 hp | a confirmar: a infobox lista 810/825 hp para versões a gasolina e trunca a do A3 |
+| M48A3: potência | 750 hp | **fonte** (D-61: diesel AVDS-1790-2; FAS DoD-101, afvdatabase) |
 | M48: velocidade | 48 km/h | **fonte**, mas é o valor do M48A5 |
-| M48: laterais e traseira | 76/51/25 mm | PLACEHOLDER |
+| M48: laterais e traseira | lado 76 mm (51 mm na metade de trás), traseira **44 mm** | **fonte** (D-61: FAS DoD-101). Antes 76/51/25 |
+| M48: teto | 25 mm | PLACEHOLDER (25 mm é o piso, FAS) |
+| M48: giro da torre | 24°/s | **fonte** (D-61: afvdatabase) |
 | Ontos | 8.600 kg; 3,83 × 2,59 × 2,13 m; 145 hp; 48 km/h; 6 × M40A1C | **fonte** (wiki:M50_Ontos) |
-| Ontos: blindagem | 13 mm | PLACEHOLDER |
+| Ontos: blindagem | 13 mm (piso 6,5 mm) | **fonte** (D-61: tanks-encyclopedia M50) |
 | M40: v0 do M344 HEAT | 503 m/s | **fonte** (wiki:M40_recoilless_rifle) |
 | LVTP-5 | 37,4 t; 9,04 × 3,57 × 2,92 m; 704 hp; 48 km/h em terra e 11 km/h na água; 6–16 mm; 3+34 | **fonte** (wiki:LVTP-5) |
 | H-34 | rotor de 56 ft (2.463 ft²); vazio 7.646 lb; bruto 11.867 lb; máx. 13.300 lb; 1.525 hp na decolagem; 122 mph; subida vertical de 600 ft/min; teto de pairar IGE 9.600 ft e OGE 5.500 ft (H-34A) | **fonte** (wiki:Sikorsky_H-34) |
-| Penetração (PG-2 150, 3,5" 250, 106 HEAT 400 mm) | — | PLACEHOLDER |
+| Penetração | PG-2 150, 3,5" **280**, 106 HEAT 400 mm | **fonte** (D-61). O 90 mm HEAT (280) segue PLACEHOLDER |
+| H-34: razão de subida | 1.100 ft/min ao nível do mar | **fonte** (D-61: Sikorsky Archives, Army Aviation Magazine, Patriots Point) |
 | Raios letal e de baixas dos explosivos | — | PLACEHOLDER |
 | CEP, cadência e recargas das missões de fogo | — | design |
-| Navio a 3 km da praia e v0 naval de 760 m/s | — | PLACEHOLDER |
+| v0 naval (5"/38 do USS Orleck) | **762 m/s** | **fonte** (D-61: navweaps, cano médio) |
+| Navio a 3 km da praia | — | PLACEHOLDER |
 | Resistência ao rolamento por chão (0,04–0,18) e eficiência de tração 0,6 | — | estimativa de engenharia |
 | Giro dos veículos (30°/s) e da torre | — | PLACEHOLDER |
 
@@ -1006,3 +1010,43 @@ Medido no Studio:
   - massa a 0,1 px do centro;
   - mão direita a 7 cm e esquerda a 3–11 cm;
   - autoteste 11/11 depois.
+
+## D-61 — Fontes para os PLACEHOLDER da F4 e subida do UH-34D (2026-11-10)
+Pesquisa na web em 2026-11-10. Cada número está no código com a fonte ao lado.
+- **UH-34D:** razão de subida de **1.100 ft/min** ao nível do mar (Sikorsky Archives, "S-58";
+  Army Aviation Magazine, "CH-34 Choctaw"; Patriots Point, "UH-34D Seahorse").
+  - Uma fonte (globalmilitary) dá 7,6 m/s. Ela destoa das outras três e não foi usada.
+  - Com a potência máxima contínua (1.275 hp), esse número dá um fator de subida de **1,03**:
+    quase todo o excesso de potência vira subida, como manda a conservação de energia. Com a de
+    decolagem daria 0,62, que não fecha. Por isso a calibração usa a contínua.
+  - **Regra:** a subida usa o fator do pairado (600 ft/min na vertical, D-38) parado e o do voo à
+    frente (1.100 ft/min) a partir da velocidade de potência mínima (51 nós), com transição linear
+    entre os dois.
+  - O corte de 8 m/s, sem fonte, virou uma rede de segurança de 20 m/s.
+  - **Resultado (teste `f4.luau`):** no peso bruto ao nível do mar, 600 e 1.100 ft/min. Sem
+    carga, na decolagem, o modelo chega a 15,5 m/s à frente.
+  - **Na vertical sem carga, 11,7 m/s:** a teoria do momento dá 11,4 m/s para a mesma carga
+    (conta à mão).
+  - **No Studio:** só o piloto, 30 °C e coletivo cheio: **10,6 m/s**. A velocidade real do
+    helicóptero foi 10,7 m/s, sem instabilidade.
+- **M48A3:** motor diesel AVDS-1790-2 de 750 hp (FAS DoD-101; afvdatabase).
+  - Blindagem do lado: 76 mm na frente e 51 mm atrás. O jogo tem uma zona só e usa 76 mm.
+  - Traseira: **44 mm**. Antes era 51 mm, sem fonte.
+  - Giro da torre: 24°/s (afvdatabase).
+  - O teto (25 mm) segue PLACEHOLDER: a fonte dá 25 mm para o piso.
+- **Ontos:** 13 mm no casco e na superestrutura, 6,5 mm no piso (tanks-encyclopedia).
+- **Penetração** (mm RHA):
+  - PG-2: 150–180 mm (wiki:RPG-2). Ficou o piso, 150 mm, e ele segue sem furar o glacis do M48;
+  - M28A2 3,5": ~11 pol., 280 mm (koreanwaronline; weaponsystems.net). Antes eram 250 mm;
+  - M344 106 mm: "mais de 400 mm" (wiki:M40_recoilless_rifle).
+- **Tiro naval:** na Starlite, o contratorpedeiro USS Orleck (5"/38) e o cruzador USS Galveston
+  (6"/47) cobriram o desembarque (história do USMC "The Landing and the Buildup"). O jogo usa o
+  5"/38: 2.500 ft/s, **762 m/s**, com o cano médio (navweaps; 2.600 com o cano novo). A distância
+  do navio segue PLACEHOLDER.
+- **Ainda sem fonte:**
+  - cargas incrementais dos morteiros;
+  - teto do M48;
+  - 90 mm HEAT;
+  - raios dos explosivos;
+  - distância do navio;
+  - giro dos veículos e da torre do Ontos.

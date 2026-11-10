@@ -260,8 +260,9 @@ Os 8 bugs encontrados foram corrigidos. **Reteste no Studio** (mesmo dia, relat�
 
 **F4 no Studio** (`testes/TESTE_F4_STUDIO_2026-11-10.md`):
 - M48A3 anda (~19 km/h aos 5 s, na areia);
-- UH-34D decola e voa, mas sobe a 8 m/s, que é o teto do código; falta calibrar a subida com pouca
-  carga;
+- UH-34D decola e voa. A subida tinha um corte de 8 m/s sem fonte; agora é calibrada na ficha
+  (600 ft/min na vertical e 1.100 ft/min à frente, D-61). No Studio, só com o piloto, ele sobe a
+  10,6 m/s;
 - o RPG-2 não fura o M48A3 de frente e fura de lado;
 - sem erros;
 - tiro naval, morteiro de 81 mm e Ontos funcionam;
@@ -366,5 +367,12 @@ em `testes/TESTE_ARTE_REAL_2026-11-10.md`.
 1. **Você:** item 2 de `TODO_USUARIO.md` (questionário de maturidade, servidores privados e
    preços). A experiência e a arte já estão publicadas.
 2. Teste com 2 ou mais jogadores (Local Server) e com controle → correções.
-3. Trocar os PLACEHOLDER da D-36 por fichas técnicas.
+3. Trocar os PLACEHOLDER que restam na D-36 por fichas técnicas. A D-61 já trocou blindagem,
+   penetração, tiro naval, torre do M48 e subida do UH-34D. Faltam:
+   - cargas dos morteiros;
+   - teto do M48;
+   - 90 mm HEAT;
+   - raios dos explosivos;
+   - distância do navio;
+   - giro dos veículos.
 4. F5: com o fps medido, ajustar `ArtBudget.SECTOR_MAX` e fazer a malha única por bloco (EditableMesh) para diques e lâminas.

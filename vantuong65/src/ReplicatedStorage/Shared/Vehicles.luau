@@ -39,7 +39,7 @@ Vehicles.SPECS = {
 		lengthM = 9.3, -- com o canhão
 		widthM = 3.65,
 		heightM = 3.1,
-		powerHp = 750, -- AVDS-1790-2 do M48A3: confirmar na ficha (D-36)
+		powerHp = 750, -- diesel Continental AVDS-1790-2 do M48A3 (FAS DoD-101; afvdatabase)
 		maxKmh = 48, -- 30 mph (valor da infobox para o M48A5)
 		seats = {
 			{ id = "driver", role = "tank_crew" },
@@ -50,15 +50,16 @@ Vehicles.SPECS = {
 		armor = {
 			front = { mm = 110, slopeDeg = 60, src = "wiki:M48_Patton (glacis 110 mm a 60°)" },
 			turret = { mm = 178, slopeDeg = 0, src = "wiki:M48_Patton (frente da torre)" },
-			side = { mm = 76, slopeDeg = 0, src = PH },
-			rear = { mm = 51, slopeDeg = 0, src = PH },
-			top = { mm = 25, slopeDeg = 0, src = PH },
+			-- lado: 76 mm na metade da frente e 51 mm na de trás; uma zona só, com o valor da frente
+			side = { mm = 76, slopeDeg = 0, src = "FAS DoD-101 M48 (lado 76 mm na frente, 51 mm atrás)" },
+			rear = { mm = 44, slopeDeg = 0, src = "FAS DoD-101 M48 (traseira 44 mm)" },
+			top = { mm = 25, slopeDeg = 0, src = PH .. " (o piso é 25 mm, FAS)" },
 		},
-		turretDegS = 24, -- PLACEHOLDER (giro hidráulico)
+		turretDegS = 24, -- giro hidráulico máximo 24°/s (afvdatabase M48)
 		src = {
 			massKg = "wiki:M48_Patton (M48: 49,6 ST)",
 			dims = "wiki:M48_Patton (9,3 x 3,65 x 3,1 m)",
-			powerHp = "D-36: a confirmar (infobox lista o motor por versão)",
+			powerHp = "FAS DoD-101 M48; afvdatabase (AVDS-1790-2, 750 hp)",
 			maxKmh = "wiki:M48_Patton (M48A5: 30 mph)",
 		},
 	},
@@ -79,10 +80,11 @@ Vehicles.SPECS = {
 			{ id = "loader", role = "tank_crew" },
 		},
 		armor = {
-			front = { mm = 13, slopeDeg = 0, src = PH },
-			side = { mm = 13, slopeDeg = 0, src = PH },
-			rear = { mm = 13, slopeDeg = 0, src = PH },
-			top = { mm = 13, slopeDeg = 0, src = PH },
+			-- 13 mm (0,5 pol.) no casco e na superestrutura; o piso tem 6,5 mm (tanks-encyclopedia M50)
+			front = { mm = 13, slopeDeg = 0, src = "tanks-encyclopedia M50 Ontos (13 mm)" },
+			side = { mm = 13, slopeDeg = 0, src = "tanks-encyclopedia M50 Ontos (13 mm)" },
+			rear = { mm = 13, slopeDeg = 0, src = "tanks-encyclopedia M50 Ontos (13 mm)" },
+			top = { mm = 13, slopeDeg = 0, src = "tanks-encyclopedia M50 Ontos (13 mm)" },
 		},
 		turretDegS = 30, -- PLACEHOLDER
 		src = { all = "wiki:M50_Ontos (8.600 kg; 3,83 x 2,59 x 2,13 m; 145 hp; 48 km/h; 3 tripulantes; 6 x M40A1C)" },
@@ -206,12 +208,13 @@ function Vehicles.penetrates(penMm: number, armor: Armor, extraDeg: number, u: n
 	return pen >= eff, pen / eff
 end
 
--- Munições contra blindagem (mm RHA). Todas PLACEHOLDER até a ficha técnica (D-36).
+-- Munições contra blindagem (mm RHA), com a fonte de cada uma (D-61). As fontes dão faixas; usamos
+-- o valor de referência mais citado e, no PG-2, o piso da faixa.
 Vehicles.PEN = {
-	pg2 = 150, -- RPG-2 (PG-2 HEAT)
-	rocket_35 = 250, -- bazuca M20 3,5 pol. (M28A2 HEAT)
-	heat_106 = 400, -- M40A1C, M344 HEAT
-	heat_90 = 280, -- 90 mm HEAT do M48A3
+	pg2 = 150, -- RPG-2 (PG-2 HEAT): 150–180 mm (wiki:RPG-2; weaponsystems.net)
+	rocket_35 = 280, -- bazuca M20 3,5 pol. (M28A2 HEAT): ~11 pol. de chapa homogênea (koreanwaronline; weaponsystems.net 280 mm)
+	heat_106 = 400, -- M40A1C, M344 HEAT: "mais de 400 mm" (wiki:M40_recoilless_rifle)
+	heat_90 = 280, -- 90 mm HEAT do M48A3: PLACEHOLDER (sem fonte)
 	he_90 = 40, -- 90 mm HE (efeito por estilhaço/sopro)
 	m60 = 8, -- 7,62 mm comum a curta distância
 	rpd = 8,

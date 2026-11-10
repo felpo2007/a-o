@@ -5,7 +5,11 @@
 -- contra números da ficha (wiki:Sikorsky_H-34, research/veiculos/...):
 --   - teto de pairar OGE 5.500 ft e IGE 9.600 ft (H-34A) → expoente de perda e potência de perfil;
 --   - velocidade máxima 122 mph → área plana equivalente f;
---   - subida vertical de 600 ft/min ao nível do mar → fator de subida.
+--   - subida vertical de 600 ft/min ao nível do mar → fator de subida no pairado;
+--   - razão de subida de 1.100 ft/min ao nível do mar (Sikorsky Archives, "S-58"; Army Aviation
+--     Magazine, "CH-34 Choctaw"; Patriots Point, "UH-34D Seahorse"), na potência máxima contínua
+--     → fator de subida em voo à frente, na velocidade de potência mínima. Entre as duas, o fator
+--     varia com a velocidade.
 local HeliModel = {}
 
 local G = 9.80665
@@ -27,6 +31,7 @@ HeliModel.SPEC = {
 	hoverOGEft = 5500,
 	hoverIGEft = 9600,
 	vClimbMs = 600 * FT / 60,
+	rocMs = 1100 * FT / 60, -- melhor razão de subida, nível do mar, peso bruto
 	-- suposições (D-38): altura do rotor no pairado IGE (cubo 4,36 m + 5 ft de roda), fator de
 	-- potência induzida e perdas de transmissão/rotor de cauda; velocidade de ponta da pá.
 	igeZ = 14.29 * FT + 5 * FT,
@@ -50,7 +55,7 @@ local function isa(hft: number): Atm
 	return HeliModel.atmosphere(15 - 0.0065 * h, h)
 end
 
-local cal = { n = 0.7, p0 = 300 * HP, f = 2.0, climbK = 1.0 }
+local cal = { n = 0.7, p0 = 300 * HP, f = 2.0, climbK = 1.0, climbKf = 1.0, vMinPower = 30 }
 
 function HeliModel.powerAvailable(atm: Atm, hp: number?): number
 	return (hp or HeliModel.SPEC.takeoffHp) * HP * atm.sigma ^ cal.n
@@ -128,9 +133,30 @@ do
 	-- subida vertical: Vc = climbK * excesso de potência / peso (ficha: 600 ft/min ao nível do mar)
 	local excess = HeliModel.powerAvailable(sl) - HeliModel.powerRequired(S.grossKg, 0, 1000, sl)
 	cal.climbK = S.vClimbMs / math.max(excess / W, 1e-6)
+	-- em voo à frente: a melhor subida sai na velocidade de potência mínima (ficha: 1.100 ft/min)
+	local best, vBest = math.huge, 0
+	for v = 0, S.maxSpeedMs, 0.25 do
+		local p = HeliModel.powerRequired(S.grossKg, v, 1000, sl)
+		if p < best then
+			best, vBest = p, v
+		end
+	end
+	cal.vMinPower = vBest
+	-- a razão publicada é na potência máxima contínua (1.275 hp): nela o fator sai ~1, como manda a
+	-- conservação de energia (todo o excesso vira subida); com a de decolagem sairia 0,62
+	cal.climbKf = S.rocMs / math.max((HeliModel.powerAvailable(sl, S.metoHp) - best) / W, 1e-6)
 end
 
-function HeliModel.calibration(): { n: number, p0: number, f: number, climbK: number }
+export type Calibration = {
+	n: number,
+	p0: number,
+	f: number,
+	climbK: number,
+	climbKf: number,
+	vMinPower: number,
+}
+
+function HeliModel.calibration(): Calibration
 	return table.clone(cal)
 end
 
@@ -149,10 +175,14 @@ function HeliModel.maxHoverKg(z: number, atm: Atm, hp: number?): number
 	return (lo + hi) / 2
 end
 
--- velocidade vertical sustentável (m/s) com a potência pedida (W); negativa = afunda
+-- velocidade vertical sustentável (m/s) com a potência pedida (W); negativa = afunda. O fator vai
+-- do pairado (600 ft/min na subida vertical) ao voo à frente (1.100 ft/min) até a velocidade de
+-- potência mínima. Antes o controle cortava a subida em 8 m/s, sem fonte.
 function HeliModel.climbRate(powerW: number, massKg: number, V: number, z: number, atm: Atm): number
 	local excess = powerW - HeliModel.powerRequired(massKg, V, z, atm)
-	return cal.climbK * excess / (massKg * G)
+	local t = math.clamp(V / math.max(cal.vMinPower, 1), 0, 1)
+	local k = cal.climbK + (cal.climbKf - cal.climbK) * t
+	return k * excess / (massKg * G)
 end
 
 -- fração do torque máximo (para o pedal): P/Ω contra o torque na potência de decolagem

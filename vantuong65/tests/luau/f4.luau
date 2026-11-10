@@ -199,8 +199,24 @@ test("UH-34D: calibração reproduz os tetos de pairar e a velocidade máxima da
 	near(HeliModel.powerRequired(h.grossKg, h.maxSpeedMs, 1000, sl), HeliModel.powerAvailable(sl), 500, "122 mph")
 	near(HeliModel.climbRate(HeliModel.powerAvailable(sl), h.grossKg, 0, 1000, sl), h.vClimbMs, 0.01, "600 ft/min")
 	local c = HeliModel.calibration()
+	-- razão de subida da ficha (1.100 ft/min) na potência máxima contínua, em voo à frente
+	local meto = HeliModel.powerAvailable(sl, h.metoHp)
+	near(HeliModel.climbRate(meto, h.grossKg, c.vMinPower, 1000, sl), h.rocMs, 0.01, "1.100 ft/min")
+	-- em voo à frente quase todo o excesso de potência vira subida (conservação de energia)
+	assert(c.climbKf > 0.9 and c.climbKf < 1.15, string.format("fator de subida à frente %.2f", c.climbKf))
+	-- sem carga e na potência de decolagem a subida segue abaixo da rede de segurança do controle (20 m/s)
+	local light = h.emptyKg + 400 + 100
+	assert(HeliModel.climbRate(HeliModel.powerAvailable(sl), light, c.vMinPower, 1000, sl) < 20, "rede de 20 m/s")
 	print(
-		string.format("       calibrado: expoente de perda %.2f, perfil %.0f hp, f = %.2f m²", c.n, c.p0 / 745.7, c.f)
+		string.format(
+			"       calibrado: expoente de perda %.2f, perfil %.0f hp, f = %.2f m², subida %.2f (pairado) e %.2f (à frente, %.0f nós)",
+			c.n,
+			c.p0 / 745.7,
+			c.f,
+			c.climbK,
+			c.climbKf,
+			c.vMinPower * 1.9438
+		)
 	)
 end)
 

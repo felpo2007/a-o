@@ -26,7 +26,9 @@ local lastTarget: { [Player]: { x: number, z: number } } = {}
 local MORTAR_OF = { us_mortar_81 = "us_81", vc_mortar_82 = "vc_82" }
 -- navio ao largo: 3 km a leste da praia (design, D-36), para tempo de voo e som distante
 local SHIP = { x = 5714.3 + 3000 / 0.28, z = -357.1 }
-local NAVAL_V = 760 -- m/s, PLACEHOLDER (sem ficha do canhão 5"/38 na pesquisa)
+-- 5"/38 Mark 12 (contratorpedeiro USS Orleck, que cobriu o desembarque na Starlite): 2.500 ft/s com
+-- o cano médio, 2.600 com o novo (navweaps WNUS_5-38_mk12). A distância do navio segue PLACEHOLDER.
+local NAVAL_V = 762 -- m/s
 
 local function reply(player: Player, msg: { [string]: any })
 	Net.event("Commander_State"):FireClient(player, msg)

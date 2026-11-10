@@ -220,7 +220,9 @@ local function heliStep(model: Model, chassis: BasePart, dt: number)
 	if hv.Magnitude > S.maxSpeedMs then
 		hv = hv.Unit * S.maxSpeedMs
 	end
-	heli.vel = Vector3.new(hv.X, math.clamp(climb, -10, 8), hv.Z)
+	-- a subida vem do modelo (calibrado em 600 e 1.100 ft/min, D-61); 20 m/s é só rede de segurança
+	-- (o modelo dá no máximo ~15,5 m/s, sem carga e na potência de decolagem). Antes: corte em 8 m/s.
+	heli.vel = Vector3.new(hv.X, math.clamp(climb, -10, 20), hv.Z)
 	local lv = chassis:FindFirstChild("DriveVelocity") :: LinearVelocity?
 	local ao = chassis:FindFirstChild("DriveAttitude") :: AlignOrientation?
 	if lv and ao then
