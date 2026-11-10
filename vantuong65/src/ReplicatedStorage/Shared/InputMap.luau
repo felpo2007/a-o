@@ -152,6 +152,9 @@ export type Settings = {
 	wheelToggle: boolean,
 	hapticFire: string,
 	hapticDamage: string,
+	fov: number, -- campo de visão base em graus (acessibilidade)
+	colorblind: string, -- "off" | "protan" | "deutan" | "tritan" (cor dos traçantes)
+	captions: boolean, -- legendas de som
 	remap: { [string]: string }, -- "ctx.actionId" -> KeyCode do controle
 }
 
@@ -179,6 +182,9 @@ InputMap.DEFAULTS = {
 	wheelToggle = false,
 	hapticFire = "normal",
 	hapticDamage = "normal",
+	fov = 70,
+	colorblind = "off",
+	captions = false,
 	remap = {},
 } :: Settings
 
@@ -195,12 +201,14 @@ local RANGES: { [string]: { number } } = {
 	sensAdsY = { 0.05, 4 },
 	sensScopeX = { 0.05, 4 },
 	sensScopeY = { 0.05, 4 },
+	fov = { 60, 90 },
 }
 local CHOICES: { [string]: { [string]: boolean } } = {
 	curve = { linear = true, exponential = true, dynamic = true },
 	aimAssist = { minimal = true, off = true },
 	hapticFire = { off = true, low = true, normal = true },
 	hapticDamage = { off = true, low = true, normal = true },
+	colorblind = { off = true, protan = true, deutan = true, tritan = true },
 }
 
 -- Saneia configurações vindas do cliente ou do DataStore (o servidor também chama).

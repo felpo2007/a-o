@@ -7,11 +7,14 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local SoundService = game:GetService("SoundService")
 
+local Accessibility = require(ReplicatedStorage.Shared.Accessibility)
 local AssetIds = require(ReplicatedStorage.Shared.AssetIds) :: any
 local Ballistics = require(ReplicatedStorage.Shared.Ballistics)
 local MapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any
 local Net = require(ReplicatedStorage.Shared.Net)
 local Weapons = require(ReplicatedStorage.Shared.Weapons)
+local Input = require(script.Parent.Input)
+local UiKit = require(script.Parent.UiKit)
 
 local player = Players.LocalPlayer
 local camera = workspace.CurrentCamera
@@ -21,6 +24,46 @@ local SND = AssetIds.Sounds
 local function sid(key: string): string?
 	local id = SND[key]
 	return if type(id) == "number" and id ~= 0 then "rbxassetid://" .. id else nil
+end
+
+-- ===== legendas de som (acessibilidade): aparecem quando o som chegaria, mesmo sem asset =====
+local capGui = UiKit.screen("VT65Captions", 15)
+local capList = Instance.new("Frame")
+capList.AnchorPoint = Vector2.new(0.5, 1)
+capList.Position = UDim2.new(0.5, 0, 1, -170)
+capList.Size = UDim2.fromOffset(640, 160)
+capList.BackgroundTransparency = 1
+capList.Parent = capGui
+local capLayout = Instance.new("UIListLayout")
+capLayout.VerticalAlignment = Enum.VerticalAlignment.Bottom
+capLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+capLayout.Parent = capList
+local lastCap: { [string]: number } = {}
+local function caption(key: string, what: string, pos: Vector3?, delay: number?)
+	if not Input.settings.captions then
+		return
+	end
+	local now = os.clock()
+	if (lastCap[key] or 0) > now - 1.5 then
+		return -- uma legenda por tipo de som a cada 1,5 s (rajada não vira parede de texto)
+	end
+	lastCap[key] = now
+	local d = if pos then (pos - camera.CFrame.Position) * M else Vector3.zero
+	local text = Accessibility.caption(what, d.X, d.Z)
+	task.delay(delay or 0, function()
+		local l = Instance.new("TextLabel")
+		l.Size = UDim2.fromOffset(640, if UiKit.tv() then 34 else 26)
+		l.BackgroundColor3 = Color3.new(0, 0, 0)
+		l.BackgroundTransparency = 0.35
+		l.TextColor3 = Color3.new(1, 1, 1)
+		l.Font = Enum.Font.GothamMedium
+		l.TextSize = UiKit.text(18)
+		l.Text = text
+		l.Parent = capList
+		task.delay(4, function()
+			l:Destroy()
+		end)
+	end)
 end
 
 -- som 3D num ponto do mundo (ou 2D se pos == nil)
@@ -232,6 +275,9 @@ Net.unreliable("Combat_Tracer").OnClientEvent:Connect(function(shot)
 	local listener = camera.CFrame.Position
 	local dM = (origin - listener).Magnitude * M
 	local delay = dM / Ballistics.SOUND
+	if dM < 2500 then
+		caption("shot:" .. wp.id, "Tiro de " .. (wp.name or wp.id), origin, delay)
+	end
 	if dM < 60 then
 		play(NEAR[wp.id] or "shot_mid", origin, 1.0, 1500, delay)
 	elseif dM < 300 then
@@ -247,6 +293,7 @@ Net.unreliable("Combat_Tracer").OnClientEvent:Connect(function(shot)
 		local tFlight = distM / math.max(wp.muzzleVelocity * 0.85, 1)
 		if closest < 8 and wp.muzzleVelocity > Ballistics.SOUND and distM > 15 then
 			play("crack", nil, math.clamp(1.2 - closest / 8, 0.3, 1.2), nil, tFlight)
+			caption("crack", "Bala passando perto", nil, tFlight)
 		end
 	end
 	-- impacto perto do ouvinte: refaz a trajetória com a mesma semente
@@ -297,12 +344,14 @@ Net.unreliable("Fire_Impact").OnClientEvent:Connect(function(e)
 	local dM = (pos - camera.CFrame.Position).Magnitude * M
 	if dM < 3000 then
 		play("explosion", pos, math.clamp(1.4 - dM / 2500, 0.3, 1.4), 3000 / M, dM / Ballistics.SOUND)
+		caption("explosion", "Explosão", pos, dM / Ballistics.SOUND)
 	end
 end)
 Net.unreliable("Fire_Incoming").OnClientEvent:Connect(function(e)
 	local pos = Vector3.new(e.x, e.y, e.z)
 	if (pos - camera.CFrame.Position).Magnitude * M < 400 then
 		play("incoming", pos, 1, 600 / M)
+		caption("incoming", "Assobio de granada chegando", pos)
 	end
 end)
 local LAUNCH: { [string]: string } = {
@@ -317,6 +366,11 @@ Net.unreliable("Fire_Launch").OnClientEvent:Connect(function(e)
 	local dM = (pos - camera.CFrame.Position).Magnitude * M
 	local k = LAUNCH[e.kind]
 	if k and dM < 6000 then
+		local what = if e.kind == "mortar"
+			then "Disparo de morteiro"
+			elseif e.kind == "naval" then "Tiro naval ao longe"
+			else "Disparo de canhão/foguete"
+		caption("launch:" .. e.kind, what, pos, dM / Ballistics.SOUND)
 		if e.kind == "naval" then
 			play(k, nil, 0.8, nil, dM / Ballistics.SOUND)
 		else

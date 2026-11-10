@@ -11,6 +11,8 @@ local InputMap = require(S .. "InputMap") :: any
 local Logistics = require(S .. "Logistics") :: any
 local Roles = require(S .. "Roles") :: any
 local Tutorial = require(S .. "Tutorial") :: any
+local Accessibility = require(S .. "Accessibility") :: any
+local AfterAction = require(S .. "AfterAction") :: any
 local ProfileSchema = require("../../src/ServerScriptService/Modules/ProfileSchema") :: any
 
 local passed, failed = 0, 0
@@ -221,6 +223,77 @@ test("perfil: configurações e tutorial sobrevivem ao load (antes as configura�
 	assert(again.settings.invertY == true and again.tutorial.rifleman, "migrar duas vezes perde dados")
 	local d = ProfileSchema.migrate("lixo")
 	assert(d.schema == 1 and d.settings == nil and next(d.tutorial) == nil)
+end)
+
+-- ===== acessibilidade (Parte 11) =====
+test("daltonismo: vermelho x verde histórico some na deuteranopia; a paleta de cada modo separa", function()
+	local h = Accessibility.TRACER.off
+	local bad = Accessibility.deltaE(h.US, h.VC, "deutan")
+	assert(bad < 30, string.format("esperava confusão (ΔE < 30), veio %.1f", bad))
+	for _, mode in Accessibility.MODES do
+		local pal = Accessibility.TRACER[mode]
+		local sim = if mode == "off" then "off" else mode
+		local d = Accessibility.deltaE(pal.US, pal.VC, sim)
+		local normal = Accessibility.deltaE(pal.US, pal.VC, "off")
+		assert(d >= 75 and normal >= 75, string.format("%s: ΔE %.1f (simulado) / %.1f (normal)", mode, d, normal))
+		print(string.format("       %-7s ΔE simulado %.0f, visão típica %.0f", mode, d, normal))
+	end
+end)
+
+test("acessibilidade: campo de visão, modo daltônico e legendas saneados", function()
+	local s = InputMap.validate({ fov = 200, colorblind = "roxo", captions = "sim" })
+	assert(s.fov == 90 and s.colorblind == "off" and s.captions == false)
+	s = InputMap.validate({ fov = 75, colorblind = "deutan", captions = true })
+	assert(s.fov == 75 and s.colorblind == "deutan" and s.captions == true)
+	assert(InputMap.validate(nil).fov == Accessibility.FOV_DEFAULT)
+end)
+
+test("legendas: direção e distância arredondada", function()
+	assert(Accessibility.direction(0, -100) == "norte" and Accessibility.direction(100, 0) == "leste")
+	assert(Accessibility.direction(0, 100) == "sul" and Accessibility.direction(-70, -70) == "noroeste")
+	assert(Accessibility.caption("Explosão", 5, 5) == "[Explosão, perto]")
+	assert(Accessibility.caption("Tiro de M14", 0, -312) == "[Tiro de M14, ~300 m a norte]")
+	assert(Accessibility.caption("Tiro naval ao longe", 2600, 0) == "[Tiro naval ao longe, ~2500 m a leste]")
+end)
+
+-- ===== relatório pós-ação (Parte 11) =====
+test("relatório: grupo data-hora de 1965 (fuso H = UTC+8) e virada do dia", function()
+	local r = AfterAction.new("Offensive", 6.5)
+	assert(AfterAction.dtg(r, 0) == "180630H AUG 65")
+	assert(AfterAction.dtg(r, 61) == "180631H AUG 65")
+	local n = AfterAction.new("Warfare", 23.5)
+	assert(AfterAction.dtg(n, 45 * 60) == "190015H AUG 65", AfterAction.dtg(n, 45 * 60))
+end)
+
+test("relatório: linha do tempo, baixas por setor e resultado", function()
+	local r = AfterAction.new("Offensive", 6.5)
+	AfterAction.event(r, 95, "neutralized", 4, "VC", "Túmulos da várzea")
+	AfterAction.event(r, 180, "captured", 4, "US", "Túmulos da várzea")
+	AfterAction.event(r, 180, "advanced", 3, "US", "An Cường (2)")
+	for _ = 1, 7 do
+		AfterAction.casualty(r, "VC", 4)
+	end
+	AfterAction.casualty(r, "US", 4)
+	AfterAction.casualty(r, "US", nil)
+	AfterAction.finish(r, "US", 3600, { "VC", "VC", "VC", "US", "US" })
+	local txt = table.concat(AfterAction.lines(r), "\n")
+	assert(string.find(txt, "180631H AUG 65  VC perde o controle de S4 %(Túmulos da várzea%)"), txt)
+	assert(string.find(txt, "180633H AUG 65  USMC toma S4"), txt)
+	assert(string.find(txt, "a frente passa para S3 %(An Cường %(2%)%)"), txt)
+	assert(string.find(txt, "USMC: 2    VC: 7"), txt)
+	assert(string.find(txt, "Combate mais pesado: S4 %(8 mortos%)"), txt)
+	assert(string.find(txt, "Vitória do USMC%. Duração: 60 min%."), txt)
+	assert(string.find(txt, "S3 VC · S4 USMC"), txt)
+end)
+
+test("relatório: cabe numa tela (linha do tempo limitada, com aviso)", function()
+	local r = AfterAction.new("Warfare", 12)
+	for i = 1, 100 do
+		AfterAction.event(r, i * 10, "captured", 3, if i % 2 == 0 then "US" else "VC")
+	end
+	local lines = AfterAction.lines(r)
+	assert(#lines <= AfterAction.MAX_ENTRIES + 20, "relatório longo demais: " .. #lines)
+	assert(string.find(table.concat(lines, "\n"), "40 registros anteriores omitidos"))
 end)
 
 print(string.format("%d ok, %d falhas", passed, failed))

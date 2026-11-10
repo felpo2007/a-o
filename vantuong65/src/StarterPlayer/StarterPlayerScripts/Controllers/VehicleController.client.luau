@@ -263,7 +263,7 @@ RunService.Heartbeat:Connect(function(dt: number)
 		if seatNow then
 			seatNow = nil
 			Input.setVehicle(nil, nil)
-			camera.FieldOfView = 70
+			camera.FieldOfView = Input.settings.fov
 		end
 		driving, yaw = nil, nil
 		drive.v = 0
@@ -285,7 +285,7 @@ RunService.Heartbeat:Connect(function(dt: number)
 	local target = if zoom == 2
 		then 10
 		elseif zoom == 1 then (if seat:GetAttribute("Weapon") == "m60" then 50 else 20)
-		else 70
+		else Input.settings.fov
 	camera.FieldOfView += (target - camera.FieldOfView) * math.min(1, dt * 8)
 	label.Visible = true
 	if seat:GetAttribute("SeatId") == "driver" then

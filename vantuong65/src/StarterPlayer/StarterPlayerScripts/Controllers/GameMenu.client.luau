@@ -8,6 +8,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UserInputService = game:GetService("UserInputService")
 
+local Accessibility = require(ReplicatedStorage.Shared.Accessibility)
 local InputMap = require(ReplicatedStorage.Shared.InputMap)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Bus = require(script.Parent.Bus)
@@ -179,6 +180,14 @@ local function render()
 			choiceRow("Mirar", "aimToggle", { false, true }, { "segurar", "alternar" })
 			choiceRow("Correr", "sprintToggle", { true, false }, { "alternar", "segurar (teclado)" })
 			choiceRow("Rodas radiais", "wheelToggle", { false, true }, { "segurar", "alternar" })
+			numberRow("Campo de visão (graus)", "fov", 5, "%d")
+			choiceRow("Modo daltônico (traçantes)", "colorblind", Accessibility.MODES, {
+				Accessibility.MODE_NAMES.off,
+				Accessibility.MODE_NAMES.protan,
+				Accessibility.MODE_NAMES.deutan,
+				Accessibility.MODE_NAMES.tritan,
+			})
+			choiceRow("Legendas de som", "captions", { false, true }, { "desligadas", "ligadas" })
 			row("Restaurar padrões", function()
 				Input.setSettings(nil)
 			end)

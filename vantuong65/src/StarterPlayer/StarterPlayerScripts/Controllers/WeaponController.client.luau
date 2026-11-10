@@ -8,6 +8,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
+local Accessibility = require(ReplicatedStorage.Shared.Accessibility)
 local AssetIds = require(ReplicatedStorage.Shared.AssetIds)
 local Ballistics = require(ReplicatedStorage.Shared.Ballistics)
 local Net = require(ReplicatedStorage.Shared.Net)
@@ -113,6 +114,12 @@ end)
 local tracerFolder = Instance.new("Folder")
 tracerFolder.Name = "VT65Tracers"
 tracerFolder.Parent = workspace
+-- cor do traçante pela facção da arma e pelo modo daltônico do jogador (Accessibility)
+local function tracerColor(faction: string): Color3
+	local c = Accessibility.tracer(faction, Input.settings.colorblind)
+	return Color3.fromRGB(c[1], c[2], c[3])
+end
+
 local function tracer(shot: any, color: Color3)
 	local pts: { Vector3 } = {}
 	local params = RaycastParams.new()
@@ -154,7 +161,7 @@ Net.unreliable("Combat_Tracer").OnClientEvent:Connect(function(shot)
 	local wp = Weapons.get(shot.w)
 	-- só metralhadoras com traçante (proporção real das fitas a confirmar: PLACEHOLDER 1 em 5)
 	if wp and wp.kind == "mg" and shot.seed % 5 == 0 then
-		tracer(shot, if wp.faction == "US" then Color3.fromRGB(255, 80, 60) else Color3.fromRGB(90, 255, 120))
+		tracer(shot, tracerColor(wp.faction))
 	end
 end)
 
@@ -244,7 +251,7 @@ local function fire()
 	Net.event("Combat_Fire"):FireServer(shot)
 	playId(SHOT_SOUND[wp.id] or 0, 0.8)
 	if wp.kind == "mg" and seed % 5 == 0 then
-		tracer(shot, if wp.faction == "US" then Color3.fromRGB(255, 80, 60) else Color3.fromRGB(90, 255, 120))
+		tracer(shot, tracerColor(wp.faction))
 	end
 	-- recuo físico aproximado: impulso do projétil e dos gases (~1,5x) contra a massa da arma.
 	-- PLACEHOLDER de escala; padrão aleatório com tendência por semente (Parte 10.3)
@@ -375,7 +382,9 @@ RunService.RenderStepped:Connect(function(dt: number)
 	Input.aimMode = if binoculars then "scope" elseif aiming then "ads" else "hip"
 	if not seated() then
 		-- mira: levar ao ombro leva tempo proporcional ao peso (Parte 10.4); binóculo 7x ≈ 10°
-		local target = if binoculars then 10 elseif aiming then 55 else 70
+		-- FOV base ajustável (acessibilidade); a mira aproxima na mesma proporção (55/70)
+		local base = Input.settings.fov
+		local target = if binoculars then 10 elseif aiming then base * 55 / 70 else base
 		local speed = if wp then 10 / math.max(wp.massLoadedKg, 1) else 4
 		camera.FieldOfView += (target - camera.FieldOfView) * math.min(1, dt * speed)
 	end

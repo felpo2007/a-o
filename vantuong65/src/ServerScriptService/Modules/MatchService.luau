@@ -1,10 +1,13 @@
 --!strict
 -- Partida Warfare/Offensive/Skirmish: sorteio dos pontos fortes, captura, tempo e vitória (Parte 4).
 -- Servidor público alterna Warfare e Offensive; o privado fica no modo escolhido pelo dono.
+local Lighting = game:GetService("Lighting")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
+local AfterAction = require(ReplicatedStorage.Shared.AfterAction)
 local Capture = require(ReplicatedStorage.Shared.Capture)
+local Geometry = require(ReplicatedStorage.Shared.Geometry)
 local MapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any
 local Net = require(ReplicatedStorage.Shared.Net)
 local Offensive = require(ReplicatedStorage.Shared.Offensive)
@@ -23,6 +26,7 @@ MatchService.capturedAt = {} :: { [number]: number }
 MatchService.initialOwner = {} :: { [number]: string }
 MatchService.ended = false
 MatchService.offensive = nil :: Offensive.State?
+MatchService.report = nil :: AfterAction.Report? -- relatório pós-ação da partida em curso
 MatchService.rotation = { "Warfare", "Offensive" }
 local pendingMode: string? = nil
 local fixedMode = false -- servidor privado: o dono escolheu o modo
@@ -83,6 +87,7 @@ function MatchService.newMatch(mode: string?)
 	MatchService.waveEpoch = MatchService.startedAt
 	MatchService.ended = false
 	showMarkers()
+	MatchService.report = AfterAction.new(MatchService.mode, Lighting.ClockTime)
 	ReplicatedStorage:SetAttribute("MatchMode", MatchService.mode)
 end
 
@@ -145,11 +150,17 @@ local function publish()
 		timeLeft = math.max(0, limitSeconds() - (os.clock() - MatchService.startedAt)),
 		ended = MatchService.ended,
 		front = if MatchService.offensive then MatchService.offensive.front else nil,
+		-- relatório pós-ação: só no fim (texto pronto, ~70 linhas no máximo)
+		report = if MatchService.ended and MatchService.report then AfterAction.lines(MatchService.report) else nil,
 	})
 end
 
 local function endMatch(winner: string)
 	MatchService.ended = true
+	local st = MatchService.state
+	if MatchService.report and st then
+		AfterAction.finish(MatchService.report, winner, os.clock() - MatchService.startedAt, st.owner)
+	end
 	ReplicatedStorage:SetAttribute("LastWinner", winner)
 	publish()
 	task.delay(30, function()
@@ -159,6 +170,20 @@ end
 
 function MatchService.start()
 	MatchService.newMatch("Warfare")
+	-- baixas para o relatório: cada morte conta no setor onde aconteceu
+	Combatants.Added:Connect(function(e: any)
+		local hum = Combatants.humanoid(e)
+		if not hum then
+			return
+		end
+		hum.Died:Once(function()
+			local rep, root = MatchService.report, Combatants.root(e)
+			if rep and not MatchService.ended and (e.faction == "US" or e.faction == "VC") then
+				local s = if root then Geometry.sectorAt(MapConfig.Sectors, root.Position.X, root.Position.Z) else nil
+				AfterAction.casualty(rep, e.faction, s)
+			end
+		end)
+	end)
 	task.spawn(function()
 		while true do
 			task.wait(1)
@@ -169,7 +194,19 @@ function MatchService.start()
 				local events: { Offensive.Event } = if o
 					then Offensive.step(o, lastCounts, 1)
 					else Capture.step(st, lastCounts, 1) :: any
+				local rep = MatchService.report
 				for _, ev in events do
+					if rep then
+						local sp = MatchService.points[ev.sector]
+						AfterAction.event(
+							rep,
+							os.clock() - MatchService.startedAt,
+							ev.kind,
+							ev.sector,
+							ev.team,
+							sp and sp.name
+						)
+					end
 					if ev.kind == "captured" then
 						MatchService.capturedAt[ev.sector] = os.clock()
 					elseif ev.kind == "advanced" then
