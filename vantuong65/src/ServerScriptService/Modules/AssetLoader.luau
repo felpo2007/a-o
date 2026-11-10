@@ -26,11 +26,12 @@ AssetLoader.SECTOR_TRI_BUDGET = ArtBudget.SECTOR_MAX
 type HedgeJob = { part: BasePart, key: string, n: number, sector: number }
 local sectorTris: { [number]: number } = {}
 local sectorCount: { [number]: number } = {}
--- Impostor à distância (Model.LevelOfDetail = StreamingMesh) nas peças grandes: hut_thatch,
--- hut_veranda, hut_kitchen, house_tile, hill_tree, coconut_palm, granary e vc_bunker. Script do
--- jogo NÃO pode ligar isso ("lacking capability PluginOrOpenCloud", conferido no Studio em
--- 2026-11-10; o luau-lsp acusou): tem de vir marcado no próprio modelo, no Studio ou no upload
--- pelo Open Cloud (D-57). Antes este arquivo tentava ligar em tempo de jogo e daria erro no
+-- Detalhe à distância (Model.LevelOfDetail = SLIM; o StreamingMesh é o valor antigo) nas peças
+-- grandes: hut_thatch, hut_veranda, hut_kitchen, house_tile, hill_tree, coconut_palm, granary e
+-- vc_bunker. Script do jogo NÃO pode ligar isso ("lacking capability PluginOrOpenCloud", conferido
+-- no Studio em 2026-11-10; o luau-lsp acusou). E, pela documentação do SLIM, ele só vale para
+-- modelos estáticos de um place publicado, não para modelos inseridos ou mudados em tempo de jogo,
+-- como os deste arquivo (D-57). Antes este arquivo tentava ligar em tempo de jogo e daria erro no
 -- carregamento da arte assim que os IDs fossem publicados.
 -- Quanto (m) a base do modelo fica abaixo do chão: a entrada do túnel tem ~0,3 m de poço sob a
 -- moldura; a trincheira apoia no fundo da vala já escavada no terreno (TRENCH_D_M).

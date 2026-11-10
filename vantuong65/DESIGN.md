@@ -918,10 +918,20 @@ Medido no Studio:
   PluginOrOpenCloud)". O trecho só roda com a arte publicada. No dia em que os IDs saíssem do 0, o
   carregamento da arte quebraria. O luau-lsp acusou, porque a propriedade não existe nas definições
   para scripts do jogo.
-- **Regra:** o impostor tem de vir marcado no próprio modelo, no Studio ou no upload pelo Open
-  Cloud. Vale para hut_thatch, hut_veranda, hut_kitchen, house_tile, hill_tree, coconut_palm,
-  granary e vc_bunker. O script só põe `ModelStreamingMode = Atomic`.
-  - **Pendente:** o `tools/roblox_cloud.py` ainda não marca o `LevelOfDetail` no upload.
+- **Regra:** o script só põe `ModelStreamingMode = Atomic`.
+- **O que a documentação do Roblox diz** (páginas Model, Streaming e SLIM, lidas em 2026-11-10):
+  - o detalhe à distância agora é o SLIM (`LevelOfDetail = SLIM`; o `StreamingMesh` é o valor
+    antigo), ligado modelo a modelo;
+  - os dados são gerados "on first publish or play", num place publicado, com StreamingEnabled;
+  - "Static models only": não vale para modelos mudados em tempo de jogo;
+  - não diz nada sobre modelos inseridos com `InsertService:LoadAsset`.
+- **Consequência:** marcar o SLIM no upload pelo `tools/roblox_cloud.py` não resolve, porque a
+  arte é inserida e posicionada em tempo de jogo. Para ter SLIM nas peças grandes (hut_thatch,
+  hut_veranda, hut_kitchen, house_tile, hill_tree, coconut_palm, granary, vc_bunker), elas teriam
+  de estar fixas no place publicado. O caminho seria uma etapa de "assar a arte" no Studio, que
+  tem a permissão de plugin, antes de publicar.
+  - **Decisão pendente:** essa etapa muda o fluxo de publicação. Ela só pode ser testada com os
+    IDs de arte publicados.
 - **Também corrigido:** o `PostureController` podia passar `nil` ao `IKControl`; o
   `WeaponController` tinha uma variável sem uso e o `Bus` declarado duas vezes.
 - **Resultado:** luau-lsp com 0 erros e 0 avisos em `src/`.
