@@ -71,8 +71,32 @@ function AssetLoader.template(key: string): Model?
 			d.Anchored = true
 		end
 	end
+	if Weapons.get(key) and GunModel.fit(tpl, key) then
+		-- cópia para a arma em primeira pessoa (cliente, WeaponVisuals)
+		local shared = ReplicatedStorage:FindFirstChild("VT65WeaponArt")
+		if not shared then
+			shared = Instance.new("Folder")
+			shared.Name = "VT65WeaponArt"
+			shared.Parent = ReplicatedStorage
+		end
+		local copy = tpl:Clone()
+		copy.Name = key
+		copy.Parent = shared
+	end
 	cache[key] = tpl
 	return tpl
+end
+
+-- Modelo da arma, com pivô no punho e boca em −Z: o publicado (já preparado por GunModel.fit) ou,
+-- sem asset, o provisório. Peças soltas; quem usa decide ancorar ou soldar.
+function AssetLoader.weaponModel(weaponId: string, kind: string?): Model
+	local tpl = AssetLoader.template(weaponId)
+	if tpl and tpl.PrimaryPart then
+		local m = tpl:Clone()
+		m.Name = "Weapon"
+		return m
+	end
+	return GunModel.build(weaponId, kind)
 end
 
 -- Altura do chão: o maior de 5 raios (centro e ±0,8 m), para que poços de túnel e a vala da
@@ -293,11 +317,6 @@ function AssetLoader.start()
 	print("[VT65] arte carregada:", #out:GetChildren(), "modelos")
 end
 
--- Eixo longo de cada GLB preparado: quase todos em Z; o RPG-2 veio em X (manifest dim_studs_xyz).
-local WEAPON_TURN: { [string]: CFrame } = {
-	rpg2 = CFrame.Angles(0, math.pi / 2, 0),
-}
-
 -- Arma visível na mão direita (todos veem). Sem asset publicado, usa a provisória (Shared/GunModel):
 -- antes ninguém aparecia armado. Troca a anterior (arma do inimigo pega do chão).
 function AssetLoader.attachWeapon(model: Model, weaponId: string)
@@ -310,21 +329,25 @@ function AssetLoader.attachWeapon(model: Model, weaponId: string)
 	if old then
 		old:Destroy()
 	end
-	local tpl = AssetLoader.template(weaponId)
-	local w = if tpl then tpl:Clone() else GunModel.build(weaponId, wp.kind)
+	-- a arma publicada chega aninhada (Model > Model > Model > MeshPart) e centrada na caixa; antes
+	-- ela nunca aparecia (a busca da peça não era recursiva) e, se aparecesse, ficaria atravessada.
+	-- weaponModel devolve já com pivô no punho e boca em −Z (teste com a arte publicada, 2026-11-10)
+	local w = AssetLoader.weaponModel(weaponId, wp.kind)
 	for _, d in w:GetDescendants() do
 		if d:IsA("BasePart") then
 			d.Anchored = false
 			d.CanCollide = false
 			d.CanQuery = false
+			d.CanTouch = false
+			d.CastShadow = false
 			d.Massless = true
 		end
 	end
-	local primary = w.PrimaryPart or w:FindFirstChildWhichIsA("BasePart")
+	local primary = w.PrimaryPart
 	if not primary then
 		return
 	end
-	w:PivotTo(hand.CFrame * CFrame.Angles(-math.pi / 2, 0, 0) * (WEAPON_TURN[weaponId] or CFrame.identity))
+	w:PivotTo(hand.CFrame * CFrame.Angles(-math.pi / 2, 0, 0))
 	for _, d in w:GetDescendants() do
 		if d:IsA("BasePart") and d ~= primary then
 			local weld = Instance.new("WeldConstraint")

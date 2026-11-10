@@ -280,6 +280,19 @@ ao `build/`: 113 scripts e 30.199 instâncias.
 - **Bots deixam a arma ao morrer:** antes só os jogadores deixavam, e numa partida com bots quase
   não havia arma do inimigo para pegar.
 
+## Teste com a arte publicada (2026-11-10, D-58 e D-59)
+São 82 assets publicados pelo Open Cloud. O place da nuvem foi aberto no Studio, e o relatório está
+em `testes/TESTE_ARTE_REAL_2026-11-10.md`.
+- **Autoteste: 11 ok, 0 falhas, 0 pulados.** É o primeiro sem pulados: 141 animais nas vilas.
+- **fps no Studio, com a arte:** 59 a 60 nos 5 setores. Cada setor tem ~2,4–2,5 milhões de
+  triângulos e ~1.000 modelos.
+- **Corrigido:**
+  - a arma real não aparecia;
+  - as armas reais ganharam pontos de boca, mira e mãos, gerados dos GLB (`tools/weapon_landmarks.py`);
+  - a mão esquerda não alcançava a arma (nova pega: 7 e 11 cm em pé, 8 e 10 cm deitado);
+  - o búfalo e a galinha não tinham sido publicados;
+  - animais e veículos andariam de ré, porque o importador gira o modelo 180°.
+
 ## Resultados-chave (medidos aqui)
 | Medida | Valor |
 |---|---|
@@ -315,8 +328,8 @@ ao `build/`: 113 scripts e 30.199 instâncias.
   exige um teste com jogadores no Studio ou num servidor publicado.
 - As compras só funcionam com os IDs criados no Creator Dashboard. Com IDs em 0, a loja esconde os
   itens.
-- Os modelos e sons do ForgeGUI ainda precisam de import e upload pelo Studio. Depois, os IDs vão em
-  `Shared/AssetIds.luau`.
+- Com a arte real, só a M14 foi conferida na mão, em primeira pessoa e mirando. Nas outras 8
+  armas, os pontos foram conferidos no modelo (D-58).
 
 ## Como testar no Studio
 1. Abra `vantuong65/place/VanTuong65.rbxl`.
@@ -347,8 +360,8 @@ ao `build/`: 113 scripts e 30.199 instâncias.
 5. O repositório próprio depende de você criar um repositório vazio (D-18).
 
 ## Próximos passos
-1. **Você:** itens 1 e 2 de `TODO_USUARIO.md` (experiência + chave Open Cloud). Com eles, eu publico
-   tudo sozinho.
-2. Seu teste no Studio (F1–F4) → correções.
+1. **Você:** item 2 de `TODO_USUARIO.md` (questionário de maturidade, servidores privados e
+   preços). A experiência e a arte já estão publicadas.
+2. Teste com 2 ou mais jogadores (Local Server) e com controle → correções.
 3. Trocar os PLACEHOLDER da D-36 por fichas técnicas.
 4. F5: com o fps medido, ajustar `ArtBudget.SECTOR_MAX` e fazer a malha única por bloco (EditableMesh) para diques e lâminas.

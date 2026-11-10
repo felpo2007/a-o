@@ -4,40 +4,15 @@ Fiz sozinho tudo o que não depende da sua conta Roblox, de dinheiro, de decisã
 Studio. A lista abaixo segue a ordem de prioridade. O que está em **negrito** destrava a maior parte
 do resto.
 
-## 1. **Criar a experiência e me dar acesso de publicação** (10 min)
-1. Em create.roblox.com → Creations, crie uma experiência vazia ("New Experience").
-2. Anote três números, que não são segredo:
-   - **universeId** (Experience ID);
-   - **placeId** (Start Place);
-   - seu **userId**.
-
-   Copie `cloud.example.json` para `cloud.json` e preencha, ou me mande os números no chat.
-3. Em create.roblox.com → Open Cloud → API Keys → **Create API Key**. Dê só estas permissões, e só
-   para essa experiência:
-   - Assets: `asset:read`, `asset:write`;
-   - Universe Places / Place Publishing: `universe-places:write`;
-   - Game Passes: `game-pass:read`, `game-pass:write`;
-   - Developer Products: `developer-product:read`, `developer-product:write`;
-   - opcional: Luau Execution (`universe.place.luau-execution-session:write`), para eu rodar
-     testes no servidor do Roblox.
-
-   Ponha data de expiração. Restrição de IP: deixe em branco, porque o IP da sessão muda.
-4. **Estado em 2026-11-10:** uma chave foi salva no ambiente (segredo de rede de
-   `apis.roblox.com`), mas a Roblox respondeu **401 "Invalid API Key"** em dois testes, com 1 min de
-   intervalo. Confira três coisas:
-   - a chave foi copiada inteira;
-   - ela está ativa e dentro da validade;
-   - o tipo é chave Open Cloud, não cookie nem token OAuth.
-
-   Para trocar: menu do ambiente na barra de título da sessão → Edit → Network secrets.
-5. **A chave nunca vai no chat nem no Git.** Quando eu pedir, um formulário seguro aparece. Cole a
-   chave lá: ela fica no ambiente e o proxy a injeta nas chamadas a apis.roblox.com.
-
-Com isso eu rodo `tools/roblox_cloud.py all`, que faz quatro coisas:
-- sobe os 79 assets (sons, modelos e roupas);
-- preenche `AssetIds.luau`;
-- cria os 4 passes e os 2 produtos de apoio;
-- publica o place.
+## 1. ~~Criar a experiência e me dar acesso de publicação~~ (feito em 2026-11-10)
+- A experiência foi criada, e os números estão em `cloud.json`.
+- A chave Open Cloud está no `.env` e funciona. **A chave nunca vai no chat nem no Git.**
+- 82 assets estão publicados: sons, modelos, roupas e os animais. O place foi publicado.
+- Falta criar os 4 passes e os 2 produtos de apoio (`tools/roblox_cloud.py create-store`). Isso
+  só quando você decidir os preços (`MONETIZATION.md`).
+- Para ver os testes salvando perfil no Studio: Game Settings → Security → **Enable Studio Access
+  to API Services**. Sem isso o Output avisa "Studio access to APIs is not allowed" e o perfil não
+  salva no Studio. No jogo publicado não muda nada.
 
 ## 2. Configurações que o Roblox só deixa o dono fazer (15 min)
 Textos prontos e imagens: **`LANCAMENTO.md`** (página do jogo, guia do questionário e beta).
@@ -91,8 +66,8 @@ Features de lançamento (D-48). Confira no Studio:
 - **Medevac:** pouse o UH-34D a até 15 m de um ferido caído.
 - **Armadilhas VC:** sapador VC → roda de equipamento → Construir → estacas ou granada com fio.
   Depois, como engenheiro EUA, chegue agachado perto: deve aparecer "Armadilha à vista".
-- **Animais:** atire perto de uma vila. Se o búfalo andar de ré, troque o sinal em
-  `AnimalService.FACE_YAW`.
+- **Animais:** atire perto de uma vila: eles devem fugir. A frente do búfalo e da galinha já foi
+  conferida no Studio (D-58).
 
 Roteiro da F4:
 1. Escolha EUA → papel *Tripulante de blindado* → sente no M48A3 (W/S/A/D) e no LVTP-5 (entre na
@@ -105,8 +80,8 @@ Roteiro da F4:
    82 mm.
 5. Escolha *Antitanque* (VC) → **Z** dispara o RPG-2 contra o M48. Pela frente não deve furar;
    pelo lado, sim.
-6. Se a arte de um veículo aparecer de ré (o canhão para trás), troque `math.rad(90)` por
-   `math.rad(-90)` em `ART_YAW` (`VehicleService.luau`). O ForgeGUI não informa a frente do modelo.
+6. A frente da arte dos 4 veículos já foi conferida no Studio (D-58: `ART_YAW` = −90°). Diga se
+   algum ainda parecer de ré.
 
 ### Controle (Parte 12): só com controle real
 Jogue **3 partidas inteiras só com controle**, sem tocar no mouse nem no teclado, passando por:

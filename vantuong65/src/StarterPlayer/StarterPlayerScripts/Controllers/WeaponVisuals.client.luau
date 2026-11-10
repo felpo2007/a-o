@@ -36,11 +36,21 @@ local aimT = 0 -- 0 = quadril, 1 = ombro
 local kick = 0 -- recuo visual, volta em ~0,15 s
 local bobT = 0
 
+-- arma publicada já preparada pelo servidor (AssetLoader → GunModel.fit), se houver
+local function artFor(id: string): Model?
+	local folder = ReplicatedStorage:FindFirstChild("VT65WeaponArt")
+	local tpl = folder and folder:FindFirstChild(id)
+	return if tpl and tpl:IsA("Model") and tpl.PrimaryPart then tpl else nil
+end
+
 local function setView(id: string?)
-	if id == viewId then
+	-- a chave inclui "arte": se o modelo publicado chegar depois, a provisória é trocada
+	local art = if id then artFor(id) else nil
+	local key = if id then id .. (if art then ":arte" else "") else nil
+	if key == viewId then
 		return
 	end
-	viewId = id
+	viewId = key
 	if view then
 		view:Destroy()
 		view = nil
@@ -49,13 +59,18 @@ local function setView(id: string?)
 	if not (id and wp) then
 		return
 	end
-	local m = GunModel.build(id, wp.kind)
+	local m = if art then art:Clone() else GunModel.build(id, wp.kind)
+	m:PivotTo(CFrame.identity)
 	local primary = m.PrimaryPart :: BasePart
 	local sight = primary:FindFirstChild("Sight") :: Attachment?
-	viewSight = if sight then sight.WorldPosition else Vector3.zero -- a arma ainda está na origem
+	viewSight = if sight then sight.WorldPosition else Vector3.zero -- a arma está na origem (punho)
 	for _, d in m:GetDescendants() do
 		if d:IsA("BasePart") then
 			d.Anchored = true
+			d.CanCollide = false
+			d.CanQuery = false
+			d.CanTouch = false
+			d.CastShadow = false
 		end
 	end
 	m.Parent = camera

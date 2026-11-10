@@ -60,17 +60,19 @@ O `sourcemap.json` não vai para o Git.
   os ganchos acima ou observe por atributos e remotes.
 - Relatórios de teste ficam em `testes/`.
 
-## Assets no Roblox (o bloqueio atual)
-- `src/ReplicatedStorage/Shared/AssetIds.luau` está com os IDs em 0, então a arte não carrega.
-- **Caminho 1:** chave Open Cloud válida no `.env` (`ROBLOX_API_KEY`, nunca no Git) e
-  `cloud.json` (copie de `cloud.example.json`). Depois rode
-  `uv run --env-file .env python tools/roblox_cloud.py all`:
-  ele sobe tudo, inclusive os modelos já reduzidos, e preenche os IDs. A chave anterior dava 401
-  "Invalid API Key".
-- **Caminho 2:** ForgeGUI → Roblox (`artifact_publish`), que exige uma "Personal connection" em
-  forgegui.com/forge-mcp. Ele só publica os arquivos do ForgeGUI: os 11 modelos reduzidos
-  localmente (ver `manifest.json`, campo `reducao_local`) subiriam pesados. Deixe esses para o
-  caminho 1.
+## Assets no Roblox (publicados em 2026-11-10)
+- 82 assets publicados; os IDs estão em `Shared/AssetIds.luau` e `assets/roblox_ids.json`. Faltam
+  só `uh34d_loop` e os 4 ícones de passe.
+- Para subir mais: ponha no `assets/upload_plan.json` e rode
+  `uv run --env-file .env python tools/roblox_cloud.py upload-assets`. O script lê
+  `ROBLOX_API_KEY` do ambiente, não do arquivo: sem `--env-file` a resposta é 401. Ele sobe só o
+  que falta.
+- O importador do Roblox gira cada GLB 180° em Y (D-58). Frente de modelo se confere no Studio,
+  não no GLB.
+- Arma nova: acrescente em `tools/weapon_landmarks.py` (frente e frações das mãos, vistas numa
+  captura) e rode-o para regenerar `Shared/WeaponArt.luau`.
+- O place da nuvem abre no Studio com
+  `roblox-studio:1+task:EditPlace+placeId:125635672454807+universeId:10775697296`.
 
 ## Regras
 - Nunca invente número: todo valor medido sai de código executado ou do Studio. Diga o que não
@@ -79,7 +81,7 @@ O `sourcemap.json` não vai para o Git.
 - Segredos só no `.env` (no `.gitignore`), nunca no código nem no chat.
 - ForgeGUI: nunca regenerar um job em `outcome_unknown`. "failed" com `retryable` pode ser
   retomado com `generation_retry`.
-- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-58) e atualize `PROGRESS.md`.
+- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-60) e atualize `PROGRESS.md`.
 - Metas da Parte 2: vegetação ≤ 3 mil triângulos, props ≤ 5 mil, herói ≤ 20 mil (`ArtBudget`,
   conferido pelo teste da F5).
 - Commits no branch acima, com mensagem em português.

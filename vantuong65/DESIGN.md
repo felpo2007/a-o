@@ -935,3 +935,44 @@ Medido no Studio:
 - **Também corrigido:** o `PostureController` podia passar `nil` ao `IKControl`; o
   `WeaponController` tinha uma variável sem uso e o `Bus` declarado duas vezes.
 - **Resultado:** luau-lsp com 0 erros e 0 avisos em `src/`.
+
+## D-58 — Arte publicada: o importador gira 180° e a arma ganha pontos (2026-11-10)
+- **Fato medido no Studio:** o importador do Roblox gira cada GLB 180° em Y. No MeshPart, x e z
+  trocam de sinal. O tamanho é o mesmo (M14: 0,316 × 1,165 × 4,021 studs no Studio e
+  0,32 × 1,16 × 4,02 no GLB).
+  - Conferido em três casos: o punho das pistolas, a ogiva do RPG-2 e a cabeça dos animais.
+  - Todo ângulo medido no GLB precisa desse giro.
+- **Regra para frente de modelo:** conferir no Studio, com captura e uma marca em −Z, e não no GLB.
+  - Veículos: `ART_YAW` = −90° (a frente está em −X).
+  - Animais: búfalo −90°, galinha 0.
+  - Os palpites antigos (+90° e 180°) punham todos andando de ré.
+- **Armas:** o modelo publicado chega centrado na caixa, aninhado e sem pontos.
+  - `tools/weapon_landmarks.py` lê os GLB e gera `Shared/WeaponArt.luau` com:
+    - a frente;
+    - a boca: mediana dos vértices em 1,5% do comprimento;
+    - a linha de visada: topo da massa de mira;
+    - o punho e o apoio: frações do comprimento medidas nas capturas, abaixo da linha do cano.
+  - Estatística de vértices não serve para as mãos: a bandoleira, o bipé e o tambor puxam a média,
+    e o meio de um tubo reto nem tem vértice.
+  - `GunModel.fit` põe o pivô no punho, a boca em −Z e os 4 Attachments: a mesma convenção da arma
+    provisória. Por isso o resto do código (IK, clarão, traçante, mira e arma caída) não mudou.
+  - O servidor publica uma cópia preparada em `ReplicatedStorage.VT65WeaponArt` para a arma em
+    primeira pessoa.
+- **Animais:** o búfalo e a galinha estavam fora do plano de upload. Agora estão em
+  `assets/upload_plan.json` e no `AssetIds`: 82 assets publicados.
+- Relatório: `testes/TESTE_ARTE_REAL_2026-11-10.md`.
+
+## D-59 — Alcance do braço e pega da arma (2026-11-10)
+- **Medido:** o IK do braço (avatar com juntas `AnimationConstraint`) alcança ~2,05 studs a partir
+  do ombro.
+  - Erro de 2–3 cm até 2,05 studs, 10 cm a 2,31 e 17 cm a 2,57.
+  - O alcance de 2,07 da D-55 confere. Mas a pega antiga deixava o apoio da M14 a 2,57 studs do
+    ombro esquerdo.
+- **Em pé e agachado:** a pega foi de (0,5; 0; −1,2) para **(0,2; 0,2; −0,7)** no tronco, com os
+  mesmos ângulos (15° de giro e 20° para baixo).
+  - É a pose alcançável mais próxima da antiga: o pior caso entre as 9 armas ficou em 1,96 studs.
+  - Medido com a M14 real: mãos a 7 e 11 cm.
+- **Deitado:** o erro do IK depende da pose, não só da distância (até 43 cm com o alvo ao alcance).
+  - A pega foi para **(−0,2; 1,3; 1,1)**: 0,5 stud à frente e 0,4 para a esquerda.
+  - Medido: 8 e 10 cm (antes 27 e 24).
+- **Piso:** sobram ~6 a 10 cm mesmo com o alvo ao alcance. O IK põe a mão perto do alvo, não nele.

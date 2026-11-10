@@ -33,14 +33,15 @@ local DEPOTS = {
 	{ spec = "uh34d", dx = -80, dz = 30 },
 }
 local RESPAWN_S = 180 -- design
--- Giro da arte em relação ao chassi (frente do chassi = -Z). Os GLBs dos veículos vieram com o eixo
--- longo em X e o ForgeGUI não infere a frente: 90° é o palpite; se no Studio o veículo andar de
--- ré, troque por -90° (TODO_USUARIO).
+-- Giro da arte em relação ao chassi (frente do chassi = -Z). Os GLBs dos veículos têm o eixo longo
+-- em X com a frente em +X, mas o importador do Roblox gira o modelo 180° em Y: no Studio (teste com a
+-- arte publicada, 2026-11-10) o canhão do M48, os tubos do Ontos, a proa do LVTP-5 e o nariz do
+-- UH-34D apontam para -X. O palpite antigo (+90°) punha todos andando de ré.
 local ART_YAW: { [string]: number } = {
-	m48a3 = math.rad(90),
-	ontos = math.rad(90),
-	lvtp5 = math.rad(90),
-	uh34d = math.rad(90),
+	m48a3 = math.rad(-90),
+	ontos = math.rad(-90),
+	lvtp5 = math.rad(-90),
+	uh34d = math.rad(-90),
 }
 
 -- Armas de veículo e foguetes de infantaria (projéteis simulados no servidor).

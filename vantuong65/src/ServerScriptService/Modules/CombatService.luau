@@ -6,7 +6,6 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Ballistics = require(ReplicatedStorage.Shared.Ballistics)
-local GunModel = require(ReplicatedStorage.Shared.GunModel)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Pickup = require(ReplicatedStorage.Shared.Pickup)
 local Rng = require(ReplicatedStorage.Shared.Rng)
@@ -60,12 +59,13 @@ spawnPickup = function(pos: Vector3, a: Pickup.Ammo)
 	if not wp then
 		return
 	end
-	-- a própria arma deitada de lado no chão (antes: uma tábua de 1,0 × 0,08 × 0,25 m)
-	local gun = GunModel.build(a.weapon, wp.kind)
+	-- a própria arma (publicada ou provisória) deitada de lado no chão (antes: uma tábua)
+	local gun = AssetLoader.weaponModel(a.weapon, wp.kind)
 	gun.Name = a.weapon
 	for _, d in gun:GetDescendants() do
 		if d:IsA("BasePart") then
 			d.Anchored = true
+			d.CanCollide = false
 		end
 	end
 	local p = gun.PrimaryPart :: BasePart
@@ -73,8 +73,11 @@ spawnPickup = function(pos: Vector3, a: Pickup.Ammo)
 	params.FilterType = Enum.RaycastFilterType.Include
 	params.FilterDescendantsInstances = { workspace.Terrain }
 	local hit = workspace:Raycast(pos + Vector3.new(0, 10, 0), Vector3.new(0, -60, 0), params)
+	-- deitada de lado (Z = 90°): o lado −X da arma fica para baixo; ergue até ele tocar o chão
+	local lowX = gun:GetAttribute("LowX")
+	local lift = (if type(lowX) == "number" then -lowX else 0.025 / M) + 0.005 / M
 	gun:PivotTo(
-		CFrame.new((if hit then hit.Position else pos) + Vector3.new(0, 0.03 / M, 0))
+		CFrame.new((if hit then hit.Position else pos) + Vector3.new(0, lift, 0))
 			* CFrame.Angles(0, math.random() * 2 * math.pi, 0)
 			* CFrame.Angles(0, 0, math.pi / 2)
 	)

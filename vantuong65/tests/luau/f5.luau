@@ -190,6 +190,43 @@ test("estimativa do mapa: nenhum setor passa do teto; sebes desbastadas por igua
 	end
 end)
 
+test("arte publicada: toda arma com modelo tem pontos coerentes (WeaponArt, D-58)", function()
+	local AssetIds = require("../../src/ReplicatedStorage/Shared/AssetIds") :: any
+	local Weapons = require("../../src/ReplicatedStorage/Shared/Weapons") :: any
+	-- WeaponArt usa o Vector3 global do Roblox: carrega com ambiente próprio
+	local luau = require("@lune/luau")
+	local roblox = require("@lune/roblox")
+	local WeaponArt = luau.load(
+		fs.readFile("src/ReplicatedStorage/Shared/WeaponArt.luau"),
+		{ debugName = "WeaponArt", environment = { Vector3 = roblox.Vector3 } }
+	)() :: any
+	local M = 0.28
+	local AXIS = { ["-Z"] = { 3, -1 }, ["+Z"] = { 3, 1 }, ["-X"] = { 1, -1 }, ["+X"] = { 1, 1 } }
+	local n = 0
+	for id, assetId in AssetIds.Models do
+		if Weapons.byId[id] and assetId ~= 0 then
+			n += 1
+			local a = WeaponArt[id]
+			assert(a, id .. ": arma publicada sem pontos em WeaponArt (rode tools/weapon_landmarks.py)")
+			local ax = AXIS[a.forward]
+			assert(ax, id .. ": frente inválida " .. tostring(a.forward))
+			local function s(v: any): number -- posição ao longo do cano (maior = mais à frente)
+				return (if ax[1] == 1 then v.X else v.Z) * ax[2]
+			end
+			local half = a.lengthM / M / 2
+			assert(math.abs(s(a.muzzle) - half) < 0.05, id .. ": a boca não está na ponta da caixa")
+			assert(s(a.muzzle) > s(a.grip), id .. ": boca atrás do punho")
+			assert(s(a.sight) >= s(a.grip) - 1e-6, id .. ": linha de visada atrás do punho")
+			assert(a.sight.Y >= a.muzzle.Y, id .. ": linha de visada abaixo do cano")
+			-- alcance do braço (D-59): o apoio a no máximo 0,26 m do punho
+			local d =
+				math.sqrt((a.support.X - a.grip.X) ^ 2 + (a.support.Y - a.grip.Y) ^ 2 + (a.support.Z - a.grip.Z) ^ 2)
+			assert(d * M <= 0.26, string.format("%s: apoio a %.2f m do punho", id, d * M))
+		end
+	end
+	assert(n == 9, "esperava 9 armas publicadas, vieram " .. n)
+end)
+
 print(string.format("%d ok, %d falhas", passed, failed))
 if failed > 0 then
 	process.exit(1)

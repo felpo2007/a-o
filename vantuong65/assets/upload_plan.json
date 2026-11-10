@@ -478,5 +478,17 @@
   "file": "assets/forgegui/models/morteiro_m29_studs.glb",
   "assetType": "Model",
   "name": "VT65 mortar_81"
+ },
+ {
+  "key": "Models.water_buffalo",
+  "file": "assets/forgegui/models/bufalo_studs.glb",
+  "assetType": "Model",
+  "name": "VT65 water_buffalo"
+ },
+ {
+  "key": "Models.chicken",
+  "file": "assets/forgegui/models/galinha_studs.glb",
+  "assetType": "Model",
+  "name": "VT65 chicken"
  }
 ]

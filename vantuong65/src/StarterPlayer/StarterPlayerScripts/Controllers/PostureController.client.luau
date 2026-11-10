@@ -25,9 +25,15 @@ local LEAN_WAIST = math.rad(16) -- inclinação do tronco (PLACEHOLDER)
 -- cria), ela seguia a rotação do pulso, que o IK não acerta (20° de erro medidos no Studio).
 -- Em pé ou agachado: pronta-baixa, cano 20° para baixo e cruzando o corpo, para a mão esquerda
 -- alcançar. Deitado: à frente do peito, cano na horizontal a ~0,2 m do chão (o tronco deitado tem o
--- +Y para a frente); medido no Studio: mão esquerda a 8 cm do apoio, direita a 23 cm do punho.
-local HOLD_STAND = CFrame.new(0.5, 0, -1.2) * CFrame.Angles(0, math.rad(15), 0) * CFrame.Angles(math.rad(-20), 0, 0)
-local HOLD_PRONE = CFrame.new(0.3, 0.8, 1.1) * CFrame.Angles(math.rad(90), 0, 0)
+-- +Y para a frente).
+-- O IK do braço só alcança ~2,05 studs a partir do ombro (medido no Studio). Com as armas reais
+-- (2026-11-10) o apoio da M14 ficava a 2,57 studs do ombro esquerdo e a mão parava a 20 cm dele: a
+-- pega em pé veio 0,5 stud para trás e 0,3 para o centro (pior caso entre as 9 armas: 1,96 studs).
+-- Medido no Studio com a M14 real: em pé, mãos a 7 e 11 cm do punho e do apoio (antes 6 e 20).
+-- Deitado, o IK erra mais conforme a pose (até 43 cm na busca em grade): a pega foi para 0,5 stud à
+-- frente (perto do rosto) e 0,4 para a esquerda: 8 e 10 cm (antes 27 e 24 cm).
+local HOLD_STAND = CFrame.new(0.2, 0.2, -0.7) * CFrame.Angles(0, math.rad(15), 0) * CFrame.Angles(math.rad(-20), 0, 0)
+local HOLD_PRONE = CFrame.new(-0.2, 1.3, 1.1) * CFrame.Angles(math.rad(90), 0, 0)
 
 local function characters(): { Model }
 	local list = {}

@@ -4,6 +4,8 @@
 -- Comprimento total real de cada arma (fichas públicas); o resto é proporção, sem pretensão de
 -- detalhe. Origem no punho; a frente é −Z (LookVector). Tem os Attachments "Muzzle" (boca do
 -- cano) e "Sight" (linha de visada, na alça), usados pela arma em primeira pessoa e pelos efeitos.
+local WeaponArt = require(script.Parent.WeaponArt)
+
 local GunModel = {}
 
 local M = 0.28
@@ -89,7 +91,56 @@ function GunModel.build(weaponId: string, kind: string?): Model
 	support.CFrame = receiver.CFrame:ToObjectSpace(CFrame.new(0, 0, -(if kind == "pistol" then 0 else L * 0.22) / M))
 	support.Parent = receiver
 	model.WorldPivot = CFrame.identity -- punho
+	model:SetAttribute("LowX", -0.025 / M) -- meia largura da caixa da culatra (arma caída de lado)
 	return model
+end
+
+-- Rotação que leva o eixo da malha que aponta para a boca a −Z (convenção da arma provisória).
+local TURN: { [string]: CFrame } = {
+	["-Z"] = CFrame.identity,
+	["+Z"] = CFrame.Angles(0, math.pi, 0),
+	["-X"] = CFrame.Angles(0, -math.pi / 2, 0),
+	["+X"] = CFrame.Angles(0, math.pi / 2, 0),
+}
+
+-- Prepara o modelo PUBLICADO da arma com a mesma convenção da provisória: pivô no punho, boca em
+-- −Z e os Attachments Muzzle/Sight/Grip/Support na peça principal. O asset chega centrado na caixa,
+-- aninhado (Model > Model > Model > MeshPart) e sem pontos; os pontos vêm de Shared/WeaponArt,
+-- gerado dos GLB por tools/weapon_landmarks.py. Devolve false se a arma não tem pontos.
+function GunModel.fit(model: Model, weaponId: string): boolean
+	local art = WeaponArt[weaponId]
+	local turn = art and TURN[art.forward]
+	if not (art and turn) then
+		return false
+	end
+	-- a malha da arma é a maior peça (a bandoleira e afins, se vierem separadas, ficam soldadas)
+	local mesh: BasePart? = nil
+	for _, d in model:GetDescendants() do
+		if d:IsA("BasePart") and (mesh == nil or d.Size.Magnitude > (mesh :: BasePart).Size.Magnitude) then
+			mesh = d
+		end
+	end
+	if not mesh then
+		return false
+	end
+	local inv = turn:Inverse()
+	local points: { [string]: Vector3 } =
+		{ Muzzle = art.muzzle, Sight = art.sight, Grip = art.grip, Support = art.support }
+	for name, pos in points do
+		local old = mesh:FindFirstChild(name)
+		if old then
+			old:Destroy()
+		end
+		local a = Instance.new("Attachment")
+		a.Name = name
+		a.CFrame = CFrame.new(pos) * inv -- LookVector = boca, como na provisória
+		a.Parent = mesh
+	end
+	model.PrimaryPart = mesh
+	mesh.PivotOffset = CFrame.new(art.grip) * inv
+	model:SetAttribute("WeaponId", weaponId)
+	model:SetAttribute("LowX", art.lowX)
+	return true
 end
 
 -- Solda todas as peças na principal (para a arma presa na mão ou solta no chão).

@@ -9,10 +9,11 @@ local Rng = require(ReplicatedStorage.Shared.Rng)
 
 local AnimalService = {}
 local M = 0.28
--- Frente de cada GLB (medida pelos pontos mais altos): búfalo com a cabeça para +X (chifres),
--- galinha para +Z (crista). lookAt aponta -Z; estes ângulos levam a frente do modelo ao rumo.
--- Se no Studio algum andar de ré, some math.pi aqui.
-local FACE_YAW: { [string]: number } = { water_buffalo = math.pi / 2, chicken = math.pi }
+-- Frente de cada modelo PUBLICADO: no GLB o búfalo olha para +X e a galinha para +Z, mas o
+-- importador do Roblox gira 180° em Y; no Studio (2026-11-10) a cabeça do búfalo está em -X e a da
+-- galinha em -Z. lookAt aponta -Z; estes ângulos levam a frente do modelo ao rumo (antes: +90° e
+-- 180°, os dois andariam de ré).
+local FACE_YAW: { [string]: number } = { water_buffalo = -math.pi / 2, chicken = 0 }
 
 type Live = { a: Animals.Animal, model: Model, lift: number, lastSlow: number }
 local live: { Live } = {}

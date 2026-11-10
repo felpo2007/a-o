@@ -78,6 +78,10 @@ return {
 		lvtp5 = 73612719536592,
 		mortar_81 = 102314699611785,
 		mortar_82 = 134024579408686,
+		-- animais da vila (Parte 11): estavam no manifest mas fora do plano de upload até o teste com
+		-- a arte publicada (2026-11-10); sem eles o AnimalService não tinha o que mover
+		water_buffalo = 135711693555155,
+		chicken = 92356283821226,
 	},
 	-- Roupas: IMAGENS dos moldes clássicos (aplicadas em Shirt.ShirtTemplate / Pants.PantsTemplate)
 	Clothing = {
