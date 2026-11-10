@@ -355,6 +355,22 @@ local function animals(): (string, string?)
 	return if #pen:GetChildren() > 0 then "ok" else "FALHA", string.format("%d animais", #pen:GetChildren())
 end
 
+local function rain(): (string, string?)
+	local atm = game:GetService("Lighting"):FindFirstChildOfClass("Atmosphere")
+	local before = if atm then atm.Density else 0
+	workspace:SetAttribute("VT65DevRain", 1)
+	local ok = waitFor(function()
+		return ReplicatedStorage:GetAttribute("Rain") == 1
+	end, 3)
+	task.wait(0.2)
+	local after = if atm then atm.Density else 0
+	workspace:SetAttribute("VT65DevRain", 0)
+	task.wait(1.5)
+	workspace:SetAttribute("VT65DevRain", nil)
+	return if ok and (not atm or after > before) then "ok" else "FALHA",
+		string.format("Rain=1: %s; névoa %.2f → %.2f%s", tostring(ok), before, after, if atm then "" else " (sem Atmosphere)")
+end
+
 function SelfTest.run()
 	okN, failN, skipN = 0, 0, 0
 	print("[VT65 TESTE] início")
@@ -365,6 +381,7 @@ function SelfTest.run()
 	check("arma caída de bot", droppedWeapon)
 	check("rádio do squad", radio)
 	check("animais da vila", animals)
+	check("chuva", rain)
 	check("pá de trincheira", dig)
 	check("medevac", medevac)
 	check("Offensive + relatório pós-ação", offensive)

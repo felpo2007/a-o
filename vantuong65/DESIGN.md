@@ -760,3 +760,18 @@ arte real.
 - **Tutorial:** o sapador aprende a armar e o engenheiro aprende a detectar.
 - **Números:** todos PLACEHOLDER de design até o playtest. Regras em `Shared/Traps.luau`, testes
   em `tests/luau/atualizacoes.luau`.
+
+## D-51 — Atualizações: chuva tropical súbita
+- **Sorteio:** 1 partida em 4 tem uma pancada (Warfare e Offensive; o Skirmish não tem). Ela nunca
+  começa nos primeiros 10 min. Sobe em 60 s, segura de 6 a 15 min e desce em 90 s.
+- **Efeitos** (`Shared/Weather.luau`):
+  - névoa mais densa (servidor, LightingService);
+  - bots enxergam até metade da distância;
+  - passos até 60% mais baixos;
+  - chuva visível em volta da câmera, com aviso na tela.
+- **Lama reduzindo velocidade:** a regra existe (até −10%), mas não foi ligada. A velocidade só é
+  recalculada em mudança de postura ou ferimento, e mexer nisso sem teste é arriscado.
+- **Ressalva histórica:** a Starlite foi marcada por calor extremo (muitas baixas por exaustão).
+  Em agosto, a costa de Quảng Ngãi ainda tem pancadas de tarde; por isso a chuva é evento, não
+  regra. Os números são PLACEHOLDER.
+- **No Studio:** `workspace:SetAttribute("VT65DevRain", 1)` força a chuva; o autoteste confere.

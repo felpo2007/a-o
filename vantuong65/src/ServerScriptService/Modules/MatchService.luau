@@ -12,6 +12,7 @@ local Geometry = require(ReplicatedStorage.Shared.Geometry)
 local MapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any
 local Net = require(ReplicatedStorage.Shared.Net)
 local Offensive = require(ReplicatedStorage.Shared.Offensive)
+local Weather = require(ReplicatedStorage.Shared.Weather)
 local Rng = require(ReplicatedStorage.Shared.Rng)
 local Combatants = require(script.Parent.Combatants)
 
@@ -28,6 +29,7 @@ MatchService.initialOwner = {} :: { [number]: string }
 MatchService.ended = false
 MatchService.offensive = nil :: Offensive.State?
 MatchService.report = nil :: AfterAction.Report? -- relatório pós-ação da partida em curso
+MatchService.shower = nil :: Weather.Shower? -- pancada de chuva sorteada para a partida (ou nenhuma)
 MatchService.rotation = { "Warfare", "Offensive" }
 MatchService.countsOverride = nil :: (() -> { { US: number, VC: number } })? -- só autoteste (Studio)
 local pendingMode: string? = nil
@@ -90,6 +92,14 @@ function MatchService.newMatch(mode: string?)
 	MatchService.ended = false
 	showMarkers()
 	MatchService.report = AfterAction.new(MatchService.mode, Lighting.ClockTime)
+	-- chuva: o Skirmish (20 min) é curto demais; Warfare e Offensive podem ter uma pancada
+	local wr = Rng.new(os.time() + 1965)
+	MatchService.shower = if MatchService.mode == "Skirmish"
+		then nil
+		else Weather.schedule(Capture.C.warfareMinutes * 60, function()
+			return wr:next()
+		end)
+	ReplicatedStorage:SetAttribute("Rain", 0)
 	ReplicatedStorage:SetAttribute("MatchMode", MatchService.mode)
 end
 
@@ -242,6 +252,15 @@ function MatchService.start()
 					end
 				end
 				local elapsed = os.clock() - MatchService.startedAt
+				-- chuva (no Studio, workspace:SetAttribute("VT65DevRain", 0..1) força a intensidade)
+				local dev = if RunService:IsStudio() then workspace:GetAttribute("VT65DevRain") else nil
+				local rain = if type(dev) == "number"
+					then math.clamp(dev, 0, 1)
+					else Weather.intensity(MatchService.shower, elapsed)
+				local cur = ReplicatedStorage:GetAttribute("Rain")
+				if type(cur) ~= "number" or math.abs(cur - rain) > 0.01 then
+					ReplicatedStorage:SetAttribute("Rain", math.floor(rain * 100 + 0.5) / 100)
+				end
 				local w = if o then Offensive.winner(o, elapsed) else Capture.winner(st, elapsed, limitSeconds())
 				if w then
 					endMatch(w)

@@ -15,6 +15,8 @@ LightingService.LAT, LightingService.LON = 15.30, 108.85
 local startHour = 6.5
 local t0 = os.clock()
 local lastC, lastL = 6.5, 15
+local lastHour = 6.5
+local applyAtmosphere: () -> ()
 
 function LightingService.setStart(hour: number)
 	startHour = hour
@@ -46,16 +48,25 @@ function LightingService.update()
 	ReplicatedStorage:SetAttribute("SunAzimuth", az)
 	ReplicatedStorage:SetAttribute("SunElevation", el)
 	ReplicatedStorage:SetAttribute("SunFitErrorDeg", errDeg)
-	-- névoa matinal: mais densa ao amanhecer, dissipa em 1 h (Parte 9.6)
+	lastHour = hour
+	applyAtmosphere()
+end
+
+-- névoa matinal (mais densa ao amanhecer, dissipa em 1 h, Parte 9.6) + chuva (Weather): a pancada
+-- engrossa a névoa e escurece o céu. Recalcula quando a hora anda e quando a chuva muda.
+applyAtmosphere = function()
 	local atm = Lighting:FindFirstChildOfClass("Atmosphere")
 	if atm then
-		local k = math.clamp((hour - 6.5) / 1.0, 0, 1)
-		atm.Density = 0.45 - 0.10 * k
-		atm.Haze = 2.5 - 0.9 * k
+		local k = math.clamp((lastHour - 6.5) / 1.0, 0, 1)
+		local rain = ReplicatedStorage:GetAttribute("Rain")
+		local r = if type(rain) == "number" then rain else 0
+		atm.Density = 0.45 - 0.10 * k + 0.25 * r
+		atm.Haze = 2.5 - 0.9 * k + 2.0 * r
 	end
 end
 
 function LightingService.start()
+	ReplicatedStorage:GetAttributeChangedSignal("Rain"):Connect(applyAtmosphere)
 	LightingService.setStart(6.5)
 	task.spawn(function()
 		while true do

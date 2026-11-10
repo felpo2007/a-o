@@ -224,6 +224,8 @@ localmente para 3.999 e 2.000 triângulos. Nada disso rodou no Roblox.
 ## Atualizações (features "Depois" da Parte 11)
 - **Armadilhas VC** (D-50): punji e granada com fio, armadas pelo sapador; o engenheiro inimigo
   detecta e desarma. 5 testes em `atualizacoes.luau`.
+- **Chuva tropical súbita** (D-51): 1 partida em 4; névoa, visão dos bots pela metade, passos
+  abafados. 2 testes.
 
 ## Primeiro teste no Studio (2026-11-10, D-49)
 Feito pelo MCP do Studio, em Play solo com 29 bots, no greybox. Relatório em

@@ -11,6 +11,7 @@ local Rng = require(ReplicatedStorage.Shared.Rng)
 local Smoke = require(ReplicatedStorage.Shared.Smoke)
 local Roles = require(ReplicatedStorage.Shared.Roles)
 local SpawnRules = require(ReplicatedStorage.Shared.SpawnRules)
+local Weather = require(ReplicatedStorage.Shared.Weather)
 local Weapons = require(ReplicatedStorage.Shared.Weapons)
 local AssetLoader = require(script.Parent.AssetLoader)
 local Characters = require(script.Parent.Characters)
@@ -212,7 +213,9 @@ local function think(bot: Bot, now: number)
 	end
 	-- percepção: inimigo ativo mais próximo com linha de visada
 	local best: Model? = nil
-	local bestD = SENSE
+	-- chuva forte: enxergam até metade da distância (Weather)
+	local rain = ReplicatedStorage:GetAttribute("Rain")
+	local bestD = SENSE * Weather.sightFactor(if type(rain) == "number" then rain else 0)
 	for _, e in Combatants.list() do
 		if e.faction ~= bot.faction and Combatants.active(e) then
 			local r = Combatants.root(e)
