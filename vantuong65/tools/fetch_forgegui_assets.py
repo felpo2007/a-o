@@ -13,6 +13,7 @@ import hashlib
 import json
 import sys
 import tempfile
+import time
 import urllib.request
 from pathlib import Path
 
@@ -23,6 +24,30 @@ def sha(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
+def download(url: str, name: str, tries: int = 3, deadline_s: float = 300) -> bytes:
+    """Baixa em blocos com prazo total por tentativa. O timeout do urlopen vale só por leitura:
+    com o servidor mandando bytes devagar, um download ficou parado mais de 10 min sem erro
+    (PC do dono, 2026-11-10). Aqui cada tentativa tem prazo total e há até 3 tentativas."""
+    last: Exception | None = None
+    for attempt in range(1, tries + 1):
+        t0 = time.monotonic()
+        try:
+            with urllib.request.urlopen(url, timeout=30) as r:
+                chunks = []
+                while True:
+                    if time.monotonic() - t0 > deadline_s:
+                        raise TimeoutError(f"passou de {deadline_s:.0f} s")
+                    b = r.read(1 << 20)
+                    if not b:
+                        break
+                    chunks.append(b)
+            return b"".join(chunks)
+        except (OSError, TimeoutError) as e:  # URLError, socket.timeout e afins
+            last = e
+            print(f"  tentativa {attempt}/{tries} de {name} falhou: {e}", flush=True)
+    raise SystemExit(f"não baixou {name}: {last}")
+
+
 def main() -> None:
     man = json.loads((ROOT / "manifest.json").read_text("utf-8"))
     for m in man["models"]:
@@ -31,7 +56,7 @@ def main() -> None:
             print("ok (já existe)", dst.name)
             continue
         dst.parent.mkdir(parents=True, exist_ok=True)
-        data = urllib.request.urlopen(m["url"], timeout=120).read()
+        data = download(m["url"], dst.name)
         red = m.get("reducao_local")
         want = red["sha256_origem"] if red else m["sha256"]
         if sha(data) != want:
