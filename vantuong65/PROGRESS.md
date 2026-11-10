@@ -10,7 +10,18 @@
 | **F3 Fatia vertical** | **código e arte entregues** (setor 3); critério (60 fps e teste de foto) **só medível no Studio** |
 | **F4 Sistemas pesados** | **código entregue**: comandante, logística, morteiros, M48A3, Ontos, LVTP-5, UH-34D. Lógica testada no Lune; critério (30v30 com 6 veículos) **só medível no Roblox** |
 | **Parte 12 Controle** | **código entregue** (vale a partir da F2): layout completo, menus/mapa/comandante sem mouse, mira no analógico, veículos, vibração; 17 testes. **Não testado num controle real** |
-| F5–F6 | não iniciadas |
+| **F5 Arte total e otimização** | **iniciada**: remesh dentro das metas da Parte 2, arte nos 5 setores com teto e streaming, fusão de diques. Critério (60 jogadores a 60 fps em todos os setores) **só medível no Roblox** |
+| F6 | não iniciada |
+
+## F5: o que foi feito (sessão 5)
+- **Remesh:** modelos com uso repetido reduzidos às metas da Parte 2 (D-45; números no
+  `manifest.json` e no `ASSETS.csv`).
+- **Arte nos 5 setores:** `AssetLoader` com teto de triângulos por setor, bosques nas colinas,
+  streaming atômico e impostor nos modelos grandes; o log do servidor mostra o total por setor.
+- **Diques:** fusão de colineares, 18.926 → 18.095 (−4,4%), comprimento preservado. Uma versão
+  que apagava trechos foi pega pelo teste e corrigida.
+- **Próximo:** malha única por bloco (EditableMesh) para diques e lâminas, depois do 1º teste de
+  fps no Studio.
 
 ## Parte 12 (controle): o que foi feito (sessão 5)
 - **Auditoria:** 14 pontos que não funcionavam só com controle (`CONTROLE.md`). O pior era o
@@ -148,6 +159,8 @@
 | Testes Lune F4 | `f4.luau` **12 ok** |
 | Testes Lune controle | `controle.luau` **17 ok** (inclui 10.000 eventos aleatórios sem estado preso) |
 | Giro de 180° no analógico (quadril) | **0,58 s** (calculado) |
+| Testes Lune F5 | `f5.luau` **3 ok** |
+| Diques após a fusão | 18.926 → **18.095** (comprimento 2.113.038 → 2.113.037 studs) |
 | Morteiro 82 mm (calibrado) | k = 1,512e-4 1/m; a 300/800/1.500/2.500 m: voo de 18,4/14,9/26,9/27,5 s |
 | M29 81 mm (v0 derivada) | **254 m/s** para 3.890 m com o arrasto do 82 mm |
 | UH-34D no peso máx. a 35 °C | pairar fora do efeito solo 1.522 hp, dentro 1.375 hp, a 20 m/s 1.033 hp; disponível 1.453 hp |

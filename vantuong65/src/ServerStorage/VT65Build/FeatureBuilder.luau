@@ -41,6 +41,90 @@ end
 
 export type Stats = { dikes: number, hedges: number, waters: number, houses: number, markers: number }
 
+-- F5 (D-14, corte 1): funde diques colineares que se tocam e têm altura parecida. Entrada e saída
+-- no formato plano x1,z1,x2,z2,yTop,yBase. Mantém o maior topo e a menor base (nada fica enterrado).
+-- tolY em studs (0,4 ≈ 11 cm) vale para o TOPO visível; a base pode variar (fica sob o terreno).
+-- tolDeg é a diferença máxima de direção.
+function FeatureBuilder.mergeDikes(d: { number }, tolY: number?, tolDeg: number?): { number }
+	local ty = tolY or 0.4
+	local cosTol = math.cos(math.rad(tolDeg or 1))
+	local n = #d // 6
+	local function key(x: number, z: number): string
+		return string.format("%d,%d", math.floor(x * 20 + 0.5), math.floor(z * 20 + 0.5))
+	end
+	local byPoint: { [string]: { number } } = {}
+	for s = 1, n do
+		local i = (s - 1) * 6 + 1
+		for _, k in { key(d[i], d[i + 1]), key(d[i + 2], d[i + 3]) } do
+			byPoint[k] = byPoint[k] or {}
+			table.insert(byPoint[k], s)
+		end
+	end
+	local used = table.create(n, false)
+	local out: { number } = {}
+	local function dir(s: number): (number, number)
+		local i = (s - 1) * 6 + 1
+		local dx, dz = d[i + 2] - d[i], d[i + 3] - d[i + 1]
+		local l = math.sqrt(dx * dx + dz * dz)
+		return if l > 0 then dx / l else 1, if l > 0 then dz / l else 0
+	end
+	for s = 1, n do
+		if not used[s] then
+			used[s] = true
+			local i = (s - 1) * 6 + 1
+			local ax, az, bx, bz = d[i], d[i + 1], d[i + 2], d[i + 3]
+			local top, base = d[i + 4], d[i + 5]
+			local ux, uz = dir(s)
+			-- estende nas duas pontas enquanto houver vizinho colinear de altura parecida
+			for _, forward in { true, false } do
+				local grew = true
+				while grew do
+					grew = false
+					local px, pz = if forward then bx else ax, if forward then bz else az
+					local near: { number } = byPoint[key(px, pz)] or {}
+					for _, t in near do
+						if not used[t] then
+							local j = (t - 1) * 6 + 1
+							local vx, vz = dir(t)
+							local aligned = math.abs(ux * vx + uz * vz) >= cosTol
+							if aligned and math.abs(d[j + 4] - top) <= ty then -- topo parecido; a base desce sob o terreno
+								-- só funde se a outra ponta do vizinho AVANÇAR no sentido da ponta.
+								-- Vizinho que volta por cima do trecho fica como peça própria
+								-- (absorver apagava trechos fora do dique: D-45).
+								local k1 = key(d[j], d[j + 1])
+								local ox, oz = d[j + 2], d[j + 3]
+								if k1 ~= key(px, pz) then
+									ox, oz = d[j], d[j + 1]
+								end
+								local ahead = (ox - px) * ux + (oz - pz) * uz
+								if not forward then
+									ahead = -ahead
+								end
+								if ahead <= 0 then
+									continue
+								end
+								if forward then
+									bx, bz = ox, oz
+								else
+									ax, az = ox, oz
+								end
+								top, base = math.max(top, d[j + 4]), math.min(base, d[j + 5])
+								used[t] = true
+								grew = true
+								break
+							end
+						end
+					end
+				end
+			end
+			for _, v in { ax, az, bx, bz, top, base } do
+				table.insert(out, v)
+			end
+		end
+	end
+	return out
+end
+
 function FeatureBuilder.build(env: Env, features: any, mapConfig: any, world: any?, parent: any): Stats
 	local root = folder(env, "Map", parent)
 	local stats = { dikes = 0, hedges = 0, waters = 0, houses = 0, markers = 0 }
@@ -48,7 +132,7 @@ function FeatureBuilder.build(env: Env, features: any, mapConfig: any, world: an
 
 	-- diques de arrozal: x1,z1,x2,z2,yTop,yBase
 	local fd = folder(env, "Dikes", root)
-	local d = features.dikes
+	local d = FeatureBuilder.mergeDikes(features.dikes)
 	for i = 1, #d, 6 do
 		local yTop, yBase = d[i + 4], d[i + 5]
 		local cf, len = segmentCFrame(env, d[i], d[i + 1], d[i + 2], d[i + 3], (yTop + yBase) / 2)

@@ -506,3 +506,27 @@ Ver `CONTROLE.md`. Resumo:
   - F8/F9 gravam e reproduzem as entradas do controle pela mesma camada.
 - **Não verificado aqui:** nada disso rodou num controle real nem num console (Parte 12.7, matriz em
   `TODO_USUARIO.md`).
+
+## D-45 — F5: otimização antes de espalhar a arte (em andamento)
+- **Metas da Parte 2:** vegetação ≤ 3 mil triângulos por instância; props ≤ 5 mil; herói (armas,
+  veículos) ≤ 20 mil. Os GLBs gerados tinham de 8 a 16 mil.
+- **Remesh com `generation_remesh_3d`:** o alvo informado não é a contagem final. Pedindo 2.800,
+  saíram 4.957 triângulos (~1,77×). Por isso o alvo é 1.650 para vegetação e 2.800 para props e
+  equipamento. Escalas e pivôs são os mesmos da preparação anterior; o manifest guarda o job de
+  remesh e os triângulos medidos.
+- **Arte nos 5 setores** (`AssetLoader`):
+  - teto por setor de 2,5 milhões de triângulos estimados de arte (PLACEHOLDER até a medição);
+  - bosque ralo nas colinas;
+  - `ModelStreamingMode = Atomic` em todos os modelos;
+  - `LevelOfDetail = StreamingMesh` (impostor à distância) nos grandes: casas, árvores, celeiro,
+    bunker;
+  - o log do servidor imprime modelos e triângulos por setor, para comparar com o HUD de fps.
+- **Diques (D-14, corte 1):** fusão de segmentos colineares (±1°) com o mesmo topo (±11 cm), com a
+  base esticada para baixo do terreno: 18.926 → **18.095** (−4,4%), comprimento preservado
+  (teste `f5.luau`).
+  - O ganho é pequeno porque os topos acompanham os terraços.
+  - Uma primeira versão "absorvia" trechos sobrepostos e apagava 16.690 studs de dique. O teste pegou
+    e a regra foi removida.
+- **Próximo corte de verdade (D-14, item 2):** juntar diques e lâminas de cada bloco numa MeshPart
+  via `EditableMesh`. Isso só pode ser validado no Studio (colisão e memória), por isso fica para
+  depois do primeiro teste de fps.

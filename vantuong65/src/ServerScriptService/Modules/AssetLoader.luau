@@ -14,7 +14,37 @@ local Tunnels = require(ReplicatedStorage.Shared.Tunnels) :: any
 local AssetLoader = {}
 local cache: { [string]: Model } = {}
 local M = 0.28
-local SLICE_SECTORS = { [3] = true } -- setor central: An Cường (2) + Colina 30
+-- F5: arte nos 5 setores, com teto por setor (Parte 2: 60 fps no pior setor). Triângulos por
+-- instância saem do manifest (depois do remesh da F5: vegetação ≤ 3k, props ≤ 5k). O teto é
+-- conservador até a medição no Studio (D-45).
+local SLICE_SECTORS = { [1] = true, [2] = true, [3] = true, [4] = true, [5] = true }
+AssetLoader.SECTOR_TRI_BUDGET = 2500000 -- triângulos estimados de arte por setor (PLACEHOLDER)
+AssetLoader.TRIS = {
+	bamboo_clump = 2800,
+	shrub = 2800,
+	elephant_grass = 2800,
+	banana = 2800,
+	coconut_palm = 2800,
+	hill_tree = 2800,
+	hut_thatch = 4800,
+	hut_veranda = 4800,
+	hut_kitchen = 4800,
+	house_tile = 4800,
+} :: { [string]: number }
+local DEFAULT_TRIS = 4800
+local sectorTris: { [number]: number } = {}
+local sectorCount: { [number]: number } = {}
+-- peças grandes ganham imagem simplificada (impostor) quando estão fora do raio de streaming
+local BIG: { [string]: boolean } = {
+	hut_thatch = true,
+	hut_veranda = true,
+	hut_kitchen = true,
+	house_tile = true,
+	hill_tree = true,
+	coconut_palm = true,
+	granary = true,
+	vc_bunker = true,
+}
 -- Quanto (m) a base do modelo fica abaixo do chão: a entrada do túnel tem ~0,3 m de poço sob a
 -- moldura; a trincheira apoia no fundo da vala já escavada no terreno (TRENCH_D_M).
 local SINK_M: { [string]: number } = {
@@ -80,6 +110,13 @@ function AssetLoader.place(key: string, x: number, z: number, yaw: number, paren
 	if not tpl then
 		return nil
 	end
+	local sector = Geometry.sectorAt(MapConfig.Sectors, x, z) or 0
+	local tris = AssetLoader.TRIS[key] or DEFAULT_TRIS
+	if (sectorTris[sector] or 0) + tris > AssetLoader.SECTOR_TRI_BUDGET then
+		return nil -- teto do setor atingido: o placeholder (se houver) continua
+	end
+	sectorTris[sector] = (sectorTris[sector] or 0) + tris
+	sectorCount[sector] = (sectorCount[sector] or 0) + 1
 	local m = tpl:Clone()
 	m.Name = key
 	local cf, size = m:GetBoundingBox()
@@ -206,6 +243,38 @@ function AssetLoader.start()
 			end
 		elseif sp.name == "Vau do riacho" then
 			AssetLoader.place("log_bridge", sp.x, sp.z, rng:range(0, 3.14), out)
+		end
+	end
+	-- árvores das colinas (cotas 43, 30 e 22): bosque ralo no topo (densidade de design)
+	if AssetLoader.template("hill_tree") then
+		for _, l in MapConfig.Locations do
+			if string.find(l.name, "Colina") then
+				for _ = 1, 60 do
+					local a, r = rng:range(0, 2 * math.pi), math.sqrt(rng:next()) * 110 / M
+					AssetLoader.place("hill_tree", l.x + math.cos(a) * r, l.z + math.sin(a) * r, a, out, true)
+				end
+			end
+		end
+	end
+	-- streaming (D-15): cada modelo chega inteiro; os grandes têm impostor à distância
+	for _, m in out:GetChildren() do
+		if m:IsA("Model") then
+			m.ModelStreamingMode = Enum.ModelStreamingMode.Atomic
+			if BIG[m.Name] then
+				m.LevelOfDetail = Enum.ModelLevelOfDetail.StreamingMesh
+			end
+		end
+	end
+	for sector = 0, 5 do
+		if sectorCount[sector] then
+			print(
+				string.format(
+					"[VT65] arte setor %d: %d modelos, ~%.0f mil triângulos",
+					sector,
+					sectorCount[sector],
+					(sectorTris[sector] or 0) / 1000
+				)
+			)
 		end
 	end
 	print("[VT65] arte carregada:", #out:GetChildren(), "modelos")
