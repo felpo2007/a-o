@@ -584,3 +584,26 @@ Ver `CONTROLE.md`. Resumo:
 - **Próximo corte de verdade (D-14, item 2):** juntar diques e lâminas de cada bloco numa MeshPart
   via `EditableMesh`. Isso só pode ser validado no Studio (colisão e memória), por isso fica para
   depois do primeiro teste de fps.
+
+## D-46 — F6: modo Offensive e rotação de modos
+- **Regra (Parte 4):** os EUA começam só com a praia (S5) e atacam para oeste. O VC defende S4, S3,
+  S2 e S1, um de cada vez. Só o setor da frente fica ativo.
+  - **Setor tomado fica travado:** o VC não retoma.
+  - **A frente pode voltar:** se os EUA neutralizam e saem, o VC sozinho no ponto a recupera.
+  - A captura é a mesma do Warfare (`Capture`): 90 s com 1 atacante; com 5 ou mais, 2× mais
+    rápida.
+  - Disputado congela.
+- **Relógio:** 20 min para o 1º setor e +15 min a cada setor tomado. Os EUA vencem ao tomar S1;
+  o VC vence se o relógio zerar.
+  - Os dois tempos são **PLACEHOLDER**: a Parte 4 só diz "tempo extra a cada captura". Calibrar
+    no beta: a meta é que metade das partidas chegue a S2.
+- **Peças reaproveitadas sem mudança:**
+  - spawn: reunião nos setores próprios; o VC perde a reunião e os túneis de um setor tomado;
+  - bots: `BotBrain.objective` já leva os EUA à frente e o VC a defendê-la (teste `f6.luau`);
+  - logística e marcadores (o próximo ponto forte aparece quando a frente anda).
+- **Rotação:** servidor público alterna Warfare e Offensive a cada partida. Servidor privado fica
+  no modo que o dono escolheu.
+- **Servidor privado:** antes não havia tela para o dono escolher modo e horário. Só existia o
+  evento no servidor. Agora o menu do jogo tem a aba **Servidor**, visível só para o dono e
+  navegável no controle; o servidor revalida dono, modo e horário.
+- **Não verificado aqui:** partida real de Offensive no Roblox (spawn na praia, ritmo, tempo).

@@ -231,7 +231,14 @@ local function drawMap()
 		end)
 	end
 	local t = matchState.timeLeft or 0
-	status.Text = string.format("%s — %02d:%02d", matchState.mode, t // 60, t % 60)
+	local extra = ""
+	if matchState.ended then
+		local w = ReplicatedStorage:GetAttribute("LastWinner")
+		extra = if w == "US" then " — vitória dos EUA" elseif w == "VC" then " — vitória do VC" else " — empate"
+	elseif matchState.mode == "Offensive" and matchState.front and matchState.front >= 1 then
+		extra = " — frente: S" .. matchState.front -- EUA atacam, VC defende
+	end
+	status.Text = string.format("%s — %02d:%02d%s", matchState.mode, t // 60, t % 60, extra)
 end
 
 local function drawSide()

@@ -1,11 +1,13 @@
 --!strict
--- Partida Warfare/Skirmish: sorteio dos pontos fortes, captura, tempo e vitória (Parte 4).
+-- Partida Warfare/Offensive/Skirmish: sorteio dos pontos fortes, captura, tempo e vitória (Parte 4).
+-- Servidor público alterna Warfare e Offensive; o privado fica no modo escolhido pelo dono.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Capture = require(ReplicatedStorage.Shared.Capture)
 local MapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any
 local Net = require(ReplicatedStorage.Shared.Net)
+local Offensive = require(ReplicatedStorage.Shared.Offensive)
 local Rng = require(ReplicatedStorage.Shared.Rng)
 local Combatants = require(script.Parent.Combatants)
 
@@ -20,14 +22,35 @@ MatchService.waveEpoch = 0
 MatchService.capturedAt = {} :: { [number]: number }
 MatchService.initialOwner = {} :: { [number]: string }
 MatchService.ended = false
+MatchService.offensive = nil :: Offensive.State?
+MatchService.rotation = { "Warfare", "Offensive" }
 local pendingMode: string? = nil
+local fixedMode = false -- servidor privado: o dono escolheu o modo
 
 local function limitSeconds(): number
+	local o = MatchService.offensive
+	if MatchService.mode == "Offensive" and o then
+		return o.deadline -- cresce a cada setor tomado
+	end
 	return (if MatchService.mode == "Skirmish" then Capture.C.skirmishMinutes else Capture.C.warfareMinutes) * 60
 end
 
+-- marcadores do greybox: só o ponto sorteado de cada setor ativo
+local function showMarkers()
+	local st = MatchService.state
+	local folder = workspace:FindFirstChild("Map") and (workspace :: any).Map:FindFirstChild("Strongpoints")
+	if not (folder and st) then
+		return
+	end
+	for _, p in folder:GetChildren() do
+		local chosen = MatchService.points[p:GetAttribute("Sector")]
+		local on = chosen ~= nil and chosen.name == p.Name and st.active[chosen.sector]
+		p.Transparency = if on then 0.6 else 1
+	end
+end
+
 function MatchService.newMatch(mode: string?)
-	MatchService.mode = mode or pendingMode or MatchService.mode
+	MatchService.mode = mode or pendingMode or Capture.nextMode(MatchService.mode, fixedMode, MatchService.rotation)
 	pendingMode = nil
 	local rng = Rng.new(os.time())
 	local bySector: { [number]: { any } } = {}
@@ -40,31 +63,32 @@ function MatchService.newMatch(mode: string?)
 		local sp = list[1 + math.floor(rng:next() * #list)]
 		MatchService.points[s] = { sector = s, name = sp.name, x = sp.x, z = sp.z, real = sp.real }
 	end
-	local initial = table.clone(MapConfig.InitialOwner)
-	local active = { true, true, true, true, true }
-	if MatchService.mode == "Skirmish" then
-		active = { false, false, true, false, false }
+	MatchService.offensive = nil
+	if MatchService.mode == "Offensive" then
+		local o = Offensive.new(5)
+		MatchService.offensive = o
+		MatchService.state = o.capture
+		MatchService.initialOwner = table.clone(o.capture.owner)
+	else
+		local initial = table.clone(MapConfig.InitialOwner)
+		local active = { true, true, true, true, true }
+		if MatchService.mode == "Skirmish" then
+			active = { false, false, true, false, false }
+		end
+		MatchService.state = Capture.new(initial, active)
+		MatchService.initialOwner = initial
 	end
-	MatchService.state = Capture.new(initial, active)
-	MatchService.initialOwner = initial
 	MatchService.capturedAt = {}
 	MatchService.startedAt = os.clock()
 	MatchService.waveEpoch = MatchService.startedAt
 	MatchService.ended = false
-	-- marcadores do greybox: mostra só o ponto sorteado de cada setor
-	local folder = workspace:FindFirstChild("Map") and (workspace :: any).Map:FindFirstChild("Strongpoints")
-	if folder then
-		for _, p in folder:GetChildren() do
-			local chosen = MatchService.points[p:GetAttribute("Sector")]
-			local on = chosen ~= nil and chosen.name == p.Name and active[chosen.sector]
-			p.Transparency = if on then 0.6 else 1
-		end
-	end
+	showMarkers()
 	ReplicatedStorage:SetAttribute("MatchMode", MatchService.mode)
 end
 
 function MatchService.requestMode(mode: string)
 	pendingMode = mode -- vale para a próxima partida (ou já, se ninguém entrou)
+	fixedMode = true
 	if #Players:GetPlayers() <= 1 then
 		MatchService.newMatch(mode)
 	end
@@ -120,6 +144,7 @@ local function publish()
 		points = pts,
 		timeLeft = math.max(0, limitSeconds() - (os.clock() - MatchService.startedAt)),
 		ended = MatchService.ended,
+		front = if MatchService.offensive then MatchService.offensive.front else nil,
 	})
 end
 
@@ -140,12 +165,19 @@ function MatchService.start()
 			local st = MatchService.state
 			if st and not MatchService.ended then
 				lastCounts = counts()
-				for _, ev in Capture.step(st, lastCounts, 1) do
+				local o = MatchService.offensive
+				local events: { Offensive.Event } = if o
+					then Offensive.step(o, lastCounts, 1)
+					else Capture.step(st, lastCounts, 1) :: any
+				for _, ev in events do
 					if ev.kind == "captured" then
 						MatchService.capturedAt[ev.sector] = os.clock()
+					elseif ev.kind == "advanced" then
+						showMarkers() -- a frente andou: o próximo ponto forte aparece
 					end
 				end
-				local w = Capture.winner(st, os.clock() - MatchService.startedAt, limitSeconds())
+				local elapsed = os.clock() - MatchService.startedAt
+				local w = if o then Offensive.winner(o, elapsed) else Capture.winner(st, elapsed, limitSeconds())
 				if w then
 					endMatch(w)
 				end

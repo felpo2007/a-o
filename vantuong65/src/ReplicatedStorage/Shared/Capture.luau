@@ -108,6 +108,19 @@ function Capture.count(st: State, team: string): number
 	return n
 end
 
+-- Próximo modo: o servidor público segue a rotação; o privado (fixed) fica no modo escolhido.
+function Capture.nextMode(current: string, fixed: boolean, rotation: { string }): string
+	if fixed then
+		return current
+	end
+	for i, m in rotation do
+		if m == current then
+			return rotation[i % #rotation + 1]
+		end
+	end
+	return rotation[1]
+end
+
 -- Vencedor: dono de todos os setores ativos na hora, ou mais setores ao fim do tempo.
 function Capture.winner(st: State, elapsed: number, limitSeconds: number): string?
 	local active = 0

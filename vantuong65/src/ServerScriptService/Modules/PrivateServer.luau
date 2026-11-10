@@ -7,7 +7,7 @@ local Net = require(ReplicatedStorage.Shared.Net)
 
 local PrivateServer = {}
 
-PrivateServer.Modes = { Warfare = true, Skirmish = true }
+PrivateServer.Modes = { Warfare = true, Offensive = true, Skirmish = true }
 PrivateServer.Clocks = { [6.5] = true, [12] = true, [18.5] = true } -- 06:30, 12:00, 18:30 (Parte 5)
 
 function PrivateServer.isPrivate(): boolean

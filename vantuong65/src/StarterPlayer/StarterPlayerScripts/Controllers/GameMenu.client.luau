@@ -1,7 +1,8 @@
 --!strict
--- Menu do jogo (segurar View / tecla P): abas Configurações, Squad e papel, Loja. LB/RB trocam
--- abas, LT/RT trocam sub-abas, A confirma, B volta (Parte 12.5). Nada exige digitar: números têm
--- botões "−" e "+", escolhas alternam com A, o remapeamento espera o próximo botão do controle.
+-- Menu do jogo (segurar View / tecla P): abas Configurações, Squad e papel, Loja (e Servidor, para o
+-- dono de servidor privado). LB/RB trocam abas, LT/RT trocam sub-abas, A confirma, B volta
+-- (Parte 12.5). Nada exige digitar: números têm botões "−" e "+", escolhas alternam com A, o
+-- remapeamento espera o próximo botão do controle.
 -- Configurações saem da conta (Settings_Get) e voltam para ela (Settings_Save) pela camada Input.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -40,7 +41,23 @@ list.Padding = UDim.new(0, 6)
 list.SortOrder = Enum.SortOrder.LayoutOrder
 list.Parent = body
 
-local TABS = { "Configurações", "Squad e papel", "Loja" }
+local BASE_TABS = { "Configurações", "Squad e papel", "Loja" }
+-- servidor privado: só o dono vê a aba "Servidor" (modo e horário; o servidor revalida)
+local MODES = { "Warfare", "Offensive", "Skirmish" }
+local MODE_NAMES = { "Warfare (5 setores, 75 min)", "Offensive (EUA atacam do mar)", "Skirmish (1 setor, 20 min)" }
+local CLOCKS = { 6.5, 12, 18.5 }
+local CLOCK_NAMES = { "06:30 (amanhecer)", "12:00", "18:30 (entardecer)" }
+local psMode, psClock = 1, 1
+local function isOwner(): boolean
+	return ReplicatedStorage:GetAttribute("PrivateServer") == true and game.PrivateServerOwnerId == player.UserId
+end
+local function TABS(): { string }
+	local t = table.clone(BASE_TABS)
+	if isOwner() then
+		table.insert(t, "Servidor")
+	end
+	return t
+end
 local SUBS = { "Controle", "Mira", "Vibração", "Acessibilidade", "Remapear" }
 local tab, sub = 1, 1
 local listening: string? = nil -- "ctx.actionId" esperando um botão
@@ -102,7 +119,9 @@ local function render()
 	clearBody()
 	order = 0
 	local t = {}
-	for i, n in TABS do
+	local tabs = TABS()
+	tab = math.min(tab, #tabs)
+	for i, n in tabs do
 		table.insert(t, if i == tab then "[" .. n .. "]" else n)
 	end
 	local _, lb = Input.glyph("ui_tab_prev", "menu")
@@ -206,6 +225,19 @@ local function render()
 		row("Abrir a loja", function()
 			Bus.fire("shop_open")
 		end)
+	elseif tab == 4 and isOwner() then
+		row("Modo: " .. MODE_NAMES[psMode], function()
+			psMode = psMode % #MODES + 1
+			render()
+		end)
+		row("Horário de início: " .. CLOCK_NAMES[psClock], function()
+			psClock = psClock % #CLOCKS + 1
+			render()
+		end)
+		row("Aplicar (vale na próxima partida)", function()
+			Net.event("PrivateServer_SetOptions"):FireServer({ mode = MODES[psMode], clock = CLOCKS[psClock] })
+			Bus.fire("toast", "Servidor: " .. MODES[psMode] .. " na próxima partida")
+		end)
 	end
 	UiKit.focus(body)
 end
@@ -244,13 +276,13 @@ Input.on("ui_back", "press", function()
 end)
 Input.on("ui_tab_prev", "press", function()
 	if gui.Enabled then
-		tab = (tab - 2) % #TABS + 1
+		tab = (tab - 2) % #TABS() + 1
 		render()
 	end
 end)
 Input.on("ui_tab_next", "press", function()
 	if gui.Enabled then
-		tab = tab % #TABS + 1
+		tab = tab % #TABS() + 1
 		render()
 	end
 end)

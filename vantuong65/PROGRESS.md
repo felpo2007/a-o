@@ -11,7 +11,19 @@
 | **F4 Sistemas pesados** | **código entregue**: comandante, logística, morteiros, M48A3, Ontos, LVTP-5, UH-34D. Lógica testada no Lune; critério (30v30 com 6 veículos) **só medível no Roblox** |
 | **Parte 12 Controle** | **código entregue** (vale a partir da F2): layout completo, menus/mapa/comandante sem mouse, mira no analógico, veículos, vibração; 17 testes. **Não testado num controle real** |
 | **F5 Arte total e otimização** | **em andamento**: todos os modelos colocados dentro das metas da Parte 2 (18 por remesh do ForgeGUI e 9 por redução local; o bambu passou pelos dois); arte nos 5 setores com teto, prioridade, desbaste uniforme e streaming; fusão de diques. Critério (60 jogadores a 60 fps em todos os setores) **só medível no Roblox** |
-| F6 | não iniciada |
+| **F6 Offensive e lançamento** | **iniciada**: modo Offensive (lógica testada + partida + rotação), aba do servidor privado. Falta tutorial e página do jogo. Critério (beta fechado com 2 sessões cheias sem crash) **só você pode rodar** |
+
+## F6: o que foi feito (sessão 6)
+- **Modo Offensive** (`Shared/Offensive.luau`, D-46):
+  - EUA desembarcam em S5 e atacam para oeste; o VC defende S4→S1;
+  - só a frente fica ativa, e setor tomado fica travado;
+  - relógio de 20 min, +15 min por captura (PLACEHOLDER);
+  - bots, spawn e logística funcionam sem mudança;
+  - 7 testes em `f6.luau`.
+- **Partida:** `MatchService` roda o Offensive. O servidor público alterna Warfare e Offensive.
+  No mapa, o status mostra a frente e, no fim, o vencedor.
+- **Servidor privado:** a aba "Servidor" no menu do jogo deixa o dono escolher modo e horário.
+  Antes não havia tela para isso.
 
 ## F5: o que foi feito (sessões 5 e 6)
 - **Remesh:** 18 modelos de uso repetido reduzidos às metas da Parte 2 pelo ForgeGUI. Números
@@ -190,6 +202,7 @@
 | Testes Lune controle | `controle.luau` **17 ok** (inclui 10.000 eventos aleatórios sem estado preso) |
 | Giro de 180° no analógico (quadril) | **0,58 s** (calculado) |
 | Testes Lune F5 | `f5.luau` **8 ok** |
+| Testes Lune F6 | `f6.luau` **7 ok** |
 | Arte estimada por setor (teto 2,5 mi) | ~1.000 modelos; touceiras de sebe 20/38/24/21/55% nos setores 1–5 (cálculo) |
 | Redução local (Hausdorff, máx.) | capacete 0,8 cm; colete 0,6 cm; fibra 0,3 cm; props da vila 2,5–16 cm |
 | Diques após a fusão | 18.926 → **18.095** (comprimento 2.113.038 → 2.113.037 studs) |
