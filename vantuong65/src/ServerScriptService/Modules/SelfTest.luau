@@ -12,6 +12,7 @@ local RunService = game:GetService("RunService")
 local AfterAction = require(ReplicatedStorage.Shared.AfterAction)
 local Ballistics = require(ReplicatedStorage.Shared.Ballistics)
 local MapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any
+local Rng = require(ReplicatedStorage.Shared.Rng)
 local Combatants = require(script.Parent.Combatants)
 local FieldWorkService = require(script.Parent.FieldWorkService)
 local LogisticsService = require(script.Parent.LogisticsService)
@@ -100,6 +101,9 @@ local function range(): (string, string?)
 	end
 	local lines = {}
 	local bad = false
+	-- sementes de 32 bits, como as do WeaponController. Com 1 a 5 o primeiro sorteio do xorshift sai
+	-- quase zero e a dispersão vira ~4σ sempre para o mesmo lado (todos os tiros à direita).
+	local seeds = Rng.new(19650818)
 	for _, side in { { f = "US", w = "m14" }, { f = "VC", w = "type56" } } do
 		local sub = folder:FindFirstChild(side.f)
 		local line = sub and sub:FindFirstChild("LinhaDeTiro") :: BasePart?
@@ -116,7 +120,8 @@ local function range(): (string, string?)
 			end
 			local hits = 0
 			local blockedBy: string? = nil
-			for seed = 1, 5 do
+			for _ = 1, 5 do
+				local seed = seeds:nextU32()
 				local aim = CFrame.lookAt(eye, d.Position)
 				local zero = Ballistics.zeroAngle(side.w, dist)
 				local dir = (aim * CFrame.Angles(zero, 0, 0)).LookVector
@@ -302,23 +307,36 @@ local function dig(): (string, string?)
 		string.format("chão à frente desceu %.2f m (esperado ~1,2 m; a recusa aparece no aviso do jogador)", drop)
 end
 
--- Medevac: bot EUA caído junto de um UH-34D pousado vira suprimento.
+-- Medevac: bot EUA caído junto de um UH-34D pousado vira suprimento. Usa um UH-34D que já está
+-- pousado no depósito. Antes o teste criava outro no depósito 1, que é do LVTP-5 (perto do mar): os
+-- dois se sobrepunham e o helicóptero não ficava parado (reteste no Studio, 2026-11-10).
 local function medevac(): (string, string?)
 	local list = bots("US")
 	if #list == 0 then
 		return "pulado", "sem bot EUA"
 	end
-	local heli = VehicleService.spawn("uh34d", 1)
-	if not heli then
-		return "pulado", "não deu para criar o UH-34D (depósito 1)"
+	local heli: Model? = nil
+	local vehicles = workspace:FindFirstChild("Vehicles")
+	for _, m in (if vehicles then vehicles:GetChildren() else {}) do
+		if m:IsA("Model") and m:GetAttribute("Spec") == "uh34d" and not m:GetAttribute("Destroyed") then
+			heli = m
+			break
+		end
 	end
-	task.wait(4) -- assentar no chão
+	local spawned = false
+	if not heli then
+		heli = VehicleService.spawn("uh34d", 5) -- depósito 5: o do UH-34D
+		spawned = true
+		task.wait(4) -- assentar no chão
+	end
+	local hp = heli and heli.PrimaryPart
 	local e = list[#list]
 	local st = MedicalService.get(e.model)
-	local hp = heli.PrimaryPart
-	if not (st and hp) then
-		heli:Destroy()
-		return "pulado", "sem estado médico ou chassi"
+	if not (heli and hp and st) then
+		if heli and spawned then
+			heli:Destroy()
+		end
+		return "pulado", "sem UH-34D, chassi ou estado médico"
 	end
 	e.model:PivotTo(hp.CFrame * CFrame.new(6 / M, 0, 0))
 	st.downedAt = os.clock()
@@ -327,8 +345,12 @@ local function medevac(): (string, string?)
 		return e.model:GetAttribute("Evacuated") == true
 	end, 10)
 	local after = LogisticsService.supply("US")
-	heli:Destroy()
-	return if ok then "ok" else "FALHA", string.format("evacuado=%s, suprimento %d → %d", tostring(ok), before, after)
+	local speed = hp.AssemblyLinearVelocity.Magnitude * M
+	if spawned then
+		heli:Destroy()
+	end
+	return if ok then "ok" else "FALHA",
+		string.format("evacuado=%s, suprimento %d → %d, UH-34D a %.1f m/s", tostring(ok), before, after, speed)
 end
 
 local function radio(): (string, string?)

@@ -217,6 +217,31 @@ Detalhes em `DESIGN.md`, D-52.
   (183 → 188, renda normal).
 - **Place:** salvo pelo Studio e conferido contra a versão anterior. Só mudaram os 4 scripts.
 
+## Rodada final (place salvo às 10:48): 10 ok
+Detalhes em `DESIGN.md`, D-52 e D-53.
+- **Regressão achada e corrigida:** com o corpo deitando de verdade, o tronco empurrava o soldado.
+  Na encosta de 14° ele escorregou 70 m em 5 s. Com os grupos de colisão: 0,02 m em 7 s, pela
+  tecla real.
+- **Raia, pá e medevac corrigidos** (D-53).
+```
+[VT65] raia US: +0° da direção preferida, linha a 120 m do QG (visada livre)
+[VT65] raia VC: -10° da direção preferida, linha a 40 m do QG (visada livre)
+[VT65 TESTE] ok terreno: TerrainReady
+[VT65 TESTE] ok bots: 14 bots EUA, 15 bots VC
+[VT65 TESTE] ok campo de tiro (raia e balística): US 100 m, 5 de 5; US 200 m, 5 de 5; US 300 m, 4 de 5 (parou em Workspace.Map.Dikes.Dike); VC 100 m, 5 de 5; VC 200 m, 5 de 5; VC 300 m, 4 de 5 (parou em Workspace.Map.Dikes.Dike)
+[VT65 TESTE] ok deitado sem queda livre: HipHeight 0.20, estado Running, deslizando 0.00 m/s, tronco a 86° da vertical no servidor
+[VT65 TESTE] ok arma caída de bot: arma caída com prompt
+[VT65 TESTE] ok rádio do squad: papel rifleman sem rádio (esperado)
+[VT65 TESTE] pulado animais da vila: sem modelos publicados (AssetIds em 0)
+[VT65 TESTE] ok chuva: Rain=1: true; névoa 0.45 → 0.70
+[VT65 TESTE] ok pá de trincheira: chão à frente desceu 1.25 m (esperado ~1,2 m; a recusa aparece no aviso do jogador)
+[VT65 TESTE] ok medevac: evacuado=true, suprimento 188 → 216, UH-34D a 0.0 m/s
+[VT65 TESTE] ok Offensive + relatório pós-ação: frente S3, prazo 35 min, fim=true, relatório com a captura
+[VT65 TESTE] resumo: 10 ok, 0 falhas, 1 pulados
+```
+- **Place:** salvo às 10:48. Mesmo total de instâncias (30.200), mesma geometria e mesmos atributos
+  da versão anterior. Mudaram só os 4 scripts, conferidos byte a byte contra os arquivos.
+
 ## O que não foi testado
 - Local Server com 2–4 jogadores (o MCP só inicia Play solo).
 - fps (não medi de novo; o greybox não mudou).

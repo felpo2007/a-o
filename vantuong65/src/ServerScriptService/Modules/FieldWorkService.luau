@@ -26,6 +26,56 @@ local function toast(p: Player, text: string)
 	Net.event("Logistics_State"):FireClient(p, { error = text })
 end
 
+-- Buraco com o fundo na altura pedida. O voxel do terreno tem 4 studs (1,12 m) e a superfície é
+-- suavizada: um FillBlock de 0,6 m de largura afundava só 0,2 a 0,5 m (reteste no Studio,
+-- 2026-11-10). Aqui as colunas de voxels sob a pegada ficam vazias acima do fundo, e o voxel do
+-- fundo fica com ocupação proporcional. A pegada vira múltiplo do voxel (2,2 a 3,4 m de lado).
+-- A suavização ainda ergue o fundo de um buraco tão estreito: pedindo 1,2 m ele ficava a 0,58 m
+-- (média de 10 buracos no Studio); pedindo 1,8 m, a 1,19 m (mediana de 42 medidas). Daí o extra.
+local VOXEL = 4
+local SMOOTH_EXTRA_M = 0.6
+local function excavate(cf: CFrame, lengthS: number, widthS: number, floorY: number)
+	local minX, maxX, minZ, maxZ = math.huge, -math.huge, math.huge, -math.huge
+	for _, s in { { -1, -1 }, { -1, 1 }, { 1, -1 }, { 1, 1 } } do
+		local p = cf * Vector3.new(s[1] * lengthS / 2, 0, s[2] * widthS / 2)
+		minX, maxX = math.min(minX, p.X), math.max(maxX, p.X)
+		minZ, maxZ = math.min(minZ, p.Z), math.max(maxZ, p.Z)
+	end
+	local region = Region3.new(
+		Vector3.new(minX, floorY - VOXEL, minZ),
+		Vector3.new(maxX, cf.Position.Y + 2 * VOXEL, maxZ)
+	):ExpandToGrid(VOXEL)
+	local mats, occs = workspace.Terrain:ReadVoxels(region, VOXEL)
+	local size = mats.Size
+	local y0 = region.CFrame.Position.Y - region.Size.Y / 2
+	for x = 1, size.X do
+		for z = 1, size.Z do
+			-- material do chão da coluna: o voxel cheio mais alto
+			local ground = Enum.Material.Ground
+			for y = size.Y, 1, -1 do
+				if mats[x][y][z] ~= Enum.Material.Air then
+					ground = mats[x][y][z]
+					break
+				end
+			end
+			for y = 1, size.Y do
+				local yb = y0 + (y - 1) * VOXEL
+				if yb >= floorY then
+					mats[x][y][z] = Enum.Material.Air
+					occs[x][y][z] = 0
+				elseif yb + VOXEL > floorY then
+					local o = (floorY - yb) / VOXEL
+					if occs[x][y][z] > o or mats[x][y][z] == Enum.Material.Air then
+						mats[x][y][z] = ground
+						occs[x][y][z] = o
+					end
+				end
+			end
+		end
+	end
+	workspace.Terrain:WriteVoxels(region, VOXEL, mats, occs)
+end
+
 -- ===== pá =====
 local function onDig(p: Player)
 	local char = p.Character
@@ -76,11 +126,7 @@ local function onDig(p: Player)
 		local yaw = math.atan2(-look.X, -look.Z)
 		local cf = CFrame.new(hit.Position) * CFrame.Angles(0, yaw, 0)
 		-- buraco: tira o terreno; a terra vira o parapeito de sacos de areia à frente
-		workspace.Terrain:FillBlock(
-			cf * CFrame.new(0, -C.depthM / 2 / M, 0),
-			Vector3.new(C.lengthM / M, C.depthM / M, C.widthM / M),
-			Enum.Material.Air
-		)
+		excavate(cf, C.lengthM / M, C.widthM / M, hit.Position.Y - (C.depthM + SMOOTH_EXTRA_M) / M)
 		local front = cf * CFrame.new(0, 0, -(C.widthM / 2 + 0.4) / M)
 		local folder = workspace:FindFirstChild("Map") and (workspace :: any).Map:FindFirstChild("Art")
 		if folder then

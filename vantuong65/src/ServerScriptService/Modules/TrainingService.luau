@@ -103,6 +103,83 @@ local function clearLane(folder: Instance, from: Vector3, look: CFrame, plates: 
 	end
 end
 
+-- Raia com visada livre. O terreno real (DEM) tem dunas e elevações perto dos QGs que tapavam os
+-- alvos (reteste no Studio, 2026-11-10: EUA 200/300 m e VC 100 m). Procura a direção mais perto da
+-- preferida (passos de 10°, até 90° para cada lado) e a distância do QG em que um atirador ajoelhado
+-- e em pé vê os três alvos por cima do terreno, fora d'água e dentro do mapa.
+local SEARCH_STEP_DEG = 10
+local SEARCH_MAX_DEG = 90
+local SEARCH_OFFSETS_M = { 80, 120 } -- depois da distância preferida (Tutorial.RANGE_LANE)
+local EYES_M = { 1.0, 1.5 } -- ajoelhado e em pé
+local TARGET_CENTER_M = 1.2
+-- alvos lado a lado, 3 m entre um e outro: em fila, o de 100 m tapava o de 200 m (autoteste, 2026-11-10)
+local TARGET_SPACING_M = 3
+
+local function targetXZ(x0: number, z0: number, dx: number, dz: number, i: number, m: number): (number, number)
+	local side = (i - (#Tutorial.RANGE_M + 1) / 2) * TARGET_SPACING_M
+	return x0 + (dx * m - dz * side) / M, z0 + (dz * m + dx * side) / M
+end
+
+local terrainOnly = RaycastParams.new()
+terrainOnly.FilterType = Enum.RaycastFilterType.Include
+
+local function terrainAt(x: number, z: number): RaycastResult?
+	return workspace:Raycast(Vector3.new(x, 2000, z), Vector3.new(0, -4000, 0), terrainOnly)
+end
+
+local function inside(x: number, z: number): boolean
+	local b = MapConfig.Bounds
+	return x > b.minX and x < b.maxX and z > b.minZ and z < b.maxZ
+end
+
+local function laneClear(x0: number, z0: number, dx: number, dz: number): boolean
+	local g0 = terrainAt(x0, z0)
+	if not (g0 and inside(x0, z0)) or g0.Material == Enum.Material.Water then
+		return false
+	end
+	for i, m in Tutorial.RANGE_M do
+		local x, z = targetXZ(x0, z0, dx, dz, i, m)
+		local g = terrainAt(x, z)
+		if not (g and inside(x, z)) or g.Material == Enum.Material.Water then
+			return false
+		end
+		local target = g.Position + Vector3.new(0, TARGET_CENTER_M / M, 0)
+		for _, h in EYES_M do
+			local eye = g0.Position + Vector3.new(0, h / M, 0)
+			if workspace:Raycast(eye, target - eye, terrainOnly) then
+				return false
+			end
+		end
+	end
+	return true
+end
+
+-- Devolve origem da raia, direção, desvio em graus da direção preferida e se a visada está livre.
+local function chooseLane(hq: any, lane: any): (number, number, number, number, number, boolean)
+	terrainOnly.FilterDescendantsInstances = { workspace.Terrain }
+	local base = math.atan2(lane.dir[2], lane.dir[1])
+	local offsets = { math.sqrt(lane.offsetM[1] ^ 2 + lane.offsetM[2] ^ 2) }
+	for _, o in SEARCH_OFFSETS_M do
+		if o > offsets[1] then
+			table.insert(offsets, o)
+		end
+	end
+	for k = 0, SEARCH_MAX_DEG // SEARCH_STEP_DEG * 2 do
+		-- 0, +10, −10, +20, −20…
+		local deg = (k + 1) // 2 * SEARCH_STEP_DEG * (if k % 2 == 1 then 1 else -1)
+		local a = base + math.rad(deg)
+		local dx, dz = math.cos(a), math.sin(a)
+		for _, off in offsets do
+			local x0, z0 = hq.x + dx * off / M, hq.z + dz * off / M
+			if laneClear(x0, z0, dx, dz) then
+				return x0, z0, dx, dz, deg, true
+			end
+		end
+	end
+	-- nenhuma livre: fica a preferida (o aviso de raios barrados sai no clearLane)
+	return hq.x + lane.offsetM[1] / M, hq.z + lane.offsetM[2] / M, lane.dir[1], lane.dir[2], 0, false
+end
+
 -- Constrói o campo de tiro de uma facção. Devolve a pasta.
 local function buildRange(faction: string, folder: Folder)
 	local hq = MapConfig.HQ[faction]
@@ -110,9 +187,20 @@ local function buildRange(faction: string, folder: Folder)
 	if not (hq and lane) then
 		return
 	end
-	local dx, dz = lane.dir[1], lane.dir[2]
-	local x0 = hq.x + lane.offsetM[1] / M
-	local z0 = hq.z + lane.offsetM[2] / M
+	local x0, z0, dx, dz, deg, clear = chooseLane(hq, lane)
+	folder:SetAttribute("LaneDeg", deg)
+	if not clear then
+		print(string.format("[VT65] raia %s: nenhuma direção com visada livre; ficou a preferida", faction))
+	else
+		print(
+			string.format(
+				"[VT65] raia %s: %+d° da direção preferida, linha a %.0f m do QG (visada livre)",
+				faction,
+				deg,
+				(Vector3.new(x0, 0, z0) - Vector3.new(hq.x, 0, hq.z)).Magnitude * M
+			)
+		)
+	end
 	local ignore: { Instance } = { folder }
 	-- linha de tiro: barra baixa de madeira com a placa voltada para o atirador
 	local y0 = groundY(x0, z0, ignore)
@@ -133,8 +221,8 @@ local function buildRange(faction: string, folder: Folder)
 	)
 	sign(board, "LINHA DE TIRO\nalvos a 100, 200 e 300 m")
 	local plates: { BasePart } = {}
-	for _, m in Tutorial.RANGE_M do
-		local x, z = x0 + dx * m / M, z0 + dz * m / M
+	for i, m in Tutorial.RANGE_M do
+		local x, z = targetXZ(x0, z0, dx, dz, i, m)
 		local y = groundY(x, z, ignore)
 		local base = CFrame.lookAt(Vector3.new(x, y, z), Vector3.new(x0, y, z0)) -- frente para o atirador
 		part(

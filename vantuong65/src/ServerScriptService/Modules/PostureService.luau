@@ -2,6 +2,7 @@
 -- Postura (Parte 10.5 e 12.2): em pé, agachado, deitado, inclinado e correndo. O servidor é a
 -- autoridade: muda HipHeight e velocidade (MedicalService.apply) e grava atributos no modelo; os
 -- clientes posam todo mundo pelos atributos (PostureController). Não deixa levantar sob teto baixo.
+local PhysicsService = game:GetService("PhysicsService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Joints = require(ReplicatedStorage.Shared.Joints)
@@ -35,6 +36,20 @@ local function setProneJoint(model: Model, prone: boolean)
 		root:SetAttribute("StandC0", orig)
 	end
 	Joints.setC0(root, if prone then (orig :: CFrame) * PRONE_ROOT else orig :: CFrame)
+end
+
+-- Deitado, o corpo encosta no chão. Com a colisão normal o soldado era empurrado e escorregava
+-- (reteste no Studio, 2026-11-10: 70 m em 5 s numa encosta de 14°), e o Humanoid religa o
+-- CanCollide do tronco. Por isso, grupos de colisão: o corpo deitado não colide com o terreno
+-- ("Ground"), mas os dois continuam colidindo com o grupo padrão, e os raycasts dos tiros (grupo
+-- Default) ainda acertam o corpo. O HumanoidRootPart fica no Default e segura o soldado pelo HipHeight.
+local GROUND, PRONE_BODY = "Ground", "ProneBody"
+local function setProneCollision(model: Model, prone: boolean)
+	for _, p in model:GetDescendants() do
+		if p:IsA("BasePart") and p.Name ~= "HumanoidRootPart" then
+			p.CollisionGroup = if prone then PRONE_BODY else "Default"
+		end
+	end
 end
 
 local function headroom(model: Model, need: number): boolean
@@ -72,6 +87,7 @@ local function setStance(model: Model, stance: string): boolean
 	end
 	hum.HipHeight = math.max((base :: number) - newDrop, MIN_HIP)
 	setProneJoint(model, stance == "prone")
+	setProneCollision(model, stance == "prone")
 	model:SetAttribute("Crouched", stance == "crouch")
 	model:SetAttribute("Prone", stance == "prone")
 	if stance ~= "stand" then
@@ -90,6 +106,13 @@ function PostureService.setCrouch(model: Model, on: boolean): boolean
 end
 
 function PostureService.start()
+	for _, g in { GROUND, PRONE_BODY } do
+		if not PhysicsService:IsCollisionGroupRegistered(g) then
+			PhysicsService:RegisterCollisionGroup(g)
+		end
+	end
+	PhysicsService:CollisionGroupSetCollidable(PRONE_BODY, GROUND, false)
+	workspace.Terrain.CollisionGroup = GROUND
 	Net.event("Posture_Set").OnServerEvent:Connect(function(player, req: any)
 		local char = player.Character
 		if not (char and Combatants.get(char)) then

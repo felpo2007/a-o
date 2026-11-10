@@ -242,9 +242,11 @@ Os 8 bugs encontrados foram corrigidos. **Reteste no Studio** (mesmo dia, relat�
 - **deitado:** não escorrega mais (0,00 m em 7 s numa encosta de 14°). O corpo não deitava porque
   as juntas do avatar agora vêm como `AnimationConstraint`. **Corrigido (D-52):** deitado com o
   tronco a 86° no servidor; agachar e inclinar também voltaram;
-- **raia:** EUA 100 m acerta 5 de 5. Uma elevação do terreno bloqueia EUA 200/300 m e VC 100 m, e
-  VC 200/300 m erram o alvo;
-- **autoteste:** 7 ok, 3 falhas (campo de tiro, pá e medevac), 1 pulado (animais). Antes da D-52
+- **deitado em encosta, de novo:** com o corpo deitando de verdade, o tronco empurrava o soldado
+  (70 m em 5 s). Corrigido com grupos de colisão (D-52): 0,02 m em 7 s;
+- **raia:** o servidor escolhe uma direção com visada livre e põe os alvos lado a lado (D-53);
+- **pá:** o buraco agora tem ~1,2 m de fundo (antes 0,48 m); a pegada é de 2,2 a 3,4 m (D-53);
+- **autoteste:** **10 ok, 0 falhas, 1 pulado** (animais, IDs de arte em 0). Na primeira rodada
   eram 6 ok e 4 falhas.
 
 **Depois do teste:**

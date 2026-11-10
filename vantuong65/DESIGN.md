@@ -803,5 +803,37 @@ arte real.
   com a versão anterior do Git aberta em outra janela: mesmas instâncias por classe (+1
   `ModuleScript`), mesma geometria, mesmos 11.808 atributos e os outros 107 scripts idênticos. O
   arquivo caiu de 2,82 para 1,86 MB, porque o Studio comprime de outro jeito.
+- **Grupos de colisão (mesmo dia):** com o corpo deitando de verdade, o tronco encostava no chão e
+  empurrava o soldado. Numa encosta de 14° ele escorregou **70 m em 5 s** (23 m/s), em queda livre.
+  O escorregão do D-49 só tinha sumido porque a pose não era aplicada. Tirar o `CanCollide` não
+  adianta, porque o Humanoid o religa no tronco. Solução: o terreno vai para o grupo `Ground`, e o
+  corpo deitado (tudo menos o `HumanoidRootPart`) vai para `ProneBody`, que não colide com `Ground`.
+  Os dois continuam colidindo com o grupo `Default`, então os raycasts dos tiros (grupo padrão)
+  acertam o corpo deitado. Medido: 0,02 m em 7 s na mesma encosta, estado `Running`, tronco a 87°;
+  ao levantar, as 16 peças voltam ao `Default`. O corpo deitado ainda colide com as peças do mapa
+  (diques, casas).
 - **Não verificado:** o que outro jogador vê (o MCP só roda Play solo). As poses de agachar e
   inclinar continuam só no cliente, como antes: o acerto no servidor usa as pernas em pé.
+
+## D-53 — Raia, pá e medevac (autoteste com 10 ok, 2026-11-10)
+- **Raia com visada livre** (`TrainingService.chooseLane`):
+  - a direção e a distância fixas de `Tutorial.RANGE_LANE` passaram a ser a primeira tentativa;
+  - se o terreno tapar um alvo, o servidor testa a cada 10° (até 90° para cada lado), a 40, 80 e
+    120 m do QG, com atirador ajoelhado (1,0 m) e em pé (1,5 m), fora d'água e dentro do mapa;
+  - no Studio: EUA a +0° e 120 m do QG; VC a −10° e 40 m;
+  - os alvos ficam lado a lado, 3 m entre um e outro. Em fila, o de 100 m tapava o de 200 m.
+- **Autoteste da raia com sementes como as do jogo:** com sementes de 1 a 5, o primeiro sorteio do
+  xorshift32 (`Rng`) sai quase zero, e o Box-Muller vira ~4σ sempre para o mesmo lado: todos os
+  tiros iam 17 a 25 cm para a direita a 100 m. O jogo usa sementes de 32 bits
+  (`seedRng:nextU32()`), então o tiro real não tinha esse viés. **Fica o alerta:** `Rng.new` com
+  semente pequena dá um primeiro sorteio ruim. Mudar o `Rng` mudaria todas as sequências fixas
+  (arte, eventos), então não mexi sem os testes do Lune.
+- **Pá:** o `FillBlock` de 1,8 × 0,6 × 1,2 m afundava só 0,2 a 0,5 m, porque o voxel tem 1,12 m e a
+  superfície é suavizada. Agora as colunas de voxels sob a pegada ficam vazias até o fundo, com
+  ocupação proporcional no voxel do fundo (`WriteVoxels`). Mesmo assim a suavização ergue o fundo
+  ~0,6 m, então o fundo é pedido a 1,8 m. Medido: 1,19 m de mediana (42 medidas, 0,63–1,24). A
+  pegada virou múltiplo do voxel: **2,2 a 3,4 m de lado**, não 1,8 × 0,6 m (D-48).
+- **Medevac:** o autoteste criava um UH-34D no depósito 1, que é do LVTP-5, e os dois se
+  sobrepunham. Agora usa um UH-34D já pousado. A regra do jogo não mudou e passou: evacuado, +25 de
+  suprimento.
+- **Autoteste no Studio:** **10 ok, 0 falhas, 1 pulado** (animais: IDs de arte em 0).
