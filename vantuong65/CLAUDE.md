@@ -23,7 +23,9 @@ Esta pasta é o jogo **VẠN TƯỜNG '65**: FPS tático 30 contra 30 no Roblox,
 - **Não salve o place pelo Studio:** o Studio grava com outra compressão, que o Lune 0.8 não lê
   ("Decompression failed"). Teste mudanças no Studio pelo MCP, mas gere o `.rbxl` pelo pipeline.
 - **No PC do dono (Windows):**
-  - Rojo 7.4.4, Lune 0.8.9 e StyLua 2.0.2 portáteis ficam em `%LOCALAPPDATA%\Programs\vt65-tools`;
+  - Rojo 7.4.4, Lune 0.8.9, StyLua 2.0.2 e luau-lsp 1.70.1 portáteis ficam em
+    `%LOCALAPPDATA%\Programs\vt65-tools`. As definições do Roblox ficam em
+    `vt65-tools\luau-lsp\globalTypes.None.d.luau`;
   - o GitHub CLI fica em `%LOCALAPPDATA%\Programs\gh` e é o login do Git para o push;
   - o checkout tem CRLF, então o `stylua --check` acusa todos os arquivos. Cheque numa cópia LF:
     `git -c core.autocrlf=false worktree add --detach <pasta> HEAD`.
@@ -77,7 +79,7 @@ O `sourcemap.json` não vai para o Git.
 - Segredos só no `.env` (no `.gitignore`), nunca no código nem no chat.
 - ForgeGUI: nunca regenerar um job em `outcome_unknown`. "failed" com `retryable` pode ser
   retomado com `generation_retry`.
-- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-57) e atualize `PROGRESS.md`.
+- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-58) e atualize `PROGRESS.md`.
 - Metas da Parte 2: vegetação ≤ 3 mil triângulos, props ≤ 5 mil, herói ≤ 20 mil (`ArtBudget`,
   conferido pelo teste da F5).
 - Commits no branch acima, com mensagem em português.

@@ -910,3 +910,18 @@ Medido no Studio:
   detecta o piso saía do centro e acertava a areia do fundo, dando velocidade de terra (21 km/h)
   na água. O raio agora sai do topo do chassi. Medido: 10,8 km/h na água (ficha: 11).
 - **Comandante, morteiro e Ontos:** funcionam no Studio (ver o relatório da F4).
+
+## D-57 — Checagem de tipos (luau-lsp 1.70.1) e o impostor dos modelos grandes
+- **Defeito escondido:** o `AssetLoader` ligava `Model.LevelOfDetail = StreamingMesh` (impostor à
+  distância) nas peças grandes durante o jogo. Script do jogo não tem permissão para isso: no Studio,
+  um Script comum recebeu "The current thread cannot write 'LevelOfDetail' (lacking capability
+  PluginOrOpenCloud)". O trecho só roda com a arte publicada. No dia em que os IDs saíssem do 0, o
+  carregamento da arte quebraria. O luau-lsp acusou, porque a propriedade não existe nas definições
+  para scripts do jogo.
+- **Regra:** o impostor tem de vir marcado no próprio modelo, no Studio ou no upload pelo Open
+  Cloud. Vale para hut_thatch, hut_veranda, hut_kitchen, house_tile, hill_tree, coconut_palm,
+  granary e vc_bunker. O script só põe `ModelStreamingMode = Atomic`.
+  - **Pendente:** o `tools/roblox_cloud.py` ainda não marca o `LevelOfDetail` no upload.
+- **Também corrigido:** o `PostureController` podia passar `nil` ao `IKControl`; o
+  `WeaponController` tinha uma variável sem uso e o `Bus` declarado duas vezes.
+- **Resultado:** luau-lsp com 0 erros e 0 avisos em `src/`.

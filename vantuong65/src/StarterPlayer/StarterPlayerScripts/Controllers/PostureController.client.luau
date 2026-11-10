@@ -73,10 +73,14 @@ local function ikTo(hum: Humanoid, name: string, root: Instance?, effector: Inst
 		k = n
 	end
 	local ik = k :: IKControl
-	ik.ChainRoot = root
-	ik.EndEffector = effector
-	ik.Target = target
-	ik.Enabled = on and root ~= nil and effector ~= nil and target ~= nil
+	if root and effector and target then
+		ik.ChainRoot = root
+		ik.EndEffector = effector
+		ik.Target = target
+		ik.Enabled = on
+	else
+		ik.Enabled = false
+	end
 end
 
 local function holdWeapon(char: Model)

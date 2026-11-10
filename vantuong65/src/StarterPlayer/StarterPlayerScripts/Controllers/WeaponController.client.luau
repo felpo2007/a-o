@@ -21,7 +21,6 @@ local UiKit = require(script.Parent.UiKit)
 
 local player = Players.LocalPlayer
 local camera = workspace.CurrentCamera
-local M = 0.28
 
 local slots: { string } = {}
 local slot = 1
@@ -343,7 +342,6 @@ Input.StateChanged:Connect(function(cancelled: { string }, ctx: string)
 end)
 
 -- roda de equipamento: binóculo
-local Bus = require(script.Parent.Bus)
 Bus.on("equip_item", function(id: string)
 	if id == "binoculars" then
 		toggleBinoculars()
