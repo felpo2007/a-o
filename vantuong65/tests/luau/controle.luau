@@ -278,6 +278,100 @@ test("10.000 eventos aleatórios: invariantes nunca quebram", function()
 	end
 end)
 
+test("layout padrão = tabela da Parte 12 (infantaria, veículos, mapa e menus)", function()
+	local function pad(ctx: string, id: string): (string?, string?)
+		for _, a in InputMap.ACTIONS do
+			if a.ctx == ctx and a.id == id then
+				return a.pad, a.padPress
+			end
+		end
+		return nil, nil
+	end
+	local spec: { { string } } = {
+		-- infantaria
+		{ "infantry", "sprint", "ButtonL3", "press" },
+		{ "infantry", "melee", "ButtonR3", "press" },
+		{ "infantry", "aim", "ButtonL2", "press" },
+		{ "infantry", "fire", "ButtonR2", "press" },
+		{ "infantry", "equip_wheel", "ButtonL1", "hold" },
+		{ "infantry", "last_item", "ButtonL1", "tap" },
+		{ "infantry", "comm_wheel", "ButtonR1", "hold" },
+		{ "infantry", "mark", "ButtonR1", "tap" },
+		{ "aim", "lean_left", "ButtonL1", "press" },
+		{ "aim", "lean_right", "ButtonR1", "press" },
+		{ "aim", "hold_breath", "ButtonL3", "press" },
+		{ "infantry", "crouch", "ButtonB", "tap" },
+		{ "infantry", "prone", "ButtonB", "hold" },
+		{ "infantry", "reload", "ButtonX", "tap" },
+		{ "infantry", "interact", "ButtonX", "hold" },
+		{ "infantry", "swap_weapon", "ButtonY", "tap" },
+		{ "infantry", "bayonet", "ButtonY", "hold" },
+		{ "infantry", "binoculars", "DPadUp", "press" },
+		{ "infantry", "quick_bandage", "DPadDown", "press" },
+		{ "infantry", "fire_mode", "DPadLeft", "tap" },
+		{ "infantry", "zeroing", "DPadLeft", "hold" },
+		{ "infantry", "radio_channel", "DPadRight", "press" },
+		{ "global", "map", "ButtonSelect", "tap" },
+		{ "global", "game_menu", "ButtonSelect", "hold" },
+		-- veículos
+		{ "ground_vehicle", "v_fire", "ButtonR2", "press" },
+		{ "ground_vehicle", "v_optic", "ButtonL2", "press" },
+		{ "ground_vehicle", "v_coax", "ButtonR1", "press" },
+		{ "ground_vehicle", "v_ammo", "ButtonX", "press" },
+		{ "ground_vehicle", "v_binoculars", "ButtonL2", "press" },
+		{ "ground_vehicle", "v_mark", "ButtonR1", "press" },
+		{ "ground_vehicle", "v_switch_seat", "ButtonY", "hold" },
+		{ "ground_vehicle", "v_exit", "ButtonB", "hold" },
+		{ "helicopter", "h_pedal_left", "ButtonL1", "press" },
+		{ "helicopter", "h_pedal_right", "ButtonR1", "press" },
+		{ "helicopter", "h_stabilize", "ButtonA", "hold" },
+		{ "helicopter", "v_door_fire", "ButtonR2", "press" },
+		{ "helicopter", "v_switch_seat", "ButtonY", "hold" },
+		{ "helicopter", "v_exit", "ButtonB", "hold" },
+		-- mapa e menus
+		{ "map", "map_prev", "ButtonL1", "press" },
+		{ "map", "map_next", "ButtonR1", "press" },
+		{ "map", "map_select", "ButtonA", "press" },
+		{ "map", "map_mark", "ButtonX", "press" },
+		{ "menu", "ui_back", "ButtonB", "press" },
+		{ "menu", "ui_tab_prev", "ButtonL1", "press" },
+		{ "menu", "ui_tab_next", "ButtonR1", "press" },
+		{ "menu", "ui_sub_prev", "ButtonL2", "press" },
+		{ "menu", "ui_sub_next", "ButtonR2", "press" },
+	}
+	for _, row in spec do
+		local p, kind = pad(row[1], row[2])
+		assert(p == row[3], string.format("%s.%s: %s (esperado %s)", row[1], row[2], tostring(p), row[3]))
+		assert(kind == row[4], string.format("%s.%s: %s (esperado %s)", row[1], row[2], tostring(kind), row[4]))
+	end
+	-- nenhum duplo toque: o tipo de toque é sempre press, tap ou hold
+	for _, a in InputMap.ACTIONS do
+		assert(a.padPress == "press" or a.padPress == "tap" or a.padPress == "hold", a.id)
+	end
+end)
+
+test("rodas: 8 itens fixos por página; mensagens sem digitar", function()
+	local Comms = require(S .. "Comms")
+	for _, page in { Comms.EQUIP, Comms.COMM, Comms.COMMAND } do
+		assert(#page == 8, "página com " .. #page .. " itens")
+	end
+	assert(Comms.EQUIP[1].id == "bandage" and Comms.COMM[1].id == "mark", "posições fixas mudaram")
+	for _, it in Comms.COMM do
+		assert(Comms.MESSAGES[it.id] or it.id == "mark" or it.id == "page_command", it.id .. " sem texto")
+	end
+	for _, id in { "corr_add", "corr_drop", "corr_right", "corr_left" } do
+		assert(Comms.CORRECTION[id], id)
+	end
+end)
+
+test("fumaça bloqueia a visão (bots e assistência), não a linha fora dela", function()
+	local Smoke = require(S .. "Smoke")
+	local clouds = { { x = 50, y = 0, z = 0, r = 10 } }
+	assert(Smoke.blocks(0, 0, 0, 100, 0, 0, clouds), "atravessa a nuvem")
+	assert(not Smoke.blocks(0, 0, 30, 100, 0, 30, clouds), "passa ao lado")
+	assert(not Smoke.blocks(0, 0, 0, 30, 0, 0, clouds), "termina antes da nuvem")
+end)
+
 print(string.format("%d ok, %d falhas", passed, failed))
 if failed > 0 then
 	process.exit(1)

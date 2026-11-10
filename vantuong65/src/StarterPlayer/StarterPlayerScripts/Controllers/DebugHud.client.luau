@@ -28,9 +28,32 @@ text.Font = Enum.Font.Code
 text.TextSize = 14
 text.Parent = gui
 
+-- Ferramentas de teste do controle (Parte 12.7), só no teclado do testador:
+-- F8 começa/para a gravação das entradas do controle (o JSON vai para o Output);
+-- F9 reproduz a última gravação pela mesma camada de entrada do jogo.
+local Input = require(script.Parent.Input)
+local HttpService = game:GetService("HttpService")
+local recording = false
+local lastTape: { any }? = nil
 UserInputService.InputBegan:Connect(function(input, processed)
-	if not processed and input.KeyCode == Enum.KeyCode.F3 then
+	if processed then
+		return
+	end
+	if input.KeyCode == Enum.KeyCode.F3 then
 		gui.Enabled = not gui.Enabled
+	elseif input.KeyCode == Enum.KeyCode.F8 then
+		if recording then
+			lastTape = Input.stopRecording()
+			recording = false
+			print("[VT65] gravação do controle:", HttpService:JSONEncode(lastTape))
+		else
+			Input.startRecording()
+			recording = true
+			print("[VT65] gravando entradas do controle (F8 para parar)")
+		end
+	elseif input.KeyCode == Enum.KeyCode.F9 and lastTape then
+		print("[VT65] reproduzindo", #lastTape, "eventos")
+		task.spawn(Input.replay, lastTape)
 	end
 end)
 

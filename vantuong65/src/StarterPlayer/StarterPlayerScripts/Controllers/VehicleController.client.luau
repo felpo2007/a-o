@@ -1,17 +1,20 @@
 --!strict
--- Controle de veículos (F4). O motorista tem a posse de rede do chassi e simula aqui:
+-- Controle de veículos (F4 + Parte 12.3). O motorista tem a posse de rede do chassi e simula aqui:
 --   blindados/anfíbios: Shared/Vehicles.drive (potência, atrito e resistência por tipo de chão);
 --   UH-34D: Shared/HeliModel (efeito solo, sustentação de translação, calor, carga e torque).
--- Teclas — chão: W/S acelera/ré, A/D vira. Helicóptero: Espaço/Ctrl coletivo, W/S cíclico
--- (arfagem), A/D cíclico (rolagem), Q/E pedais. Artilheiro: mira com a câmera, clique atira,
--- R recarrega o Ontos (parado). A pé, antitanque: Z dispara o foguete. Y sai do veículo.
-local ContextActionService = game:GetService("ContextActionService")
+-- Controle: motorista — analógico esquerdo dirige, RT acelera, LT freia/ré; atirador — analógico
+-- direito gira a torre (câmera), RT tiro principal, LT ótica, RB coaxial, X munição; comandante —
+-- LT binóculo, RB marca o alvo; piloto — analógico esquerdo cíclico, RT/LT coletivo, RB/LB
+-- pedais, A segurado estabiliza (assistência opcional); porta — RT atira, LT zoom; todos — Y
+-- segurado troca de assento, B segurado sai. Teclado: WASD, Espaço/Ctrl, Q/E, mouse, C, Y.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 
 local HeliModel = require(ReplicatedStorage.Shared.HeliModel)
+local Input = require(script.Parent.Input)
+local InputMap = require(ReplicatedStorage.Shared.InputMap)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Vehicles = require(ReplicatedStorage.Shared.Vehicles)
 local Weapons = require(ReplicatedStorage.Shared.Weapons) :: any
@@ -88,14 +91,21 @@ end
 local drive = { v = 0 }
 local yaw: number? = nil
 local heli = { collective = 0.55, vel = Vector3.zero, pitch = 0, roll = 0 }
-
-local function sinkJump(_: string, _state: Enum.UserInputState, _: InputObject)
-	return Enum.ContextActionResult.Sink
-end
+local pedalL, pedalR, stabilize = false, false, false
 
 local function groundStep(model: Model, chassis: BasePart, spec: any, dt: number)
-	local throttle = key(Enum.KeyCode.W) - key(Enum.KeyCode.S)
-	local steer = key(Enum.KeyCode.D) - key(Enum.KeyCode.A)
+	-- controle: RT acelera, LT freia/ré, analógico esquerdo dirige (Parte 12.3); teclado: WASD
+	local throttle, steer
+	if Input.isGamepad() then
+		throttle = Input.trigger("right") - Input.trigger("left")
+		steer = Input.move().X
+	else
+		throttle = key(Enum.KeyCode.W) - key(Enum.KeyCode.S)
+		steer = key(Enum.KeyCode.D) - key(Enum.KeyCode.A)
+	end
+	if not InputMap.acceptsGame(Input.state) then
+		throttle, steer = 0, 0
+	end
 	local hit = groundRay(chassis.Position, model, chassis.Size.Y + 6)
 	local surface = surfaceOf(hit)
 	if (model:GetAttribute("Engine") :: number) <= 0 or (model:GetAttribute("Tracks") :: number) <= 0 then
@@ -140,10 +150,28 @@ end
 local function heliStep(model: Model, chassis: BasePart, dt: number)
 	local S = HeliModel.SPEC
 	local atm = HeliModel.atmosphere(AIR_C)
-	heli.collective =
-		math.clamp(heli.collective + (key(Enum.KeyCode.Space) - key(Enum.KeyCode.LeftControl)) * 0.35 * dt, 0, 1)
-	local tp = (key(Enum.KeyCode.S) - key(Enum.KeyCode.W)) * math.rad(15)
-	local tr = (key(Enum.KeyCode.A) - key(Enum.KeyCode.D)) * math.rad(15)
+	-- controle: RT/LT coletivo, analógico esquerdo cíclico, RB/LB pedais; teclado: Espaço/Ctrl, WASD, Q/E
+	local up, cyc
+	if Input.isGamepad() then
+		up = Input.trigger("right") - Input.trigger("left")
+		cyc = Input.move()
+	else
+		up = key(Enum.KeyCode.Space) - key(Enum.KeyCode.LeftControl)
+		cyc = Vector2.new(key(Enum.KeyCode.D) - key(Enum.KeyCode.A), key(Enum.KeyCode.W) - key(Enum.KeyCode.S))
+	end
+	if not InputMap.acceptsGame(Input.state) then
+		up, cyc = 0, Vector2.zero
+	end
+	heli.collective = math.clamp(heli.collective + up * 0.35 * dt, 0, 1)
+	local tp = -cyc.Y * math.rad(15)
+	local tr = -cyc.X * math.rad(15)
+	-- estabilizar (A segurado): assistência opcional, sem piloto automático — nivela o disco
+	-- contra a deriva e aproxima o coletivo do pairado; o piloto segue no comando.
+	if stabilize then
+		local localV = CFrame.Angles(0, (yaw or 0) :: number, 0):VectorToObjectSpace(heli.vel)
+		tp += math.clamp(-localV.Z * 0.02, -0.15, 0.15)
+		tr += math.clamp(localV.X * 0.02, -0.15, 0.15)
+	end
 	heli.pitch += (tp - heli.pitch) * math.min(1, 2 * dt)
 	heli.roll += (tr - heli.roll) * math.min(1, 2 * dt)
 	-- carga: vazio + 2 pilotos + ocupantes + combustível (PLACEHOLDER 400 kg)
@@ -169,7 +197,11 @@ local function heliStep(model: Model, chassis: BasePart, dt: number)
 	local _, cy, _ = chassis.CFrame:ToOrientation()
 	yaw = yaw or cy
 	local torque = HeliModel.torqueFraction(pDemand)
-	local pedal = key(Enum.KeyCode.E) - key(Enum.KeyCode.Q)
+	local pedal = (if pedalR then 1 else 0) - (if pedalL then 1 else 0)
+	if stabilize and up == 0 then
+		-- aproxima o coletivo da potência de pairar (subida ~0)
+		heli.collective += ((pReq / pAvail) - heli.collective) * math.min(1, dt * 0.8)
+	end
 	local drift = if torque > 0.92 then (torque - 0.92) * math.rad(200) else 0 -- falta pedal: nariz gira
 	yaw = (yaw :: number) - (pedal * math.rad(35) + drift) * dt
 	local yawCF = CFrame.Angles(0, yaw :: number, 0)
@@ -208,15 +240,34 @@ local function heliStep(model: Model, chassis: BasePart, dt: number)
 end
 
 local driving: Model? = nil
-RunService.Heartbeat:Connect(function(dt)
+local seatNow: Seat? = nil
+local zoom = 0 -- 0 nenhum, 1 ótica/zoom, 2 binóculo
+
+-- tipo de contexto e papel do assento para a camada Input (Parte 12.3)
+local function seatRole(seat: Seat, spec: any): string?
+	local id = seat:GetAttribute("SeatId")
+	if id == "driver" then
+		return "driver"
+	elseif id == "gunner" then
+		return if spec.kind == "heli" then "door" else "gunner"
+	elseif id == "commander" then
+		return "commander"
+	end
+	return nil
+end
+
+RunService.Heartbeat:Connect(function(dt: number)
 	local seat = currentSeat()
 	local model = seat and vehicleOf(seat)
 	if not seat or not model or model:GetAttribute("Destroyed") then
-		if driving then
-			ContextActionService:UnbindAction("VT65_HeliNoJump")
+		if seatNow then
+			seatNow = nil
+			Input.setVehicle(nil, nil)
+			camera.FieldOfView = 70
 		end
 		driving, yaw = nil, nil
 		drive.v = 0
+		zoom = 0
 		label.Visible = false
 		return
 	end
@@ -225,6 +276,17 @@ RunService.Heartbeat:Connect(function(dt)
 	if not chassis or not spec then
 		return
 	end
+	if seat ~= seatNow then
+		seatNow = seat
+		zoom = 0
+		Input.setVehicle(if spec.kind == "heli" then "helicopter" else "ground_vehicle", seatRole(seat, spec))
+	end
+	-- FOV no veículo: ótica do atirador ~20°, binóculo do comandante 10°, zoom leve da porta 50°
+	local target = if zoom == 2
+		then 10
+		elseif zoom == 1 then (if seat:GetAttribute("Weapon") == "m60" then 50 else 20)
+		else 70
+	camera.FieldOfView += (target - camera.FieldOfView) * math.min(1, dt * 8)
 	label.Visible = true
 	if seat:GetAttribute("SeatId") == "driver" then
 		if driving ~= model then
@@ -232,9 +294,6 @@ RunService.Heartbeat:Connect(function(dt)
 			yaw = nil
 			drive.v = 0
 			heli.vel = Vector3.zero
-			if spec.kind == "heli" then
-				ContextActionService:BindActionAtPriority("VT65_HeliNoJump", sinkJump, false, 3000, Enum.KeyCode.Space)
-			end
 		end
 		if spec.kind == "heli" then
 			heliStep(model, chassis, dt)
@@ -243,57 +302,141 @@ RunService.Heartbeat:Connect(function(dt)
 		end
 	else
 		local w = seat:GetAttribute("Weapon")
+		local _, fireTxt = Input.glyph(if seatRole(seat, spec) == "door" then "v_door_fire" else "v_fire")
 		label.Text = string.format(
 			"%s — %s%s",
 			spec.name,
 			tostring(seat:GetAttribute("SeatId")),
 			if w == "rr_106"
 				then string.format(
-					"\ntubos carregados: %d (R recarrega parado)",
+					"\ntubos carregados: %d (recarregar: parado)",
 					(model:GetAttribute("Tubes") :: number?) or 0
 				)
-				elseif w then "\narma: " .. tostring(w)
+				elseif w == "gun_90" then string.format(
+					"\nmunição: %s · atirar: %s",
+					tostring(model:GetAttribute("Ammo") or "he"),
+					fireTxt
+				)
+				elseif w then "\narma: " .. tostring(w) .. " · atirar: " .. fireTxt
 				else ""
 		)
 	end
 end)
 
--- tiro do assento (mira pela câmera); M60 em automático pela cadência da ficha
+-- ===== armas e ações dos assentos (camada Input) =====
 local firing = false
-UserInputService.InputBegan:Connect(function(input, processed)
-	if processed then
-		return
+local function fireOnce(extra: { [string]: any }?)
+	local req: { [string]: any } = { dir = camera.CFrame.LookVector }
+	if extra then
+		for k, v in extra do
+			req[k] = v
+		end
 	end
+	Net.event("Vehicle_Fire"):FireServer(req)
+end
+local function autoFire(extra: { [string]: any }?)
+	firing = true
+	local wp = Weapons.get("m60")
+	local interval = 60 / ((wp and wp.rpm) or 550)
 	local seat = currentSeat()
-	if input.KeyCode == Enum.KeyCode.Y and seat then
-		local hum = (player.Character :: Model):FindFirstChildOfClass("Humanoid")
-		if hum then
-			hum.Sit = false
-			hum.Jump = true
+	task.spawn(function()
+		while firing and currentSeat() == seat do
+			fireOnce(extra)
+			task.wait(interval)
 		end
-	elseif input.KeyCode == Enum.KeyCode.R and seat and seat:GetAttribute("Weapon") == "rr_106" then
-		Net.event("Vehicle_Reload"):FireServer()
-	elseif input.KeyCode == Enum.KeyCode.Z and not seat and player:GetAttribute("Role") == "anti_tank" then
-		Net.event("Vehicle_Fire"):FireServer({ dir = camera.CFrame.LookVector })
-	elseif input.UserInputType == Enum.UserInputType.MouseButton1 and seat and seat:GetAttribute("Weapon") then
-		local w = seat:GetAttribute("Weapon")
-		if w == "m60" then
-			firing = true
-			local wp = Weapons.get("m60")
-			local interval = 60 / ((wp and wp.rpm) or 550)
-			task.spawn(function()
-				while firing and currentSeat() == seat do
-					Net.event("Vehicle_Fire"):FireServer({ dir = camera.CFrame.LookVector })
-					task.wait(interval)
-				end
-			end)
-		else
-			Net.event("Vehicle_Fire"):FireServer({ dir = camera.CFrame.LookVector })
-		end
+	end)
+end
+local function stopFire()
+	firing = false
+end
+
+-- atirador do blindado: RT principal, RB coaxial, LT ótica, X munição/recarga
+Input.on("v_fire", "press", function()
+	local seat = currentSeat()
+	if seat and seat:GetAttribute("Weapon") == "m60" then
+		autoFire(nil)
+	else
+		fireOnce(nil)
 	end
 end)
-UserInputService.InputEnded:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 then
-		firing = false
+Input.on("v_fire", "release", stopFire)
+Input.on("v_coax", "press", function()
+	autoFire({ coax = true })
+end)
+Input.on("v_coax", "release", stopFire)
+Input.on("v_ammo", "press", function()
+	Net.event("Vehicle_Reload"):FireServer({ op = "ammo" })
+end)
+Input.on("v_optic", "press", function()
+	zoom = 1
+end)
+Input.on("v_optic", "release", function()
+	zoom = 0
+end)
+-- comandante: LT binóculo, RB marca o alvo para o atirador
+Input.on("v_binoculars", "press", function()
+	zoom = 2
+end)
+Input.on("v_binoculars", "release", function()
+	zoom = 0
+end)
+Input.on("v_mark", "press", function()
+	local params = RaycastParams.new()
+	params.FilterType = Enum.RaycastFilterType.Exclude
+	params.FilterDescendantsInstances = { player.Character :: Model }
+	local seat = currentSeat()
+	local model = seat and vehicleOf(seat)
+	if model then
+		params:AddToFilter(model)
 	end
+	local r = workspace:Raycast(camera.CFrame.Position, camera.CFrame.LookVector * (2000 / M), params)
+	if r then
+		Net.event("Squad_Mark"):FireServer({ pos = r.Position, kind = "target" })
+	end
+end)
+-- atirador de porta: RT atira (automático), LT zoom leve
+Input.on("v_door_fire", "press", function()
+	autoFire(nil)
+end)
+Input.on("v_door_fire", "release", stopFire)
+-- piloto: pedais e estabilização
+Input.on("h_pedal_left", "press", function()
+	pedalL = true
+end)
+Input.on("h_pedal_left", "release", function()
+	pedalL = false
+end)
+Input.on("h_pedal_right", "press", function()
+	pedalR = true
+end)
+Input.on("h_pedal_right", "release", function()
+	pedalR = false
+end)
+Input.on("h_stabilize", "holdStart", function()
+	stabilize = true
+end)
+Input.on("h_stabilize", "holdEnd", function()
+	stabilize = false
+end)
+Input.on("h_stabilize", "press", function() -- R no teclado: alterna
+	stabilize = not stabilize
+end)
+-- todos: Y segurado troca de assento; B segurado sai (teclado: C e Y)
+local function switchSeat()
+	Net.event("Vehicle_SwitchSeat"):FireServer()
+end
+local function exitVehicle()
+	local hum = (player.Character :: Model):FindFirstChildOfClass("Humanoid")
+	if hum then
+		hum.Sit = false
+		hum.Jump = true
+	end
+end
+Input.on("v_switch_seat", "holdStart", switchSeat)
+Input.on("v_switch_seat", "press", switchSeat)
+Input.on("v_exit", "holdStart", exitVehicle)
+Input.on("v_exit", "press", exitVehicle)
+Input.StateChanged:Connect(function()
+	firing = false
+	pedalL, pedalR, stabilize = false, false, false
 end)

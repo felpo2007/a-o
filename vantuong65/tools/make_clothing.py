@@ -1,8 +1,10 @@
-"""Gera os moldes clássicos de roupa do Roblox (585 x 559 px) por código, como placeholder.
+"""Gera os moldes clássicos de roupa do Roblox (585 x 559 px) por código.
 
-Os moldes do ForgeGUI terminaram em `outcome_unknown` e não podem ser regenerados (regra do
-serviço). Estes PNGs são procedurais: tecido com trama, costuras, bolsos, botões e cinto nas
-cores documentadas em DESIGN.md (D-30). Uso: `uv run python tools/make_clothing.py`.
+Por que por código: os 6 moldes e as 3 texturas de tecido pedidos ao ForgeGUI terminaram todos em
+`outcome_unknown` ("worker interruption" aos 15 min), e a regra do serviço é não regenerar. O
+molde é 100% sob controle aqui: trama (sarja no OG-107, tela nos uniformes VC), tingimento e
+desbotamento, costuras, bolsos, botões, cinto, vincos, suor, sol nos ombros e lama nas pernas, nas
+cores de DESIGN.md (D-30). Uso: `uv run python tools/make_clothing.py`.
 """
 
 from __future__ import annotations
@@ -44,8 +46,20 @@ L_LIMB = {
 
 # Cores (RGB): OG-107 desbotado; cáqui e verde-escuro da Força Principal; cintos.
 UNIFORMS = {
-    "us_shirt": {"cloth": (104, 108, 74), "kind": "shirt", "belt": None, "pockets": "flap"},
-    "us_pants": {"cloth": (98, 102, 70), "kind": "pants", "belt": (84, 88, 58), "cargo": True},
+    "us_shirt": {
+        "cloth": (104, 108, 74),
+        "kind": "shirt",
+        "belt": None,
+        "pockets": "flap",
+        "weave": "twill",
+    },
+    "us_pants": {
+        "cloth": (98, 102, 70),
+        "kind": "pants",
+        "belt": (84, 88, 58),
+        "cargo": True,
+        "weave": "twill",
+    },
     "vc_khaki_shirt": {"cloth": (170, 150, 108), "kind": "shirt", "belt": None, "pockets": "flap"},
     "vc_khaki_pants": {"cloth": (164, 144, 104), "kind": "pants", "belt": (112, 84, 52)},
     "vc_green_shirt": {"cloth": (64, 76, 54), "kind": "shirt", "belt": None, "pockets": "flap"},
@@ -57,21 +71,80 @@ def shade(c: tuple[int, int, int], f: float) -> tuple[int, int, int]:
     return tuple(int(max(0, min(255, v * f))) for v in c)  # type: ignore[return-value]
 
 
-def fabric(base: tuple[int, int, int], seed: int) -> np.ndarray:
-    """Tecido de algodão: ruído fino + trama diagonal + manchas largas de desbotamento."""
+def smooth(rng: np.random.Generator, cell: int) -> np.ndarray:
+    """Ruído suave (0 de média, ~1 de desvio) por interpolação bicúbica de uma grade grossa."""
+    g = rng.normal(0, 1, (H // cell + 3, W // cell + 3)).astype(np.float32)
+    im = Image.fromarray(g, "F").resize((W + 3 * cell, H + 3 * cell), Image.BICUBIC)
+    return np.asarray(im, dtype=np.float32)[cell : cell + H, cell : cell + W]
+
+
+def fabric(base: tuple[int, int, int], seed: int, weave: str = "plain") -> np.ndarray:
+    """Algodão: fios (ruído fino), trama (sarja diagonal no OG-107; tela nos uniformes VC),
+    variação de tingimento e desbotamento em manchas largas."""
     rng = np.random.default_rng(seed)
-    yy, xx = np.mgrid[0:H, 0:W]
-    fine = rng.normal(0, 6, (H, W))
-    weave = 4 * np.sin((xx + yy) * 1.9) * np.sin((xx - yy) * 1.7)
-    big = rng.normal(0, 1, (H // 16 + 2, W // 16 + 2))
-    big = np.kron(big, np.ones((16, 16)))[:H, :W]
-    k = np.ones(9) / 9
-    big = np.apply_along_axis(lambda r: np.convolve(r, k, "same"), 1, big)
-    big = np.apply_along_axis(lambda r: np.convolve(r, k, "same"), 0, big)
-    img = np.zeros((H, W, 3))
+    yy, xx = np.mgrid[0:H, 0:W].astype(np.float32)
+    threads = rng.normal(0, 4.5, (H, W))
+    if weave == "twill":
+        pattern = 5 * np.sin((2 * xx + yy) * 1.15) + 2 * np.sin((xx - 2 * yy) * 0.6)
+    else:
+        pattern = 3.5 * np.sin(xx * 2.3) * np.sin(yy * 2.3) + 1.5 * np.sin((xx + yy) * 0.9)
+    dye = 3.5 * smooth(rng, 24)
+    fade = 3.5 * smooth(rng, 64)
+    img = np.zeros((H, W, 3), dtype=np.float32)
     for i in range(3):
-        img[..., i] = base[i] + fine + weave + 5 * big
+        img[..., i] = base[i] + threads + pattern + dye + fade * (1.0 if i < 2 else 0.6)
     return np.clip(img, 0, 255).astype(np.uint8)
+
+
+def blend(arr: np.ndarray, mask: np.ndarray, color: tuple[int, int, int], alpha: float) -> None:
+    m = np.clip(mask, 0, 1)[..., None] * alpha
+    arr[...] = arr * (1 - m) + np.array(color, dtype=np.float32) * m
+
+
+def weather(img: Image.Image, spec: dict, seed: int) -> Image.Image:
+    """Uso de campo: vincos em cotovelos/joelhos, suor (camisa), sol nos ombros, lama nas pernas."""
+    rng = np.random.default_rng(seed + 100)
+    arr = np.asarray(img.convert("RGB"), dtype=np.float32).copy()
+    yy, xx = np.mgrid[0:H, 0:W].astype(np.float32)
+    limbs = [*R_LIMB.items(), *L_LIMB.items()]
+    # vincos: faixas escuras/claras no meio do membro (cotovelo / joelho)
+    for face, (x0, y0, x1, y1) in limbs:
+        if face in ("up", "down"):
+            continue
+        mid = y0 + (y1 - y0) * 0.5
+        band = np.exp(-(((yy - mid) / 6) ** 2)) * (np.sin(xx * 0.35 + yy * 0.2) * 0.5 + 0.5)
+        region = (xx >= x0) & (xx < x1) & (yy >= y0) & (yy < y1)
+        arr[region] *= (1 - 0.18 * band[region])[..., None]
+    if spec["kind"] == "shirt":
+        # sol: ombros e alto das costas mais claros; suor: costas e axilas mais escuros
+        x0, y0, x1, y1 = TORSO["up"]
+        arr[y0:y1, x0:x1] *= 1.08
+        sweat = np.clip(smooth(rng, 40) * 0.6 + 0.4, 0, 1)
+        for name in ("back", "left", "right"):
+            x0, y0, x1, y1 = TORSO[name]
+            m = np.zeros((H, W), dtype=np.float32)
+            m[y0:y1, x0:x1] = sweat[y0:y1, x0:x1] * np.linspace(0.9, 0.2, y1 - y0)[:, None]
+            blend(arr, m, (40, 40, 30), 0.22)
+    else:
+        # lama: sobe da barra até o joelho em manchas; respingos
+        mud = smooth(rng, 18)
+        for face, (x0, y0, x1, y1) in limbs:
+            if face in ("up", "down"):
+                continue
+            h = y1 - y0
+            grad = np.clip((yy - (y0 + 0.55 * h)) / (0.45 * h), 0, 1)
+            knee = np.exp(-(((yy - (y0 + 0.5 * h)) / 8) ** 2)) * 0.6
+            m = np.zeros((H, W), dtype=np.float32)
+            sel = (slice(y0, y1), slice(x0, x1))
+            m[sel] = np.clip((grad[sel] + knee[sel]) * (0.55 + 0.45 * mud[sel]), 0, 1)
+            blend(arr, m, (98, 74, 46), 0.62)
+            for _ in range(18):  # respingos
+                cx, cy = rng.integers(x0, x1), rng.integers(y0 + h // 3, y1)
+                r = float(rng.uniform(1.0, 2.6))
+                dot = ((xx - cx) ** 2 + (yy - cy) ** 2) <= r * r
+                blend(arr, dot.astype(np.float32), (84, 64, 40), 0.85)
+    out = Image.fromarray(np.clip(arr, 0, 255).astype(np.uint8), "RGB")
+    return out
 
 
 def seams(d: ImageDraw.ImageDraw, box: tuple[int, int, int, int], c) -> None:
@@ -154,12 +227,13 @@ def draw_pants(img: Image.Image, spec: dict) -> None:
 
 
 def make(name: str, spec: dict, seed: int) -> Path:
-    arr = fabric(spec["cloth"], seed)
+    arr = fabric(spec["cloth"], seed, spec.get("weave", "plain"))
     img = Image.fromarray(arr, "RGB")
     if spec["kind"] == "shirt":
         draw_shirt(img, spec)
     else:
         draw_pants(img, spec)
+    img = weather(img, spec, seed)
     # fora das regiões úteis: transparente (o Roblox ignora, mas deixa o arquivo limpo)
     mask = Image.new("L", (W, H), 0)
     md = ImageDraw.Draw(mask)

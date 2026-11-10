@@ -21,29 +21,20 @@ do repositório.
 Roteiro de teste em `PROGRESS.md`. **O que depende de você está em [`TODO_USUARIO.md`](TODO_USUARIO.md)**.
 Publicação automática: `tools/roblox_cloud.py`.
 
-Controles (placeholder):
+Controles: **jogável do começo ao fim só com controle de Xbox ou PlayStation** (Parte 12). Layout
+completo, equivalentes de teclado e mouse e a auditoria em [`CONTROLE.md`](CONTROLE.md).
 
-| Tecla | Ação |
+| Controle | Infantaria |
 |---|---|
-| clique esq. | atirar |
-| clique dir. | mirar |
-| R | recarregar |
-| V | seletor de tiro |
-| G | curativo |
-| T | torniquete |
-| F | curar/reanimar aliado |
-| H | desistir |
-| M | mapa |
-| B | loja |
-| C | agachar |
-| N | apoio de fogo por grade (comandante, morteiro) |
-| J | construir (líder de squad, engenheiro, morteiro) |
-| Z | foguete antitanque (RPG-2 / bazuca), a pé |
-| Y | sair do veículo |
-| veículo de esteira | W/S acelera/ré, A/D vira |
-| UH-34D | Espaço/Ctrl coletivo, W/S/A/D cíclico, Q/E pedais |
-| artilheiro | mira pela câmera, clique atira, R recarrega o Ontos (parado) |
-| F3 | HUD de medição |
+| RT / LT | atirar / mirar |
+| L3 / R3 | correr / corpo a corpo (mirando, L3 prende a respiração) |
+| LB / RB | tocar: último item / marcar; segurar: roda de equipamento / comunicação; mirando: inclinar |
+| A / B / X / Y | pular / agachar (segurar: deitar) / recarregar (segurar: interagir) / trocar arma (segurar: baioneta) |
+| ↑ ↓ ← → | binóculo / bandagem rápida / seletor (segurar: alça) / canal de rádio |
+| View | tocar: mapa; segurar: menu do jogo (configurações, papel, loja) |
+
+Veículos, mapa e menus: tabelas em `CONTROLE.md`. F3, F8 e F9 (HUD e gravador de entradas) são
+ferramentas do testador.
 
 Monetização: `MONETIZATION.md`. Assets: `assets/forgegui/` (GLBs em escala real, baixados com
 `tools/fetch_forgegui_assets.py`) e `assets/clothing/` (moldes procedurais). Para publicá-los e

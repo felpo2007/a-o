@@ -47,6 +47,8 @@ local ART_YAW: { [string]: number } = {
 -- v0: 106 mm M344 HEAT = 503 m/s (wiki:M40_recoilless_rifle); demais PLACEHOLDER (D-36).
 local GUNS = {
 	gun_90 = { explosive = "he_90", pen = "he_90", v0 = 820, reloadS = 6, launch = "gun_90" },
+	-- 90 mm com munição anticarro (troca com X / tecla X): PLACEHOLDER de v0 e penetração
+	gun_90_heat = { explosive = "heat_106", pen = "heat_90", v0 = 850, reloadS = 6, launch = "gun_90" },
 	rr_106 = { explosive = "heat_106", pen = "heat_106", v0 = 503, reloadS = 1.2, launch = "rr_106", tubes = 6 },
 	pg2 = { explosive = "pg2", pen = "pg2", v0 = 84, reloadS = 6, launch = "rocket" },
 	rocket_35 = { explosive = "rocket_35", pen = "rocket_35", v0 = 100, reloadS = 6, launch = "rocket" },
@@ -211,9 +213,17 @@ local function onFire(player: Player, req: any)
 			return
 		end
 		local origin = seat.Position + Vector3.new(0, 2.5 / M, 0) + dir * (2 / M)
-		if weapon == "m60" then
+		-- M60 do assento (porta, cúpula) e a coaxial do atirador do M48 (RB / tecla F)
+		if weapon == "m60" or (req.coax == true and weapon == "gun_90") then
+			if now - (lastShot[seat :: any] or 0) < 0.09 then
+				return -- ~650 tiros/min no máximo (validação; a cadência real vem da ficha da M60)
+			end
+			lastShot[seat :: any] = now
 			CombatService.fire(char, "m60", origin, dir, math.floor(rng:next() * 2 ^ 31), player)
 			return
+		end
+		if weapon == "gun_90" and model:GetAttribute("Ammo") == "heat" then
+			weapon = "gun_90_heat"
 		end
 		local gun = GUNS[weapon]
 		if not gun or now - (lastShot[seat] or 0) < gun.reloadS then
@@ -249,9 +259,19 @@ local function onFire(player: Player, req: any)
 end
 
 -- recarga do Ontos: os tubos são carregados por fora; só com o veículo parado (10 s por tubo, D-36)
-local function onReload(player: Player)
+local function onReload(player: Player, req: any)
 	local seat = seatOf(player)
-	if not seat or seat:GetAttribute("Weapon") ~= "rr_106" then
+	if not seat then
+		return
+	end
+	-- M48A3: X troca a munição do 90 mm entre explosiva (HE) e anticarro (HEAT)
+	if seat:GetAttribute("Weapon") == "gun_90" and type(req) == "table" and req.op == "ammo" then
+		local m = seat:FindFirstAncestorWhichIsA("Model") :: Model
+		m:SetAttribute("Ammo", if m:GetAttribute("Ammo") == "heat" then "he" else "heat")
+		lastShot[seat] = os.clock() -- trocar a granada na culatra leva o tempo de uma recarga
+		return
+	end
+	if seat:GetAttribute("Weapon") ~= "rr_106" then
 		return
 	end
 	local model = seat:FindFirstAncestorWhichIsA("Model") :: Model
@@ -414,6 +434,8 @@ function VehicleService.spawn(specId: string, depot: number): Model?
 	model:SetAttribute("Tracks", 100)
 	if specId == "ontos" then
 		model:SetAttribute("Tubes", GUNS.rr_106.tubes)
+	elseif specId == "m48a3" then
+		model:SetAttribute("Ammo", "he")
 	end
 	model.Parent = folder
 	return model
@@ -449,6 +471,35 @@ function VehicleService.start()
 	folder.Parent = workspace
 	Net.event("Vehicle_Fire").OnServerEvent:Connect(onFire)
 	Net.event("Vehicle_Reload").OnServerEvent:Connect(onReload)
+	-- trocar de assento (Y segurado / C): próximo assento livre que o papel permite
+	Net.event("Vehicle_SwitchSeat").OnServerEvent:Connect(function(player)
+		local seat = seatOf(player)
+		local hum = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+		if not seat or not hum then
+			return
+		end
+		local model = seat:FindFirstAncestorWhichIsA("Model") :: Model
+		local seats = {}
+		for _, d in model:GetDescendants() do
+			if d:IsA("Seat") and not d.Disabled then
+				table.insert(seats, d)
+			end
+		end
+		table.sort(seats, function(a, b)
+			return a.Name < b.Name
+		end)
+		local i = table.find(seats, seat) or 0
+		for k = 1, #seats - 1 do
+			local cand = seats[(i + k - 1) % #seats + 1]
+			local role = cand:GetAttribute("Role")
+			if not cand.Occupant and (role == "any" or player:GetAttribute("Role") == role) then
+				hum.Sit = false
+				task.wait()
+				cand:Sit(hum)
+				return
+			end
+		end
+	end)
 	-- foguetes do papel antitanque: 3 por vida (PLACEHOLDER)
 	local function arm(player: Player)
 		player.CharacterAdded:Connect(function()

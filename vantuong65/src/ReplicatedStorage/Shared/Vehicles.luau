@@ -211,6 +211,7 @@ Vehicles.PEN = {
 	pg2 = 150, -- RPG-2 (PG-2 HEAT)
 	rocket_35 = 250, -- bazuca M20 3,5 pol. (M28A2 HEAT)
 	heat_106 = 400, -- M40A1C, M344 HEAT
+	heat_90 = 280, -- 90 mm HEAT do M48A3
 	he_90 = 40, -- 90 mm HE (efeito por estilhaço/sopro)
 	m60 = 8, -- 7,62 mm comum a curta distância
 	rpd = 8,

@@ -278,6 +278,16 @@ O UH-34D ficou para a F4.
 ## D-30 — Personagens e uniformes (placeholder honesto)
 - Escala dos personagens: 1,2× a altura padrão do Roblox (`Characters.HEIGHT_SCALE`).
 - Uniformes como Shirt/Pants clássicos de 585 × 559 px.
+- **Por que as roupas do ForgeGUI não saíram:** os 6 moldes (09/11) e as 3 texturas de tecido
+  pedidas depois (10/11) terminaram em `outcome_unknown` ("worker interruption") exatamente aos
+  15 min. Nos mesmos dias, modelos 3D e sons saíram normalmente. A falha é do gerador de imagens
+  do serviço, não do pedido.
+- **Solução adotada:** molde 100% por código (`tools/make_clothing.py` v2):
+  - sarja no OG-107 e tela nos uniformes VC;
+  - tingimento irregular e desbotamento;
+  - costuras pespontadas, bolsos com aba e botões;
+  - vincos em cotovelos e joelhos, suor nas costas, sol nos ombros;
+  - lama subindo da barra até o joelho.
 - Os 6 moldes pedidos ao ForgeGUI terminaram em `outcome_unknown`, e a regra do serviço é não
   regenerar. Por isso `tools/make_clothing.py` os gera por código.
 - Cores dos moldes (RGB):
@@ -426,3 +436,73 @@ devem ser refeitos antes do lançamento (F5), com prompt de proporções ou mode
 
 A frente dos GLBs dos veículos não é informada (`semantic_front: not_inferred`). A arte gira 90°
 (`ART_YAW`); se no Studio o veículo andar de ré, troque por −90°.
+
+## D-40 — Controle em primeiro lugar: arquitetura (firme)
+Ver `CONTROLE.md`. Resumo:
+- `InputMap` é puro e testado.
+- `Input` usa o Input Action System, com reserva no UserInputService e deduplicação por botão.
+- Os controllers só falam com a camada `Input`, nunca com o UserInputService.
+- O olhar no analógico (`CameraLook`) tira o Thumbstick2 da câmera padrão e aplica a matemática do
+  jogo. A rotação persiste porque o módulo de câmera relê a direção a cada quadro, como já acontece
+  com o recuo.
+- A partir da F2, todo critério de aceite inclui "jogável só com controle".
+
+## D-41 — Números do controle (design, ajustáveis pelo jogador)
+| Item | Padrão | Faixa |
+|---|---|---|
+| Segurar | 0,3 s | 0,2–0,6 s |
+| Limiar do gatilho | 0,15 | 0,02–0,9 |
+| Zona morta: mover | 0,15–0,95 | — |
+| Zona morta: olhar | 0,12–0,95 | — |
+| Curva | exponencial (m²) | também linear e dinâmica (0,5m + 0,5m³) |
+| Giro máximo no quadril | 200°/s | +100% após 0,5 s no máximo |
+
+- **Giro de 180°:** 0,58 s, medido no teste.
+- **Sensibilidades:**
+
+  | Modo | Horizontal | Vertical |
+  |---|---|---|
+  | Quadril | 1,0 | 0,85 |
+  | Mira de ferro | 0,55 | 0,5 |
+  | Luneta/binóculo | 0,3 | 0,28 |
+
+- **Assistência (só controle):** desacelera até 30% sobre o alvo, só com mira de ferro ou luneta,
+  até 150 m, com o alvo visível de verdade. Visível quer dizer: o raio da câmera chega ao inimigo e
+  a fumaça não tapa. Nunca puxa nem gruda.
+- **Iguais para controle e mouse:** recuo, balanço da mira (0,12°, ×0,2 prendendo a respiração por
+  4 s), inércia e FOV.
+
+## D-42 — Itens novos da infantaria (PLACEHOLDER até manual/playtest)
+- 2 granadas e 1 fumaça por vida. Espoleta de 4,5 s; arremesso a 15 m/s.
+- Fumaça: 60 s, raio útil de 6 m. Bloqueia visão de bots e da assistência, não bloqueia balas
+  (teste geométrico em `Shared/Smoke`).
+- Corpo a corpo: coronhada 250 J (alcance 1,8 m); baioneta 900 J (2,4 m). Baioneta só em M14, SKS e
+  Type 56.
+- Rastejar a 25% do andar. Deitar baixa o quadril 4,4 studs; agachar, 2,2.
+- Inclinação: câmera 0,35 m para o lado e tronco 16°.
+- Roda: 8 posições fixas por página, zona morta de 40%. A pá fica apagada, no lugar, até a F5.
+
+## D-43 — Vibração (Parte 12.6)
+- Disparo proporcional ao recuo calculado (M14 forte e seco, M60 contínuo, pistola leve).
+- Explosão cai com a distância até 120 m. A partir de 40 m, usa `HapticEffect` (`GameplayExplosion`)
+  quando disponível.
+- Tiro recebido vibra do lado do impacto: motores das mãos, ou grande/pequeno como reserva.
+- Batimento cardíaco com sangramento grave ou caído.
+- Motor do veículo constante; rotor a ~4 Hz (PLACEHOLDER).
+- Intensidade separada para disparo e dano: desligada, baixa ou normal.
+- Gatilhos adaptativos do DualSense não existem no Roblox: não prometemos.
+
+## D-44 — Testes do controle
+- `tests/luau/controle.luau` (17 testes) cobre:
+  - layout = tabela da Parte 12;
+  - sem conflito; Start nunca usado; Select só onde a navegação automática fica desligada;
+  - zona morta circular, curvas, giro, assistência, roda, ímã, tocar/segurar e configurações;
+  - cada transição (morrer, renascer, veículo, assento, túnel, reanimado segurando, mapa durante a
+    recarga);
+  - um teste aleatório de 10 mil eventos em que nada "segurado" sobrevive a menu, mapa, morte ou
+    desconexão.
+- No jogo:
+  - o vigia do `UiKit` avisa e refoca qualquer tela visível sem foco no controle;
+  - F8/F9 gravam e reproduzem as entradas do controle pela mesma camada.
+- **Não verificado aqui:** nada disso rodou num controle real nem num console (Parte 12.7, matriz em
+  `TODO_USUARIO.md`).

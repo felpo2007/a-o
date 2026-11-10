@@ -74,17 +74,49 @@ Roteiro da F4:
 6. Se a arte de um veículo aparecer de ré (o canhão para trás), troque `math.rad(90)` por
    `math.rad(-90)` em `ART_YAW` (`VehicleService.luau`). O ForgeGUI não informa a frente do modelo.
 
+### Controle (Parte 12): só com controle real
+Jogue **3 partidas inteiras só com controle**, sem tocar no mouse nem no teclado, passando por:
+- todos os papéis;
+- os veículos;
+- o mapa, o spawn, o comandante (alvo no mapa) e o menu do jogo (segurar View).
+
+Anote qualquer tela sem foco, qualquer botão que não respondeu e qualquer estado travado. Para
+gravar a sessão, use F8 no teclado do PC de teste; F9 reproduz.
+
+Matriz:
+
+| Controle | Plataforma |
+|---|---|
+| Xbox Series | PC, com fio e Bluetooth |
+| DualSense | PC, com fio e Bluetooth |
+| DualShock 4 | PC |
+| Genérico | PC |
+| Xbox Series X\|S | console |
+| PlayStation 5 | console |
+
+Confira também:
+- os ícones certos de cada controle;
+- a vibração;
+- o texto lido a 3 m da TV;
+- o piso de 60 fps no console.
+
+Há relatos de Thumbstick1/ButtonA sem resposta no Input Action System. A reserva no
+UserInputService já cobre, mas diga se notar atraso.
+
 ## 4. Decisões históricas que precisam de você ou de um consultor
 - Confirmar o fuso de 1965 (**UTC+8**, hora de Saigon), que define a luz do amanhecer (D-27).
 - Fotos de 1965 para conferir as cores dos uniformes e os modelos (dossiê da Parte 9.1).
 - Consultor vietnamita para casas, altares, túmulos e vozes (Parte 9.9).
 
 ## 5. ForgeGUI (a decisão de gastar crédito é sua)
-Três pedidos terminaram como `outcome_unknown`. A regra do serviço é **não regenerar** sem confirmar
-se houve cobrança:
-- loop do rotor do UH-34D;
-- 6 moldes de roupa: no lugar deles há placeholders gerados por código;
-- capa v1/v2: já refeita na v3.
+O **gerador de imagens** do ForgeGUI está terminando os pedidos em `outcome_unknown`
+("worker interruption" aos 15 min). Isso já aconteceu com 6 moldes de roupa, 3 texturas de tecido
+e o som do rotor do UH-34D. Os de modelos 3D e de sons funcionam.
+
+- Vale abrir um chamado no suporte do ForgeGUI, com os jobs listados em `ASSETS.csv`, e confirmar
+  se houve cobrança.
+- A regra do serviço é **não regenerar** esses jobs.
+- As roupas já estão resolvidas por código (D-30).
 
 Se o suporte do ForgeGUI confirmar que não houve cobrança, me autorize a pedir de novo.
 

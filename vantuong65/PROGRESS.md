@@ -9,7 +9,33 @@
 | F2 Loop central | código completo + **bots** (D-28); lógica testada fora do Roblox; **não executado no Roblox** |
 | **F3 Fatia vertical** | **código e arte entregues** (setor 3); critério (60 fps e teste de foto) **só medível no Studio** |
 | **F4 Sistemas pesados** | **código entregue**: comandante, logística, morteiros, M48A3, Ontos, LVTP-5, UH-34D. Lógica testada no Lune; critério (30v30 com 6 veículos) **só medível no Roblox** |
+| **Parte 12 Controle** | **código entregue** (vale a partir da F2): layout completo, menus/mapa/comandante sem mouse, mira no analógico, veículos, vibração; 17 testes. **Não testado num controle real** |
 | F5–F6 | não iniciadas |
+
+## Parte 12 (controle): o que foi feito (sessão 5)
+- **Auditoria:** 14 pontos que não funcionavam só com controle (`CONTROLE.md`). O pior era o
+  comandante, que exigia digitar a grade.
+- **Base:**
+  - `InputMap` puro;
+  - `Input` (IAS + reserva no UIS, PreferredInput, ícones por controle, limiar dos gatilhos,
+    desconexão, configurações salvas na conta, gravador);
+  - `FieldService` no servidor.
+- **Infantaria:** correr, corpo a corpo, inclinar, deitar, interagir segurando, rodas,
+  marcações, mensagens, granadas, fumaça, baioneta, binóculo, alça de mira, canal de rádio.
+- **Menus e mapa:**
+  - foco visível de alto contraste e texto de 24 px na TV;
+  - cursor com ímã, zoom e LB/RB entre spawns;
+  - menu do jogo com abas e sub-abas, remapeamento por contexto e acessibilidade;
+  - comandante escolhe o alvo no mapa.
+- **Mira:** zona morta radial, 3 curvas, sensibilidade por modo e eixo, aceleração de giro
+  (180° em 0,58 s), assistência mínima que respeita vegetação e fumaça.
+- **Veículos:** motorista, atirador (coaxial, munição HE/HEAT), comandante (binóculo, marcar),
+  piloto (cíclico, coletivo nos gatilhos, pedais, estabilizar), porta, trocar assento e sair
+  segurando.
+- **Vibração:** disparo, explosão, lado do impacto, batimento, motor e rotor.
+- **Roupas:** os moldes do ForgeGUI falharam de novo (`outcome_unknown` aos 15 min, inclusive 3
+  texturas novas). Molde por código v2, com trama e desgaste reais (D-30).
+- **F4:** M29 81 mm preparado (1,2 m armado).
 
 ## F4: o que foi feito (sessão 4)
 - **Lógica pura** (`Shared/`, testada em `tests/luau/f4.luau`):
@@ -120,6 +146,8 @@
 | Sol em 18/08/1965 (calculado, UTC+8) | 06:30 → −0,9°; 12:00 → 78,1°; 18:30 → 7,8° |
 | Túneis (gerados) | 64 peças, 474 m de galeria |
 | Testes Lune F4 | `f4.luau` **12 ok** |
+| Testes Lune controle | `controle.luau` **17 ok** (inclui 10.000 eventos aleatórios sem estado preso) |
+| Giro de 180° no analógico (quadril) | **0,58 s** (calculado) |
 | Morteiro 82 mm (calibrado) | k = 1,512e-4 1/m; a 300/800/1.500/2.500 m: voo de 18,4/14,9/26,9/27,5 s |
 | M29 81 mm (v0 derivada) | **254 m/s** para 3.890 m com o arrasto do 82 mm |
 | UH-34D no peso máx. a 35 °C | pairar fora do efeito solo 1.522 hp, dentro 1.375 hp, a 20 m/s 1.033 hp; disponível 1.453 hp |
