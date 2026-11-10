@@ -54,7 +54,8 @@ O `sourcemap.json` não vai para o Git.
 ## Assets no Roblox (o bloqueio atual)
 - `src/ReplicatedStorage/Shared/AssetIds.luau` está com os IDs em 0, então a arte não carrega.
 - **Caminho 1:** chave Open Cloud válida no `.env` (`ROBLOX_API_KEY`, nunca no Git) e
-  `cloud.json` (copie de `cloud.example.json`). Depois rode `uv run python tools/roblox_cloud.py all`:
+  `cloud.json` (copie de `cloud.example.json`). Depois rode
+  `uv run --env-file .env python tools/roblox_cloud.py all`:
   ele sobe tudo, inclusive os modelos já reduzidos, e preenche os IDs. A chave anterior dava 401
   "Invalid API Key".
 - **Caminho 2:** ForgeGUI → Roblox (`artifact_publish`), que exige uma "Personal connection" em
