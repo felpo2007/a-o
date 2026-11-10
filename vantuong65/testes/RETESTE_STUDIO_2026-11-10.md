@@ -200,6 +200,23 @@ Renascendo pelo botão do mapa, o mapa e o painel lateral fecharam 38 ms depois 
 - **`execute_luau` do cliente:** serve para registrar sinais (`Visible`, `Activated`, `Match_State`) e
   ler o resultado depois de cada ação.
 
+## Depois do reteste (01:42–01:51): problemas A e C corrigidos
+Detalhes em `DESIGN.md`, D-52.
+- **A (juntas):** o módulo `Shared/Joints` trata `Motor6D` e `AnimationConstraint`. No Studio:
+  - deitado: tronco a **86°** no servidor e 101° no cliente;
+  - agachado: coxa a 87° do quadril, joelho a 131°;
+  - inclinado: tronco rolado 17°.
+- **C (Output):** a linha da raia agora sai inteira, por exemplo `US 100 m, 5 de 5`.
+- **Autoteste de novo:**
+  ```
+  [VT65 TESTE] ok deitado sem queda livre: HipHeight 0.20, estado Running, deslizando 0.00 m/s, tronco a 86° da vertical no servidor
+  [VT65 TESTE] FALHA campo de tiro (raia e balística): US 100 m, 5 de 5; US 200 m, 0 de 5 (parou em Workspace.Terrain); US 300 m, 0 de 5 (parou em Workspace.Terrain); VC 100 m, 0 de 5 (parou em Workspace.Terrain); VC 200 m, 0 de 5 (parou em Workspace.Terrain); VC 300 m, 0 de 5 (parou em Workspace.Terrain)
+  [VT65 TESTE] resumo: 7 ok, 3 falhas, 1 pulados
+  ```
+  As outras linhas saíram iguais às da primeira rodada. Só o suprimento do medevac mudou
+  (183 → 188, renda normal).
+- **Place:** salvo pelo Studio e conferido contra a versão anterior. Só mudaram os 4 scripts.
+
 ## O que não foi testado
 - Local Server com 2–4 jogadores (o MCP só inicia Play solo).
 - fps (não medi de novo; o greybox não mudou).

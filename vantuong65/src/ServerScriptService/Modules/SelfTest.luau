@@ -164,8 +164,9 @@ local function range(): (string, string?)
 			end
 			table.insert(
 				lines,
+				-- sem "m: N/": o Output do Roblox apaga esse trecho (reteste no Studio, 2026-11-10)
 				string.format(
-					"%s %d m: %d/5%s",
+					"%s %d m, %d de 5%s",
 					side.f,
 					dist,
 					hits,
@@ -192,19 +193,19 @@ local function prone(): (string, string?)
 	local hip = hum.HipHeight
 	local state = hum:GetState()
 	local v = Vector3.new(root.AssemblyLinearVelocity.X, 0, root.AssemblyLinearVelocity.Z).Magnitude * M
-	local rootJoint = c:FindFirstChild("LowerTorso") and (c :: any).LowerTorso:FindFirstChild("Root")
-	local posed = rootJoint
-		and rootJoint:GetAttribute("StandC0") ~= nil
-		and rootJoint.C0 ~= rootJoint:GetAttribute("StandC0")
+	-- corpo deitado no servidor: mede o tronco (vale para Motor6D e AnimationConstraint)
+	local torso = c:FindFirstChild("UpperTorso") :: BasePart?
+	local tilt = if torso then math.deg(math.acos(math.clamp(torso.CFrame.UpVector.Y, -1, 1))) else 0
+	local posed = tilt >= 60
 	PostureService.setStance(c, "stand")
 	local good = hip >= 0.2 and state ~= Enum.HumanoidStateType.Freefall and v < 1 and posed
 	return if good then "ok" else "FALHA",
 		string.format(
-			"HipHeight %.2f, estado %s, deslizando %.2f m/s, corpo deitado no servidor: %s",
+			"HipHeight %.2f, estado %s, deslizando %.2f m/s, tronco a %.0f° da vertical no servidor",
 			hip,
 			state.Name,
 			v,
-			tostring(posed)
+			tilt
 		)
 end
 

@@ -239,12 +239,13 @@ Os 8 bugs encontrados foram corrigidos. **Reteste no Studio** (mesmo dia, relat�
 `testes/RETESTE_STUDIO_2026-11-10.md`):
 - **corrigidos:** mouse preso nas telas, M e P fechando o que abriam, mira, comandos de teste, mapa
   que ficava na tela e Output poluído;
-- **deitado:** não escorrega mais (0,00 m em 7 s numa encosta de 14°), mas o corpo não deita. As
-  juntas do avatar agora vêm como `AnimationConstraint`, e a pose só mexe em `Motor6D`. O mesmo vale
-  para agachar e inclinar;
+- **deitado:** não escorrega mais (0,00 m em 7 s numa encosta de 14°). O corpo não deitava porque
+  as juntas do avatar agora vêm como `AnimationConstraint`. **Corrigido (D-52):** deitado com o
+  tronco a 86° no servidor; agachar e inclinar também voltaram;
 - **raia:** EUA 100 m acerta 5 de 5. Uma elevação do terreno bloqueia EUA 200/300 m e VC 100 m, e
   VC 200/300 m erram o alvo;
-- **autoteste:** 6 ok, 4 falhas (campo de tiro, deitado, pá e medevac), 1 pulado (animais).
+- **autoteste:** 7 ok, 3 falhas (campo de tiro, pá e medevac), 1 pulado (animais). Antes da D-52
+  eram 6 ok e 4 falhas.
 
 **Depois do teste:**
 - **Autoteste no motor:** `workspace:SetAttribute("VT65SelfTest", true)`, só no Studio. Roda

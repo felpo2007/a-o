@@ -4,6 +4,7 @@
 -- clientes posam todo mundo pelos atributos (PostureController). Não deixa levantar sob teto baixo.
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
+local Joints = require(ReplicatedStorage.Shared.Joints)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Combatants = require(script.Parent.Combatants)
 local MedicalService = require(script.Parent.MedicalService)
@@ -17,18 +18,23 @@ local MIN_HIP = 0.2
 -- com o que se vê. Antes só os clientes posavam e o "deitado" do servidor era o corpo enterrado.
 local PRONE_ROOT = CFrame.new(0, -0.6, 0) * CFrame.Angles(math.rad(-85), 0, 0)
 
+-- Motor6D ou AnimationConstraint (Shared/Joints): com a atualização de juntas do Roblox, a junta
+-- Root virou AnimationConstraint e o corpo deixou de deitar (reteste no Studio, 2026-11-10).
 local function setProneJoint(model: Model, prone: boolean)
 	local lower = model:FindFirstChild("LowerTorso")
-	local root = lower and lower:FindFirstChild("Root")
-	if not (root and root:IsA("Motor6D")) then
+	local root = lower and Joints.find(lower, "Root")
+	if not root then
 		return
 	end
 	local orig = root:GetAttribute("StandC0")
 	if typeof(orig) ~= "CFrame" then
-		orig = root.C0
+		orig = Joints.getC0(root)
+		if not orig then
+			return
+		end
 		root:SetAttribute("StandC0", orig)
 	end
-	root.C0 = if prone then (orig :: CFrame) * PRONE_ROOT else orig :: CFrame
+	Joints.setC0(root, if prone then (orig :: CFrame) * PRONE_ROOT else orig :: CFrame)
 end
 
 local function headroom(model: Model, need: number): boolean

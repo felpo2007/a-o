@@ -775,3 +775,33 @@ arte real.
   Em agosto, a costa de Quảng Ngãi ainda tem pancadas de tarde; por isso a chuva é evento, não
   regra. Os números são PLACEHOLDER.
 - **No Studio:** `workspace:SetAttribute("VT65DevRain", 1)` força a chuva; o autoteste confere.
+
+## D-52 — Juntas do avatar como AnimationConstraint (reteste no Studio, 2026-11-10)
+- **Problema:** no Studio 0.746, as 15 juntas R15 de jogadores e bots vêm como
+  `AnimationConstraint` (atualização de juntas do avatar do Roblox), não como `Motor6D`. O
+  `PostureService` e o `PostureController` só mexiam em `Motor6D`. Por isso ninguém deitava,
+  agachava nem inclinava: o "deitado" era o corpo em pé, afundado até a cintura (cabeça a 0,90 m e
+  pés 0,59 m abaixo do chão).
+- **Regra:** a junta `Root` é cinemática (`IsKinematic = true`). O `CFrame` do `Attachment0` faz o
+  papel do `C0` (C0 · Transform · C1⁻¹ ≡ A0 · Transform · A1⁻¹). O módulo `Shared/Joints` trata os
+  dois tipos (`find`, `getC0`, `setC0`), e postura e autoteste passam a usá-lo. O cliente só grava
+  a junta quando o valor muda.
+- **Medido no Studio, depois da correção:**
+
+  | Pose | Antes | Depois |
+  |---|---|---|
+  | Deitado (servidor) | tronco a 2° da vertical | **86°** |
+  | Deitado (cliente) | 2° | **101°** (a mira inclina o tronco) |
+  | Agachado (cliente) | sem pose | coxa a **87°** do quadril, joelho a **131°** |
+  | Inclinado (cliente, E na mira) | sem pose | tronco rolado **17°** (alvo 16°) |
+
+- **Autoteste:** o "deitado" agora mede a inclinação do tronco (passa com ≥ 60°), em vez de
+  comparar o `C0`. A linha da raia virou "US 100 m, 5 de 5": o Output do Roblox apagava o trecho
+  `m: N/` do formato antigo. Resultado: **7 ok, 3 falhas** (raia, pá e medevac), 1 pulado.
+- **Place salvo pelo Studio:** este PC não tem Rojo nem Lune. Os 4 scripts foram aplicados no place
+  aberto pelo MCP, conferidos byte a byte contra os arquivos, e o Studio salvou o `.rbxl`. Comparei
+  com a versão anterior do Git aberta em outra janela: mesmas instâncias por classe (+1
+  `ModuleScript`), mesma geometria, mesmos 11.808 atributos e os outros 107 scripts idênticos. O
+  arquivo caiu de 2,82 para 1,86 MB, porque o Studio comprime de outro jeito.
+- **Não verificado:** o que outro jogador vê (o MCP só roda Play solo). As poses de agachar e
+  inclinar continuam só no cliente, como antes: o acerto no servidor usa as pernas em pé.

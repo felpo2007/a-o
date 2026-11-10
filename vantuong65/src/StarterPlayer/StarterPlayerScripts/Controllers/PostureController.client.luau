@@ -1,12 +1,16 @@
 --!strict
 -- Poses de postura de TODOS os personagens (jogadores e bots), a partir dos atributos que o
 -- servidor grava: "Crouched" (pernas dobradas), "Prone" (corpo deitado) e "Lean" (-1/0/1, tronco
--- inclinado). C0 dos Motor6D é local; por isso cada cliente posa todo mundo. Visual placeholder até
--- as animações próprias. As entradas ficam no InfantryController (camada Input, Parte 12).
+-- inclinado). O C0 da junta (Motor6D, ou o Attachment0 da AnimationConstraint: Shared/Joints) mudado
+-- no cliente é local; por isso cada cliente posa todo mundo. Visual placeholder até as animações
+-- próprias. As entradas ficam no InfantryController (camada Input, Parte 12).
 local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
-local original: { [Motor6D]: CFrame } = setmetatable({}, { __mode = "k" }) :: any
+local Joints = require(ReplicatedStorage.Shared.Joints)
+
+local original: { [Instance]: CFrame } = setmetatable({}, { __mode = "k" }) :: any
 local CROUCH: { [string]: CFrame } = {
 	LeftHip = CFrame.Angles(math.rad(70), 0, 0),
 	RightHip = CFrame.Angles(math.rad(70), 0, 0),
@@ -33,15 +37,23 @@ local function characters(): { Model }
 	return list
 end
 
-local function motor(char: Model, name: string): Motor6D?
-	local m = char:FindFirstChild(name, true)
-	if m and m:IsA("Motor6D") then
-		if not original[m] then
-			original[m] = m.C0
+local function motor(char: Model, name: string): Instance?
+	local m = Joints.find(char, name)
+	if m and not original[m] then
+		local c0 = Joints.getC0(m)
+		if not c0 then
+			return nil
 		end
-		return m
+		original[m] = c0
 	end
-	return nil
+	return m
+end
+
+-- só grava quando muda (evita escrever ~5 juntas × 60 personagens a cada quadro)
+local function pose(m: Instance, cf: CFrame)
+	if Joints.getC0(m) ~= cf then
+		Joints.setC0(m, cf)
+	end
 end
 
 RunService.Heartbeat:Connect(function()
@@ -51,14 +63,14 @@ RunService.Heartbeat:Connect(function()
 		for name, rot in CROUCH do
 			local m = motor(char, name)
 			if m then
-				m.C0 = if crouched then original[m] * rot else original[m]
+				pose(m, if crouched then original[m] * rot else original[m])
 			end
 		end
 		-- deitado: a junta Root é posada pelo SERVIDOR (PostureService), para o acerto bater
 		local waist = motor(char, "Waist")
 		if waist then
 			local l = if type(lean) == "number" then lean else 0
-			waist.C0 = original[waist] * CFrame.Angles(0, 0, -l * LEAN_WAIST)
+			pose(waist, original[waist] * CFrame.Angles(0, 0, -l * LEAN_WAIST))
 		end
 	end
 end)
