@@ -268,6 +268,10 @@ Os 8 bugs encontrados foram corrigidos. **Reteste no Studio** (mesmo dia, relat�
 - o mar não existia no terreno (virava areia): corrigido (D-56). O LVTP-5 nada a 10,8 km/h;
 - no solo do Studio os papéis pesados não aparecem no menu, porque o time não chega a 16.
 
+**Testes no PC (2026-11-10):** com Rojo, Lune e StyLua instalados, as 8 suítes passam (106 ok, 0
+falhas) e o StyLua está limpo. O `place/` voltou a ser a saída do pipeline (Rojo + bake), idêntico
+ao `build/`: 113 scripts e 30.199 instâncias.
+
 **Depois do teste:**
 - **Autoteste no motor:** `workspace:SetAttribute("VT65SelfTest", true)`, só no Studio. Roda
   10 verificações no servidor de verdade e imprime OK ou FALHA.

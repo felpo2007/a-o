@@ -20,6 +20,13 @@ Esta pasta é o jogo **VẠN TƯỜNG '65**: FPS tático 30 contra 30 no Roblox,
   ```
 
   O resultado é `build/VanTuong65_F1.rbxl`; copie para `place/VanTuong65.rbxl`.
+- **Não salve o place pelo Studio:** o Studio grava com outra compressão, que o Lune 0.8 não lê
+  ("Decompression failed"). Teste mudanças no Studio pelo MCP, mas gere o `.rbxl` pelo pipeline.
+- **No PC do dono (Windows):**
+  - Rojo 7.4.4, Lune 0.8.9 e StyLua 2.0.2 portáteis ficam em `%LOCALAPPDATA%\Programs\vt65-tools`;
+  - o GitHub CLI fica em `%LOCALAPPDATA%\Programs\gh` e é o login do Git para o push;
+  - o checkout tem CRLF, então o `stylua --check` acusa todos os arquivos. Cheque numa cópia LF:
+    `git -c core.autocrlf=false worktree add --detach <pasta> HEAD`.
 - Os modelos do ForgeGUI não vão para o Git:
 
   ```

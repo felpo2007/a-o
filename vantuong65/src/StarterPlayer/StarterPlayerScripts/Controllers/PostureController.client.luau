@@ -106,8 +106,22 @@ local function holdWeapon(char: Model)
 		w:SetAttribute("VT65Hold", key)
 	end
 	local free = char:GetAttribute("Downed") ~= true
-	ikTo(hum, "VT65IK_R", char:FindFirstChild("RightUpperArm"), char:FindFirstChild("RightHand"), primary:FindFirstChild("Grip"), free)
-	ikTo(hum, "VT65IK_L", char:FindFirstChild("LeftUpperArm"), char:FindFirstChild("LeftHand"), primary:FindFirstChild("Support"), free)
+	ikTo(
+		hum,
+		"VT65IK_R",
+		char:FindFirstChild("RightUpperArm"),
+		char:FindFirstChild("RightHand"),
+		primary:FindFirstChild("Grip"),
+		free
+	)
+	ikTo(
+		hum,
+		"VT65IK_L",
+		char:FindFirstChild("LeftUpperArm"),
+		char:FindFirstChild("LeftHand"),
+		primary:FindFirstChild("Support"),
+		free
+	)
 end
 
 RunService.Heartbeat:Connect(function()

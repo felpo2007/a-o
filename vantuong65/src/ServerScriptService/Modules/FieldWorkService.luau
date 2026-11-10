@@ -41,10 +41,9 @@ local function excavate(cf: CFrame, lengthS: number, widthS: number, floorY: num
 		minX, maxX = math.min(minX, p.X), math.max(maxX, p.X)
 		minZ, maxZ = math.min(minZ, p.Z), math.max(maxZ, p.Z)
 	end
-	local region = Region3.new(
-		Vector3.new(minX, floorY - VOXEL, minZ),
-		Vector3.new(maxX, cf.Position.Y + 2 * VOXEL, maxZ)
-	):ExpandToGrid(VOXEL)
+	local region =
+		Region3.new(Vector3.new(minX, floorY - VOXEL, minZ), Vector3.new(maxX, cf.Position.Y + 2 * VOXEL, maxZ))
+			:ExpandToGrid(VOXEL)
 	local mats, occs = workspace.Terrain:ReadVoxels(region, VOXEL)
 	local size = mats.Size
 	local y0 = region.CFrame.Position.Y - region.Size.Y / 2

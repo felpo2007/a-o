@@ -106,11 +106,8 @@ function TerrainBuilder.build(world: any, envIn: Env?, opts: Options?): number
 					if c == 0 then
 						local coast = coastX[math.floor((wz - g.originZ) / g.cellStuds)]
 						if coast and wx >= coast then
-							local depthM = math.clamp(
-								SEA_MIN_M + (wx - coast) * STUD_M * SEA_SLOPE,
-								SEA_MIN_M,
-								SEA_MAX_M
-							)
+							local depthM =
+								math.clamp(SEA_MIN_M + (wx - coast) * STUD_M * SEA_SLOPE, SEA_MIN_M, SEA_MAX_M)
 							h = math.min(h, -depthM / STUD_M)
 						end
 					end
