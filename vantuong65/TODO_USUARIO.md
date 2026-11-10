@@ -59,6 +59,11 @@ Nada rodou dentro do Roblox. Os critérios abaixo exigem o Studio ou o jogo publ
 | F2 | partida de 60 min sem erro no servidor (os bots completam 15v15) |
 | F3 | fps no setor 3 com a arte e comparação lado a lado com fotos de 1965 |
 | F4 | 30v30 com os 6 veículos ativos e heartbeat do servidor estável |
+| F5 | fps no pior setor com a arte. O Output mostra `[VT65] arte setor N` e a fração das sebes |
+
+F5: o teto de arte por setor (`ArtBudget.SECTOR_MAX`, 2,5 milhões) é um chute conservador.
+- Se o fps sobrar, diga quanto: eu subo o teto e as sebes ganham touceiras.
+- Se faltar, eu desço o teto.
 
 Roteiro da F4:
 1. Escolha EUA → papel *Tripulante de blindado* → sente no M48A3 (W/S/A/D) e no LVTP-5 (entre na
@@ -113,6 +118,8 @@ O **gerador de imagens** do ForgeGUI está terminando os pedidos em `outcome_unk
 ("worker interruption" aos 15 min). Isso já aconteceu com 6 moldes de roupa, 3 texturas de tecido
 e o som do rotor do UH-34D. Os de modelos 3D e de sons funcionam.
 
+- O **remesh** (redução de malha) também falhou assim 6 vezes na F5: cozinha, celeiro, poço,
+  altar, túmulo e uma tentativa do bambu. Os jobs estão em `ASSETS.csv`.
 - Vale abrir um chamado no suporte do ForgeGUI, com os jobs listados em `ASSETS.csv`, e confirmar
   se houve cobrança.
 - A regra do serviço é **não regenerar** esses jobs.

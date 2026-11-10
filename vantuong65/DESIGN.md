@@ -513,14 +513,45 @@ Ver `CONTROLE.md`. Resumo:
 - **Remesh com `generation_remesh_3d`:** o alvo informado não é a contagem final. Pedindo 2.800,
   saíram 4.957 triângulos (~1,77×). Por isso o alvo é 1.650 para vegetação e 2.800 para props e
   equipamento. Escalas e pivôs são os mesmos da preparação anterior; o manifest guarda o job de
-  remesh e os triângulos medidos.
+  remesh e os triângulos medidos no GLB preparado.
+- **Resultado (triângulos medidos):**
+
+  | Grupo | Modelos |
+  |---|---|
+  | Vegetação | capim-elefante 1.865, coqueiro 1.988, bananeira 2.136, árvore de colina 2.189, arbusto 2.801, bambu 3.020 |
+  | Casas | casa de telha 3.054, palha 3.127, varanda 3.135 |
+  | Props | sacos de areia 2.838, cerca 2.851, entrada de túnel 3.239, toca 3.467, ponte 3.676, trincheira 3.725, bunker 3.975 |
+  | Equipamento e herói | chapéu de selva 2.447, morteiro M29 2.884 |
+
+  - O bambu ficou 0,7% acima da meta. Aceito e registrado como exceção.
+  - **Sem remesh:** cozinha 13.483, celeiro 14.106, poço 13.615, altar 13.489 e túmulo 14.278. Os
+    remeshes terminaram em `outcome_unknown` e a regra do ForgeGUI é não regenerar.
+    - A cozinha saiu do sorteio das casas: seriam ~40 cópias.
+    - O celeiro não é colocado.
+    - Poço (1), altar (1) e túmulos (6) somam ~113 mil triângulos no setor 3.
+- **`ArtBudget` (módulo puro):** tipo, triângulos medidos e exceções por modelo. O teste da F5
+  falha em três casos:
+  - um número diverge do manifest;
+  - um modelo passa da meta sem exceção registrada;
+  - uma exceção fica velha.
 - **Arte nos 5 setores** (`AssetLoader`):
-  - teto por setor de 2,5 milhões de triângulos estimados de arte (PLACEHOLDER até a medição);
-  - bosque ralo nas colinas;
+  - teto por setor de 2,5 milhões de triângulos de arte (PLACEHOLDER até a medição);
+  - ordem de prioridade: casas e quintais → vila, túneis, cemitério e vau → bosques das colinas →
+    sebes;
+  - as sebes pediriam ~22 mil touceiras e ~47 milhões de triângulos nos 5 setores. O que sobra do
+    teto vira um **desbaste uniforme por setor** (`ArtBudget.factor`), não um corte no meio do
+    mapa. Estimativa offline (`lune run tools/art_estimate.luau`): 20%, 37%, 24%, 21% e 54% das
+    touceiras nos setores 1–5;
+  - **a peça da sebe só fica invisível se todas as touceiras dela entraram**. Antes ela sumia
+    sempre, e o corte do teto deixaria cobertura invisível;
   - `ModelStreamingMode = Atomic` em todos os modelos;
   - `LevelOfDetail = StreamingMesh` (impostor à distância) nos grandes: casas, árvores, celeiro,
     bunker;
-  - o log do servidor imprime modelos e triângulos por setor, para comparar com o HUD de fps.
+  - o log do servidor imprime modelos, triângulos e a fração de sebes por setor, para comparar com
+    o HUD de fps.
+- **O teto é conservador:** o cliente só recebe o que está no raio de streaming, uma fração
+  pequena do setor. Se o fps sobrar no Studio, suba `ArtBudget.SECTOR_MAX` e as sebes ganham
+  touceiras sozinhas.
 - **Diques (D-14, corte 1):** fusão de segmentos colineares (±1°) com o mesmo topo (±11 cm), com a
   base esticada para baixo do terreno: 18.926 → **18.095** (−4,4%), comprimento preservado
   (teste `f5.luau`).

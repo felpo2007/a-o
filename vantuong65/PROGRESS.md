@@ -1,6 +1,6 @@
 # VẠN TƯỜNG '65 — Progresso
 
-## Fase atual (2026-11-10, sessão 4)
+## Fase atual (2026-11-10, sessão 6)
 | Fase | Estado |
 |---|---|
 | F0 Pesquisa | parcial: critério de 25 m atingido no setor oeste; setor leste depende da CORONA (`research/F0_CORONA.md`) |
@@ -10,18 +10,40 @@
 | **F3 Fatia vertical** | **código e arte entregues** (setor 3); critério (60 fps e teste de foto) **só medível no Studio** |
 | **F4 Sistemas pesados** | **código entregue**: comandante, logística, morteiros, M48A3, Ontos, LVTP-5, UH-34D. Lógica testada no Lune; critério (30v30 com 6 veículos) **só medível no Roblox** |
 | **Parte 12 Controle** | **código entregue** (vale a partir da F2): layout completo, menus/mapa/comandante sem mouse, mira no analógico, veículos, vibração; 17 testes. **Não testado num controle real** |
-| **F5 Arte total e otimização** | **iniciada**: remesh dentro das metas da Parte 2, arte nos 5 setores com teto e streaming, fusão de diques. Critério (60 jogadores a 60 fps em todos os setores) **só medível no Roblox** |
+| **F5 Arte total e otimização** | **em andamento**: 18 modelos reduzidos às metas da Parte 2; arte nos 5 setores com teto, prioridade, desbaste uniforme e streaming; fusão de diques. Critério (60 jogadores a 60 fps em todos os setores) **só medível no Roblox** |
 | F6 | não iniciada |
 
-## F5: o que foi feito (sessão 5)
-- **Remesh:** modelos com uso repetido reduzidos às metas da Parte 2 (D-45; números no
-  `manifest.json` e no `ASSETS.csv`).
-- **Arte nos 5 setores:** `AssetLoader` com teto de triângulos por setor, bosques nas colinas,
-  streaming atômico e impostor nos modelos grandes; o log do servidor mostra o total por setor.
+## F5: o que foi feito (sessões 5 e 6)
+- **Remesh:** 18 modelos de uso repetido reduzidos às metas da Parte 2. Números medidos no GLB
+  preparado, em D-45, `manifest.json` e `ASSETS.csv`.
+  - Vegetação: 1.865 a 3.020 triângulos.
+  - Casas: 3.054 a 3.135.
+  - Props: 2.838 a 3.975.
+  - **Seis remeshes terminaram em `outcome_unknown`** e não foram regenerados (regra do ForgeGUI):
+    cozinha, celeiro, poço, altar, túmulo e uma das tentativas do bambu.
+    - A cozinha saiu do sorteio das casas.
+    - O celeiro não é colocado.
+    - Poço, altar e túmulos ficam acima da meta: 8 cópias, ~113 mil triângulos.
+- **`ArtBudget`:** tabela de tipos e triângulos medidos, metas e exceções. O teste falha se divergir
+  do manifest ou se algo passar da meta sem motivo.
+- **Arte nos 5 setores:**
+  - `AssetLoader` com teto por setor e ordem de prioridade (casas → vila e túneis → colinas →
+    sebes);
+  - desbaste **uniforme** das sebes pelo que sobra do teto;
+  - streaming atômico e impostor nos grandes.
+- **Bug evitado:** a peça da sebe ficava invisível mesmo quando o teto barrava as touceiras. Isso
+  deixaria cobertura invisível em boa parte do mapa. Agora ela só some se todas as touceiras
+  entraram.
+- **Estimativa offline** (`lune run tools/art_estimate.luau`):
+  - ~1.000 modelos por setor (5,2 mil no total, 12,6 milhões de triângulos);
+  - das touceiras de sebe, entram 20%, 37%, 24%, 21% e 54% nos setores 1–5 com o teto provisório
+    de 2,5 milhões;
+  - **é cálculo, não medição em jogo.**
 - **Diques:** fusão de colineares, 18.926 → 18.095 (−4,4%), comprimento preservado. Uma versão
   que apagava trechos foi pega pelo teste e corrigida.
-- **Próximo:** malha única por bloco (EditableMesh) para diques e lâminas, depois do 1º teste de
-  fps no Studio.
+- **Próximo:**
+  - medir fps no Studio e então ajustar `ArtBudget.SECTOR_MAX`;
+  - malha única por bloco (EditableMesh) para diques e lâminas.
 
 ## Parte 12 (controle): o que foi feito (sessão 5)
 - **Auditoria:** 14 pontos que não funcionavam só com controle (`CONTROLE.md`). O pior era o
@@ -159,7 +181,8 @@
 | Testes Lune F4 | `f4.luau` **12 ok** |
 | Testes Lune controle | `controle.luau` **17 ok** (inclui 10.000 eventos aleatórios sem estado preso) |
 | Giro de 180° no analógico (quadril) | **0,58 s** (calculado) |
-| Testes Lune F5 | `f5.luau` **3 ok** |
+| Testes Lune F5 | `f5.luau` **8 ok** |
+| Arte estimada por setor (teto 2,5 mi) | ~1.000 modelos; touceiras de sebe 20/37/24/21/54% nos setores 1–5 (cálculo) |
 | Diques após a fusão | 18.926 → **18.095** (comprimento 2.113.038 → 2.113.037 studs) |
 | Morteiro 82 mm (calibrado) | k = 1,512e-4 1/m; a 300/800/1.500/2.500 m: voo de 18,4/14,9/26,9/27,5 s |
 | M29 81 mm (v0 derivada) | **254 m/s** para 3.890 m com o arrasto do 82 mm |
@@ -192,9 +215,10 @@
 4. Teste:
    - tiro (clique esquerdo), mira (direito), recarga (R), seletor (V);
    - captura: fique 90 s no ponto forte central;
-   - ferimentos: tiro no braço → G (curativo); médico reanima com F;
+   - ferimentos: tiro no braço → G (curativo); médico reanima segurando F;
    - morte: espere 60 s e as ondas de 20 s;
-   - loja (B), mapa (M), HUD de medição (F3).
+   - loja (L), mapa (M), menu do jogo (P), HUD de medição (F3);
+   - o Output mostra arte por setor ("[VT65] arte setor") e a fração de sebes.
 5. Me mande os erros do Output e os números do HUD.
 
 ## Problemas
@@ -209,4 +233,4 @@
    tudo sozinho.
 2. Seu teste no Studio (F1–F4) → correções.
 3. Trocar os PLACEHOLDER da D-36 por fichas técnicas.
-4. F5: arte total nos 5 setores e otimização para 60 jogadores.
+4. F5: com o fps medido, ajustar `ArtBudget.SECTOR_MAX` e fazer a malha única por bloco (EditableMesh) para diques e lâminas.

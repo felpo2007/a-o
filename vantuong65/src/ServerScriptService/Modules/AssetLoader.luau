@@ -6,6 +6,7 @@ local InsertService = game:GetService("InsertService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local AssetIds = require(ReplicatedStorage.Shared.AssetIds) :: any
+local ArtBudget = require(script.Parent.ArtBudget)
 local Geometry = require(ReplicatedStorage.Shared.Geometry)
 local MapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any
 local Rng = require(ReplicatedStorage.Shared.Rng)
@@ -15,23 +16,11 @@ local AssetLoader = {}
 local cache: { [string]: Model } = {}
 local M = 0.28
 -- F5: arte nos 5 setores, com teto por setor (Parte 2: 60 fps no pior setor). Triângulos por
--- instância saem do manifest (depois do remesh da F5: vegetação ≤ 3k, props ≤ 5k). O teto é
--- conservador até a medição no Studio (D-45).
+-- instância medidos no manifest (ArtBudget, conferido pelo teste da F5). O teto é conservador até a
+-- medição no Studio (D-45).
 local SLICE_SECTORS = { [1] = true, [2] = true, [3] = true, [4] = true, [5] = true }
-AssetLoader.SECTOR_TRI_BUDGET = 2500000 -- triângulos estimados de arte por setor (PLACEHOLDER)
-AssetLoader.TRIS = {
-	bamboo_clump = 2800,
-	shrub = 2800,
-	elephant_grass = 2800,
-	banana = 2800,
-	coconut_palm = 2800,
-	hill_tree = 2800,
-	hut_thatch = 4800,
-	hut_veranda = 4800,
-	hut_kitchen = 4800,
-	house_tile = 4800,
-} :: { [string]: number }
-local DEFAULT_TRIS = 4800
+AssetLoader.SECTOR_TRI_BUDGET = ArtBudget.SECTOR_MAX
+type HedgeJob = { part: BasePart, key: string, n: number, sector: number }
 local sectorTris: { [number]: number } = {}
 local sectorCount: { [number]: number } = {}
 -- peças grandes ganham imagem simplificada (impostor) quando estão fora do raio de streaming
@@ -111,7 +100,7 @@ function AssetLoader.place(key: string, x: number, z: number, yaw: number, paren
 		return nil
 	end
 	local sector = Geometry.sectorAt(MapConfig.Sectors, x, z) or 0
-	local tris = AssetLoader.TRIS[key] or DEFAULT_TRIS
+	local tris = ArtBudget.tris(key)
 	if (sectorTris[sector] or 0) + tris > AssetLoader.SECTOR_TRI_BUDGET then
 		return nil -- teto do setor atingido: o placeholder (se houver) continua
 	end
@@ -137,11 +126,6 @@ function AssetLoader.place(key: string, x: number, z: number, yaw: number, paren
 	return m
 end
 
-local function inSlice(x: number, z: number): boolean
-	local s = Geometry.sectorAt(MapConfig.Sectors, x, z)
-	return s ~= nil and SLICE_SECTORS[s] == true
-end
-
 function AssetLoader.start()
 	local map = workspace:WaitForChild("Map", 30)
 	if not map then
@@ -151,8 +135,8 @@ function AssetLoader.start()
 	out.Name = "Art"
 	out.Parent = map
 	local rng = Rng.new(19650818)
-	-- casas: variante por sorteio; o placeholder some (fica só se não houver modelo)
-	local variants = { "hut_thatch", "hut_veranda", "hut_thatch", "hut_kitchen", "house_tile" }
+	-- casas: variante por sorteio (só as que cabem na meta); o placeholder some (fica só se não houver modelo)
+	local variants = ArtBudget.HOUSE_VARIANTS
 	local houses = map:FindFirstChild("Houses")
 	if houses then
 		for _, h in houses:GetChildren() do
@@ -172,32 +156,6 @@ function AssetLoader.start()
 						local a = rng:range(0, 2 * math.pi)
 						AssetLoader.place("banana", p.X + math.cos(a) * 16, p.Z + math.sin(a) * 16, a, out, true)
 					end
-				end
-			end
-		end
-	end
-	-- bambu das vilas: touceiras ao longo das sebes (a peça fica invisível e mantém colisão e visada)
-	local hedges = map:FindFirstChild("Hedges")
-	if hedges and AssetLoader.template("bamboo_clump") then
-		for _, hp in hedges:GetChildren() do
-			if hp:IsA("BasePart") and hp.Name == "BambooHedge" and inSlice(hp.Position.X, hp.Position.Z) then
-				local n = math.max(1, math.floor(hp.Size.X * M / 7))
-				for i = 1, n do
-					local t = (i - 0.5) / n - 0.5
-					local pos = hp.CFrame * CFrame.new(t * hp.Size.X, 0, 0)
-					AssetLoader.place("bamboo_clump", pos.X, pos.Z, rng:range(0, 6.28), out, true)
-				end
-				hp.Transparency = 1
-			elseif hp:IsA("BasePart") and hp.Name == "PaddyHedge" and inSlice(hp.Position.X, hp.Position.Z) then
-				local key = if rng:next() < 0.5 then "shrub" else "elephant_grass"
-				if AssetLoader.template(key) then
-					local n = math.max(1, math.floor(hp.Size.X * M / 3))
-					for i = 1, n do
-						local t = (i - 0.5) / n - 0.5
-						local pos = hp.CFrame * CFrame.new(t * hp.Size.X, 0, 0)
-						AssetLoader.place(key, pos.X, pos.Z, rng:range(0, 6.28), out, true)
-					end
-					hp.Transparency = 1
 				end
 			end
 		end
@@ -253,6 +211,49 @@ function AssetLoader.start()
 					local a, r = rng:range(0, 2 * math.pi), math.sqrt(rng:next()) * 110 / M
 					AssetLoader.place("hill_tree", l.x + math.cos(a) * r, l.z + math.sin(a) * r, a, out, true)
 				end
+			end
+		end
+	end
+	-- Sebes por último. O que sobra do teto de cada setor vira um desbaste uniforme no setor (e não
+	-- um corte no meio do mapa). A peça da sebe só fica invisível se TODAS as touceiras dela
+	-- entraram; senão continua como enchimento, para nunca haver cobertura invisível.
+	local hedges = map:FindFirstChild("Hedges")
+	if hedges then
+		local jobs: { HedgeJob } = {}
+		local demand: { [number]: number } = {}
+		for _, hp in hedges:GetChildren() do
+			if hp:IsA("BasePart") and (hp.Name == "BambooHedge" or hp.Name == "PaddyHedge") then
+				local s = Geometry.sectorAt(MapConfig.Sectors, hp.Position.X, hp.Position.Z)
+				if s and SLICE_SECTORS[s] then
+					local tall = hp.Name == "BambooHedge"
+					local key = if tall then "bamboo_clump" elseif rng:next() < 0.5 then "shrub" else "elephant_grass"
+					if AssetLoader.template(key) then
+						local n = ArtBudget.hedgeClumps(hp.Size.X * M, tall)
+						table.insert(jobs, { part = hp, key = key, n = n, sector = s })
+						demand[s] = (demand[s] or 0) + n * ArtBudget.tris(key)
+					end
+				end
+			end
+		end
+		local factor: { [number]: number } = {}
+		for s, d in demand do
+			factor[s] = ArtBudget.factor(sectorTris[s] or 0, d)
+			print(string.format("[VT65] sebes setor %d: %.0f%% das touceiras (teto do setor)", s, 100 * factor[s]))
+		end
+		for _, j in jobs do
+			local hp = j.part
+			local placed = 0
+			for i = 1, j.n do
+				if rng:next() < factor[j.sector] then
+					local t = (i - 0.5) / j.n - 0.5
+					local pos = hp.CFrame * CFrame.new(t * hp.Size.X, 0, 0)
+					if AssetLoader.place(j.key, pos.X, pos.Z, rng:range(0, 6.28), out, true) then
+						placed += 1
+					end
+				end
+			end
+			if placed == j.n then
+				hp.Transparency = 1
 			end
 		end
 	end

@@ -32,44 +32,50 @@
   {
    "arquivo": "models/casa_palha_studs.glb",
    "job": "6431342a-d90d-48ac-8846-3e267912185e",
-   "prep": "ec241ea1-e566-4c16-859e-e186acad3640",
+   "prep": "105d5132-24f6-4cbd-bda7-0501cc3c5587",
    "escala": "7,0 x 5,7 x 5,2 m (projeto)",
-   "triangulos": 13030,
-   "sha256": "d2ae916b0679a6cb377452df3115b0bf5398799c5b721213a4e7af0173549920",
-   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/ec241ea1-e566-4c16-859e-e186acad3640/557c295b-272a-492e-b206-76250eca9161/Model-d2ae916b0679a6cb377452df3115b0bf5398799c5b721213a4e7af0173549920.glb",
+   "triangulos": 3127,
+   "sha256": "af962510a99f0feb059c7d248b36f9cd058cdf590e5aceb0856bd67f2d0f430a",
+   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/105d5132-24f6-4cbd-bda7-0501cc3c5587/b579d8c6-0d3a-4cd8-8860-7100e51c92e2/Model-af962510a99f0feb059c7d248b36f9cd058cdf590e5aceb0856bd67f2d0f430a.glb",
    "dim_studs_xyz": [
-    20.51,
-    18.58,
+    20.46,
+    18.56,
     25.0
-   ]
+   ],
+   "chave": "hut_thatch",
+   "remesh": "b38f33e7-43df-491e-abf9-1e3276d714d3"
   },
   {
    "arquivo": "models/coqueiro_studs.glb",
    "job": "1f9588a4-f340-45da-b472-ca8cabb5e53a",
-   "prep": "d7a96bdd-776b-483d-81d3-8e4d6de31e72",
+   "prep": "1736bfaa-79ce-4833-bf8a-701bf7aed05c",
    "escala": "altura 14,0 m (projeto)",
-   "triangulos": 13261,
-   "sha256": "2ed832ba353ab4e0c3d5ccea12ccf50ca8e760bd6ed9baae699a82a6d65dc03c",
-   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/d7a96bdd-776b-483d-81d3-8e4d6de31e72/a82db469-4760-4159-843f-4b101259138e/Model-2ed832ba353ab4e0c3d5ccea12ccf50ca8e760bd6ed9baae699a82a6d65dc03c.glb",
+   "triangulos": 1988,
+   "sha256": "60183f83037a347db7f5816b6cded3bd0adf0ed71e7916e90b00a24c2be0561e",
+   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/1736bfaa-79ce-4833-bf8a-701bf7aed05c/b8f91c19-c296-4795-bc8a-c52256cb988b/Model-60183f83037a347db7f5816b6cded3bd0adf0ed71e7916e90b00a24c2be0561e.glb",
    "dim_studs_xyz": [
-    34.84,
-    49.98,
-    35.18
-   ]
+    34.71,
+    49.81,
+    35.13
+   ],
+   "chave": "coconut_palm",
+   "remesh": "5f11d090-18da-46de-852d-2c71b712f598"
   },
   {
    "arquivo": "models/bambu_touceira_studs.glb",
    "job": "a15f97ec-e881-4dc0-93ee-7f9dff23aa99",
-   "prep": "09730e7e-2924-453c-8809-66fc1caaa39a",
+   "prep": "0ecf3212-2972-48b2-88bb-1057aaddc9a3",
    "escala": "altura 7,7 m, largura 8,0 m (projeto: 6-9 m)",
-   "triangulos": 11456,
-   "sha256": "a822894eb8d183bcd5dac810d63321962581d30297c906132af719ae44909de0",
-   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/09730e7e-2924-453c-8809-66fc1caaa39a/2ffea426-6f64-42f4-89e1-b2a60f10b00f/Model-a822894eb8d183bcd5dac810d63321962581d30297c906132af719ae44909de0.glb",
+   "triangulos": 3020,
+   "sha256": "719e8cb2cf8d5924bff013278666bd9dc4580fcf669ed7353137b3bd5b5e18a9",
+   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/0ecf3212-2972-48b2-88bb-1057aaddc9a3/2f86aa0e-9292-4090-aefa-1524a9e57f22/Model-719e8cb2cf8d5924bff013278666bd9dc4580fcf669ed7353137b3bd5b5e18a9.glb",
    "dim_studs_xyz": [
     27.41,
-    27.58,
-    28.56
-   ]
+    27.55,
+    28.54
+   ],
+   "chave": "bamboo_clump",
+   "remesh": "6efb66d7-e0fa-431d-9b9c-edfb1ef8e7d3"
   },
   {
    "arquivo": "models/colete_m1955_studs.glb",
@@ -105,16 +111,17 @@
    "arquivo": "models/arvore_colina_studs.glb",
    "chave": "hill_tree",
    "job": "2b0fa422-076d-4d41-8a79-a35241f709b4",
-   "prep": "d69cffe4-603f-4f0e-9e77-b5fca0f63f1b",
+   "prep": "9210d89f-b42e-4d89-bc65-7ca1bae2559d",
    "escala": "altura 12 m (projeto)",
    "dim_studs_xyz": [
-    41.12,
-    42.86,
-    43.32
+    40.86,
+    41.75,
+    42.01
    ],
-   "triangulos": 13215,
-   "sha256": "f8f8eee1f5cc4d26ce33e8241e1c2be2690a995458a4295c58293adc47dfe317",
-   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/d69cffe4-603f-4f0e-9e77-b5fca0f63f1b/cce22498-c8bb-403a-8997-ff3dcba1b353/Model-f8f8eee1f5cc4d26ce33e8241e1c2be2690a995458a4295c58293adc47dfe317.glb"
+   "triangulos": 2189,
+   "sha256": "0fa3c8bbb1263715d9293381f640fd2db85ae4204e2b4eb72237c588097dc7d3",
+   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/9210d89f-b42e-4d89-bc65-7ca1bae2559d/0725eb5c-aa94-4c5d-a6f7-b002e47062aa/Model-0fa3c8bbb1263715d9293381f640fd2db85ae4204e2b4eb72237c588097dc7d3.glb",
+   "remesh": "c5e71f38-24e1-42b1-aeb1-49729f635484"
   },
   {
    "arquivo": "models/arroz_canteiro_studs.glb",
@@ -135,76 +142,81 @@
    "arquivo": "models/capim_elefante_studs.glb",
    "chave": "elephant_grass",
    "job": "7f002afa-f9b3-4cb2-a25a-d7233193f1e1",
-   "prep": "7c2b34f0-dbed-4a67-897b-7069fa682beb",
+   "prep": "b941ed12-5b6f-42ee-a4a5-a76fea8374a0",
    "escala": "altura 2,5 m (projeto)",
    "dim_studs_xyz": [
-    6.28,
-    8.93,
-    6.41
+    6.36,
+    8.9,
+    6.39
    ],
-   "triangulos": 7978,
-   "sha256": "abd5b21604c9de88d01e7b1199adda45710dc6c94bcde24d0e2e7d7c489014b8",
-   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/7c2b34f0-dbed-4a67-897b-7069fa682beb/f950fadf-bcdc-4f8b-a2b7-967ef74c6945/Model-abd5b21604c9de88d01e7b1199adda45710dc6c94bcde24d0e2e7d7c489014b8.glb"
+   "triangulos": 1865,
+   "sha256": "9f046693f057dbd6d14dfe1ef0f65eb66e5118f2144aa07a94897035899b04da",
+   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/b941ed12-5b6f-42ee-a4a5-a76fea8374a0/9cbc623d-6424-42f7-86f1-37abe76b45c2/Model-9f046693f057dbd6d14dfe1ef0f65eb66e5118f2144aa07a94897035899b04da.glb",
+   "remesh": "a20dbe78-3178-458f-bd7d-63c29563bcb7"
   },
   {
    "arquivo": "models/arbusto_studs.glb",
    "chave": "shrub",
    "job": "9d7ff5f9-c41d-436d-b764-195e5998f3d7",
-   "prep": "82e32309-f3ea-46d0-ad45-e631ca0a8239",
+   "prep": "f8d20cf8-dd6b-4dde-b6a9-7ab60e9aca25",
    "escala": "largura 1,93 m (projeto 1,8 x 2,5 m)",
    "dim_studs_xyz": [
-    6.9,
-    6.43,
-    6.81
+    6.64,
+    6.5,
+    6.68
    ],
-   "triangulos": 10515,
-   "sha256": "92bc416313907c49699ce31386a577fdb809b23aed6c8a940da0d350c02cdaf1",
-   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/82e32309-f3ea-46d0-ad45-e631ca0a8239/242e0bc7-6318-4f20-8dfa-730510bc82fd/Model-92bc416313907c49699ce31386a577fdb809b23aed6c8a940da0d350c02cdaf1.glb"
+   "triangulos": 2801,
+   "sha256": "fd433a08b7c7a9d09722fecdaa98b06ba4afd848dffa063db2364c017fac8b02",
+   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/f8d20cf8-dd6b-4dde-b6a9-7ab60e9aca25/dc725f6d-af19-407f-bee1-202d17993995/Model-fd433a08b7c7a9d09722fecdaa98b06ba4afd848dffa063db2364c017fac8b02.glb",
+   "remesh": "47a4dffe-f369-41ea-a869-41cf0e1641a5"
   },
   {
    "arquivo": "models/bananeira_studs.glb",
    "chave": "banana",
    "job": "627b9643-d15c-4b09-9edd-27abba9a1337",
-   "prep": "eb52ec12-ab6c-4fe1-b382-7b6b932f5c60",
+   "prep": "07206aca-9c89-4e51-8b51-733a632c266d",
    "escala": "altura 4,0 m (projeto)",
    "dim_studs_xyz": [
-    14.29,
-    14.29,
-    13.43
+    14.4,
+    14.33,
+    13.37
    ],
-   "triangulos": 12686,
-   "sha256": "844b666b425777bb59e577526991d5e73589d056de55ae827cfe9e61a355668a",
-   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/eb52ec12-ab6c-4fe1-b382-7b6b932f5c60/04541553-02fc-4992-9d61-fc90bc7cd645/Model-844b666b425777bb59e577526991d5e73589d056de55ae827cfe9e61a355668a.glb"
+   "triangulos": 2136,
+   "sha256": "90bb09bb4a6dbc2cef21b9c5a44190343ecf706e678d739d70b5e2cb2da0fb7f",
+   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/07206aca-9c89-4e51-8b51-733a632c266d/5a1bb1d0-6645-4a2d-a4f2-fee414519bda/Model-90bb09bb4a6dbc2cef21b9c5a44190343ecf706e678d739d70b5e2cb2da0fb7f.glb",
+   "remesh": "07c63ef8-fcb3-41eb-ba19-896e1529673f"
   },
   {
    "arquivo": "models/toca_aranha_studs.glb",
    "chave": "spider_hole",
    "job": "ea1bd767-0f85-4a6e-b1a6-c1a9cc969330",
-   "prep": "099adc8e-8cd0-4fe1-9c7c-ca1e18f8978f",
+   "prep": "4a79de18-4147-4921-ab3f-fed644e0d1f6",
    "escala": "diâmetro 0,9 m com tampa (projeto)",
    "dim_studs_xyz": [
     3.21,
-    2.35,
+    2.32,
     3.21
    ],
-   "triangulos": 9602,
-   "sha256": "f514dd753ce21695027a8f7c0a0d5102c77c626bb0627b6c55ca01c02ae7457d",
-   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/099adc8e-8cd0-4fe1-9c7c-ca1e18f8978f/6fc5663d-31ab-480c-a755-c73079ba1806/Model-f514dd753ce21695027a8f7c0a0d5102c77c626bb0627b6c55ca01c02ae7457d.glb"
+   "triangulos": 3467,
+   "sha256": "109d9434e5ff8b7a339cff70d3df190043a03aa7dfebc2ede57d8479106ffd6a",
+   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/4a79de18-4147-4921-ab3f-fed644e0d1f6/4430579d-5879-47dc-abb3-da756b8cbbc2/Model-109d9434e5ff8b7a339cff70d3df190043a03aa7dfebc2ede57d8479106ffd6a.glb",
+   "remesh": "ad5a4f11-ed5b-46b3-8c81-b80ddf4d2b79"
   },
   {
    "arquivo": "models/sacos_areia_studs.glb",
    "chave": "sandbags",
    "job": "8e9c234d-70e6-4423-a0b8-22f295a07af1",
-   "prep": "8ac84f91-7ea9-4c2f-a298-937116398c7f",
+   "prep": "c5ab3028-0b94-424a-90cc-985190d11639",
    "escala": "comprimento 2,0 m (projeto)",
    "dim_studs_xyz": [
     1.67,
-    2.41,
+    2.4,
     7.14
    ],
-   "triangulos": 17067,
-   "sha256": "0bcf327f34698eff10fca2a72065c3a6c2f2b22fc583e599d42ad847e5229588",
-   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/8ac84f91-7ea9-4c2f-a298-937116398c7f/908b10b6-8872-4aea-a619-0ac65a803666/Model-0bcf327f34698eff10fca2a72065c3a6c2f2b22fc583e599d42ad847e5229588.glb"
+   "triangulos": 2838,
+   "sha256": "0ec205d272b2049ffbc701c79d65ca1ee3c648a6339c03894d6adb13e81aebe1",
+   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/c5ab3028-0b94-424a-90cc-985190d11639/14052590-e3c9-4d62-93c3-510bc8eb20cb/Model-0ec205d272b2049ffbc701c79d65ca1ee3c648a6339c03894d6adb13e81aebe1.glb",
+   "remesh": "32ad4d0a-a946-48fb-871e-9ebb0d7a7b02"
   },
   {
    "arquivo": "models/m60_studs.glb",
@@ -255,46 +267,49 @@
    "arquivo": "models/casa_varanda_studs.glb",
    "chave": "hut_veranda",
    "job": "ad721418-c9b9-4929-bccf-266dd4d78a12",
-   "prep": "fe0e95cd-8eba-408e-be0e-7a6f79531b6d",
+   "prep": "aa2ed662-0005-4cd0-af25-a612475a1f9f",
    "escala": "comprimento 8,0 m (projeto)",
    "dim_studs_xyz": [
-    28.57,
-    21.98,
-    28.46
+    28.62,
+    21.95,
+    28.53
    ],
-   "triangulos": 13249,
-   "sha256": "79672548a1c1f01b4ca704eb12eb0785b9e627e82c4adb525adf5e5fcb902b0f",
-   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/fe0e95cd-8eba-408e-be0e-7a6f79531b6d/db328da5-563c-47df-b234-a254539c6487/Model-79672548a1c1f01b4ca704eb12eb0785b9e627e82c4adb525adf5e5fcb902b0f.glb"
+   "triangulos": 3135,
+   "sha256": "22793fdd5df6c4c9243f50f62ba553867af773b3f5d5b3799c14f486aa1cb5ea",
+   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/aa2ed662-0005-4cd0-af25-a612475a1f9f/b56f5a58-7dfb-41b4-8353-f7bb875ba2a2/Model-22793fdd5df6c4c9243f50f62ba553867af773b3f5d5b3799c14f486aa1cb5ea.glb",
+   "remesh": "a3cf63a5-da03-422c-b700-99029a47768b"
   },
   {
    "arquivo": "models/trincheira_secao_studs.glb",
    "chave": "trench_section",
    "job": "9f18610a-4b93-43a1-b196-744d0588b52c",
-   "prep": "10c523b1-dd71-4720-9737-8c4459d28b03",
+   "prep": "32c841c0-5c9d-450b-aac2-82ef49f19017",
    "escala": "comprimento 4,0 m (projeto)",
    "dim_studs_xyz": [
-    14.29,
-    4.01,
-    7.06
+    14.26,
+    3.99,
+    7.04
    ],
-   "triangulos": 12072,
-   "sha256": "6e86da42dc2b837b0d5dca70fb185d9d882e157318e22c6db85399a6c2fb8ac2",
-   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/10c523b1-dd71-4720-9737-8c4459d28b03/ac6d6568-3f65-4849-ae59-87ff980b9f0e/Model-6e86da42dc2b837b0d5dca70fb185d9d882e157318e22c6db85399a6c2fb8ac2.glb"
+   "triangulos": 3725,
+   "sha256": "c4bf7c22fca9fafe34affc368ea16ab51b5749c9c127215f6a20b33efac4cf83",
+   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/32c841c0-5c9d-450b-aac2-82ef49f19017/723288aa-a2b1-47cd-be0c-1ab78284eb05/Model-c4bf7c22fca9fafe34affc368ea16ab51b5749c9c127215f6a20b33efac4cf83.glb",
+   "remesh": "e11a4f0d-bcfe-49db-8eb6-7400a0d207f3"
   },
   {
    "arquivo": "models/cerca_bambu_studs.glb",
    "chave": "bamboo_fence",
    "job": "d9abae47-8540-48c4-81a3-032ba89f62b5",
-   "prep": "9ddf14ae-0166-4333-b362-8cca2fa727ed",
+   "prep": "2c7252ef-9a88-40d6-840a-573c645fc5a2",
    "escala": "comprimento 3,0 m (projeto)",
    "dim_studs_xyz": [
     1.19,
     6.51,
-    10.71
+    10.72
    ],
-   "triangulos": 16418,
-   "sha256": "21e2604895519af19c5287822f8e590b6d7c7fadcbea430dfaf6c3de3171c794",
-   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/9ddf14ae-0166-4333-b362-8cca2fa727ed/07d6e03e-8cae-4afc-bac4-39cdce3ec432/Model-21e2604895519af19c5287822f8e590b6d7c7fadcbea430dfaf6c3de3171c794.glb"
+   "triangulos": 2851,
+   "sha256": "d591f8292db11d47eb15467340322454a5c412a6d96cd4c8789828c6041ad271",
+   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/2c7252ef-9a88-40d6-840a-573c645fc5a2/e9477c44-ac9c-4971-bc04-37b83445a01e/Model-d591f8292db11d47eb15467340322454a5c412a6d96cd4c8789828c6041ad271.glb",
+   "remesh": "7d6b8a67-5736-48a4-8301-aea8bc9fabaf"
   },
   {
    "arquivo": "models/tumulo_studs.glb",
@@ -360,16 +375,17 @@
    "arquivo": "models/casa_telha_studs.glb",
    "chave": "house_tile",
    "job": "d77bfaea-d3df-458e-bd9e-01b1abcf215c",
-   "prep": "8a6b3a83-8751-4ca5-a15f-b10b9a369ba4",
+   "prep": "ed63dfba-fe52-4da3-a1d7-8b16e232e7ed",
    "escala": "ajustada a 6 m de largura e 5 m de cumeeira; comprimento sai 7 m (projeto: 9 m)",
    "dim_studs_xyz": [
-    22.01,
-    17.86,
-    24.99
+    22.05,
+    17.76,
+    25.04
    ],
-   "triangulos": 14938,
-   "sha256": "e6e6d97f39f0ba570f9834df69bb68d75b60094d6654bb1ca2695ffaae9aa4c7",
-   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/8a6b3a83-8751-4ca5-a15f-b10b9a369ba4/08158e3d-88dd-4c66-a4da-cb4fa6daa053/Model-e6e6d97f39f0ba570f9834df69bb68d75b60094d6654bb1ca2695ffaae9aa4c7.glb"
+   "triangulos": 3054,
+   "sha256": "cf4ad9f806c512bda60b30096d12a896231f99e84902b5cbcfaca39452cf1a04",
+   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/ed63dfba-fe52-4da3-a1d7-8b16e232e7ed/756ab7fd-50ab-446d-859f-315e6978092d/Model-cf4ad9f806c512bda60b30096d12a896231f99e84902b5cbcfaca39452cf1a04.glb",
+   "remesh": "e3db2203-40b7-4b88-aff7-3fab3f81fb9b"
   },
   {
    "arquivo": "models/altar_studs.glb",
@@ -450,16 +466,17 @@
    "arquivo": "models/chapeu_selva_studs.glb",
    "chave": "vc_jungle_hat",
    "job": "05eee9ca-4b84-4da9-b3f6-d10704722015",
-   "prep": "68f50e28-86bb-466b-8748-eea8db780d80",
+   "prep": "232b4b18-8d43-46c5-a83b-a6d0a7ea0df5",
    "escala": "aba 0,34 m (projeto)",
    "dim_studs_xyz": [
     1.14,
     0.95,
     1.21
    ],
-   "triangulos": 15986,
-   "sha256": "4efa3032c23193feb2f69eb0e7628d375517ad10b36415432cbc78bc9c1d9e3e",
-   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/68f50e28-86bb-466b-8748-eea8db780d80/51264be4-07c5-49f5-93e2-dff29e214ea9/Model-4efa3032c23193feb2f69eb0e7628d375517ad10b36415432cbc78bc9c1d9e3e.glb"
+   "triangulos": 2447,
+   "sha256": "dd9a53b31b1f3eea4702ff3fd5914b9c98a529995ce2bc097955828f9a6c5de8",
+   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/232b4b18-8d43-46c5-a83b-a6d0a7ea0df5/b6cd70e7-8f00-4645-9f26-114b0d2a34f4/Model-dd9a53b31b1f3eea4702ff3fd5914b9c98a529995ce2bc097955828f9a6c5de8.glb",
+   "remesh": "a40a6db2-6ecd-4112-af9f-9408fdc77cca"
   },
   {
    "arquivo": "models/capacete_fibra_studs.glb",
@@ -480,31 +497,33 @@
    "arquivo": "models/entrada_tunel_studs.glb",
    "chave": "tunnel_entrance",
    "job": "9a42011f-0dbc-42b8-ae5d-8ad419863a30",
-   "prep": "7dca9937-4918-42c9-826b-d4daa4b6a750",
+   "prep": "19e0637e-4e13-4bd9-a4fc-d1e957838590",
    "escala": "moldura 1,0 m (projeto; poço 0,6 m)",
    "dim_studs_xyz": [
     3.57,
     3.56,
-    3.57
+    3.56
    ],
-   "triangulos": 13576,
-   "sha256": "c6675a9ce68577382a79f2e1cf8de0df97702e9dc645752b34e7a2eb2bc6bcb3",
-   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/7dca9937-4918-42c9-826b-d4daa4b6a750/99b97c4d-f40d-4147-b5dc-e974fbddc8d1/Model-c6675a9ce68577382a79f2e1cf8de0df97702e9dc645752b34e7a2eb2bc6bcb3.glb"
+   "triangulos": 3239,
+   "sha256": "5c2210744ca98f409c0aac7b00ba78d2ca1ad6a95990fa399448e1d18978ec22",
+   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/19e0637e-4e13-4bd9-a4fc-d1e957838590/6b82d1b9-9167-4e66-9c93-e1832e10d1e4/Model-5c2210744ca98f409c0aac7b00ba78d2ca1ad6a95990fa399448e1d18978ec22.glb",
+   "remesh": "883b2d4e-0e8e-435a-8bbf-a8fa8d731d67"
   },
   {
    "arquivo": "models/ponte_troncos_studs.glb",
    "chave": "log_bridge",
    "job": "5635420d-f422-4959-b20b-33549c4d2629",
-   "prep": "11ecc0b2-2793-4f88-81b2-31c012d10ed9",
+   "prep": "9b7139f5-a27b-40b1-b509-52c1972afb9f",
    "escala": "comprimento 6,0 m (projeto)",
    "dim_studs_xyz": [
     21.43,
-    5.54,
-    3.26
+    5.49,
+    3.24
    ],
-   "triangulos": 15388,
-   "sha256": "bca00b6ce03c3e2c05cff9d3a815597a82369d7e8dc8fc1254f16882f3ef3415",
-   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/11ecc0b2-2793-4f88-81b2-31c012d10ed9/9a5a2a73-79ab-4197-8b4a-47faf2c98ecd/Model-bca00b6ce03c3e2c05cff9d3a815597a82369d7e8dc8fc1254f16882f3ef3415.glb"
+   "triangulos": 3676,
+   "sha256": "60bd4e5f2b70aea9d556d19e6d3fcc9c57aec4a53548ff3609d1cb191a440419",
+   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/9b7139f5-a27b-40b1-b509-52c1972afb9f/9b747896-e92d-41a3-b3b4-66c623b178f2/Model-60bd4e5f2b70aea9d556d19e6d3fcc9c57aec4a53548ff3609d1cb191a440419.glb",
+   "remesh": "4500d923-7a83-4c9a-bf51-3f5d3385ea4d"
   },
   {
    "arquivo": "models/uh34d_studs.glb",
@@ -585,31 +604,33 @@
    "arquivo": "models/bunker_vc_studs.glb",
    "chave": "vc_bunker",
    "job": "f6a47bd7-f1bc-442b-a56a-1e6064b5cc9d",
-   "prep": "ff1e0ab6-aece-4615-99b7-b6c38a72ec97",
+   "prep": "f080aa5f-b52e-47c0-9a2c-106dee4916a1",
    "escala": "comprimento 4,0 m (projeto)",
    "dim_studs_xyz": [
     14.29,
-    4.29,
-    12.63
+    4.35,
+    12.67
    ],
-   "triangulos": 11287,
-   "sha256": "bdbba7d5b03796ffb0e81c7fdedaacaf8ab095aef1f3e22c6438eebf08377b98",
-   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/ff1e0ab6-aece-4615-99b7-b6c38a72ec97/f3a2d728-a055-4967-bc02-b33aef1aed59/Model-bdbba7d5b03796ffb0e81c7fdedaacaf8ab095aef1f3e22c6438eebf08377b98.glb"
+   "triangulos": 3975,
+   "sha256": "7f888d2cad4775d76a9fb556d7979c3f13f06bea612a9f6df1bd05b57267d952",
+   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/f080aa5f-b52e-47c0-9a2c-106dee4916a1/3ac557b1-7630-4482-b150-6938680cd64e/Model-7f888d2cad4775d76a9fb556d7979c3f13f06bea612a9f6df1bd05b57267d952.glb",
+   "remesh": "d8a5862f-908c-4d0f-9b2e-0c76ab3a995d"
   },
   {
    "arquivo": "models/morteiro_m29_studs.glb",
    "chave": "mortar_81",
    "job": "81d1176f-1700-4805-9e7b-ee2abf2c5d46",
-   "prep": "444f9c11-2568-4e79-b4f1-19fa68e9e063",
+   "prep": "58f8aaf2-4c31-4c7e-b7dc-19afa6f165e8",
    "escala": "altura 1,2 m armado (tubo de ~1,3 m a ~60°; projeto)",
    "dim_studs_xyz": [
-    4.08,
+    4.07,
     4.29,
     2.69
    ],
-   "triangulos": 15363,
-   "sha256": "d370b3fb96ad357d304913b9298bc5f2993beb21465a34e3317fb65a5b7e6b89",
-   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/444f9c11-2568-4e79-b4f1-19fa68e9e063/86e315a7-526f-4ea4-8c94-b8a62195302a/Model-d370b3fb96ad357d304913b9298bc5f2993beb21465a34e3317fb65a5b7e6b89.glb"
+   "triangulos": 2884,
+   "sha256": "899655fb1473a8bd3080933cd01518564250e37aaa08d15beff30fadd1b13db6",
+   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/58f8aaf2-4c31-4c7e-b7dc-19afa6f165e8/77a3f7a9-3ce6-4d29-8614-3c6763fe3d35/Model-899655fb1473a8bd3080933cd01518564250e37aaa08d15beff30fadd1b13db6.glb",
+   "remesh": "e9ec1fdd-235e-463d-a839-6547d703d841"
   }
  ]
 }

@@ -68,8 +68,9 @@ lune run tools/bake_place.luau              # -> build/VanTuong65_F1.rbxl
 cp build/VanTuong65_F1.rbxl place/
 # verificação
 uv run pytest && uv run ruff check .
-lune run tests/luau/run.luau
-stylua --check src tests/luau tools/bake_place.luau
+for t in run f2 f3 f4 controle f5; do lune run tests/luau/$t.luau; done
+lune run tools/art_estimate.luau            # arte estimada por setor (cálculo, não medição)
+stylua --check src tests/luau tools
 rojo sourcemap default.project.json -o sourcemap.json
 luau-lsp analyze --definitions=globalTypes.None.d.luau --sourcemap=sourcemap.json \
   --ignore "src/ServerStorage/VT65Build/Data/**" src
