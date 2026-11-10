@@ -11,6 +11,7 @@ local CombatService = require(script.Parent.CombatService)
 local Combatants = require(script.Parent.Combatants)
 local MatchService = require(script.Parent.MatchService)
 local SpawnService = require(script.Parent.SpawnService)
+local TrapService = require(script.Parent.TrapService)
 
 local LogisticsService = {}
 local M = 0.28
@@ -104,6 +105,8 @@ local function place(kind: string, faction: string, pos: Vector3, yaw: number): 
 	if kind == "mg_nest" then
 		local m = AssetLoader.place("sandbags", pos.X, pos.Z, yaw, folder)
 		out = m or Instance.new("Model")
+	elseif kind == "punji" or kind == "tripwire" then
+		out = TrapService.place(kind, faction, pos, yaw)
 	elseif kind == "mortar_pit" then
 		local key = if faction == "US" then "mortar_81" else "mortar_82"
 		local m = AssetLoader.place(key, pos.X, pos.Z, yaw, folder)

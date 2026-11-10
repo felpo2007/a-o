@@ -743,3 +743,20 @@ arte real.
   Para simular quem está nos pontos fortes, o MatchService tem `countsOverride`, que só vale no
   Studio.
 - **Bots deixam a arma ao morrer** (`CombatService.dropWeapon`), com o que tinham no carregador.
+
+## D-50 — Atualizações ("Depois" da Parte 11): armadilhas VC
+- **O que é:** o sapador VC arma estacas punji e granada com fio pela roda de equipamento, em
+  Construir. Custam 10 e 15 de suprimento, com limite de 20 e 12, e não podem ficar a menos de
+  40 m de inimigo.
+- **Quem vê:**
+  - a peça é invisível no servidor;
+  - quem é do mesmo lado vê, para não pisar;
+  - o engenheiro inimigo detecta a até 6 m andando devagar (≤ 1,2 m/s). Detectada, ela fica
+    vermelha para todos e o prompt de desarmar (4 s segurando) liga, só para engenheiros.
+- **Disparo:** uma rolagem por pisada (não a cada tique). Com cuidado (< 0,6 m/s), metade da
+  chance. Detectada, não dispara.
+  - Punji: 350 J na perna, que dá ferimento grave, perna prejudicada e sangramento, sem matar.
+  - Fio: a granada de cabo explode 1 s depois.
+- **Tutorial:** o sapador aprende a armar e o engenheiro aprende a detectar.
+- **Números:** todos PLACEHOLDER de design até o playtest. Regras em `Shared/Traps.luau`, testes
+  em `tests/luau/atualizacoes.luau`.

@@ -59,6 +59,25 @@ Logistics.BUILDS = {
 		nearSupplyM = 50,
 		limit = 6,
 	},
+	-- armadilhas VC (Parte 11): só o sapador; escondidas, sem caixote por perto
+	punji = {
+		id = "punji",
+		name = "Estacas punji (armadilha)",
+		cost = 10,
+		role = { sapper = true },
+		minEnemyM = 40,
+		nearSupplyM = nil,
+		limit = 20,
+	},
+	tripwire = {
+		id = "tripwire",
+		name = "Granada com fio (armadilha)",
+		cost = 15,
+		role = { sapper = true },
+		minEnemyM = 40,
+		nearSupplyM = nil,
+		limit = 12,
+	},
 } :: { [string]: BuildDef }
 
 -- capacidade de caixotes por veículo (design): LVTP-5 traz da praia, UH-34D lança de cima

@@ -68,7 +68,7 @@ lune run tools/bake_place.luau              # -> build/VanTuong65_F1.rbxl
 cp build/VanTuong65_F1.rbxl place/
 # verificação
 uv run pytest && uv run ruff check .
-for t in run f2 f3 f4 controle f5 f6; do lune run tests/luau/$t.luau; done
+for t in run f2 f3 f4 controle f5 f6 atualizacoes; do lune run tests/luau/$t.luau; done
 lune run tools/art_estimate.luau            # arte estimada por setor (cálculo, não medição)
 # modelos do ForgeGUI (não versionados); os reduzidos localmente precisam de libopengl0
 uv run --group arte python tools/fetch_forgegui_assets.py

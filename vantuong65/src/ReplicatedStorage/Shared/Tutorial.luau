@@ -68,7 +68,10 @@ Tutorial.ROLE = {
 	grenadier = { GRENADES },
 	machine_gunner = { act("fire_mode", "Modo de tiro: {a}. Deitado, a rajada fica controlável.") },
 	anti_tank = { act("swap_weapon", "Lançador: {a}. A blindagem da frente é grossa: mire no lado.") },
-	engineer = { act("equip_wheel", "Construir ninho de metralhadora ou caixa de munição: {a}.") },
+	engineer = {
+		act("equip_wheel", "Construir ninho de metralhadora ou caixa de munição: {a}."),
+		act("crouch", "Agachado, perto, você percebe armadilhas inimigas: {a}. Para desarmar, segure Interagir."),
+	},
 	medic = {
 		act("quick_bandage", "Bandagem no seu sangramento mais urgente: {a}."),
 		act("interact", "Tratar ou reanimar um ferido: {a}, perto dele."),
@@ -82,7 +85,10 @@ Tutorial.ROLE = {
 		act("equip_wheel", "Construir a posição de morteiro: {a}."),
 		act("comm_wheel", "Roda de comunicação: {a}. A página Comando pede a missão de fogo pela grade."),
 	},
-	sapper = { GRENADES },
+	sapper = {
+		GRENADES,
+		act("equip_wheel", "Construir armadilhas (estacas punji, granada com fio) longe do inimigo: {a}."),
+	},
 	radio_operator = {
 		act(
 			"comm_wheel",

@@ -30,6 +30,7 @@ local AnimalService = require(Modules:WaitForChild("AnimalService"))
 local RadioService = require(Modules:WaitForChild("RadioService"))
 local FieldWorkService = require(Modules:WaitForChild("FieldWorkService"))
 local SelfTest = require(Modules:WaitForChild("SelfTest"))
+local TrapService = require(Modules:WaitForChild("TrapService"))
 
 task.spawn(TerrainRuntime.start) -- gera o terreno se o place veio sem ele
 PlayerData.start()
@@ -44,6 +45,7 @@ PostureService.start()
 TunnelService.start()
 task.spawn(AssetLoader.start) -- troca placeholders por modelos publicados (se houver IDs)
 BotService.start()
+TrapService.start() -- Parte 11 (depois): armadilhas VC, antes da logística que as arma
 LogisticsService.start() -- F4: suprimento, caixotes e construções
 CommanderService.start() -- F4: comandante e missões de fogo por grade
 VehicleService.start() -- F4: M48A3, Ontos, LVTP-5 e UH-34D

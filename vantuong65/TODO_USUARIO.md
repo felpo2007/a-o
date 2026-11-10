@@ -89,6 +89,8 @@ Features de lançamento (D-48). Confira no Studio:
 - **Operador de rádio:** papel novo. Sem ele, o líder do squad não fala com o comandante.
 - **Pá:** roda de equipamento → Pá de trincheira, em setor do seu lado e fora da água.
 - **Medevac:** pouse o UH-34D a até 15 m de um ferido caído.
+- **Armadilhas VC:** sapador VC → roda de equipamento → Construir → estacas ou granada com fio.
+  Depois, como engenheiro EUA, chegue agachado perto: deve aparecer "Armadilha à vista".
 - **Animais:** atire perto de uma vila. Se o búfalo andar de ré, troque o sinal em
   `AnimalService.FACE_YAW`.
 

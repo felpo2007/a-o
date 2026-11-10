@@ -221,6 +221,10 @@ localmente para 3.999 e 2.000 triângulos. Nada disso rodou no Roblox.
   Os modelos e sons estão em `assets/forgegui/`. Os modelos foram preparados em escala real, com a
   M14 em 1,126 m e a Type 56 em 0,882 m.
 
+## Atualizações (features "Depois" da Parte 11)
+- **Armadilhas VC** (D-50): punji e granada com fio, armadas pelo sapador; o engenheiro inimigo
+  detecta e desarma. 5 testes em `atualizacoes.luau`.
+
 ## Primeiro teste no Studio (2026-11-10, D-49)
 Feito pelo MCP do Studio, em Play solo com 29 bots, no greybox. Relatório em
 `testes/TESTE_STUDIO_2026-11-10.md`.
