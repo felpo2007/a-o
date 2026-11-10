@@ -12,6 +12,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
 local InputMap = require(ReplicatedStorage.Shared.InputMap)
+local Comms = require(ReplicatedStorage.Shared.Comms)
 local MapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any
 local Net = require(ReplicatedStorage.Shared.Net)
 local Roles = require(ReplicatedStorage.Shared.Roles)
@@ -87,6 +88,13 @@ cr.Parent = cursorUI
 cursorUI.Parent = mapFrame
 
 local B = MapConfig.Bounds
+-- marcações de inimigo recebidas (área aproximada que envelhece): { x, z (studs), r (m), t }
+local enemyMarks: { { x: number, z: number, r: number, t: number } } = {}
+Net.event("Squad_Mark").OnClientEvent:Connect(function(m)
+	if type(m) == "table" and m.kind == "target" and type(m.r) == "number" then
+		table.insert(enemyMarks, { x = m.x, z = m.z, r = m.r, t = os.clock() })
+	end
+end)
 local function toUV(x: number, z: number): Vector2
 	return Vector2.new((x - B.minX) / (B.maxX - B.minX), (z - B.minZ) / (B.maxZ - B.minZ))
 end
@@ -169,6 +177,28 @@ local function drawMap()
 		band.BackgroundTransparency = if matchState.active[s.id] then 0.5 else 0.85
 		band.BorderSizePixel = 1
 		band.Parent = canvas
+	end
+	-- áreas de inimigo marcadas pelo squad (aproximadas; somem com a idade)
+	local now = os.clock()
+	for i = #enemyMarks, 1, -1 do
+		local mk = enemyMarks[i]
+		local alpha = Comms.markAlpha(now - mk.t)
+		if alpha <= 0 then
+			table.remove(enemyMarks, i)
+			continue
+		end
+		local uv = toUV(mk.x, mk.z)
+		local size = 2 * mk.r / MapConfig.STUD_M / (B.maxX - B.minX)
+		local c = Instance.new("Frame")
+		c.AnchorPoint = Vector2.new(0.5, 0.5)
+		c.Position = UDim2.fromScale(uv.X, uv.Y)
+		c.Size = UDim2.new(size, 6, size * (B.maxX - B.minX) / (B.maxZ - B.minZ), 6)
+		c.BackgroundColor3 = Color3.fromRGB(170, 40, 30)
+		c.BackgroundTransparency = 1 - 0.5 * alpha
+		local corner = Instance.new("UICorner")
+		corner.CornerRadius = UDim.new(0.5, 0)
+		corner.Parent = c
+		c.Parent = canvas
 	end
 	for _, sp in matchState.points do
 		local d = Instance.new("TextLabel")

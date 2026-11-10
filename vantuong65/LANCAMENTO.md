@@ -6,7 +6,7 @@ Tudo aqui é para você colar no Creator Dashboard. Eu não tenho acesso à sua 
 
 **Nome:** `VẠN TƯỜNG '65`
 
-**Descrição (português, 918 de 1.000 caracteres):**
+**Descrição (português, 985 de 1.000 caracteres):**
 
 ```
 Agosto de 1965, costa de Quảng Ngãi. Operação Starlite: fuzileiros navais dos EUA desembarcam em Green Beach e avançam contra o 1º Regimento Viet Cong entre arrozais, sebes de bambu, vilas e túneis.
@@ -17,12 +17,13 @@ Agosto de 1965, costa de Quảng Ngãi. Operação Starlite: fuzileiros navais d
 • M48A3, Ontos, LVTP-5 e helicóptero UH-34D com física calibrada com dados reais.
 • Sem minimapa e sem marcador automático de inimigo: carta, bússola e rádio.
 • Um ou dois tiros derrubam. Campo de tiro e tutorial por papel ao lado do QG.
+• Operador de rádio, medevac, relatório pós-ação e modo daltônico.
 • Jogável de ponta a ponta no controle (Xbox e PlayStation), no teclado e no mouse.
 
 Itens à venda são só visuais e de apoio: nada compra vantagem em combate.
 ```
 
-**Descrição (inglês, 905 caracteres, para a tradução automática não decidir sozinha):**
+**Descrição (inglês, 973 caracteres, para a tradução automática não decidir sozinha):**
 
 ```
 August 1965, Quảng Ngãi coast. Operation Starlite: US Marines land on Green Beach and push against the Viet Cong 1st Regiment through rice paddies, bamboo hedgerows, villages and tunnels.
@@ -33,6 +34,7 @@ August 1965, Quảng Ngãi coast. Operation Starlite: US Marines land on Green B
 • M48A3, Ontos, LVTP-5 and a UH-34D helicopter with physics calibrated on real data.
 • No minimap and no automatic enemy markers: map, compass and radio.
 • One or two hits put you down. Firing range and a short tutorial per role next to HQ.
+• Radio operator, medevac, after-action report and colorblind mode.
 • Fully playable on controller (Xbox and PlayStation), keyboard and mouse.
 
 Items for sale are cosmetic or supporter-only: nothing buys a combat advantage.

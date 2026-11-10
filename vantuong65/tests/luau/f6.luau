@@ -13,6 +13,14 @@ local Roles = require(S .. "Roles") :: any
 local Tutorial = require(S .. "Tutorial") :: any
 local Accessibility = require(S .. "Accessibility") :: any
 local AfterAction = require(S .. "AfterAction") :: any
+local Comms = require(S .. "Comms") :: any
+local Animals = require(S .. "Animals") :: any
+local Rng = require(S .. "Rng") :: any
+local Pickup = require(S .. "Pickup") :: any
+local Weapons = require(S .. "Weapons") :: any
+local Kit = require(S .. "Kit") :: any
+local Radio = require(S .. "Radio") :: any
+local FieldWork = require(S .. "FieldWork") :: any
 local ProfileSchema = require("../../src/ServerScriptService/Modules/ProfileSchema") :: any
 
 local passed, failed = 0, 0
@@ -294,6 +302,131 @@ test("relatório: cabe numa tela (linha do tempo limitada, com aviso)", function
 	local lines = AfterAction.lines(r)
 	assert(#lines <= AfterAction.MAX_ENTRIES + 20, "relatório longo demais: " .. #lines)
 	assert(string.find(table.concat(lines, "\n"), "40 registros anteriores omitidos"))
+end)
+
+-- ===== marcação imperfeita e animais (Parte 11) =====
+test("marcação imperfeita: erro cresce com a distância, alvo real dentro da área, envelhece", function()
+	assert(Comms.markError(50) == 10 and Comms.markError(400) == 40 and Comms.markError(5000) == 100)
+	local rng = Rng.new(7)
+	for _ = 1, 2000 do
+		local r = 40
+		local ox, oz = Comms.markOffset(r, rng:next(), rng:next())
+		assert(math.sqrt(ox * ox + oz * oz) <= r + 1e-9, "alvo fora da área")
+	end
+	assert(Comms.markAlpha(0) == 1 and Comms.markAlpha(30) == 0.5 and Comms.markAlpha(90) == 0)
+end)
+
+test("animais: fogem para longe do tiro, na velocidade da espécie; explosão assusta mais longe", function()
+	local b = Animals.new("water_buffalo", 100, 0)
+	assert(Animals.noise(b, 0, 0, false, 0), "búfalo a 100 m deveria ouvir o tiro")
+	Animals.step(b, 1, 0.5, 0.3)
+	assert(math.abs(b.x - 106) < 1e-9 and b.z == 0, "fuga de 6 m/s para longe do tiro")
+	local c = Animals.new("chicken", 100, 0)
+	assert(not Animals.noise(c, 0, 0, false, 0), "galinha a 100 m não ouve o tiro (60 m)")
+	assert(Animals.noise(c, 0, 0, true, 0), "mas ouve a explosão (180 m)")
+	assert(Animals.fleeing(c, 3.9) and not Animals.fleeing(c, 4.1))
+end)
+
+test("animais: calmos ficam perto de casa; nascem em parte dos quintais", function()
+	local c = Animals.new("chicken", 0, 0)
+	local rng = Rng.new(3)
+	for t = 1, 3600 do
+		Animals.step(c, 1, t, rng:next())
+		assert(math.sqrt(c.x ^ 2 + c.z ^ 2) <= Animals.SPECIES.chicken.leashM + 1, "galinha fugiu de casa sem susto")
+	end
+	local houses = {}
+	for i = 1, 60 do
+		table.insert(houses, i * 50)
+		table.insert(houses, 0)
+	end
+	local r2 = Rng.new(11)
+	local list = Animals.spawns(houses, function()
+		return r2:next()
+	end)
+	local nb, nc = 0, 0
+	for _, a in list do
+		if a.species == "water_buffalo" then
+			nb += 1
+		else
+			nc += 1
+		end
+	end
+	assert(nb == 10, "1 búfalo a cada 6 casas: " .. nb)
+	assert(nc >= 10 and nc <= 60 and nc % 2 == 0, "galinhas em ~1/4 dos quintais: " .. nc)
+end)
+
+test("arma do inimigo: cai só com o carregador; troca deixa a sua no chão; caixa não reabastece", function()
+	local d = Pickup.dropOnDeath({ weapon = "type56", mag = 17, spare = 3 })
+	assert(d and d.weapon == "type56" and d.mag == 17 and d.spare == 0, "sobressalentes não caem")
+	assert(Pickup.dropOnDeath({ weapon = "m14", mag = 0, spare = 4 }) == nil, "arma vazia não cai")
+	local new, dropped = Pickup.swap({ weapon = "m14", mag = 12, spare = 4 }, d)
+	assert(new.weapon == "type56" and new.mag == 17 and new.spare == 0)
+	assert(dropped and dropped.weapon == "m14" and dropped.mag == 12 and dropped.spare == 4)
+	local ak = Weapons.get("type56")
+	assert(ak and not Pickup.canRefill(ak.faction, "US") and Pickup.canRefill(ak.faction, "VC"))
+end)
+
+test("equipamento por peso: padrão cabe; trocar item por item; passar do limite é cortado", function()
+	for _, kind in { "rifle", "mg", "pistol", "launcher" } do
+		local d = Kit.defaults(kind)
+		local v = Kit.validate(d, kind)
+		assert(v.mags == d.mags and v.frags == d.frags, kind .. ": o padrão deveria passar intacto")
+		assert(math.abs(Kit.limit(kind) - Kit.weight(d, kind) - 1) < 1e-9)
+	end
+	-- fuzil: tirar 1 granada e a fumaça (0,99 kg) libera 2 carregadores a mais (1,5 kg) com a margem
+	local k = Kit.validate({ mags = 8, frags = 1, smokes = 0, bandages = 2 }, "rifle")
+	assert(k.mags == 8 and k.frags == 1 and k.smokes == 0)
+	-- tudo no máximo: o servidor corta fumaça, granadas e curativos até caber
+	local big = Kit.validate({ mags = 10, frags = 4, smokes = 3, bandages = 6 }, "rifle")
+	assert(Kit.weight(big, "rifle") <= Kit.limit("rifle") + 1e-9, "acima do limite")
+	-- 11,52 kg pedidos; limite 7,14 kg: sai fumaça, granadas, um curativo e 1 carregador (6,85 kg)
+	assert(big.mags == 9 and big.frags == 0 and big.smokes == 0 and big.bandages == 1)
+	local junk = Kit.validate({ mags = -5, frags = 1 / 0 * 0, bandages = "x" }, "rifle")
+	assert(junk.mags == 1 and junk.frags == 2 and junk.bandages == 2)
+end)
+
+test("rádio: só o rádio do squad fala com o comandante; caído, só o mesmo lado pega", function()
+	assert(Radio.canTalkToCommand("commander", false) and Radio.canTalkToCommand("mortar", false))
+	assert(not Radio.canTalkToCommand("squad_leader", false), "líder sem rádio não fala com o comando")
+	assert(Radio.canTalkToCommand("rifleman", true), "quem pegou o rádio fala")
+	assert(Radio.startsWithRadio("radio_operator") and not Radio.startsWithRadio("squad_leader"))
+	assert(Radio.canPickUp("US", "US", true) and not Radio.canPickUp("US", "VC", true))
+	assert(not Radio.canPickUp("US", "US", false), "caído não pega")
+	assert(not Radio.squadLinked({ { carries = false }, { carries = false } }))
+	assert(Radio.squadLinked({ { carries = false }, { carries = true } }))
+	assert(
+		Roles.roles.radio_operator.unit == "infantry"
+			and Roles.loadout.US.radio_operator
+			and Roles.loadout.VC.radio_operator
+	)
+end)
+
+test("pá: só em setor próprio, fora da água, 1 por minuto e com teto no mapa", function()
+	assert(FieldWork.canDig("US", "US", false, nil, 0, 0))
+	local ok, why = FieldWork.canDig("VC", "US", false, nil, 0, 0)
+	assert(not ok and why == "só em setor do seu lado")
+	assert(not FieldWork.canDig("Neutral", "US", false, nil, 0, 0), "neutro não")
+	assert(select(2, FieldWork.canDig("US", "US", true, nil, 0, 0)) == "não dá para cavar na água")
+	assert(not FieldWork.canDig("US", "US", false, 100, 159, 0) and FieldWork.canDig("US", "US", false, 100, 160, 0))
+	assert(not FieldWork.canDig("US", "US", false, nil, 0, FieldWork.DIG.maxTotal))
+end)
+
+test("medevac: só com o UH-34D parado e pousado; 5 s junto do helicóptero", function()
+	assert(FieldWork.heliReady(0.3, 0.5, false))
+	assert(not FieldWork.heliReady(3, 0.5, false), "em movimento não")
+	assert(not FieldWork.heliReady(0.2, 6, false), "pairando alto não")
+	assert(not FieldWork.heliReady(0, 0, true), "destruído não")
+	local tt, done = 0, false
+	for _ = 1, 4 do
+		tt, done = FieldWork.boarding(tt, true, 1)
+	end
+	assert(not done)
+	tt, done = FieldWork.boarding(tt, false, 1)
+	assert(tt == 0 and not done, "afastou: recomeça")
+	for _ = 1, 5 do
+		tt, done = FieldWork.boarding(tt, true, 1)
+	end
+	assert(done)
 end)
 
 print(string.format("%d ok, %d falhas", passed, failed))

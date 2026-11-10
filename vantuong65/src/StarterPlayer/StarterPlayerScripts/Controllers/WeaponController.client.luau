@@ -95,6 +95,11 @@ end
 local function equip()
 	local s = player:GetAttribute("Loadout")
 	slots = if type(s) == "string" then string.split(s, ",") else {}
+	-- arma pega do chão (servidor) substitui a principal até o próximo spawn
+	local carried = player:GetAttribute("CarriedWeapon")
+	if type(carried) == "string" and #slots > 0 then
+		slots[1] = carried
+	end
 	if player:GetAttribute("Role") == "anti_tank" then
 		table.insert(slots, "launcher")
 	end
@@ -335,6 +340,7 @@ end)
 local function toggleBinoculars()
 	binoculars = not binoculars
 	binoc.Visible = binoculars
+	player:SetAttribute("Binoculars", binoculars) -- local: a marcação vira "alvo" (área aproximada)
 	if binoculars then
 		setAim(false)
 	end
@@ -411,6 +417,7 @@ RunService.RenderStepped:Connect(function(dt: number)
 end)
 
 player:GetAttributeChangedSignal("Loadout"):Connect(equip)
+player:GetAttributeChangedSignal("CarriedWeapon"):Connect(equip)
 player:GetAttributeChangedSignal("Role"):Connect(equip)
 player.CharacterAdded:Connect(function()
 	slot = 1

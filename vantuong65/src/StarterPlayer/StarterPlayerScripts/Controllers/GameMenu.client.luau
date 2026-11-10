@@ -10,6 +10,8 @@ local UserInputService = game:GetService("UserInputService")
 
 local Accessibility = require(ReplicatedStorage.Shared.Accessibility)
 local InputMap = require(ReplicatedStorage.Shared.InputMap)
+local Kit = require(ReplicatedStorage.Shared.Kit)
+local Weapons = require(ReplicatedStorage.Shared.Weapons)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Bus = require(script.Parent.Bus)
 local Input = require(script.Parent.Input)
@@ -49,6 +51,13 @@ local MODE_NAMES = { "Warfare (5 setores, 75 min)", "Offensive (EUA atacam do ma
 local CLOCKS = { 6.5, 12, 18.5 }
 local CLOCK_NAMES = { "06:30 (amanhecer)", "12:00", "18:30 (entardecer)" }
 local psMode, psClock = 1, 1
+-- equipamento por peso (Kit): escolha local; o servidor valida e aplica no próximo spawn
+local kit: Kit.Kit? = nil
+local function kitKind(): string
+	local wid = string.split(tostring(player:GetAttribute("Loadout") or ""), ",")[1]
+	local wp = Weapons.get(wid)
+	return if wp then wp.kind else "rifle"
+end
 local function isOwner(): boolean
 	return ReplicatedStorage:GetAttribute("PrivateServer") == true and game.PrivateServerOwnerId == player.UserId
 end
@@ -230,6 +239,49 @@ local function render()
 			Net.event("Squad_Action"):FireServer({ op = "leave" })
 			Bus.fire("menu_close_request")
 		end)
+		-- equipamento por peso: −/+ por item, dentro do limite em kg
+		local kind = kitKind()
+		local k = kit or Kit.validate(nil, kind)
+		kit = k
+		UiKit.label(
+			body,
+			string.format("Equipamento: %.1f de %.1f kg (vale no próximo spawn)", Kit.weight(k, kind), Kit.limit(kind)),
+			15
+		).LayoutOrder = order
+			+ 1
+		order += 1
+		for _, it in Kit.ITEMS do
+			order += 1
+			local holder = Instance.new("Frame")
+			holder.LayoutOrder = order
+			holder.Size = UDim2.new(1, -8, 0, if UiKit.tv() then 50 else 36)
+			holder.BackgroundTransparency = 1
+			holder.Parent = body
+			local l = UiKit.label(
+				holder,
+				string.format("%s: %d", it.name, (k :: any)[it.id]),
+				16,
+				if UiKit.tv() then 50 else 36
+			)
+			l.Size = UDim2.new(0.6, 0, 1, 0)
+			l.TextXAlignment = Enum.TextXAlignment.Left
+			for i, d in { -1, 1 } do
+				local b = UiKit.button(holder, if d < 0 then "−" else "+", function()
+					local raw = table.clone(k) :: any
+					raw[it.id] += d
+					if d > 0 and Kit.weight(raw, kind) > Kit.limit(kind) + 1e-9 then
+						Bus.fire("toast", "Passa do limite de peso: tire outro item antes")
+						return
+					end
+					local nk = Kit.validate(raw, kind)
+					kit = nk
+					Net.event("Kit_Set"):FireServer(nk)
+					render()
+				end)
+				b.Size = UDim2.new(0.18, 0, 1, 0)
+				b.Position = UDim2.new(0.6 + (i - 1) * 0.2, 0, 0, 0)
+			end
+		end
 		row("Refazer o tutorial do papel", function()
 			Bus.fire("tutorial_restart")
 			Bus.fire("menu_close_request")

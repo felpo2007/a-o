@@ -67,6 +67,23 @@ F5: o teto de arte por setor (`ArtBudget.SECTOR_MAX`, 2,5 milhões) é um chute 
 - Se o fps sobrar, diga quanto: eu subo o teto e as sebes ganham touceiras.
 - Se faltar, eu desço o teto.
 
+Features de lançamento (D-48). Confira no Studio:
+- **Acessibilidade:** menu do jogo (P) → Configurações → Acessibilidade:
+  - modo daltônico (cor dos traçantes);
+  - campo de visão;
+  - legendas de som.
+- **Relatório pós-ação:** aparece no fim da partida. Para não esperar 75 min, use na barra de
+  comando do servidor: `require(game.ServerScriptService.Modules.MatchService).newMatch("Skirmish")`.
+- **Marcação imperfeita:** binóculo (B ou ↑) + marcar (Z ou RB) num inimigo. Aparece um círculo
+  que some em 1 min.
+- **Arma do inimigo:** mate um bot e segure F ou X sobre a arma caída.
+- **Equipamento por peso:** menu → Squad e papel; vale no próximo spawn.
+- **Operador de rádio:** papel novo. Sem ele, o líder do squad não fala com o comandante.
+- **Pá:** roda de equipamento → Pá de trincheira, em setor do seu lado e fora da água.
+- **Medevac:** pouse o UH-34D a até 15 m de um ferido caído.
+- **Animais:** atire perto de uma vila. Se o búfalo andar de ré, troque o sinal em
+  `AnimalService.FACE_YAW`.
+
 Roteiro da F4:
 1. Escolha EUA → papel *Tripulante de blindado* → sente no M48A3 (W/S/A/D) e no LVTP-5 (entre na
    água: deve cair para 11 km/h).

@@ -15,6 +15,7 @@ Roles.roles = {
 	anti_tank = { id = "anti_tank", name = "Antitanque", unit = "infantry", maxPerSquad = 1 },
 	engineer = { id = "engineer", name = "Engenheiro/sapador", unit = "infantry", maxPerSquad = 1 },
 	medic = { id = "medic", name = "Médico", unit = "infantry", maxPerSquad = 1 },
+	radio_operator = { id = "radio_operator", name = "Operador de rádio", unit = "infantry", maxPerSquad = 1 },
 	observer = { id = "observer", name = "Observador", unit = "recon", maxPerSquad = 1 },
 	sniper = { id = "sniper", name = "Atirador de elite", unit = "recon", maxPerSquad = 1 },
 	tank_crew = { id = "tank_crew", name = "Tripulante de blindado", unit = "armor", maxPerSquad = 3 },
@@ -60,6 +61,7 @@ Roles.loadout = {
 		anti_tank = { "m1911" }, -- bazuca 3.5" M20 na F4
 		engineer = { "m14" },
 		medic = { "m1911" }, -- corpsman
+		radio_operator = { "m14" }, -- PRC-10 nas costas
 		observer = { "m14" },
 		sniper = { "m14" }, -- rifle de precisão da época: modelo a confirmar
 		tank_crew = { "m1911" },
@@ -76,6 +78,7 @@ Roles.loadout = {
 		anti_tank = { "type54" }, -- RPG-2 na F4
 		engineer = { "sks" },
 		medic = { "sks" },
+		radio_operator = { "sks" },
 		observer = { "type56" },
 		sniper = { "sks" }, -- Mosin-Nagant com luneta na F4
 		sapper = { "sks" },

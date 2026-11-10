@@ -40,6 +40,8 @@ Net.Events = {
 	"Combat_Hit", -- s->c { x, y, z }: origem do tiro que acertou (vibração do lado do impacto)
 	"Tutorial_Done", -- c->s roleId: tutorial do papel concluído (F6)
 	"Range_Hit", -- s->c { dist, right, up }: acerto no campo de tiro, só para o atirador (cm)
+	"Kit_Set", -- c->s { mags, frags, smokes, bandages }: equipamento por peso (próximo spawn)
+	"Dig_Request", -- c->s: cavar buraco de combate à frente (pá de trincheira)
 }
 Net.Unreliable = {
 	"Combat_Tracer", -- s->c: traçantes/efeitos de outros jogadores

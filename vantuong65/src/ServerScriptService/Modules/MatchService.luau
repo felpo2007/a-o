@@ -178,7 +178,8 @@ function MatchService.start()
 		end
 		hum.Died:Once(function()
 			local rep, root = MatchService.report, Combatants.root(e)
-			if rep and not MatchService.ended and (e.faction == "US" or e.faction == "VC") then
+			local evacuated = e.model:GetAttribute("Evacuated") == true -- medevac não é baixa
+			if rep and not evacuated and not MatchService.ended and (e.faction == "US" or e.faction == "VC") then
 				local s = if root then Geometry.sectorAt(MapConfig.Sectors, root.Position.X, root.Position.Z) else nil
 				AfterAction.casualty(rep, e.faction, s)
 			end

@@ -26,6 +26,9 @@ local CommanderService = require(Modules:WaitForChild("CommanderService"))
 local VehicleService = require(Modules:WaitForChild("VehicleService"))
 local FieldService = require(Modules:WaitForChild("FieldService"))
 local TrainingService = require(Modules:WaitForChild("TrainingService"))
+local AnimalService = require(Modules:WaitForChild("AnimalService"))
+local RadioService = require(Modules:WaitForChild("RadioService"))
+local FieldWorkService = require(Modules:WaitForChild("FieldWorkService"))
 
 task.spawn(TerrainRuntime.start) -- gera o terreno se o place veio sem ele
 PlayerData.start()
@@ -45,6 +48,9 @@ CommanderService.start() -- F4: comandante e missões de fogo por grade
 VehicleService.start() -- F4: M48A3, Ontos, LVTP-5 e UH-34D
 FieldService.start() -- Parte 12: configurações de controle, marcações, mensagens, granadas e corpo a corpo
 TrainingService.start() -- F6: campo de tiro e tutorial por papel
+AnimalService.start() -- Parte 11: búfalos e galinhas fogem de tiros e explosões
+RadioService.start() -- Parte 11: só o rádio do squad fala com o comandante
+FieldWorkService.start() -- Parte 11: pá de trincheira e medevac pelo UH-34D
 PrivateServer.start(function(mode: string, clock: number)
 	MatchService.requestMode(mode)
 	LightingService.setStart(clock)

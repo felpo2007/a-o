@@ -8,6 +8,7 @@ local ProximityPromptService = game:GetService("ProximityPromptService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Comms = require(ReplicatedStorage.Shared.Comms)
+local Radio = require(ReplicatedStorage.Shared.Radio)
 local Logistics = require(ReplicatedStorage.Shared.Logistics)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Bus = require(script.Parent.Bus)
@@ -110,7 +111,8 @@ end
 local function mark()
 	local p = aimPoint()
 	if p then
-		Net.event("Squad_Mark"):FireServer({ pos = p, kind = "point" })
+		local kind = if player:GetAttribute("Binoculars") then "target" else "point"
+		Net.event("Squad_Mark"):FireServer({ pos = p, kind = kind })
 	end
 end
 Input.on("mark", "tap", mark)
@@ -182,6 +184,36 @@ Net.event("Squad_Mark").OnClientEvent:Connect(function(m)
 	t.Parent = bb
 	bb.Parent = a
 	a.Parent = workspace
+	if m.kind == "target" and type(m.r) == "number" and type(m.ttl) == "number" then
+		-- área aproximada no chão, que esmaece até sumir (Comms.markAlpha)
+		local disc = Instance.new("Part")
+		disc.Shape = Enum.PartType.Cylinder
+		disc.Anchored, disc.CanCollide, disc.CanQuery, disc.CanTouch = true, false, false, false
+		disc.Material = Enum.Material.Neon
+		disc.Color = Color3.fromRGB(255, 120, 90)
+		disc.Size = Vector3.new(0.3, 2 * m.r / M, 2 * m.r / M)
+		disc.CFrame = CFrame.new(m.x, m.y, m.z) * CFrame.Angles(0, 0, math.pi / 2)
+		disc.Parent = a
+		t.Text = string.format("≈ inimigo (±%d m) — %s", math.floor(m.r + 0.5), tostring(m.from))
+		local born = os.clock()
+		task.spawn(function()
+			while a.Parent do
+				local alpha = Comms.markAlpha(os.clock() - born)
+				disc.Transparency = 1 - 0.35 * alpha
+				t.TextTransparency = 1 - alpha
+				if alpha <= 0 then
+					break
+				end
+				task.wait(0.5)
+			end
+			a:Destroy()
+		end)
+		line(
+			string.format("%s marcou inimigo (área de ±%d m)", m.from, math.floor(m.r + 0.5)),
+			Color3.fromRGB(255, 160, 120)
+		)
+		return
+	end
 	task.delay(10, function()
 		a:Destroy()
 	end)
@@ -197,7 +229,7 @@ end
 
 local function equipEnabled(id: string): boolean
 	if id == "shovel" then
-		return false -- cavar posição entra na F5
+		return true -- cava em setor próprio (o servidor recusa e explica quando não pode)
 	elseif id == "frag" then
 		return ((player:GetAttribute("Frags") :: number?) or 0) > 0
 	elseif id == "smoke" then
@@ -226,7 +258,9 @@ end)
 
 local function useItem(id: string)
 	lastItem = id
-	if id == "frag" or id == "smoke" then
+	if id == "shovel" then
+		Net.event("Dig_Request"):FireServer()
+	elseif id == "frag" or id == "smoke" then
 		Net.event("Throw_Request"):FireServer({ kind = id, dir = camera.CFrame.LookVector })
 	elseif id == "build" then
 		Wheel.open("equip", "Construir", buildItems, function(bid: string)
@@ -256,8 +290,7 @@ local function openEquip()
 	Wheel.open("equip", "Equipamento", Comms.EQUIP, equipEnabled)
 end
 local function commandAllowed(): boolean
-	local r = role()
-	return r == "commander" or r == "mortar" or r == "squad_leader"
+	return Radio.canTalkToCommand(role(), player:GetAttribute("Radio") == true)
 end
 local function openComm()
 	wheelOpen = "comm"

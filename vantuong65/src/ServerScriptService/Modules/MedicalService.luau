@@ -115,6 +115,12 @@ end
 function MedicalService.start()
 	Combatants.Added:Connect(function(e: Combatants.Entry)
 		states[e.model] = Medical.new(Combatants.role(e) == "medic")
+		local kb = e.player and e.player:GetAttribute("KitBandages")
+		if type(kb) == "number" then
+			-- médico mantém a dotação de médico se ela for maior; os outros levam o que escolheram
+			local s = states[e.model]
+			s.bandages = if Combatants.role(e) == "medic" then math.max(s.bandages, kb) else kb
+		end
 		busy[e.model] = nil
 		e.model.AncestryChanged:Connect(function(_, parent)
 			if parent == nil then

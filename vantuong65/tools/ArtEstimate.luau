@@ -3,6 +3,8 @@
 -- as mesmas regras (ordem, densidade, teto e desbaste das sebes), a partir dos dados do mapa e do
 -- ArtBudget. É valor esperado: o sorteio real depende da ordem das peças no Roblox. Não é medição.
 local ArtBudget = require("../src/ServerScriptService/Modules/ArtBudget")
+local Animals = require("../src/ReplicatedStorage/Shared/Animals")
+local Rng = require("../src/ReplicatedStorage/Shared/Rng") :: any
 local Features = require("../src/ServerStorage/VT65Build/Data/Features") :: any
 local Geometry = require("../src/ReplicatedStorage/Shared/Geometry")
 local MapConfig = require("../src/ReplicatedStorage/Shared/MapConfig") :: any
@@ -82,7 +84,21 @@ return function(): Result
 			add("hill_tree", at(l.x, l.z), 60)
 		end
 	end
-	-- 4) sebes por último, desbastadas pelo que sobrou do teto do setor
+	-- 4) animais da vila (antes das sebes, como no AssetLoader); sorteio com semente fixa
+	local housesM = {}
+	for i = 1, #hs, 4 do
+		table.insert(housesM, hs[i] * M)
+		table.insert(housesM, hs[i + 1] * M)
+	end
+	local rng = Rng.new(1)
+	for _, a in
+		Animals.spawns(housesM, function()
+			return rng:next()
+		end)
+	do
+		add(a.species, at(a.x / M, a.z / M), 1)
+	end
+	-- 5) sebes por último, desbastadas pelo que sobrou do teto do setor
 	type Job = { s: number, tall: boolean, n: number }
 	local jobs: { Job } = {}
 	local hg = Features.hedges

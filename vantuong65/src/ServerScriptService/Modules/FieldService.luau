@@ -12,6 +12,9 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Comms = require(ReplicatedStorage.Shared.Comms)
+local Kit = require(ReplicatedStorage.Shared.Kit)
+local Radio = require(ReplicatedStorage.Shared.Radio)
+local Weapons = require(ReplicatedStorage.Shared.Weapons)
 local InputMap = require(ReplicatedStorage.Shared.InputMap)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Rng = require(ReplicatedStorage.Shared.Rng)
@@ -71,6 +74,7 @@ local function recipients(p: Player, channel: string): { Player }
 	return out
 end
 
+local markRng = Random.new()
 local function onMark(p: Player, req: any)
 	local c = alive(p)
 	if not c or type(req) ~= "table" or not finite(req.pos) or not throttle(p, "mark", 1) then
@@ -83,8 +87,16 @@ local function onMark(p: Player, req: any)
 		return
 	end
 	local kind = if req.kind == "target" or req.kind == "map" then req.kind else "point"
+	local msg = { x = pos.X, y = pos.Y, z = pos.Z, from = p.DisplayName, kind = kind } :: any
+	if kind == "target" and root then
+		-- inimigo: área aproximada (erro cresce com a distância); quem recebe não sabe o ponto exato
+		local r = Comms.markError((pos - root.Position).Magnitude * M)
+		local ox, oz = Comms.markOffset(r, markRng:NextNumber(), markRng:NextNumber())
+		msg.x, msg.z = pos.X + ox / M, pos.Z + oz / M
+		msg.r, msg.ttl = r, Comms.MARK_TTL_S
+	end
 	for _, o in recipients(p, "squad") do
-		Net.event("Squad_Mark"):FireClient(o, { x = pos.X, y = pos.Y, z = pos.Z, from = p.DisplayName, kind = kind })
+		Net.event("Squad_Mark"):FireClient(o, msg)
 	end
 end
 
@@ -98,6 +110,14 @@ local function onMessage(p: Player, req: any)
 		return
 	end
 	local channel = if req.channel == "command" then "command" else "squad"
+	-- canal Comando: só com o rádio do squad (Parte 11), o comandante ou o morteiro
+	if
+		channel == "command"
+		and not Radio.canTalkToCommand(p:GetAttribute("Role") :: string?, p:GetAttribute("Radio") == true)
+	then
+		Net.event("Squad_Message"):FireClient(p, { id = "no_radio", from = "", channel = "squad" })
+		return
+	end
 	for _, o in recipients(p, channel) do
 		Net.event("Squad_Message"):FireClient(o, { id = req.id, from = p.DisplayName, channel = channel })
 	end
@@ -251,11 +271,24 @@ function FieldService.start()
 		end
 	end)
 
+	Net.event("Kit_Set").OnServerEvent:Connect(function(p: Player, raw: any)
+		if not throttle(p, "kit", 0.5) then
+			return
+		end
+		local wid = string.split(tostring(p:GetAttribute("Loadout") or ""), ",")[1]
+		local wp = Weapons.get(wid)
+		local k = Kit.validate(raw, if wp then wp.kind else "rifle")
+		p:SetAttribute("KitMags", k.mags)
+		p:SetAttribute("KitFrags", k.frags)
+		p:SetAttribute("KitSmokes", k.smokes)
+		p:SetAttribute("KitBandages", k.bandages)
+	end)
 	-- itens por vida: 2 granadas e 1 fumaça (PLACEHOLDER); baioneta começa recolhida
 	local function arm(p: Player)
 		p.CharacterAdded:Connect(function(c)
-			p:SetAttribute("Frags", 2)
-			p:SetAttribute("Smokes", 1)
+			-- equipamento por peso (Kit): validado no Kit_Set; padrão 2 granadas e 1 fumaça
+			p:SetAttribute("Frags", p:GetAttribute("KitFrags") or 2)
+			p:SetAttribute("Smokes", p:GetAttribute("KitSmokes") or 1)
 			c:SetAttribute("Bayonet", false)
 		end)
 	end

@@ -6,6 +6,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Explosive = require(ReplicatedStorage.Shared.Explosive)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Rng = require(ReplicatedStorage.Shared.Rng)
+local AnimalService = require(script.Parent.AnimalService)
 local Combatants = require(script.Parent.Combatants)
 local MedicalService = require(script.Parent.MedicalService)
 
@@ -39,6 +40,7 @@ function ExplosionService.detonate(id: string, pos: Vector3)
 		return
 	end
 	Net.unreliable("Fire_Impact"):FireAllClients({ id = id, x = pos.X, y = pos.Y, z = pos.Z })
+	AnimalService.noise(pos, true)
 	local origin = pos + Vector3.new(0, 1, 0)
 	for _, e in Combatants.list() do
 		local root = Combatants.root(e)

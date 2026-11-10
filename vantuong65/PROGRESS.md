@@ -39,6 +39,22 @@
   - guia do questionário de maturidade conferido no código;
   - roteiro do beta.
 
+## Features de lançamento da Parte 11 (sessão 6, D-48)
+Todas as 13 features marcadas "Lançamento" estão no código:
+- acessibilidade (daltonismo medido por simulação, FOV, legendas);
+- relatório pós-ação;
+- marcação imperfeita;
+- arma do inimigo;
+- equipamento por peso;
+- operador de rádio;
+- pá de trincheira;
+- medevac;
+- animais da vila;
+- além das que já existiam: bots, monetização, campo de tiro e tutorial.
+
+Cada regra tem teste em `f6.luau`. Búfalo e galinha vieram do ForgeGUI e foram reduzidos
+localmente para 3.999 e 2.000 triângulos. Nada disso rodou no Roblox.
+
 ## F5: o que foi feito (sessões 5 e 6)
 - **Remesh:** 18 modelos de uso repetido reduzidos às metas da Parte 2 pelo ForgeGUI. Números
   medidos no GLB preparado, em D-45, `manifest.json` e `ASSETS.csv`.
@@ -216,8 +232,9 @@
 | Testes Lune controle | `controle.luau` **17 ok** (inclui 10.000 eventos aleatórios sem estado preso) |
 | Giro de 180° no analógico (quadril) | **0,58 s** (calculado) |
 | Testes Lune F5 | `f5.luau` **8 ok** |
-| Testes Lune F6 | `f6.luau` **13 ok** |
-| Arte estimada por setor (teto 2,5 mi) | ~1.000 modelos; touceiras de sebe 20/38/24/21/55% nos setores 1–5 (cálculo) |
+| Testes Lune F6 | `f6.luau` **27 ok** |
+| Arte estimada por setor (teto 2,5 mi) | ~1.000 modelos; touceiras de sebe 19/37/24/21/52% nos setores 1–5, com 104 galinhas e 33 búfalos (cálculo) |
+| Daltonismo (ΔE76 simulado) | vermelho x verde histórico: 24 na deuteranopia; laranja x azul: 133–149 |
 | Redução local (Hausdorff, máx.) | capacete 0,8 cm; colete 0,6 cm; fibra 0,3 cm; props da vila 2,5–16 cm |
 | Diques após a fusão | 18.926 → **18.095** (comprimento 2.113.038 → 2.113.037 studs) |
 | Morteiro 82 mm (calibrado) | k = 1,512e-4 1/m; a 300/800/1.500/2.500 m: voo de 18,4/14,9/26,9/27,5 s |

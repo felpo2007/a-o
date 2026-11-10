@@ -647,3 +647,41 @@ Ver `CONTROLE.md`. Resumo:
   - roteiro do beta fechado.
 - **Não verificado aqui:** o tutorial e o campo de tiro dentro do Roblox (posição dos alvos no
   terreno, legibilidade do painel na TV).
+
+## D-48 — Features de "Lançamento" da Parte 11 (fecham a F6)
+A Parte 11 marca 13 features como "Lançamento", com entrada entre a F5 e a F6. Já existiam: bots,
+monetização sem vantagem, campo de tiro e tutorial. Entraram agora as outras, cada uma com a
+regra num módulo puro testado (`f6.luau`).
+
+| Feature | Como ficou | Números (PLACEHOLDER onde indicado) |
+|---|---|---|
+| Acessibilidade | Modo daltônico dos traçantes, campo de visão, legendas de som | Paletas medidas: vermelho x verde cai a ΔE 24 na deuteranopia; laranja x azul fica em 133–149 (simulação Machado 2009 + CIELAB). FOV de 60 a 90°. Legenda com direção e distância, no tempo do som |
+| Relatório pós-ação | Folha datilografada no fim da partida | Grupo data-hora de 1965 (fuso H = UTC+8), linha do tempo, mortos por lado e setor, resultado |
+| Marcação imperfeita | Marcar com o binóculo vira uma área, no mundo e na carta | Erro de 10% da distância (10 a 100 m); o alvo real fica dentro do círculo; some em 60 s |
+| Arma do inimigo | A arma de quem morre cai só com o carregador | Some em 2 min; quem pega deixa a sua no chão; a caixa de munição do seu lado não reabastece arma do outro lado |
+| Equipamento por peso | Carregadores, granadas, fumaça e curativos no menu (Squad e papel) | Limite = kit padrão + 1 kg; pesos aproximados (carregador de fuzil 0,75 kg, granada 0,45, fumaça 0,54, curativo 0,1). O cantil fica de fora enquanto não houver sede ou fadiga |
+| Operador de rádio | Novo papel na infantaria (1 por squad): só ele fala no canal do comando | Antena de 1,2 m nas costas; ao morrer, o rádio cai e qualquer aliado pode pegá-lo |
+| Pá de trincheira | Buraco de 2 homens e parapeito de sacos de areia | 1,8 × 0,6 × 1,2 m; 8 s parado; só em setor próprio, fora da água; 1 por minuto; 80 por partida |
+| Medevac | Ferido grave a até 15 m de um UH-34D pousado é evacuado em 5 s | +25 de suprimento para o time; não conta como morto no relatório; leva a própria arma |
+| Animais da vila | Búfalos e galinhas pastam perto de casa e fogem de tiros e explosões | Fuga a 6 m/s (búfalo) e 4 m/s (galinha); ouvem a 150 e 60 m, explosões a 3×; 1 búfalo a cada 6 casas e galinhas em 1 de cada 4 quintais |
+
+**Suposições:**
+- O medevac devolve suprimento porque o jogo não tem recurso de "mão de obra".
+- Medevac não exige carregar o ferido: o jogo não tem mecânica de carregar. O helicóptero pousa
+  junto dele, como numa evacuação real.
+- O líder de squad perdeu o canal do comando, como manda a Parte 11 ("só ele fala com o
+  comandante"). O comandante e a equipe de morteiro mantêm a própria rede.
+- Os animais são estáticos (sem esqueleto) e deslizam no chão; a fuga é a pista de detecção.
+  Animar exigiria rigging, mais crédito.
+
+**ForgeGUI** (2 modelos):
+- **Búfalo** (job 4ff96eac): preparado em 2,6 m; reduzido de 14.459 para 3.999 triângulos
+  (desvio máx. 3,2 cm). A cabeça fica para +X no GLB (medido pelos chifres).
+- **Galinha** (job ea7ed3ae): a 1ª tentativa falhou como "retomável" (não `outcome_unknown`) e o
+  próprio ForgeGUI retomou. Preparada em 0,45 m; reduzida de 16.688 para 2.000 triângulos
+  (desvio máx. 1,9 cm). A frente fica para +Z (medido pela crista).
+- Os dois foram conferidos em render antes/depois. `AnimalService.FACE_YAW` usa as frentes
+  medidas; conferir no Studio.
+
+**Não verificado aqui:** tudo isso dentro do Roblox. Escavação do terreno, antena, legendas, folha
+do relatório e animais andando precisam do Studio.

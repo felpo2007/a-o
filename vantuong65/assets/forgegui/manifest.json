@@ -712,6 +712,54 @@
    "sha256": "899655fb1473a8bd3080933cd01518564250e37aaa08d15beff30fadd1b13db6",
    "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/58f8aaf2-4c31-4c7e-b7dc-19afa6f165e8/77a3f7a9-3ce6-4d29-8614-3c6763fe3d35/Model-899655fb1473a8bd3080933cd01518564250e37aaa08d15beff30fadd1b13db6.glb",
    "remesh": "e9ec1fdd-235e-463d-a839-6547d703d841"
+  },
+  {
+   "arquivo": "models/bufalo_studs.glb",
+   "chave": "water_buffalo",
+   "job": "4ff96eac-8b3f-4984-a3d4-02a08f073bdf",
+   "prep": "bb979f29-e429-4f5d-b302-96a7f660f6ff",
+   "escala": "comprimento 2,6 m (búfalo-do-pântano adulto)",
+   "dim_studs_xyz": [
+    9.29,
+    5.54,
+    4.65
+   ],
+   "triangulos": 3999,
+   "sha256": "11f22be5d585f43c019fc4b1f2ebe78c3d664642d95ca5c519c0d9ae9f327d02",
+   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/bb979f29-e429-4f5d-b302-96a7f660f6ff/39e031a0-bc38-4c06-92af-3a449e5b407d/Model-17d4e24c49ad2518546711b3881efe0171fd96aeb745dbfbad964ab217eba937.glb",
+   "reducao_local": {
+    "ferramenta": "tools/decimate_glb.py",
+    "pymeshlab": "2025.7.post1",
+    "faces": 4000,
+    "sha256_origem": "17d4e24c49ad2518546711b3881efe0171fd96aeb745dbfbad964ab217eba937",
+    "triangulos_origem": 14459,
+    "desvio_max_m": 0.0323,
+    "desvio_medio_m": 0.00323
+   }
+  },
+  {
+   "arquivo": "models/galinha_studs.glb",
+   "chave": "chicken",
+   "job": "ea7ed3ae-7386-445b-a084-5fc36d94c64d",
+   "prep": "1b8f6feb-bc48-41ba-844c-0f7a0ab10a05",
+   "escala": "altura 0,45 m (galo ga ta)",
+   "dim_studs_xyz": [
+    0.7,
+    1.6,
+    1.75
+   ],
+   "triangulos": 2000,
+   "sha256": "55ea7041b2a0674fc8a42e8c383b053a938c430ca2adbb2ec42ce5980e36efb3",
+   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/1b8f6feb-bc48-41ba-844c-0f7a0ab10a05/0d692fab-2c1e-4ebc-9c07-1fa581ff0e04/Model-3dc5d046ce841e7d6953494b91abb20d92b3f3d93e502f54578204e9cec04418.glb",
+   "reducao_local": {
+    "ferramenta": "tools/decimate_glb.py",
+    "pymeshlab": "2025.7.post1",
+    "faces": 2000,
+    "sha256_origem": "3dc5d046ce841e7d6953494b91abb20d92b3f3d93e502f54578204e9cec04418",
+    "triangulos_origem": 16688,
+    "desvio_max_m": 0.0185,
+    "desvio_medio_m": 0.00205
+   }
   }
  ]
 }

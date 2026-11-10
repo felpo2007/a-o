@@ -7,6 +7,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local AssetIds = require(ReplicatedStorage.Shared.AssetIds) :: any
 local ArtBudget = require(script.Parent.ArtBudget)
+local Animals = require(ReplicatedStorage.Shared.Animals)
 local Geometry = require(ReplicatedStorage.Shared.Geometry)
 local MapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any
 local Rng = require(ReplicatedStorage.Shared.Rng)
@@ -137,6 +138,7 @@ function AssetLoader.start()
 	local rng = Rng.new(19650818)
 	-- casas: variante por sorteio (só as que cabem na meta); o placeholder some (fica só se não houver modelo)
 	local variants = ArtBudget.HOUSE_VARIANTS
+	local housePos: { number } = {} -- metros, para os animais da vila
 	local houses = map:FindFirstChild("Houses")
 	if houses then
 		for _, h in houses:GetChildren() do
@@ -145,6 +147,8 @@ function AssetLoader.start()
 				local p = body.Position
 				local _, yaw, _ = body.CFrame:ToOrientation()
 				local key = variants[1 + math.floor(rng:next() * #variants)]
+				table.insert(housePos, p.X * M)
+				table.insert(housePos, p.Z * M)
 				if AssetLoader.place(key, p.X, p.Z, yaw, out) then
 					h:Destroy()
 					-- quintal: bananeira e coqueiro ao redor (densidade da Parte 5)
@@ -213,6 +217,19 @@ function AssetLoader.start()
 				end
 			end
 		end
+	end
+	-- animais da vila (Parte 11): antes das sebes no orçamento; o AnimalService os move
+	if AssetLoader.template("water_buffalo") or AssetLoader.template("chicken") then
+		local pen = Instance.new("Folder")
+		pen.Name = "Animals"
+		for _, sp in
+			Animals.spawns(housePos, function()
+				return rng:next()
+			end)
+		do
+			AssetLoader.place(sp.species, sp.x / M, sp.z / M, rng:range(0, 6.28), pen, true)
+		end
+		pen.Parent = out
 	end
 	-- Sebes por último. O que sobra do teto de cada setor vira um desbaste uniforme no setor (e não
 	-- um corte no meio do mapa). A peça da sebe só fica invisível se TODAS as touceiras dela

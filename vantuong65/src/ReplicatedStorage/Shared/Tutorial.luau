@@ -47,6 +47,7 @@ Tutorial.RIFLE_ROLES = {
 	observer = true,
 	sniper = true,
 	sapper = true,
+	radio_operator = true,
 }
 
 -- veículos: o tutorial começa ao entrar (interagir perto do veículo)
@@ -82,6 +83,12 @@ Tutorial.ROLE = {
 		act("comm_wheel", "Roda de comunicação: {a}. A página Comando pede a missão de fogo pela grade."),
 	},
 	sapper = { GRENADES },
+	radio_operator = {
+		act(
+			"comm_wheel",
+			"Rádio: {a}. Só você fala com o comandante (página Comando). Se cair, um aliado pega o rádio."
+		),
+	},
 	tank_crew = {
 		ENTER,
 		act("v_optic", "Ótica: {a}."),

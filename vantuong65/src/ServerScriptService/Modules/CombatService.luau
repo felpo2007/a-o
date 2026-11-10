@@ -7,10 +7,12 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Ballistics = require(ReplicatedStorage.Shared.Ballistics)
 local Net = require(ReplicatedStorage.Shared.Net)
+local Pickup = require(ReplicatedStorage.Shared.Pickup)
 local Rng = require(ReplicatedStorage.Shared.Rng)
 local Weapons = require(ReplicatedStorage.Shared.Weapons)
 local Combatants = require(script.Parent.Combatants)
 local MedicalService = require(script.Parent.MedicalService)
+local AnimalService = require(script.Parent.AnimalService)
 local TrainingService = require(script.Parent.TrainingService)
 
 local CombatService = {}
@@ -37,9 +39,67 @@ local function resetAmmo(player: Player)
 		ammo[player] = nil
 		return
 	end
-	ammo[player] =
-		{ weapon = wp.id, mag = wp.magazine, spare = (MAGS[wp.kind] or 3) - 1, lastShot = 0, reloadUntil = 0 }
+	-- equipamento por peso (Kit_Set): carregadores escolhidos; senão a dotação padrão
+	local km = player:GetAttribute("KitMags")
+	local mags = if type(km) == "number" then km else (MAGS[wp.kind] or 3)
+	ammo[player] = { weapon = wp.id, mag = wp.magazine, spare = mags - 1, lastShot = 0, reloadUntil = 0 }
+	player:SetAttribute("CarriedWeapon", nil)
 	Net.event("Combat_Ammo"):FireClient(player, ammo[player])
+end
+
+-- ===== arma caída (Parte 11): pegar a arma do inimigo só com a munição dela =====
+local pickups = Instance.new("Folder")
+pickups.Name = "DroppedWeapons"
+pickups.Parent = workspace
+
+local spawnPickup: (pos: Vector3, a: Pickup.Ammo) -> ()
+spawnPickup = function(pos: Vector3, a: Pickup.Ammo)
+	local wp = Weapons.get(a.weapon)
+	if not wp then
+		return
+	end
+	local p = Instance.new("Part")
+	p.Name = a.weapon
+	p.Size = Vector3.new(1.0 / M, 0.08 / M, 0.25 / M) -- volume de fuzil deitado no chão
+	p.Color = Color3.fromRGB(70, 60, 45)
+	p.Material = Enum.Material.Wood
+	p.CanCollide = false
+	p.Anchored = true
+	local params = RaycastParams.new()
+	params.FilterType = Enum.RaycastFilterType.Include
+	params.FilterDescendantsInstances = { workspace.Terrain }
+	local hit = workspace:Raycast(pos + Vector3.new(0, 10, 0), Vector3.new(0, -60, 0), params)
+	p.CFrame = CFrame.new((if hit then hit.Position else pos) + Vector3.new(0, p.Size.Y / 2, 0))
+		* CFrame.Angles(0, math.random() * 2 * math.pi, 0)
+	p.Parent = pickups
+	local prompt = Instance.new("ProximityPrompt")
+	prompt.ActionText = "Pegar " .. wp.name
+	prompt.ObjectText = string.format("%d cartucho(s) no carregador", a.mag)
+	prompt.HoldDuration = 0.6
+	prompt.MaxActivationDistance = 8
+	prompt.RequiresLineOfSight = false
+	prompt.Parent = p
+	prompt.Triggered:Connect(function(player: Player)
+		local char = player.Character
+		local hum = char and char:FindFirstChildOfClass("Humanoid")
+		if not (char and hum) or hum.Health <= 0 or char:GetAttribute("Downed") or p.Parent ~= pickups then
+			return
+		end
+		p:Destroy()
+		local cur = ammo[player]
+		local new, dropped =
+			Pickup.swap(if cur then { weapon = cur.weapon, mag = cur.mag, spare = cur.spare } else nil, a)
+		ammo[player] = { weapon = new.weapon, mag = new.mag, spare = new.spare, lastShot = 0, reloadUntil = 0 }
+		player:SetAttribute("CarriedWeapon", new.weapon)
+		Net.event("Combat_Ammo"):FireClient(player, ammo[player])
+		local root = char:FindFirstChild("HumanoidRootPart") :: BasePart?
+		if dropped and root then
+			spawnPickup(root.Position + root.CFrame.RightVector * 2, dropped)
+		end
+	end)
+	task.delay(Pickup.TTL_S, function()
+		p:Destroy()
+	end)
 end
 
 local function zoneOf(part: Instance): string
@@ -102,6 +162,7 @@ function CombatService.fire(
 		end
 		return nil
 	end)
+	AnimalService.noise(origin, false) -- búfalos e galinhas fogem do tiro (pista de detecção)
 	-- traçante, som e impacto para os outros clientes (eles refazem a trajetória com a semente)
 	local payload = {
 		w = weaponId,
@@ -137,13 +198,33 @@ function CombatService.fire(
 	end
 end
 
--- reabastece a munição (caixa de munição construída pela logística)
-CombatService.refill = resetAmmo
+-- reabastece a munição (caixa de munição construída pela logística). Arma do outro lado não
+-- reabastece: quem pegou a arma do inimigo fica com o que tem nela.
+function CombatService.refill(player: Player)
+	local a = ammo[player]
+	local wp = a and Weapons.get(a.weapon)
+	if wp and not Pickup.canRefill(wp.faction, player:GetAttribute("Faction") :: string?) then
+		return
+	end
+	resetAmmo(player)
+end
 
 function CombatService.start()
 	Players.PlayerAdded:Connect(function(p)
-		p.CharacterAdded:Connect(function()
+		p.CharacterAdded:Connect(function(char)
 			resetAmmo(p)
+			local hum = char:WaitForChild("Humanoid", 10) :: Humanoid?
+			if hum then
+				hum.Died:Once(function()
+					local root = char:FindFirstChild("HumanoidRootPart") :: BasePart?
+					local a = ammo[p]
+					local drop =
+						Pickup.dropOnDeath(if a then { weapon = a.weapon, mag = a.mag, spare = a.spare } else nil)
+					if drop and root and not char:GetAttribute("Evacuated") then -- evacuado leva a arma
+						spawnPickup(root.Position, drop)
+					end
+				end)
+			end
 		end)
 	end)
 	Players.PlayerRemoving:Connect(function(p)
