@@ -175,4 +175,40 @@ function FeatureBuilder.build(env: Env, features: any, mapConfig: any, world: an
 	return stats
 end
 
+-- Forro dos túneis e poços (peças), a partir das caixas de TunnelGeometry.build.
+function FeatureBuilder.tunnels(env: Env, boxes: { any }, parent: any): number
+	local root = folder(env, "Tunnels", parent)
+	local C = env.Color3.fromRGB
+	local n = 0
+	for _, b in boxes do
+		if b.kind == "carve" then
+			continue
+		end
+		local p
+		if b.kind == "truss" then
+			p = env.Instance.new("TrussPart")
+			p.Anchored = true
+			p.Size = env.Vector3.new(2, math.max(2, math.floor(b.size.Y / 2) * 2), 2)
+			p.Transparency = 1 -- escada invisível para subir/descer o poço
+		else
+			p = part(env)
+			p.Size = b.size
+			p.Material = env.Enum.Material.Ground
+			p.Color = if b.kind == "entrance" then C(92, 74, 52) else C(78, 62, 44)
+			p.CastShadow = b.kind ~= "entrance"
+		end
+		p.CFrame = b.cf
+		p.Name = b.name .. "_" .. b.kind
+		if b.kind == "entrance" then
+			p.CanCollide = false
+			p.Transparency = 0.2
+			p:SetAttribute("TunnelEntrance", b.name)
+		end
+		p:SetAttribute("Material", "Earth")
+		p.Parent = root
+		n += 1
+	end
+	return n
+end
+
 return FeatureBuilder

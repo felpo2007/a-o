@@ -88,7 +88,29 @@ Net.unreliable("Combat_Tracer").OnClientEvent:Connect(function(shot)
 end)
 
 -- som do próprio tiro (camadas perto/médio/longe e o estalo supersônico entram na F3)
-local SHOT_SOUND: { [string]: number } = { m14 = AssetIds.Sounds.shot_m14, type56 = AssetIds.Sounds.shot_type56 }
+local S = AssetIds.Sounds
+local SHOT_SOUND: { [string]: number } = {
+	m14 = S.shot_m14,
+	m60 = S.shot_m14, -- mesmo cartucho 7.62x51 até a camada própria
+	m1911 = S.shot_m14,
+	type56 = S.shot_type56,
+	sks = S.shot_type56,
+	rpd = S.shot_type56,
+	type54 = S.shot_type56,
+}
+local function playId(id: number, volume: number)
+	if id == 0 then
+		return
+	end
+	local s = Instance.new("Sound")
+	s.SoundId = "rbxassetid://" .. id
+	s.Volume = volume
+	s.Parent = camera
+	s:Play()
+	s.Ended:Once(function()
+		s:Destroy()
+	end)
+end
 local function playShot(id: string)
 	local sid = SHOT_SOUND[id]
 	if not sid or sid == 0 then
@@ -108,7 +130,14 @@ local function fire()
 	local wp = weapon
 	local char = player.Character
 	local head = char and char:FindFirstChild("Head") :: BasePart?
-	if not (wp and head) or mag <= 0 or player:GetAttribute("Downed") then
+	if not (wp and head) or player:GetAttribute("Downed") then
+		return
+	end
+	if mag <= 0 then
+		if os.clock() - lastShot > 0.3 then
+			lastShot = os.clock()
+			playId(S.dry_click, 0.8) -- Type 56 sem trava do ferrolho: só o clique (Parte 10.6)
+		end
 		return
 	end
 	local now = os.clock()
@@ -162,6 +191,9 @@ UserInputService.InputBegan:Connect(function(input, processed)
 		aiming = true
 	elseif input.KeyCode == Enum.KeyCode.R then
 		Net.event("Combat_Reload"):FireServer()
+		if weapon then
+			playId(if weapon.faction == "US" then S.reload_m14 else S.reload_type56, 0.7)
+		end
 	elseif input.KeyCode == Enum.KeyCode.V and weapon then
 		modeIdx = modeIdx % #weapon.modes + 1
 	end

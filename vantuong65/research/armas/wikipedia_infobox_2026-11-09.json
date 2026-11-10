@@ -16,7 +16,8 @@
   "weight": "{{convert|10.5|kg|lb|2|abbr=on}}",
   "feed": "Disintegrating [[Belt (firearm)|belt]] with [[M13 Link]]s",
   "range": "1,200 yd (1,100 m)",
-  "_fonte": "https://en.wikipedia.org/wiki/M60_machine_gun"
+  "_fonte": "https://en.wikipedia.org/wiki/M60_machine_gun",
+  "length": "{{convert|1105|mm|in|abbr=on}}"
  },
  "M79 grenade launcher": {
   "cartridge": "[[40mm grenade|40×46mm grenade]]",
@@ -37,7 +38,8 @@
   "weight": "{{convert|39|oz|g|abbr=on|lk=on}} empty, with magazine",
   "feed": "7-, 8-, 9-, 10- or 12-round box magazines",
   "range": "{{convert|50|m|ft|abbr=on}}",
-  "_fonte": "https://en.wikipedia.org/wiki/M1911_pistol"
+  "_fonte": "https://en.wikipedia.org/wiki/M1911_pistol",
+  "length": "8.5 in (216 mm)"
  },
  "Type 56 assault rifle": {
   "cartridge": "Type 56 variants -[[7.62×39mm]]",
@@ -110,6 +112,7 @@
   "weight": "{{convert|7.4|kg|lb|2|abbr=on}} when empty",
   "feed": "Non-disintegrating 100-round segmented belt stored in a drum container. Custom 125 round belt (MACVSOG version)",
   "range": "100–1,000 m sight adjustments",
-  "_fonte": "https://en.wikipedia.org/wiki/RPD_machine_gun"
+  "_fonte": "https://en.wikipedia.org/wiki/RPD_machine_gun",
+  "length": "{{convert|1037|mm|in|abbr=on}}"
  }
 }

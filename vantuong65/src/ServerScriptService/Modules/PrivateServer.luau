@@ -1,7 +1,6 @@
 --!strict
 -- Servidores privados (vendidos pelo próprio Roblox; preço definido nas configurações do jogo):
 -- o dono escolhe modo e horário antes da partida — útil para treino de unidade e campeonatos.
-local Lighting = game:GetService("Lighting")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Net = require(ReplicatedStorage.Shared.Net)
@@ -36,7 +35,6 @@ function PrivateServer.start(onChange: (mode: string, clock: number) -> ())
 		if not ok or not v then
 			return
 		end
-		Lighting.ClockTime = v.clock
 		ReplicatedStorage:SetAttribute("MatchMode", v.mode)
 		onChange(v.mode, v.clock)
 	end)

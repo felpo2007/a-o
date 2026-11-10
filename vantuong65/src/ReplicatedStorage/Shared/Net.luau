@@ -23,6 +23,7 @@ Net.Events = {
 	"Medical_State", -- s->c: estado do próprio corpo
 	"Match_State", -- s->c: setores, pontos fortes, tempo
 	"Squad_State", -- s->c: squads do próprio time
+	"Posture_Set", -- c->s: agachar (true/false)
 }
 Net.Unreliable = {
 	"Combat_Tracer", -- s->c: traçantes/efeitos de outros jogadores

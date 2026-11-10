@@ -30,6 +30,19 @@ local env = {
 }
 local t0 = os.clock()
 local stats = FeatureBuilder.build(env, Features, MapConfig, world, workspace)
+local TunnelGeometry = require("../src/ServerStorage/VT65Build/TunnelGeometry")
+local Tunnels = require("../src/ReplicatedStorage/Shared/Tunnels")
+local cx, cz = 0, 0
+for _, l in MapConfig.Locations do
+	if l.name == "An Cường (2)" then
+		cx, cz = l.x, l.z
+	end
+end
+local boxes = TunnelGeometry.build(env, Tunnels, cx, cz, function(x, z)
+	return world:heightAt(x, z)
+end)
+local nt = FeatureBuilder.tunnels(env, boxes, workspace:FindFirstChild("Map"))
+print(string.format("túneis: %d peças, %.0f m de galeria", nt, Tunnels.length()))
 print(
 	string.format(
 		"peças: %d diques, %d lâminas, %d sebes, %d casas, %d marcadores (%.1f s)",

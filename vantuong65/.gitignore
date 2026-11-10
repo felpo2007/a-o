@@ -8,3 +8,5 @@ __pycache__/
 .pytest_cache/
 .ruff_cache/
 assets/forgegui/models/
+# config por usuário (IDs da experiência)
+cloud.json

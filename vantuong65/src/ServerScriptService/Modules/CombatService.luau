@@ -9,6 +9,7 @@ local Ballistics = require(ReplicatedStorage.Shared.Ballistics)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Rng = require(ReplicatedStorage.Shared.Rng)
 local Weapons = require(ReplicatedStorage.Shared.Weapons)
+local Combatants = require(script.Parent.Combatants)
 local MedicalService = require(script.Parent.MedicalService)
 
 local CombatService = {}
@@ -56,6 +57,77 @@ local function num(v: any): number?
 	return if type(v) == "number" and v == v and math.abs(v) < 1e7 then v else nil
 end
 
+-- Simula o tiro no servidor e aplica o dano. `shooter` é o modelo do personagem (jogador ou bot).
+function CombatService.fire(
+	shooter: Model,
+	weaponId: string,
+	origin: Vector3,
+	dir: Vector3,
+	seed: number,
+	exceptPlayer: Player?
+)
+	local params = RaycastParams.new()
+	params.FilterType = Enum.RaycastFilterType.Exclude
+	local ignore: { Instance } = { shooter }
+	params.FilterDescendantsInstances = ignore
+	local speedFactor = 1
+	local hit = Ballistics.trace({
+		ox = origin.X * M,
+		oy = origin.Y * M,
+		oz = origin.Z * M,
+		dx = dir.X,
+		dy = dir.Y,
+		dz = dir.Z,
+		weaponId = weaponId,
+		seed = seed,
+	}, function(ax, ay, az, bx, by, bz)
+		local from = Vector3.new(ax, ay, az) / M
+		local delta = Vector3.new(bx - ax, by - ay, bz - az) / M
+		for _ = 1, 4 do -- até 4 materiais atravessáveis por segmento
+			local r = workspace:Raycast(from, delta, params)
+			if not r then
+				return nil
+			end
+			local mat = r.Instance:GetAttribute("Material")
+			local keep = if type(mat) == "string" then PASS[mat] else nil
+			if keep then
+				speedFactor *= keep
+				table.insert(ignore, r.Instance)
+				params.FilterDescendantsInstances = ignore
+			else
+				local p = r.Position * M
+				return { x = p.X, y = p.Y, z = p.Z, target = r.Instance }
+			end
+		end
+		return nil
+	end)
+	-- traçante, som e impacto para os outros clientes (eles refazem a trajetória com a semente)
+	local payload = {
+		w = weaponId,
+		ox = origin.X,
+		oy = origin.Y,
+		oz = origin.Z,
+		dx = dir.X,
+		dy = dir.Y,
+		dz = dir.Z,
+		seed = seed,
+	}
+	for _, other in Players:GetPlayers() do
+		if other ~= exceptPlayer then
+			Net.unreliable("Combat_Tracer"):FireClient(other, payload)
+		end
+	end
+	if hit and hit.target then
+		local model = (hit.target :: Instance):FindFirstAncestorOfClass("Model")
+		local victim = Combatants.get(model)
+		if victim then
+			local energy = hit.energy * speedFactor * speedFactor
+			local roll = Rng.new(seed + 1):next()
+			MedicalService.hit(victim.model, zoneOf(hit.target), energy, roll)
+		end
+	end
+end
+
 function CombatService.start()
 	Players.PlayerAdded:Connect(function(p)
 		p.CharacterAdded:Connect(function()
@@ -90,7 +162,7 @@ function CombatService.start()
 		local char = player.Character
 		local head = char and char:FindFirstChild("Head") :: BasePart?
 		local hum = char and char:FindFirstChildOfClass("Humanoid")
-		if not (a and head and hum) or hum.Health <= 0 or player:GetAttribute("Downed") then
+		if not (a and char and head and hum) or hum.Health <= 0 or char:GetAttribute("Downed") then
 			return
 		end
 		local wp = Weapons.get(a.weapon)
@@ -113,58 +185,7 @@ function CombatService.start()
 		end
 		a.lastShot = clock
 		a.mag -= 1
-
-		local params = RaycastParams.new()
-		params.FilterType = Enum.RaycastFilterType.Exclude
-		local ignore: { Instance } = { char :: Model }
-		params.FilterDescendantsInstances = ignore
-		local speedFactor = 1
-		local hit = Ballistics.trace({
-			ox = ox * M,
-			oy = oy * M,
-			oz = oz * M,
-			dx = dx,
-			dy = dy,
-			dz = dz,
-			weaponId = wp.id,
-			seed = seed,
-		}, function(ax, ay, az, bx, by, bz)
-			local from = Vector3.new(ax, ay, az) / M
-			local delta = Vector3.new(bx - ax, by - ay, bz - az) / M
-			for _ = 1, 4 do -- até 4 materiais atravessáveis por segmento
-				local r = workspace:Raycast(from, delta, params)
-				if not r then
-					return nil
-				end
-				local mat = r.Instance:GetAttribute("Material")
-				local keep = if type(mat) == "string" then PASS[mat] else nil
-				if keep then
-					speedFactor *= keep
-					table.insert(ignore, r.Instance)
-					params.FilterDescendantsInstances = ignore
-				else
-					local p = r.Position * M
-					return { x = p.X, y = p.Y, z = p.Z, target = r.Instance }
-				end
-			end
-			return nil
-		end)
-		-- traçante/efeito para os outros clientes (eles refazem a trajetória com a semente)
-		for _, other in Players:GetPlayers() do
-			if other ~= player then
-				Net.unreliable("Combat_Tracer")
-					:FireClient(other, { w = wp.id, ox = ox, oy = oy, oz = oz, dx = dx, dy = dy, dz = dz, seed = seed })
-			end
-		end
-		if hit and hit.target then
-			local model = (hit.target :: Instance):FindFirstAncestorOfClass("Model")
-			local victim = if model then Players:GetPlayerFromCharacter(model) else nil
-			if victim then
-				local energy = hit.energy * speedFactor * speedFactor
-				local roll = Rng.new(seed + 1):next()
-				MedicalService.hit(victim, zoneOf(hit.target), energy, roll)
-			end
-		end
+		CombatService.fire(char, wp.id, Vector3.new(ox, oy, oz), Vector3.new(dx, dy, dz), seed, player)
 	end)
 end
 

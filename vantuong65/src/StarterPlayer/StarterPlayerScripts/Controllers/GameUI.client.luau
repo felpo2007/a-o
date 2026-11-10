@@ -258,4 +258,20 @@ UserInputService.InputBegan:Connect(function(input, processed)
 		refresh()
 	end
 end)
+-- aviso enquanto o servidor gera o terreno
+local loading = Instance.new("TextLabel")
+loading.AnchorPoint = Vector2.new(0.5, 0)
+loading.Position = UDim2.fromScale(0.5, 0.02)
+loading.Size = UDim2.fromOffset(560, 40)
+loading.BackgroundColor3 = PAPER
+loading.TextColor3 = INK
+loading.Font = Enum.Font.GothamMedium
+loading.TextSize = 18
+loading.Text = "Preparando o campo de batalha (terreno de 4 x 2,4 km)…"
+loading.Parent = gui
+local function loadingState()
+	loading.Visible = ReplicatedStorage:GetAttribute("TerrainReady") == false
+end
+ReplicatedStorage:GetAttributeChangedSignal("TerrainReady"):Connect(loadingState)
+loadingState()
 refresh()

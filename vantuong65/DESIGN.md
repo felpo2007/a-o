@@ -246,3 +246,83 @@ Não existe consulta de saldo. Gastei em ordem de prioridade e parei antes de it
 | Preparação | gratuita |
 
 O UH-34D ficou para a F4.
+
+## D-27 — Sol real de 18/08/1965 (firme no método; fuso a confirmar)
+- `Shared/SolarPosition` implementa o algoritmo da NOAA (teste: Greenwich, 61,96° de elevação).
+- O `LightingService` mede a direção real do sol a cada 15 s. Depois ajusta `ClockTime` e
+  `GeographicLatitude` por busca em padrão até `Lighting:GetSunDirection()` coincidir com ela.
+  Erro em graus no atributo `SunFitErrorDeg`.
+- Fuso: **UTC+8**, a hora oficial do Vietnã do Sul em 1965. Isso é **suposição**: a confirmar em
+  fonte primária.
+- Resultado calculado às 06:30 do dia 18: sol a **−0,9°**, ou seja, o desembarque foi no nascer do
+  sol. Às 12:00 o sol está a 78,1°; às 18:30, a 7,8°.
+- Neblina matinal: densidade 0,45 → 0,35 entre 06:30 e 07:30.
+
+## D-28 — Bots completam o servidor (provisório)
+- `BotService`: o atributo `BotFill` define quantos combatentes cada time deve ter. O padrão é 15 no
+  Studio e 10 no servidor público. Cada 6º bot é metralhador.
+- Percepção por linha de visada: as sebes bloqueiam.
+- O tiro passa pelo mesmo `CombatService.fire` dos jogadores, então todo dano continua validado no
+  servidor.
+- O erro de mira (`BotBrain.aimSigma`) cresce com a distância e com o movimento. Rajadas por arma.
+- Os bots saem quando entram jogadores. Os números de mira e reação são de design: calibrar em
+  playtest.
+
+## D-29 — Túneis de An Cường (2) (traçado de design)
+- As fontes confirmam túneis ligando trincheiras e tocas (First Fight p.25), mas não a planta.
+- Galeria de 1,0 × 1,2 m, piso a 3 m de profundidade, 5 entradas com poço de 0,6 m, ~474 m no total.
+- Trincheira sul com 1,0 m de largura e 1,5 m de profundidade (p.23).
+- O terreno é escavado com `FillBlock(Air)`, com forro de peças.
+- O engenheiro dos EUA desmonta uma entrada segurando a interação por 8 s.
+
+## D-30 — Personagens e uniformes (placeholder honesto)
+- Escala dos personagens: 1,2× a altura padrão do Roblox (`Characters.HEIGHT_SCALE`).
+- Uniformes como Shirt/Pants clássicos de 585 × 559 px.
+- Os 6 moldes pedidos ao ForgeGUI terminaram em `outcome_unknown`, e a regra do serviço é não
+  regenerar. Por isso `tools/make_clothing.py` os gera por código.
+- Cores dos moldes (RGB):
+  - OG-107 desbotado: (104, 108, 74);
+  - cáqui da Força Principal: (170, 150, 108);
+  - verde-escuro: (64, 76, 54);
+  - cinto de lona marrom: (112, 84, 52).
+  São estimativas de design: conferir com fotos coloridas de 1965 (Parte 9.1).
+- Capacete M1, colete M1955, capacete de fibra e chapéu de selva: GLBs do ForgeGUI soldados à
+  cabeça e ao tronco.
+
+## D-31 — Terreno gerado no servidor (firme)
+- Se o place chegar sem terreno, `TerrainRuntime` roda `Build.terrain()` no servidor.
+- Enquanto `ReplicatedStorage.TerrainReady` for falso, ninguém nasce e os bots esperam.
+- Motivo: assim o place pode ser publicado direto pelo Open Cloud, sem abrir o Studio. O custo é
+  esperar alguns segundos no início de cada servidor.
+
+## D-32 — Publicação automática pelo Open Cloud (firme)
+`tools/roblox_cloud.py` faz quatro coisas:
+1. Sobe os 64 itens de `assets/upload_plan.json` pela Assets API.
+2. Reescreve `AssetIds.luau`.
+3. Cria os 4 passes e os 2 produtos e preenche `Commerce.IDS`.
+4. Publica o place.
+
+A chave nunca entra no repositório: o proxy da sessão injeta `x-api-key`, ou ela vem de
+`ROBLOX_API_KEY` localmente. Imagens sobem como Decal, e o servidor converte o ID do Decal no da
+imagem com `InsertService:LoadAsset` (`Characters.imageUrl`).
+
+## D-33 — Escopo da fatia vertical (F3)
+- Arte final só no setor 3 (An Cường 2 + Colina 30). Os demais setores continuam em greybox até a F5.
+- Os GLBs preparados estão em escala real, conferida no `manifest.json` (`dim_studs_xyz`).
+- Exceção: a casa de telha foi ajustada para 6 m de largura e 5 m de cumeeira. O comprimento ficou
+  em 7 m, contra 9 m do projeto, porque o modelo gerado é mais curto.
+- Agachar (C) usa uma pose procedural via `Motor6D.C0`, que é placeholder até haver animação.
+- O critério da F3 (60 fps no setor e comparativo com fotos de 1965) **só pode ser medido no Studio
+  ou no jogo publicado**.
+
+## D-34 — Uso do crédito do ForgeGUI, sessão 4 (registro)
+| Tipo | Itens |
+|---|---|
+| Modelos L2 | M60, RPD, SKS, M1911, Type 54, M79, RPG-2 ✔ |
+| Modelos L3 | capacete M1, colete M1955 ✔; capacete de fibra e chapéu de selva ✔ (2ª tentativa) |
+| Modelos L4 | casa com varanda, cozinha, casa de telha, altar, poço, celeiro, túmulo, cerca, trincheira, toca, sacos de areia ✔; ponte e entrada de túnel ✔ (2ª tentativa) |
+| Modelos L5 | bananeira, arbusto, capim-elefante, canteiro de arroz, árvore de colina ✔ |
+| Imagens | ícone USMC v2 ✔; 6 moldes de roupa: `outcome_unknown` (não regenerar) |
+| Sons | 21 de tiro, passos, impacto, recarga e ambiência ✔; loop do UH-34D: `outcome_unknown` |
+| Preparação | 34 GLBs em escala real (gratuita) |
+| Bunker VC | falhou 2×; 3ª tentativa enviada |

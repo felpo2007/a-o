@@ -20,10 +20,29 @@ function Build.world(): WorldData.World
 	return WorldData.load(grid, chunks)
 end
 
+local function tunnelBoxes(world: any): { any }
+	local TunnelGeometry = require(VT65Build.TunnelGeometry) :: any
+	local Tunnels = require(ReplicatedStorage.Shared.Tunnels) :: any
+	local mapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any
+	local cx, cz = 0, 0
+	for _, l in mapConfig.Locations do
+		if l.name == "An Cường (2)" then
+			cx, cz = l.x, l.z
+		end
+	end
+	local env = { Vector3 = Vector3, CFrame = CFrame }
+	return TunnelGeometry.build(env, Tunnels, cx, cz, function(x, z)
+		return world:heightAt(x, z)
+	end)
+end
+
 function Build.terrain()
 	local TerrainBuilder = require(VT65Build.TerrainBuilder)
 	workspace.Terrain:Clear()
-	TerrainBuilder.build(Build.world())
+	local world = Build.world()
+	TerrainBuilder.build(world)
+	local n = TerrainBuilder.carve(tunnelBoxes(world))
+	print("[VT65] túneis e trincheira escavados:", n, "blocos")
 end
 
 function Build.features()
@@ -34,7 +53,9 @@ function Build.features()
 	end
 	local env = { Instance = Instance, Vector3 = Vector3, CFrame = CFrame, Color3 = Color3, Enum = Enum }
 	local mapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any
-	local stats = FeatureBuilder.build(env, require(Data.Features), mapConfig, Build.world(), workspace)
+	local world = Build.world()
+	local stats = FeatureBuilder.build(env, require(Data.Features), mapConfig, world, workspace)
+	FeatureBuilder.tunnels(env, tunnelBoxes(world), workspace:FindFirstChild("Map"))
 	print(
 		"[VT65] peças:",
 		stats.dikes,

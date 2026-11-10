@@ -6,8 +6,13 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local MapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any
 local Net = require(ReplicatedStorage.Shared.Net)
 local SpawnRules = require(ReplicatedStorage.Shared.SpawnRules)
+local AssetLoader = require(script.Parent.AssetLoader)
+local Characters = require(script.Parent.Characters)
+local Combatants = require(script.Parent.Combatants)
 local MatchService = require(script.Parent.MatchService)
+local PlayerData = require(script.Parent.PlayerData)
 local TeamService = require(script.Parent.TeamService)
+local TunnelService = require(script.Parent.TunnelService)
 
 local SpawnService = {}
 local M = MapConfig.STUD_M
@@ -35,22 +40,35 @@ function SpawnService.points(faction: string): { Point }
 			})
 		end
 	end
+	if faction == "VC" then
+		for _, en in TunnelService.entrances() do
+			if en.sector and MatchService.ownerOf(en.sector) == "VC" and not TunnelService.destroyed[en.id] then
+				table.insert(out, {
+					id = "tunnel:" .. en.id,
+					name = "Túnel " .. en.id,
+					x = en.x,
+					z = en.z,
+					kind = "garrison",
+					sector = en.sector,
+				})
+			end
+		end
+	end
 	return out
 end
 
-local function enemiesMeters(faction: string): { number }
+function SpawnService.enemiesMeters(faction: string): { number }
 	local list = {}
-	for _, p in Players:GetPlayers() do
-		local f = p:GetAttribute("Faction")
-		local char = p.Character
-		local r = char and char:FindFirstChild("HumanoidRootPart") :: BasePart?
-		if f and f ~= faction and r then
+	for _, e in Combatants.list() do
+		local r = Combatants.root(e)
+		if e.faction ~= faction and r and Combatants.active(e) then
 			table.insert(list, r.Position.X * M)
 			table.insert(list, r.Position.Z * M)
 		end
 	end
 	return list
 end
+local enemiesMeters = SpawnService.enemiesMeters
 
 local function status(player: Player, pt: Point, now: number): (number, boolean, string?)
 	local inf = info[player]
@@ -69,12 +87,29 @@ local function status(player: Player, pt: Point, now: number): (number, boolean,
 	return math.max(0, ready - now), blocked, why
 end
 
-local function groundY(x: number, z: number): number
+function SpawnService.groundY(x: number, z: number): number
 	local params = RaycastParams.new()
 	params.FilterType = Enum.RaycastFilterType.Include
 	params.FilterDescendantsInstances = { workspace.Terrain }
 	local hit = workspace:Raycast(Vector3.new(x, 2000, z), Vector3.new(0, -4000, 0), params)
 	return if hit then hit.Position.Y else 10
+end
+local groundY = SpawnService.groundY
+
+-- pontos livres agora (para bots): sem bloqueio
+function SpawnService.freePoints(faction: string): { Point }
+	local out = {}
+	local now = os.clock()
+	for _, pt in SpawnService.points(faction) do
+		local contested = pt.sector ~= nil and MatchService.isContested(pt.sector)
+		local openedAt = if pt.sector then MatchService.capturedAt[pt.sector] else nil
+		local blocked = pt.kind ~= "hq"
+			and SpawnRules.blocked(pt.x * M, pt.z * M, enemiesMeters(faction), contested, openedAt, now)
+		if not blocked then
+			table.insert(out, pt)
+		end
+	end
+	return out
 end
 
 local function alive(player: Player): boolean
@@ -105,6 +140,9 @@ function SpawnService.start()
 		if type(pointId) ~= "string" or not faction or not player:GetAttribute("Role") or alive(player) then
 			return
 		end
+		if ReplicatedStorage:GetAttribute("TerrainReady") == false then
+			return -- terreno ainda sendo gerado
+		end
 		local now = os.clock()
 		for _, pt in SpawnService.points(faction) do
 			if pt.id == pointId then
@@ -114,11 +152,19 @@ function SpawnService.start()
 				end
 				local inf = info[player]
 				inf.firstSpawn, inf.roleChanged = false, false
-				player:LoadCharacterAsync()
+				local prof = PlayerData.get(player)
+				local equipped = if prof then prof.equipped[faction] else nil
+				player:LoadCharacterWithHumanoidDescriptionAsync(Characters.describe(faction, equipped, player.UserId))
 				local char = player.Character
 				if char then
 					local y = groundY(pt.x, pt.z)
-					char:PivotTo(CFrame.new(pt.x, y + 4, pt.z))
+					char:PivotTo(CFrame.new(pt.x, y + 5, pt.z))
+					Combatants.register(char, faction, player)
+					Characters.dress(char, faction, equipped)
+					local lo = player:GetAttribute("Loadout")
+					if type(lo) == "string" then
+						AssetLoader.attachWeapon(char, string.split(lo, ",")[1])
+					end
 					local hum = char:FindFirstChildOfClass("Humanoid")
 					if hum then
 						hum.Died:Connect(function()

@@ -7,6 +7,7 @@ local Capture = require(ReplicatedStorage.Shared.Capture)
 local MapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any
 local Net = require(ReplicatedStorage.Shared.Net)
 local Rng = require(ReplicatedStorage.Shared.Rng)
+local Combatants = require(script.Parent.Combatants)
 
 export type Strongpoint = { sector: number, name: string, x: number, z: number, real: boolean }
 
@@ -87,23 +88,14 @@ local function counts(): { { US: number, VC: number } }
 	for s = 1, 5 do
 		out[s] = { US = 0, VC = 0 }
 	end
-	for _, player in Players:GetPlayers() do
-		local faction = player:GetAttribute("Faction")
-		local char = player.Character
-		local root = char and char:FindFirstChild("HumanoidRootPart") :: BasePart?
-		local hum = char and char:FindFirstChildOfClass("Humanoid")
-		if
-			(faction == "US" or faction == "VC")
-			and root
-			and hum
-			and hum.Health > 0
-			and not player:GetAttribute("Downed")
-		then
+	for _, e in Combatants.list() do
+		local root = Combatants.root(e)
+		if (e.faction == "US" or e.faction == "VC") and root and Combatants.active(e) then
 			for s, sp in MatchService.points do
 				local dx, dz = root.Position.X - sp.x, root.Position.Z - sp.z
 				if dx * dx + dz * dz <= r2 then
 					local c = out[s] :: any
-					c[faction] += 1
+					c[e.faction] += 1
 				end
 			end
 		end

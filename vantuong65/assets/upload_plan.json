@@ -1,0 +1,386 @@
+[
+ {
+  "key": "Sounds.ambience_paddy_morning",
+  "file": "assets/forgegui/audio/ambiencia_arrozal_0630.mp3",
+  "assetType": "Audio",
+  "name": "VT65 ambiencia_arrozal_0630"
+ },
+ {
+  "key": "Sounds.ambience_beach",
+  "file": "assets/forgegui/audio/ambiencia_praia.mp3",
+  "assetType": "Audio",
+  "name": "VT65 ambiencia_praia"
+ },
+ {
+  "key": "Sounds.ambience_tunnel",
+  "file": "assets/forgegui/audio/ambiencia_tunel.mp3",
+  "assetType": "Audio",
+  "name": "VT65 ambiencia_tunel"
+ },
+ {
+  "key": "Sounds.ambience_village",
+  "file": "assets/forgegui/audio/ambiencia_vila.mp3",
+  "assetType": "Audio",
+  "name": "VT65 ambiencia_vila"
+ },
+ {
+  "key": "Sounds.dry_click",
+  "file": "assets/forgegui/audio/clique_seco.mp3",
+  "assetType": "Audio",
+  "name": "VT65 clique_seco"
+ },
+ {
+  "key": "Sounds.bandage",
+  "file": "assets/forgegui/audio/curativo.mp3",
+  "assetType": "Audio",
+  "name": "VT65 curativo"
+ },
+ {
+  "key": "Sounds.crack",
+  "file": "assets/forgegui/audio/estalo_supersonico.mp3",
+  "assetType": "Audio",
+  "name": "VT65 estalo_supersonico"
+ },
+ {
+  "key": "Sounds.impact_water",
+  "file": "assets/forgegui/audio/impacto_agua.mp3",
+  "assetType": "Audio",
+  "name": "VT65 impacto_agua"
+ },
+ {
+  "key": "Sounds.impact_wood",
+  "file": "assets/forgegui/audio/impacto_bambu_madeira.mp3",
+  "assetType": "Audio",
+  "name": "VT65 impacto_bambu_madeira"
+ },
+ {
+  "key": "Sounds.impact_thatch",
+  "file": "assets/forgegui/audio/impacto_palha.mp3",
+  "assetType": "Audio",
+  "name": "VT65 impacto_palha"
+ },
+ {
+  "key": "Sounds.impact_earth",
+  "file": "assets/forgegui/audio/impacto_terra.mp3",
+  "assetType": "Audio",
+  "name": "VT65 impacto_terra"
+ },
+ {
+  "key": "Sounds.step_sand",
+  "file": "assets/forgegui/audio/passos_areia.mp3",
+  "assetType": "Audio",
+  "name": "VT65 passos_areia"
+ },
+ {
+  "key": "Sounds.step_paddy",
+  "file": "assets/forgegui/audio/passos_arrozal.mp3",
+  "assetType": "Audio",
+  "name": "VT65 passos_arrozal"
+ },
+ {
+  "key": "Sounds.step_mud",
+  "file": "assets/forgegui/audio/passos_lama.mp3",
+  "assetType": "Audio",
+  "name": "VT65 passos_lama"
+ },
+ {
+  "key": "Sounds.step_wood",
+  "file": "assets/forgegui/audio/passos_ponte_troncos.mp3",
+  "assetType": "Audio",
+  "name": "VT65 passos_ponte_troncos"
+ },
+ {
+  "key": "Sounds.step_grass",
+  "file": "assets/forgegui/audio/passos_terra_capim.mp3",
+  "assetType": "Audio",
+  "name": "VT65 passos_terra_capim"
+ },
+ {
+  "key": "Sounds.burst_m60",
+  "file": "assets/forgegui/audio/rajada_m60.mp3",
+  "assetType": "Audio",
+  "name": "VT65 rajada_m60"
+ },
+ {
+  "key": "Sounds.burst_rpd",
+  "file": "assets/forgegui/audio/rajada_rpd.mp3",
+  "assetType": "Audio",
+  "name": "VT65 rajada_rpd"
+ },
+ {
+  "key": "Sounds.reload_m14",
+  "file": "assets/forgegui/audio/recarga_m14.mp3",
+  "assetType": "Audio",
+  "name": "VT65 recarga_m14"
+ },
+ {
+  "key": "Sounds.reload_type56",
+  "file": "assets/forgegui/audio/recarga_type56.mp3",
+  "assetType": "Audio",
+  "name": "VT65 recarga_type56"
+ },
+ {
+  "key": "Sounds.shot_distant",
+  "file": "assets/forgegui/audio/tiro_distante_500m.mp3",
+  "assetType": "Audio",
+  "name": "VT65 tiro_distante_500m"
+ },
+ {
+  "key": "Sounds.shot_m14",
+  "file": "assets/forgegui/audio/tiro_m14.mp3",
+  "assetType": "Audio",
+  "name": "VT65 tiro_m14"
+ },
+ {
+  "key": "Sounds.shot_mid",
+  "file": "assets/forgegui/audio/tiro_medio_150m.mp3",
+  "assetType": "Audio",
+  "name": "VT65 tiro_medio_150m"
+ },
+ {
+  "key": "Sounds.shot_type56",
+  "file": "assets/forgegui/audio/tiro_type56.mp3",
+  "assetType": "Audio",
+  "name": "VT65 tiro_type56"
+ },
+ {
+  "key": "Models.m14",
+  "file": "assets/forgegui/models/m14_studs.glb",
+  "assetType": "Model",
+  "name": "VT65 m14"
+ },
+ {
+  "key": "Models.type56",
+  "file": "assets/forgegui/models/type56_studs.glb",
+  "assetType": "Model",
+  "name": "VT65 type56"
+ },
+ {
+  "key": "Models.hut_thatch",
+  "file": "assets/forgegui/models/casa_palha_studs.glb",
+  "assetType": "Model",
+  "name": "VT65 hut_thatch"
+ },
+ {
+  "key": "Models.coconut_palm",
+  "file": "assets/forgegui/models/coqueiro_studs.glb",
+  "assetType": "Model",
+  "name": "VT65 coconut_palm"
+ },
+ {
+  "key": "Models.bamboo_clump",
+  "file": "assets/forgegui/models/bambu_touceira_studs.glb",
+  "assetType": "Model",
+  "name": "VT65 bamboo_clump"
+ },
+ {
+  "key": "Accessories.us_m1955_vest",
+  "file": "assets/forgegui/models/colete_m1955_studs.glb",
+  "assetType": "Model",
+  "name": "VT65 us_m1955_vest"
+ },
+ {
+  "key": "Accessories.us_m1_helmet",
+  "file": "assets/forgegui/models/capacete_m1_studs.glb",
+  "assetType": "Model",
+  "name": "VT65 us_m1_helmet"
+ },
+ {
+  "key": "Models.hill_tree",
+  "file": "assets/forgegui/models/arvore_colina_studs.glb",
+  "assetType": "Model",
+  "name": "VT65 hill_tree"
+ },
+ {
+  "key": "Models.rice_patch",
+  "file": "assets/forgegui/models/arroz_canteiro_studs.glb",
+  "assetType": "Model",
+  "name": "VT65 rice_patch"
+ },
+ {
+  "key": "Models.elephant_grass",
+  "file": "assets/forgegui/models/capim_elefante_studs.glb",
+  "assetType": "Model",
+  "name": "VT65 elephant_grass"
+ },
+ {
+  "key": "Models.shrub",
+  "file": "assets/forgegui/models/arbusto_studs.glb",
+  "assetType": "Model",
+  "name": "VT65 shrub"
+ },
+ {
+  "key": "Models.banana",
+  "file": "assets/forgegui/models/bananeira_studs.glb",
+  "assetType": "Model",
+  "name": "VT65 banana"
+ },
+ {
+  "key": "Models.spider_hole",
+  "file": "assets/forgegui/models/toca_aranha_studs.glb",
+  "assetType": "Model",
+  "name": "VT65 spider_hole"
+ },
+ {
+  "key": "Models.sandbags",
+  "file": "assets/forgegui/models/sacos_areia_studs.glb",
+  "assetType": "Model",
+  "name": "VT65 sandbags"
+ },
+ {
+  "key": "Models.m60",
+  "file": "assets/forgegui/models/m60_studs.glb",
+  "assetType": "Model",
+  "name": "VT65 m60"
+ },
+ {
+  "key": "Models.rpd",
+  "file": "assets/forgegui/models/rpd_studs.glb",
+  "assetType": "Model",
+  "name": "VT65 rpd"
+ },
+ {
+  "key": "Models.sks",
+  "file": "assets/forgegui/models/sks_studs.glb",
+  "assetType": "Model",
+  "name": "VT65 sks"
+ },
+ {
+  "key": "Models.hut_veranda",
+  "file": "assets/forgegui/models/casa_varanda_studs.glb",
+  "assetType": "Model",
+  "name": "VT65 hut_veranda"
+ },
+ {
+  "key": "Models.trench_section",
+  "file": "assets/forgegui/models/trincheira_secao_studs.glb",
+  "assetType": "Model",
+  "name": "VT65 trench_section"
+ },
+ {
+  "key": "Models.bamboo_fence",
+  "file": "assets/forgegui/models/cerca_bambu_studs.glb",
+  "assetType": "Model",
+  "name": "VT65 bamboo_fence"
+ },
+ {
+  "key": "Models.grave_mound",
+  "file": "assets/forgegui/models/tumulo_studs.glb",
+  "assetType": "Model",
+  "name": "VT65 grave_mound"
+ },
+ {
+  "key": "Models.granary",
+  "file": "assets/forgegui/models/celeiro_studs.glb",
+  "assetType": "Model",
+  "name": "VT65 granary"
+ },
+ {
+  "key": "Models.well",
+  "file": "assets/forgegui/models/poco_studs.glb",
+  "assetType": "Model",
+  "name": "VT65 well"
+ },
+ {
+  "key": "Models.hut_kitchen",
+  "file": "assets/forgegui/models/cozinha_studs.glb",
+  "assetType": "Model",
+  "name": "VT65 hut_kitchen"
+ },
+ {
+  "key": "Models.house_tile",
+  "file": "assets/forgegui/models/casa_telha_studs.glb",
+  "assetType": "Model",
+  "name": "VT65 house_tile"
+ },
+ {
+  "key": "Models.shrine",
+  "file": "assets/forgegui/models/altar_studs.glb",
+  "assetType": "Model",
+  "name": "VT65 shrine"
+ },
+ {
+  "key": "Models.m1911",
+  "file": "assets/forgegui/models/m1911_studs.glb",
+  "assetType": "Model",
+  "name": "VT65 m1911"
+ },
+ {
+  "key": "Models.type54",
+  "file": "assets/forgegui/models/type54_studs.glb",
+  "assetType": "Model",
+  "name": "VT65 type54"
+ },
+ {
+  "key": "Models.m79",
+  "file": "assets/forgegui/models/m79_studs.glb",
+  "assetType": "Model",
+  "name": "VT65 m79"
+ },
+ {
+  "key": "Models.rpg2",
+  "file": "assets/forgegui/models/rpg2_studs.glb",
+  "assetType": "Model",
+  "name": "VT65 rpg2"
+ },
+ {
+  "key": "Accessories.vc_jungle_hat",
+  "file": "assets/forgegui/models/chapeu_selva_studs.glb",
+  "assetType": "Model",
+  "name": "VT65 vc_jungle_hat"
+ },
+ {
+  "key": "Accessories.vc_pith_helmet",
+  "file": "assets/forgegui/models/capacete_fibra_studs.glb",
+  "assetType": "Model",
+  "name": "VT65 vc_pith_helmet"
+ },
+ {
+  "key": "Models.tunnel_entrance",
+  "file": "assets/forgegui/models/entrada_tunel_studs.glb",
+  "assetType": "Model",
+  "name": "VT65 tunnel_entrance"
+ },
+ {
+  "key": "Models.log_bridge",
+  "file": "assets/forgegui/models/ponte_troncos_studs.glb",
+  "assetType": "Model",
+  "name": "VT65 log_bridge"
+ },
+ {
+  "key": "Clothing.us_pants",
+  "file": "assets/clothing/us_pants.png",
+  "assetType": "Decal",
+  "name": "VT65 us_pants"
+ },
+ {
+  "key": "Clothing.us_shirt",
+  "file": "assets/clothing/us_shirt.png",
+  "assetType": "Decal",
+  "name": "VT65 us_shirt"
+ },
+ {
+  "key": "Clothing.vc_green_pants",
+  "file": "assets/clothing/vc_green_pants.png",
+  "assetType": "Decal",
+  "name": "VT65 vc_green_pants"
+ },
+ {
+  "key": "Clothing.vc_green_shirt",
+  "file": "assets/clothing/vc_green_shirt.png",
+  "assetType": "Decal",
+  "name": "VT65 vc_green_shirt"
+ },
+ {
+  "key": "Clothing.vc_khaki_pants",
+  "file": "assets/clothing/vc_khaki_pants.png",
+  "assetType": "Decal",
+  "name": "VT65 vc_khaki_pants"
+ },
+ {
+  "key": "Clothing.vc_khaki_shirt",
+  "file": "assets/clothing/vc_khaki_shirt.png",
+  "assetType": "Decal",
+  "name": "VT65 vc_khaki_shirt"
+ }
+]

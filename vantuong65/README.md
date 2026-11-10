@@ -11,11 +11,15 @@ do repositório.
   [`research/F0_GEORREF.md`](research/F0_GEORREF.md),
   [`research/F0_CORONA.md`](research/F0_CORONA.md)
 
-## Abrir o jogo (F1 greybox + F2 loop central + monetização)
+## Abrir o jogo
 1. Abra `place/VanTuong65.rbxl` no Roblox Studio.
-2. Barra de comando: `require(game.ServerStorage.VT65Build.Build).terrain()`
-3. Espere a mensagem "terreno pronto" e salve.
-4. Test → Local Server com 2–4 jogadores. Roteiro completo em `PROGRESS.md`.
+2. Test → Local Server com 2–4 jogadores. Se o place não tiver terreno, o servidor gera um
+   (`TerrainRuntime`, alguns segundos com o aviso "Preparando o campo de batalha…").
+3. Opcional: para salvar o terreno no arquivo, rode na barra de comando
+   `require(game.ServerStorage.VT65Build.Build).terrain()` e salve.
+
+Roteiro de teste em `PROGRESS.md`. Publicação automática: `TODO_USUARIO.md` e
+`tools/roblox_cloud.py`.
 
 Controles (placeholder):
 
@@ -31,10 +35,12 @@ Controles (placeholder):
 | H | desistir |
 | M | mapa |
 | B | loja |
+| C | agachar |
 | F3 | HUD de medição |
 
-Monetização: `MONETIZATION.md`. Assets do ForgeGUI: `assets/forgegui/`, a importar no Studio
-(modelos com unidade = stud) e com os IDs colados em `src/ReplicatedStorage/Shared/AssetIds.luau`.
+Monetização: `MONETIZATION.md`. Assets: `assets/forgegui/` (GLBs em escala real, baixados com
+`tools/fetch_forgegui_assets.py`) e `assets/clothing/` (moldes procedurais). Para publicá-los e
+preencher `Shared/AssetIds.luau`, use `uv run python tools/roblox_cloud.py upload-assets`.
 
 ## Estrutura
 ```

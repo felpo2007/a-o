@@ -18,7 +18,7 @@ gui.Enabled = false
 gui.Parent = player:WaitForChild("PlayerGui")
 local text = Instance.new("TextLabel")
 text.Position = UDim2.fromOffset(8, 8)
-text.Size = UDim2.fromOffset(360, 150)
+text.Size = UDim2.fromOffset(380, 190)
 text.BackgroundTransparency = 0.4
 text.BackgroundColor3 = Color3.new(0, 0, 0)
 text.TextColor3 = Color3.new(1, 1, 1)
@@ -79,13 +79,21 @@ RunService.RenderStepped:Connect(function(dt)
 			line3 = string.format("travessia em curso: %.0f s", os.clock() - cross.start)
 		end
 	end
+	local heightM = 0
+	if char then
+		heightM = (char :: Model):GetExtentsSize().Y * MapConfig.STUD_M
+	end
 	text.Text = string.format(
-		"VT65 F1 — medição\nfps médio %.1f | p99 %.1f ms (meta <= 16,7)\n%s\n%s\nX %.0f Z %.0f studs",
+		"VT65 — medição\nfps médio %.1f | p99 %.1f ms (meta <= 16,7)\n%s\n%s\nX %.0f Z %.0f studs | soldado %.2f m (meta 1,75)\nSol: az %.1f° el %.1f° (ajuste %.2f°)",
 		N / sum,
 		p99 * 1000,
 		line2,
 		line3,
 		root and root.Position.X or 0,
-		root and root.Position.Z or 0
+		root and root.Position.Z or 0,
+		heightM,
+		ReplicatedStorage:GetAttribute("SunAzimuth") or 0,
+		ReplicatedStorage:GetAttribute("SunElevation") or 0,
+		ReplicatedStorage:GetAttribute("SunFitErrorDeg") or 0
 	)
 end)

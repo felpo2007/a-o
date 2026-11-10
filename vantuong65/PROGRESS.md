@@ -1,13 +1,43 @@
 # VẠN TƯỜNG '65 — Progresso
 
-## Fase atual (2026-11-09, sessão 3)
+## Fase atual (2026-11-10, sessão 4)
 | Fase | Estado |
 |---|---|
 | F0 Pesquisa | parcial: critério de 25 m atingido no setor oeste; setor leste depende da CORONA (`research/F0_CORONA.md`) |
 | F1 Greybox | código e place prontos; **fps e travessia ainda sem medição no Studio** |
-| **Monetização** | **implementada** (`MONETIZATION.md`); falta você criar os itens no Creator Dashboard e colar os IDs |
-| **F2 Loop central** | **código completo com placeholders**; lógica testada fora do Roblox; **não executado no Roblox** |
-| F3 em diante | não iniciadas |
+| Monetização | implementada (`MONETIZATION.md`); `tools/roblox_cloud.py create-store` cria os itens assim que houver chave Open Cloud |
+| F2 Loop central | código completo + **bots** (D-28); lógica testada fora do Roblox; **não executado no Roblox** |
+| **F3 Fatia vertical** | **código e arte entregues** (setor 3); critério (60 fps e teste de foto) **só medível no Studio** |
+| F4 Sistemas pesados | em andamento |
+
+## F3: o que foi feito (sessão 4)
+- **Luz:**
+  - `SolarPosition` (NOAA) + `LightingService`: sol real de 18/08/1965 ajustado ao Roblox a cada
+    15 s; às 06:30 o sol está a −0,9° (D-27);
+  - neblina matinal que se dissipa até 07:30.
+- **Áudio** (`AudioController`):
+  - ambiências com crossfade (arrozal, vila, praia, túnel);
+  - passos 3D por material;
+  - tiros em camadas por distância com atraso d/349 m/s;
+  - estalo supersônico;
+  - impacto re-simulado com a semente do tiro.
+- **Túneis** (D-29): 474 m de galeria escavada no terreno, 5 entradas e a trincheira sul. O
+  engenheiro dos EUA desmonta entradas.
+- **Personagens** (D-30):
+  - `Characters`: altura 1,2×, uniformes por facção (moldes procedurais), capacetes, colete e
+    chapéu;
+  - agachar (C);
+  - bots (D-28).
+- **Arte do Lote 1 no setor 3:** `AssetLoader` troca as casas do greybox por 5 variantes e põe
+  bambu, arbustos e capim nas sebes, bananeira e coqueiro nos quintais, altar, poço, túmulos, ponte,
+  entradas de túnel e trincheira. Tudo no chão real, com semente fixa.
+- **ForgeGUI:**
+  - 34 GLBs em escala real (`assets/forgegui/manifest.json`, com `dim_studs_xyz` medido);
+  - 24 sons;
+  - ícone USMC v2.
+- **Publicação sem Studio** (D-31, D-32):
+  - terreno gerado no servidor se o place vier sem ele;
+  - `tools/roblox_cloud.py` sobe 64 assets, cria a loja e publica o place pelo Open Cloud.
 
 ## Monetização: o que foi feito
 - Catálogo sem vantagem (`Shared/Commerce.luau`):
@@ -58,8 +88,10 @@
 ## Resultados-chave (medidos aqui)
 | Medida | Valor |
 |---|---|
-| Testes Lune | `run.luau` **11 ok**; `f2.luau` **17 ok** |
-| pytest | **10 passed** |
+| Testes Lune | `run.luau` **11 ok**; `f2.luau` **17 ok**; `f3.luau` **6 ok** |
+| pytest | **17 passed** |
+| Sol em 18/08/1965 (calculado, UTC+8) | 06:30 → −0,9°; 12:00 → 78,1°; 18:30 → 7,8° |
+| Túneis (gerados) | 64 peças, 474 m de galeria |
 | luau-lsp (API do Roblox, `--!strict`) | **0 erros** em todo `src/` |
 | StyLua / Ruff | limpos |
 | Queda calculada com zeragem a 100 m | M14 0,16 m (200 m) e 0,52 m (300 m); Type 56 0,24 m e 0,80 m. **Não validada** contra tabela de tiro |

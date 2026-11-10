@@ -25,21 +25,35 @@ Net.event("Medical_State").OnClientEvent:Connect(function(s)
 	state.recvAt = os.clock()
 end)
 
-local function nearestAlly(): Player?
+-- aliado mais próximo (jogador ou bot) a até 3 m
+local function nearestAlly(): Model?
 	local char = player.Character
 	local root = char and char:FindFirstChild("HumanoidRootPart") :: BasePart?
-	if not root then
+	if not (char and root) then
 		return nil
 	end
-	local best, bestD = nil, 3 / 0.28 -- 3 m
+	local myFaction = player:GetAttribute("Faction")
+	local candidates: { Model } = {}
 	for _, p in Players:GetPlayers() do
-		if p ~= player and p:GetAttribute("Faction") == player:GetAttribute("Faction") then
-			local r = p.Character and p.Character:FindFirstChild("HumanoidRootPart") :: BasePart?
-			if r then
-				local d = (r.Position - root.Position).Magnitude
-				if d < bestD then
-					best, bestD = p, d
-				end
+		if p ~= player and p.Character then
+			table.insert(candidates, p.Character)
+		end
+	end
+	local folder = workspace:FindFirstChild("Combatants")
+	if folder then
+		for _, m in folder:GetChildren() do
+			if m:IsA("Model") then
+				table.insert(candidates, m)
+			end
+		end
+	end
+	local best, bestD = nil, 3 / 0.28
+	for _, m in candidates do
+		local r = m:FindFirstChild("HumanoidRootPart") :: BasePart?
+		if r and m:GetAttribute("Faction") == myFaction then
+			local d = (r.Position - root.Position).Magnitude
+			if d < bestD then
+				best, bestD = m, d
 			end
 		end
 	end
@@ -64,7 +78,7 @@ UserInputService.InputBegan:Connect(function(input, processed)
 				then "revive"
 				elseif player:GetAttribute("Role") == "medic" then "treat"
 				else "bandage"
-			Net.event("Medical_Action"):FireServer({ op = op, target = ally.UserId })
+			Net.event("Medical_Action"):FireServer({ op = op, target = ally })
 		end
 	end
 end)

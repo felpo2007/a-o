@@ -141,4 +141,17 @@ function TerrainBuilder.build(world: any, envIn: Env?, opts: Options?): number
 	return done
 end
 
+-- Escava túneis, poços e a trincheira (caixas "carve" de TunnelGeometry.build).
+function TerrainBuilder.carve(boxes: { any }, terrainIn: any?): number
+	local terrain = terrainIn or workspace.Terrain
+	local n = 0
+	for _, b in boxes do
+		if b.kind == "carve" then
+			terrain:FillBlock(b.cf, b.size, Enum.Material.Air)
+			n += 1
+		end
+	end
+	return n
+end
+
 return TerrainBuilder
