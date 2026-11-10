@@ -291,4 +291,75 @@ Net.unreliable("Combat_Tracer").OnClientEvent:Connect(function(shot)
 	end
 end)
 
+-- ===== F4: explosões, granada chegando, disparos e motores =====
+Net.unreliable("Fire_Impact").OnClientEvent:Connect(function(e)
+	local pos = Vector3.new(e.x, e.y, e.z)
+	local dM = (pos - camera.CFrame.Position).Magnitude * M
+	if dM < 3000 then
+		play("explosion", pos, math.clamp(1.4 - dM / 2500, 0.3, 1.4), 3000 / M, dM / Ballistics.SOUND)
+	end
+end)
+Net.unreliable("Fire_Incoming").OnClientEvent:Connect(function(e)
+	local pos = Vector3.new(e.x, e.y, e.z)
+	if (pos - camera.CFrame.Position).Magnitude * M < 400 then
+		play("incoming", pos, 1, 600 / M)
+	end
+end)
+local LAUNCH: { [string]: string } = {
+	mortar = "mortar_launch",
+	naval = "naval_distant",
+	gun_90 = "gun_90",
+	rr_106 = "rr_106",
+	rocket = "rr_106",
+}
+Net.unreliable("Fire_Launch").OnClientEvent:Connect(function(e)
+	local pos = Vector3.new(e.x, e.y, e.z)
+	local dM = (pos - camera.CFrame.Position).Magnitude * M
+	local k = LAUNCH[e.kind]
+	if k and dM < 6000 then
+		if e.kind == "naval" then
+			play(k, nil, 0.8, nil, dM / Ballistics.SOUND)
+		else
+			play(k, pos, 1, 2500 / M, dM / Ballistics.SOUND)
+		end
+	end
+end)
+
+-- motor de cada veículo (loop 3D no chassi; tom sobe com a velocidade)
+local ENGINE: { [string]: string } = {
+	m48a3 = "engine_tank",
+	ontos = "engine_tank",
+	lvtp5 = "engine_amtrac",
+	uh34d = "uh34d_loop",
+}
+task.spawn(function()
+	local folder = workspace:WaitForChild("Vehicles", 120)
+	while folder do
+		task.wait(0.5)
+		for _, v in folder:GetChildren() do
+			local chassis = v:FindFirstChild("Chassis") :: BasePart?
+			local id = sid(ENGINE[v:GetAttribute("Spec") :: string] or "")
+			if chassis and id then
+				local snd = chassis:FindFirstChild("Engine") :: Sound?
+				if not snd then
+					local s = Instance.new("Sound")
+					s.Name = "Engine"
+					s.SoundId = id
+					s.Looped = true
+					s.Volume = 0.7
+					s.RollOffMaxDistance = 600 / M
+					s.Parent = chassis
+					s:Play()
+					snd = s
+				end
+				local sp = chassis.AssemblyLinearVelocity.Magnitude * M;
+				(snd :: Sound).PlaybackSpeed = 0.85 + math.min(sp / 15, 0.35)
+				if v:GetAttribute("Destroyed") then
+					(snd :: Sound):Stop()
+				end
+			end
+		end
+	end
+end)
+
 local _ = RunService

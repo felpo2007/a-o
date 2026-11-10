@@ -29,6 +29,15 @@ return {
 		ambience_beach = 0,
 		ambience_tunnel = 0,
 		uh34d_loop = 0,
+		engine_tank = 0,
+		engine_amtrac = 0,
+		gun_90 = 0,
+		rr_106 = 0,
+		mortar_launch = 0,
+		explosion = 0,
+		incoming = 0,
+		naval_distant = 0,
+		radio_squelch = 0,
 	},
 	-- Modelos publicados como "Model" (InsertService:LoadAsset no servidor)
 	Models = {
@@ -64,6 +73,11 @@ return {
 		m79 = 0,
 		rpg2 = 0,
 		uh34d = 0,
+		m48a3 = 0,
+		ontos = 0,
+		lvtp5 = 0,
+		mortar_81 = 0,
+		mortar_82 = 0,
 	},
 	-- Roupas: IMAGENS dos moldes clássicos (aplicadas em Shirt.ShirtTemplate / Pants.PantsTemplate)
 	Clothing = {

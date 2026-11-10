@@ -21,6 +21,9 @@ local PostureService = require(Modules:WaitForChild("PostureService"))
 local TunnelService = require(Modules:WaitForChild("TunnelService"))
 local AssetLoader = require(Modules:WaitForChild("AssetLoader"))
 local TerrainRuntime = require(Modules:WaitForChild("TerrainRuntime"))
+local LogisticsService = require(Modules:WaitForChild("LogisticsService"))
+local CommanderService = require(Modules:WaitForChild("CommanderService"))
+local VehicleService = require(Modules:WaitForChild("VehicleService"))
 
 task.spawn(TerrainRuntime.start) -- gera o terreno se o place veio sem ele
 PlayerData.start()
@@ -35,6 +38,9 @@ PostureService.start()
 TunnelService.start()
 task.spawn(AssetLoader.start) -- troca placeholders por modelos publicados (se houver IDs)
 BotService.start()
+LogisticsService.start() -- F4: suprimento, caixotes e construções
+CommanderService.start() -- F4: comandante e missões de fogo por grade
+VehicleService.start() -- F4: M48A3, Ontos, LVTP-5 e UH-34D
 PrivateServer.start(function(mode: string, clock: number)
 	MatchService.requestMode(mode)
 	LightingService.setStart(clock)

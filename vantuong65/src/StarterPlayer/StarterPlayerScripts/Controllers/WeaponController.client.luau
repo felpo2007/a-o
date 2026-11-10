@@ -130,6 +130,10 @@ local function fire()
 	local wp = weapon
 	local char = player.Character
 	local head = char and char:FindFirstChild("Head") :: BasePart?
+	local hum = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+	if hum and hum.SeatPart then
+		return -- em veículo: a arma do assento é do VehicleController
+	end
 	if not (wp and head) or player:GetAttribute("Downed") then
 		return
 	end

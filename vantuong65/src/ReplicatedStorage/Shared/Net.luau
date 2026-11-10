@@ -24,9 +24,18 @@ Net.Events = {
 	"Match_State", -- s->c: setores, pontos fortes, tempo
 	"Squad_State", -- s->c: squads do próprio time
 	"Posture_Set", -- c->s: agachar (true/false)
+	"Commander_Request", -- c->s: { ability, grid?, correction?, confirm? } (comandante e morteiro)
+	"Commander_State", -- s->c: suprimento, recargas, avisos e erros
+	"Build_Request", -- c->s: { kind } (logística)
+	"Logistics_State", -- s->c: erro de construção
+	"Vehicle_Fire", -- c->s: { dir } (arma do assento ou foguete antitanque)
+	"Vehicle_Reload", -- c->s: recarga do Ontos (parado)
 }
 Net.Unreliable = {
 	"Combat_Tracer", -- s->c: traçantes/efeitos de outros jogadores
+	"Fire_Impact", -- s->c: explosão { id, x, y, z }
+	"Fire_Incoming", -- s->c: assobio de granada chegando { x, y, z }
+	"Fire_Launch", -- s->c: disparo de morteiro/canhão/naval/foguete { kind, x, y, z }
 }
 Net.Functions = {
 	"Commerce_GetState",

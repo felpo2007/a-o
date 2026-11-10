@@ -128,6 +128,9 @@ function CombatService.fire(
 	end
 end
 
+-- reabastece a munição (caixa de munição construída pela logística)
+CombatService.refill = resetAmmo
+
 function CombatService.start()
 	Players.PlayerAdded:Connect(function(p)
 		p.CharacterAdded:Connect(function()

@@ -326,3 +326,83 @@ imagem com `InsertService:LoadAsset` (`Characters.imageUrl`).
 | Sons | 21 de tiro, passos, impacto, recarga e ambiência ✔; loop do UH-34D: `outcome_unknown` |
 | Preparação | 34 GLBs em escala real (gratuita) |
 | Bunker VC | falhou 2×; 3ª tentativa enviada |
+
+## D-35 — F4: o que entra e o que não entra (firme)
+- **Entra:**
+  - comandante (EUA e VC);
+  - logística: suprimento, caixotes, posto de reunião, ninho de MG, posição de morteiro, caixa
+    de munição;
+  - morteiros: M29 81 mm e 82 mm;
+  - M48A3, M50 Ontos, LVTP-5 e UH-34D;
+  - foguetes de infantaria: RPG-2 e bazuca de 3,5".
+- **O VC não tem veículos.** Em Starlite o 1º Regimento VC não tinha blindados nem helicópteros. A
+  força dele está em morteiros, túneis, emboscadas e RPG-2.
+- **Sem marcador de inimigo** (Parte 9.5). Fogo indireto só por coordenada de grade da carta de
+  1965 (quadrado BS) com correção do observador.
+- Bots não dirigem veículos nem pedem fogo nesta fase.
+
+## D-36 — Números da F4: com fonte, derivados e placeholders
+| Número | Valor | Status |
+|---|---|---|
+| 82-BM-37: v0, alcance, granada | 211 m/s, 3.040 m, 3,05 kg | **fonte** (wiki:82-BM-37) |
+| M29 81 mm + HE M43A1B1: alcance | 69–3.890 m | **fonte** (Hogg 1987, via wiki:M29_mortar) |
+| M29: v0 | **254 m/s** | **derivado**: arrasto do 82 mm calibrado (k = 1,512e-4 1/m) e alcance de 3.890 m. Suposição: calibre e massa parecidos |
+| Cargas incrementais | 45–100% da v0 | PLACEHOLDER |
+| M48: massa, dimensões, blindagem frontal | 45,0 t; 9,3 × 3,65 × 3,1 m; glacis 110 mm a 60° (220 mm efetivos); torre 178 mm | **fonte** (wiki:M48_Patton) |
+| M48A3: potência | 750 hp | a confirmar: a infobox lista 810/825 hp para versões a gasolina e trunca a do A3 |
+| M48: velocidade | 48 km/h | **fonte**, mas é o valor do M48A5 |
+| M48: laterais e traseira | 76/51/25 mm | PLACEHOLDER |
+| Ontos | 8.600 kg; 3,83 × 2,59 × 2,13 m; 145 hp; 48 km/h; 6 × M40A1C | **fonte** (wiki:M50_Ontos) |
+| Ontos: blindagem | 13 mm | PLACEHOLDER |
+| M40: v0 do M344 HEAT | 503 m/s | **fonte** (wiki:M40_recoilless_rifle) |
+| LVTP-5 | 37,4 t; 9,04 × 3,57 × 2,92 m; 704 hp; 48 km/h em terra e 11 km/h na água; 6–16 mm; 3+34 | **fonte** (wiki:LVTP-5) |
+| H-34 | rotor de 56 ft (2.463 ft²); vazio 7.646 lb; bruto 11.867 lb; máx. 13.300 lb; 1.525 hp na decolagem; 122 mph; subida vertical de 600 ft/min; teto de pairar IGE 9.600 ft e OGE 5.500 ft (H-34A) | **fonte** (wiki:Sikorsky_H-34) |
+| Penetração (PG-2 150, 3,5" 250, 106 HEAT 400 mm) | — | PLACEHOLDER |
+| Raios letal e de baixas dos explosivos | — | PLACEHOLDER |
+| CEP, cadência e recargas das missões de fogo | — | design |
+| Navio a 3 km da praia e v0 naval de 760 m/s | — | PLACEHOLDER |
+| Resistência ao rolamento por chão (0,04–0,18) e eficiência de tração 0,6 | — | estimativa de engenharia |
+| Giro dos veículos (30°/s) e da torre | — | PLACEHOLDER |
+
+Toda linha PLACEHOLDER deve ser trocada por ficha técnica ou manual antes do lançamento
+(Parte 9.11).
+
+## D-37 — Assentos, depósitos e respawn (design)
+- **Depósitos ao lado do QG dos EUA na praia:** 2 LVTP-5, 1 M48A3, 1 Ontos e 2 UH-34D, que são os 6
+  veículos do critério da F4. Respawn em 180 s.
+- **Assentos por papel:**
+  - blindados: `tank_crew`;
+  - helicóptero: `pilot` no comando e `door_gunner` na M60 da porta;
+  - passageiros: qualquer papel da facção.
+- **Lugares de passageiro reduzidos:** a ficha dá 34 para o LVTP-5 e 12 para o H-34A. No jogo são
+  12 e 8, porque o squad tem 6.
+- **Recarga do Ontos:** só com o veículo parado, 10 s por tubo. Na vida real os tubos eram
+  recarregados por fora do veículo.
+
+## D-38 — Modelo de voo do UH-34D (firme no método)
+- **Base física:**
+  - teoria do momento;
+  - efeito solo de Cheeseman–Bennett;
+  - velocidade induzida de Glauert, que dá a sustentação de translação;
+  - potência de perfil (1 + 4,65 μ²);
+  - arrasto parasita ½ρV³f;
+  - perda de potência σⁿ.
+- **Calibrado no código** (`HeliModel`) contra a ficha:
+  - expoente de perda **n = 0,72** e potência de perfil **378 hp**, pelos dois tetos de pairar;
+  - área plana equivalente **f = 5,08 m²**, pelos 122 mph;
+  - fator de subida, pelos 600 ft/min.
+- **Suposições:**
+  - no efeito solo, o rotor fica a 5,9 m do chão (cubo a 4,36 m + 5 ft de roda);
+  - κ = 1,15;
+  - 15% de perdas de transmissão e do rotor de cauda;
+  - ponta da pá a 200 m/s;
+  - 400 kg de combustível;
+  - 100 kg por ocupante.
+- **Consequência medida** (teste `f4.luau`), no peso máximo a 35 °C:
+  - pairar fora do efeito solo exige 1.522 hp, contra 1.453 hp disponíveis;
+  - no efeito solo exige 1.375 hp;
+  - a 20 m/s exige 1.033 hp.
+
+  Ou seja, o piloto precisa de decolagem corrida no calor, como na vida real.
+- **Peso máximo para pairar a 35 °C:** 5.784 kg fora do efeito solo e 6.355 kg dentro.
+- **Torque:** acima de 92% do torque de decolagem, o nariz gira à direita se faltar pedal.

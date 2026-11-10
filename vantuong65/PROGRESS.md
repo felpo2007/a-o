@@ -8,7 +8,34 @@
 | Monetização | implementada (`MONETIZATION.md`); `tools/roblox_cloud.py create-store` cria os itens assim que houver chave Open Cloud |
 | F2 Loop central | código completo + **bots** (D-28); lógica testada fora do Roblox; **não executado no Roblox** |
 | **F3 Fatia vertical** | **código e arte entregues** (setor 3); critério (60 fps e teste de foto) **só medível no Studio** |
-| F4 Sistemas pesados | em andamento |
+| **F4 Sistemas pesados** | **código entregue**: comandante, logística, morteiros, M48A3, Ontos, LVTP-5, UH-34D. Lógica testada no Lune; critério (30v30 com 6 veículos) **só medível no Roblox** |
+| F5–F6 | não iniciadas |
+
+## F4: o que foi feito (sessão 4)
+- **Lógica pura** (`Shared/`, testada em `tests/luau/f4.luau`):
+  - `Mortar`: trajetória com arrasto. O arrasto é calibrado pelo alcance da fonte; ramo alto;
+    cargas; mils.
+  - `FireSupport`: grade BS da carta de 1965 ↔ jogo, correção "mais/menos, direita/esquerda" no
+    eixo observador–alvo, dispersão por CEP e habilidades com recarga e custo.
+  - `Explosive`: zonas letal e de ferimento, postura e cobertura, orçamento de crateras.
+  - `Vehicles`: fichas com fonte, tração por potência e atrito por tipo de chão, anfíbio na água,
+    blindagem efetiva por inclinação, zona do impacto.
+  - `HeliModel` (UH-34D): calibrado pelos tetos de pairar, pela velocidade máxima e pela subida da
+    ficha (D-38).
+  - `Logistics`: renda, gasto, regras de construção.
+- **Servidor:**
+  - `ExplosionService`: dano validado no servidor e crateras com orçamento;
+  - `LogisticsService`: caixotes, construções e pontos de reunião;
+  - `CommanderService`: missões por grade, perigo próximo, tempo de voo calculado, naval, ataque
+    aéreo, suprimento e reforço por túnel;
+  - `VehicleService`: 6 veículos nos depósitos, assentos por papel, posse de rede ao motorista
+    com validação de velocidade, projéteis, penetração por zona, motor e esteira atingíveis,
+    destruição e respawn.
+- **Cliente:**
+  - `VehicleController`: direção, voo e HUD de potência e torque;
+  - `CommanderController`: N fogo, J construir;
+  - áudio de explosão, assobio, disparos e motores.
+- **ForgeGUI:** modelos UH-34D, M48A3, LVTP-5, Ontos e dois morteiros; 9 sons da F4.
 
 ## F3: o que foi feito (sessão 4)
 - **Luz:**
@@ -92,14 +119,22 @@
 | pytest | **17 passed** |
 | Sol em 18/08/1965 (calculado, UTC+8) | 06:30 → −0,9°; 12:00 → 78,1°; 18:30 → 7,8° |
 | Túneis (gerados) | 64 peças, 474 m de galeria |
+| Testes Lune F4 | `f4.luau` **12 ok** |
+| Morteiro 82 mm (calibrado) | k = 1,512e-4 1/m; a 300/800/1.500/2.500 m: voo de 18,4/14,9/26,9/27,5 s |
+| M29 81 mm (v0 derivada) | **254 m/s** para 3.890 m com o arrasto do 82 mm |
+| UH-34D no peso máx. a 35 °C | pairar fora do efeito solo 1.522 hp, dentro 1.375 hp, a 20 m/s 1.033 hp; disponível 1.453 hp |
+| UH-34D: peso máx. para pairar a 35 °C | 5.784 kg fora do efeito solo; 6.355 kg dentro |
+| 0–5 s na estrada (calculado) | Ontos 26,7 km/h; M48A3 26,5 km/h |
 | luau-lsp (API do Roblox, `--!strict`) | **0 erros** em todo `src/` |
 | StyLua / Ruff | limpos |
 | Queda calculada com zeragem a 100 m | M14 0,16 m (200 m) e 0,52 m (300 m); Type 56 0,24 m e 0,80 m. **Não validada** contra tabela de tiro |
 | M14 a 300 m | 640 m/s e 1.946 J (calculado) |
 
 ## O que NÃO foi verificado
-- **Nada da F2 nem da monetização rodou dentro do Roblox.** Só a lógica (Lune) e os tipos (luau-lsp)
-  foram verificados.
+- **Nada da F2, F3, F4 nem da monetização rodou dentro do Roblox.** Só a lógica (Lune) e os tipos
+  (luau-lsp) foram verificados.
+- A física dos veículos no Roblox (LinearVelocity/AlignOrientation) pode precisar de ajuste de
+  força e responsividade no primeiro teste.
 - O critério da F2 ("partida 15v15 de 60 min sem erro no servidor; todo dano validado no servidor")
   exige um teste com jogadores no Studio ou num servidor publicado.
 - As compras só funcionam com os IDs criados no Creator Dashboard. Com IDs em 0, a loja esconde os
@@ -129,7 +164,8 @@
 5. O repositório próprio depende de você criar um repositório vazio (D-18).
 
 ## Próximos passos
-1. Seu teste no Studio (F1 + F2) → correções.
-2. Criar os itens de monetização e colar os IDs (checklist em `MONETIZATION.md`).
-3. Importar os modelos e sons do ForgeGUI e colar os IDs em `AssetIds.luau`.
-4. F3, a fatia vertical: setor central com a arte do Lote 1, luz, áudio e túneis.
+1. **Você:** itens 1 e 2 de `TODO_USUARIO.md` (experiência + chave Open Cloud). Com eles, eu publico
+   tudo sozinho.
+2. Seu teste no Studio (F1–F4) → correções.
+3. Trocar os PLACEHOLDER da D-36 por fichas técnicas.
+4. F5: arte total nos 5 setores e otimização para 60 jogadores.

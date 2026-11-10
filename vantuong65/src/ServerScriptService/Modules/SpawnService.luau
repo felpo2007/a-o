@@ -22,8 +22,19 @@ local info: { [Player]: Info } = {}
 
 export type Point = { id: string, name: string, x: number, z: number, kind: SpawnRules.Kind, sector: number? }
 
+-- Provedores extras de pontos (postos construídos, reforço por túnel): LogisticsService etc.
+local providers: { (faction: string) -> { Point } } = {}
+function SpawnService.addProvider(fn: (faction: string) -> { Point })
+	table.insert(providers, fn)
+end
+
 function SpawnService.points(faction: string): { Point }
 	local out: { Point } = {}
+	for _, fn in providers do
+		for _, pt in fn(faction) do
+			table.insert(out, pt)
+		end
+	end
 	local hq = MapConfig.HQ[faction]
 	table.insert(out, { id = "hq", name = "QG", x = hq.x, z = hq.z, kind = "hq" })
 	for s, sp in MatchService.points do

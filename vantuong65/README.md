@@ -18,8 +18,8 @@ do repositório.
 3. Opcional: para salvar o terreno no arquivo, rode na barra de comando
    `require(game.ServerStorage.VT65Build.Build).terrain()` e salve.
 
-Roteiro de teste em `PROGRESS.md`. Publicação automática: `TODO_USUARIO.md` e
-`tools/roblox_cloud.py`.
+Roteiro de teste em `PROGRESS.md`. **O que depende de você está em [`TODO_USUARIO.md`](TODO_USUARIO.md)**.
+Publicação automática: `tools/roblox_cloud.py`.
 
 Controles (placeholder):
 
@@ -36,6 +36,13 @@ Controles (placeholder):
 | M | mapa |
 | B | loja |
 | C | agachar |
+| N | apoio de fogo por grade (comandante, morteiro) |
+| J | construir (líder de squad, engenheiro, morteiro) |
+| Z | foguete antitanque (RPG-2 / bazuca), a pé |
+| Y | sair do veículo |
+| veículo de esteira | W/S acelera/ré, A/D vira |
+| UH-34D | Espaço/Ctrl coletivo, W/S/A/D cíclico, Q/E pedais |
+| artilheiro | mira pela câmera, clique atira, R recarrega o Ontos (parado) |
 | F3 | HUD de medição |
 
 Monetização: `MONETIZATION.md`. Assets: `assets/forgegui/` (GLBs em escala real, baixados com
