@@ -62,10 +62,10 @@ de servidor cheio.
 
 ## Observações (não corrigidas)
 - **Mira:** na M14, a caixa da culatra ocupa a metade de baixo da tela. O olho fica perto da alça
-  traseira. Dá para ajustar `SIGHT_BACK_U` por arma em `tools/weapon_landmarks.py`, se incomodar.
+  traseira. (Corrigido na segunda rodada, abaixo.)
 - **RPD:** o cano do modelo sobe ~6° em relação à caixa. É só visual: o tiro sai da câmera.
 - **Primeira pessoa e mira:** só a M14 foi conferida na mão. Nas outras 8, os pontos foram conferidos
-  no modelo, não em jogo.
+  no modelo, não em jogo. (As 9 foram conferidas na segunda rodada, abaixo.)
 - **Avisos `ContentId ... No asset content representation`:**
   - IDs 124251417301593, 102331967959169, 138533985753217 e 135346936478811;
   - nenhum é ID nosso;
@@ -75,3 +75,43 @@ de servidor cheio.
   (Game Settings → Security), decisão sua. Sem ela, o perfil não salva no Studio.
 - **Captura de tela:** com a janela do Studio minimizada, o `screen_capture` do MCP devolve tela
   branca.
+
+## Segunda rodada (mesmo dia): mira das 9 armas e pendências
+Feita no place publicado como versão 13, reaberto no Studio, com as correções copiadas pelo MCP e
+conferidas byte a byte. Detalhes em D-60.
+
+| Arma | Mão direita / esquerda até o alvo do IK | Massa até o centro da tela | Giro da arma na mira |
+|---|---|---|---|
+| M14 | 7 / 11 cm | 0,1 px | 0,7° |
+| Type 56 | 7 / 11 cm | 0,1 px | 0,0° |
+| SKS | 7 / 11 cm | 0,1 px | 0,0° |
+| M60 | 7 / 11 cm | 0,1 px | 3,6° |
+| RPD | 7 / 11 cm | 0,1 px | 0,0° |
+| M79 | 7 / 9 cm | 0,1 px | 0,0° |
+| M1911 | 7 / 5 cm | 0,1 px | 0,7° |
+| Type 54 | 7 / 3 cm | 0,1 px | 0,7° |
+| RPG-2 | 7 / 5 cm | 0,1 px | 0,0° |
+
+O tiro sai do centro da tela, então a massa precisa estar ali. Cada arma foi conferida também por
+captura da tela mirando.
+
+- **Corrigido na mira:**
+  - **M14:** a massa ficava ~2° abaixo do centro, porque o topo usado era o das orelhas que protegem
+    a massa. Agora o topo é medido a até 2 mm do plano do cano, e a massa aparece no meio da janela
+    da alça de dioptro.
+  - **Caixa da culatra tomando a metade da tela:** o olho foi para cima do punho (rosto na coronha).
+  - **Pistolas:** antes o olho ficava a 9 cm, como num fuzil. Agora fica a 45 cm (braço estendido).
+  - **Type 54:** aparecia de perfil. O modelo veio girado 27° em guinada. O giro é medido pelo eixo
+    principal dos vértices e corrigido em `GunModel.fit`.
+  - **RPD:** vinha de lado (7,2° de guinada). Corrigida do mesmo jeito, sem ajuste manual.
+  - **M60:** o modelo tem a alça de transporte levantada no meio da linha de visada. O olho vai 3 cm
+    para a direita, 3,2 cm para cima e 10 cm para trás.
+  - **M79:** a escada de mira levantada fica na frente da massa. A referência passou a ser o meio da
+    janela da escada.
+- **Avisos `ContentId`:** nesta rodada eles vêm como `rbxassethash://…`, que é conteúdo interno de
+  malha do Roblox. Nenhuma das 32.584 instâncias do cliente usa os 4 IDs da primeira rodada. Não é
+  código do jogo, e não há o que corrigir aqui.
+- **Autoteste depois de tudo: 11 ok, 0 falhas, 0 pulados.**
+- **Não feito:** ligar o "Enable Studio Access to API Services". Ele fica na aba Security das
+  configurações do jogo, e configuração de segurança fica com você (passo a passo no
+  `TODO_USUARIO.md`).

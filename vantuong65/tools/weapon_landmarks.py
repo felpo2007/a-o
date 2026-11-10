@@ -71,8 +71,55 @@ SUPPORT_U = {
 # RPD: a massa de mira fica a ~7% da boca. RPG-2: a alça é o poste de mira sobre o tubo.
 SIGHT_WINDOW = {"m79": (0.0, 0.04), "rpd": (0.0, 0.12), "rpg2": (0.25, 0.36)}
 SIGHT_WINDOW_DEFAULT = (0.0, 0.08)
-SIGHT_BACK_U = 0.15  # olho: a alça traseira fica ~15% do comprimento à frente da mão direita
-SIGHT_U = {"rpg2": 0.31}  # RPG-2: o olho fica no próprio poste de mira
+# o topo da massa é o ponto mais alto a até 2 mm do plano do cano: na M14 as orelhas que protegem a
+# massa ficam 40 mm acima do cano e a massa só 15 mm; com o topo geral, a massa aparecia ~2° abaixo
+# do centro da tela, e o tiro (que sai do centro) iria alto (Studio, 2026-11-10)
+SIGHT_POST_BAND_M = 0.002
+# olho (m atrás do ponto Sight). Fuzis, metralhadoras e M79: o ponto Sight fica 9 cm à frente da
+# mão direita, então o olho fica sobre o punho (rosto na coronha). Com o olho 7 cm mais à frente,
+# a caixa da culatra tomava a metade de baixo da tela. Pistolas: braço estendido.
+EYE_M = {"m1911": 0.45, "type54": 0.45}
+EYE_DEFAULT_M = 0.09
+SIGHT_U = {"rpg2": 0.39}  # RPG-2: o ponto Sight fica 9 cm atrás do poste de mira (sobre o punho)
+# Linha de visada: do ponto Sight (perto do olho) ao topo da massa (SightFront); a arma em primeira
+# pessoa gira um pouco para essa linha cair no centro da tela, que é para onde o tiro vai. Sem
+# deslocamento, a linha é paralela ao cano. Nas malhas geradas a alça traseira não é zerada com a
+# massa e às vezes tapa a vista: o ponto Sight é deslocado (m, no referencial da arma: direita,
+# acima, para trás), escolhido olhando a captura da mira no Studio (2026-11-10).
+EYE_OFFSET_M: dict[str, tuple[float, float, float]] = {
+    "m14": (0.0, 0.008, 0.0),  # massa no centro da janela da alça de dioptro
+    "m60": (0.030, 0.032, 0.10),  # por cima da tampa da caixa; a alça de transporte fica à esquerda
+    "m1911": (0.0, 0.002, 0.0),  # a massa aparece por cima da alça traseira
+    "type54": (0.0, 0.002, 0.0),
+}
+# M79: a escada de mira levantada fica na frente da massa e a tapa; a referência é o meio da janela
+# aberta da escada (fração a partir da boca, altura acima do cano em m), conferido na captura
+FRONT_OVERRIDE = {"m79": (0.075, 0.105)}
+# Modelos gerados tortos em guinada (eixo principal dos vértices, PCA no plano XZ): a Type 54 veio
+# ~27° girada e a RPD ~7° (na RPD o cano por fatias dá o mesmo). Corrige acima de 0,5°.
+YAW_MIN_DEG = 0.5
+
+
+def ry(a: float) -> np.ndarray:
+    """Giro em Y na convenção do Roblox (CFrame.Angles(0, a, 0))."""
+    c, s = np.cos(a), np.sin(a)
+    return np.array([[c, 0.0, s], [0.0, 1.0, 0.0], [-s, 0.0, c]])
+
+
+TURN_Y = {"-Z": 0.0, "+Z": np.pi, "-X": -np.pi / 2, "+X": np.pi / 2}  # igual ao GunModel.TURN
+
+
+def yaw_fix(p: np.ndarray, fwd: str) -> float:
+    """Ângulo (rad) que leva o eixo principal dos vértices ao eixo nomeado em FORWARD."""
+    xz = p[:, [0, 2]] - p[:, [0, 2]].mean(0)
+    w, v = np.linalg.eigh(xz.T @ xz)
+    vx, vz = v[:, np.argmax(w)]
+    phi = np.degrees(np.arctan2(vx, vz))  # a partir de +Z rumo a +X
+    target = 0.0 if fwd[1] == "Z" else 90.0
+    a = (target - phi + 90) % 180 - 90  # menor giro (o sinal do eixo vem de FORWARD)
+    return float(np.radians(a)) if abs(a) >= YAW_MIN_DEG else 0.0
+
+
 # centro da mão abaixo da linha do cano (m). Estatística de vértices não serve aqui: bandoleira,
 # bipé e tambor puxam a média, e o meio de um tubo reto nem tem vértice (RPG-2). A arma provisória
 # tinha o punho 2,5 cm abaixo do cano; aqui a mão desce até o punho de pistola ou o delgado.
@@ -137,8 +184,11 @@ def load_points(path: Path) -> np.ndarray:
 
 
 def landmarks(key: str) -> dict:
-    p = load_points(MODELS / f"{key}_studs.glb")
     fwd = FORWARD[key]
+    mesh = load_points(MODELS / f"{key}_studs.glb")
+    yaw = yaw_fix(mesh, fwd)
+    rot = ry(yaw)  # malha → "alinhada" (eixo longo exato); os pontos voltam à malha no fim
+    p = mesh @ rot.T
     ax = 0 if fwd[1] == "X" else 2
     lat = 2 - ax  # eixo lateral (o outro horizontal)
     lo, hi = p[:, ax].min(), p[:, ax].max()
@@ -150,11 +200,17 @@ def landmarks(key: str) -> dict:
     def along(uu: float) -> float:
         return float(muzzle_end - sign * uu * length)
 
-    def at(uu: float, y: float, lateral: float) -> list[float]:
-        v = [0.0, y, 0.0]
+    def at(uu: float, y: float, lateral: float) -> np.ndarray:
+        v = np.zeros(3)
+        v[1] = y
         v[ax] = along(uu)
         v[lat] = lateral
-        return [round(c, 3) for c in v]
+        return v
+
+    turn = ry(TURN_Y[fwd])  # alinhada → referencial da arma (boca em −Z)
+
+    def out(v: np.ndarray) -> list[float]:  # alinhada → espaço da malha
+        return [round(float(c), 3) for c in rot.T @ v]
 
     # linha do cano: vértices da boca (1,5% do comprimento); o plano lateral do cano vale para
     # todos os pontos (a caixa nem sempre é simétrica: bipé aberto, argola de fiel na pistola)
@@ -162,33 +218,38 @@ def landmarks(key: str) -> dict:
     bore_y, bore_lat = float(np.median(q[:, 1])), float(np.median(q[:, lat]))
     muzzle = at(0.0, bore_y, bore_lat)
     w0, w1 = SIGHT_WINDOW.get(key, SIGHT_WINDOW_DEFAULT)
-    sight_y = float(p[(u >= w0) & (u <= w1), 1].max())
+    in_win = (u >= w0) & (u <= w1)
+    post = in_win & (np.abs(p[:, lat] - bore_lat) < SIGHT_POST_BAND_M / M)
+    cand = post if post.any() else in_win
+    i_tip = int(np.argmax(np.where(cand, p[:, 1], -np.inf)))
+    if key in FRONT_OVERRIDE:
+        fu, fh = FRONT_OVERRIDE[key]
+        front = at(fu, bore_y + fh / M, bore_lat)
+    else:
+        front = at(float(u[i_tip]), float(p[i_tip, 1]), bore_lat)  # topo da massa de mira
     gu = GRIP_U[key]
     pistol = SUPPORT_U[key] == gu
-    sight_u = SIGHT_U.get(key, gu if pistol else gu - SIGHT_BACK_U)
-    sight = at(sight_u, sight_y, bore_lat)
+    eye_m = EYE_M.get(key, EYE_DEFAULT_M)
+    sight_u = SIGHT_U.get(key, gu if pistol else gu - EYE_DEFAULT_M / (length * M))
+    off = np.array(EYE_OFFSET_M.get(key, (0.0, 0.0, 0.0))) / M  # referencial da arma
+    sight = at(sight_u, float(front[1]), bore_lat) + turn.T @ off
     grip = at(gu, bore_y - GRIP_DROP_M.get(key, GRIP_DROP_DEFAULT) / M, bore_lat)
     support_drop = SUPPORT_DROP_M.get(key, SUPPORT_DROP_DEFAULT)
     support = grip if pistol else at(SUPPORT_U[key], bore_y - support_drop / M, bore_lat)
     # caixa no referencial da arma (punho na origem, boca em −Z): só o X mínimo é usado (arma
     # caída de lado no chão)
-    rel = p - np.array(grip)
-    wx = rel[:, 0] if ax == 2 else rel[:, 2]
-    if fwd == "+Z":
-        wx = -wx  # 180° em Y
-    elif fwd == "-X":
-        wx = -rel[:, 2]  # −90° em Y: x' = −z
-    elif fwd == "+X":
-        wx = rel[:, 2]
-    # comprimento real (m) para conferir a escala do ForgeGUI
+    wx = ((p - grip) @ turn.T)[:, 0]
     return {
         "forward": fwd,
-        "muzzle": muzzle,
-        "sight": sight,
-        "grip": grip,
-        "support": support,
+        "yaw": round(yaw, 4),
+        "muzzle": out(muzzle),
+        "sight": out(sight),
+        "front": out(front),
+        "grip": out(grip),
+        "support": out(support),
         "lowX": round(float(wx.min()), 3),
-        "lengthM": round(float(length * M), 3),
+        "lengthM": round(float(length * M), 3),  # para conferir a escala do ForgeGUI
+        "eyeM": eye_m,
     }
 
 
@@ -203,14 +264,19 @@ def main() -> None:
         "-- Pontos no espaço da MeshPart publicada (studs, centro da caixa na origem).",
         "-- forward = eixo que aponta para a boca. lowX = menor X da malha com o punho na",
         "-- origem e a boca em −Z (arma caída de lado). lengthM = comprimento da malha (m).",
+        "-- eyeM = distância (m) do olho ao ponto sight, mirando. yaw = giro extra em Y (rad) de",
+        "-- modelo gerado torto; o referencial da arma é TURN[forward] * CFrame.Angles(0, yaw, 0).",
         "export type Art = {",
         "\tforward: string,",
+        "\tyaw: number,",
         "\tmuzzle: Vector3,",
         "\tsight: Vector3,",
+        "\tfront: Vector3,",
         "\tgrip: Vector3,",
         "\tsupport: Vector3,",
         "\tlowX: number,",
         "\tlengthM: number,",
+        "\teyeM: number,",
         "}",
         "local WeaponArt: { [string]: Art } = {",
     ]
@@ -220,12 +286,15 @@ def main() -> None:
         lines += [
             f"\t{key} = {{",
             f'\t\tforward = "{d["forward"]}",',
+            f"\t\tyaw = {d['yaw']},",
             f"\t\tmuzzle = {vec(d['muzzle'])},",
             f"\t\tsight = {vec(d['sight'])},",
+            f"\t\tfront = {vec(d['front'])},",
             f"\t\tgrip = {vec(d['grip'])},",
             f"\t\tsupport = {vec(d['support'])},",
             f"\t\tlowX = {d['lowX']},",
             f"\t\tlengthM = {d['lengthM']},",
+            f"\t\teyeM = {d['eyeM']},",
             "\t},",
         ]
     lines += ["}", "", "return WeaponArt", ""]

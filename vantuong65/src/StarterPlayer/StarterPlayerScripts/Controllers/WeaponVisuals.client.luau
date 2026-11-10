@@ -32,6 +32,10 @@ local EYE_TO_SIGHT_M = 0.09 -- olho até a alça, mirando
 local view: Model? = nil
 local viewId: string? = nil
 local viewSight = Vector3.zero -- posição da alça no espaço da arma (punho na origem)
+local viewEye = EYE_TO_SIGHT_M -- olho até a alça (m); a arma publicada traz o seu (EyeM: pistola 0,45)
+-- giro que deixa a linha alça → massa (Sight → SightFront) no centro da tela, para onde o tiro vai.
+-- Na arma provisória a linha já é paralela ao cano (sem giro).
+local viewAlign = CFrame.identity
 local aimT = 0 -- 0 = quadril, 1 = ombro
 local kick = 0 -- recuo visual, volta em ~0,15 s
 local bobT = 0
@@ -64,6 +68,11 @@ local function setView(id: string?)
 	local primary = m.PrimaryPart :: BasePart
 	local sight = primary:FindFirstChild("Sight") :: Attachment?
 	viewSight = if sight then sight.WorldPosition else Vector3.zero -- a arma está na origem (punho)
+	local eye = m:GetAttribute("EyeM")
+	viewEye = if type(eye) == "number" then eye else EYE_TO_SIGHT_M
+	local front = primary:FindFirstChild("SightFront") :: Attachment?
+	local los = if front then front.WorldPosition - viewSight else Vector3.new(0, 0, -1)
+	viewAlign = if los.Z < -1e-3 then CFrame.lookAt(Vector3.zero, los):Inverse() else CFrame.identity
 	for _, d in m:GetDescendants() do
 		if d:IsA("BasePart") then
 			d.Anchored = true
@@ -109,7 +118,7 @@ RunService:BindToRenderStep("VT65ViewModel", Enum.RenderPriority.Camera.Value + 
 	local aiming = player:GetAttribute("Aiming") == true
 	aimT += ((if aiming then 1 else 0) - aimT) * math.min(1, dt * 12)
 	kick = math.max(0, kick - dt * 7)
-	local ads = CFrame.new(-viewSight.X, -viewSight.Y, -EYE_TO_SIGHT_M / M - viewSight.Z)
+	local ads = CFrame.new(0, 0, -viewEye / M) * viewAlign * CFrame.new(-viewSight)
 	local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart") :: BasePart?
 	local speed = if root
 		then Vector3.new(root.AssemblyLinearVelocity.X, 0, root.AssemblyLinearVelocity.Z).Magnitude * M

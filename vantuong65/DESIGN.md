@@ -976,3 +976,33 @@ Medido no Studio:
   - A pega foi para **(−0,2; 1,3; 1,1)**: 0,5 stud à frente e 0,4 para a esquerda.
   - Medido: 8 e 10 cm (antes 27 e 24).
 - **Piso:** sobram ~6 a 10 cm mesmo com o alvo ao alcance. O IK põe a mão perto do alvo, não nele.
+
+## D-60 — Mira com a arte real: linha alça → massa no centro da tela (2026-11-10)
+- **Regra:** o tiro sai do centro da tela. Mirando, a arma em primeira pessoa gira (até 3,6°, na
+  M60) para que a linha do ponto `Sight` (perto do olho) ao `SightFront` (topo da massa) caia no
+  centro. Nas malhas geradas a alça traseira não é zerada com a massa, então alinhar ao cano
+  deixava a massa fora do centro ou tapada.
+- **Topo da massa:** é o ponto mais alto a até 2 mm do plano do cano, na frente da arma.
+  - O topo geral pegava as orelhas que protegem a massa (na M14 ficam mais altas que ela).
+  - Com esse topo, a massa aparecia ~2° abaixo do centro, e o jogador que a pusesse no alvo
+    erraria alto.
+- **Olho:** o ponto `Sight` fica 9 cm à frente da mão direita, e o olho 9 cm atrás dele: o olho
+  fica sobre o punho, com o rosto na coronha.
+  - Com o olho 7 cm mais à frente, a caixa da culatra tomava a metade de baixo da tela.
+  - Pistolas: o olho fica a 45 cm (braço estendido; `EyeM`).
+- **Ajustes por arma, escolhidos olhando a captura da mira** (`tools/weapon_landmarks.py`):
+  - M14: olho 8 mm acima, para a massa ficar no meio da janela da alça de dioptro;
+  - M60: 30 mm à direita, 32 mm acima e 10 cm atrás. A alça de transporte do modelo está
+    levantada no meio da linha;
+  - M79: a escada de mira levantada fica na frente da massa. A referência é o meio da janela da
+    escada, 105 mm acima do cano (é por ela que se mira longe);
+  - pistolas: olho 2 mm acima, para a massa aparecer por cima da alça;
+  - Type 56, SKS, RPD e RPG-2: sem ajuste.
+- **Guinada dos modelos:** a Type 54 veio girada 27° e a RPD 7,2° (a M60, 1°).
+  - O giro é o do eixo principal dos vértices (PCA no plano XZ). Na RPD, a reta do cano dá o mesmo.
+  - É corrigido acima de 0,5°: `WeaponArt.yaw`, aplicado em `GunModel.fit`.
+  - Sem isso, a pistola aparecia de perfil e a RPD de lado.
+- **Medido no Studio, nas 9 armas:**
+  - massa a 0,1 px do centro;
+  - mão direita a 7 cm e esquerda a 3–11 cm;
+  - autoteste 11/11 depois.

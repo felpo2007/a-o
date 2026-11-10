@@ -201,7 +201,12 @@ test("arte publicada: toda arma com modelo tem pontos coerentes (WeaponArt, D-58
 		{ debugName = "WeaponArt", environment = { Vector3 = roblox.Vector3 } }
 	)() :: any
 	local M = 0.28
-	local AXIS = { ["-Z"] = { 3, -1 }, ["+Z"] = { 3, 1 }, ["-X"] = { 1, -1 }, ["+X"] = { 1, 1 } }
+	local AXIS = {
+		["-Z"] = roblox.Vector3.new(0, 0, -1),
+		["+Z"] = roblox.Vector3.new(0, 0, 1),
+		["-X"] = roblox.Vector3.new(-1, 0, 0),
+		["+X"] = roblox.Vector3.new(1, 0, 0),
+	}
 	local n = 0
 	for id, assetId in AssetIds.Models do
 		if Weapons.byId[id] and assetId ~= 0 then
@@ -210,14 +215,20 @@ test("arte publicada: toda arma com modelo tem pontos coerentes (WeaponArt, D-58
 			assert(a, id .. ": arma publicada sem pontos em WeaponArt (rode tools/weapon_landmarks.py)")
 			local ax = AXIS[a.forward]
 			assert(ax, id .. ": frente inválida " .. tostring(a.forward))
+			assert(math.abs(a.yaw) < math.rad(45), id .. ": giro extra grande demais")
+			-- direção da boca no espaço da malha (com o giro de modelo torto)
+			local f = roblox.CFrame.Angles(0, -a.yaw, 0) * ax
 			local function s(v: any): number -- posição ao longo do cano (maior = mais à frente)
-				return (if ax[1] == 1 then v.X else v.Z) * ax[2]
+				return v:Dot(f)
 			end
-			local half = a.lengthM / M / 2
-			assert(math.abs(s(a.muzzle) - half) < 0.05, id .. ": a boca não está na ponta da caixa")
-			assert(s(a.muzzle) > s(a.grip), id .. ": boca atrás do punho")
-			assert(s(a.sight) >= s(a.grip) - 1e-6, id .. ": linha de visada atrás do punho")
+			local L = a.lengthM / M
+			assert(s(a.muzzle) >= s(a.front) - 0.02, id .. ": a massa está à frente da boca")
+			local mg = s(a.muzzle) - s(a.grip)
+			assert(mg > 0.3 * L and mg < L, string.format("%s: boca a %.2f do punho (L %.2f)", id, mg, L))
+			assert(s(a.front) > s(a.sight), id .. ": massa atrás da alça")
+			assert(s(a.sight) >= s(a.grip) - 0.15 / M, id .. ": olho atrás demais do punho")
 			assert(a.sight.Y >= a.muzzle.Y, id .. ": linha de visada abaixo do cano")
+			assert(a.eyeM > 0 and a.eyeM <= 0.7, id .. ": olho fora de 0–0,7 m")
 			-- alcance do braço (D-59): o apoio a no máximo 0,26 m do punho
 			local d =
 				math.sqrt((a.support.X - a.grip.X) ^ 2 + (a.support.Y - a.grip.Y) ^ 2 + (a.support.Z - a.grip.Z) ^ 2)

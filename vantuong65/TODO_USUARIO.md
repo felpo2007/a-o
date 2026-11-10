@@ -10,9 +10,14 @@ do resto.
 - 82 assets estão publicados: sons, modelos, roupas e os animais. O place foi publicado.
 - Falta criar os 4 passes e os 2 produtos de apoio (`tools/roblox_cloud.py create-store`). Isso
   só quando você decidir os preços (`MONETIZATION.md`).
-- Para ver os testes salvando perfil no Studio: Game Settings → Security → **Enable Studio Access
-  to API Services**. Sem isso o Output avisa "Studio access to APIs is not allowed" e o perfil não
-  salva no Studio. No jogo publicado não muda nada.
+- **Perfil salvando nos testes do Studio** (opcional, 1 min). É configuração de segurança, por isso
+  fica com você. Sem ela, o Output avisa "Studio access to APIs is not allowed" e o perfil não salva
+  no Studio; no jogo publicado não muda nada.
+  1. No Studio, com o place aberto e fora do Play: aba **Página Inicial (Home)** → **Configurações
+     do jogo (Game Settings)**.
+  2. Na lista da esquerda: **Segurança (Security)**.
+  3. Ligue **Ativar acesso do Studio aos serviços de API (Enable Studio Access to API Services)**.
+  4. **Salvar (Save)**.
 
 ## 2. Configurações que o Roblox só deixa o dono fazer (15 min)
 Textos prontos e imagens: **`LANCAMENTO.md`** (página do jogo, guia do questionário e beta).

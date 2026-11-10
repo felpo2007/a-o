@@ -70,7 +70,9 @@ O `sourcemap.json` não vai para o Git.
 - O importador do Roblox gira cada GLB 180° em Y (D-58). Frente de modelo se confere no Studio,
   não no GLB.
 - Arma nova: acrescente em `tools/weapon_landmarks.py` (frente e frações das mãos, vistas numa
-  captura) e rode-o para regenerar `Shared/WeaponArt.luau`.
+  captura) e rode-o para regenerar `Shared/WeaponArt.luau`. Depois confira a mira no Studio
+  (captura mirando): a massa deve aparecer no centro sem nada tapando. Se algo tapar, ajuste
+  `EYE_OFFSET_M` (D-60).
 - O place da nuvem abre no Studio com
   `roblox-studio:1+task:EditPlace+placeId:125635672454807+universeId:10775697296`.
 
@@ -81,7 +83,7 @@ O `sourcemap.json` não vai para o Git.
 - Segredos só no `.env` (no `.gitignore`), nunca no código nem no chat.
 - ForgeGUI: nunca regenerar um job em `outcome_unknown`. "failed" com `retryable` pode ser
   retomado com `generation_retry`.
-- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-60) e atualize `PROGRESS.md`.
+- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-61) e atualize `PROGRESS.md`.
 - Metas da Parte 2: vegetação ≤ 3 mil triângulos, props ≤ 5 mil, herói ≤ 20 mil (`ArtBudget`,
   conferido pelo teste da F5).
 - Commits no branch acima, com mensagem em português.

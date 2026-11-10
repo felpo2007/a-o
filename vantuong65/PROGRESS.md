@@ -292,6 +292,9 @@ em `testes/TESTE_ARTE_REAL_2026-11-10.md`.
   - a mão esquerda não alcançava a arma (nova pega: 7 e 11 cm em pé, 8 e 10 cm deitado);
   - o búfalo e a galinha não tinham sido publicados;
   - animais e veículos andariam de ré, porque o importador gira o modelo 180°.
+- **Segunda rodada (D-60):** a mira das 9 armas foi conferida por captura. A massa fica no centro da
+  tela, e as pistolas ficam com o braço estendido. A Type 54 e a RPD vieram tortas do gerador e
+  agora são corrigidas. O autoteste continua 11/11. O place foi publicado de novo.
 
 ## Resultados-chave (medidos aqui)
 | Medida | Valor |
@@ -328,8 +331,8 @@ em `testes/TESTE_ARTE_REAL_2026-11-10.md`.
   exige um teste com jogadores no Studio ou num servidor publicado.
 - As compras só funcionam com os IDs criados no Creator Dashboard. Com IDs em 0, a loja esconde os
   itens.
-- Com a arte real, só a M14 foi conferida na mão, em primeira pessoa e mirando. Nas outras 8
-  armas, os pontos foram conferidos no modelo (D-58).
+- A mira das 9 armas foi conferida contra um alvo parado. Atirando em movimento e com recuo, só no
+  teste com jogadores.
 
 ## Como testar no Studio
 1. Abra `vantuong65/place/VanTuong65.rbxl`.

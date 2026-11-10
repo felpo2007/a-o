@@ -109,10 +109,12 @@ local TURN: { [string]: CFrame } = {
 -- gerado dos GLB por tools/weapon_landmarks.py. Devolve false se a arma não tem pontos.
 function GunModel.fit(model: Model, weaponId: string): boolean
 	local art = WeaponArt[weaponId]
-	local turn = art and TURN[art.forward]
-	if not (art and turn) then
+	local axis = art and TURN[art.forward]
+	if not (art and axis) then
 		return false
 	end
+	-- yaw: modelo gerado torto em guinada (Type 54 ~27°, RPD ~7°; tools/weapon_landmarks.py)
+	local turn = axis * CFrame.Angles(0, art.yaw, 0)
 	-- a malha da arma é a maior peça (a bandoleira e afins, se vierem separadas, ficam soldadas)
 	local mesh: BasePart? = nil
 	for _, d in model:GetDescendants() do
@@ -124,8 +126,14 @@ function GunModel.fit(model: Model, weaponId: string): boolean
 		return false
 	end
 	local inv = turn:Inverse()
-	local points: { [string]: Vector3 } =
-		{ Muzzle = art.muzzle, Sight = art.sight, Grip = art.grip, Support = art.support }
+	-- SightFront: topo da massa de mira; a mira em primeira pessoa alinha Sight → SightFront ao centro
+	local points: { [string]: Vector3 } = {
+		Muzzle = art.muzzle,
+		Sight = art.sight,
+		SightFront = art.front,
+		Grip = art.grip,
+		Support = art.support,
+	}
 	for name, pos in points do
 		local old = mesh:FindFirstChild(name)
 		if old then
@@ -140,6 +148,7 @@ function GunModel.fit(model: Model, weaponId: string): boolean
 	mesh.PivotOffset = CFrame.new(art.grip) * inv
 	model:SetAttribute("WeaponId", weaponId)
 	model:SetAttribute("LowX", art.lowX)
+	model:SetAttribute("EyeM", art.eyeM) -- olho até o ponto Sight, mirando (WeaponVisuals)
 	return true
 end
 
