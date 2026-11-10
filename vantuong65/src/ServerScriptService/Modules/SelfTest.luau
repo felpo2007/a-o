@@ -368,7 +368,13 @@ local function rain(): (string, string?)
 	task.wait(1.5)
 	workspace:SetAttribute("VT65DevRain", nil)
 	return if ok and (not atm or after > before) then "ok" else "FALHA",
-		string.format("Rain=1: %s; névoa %.2f → %.2f%s", tostring(ok), before, after, if atm then "" else " (sem Atmosphere)")
+		string.format(
+			"Rain=1: %s; névoa %.2f → %.2f%s",
+			tostring(ok),
+			before,
+			after,
+			if atm then "" else " (sem Atmosphere)"
+		)
 end
 
 function SelfTest.run()
