@@ -255,7 +255,17 @@ Os 8 bugs encontrados foram corrigidos. **Reteste no Studio** (mesmo dia, relat�
 - clarão de boca, poeira no impacto e traçante que voa pela trajetória;
 - arma caída com a forma da arma, e a arma na mão troca ao pegar a do inimigo;
 - sem o cursor no meio da tela;
-- corrigido também o acúmulo das rotações nas poses (agachar, inclinar, braços).
+- corrigido também o acúmulo das rotações nas poses (agachar, inclinar, braços);
+- a arma fica presa ao peito e as duas mãos a seguram por IK (D-55).
+
+**F4 no Studio** (`testes/TESTE_F4_STUDIO_2026-11-10.md`):
+- M48A3 anda (~19 km/h aos 5 s, na areia);
+- UH-34D decola e voa, mas sobe a 8 m/s, que é o teto do código; falta calibrar a subida com pouca
+  carga;
+- o RPG-2 não fura o M48A3 de frente e fura de lado;
+- sem erros;
+- não testados: LVTP-5 na água, comandante, morteiros e Ontos;
+- no solo do Studio os papéis pesados não aparecem no menu, porque o time não chega a 16.
 
 **Depois do teste:**
 - **Autoteste no motor:** `workspace:SetAttribute("VT65SelfTest", true)`, só no Studio. Roda

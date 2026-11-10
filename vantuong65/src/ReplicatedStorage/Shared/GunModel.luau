@@ -78,6 +78,16 @@ function GunModel.build(weaponId: string, kind: string?): Model
 	sight.Name = "Sight"
 	sight.CFrame = receiver.CFrame:ToObjectSpace(CFrame.new(0, sightY / M, -sightZ / M))
 	sight.Parent = receiver
+	-- mãos (IK no PostureController): direita no punho; esquerda logo à frente do carregador, a
+	-- 22% do comprimento. O braço esquerdo alcança ~0,58 m: a 36% (meio do guarda-mão) não chegava.
+	local grip = Instance.new("Attachment")
+	grip.Name = "Grip"
+	grip.CFrame = receiver.CFrame:ToObjectSpace(CFrame.identity)
+	grip.Parent = receiver
+	local support = Instance.new("Attachment")
+	support.Name = "Support"
+	support.CFrame = receiver.CFrame:ToObjectSpace(CFrame.new(0, 0, -(if kind == "pistol" then 0 else L * 0.22) / M))
+	support.Parent = receiver
 	model.WorldPivot = CFrame.identity -- punho
 	return model
 end

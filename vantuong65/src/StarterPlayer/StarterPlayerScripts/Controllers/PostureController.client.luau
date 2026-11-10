@@ -19,15 +19,15 @@ local CROUCH: { [string]: CFrame } = {
 	RightKnee = CFrame.Angles(math.rad(-100), 0, 0),
 }
 local LEAN_WAIST = math.rad(16) -- inclinação do tronco (PLACEHOLDER)
--- Braços segurando a arma (quem tem "Weapon"): antes os braços caíam soltos e a arma presa na mão
--- apontava para o chão. Braços à frente; o esquerdo vem para o meio, sob o guarda-mão. PLACEHOLDER
--- até as animações próprias.
-local ARMS: { [string]: CFrame } = {
-	RightShoulder = CFrame.Angles(math.rad(78), 0, 0),
-	RightElbow = CFrame.Angles(math.rad(12), 0, 0),
-	LeftShoulder = CFrame.Angles(0, math.rad(-38), 0) * CFrame.Angles(math.rad(82), 0, 0),
-	LeftElbow = CFrame.Angles(math.rad(12), 0, 0),
-}
+
+-- Arma nas mãos: a arma passa a ficar presa ao peito (no cliente), e as duas mãos vão até ela por IK
+-- (IKControl): a direita no punho, a esquerda à frente do carregador. Presa à mão (como o servidor a
+-- cria), ela seguia a rotação do pulso, que o IK não acerta (20° de erro medidos no Studio).
+-- Em pé ou agachado: pronta-baixa, cano 20° para baixo e cruzando o corpo, para a mão esquerda
+-- alcançar. Deitado: à frente do peito, cano na horizontal a ~0,2 m do chão (o tronco deitado tem o
+-- +Y para a frente); medido no Studio: mão esquerda a 8 cm do apoio, direita a 23 cm do punho.
+local HOLD_STAND = CFrame.new(0.5, 0, -1.2) * CFrame.Angles(0, math.rad(15), 0) * CFrame.Angles(math.rad(-20), 0, 0)
+local HOLD_PRONE = CFrame.new(0.3, 0.8, 1.1) * CFrame.Angles(math.rad(90), 0, 0)
 
 local function characters(): { Model }
 	local list = {}
@@ -63,6 +63,53 @@ local function pose(m: Instance, cf: CFrame)
 	end
 end
 
+local function ikTo(hum: Humanoid, name: string, root: Instance?, effector: Instance?, target: Instance?, on: boolean)
+	local k = hum:FindFirstChild(name) :: IKControl?
+	if not k then
+		local n = Instance.new("IKControl")
+		n.Name = name
+		n.Type = Enum.IKControlType.Position
+		n.Parent = hum
+		k = n
+	end
+	local ik = k :: IKControl
+	ik.ChainRoot = root
+	ik.EndEffector = effector
+	ik.Target = target
+	ik.Enabled = on and root ~= nil and effector ~= nil and target ~= nil
+end
+
+local function holdWeapon(char: Model)
+	local w = char:FindFirstChild("Weapon") :: Model?
+	local ut = char:FindFirstChild("UpperTorso") :: BasePart?
+	local hum = char:FindFirstChildOfClass("Humanoid")
+	local primary = w and w.PrimaryPart
+	if not (w and ut and hum and primary) then
+		return
+	end
+	local key = if char:GetAttribute("Prone") == true then "prone" else "stand"
+	if w:GetAttribute("VT65Hold") ~= key then
+		-- a solda que o servidor criou (mão → arma) passa a ser peito → arma, só neste cliente
+		local weld: WeldConstraint? = nil
+		for _, d in primary:GetChildren() do
+			if d:IsA("WeldConstraint") and d.Part0 and not (d.Part0 :: BasePart):IsDescendantOf(w) then
+				weld = d
+			end
+		end
+		if not weld then
+			return
+		end
+		weld.Enabled = false
+		w:PivotTo(ut.CFrame * (if key == "prone" then HOLD_PRONE else HOLD_STAND))
+		weld.Part0 = ut
+		weld.Enabled = true
+		w:SetAttribute("VT65Hold", key)
+	end
+	local free = char:GetAttribute("Downed") ~= true
+	ikTo(hum, "VT65IK_R", char:FindFirstChild("RightUpperArm"), char:FindFirstChild("RightHand"), primary:FindFirstChild("Grip"), free)
+	ikTo(hum, "VT65IK_L", char:FindFirstChild("LeftUpperArm"), char:FindFirstChild("LeftHand"), primary:FindFirstChild("Support"), free)
+end
+
 RunService.Heartbeat:Connect(function()
 	for _, char in characters() do
 		local crouched = char:GetAttribute("Crouched") == true
@@ -73,13 +120,7 @@ RunService.Heartbeat:Connect(function()
 				pose(m, if crouched then rest * rot else rest)
 			end
 		end
-		local armed = char:FindFirstChild("Weapon") ~= nil and char:GetAttribute("Downed") ~= true
-		for name, rot in ARMS do
-			local m, rest = motor(char, name)
-			if m then
-				pose(m, if armed then rest * rot else rest)
-			end
-		end
+		holdWeapon(char)
 		-- deitado: a junta Root é posada pelo SERVIDOR (PostureService), para o acerto bater
 		local waist, rest = motor(char, "Waist")
 		if waist then

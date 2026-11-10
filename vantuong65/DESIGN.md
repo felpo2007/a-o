@@ -875,8 +875,27 @@ Medido no Studio:
 - nenhum erro no cliente nem no servidor;
 - autoteste: 10 ok, 0 falhas.
 
-**Não verificado:**
-- o traçante em jogo: só sai em metralhadora, 1 tiro em 5;
+**Não verificado (o traçante foi conferido depois, na D-55):**
 - a pose vista por outro jogador (o MCP só roda Play solo);
 - a "mãozinha" que aparece nas capturas: o jogo informa `MouseIconEnabled = false`, então
   provavelmente é o indicador do mouse virtual do MCP.
+
+## D-55 — Arma presa ao peito, mãos por IK (2026-11-10)
+- **Problema:** com a arma presa à mão (como o servidor a cria), ela seguia a rotação do pulso. O
+  `IKControl` acerta a posição da mão, mas não a rotação: ficavam 20° de erro, e a arma apontava
+  para onde o pulso parava.
+- **Regra:** em cada cliente, a solda da arma passa de mão → arma para peito → arma, e as duas mãos
+  vão até a arma por IK: a direita no punho (`Grip`) e a esquerda no apoio (`Support`).
+  - Em pé e agachado: posição pronta-baixa, com o cano 20° para baixo e cruzando o corpo.
+  - Deitado: à frente do peito, com o cano na horizontal.
+  - A pose fixa dos braços (D-54) saiu.
+- **Alcance:** o braço esquerdo alcança ~2,07 studs (0,58 m). Por isso o apoio da mão esquerda
+  fica a 22% do comprimento da arma, logo à frente do carregador, e não no meio do guarda-mão.
+- **Medido no Studio:**
+  - em pé (3 bots): mão direita a 0,00 stud do punho e esquerda a 0,32 stud do apoio;
+  - deitado: arma a 0,21 m do chão, mão esquerda a 8 cm e direita a 23 cm.
+- **Traçante conferido:** numa rajada de M60 houve 26 clarões e 2 traçantes de 3,4 m, voando pela
+  trajetória.
+- **Não verificado:** a arma do ForgeGUI, quando publicada, precisa ter os pontos `Grip` e
+  `Support`; sem eles o IK fica desligado.
+- O teste da F4 está em `testes/TESTE_F4_STUDIO_2026-11-10.md`.
