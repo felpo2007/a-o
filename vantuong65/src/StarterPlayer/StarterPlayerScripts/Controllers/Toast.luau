@@ -97,7 +97,7 @@ local STYLE: { [string]: Style } = {
 	erro = {
 		accent = Color3.fromRGB(200, 70, 54),
 		title = Color3.fromRGB(240, 124, 104),
-		glyph = "✕",
+		glyph = "×",
 		label = "Negado",
 		life = 4.6,
 	},

@@ -221,7 +221,7 @@ function Idioma.chip(parent: Instance, o: ChipOpcoes): Chip
 	local function atualizar()
 		local c = Idioma.atual()
 		local n = Idioma.nome(c)
-		cur.Text = if c == "auto" then string.format("AUTO · %s ▾", n) else string.format("%s ▾", n)
+		cur.Text = if c == "auto" then string.format("AUTO · %s ▼", n) else string.format("%s ▼", n)
 		cur.FontFace = if string.find(n, "[\196-\225]") then BODY_B else HEAD
 		local img = if o.padKey and usingPad() then padImage(o.padKey) else nil
 		key.Image = img or ""

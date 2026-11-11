@@ -243,16 +243,27 @@ chipSub.Size = UDim2.new(1, -4, 0, SUB_H)
 chipSub.FontFace = UiKit.HEAD_FONT
 chipSub.TextSize = if TV then 24 else 12
 chipSub.TextColor3 = UiKit.STAMP
+-- Menos texto (pedido do dono, 2026-11-11): o passo inteiro fica num rótulo escondido (é a frase
+-- que o dicionário traduz); a tela mostra a 1ª frase (a ordem, com o botão) e, menor, numa linha,
+-- o resto (a dica). UiKit.resumo refaz a divisão quando a tradução chega.
 local body = text(content, "Texto")
-body.Position = UDim2.fromOffset(BODY_X, 0)
-body.Size = UDim2.fromOffset(BODY_W, CHIP_H)
-body.Font = UiKit.BODY_FONT
-body.TextSize = BODY_SIZE
-body.TextColor3 = LIGHT
-body.TextXAlignment = Enum.TextXAlignment.Left
-body.TextYAlignment = Enum.TextYAlignment.Center
-body.TextWrapped = true
+body.Visible = false
 body.RichText = true
+local DETAIL_H = if TV then 26 else 16
+local orderText = UiKit.fixedText(content, 16, LIGHT, Enum.Font.ArimoBold)
+orderText.Name = "Ordem"
+orderText.Position = UDim2.fromOffset(BODY_X, 0)
+orderText.Size = UDim2.fromOffset(BODY_W, CHIP_H)
+orderText.TextSize = BODY_SIZE
+orderText.TextYAlignment = Enum.TextYAlignment.Center
+orderText.TextWrapped = true
+orderText.RichText = true
+local detail = UiKit.fixedText(content, 13, UiKit.KHAKI, UiKit.BODY_FONT)
+detail.Name = "Dica"
+detail.TextTruncate = Enum.TextTruncate.AtEnd
+detail.TextTransparency = 0.15
+detail.RichText = true
+detail.Visible = false
 
 -- pé do cartão: como pular (chips pelo dispositivo) e a barra de latão do segurar
 local foot = Instance.new("TextButton") -- toque/clique: dois toques pulam
@@ -294,8 +305,28 @@ local fadeItems: { { inst: Instance, prop: string, base: number } } = {
 	{ inst = chipIcon, prop = "ImageTransparency", base = 0 },
 	{ inst = chipKey, prop = "TextTransparency", base = 0 },
 	{ inst = chipSub, prop = "TextTransparency", base = 0 },
-	{ inst = body, prop = "TextTransparency", base = 0 },
+	{ inst = orderText, prop = "TextTransparency", base = 0 },
+	{ inst = detail, prop = "TextTransparency", base = 0.15 },
 }
+
+-- altura da área do passo: a ordem (até onde precisar) e a linha da dica embaixo
+local function layoutText(): number
+	local plainHead = string.gsub(orderText.Text, "<[^>]+>", "")
+	local hh = TextService:GetTextSize(plainHead, BODY_SIZE, Enum.Font.ArimoBold, Vector2.new(BODY_W, 10000)).Y
+	local hasDetail = detail.Text ~= ""
+	local extra = if hasDetail then DETAIL_H else 0
+	local ch = math.max(CHIP_H, math.ceil(hh) + 4 + extra)
+	orderText.Size = UDim2.fromOffset(BODY_W, ch - extra)
+	detail.Position = UDim2.fromOffset(BODY_X, ch - DETAIL_H)
+	detail.Size = UDim2.fromOffset(BODY_W, DETAIL_H)
+	detail.Visible = hasDetail
+	content.Size = UDim2.new(1, 0, 0, ch)
+	return ch
+end
+local function splitInto(hd: string, rest: string)
+	orderText.Text = hd
+	detail.Text = rest
+end
 
 -- ===== estado =====
 local done: { [string]: boolean } = {}
@@ -347,14 +378,11 @@ local function apply(st: Tutorial.Step): number
 	chipKey.Size = UDim2.fromOffset(CHIP_W - 8, top - 6)
 	chipSub.Text = sub
 	chipSub.Visible = sub ~= ""
-	-- texto: o mesmo do Tutorial.render, com o botão em destaque
-	local plain = Tutorial.render(st, glyph)
+	-- texto: o mesmo do Tutorial.render, com o botão em destaque; na tela, ordem + dica
 	body.Text = Tutorial.render({ id = st.id, action = st.action, range = st.range, text = esc(st.text) }, hotGlyph)
+	splitInto(UiKit.splitSentence(body.Text))
 	-- medida no Arimo negrito: nunca menor que o texto real (parte dele é negrito)
-	local h = TextService:GetTextSize(plain, BODY_SIZE, Enum.Font.ArimoBold, Vector2.new(BODY_W, 10000)).Y
-	local ch = math.max(CHIP_H, math.ceil(h) + 4)
-	content.Size = UDim2.new(1, 0, 0, ch)
-	body.Size = UDim2.fromOffset(BODY_W, ch)
+	local ch = layoutText()
 	return CONTENT_Y + ch + PAD + FOOT_H
 end
 
@@ -380,6 +408,20 @@ local shown = false
 local shownKey = ""
 local swapToken = 0
 local targetX = MARGIN
+
+-- a tradução chegou (o rótulo escondido mudou): divide de novo e acerta a altura do cartão
+UiKit.resumo(body, function(hd: string, rest: string)
+	if hd == orderText.Text and rest == detail.Text then
+		return
+	end
+	splitInto(hd, rest)
+	local ch = layoutText()
+	if shown then
+		TweenService:Create(root, TweenInfo.new(0.15, Enum.EasingStyle.Quad), {
+			Size = UDim2.fromOffset(W, CONTENT_Y + ch + PAD + FOOT_H),
+		}):Play()
+	end
+end)
 
 local function fadeContent(show: boolean, t: number)
 	local info =

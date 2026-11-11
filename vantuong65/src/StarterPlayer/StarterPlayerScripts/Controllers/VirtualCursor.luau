@@ -57,6 +57,7 @@ local held = 0
 local hovered: GuiObject? = nil
 local scrollTarget: ScrollingFrame? = nil
 local lastProbe = Vector2.new(-1, -1)
+local lastProbeT = 0
 local nextProbe = 0
 local jumpFrom: Vector2? = nil
 local jumpTo: Vector2? = nil
@@ -180,12 +181,21 @@ local function insideRect(o: GuiObject, gp: Vector2): boolean
 	return gp.X >= a.X and gp.Y >= a.Y and gp.X <= a.X + s.X and gp.Y <= a.Y + s.Y
 end
 
--- visível de verdade naquele ponto: toda a cadeia visível, tela ligada e sem corte de rolagem
+-- Interactable = false (véus, sombras, filme, rótulos que não recebem clique): não conta no ponto
+local hasInteractable = pcall(function()
+	return (Instance.new("Frame") :: any).Interactable
+end)
+local function interactive(o: GuiObject): boolean
+	return not hasInteractable or (o :: any).Interactable ~= false
+end
+
+-- visível de verdade naquele ponto: toda a cadeia visível e interativa, tela ligada e sem corte
+-- de rolagem
 local function shownAt(o: GuiObject, gp: Vector2): boolean
 	local cur: Instance? = o
 	while cur do
 		if cur:IsA("GuiObject") then
-			if not cur.Visible then
+			if not cur.Visible or not interactive(cur) then
 				return false
 			end
 			if cur ~= o and cur.ClipsDescendants and not insideRect(cur, gp) then
@@ -199,8 +209,23 @@ local function shownAt(o: GuiObject, gp: Vector2): boolean
 	return false
 end
 
+-- o botão registrado que contém este pedaço (a seta, o rótulo ou a lista dentro de um cartão)
+local function boundAncestor(o: Instance): GuiObject?
+	local cur = o.Parent
+	while cur and not cur:IsA("LayerCollector") do
+		if cur:IsA("GuiObject") and bound[cur] then
+			return cur
+		end
+		cur = cur.Parent
+	end
+	return nil
+end
+
 -- Botão registrado sob o ponto (pixels da janela) e se há interface tapando a cena 3D ali.
 -- "Tapa" = botão de qualquer tipo, lista rolável ou quadro com Active (painéis do lobby).
+-- Correção (pedido do dono, 2026-11-11: "às vezes estou em cima do que eu quero e não vai"): um
+-- botão ou quadro Active DENTRO do botão registrado (as setas ◄ ► da linha do menu, uma lista no
+-- cartão) tapava o próprio botão: o A não ia. Agora a peça de dentro devolve o botão que a contém.
 function VirtualCursor.guiAt(p: Vector2): (GuiObject?, boolean, ScrollingFrame?)
 	local pg = player:FindFirstChildOfClass("PlayerGui")
 	if not pg then
@@ -224,23 +249,74 @@ function VirtualCursor.guiAt(p: Vector2): (GuiObject?, boolean, ScrollingFrame?)
 		if not scroller and o:IsA("ScrollingFrame") then
 			scroller = o
 		end
-		if bound[o] then
+		local hit: GuiObject? = if bound[o] then o else nil
+		if not hit and (o:IsA("GuiButton") or o:IsA("ScrollingFrame") or o.Active) then
+			hit = boundAncestor(o)
+			if not hit then
+				return nil, true, scroller -- peça solta por cima: tapa
+			end
+		end
+		if hit then
 			if not scroller then
 				-- a lista que contém o botão rola junto
-				local anc = o:FindFirstAncestorWhichIsA("ScrollingFrame")
-				scroller = anc
+				scroller = hit:FindFirstAncestorWhichIsA("ScrollingFrame")
 			end
-			return o, true, scroller
-		end
-		if o:IsA("GuiButton") or o:IsA("ScrollingFrame") or o.Active then
-			return nil, true, scroller
+			return hit, true, scroller
 		end
 	end
 	return nil, false, scroller
 end
 
--- A interface tapa a cena neste ponto? (o LobbyScene pergunta antes de realçar um objeto 3D)
+-- distância do ponto (pixels da janela) até a caixa do objeto (0 dentro)
+local function rectDist(o: GuiObject, p: Vector2): number
+	local a = o.AbsolutePosition + inset()
+	local s = o.AbsoluteSize
+	local dx = math.max(a.X - p.X, 0, p.X - (a.X + s.X))
+	local dy = math.max(a.Y - p.Y, 0, p.Y - (a.Y + s.Y))
+	return math.sqrt(dx * dx + dy * dy)
+end
+
+-- O alvo é o que o anel do cursor cobre, não só o pixel do meio: sem botão no ponto, procura num
+-- círculo do tamanho do anel (o meio do cursor caía no vão de 2 px entre duas linhas, ou na
+-- borda arredondada, e o A não ia com o anel em cima do botão). Fica o mais perto do meio.
+local REACH = 13 -- px: o raio do anel
+local RING_DIRS: { Vector2 } = {}
+for i = 0, 7 do
+	local a = i * math.pi / 4
+	table.insert(RING_DIRS, Vector2.new(math.cos(a), math.sin(a)))
+end
+local function targetAt(p: Vector2): (GuiObject?, boolean, ScrollingFrame?)
+	local b, over, sf = VirtualCursor.guiAt(p)
+	if b then
+		return b, over, sf
+	end
+	local best: GuiObject?, bestD, bestSf = nil, math.huge, sf
+	for _, dir in RING_DIRS do
+		local q = p + dir * REACH
+		local hb, _, hsf = VirtualCursor.guiAt(q)
+		if hb then
+			local d = rectDist(hb, p)
+			if d < bestD then
+				best, bestD, bestSf = hb, d, hsf
+			end
+		end
+	end
+	if best then
+		return best, true, bestSf
+	end
+	return nil, over, sf
+end
+VirtualCursor.targetAt = targetAt
+
+-- A interface tapa a cena neste ponto? (o LobbyScene pergunta antes de realçar um objeto 3D, a
+-- cada quadro). No cursor virtual vale o resultado da última sondagem (o mesmo alvo do realce e do
+-- A, já com o alcance do anel); com o mouse, o ponto exato.
+local probeOver = false
+local probePos = Vector2.new(-1, -1)
 function VirtualCursor.overGui(p: Vector2): boolean
+	if p == probePos then
+		return probeOver
+	end
 	local _, over = VirtualCursor.guiAt(p)
 	return over
 end
@@ -330,7 +406,12 @@ end
 local function click()
 	pulse = 0.18
 	GuiService.SelectedObject = nil -- nada da navegação do Roblox ativa o mesmo botão
-	local b, over = VirtualCursor.guiAt(pos)
+	-- o mesmo alvo do realce: o que está aceso é o que o A aciona
+	local b, over = targetAt(pos)
+	local h = hovered
+	if not b and h and h.Parent and h.Visible and rectDist(h, pos) <= REACH then
+		b, over = h, true
+	end
 	if b then
 		local bd = bound[b]
 		if bd then
@@ -475,14 +556,17 @@ RunService.RenderStepped:Connect(function(dt: number)
 	else
 		held = 0
 	end
-	-- interface sob o cursor: quando mexe, e de vez em quando (a lista pode ter rolado)
+	-- interface sob o cursor: quando mexe (até 30 vezes por segundo) e de vez em quando (a lista
+	-- pode ter rolado). O mesmo targetAt do A: realce e clique pegam sempre o mesmo botão.
 	local now = os.clock()
-	if (pos - lastProbe).Magnitude > 0.5 or now >= nextProbe then
+	if ((pos - lastProbe).Magnitude > 0.5 and now - lastProbeT >= 1 / 30) or now >= nextProbe then
 		lastProbe = pos
+		lastProbeT = now
 		nextProbe = now + 0.15
-		local b, _, sf = VirtualCursor.guiAt(pos)
+		local b, over, sf = targetAt(pos)
 		setHover(b)
 		scrollTarget = sf
+		probePos, probeOver = pos, over
 	end
 	-- analógico direito: rola a lista sob o cursor
 	local sf = scrollTarget

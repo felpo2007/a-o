@@ -127,7 +127,7 @@ close.AutoButtonColor = false
 close.FontFace = UiKit.HEAD_FONT
 close.TextColor3 = UiKit.KHAKI
 close.TextSize = UiKit.text(16)
-close.Text = "ARQUIVAR ✕"
+close.Text = "ARQUIVAR ×"
 close.Selectable = true
 close.SelectionImageObject = UiKit.FOCUS
 close.Parent = sheet
@@ -135,13 +135,13 @@ UiKit.corner(close, 3)
 UiKit.lit(close, 0.72)
 
 -- ===== conteúdo =====
-local function line(text: string, order: number): TextLabel
+local function line(text: string, order: number, parent: Instance?): TextLabel
 	local row = Instance.new("Frame")
 	row.BackgroundTransparency = 1
 	row.LayoutOrder = order
 	row.Size = UDim2.new(1, 0, 0, 0)
 	row.AutomaticSize = Enum.AutomaticSize.Y
-	row.Parent = scroll
+	row.Parent = parent or scroll
 	local t = UiKit.rotulo(row, 15, UiKit.INK, UiKit.TYPE_FONT)
 	t.Size = UDim2.new(1, 0, 0, 0)
 	t.AutomaticSize = Enum.AutomaticSize.Y
@@ -207,12 +207,100 @@ local function fill(report: { string })
 	else
 		subtitle.Text = ""
 	end
-	local labels: { TextLabel } = {}
+	-- Menos texto (pedido do dono, 2026-11-11): primeiro o que importa (3. resultado e 2. baixas);
+	-- a linha do tempo (1.) fica dobrada atrás de um botão. As seções vêm numeradas do servidor
+	-- (Shared/AfterAction); o número vale em qualquer idioma.
+	type Sec = { title: string, lines: { string } }
+	local secs: { [number]: Sec } = {}
+	local cur: Sec? = nil
 	for i = first, #report do
-		local t = line(report[i], i)
+		local raw = report[i]
+		local trimmed = string.match(raw, "^%s*(.-)%s*$") or raw
+		local num = tonumber(string.match(trimmed, "^(%d+)%. %S") or "")
+		if num and UiKit.upper(trimmed) == trimmed then
+			local s: Sec = { title = trimmed, lines = {} }
+			secs[num] = s
+			cur = s
+		elseif cur and trimmed ~= "" then
+			table.insert(cur.lines, raw)
+		end
+	end
+	local labels: { TextLabel } = {}
+	local order = 0
+	local function add(text: string, parent: Instance?): TextLabel
+		order += 1
+		local t = line(text, order, parent)
 		if t.Visible then
 			table.insert(labels, t)
 		end
+		return t
+	end
+	for _, n in { 3, 2 } do
+		local s = secs[n]
+		if s then
+			add(s.title)
+			for k, l in s.lines do
+				local t = add(l)
+				if n == 3 and k == 1 then -- o resultado, grande
+					t.FontFace = UiKit.HEAD_FONT
+					t.TextSize = UiKit.text(20)
+				end
+			end
+			add("")
+		end
+	end
+	local tl = secs[1]
+	if tl then
+		add(tl.title)
+		-- botão que abre e fecha a linha do tempo
+		order += 1
+		local toggle = Instance.new("TextButton")
+		toggle.Name = "LinhaDoTempo"
+		toggle.LayoutOrder = order
+		toggle.Size = UDim2.new(1, -8, 0, px(34, 48))
+		toggle.BackgroundColor3 = UiKit.DRAB
+		toggle.AutoButtonColor = false
+		toggle.Text = ""
+		toggle.Selectable = true
+		toggle.SelectionImageObject = UiKit.FOCUS
+		toggle.Parent = scroll
+		UiKit.corner(toggle, 3)
+		UiKit.lit(toggle, 0.72)
+		local tt = UiKit.rotulo(toggle, 15, UiKit.KHAKI, UiKit.HEAD_FONT)
+		tt.Position = UDim2.fromOffset(px(12, 16), 0)
+		tt.Size = UDim2.new(1, -px(24, 32), 1, 0)
+		order += 1
+		local box = Instance.new("Frame")
+		box.Name = "Registros"
+		box.LayoutOrder = order
+		box.BackgroundTransparency = 1
+		box.Size = UDim2.new(1, 0, 0, 0)
+		box.AutomaticSize = Enum.AutomaticSize.Y
+		box.Visible = false
+		box.Parent = scroll
+		local bl = Instance.new("UIListLayout")
+		bl.SortOrder = Enum.SortOrder.LayoutOrder
+		bl.Parent = box
+		for k, l in tl.lines do
+			line(l, k, box)
+		end
+		local function paint()
+			tt.Text = if box.Visible
+				then string.format("Fechar a linha do tempo (%d registros) ▼", #tl.lines)
+				else string.format("Ver a linha do tempo (%d registros) ▸", #tl.lines)
+		end
+		paint()
+		local r = UiKit.realce(toggle, UiKit.DRAB, UiKit.OLIVE, 1.01)
+		UiKit.bind(toggle, function()
+			box.Visible = not box.Visible
+			paint()
+		end, r.set)
+		toggle.MouseEnter:Connect(function()
+			r.set(true)
+		end)
+		toggle.MouseLeave:Connect(function()
+			r.set(false)
+		end)
 	end
 	-- as linhas entram uma a uma (só as primeiras 40 animam; o resto já aparece)
 	for i, t in labels do

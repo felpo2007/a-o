@@ -18,9 +18,9 @@
 --   * os prompts não são varridos: entram quando aparecem na tela.
 --
 -- Fonte (vietnamita): as fontes de época (SpecialElite, Oswald, Gotham...) não têm todas as letras
--- vietnamitas. Com o idioma "vi", se o texto tem letra de U+0100 a U+1FFF e a fonte do rótulo não
--- é uma das seguras, a FontFace passa para a Arimo (peso e estilo mantidos). Texto sem essas letras,
--- ou outro idioma, devolve a fonte original.
+-- vietnamitas. Em qualquer idioma (nome de lugar vietnamita aparece também em português), se o
+-- texto tem letra de U+0100 a U+1FFF e a fonte do rótulo não é uma das seguras, a FontFace passa
+-- para a Arimo (peso e estilo mantidos). Texto sem essas letras devolve a fonte original.
 --
 -- Idioma: opção "Idioma" do menu (padrão "automático" = idioma da conta Roblox; sem dicionário,
 -- inglês).
@@ -97,7 +97,8 @@ end
 local function fixFont(obj: WithFont, text: string)
 	local saved = fontOrig[obj]
 	local any = obj :: any -- (o verificador não escreve FontFace em união de classes)
-	if current == "vi" and Lang.needsWide(text) then
+	-- em qualquer idioma: nome de lugar vietnamita ("AN CƯỜNG") também aparece em português
+	if Lang.needsWide(text) then
 		local face = any.FontFace :: Font
 		if lacksViet(face) then
 			fontOrig[obj] = face

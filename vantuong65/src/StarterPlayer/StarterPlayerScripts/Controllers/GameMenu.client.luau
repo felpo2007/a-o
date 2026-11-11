@@ -124,7 +124,7 @@ do
 	close.FontFace = UiKit.HEAD_FONT
 	close.TextColor3 = C.khaki
 	close.TextSize = UiKit.text(16)
-	close.Text = "FECHAR ✕"
+	close.Text = "FECHAR ×"
 	close.Selectable = false
 	close.Parent = root
 	UiKit.corner(close, 3)
@@ -176,7 +176,7 @@ end
 
 -- ===== estado =====
 local BASE_TABS = { "Configurações", "Squad e papel", "Loja" }
-local SUBS = { "Controle", "Mira", "Mouse/teclado", "Gráficos", "Vibração", "Acessib.", "Botões" }
+local SUBS = { "Controle", "Mira", "Mouse/teclado", "Gráficos", "Som", "Vibração", "Acessib.", "Botões" }
 -- servidor privado: só o dono vê a aba "Servidor" (modo e horário; o servidor revalida)
 local MODES = { "Warfare", "Offensive", "Skirmish" }
 local MODE_NAMES = { "Warfare (5 setores, 75 min)", "Offensive (EUA atacam do leste)", "Skirmish (1 setor, 20 min)" }
@@ -214,6 +214,7 @@ local S = {
 	menuCursor = false,
 	armedUntil = 0, -- "Pular o tutorial": o primeiro A/clique arma por 3 s
 	lastTab = 0,
+	dirty = true, -- algo mudou com o menu fechado: redesenha ao abrir (senão abre o que já existe)
 }
 local function busy(): boolean
 	return S.listening ~= nil or S.keyListening ~= nil or os.clock() < S.swallowUntil
@@ -373,6 +374,7 @@ end
 -- Cada linha é um botão (focável no controle) com o rótulo à esquerda e o valor numa etiqueta
 -- oliva à direita. adjust(dir) muda o valor (◄ ► do direcional, das setas da linha e do A).
 local adjusters: { [Instance]: (dir: number) -> () } = {}
+local updaters: { () -> () } = {} -- valores que mudam no lugar quando a configuração muda
 
 local function rowShell(key: string, labelText: string): (TextButton, TextLabel)
 	S.order += 1
@@ -419,7 +421,13 @@ local function rowShell(key: string, labelText: string): (TextButton, TextLabel)
 end
 
 -- etiqueta do valor, com ◄ ► clicáveis quando adjust existe; img = botão do controle
-local function valueTag(b: TextButton, text: string, adjust: ((dir: number) -> ())?, img: string?, waiting: boolean?)
+local function valueTag(
+	b: TextButton,
+	text: string,
+	adjust: ((dir: number) -> ())?,
+	img: string?,
+	waiting: boolean?
+): TextLabel
 	local tag = Instance.new("Frame")
 	tag.Name = "Valor"
 	tag.AnchorPoint = Vector2.new(1, 0.5)
@@ -462,12 +470,14 @@ local function valueTag(b: TextButton, text: string, adjust: ((dir: number) -> (
 			a.Text = if d < 0 then "◄" else "►"
 			a.Selectable = false
 			a.Parent = tag
-			a.Activated:Connect(function()
+			-- registrada no cursor virtual também: sem isso a seta "tapava" a linha e o A não ia
+			UiKit.bind(a, function()
 				adjust(d)
 			end)
 		end
 		adjusters[b] = adjust
 	end
+	return t
 end
 
 local function section(text: string)
@@ -522,31 +532,61 @@ local function action(key: string, text: string, onClick: () -> (), danger: bool
 	UiKit.bind(b, onClick)
 end
 
+-- Muda UMA configuração pelo caminho leve do Input (setSetting só refaz os botões quando a chave
+-- mexe neles); antes cada ◄ ► recriava todo o Input Action System e redesenhava o menu inteiro.
 local function set(k: string, v: any)
-	local s = table.clone(Input.settings) :: any
-	s[k] = v
-	Input.setSettings(s)
+	Input.setSetting(k, v)
 end
 
-local function numberRow(label: string, k: string, step: number, fmt: string)
+-- valor que muda no lugar (sem redesenhar a folha): a etiqueta troca o texto e dá um pulo
+local function refreshTag(t: TextLabel, text: string)
+	if t.Text == text then
+		return
+	end
+	t.Text = text
+	t.FontFace = UiKit.headFont(text)
+	local sc = t:FindFirstChildOfClass("UIScale")
+	if not sc then
+		local s = Instance.new("UIScale")
+		s.Parent = t
+		sc = s
+	end
+	local scale = sc :: UIScale
+	scale.Scale = 1.18
+	TweenService:Create(scale, TweenInfo.new(0.22, Enum.EasingStyle.Back), { Scale = 1 }):Play()
+end
+
+local function numberRow(label: string, k: string, step: number, fmt: string, scaleBy: number?)
 	local b = rowShell("n:" .. k, label)
+	local mul = scaleBy or 1
+	local function text(): string
+		local v = (Input.settings :: any)[k] * mul
+		return string.format(fmt, if mul ~= 1 then math.floor(v + 0.5) else v)
+	end
 	local function adjust(d: number)
 		set(k, (Input.settings :: any)[k] + d * step)
 	end
-	valueTag(b, string.format(fmt, (Input.settings :: any)[k]), adjust)
+	local t = valueTag(b, text(), adjust)
+	table.insert(updaters, function()
+		refreshTag(t, text())
+	end)
 	UiKit.bind(b, function()
 		adjust(1)
 	end)
 end
 
 local function choiceRow(label: string, k: string, options: { any }, names: { string })
-	local cur = (Input.settings :: any)[k]
-	local idx = table.find(options, cur) or 1
+	local function idx(): number
+		return table.find(options, (Input.settings :: any)[k]) or 1
+	end
 	local b = rowShell("c:" .. k, label)
 	local function adjust(d: number)
-		set(k, options[(idx - 1 + d) % #options + 1])
+		set(k, options[(idx() - 1 + d) % #options + 1])
 	end
-	valueTag(b, names[idx], adjust)
+	local t = valueTag(b, names[idx()], adjust)
+	table.insert(updaters, function()
+		refreshTag(t, names[idx()])
+	end)
 	UiKit.bind(b, function()
 		adjust(1)
 	end)
@@ -669,6 +709,17 @@ local function renderSettings()
 			{ "1ª pessoa", "3ª pessoa (ombro)" }
 		)
 		choiceRow("Ombro da 3ª pessoa", "shoulderLeft", { false, true }, { "direito", "esquerdo" })
+	elseif SUB == "Som" then
+		-- volume de cada SoundGroup do AudioController (VT65Efeitos, VT65Ambiente, VT65Musica)
+		section("Volume")
+		numberRow("Efeitos (tiros, passos, motores)", "volEffects", 0.05, "%d%%", 100)
+		numberRow("Ambiente (mata, vila, chuva)", "volAmbient", 0.05, "%d%%", 100)
+		numberRow("Música (menus)", "volMusic", 0.05, "%d%%", 100)
+		action("v:reset", "Restaurar o som padrão", function()
+			for _, k in { "volEffects", "volAmbient", "volMusic" } do
+				Input.setSetting(k, (InputMap.DEFAULTS :: any)[k])
+			end
+		end)
 	elseif SUB == "Vibração" then
 		section("Vibração do controle")
 		choiceRow("Disparo", "hapticFire", { "normal", "low", "off" }, { "normal", "baixa", "desligada" })
@@ -785,9 +836,7 @@ end
 
 local function renderShop()
 	section("Intendência")
-	note(
-		"Loja e intendência: passes visuais, apoio, skins e o equipamento de campo. Nada vende vantagem em combate, só a camuflagem de mato."
-	)
+	note("Passes visuais, apoio, skins e equipamento de campo.")
 	action("l:open", "Abrir a loja", function()
 		Bus.fire("shop_open")
 	end)
@@ -984,6 +1033,7 @@ render = function()
 		end
 	end
 	table.clear(adjusters)
+	table.clear(updaters)
 	S.order = 0
 	local tabs = TABS()
 	S.tab = math.min(S.tab, #tabs)
@@ -1016,7 +1066,8 @@ render = function()
 		U.body.CanvasPosition = canvas
 	end
 	-- foco: a mesma linha; senão "Pular o tutorial" (se houver) ou a primeira linha
-	if Input.isGamepad() and not VirtualCursor.isActive() then
+	S.dirty = false
+	if gui.Enabled and Input.isGamepad() and not VirtualCursor.isActive() then
 		task.defer(function()
 			local again = if focusName and not tabChanged then U.root:FindFirstChild(focusName, true) else nil
 			if again and again:IsA("GuiObject") and again.Selectable then
@@ -1057,6 +1108,8 @@ for _, a in { "TutorialPasso", "TutorialTotal" } do
 	player:GetAttributeChangedSignal(a):Connect(function()
 		if gui.Enabled then
 			render()
+		else
+			S.dirty = true
 		end
 	end)
 end
@@ -1090,8 +1143,23 @@ local function setOpen(open: boolean)
 		gui.Enabled = true
 		syncCursor()
 		Input.openMenu()
-		S.lastTab = -1
-		render()
+		if S.dirty then
+			S.lastTab = -1
+			render()
+		else
+			-- nada mudou desde a última vez: abre a folha que já existe (nada é criado na entrada)
+			renderBanner()
+			renderFoot()
+			if Input.isGamepad() and not VirtualCursor.isActive() then
+				task.defer(function()
+					if U.banner.Visible then
+						GuiService.SelectedObject = U.skip
+					else
+						UiKit.focus(U.body)
+					end
+				end)
+			end
+		end
 		-- entra: o véu escurece, o dossiê sobe e assenta
 		local k = U.fit.k()
 		U.dim.BackgroundTransparency = 1
@@ -1210,10 +1278,36 @@ end)
 Bus.on("menu_close_request", function()
 	setOpen(false)
 end)
+-- Configuração mudou: nas folhas de valores, só as etiquetas trocam (sem recriar nada, o foco e a
+-- rolagem ficam); teclas e botões (a lista e os conflitos mudam) redesenham a folha.
+local function bindingSig(): string
+	local parts = {}
+	for k, v in Input.settings.remap do
+		table.insert(parts, k .. "=" .. v)
+	end
+	for k, v in Input.settings.keymap do
+		table.insert(parts, k .. ":" .. v)
+	end
+	table.sort(parts)
+	return table.concat(parts, ",") .. tostring(Input.settings.swapTriggers)
+end
+local lastSig = bindingSig()
 Input.SettingsChanged:Connect(function()
-	if gui.Enabled then
-		syncCursor()
+	local sig = bindingSig()
+	local bindingsChanged = sig ~= lastSig
+	lastSig = sig
+	if not gui.Enabled then
+		S.dirty = true
+		return
+	end
+	syncCursor()
+	local structural = S.tab ~= 1 or bindingsChanged or #updaters == 0
+	if structural then
 		render()
+	else
+		for _, fn in updaters do
+			fn()
+		end
 	end
 end)
 Input.DeviceChanged:Connect(function()
@@ -1316,11 +1410,23 @@ UserInputService.InputBegan:Connect(function(input)
 	Input.setSettings(trial)
 end)
 
+-- a folha é montada com o jogo parado, em segundo plano: a 1ª abertura já não cria nada
+task.delay(4, function()
+	if not gui.Enabled and S.dirty then
+		render()
+	end
+end)
+
 -- ===== gancho de teste (só no Studio): foto do menu =====
 if RunService:IsStudio() then
 	workspace:GetAttributeChangedSignal("VT65DevTela"):Connect(function()
 		local v = workspace:GetAttribute("VT65DevTela")
-		if v == "menu" then
+		if v == "menu" or v == "menu_som" then
+			if v == "menu_som" then
+				S.tab = 1
+				S.sub = table.find(SUBS, "Som") or 1
+				S.dirty = true
+			end
 			setOpen(true)
 			task.defer(function()
 				workspace:SetAttribute("VT65DevTela", nil)

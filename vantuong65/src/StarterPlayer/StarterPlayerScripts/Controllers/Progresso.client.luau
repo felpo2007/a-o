@@ -330,7 +330,8 @@ local function button(
 	style: Style,
 	key: string,
 	onClick: () -> (),
-	hover: (() -> ())?
+	hover: (() -> ())?,
+	focus: ((on: boolean) -> ())? -- realce ligou/desligou (mouse, foco e cursor virtual)
 ): TextButton
 	local st = STYLE[style]
 	local b = Instance.new("TextButton")
@@ -351,13 +352,17 @@ local function button(
 	c.Parent = b
 	b.Parent = parent
 	local h = hover
+	local fo = focus
 	UiKit.bind(
 		b,
 		onClick,
-		if h
+		if h or fo
 			then function(on: boolean)
-				if on then
+				if on and h then
 					h()
+				end
+				if fo then
+					fo(on)
 				end
 			end
 			else nil
@@ -365,6 +370,20 @@ local function button(
 	if h then
 		b.MouseEnter:Connect(h)
 		b.SelectionGained:Connect(h)
+	end
+	if fo then
+		b.MouseEnter:Connect(function()
+			fo(true)
+		end)
+		b.MouseLeave:Connect(function()
+			fo(false)
+		end)
+		b.SelectionGained:Connect(function()
+			fo(true)
+		end)
+		b.SelectionLost:Connect(function()
+			fo(false)
+		end)
 	end
 	buttons[key] = b
 	return b
@@ -409,9 +428,15 @@ local function line(text: string, size: number?, color: Color3?, bold: boolean?)
 	t.Size = UDim2.new(1, -24, 0, 0)
 	return t
 end
-local function fullButton(text: string, style: Style, key: string, onClick: () -> ()): TextButton
+local function fullButton(
+	text: string,
+	style: Style,
+	key: string,
+	onClick: () -> (),
+	focus: ((on: boolean) -> ())?
+): TextButton
 	order += 1
-	local b = button(body, text, style, key, onClick)
+	local b = button(body, text, style, key, onClick, nil, focus)
 	b.Size = UDim2.new(1, -24, 0, if TV then 44 else 30)
 	b.LayoutOrder = order
 	return b
@@ -581,11 +606,10 @@ local function select(id: string)
 end
 
 -- ===== aba EQUIPAMENTO =====
+-- Menos texto (pedido do dono, 2026-11-11): uma linha de abertura; o efeito de cada item só abre
+-- no item sob o mouse, o foco ou o cursor virtual.
 local function renderGear(s: { [string]: any })
-	line(
-		"O kit padrão de 1965 vem sempre. Cada item abaixo soma a ele e pesa no corpo. Liberação permanente: pelo posto, com $ ou pelo passe em Robux.",
-		13
-	)
+	line("Soma ao kit de 1965 e pesa no corpo.", 13)
 	for _, t in s.tiers do
 		line(string.format("%s (nível %d)", t.name, t.tier), 16, UiKit.BRASS, true)
 		if t.owned then
@@ -601,7 +625,11 @@ local function renderGear(s: { [string]: any })
 		for _, g in s.gear do
 			if g.tier == t.tier then
 				line(string.format("• %s  (%.1f kg)", g.name, g.kg), 14, UiKit.KHAKI, true)
-				line(g.effect, 13)
+				local eff = line(g.effect, 13)
+				eff.Visible = false
+				local function showEffect(on: boolean)
+					eff.Visible = on
+				end
 				if g.unlocked then
 					-- frase inteira por caso (levando/deixado × como liberou): o dicionário traduz a frase
 					local how = if g.how == "rank"
@@ -614,14 +642,16 @@ local function renderGear(s: { [string]: any })
 						"gear:" .. g.id,
 						function()
 							Net.event("Gear_Equip"):FireServer(g.id, not g.on)
-						end
+						end,
+						showEffect
 					)
 				elseif (tonumber(s.rank) or 1) < g.buyRank then
 					fullButton(
 						string.format("Posto %d para comprar (%s)", g.buyRank, money(g.price)),
 						"off",
 						"gear:" .. g.id,
-						function() end
+						function() end,
+						showEffect
 					)
 				else
 					local can = (tonumber(s.credits) or 0) >= g.price
@@ -633,7 +663,8 @@ local function renderGear(s: { [string]: any })
 							if can then
 								Net.event("Gear_Buy"):FireServer(g.id)
 							end
-						end
+						end,
+						showEffect
 					)
 				end
 			end
@@ -691,7 +722,9 @@ local function skinCard(s: Skins.Skin, sk: { [string]: any })
 	elseif how then
 		status = "Sua"
 	else
-		status = money(s.price) .. (if Skins.robuxId(s) ~= 0 then "  ·  " .. robuxText(s) else "")
+		status = if Skins.robuxId(s) ~= 0
+			then string.format("%s · %s", money(s.price), robuxText(s))
+			else money(s.price)
 	end
 	text(status, 13, if how then UiKit.KHAKI else UiKit.BRASS, true, 2)
 	local actions = rowOf(card, 3)
@@ -784,10 +817,7 @@ local function renderSkins(s: { [string]: any })
 		line("Escolha um lado na sala de arquivo para ver as skins dele.", 13)
 		return
 	end
-	line(
-		"Em $ é caro (dezenas de partidas); em Robux, barato. A skin fica sua para sempre e vale só no lado dela.",
-		12
-	)
+	line("Fica sua para sempre, só no lado dela.", 12)
 	local first: string? = nil
 	if cat == "weapon" then
 		for _, wp in Weapons.list do
@@ -809,17 +839,14 @@ local function renderSkins(s: { [string]: any })
 			end
 		end
 	elseif cat == "uniform" then
-		line("O OG-107, as mangas arregaçadas, o cáqui e o verde da Força Principal ficam no armário da loja.", 12)
+		line("Os uniformes de época ficam no armário da loja.", 12)
 		defaultRow("uniform", sk, "Voltar ao uniforme do armário")
 		for _, x in Skins.list("uniform", faction) do
 			first = first or x.id
 			skinCard(x, sk)
 		end
 	else
-		line(
-			"Feixes de folha e capim presos ao corpo. É a única skin com vantagem: os bots te veem de mais perto na vegetação do mesmo tipo.",
-			12
-		)
+		line("Folha e capim no corpo: os bots te veem de mais perto na mesma vegetação.", 12)
 		defaultRow("camo", sk, "Sem camuflagem")
 		for _, x in Skins.list("camo", faction) do
 			first = first or x.id
@@ -1010,12 +1037,20 @@ end)
 Bus.on("shop_open", function()
 	root.Visible = true
 	if not state then
-		local ok, s = pcall(function()
-			return Net.func("Progress_Get"):InvokeServer()
+		-- a tela nunca espera o servidor vazia: o painel abre já com o aviso e preenche quando chegar
+		clear()
+		order = 0
+		line("Recebendo a intendência do servidor…", 14)
+		task.spawn(function()
+			local ok, s = pcall(function()
+				return Net.func("Progress_Get"):InvokeServer()
+			end)
+			if ok and type(s) == "table" and not state then
+				state = s
+			end
+			render()
 		end)
-		if ok and type(s) == "table" then
-			state = s
-		end
+		return
 	end
 	render()
 end)

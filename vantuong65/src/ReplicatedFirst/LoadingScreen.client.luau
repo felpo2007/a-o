@@ -724,12 +724,7 @@ local function showEnter()
 		tw:Play()
 		enterPulse = tw
 	end
-	Acabamento.datilografar(
-		enterHint,
-		"Já dá para entrar (clique, toque, Enter ou A). O resto termina no lobby; o spawn só libera com o terreno pronto.",
-		70,
-		0.3
-	)
+	Acabamento.datilografar(enterHint, "Pronto para entrar. O resto carrega no lobby.", 70, 0.3)
 end
 
 local function hover(on: boolean)
@@ -750,7 +745,13 @@ enter.SelectionLost:Connect(function()
 end)
 
 -- Sai esmaecendo por cima do lobby: tudo vai para um CanvasGroup que some (o lobby aparece por
--- trás, sem passar pelo preto) enquanto o palco sobe um pouco, como câmera recuando.
+-- trás, sem passar pelo preto) enquanto o palco sobe um pouco, como câmera recuando. O grupo existe
+-- desde o início, vazio (em repouso o texto fica fora dele, nítido).
+local exitGroup = Instance.new("CanvasGroup")
+exitGroup.Name = "Saida"
+exitGroup.Size = UDim2.fromScale(1, 1)
+exitGroup.BackgroundTransparency = 1
+exitGroup.Parent = gui
 local function close()
 	if closing then
 		return
@@ -759,11 +760,8 @@ local function close()
 	Idioma.fechar()
 	gui:SetAttribute("Saindo", true) -- a mesa do lobby (LobbyScene) começa o travelling de chegada agora
 	local my = alive
-	local cg = Instance.new("CanvasGroup")
-	cg.Name = "Saida"
-	cg.Size = UDim2.fromScale(1, 1)
-	cg.BackgroundTransparency = 1
-	cg.Parent = gui
+	local cg = exitGroup -- criado vazio no início: nada novo nasce na hora da saída
+	cg.GroupTransparency = 0
 	bg.Parent = cg
 	film.raiz.Parent = cg
 	tween(stage, 1.0, { Position = UDim2.new(0.5, 0, 0.5, -14) }, Enum.EasingStyle.Sine, INOUT)
@@ -780,7 +778,7 @@ local function close()
 		gui.Enabled = false
 		bg.Parent = gui
 		film.raiz.Parent = gui
-		cg:Destroy()
+		cg.GroupTransparency = 0
 	else
 		gui:Destroy()
 	end

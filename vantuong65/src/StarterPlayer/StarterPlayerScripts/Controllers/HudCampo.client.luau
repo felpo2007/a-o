@@ -27,6 +27,7 @@ local Net = require(ReplicatedStorage.Shared.Net)
 local Weapons = require(ReplicatedStorage.Shared.Weapons) :: any
 local Bus = require(script.Parent.Bus)
 local Input = require(script.Parent.Input)
+local Marcadores = require(script.Parent.Marcadores) -- liga os marcadores de aliados e objetivos
 local Toast = require(script.Parent.Toast)
 local UiKit = require(script.Parent.UiKit)
 
@@ -157,7 +158,21 @@ do
 	goal.TextXAlignment = Enum.TextXAlignment.Center
 	goal.Text = "▼"
 	goal.Visible = false
-	B = { box = box, scale = sc, tape = tape, letters = letters, deg = deg, goal = goal }
+	-- o squad na fita (pontos de latão; o líder maior; caído em vermelho)
+	local dots: { Frame } = {}
+	for i = 1, 8 do
+		local d = Instance.new("Frame")
+		d.AnchorPoint = Vector2.new(0.5, 1)
+		d.Size = UDim2.fromOffset(px(6, 9), px(6, 9))
+		d.Position = UDim2.new(0, 0, 1, -2)
+		d.BackgroundColor3 = UiKit.BRASS_LIGHT
+		d.BorderSizePixel = 0
+		d.Visible = false
+		d.Parent = view
+		UiKit.corner(d, 99)
+		dots[i] = d
+	end
+	B = { box = box, scale = sc, tape = tape, letters = letters, deg = deg, goal = goal, dots = dots }
 end
 
 -- pontos cardeais na língua escolhida (atributo "Lang" do Traducao.client)
@@ -585,6 +600,28 @@ RunService.RenderStepped:Connect(function()
 			B.goal.Position = UDim2.fromOffset(CW / 2 + math.clamp(rel, -half, half) * DEG_PX, -2)
 		else
 			B.goal.Visible = false
+		end
+		-- squad (Marcadores): cada um no rumo dele; fora da vista, na borda
+		local mates = Marcadores.squad()
+		for i, dot in B.dots :: { Frame } do
+			local s = mates[i]
+			if s and root then
+				local dx, dz = s.pos.X - root.Position.X, s.pos.Z - root.Position.Z
+				local b = math.deg(math.atan2(dx, -dz)) % 360
+				local rel = (b - h + 540) % 360 - 180
+				local half = 110 / 2 - 2
+				dot.Visible = true
+				dot.Position = UDim2.new(0, CW / 2 + math.clamp(rel, -half, half) * DEG_PX, 1, -2)
+				dot.BackgroundColor3 = if s.downed
+					then Color3.fromRGB(240, 124, 104)
+					elseif s.leader then Color3.fromRGB(255, 226, 140)
+					else UiKit.BRASS_LIGHT
+				dot.Size = if s.leader
+					then UDim2.fromOffset(px(8, 12), px(8, 12))
+					else UDim2.fromOffset(px(6, 9), px(6, 9))
+			else
+				dot.Visible = false
+			end
 		end
 	end
 	-- HUD mínimo: o cartão esmaece em 5 s sem novidade

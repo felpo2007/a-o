@@ -161,6 +161,8 @@ local FILES = {
 	C .. "CasualtyScreen.luau",
 	C .. "GameUI.client.luau",
 	C .. "DeployScreen.luau",
+	C .. "Marcadores.luau",
+	C .. "Progresso.client.luau",
 	"src/ReplicatedFirst/Idioma.luau",
 	"src/ReplicatedFirst/LoadingScreen.client.luau",
 }
@@ -200,6 +202,39 @@ test("modelos novos casam no dicionário (ex.: setor tomado, tutorial pulado, c�
 			== "Gear: 7.5 of 22.0 kg (applies on next spawn)"
 	)
 	assert(Lang.translate(t, "Conflito: Correr e Mirar em Shift") == "Conflict: Correr and Mirar on Shift")
+end)
+
+-- ===== volume (menu de opções → Som) =====
+test("volume: efeitos 0,5, ambiente 0,6 e música 0,35 no padrão; 0 a 1 no validate", function()
+	local d = InputMap.DEFAULTS
+	assert(d.volEffects == 0.5 and d.volAmbient == 0.6 and d.volMusic == 0.35, "padrões")
+	local s = InputMap.validate({ volEffects = 2, volAmbient = -1, volMusic = "alto" })
+	assert(s.volEffects == 1 and s.volAmbient == 0 and s.volMusic == 0.35, "faixas")
+	assert(InputMap.validate({ volMusic = 0.2 }).volMusic == 0.2)
+end)
+
+-- ===== menos texto: 1ª frase e o resto, sem quebrar o RichText =====
+local Texto = require("../../" .. C .. "Texto")
+test("menos texto: a 1ª frase sai inteira, com o botão em RichText", function()
+	local a, b = Texto.splitSentence('Atirar: <font color="#D6AC48"><b>RT</b></font>. Um ou dois tiros derrubam.')
+	assert(a == 'Atirar: <font color="#D6AC48"><b>RT</b></font>.', a)
+	assert(b == "Um ou dois tiros derrubam.", b)
+	local c, e = Texto.splitSentence("Tratar ou reanimar um ferido: <b>X</b>, perto dele.")
+	assert(c == "Tratar ou reanimar um ferido: <b>X</b>, perto dele." and e == "")
+	local f, g = Texto.splitSentence("Alça de mira (100, 200, 300 m): <b>V</b>.")
+	assert(g == "" and f == "Alça de mira (100, 200, 300 m): <b>V</b>.")
+	-- tradução para o inglês (o dicionário devolve a frase inteira): divide do mesmo jeito
+	local h, i = Texto.splitSentence("Fire: <b>RT</b>. One or two rifle hits drop a man.")
+	assert(h == "Fire: <b>RT</b>." and i == "One or two rifle hits drop a man.")
+end)
+
+-- ===== marcadores: nunca inimigo (Parte 9.5) =====
+test("marcadores: só modelos do mesmo lado (Faction igual), nada de inimigo", function()
+	local src = fs.readFile(C .. "Marcadores.luau")
+	-- toda escolha de quem marcar passa pelo lado do jogador
+	local _, nFaction = string.gsub(src, 'GetAttribute%("Faction"%) == faction', "")
+	assert(nFaction >= 2, "jogadores e bots filtrados pelo lado")
+	assert(not string.find(src, "~= faction", 1, true), "nenhum ramo para o outro lado")
 end)
 
 print(string.format("%d ok, %d falhas", passed, failed))

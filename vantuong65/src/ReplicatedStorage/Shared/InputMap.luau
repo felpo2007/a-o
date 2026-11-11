@@ -176,6 +176,10 @@ export type Settings = {
 	gfxPost: string, -- "full" | "light" | "off": brilho, raios de sol e correção de cor
 	gfxBrightness: number, -- ajuste de brilho (−0,2 a 0,2)
 	lang: string, -- D-84: "auto" (idioma da conta) | "pt" | "en" | "es" | "vi"
+	-- volume dos SoundGroups do AudioController (VT65Efeitos, VT65Ambiente, VT65Musica), 0 a 1
+	volEffects: number,
+	volAmbient: number,
+	volMusic: number,
 }
 
 InputMap.DEFAULTS = {
@@ -218,6 +222,9 @@ InputMap.DEFAULTS = {
 	gfxPost = "full",
 	gfxBrightness = 0,
 	lang = "auto",
+	volEffects = 0.5,
+	volAmbient = 0.6,
+	volMusic = 0.35,
 } :: Settings
 
 -- Configurações que mudam os botões (o runtime refaz os bindings só quando uma delas muda).
@@ -258,6 +265,9 @@ local RANGES: { [string]: { number } } = {
 	mouseAds = { 0.1, 1.5 },
 	mouseScope = { 0.05, 1.5 },
 	gfxBrightness = { -0.2, 0.2 },
+	volEffects = { 0, 1 },
+	volAmbient = { 0, 1 },
+	volMusic = { 0, 1 },
 }
 local CHOICES: { [string]: { [string]: boolean } } = {
 	gfxDetail = { high = true, medium = true, low = true },

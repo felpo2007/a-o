@@ -2576,3 +2576,59 @@ só num programa fechado). Ficou:
 - máximo do place em 100 no Creator Hub, em Access;
 - EUA com 7 squads (Alfa a Golf), VC com 8 tiểu đội;
 - os bots continuam preenchendo até `BotFill` (10 no Roblox).
+
+## D-92 — Aliados na tela, cursor do controle, telas mais leves e volume (2026-11-11)
+
+Pedido do dono depois de jogar: ver sempre os aliados, o squad e os objetivos; o cursor do controle
+"às vezes está em cima e não vai"; telas mais lisas; menos texto.
+
+**Marcadores** (`Marcadores.luau`, ligado pelo `HudCampo`):
+- **Aliado à vista:**
+  - chevron azul discreto, com o nome curto a até 40 m;
+  - a parede tapa;
+  - some a 150 m.
+- **Squad:**
+  - sempre na tela, mesmo atrás de parede, com nome e distância;
+  - líder com ★, caído em vermelho com ✚;
+  - longe demais para o streaming, usa a posição que o servidor manda a cada 2 s;
+  - também aparece como pontos na fita da bússola.
+- **Objetivo:** ATACAR ou DEFENDER, com setor e distância. Os outros setores ativos aparecem num selo
+  pequeno.
+- Atualiza a 12 Hz e reaproveita os marcadores (até 24 aliados mais o squad).
+- Nunca marca inimigo (Parte 9.5): o teste `interface` confere que não há ramo para isso.
+
+**Cursor virtual** (`VirtualCursor`):
+- O A não acionava quando:
+  - o botão tinha por cima uma peça solta (as setas ◄ ► da linha do menu);
+  - o centro do cursor caía no vão de 2 px entre linhas ou na borda arredondada.
+- Agora:
+  - o alvo é o que o anel cobre, num raio de 13 px;
+  - realce e clique usam a mesma função;
+  - véus e sombras não contam.
+
+**Fluidez:**
+- **Menu:** troca só o valor no lugar, sem refazer o menu inteiro.
+- **Loja:** abre com o que já sabe; os preços em Robux chegam em segundo plano.
+- **Intendência:** abre na hora, com aviso de espera.
+- **Imagens:** os botões do controle, a vinheta e as sombras são pré-carregados no início.
+- **Correção vista no Studio:** o menu criado desligado guardava a escala da janela do início e abria
+  cortado numa janela estreita (671 px). O `UiKit.fit` agora mede a câmera na hora de abrir.
+
+**Menos texto:**
+- **Tutorial:** a ordem em uma frase e a dica numa linha.
+- **Loja:** a descrição só aparece no item com foco.
+- **Relatório:** resultado e baixas em cima; a linha do tempo fica dobrada.
+- **Carregamento:** dica de uma linha.
+
+**Volume:**
+- Aba "Som" no menu: efeitos, ambiente e música, em porcentagem.
+- Salvo na conta: `volEffects` 0,5, `volAmbient` 0,6, `volMusic` 0,35.
+- Aplicado nos SoundGroups da D-91.
+
+**Fontes:**
+- Nome de lugar vietnamita ("AN CƯỜNG") passa para a Arimo em qualquer idioma. A SpecialElite não
+  tem Ư e Ờ.
+- "✕" e "▾" viraram "×" e "▼", que as fontes de época desenham (apareciam como quadradinho).
+
+**Studio:** menu na aba Som, cabendo em 671 px; o volume de efeitos foi de 50% para 55% no
+SoundGroup; a música do menu toca e carrega.

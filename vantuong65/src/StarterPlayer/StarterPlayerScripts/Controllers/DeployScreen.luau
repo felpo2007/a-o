@@ -1373,6 +1373,13 @@ do
 		stroke(b, INK, 1, if isNew then 0.45 else 0.7)
 		local top = txt(b, HEAD, 18, INK, 7, 2, 90, 26)
 		top.FontFace = HEAD_B
+		-- D-91: 7 squads nos EUA e 8 no VC ("Tiểu đội 8"): o nome encolhe para caber, nunca corta
+		top.TextScaled = true
+		do
+			local lim = Instance.new("UITextSizeConstraint")
+			lim.MaxTextSize = 18
+			lim.Parent = top
+		end
 		hline(b, UiKit.RULE_RED, 7, 29, 90)
 		local mid = if isNew then txt(b, TYPE, 15, INK, 7, 34, 90, 30) else txt(b, HEAD, 28, INK, 7, 32, 90, 32)
 		local bottom = txt(b, TYPE, 14, INK, 7, 66, 90, 22)

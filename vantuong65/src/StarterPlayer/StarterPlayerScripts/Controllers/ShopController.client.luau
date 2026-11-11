@@ -10,6 +10,7 @@
 -- A Intendência (Progresso.client) abre junto, à esquerda: a pasta fica à direita dela e encolhe
 -- para não cobrir o painel (antes, numa tela de 1280 px, as duas se sobrepunham).
 -- Só no Studio: workspace:SetAttribute("VT65DevTela", "loja") abre a loja.
+local HttpService = game:GetService("HttpService")
 local MarketplaceService = game:GetService("MarketplaceService")
 local Players = game:GetService("Players")
 local ReplicatedFirst = game:GetService("ReplicatedFirst")
@@ -108,7 +109,7 @@ close.AutoButtonColor = false
 close.TextColor3 = UiKit.KHAKI
 close.FontFace = UiKit.HEAD_FONT
 close.TextSize = UiKit.text(16)
-close.Text = "FECHAR ✕"
+close.Text = "FECHAR ×"
 close.Selectable = false -- no controle, B
 close.Parent = folder
 UiKit.corner(close, 3)
@@ -165,17 +166,47 @@ local state: any = { passes = {}, unlocked = {}, equipped = {} }
 local priceCache: { [string]: string } = {}
 local order = 0
 
+-- Preço ao vivo sem travar a lista: o 1º desenho mostra "R$ …" e o botão se completa quando o
+-- Roblox responde (antes cada GetProductInfoAsync parava a montagem da pasta).
+type PriceWait = { b: TextButton, fmt: string }
+local pricePending: { [string]: boolean } = {}
+local priceWaiting: { [string]: { PriceWait } } = {}
+local function priceKey(id: number, infoType: Enum.InfoType): string
+	return tostring(infoType) .. id
+end
 local function price(id: number, infoType: Enum.InfoType): string
-	local key = tostring(infoType) .. id
+	local key = priceKey(id, infoType)
 	if priceCache[key] then
 		return priceCache[key]
 	end
-	local ok, info = pcall(function()
-		return MarketplaceService:GetProductInfoAsync(id, infoType)
-	end)
-	local p = if ok and info and info.PriceInRobux then string.format("R$ %d", info.PriceInRobux) else "—"
-	priceCache[key] = p
-	return p
+	if not pricePending[key] then
+		pricePending[key] = true
+		task.spawn(function()
+			local ok, info = pcall(function()
+				return MarketplaceService:GetProductInfoAsync(id, infoType)
+			end)
+			local p = if ok and info and info.PriceInRobux then string.format("R$ %d", info.PriceInRobux) else "—"
+			priceCache[key] = p
+			local list = priceWaiting[key]
+			if list then
+				for _, w in list do
+					if w.b.Parent then
+						w.b.Text = string.format(w.fmt, p)
+					end
+				end
+			end
+			priceWaiting[key] = nil
+		end)
+	end
+	return "R$ …"
+end
+-- o botão espera o preço (se ainda não chegou)
+local function waitPrice(b: TextButton?, id: number, infoType: Enum.InfoType, fmt: string)
+	local key = priceKey(id, infoType)
+	if b and not priceCache[key] then
+		priceWaiting[key] = priceWaiting[key] or {}
+		table.insert(priceWaiting[key], { b = b, fmt = fmt })
+	end
 end
 
 local function section(text: string)
@@ -216,7 +247,8 @@ local function item(
 	buttonText: string?,
 	onClick: (() -> ())?,
 	owned: boolean?
-)
+): TextButton?
+	local made: TextButton? = nil
 	order += 1
 	local card = Instance.new("Frame")
 	card.Name = key
@@ -238,14 +270,26 @@ local function item(
 	n.Text = name
 	n.FontFace = UiKit.headFont(name)
 	n.TextTruncate = Enum.TextTruncate.AtEnd
+	-- menos texto (pedido do dono, 2026-11-11): a descrição só abre no item sob o mouse ou o foco
+	local d: TextLabel? = nil
 	if desc and desc ~= "" then
-		local d = UiKit.rotulo(card, 14, UiKit.INK, UiKit.BODY_FONT)
-		d.Position = UDim2.fromOffset(0, px(26, 36))
-		d.Size = UDim2.new(1, -right, 0, 0)
-		d.AutomaticSize = Enum.AutomaticSize.Y
-		d.TextWrapped = true
-		d.TextTransparency = 0.15
-		d.Text = desc
+		local dl = UiKit.rotulo(card, 14, UiKit.INK, UiKit.BODY_FONT)
+		dl.Position = UDim2.fromOffset(0, px(26, 36))
+		dl.Size = UDim2.new(1, -right, 0, 0)
+		dl.AutomaticSize = Enum.AutomaticSize.Y
+		dl.TextWrapped = true
+		dl.TextTransparency = 0.15
+		dl.Text = desc
+		dl.Visible = false
+		d = dl
+		local more = UiKit.rotulo(card, 12, UiKit.OLIVE, UiKit.TYPE_FONT)
+		more.Name = "Mais"
+		more.Position = UDim2.fromOffset(0, px(26, 36))
+		more.Size = UDim2.new(1, -right, 0, px(16, 24))
+		more.Text = "mais ▸"
+		dl:GetPropertyChangedSignal("Visible"):Connect(function()
+			more.Visible = not dl.Visible
+		end)
 	end
 	if owned then
 		local s = UiKit.rotulo(card, 18, OLIVE_INK, UiKit.HEAD_FONT)
@@ -275,20 +319,29 @@ local function item(
 		UiKit.corner(b, 3)
 		UiKit.lit(b, 0.78)
 		local r = UiKit.realce(b, UiKit.BRASS, UiKit.BRASS_LIGHT, 1.04)
+		local function hot(on: boolean)
+			r.set(on)
+			local dl = d
+			if dl then
+				dl.Visible = on
+			end
+		end
 		b.MouseEnter:Connect(function()
-			r.set(true)
+			hot(true)
 		end)
 		b.MouseLeave:Connect(function()
-			r.set(false)
+			hot(false)
 		end)
 		b.SelectionGained:Connect(function()
-			r.set(true)
+			hot(true)
 		end)
 		b.SelectionLost:Connect(function()
-			r.set(false)
+			hot(false)
 		end)
-		UiKit.bind(b, onClick)
+		UiKit.bind(b, onClick, hot)
+		made = b
 	end
+	return made
 end
 
 -- linha do armário: um botão por item (● equipado, ○ não)
@@ -371,7 +424,7 @@ local function render()
 			listed = true
 			local id = (Commerce.IDS :: any)[pass.key] :: number
 			local mine = state.passes[pass.key] == true
-			item(
+			local pb = item(
 				"pass:" .. pass.key,
 				pass.name,
 				pass.description,
@@ -382,6 +435,7 @@ local function render()
 				end,
 				mine
 			)
+			waitPrice(pb, id, Enum.InfoType.GamePass, "REQUISITAR · %s")
 		end
 	end
 	if #products > 0 then
@@ -389,7 +443,7 @@ local function render()
 		for _, prod in products do
 			listed = true
 			local id = (Commerce.IDS :: any)[prod.key] :: number
-			item(
+			local bb = item(
 				"prod:" .. prod.key,
 				prod.name,
 				prod.description,
@@ -399,6 +453,7 @@ local function render()
 					MarketplaceService:PromptProductPurchase(player, id)
 				end
 			)
+			waitPrice(bb, id, Enum.InfoType.Product, "APOIAR · %s")
 		end
 	end
 	local sid = Commerce.IDS.SUBSCRIPTION_UNIT_RESERVE
@@ -486,16 +541,30 @@ local function setOpen(open: boolean)
 		}):Play()
 		Input.openMenu()
 		Net.event("Commerce_Track"):FireServer("store_open")
-		render()
+		render() -- com o que já se sabe: a pasta nunca abre vazia esperando o servidor
+		UiKit.focus(panel)
+		local openedAt = os.clock()
 		task.spawn(function()
 			local ok, s = pcall(function()
 				return Net.func("Commerce_GetState"):InvokeServer()
 			end)
-			if ok and s then
-				state = s
+			if not (ok and type(s) == "table") then
+				return
 			end
-			render()
-			UiKit.focus(panel)
+			local same = false
+			pcall(function()
+				same = HttpService:JSONEncode(s) == HttpService:JSONEncode(state)
+			end)
+			state = s
+			if same then
+				return
+			end
+			-- redesenha só se mudou, e depois da entrada (nada é recriado no meio da animação)
+			task.wait(math.max(0, openedAt + 0.32 - os.clock()))
+			if gui.Enabled and closeToken == my then
+				render()
+				UiKit.focus(panel)
+			end
 		end)
 	else
 		Input.closeMenu()

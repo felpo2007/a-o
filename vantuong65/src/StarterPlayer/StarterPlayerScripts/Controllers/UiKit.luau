@@ -11,6 +11,7 @@ local UserInputService = game:GetService("UserInputService")
 
 local Lang = require(game:GetService("ReplicatedStorage").Shared.Lang)
 local Input = require(script.Parent.Input)
+local Texto = require(script.Parent.Texto)
 local VirtualCursor = require(script.Parent.VirtualCursor)
 
 local UiKit = {}
@@ -368,6 +369,51 @@ function UiKit.rotulo(parent: Instance, size: number, color: Color3, font: any?)
 	return t
 end
 
+-- ----- menos texto na tela, sem quebrar a tradução (pedido do dono, 2026-11-11: "algumas telas
+-- que possuem muita escrita, mude") -----
+-- O dicionário traduz a FRASE INTEIRA (é a chave). Então o texto inteiro vai num rótulo escondido
+-- (o Traducao.client traduz) e a tela mostra só a 1ª frase e, menor, o resto, em TextBox só de
+-- leitura (a tradução nunca mexe em TextBox). Trocou o idioma: o rótulo escondido muda e a divisão
+-- se refaz sozinha.
+function UiKit.fixedText(parent: Instance, size: number, color: Color3, font: any?): TextBox
+	local t = Instance.new("TextBox")
+	t.BackgroundTransparency = 1
+	t.BorderSizePixel = 0
+	t.TextColor3 = color
+	t.TextSize = UiKit.text(size)
+	if typeof(font) == "Font" then
+		t.FontFace = font
+	elseif typeof(font) == "EnumItem" then
+		t.Font = font :: any
+	else
+		t.Font = UiKit.BODY_FONT
+	end
+	t.TextXAlignment = Enum.TextXAlignment.Left
+	t.TextEditable = false
+	t.ClearTextOnFocus = false
+	t.Selectable = false
+	t.Active = false
+	t.Text = ""
+	pcall(function()
+		t.Interactable = false
+	end)
+	t.Parent = parent
+	return t
+end
+
+-- 1ª frase e o resto (Controllers/Texto, puro e testado no Lune)
+UiKit.splitSentence = Texto.splitSentence
+
+-- Liga o rótulo escondido (fonte) à divisão: onSplit(1ª frase, resto) a cada texto novo/traduzido.
+function UiKit.resumo(source: TextLabel, onSplit: (head: string, rest: string) -> ())
+	local function run()
+		local head, rest = UiKit.splitSentence(source.Text)
+		onSplit(head, rest)
+	end
+	source:GetPropertyChangedSignal("Text"):Connect(run)
+	run()
+end
+
 -- ----- teclas e botões -----
 local KEY_TEXT: { [string]: string } = {
 	MouseLeftButton = "LMB",
@@ -535,21 +581,41 @@ function UiKit.fit(gui: LayerCollector, target: GuiObject, w: number, h: number,
 	local scale = sc :: UIScale
 	local k = 1
 	local m = margin or 16
-	local function update()
-		local a = gui.AbsoluteSize
-		if a.X < 10 or a.Y < 10 then
-			return
+	-- Área útil medida na hora. A ScreenGui desligada não atualiza o AbsoluteSize: o menu criado
+	-- desligado guardava a escala da janela do início e, numa janela mais estreita, abria cortado dos
+	-- lados (visto no Studio com 671 px de largura). Para ScreenGui vale o tamanho da câmera.
+	local function area(): Vector2
+		local cam = workspace.CurrentCamera
+		if gui:IsA("ScreenGui") and cam then
+			local v = cam.ViewportSize
+			if not (gui :: ScreenGui).IgnoreGuiInset then
+				local tl, br = GuiService:GetGuiInset()
+				v -= tl + br
+			end
+			return v
 		end
-		k = math.clamp(math.min((a.X - 2 * m) / w, (a.Y - 2 * m) / h), minK or 0.45, 1)
-		scale.Scale = k
+		return gui.AbsoluteSize
+	end
+	local function measure(): number
+		local a = area()
+		if a.X >= 10 and a.Y >= 10 then
+			k = math.clamp(math.min((a.X - 2 * m) / w, (a.Y - 2 * m) / h), minK or 0.45, 1)
+		end
+		return k
+	end
+	local function update()
+		scale.Scale = measure()
 	end
 	gui:GetPropertyChangedSignal("AbsoluteSize"):Connect(update)
+	local cam = workspace.CurrentCamera
+	if cam then
+		cam:GetPropertyChangedSignal("ViewportSize"):Connect(update)
+	end
 	update()
 	return {
 		scale = scale,
-		k = function(): number
-			return k
-		end,
+		-- mede de novo: quem anima a entrada termina o tween na escala da janela de agora
+		k = measure,
 	}
 end
 
@@ -597,5 +663,52 @@ function UiKit.hold(bar: Frame, seconds: number, done: () -> ()): Hold
 		end,
 	}
 end
+
+-- ----- pré-carga (pedido do dono, 2026-11-11: "1000x mais liso") -----
+-- As imagens das telas (botões do controle nos chips, vinheta, luz e sombra do Acabamento) entram
+-- na memória uma vez, logo no início: nenhuma tela aparece com o ícone vazio e "pisca" depois.
+task.spawn(function()
+	local ContentProvider = game:GetService("ContentProvider")
+	local list: { Instance } = {}
+	local function img(id: string?)
+		if id and id ~= "" then
+			local i = Instance.new("ImageLabel")
+			i.Image = id
+			table.insert(list, i)
+		end
+	end
+	for _, k in
+		{
+			Enum.KeyCode.ButtonA,
+			Enum.KeyCode.ButtonB,
+			Enum.KeyCode.ButtonX,
+			Enum.KeyCode.ButtonY,
+			Enum.KeyCode.ButtonL1,
+			Enum.KeyCode.ButtonR1,
+			Enum.KeyCode.ButtonL2,
+			Enum.KeyCode.ButtonR2,
+			Enum.KeyCode.ButtonSelect,
+			Enum.KeyCode.DPadLeft,
+			Enum.KeyCode.DPadRight,
+			Enum.KeyCode.Thumbstick2,
+		}
+	do
+		img(UiKit.padImage(k))
+	end
+	local ok, acab = pcall(function()
+		return require(game:GetService("ReplicatedFirst"):WaitForChild("Acabamento", 10) :: ModuleScript) :: any
+	end)
+	if ok and type(acab) == "table" then
+		img(acab.VINHETA)
+		img(acab.LUZ)
+		img(acab.SOMBRA)
+	end
+	pcall(function()
+		ContentProvider:PreloadAsync(list)
+	end)
+	for _, i in list do
+		i:Destroy()
+	end
+end)
 
 return UiKit

@@ -851,7 +851,7 @@ local function pointGlyph(pt: any): string
 		elseif string.sub(pt.id, 1, 7) == "tunnel:" then
 			return "T"
 		elseif pt.id == "inplace" then
-			return "✕"
+			return "×"
 		end
 	end
 	local k = KIND[pt.kind or ""]
@@ -1389,7 +1389,7 @@ function CartaView.buildLegend(parent: Instance, x: number, y: number, w: number
 	row(glyph("SQ", COR.prancheta, COR.latao), "Reunião do squad · P posto")
 	row(glyph("▲", COR.prancheta, COR.latao), "Você e o rumo")
 	row(glyph("●", COR.nosso), "Seu squad (★ líder)")
-	row(glyph("✕", COR.neutro), "Marca do squad (lápis)")
+	row(glyph("×", COR.neutro), "Marca do squad (lápis)")
 	row(fill(COR.inimigo, 0.8), "Inimigo marcado: área aproximada")
 	title("CARTA (1:50 000, ampliada)")
 	row(fill(Color3.fromRGB(196, 214, 166), 0), "Mata")
