@@ -90,8 +90,27 @@ local function assist(mode: string): number
 	return InputMap.assistFactor(Input.settings.aimAssist, mode, bestDist, bestAng, visible, 0.3)
 end
 
+-- D-82: sensibilidade do mouse do jogo, por modo (quadril, mira de ferro, luneta), por cima da
+-- sensibilidade do Roblox. O módulo de câmera padrão lê o delta já escalado.
+local UserInputService = game:GetService("UserInputService")
+local lastMouse = -1
+local function mouseSens()
+	local s = Input.settings
+	local k = s.mouseSens
+	if Input.aimMode == "ads" then
+		k *= s.mouseAds
+	elseif Input.aimMode == "scope" then
+		k *= s.mouseScope
+	end
+	if math.abs(k - lastMouse) > 1e-4 then
+		lastMouse = k
+		UserInputService.MouseDeltaSensitivity = k
+	end
+end
+
 RunService:BindToRenderStep("VT65_Look", Enum.RenderPriority.Camera.Value + 1, function(dt: number)
 	if not Input.isGamepad() then
+		mouseSens()
 		return
 	end
 	local ctx = Input.context()

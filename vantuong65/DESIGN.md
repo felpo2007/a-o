@@ -2105,3 +2105,38 @@ em terceira pessoa também.
 - Se uma parede ou o terreno estão entre o soldado e o ponto da mira (raio do olho até o alvo, 10
   vezes por segundo), os riscos da retícula ficam vermelhos: o tiro vai bater no obstáculo, não no
   ponto mirado.
+
+## D-82 — Opções: gráficos, mouse e teclado, cursor virtual (2026-11-11)
+**Pedido do usuário:** "coloque opções no jogo para ajeitar os gráficos, a sensibilidade, os
+botões, poder trocar os botões"; "pode colocar o mouse no controle sendo analógico, com uma
+sensibilidade normal".
+
+O menu do jogo (segurar View / P) já tinha controle, mira no analógico, vibração, acessibilidade
+e troca de botões do controle (Parte 12.8). Entraram duas sub-abas e uma opção:
+
+**Mouse/teclado:**
+- Sensibilidade do mouse (0,1–3, padrão 1), que multiplica a do Roblox.
+- Frações ao apontar (padrão 0,7) e na luneta ou no binóculo (padrão 0,45). Valores de projeto
+  (PLACEHOLDER).
+- Troca de tecla de cada ação (infantaria, mirando, geral, veículo, helicóptero, mapa): a próxima
+  tecla ou botão do mouse vira a tecla da ação.
+  - Backspace cancela.
+  - Recusadas: Esc, W/A/S/D, Tab, /, F9, F11, F12 (são do Roblox ou do movimento).
+  - Conflito no mesmo contexto é recusado, com a mesma regra dos botões do controle.
+  - As teclas do menu e da roda não se trocam: o jogador não pode se trancar fora do menu.
+
+**Gráficos** (no cliente de quem escolheu, salvo na conta):
+
+| Opção | Valores | O que faz |
+|---|---|---|
+| Detalhe | alto / médio / baixo | arroz em cartões até 65 / 45 / 29 m, o alto até 30 / 18 / 10 m; poeira, folhas e fumaça a 100 / 60 / 30 %; no baixo o arroz não balança e a poeira some |
+| Sombras do sol | ligadas / desligadas | a que mais pesa em máquina fraca |
+| Efeitos de tela | completos / leves / desligados | o leve tira o bloom (o mais caro) e mantém raios de sol e correção de cor |
+| Brilho | −0,2 a +0,2 | exposição de −1 a +1 EV em volta da do jogo |
+
+A qualidade gráfica geral continua no menu do Roblox.
+
+**Cursor virtual** (sub-aba Controle, desligado no padrão):
+- Nos menus, o analógico esquerdo vira um mouse na velocidade padrão do Roblox e o A clica.
+- Desligado, os menus seguem pela seleção (direcional, LB/RB).
+- O mapa tem cursor próprio.

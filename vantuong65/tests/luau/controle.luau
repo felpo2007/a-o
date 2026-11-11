@@ -419,6 +419,27 @@ test("troca de contexto: mira não desliga sozinha; M e P não fecham o que abri
 	assert(not InputMap.survives({ act("lean_left", "aim") }, "infantry"))
 end)
 
+test("D-82: teclado remapeável, mouse e gráficos saneados", function()
+	local kc = InputMap.keyConflicts(D)
+	assert(#kc == 0, "conflitos no teclado padrão: " .. table.concat(kc, "; "))
+	local reload: any = nil
+	for _, a in InputMap.ACTIONS do
+		if a.id == "reload" and a.ctx == "infantry" then
+			reload = a
+		end
+	end
+	assert(InputMap.keyFor(reload, D) == "R", "padrão do recarregar")
+	local s = InputMap.validate({ keymap = { ["infantry.reload"] = "T", ["infantry.fire"] = "Escape" } })
+	assert(InputMap.keyFor(reload, s) == "T", "troca de tecla")
+	assert(s.keymap["infantry.fire"] == nil, "Esc é reservado")
+	assert(#InputMap.keyConflicts(s) > 0, "T já é o torniquete: conflito detectado")
+	assert(InputMap.BINDING_KEYS.keymap, "trocar tecla refaz os bindings")
+	local g = InputMap.validate({ gfxDetail = "ultra", gfxPost = "light", mouseSens = 9, gfxBrightness = -1 })
+	assert(g.gfxDetail == "high" and g.gfxPost == "light", "escolhas de gráfico")
+	assert(g.mouseSens == 3 and g.gfxBrightness == -0.2, "faixas do mouse e do brilho")
+	assert(D.mouseAds < 1 and D.mouseScope < D.mouseAds, "mouse mais lento apontando e na luneta")
+end)
+
 print(string.format("%d ok, %d falhas", passed, failed))
 if failed > 0 then
 	process.exit(1)

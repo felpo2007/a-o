@@ -165,6 +165,16 @@ export type Settings = {
 	thirdPerson: boolean, -- câmera de ombro (3ª pessoa) fora da mira
 	shoulderLeft: boolean, -- 3ª pessoa: ombro esquerdo
 	remap: { [string]: string }, -- "ctx.actionId" -> KeyCode do controle
+	-- D-82: teclado e mouse, gráficos e cursor virtual
+	keymap: { [string]: string }, -- "ctx.actionId" -> KeyCode do teclado/mouse
+	mouseSens: number, -- mouse no quadril (multiplica a sensibilidade do Roblox)
+	mouseAds: number, -- fração do mouse apontando (mira de ferro)
+	mouseScope: number, -- fração do mouse na luneta/binóculo
+	virtualCursor: boolean, -- cursor virtual no analógico esquerdo nos menus
+	gfxDetail: string, -- "high" | "medium" | "low": densidade de efeitos e alcance do detalhe
+	gfxShadows: boolean, -- sombras do sol
+	gfxPost: string, -- "full" | "light" | "off": brilho, raios de sol e correção de cor
+	gfxBrightness: number, -- ajuste de brilho (−0,2 a 0,2)
 }
 
 InputMap.DEFAULTS = {
@@ -197,10 +207,36 @@ InputMap.DEFAULTS = {
 	thirdPerson = false,
 	shoulderLeft = false,
 	remap = {},
+	keymap = {},
+	mouseSens = 1.0,
+	mouseAds = 0.7,
+	mouseScope = 0.45,
+	virtualCursor = false,
+	gfxDetail = "high",
+	gfxShadows = true,
+	gfxPost = "full",
+	gfxBrightness = 0,
 } :: Settings
 
 -- Configurações que mudam os botões (o runtime refaz os bindings só quando uma delas muda).
-InputMap.BINDING_KEYS = { remap = true, swapTriggers = true } :: { [string]: boolean }
+InputMap.BINDING_KEYS = { remap = true, swapTriggers = true, keymap = true } :: { [string]: boolean }
+
+-- Teclas que não podem receber ação (D-82): Esc abre o menu do Roblox, WASD andam (PlayerModule),
+-- Tab é a lista de jogadores, / abre o chat, F9 o console, F11/F12 tela cheia e gravação.
+InputMap.KEY_RESERVED = {
+	Escape = true,
+	W = true,
+	A = true,
+	S = true,
+	D = true,
+	Tab = true,
+	Slash = true,
+	F9 = true,
+	F11 = true,
+	F12 = true,
+	Print = true,
+	Unknown = true,
+} :: { [string]: boolean }
 
 local RANGES: { [string]: { number } } = {
 	holdTime = { 0.2, 0.6 },
@@ -216,8 +252,14 @@ local RANGES: { [string]: { number } } = {
 	sensScopeX = { 0.05, 4 },
 	sensScopeY = { 0.05, 4 },
 	fov = { 60, 90 },
+	mouseSens = { 0.1, 3 },
+	mouseAds = { 0.1, 1.5 },
+	mouseScope = { 0.05, 1.5 },
+	gfxBrightness = { -0.2, 0.2 },
 }
 local CHOICES: { [string]: { [string]: boolean } } = {
+	gfxDetail = { high = true, medium = true, low = true },
+	gfxPost = { full = true, light = true, off = true },
 	curve = { linear = true, exponential = true, dynamic = true },
 	aimAssist = { minimal = true, off = true },
 	hapticFire = { off = true, low = true, normal = true },
@@ -229,6 +271,7 @@ local CHOICES: { [string]: { [string]: boolean } } = {
 function InputMap.validate(raw: any): Settings
 	local out = table.clone(InputMap.DEFAULTS) :: any
 	out.remap = {}
+	out.keymap = {}
 	if type(raw) ~= "table" then
 		return out
 	end
@@ -257,6 +300,18 @@ function InputMap.validate(raw: any): Settings
 			end
 		end
 	end
+	if type(raw.keymap) == "table" then
+		local n = 0
+		for k, v in raw.keymap do
+			if type(k) == "string" and type(v) == "string" and #k < 48 and #v < 32 and not InputMap.KEY_RESERVED[v] then
+				n += 1
+				if n > 80 then
+					break
+				end
+				out.keymap[k] = v
+			end
+		end
+	end
 	if out.moveOuter <= out.moveInner + 0.1 then
 		out.moveOuter = math.min(1, out.moveInner + 0.3)
 	end
@@ -270,6 +325,12 @@ end
 function InputMap.padFor(a: Action, s: Settings?): string?
 	local r = s and s.remap[a.ctx .. "." .. a.id]
 	return r or a.pad
+end
+
+-- Tecla (ou botão do mouse) de uma ação, com a troca feita pelo jogador (D-82).
+function InputMap.keyFor(a: Action, s: Settings?): string?
+	local r = s and s.keymap and s.keymap[a.ctx .. "." .. a.id]
+	return r or a.key
 end
 
 -- Contextos que valem juntos (o global entra em todos os de jogo; a mira se soma à infantaria).
@@ -301,34 +362,45 @@ end
 -- Conflitos: dentro de cada pilha de camadas, o mesmo botão (no mesmo assento ou em "qualquer
 -- assento") não pode ter duas ações do mesmo tipo, nem "press" junto com tap/hold. Na mira, a
 -- camada de cima vence de propósito (LB/RB inclinam), então só se compara dentro da camada.
-function InputMap.conflicts(s: Settings?): { string }
+local function conflictsBy(s: Settings?, keyboard: boolean): { string }
 	local out = {}
 	for ctx in InputMap.CONTEXTS do
 		local layers = if ctx == "aim" then { "aim" } else InputMap.layers(ctx)
 		local groups: { [string]: { Action } } = {}
 		for _, a in InputMap.ACTIONS do
 			if table.find(layers, a.ctx) then
-				local pad = InputMap.padFor(a, s)
-				if pad then
-					groups[pad] = groups[pad] or {}
-					table.insert(groups[pad], a)
+				local code = if keyboard then InputMap.keyFor(a, s) else InputMap.padFor(a, s)
+				if code then
+					groups[code] = groups[code] or {}
+					table.insert(groups[code], a)
 				end
 			end
 		end
-		for pad, list in groups do
+		for code, list in groups do
 			for i = 1, #list do
 				for j = i + 1, #list do
 					local a, b = list[i], list[j]
+					local pa = if keyboard then a.keyPress else a.padPress
+					local pb = if keyboard then b.keyPress else b.padPress
 					local sameSeat = a.seat == nil or b.seat == nil or a.seat == b.seat
-					local clash = a.padPress == b.padPress or a.padPress == "press" or b.padPress == "press"
+					local clash = pa == pb or pa == "press" or pb == "press"
 					if sameSeat and clash then
-						table.insert(out, string.format("%s|%s: %s x %s", ctx, pad, a.id, b.id))
+						table.insert(out, string.format("%s|%s: %s x %s", ctx, code, a.id, b.id))
 					end
 				end
 			end
 		end
 	end
 	return out
+end
+
+function InputMap.conflicts(s: Settings?): { string }
+	return conflictsBy(s, false)
+end
+
+-- O mesmo para o teclado e o mouse (D-82).
+function InputMap.keyConflicts(s: Settings?): { string }
+	return conflictsBy(s, true)
 end
 
 -- ===== analógicos =====

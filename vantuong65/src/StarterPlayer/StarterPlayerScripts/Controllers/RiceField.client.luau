@@ -14,6 +14,23 @@ local RiceField = require(ReplicatedStorage.Shared.RiceField)
 
 local camera = workspace.CurrentCamera
 local HIDDEN = CFrame.new(0, -5000, 0)
+local player = game:GetService("Players").LocalPlayer
+
+-- D-82: opção de detalhe (Graficos.client): 1, 0,6 ou 0,3
+local function detail(): number
+	local d = player:GetAttribute("GfxDetail")
+	return if type(d) == "number" then d else 1
+end
+-- alcance do arroz em cartões (fora dele, o dossel) e do ladrilho alto, por nível de detalhe
+local function ranges(): (number, number)
+	local d = detail()
+	if d >= 0.99 then
+		return RiceField.FAR, RiceField.NEAR
+	elseif d >= 0.5 then
+		return RiceField.FAR * 0.7, RiceField.NEAR * 0.6
+	end
+	return RiceField.FAR * 0.45, RiceField.NEAR * 0.35
+end
 
 local art = ReplicatedStorage:WaitForChild("VT65RiceArt", 900)
 local map = workspace:WaitForChild("Map", 900)
@@ -59,11 +76,11 @@ local function release(f: Field)
 	f.part.LocalTransparencyModifier = 0
 end
 
-local function update(f: Field, camPos: Vector3)
+local function update(f: Field, camPos: Vector3, far: number, near: number)
 	local part = f.part
 	local cf, size = part.CFrame, part.Size
 	local lp = cf:PointToObjectSpace(camPos)
-	if RiceField.distToRect(lp.X, lp.Z, size.X, size.Z) >= RiceField.FAR then
+	if RiceField.distToRect(lp.X, lp.Z, size.X, size.Z) >= far then
 		if f.active then
 			release(f)
 		end
@@ -87,7 +104,7 @@ local function update(f: Field, camPos: Vector3)
 			k += 1
 			local lz = -size.Z / 2 + (j + 0.5) * tz
 			local dx, dz = lp.X - lx, lp.Z - lz
-			local lod = if math.sqrt(dx * dx + dz * dz) < RiceField.NEAR then "hi" else "lo"
+			local lod = if math.sqrt(dx * dx + dz * dz) < near then "hi" else "lo"
 			local t = f.tiles[k]
 			if not t or t.lod ~= lod then
 				if t then
@@ -162,8 +179,8 @@ RunService.Heartbeat:Connect(function()
 	lastSway = now
 	local wind = workspace.GlobalWind
 	local w = wind.Magnitude * 0.28 -- m/s
-	if w < 0.2 then
-		return
+	if w < 0.2 or detail() < 0.5 then
+		return -- sem vento ou detalhe baixo: arroz parado
 	end
 	local dir = wind.Unit
 	local axis = Vector3.new(-dir.Z, 0, dir.X) -- horizontal, perpendicular ao vento
@@ -213,9 +230,10 @@ task.spawn(function()
 		-- passo completo quando a câmera anda 6 studs ou a cada 1 s (tabuleiro que chegou pelo streaming)
 		if (camPos - lastPos).Magnitude > 6 or now - lastFull > 1 then
 			lastPos, lastFull = camPos, now
+			local far, near = ranges()
 			for _, f in fields do
 				if f.part.Parent then
-					update(f, camPos)
+					update(f, camPos, far, near)
 				end
 			end
 			holder:SetAttribute("Ladrilhos", stats.hi + stats.lo)

@@ -112,6 +112,7 @@ end
 
 -- ===== fumaça de guerra no horizonte =====
 -- Fora do mapa de 2 x 2 km (MapConfig.Bounds: X -6607 a 536, Z -3929 a 3214), em volta.
+local columns: { ParticleEmitter } = {}
 local COLUMNS = {
 	Vector3.new(-7600, 40, 400),
 	Vector3.new(-2600, 40, -4900),
@@ -139,11 +140,26 @@ for i, pos in COLUMNS do
 	e.Rotation = NumberRange.new(0, 360)
 	e.RotSpeed = NumberRange.new(-4, 4)
 	e.Parent = base
+	table.insert(columns, e)
 	-- já começa cheia (sem ver a coluna nascer ao entrar)
 	task.delay(1 + i * 0.3, function()
 		e:Emit(40)
 	end)
 end
+
+-- ===== detalhe (D-82, opção de gráficos: 1, 0,6 ou 0,3) =====
+local player = game:GetService("Players").LocalPlayer
+local detail = 1
+local function readDetail()
+	local d = player:GetAttribute("GfxDetail")
+	detail = if type(d) == "number" then d else 1
+	dust.Rate = 10 * detail
+	for _, e in columns do
+		e.Rate = 1.6 * math.max(detail, 0.5)
+	end
+end
+readDetail()
+player:GetAttributeChangedSignal("GfxDetail"):Connect(readDetail)
 
 -- ===== laço =====
 local lastCanopy = 0
@@ -158,11 +174,11 @@ RunService.Heartbeat:Connect(function()
 	local rain = ReplicatedStorage:GetAttribute("Rain")
 	local wet = type(rain) == "number" and rain > 0.2
 	local day = Lighting.ClockTime > 6.2 and Lighting.ClockTime < 18
-	dust.Enabled = day and not wet
+	dust.Enabled = day and not wet and detail >= 0.5
 	if t - lastCanopy > 1 then
 		lastCanopy = t
 		canopy = underCanopy(pos)
 	end
 	leafBox.CFrame = CFrame.new(pos + Vector3.new(0, 12, 0) + cf.LookVector * 6)
-	leaves.Rate = if canopy then (if wet then 4 else 1.8) else 0
+	leaves.Rate = if canopy then (if wet then 4 else 1.8) * detail else 0
 end)

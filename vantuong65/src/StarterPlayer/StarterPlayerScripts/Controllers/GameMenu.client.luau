@@ -68,9 +68,43 @@ local function TABS(): { string }
 	end
 	return t
 end
-local SUBS = { "Controle", "Mira", "Vibração", "Acessibilidade", "Remapear" }
+-- D-82: "Mouse/teclado" (sensibilidade do mouse e troca de teclas) e "Gráficos"
+local SUBS = { "Controle", "Mira", "Mouse/teclado", "Gráficos", "Vibração", "Acessib.", "Botões" }
 local tab, sub = 1, 1
-local listening: string? = nil -- "ctx.actionId" esperando um botão
+local listening: string? = nil -- "ctx.actionId" esperando um botão do controle
+local keyListening: string? = nil -- "ctx.actionId" esperando uma tecla
+local CTX_NAMES: { [string]: string } = {
+	infantry = "Infantaria",
+	aim = "Mirando",
+	global = "Geral",
+	ground_vehicle = "Veículo",
+	helicopter = "Helicóptero",
+	map = "Mapa",
+}
+local KEY_NAMES: { [string]: string } = {
+	MouseLeftButton = "botão esquerdo",
+	MouseRightButton = "botão direito",
+	MouseMiddleButton = "botão do meio",
+	LeftShift = "Shift",
+	LeftControl = "Ctrl",
+	Return = "Enter",
+	Space = "Espaço",
+	One = "1",
+	Two = "2",
+	Three = "3",
+	Four = "4",
+}
+local MOUSE_KEYS: { [Enum.UserInputType]: string } = {
+	[Enum.UserInputType.MouseButton1] = "MouseLeftButton",
+	[Enum.UserInputType.MouseButton2] = "MouseRightButton",
+	[Enum.UserInputType.MouseButton3] = "MouseMiddleButton",
+}
+do -- a barra de sub-abas cabe na largura (texto encolhe se precisar)
+	subBar.TextScaled = true
+	local c = Instance.new("UITextSizeConstraint")
+	c.MaxTextSize = UiKit.text(16)
+	c.Parent = subBar
+end
 
 local function clearBody()
 	for _, c in body:GetChildren() do
@@ -162,6 +196,63 @@ local function render()
 			choiceRow("Inverter Y", "invertY", { false, true }, { "não", "sim" })
 			choiceRow("Trocar analógicos (canhoto)", "swapSticks", { false, true }, { "não", "sim" })
 			choiceRow("Trocar gatilhos com bumpers", "swapTriggers", { false, true }, { "não", "sim" })
+			-- D-82: o analógico esquerdo vira um mouse nos menus (velocidade padrão do Roblox; A clica)
+			choiceRow("Cursor virtual nos menus", "virtualCursor", { false, true }, { "desligado", "ligado" })
+		elseif S == "Mouse/teclado" then
+			numberRow("Sensibilidade do mouse", "mouseSens", 0.05, "%.2f")
+			numberRow("Mouse apontando (fração)", "mouseAds", 0.05, "%.2f")
+			numberRow("Mouse na luneta/binóculo (fração)", "mouseScope", 0.05, "%.2f")
+			local conflicts = InputMap.keyConflicts(Input.settings)
+			if #conflicts > 0 then
+				UiKit.label(body, "Conflito: " .. conflicts[1], 14)
+			end
+			for _, a in InputMap.ACTIONS do
+				local ctxName = CTX_NAMES[a.ctx]
+				local key = InputMap.keyFor(a, Input.settings)
+				if ctxName and key then
+					local id = a.ctx .. "." .. a.id
+					row(
+						string.format(
+							"[%s] %s: %s",
+							ctxName,
+							a.label,
+							if keyListening == id then "aperte uma tecla…" else KEY_NAMES[key] or key
+						),
+						function()
+							keyListening = id
+							render()
+						end
+					)
+				end
+			end
+			row("Restaurar teclas padrão", function()
+				local s = table.clone(Input.settings) :: any
+				s.keymap = {}
+				Input.setSettings(s)
+			end)
+		elseif S == "Gráficos" then
+			choiceRow(
+				"Detalhe (arroz, poeira, folhas, fumaça)",
+				"gfxDetail",
+				{ "high", "medium", "low" },
+				{ "alto", "médio", "baixo" }
+			)
+			choiceRow("Sombras do sol", "gfxShadows", { true, false }, { "ligadas", "desligadas (mais rápido)" })
+			choiceRow(
+				"Efeitos de tela",
+				"gfxPost",
+				{ "full", "light", "off" },
+				{ "completos", "leves (sem brilho)", "desligados" }
+			)
+			numberRow("Brilho", "gfxBrightness", 0.02, "%+.2f")
+			UiKit.label(body, "A qualidade geral fica no menu do Roblox (Esc > Configurações).", 14)
+			row("Restaurar gráficos padrão", function()
+				local s = table.clone(Input.settings) :: any
+				for _, k in { "gfxDetail", "gfxShadows", "gfxPost", "gfxBrightness" } do
+					s[k] = (InputMap.DEFAULTS :: any)[k]
+				end
+				Input.setSettings(s)
+			end)
 		elseif S == "Mira" then
 			numberRow("Quadril horizontal", "sensHipX", 0.05, "%.2f")
 			numberRow("Quadril vertical", "sensHipY", 0.05, "%.2f")
@@ -193,7 +284,7 @@ local function render()
 				{ "normal", "low", "off" },
 				{ "normal", "baixa", "desligada" }
 			)
-		elseif S == "Acessibilidade" then
+		elseif S == "Acessib." then
 			numberRow("Tempo de segurar (s)", "holdTime", 0.05, "%.2f")
 			choiceRow("Mirar", "aimToggle", { false, true }, { "segurar", "alternar" })
 			choiceRow("Correr", "sprintToggle", { true, false }, { "alternar", "segurar (teclado)" })
@@ -209,7 +300,7 @@ local function render()
 			row("Restaurar padrões", function()
 				Input.setSettings(nil)
 			end)
-		elseif S == "Remapear" then
+		elseif S == "Botões" then
 			local conflicts = InputMap.conflicts(Input.settings)
 			if #conflicts > 0 then
 				UiKit.label(body, "Conflito: " .. conflicts[1], 14)
@@ -326,6 +417,7 @@ local function setOpen(open: boolean)
 	end
 	gui.Enabled = open
 	listening = nil
+	keyListening = nil
 	if open then
 		Input.openMenu()
 		render()
@@ -345,33 +437,34 @@ Input.on("ui_back", "press", function()
 	if shop and shop.Enabled then
 		return -- a loja (por cima) fecha primeiro
 	end
-	if listening then
-		listening = nil
+	if listening or keyListening then
+		listening, keyListening = nil, nil
 		render()
 	else
 		setOpen(false)
 	end
 end)
+-- esperando uma tecla, Q/E/Z/C trocam a tecla da ação, não a aba
 Input.on("ui_tab_prev", "press", function()
-	if gui.Enabled then
+	if gui.Enabled and not keyListening then
 		tab = (tab - 2) % #TABS() + 1
 		render()
 	end
 end)
 Input.on("ui_tab_next", "press", function()
-	if gui.Enabled then
+	if gui.Enabled and not keyListening then
 		tab = tab % #TABS() + 1
 		render()
 	end
 end)
 Input.on("ui_sub_prev", "press", function()
-	if gui.Enabled and tab == 1 then
+	if gui.Enabled and tab == 1 and not keyListening then
 		sub = (sub - 2) % #SUBS + 1
 		render()
 	end
 end)
 Input.on("ui_sub_next", "press", function()
-	if gui.Enabled and tab == 1 then
+	if gui.Enabled and tab == 1 and not keyListening then
 		sub = sub % #SUBS + 1
 		render()
 	end
@@ -386,6 +479,39 @@ Input.SettingsChanged:Connect(function()
 end)
 UiKit.watch(root, function()
 	return gui.Enabled
+end)
+
+-- D-82: troca de tecla: a próxima tecla (ou botão do mouse fora dos botões da tela) vira a tecla da
+-- ação. Backspace cancela (é o "voltar"); Esc, WASD e outras do Roblox são recusadas.
+UserInputService.InputBegan:Connect(function(input, processed)
+	if not keyListening or not gui.Enabled then
+		return
+	end
+	local code: string? = nil
+	if input.UserInputType == Enum.UserInputType.Keyboard then
+		code = input.KeyCode.Name
+	elseif MOUSE_KEYS[input.UserInputType] and not processed then
+		code = MOUSE_KEYS[input.UserInputType]
+	end
+	if not code or code == "Backspace" then
+		return
+	end
+	if InputMap.KEY_RESERVED[code] then
+		Bus.fire("toast", "Tecla reservada pelo Roblox ou pelo movimento: escolha outra")
+		return
+	end
+	local key = keyListening :: string
+	keyListening = nil
+	local s = table.clone(Input.settings) :: any
+	s.keymap = table.clone(s.keymap)
+	s.keymap[key] = code
+	local trial = InputMap.validate(s)
+	if #InputMap.keyConflicts(trial) > 0 then
+		Bus.fire("toast", "Conflito com outra ação: escolha outra tecla")
+		render()
+		return
+	end
+	Input.setSettings(trial)
 end)
 
 -- remapeamento: o próximo botão do controle vira o novo botão da ação (Start é reservado)
