@@ -36,6 +36,10 @@ VehicleLive.view = {
 	speed = 0, -- m/s
 	rpm = 0,
 	rotor = 0,
+	-- malha em relação ao chassi agora (com a mola) e a escala da malha: a câmera põe o olho do assento
+	-- (VehicleDrive.eyeOf) em chassi.CFrame * meshRel no mesmo quadro
+	meshRel = nil :: CFrame?,
+	scale = Vector3.one,
 }
 
 -- ===== raio de chão =====

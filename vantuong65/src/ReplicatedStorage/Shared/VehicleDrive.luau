@@ -717,12 +717,20 @@ end
 -- Escapamentos: posição de projeto (PLACEHOLDER: conferir no Studio).
 export type TrackArt = { zIn: number, zOut: number, circles: { { number } }, bars: number }
 export type RotorArt = { x: number, y: number, z: number, r: number }
+-- passageiros em fileiras de 2 (um de cada lado, ±z), a partir de x0, de dx em dx
+export type Riders = { x0: number, dx: number, y: number, z: number }
 export type Art = {
 	box: { number },
 	track: TrackArt?,
 	exhaust: { { number } }?,
 	rotor: RotorArt?,
 	tail: RotorArt?,
+	-- Olho de cada assento (SeatId → x, y, z). A malha só tem faces de fora: com o olho dentro dela
+	-- o casco some e o jogador flutua no capim. Então o olho fica FORA da malha: cabeça para fora da
+	-- escotilha nos blindados (convés/teto medido na malha + ~0,5 m de cabeça), cabine e porta aberta
+	-- no UH-34D. Alturas de convés e teto: mapa de alturas da malha (2026-11-11); o resto é projeto.
+	eyes: { [string]: { number } }?,
+	riders: Riders?,
 }
 
 VehicleDrive.ART = {
@@ -735,6 +743,18 @@ VehicleDrive.ART = {
 			bars = 34,
 		},
 		exhaust = { { 13.4, -0.2, 3.0 }, { 13.4, -0.2, -3.0 } },
+		-- convés da frente y ≈ 0 (o tubo do canhão passa em z ≈ 0, y ≈ 2,5); teto da torre 3,8–5,0;
+		-- cúpula do comandante à direita atrás (≈ 4,9); escotilha do municiador à esquerda (≈ 5,4)
+		eyes = {
+			-- escotilha na frente do casco, à esquerda do tubo. No Studio, em x = −7 o olho ficava em
+			-- cima da quina da frente e o casco não aparecia; raios na malha deram o convés em y ≈ 0,3
+			-- (malha) de x = −6,4 a −3,4 e a frente da torre em x ≈ −2,4: o olho vai ~1,8 stud à frente
+			-- dela, com a cabeça 1,5 stud (0,4 m) acima do convés
+			driver = { -4.2, 1.8, 2.2 },
+			gunner = { -0.8, 4.9, -2.4 }, -- periscópio da mira no teto, frente direita da torre
+			commander = { 4.6, 6.6, -1.6 }, -- cabeça fora da cúpula
+			loader = { 3.2, 6.8, 2.8 },
+		},
 	},
 	ontos = {
 		box = { 12.1, 10.26, 7.75 },
@@ -745,6 +765,12 @@ VehicleDrive.ART = {
 			bars = 22,
 		},
 		exhaust = { { 5.7, -0.6, -2.0 } },
+		-- convés da frente y ≈ 0,3; teto do meio ≈ 3,3; os 6 tubos dos dois lados sobem até ≈ 5,1
+		eyes = {
+			driver = { -4.6, 2.2, 1.6 }, -- escotilha da frente, à esquerda
+			gunner = { 0.0, 4.8, 0.0 }, -- cabeça fora, entre os tubos
+			loader = { 3.4, 4.8, 0.0 },
+		},
 	},
 	lvtp5 = {
 		box = { 28.41, 12.45, 12.14 },
@@ -755,13 +781,59 @@ VehicleDrive.ART = {
 			bars = 36,
 		},
 		exhaust = { { 13.9, 3.6, 3.6 }, { 13.9, 3.6, -3.6 } },
+		-- convés y ≈ 3,2–3,9; cúpula da metralhadora na frente, no meio (≈ 6,2)
+		eyes = {
+			driver = { -9.6, 5.2, 3.4 },
+			gunner = { -6.0, 7.6, 0.1 },
+			commander = { -9.6, 5.2, -3.4 },
+		},
+		-- a tropa vai sentada em cima (no Vietnã os fuzileiros andavam no teto do amtrac por causa das
+		-- minas): olho a ~0,9 m acima do convés
+		riders = { x0 = 0.0, dx = 2.2, y = 6.9, z = 3.0 },
 	},
 	uh34d = {
 		box = { 48.09, 19.76, 47.01 },
 		rotor = { x = -6.2, y = 8.7, z = 0, r = 23.5 },
 		tail = { x = 21.8, y = 4.37, z = -0.06, r = 2.24 },
+		-- cabine alta sobre o motor do nariz (teto ≈ 7,4 em x ≈ −16,5); pele da direita em z ≈ −4,9
+		eyes = {
+			driver = { -15.5, 6.3, -1.7 }, -- piloto à direita
+			copilot = { -15.5, 6.3, 1.7 },
+			gunner = { -6.0, -1.0, -5.4 }, -- porta da direita aberta, debruçado para fora
+		},
+		-- tropa sentada nas portas, pernas para fora (a da esquerda é licença: o H-34 só tem a da direita)
+		riders = { x0 = -10.0, dx = 2.4, y = -2.2, z = 5.3 },
 	},
 } :: { [string]: Art }
+
+-- Olho do assento no referencial da malha (studs): tripulação pela tabela; passageiro "p<n>" na
+-- fileira (n−1)//2, ímpar à direita (−z), par à esquerda (+z). nil = sem olho (fica a cabeça).
+function VehicleDrive.eyeOf(id: string, seatId: string): (number?, number?, number?)
+	local art = VehicleDrive.ART[id]
+	if not art then
+		return nil, nil, nil
+	end
+	local e = art.eyes and art.eyes[seatId]
+	if e then
+		return e[1], e[2], e[3]
+	end
+	local n = tonumber(string.match(seatId, "^p(%d+)$"))
+	local r = art.riders
+	if n and r then
+		local row = (n - 1) // 2
+		return r.x0 + row * r.dx, r.y, (if n % 2 == 1 then -1 else 1) * r.z
+	end
+	return nil, nil, nil
+end
+
+-- Câmera de perseguição (3ª pessoa) atrás do veículo: distância (studs) e altura do pivô acima do
+-- topo do chassi, pelo tamanho. Projeto: o casco inteiro cabe na tela com FOV 70.
+function VehicleDrive.chaseOf(kind: string, lengthStuds: number): (number, number)
+	if kind == "heli" then
+		return 62, 6
+	end
+	return lengthStuds * 1.2 + 8, 4
+end
 
 -- ===== som do motor =====
 -- Tom (PlaybackSpeed) e volume relativo pela rotação (0..1) e pela carga (0..1). A rotação de marcha

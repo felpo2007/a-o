@@ -1031,10 +1031,14 @@ RunService.PreSimulation:Connect(function(dt: number)
 			view.rough = VehicleDrive.ground(fx.ground).rough
 			view.speed = fx.chassis.AssemblyLinearVelocity.Magnitude * M
 			view.rpm, view.rotor = fx.rpm, fx.rotor
+			local motor, rel = fx.motor, fx.meshRel
+			view.meshRel = if motor and rel then motor.C0 * fx.pose * rel else nil
+			view.scale = fx.scale
 		end
 	end
 	if not seated or not fxs[seated] then
 		VehicleLive.view.model = nil
+		VehicleLive.view.meshRel = nil
 	end
 end)
 

@@ -33,7 +33,10 @@ local LEAN_WAIST = math.rad(16) -- inclinação do tronco (PLACEHOLDER)
 -- Deitado, o IK erra mais conforme a pose (até 43 cm na busca em grade): a pega foi para 0,5 stud à
 -- frente (perto do rosto) e 0,4 para a esquerda: 8 e 10 cm (antes 27 e 24 cm).
 local HOLD_STAND = CFrame.new(0.2, 0.2, -0.7) * CFrame.Angles(0, math.rad(15), 0) * CFrame.Angles(math.rad(-20), 0, 0)
-local HOLD_PRONE = CFrame.new(-0.2, 1.3, 1.1) * CFrame.Angles(math.rad(90), 0, 0)
+-- Deitado com a animação de captura (SoldierAnims, D-88): pega medida na pose "deitado" do retarget
+-- (tools/anim); a pega antiga (0,2 / 1,3 / 1,1, 90°) deixava o fuzil acima das costas.
+local HOLD_PRONE = CFrame.new(0.572, 1.446, -0.281)
+	* CFrame.fromEulerAnglesXYZ(math.rad(76.29), math.rad(-0.70), math.rad(7.71))
 
 local function characters(): { Model }
 	local list = {}

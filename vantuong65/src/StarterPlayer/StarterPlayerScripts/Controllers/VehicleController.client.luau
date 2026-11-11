@@ -18,6 +18,7 @@ local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 
 local HeliModel = require(ReplicatedStorage.Shared.HeliModel)
+local Bus = require(script.Parent.Bus)
 local Haptics = require(script.Parent.Haptics)
 local Input = require(script.Parent.Input)
 local InputMap = require(ReplicatedStorage.Shared.InputMap)
@@ -25,6 +26,7 @@ local Net = require(ReplicatedStorage.Shared.Net)
 local VehicleDrive = require(ReplicatedStorage.Shared.VehicleDrive)
 local VehicleLive = require(script.Parent.VehicleLive)
 local Vehicles = require(ReplicatedStorage.Shared.Vehicles)
+local ViewMode = require(script.Parent.ViewMode)
 local Weapons = require(ReplicatedStorage.Shared.Weapons) :: any
 
 local player = Players.LocalPlayer
@@ -487,17 +489,159 @@ RunService.Heartbeat:Connect(function(dt: number)
 	end
 end)
 
--- ===== câmera: balanço e tremor =====
+-- ===== vista de quem está sentado =====
+-- A malha do veículo só tem faces de fora: com o olho dentro dela (a cabeça do personagem sentado) o
+-- casco some e o jogador flutua no capim (teste no Studio, 2026-11-11). Então:
+--   - 1ª pessoa: o olho vai para o ponto do assento FORA da malha (VehicleDrive.eyeOf): cabeça para
+--     fora da escotilha nos blindados (vê a borda do casco e o tubo), cabine e porta no UH-34D; a
+--     ótica do atirador, o binóculo do comandante e a cabine do piloto ganham moldura na tela;
+--   - 3ª pessoa (Input.settings.thirdPerson, se o modo deixa): câmera de perseguição atrás do
+--     veículo, girada pelo olhar do jogador, encurtada por parede e terreno; ótica e binóculo voltam
+--     à 1ª pessoa;
+--   - nos dois, balanço com a carroceria e tremor pela velocidade, chão e motor.
 -- A câmera do Roblox lê a própria direção a cada quadro (CameraLook): um giro deixado nela acumula.
 -- Por isso o deslocamento é desfeito antes da câmera (Camera − 1) e refeito depois (Camera + 3, depois
--- do CameraLook e do ThirdPerson).
+-- do CameraLook e do ThirdPerson). O corpo do próprio personagem fica escondido (só ele vê).
 local cam = {
 	applied = CFrame.identity,
 	slowP = 0, -- média lenta da inclinação: ladeira parada não entorta a vista, só o balanço
 	slowR = 0,
 	t = 0,
 	model = nil :: Model?,
+	blend = 0, -- 0 olho, 1 perseguição
+	boom = -1, -- distância livre da perseguição (studs)
+	body = {} :: { Instance },
+	bodyOf = nil :: Model?,
+	bodyT = 0,
+	chaseAttr = false,
+	aimAttr = false,
 }
+
+-- molduras na tela (atrás do painel do veículo)
+local sight = Instance.new("ScreenGui")
+sight.Name = "VehicleSight"
+sight.ResetOnSpawn = false
+sight.IgnoreGuiInset = true
+sight.DisplayOrder = -1
+sight.Parent = player:WaitForChild("PlayerGui")
+local overlay = {
+	reticle = Instance.new("Frame"),
+	optic = Instance.new("Frame"),
+	binoc = Instance.new("Frame"),
+	cockpit = Instance.new("Frame"),
+}
+local overlayList: { Frame } = { overlay.reticle, overlay.optic, overlay.binoc, overlay.cockpit }
+for _, f in overlayList do
+	f.BackgroundTransparency = 1
+	f.Size = UDim2.fromScale(1, 1)
+	f.Visible = false
+	f.Parent = sight
+end
+local function bar(parent: Instance, pos: UDim2, size: UDim2, color: Color3, alpha: number, anchor: Vector2?): Frame
+	local b = Instance.new("Frame")
+	b.AnchorPoint = anchor or Vector2.new(0.5, 0.5)
+	b.Position = pos
+	b.Size = size
+	b.BorderSizePixel = 0
+	b.BackgroundColor3 = color
+	b.BackgroundTransparency = alpha
+	b.Parent = parent
+	return b
+end
+-- círculo vazado: o anel preto de borda enorme escurece tudo fora dele
+local function porthole(parent: Instance, x: number, scale: number)
+	local c = Instance.new("Frame")
+	c.AnchorPoint = Vector2.new(0.5, 0.5)
+	c.Position = UDim2.fromScale(x, 0.5)
+	c.Size = UDim2.fromScale(scale, scale)
+	c.BackgroundTransparency = 1
+	local ar = Instance.new("UIAspectRatioConstraint")
+	ar.AspectRatio = 1
+	ar.Parent = c
+	local s = Instance.new("UIStroke")
+	s.Thickness = 1600
+	s.Color = Color3.new(0, 0, 0)
+	s.Parent = c
+	local r = Instance.new("UICorner")
+	r.CornerRadius = UDim.new(1, 0)
+	r.Parent = c
+	c.Parent = parent
+end
+do
+	local ink = Color3.fromRGB(235, 228, 200)
+	bar(overlay.reticle, UDim2.fromScale(0.5, 0.5), UDim2.fromOffset(14, 2), ink, 0.2)
+	bar(overlay.reticle, UDim2.fromScale(0.5, 0.5), UDim2.fromOffset(2, 14), ink, 0.2)
+	-- ótica: campo redondo, retícula fina com marcas de distância abaixo do centro
+	porthole(overlay.optic, 0.5, 0.86)
+	local black = Color3.new(0, 0, 0)
+	bar(overlay.optic, UDim2.fromScale(0.5, 0.5), UDim2.new(0.34, 0, 0, 1), black, 0.1)
+	bar(overlay.optic, UDim2.fromScale(0.5, 0.5), UDim2.new(0, 1, 0.5, 0), black, 0.1)
+	for i = 1, 4 do
+		bar(overlay.optic, UDim2.new(0.5, 0, 0.5, i * 34), UDim2.fromOffset(28 - i * 4, 1), black, 0.1)
+	end
+	-- binóculo: dois campos
+	porthole(overlay.binoc, 0.4, 0.62)
+	porthole(overlay.binoc, 0.6, 0.62)
+	-- cabine: teto, montantes do para-brisa e o painel embaixo
+	local frame = Color3.fromRGB(38, 40, 32)
+	bar(overlay.cockpit, UDim2.fromScale(0.5, 0), UDim2.fromScale(1, 0.09), frame, 0.05, Vector2.new(0.5, 0))
+	bar(overlay.cockpit, UDim2.fromScale(0.5, 1), UDim2.fromScale(1, 0.17), frame, 0.05, Vector2.new(0.5, 1))
+	bar(overlay.cockpit, UDim2.fromScale(0.5, 0.45), UDim2.new(0, 10, 0.8, 0), frame, 0.1)
+	for _, x in { 0.07, 0.93 } do
+		local post = bar(overlay.cockpit, UDim2.fromScale(x, 0.45), UDim2.new(0, 22, 0.9, 0), frame, 0.05)
+		post.Rotation = if x < 0.5 then 8 else -8
+	end
+end
+
+local function setLocalAttr(name: string, value: boolean, field: string)
+	if (cam :: any)[field] ~= value then
+		(cam :: any)[field] = value
+		player:SetAttribute(name, value)
+	end
+end
+
+-- o próprio corpo (e o fuzil que ele carrega) some para quem está sentado: a câmera não fica mais na
+-- cabeça e o boneco apareceria cortado pelo casco
+local function hideBody(char: Model)
+	if cam.bodyOf ~= char or os.clock() - cam.bodyT > 2 then
+		cam.bodyOf, cam.bodyT = char, os.clock()
+		cam.body = {}
+		for _, d in char:GetDescendants() do
+			if d:IsA("BasePart") or d:IsA("Decal") then
+				table.insert(cam.body, d)
+			end
+		end
+	end
+	for _, d in cam.body do
+		if d:IsA("BasePart") then
+			if d.LocalTransparencyModifier ~= 1 then
+				d.LocalTransparencyModifier = 1
+			end
+		elseif d:IsA("Decal") and d.LocalTransparencyModifier ~= 1 then
+			d.LocalTransparencyModifier = 1
+		end
+	end
+end
+
+local function rayList(model: Model): { Instance }
+	local list: { Instance } = { model }
+	for _, inst in
+		{ player.Character, workspace:FindFirstChild("VT65VehicleFx"), workspace:FindFirstChild("VT65Effects") }
+	do
+		if inst then
+			table.insert(list, inst)
+		end
+	end
+	return list
+end
+
+local function offAll()
+	for _, f in overlayList do
+		f.Visible = false
+	end
+	setLocalAttr("VehicleChase", false, "chaseAttr")
+	setLocalAttr("VehicleAim", false, "aimAttr")
+end
 
 RunService:BindToRenderStep("VT65VehicleCamUndo", Enum.RenderPriority.Camera.Value - 1, function()
 	if cam.applied ~= CFrame.identity then
@@ -511,8 +655,15 @@ RunService:BindToRenderStep("VT65VehicleCam", Enum.RenderPriority.Camera.Value +
 	local model = seat and vehicleOf(seat)
 	local chassis = model and model:FindFirstChild("Chassis") :: BasePart?
 	if not (seat and model and chassis) or camera.CameraType ~= Enum.CameraType.Custom then
-		cam.model = nil
+		if cam.model then
+			cam.model = nil
+			cam.blend, cam.boom = 0, -1
+			offAll()
+		end
 		return
+	end
+	if player.Character then
+		hideBody(player.Character)
 	end
 	cam.t += dt
 	local cf = chassis.CFrame
@@ -523,12 +674,37 @@ RunService:BindToRenderStep("VT65VehicleCam", Enum.RenderPriority.Camera.Value +
 	if cam.model ~= model then
 		cam.model = model
 		cam.slowP, cam.slowR = p, r
+		cam.boom = -1
 	end
 	cam.slowP = approach(cam.slowP, p, 1.2, dt)
 	cam.slowR = approach(cam.slowR, r, 1.2, dt)
-	local driver = seat:GetAttribute("SeatId") == "driver"
-	local k = (if driver then 1 else 0.45) * (if state.zoom > 0 then 0.25 else 1)
+	local seatId = tostring(seat:GetAttribute("SeatId"))
+	local weapon = seat:GetAttribute("Weapon")
 	local heliKind = model:GetAttribute("Kind") == "heli"
+	local chase = Input.settings.thirdPerson and ViewMode.allowed() and state.zoom == 0
+	cam.blend = approach(cam.blend, if chase then 1 else 0, 0.16, dt)
+	local b = cam.blend * cam.blend * (3 - 2 * cam.blend)
+	local rot = camera.CFrame.Rotation
+	-- olho do assento (fora da malha), com a mola da carroceria
+	local eye = camera.CFrame.Position
+	local ex, ey, ez = VehicleDrive.eyeOf(tostring(model:GetAttribute("Spec")), seatId)
+	if fresh and view.meshRel and ex and ey and ez then
+		local s = view.scale
+		eye = (cf * (view.meshRel :: CFrame) * CFrame.new(ex * s.X, ey * s.Y, ez * s.Z)).Position
+	end
+	local pos = eye
+	if b > 0.001 then
+		local dist, lift = VehicleDrive.chaseOf(if heliKind then "heli" else "ground", chassis.Size.Z + 3.2)
+		local pivot = chassis.Position + Vector3.new(0, chassis.Size.Y / 2 + lift, 0)
+		local want = -rot.LookVector * dist + Vector3.new(0, dist * 0.1, 0)
+		local hit = workspace:Raycast(pivot, want, VehicleLive.solid(rayList(model)))
+		local free = if hit then math.max((hit.Position - pivot).Magnitude - 1.5, 3) else want.Magnitude
+		cam.boom = if cam.boom < 0 or free < cam.boom then free else approach(cam.boom, free, 0.5, dt)
+		pos = eye:Lerp(pivot + want.Unit * cam.boom, b)
+	end
+	-- balanço e tremor (menores na perseguição e com zoom)
+	local driver = seatId == "driver"
+	local k = (if driver then 1 else 0.45) * (if state.zoom > 0 then 0.25 else 1) * (1 - 0.7 * b)
 	local speed = chassis.AssemblyLinearVelocity.Magnitude * M
 	local sp, sy, sr, bob
 	if heliKind then
@@ -541,22 +717,56 @@ RunService:BindToRenderStep("VT65VehicleCam", Enum.RenderPriority.Camera.Value +
 	local follow = 0.6 * k -- quanto da inclinação dinâmica a vista acompanha
 	local w = CFrame.fromAxisAngle(cf.RightVector, (p - cam.slowP) * follow)
 		* CFrame.fromAxisAngle(-cf.LookVector, (r - cam.slowR) * follow)
-	local rot = camera.CFrame.Rotation
-	local off = rot:Inverse() * w * rot * CFrame.new(0, bob * k / M, 0) * CFrame.Angles(sp * k, sy * k, sr * k)
-	camera.CFrame = camera.CFrame * off
+	local target = CFrame.new(pos) * w * rot * CFrame.new(0, bob * k / M, 0) * CFrame.Angles(sp * k, sy * k, sr * k)
+	local off = camera.CFrame:Inverse() * target
+	camera.CFrame = target
 	cam.applied = off
+	-- molduras: ótica (canhão), binóculo (comandante), cabine (pilotos, em 1ª pessoa); retícula de quem
+	-- tem arma (na perseguição é por ela que se mira)
+	local first = b < 0.5
+	local bigGun = weapon == "gun_90" or weapon == "rr_106"
+	overlay.optic.Visible = first and state.zoom == 1 and bigGun
+	overlay.binoc.Visible = first and state.zoom == 2
+	overlay.cockpit.Visible = first and heliKind and (seatId == "driver" or seatId == "copilot")
+	-- a M60 em 1ª pessoa mira pela própria alça e massa (como a pé): retícula só na perseguição
+	overlay.reticle.Visible = weapon ~= nil
+		and not overlay.optic.Visible
+		and not overlay.binoc.Visible
+		and (not first or weapon ~= "m60")
+	setLocalAttr("VehicleChase", not first, "chaseAttr")
+	setLocalAttr("VehicleAim", first and state.zoom == 1 and weapon == "m60", "aimAttr")
 end)
 
 -- ===== armas e ações dos assentos (camada Input) =====
 local fire = { on = false }
+
+-- direção do tiro: em 1ª pessoa, a linha de visada; na perseguição, do assento até o ponto da retícula
+local function aimDir(): Vector3
+	local look = camera.CFrame.LookVector
+	local seat = currentSeat()
+	local model = seat and vehicleOf(seat)
+	if cam.blend < 0.5 or not (seat and model) then
+		return look
+	end
+	local origin = camera.CFrame.Position
+	local hit = workspace:Raycast(origin, look * (1500 / M), VehicleLive.solid(rayList(model)))
+	local at = if hit then hit.Position else origin + look * (1500 / M)
+	local d = at - (seat.Position + Vector3.new(0, 2.5 / M, 0))
+	return if d.Magnitude > 1 then d.Unit else look
+end
+
 local function fireOnce(extra: { [string]: any }?)
-	local req: { [string]: any } = { dir = camera.CFrame.LookVector }
+	local req: { [string]: any } = { dir = aimDir() }
 	if extra then
 		for k, v in extra do
 			req[k] = v
 		end
 	end
 	Net.event("Vehicle_Fire"):FireServer(req)
+	local seat = currentSeat()
+	if seat and seat:GetAttribute("Weapon") == "m60" and not (extra and extra.coax) then
+		Bus.fire("vehicle_shot") -- coice e clarão na M60 do assento (WeaponVisuals)
+	end
 end
 local function autoFire(extra: { [string]: any }?)
 	fire.on = true

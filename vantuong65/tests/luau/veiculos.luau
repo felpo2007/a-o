@@ -449,6 +449,45 @@ test("UH-34D: rotor parte e para, atitude com inércia, pouso amortecido, curva 
 	print(string.format("       atitude: 90%% de 10° em %.2f s; partida do rotor %.0f s", t10 :: number, t))
 end)
 
+test("vista sentado: todo assento tem olho fora do casco (escotilha, cabine, porta, teto)", function()
+	for id, sp in Vehicles.SPECS do
+		local art = VehicleDrive.ART[id]
+		local box = art.box
+		local seats = {}
+		for _, s in sp.seats do
+			table.insert(seats, s.id)
+		end
+		for i = 1, Vehicles.PASSENGERS[id] or 0 do
+			table.insert(seats, "p" .. i)
+		end
+		local seen = {}
+		for _, seatId in seats do
+			local x, y, z = VehicleDrive.eyeOf(id, seatId)
+			assert(x and y and z, id .. ": sem olho para " .. seatId)
+			assert(math.abs(x) <= box[1] / 2 and math.abs(z) <= box[3] / 2 + 1, id .. ": olho fora da caixa " .. seatId)
+			local key = string.format("%.1f %.1f %.1f", x, y, z)
+			assert(not seen[key], id .. ": dois assentos no mesmo olho " .. seatId)
+			seen[key] = true
+			if art.track then
+				-- blindado: a cabeça fica acima do laço da lagarta (convés), nunca dentro do casco baixo
+				local top = -math.huge
+				for _, c in art.track.circles do
+					top = math.max(top, c[2] + c[3])
+				end
+				assert(y > top + 1, string.format("%s %s: olho em y %.1f, laço até %.1f", id, seatId, y, top))
+			end
+		end
+	end
+	-- UH-34D: piloto acima do meio da altura (cabine alta), atirador fora da pele da direita (z ≈ −4,9)
+	local _, py = VehicleDrive.eyeOf("uh34d", "driver")
+	local _, _, gz = VehicleDrive.eyeOf("uh34d", "gunner")
+	assert((py :: number) > 5 and (gz :: number) < -4.9)
+	assert(VehicleDrive.eyeOf("m48a3", "p1") == nil, "M48 não leva passageiro")
+	local dHeli = VehicleDrive.chaseOf("heli", 40)
+	local dTank = VehicleDrive.chaseOf("ground", 22.6)
+	assert(dHeli > dTank and dTank > 22.6, "perseguição mostra o casco inteiro")
+end)
+
 test("compatível: Vehicles.drive usa o mesmo modelo", function()
 	local a = { v = 0 }
 	for _ = 1, 300 do

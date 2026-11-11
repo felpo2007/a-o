@@ -2313,6 +2313,70 @@ PLACEHOLDER.
 Só no Studio: `workspace:SetAttribute("VT65DevDrive", "m48a3")` (também `"ontos"`, `"lvtp5"`,
 `"uh34d"` e `"sair"`) põe o jogador no assento do motorista.
 
+**Vista sentado** (teste no Studio):
+- **Problema:** com o olho na cabeça do personagem, dentro da malha, que só tem faces externas, o
+  casco sumia e o fuzil continuava na mão.
+- **Agora cada assento tem um olho fora da malha:**
+  - motorista com a cabeça fora da escotilha;
+  - atirador no periscópio, com moldura de ótica;
+  - comandante fora da cúpula;
+  - tropa do LVTP-5 sentada no teto, como os fuzileiros andavam no Vietnã por causa das minas;
+  - pilotos na cabine alta do UH-34D;
+  - atirador debruçado na porta.
+- **Arma de 1ª pessoa:** é a do assento. O motorista não tem nenhuma; as portas e as cúpulas têm a
+  M60.
+- **Corpo:** o do próprio personagem some sentado.
+- **3ª pessoa:** câmera de perseguição atrás do veículo.
+- **Ajuste à vista no Studio:** o olho do motorista do M48 recuou para cima do convés (em x = −7
+  ficava na quina da frente e o casco não aparecia). Agora a frente do casco aparece embaixo e o tubo
+  do canhão em cima.
+
+## D-88 — Animações do soldado por captura de movimento (2026-11-11)
+**Pedido do usuário:** "as animações ultra realistas".
+
+**Fonte:**
+- Captura de movimento da CMU Graphics Lab Motion Capture Database (mocap.cs.cmu.edu), com licença
+  livre para qualquer uso, sem revender os dados.
+- Crédito pedido: "mocap.cs.cmu.edu / NSF EIA-0196217" (está na descrição dos assets; pôr também nos
+  créditos do jogo).
+- Os sujeitos 141 e 143 estão a 60 quadros por segundo, não a 120 como diz o site (a pelve cairia a
+  −44 m/s²).
+
+**Clipes** (`tools/anim`: retarget para o R15 em Python/Blender, `.rbxm` gravado no Lune; enviados
+pelo Open Cloud):
+
+| Clipe | Fonte | Velocidade natural |
+|---|---|---|
+| parado | 77_02 | — |
+| andar | 35_01 | 1,08 m/s (×1,30 no jogo) |
+| trote | 35_17 | 2,66 m/s |
+| correr | 127_06 | 3,90 m/s (×1,41 a 5,5 m/s) |
+| agachado | pose montada sobre a 77_02 | — |
+| agachado andando | 136_09 | 0,76 m/s |
+| deitado | 77_16 | — |
+| rastejar | procedural sobre a 77_16 | 0,35 m/s |
+| recarregar | procedural (tronco e braços) | — |
+| granada | 143_22 espelhada | sai em 0,4 s |
+
+**Qualidade medida:**
+- os laços fecham sem emenda;
+- o pé escorrega no máximo 0,01 cm;
+- as mãos ficam na pega do fuzil;
+- no jogo (`SoldierAnimations.client`) a passada mistura andar, trote e correr pela velocidade.
+
+**No Studio:** a animação de andar carregou (69 quadros, todas as juntas do R15) e tocou com o
+soldado andando a 1,36 m/s.
+
+**Ajustes:**
+- **Fuzil deitado:** a pega nova foi medida na pose (`PostureController.HOLD_PRONE`); com a antiga, o
+  fuzil ficava acima das costas.
+
+**Falta:**
+- **Câmera agachado:** fica ~30 cm abaixo da cabeça da animação. Sugestão: `DROP.crouch` de 2,2 para
+  ~1,0 stud e regravar os dois clipes agachados.
+- **Bots:** ainda deslizam sem animação. `SoldierAnims.BOTS = true` anima os bots perto de cada
+  cliente; falta medir o custo com 58 bots.
+
 **Falta:**
 - o som do UH-34D (`uh34d_loop` em 0) e o chocalho da lagarta;
 - separar as pás do UH-34D no Blender: a malha publicada tem pás paradas.

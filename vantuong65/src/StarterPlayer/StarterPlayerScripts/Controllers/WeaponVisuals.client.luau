@@ -422,12 +422,37 @@ local function setView(id: string?)
 	view = m
 end
 
+-- Veículo (VehicleController): sentado, a arma de 1ª pessoa é a do ASSENTO, se ele tiver uma de
+-- infantaria (a M60 da porta do UH-34D, da cúpula do M48 e do LVTP-5). Motorista, piloto, passageiro
+-- e os canhões não mostram arma nenhuma (antes aparecia o fuzil equipado e a mão, teste 2026-11-11).
+-- Na câmera de perseguição (atributo local "VehicleChase") ela some; "VehicleAim" leva ao ombro.
+local function seated(): boolean
+	local char = player.Character
+	local hum = char and char:FindFirstChildOfClass("Humanoid")
+	return (hum ~= nil and hum.SeatPart ~= nil) or Input.state.vehicle ~= nil
+end
+
+local function seatGun(): string?
+	local char = player.Character
+	local hum = char and char:FindFirstChildOfClass("Humanoid")
+	local seat = hum and hum.SeatPart
+	local w = seat and seat:GetAttribute("Weapon")
+	return if type(w) == "string" and Weapons.get(w) then w else nil
+end
+
 local function showView(): boolean
 	local char = player.Character
 	local hum = char and char:FindFirstChildOfClass("Humanoid")
+	if seated() then
+		return hum ~= nil
+			and hum.Health > 0
+			and seatGun() ~= nil
+			and player:GetAttribute("VehicleChase") ~= true
+			and Input.state.menus == 0
+			and not Input.state.map
+	end
 	return hum ~= nil
 		and hum.Health > 0
-		and hum.SeatPart == nil
 		and player:GetAttribute("Downed") ~= true
 		and player:GetAttribute("Binoculars") ~= true
 		-- 3ª pessoa (D-68, ThirdPerson.client): a câmera está atrás do ombro e o corpo aparece com
@@ -444,8 +469,14 @@ local function muzzleOf(model: Instance?): Vector3?
 	return if a then a.WorldPosition else nil
 end
 
+-- No veículo a câmera ainda muda depois daqui (VehicleController, Camera + 3: olho fora da malha).
+-- A arma do assento é posta de novo depois dela (Camera + 4), pela diferença; a pé nada muda.
+local placed = { cf = CFrame.identity, seat = false }
+
 RunService:BindToRenderStep("VT65ViewModel", Enum.RenderPriority.Camera.Value + 1, function(dt: number)
-	setView(player:GetAttribute("EquippedWeapon") :: string?)
+	placed.seat = false
+	local inSeat = seated()
+	setView(if inSeat then seatGun() else player:GetAttribute("EquippedWeapon") :: string?)
 	local v = view
 	if not v then
 		if arms then
@@ -469,7 +500,8 @@ RunService:BindToRenderStep("VT65ViewModel", Enum.RenderPriority.Camera.Value + 
 		clearMags()
 	end
 	-- recarregando, a arma sai do ombro
-	local aiming = player:GetAttribute("Aiming") == true and not reloading
+	local aiming = (if inSeat then player:GetAttribute("VehicleAim") else player:GetAttribute("Aiming")) == true
+		and not reloading
 	aimT += ((if aiming then 1 else 0) - aimT) * math.min(1, dt * 12)
 	kick = math.max(0, kick - dt * 7)
 	local ads = CFrame.new(0, 0, -viewEye / M) * viewAlign * CFrame.new(-viewSight)
@@ -570,6 +602,22 @@ RunService:BindToRenderStep("VT65ViewModel", Enum.RenderPriority.Camera.Value + 
 		local cam = camera.CFrame
 		forearm(handR + rot * Vector3.new(0, -0.03 / M, 0.05 / M), cam * ELBOW_R, "R")
 		forearm(handL + rot * Vector3.new(0, -0.01 / M, 0.05 / M), cam * ELBOW_L, "L")
+	end
+	placed.cf, placed.seat = camera.CFrame, inSeat
+end)
+
+RunService:BindToRenderStep("VT65ViewModelSeat", Enum.RenderPriority.Camera.Value + 4, function()
+	local v = view
+	if not (placed.seat and v) then
+		return
+	end
+	placed.seat = false
+	local delta = camera.CFrame * placed.cf:Inverse()
+	if delta ~= CFrame.identity then
+		v:PivotTo(delta * v:GetPivot())
+		if arms then
+			arms:PivotTo(delta * arms:GetPivot())
+		end
 	end
 end)
 
@@ -745,6 +793,15 @@ Bus.on("shot_fired", function(shot: any)
 		table.insert(ignore, player.Character)
 	end
 	impactOf(shot, ignore)
+end)
+
+-- M60 do assento do veículo (VehicleController): coice e clarão na arma de 1ª pessoa
+Bus.on("vehicle_shot", function()
+	kick = 1
+	local muzzle = if view then muzzleOf(camera) else nil
+	if muzzle then
+		flash(muzzle)
+	end
 end)
 
 Net.unreliable("Combat_Tracer").OnClientEvent:Connect(function(shot: any)
