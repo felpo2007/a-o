@@ -6,6 +6,7 @@
 -- nele, e o foco automático fica desligado enquanto o cursor estiver na tela.
 local GuiService = game:GetService("GuiService")
 local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
 
 local Input = require(script.Parent.Input)
 local VirtualCursor = require(script.Parent.VirtualCursor)
@@ -87,7 +88,91 @@ function UiKit.screen(name: string, order: number?): ScreenGui
 	return g
 end
 
--- moldura de foco de alto contraste (amarelo sobre preto, 4 px)
+-- ===== movimento (pedido do dono, 2026-11-11: "mais fluido") =====
+-- Tempos de interface: QUICK para realce e cor, SOFT para escala e entrada de cartão.
+UiKit.QUICK = TweenInfo.new(0.14, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
+UiKit.SOFT = TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
+
+function UiKit.tween(o: Instance, info: TweenInfo, props: { [string]: any }): Tween
+	local t = TweenService:Create(o, info, props)
+	t:Play()
+	return t
+end
+
+-- Realce animado de um botão (mouse, foco do Roblox e cursor virtual chamam set): cresce um pouco,
+-- a borda vira latão e o fundo passa para `quente`. base() troca a cor de repouso (ficha cheia,
+-- trancada) com a mesma transição. A escala usa o UIScale "Escala" do botão (criado se faltar), o
+-- mesmo que a entrada escalonada dos cartões anima.
+export type Realce = {
+	set: (on: boolean) -> (),
+	base: (color: Color3) -> (),
+	hot: () -> boolean,
+}
+function UiKit.realce(b: GuiObject, base: Color3?, quente: Color3?, escala: number?): Realce
+	local sc = b:FindFirstChild("Escala")
+	if not (sc and sc:IsA("UIScale")) then
+		local s = Instance.new("UIScale")
+		s.Name = "Escala"
+		s.Parent = b
+		sc = s
+	end
+	local scale = sc :: UIScale
+	local ring: UIStroke? = nil
+	for _, c in b:GetChildren() do
+		if c:IsA("UIStroke") and c.ApplyStrokeMode == Enum.ApplyStrokeMode.Border then
+			ring = c
+			break
+		end
+	end
+	if not ring then
+		local s = Instance.new("UIStroke")
+		s.Name = "Realce"
+		s.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+		s.Color = UiKit.BRASS
+		s.Thickness = 2
+		s.Transparency = 1
+		s.Parent = b
+		ring = s
+	end
+	local edge = ring :: UIStroke
+	local rest = { color = edge.Color, thick = edge.Thickness, tr = edge.Transparency }
+	local on = false
+	local cold: Color3? = base
+	local function paint()
+		local c = if on and quente then quente else cold
+		if c then
+			UiKit.tween(b, UiKit.QUICK, { BackgroundColor3 = c })
+		end
+	end
+	return {
+		set = function(v: boolean)
+			if v == on then
+				return
+			end
+			on = v
+			UiKit.tween(scale, UiKit.SOFT, { Scale = if v then (escala or 1.035) else 1 })
+			UiKit.tween(edge, UiKit.QUICK, {
+				Color = if v then UiKit.BRASS else rest.color,
+				Thickness = if v then math.max(rest.thick, 2) else rest.thick,
+				Transparency = if v then 0 else rest.tr,
+			})
+			paint()
+		end,
+		base = function(c: Color3)
+			if c == cold then
+				return -- a tela redesenha muito: só anima quando a cor muda de fato
+			end
+			cold = c
+			paint()
+		end,
+		hot = function(): boolean
+			return on
+		end,
+	}
+end
+
+-- moldura de foco de alto contraste (amarelo sobre preto, 4 px). Ao trocar de item ela "fecha" sobre
+-- o novo (vem de 10 px para 4) e depois respira devagar: o foco do controle nunca some nem pula seco.
 local focusFrame = Instance.new("Frame")
 focusFrame.Name = "VT65Focus"
 focusFrame.BackgroundTransparency = 1
@@ -98,11 +183,33 @@ stroke.Thickness = 4
 stroke.Color = Color3.fromRGB(255, 214, 0)
 stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 stroke.Parent = focusFrame
-local inner = Instance.new("UIStroke")
-inner.Name = "Inner"
-inner.Thickness = 1
-inner.Color = Color3.new(0, 0, 0)
 UiKit.FOCUS = focusFrame
+
+local breathe: Tween? = nil
+GuiService:GetPropertyChangedSignal("SelectedObject"):Connect(function()
+	local b = breathe
+	if b then
+		b:Cancel()
+		breathe = nil
+	end
+	stroke.Transparency = 0
+	if not GuiService.SelectedObject then
+		return
+	end
+	focusFrame.Size = UDim2.new(1, 20, 1, 20)
+	focusFrame.Position = UDim2.fromOffset(-10, -10)
+	UiKit.tween(focusFrame, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+		Size = UDim2.new(1, 8, 1, 8),
+		Position = UDim2.fromOffset(-4, -4),
+	})
+	local t = TweenService:Create(
+		stroke,
+		TweenInfo.new(0.8, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true, 0.25),
+		{ Transparency = 0.4 }
+	)
+	t:Play()
+	breathe = t
+end)
 
 function UiKit.button(parent: Instance, text: string, onClick: () -> (), order: number?): TextButton
 	local b = Instance.new("TextButton")

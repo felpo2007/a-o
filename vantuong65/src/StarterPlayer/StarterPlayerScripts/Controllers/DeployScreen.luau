@@ -15,12 +15,32 @@
 -- reservatório por chave). Só dados reais: Roles, Weapons, MapConfig, efetivo pelo atributo
 -- "Faction" (a conta do TeamService) e a caderneta do servidor (Daily_State).
 -- Remotes: Team_Choose, Squad_Action {op = create/join/leave}, Role_Choose, Daily_Get/Daily_Claim.
+-- Movimento e acabamento (pedido do dono, 2026-11-11: "mais fluido e com uma qualidade gráfica
+-- melhor ... faça com maestria", realismo de época):
+--   - troca de pasta em crossfade: a que sai esmaece e recua, a que entra desliza e abre; durante a
+--     troca cada pasta vai para um CanvasGroup do tamanho dela (em repouso fica fora, texto nítido);
+--   - cartões entram escalonados, "dados" na pasta (um véu da cor da pasta some, escala e giro
+--     assentam); carimbos caem na ficha (escala e tinta);
+--   - realce animado no mouse, no foco do controle e no cursor virtual (UiKit.realce);
+--   - papéis com sombra macia (Acabamento.sombra), luz de cima e filete; selos com glifo por papel e
+--     por unidade (glifos do Arimo, que vêm com o Roblox);
+--   - a ficha do papel mostra o que muda ao escolher: armas datilografadas, e cano, cadência,
+--     carregador e peso em barras que deslizam, com a diferença para o papel atual;
+--   - abas com indicador de latão deslizando; dicas de botão em chip (imagem do botão do controle ou
+--     tecla em relevo).
+-- Gancho de teste (só no Studio): workspace:SetAttribute("VT65DevTela", "escolha") abre o passo
+-- de escolha (lado, se não há; senão squad ou papel); também "lado", "squad", "papel", "diaria" e
+-- "insercao" (completa lado, squad e papel pelos remotes e abre a ficha de inserção). Ver o fim do
+-- arquivo.
 local GuiService = game:GetService("GuiService")
 local Players = game:GetService("Players")
+local ReplicatedFirst = game:GetService("ReplicatedFirst")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 
+local Acabamento = require(ReplicatedFirst:WaitForChild("Acabamento"))
 local Commerce = require(ReplicatedStorage.Shared.Commerce)
 local MapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any
 local Net = require(ReplicatedStorage.Shared.Net)
@@ -47,7 +67,54 @@ local NEW_CARD = Color3.fromRGB(222, 206, 162) -- "formar squad"
 local MANILA_HOT = Color3.fromRGB(206, 184, 136)
 local OLIVE_INK = Color3.fromRGB(58, 82, 44) -- carimbo verde ("ABERTO", "ATUAL", "RECEBIDO")
 local NOTICE = Color3.fromRGB(238, 132, 104)
+local BRASS = UiKit.BRASS
+local HEAD_B = Font.fromName("Oswald", Enum.FontWeight.Bold) -- títulos em negrito (hierarquia)
+local GLYPH = Font.fromEnum(Enum.Font.ArimoBold) -- glifos dos selos (todos existem no Arimo)
+local VEIL = MANILA:Lerp(INK, 0.08) -- cor da pasta sob os cartões (véu da entrada)
 local DESIGN_W, DESIGN_H = 1280, 720
+
+-- tempos de movimento
+local QUICK = UiKit.QUICK
+local SOFT = UiKit.SOFT
+local PAGE_IN = TweenInfo.new(0.42, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
+local PAGE_OUT = TweenInfo.new(0.22, Enum.EasingStyle.Sine, Enum.EasingDirection.In)
+local function tw(o: Instance, info: TweenInfo, props: { [string]: any }): Tween
+	local t = TweenService:Create(o, info, props)
+	t:Play()
+	return t
+end
+local function after(delay: number, info: TweenInfo): TweenInfo
+	return TweenInfo.new(info.Time, info.EasingStyle, info.EasingDirection, 0, false, delay)
+end
+
+-- selos: um glifo por papel e por unidade (sinais de carta militar, do que o Arimo tem)
+local ROLE_GLYPH: { [string]: string } = {
+	commander = "♦",
+	squad_leader = "▲",
+	rifleman = "×", -- o X do símbolo de infantaria
+	grenadier = "⁂",
+	machine_gunner = "≡", -- fita de munição
+	anti_tank = "►",
+	engineer = "⌂",
+	medic = "+",
+	radio_operator = "≈",
+	observer = "∞", -- binóculo
+	sniper = "◙",
+	sapper = "▼",
+	mortar = "∩", -- trajetória curva
+	tank_crew = "▬",
+	pilot = "┼", -- rotor visto de cima
+	door_gunner = "◄",
+}
+local UNIT_GLYPH: { [string]: string } = {
+	command = "♦",
+	infantry = "×",
+	recon = "∞",
+	sapper = "▼",
+	mortar = "∩",
+	armor = "▬",
+	helicopter = "┼",
+}
 
 local UNIT_ORDER = { "infantry", "command", "recon", "sapper", "mortar", "armor", "helicopter" }
 local UNIT_NAME: { [string]: string } = {
@@ -232,6 +299,9 @@ local function stamp(parent: Instance, size: number, x: number, y: number, w: nu
 	t.TextTransparency = 0.12
 	t.ZIndex = 3
 	stroke(t, STAMP, 3, 0.18)
+	local hit = Instance.new("UIScale")
+	hit.Name = "Pancada"
+	hit.Parent = t
 	return t
 end
 
@@ -241,6 +311,67 @@ local function inkStamp(t: TextLabel, color: Color3)
 	if s then
 		s.Color = color
 	end
+end
+
+-- O carimbo cai na ficha: grande e claro, assenta em 0,22 s com a tinta firmando.
+local function thump(t: TextLabel, delay: number?)
+	local hit = t:FindFirstChild("Pancada")
+	local s = t:FindFirstChildOfClass("UIStroke")
+	local d = delay or 0
+	if hit and hit:IsA("UIScale") then
+		hit.Scale = 1.55
+		tw(hit, after(d, TweenInfo.new(0.24, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)), { Scale = 1 })
+	end
+	t.TextTransparency = 1
+	tw(t, after(d, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)), { TextTransparency = 0.12 })
+	if s then
+		s.Transparency = 1
+		tw(s, after(d, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)), { Transparency = 0.18 })
+	end
+end
+
+-- Muda o carimbo; se o texto mudou (ou ele apareceu agora), ele cai de novo.
+local function stampSet(t: TextLabel, text: string?, color: Color3?, delay: number?)
+	local show = text ~= nil and text ~= ""
+	local changed = show and (not t.Visible or t.Text ~= text)
+	t.Visible = show
+	if not show then
+		return
+	end
+	t.Text = text :: string
+	if color then
+		inkStamp(t, color)
+	end
+	if changed then
+		thump(t, delay)
+	end
+end
+
+-- selo redondo com glifo (papel, unidade): anel de tinta e o sinal no meio
+local function seal(parent: Instance, x: number, y: number, d: number, glyph: string): (Frame, TextLabel)
+	local f = Instance.new("Frame")
+	f.Name = "Selo"
+	f.BackgroundColor3 = CARD
+	f.BorderSizePixel = 0
+	f.Position = UDim2.fromOffset(x, y)
+	f.Size = UDim2.fromOffset(d, d)
+	f.Parent = parent
+	local c = Instance.new("UICorner")
+	c.CornerRadius = UDim.new(1, 0)
+	c.Parent = f
+	stroke(f, INK, 2, 0.15)
+	local t = Instance.new("TextLabel")
+	t.BackgroundTransparency = 1
+	t.Size = UDim2.fromScale(1, 1)
+	t.FontFace = GLYPH
+	t.TextColor3 = INK
+	t.Text = glyph
+	t.Parent = f
+	reg(t, math.floor(d * 0.56))
+	local pop = Instance.new("UIScale")
+	pop.Name = "Pop"
+	pop.Parent = f
+	return f, t
 end
 
 local function hline(parent: Instance, color: Color3, x: number, y: number, w: number, tr: number?)
@@ -255,6 +386,31 @@ local function paper(parent: Instance, rot: number)
 	g.Parent = parent
 end
 
+-- Peças da entrada escalonada: o UIScale "Escala" (também do realce) e o "Veu", um quadro da cor da
+-- pasta por cima de tudo que some quando o cartão "pousa" na pasta.
+local function entryParts(o: GuiObject, radius: number?)
+	local sc = Instance.new("UIScale")
+	sc.Name = "Escala"
+	sc.Parent = o
+	local veil = Instance.new("Frame")
+	veil.Name = "Veu"
+	veil.BackgroundColor3 = VEIL
+	veil.BackgroundTransparency = 1
+	veil.BorderSizePixel = 0
+	veil.Size = UDim2.fromScale(1, 1)
+	veil.ZIndex = 20
+	if radius then
+		local c = Instance.new("UICorner")
+		c.CornerRadius = UDim.new(0, radius)
+		c.Parent = veil
+	end
+	pcall(function()
+		veil.Interactable = false -- não tapa o clique nem o cursor virtual
+	end)
+	veil.Parent = o
+end
+
+-- Cartão clicável (com as peças da entrada escalonada).
 local function cardButton(parent: Instance?, w: number, h: number, color: Color3): TextButton
 	local b = Instance.new("TextButton")
 	b.AutoButtonColor = false
@@ -264,8 +420,51 @@ local function cardButton(parent: Instance?, w: number, h: number, color: Color3
 	b.Size = UDim2.fromOffset(w, h)
 	b.Selectable = true
 	b.SelectionImageObject = UiKit.FOCUS
+	entryParts(b, 3)
 	b.Parent = parent
 	return b
+end
+
+-- Entrada escalonada: cada cartão "pousa" (véu some, escala e um leve giro assentam), um depois do
+-- outro. Só os visíveis, na ordem em que aparecem.
+local function deal(list: { GuiObject }, delay0: number?, step: number?)
+	local d0 = delay0 or 0.1
+	local k = 0
+	for _, b in list do
+		if not b.Visible then
+			continue
+		end
+		local d = d0 + k * (step or 0.035)
+		k += 1
+		local veil = b:FindFirstChild("Veu")
+		if veil and veil:IsA("Frame") then
+			veil.BackgroundTransparency = 0
+			tw(veil, after(d, TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)), {
+				BackgroundTransparency = 1,
+			})
+		end
+		local sc = b:FindFirstChild("Escala")
+		if sc and sc:IsA("UIScale") then
+			sc.Scale = 0.93
+			tw(sc, after(d, TweenInfo.new(0.42, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)), { Scale = 1 })
+		end
+		b.Rotation = if k % 2 == 0 then 1.6 else -1.6
+		tw(b, after(d, TweenInfo.new(0.42, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)), { Rotation = 0 })
+	end
+end
+
+-- botões visíveis de uma lista, na ordem do LayoutOrder (para a entrada escalonada)
+local function byOrder(list: { GuiObject }): { GuiObject }
+	local out = {}
+	for _, b in list do
+		if b.Visible then
+			table.insert(out, b)
+		end
+	end
+	table.sort(out, function(a: GuiObject, b: GuiObject): boolean
+		return a.LayoutOrder < b.LayoutOrder
+	end)
+	return out
 end
 
 -- clique (mouse, toque, A) + realce do mouse, do foco nativo e do cursor virtual do controle
@@ -314,37 +513,58 @@ local function scroller(parent: Instance, x: number, y: number, w: number, h: nu
 	return s
 end
 
--- pasta parda com aba datilografada; devolve a pasta e a linha de informação à direita da aba
+-- pasta parda com aba datilografada; devolve a pasta e a linha de informação à direita da aba.
+-- Profundidade: sombra macia embaixo, uma folha de trás aparecendo torta e a luz de cima.
 local function folder(parent: Instance, tab: string, w: number, h: number): (Frame, TextLabel)
+	local back = box(parent, MANILA:Lerp(INK, 0.2), 7, -5, w, h)
+	back.Name = "FolhaDeTras"
+	back.Rotation = -0.9
+	back.ZIndex = 1
+	corner(back, 4)
+	paper(back, 80)
 	local f = box(parent, MANILA, 0, 0, w, h)
+	f.Name = "Pasta"
 	f.Active = true -- tapa a mesa atrás (clique e cursor não atravessam)
+	f.ZIndex = 2
 	corner(f, 4)
 	paper(f, 80)
-	stroke(f, INK, 1, 0.75)
+	stroke(f, INK, 1, 0.7)
+	local shadow = Acabamento.sombra(f, 20, Vector2.new(0, 9), 0.6)
+	shadow.ZIndex = 0
 	local t = box(f, DRAB, 16, 12, 270, 32)
 	corner(t, 2)
+	paper(t, 90)
+	local tb = box(t, BRASS, 0, 0, 3, 32) -- filete de latão na aba
+	corner(tb, 1)
 	local tt = txt(t, TYPE, 16, KHAKI, 12, 0, 246, 32)
 	tt.Text = tab
 	local info = txt(f, TYPE, 15, INK, 296, 12, w - 312, 32, Enum.TextXAlignment.Right)
 	return f, info
 end
 
--- botão escuro de rodapé/ação
+-- botão escuro de rodapé/ação (realce animado: escala e filete de latão)
 local function darkButton(parent: Instance, text: string, x: number, y: number, w: number, h: number): TextButton
 	local b = Instance.new("TextButton")
 	b.Position = UDim2.fromOffset(x, y)
 	b.Size = UDim2.fromOffset(w, h)
 	b.BackgroundColor3 = DRAB
 	b.TextColor3 = KHAKI
-	b.Font = HEAD
-	b.AutoButtonColor = true
+	b.FontFace = HEAD_B
+	b.AutoButtonColor = false
 	b.Selectable = true
 	b.SelectionImageObject = UiKit.FOCUS
 	b.Text = text
 	b.Parent = parent
 	reg(b, 17)
+	corner(b, 3)
+	paper(b, 90)
 	stroke(b, KHAKI, 1, 0.4)
 	return b
+end
+
+local function bindDark(b: GuiButton, onClick: () -> ())
+	local r = UiKit.realce(b, DRAB, UiKit.OLIVE, 1.03)
+	bindCard(b, onClick, r.set)
 end
 
 -- ===== raiz =====
@@ -379,19 +599,26 @@ end
 
 -- cabeçalho
 local title = txt(root, HEAD, 38, CARD, 40, 6, 600, 46)
+title.FontFace = HEAD_B
 title.Text = "VẠN TƯỜNG '65"
 local subtitle = txt(root, TYPE, 16, KHAKI, 40, 52, 700, 22)
 subtitle.Text = "OPERAÇÃO STARLITE · 18–24 AGO 1965 · ORDEM DE DESLOCAMENTO"
+box(root, BRASS, 40, 77, 520, 1, 0.5) -- filete de latão sob o cabeçalho
 local posLine = txt(root, TYPE, 16, KHAKI, 700, 12, 540, 22, Enum.TextXAlignment.Right)
 local teamLine = txt(root, TYPE, 16, KHAKI, 700, 36, 540, 22, Enum.TextXAlignment.Right)
 local notice = txt(root, TYPE, 16, NOTICE, 560, 58, 680, 22, Enum.TextXAlignment.Right)
+notice.RichText = true
 
 -- lugar do posto (rank) e da experiência: atributos "Rank" e "XP" (números) do jogador, publicados
 -- pelo sistema de progressão; sem eles, a plaqueta fica escondida
 local rankTag = box(root, DRAB, 380, 14, 220, 30)
 corner(rankTag, 3)
-stroke(rankTag, KHAKI, 1, 0.45)
+paper(rankTag, 90)
+local rankEdge = stroke(rankTag, BRASS, 1, 0.45)
+local rankPop = Instance.new("UIScale")
+rankPop.Parent = rankTag
 local rankText = txt(rankTag, HEAD, 16, KHAKI, 8, 0, 204, 30, Enum.TextXAlignment.Center)
+rankText.FontFace = HEAD_B
 local function rankLine(): string?
 	local r, xp = player:GetAttribute("Rank"), player:GetAttribute("XP")
 	if type(r) ~= "number" then
@@ -403,20 +630,36 @@ local function rankLine(): string?
 end
 local function renderRank()
 	local line = rankLine()
+	local changed = rankTag.Visible and line ~= nil and line ~= rankText.Text
 	rankTag.Visible = line ~= nil
 	rankText.Text = line or ""
+	if changed then -- XP ou posto novo: a plaqueta acende e assenta
+		rankPop.Scale = 1.08
+		rankEdge.Transparency = 0
+		tw(rankPop, SOFT, { Scale = 1 })
+		tw(rankEdge, TweenInfo.new(0.8, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), { Transparency = 0.45 })
+	end
 end
 renderRank()
 player:GetAttributeChangedSignal("Rank"):Connect(renderRank)
 player:GetAttributeChangedSignal("XP"):Connect(renderRank)
+-- aviso do cabeçalho: datilografado, some esmaecendo depois de 6 s
 local noticeToken = 0
 local function notify(msg: string)
 	noticeToken += 1
 	local my = noticeToken
-	notice.Text = msg
+	notice.TextTransparency = 0
+	Acabamento.datilografar(notice, Acabamento.viet(msg), 80)
 	task.delay(6, function()
 		if noticeToken == my then
-			notice.Text = ""
+			local t =
+				tw(notice, TweenInfo.new(0.5, Enum.EasingStyle.Sine, Enum.EasingDirection.In), { TextTransparency = 1 })
+			t.Completed:Once(function()
+				if noticeToken == my then
+					notice.Text = ""
+					notice.TextTransparency = 0
+				end
+			end)
 		end
 	end)
 end
@@ -556,42 +799,105 @@ end
 local function page(x: number, y: number, w: number, h: number): Frame
 	local p = Instance.new("Frame")
 	p.BackgroundTransparency = 1
-	p.Position = UDim2.fromOffset(x, y)
+	p.AnchorPoint = Vector2.new(0.5, 0.5) -- a pasta "abre" pelo meio (o UIScale escala pela âncora)
+	p.Position = UDim2.fromOffset(x + w / 2, y + h / 2)
 	p.Size = UDim2.fromOffset(w, h)
 	return p
 end
 local PANEL_X, PANEL_Y, PANEL_W, PANEL_H = 560, 146, 680, 520
+local CHOOSE_Y = 396 -- a sala de arquivo só usa a faixa de baixo (as fichas); o alto é a mesa 3D
 local pages: { [string]: Frame } = {
 	squad = page(PANEL_X, PANEL_Y, PANEL_W, PANEL_H),
 	role = page(PANEL_X, PANEL_Y, PANEL_W, PANEL_H),
 	daily = page(PANEL_X, PANEL_Y, PANEL_W, PANEL_H),
 	insert = page(40, PANEL_Y, 370, PANEL_H),
-	choose = page(0, 0, DESIGN_W, DESIGN_H),
+	choose = page(0, CHOOSE_Y, DESIGN_W, 300),
 }
 
--- ===== transições (só Position e UIScale: baratas) =====
-local SLIDE = TweenInfo.new(0.24, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-local FOLD = TweenInfo.new(0.28, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+-- ===== transições: crossfade de pastas =====
+-- Em repouso a pasta fica direto na raiz (texto nítido). Na troca ela vai para um CanvasGroup do
+-- tamanho dela (com folga para a sombra), que esmaece: a que sai recua e some, a que entra desliza
+-- e abre (escala 0,96 → 1). Só Position, escala e GroupTransparency: o motor faz o resto.
+local MARGIN = 40
 local pageBase: { [string]: UDim2 } = {}
 local pageScale: { [string]: UIScale } = {}
+local carrier: { [string]: CanvasGroup } = {}
+local pageToken: { [string]: number } = {}
+local pageShown: { [string]: boolean } = {}
 for name, p in pages do
 	pageBase[name] = p.Position
 	local s = Instance.new("UIScale")
 	s.Parent = p
 	pageScale[name] = s
+	local cg = Instance.new("CanvasGroup")
+	cg.Name = "Troca_" .. name
+	cg.BackgroundTransparency = 1
+	cg.Size = p.Size + UDim2.fromOffset(2 * MARGIN, 2 * MARGIN)
+	carrier[name] = cg
+	pageToken[name] = 0
+	pageShown[name] = false
 end
 
--- a pasta chega deslizando de lado (dx) ou de baixo (dy) e "abre" (escala 0,94 → 1)
-local function animateIn(name: string, dx: number, dy: number)
-	local p, base, s = pages[name], pageBase[name], pageScale[name]
-	p.Position = base + UDim2.fromOffset(dx, dy)
-	s.Scale = 0.94
-	TweenService:Create(p, SLIDE, { Position = base }):Play()
-	TweenService:Create(s, FOLD, { Scale = 1 }):Play()
+local function pageShow(name: string, on: boolean, dx: number, dy: number)
+	pageToken[name] += 1
+	local my = pageToken[name]
+	local p, cg, s, base = pages[name], carrier[name], pageScale[name], pageBase[name]
+	-- a pasta (âncora no meio) fica no CanvasGroup com MARGIN de folga para a sombra
+	local inner = UDim2.fromOffset(MARGIN + p.Size.X.Offset / 2, MARGIN + p.Size.Y.Offset / 2)
+	local home = base - inner
+	-- já no meio de uma troca (entrou e já vai sair, ou o contrário): continua de onde está
+	local inFlight = p.Parent == cg and cg.Parent == root
+	p.Parent = cg
+	p.Position = inner
+	cg.Parent = root
+	if on then
+		if not inFlight then
+			cg.Position = home + UDim2.fromOffset(dx, dy)
+			cg.GroupTransparency = 1
+			s.Scale = 0.96
+		end
+		tw(cg, PAGE_IN, { Position = home, GroupTransparency = 0 })
+		tw(s, PAGE_IN, { Scale = 1 }).Completed:Once(function()
+			if pageToken[name] == my then
+				p.Parent = root -- assentou: sai do CanvasGroup
+				p.Position = base
+				cg.Parent = nil
+			end
+		end)
+	else
+		if not inFlight then
+			cg.Position = home
+			cg.GroupTransparency = 0
+		end
+		tw(s, PAGE_OUT, { Scale = 0.97 })
+		tw(cg, PAGE_OUT, { Position = home + UDim2.fromOffset(dx, dy), GroupTransparency = 1 }).Completed:Once(
+			function()
+				if pageToken[name] == my then
+					p.Parent = nil
+					p.Position = base
+					s.Scale = 1
+					cg.Parent = nil
+				end
+			end
+		)
+	end
+end
+
+-- lobby fechado: tudo sai na hora (a próxima abertura anima de novo)
+local function pagesReset()
+	for name, p in pages do
+		pageToken[name] += 1
+		pageShown[name] = false
+		p.Parent = nil
+		p.Position = pageBase[name]
+		pageScale[name].Scale = 1
+		carrier[name].Parent = nil
+	end
 end
 
 -- ===== abas (os mesmos objetos da mesa) =====
-type Tab = { id: string, btn: TextButton, name: TextLabel, info: TextLabel, hot: boolean }
+-- A aba ativa fica em vermelho de carimbo e um filete de latão desliza até ela.
+type Tab = { id: string, btn: TextButton, name: TextLabel, info: TextLabel, hot: boolean, look: string }
 local TAB_DEFS: { { id: string, name: string, w: number } } = {
 	{ id = "desk", name = "◄ MESA", w = 118 },
 	{ id = "squad", name = "1 · SQUAD", w = 160 },
@@ -608,18 +914,31 @@ tabsFrame.Position = UDim2.fromOffset(40, 84)
 tabsFrame.Size = UDim2.fromOffset(1200, 52)
 tabsFrame.Parent = root
 local tabs: { [string]: Tab } = {}
+local tabMark = box(tabsFrame, BRASS, 0, 50, 118, 3)
+tabMark.Name = "Indicador"
+tabMark.ZIndex = 3
+corner(tabMark, 1)
 
 local function tabStyle(t: Tab)
 	local active = t.id == panel
+	local look = (if active then "a" else "-") .. (if t.hot then "h" else "-")
+	if look == t.look then
+		return
+	end
+	t.look = look
 	local f = t.btn
+	tw(f, QUICK, { BackgroundColor3 = if active then STAMP elseif t.hot then UiKit.OLIVE else DRAB })
+	tw(t.name, QUICK, { TextColor3 = if active or t.hot then CARD else KHAKI })
+	tw(t.info, QUICK, { TextColor3 = if active then CARD else KHAKI })
+	local sc = f:FindFirstChild("Escala")
+	if sc then
+		tw(sc, SOFT, { Scale = if t.hot then 1.04 else 1 })
+	end
 	if active then
-		f.BackgroundColor3 = STAMP
-		t.name.TextColor3 = CARD
-		t.info.TextColor3 = CARD
-	else
-		f.BackgroundColor3 = if t.hot then UiKit.OLIVE else DRAB
-		t.name.TextColor3 = KHAKI
-		t.info.TextColor3 = KHAKI
+		tw(tabMark, PAGE_IN, {
+			Position = UDim2.fromOffset(f.Position.X.Offset + 6, 50),
+			Size = UDim2.fromOffset(f.Size.X.Offset - 12, 3),
+		})
 	end
 end
 
@@ -629,12 +948,14 @@ do
 		local b = cardButton(tabsFrame, d.w, 50, DRAB)
 		b.Position = UDim2.fromOffset(x, 0)
 		corner(b, 2)
+		paper(b, 90)
 		stroke(b, KHAKI, 1, 0.55)
 		local n = txt(b, HEAD, 17, KHAKI, 8, 2, d.w - 16, 26, Enum.TextXAlignment.Center)
+		n.FontFace = HEAD_B
 		n.Text = d.name
 		local i = txt(b, TYPE, 13, KHAKI, 6, 26, d.w - 12, 20, Enum.TextXAlignment.Center)
 		i.TextTruncate = Enum.TextTruncate.AtEnd
-		local t: Tab = { id = d.id, btn = b, name = n, info = i, hot = false }
+		local t: Tab = { id = d.id, btn = b, name = n, info = i, hot = false, look = "" }
 		tabs[d.id] = t
 		bindCard(b, function()
 			if d.id == "desk" then
@@ -651,7 +972,17 @@ do
 end
 
 -- ===== sala de arquivo: fichas de alistamento =====
-type FCard = { btn: TextButton, count: TextLabel, avail: TextLabel, cta: Frame, ctaText: TextLabel, hot: boolean }
+type FCard = {
+	btn: TextButton,
+	count: TextLabel,
+	avail: TextLabel,
+	cta: Frame,
+	ctaText: TextLabel,
+	hot: boolean,
+	realce: UiKit.Realce,
+	shadow: ImageLabel,
+	look: boolean?,
+}
 local fcards: { [string]: FCard } = {}
 
 local function chooseFaction(f: string)
@@ -684,20 +1015,31 @@ local function unitsText(f: string): string
 	return table.concat(parts, " · ") .. string.format("\n* abre com %d no time", Roles.HEAVY_UNLOCK)
 end
 
+-- ficha sob o ponteiro (ou o dossiê na mesa): sobe um pouco, a sombra abre e a faixa vira carimbo
 local function fcardStyle(f: string)
 	local c = fcards[f]
 	local on = c.hot or hoverFaction == f
-	c.btn.BackgroundColor3 = if on then MANILA_HOT else MANILA
-	c.cta.BackgroundColor3 = if on then STAMP else DRAB
+	if c.look == on then
+		return
+	end
+	c.look = on
+	c.realce.set(on)
+	tw(c.cta, QUICK, { BackgroundColor3 = if on then STAMP else DRAB })
+	tw(c.shadow, SOFT, { ImageTransparency = if on then 0.3 else 0.45 })
 end
 
+local FCARD_Y = 48
+local FCARD_CY = FCARD_Y + 108 -- centro da ficha (a âncora fica no meio: o realce cresce por igual)
 local function factionCard(f: string, x: number): FCard
 	local info = FACTION[f]
 	local hq = MapConfig.HQ[f]
 	local b = cardButton(pages.choose, 560, 216, MANILA)
-	b.Position = UDim2.fromOffset(x, 444)
+	b.AnchorPoint = Vector2.new(0.5, 0.5)
+	b.Position = UDim2.fromOffset(x + 280, FCARD_CY)
 	corner(b, 4)
 	paper(b, 75)
+	stroke(b, INK, 1, 0.7)
+	local shadow = Acabamento.sombra(b, 18, Vector2.new(0, 8), 0.55)
 	local tabT = txt(b, TYPE, 15, INK, 20, 8, 300, 22)
 	tabT.Text = if f == "US" then "FICHA 1-A · ALISTAMENTO" else "FICHA 1-B · ALISTAMENTO"
 	tabT.TextTransparency = 0.25
@@ -707,6 +1049,7 @@ local function factionCard(f: string, x: number): FCard
 		st.Font = VIET
 	end
 	local t = txt(b, HEAD, 26, INK, 20, 34, 520, 34)
+	t.FontFace = HEAD_B
 	t.Text = info.title
 	local u = txt(b, TYPE, 15, INK, 20, 68, 520, 20)
 	u.Text = info.unit .. " · " .. info.kit
@@ -717,10 +1060,23 @@ local function factionCard(f: string, x: number): FCard
 	units.TextYAlignment = Enum.TextYAlignment.Top
 	units.Text = unitsText(f)
 	local count = txt(b, HEAD, 22, INK, 390, 118, 150, 28, Enum.TextXAlignment.Right)
+	count.FontFace = HEAD_B
 	local avail = stamp(b, 16, 400, 146, 140, 26, -6)
 	local cta = box(b, DRAB, 0, 172, 560, 44)
+	paper(cta, 90)
 	local ctaText = txt(cta, HEAD, 22, KHAKI, 0, 0, 560, 44, Enum.TextXAlignment.Center)
-	local c: FCard = { btn = b, count = count, avail = avail, cta = cta, ctaText = ctaText, hot = false }
+	ctaText.FontFace = HEAD_B
+	local c: FCard = {
+		btn = b,
+		count = count,
+		avail = avail,
+		cta = cta,
+		ctaText = ctaText,
+		hot = false,
+		realce = UiKit.realce(b, MANILA, MANILA_HOT, 1.025),
+		shadow = shadow,
+		look = nil,
+	}
 	bindCard(b, function()
 		chooseFaction(f)
 	end, function(on: boolean)
@@ -732,8 +1088,28 @@ local function factionCard(f: string, x: number): FCard
 end
 fcards.US = factionCard("US", 40)
 fcards.VC = factionCard("VC", 680)
-local chooseHint = txt(pages.choose, TYPE, 16, KHAKI, 40, 410, 1200, 26, Enum.TextXAlignment.Center)
+local chooseHint = txt(pages.choose, TYPE, 16, KHAKI, 40, 14, 1200, 26, Enum.TextXAlignment.Center)
 chooseHint.Text = "Escolha o seu lado: aponte para um dossiê na mesa ou para uma ficha."
+
+-- as duas fichas sobem para a mesa, uma depois da outra, e o carimbo de vaga cai
+local function dealChoose()
+	for i, f in { "US", "VC" } do
+		local c = fcards[f]
+		local d = 0.12 + (i - 1) * 0.09
+		local x = c.btn.Position.X.Offset
+		c.btn.Position = UDim2.fromOffset(x, FCARD_CY + 46)
+		c.btn.Rotation = if i == 1 then -2.2 else 2.2
+		tw(c.btn, after(d, TweenInfo.new(0.55, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)), {
+			Position = UDim2.fromOffset(x, FCARD_CY),
+			Rotation = 0,
+		})
+		if c.avail.Visible then
+			thump(c.avail, d + 0.35)
+		end
+	end
+	chooseHint.TextTransparency = 0
+	Acabamento.datilografar(chooseHint, chooseHint.Text, 70, 0.2)
+end
 
 local function renderChoose()
 	local us, vc = counts()
@@ -743,50 +1119,201 @@ local function renderChoose()
 		c.count.Text = string.format("JOGADORES %d/%d", if f == "US" then us else vc, Roles.TEAM_MAX)
 		local why = joinBlocked(f)
 		if mine == f then
-			c.avail.Text = "SEU LADO"
-			inkStamp(c.avail, OLIVE_INK)
+			stampSet(c.avail, "SEU LADO", OLIVE_INK)
 			c.ctaText.Text = "VOLTAR À MESA ►"
 		elseif why then
-			c.avail.Text = why
-			inkStamp(c.avail, STAMP)
+			stampSet(c.avail, why, STAMP)
 			c.ctaText.Text = "ALISTAR-SE ►"
 		else
-			c.avail.Text = "ABERTO"
-			inkStamp(c.avail, OLIVE_INK)
+			stampSet(c.avail, "ABERTO", OLIVE_INK)
 			c.ctaText.Text = "ALISTAR-SE ►"
 		end
 		fcardStyle(f)
 	end
 end
 
--- ===== papel: legenda do soldado (embaixo, à esquerda, sobre a cena) =====
-local capCard = box(root, CARD, 40, 528, 480, 132)
+-- ===== papel: ficha do soldado (embaixo, à esquerda, sobre a cena) =====
+-- Mostra o que muda ao escolher: as armas do papel (as que trocam marcadas com ►) e, da arma
+-- principal, cano (V0), cadência, carregador e peso em barras que deslizam até o valor; o traço
+-- vermelho em cada barra é a arma do papel atual. Valores do Shared/Weapons (as fontes estão lá).
+-- Na TV o texto não fica abaixo de 24 px na tela: a ficha cresce (mais larga e mais alta, subindo
+-- a partir do rodapé) para as linhas caberem.
+local TV = UiKit.tv()
+local CAP_W, CAP_H, CAP_M = if TV then 600 else 500, if TV then 210 else 140, 24
+local CAP_Y = 660 - CAP_H
+local CAP_TEXT_W = if TV then 272 else 236 -- coluna das armas
+local STAT_LW = if TV then 112 else 74 -- rótulo da barra
+local STAT_VW = if TV then 66 else 52 -- valor da barra
+local STAT_DY = if TV then 36 else 21 -- entre as barras
+local capHolder = Instance.new("CanvasGroup") -- entra e sai esmaecendo (pequeno: 548 x 188)
+capHolder.Name = "FichaPapel"
+capHolder.BackgroundTransparency = 1
+capHolder.Position = UDim2.fromOffset(40 - CAP_M, CAP_Y - CAP_M)
+capHolder.Size = UDim2.fromOffset(CAP_W + 2 * CAP_M, CAP_H + 2 * CAP_M)
+capHolder.GroupTransparency = 1
+capHolder.Visible = false
+capHolder.Parent = root
+local capCard = box(capHolder, CARD, CAP_M, CAP_M, CAP_W, CAP_H)
 capCard.Active = true
-capCard.Visible = false
+capCard.ZIndex = 2
 stroke(capCard, INK, 1, 0.6)
 paper(capCard, 90)
-local capTitle = txt(capCard, HEAD, 24, INK, 14, 6, 452, 32)
-hline(capCard, UiKit.RULE_RED, 14, 40, 452)
-local capLines = txt(capCard, TYPE, 15, INK, 14, 46, 452, 82)
+Acabamento.sombra(capCard, 16, Vector2.new(0, 6), 0.55).ZIndex = 1
+local capSeal, capGlyph = seal(capCard, 12, 8, 32, "×")
+local capTitle = txt(capCard, HEAD, 22, INK, 52, 6, CAP_W - 180, 32)
+capTitle.FontFace = HEAD_B
+capTitle.TextYAlignment = Enum.TextYAlignment.Center
+capTitle.TextTruncate = Enum.TextTruncate.AtEnd
+local capMark = stamp(capCard, 15, CAP_W - 116, 8, 104, 26, -4)
+capMark.Visible = false
+hline(capCard, UiKit.RULE_RED, 12, 44, CAP_W - 24)
+local capLines = txt(capCard, TYPE, 14, INK, 12, 50, CAP_TEXT_W, CAP_H - 54)
 capLines.TextYAlignment = Enum.TextYAlignment.Top
+capLines.RichText = true
 
+-- maiores valores entre as armas ligadas: a barra cheia é a melhor arma do jogo naquele número
+type Stat = { key: string, label: string, unit: string, max: number, more: boolean }
+local STATS: { Stat } = {
+	{ key = "muzzleVelocity", label = "V0", unit = " m/s", max = 1, more = true },
+	{ key = "rpm", label = "CADÊNCIA", unit = "/min", max = 1, more = true },
+	{ key = "magazine", label = "CARREGADOR", unit = "", max = 1, more = true },
+	{ key = "massLoadedKg", label = "PESO", unit = " kg", max = 1, more = false },
+}
+for _, w in Weapons.list do
+	if w.enabled then
+		for _, s in STATS do
+			s.max = math.max(s.max, (w :: any)[s.key] :: number)
+		end
+	end
+end
+type StatRow = { fill: Frame, ghost: Frame, value: TextLabel }
+local statRows: { StatRow } = {}
+do
+	local lx = 12 + CAP_TEXT_W + 10 -- rótulo
+	local bx = lx + STAT_LW + 2 -- barra
+	local vx = CAP_W - 12 - STAT_VW -- valor
+	local bw = vx - 4 - bx
+	local rowH = if TV then 30 else 18
+	for i, s in STATS do
+		local y = 50 + (i - 1) * STAT_DY
+		local l = txt(capCard, TYPE, 12, INK, lx, y, STAT_LW, rowH)
+		l.Text = s.label
+		l.TextTransparency = 0.2
+		l.TextYAlignment = Enum.TextYAlignment.Center
+		local back = box(capCard, INK, bx, y + math.floor(rowH / 2) - 3, bw, 6, 0.84)
+		corner(back, 2)
+		local fill = box(back, INK, 0, 0, 0, 6, 0.1)
+		fill.Size = UDim2.fromScale(0, 1)
+		corner(fill, 2)
+		local ghost = box(back, STAMP, 0, -3, 2, 12)
+		ghost.AnchorPoint = Vector2.new(0.5, 0)
+		ghost.Visible = false
+		local v = txt(capCard, HEAD, 13, INK, vx, y, STAT_VW, rowH, Enum.TextXAlignment.Right)
+		v.FontFace = HEAD_B
+		v.TextYAlignment = Enum.TextYAlignment.Center
+		statRows[i] = { fill = fill, ghost = ghost, value = v }
+	end
+end
+
+local function statText(s: Stat, x: number): string
+	if s.key == "massLoadedKg" then
+		return string.format("%.1f", x):gsub("%.", ",") .. s.unit
+	end
+	return tostring(math.floor(x + 0.5)) .. s.unit
+end
+
+local capShown = ""
 local function caption(f: string, roleId: string?, extra: string?)
 	local rid = roleId or "rifleman"
+	local key = f .. "|" .. rid .. "|" .. (extra or "") .. "|" .. tostring(player:GetAttribute("Role"))
+	if key == capShown then
+		return -- o mesmo papel: nada a animar (render chama a cada mudança de estado)
+	end
+	capShown = key
 	local r = Roles.roles[rid]
 	local lo = Roles.loadout[f][rid]
-	capTitle.Text = string.upper(if r then r.name else rid)
+	local cur = player:GetAttribute("Role")
+	local curLo = if type(cur) == "string" then Roles.loadout[f][cur] else nil
+	local isCurrent = cur == rid
+	-- cabeçalho: selo com o glifo do papel e o título datilografado
+	capGlyph.Text = ROLE_GLYPH[rid] or "•"
+	capGlyph.TextColor3 = if rid == "medic" then STAMP else INK
+	local pop = capSeal:FindFirstChild("Pop") :: UIScale?
+	if pop then
+		pop.Scale = 1.3
+		tw(pop, SOFT, { Scale = 1 })
+	end
+	Acabamento.datilografar(capTitle, string.upper(if r then r.name else rid), 70)
+	if isCurrent then
+		stampSet(capMark, "ATUAL", OLIVE_INK)
+	elseif curLo then
+		stampSet(capMark, "TROCA", STAMP) -- escolher este papel troca o equipamento
+	else
+		stampSet(capMark, nil)
+	end
+	-- armas: as que não estão no papel atual vão marcadas (o viet vem antes da marca: o padrão dele
+	-- não pode ver as tags)
 	local lines = {}
 	if lo then
 		for _, id in lo do
 			local w = Weapons.get(id)
-			table.insert(lines, if w then string.format("%s — %s", w.name, w.cartridge) else id)
+			local line = Acabamento.viet(if w then string.format("%s · %s", w.name, w.cartridge) else id)
+			local new = curLo ~= nil and not isCurrent and not table.find(curLo, id)
+			table.insert(lines, if new then '<font color="#96281E" face="Arimo">►</font> ' .. line else line)
 		end
 	end
-	table.insert(lines, FACTION[f].kit)
+	table.insert(lines, Acabamento.viet(FACTION[f].kit))
 	if extra then
-		table.insert(lines, extra)
+		table.insert(lines, Acabamento.viet(extra))
 	end
-	capLines.Text = table.concat(lines, "\n")
+	Acabamento.datilografar(capLines, table.concat(lines, "\n"), 140, 0.08)
+	-- barras da arma principal (e o traço da arma do papel atual)
+	local w = if lo then Weapons.get(lo[1]) else nil
+	local cw = if curLo and not isCurrent then Weapons.get(curLo[1]) else nil
+	for i, s in STATS do
+		local row = statRows[i]
+		local x = if w then (w :: any)[s.key] :: number else 0
+		local k = math.clamp(x / s.max, 0, 1)
+		local better = cw and (if s.more then x > (cw :: any)[s.key] else x < (cw :: any)[s.key])
+		local worse = cw and (if s.more then x < (cw :: any)[s.key] else x > (cw :: any)[s.key])
+		tw(row.fill, after((i - 1) * 0.04, TweenInfo.new(0.45, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)), {
+			Size = UDim2.fromScale(k, 1),
+			BackgroundColor3 = if better then OLIVE_INK elseif worse then STAMP else INK,
+		})
+		row.value.Text = if w then statText(s, x) else "—"
+		row.ghost.Visible = cw ~= nil
+		if cw then
+			tw(row.ghost, SOFT, {
+				Position = UDim2.fromScale(math.clamp(((cw :: any)[s.key] :: number) / s.max, 0, 1), 0),
+			})
+		end
+	end
+end
+
+local capToken = 0
+local capOn = false
+local function capShow(on: boolean)
+	if on == capOn then
+		return
+	end
+	capOn = on
+	capToken += 1
+	local my = capToken
+	local home = UDim2.fromOffset(40 - CAP_M, CAP_Y - CAP_M)
+	if on then
+		capHolder.Visible = true
+		capHolder.Position = home - UDim2.fromOffset(36, 0)
+		capHolder.GroupTransparency = 1
+		tw(capHolder, PAGE_IN, { Position = home, GroupTransparency = 0 })
+	else
+		tw(capHolder, PAGE_OUT, { Position = home - UDim2.fromOffset(24, 0), GroupTransparency = 1 }).Completed:Once(
+			function()
+				if capToken == my then
+					capHolder.Visible = false
+				end
+			end
+		)
+	end
 end
 
 -- ===== squad =====
@@ -798,8 +1325,17 @@ type SCard = {
 	base: Color3,
 	hot: boolean,
 	action: (() -> ())?,
+	realce: UiKit.Realce,
 }
-type Row = { frame: Frame, name: TextLabel, detail: TextLabel, holder: Frame, newCard: SCard }
+type Row = {
+	frame: Frame,
+	label: Frame,
+	glyph: TextLabel,
+	name: TextLabel,
+	detail: TextLabel,
+	holder: Frame,
+	newCard: SCard,
+}
 
 local sFolder, sInfo = folder(pages.squad, "FICHA 2 · SQUAD", PANEL_W, PANEL_H)
 local sScroll = scroller(sFolder, 16, 56, PANEL_W - 32, PANEL_H - 116)
@@ -807,24 +1343,38 @@ local sList = Instance.new("UIListLayout")
 sList.Padding = UDim.new(0, 10)
 sList.SortOrder = Enum.SortOrder.LayoutOrder
 sList.Parent = sScroll
+local sPad = Instance.new("UIPadding") -- folga para o cartão crescer no realce sem cortar
+sPad.PaddingLeft = UDim.new(0, 4)
+sPad.PaddingTop = UDim.new(0, 4)
+sPad.PaddingBottom = UDim.new(0, 10)
+sPad.Parent = sScroll
 local leaveBtn = darkButton(sFolder, "SAIR DO SQUAD", PANEL_W - 236, PANEL_H - 52, 220, 38)
-UiKit.bind(leaveBtn, function()
+bindDark(leaveBtn, function()
 	Net.event("Squad_Action"):FireServer({ op = "leave" })
 end)
 local squadHint = txt(sFolder, TYPE, 14, INK, 16, PANEL_H - 50, PANEL_W - 270, 36)
 
 local function squadCard(parent: Instance, isNew: boolean): SCard
-	local b = cardButton(parent, 104, 92, if isNew then NEW_CARD else CARD)
+	local base = if isNew then NEW_CARD else CARD
+	local b = cardButton(parent, 104, 92, base)
 	corner(b, 3)
+	paper(b, 90)
+	stroke(b, INK, 1, if isNew then 0.45 else 0.7)
 	local top = txt(b, HEAD, 18, INK, 7, 2, 90, 26)
+	top.FontFace = HEAD_B
 	hline(b, UiKit.RULE_RED, 7, 29, 90)
 	local mid = if isNew then txt(b, TYPE, 15, INK, 7, 34, 90, 30) else txt(b, HEAD, 28, INK, 7, 32, 90, 32)
 	local bottom = txt(b, TYPE, 14, INK, 7, 66, 90, 22)
-	if isNew then
-		stroke(b, INK, 1, 0.45)
-	end
-	local c: SCard =
-		{ btn = b, top = top, mid = mid, bottom = bottom, base = b.BackgroundColor3, hot = false, action = nil }
+	local c: SCard = {
+		btn = b,
+		top = top,
+		mid = mid,
+		bottom = bottom,
+		base = base,
+		hot = false,
+		action = nil,
+		realce = UiKit.realce(b, base, CARD_HOT, 1.05),
+	}
 	bindCard(b, function()
 		local fn = c.action
 		if fn then
@@ -832,7 +1382,8 @@ local function squadCard(parent: Instance, isNew: boolean): SCard
 		end
 	end, function(on: boolean)
 		c.hot = on
-		b.BackgroundColor3 = if on then CARD_HOT else c.base
+		b.ZIndex = if on then 3 else 1 -- o cartão que cresce fica por cima dos vizinhos
+		c.realce.set(on)
 	end)
 	return c
 end
@@ -844,18 +1395,22 @@ local function unitRow(): Row
 	local fr = Instance.new("Frame")
 	fr.BackgroundTransparency = 1
 	fr.AutomaticSize = Enum.AutomaticSize.Y
-	fr.Size = UDim2.fromOffset(PANEL_W - 40, 92)
+	fr.Size = UDim2.fromOffset(PANEL_W - 44, 92)
 	fr.Parent = sScroll
 	local label = box(fr, CARD, 0, 0, 170, 92, 0.12)
 	corner(label, 3)
-	local name = txt(label, HEAD, 19, INK, 9, 2, 154, 26)
-	hline(label, UiKit.RULE_RED, 9, 29, 152)
-	local detail = txt(label, TYPE, 13, INK, 9, 34, 156, 56)
+	paper(label, 90)
+	entryParts(label, 3)
+	local _, glyph = seal(label, 8, 4, 26, "×")
+	local name = txt(label, HEAD, 19, INK, 40, 2, 124, 26)
+	name.FontFace = HEAD_B
+	hline(label, UiKit.RULE_RED, 9, 33, 152)
+	local detail = txt(label, TYPE, 13, INK, 9, 38, 156, 52)
 	detail.TextYAlignment = Enum.TextYAlignment.Top
 	local holder = Instance.new("Frame")
 	holder.BackgroundTransparency = 1
 	holder.Position = UDim2.fromOffset(178, 0)
-	holder.Size = UDim2.fromOffset(PANEL_W - 40 - 178, 92)
+	holder.Size = UDim2.fromOffset(PANEL_W - 44 - 178, 92)
 	holder.AutomaticSize = Enum.AutomaticSize.Y
 	holder.Parent = fr
 	local grid = Instance.new("UIGridLayout")
@@ -865,10 +1420,50 @@ local function unitRow(): Row
 	grid.Parent = holder
 	local nc = squadCard(holder, true)
 	nc.btn.LayoutOrder = 99
-	return { frame = fr, name = name, detail = detail, holder = holder, newCard = nc }
+	return { frame = fr, label = label, glyph = glyph, name = name, detail = detail, holder = holder, newCard = nc }
 end
 
-local function renderSquad(f: string, st: any)
+-- entrada da ficha de squad: rótulos e cartões pousando, linha por linha
+local function dealSquad()
+	local list: { GuiObject } = {}
+	local ordered: { Row } = {}
+	for _, r in rows do
+		if r.frame.Visible then
+			table.insert(ordered, r)
+		end
+	end
+	table.sort(ordered, function(a: Row, b: Row): boolean
+		return a.frame.LayoutOrder < b.frame.LayoutOrder
+	end)
+	for _, r in ordered do
+		table.insert(list, r.label)
+		local cards: { GuiObject } = {}
+		for _, c in r.holder:GetChildren() do
+			if c:IsA("GuiButton") then
+				table.insert(cards, c)
+			end
+		end
+		for _, c in byOrder(cards) do
+			table.insert(list, c)
+		end
+	end
+	deal(list, 0.12, 0.03)
+end
+
+-- Desenha a ficha de squad; devolve os cartões que acabaram de aparecer (squad novo formado por
+-- alguém, ou o estado do servidor chegando), para pousarem animados.
+local function renderSquad(f: string, st: any): { GuiObject }
+	local before: { [GuiObject]: boolean } = {}
+	for _, r in rows do
+		if r.frame.Visible then
+			before[r.label] = true
+			for _, c in r.holder:GetChildren() do
+				if c:IsA("GuiButton") and c.Visible then
+					before[c] = true
+				end
+			end
+		end
+	end
 	local size: number? = if st and type(st.size) == "number" then st.size else nil
 	local squads: { any } = if st and type(st.squads) == "table" then st.squads else {}
 	local mySid = player:GetAttribute("SquadId")
@@ -902,6 +1497,7 @@ local function renderSquad(f: string, st: any)
 		row.frame.Visible = true
 		row.frame.LayoutOrder = order
 		row.name.Text = string.upper(UNIT_NAME[unit] or unit)
+		row.glyph.Text = UNIT_GLYPH[unit] or "•"
 		local locked = def.heavy and (size == nil or size < Roles.HEAVY_UNLOCK)
 		local detail = if def.size == 1 then "1 vaga" else string.format("Squads de %d · até %d", def.size, def.count)
 		if def.heavy then
@@ -937,7 +1533,7 @@ local function renderSquad(f: string, st: any)
 				card.mid.Text = string.format("%d/%d", n, def.size)
 				card.bottom.Text = if mine then "SEU SQUAD" elseif full then "CHEIO" else "ENTRAR"
 				card.base = if mine then NEW_CARD elseif full then CARD_OFF else CARD
-				card.btn.BackgroundColor3 = if card.hot then CARD_HOT else card.base
+				card.realce.base(card.base)
 				local id = s.id
 				card.action = function()
 					if mine then
@@ -966,7 +1562,7 @@ local function renderSquad(f: string, st: any)
 			nc.mid.Font = if f == "VC" then VIET else TYPE
 			nc.bottom.Text = if locked then "TRANCADO" else "FORMAR"
 			nc.base = if locked then CARD_OFF else NEW_CARD
-			nc.btn.BackgroundColor3 = if nc.hot then CARD_HOT else nc.base
+			nc.realce.base(nc.base)
 			nc.action = function()
 				if locked then
 					notify(string.format("Unidade pesada: abre com %d no time.", Roles.HEAVY_UNLOCK))
@@ -976,6 +1572,24 @@ local function renderSquad(f: string, st: any)
 			end
 		end
 	end
+	local fresh: { GuiObject } = {}
+	for _, r in rows do
+		if r.frame.Visible then
+			if not before[r.label] then
+				table.insert(fresh, r.label)
+			end
+			local cards: { GuiObject } = {}
+			for _, c in r.holder:GetChildren() do
+				if c:IsA("GuiButton") and c.Visible and not before[c] then
+					table.insert(cards, c)
+				end
+			end
+			for _, c in byOrder(cards) do
+				table.insert(fresh, c)
+			end
+		end
+	end
+	return fresh
 end
 
 -- ===== papel =====
@@ -988,6 +1602,7 @@ type RCard = {
 	base: Color3,
 	hot: boolean,
 	blocked: string?,
+	realce: UiKit.Realce,
 }
 local rFolder, rInfo = folder(pages.role, "FICHA 3 · PAPEL", PANEL_W, PANEL_H)
 local rScroll = scroller(rFolder, 16, 56, PANEL_W - 32, PANEL_H - 72)
@@ -996,6 +1611,11 @@ rGrid.CellSize = UDim2.fromOffset(196, 150)
 rGrid.CellPadding = UDim2.fromOffset(10, 10)
 rGrid.SortOrder = Enum.SortOrder.LayoutOrder
 rGrid.Parent = rScroll
+local rPad = Instance.new("UIPadding") -- folga para o cartão crescer no realce sem cortar
+rPad.PaddingLeft = UDim.new(0, 4)
+rPad.PaddingTop = UDim.new(0, 4)
+rPad.PaddingBottom = UDim.new(0, 10)
+rPad.Parent = rScroll
 local roleCards: { [string]: RCard } = {}
 
 local function showRole(id: string?)
@@ -1023,32 +1643,59 @@ local function chooseRole(id: string)
 	Net.event("Role_Choose"):FireServer(id)
 end
 
+-- ficha de papel: selo com o glifo do papel, nome em negrito, armas datilografadas, vagas e o
+-- carimbo (ATUAL, OCUPADO, SÓ O LÍDER)
 local function roleCard(id: string): RCard
 	local b = cardButton(rScroll, 196, 150, CARD)
 	corner(b, 3)
+	paper(b, 90)
+	stroke(b, INK, 1, 0.7)
 	for i = 1, 3 do -- pauta azul
 		hline(b, UiKit.RULE_BLUE, 10, 82 + i * 22, 176, 0.8)
 	end
-	local name = txt(b, HEAD, 20, INK, 10, 4, 176, 48)
-	name.TextYAlignment = Enum.TextYAlignment.Top
+	local _, glyph = seal(b, 10, 9, 32, ROLE_GLYPH[id] or "•")
+	if id == "medic" then
+		glyph.TextColor3 = STAMP
+	end
+	local name = txt(b, HEAD, 19, INK, 50, 4, 138, 48)
+	name.FontFace = HEAD_B
+	name.TextYAlignment = Enum.TextYAlignment.Center
 	hline(b, UiKit.RULE_RED, 10, 54, 176)
 	local weapons = txt(b, TYPE, 15, INK, 10, 60, 176, 52)
 	weapons.TextYAlignment = Enum.TextYAlignment.Top
 	local slots = txt(b, TYPE, 15, INK, 10, 118, 176, 26, Enum.TextXAlignment.Right)
 	local mark = stamp(b, 18, 24, 56, 148, 36, -9)
 	mark.Visible = false
-	local c: RCard =
-		{ btn = b, name = name, weapons = weapons, slots = slots, mark = mark, base = CARD, hot = false, blocked = nil }
+	local c: RCard = {
+		btn = b,
+		name = name,
+		weapons = weapons,
+		slots = slots,
+		mark = mark,
+		base = CARD,
+		hot = false,
+		blocked = nil,
+		realce = UiKit.realce(b, CARD, CARD_HOT, 1.04),
+	}
 	bindCard(b, function()
 		chooseRole(id)
 	end, function(on: boolean)
 		c.hot = on
-		b.BackgroundColor3 = if on then CARD_HOT else c.base
+		b.ZIndex = if on then 3 else 1
+		c.realce.set(on)
 		if on then
 			showRole(id)
 		end
 	end)
 	return c
+end
+
+local function dealRoles()
+	local list: { GuiObject } = {}
+	for _, c in roleCards do
+		table.insert(list, c.btn)
+	end
+	deal(byOrder(list), 0.12, 0.04)
 end
 
 local function findSquad(st: any, sid: string): any
@@ -1139,16 +1786,15 @@ local function renderRole(f: string, st: any, sid: string)
 				end
 				card.blocked = blocked
 				local current = cur == id
-				card.mark.Visible = blocked ~= nil or current
 				if current then
-					card.mark.Text = "ATUAL"
-					inkStamp(card.mark, OLIVE_INK)
+					stampSet(card.mark, "ATUAL", OLIVE_INK)
 				elseif blocked then
-					card.mark.Text = blocked
-					inkStamp(card.mark, STAMP)
+					stampSet(card.mark, blocked, STAMP)
+				else
+					stampSet(card.mark, nil)
 				end
 				card.base = if blocked then CARD_OFF else CARD
-				card.btn.BackgroundColor3 = if card.hot then CARD_HOT else card.base
+				card.realce.base(card.base)
 				if not firstId then
 					firstId = id
 				end
@@ -1168,12 +1814,24 @@ end
 -- ===== inserção (o mapa do GameUI fica à direita) =====
 local iFolder, iInfo = folder(pages.insert, "FICHA 4 · INSERÇÃO", 370, PANEL_H)
 iInfo.Visible = false
+-- foto do soldado presa na ficha: papel fotográfico com sombra e duas fitas nos cantos
+local PHOTO_ROT = -1.2 -- presa à mão: nunca reta
 local iPhoto = box(iFolder, CARD, 16, 52, 338, 268)
+iPhoto.Rotation = PHOTO_ROT
 stroke(iPhoto, INK, 1, 0.7)
+paper(iPhoto, 90)
+Acabamento.sombra(iPhoto, 12, Vector2.new(2, 5), 0.5)
+for k, x in { -14, 282 } do
+	local tape = box(iPhoto, Color3.fromRGB(232, 222, 186), x, -6, 70, 18, 0.28)
+	tape.Rotation = if k == 1 then -32 else 32
+	tape.ZIndex = 4
+end
 local iSlot = box(iPhoto, INK, 10, 10, 318, 212)
 local iCaption = txt(iPhoto, HEAD, 22, INK, 10, 226, 318, 36, Enum.TextXAlignment.Center)
+iCaption.FontFace = HEAD_B
 local iLines = txt(iFolder, TYPE, 15, INK, 16, 330, 338, 180)
 iLines.TextYAlignment = Enum.TextYAlignment.Top
+iLines.RichText = true
 local portrait = SoldierPreview.new(0.24, -0.45)
 local portraitFrame = portrait.frame :: Frame
 portraitFrame.Parent = iSlot
@@ -1198,14 +1856,32 @@ local function renderInsert(f: string)
 	local hq = MapConfig.HQ[f]
 	iCaption.Text = string.upper(if r then r.name else rid)
 	local _, padText = Input.glyph("map_role", "map")
-	iLines.Text = table.concat({
+	local text = Acabamento.viet(table.concat({
 		"SQUAD  " .. squadName .. (if unit then " (" .. (UNIT_NAME[unit] or unit) .. ")" else ""),
 		"ARMAS  " .. weaponNames(lo),
 		"QG     " .. gridRef(hq.x, hq.z),
 		"",
 		"Escolha na carta um ponto PRONTO.",
 		string.format("Trocar de papel: aba PAPEL ou %s (+15 s)", keyName(padText)),
-	}, "\n")
+	}, "\n"))
+	if text ~= iLines.Text then -- datilografa só o que mudou (render roda a cada mudança de estado)
+		Acabamento.datilografar(iLines, text, 160, 0.25)
+	end
+end
+
+-- entrada da ficha de inserção: a foto é presa na pasta (gira e assenta) e a imagem "revela"
+local function dealInsert()
+	iPhoto.Rotation = -7
+	tw(iPhoto, after(0.1, TweenInfo.new(0.6, Enum.EasingStyle.Back, Enum.EasingDirection.Out)), {
+		Rotation = PHOTO_ROT,
+	})
+	local vp = portrait.vp
+	if vp then
+		vp.ImageTransparency = 1
+		tw(vp, after(0.3, TweenInfo.new(0.9, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)), {
+			ImageTransparency = 0,
+		})
+	end
 end
 
 -- ===== recompensa diária: a caderneta de serviço =====
@@ -1220,8 +1896,11 @@ for i = 1, Commerce.TRACK_DAYS do
 	local x = 14 + (i - 1) * 94
 	local fr = box(dFolder, CARD, x, 100, 88, 206)
 	corner(fr, 3)
+	paper(fr, 90)
 	stroke(fr, INK, 1, 0.6)
+	entryParts(fr, 3)
 	local d = txt(fr, HEAD, 18, INK, 4, 4, 80, 24, Enum.TextXAlignment.Center)
+	d.FontFace = HEAD_B
 	local dt = txt(fr, TYPE, 13, INK, 4, 28, 80, 18, Enum.TextXAlignment.Center)
 	hline(fr, UiKit.RULE_RED, 6, 48, 76)
 	local rw = txt(fr, TYPE, 13, INK, 5, 54, 78, 96)
@@ -1236,13 +1915,24 @@ claimBtn.Position = UDim2.fromOffset(14, 320)
 claimBtn.Size = UDim2.fromOffset(PANEL_W - 28, 62)
 claimBtn.BackgroundColor3 = STAMP
 claimBtn.TextColor3 = CARD
-claimBtn.Font = HEAD
-claimBtn.AutoButtonColor = true
+claimBtn.FontFace = HEAD_B
+claimBtn.AutoButtonColor = false
 claimBtn.Selectable = true
 claimBtn.SelectionImageObject = UiKit.FOCUS
 claimBtn.Parent = dFolder
 reg(claimBtn, 24)
 corner(claimBtn, 3)
+paper(claimBtn, 90)
+local claimLook = UiKit.realce(claimBtn, STAMP, nil, 1.02)
+
+-- entrada da caderneta: os sete dias pousam em fila
+local function dealDaily()
+	local list: { GuiObject } = {}
+	for _, c in cells do
+		table.insert(list, c.frame)
+	end
+	deal(list, 0.12, 0.05)
+end
 local dResult = txt(dFolder, TYPE, 15, INK, 16, 392, PANEL_W - 32, 64)
 dResult.TextYAlignment = Enum.TextYAlignment.Top
 local dNote = txt(dFolder, TYPE, 14, STAMP, 16, 460, PANEL_W - 32, 48)
@@ -1270,7 +1960,7 @@ local function claim()
 		end
 	end)
 end
-UiKit.bind(claimBtn, claim)
+bindCard(claimBtn, claim, claimLook.set)
 
 local function dailySummary(): (string, string)
 	-- texto curto para a aba e para o calendário da mesa
@@ -1290,7 +1980,7 @@ local function renderDaily(f: string)
 	if not (d and d.ready) then
 		dInfo.Text = "Lendo a caderneta…"
 		claimBtn.Text = "CARREGANDO A CADERNETA…"
-		claimBtn.BackgroundColor3 = DRAB
+		claimLook.base(DRAB)
 		claimBtn.TextColor3 = KHAKI
 		for _, c in cells do
 			c.mark.Visible = false
@@ -1334,9 +2024,8 @@ local function renderDaily(f: string)
 		elseif d.claimedToday and i == tomorrow then
 			markText, markColor = "AMANHÃ", INK
 		end
-		c.mark.Visible = markText ~= ""
-		c.mark.Text = markText
-		inkStamp(c.mark, markColor)
+		-- o carimbo novo (o resgate de hoje) cai na ficha; o que já estava fica parado
+		stampSet(c.mark, if markText ~= "" then markText else nil, markColor)
 		c.frame.BackgroundColor3 = if today then CARD_HOT elseif done then Color3.fromRGB(214, 222, 196) else CARD
 		local s = c.frame:FindFirstChildOfClass("UIStroke")
 		if s then
@@ -1347,19 +2036,19 @@ local function renderDaily(f: string)
 	end
 	if dailyBusy then
 		claimBtn.Text = "REGISTRANDO O SELO…"
-		claimBtn.BackgroundColor3 = DRAB
+		claimLook.base(DRAB)
 		claimBtn.TextColor3 = KHAKI
 	elseif d.canClaim then
 		claimBtn.Text = string.format("CARIMBAR O DIA %d · RESGATAR", day)
-		claimBtn.BackgroundColor3 = STAMP
+		claimLook.base(STAMP)
 		claimBtn.TextColor3 = CARD
 	elseif d.claimedToday then
 		claimBtn.Text = "CARIMBADO HOJE · próximo selo em " .. hms(dailyLeft()) .. " (UTC)"
-		claimBtn.BackgroundColor3 = DRAB
+		claimLook.base(DRAB)
 		claimBtn.TextColor3 = KHAKI
 	else
 		claimBtn.Text = "AGUARDE A VIRADA DO DIA (UTC)"
-		claimBtn.BackgroundColor3 = DRAB
+		claimLook.base(DRAB)
 		claimBtn.TextColor3 = KHAKI
 	end
 	local res = dailyResult
@@ -1398,7 +2087,9 @@ hintsLayout.Padding = UDim.new(0, 22)
 hintsLayout.VerticalAlignment = Enum.VerticalAlignment.Center
 hintsLayout.SortOrder = Enum.SortOrder.LayoutOrder
 hintsLayout.Parent = hints
-type Chip = { f: Frame, img: ImageLabel, img2: ImageLabel, t: TextLabel }
+-- Cada dica é um chip: o botão do controle (imagem do Roblox para o controle conectado) ou, no
+-- teclado e no toque, a tecla em relevo (ficha clara, filete de tinta, luz de cima); depois o texto.
+type Chip = { f: Frame, img: ImageLabel, img2: ImageLabel, key: TextLabel, t: TextLabel }
 local chips: { Chip } = {}
 for i = 1, 6 do
 	local f = Instance.new("Frame")
@@ -1410,7 +2101,7 @@ for i = 1, 6 do
 	f.Parent = hints
 	local l = Instance.new("UIListLayout")
 	l.FillDirection = Enum.FillDirection.Horizontal
-	l.Padding = UDim.new(0, 4)
+	l.Padding = UDim.new(0, 6)
 	l.VerticalAlignment = Enum.VerticalAlignment.Center
 	l.SortOrder = Enum.SortOrder.LayoutOrder
 	l.Parent = f
@@ -1424,16 +2115,33 @@ for i = 1, 6 do
 	img2.Size = UDim2.fromOffset(30, 30)
 	img2.LayoutOrder = 2
 	img2.Parent = f
+	local key = Instance.new("TextLabel")
+	key.BackgroundColor3 = CARD
+	key.BorderSizePixel = 0
+	key.AutomaticSize = Enum.AutomaticSize.X
+	key.Size = UDim2.fromOffset(0, 26)
+	key.FontFace = HEAD_B
+	key.TextColor3 = INK
+	key.LayoutOrder = 3
+	key.Parent = f
+	reg(key, 15)
+	corner(key, 4)
+	paper(key, 90)
+	stroke(key, INK, 1, 0.45)
+	local kp = Instance.new("UIPadding")
+	kp.PaddingLeft = UDim.new(0, 8)
+	kp.PaddingRight = UDim.new(0, 8)
+	kp.Parent = key
 	local t = Instance.new("TextLabel")
 	t.BackgroundTransparency = 1
 	t.AutomaticSize = Enum.AutomaticSize.X
 	t.Size = UDim2.fromOffset(0, 36)
 	t.Font = TYPE
 	t.TextColor3 = KHAKI
-	t.LayoutOrder = 3
+	t.LayoutOrder = 4
 	t.Parent = f
 	reg(t, 16)
-	table.insert(chips, { f = f, img = img, img2 = img2, t = t })
+	table.insert(chips, { f = f, img = img, img2 = img2, key = key, t = t })
 end
 
 local function padImage(code: Enum.KeyCode): string?
@@ -1459,7 +2167,10 @@ local function chip(img: string?, img2: string?, key: string, label: string)
 	c.img.Image = img or ""
 	c.img2.Visible = img2 ~= nil
 	c.img2.Image = img2 or ""
-	c.t.Text = if img then label else string.format("[%s] %s", key, label)
+	c.key.Visible = img == nil and key ~= ""
+	c.key.Text = UiKit.upper(key)
+	c.key.FontFace = UiKit.headFont(key)
+	c.t.Text = label
 end
 
 -- ícone do botão certo do controle conectado (Input.glyph usa GetImageForKeyCode)
@@ -1480,7 +2191,7 @@ end
 
 local backBtn = darkButton(root, "", 960, 674, 280, 40)
 backBtn.Visible = false
-UiKit.bind(backBtn, function()
+bindDark(backBtn, function()
 	DeployScreen.back()
 end)
 
@@ -1643,9 +2354,75 @@ local function placeLobbyCamera(scene: string)
 	LobbyScene.setNext(nextStep())
 end
 
+-- ordem das pastas no caminho até o campo: a pasta seguinte chega da direita, a anterior da esquerda
+local PAGE_ORDER: { [string]: number } = { squad = 1, role = 2, insert = 3, daily = 4 }
+local lastPage: string? = nil
+
+-- Troca de pasta em crossfade (pageShow). Devolve a pasta que acabou de entrar (para a entrada
+-- escalonada dos cartões, depois de desenhados) ou nil.
+local function swapPages(onChoose: boolean): string?
+	local want: string? = if onChoose then "choose" elseif pages[panel] then panel else nil
+	local from = lastPage
+	local dir = 1
+	if want and from and PAGE_ORDER[want] and PAGE_ORDER[from] and PAGE_ORDER[want] < PAGE_ORDER[from] then
+		dir = -1
+	end
+	local entered: string? = nil
+	for name in pages do
+		local on = name == want
+		if on ~= pageShown[name] then
+			pageShown[name] = on
+			if on then
+				entered = name
+			end
+			if name == "choose" then
+				pageShow(name, on, 0, if on then 36 else 24) -- fichas de lado: sobem / descem
+			elseif name == "insert" then
+				pageShow(name, on, if on then -50 else -30, 0) -- inserção: pela esquerda
+			else
+				pageShow(name, on, if on then 60 * dir else -30 * dir, 0) -- papéis: folheando
+			end
+		end
+	end
+	lastPage = want
+	return entered
+end
+
+-- abas descem para o lugar, uma depois da outra
+local function dealTabs()
+	tabsFrame.Position = UDim2.fromOffset(40, 70)
+	tw(tabsFrame, PAGE_IN, { Position = UDim2.fromOffset(40, 84) })
+	for i, d in TAB_DEFS do
+		local b = tabs[d.id].btn
+		local sc = b:FindFirstChild("Escala")
+		if sc and sc:IsA("UIScale") then
+			sc.Scale = 0.9
+			tw(sc, after(0.04 * i, TweenInfo.new(0.4, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)), {
+				Scale = 1,
+			})
+		end
+	end
+end
+
+-- lobby fechado (ou aberto de novo): a próxima abertura anima tudo outra vez
+local function resetLook()
+	pagesReset()
+	lastPage = nil
+	capToken += 1
+	capOn = false
+	capHolder.Visible = false
+	capHolder.GroupTransparency = 1
+	capShown = ""
+	iLines.Text = ""
+	tabsFrame.Visible = false
+end
+
 -- st: último Squad_State (ou nil). Só desenha com a tela visível (o GameUI controla Visible).
 function DeployScreen.render(st: any)
 	if not root.Visible then
+		if wasVisible then
+			resetLook()
+		end
 		wasVisible = false
 		SoldierPreview.setActive(portrait, false)
 		LobbyScene.setExternalHover(nil)
@@ -1654,6 +2431,7 @@ function DeployScreen.render(st: any)
 	if not wasVisible then
 		wasVisible = true
 		panel = defaultPanel()
+		resetLook()
 		fetchDaily()
 	end
 	local f = myFaction()
@@ -1672,44 +2450,24 @@ function DeployScreen.render(st: any)
 	LobbyScene.setScene(scene)
 	updateHeader(f)
 	local onChoose = scene == "choose"
-	for name, p in pages do
-		local want = if onChoose then name == "choose" else name == panel
-		local parent = if want then root else nil
-		if p.Parent ~= parent then
-			p.Parent = parent
-			if want then
-				-- pasta nova na tela: fichas de lado sobem; papéis entram pela direita; a
-				-- inserção, pela esquerda
-				if name == "choose" then
-					animateIn(name, 0, 60)
-				elseif name == "insert" then
-					animateIn(name, -50, 0)
-				else
-					animateIn(name, 60, 0)
-				end
-			end
-		end
-	end
+	-- pasta nova na tela: a anterior esmaece e recua, a nova desliza e abre
+	local entered = swapPages(onChoose)
 	if tabsFrame.Visible == onChoose then
 		tabsFrame.Visible = not onChoose
 		if not onChoose then
-			tabsFrame.Position = UDim2.fromOffset(40, 64)
-			TweenService:Create(tabsFrame, SLIDE, { Position = UDim2.fromOffset(40, 84) }):Play()
+			dealTabs()
 		end
 	end
-	local wantCap = not onChoose and panel == "role"
-	if wantCap and not capCard.Visible then
-		capCard.Position = UDim2.fromOffset(-20, 548)
-		TweenService:Create(capCard, SLIDE, { Position = UDim2.fromOffset(40, 528) }):Play()
-	end
-	capCard.Visible = wantCap
 	if onChoose then
 		renderChoose()
 	elseif f then
 		renderTabs(f, st)
 		renderDesk(f, st)
 		if panel == "squad" then
-			renderSquad(f, st)
+			local fresh = renderSquad(f, st)
+			if entered ~= "squad" and #fresh > 0 then
+				deal(fresh, 0.02, 0.04) -- squad novo (de outro jogador) ou o estado chegando
+			end
 		elseif panel == "role" then
 			local sid = player:GetAttribute("SquadId")
 			renderRole(f, st, tostring(sid))
@@ -1718,6 +2476,20 @@ function DeployScreen.render(st: any)
 		elseif panel == "daily" then
 			renderDaily(f)
 		end
+	end
+	-- ficha do soldado (papel): entra depois de desenhada, esmaecendo
+	capShow(not onChoose and panel == "role")
+	-- cartões da pasta que acabou de entrar pousam um a um (já com o conteúdo certo)
+	if entered == "choose" then
+		dealChoose()
+	elseif entered == "squad" then
+		dealSquad()
+	elseif entered == "role" then
+		dealRoles()
+	elseif entered == "daily" then
+		dealDaily()
+	elseif entered == "insert" then
+		dealInsert()
 	end
 	SoldierPreview.setActive(portrait, not onChoose and panel == "insert")
 	placeLobbyCamera(scene)
@@ -1941,5 +2713,81 @@ task.spawn(function()
 		end
 	end
 end)
+
+-- ===== gancho de teste (só no Studio): fotos da escolha e da inserção =====
+-- workspace:SetAttribute("VT65DevTela", x), com o jogador no lobby (sem corpo em campo):
+--   - "escolha": o passo de escolha que falta (lado; com lado, o squad; com squad, o papel);
+--   - "lado", "squad", "papel", "diaria": aquela ficha (com lado escolhido, "lado" abre a sala de
+--     arquivo do "trocar de lado");
+--   - "insercao": completa o caminho pelos remotes, como o jogador faria (EUA se não há lado, squad
+--     de infantaria, fuzileiro) e abre a ficha de inserção com a carta de spawn.
+-- "carregamento" é da tela de entrada (LoadingScreen) e "transicao", da ordem de inserção
+-- (SpawnTransition). Do lado do cliente o valor volta a nil sozinho (dá para repetir); do lado do
+-- servidor, alterne os valores.
+if RunService:IsStudio() then
+	local function waitAttr(name: string, seconds: number): boolean
+		local t0 = os.clock()
+		while player:GetAttribute(name) == nil and os.clock() - t0 < seconds do
+			task.wait(0.1)
+		end
+		return player:GetAttribute(name) ~= nil
+	end
+	local function devInsertion()
+		if not myFaction() then
+			Net.event("Team_Choose"):FireServer("US")
+			if not waitAttr("Faction", 5) then
+				warn("[VT65] VT65DevTela insercao: o servidor não deu lado")
+				return
+			end
+		end
+		if not hasSquad() then
+			Net.event("Squad_Action"):FireServer({ op = "create", unit = "infantry" })
+			if not waitAttr("SquadId", 5) then
+				warn("[VT65] VT65DevTela insercao: o servidor não deu squad")
+				return
+			end
+		end
+		if not currentRole() then
+			Net.event("Role_Choose"):FireServer("rifleman")
+			if not waitAttr("Role", 5) then
+				warn("[VT65] VT65DevTela insercao: o servidor não deu papel")
+				return
+			end
+		end
+		task.wait(0.2) -- deixa o refresh do GameUI rodar com o papel novo
+		DeployScreen.open("insert")
+	end
+	local DEV_PANEL: { [string]: string } = { squad = "squad", papel = "role", diaria = "daily" }
+	workspace:GetAttributeChangedSignal("VT65DevTela"):Connect(function()
+		local v = workspace:GetAttribute("VT65DevTela")
+		if type(v) ~= "string" or v == "carregamento" or v == "transicao" then
+			return
+		end
+		if v == "escolha" then
+			if not myFaction() then
+				DeployScreen.changed()
+			elseif not hasSquad() then
+				DeployScreen.open("squad")
+			else
+				DeployScreen.open("role")
+			end
+		elseif v == "lado" then
+			if myFaction() then
+				DeployScreen.open("faction")
+			else
+				DeployScreen.changed()
+			end
+		elseif DEV_PANEL[v] then
+			DeployScreen.open(DEV_PANEL[v])
+		elseif v == "insercao" then
+			task.spawn(devInsertion)
+		else
+			return
+		end
+		task.defer(function()
+			workspace:SetAttribute("VT65DevTela", nil) -- local: no cliente, o mesmo valor repete
+		end)
+	end)
+end
 
 return DeployScreen

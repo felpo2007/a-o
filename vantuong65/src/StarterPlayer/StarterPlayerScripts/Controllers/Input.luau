@@ -574,28 +574,6 @@ local function sinkJump(_: string, _s: Enum.UserInputState, _o: InputObject): En
 	return Enum.ContextActionResult.Sink
 end
 
--- D-82: cursor virtual do Roblox nos menus (opção "Cursor virtual"): o analógico esquerdo vira um
--- mouse na velocidade padrão do Roblox e o A clica. Desligado, os menus seguem pela seleção (LB/RB,
--- direcional). Nunca no mapa (cursor próprio) nem no jogo.
-local cursorOn = false
-local function updateCursor()
-	local want = device == "gamepad" and Input.settings.virtualCursor and Input.state.menus > 0
-	if want == cursorOn then
-		return
-	end
-	cursorOn = want
-	pcall(function()
-		local gs = game:GetService("GamepadService")
-		if want then
-			gs:EnableGamepadCursor(nil)
-		else
-			gs:DisableGamepadCursor()
-		end
-	end)
-end
-Input.SettingsChanged:Connect(updateCursor)
-Input.DeviceChanged:Connect(updateCursor)
-
 applyEvent = function(ev: string, arg: any?)
 	local before = InputMap.activeContext(Input.state)
 	local cancelled = InputMap.event(Input.state, ev, arg)
@@ -629,7 +607,6 @@ applyEvent = function(ev: string, arg: any?)
 	else
 		ContextActionService:UnbindAction("VT65_NoSeatJump")
 	end
-	updateCursor()
 	if #cancelled > 0 or ctx ~= before then
 		stateChanged:Fire(cancelled, ctx)
 	end

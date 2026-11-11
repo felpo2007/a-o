@@ -16,6 +16,7 @@ local Net = require(ReplicatedStorage.Shared.Net)
 local Bus = require(script.Parent.Bus)
 local Input = require(script.Parent.Input)
 local UiKit = require(script.Parent.UiKit)
+local VirtualCursor = require(script.Parent.VirtualCursor)
 
 local player = Players.LocalPlayer
 local gui = UiKit.screen("VT65GameMenu", 35)
@@ -423,6 +424,21 @@ local function render()
 	UiKit.focus(body)
 end
 
+-- D-82: com a opção "Cursor virtual", o menu usa o cursor do lobby (VirtualCursor: analógico
+-- esquerdo move, A clica, direcional pula entre botões, analógico direito rola). Só desliga o
+-- cursor que ele mesmo ligou.
+local menuCursor = false
+local function syncCursor()
+	local want = gui.Enabled and Input.settings.virtualCursor
+	if want and not menuCursor and not VirtualCursor.isActive() then
+		menuCursor = true
+		VirtualCursor.setActive(true)
+	elseif not want and menuCursor then
+		menuCursor = false
+		VirtualCursor.setActive(false)
+	end
+end
+
 local function setOpen(open: boolean)
 	if open == gui.Enabled then
 		return
@@ -430,6 +446,7 @@ local function setOpen(open: boolean)
 	gui.Enabled = open
 	listening = nil
 	keyListening = nil
+	syncCursor()
 	if open then
 		Input.openMenu()
 		render()
@@ -489,6 +506,7 @@ Bus.on("menu_close_request", function()
 end)
 Input.SettingsChanged:Connect(function()
 	if gui.Enabled then
+		syncCursor()
 		render()
 	end
 end)

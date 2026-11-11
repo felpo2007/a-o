@@ -20,14 +20,21 @@
 -- Continua do lobby antigo: só com o lobby aberto e sem corpo na tela (ou morto há DEAD_GRACE s);
 -- pede streaming em volta do QG do lado (o spawn fica pronto); esconde o chat padrão; efeitos só no
 -- lobby (profundidade de campo e cor). Ao nascer, tudo volta ao normal.
+-- Movimento (pedido do dono, 2026-11-11: "mais fluido ... com maestria"): a câmera chega à mesa
+-- num travelling lento (sem corte seco), vai de um objeto a outro em curva suave (sem tranco no
+-- começo nem no fim), a troca de cena passa por um escuro quente curto, e o realce e a etiqueta do
+-- objeto entram animados. Película leve (Acabamento: vinheta, grão, luz de lampião) sobre a cena e
+-- abaixo dos papéis.
 local Lighting = game:GetService("Lighting")
 local Players = game:GetService("Players")
+local ReplicatedFirst = game:GetService("ReplicatedFirst")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local TextChatService = game:GetService("TextChatService")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 
+local Acabamento = require(ReplicatedFirst:WaitForChild("Acabamento"))
 local MapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any
 local SoldierPreview = require(script.Parent.SoldierPreview)
 local UiKit = require(script.Parent.UiKit)
@@ -39,7 +46,8 @@ local player = Players.LocalPlayer
 local M = MapConfig.STUD_M -- 0,28 m por stud
 local FOV = 50
 local DEAD_GRACE = 2.5 -- s: depois de morrer, o corpo fica na tela um instante antes da cena
-local MOVE_TIME = 0.6 -- s da câmera indo até um objeto
+local MOVE_TIME = 0.7 -- s da câmera indo até um objeto
+local ARRIVE_TIME = 1.6 -- s do travelling de chegada (abrir a mesa, trocar de cena)
 local B = MapConfig.Bounds
 -- as cenas ficam no alto e fora da área jogável: ninguém as vê do mapa e o mapa não aparece nelas
 local BASE = Vector3.new((B.minX + B.maxX) / 2, 2600, B.maxZ + 3000)
@@ -1335,12 +1343,24 @@ edge(0, UDim2.fromScale(0.2, 1), UDim2.fromScale(0, 0), Vector2.zero)
 edge(180, UDim2.fromScale(0.2, 1), UDim2.fromScale(1, 0), Vector2.new(1, 0))
 local fade = Instance.new("Frame")
 fade.Name = "Fade"
-fade.BackgroundColor3 = Color3.new(0, 0, 0)
+fade.BackgroundColor3 = rgb(14, 12, 8) -- escuro quente (barraca à noite), não preto chapado
 fade.BackgroundTransparency = 1
 fade.BorderSizePixel = 0
 fade.Size = UDim2.fromScale(1, 1)
 fade.ZIndex = 5
 fade.Parent = backdrop
+-- película da mesa: leve (a cena 3D já tem luz própria), só com a câmera na mesa
+local film = Acabamento.filme(backdrop, {
+	vinheta = 0.5,
+	grao = 0.32,
+	poeira = 22,
+	riscos = 1,
+	tremor = 0.3,
+	lampiao = 0.18,
+	z = 3,
+})
+Acabamento.luz(film, UDim2.fromScale(0.5, -0.05), 1.5)
+local filmOn = false
 backdrop.Parent = player:WaitForChild("PlayerGui")
 
 local tags = Instance.new("ScreenGui")
@@ -1375,6 +1395,13 @@ local function makeTag(hot: boolean): (Frame, TextLabel, TextLabel)
 	st.Thickness = 2
 	st.Transparency = 0.2
 	st.Parent = fr
+	local light = Instance.new("UIGradient") -- papel com luz de cima, como as fichas
+	light.Rotation = 90
+	light.Color = ColorSequence.new(Color3.new(1, 1, 1), rgb(206, 200, 186))
+	light.Parent = fr
+	local pop = Instance.new("UIScale")
+	pop.Name = "Pop"
+	pop.Parent = fr
 	local t1 = Instance.new("TextLabel")
 	t1.BackgroundTransparency = 1
 	t1.AutomaticSize = Enum.AutomaticSize.XY
@@ -1445,6 +1472,11 @@ local openObj: Obj? = nil
 local subOverride: { [string]: string } = {}
 local camFrom: CFrame? = nil
 local camT = 1
+local camDur = MOVE_TIME
+local arriving = false -- próximo quadro começa o travelling de chegada
+local wasCovered = false -- a tela de entrada (LoadingScreen) cobria a mesa no quadro anterior
+local lastShow: Obj? = nil -- objeto realçado no quadro anterior (entrada do realce e da etiqueta)
+local lastNext: Obj? = nil
 local sway = Vector2.zero
 local savedFov: number? = nil
 local rainWas: boolean? = nil
@@ -1502,6 +1534,20 @@ local function startMove()
 	local cam = camera()
 	camFrom = if cam then cam.CFrame else nil
 	camT = 0
+	camDur = MOVE_TIME
+	arriving = false
+end
+
+-- curva sem tranco: começa e termina com velocidade e aceleração zero (smootherstep)
+local function smooth(t: number): number
+	return t * t * t * (t * (t * 6 - 15) + 10)
+end
+
+-- A tela de entrada ainda cobre a mesa? (ela marca "Saindo" quando começa a esmaecer)
+local function entryCovering(): boolean
+	local pg = player:FindFirstChildOfClass("PlayerGui")
+	local lg = pg and pg:FindFirstChild("VT65Loading")
+	return lg ~= nil and lg:IsA("ScreenGui") and lg.Enabled and lg:GetAttribute("Saindo") ~= true
 end
 
 -- realce do objeto sob o ponteiro e contorno pulsante do "próximo passo"
@@ -1557,7 +1603,10 @@ local function applyScene(id: string)
 	nextHl.Parent = sc.folder
 	params.FilterDescendantsInstances = { sc.hits }
 	hovered, touchSel = nil, nil
-	camFrom, camT = nil, 1 -- corte seco para a cena nova
+	lastShow, lastNext = nil, nil
+	-- cena nova: a câmera chega num travelling (sai de um pouco mais longe e assenta)
+	camFrom, camT = nil, 1
+	arriving = true
 end
 
 local fadeToken = 0
@@ -1571,13 +1620,23 @@ local function switchScene(id: string)
 	end
 	fadeToken += 1
 	local my = fadeToken
-	TweenService:Create(fade, TweenInfo.new(0.16), { BackgroundTransparency = 0 }):Play()
-	task.delay(0.17, function()
+	TweenService
+		:Create(
+			fade,
+			TweenInfo.new(0.2, Enum.EasingStyle.Sine, Enum.EasingDirection.In),
+			{ BackgroundTransparency = 0 }
+		)
+		:Play()
+	task.delay(0.21, function()
 		if my ~= fadeToken then
 			return
 		end
 		applyScene(wantScene)
-		TweenService:Create(fade, TweenInfo.new(0.35), { BackgroundTransparency = 1 }):Play()
+		TweenService:Create(
+			fade,
+			TweenInfo.new(0.55, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
+			{ BackgroundTransparency = 1 }
+		):Play()
 	end)
 end
 
@@ -1727,7 +1786,34 @@ local function step(dt: number)
 	else
 		hl.Enabled = false
 	end
+	if show ~= lastShow then
+		lastShow = show
+		if show then -- o contorno acende e a etiqueta "sai" do objeto (só quando o alvo muda)
+			hl.OutlineTransparency, hl.FillTransparency = 1, 1
+			TweenService:Create(hl, TweenInfo.new(0.18, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+				OutlineTransparency = 0.05,
+				FillTransparency = 0.82,
+			}):Play()
+			local pop = hoverTag:FindFirstChild("Pop") :: UIScale?
+			if pop then
+				pop.Scale = 0.86
+				TweenService:Create(pop, TweenInfo.new(0.24, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+					Scale = 1,
+				}):Play()
+			end
+		end
+	end
 	local nx = if nextId and focusId == nil then objById(sc, nextId) else nil
+	if nx ~= lastNext then
+		lastNext = nx
+		local pop = nextTag:FindFirstChild("Pop") :: UIScale?
+		if nx and pop then
+			pop.Scale = 0.9
+			TweenService:Create(pop, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+				Scale = 1,
+			}):Play()
+		end
+	end
 	if nx and nx ~= show then
 		nextHl.Adornee = nx.model
 		nextHl.Enabled = true
@@ -1764,11 +1850,29 @@ local function step(dt: number)
 		sway = sway:Lerp(want, 1 - math.exp(-dt * 3))
 		local breathe = math.sin(t * 0.7) * 0.0015
 		target = target * CFrame.Angles(-sway.Y * 0.03 + breathe, -sway.X * 0.04, 0)
+		-- a tela de entrada acabou de começar a sair: a mesa "chega" junto com o esmaecer dela
+		local covered = entryCovering()
+		if wasCovered and not covered then
+			arriving = true
+		end
+		wasCovered = covered
+		if arriving then
+			-- travelling de chegada: de 22% mais longe e um pouco mais alto até o enquadramento (a
+			-- folga do shotCF para tela estreita é de até 40%: o recuo não sai da barraca). Com a
+			-- tela de entrada por cima, a câmera espera parada no ponto de partida.
+			local dist = (s.focus - target.Position).Magnitude
+			camFrom = target * CFrame.new(0, dist * 0.06, dist * 0.22)
+			camT, camDur = 0, ARRIVE_TIME
+			if not covered then
+				arriving = false
+			end
+		end
 		local from = camFrom
 		if from and camT < 1 then
-			camT = math.min(camT + dt / MOVE_TIME, 1)
-			local a = 1 - (1 - camT) ^ 3
-			cam.CFrame = from:Lerp(target, a)
+			if not arriving then
+				camT = math.min(camT + dt / camDur, 1)
+			end
+			cam.CFrame = from:Lerp(target, smooth(camT))
 		else
 			cam.CFrame = target
 		end
@@ -1871,7 +1975,12 @@ local function evaluate()
 	-- na mesa: só a vinheta; vivo (troca de papel), escurece o jogo atrás dos papéis
 	dim.BackgroundTransparency = if deskOn then 1 else 0.38
 	for _, e in edges do
-		e.BackgroundTransparency = if deskOn then 0.25 else 0
+		e.BackgroundTransparency = if deskOn then 0.35 else 0
+	end
+	local wantFilm = dressed and deskOn
+	if wantFilm ~= filmOn then
+		filmOn = wantFilm
+		Acabamento.ligar(film, wantFilm, if wantFilm then 1.2 else 0)
 	end
 end
 

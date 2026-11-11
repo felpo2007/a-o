@@ -2137,6 +2137,46 @@ e troca de botões do controle (Parte 12.8). Entraram duas sub-abas e uma opçã
 A qualidade gráfica geral continua no menu do Roblox.
 
 **Cursor virtual** (sub-aba Controle, desligado no padrão):
-- Nos menus, o analógico esquerdo vira um mouse na velocidade padrão do Roblox e o A clica.
-- Desligado, os menus seguem pela seleção (direcional, LB/RB).
-- O mapa tem cursor próprio.
+- No menu do jogo entra o mesmo cursor do lobby (`VirtualCursor`):
+  - o analógico esquerdo move, com ímã leve sobre os botões;
+  - o A clica;
+  - o direcional pula entre os botões;
+  - o analógico direito rola a lista.
+- Desligado, o menu segue pela seleção do Roblox (direcional, LB/RB).
+- O lobby já usa o cursor sempre. O mapa tem cursor próprio.
+
+## D-83 — Telas fluidas: carregamento, mesa, escolha e chegada ao campo (2026-11-11)
+**Pedido do usuário:** "melhore a qualidade gráfica das animações e das telas de escolha,
+carregamento etc.; mais fluido e com qualidade gráfica melhor".
+
+Módulo novo `ReplicatedFirst/Acabamento` (grão de filme, vinheta, papel, carimbo, máquina de
+escrever), usado por todas as telas.
+
+**Carregamento** (`LoadingScreen`):
+- Cartão de briefing datilografado com fatos da operação.
+- Carta com os eixos a lápis que se desenham.
+- Carimbo SECRET.
+- A barra nunca volta.
+- Saída em fade sobre o lobby, sem tela preta.
+
+**Mesa do lobby** (`LobbyScene`):
+- A câmera chega devagar enquanto a tela de entrada some e anda entre os objetos sem tranco.
+- A troca de cena passa por um escuro quente.
+- Contorno e etiqueta entram animados; vinheta e grão leves.
+
+**Escolha de lado, squad, papel, diária e inserção** (`DeployScreen`):
+- A pasta que sai esmaece enquanto a nova entra.
+- Os cartões entram um a um e os carimbos "caem".
+- Realce animado no mouse, no foco do Roblox e no cursor virtual.
+- Dicas de botão em chip: imagem do botão do controle ou tecla em relevo.
+- A ficha do papel mostra as armas que mudam (►) e barras de velocidade inicial, cadência,
+  carregador e peso, comparadas com o papel atual.
+
+**Chegada ao campo** (`SpawnTransition`):
+- Ordem datilografada com a carta.
+- Eixo vermelho do QG até o ponto.
+- Carimbo "EM CAMPO" ou "RECUSADA".
+- A câmera desce do alto até o soldado em ~1,3 s; qualquer botão pula a descida.
+
+Só no Studio: `workspace:SetAttribute("VT65DevTela", ...)` com `"carregamento"`, `"escolha"`,
+`"lado"`, `"squad"`, `"papel"`, `"diaria"`, `"insercao"` ou `"transicao"`.

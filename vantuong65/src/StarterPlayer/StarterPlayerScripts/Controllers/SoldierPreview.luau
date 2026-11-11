@@ -10,6 +10,7 @@
 --     dado, de frente para onde o ponto olha. Ilumina-se pelas luzes da cena.
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
 
 local GunModel = require(ReplicatedStorage.Shared.GunModel)
 local Weapons = require(ReplicatedStorage.Shared.Weapons)
@@ -167,6 +168,13 @@ local function sync(p: Preview)
 			p.weaponArt = w ~= nil and w:GetAttribute("Kind") == nil
 			if not stand then
 				frameModel(p)
+			end
+			local vp = p.vp
+			if vp then -- retrato: a foto "revela" (o soldado esmaece sobre o fundo de estúdio)
+				vp.ImageTransparency = 1
+				TweenService:Create(vp, TweenInfo.new(0.6, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
+					ImageTransparency = 0,
+				}):Play()
 			end
 		end
 	end
