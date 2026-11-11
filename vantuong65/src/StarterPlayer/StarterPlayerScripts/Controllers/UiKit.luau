@@ -38,12 +38,32 @@ function UiKit.headFont(text: string): Font
 	return if string.find(text, "[\196-\244]") then Font.fromEnum(Enum.Font.ArimoBold) else UiKit.HEAD_FONT
 end
 
--- Caixa alta que também sobe as letras acentuadas do português (o string.upper só mexe no ASCII).
+-- Caixa alta que também sobe as letras acentuadas do português e do vietnamita (o string.upper só
+-- mexe no ASCII; no Studio "An Cường" saía "AN CườNG"). Pares minúscula/maiúscula do Unicode:
+-- Latin-1 (à–þ, menos ÷), Latin Extended-A (ă, đ, ĩ, ũ), ơ, ư e o bloco vietnamita (ạ–ỹ).
+local function upCodepoint(cp: number): number
+	if cp >= 97 and cp <= 122 then
+		return cp - 32
+	elseif cp >= 0xE0 and cp <= 0xFE and cp ~= 0xF7 then
+		return cp - 32
+	elseif ((cp >= 0x100 and cp <= 0x137) or (cp >= 0x14A and cp <= 0x177)) and cp % 2 == 1 then
+		return cp - 1
+	elseif cp == 0x1A1 or cp == 0x1B0 then
+		return cp - 1
+	elseif cp >= 0x1EA0 and cp <= 0x1EF9 and cp % 2 == 1 then
+		return cp - 1
+	end
+	return cp
+end
 function UiKit.upper(s: string): string
-	local out = string.gsub(string.upper(s), "\195([\160-\190])", function(c: string): string
-		return if c == "\183" then "\195\183" else "\195" .. string.char(string.byte(c) - 32) -- \183: ÷
+	local ok, out = pcall(function(): string
+		local parts = {}
+		for _, cp in utf8.codes(s) do
+			table.insert(parts, utf8.char(upCodepoint(cp)))
+		end
+		return table.concat(parts)
 	end)
-	return out
+	return if ok then out else string.upper(s)
 end
 
 -- Primeira letra em maiúscula (texto do servidor chega em minúscula: "alvo fora do mapa").

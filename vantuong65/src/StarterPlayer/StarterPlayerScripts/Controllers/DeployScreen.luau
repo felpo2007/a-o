@@ -1248,7 +1248,7 @@ do
 			pop.Scale = 1.3
 			tw(pop, SOFT, { Scale = 1 })
 		end
-		Acabamento.datilografar(capTitle, string.upper(if r then r.name else rid), 70)
+		Acabamento.datilografar(capTitle, UiKit.upper(if r then r.name else rid), 70)
 		if isCurrent then
 			stampSet(capMark, "ATUAL", OLIVE_INK)
 		elseif curLo then
@@ -1502,7 +1502,7 @@ do
 			end
 			row.frame.Visible = true
 			row.frame.LayoutOrder = order
-			row.name.Text = string.upper(UNIT_NAME[unit] or unit)
+			row.name.Text = UiKit.upper(UNIT_NAME[unit] or unit)
 			row.glyph.Text = UNIT_GLYPH[unit] or "•"
 			local locked = def.heavy and (size == nil or size < Roles.HEAVY_UNLOCK)
 			local detail = if def.size == 1
@@ -1775,7 +1775,7 @@ do
 				card.btn.Visible = show
 				if show then
 					card.btn.LayoutOrder = order
-					card.name.Text = string.upper(r.name)
+					card.name.Text = UiKit.upper(r.name)
 					card.weapons.Text = weaponNames(lo)
 					local max = r.maxPerSquad
 					local free: number? = nil
@@ -1877,7 +1877,7 @@ do
 		local squadName = if type(sid) == "string" then (string.match(sid, ":(.+)$") or sid) else "—"
 		local unit = if type(sid) == "string" then unitOfSquad(f, sid) else nil
 		local hq = MapConfig.HQ[f]
-		iCaption.Text = string.upper(if r then r.name else rid)
+		iCaption.Text = UiKit.upper(if r then r.name else rid)
 		local _, padText = Input.glyph("map_role", "map")
 		local text = Acabamento.viet(table.concat({
 			"SQUAD  " .. squadName .. (if unit then " (" .. (UNIT_NAME[unit] or unit) .. ")" else ""),
@@ -2290,7 +2290,7 @@ local function updateHeader(f: string?)
 	else
 		for _, sp in MapConfig.Strongpoints do
 			if sp.name == "An Cường (2)" then
-				posLine.Text = string.format("%s · %s", string.upper(sp.name), gridRef(sp.x, sp.z))
+				posLine.Text = string.format("%s · %s", UiKit.upper(sp.name), gridRef(sp.x, sp.z))
 			end
 		end
 	end
@@ -2338,7 +2338,7 @@ local function renderDesk(f: string, st: any)
 	LobbyScene.setText(
 		"radio",
 		if squadName
-			then string.upper(squadName) .. (if sq and def then string.format("  %d/%d", #sq.members, def.size) else "")
+			then UiKit.upper(squadName) .. (if sq and def then string.format("  %d/%d", #sq.members, def.size) else "")
 			else "— SEM SQUAD —"
 	)
 	local rid = currentRole()
