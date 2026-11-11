@@ -1823,3 +1823,49 @@ Resultado final no Studio: **17 ok, 0 falhas, 0 pulados**; nenhum erro de script
 - Só um jogador: ferimento entre jogadores e 60 jogadores a 60 fps continuam para o teste real.
 - Avisos `ContentId ... No asset content representation` e `Wrap-deformer` vêm do corpo e das
   roupas do personagem e dos modelos recém-publicados; não quebram nada.
+
+## D-76 — Garças no arrozal, partida longa e medidas (2026-11-11)
+**Pedido do usuário:** "continue melhorando e testando".
+
+**Garças** (`Shared/Egrets.luau`, `Egrets.client.luau`):
+- Bandos de 2 a 5 garças nos tabuleiros alagados: 50% dos tabuleiros em pousio e 20% dos de muda
+  nova. No arroz alto não há bando, porque ali a garça some.
+- Uma garça-vaqueira junto de cada búfalo, andando com ele (a cena clássica da lavoura).
+- 2 em cada 5 são garças-brancas-grandes (~0,95 m em pé); as outras são garças-vaqueiras
+  (~0,65 m).
+- Corpo, pescoço e asas são esferas esticadas. Com placas retas, a garça parada parecia uma caixa
+  e a asa recolhida uma barbatana.
+- **Susto:**
+  - tiro a até 120 m: os dos outros chegam pelo `Combat_Tracer`, o seu pelo `Bus`;
+  - explosão a até 300 m.
+  - A garça decola escalonada, sobe a 14 m e voa ~130 m para longe do barulho, batendo as asas
+    e com as pernas para trás; depois some.
+  - O bando volta ao tabuleiro em 1–2 min.
+  - Como os búfalos, o voo mostra de onde veio o barulho.
+- Só no cliente, 8 peças por garça, sem rede. Aparecem até 150 m da câmera.
+- Os números de alcance e voo são de projeto: a garça-vaqueira voa a ~30–40 km/h, e o alcance do
+  susto não tem fonte.
+- **Studio:** bando no pousio, a explosão a 60 m levantou todos e o voo saiu como previsto.
+
+**Partida longa no Studio** (6 min, 14 x 15 bots):
+- os bots se acharam e lutaram: 8 fora de combate;
+- servidor a 60 quadros por segundo e memória estável;
+- nenhum erro de script.
+
+**Medidas:**
+- **Mata mais densa:** célula de 40 m com 70 plantas, câmera girando 360°: 57,1 fps. Sem a sombra
+  da folhagem, 58,0. A sombra não é o gargalo e ficou ligada.
+- **Altura do soldado:** todos os bots e o jogador medem 1,68 m. O aviso de 1,45 m no início do
+  servidor vinha do manequim da prévia, montado fora do Workspace (juntas não resolvidas). Agora
+  só se mede no Workspace.
+  - O aviso que sobra é verdadeiro: 1,68 m contra a meta de 1,75 m (D-30).
+  - Não mudei o `heightScale`: muda postura, câmera e a passagem no túnel de 1,2 m. Decisão
+    em aberto.
+- **Autoteste da pá intermitente** (falhou 1 vez em 4). O `PivotTo` não zera a velocidade: depois
+  de 1 s caindo de 400 studs o soldado chegava ao chão rápido, quicava e a pá cancelava ("você se
+  moveu"). Agora o teste zera a velocidade e espera o soldado parar. Era defeito do teste, não do
+  jogo.
+- **Itens em Robux:** tentei de novo; a chave segue sem a permissão (HTTP 403).
+
+**Autoteste final:** 17 ok, 0 falhas, 0 pulados, também com a câmera seguindo o soldado (a
+condição em que a pá tinha falhado).

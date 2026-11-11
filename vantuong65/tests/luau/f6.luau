@@ -15,6 +15,8 @@ local Accessibility = require(S .. "Accessibility") :: any
 local AfterAction = require(S .. "AfterAction") :: any
 local Comms = require(S .. "Comms") :: any
 local Animals = require(S .. "Animals") :: any
+local Egrets = require(S .. "Egrets") :: any
+local RiceField = require(S .. "RiceField") :: any
 local Rng = require(S .. "Rng") :: any
 local Pickup = require(S .. "Pickup") :: any
 local Weapons = require(S .. "Weapons") :: any
@@ -325,6 +327,49 @@ test("animais: fogem para longe do tiro, na velocidade da espécie; explosão as
 	assert(not Animals.noise(c, 0, 0, false, 0), "galinha a 100 m não ouve o tiro (60 m)")
 	assert(Animals.noise(c, 0, 0, true, 0), "mas ouve a explosão (180 m)")
 	assert(Animals.fleeing(c, 3.9) and not Animals.fleeing(c, 4.1))
+end)
+
+test("arrozal e garças (D-74, D-76): estados dos tabuleiros, grade sem sobra, bando e voo", function()
+	-- estados: ~60% arroz em pé, ~25% muda, ~15% pousio, sempre iguais para a mesma posição
+	local count = { mature = 0, young = 0, fallow = 0 }
+	local flocks, inMature = 0, 0
+	for i = 1, 2000 do
+		local x, z = i * 37.3 - 3000, (i * 91.7) % 6000 - 3000
+		local k = RiceField.kind(x, z)
+		count[k] += 1
+		assert(RiceField.kind(x, z) == k, "estado do tabuleiro mudou na 2ª consulta")
+		local n = Egrets.flockSize(x, z)
+		if n > 0 then
+			flocks += 1
+			assert(n >= 2 and n <= 5, "bando de 2 a 5 garças: " .. n)
+			if k == "mature" then
+				inMature += 1
+			end
+		end
+	end
+	assert(count.mature > 1000 and count.mature < 1400, "arroz em pé ~60%: " .. count.mature)
+	assert(count.fallow > 200 and count.fallow < 400, "pousio ~15%: " .. count.fallow)
+	assert(inMature == 0, "garça no arroz alto some: não tem bando lá")
+	assert(flocks > 150 and flocks < 330, "bando em ~30% dos tabuleiros alagados: " .. flocks)
+	-- grade: cobre o tabuleiro sem sobra, ladrilho entre 2/3 e 4/3 do nominal
+	for _, s in { { 117.7, 85.5 }, { 20, 20 }, { 300, 9 } } do
+		local nx, nz, tw, tz = RiceField.grid(s[1], s[2])
+		assert(math.abs(nx * tw - s[1]) < 1e-6 and math.abs(nz * tz - s[2]) < 1e-6, "grade com sobra")
+		assert(nx == 1 or (tw >= 16 * 2 / 3 and tw <= 16 * 4 / 3), "ladrilho fora da faixa: " .. tw)
+	end
+	assert(RiceField.lod(10) == "hi" and RiceField.lod(150) == "lo" and RiceField.lod(400) == nil)
+	-- voo: sobe até o cruzeiro e segue reto; contínuo na troca de fase
+	local a0, h0 = Egrets.flight(0)
+	assert(a0 == 0 and h0 == 0, "decola do chão")
+	local a1, h1 = Egrets.flight(Egrets.CLIMB_S - 1e-6)
+	local a2, h2 = Egrets.flight(Egrets.CLIMB_S + 1e-6)
+	assert(math.abs(a1 - a2) < 0.01 and math.abs(h1 - h2) < 0.01, "voo pula na troca de fase")
+	local aEnd, hEnd = Egrets.flight(Egrets.FLIGHT_S)
+	assert(math.abs(hEnd - Egrets.CLIMB_M) < 1e-6, "altura de cruzeiro")
+	assert(aEnd > 100 and aEnd < 160, "some a 100–160 m de onde estava: " .. aEnd)
+	-- ouve: tiro a 120 m, explosão a 300 m
+	assert(Egrets.hears(0, 0, 100, 0, false) and not Egrets.hears(0, 0, 130, 0, false))
+	assert(Egrets.hears(0, 0, 250, 0, true) and not Egrets.hears(0, 0, 320, 0, true))
 end)
 
 test("animais: calmos ficam perto de casa; nascem em parte dos quintais", function()

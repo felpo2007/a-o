@@ -10,7 +10,7 @@
 | F3 Fatia vertical | **testado no Studio**: deitado, rádio (antena corrigida na D-75), tutorial |
 | F4 Sistemas pesados | **testado no Studio**: 6 veículos parados com assento, túneis e spawn do VC, pá, medevac, morteiro. Critério 30v30 com 6 veículos **só no Roblox** |
 | Parte 12 Controle | 19 regras no Lune; **não testado num controle real** (o Studio do MCP injeta o botão como teclado) |
-| F5 Arte total e otimização | arte nos 5 setores a 100% do plano; 53,2 fps no ponto mais denso da mata (D-67) e 59,6 fps no arrozal (D-74). Critério de 60 jogadores **só no Roblox** |
+| F5 Arte total e otimização | arte nos 5 setores a 100% do plano; 57,1 fps girando a câmera na célula mais densa da mata (D-76) e 59,6 fps no arrozal (D-74). Critério de 60 jogadores **só no Roblox** |
 | F6 Offensive e lançamento | **testado no Studio**: Offensive com relatório pós-ação, progressão. Beta fechado **só você pode rodar** |
 
 ## Sessão 7 (2026-11-11): vida no mapa e teste fase a fase (D-74, D-75)
@@ -25,6 +25,12 @@
   vilas.
 - **Autoteste:** 17 verificações (eram 12), **17 ok**. Corrigidos: antena do operador de rádio e
   ponto do teste da pá.
+- **Garças (D-76):**
+  - bandos nos tabuleiros em pousio e de muda, e uma garça junto de cada búfalo;
+  - levantam voo com tiro (120 m) ou explosão (300 m) e voltam em 1–2 min.
+- **Partida longa (D-76):** 6 min de bots, servidor a 60 quadros por segundo, memória estável e
+  nenhum erro de script.
+- **Aviso falso de altura do soldado removido:** todos medem 1,68 m.
 
 ## F6: o que foi feito (sessão 6)
 - **Modo Offensive** (`Shared/Offensive.luau`, D-46):

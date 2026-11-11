@@ -257,7 +257,10 @@ local BODY_PARTS = {
 local warnedHeight = false
 local function measureHeight(model: Model)
 	local root = model:FindFirstChild("HumanoidRootPart") :: BasePart?
-	if not root then
+	-- Só no Workspace. O manequim da prévia (PreviewService) é montado fora dele, as juntas não
+	-- são resolvidas e a medida saía 1,45 m: um aviso falso a cada início de servidor. No campo,
+	-- todos os soldados medem 1,68 m (Studio, 2026-11-11).
+	if not root or not model:IsDescendantOf(workspace) then
 		return
 	end
 	local up = root.CFrame.UpVector

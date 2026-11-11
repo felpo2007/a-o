@@ -313,8 +313,16 @@ local function dig(): (string, string?)
 	c:PivotTo(CFrame.new(x, 400, z))
 	task.wait(1)
 	local root = c:FindFirstChild("HumanoidRootPart") :: BasePart
+	-- O PivotTo não zera a velocidade: depois de 1 s caindo de 400 studs o soldado chegava ao chão
+	-- a ~200 studs/s, quicava, e a pá cancelava ("você se moveu"). Falhou 1 vez em 4 no Studio
+	-- (2026-11-11). Agora zera a velocidade e espera ficar parado antes de cavar.
 	c:PivotTo(CFrame.new(g.Position + Vector3.new(0, 4, 0)))
+	root.AssemblyLinearVelocity = Vector3.zero
+	root.AssemblyAngularVelocity = Vector3.zero
 	task.wait(1.5)
+	waitFor(function()
+		return root.AssemblyLinearVelocity.Magnitude * M < 0.2
+	end, 5)
 	local ahead = root.Position + root.CFrame.LookVector * Vector3.new(1, 0, 1) * (1.5 / M)
 	FieldWorkService.dig(p)
 	task.wait(9.5)
