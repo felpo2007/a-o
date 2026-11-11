@@ -146,12 +146,11 @@ local function setShown(on: boolean)
 		vin.ImageTransparency = 1
 		TweenService:Create(dim, TweenInfo.new(0.3), { BackgroundTransparency = 0.4 }):Play()
 		TweenService:Create(vin, TweenInfo.new(0.3), { ImageTransparency = 0.25 }):Play()
-		local k = fit.k()
 		card.Position = UDim2.new(0.5, 0, 0.5, 30)
-		fit.scale.Scale = k * 0.95
-		TweenService:Create(card, TweenInfo.new(0.38, Enum.EasingStyle.Quint), { Position = UDim2.fromScale(0.5, 0.5) })
+		TweenService:Create(card, TweenInfo.new(0.32, Enum.EasingStyle.Quint), { Position = UDim2.fromScale(0.5, 0.5) })
 			:Play()
-		TweenService:Create(fit.scale, TweenInfo.new(0.38, Enum.EasingStyle.Quint), { Scale = k }):Play()
+		-- um tween de escala por vez (a janela mudando no meio assenta na escala nova)
+		fit.play(TweenInfo.new(0.32, Enum.EasingStyle.Quint), 1, 0.95)
 		-- o carimbo cai depois da ficha
 		stamp.TextTransparency = 1
 		stampInk.Transparency = 1
@@ -182,7 +181,7 @@ local function setShown(on: boolean)
 		TweenService:Create(dim, info, { BackgroundTransparency = 1 }):Play()
 		TweenService:Create(vin, info, { ImageTransparency = 1 }):Play()
 		TweenService:Create(card, info, { Position = UDim2.new(0.5, 0, 0.5, 24) }):Play()
-		TweenService:Create(fit.scale, info, { Scale = fit.k() * 0.94 }):Play()
+		fit.play(info, 0.94)
 		task.delay(0.23, function()
 			if not shown then
 				gui.Enabled = false

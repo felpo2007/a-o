@@ -325,7 +325,7 @@ end
 -- como "processado", e a reserva perderia o Espaço do transpor. Caixa de texto em foco continua vetando.
 local CAS_KEYS: { [Enum.KeyCode]: boolean } = { [Enum.KeyCode.Space] = true }
 
-UserInputService.InputBegan:Connect(function(input, processed)
+UserInputService.InputBegan:Connect(function(input: InputObject, processed: boolean)
 	local t = input.UserInputType
 	if isGamepad(t) then
 		if Input.state.disconnected then
@@ -342,7 +342,21 @@ UserInputService.InputBegan:Connect(function(input, processed)
 			onButton(kc.Name, true, true)
 		end
 	elseif t == Enum.UserInputType.Keyboard then
-		if (not processed or CAS_KEYS[input.KeyCode]) and not UserInputService:GetFocusedTextBox() then
+		if
+			input.KeyCode == Enum.KeyCode.Escape
+			and Input.state.menus > 0
+			and not UserInputService:GetFocusedTextBox()
+		then
+			-- D-93: Esc também volta nas telas do jogo (como B e Backspace). O Roblox abre o menu dele
+			-- por cima; ao voltar, a tela do jogo já fechou.
+			local h = handlers.ui_back
+			local list = h and h.press
+			if list then
+				for _, fn in list do
+					task.spawn(fn)
+				end
+			end
+		elseif (not processed or CAS_KEYS[input.KeyCode]) and not UserInputService:GetFocusedTextBox() then
 			onButton(input.KeyCode.Name, true, false)
 		end
 	elseif MOUSE[t] and not processed then

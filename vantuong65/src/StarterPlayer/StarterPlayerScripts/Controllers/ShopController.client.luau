@@ -31,9 +31,11 @@ local TV = UiKit.tv()
 local function px(pc: number, tv: number): number
 	return if TV then tv else pc
 end
-local W, H = px(620, 820), px(620, 780)
-local LEFT = px(24 + 400 + 24, 24 + 470 + 24) -- a Intendência ocupa a esquerda
+local W, H = px(640, 860), px(600, 800)
 local OLIVE_INK = Color3.fromRGB(58, 82, 44)
+-- duas abas na mesma ficha (D-93: antes eram duas telas, uma por cima da outra)
+local TABS = { { id = "loja", name = "LOJA E ARMÁRIO" }, { id = "intendencia", name = "INTENDÊNCIA" } }
+local tab = "intendencia"
 
 local gui = Instance.new("ScreenGui")
 gui.Name = "VT65Shop"
@@ -46,11 +48,12 @@ pcall(function()
 end)
 gui.Parent = player:WaitForChild("PlayerGui")
 
--- pasta parda com a folha de requisição por cima
+-- pasta parda com a folha de requisição por cima, no meio; UiKit.fit encolhe numa janela pequena
+-- (D-93: numa janela de 671 x 565 o FECHAR ficava em y = −28, em cima da faixa do Roblox)
 local folder = Instance.new("Frame")
 folder.Name = "Pasta"
-folder.AnchorPoint = Vector2.new(1, 0.5)
-folder.Position = UDim2.new(1, -24, 0.5, 0)
+folder.AnchorPoint = Vector2.new(0.5, 0.5)
+folder.Position = UDim2.fromScale(0.5, 0.5)
 folder.Size = UDim2.fromOffset(W, H)
 folder.BackgroundColor3 = UiKit.MANILA
 folder.BorderSizePixel = 0
@@ -59,46 +62,56 @@ folder.Parent = gui
 UiKit.corner(folder, 5)
 UiKit.lit(folder, 0.8)
 UiKit.edge(folder, UiKit.INK, 1, 0.55)
-local openScale = Instance.new("UIScale") -- a pasta "abre" ao aparecer; também é a escala de ajuste
-openScale.Parent = folder
+local fit = UiKit.fit(gui, folder, W, H, 12)
 Acabamento.sombra(folder, 24, Vector2.new(0, 9), 0.6)
-
--- escala: cabe à direita da Intendência; numa janela estreita demais, ocupa o centro
-local fitK = 1
-local function fit()
-	local a = gui.AbsoluteSize
-	if a.X < 10 then
-		return
-	end
-	local room = a.X - LEFT - 24
-	if room < W * 0.55 then
-		folder.AnchorPoint = Vector2.new(0.5, 0.5)
-		folder.Position = UDim2.fromScale(0.5, 0.5)
-		room = a.X - 32
-	else
-		folder.AnchorPoint = Vector2.new(1, 0.5)
-		folder.Position = UDim2.new(1, -24, 0.5, 0)
-	end
-	fitK = math.clamp(math.min(room / W, (a.Y - 32) / H), 0.45, 1)
-	openScale.Scale = fitK
-end
-gui:GetPropertyChangedSignal("AbsoluteSize"):Connect(fit)
-fit()
 
 local kicker = UiKit.rotulo(folder, px(14, 22), UiKit.INK, UiKit.TYPE_FONT)
 kicker.Position = UDim2.fromOffset(px(20, 26), px(12, 16))
 kicker.Size = UDim2.new(1, -px(180, 240), 0, px(18, 26))
 kicker.TextTransparency = 0.3
-kicker.Text = "FORMULÁRIO DE REQUISIÇÃO · INTENDÊNCIA · 1965"
-local title = UiKit.rotulo(folder, px(28, 40), UiKit.INK, UiKit.HEAD_FONT)
-title.Position = UDim2.fromOffset(px(18, 24), px(28, 38))
-title.Size = UDim2.new(1, -px(180, 240), 0, px(38, 52))
-title.Text = "LOJA E ARMÁRIO"
-local sub = UiKit.rotulo(folder, px(14, 22), UiKit.INK, UiKit.BODY_FONT)
-sub.Position = UDim2.fromOffset(px(20, 26), px(66, 92))
-sub.Size = UDim2.new(1, -px(40, 52), 0, px(20, 28))
-sub.TextTransparency = 0.15
-sub.Text = "Tudo aqui é visual ou apoio. Nada vende vantagem em combate."
+kicker.Text = "FORMULÁRIO DE REQUISIÇÃO · 1965"
+-- abas de arquivo: LOJA E ARMÁRIO | INTENDÊNCIA (LB/RB, Q/E ou clique)
+local tabRow = Instance.new("Frame")
+tabRow.BackgroundTransparency = 1
+tabRow.Position = UDim2.fromOffset(px(14, 18), px(34, 46))
+tabRow.Size = UDim2.new(1, -px(150, 200), 0, px(40, 54))
+tabRow.Parent = folder
+do
+	local l = Instance.new("UIListLayout")
+	l.FillDirection = Enum.FillDirection.Horizontal
+	l.VerticalAlignment = Enum.VerticalAlignment.Bottom
+	l.SortOrder = Enum.SortOrder.LayoutOrder
+	l.Padding = UDim.new(0, 4)
+	l.Parent = tabRow
+end
+local tabButtons: { [string]: TextButton } = {}
+local setTab: (id: string) -> () = function(_id: string) end
+for i, d in TABS do
+	local b = Instance.new("TextButton")
+	b.Name = d.id
+	b.AutoButtonColor = false
+	b.AutomaticSize = Enum.AutomaticSize.X
+	b.Size = UDim2.fromOffset(0, px(36, 50))
+	b.BackgroundColor3 = UiKit.CARD
+	b.BorderSizePixel = 0
+	b.FontFace = UiKit.HEAD_FONT
+	b.TextSize = UiKit.text(17)
+	b.TextColor3 = UiKit.INK
+	b.Text = d.name
+	b.Selectable = false
+	b.LayoutOrder = i
+	b.Parent = tabRow
+	UiKit.corner(b, 4)
+	UiKit.lit(b, 0.86)
+	local p = Instance.new("UIPadding")
+	p.PaddingLeft = UDim.new(0, px(14, 20))
+	p.PaddingRight = UDim.new(0, px(14, 20))
+	p.Parent = b
+	UiKit.bind(b, function()
+		setTab(d.id)
+	end)
+	tabButtons[d.id] = b
+end
 
 local close = Instance.new("TextButton")
 close.AnchorPoint = Vector2.new(1, 0)
@@ -116,7 +129,7 @@ UiKit.corner(close, 3)
 UiKit.lit(close, 0.72)
 
 -- folha pautada com a lista (rola no analógico direito ou na roda do mouse)
-local TOP = px(96, 132)
+local TOP = px(76, 100)
 local FOOT = px(44, 62)
 local sheet = Instance.new("Frame")
 sheet.Name = "Folha"
@@ -156,6 +169,14 @@ layout.Parent = panel
 local pad = Instance.new("UIPadding")
 pad.PaddingTop, pad.PaddingBottom = UDim.new(0, 8), UDim.new(0, 14)
 pad.Parent = panel
+-- a página da Intendência (Progresso.client) entra aqui quando a aba dela está ativa
+local host = Instance.new("Frame")
+host.Name = "Intendencia"
+host.BackgroundTransparency = 1
+host.Position = UDim2.fromOffset(0, 6)
+host.Size = UDim2.new(1, 0, 1, -6)
+host.Visible = false
+host.Parent = sheet
 
 local foot = UiKit.chips(folder, px(30, 44), true, px(14, 22))
 foot.frame.AnchorPoint = Vector2.new(0, 1)
@@ -286,7 +307,7 @@ local function item(
 		more.Name = "Mais"
 		more.Position = UDim2.fromOffset(0, px(26, 36))
 		more.Size = UDim2.new(1, -right, 0, px(16, 24))
-		more.Text = "mais ▸"
+		more.Text = "mais ►"
 		dl:GetPropertyChangedSignal("Visible"):Connect(function()
 			more.Visible = not dl.Visible
 		end)
@@ -388,14 +409,15 @@ local function renderFoot()
 	foot.clear()
 	local dev = Input.device()
 	if dev == "gamepad" then
-		foot.add(UiKit.padImage(Enum.KeyCode.ButtonA), nil, "A", "Requisitar / equipar")
+		foot.pair("ui_tab_prev", "ui_tab_next", "menu", "Abas")
+		foot.add(UiKit.padImage(Enum.KeyCode.ButtonA), nil, "A", "Escolher")
 		foot.action("ui_back", "menu", "Fechar")
 	elseif dev == "touch" then
-		foot.add(nil, nil, "Toque", "no botão do item")
+		foot.add(nil, nil, "Toque", "na aba ou no item")
 	else
-		foot.add(nil, nil, "Clique", "no botão do item")
+		foot.pair("ui_tab_prev", "ui_tab_next", "menu", "Abas")
+		foot.add(nil, nil, "Clique", "no item")
 		foot.action("ui_back", "menu", "Fechar")
-		foot.add(nil, nil, "L", "Loja")
 	end
 end
 
@@ -406,6 +428,7 @@ local function render()
 		end
 	end
 	order = 0
+	note("Tudo aqui é visual ou apoio. Nada vende vantagem em combate.")
 	local listed = false
 	local passes, products = {}, {}
 	for _, pass in Commerce.Passes do
@@ -520,29 +543,70 @@ Net.event("Commerce_State").OnClientEvent:Connect(function(s)
 	end
 end)
 
+-- aba ativa: a loja (lista desta tela) ou a intendência (página do Progresso montada na folha)
+local function paintTabs()
+	for id, b in tabButtons do
+		local on = id == tab
+		TweenService:Create(b, UiKit.QUICK, {
+			BackgroundColor3 = if on then UiKit.CARD else Color3.fromRGB(170, 148, 102),
+			TextColor3 = if on then UiKit.STAMP else UiKit.INK,
+			Size = UDim2.fromOffset(0, if on then px(40, 54) else px(34, 46)),
+		}):Play()
+	end
+end
+local pageBase: { [Instance]: UDim2 } = {}
+setTab = function(id: string)
+	if id ~= "loja" and id ~= "intendencia" then
+		return
+	end
+	tab = id
+	paintTabs()
+	if not gui.Enabled then
+		return
+	end
+	local isShop = id == "loja"
+	panel.Visible = isShop
+	host.Visible = not isShop
+	if isShop then
+		Bus.fire("intendencia_hide")
+		UiKit.focus(panel)
+	else
+		Bus.fire("intendencia_show", host)
+	end
+	-- a folha nova desliza um pouco (o conteúdo já existe: nada é criado aqui)
+	-- posição de repouso guardada: trocar de aba rápido não deixa a folha deslocada no meio do tween
+	local page: GuiObject = if isShop then panel else host
+	local p0: UDim2 = pageBase[page] or page.Position
+	pageBase[page] = p0
+	page.Position = p0 + UDim2.fromOffset(px(14, 20), 0)
+	TweenService:Create(page, TweenInfo.new(0.22, Enum.EasingStyle.Quint), { Position = p0 }):Play()
+end
+
 local closeToken = 0
-local function setOpen(open: boolean)
+local function setOpen(open: boolean, which: string?)
+	if which then
+		tab = which
+	end
 	if open == gui.Enabled then
+		if open and which then
+			setTab(which)
+		end
 		return
 	end
 	closeToken += 1
 	local my = closeToken
 	if open then
 		gui.Enabled = true
-		fit()
-		openScale.Scale = fitK * 0.92
-		local p = folder.Position
-		folder.Position = p + UDim2.fromOffset(0, 30)
-		TweenService:Create(openScale, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-			Scale = fitK,
-		}):Play()
+		UiKit.opened("loja", gui.DisplayOrder)
+		folder.Position = UDim2.new(0.5, 0, 0.5, 26)
+		fit.play(TweenInfo.new(0.28, Enum.EasingStyle.Back, Enum.EasingDirection.Out), 1, 0.94)
 		TweenService:Create(folder, TweenInfo.new(0.24, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
-			Position = p,
+			Position = UDim2.fromScale(0.5, 0.5),
 		}):Play()
 		Input.openMenu()
 		Net.event("Commerce_Track"):FireServer("store_open")
 		render() -- com o que já se sabe: a pasta nunca abre vazia esperando o servidor
-		UiKit.focus(panel)
+		setTab(tab)
 		local openedAt = os.clock()
 		task.spawn(function()
 			local ok, s = pcall(function()
@@ -563,14 +627,19 @@ local function setOpen(open: boolean)
 			task.wait(math.max(0, openedAt + 0.32 - os.clock()))
 			if gui.Enabled and closeToken == my then
 				render()
-				UiKit.focus(panel)
+				if tab == "loja" then
+					UiKit.focus(panel)
+				end
 			end
 		end)
 	else
 		Input.closeMenu()
+		UiKit.closed("loja")
+		UiKit.release(gui)
+		Bus.fire("intendencia_hide")
 		Bus.fire("shop_closed")
 		local info = TweenInfo.new(0.16, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
-		TweenService:Create(openScale, info, { Scale = fitK * 0.95 }):Play()
+		fit.play(info, 0.95)
 		task.delay(0.16, function()
 			if closeToken == my then
 				gui.Enabled = false
@@ -582,12 +651,27 @@ end
 UiKit.bind(close, function()
 	setOpen(false)
 end)
-Bus.on("shop_open", function()
-	setOpen(true)
+-- shop_open(aba?): "loja" ou "intendencia" (sem aba: a última usada; a primeira é a intendência)
+Bus.on("shop_open", function(which: string?)
+	setOpen(true, which)
 end)
-Input.on("ui_back", "press", function()
+Bus.on("shop_close", function()
 	setOpen(false)
 end)
+Input.on("ui_back", "press", function()
+	if gui.Enabled and UiKit.backFor("loja") then
+		setOpen(false)
+	end
+end)
+-- LB/RB (Q/E) trocam a aba (LT/RT ficam para as abas de dentro da intendência)
+for action, dir in { ui_tab_prev = -1, ui_tab_next = 1 } :: { [string]: number } do
+	Input.on(action, "press", function()
+		if gui.Enabled and UiKit.top() == "loja" then
+			local i = if tab == "loja" then 1 else 2
+			setTab(TABS[(i - 1 + dir) % #TABS + 1].id)
+		end
+	end)
+end
 Input.DeviceChanged:Connect(function()
 	if gui.Enabled then
 		renderFoot()
@@ -603,9 +687,11 @@ UserInputService.InputBegan:Connect(function(input, processed)
 end)
 
 if RunService:IsStudio() then
+	-- "loja" abre na aba da loja; "intendencia" na da intendência
 	workspace:GetAttributeChangedSignal("VT65DevTela"):Connect(function()
-		if workspace:GetAttribute("VT65DevTela") == "loja" then
-			Bus.fire("shop_open")
+		local v = workspace:GetAttribute("VT65DevTela")
+		if v == "loja" or v == "intendencia" then
+			Bus.fire("shop_open", v)
 			task.defer(function()
 				workspace:SetAttribute("VT65DevTela", nil)
 			end)

@@ -22,8 +22,11 @@ local TV = UiKit.tv()
 local function px(pc: number, tv: number): number
 	return if TV then tv else pc
 end
-local SIZE = px(470, 660)
-local RADIUS = SIZE * 0.36
+-- Fichas numa elipse (D-93; no Studio as fichas 5 e 6 se sobrepunham e a 1 encostava no anel):
+-- mais largo que alto, as diagonais ficam fora do alcance das de cima/baixo e o anel de marcas
+-- (0,46) fica por dentro de todas, com folga até na ficha acesa (escala 1,1).
+local SIZE = px(520, 728)
+local RX, RY = SIZE * 0.42, SIZE * 0.34
 local CARD_W, CARD_H = px(136, 190), px(58, 80)
 
 local gui = UiKit.screen("VT65Wheel", 40)
@@ -34,7 +37,8 @@ center.Position = UDim2.fromScale(0.5, 0.5)
 center.Size = UDim2.fromOffset(SIZE, SIZE)
 center.BackgroundTransparency = 1
 center.Parent = gui
-local fit = UiKit.fit(gui, center, SIZE, SIZE, 10)
+-- a área medida inclui as fichas dos lados (passam do mostrador)
+local fit = UiKit.fit(gui, center, 2 * (RX + CARD_W * 0.55), SIZE, 10)
 
 local function circle(parent: Instance, d: number, color: Color3, tr: number): Frame
 	local f = Instance.new("Frame")
@@ -52,7 +56,7 @@ end
 local dial = circle(center, 0.9, UiKit.CARD_DARK, 0.22)
 UiKit.edge(dial, UiKit.KHAKI, 1, 0.65)
 UiKit.lit(dial, 0.7)
-local ring = circle(center, 0.62, UiKit.CARD_DARK, 1)
+local ring = circle(center, 0.46, UiKit.CARD_DARK, 1)
 UiKit.edge(ring, UiKit.KHAKI, 1, 0.82)
 for i = 0, 35 do -- marcas de 10° como num mostrador (o giro é no centro do quadro inteiro)
 	local tick = Instance.new("Frame")
@@ -122,7 +126,7 @@ for i = 1, 8 do
 	local a = (i - 1) * math.pi / 4
 	local f = Instance.new("TextButton") -- o mouse também escolhe pela ficha
 	f.AnchorPoint = Vector2.new(0.5, 0.5)
-	f.Position = UDim2.new(0.5, math.sin(a) * RADIUS, 0.5, -math.cos(a) * RADIUS)
+	f.Position = UDim2.new(0.5, math.sin(a) * RX, 0.5, -math.cos(a) * RY)
 	f.Size = UDim2.fromOffset(CARD_W, CARD_H)
 	f.BackgroundColor3 = UiKit.DRAB
 	f.BackgroundTransparency = 0.08
@@ -229,8 +233,28 @@ local function renderHint()
 	end
 end
 
+-- aberta de fato (a ScreenGui fica ligada mais 0,1 s na saída, só para o encolher)
+local isOpen = false
+local openToken = 0
 function Wheel.isOpen(): boolean
-	return gui.Enabled
+	return isOpen
+end
+
+local function hide(animated: boolean)
+	isOpen = false
+	openToken += 1
+	local my = openToken
+	if not animated then
+		gui.Enabled = false
+		return
+	end
+	fit.play(TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.In), 0.9)
+	TweenService:Create(dial, TweenInfo.new(0.1), { BackgroundTransparency = 0.7 }):Play()
+	task.delay(0.1, function()
+		if openToken == my then
+			gui.Enabled = false
+		end
+	end)
 end
 
 local function reset(label: string, list: { Item })
@@ -250,34 +274,32 @@ function Wheel.open(name: string, label: string, list: { Item }, enabled: ((stri
 	enabledFn = enabled or function()
 		return true
 	end
+	openToken += 1
+	isOpen = true
 	gui.Enabled = true
 	Input.event("wheel_open", name)
 	reset(label, list)
 	-- entra crescendo do centro
-	local k = fit.k()
-	fit.scale.Scale = k * 0.84
-	TweenService:Create(fit.scale, TweenInfo.new(0.16, Enum.EasingStyle.Quint), { Scale = k }):Play()
+	fit.play(TweenInfo.new(0.16, Enum.EasingStyle.Quint), 1, 0.84)
 	dial.BackgroundTransparency = 0.6
 	TweenService:Create(dial, TweenInfo.new(0.16), { BackgroundTransparency = 0.22 }):Play()
 end
 
--- troca de página sem fechar (ex.: "Comando ▸")
+-- troca de página sem fechar (ex.: "Comando ►")
 function Wheel.page(label: string, list: { Item }, enabled: ((string) -> boolean)?)
 	if enabled then
 		enabledFn = enabled
 	end
 	reset(label, list)
-	local k = fit.k()
-	fit.scale.Scale = k * 0.94
-	TweenService:Create(fit.scale, TweenInfo.new(0.14, Enum.EasingStyle.Quint), { Scale = k }):Play()
+	fit.play(TweenInfo.new(0.14, Enum.EasingStyle.Quint), 1, 0.94)
 end
 
 -- Fecha; devolve o id escolhido (ou nil se cancelou / item apagado).
 function Wheel.close(confirm: boolean): string?
-	if not gui.Enabled then
+	if not isOpen then
 		return nil
 	end
-	gui.Enabled = false
+	hide(true)
 	Input.event("wheel_close")
 	local it = selected and items[selected]
 	if confirm and it and enabledFn(it.id) then
@@ -289,7 +311,7 @@ end
 -- o mouse sobre uma ficha também escolhe (sem precisar do arrasto)
 for i, s in slots do
 	s.f.MouseEnter:Connect(function()
-		if gui.Enabled and items[i] then
+		if isOpen and items[i] then
 			selected = i
 			render()
 		end
@@ -297,7 +319,7 @@ for i, s in slots do
 end
 
 RunService.RenderStepped:Connect(function()
-	if not gui.Enabled then
+	if not isOpen then
 		return
 	end
 	local idx: number?
@@ -320,7 +342,7 @@ end)
 
 -- teclas 1–8 escolhem direto no teclado
 UserInputService.InputBegan:Connect(function(input)
-	if not gui.Enabled or input.UserInputType ~= Enum.UserInputType.Keyboard then
+	if not isOpen or input.UserInputType ~= Enum.UserInputType.Keyboard then
 		return
 	end
 	local n = ({
@@ -343,12 +365,12 @@ Input.on("wheel_cancel", "press", function()
 	Wheel.close(false)
 end)
 Input.StateChanged:Connect(function(cancelled: { string })
-	if table.find(cancelled, "wheel") and gui.Enabled then
-		gui.Enabled = false -- menu/mapa/morte cancelaram a roda
+	if table.find(cancelled, "wheel") and isOpen then
+		hide(false) -- menu/mapa/morte cancelaram a roda (sai na hora: outra tela vem por cima)
 	end
 end)
 Input.DeviceChanged:Connect(function()
-	if gui.Enabled then
+	if isOpen then
 		renderHint()
 		for _, s in slots do
 			s.on, s.hot = nil, nil
@@ -373,7 +395,7 @@ if RunService:IsStudio() then
 		selected = 3
 		render()
 		task.delay(4, function()
-			if gui.Enabled then
+			if isOpen then
 				Wheel.close(false)
 			end
 		end)

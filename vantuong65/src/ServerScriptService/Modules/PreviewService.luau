@@ -97,7 +97,9 @@ local function build(faction: string, folder: Folder)
 		hum.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
 		hum.HealthDisplayType = Enum.HumanoidHealthDisplayType.AlwaysOff
 	end
-	Characters.dress(model, faction, nil)
+	-- o VC sem cosmético não tem cobertura de cabeça e o manequim da mesa saía careca (Studio, D-93):
+	-- a prévia usa o capacete de medula (o mesmo prop da mesa do VC); sem a arte, fica como antes
+	Characters.dress(model, faction, if faction == "VC" then { helmet = "vc_pith_helmet" } else nil)
 	AssetLoader.attachWeapon(model, weaponId)
 	-- âncora em tudo DEPOIS de vestir e armar: capacete, colete e arma já estão na posição soldada, e
 	-- o WorldModel do ViewportFrame não resolve as soldas

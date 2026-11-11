@@ -209,17 +209,24 @@ local function show(forceVector: boolean?)
 	ringInk.Transparency = 0.35
 	play(ring, 0.55, { Size = UDim2.fromScale(1.4, 1.4) }, Enum.EasingStyle.Quad)
 	play(ringInk, 0.55, { Transparency = 1 }, Enum.EasingStyle.Quad)
-	-- fica um instante e sai esmaecendo
+	-- fica um instante e sai esmaecendo. A saída começa por relógio, não por tween com atraso: um
+	-- tween atrasado na MESMA propriedade cancela o de entrada na hora (no Studio a caveira não
+	-- aparecia: ficava em transparência 1 o tempo todo).
 	local HOLD, OUT = 0.72, 0.42
-	play(scale, OUT, { Scale = 0.94 }, Enum.EasingStyle.Sine, Enum.EasingDirection.In, HOLD)
-	if useImg then
-		play(img, OUT, { ImageTransparency = 1 }, Enum.EasingStyle.Sine, Enum.EasingDirection.In, HOLD)
-		play(shadow, OUT, { ImageTransparency = 1 }, Enum.EasingStyle.Sine, Enum.EasingDirection.In, HOLD)
-	else
-		for _, p in pieces do
-			play(p.o, OUT, { BackgroundTransparency = 1 }, Enum.EasingStyle.Sine, Enum.EasingDirection.In, HOLD)
+	task.delay(HOLD, function()
+		if token ~= my then
+			return
 		end
-	end
+		play(scale, OUT, { Scale = 0.94 }, Enum.EasingStyle.Sine, Enum.EasingDirection.In)
+		if useImg then
+			play(img, OUT, { ImageTransparency = 1 }, Enum.EasingStyle.Sine, Enum.EasingDirection.In)
+			play(shadow, OUT, { ImageTransparency = 1 }, Enum.EasingStyle.Sine, Enum.EasingDirection.In)
+		else
+			for _, p in pieces do
+				play(p.o, OUT, { BackgroundTransparency = 1 }, Enum.EasingStyle.Sine, Enum.EasingDirection.In)
+			end
+		end
+	end)
 	task.delay(HOLD + OUT + 0.05, function()
 		if token == my then
 			holder.Visible = false

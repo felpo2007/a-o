@@ -180,6 +180,9 @@ export type Settings = {
 	volEffects: number,
 	volAmbient: number,
 	volMusic: number,
+	-- movimento da câmera (balanço da passada, inércia da cabeça, inclinação nas curvas), 0 a 1;
+	-- lido pelo Movement.client (acessibilidade: enjoo de movimento)
+	cameraBob: number,
 }
 
 InputMap.DEFAULTS = {
@@ -225,6 +228,7 @@ InputMap.DEFAULTS = {
 	volEffects = 0.5,
 	volAmbient = 0.6,
 	volMusic = 0.35,
+	cameraBob = 1,
 } :: Settings
 
 -- Configurações que mudam os botões (o runtime refaz os bindings só quando uma delas muda).
@@ -268,6 +272,7 @@ local RANGES: { [string]: { number } } = {
 	volEffects = { 0, 1 },
 	volAmbient = { 0, 1 },
 	volMusic = { 0, 1 },
+	cameraBob = { 0, 1 },
 }
 local CHOICES: { [string]: { [string]: boolean } } = {
 	gfxDetail = { high = true, medium = true, low = true },

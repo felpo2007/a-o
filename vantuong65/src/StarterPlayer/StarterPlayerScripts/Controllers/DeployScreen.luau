@@ -1093,8 +1093,12 @@ local function factionCard(f: string, x: number): FCard
 end
 fcards.US = factionCard("US", 40)
 fcards.VC = factionCard("VC", 680)
-local chooseHint = txt(pages.choose, TYPE, 16, KHAKI, 40, 14, 1200, 26, Enum.TextXAlignment.Center)
+-- D-93: a dica ficava no meio da tela, por cima dos dossiês da mesa (Studio); agora vai na faixa
+-- das abas (livre na sala de arquivo: as abas só aparecem depois do lado escolhido)
+local chooseHint = txt(root, TYPE, 16, KHAKI, 40, 92, 1200, 26, Enum.TextXAlignment.Center)
 chooseHint.Text = "Escolha o seu lado: aponte para um dossiê na mesa ou para uma ficha."
+chooseHint.TextTruncate = Enum.TextTruncate.AtEnd
+chooseHint.Visible = false
 
 -- as duas fichas sobem para a mesa, uma depois da outra, e o carimbo de vaga cai
 local function dealChoose()
@@ -1154,7 +1158,7 @@ do
 	local CAP_W, CAP_H, CAP_M = if TV then 600 else 500, if TV then 210 else 140, 24
 	local CAP_Y = 660 - CAP_H
 	local CAP_TEXT_W = if TV then 272 else 236 -- coluna das armas
-	local STAT_LW = if TV then 112 else 74 -- rótulo da barra
+	local STAT_LW = if TV then 112 else 84 -- rótulo da barra ("CARREGADOR" não cabia em 74)
 	local STAT_VW = if TV then 66 else 52 -- valor da barra
 	local STAT_DY = if TV then 36 else 21 -- entre as barras
 	capHolder.Name = "FichaPapel"
@@ -1181,6 +1185,11 @@ do
 	local capLines = txt(capCard, TYPE, 14, INK, 12, 50, CAP_TEXT_W, CAP_H - 54)
 	capLines.TextYAlignment = Enum.TextYAlignment.Top
 	capLines.RichText = true
+	-- nome de arma longo passava da coluna e corria por cima das barras (Studio, D-93): quebra
+	-- dentro da coluna e o que não couber termina em "…"
+	capLines.TextWrapped = true
+	capLines.TextTruncate = Enum.TextTruncate.AtEnd
+	capLines.ClipsDescendants = true
 
 	-- maiores valores entre as armas ligadas: a barra cheia é a melhor arma do jogo naquele número
 	type Stat = { key: string, label: string, unit: string, max: number, more: boolean }
@@ -1211,6 +1220,8 @@ do
 			l.Text = s.label
 			l.TextTransparency = 0.2
 			l.TextYAlignment = Enum.TextYAlignment.Center
+			l.TextWrapped = false -- uma linha só; o que passar termina em "…" (não invade a barra)
+			l.TextTruncate = Enum.TextTruncate.AtEnd
 			local back = box(capCard, INK, bx, y + math.floor(rowH / 2) - 3, bw, 6, 0.84)
 			corner(back, 2)
 			local fill = box(back, INK, 0, 0, 0, 6, 0.1)
@@ -1931,15 +1942,18 @@ local dailySummary: () -> (string, string)
 local renderDaily: (f: string) -> ()
 do
 	type DCell = { frame: Frame, day: TextLabel, date: TextLabel, reward: TextLabel, mark: TextLabel }
-	local dFolder, dInfo = folder(pages.daily, "FICHA · RECOMPENSA DIÁRIA", PANEL_W, PANEL_H)
-	local dRule = txt(dFolder, TYPE, 14, INK, 16, 52, PANEL_W - 32, 40)
-	dRule.TextYAlignment = Enum.TextYAlignment.Top
-	dRule.Text =
-		"Um selo por dia (dia UTC). Pulou um dia, a sequência volta ao dia 1; os selos e os itens já ganhos ficam com você. Dias 3 e 7: item que só sai daqui."
+	-- Studio (D-93): a ficha sobrava embaixo, a regra ocupava três linhas e o "HOJE" era miúdo.
+	-- Agora a regra é uma linha, a ficha é do tamanho do conteúdo e o carimbo do dia é maior.
+	local DAILY_H = 470
+	local dFolder, dInfo = folder(pages.daily, "FICHA · RECOMPENSA DIÁRIA", PANEL_W, DAILY_H)
+	local dRule = txt(dFolder, TYPE, 14, INK, 16, 50, PANEL_W - 32, 22)
+	dRule.TextWrapped = false
+	dRule.TextTruncate = Enum.TextTruncate.AtEnd
+	dRule.Text = "Um selo por dia (UTC). Pulou um dia, volta ao dia 1. Dias 3 e 7: item único."
 	local cells: { DCell } = {}
 	for i = 1, Commerce.TRACK_DAYS do
 		local x = 14 + (i - 1) * 94
-		local fr = box(dFolder, CARD, x, 100, 88, 206)
+		local fr = box(dFolder, CARD, x, 80, 88, 192)
 		corner(fr, 3)
 		paper(fr, 90)
 		stroke(fr, INK, 1, 0.6)
@@ -1948,16 +1962,17 @@ do
 		d.FontFace = HEAD_B
 		local dt = txt(fr, TYPE, 13, INK, 4, 28, 80, 18, Enum.TextXAlignment.Center)
 		hline(fr, UiKit.RULE_RED, 6, 48, 76)
-		local rw = txt(fr, TYPE, 13, INK, 5, 54, 78, 96)
+		local rw = txt(fr, TYPE, 13, INK, 5, 54, 78, 92)
 		rw.TextYAlignment = Enum.TextYAlignment.Top
 		rw.TextXAlignment = Enum.TextXAlignment.Center
-		local mk = stamp(fr, 14, 4, 160, 80, 30, -7)
+		rw.TextTruncate = Enum.TextTruncate.AtEnd
+		local mk = stamp(fr, 19, 2, 148, 84, 38, -7)
 		mk.Visible = false
 		cells[i] = { frame = fr, day = d, date = dt, reward = rw, mark = mk }
 	end
 	local claimBtn = Instance.new("TextButton")
-	claimBtn.Position = UDim2.fromOffset(14, 320)
-	claimBtn.Size = UDim2.fromOffset(PANEL_W - 28, 62)
+	claimBtn.Position = UDim2.fromOffset(14, 286)
+	claimBtn.Size = UDim2.fromOffset(PANEL_W - 28, 56)
 	claimBtn.BackgroundColor3 = STAMP
 	claimBtn.TextColor3 = CARD
 	claimBtn.FontFace = HEAD_B
@@ -1978,9 +1993,9 @@ do
 		end
 		deal(list, 0.12, 0.05)
 	end
-	local dResult = txt(dFolder, TYPE, 15, INK, 16, 392, PANEL_W - 32, 64)
+	local dResult = txt(dFolder, TYPE, 15, INK, 16, 352, PANEL_W - 32, 60)
 	dResult.TextYAlignment = Enum.TextYAlignment.Top
-	local dNote = txt(dFolder, TYPE, 14, STAMP, 16, 460, PANEL_W - 32, 48)
+	local dNote = txt(dFolder, TYPE, 14, STAMP, 16, 414, PANEL_W - 32, 44)
 	dNote.TextYAlignment = Enum.TextYAlignment.Top
 
 	local REASON: { [string]: string } = {
@@ -2130,11 +2145,23 @@ end
 local renderFooter: (scene: string) -> ()
 do
 	-- ===== rodapé: dicas de botão e "VOLTAR" para mouse e toque =====
+	-- numa faixa escura do tamanho das dicas: sobre os papéis claros e a carta, o cáqui sumia
+	-- (Studio, D-93)
 	local hints = Instance.new("Frame")
-	hints.BackgroundTransparency = 1
+	hints.BackgroundColor3 = UiKit.NIGHT
+	hints.BackgroundTransparency = 0.28
+	hints.BorderSizePixel = 0
 	hints.Position = UDim2.fromOffset(40, 676)
-	hints.Size = UDim2.fromOffset(900, 36)
+	hints.AutomaticSize = Enum.AutomaticSize.X
+	hints.Size = UDim2.fromOffset(0, 36)
 	hints.Parent = root
+	corner(hints, 4)
+	do
+		local hp = Instance.new("UIPadding")
+		hp.PaddingLeft = UDim.new(0, 10)
+		hp.PaddingRight = UDim.new(0, 12)
+		hp.Parent = hints
+	end
 	local hintsLayout = Instance.new("UIListLayout")
 	hintsLayout.FillDirection = Enum.FillDirection.Horizontal
 	hintsLayout.Padding = UDim.new(0, 22)
@@ -2298,6 +2325,7 @@ do
 		for i = hintCount + 1, #chips do
 			chips[i].f.Visible = false
 		end
+		hints.Visible = hintCount > 0
 		backBtn.Visible = back ~= nil and dev ~= "gamepad"
 		backBtn.Text = back or ""
 	end
@@ -2395,6 +2423,16 @@ end
 
 -- ===== render =====
 local function placeLobbyCamera(scene: string)
+	-- etiquetas 3D da mesa: abaixo do título e das abas (subiam por cima deles, D-93); com uma pasta
+	-- aberta elas somem
+	LobbyScene.setTagArea(function(): number
+		local a, s = root.AbsolutePosition, root.AbsoluteSize
+		if s.Y < 10 then
+			return 60
+		end
+		local bottom = if tabsFrame.Visible then tabsFrame.Position.Y.Offset + tabsFrame.Size.Y.Offset else 120
+		return a.Y + bottom / DESIGN_H * s.Y + GuiService:GetGuiInset().Y
+	end, scene ~= "choose" and panel ~= "desk")
 	if scene == "choose" then
 		LobbyScene.setFocus(nil, ndc(640, 250))
 		LobbyScene.setNext(nil)
@@ -2473,6 +2511,7 @@ local function resetLook()
 	capShown = ""
 	iLines.Text = ""
 	tabsFrame.Visible = false
+	chooseHint.Visible = false
 end
 
 -- st: último Squad_State (ou nil). Só desenha com a tela visível (o GameUI controla Visible).
@@ -2508,6 +2547,7 @@ function DeployScreen.render(st: any)
 	LobbyScene.setScene(scene)
 	updateHeader(f)
 	local onChoose = scene == "choose"
+	chooseHint.Visible = onChoose
 	-- pasta nova na tela: a anterior esmaece e recua, a nova desliza e abre
 	local entered = swapPages(onChoose)
 	if tabsFrame.Visible == onChoose then

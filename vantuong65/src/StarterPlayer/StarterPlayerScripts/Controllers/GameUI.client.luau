@@ -335,7 +335,8 @@ RunService.Heartbeat:Connect(function()
 	menusBefore = Input.state.menus
 end)
 Input.on("ui_back", "press", function()
-	if Input.state.menus > 1 or menusBefore > 1 then
+	-- UiKit.top(): uma tela da pilha (menu, loja, relatório, fim) está por cima e trata o voltar
+	if UiKit.top() ~= nil or Input.state.menus > 1 or menusBefore > 1 then
 		return
 	end
 	if side.Visible and not mapWanted then
@@ -346,7 +347,7 @@ end)
 local TAB_DIR: { [string]: number } = { ui_tab_prev = -1, ui_tab_next = 1 }
 for action, dir in TAB_DIR do
 	Input.on(action, "press", function()
-		if Input.state.menus > 1 or menusBefore > 1 then
+		if UiKit.top() ~= nil or Input.state.menus > 1 or menusBefore > 1 then
 			return
 		end
 		if side.Visible and not mapWanted then
@@ -577,7 +578,9 @@ loading.TextColor3 = UiKit.KHAKI
 loading.TextXAlignment = Enum.TextXAlignment.Right
 loading.Font = Enum.Font.SpecialElite
 loading.TextSize = TS(16)
-loading.Text = "● Preparando o campo de batalha (terreno de 4 x 2,4 km)…"
+-- sem o tamanho do terreno no texto: o mapa muda (MapConfig.Bounds) e a frase ficava errada
+loading.Text = "● Preparando o campo de batalha…"
+loading.TextTruncate = Enum.TextTruncate.AtEnd
 loading.ZIndex = 3
 loading.Parent = stage
 local loadingPad = Instance.new("UIPadding")
@@ -642,5 +645,14 @@ if RunService:IsStudio() then
 		task.defer(function()
 			workspace:SetAttribute("VT65DevCarta", nil)
 		end)
+	end)
+	-- pelo gancho comum das telas: VT65DevTela = "carta" abre (o mesmo que VT65DevCarta = "abrir")
+	workspace:GetAttributeChangedSignal("VT65DevTela"):Connect(function()
+		if workspace:GetAttribute("VT65DevTela") == "carta" then
+			workspace:SetAttribute("VT65DevCarta", "abrir")
+			task.defer(function()
+				workspace:SetAttribute("VT65DevTela", nil)
+			end)
+		end
 	end)
 end

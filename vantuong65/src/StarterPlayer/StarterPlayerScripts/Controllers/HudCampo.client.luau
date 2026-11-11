@@ -198,7 +198,8 @@ paintCardinals()
 -- ============================================================================================
 -- arma e postura
 -- ============================================================================================
-local AW, AH = px(256, 370), px(96, 138)
+-- D-93 (Studio: contraste baixo e letra miúda): cartão maior, fundo mais fechado, letras maiores
+local AW, AH = px(290, 410), px(108, 152)
 local A: { [string]: any } = {}
 do
 	local card = Instance.new("CanvasGroup")
@@ -221,7 +222,7 @@ do
 	local cardBack = Instance.new("Frame")
 	cardBack.Size = UDim2.fromScale(1, 1)
 	cardBack.BackgroundColor3 = UiKit.CARD_DARK
-	cardBack.BackgroundTransparency = 0.18
+	cardBack.BackgroundTransparency = 0.06
 	cardBack.BorderSizePixel = 0
 	cardBack.Parent = card
 	UiKit.corner(cardBack, 4)
@@ -232,9 +233,9 @@ do
 	bar.BorderSizePixel = 0
 	bar.Parent = card
 	local P = px(12, 18)
-	local name = UiKit.rotulo(card, 19, UiKit.CARD, UiKit.HEAD_FONT)
+	local name = UiKit.rotulo(card, 21, UiKit.CARD, UiKit.HEAD_FONT)
 	name.Position = UDim2.fromOffset(P, px(6, 8))
-	name.Size = UDim2.new(1, -P - px(54, 78), 0, px(24, 34))
+	name.Size = UDim2.new(1, -P - px(54, 78), 0, px(26, 36))
 	name.TextTruncate = Enum.TextTruncate.AtEnd
 	-- postura: três barras (de pé, agachado, deitado), a ativa em latão
 	local stance = Instance.new("Frame")
@@ -255,30 +256,31 @@ do
 		f.Parent = stance
 		bars[i] = f
 	end
-	local stanceText = UiKit.rotulo(card, 11, UiKit.KHAKI, UiKit.HEAD_REG)
+	local stanceText = UiKit.rotulo(card, 13, UiKit.CARD, UiKit.HEAD_REG)
 	stanceText.AnchorPoint = Vector2.new(1, 0)
-	stanceText.Position = UDim2.new(1, -P, 0, px(33, 46))
-	stanceText.Size = UDim2.fromOffset(px(80, 120), px(14, 22))
+	stanceText.Position = UDim2.new(1, -P, 0, px(34, 46))
+	stanceText.Size = UDim2.fromOffset(px(88, 130), px(18, 24))
+	stanceText.TextTruncate = Enum.TextTruncate.AtEnd
 	stanceText.TextXAlignment = Enum.TextXAlignment.Right
 	-- seletor e alça em etiquetas
 	local function pill(x: number, w: number): TextLabel
-		local l = UiKit.rotulo(card, 13, UiKit.NIGHT, UiKit.HEAD_FONT)
-		l.Position = UDim2.fromOffset(x, px(34, 48))
-		l.Size = UDim2.fromOffset(w, px(18, 26))
+		local l = UiKit.rotulo(card, 15, UiKit.NIGHT, UiKit.HEAD_FONT)
+		l.Position = UDim2.fromOffset(x, px(38, 54))
+		l.Size = UDim2.fromOffset(w, px(22, 30))
 		l.BackgroundColor3 = UiKit.KHAKI
 		l.BackgroundTransparency = 0
 		l.TextXAlignment = Enum.TextXAlignment.Center
 		UiKit.corner(l, 3)
 		return l
 	end
-	local mode = pill(P, px(56, 80))
-	local zero = pill(P + px(62, 88), px(96, 138))
+	local mode = pill(P, px(62, 86))
+	local zero = pill(P + px(68, 94), px(106, 146))
 	zero.BackgroundColor3 = UiKit.DRAB
 	zero.TextColor3 = UiKit.KHAKI
 	-- carregadores: o da arma (barra de 4 pedaços) e os de reserva (pentes)
 	local magBox = Instance.new("Frame")
-	magBox.Position = UDim2.fromOffset(P, px(60, 86))
-	magBox.Size = UDim2.fromOffset(px(10, 14), px(26, 38))
+	magBox.Position = UDim2.fromOffset(P, px(68, 96))
+	magBox.Size = UDim2.fromOffset(px(11, 15), px(30, 42))
 	magBox.BackgroundTransparency = 1
 	magBox.Parent = card
 	local cells: { Frame } = {}
@@ -291,12 +293,12 @@ do
 		c.Parent = magBox
 		cells[i] = c
 	end
-	local magText = UiKit.rotulo(card, 12, UiKit.KHAKI, UiKit.BODY_FONT)
-	magText.Position = UDim2.fromOffset(P + px(16, 22), px(58, 84))
-	magText.Size = UDim2.fromOffset(px(110, 160), px(16, 22))
+	local magText = UiKit.rotulo(card, 14, UiKit.CARD, UiKit.BODY_FONT)
+	magText.Position = UDim2.fromOffset(P + px(18, 24), px(66, 92))
+	magText.Size = UDim2.fromOffset(px(130, 180), px(18, 26))
 	local spareRow = Instance.new("Frame")
-	spareRow.Position = UDim2.fromOffset(P + px(16, 22), px(76, 108))
-	spareRow.Size = UDim2.new(1, -P - px(30, 42), 0, px(10, 14))
+	spareRow.Position = UDim2.fromOffset(P + px(18, 24), px(87, 122))
+	spareRow.Size = UDim2.new(1, -P - px(32, 44), 0, px(12, 16))
 	spareRow.BackgroundTransparency = 1
 	spareRow.Parent = card
 	local srl = Instance.new("UIListLayout")
@@ -306,7 +308,7 @@ do
 	local pips: { Frame } = {}
 	for i = 1, 10 do
 		local p = Instance.new("Frame")
-		p.Size = UDim2.fromOffset(px(7, 10), px(10, 14))
+		p.Size = UDim2.fromOffset(px(8, 11), px(12, 16))
 		p.BackgroundColor3 = UiKit.KHAKI
 		p.BorderSizePixel = 0
 		p.LayoutOrder = i
@@ -315,10 +317,10 @@ do
 		UiKit.corner(p, 1)
 		pips[i] = p
 	end
-	local more = UiKit.rotulo(spareRow, 11, UiKit.KHAKI, UiKit.HEAD_FONT)
+	local more = UiKit.rotulo(spareRow, 13, UiKit.CARD, UiKit.HEAD_FONT)
 	more.LayoutOrder = 99
 	more.AutomaticSize = Enum.AutomaticSize.X
-	more.Size = UDim2.fromOffset(0, px(10, 14))
+	more.Size = UDim2.fromOffset(0, px(12, 16))
 	-- recarga: barra que corre embaixo; aviso curto da arma no alto à direita
 	local reload = Instance.new("Frame")
 	reload.AnchorPoint = Vector2.new(0, 1)
@@ -327,10 +329,10 @@ do
 	reload.BackgroundColor3 = UiKit.BRASS_LIGHT
 	reload.BorderSizePixel = 0
 	reload.Parent = card
-	local flash = UiKit.rotulo(card, 13, UiKit.BRASS_LIGHT, UiKit.HEAD_FONT)
+	local flash = UiKit.rotulo(card, 15, UiKit.BRASS_LIGHT, UiKit.HEAD_FONT)
 	flash.AnchorPoint = Vector2.new(1, 0)
-	flash.Position = UDim2.new(1, -P, 0, px(58, 84))
-	flash.Size = UDim2.fromOffset(px(118, 170), px(16, 22))
+	flash.Position = UDim2.new(1, -P, 0, px(66, 92))
+	flash.Size = UDim2.fromOffset(px(124, 176), px(18, 26))
 	flash.TextXAlignment = Enum.TextXAlignment.Right
 	flash.TextTransparency = 1
 	A = {
@@ -627,7 +629,8 @@ RunService.RenderStepped:Connect(function()
 	-- HUD mínimo: o cartão esmaece em 5 s sem novidade
 	if W.bright and os.clock() - W.lastActive > 5 then
 		W.bright = false
-		TweenService:Create(A.card, TweenInfo.new(0.8), { GroupTransparency = 0.62 }):Play()
+		-- parado: esmaece só até 0,35 (a 0,62 sumia no campo claro, Studio D-93)
+		TweenService:Create(A.card, TweenInfo.new(0.8), { GroupTransparency = 0.35 }):Play()
 	end
 	-- 4 vezes por segundo: escala da janela e o cartão do tutorial (nada sobreposto)
 	local now = os.clock()

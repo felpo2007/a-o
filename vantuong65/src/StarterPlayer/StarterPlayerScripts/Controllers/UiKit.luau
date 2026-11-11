@@ -569,7 +569,11 @@ end
 -- O quadro de projeto (w x h) cabe na tela com margem: abaixo do tamanho de projeto ele encolhe por
 -- UIScale (nunca cresce; na TV os tamanhos já são os da TV). k() dá a escala atual para quem anima
 -- a entrada (o tween termina em k(), não em 1). Usa o UIScale que o alvo já tiver.
-export type Fit = { scale: UIScale, k: () -> number }
+export type Fit = {
+	scale: UIScale,
+	k: () -> number,
+	play: (info: TweenInfo, to: number?, from: number?) -> Tween,
+}
 function UiKit.fit(gui: LayerCollector, target: GuiObject, w: number, h: number, margin: number?, minK: number?): Fit
 	local sc = target:FindFirstChildOfClass("UIScale")
 	if not sc then
@@ -603,7 +607,18 @@ function UiKit.fit(gui: LayerCollector, target: GuiObject, w: number, h: number,
 		end
 		return k
 	end
+	-- um tween de escala por vez: entrada, saída e mudança de janela não brigam pela mesma
+	-- propriedade (o novo cancela o anterior; a janela mudando cancela e assenta na hora)
+	local running: Tween? = nil
+	local function stop()
+		local t = running
+		if t then
+			running = nil
+			t:Cancel()
+		end
+	end
 	local function update()
+		stop()
 		scale.Scale = measure()
 	end
 	gui:GetPropertyChangedSignal("AbsoluteSize"):Connect(update)
@@ -616,7 +631,65 @@ function UiKit.fit(gui: LayerCollector, target: GuiObject, w: number, h: number,
 		scale = scale,
 		-- mede de novo: quem anima a entrada termina o tween na escala da janela de agora
 		k = measure,
+		-- anima a escala de from × k até to × k (from nil: de onde está)
+		play = function(info: TweenInfo, to: number?, from: number?): Tween
+			stop()
+			local kk = measure()
+			if from then
+				scale.Scale = kk * from
+			end
+			local t = TweenService:Create(scale, info, { Scale = kk * (to or 1) })
+			running = t
+			t:Play()
+			return t
+		end,
 	}
+end
+
+-- ----- foco do controle nunca preso numa tela fechada -----
+function UiKit.release(root: Instance)
+	local sel = GuiService.SelectedObject
+	if sel and sel:IsDescendantOf(root) then
+		GuiService.SelectedObject = nil
+	end
+end
+
+-- ----- qual tela está por cima (B, Backspace e Esc fecham só a de cima) -----
+-- Cada tela que fecha com "voltar" se registra ao abrir (UiKit.opened) e sai ao fechar
+-- (UiKit.closed). UiKit.backFor(nome) diz se esta tela deve tratar o "voltar" agora: só a de cima,
+-- e um aperto só fecha uma tela (os handlers de ui_back rodam todos no mesmo aperto).
+-- order = DisplayOrder da tela: uma tela que abre DEPOIS mas fica por baixo (o relatório, 40, que
+-- chega com a tela de fim, 43, já aberta) entra abaixo dela na pilha, como aparece.
+type Entry = { name: string, order: number }
+local stack: { Entry } = {}
+local lastBack = 0
+function UiKit.closed(name: string)
+	for i, e in stack do
+		if e.name == name then
+			table.remove(stack, i)
+			return
+		end
+	end
+end
+function UiKit.opened(name: string, order: number?)
+	UiKit.closed(name)
+	local o = order or 0
+	local at = #stack + 1
+	while at > 1 and stack[at - 1].order > o do
+		at -= 1
+	end
+	table.insert(stack, at, { name = name, order = o })
+end
+function UiKit.top(): string?
+	local e = stack[#stack]
+	return if e then e.name else nil
+end
+function UiKit.backFor(name: string): boolean
+	if UiKit.top() ~= name or os.clock() - lastBack < 0.15 then
+		return false
+	end
+	lastBack = os.clock()
+	return true
 end
 
 -- ----- segurar para confirmar -----

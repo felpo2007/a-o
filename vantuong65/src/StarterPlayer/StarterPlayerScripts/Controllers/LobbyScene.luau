@@ -30,7 +30,6 @@ local Players = game:GetService("Players")
 local ReplicatedFirst = game:GetService("ReplicatedFirst")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
-local TextChatService = game:GetService("TextChatService")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 
@@ -273,6 +272,19 @@ local function sgStamp(
 end
 
 -- texto que o DeployScreen atualiza (LobbyScene.setText)
+-- texto vivo da ficha (várias linhas que mudam): folga interna e teto de tamanho, para a linha
+-- longa encolher a letra em vez de correr até a borda
+local function dossierText(t: TextLabel): TextLabel
+	local pad = Instance.new("UIPadding")
+	pad.PaddingRight = UDim.new(0.04, 0)
+	pad.PaddingTop = UDim.new(0.01, 0)
+	pad.Parent = t
+	local c = Instance.new("UITextSizeConstraint")
+	c.MaxTextSize = 34
+	c.Parent = t
+	return t
+end
+
 local function liveText(key: string, t: TextLabel)
 	live[key] = live[key] or {}
 	table.insert(live[key], t)
@@ -806,7 +818,9 @@ local function buildUS(): Scene
 	for i = 1, 7 do
 		sgBox(rsg, UiKit.RULE_BLUE, 0.08, 0.2 + i * 0.09, 0.84, 0.004, 0.5)
 	end
-	liveText("dossier", sgText(rsg, "", TYPE, INK, 0.08, 0.2, 0.84, 0.66))
+	-- mais estreito que a pauta e com folga à direita: no Studio o texto passava da borda da folha
+	-- (D-93; a folha gira -5° e a borda da face corta antes do papel)
+	liveText("dossier", dossierText(sgText(rsg, "", TYPE, INK, 0.1, 0.2, 0.76, 0.66)))
 	part(dos, 0.03, 0.006, 0.008, at(0.31, 0.012, 0.07, -5), rgb(150, 150, 150), Enum.Material.Metal) -- clipe
 	cyl(dos, 0.17, 0.008, at(0.36, 0.008, 0.33, 80), rgb(196, 160, 60), Enum.Material.Wood) -- lápis
 	local hingeAt = W(at(0.12, 0.012, 0.22, -5))
@@ -1036,7 +1050,7 @@ local function buildVC(): Scene
 	sgText(tsg, "TRUNG ĐOÀN 1", VIET, INK, 0.08, 0.05, 0.84, 0.1)
 	sgText(tsg, "QUÂN GIẢI PHÓNG", VIET, INK, 0.08, 0.15, 0.84, 0.08)
 	sgBox(tsg, UiKit.RULE_RED, 0.08, 0.25, 0.84, 0.006)
-	liveText("dossier", sgText(tsg, "", VIET, INK, 0.08, 0.29, 0.84, 0.5))
+	liveText("dossier", dossierText(sgText(tsg, "", VIET, INK, 0.1, 0.29, 0.76, 0.5)))
 	sgStamp(tsg, "MẬT", STAMP, 0.6, 0.8, 0.3, 0.12, -10)
 	part(docs, 0.33, 0.006, 0.012, at(0.12, 0.022, 0.22, 1), rgb(140, 70, 50), Enum.Material.Fabric) -- barbante
 	part(docs, 0.012, 0.006, 0.41, at(0.12, 0.022, 0.22, 1), rgb(140, 70, 50), Enum.Material.Fabric)
@@ -1737,14 +1751,32 @@ UserInputService.TouchTap:Connect(function(positions: { Vector2 }, processed: bo
 end)
 
 -- ===== etiquetas =====
+-- Área das etiquetas (D-93: no Studio elas subiam por cima do título e das abas): a interface 2D
+-- (DeployScreen) diz onde termina o cabeçalho (px da janela) e se uma pasta está aberta (aí as
+-- etiquetas somem: quem fala é a pasta).
+local tagArea = {
+	top = function(): number
+		return 60
+	end,
+	hidden = false,
+}
+function LobbyScene.setTagArea(top: () -> number, hidden: boolean)
+	tagArea.top = top
+	tagArea.hidden = hidden
+end
 local function placeTag(fr: Frame, cam: Camera, o: Obj, rise: number): boolean
+	if tagArea.hidden then
+		return false
+	end
 	local p, onScreen = cam:WorldToViewportPoint(o.top)
 	if not onScreen then
 		return false
 	end
 	local vp = cam.ViewportSize
+	-- a etiqueta pende do ponto (âncora embaixo): o alto dela fica abaixo do cabeçalho
+	local minY = tagArea.top() + fr.AbsoluteSize.Y + 6
 	local x = math.clamp(p.X, 120, vp.X - 120)
-	local y = math.clamp(p.Y - rise, 60, vp.Y - 20)
+	local y = math.clamp(p.Y - rise, math.min(minY, vp.Y - 20), vp.Y - 20)
 	fr.Position = UDim2.fromOffset(x, y)
 	return true
 end
@@ -1958,20 +1990,8 @@ local function evaluate()
 	setEffects(dressed)
 	backdrop.Enabled = dressed
 	tags.Enabled = dressed and deskOn
-	-- a janela padrão do chat do Roblox escrevia por cima do cabeçalho (captura, D-64)
-	pcall(function()
-		local cfg = TextChatService:FindFirstChildOfClass("ChatWindowConfiguration")
-		if cfg then
-			cfg.Enabled = not dressed
-		end
-		-- só a janela não basta: a mensagem do sistema e a barra de digitar seguiam por cima do
-		-- cabeçalho (Studio, 2026-11-11). Desliga o chat inteiro com o lobby aberto.
-		local bar = TextChatService:FindFirstChildOfClass("ChatInputBarConfiguration")
-		if bar then
-			bar.Enabled = not dressed
-		end
-		game:GetService("StarterGui"):SetCoreGuiEnabled(Enum.CoreGuiType.Chat, not dressed)
-	end)
+	-- o chat do Roblox some com o lobby aberto (escrevia por cima do cabeçalho, D-64): quem decide é
+	-- o JanelaChat, pelo backdrop ligado (um dono só; o menu, a loja e o mapa também o escondem)
 	-- na mesa: só a vinheta; vivo (troca de papel), escurece o jogo atrás dos papéis
 	dim.BackgroundTransparency = if deskOn then 1 else 0.38
 	for _, e in edges do

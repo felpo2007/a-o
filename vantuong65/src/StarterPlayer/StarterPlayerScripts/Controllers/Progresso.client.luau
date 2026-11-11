@@ -23,7 +23,6 @@ local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 
-local Acabamento = require(game:GetService("ReplicatedFirst"):WaitForChild("Acabamento"))
 local BotBrain = require(ReplicatedStorage.Shared.BotBrain)
 local GunModel = require(ReplicatedStorage.Shared.GunModel)
 local Net = require(ReplicatedStorage.Shared.Net)
@@ -147,40 +146,32 @@ local function ceremony(r: { [string]: any })
 end
 
 -- ============================================================================================
--- Painel da Intendência (oliva escuro, cáqui e latão)
+-- Intendência (D-93, Studio: abria junto com a loja, escura e por cima dela; o Backspace fechava a
+-- loja e a intendência ficava). Agora é uma ABA da ficha da loja (ShopController): a loja monta esta
+-- página dentro da folha dela (Bus "intendencia_show"/"intendencia_hide") e uma tela só abre e
+-- fecha. Papel e tinta, como as outras fichas.
 -- ============================================================================================
-local PW = if TV then 470 else 400
 local HEADER_H = if TV then 78 else 62
 local TABS_H = if TV then 48 else 34
 local PREVIEW_H = if TV then 190 else 150
 local FOOT_H = if TV then 40 else 30
-local CARD_BG = Color3.fromRGB(58, 62, 46)
-local OFF_BG = Color3.fromRGB(70, 72, 60)
-local OFF_TEXT = Color3.fromRGB(150, 142, 112)
+local CARD_BG = Color3.fromRGB(242, 236, 214) -- ficha clara sobre a folha
+local OFF_BG = Color3.fromRGB(196, 188, 164)
+local OFF_TEXT = Color3.fromRGB(110, 104, 88)
+local P = { -- tinta da página
+	text = UiKit.INK,
+	head = UiKit.RULE_RED,
+	money = Color3.fromRGB(58, 82, 44),
+	accent = UiKit.STAMP,
+}
 
 local root = Instance.new("Frame")
 root.Name = "Intendencia"
-root.AnchorPoint = Vector2.new(0, 0.5)
-root.Position = UDim2.new(0, 24, 0.5, 0)
-root.Size = UDim2.new(0, PW, 0.84, 0)
-root.BackgroundColor3 = UiKit.DRAB
+root.Size = UDim2.fromScale(1, 1)
+root.BackgroundTransparency = 1
 root.BorderSizePixel = 0
-root.Active = true
 root.Visible = false
 root.Parent = screen
-do
-	local c = Instance.new("UICorner")
-	c.CornerRadius = UDim.new(0, 4)
-	c.Parent = root
-	local s = Instance.new("UIStroke")
-	s.Color = UiKit.KHAKI
-	s.Transparency = 0.65
-	s.Parent = root
-	UiKit.lit(root, 0.78)
-	Acabamento.sombra(root, 22, Vector2.new(0, 8), 0.55)
-	-- janela baixa: o painel encolhe (a lista rola dentro dele)
-	UiKit.fit(screen, root, PW, 420, 12)
-end
 
 -- 2026-11-11: Oswald nos títulos e Arimo no texto, as fontes de época das outras telas (era Gotham)
 local function label(parent: Instance, s: string, size: number, color: Color3, bold: boolean?): TextLabel
@@ -201,16 +192,16 @@ local function label(parent: Instance, s: string, size: number, color: Color3, b
 end
 
 -- cabeçalho: nome, dinheiro do jogo em latão e o posto
-local title = label(root, "INTENDÊNCIA", 20, UiKit.KHAKI, true)
+local title = label(root, "INTENDÊNCIA", 20, P.text, true)
 title.FontFace = UiKit.HEAD_FONT
 title.Position = UDim2.fromOffset(14, 6)
 title.Size = UDim2.new(0.5, -14, 0, if TV then 36 else 28)
-local moneyLabel = label(root, "", 22, UiKit.BRASS, true)
+local moneyLabel = label(root, "", 22, P.money, true)
 moneyLabel.FontFace = UiKit.HEAD_FONT
 moneyLabel.TextXAlignment = Enum.TextXAlignment.Right
 moneyLabel.Position = UDim2.new(0.5, 0, 0, 6)
 moneyLabel.Size = UDim2.new(0.5, -14, 0, if TV then 36 else 28)
-local rankLabel = label(root, "", 13, UiKit.KHAKI)
+local rankLabel = label(root, "", 13, P.text)
 rankLabel.Position = UDim2.fromOffset(14, if TV then 44 else 36)
 rankLabel.Size = UDim2.new(1, -28, 0, if TV then 28 else 20)
 rankLabel.TextTransparency = 0.15
@@ -222,7 +213,7 @@ tabsBar.Position = UDim2.fromOffset(10, HEADER_H)
 tabsBar.Size = UDim2.new(1, -20, 0, TABS_H)
 tabsBar.Parent = root
 local tabLine = Instance.new("Frame")
-tabLine.BackgroundColor3 = UiKit.BRASS
+tabLine.BackgroundColor3 = P.accent
 tabLine.BorderSizePixel = 0
 tabLine.AnchorPoint = Vector2.new(0, 1)
 tabLine.Size = UDim2.new(0.5, 0, 0, 3)
@@ -279,7 +270,7 @@ body.Name = "Lista"
 body.BackgroundTransparency = 1
 body.BorderSizePixel = 0
 body.ScrollBarThickness = 6
-body.ScrollBarImageColor3 = UiKit.KHAKI
+body.ScrollBarImageColor3 = P.text
 body.AutomaticCanvasSize = Enum.AutomaticSize.Y
 body.CanvasSize = UDim2.new()
 body.Parent = root
@@ -422,7 +413,7 @@ end
 local order = 0
 local function line(text: string, size: number?, color: Color3?, bold: boolean?): TextLabel
 	order += 1
-	local t = label(body, text, size or 14, color or UiKit.KHAKI, bold)
+	local t = label(body, text, size or 14, color or P.text, bold)
 	t.LayoutOrder = order
 	t.AutomaticSize = Enum.AutomaticSize.Y
 	t.Size = UDim2.new(1, -24, 0, 0)
@@ -611,7 +602,7 @@ end
 local function renderGear(s: { [string]: any })
 	line("Soma ao kit de 1965 e pesa no corpo.", 13)
 	for _, t in s.tiers do
-		line(string.format("%s (nível %d)", t.name, t.tier), 16, UiKit.BRASS, true)
+		line(string.format("%s (nível %d)", t.name, t.tier), 16, P.head, true)
 		if t.owned then
 			line("Passe seu: nível liberado.", 13)
 		else
@@ -624,7 +615,7 @@ local function renderGear(s: { [string]: any })
 		end
 		for _, g in s.gear do
 			if g.tier == t.tier then
-				line(string.format("• %s  (%.1f kg)", g.name, g.kg), 14, UiKit.KHAKI, true)
+				line(string.format("• %s  (%.1f kg)", g.name, g.kg), 14, P.text, true)
 				local eff = line(g.effect, 13)
 				eff.Visible = false
 				local function showEffect(on: boolean)
@@ -695,7 +686,7 @@ local function skinCard(s: Skins.Skin, sk: { [string]: any })
 	cc.Parent = card
 	if equipped then
 		local st = Instance.new("UIStroke")
-		st.Color = UiKit.BRASS
+		st.Color = P.accent
 		st.Thickness = 2
 		st.Parent = card
 	end
@@ -713,7 +704,7 @@ local function skinCard(s: Skins.Skin, sk: { [string]: any })
 		x.Size = UDim2.new(1, 0, 0, 0)
 		x.LayoutOrder = o
 	end
-	text(s.name, 15, UiKit.KHAKI, true, 1)
+	text(s.name, 15, P.text, true, 1)
 	local status: string
 	if equipped then
 		status = "EQUIPADA"
@@ -726,7 +717,7 @@ local function skinCard(s: Skins.Skin, sk: { [string]: any })
 			then string.format("%s · %s", money(s.price), robuxText(s))
 			else money(s.price)
 	end
-	text(status, 13, if how then UiKit.KHAKI else UiKit.BRASS, true, 2)
+	text(status, 13, if how then P.money else P.accent, true, 2)
 	local actions = rowOf(card, 3)
 	local look = function()
 		select(s.id)
@@ -829,7 +820,7 @@ local function renderSkins(s: { [string]: any })
 					end
 				end
 				if #list > 0 then
-					line(wp.name, 16, UiKit.BRASS, true)
+					line(wp.name, 16, P.head, true)
 					defaultRow(wp.id, sk, "Voltar ao acabamento de fábrica")
 					for _, x in list do
 						first = first or x.id
@@ -896,7 +887,7 @@ local function chip(imgs: { string }, keys: string, text: string, o: number)
 		im.LayoutOrder = i
 		im.Parent = f
 	end
-	local t = label(f, if #imgs > 0 then text else string.format("[%s] %s", keys, text), 13, UiKit.KHAKI)
+	local t = label(f, if #imgs > 0 then text else string.format("[%s] %s", keys, text), 13, P.text)
 	t.AutomaticSize = Enum.AutomaticSize.X
 	t.Size = UDim2.fromOffset(0, FOOT_H)
 	t.TextWrapped = false
@@ -949,7 +940,7 @@ for i, d in { { id = "gear", name = "EQUIPAMENTO" }, { id = "skins", name = "SKI
 	b.BackgroundTransparency = 1
 	b.FontFace = UiKit.HEAD_FONT
 	b.TextSize = UiKit.text(17)
-	b.TextColor3 = UiKit.KHAKI
+	b.TextColor3 = P.text
 	b.Text = d.name
 	b.Size = UDim2.new(0.5, 0, 1, 0)
 	b.Position = UDim2.fromScale((i - 1) * 0.5, 0)
@@ -963,18 +954,19 @@ for i, d in { { id = "gear", name = "EQUIPAMENTO" }, { id = "skins", name = "SKI
 end
 local function paintTabs()
 	for id, b in tabButtons do
-		b.TextColor3 = if id == tab then UiKit.BRASS else UiKit.KHAKI
+		b.TextColor3 = if id == tab then P.accent else P.text
 		b.TextTransparency = if id == tab then 0 else 0.25
 	end
 	UiKit.tween(tabLine, UiKit.SOFT, { Position = UDim2.new(if tab == "gear" then 0 else 0.5, 0, 1, 0) })
 end
+-- só com a loja no topo (com o relatório ou o menu por cima, o LT/RT é deles)
 Input.on("ui_sub_prev", "press", function()
-	if root.Visible then
+	if root.Visible and UiKit.top() == "loja" then
 		setTab(if tab == "gear" then "skins" else "gear")
 	end
 end)
 Input.on("ui_sub_next", "press", function()
-	if root.Visible then
+	if root.Visible and UiKit.top() == "loja" then
 		setTab(if tab == "gear" then "skins" else "gear")
 	end
 end)
@@ -1003,7 +995,7 @@ render = function()
 		renderSkins(s)
 	end
 	if s.result then
-		line(UiKit.capitalize(tostring(s.result)), 14, UiKit.BRASS, true)
+		line(UiKit.capitalize(tostring(s.result)), 14, P.accent, true)
 	end
 	renderChips()
 	local again = if type(focusKey) == "string" then buttons[focusKey] else nil
@@ -1034,7 +1026,11 @@ Net.event("Progress_State").OnClientEvent:Connect(function(s: any)
 	render()
 end)
 
-Bus.on("shop_open", function()
+-- a loja monta a página dentro da folha dela (uma tela só); esconder devolve a página para cá
+Bus.on("intendencia_show", function(host: Instance?)
+	if host then
+		root.Parent = host
+	end
 	root.Visible = true
 	if not state then
 		-- a tela nunca espera o servidor vazia: o painel abre já com o aviso e preenche quando chegar
@@ -1054,7 +1050,8 @@ Bus.on("shop_open", function()
 	end
 	render()
 end)
-Bus.on("shop_closed", function()
+Bus.on("intendencia_hide", function()
+	UiKit.release(root)
 	root.Visible = false
 	confirmId = nil
 end)

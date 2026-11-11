@@ -489,10 +489,10 @@ local function fillGain(e: Entry, caption: string, xp: number, cr: number, cur: 
 	paint(e, "recompensa")
 	e.xp, e.cr = xp, cr
 	local x, c, l = e.xpChip :: TextLabel, e.crChip :: TextLabel, e.caption :: TextLabel
-	x.Text = "+" .. fmt(xp) .. " XP"
+	x.Text = string.format("+%s XP", fmt(xp))
 	x.Visible = xp > 0
 	-- dinheiro do jogo com o símbolo na frente ("+$ 2"); outra moeda segue depois do número
-	c.Text = "+" .. (if cur == "$" then "$ " .. fmt(cr) else fmt(cr) .. " " .. cur)
+	c.Text = if cur == "$" then string.format("+$ %s", fmt(cr)) else string.format("+%s %s", fmt(cr), cur)
 	c.Visible = cr > 0
 	l.Text = UiKit.upper(caption)
 	l.FontFace = UiKit.headFont(caption)
@@ -603,6 +603,38 @@ local function push(e: Entry)
 	arm(e)
 end
 
+-- ===== segurar a pilha =====
+-- Toast.hold(true): uma tela cheia (o relatório de baixa) está por baixo e os avisos não podem
+-- cobri-la (no Studio a faixa de ganho saía em cima da ficha de baixa, D-93). A pilha some e o que
+-- chegar espera; hold(false) devolve a pilha e mostra o que esperou, um a um (ganhos com o mesmo
+-- motivo somam no mesmo aviso).
+local held = false
+local waiting: { () -> () } = {}
+local function park(fn: () -> ()): boolean
+	if not held then
+		return false
+	end
+	table.insert(waiting, fn)
+	if #waiting > MAX * 2 then
+		table.remove(waiting, 1)
+	end
+	return true
+end
+function Toast.hold(on: boolean)
+	if held == on then
+		return
+	end
+	held = on
+	band.Visible = not on
+	if not on then
+		local list = waiting
+		waiting = {}
+		for i, fn in list do
+			task.delay(0.2 + (i - 1) * 0.15, fn)
+		end
+	end
+end
+
 -- ===== API =====
 
 -- Aviso de texto. tipo: "info", "sucesso", "recompensa", "alerta" ou "erro" (nil: deduz do texto).
@@ -618,6 +650,11 @@ function Toast.show(text: string, kind: string?, opts: Options?)
 		if ok and taken then
 			return
 		end
+	end
+	if park(function()
+		Toast.show(text, kind, opts)
+	end) then
+		return
 	end
 	local k, rest, known = classify(text, kind)
 	local title: string, body: string
@@ -660,6 +697,11 @@ function Toast.reward(caption: string, xp: number, cr: number, cur: string)
 	if xp <= 0 and cr <= 0 then
 		return
 	end
+	if park(function()
+		Toast.reward(caption, xp, cr, cur)
+	end) then
+		return
+	end
 	local key = "ganho|" .. caption .. "|" .. cur
 	local life = STYLE.recompensa.life
 	local open = find(key)
@@ -681,6 +723,11 @@ end
 -- põe as peças e devolve a altura usada a partir do topo; paper = papel cáqui em vez do escuro.
 function Toast.custom(build: (card: Frame, layout: Layout) -> number, opts: CustomOptions?)
 	local o: CustomOptions = opts or {}
+	if park(function()
+		Toast.custom(build, opts)
+	end) then
+		return
+	end
 	if o.key then
 		local old = find(o.key)
 		if old then
@@ -743,6 +790,15 @@ if RunService:IsStudio() then
 		if v ~= "promocao" then
 			task.defer(function()
 				workspace:SetAttribute("VT65DevToast", nil) -- local: no cliente, o mesmo valor repete
+			end)
+		end
+	end)
+	-- o mesmo "todos" pelo gancho comum das telas: VT65DevTela = "avisos"
+	workspace:GetAttributeChangedSignal("VT65DevTela"):Connect(function()
+		if workspace:GetAttribute("VT65DevTela") == "avisos" then
+			workspace:SetAttribute("VT65DevToast", "todos")
+			task.defer(function()
+				workspace:SetAttribute("VT65DevTela", nil)
 			end)
 		end
 	end)

@@ -37,7 +37,7 @@ local CartaView = {}
 local player = Players.LocalPlayer
 local B = MapConfig.Bounds
 local M = MapConfig.STUD_M
-local SIDE_M = (B.maxX - B.minX) * M -- 2000 m
+local SIDE_M = (B.maxX - B.minX) * M -- lado da carta em metros (sempre dos Bounds de agora)
 
 -- lápis de cor sobre a carta: azul = nosso, vermelho = do inimigo, grafite = neutro/anotação
 local COR = {
@@ -80,6 +80,7 @@ local S = {
 	squad = {} :: { any },
 	marks = {} :: { any },
 	focused = nil :: InputMap.MagnetPoint?,
+	hoverPoint = nil :: string?, -- ponto de inserção sob o mouse (o nome aparece só nele)
 	sig = "",
 	spawnSig = "",
 	objWidgets = {} :: { [number]: any },
@@ -909,9 +910,11 @@ function CartaView.drawPoints()
 			local gp = Instance.new("UIPadding")
 			gp.PaddingLeft, gp.PaddingRight = UDim.new(0, 3), UDim.new(0, 3)
 			gp.Parent = glyph
+			-- o nome (e a espera) só no ponto em foco, sob o mouse ou com zoom: todos abertos ao mesmo
+			-- tempo trombavam com as fichas dos setores (Studio, D-93). O estado fica na cor do símbolo.
 			local text = label(holder, "", 12, COR.papel, Enum.Font.GothamMedium)
 			text.LayoutOrder = 2
-			text.Visible = spawnMode or S.zoom >= 2
+			text.Visible = false
 			holder.Parent = layer
 			-- pino no chão do ponto
 			local pin = Instance.new("Frame")
@@ -930,7 +933,17 @@ function CartaView.drawPoints()
 					S.onSpawn(w.pt) -- o ponto com a espera de agora (atualizado a cada segundo)
 				end
 			end)
-			S.spawnWidgets[tostring(pt.id)] = { holder = holder, text = text, edge = edge, pt = pt }
+			holder.MouseEnter:Connect(function()
+				S.hoverPoint = id
+				CartaView.drawPoints()
+			end)
+			holder.MouseLeave:Connect(function()
+				if S.hoverPoint == id then
+					S.hoverPoint = nil
+					CartaView.drawPoints()
+				end
+			end)
+			S.spawnWidgets[id] = { holder = holder, text = text, edge = edge, glyph = glyph, pt = pt }
 		end
 	end
 	-- textos que mudam todo segundo (espera)
@@ -951,8 +964,18 @@ function CartaView.drawPoints()
 			else
 				w.text.Text = Acabamento.viet(pt.name)
 			end
-			local hot = S.focused ~= nil and S.focused.id == "spawn:" .. tostring(pt.id)
+			local id = tostring(pt.id)
+			local hot = (S.focused ~= nil and S.focused.id == "spawn:" .. id) or S.hoverPoint == id
 			w.edge.Thickness = if hot then 2.5 else 0
+			w.text.Visible = hot or S.zoom >= 2
+			-- o em foco passa por cima dos vizinhos e das fichas
+			w.holder.ZIndex = if hot then 3 else 1
+			-- estado no símbolo: latão = pronto, papel = esperando, vermelho = bloqueado
+			w.glyph.BackgroundColor3 = if not spawnMode
+				then COR.latao
+				elseif pt.blocked then Color3.fromRGB(196, 92, 72)
+				elseif (pt.wait or 0) > 0 then Color3.fromRGB(170, 162, 136)
+				else COR.latao
 		end
 	end
 end
@@ -1204,9 +1227,8 @@ function CartaView.step(dt: number, pad: boolean)
 	local sheet = S.sheet :: Frame
 	sheet.Position = UDim2.fromOffset(x0 + size / 2, y0 + size / 2) -- âncora no meio: abre e gira pelo centro
 	sheet.Size = UDim2.fromOffset(size, size)
-	if (before < 2) ~= (S.zoom < 2) and S.mode ~= "spawn" then
-		S.spawnSig = "" -- nome dos pontos só com zoom
-		CartaView.drawPoints()
+	if (before < 2) ~= (S.zoom < 2) then
+		CartaView.drawPoints() -- com zoom, os nomes de todos os pontos aparecem (só muda a visibilidade)
 	end
 	-- ímã (controle) e realce
 	local f: InputMap.MagnetPoint? = nil

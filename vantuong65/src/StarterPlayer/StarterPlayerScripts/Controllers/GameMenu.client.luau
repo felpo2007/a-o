@@ -27,6 +27,7 @@ local InputMap = require(ReplicatedStorage.Shared.InputMap)
 local Kit = require(ReplicatedStorage.Shared.Kit)
 local Weapons = require(ReplicatedStorage.Shared.Weapons)
 local Net = require(ReplicatedStorage.Shared.Net)
+local Progression = require(ReplicatedStorage.Shared.Progression)
 local Acabamento = require(ReplicatedFirst:WaitForChild("Acabamento"))
 local Idioma = require(ReplicatedFirst:WaitForChild("Idioma"))
 local Bus = require(script.Parent.Bus)
@@ -739,6 +740,8 @@ local function renderSettings()
 		choiceRow("Correr", "sprintToggle", { true, false }, { "alternar", "segurar (teclado)" })
 		choiceRow("Rodas radiais", "wheelToggle", { false, true }, { "segurar", "alternar" })
 		numberRow("Campo de visão (graus)", "fov", 5, "%d")
+		-- balanço da passada, inércia da cabeça e inclinação nas curvas (Movement.client)
+		numberRow("Movimento da câmera", "cameraBob", 0.1, "%d%%", 100)
 		choiceRow("Modo daltônico (traçantes)", "colorblind", Accessibility.MODES, {
 			Accessibility.MODE_NAMES.off,
 			Accessibility.MODE_NAMES.protan,
@@ -834,13 +837,74 @@ local function renderSquad()
 	end
 end
 
+-- Studio (D-93): a aba ficava quase vazia (uma linha e um botão). Agora é um resumo da ficha (saldo,
+-- posto, renasceres) e as duas portas; abrir fecha o menu antes (a loja fica por baixo, ordem 30).
+local progress: { [string]: any }? = nil
+local progressAsked = false
 local function renderShop()
-	section("Intendência")
-	note("Passes visuais, apoio, skins e equipamento de campo.")
-	action("l:open", "Abrir a loja", function()
-		Bus.fire("shop_open")
+	local s = progress
+	if not s and not progressAsked then
+		progressAsked = true
+		task.spawn(function()
+			local ok, got = pcall(function()
+				return Net.func("Progress_Get"):InvokeServer()
+			end)
+			if ok and type(got) == "table" and not progress then
+				progress = got
+				if gui.Enabled and S.tab == 3 then
+					render()
+				end
+			end
+		end)
+	end
+	section("Sua ficha")
+	if s then
+		-- linhas só de leitura: fora do foco do controle (o A nelas não faria nada)
+		for _, row in
+			{
+				{ "l:money", "Saldo", Progression.money(tonumber(s.credits) or 0) },
+				{ "l:rank", "Posto", tostring(s.rankName or "—") },
+				{ "l:respawn", "Renasceres guardados", string.format("%d", tonumber(s.respawnCredits) or 0) },
+			}
+		do
+			local b = rowShell(row[1], row[2])
+			b.Selectable = false
+			valueTag(b, row[3])
+		end
+	else
+		note("Recebendo a ficha do servidor…")
+	end
+	section("Abrir")
+	action("l:open", "Loja e armário (skins, passes, apoio)", function()
+		Bus.fire("menu_close_request")
+		Bus.fire("shop_open", "loja")
 	end)
+	action("l:quarter", "Intendência (equipamento de campo)", function()
+		Bus.fire("menu_close_request")
+		Bus.fire("shop_open", "intendencia")
+	end)
+	note("Atalho: tecla L abre e fecha a loja.")
 end
+Net.event("Progress_State").OnClientEvent:Connect(function(s: any)
+	if type(s) ~= "table" then
+		return
+	end
+	local old = progress
+	progress = s
+	-- só redesenha a aba aberta, e só se o resumo mudou (cada abate manda um Progress_State)
+	if
+		gui.Enabled
+		and S.tab == 3
+		and (
+			not old
+			or old.credits ~= s.credits
+			or old.rankName ~= s.rankName
+			or old.respawnCredits ~= s.respawnCredits
+		)
+	then
+		render()
+	end
+end)
 
 local function renderServer()
 	section("Servidor privado")
@@ -1140,7 +1204,11 @@ local function setOpen(open: boolean)
 	S.keyListening = nil
 	skipHold.stop()
 	if open then
+		-- D-93: a loja e a intendência ficam por baixo do menu (ordem 30 < 35) e o B fecharia a de
+		-- baixo: abrir o menu fecha a loja antes
+		Bus.fire("shop_close")
 		gui.Enabled = true
+		UiKit.opened("menu", gui.DisplayOrder)
 		syncCursor()
 		Input.openMenu()
 		if S.dirty then
@@ -1160,23 +1228,28 @@ local function setOpen(open: boolean)
 				end)
 			end
 		end
-		-- entra: o véu escurece, o dossiê sobe e assenta
-		local k = U.fit.k()
-		U.dim.BackgroundTransparency = 1
-		TweenService:Create(U.dim, TweenInfo.new(0.25), { BackgroundTransparency = 0.42 }):Play()
-		U.root.Position = UDim2.new(0.5, 0, 0.5, 26)
-		U.fit.scale.Scale = k * 0.96
+		-- entra: o véu escurece, o dossiê sobe e assenta (abrir no meio da saída parte de onde está)
+		if U.dim.BackgroundTransparency >= 0.99 then
+			U.root.Position = UDim2.new(0.5, 0, 0.5, 26)
+		end
+		TweenService:Create(U.dim, TweenInfo.new(0.22), { BackgroundTransparency = 0.42 }):Play()
 		TweenService
-			:Create(U.root, TweenInfo.new(0.34, Enum.EasingStyle.Quint), { Position = UDim2.fromScale(0.5, 0.5) })
+			:Create(U.root, TweenInfo.new(0.3, Enum.EasingStyle.Quint), { Position = UDim2.fromScale(0.5, 0.5) })
 			:Play()
-		TweenService:Create(U.fit.scale, TweenInfo.new(0.34, Enum.EasingStyle.Quint), { Scale = k }):Play()
+		U.fit.play(
+			TweenInfo.new(0.3, Enum.EasingStyle.Quint),
+			1,
+			if U.dim.BackgroundTransparency >= 0.99 then 0.96 else nil
+		)
 	else
 		Idioma.fechar()
 		Input.closeMenu()
+		UiKit.closed("menu")
+		UiKit.release(gui)
 		local info = TweenInfo.new(0.16, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
 		TweenService:Create(U.dim, info, { BackgroundTransparency = 1 }):Play()
 		TweenService:Create(U.root, info, { Position = UDim2.new(0.5, 0, 0.5, 18) }):Play()
-		TweenService:Create(U.fit.scale, info, { Scale = U.fit.k() * 0.97 }):Play()
+		U.fit.play(info, 0.97)
 		task.delay(0.17, function()
 			if closeToken == my then
 				gui.Enabled = false
@@ -1233,15 +1306,14 @@ Input.on("game_menu", "press", function() -- P no teclado
 	setOpen(not gui.Enabled)
 end)
 Input.on("ui_back", "press", function()
-	local shop = player:WaitForChild("PlayerGui"):FindFirstChild("VT65Shop") :: ScreenGui?
-	if shop and shop.Enabled then
-		return -- a loja (por cima) fecha primeiro
-	end
-	if Idioma.recente() then
+	if not gui.Enabled or Idioma.recente() then
 		return -- o B fechou o cartão de idiomas
 	end
 	if os.clock() < S.swallowUntil then
 		return -- o B (ou a tecla) acabou de virar o botão de uma ação
+	end
+	if not UiKit.backFor("menu") then
+		return -- outra tela está por cima (relatório, loja): ela fecha primeiro
 	end
 	if S.listening or S.keyListening then
 		S.listening, S.keyListening = nil, nil

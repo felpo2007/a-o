@@ -2921,3 +2921,40 @@ granadas; nível médio"; "movimentação linear como se fossem jogadores reais"
 - **Ganchos no Studio:** `VT65DevBots` com "depurar", "m48", "ontos", "lvtp", "tunel", "cobertura" e
   "parar".
 - **Falta medir:** o custo com 58 bots; o comportamento numa partida longa.
+
+## D-97 — Revisão de todos os menus: fluidez e bugs (2026-11-11)
+
+Pedido do dono: "melhore todos os menus do jogo, inclusive os recém-criados; quero eles bem fluidos e
+sem bugs". Varredura de cada tela no Studio numa janela de 671 x 565 e correção:
+- **Voltar (B, Esc, Backspace):**
+  - fecha só a tela de cima, numa pilha na ordem de desenho;
+  - o lobby não age com outra tela por cima;
+  - a ficha de baixa não desconta mais o contador de menus em dobro.
+- **Loja e intendência:**
+  - eram duas telas que abriam uma por cima da outra; agora são uma pasta só, com abas, que cabe na
+    janela;
+  - a aba Loja do menu mostra saldo, posto e renasceres guardados.
+- **Câmera depois da inserção:**
+  - chegava olhando −77° para o chão (o capim do terreno enchia a tela e parecia que o soldado nascia
+    no mato);
+  - agora nivela em 0,35 s para −3°, virada para o objetivo, antes do voo de descida.
+  - Studio: `LookVector.Y` = −0,052.
+- **Fim de partida e relatório:**
+  - o motivo cabe em duas linhas;
+  - o tutorial some;
+  - as seções foram renumeradas 1, 2, 3, com o singular certo;
+  - a faixa da frente atualiza a 10 Hz.
+- **Roda:** fichas em elipse, sem se sobrepor (teste no PC e na TV).
+- **Chat do Roblox:** um dono só (`JanelaChat`); some com o lobby, os menus e o mapa.
+- **Carta de inserção:**
+  - o nome do ponto só aparece em foco;
+  - o estado do ponto vai na cor do símbolo;
+  - as dicas ficam numa faixa escura.
+- **Lobby:**
+  - rótulos 3D abaixo do cabeçalho;
+  - o manequim do VC ganhou o capacete de medula;
+  - a recompensa diária ficou numa linha, com o carimbo maior.
+- **Cartão da arma:** maior e com mais contraste.
+- **Avisos:** esperam a ficha de baixa sair e somam ganhos iguais.
+- **Opção nova:** "Movimento da câmera" (`cameraBob`, 0–100%) em Acessibilidade.
+- **Falta:** o aviso de captura ainda aparece por cima da loja aberta.

@@ -39,7 +39,7 @@ Comms.COMM = {
 	{ id = "medic", label = "Médico!" },
 	{ id = "ammo", label = "Munição!" },
 	{ id = "contact", label = "Contato" },
-	{ id = "page_command", label = "Comando ▸" },
+	{ id = "page_command", label = "Comando ►" },
 } :: { Item }
 
 -- Página "Comando" (comandante e morteiro): habilidades e correções sem teclado.
@@ -51,7 +51,7 @@ Comms.COMMAND = {
 	{ id = "corr_left", label = "Esquerda 50" },
 	{ id = "ok", label = "Entendido" },
 	{ id = "no", label = "Negativo" },
-	{ id = "page_squad", label = "◂ Squad" },
+	{ id = "page_squad", label = "◄ Squad" },
 } :: { Item }
 
 -- texto de correção para o servidor (mesmo formato que o observador falaria)

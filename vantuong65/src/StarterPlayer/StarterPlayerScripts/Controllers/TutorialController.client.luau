@@ -469,10 +469,12 @@ local function swap()
 end
 
 -- caído ou morto o tutorial some: a tela de ferido e o relatório de baixa ficam sozinhos (no Studio
--- o cartão cobria o painel de ferido, D-87)
+-- o cartão cobria o painel de ferido, D-87). O mesmo com a tela de fim e o relatório pós-ação (no
+-- Studio o cartão aparecia por trás da ficha de fim, D-93).
+local COVERS = { VT65Caido = true, VT65Baixa = true, VT65FimDePartida = true, VT65AfterAction = true }
 local function casualtyShown(): boolean
 	local pg = player:FindFirstChild("PlayerGui")
-	for _, name in { "VT65Caido", "VT65Baixa" } do
+	for name in COVERS do
 		local g = pg and pg:FindFirstChild(name)
 		if g and g:IsA("ScreenGui") and g.Enabled then
 			return true
@@ -661,7 +663,7 @@ player:GetAttributeChangedSignal("Downed"):Connect(draw)
 task.spawn(function()
 	local pg = player:WaitForChild("PlayerGui")
 	local function watchGui(g: Instance)
-		if g:IsA("ScreenGui") and (g.Name == "VT65Caido" or g.Name == "VT65Baixa") then
+		if g:IsA("ScreenGui") and COVERS[g.Name] then
 			g:GetPropertyChangedSignal("Enabled"):Connect(draw)
 		end
 	end

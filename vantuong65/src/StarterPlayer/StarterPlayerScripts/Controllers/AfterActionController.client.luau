@@ -111,6 +111,16 @@ lp.PaddingLeft = UDim.new(0, 6)
 lp.PaddingRight = UDim.new(0, 10)
 lp.PaddingBottom = UDim.new(0, 10)
 lp.Parent = scroll
+-- a folha encolhe ao conteúdo (Studio: metade de baixo vazia), centrada; nunca passa da altura de
+-- projeto (aí a lista rola)
+list:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+	local k = math.max(fit.scale.Scale, 0.01)
+	local content = list.AbsoluteContentSize.Y / k + px(16, 22)
+	local h = math.clamp(px(112, 156) + content + FOOT, px(320, 440), H)
+	if math.abs(sheet.Size.Y.Offset - h) > 1 then
+		sheet.Size = UDim2.fromOffset(W, h)
+	end
+end)
 
 local foot = UiKit.chips(sheet, px(30, 44), true, px(14, 22))
 foot.frame.AnchorPoint = Vector2.new(0, 1)
@@ -235,10 +245,16 @@ local function fill(report: { string })
 		end
 		return t
 	end
-	for _, n in { 3, 2 } do
+	-- renumeradas na ordem nova (Studio: saíam "3., 2., 1."); "1. RESULTADO" etc. são frases
+	-- inteiras no dicionário
+	local function renum(s: Sec, n: number): string
+		local rest = string.match(s.title, "^%d+%.%s*(.+)$") or s.title
+		return string.format("%d. %s", n, rest)
+	end
+	for newN, n in { 3, 2 } do
 		local s = secs[n]
 		if s then
-			add(s.title)
+			add(renum(s, newN))
 			for k, l in s.lines do
 				local t = add(l)
 				if n == 3 and k == 1 then -- o resultado, grande
@@ -251,7 +267,7 @@ local function fill(report: { string })
 	end
 	local tl = secs[1]
 	if tl then
-		add(tl.title)
+		add(renum(tl, 3))
 		-- botão que abre e fecha a linha do tempo
 		order += 1
 		local toggle = Instance.new("TextButton")
@@ -285,9 +301,16 @@ local function fill(report: { string })
 			line(l, k, box)
 		end
 		local function paint()
-			tt.Text = if box.Visible
-				then string.format("Fechar a linha do tempo (%d registros) ▼", #tl.lines)
-				else string.format("Ver a linha do tempo (%d registros) ▸", #tl.lines)
+			local n = #tl.lines
+			if n == 1 then -- singular: frase própria no dicionário
+				tt.Text = if box.Visible
+					then "Fechar a linha do tempo (1 registro) ▼"
+					else "Ver a linha do tempo (1 registro) ►"
+			else
+				tt.Text = if box.Visible
+					then string.format("Fechar a linha do tempo (%d registros) ▼", n)
+					else string.format("Ver a linha do tempo (%d registros) ►", n)
+			end
 		end
 		paint()
 		local r = UiKit.realce(toggle, UiKit.DRAB, UiKit.OLIVE, 1.01)
@@ -340,17 +363,16 @@ local function setOpen(open: boolean)
 	local my = token
 	if open then
 		gui.Enabled = true
+		UiKit.opened("relatorio", gui.DisplayOrder)
 		Input.openMenu()
 		renderFoot()
-		local k = fit.k()
 		dim.BackgroundTransparency = 1
-		TweenService:Create(dim, TweenInfo.new(0.35), { BackgroundTransparency = 0.45 }):Play()
-		sheet.Position = UDim2.new(0.5, 0, 0.5, 60)
-		fit.scale.Scale = k * 0.96
+		TweenService:Create(dim, TweenInfo.new(0.3), { BackgroundTransparency = 0.45 }):Play()
+		sheet.Position = UDim2.new(0.5, 0, 0.5, 40)
 		TweenService
-			:Create(sheet, TweenInfo.new(0.45, Enum.EasingStyle.Quint), { Position = UDim2.fromScale(0.5, 0.5) })
+			:Create(sheet, TweenInfo.new(0.35, Enum.EasingStyle.Quint), { Position = UDim2.fromScale(0.5, 0.5) })
 			:Play()
-		TweenService:Create(fit.scale, TweenInfo.new(0.45, Enum.EasingStyle.Quint), { Scale = k }):Play()
+		fit.play(TweenInfo.new(0.35, Enum.EasingStyle.Quint), 1, 0.96)
 		-- o carimbo cai depois da folha
 		stamp.TextTransparency = 1
 		stampInk.Transparency = 1
@@ -362,10 +384,12 @@ local function setOpen(open: boolean)
 		UiKit.focus(sheet)
 	else
 		Input.closeMenu()
-		local info = TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
+		UiKit.closed("relatorio")
+		UiKit.release(gui)
+		local info = TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
 		TweenService:Create(dim, info, { BackgroundTransparency = 1 }):Play()
 		TweenService:Create(sheet, info, { Position = UDim2.new(0.5, 0, 0.5, 40) }):Play()
-		task.delay(0.23, function()
+		task.delay(0.21, function()
 			if token == my then
 				gui.Enabled = false
 			end
@@ -377,7 +401,7 @@ UiKit.bind(close, function()
 	setOpen(false)
 end)
 Input.on("ui_back", "press", function()
-	if gui.Enabled then
+	if gui.Enabled and UiKit.backFor("relatorio") then
 		setOpen(false)
 	end
 end)

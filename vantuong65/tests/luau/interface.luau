@@ -163,6 +163,9 @@ local FILES = {
 	C .. "DeployScreen.luau",
 	C .. "Marcadores.luau",
 	C .. "Progresso.client.luau",
+	C .. "JanelaChat.client.luau",
+	C .. "Toast.luau",
+	C .. "CartaView.luau",
 	"src/ReplicatedFirst/Idioma.luau",
 	"src/ReplicatedFirst/LoadingScreen.client.luau",
 }
@@ -211,6 +214,106 @@ test("volume: efeitos 0,5, ambiente 0,6 e música 0,35 no padrão; 0 a 1 no vali
 	local s = InputMap.validate({ volEffects = 2, volAmbient = -1, volMusic = "alto" })
 	assert(s.volEffects == 1 and s.volAmbient == 0 and s.volMusic == 0.35, "faixas")
 	assert(InputMap.validate({ volMusic = 0.2 }).volMusic == 0.2)
+end)
+
+-- ===== movimento da câmera (Acessib.) =====
+test("movimento da câmera: padrão 1 (100%), 0 a 1 no validate", function()
+	assert(InputMap.DEFAULTS.cameraBob == 1, "padrão")
+	assert(InputMap.validate({ cameraBob = 3 }).cameraBob == 1, "teto")
+	assert(InputMap.validate({ cameraBob = -2 }).cameraBob == 0, "piso")
+	assert(InputMap.validate({ cameraBob = "x" }).cameraBob == 1, "lixo volta ao padrão")
+	assert(InputMap.validate({ cameraBob = 0.4 }).cameraBob == 0.4)
+end)
+
+-- ===== roda radial: fichas sem sobrepor e fora do anel (Studio: 5 e 6 encavaladas, 1 no anel) =====
+test("roda: nenhuma ficha encosta em outra (nem a acesa, 1,1x) e todas ficam fora do anel", function()
+	local src = fs.readFile(C .. "Wheel.luau")
+	local s1, s2 = string.match(src, "local SIZE = px%((%d+), (%d+)%)")
+	local fx, fy = string.match(src, "local RX, RY = SIZE %* ([%d%.]+), SIZE %* ([%d%.]+)")
+	local w1, w2, h1, h2 = string.match(src, "local CARD_W, CARD_H = px%((%d+), (%d+)%), px%((%d+), (%d+)%)")
+	local ringK = string.match(src, "local ring = circle%(center, ([%d%.]+)")
+	assert(s1 and fx and w1 and ringK, "constantes da roda mudaram de forma: ajuste o teste")
+	for _, v in { { s1, w1, h1 }, { s2, w2, h2 } } do
+		local size, cw, ch = tonumber(v[1]) :: number, tonumber(v[2]) :: number, tonumber(v[3]) :: number
+		local rx, ry = size * (tonumber(fx) :: number), size * (tonumber(fy) :: number)
+		local ring = size * (tonumber(ringK) :: number) / 2
+		local c = {}
+		for i = 1, 8 do
+			local a = (i - 1) * math.pi / 4
+			c[i] = { x = math.sin(a) * rx, y = -math.cos(a) * ry }
+		end
+		for i = 1, 8 do
+			-- ponto da ficha mais perto do centro (retângulo): longe do anel
+			local dx = math.max(math.abs(c[i].x) - cw / 2, 0)
+			local dy = math.max(math.abs(c[i].y) - ch / 2, 0)
+			assert(math.sqrt(dx * dx + dy * dy) > ring + 2, string.format("ficha %d encosta no anel (%d)", i, size))
+			for j = i + 1, 8 do
+				-- uma das duas pode estar acesa (escala 1,1)
+				local hw, hh = cw * 1.1 / 2 + cw / 2, ch * 1.1 / 2 + ch / 2
+				local ox = math.abs(c[i].x - c[j].x) < hw
+				local oy = math.abs(c[i].y - c[j].y) < hh
+				assert(not (ox and oy), string.format("fichas %d e %d se sobrepõem (%d)", i, j, size))
+			end
+		end
+	end
+end)
+
+-- ===== voltar (B, Esc, Backspace): uma tela por aperto, a de cima =====
+test("voltar: cada tela que fecha com o voltar entra e sai da pilha do UiKit", function()
+	for file, name in
+		{
+			["GameMenu.client.luau"] = "menu",
+			["ShopController.client.luau"] = "loja",
+			["AfterActionController.client.luau"] = "relatorio",
+			["FrontHud.client.luau"] = "fim",
+		} :: { [string]: string }
+	do
+		local src = fs.readFile(C .. file)
+		assert(string.find(src, string.format('UiKit.opened("%s"', name), 1, true), file .. ": opened")
+		assert(string.find(src, string.format('UiKit.closed("%s")', name), 1, true), file .. ": closed")
+		assert(string.find(src, string.format('UiKit.backFor("%s")', name), 1, true), file .. ": backFor")
+		assert(string.find(src, "UiKit.release(", 1, true), file .. ": o foco sai da tela fechada")
+	end
+end)
+
+-- ===== inserção: a câmera chega nivelada (Studio: chegava olhando o chão, −77°) =====
+test("inserção: câmera nivelada (−5° a 0°) em tween curto, antes do voo, em todo caminho", function()
+	local src = fs.readFile(C .. "SpawnTransition.luau")
+	local deg = tonumber(string.match(src, "local LEVEL_PITCH = math%.rad%((%-?[%d%.]+)%)"))
+	assert(deg and deg >= -5 and deg <= 0, "LEVEL_PITCH fora de −5° a 0°")
+	local s = tonumber(string.match(src, "local LEVEL_S = ([%d%.]+)"))
+	assert(s and s >= 0.15 and s <= 0.5, "tween do nível curto (0,15 a 0,5 s)")
+	-- o nível termina antes do voo: cabe na pausa do carimbo (0,5 s) com a ordem ainda opaca
+	assert(s <= 0.5)
+	-- todo caminho que chama o voo nivela antes (inserção e gancho de teste)
+	local starts, settles = 0, 0
+	for line in string.gmatch(src, "[^\n]+") do
+		local code = string.gsub(line, "%-%-.*$", "")
+		if string.find(code, "startFlight()", 1, true) and not string.find(code, "function", 1, true) then
+			starts += 1
+		end
+		if string.find(code, "settleCamera()", 1, true) and not string.find(code, "function", 1, true) then
+			settles += 1
+		end
+	end
+	assert(starts >= 1 and settles == starts, string.format("voos %d, nivelamentos %d", starts, settles))
+	-- rumo: objetivo do time; sem objetivo, a frente do HumanoidRootPart
+	assert(string.find(src, "Front.objective", 1, true), "rumo no objetivo")
+	assert(string.find(src, "root.CFrame.LookVector", 1, true), "sem objetivo: a frente do corpo")
+	-- a imagem do voo nunca passa de −80° (não vira de cabeça para baixo)
+	assert(string.find(src, "math.rad(80)", 1, true), "trava da imagem do voo")
+	-- o mesmo cálculo do tween: começa no pitch de agora e termina exatamente no nível, sem salto
+	local function smooth(t: number): number
+		return t * t * t * (t * (t * 6 - 15) + 10)
+	end
+	local p0, pT = math.rad(-77), math.rad(deg :: number)
+	local last = p0
+	for i = 1, 30 do
+		local p = p0 + (pT - p0) * smooth(i / 30)
+		assert(math.abs(p - last) < math.rad(9), "passo grande demais num quadro") -- 30 quadros ~ 0,5 s
+		last = p
+	end
+	assert(math.abs(last - pT) < 1e-9)
 end)
 
 -- ===== menos texto: 1ª frase e o resto, sem quebrar o RichText =====

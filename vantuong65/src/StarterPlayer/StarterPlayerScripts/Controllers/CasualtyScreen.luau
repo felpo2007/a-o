@@ -32,6 +32,7 @@ local Weapons = require(ReplicatedStorage.Shared.Weapons) :: any
 local Acabamento = require(ReplicatedFirst:WaitForChild("Acabamento"))
 local DeployScreen = require(script.Parent.DeployScreen)
 local Input = require(script.Parent.Input)
+local Toast = require(script.Parent.Toast)
 local UiKit = require(script.Parent.UiKit)
 
 local CasualtyScreen = {}
@@ -528,20 +529,32 @@ RunService.RenderStepped:Connect(function()
 end)
 
 -- ===== morto =====
+-- Uma ficha por vez. deathToken invalida a saída pendente se outra baixa chega no meio dela;
+-- menuHeld garante um closeMenu para cada openMenu (antes, fechar duas vezes na mesma saída, pelo
+-- renascer e pelo relógio, descontava o contador de menus duas vezes).
+local deathToken = 0
+local menuHeld = false
 local function closeDeath(fast: boolean?)
-	if not deathGui.Enabled then
+	if not S.deathCard then
 		return
 	end
 	S.deathCard = false
+	deathToken += 1
+	local my = deathToken
 	local t = if fast then 0.25 else 0.6
 	local info = TweenInfo.new(t, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
 	TweenService:Create(K.card, info, { Position = UDim2.fromScale(0.5, 1.5), Rotation = 4 }):Play()
 	TweenService:Create(K.black, TweenInfo.new(t + 0.2, Enum.EasingStyle.Quad), { BackgroundTransparency = 1 }):Play()
 	TweenService:Create(K.glow, TweenInfo.new(t), { ImageTransparency = 1 }):Play()
 	task.delay(t + 0.25, function()
-		if not S.deathCard then
-			deathGui.Enabled = false
-			S.dev = false
+		if deathToken ~= my then
+			return
+		end
+		deathGui.Enabled = false
+		S.dev = false
+		Toast.hold(false) -- os avisos que esperaram a ficha descer aparecem agora
+		if menuHeld then
+			menuHeld = false
 			Input.closeMenu() -- o controle volta para a carta de inserção
 		end
 	end)
@@ -554,12 +567,19 @@ local function roleName(): string
 end
 
 local function showDeath(cause: Casualty.Cause?, where: Vector3?, note: string?)
-	if deathGui.Enabled then
+	if S.deathCard then
 		return
 	end
 	S.deathCard = true
+	deathToken += 1
+	local my = deathToken
 	deathGui.Enabled = true
-	Input.openMenu() -- até a ficha descer, nada da carta de baixo responde
+	if not menuHeld then
+		menuHeld = true
+		Input.openMenu() -- até a ficha descer, nada da carta de baixo responde
+	end
+	-- os avisos (ganhos do abate, setores) esperam: a faixa deles saía por cima da ficha (D-93)
+	Toast.hold(true)
 	GuiService.SelectedObject = nil
 	local sid = player:GetAttribute("SquadId")
 	local squad = if type(sid) == "string" then (string.match(sid, ":(.+)$") or sid) else "—"
@@ -585,14 +605,15 @@ local function showDeath(cause: Casualty.Cause?, where: Vector3?, note: string?)
 	TweenService:Create(K.glow, TweenInfo.new(1.2), { ImageTransparency = 0.55 }):Play()
 	K.card.Position = UDim2.fromScale(0.5, 0.42)
 	K.card.Rotation = -4
-	local k = K.fit.k()
-	K.scale.Scale = k * 1.08
 	local drop = TweenInfo.new(0.55, Enum.EasingStyle.Quint, Enum.EasingDirection.Out, 0, false, 0.35)
 	TweenService:Create(K.card, drop, { Position = UDim2.fromScale(0.5, 0.5), Rotation = 1.2 }):Play()
-	TweenService:Create(K.scale, drop, { Scale = k }):Play()
+	K.fit.play(drop, 1, 1.08) -- a janela mudando no meio assenta na escala nova
 	K.stamp.TextTransparency = 1
 	K.stamp.Size = UDim2.fromOffset(px(260, 380), px(74, 110))
 	task.delay(1.0, function()
+		if deathToken ~= my then
+			return
+		end
 		K.stamp.TextTransparency = 0
 		TweenService:Create(
 			K.stamp,
@@ -730,6 +751,16 @@ if RunService:IsStudio() then
 		task.defer(function()
 			workspace:SetAttribute("VT65DevQueda", nil)
 		end)
+	end)
+	-- os mesmos pelo gancho comum das telas: VT65DevTela = "caido" ou "morto"
+	workspace:GetAttributeChangedSignal("VT65DevTela"):Connect(function()
+		local v = workspace:GetAttribute("VT65DevTela")
+		if v == "caido" or v == "morto" then
+			workspace:SetAttribute("VT65DevQueda", v)
+			task.defer(function()
+				workspace:SetAttribute("VT65DevTela", nil)
+			end)
+		end
 	end)
 end
 

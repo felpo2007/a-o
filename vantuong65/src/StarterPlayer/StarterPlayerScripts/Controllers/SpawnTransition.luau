@@ -7,7 +7,8 @@
 --      spawn ao servidor (o servidor valida tudo de novo);
 --   3. espera o corpo novo chegar no ponto, segura o HumanoidRootPart parado (só no cliente, dono da
 --      física do próprio corpo), pede o streaming em volta dele e confere que há chão embaixo;
---   4. solta o corpo, carimba "EM CAMPO" e a ordem esmaece enquanto a câmera desce do alto até o
+--   4. solta o corpo, carimba "EM CAMPO" e, ainda por baixo da ordem, nivela a câmera (tween curto
+--      até −3°, rumo no objetivo do time); a ordem esmaece enquanto a câmera desce do alto até o
 --      lugar dela (voo de grua); só então devolve o controle.
 -- Se o servidor recusar (o corpo não chega), a ordem é carimbada "RECUSADA" e o lobby volta.
 -- Tempos-limite são de segurança: nunca deixam o jogador preso aqui.
@@ -30,7 +31,9 @@ local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 
 local Acabamento = require(ReplicatedFirst:WaitForChild("Acabamento"))
+local Front = require(ReplicatedStorage.Shared.Front)
 local MapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any
+local Net = require(ReplicatedStorage.Shared.Net)
 local Input = require(script.Parent.Input)
 local UiKit = require(script.Parent.UiKit)
 
@@ -509,9 +512,13 @@ local function startFlight(): boolean
 		flight.real = real
 		flight.t = if flight.skip then 1 else math.min(flight.t + dt / FLY_S, 1)
 		local k = 1 - smooth(flight.t)
+		-- a imagem nunca passa de −80° (com a câmera de verdade ainda inclinada, −77° − 32° virava a
+		-- imagem de cabeça para baixo)
+		local realPitch = real:ToOrientation()
+		local extra = math.min(FLY_PITCH * k, math.max(0, realPitch + math.rad(80)))
 		c.CFrame = CFrame.new(real.Position + Vector3.yAxis * (FLY_RISE * k))
 			* real.Rotation
-			* CFrame.Angles(-FLY_PITCH * k, 0, 0)
+			* CFrame.Angles(-extra, 0, 0)
 		if flight.t >= 1 then
 			stopFlight() -- este quadro já é a câmera de verdade: nada pula
 		end
@@ -536,6 +543,114 @@ UserInputService.InputBegan:Connect(function(input: InputObject)
 	end
 end)
 
+-- ===== câmera nivelada na chegada =====
+-- Studio (D-93): depois da inserção a câmera chegava olhando quase reto para o chão (LookVector.Y
+-- = −0,97, −77°) e o capim enchia a tela. A câmera do jogo herda a direção que tinha (a vista da
+-- mesa do lobby olha para baixo) e o módulo do Roblox e o CameraLook mantêm o pitch que recebem.
+-- Na chegada, com a ordem ainda cobrindo a tela, a câmera de verdade vai num tween curto até o
+-- nível (LEVEL_PITCH), com o rumo no objetivo do time (sem objetivo: a frente do corpo). Roda
+-- ANTES do módulo de câmera (que lê a direção atual a cada quadro: o nível persiste) e depois do
+-- VT65InsertPre (que devolve a câmera de verdade). A inclinação lateral (roll) do Movement é
+-- preservada: ele a desfaz no começo de cada quadro.
+local LEVEL_S = 0.35 -- s do tween de nível
+local LEVEL_PITCH = math.rad(-3) -- olhando o horizonte (entre −5° e 0°)
+local LEVEL_WAIT_S = 3 -- s no máximo esperando a câmera do jogo (Custom)
+local level = { on = false, t = 0, p0 = 0, y0 = 0, dy = 0, started = false, token = 0 }
+local matchState: any = nil
+task.spawn(function()
+	Net.event("Match_State").OnClientEvent:Connect(function(st: any)
+		if type(st) == "table" then
+			matchState = st
+		end
+	end)
+end)
+
+-- rumo (yaw) para o objetivo do time; sem objetivo, a frente do HumanoidRootPart
+local function levelYaw(root: BasePart?, fallback: number): number
+	local st = matchState
+	local f = player:GetAttribute("Faction")
+	if root and type(st) == "table" and type(f) == "string" and type(st.owner) == "table" then
+		local cap: { [number]: string } = {}
+		if type(st.capturing) == "table" then
+			for i, v in st.capturing do
+				if type(v) == "string" and v ~= "" then
+					cap[i] = v
+				end
+			end
+		end
+		local ok, _, target = pcall(Front.objective, st.owner, st.active or {}, f, cap)
+		local p = if ok and target and type(st.points) == "table" then st.points[target] else nil
+		if type(p) == "table" and type(p.x) == "number" and type(p.z) == "number" then
+			local dx, dz = p.x - root.Position.X, p.z - root.Position.Z
+			if dx * dx + dz * dz > 1 then
+				return math.atan2(-dx, -dz)
+			end
+		end
+	end
+	if root then
+		local lv = root.CFrame.LookVector
+		if lv.X * lv.X + lv.Z * lv.Z > 1e-4 then
+			return math.atan2(-lv.X, -lv.Z)
+		end
+	end
+	return fallback
+end
+
+local function stopLevel()
+	if level.on then
+		level.on = false
+		RunService:UnbindFromRenderStep("VT65InsertLevel")
+	end
+end
+
+-- Nivela a câmera do jogo (todo caminho que termina em campo chama: inserção, renascer onde caiu,
+-- gancho de teste). Espera a câmera virar a do jogo (o lobby a deixa Scriptable) até LEVEL_WAIT_S.
+local function levelCamera()
+	stopLevel()
+	level.token += 1
+	local my = level.token
+	level.on, level.t, level.started = true, 0, false
+	local since = os.clock()
+	RunService:BindToRenderStep("VT65InsertLevel", Enum.RenderPriority.Camera.Value - 1, function(dt: number)
+		local c = workspace.CurrentCamera
+		local char = player.Character
+		local hum = char and char:FindFirstChildOfClass("Humanoid")
+		if level.token ~= my then
+			return
+		end
+		if not c or c.CameraType ~= Enum.CameraType.Custom or not hum or hum.Health <= 0 then
+			if os.clock() - since > LEVEL_WAIT_S then
+				stopLevel()
+			end
+			return -- ainda não é a câmera do jogo: espera sem andar o relógio
+		end
+		local cf = c.CFrame
+		local pitch, yaw, roll = cf:ToOrientation()
+		if not level.started then
+			level.started = true
+			local root = char and char:FindFirstChild("HumanoidRootPart")
+			local yT = levelYaw(if root and root:IsA("BasePart") then root else nil, yaw)
+			level.p0, level.y0 = pitch, yaw
+			level.dy = (yT - yaw + math.pi) % (2 * math.pi) - math.pi -- o caminho mais curto
+		end
+		level.t = math.min(level.t + dt / LEVEL_S, 1)
+		local e = smooth(level.t)
+		c.CFrame = CFrame.new(cf.Position)
+			* CFrame.fromOrientation(level.p0 + (LEVEL_PITCH - level.p0) * e, level.y0 + level.dy * e, roll)
+		if level.t >= 1 then
+			stopLevel()
+		end
+	end)
+end
+
+-- espera o nível terminar (ou desistir); no máximo LEVEL_S + LEVEL_WAIT_S
+local function waitLevel()
+	local t0 = os.clock()
+	while level.on and os.clock() - t0 < LEVEL_S + LEVEL_WAIT_S do
+		task.wait()
+	end
+end
+
 -- espera o voo chegar à fração `frac` (ou acabar); no máximo FLY_S + 1 s
 local function waitFlight(frac: number)
 	local t0 = os.clock()
@@ -544,10 +659,21 @@ local function waitFlight(frac: number)
 	end
 end
 
+-- nivela por baixo da ordem (ainda opaca, 0,5 s com o carimbo) antes de o voo começar: o voo já
+-- desce para uma câmera nivelada. Se a câmera do jogo ainda não chegou, o nível fica para quando
+-- ela chegar (tween do mesmo jeito, nunca salto).
+local function settleCamera()
+	levelCamera()
+	task.wait(0.5)
+	if level.on and level.started then
+		waitLevel()
+	end
+end
+
 -- O fim de toda ordem que deu certo: carimbo, a ordem esmaece com a câmera descendo, controle volta.
 local function arrive()
 	stampDone("EM CAMPO", STAMP)
-	task.wait(0.5)
+	settleCamera()
 	busy = false
 	local flying = startFlight()
 	hide(0)
@@ -695,6 +821,7 @@ if RunService:IsStudio() then
 			while workspace:GetAttribute("VT65DevTela") == "transicao" do
 				task.wait(0.2)
 			end
+			settleCamera()
 			busy = false
 			local flying = startFlight()
 			hide(0)

@@ -10,7 +10,7 @@
 --   - fim: carimbo VITÓRIA / DERROTA / EMPATE, o motivo e o placar (setores, reforços, baixas,
 --     duração) sobre o relatório pós-ação; some sozinho ou com A / Enter.
 -- Nada aqui mostra inimigo: só o estado dos pontos (Parte 9.5). Studio: o VT65DevEnd do servidor
--- encerra a partida e mostra a tela de fim.
+-- encerra a partida e mostra a tela de fim; workspace:SetAttribute("VT65DevTela", "fim") só a mostra.
 local GuiService = game:GetService("GuiService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -294,8 +294,11 @@ local function render(st: any)
 			then Color3.fromRGB(255, 214, 120)
 			elseif cap == f then Color3.fromRGB(190, 220, 255)
 			else Color3.fromRGB(255, 170, 150)
-		ch.stroke.Transparency = if i == target then 0 else 1
+		ch.target = i == target
 		ch.contested = con == true
+		if not ch.contested then -- em disputa, quem cuida do contorno é o pisca (paintPulses)
+			ch.stroke.Transparency = if ch.target then 0 else 1
+		end
 	end
 	-- direita: reforços (Warfare) ou frente (Offensive)
 	if st.score and f then
@@ -332,6 +335,31 @@ local function render(st: any)
 	end
 end
 
+-- o pisca da disputa: um tween em laço por setor (antes era por quadro), ligado e desligado só
+-- quando a disputa muda
+local pulses: { [number]: Tween } = {}
+local function paintPulses()
+	for i, ch in chips do
+		local tw = pulses[i]
+		if ch.contested and not tw then
+			ch.stroke.Color = Color3.fromRGB(255, 214, 120)
+			ch.stroke.Transparency = 0
+			local t = TweenService:Create(
+				ch.stroke,
+				TweenInfo.new(0.6, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true),
+				{ Transparency = 0.8 }
+			)
+			pulses[i] = t
+			t:Play()
+		elseif not ch.contested and tw then
+			tw:Cancel()
+			pulses[i] = nil
+			ch.stroke.Color = C.brass
+			ch.stroke.Transparency = if ch.target then 0 else 1
+		end
+	end
+end
+
 -- ===== fim de partida =====
 local endGui = UiKit.screen("VT65FimDePartida", 43) -- acima do relatório pós-ação (40)
 endGui.Enabled = false
@@ -346,7 +374,7 @@ do
 	local card = Instance.new("Frame")
 	card.AnchorPoint = Vector2.new(0.5, 0.5)
 	card.Position = UDim2.fromScale(0.5, 0.48)
-	card.Size = UDim2.fromOffset(px(560, 820), px(380, 540))
+	card.Size = UDim2.fromOffset(px(560, 820), px(400, 570))
 	card.BackgroundColor3 = UiKit.CARD
 	card.BorderSizePixel = 0
 	card.Rotation = -0.8
@@ -381,13 +409,21 @@ do
 	ss.Parent = stamp
 	local why = text(card, px(17, 26), UiKit.INK, false)
 	why.Font = Enum.Font.SpecialElite
-	-- abaixo do carimbo girado (no Studio ele encostava no motivo, D-87)
-	why.Position = UDim2.fromOffset(24, px(170, 248))
-	why.Size = UDim2.new(1, -48, 0, px(24, 34))
+	-- abaixo do carimbo girado (no Studio ele encostava no motivo, D-87). Duas linhas e a letra
+	-- encolhe se ainda faltar (no Studio o motivo longo saía cortado, D-93)
+	why.Position = UDim2.fromOffset(24, px(168, 246))
+	why.Size = UDim2.new(1, -48, 0, px(46, 66))
 	why.TextWrapped = true
+	why.TextScaled = true
+	do
+		local lim = Instance.new("UITextSizeConstraint")
+		lim.MaxTextSize = px(17, 26)
+		lim.MinTextSize = px(11, 16)
+		lim.Parent = why
+	end
 	local table_ = text(card, px(17, 26), UiKit.INK, false)
 	table_.Font = Enum.Font.Code
-	table_.Position = UDim2.fromOffset(40, px(206, 294))
+	table_.Position = UDim2.fromOffset(40, px(222, 318))
 	table_.Size = UDim2.new(1, -80, 0, px(120, 170))
 	table_.TextXAlignment = Enum.TextXAlignment.Left
 	table_.TextYAlignment = Enum.TextYAlignment.Top
@@ -438,16 +474,31 @@ local function reason(st: any): string
 	return string.format("Tempo esgotado: o %s tem mais setores (ou mais reforços).", who)
 end
 
+-- endOpen: a ficha está de pé (a ScreenGui ainda fica ligada 0,3 s na saída). Enquanto aberta ela
+-- é uma tela de menu: o mouse fica solto (clique fecha) e o "voltar" (B, Esc, Backspace) também
+-- fecha, sem passar para o relatório de baixo (pilha do UiKit).
+local endOpen = false
+local endToken = 0
 local function closeEnd()
-	if not endGui.Enabled then
+	if not endOpen then
 		return
 	end
+	endOpen = false
+	endShown = nil
+	endToken += 1
+	local my = endToken
+	Input.closeMenu()
+	UiKit.closed("fim")
+	UiKit.release(endGui)
 	local p = endParts
-	local info = TweenInfo.new(0.35, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
-	TweenService:Create(p.scale, info, { Scale = p.fit.k() * 0.9 }):Play()
+	local info = TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
+	p.fit.play(info, 0.9)
 	TweenService:Create(p.dim, info, { BackgroundTransparency = 1 }):Play()
 	TweenService:Create(p.card, info, { Position = UDim2.fromScale(0.5, 1.4) }):Play()
-	task.delay(0.36, function()
+	task.delay(0.31, function()
+		if endToken ~= my then
+			return
+		end
 		endGui.Enabled = false
 		-- o relatório pós-ação fica por baixo: o foco do controle volta para ele
 		local rep = player.PlayerGui:FindFirstChild("VT65AfterAction")
@@ -490,19 +541,27 @@ local function showEnd(st: any)
 	end
 	table.insert(lines, string.format("%-12s %8s", "Duração", Casualty.duration(st.elapsed or 0)))
 	p.table.Text = table.concat(lines, "\n")
-	endShown = os.clock()
+	local shownAt = os.clock()
+	endShown = shownAt
+	endToken += 1
+	local my = endToken
+	if not endOpen then
+		endOpen = true
+		Input.openMenu()
+	end
+	UiKit.opened("fim", endGui.DisplayOrder)
 	endGui.Enabled = true
 	-- carimbo: bate de cima e assenta
 	p.card.Position = UDim2.fromScale(0.5, 0.48)
-	local k = p.fit.k()
-	p.scale.Scale = k * 0.85
 	p.dim.BackgroundTransparency = 1
-	TweenService:Create(p.dim, TweenInfo.new(0.4), { BackgroundTransparency = 0.45 }):Play()
-	TweenService:Create(p.scale, TweenInfo.new(0.45, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = k })
-		:Play()
+	TweenService:Create(p.dim, TweenInfo.new(0.35), { BackgroundTransparency = 0.45 }):Play()
+	p.fit.play(TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out), 1, 0.85)
 	p.stamp.TextTransparency = 1
 	p.stamp.Size = UDim2.fromOffset(px(560, 820), px(110, 160))
-	task.delay(0.35, function()
+	task.delay(0.3, function()
+		if endToken ~= my then
+			return
+		end
 		p.stamp.TextTransparency = 0
 		TweenService:Create(
 			p.stamp,
@@ -511,14 +570,20 @@ local function showEnd(st: any)
 		):Play()
 	end)
 	task.delay(9, function()
-		if endShown and os.clock() - endShown >= 8.9 then
+		if endShown == shownAt then
 			closeEnd()
 		end
 	end)
 end
 
+Input.on("ui_back", "press", function()
+	if endOpen and endShown and os.clock() - endShown >= 0.6 and UiKit.backFor("fim") then
+		closeEnd()
+	end
+end)
+
 UserInputService.InputBegan:Connect(function(io: InputObject)
-	if not endGui.Enabled or not endShown or os.clock() - endShown < 1.2 then
+	if not endOpen or not endShown or os.clock() - endShown < 1.2 then
 		return
 	end
 	local k = io.KeyCode
@@ -556,32 +621,30 @@ Net.event("Match_State").OnClientEvent:Connect(function(st)
 	end
 	alerts(st, prev)
 	render(st)
+	paintPulses()
 end)
 
-RunService.Heartbeat:Connect(function()
+-- 10 Hz (antes era por quadro): visibilidade da faixa, o pé da tela de fim e o foco
+local acc = 0
+RunService.Heartbeat:Connect(function(dt: number)
+	acc += dt
+	if acc < 0.1 then
+		return
+	end
+	acc = 0
 	local st = state
 	local char = player.Character
 	local hum = char and char:FindFirstChildOfClass("Humanoid")
 	local inField = st ~= nil and mine() ~= nil and hum ~= nil and hum.Health > 0
 	strip.Visible = inField and not Input.state.map and Input.state.menus == 0 and not endGui.Enabled
-	if endGui.Enabled and endShown then
+	if endOpen and endShown then
 		local n = state and state.nextIn
 		endParts.foot.Text = if type(n) ~= "number"
 			then ""
 			elseif Input.isGamepad() then string.format("Próxima partida em %d s · A: relatório", math.ceil(n))
 			else string.format("Próxima partida em %d s · Enter: relatório", math.ceil(n))
 	end
-	-- disputa: o setor pisca
-	local pulse = 0.5 + 0.5 * math.sin(os.clock() * 5)
-	for _, ch in chips do
-		if ch.contested then
-			ch.stroke.Color = Color3.fromRGB(255, 214, 120)
-			ch.stroke.Transparency = pulse * 0.8
-		else
-			ch.stroke.Color = C.brass
-		end
-	end
-	if GuiService.SelectedObject and endGui.Enabled and GuiService.SelectedObject:IsDescendantOf(player.PlayerGui) then
+	if GuiService.SelectedObject and endOpen and GuiService.SelectedObject:IsDescendantOf(player.PlayerGui) then
 		-- com a tela de fim por cima, A não pode fechar o relatório de baixo
 		local rep = player.PlayerGui:FindFirstChild("VT65AfterAction")
 		if rep and GuiService.SelectedObject:IsDescendantOf(rep) then
@@ -589,3 +652,27 @@ RunService.Heartbeat:Connect(function()
 		end
 	end
 end)
+
+-- Studio: workspace:SetAttribute("VT65DevTela", "fim") mostra a tela de fim com um placar de
+-- exemplo (vitória do meu lado por reforços), sem encerrar a partida
+if RunService:IsStudio() then
+	workspace:GetAttributeChangedSignal("VT65DevTela"):Connect(function()
+		if workspace:GetAttribute("VT65DevTela") ~= "fim" then
+			return
+		end
+		task.defer(function()
+			workspace:SetAttribute("VT65DevTela", nil)
+		end)
+		local w = mine() or "US"
+		showEnd({
+			ended = true,
+			winner = w,
+			mode = "Warfare",
+			owner = { "US", "US", "VC", "US", "VC" },
+			active = { true, true, true, true, true },
+			score = { US = if w == "US" then 132 else 0, VC = if w == "VC" then 132 else 0, max = 400 },
+			kia = { US = 31, VC = 58 },
+			elapsed = 1512,
+		})
+	end)
+end
