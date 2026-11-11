@@ -157,9 +157,10 @@
  },
  {
   "key": "Models.hut_thatch",
-  "file": "assets/forgegui/models/casa_palha_studs_fosco.glb",
+  "file": "assets/blender/hut_thatch/hut_thatch.glb",
   "assetType": "Model",
-  "name": "VT65 hut_thatch fosco"
+  "name": "VT65 hut_thatch blender",
+  "description": "VAN TUONG 65 - refeito no Blender, mesma forma com 1/3 dos triangulos"
  },
  {
   "key": "Models.coconut_palm",
@@ -217,15 +218,17 @@
  },
  {
   "key": "Models.spider_hole",
-  "file": "assets/forgegui/models/toca_aranha_studs_fosco.glb",
+  "file": "assets/blender/spider_hole/spider_hole.glb",
   "assetType": "Model",
-  "name": "VT65 spider_hole fosco"
+  "name": "VT65 spider_hole blender",
+  "description": "VAN TUONG 65 - refeito no Blender, mesma forma com 1/3 dos triangulos"
  },
  {
   "key": "Models.sandbags",
-  "file": "assets/forgegui/models/sacos_areia_studs_fosco.glb",
+  "file": "assets/blender/sandbags/sandbags.glb",
   "assetType": "Model",
-  "name": "VT65 sandbags fosco"
+  "name": "VT65 sandbags blender",
+  "description": "VAN TUONG 65 - refeito no Blender, mesma forma com 1/3 dos triangulos"
  },
  {
   "key": "Models.m60",
@@ -247,9 +250,10 @@
  },
  {
   "key": "Models.hut_veranda",
-  "file": "assets/forgegui/models/casa_varanda_studs_fosco.glb",
+  "file": "assets/blender/hut_veranda/hut_veranda.glb",
   "assetType": "Model",
-  "name": "VT65 hut_veranda fosco"
+  "name": "VT65 hut_veranda blender",
+  "description": "VAN TUONG 65 - refeito no Blender, mesma forma com 1/3 dos triangulos"
  },
  {
   "key": "Models.trench_section",
@@ -265,39 +269,45 @@
  },
  {
   "key": "Models.grave_mound",
-  "file": "assets/forgegui/models/tumulo_studs_fosco.glb",
+  "file": "assets/blender/grave_mound/grave_mound.glb",
   "assetType": "Model",
-  "name": "VT65 grave_mound fosco"
+  "name": "VT65 grave_mound blender",
+  "description": "VAN TUONG 65 - refeito no Blender, mesma forma com 1/3 dos triangulos"
  },
  {
   "key": "Models.granary",
-  "file": "assets/forgegui/models/celeiro_studs_fosco.glb",
+  "file": "assets/blender/granary/granary.glb",
   "assetType": "Model",
-  "name": "VT65 granary fosco"
+  "name": "VT65 granary blender",
+  "description": "VAN TUONG 65 - refeito no Blender, mesma forma com 1/3 dos triangulos"
  },
  {
   "key": "Models.well",
-  "file": "assets/forgegui/models/poco_studs_fosco.glb",
+  "file": "assets/blender/well/well.glb",
   "assetType": "Model",
-  "name": "VT65 well fosco"
+  "name": "VT65 well blender",
+  "description": "VAN TUONG 65 - refeito no Blender, mesma forma com 1/3 dos triangulos"
  },
  {
   "key": "Models.hut_kitchen",
-  "file": "assets/forgegui/models/cozinha_studs_fosco.glb",
+  "file": "assets/blender/hut_kitchen/hut_kitchen.glb",
   "assetType": "Model",
-  "name": "VT65 hut_kitchen fosco"
+  "name": "VT65 hut_kitchen blender",
+  "description": "VAN TUONG 65 - refeito no Blender, mesma forma com 1/3 dos triangulos"
  },
  {
   "key": "Models.house_tile",
-  "file": "assets/forgegui/models/casa_telha_studs_fosco.glb",
+  "file": "assets/blender/house_tile/house_tile.glb",
   "assetType": "Model",
-  "name": "VT65 house_tile fosco"
+  "name": "VT65 house_tile blender",
+  "description": "VAN TUONG 65 - refeito no Blender, mesma forma com 1/3 dos triangulos"
  },
  {
   "key": "Models.shrine",
-  "file": "assets/forgegui/models/altar_studs_fosco.glb",
+  "file": "assets/blender/shrine/shrine.glb",
   "assetType": "Model",
-  "name": "VT65 shrine fosco"
+  "name": "VT65 shrine blender",
+  "description": "VAN TUONG 65 - refeito no Blender, mesma forma com 1/3 dos triangulos"
  },
  {
   "key": "Models.m1911",
@@ -337,15 +347,17 @@
  },
  {
   "key": "Models.tunnel_entrance",
-  "file": "assets/forgegui/models/entrada_tunel_studs_fosco.glb",
+  "file": "assets/blender/tunnel_entrance/tunnel_entrance.glb",
   "assetType": "Model",
-  "name": "VT65 tunnel_entrance fosco"
+  "name": "VT65 tunnel_entrance blender",
+  "description": "VAN TUONG 65 - refeito no Blender, mesma forma com 1/3 dos triangulos"
  },
  {
   "key": "Models.log_bridge",
-  "file": "assets/forgegui/models/ponte_troncos_studs_fosco.glb",
+  "file": "assets/blender/log_bridge/log_bridge.glb",
   "assetType": "Model",
-  "name": "VT65 log_bridge fosco"
+  "name": "VT65 log_bridge blender",
+  "description": "VAN TUONG 65 - refeito no Blender, mesma forma com 1/3 dos triangulos"
  },
  {
   "key": "Clothing.us_pants",
@@ -469,9 +481,10 @@
  },
  {
   "key": "Models.vc_bunker",
-  "file": "assets/forgegui/models/bunker_vc_studs_fosco.glb",
+  "file": "assets/blender/vc_bunker/vc_bunker.glb",
   "assetType": "Model",
-  "name": "VT65 vc_bunker fosco"
+  "name": "VT65 vc_bunker blender",
+  "description": "VAN TUONG 65 - refeito no Blender, mesma forma com 1/3 dos triangulos"
  },
  {
   "key": "Models.mortar_81",
@@ -853,5 +866,82 @@
   "assetType": "Decal",
   "name": "VT65 caveira de abate",
   "description": "VAN TUONG 65 - caveira em estencil militar mostrada no abate (tools/make_caveira.py)"
+ },
+ {
+  "key": "Models.water_jar",
+  "file": "assets/blender/water_jar/water_jar.glb",
+  "assetType": "Model",
+  "name": "VT65 water_jar",
+  "description": "VAN TUONG 65 - modelado no Blender"
+ },
+ {
+  "key": "Models.straw_stack",
+  "file": "assets/blender/straw_stack/straw_stack.glb",
+  "assetType": "Model",
+  "name": "VT65 straw_stack",
+  "description": "VAN TUONG 65 - modelado no Blender"
+ },
+ {
+  "key": "Models.grenade_m26",
+  "file": "assets/blender/grenade_m26/grenade_m26.glb",
+  "assetType": "Model",
+  "name": "VT65 grenade_m26",
+  "description": "VAN TUONG 65 - modelado no Blender"
+ },
+ {
+  "key": "Models.grenade_stick",
+  "file": "assets/blender/grenade_stick/grenade_stick.glb",
+  "assetType": "Model",
+  "name": "VT65 grenade_stick",
+  "description": "VAN TUONG 65 - modelado no Blender"
+ },
+ {
+  "key": "Models.smoke_m18",
+  "file": "assets/blender/smoke_m18/smoke_m18.glb",
+  "assetType": "Model",
+  "name": "VT65 smoke_m18",
+  "description": "VAN TUONG 65 - modelado no Blender"
+ },
+ {
+  "key": "Models.ammo_crate",
+  "file": "assets/blender/ammo_crate/ammo_crate.glb",
+  "assetType": "Model",
+  "name": "VT65 ammo_crate",
+  "description": "VAN TUONG 65 - modelado no Blender"
+ },
+ {
+  "key": "Models.rice_sack",
+  "file": "assets/blender/rice_sack/rice_sack.glb",
+  "assetType": "Model",
+  "name": "VT65 rice_sack",
+  "description": "VAN TUONG 65 - modelado no Blender"
+ },
+ {
+  "key": "Models.clay_lamp",
+  "file": "assets/blender/clay_lamp/clay_lamp.glb",
+  "assetType": "Model",
+  "name": "VT65 clay_lamp",
+  "description": "VAN TUONG 65 - modelado no Blender"
+ },
+ {
+  "key": "Models.sandbag_wall",
+  "file": "assets/blender/sandbag_wall/sandbag_wall.glb",
+  "assetType": "Model",
+  "name": "VT65 sandbag_wall",
+  "description": "VAN TUONG 65 - modelado no Blender"
+ },
+ {
+  "key": "Models.conical_hat",
+  "file": "assets/blender/conical_hat/conical_hat.glb",
+  "assetType": "Model",
+  "name": "VT65 conical_hat",
+  "description": "VAN TUONG 65 - modelado no Blender"
+ },
+ {
+  "key": "Models.bamboo_clothesline",
+  "file": "assets/blender/bamboo_clothesline/bamboo_clothesline.glb",
+  "assetType": "Model",
+  "name": "VT65 bamboo_clothesline",
+  "description": "VAN TUONG 65 - modelado no Blender"
  }
 ]
