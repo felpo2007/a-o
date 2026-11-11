@@ -129,6 +129,10 @@ export type DriveSpec = {
 	brakeG: number,
 	coastG: number, -- freio-motor e perdas com o acelerador solto
 	pivotDegS: number, -- giro no lugar
+	-- D-93: raio da curva em movimento (m). O câmbio de direção regenerativa (cross-drive) faz curva de
+	-- raio fixo por faixa: andando, a guinada (v / raio) passa da do giro no lugar até o limite da
+	-- aderência lateral. PLACEHOLDER (sem ficha); nil = só o giro no lugar.
+	turnRadiusM: number?,
 	yawTauS: number, -- inércia do giro
 	latG: number, -- aceleração lateral máxima em movimento (limita o giro: curva ampla)
 	turnDrag: number, -- resistência extra da lagarta derrapando na curva (fração do peso no giro máximo)
@@ -154,9 +158,10 @@ VehicleDrive.DRIVE = {
 		brakeG = 0.45,
 		coastG = 0.025,
 		pivotDegS = 20,
-		yawTauS = 0.6,
+		turnRadiusM = 12,
+		yawTauS = 0.45,
 		latG = 0.35,
-		turnDrag = 0.06,
+		turnDrag = 0.045,
 		fordM = 1.2,
 		spring = {
 			pitchHz = 1.0,
@@ -183,9 +188,10 @@ VehicleDrive.DRIVE = {
 		brakeG = 0.5,
 		coastG = 0.03,
 		pivotDegS = 40,
-		yawTauS = 0.3,
+		turnRadiusM = 7,
+		yawTauS = 0.25,
 		latG = 0.4,
-		turnDrag = 0.05,
+		turnDrag = 0.04,
 		fordM = 0.6,
 		spring = {
 			pitchHz = 1.4,
@@ -213,9 +219,10 @@ VehicleDrive.DRIVE = {
 		brakeG = 0.4,
 		coastG = 0.025,
 		pivotDegS = 18,
-		yawTauS = 0.65,
+		turnRadiusM = 13,
+		yawTauS = 0.5,
 		latG = 0.3,
-		turnDrag = 0.07,
+		turnDrag = 0.055,
 		fordM = 99,
 		water = { thrust = 0.15, yawDegS = 8, yawTauS = 1.4, latTauS = 2.5, addedMass = 0.25, draftM = 1.4 },
 		spring = {
@@ -251,6 +258,7 @@ export type State = {
 	slip: number, -- 0..1: lagarta patinando ou carroceria escorregando
 	floating: boolean,
 	blockedT: number,
+	climbT: number, -- s subindo degrau com o chassi segurado (VehicleDrive.contact)
 	accel: number, -- m/s² ao longo da frente no último passo
 }
 
@@ -278,6 +286,7 @@ function VehicleDrive.newState(): State
 		slip = 0,
 		floating = false,
 		blockedT = 0,
+		climbT = 0,
 		accel = 0,
 	}
 end
@@ -509,7 +518,10 @@ function VehicleDrive.step(body: Body, st: State, inp: Input, env: Env, dt: numb
 	local speed = math.abs(v)
 	local limit = pivot
 	if speed > 0.5 and not floating then
-		limit = math.min(pivot, d.latG * G * math.clamp(g.muLat / 0.6, 0.4, 1) / speed)
+		-- andando: curva de raio fixo (cross-drive) até o limite da aderência lateral
+		local radius = d.turnRadiusM
+		local moving = if radius then math.max(pivot, speed / radius * math.clamp(g.mu / 0.7, 0.45, 1)) else pivot
+		limit = math.min(moving, d.latG * G * math.clamp(g.muLat / 0.6, 0.4, 1) / speed)
 	end
 	local rev = if v < -0.3 then -1 else 1 -- de ré, como carro: a traseira vai para o lado do comando
 	local yawTarget = if mobile and not drowned then -steer * limit * rev else 0
@@ -535,16 +547,39 @@ end
 
 -- O chassi não acompanha o comando (parede, barranco, outro veículo): depois de 0,25 s a velocidade
 -- do modelo cai para a medida e a lagarta patina. `measured` = m/s reais ao longo da frente.
-function VehicleDrive.contact(st: State, measured: number, dt: number): boolean
+-- D-93, degrau (dique do arrozal, barranco baixo): a quina segura o chassi por um instante enquanto
+-- a rampa da lagarta sobe, e o comando caía para a velocidade medida: o tanque parava em cima do
+-- dique ("empacar"). Com `climb` (o motorista vê à frente um degrau que a rampa sobe, até
+-- CLIMB_STEP_M), o comando não cai abaixo de CLIMB_MPS por até CLIMB_MAX_S: a lagarta continua
+-- empurrando e a rampa termina de subir. Parede ou degrau alto: como antes.
+VehicleDrive.CLIMB_MPS = 1.5
+VehicleDrive.CLIMB_MAX_S = 3
+VehicleDrive.CLIMB_STEP_M = 0.65 -- rampa da lagarta do VehicleService (0,6 m) + folga do raio
+
+function VehicleDrive.contact(st: State, measured: number, dt: number, climb: boolean?): boolean
 	local gap = (st.v - measured) * sign(st.v)
 	if math.abs(st.v) > 1 and gap > 1.2 then
 		st.blockedT += dt
 	else
 		st.blockedT = 0
 	end
+	if math.abs(measured) > 1 then
+		st.climbT = 0 -- andou de verdade: o próximo degrau tem a ajuda de novo
+	end
 	if st.blockedT > 0.25 then
-		st.v = measured + (st.v - measured) * math.exp(-dt / 0.15)
-		st.slip = 1
+		local floor = 0
+		if climb then
+			st.climbT += dt
+			if st.climbT <= VehicleDrive.CLIMB_MAX_S then
+				floor = VehicleDrive.CLIMB_MPS
+			end
+		end
+		local nv = measured + (st.v - measured) * math.exp(-dt / 0.15)
+		if floor > 0 and math.abs(nv) < floor then
+			nv = sign(st.v) * math.min(floor, math.abs(st.v))
+		end
+		st.v = nv
+		st.slip = if floor > 0 then 0.5 else 1
 		return true
 	end
 	return false

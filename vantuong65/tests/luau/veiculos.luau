@@ -326,6 +326,73 @@ test("contato: parede ou barranco seguram o chassi e a velocidade do modelo cai 
 	assert(s.v < v and s.slip == 1, "bloqueado: cai e patina")
 end)
 
+test("D-93: dique (degrau baixo à frente): a lagarta continua empurrando até a rampa subir", function()
+	-- a quina segura o chassi (velocidade real ~0): sem degrau, o comando cai (como antes)
+	local wall = run("m48a3", 30, { throttle = 1, steer = 0 }, { ground = "paddy" })
+	local climb = table.clone(wall)
+	for _ = 1, 60 do -- 1 s segurado
+		VehicleDrive.contact(wall, 0, DT)
+		VehicleDrive.contact(climb, 0, DT, true)
+	end
+	-- (abaixo de 1 m/s o contato solta e o comando para de cair: fica perto de 1 m/s)
+	assert(wall.v < VehicleDrive.CLIMB_MPS - 0.3, string.format("parede: %.2f m/s", wall.v))
+	assert(climb.v >= VehicleDrive.CLIMB_MPS - 1e-9 and climb.slip < 1, "dique: segue empurrando")
+	-- preso de verdade (degrau que não sobe em 3 s): desiste e o comando cai como na parede, e a ajuda
+	-- não volta enquanto o casco não andar
+	for _ = 1, math.ceil(VehicleDrive.CLIMB_MAX_S / DT) + 60 do
+		VehicleDrive.contact(climb, 0, DT, true)
+	end
+	assert(climb.v <= wall.v + 0.05, string.format("preso: %.2f m/s", climb.v))
+	climb.v = 3
+	for _ = 1, 30 do
+		VehicleDrive.contact(climb, 0, DT, true)
+	end
+	assert(climb.v < VehicleDrive.CLIMB_MPS, "sem ajuda de novo sem andar")
+	-- andou (subiu): os contadores zeram
+	VehicleDrive.contact(climb, 2, DT, true)
+	assert(climb.blockedT == 0 and climb.climbT == 0)
+	-- devagar (abaixo da subida assistida) não acelera sozinho
+	local slowSt = VehicleDrive.newState()
+	slowSt.v = 1.2
+	for _ = 1, 60 do
+		VehicleDrive.contact(slowSt, -0.5, DT, true)
+	end
+	assert(slowSt.v <= 1.2 + 1e-9, "não passa do comando")
+end)
+
+test("D-93: direção mais viva (giro chega antes) e curva de raio fixo andando, sem mudar a D-86", function()
+	-- giro no lugar: mesma velocidade da D-86, mas chega a 90% em menos de 1,1 s (antes 1,4 s)
+	local p = VehicleDrive.newState()
+	local t = 0
+	while math.abs(p.yawRate) < math.rad(20) * 0.9 and t < 5 do
+		VehicleDrive.step(spec("m48a3"), p, { throttle = 0, steer = 1 }, { ground = "road" }, DT)
+		t += DT
+	end
+	assert(t < 1.1, string.format("giro do M48 a 90%% em %.2f s", t))
+	-- andando devagar, o raio fixo do câmbio dá mais guinada que o giro no lugar; rápido, a aderência
+	-- lateral limita (a curva continua abrindo com a velocidade)
+	local s = VehicleDrive.newState()
+	s.v, s.gear, s.rpm = 5, 1, 0.8
+	for _ = 1, 120 do
+		VehicleDrive.step(spec("m48a3"), s, { throttle = 0.6, steer = 1 }, { ground = "earth" }, DT)
+	end
+	assert(math.abs(s.yawRate) > math.rad(20), string.format("a 18 km/h: %.1f°/s", math.deg(math.abs(s.yawRate))))
+	local f = VehicleDrive.newState()
+	f.v, f.gear, f.rpm = 10, 2, 0.9
+	VehicleDrive.step(spec("m48a3"), f, { throttle = 1, steer = 1 }, { ground = "earth" }, 2)
+	local latLimit = VehicleDrive.DRIVE.m48a3.latG * G / f.v
+	assert(math.abs(f.yawRate) <= latLimit + 1e-6, "limite da aderência lateral")
+	-- números da D-86 (tabela) continuam: giro no lugar 20/40°/s, ré 12 km/h, freada 2,2 s, máximas
+	assert(VehicleDrive.DRIVE.m48a3.pivotDegS == 20 and VehicleDrive.DRIVE.ontos.pivotDegS == 40)
+	print(
+		string.format(
+			"       giro do M48 a 90%% em %.2f s; a 18 km/h na terra %.0f°/s (giro no lugar 20°/s)",
+			t,
+			math.deg(math.abs(s.yawRate))
+		)
+	)
+end)
+
 test("mola visual: arrancada levanta o nariz, freada mergulha, balança e assenta", function()
 	local p = VehicleDrive.DRIVE.m48a3.spring
 	local sp = VehicleDrive.newSpring()

@@ -2,6 +2,15 @@
 -- Movimento da infantaria (pedido do dono, 2026-11-11: "a melhor movimentação possível") e a
 -- câmera de ombro da 3ª pessoa. Módulo PURO, testado no Lune (tests/luau/movimento.luau); o runtime
 -- fica em Controllers/Movement.client e Controllers/ThirdPerson.client.
+-- D-93 (pedido do dono depois de jogar: "a movimentação na água está toda bugada", "faça a
+-- movimentação do personagem e dos veículos muito boa", "faça que os do Vietnã sejam mais rápidos"):
+--   - água: o modo (seco, vadeando, nadando) sai da fundura do LEITO, com histerese; vadeando, o
+--     Humanoid não entra no estado Swimming (o runtime desliga o estado);
+--   - chão: a superfície só troca depois de lida igual por 0,3 s, e o fator do chão é suavizado;
+--   - passo: arrancada rápida, corrida que embala, curva que gira a velocidade em vez de encolher;
+--   - câmera: balanço preso à passada, inclinação nas curvas, cabeça com inércia, degrau suavizado,
+--     tudo multiplicado pela opção de movimento da câmera (acessibilidade);
+--   - lado: o VC, mais leve, anda, trota e corre 12% mais rápido (PLACEHOLDER).
 -- Tudo em metros e segundos (o runtime converte com STUD_M). Os números são de DESIGN, escolhidos
 -- pela fisiologia de referência e pelo ritmo do jogo; NENHUM foi medido em playtest (PLACEHOLDER).
 local Units = require(script and (script :: any).Parent.Units or "./Units") :: any
@@ -12,6 +21,8 @@ local STUD: number = Units.STUD_M
 Movement.STUD_M = STUD
 
 -- ===== velocidades-base (m/s): as mesmas do servidor (Units.Speed e MedicalService.apply) =====
+-- São também as âncoras das animações (SoldierAnims.ANCHOR) e dos bots (BotLocomotion): não mudam
+-- por lado. O lado multiplica por cima (Movement.factionSpeed).
 Movement.WALK = Units.Speed.walk * STUD -- 1,4: caminhada (perna ferida)
 Movement.JOG = Units.Speed.jog * STUD -- 3,1: andar padrão do jogo (trote)
 Movement.SPRINT = Units.Speed.sprint * STUD -- 5,5: corrida
@@ -20,27 +31,65 @@ Movement.PRONE = Movement.WALK * 0.25 -- 0,35: rastejar
 Movement.ADS = 1.8 -- andando com a arma no ombro
 Movement.TRANSITION = 0.6 -- enquanto deita ou levanta
 Movement.SWIM = 0.9
-Movement.SPRINT_FORWARD = 0.6 -- só corre para a frente (pedido com cosseno ≥ 0,6, ~53°)
+-- Corrida pela direção do pedido em relação à frente (cosseno): cheia até ~45° (W+D no teclado),
+-- diminui até o trote em ~60°. Antes era um degrau em 0,6 (~53°): a velocidade caía aos trancos.
+Movement.SPRINT_FORWARD = 0.5
+Movement.SPRINT_FORWARD_FULL = 0.7
 Movement.SPRINT_FULL_AT = 0.3 -- abaixo de 30% do fôlego a corrida perde velocidade até o trote
 Movement.SPRINT_MAX_WATER_M = 0.45 -- com água acima do joelho não dá para correr
 Movement.SPRINT_COUNT_MPS = Movement.JOG * 1.05 -- acima disto, com a corrida ligada, o fôlego gasta
 
--- Velocidade máxima que o SERVIDOR aplica no WalkSpeed (espelho de MedicalService.apply), em m/s.
-function Movement.serverSpeed(stance: string, sprinting: boolean, legImpaired: boolean, downed: boolean): number
+-- ===== lado (D-93): o VC levava menos peso =====
+-- Em 1965 o guerrilheiro do VC andava de sandália de pneu, cinto de pano, sem capacete nem colete,
+-- com poucos carregadores; o fuzileiro dos EUA ia de coturno, capacete M1 e cinto M1956 cheio.
+-- O VC anda, trota, corre e anda agachado 12% mais rápido e transpõe 10% mais rápido. Mira de ferro,
+-- rastejar e nado não mudam: o tiro fica igual para os dois lados. Base do equipamento: 7 kg
+-- (sandália, cinto de pano, cantil, chapéu) contra 11 kg. Tudo PLACEHOLDER (escolha de jogo).
+export type FactionDef = { speed: number, baseKg: number, agility: number }
+Movement.FACTION = {
+	VC = { speed = 1.12, baseKg = 7, agility = 1.1 },
+} :: { [string]: FactionDef }
+
+local function factionDef(faction: string?): FactionDef?
+	return if faction then Movement.FACTION[faction] else nil
+end
+
+-- Multiplicador de velocidade do lado (andar, trote, corrida, agachado). 1 para os EUA e sem lado.
+function Movement.factionSpeed(faction: string?): number
+	local f = factionDef(faction)
+	return if f then f.speed else 1
+end
+
+-- Multiplicador de agilidade (transpor, escalar, subir degrau agachado): a duração divide por ele.
+function Movement.factionAgility(faction: string?): number
+	local f = factionDef(faction)
+	return if f then f.agility else 1
+end
+
+-- Velocidade máxima que o SERVIDOR aplica no WalkSpeed (MedicalService.apply chama esta função), em
+-- m/s. `faction` é opcional (os bots chamam com 4 argumentos e ficam na velocidade-base).
+function Movement.serverSpeed(
+	stance: string,
+	sprinting: boolean,
+	legImpaired: boolean,
+	downed: boolean,
+	faction: string?
+): number
 	if downed then
 		return 0
 	end
+	local k = Movement.factionSpeed(faction)
 	local v = if stance == "prone"
 		then Movement.PRONE
-		elseif stance == "crouch" then Movement.CROUCH
-		elseif sprinting then Movement.SPRINT
-		else Movement.JOG
-	return if legImpaired then math.min(v, Movement.WALK) else v
+		elseif stance == "crouch" then Movement.CROUCH * k
+		elseif sprinting then Movement.SPRINT * k
+		else Movement.JOG * k
+	return if legImpaired then math.min(v, Movement.WALK * k) else v
 end
 
 -- ===== peso do equipamento =====
 -- Base: uniforme, coturno, capacete, cinto com 2 cantis, kit de primeiros socorros e mochila leve
--- (PLACEHOLDER, ~11 kg). O resto vem da arma (Weapons.massLoadedKg) e do Kit (carregadores etc.).
+-- (PLACEHOLDER, ~11 kg; VC 7 kg). O resto vem da arma (Weapons.massLoadedKg) e do Kit.
 Movement.BASE_KG = 11
 Movement.ROLE_KG = {
 	radio_operator = 10, -- rádio de mochila (PRC-10/PRC-25, ~10 kg com bateria)
@@ -60,10 +109,16 @@ export type Load = {
 	smokes: number,
 	bandages: number,
 	role: string,
+	faction: string?,
 }
 
+function Movement.baseKg(faction: string?): number
+	local f = factionDef(faction)
+	return if f then f.baseKg else Movement.BASE_KG
+end
+
 function Movement.loadKg(l: Load): number
-	return Movement.BASE_KG
+	return Movement.baseKg(l.faction)
 		+ l.weaponsKg
 		+ l.mags * l.magKg
 		+ l.frags * 0.45
@@ -118,6 +173,12 @@ function Movement.surfaceOf(material: string?, attr: string?, partName: string?)
 	return "firm"
 end
 
+-- Arrozal (D-93): a lâmina d'água (peça sem colisão) fica 6 cm acima da MEDIANA do chão do tabuleiro
+-- (AssetLoader.fitFeatures), então o capim do terreno fura a lâmina em metade dos pontos. O raio que
+-- pegava "a primeira coisa" alternava arrozal (62%) e capim (100%) a cada passo. Agora: com a lâmina
+-- na coluna até PADDY_BELOW_M abaixo do chão achado, o chão é arrozal.
+Movement.PADDY_BELOW_M = 0.3
+
 local function surface(s: string): Surface
 	return Movement.SURFACE[s] or Movement.SURFACE.firm
 end
@@ -153,6 +214,87 @@ function Movement.slopeFactor(grade: number): number
 	return math.max(1 - 0.5 * math.max(-grade - 0.2, 0), 0.7)
 end
 
+-- Fator do chão inteiro (superfície, chuva, água e rampa); os bots usam o mesmo produto.
+function Movement.groundFactor(s: string, rain: number, waterM: number, grade: number): number
+	return Movement.surfaceSpeed(s, rain) * Movement.waterFactor(waterM) * Movement.slopeFactor(grade)
+end
+
+-- Superfície com espera: só troca depois de lida igual por SURFACE_HOLD_S (borda de tabuleiro, capim
+-- furando a lâmina, raiz). O fator do chão ainda passa por Movement.approach com GROUND_TAU_S.
+Movement.SURFACE_HOLD_S = 0.3
+Movement.GROUND_TAU_S = 0.25
+export type GroundState = { surface: string, seen: string, seenT: number }
+
+function Movement.newGround(): GroundState
+	return { surface = "firm", seen = "firm", seenT = 0 }
+end
+
+function Movement.surfaceStep(g: GroundState, seen: string, dt: number): string
+	if seen == g.surface then
+		g.seen, g.seenT = seen, 0
+	elseif seen ~= g.seen then
+		g.seen, g.seenT = seen, dt
+	else
+		g.seenT += dt
+	end
+	if g.seen ~= g.surface and g.seenT >= Movement.SURFACE_HOLD_S - 1e-9 then
+		g.surface, g.seenT = g.seen, 0
+	end
+	return g.surface
+end
+
+-- Aproximação exponencial (constante de tempo tau, s).
+function Movement.approach(x: number, target: number, tau: number, dt: number): number
+	return x + (target - x) * (1 - math.exp(-dt / math.max(tau, 1e-3)))
+end
+
+-- ===== água do terreno (riacho e mar) =====
+-- O modo sai da fundura do LEITO (superfície da água − fundo), que não depende de onde o corpo está.
+-- Antes a fundura era medida até o pé: boiando, o pé subia, a "fundura" caía e o soldado alternava
+-- nadar e andar. Vadeando (até o peito), o runtime desliga o estado Swimming do Humanoid: o soldado
+-- anda no fundo, mais devagar e com passada pesada. Acima de SWIM_IN_M nada; volta a vadear abaixo
+-- de SWIM_OUT_M (histerese). Soldado de 1,75 m: cintura ~1,0 m, peito ~1,3 m.
+Movement.WADE_MIN_M = 0.05
+Movement.SWIM_IN_M = 1.3
+Movement.SWIM_OUT_M = 1.1
+Movement.WATER_GRIP = 0.5 -- nadando: arranca e vira devagar, mas não como no ar
+Movement.PRONE_MAX_WATER_M = 0.3 -- deitado, a cabeça fica fora até aqui
+Movement.CROUCH_MAX_WATER_M = 0.8 -- agachado, até aqui
+
+-- "dry" | "wade" | "swim". bedM = math.huge quando há água sem fundo ao alcance.
+function Movement.waterMode(prev: string, bedM: number): string
+	if bedM < Movement.WADE_MIN_M then
+		return "dry"
+	elseif bedM >= Movement.SWIM_IN_M or (prev == "swim" and bedM >= Movement.SWIM_OUT_M) then
+		return "swim"
+	end
+	return "wade"
+end
+
+-- Postura possível na água (o runtime pede ao servidor quando muda).
+function Movement.waterStance(stance: string, bedM: number): string
+	if stance ~= "stand" and bedM > Movement.CROUCH_MAX_WATER_M then
+		return "stand"
+	elseif stance == "prone" and bedM > Movement.PRONE_MAX_WATER_M then
+		return "crouch"
+	end
+	return stance
+end
+
+-- Aderência vadeando: a água segura a perna (arrancar e virar pesam mais); na cintura, 65%.
+function Movement.wadeGrip(bedM: number): number
+	return 1 - 0.35 * math.clamp((bedM - 0.15) / 0.85, 0, 1)
+end
+
+-- Fração da corrida pela direção do pedido (0 = trote, 1 = corrida cheia).
+function Movement.sprintDir(forward: number): number
+	return math.clamp(
+		(forward - Movement.SPRINT_FORWARD) / (Movement.SPRINT_FORWARD_FULL - Movement.SPRINT_FORWARD),
+		0,
+		1
+	)
+end
+
 -- ===== velocidade-alvo =====
 export type SpeedCtx = {
 	stance: string, -- "stand" | "crouch" | "prone"
@@ -169,6 +311,8 @@ export type SpeedCtx = {
 	rain: number,
 	transition: boolean, -- deitando ou levantando
 	swimming: boolean,
+	faction: string?, -- "VC" corre mais (Movement.FACTION)
+	groundK: number?, -- fator do chão já suavizado (no lugar de superfície × água × rampa)
 }
 
 -- Velocidade-alvo em m/s (para pedido de movimento cheio; o analógico escala).
@@ -176,37 +320,33 @@ function Movement.targetSpeed(c: SpeedCtx): number
 	if c.downed then
 		return 0
 	end
+	local k = Movement.factionSpeed(c.faction)
+	local dirK = Movement.sprintDir(c.forward)
 	local v
 	local sprint = false
 	if c.stance == "prone" then
 		v = Movement.PRONE
 	elseif c.stance == "crouch" then
-		v = Movement.CROUCH
-	elseif
-		c.sprinting
-		and not c.aiming
-		and c.forward >= Movement.SPRINT_FORWARD
-		and c.waterM < Movement.SPRINT_MAX_WATER_M
-	then
-		local k = math.clamp(c.stamina / Movement.SPRINT_FULL_AT, 0, 1)
-		v = Movement.JOG + (Movement.SPRINT - Movement.JOG) * k
+		v = Movement.CROUCH * k
+	elseif c.sprinting and not c.aiming and dirK > 0 and c.waterM < Movement.SPRINT_MAX_WATER_M then
+		local st = math.clamp(c.stamina / Movement.SPRINT_FULL_AT, 0, 1)
+		v = (Movement.JOG + (Movement.SPRINT - Movement.JOG) * st * dirK) * k
 		sprint = true
 	else
-		v = Movement.JOG
+		v = Movement.JOG * k
 	end
 	if c.aiming then
 		v = math.min(v, Movement.ADS)
 	end
 	if c.legImpaired then
-		v = math.min(v, Movement.WALK)
+		v = math.min(v, Movement.WALK * k)
 	end
 	if c.transition then
 		v = math.min(v, Movement.TRANSITION)
 	end
 	v *= Movement.loadFactor(c.loadKg, sprint)
-	v *= Movement.surfaceSpeed(c.surface, c.rain)
-	v *= Movement.waterFactor(c.waterM)
-	v *= Movement.slopeFactor(c.grade)
+	local g = c.groundK
+	v *= if g then math.clamp(g, 0, 1) else Movement.groundFactor(c.surface, c.rain, c.waterM, c.grade)
 	if c.swimming then
 		v = math.min(v, Movement.SWIM)
 	end
@@ -214,6 +354,8 @@ function Movement.targetSpeed(c: SpeedCtx): number
 end
 
 -- ===== inércia =====
+-- accelStep: o modelo vetorial da D-68 (7 m/s² acelerando, 10 freando). Os bots usam (BotMove) e ficam
+-- com ele. O jogador usa moveStep (D-93).
 Movement.ACCEL = 7 -- m/s² acelerando: parado → trote em ~0,45 s; trote → corrida em ~0,35 s
 Movement.DECEL = 10 -- m/s² freando: corrida → parado em ~0,55 s
 Movement.AIR_GRIP = 0.1 -- no ar quase não há controle (o embalo continua)
@@ -232,6 +374,64 @@ function Movement.accelStep(vx: number, vz: number, tx: number, tz: number, dt: 
 		return tx, tz
 	end
 	return vx + dx / dl * step, vz + dz / dl * step
+end
+
+-- D-93: o passo do jogador. O módulo da velocidade e a direção andam separados:
+--   - arrancada: 11 m/s² no primeiro passo, caindo para 5 m/s² perto da corrida (o embalo pesa);
+--   - parada: 12 m/s² (corrida → parado em ~0,45 s; trote → parado em ~0,25 s);
+--   - curva: a direção gira até a aceleração lateral TURN_LAT (16 m/s² no chão firme; trote ~300°/s,
+--     corrida ~170°/s) SEM perder velocidade. O modelo vetorial cortava caminho pela corda: no
+--     A↔D ou numa curva de 90° a velocidade caía a 70% e o passo parecia patinar;
+--   - meia-volta (mais de ~110°): freia e arranca para o outro lado.
+Movement.ACCEL_LOW = 11
+Movement.ACCEL_HIGH = 5
+Movement.DECEL_MOVE = 12
+Movement.TURN_LAT = 16
+Movement.TURN_MAX = 8 -- rad/s (devagar a direção vira quase na hora)
+Movement.TURN_MIN_MPS = 0.5 -- abaixo disto a velocidade é tratada como vetor (arrancada)
+Movement.REVERSE_COS = -0.35
+
+function Movement.accelAt(speed: number): number
+	local u = math.clamp(speed / Movement.SPRINT, 0, 1)
+	return Movement.ACCEL_LOW + (Movement.ACCEL_HIGH - Movement.ACCEL_LOW) * u
+end
+
+local function vecToward(vx: number, vz: number, tx: number, tz: number, step: number): (number, number)
+	local dx, dz = tx - vx, tz - vz
+	local dl = math.sqrt(dx * dx + dz * dz)
+	if dl <= step or dl < 1e-9 then
+		return tx, tz
+	end
+	return vx + dx / dl * step, vz + dz / dl * step
+end
+
+function Movement.moveStep(vx: number, vz: number, tx: number, tz: number, dt: number, grip: number): (number, number)
+	local sp = math.sqrt(vx * vx + vz * vz)
+	local ts = math.sqrt(tx * tx + tz * tz)
+	if ts < 1e-6 or sp < Movement.TURN_MIN_MPS then
+		local accelerating = ts * ts >= sp * sp and (tx * vx + tz * vz) >= 0
+		local a = if accelerating then Movement.accelAt(sp) else Movement.DECEL_MOVE
+		return vecToward(vx, vz, tx, tz, a * grip * dt)
+	end
+	local cos = (vx * tx + vz * tz) / (sp * ts)
+	if cos < Movement.REVERSE_COS then
+		return vecToward(vx, vz, tx, tz, Movement.DECEL_MOVE * grip * dt)
+	end
+	-- direção: gira no máximo pela aceleração lateral
+	local ang = math.acos(math.clamp(cos, -1, 1))
+	local rate = math.min(Movement.TURN_MAX, Movement.TURN_LAT * grip / sp)
+	local turn = math.min(ang, rate * dt) * (if vx * tz - vz * tx >= 0 then 1 else -1)
+	local c, s = math.cos(turn), math.sin(turn)
+	local ux, uz = vx / sp, vz / sp
+	local dx, dz = ux * c - uz * s, ux * s + uz * c
+	-- módulo
+	local ns
+	if ts > sp then
+		ns = math.min(sp + Movement.accelAt(sp) * grip * dt, ts)
+	else
+		ns = math.max(sp - Movement.DECEL_MOVE * grip * dt, ts)
+	end
+	return dx * ns, dz * ns
 end
 
 -- ===== fôlego =====
@@ -382,6 +582,7 @@ export type VaultProbe = {
 	stance: string,
 	legImpaired: boolean,
 	loadKg: number,
+	agility: number?, -- Movement.factionAgility (VC 1,1): a duração divide por ele
 }
 export type VaultPlan = { kind: string, duration: number, cost: number }
 
@@ -423,8 +624,54 @@ function Movement.vaultPlan(p: VaultProbe): (VaultPlan?, string)
 	local heavy = 1 + math.max(p.loadKg - Movement.LOAD_FREE_KG, 0) / 60
 	local tall = 1 + 0.4 * math.max(h - 0.6, 0)
 	local run = if kind == "vault" and p.speed > 3 then 0.85 else 1
+	local agile = math.clamp(p.agility or 1, 0.5, 2)
 	local cost = if kind == "vault" then Movement.COST.vault else Movement.COST.mantle
-	return { kind = kind, duration = base * tired * heavy * tall * run, cost = cost }, "ok"
+	return { kind = kind, duration = base * tired * heavy * tall * run / agile, cost = cost }, "ok"
+end
+
+-- ===== degrau agachado ou deitado (D-93) =====
+-- Agachado, o HumanoidRootPart fica a ~6 cm do chão (HipHeight 0,2) e batia na face do dique do
+-- arrozal (35 cm ou mais): o soldado empacava e tinha de levantar. De pé o Humanoid sobe sozinho até
+-- ~0,65 m; agachado ou deitado, um degrau baixo à frente vira uma passada assistida curta, sem
+-- botão, na mesma postura.
+Movement.STEP_MIN_M = 0.1
+Movement.STEP_MAX_M = { crouch = 0.65, prone = 0.45 } :: { [string]: number }
+Movement.STEP_REACH_M = 0.6
+Movement.STEP_HEAD_M = { crouch = 1.0, prone = 0.45 } :: { [string]: number } -- espaço acima do topo
+Movement.STEP_TIME = { crouch = 0.38, prone = 0.75 } :: { [string]: number }
+
+export type StepProbe = {
+	height: number?, -- m do topo acima dos pés
+	distance: number, -- m até a face
+	headroom: number, -- m livres acima do topo
+	stance: string,
+	legImpaired: boolean,
+	agility: number?,
+}
+
+function Movement.stepPlan(p: StepProbe): (VaultPlan?, string)
+	local maxH = Movement.STEP_MAX_M[p.stance]
+	if not maxH then
+		return nil, "postura"
+	elseif p.height == nil then
+		return nil, "nada à frente"
+	end
+	local h = p.height :: number
+	if h < Movement.STEP_MIN_M then
+		return nil, "baixo"
+	elseif h > maxH then
+		return nil, "alto"
+	elseif p.distance > Movement.STEP_REACH_M then
+		return nil, "longe"
+	elseif p.headroom < Movement.STEP_HEAD_M[p.stance] then
+		return nil, "sem espaço"
+	end
+	local agile = math.clamp(p.agility or 1, 0.5, 2)
+	local dur = Movement.STEP_TIME[p.stance]
+		* (1 + 0.8 * math.max(h - 0.2, 0))
+		* (if p.legImpaired then 1.4 else 1)
+		/ agile
+	return { kind = "step", duration = dur, cost = 0 }, "ok"
 end
 
 -- ===== postura: tempo da transição (câmera e velocidade) =====
@@ -459,15 +706,27 @@ function Movement.diveSpeed(v0: number, t: number): number
 end
 
 -- ===== câmera: passo, respiração e afundada =====
--- Passos por segundo pela velocidade (m/s): caminhada ~1,8; trote ~2,4; corrida ~3,4.
+-- Passos por segundo pela velocidade (m/s): caminhada ~1,8; trote ~2,4; corrida ~3,4. Reserva: o
+-- runtime usa a frequência da passada das animações (SoldierAnims.cycleRate) quando elas tocam.
 function Movement.cadence(speedMps: number): number
 	return math.clamp(1.2 + 0.4 * speedMps, 1.2, 3.4)
 end
 
--- Deslocamento sutil da câmera (m) na fase do passo (rad; um ciclo = dois passos).
-function Movement.bob(phase: number, speedMps: number, stance: string, aiming: boolean): (number, number)
-	local k = math.clamp(speedMps / Movement.JOG, 0, 1.8)
-	local ax, ay = 0.008 * k, 0.012 * k -- trote: 0,8 cm de lado e 1,2 cm de altura
+-- Deslocamento sutil da câmera (m): lado e altura. phase em rad, um ciclo = dois passos, 0 = apoio do
+-- pé esquerdo (como os clipes da D-88): a cabeça desce no apoio e vai para o lado do pé apoiado.
+-- waterM (opcional, fundura do leito): vadeando a passada é mais pesada (a perna sobe contra a água),
+-- e o balanço segue o esforço (velocidade em relação à que a água deixa), não a velocidade crua.
+function Movement.bob(
+	phase: number,
+	speedMps: number,
+	stance: string,
+	aiming: boolean,
+	waterM: number?
+): (number, number)
+	local wet = math.clamp(((waterM or 0) - 0.15) / 0.85, 0, 1)
+	local ref = Movement.JOG * (if wet > 0 then Movement.waterFactor(waterM :: number) else 1)
+	local k = math.clamp(speedMps / ref, 0, 1.8)
+	local ax, ay = 0.008 * k * (1 + 0.6 * wet), 0.012 * k * (1 + 1.2 * wet) -- trote: 0,8 cm e 1,2 cm
 	if stance == "crouch" then
 		ax, ay = ax * 0.8, ay * 0.6
 	elseif stance == "prone" then
@@ -476,7 +735,12 @@ function Movement.bob(phase: number, speedMps: number, stance: string, aiming: b
 	if aiming then
 		ax, ay = ax * 0.35, ay * 0.35
 	end
-	return ax * math.sin(phase), ay * (math.abs(math.cos(phase)) - 2 / math.pi)
+	return -ax * math.sin(phase), -ay * (math.abs(math.cos(phase)) - 2 / math.pi)
+end
+
+-- Nadando: a cabeça sobe e desce devagar com a braçada (m).
+function Movement.swimBob(t: number): number
+	return 0.025 * math.sin(2 * math.pi * 0.45 * t)
 end
 
 -- Respiração (m, vertical): mais funda e rápida sem fôlego.
@@ -494,6 +758,64 @@ function Movement.dipCurve(t: number, tau: number): number
 	end
 	local x = t / tau
 	return -x * math.exp(1 - x)
+end
+
+-- ===== câmera: degrau, cabeça com inércia e inclinação (D-93) =====
+-- Opção de acessibilidade "movimento da câmera" (0..1; 1 = padrão): multiplica balanço, respiração,
+-- afundada, inércia e inclinação. Não mexe na altura da postura nem na suavização do degrau.
+function Movement.cameraScale(v: any): number
+	return if type(v) == "number" and v == v then math.clamp(v, 0, 1) else 1
+end
+
+-- Degrau (dique, soleira, pedra): o Humanoid sobe o quadril de uma vez e a câmera pulava junto.
+-- off = quanto a câmera está abaixo (−) ou acima (+) do corpo (m). dyM = quanto o corpo subiu neste
+-- quadro; expectedM = o que a rampa explica (velocidade × inclinação): só o resto é suavizado, então
+-- numa ladeira a câmera não atrasa.
+Movement.STEP_TAU_S = 0.08
+Movement.STEP_SMOOTH_MAX_M = 0.75
+
+function Movement.stepSmooth(off: number, dyM: number, expectedM: number, dt: number): number
+	local o = (off - (dyM - expectedM)) * math.exp(-dt / Movement.STEP_TAU_S)
+	return math.clamp(o, -Movement.STEP_SMOOTH_MAX_M, Movement.STEP_SMOOTH_MAX_M)
+end
+
+-- Cabeça com inércia: massa e mola presas ao corpo. Arrancando, a cabeça fica um pouco para trás;
+-- parando de repente, vai um pouco para a frente e volta; na curva, para fora. ax = aceleração para a
+-- direita, az = para a frente (m/s², no rumo da câmera). Devolve em s.x (direita) e s.z (frente), m.
+Movement.HEAD = { hz = 2.2, zeta = 0.7, gain = 0.4, maxM = 0.035 }
+export type HeadState = { x: number, z: number, vx: number, vz: number }
+
+function Movement.newHead(): HeadState
+	return { x = 0, z = 0, vx = 0, vz = 0 }
+end
+
+function Movement.headStep(s: HeadState, ax: number, az: number, dt: number)
+	local H = Movement.HEAD
+	local w = 2 * math.pi * H.hz
+	local n = math.max(1, math.ceil(dt / (1 / 120)))
+	local h = dt / n
+	for _ = 1, n do
+		s.vx += (-w * w * s.x - 2 * H.zeta * w * s.vx - H.gain * ax) * h
+		s.x += s.vx * h
+		s.vz += (-w * w * s.z - 2 * H.zeta * w * s.vz - H.gain * az) * h
+		s.z += s.vz * h
+	end
+	s.x = math.clamp(s.x, -H.maxM, H.maxM)
+	s.z = math.clamp(s.z, -H.maxM, H.maxM)
+end
+
+-- Inclinação lateral da câmera (rad; > 0 = cabeça para a esquerda, como CFrame.Angles(0, 0, a)):
+-- para o lado do passo lateral e para dentro da curva. Mirando e deitado, nada (a mira de ferro fica
+-- reta); agachado, menos. vRight em m/s, aRight em m/s² (para a direita > 0).
+Movement.ROLL = { perMps = 0.22, perAccel = 0.06, maxDeg = 1.4, tau = 0.12 }
+
+function Movement.rollTarget(vRight: number, aRight: number, stance: string, aiming: boolean): number
+	if aiming or stance == "prone" then
+		return 0
+	end
+	local R = Movement.ROLL
+	local deg = math.clamp(-(R.perMps * vRight + R.perAccel * aRight), -R.maxDeg, R.maxDeg)
+	return math.rad(if stance == "crouch" then deg * 0.6 else deg)
 end
 
 -- ===== 3ª pessoa (câmera de ombro) =====

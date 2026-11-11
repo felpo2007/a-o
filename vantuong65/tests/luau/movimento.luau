@@ -60,11 +60,13 @@ test("velocidade: bases iguais às do servidor (trote, corrida, agachado, rastej
 	near(Movement.targetSpeed(ctx({ sprinting = true, waterM = 0.6 })), 3.1 * Movement.waterFactor(0.6), 1e-6)
 end)
 
-test("velocidade: o cliente nunca passa do teto do servidor (5.000 sorteios)", function()
+test("velocidade: o cliente nunca passa do teto do servidor (10.000 sorteios, com lado e chão suavizado)", function()
 	local rng = Rng.new(651818)
 	local stances = { "stand", "crouch", "prone" }
 	local surfaces = { "firm", "grass", "forest", "sand", "mud", "paddy", "water" }
-	for i = 1, 5000 do
+	local factions = { "US", "VC", "?" }
+	for i = 1, 10000 do
+		local fac = factions[1 + math.floor(rng:next() * 3)]
 		local c = ctx({
 			stance = stances[1 + math.floor(rng:next() * 3)],
 			sprinting = rng:next() < 0.5,
@@ -73,16 +75,94 @@ test("velocidade: o cliente nunca passa do teto do servidor (5.000 sorteios)", f
 			legImpaired = rng:next() < 0.1,
 			forward = rng:range(-1, 1),
 			stamina = rng:next(),
-			loadKg = rng:range(8, 40),
+			loadKg = rng:range(5, 40),
 			surface = surfaces[1 + math.floor(rng:next() * #surfaces)],
 			waterM = rng:range(0, 1.5),
 			grade = rng:range(-0.8, 0.8),
 			rain = rng:next(),
 			transition = rng:next() < 0.1,
+			swimming = rng:next() < 0.1,
+			faction = if fac == "?" then nil else fac,
+			groundK = if rng:next() < 0.5 then rng:range(0, 1.3) else nil,
 		})
 		local v = Movement.targetSpeed(c)
-		local cap = Movement.serverSpeed(c.stance, c.sprinting, c.legImpaired, c.downed)
+		local cap = Movement.serverSpeed(c.stance, c.sprinting, c.legImpaired, c.downed, c.faction)
 		assert(v >= 0 and v <= cap + 1e-9, string.format("sorteio %d: %.3f > teto %.3f", i, v, cap))
+	end
+	-- sem o lado (bots, BotLocomotion): o teto é o de antes
+	near(Movement.serverSpeed("stand", false, false, false), 3.1, 1e-9)
+	near(Movement.serverSpeed("stand", true, false, false), 5.5, 1e-9)
+	near(Movement.serverSpeed("crouch", false, false, false), 0.84, 1e-9)
+end)
+
+test("D-93: VC mais leve corre 12% mais; mira, rastejar e nado iguais; teto do servidor acompanha", function()
+	local k = Movement.factionSpeed("VC")
+	near(k, 1.12, 1e-9, "PLACEHOLDER de projeto")
+	assert(Movement.factionSpeed("US") == 1 and Movement.factionSpeed(nil) == 1)
+	near(Movement.targetSpeed(ctx({ faction = "VC" })), 3.1 * k, 1e-9, "trote")
+	near(Movement.targetSpeed(ctx({ faction = "VC", sprinting = true })), 5.5 * k, 1e-9, "corrida")
+	near(Movement.targetSpeed(ctx({ faction = "VC", stance = "crouch" })), 0.84 * k, 1e-9, "agachado")
+	near(Movement.targetSpeed(ctx({ faction = "VC", stance = "prone" })), 0.35, 1e-9, "rastejar igual")
+	near(Movement.targetSpeed(ctx({ faction = "VC", aiming = true })), Movement.ADS, 1e-9, "mirando igual")
+	near(Movement.targetSpeed(ctx({ faction = "VC", swimming = true })), Movement.SWIM, 1e-9, "nado igual")
+	near(Movement.serverSpeed("stand", true, false, false, "VC"), 5.5 * k, 1e-9)
+	near(Movement.serverSpeed("stand", true, true, false, "VC"), 1.4 * k, 1e-9, "perna ferida")
+	near(Movement.serverSpeed("prone", false, false, false, "VC"), 0.35, 1e-9)
+	-- equipamento mais leve: menos peso, pulo e fôlego melhores com a mesma arma
+	local function kit(f: string?): number
+		return Movement.loadKg({
+			weaponsKg = 4.5,
+			magKg = 0.75,
+			mags = 3,
+			frags = 2,
+			smokes = 0,
+			bandages = 1,
+			role = "rifleman",
+			faction = f,
+		})
+	end
+	near(kit("US") - kit("VC"), Movement.BASE_KG - Movement.FACTION.VC.baseKg, 1e-9, "base do equipamento")
+	-- transpor: o VC passa o mesmo dique mais rápido
+	local probeUS = {
+		height = 0.5,
+		distance = 0.3,
+		clearance = 2,
+		depth = 0.8,
+		drop = 0.5,
+		headroom = 2,
+		speed = 3,
+		stamina = 1,
+		stance = "stand",
+		legImpaired = false,
+		loadKg = 20,
+	}
+	local probeVC = table.clone(probeUS) :: any
+	probeVC.agility = Movement.factionAgility("VC")
+	local us = Movement.vaultPlan(probeUS :: any) :: Movement.VaultPlan
+	local vc = Movement.vaultPlan(probeVC) :: Movement.VaultPlan
+	near(vc.duration, us.duration / 1.1, 1e-9, "transpor 10% mais rápido")
+	print(
+		string.format(
+			"       VC: trote %.2f m/s, corrida %.2f m/s, agachado %.2f m/s; dique em %.2f s (EUA %.2f s)",
+			3.1 * k,
+			5.5 * k,
+			0.84 * k,
+			vc.duration,
+			us.duration
+		)
+	)
+end)
+
+test("D-93: corrida firme até ~45° do rumo e cai suave até o trote em ~60°", function()
+	near(Movement.targetSpeed(ctx({ sprinting = true, forward = 0.72 })), 5.5, 1e-9, "W+D (45°) corre cheio")
+	local mid = Movement.targetSpeed(ctx({ sprinting = true, forward = 0.6 }))
+	assert(mid > 3.1 + 0.5 and mid < 5.5 - 0.5, "entre trote e corrida")
+	near(Movement.targetSpeed(ctx({ sprinting = true, forward = 0.5 })), 3.1, 1e-9, "60°: trote")
+	local last = 0
+	for i = 0, 100 do
+		local v = Movement.targetSpeed(ctx({ sprinting = true, forward = 0.4 + i * 0.004 }))
+		assert(v >= last - 1e-12, "monotônico no ângulo")
+		last = v
 	end
 end)
 
@@ -264,36 +344,30 @@ test(
 		)
 		assert(tf < 20, "recuperação parado")
 		-- trote no plano recupera devagar; trote em subida ou no arrozal cansa
-		assert(
-			Movement.staminaRate({
-				kind = "jog",
-				stance = "stand",
-				surface = "firm",
-				grade = 0,
-				loadKg = 20,
-				waterM = 0,
-			}) > 0
-		)
-		assert(
-			Movement.staminaRate({
-				kind = "jog",
-				stance = "stand",
-				surface = "firm",
-				grade = 0.3,
-				loadKg = 20,
-				waterM = 0,
-			}) < 0
-		)
-		assert(
-			Movement.staminaRate({
-				kind = "jog",
-				stance = "stand",
-				surface = "paddy",
-				grade = 0,
-				loadKg = 20,
-				waterM = 0,
-			}) < 0
-		)
+		assert(Movement.staminaRate({
+			kind = "jog",
+			stance = "stand",
+			surface = "firm",
+			grade = 0,
+			loadKg = 20,
+			waterM = 0,
+		}) > 0)
+		assert(Movement.staminaRate({
+			kind = "jog",
+			stance = "stand",
+			surface = "firm",
+			grade = 0.3,
+			loadKg = 20,
+			waterM = 0,
+		}) < 0)
+		assert(Movement.staminaRate({
+			kind = "jog",
+			stance = "stand",
+			surface = "paddy",
+			grade = 0,
+			loadKg = 20,
+			waterM = 0,
+		}) < 0)
 		local prone = Movement.staminaRate({
 			kind = "still",
 			stance = "prone",
@@ -533,6 +607,282 @@ test("3ª pessoa: dispersão do quadril cresce com velocidade e cansaço", funct
 	assert(Movement.hipSpreadDeg(3.1, 1, "stand") > still and Movement.hipSpreadDeg(0, 0, "stand") > still)
 	assert(Movement.hipSpreadDeg(0, 1, "prone") < Movement.hipSpreadDeg(0, 1, "crouch"))
 	assert(still >= 1, "nunca vira mira de ferro")
+end)
+
+-- ===== D-93: chão e água =====
+test("D-93: arrozal com capim furando a lâmina não alterna o chão; borda de verdade troca em 0,3 s", function()
+	local g = Movement.newGround()
+	for _ = 1, 4 do
+		Movement.surfaceStep(g, "paddy", 0.1)
+	end
+	assert(g.surface == "paddy", "entrou no arrozal")
+	-- o raio antigo dava capim em metade dos pontos (lâmina 6 cm acima da mediana do chão)
+	for i = 1, 60 do
+		local s = Movement.surfaceStep(g, if i % 2 == 0 then "grass" else "paddy", 0.1)
+		assert(s == "paddy", "alternou no passo " .. i)
+	end
+	local t = 0
+	while Movement.surfaceStep(g, "firm", 0.1) ~= "firm" do
+		t += 0.1
+		assert(t < 1, "não saiu")
+	end
+	assert(t >= 0.15 and t <= 0.35, string.format("troca em %.2f s", t))
+	-- fator suavizado: sobe e desce sem degrau, nunca passa do alvo
+	local k = 1
+	local ks = {}
+	for _ = 1, 30 do
+		k = Movement.approach(k, Movement.groundFactor("paddy", 0, 0, 0), Movement.GROUND_TAU_S, 1 / 60)
+		table.insert(ks, k)
+	end
+	assert(ks[1] > 0.95 and ks[30] < 0.82 and ks[30] > 0.62, "suave")
+	near(
+		Movement.groundFactor("mud", 0.5, 0.6, 0.2),
+		Movement.surfaceSpeed("mud", 0.5) * Movement.waterFactor(0.6) * Movement.slopeFactor(0.2),
+		1e-12
+	)
+end)
+
+test("D-93: água pelo leito com histerese: vadeia até o peito, nada no fundo, sem alternar", function()
+	assert(Movement.waterMode("dry", 0) == "dry" and Movement.waterMode("dry", 0.02) == "dry")
+	assert(Movement.waterMode("dry", 0.6) == "wade", "riacho de projeto (0,6 m)")
+	assert(Movement.waterMode("dry", 1.0) == "wade", "cintura")
+	assert(Movement.waterMode("wade", 1.25) == "wade", "peito ainda vadeia")
+	assert(Movement.waterMode("wade", 1.35) == "swim", "fundo")
+	assert(Movement.waterMode("dry", math.huge) == "swim", "sem fundo ao alcance")
+	assert(Movement.waterMode("swim", 1.2) == "swim", "histerese: continua nadando")
+	assert(Movement.waterMode("swim", 1.0) == "wade", "voltou a dar pé")
+	-- riacho com voxels de 4 studs: a fundura do leito varia 0 a 1,25 m ao longo do caminho
+	local rng = Rng.new(1965)
+	local mode, flips = "dry", 0
+	for _ = 1, 2000 do
+		local nm = Movement.waterMode(mode, rng:range(0.05, 1.25))
+		if nm ~= mode then
+			flips += 1
+		end
+		mode = nm
+		assert(mode ~= "swim", "nadou no raso")
+	end
+	assert(flips <= 1, "trocou de modo " .. flips .. " vezes")
+	-- passando da cintura para o fundo e voltando, com ruído de ±0,1 m: troca 2 vezes, não a cada passo
+	mode, flips = "wade", 0
+	for i = 0, 400 do
+		local depth = 0.9 + 0.8 * math.sin(i / 400 * math.pi) + rng:range(-0.1, 0.1)
+		local nm = Movement.waterMode(mode, depth)
+		if nm ~= mode then
+			flips += 1
+		end
+		mode = nm
+	end
+	assert(flips == 2, "trocas na travessia: " .. flips)
+	-- postura: deitado só no raso, agachado até 0,8 m, nadando em pé
+	assert(Movement.waterStance("prone", 0.2) == "prone" and Movement.waterStance("prone", 0.5) == "crouch")
+	assert(Movement.waterStance("crouch", 0.7) == "crouch" and Movement.waterStance("crouch", 1.0) == "stand")
+	assert(Movement.waterStance("stand", 1.2) == "stand")
+	-- vadeando: mais devagar e arranca/vira mais pesado
+	local wade = Movement.targetSpeed(ctx({ waterM = 1.0 }))
+	near(wade, 3.1 * Movement.waterFactor(1.0), 1e-9)
+	assert(Movement.wadeGrip(1.0) < Movement.wadeGrip(0.3) and Movement.wadeGrip(0.1) == 1)
+	assert(Movement.targetSpeed(ctx({ sprinting = true, waterM = 0.6 })) <= 3.1 * Movement.waterFactor(0.6) + 1e-9)
+	print(
+		string.format(
+			"       vadeando: canela %.2f, joelho %.2f, cintura %.2f, peito %.2f m/s; nadando %.2f m/s",
+			Movement.targetSpeed(ctx({ waterM = 0.15 })),
+			Movement.targetSpeed(ctx({ waterM = 0.5 })),
+			wade,
+			Movement.targetSpeed(ctx({ waterM = 1.25 })),
+			Movement.targetSpeed(ctx({ waterM = 2, swimming = true }))
+		)
+	)
+end)
+
+-- ===== D-93: passo do jogador =====
+local function timeMove(vx: number, tx: number, tz: number, grip: number): number
+	local x, z, t = vx, 0, 0
+	while math.abs(x - tx) + math.abs(z - tz) > 1e-6 do
+		x, z = Movement.moveStep(x, z, tx, tz, 1 / 60, grip)
+		t += 1 / 60
+		assert(t < 10, "não chegou")
+	end
+	return t
+end
+
+test("D-93: passo responsivo (arranca rápido, embala na corrida, para firme)", function()
+	local start = timeMove(0, 3.1, 0, 1)
+	local walk = timeMove(0, 1.4, 0, 1)
+	local build = timeMove(3.1, 5.5, 0, 1)
+	local stop = timeMove(5.5, 0, 0, 1)
+	local stopJog = timeMove(3.1, 0, 0, 1)
+	local back = timeMove(3.1, -3.1, 0, 1)
+	print(
+		string.format(
+			"       parado→andar %.2f s, →trote %.2f s; trote→corrida %.2f s; corrida→parado %.2f s; trote→parado %.2f s; meia-volta %.2f s",
+			walk,
+			start,
+			build,
+			stop,
+			stopJog,
+			back
+		)
+	)
+	assert(walk < 0.2, "primeiro passo")
+	assert(start > 0.25 and start < 0.45, "arrancada")
+	assert(build > start * 0.9, "a corrida embala mais devagar que o trote")
+	assert(stop > 0.35 and stop < 0.6 and stopJog < 0.3, "parada")
+	assert(back > stop * 0.5 and back < 1.0, "meia-volta freia e arranca")
+	assert(
+		timeMove(0, 3.1, 0, Movement.surfaceGrip("paddy") * Movement.wadeGrip(0.5)) > start * 1.5,
+		"arrozal e água pesam"
+	)
+	local x = Movement.moveStep(3, 0, -3, 0, 0.1, Movement.AIR_GRIP)
+	assert(x > 2.8, "no ar quase não muda o embalo")
+end)
+
+test("D-93: curva gira a velocidade sem encolher (antes caía a 70% no meio)", function()
+	local function turn(speed: number, deg: number): (number, number)
+		local a = math.rad(deg)
+		local tx, tz = speed * math.cos(a), speed * math.sin(a)
+		local x, z, t, minS = speed, 0, 0, speed
+		while math.abs(x - tx) + math.abs(z - tz) > 1e-6 do
+			x, z = Movement.moveStep(x, z, tx, tz, 1 / 60, 1)
+			minS = math.min(minS, math.sqrt(x * x + z * z))
+			t += 1 / 60
+			assert(t < 5, "não virou")
+		end
+		return t, minS / speed
+	end
+	local tJog, kJog = turn(3.1, 90)
+	local tRun, kRun = turn(5.5, 90)
+	local tStrafe, kStrafe = turn(3.1, 100)
+	-- o modelo vetorial antigo (bots) para comparar
+	local ox, oz, omin = 3.1, 0, 3.1
+	for _ = 1, 120 do
+		ox, oz = Movement.accelStep(ox, oz, 0, 3.1, 1 / 60, 1)
+		omin = math.min(omin, math.sqrt(ox * ox + oz * oz))
+	end
+	print(
+		string.format(
+			"       90° no trote %.2f s (mínimo %.0f%%), na corrida %.2f s (%.0f%%); antes o mínimo era %.0f%%",
+			tJog,
+			kJog * 100,
+			tRun,
+			kRun * 100,
+			omin / 3.1 * 100
+		)
+	)
+	assert(kJog > 0.99 and kRun > 0.99 and kStrafe > 0.99, "velocidade mantida na curva")
+	assert(tJog < 0.45 and tRun > tJog, "a corrida faz curva mais aberta (peso)")
+	assert(omin / 3.1 < 0.75, "o modelo vetorial cortava pela corda")
+	-- nunca passa do maior entre a velocidade atual e a pedida (o teto do servidor vale)
+	local rng = Rng.new(92)
+	for _ = 1, 5000 do
+		local vx, vz = rng:range(-6, 6), rng:range(-6, 6)
+		local tx, tz = rng:range(-6, 6), rng:range(-6, 6)
+		local nx, nz = Movement.moveStep(vx, vz, tx, tz, rng:range(0, 0.1), rng:range(0.1, 1))
+		local lim = math.max(math.sqrt(vx * vx + vz * vz), math.sqrt(tx * tx + tz * tz))
+		assert(math.sqrt(nx * nx + nz * nz) <= lim + 1e-9, "passou do teto")
+	end
+end)
+
+test("D-93: degrau agachado ou deitado (dique) vira passada assistida curta", function()
+	local function sp(over: { [string]: any }): Movement.StepProbe
+		local p: Movement.StepProbe = {
+			height = 0.45,
+			distance = 0.2,
+			headroom = 2,
+			stance = "crouch",
+			legImpaired = false,
+		}
+		for k, v in over do
+			(p :: any)[k] = if v == NIL then nil else v
+		end
+		return p
+	end
+	local crouch = Movement.stepPlan(sp({}))
+	assert(crouch and crouch.kind == "step" and crouch.cost == 0, "dique agachado")
+	local prone = Movement.stepPlan(sp({ stance = "prone", height = 0.35 }))
+	assert(prone and prone.duration > crouch.duration, "deitado demora mais")
+	local cases: { { any } } = {
+		{ { stance = "stand" }, "postura" },
+		{ { height = NIL }, "nada à frente" },
+		{ { height = 0.05 }, "baixo" },
+		{ { height = 0.8 }, "alto" },
+		{ { stance = "prone", height = 0.5 }, "alto" },
+		{ { distance = 0.9 }, "longe" },
+		{ { headroom = 0.5 }, "sem espaço" },
+	}
+	for _, c in cases do
+		local plan, why = Movement.stepPlan(sp(c[1]))
+		assert(plan == nil and why == c[2], string.format("esperado '%s', veio '%s'", c[2], tostring(why)))
+	end
+	local vc = Movement.stepPlan(sp({ agility = Movement.factionAgility("VC") })) :: Movement.VaultPlan
+	assert(vc.duration < crouch.duration, "VC mais ágil")
+	print(
+		string.format(
+			"       degrau de 0,45 m: agachado %.2f s; deitado (0,35 m) %.2f s",
+			crouch.duration,
+			prone.duration
+		)
+	)
+end)
+
+-- ===== D-93: câmera =====
+test("D-93: câmera: passada pesada na água, degrau suave, cabeça com inércia, inclinação na curva", function()
+	-- a cabeça desce no apoio do pé (fase 0, como os clipes) e vai para o lado do pé apoiado
+	local _, y0 = Movement.bob(0, 3.1, "stand", false)
+	local xMid = Movement.bob(math.pi / 2, 3.1, "stand", false)
+	assert(y0 < 0 and xMid < 0, "apoio do pé esquerdo: desce e vai para a esquerda")
+	-- vadeando a passada pesa mais na mesma velocidade de esforço
+	local function peak(w: number?): number
+		local m = 0
+		local v = 3.1 * (if w then Movement.waterFactor(w) else 1)
+		for i = 0, 200 do
+			local _, y = Movement.bob(i * 0.05, v, "stand", false, w)
+			m = math.max(m, math.abs(y))
+		end
+		return m
+	end
+	assert(peak(0.9) > peak(nil) * 1.5, "vadeando: passada pesada")
+	assert(peak(0.9) < 0.03, "ainda sutil")
+	assert(math.abs(Movement.swimBob(0.3)) <= 0.025, "nadando: boia devagar")
+	-- degrau de 0,45 m num quadro: 90% assentado em ~0,2 s; numa ladeira, nada (o que a rampa explica)
+	local off = Movement.stepSmooth(0, 0.45, 0, 1 / 60)
+	assert(off < -0.3, "no primeiro quadro a câmera fica para trás")
+	local t = 1 / 60
+	while math.abs(off) > 0.045 do
+		off = Movement.stepSmooth(off, 0, 0, 1 / 60)
+		t += 1 / 60
+	end
+	assert(t < 0.25, string.format("assenta em %.2f s", t))
+	local ramp = 0
+	for _ = 1, 120 do
+		ramp = Movement.stepSmooth(ramp, 0.02, 0.02, 1 / 60)
+	end
+	assert(math.abs(ramp) < 1e-9, "ladeira não atrasa a câmera")
+	assert(Movement.stepSmooth(0, 5, 0, 1 / 60) >= -Movement.STEP_SMOOTH_MAX_M, "limitado")
+	-- cabeça: arrancando fica para trás; parando de repente vai para a frente e volta
+	local h = Movement.newHead()
+	for _ = 1, 60 do
+		Movement.headStep(h, 0, 11, 1 / 60)
+	end
+	assert(h.z < 0 and h.z >= -Movement.HEAD.maxM, "arrancando: para trás")
+	local h2 = Movement.newHead()
+	local fwdMax = 0
+	for _ = 1, 30 do
+		Movement.headStep(h2, 0, -12, 1 / 60)
+		fwdMax = math.max(fwdMax, h2.z)
+	end
+	for _ = 1, 120 do
+		Movement.headStep(h2, 0, 0, 1 / 60)
+	end
+	assert(fwdMax > 0.01 and math.abs(h2.z) < 0.002, "parada: vai à frente e volta")
+	-- inclinação: para o lado do passo e para dentro da curva; mirando e deitado, reta
+	assert(Movement.rollTarget(3, 0, "stand", false) < 0, "passo à direita: cabeça para a direita")
+	assert(Movement.rollTarget(0, -8, "stand", false) > 0, "curva à esquerda: cabeça para a esquerda")
+	assert(Movement.rollTarget(5, 10, "stand", true) == 0 and Movement.rollTarget(5, 10, "prone", false) == 0)
+	assert(math.abs(Movement.rollTarget(99, 99, "stand", false)) <= math.rad(Movement.ROLL.maxDeg) + 1e-12)
+	-- opção de acessibilidade
+	assert(Movement.cameraScale(nil) == 1 and Movement.cameraScale(0) == 0 and Movement.cameraScale(2) == 1)
+	assert(Movement.cameraScale(0.0 / 0.0) == 1, "NaN cai no padrão")
 end)
 
 -- ===== servidor =====

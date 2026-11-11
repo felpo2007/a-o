@@ -135,6 +135,11 @@ local ctl = {
 	pedalL = false,
 	pedalR = false,
 	stabilize = false,
+	stepT = 0, -- próxima sonda de degrau à frente
+	stepM = nil :: number?, -- degrau à frente (m)
+	climbUntil = 0,
+	devInfo = false, -- Studio: workspace "VT65DevMov" = "veiculo"
+	devAt = 0,
 }
 local heli = {
 	collective = 0.55,
@@ -166,6 +171,31 @@ local function sendTelemetry(dt: number, rpm: number, load: number, rotor: numbe
 	end
 end
 
+-- Degrau à frente da lagarta (m, + = sobe), no sentido do movimento: o chão logo depois da ponta da
+-- rampa menos o chão debaixo da ponta do casco. nil se algum raio não achou chão.
+local function stepAhead(chassis: BasePart, yaw: number, dirSign: number): number?
+	local fwd = CFrame.Angles(0, yaw, 0).LookVector * dirSign
+	local fromY = chassis.Position.Y - chassis.Size.Y / 2 + 1.2 / M
+	local function groundY(dist: number): number?
+		local p = chassis.Position + fwd * dist
+		local r = workspace:Raycast(Vector3.new(p.X, fromY, p.Z), Vector3.new(0, -3 / M, 0), rays.solid)
+		return if r then r.Position.Y else nil
+	end
+	local half = chassis.Size.Z / 2
+	local here = groundY(half * 0.7)
+	if not here then
+		return nil
+	end
+	local best: number? = nil
+	for _, extra in { 0.6, 1.2 } do
+		local y = groundY(half + extra / M + 1.6) -- 1,6 stud: a rampa passa da ponta do casco
+		if y then
+			best = math.max(best or -math.huge, (y - here) * M)
+		end
+	end
+	return best
+end
+
 local function groundStep(model: Model, chassis: BasePart, spec: any, dt: number)
 	-- controle: RT acelera, LT freia/ré, analógico esquerdo dirige (Parte 12.3); teclado: WASD
 	local throttle, steer
@@ -180,11 +210,12 @@ local function groundStep(model: Model, chassis: BasePart, spec: any, dt: number
 	if not InputMap.acceptsGame(Input.state) then
 		throttle, steer = 0, 0
 	end
-	-- pedal e volante têm curso: tecla sobe em ~0,3 s e solta em ~0,15 s; analógico quase direto
+	-- pedal e volante têm curso: tecla sobe em ~0,22 s e solta em ~0,15 s; analógico quase direto
+	-- (D-93: o teclado subia em 0,3 s e o volante em 0,22 s; somado ao motor, a resposta atrasava)
 	local pad = Input.isGamepad()
 	ctl.thr =
-		slew(ctl.thr, throttle, if math.abs(throttle) > math.abs(ctl.thr) then (if pad then 8 else 3.2) else 7, dt)
-	ctl.steer = slew(ctl.steer, steer, if pad then 10 else 4.5, dt)
+		slew(ctl.thr, throttle, if math.abs(throttle) > math.abs(ctl.thr) then (if pad then 8 else 4.5) else 7, dt)
+	ctl.steer = slew(ctl.steer, steer, if pad then 12 else 6, dt)
 	prepRays(model)
 	ctl.probeT -= dt
 	if ctl.probeT <= 0 then
@@ -194,6 +225,14 @@ local function groundStep(model: Model, chassis: BasePart, spec: any, dt: number
 	end
 	local _, cy, _ = chassis.CFrame:ToOrientation()
 	local yaw = ctl.yaw or cy
+	-- D-93: o casco não acompanhou o giro (encostado em árvore, casa ou outro veículo). O comando
+	-- seguia somando e o AlignOrientation torcia o chassi de uma vez quando ele soltava ("travava" e
+	-- depois dava um tranco). Agora o comando fica a no máximo 12° do giro real.
+	local lag = (yaw - cy + math.pi) % (2 * math.pi) - math.pi
+	if math.abs(lag) > math.rad(12) then
+		yaw = cy + math.sign(lag) * math.rad(12)
+		ctl.drive.yawRate *= 0.5
+	end
 	local p, r = groundAttitude(chassis, yaw)
 	if p and r then
 		ctl.pitch = approach(ctl.pitch, p, 0.1, dt)
@@ -210,12 +249,22 @@ local function groundStep(model: Model, chassis: BasePart, spec: any, dt: number
 		engine = ((model:GetAttribute("Engine") :: number?) or 0) / 100,
 		tracks = ((model:GetAttribute("Tracks") :: number?) or 0) / 100,
 	}, dt)
-	-- contato: parede, barranco ou outro veículo seguram o chassi; o modelo acompanha a velocidade real
+	-- contato: parede, barranco ou outro veículo seguram o chassi; o modelo acompanha a velocidade real.
+	-- Degrau baixo à frente (dique): a lagarta continua empurrando até a rampa subir (D-93).
 	local flat = CFrame.Angles(0, yaw, 0)
 	local vel = chassis.AssemblyLinearVelocity * M
 	if not d.floating then
 		local measured = Vector3.new(vel.X, 0, vel.Z):Dot(flat.LookVector) / math.max(math.cos(ctl.pitch), 0.5)
-		VehicleDrive.contact(d, measured, dt)
+		local now = os.clock()
+		if math.abs(d.v) > 0.5 and now >= ctl.stepT then
+			ctl.stepT = now + 0.1
+			local h = stepAhead(chassis, yaw, if d.v >= 0 then 1 else -1)
+			ctl.stepM = h
+			if h and h > 0.08 and h <= VehicleDrive.CLIMB_STEP_M then
+				ctl.climbUntil = now + 1.5 -- a frente já em cima: segue valendo até o casco passar
+			end
+		end
+		VehicleDrive.contact(d, measured, dt, now < ctl.climbUntil)
 	end
 	yaw += d.yawRate * dt
 	ctl.yaw = yaw
@@ -247,6 +296,37 @@ local function groundStep(model: Model, chassis: BasePart, spec: any, dt: number
 		engine = model:GetAttribute("Engine") :: number?,
 		tracks = model:GetAttribute("Tracks") :: number?,
 	})
+	if ctl.devInfo and os.clock() >= ctl.devAt then
+		ctl.devAt = os.clock() + 0.5
+		print(
+			string.format(
+				"[VT65 VEÍCULO] %s: %.0f km/h no comando, %.0f km/h real | marcha %d, rotação %.2f | chão %s, rampa %.0f° | degrau à frente %s%s | patinando %.2f",
+				spec.name,
+				d.v * 3.6,
+				Vector3.new(vel.X, 0, vel.Z).Magnitude * 3.6,
+				d.gear,
+				d.rpm,
+				ctl.ground,
+				math.deg(ctl.pitch),
+				if ctl.stepM then string.format("%.2f m", ctl.stepM :: number) else "—",
+				if os.clock() < ctl.climbUntil then " (subindo)" else "",
+				d.slip
+			)
+		)
+	end
+end
+
+-- Só no Studio: workspace:SetAttribute("VT65DevMov", "veiculo") liga/desliga a leitura do motorista no
+-- Output a cada 0,5 s (velocidade no comando e real, marcha, chão, rampa, degrau à frente). Para levar
+-- o veículo até um dique: "dique" (Movement.client). Para sentar no motorista: "VT65DevDrive".
+if RunService:IsStudio() then
+	workspace:GetAttributeChangedSignal("VT65DevMov"):Connect(function()
+		if workspace:GetAttribute("VT65DevMov") == "veiculo" then
+			ctl.devInfo = not ctl.devInfo
+			print("[VT65 VEÍCULO] leitura " .. (if ctl.devInfo then "ligada" else "desligada"))
+			workspace:SetAttribute("VT65DevMov", nil) -- só local: no cliente o mesmo valor repete
+		end
+	end)
 end
 
 local function heliStep(model: Model, chassis: BasePart, dt: number)

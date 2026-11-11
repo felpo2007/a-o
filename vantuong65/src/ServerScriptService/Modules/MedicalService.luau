@@ -5,6 +5,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Medical = require(ReplicatedStorage.Shared.Medical)
+local Movement = require(ReplicatedStorage.Shared.Movement)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Units = require(ReplicatedStorage.Shared.Units)
 local Combatants = require(script.Parent.Combatants)
@@ -45,13 +46,20 @@ local function apply(model: Model)
 	else
 		hum.Health = math.clamp(s.health, 1, 100)
 		-- postura e corrida (PostureService): deitado rasteja, agachado anda devagar, correndo só
-		-- de pé e sem perna ferida. Rastejar = 25% do andar (PLACEHOLDER).
-		local base = if model:GetAttribute("Prone")
-			then Units.Speed.walk * 0.25
-			elseif model:GetAttribute("Crouched") then Units.Speed.walk * 0.6
-			elseif model:GetAttribute("Sprinting") then Units.Speed.sprint
-			else Units.Speed.jog
-		hum.WalkSpeed = if s.legImpaired then math.min(base, Units.Speed.walk) else base
+		-- de pé e sem perna ferida. Teto único em Shared/Movement.serverSpeed (o cliente nunca passa
+		-- dele, teste "movimento"); o VC, mais leve, tem teto 12% maior (D-93).
+		local stance = if model:GetAttribute("Prone")
+			then "prone"
+			elseif model:GetAttribute("Crouched") then "crouch"
+			else "stand"
+		local faction = model:GetAttribute("Faction")
+		hum.WalkSpeed = Movement.serverSpeed(
+			stance,
+			model:GetAttribute("Sprinting") == true,
+			s.legImpaired,
+			false,
+			if type(faction) == "string" then faction else nil
+		) / Units.STUD_M
 		hum.JumpPower = if s.legImpaired then 0 else 30
 	end
 	model:SetAttribute("ArmImpaired", s.armImpaired)
