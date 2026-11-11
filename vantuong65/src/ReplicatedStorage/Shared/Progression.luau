@@ -73,7 +73,12 @@ Progression.RANKS = {
 		us("First Lieutenant", "1stLt", "1º tenente", { bars = 1, metal = "silver" }),
 		us("Captain", "Capt", "capitão, comandante de companhia", { bars = 2, metal = "silver" }),
 		us("Major", "Maj", "major", { leaf = true, metal = "gold" }),
-		us("Lieutenant Colonel", "LtCol", "tenente-coronel, comandante de batalhão", { leaf = true, metal = "silver" }),
+		us(
+			"Lieutenant Colonel",
+			"LtCol",
+			"tenente-coronel, comandante de batalhão",
+			{ leaf = true, metal = "silver" }
+		),
 		us("Colonel", "Col", "coronel, comandante de regimento", { eagle = true, metal = "silver" }),
 	},
 	VC = {

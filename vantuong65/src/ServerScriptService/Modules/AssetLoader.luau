@@ -12,6 +12,7 @@ local Animals = require(ReplicatedStorage.Shared.Animals)
 local Geometry = require(ReplicatedStorage.Shared.Geometry)
 local GunModel = require(ReplicatedStorage.Shared.GunModel)
 local MapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any
+local MapLife = require(script.Parent.MapLife)
 local Rng = require(ReplicatedStorage.Shared.Rng)
 local Tunnels = require(ReplicatedStorage.Shared.Tunnels) :: any
 local Vegetation = require(script.Parent.Vegetation)
@@ -29,6 +30,14 @@ AssetLoader.SECTOR_TRI_BUDGET = ArtBudget.SECTOR_MAX
 type HedgeJob = { part: BasePart, key: string, n: number, sector: number }
 local sectorTris: { [number]: number } = {}
 local sectorCount: { [number]: number } = {}
+-- vilas da carta com gente morando (D-74): canteiro de muda e manada de búfalos no arrozal
+local VILLAGES: { [string]: boolean } = {
+	["An Cường (2)"] = true,
+	["Nam Yên (4)"] = true,
+	["An Thới (2)"] = true,
+	["Nam Yên (3)"] = true,
+	["Lugarejo da Colina 43"] = true,
+}
 -- Detalhe à distância (Model.LevelOfDetail = SLIM; o StreamingMesh é o valor antigo) nas peças
 -- grandes: hut_thatch, hut_veranda, hut_kitchen, house_tile, hill_tree, coconut_palm, granary e
 -- vc_bunker. Script do jogo NÃO pode ligar isso ("lacking capability PluginOrOpenCloud", conferido
@@ -370,10 +379,30 @@ function AssetLoader.start()
 			fit.hedges
 		)
 	)
+	-- arrozal (D-74): dossel dos tabuleiros plantados e ladrilhos de arroz para o cliente
+	print(string.format("[VT65] arrozal: %d tabuleiros com arroz", MapLife.rice(map, AssetLoader.template)))
+	-- lâminas d'água (studs): a meda, o pote e a manada usam para saber se o ponto é arrozal alagado
+	local sheets: { { cf: CFrame, hx: number, hz: number } } = {}
+	local waterFolder = map:FindFirstChild("PaddyWater")
+	for _, p in if waterFolder then waterFolder:GetChildren() else {} do
+		if p:IsA("BasePart") then
+			table.insert(sheets, { cf = p.CFrame, hx = p.Size.X / 2, hz = p.Size.Z / 2 })
+		end
+	end
+	local function inWater(x: number, z: number): boolean
+		for _, s in sheets do
+			local lp = s.cf:PointToObjectSpace(Vector3.new(x, s.cf.Y, z))
+			if math.abs(lp.X) <= s.hx and math.abs(lp.Z) <= s.hz then
+				return true
+			end
+		end
+		return false
+	end
 	local out = Instance.new("Folder")
 	out.Name = "Art"
 	out.Parent = map
 	local rng = Rng.new(19650818)
+	local houseModels: { Model } = {}
 	-- casas: variante por sorteio (só as que cabem na meta); o placeholder some (fica só se não houver modelo)
 	local variants = ArtBudget.HOUSE_VARIANTS
 	local housePos: { number } = {} -- metros, para os animais da vila
@@ -387,7 +416,9 @@ function AssetLoader.start()
 				local key = variants[1 + math.floor(rng:next() * #variants)]
 				table.insert(housePos, p.X * M)
 				table.insert(housePos, p.Z * M)
-				if AssetLoader.place(key, p.X, p.Z, yaw, out) then
+				local hm = AssetLoader.place(key, p.X, p.Z, yaw, out)
+				if hm then
+					table.insert(houseModels, hm)
 					h:Destroy()
 					-- quintal: bananeira e coqueiro ao redor (densidade da Parte 5)
 					if rng:next() < 0.35 then
@@ -431,6 +462,9 @@ function AssetLoader.start()
 			end
 		end
 	end
+	-- túneis por dentro (D-74): escoras, lamparinas e câmaras mobiliadas
+	local tParts, tLamps = MapLife.tunnels(map)
+	print(string.format("[VT65] túneis: %d peças de escora e mobília, %d lamparinas", tParts, tLamps))
 	if AssetLoader.template("trench_section") then
 		for i = 1, #Tunnels.trench - 1 do
 			local a, b = Tunnels.trench[i], Tunnels.trench[i + 1]
@@ -534,8 +568,36 @@ function AssetLoader.start()
 		do
 			AssetLoader.place(sp.species, sp.x / M, sp.z / M, rng:range(0, 6.28), pen, true)
 		end
+		-- manadas no arrozal alagado perto das vilas (D-74): 2 búfalos e 1 bezerro
+		local herds = 0
+		for _, l in MapConfig.Locations do
+			if VILLAGES[l.name] then
+				local herd = Animals.herd(l.x * M, l.z * M, function()
+					return rng:next()
+				end, function(xm: number, zm: number): boolean
+					return inWater(xm / M, zm / M)
+				end)
+				for _, b in herd do
+					AssetLoader.place(b.species, b.x / M, b.z / M, rng:range(0, 6.28), pen, true, b.scale)
+				end
+				herds += if #herd > 0 then 1 else 0
+			end
+		end
+		print(string.format("[VT65] animais postos: %d (%d manadas no arrozal)", #pen:GetChildren(), herds))
 		pen.Parent = out
 	end
+	-- vida nas vilas (D-74): fumaça de cozinha, potes d'água, medas de palha e lenha. Antes da mata,
+	-- que desvia de tudo que já está em Art (zonas livres).
+	local vida = MapLife.village(houseModels, out, rng, groundAt, inWater)
+	print(
+		string.format(
+			"[VT65] vilas: %d fumaças, %d potes, %d medas, %d lenhas",
+			vida.smoke,
+			vida.jars,
+			vida.straw,
+			vida.wood
+		)
+	)
 	-- Sebes por último. O que sobra do teto de cada setor vira um desbaste uniforme no setor (e não
 	-- um corte no meio do mapa). A peça da sebe só fica invisível se TODAS as touceiras dela
 	-- entraram; senão continua como enchimento, para nunca haver cobertura invisível.
@@ -587,9 +649,10 @@ function AssetLoader.start()
 	-- bambu nos riachos e cortina de árvores fora da borda. Como nas sebes, o que não cabe no teto
 	-- do setor vira desbaste uniforme no setor inteiro.
 	local world = (require(ServerStorage:WaitForChild("VT65Build"):WaitForChild("Build")) :: any).world()
-	-- canteiros de arroz (rice_patch, 13 mil triângulos cada): um por vila, 2 x 4 mudas na beira do arrozal
+	-- canteiros de arroz (rice_patch, 13 mil triângulos cada): um por vila, 2 x 4 mudas na beira do
+	-- arrozal (o viveiro de onde sai a muda do transplante). D-74: nas 5 vilas (eram 3).
 	for _, l in MapConfig.Locations do
-		if l.name == "An Cường (2)" or l.name == "Nam Yên (4)" or l.name == "An Thới (2)" then
+		if VILLAGES[l.name] then
 			for _ = 1, 60 do
 				local a, r = rng:range(0, 2 * math.pi), rng:range(35, 80) / M
 				local x0, z0 = l.x + math.cos(a) * r, l.z + math.sin(a) * r

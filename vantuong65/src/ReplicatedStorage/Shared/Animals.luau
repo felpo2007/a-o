@@ -79,27 +79,61 @@ function Animals.step(a: Animal, dt: number, now: number, roll: number): boolean
 	return true
 end
 
--- Onde nascem: galinhas no quintal de 1 em cada 4 casas (2 por quintal); um búfalo para cada 6
--- casas, no arrozal a ~25 m da casa. rolls: função que devolve um número em [0,1).
--- houses: lista plana x1, z1, x2, z2, ... (metros). Devolve { species, x, z }.
+-- Onde nascem (D-74, com os modelos reduzidos): galinhas no quintal de 2 em cada 5 casas, em bando
+-- de 3; um búfalo para cada 5 casas, no arrozal a ~25 m da casa. Antes: 2 galinhas em 1 de cada 4
+-- quintais e 1 búfalo a cada 6 casas (o mapa parecia vazio). rolls: função que devolve um número
+-- em [0,1). houses: lista plana x1, z1, x2, z2, ... (metros). Devolve { species, x, z }.
+Animals.CHICKEN_YARDS = 0.4
+Animals.CHICKENS_PER_YARD = 3
+Animals.HOUSES_PER_BUFFALO = 5
 function Animals.spawns(houses: { number }, rolls: () -> number): { { species: string, x: number, z: number } }
 	local out = {}
 	local n = 0
 	for i = 1, #houses, 2 do
 		n += 1
 		local hx, hz = houses[i], houses[i + 1]
-		if rolls() < 0.25 then
-			for _ = 1, 2 do
-				local a = rolls() * 2 * math.pi
-				table.insert(out, { species = "chicken", x = hx + math.cos(a) * 6, z = hz + math.sin(a) * 6 })
+		if rolls() < Animals.CHICKEN_YARDS then
+			for _ = 1, Animals.CHICKENS_PER_YARD do
+				local a, r = rolls() * 2 * math.pi, 4 + rolls() * 4
+				table.insert(out, { species = "chicken", x = hx + math.cos(a) * r, z = hz + math.sin(a) * r })
 			end
 		end
-		if n % 6 == 0 then
+		if n % Animals.HOUSES_PER_BUFFALO == 0 then
 			local a = rolls() * 2 * math.pi
 			table.insert(out, { species = "water_buffalo", x = hx + math.cos(a) * 25, z = hz + math.sin(a) * 25 })
 		end
 	end
 	return out
+end
+
+-- Manada no arrozal perto de uma vila (D-74): 2 adultos e 1 bezerro (escala 0,6) a poucos metros
+-- um do outro, a 50–110 m do centro. isPaddy(x, z) em metros diz se o ponto é arrozal; tenta 40
+-- rumos e desiste (lista vazia) se não achar. Devolve { species, x, z, scale }.
+function Animals.herd(
+	cx: number,
+	cz: number,
+	rolls: () -> number,
+	isPaddy: (number, number) -> boolean
+): { { species: string, x: number, z: number, scale: number } }
+	for _ = 1, 40 do
+		local a, r = rolls() * 2 * math.pi, 50 + rolls() * 60
+		local x, z = cx + math.cos(a) * r, cz + math.sin(a) * r
+		if isPaddy(x, z) then
+			local out = {}
+			for k = 1, 3 do
+				local b = rolls() * 2 * math.pi
+				local d = if k == 1 then 0 else 3 + rolls() * 3
+				table.insert(out, {
+					species = "water_buffalo",
+					x = x + math.cos(b) * d,
+					z = z + math.sin(b) * d,
+					scale = if k == 3 then 0.6 else 1,
+				})
+			end
+			return out
+		end
+	end
+	return {}
 end
 
 return Animals

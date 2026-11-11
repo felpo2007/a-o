@@ -9,21 +9,34 @@ local Radio = require(ReplicatedStorage.Shared.Radio)
 local RadioService = {}
 local M = 0.28
 
--- antena de chicote do PRC-10/PRC-25 (~1,2 m) presa nas costas
+-- antena de chicote do PRC-10/PRC-25 (~1,2 m) presa nas costas.
+-- O personagem vem de LoadCharacterWithHumanoidDescriptionAsync (D-70): depois do CharacterAdded a
+-- descrição troca o tronco pelo do corpo "Man", a solda ia junto com o tronco velho e a antena caía
+-- do mapa (o operador de rádio nascia sem antena; Studio, 2026-11-11). Agora a antena é refeita a
+-- cada tronco novo, com Weld de deslocamento fixo (vale mesmo antes de o tronco ir para o lugar).
 local function antenna(char: Model)
 	local torso = (char:FindFirstChild("UpperTorso") or char:FindFirstChild("Torso")) :: BasePart?
-	if not torso or char:FindFirstChild("RadioAntenna") then
+	if not torso then
 		return
+	end
+	local old = char:FindFirstChild("RadioAntenna")
+	if old then
+		local w = old:FindFirstChildOfClass("Weld")
+		if w and w.Part0 == torso then
+			return -- já presa a este tronco
+		end
+		old:Destroy()
 	end
 	local a = Instance.new("Part")
 	a.Name = "RadioAntenna"
 	a.Size = Vector3.new(0.012 / M, 1.2 / M, 0.012 / M)
 	a.Color = Color3.fromRGB(40, 42, 34)
 	a.CanCollide, a.CanQuery, a.CanTouch, a.Massless = false, false, false, true
-	a.CFrame = torso.CFrame * CFrame.new(0.12 / M, 0.6 / M, 0.18 / M)
-	local w = Instance.new("WeldConstraint")
+	local w = Instance.new("Weld")
 	w.Part0, w.Part1 = torso, a
+	w.C0 = CFrame.new(0.12 / M, 0.6 / M, 0.18 / M)
 	w.Parent = a
+	a.CFrame = torso.CFrame * w.C0
 	a.Parent = char
 end
 
@@ -69,6 +82,12 @@ local function track(p: Player)
 		if p:GetAttribute("Radio") then
 			antenna(char)
 		end
+		-- tronco trocado pela descrição (ou pelo uniforme): refaz a antena no novo
+		char.ChildAdded:Connect(function(c: Instance)
+			if (c.Name == "UpperTorso" or c.Name == "Torso") and p:GetAttribute("Radio") then
+				task.defer(antenna, char)
+			end
+		end)
 		local hum = char:WaitForChild("Humanoid", 10) :: Humanoid?
 		if hum then
 			hum.Died:Once(function()

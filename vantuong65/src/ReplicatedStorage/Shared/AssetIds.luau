@@ -89,9 +89,13 @@ return {
 		mortar_81 = 102314699611785,
 		mortar_82 = 134024579408686,
 		-- animais da vila (Parte 11): estavam no manifest mas fora do plano de upload até o teste com
-		-- a arte publicada (2026-11-10); sem eles o AnimalService não tinha o que mover
-		water_buffalo = 88948304033404,
-		chicken = 121576862821828,
+		-- a arte publicada (2026-11-10); sem eles o AnimalService não tinha o que mover.
+		-- D-74: reduzidos para 5 mil e 3 mil triângulos (eram 14,5 e 16,7 mil) e republicados
+		water_buffalo = 83644982452765,
+		chicken = 108410985778270,
+		-- arrozal em cartões (tools/make_rice.py, D-74): o cliente põe em volta da câmera (RiceField)
+		rice_tile_hi = 120451731988908,
+		rice_tile_lo = 137999556221661,
 	},
 	-- Roupas: IMAGENS dos moldes clássicos (aplicadas em Shirt.ShirtTemplate / Pants.PantsTemplate)
 	Clothing = {

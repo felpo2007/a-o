@@ -351,8 +351,29 @@ test("animais: calmos ficam perto de casa; nascem em parte dos quintais", functi
 			nc += 1
 		end
 	end
-	assert(nb == 10, "1 búfalo a cada 6 casas: " .. nb)
-	assert(nc >= 10 and nc <= 60 and nc % 2 == 0, "galinhas em ~1/4 dos quintais: " .. nc)
+	assert(nb == 12, "1 búfalo a cada 5 casas (D-74): " .. nb)
+	assert(nc >= 36 and nc <= 108 and nc % 3 == 0, "galinhas em bando de 3 em ~2/5 dos quintais: " .. nc)
+	-- manada (D-74): 2 adultos e 1 bezerro no arrozal; sem arrozal, nenhuma
+	local r3 = Rng.new(5)
+	local herd = Animals.herd(0, 0, function()
+		return r3:next()
+	end, function(x: number, _z: number)
+		return x > 40
+	end)
+	assert(#herd == 3, "manada de 3: " .. #herd)
+	local calves = 0
+	for _, b in herd do
+		assert(b.species == "water_buffalo" and b.x > 30, "búfalo da manada fora do arrozal")
+		if b.scale < 1 then
+			calves += 1
+		end
+	end
+	assert(calves == 1, "um bezerro por manada")
+	assert(#Animals.herd(0, 0, function()
+		return r3:next()
+	end, function()
+		return false
+	end) == 0, "sem arrozal não há manada")
 end)
 
 test("arma do inimigo: cai só com o carregador; troca deixa a sua no chão; caixa não reabastece", function()

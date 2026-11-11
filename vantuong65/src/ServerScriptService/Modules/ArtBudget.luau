@@ -60,6 +60,9 @@ ArtBudget.KIND = {
 	-- animais da vila (Parte 11)
 	water_buffalo = "prop",
 	chicken = "prop",
+	-- arrozal em cartões (D-74): fora do teto do setor, o cliente põe só em volta da câmera
+	rice_tile_hi = "veg",
+	rice_tile_lo = "veg",
 	m60 = "hero",
 	rpd = "hero",
 	sks = "hero",
@@ -115,8 +118,12 @@ ArtBudget.TRIS = {
 	us_m1955_vest = 3999,
 	vc_pith_helmet = 2999,
 	vc_jungle_hat = 2447,
-	water_buffalo = 14459,
-	chicken = 16688,
+	-- D-74: redução local (tools/decimate_glb.py) para pôr manadas e mais galinhas
+	water_buffalo = 4999,
+	chicken = 3000,
+	-- ladrilho de 4,5 x 4,5 m (tools/make_rice.py): perto 96 cartões, longe 24 (2 faces cada)
+	rice_tile_hi = 384,
+	rice_tile_lo = 96,
 	m60 = 14933,
 	rpd = 15735,
 	sks = 14683,
@@ -138,6 +145,8 @@ ArtBudget.EXCEPTIONS = {} :: { [string]: string }
 -- abaixo do mínimo de 8 mil (D-66), com o motivo
 ArtBudget.BELOW_MIN = {
 	elephant_grass = "a malha cheia do gerador tem 7.978; não há versão maior",
+	rice_tile_hi = "ladrilho de cartões: ~1.200 em volta da câmera (D-74)",
+	rice_tile_lo = "ladrilho de cartões: ~1.200 em volta da câmera (D-74)",
 } :: { [string]: string }
 
 -- variantes sorteadas para as casas (o teste exige que todas caibam na meta)

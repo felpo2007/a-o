@@ -1728,3 +1728,98 @@ sessão, que nunca apaga o ganho de outro servidor.
 "+10 XP · +2 CI Tempo em campo", ponto "Onde caiu" na carta com a espera certa.
 - **Não criados no Roblox:** os 2 Game Passes e o produto. A chave Open Cloud não tem a
   permissão (TODO_USUARIO). Com ID 0, só o botão de Robux some.
+
+## D-74 — Vida no mapa: arrozal, manadas, túneis por dentro e vilas (2026-11-11)
+**Pedido do usuário:** "dar vida ao mapa colocando detalhes como os animais q baixamos, as
+plantações de arroz q baixamos, os túneis, tudo q falamos em colocar".
+
+**Arrozal** (`Shared/RiceField.luau`, `MapLife.rice`, `RiceField.client.luau`):
+- O arrozal ocupa 78% das células do mapa e tem 1.155 tabuleiros d'água. O canteiro do ForgeGUI
+  (13 mil triângulos para 2 x 1,45 m) não cobre isso: daria mais de 10 bilhões de triângulos.
+- Ladrilho próprio de arroz em cartões (`tools/make_rice.py`):
+  - 16 x 16 studs (4,5 m);
+  - textura desenhada com as cores do canteiro do ForgeGUI, sem costura;
+  - perto: 96 cartões (384 triângulos); longe: 24 cartões (96 triângulos);
+  - cartão de duas faces com normal para cima, 74 cm de altura, pé abaixo da água.
+- **Servidor:** em cada tabuleiro plantado põe o dossel, uma placa verde na altura do arroz (é o
+  que se vê de longe), e publica os 2 ladrilhos em `ReplicatedStorage.VT65RiceArt`.
+- **Cliente:** esconde o dossel dos tabuleiros a menos de 65 m e cobre o tabuleiro inteiro de
+  ladrilhos.
+  - Ladrilho alto até 30 m, baixo até 65 m.
+  - Reserva de peças: o ladrilho só muda de lugar, sem criar e destruir.
+  - Grade e giro saem da posição do tabuleiro: todos veem o mesmo arroz.
+  - Quem está deitado no arrozal fica escondido.
+- **Estado de cada tabuleiro** (proporção de projeto, sem fonte): 60% arroz em pé, 25% muda nova
+  (55% da altura) e 15% em pousio, só água.
+- MeshPart com cor em `TextureID` só recorta pelo alfa com `Transparency` acima de 0. Os
+  ladrilhos usam 0,02; com 0 os cartões saíam como triângulos verdes opacos.
+- **Studio:** 989 tabuleiros com arroz; 59,6 fps com 1.259 ladrilhos em volta, no meio do setor 4
+  (o limite do Studio é 60).
+- Os canteiros de muda do ForgeGUI (rice_patch) agora estão nas 5 vilas da carta (eram 3).
+
+**Animais:**
+- Búfalo e galinha reduzidos para 4.999 e 3.000 triângulos (eram 14,5 e 16,7 mil) e republicados.
+  A redução está no manifest, refeita pelo fetch.
+- Galinhas em bando de 3 em 2 de cada 5 quintais; 1 búfalo para cada 5 casas.
+- Uma manada no arrozal alagado perto de cada vila, a 50–110 m: 2 búfalos e 1 bezerro.
+- **Studio:** 138 animais (eram 79), 4 manadas; uma vila não tem tabuleiro alagado nessa faixa.
+
+**Túneis por dentro** (`MapLife.tunnels`):
+- Escora de madeira a cada 4 m (2 esteios e a travessa).
+- Lamparina de barro com chama a cada 12 m, em nicho na parede.
+- Câmaras mobiliadas fora da boca das galerias:
+  - J1: posto de comando e enfermaria (esteiras, mesa baixa com carta, padiola e ataduras);
+  - J2: depósito (caixotes e sacos de arroz);
+  - J3: cozinha (fogão de barro com brasa, sacos e esteiras).
+- Uma lamparina pendurada no meio de cada câmara.
+- Ao todo: 44 lamparinas, sem sombra (`Shadows` desligado). A chama treme só perto da câmera.
+- **Correção:** a coluna do terreno é toda do material da superfície, e o capim animado nascia
+  dentro das galerias. Em volta de cada escavação o capim vira terra (`TerrainBuilder.carve`).
+
+**Vilas** (`MapLife.village`):
+- Fumaça de cozinha em toda casa-cozinha e em 22% das outras.
+- Pote d'água de barro (chum) ao lado de 55% das casas.
+- Meda de palha no terreiro, a 5–9 m de 30% das casas. A bala passa como em telhado de palha.
+- Lenha empilhada junto da cozinha.
+- Tudo é peça simples, fora do teto de triângulos.
+- Pote, meda e lenha entram nas zonas livres da mata.
+- **Studio:** 36 fumaças, 21 potes, 7 medas, 32 lenhas.
+
+## D-75 — Teste fase a fase no Studio e o que ele corrigiu (2026-11-11)
+**Pedido do usuário:** "teste e corrija cada fase que fizemos, uma a uma, passo a passo".
+
+**O autoteste (`SelfTest`) ganhou 5 verificações:**
+- vida no mapa (D-74);
+- explosão de morteiro: dano validado no servidor (F4);
+- veículos no depósito: no chão, com assento, parados (F4);
+- túneis: as 5 entradas com prompt; o VC só nasce no túnel do setor que é dele (F4);
+- progressão nos atributos (F6), só leitura: não mexe no perfil.
+
+Resultado final no Studio: **17 ok, 0 falhas, 0 pulados**; nenhum erro de script no log.
+
+**Corrigido pelo teste:**
+- **Operador de rádio sem antena** (Parte 11). Depois do `CharacterAdded`, a descrição do corpo
+  "Man" (D-70) troca o tronco; a solda ia junto e a antena caía do mapa. Agora a antena é refeita
+  a cada tronco novo, com `Weld` de deslocamento fixo.
+- **Pá de trincheira recusava no autoteste.** O ponto fixo 60 m a oeste do QG virou arrozal
+  alagado quando a lâmina d'água foi para o terreno real (D-73). O teste agora procura chão seco
+  perto do QG. Não era defeito do jogo.
+- Arroz opaco, capim nos túneis e meda em degraus: corrigidos durante a D-74.
+
+**Fase a fase:**
+| Fase | Coberto por | Resultado |
+|---|---|---|
+| F1 Greybox | autoteste (terreno, arte no chão: 3.770 de 3.772 a até 2 m) | ok |
+| F2 Laço | autoteste (bots 14 x 15, raia e balística, explosão), nascimento e espera no Studio | ok |
+| F3 Fatia | autoteste (deitado, rádio), agachar no teclado | ok depois da correção da antena |
+| F4 Sistemas pesados | autoteste (veículos, túneis, pá, medevac, morteiro) | ok |
+| F5 Arte | arte nos 5 setores a 100% do plano; 59,6 fps no arrozal | ok no Studio |
+| F6 Offensive | autoteste (Offensive e relatório, progressão) | ok |
+| Parte 11 | autoteste (animais, arma caída, chuva, pá, medevac, rádio) | ok |
+| Parte 12 Controle | Lune `controle` (19 regras); no Studio, só o teclado | sem controle real |
+
+**Limites:**
+- O Studio do MCP não simula controle: o botão injetado chega como teclado.
+- Só um jogador: ferimento entre jogadores e 60 jogadores a 60 fps continuam para o teste real.
+- Avisos `ContentId ... No asset content representation` e `Wrap-deformer` vêm do corpo e das
+  roupas do personagem e dos modelos recém-publicados; não quebram nada.

@@ -483,13 +483,15 @@
   "key": "Models.water_buffalo",
   "file": "assets/forgegui/models/bufalo_studs_fosco.glb",
   "assetType": "Model",
-  "name": "VT65 water_buffalo fosco"
+  "name": "VT65 water_buffalo fosco 5k",
+  "description": "VAN TUONG 65 - bufalo reduzido para 5 mil triangulos (D-74)"
  },
  {
   "key": "Models.chicken",
   "file": "assets/forgegui/models/galinha_studs_fosco.glb",
   "assetType": "Model",
-  "name": "VT65 chicken fosco"
+  "name": "VT65 chicken fosco 3k",
+  "description": "VAN TUONG 65 - galinha reduzida para 3 mil triangulos (D-74)"
  },
  {
   "key": "Models.canopy_tree",
@@ -704,5 +706,19 @@
   "assetType": "Decal",
   "name": "VT65 ceu dn",
   "description": "VAN TUONG 65 - ceu Poly Haven kloofendal_48d_partly_cloudy_puresky (CC0)"
+ },
+ {
+  "key": "Models.rice_tile_hi",
+  "file": "assets/arroz/arroz_alto.glb",
+  "assetType": "Model",
+  "name": "VT65 arrozal ladrilho perto",
+  "description": "VAN TUONG 65 - arroz em cartoes, desenho proprio (D-74)"
+ },
+ {
+  "key": "Models.rice_tile_lo",
+  "file": "assets/arroz/arroz_baixo.glb",
+  "assetType": "Model",
+  "name": "VT65 arrozal ladrilho longe",
+  "description": "VAN TUONG 65 - arroz em cartoes, desenho proprio (D-74)"
  }
 ]

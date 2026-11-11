@@ -80,8 +80,6 @@
  "Models.tunnel_entrance": "139514064636040",
  "Models.log_bridge": "126447968922363",
  "Models.vc_bunker": "83599657179313",
- "Models.water_buffalo": "88948304033404",
- "Models.chicken": "121576862821828",
  "Models.shrine": "70871952568587",
  "Models.ph_island_tree_01": "129507217098430",
  "Models.ph_island_tree_02": "94197688304927",
@@ -114,5 +112,9 @@
  "Sky.lf": "136525023485486",
  "Sky.rt": "128382971413174",
  "Sky.up": "140458538027287",
- "Sky.dn": "79041152014310"
+ "Sky.dn": "79041152014310",
+ "Models.water_buffalo": "83644982452765",
+ "Models.chicken": "108410985778270",
+ "Models.rice_tile_hi": "120451731988908",
+ "Models.rice_tile_lo": "137999556221661"
 }

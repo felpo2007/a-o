@@ -21,3 +21,5 @@ assets/arvores_src/
 assets/arvores/
 assets/miras/
 assets/ceu/
+# arroz em cartões gerado (tools/make_rice.py, D-74)
+assets/arroz/

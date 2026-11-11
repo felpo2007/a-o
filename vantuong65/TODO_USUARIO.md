@@ -16,6 +16,10 @@ do resto.
      VT65 → em Access Permissions, adicione **game-pass** e **developer-product** com
      leitura e escrita, na experiência VẠN TƯỜNG '65 → Save. Depois me avise: eu rodo
      `create-store PASS_KIT_VETERAN PASS_KIT_ELITE PRODUCT_RESPAWN_INPLACE`.
+  Também tentei pelo Studio (assistente com MCP, 2026-11-11): "Scope 'developer-product:write'
+  has not been granted". Outro caminho é liberar no Studio: Assistant → MCP Permissions →
+  **game-pass:write** e **developer-product:write**, e aprovar a pasta
+  `assets/forgegui/marketing` para o ícone subir.
   2. **Criar à mão** no Creator Dashboard → a experiência → Monetization:
      - Game Pass "Kit Veterano", R$ 149, ícone `assets/forgegui/marketing/gamepass_kit_veterano.jpg`;
      - Game Pass "Kit de Elite", R$ 299, ícone `assets/forgegui/marketing/gamepass_kit_elite.jpg`;

@@ -1,17 +1,30 @@
 # VẠN TƯỜNG '65 — Progresso
 
-## Fase atual (2026-11-10, sessão 6)
+## Fase atual (2026-11-11, sessão 7: teste fase a fase no Studio, D-75)
 | Fase | Estado |
 |---|---|
 | F0 Pesquisa | parcial: critério de 25 m atingido no setor oeste; setor leste depende da CORONA (`research/F0_CORONA.md`) |
-| F1 Greybox | código e place prontos; **fps e travessia ainda sem medição no Studio** |
-| Monetização | implementada (`MONETIZATION.md`); `tools/roblox_cloud.py create-store` cria os itens assim que houver chave Open Cloud |
-| F2 Loop central | código completo + **bots** (D-28); lógica testada fora do Roblox; **não executado no Roblox** |
-| **F3 Fatia vertical** | **código e arte entregues** (setor 3); critério (60 fps e teste de foto) **só medível no Studio** |
-| **F4 Sistemas pesados** | **código entregue**: comandante, logística, morteiros, M48A3, Ontos, LVTP-5, UH-34D. Lógica testada no Lune; critério (30v30 com 6 veículos) **só medível no Roblox** |
-| **Parte 12 Controle** | **código entregue** (vale a partir da F2): layout completo, menus/mapa/comandante sem mouse, mira no analógico, veículos, vibração; 17 testes. **Não testado num controle real** |
-| **F5 Arte total e otimização** | **em andamento**: todos os modelos colocados dentro das metas da Parte 2 (18 por remesh do ForgeGUI e 9 por redução local; o bambu passou pelos dois); arte nos 5 setores com teto, prioridade, desbaste uniforme e streaming; fusão de diques. Critério (60 jogadores a 60 fps em todos os setores) **só medível no Roblox** |
-| **F6 Offensive e lançamento** | **código e página entregues**: modo Offensive, rotação, aba do servidor privado, tutorial por papel, campo de tiro, página do jogo e guia de maturidade (`LANCAMENTO.md`). Critério (beta fechado com 2 sessões cheias sem crash) **só você pode rodar** |
+| F1 Greybox | **testado no Studio**: terreno em 14 s, arte no chão (3.770 de 3.772 a até 2 m) |
+| Monetização | implementada (`MONETIZATION.md`); os 2 Game Passes de kit e o renascer em Robux **esperam a permissão** (TODO_USUARIO) |
+| F2 Loop central | **testado no Studio** com bots (14 x 15): nascimento, espera, raia e balística, dano de explosão |
+| F3 Fatia vertical | **testado no Studio**: deitado, rádio (antena corrigida na D-75), tutorial |
+| F4 Sistemas pesados | **testado no Studio**: 6 veículos parados com assento, túneis e spawn do VC, pá, medevac, morteiro. Critério 30v30 com 6 veículos **só no Roblox** |
+| Parte 12 Controle | 19 regras no Lune; **não testado num controle real** (o Studio do MCP injeta o botão como teclado) |
+| F5 Arte total e otimização | arte nos 5 setores a 100% do plano; 53,2 fps no ponto mais denso da mata (D-67) e 59,6 fps no arrozal (D-74). Critério de 60 jogadores **só no Roblox** |
+| F6 Offensive e lançamento | **testado no Studio**: Offensive com relatório pós-ação, progressão. Beta fechado **só você pode rodar** |
+
+## Sessão 7 (2026-11-11): vida no mapa e teste fase a fase (D-74, D-75)
+- **Arrozal vivo:** arroz em cartões nos 989 tabuleiros plantados (perto: ladrilho de 384
+  triângulos; longe: dossel verde). Muda nova e pousio em parte dos tabuleiros. 59,6 fps no meio
+  dos arrozais.
+- **Animais:** búfalo e galinha reduzidos (4.999 e 3.000 triângulos), 138 animais (eram 79) e
+  manadas com bezerro no arrozal das vilas.
+- **Túneis:** escoras, 44 lamparinas, câmaras de comando/enfermaria, depósito e cozinha; sem capim
+  dentro das galerias.
+- **Vilas:** fumaça de cozinha, potes d'água, medas de palha e lenha; canteiros de muda nas 5
+  vilas.
+- **Autoteste:** 17 verificações (eram 12), **17 ok**. Corrigidos: antena do operador de rádio e
+  ponto do teste da pá.
 
 ## F6: o que foi feito (sessão 6)
 - **Modo Offensive** (`Shared/Offensive.luau`, D-46):

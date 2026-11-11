@@ -650,13 +650,23 @@
       "prep": "6e75801f-90db-4bf0-82a7-e0688ad0e83c",
       "escala": "comprimento 2,6 m (búfalo-do-pântano adulto) (D-66: malha cheia)",
       "dim_studs_xyz": [
-        9.24,
-        5.54,
+        9.25,
+        5.52,
         4.63
       ],
-      "triangulos": 14459,
-      "sha256": "40954bfa6b6cbe44d83cbcdd7212e88e0dbf0328bdcb4783e916f815258cc6a0",
-      "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/6e75801f-90db-4bf0-82a7-e0688ad0e83c/6e6065b8-11c5-4257-809c-08077be7fa8b/Model-40954bfa6b6cbe44d83cbcdd7212e88e0dbf0328bdcb4783e916f815258cc6a0.glb"
+      "triangulos": 4999,
+      "sha256": "fafca415bfe08e7c2140b5e8f02861af06f4a17b4e1705f12e7da00faef81398",
+      "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/6e75801f-90db-4bf0-82a7-e0688ad0e83c/6e6065b8-11c5-4257-809c-08077be7fa8b/Model-40954bfa6b6cbe44d83cbcdd7212e88e0dbf0328bdcb4783e916f815258cc6a0.glb",
+      "reducao_local": {
+        "ferramenta": "tools/decimate_glb.py",
+        "pymeshlab": "2025.7.post1",
+        "faces": 5000,
+        "sha256_origem": "40954bfa6b6cbe44d83cbcdd7212e88e0dbf0328bdcb4783e916f815258cc6a0",
+        "triangulos_origem": 14459,
+        "desvio_max_m": 0.0312,
+        "desvio_medio_m": 0.00226,
+        "motivo": "D-74: mais animais no mapa pelo mesmo custo"
+      }
     },
     {
       "arquivo": "models/galinha_studs.glb",
@@ -666,12 +676,22 @@
       "escala": "altura 0,45 m (galo ga ta) (D-66: malha cheia)",
       "dim_studs_xyz": [
         0.72,
-        1.6,
+        1.59,
         1.75
       ],
-      "triangulos": 16688,
-      "sha256": "a7a96f91b59360e44d10d92f549504ff358e2514de7dbbc2a7be610334dcd252",
-      "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/3d6f5415-06fb-48fe-b763-9016e8dd9742/866ee162-6443-4257-bd44-a94ae4531ccf/Model-a7a96f91b59360e44d10d92f549504ff358e2514de7dbbc2a7be610334dcd252.glb"
+      "triangulos": 3000,
+      "sha256": "ad40e8fc4674e06ed87aab518db61fa948c74ecb3cabdd574fa952f2bd649189",
+      "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/3d6f5415-06fb-48fe-b763-9016e8dd9742/866ee162-6443-4257-bd44-a94ae4531ccf/Model-a7a96f91b59360e44d10d92f549504ff358e2514de7dbbc2a7be610334dcd252.glb",
+      "reducao_local": {
+        "ferramenta": "tools/decimate_glb.py",
+        "pymeshlab": "2025.7.post1",
+        "faces": 3000,
+        "sha256_origem": "a7a96f91b59360e44d10d92f549504ff358e2514de7dbbc2a7be610334dcd252",
+        "triangulos_origem": 16688,
+        "desvio_max_m": 0.0148,
+        "desvio_medio_m": 0.00123,
+        "motivo": "D-74: mais animais no mapa pelo mesmo custo"
+      }
     },
     {
       "arquivo": "models/arvore_dossel_studs.glb",

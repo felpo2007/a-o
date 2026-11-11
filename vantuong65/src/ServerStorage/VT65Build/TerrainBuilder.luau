@@ -184,11 +184,30 @@ function TerrainBuilder.build(world: any, envIn: Env?, opts: Options?): number
 end
 
 -- Escava túneis, poços e a trincheira (caixas "carve" de TunnelGeometry.build).
+-- D-74: a coluna do terreno é toda do material da superfície (capim até o fundo), então a parede
+-- e o chão escavados eram de capim, e o capim animado nascia DENTRO das câmaras e galerias (visto
+-- no Studio, 2026-11-11). Em volta de cada caixa o capim vira terra antes de escavar.
 function TerrainBuilder.carve(boxes: { any }, terrainIn: any?): number
 	local terrain = terrainIn or workspace.Terrain
+	-- dentro da função: o módulo também carrega no Lune (teste do WriteVoxels), sem Enum.Material
+	local GRASSY = { Enum.Material.Grass, Enum.Material.LeafyGrass }
 	local n = 0
 	for _, b in boxes do
 		if b.kind == "carve" then
+			local lo, hi = Vector3.new(math.huge, math.huge, math.huge), Vector3.new(-math.huge, -math.huge, -math.huge)
+			for _, sx in { -1, 1 } do
+				for _, sy in { -1, 1 } do
+					for _, sz in { -1, 1 } do
+						local c = b.cf
+							* Vector3.new(sx * (b.size.X / 2 + 3), sy * (b.size.Y / 2 + 3), sz * (b.size.Z / 2 + 3))
+						lo, hi = lo:Min(c), hi:Max(c)
+					end
+				end
+			end
+			local region = Region3.new(lo, hi):ExpandToGrid(4)
+			for _, m in GRASSY do
+				terrain:ReplaceMaterial(region, 4, m, Enum.Material.Ground)
+			end
 			terrain:FillBlock(b.cf, b.size, Enum.Material.Air)
 			n += 1
 		end
