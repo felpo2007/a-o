@@ -1,11 +1,13 @@
 --!strict
 -- Menus de entrada e mapa tático (F2 + Parte 12.5).
--- Painel lateral: facção → squad → papel. Abre com foco no 1º botão; A confirma, B volta.
+-- Tela de deslocamento (DeployScreen, tela cheia): lado → squad → papel → inserção, com prévia 3D
+-- do soldado e a cena do mapa ao fundo (LobbyScene). Abre com foco no 1º cartão; A confirma, B volta.
 -- Mapa (tocar View / M): setores e pontos fortes, nunca inimigos (Parte 9.5). No controle, o
 -- analógico esquerdo move um cursor com ímã que gruda nos pontos de spawn e nos pontos fortes; o
 -- direito dá zoom; LB/RB pulam entre spawns liberados; A escolhe; X marca; Y troca de papel;
 -- B/Select fecham. A navegação automática do Roblox fica desligada no mapa (a nossa assume).
 -- Modos: "spawn" (morto), "view" (aberto em jogo) e "target" (comandante escolhendo o alvo).
+-- Tudo fica num "palco" de projeto de 1280 x 720 que escala para caber na tela (UIScale).
 local GuiService = game:GetService("GuiService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -15,9 +17,10 @@ local InputMap = require(ReplicatedStorage.Shared.InputMap)
 local Comms = require(ReplicatedStorage.Shared.Comms)
 local MapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any
 local Net = require(ReplicatedStorage.Shared.Net)
-local Roles = require(ReplicatedStorage.Shared.Roles)
 local Bus = require(script.Parent.Bus)
+local DeployScreen = require(script.Parent.DeployScreen)
 local Input = require(script.Parent.Input)
+local LobbyScene = require(script.Parent.LobbyScene)
 local UiKit = require(script.Parent.UiKit)
 
 local player = Players.LocalPlayer
@@ -25,6 +28,23 @@ local gui = UiKit.screen("VT65Menus", 20)
 gui.IgnoreGuiInset = true
 
 local PAPER, INK = UiKit.PAPER, UiKit.INK
+
+-- palco de projeto (1280 x 720), centrado e escalado para caber; o fundo em tela cheia é do LobbyScene
+local DESIGN_W, DESIGN_H = 1280, 720
+local stage = Instance.new("Frame")
+stage.Name = "Stage"
+stage.AnchorPoint = Vector2.new(0.5, 0.5)
+stage.Position = UDim2.fromScale(0.5, 0.5)
+stage.Size = UDim2.fromOffset(DESIGN_W, DESIGN_H)
+stage.BackgroundTransparency = 1
+stage.Parent = gui
+local stageScale = Instance.new("UIScale")
+stageScale.Parent = stage
+
+-- tamanho de texto no palco: na TV, nunca abaixo de 24 px na tela
+local function TS(size: number): number
+	return UiKit.textAt(size, stageScale.Scale)
+end
 
 local function frame(parent: Instance, size: UDim2, pos: UDim2): Frame
 	local f = Instance.new("Frame")
@@ -43,17 +63,35 @@ local function clear(f: Instance)
 	end
 end
 
--- painel lateral (facção / squad / papel)
-local side = frame(gui, UDim2.fromOffset(if UiKit.tv() then 460 else 340, 560), UDim2.fromOffset(16, 80))
-local sideList = Instance.new("UIListLayout")
-sideList.Padding = UDim.new(0, 6)
-sideList.SortOrder = Enum.SortOrder.LayoutOrder
-sideList.Parent = side
+-- tela de deslocamento (lado / squad / papel / inserção), em tela cheia no palco
+local side = DeployScreen.root
+side.Parent = stage
 
--- mapa tático: janela fixa; a "tela" interna escala com o zoom
-local mapFrame = frame(gui, UDim2.fromOffset(720, 432), UDim2.new(0, if UiKit.tv() then 500 else 380, 0, 80))
+-- mapa tático: janela fixa (5:3) presa como carta numa prancheta; a "tela" interna escala com o zoom
+local MAP_W, MAP_H, MAP_Y = 810, 486, 160
+local mapFrame = frame(stage, UDim2.fromOffset(MAP_W, MAP_H), UDim2.fromOffset(430, MAP_Y))
 mapFrame.ClipsDescendants = true
 mapFrame.Visible = false
+mapFrame.ZIndex = 2 -- por cima da tela de deslocamento (passo da inserção)
+local mapEdge = Instance.new("UIStroke")
+mapEdge.Thickness = 4
+mapEdge.Color = UiKit.DRAB
+mapEdge.Parent = mapFrame
+-- aba datilografada em cima da carta (fora do mapFrame, que corta os filhos)
+local mapTab = Instance.new("TextLabel")
+mapTab.Size = UDim2.fromOffset(MAP_W, 28)
+mapTab.BackgroundColor3 = UiKit.DRAB
+mapTab.BorderSizePixel = 0
+mapTab.TextColor3 = UiKit.KHAKI
+mapTab.Font = Enum.Font.SpecialElite
+mapTab.TextXAlignment = Enum.TextXAlignment.Left
+mapTab.TextSize = TS(16)
+mapTab.Visible = false
+mapTab.ZIndex = 2
+mapTab.Parent = stage
+local mapTabPad = Instance.new("UIPadding")
+mapTabPad.PaddingLeft = UDim.new(0, 12)
+mapTabPad.Parent = mapTab
 local canvas = Instance.new("Frame")
 canvas.Name = "Keep"
 canvas.BackgroundColor3 = PAPER
@@ -65,11 +103,11 @@ status.Name = "Keep"
 status.AnchorPoint = Vector2.new(0, 1)
 status.Position = UDim2.new(0, 0, 1, 0)
 status.Size = UDim2.new(1, 0, 0, if UiKit.tv() then 34 else 26)
-status.BackgroundColor3 = Color3.fromRGB(40, 36, 28)
-status.BackgroundTransparency = 0.2
-status.TextColor3 = Color3.new(1, 1, 1)
-status.Font = Enum.Font.GothamMedium
-status.TextSize = UiKit.text(15)
+status.BackgroundColor3 = UiKit.NIGHT
+status.BackgroundTransparency = 0.15
+status.TextColor3 = UiKit.KHAKI
+status.Font = Enum.Font.SpecialElite
+status.TextSize = TS(15)
 status.ZIndex = 5
 status.Parent = mapFrame
 local cursorUI = Instance.new("Frame")
@@ -200,29 +238,36 @@ local function drawMap()
 		corner.Parent = c
 		c.Parent = canvas
 	end
+	-- rótulo perto da borda abre para dentro da carta: o QG dos EUA fica a 50 m da borda leste e o
+	-- "QG PRONTO" saía cortado (captura do lobby, D-64)
+	local function edgeAnchor(uv: Vector2): Vector2
+		local ax = if uv.X < 0.12 then 0 elseif uv.X > 0.88 then 1 else 0.5
+		local ay = if uv.Y < 0.08 then 0 elseif uv.Y > 0.92 then 1 else 0.5
+		return Vector2.new(ax, ay)
+	end
 	for _, sp in matchState.points do
 		local d = Instance.new("TextLabel")
-		d.AnchorPoint = Vector2.new(0.5, 0.5)
 		local uv = toUV(sp.x, sp.z)
+		d.AnchorPoint = edgeAnchor(uv)
 		d.Position = UDim2.fromScale(uv.X, uv.Y)
 		d.Size = UDim2.fromOffset(140, 20)
 		d.BackgroundTransparency = 1
 		d.TextColor3 = INK
 		d.Font = Enum.Font.Code
-		d.TextSize = UiKit.text(13)
+		d.TextSize = TS(13)
 		d.Text = "◎ " .. sp.name
 		d.Parent = canvas
 	end
 	if mode == "spawn" then
 		for _, pt in spawnList do
 			local b = Instance.new("TextButton")
-			b.AnchorPoint = Vector2.new(0.5, 0.5)
 			local uv = toUV(pt.x, pt.z)
+			b.AnchorPoint = edgeAnchor(uv)
 			b.Position = UDim2.fromScale(uv.X, uv.Y)
 			b.Size = UDim2.fromOffset(136, if UiKit.tv() then 44 else 34)
 			b.BackgroundColor3 = if pt.blocked then Color3.fromRGB(120, 60, 50) else Color3.fromRGB(60, 80, 50)
 			b.TextColor3 = Color3.new(1, 1, 1)
-			b.TextSize = UiKit.text(12)
+			b.TextSize = TS(12)
 			b.Font = Enum.Font.GothamMedium
 			b.Selectable = false -- no controle, o cursor com ímã escolhe
 			b.Text = pt.name
@@ -271,70 +316,20 @@ local function drawMap()
 	status.Text = string.format("%s — %02d:%02d%s", matchState.mode, t // 60, t % 60, extra)
 end
 
-local function drawSide()
-	clear(side)
-	local faction = player:GetAttribute("Faction")
-	if not faction then
-		UiKit.label(side, "Escolha o lado")
-		UiKit.button(side, "Fuzileiros dos EUA (USMC)", function()
-			Net.event("Team_Choose"):FireServer("US")
-		end, 1)
-		UiKit.button(side, "1º Regimento (Viet Cong)", function()
-			Net.event("Team_Choose"):FireServer("VC")
-		end, 2)
-	elseif not player:GetAttribute("SquadId") then
-		UiKit.label(side, "Squads")
-		if squadState then
-			local n = 0
-			for _, s in squadState.squads do
-				n += 1
-				local size = Roles.units[faction][s.unit].size
-				UiKit.button(side, string.format("Entrar: %s (%d/%d)", s.name, #s.members, size), function()
-					Net.event("Squad_Action"):FireServer({ op = "join", id = s.id })
-				end, n)
-			end
-			for unit, def in Roles.units[faction] do
-				local ok = not def.heavy or (squadState.size or 0) >= Roles.HEAVY_UNLOCK
-				if ok then
-					n += 1
-					UiKit.button(side, "Criar: " .. unit, function()
-						Net.event("Squad_Action"):FireServer({ op = "create", unit = unit })
-					end, n)
-				end
-			end
-		end
-	elseif not player:GetAttribute("Role") then
-		UiKit.label(side, "Papel")
-		local mySquad: any = nil
-		if squadState then
-			for _, s in squadState.squads do
-				if s.id == player:GetAttribute("SquadId") then
-					mySquad = s
-				end
-			end
-		end
-		local n = 0
-		if mySquad then
-			for id, r in Roles.roles do
-				if r.unit == mySquad.unit and Roles.loadout[faction][id] then
-					n += 1
-					UiKit.button(side, r.name .. " — " .. table.concat(Roles.loadout[faction][id], ", "), function()
-						Net.event("Role_Choose"):FireServer(id)
-					end, n)
-				end
-			end
-		end
-		UiKit.button(side, "Sair do squad", function()
-			Net.event("Squad_Action"):FireServer({ op = "leave" })
-		end, 99)
-	elseif not alive() then
-		UiKit.label(side, "Escolha onde renascer no mapa")
-		local _, padText = Input.glyph("map_role", "map")
-		UiKit.label(side, string.format("Trocar de papel: %s (+15 s)", padText), 14)
-	end
+-- posição da carta: à direita da ficha de inserção (morto) ou no centro (aberta em jogo / alvo)
+local function placeMap()
+	local insertion = mode == "spawn" and side.Visible
+	local x = if insertion then 430 else math.floor((DESIGN_W - MAP_W) / 2)
+	mapFrame.Position = UDim2.fromOffset(x, MAP_Y)
+	mapTab.Position = UDim2.fromOffset(x, MAP_Y - 32)
+	mapTab.Visible = mapFrame.Visible
+	mapTab.Text = if mode == "spawn"
+		then "CARTA DE INSERÇÃO · escolha um ponto PRONTO"
+		elseif mode == "target" then "CARTA TÁTICA · ALVO DA MISSÃO DE FOGO"
+		else "CARTA TÁTICA · setores e pontos fortes (sem inimigos)"
 end
 
--- o painel lateral é um "menu" (personagem parado, A confirma) enquanto não houver papel
+-- a tela de deslocamento é um "menu" (personagem parado, A confirma) enquanto não houver papel
 local sideAsMenu = false
 local mapOpenState = false
 
@@ -377,15 +372,34 @@ local function refresh()
 			mode = "view"
 		end
 	end
-	drawSide()
+	DeployScreen.render(squadState)
+	placeMap()
 	if mapFrame.Visible then
 		drawMap()
 	end
+	local faction = player:GetAttribute("Faction")
+	LobbyScene.update(side.Visible, if type(faction) == "string" then faction else nil)
 	syncInput()
 end
+DeployScreen.changed = refresh -- voltar um passo (B) e trocar de papel pelo botão mudam só o cliente
 
 UiKit.watch(side, function()
 	return side.Visible and not mapFrame.Visible
+end)
+
+-- B / Backspace na tela de deslocamento. Outro menu por cima (menu do jogo, loja, relatório) fecha
+-- primeiro: os handlers de ui_back rodam todos no mesmo aperto, então olha também o quadro anterior.
+local menusBefore = 0
+RunService.Heartbeat:Connect(function()
+	menusBefore = Input.state.menus
+end)
+Input.on("ui_back", "press", function()
+	if Input.state.menus > 1 or menusBefore > 1 then
+		return
+	end
+	if side.Visible and not mapFrame.Visible then
+		DeployScreen.back()
+	end
 end)
 
 -- ===== entradas do mapa =====
@@ -544,20 +558,48 @@ player.CharacterAdded:Connect(function(char)
 end)
 Input.DeviceChanged:Connect(refresh)
 
--- aviso enquanto o servidor gera o terreno
+-- aviso enquanto o servidor gera o terreno (faixa datilografada à direita dos passos)
 local loading = Instance.new("TextLabel")
-loading.AnchorPoint = Vector2.new(0.5, 0)
-loading.Position = UDim2.fromScale(0.5, 0.02)
-loading.Size = UDim2.fromOffset(620, 44)
-loading.BackgroundColor3 = PAPER
-loading.TextColor3 = INK
-loading.Font = Enum.Font.GothamMedium
-loading.TextSize = UiKit.text(18)
-loading.Text = "Preparando o campo de batalha (terreno de 4 x 2,4 km)…"
-loading.Parent = gui
+loading.Position = UDim2.fromOffset(700, 84)
+loading.Size = UDim2.fromOffset(540, 22)
+loading.BackgroundColor3 = UiKit.NIGHT
+loading.BackgroundTransparency = 0.35
+loading.BorderSizePixel = 0
+loading.TextColor3 = UiKit.KHAKI
+loading.TextXAlignment = Enum.TextXAlignment.Right
+loading.Font = Enum.Font.SpecialElite
+loading.TextSize = TS(16)
+loading.Text = "● Preparando o campo de batalha (terreno de 4 x 2,4 km)…"
+loading.ZIndex = 3
+loading.Parent = stage
+local loadingPad = Instance.new("UIPadding")
+loadingPad.PaddingRight = UDim.new(0, 8)
+loadingPad.Parent = loading
 local function loadingState()
 	loading.Visible = ReplicatedStorage:GetAttribute("TerrainReady") == false
 end
 ReplicatedStorage:GetAttributeChangedSignal("TerrainReady"):Connect(loadingState)
 loadingState()
+
+-- palco: cabe na tela inteira (na TV, com margem de segurança e nunca menor que 1:1)
+local function fit()
+	local s = gui.AbsoluteSize
+	if s.X < 10 or s.Y < 10 then
+		return
+	end
+	local k = math.min(s.X / DESIGN_W, s.Y / DESIGN_H)
+	if UiKit.tv() then
+		k = math.max(k * 0.92, 1)
+	end
+	stageScale.Scale = k
+	DeployScreen.setScale(k)
+	status.TextSize = TS(15)
+	mapTab.TextSize = TS(16)
+	loading.TextSize = TS(16)
+	if mapFrame.Visible then
+		drawMap()
+	end
+end
+gui:GetPropertyChangedSignal("AbsoluteSize"):Connect(fit)
+fit()
 refresh()

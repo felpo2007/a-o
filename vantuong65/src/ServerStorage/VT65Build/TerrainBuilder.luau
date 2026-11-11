@@ -45,11 +45,13 @@ function TerrainBuilder.build(world: any, envIn: Env?, opts: Options?): number
 			end,
 		}
 	local Enum = env.Enum
+	-- arrozal = Grass (D-64): a grama animada do Roblox faz o arroz verde de agosto debaixo da lâmina
+	-- d'água. Passos e veículos continuam "arrozal" porque o raio acerta a lâmina (PaddyWater) antes.
 	local MATERIAL: { [number]: any } = {
 		[0] = Enum.Material.Sand,
 		[1] = Enum.Material.Sand,
-		[2] = Enum.Material.Mud,
-		[3] = Enum.Material.Ground,
+		[2] = Enum.Material.Grass,
+		[3] = Enum.Material.LeafyGrass, -- chão de mata e quintal: folhas secas e capim (D-64)
 		[4] = Enum.Material.Grass,
 		[5] = Enum.Material.Mud,
 	}

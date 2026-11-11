@@ -5,8 +5,11 @@
 local ArtBudget = {}
 
 ArtBudget.MAX = { veg = 3000, prop = 5000, hero = 20000 } :: { [string]: number }
--- teto de arte por setor; PLACEHOLDER conservador até medir fps no Studio (D-45)
-ArtBudget.SECTOR_MAX = 2500000
+-- teto de arte por setor; PLACEHOLDER até medir fps no Studio com a mata (D-45, D-64). O plano
+-- inteiro da mata pede até 15,5 milhões no setor 2 (tools/ArtEstimate, sem teto).
+ArtBudget.SECTOR_MAX = 16000000
+-- multiplica a densidade da mata (Vegetation.plan); 1 = valores de projeto da D-64
+ArtBudget.JUNGLE_DENSITY = 1
 -- chave sem número medido: assume um modelo não reduzido (o pior caso do manifest é ~15,8k)
 ArtBudget.DEFAULT = 16000
 
@@ -105,7 +108,7 @@ ArtBudget.TRIS = {
 -- Acima da meta, com o motivo. O teste falha se um modelo passar da meta sem estar aqui, ou se
 -- uma exceção ficar velha (o modelo já cabe na meta).
 ArtBudget.EXCEPTIONS = {
-	rice_patch = "não é colocado: o arrozal é terreno + diques (D-14)",
+	rice_patch = "só 3 canteiros de 8 mudas, perto das vilas; o arrozal é terreno com grama (D-64)",
 } :: { [string]: string }
 
 -- variantes sorteadas para as casas (o teste exige que todas caibam na meta)

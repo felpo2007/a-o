@@ -9,9 +9,17 @@ local Features = require("../src/ServerStorage/VT65Build/Data/Features") :: any
 local Geometry = require("../src/ReplicatedStorage/Shared/Geometry")
 local MapConfig = require("../src/ReplicatedStorage/Shared/MapConfig") :: any
 local Tunnels = require("../src/ReplicatedStorage/Shared/Tunnels") :: any
+local Tutorial = require("../src/ReplicatedStorage/Shared/Tutorial") :: any
+local Vegetation = require("../src/ServerScriptService/Modules/Vegetation")
+local WorldData = require("../src/ServerStorage/VT65Build/WorldData")
+local Grid = require("../src/ServerStorage/VT65Build/Data/Grid") :: any
 
 export type Sector = { count: number, tris: number, factor: number, demand: number }
-export type Result = { sectors: { [number]: Sector }, byKey: { [string]: number } }
+export type Result = {
+	sectors: { [number]: Sector },
+	byKey: { [string]: number },
+	jungle: { [number]: { planned: number, factor: number } },
+}
 
 local M = 0.28
 local SLICE = { [1] = true, [2] = true, [3] = true, [4] = true, [5] = true }
@@ -127,5 +135,80 @@ return function(): Result
 			add("elephant_grass", j.s, j.n * f / 2)
 		end
 	end
-	return { sectors = sectors, byKey = byKey }
+	-- 6) QGs, quintais, tocas e canteiros de arroz (D-64): valores esperados do AssetLoader
+	add("sandbags", at(MapConfig.HQ.US.x, MapConfig.HQ.US.z), 8)
+	add("bamboo_fence", at(MapConfig.HQ.VC.x, MapConfig.HQ.VC.z), 12)
+	add("granary", at(MapConfig.HQ.VC.x, MapConfig.HQ.VC.z), 2)
+	add("vc_bunker", at(MapConfig.HQ.VC.x, MapConfig.HQ.VC.z), 1)
+	for i = 1, #hs, 4 do
+		local s = at(hs[i], hs[i + 1])
+		add("granary", s, 0.15)
+		add("bamboo_fence", s, 0.3 * 3)
+	end
+	for _, sp in MapConfig.Strongpoints do
+		if sp.sector <= 3 then
+			add("spider_hole", sp.sector, 3)
+		end
+	end
+	for _, l in MapConfig.Locations do
+		if l.name == "An Cường (2)" or l.name == "Nam Yên (4)" or l.name == "An Thới (2)" then
+			add("rice_patch", at(l.x, l.z), 8)
+		end
+	end
+	-- 7) mata por uso do solo, por último, desbastada pelo que sobrou do teto (mesmo plano do jogo)
+	local chunks = {}
+	for _, name in Grid.heightChunks do
+		table.insert(chunks, (require :: any)("../src/ServerStorage/VT65Build/Data/" .. name))
+	end
+	local world = WorldData.load(Grid, chunks)
+	local housesXZ, tunnelXZ = {}, {}
+	for i = 1, #hs, 4 do
+		table.insert(housesXZ, hs[i])
+		table.insert(housesXZ, hs[i + 1])
+	end
+	for _, n in Tunnels.nodes do
+		local x, z = Tunnels.toWorld(cx, cz, n.x, n.z)
+		table.insert(tunnelXZ, x)
+		table.insert(tunnelXZ, z)
+	end
+	-- raias: a direção preferida (no jogo, a escolhida pelo TrainingService), 330 m a partir do QG
+	local corridors = {}
+	for f, hq in MapConfig.HQ do
+		local lane = Tutorial.RANGE_LANE[f]
+		if lane then
+			local x2, z2 = hq.x + lane.dir[1] * 330 / M, hq.z + lane.dir[2] * 330 / M
+			table.insert(corridors, { x1 = hq.x, z1 = hq.z, x2 = x2, z2 = z2, w = 10 / M })
+		end
+	end
+	local plan = Vegetation.plan({
+		classAt = function(x: number, z: number): number
+			return world:classAt(x, z)
+		end,
+		bounds = MapConfig.Bounds,
+		cell = Grid.cellStuds,
+		exclude = Vegetation.exclusions(MapConfig, housesXZ, tunnelXZ),
+		corridors = corridors,
+		density = ArtBudget.JUNGLE_DENSITY,
+		seed = 1965,
+		rng = Rng.new(19650818 + 64),
+	})
+	local demand: { [number]: number } = {}
+	local planned: { [number]: { [string]: number } } = {}
+	for _, it in plan do
+		local s = at(it.x, it.z)
+		demand[s] = (demand[s] or 0) + ArtBudget.tris(it.key)
+		planned[s] = planned[s] or {}
+		planned[s][it.key] = (planned[s][it.key] or 0) + 1
+	end
+	local jungle: { [number]: { planned: number, factor: number } } = {}
+	for s, d in demand do
+		local f = ArtBudget.factor(sec(s).tris, d)
+		local n = 0
+		for key, c in planned[s] do
+			add(key, s, c * f)
+			n += c
+		end
+		jungle[s] = { planned = n, factor = f }
+	end
+	return { sectors = sectors, byKey = byKey, jungle = jungle }
 end

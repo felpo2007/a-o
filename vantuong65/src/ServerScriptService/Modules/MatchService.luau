@@ -43,18 +43,139 @@ local function limitSeconds(): number
 	return (if MatchService.mode == "Skirmish" then Capture.C.skirmishMinutes else Capture.C.warfareMinutes) * 60
 end
 
--- marcadores do greybox: só o ponto sorteado de cada setor ativo
+-- Bandeira no ponto forte sorteado de cada setor ativo (D-64). Antes era um disco amarelo de
+-- ForceField, do greybox. O disco continua no mapa (atributos do ponto), mas invisível. A bandeira
+-- troca com o dono: EUA, Frente (VC) ou só o mastro (neutro).
+local M = 0.28
+local flagFolder: Folder? = nil
+local flags: { [number]: Model } = {}
+
+local function groundAt(x: number, z: number): number
+	local params = RaycastParams.new()
+	params.FilterType = Enum.RaycastFilterType.Include
+	params.FilterDescendantsInstances = { workspace.Terrain }
+	local hit = workspace:Raycast(Vector3.new(x, 2000, z), Vector3.new(0, -4000, 0), params)
+	return if hit then hit.Position.Y else 0
+end
+
+local function flagPart(parent: Instance, size: Vector3, cf: CFrame, color: Color3, mat: Enum.Material): Part
+	local p = Instance.new("Part")
+	p.Size, p.CFrame, p.Color, p.Material = size, cf, color, mat
+	p.Anchored, p.CanCollide, p.CanQuery, p.CanTouch, p.CastShadow = true, false, false, false, false
+	p.Parent = parent
+	return p
+end
+
+-- pano de 1,5 x 1,0 m preso no topo do mastro, para +X; camadas mais grossas na frente (sem z-fighting)
+local function paintFlag(m: Model, owner: string)
+	if m:GetAttribute("Owner") == owner then
+		return
+	end
+	m:SetAttribute("Owner", owner)
+	local old = m:FindFirstChild("Cloth")
+	if old then
+		old:Destroy()
+	end
+	if owner ~= "US" and owner ~= "VC" then
+		return -- neutro: só o mastro
+	end
+	local cloth = Instance.new("Model")
+	cloth.Name = "Cloth"
+	local top = m:GetAttribute("Top") :: CFrame
+	local W, H = 1.5 / M, 1.0 / M
+	local function rect(u0: number, v0: number, w: number, h: number, t: number, color: Color3)
+		local cf = top * CFrame.new((u0 + w / 2) * W, -(v0 + h / 2) * H, 0)
+		flagPart(cloth, Vector3.new(w * W, h * H, t / M), cf, color, Enum.Material.Fabric)
+	end
+	if owner == "US" then
+		rect(0, 0, 1, 1, 0.02, Color3.fromRGB(236, 232, 220))
+		for k = 0, 6, 2 do
+			rect(0, k / 7, 1, 1 / 7, 0.026, Color3.fromRGB(160, 36, 44))
+		end
+		rect(0, 0, 0.4, 4 / 7, 0.032, Color3.fromRGB(40, 48, 92))
+	else
+		rect(0, 0, 1, 0.5, 0.02, Color3.fromRGB(196, 38, 36))
+		rect(0, 0.5, 1, 0.5, 0.02, Color3.fromRGB(30, 92, 168))
+		local star = top * CFrame.new(0.5 * W, -0.5 * H, 0) * CFrame.Angles(0, 0, math.rad(45))
+		flagPart(
+			cloth,
+			Vector3.new(0.22 / M, 0.22 / M, 0.03 / M),
+			star,
+			Color3.fromRGB(250, 214, 40),
+			Enum.Material.Fabric
+		)
+	end
+	cloth.Parent = m
+end
+
+local function updateFlags()
+	local st = MatchService.state
+	if not st then
+		return
+	end
+	for s, m in flags do
+		paintFlag(m, st.owner[s] or "Neutral")
+	end
+end
+
+local waitingTerrain = false
 local function showMarkers()
 	local st = MatchService.state
-	local folder = workspace:FindFirstChild("Map") and (workspace :: any).Map:FindFirstChild("Strongpoints")
+	local map = workspace:FindFirstChild("Map")
+	local folder = map and map:FindFirstChild("Strongpoints")
 	if not (folder and st) then
 		return
 	end
-	for _, p in folder:GetChildren() do
-		local chosen = MatchService.points[p:GetAttribute("Sector")]
-		local on = chosen ~= nil and chosen.name == p.Name and st.active[chosen.sector]
-		p.Transparency = if on then 0.6 else 1
+	-- o mastro vai no chão real: o terreno é gerado em runtime (~50 s)
+	if ReplicatedStorage:GetAttribute("TerrainReady") ~= true then
+		if not waitingTerrain then
+			waitingTerrain = true
+			task.spawn(function()
+				while ReplicatedStorage:GetAttribute("TerrainReady") ~= true do
+					ReplicatedStorage:GetAttributeChangedSignal("TerrainReady"):Wait()
+				end
+				waitingTerrain = false
+				showMarkers()
+			end)
+		end
+		return
 	end
+	for _, p in folder:GetChildren() do
+		if p:IsA("BasePart") then
+			p.Transparency = 1
+		end
+	end
+	if not flagFolder then
+		local f = Instance.new("Folder")
+		f.Name = "Flags"
+		f.Parent = map
+		flagFolder = f
+	end
+	for s, m in flags do
+		m:Destroy()
+		flags[s] = nil
+	end
+	for s, sp in MatchService.points do
+		if st.active[s] then
+			local m = Instance.new("Model")
+			m.Name = "Flag_" .. sp.name
+			local y = groundAt(sp.x, sp.z)
+			local poleH = 7 / M
+			local pole = flagPart(
+				m,
+				Vector3.new(poleH, 0.08 / M, 0.08 / M),
+				CFrame.new(sp.x, y + poleH / 2, sp.z) * CFrame.Angles(0, 0, math.pi / 2),
+				Color3.fromRGB(92, 76, 54),
+				Enum.Material.Wood
+			)
+			pole.Shape = Enum.PartType.Cylinder
+			pole.CastShadow = true
+			m:SetAttribute("Top", CFrame.new(sp.x + 0.05 / M, y + poleH - 0.15 / M, sp.z))
+			m.Parent = flagFolder
+			flags[s] = m
+		end
+	end
+	updateFlags()
 end
 
 function MatchService.newMatch(mode: string?)
@@ -251,6 +372,7 @@ function MatchService.start()
 						showMarkers() -- a frente andou: o próximo ponto forte aparece
 					end
 				end
+				updateFlags()
 				local elapsed = os.clock() - MatchService.startedAt
 				-- chuva (no Studio, workspace:SetAttribute("VT65DevRain", 0..1) força a intensidade)
 				local dev = if RunService:IsStudio() then workspace:GetAttribute("VT65DevRain") else nil

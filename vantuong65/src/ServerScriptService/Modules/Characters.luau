@@ -68,13 +68,16 @@ local function template(key: string): Model?
 	return m :: Model
 end
 
-local function weldTo(key: string, part: BasePart?, offset: CFrame, model: Model)
+local function weldTo(key: string, part: BasePart?, offset: CFrame, model: Model, scale: number?)
 	local tpl = template(key)
 	if not (tpl and part) then
 		return
 	end
 	local acc = tpl:Clone()
 	acc.Name = "Gear_" .. key
+	if scale then
+		acc:ScaleTo(acc:GetScale() * scale)
+	end
 	local parts = {}
 	for _, d in acc:GetDescendants() do
 		if d:IsA("BasePart") then
@@ -140,12 +143,15 @@ function Characters.dress(model: Model, faction: string, equipped: { [string]: s
 	end
 	local head = model:FindFirstChild("Head") :: BasePart?
 	local torso = model:FindFirstChild("UpperTorso") :: BasePart?
-	local up = if head then CFrame.new(0, head.Size.Y * 0.32, 0) else CFrame.new()
+	-- O capacete tem tamanho real (0,29 m ≈ 1 stud), mas a cabeça do avatar do Roblox tem 1,2 studs:
+	-- ficava rente à cabeça e parecia uma faixa escura, não um M1 (captura do lobby, D-64).
+	local up = if head then CFrame.new(0, head.Size.Y * 0.38, 0) else CFrame.new()
+	local HEADGEAR = 1.15
 	if faction == "US" then
-		weldTo("us_m1_helmet", head, up, model)
+		weldTo("us_m1_helmet", head, up, model, HEADGEAR)
 		weldTo("us_m1955_vest", torso, CFrame.new(), model)
 	elseif eq.helmet == "vc_pith_helmet" or eq.helmet == "vc_jungle_hat" then
-		weldTo(eq.helmet, head, up, model)
+		weldTo(eq.helmet, head, up, model, HEADGEAR)
 	end
 end
 

@@ -1127,3 +1127,106 @@ mais mar).
   - o modo Offensive se chama "EUA atacam do leste";
   - o navio do tiro naval continua 3 km a leste da praia real, fora do mapa;
   - a borda do terreno aparece como horizonte plano a 150 m da área jogável.
+
+## D-64 — Mata, chão, luz e lobby (2026-11-10)
+**Pedido do usuário:** "está horrível assim sem nada". Ele quer:
+- mata densa, com as capturas de Hell Let Loose: Vietnam como referência;
+- chão menos genérico;
+- todos os modelos do ForgeGUI em uso;
+- lobby e gráficos novos;
+- "4K".
+
+**Diagnóstico:**
+- A arte só ia para vilas, sebes e colinas. Mata e capim ficavam em terreno pelado.
+- Quatro modelos publicados nunca eram usados.
+- O chão tinha as cores padrão do Roblox.
+- As folhas refletiam o céu como cromo, porque todo GLB do gerador vem com mapa de metal.
+- A partida começava às 06:30, com o sol a −0,9°, ou seja, no escuro.
+
+**Decisões:**
+- **Mata segue a carta** (`Modules/Vegetation.luau`, módulo puro):
+  - a carta manda no "onde": 78% da área é arrozal e continua aberta;
+  - **vila/mata** (3,6%): bosque fechado de árvore, coqueiro, bambu, bananeira, arbusto e capim
+    alto, com 0,75 planta por célula de 20 m²;
+  - **capim** (18%): moitas em manchas de ~70 m (ruído) e capim alto solto no resto;
+  - **riacho**: barranco de bambu;
+  - **cortina fora da área** (40 a 100 m da borda): árvores grandes que escondem o fim do terreno.
+    É moldura de arte, não é a carta.
+  - Zonas livres:
+    - QG dos EUA 150 m e do VC 100 m (depósitos e pouso);
+    - casas 6,5 m;
+    - mastros 8 m;
+    - bocas de túnel 5 m;
+    - trincheira;
+    - raias do campo de tiro.
+  - **Plano:** 17,4 mil plantas, com 25,4 mil modelos no mapa ao todo (61 milhões de triângulos
+    sem LOD). `SECTOR_MAX` passou para 16 milhões; `ArtBudget.JUNGLE_DENSITY` é o botão de ajuste.
+  - Se o usuário quiser mata no lugar do arrozal, é só mudar a classe 2 em `Vegetation.plan`. Isso
+    contraria a carta de 1965 (princípio 1), por isso não é o padrão.
+- **Todos os modelos em uso:**
+  - celeiro e cerca de bambu nos quintais e no QG do VC;
+  - tocas de atirador em volta dos pontos fortes dos setores 1 a 3;
+  - 3 canteiros de arroz perto das vilas;
+  - anel de sacos de areia no QG dos EUA.
+- **Modelos foscos:**
+  - `tools/matte_glb.py` zera o metal e tira a textura de metal/rugosidade (rugosidade fixa 0,9) dos
+    24 modelos que não são de metal: vegetação, casas, estruturas e animais;
+  - os 24 foram republicados com IDs novos;
+  - armas e veículos continuam com metal.
+- **Luz:**
+  - a partida começa às **07:00**, com o sol a 6,2° no leste-nordeste;
+  - quem olha para o leste tem contraluz dourada;
+  - o servidor privado ainda pode escolher 06:30;
+  - Atmosphere quente: cor (232, 196, 142), decaimento (150, 112, 74), névoa 2,5 que cai até 08:00;
+  - ColorCorrection com tinta quente;
+  - Bloom e SunRays mais fortes;
+  - nuvens dinâmicas.
+- **Chão:**
+  - arrozal = Grass, com a grama animada do Roblox fazendo o arroz verde sob a lâmina d'água;
+  - mata = LeafyGrass;
+  - cores próprias por material;
+  - a lâmina d'água ficou mais escura e menos espelhada (antes refletia o céu azul);
+  - diques cobertos de capim.
+  - Passos e veículos continuam "arrozal", porque o raio acerta a lâmina antes do terreno.
+- **Grama animada:** `Terrain.Decoration` e `GrassLength` não podem ser escritos por script do jogo
+  ("lacking capability PluginOrOpenCloud"). Eles vêm ligados no arquivo do place:
+  `tools/bake_place` cria o Terrain.
+- **Marcadores:**
+  - o disco amarelo do ponto forte ativo virou mastro com bandeira (EUA, Frente ou só o mastro
+    quando neutro), que troca com o dono;
+  - as placas dos QGs ficaram invisíveis e sem colisão.
+- **"4K":** o Roblox desenha na resolução do monitor de quem joga, e a qualidade gráfica é escolha
+  do jogador. O que dá para fazer é arte e luz boas na qualidade alta, e foi isso que foi feito.
+- **Lobby (tela de deslocamento), identidade própria:** dossiê de operações de 1965. As capturas de
+  HLL foram só referência de clima; o layout delas não foi copiado (D-09).
+  - Fichas de arquivo creme com carimbos ("USMC", "QUÂN GIẢI PHÓNG"), pastas pardas e fundo oliva.
+  - Fontes: `SpecialElite` (máquina de escrever) e `Oswald` (títulos).
+  - Quatro passos: lado → squad → papel → inserção (a carta de spawn).
+  - Prévia 3D do soldado (ViewportFrame) com o uniforme e a arma do papel. Os manequins são montados
+    no servidor (`PreviewService`).
+  - Fundo: a câmera sobre o mapa real, perto do QG do lado escolhido, com profundidade de campo e
+    vinheta. Tudo volta ao normal ao nascer.
+  - Arquivos: `DeployScreen`, `LobbyScene`, `SoldierPreview` e o `GameUI` reestilizado.
+  - Controle: foco em todo passo; B volta.
+  - Os remotes não mudaram.
+- **Corrigidos no teste do lobby:**
+  - a prévia do VC saía só com um braço e o fuzil: o cliente clonava antes de o modelo replicar
+    inteiro; agora espera o atributo `Parts`;
+  - o capacete (tamanho real) ficava rente à cabeça do avatar, que é maior que a real; agora sai
+    15% maior em jogadores, bots e prévia;
+  - o chat padrão do Roblox escrevia sobre o cabeçalho; agora fica escondido enquanto o lobby está
+    aberto;
+  - o "QG PRONTO" saía cortado na borda da carta;
+  - o laço das sebes e o plano da mata passavam do limite de 10 s de script num servidor lento.
+- **Pendente:** a fonte de máquina de escrever não tem algumas letras do vietnamita, e
+  "An Cường" mistura glifos.
+
+**Medido no Studio:**
+- **fps:** 59,3 de média (pior quadro 26 ms), com 25,4 mil peças de arte no cliente, no ponto
+  mais denso do setor 2.
+  - A medida foi antes dos modelos foscos e da grama animada, com qualidade "Automática".
+  - Depois mediu 14 fps, mas com o EA FC 26 em primeiro plano no mesmo PC. Desligar a grama não
+    mudou o número, então essa medida não vale.
+  - **Medir de novo com o PC livre.**
+- **Capturas:** mata fechada com folhas verdes e foscas, arrozal com arroz, vilas como ilhas de
+  árvores no arrozal, bandeiras e sacos de areia.

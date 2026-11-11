@@ -31,6 +31,7 @@ local RadioService = require(Modules:WaitForChild("RadioService"))
 local FieldWorkService = require(Modules:WaitForChild("FieldWorkService"))
 local SelfTest = require(Modules:WaitForChild("SelfTest"))
 local TrapService = require(Modules:WaitForChild("TrapService"))
+local PreviewService = require(Modules:WaitForChild("PreviewService"))
 
 task.spawn(TerrainRuntime.start) -- gera o terreno se o place veio sem ele
 PlayerData.start()
@@ -44,6 +45,7 @@ LightingService.start()
 PostureService.start()
 TunnelService.start()
 task.spawn(AssetLoader.start) -- troca placeholders por modelos publicados (se houver IDs)
+task.spawn(PreviewService.start) -- tela de deslocamento: manequins vestidos e arte das armas para a prévia 3D
 BotService.start()
 TrapService.start() -- Parte 11 (depois): armadilhas VC, antes da logística que as arma
 LogisticsService.start() -- F4: suprimento, caixotes e construções

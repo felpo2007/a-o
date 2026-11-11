@@ -43,7 +43,13 @@ Nada rodou dentro do Roblox. Os critérios abaixo exigem o Studio ou o jogo publ
 | F5 | fps no pior setor com a arte. O Output mostra `[VT65] arte setor N` e a fração das sebes |
 | F6 | beta fechado: 2 partidas cheias sem crash (Warfare e Offensive), tutorial e campo de tiro (roteiro em `LANCAMENTO.md`) |
 
-F5: o teto de arte por setor (`ArtBudget.SECTOR_MAX`, 2,5 milhões) é um chute conservador.
+**Mata nova (D-64): meça o fps com o PC livre**, sem jogo aberto e com o Studio em primeiro
+plano.
+- Onde: nasça pelos EUA, vá até as vilas do setor 2 (Nam Yên (3)) e olhe o HUD (F3).
+- Se ficar abaixo de 60, diga o número: eu desço `ArtBudget.JUNGLE_DENSITY`.
+- Se sobrar, dá para pôr mais mata.
+
+F5: o teto de arte por setor (`ArtBudget.SECTOR_MAX`, 16 milhões desde a D-64) segue sem medição.
 - Se o fps sobrar, diga quanto: eu subo o teto e as sebes ganham touceiras.
 - Se faltar, eu desço o teto.
 

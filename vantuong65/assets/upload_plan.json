@@ -157,21 +157,21 @@
  },
  {
   "key": "Models.hut_thatch",
-  "file": "assets/forgegui/models/casa_palha_studs.glb",
+  "file": "assets/forgegui/models/casa_palha_studs_fosco.glb",
   "assetType": "Model",
-  "name": "VT65 hut_thatch"
+  "name": "VT65 hut_thatch fosco"
  },
  {
   "key": "Models.coconut_palm",
-  "file": "assets/forgegui/models/coqueiro_studs.glb",
+  "file": "assets/forgegui/models/coqueiro_studs_fosco.glb",
   "assetType": "Model",
-  "name": "VT65 coconut_palm"
+  "name": "VT65 coconut_palm fosco"
  },
  {
   "key": "Models.bamboo_clump",
-  "file": "assets/forgegui/models/bambu_touceira_studs.glb",
+  "file": "assets/forgegui/models/bambu_touceira_studs_fosco.glb",
   "assetType": "Model",
-  "name": "VT65 bamboo_clump"
+  "name": "VT65 bamboo_clump fosco"
  },
  {
   "key": "Accessories.us_m1955_vest",
@@ -187,45 +187,45 @@
  },
  {
   "key": "Models.hill_tree",
-  "file": "assets/forgegui/models/arvore_colina_studs.glb",
+  "file": "assets/forgegui/models/arvore_colina_studs_fosco.glb",
   "assetType": "Model",
-  "name": "VT65 hill_tree"
+  "name": "VT65 hill_tree fosco"
  },
  {
   "key": "Models.rice_patch",
-  "file": "assets/forgegui/models/arroz_canteiro_studs.glb",
+  "file": "assets/forgegui/models/arroz_canteiro_studs_fosco.glb",
   "assetType": "Model",
-  "name": "VT65 rice_patch"
+  "name": "VT65 rice_patch fosco"
  },
  {
   "key": "Models.elephant_grass",
-  "file": "assets/forgegui/models/capim_elefante_studs.glb",
+  "file": "assets/forgegui/models/capim_elefante_studs_fosco.glb",
   "assetType": "Model",
-  "name": "VT65 elephant_grass"
+  "name": "VT65 elephant_grass fosco"
  },
  {
   "key": "Models.shrub",
-  "file": "assets/forgegui/models/arbusto_studs.glb",
+  "file": "assets/forgegui/models/arbusto_studs_fosco.glb",
   "assetType": "Model",
-  "name": "VT65 shrub"
+  "name": "VT65 shrub fosco"
  },
  {
   "key": "Models.banana",
-  "file": "assets/forgegui/models/bananeira_studs.glb",
+  "file": "assets/forgegui/models/bananeira_studs_fosco.glb",
   "assetType": "Model",
-  "name": "VT65 banana"
+  "name": "VT65 banana fosco"
  },
  {
   "key": "Models.spider_hole",
-  "file": "assets/forgegui/models/toca_aranha_studs.glb",
+  "file": "assets/forgegui/models/toca_aranha_studs_fosco.glb",
   "assetType": "Model",
-  "name": "VT65 spider_hole"
+  "name": "VT65 spider_hole fosco"
  },
  {
   "key": "Models.sandbags",
-  "file": "assets/forgegui/models/sacos_areia_studs.glb",
+  "file": "assets/forgegui/models/sacos_areia_studs_fosco.glb",
   "assetType": "Model",
-  "name": "VT65 sandbags"
+  "name": "VT65 sandbags fosco"
  },
  {
   "key": "Models.m60",
@@ -247,57 +247,57 @@
  },
  {
   "key": "Models.hut_veranda",
-  "file": "assets/forgegui/models/casa_varanda_studs.glb",
+  "file": "assets/forgegui/models/casa_varanda_studs_fosco.glb",
   "assetType": "Model",
-  "name": "VT65 hut_veranda"
+  "name": "VT65 hut_veranda fosco"
  },
  {
   "key": "Models.trench_section",
-  "file": "assets/forgegui/models/trincheira_secao_studs.glb",
+  "file": "assets/forgegui/models/trincheira_secao_studs_fosco.glb",
   "assetType": "Model",
-  "name": "VT65 trench_section"
+  "name": "VT65 trench_section fosco"
  },
  {
   "key": "Models.bamboo_fence",
-  "file": "assets/forgegui/models/cerca_bambu_studs.glb",
+  "file": "assets/forgegui/models/cerca_bambu_studs_fosco.glb",
   "assetType": "Model",
-  "name": "VT65 bamboo_fence"
+  "name": "VT65 bamboo_fence fosco"
  },
  {
   "key": "Models.grave_mound",
-  "file": "assets/forgegui/models/tumulo_studs.glb",
+  "file": "assets/forgegui/models/tumulo_studs_fosco.glb",
   "assetType": "Model",
-  "name": "VT65 grave_mound"
+  "name": "VT65 grave_mound fosco"
  },
  {
   "key": "Models.granary",
-  "file": "assets/forgegui/models/celeiro_studs.glb",
+  "file": "assets/forgegui/models/celeiro_studs_fosco.glb",
   "assetType": "Model",
-  "name": "VT65 granary"
+  "name": "VT65 granary fosco"
  },
  {
   "key": "Models.well",
-  "file": "assets/forgegui/models/poco_studs.glb",
+  "file": "assets/forgegui/models/poco_studs_fosco.glb",
   "assetType": "Model",
-  "name": "VT65 well"
+  "name": "VT65 well fosco"
  },
  {
   "key": "Models.hut_kitchen",
-  "file": "assets/forgegui/models/cozinha_studs.glb",
+  "file": "assets/forgegui/models/cozinha_studs_fosco.glb",
   "assetType": "Model",
-  "name": "VT65 hut_kitchen"
+  "name": "VT65 hut_kitchen fosco"
  },
  {
   "key": "Models.house_tile",
-  "file": "assets/forgegui/models/casa_telha_studs.glb",
+  "file": "assets/forgegui/models/casa_telha_studs_fosco.glb",
   "assetType": "Model",
-  "name": "VT65 house_tile"
+  "name": "VT65 house_tile fosco"
  },
  {
   "key": "Models.shrine",
-  "file": "assets/forgegui/models/altar_studs.glb",
+  "file": "assets/forgegui/models/altar_studs_fosco.glb",
   "assetType": "Model",
-  "name": "VT65 shrine"
+  "name": "VT65 shrine fosco"
  },
  {
   "key": "Models.m1911",
@@ -337,15 +337,15 @@
  },
  {
   "key": "Models.tunnel_entrance",
-  "file": "assets/forgegui/models/entrada_tunel_studs.glb",
+  "file": "assets/forgegui/models/entrada_tunel_studs_fosco.glb",
   "assetType": "Model",
-  "name": "VT65 tunnel_entrance"
+  "name": "VT65 tunnel_entrance fosco"
  },
  {
   "key": "Models.log_bridge",
-  "file": "assets/forgegui/models/ponte_troncos_studs.glb",
+  "file": "assets/forgegui/models/ponte_troncos_studs_fosco.glb",
   "assetType": "Model",
-  "name": "VT65 log_bridge"
+  "name": "VT65 log_bridge fosco"
  },
  {
   "key": "Clothing.us_pants",
@@ -469,9 +469,9 @@
  },
  {
   "key": "Models.vc_bunker",
-  "file": "assets/forgegui/models/bunker_vc_studs.glb",
+  "file": "assets/forgegui/models/bunker_vc_studs_fosco.glb",
   "assetType": "Model",
-  "name": "VT65 vc_bunker"
+  "name": "VT65 vc_bunker fosco"
  },
  {
   "key": "Models.mortar_81",
@@ -481,14 +481,14 @@
  },
  {
   "key": "Models.water_buffalo",
-  "file": "assets/forgegui/models/bufalo_studs.glb",
+  "file": "assets/forgegui/models/bufalo_studs_fosco.glb",
   "assetType": "Model",
-  "name": "VT65 water_buffalo"
+  "name": "VT65 water_buffalo fosco"
  },
  {
   "key": "Models.chicken",
-  "file": "assets/forgegui/models/galinha_studs.glb",
+  "file": "assets/forgegui/models/galinha_studs_fosco.glb",
   "assetType": "Model",
-  "name": "VT65 chicken"
+  "name": "VT65 chicken fosco"
  }
 ]

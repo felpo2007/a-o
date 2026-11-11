@@ -54,5 +54,28 @@ print(
 		os.clock() - t0
 	)
 )
+-- Grama animada (D-64): Terrain.Decoration e GrassLength só podem ser escritos por plugin ou no
+-- arquivo; o script do jogo leva "lacking capability PluginOrOpenCloud" (teste no Studio, 2026-11-10).
+-- O place do Rojo vem sem Terrain (o Studio cria um vazio ao abrir): criamos aqui, com as
+-- propriedades, e o servidor gera os voxels em runtime (TerrainRuntime).
+local terrain = workspace:FindFirstChildOfClass("Terrain")
+if not terrain then
+	local ok, t = pcall(function()
+		local t = roblox.Instance.new("Terrain")
+		t.Name = "Terrain"
+		t.Parent = workspace
+		return t
+	end)
+	terrain = if ok then t else nil
+end
+if terrain then
+	local ok, err = pcall(function()
+		(terrain :: any).Decoration = true;
+		(terrain :: any).GrassLength = 1
+	end)
+	print(if ok then "terreno: grama animada ligada" else "terreno: sem grama animada (" .. tostring(err) .. ")")
+else
+	print("terreno: Workspace sem Terrain no place base")
+end
 fs.writeFile("build/VanTuong65_F1.rbxl", roblox.serializePlace(game))
 print("gravado build/VanTuong65_F1.rbxl")

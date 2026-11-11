@@ -13,6 +13,15 @@ local player = Players.LocalPlayer
 UiKit.PAPER = Color3.fromRGB(214, 203, 170)
 UiKit.INK = Color3.fromRGB(40, 36, 28)
 UiKit.OLIVE = Color3.fromRGB(86, 90, 62)
+-- dossiê de operações de 1965 (tela de deslocamento e mapa): pasta parda, ficha pautada, carimbo
+UiKit.NIGHT = Color3.fromRGB(20, 22, 16) -- fundo verde-oliva quase preto
+UiKit.DRAB = Color3.fromRGB(46, 50, 36) -- painel oliva escuro
+UiKit.KHAKI = Color3.fromRGB(201, 186, 140) -- texto claro sobre oliva
+UiKit.MANILA = Color3.fromRGB(190, 166, 116) -- pasta parda
+UiKit.CARD = Color3.fromRGB(234, 226, 200) -- ficha de arquivo
+UiKit.RULE_RED = Color3.fromRGB(176, 62, 48) -- linha de cabeçalho da ficha
+UiKit.RULE_BLUE = Color3.fromRGB(118, 138, 168) -- pauta da ficha
+UiKit.STAMP = Color3.fromRGB(150, 40, 30) -- tinta de carimbo
 
 function UiKit.tv(): boolean
 	local ok, v = pcall(function()
@@ -24,6 +33,15 @@ end
 -- tamanho de texto: na TV nunca abaixo de 24 px (1080p)
 function UiKit.text(size: number): number
 	return if UiKit.tv() then math.max(size, 24) else size
+end
+
+-- Texto dentro de uma tela com UIScale: na TV o tamanho NA TELA (size × scale) nunca fica abaixo de
+-- 24 px. Fora da TV devolve o tamanho de projeto.
+function UiKit.textAt(size: number, scale: number): number
+	if not UiKit.tv() then
+		return size
+	end
+	return math.max(size, math.ceil(24 / math.max(scale, 0.05)))
 end
 
 function UiKit.screen(name: string, order: number?): ScreenGui

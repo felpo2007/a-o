@@ -4,6 +4,7 @@
 -- Posicionamento determinístico (semente fixa), sempre no chão real do terreno.
 local InsertService = game:GetService("InsertService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ServerStorage = game:GetService("ServerStorage")
 
 local AssetIds = require(ReplicatedStorage.Shared.AssetIds) :: any
 local ArtBudget = require(script.Parent.ArtBudget)
@@ -13,6 +14,7 @@ local GunModel = require(ReplicatedStorage.Shared.GunModel)
 local MapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any
 local Rng = require(ReplicatedStorage.Shared.Rng)
 local Tunnels = require(ReplicatedStorage.Shared.Tunnels) :: any
+local Vegetation = require(script.Parent.Vegetation)
 local Weapons = require(ReplicatedStorage.Shared.Weapons)
 
 local AssetLoader = {}
@@ -121,8 +123,19 @@ local function groundY(x: number, z: number): number
 	return best
 end
 
--- coloca uma cópia com a base no chão; foliage=true desliga colisão/consulta/sombra (Parte 5)
-function AssetLoader.place(key: string, x: number, z: number, yaw: number, parent: Instance, foliage: boolean?): Model?
+-- Coloca uma cópia com a base no chão. foliage=true desliga colisão e toque e marca como folhagem
+-- (esconde, não para bala; Parte 5). scale muda o tamanho (variação da mata, D-64). shadow liga a
+-- sombra da folhagem: só as árvores, para a luz manchada da mata sem pagar sombra de cada moita.
+function AssetLoader.place(
+	key: string,
+	x: number,
+	z: number,
+	yaw: number,
+	parent: Instance,
+	foliage: boolean?,
+	scale: number?,
+	shadow: boolean?
+): Model?
 	local tpl = AssetLoader.template(key)
 	if not tpl then
 		return nil
@@ -136,6 +149,9 @@ function AssetLoader.place(key: string, x: number, z: number, yaw: number, paren
 	sectorCount[sector] = (sectorCount[sector] or 0) + 1
 	local m = tpl:Clone()
 	m.Name = key
+	if scale and math.abs(scale - 1) > 0.01 then
+		m:ScaleTo(m:GetScale() * scale)
+	end
 	local cf, size = m:GetBoundingBox()
 	local pivotToBottom = m:GetPivot().Position.Y - (cf.Position.Y - size.Y / 2)
 	local y = groundY(x, z) + pivotToBottom - (SINK_M[key] or 0) / M
@@ -145,7 +161,7 @@ function AssetLoader.place(key: string, x: number, z: number, yaw: number, paren
 			if d:IsA("BasePart") then
 				d.CanCollide = false
 				d.CanTouch = false
-				d.CastShadow = false
+				d.CastShadow = shadow == true
 				d:SetAttribute("Material", "Bamboo")
 			end
 		end
@@ -194,6 +210,18 @@ function AssetLoader.start()
 						local a = rng:range(0, 2 * math.pi)
 						AssetLoader.place("banana", p.X + math.cos(a) * 16, p.Z + math.sin(a) * 16, a, out, true)
 					end
+					-- quintal (D-64): celeiro de bambu atrás da casa e cerca de bambu na frente
+					local frame = CFrame.new(p) * CFrame.Angles(0, yaw, 0)
+					if rng:next() < 0.15 then
+						local g = (frame * CFrame.new(0, 0, 8 / M)).Position
+						AssetLoader.place("granary", g.X, g.Z, yaw, out)
+					end
+					if rng:next() < 0.3 then
+						for k = -1, 1 do
+							local f = (frame * CFrame.new(k * 3 / M, 0, -6.5 / M)).Position
+							AssetLoader.place("bamboo_fence", f.X, f.Z, yaw, out)
+						end
+					end
 				end
 			end
 		end
@@ -225,6 +253,51 @@ function AssetLoader.start()
 				local xm, zm = a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t
 				local x, z = Tunnels.toWorld(cx, cz, xm, zm)
 				AssetLoader.place("trench_section", x, z, yaw + math.pi / 2, out)
+			end
+		end
+	end
+	-- QGs (D-64): antes, uma placa de plástico colorida. EUA: anel de sacos de areia com quatro
+	-- entradas; VC: cerca de bambu, dois celeiros e um bunker de toras.
+	local usHQ, vcHQ = MapConfig.HQ.US, MapConfig.HQ.VC
+	for i = 0, 11 do
+		if i % 3 ~= 0 then
+			local a = i * math.pi / 6
+			AssetLoader.place(
+				"sandbags",
+				usHQ.x + math.cos(a) * 14 / M,
+				usHQ.z + math.sin(a) * 14 / M,
+				-a + math.pi / 2,
+				out
+			)
+		end
+	end
+	for i = 0, 15 do
+		if i % 4 ~= 0 then
+			local a = i * math.pi / 8
+			AssetLoader.place(
+				"bamboo_fence",
+				vcHQ.x + math.cos(a) * 18 / M,
+				vcHQ.z + math.sin(a) * 18 / M,
+				-a + math.pi / 2,
+				out
+			)
+		end
+	end
+	AssetLoader.place("granary", vcHQ.x - 10 / M, vcHQ.z + 8 / M, 0.4, out)
+	AssetLoader.place("granary", vcHQ.x - 12 / M, vcHQ.z - 7 / M, 2.1, out)
+	AssetLoader.place("vc_bunker", vcHQ.x + 11 / M, vcHQ.z - 4 / M, -math.pi / 2, out)
+	-- tocas de atirador (spider hole) em volta dos pontos fortes que começam com o VC ou neutros
+	for _, sp in MapConfig.Strongpoints do
+		if sp.sector <= 3 then
+			for _ = 1, 3 do
+				local a, r = rng:range(0, 2 * math.pi), rng:range(25, 45) / M
+				AssetLoader.place(
+					"spider_hole",
+					sp.x + math.cos(a) * r,
+					sp.z + math.sin(a) * r,
+					rng:range(0, 6.28),
+					out
+				)
 			end
 		end
 	end
@@ -295,7 +368,11 @@ function AssetLoader.start()
 			factor[s] = ArtBudget.factor(sectorTris[s] or 0, d)
 			print(string.format("[VT65] sebes setor %d: %.0f%% das touceiras (teto do setor)", s, 100 * factor[s]))
 		end
-		for _, j in jobs do
+		for k, j in jobs do
+			if k % 100 == 0 then
+				-- com as sebes a 100% (D-64) o laço passou do limite de 10 s de script (Studio, 2026-11-10)
+				task.wait()
+			end
 			local hp = j.part
 			local placed = 0
 			for i = 1, j.n do
@@ -312,10 +389,108 @@ function AssetLoader.start()
 			end
 		end
 	end
+	-- Mata por uso do solo (D-64), por último: bosque nas vilas e matas, moitas em manchas no capim,
+	-- bambu nos riachos e cortina de árvores fora da borda. Como nas sebes, o que não cabe no teto
+	-- do setor vira desbaste uniforme no setor inteiro.
+	local world = (require(ServerStorage:WaitForChild("VT65Build"):WaitForChild("Build")) :: any).world()
+	-- canteiros de arroz (rice_patch, 13 mil triângulos cada): um por vila, 2 x 4 mudas na beira do arrozal
+	for _, l in MapConfig.Locations do
+		if l.name == "An Cường (2)" or l.name == "Nam Yên (4)" or l.name == "An Thới (2)" then
+			for _ = 1, 60 do
+				local a, r = rng:range(0, 2 * math.pi), rng:range(35, 80) / M
+				local x0, z0 = l.x + math.cos(a) * r, l.z + math.sin(a) * r
+				if world:classAt(x0, z0) == 2 then
+					local plot = CFrame.new(x0, 0, z0) * CFrame.Angles(0, a, 0)
+					for i = 0, 3 do
+						for j = 0, 1 do
+							local t = (plot * CFrame.new(i * 2 / M, 0, j * 1.45 / M)).Position
+							AssetLoader.place("rice_patch", t.X, t.Z, a, out, true)
+						end
+					end
+					break
+				end
+			end
+		end
+	end
+	local housesXZ: { number } = {}
+	for i = 1, #housePos, 2 do
+		table.insert(housesXZ, housePos[i] / M)
+		table.insert(housesXZ, housePos[i + 1] / M)
+	end
+	local tunnelXZ: { number } = {}
+	for _, n in Tunnels.nodes do
+		local x, z = Tunnels.toWorld(cx, cz, n.x, n.z)
+		table.insert(tunnelXZ, x)
+		table.insert(tunnelXZ, z)
+	end
+	local corridors: { Vegetation.Segment } = {}
+	for i = 1, #Tunnels.trench - 1 do
+		local a, b = Tunnels.trench[i], Tunnels.trench[i + 1]
+		local x1, z1 = Tunnels.toWorld(cx, cz, a[1], a[2])
+		local x2, z2 = Tunnels.toWorld(cx, cz, b[1], b[2])
+		table.insert(corridors, { x1 = x1, z1 = z1, x2 = x2, z2 = z2, w = 4 / M })
+	end
+	-- raias do campo de tiro (TrainingService escolhe a direção com visada livre): do QG a cada alvo
+	local camp = workspace:FindFirstChild("CampoDeTiro") or workspace:WaitForChild("CampoDeTiro", 30)
+	for f, hq in MapConfig.HQ do
+		local lane = camp and camp:FindFirstChild(f)
+		for _, d in if lane then lane:GetChildren() else {} do
+			if string.sub(d.Name, 1, 4) == "Alvo" then
+				local p = if d:IsA("Model") then d:GetPivot().Position elseif d:IsA("BasePart") then d.Position else nil
+				if p then
+					table.insert(corridors, { x1 = hq.x, z1 = hq.z, x2 = p.X, z2 = p.Z, w = 10 / M })
+				end
+			end
+		end
+	end
+	local plan = Vegetation.plan({
+		classAt = function(x: number, z: number): number
+			return world:classAt(x, z)
+		end,
+		bounds = MapConfig.Bounds,
+		cell = world.grid.cellStuds,
+		exclude = Vegetation.exclusions(MapConfig, housesXZ, tunnelXZ),
+		corridors = corridors,
+		density = ArtBudget.JUNGLE_DENSITY,
+		seed = 1965,
+		rng = Rng.new(19650818 + 64),
+		yield = function()
+			task.wait()
+		end,
+	})
+	local jDemand: { [number]: number } = {}
+	for _, it in plan do
+		local s = Geometry.sectorAt(MapConfig.Sectors, it.x, it.z) or 0
+		jDemand[s] = (jDemand[s] or 0) + ArtBudget.tris(it.key)
+	end
+	local jFactor: { [number]: number } = {}
+	for s, d in jDemand do
+		jFactor[s] = ArtBudget.factor(sectorTris[s] or 0, d)
+		print(string.format("[VT65] mata setor %d: %.0f%% do plano (teto do setor)", s, 100 * jFactor[s]))
+	end
+	local jungle = Instance.new("Folder")
+	jungle.Name = "Jungle"
+	jungle.Parent = out
+	local jrng = Rng.new(64)
+	local nJungle = 0
+	for i, it in plan do
+		local s = Geometry.sectorAt(MapConfig.Sectors, it.x, it.z) or 0
+		if jrng:next() < jFactor[s] then
+			if AssetLoader.place(it.key, it.x, it.z, it.yaw, jungle, true, it.scale, it.shadow) then
+				nJungle += 1
+			end
+		end
+		if i % 200 == 0 then
+			task.wait() -- não trava o servidor enquanto planta milhares de modelos
+		end
+	end
+	print(string.format("[VT65] mata: %d plantas de %d no plano", nJungle, #plan))
 	-- streaming (D-15): cada modelo chega inteiro (o impostor vem do próprio asset; ver acima)
-	for _, m in out:GetChildren() do
-		if m:IsA("Model") then
-			m.ModelStreamingMode = Enum.ModelStreamingMode.Atomic
+	for _, folder in { out, jungle } do
+		for _, m in folder:GetChildren() do
+			if m:IsA("Model") then
+				m.ModelStreamingMode = Enum.ModelStreamingMode.Atomic
+			end
 		end
 	end
 	for sector = 0, 5 do

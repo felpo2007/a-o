@@ -140,8 +140,9 @@ function FeatureBuilder.build(env: Env, features: any, mapConfig: any, world: an
 		p.Name = "Dike"
 		p.Size = env.Vector3.new(len + DIKE_W, math.max(yTop - yBase, 0.5), DIKE_W)
 		p.CFrame = cf
-		p.Material = env.Enum.Material.Ground
-		p.Color = C(110, 94, 68) -- #6E5E44 (dique de várzea)
+		-- dique de várzea em agosto: terra batida coberta de capim (D-64; antes, terra lisa #6E5E44)
+		p.Material = env.Enum.Material.LeafyGrass
+		p.Color = C(104, 102, 62)
 		p.CastShadow = false
 		p.Parent = fd
 		stats.dikes += 1
@@ -155,10 +156,12 @@ function FeatureBuilder.build(env: Env, features: any, mapConfig: any, world: an
 		p.Name = "PaddyWater"
 		p.Size = env.Vector3.new(math.max(w[i + 3], 1), WATER_T, math.max(w[i + 4], 1))
 		p.CFrame = env.CFrame.new(w[i], w[i + 2] - WATER_T / 2, w[i + 1]) * env.CFrame.Angles(0, w[i + 5], 0)
+		-- água rasa sobre o arroz (D-64): translúcida e espelhada, o arroz verde (grama do terreno)
+		-- aparece por baixo e o céu do amanhecer reflete. Antes: placa marrom quase opaca.
 		p.Material = env.Enum.Material.SmoothPlastic
-		p.Color = C(94, 82, 66) -- água barrenta
-		p.Transparency = 0.25
-		p.Reflectance = 0.05
+		p.Color = C(84, 82, 60)
+		p.Transparency = 0.32
+		p.Reflectance = 0.15 -- mais que isso a lâmina ficava azul-céu (captura, 2026-11-10)
 		p.CanCollide = false
 		p.CanTouch = false
 		p.CastShadow = false
@@ -232,7 +235,7 @@ function FeatureBuilder.build(env: Env, features: any, mapConfig: any, world: an
 		p.CFrame = env.CFrame.new(sp.x, y + 0.5, sp.z) * env.CFrame.Angles(0, 0, math.pi / 2)
 		p.Material = env.Enum.Material.ForceField
 		p.Color = C(255, 196, 0)
-		p.Transparency = 0.6
+		p.Transparency = 1 -- o ponto ativo ganha um mastro com bandeira (MatchService, D-64)
 		p.CanCollide = false
 		p.CanTouch = false
 		p.CanQuery = false
@@ -252,6 +255,10 @@ function FeatureBuilder.build(env: Env, features: any, mapConfig: any, world: an
 		p.CFrame = env.CFrame.new(hq.x, y + 0.5, hq.z)
 		p.Color = if fac == "US" then C(70, 90, 160) else C(160, 60, 50)
 		p.Material = env.Enum.Material.SmoothPlastic
+		-- marcador do greybox: invisível e sem colisão; o QG ganha sacos de areia e cerca (AssetLoader)
+		p.Transparency = 1
+		p.CanCollide = false
+		p.CanQuery = false
 		p:SetAttribute("Faction", fac)
 		p.Parent = fq
 		stats.markers += 1

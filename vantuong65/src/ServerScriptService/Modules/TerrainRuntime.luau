@@ -25,6 +25,7 @@ function TerrainRuntime.ready(): boolean
 end
 
 function TerrainRuntime.start()
+	require(script.Parent.TerrainLook).apply() -- cores, grama, água e nuvens (D-64)
 	if hasTerrain() then
 		ReplicatedStorage:SetAttribute("TerrainReady", true)
 		return

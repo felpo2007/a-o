@@ -371,6 +371,12 @@ end
 
 local function animals(): (string, string?)
 	local art = workspace:FindFirstChild("Map") and (workspace :: any).Map:FindFirstChild("Art")
+	-- com a mata (D-64) a arte demora mais: o teste rodava antes dos animais existirem
+	if art then
+		waitFor(function()
+			return art:GetAttribute("Placed") == true
+		end, 240)
+	end
 	local pen = art and art:FindFirstChild("Animals")
 	if not pen then
 		return "pulado", "sem modelos publicados (AssetIds em 0)"

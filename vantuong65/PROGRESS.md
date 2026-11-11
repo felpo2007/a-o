@@ -324,6 +324,25 @@ do usuário (opção A).
 - **Corrigido:** um bot morto enquanto a arte dele carregava ficava caído para sempre, sem largar a
   arma, e a vaga não voltava.
 
+## Mata, chão, luz e lobby (2026-11-10, D-64)
+- **Mata:** 17,4 mil plantas por uso do solo da carta.
+  - Bosque fechado nas vilas e matas, moitas em manchas no capim e bambu nos riachos.
+  - Fora da borda, uma cortina de árvores grandes esconde o fim do terreno.
+  - O arrozal continua aberto, como na carta, agora com arroz verde (grama animada).
+  - Sebes a 100% em todos os setores (eram 37–77%).
+- **Todos os modelos do ForgeGUI em uso:** celeiro, cerca de bambu, toca de atirador e canteiro de
+  arroz entraram. O QG dos EUA ganhou anel de sacos de areia.
+- **Folhas que pareciam cromo:** 24 modelos sem metal republicados (`tools/matte_glb.py`).
+- **Luz:** a partida começa às 07:00 com sol baixo e névoa dourada; tinta quente e nuvens.
+- **Chão:** cores próprias, mata com folhas secas e água do arrozal mais escura.
+- **Pontos fortes e QGs:** o disco amarelo virou mastro com bandeira, e a placa de plástico dos QGs
+  sumiu.
+- **Lobby novo:** dossiê de 1965 em 4 passos (lado, squad, papel, inserção), com o soldado em 3D e
+  o mapa real desfocado ao fundo. Foi conferido no Studio passo a passo, até o spawn.
+- **Capacete visível:** antes ficava rente à cabeça do avatar.
+- **fps:** 59,3 de média no ponto mais denso, antes dos modelos foscos e da grama. Com o EA FC 26
+  aberto em primeiro plano, a medida não vale. **Medir de novo com o PC livre.**
+
 ## Resultados-chave (medidos aqui)
 | Medida | Valor |
 |---|---|

@@ -238,6 +238,70 @@ test("arte publicada: toda arma com modelo tem pontos coerentes (WeaponArt, D-58
 	assert(n == 9, "esperava 9 armas publicadas, vieram " .. n)
 end)
 
+test("mata (D-64): determinística, respeita as zonas livres, arrozal aberto e cortina só fora", function()
+	local M = 0.28
+	local Vegetation = require("../../src/ServerScriptService/Modules/Vegetation")
+	local Rng = require("../../src/ReplicatedStorage/Shared/Rng") :: any
+	local WorldData = require("../../src/ServerStorage/VT65Build/WorldData")
+	local Grid = require("../../src/ServerStorage/VT65Build/Data/Grid") :: any
+	local MapConfig = require("../../src/ReplicatedStorage/Shared/MapConfig") :: any
+	local Features = require("../../src/ServerStorage/VT65Build/Data/Features") :: any
+	local chunks = {}
+	for _, name in Grid.heightChunks do
+		table.insert(chunks, (require :: any)("../../src/ServerStorage/VT65Build/Data/" .. name))
+	end
+	local world = WorldData.load(Grid, chunks)
+	local houses = {}
+	for i = 1, #Features.houses, 4 do
+		table.insert(houses, Features.houses[i])
+		table.insert(houses, Features.houses[i + 1])
+	end
+	local function plan()
+		return Vegetation.plan({
+			classAt = function(x: number, z: number): number
+				return world:classAt(x, z)
+			end,
+			bounds = MapConfig.Bounds,
+			cell = Grid.cellStuds,
+			exclude = Vegetation.exclusions(MapConfig, houses, {}),
+			corridors = { { x1 = 0, z1 = 0, x2 = 500, z2 = 0, w = 20 } },
+			seed = 1965,
+			rng = Rng.new(7),
+		})
+	end
+	local a, b = plan(), plan()
+	assert(#a == #b and #a > 5000, "plano com " .. #a .. " plantas")
+	for i = 1, #a, 97 do
+		assert(a[i].key == b[i].key and a[i].x == b[i].x and a[i].z == b[i].z, "não determinístico")
+	end
+	local B = MapConfig.Bounds
+	local inside, border, paddy = 0, 0, 0
+	for _, it in a do
+		local isIn = it.x >= B.minX and it.x <= B.maxX and it.z >= B.minZ and it.z <= B.maxZ
+		if isIn then
+			inside += 1
+			for f, hq in MapConfig.HQ do
+				local d = math.sqrt((it.x - hq.x) ^ 2 + (it.z - hq.z) ^ 2) * M
+				assert(d >= (if f == "US" then 150 else 100) - 3, string.format("%s a %.0f m do QG %s", it.key, d, f))
+			end
+			for i = 1, #houses, 2 do
+				local d = math.sqrt((it.x - houses[i]) ^ 2 + (it.z - houses[i + 1]) ^ 2) * M
+				assert(d >= 6.5 - 0.01, string.format("%s dentro de casa (%.1f m)", it.key, d))
+			end
+			-- o jitter (meia célula) pode levar a planta para a célula vizinha; o centro dela não é arrozal
+			if world:classAt(it.x, it.z) == 2 then
+				paddy += 1
+			end
+			assert(it.key ~= "hill_tree" or it.scale <= 1.31, "árvore gigante dentro da área")
+		else
+			border += 1
+		end
+	end
+	assert(inside > 4000 and border > 500, string.format("dentro %d, cortina %d", inside, border))
+	assert(paddy / inside < 0.2, string.format("%.0f%% das plantas caíram no arrozal", 100 * paddy / inside))
+	print(string.format("       %d plantas: %d na área, %d na cortina de fora", #a, inside, border))
+end)
+
 print(string.format("%d ok, %d falhas", passed, failed))
 if failed > 0 then
 	process.exit(1)
