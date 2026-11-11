@@ -11,6 +11,7 @@ local RunService = game:GetService("RunService")
 
 local AfterAction = require(ReplicatedStorage.Shared.AfterAction)
 local Ballistics = require(ReplicatedStorage.Shared.Ballistics)
+local Geometry = require(ReplicatedStorage.Shared.Geometry)
 local MapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any
 local Rng = require(ReplicatedStorage.Shared.Rng)
 local Combatants = require(script.Parent.Combatants)
@@ -297,14 +298,37 @@ local function dig(): (string, string?)
 	local anyParams = RaycastParams.new()
 	anyParams.FilterType = Enum.RaycastFilterType.Exclude
 	anyParams.FilterDescendantsInstances = { c }
+	-- Chão seco = o mesmo raio da pá (FieldWorkService: 20 studs acima do chão, 60 para baixo), fora
+	-- da lâmina d'água e do dique. Do alto (2000) o raio batia antes numa copa e o arrozal alagado
+	-- passava por seco; e em volta do QG dos EUA quase tudo é arrozal (reteste no Studio, D-88): a
+	-- busca anda em anéis de 30 a 240 m e confere também os pontos a 1,5 m nos quatro lados (a pá cava
+	-- à frente, e em 1ª pessoa o soldado vira para onde a câmera olha) e o dono do setor.
+	local function dryAt(px: number, pz: number): RaycastResult?
+		local hit = workspace:Raycast(Vector3.new(px, 2000, pz), Vector3.new(0, -4000, 0), params)
+		if not hit or hit.Material == Enum.Material.Water then
+			return nil
+		end
+		local top = workspace:Raycast(hit.Position + Vector3.new(0, 20, 0), Vector3.new(0, -60, 0), anyParams)
+		if top and (top.Instance:GetAttribute("Material") == "PaddyWater" or top.Instance.Name == "Dike") then
+			return nil
+		end
+		return hit
+	end
 	local x, z, g
-	for _, o in { { -60, 0 }, { -60, 25 }, { -60, -25 }, { -40, 40 }, { -40, -40 }, { -90, 0 }, { -30, 0 } } do
-		local tx, tz = hq.x + o[1] / M, hq.z + o[2] / M
-		local hit = workspace:Raycast(Vector3.new(tx, 2000, tz), Vector3.new(0, -4000, 0), params)
-		local top = workspace:Raycast(Vector3.new(tx, 2000, tz), Vector3.new(0, -4000, 0), anyParams)
-		local wet = top ~= nil and top.Instance:GetAttribute("Material") == "PaddyWater"
-		if hit and hit.Material ~= Enum.Material.Water and not wet then
-			x, z, g = tx, tz, hit
+	for _, rM in { 30, 60, 90, 120, 160, 200, 240 } do
+		for k = 0, 15 do
+			local a = k * math.pi / 8
+			local tx, tz = hq.x + math.cos(a) * rM / M, hq.z + math.sin(a) * rM / M
+			local sector = Geometry.sectorAt(MapConfig.Sectors, tx, tz)
+			local ours = sector ~= nil and MatchService.ownerOf(sector) == "US"
+			local hit = if ours then dryAt(tx, tz) else nil
+			local d = 1.5 / M
+			if hit and dryAt(tx + d, tz) and dryAt(tx - d, tz) and dryAt(tx, tz + d) and dryAt(tx, tz - d) then
+				x, z, g = tx, tz, hit
+				break
+			end
+		end
+		if g then
 			break
 		end
 	end
