@@ -19,9 +19,14 @@ ING_A_UTM49 = (
 # (tools/road_transects.py). Somar às coordenadas WGS 84 vindas da carta.
 CORR_DE, CORR_DN = -18.2, +5.3
 
-# Área jogável PROPOSTA (grade impressa de 1965, ING-A). Ver DESIGN.md, decisão D-03:
-# 4,0 km (L-O) x 2,4 km (N-S), da encosta oeste da Colina 43 até o mar na Green Beach.
-PLAY_ING = (268200.0, 1691200.0, 272200.0, 1693600.0)
+# Mundo gerado (grade impressa de 1965, ING-A): os 4,0 km (L-O) x 2,4 km (N-S) da D-03, da encosta
+# oeste da Colina 43 até o mar na Green Beach. O CENTRO dele é a origem do quadro local (0, 0, 0)
+# e não muda, para que as coordenadas de todos os locais, da grade de 1965 e do comandante
+# continuem valendo (D-63).
+WORLD_ING = (268200.0, 1691200.0, 272200.0, 1693600.0)
+# Área JOGÁVEL (D-63, escolha do usuário em 2026-11-10): 2 x 2 km a oeste, da Colina 43 até An
+# Cường (2) e a Colina 30, em escala 1:1. tools/crop_world.py recorta o mundo para ela.
+PLAY_ING = (268350.0, 1691500.0, 270350.0, 1693500.0)
 
 _ing_to_wgsutm = Transformer.from_crs(ING_A_UTM49, "EPSG:32649", always_xy=True)
 _wgsutm_to_ll = Transformer.from_crs("EPSG:32649", "EPSG:4326", always_xy=True)
@@ -39,7 +44,8 @@ def wgs_utm_to_lonlat(E: float, N: float) -> tuple[float, float]:
 
 
 def play_center_wgs() -> tuple[float, float]:
-    e0, n0, e1, n1 = PLAY_ING
+    """Origem do quadro local: centro do MUNDO gerado (não da área jogável, que é menor; D-63)."""
+    e0, n0, e1, n1 = WORLD_ING
     return ing_to_wgs_utm((e0 + e1) / 2, (n0 + n1) / 2)
 
 

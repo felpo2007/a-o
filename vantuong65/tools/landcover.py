@@ -28,8 +28,8 @@ from geo import (  # noqa: E402
     CORR_DE,
     CORR_DN,
     ING_A_UTM49,
-    PLAY_ING,
     STUD_M,
+    WORLD_ING,
     ing_to_wgs_utm,
     play_center_wgs,
 )
@@ -60,7 +60,7 @@ class Grid:
 
 def extent() -> tuple[float, float, float, float]:
     cE, cN = play_center_wgs()
-    e0, n0, e1, n1 = PLAY_ING
+    e0, n0, e1, n1 = WORLD_ING  # mundo gerado (D-63)
     W, H = (e1 - e0) + 2 * MARGEM_M, (n1 - n0) + 2 * MARGEM_M
     return cE - W / 2, cN - H / 2, cE + W / 2, cN + H / 2
 

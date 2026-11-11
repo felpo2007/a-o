@@ -308,8 +308,8 @@ local function dig(): (string, string?)
 end
 
 -- Medevac: bot EUA caído junto de um UH-34D pousado vira suprimento. Usa um UH-34D que já está
--- pousado no depósito. Antes o teste criava outro no depósito 1, que é do LVTP-5 (perto do mar): os
--- dois se sobrepunham e o helicóptero não ficava parado (reteste no Studio, 2026-11-10).
+-- pousado no depósito. Antes o teste criava outro no depósito 1, que é do LVTP-5: os dois se
+-- sobrepunham e o helicóptero não ficava parado (reteste no Studio, 2026-11-10).
 local function medevac(): (string, string?)
 	local list = bots("US")
 	if #list == 0 then

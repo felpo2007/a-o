@@ -1069,3 +1069,61 @@ Pesquisa na web em 2026-11-10. Cada número está no código com a fonte ao lado
   - a `hill_tree` foi destruída pela redução local;
   - o terreno usa as cores padrão;
   - o fps com a arte visível precisa ser medido com o PC livre e o Studio em primeiro plano.
+
+## D-63 — Mapa de 2 × 2 km no oeste (FIRME, aprovado pelo usuário em 2026-11-10)
+**Substitui** a área de D-03, os setores, pontos fortes e QGs de D-08, o critério de travessia de
+D-12, os depósitos "na praia" de D-37 e o mar de D-56 (o código do mar continua, mas o mapa não tem
+mais mar).
+- **Pedido:** "o mapa está muito grande". Das 4 janelas de 2 × 2 km em 1:1, o usuário escolheu a
+  **A**: Colina 43 → An Cường (2), que é a alternativa B de D-03. A escala 1:1 não mudou.
+- **Área:** E 268,35–270,35 km × N 1691,5–1693,5 km, em grade de 1965 (`geo.PLAY_ING`).
+  - O terreno é gerado com 150 m de margem (2,3 × 2,3 km, grade de 515 × 514).
+  - Uma travessia leste–oeste em corrida leve (3,1 m/s) leva ~10,8 min, o que devolve o critério
+    "8–12 min" do prompt.
+- **O que ficou de fora:** Green Beach e o mar, An Cường (1), Colina 22, An Phước (1), o vau do
+  riacho e os túmulos da várzea. A partida começa depois do desembarque: os EUA entram pela borda
+  leste, ao sul de An Cường (2).
+- **Origem:** o quadro local continua com a origem em E 270,2 / N 1692,4, o centro do mundo gerado
+  antes. Por isso nenhuma coordenada já gravada mudou. A área nova vai de X −6607,2 a 535,7 e de
+  Z −3928,6 a 3214,3 (studs).
+- **Como foi feito:**
+  - `geo.WORLD_ING` (a extensão de 4 × 2,4 km usada na geração) ficou separado de `geo.PLAY_ING`
+    (a área jogável).
+  - `tools/crop_world.py` recorta `Grid`, `Heights_*` e `Features` já gerados e escreve o
+    `MapConfig.luau`.
+  - Os rasters de origem (DEM, carta, satélite) não estão no repositório, então recortar foi mais
+    seguro que regerar.
+- **Setores** (E em km; "sul / norte" quando a fronteira dobra em N 1693,0):
+
+  | Setor | E (km) | Pontos fortes (★ = local real) |
+  |---|---|---|
+  | S1 (oeste, início do VC) | 268,35–268,75 | Colina 43 ★, Athletic field ★, Lugarejo da Colina 43 ★ (5 casas da carta) |
+  | S2 (início do VC) | 268,75–269,15 | LZ Blue ★, Nam Yên (3) ★, Encosta norte (design) |
+  | S3 (centro, neutro) | 269,15–269,60 / 269,45 | Nam Yên (4) ★, Cemitério ★, Bosque ao sul de Nam Yên (4) ★ |
+  | S4 (início dos EUA) | 269,60 / 269,45–269,85 | An Thới (2) ★, Morrote do arrozal (design), Arrozal central (design) |
+  | S5 (leste, QG dos EUA) | 269,85–270,35 | An Cường (2) ★, Trincheira sul ★, Colina 30 ★ |
+
+  A fronteira S3/S4 dobra a oeste ao norte de N 1693,0. Sem a dobra, An Thới (2) caía no S3 e o S4
+  ficava sem nenhum local real (o teste Luau exige ≥ 1 por setor).
+- **QGs:**
+  - EUA em E 270,30 / N 1691,75, a 50 m da borda leste e 250 m da sul;
+  - VC em E 268,42 / N 1692,90, na retaguarda oeste.
+- **Depósitos e campo de tiro:**
+  - os 6 veículos ficam a oeste e ao norte do QG dos EUA, a 63–136 m dele;
+  - o LVTP-5 agora anda em terra;
+  - a raia dos EUA atira para oeste, porque ao sul a borda fica a 250 m.
+- **Medido no Studio (2026-11-10):**
+  - terreno em 1.089 blocos, pronto em 21–47 s;
+  - 9.738 diques, 2.353 sebes e 92 casas no place;
+  - 4.899 modelos de arte, 4.896 com a base a até 2 m do chão;
+  - Colina 43 a 43,6 m;
+  - autoteste com 12 ok, 0 falhas.
+- **Defeito achado no teste:** o bot entrava em `Combatants` (já alvo) antes de `attachWeapon` e
+  `dress`, que esperam o `LoadAsset`, e só depois ligava o `Died`. Morto nessa janela, ficava caído
+  para sempre: não largava a arma e a vaga nunca voltava. Agora o `Died` é ligado antes de qualquer
+  espera, e o modelo não volta à IA se morrer enquanto se veste.
+- **Efeitos colaterais:**
+  - o som "praia" não toca mais, porque o local não existe;
+  - o modo Offensive se chama "EUA atacam do leste";
+  - o navio do tiro naval continua 3 km a leste da praia real, fora do mapa;
+  - a borda do terreno aparece como horizonte plano a 150 m da área jogável.

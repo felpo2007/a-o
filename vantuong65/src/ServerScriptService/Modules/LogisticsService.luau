@@ -227,7 +227,7 @@ function LogisticsService.start()
 			end
 		end
 	end)
-	-- caixotes iniciais: praia (EUA) e depósito de retaguarda (VC)
+	-- caixotes iniciais ao lado de cada QG (EUA na borda leste, VC na retaguarda oeste)
 	local MapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any
 	for f, hq in MapConfig.HQ do
 		for i = 1, 2 do

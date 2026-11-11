@@ -1,5 +1,5 @@
 --!strict
--- Modo Offensive (Parte 4): os EUA desembarcam na praia (setor 5, leste) e atacam para oeste; o VC
+-- Modo Offensive (Parte 4): os EUA partem do setor 5 (leste, An Cường (2); D-63) e atacam para oeste; o VC
 -- defende os 4 setores restantes em sequência. Só o setor da frente fica ativo: setor tomado pelos
 -- EUA fica travado (não volta). Cada captura soma tempo ao relógio. Os EUA vencem ao tomar o
 -- setor 1; o VC vence se o relógio zerar. A captura em si é a mesma do Warfare (Capture).

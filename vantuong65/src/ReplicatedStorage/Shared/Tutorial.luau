@@ -20,7 +20,8 @@ end
 Tutorial.RANGE_M = { 100, 200, 300 }
 -- o campo de tiro fica na retaguarda: sai do QG em direção oposta à frente, ao longo da borda
 Tutorial.RANGE_LANE = {
-	US = { offsetM = { 0, 40 }, dir = { 0, 1 } }, -- praia, para o sul
+	-- QG no canto sudeste (D-63): ao sul a borda fica a 250 m, então a raia atira para oeste
+	US = { offsetM = { -40, 0 }, dir = { -1, 0 } },
 	VC = { offsetM = { 0, -40 }, dir = { 0, -1 } }, -- retaguarda oeste, para o norte
 }
 

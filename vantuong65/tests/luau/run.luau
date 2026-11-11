@@ -58,10 +58,16 @@ test("Colina 43 chega a 43 m no terreno", function()
 	near(world:heightAt(sp.x, sp.z) * 0.28, 43.0, 0.5, "cume")
 end)
 
-test("área jogável é 4,0 x 2,4 km", function()
+test("área jogável é 2,0 x 2,0 km (D-63) e o terreno a cobre com margem", function()
 	local b = MapConfig.Bounds
-	near((b.maxX - b.minX) * 0.28, 4000, 1)
-	near((b.maxZ - b.minZ) * 0.28, 2400, 1)
+	near((b.maxX - b.minX) * 0.28, 2000, 1)
+	near((b.maxZ - b.minZ) * 0.28, 2000, 1)
+	-- o terreno recortado (tools/crop_world.py) cobre a área inteira mais ~150 m de margem
+	local g = require("../../src/ServerStorage/VT65Build/Data/Grid") :: any
+	local gx0, gz0 = g.originX, g.originZ
+	local gx1, gz1 = gx0 + g.width * g.cellStuds, gz0 + g.height * g.cellStuds
+	assert(gx0 <= b.minX - 100 / 0.28 and gx1 >= b.maxX + 100 / 0.28, "terreno cobre leste-oeste")
+	assert(gz0 <= b.minZ - 100 / 0.28 and gz1 >= b.maxZ + 100 / 0.28, "terreno cobre norte-sul")
 end)
 
 test("15 pontos fortes, 3 por setor, cada um dentro do seu setor e com >= 1 real", function()
@@ -134,7 +140,8 @@ test("place assado tem as peças e todas ancoradas", function()
 		end
 	end
 	assert(unanchored == 0, unanchored .. " peças soltas")
-	assert(#map.Dikes:GetChildren() > 10000, "diques")
+	-- D-63: recorte de 2,3 x 2,3 km (área + margem) tem ~9,7 mil diques (eram ~19 mil em 4 x 2,4 km)
+	assert(#map.Dikes:GetChildren() > 8000, "diques")
 	assert(#map.Strongpoints:GetChildren() == 15, "marcadores")
 	print(string.format("       (%d BaseParts no Map)", n))
 end)

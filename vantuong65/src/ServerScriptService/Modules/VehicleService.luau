@@ -23,14 +23,16 @@ local rng = Rng.new(1965081)
 local folder: Folder
 local nextId = 0
 
--- Depósitos ao redor do QG dos EUA na praia (posições de design, D-37). 6 veículos = critério da F4.
+-- Depósitos ao redor do QG dos EUA (posições de design, D-37), em metros a partir do QG. 6 veículos =
+-- critério da F4. No mapa de 2 x 2 km (D-63) o QG fica a 50 m da borda leste e a 250 m da sul: os
+-- depósitos ficam a oeste e ao norte dele (antes os LVTP-5 ficavam no mar, 140 m a leste).
 local DEPOTS = {
-	{ spec = "lvtp5", dx = 140, dz = -40 },
-	{ spec = "lvtp5", dx = 140, dz = 0 },
-	{ spec = "m48a3", dx = 60, dz = -30 },
-	{ spec = "ontos", dx = 60, dz = 10 },
-	{ spec = "uh34d", dx = -80, dz = -60 },
-	{ spec = "uh34d", dx = -80, dz = 30 },
+	{ spec = "lvtp5", dx = -60, dz = -60 },
+	{ spec = "lvtp5", dx = -60, dz = -20 },
+	{ spec = "m48a3", dx = -130, dz = -40 },
+	{ spec = "ontos", dx = -130, dz = 0 },
+	{ spec = "uh34d", dx = -20, dz = 70 },
+	{ spec = "uh34d", dx = -90, dz = 70 },
 }
 local RESPAWN_S = 180 -- design
 -- Giro da arte em relação ao chassi (frente do chassi = -Z). Os GLBs dos veículos têm o eixo longo

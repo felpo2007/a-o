@@ -139,6 +139,7 @@ for _, l in MapConfig.Locations do
 	then
 		table.insert(villages, Vector3.new(l.x, 0, l.z))
 	end
+	-- no mapa de 2 x 2 km (D-63) a praia ficou fora: sem o local, o som de praia não toca
 	if string.find(l.name, "Green Beach") then
 		beachX = l.x - 120 / M
 	end

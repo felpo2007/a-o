@@ -36,7 +36,7 @@ Nada rodou dentro do Roblox. Os critérios abaixo exigem o Studio ou o jogo publ
 
 | Fase | O que medir |
 |---|---|
-| F1 | fps (99% dos quadros ≥ 60) e travessia leste–oeste a pé |
+| F1 | fps (99% dos quadros ≥ 60) e travessia leste–oeste a pé (2 km: esperado 8–12 min, D-63) |
 | F2 | partida de 60 min sem erro no servidor (os bots completam 15v15) |
 | F3 | fps no setor 3 com a arte e comparação lado a lado com fotos de 1965 |
 | F4 | 30v30 com os 6 veículos ativos e heartbeat do servidor estável |
@@ -50,8 +50,8 @@ F5: o teto de arte por setor (`ArtBudget.SECTOR_MAX`, 2,5 milhões) é um chute 
 **Autoteste no motor (mais rápido):** durante o Play, na barra de comando do lado do servidor,
 rode `workspace:SetAttribute("VT65SelfTest", true)`.
 - Em ~2 min, o Output mostra uma linha `[VT65 TESTE] ok/FALHA/pulado` por sistema:
-  terreno, bots, campo de tiro (raia e balística), deitado, arma caída, rádio, animais, pá,
-  medevac, Offensive e relatório pós-ação.
+  terreno, bots, campo de tiro (raia e balística), deitado, arma caída, rádio, animais, arte no
+  chão, chuva, pá, medevac, Offensive e relatório pós-ação.
 - Me mande essas linhas. Para o teste da pá, escolha o lado EUA.
 
 Features de lançamento (D-48). Confira no Studio:
@@ -75,8 +75,8 @@ Features de lançamento (D-48). Confira no Studio:
   conferida no Studio (D-58).
 
 Roteiro da F4:
-1. Escolha EUA → papel *Tripulante de blindado* → sente no M48A3 (W/S/A/D) e no LVTP-5 (entre na
-   água: deve cair para 11 km/h).
+1. Escolha EUA → papel *Tripulante de blindado* → sente no M48A3 (W/S/A/D) e no LVTP-5. O mapa de
+   2 × 2 km não tem mar (D-63): o LVTP-5 só anda em terra.
 2. Escolha *Piloto* → UH-34D: Espaço/Ctrl coletivo, W/S/A/D cíclico, Q/E pedais. No calor e
    carregado, ele **não paira fora do efeito solo**: decole correndo.
 3. Escolha *Comandante* → **N** → digite a grade (o painel mostra a sua) e peça tiro naval.

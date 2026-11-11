@@ -105,21 +105,10 @@ local function spawnModel(bot: Bot)
 	model.Name = string.format("Bot_%s_%02d", bot.faction, bot.id)
 	model:SetAttribute("Bot", true)
 	model:SetAttribute("Role", bot.role)
-	local jx, jz = bot.rng:range(-20, 20), bot.rng:range(-20, 20)
-	local y = SpawnService.groundY(pt.x + jx, pt.z + jz)
-	model:PivotTo(CFrame.new(pt.x + jx, y + 5, pt.z + jz))
-	model.Parent = folder
-	local root = model:FindFirstChild("HumanoidRootPart") :: BasePart?
-	if root then
-		root:SetNetworkOwner(nil)
-	end
-	Combatants.register(model, bot.faction, nil)
-	AssetLoader.attachWeapon(model, bot.weapon.id)
-	Characters.dress(model, bot.faction, nil)
-	bot.model = model
 	bot.mag = bot.weapon.magazine
-	bot.target, bot.goal, bot.goalSector = nil, nil, nil
-	bot.lastProgress = os.clock()
+	-- Died antes de qualquer espera: register() já o torna alvo, e attachWeapon/dress carregam
+	-- arte (LoadAsset). Morto nessa janela, o bot ficava caído para sempre, sem largar a arma e
+	-- sem voltar (autoteste no Studio, 2026-11-10: "nenhuma arma caiu em 3 s").
 	local hum = model:FindFirstChildOfClass("Humanoid")
 	if hum then
 		hum.Died:Connect(function()
@@ -138,6 +127,23 @@ local function spawnModel(bot: Bot)
 			end)
 		end)
 	end
+	local jx, jz = bot.rng:range(-20, 20), bot.rng:range(-20, 20)
+	local y = SpawnService.groundY(pt.x + jx, pt.z + jz)
+	model:PivotTo(CFrame.new(pt.x + jx, y + 5, pt.z + jz))
+	model.Parent = folder
+	local root = model:FindFirstChild("HumanoidRootPart") :: BasePart?
+	if root then
+		root:SetNetworkOwner(nil)
+	end
+	Combatants.register(model, bot.faction, nil)
+	AssetLoader.attachWeapon(model, bot.weapon.id)
+	Characters.dress(model, bot.faction, nil)
+	if hum and hum.Health <= 0 then
+		return -- morreu enquanto se vestia: o Died já marcou a volta e some com o corpo
+	end
+	bot.model = model
+	bot.target, bot.goal, bot.goalSector = nil, nil, nil
+	bot.lastProgress = os.clock()
 end
 
 local function newBot(faction: string): Bot

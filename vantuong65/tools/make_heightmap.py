@@ -24,7 +24,7 @@ from rasterio.warp import Resampling, reproject
 from scipy import ndimage
 
 sys.path.insert(0, str(Path(__file__).parent))
-from geo import PLAY_ING, STUD_M, ing_to_wgs_utm, play_center_wgs  # noqa: E402
+from geo import STUD_M, WORLD_ING, ing_to_wgs_utm, play_center_wgs  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 DEM = ROOT / "research/dem/Copernicus_DSM_COG_10_N15_00_E108_00_DEM.tif"
@@ -77,7 +77,7 @@ def to_png16(z: np.ndarray, name: str, meta: dict) -> None:
 def main() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
     cE, cN = play_center_wgs()
-    e0, n0, e1, n1 = PLAY_ING
+    e0, n0, e1, n1 = WORLD_ING  # mundo gerado (D-63)
     w_play, h_play = e1 - e0, n1 - n0
     margem = 500.0
     res = 8 * STUD_M  # 1 pixel = 8 studs = 2,24 m (2 voxels de terreno)

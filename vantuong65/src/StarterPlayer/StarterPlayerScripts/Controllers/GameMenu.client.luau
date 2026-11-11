@@ -47,7 +47,7 @@ list.Parent = body
 local BASE_TABS = { "Configurações", "Squad e papel", "Loja" }
 -- servidor privado: só o dono vê a aba "Servidor" (modo e horário; o servidor revalida)
 local MODES = { "Warfare", "Offensive", "Skirmish" }
-local MODE_NAMES = { "Warfare (5 setores, 75 min)", "Offensive (EUA atacam do mar)", "Skirmish (1 setor, 20 min)" }
+local MODE_NAMES = { "Warfare (5 setores, 75 min)", "Offensive (EUA atacam do leste)", "Skirmish (1 setor, 20 min)" }
 local CLOCKS = { 6.5, 12, 18.5 }
 local CLOCK_NAMES = { "06:30 (amanhecer)", "12:00", "18:30 (entardecer)" }
 local psMode, psClock = 1, 1

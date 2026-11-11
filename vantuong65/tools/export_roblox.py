@@ -4,6 +4,7 @@ Gera, a partir da carta L7014 (ed. 3), do DEM e das decisões do DESIGN.md:
   src/ServerStorage/VT65Build/Data/Heights_XX.luau  alturas em cm (uint16 LE, base64), 16 studs
   src/ServerStorage/VT65Build/Data/Classes.luau     uso do solo (RLE por linha, base64)
   src/ServerStorage/VT65Build/Data/Features.luau    quadros de arrozal, diques, sebes, casas
+Depois rode tools/crop_world.py: ele recorta estes dados para a área jogável (D-63) e escreve
   src/ReplicatedStorage/Shared/MapConfig.luau       limites, setores, pontos fortes, QGs, locais
 
 Sistema de coordenadas do jogo: X = leste, Z = sul, Y = altura; 1 stud = 0,28 m; origem no centro
@@ -14,7 +15,6 @@ Uso: uv run python tools/export_roblox.py
 from __future__ import annotations
 
 import base64
-import csv
 import json
 import math
 import sys
@@ -26,7 +26,7 @@ from skimage.draw import polygon as draw_polygon
 from skimage.measure import find_contours
 
 sys.path.insert(0, str(Path(__file__).parent))
-from geo import PLAY_ING, STUD_M, ing_to_wgs_utm, play_center_wgs  # noqa: E402
+from geo import STUD_M, WORLD_ING, ing_to_wgs_utm, play_center_wgs  # noqa: E402
 from landcover import (  # noqa: E402
     CELL_M,
     CELL_STUDS,
@@ -56,45 +56,13 @@ COTAS = [
     ("cota trig. 45", 272057, 1693790, 45.0),
 ]
 
-# Fronteiras de setor (DESIGN D-08), polilinhas sul -> norte em ING-A
-FRONTEIRAS_ING = [
-    [(269300, 1691200), (269300, 1692450), (269050, 1692450), (269050, 1693600)],
-    [(269800, 1691200), (269800, 1693600)],
-    [(270420, 1691200), (270420, 1692400), (270500, 1692400), (270500, 1693600)],
-    [(271250, 1691200), (271250, 1693600)],
-]
-SETORES = ["S1 Colina 43", "S2 Nam Yên", "S3 An Cường (2)", "S4 An Phước", "S5 Green Beach"]
-# Pontos fortes candidatos: (setor, nome, E, N, real?, observação)
-PONTOS_FORTES = [
-    (1, "Colina 43", 268545, 1691655, True, "cota 43 da carta"),
-    (1, "LZ Blue / Nam Yên (3)", 268900, 1692050, True, "First Fight PDF p.29"),
-    (1, "Athletic field", 268400, 1692170, True, "retângulo tracejado da carta"),
-    (2, "Nam Yên (4)", 269350, 1692870, True, "vila da carta"),
-    (2, "An Thới (2)", 269530, 1693200, True, "vila da carta"),
-    (2, "Cemitério", 269435, 1692547, True, "símbolo de cemitério da carta"),
-    (3, "An Cường (2)", 270030, 1692850, True, "vila fortificada (First Fight p.25)"),
-    (3, "Trincheira sul", 270040, 1692640, True, "'wide, deep trench south of the village' (p.23)"),
-    (3, "Colina 30", 270205, 1693420, True, "First Fight p.29"),
-    (4, "An Phước (1)", 270560, 1691600, True, "vila da carta"),
-    (4, "Vau do riacho", 270730, 1692015, True, "riacho real; ponto do vau é de design"),
-    (4, "Túmulos da várzea", 270950, 1692900, False, "elemento de design (confirmar em foto)"),
-    (5, "An Cường (1)", 271550, 1692360, True, "vila de pescadores (First Fight p.21)"),
-    (5, "Colina 22", 271630, 1692740, True, "Hill 22 (First Fight p.21) = cota trig. 22"),
-    (5, "Green Beach (dunas)", 271800, 1692500, True, "praia do desembarque, 06:30"),
-]
-QGS = {
-    "US": (271830, 1691750, "Green Beach sul (setor S5)"),
-    "VC": (268280, 1692900, "retaguarda oeste (setor S1)"),
-}
+# Setores, pontos fortes, QGs e o MapConfig ficam em tools/crop_world.py, que recorta este mundo
+# (4 x 2,4 km, D-03) para a área jogável de 2 x 2 km (D-63).
 
 
 def to_local(E: float, N: float) -> tuple[float, float]:
     cE, cN = play_center_wgs()
     return (E - cE) / STUD_M, -(N - cN) / STUD_M
-
-
-def ing_local(e: float, n: float) -> tuple[float, float]:
-    return to_local(*ing_to_wgs_utm(e, n))
 
 
 def b64(arr: np.ndarray) -> str:
@@ -126,7 +94,7 @@ def calibrate(gd, h: np.ndarray) -> list[tuple[str, float, float]]:
 
 def gen_paddies(gd, h: np.ndarray, cls: np.ndarray, rng: np.random.Generator):
     """Quadros de arrozal irregulares (20-60 m) numa grade girada e com jitter; terraços."""
-    e0, n0, e1, n1 = PLAY_ING
+    e0, n0, e1, n1 = WORLD_ING
     m = 150.0
     corners = [ing_to_wgs_utm(e, n) for e, n in ((e0 - m, n0 - m), (e1 + m, n1 + m))]
     (Ea, Na), (Eb, Nb) = corners
@@ -233,7 +201,7 @@ def village_hedges(gd, cls: np.ndarray, rng: np.random.Generator):
 
 
 def in_play(E: float, N: float, margin: float = 150.0) -> bool:
-    e0, n0, e1, n1 = PLAY_ING
+    e0, n0, e1, n1 = WORLD_ING
     a = ing_to_wgs_utm(e0 - margin, n0 - margin)
     b = ing_to_wgs_utm(e1 + margin, n1 + margin)
     return a[0] <= E <= b[0] and a[1] <= N <= b[1]
@@ -358,62 +326,8 @@ def main() -> None:
     )
     write(DATA / "Features.luau", feats)
 
-    # ---------- MapConfig (replicado) ----------
-    e0, n0, e1, n1 = PLAY_ING
-    ing0 = ((e0 + e1) / 2, (n0 + n1) / 2)  # o centro da área é a origem local por construção
-    xa, za = ing_local(e0, n1)  # NO
-    xb, zb = ing_local(e1, n0)  # SE
-
-    def poly(pts):  # lista plana x1, z1, x2, z2, ... (sem Vector2: o módulo roda também no Lune)
-        return "{" + ", ".join(f"{x:.1f}, {z:.1f}" for x, z in pts) + "}"
-
-    bounds_w = [(e0, n0), (e0, n1)]
-    bounds_e = [(e1, n0), (e1, n1)]
-    lines = [bounds_w] + FRONTEIRAS_ING + [bounds_e]
-    sec_txt = []
-    for k in range(5):
-        west = [ing_local(*p) for p in lines[k]]
-        east = [ing_local(*p) for p in lines[k + 1]]
-        ring = west + east[::-1]
-        sec_txt.append(f'\t\t{{ id = {k + 1}, name = "{SETORES[k]}", polygon = {poly(ring)} }},')
-    sp_txt = []
-    for s, nome, e, n, real, obs in PONTOS_FORTES:
-        x, z = ing_local(e, n)
-        sp_txt.append(
-            f'\t\t{{ sector = {s}, name = "{nome}", x = {x:.1f}, z = {z:.1f}, '
-            f'real = {str(real).lower()}, note = "{obs}" }},'
-        )
-    qg_txt = []
-    for fac, (e, n, obs) in QGS.items():
-        x, z = ing_local(e, n)
-        qg_txt.append(f'\t\t{fac} = {{ x = {x:.1f}, z = {z:.1f}, note = "{obs}" }},')
-    with open(ROOT / "research/locais.csv", encoding="utf-8") as f:
-        locs = list(csv.DictReader(f))
-    loc_txt = [
-        f'\t\t{{ name = "{r["nome"]}", grid = "{r["grade_1965"]}", x = {float(r["x_studs"]):.1f}, '
-        f"z = {float(r['z_studs']):.1f}, e1965 = {r['E_ing']}, n1965 = {r['N_ing']} }},"
-        for r in locs
-    ]
-    cfg = (
-        "--!strict\n-- GERADO por tools/export_roblox.py (DESIGN.md D-03, D-08). Não editar.\n"
-        "-- Coordenadas em studs no quadro local: X = leste, Z = sul, origem no centro da área.\n"
-        "local MapConfig = {}\n\n"
-        f"MapConfig.STUD_M = {STUD_M}\n"
-        f"MapConfig.Bounds = {{ minX = {xa:.1f}, maxX = {xb:.1f}, "
-        f"minZ = {za:.1f}, maxZ = {zb:.1f} }}\n"
-        f"-- grade de 1965 (ING-A) da origem local: E = gridE0 + x*0,28 ; N = gridN0 - z*0,28\n"
-        f"MapConfig.GridOrigin1965 = {{ e = {ing0[0]:.1f}, n = {ing0[1]:.1f} }}\n"
-        "MapConfig.OutOfBoundsKillSeconds = 10\n"
-        "MapConfig.CaptureRadiusStuds = 50 / 0.28 -- 50 m (prompt: 40-60 m)\n"
-        "MapConfig.Sectors = {\n" + "\n".join(sec_txt) + "\n}\n"
-        "MapConfig.Strongpoints = {\n" + "\n".join(sp_txt) + "\n}\n"
-        "MapConfig.HQ = {\n" + "\n".join(qg_txt) + "\n}\n"
-        "MapConfig.Locations = {\n" + "\n".join(loc_txt) + "\n}\n"
-        "-- EUA começam com S4-S5, VC com S1-S2, S3 neutro (prompt, Parte 3)\n"
-        'MapConfig.InitialOwner = { "VC", "VC", "Neutral", "US", "US" }\n\n'
-        "return MapConfig\n"
-    )
-    write(SHARED / "MapConfig.luau", cfg)
+    # O MapConfig (limites, setores, pontos fortes e QGs) é escrito por tools/crop_world.py, que
+    # também recorta estes dados para a área jogável de 2 x 2 km (D-63). Rode-o em seguida.
 
     fx = []
     for nome, e, n, _z in COTAS + [

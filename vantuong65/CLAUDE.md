@@ -1,7 +1,7 @@
 # Instruções para o Claude: VẠN TƯỜNG '65 (jogo de Roblox)
 
 Esta pasta é o jogo **VẠN TƯỜNG '65**: FPS tático 30 contra 30 no Roblox, na Operação Starlite
-(agosto de 1965), mapa 1:1 de 4 × 2,4 km. O `CLAUDE.md` da raiz do repositório é de OUTRO projeto
+(agosto de 1965), mapa 1:1 de 2 × 2 km, da Colina 43 a An Cường (2) (D-63). O `CLAUDE.md` da raiz do repositório é de OUTRO projeto
 (estratégias de trade). Aqui vale este arquivo. Responda sempre em português.
 
 ## Antes de qualquer coisa
@@ -20,6 +20,10 @@ Esta pasta é o jogo **VẠN TƯỜNG '65**: FPS tático 30 contra 30 no Roblox,
   ```
 
   O resultado é `build/VanTuong65_F1.rbxl`; copie para `place/VanTuong65.rbxl`.
+- Mapa: os dados em `VT65Build/Data` e o `MapConfig.luau` saem de `tools/crop_world.py`, que
+  recorta o mundo gerado (`geo.WORLD_ING`, 4 × 2,4 km) para a área jogável (`geo.PLAY_ING`) com
+  150 m de margem. Setores, pontos fortes e QGs ficam nele. Se regerar com `export_roblox.py`, rode
+  o `crop_world.py` depois.
 - **Não salve o place pelo Studio:** o Studio grava com outra compressão, que o Lune 0.8 não lê
   ("Decompression failed"). Teste mudanças no Studio pelo MCP, mas gere o `.rbxl` pelo pipeline.
 - **No PC do dono (Windows):**
@@ -48,10 +52,14 @@ luau-lsp analyze --definitions=<globalTypes.None.d.luau> --sourcemap=sourcemap.j
 O `sourcemap.json` não vai para o Git.
 
 ## Teste no Studio (MCP do Roblox Studio)
-- Abra `place/VanTuong65.rbxl` e dê Play.
+- Abra uma cópia de `place/VanTuong65.rbxl` (fora do repositório) e dê Play. O place da nuvem só
+  tem o código e os dados da última publicação.
 - Na barra de comando, do lado do servidor, use os ganchos (só funcionam no Studio):
-  - `workspace:SetAttribute("VT65SelfTest", true)`: autoteste de 11 sistemas. As linhas
-    `[VT65 TESTE]` aparecem no Output;
+  - `workspace:SetAttribute("VT65SelfTest", true)`: autoteste de 12 sistemas. As linhas
+    `[VT65 TESTE]` aparecem no Output. "Deitado" e "pá" pedem o jogador em campo pelos EUA: do
+    lado do cliente, dispare `VT65Remotes.Team_Choose("US")`,
+    `Squad_Action({op="create", unit="infantry"})`, `Role_Choose("rifleman")` e
+    `Spawn_Request("hq")`;
   - `workspace:SetAttribute("VT65DevMode", "Offensive")`: troca o modo (Warfare, Offensive ou
     Skirmish);
   - `workspace:SetAttribute("VT65DevEnd", true)`: encerra a partida e mostra o relatório pós-ação;
@@ -83,7 +91,7 @@ O `sourcemap.json` não vai para o Git.
 - Segredos só no `.env` (no `.gitignore`), nunca no código nem no chat.
 - ForgeGUI: nunca regenerar um job em `outcome_unknown`. "failed" com `retryable` pode ser
   retomado com `generation_retry`.
-- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-63) e atualize `PROGRESS.md`.
+- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-64) e atualize `PROGRESS.md`.
 - Metas da Parte 2: vegetação ≤ 3 mil triângulos, props ≤ 5 mil, herói ≤ 20 mil (`ArtBudget`,
   conferido pelo teste da F5).
 - Commits no branch acima, com mensagem em português.

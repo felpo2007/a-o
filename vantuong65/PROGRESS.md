@@ -305,6 +305,25 @@ em `testes/TESTE_ARTE_REAL_2026-11-10.md`.
   tela, e as pistolas ficam com o braço estendido. A Type 54 e a RPD vieram tortas do gerador e
   agora são corrigidas. O autoteste continua 11/11. O place foi publicado de novo.
 
+## Mapa de 2 × 2 km (2026-11-10, D-63)
+O mapa encolheu de 4 × 2,4 km para **2 × 2 km em 1:1**, da Colina 43 a An Cường (2), a pedido
+do usuário (opção A).
+- **Ficaram de fora:** a praia, o mar, An Cường (1), a Colina 22 e An Phước (1).
+- **O que mudou:**
+  - setores, 15 pontos fortes e QGs novos;
+  - os EUA começam na borda leste;
+  - os depósitos de veículos ficam a oeste e ao norte do QG;
+  - a raia dos EUA atira para oeste.
+- **Como:** `tools/crop_world.py` recorta os dados já gerados, com 150 m de margem. A origem do
+  quadro local não mudou.
+- **Medido no Studio:**
+  - terreno em 21–47 s;
+  - 9.738 diques, 92 casas e 4.899 modelos de arte (4.896 no chão);
+  - os 6 veículos, os QGs e os alvos estão dentro da área.
+- **Autoteste: 12 ok, 0 falhas, 0 pulados** (com o jogador em campo pelos EUA).
+- **Corrigido:** um bot morto enquanto a arte dele carregava ficava caído para sempre, sem largar a
+  arma, e a vaga não voltava.
+
 ## Resultados-chave (medidos aqui)
 | Medida | Valor |
 |---|---|
@@ -315,12 +334,12 @@ em `testes/TESTE_ARTE_REAL_2026-11-10.md`.
 | Testes Lune F4 | `f4.luau` **12 ok** |
 | Testes Lune controle | `controle.luau` **18 ok** (inclui 10.000 eventos aleatórios sem estado preso e a troca de contexto do teste no Studio) |
 | Giro de 180° no analógico (quadril) | **0,58 s** (calculado) |
-| Testes Lune F5 | `f5.luau` **8 ok** |
+| Testes Lune F5 | `f5.luau` **9 ok** |
 | Testes Lune F6 | `f6.luau` **27 ok** |
 | Arte estimada por setor (teto 2,5 mi) | ~1.000 modelos; touceiras de sebe 19/37/24/21/52% nos setores 1–5, com 104 galinhas e 33 búfalos (cálculo) |
 | Daltonismo (ΔE76 simulado) | vermelho x verde histórico: 24 na deuteranopia; laranja x azul: 133–149 |
 | Redução local (Hausdorff, máx.) | capacete 0,8 cm; colete 0,6 cm; fibra 0,3 cm; props da vila 2,5–16 cm |
-| Diques após a fusão | 18.926 → **18.095** (comprimento 2.113.038 → 2.113.037 studs) |
+| Diques após a fusão | 18.926 → **18.095** no mapa de 4 × 2,4 km; **9.738** no recorte de 2 × 2 km (D-63) |
 | Morteiro 82 mm (calibrado) | k = 1,512e-4 1/m; a 300/800/1.500/2.500 m: voo de 18,4/14,9/26,9/27,5 s |
 | M29 81 mm (v0 derivada) | **254 m/s** para 3.890 m com o arrasto do 82 mm |
 | UH-34D no peso máx. a 35 °C | pairar fora do efeito solo 1.522 hp, dentro 1.375 hp, a 20 m/s 1.033 hp; disponível 1.453 hp |

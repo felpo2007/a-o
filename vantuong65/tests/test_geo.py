@@ -51,7 +51,9 @@ def test_quadro_local_centro_e_orientacao():
     assert x == pytest.approx(100) and z == pytest.approx(-100)  # norte = -Z
 
 
-def test_area_jogavel_contem_colina43_e_praia():
+def test_mundo_gerado_contem_colina43_e_praia():
+    # a coluna na_area_jogavel é da pesquisa (área antiga de 4 x 2,4 km = WORLD_ING); a área
+    # jogável de 2 x 2 km (D-63) deixa a praia e An Cường (1) de fora
     with open(ROOT / "research/locais.csv", encoding="utf-8") as f:
         rows = {r["nome"]: r for r in csv.DictReader(f)}
     for nome in (
@@ -81,7 +83,9 @@ def test_export_roblox_relatorio():
     assert total < 40000
 
 
-def test_mapconfig_gerado_tem_area_de_4_por_2_4_km():
+def test_mapconfig_gerado_tem_area_de_2_por_2_km():
+    """D-63: 2 x 2 km a oeste (Colina 43 -> An Cường 2), origem no centro do mundo gerado."""
     txt = (ROOT / "src/ReplicatedStorage/Shared/MapConfig.luau").read_text("utf-8")
-    assert "minX = -7142.9, maxX = 7142.9" in txt
-    assert "minZ = -4285.7, maxZ = 4285.7" in txt
+    assert "minX = -6607.2, maxX = 535.7" in txt
+    assert "minZ = -3928.6, maxZ = 3214.3" in txt
+    assert "GridOrigin1965 = { e = 270200.0, n = 1692400.0 }" in txt  # origem não mudou

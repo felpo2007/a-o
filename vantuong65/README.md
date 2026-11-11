@@ -1,7 +1,7 @@
 # VẠN TƯỜNG '65
 
 FPS tático 30v30 para Roblox, ambientado na Batalha de Vạn Tường (Operação Starlite), de 18 a 24 de
-agosto de 1965. A área jogável tem **4,0 × 2,4 km em escala 1:1**. Esta pasta é independente do resto
+agosto de 1965. A área jogável tem **2,0 × 2,0 km em escala 1:1**, da Colina 43 a An Cường (2) (D-63). Esta pasta é independente do resto
 do repositório.
 
 - Estado e como testar: [`PROGRESS.md`](PROGRESS.md)

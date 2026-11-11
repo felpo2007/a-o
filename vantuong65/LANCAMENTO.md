@@ -11,8 +11,8 @@ Tudo aqui é para você colar no Creator Dashboard. Eu não tenho acesso à sua 
 ```
 Agosto de 1965, costa de Quảng Ngãi. Operação Starlite: fuzileiros navais dos EUA desembarcam em Green Beach e avançam contra o 1º Regimento Viet Cong entre arrozais, sebes de bambu, vilas e túneis.
 
-• 30 contra 30 num mapa 1:1 de 4 × 2,4 km, feito a partir da carta militar e do relevo reais.
-• Warfare: 5 setores em linha, 75 min. Offensive: os EUA atacam do mar, o VC defende setor por setor. Skirmish: 1 setor, 20 min.
+• 30 contra 30 num mapa 1:1 de 2 × 2 km, feito a partir da carta militar e do relevo reais.
+• Warfare: 5 setores em linha, 75 min. Offensive: os EUA atacam do leste, o VC defende setor por setor. Skirmish: 1 setor, 20 min.
 • Papéis de squad, comandante com fogo naval e de morteiro pela grade, médicos, sapadores, túneis.
 • M48A3, Ontos, LVTP-5 e helicóptero UH-34D com física calibrada com dados reais.
 • Sem minimapa e sem marcador automático de inimigo: carta, bússola e rádio.
@@ -23,13 +23,13 @@ Agosto de 1965, costa de Quảng Ngãi. Operação Starlite: fuzileiros navais d
 Itens à venda são só visuais e de apoio: nada compra vantagem em combate.
 ```
 
-**Descrição (inglês, 973 caracteres, para a tradução automática não decidir sozinha):**
+**Descrição (inglês, 972 caracteres, para a tradução automática não decidir sozinha):**
 
 ```
 August 1965, Quảng Ngãi coast. Operation Starlite: US Marines land on Green Beach and push against the Viet Cong 1st Regiment through rice paddies, bamboo hedgerows, villages and tunnels.
 
-• 30 vs 30 on a 1:1 map of 4 × 2.4 km, built from the real military chart and terrain.
-• Warfare: 5 sectors in a line, 75 min. Offensive: the US attacks from the sea, the VC defends sector by sector. Skirmish: 1 sector, 20 min.
+• 30 vs 30 on a 1:1 map of 2 × 2 km, built from the real military chart and terrain.
+• Warfare: 5 sectors in a line, 75 min. Offensive: the US attacks from the east, the VC defends sector by sector. Skirmish: 1 sector, 20 min.
 • Squad roles, a commander calling naval and mortar fire by grid, medics, sappers, tunnels.
 • M48A3, Ontos, LVTP-5 and a UH-34D helicopter with physics calibrated on real data.
 • No minimap and no automatic enemy markers: map, compass and radio.

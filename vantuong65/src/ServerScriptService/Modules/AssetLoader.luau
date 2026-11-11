@@ -237,11 +237,15 @@ function AssetLoader.start()
 				local a = k * 1.05
 				AssetLoader.place("grave_mound", sp.x + math.cos(a) * 25, sp.z + math.sin(a) * 25, a, out)
 			end
-		elseif sp.name == "Vau do riacho" then
-			AssetLoader.place("log_bridge", sp.x, sp.z, rng:range(0, 3.14), out)
 		end
 	end
-	-- árvores das colinas (cotas 43, 30 e 22): bosque ralo no topo (densidade de design)
+	-- ponte de toras no riacho a leste de An Cường (2): o vau do riacho ficou fora do mapa de 2 x 2 km
+	for _, l in MapConfig.Locations do
+		if string.find(l.name, "Riacho", 1, true) then
+			AssetLoader.place("log_bridge", l.x, l.z, rng:range(0, 3.14), out)
+		end
+	end
+	-- árvores das colinas (cotas 43 e 30 no mapa de 2 x 2 km): bosque ralo no topo (densidade de design)
 	if AssetLoader.template("hill_tree") then
 		for _, l in MapConfig.Locations do
 			if string.find(l.name, "Colina") then
