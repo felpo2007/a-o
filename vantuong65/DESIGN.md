@@ -2250,10 +2250,15 @@ não aparece.
 
 **Onde vale:** uniforme e camuflagem no próximo spawn; a skin de arma troca na hora.
 
-**Falta:**
-- criar os 17 Developer Products e os 7 Game Passes (depende da permissão da chave);
-- refazer as armas no Blender com as peças `Madeira`, `GuardaMao` e `Metal`. Hoje cada arma é uma
-  malha só, e a skin de arma só aparece na arma provisória.
+**Itens de Robux criados** (2026-11-11, depois que o dono liberou `game-pass:write` e
+`developer-product:write` na chave):
+- **Skins:** 17 Developer Products e 7 Game Passes (`tools/roblox_cloud.py create-skins`, catálogo
+  exportado por `tools/skins_loja.luau`, ícones gerados), com IDs em `Skins.IDS`.
+- **Loja:** os 6 Game Passes (uniformes USMC e VC, Passe de Unidade, Apoiador, Kit Veterano, Kit de
+  Elite) e os 3 Developer Products (duas gorjetas e "Renascer onde caiu"), com IDs em `Commerce.IDS`.
+
+**Falta:** refazer as armas no Blender com as peças `Madeira`, `GuardaMao` e `Metal`. Hoje cada arma é
+uma malha só, e a skin de arma só aparece na arma provisória.
 
 ## D-86 — Veículos com movimento realista (2026-11-11)
 **Pedido do usuário:** "faça a movimentação dos veículos realista e visualmente agradável, com bons

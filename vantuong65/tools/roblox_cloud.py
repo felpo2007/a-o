@@ -243,6 +243,94 @@ def cmd_create_store(only: set[str] | None = None) -> None:
     print("Commerce.IDS atualizado")
 
 
+def skin_icon(item: dict, plan: dict[str, str]) -> Path:
+    """Ícone 512 x 512 da skin: recorte do uniforme, textura da camuflagem ou as cores da prévia."""
+    from PIL import Image, ImageDraw, ImageFilter
+
+    out_dir = ROOT / "assets/skins_icones"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    out = out_dir / f"{item['key']}.png"
+    size = 512
+    paper = Image.new("RGB", (size, size), (196, 184, 150))
+    art: Image.Image | None = None
+    shirt = item.get("shirt")
+    texture = item.get("texture")
+    if shirt and plan.get(f"Clothing.{shirt}"):
+        tpl = Image.open(ROOT / plan[f"Clothing.{shirt}"]).convert("RGBA")
+        art = tpl.crop((231, 74, 359, 202))  # frente do tronco no molde de camisa do Roblox
+    elif texture and plan.get(f"Images.{texture}"):
+        tex = Image.open(ROOT / plan[f"Images.{texture}"]).convert("RGBA")
+        w, h = tex.size
+        side = min(w, h)
+        art = tex.crop(((w - side) // 2, (h - side) // 2, (w + side) // 2, (h + side) // 2))
+    if art is None:
+        # faixas diagonais com as cores da prévia (madeira, metal, fita, tecido)
+        sw = [tuple(int(c) for c in s[:3]) for s in item.get("swatch") or [[90, 90, 70]]]
+        art = Image.new("RGBA", (size, size))
+        d = ImageDraw.Draw(art)
+        band = size // max(len(sw) * 2, 2)
+        for i in range(-size, size * 2, band):
+            color = sw[(i // band) % len(sw)]
+            d.polygon([(i, 0), (i + band, 0), (i + band - size, size), (i - size, size)], color)
+        art = art.filter(ImageFilter.GaussianBlur(1.2))
+    inner = size - 64
+    art = art.resize((inner, inner), Image.LANCZOS)
+    shadow = Image.new("RGBA", (inner, inner), (0, 0, 0, 120)).filter(ImageFilter.GaussianBlur(8))
+    paper.paste(shadow, (36, 38), shadow)
+    paper.paste(art, (32, 32), art)
+    ImageDraw.Draw(paper).rectangle((32, 32, 32 + inner, 32 + inner), outline=(60, 54, 40), width=4)
+    paper.save(out)
+    return out
+
+
+def cmd_create_skins() -> None:
+    """Cria os Developer Products (arma) e Game Passes (uniforme, camuflagem) das skins (D-85).
+
+    Lê assets/skins_loja.json (lune run tools/skins_loja.luau) e grava os IDs em Skins.IDS.
+    """
+    c = cfg()
+    u = c["universeId"]
+    ids = load_ids()
+    items = json.loads((ROOT / "assets/skins_loja.json").read_text("utf-8"))
+    plan = {p["key"]: p["file"] for p in json.loads(PLAN.read_text("utf-8"))}
+    for item in items:
+        key = item["key"]
+        if f"store.{key}" in ids:
+            continue
+        icon = skin_icon(item, plan)
+        fields = {
+            "name": item["name"][:50],
+            "description": item["desc"][:1000],
+            "isForSale": "true",
+            "price": str(int(item["robux"])),
+        }
+        body, ctype = multipart(fields, {"imageFile": icon})
+        if item["robuxKind"] == "pass":
+            url = f"{API}/game-passes/v1/universes/{u}/game-passes"
+        else:
+            url = f"{API}/developer-products/v2/universes/{u}/developer-products"
+        try:
+            r = request("POST", url, body, {"Content-Type": ctype})
+        except RuntimeError as e:
+            print("FALHA", key, str(e)[:300])
+            continue
+        new_id = r.get("gamePassId") or r.get("productId") or r.get("id")
+        print("ok", key, new_id)
+        if new_id:
+            ids[f"store.{key}"] = str(new_id)
+            save_ids(ids)
+        time.sleep(0.5)  # limite de 3 a 5 pedidos por segundo
+    p = ROOT / "src/ReplicatedStorage/Shared/Skins.luau"
+    s = p.read_text("utf-8")
+    for k, v in ids.items():
+        if k.startswith("store.") and (
+            k[6:].startswith("PRODUCT_SKIN_") or "PASS_SKIN" in k or "PASS_CAMO" in k
+        ):
+            s = re.sub(rf"(\b{k[6:]} = )\d+", rf"\g<1>{int(v)}", s, count=1)
+    p.write_text(s, "utf-8")
+    print("Skins.IDS atualizado")
+
+
 def cmd_publish_place() -> None:
     c = cfg()
     rbxl = ROOT / "place/VanTuong65.rbxl"
@@ -260,6 +348,8 @@ if __name__ == "__main__":
     elif cmd == "create-store":
         # create-store [CHAVE ...]: sem chaves cria tudo o que falta
         cmd_create_store(set(sys.argv[2:]) or None)
+    elif cmd == "create-skins":
+        cmd_create_skins()
     elif cmd == "publish-place":
         cmd_publish_place()
     elif cmd == "all":

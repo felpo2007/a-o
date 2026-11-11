@@ -21,16 +21,16 @@ local Commerce = {}
 
 Commerce.IDS = {
 	-- Game Passes (compra única)
-	PASS_USMC_1965 = 0, -- "Uniformes USMC 1965"
-	PASS_VC_1965 = 0, -- "Uniformes da Força Principal 1965"
-	PASS_UNIT = 0, -- "Passe de Unidade" (criar unidade/clã, tag, lista)
-	PASS_SUPPORTER = 0, -- "Apoiador — Dossiê Starlite"
-	PASS_KIT_VETERAN = 0, -- "Kit Veterano" (equipamento nível 1; decisão do dono, 2026-11-11)
-	PASS_KIT_ELITE = 0, -- "Kit de Elite" (equipamento nível 2, inclui o Veterano)
+	PASS_USMC_1965 = 2078234463, -- "Uniformes USMC 1965"
+	PASS_VC_1965 = 2078306456, -- "Uniformes da Força Principal 1965"
+	PASS_UNIT = 2079194497, -- "Passe de Unidade" (criar unidade/clã, tag, lista)
+	PASS_SUPPORTER = 2078948463, -- "Apoiador — Dossiê Starlite"
+	PASS_KIT_VETERAN = 2079866464, -- "Kit Veterano" (equipamento nível 1; decisão do dono, 2026-11-11)
+	PASS_KIT_ELITE = 2079338501, -- "Kit de Elite" (equipamento nível 2, inclui o Veterano)
 	-- Developer Products (consumíveis)
-	PRODUCT_TIP_SMALL = 0, -- "Apoiar o desenvolvimento (pequeno)"
-	PRODUCT_TIP_LARGE = 0, -- "Apoiar o desenvolvimento (grande)"
-	PRODUCT_RESPAWN_INPLACE = 0, -- "Renascer onde caiu" (decisão do dono, 2026-11-11)
+	PRODUCT_TIP_SMALL = 3730455552, -- "Apoiar o desenvolvimento (pequeno)"
+	PRODUCT_TIP_LARGE = 3730455555, -- "Apoiar o desenvolvimento (grande)"
+	PRODUCT_RESPAWN_INPLACE = 3730455499, -- "Renascer onde caiu" (decisão do dono, 2026-11-11)
 	-- Experience Subscription (mensal; o criador precisa estar habilitado)
 	SUBSCRIPTION_UNIT_RESERVE = "", -- "Reserva da Unidade"; ex.: "EXP-1234567890"
 }
