@@ -24,9 +24,15 @@ gui.Enabled = false
 local root = Instance.new("Frame")
 root.AnchorPoint = Vector2.new(0.5, 0.5)
 root.Position = UDim2.fromScale(0.5, 0.5)
-root.Size = UDim2.fromOffset(if UiKit.tv() then 900 else 720, if UiKit.tv() then 640 else 540)
+-- cabe em qualquer tela (D-82: numa janela estreita o quadro passava da borda)
+root.Size = UDim2.fromScale(0.94, 0.9)
 root.BackgroundColor3 = UiKit.PAPER
 root.Parent = gui
+do
+	local sc = Instance.new("UISizeConstraint")
+	sc.MaxSize = Vector2.new(if UiKit.tv() then 900 else 720, if UiKit.tv() then 640 else 540)
+	sc.Parent = root
+end
 local tabsBar = UiKit.label(root, "", 20, 40)
 tabsBar.Position = UDim2.fromOffset(4, 4)
 local subBar = UiKit.label(root, "", 16, 30)
@@ -73,6 +79,12 @@ local SUBS = { "Controle", "Mira", "Mouse/teclado", "Gráficos", "Vibração", "
 local tab, sub = 1, 1
 local listening: string? = nil -- "ctx.actionId" esperando um botão do controle
 local keyListening: string? = nil -- "ctx.actionId" esperando uma tecla
+-- A tecla capturada chega também às ações do menu (Q/E/Z/C, LB/RB...), às vezes depois da captura:
+-- por um instante após capturar, as abas não trocam e o menu não fecha (teste no Studio, D-82).
+local swallowUntil = 0
+local function busy(): boolean
+	return listening ~= nil or keyListening ~= nil or os.clock() < swallowUntil
+end
 local CTX_NAMES: { [string]: string } = {
 	infantry = "Infantaria",
 	aim = "Mirando",
@@ -437,6 +449,9 @@ Input.on("ui_back", "press", function()
 	if shop and shop.Enabled then
 		return -- a loja (por cima) fecha primeiro
 	end
+	if os.clock() < swallowUntil then
+		return -- o B (ou a tecla) acabou de virar o botão de uma ação
+	end
 	if listening or keyListening then
 		listening, keyListening = nil, nil
 		render()
@@ -444,27 +459,27 @@ Input.on("ui_back", "press", function()
 		setOpen(false)
 	end
 end)
--- esperando uma tecla, Q/E/Z/C trocam a tecla da ação, não a aba
+-- esperando um botão ou uma tecla, Q/E/Z/C e LB/RB/LT/RT trocam o botão da ação, não a aba
 Input.on("ui_tab_prev", "press", function()
-	if gui.Enabled and not keyListening then
+	if gui.Enabled and not busy() then
 		tab = (tab - 2) % #TABS() + 1
 		render()
 	end
 end)
 Input.on("ui_tab_next", "press", function()
-	if gui.Enabled and not keyListening then
+	if gui.Enabled and not busy() then
 		tab = tab % #TABS() + 1
 		render()
 	end
 end)
 Input.on("ui_sub_prev", "press", function()
-	if gui.Enabled and tab == 1 and not keyListening then
+	if gui.Enabled and tab == 1 and not busy() then
 		sub = (sub - 2) % #SUBS + 1
 		render()
 	end
 end)
 Input.on("ui_sub_next", "press", function()
-	if gui.Enabled and tab == 1 and not keyListening then
+	if gui.Enabled and tab == 1 and not busy() then
 		sub = sub % #SUBS + 1
 		render()
 	end
@@ -502,6 +517,7 @@ UserInputService.InputBegan:Connect(function(input, processed)
 	end
 	local key = keyListening :: string
 	keyListening = nil
+	swallowUntil = os.clock() + 0.3
 	local s = table.clone(Input.settings) :: any
 	s.keymap = table.clone(s.keymap)
 	s.keymap[key] = code
@@ -525,6 +541,7 @@ UserInputService.InputBegan:Connect(function(input)
 	end
 	local key = listening :: string
 	listening = nil
+	swallowUntil = os.clock() + 0.3
 	local s = table.clone(Input.settings) :: any
 	s.remap = table.clone(s.remap)
 	s.remap[key] = code
