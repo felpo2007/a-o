@@ -379,6 +379,22 @@ test("animais: calmos ficam perto de casa; nascem em parte dos quintais", functi
 		Animals.step(c, 1, t, rng:next())
 		assert(math.sqrt(c.x ^ 2 + c.z ^ 2) <= Animals.SPECIES.chicken.leashM + 1, "galinha fugiu de casa sem susto")
 	end
+	-- D-77: o búfalo calmo passa a maior parte do tempo parado pastando; o andar sai certo
+	local b = Animals.new("water_buffalo", 0, 0)
+	local still = 0
+	for t = 1, 3600 do
+		local moved = Animals.step(b, 1, t, rng:next())
+		if not moved then
+			still += 1
+			assert(Animals.gait(b, t, moved) == "idle", "parado = idle")
+		else
+			assert(Animals.gait(b, t, moved) == "walk", "andando calmo = walk")
+		end
+		assert(math.sqrt(b.x ^ 2 + b.z ^ 2) <= Animals.SPECIES.water_buffalo.leashM + 1, "búfalo saiu do pasto")
+	end
+	assert(still > 3600 * 0.55, "búfalo calmo parado a maior parte do tempo: " .. still .. " s de 3600")
+	Animals.noise(b, b.x + 10, b.z, false, 4000)
+	assert(Animals.step(b, 0.1, 4000.1, 0.5) and Animals.gait(b, 4000.1, true) == "run", "assustado = run")
 	local houses = {}
 	for i = 1, 60 do
 		table.insert(houses, i * 50)

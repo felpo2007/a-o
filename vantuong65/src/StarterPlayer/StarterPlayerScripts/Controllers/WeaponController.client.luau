@@ -21,6 +21,7 @@ local Weapons = require(ReplicatedStorage.Shared.Weapons)
 local Bus = require(script.Parent.Bus)
 local Haptics = require(script.Parent.Haptics)
 local Input = require(script.Parent.Input)
+local Toast = require(script.Parent.Toast)
 local UiKit = require(script.Parent.UiKit)
 local ViewMode = require(script.Parent.ViewMode)
 
@@ -47,30 +48,11 @@ local zeroIdx = 1
 local breathUntil, breathReady = 0, 0
 local swayT = 0
 
--- aviso curto na tela (seletor, alça, arma)
+-- aviso curto na tela (seletor, alça, arma): sistema de avisos (Toast), um aviso só para a arma
+-- (cada troca atualiza o aberto em vez de empilhar). A tela fica para a vinheta do binóculo.
 local hud = UiKit.screen("VT65WeaponToast", 15)
-local toast = Instance.new("TextLabel")
-toast.AnchorPoint = Vector2.new(0.5, 1)
-toast.Position = UDim2.new(0.5, 0, 1, -120)
-toast.Size = UDim2.fromOffset(360, 36)
-toast.BackgroundTransparency = 0.4
-toast.BackgroundColor3 = Color3.fromRGB(20, 20, 16)
-toast.TextColor3 = Color3.new(1, 1, 1)
-toast.Font = Enum.Font.GothamMedium
-toast.TextSize = UiKit.text(18)
-toast.Visible = false
-toast.Parent = hud
-local toastId = 0
 local function say(text: string)
-	toastId += 1
-	local my = toastId
-	toast.Text = text
-	toast.Visible = true
-	task.delay(1.6, function()
-		if toastId == my then
-			toast.Visible = false
-		end
-	end)
+	Toast.show(text, "info", { key = "arma", fallback = "Arma", duration = 1.8 })
 end
 
 -- vinheta do binóculo

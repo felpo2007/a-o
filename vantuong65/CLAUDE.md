@@ -44,7 +44,7 @@ com lavoura em volta das vilas (D-65). O `CLAUDE.md` da raiz do repositório é 
 
 ## Testes (rode antes de cada commit)
 ```
-for t in run f2 f3 f4 controle f5 f6 atualizacoes movimento uniformes progressao; do lune run tests/luau/$t.luau; done
+for t in run f2 f3 f4 controle f5 f6 atualizacoes movimento uniformes progressao bots; do lune run tests/luau/$t.luau; done
 uv run --group arte pytest -q && uv run ruff check .
 stylua --check src tests/luau tools
 rojo sourcemap default.project.json -o sourcemap.json
@@ -134,7 +134,7 @@ O `sourcemap.json` não vai para o Git.
 - Segredos só no `.env` (no `.gitignore`), nunca no código nem no chat.
 - ForgeGUI: nunca regenerar um job em `outcome_unknown`. "failed" com `retryable` pode ser
   retomado com `generation_retry`.
-- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-77) e atualize `PROGRESS.md`.
+- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-79) e atualize `PROGRESS.md`.
 - Metas da Parte 2: vegetação ≤ 3 mil triângulos, props ≤ 5 mil, herói ≤ 20 mil (`ArtBudget`,
   conferido pelo teste da F5).
 - Commits no branch acima, com mensagem em português.

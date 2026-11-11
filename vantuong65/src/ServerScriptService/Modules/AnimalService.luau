@@ -75,13 +75,23 @@ function AnimalService.start()
 				if l.model.Parent == nil then
 					continue
 				end
+				local moved: boolean? = nil
 				if Animals.fleeing(l.a, now) then
-					Animals.step(l.a, dt, now, rng:next())
-					place(l)
+					moved = Animals.step(l.a, dt, now, rng:next())
 				elseif now - l.lastSlow >= 1 then
-					Animals.step(l.a, now - math.max(l.lastSlow, now - 1), now, rng:next())
+					moved = Animals.step(l.a, now - math.max(l.lastSlow, now - 1), now, rng:next())
 					l.lastSlow = now
-					place(l)
+				end
+				if moved ~= nil then
+					-- parado pastando: não mexe no modelo (menos rede); o cliente anima no lugar
+					if moved then
+						place(l)
+					end
+					-- andar para a animação do cliente (AnimalVisuals, D-77): só quando muda
+					local gait = Animals.gait(l.a, now, moved)
+					if l.model:GetAttribute("Gait") ~= gait then
+						l.model:SetAttribute("Gait", gait)
+					end
 				end
 			end
 		end

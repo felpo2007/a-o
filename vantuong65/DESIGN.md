@@ -1869,3 +1869,159 @@ Resultado final no Studio: **17 ok, 0 falhas, 0 pulados**; nenhum erro de script
 
 **Autoteste final:** 17 ok, 0 falhas, 0 pulados, também com a câmera seguindo o soldado (a
 condição em que a pá tinha falhado).
+
+## D-77 — Animais andando de verdade, granadas, soldado de 1,75 m (2026-11-11)
+**Pedidos do usuário:**
+- "faça o movimento [dos animais] ser realista e perfeito graficamente e visualmente";
+- "granadas com qualidade de movimento de arremesso e gráficos";
+- "aumente a altura do personagem para ter melhor visão pois a grama está bem alta".
+
+**Animais** (`tools/rig_animals.py`, `AnimalVisuals.client.luau`, `Shared/Animals`):
+- **Antes:** o modelo era uma malha só, empurrada pelo chão a 1 Hz. Andava sem parar e dava saltos
+  de 0,4 m por segundo.
+- **Modelo em partes:** búfalo e galinha divididos em corpo, cabeça e pernas, e republicados.
+  - A divisão é pelo centro de cada triângulo. O lugar de cada perna vem das canelas (os 15% de
+    baixo).
+  - Pela mediana da faixa baixa, o tufo do rabo puxava o corte e a barriga ia junto com as pernas
+    (visto na prévia).
+- **Servidor** (`AnimalService`):
+  - o búfalo calmo para e pasta 65% das vezes, por 8–22 s, e anda em trechos de 3–9 s a 0,8 m/s;
+  - a galinha para e cisca 50% das vezes, por 2–7 s;
+  - o andar vai no atributo `Gait` (idle, walk, run), gravado só quando muda;
+  - parado, o modelo não se mexe (menos rede).
+- **Cliente:** cópia local de cada animal até 250 m; pernas e cabeça animadas até 120 m.
+  - Anda suave até a posição do servidor, na velocidade da espécie, sem os saltos de 1 Hz.
+  - Vira para onde anda: o búfalo a ~70°/s, a galinha a ~320°/s.
+  - O búfalo acompanha a ladeira.
+  - **Pernas:** o búfalo anda em quatro tempos (trás-esquerda, frente-esquerda, trás-direita,
+    frente-direita) e trota em diagonal fugindo; a galinha alterna as patas.
+  - O corpo sobe a cada passo e balança de lado.
+  - Parado, o búfalo pasta de cabeça baixa mastigando; a galinha bica de tempos em tempos.
+  - Andando, a cabeça acompanha o passo.
+  - O modelo do servidor some só neste cliente.
+  - Números de animação (passada, amplitude) são de projeto.
+
+**Granadas** (`FieldService`, `WeaponVisuals`, `ExplosionFx.client.luau`):
+- **Modelos em peças:**
+  - M26 dos EUA: corpo de limão verde-oliva, espoleta e alavanca;
+  - granada de cabo do VC: cabeça de ferro e cabo de madeira; gira de ponta no ar;
+  - fumaça M18: lata.
+- **Física:** a gravidade do Roblox (196,2 studs/s² = 55 m/s²) fazia a granada cair a 3–4 m. Uma
+  força para cima deixa 9,81 m/s².
+  - 17 m/s de arremesso: ~30 m a 45°, perto do arremesso real.
+  - Quica e rola no chão; gira no ar.
+  - Espoleta: 4,5 s (EUA) e 4,0 s (VC), PLACEHOLDER.
+- **Arremesso em 1ª pessoa** (0,8 s):
+  - a arma desce;
+  - a mão direita pega a granada no cinto;
+  - a esquerda puxa o pino, que cai girando;
+  - o braço arma ao lado da cabeça e lança.
+  - A granada sai da mão em 0,4 s, junto com a do servidor.
+- **Os outros jogadores** veem o braço do ombro direito armar atrás da cabeça e lançar
+  (`RightShoulder.C0`).
+- **Bots:** `FieldService.throwFrom` calcula o arco de 40° que cai no alvo.
+- **Explosão** (antes: só som e cratera):
+  - clarão e bola de fogo curta;
+  - nuvem de terra marrom que sobe, poeira rasteira, torrões caindo e faíscas;
+  - fumaça cinza que fica;
+  - na água (arrozal, riacho), coluna de água branca;
+  - a câmera treme perto, até ~45 m da granada.
+  - O tamanho vem do tipo: granada, foguete, canhão, morteiro, tiro naval, bomba.
+
+**Soldado de 1,75 m:** `heightScale` de 1,2 para 1,25. Com 1,2 todos mediam 1,68 m (D-76). O
+túnel de 1,2 m continua pedindo agachar ou deitar, como antes.
+- **Studio:** 1,73 m (meta 1,75, dentro da tolerância de 5 cm).
+
+**Granadas, o que o Studio mostrou e foi corrigido:**
+- **Atravessava o chão.** Bola menor que ~0,5 stud passa pelo terreno do Roblox: a de 0,25 caiu a
+  -166, a de 0,5 afundou 25 studs, a de 1 parou.
+  - O servidor agora simula um núcleo invisível de 1 stud.
+  - A granada desenhada (`Shared/GrenadeArt`) é posta pelo cliente sobre o núcleo, girando com
+    ele, e encosta no chão quando para.
+- **Rolava longe:** 6 m/s por mais 10 m depois de cair; a bola do Roblox não tem atrito de
+  rolamento. No chão a velocidade cai 28% a cada 0,1 s.
+- **Voo medido:** a 38°, sobe 5,7 m e cai a ~32 m.
+- **Braço do arremesso:** o corpo "Man" tem juntas `AnimationConstraint`, sem C0. O 1º teste dava
+  "Unable to assign property C0" e deixava a marca `Throwing` presa: aquele soldado nunca mais
+  arremessava. Agora o giro é no encaixe do ombro do lado do tronco (Attachment0), que vale para
+  Motor6D e AnimationConstraint.
+- **Explosão:** na água, a 1ª versão virou uma nuvem branca do tamanho de um prédio (agora é uma
+  coluna estreita, de 3–5 m para granada). Em terra, a textura `explosion01_smoke` do Roblox é
+  quase preta e a nuvem saía uma bola escura (agora é poeira marrom clara).
+
+**Bots de nível médio** (pedido: "bots de nível médio que se adaptam ao ambiente";
+`Shared/BotBrain`, `BotService`, `tests/luau/bots.luau` com 24 testes):
+- **Uma tabela de dificuldade** (`BotBrain.DIFFICULTY.medium`):
+  - reação de 0,4–0,8 s;
+  - erro de mira de 2,2 mrad que dobra a cada 500 m e piora andando, sob supressão ou ferido;
+  - rajadas curtas: fuzil 2–3 tiros, metralhadora 4–8;
+  - coice que soma erro na rajada.
+  - Pela conta, acerta o tronco em 92% a 50 m, 43% a 100 m e 10% a 200 m.
+- **Abrigo:** ao avistar o inimigo ou com bala passando perto, 8 raios até 15 m acham dique,
+  sebe, moita, capim, tronco, parede, sacos, trincheira, bunker e barranco. O bot vai para o lado
+  protegido.
+- **Postura conforme o lugar:**
+  - em pé atrás de parede e tronco;
+  - agachado atrás de sebe, sacos e dique;
+  - deitado no arrozal e no capim quando preso pelo fogo.
+- **Supressão** (0 a 1, cai em ~4 s): acima de 0,45 o bot não levanta a cabeça.
+- **Combate do abrigo:** espia, dá a rajada, volta; troca de abrigo depois de 2–4 rajadas. Ferido
+  (vida abaixo de 55) recua.
+- **Granada:** no inimigo a 15–35 m fora da visada, no máximo 2 por vida, nunca com companheiro
+  perto. Usa `FieldService.throwFrom`.
+- **Lados:** o VC espera escondido mais tempo e segura o fogo até 80 m; os EUA avançam mais.
+- **Custo:** cada bot pensa a cada 0,3 s, com orçamento de raios (no máximo ~360/s para 30 bots).
+- **Studio:** antes os 29 bots lutavam em pé. Agora, em combate, chegaram a 6 agachados e 4
+  deitados ao mesmo tempo.
+- O `BotService.start()` envolve `CombatService.fire` para os bots sentirem a bala passando
+  (dentro de `pcall`; o tiro sai antes).
+
+**Pop-ups** (pedido: "melhore a qualidade visual dos pop ups"; `Controllers/Toast.luau`):
+- **Um sistema só** para todos os avisos curtos. Cartão oliva escuro com filete cáqui, barra
+  lateral e selo na cor do tipo:
+  - info: azul-aço;
+  - confirmado: verde;
+  - recompensa: latão;
+  - atenção: âmbar;
+  - erro: vermelho de carimbo.
+- Título em Oswald (o do lobby) e barra de tempo.
+- No máximo 4, numa faixa abaixo do topo, longe da mira; entram deslizando.
+- **Recompensa:** chips "+10 XP" e "+2 CI"; o mesmo motivo soma no aviso aberto.
+- **Promoção:** ficha de papel com carimbo "SOLDO".
+- **Tutorial:** saiu do meio da tela (tapava a mira). Agora é um cartão compacto no canto de baixo
+  à esquerda, com "1/9", barra de progresso e a tecla ou o botão do controle num chip.
+- Só no Studio: `workspace:SetAttribute("VT65DevToast", "todos")` mostra os tipos.
+
+## D-78 — Pente-fino fase a fase com tudo junto (2026-11-11)
+**Pedido do usuário:** "corrija erros de todas as fases, uma por uma, passo a passo".
+
+O place com tudo da D-77 rodou no Studio:
+- duas partidas de ~9 min com 29 bots;
+- o caminho real do jogador pela rede;
+- o autoteste.
+
+| Fase | O que foi testado | Resultado |
+|---|---|---|
+| F1 Mapa | terreno em 10 s, arte no chão (3.770 de 3.772), vida no mapa | ok |
+| F2 Laço | escolher time, squad e papel, esperar e nascer, atirar e recarregar (`Combat_Fire`, `Combat_Reload`), bots lutando | ok |
+| F3 Soldado | deitado, rádio, altura de 1,73 m, marcação, mensagem e postura pela rede | ok |
+| F4 Pesados | M48 dirigido no W (12,7 m em 4 s, para ao soltar), veículos, túneis, pá, medevac, morteiro, granada | **1 erro corrigido** |
+| F5 Arte | sem erro de script com animais, garças, arroz e explosões | ok |
+| F6 Lançamento | Offensive e relatório, recompensa diária, progressão, loja (`Daily_Get`, `Progress_Get`, `Commerce_GetState`) | ok |
+| Parte 11 | animais fugindo da granada, garças, chuva, arma caída, pá, medevac | ok |
+| Parte 12 | regras no Lune (19); no Studio o botão do controle chega como teclado | sem controle real |
+
+**Erro achado e corrigido:** o braço do arremesso (D-77) tentava mudar o C0 de uma junta
+`AnimationConstraint`. Cada arremesso dava erro e deixava o soldado marcado como "arremessando"
+para sempre. Ver D-77.
+
+**Não é defeito do jogo:**
+- **Câmera presa no QG nos testes:** o assistente do Studio reverte a troca de câmera feita pelo
+  `execute_luau`.
+- **Morte nos testes:** uma das mortes foi a própria granada de teste, jogada com a câmera olhando
+  para o chão.
+- **Avisos `StyleRule ... RoundedCorner8`:** vêm da interface interna do Roblox.
+
+**Autoteste com tudo junto:** 17 ok, 0 falhas, 0 pulados. Log das sessões: 0 erros de script.
+Os bots não jogaram granada nas duas partidas: os encontros foram a mais de 35 m (a regra pede
+15–35 m fora da visada).

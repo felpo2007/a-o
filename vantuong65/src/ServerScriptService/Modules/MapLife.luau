@@ -128,6 +128,34 @@ function MapLife.rice(map: Instance, template: (string) -> Model?): number
 	return n
 end
 
+-- Animais em partes (D-77) para o cliente animar o andar (AnimalVisuals): o modelo de cada
+-- espécie vai para ReplicatedStorage.VT65AnimalArt com o nome da espécie. Devolve quantos.
+function MapLife.animalArt(template: (string) -> Model?): number
+	local art = Instance.new("Folder")
+	art.Name = "VT65AnimalArt"
+	local n = 0
+	for _, species in { "water_buffalo", "chicken" } do
+		local tpl = template(species .. "_rig")
+		if tpl then
+			local c = tpl:Clone()
+			c.Name = species
+			for _, d in c:GetDescendants() do
+				if d:IsA("BasePart") then
+					d.Anchored = true
+					d.CanCollide = false
+					d.CanTouch = false
+					d.CanQuery = false
+					d.CastShadow = species == "water_buffalo"
+				end
+			end
+			c.Parent = art
+			n += 1
+		end
+	end
+	art.Parent = ReplicatedStorage
+	return n
+end
+
 ---------------------------------------------------------------------------------------------
 -- Túneis
 ---------------------------------------------------------------------------------------------

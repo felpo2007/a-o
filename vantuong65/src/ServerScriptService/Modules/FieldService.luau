@@ -124,11 +124,192 @@ local function onMessage(p: Player, req: any)
 end
 
 -- ===== granadas =====
-local THROW_MS = 15 -- velocidade de arremesso (PLACEHOLDER)
-local FUSE_S = 4.5 -- espoleta (PLACEHOLDER: manual da granada a confirmar)
+-- D-77 (pedido do dono: "granadas com qualidade de movimento de arremesso e gráficos"):
+-- - modelo de verdade em peças: M26 (corpo de limão verde-oliva, espoleta e alavanca), granada de
+--   cabo do VC (cabeça de ferro e cabo de madeira, gira de ponta) e a lata de fumaça M18;
+-- - a gravidade do Roblox é 196,2 studs/s² (55 m/s²): a granada caía a 3–4 m da mão. Uma força
+--   para cima deixa a granada com 9,81 m/s² e o voo sai na distância real (~30 m a 45°);
+-- - quica e rola (atrito e elasticidade de ferro na terra), gira no ar;
+-- - braço direito arma atrás da cabeça e lança (RightShoulder.C0, visto por todos); a granada sai
+--   da mão em RELEASE_S, o mesmo tempo da animação em 1ª pessoa (WeaponVisuals);
+-- - bots arremessam com FieldService.throwFrom (balística para cair no alvo).
+local THROW_MS = 17 -- velocidade de arremesso (PLACEHOLDER; arremesso de granada de 30–40 m)
+local FUSE_S = { US = 4.5, VC = 4.0 } -- espoleta (PLACEHOLDER: M26 4–5 s; cabo chinês ~4 s)
+local SMOKE_FUSE_S = 1.5
+local RELEASE_S = 0.4 -- do pedido à saída da mão
+local THROW_S = 0.8 -- animação inteira
+local G_REAL = 9.81 / M -- studs/s²
 local smokeFolder: Folder
+local grenadeFolder: Folder
+local spawnSmoke: (pos: Vector3) -> () -- definida mais abaixo
 
-local function spawnSmoke(pos: Vector3)
+-- Núcleo de colisão de 1 stud (invisível): bola menor que ~0,5 stud atravessa o terreno do Roblox
+-- (Studio, 2026-11-11: a de 7 cm caiu a -166). A granada desenhada (Shared/GrenadeArt) é posta
+-- pelo cliente em cima dele (ExplosionFx), encostada no chão quando para.
+local function grenadeModel(kind: string, faction: string?): (Model, BasePart)
+	local m = Instance.new("Model")
+	m.Name = "Granada"
+	m:SetAttribute("Kind", kind)
+	m:SetAttribute("Faction", faction or "US")
+	local core = Instance.new("Part")
+	core.Name = "Nucleo"
+	core.Shape = Enum.PartType.Ball
+	core.Size = Vector3.one
+	core.Transparency = 1
+	core.CastShadow = false
+	core.CanQuery = false
+	core.CanTouch = false
+	-- ferro na terra: atrito médio, quica pouco (densidade, atrito, elasticidade)
+	core.CustomPhysicalProperties = PhysicalProperties.new(1.2, 0.6, 0.28, 1, 1)
+	core.Parent = m
+	m.PrimaryPart = core
+	return m, core
+end
+
+-- Braço direito armando atrás da cabeça e lançando (graus: pitch, roll no ombro), visto por todos.
+local THROW_KEYS = { { 0, 0, 0 }, { 0.3, -150, 18 }, { 0.5, 105, 8 }, { 0.66, 45, 0 }, { 1, 0, 0 } }
+local function throwRot(t: number): CFrame
+	for i = 1, #THROW_KEYS - 1 do
+		local a, b = THROW_KEYS[i], THROW_KEYS[i + 1]
+		if t <= b[1] then
+			local k = math.clamp((t - a[1]) / (b[1] - a[1]), 0, 1)
+			k = k * k * (3 - 2 * k)
+			return CFrame.Angles(math.rad(a[2] + (b[2] - a[2]) * k), 0, math.rad(a[3] + (b[3] - a[3]) * k))
+		end
+	end
+	return CFrame.identity
+end
+
+-- O corpo "Man" (D-70) tem juntas AnimationConstraint, não Motor6D: o C0 não existe nelas (o
+-- primeiro teste dava "Unable to assign property C0" a cada arremesso). Gira-se então o encaixe do
+-- lado do tronco (Attachment0), que vale para os dois tipos de junta e replica para todos.
+local function throwPose(model: Model)
+	local ua = model:FindFirstChild("RightUpperArm")
+	local sh = ua and ua:FindFirstChild("RightShoulder")
+	if not sh or model:GetAttribute("Throwing") then
+		return
+	end
+	local set: ((CFrame) -> ())?, base: CFrame? = nil, nil
+	if sh:IsA("Motor6D") then
+		local motor = sh
+		base = motor.C0
+		set = function(cf: CFrame)
+			motor.C0 = cf
+		end
+	elseif sh:IsA("AnimationConstraint") and sh.Attachment0 then
+		local att = sh.Attachment0 :: Attachment
+		base = att.CFrame
+		set = function(cf: CFrame)
+			att.CFrame = cf
+		end
+	end
+	local apply, rest = set, base
+	if not apply or not rest then
+		return
+	end
+	model:SetAttribute("Throwing", true)
+	task.spawn(function()
+		local t0 = os.clock()
+		while sh.Parent do
+			local t = (os.clock() - t0) / THROW_S
+			if t >= 1 then
+				break
+			end
+			apply(rest * throwRot(t))
+			task.wait(1 / 30)
+		end
+		if sh.Parent then
+			apply(rest)
+		end
+		model:SetAttribute("Throwing", nil)
+	end)
+end
+FieldService.throwRot = throwRot -- teste
+
+local function launch(kind: string, faction: string?, from: Vector3, vel: Vector3, by: Player?)
+	local m, core = grenadeModel(kind, faction)
+	m:PivotTo(CFrame.lookAt(from, from + vel) * CFrame.Angles(0, math.pi / 2, 0))
+	m.Parent = grenadeFolder
+	-- gravidade real: o Roblox puxa com workspace.Gravity; a força devolve a diferença
+	local att = Instance.new("Attachment")
+	att.Parent = core
+	local vf = Instance.new("VectorForce")
+	vf.Attachment0 = att
+	vf.RelativeTo = Enum.ActuatorRelativeTo.World
+	vf.ApplyAtCenterOfMass = true
+	vf.Force = Vector3.new(0, core.AssemblyMass * math.max(workspace.Gravity - G_REAL, 0), 0)
+	vf.Parent = core
+	core:SetNetworkOwner(nil)
+	core.AssemblyLinearVelocity = vel
+	-- gira no ar: a de cabo vira de ponta, a M26 rola de lado
+	core.AssemblyAngularVelocity = if faction == "VC" and kind ~= "smoke"
+		then Vector3.new(0, 0, rng:range(-16, -10))
+		else Vector3.new(rng:range(-8, 8), rng:range(-4, 4), rng:range(-8, 8))
+	-- freio no chão: a bola do Roblox rola sem atrito de rolamento e a granada seguia a 6 m/s por
+	-- mais 10 m depois de cair (Studio, 2026-11-11); granada de verdade quica e para em 1–3 m
+	task.spawn(function()
+		local params = RaycastParams.new()
+		params.FilterType = Enum.RaycastFilterType.Exclude
+		params.FilterDescendantsInstances = { m }
+		while m.Parent do
+			task.wait(0.1)
+			if workspace:Raycast(core.Position, Vector3.new(0, -0.75, 0), params) then
+				core.AssemblyLinearVelocity *= 0.72
+				core.AssemblyAngularVelocity *= 0.72
+			end
+		end
+	end)
+	local fuse = if kind == "smoke" then SMOKE_FUSE_S else (FUSE_S[faction or "US"] or 4.5)
+	task.delay(fuse, function()
+		if not m.Parent then
+			return
+		end
+		local pos = core.Position
+		if kind == "smoke" then
+			spawnSmoke(pos)
+			task.delay(Smoke.DURATION_S, function()
+				m:Destroy()
+			end)
+		else
+			m:Destroy()
+			ExplosionService.detonate(if faction == "VC" then "grenade_vc" else "grenade_us", pos, by)
+		end
+	end)
+end
+
+-- Bot (ou qualquer modelo) arremessa no alvo: arco de 40° que cai em target, com a mesma animação
+-- e a mesma espera de saída da mão do jogador. Devolve false se não dá (sem cabeça, já
+-- arremessando, alvo alto demais para o arco).
+function FieldService.throwFrom(model: Model, faction: string, kind: string, target: Vector3, by: Player?): boolean
+	local head = model:FindFirstChild("Head") :: BasePart?
+	if not head or model:GetAttribute("Throwing") or model:GetAttribute("Downed") then
+		return false
+	end
+	local from = head.Position + Vector3.new(0, 0.15 / M, 0)
+	local flat = (target - from) * Vector3.new(1, 0, 1)
+	local d = flat.Magnitude
+	if d < 1 then
+		return false
+	end
+	local h = target.Y - from.Y
+	local th = math.rad(40)
+	local denom = 2 * math.cos(th) ^ 2 * (d * math.tan(th) - h)
+	if denom <= 0 then
+		return false
+	end
+	local v = math.min(math.sqrt(G_REAL * d * d / denom), 22 / M)
+	local vel = (flat.Unit * math.cos(th) + Vector3.new(0, math.sin(th), 0)) * v
+	throwPose(model)
+	task.delay(RELEASE_S, function()
+		if model.Parent and not model:GetAttribute("Downed") then
+			local hd = model:FindFirstChild("Head") :: BasePart?
+			launch(kind, faction, if hd then hd.Position + flat.Unit * (0.4 / M) else from, vel, by)
+		end
+	end)
+	return true
+end
+
+spawnSmoke = function(pos: Vector3)
 	local p = Instance.new("Part")
 	p.Name = "Cloud"
 	p.Anchored, p.CanCollide, p.CanQuery, p.CanTouch, p.CastShadow = true, false, false, false, false
@@ -165,33 +346,20 @@ local function onThrow(p: Player, req: any)
 		return
 	end
 	p:SetAttribute(attr, left - 1)
-	local head = c:FindFirstChild("Head") :: BasePart?
-	if not head then
+	if not c:FindFirstChild("Head") then
 		return
 	end
 	local dir: Vector3 = (req.dir :: Vector3).Unit
-	local g = Instance.new("Part")
-	g.Name = "Grenade"
-	g.Shape = Enum.PartType.Ball
-	g.Size = Vector3.one * (0.08 / M)
-	g.Color = Color3.fromRGB(60, 66, 44)
-	g.CanQuery = false
-	g.Position = head.Position + dir * (0.6 / M)
-	g.Parent = workspace
-	g:SetNetworkOwner(nil)
-	g.AssemblyLinearVelocity = (dir + Vector3.new(0, 0.25, 0)).Unit * THROW_MS / M
-	local faction = p:GetAttribute("Faction")
-	task.delay(if kind == "smoke" then 1.5 else FUSE_S, function()
-		if not g.Parent then
+	local faction = p:GetAttribute("Faction") :: string?
+	throwPose(c)
+	-- sai da mão junto com a animação de 1ª pessoa; da frente da cabeça (o que o jogador mirou)
+	task.delay(RELEASE_S, function()
+		local head = c:FindFirstChild("Head") :: BasePart?
+		if not head or alive(p) ~= c then
 			return
 		end
-		local pos = g.Position
-		g:Destroy()
-		if kind == "smoke" then
-			spawnSmoke(pos)
-		else
-			ExplosionService.detonate(if faction == "VC" then "grenade_vc" else "grenade_us", pos, p)
-		end
+		local from = head.Position + dir * (0.5 / M) + Vector3.new(0, 0.05 / M, 0)
+		launch(kind, faction, from, (dir + Vector3.new(0, 0.2, 0)).Unit * THROW_MS / M, p)
 	end)
 end
 
@@ -240,6 +408,9 @@ function FieldService.start()
 	smokeFolder = Instance.new("Folder")
 	smokeFolder.Name = "Smoke"
 	smokeFolder.Parent = workspace
+	grenadeFolder = Instance.new("Folder")
+	grenadeFolder.Name = "Granadas"
+	grenadeFolder.Parent = workspace
 
 	Net.func("Settings_Get").OnServerInvoke = function(p: Player)
 		local prof = PlayerData.get(p)

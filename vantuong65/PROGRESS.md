@@ -31,6 +31,16 @@
 - **Partida longa (D-76):** 6 min de bots, servidor a 60 quadros por segundo, memória estável e
   nenhum erro de script.
 - **Aviso falso de altura do soldado removido:** todos medem 1,68 m.
+- **D-77:**
+  - animais em partes, andando de verdade: passo do búfalo em quatro tempos, trote na fuga;
+    pastam e ciscam parados;
+  - granadas com modelo, voo na gravidade real, arremesso em 1ª pessoa, braço visto por todos e
+    explosão com efeitos;
+  - soldado de 1,75 m;
+  - bots de nível médio que usam abrigo e postura;
+  - pop-ups novos e tutorial no canto.
+- **D-78:** pente-fino fase a fase com tudo junto. 1 erro corrigido (braço do arremesso em junta
+  `AnimationConstraint`); autoteste 17 ok; 0 erros de script em ~18 min de partida com bots.
 
 ## F6: o que foi feito (sessão 6)
 - **Modo Offensive** (`Shared/Offensive.luau`, D-46):

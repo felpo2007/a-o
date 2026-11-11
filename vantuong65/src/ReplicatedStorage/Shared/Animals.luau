@@ -10,6 +10,8 @@ export type Species = {
 	hearM: number, -- distância em que um tiro assusta
 	fleeS: number, -- duração da fuga
 	leashM: number, -- raio de pasto em volta de casa
+	pauseShare: number, -- chance de parar (pastar, ciscar) quando acaba o trecho de caminhada
+	pauseS: { number }, -- duração da parada, mínimo e máximo
 }
 export type Animal = {
 	species: string,
@@ -21,18 +23,41 @@ export type Animal = {
 	dirZ: number,
 	fleeUntil: number,
 	nextWander: number,
+	pauseUntil: number,
 }
 
 -- Velocidades: galinha corre ~4 m/s (14 km/h); búfalo-do-pântano em trote assustado ~6 m/s
 -- (PLACEHOLDER; o galope chega bem acima). Raios de susto de design.
+-- D-77: o búfalo passa a maior parte do tempo parado pastando e anda em trechos curtos; a
+-- galinha cisca e anda aos pulinhos. Antes os dois andavam sem parar, como numa esteira.
+-- Passo do búfalo pastando ~0,8 m/s (andar de bovino ~1 m/s; PLACEHOLDER).
 Animals.SPECIES = {
-	water_buffalo = { fleeMs = 6, walkMs = 0.4, hearM = 150, fleeS = 10, leashM = 40 },
-	chicken = { fleeMs = 4, walkMs = 0.5, hearM = 60, fleeS = 4, leashM = 12 },
+	water_buffalo = {
+		fleeMs = 6,
+		walkMs = 0.8,
+		hearM = 150,
+		fleeS = 10,
+		leashM = 40,
+		pauseShare = 0.65,
+		pauseS = { 8, 22 },
+	},
+	chicken = { fleeMs = 4, walkMs = 0.5, hearM = 60, fleeS = 4, leashM = 12, pauseShare = 0.5, pauseS = { 2, 7 } },
 } :: { [string]: Species }
 Animals.EXPLOSION_MULT = 3 -- explosão assusta a 3x a distância de um tiro
 
 function Animals.new(species: string, x: number, z: number): Animal
-	return { species = species, x = x, z = z, homeX = x, homeZ = z, dirX = 0, dirZ = 0, fleeUntil = 0, nextWander = 0 }
+	return {
+		species = species,
+		x = x,
+		z = z,
+		homeX = x,
+		homeZ = z,
+		dirX = 0,
+		dirZ = 0,
+		fleeUntil = 0,
+		nextWander = 0,
+		pauseUntil = 0,
+	}
 end
 
 -- Barulho em (nx, nz). Devolve true se o animal se assustou (e passa a fugir para longe dele).
@@ -56,27 +81,46 @@ function Animals.fleeing(a: Animal, now: number): boolean
 	return now < a.fleeUntil
 end
 
--- Avança dt segundos. roll em [0,1) escolhe o rumo do pasto. Devolve true se andou.
+-- Avança dt segundos. roll em [0,1) escolhe parar ou o rumo do pasto. Devolve true se andou
+-- (false = parado pastando/ciscando).
 function Animals.step(a: Animal, dt: number, now: number, roll: number): boolean
 	local sp = Animals.SPECIES[a.species]
 	if Animals.fleeing(a, now) then
+		a.pauseUntil = 0
 		a.x += a.dirX * sp.fleeMs * dt
 		a.z += a.dirZ * sp.fleeMs * dt
 		return true
 	end
-	-- calmo: volta devagar para perto de casa; às vezes muda o rumo do pasto
+	-- calmo: volta devagar para perto de casa; no fim de cada trecho, para ou muda o rumo
 	local hx, hz = a.homeX - a.x, a.homeZ - a.z
 	local hd = math.sqrt(hx * hx + hz * hz)
 	if hd > sp.leashM then
 		a.dirX, a.dirZ = hx / hd, hz / hd
+		a.pauseUntil = 0
+	elseif now < a.pauseUntil then
+		return false
 	elseif now >= a.nextWander then
+		if roll < sp.pauseShare then
+			local k = roll / sp.pauseShare
+			a.pauseUntil = now + sp.pauseS[1] + k * (sp.pauseS[2] - sp.pauseS[1])
+			a.nextWander = a.pauseUntil
+			return false
+		end
 		local ang = roll * 2 * math.pi
 		a.dirX, a.dirZ = math.cos(ang), math.sin(ang)
-		a.nextWander = now + 6 + roll * 8
+		a.nextWander = now + 3 + roll * 6
 	end
 	a.x += a.dirX * sp.walkMs * dt
 	a.z += a.dirZ * sp.walkMs * dt
 	return true
+end
+
+-- Andar para a animação do cliente: "run" (fugindo), "walk" ou "idle" (parado).
+function Animals.gait(a: Animal, now: number, moved: boolean): string
+	if Animals.fleeing(a, now) then
+		return "run"
+	end
+	return if moved then "walk" else "idle"
 end
 
 -- Onde nascem (D-74, com os modelos reduzidos): galinhas no quintal de 2 em cada 5 casas, em bando

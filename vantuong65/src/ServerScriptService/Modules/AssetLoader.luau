@@ -381,6 +381,7 @@ function AssetLoader.start()
 	)
 	-- arrozal (D-74): dossel dos tabuleiros plantados e ladrilhos de arroz para o cliente
 	print(string.format("[VT65] arrozal: %d tabuleiros com arroz", MapLife.rice(map, AssetLoader.template)))
+	print(string.format("[VT65] animais em partes para o cliente: %d", MapLife.animalArt(AssetLoader.template)))
 	-- lâminas d'água (studs): a meda, o pote e a manada usam para saber se o ponto é arrozal alagado
 	local sheets: { { cf: CFrame, hx: number, hz: number } } = {}
 	local waterFolder = map:FindFirstChild("PaddyWater")

@@ -63,6 +63,9 @@ ArtBudget.KIND = {
 	-- arrozal em cartões (D-74): fora do teto do setor, o cliente põe só em volta da câmera
 	rice_tile_hi = "veg",
 	rice_tile_lo = "veg",
+	-- animais em partes para o andar (D-77): só o cliente põe, no lugar do modelo do servidor
+	water_buffalo_rig = "prop",
+	chicken_rig = "prop",
 	m60 = "hero",
 	rpd = "hero",
 	sks = "hero",
@@ -124,6 +127,9 @@ ArtBudget.TRIS = {
 	-- ladrilho de 4,5 x 4,5 m (tools/make_rice.py): perto 96 cartões, longe 24 (2 faces cada)
 	rice_tile_hi = 384,
 	rice_tile_lo = 96,
+	-- os mesmos triângulos do modelo reduzido, divididos em partes (tools/rig_animals.py)
+	water_buffalo_rig = 4999,
+	chicken_rig = 3000,
 	m60 = 14933,
 	rpd = 15735,
 	sks = 14683,

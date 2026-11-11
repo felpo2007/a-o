@@ -20,8 +20,9 @@ local Characters = {}
 --   proporção clássica com peito, ombro e membros afinados; feito para a roupa clássica.
 -- - cabeça "Man Face - Head" (cabeça dinâmica, tipo 79) e a animação de rosto "Man Face - Mood".
 -- "bloco" volta ao corpo padrão em bloco (0 = parte padrão).
--- A ALTURA do "Man" com HeightScale 1,2 não foi medida: confira no Studio (atributo AlturaM do
--- soldado ou o HUD da F3) e ajuste heightScale para dar 1,75 m.
+-- Altura: com HeightScale 1,2 o "Man" mediu 1,68 m no Studio (2026-11-11, atributo AlturaM).
+-- D-77 (pedido do dono: "aumente a altura para ter melhor visão, a grama está alta"): 1,25, que
+-- dá a meta de 1,75 m (1,68 x 1,25 / 1,2).
 export type Body = {
 	Torso: number,
 	RightArm: number,
@@ -41,7 +42,7 @@ Characters.BODIES = {
 		RightLeg = 86500078,
 		Head = 10725826963,
 		MoodAnimation = 10725833199,
-		heightScale = 1.2,
+		heightScale = 1.25,
 	},
 	bloco = {
 		Torso = 0,

@@ -39,6 +39,7 @@ capList.Parent = capGui
 local capLayout = Instance.new("UIListLayout")
 capLayout.VerticalAlignment = Enum.VerticalAlignment.Bottom
 capLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+capLayout.Padding = UDim.new(0, 3)
 capLayout.Parent = capList
 local lastCap: { [string]: number } = {}
 local function caption(key: string, what: string, pos: Vector3?, delay: number?)
@@ -53,14 +54,23 @@ local function caption(key: string, what: string, pos: Vector3?, delay: number?)
 	local d = if pos then (pos - camera.CFrame.Position) * M else Vector3.zero
 	local text = Accessibility.caption(what, d.X, d.Z)
 	task.delay(delay or 0, function()
+		-- mesmo contraste de antes (branco sobre preto); a faixa só abraça o texto, com canto leve
 		local l = Instance.new("TextLabel")
-		l.Size = UDim2.fromOffset(640, if UiKit.tv() then 34 else 26)
+		l.AutomaticSize = Enum.AutomaticSize.X
+		l.Size = UDim2.fromOffset(0, if UiKit.tv() then 34 else 26)
 		l.BackgroundColor3 = Color3.new(0, 0, 0)
 		l.BackgroundTransparency = 0.35
 		l.TextColor3 = Color3.new(1, 1, 1)
 		l.Font = Enum.Font.GothamMedium
 		l.TextSize = UiKit.text(18)
 		l.Text = text
+		local pad = Instance.new("UIPadding")
+		pad.PaddingLeft = UDim.new(0, 12)
+		pad.PaddingRight = UDim.new(0, 12)
+		pad.Parent = l
+		local round = Instance.new("UICorner")
+		round.CornerRadius = UDim.new(0, 4)
+		round.Parent = l
 		l.Parent = capList
 		task.delay(4, function()
 			l:Destroy()

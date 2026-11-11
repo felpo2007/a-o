@@ -247,6 +247,116 @@ Bus.on("reload_start", function(dur: number, _kind: string)
 	magDropped = false
 end)
 
+-- ===== arremesso de granada em 1ª pessoa (D-77) =====
+-- A arma desce; a mão direita pega a granada no cinto, a esquerda puxa o pino, o braço arma ao
+-- lado da cabeça e lança. A granada sai da mão em 0,4 s, junto com a do servidor (FieldService).
+local THROW_S = 0.8
+local throwT0 = -1
+local throwKind = "frag"
+local held: BasePart? = nil
+local pinDone = false
+-- mão direita no espaço da câmera (m): x direita, y cima, z frente negativa
+local THROW_HAND = {
+	{ t = 0.15, p = Vector3.new(0.17, -0.24, -0.3) },
+	{ t = 0.27, p = Vector3.new(0.06, -0.13, -0.33) },
+	{ t = 0.4, p = Vector3.new(0.27, 0.1, -0.06) },
+	{ t = 0.52, p = Vector3.new(0.1, 0.06, -0.55) },
+	{ t = 0.68, p = Vector3.new(0.02, -0.2, -0.45) },
+}
+local function heldGrenade(kind: string): BasePart
+	local p = Instance.new("Part")
+	p.Anchored, p.CanCollide, p.CanQuery, p.CanTouch, p.CastShadow = true, false, false, false, false
+	if kind == "smoke" then
+		p.Shape = Enum.PartType.Cylinder
+		p.Size = Vector3.new(0.145, 0.06, 0.06) / M
+		p.Color = Color3.fromRGB(74, 80, 48)
+		p.Material = Enum.Material.Metal
+	elseif player:GetAttribute("Faction") == "VC" then
+		p.Shape = Enum.PartType.Cylinder
+		p.Size = Vector3.new(0.25, 0.04, 0.04) / M
+		p.Color = Color3.fromRGB(120, 90, 58)
+		p.Material = Enum.Material.Wood
+	else
+		local mesh = Instance.new("SpecialMesh")
+		mesh.MeshType = Enum.MeshType.Sphere
+		mesh.Parent = p
+		p.Size = Vector3.new(0.057, 0.085, 0.057) / M
+		p.Color = Color3.fromRGB(74, 80, 48)
+		p.Material = Enum.Material.Metal
+	end
+	p.Parent = fx
+	return p
+end
+local function dropPin(at: Vector3)
+	local ring = Instance.new("Part")
+	ring.Shape = Enum.PartType.Cylinder
+	ring.Size = Vector3.new(0.004, 0.03, 0.03) / M
+	ring.Color = Color3.fromRGB(160, 160, 150)
+	ring.Material = Enum.Material.Metal
+	ring.CanCollide, ring.CanQuery, ring.CanTouch, ring.CastShadow = false, false, false, false
+	ring.CFrame = CFrame.new(at)
+	ring.Parent = fx
+	ring.AssemblyLinearVelocity = camera.CFrame:VectorToWorldSpace(Vector3.new(-0.5, 0.8, -0.3)) / M
+	task.delay(1.5, function()
+		ring:Destroy()
+	end)
+end
+Bus.on("grenade_throw", function(kind: string)
+	throwT0, throwKind, pinDone = os.clock(), kind, kind == "smoke"
+	if held then
+		held:Destroy()
+		held = nil
+	end
+end)
+-- (peso da arma baixada, posição da mão direita no mundo ou nil, mão esquerda no pino)
+local function throwState(handR: Vector3): (number, Vector3?, boolean)
+	local tp = if throwT0 >= 0 then (os.clock() - throwT0) / THROW_S else 2
+	if tp >= 1 then
+		if held then
+			held:Destroy()
+			held = nil
+		end
+		throwT0 = -1
+		return 0, nil, false
+	end
+	local down = smooth(tp / 0.15) * (1 - smooth((tp - 0.8) / 0.2))
+	local cam = camera.CFrame
+	local function at(k: number): Vector3
+		return cam * (THROW_HAND[k].p / M)
+	end
+	local hand: Vector3
+	if tp < THROW_HAND[1].t then
+		hand = handR:Lerp(at(1), smooth(tp / THROW_HAND[1].t))
+	elseif tp >= THROW_HAND[#THROW_HAND].t then
+		local t0 = THROW_HAND[#THROW_HAND].t
+		hand = at(#THROW_HAND):Lerp(handR, smooth((tp - t0) / (1 - t0)))
+	else
+		hand = at(1)
+		for k = 1, #THROW_HAND - 1 do
+			local a, b = THROW_HAND[k], THROW_HAND[k + 1]
+			if tp >= a.t and tp < b.t then
+				hand = at(k):Lerp(at(k + 1), smooth((tp - a.t) / (b.t - a.t)))
+				break
+			end
+		end
+	end
+	-- granada na mão do cinto (0,1) até sair (0,5)
+	if tp >= 0.1 and tp < 0.5 then
+		local h = held or heldGrenade(throwKind)
+		held = h
+		h.CFrame = cam.Rotation * CFrame.Angles(math.rad(20), 0, math.rad(70)) + hand
+	elseif held then
+		held:Destroy()
+		held = nil
+	end
+	local pulling = tp >= 0.18 and tp < 0.3 and throwKind ~= "smoke"
+	if tp >= 0.27 and not pinDone then
+		pinDone = true
+		dropPin(hand + cam.LookVector * 0.02 / M)
+	end
+	return down, hand, pulling
+end
+
 -- arma publicada já preparada pelo servidor (AssetLoader → GunModel.fit), se houver
 local function artFor(id: string): Model?
 	local folder = ReplicatedStorage:FindFirstChild("VT65WeaponArt")
@@ -382,6 +492,17 @@ RunService:BindToRenderStep("VT65ViewModel", Enum.RenderPriority.Camera.Value + 
 		local pull = smooth((rp - 0.79) / 0.06) * (1 - smooth((rp - 0.86) / 0.05))
 		pose *= CFrame.new(0, slap * 0.008 / M, pull * 0.012 / M)
 	end
+	-- arremessando: a arma desce e sai da frente
+	local throwDown = if throwT0 >= 0 then smooth(((os.clock() - throwT0) / THROW_S) / 0.15) else 0
+	if throwT0 >= 0 then
+		local tp = (os.clock() - throwT0) / THROW_S
+		throwDown *= 1 - smooth((tp - 0.8) / 0.2)
+		pose *= CFrame.new(0.05 / M * throwDown, -0.22 / M * throwDown, 0.05 / M * throwDown) * CFrame.Angles(
+			math.rad(-35) * throwDown,
+			math.rad(20) * throwDown,
+			0
+		)
+	end
 	local wcf = camera.CFrame * HIP:Lerp(ads, aimT) * bob * recoil * pose
 	v:PivotTo(wcf)
 	-- braços
@@ -429,9 +550,19 @@ RunService:BindToRenderStep("VT65ViewModel", Enum.RenderPriority.Camera.Value + 
 			end
 		end
 	end
+	-- arremesso: a mão direita larga a arma; a esquerda vai ao pino
+	local _, throwHand, pulling = throwState(handR)
+	local handRot = rot
+	if throwHand then
+		handR = throwHand
+		handRot = camera.CFrame.Rotation
+		if pulling then
+			handL = handL:Lerp(throwHand + camera.CFrame:VectorToWorldSpace(Vector3.new(-0.05, 0.03, 0) / M), 0.85)
+		end
+	end
 	local mr, ml = armBits.MaoR, armBits.MaoL
 	if mr and ml then
-		mr.CFrame = rot + handR
+		mr.CFrame = handRot + handR
 		ml.CFrame = rot + handL
 		local cam = camera.CFrame
 		forearm(handR + rot * Vector3.new(0, -0.03 / M, 0.05 / M), cam * ELBOW_R, "R")

@@ -720,5 +720,19 @@
   "assetType": "Model",
   "name": "VT65 arrozal ladrilho longe",
   "description": "VAN TUONG 65 - arroz em cartoes, desenho proprio (D-74)"
+ },
+ {
+  "key": "Models.water_buffalo_rig",
+  "file": "assets/animais/water_buffalo_rig.glb",
+  "assetType": "Model",
+  "name": "VT65 bufalo em partes",
+  "description": "VAN TUONG 65 - animal dividido em corpo, pernas e cabeca para animar (D-77)"
+ },
+ {
+  "key": "Models.chicken_rig",
+  "file": "assets/animais/chicken_rig.glb",
+  "assetType": "Model",
+  "name": "VT65 galinha em partes",
+  "description": "VAN TUONG 65 - animal dividido em corpo, pernas e cabeca para animar (D-77)"
  }
 ]

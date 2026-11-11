@@ -23,3 +23,5 @@ assets/miras/
 assets/ceu/
 # arroz em cartões gerado (tools/make_rice.py, D-74)
 assets/arroz/
+# animais em partes (tools/rig_animals.py, D-77)
+assets/animais/

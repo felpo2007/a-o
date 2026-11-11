@@ -2,13 +2,17 @@
 -- Progressão no cliente (D-72): avisos de ganho (+XP, +CI), a cerimônia de promoção e o painel de
 -- equipamento de campo na Intendência do lobby (abre junto com a loja: Bus "shop_open"). O servidor
 -- (ProgressionService) decide tudo; aqui só se mostra e se pede (Gear_Buy, Gear_Equip).
+-- Ganhos e promoção saem pelo sistema de avisos (Toast): chips de XP e de créditos, e a ficha da
+-- promoção em papel com o carimbo do soldo.
 local MarketplaceService = game:GetService("MarketplaceService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 
 local Net = require(ReplicatedStorage.Shared.Net)
 local Bus = require(script.Parent.Bus)
+local Toast = require(script.Parent.Toast)
 local UiKit = require(script.Parent.UiKit)
 
 local player = Players.LocalPlayer
@@ -21,112 +25,102 @@ local function fmt(n: number): string
 	return (out:gsub("^%.", ""))
 end
 
--- ===== avisos de ganho (embaixo, no centro) =====
-local toasts = Instance.new("Frame")
-toasts.Name = "Ganhos"
-toasts.BackgroundTransparency = 1
-toasts.AnchorPoint = Vector2.new(0.5, 1)
-toasts.Position = UDim2.new(0.5, 0, 1, -150)
-toasts.Size = UDim2.fromOffset(420, 120)
-toasts.Parent = screen
-local tl = Instance.new("UIListLayout")
-tl.VerticalAlignment = Enum.VerticalAlignment.Bottom
-tl.HorizontalAlignment = Enum.HorizontalAlignment.Center
-tl.Padding = UDim.new(0, 4)
-tl.Parent = toasts
-
-local function toast(text: string)
-	local t = Instance.new("TextLabel")
-	t.BackgroundColor3 = UiKit.NIGHT
-	t.BackgroundTransparency = 0.35
-	t.TextColor3 = UiKit.KHAKI
-	t.Font = Enum.Font.GothamBold
-	t.TextSize = UiKit.text(16)
-	t.Size = UDim2.fromOffset(400, if UiKit.tv() then 36 else 28)
-	t.Text = text
-	t.Parent = toasts
-	local kids = toasts:GetChildren()
-	if #kids > 5 then -- só os 4 mais novos (o 1º filho é o layout)
-		kids[2]:Destroy()
-	end
-	task.delay(2.6, function()
-		local tw = TweenService:Create(t, TweenInfo.new(0.6), { TextTransparency = 1, BackgroundTransparency = 1 })
-		tw:Play()
-		tw.Completed:Wait()
-		t:Destroy()
-	end)
-end
-
--- ===== promoção (cerimônia animada no alto) =====
+-- ===== promoção: ficha de papel no topo da pilha de avisos, com o carimbo do soldo =====
 local function ceremony(r: { [string]: any })
-	local card = Instance.new("Frame")
-	card.AnchorPoint = Vector2.new(0.5, 0)
-	card.Position = UDim2.new(0.5, 0, 0, 90)
-	card.Size = UDim2.fromOffset(520, 190)
-	card.BackgroundColor3 = UiKit.CARD
-	card.BorderSizePixel = 0
-	card.Parent = screen
-	local sc = Instance.new("UIScale")
-	sc.Scale = 0.6
-	sc.Parent = card
-	local corner = Instance.new("UIStroke")
-	corner.Thickness = 3
-	corner.Color = UiKit.RULE_RED
-	corner.Parent = card
-	local head = Instance.new("TextLabel")
-	head.BackgroundColor3 = UiKit.OLIVE
-	head.BorderSizePixel = 0
-	head.Size = UDim2.new(1, 0, 0, 40)
-	head.Font = Enum.Font.GothamBlack
-	head.TextColor3 = UiKit.KHAKI
-	head.TextSize = UiKit.text(22)
-	head.Text = if state and state.faction == "VC" then "THĂNG CHỨC  ·  PROMOÇÃO" else "PROMOTION  ·  PROMOÇÃO"
-	head.Parent = card
-	local name = Instance.new("TextLabel")
-	name.BackgroundTransparency = 1
-	name.Position = UDim2.fromOffset(0, 50)
-	name.Size = UDim2.new(1, 0, 0, 52)
-	name.Font = Enum.Font.Bodoni
-	name.TextColor3 = UiKit.INK
-	name.TextSize = UiKit.text(40)
-	name.Text = tostring(r.name or ("Posto " .. tostring(r.to)))
-	name.Parent = card
-	local pt = Instance.new("TextLabel")
-	pt.BackgroundTransparency = 1
-	pt.Position = UDim2.fromOffset(0, 104)
-	pt.Size = UDim2.new(1, 0, 0, 28)
-	pt.Font = Enum.Font.Gotham
-	pt.TextColor3 = UiKit.INK
-	pt.TextSize = UiKit.text(18)
-	pt.Text = tostring(r.pt or "")
-	pt.Parent = card
-	local stamp = Instance.new("TextLabel")
-	stamp.BackgroundTransparency = 1
-	stamp.Position = UDim2.fromOffset(0, 140)
-	stamp.Size = UDim2.new(1, 0, 0, 34)
-	stamp.Font = Enum.Font.GothamBlack
-	stamp.TextColor3 = UiKit.STAMP
-	stamp.TextSize = UiKit.text(22)
-	stamp.Rotation = -3
-	stamp.TextTransparency = 1
-	stamp.Text = string.format("SOLDO: +%s %s", fmt(tonumber(r.bonus) or 0), tostring(state and state.cur or "CI"))
-	stamp.Parent = card
-	TweenService:Create(sc, TweenInfo.new(0.45, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = 1 }):Play()
-	task.delay(0.6, function()
-		TweenService:Create(stamp, TweenInfo.new(0.2), { TextTransparency = 0, Rotation = -6 }):Play()
-	end)
-	task.delay(4.2, function()
-		local fade = TweenInfo.new(0.5)
-		for _, d in card:GetDescendants() do
-			if d:IsA("TextLabel") then
-				TweenService:Create(d, fade, { TextTransparency = 1, BackgroundTransparency = 1 }):Play()
+	local nameText = tostring(r.name or ("Posto " .. tostring(r.to)))
+	local headText = if state and state.faction == "VC"
+		then "THĂNG CHỨC  ·  PROMOÇÃO"
+		else "PROMOTION  ·  PROMOÇÃO"
+	local soldo = string.format("SOLDO: +%s %s", fmt(tonumber(r.bonus) or 0), tostring(state and state.cur or "CI"))
+	Toast.custom(function(card: Frame, lay: Toast.Layout): number
+		local tv = lay.tv
+		local y = lay.pad
+		-- tarja oliva com o título
+		local head = Instance.new("TextLabel")
+		head.Name = "Tarja"
+		head.BackgroundColor3 = UiKit.OLIVE
+		head.BorderSizePixel = 0
+		head.Position = UDim2.fromOffset(lay.x, y)
+		head.Size = UDim2.fromOffset(lay.w, if tv then 40 else 28)
+		head.FontFace = UiKit.headFont(headText)
+		head.TextColor3 = UiKit.KHAKI
+		head.TextSize = UiKit.text(18)
+		head.Text = headText
+		local hc = Instance.new("UICorner")
+		hc.CornerRadius = UDim.new(0, 2)
+		hc.Parent = head
+		head.Parent = card
+		y += head.Size.Y.Offset + 4
+		-- linha vermelha de cabeçalho da ficha
+		local rule = Instance.new("Frame")
+		rule.BackgroundColor3 = UiKit.RULE_RED
+		rule.BorderSizePixel = 0
+		rule.Position = UDim2.fromOffset(lay.x, y)
+		rule.Size = UDim2.fromOffset(lay.w, 2)
+		rule.Parent = card
+		y += 6
+		-- o posto, grande, e o nome em português
+		local latin = not string.find(nameText, "[\196-\244]")
+		local name = Instance.new("TextLabel")
+		name.BackgroundTransparency = 1
+		name.Position = UDim2.fromOffset(lay.x, y)
+		name.Size = UDim2.fromOffset(lay.w, if tv then 56 else 42)
+		name.Font = if latin then Enum.Font.Bodoni else Enum.Font.ArimoBold
+		name.TextColor3 = UiKit.INK
+		name.TextSize = if tv then 48 else 36
+		name.TextTruncate = Enum.TextTruncate.AtEnd
+		name.Text = nameText
+		name.Parent = card
+		y += name.Size.Y.Offset
+		local pt = Instance.new("TextLabel")
+		pt.BackgroundTransparency = 1
+		pt.Position = UDim2.fromOffset(lay.x, y)
+		pt.Size = UDim2.fromOffset(lay.w, if tv then 30 else 22)
+		pt.Font = UiKit.BODY_FONT
+		pt.TextColor3 = UiKit.INK
+		pt.TextSize = UiKit.text(16)
+		pt.Text = tostring(r.pt or "")
+		pt.Parent = card
+		y += pt.Size.Y.Offset + 6
+		-- carimbo: tinta e moldura, torto, cai sobre a ficha logo depois que ela entra
+		local stampH = if tv then 46 else 34
+		local stamp = Instance.new("TextLabel")
+		stamp.AnchorPoint = Vector2.new(0.5, 0.5)
+		stamp.AutomaticSize = Enum.AutomaticSize.X
+		stamp.BackgroundTransparency = 1
+		stamp.Position = UDim2.fromOffset(lay.x + lay.w / 2, y + stampH / 2)
+		stamp.Size = UDim2.fromOffset(0, stampH)
+		stamp.FontFace = UiKit.HEAD_FONT
+		stamp.TextSize = UiKit.text(22)
+		stamp.TextColor3 = UiKit.STAMP
+		stamp.Rotation = -4
+		stamp.TextTransparency = 1
+		stamp.Text = soldo
+		local sp = Instance.new("UIPadding")
+		sp.PaddingLeft = UDim.new(0, 10)
+		sp.PaddingRight = UDim.new(0, 10)
+		sp.Parent = stamp
+		local ink = Instance.new("UIStroke")
+		ink.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+		ink.Color = UiKit.STAMP
+		ink.Thickness = 2
+		ink.Transparency = 1
+		ink.Parent = stamp
+		local sc = Instance.new("UIScale")
+		sc.Scale = 1.6
+		sc.Parent = stamp
+		stamp.Parent = card
+		task.delay(0.55, function()
+			if card.BackgroundTransparency > 0.5 then
+				return -- a ficha já está saindo
 			end
-		end
-		local tw = TweenService:Create(card, fade, { BackgroundTransparency = 1 })
-		tw:Play()
-		tw.Completed:Wait()
-		card:Destroy()
-	end)
+			local hit = TweenInfo.new(0.16, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
+			TweenService:Create(stamp, hit, { TextTransparency = 0.08, Rotation = -7 }):Play()
+			TweenService:Create(ink, hit, { Transparency = 0.15 }):Play()
+			TweenService:Create(sc, hit, { Scale = 1 }):Play()
+		end)
+		return y + stampH
+	end, { kind = "recompensa", paper = true, duration = 5, key = "promocao" })
 end
 
 -- ===== painel de equipamento (Intendência) =====
@@ -255,14 +249,12 @@ Net.event("Progress_State").OnClientEvent:Connect(function(s: any)
 	state = s
 	local g = s.gain
 	if type(g) == "table" and ((g.xp or 0) > 0 or (g.cr or 0) > 0) then
-		local parts = {}
-		if (g.xp or 0) > 0 then
-			table.insert(parts, "+" .. fmt(g.xp) .. " XP")
-		end
-		if (g.cr or 0) > 0 then
-			table.insert(parts, "+" .. fmt(g.cr) .. " " .. tostring(s.cur))
-		end
-		toast(table.concat(parts, " · ") .. "   " .. tostring(g.label))
+		Toast.reward(
+			if g.label ~= nil then tostring(g.label) else "",
+			tonumber(g.xp) or 0,
+			tonumber(g.cr) or 0,
+			tostring(s.cur)
+		)
 	end
 	if type(s.rankUp) == "table" then
 		ceremony(s.rankUp)
@@ -288,3 +280,22 @@ end)
 UiKit.watch(panel, function()
 	return panel.Visible
 end)
+
+-- gancho de teste (só no Studio): workspace:SetAttribute("VT65DevToast", "promocao") mostra a ficha
+-- de promoção (os outros valores ficam no Toast)
+if RunService:IsStudio() then
+	workspace:GetAttributeChangedSignal("VT65DevToast"):Connect(function()
+		if workspace:GetAttribute("VT65DevToast") ~= "promocao" then
+			return
+		end
+		local vc = state ~= nil and state.faction == "VC"
+		ceremony(
+			if vc
+				then { name = "Tiểu đội trưởng", pt = "chefe de esquadra (squad)", bonus = 500, to = 5 }
+				else { name = "Sergeant", pt = "sargento, líder de squad", bonus = 500, to = 5 }
+		)
+		task.defer(function()
+			workspace:SetAttribute("VT65DevToast", nil) -- local: no cliente, o mesmo valor repete
+		end)
+	end)
+end

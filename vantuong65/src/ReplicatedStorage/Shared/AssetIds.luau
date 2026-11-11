@@ -96,6 +96,9 @@ return {
 		-- arrozal em cartões (tools/make_rice.py, D-74): o cliente põe em volta da câmera (RiceField)
 		rice_tile_hi = 120451731988908,
 		rice_tile_lo = 137999556221661,
+		-- animais em partes (corpo, pernas, cabeça) para o andar no cliente (tools/rig_animals.py, D-77)
+		water_buffalo_rig = 115492603708245,
+		chicken_rig = 103660036877609,
 	},
 	-- Roupas: IMAGENS dos moldes clássicos (aplicadas em Shirt.ShirtTemplate / Pants.PantsTemplate)
 	Clothing = {

@@ -25,6 +25,33 @@ UiKit.CARD = Color3.fromRGB(234, 226, 200) -- ficha de arquivo
 UiKit.RULE_RED = Color3.fromRGB(176, 62, 48) -- linha de cabeçalho da ficha
 UiKit.RULE_BLUE = Color3.fromRGB(118, 138, 168) -- pauta da ficha
 UiKit.STAMP = Color3.fromRGB(150, 40, 30) -- tinta de carimbo
+UiKit.BRASS = Color3.fromRGB(214, 172, 72) -- latão: recompensa e botão em destaque
+
+-- tipografia dos avisos e do tutorial, a mesma do lobby: título condensado (Oswald) e texto legível
+UiKit.HEAD_FONT = Font.fromName("Oswald", Enum.FontWeight.Bold)
+UiKit.BODY_FONT = Enum.Font.Arimo
+
+-- O Oswald pode não ter as letras do vietnamita (como a máquina de escrever do lobby): texto com
+-- letra fora do Latin-1 vai no Arimo, que tem.
+function UiKit.headFont(text: string): Font
+	return if string.find(text, "[\196-\244]") then Font.fromEnum(Enum.Font.ArimoBold) else UiKit.HEAD_FONT
+end
+
+-- Caixa alta que também sobe as letras acentuadas do português (o string.upper só mexe no ASCII).
+function UiKit.upper(s: string): string
+	local out = string.gsub(string.upper(s), "\195([\160-\190])", function(c: string): string
+		return if c == "\183" then "\195\183" else "\195" .. string.char(string.byte(c) - 32) -- \183: ÷
+	end)
+	return out
+end
+
+-- Primeira letra em maiúscula (texto do servidor chega em minúscula: "alvo fora do mapa").
+function UiKit.capitalize(s: string): string
+	if string.byte(s, 1) == 195 then
+		return UiKit.upper(string.sub(s, 1, 2)) .. string.sub(s, 3)
+	end
+	return string.upper(string.sub(s, 1, 1)) .. string.sub(s, 2)
+end
 
 function UiKit.tv(): boolean
 	local ok, v = pcall(function()

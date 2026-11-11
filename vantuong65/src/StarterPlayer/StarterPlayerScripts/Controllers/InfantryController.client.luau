@@ -15,6 +15,7 @@ local Logistics = require(ReplicatedStorage.Shared.Logistics)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Bus = require(script.Parent.Bus)
 local Input = require(script.Parent.Input)
+local Toast = require(script.Parent.Toast)
 local UiKit = require(script.Parent.UiKit)
 local ViewMode = require(script.Parent.ViewMode)
 local Wheel = require(script.Parent.Wheel)
@@ -195,8 +196,10 @@ local function line(text: string, color: Color3)
 		l:Destroy()
 	end)
 end
-Bus.on("toast", function(text: string)
-	line(text, Color3.fromRGB(255, 230, 150))
+-- avisos curtos de todos os controllers: Bus.fire("toast", texto, tipo?) vai para o sistema único
+-- de avisos (Toast, faixa abaixo do centro-topo); tipo: "info", "sucesso", "alerta" ou "erro"
+Bus.on("toast", function(text: string, kind: string?)
+	Toast.show(text, kind)
 end)
 Net.event("Squad_Message").OnClientEvent:Connect(function(m)
 	local text = Comms.MESSAGES[m.id] or m.id
@@ -303,7 +306,11 @@ local function useItem(id: string)
 	if id == "shovel" then
 		Net.event("Dig_Request"):FireServer()
 	elseif id == "frag" or id == "smoke" then
+		if player.Character and player.Character:GetAttribute("Throwing") then
+			return -- já arremessando
+		end
 		Net.event("Throw_Request"):FireServer({ kind = id, dir = camera.CFrame.LookVector })
+		Bus.fire("grenade_throw", id) -- braço e granada em 1ª pessoa (WeaponVisuals, D-77)
 	elseif id == "build" then
 		Wheel.open("equip", "Construir", buildItems, function(bid: string)
 			local b = Logistics.BUILDS[string.sub(bid, 7)]
@@ -324,6 +331,17 @@ local function useItem(id: string)
 	else
 		Bus.fire("equip_item", id) -- bandagem, torniquete, binóculo (Medical/Weapon)
 	end
+end
+
+-- só no Studio, para o teste: workspace:SetAttribute("VT65DevItem", "frag") usa o item como a roda
+if game:GetService("RunService"):IsStudio() then
+	workspace:GetAttributeChangedSignal("VT65DevItem"):Connect(function()
+		local id = workspace:GetAttribute("VT65DevItem")
+		if type(id) == "string" and id ~= "" then
+			workspace:SetAttribute("VT65DevItem", nil)
+			useItem(id)
+		end
+	end)
 end
 
 local wheelOpen: string? = nil
