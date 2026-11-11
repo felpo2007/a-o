@@ -99,6 +99,9 @@ return {
 		-- animais em partes (corpo, pernas, cabeça) para o andar no cliente (tools/rig_animals.py, D-77)
 		water_buffalo_rig = 115492603708245,
 		chicken_rig = 103660036877609,
+		-- animais com esqueleto e pele feitos no Blender (tools/animais/esqueleto.py, D-79)
+		water_buffalo_skin = 109421966021264,
+		chicken_skin = 89649386620898,
 	},
 	-- Roupas: IMAGENS dos moldes clássicos (aplicadas em Shirt.ShirtTemplate / Pants.PantsTemplate)
 	Clothing = {

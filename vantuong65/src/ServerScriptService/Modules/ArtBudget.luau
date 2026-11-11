@@ -66,6 +66,9 @@ ArtBudget.KIND = {
 	-- animais em partes para o andar (D-77): só o cliente põe, no lugar do modelo do servidor
 	water_buffalo_rig = "prop",
 	chicken_rig = "prop",
+	-- com esqueleto e pele (Blender, D-79)
+	water_buffalo_skin = "prop",
+	chicken_skin = "prop",
 	m60 = "hero",
 	rpd = "hero",
 	sks = "hero",
@@ -130,6 +133,8 @@ ArtBudget.TRIS = {
 	-- os mesmos triângulos do modelo reduzido, divididos em partes (tools/rig_animals.py)
 	water_buffalo_rig = 4999,
 	chicken_rig = 3000,
+	water_buffalo_skin = 4999,
+	chicken_skin = 3000,
 	m60 = 14933,
 	rpd = 15735,
 	sks = 14683,

@@ -20,6 +20,7 @@ local VIEW_M = 250 -- cópia local até aqui
 local ANIM_M = 120 -- pernas e cabeça animadas até aqui
 
 type Leg = { i: number, pivot: Vector3, name: string }
+type BoneInfo = { b: Bone, lat: Vector3, up: Vector3 }
 type Rig = {
 	server: Model,
 	model: Model,
@@ -29,6 +30,7 @@ type Rig = {
 	legs: { Leg },
 	head: number?,
 	headPivot: Vector3,
+	bones: { [string]: BoneInfo }?, -- com esqueleto (D-79)
 	pos: Vector3,
 	yaw: number,
 	pitch: number,
@@ -81,6 +83,71 @@ local function ground(x: number, z: number, fallback: number): number
 	return if hit then hit.Position.Y else fallback
 end
 
+-- D-79: animal com esqueleto e pele (Blender, tools/animais/esqueleto.py). Uma malha só; os
+-- ossos giram em volta do eixo lateral do animal (calculado no repouso, no espaço de cada osso) e a
+-- pele acompanha sem fresta. Devolve o Rig com `bones`.
+local function hideServer(server: Model)
+	for _, d in server:GetDescendants() do
+		if d:IsA("BasePart") then
+			d.LocalTransparencyModifier = 1
+		end
+	end
+end
+
+local function buildSkinned(server: Model, species: string, m: Model): Rig?
+	local mesh = m:FindFirstChildWhichIsA("MeshPart", true)
+	local head = m:FindFirstChild("Cabeca", true)
+	local back = m:FindFirstChild("Quadril", true) or m:FindFirstChild("Corpo", true)
+	if not (mesh and head and back and head:IsA("Bone") and back:IsA("Bone")) then
+		m:Destroy()
+		return nil
+	end
+	local fwd = (head.WorldPosition - back.WorldPosition) * Vector3.new(1, 0, 1)
+	if fwd.Magnitude < 1e-3 then
+		fwd = -Vector3.zAxis
+	end
+	local origin = Vector3.new(mesh.Position.X, mesh.Position.Y - mesh.Size.Y / 2, mesh.Position.Z)
+	local root = CFrame.lookAt(origin, origin + fwd.Unit)
+	local bones = {}
+	for _, b in m:GetDescendants() do
+		if b:IsA("Bone") then
+			local w = b.WorldCFrame
+			bones[b.Name] = {
+				b = b,
+				lat = w:VectorToObjectSpace(root.RightVector),
+				up = w:VectorToObjectSpace(root.UpVector),
+			}
+		end
+	end
+	mesh.Anchored, mesh.CanCollide, mesh.CanQuery, mesh.CanTouch = true, false, false, false
+	m.Parent = holder
+	hideServer(server)
+	local sp = server:GetPivot().Position
+	local gy = ground(sp.X, sp.Z, sp.Y)
+	return {
+		server = server,
+		model = m,
+		species = species,
+		parts = { mesh },
+		rest = { root:ToObjectSpace(mesh.CFrame) },
+		legs = {},
+		head = nil,
+		headPivot = Vector3.zero,
+		bones = bones,
+		pos = Vector3.new(sp.X, gy, sp.Z),
+		yaw = math.random() * 2 * math.pi,
+		pitch = 0,
+		speed = 0,
+		phase = math.random(),
+		groundAt = 0,
+		groundY = gy,
+		headPitch = 0,
+		peckUntil = 0,
+		nextPeck = os.clock() + math.random() * 3,
+		seed = math.random(1, 1000),
+	}
+end
+
 -- Raiz da cópia: no chão, sob o centro do corpo, olhando do corpo para a cabeça. Guarda cada
 -- parte relativa a ela, a junta de cada perna (topo da perna) e a do pescoço (trás da cabeça).
 local function build(server: Model, species: string, tpl: Model): Rig?
@@ -88,6 +155,9 @@ local function build(server: Model, species: string, tpl: Model): Rig?
 	local scale = server:GetScale()
 	if math.abs(scale - 1) > 0.01 then
 		m:ScaleTo(scale) -- bezerro (0,6)
+	end
+	if m:FindFirstChildWhichIsA("Bone", true) then
+		return buildSkinned(server, species, m)
 	end
 	-- o importador põe cada malha dentro de um modelo "<nome>_Node"
 	local body = m:FindFirstChild("Corpo", true) :: BasePart?
@@ -259,6 +329,38 @@ local function step(r: Rig, dt: number, now: number, camPos: Vector3)
 		if h then
 			local p = r.headPivot
 			cfs[h] = root * CFrame.new(p) * CFrame.Angles(r.headPitch, 0, 0) * CFrame.new(-p) * r.rest[h]
+		end
+		local bones = r.bones
+		if bones then
+			-- esqueleto: coxa balança, canela dobra só no balanço (casco sobe e vai para trás),
+			-- coluna verga a cada passo e respira parada, cabeça pasta, rabo espanta mosca
+			local function rot(name: string, lateral: number, vertical: number?)
+				local bi = bones[name]
+				if bi then
+					local cf = CFrame.fromAxisAngle(bi.lat, lateral)
+					if vertical and vertical ~= 0 then
+						cf *= CFrame.fromAxisAngle(bi.up, vertical)
+					end
+					bi.b.Transform = cf
+				end
+			end
+			local knee = if run then math.rad(62) else math.rad(38)
+			for _, side in { "FE", "FD", "TE", "TD" } do
+				local th = (r.phase + (phases["Perna" .. side] or 0)) * 2 * math.pi
+				local a = amp * math.sin(th)
+				local lift = if moving then math.max(0, math.cos(th)) * math.clamp(r.speed / 0.4, 0.3, 1) else 0
+				rot("Coxa" .. side, a)
+				rot("Canela" .. side, -knee * lift)
+			end
+			local breathe = math.sin(now * 1.6 + r.seed) * math.rad(1.2)
+			local step = if moving then math.sin(r.phase * 4 * math.pi) * math.rad(2.5) else breathe
+			rot("Coluna", step)
+			rot("Corpo", step)
+			rot("Pescoco", r.headPitch * 0.45)
+			rot("Cabeca", r.headPitch * 0.55)
+			local swish = math.sin(now * (if run then 6 else 2.3) + r.seed) * math.rad(if run then 30 else 22)
+			rot("Rabo1", math.rad(if run then 25 else 0), swish)
+			rot("Rabo2", 0, swish * 0.8)
 		end
 	end
 	workspace:BulkMoveTo(r.parts, cfs, Enum.BulkMoveMode.FireCFrameChanged)

@@ -2023,5 +2023,85 @@ para sempre. Ver D-77.
 - **Avisos `StyleRule ... RoundedCorner8`:** vêm da interface interna do Roblox.
 
 **Autoteste com tudo junto:** 17 ok, 0 falhas, 0 pulados. Log das sessões: 0 erros de script.
+
+## D-79 — Blender na linha de produção; animais com esqueleto e pele (2026-11-11)
+**Pedido do usuário:**
+- fazer os assets no Blender (os novos e os antigos refeitos) e comparar: mais bonito, mais
+  gráfico, mais funcional, menos pesado;
+- tudo realista; animações ultra realistas;
+- telas mais fluidas;
+- resolver o que faltava e seguir para a próxima fase.
+
+**Blender 5.3** roda sem janela pelo Python (`blender -b --factory-startup -P script.py -- args`),
+com importador e exportador glTF/FBX, BVH e Cycles. Os scripts ficam em `tools/` e rodam de novo
+do zero.
+
+**Animais com esqueleto e pele** (`tools/animais/esqueleto.py`, `tools/animais/previa_pose.py`):
+- Na D-77 o animal era peças que giram nas juntas: dá passo, mas a perna gira dura e abre fresta.
+- Agora é uma malha só presa a um esqueleto:
+  - búfalo: 16 ossos (raiz, quadril, coluna, peito, pescoço, cabeça, rabo em 2, coxa e canela
+    nas 4 pernas);
+  - galinha: 9 ossos.
+- **Pesos:** o "heat" automático do Blender falha em malha de gerador. O peso vem da distância
+  aos ossos da região de cada vértice (perna, corpo, pescoço, rabo), com mistura nas juntas.
+- **Prévia no Blender:** passada e cabeça baixa com a pele contínua, sem fresta.
+- **Roblox:** importou uma MeshPart com os 16 ossos (`Bone`).
+- **No cliente** (`AnimalVisuals`), cada osso gira no eixo lateral do animal, calculado no
+  repouso:
+  - a canela dobra só no balanço (o casco sobe e vai para trás);
+  - a coluna verga a cada passo e respira parada;
+  - a cabeça pasta;
+  - o rabo espanta mosca.
+- O modelo em peças (D-77) fica de reserva se o com esqueleto não carregar.
+
+**Granada de bot:** nova verificação no autoteste. Um bot de verdade arremessa num alvo a 25 m:
+- o braço gira;
+- a granada caiu a 3,2 m do alvo (com quique e rolagem);
+- ela é desarmada antes de explodir.
+
+Autoteste: 18 ok.
 Os bots não jogaram granada nas duas partidas: os encontros foram a mais de 35 m (a regra pede
 15–35 m fora da visada).
+
+## D-80 — Vento, poeira e folhas; tutorial estável no controle (2026-11-11)
+**Pedido do usuário:**
+- "coloque poeira, vento etc.";
+- "as vilas devem fazer parte do ambiente de guerra";
+- "o tutorial, quando está no controle, deve aparecer os botões do controle".
+
+**Ambiente** (`Ambiente.client`, tudo local e barato):
+- **Vento:** brisa do mar vindo do leste (a costa fica a leste), 3 m/s com rajadas até ~7 m/s
+  (PLACEHOLDER), e o dobro na chuva. Vai em `workspace.GlobalWind`, que já mexe o capim do
+  terreno, a fumaça e as partículas.
+- **Arroz** (`RiceField.client`): os ladrilhos de perto balançam a 15 Hz, girando no pé para longe
+  do vento, numa onda que corre pelo campo na direção da rajada.
+- **Poeira no ar:** cisco claro em volta da câmera, só de dia e sem chuva.
+- **Folhas caindo** quando a câmera está debaixo da copa da mata (raio para cima, 1 vez por
+  segundo); mais na chuva.
+- **Fumaça de guerra no horizonte:** 5 colunas escuras fora do mapa de 2 x 2 km, inclinadas pelo
+  vento (vilas e plantações queimando; a área foi bombardeada antes do desembarque).
+
+**Tutorial no controle:** o tutorial já trocava a tecla pelo botão do controle, mas piscava. Causa:
+o mouse parado gera eventos de movimento mínimo e o jogo voltava para "teclado". Agora:
+- controle → teclado só com tecla, clique ou mouse andando mais de 40 px em 0,5 s;
+- teclado → controle em qualquer entrada do controle, na hora.
+
+## D-81 — O tiro sai exatamente no centro da mira (2026-11-11)
+**Pedido do usuário:** "a bala tem que sair exatamente no centro da mira, em cima do risquinho";
+em terceira pessoa também.
+
+**Primeira pessoa:**
+- A bala já saía do centro da câmera, e o balanço e o recuo giram a própria câmera, então o ponto
+  de impacto andava junto com a mira.
+- O defeito era só visual: o coice do modelo da arma girava a arma para cima. Com a arma apontada,
+  a massa de mira saía do ponto onde a bala ia.
+- Agora o giro do coice é proporcional a (1 − mirando): apontando, o coice só empurra a arma para
+  trás e a massa fica sobre o ponto de impacto; no quadril o coice gira como antes.
+
+**Terceira pessoa:**
+- A bala sai do olho do soldado para o ponto da mira (câmera por cima do ombro), com a dispersão
+  do quadril.
+- A retícula fecha quando aponta.
+- Se uma parede ou o terreno estão entre o soldado e o ponto da mira (raio do olho até o alvo, 10
+  vezes por segundo), os riscos da retícula ficam vermelhos: o tiro vai bater no obstáculo, não no
+  ponto mirado.

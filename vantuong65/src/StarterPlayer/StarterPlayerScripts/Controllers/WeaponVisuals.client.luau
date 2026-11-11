@@ -480,7 +480,10 @@ RunService:BindToRenderStep("VT65ViewModel", Enum.RenderPriority.Camera.Value + 
 	bobT += dt * math.clamp(speed, 0, 6) * 2.2
 	local amp = math.clamp(speed / 3, 0, 1) * (1 - aimT) * 0.008 / M
 	local bob = CFrame.new(math.sin(bobT) * amp, math.abs(math.cos(bobT)) * amp, 0)
-	local recoil = CFrame.new(0, 0, kick * 0.05 / M) * CFrame.Angles(kick * math.rad(4), 0, 0)
+	-- D-81: mirando, o coice só empurra a arma para trás (a subida da boca já vai na câmera,
+	-- WeaponController). Antes a arma girava até 4° acima da câmera: o tiro seguinte saía no centro
+	-- da tela e não onde a massa de mira mostrava ("a bala tem que sair em cima do risquinho").
+	local recoil = CFrame.new(0, 0, kick * 0.05 / M) * CFrame.Angles(kick * math.rad(4) * (1 - aimT), 0, 0)
 	-- recarga: inclina a arma para mostrar o encaixe; tapa no carregador; puxa o ferrolho
 	local pose = CFrame.identity
 	if reloading then

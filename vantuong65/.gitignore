@@ -25,3 +25,5 @@ assets/ceu/
 assets/arroz/
 # animais em partes (tools/rig_animals.py, D-77)
 assets/animais/
+# captura de movimento da CMU (tools/anim/fetch_cmu.py) e animações geradas (tools/anim)
+assets/mocap/

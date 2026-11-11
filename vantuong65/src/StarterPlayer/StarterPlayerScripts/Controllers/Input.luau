@@ -436,8 +436,8 @@ local function readPreferred()
 			setDevice("gamepad")
 		elseif pref == Enum.PreferredInput.Touch then
 			setDevice("touch")
-		else
-			setDevice("kbm")
+		elseif device ~= "gamepad" then
+			setDevice("kbm") -- do controle para o teclado só por tecla, clique ou mouse andando (abaixo)
 		end
 		return
 	end
@@ -448,12 +448,31 @@ end
 pcall(function()
 	UserInputService:GetPropertyChangedSignal("PreferredInput"):Connect(readPreferred)
 end)
+-- D-80: quem joga no controle com o mouse em cima da mesa via o tutorial e os avisos voltarem para
+-- teclado a cada tremida do mouse. Do controle para o teclado, só tecla, clique ou mouse andando de
+-- verdade (40 px em meio segundo).
+local mouseRun, mouseT0 = 0, 0
+UserInputService.InputChanged:Connect(function(input: InputObject)
+	if input.UserInputType ~= Enum.UserInputType.MouseMovement or device ~= "gamepad" then
+		return
+	end
+	local now = os.clock()
+	if now - mouseT0 > 0.5 then
+		mouseRun, mouseT0 = 0, now
+	end
+	mouseRun += input.Delta.Magnitude
+	if mouseRun > 40 then
+		setDevice("kbm")
+	end
+end)
 UserInputService.LastInputTypeChanged:Connect(function(t)
 	-- reação imediata à troca (o PreferredInput também muda; este cobre versões sem ele)
 	if isGamepad(t) then
 		setDevice("gamepad")
-	elseif t == Enum.UserInputType.Keyboard or MOUSE[t] or t == Enum.UserInputType.MouseMovement then
+	elseif t == Enum.UserInputType.Keyboard or MOUSE[t] then
 		setDevice("kbm")
+	elseif t == Enum.UserInputType.MouseMovement and device ~= "gamepad" then
+		setDevice("kbm") -- do controle, só pelo InputChanged acima
 	elseif t == Enum.UserInputType.Touch then
 		setDevice("touch")
 	end

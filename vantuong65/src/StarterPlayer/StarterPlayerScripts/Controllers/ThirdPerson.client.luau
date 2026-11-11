@@ -145,14 +145,40 @@ tick(2, 2) -- ponto central
 local ticks = { tick(2, 7), tick(2, 7), tick(7, 2), tick(7, 2) } -- cima, baixo, esquerda, direita
 local DIRS = { Vector2.new(0, -1), Vector2.new(0, 1), Vector2.new(-1, 0), Vector2.new(1, 0) }
 
+-- D-81: o tiro sai do olho do soldado, não da câmera do ombro. Se algo entre o olho e o ponto da
+-- retícula (borda de dique, parede, tronco) for pegar a bala antes, a retícula fica vermelha: em 3ª
+-- pessoa a câmera vê por cima do que o soldado não vê.
+local BLOCKED_COLOR = Color3.fromRGB(220, 70, 60)
+local blockParams = RaycastParams.new()
+blockParams.FilterType = Enum.RaycastFilterType.Exclude
+blockParams.RespectCanCollide = true
+local blockedAt = 0
+local blocked = false
+
 local function updateReticle()
-	-- abertura = dispersão do quadril (Movement.hipSpreadDeg), projetada na tela
-	local spread = ViewMode.hipSpread()
+	-- abertura = dispersão do quadril (Movement.hipSpreadDeg), projetada na tela; mirando não há
+	-- dispersão (WeaponController.shotRay): a retícula fecha no ponto
+	local aimingNow = player:GetAttribute("Aiming") == true
+	local spread = if aimingNow then 0 else ViewMode.hipSpread()
 	local half = math.tan(math.rad(camera.FieldOfView / 2))
 	local gap = math.clamp(math.tan(math.rad(spread)) / half * camera.ViewportSize.Y / 2, 3, 80)
 	for i, t in ticks do
 		local d = DIRS[i]
 		t.Position = UDim2.new(0.5, d.X * (gap + 3.5), 0.5, d.Y * (gap + 3.5))
+	end
+	local now = os.clock()
+	if now - blockedAt > 0.1 then
+		blockedAt = now
+		local char = player.Character
+		local o = ViewMode.origin()
+		local p = ViewMode.aimPoint(1500 / M)
+		blockParams.FilterDescendantsInstances = if char then { char } else {}
+		local hit = workspace:Raycast(o, p - o, blockParams)
+		blocked = hit ~= nil and (p - hit.Position).Magnitude > 1.5
+	end
+	local color = if blocked then BLOCKED_COLOR else RET_COLOR
+	for _, t in ticks do
+		t.BackgroundColor3 = color
 	end
 end
 

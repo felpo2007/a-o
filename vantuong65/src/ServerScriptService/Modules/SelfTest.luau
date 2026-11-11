@@ -15,6 +15,7 @@ local MapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any
 local Rng = require(ReplicatedStorage.Shared.Rng)
 local Combatants = require(script.Parent.Combatants)
 local ExplosionService = require(script.Parent.ExplosionService)
+local FieldService = require(script.Parent.FieldService)
 local FieldWorkService = require(script.Parent.FieldWorkService)
 local LogisticsService = require(script.Parent.LogisticsService)
 local MatchService = require(script.Parent.MatchService)
@@ -482,6 +483,56 @@ local function explosion(): (string, string?)
 		)
 end
 
+-- D-77/D-79: bot arremessa (FieldService.throwFrom) num alvo a 25 m: o braço gira (atributo
+-- Throwing), a granada sai e cai perto do alvo. É desarmada antes de explodir (não fere ninguém).
+local function botGrenade(): (string, string?)
+	local list = bots("US")
+	local e = list[1]
+	local root = e and Combatants.root(e)
+	local folder = workspace:FindFirstChild("Granadas")
+	if not (e and root and folder) then
+		return "pulado", "sem bot EUA ou sem a pasta de granadas"
+	end
+	local params = RaycastParams.new()
+	params.FilterType = Enum.RaycastFilterType.Include
+	params.FilterDescendantsInstances = { workspace.Terrain }
+	local look = root.CFrame.LookVector * Vector3.new(1, 0, 1)
+	local aim = root.Position + look.Unit * (25 / M)
+	local g = workspace:Raycast(Vector3.new(aim.X, root.Position.Y + 300, aim.Z), Vector3.new(0, -800, 0), params)
+	if not g then
+		return "pulado", "sem chão no alvo"
+	end
+	local spawned: Model? = nil
+	local conn = folder.ChildAdded:Connect(function(m)
+		if m:IsA("Model") then
+			spawned = m
+		end
+	end)
+	local armed = false
+	local ok = FieldService.throwFrom(e.model, "US", "frag", g.Position, nil)
+	local t0 = os.clock()
+	while os.clock() - t0 < 3.6 do
+		armed = armed or e.model:GetAttribute("Throwing") == true
+		task.wait(0.05)
+	end
+	conn:Disconnect()
+	local m = spawned
+	local core = m and m:FindFirstChild("Nucleo") :: BasePart?
+	local miss = if core then ((core.Position - g.Position) * Vector3.new(1, 0, 1)).Magnitude * M else math.huge
+	if m then
+		m:Destroy() -- desarma antes da espoleta
+	end
+	local good = ok and armed and core ~= nil and miss < 5
+	return if good then "ok" else "FALHA",
+		string.format(
+			"arremessou=%s, braço=%s, granada=%s, caiu a %.1f m do alvo de 25 m",
+			tostring(ok),
+			tostring(armed),
+			tostring(core ~= nil),
+			miss
+		)
+end
+
 -- F4: veículos do depósito parados no chão e com assento (sem motorista, nada anda sozinho)
 local function vehicles(): (string, string?)
 	local f = workspace:FindFirstChild("Vehicles")
@@ -662,6 +713,7 @@ function SelfTest.run()
 	check("pá de trincheira", dig)
 	check("medevac", medevac)
 	check("explosão de morteiro", explosion)
+	check("granada de bot", botGrenade)
 	check("veículos no depósito", vehicles)
 	check("túneis e spawn do VC", tunnels)
 	check("progressão nos atributos", progression)

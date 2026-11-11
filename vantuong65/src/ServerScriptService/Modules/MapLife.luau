@@ -135,7 +135,8 @@ function MapLife.animalArt(template: (string) -> Model?): number
 	art.Name = "VT65AnimalArt"
 	local n = 0
 	for _, species in { "water_buffalo", "chicken" } do
-		local tpl = template(species .. "_rig")
+		-- D-79: com esqueleto e pele (Blender) quando publicado; senão, em partes (D-77)
+		local tpl = template(species .. "_skin") or template(species .. "_rig")
 		if tpl then
 			local c = tpl:Clone()
 			c.Name = species

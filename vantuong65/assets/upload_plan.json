@@ -734,5 +734,19 @@
   "assetType": "Model",
   "name": "VT65 galinha em partes",
   "description": "VAN TUONG 65 - animal dividido em corpo, pernas e cabeca para animar (D-77)"
+ },
+ {
+  "key": "Models.water_buffalo_skin",
+  "file": "assets/animais/water_buffalo_pele.glb",
+  "assetType": "Model",
+  "name": "VT65 bufalo com esqueleto",
+  "description": "VAN TUONG 65 - animal com esqueleto e pele feito no Blender (D-79)"
+ },
+ {
+  "key": "Models.chicken_skin",
+  "file": "assets/animais/chicken_pele.glb",
+  "assetType": "Model",
+  "name": "VT65 galinha com esqueleto",
+  "description": "VAN TUONG 65 - animal com esqueleto e pele feito no Blender (D-79)"
  }
 ]

@@ -118,5 +118,7 @@
  "Models.rice_tile_hi": "120451731988908",
  "Models.rice_tile_lo": "137999556221661",
  "Models.water_buffalo_rig": "115492603708245",
- "Models.chicken_rig": "103660036877609"
+ "Models.chicken_rig": "103660036877609",
+ "Models.water_buffalo_skin": "109421966021264",
+ "Models.chicken_skin": "89649386620898"
 }
