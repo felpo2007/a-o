@@ -29,6 +29,19 @@
   **não medido**.
 - **Não testado no Studio.** Subir: 4 GLB, 4 sons e 9 clipes (TODO na D-94).
 
+## v36 publicada (2026-11-11, D-91 a D-97)
+- **Espera e som:** nascer em 10 s; som mais baixo, com música no menu; 50 x 50 jogadores.
+- **Mapa:** de 1 x 1 km (terreno em 7 s, arte de 3.775 para 1.510 modelos), com carta nova.
+- **Bots:** usam o mapa, os veículos e os túneis.
+- **Movimento:** água sem nadar no raso, VC ×1,12, veículos sobem dique.
+- **Facas e braços:** facas e facadas; braços fora do corpo.
+- **Menus:** revisados (pilha de voltar, loja com abas, câmera nivelada na chegada).
+- **Modelos do Blender:** 13 refeitos publicados.
+- **Testado no Studio:** lobby, inserção EUA e VC, câmera de chegada, menus, loja, carta, faca e
+  marcadores.
+- **Não testado:** fps real, água andando (o teclado simulado do Studio não move o soldado) e
+  controle físico.
+
 ## Sessão 7 (2026-11-11): vida no mapa e teste fase a fase (D-74, D-75)
 - **Arrozal vivo:** arroz em cartões nos 989 tabuleiros plantados (perto: ladrilho de 384
   triângulos; longe: dossel verde). Muda nova e pousio em parte dos tabuleiros. 59,6 fps no meio
