@@ -8,6 +8,7 @@ local GuiService = game:GetService("GuiService")
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 
+local Lang = require(game:GetService("ReplicatedStorage").Shared.Lang)
 local Input = require(script.Parent.Input)
 local VirtualCursor = require(script.Parent.VirtualCursor)
 
@@ -39,32 +40,9 @@ function UiKit.headFont(text: string): Font
 end
 
 -- Caixa alta que também sobe as letras acentuadas do português e do vietnamita (o string.upper só
--- mexe no ASCII; no Studio "An Cường" saía "AN CườNG"). Pares minúscula/maiúscula do Unicode:
--- Latin-1 (à–þ, menos ÷), Latin Extended-A (ă, đ, ĩ, ũ), ơ, ư e o bloco vietnamita (ạ–ỹ).
-local function upCodepoint(cp: number): number
-	if cp >= 97 and cp <= 122 then
-		return cp - 32
-	elseif cp >= 0xE0 and cp <= 0xFE and cp ~= 0xF7 then
-		return cp - 32
-	elseif ((cp >= 0x100 and cp <= 0x137) or (cp >= 0x14A and cp <= 0x177)) and cp % 2 == 1 then
-		return cp - 1
-	elseif cp == 0x1A1 or cp == 0x1B0 then
-		return cp - 1
-	elseif cp >= 0x1EA0 and cp <= 0x1EF9 and cp % 2 == 1 then
-		return cp - 1
-	end
-	return cp
-end
-function UiKit.upper(s: string): string
-	local ok, out = pcall(function(): string
-		local parts = {}
-		for _, cp in utf8.codes(s) do
-			table.insert(parts, utf8.char(upCodepoint(cp)))
-		end
-		return table.concat(parts)
-	end)
-	return if ok then out else string.upper(s)
-end
+-- mexe no ASCII; no Studio "An Cường" saía "AN CườNG"). Mora no Shared/Lang (a tradução usa a
+-- mesma para achar "FUZILEIRO" no dicionário de "Fuzileiro").
+UiKit.upper = Lang.upper
 
 -- Primeira letra em maiúscula (texto do servidor chega em minúscula: "alvo fora do mapa").
 function UiKit.capitalize(s: string): string

@@ -376,13 +376,30 @@ end
 -- ===== máquina de escrever =====
 -- Mostra o texto letra a letra (cps = letras por segundo). Devolve o tween (quem quiser espera o
 -- Completed). Terminado, o limite sai (-1): trocar o texto depois não corta nada.
+-- D-84: a tradução (Traducao.client) troca o texto logo depois de escrito, com outro tamanho; as
+-- letras visíveis saem da fração do tempo sobre o texto que está no rótulo, não do português.
+local typing: { [TextLabel]: number } = setmetatable({}, { __mode = "k" }) :: any
+local function graphemes(l: TextLabel): number
+	local t = l.Text
+	local plain = if l.RichText then string.gsub(t, "<[^>]+>", "") else t -- as marcas não contam
+	return utf8.len(plain) or #plain
+end
 function Acabamento.datilografar(l: TextLabel, texto: string, cps: number?, atraso: number?): Tween
 	l.Text = texto
 	l.MaxVisibleGraphemes = 0
-	local plain = if l.RichText then string.gsub(texto, "<[^>]+>", "") else texto -- as marcas não contam
+	local token = (typing[l] or 0) + 1
+	typing[l] = token
+	local plain = if l.RichText then string.gsub(texto, "<[^>]+>", "") else texto
 	local n = utf8.len(plain) or #plain
+	local progress = Instance.new("NumberValue")
+	progress.Value = 0
+	progress.Changed:Connect(function(v: number)
+		if typing[l] == token then
+			l.MaxVisibleGraphemes = math.floor(v * graphemes(l) + 0.5)
+		end
+	end)
 	local tw = TweenService:Create(
-		l,
+		progress,
 		TweenInfo.new(
 			math.max(n / (cps or 45), 0.05),
 			Enum.EasingStyle.Linear,
@@ -391,12 +408,13 @@ function Acabamento.datilografar(l: TextLabel, texto: string, cps: number?, atra
 			false,
 			atraso or 0
 		),
-		{ MaxVisibleGraphemes = n }
+		{ Value = 1 }
 	)
 	tw.Completed:Once(function(state: Enum.PlaybackState)
-		if state == Enum.PlaybackState.Completed and l.Text == texto then
+		if state == Enum.PlaybackState.Completed and typing[l] == token then
 			l.MaxVisibleGraphemes = -1
 		end
+		progress:Destroy()
 	end)
 	tw:Play()
 	return tw

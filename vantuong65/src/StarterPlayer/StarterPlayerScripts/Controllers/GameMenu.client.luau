@@ -298,6 +298,13 @@ local function render()
 				{ "normal", "baixa", "desligada" }
 			)
 		elseif S == "Acessib." then
+			-- D-84: idioma da interface (Traducao.client); "automático" = idioma da conta Roblox
+			choiceRow(
+				"Idioma / Language",
+				"lang",
+				{ "auto", "pt", "en", "es", "vi" },
+				{ "automático", "Português", "English", "Español", "Tiếng Việt" }
+			)
 			numberRow("Tempo de segurar (s)", "holdTime", 0.05, "%.2f")
 			choiceRow("Mirar", "aimToggle", { false, true }, { "segurar", "alternar" })
 			choiceRow("Correr", "sprintToggle", { true, false }, { "alternar", "segurar (teclado)" })

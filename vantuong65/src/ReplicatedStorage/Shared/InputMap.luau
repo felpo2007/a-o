@@ -175,6 +175,7 @@ export type Settings = {
 	gfxShadows: boolean, -- sombras do sol
 	gfxPost: string, -- "full" | "light" | "off": brilho, raios de sol e correção de cor
 	gfxBrightness: number, -- ajuste de brilho (−0,2 a 0,2)
+	lang: string, -- D-84: "auto" (idioma da conta) | "pt" | "en" | "es" | "vi"
 }
 
 InputMap.DEFAULTS = {
@@ -216,6 +217,7 @@ InputMap.DEFAULTS = {
 	gfxShadows = true,
 	gfxPost = "full",
 	gfxBrightness = 0,
+	lang = "auto",
 } :: Settings
 
 -- Configurações que mudam os botões (o runtime refaz os bindings só quando uma delas muda).
@@ -260,6 +262,7 @@ local RANGES: { [string]: { number } } = {
 local CHOICES: { [string]: { [string]: boolean } } = {
 	gfxDetail = { high = true, medium = true, low = true },
 	gfxPost = { full = true, light = true, off = true },
+	lang = { auto = true, pt = true, en = true, es = true, vi = true },
 	curve = { linear = true, exponential = true, dynamic = true },
 	aimAssist = { minimal = true, off = true },
 	hapticFire = { off = true, low = true, normal = true },
