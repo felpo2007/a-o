@@ -4,6 +4,9 @@
 -- e reescreve os zeros abaixo. Origem: assets/forgegui/manifest.json, assets/clothing e ASSETS.csv.
 return {
 	Sounds = {
+		-- música de fundo do menu (D-91): "Ancient Grounds underscore", APM Music, biblioteca licenciada
+		-- pela Roblox (APMOfficial, grátis para experiências)
+		music_menu = 9045929119,
 		shot_m14 = 115514991960057,
 		shot_type56 = 88541025090577,
 		shot_mid = 128124799917228, -- tiro a ~150 m (camada média)

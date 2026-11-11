@@ -9,6 +9,7 @@ Uso (a partir de vantuong65/):
   uv run python tools/roblox_cloud.py create-store       # passes e produtos que faltam -> Commerce
   uv run python tools/roblox_cloud.py create-store PASS_KIT_VETERAN ...   # só estas chaves
   uv run python tools/roblox_cloud.py publish-place      # publica place/VanTuong65.rbxl
+  uv run python tools/roblox_cloud.py server-size 100    # máximo de jogadores por servidor
   uv run python tools/roblox_cloud.py all
 
 Endpoints: Assets API v1 e Place Publishing (documentados); Game Passes/Developer Products
@@ -340,6 +341,16 @@ def cmd_publish_place() -> None:
     print("publicado:", r)
 
 
+def cmd_server_size(size: int) -> None:
+    """Máximo de jogadores por servidor do place (o Roblox aceita até 100 sem programa especial)."""
+    c = cfg()
+    u, pid = c["universeId"], c["placeId"]
+    url = f"{API}/cloud/v2/universes/{u}/places/{pid}?updateMask=serverSize"
+    body = json.dumps({"serverSize": size}).encode("utf-8")
+    r = request("PATCH", url, body, {"Content-Type": "application/json"})
+    print("serverSize:", r.get("serverSize"))
+
+
 if __name__ == "__main__":
     cmd = sys.argv[1] if len(sys.argv) > 1 else "help"
     if cmd == "upload-assets":
@@ -352,6 +363,8 @@ if __name__ == "__main__":
         cmd_create_skins()
     elif cmd == "publish-place":
         cmd_publish_place()
+    elif cmd == "server-size":
+        cmd_server_size(int(sys.argv[2]))
     elif cmd == "all":
         cmd_upload_assets()
         cmd_create_store()

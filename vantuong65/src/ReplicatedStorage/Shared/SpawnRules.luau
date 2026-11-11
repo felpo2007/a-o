@@ -3,15 +3,18 @@
 -- mortes, troca de papel e bloqueio por inimigo próximo ou setor em disputa.
 local SpawnRules = {}
 
+-- D-91 (pedido do dono, 2026-11-11, depois de jogar: "diminua o tempo de espera para 10 seg"; a
+-- espera de 60 s + ondas de 20 s chegava a 75 s e parecia que não dava para nascer). Base de 10 s,
+-- ondas de 5 s, extras na mesma proporção (antes: 60 / 20 / 20 / 30 / 15 até 45 / 15).
 SpawnRules.C = {
-	minWait = 60,
-	wave = 20,
-	extraRallyCaptured = 20,
-	extraGarrison = 30,
-	streakStep = 15,
-	streakMax = 45,
+	minWait = 10,
+	wave = 5,
+	extraRallyCaptured = 5,
+	extraGarrison = 8,
+	streakStep = 4,
+	streakMax = 12,
 	streakWindow = 120,
-	roleChange = 15,
+	roleChange = 4,
 	blockRadiusM = 75,
 	newSectorDelay = 30,
 	rallyBehindM = 100, -- 80-120 m atrás do ponto forte

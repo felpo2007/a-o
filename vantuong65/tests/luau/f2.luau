@@ -128,16 +128,16 @@ test("tratamento do médico devolve até 75 e para o sangramento", function()
 end)
 
 -- Spawn ------------------------------------------------------------------------------------
-test("espera mínima de 60 s alinhada às ondas de 20 s", function()
-	near(SpawnRules.readyAt(0, 0, 0), 60, 1e-9)
-	near(SpawnRules.readyAt(5, 0, 0), 80, 1e-9) -- 65 -> próxima onda em 80
-	near(SpawnRules.readyAt(5, 20, 0), 100, 1e-9)
+test("D-91: espera mínima de 10 s alinhada às ondas de 5 s", function()
+	near(SpawnRules.readyAt(0, 0, 0), 10, 1e-9)
+	near(SpawnRules.readyAt(3, 0, 0), 15, 1e-9) -- 13 -> próxima onda em 15
+	near(SpawnRules.readyAt(5, 5, 0), 20, 1e-9)
 end)
 
-test("extras: setor capturado, sequência de mortes (máx. 45) e troca de papel", function()
-	assert(SpawnRules.extraWait("rally_captured", { 0 }, false) == 20)
-	assert(SpawnRules.extraWait("garrison", { 0 }, true) == 45)
-	assert(SpawnRules.extraWait("hq", { 0, 60, 120, 170, 200 }, false) == 45)
+test("extras: setor capturado, sequência de mortes (máx. 12) e troca de papel", function()
+	assert(SpawnRules.extraWait("rally_captured", { 0 }, false) == 5)
+	assert(SpawnRules.extraWait("garrison", { 0 }, true) == 12)
+	assert(SpawnRules.extraWait("hq", { 0, 60, 120, 170, 200 }, false) == 12)
 	assert(SpawnRules.extraWait("hq", { 0, 300 }, false) == 0)
 end)
 

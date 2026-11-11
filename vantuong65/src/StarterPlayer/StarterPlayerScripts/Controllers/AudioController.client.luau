@@ -28,6 +28,66 @@ local function sid(key: string): string?
 	return if type(id) == "number" and id ~= 0 then "rbxassetid://" .. id else nil
 end
 
+-- ===== mixagem (D-91, depois de jogar: "o barulho é insuportável, os sons estão muito altos e
+-- continuam mesmo no menu") =====
+-- Todo som do jogo passa por um grupo: efeitos (tiros, passos, explosões, motores), ambiente (água,
+-- vila, praia, túnel) e música (só no menu). Efeitos e ambiente baixaram; no lobby e na tela de
+-- inserção o ambiente some e entra a música baixa.
+local function group(name: string, volume: number): SoundGroup
+	local g = Instance.new("SoundGroup")
+	g.Name = name
+	g.Volume = volume
+	g.Parent = SoundService
+	return g
+end
+local sfxGroup = group("VT65Efeitos", 0.5)
+local ambGroup = group("VT65Ambiente", 0.6)
+local musicGroup = group("VT65Musica", 0.35)
+-- volume escolhido no menu do jogo (Configurações → Som), salvo na conta (Input.settings)
+local function applyVolumes()
+	local s = Input.settings :: any
+	sfxGroup.Volume = tonumber(s.volEffects) or 0.5
+	ambGroup.Volume = tonumber(s.volAmbient) or 0.6
+	musicGroup.Volume = tonumber(s.volMusic) or 0.35
+end
+Input.SettingsChanged:Connect(applyVolumes)
+applyVolumes()
+-- sons criados por outros scripts (arma, veículo, explosão) também entram nos efeitos
+local function adopt(inst: Instance)
+	if inst:IsA("Sound") and inst.SoundGroup == nil then
+		inst.SoundGroup = sfxGroup
+	end
+end
+workspace.DescendantAdded:Connect(adopt)
+SoundService.DescendantAdded:Connect(adopt)
+task.spawn(function()
+	for _, d in workspace:GetDescendants() do
+		adopt(d)
+	end
+end)
+
+local function inField(): boolean
+	local c = player.Character
+	local h = c and c:FindFirstChildOfClass("Humanoid")
+	return h ~= nil and h.Health > 0 and Input.state.alive
+end
+
+local music: Sound? = nil
+do
+	local id = sid("music_menu")
+	if id then
+		local s = Instance.new("Sound")
+		s.Name = "MusicaMenu"
+		s.SoundId = id
+		s.Looped = true
+		s.Volume = 0
+		s.SoundGroup = musicGroup
+		s.Parent = SoundService
+		s:Play()
+		music = s
+	end
+end
+
 -- ===== legendas de som (acessibilidade): aparecem quando o som chegaria, mesmo sem asset =====
 local capGui = UiKit.screen("VT65Captions", 15)
 local capList = Instance.new("Frame")
@@ -88,6 +148,7 @@ local function play(key: string, pos: Vector3?, volume: number, maxDist: number?
 		local s = Instance.new("Sound")
 		s.SoundId = id
 		s.Volume = volume
+		s.SoundGroup = sfxGroup
 		s.RollOffMode = Enum.RollOffMode.InverseTapered
 		s.RollOffMinDistance = 10
 		s.RollOffMaxDistance = maxDist or 400
@@ -132,6 +193,7 @@ for zone, key in AMB do
 		s.SoundId = id
 		s.Looped = true
 		s.Volume = 0
+		s.SoundGroup = ambGroup
 		s.Parent = SoundService
 		s:Play()
 		loops[zone] = s
@@ -182,10 +244,18 @@ end
 task.spawn(function()
 	while true do
 		task.wait(0.5)
-		local zone = zoneAt(camera.CFrame.Position)
+		-- fora de campo (lobby, inserção, morto) o ambiente some e a música baixa entra; em campo, o
+		-- contrário. A mesa do lobby fica no mundo e contava como "arrozal" (o som de água tocava no menu).
+		local field = inField()
+		local zone = if field then zoneAt(camera.CFrame.Position) else ""
 		for z, s in loops do
-			local target = if z == zone then 0.5 else 0
+			local target = if z == zone then 0.2 else 0
 			s.Volume += (target - s.Volume) * 0.35
+		end
+		local m = music
+		if m then
+			local target = if field then 0 else 0.5
+			m.Volume += (target - m.Volume) * 0.25
 		end
 	end
 end)
@@ -242,13 +312,34 @@ local function characters(): { Model }
 	return list
 end
 
+-- D-91: só os 4 mais perto fazem passo (com um squad de bots andando no arrozal, a água "ficava
+-- repetindo"); volumes mais baixos e o passo na água mais baixo ainda.
+local NEAREST_STEPS = 4
+type Near = { char: Model, root: BasePart, d: number }
 task.spawn(function()
 	while true do
 		task.wait(0.1)
 		local listener = camera.CFrame.Position
+		local near: { Near } = {}
 		for _, char in characters() do
 			local root = char:FindFirstChild("HumanoidRootPart") :: BasePart?
-			if root and (root.Position - listener).Magnitude < 60 / M then
+			if root then
+				local d = (root.Position - listener).Magnitude
+				if d < 60 / M then
+					table.insert(near, { char = char, root = root, d = d })
+				end
+			end
+		end
+		table.sort(near, function(a: Near, b: Near): boolean
+			return a.d < b.d
+		end)
+		for i, n in near do
+			if i > NEAREST_STEPS then
+				walked[n.char] = nil -- volta a contar do zero quando entrar entre os mais perto
+				continue
+			end
+			local char, root = n.char, n.root
+			do
 				local w = walked[char]
 				if not w then
 					walked[char] = { pos = root.Position, acc = 0 }
@@ -261,12 +352,16 @@ task.spawn(function()
 						local rain = ReplicatedStorage:GetAttribute("Rain")
 						-- rastejando quase não se ouve; correndo, mais alto (movimento, 2026-11-11)
 						local base = if char:GetAttribute("Prone")
-							then 0.15
-							elseif char:GetAttribute("Crouched") then 0.25
-							elseif char:GetAttribute("Sprinting") then 0.85
-							else 0.6
+							then 0.1
+							elseif char:GetAttribute("Crouched") then 0.16
+							elseif char:GetAttribute("Sprinting") then 0.5
+							else 0.35
+						local key = stepKey(root, char)
+						if key == "step_paddy" then
+							base *= 0.55
+						end
 						local vol = base * Weather.footstepVolume(if type(rain) == "number" then rain else 0) -- a chuva cobre os passos
-						play(stepKey(root, char), root.Position, vol, 45 / M)
+						play(key, root.Position, vol, 45 / M)
 					end
 				end
 			end

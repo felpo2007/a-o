@@ -1,8 +1,9 @@
 --!strict
--- Estrutura dos times e papéis (Parte 4). 30 por time; vagas somam mais que 30 de propósito.
+-- Estrutura dos times e papéis (Parte 4). 50 por time (D-91: o servidor do Roblox aceita até 100
+-- jogadores); as vagas somam mais que 50 de propósito.
 local Roles = {}
 
-Roles.TEAM_MAX = 30
+Roles.TEAM_MAX = 50
 Roles.HEAVY_UNLOCK = 16 -- blindado, helicóptero e morteiro só com o time a partir de 16
 
 export type RoleDef = { id: string, name: string, unit: string, maxPerSquad: number? }
@@ -30,7 +31,12 @@ export type UnitDef = { count: number, size: number, heavy: boolean, names: { st
 Roles.units = {
 	US = {
 		command = { count = 1, size = 1, heavy = false, names = { "Comando" } },
-		infantry = { count = 4, size = 6, heavy = false, names = { "Alfa", "Bravo", "Charlie", "Delta" } },
+		infantry = {
+			count = 7,
+			size = 6,
+			heavy = false,
+			names = { "Alfa", "Bravo", "Charlie", "Delta", "Echo", "Foxtrot", "Golf" },
+		},
 		recon = { count = 1, size = 2, heavy = false, names = { "Recon" } },
 		armor = { count = 1, size = 3, heavy = true, names = { "Blindado" } },
 		helicopter = { count = 1, size = 2, heavy = true, names = { "Helicóptero" } },
@@ -39,10 +45,19 @@ Roles.units = {
 	VC = {
 		command = { count = 1, size = 1, heavy = false, names = { "Chỉ huy" } },
 		infantry = {
-			count = 5,
+			count = 8,
 			size = 6,
 			heavy = false,
-			names = { "Tiểu đội 1", "Tiểu đội 2", "Tiểu đội 3", "Tiểu đội 4", "Tiểu đội 5" },
+			names = {
+				"Tiểu đội 1",
+				"Tiểu đội 2",
+				"Tiểu đội 3",
+				"Tiểu đội 4",
+				"Tiểu đội 5",
+				"Tiểu đội 6",
+				"Tiểu đội 7",
+				"Tiểu đội 8",
+			},
 		},
 		recon = { count = 1, size = 2, heavy = false, names = { "Trinh sát" } },
 		sapper = { count = 1, size = 4, heavy = false, names = { "Đặc công" } },

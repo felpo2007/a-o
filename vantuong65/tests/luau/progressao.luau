@@ -105,7 +105,7 @@ test("renascer onde caiu: regras na ordem e espera mínima", function()
 		hasDeath = true,
 		uses = 0,
 		roleLocked = false,
-		now = 100,
+		now = 92,
 		deathT = 90,
 		regularReadyAt = 95,
 		inBounds = true,
@@ -118,7 +118,7 @@ test("renascer onde caiu: regras na ordem e espera mínima", function()
 		enemies = { 500, 0 },
 	}
 	local why, wait = Progression.inPlaceCheck(base)
-	assert(why == nil and math.abs(wait - 50) < 1e-6, tostring(why) .. " " .. wait) -- mínimo de 60 s após a queda
+	assert(why == nil and math.abs(wait - 8) < 1e-6, tostring(why) .. " " .. wait) -- mínimo de 10 s após a queda (D-91)
 	local c = table.clone(base)
 	c.enemies = { 80, 30 }
 	assert(Progression.inPlaceCheck(c) ~= nil, "inimigo a menos de 100 m")

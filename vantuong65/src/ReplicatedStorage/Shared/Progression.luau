@@ -557,7 +557,7 @@ end
 -- ===== renascer onde caiu =====
 -- Regras (as mesmas para os dois meios de pagamento; o servidor confere ANTES de cobrar):
 --   - só depois de morrer (ou de desistir caído), no ponto da queda, e não se foi evacuado (medevac);
---   - nunca antes da espera normal (a mesma onda de um posto de reunião, mínimo de 60 s): o que se
+--   - nunca antes da espera normal (a mesma onda de um posto de reunião, mínimo de 10 s): o que se
 --     paga é o LUGAR, nunca tempo de spawn;
 --   - nenhum inimigo ativo a menos de 100 m (o posto de reunião usa 75 m);
 --   - nem em área inimiga travada (setor do inimigo que o seu lado não pode atacar), nem a menos de
@@ -571,7 +571,7 @@ Progression.INPLACE = {
 	maxPerMatch = 3,
 	enemyM = 100,
 	enemyHqM = 250,
-	minWaitS = 60,
+	minWaitS = 10, -- D-91: igual à espera normal (antes 60)
 	buyTimeoutS = 120, -- s que o servidor espera o recibo para renascer na hora
 }
 

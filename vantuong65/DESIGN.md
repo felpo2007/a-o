@@ -2536,3 +2536,43 @@ Ganchos só no Studio:
 
 **Falta:** o relatório pós-ação antigo (cinza, sem acentos) aparece por trás da ficha de fim e ainda
 não tem o estilo novo.
+
+## D-91 — Espera de 10 s, som mais baixo, música no menu e 50 x 50 jogadores (2026-11-11)
+
+O dono jogou a v35 publicada e reclamou da espera, do barulho e de não conseguir nascer no VC.
+
+**Espera para nascer** (`SpawnRules.C`, `Progression.INPLACE`):
+- Causa do "não consigo nascer no VC": todo ponto mostrava cerca de 75 s de espera (60 s de mínimo
+  mais a onda de 20 s). O jogador clicava e nada acontecia.
+- Agora (todos de projeto, PLACEHOLDER):
+  - mínimo de **10 s** depois da queda (era 60);
+  - ondas de 5 s (eram 20);
+  - reunião capturada +5 s;
+  - guarnição +8 s;
+  - passo de sequência 4 s, até 12 s;
+  - troca de papel 4 s;
+  - renascer onde caiu: mínimo de 10 s.
+
+**Som** (`AudioController`):
+- Três SoundGroups no SoundService:
+  - `VT65Efeitos`: 0,5;
+  - `VT65Ambiente`: 0,6;
+  - `VT65Musica`: 0,35.
+- Todo som solto no mundo sem grupo entra em Efeitos.
+- **Fora do campo** (menu, lobby, morto):
+  - o ambiente se cala;
+  - toca a música do menu, baixa: "Ancient Grounds underscore", da APM Music, biblioteca
+    licenciada pela Roblox.
+- O ambiente do arrozal tocava no menu porque a zona era calculada pela câmera do lobby, que fica no
+  mundo. **No campo**, o ambiente fica em 0,2 e a música some.
+- **Passos:**
+  - só os 4 soldados mais próximos fazem som;
+  - volume mais baixo: deitado 0,1, agachado 0,16, andando 0,35, correndo 0,5;
+  - passo na água em 55%. Era a água "repetindo" com 30 soldados no arrozal.
+
+**Jogadores:** o dono pediu 60 x 60, mas o servidor do Roblox aceita até 100 jogadores (200 e 700
+só num programa fechado). Ficou:
+- 50 por lado (`Roles.TEAM_MAX`);
+- máximo do place em 100 no Creator Hub, em Access;
+- EUA com 7 squads (Alfa a Golf), VC com 8 tiểu đội;
+- os bots continuam preenchendo até `BotFill` (10 no Roblox).
