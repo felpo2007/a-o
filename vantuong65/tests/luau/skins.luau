@@ -166,8 +166,12 @@ end)
 
 test("Robux: ID 0 esconde; produto e passe acham a skin pelo ID", function()
 	local m14 = Skins.get("skin_m14_birch")
-	assert(Skins.robuxId(m14) == 0 and Skins.skinByProductId(0) == nil and Skins.skinByPassId(0) == nil)
+	-- os itens já existem no Roblox (IDs reais em Skins.IDS): o teste zera e põe IDs de mentira
 	local oldP, oldC = Skins.IDS.PRODUCT_SKIN_M14_BIRCH, Skins.IDS.PASS_CAMO_RICE
+	Skins.IDS.PRODUCT_SKIN_M14_BIRCH = 0
+	local hidden = Skins.robuxId(m14) == 0 and Skins.skinByProductId(0) == nil and Skins.skinByPassId(0) == nil
+	Skins.IDS.PRODUCT_SKIN_M14_BIRCH = oldP
+	assert(hidden, "ID 0 esconde o botão de Robux")
 	Skins.IDS.PRODUCT_SKIN_M14_BIRCH = 123456
 	Skins.IDS.PASS_CAMO_RICE = 654321
 	local ok, err = pcall(function()
