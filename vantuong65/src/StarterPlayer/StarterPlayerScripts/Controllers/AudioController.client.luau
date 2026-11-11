@@ -14,6 +14,7 @@ local MapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any
 local Net = require(ReplicatedStorage.Shared.Net)
 local Weapons = require(ReplicatedStorage.Shared.Weapons)
 local Weather = require(ReplicatedStorage.Shared.Weather)
+local Bus = require(script.Parent.Bus)
 local Input = require(script.Parent.Input)
 local UiKit = require(script.Parent.UiKit)
 
@@ -248,14 +249,34 @@ task.spawn(function()
 					if w.acc >= STRIDE * 4 then
 						w.acc = 0
 						local rain = ReplicatedStorage:GetAttribute("Rain")
-						local vol = (if char:GetAttribute("Crouched") then 0.25 else 0.6)
-							* Weather.footstepVolume(if type(rain) == "number" then rain else 0) -- a chuva cobre os passos
+						-- rastejando quase não se ouve; correndo, mais alto (movimento, 2026-11-11)
+						local base = if char:GetAttribute("Prone")
+							then 0.15
+							elseif char:GetAttribute("Crouched") then 0.25
+							elseif char:GetAttribute("Sprinting") then 0.85
+							else 0.6
+						local vol = base * Weather.footstepVolume(if type(rain) == "number" then rain else 0) -- a chuva cobre os passos
 						play(stepKey(root, char), root.Position, vol, 45 / M)
 					end
 				end
 			end
 		end
 	end
+end)
+
+-- próprio corpo: aterrissagem (queda em m) e transpor/mergulho fazem o barulho do chão (Movement.client)
+local function ownStep(volume: number)
+	local char = player.Character
+	local root = char and char:FindFirstChild("HumanoidRootPart") :: BasePart?
+	if char and root then
+		play(stepKey(root, char), root.Position, volume, 45 / M)
+	end
+end
+Bus.on("landed", function(dropM: number)
+	ownStep(math.clamp(0.4 + dropM * 0.3, 0.4, 1.2))
+end)
+Bus.on("vault_start", function()
+	ownStep(0.5)
 end)
 
 -- ===== tiros dos outros: camadas, atraso do som, estalo e impacto =====

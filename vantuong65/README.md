@@ -27,8 +27,8 @@ completo, equivalentes de teclado e mouse e a auditoria em [`CONTROLE.md`](CONTR
 | Controle | Infantaria |
 |---|---|
 | RT / LT | atirar / mirar |
-| L3 / R3 | correr / corpo a corpo (mirando, L3 prende a respiração) |
-| LB / RB | tocar: último item / marcar; segurar: roda de equipamento / comunicação; mirando: inclinar |
+| L3 / R3 | correr / corpo a corpo (mirando: inclinar à esquerda / à direita) |
+| LB / RB | tocar: último item / marcar; segurar: roda de equipamento / comunicação; mirando: LB prende a respiração |
 | A / B / X / Y | pular / agachar (segurar: deitar) / recarregar (segurar: interagir) / trocar arma (segurar: baioneta) |
 | ↑ ↓ ← → | binóculo / bandagem rápida / seletor (segurar: alça) / canal de rádio |
 | View | tocar: mapa; segurar: menu do jogo (configurações, papel, loja) |
@@ -89,5 +89,11 @@ Para desenvolver ao vivo no Studio: `rojo serve` com o plugin do Rojo.
 - Texturas do chão: Poly Haven (polyhaven.com), licença CC0.
   - `forrest_ground_01` e `brown_mud_leaves_01`: Rob Tuytel;
   - `leafy_grass` e `forest_ground_06`: Charlotte Baglioni.
+- Árvores da mata (D-67): Poly Haven, licença CC0, folhas refeitas em cartão por
+  `tools/prep_trees.py`.
+  - `island_tree_01`, `island_tree_02` e `island_tree_03`: Rob Tuytel e Rico Cilliers;
+  - `tree_small_02`: Rico Cilliers.
+- Céu (D-69): Poly Haven, licença CC0, `kloofendal_48d_partly_cloudy_puresky` (Greg Zaal e Jarod
+  Guest), cortado em 6 faces por `tools/fetch_sky.py`.
 - Histórico: Andrew Jr., R. *The First Fight: U.S. Marines in Operation Starlite, August 1965*.
   USMC History Division, 2015.

@@ -74,11 +74,25 @@ local function apply(model: Model)
 end
 MedicalService.apply = apply
 
--- chamado pelo CombatService após validar o tiro
-function MedicalService.hit(victim: Model, zone: string, energyJ: number, roll: number)
+-- Progressão (D-72): quem acertou quem e quando, para o abate e a assistência na morte, e o aviso
+-- de cuidado com um companheiro. Ganchos postos pelo ProgressionService (sem dependência circular).
+local attackers: { [Model]: { [Player]: number } } = {}
+MedicalService.onCare = nil :: ((actor: Player, target: Model, op: string) -> ())?
+
+-- jogadores que acertaram a vítima (instante do último acerto de cada um)
+function MedicalService.attackers(victim: Model): { [Player]: number }
+	return attackers[victim] or {}
+end
+
+-- chamado pelo CombatService após validar o tiro (by = quem atirou, se for jogador)
+function MedicalService.hit(victim: Model, zone: string, energyJ: number, roll: number, by: Player?)
 	local s = states[victim]
 	if not s then
 		return
+	end
+	if by and by.Character ~= victim then
+		attackers[victim] = attackers[victim] or {}
+		attackers[victim][by] = os.clock()
 	end
 	busy[victim] = nil -- levar dano interrompe a ação
 	Medical.applyHit(s, zone, energyJ, roll, os.clock())
@@ -91,7 +105,7 @@ local function still(model: Model): boolean
 end
 
 -- ação com tempo; cancela se mexer, levar dano ou o alvo sair do alcance
-local function timed(actor: Model, target: Model, seconds: number, fn: () -> boolean)
+local function timed(actor: Model, target: Model, seconds: number, fn: () -> boolean, op: string?)
 	local token = os.clock()
 	busy[actor] = token
 	actor:SetAttribute("ActionUntil", os.clock() + seconds)
@@ -108,6 +122,10 @@ local function timed(actor: Model, target: Model, seconds: number, fn: () -> boo
 		if fn() then
 			apply(target)
 			apply(actor)
+			local who = Players:GetPlayerFromCharacter(actor)
+			if op and who and target ~= actor and MedicalService.onCare then
+				MedicalService.onCare(who, target, op)
+			end
 		end
 	end)
 end
@@ -121,11 +139,20 @@ function MedicalService.start()
 			local s = states[e.model]
 			s.bandages = if Combatants.role(e) == "medic" then math.max(s.bandages, kb) else kb
 		end
+		-- equipamento liberado (D-72, ProgressionService.applyGear): curativos e torniquetes a mais
+		if e.player then
+			local s = states[e.model]
+			local gb, gt = e.player:GetAttribute("GearBandages"), e.player:GetAttribute("GearTourniquets")
+			s.bandages += if type(gb) == "number" then gb else 0
+			s.tourniquets += if type(gt) == "number" then gt else 0
+		end
 		busy[e.model] = nil
+		attackers[e.model] = nil
 		e.model.AncestryChanged:Connect(function(_, parent)
 			if parent == nil then
 				states[e.model] = nil
 				busy[e.model] = nil
+				attackers[e.model] = nil
 			end
 		end)
 		task.defer(apply, e.model)
@@ -176,7 +203,7 @@ function MedicalService.start()
 					mine.bandages -= 1
 				end
 				return ok
-			end)
+			end, "bandage")
 		elseif req.op == "tourniquet" and target == actor then
 			timed(actor, actor, C.tourniquet, function()
 				return Medical.tourniquet(mine)
@@ -184,11 +211,11 @@ function MedicalService.start()
 		elseif req.op == "treat" and isMedic and target ~= actor then
 			timed(actor, target, C.medicTreat, function()
 				return Medical.treat(ts)
-			end)
+			end, "treat")
 		elseif req.op == "revive" and isMedic and target ~= actor then
 			timed(actor, target, C.reviveTime, function()
 				return Medical.revive(ts, os.clock())
-			end)
+			end, "revive")
 		end
 	end)
 

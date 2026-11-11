@@ -32,6 +32,11 @@ ArtBudget.KIND = {
 	vine_tree = "veg",
 	melaleuca_grove = "veg",
 	taro_fern = "veg",
+	-- árvores prontas do Poly Haven (D-67)
+	ph_island_tree_01 = "veg",
+	ph_island_tree_02 = "veg",
+	ph_island_tree_03 = "veg",
+	ph_tree_small_02 = "veg",
 	hut_thatch = "prop",
 	hut_veranda = "prop",
 	hut_kitchen = "prop",
@@ -85,6 +90,11 @@ ArtBudget.TRIS = {
 	melaleuca_grove = 10995,
 	taro_fern = 8397,
 	vine_tree = 13215, -- sem modelo (outcome_unknown): o substituto é a hill_tree
+	-- árvores prontas (tools/prep_trees.py, D-67): madeira reduzida + folha em cartão (2 por folha)
+	ph_island_tree_01 = 13599,
+	ph_island_tree_02 = 12599,
+	ph_island_tree_03 = 12554,
+	ph_tree_small_02 = 13736,
 	-- props na malha cheia do gerador (D-66; antes, remesh de 2,8–4,9 mil)
 	hut_thatch = 13030,
 	hut_veranda = 13249,

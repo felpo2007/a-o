@@ -1,24 +1,46 @@
 --!strict
 -- Spawn escolhido no mapa, só no próprio lado, com espera longa por ondas (Parte 10.1).
+-- D-72: equipamento liberado aplicado ao nascer (ProgressionService.applyGear) e o "renascer onde
+-- caiu" (ponto "inplace" na carta, só para quem caiu): pago com um renascer guardado (Robux), com
+-- créditos de intendência ou abrindo a compra em Robux. Regras em Shared/Progression.INPLACE.
+local MarketplaceService = game:GetService("MarketplaceService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
+local Commerce = require(ReplicatedStorage.Shared.Commerce)
+local Geometry = require(ReplicatedStorage.Shared.Geometry)
 local MapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any
 local Net = require(ReplicatedStorage.Shared.Net)
+local Progression = require(ReplicatedStorage.Shared.Progression)
+local Roles = require(ReplicatedStorage.Shared.Roles)
 local SpawnRules = require(ReplicatedStorage.Shared.SpawnRules)
 local AssetLoader = require(script.Parent.AssetLoader)
 local Characters = require(script.Parent.Characters)
 local Combatants = require(script.Parent.Combatants)
 local MatchService = require(script.Parent.MatchService)
 local PlayerData = require(script.Parent.PlayerData)
+local ProgressionService = require(script.Parent.ProgressionService)
 local TeamService = require(script.Parent.TeamService)
 local TunnelService = require(script.Parent.TunnelService)
 
 local SpawnService = {}
 local M = MapConfig.STUD_M
 
-type Info = { deaths: { number }, lastDeath: number?, roleChanged: boolean, firstSpawn: boolean }
+type Info = {
+	deaths: { number },
+	lastDeath: number?,
+	roleChanged: boolean,
+	firstSpawn: boolean,
+	deathPos: Vector3?, -- onde caiu (studs); nil depois de renascer, se evacuado ou sem lado
+	inplaceUses: number, -- renasceres no lugar nesta partida
+	matchStart: number, -- MatchService.startedAt quando os usos foram contados
+	buyAt: number?, -- pediu a compra em Robux do renascer no lugar (os.clock)
+}
 local info: { [Player]: Info } = {}
+
+local function newInfo(): Info
+	return { deaths = {}, roleChanged = false, firstSpawn = true, inplaceUses = 0, matchStart = 0 }
+end
 
 export type Point = { id: string, name: string, x: number, z: number, kind: SpawnRules.Kind, sector: number? }
 
@@ -128,13 +150,180 @@ local function alive(player: Player): boolean
 	return hum ~= nil and hum.Health > 0
 end
 
+-- Põe o personagem no chão em (x, z), com uniforme, equipamento e arma. Registra a morte.
+local function spawnAt(player: Player, faction: string, x: number, z: number)
+	local inf = info[player]
+	inf.firstSpawn, inf.roleChanged = false, false
+	inf.deathPos = nil
+	ProgressionService.applyGear(player) -- antes do personagem: o kit lê os atributos ao nascer
+	local prof = PlayerData.get(player)
+	local equipped = if prof then prof.equipped[faction] else nil
+	player:LoadCharacterWithHumanoidDescriptionAsync(Characters.describe(faction, equipped, player.UserId))
+	local char = player.Character
+	if not char then
+		return
+	end
+	local y = groundY(x, z)
+	char:PivotTo(CFrame.new(x, y + 5, z))
+	Combatants.register(char, faction, player)
+	Characters.dress(char, faction, equipped)
+	local lo = player:GetAttribute("Loadout")
+	if type(lo) == "string" then
+		AssetLoader.attachWeapon(char, string.split(lo, ",")[1])
+	end
+	local hum = char:FindFirstChildOfClass("Humanoid")
+	if hum then
+		hum.Died:Connect(function()
+			local t = os.clock()
+			inf.lastDeath = t
+			table.insert(inf.deaths, t)
+			if #inf.deaths > 10 then
+				table.remove(inf.deaths, 1)
+			end
+			-- ponto de queda para o renascer onde caiu (evacuado pelo medevac não conta)
+			local root = char:FindFirstChild("HumanoidRootPart") :: BasePart?
+			inf.deathPos = if root and char:GetAttribute("Evacuated") ~= true then root.Position else nil
+		end)
+	end
+end
+
+-- ===== renascer onde caiu (D-72) =====
+local function inWater(pos: Vector3): boolean
+	local params = RaycastParams.new()
+	params.FilterType = Enum.RaycastFilterType.Include
+	params.FilterDescendantsInstances = { workspace.Terrain }
+	params.IgnoreWater = false
+	local hit = workspace:Raycast(pos + Vector3.new(0, 30, 0), Vector3.new(0, -80, 0), params)
+	return hit ~= nil and hit.Material == Enum.Material.Water
+end
+
+-- Contexto das regras (Progression.inPlaceCheck) e o motivo do bloqueio (nil = permitido) e a espera.
+local function inPlaceStatus(player: Player, now: number): (string?, number, Vector3?)
+	local inf = info[player]
+	local faction = player:GetAttribute("Faction") :: string?
+	if not inf or not faction then
+		return "sem lado", 0, nil
+	end
+	if inf.matchStart ~= MatchService.startedAt then
+		inf.matchStart = MatchService.startedAt
+		inf.inplaceUses = 0
+	end
+	local pos = inf.deathPos
+	local enemy = if faction == "US" then "VC" else "US"
+	local hq = MapConfig.HQ[enemy]
+	local b = MapConfig.Bounds
+	local x, z = if pos then pos.X else 0, if pos then pos.Z else 0
+	local sector = if pos then Geometry.sectorAt(MapConfig.Sectors, x, z) else nil
+	local st = MatchService.state :: any
+	local owner = if sector then MatchService.ownerOf(sector) else nil
+	local locked = sector ~= nil and owner == enemy and st ~= nil and st.active ~= nil and st.active[sector] == false
+	local extra = SpawnRules.extraWait("rally", inf.deaths, inf.roleChanged)
+	local readyAt = if inf.lastDeath then SpawnRules.readyAt(inf.lastDeath, extra, MatchService.waveEpoch) else now
+	local role = tostring(player:GetAttribute("Role") or "")
+	local why, wait = Progression.inPlaceCheck({
+		matchOver = MatchService.ended,
+		hasDeath = pos ~= nil and not inf.firstSpawn,
+		uses = inf.inplaceUses,
+		roleLocked = ProgressionService.rank(player) < Roles.minRank(role),
+		now = now,
+		deathT = inf.lastDeath or now,
+		regularReadyAt = readyAt,
+		inBounds = pos ~= nil and x >= b.minX and x <= b.maxX and z >= b.minZ and z <= b.maxZ,
+		inWater = pos ~= nil and inWater(pos),
+		enemyHqM = if pos then Vector3.new(x - hq.x, 0, z - hq.z).Magnitude * M else 0,
+		sectorLocked = locked,
+		contested = sector ~= nil and MatchService.isContested(sector),
+		x = x * M,
+		z = z * M,
+		enemies = SpawnService.enemiesMeters(faction),
+	})
+	return why, wait, pos
+end
+
+local function productOn(): boolean
+	return Commerce.IDS.PRODUCT_RESPAWN_INPLACE ~= 0
+end
+
+-- rótulo do pagamento no ponto da carta
+local function payLabel(player: Player): (string?, string)
+	local inf = info[player]
+	local prof = PlayerData.get(player)
+	local credits = if prof then prof.credits else 0
+	local rc = if prof then prof.respawnCredits else 0
+	local m = Progression.inPlaceAuto(inf.inplaceUses, credits, rc, productOn())
+	if m == "credit" then
+		return m, "renascer guardado"
+	elseif m == "ci" then
+		return m, string.format("%d %s", Progression.inPlacePrice(inf.inplaceUses) or 0, Progression.CUR)
+	elseif m == "robux" then
+		return m, "Robux"
+	end
+	local price = Progression.inPlacePrice(inf.inplaceUses)
+	if not price then
+		return nil, "limite da partida"
+	end
+	return nil, string.format("%d %s: faltam %d", price, Progression.CUR, math.max(price - credits, 0))
+end
+
+-- Tenta o renascer onde caiu. method: "credit" | "ci" | "robux" | nil (automático).
+local function inPlace(player: Player, method: string?)
+	local faction = player:GetAttribute("Faction") :: string?
+	local inf = info[player]
+	if not faction or not inf or alive(player) then
+		return
+	end
+	local now = os.clock()
+	local why, wait, pos = inPlaceStatus(player, now)
+	if why or wait > 0 or not pos then
+		return
+	end
+	local prof = PlayerData.get(player)
+	local credits = if prof then prof.credits else 0
+	local rc = if prof then prof.respawnCredits else 0
+	local m = method
+	if m ~= "credit" and m ~= "ci" and m ~= "robux" then
+		m = Progression.inPlaceAuto(inf.inplaceUses, credits, rc, productOn())
+	end
+	if not m then
+		return
+	end
+	local ok, _, price = Progression.inPlacePay(m, inf.inplaceUses, credits, rc, productOn())
+	if not ok then
+		return
+	end
+	if m == "robux" then
+		-- abre a compra; o recibo vira um renascer guardado e volta aqui (onRespawnCredit)
+		inf.buyAt = now
+		pcall(function()
+			MarketplaceService:PromptProductPurchase(player, Commerce.IDS.PRODUCT_RESPAWN_INPLACE)
+		end)
+		return
+	end
+	local paid = if m == "credit"
+		then ProgressionService.useRespawnCredit(player)
+		else ProgressionService.spendCredits(player, price or math.huge)
+	if not paid then
+		return
+	end
+	inf.inplaceUses += 1
+	spawnAt(player, faction, pos.X, pos.Z)
+end
+
 function SpawnService.start()
 	Players.CharacterAutoLoads = false
 	Players.PlayerAdded:Connect(function(p)
-		info[p] = { deaths = {}, roleChanged = false, firstSpawn = true }
+		info[p] = newInfo()
 	end)
 	for _, p in Players:GetPlayers() do
-		info[p] = { deaths = {}, roleChanged = false, firstSpawn = true }
+		info[p] = newInfo()
+	end
+	-- recibo do renascer em Robux chegou: se o pedido é recente e ainda vale, renasce agora
+	ProgressionService.onRespawnCredit = function(p: Player)
+		local inf = info[p]
+		if inf and inf.buyAt and os.clock() - inf.buyAt <= Progression.INPLACE.buyTimeoutS then
+			inf.buyAt = nil
+			inPlace(p, "credit")
+		end
 	end
 	Players.PlayerRemoving:Connect(function(p)
 		info[p] = nil
@@ -146,13 +335,21 @@ function SpawnService.start()
 		end
 	end)
 
-	Net.event("Spawn_Request").OnServerEvent:Connect(function(player, pointId)
+	Net.event("Spawn_Request").OnServerEvent:Connect(function(player, pointId, method)
 		local faction = player:GetAttribute("Faction") :: string?
 		if type(pointId) ~= "string" or not faction or not player:GetAttribute("Role") or alive(player) then
 			return
 		end
 		if ReplicatedStorage:GetAttribute("TerrainReady") == false then
 			return -- terreno ainda sendo gerado
+		end
+		local role = tostring(player:GetAttribute("Role"))
+		if ProgressionService.rank(player) < Roles.minRank(role) then
+			return -- papel acima do posto (o lobby mostra o cadeado)
+		end
+		if pointId == "inplace" then
+			inPlace(player, if type(method) == "string" then method else nil)
+			return
 		end
 		local now = os.clock()
 		for _, pt in SpawnService.points(faction) do
@@ -161,33 +358,7 @@ function SpawnService.start()
 				if wait > 0 or blocked then
 					return
 				end
-				local inf = info[player]
-				inf.firstSpawn, inf.roleChanged = false, false
-				local prof = PlayerData.get(player)
-				local equipped = if prof then prof.equipped[faction] else nil
-				player:LoadCharacterWithHumanoidDescriptionAsync(Characters.describe(faction, equipped, player.UserId))
-				local char = player.Character
-				if char then
-					local y = groundY(pt.x, pt.z)
-					char:PivotTo(CFrame.new(pt.x, y + 5, pt.z))
-					Combatants.register(char, faction, player)
-					Characters.dress(char, faction, equipped)
-					local lo = player:GetAttribute("Loadout")
-					if type(lo) == "string" then
-						AssetLoader.attachWeapon(char, string.split(lo, ",")[1])
-					end
-					local hum = char:FindFirstChildOfClass("Humanoid")
-					if hum then
-						hum.Died:Connect(function()
-							local t = os.clock()
-							inf.lastDeath = t
-							table.insert(inf.deaths, t)
-							if #inf.deaths > 10 then
-								table.remove(inf.deaths, 1)
-							end
-						end)
-					end
-				end
+				spawnAt(player, faction, pt.x, pt.z)
 				return
 			end
 		end
@@ -214,6 +385,24 @@ function SpawnService.start()
 							why = why,
 						}
 						table.insert(list, entry)
+					end
+					-- renascer onde caiu: só para quem tem ponto de queda nesta partida
+					local inf = info[player]
+					if inf and inf.deathPos then
+						local why, wait, pos = inPlaceStatus(player, now)
+						local m, label = payLabel(player)
+						if pos then
+							table.insert(list, {
+								id = "inplace",
+								name = "Onde caiu (" .. label .. ")",
+								x = pos.X,
+								z = pos.Z,
+								wait = wait,
+								blocked = why ~= nil or m == nil,
+								why = why or (if m == nil then label else nil),
+								pay = m,
+							})
+						end
 					end
 					Net.event("Spawn_State"):FireClient(player, list)
 				end

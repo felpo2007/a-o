@@ -44,7 +44,7 @@ com lavoura em volta das vilas (D-65). O `CLAUDE.md` da raiz do repositório é 
 
 ## Testes (rode antes de cada commit)
 ```
-for t in run f2 f3 f4 controle f5 f6 atualizacoes; do lune run tests/luau/$t.luau; done
+for t in run f2 f3 f4 controle f5 f6 atualizacoes movimento uniformes progressao; do lune run tests/luau/$t.luau; done
 uv run --group arte pytest -q && uv run ruff check .
 stylua --check src tests/luau tools
 rojo sourcemap default.project.json -o sourcemap.json
@@ -93,6 +93,20 @@ O `sourcemap.json` não vai para o Git.
   3. registre no `manifest.json` e no `ArtBudget`;
   4. ponha em `FOSCOS` (e em `COLOR_GAIN` se a textura for escura) no `matte_glb`;
   5. suba com `upload-assets`.
+- Árvores da mata (D-67): prontas do Poly Haven (CC0), com folha em cartão recortado.
+  - `uv run python tools/fetch_trees.py` baixa e `uv run --group arte python tools/prep_trees.py`
+    prepara (`assets/arvores/<chave>.glb` e uma prévia `_previa.png`);
+  - o importador do Open Cloud traz a folha com `AlphaMode = Overlay` e face única; o
+    `AssetLoader.template` liga `Transparency` e `DoubleSided` nas peças `Folhas*`;
+  - asset grátis de terceiro (Creator Store) não carrega no jogo publicado: só os do dono.
+- Armas: `tools/armas_parker.py` gera `<arma>_studs_parker.glb` (aço fosco, texturas de 1024) a
+  partir do GLB do gerador; é ele que sobe. Rode depois do `fetch_forgegui_assets.py`.
+- Mira (D-67): `tools/sight_align.py` mede o centro do anel ou do entalhe e a ponta da massa na
+  malha (M14, Type 56, SKS); o `weapon_landmarks.py` usa. `--side` desenha a arma de lado para
+  achar as janelas de uma arma nova.
+- Céu (D-69): `uv run python tools/fetch_sky.py` corta o HDRI em 6 faces (`assets/ceu/`). Os IDs de
+  imagem vão no `Sky` do `default.project.json` (resolvidos no Studio, como os do chão). Para conferir
+  orientação sem subir, copie as faces para `content\textures` do Studio e use `rbxasset://`.
 - Não dá para testar render pesado no Studio com outro jogo aberto: a GPU de 2 GB do PC do dono
   travou (`DXGI_ERROR_DEVICE_HUNG`) e isso derruba o jogo dele também.
 - `Terrain.Decoration` (grama animada) só vai no arquivo do place (`tools/bake_place`): script do
@@ -103,9 +117,13 @@ O `sourcemap.json` não vai para o Git.
 - Relevo: `tools/relevo_dem.py` (DEM Copernicus, cumes calibrados na carta). Rode depois do
   `crop_world.py`.
 - Arma nova: acrescente em `tools/weapon_landmarks.py` (frente e frações das mãos, vistas numa
-  captura) e rode-o para regenerar `Shared/WeaponArt.luau`. Depois confira a mira no Studio
-  (captura mirando): a massa deve aparecer no centro sem nada tapando. Se algo tapar, ajuste
-  `EYE_OFFSET_M` (D-60).
+  captura) e, se tiver alça de anel ou entalhe, as janelas em `tools/sight_align.py`. Rode o
+  `weapon_landmarks.py` para regenerar `Shared/WeaponArt.luau`. Depois confira a mira no Studio
+  (captura mirando): o anel ou o entalhe e a massa devem aparecer no centro sem nada tapando. Sem
+  medida, ajuste `EYE_OFFSET_M` (D-60).
+- Captura da mira no Studio: o `execute_luau` não deve mudar o tipo da câmera do jogador (o
+  Studio desfaz). Ponha o jogador em campo, faça `Aiming = true` no cliente e capture com a
+  câmera do jogo.
 - O place da nuvem abre no Studio com
   `roblox-studio:1+task:EditPlace+placeId:125635672454807+universeId:10775697296`.
 
@@ -116,7 +134,7 @@ O `sourcemap.json` não vai para o Git.
 - Segredos só no `.env` (no `.gitignore`), nunca no código nem no chat.
 - ForgeGUI: nunca regenerar um job em `outcome_unknown`. "failed" com `retryable` pode ser
   retomado com `generation_retry`.
-- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-67) e atualize `PROGRESS.md`.
+- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-74) e atualize `PROGRESS.md`.
 - Metas da Parte 2: vegetação ≤ 3 mil triângulos, props ≤ 5 mil, herói ≤ 20 mil (`ArtBudget`,
   conferido pelo teste da F5).
 - Commits no branch acima, com mensagem em português.

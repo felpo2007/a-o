@@ -372,6 +372,43 @@ do usuário (opção A).
 - **fps:** 59,3 de média no ponto mais denso, antes dos modelos foscos e da grama. Com o EA FC 26
   aberto em primeiro plano, a medida não vale. **Medir de novo com o PC livre.**
 
+## Árvores prontas, mira e aço das armas (2026-11-11, D-67)
+- **Árvores:** 4 árvores CC0 do Poly Haven com folha em cartão recortado (12,5–13,7 mil
+  triângulos cada, de 1–2 milhões no original), no lugar das 3 árvores do ForgeGUI. São 15.102
+  das 47.818 plantas. No Studio: folhas recortadas, dupla face e tronco sólido conferidos no
+  cliente.
+- **Mira:** anel da M14 e entalhe da Type 56 e da SKS medidos na malha; no Studio o anel e a
+  massa ficam no centro da tela.
+- **Armas:** aço fosco (fosfatizado ou oxidado) e texturas de 1024 px com nitidez; as 9
+  republicadas.
+- **fps da mata nova (Studio em primeiro plano):** 53,2 de média girando 360° no ponto mais denso,
+  99% dos quadros abaixo de 25 ms (eram 45 fps na D-66).
+
+## Terceira pessoa, movimento, céu, recarga, uniformes e lobby (2026-11-11, D-68 a D-71)
+- **D-68:** 3ª pessoa no ombro (O / direcional → segurado), mirar volta à 1ª pessoa; movimento
+  com inércia, fôlego, peso, chão, transpor/escalar (Espaço/A), mergulho e anti-trapaça de corrida
+  no servidor. Testes: `movimento.luau` 19 ok.
+- **D-69:** céu de foto (HDRI CC0, conferido no Studio, sem emendas) e sem nuvens dinâmicas; recuo
+  corrigido (bug de ~100° por tiro); inclinar mirando no L3/R3; recarga com braços e troca de
+  carregador; mira limpa (anel/entalhe e massa em peças lisas).
+- **D-70:** uniformes v3 (9 moldes publicados), corpo "Man" da Roblox, equipamento 3D por código
+  e o giro de −90° do capacete e do colete; acessórios republicados foscos. Testes:
+  `uniformes.luau` 14 ok, pytest 50.
+- **D-71:** lobby na mesa (barraca dos Marines / abrigo VC), cursor virtual no controle,
+  recompensa diária de 7 dias (perfil v2), tela de entrada no ReplicatedFirst e inserção que
+  carrega a área antes de soltar o jogador. Testes: `f2.luau` 22 ok.
+- **Studio (place com tudo, 2026-11-11):** 0 erros no servidor e no cliente; tela de entrada,
+  lobby na mesa, carta de inserção, mira limpa, recarga, 3ª pessoa e avisos de XP conferidos.
+
+## Progressão e mapa (2026-11-11, D-72 e D-73)
+- **D-72:** 13 postos por lado, XP e créditos de intendência por ação (com teto), soldo de
+  promoção com tela animada, equipamento por posto, créditos ou Game Pass, e o renascer onde caiu
+  (créditos ou Robux). Testes: `progressao.luau` 12 ok. Os itens em Robux não foram criados: a
+  chave não tem permissão (TODO_USUARIO).
+- **D-73:** arrozal encaixado no terreno real (lâminas escondidas: 1.136 → 3), diques, sebes sem
+  parede invisível, casas em patamar de terra, mata fora de construções e das raias. Autoteste
+  10 ok, 0 falhas.
+
 ## Resultados-chave (medidos aqui)
 | Medida | Valor |
 |---|---|

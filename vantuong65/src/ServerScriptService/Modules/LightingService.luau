@@ -57,15 +57,17 @@ end
 -- névoa matinal (mais densa ao amanhecer, dissipa em 1,5 h, Parte 9.6) + chuva (Weather): a pancada
 -- engrossa a névoa e escurece o céu. Recalcula quando a hora anda e quando a chuva muda.
 -- Valores de arte (D-64): névoa quente e baixa que pega a luz do sol rasante, sem tapar 300 m.
+-- D-69: com o céu de foto, a névoa da D-64 (Haze 2,5 às 07:00) cobria tudo de laranja chapado;
+-- caiu para ~1,2 e as nuvens da foto aparecem (conferido no Studio).
 applyAtmosphere = function()
 	local atm = Lighting:FindFirstChildOfClass("Atmosphere")
 	if atm then
 		local k = math.clamp((lastHour - 6.5) / 1.5, 0, 1)
 		local rain = ReplicatedStorage:GetAttribute("Rain")
 		local r = if type(rain) == "number" then rain else 0
-		atm.Density = 0.42 - 0.12 * k + 0.25 * r
-		atm.Haze = 2.8 - 1.0 * k + 2.0 * r
-		atm.Glare = (1.0 - 0.5 * k) * (1 - r)
+		atm.Density = 0.34 - 0.08 * k + 0.25 * r
+		atm.Haze = 1.4 - 0.6 * k + 2.0 * r
+		atm.Glare = 0.5 * (1.0 - 0.4 * k) * (1 - r)
 	end
 end
 

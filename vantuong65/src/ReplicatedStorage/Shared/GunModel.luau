@@ -149,6 +149,9 @@ function GunModel.fit(model: Model, weaponId: string): boolean
 	model:SetAttribute("WeaponId", weaponId)
 	model:SetAttribute("LowX", art.lowX)
 	model:SetAttribute("EyeM", art.eyeM) -- olho até o ponto Sight, mirando (WeaponVisuals)
+	-- alça medida na malha (D-69): o WeaponVisuals desenha anel/entalhe e massa limpos por cima
+	model:SetAttribute("SightKind", art.sightKind)
+	model:SetAttribute("SightMm", art.sightMm)
 	return true
 end
 

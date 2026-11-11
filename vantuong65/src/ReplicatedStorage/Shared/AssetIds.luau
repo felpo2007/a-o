@@ -68,15 +68,20 @@ return {
 		melaleuca_grove = 95774589766161, -- tràm, grupo de 5 troncos de 13 m
 		taro_fern = 131679866372706, -- taioba e samambaia de 1,8 m
 		vine_tree = 0, -- copa tomada de cipó: geração em outcome_unknown (não regerar); usa o substituto
-		m14 = 88428577780253,
-		type56 = 92378317190418,
-		sks = 130539342920510,
-		m60 = 91094226063538,
-		rpd = 105834324536160,
-		m1911 = 111652541303464,
-		type54 = 118978127433037,
-		m79 = 115075736344105,
-		rpg2 = 86123225979315,
+		-- árvores prontas do Poly Haven (CC0), folha em cartão recortado (tools/prep_trees.py, D-67)
+		ph_island_tree_01 = 129507217098430,
+		ph_island_tree_02 = 94197688304927,
+		ph_island_tree_03 = 94525275658839,
+		ph_tree_small_02 = 86317806051129,
+		m14 = 89317219190262,
+		type56 = 130417403055419,
+		sks = 97318124582467,
+		m60 = 78397702456512,
+		rpd = 97742986087778,
+		m1911 = 72933851519050,
+		type54 = 89276790728567,
+		m79 = 115974893628870,
+		rpg2 = 115951819927247,
 		uh34d = 104404673955740,
 		m48a3 = 83880316083319,
 		ontos = 116051447339407,
@@ -96,13 +101,23 @@ return {
 		vc_khaki_pants = 77430835589563,
 		vc_green_shirt = 82261531108188,
 		vc_green_pants = 134078542980416,
+		-- moldes v3 (tools/make_clothing_v3.py, D-70); 0 = cai no v2 acima
+		us_shirt_v3 = 94642390838308,
+		us_shirt_rolled_v3 = 126361357269017,
+		us_pants_v3 = 91522016319564,
+		vc_khaki_shirt_v3 = 137934326333552,
+		vc_khaki_pants_v3 = 77338277185056,
+		vc_green_shirt_v3 = 104958149803032,
+		vc_green_pants_v3 = 136585753172189,
+		vc_black_shirt_v3 = 87527564693316,
+		vc_black_pants_v3 = 135154812229650,
 	},
 	-- Equipamento: MODELOS (GLB) soldados à cabeça/tronco em runtime (Characters.dress)
 	Accessories = {
-		us_m1_helmet = 79958913450723,
-		us_m1955_vest = 92851024413374,
-		vc_pith_helmet = 92224071886927,
-		vc_jungle_hat = 99421757488229,
+		us_m1_helmet = 74793570804591,
+		us_m1955_vest = 101251968560886,
+		vc_pith_helmet = 140572292985058,
+		vc_jungle_hat = 99413247149061,
 	},
 	Images = {
 		gamepass_usmc_1965 = 0,
@@ -125,6 +140,24 @@ return {
 		forest_ground_06_cor = 70592474113049,
 		forest_ground_06_normal = 103100751913983,
 		forest_ground_06_rugosidade = 80664182036978,
+	},
+	-- Céu de foto (D-69; Poly Haven kloofendal_48d_partly_cloudy_puresky, CC0; tools/fetch_sky.py):
+	-- IDs de DECAL do Open Cloud; o Sky precisa do ID da IMAGEM (SkyImages, resolvido no Studio).
+	Sky = {
+		ft = 119511350491403,
+		bk = 111158168134738,
+		lf = 136525023485486,
+		rt = 128382971413174,
+		up = 140458538027287,
+		dn = 79041152014310,
+	},
+	SkyImages = {
+		ft = 0,
+		bk = 0,
+		lf = 0,
+		rt = 0,
+		up = 0,
+		dn = 0,
 	},
 	GroundImages = {
 		forrest_ground_01_cor = 83248274685054,

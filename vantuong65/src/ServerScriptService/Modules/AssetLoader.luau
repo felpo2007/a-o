@@ -43,6 +43,25 @@ local SINK_M: { [string]: number } = {
 	trench_section = Tunnels.TRENCH_D_M,
 }
 
+-- Grupos de colisão (D-67): o tronco das árvores prontas segura gente e bala, mas não o chassi dos
+-- veículos. Com o tronco sólido, um M48 parava em cada árvore da mata.
+AssetLoader.TRUNK_GROUP = "VT65Tronco"
+AssetLoader.VEHICLE_GROUP = "VT65Veiculo"
+local groupsReady = false
+function AssetLoader.ensureGroups()
+	if groupsReady then
+		return
+	end
+	local PhysicsService = game:GetService("PhysicsService")
+	for _, g in { AssetLoader.TRUNK_GROUP, AssetLoader.VEHICLE_GROUP } do
+		if not PhysicsService:IsCollisionGroupRegistered(g) then
+			PhysicsService:RegisterCollisionGroup(g)
+		end
+	end
+	PhysicsService:CollisionGroupSetCollidable(AssetLoader.TRUNK_GROUP, AssetLoader.VEHICLE_GROUP, false)
+	groupsReady = true
+end
+
 -- Carrega o modelo publicado (uma vez) e devolve um template ancorado, sem colisão de folhagem.
 function AssetLoader.template(key: string): Model?
 	if cache[key] then
@@ -72,6 +91,16 @@ function AssetLoader.template(key: string): Model?
 	for _, d in tpl:GetDescendants() do
 		if d:IsA("BasePart") then
 			d.Anchored = true
+		end
+		-- Árvore pronta do Poly Haven (D-67): folhas em cartão. O importador do Open Cloud traz a
+		-- textura com AlphaMode Overlay e face única; o script do jogo pode trocar (conferido no
+		-- Studio, 2026-11-11). O template é clonado, então vale para todas as cópias.
+		if d:IsA("MeshPart") and string.sub(d.Name, 1, 6) == "Folhas" then
+			d.DoubleSided = true
+			local sa = d:FindFirstChildOfClass("SurfaceAppearance")
+			if sa then
+				sa.AlphaMode = Enum.AlphaMode.Transparency
+			end
 		end
 	end
 	if Weapons.get(key) and GunModel.fit(tpl, key) then
@@ -123,6 +152,50 @@ local function groundY(x: number, z: number): number
 	return best
 end
 
+-- Assentamento em ladeira (D-73). Medido no Studio (2026-11-11): 217 modelos com a base até 1,2 m
+-- acima do lado de baixo do chão (casas, celeiros, cercas, túmulos, coqueiros), porque a base ia
+-- para o ponto mais alto de 5 raios.
+-- - PLATFORM: construções e montes. A base fica no ponto mais alto do chão sob a planta (sem chão
+--   entrando na casa) e o terreno embaixo é aterrado até ela: o patamar de terra batida das casas
+--   da região.
+-- - Folhagem e cerca: a base vai ao ponto mais baixo sob o tronco (a raiz entra na encosta).
+local PLATFORM: { [string]: boolean } = {
+	hut_thatch = true,
+	hut_veranda = true,
+	hut_kitchen = true,
+	house_tile = true,
+	granary = true,
+	shrine = true,
+	well = true,
+	grave_mound = true,
+	vc_bunker = true,
+	sandbags = true,
+}
+local SINK_LOW: { [string]: boolean } = { bamboo_fence = true }
+local rayParams = RaycastParams.new()
+rayParams.FilterType = Enum.RaycastFilterType.Include
+local function groundAt(x: number, z: number): number?
+	rayParams.FilterDescendantsInstances = { workspace.Terrain }
+	local hit = workspace:Raycast(Vector3.new(x, 2000, z), Vector3.new(0, -4000, 0), rayParams)
+	return if hit then hit.Position.Y else nil
+end
+-- menor e maior altura do chão na planta (centro e 4 cantos a 45% da meia caixa, girados)
+local function footprint(x: number, z: number, yaw: number, hx: number, hz: number): (number?, number?)
+	local lo, hi = math.huge, -math.huge
+	local rot = CFrame.Angles(0, yaw, 0)
+	for _, o in { { 0, 0 }, { 1, 1 }, { -1, 1 }, { 1, -1 }, { -1, -1 } } do
+		local p = rot * Vector3.new(o[1] * hx * 0.9, 0, o[2] * hz * 0.9)
+		local y = groundAt(x + p.X, z + p.Z)
+		if y then
+			lo, hi = math.min(lo, y), math.max(hi, y)
+		end
+	end
+	if lo == math.huge then
+		return nil, nil
+	end
+	return lo, hi
+end
+
 -- Coloca uma cópia com a base no chão. foliage=true desliga colisão e toque e marca como folhagem
 -- (esconde, não para bala; Parte 5). scale muda o tamanho (variação da mata, D-64). shadow liga a
 -- sombra da folhagem: só as árvores, para a luz manchada da mata sem pagar sombra de cada moita.
@@ -154,20 +227,126 @@ function AssetLoader.place(
 	end
 	local cf, size = m:GetBoundingBox()
 	local pivotToBottom = m:GetPivot().Position.Y - (cf.Position.Y - size.Y / 2)
-	local y = groundY(x, z) + pivotToBottom - (SINK_M[key] or 0) / M
+	local base: number
+	if SINK_M[key] then
+		base = groundY(x, z) -- poço de túnel e vala de trincheira: o mais alto de 5 raios
+	elseif foliage or SINK_LOW[key] then
+		local lo = footprint(x, z, yaw, 0.5 / M, 0.5 / M) -- só o pé do tronco
+		base = lo or groundY(x, z)
+	else
+		local lo, hi = footprint(x, z, yaw, size.X / 2, size.Z / 2)
+		base = hi or groundY(x, z)
+		-- patamar de terra sob a construção, do ponto mais baixo até a base (só se houver vão)
+		if PLATFORM[key] and lo and hi and (hi - lo) * M > 0.1 then
+			local top = base - 0.02 / M
+			local bottom = lo - 0.6 / M
+			workspace.Terrain:FillBlock(
+				CFrame.new(x, (top + bottom) / 2, z) * CFrame.Angles(0, yaw, 0),
+				Vector3.new(size.X + 0.8 / M, top - bottom, size.Z + 0.8 / M),
+				Enum.Material.Ground
+			)
+		end
+	end
+	local y = base + pivotToBottom - (SINK_M[key] or 0) / M
 	m:PivotTo(CFrame.new(x, y, z) * CFrame.Angles(0, yaw, 0))
 	if foliage then
 		for _, d in m:GetDescendants() do
 			if d:IsA("BasePart") then
-				d.CanCollide = false
+				-- árvore pronta (D-67): o tronco (Madeira0) é sólido e para a bala; copa e galhos não
+				local trunk = string.sub(d.Name, 1, 8) == "Madeira0"
+				if trunk then
+					AssetLoader.ensureGroups()
+					d.CollisionGroup = AssetLoader.TRUNK_GROUP
+				end
+				d.CanCollide = trunk
 				d.CanTouch = false
 				d.CastShadow = shadow == true
-				d:SetAttribute("Material", "Bamboo")
+				d:SetAttribute("Material", if trunk then "Wood" else "Bamboo")
 			end
 		end
 	end
 	m.Parent = parent
 	return m
+end
+
+-- Encaixe das peças do bake no terreno real (D-73). O terreno é gerado em tempo de jogo
+-- (WriteVoxels, voxel de 4 studs) e a superfície sai ~0,44 m acima da altura que o bake usou. Medido
+-- no Studio (2026-11-11): 1.136 das 1.155 lâminas d'água do arrozal com o topo abaixo do chão (o
+-- arrozal parecia capim seco), 594 diques enterrados e 134 sebes flutuando até 0,9 m.
+-- - lâmina: 6 cm acima da mediana do chão sob ela;
+-- - dique: crista 35 cm acima do ponto mais alto do chão ao longo dele, e o pé abaixo do mais baixo;
+-- - sebe (peça invisível que marca a linha das touceiras): pé no chão e SEM colisão. Era uma parede
+--   invisível de 2,3 m no meio da lavoura.
+function AssetLoader.fitFeatures(map: Instance): { [string]: number }
+	local done: { [string]: number } = { water = 0, dikes = 0, hedges = 0 }
+	local function along(p: BasePart, offs: { { number } }): { number }
+		local ys = {}
+		for _, o in offs do
+			local q = p.CFrame * Vector3.new(o[1] * p.Size.X, 0, o[2] * p.Size.Z)
+			local y = groundAt(q.X, q.Z)
+			if y then
+				table.insert(ys, y)
+			end
+		end
+		table.sort(ys)
+		return ys
+	end
+	local function setY(p: BasePart, centerY: number)
+		p.CFrame = p.CFrame + Vector3.new(0, centerY - p.Position.Y, 0)
+	end
+	local i = 0
+	local function tick()
+		i += 1
+		if i % 300 == 0 then
+			task.wait()
+		end
+	end
+	local water = map:FindFirstChild("PaddyWater")
+	if water then
+		for _, p in water:GetDescendants() do
+			if p:IsA("BasePart") then
+				tick()
+				local ys = along(p, { { 0, 0 }, { 0.35, 0.35 }, { -0.35, 0.35 }, { 0.35, -0.35 }, { -0.35, -0.35 } })
+				if #ys > 0 then
+					local med = ys[math.ceil(#ys / 2)]
+					setY(p, med + 0.06 / M - p.Size.Y / 2)
+					done.water += 1
+				end
+			end
+		end
+	end
+	local line = { { -0.45, 0 }, { -0.2, 0 }, { 0, 0 }, { 0.2, 0 }, { 0.45, 0 } }
+	local dikes = map:FindFirstChild("Dikes")
+	if dikes then
+		for _, p in dikes:GetDescendants() do
+			if p:IsA("BasePart") then
+				tick()
+				local ys = along(p, line)
+				if #ys > 0 then
+					local top = ys[#ys] + 0.35 / M
+					local bottom = math.min(ys[1] - 0.2 / M, top - p.Size.Y)
+					p.Size = Vector3.new(p.Size.X, top - bottom, p.Size.Z)
+					setY(p, (top + bottom) / 2)
+					done.dikes += 1
+				end
+			end
+		end
+	end
+	local hedges = map:FindFirstChild("Hedges")
+	if hedges then
+		for _, p in hedges:GetDescendants() do
+			if p:IsA("BasePart") then
+				tick()
+				p.CanCollide = false
+				local ys = along(p, line)
+				if #ys > 0 then
+					setY(p, ys[1] - 0.1 / M + p.Size.Y / 2)
+					done.hedges += 1
+				end
+			end
+		end
+	end
+	return done
 end
 
 function AssetLoader.start()
@@ -182,6 +361,15 @@ function AssetLoader.start()
 	while ReplicatedStorage:GetAttribute("TerrainReady") ~= true do
 		ReplicatedStorage:GetAttributeChangedSignal("TerrainReady"):Wait()
 	end
+	local fit = AssetLoader.fitFeatures(map)
+	print(
+		string.format(
+			"[VT65] arrozal no terreno real: %d lâminas, %d diques, %d sebes",
+			fit.water,
+			fit.dikes,
+			fit.hedges
+		)
+	)
 	local out = Instance.new("Folder")
 	out.Name = "Art"
 	out.Parent = map
@@ -318,13 +506,19 @@ function AssetLoader.start()
 			AssetLoader.place("log_bridge", l.x, l.z, rng:range(0, 3.14), out)
 		end
 	end
-	-- árvores das colinas (cotas 43 e 30 no mapa de 2 x 2 km): bosque ralo no topo (densidade de design)
-	if AssetLoader.template("hill_tree") then
+	-- árvores das colinas (cotas 43 e 30 no mapa de 2 x 2 km): bosque ralo no topo (densidade de design).
+	-- D-67: árvore pronta (Poly Haven) de 9 a 17 m; sem ela, a do ForgeGUI.
+	local hillKeys = { "ph_island_tree_01", "ph_island_tree_02" }
+	if AssetLoader.template(hillKeys[1]) or AssetLoader.template("hill_tree") then
 		for _, l in MapConfig.Locations do
 			if string.find(l.name, "Colina") then
-				for _ = 1, 60 do
+				for i = 1, 60 do
 					local a, r = rng:range(0, 2 * math.pi), math.sqrt(rng:next()) * 110 / M
-					AssetLoader.place("hill_tree", l.x + math.cos(a) * r, l.z + math.sin(a) * r, a, out, true)
+					local key, scale = hillKeys[1 + i % 2], rng:range(2.6, 3.4)
+					if not AssetLoader.template(key) then
+						key, scale = "hill_tree", 1
+					end
+					AssetLoader.place(key, l.x + math.cos(a) * r, l.z + math.sin(a) * r, a, out, true, scale)
 				end
 			end
 		end
@@ -445,6 +639,19 @@ function AssetLoader.start()
 	end
 	local VT65Build = ServerStorage:WaitForChild("VT65Build")
 	local landscape = (require(VT65Build:WaitForChild("Landscape")) :: any).new(world, MapConfig, housesXZ)
+	-- Zonas livres: além das casas, todo prop já posto (celeiro, poço, altar, túmulo, cerca, bunker,
+	-- sacos de areia). No Studio (2026-11-11) havia coqueiro a 1,4 m do centro de um celeiro e árvore
+	-- dentro de altar: a mata só desviava das casas (D-73).
+	local exclude = Vegetation.exclusions(MapConfig, housesXZ, tunnelXZ)
+	for _, m in out:GetChildren() do
+		if m:IsA("Model") and not m:FindFirstChild("Folhas0_0", true) and m.Name ~= "Jungle" then
+			local cfm, sz = m:GetBoundingBox()
+			local isPlant = m.Name == "coconut_palm" or m.Name == "banana" or string.sub(m.Name, 1, 3) == "ph_"
+			if not isPlant then
+				table.insert(exclude, { x = cfm.X, z = cfm.Z, r = math.max(sz.X, sz.Z) / 2 + 1.5 / M })
+			end
+		end
+	end
 	local plan = Vegetation.plan({
 		classAt = function(x: number, z: number): number
 			return world:classAt(x, z)
@@ -454,7 +661,7 @@ function AssetLoader.start()
 		end,
 		bounds = MapConfig.Bounds,
 		cell = world.grid.cellStuds,
-		exclude = Vegetation.exclusions(MapConfig, housesXZ, tunnelXZ),
+		exclude = exclude,
 		corridors = corridors,
 		density = ArtBudget.JUNGLE_DENSITY,
 		seed = 1965,
@@ -478,6 +685,37 @@ function AssetLoader.start()
 	jungle.Parent = out
 	local jrng = Rng.new(64)
 	local nJungle = 0
+	local skippedLane = 0
+	-- raio do tronco (peça Madeira0, com os galhos grossos) de cada árvore pronta, na escala 1
+	local trunkR: { [string]: number } = {}
+	local function laneClear(key: string, scale: number, x: number, z: number): boolean
+		if string.sub(key, 1, 3) ~= "ph_" then
+			return true
+		end
+		if trunkR[key] == nil then
+			-- o centro do tronco fica fora do pé (tronco inclinado, galhos abertos): conta o
+			-- deslocamento horizontal até o pivô e a meia largura
+			local tpl = AssetLoader.template(key)
+			local trunk = tpl and tpl:FindFirstChild("Madeira0_0", true) :: BasePart?
+			if tpl and trunk then
+				local off = trunk.Position - tpl:GetPivot().Position
+				trunkR[key] = Vector3.new(off.X, 0, off.Z).Magnitude + math.max(trunk.Size.X, trunk.Size.Z) / 2
+			else
+				trunkR[key] = 0
+			end
+		end
+		local r = trunkR[key] * scale + 2 / M
+		for _, sgm in corridors do
+			local dx, dz = sgm.x2 - sgm.x1, sgm.z2 - sgm.z1
+			local L2 = dx * dx + dz * dz
+			local t = if L2 > 0 then math.clamp(((x - sgm.x1) * dx + (z - sgm.z1) * dz) / L2, 0, 1) else 0
+			local qx, qz = sgm.x1 + t * dx - x, sgm.z1 + t * dz - z
+			if qx * qx + qz * qz < (sgm.w + r) ^ 2 then
+				return false
+			end
+		end
+		return true
+	end
 	for i, it in plan do
 		local s = Geometry.sectorAt(MapConfig.Sectors, it.x, it.z) or 0
 		if jrng:next() < jFactor[s] then
@@ -486,7 +724,11 @@ function AssetLoader.start()
 			if fb and not AssetLoader.template(key) then
 				key, scale = fb[1], scale * fb[2] -- espécie nova ainda sem ID publicado (D-65)
 			end
-			if AssetLoader.place(key, it.x, it.z, it.yaw, jungle, true, scale, it.shadow) then
+			-- árvore pronta: o tronco sólido (D-67) abre galhos grossos de vários metros. O plano só
+			-- afasta o pé 10 m da raia; no autoteste (2026-11-11) um tiro de 300 m parou num tronco.
+			if not laneClear(key, scale, it.x, it.z) then
+				skippedLane += 1
+			elseif AssetLoader.place(key, it.x, it.z, it.yaw, jungle, true, scale, it.shadow) then
 				nJungle += 1
 			end
 		end
@@ -494,7 +736,7 @@ function AssetLoader.start()
 			task.wait() -- não trava o servidor enquanto planta milhares de modelos
 		end
 	end
-	print(string.format("[VT65] mata: %d plantas de %d no plano", nJungle, #plan))
+	print(string.format("[VT65] mata: %d plantas de %d no plano (%d tiradas da raia)", nJungle, #plan, skippedLane))
 	-- streaming (D-15): cada modelo chega inteiro (o impostor vem do próprio asset; ver acima)
 	for _, folder in { out, jungle } do
 		for _, m in folder:GetChildren() do

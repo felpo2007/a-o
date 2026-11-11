@@ -10,6 +10,19 @@ do resto.
 - 82 assets estão publicados: sons, modelos, roupas e os animais. O place foi publicado.
 - Falta criar os 4 passes e os 2 produtos de apoio (`tools/roblox_cloud.py create-store`). Isso
   só quando você decidir os preços (`MONETIZATION.md`).
+- **Itens em Robux da D-72 (kits e renascer onde caiu): a chave não tem permissão.** Tentei criar
+  em 2026-11-11 e o Roblox respondeu "Scope not authorized". Escolha um dos caminhos:
+  1. **Dar a permissão à chave** (5 min): Creator Dashboard → Open Cloud → API Keys → a chave do
+     VT65 → em Access Permissions, adicione **game-pass** e **developer-product** com
+     leitura e escrita, na experiência VẠN TƯỜNG '65 → Save. Depois me avise: eu rodo
+     `create-store PASS_KIT_VETERAN PASS_KIT_ELITE PRODUCT_RESPAWN_INPLACE`.
+  2. **Criar à mão** no Creator Dashboard → a experiência → Monetization:
+     - Game Pass "Kit Veterano", R$ 149, ícone `assets/forgegui/marketing/gamepass_kit_veterano.jpg`;
+     - Game Pass "Kit de Elite", R$ 299, ícone `assets/forgegui/marketing/gamepass_kit_elite.jpg`;
+     - Developer Product "Renascer onde caiu", R$ 25.
+     Depois me mande os 3 IDs: eu colo em `Shared/Commerce.luau` e publico.
+  Enquanto os IDs forem 0, tudo funciona com os créditos do jogo e pelo posto; só o botão de
+  Robux fica escondido.
 - **Perfil salvando nos testes do Studio** (opcional, 1 min). É configuração de segurança, por isso
   fica com você. Sem ela, o Output avisa "Studio access to APIs is not allowed" e o perfil não salva
   no Studio; no jogo publicado não muda nada.
@@ -43,13 +56,34 @@ Nada rodou dentro do Roblox. Os critérios abaixo exigem o Studio ou o jogo publ
 | F5 | fps no pior setor com a arte. O Output mostra `[VT65] arte setor N` e a fração das sebes |
 | F6 | beta fechado: 2 partidas cheias sem crash (Warfare e Offensive), tutorial e campo de tiro (roteiro em `LANCAMENTO.md`) |
 
-**Mata com malha cheia (D-66): meça o fps no jogo publicado.**
-- No Studio, com o PC livre, deu 45 fps no ponto mais denso.
+**Mata com as árvores prontas (D-67): meça o fps no jogo publicado.**
+- As 3 árvores do ForgeGUI viraram 4 árvores do Poly Haven com folha em cartão recortado, com o
+  mesmo número de triângulos.
+- No Studio em primeiro plano deu 53,2 fps de média no ponto mais denso (99% dos quadros abaixo
+  de 25 ms); na D-66 eram 45.
 - No jogo, sem o Studio, o número tende a ser maior.
 - Com o FC 26 aberto ao mesmo tempo, a GPU de 2 GB travou no Studio (`DXGI_ERROR_DEVICE_HUNG`).
 - Onde: nasça pelos EUA e entre na mata entre An Thới (2) e Nam Yên (4). Olhe o HUD (F3).
 - Se ficar abaixo de 60, diga o número: eu desço `ArtBudget.JUNGLE_DENSITY`.
 - Se sobrar, dá para pôr mais mata.
+
+**Armas com mais detalhe (opcional, decisão sua).** Na D-67 as 9 armas ganharam aço fosco e
+textura mais nítida, mas a malha continua a do gerador. Para mais detalhe, o caminho é o do Front44:
+você baixa modelos do Sketchfab com a sua conta (eu não posso entrar nem criar conta) e eu preparo.
+Candidatos com licença CC BY (crédito obrigatório, que eu ponho no README e na página), achados
+pela busca pública em 2026-11-11. Confira a qualidade na página antes de baixar:
+- SKS: "Type 56 Carbine / SKS" (haoliu95, 54,6 mil triângulos)
+  https://sketchfab.com/3d-models/d5fc1eb5bbd549b7818a63f4decaa86f
+- M60: "M60 Light Machine Gun" (Badboy17Aiden, 19,8 mil)
+  https://sketchfab.com/3d-models/cbf408387dc94a30abe11afb3698ac13
+- RPD: "Low-Poly RPD" (TastyTony, 13,5 mil)
+  https://sketchfab.com/3d-models/fecd845923fb4106b2abca4a80f82491
+- M79: "M79 Grenade Launcher" (denis1.eremin, 8,5 mil)
+  https://sketchfab.com/3d-models/f1309916894a45e3ae6eb24f17f728d4
+- Type 56: "TYPE-56-1 LOW POLY" (eninbolshevik1918, 12,5 mil)
+  https://sketchfab.com/3d-models/39af2dd81b6549b9905b03f4a192edd8
+- M1911 e Type 54 (TT-33): já estão baixadas no Front44 (`Downloads\F44_Sketchfab`, CC BY).
+- M14 e RPG-2: a busca não achou modelo baixável com licença livre.
 
 **ForgeGUI sem crédito:** restam 3.693, e cada modelo custa 4.000.
 - Com mais crédito, gero o monte de cipó e uma copa tomada de cipó nova; a de agora ficou em

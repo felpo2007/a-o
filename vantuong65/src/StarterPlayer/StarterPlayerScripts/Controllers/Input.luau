@@ -321,6 +321,10 @@ local function isGamepad(t: Enum.UserInputType): boolean
 	return string.sub(t.Name, 1, 7) == "Gamepad"
 end
 
+-- Teclas que o PlayerModule também usa pelo ContextActionService (o pulo): o Roblox marca o aperto
+-- como "processado", e a reserva perderia o Espaço do transpor. Caixa de texto em foco continua vetando.
+local CAS_KEYS: { [Enum.KeyCode]: boolean } = { [Enum.KeyCode.Space] = true }
+
 UserInputService.InputBegan:Connect(function(input, processed)
 	local t = input.UserInputType
 	if isGamepad(t) then
@@ -338,7 +342,7 @@ UserInputService.InputBegan:Connect(function(input, processed)
 			onButton(kc.Name, true, true)
 		end
 	elseif t == Enum.UserInputType.Keyboard then
-		if not processed and not UserInputService:GetFocusedTextBox() then
+		if (not processed or CAS_KEYS[input.KeyCode]) and not UserInputService:GetFocusedTextBox() then
 			onButton(input.KeyCode.Name, true, false)
 		end
 	elseif MOUSE[t] and not processed then
@@ -463,6 +467,7 @@ local KEY_TEXT: { [string]: string } = {
 	LeftShift = "Shift",
 	Return = "Enter",
 	One = "1",
+	Space = "Espaço",
 }
 
 -- Devolve (imagem, texto) para a ação no contexto ativo (ou num contexto dado).
@@ -487,6 +492,14 @@ function Input.glyph(actionId: string, ctx: string?): (string?, string)
 end
 
 -- ===== máquina de estados =====
+-- Filtro de movimento (Controllers/Movement.client: inércia, fôlego, chão): recebe o pedido já com a
+-- zona morta e devolve o que o Humanoid deve andar. Sem filtro, o pedido passa direto.
+export type MoveFilter = (vec: Vector3, rel: boolean) -> (Vector3, boolean)
+Input.moveFilter = nil :: MoveFilter?
+function Input.setMoveFilter(fn: MoveFilter?)
+	Input.moveFilter = fn
+end
+
 local controls: any = nil
 task.spawn(function()
 	local ok, pm = pcall(function()
@@ -503,6 +516,14 @@ task.spawn(function()
 			end
 			if not InputMap.acceptsGame(Input.state) or Input.state.downed then
 				vec = Vector3.zero
+			end
+			local f = Input.moveFilter
+			if f then
+				-- erro no filtro não pode travar o soldado: cai para o pedido cru
+				local okF, v2, r2 = pcall(f, vec, rel)
+				if okF then
+					vec, rel = v2, r2
+				end
 			end
 			orig(plr, vec, rel)
 		end
@@ -699,12 +720,7 @@ end
 
 -- ===== configurações (salvas na conta) =====
 local saveQueued = false
-function Input.setSettings(new: any)
-	Input.settings = InputMap.validate(new)
-	rebuildBindings()
-	buildIAS()
-	syncContexts()
-	settingsChanged:Fire(Input.settings)
+local function queueSave()
 	if not saveQueued then
 		saveQueued = true
 		task.delay(2, function()
@@ -712,6 +728,30 @@ function Input.setSettings(new: any)
 			Net.event("Settings_Save"):FireServer(Input.settings)
 		end)
 	end
+end
+
+function Input.setSettings(new: any)
+	Input.settings = InputMap.validate(new)
+	rebuildBindings()
+	buildIAS()
+	syncContexts()
+	settingsChanged:Fire(Input.settings)
+	queueSave()
+end
+
+-- Muda UMA preferência (ex.: 3ª pessoa pela tecla O) e salva na conta. Só refaz os bindings se a
+-- chave mexe nos botões (InputMap.BINDING_KEYS): trocar de câmera no meio do combate não recria o IAS.
+function Input.setSetting(key: string, value: any)
+	local raw = table.clone(Input.settings) :: any
+	raw[key] = value
+	Input.settings = InputMap.validate(raw)
+	if InputMap.BINDING_KEYS[key] then
+		rebuildBindings()
+		buildIAS()
+		syncContexts()
+	end
+	settingsChanged:Fire(Input.settings)
+	queueSave()
 end
 
 -- ===== gravador / reprodutor (Parte 12.7) =====

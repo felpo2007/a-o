@@ -134,22 +134,43 @@ local function holdWeapon(char: Model)
 	)
 end
 
-RunService.Heartbeat:Connect(function()
+-- Transições suaves (pedido do dono, 2026-11-11): as pernas dobram em ~0,25 s e o tronco inclina em
+-- ~0,2 s, em vez de pular de pose. Só escreve nas juntas enquanto a mistura anda (pose() compara).
+-- "Vaulting" (transpor, Movement.client/PostureService) dobra as pernas como agachado.
+local CROUCH_TIME, LEAN_TIME = 0.25, 0.2
+type Blend = { crouch: number, lean: number }
+local blend: { [Model]: Blend } = setmetatable({}, { __mode = "k" }) :: any
+
+local function toward(v: number, target: number, step: number): number
+	if v < target then
+		return math.min(v + step, target)
+	end
+	return math.max(v - step, target)
+end
+
+RunService.Heartbeat:Connect(function(dt: number)
 	for _, char in characters() do
-		local crouched = char:GetAttribute("Crouched") == true
+		local b = blend[char]
+		if not b then
+			b = { crouch = 0, lean = 0 }
+			blend[char] = b
+		end
+		local bent = char:GetAttribute("Crouched") == true or char:GetAttribute("Vaulting") == true
 		local lean = char:GetAttribute("Lean")
+		b.crouch = toward(b.crouch, if bent then 1 else 0, dt / CROUCH_TIME)
+		b.lean = toward(b.lean, if type(lean) == "number" then lean else 0, dt / LEAN_TIME)
+		local e = b.crouch * b.crouch * (3 - 2 * b.crouch)
 		for name, rot in CROUCH do
 			local m, rest = motor(char, name)
 			if m then
-				pose(m, if crouched then rest * rot else rest)
+				pose(m, if e >= 1 then rest * rot elseif e <= 0 then rest else rest * CFrame.identity:Lerp(rot, e))
 			end
 		end
 		holdWeapon(char)
 		-- deitado: a junta Root é posada pelo SERVIDOR (PostureService), para o acerto bater
 		local waist, rest = motor(char, "Waist")
 		if waist then
-			local l = if type(lean) == "number" then lean else 0
-			pose(waist, rest * CFrame.Angles(0, 0, -l * LEAN_WAIST))
+			pose(waist, rest * CFrame.Angles(0, 0, -b.lean * LEAN_WAIST))
 		end
 	end
 end)

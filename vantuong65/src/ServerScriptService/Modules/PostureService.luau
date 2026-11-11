@@ -2,10 +2,15 @@
 -- Postura (Parte 10.5 e 12.2): em pé, agachado, deitado, inclinado e correndo. O servidor é a
 -- autoridade: muda HipHeight e velocidade (MedicalService.apply) e grava atributos no modelo; os
 -- clientes posam todo mundo pelos atributos (PostureController). Não deixa levantar sob teto baixo.
+-- Movimento (2026-11-11): o fôlego mora no cliente (Movement.client); aqui há um orçamento de corrida
+-- MAIS FOLGADO (Movement.serverBudgetStep) que só corta quem ignora o fôlego. "Vaulting" (transpor)
+-- vai para o modelo por ~1 s para os outros clientes dobrarem as pernas.
+local Players = game:GetService("Players")
 local PhysicsService = game:GetService("PhysicsService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Joints = require(ReplicatedStorage.Shared.Joints)
+local Movement = require(ReplicatedStorage.Shared.Movement)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Combatants = require(script.Parent.Combatants)
 local MedicalService = require(script.Parent.MedicalService)
@@ -101,6 +106,10 @@ function PostureService.setCrouch(model: Model, on: boolean): boolean
 	return setStance(model, if on then "crouch" else "stand")
 end
 
+-- orçamento de corrida por jogador (0..1), folgado de propósito (ver Movement.SERVER_*)
+local budget: { [Player]: number } = {}
+local budgetChar: { [Player]: Model? } = {}
+
 function PostureService.start()
 	for _, g in { GROUND, PRONE_BODY } do
 		if not PhysicsService:IsCollisionGroupRegistered(g) then
@@ -109,9 +118,60 @@ function PostureService.start()
 	end
 	PhysicsService:CollisionGroupSetCollidable(PRONE_BODY, GROUND, false)
 	workspace.Terrain.CollisionGroup = GROUND
+	Players.PlayerRemoving:Connect(function(p)
+		budget[p] = nil
+		budgetChar[p] = nil
+	end)
+	task.spawn(function()
+		local DT = 0.25
+		while true do
+			task.wait(DT)
+			for _, p in Players:GetPlayers() do
+				local char = p.Character
+				if budgetChar[p] ~= char then
+					budgetChar[p] = char
+					budget[p] = 1 -- renasceu descansado (o cliente também zera o cansaço)
+				end
+				local root = char and char:FindFirstChild("HumanoidRootPart") :: BasePart?
+				local v = if root then root.AssemblyLinearVelocity else Vector3.zero
+				-- só gasta correndo de verdade (como o cliente), não com a corrida ligada e parado
+				local running = char ~= nil
+					and char:GetAttribute("Sprinting") == true
+					and Vector3.new(v.X, 0, v.Z).Magnitude * Movement.STUD_M > Movement.SPRINT_COUNT_MPS
+				local b = Movement.serverBudgetStep(budget[p] or 1, DT, running)
+				budget[p] = b
+				if running and b <= 0 and char then
+					char:SetAttribute("Sprinting", false)
+					MedicalService.apply(char)
+				end
+			end
+		end
+	end)
 	Net.event("Posture_Set").OnServerEvent:Connect(function(player, req: any)
 		local char = player.Character
 		if not (char and Combatants.get(char)) then
+			return
+		end
+		if type(req) == "table" and (req.vault == "vault" or req.vault == "mantle") then
+			-- transpor: só de pé, sem estar caído, um por vez
+			local hum = char:FindFirstChildOfClass("Humanoid")
+			if
+				hum
+				and hum.Health > 0
+				and not char:GetAttribute("Prone")
+				and not char:GetAttribute("Downed")
+				and not char:GetAttribute("Vaulting")
+			then
+				char:SetAttribute("Vaulting", true)
+				local dur = if type(req.dur) == "number" and req.dur == req.dur
+					then math.clamp(req.dur, 0.3, 1.5)
+					else 0.8
+				task.delay(dur, function()
+					if char.Parent then
+						char:SetAttribute("Vaulting", nil)
+					end
+				end)
+			end
 			return
 		end
 		if type(req) == "boolean" then -- formato antigo: agachar
@@ -129,7 +189,10 @@ function PostureService.start()
 			char:SetAttribute("Lean", if char:GetAttribute("Prone") then 0 else l)
 		end
 		if type(req.sprint) == "boolean" then
-			local ok = req.sprint and not char:GetAttribute("Crouched") and not char:GetAttribute("Prone")
+			local ok = req.sprint
+				and not char:GetAttribute("Crouched")
+				and not char:GetAttribute("Prone")
+				and (if budgetChar[player] == char then budget[player] or 1 else 1) >= Movement.SERVER_MIN_TO_START
 			char:SetAttribute("Sprinting", ok)
 			MedicalService.apply(char)
 		end

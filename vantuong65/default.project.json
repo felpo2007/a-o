@@ -2,6 +2,9 @@
   "name": "VanTuong65",
   "tree": {
     "$className": "DataModel",
+    "ReplicatedFirst": {
+      "$path": "src/ReplicatedFirst"
+    },
     "ReplicatedStorage": {
       "Shared": {
         "$path": "src/ReplicatedStorage/Shared"
@@ -63,19 +66,19 @@
       "Atmosphere": {
         "$className": "Atmosphere",
         "$properties": {
-          "Density": 0.38,
+          "Density": 0.3,
           "Offset": 0.3,
-          "Haze": 2.5,
-          "Glare": 0.85,
+          "Haze": 1.1,
+          "Glare": 0.4,
           "Color": [
-            0.91,
-            0.77,
-            0.56
+            0.86,
+            0.8,
+            0.7
           ],
           "Decay": [
-            0.59,
-            0.44,
-            0.29
+            0.62,
+            0.52,
+            0.4
           ]
         }
       },
@@ -84,7 +87,13 @@
         "$properties": {
           "SunAngularSize": 16,
           "MoonAngularSize": 9,
-          "StarCount": 1500
+          "StarCount": 1500,
+          "SkyboxFt": "rbxassetid://98142843504803",
+          "SkyboxBk": "rbxassetid://73889296552932",
+          "SkyboxLf": "rbxassetid://71387812681789",
+          "SkyboxRt": "rbxassetid://99209067058568",
+          "SkyboxUp": "rbxassetid://83892443850885",
+          "SkyboxDn": "rbxassetid://79510939689941"
         }
       },
       "ColorCorrection": {

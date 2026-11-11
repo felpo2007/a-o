@@ -14,7 +14,7 @@ Net.Events = {
 	"Team_Choose", -- c->s: "US" | "VC"
 	"Squad_Action", -- c->s: { op = "create"|"join"|"leave", ... }
 	"Role_Choose", -- c->s: roleId
-	"Spawn_Request", -- c->s: spawnPointId
+	"Spawn_Request", -- c->s: spawnPointId (e, para "inplace", o pagamento: "ci" | "credit")
 	"Spawn_State", -- s->c: pontos e esperas
 	"Combat_Fire", -- c->s: tiro (origem, direção, t, semente)
 	"Combat_Reload", -- c->s: recarregar
@@ -42,6 +42,15 @@ Net.Events = {
 	"Range_Hit", -- s->c { dist, right, up }: acerto no campo de tiro, só para o atirador (cm)
 	"Kit_Set", -- c->s { mags, frags, smokes, bandages }: equipamento por peso (próximo spawn)
 	"Dig_Request", -- c->s: cavar buraco de combate à frente (pá de trincheira)
+	"Daily_Claim", -- c->s: pede o selo do dia (recompensa diária); o servidor valida tudo
+	"Daily_State", -- s->c: caderneta de serviço (sequência, dia, total, itens) e o resultado do pedido
+	-- progressão (2026-11-11, Shared/Progression)
+	"Gear_Buy", -- c->s gearId: compra com créditos de intendência (permanente; gravação atômica)
+	"Gear_Equip", -- c->s gearId, on: leva ou deixa o item no próximo spawn
+	"Progress_State", -- s->c: XP, posto, créditos, níveis de kit, escolha e o resultado do último pedido
+	"Progress_Report", -- s->c: relatório de serviço ao sair de campo (linhas, XP, CI, subida de posto)
+	"InPlace_Buy", -- c->s: pede a compra em Robux do renascer onde caiu (o servidor confere as regras antes)
+	"InPlace_Ready", -- s->c: o recibo chegou e o renascer guardado pode ser usado agora
 }
 Net.Unreliable = {
 	"Combat_Tracer", -- s->c: traçantes/efeitos de outros jogadores
@@ -53,6 +62,8 @@ Net.Functions = {
 	"Commerce_GetState",
 	"Settings_Get",
 	"Tutorial_Get", -- papéis com o tutorial concluído
+	"Daily_Get", -- caderneta de serviço (recompensa diária) do jogador
+	"Progress_Get", -- estado da progressão (o mesmo do Progress_State)
 }
 
 local folderName = "VT65Remotes"

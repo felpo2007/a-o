@@ -34,7 +34,8 @@ end
 
 local ZONES = { "torso", "torso", "arm", "leg", "leg", "head" }
 
-function ExplosionService.detonate(id: string, pos: Vector3)
+-- by: quem lançou (granada, morteiro pedido por jogador), para o abate e a assistência (D-72)
+function ExplosionService.detonate(id: string, pos: Vector3, by: Player?)
 	local t = Explosive.TYPES[id]
 	if not t then
 		return
@@ -52,11 +53,14 @@ function ExplosionService.detonate(id: string, pos: Vector3)
 					exposure *= Explosive.COVERED
 				end
 				local result, energy = Explosive.effect(id, dM, exposure, rng:next())
+				-- colete M1955 (D-72, equipamento liberado): estilhaço no tronco perde energia
+				local ff = e.player and e.player:GetAttribute("FragFactor")
+				local vest = if type(ff) == "number" then math.clamp(ff, 0.1, 1) else 1
 				if result == "lethal" then
-					MedicalService.hit(e.model, "torso", energy, rng:next())
+					MedicalService.hit(e.model, "torso", energy * vest, rng:next(), by)
 				elseif result == "wound" then
 					local zone = ZONES[1 + math.floor(rng:next() * #ZONES)]
-					MedicalService.hit(e.model, zone, energy, rng:next())
+					MedicalService.hit(e.model, zone, if zone == "torso" then energy * vest else energy, rng:next(), by)
 				end
 			end
 		end

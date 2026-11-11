@@ -40,13 +40,13 @@ function TerrainLook.apply()
 	set(terrain, "WaterReflectance", 0.7)
 	set(terrain, "WaterWaveSize", 0.04)
 	set(terrain, "WaterWaveSpeed", 3)
-	-- nuvens dinâmicas (precisam de Atmosphere, que está no Lighting)
-	if not terrain:FindFirstChildOfClass("Clouds") then
-		local c = Instance.new("Clouds")
-		c.Cover = 0.58
-		c.Density = 0.62
-		c.Color = Color3.fromRGB(255, 236, 214)
-		c.Parent = terrain
+	-- Sem nuvens dinâmicas (D-69): o usuário viu o céu "pixelando muito e trocando conforme eu
+	-- olho". As nuvens volumétricas do Roblox são desenhadas em baixa resolução, com ruído que
+	-- muda com o giro da câmera; com a névoa da Atmosphere ficava pior. As nuvens vêm do Sky.
+	for _, c in terrain:GetChildren() do
+		if c:IsA("Clouds") then
+			c:Destroy()
+		end
 	end
 end
 

@@ -19,6 +19,7 @@ local TrainingService = require(script.Parent.TrainingService)
 local CombatService = {}
 local M = 0.28
 local MAX_LAG = 0.25 -- compensação de latência até 200 ms + folga (Parte 10.7)
+local LOS_CHECK_STUDS = 1.0 / M -- origem mais longe que isto da cabeça precisa de linha livre
 local MAGS = { rifle = 6, mg = 2, pistol = 3, launcher = 6 } -- PLACEHOLDER de dotação
 local RELOAD = { rifle = 3.0, mg = 7.0, pistol = 2.5, launcher = 3.0 } -- PLACEHOLDER (s)
 -- materiais que a bala atravessa perdendo velocidade (fração mantida). PLACEHOLDER até a
@@ -43,6 +44,9 @@ local function resetAmmo(player: Player)
 	-- equipamento por peso (Kit_Set): carregadores escolhidos; senão a dotação padrão
 	local km = player:GetAttribute("KitMags")
 	local mags = if type(km) == "number" then km else (MAGS[wp.kind] or 3)
+	-- equipamento liberado (D-72, ProgressionService.applyGear): bandoleira/peitoral
+	local gm = player:GetAttribute("GearMags")
+	mags += if type(gm) == "number" then gm else 0
 	ammo[player] = { weapon = wp.id, mag = wp.magazine, spare = mags - 1, lastShot = 0, reloadUntil = 0 }
 	player:SetAttribute("CarriedWeapon", nil)
 	Net.event("Combat_Ammo"):FireClient(player, ammo[player])
@@ -203,7 +207,9 @@ function CombatService.fire(
 		if victim then
 			local energy = hit.energy * speedFactor * speedFactor
 			local roll = Rng.new(seed + 1):next()
-			MedicalService.hit(victim.model, zoneOf(hit.target), energy, roll)
+			-- quem atirou (se for jogador) vai para o registro de abate/assistência (D-72)
+			local by = game:GetService("Players"):GetPlayerFromCharacter(shooter)
+			MedicalService.hit(victim.model, zoneOf(hit.target), energy, roll, by)
 			if victim.player then -- vibração do lado do impacto (Parte 12.6)
 				Net.event("Combat_Hit"):FireClient(victim.player, { x = origin.X, y = origin.Y, z = origin.Z })
 			end
@@ -294,12 +300,26 @@ function CombatService.start()
 		if clock - a.lastShot < Weapons.minInterval(wp) * 0.85 then
 			return -- cadência acima da arma
 		end
-		if (Vector3.new(ox, oy, oz) - head.Position).Magnitude > 8 then
+		local origin = Vector3.new(ox, oy, oz)
+		if (origin - head.Position).Magnitude > 8 then
 			return -- origem longe da cabeça
+		end
+		-- 3ª pessoa (2026-11-11): o cliente legítimo atira do olho, nunca da câmera atrás do ombro. Se a
+		-- origem estiver a mais de ~1 m da cabeça e houver algo sólido no meio (câmera do outro lado de
+		-- uma parede ou de uma crista), o tiro sai da cabeça. Até 1 m (inclinar, deitado, olho da
+		-- câmera de 1ª pessoa) nada muda: o terreno irregular de quem está deitado não derruba o tiro.
+		if (origin - head.Position).Magnitude > LOS_CHECK_STUDS then
+			local los = RaycastParams.new()
+			los.FilterType = Enum.RaycastFilterType.Exclude
+			los.FilterDescendantsInstances = { char }
+			los.RespectCanCollide = true
+			if workspace:Raycast(head.Position, origin - head.Position, los) then
+				origin = head.Position
+			end
 		end
 		a.lastShot = clock
 		a.mag -= 1
-		CombatService.fire(char, wp.id, Vector3.new(ox, oy, oz), Vector3.new(dx, dy, dz), seed, player)
+		CombatService.fire(char, wp.id, origin, Vector3.new(dx, dy, dz), seed, player)
 	end)
 end
 

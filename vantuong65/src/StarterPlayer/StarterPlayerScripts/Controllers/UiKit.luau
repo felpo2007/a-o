@@ -2,10 +2,13 @@
 -- Interface para TV e controle (Parte 12.5): texto mínimo de 24 px na TV (IsTenFootInterface),
 -- nada essencial fora da área segura (ScreenInsets = DeviceSafeInsets), foco sempre visível com
 -- moldura de alto contraste e toda tela abrindo com um item focado (GuiService.SelectedObject).
+-- No lobby o controle usa o cursor virtual (VirtualCursor): todo UiKit.button já fica registrado
+-- nele, e o foco automático fica desligado enquanto o cursor estiver na tela.
 local GuiService = game:GetService("GuiService")
 local Players = game:GetService("Players")
 
 local Input = require(script.Parent.Input)
+local VirtualCursor = require(script.Parent.VirtualCursor)
 
 local UiKit = {}
 local player = Players.LocalPlayer
@@ -88,7 +91,15 @@ function UiKit.button(parent: Instance, text: string, onClick: () -> (), order: 
 	b.LayoutOrder = order or 0
 	b.Parent = parent
 	b.Activated:Connect(onClick)
+	VirtualCursor.bind(b, onClick)
 	return b
+end
+
+-- Liga um botão feito à mão ao clique (mouse, toque, A da navegação do Roblox) e ao cursor virtual
+-- do controle; hover (opcional) recebe também o passar do cursor virtual.
+function UiKit.bind(b: GuiButton, onClick: () -> (), hover: ((boolean) -> ())?)
+	b.Activated:Connect(onClick)
+	VirtualCursor.bind(b, onClick, hover)
 end
 
 function UiKit.label(parent: Instance, text: string, size: number?, height: number?): TextLabel
@@ -121,8 +132,8 @@ end
 
 -- Põe o foco no primeiro item (de cima para baixo) se o jogador estiver no controle.
 function UiKit.focus(root: Instance)
-	if not Input.isGamepad() then
-		return
+	if not Input.isGamepad() or VirtualCursor.isActive() then
+		return -- com o cursor virtual, quem escolhe é o cursor (A não pode ativar dois botões)
 	end
 	task.defer(function()
 		local cur = GuiService.SelectedObject
@@ -144,7 +155,7 @@ end
 task.spawn(function()
 	while true do
 		task.wait(0.5)
-		if Input.isGamepad() and GuiService.GuiNavigationEnabled then
+		if Input.isGamepad() and GuiService.GuiNavigationEnabled and not VirtualCursor.isActive() then
 			for _, w in watched do
 				if w.active() and w.root.Visible then
 					local cur = GuiService.SelectedObject

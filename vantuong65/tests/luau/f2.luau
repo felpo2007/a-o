@@ -224,13 +224,134 @@ test("cosméticos: padrão liberado, passe libera, equipar valida facção/slot"
 	assert(Commerce.productKeyById(0) == nil, "ID 0 não é produto válido")
 end)
 
-test("nenhum item à venda dá vantagem: catálogo só tem slots cosméticos", function()
+test("catálogo: cosméticos só em slots visuais; itens de jogo só os da lista do dono (D-72)", function()
 	for _, c in Commerce.Cosmetics do
 		assert(c.slot == "helmet" or c.slot == "uniform" or c.slot == "extra", c.id)
 	end
+	-- exceção decidida pelo dono em 2026-11-11: kits de equipamento e o renascer onde caiu. Qualquer
+	-- outro produto ou passe de jogo (arma, munição, tempo de spawn, atributo) continua proibido.
 	for _, p in Commerce.Products do
-		assert(p.grants == "tip", p.key)
+		assert(p.grants == "tip" or Commerce.GAMEPLAY[p.key] == p.grants, p.key)
 	end
+	for _, p in Commerce.Passes do
+		assert(p.kind == nil or Commerce.GAMEPLAY[p.key] == p.kind, p.key)
+	end
+	local n = 0
+	for _ in Commerce.GAMEPLAY do
+		n += 1
+	end
+	assert(n == 3, "a lista do dono tem 3 itens (2 kits e o renascer)")
+end)
+
+-- Recompensa diária (caderneta de serviço) e perfil v2 ------------------------------------------
+local ProfileSchema = require("../../src/ServerScriptService/Modules/ProfileSchema") :: any
+local DAY = Commerce.DAY_SECONDS
+
+-- aplica um resgate como o PlayerData (estado + itens ganhos)
+local function claimOn(st: any, earned: { [string]: boolean }, day: number): any
+	local r = Commerce.dailyClaim(st, day, earned)
+	if r.ok then
+		for _, id in r.items do
+			earned[id] = true
+		end
+	end
+	return r
+end
+
+test("diária: dia UTC vira à meia-noite e a contagem regressiva fecha com ela", function()
+	assert(Commerce.dayIndex(0) == 0 and Commerce.dayIndex(DAY - 1) == 0, "antes da meia-noite")
+	assert(Commerce.dayIndex(DAY) == 1, "meia-noite UTC já é o dia seguinte")
+	local t = 20000 * DAY + 3600 * 23 + 59 * 60 + 30 -- 23:59:30 UTC
+	assert(Commerce.secondsToNextDay(t) == 30)
+	assert(Commerce.secondsToNextDay(20000 * DAY) == DAY, "na virada, falta o dia inteiro")
+	assert(Commerce.dayIndex(t + 30) == Commerce.dayIndex(t) + 1)
+end)
+
+test("diária: sequência de 7 dias, um resgate por dia, volta ao dia 1 depois do 7", function()
+	local st = Commerce.dailyDefault()
+	local earned = {}
+	local d0 = 20400
+	for i = 1, 7 do
+		local v = Commerce.dailyView(st, d0 + i)
+		assert(v.canClaim and v.day == i, "dia " .. i .. " disponível")
+		local r = claimOn(st, earned, d0 + i)
+		assert(r.ok and r.day == i and r.run == i, "resgate do dia " .. i)
+		st = r.state
+		local again = Commerce.dailyClaim(st, d0 + i, earned)
+		assert(not again.ok and again.reason == "already", "segundo resgate no mesmo dia é recusado")
+		assert(again.state.total == st.total and again.state.lastDay == st.lastDay, "recusa não muda nada")
+		local view = Commerce.dailyView(st, d0 + i)
+		assert(view.claimedToday and not view.canClaim and view.day == i)
+	end
+	assert(st.total == 7 and st.run == 7)
+	local r8 = claimOn(st, earned, d0 + 8)
+	assert(r8.ok and r8.day == 1 and r8.run == 8, "depois do dia 7 a trilha recomeça e a sequência continua")
+	assert(r8.state.total == 8)
+end)
+
+test("diária: dia perdido zera a sequência, mas o total e os itens ficam", function()
+	local earned = {}
+	local st = Commerce.dailyDefault()
+	for i = 1, 3 do
+		st = claimOn(st, earned, 100 + i).state
+	end
+	assert(earned.us_zippo and earned.vc_tire_sandals, "dia 3 dá o item dos dois lados")
+	-- pula o dia 104 inteiro: no 105 a sequência quebrou
+	local v = Commerce.dailyView(st, 105)
+	assert(v.canClaim and v.broken and v.day == 1 and v.run == 0, "sequência zerada")
+	local r = claimOn(st, earned, 105)
+	assert(r.ok and r.day == 1 and r.run == 1 and r.state.total == 4, "total não zera")
+	assert(earned.us_zippo, "item ganho não some")
+	-- primeira vez na vida: não é "quebra"
+	local fresh = Commerce.dailyView(Commerce.dailyDefault(), 105)
+	assert(fresh.canClaim and not fresh.broken and fresh.day == 1)
+end)
+
+test("diária: item novo só na primeira vez; relógio voltando não deixa resgatar", function()
+	local earned = { us_zippo = true }
+	local st = { run = 2, lastDay = 49, total = 9 }
+	local r = Commerce.dailyClaim(st, 50, earned)
+	assert(r.ok and r.day == 3 and #r.items == 2, "dia 3: Zippo e dép lốp")
+	assert(#r.newItems == 1 and r.newItems[1] == "vc_tire_sandals", "Zippo já era dele")
+	local back = Commerce.dailyClaim({ run = 3, lastDay = 60, total = 10 }, 59, {})
+	assert(not back.ok and back.reason == "clock", "último resgate no futuro: espera")
+	-- os itens da trilha existem no catálogo, são "extra" e não saem por passe
+	for _, d in Commerce.DailyTrack do
+		for _, id in d.items or {} do
+			local c = Commerce.find(id)
+			assert(c and c.unlock == "daily" and c.slot == "extra", id)
+		end
+	end
+	local none = { passes = {}, premium = false, subscription = false }
+	assert(not Commerce.canEquip("us_zippo", "US", "extra", none), "sem ganhar, não equipa")
+	local won = { passes = {}, premium = false, subscription = false, earned = { us_zippo = true } }
+	assert(Commerce.canEquip("us_zippo", "US", "extra", won), "ganhou, equipa")
+	assert(not Commerce.canEquip("us_zippo", "VC", "extra", won), "item de outro lado")
+end)
+
+test("perfil v1 → atual: ganha a caderneta zerada; valores corrompidos voltam ao seguro", function()
+	assert(ProfileSchema.VERSION == 3) -- v3 (D-72): progressão; a migração v2 → v3 está em progressao.luau
+	local v1 = { schema = 1, tips = 2, purchases = { x = 5 }, tutorial = { rifleman = true } }
+	local p = ProfileSchema.migrate(v1)
+	assert(p.schema == 3 and p.tips == 2 and p.purchases.x == 5 and p.tutorial.rifleman)
+	assert(p.daily.run == 0 and p.daily.lastDay == -1 and p.daily.total == 0 and next(p.earned) == nil)
+	local bad = ProfileSchema.migrate({
+		schema = 2,
+		daily = { run = -4, lastDay = 0 / 0, total = "muito" },
+		earned = { us_zippo = true, vc_mess_tin = "sim", [7] = true },
+	})
+	assert(bad.daily.run == 0 and bad.daily.lastDay == -1 and bad.daily.total == 0, "daily corrompido")
+	assert(bad.earned.us_zippo == true and bad.earned.vc_mess_tin == nil, "earned só aceita true")
+	local good = { schema = 2, daily = { run = 5, lastDay = 20401, total = 12 }, earned = { vc_mess_tin = true } }
+	local twice = ProfileSchema.migrate(ProfileSchema.migrate(good))
+	assert(twice.daily.run == 5 and twice.daily.lastDay == 20401 and twice.daily.total == 12, "migrar 2x")
+	assert(twice.earned.vc_mess_tin)
+	local odd = ProfileSchema.migrate({ daily = { run = 9, lastDay = 20401, total = 3 } })
+	assert(odd.daily.total == 9, "total nunca menor que a sequência")
+	-- dois servidores: vale o resgate mais novo
+	local a = { run = 2, lastDay = 10, total = 5 }
+	local b = { run = 3, lastDay = 11, total = 6 }
+	assert(ProfileSchema.newerDaily(a, b).lastDay == 11 and ProfileSchema.newerDaily(b, a).lastDay == 11)
 end)
 
 print(string.format("%d ok, %d falhas", passed, failed))

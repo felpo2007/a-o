@@ -297,20 +297,24 @@ test("layout padrão = tabela da Parte 12 (infantaria, veículos, mapa e menus)"
 		{ "infantry", "last_item", "ButtonL1", "tap" },
 		{ "infantry", "comm_wheel", "ButtonR1", "hold" },
 		{ "infantry", "mark", "ButtonR1", "tap" },
-		{ "aim", "lean_left", "ButtonL1", "press" },
-		{ "aim", "lean_right", "ButtonR1", "press" },
-		{ "aim", "hold_breath", "ButtonL3", "press" },
+		{ "aim", "lean_left", "ButtonL3", "press" },
+		{ "aim", "lean_right", "ButtonR3", "press" },
+		{ "aim", "hold_breath", "ButtonL1", "press" },
 		{ "infantry", "crouch", "ButtonB", "tap" },
 		{ "infantry", "prone", "ButtonB", "hold" },
 		{ "infantry", "reload", "ButtonX", "tap" },
 		{ "infantry", "interact", "ButtonX", "hold" },
 		{ "infantry", "swap_weapon", "ButtonY", "tap" },
 		{ "infantry", "bayonet", "ButtonY", "hold" },
-		{ "infantry", "binoculars", "DPadUp", "press" },
+		-- 2026-11-11 (3ª pessoa): ↑ e → passaram a tocar/segurar; tocar mantém a função da Parte 12
+		{ "infantry", "binoculars", "DPadUp", "tap" },
+		{ "infantry", "shoulder_swap", "DPadUp", "hold" },
 		{ "infantry", "quick_bandage", "DPadDown", "press" },
 		{ "infantry", "fire_mode", "DPadLeft", "tap" },
 		{ "infantry", "zeroing", "DPadLeft", "hold" },
-		{ "infantry", "radio_channel", "DPadRight", "press" },
+		{ "infantry", "radio_channel", "DPadRight", "tap" },
+		{ "infantry", "view_toggle", "DPadRight", "hold" },
+		{ "infantry", "jump", "ButtonA", "press" }, -- pular ou transpor dique (contextual, Parte 12.2)
 		{ "global", "map", "ButtonSelect", "tap" },
 		{ "global", "game_menu", "ButtonSelect", "hold" },
 		-- veículos
@@ -348,6 +352,30 @@ test("layout padrão = tabela da Parte 12 (infantaria, veículos, mapa e menus)"
 	for _, a in InputMap.ACTIONS do
 		assert(a.padPress == "press" or a.padPress == "tap" or a.padPress == "hold", a.id)
 	end
+end)
+
+test("3ª pessoa: teclas próprias no teclado, preferências salvas e saneadas", function()
+	local keys: { [string]: string } = {}
+	for _, a in InputMap.ACTIONS do
+		if a.ctx == "infantry" or a.ctx == "global" then
+			keys[a.id] = a.key or ""
+		end
+	end
+	assert(keys.view_toggle == "O" and keys.shoulder_swap == "I" and keys.jump == "Space", "teclas da câmera/pulo")
+	-- nenhuma outra ação de infantaria usa O, I ou Espaço
+	for id, k in keys do
+		if id ~= "view_toggle" and id ~= "shoulder_swap" and id ~= "jump" then
+			assert(k ~= "O" and k ~= "I" and k ~= "Space", id .. " usa tecla da câmera")
+		end
+	end
+	assert(D.thirdPerson == false and D.shoulderLeft == false, "padrão: 1ª pessoa, ombro direito")
+	local s = InputMap.validate({ thirdPerson = true, shoulderLeft = "sim" })
+	assert(s.thirdPerson == true and s.shoulderLeft == false, "booleanos saneados")
+	assert(not InputMap.BINDING_KEYS.thirdPerson and InputMap.BINDING_KEYS.remap, "câmera não refaz bindings")
+	-- caído não pula nem transpõe; a câmera também não muda (só olhar, desistir e chamar ajuda)
+	local st = InputMap.newState()
+	InputMap.event(st, "downed")
+	assert(not InputMap.allowed(st, "jump") and not InputMap.allowed(st, "view_toggle"))
 end)
 
 test("rodas: 8 itens fixos por página; mensagens sem digitar", function()

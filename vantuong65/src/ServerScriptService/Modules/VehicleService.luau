@@ -363,6 +363,9 @@ function VehicleService.spawn(specId: string, depot: number): Model?
 	chassis.Material = Enum.Material.Metal
 	chassis.CustomPhysicalProperties = PhysicalProperties.new(0.7, 0.6, 0.1)
 	chassis.CFrame = CFrame.new(x, SpawnService.groundY(x, z) + chassis.Size.Y / 2 + 1, z)
+	-- passa pelo tronco das árvores da mata (D-67): o tronco só segura gente e bala
+	AssetLoader.ensureGroups()
+	chassis.CollisionGroup = AssetLoader.VEHICLE_GROUP
 	chassis.Parent = model
 	model.PrimaryPart = chassis
 	-- arte do ForgeGUI (se publicada): soldada, sem colisão; o chassi vira invisível

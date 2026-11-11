@@ -5,6 +5,18 @@ Regra do prompt (Parte 11): **nada que dê vantagem**. Vendemos só cosméticos 
 venda. O teste `tests/luau/f2.luau` garante que o catálogo só tem slots cosméticos e produtos de
 apoio.
 
+**Exceção decidida pelo dono (2026-11-11, D-72):** "quero usar robux" e "faça com a opção de
+dinheiro do jogo também". Dois itens de jogo podem ser pagos em Robux **ou** com a moeda ganha
+jogando:
+- **equipamento melhor** (permanente): Game Pass em Robux, compra com a moeda do jogo ou de graça
+  num rank alto, para não fechar o jogo a quem não paga;
+- **renascer no mesmo lugar** (consumível): Developer Product em Robux ou moeda do jogo, com as
+  mesmas regras de segurança do servidor (sem inimigo perto, fora de área travada) conferidas
+  antes de cobrar; se o renascer ficar impossível na hora do recibo, a compra em Robux vira
+  crédito para a próxima morte.
+
+O `f2.luau` aceita só esses itens listados; qualquer outra vantagem continua proibida.
+
 ## Fontes de receita (o que foi implementado e o que você ativa)
 
 | # | Fonte | Como gera dinheiro | No código | O que você faz no Creator Dashboard |

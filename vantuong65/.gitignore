@@ -16,3 +16,8 @@ sourcemap.json
 # especificação original do dono (prompts): só local, nunca no repositório público
 especificacao/
 assets/texturas/
+# árvores do Poly Haven (tools/fetch_trees.py + tools/prep_trees.py) e conferência da mira
+assets/arvores_src/
+assets/arvores/
+assets/miras/
+assets/ceu/

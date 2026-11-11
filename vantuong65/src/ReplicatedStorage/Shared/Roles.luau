@@ -86,6 +86,22 @@ Roles.loadout = {
 	},
 } :: { [string]: { [string]: { string } } }
 
+-- Posto mínimo por papel (progressão, 2026-11-11; Shared/Progression). Só papéis de especialista: os
+-- de infantaria e o líder de squad ficam no posto 1, para um servidor novo (todos no posto 1) não
+-- ficar sem squad nem construção. PLACEHOLDER até o playtest.
+Roles.MIN_RANK = {
+	commander = 3,
+	sniper = 3,
+	pilot = 3,
+	observer = 2,
+	tank_crew = 2,
+	door_gunner = 2,
+} :: { [string]: number }
+
+function Roles.minRank(roleId: string): number
+	return Roles.MIN_RANK[roleId] or 1
+end
+
 function Roles.unitAllowed(faction: string, unit: string, teamSize: number): boolean
 	local u = Roles.units[faction] and Roles.units[faction][unit]
 	if not u then

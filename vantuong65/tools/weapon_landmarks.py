@@ -233,6 +233,23 @@ def landmarks(key: str) -> dict:
     sight_u = SIGHT_U.get(key, gu if pistol else gu - EYE_DEFAULT_M / (length * M))
     off = np.array(EYE_OFFSET_M.get(key, (0.0, 0.0, 0.0))) / M  # referencial da arma
     sight = at(sight_u, float(front[1]), bore_lat) + turn.T @ off
+    sight_out, front_out = out(sight), out(front)
+    # D-67: alça e massa medidas na malha (tools/sight_align.py): o anel ou o entalhe e a ponta da
+    # massa caem no centro da tela. Entalhe: olho sobre o punho (rosto na coronha). Anel: olho a
+    # EYE_ANEL_M (com 6,5 cm o anel de 5,5 mm da M14 ficava pequeno e a base da alça tomava o meio
+    # da tela; Studio, 2026-11-11).
+    # sightKind/sightMm (D-69): a arma em 1ª pessoa desenha alça e massa em geometria limpa por
+    # cima da malha (a textura da alça, de poucos texels, aparecia pixelada)
+    sight_kind, sight_mm = "", 0.0
+    if key in MEDIDAS:
+        med = MEDIDAS[key]
+        sight_out, front_out = med["sight"], med["front"]
+        if "furo_mm" in med:
+            eye_m = EYE_ANEL_M
+            sight_kind, sight_mm = "anel", float(med["furo_mm"])
+        else:
+            eye_m = round(float(max(0.06, (gu - med["rear_u"]) * length * M)), 3)
+            sight_kind, sight_mm = "entalhe", float(med["entalhe_mm"])
     grip = at(gu, bore_y - GRIP_DROP_M.get(key, GRIP_DROP_DEFAULT) / M, bore_lat)
     support_drop = SUPPORT_DROP_M.get(key, SUPPORT_DROP_DEFAULT)
     support = grip if pistol else at(SUPPORT_U[key], bore_y - support_drop / M, bore_lat)
@@ -243,13 +260,15 @@ def landmarks(key: str) -> dict:
         "forward": fwd,
         "yaw": round(yaw, 4),
         "muzzle": out(muzzle),
-        "sight": out(sight),
-        "front": out(front),
+        "sight": sight_out,
+        "front": front_out,
         "grip": out(grip),
         "support": out(support),
         "lowX": round(float(wx.min()), 3),
         "lengthM": round(float(length * M), 3),  # para conferir a escala do ForgeGUI
         "eyeM": eye_m,
+        "sightKind": sight_kind,
+        "sightMm": round(sight_mm, 2),
     }
 
 
@@ -257,7 +276,21 @@ def vec(v: list[float]) -> str:
     return f"Vector3.new({v[0]}, {v[1]}, {v[2]})"
 
 
+MEDIDAS: dict[str, dict] = {}
+EYE_ANEL_M = 0.045
+
+
 def main() -> None:
+    import sys
+
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from sight_align import CFG, medir  # importa este módulo: só aqui, para não virar ciclo
+
+    for k, cfg in CFG.items():
+        try:
+            MEDIDAS[k] = medir(k, cfg)
+        except SystemExit as e:  # alça não achada: fica a linha de visada da D-60
+            print("sem medida:", e)
     lines = [
         "--!strict",
         "-- GERADO por tools/weapon_landmarks.py a partir dos GLB das armas. Não editar à mão.",
@@ -266,6 +299,8 @@ def main() -> None:
         "-- origem e a boca em −Z (arma caída de lado). lengthM = comprimento da malha (m).",
         "-- eyeM = distância (m) do olho ao ponto sight, mirando. yaw = giro extra em Y (rad) de",
         "-- modelo gerado torto; o referencial da arma é TURN[forward] * CFrame.Angles(0, yaw, 0).",
+        '-- sightKind = "anel" ou "entalhe" medido na malha (tools/sight_align.py; "" = sem',
+        "-- medida) e sightMm = diâmetro do furo ou fundura do entalhe (mm).",
         "export type Art = {",
         "\tforward: string,",
         "\tyaw: number,",
@@ -277,6 +312,8 @@ def main() -> None:
         "\tlowX: number,",
         "\tlengthM: number,",
         "\teyeM: number,",
+        "\tsightKind: string,",
+        "\tsightMm: number,",
         "}",
         "local WeaponArt: { [string]: Art } = {",
     ]
@@ -295,6 +332,8 @@ def main() -> None:
             f"\t\tlowX = {d['lowX']},",
             f"\t\tlengthM = {d['lengthM']},",
             f"\t\teyeM = {d['eyeM']},",
+            f'\t\tsightKind = "{d["sightKind"]}",',
+            f"\t\tsightMm = {d['sightMm']},",
             "\t},",
         ]
     lines += ["}", "", "return WeaponArt", ""]

@@ -5,6 +5,8 @@
 -- origem e a boca em −Z (arma caída de lado). lengthM = comprimento da malha (m).
 -- eyeM = distância (m) do olho ao ponto sight, mirando. yaw = giro extra em Y (rad) de
 -- modelo gerado torto; o referencial da arma é TURN[forward] * CFrame.Angles(0, yaw, 0).
+-- sightKind = "anel" ou "entalhe" medido na malha (tools/sight_align.py; "" = sem
+-- medida) e sightMm = diâmetro do furo ou fundura do entalhe (mm).
 export type Art = {
 	forward: string,
 	yaw: number,
@@ -16,43 +18,51 @@ export type Art = {
 	lowX: number,
 	lengthM: number,
 	eyeM: number,
+	sightKind: string,
+	sightMm: number,
 }
 local WeaponArt: { [string]: Art } = {
 	m14 = {
 		forward = "+Z",
 		yaw = 0.0,
 		muzzle = Vector3.new(0.025, 0.419, 2.011),
-		sight = Vector3.new(0.025, 0.554, -0.644),
-		front = Vector3.new(0.025, 0.526, 1.708),
+		sight = Vector3.new(0.0192, 0.5531, -0.7339),
+		front = Vector3.new(0.0206, 0.5434, 1.6824),
 		grip = Vector3.new(0.025, 0.241, -0.965),
 		support = Vector3.new(0.025, 0.277, -0.08),
 		lowX = -0.134,
 		lengthM = 1.126,
-		eyeM = 0.09,
+		eyeM = 0.045,
+		sightKind = "anel",
+		sightMm = 5.51,
 	},
 	type56 = {
 		forward = "+Z",
 		yaw = 0.0,
 		muzzle = Vector3.new(0.042, 0.349, 1.575),
-		sight = Vector3.new(0.042, 0.526, -0.214),
-		front = Vector3.new(0.042, 0.526, 1.464),
+		sight = Vector3.new(0.042, 0.541, 0.1496),
+		front = Vector3.new(0.0423, 0.5253, 1.4615),
 		grip = Vector3.new(0.042, 0.17, -0.535),
 		support = Vector3.new(0.042, 0.206, 0.157),
 		lowX = -0.083,
 		lengthM = 0.882,
-		eyeM = 0.09,
+		eyeM = 0.192,
+		sightKind = "entalhe",
+		sightMm = 2.6,
 	},
 	sks = {
 		forward = "+Z",
 		yaw = 0.0,
 		muzzle = Vector3.new(0.076, 0.199, 1.823),
-		sight = Vector3.new(0.076, 0.396, -0.554),
-		front = Vector3.new(0.076, 0.396, 1.643),
+		sight = Vector3.new(0.0705, 0.334, 0.2644),
+		front = Vector3.new(0.0689, 0.3497, 1.6634),
 		grip = Vector3.new(0.076, 0.02, -0.875),
 		support = Vector3.new(0.076, 0.056, -0.073),
 		lowX = -0.086,
 		lengthM = 1.021,
-		eyeM = 0.09,
+		eyeM = 0.319,
+		sightKind = "entalhe",
+		sightMm = 2.4,
 	},
 	m60 = {
 		forward = "-Z",
@@ -65,6 +75,8 @@ local WeaponArt: { [string]: Art } = {
 		lowX = -0.305,
 		lengthM = 1.105,
 		eyeM = 0.09,
+		sightKind = "",
+		sightMm = 0.0,
 	},
 	rpd = {
 		forward = "+Z",
@@ -77,6 +89,8 @@ local WeaponArt: { [string]: Art } = {
 		lowX = -0.616,
 		lengthM = 1.044,
 		eyeM = 0.09,
+		sightKind = "",
+		sightMm = 0.0,
 	},
 	m79 = {
 		forward = "+Z",
@@ -89,6 +103,8 @@ local WeaponArt: { [string]: Art } = {
 		lowX = -0.133,
 		lengthM = 0.731,
 		eyeM = 0.09,
+		sightKind = "",
+		sightMm = 0.0,
 	},
 	m1911 = {
 		forward = "-Z",
@@ -101,6 +117,8 @@ local WeaponArt: { [string]: Art } = {
 		lowX = -0.06,
 		lengthM = 0.216,
 		eyeM = 0.45,
+		sightKind = "",
+		sightMm = 0.0,
 	},
 	type54 = {
 		forward = "-Z",
@@ -113,6 +131,8 @@ local WeaponArt: { [string]: Art } = {
 		lowX = -0.056,
 		lengthM = 0.214,
 		eyeM = 0.45,
+		sightKind = "",
+		sightMm = 0.0,
 	},
 	rpg2 = {
 		forward = "-X",
@@ -125,6 +145,8 @@ local WeaponArt: { [string]: Art } = {
 		lowX = -0.329,
 		lengthM = 1.2,
 		eyeM = 0.09,
+		sightKind = "",
+		sightMm = 0.0,
 	},
 }
 

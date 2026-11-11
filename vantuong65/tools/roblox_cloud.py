@@ -6,7 +6,8 @@ Configuração não secreta em cloud.json (universeId, placeId, creator).
 
 Uso (a partir de vantuong65/):
   uv run python tools/roblox_cloud.py upload-assets      # ForgeGUI -> Roblox; gera AssetIds.luau
-  uv run python tools/roblox_cloud.py create-store       # 4 passes + 2 produtos -> Commerce
+  uv run python tools/roblox_cloud.py create-store       # passes e produtos que faltam -> Commerce
+  uv run python tools/roblox_cloud.py create-store PASS_KIT_VETERAN ...   # só estas chaves
   uv run python tools/roblox_cloud.py publish-place      # publica place/VanTuong65.rbxl
   uv run python tools/roblox_cloud.py all
 
@@ -87,11 +88,11 @@ def save_ids(ids: dict) -> None:
     IDS_FILE.write_text(json.dumps(ids, ensure_ascii=False, indent=1), "utf-8")
 
 
-def upload_asset(path: Path, asset_type: str, name: str, creator: dict) -> str:
+def upload_asset(path: Path, asset_type: str, name: str, creator: dict, desc: str = "") -> str:
     req = {
         "assetType": asset_type,
         "displayName": name[:50],
-        "description": "VAN TUONG 65 (ForgeGUI)",
+        "description": desc or "VAN TUONG 65 (ForgeGUI)",
         "creationContext": {"creator": creator},
     }
     body, ctype = multipart({"request": json.dumps(req)}, {"fileContent": path})
@@ -138,7 +139,9 @@ def cmd_upload_assets() -> None:
             print("pulando (arquivo ausente):", rel)
             continue
         try:
-            ids[key] = upload_asset(f, atype, item.get("name", key), c["creator"])
+            ids[key] = upload_asset(
+                f, atype, item.get("name", key), c["creator"], item.get("description", "")
+            )
             print("ok", key, ids[key])
             save_ids(ids)
         except (RuntimeError, OSError) as e:  # registra e segue para os demais
@@ -147,7 +150,20 @@ def cmd_upload_assets() -> None:
     print(f"{len(ids)} IDs em {IDS_FILE.name}; AssetIds.luau atualizado")
 
 
-def cmd_create_store() -> None:
+KIT_DESC = {
+    "PASS_KIT_VETERAN": (
+        "Equipamento nível 1 nos dois lados: +2 carregadores, cantil extra e estojo de socorro "
+        "reforçado. Também sai de graça no posto 5 ou com créditos ganhos jogando."
+    ),
+    "PASS_KIT_ELITE": (
+        "Equipamento nível 2 (inclui o Veterano): colete antiestilhaço e fumaça extra (EUA), "
+        "granada e fumaça extras (VC). Também sai de graça no posto 7 ou com créditos."
+    ),
+}
+
+
+def cmd_create_store(only: set[str] | None = None) -> None:
+    """Cria passes e produtos que faltam. `only`: só estas chaves (ex.: itens de jogo da D-72)."""
     c = cfg()
     u = c["universeId"]
     ids = load_ids()
@@ -156,14 +172,17 @@ def cmd_create_store() -> None:
         ("PASS_VC_1965", "Uniformes Força Principal 1965", "marketing/gamepass_vc_1965.jpg", 149),
         ("PASS_UNIT", "Passe de Unidade", "marketing/gamepass_unidade.jpg", 299),
         ("PASS_SUPPORTER", "Apoiador — Dossiê Starlite", "marketing/gamepass_apoiador.jpg", 99),
+        # itens de jogo (decisão do dono, 2026-11-11, D-72); preços = Commerce.suggestedRobux
+        ("PASS_KIT_VETERAN", "Kit Veterano", "marketing/gamepass_kit_veterano.jpg", 149),
+        ("PASS_KIT_ELITE", "Kit de Elite", "marketing/gamepass_kit_elite.jpg", 299),
     ]
     for key, name, img, price in passes:
-        if f"store.{key}" in ids:
+        if f"store.{key}" in ids or (only is not None and key not in only):
             continue
         body, ctype = multipart(
             {
                 "name": name,
-                "description": "Só visual/apoio. Sem vantagem.",
+                "description": KIT_DESC.get(key, "Só visual/apoio. Sem vantagem."),
                 "isForSale": "true",
                 "price": str(price),
             },
@@ -177,16 +196,23 @@ def cmd_create_store() -> None:
             ids[f"store.{key}"] = str(gid)
             save_ids(ids)
     products = [
-        ("PRODUCT_TIP_SMALL", "Apoiar o desenvolvimento", 25),
-        ("PRODUCT_TIP_LARGE", "Apoiar o desenvolvimento (grande)", 100),
+        ("PRODUCT_TIP_SMALL", "Apoiar o desenvolvimento", 25, "Sem recompensa em jogo."),
+        ("PRODUCT_TIP_LARGE", "Apoiar o desenvolvimento (grande)", 100, "Sem recompensa em jogo."),
+        (
+            "PRODUCT_RESPAWN_INPLACE",
+            "Renascer onde caiu",
+            25,
+            "Volta a campo onde você caiu, na mesma espera do spawn normal, sem inimigo a menos "
+            "de 100 m. Se não der na hora, fica guardado para a próxima queda.",
+        ),
     ]
-    for key, name, price in products:
-        if f"store.{key}" in ids:
+    for key, name, price, desc in products:
+        if f"store.{key}" in ids or (only is not None and key not in only):
             continue
         url = f"{API}/developer-products/v2/universes/{u}/developer-products"
         fields = {
             "name": name,
-            "description": "Sem recompensa em jogo.",
+            "description": desc,
             "price": str(price),
             "isForSale": "true",
         }
@@ -230,7 +256,8 @@ if __name__ == "__main__":
     if cmd == "upload-assets":
         cmd_upload_assets()
     elif cmd == "create-store":
-        cmd_create_store()
+        # create-store [CHAVE ...]: sem chaves cria tudo o que falta
+        cmd_create_store(set(sys.argv[2:]) or None)
     elif cmd == "publish-place":
         cmd_publish_place()
     elif cmd == "all":

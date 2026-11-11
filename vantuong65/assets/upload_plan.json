@@ -145,15 +145,15 @@
  },
  {
   "key": "Models.m14",
-  "file": "assets/forgegui/models/m14_studs.glb",
+  "file": "assets/forgegui/models/m14_studs_parker.glb",
   "assetType": "Model",
-  "name": "VT65 m14"
+  "name": "VT65 m14 aco"
  },
  {
   "key": "Models.type56",
-  "file": "assets/forgegui/models/type56_studs.glb",
+  "file": "assets/forgegui/models/type56_studs_parker.glb",
   "assetType": "Model",
-  "name": "VT65 type56"
+  "name": "VT65 type56 aco"
  },
  {
   "key": "Models.hut_thatch",
@@ -175,15 +175,15 @@
  },
  {
   "key": "Accessories.us_m1955_vest",
-  "file": "assets/forgegui/models/colete_m1955_studs.glb",
+  "file": "assets/forgegui/models/colete_m1955_studs_fosco.glb",
   "assetType": "Model",
-  "name": "VT65 us_m1955_vest"
+  "name": "VT65 us_m1955_vest fosco"
  },
  {
   "key": "Accessories.us_m1_helmet",
-  "file": "assets/forgegui/models/capacete_m1_studs.glb",
+  "file": "assets/forgegui/models/capacete_m1_studs_fosco.glb",
   "assetType": "Model",
-  "name": "VT65 us_m1_helmet"
+  "name": "VT65 us_m1_helmet fosco"
  },
  {
   "key": "Models.hill_tree",
@@ -229,21 +229,21 @@
  },
  {
   "key": "Models.m60",
-  "file": "assets/forgegui/models/m60_studs.glb",
+  "file": "assets/forgegui/models/m60_studs_parker.glb",
   "assetType": "Model",
-  "name": "VT65 m60"
+  "name": "VT65 m60 aco"
  },
  {
   "key": "Models.rpd",
-  "file": "assets/forgegui/models/rpd_studs.glb",
+  "file": "assets/forgegui/models/rpd_studs_parker.glb",
   "assetType": "Model",
-  "name": "VT65 rpd"
+  "name": "VT65 rpd aco"
  },
  {
   "key": "Models.sks",
-  "file": "assets/forgegui/models/sks_studs.glb",
+  "file": "assets/forgegui/models/sks_studs_parker.glb",
   "assetType": "Model",
-  "name": "VT65 sks"
+  "name": "VT65 sks aco"
  },
  {
   "key": "Models.hut_veranda",
@@ -301,39 +301,39 @@
  },
  {
   "key": "Models.m1911",
-  "file": "assets/forgegui/models/m1911_studs.glb",
+  "file": "assets/forgegui/models/m1911_studs_parker.glb",
   "assetType": "Model",
-  "name": "VT65 m1911"
+  "name": "VT65 m1911 aco"
  },
  {
   "key": "Models.type54",
-  "file": "assets/forgegui/models/type54_studs.glb",
+  "file": "assets/forgegui/models/type54_studs_parker.glb",
   "assetType": "Model",
-  "name": "VT65 type54"
+  "name": "VT65 type54 aco"
  },
  {
   "key": "Models.m79",
-  "file": "assets/forgegui/models/m79_studs.glb",
+  "file": "assets/forgegui/models/m79_studs_parker.glb",
   "assetType": "Model",
-  "name": "VT65 m79"
+  "name": "VT65 m79 aco"
  },
  {
   "key": "Models.rpg2",
-  "file": "assets/forgegui/models/rpg2_studs.glb",
+  "file": "assets/forgegui/models/rpg2_studs_parker.glb",
   "assetType": "Model",
-  "name": "VT65 rpg2"
+  "name": "VT65 rpg2 aco"
  },
  {
   "key": "Accessories.vc_jungle_hat",
-  "file": "assets/forgegui/models/chapeu_selva_studs.glb",
+  "file": "assets/forgegui/models/chapeu_selva_studs_fosco.glb",
   "assetType": "Model",
-  "name": "VT65 vc_jungle_hat"
+  "name": "VT65 vc_jungle_hat fosco"
  },
  {
   "key": "Accessories.vc_pith_helmet",
-  "file": "assets/forgegui/models/capacete_fibra_studs.glb",
+  "file": "assets/forgegui/models/capacete_fibra_studs_fosco.glb",
   "assetType": "Model",
-  "name": "VT65 vc_pith_helmet"
+  "name": "VT65 vc_pith_helmet fosco"
  },
  {
   "key": "Models.tunnel_entrance",
@@ -580,5 +580,129 @@
   "file": "assets/texturas/forest_ground_06_rugosidade.jpg",
   "assetType": "Decal",
   "name": "VT65 chao forest_ground_06 rugosidade"
+ },
+ {
+  "key": "Models.ph_island_tree_01",
+  "file": "assets/arvores/ph_island_tree_01.glb",
+  "assetType": "Model",
+  "name": "VT65 arvore ph_island_tree_01",
+  "description": "VAN TUONG 65 - arvore Poly Haven (CC0), cartoes de folha (D-67)"
+ },
+ {
+  "key": "Models.ph_island_tree_02",
+  "file": "assets/arvores/ph_island_tree_02.glb",
+  "assetType": "Model",
+  "name": "VT65 arvore ph_island_tree_02",
+  "description": "VAN TUONG 65 - arvore Poly Haven (CC0), cartoes de folha (D-67)"
+ },
+ {
+  "key": "Models.ph_island_tree_03",
+  "file": "assets/arvores/ph_island_tree_03.glb",
+  "assetType": "Model",
+  "name": "VT65 arvore ph_island_tree_03",
+  "description": "VAN TUONG 65 - arvore Poly Haven (CC0), cartoes de folha (D-67)"
+ },
+ {
+  "key": "Models.ph_tree_small_02",
+  "file": "assets/arvores/ph_tree_small_02.glb",
+  "assetType": "Model",
+  "name": "VT65 arvore ph_tree_small_02",
+  "description": "VAN TUONG 65 - arvore Poly Haven (CC0), cartoes de folha (D-67)"
+ },
+ {
+  "key": "Clothing.us_shirt_v3",
+  "file": "assets/clothing/v3/us_shirt_v3.png",
+  "assetType": "Decal",
+  "name": "VT65 us_shirt_v3"
+ },
+ {
+  "key": "Clothing.us_shirt_rolled_v3",
+  "file": "assets/clothing/v3/us_shirt_rolled_v3.png",
+  "assetType": "Decal",
+  "name": "VT65 us_shirt_rolled_v3"
+ },
+ {
+  "key": "Clothing.us_pants_v3",
+  "file": "assets/clothing/v3/us_pants_v3.png",
+  "assetType": "Decal",
+  "name": "VT65 us_pants_v3"
+ },
+ {
+  "key": "Clothing.vc_khaki_shirt_v3",
+  "file": "assets/clothing/v3/vc_khaki_shirt_v3.png",
+  "assetType": "Decal",
+  "name": "VT65 vc_khaki_shirt_v3"
+ },
+ {
+  "key": "Clothing.vc_khaki_pants_v3",
+  "file": "assets/clothing/v3/vc_khaki_pants_v3.png",
+  "assetType": "Decal",
+  "name": "VT65 vc_khaki_pants_v3"
+ },
+ {
+  "key": "Clothing.vc_green_shirt_v3",
+  "file": "assets/clothing/v3/vc_green_shirt_v3.png",
+  "assetType": "Decal",
+  "name": "VT65 vc_green_shirt_v3"
+ },
+ {
+  "key": "Clothing.vc_green_pants_v3",
+  "file": "assets/clothing/v3/vc_green_pants_v3.png",
+  "assetType": "Decal",
+  "name": "VT65 vc_green_pants_v3"
+ },
+ {
+  "key": "Clothing.vc_black_shirt_v3",
+  "file": "assets/clothing/v3/vc_black_shirt_v3.png",
+  "assetType": "Decal",
+  "name": "VT65 vc_black_shirt_v3"
+ },
+ {
+  "key": "Clothing.vc_black_pants_v3",
+  "file": "assets/clothing/v3/vc_black_pants_v3.png",
+  "assetType": "Decal",
+  "name": "VT65 vc_black_pants_v3"
+ },
+ {
+  "key": "Sky.ft",
+  "file": "assets/ceu/ceu_ft.png",
+  "assetType": "Decal",
+  "name": "VT65 ceu ft",
+  "description": "VAN TUONG 65 - ceu Poly Haven kloofendal_48d_partly_cloudy_puresky (CC0)"
+ },
+ {
+  "key": "Sky.bk",
+  "file": "assets/ceu/ceu_bk.png",
+  "assetType": "Decal",
+  "name": "VT65 ceu bk",
+  "description": "VAN TUONG 65 - ceu Poly Haven kloofendal_48d_partly_cloudy_puresky (CC0)"
+ },
+ {
+  "key": "Sky.lf",
+  "file": "assets/ceu/ceu_lf.png",
+  "assetType": "Decal",
+  "name": "VT65 ceu lf",
+  "description": "VAN TUONG 65 - ceu Poly Haven kloofendal_48d_partly_cloudy_puresky (CC0)"
+ },
+ {
+  "key": "Sky.rt",
+  "file": "assets/ceu/ceu_rt.png",
+  "assetType": "Decal",
+  "name": "VT65 ceu rt",
+  "description": "VAN TUONG 65 - ceu Poly Haven kloofendal_48d_partly_cloudy_puresky (CC0)"
+ },
+ {
+  "key": "Sky.up",
+  "file": "assets/ceu/ceu_up.png",
+  "assetType": "Decal",
+  "name": "VT65 ceu up",
+  "description": "VAN TUONG 65 - ceu Poly Haven kloofendal_48d_partly_cloudy_puresky (CC0)"
+ },
+ {
+  "key": "Sky.dn",
+  "file": "assets/ceu/ceu_dn.png",
+  "assetType": "Decal",
+  "name": "VT65 ceu dn",
+  "description": "VAN TUONG 65 - ceu Poly Haven kloofendal_48d_partly_cloudy_puresky (CC0)"
  }
 ]

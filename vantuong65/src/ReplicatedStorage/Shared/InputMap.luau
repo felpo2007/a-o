@@ -6,7 +6,7 @@
 local InputMap = {}
 
 -- Contextos: um de jogo por vez (infantaria, veículo terrestre, helicóptero); "aim" é uma camada da
--- infantaria (LB/RB inclinam); mapa, menu e roda ficam por cima e bloqueiam o jogo (Sink).
+-- infantaria (L3/R3 inclinam); mapa, menu e roda ficam por cima e bloqueiam o jogo (Sink).
 InputMap.CONTEXTS = {
 	global = { priority = 90, game = true, sink = false }, -- vale em todos os contextos de jogo
 	infantry = { priority = 100, game = true, sink = false },
@@ -55,8 +55,10 @@ local function act(
 	})
 end
 
--- Infantaria (Parte 12.2). Mover, olhar e pular ficam com o PlayerModule/CameraLook.
+-- Infantaria (Parte 12.2). Mover e olhar ficam com o PlayerModule/CameraLook. O pulo continua no
+-- PlayerModule; "jump" só escuta o mesmo botão para o contextual (transpor/escalar, levantar).
 act("sprint", "infantry", "ButtonL3", "press", "LeftShift", "press", "Correr")
+act("jump", "infantry", "ButtonA", "press", "Space", "press", "Pular / transpor")
 act("melee", "infantry", "ButtonR3", "press", "MouseMiddleButton", "press", "Corpo a corpo")
 act("aim", "infantry", "ButtonL2", "press", "MouseRightButton", "press", "Mirar")
 act("fire", "infantry", "ButtonR2", "press", "MouseLeftButton", "press", "Atirar")
@@ -70,19 +72,24 @@ act("reload", "infantry", "ButtonX", "tap", "R", "press", "Recarregar")
 act("interact", "infantry", "ButtonX", "hold", "F", "hold", "Interagir")
 act("swap_weapon", "infantry", "ButtonY", "tap", "One", "press", "Trocar arma")
 act("bayonet", "infantry", "ButtonY", "hold", "K", "press", "Baioneta")
-act("binoculars", "infantry", "DPadUp", "press", "B", "press", "Binóculo")
+-- Direcional ↑ e →: tocar mantém a função da Parte 12 (binóculo, canal de rádio); segurar controla a
+-- câmera de 3ª pessoa (pedido do dono, 2026-11-11). No teclado, O e I.
+act("binoculars", "infantry", "DPadUp", "tap", "B", "press", "Binóculo")
+act("shoulder_swap", "infantry", "DPadUp", "hold", "I", "press", "Trocar ombro (3ª pessoa)")
 act("quick_bandage", "infantry", "DPadDown", "press", "G", "press", "Bandagem rápida")
 act("fire_mode", "infantry", "DPadLeft", "tap", "V", "tap", "Seletor de tiro")
 act("zeroing", "infantry", "DPadLeft", "hold", "V", "hold", "Alça de mira")
-act("radio_channel", "infantry", "DPadRight", "press", "U", "press", "Canal de rádio")
+act("radio_channel", "infantry", "DPadRight", "tap", "U", "press", "Canal de rádio")
+act("view_toggle", "infantry", "DPadRight", "hold", "O", "press", "1ª / 3ª pessoa")
 act("map", "global", "ButtonSelect", "tap", "M", "press", "Mapa tático")
 act("game_menu", "global", "ButtonSelect", "hold", "P", "press", "Menu do jogo")
 act("give_up", "infantry", nil, "press", "H", "press", "Desistir (caído: segure B)")
 act("tourniquet", "infantry", nil, "press", "T", "press", "Torniquete (também na roda)")
--- Camada de mira: LB/RB inclinam enquanto mira (Q/E no teclado a qualquer hora).
-act("lean_left", "aim", "ButtonL1", "press", "Q", "press", "Inclinar à esquerda")
-act("lean_right", "aim", "ButtonR1", "press", "E", "press", "Inclinar à direita")
-act("hold_breath", "aim", "ButtonL3", "press", "LeftShift", "press", "Prender a respiração")
+-- Camada de mira: L3/R3 (afundar os analógicos) inclinam enquanto mira, a pedido do usuário (D-69);
+-- LB prende a respiração; RB segue marcando. Q/E no teclado a qualquer hora.
+act("lean_left", "aim", "ButtonL3", "press", "Q", "press", "Inclinar à esquerda")
+act("lean_right", "aim", "ButtonR3", "press", "E", "press", "Inclinar à direita")
+act("hold_breath", "aim", "ButtonL1", "press", "LeftShift", "press", "Prender a respiração")
 
 -- Veículo terrestre (Parte 12.3). Direção: analógico esquerdo (ou A/D); acelerar/frear: gatilhos
 -- (ou W/S) lidos como eixo no VehicleController.
@@ -155,6 +162,8 @@ export type Settings = {
 	fov: number, -- campo de visão base em graus (acessibilidade)
 	colorblind: string, -- "off" | "protan" | "deutan" | "tritan" (cor dos traçantes)
 	captions: boolean, -- legendas de som
+	thirdPerson: boolean, -- câmera de ombro (3ª pessoa) fora da mira
+	shoulderLeft: boolean, -- 3ª pessoa: ombro esquerdo
 	remap: { [string]: string }, -- "ctx.actionId" -> KeyCode do controle
 }
 
@@ -185,8 +194,13 @@ InputMap.DEFAULTS = {
 	fov = 70,
 	colorblind = "off",
 	captions = false,
+	thirdPerson = false,
+	shoulderLeft = false,
 	remap = {},
 } :: Settings
+
+-- Configurações que mudam os botões (o runtime refaz os bindings só quando uma delas muda).
+InputMap.BINDING_KEYS = { remap = true, swapTriggers = true } :: { [string]: boolean }
 
 local RANGES: { [string]: { number } } = {
 	holdTime = { 0.2, 0.6 },

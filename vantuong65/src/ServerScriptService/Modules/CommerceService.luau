@@ -12,6 +12,11 @@ local PlayerData = require(script.Parent.PlayerData)
 
 local CommerceService = {}
 local ownership: { [Player]: Commerce.Ownership } = {}
+-- produto entregue (grants "respawn"/"tip"); `now` = entregue agora (não um recibo repetido).
+-- Posto pelo ProgressionService (D-72).
+CommerceService.onGrant = nil :: ((player: Player, grants: string, now: boolean) -> ())?
+-- passes mudaram (compra de Game Pass, Premium, assinatura)
+CommerceService.onRefresh = nil :: ((player: Player) -> ())?
 
 local function passOwned(player: Player, id: number): boolean
 	if id == 0 then
@@ -34,8 +39,14 @@ local function subscribed(player: Player): boolean
 	return ok and type(status) == "table" and status.IsSubscribed == true
 end
 
+-- cosméticos ganhos em jogo (recompensa diária), lidos do perfil
+local function earnedOf(player: Player): { [string]: boolean }
+	local p = PlayerData.get(player)
+	return if p then table.clone(p.earned) else {}
+end
+
 function CommerceService.ownership(player: Player): Commerce.Ownership
-	return ownership[player] or { passes = {}, premium = false, subscription = false }
+	return ownership[player] or { passes = {}, premium = false, subscription = false, earned = earnedOf(player) }
 end
 
 local function stateFor(player: Player)
@@ -68,6 +79,7 @@ function CommerceService.refresh(player: Player)
 		passes = passes,
 		premium = player.MembershipType == Enum.MembershipType.Premium,
 		subscription = subscribed(player),
+		earned = earnedOf(player),
 	}
 	-- se algo equipado deixou de valer (ex.: assinatura vencida), volta ao padrão
 	local p = PlayerData.get(player)
@@ -79,6 +91,19 @@ function CommerceService.refresh(player: Player)
 				end
 			end
 		end
+	end
+	push(player)
+	if CommerceService.onRefresh then
+		task.spawn(CommerceService.onRefresh, player)
+	end
+end
+
+-- Depois de um resgate diário: relê os itens ganhos do perfil e manda o armário de novo (sem refazer
+-- as consultas de passe, que vão à rede).
+function CommerceService.earnedChanged(player: Player)
+	local own = ownership[player]
+	if own then
+		own.earned = earnedOf(player)
 	end
 	push(player)
 end
@@ -103,13 +128,23 @@ local function processReceipt(info: { [string]: any }): Enum.ProductPurchaseDeci
 		warn("[Commerce] produto desconhecido", info.ProductId)
 		return Enum.ProductPurchaseDecision.NotProcessedYet
 	end
-	local ok = PlayerData.applyReceipt(player, tostring(info.PurchaseId), function(p)
-		if string.find(key, "TIP") then
+	local grants = Commerce.productGrants(key)
+	local ok, now = PlayerData.applyReceipt(player, tostring(info.PurchaseId), function(p)
+		if grants == "respawn" then
+			-- renascer onde caiu (D-72): vira um "renascer guardado", gasto só quando acontecer
+			p.respawnCredits = math.min(p.respawnCredits + 1, 1000)
+		elseif string.find(key, "TIP") then
 			p.tips += 1
 		end
 	end)
 	if not ok then
 		return Enum.ProductPurchaseDecision.NotProcessedYet
+	end
+	if now and grants == "respawn" then
+		PlayerData.bump(player, "respawnCredits", 1)
+	end
+	if grants and CommerceService.onGrant then
+		task.spawn(CommerceService.onGrant, player, grants, now)
 	end
 	track(player, "purchase", key)
 	pcall(function()

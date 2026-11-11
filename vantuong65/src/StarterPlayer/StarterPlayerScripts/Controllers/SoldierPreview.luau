@@ -1,10 +1,13 @@
 --!strict
--- Prévia 3D do soldado na tela de deslocamento. Clona o manequim que o servidor vestiu
--- (ReplicatedStorage.VT65Preview.<US|VC>, PreviewService) num ViewportFrame com WorldModel e troca a
--- arma pela do papel: a arte publicada (cópias em ReplicatedStorage.VT65WeaponArt) ou, sem ela, a
--- provisória do GunModel, exatamente como AssetLoader.attachWeapon faz no spawn. A câmera gira devagar
--- em volta do soldado (mesa giratória) e a luz principal acompanha a câmera, então o efeito é o do
--- soldado girando sob uma luz fixa e quente. Enquanto o manequim não chega, mostra uma silhueta.
+-- Prévia 3D do soldado no lobby. Clona o manequim que o servidor vestiu
+-- (ReplicatedStorage.VT65Preview.<US|VC>, PreviewService) e troca a arma pela do papel: a arte
+-- publicada (cópias em ReplicatedStorage.VT65WeaponArt) ou, sem ela, a provisória do GunModel,
+-- exatamente como AssetLoader.attachWeapon faz no spawn. Dois modos:
+--   - SoldierPreview.new: retrato num ViewportFrame com WorldModel; a câmera gira devagar em volta do
+--     soldado (mesa giratória) e a luz principal acompanha a câmera. Enquanto o manequim não chega,
+--     mostra uma silhueta;
+--   - SoldierPreview.newWorld: o soldado de pé na cena do lobby (LobbyScene), com os pés no ponto
+--     dado, de frente para onde o ponto olha. Ilumina-se pelas luzes da cena.
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
@@ -15,12 +18,13 @@ local UiKit = require(script.Parent.UiKit)
 local SoldierPreview = {}
 
 export type Preview = {
-	frame: Frame, -- contêiner: quem usa define Parent, Position e Size
-	vp: ViewportFrame,
-	world: WorldModel,
-	cam: Camera,
-	silhouette: Frame,
-	note: TextLabel, -- texto da silhueta (quem usa registra o tamanho de texto)
+	frame: Frame?, -- contêiner do retrato: quem usa define Parent, Position e Size (nil no mundo)
+	vp: ViewportFrame?,
+	world: Instance, -- WorldModel do retrato ou a pasta da cena
+	cam: Camera?,
+	silhouette: Frame?,
+	note: TextLabel?, -- texto da silhueta (quem usa registra o tamanho de texto)
+	stand: CFrame?, -- modo mundo: chão sob os pés e direção do olhar
 	wantFaction: string?,
 	wantWeapon: string?,
 	model: Model?,
@@ -114,6 +118,29 @@ local function frameModel(p: Preview)
 	p.dist = (h * 0.5 * 1.12) / math.tan(math.rad(FOV / 2))
 end
 
+-- modo mundo: pés no chão do ponto (a arma pendurada na mão não conta como "pé")
+local function standModel(m: Model, stand: CFrame)
+	m:PivotTo(stand)
+	local bottom = math.huge
+	for _, name in { "LeftFoot", "RightFoot" } do
+		local f = m:FindFirstChild(name)
+		if f and f:IsA("BasePart") then
+			bottom = math.min(bottom, f.Position.Y - f.Size.Y / 2)
+		end
+	end
+	if bottom == math.huge then
+		local cf, size = m:GetBoundingBox()
+		bottom = cf.Position.Y - size.Y / 2
+	end
+	m:PivotTo(stand + Vector3.new(0, stand.Position.Y - bottom, 0))
+	local hum = m:FindFirstChildOfClass("Humanoid")
+	if hum then
+		pcall(function()
+			hum.EvaluateStateMachine = false -- boneco parado: sem estados nem física de personagem
+		end)
+	end
+end
+
 local function sync(p: Preview)
 	local f = p.wantFaction
 	if f ~= p.modelFaction then
@@ -125,7 +152,12 @@ local function sync(p: Preview)
 		if src then
 			local m = src:Clone()
 			freeze(m)
-			m:PivotTo(CFrame.identity) -- frente do soldado em −Z
+			local stand = p.stand
+			if stand then
+				standModel(m, stand)
+			else
+				m:PivotTo(CFrame.identity) -- frente do soldado em −Z
+			end
 			m.Parent = p.world
 			p.model, p.modelFaction = m, f
 			local w = m:FindFirstChild("Weapon")
@@ -133,10 +165,15 @@ local function sync(p: Preview)
 			p.weapon = if type(wid) == "string" then wid else nil
 			-- a provisória (GunModel.build) tem o atributo Kind; a publicada (GunModel.fit), não
 			p.weaponArt = w ~= nil and w:GetAttribute("Kind") == nil
-			frameModel(p)
+			if not stand then
+				frameModel(p)
+			end
 		end
 	end
-	p.silhouette.Visible = p.model == nil
+	local sil = p.silhouette
+	if sil then
+		sil.Visible = p.model == nil
+	end
 	local want = p.wantWeapon or p.weapon
 	if p.model and want and (want ~= p.weapon or (not p.weaponArt and weaponArt(want) ~= nil)) then
 		mountWeapon(p, want)
@@ -149,6 +186,30 @@ local function syncAll()
 	end
 end
 
+local function blank(world: Instance): Preview
+	return {
+		frame = nil,
+		vp = nil,
+		world = world,
+		cam = nil,
+		silhouette = nil,
+		note = nil,
+		stand = nil,
+		wantFaction = nil,
+		wantWeapon = nil,
+		model = nil,
+		modelFaction = nil,
+		weapon = nil,
+		weaponArt = false,
+		center = Vector3.zero,
+		dist = 16,
+		angle = -0.45,
+		speed = 0.24,
+		active = false,
+	}
+end
+
+-- Retrato num ViewportFrame (p.frame e p.note existem sempre neste modo)
 function SoldierPreview.new(speed: number?, startAngle: number?): Preview
 	local frame = Instance.new("Frame")
 	frame.Name = "SoldierPreview"
@@ -223,30 +284,23 @@ function SoldierPreview.new(speed: number?, startAngle: number?): Preview
 	cam.Parent = vp
 	vp.CurrentCamera = cam
 
-	local p: Preview = {
-		frame = frame,
-		vp = vp,
-		world = world,
-		cam = cam,
-		silhouette = sil,
-		note = note,
-		wantFaction = nil,
-		wantWeapon = nil,
-		model = nil,
-		modelFaction = nil,
-		weapon = nil,
-		weaponArt = false,
-		center = Vector3.zero,
-		dist = 16,
-		angle = startAngle or -0.45,
-		speed = speed or 0.24, -- uma volta em ~26 s
-		active = false,
-	}
+	local p = blank(world)
+	p.frame, p.vp, p.cam, p.silhouette, p.note = frame, vp, cam, sil, note
+	p.angle = startAngle or -0.45
+	p.speed = speed or 0.24 -- uma volta em ~26 s
 	table.insert(list, p)
 	return p
 end
 
--- facção (nil = só a silhueta) e arma do papel (nil = a que o servidor montou: a do fuzileiro)
+-- Soldado de pé na cena: `stand` é o chão sob os pés, olhando para a frente do soldado (−Z).
+function SoldierPreview.newWorld(parent: Instance, stand: CFrame): Preview
+	local p = blank(parent)
+	p.stand = stand
+	table.insert(list, p)
+	return p
+end
+
+-- facção (nil = nada / silhueta) e arma do papel (nil = a que o servidor montou: a do fuzileiro)
 function SoldierPreview.set(p: Preview, faction: string?, weaponId: string?)
 	if faction == p.wantFaction and weaponId == p.wantWeapon then
 		return
@@ -259,16 +313,17 @@ function SoldierPreview.setActive(p: Preview, on: boolean)
 	p.active = on
 end
 
--- mesa giratória: só as prévias ativas; nenhuma tabela ou instância criada por quadro
+-- mesa giratória: só os retratos ativos; nenhuma tabela ou instância criada por quadro
 RunService.RenderStepped:Connect(function(dt: number)
 	for _, p in list do
-		if p.active and p.model then
+		local cam, vp = p.cam, p.vp
+		if p.active and p.model and cam and vp then
 			local a = (p.angle + dt * p.speed) % (2 * math.pi)
 			p.angle = a
 			local c, d = p.center, p.dist
 			local cf = CFrame.lookAt(Vector3.new(c.X + math.sin(a) * d, c.Y + d * 0.05, c.Z - math.cos(a) * d), c)
-			p.cam.CFrame = cf
-			p.vp.LightDirection = cf:VectorToWorldSpace(KEY)
+			cam.CFrame = cf
+			vp.LightDirection = cf:VectorToWorldSpace(KEY)
 		end
 	end
 end)

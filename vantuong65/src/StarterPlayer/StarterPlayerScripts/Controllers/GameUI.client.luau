@@ -1,7 +1,9 @@
 --!strict
 -- Menus de entrada e mapa tático (F2 + Parte 12.5).
--- Tela de deslocamento (DeployScreen, tela cheia): lado → squad → papel → inserção, com prévia 3D
--- do soldado e a cena do mapa ao fundo (LobbyScene). Abre com foco no 1º cartão; A confirma, B volta.
+-- Lobby (DeployScreen sobre a mesa 3D do LobbyScene): lado → mesa → squad → papel → inserção. No
+-- controle, o analógico esquerdo move o cursor virtual (VirtualCursor) pela mesa e pelos papéis;
+-- A escolhe, B volta, LB/RB pulam entre os objetos/abas. A carta de spawn abre quando a inserção é
+-- escolhida na mesa (ou direto, ao morrer com papel).
 -- Mapa (tocar View / M): setores e pontos fortes, nunca inimigos (Parte 9.5). No controle, o
 -- analógico esquerdo move um cursor com ímã que gruda nos pontos de spawn e nos pontos fortes; o
 -- direito dá zoom; LB/RB pulam entre spawns liberados; A escolhe; X marca; Y troca de papel;
@@ -21,7 +23,9 @@ local Bus = require(script.Parent.Bus)
 local DeployScreen = require(script.Parent.DeployScreen)
 local Input = require(script.Parent.Input)
 local LobbyScene = require(script.Parent.LobbyScene)
+local SpawnTransition = require(script.Parent.SpawnTransition)
 local UiKit = require(script.Parent.UiKit)
+local VirtualCursor = require(script.Parent.VirtualCursor)
 
 local player = Players.LocalPlayer
 local gui = UiKit.screen("VT65Menus", 20)
@@ -68,9 +72,11 @@ local side = DeployScreen.root
 side.Parent = stage
 
 -- mapa tático: janela fixa (5:3) presa como carta numa prancheta; a "tela" interna escala com o zoom
-local MAP_W, MAP_H, MAP_Y = 810, 486, 160
+-- (MAP_Y abaixo das abas do lobby, que vão de 84 a 136)
+local MAP_W, MAP_H, MAP_Y = 810, 486, 176
 local mapFrame = frame(stage, UDim2.fromOffset(MAP_W, MAP_H), UDim2.fromOffset(430, MAP_Y))
 mapFrame.ClipsDescendants = true
+mapFrame.Active = true -- tapa a mesa 3D do lobby atrás da carta (o clique não atravessa)
 mapFrame.Visible = false
 mapFrame.ZIndex = 2 -- por cima da tela de deslocamento (passo da inserção)
 local mapEdge = Instance.new("UIStroke")
@@ -193,6 +199,24 @@ local function spawnById(id: string): any
 	return nil
 end
 
+-- Inserção: só ponto PRONTO; a transição carrega a área antes de pedir o spawn (SpawnTransition)
+local function insert(pt: any)
+	if SpawnTransition.busy() then
+		return
+	end
+	if pt.blocked or (type(pt.wait) == "number" and pt.wait > 0) then
+		status.Text = string.format(
+			"%s — %s",
+			pt.name,
+			if pt.blocked then (pt.why or "bloqueado") else string.format("espera %d s", pt.wait)
+		)
+		return
+	end
+	SpawnTransition.go({ id = pt.id, name = pt.name, x = pt.x, z = pt.z }, function()
+		Net.event("Spawn_Request"):FireServer(pt.id)
+	end)
+end
+
 local function drawMap()
 	clear(canvas)
 	if not matchState then
@@ -284,7 +308,7 @@ local function drawMap()
 			s.Parent = b
 			b.Parent = canvas
 			b.Activated:Connect(function()
-				Net.event("Spawn_Request"):FireServer(pt.id)
+				insert(pt)
 			end)
 		end
 	end
@@ -348,14 +372,16 @@ local function syncInput()
 		mapOpenState = wantMap
 		Input.event(if wantMap then "map_open" else "map_close")
 	end
-	-- no mapa a navegação é nossa (cursor com ímã); fora dele, a do Roblox
+	-- lobby: o cursor virtual do controle manda (mesa 3D e papéis); no mapa, o cursor com ímã do
+	-- mapa; fora dos dois, a navegação do Roblox
 	local inMap = mapFrame.Visible
-	GuiService.GuiNavigationEnabled = not inMap
+	VirtualCursor.setActive(wantMenu)
+	GuiService.GuiNavigationEnabled = not inMap and not VirtualCursor.isActive()
 	cursorUI.Visible = inMap and Input.isGamepad()
-	if wantMenu then
-		UiKit.focus(side)
-	elseif inMap then
+	if VirtualCursor.isActive() or inMap then
 		GuiService.SelectedObject = nil
+	elseif wantMenu then
+		UiKit.focus(side)
 	end
 end
 
@@ -363,7 +389,9 @@ local function refresh()
 	local dead = not alive()
 	local hasRole = player:GetAttribute("Role") ~= nil
 	side.Visible = dead or not hasRole
-	mapFrame.Visible = (dead and hasRole) or pinned or mode == "target"
+	DeployScreen.render(squadState) -- decide o painel (a inserção abre a carta de spawn)
+	local insertion = side.Visible and dead and hasRole and DeployScreen.panel() == "insert"
+	mapFrame.Visible = insertion or pinned or mode == "target"
 	local targeting = mode == "target"
 	if not targeting then
 		if dead and hasRole then
@@ -372,7 +400,6 @@ local function refresh()
 			mode = "view"
 		end
 	end
-	DeployScreen.render(squadState)
 	placeMap()
 	if mapFrame.Visible then
 		drawMap()
@@ -401,6 +428,27 @@ Input.on("ui_back", "press", function()
 		DeployScreen.back()
 	end
 end)
+-- LB/RB (Q/E): objeto seguinte da mesa / aba seguinte do lobby (só com o lobby por cima de tudo)
+local TAB_DIR: { [string]: number } = { ui_tab_prev = -1, ui_tab_next = 1 }
+for action, dir in TAB_DIR do
+	Input.on(action, "press", function()
+		if Input.state.menus > 1 or menusBefore > 1 then
+			return
+		end
+		if side.Visible and not mapFrame.Visible then
+			DeployScreen.cycle(dir)
+		end
+	end)
+end
+
+-- a carta de spawn aberta pela mesa: B (ou Select) volta para a mesa, não fecha o lobby
+local function spawnMapBack(): boolean
+	if mode == "spawn" and side.Visible and DeployScreen.panel() == "insert" then
+		DeployScreen.open("desk")
+		return true
+	end
+	return false
+end
 
 -- ===== entradas do mapa =====
 local function moveCursorTo(pt: any)
@@ -421,14 +469,18 @@ Input.on("map_close", "press", function()
 		Bus.fire("map_target_end")
 	end
 	pinned = false
-	refresh()
+	if not spawnMapBack() then
+		refresh()
+	end
 end)
 Input.on("map_back", "press", function()
 	if mode == "target" then
 		Bus.fire("map_target_end")
 	end
 	pinned = false
-	refresh()
+	if not spawnMapBack() then
+		refresh()
+	end
 end)
 Input.on("map_next", "press", function()
 	local list = readySpawns()
@@ -455,7 +507,7 @@ Input.on("map_select", "press", function()
 	elseif mode == "spawn" and focused then
 		local pt = spawnById(focused.id)
 		if pt then
-			Net.event("Spawn_Request"):FireServer(pt.id)
+			insert(pt)
 		end
 	end
 end)
@@ -465,8 +517,7 @@ Input.on("map_mark", "press", function()
 end)
 Input.on("map_role", "press", function()
 	if mode == "spawn" and not alive() then
-		player:SetAttribute("Role", nil) -- só o menu; o servidor confirma ao escolher
-		refresh()
+		DeployScreen.open("role") -- o papel da mesa; o servidor só troca ao escolher outro (+15 s)
 	end
 end)
 
@@ -560,8 +611,8 @@ Input.DeviceChanged:Connect(refresh)
 
 -- aviso enquanto o servidor gera o terreno (faixa datilografada à direita dos passos)
 local loading = Instance.new("TextLabel")
-loading.Position = UDim2.fromOffset(700, 84)
-loading.Size = UDim2.fromOffset(540, 22)
+loading.Position = UDim2.fromOffset(660, 138) -- entre as abas do lobby e os papéis
+loading.Size = UDim2.fromOffset(580, 20)
 loading.BackgroundColor3 = UiKit.NIGHT
 loading.BackgroundTransparency = 0.35
 loading.BorderSizePixel = 0

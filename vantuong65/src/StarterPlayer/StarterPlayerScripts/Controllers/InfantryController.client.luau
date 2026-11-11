@@ -2,7 +2,9 @@
 -- Infantaria no controle (Parte 12.2): correr (L3), agachar/deitar (B tocar/segurar), inclinar
 -- (LB/RB mirando), interagir segurando X (caixotes, túneis, construções via ProximityPrompt),
 -- marcar (RB tocar), rodas de equipamento (LB segurar) e de comunicação (RB segurar), último item
--- (LB tocar), canal de rádio (direcional →). Mostra marcações e mensagens recebidas do squad.
+-- (LB tocar), canal de rádio (direcional → tocar). Mostra marcações e mensagens recebidas do squad.
+-- Movimento (fôlego, inércia, pulo, transpor, câmera da postura): Movement.client. Aqui ficam só os
+-- pedidos de postura e corrida ao servidor; deitar correndo vira mergulho (Bus "dive").
 local Players = game:GetService("Players")
 local ProximityPromptService = game:GetService("ProximityPromptService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -14,6 +16,7 @@ local Net = require(ReplicatedStorage.Shared.Net)
 local Bus = require(script.Parent.Bus)
 local Input = require(script.Parent.Input)
 local UiKit = require(script.Parent.UiKit)
+local ViewMode = require(script.Parent.ViewMode)
 local Wheel = require(script.Parent.Wheel)
 
 local player = Players.LocalPlayer
@@ -31,10 +34,36 @@ local function setSprint(on: boolean)
 	if on == sprinting then
 		return
 	end
+	if on then
+		-- sem fôlego, deitando/levantando, mirando ou transpondo: não começa a correr (Movement.client)
+		if player:GetAttribute("Exhausted") == true then
+			Bus.fire("toast", "Sem fôlego")
+			return
+		elseif
+			player:GetAttribute("StanceBusy") == true
+			or player:GetAttribute("Aiming") == true
+			or player:GetAttribute("Vaulting") == true
+		then
+			return
+		end
+	end
 	sprinting = on
 	Input.event("sprint", on)
 	Net.event("Posture_Set"):FireServer({ sprint = on })
 end
+-- o Movement.client para a corrida (sem fôlego, ou parado com a corrida ligada)
+Bus.on("sprint_stop", function(reason: string?)
+	if sprinting then
+		setSprint(false)
+		if reason then
+			Bus.fire("toast", reason)
+		end
+	end
+end)
+-- mirar tira da corrida
+Input.on("aim", "press", function()
+	setSprint(false)
+end)
 Input.on("sprint", "press", function()
 	if Input.isGamepad() or Input.settings.sprintToggle then
 		setSprint(not sprinting) -- L3 alterna (Parte 12.2)
@@ -60,8 +89,13 @@ Input.on("crouch", "tap", function()
 	Net.event("Posture_Set"):FireServer({ stance = if stance() == "crouch" then "stand" else "crouch" })
 end)
 Input.on("prone", "holdStart", function()
+	local wasRunning = sprinting or (player.Character ~= nil and player.Character:GetAttribute("Sprinting") == true)
 	setSprint(false)
-	Net.event("Posture_Set"):FireServer({ stance = if stance() == "prone" then "stand" else "prone" })
+	local st = stance()
+	if st == "stand" and wasRunning then
+		Bus.fire("dive") -- correndo: mergulho para o chão (o Movement confere a velocidade)
+	end
+	Net.event("Posture_Set"):FireServer({ stance = if st == "prone" then "stand" else "prone" })
 end)
 
 -- inclinar: só mirando; câmera desloca ~0,35 m para o lado
@@ -100,6 +134,12 @@ end)
 
 -- ===== marcações e mensagens =====
 local function aimPoint(): Vector3?
+	if ViewMode.third then
+		-- 3ª pessoa: o ponto da retícula (o raio não para no que fica entre a câmera e o ombro)
+		local cf = camera.CFrame
+		local p = ViewMode.aimPoint(1500 / M)
+		return if (p - cf.Position).Magnitude < 1499 / M then p else nil
+	end
 	local params = RaycastParams.new()
 	params.FilterType = Enum.RaycastFilterType.Exclude
 	params.FilterDescendantsInstances = { player.Character :: Model }
@@ -118,11 +158,13 @@ end
 Input.on("mark", "tap", mark)
 
 local channel = "squad"
-Input.on("radio_channel", "press", function()
+local function switchChannel()
 	channel = if channel == "squad" then "command" else "squad"
 	player:SetAttribute("RadioChannel", channel)
 	Bus.fire("toast", if channel == "squad" then "Rádio: squad" else "Rádio: comando")
-end)
+end
+Input.on("radio_channel", "press", switchChannel) -- tecla U
+Input.on("radio_channel", "tap", switchChannel) -- direcional → tocar (segurar: 1ª/3ª pessoa)
 
 local function sendMessage(id: string)
 	Net.event("Squad_Message"):FireServer({ id = id, channel = channel })
@@ -372,18 +414,14 @@ Input.StateChanged:Connect(function(cancelled: { string })
 	end
 end)
 
--- câmera do inclinar e detecção de túnel (teto baixo cancela corrida e inclinação)
+-- detecção de túnel (teto baixo cancela corrida e inclinação). A câmera do inclinar e de deitado
+-- (CameraOffset) passou para o Movement.client, a cada quadro e com transição suave.
 local wasTunnel = false
 task.spawn(function()
 	while true do
 		task.wait(0.1)
 		local h = hum()
 		if h then
-			local lean = Input.state.lean
-			-- deitado: o quadril não desce abaixo de 0,2 stud (PostureService), então a câmera desce
-			-- até o olho de quem está de bruços (~0,3 m do chão)
-			local prone = player.Character and player.Character:GetAttribute("Prone") == true
-			h.CameraOffset = h.CameraOffset:Lerp(Vector3.new(lean * 0.35 / M, if prone then -1.6 else 0, 0), 0.5)
 			local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart") :: BasePart?
 			if root then
 				local params = RaycastParams.new()

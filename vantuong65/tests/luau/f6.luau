@@ -230,7 +230,7 @@ test("perfil: configurações e tutorial sobrevivem ao load (antes as configura�
 	local again = ProfileSchema.migrate(p)
 	assert(again.settings.invertY == true and again.tutorial.rifleman, "migrar duas vezes perde dados")
 	local d = ProfileSchema.migrate("lixo")
-	assert(d.schema == 1 and d.settings == nil and next(d.tutorial) == nil)
+	assert(d.schema == ProfileSchema.VERSION and d.settings == nil and next(d.tutorial) == nil)
 end)
 
 -- ===== acessibilidade (Parte 11) =====

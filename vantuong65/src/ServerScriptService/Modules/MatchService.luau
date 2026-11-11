@@ -288,8 +288,16 @@ local function publish()
 	})
 end
 
+-- Progressão (D-72): eventos de captura e fim de partida para quem ganha XP. Ganchos postos pelo
+-- ProgressionService (sem dependência circular).
+MatchService.onEvent = nil :: ((kind: string, sector: number, team: string?) -> ())?
+MatchService.onEnd = nil :: ((winner: string, seconds: number) -> ())?
+
 local function endMatch(winner: string)
 	MatchService.ended = true
+	if MatchService.onEnd then
+		task.spawn(MatchService.onEnd, winner, os.clock() - MatchService.startedAt)
+	end
 	local st = MatchService.state
 	if MatchService.report and st then
 		AfterAction.finish(MatchService.report, winner, os.clock() - MatchService.startedAt, st.owner)
@@ -365,6 +373,9 @@ function MatchService.start()
 							ev.team,
 							sp and sp.name
 						)
+					end
+					if MatchService.onEvent then
+						task.spawn(MatchService.onEvent, ev.kind, ev.sector, (ev :: any).team)
 					end
 					if ev.kind == "captured" then
 						MatchService.capturedAt[ev.sector] = os.clock()

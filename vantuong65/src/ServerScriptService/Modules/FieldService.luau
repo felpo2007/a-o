@@ -190,7 +190,7 @@ local function onThrow(p: Player, req: any)
 		if kind == "smoke" then
 			spawnSmoke(pos)
 		else
-			ExplosionService.detonate(if faction == "VC" then "grenade_vc" else "grenade_us", pos)
+			ExplosionService.detonate(if faction == "VC" then "grenade_vc" else "grenade_us", pos, p)
 		end
 	end)
 end
@@ -287,8 +287,14 @@ function FieldService.start()
 	local function arm(p: Player)
 		p.CharacterAdded:Connect(function(c)
 			-- equipamento por peso (Kit): validado no Kit_Set; padrão 2 granadas e 1 fumaça
-			p:SetAttribute("Frags", p:GetAttribute("KitFrags") or 2)
-			p:SetAttribute("Smokes", p:GetAttribute("KitSmokes") or 1)
+			-- + equipamento liberado (D-72, ProgressionService.applyGear)
+			local gf, gs = p:GetAttribute("GearFrags"), p:GetAttribute("GearSmokes")
+			local kf, ks = p:GetAttribute("KitFrags"), p:GetAttribute("KitSmokes")
+			p:SetAttribute("Frags", (if type(kf) == "number" then kf else 2) + (if type(gf) == "number" then gf else 0))
+			p:SetAttribute(
+				"Smokes",
+				(if type(ks) == "number" then ks else 1) + (if type(gs) == "number" then gs else 0)
+			)
 			c:SetAttribute("Bayonet", false)
 		end)
 	end

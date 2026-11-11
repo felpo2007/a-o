@@ -27,7 +27,9 @@ fx.Name = "VT65Effects"
 fx.Parent = workspace
 
 -- ===== arma em primeira pessoa =====
-local HIP = CFrame.new(0.17 / M, -0.19 / M, -0.34 / M) * CFrame.Angles(0, math.rad(4), 0)
+-- quadril: arma junto ao corpo (D-69: "aproxime as armas para mais perto do jogador"); era
+-- (0,17; −0,19; −0,34) m e a arma parecia flutuar longe
+local HIP = CFrame.new(0.12 / M, -0.15 / M, -0.23 / M) * CFrame.Angles(0, math.rad(3), 0)
 local EYE_TO_SIGHT_M = 0.09 -- olho até a alça, mirando
 local view: Model? = nil
 local viewId: string? = nil
@@ -39,6 +41,211 @@ local viewAlign = CFrame.identity
 local aimT = 0 -- 0 = quadril, 1 = ombro
 local kick = 0 -- recuo visual, volta em ~0,15 s
 local bobT = 0
+-- pontos no espaço da arma (punho na origem, boca em −Z, +Y para cima), lidos em setView
+local gripL, supportL, magL, chargeL = Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero
+local viewKind = "rifle"
+
+-- ===== mira limpa (D-69) =====
+-- "a mira está muito pixelada" (usuário): a alça e a massa ocupam poucos texels da textura de
+-- 1024 px da arma inteira. Por cima delas vão peças lisas de aço, no ponto medido na malha
+-- (tools/sight_align.py): anel (M14) ou entalhe (Type 56, SKS) e a lâmina da massa. Ficam 0,4–0,6 mm
+-- à frente da malha (lado do olho), sem disputar o mesmo plano.
+local STEEL = Color3.fromRGB(38, 39, 37)
+local function sightPart(parent: Instance, cf: CFrame, sizeM: Vector3)
+	local p = Instance.new("Part")
+	p.Name = "MiraLimpa"
+	p.Anchored, p.CanCollide, p.CanQuery, p.CanTouch, p.CastShadow = true, false, false, false, false
+	p.Material = Enum.Material.Metal
+	p.Color = STEEL
+	p.Size = sizeM / M
+	p.CFrame = cf
+	p.Parent = parent
+end
+
+local function crispSights(m: Model, sightP: Vector3, frontP: Vector3, kind: string, mm: number)
+	local los = (frontP - sightP).Unit
+	local up = (Vector3.yAxis - los * los:Dot(Vector3.yAxis)).Unit
+	local right = los:Cross(up)
+	local toEye = -los
+	if kind == "anel" then
+		local rIn = mm / 2000
+		local rOut = rIn + 0.0022
+		local rMid = (rIn + rOut) / 2
+		local n = 16
+		local seg = 2 * math.pi * rMid / n * 1.2
+		for i = 0, n - 1 do
+			local a = (i + 0.5) / n * 2 * math.pi
+			local radial = right * math.cos(a) + up * math.sin(a)
+			local tangent = -right * math.sin(a) + up * math.cos(a)
+			local center = sightP + radial * (rMid / M) + toEye * (0.0006 / M)
+			sightPart(m, CFrame.fromMatrix(center, tangent, radial), Vector3.new(seg, rOut - rIn, 0.0025))
+		end
+	elseif kind == "entalhe" then
+		local w = 0.0026 -- largura do entalhe (m)
+		local depth = mm / 1000
+		local leafW, leafH = 0.022, 0.006
+		local bw = (leafW - w) / 2
+		local base = sightP + toEye * (0.0006 / M)
+		for _, s in { -1, 1 } do
+			local c = base + right * (s * (w / 2 + bw / 2) / M) - up * (leafH / 2 / M)
+			sightPart(m, CFrame.fromMatrix(c, right, up), Vector3.new(bw, leafH, 0.0016))
+		end
+		local hb = leafH - depth
+		sightPart(m, CFrame.fromMatrix(base - up * ((depth + hb / 2) / M), right, up), Vector3.new(w, hb, 0.0016))
+	end
+	if kind ~= "" then
+		local postH = 0.010
+		local c = frontP + toEye * (0.0004 / M) - up * (postH / 2 / M)
+		sightPart(m, CFrame.fromMatrix(c, right, up), Vector3.new(0.0022, postH, 0.0026))
+	end
+end
+
+-- ===== braços em primeira pessoa (D-69) =====
+-- Antes a arma flutuava sozinha. Mão direita no punho, esquerda no guarda-mão, antebraço com a manga
+-- do uniforme até um cotovelo fixo na câmera. Na recarga a mão esquerda troca o carregador.
+local SLEEVE: { [string]: Color3 } = { US = Color3.fromRGB(84, 88, 60), VC = Color3.fromRGB(142, 126, 92) }
+local ELBOW_R = Vector3.new(0.2, -0.36, 0.06) / M -- espaço da câmera
+local ELBOW_L = Vector3.new(-0.14, -0.38, -0.1) / M
+local POUCH = Vector3.new(-0.22, -0.5, -0.12) / M -- cartucheira, fora da tela
+local arms: Model? = nil
+local armBits: { [string]: BasePart } = {}
+local armsKey = ""
+
+local function armPart(m: Model, name: string, color: Color3, mat: Enum.Material, cyl: boolean): BasePart
+	local p = Instance.new("Part")
+	p.Name = name
+	p.Anchored, p.CanCollide, p.CanQuery, p.CanTouch, p.CastShadow = true, false, false, false, false
+	p.Material = mat
+	p.Color = color
+	if cyl then
+		p.Shape = Enum.PartType.Cylinder
+	end
+	p.Parent = m
+	armBits[name] = p
+	return p
+end
+
+local function ensureArms()
+	local faction = player:GetAttribute("Faction")
+	local head = player.Character and player.Character:FindFirstChild("Head") :: BasePart?
+	local skin = if head then head.Color else Color3.fromRGB(196, 150, 112)
+	local key = tostring(faction) .. ":" .. skin:ToHex()
+	if arms and key == armsKey then
+		return
+	end
+	armsKey = key
+	if arms then
+		arms:Destroy()
+	end
+	table.clear(armBits)
+	local m = Instance.new("Model")
+	m.Name = "VT65Arms"
+	local sleeve = SLEEVE[if type(faction) == "string" then faction else "US"] or SLEEVE.US
+	for _, s in { "R", "L" } do
+		local h = armPart(m, "Mao" .. s, skin, Enum.Material.SmoothPlastic, false)
+		h.Size = (if s == "R" then Vector3.new(0.04, 0.085, 0.1) else Vector3.new(0.09, 0.04, 0.1)) / M
+		-- mão arredondada (elipsoide): o bloco reto parecia uma caixa laranja no canto da tela
+		local shape = Instance.new("SpecialMesh")
+		shape.MeshType = Enum.MeshType.Sphere
+		shape.Parent = h
+		armPart(m, "Punho" .. s, skin, Enum.Material.SmoothPlastic, true)
+		armPart(m, "Manga" .. s, sleeve, Enum.Material.Fabric, true)
+	end
+	m.Parent = camera
+	arms = m
+end
+
+-- antebraço: cilindro (eixo X) que sai do punho rumo ao cotovelo, só com o comprimento do antebraço
+-- (FOREARM_M). Pedido do usuário: arma perto do corpo, só antebraço e mãos, sem o braço inteiro.
+local FOREARM_M = 0.27
+local function forearm(wrist: Vector3, elbow: Vector3, side: string)
+	local cuff = armBits["Punho" .. side]
+	local sl = armBits["Manga" .. side]
+	if not (cuff and sl) then
+		return
+	end
+	local dir = elbow - wrist
+	local len = dir.Magnitude
+	if len < 1e-3 then
+		return
+	end
+	local u = dir / len
+	len = math.min(len, FOREARM_M / M)
+	elbow = wrist + u * len
+	local cuffLen = math.min(0.05 / M, len * 0.3)
+	local cuffEnd = wrist + u * cuffLen
+	cuff.Size = Vector3.new(cuffLen, 0.06 / M, 0.06 / M)
+	cuff.CFrame = CFrame.lookAt((wrist + cuffEnd) / 2, cuffEnd) * CFrame.Angles(0, math.pi / 2, 0)
+	sl.Size = Vector3.new(len - cuffLen, 0.085 / M, 0.085 / M)
+	sl.CFrame = CFrame.lookAt((cuffEnd + elbow) / 2, elbow) * CFrame.Angles(0, math.pi / 2, 0)
+end
+
+-- ===== recarga (D-69) =====
+-- "faça um recarregamento real" (usuário). A malha da arma é uma peça só (o carregador não sai
+-- dela), então a troca é encenada: a arma inclina, a mão esquerda puxa um carregador (peça à parte)
+-- que cai no chão, busca outro na cartucheira, encaixa, dá o tapa e puxa o ferrolho. No tempo do
+-- servidor (CombatService.RELOAD), avisado pelo WeaponController ("reload_start").
+local reloadT0, reloadDur = 0, 0
+local oldMag: BasePart? = nil
+local newMag: BasePart? = nil
+local magDropped = false
+local MAG_SIZE: { [string]: Vector3 } = {
+	rifle = Vector3.new(0.03, 0.17, 0.065),
+	mg = Vector3.new(0.08, 0.1, 0.12),
+	pistol = Vector3.new(0.025, 0.11, 0.032),
+}
+-- quadros-chave da mão esquerda: tempo (fração), espaço ("w" arma, "c" câmera), ponto
+type Key = { t: number, s: string, p: Vector3 }
+local function reloadKeys(): { Key }
+	local down = Vector3.new(0, -1, 0) / M
+	local back = Vector3.new(0, 0, 1) / M
+	return {
+		{ t = 0.0, s = "w", p = supportL },
+		{ t = 0.13, s = "w", p = magL + down * 0.02 },
+		{ t = 0.25, s = "w", p = magL + down * 0.14 },
+		{ t = 0.4, s = "c", p = POUCH },
+		{ t = 0.52, s = "w", p = magL + down * 0.12 },
+		{ t = 0.64, s = "w", p = magL + down * 0.01 },
+		{ t = 0.72, s = "w", p = magL + down * 0.03 },
+		{ t = 0.79, s = "w", p = chargeL },
+		{ t = 0.85, s = "w", p = chargeL + back * 0.07 },
+		{ t = 0.94, s = "w", p = supportL },
+		{ t = 1.0, s = "w", p = supportL },
+	}
+end
+
+local function smooth(x: number): number
+	x = math.clamp(x, 0, 1)
+	return x * x * (3 - 2 * x)
+end
+
+local function magPart(kind: string): BasePart
+	local p = Instance.new("Part")
+	p.Name = "Carregador"
+	p.Anchored, p.CanCollide, p.CanQuery, p.CanTouch, p.CastShadow = true, false, false, false, false
+	p.Material = Enum.Material.Metal
+	p.Color = STEEL
+	p.Size = (MAG_SIZE[kind] or MAG_SIZE.rifle) / M
+	p.Parent = camera
+	return p
+end
+
+local function clearMags()
+	if oldMag then
+		oldMag:Destroy()
+		oldMag = nil
+	end
+	if newMag then
+		newMag:Destroy()
+		newMag = nil
+	end
+end
+
+Bus.on("reload_start", function(dur: number, _kind: string)
+	clearMags()
+	reloadT0, reloadDur = os.clock(), dur
+	magDropped = false
+end)
 
 -- arma publicada já preparada pelo servidor (AssetLoader → GunModel.fit), se houver
 local function artFor(id: string): Model?
@@ -73,6 +280,25 @@ local function setView(id: string?)
 	local front = primary:FindFirstChild("SightFront") :: Attachment?
 	local los = if front then front.WorldPosition - viewSight else Vector3.new(0, 0, -1)
 	viewAlign = if los.Z < -1e-3 then CFrame.lookAt(Vector3.zero, los):Inverse() else CFrame.identity
+	-- mãos, carregador e ferrolho (espaço da arma; a arma está na origem)
+	local g = primary:FindFirstChild("Grip") :: Attachment?
+	local s = primary:FindFirstChild("Support") :: Attachment?
+	gripL = if g then g.WorldPosition else Vector3.zero
+	supportL = if s then s.WorldPosition else gripL + Vector3.new(0, 0, -0.3 / M)
+	viewKind = wp.kind
+	if wp.kind == "pistol" then
+		supportL = gripL + Vector3.new(-0.025 / M, -0.01 / M, -0.01 / M) -- a esquerda abraça a direita
+		magL = gripL + Vector3.new(0, -0.07 / M, 0.01 / M)
+		chargeL = viewSight + Vector3.new(0, 0.01 / M, 0.02 / M) -- ferrolho (corrediça)
+	else
+		magL = gripL:Lerp(supportL, 0.5) + Vector3.new(0, -0.04 / M, 0)
+		chargeL = gripL:Lerp(supportL, 0.25) + Vector3.new(0.035 / M, 0.06 / M, 0)
+	end
+	local kind = m:GetAttribute("SightKind")
+	local mm = m:GetAttribute("SightMm")
+	if front and type(kind) == "string" and type(mm) == "number" and kind ~= "" then
+		crispSights(m, viewSight, front.WorldPosition, kind, mm)
+	end
 	for _, d in m:GetDescendants() do
 		if d:IsA("BasePart") then
 			d.Anchored = true
@@ -94,6 +320,9 @@ local function showView(): boolean
 		and hum.SeatPart == nil
 		and player:GetAttribute("Downed") ~= true
 		and player:GetAttribute("Binoculars") ~= true
+		-- 3ª pessoa (D-68, ThirdPerson.client): a câmera está atrás do ombro e o corpo aparece com
+		-- a arma "Weapon" do personagem; mirando, volta a 1ª pessoa e o atributo fica false
+		and player:GetAttribute("ThirdPersonView") ~= true
 		and Input.state.menus == 0
 		and not Input.state.map
 end
@@ -109,13 +338,28 @@ RunService:BindToRenderStep("VT65ViewModel", Enum.RenderPriority.Camera.Value + 
 	setView(player:GetAttribute("EquippedWeapon") :: string?)
 	local v = view
 	if not v then
+		if arms then
+			arms:PivotTo(CFrame.new(0, -1e4, 0))
+		end
 		return
 	end
+	ensureArms()
 	if not showView() then
 		v:PivotTo(CFrame.new(0, -1e4, 0)) -- fora da vista (sem recriar a arma)
+		if arms then
+			arms:PivotTo(CFrame.new(0, -1e4, 0))
+		end
+		clearMags()
 		return
 	end
-	local aiming = player:GetAttribute("Aiming") == true
+	local rp = if reloadDur > 0 then (os.clock() - reloadT0) / reloadDur else 2
+	local reloading = rp < 1
+	if not reloading and reloadDur > 0 then
+		reloadDur = 0
+		clearMags()
+	end
+	-- recarregando, a arma sai do ombro
+	local aiming = player:GetAttribute("Aiming") == true and not reloading
 	aimT += ((if aiming then 1 else 0) - aimT) * math.min(1, dt * 12)
 	kick = math.max(0, kick - dt * 7)
 	local ads = CFrame.new(0, 0, -viewEye / M) * viewAlign * CFrame.new(-viewSight)
@@ -127,7 +371,72 @@ RunService:BindToRenderStep("VT65ViewModel", Enum.RenderPriority.Camera.Value + 
 	local amp = math.clamp(speed / 3, 0, 1) * (1 - aimT) * 0.008 / M
 	local bob = CFrame.new(math.sin(bobT) * amp, math.abs(math.cos(bobT)) * amp, 0)
 	local recoil = CFrame.new(0, 0, kick * 0.05 / M) * CFrame.Angles(kick * math.rad(4), 0, 0)
-	v:PivotTo(camera.CFrame * HIP:Lerp(ads, aimT) * bob * recoil)
+	-- recarga: inclina a arma para mostrar o encaixe; tapa no carregador; puxa o ferrolho
+	local pose = CFrame.identity
+	if reloading then
+		local w = smooth(rp / 0.12) * (1 - smooth((rp - 0.86) / 0.14))
+		local tilt = CFrame.new(0.02 / M, -0.07 / M, 0.03 / M)
+			* CFrame.Angles(math.rad(-10), math.rad(10), math.rad(30))
+		pose = CFrame.identity:Lerp(tilt, w)
+		local slap = math.max(0, 1 - math.abs(rp - 0.66) / 0.03)
+		local pull = smooth((rp - 0.79) / 0.06) * (1 - smooth((rp - 0.86) / 0.05))
+		pose *= CFrame.new(0, slap * 0.008 / M, pull * 0.012 / M)
+	end
+	local wcf = camera.CFrame * HIP:Lerp(ads, aimT) * bob * recoil * pose
+	v:PivotTo(wcf)
+	-- braços
+	local rot = wcf.Rotation
+	local handR = wcf * (gripL + Vector3.new(0.012 / M, 0, 0.015 / M))
+	local handL = wcf * (supportL + Vector3.new(0, -0.025 / M, 0))
+	if reloading then
+		local keys = reloadKeys()
+		local function world(k: Key): Vector3
+			return if k.s == "c" then camera.CFrame * k.p else wcf * k.p
+		end
+		for i = 1, #keys - 1 do
+			local a, b = keys[i], keys[i + 1]
+			if rp >= a.t and rp < b.t then
+				handL = world(a):Lerp(world(b), smooth((rp - a.t) / (b.t - a.t)))
+				break
+			end
+		end
+		-- carregador velho: sai com a mão (0,13–0,25) e cai; o novo vem da cartucheira (0,40–0,64)
+		if viewKind ~= "launcher" then
+			local magOff = Vector3.new(0, 0.07 / M, 0)
+			if rp >= 0.13 and rp < 0.25 then
+				oldMag = oldMag or magPart(viewKind)
+				local om = oldMag :: BasePart
+				om.CFrame = rot + (handL + rot * magOff)
+			elseif rp >= 0.25 and oldMag and not magDropped then
+				magDropped = true
+				local om = oldMag :: BasePart
+				oldMag = nil
+				om.Anchored = false
+				om.CanCollide = true
+				om.Parent = fx
+				om.AssemblyLinearVelocity = rot * Vector3.new(-0.6, -1.5, 0.2) / M
+				task.delay(4, function()
+					om:Destroy()
+				end)
+			end
+			if rp >= 0.4 and rp < 0.64 then
+				newMag = newMag or magPart(viewKind)
+				local nm = newMag :: BasePart
+				nm.CFrame = rot + (handL + rot * magOff)
+			elseif rp >= 0.64 and newMag then
+				newMag:Destroy() -- encaixado: some dentro da arma
+				newMag = nil
+			end
+		end
+	end
+	local mr, ml = armBits.MaoR, armBits.MaoL
+	if mr and ml then
+		mr.CFrame = rot + handR
+		ml.CFrame = rot + handL
+		local cam = camera.CFrame
+		forearm(handR + rot * Vector3.new(0, -0.03 / M, 0.05 / M), cam * ELBOW_R, "R")
+		forearm(handL + rot * Vector3.new(0, -0.01 / M, 0.05 / M), cam * ELBOW_L, "L")
+	end
 end)
 
 -- ===== clarão de boca =====
@@ -291,7 +600,11 @@ Bus.on("tracer", tracer)
 -- ===== tiros =====
 Bus.on("shot_fired", function(shot: any)
 	kick = 1
-	local muzzle = if view then muzzleOf(camera) else nil
+	-- em 3ª pessoa o clarão sai da arma do personagem (a de 1ª pessoa fica escondida)
+	local muzzle = if player:GetAttribute("ThirdPersonView") == true
+		then muzzleOf(player.Character)
+		elseif view then muzzleOf(camera)
+		else nil
 	flash(muzzle or (camera.CFrame.Position + camera.CFrame.LookVector * (0.8 / M)))
 	local ignore: { Instance } = { fx, camera }
 	if player.Character then

@@ -1357,3 +1357,374 @@ estão resolvidos.
   - **Medir de novo com o PC livre.**
 - **Capturas:** mata fechada com folhas verdes e foscas, arrozal com arroz, vilas como ilhas de
   árvores no arrozal, bandeiras e sacos de areia.
+
+## D-67 — Árvores prontas com folha em cartão, mira centrada e aço das armas (2026-11-11)
+**Pedido do usuário:**
+- árvores prontas de qualidade, como as do Front44, "para o jogo não ficar tão pesado";
+- "concerte as miras": anel e risco da mira centralizados;
+- miras e armas com mais textura e detalhe.
+
+**Árvores (Poly Haven, CC0):**
+- **Por que não o Creator Store:** `InsertService:LoadAsset` só carrega, no jogo publicado, asset
+  do dono do jogo, compartilhado com ele ou da Roblox. Árvore grátis de terceiro não carrega.
+- **Fonte:** quatro árvores CC0 do Poly Haven (`tools/fetch_trees.py`, sem login): `island_tree_01`,
+  `_02`, `_03` e `tree_small_02`. O jacarandá (24 m) ficou de fora: a redução dos 1,2 milhão de
+  triângulos de galho parava em 167 mil.
+- **O modelo original** tem cada folha modelada: ~30 a 59 mil folhas de 24 triângulos, de 1 a
+  2 milhões de triângulos por árvore.
+- **Preparo (`tools/prep_trees.py`):**
+  - cada folha vira um cartão (2 triângulos) no plano dela, com a mesma região da textura. A
+    transparência é o contorno das folhas, desenhado a partir das UVs originais (a textura é JPEG,
+    sem alfa), e também exige cor acima do fundo preto;
+  - ficam 4,8 a 5,2 mil folhas, cada uma 2,4 a 3,5 vezes maior, para a copa cobrir o mesmo
+    volume;
+  - a normal da folha fica meio voltada para fora da copa (volume na luz);
+  - tronco e galhos: galho fino demais (escondido na copa) sai, e o resto é reduzido por
+    quádricas a ~3 mil triângulos; a escala da textura (`KHR_texture_transform`) vai para as UVs;
+  - base do tronco na origem, em studs; peças de até 19 mil triângulos; sem metal.
+- **Resultado:** 12.554 a 13.736 triângulos por árvore, e 2,6 a 2,8 MB por GLB.
+- **No Roblox:**
+  - o importador do Open Cloud traz a folha com `AlphaMode = Overlay` e face única;
+  - script do jogo pode trocar (conferido no Studio): o `AssetLoader.template` liga
+    `AlphaMode = Transparency` e `DoubleSided` em toda peça `Folhas*`. O cliente recebe as duas
+    propriedades replicadas;
+  - o tronco (`Madeira0`) é sólido e para a bala (`Material = "Wood"`); copa e galhos continuam
+    folhagem (escondem, não param bala);
+  - o tronco fica no grupo de colisão `VT65Tronco`, que não colide com o chassi dos veículos
+    (`VT65Veiculo`): sem isso, um M48 pararia em cada árvore da mata. Os bots já pulam e mudam o
+    desvio quando ficam 3 s sem avançar.
+- **Na mata (`Vegetation`):**
+  - emergente de 17–21 m: `ph_tree_small_02` (escala 3,6–4,6);
+  - dossel de 8–17 m: `ph_island_tree_01` e `_02` (2,2–3,6);
+  - árvore torta baixa nas manchas de cipó: `ph_island_tree_03` (1,6–2,6);
+  - bosque das vilas, capinzal, cortina da borda e colinas trocam a árvore do ForgeGUI pelas
+    novas. Bambu, bananeira, coqueiro, tràm, taioba, capim e o monte de cipó continuam;
+  - a folha cresce com a escala (25 a 65 cm), como a das árvores de folha larga da região.
+- Sombra: emergente sempre; dossel só a partir da escala 3,0–3,2 (`Vegetation.SHADOW`, agora a
+  escala mínima por espécie).
+- **Captura no Studio:** folhas recortadas uma a uma, tronco retorcido com casca de foto.
+  - Na primeira versão cada folha tinha contorno preto: era o fundo da textura vazando pela
+    borda. Corrigido com o alfa pela cor.
+- **Peso:**
+  - por árvore, igual ao da D-66: 12,5–13,7 mil triângulos contra 13,2–13,6 mil;
+  - o plano tem 47.818 plantas, das quais 15.102 são árvores novas;
+  - **fps (Studio em primeiro plano, Roblox Player do usuário aberto ao fundo):** 53,2 fps de média
+    girando 360° na célula de 60 m mais densa (133 plantas; 320 a 80 m; 5.500 no cliente), 99% dos
+    quadros abaixo de 25 ms, pior quadro 32 ms. Na D-66 eram 45 fps no ponto mais denso.
+
+**Mira (`tools/sight_align.py`):**
+- **Causa:** até a D-66 o ponto `Sight` era de conta (9 cm à frente da mão, na altura da massa).
+  - A linha ia dele ao topo da massa, e a alça de verdade ficava onde caísse.
+  - Na M14, o olho ficava 5 mm acima do centro do anel, e o anel aparecia abaixo do centro.
+- **Agora:** a malha é fatiada na alça e na massa, e vista de frente a 0,2 mm por pixel:
+  - **anel** (M14): o furo fechado mais perto do plano do cano; o centro do furo é o ponto `Sight`
+    (furo de 5,5 mm, 37,4 mm acima do cano);
+  - **entalhe** (Type 56, SKS): o meio do vale do topo, na altura dos ombros;
+  - **massa:** o ponto mais alto a até 3 mm da coluna da alça. Na massa com capuz (Type 56, SKS)
+    pula o arco do capuz e pega a ponta da massa.
+- **Olho:** M14 a 4,5 cm do anel. Type 56 (19 cm) e SKS (32 cm) com o olho sobre o punho, rosto
+  na coronha.
+- **Studio:** na M14 o anel fica no centro da tela, com a massa dentro dele; na Type 56 a massa
+  fica no entalhe, no centro.
+  - Com o olho a 6,5 cm, o anel ficava pequeno e a base da alça tomava o meio da tela.
+- **Ficam com a linha da D-60:** M60 (a fatia da alça não mostrou furo fechado), RPD, M79,
+  pistolas e RPG-2.
+- O `tools/weapon_landmarks.py` usa as medidas automaticamente.
+
+**Aço das armas (`tools/armas_parker.py`):**
+- Os GLB do gerador vêm com textura de 4096 px, metal médio (~0,4) e rugosidade ~0,5. O Roblox
+  reduz a textura para 1024, e o aço da M14 parecia prata polida.
+- **Agora:**
+  - as três texturas vão a 1024 px com Lanczos, e a cor ganha nitidez;
+  - onde o mapa diz metal, a cor vai ao aço fosfatizado cinza-esverdeado (EUA) ou oxidado
+    azulado (armas chinesas e soviéticas). A rugosidade sobe a 0,62 no mínimo e o metal cai 30%;
+  - madeira, lona e plástico ficam como estão;
+  - a malha não muda: os pontos do `WeaponArt` continuam valendo.
+- As 9 armas foram republicadas com IDs novos.
+- **Limite:** o detalhe da malha é o do gerador. Mais detalhe pede modelo novo: do Sketchfab, como
+  no Front44 (download com a conta do dono), ou crédito no ForgeGUI.
+
+## D-68 — Terceira pessoa e movimentação (2026-11-11)
+**Pedido do usuário:** "permita jogar em terceira pessoa" e "coloque a melhor movimentação
+possível para o personagem".
+
+**Terceira pessoa** (`Controllers/ThirdPerson.client`, `ViewMode`):
+- **Teclas:** O alterna 1ª/3ª pessoa e I troca o ombro. No controle: direcional → segurado e
+  ↑ segurado.
+  - No controle, o binóculo (↑) e o canal de rádio (→) passaram de "apertar" para "tocar":
+    disparam ao soltar, com menos de 0,3 s.
+- **Menu:** Configurações › Mira ganhou "Câmera" e "Ombro da 3ª pessoa", salvos na conta.
+- **Câmera:**
+  - fica até 0,55 m para o lado e 2,1 m atrás do olho (agachado 1,9 m, deitado 1,7 m);
+  - a transição leva 0,28 s;
+  - parede e terreno puxam a câmera na hora, e ela nunca atravessa;
+  - a folhagem a aproxima de forma suave, até 1 m do ombro (`FOLIAGE_MIN_M`).
+- **Mira:** mirar ou usar o binóculo volta à 1ª pessoa em 0,1 s, porque a mira de ferro é em
+  1ª pessoa; ao soltar, volta ao ombro em 0,2 s.
+- **Onde fica em 1ª pessoa:** veículos, caído, morto e lobby, como antes.
+- **Por modo:** com `workspace:SetAttribute("ThirdPersonAllowed", false)` no servidor, a 3ª
+  pessoa fica desligada. Sem o atributo, é permitida.
+- **Contrato:** o atributo local `ThirdPersonView` é `true` só com a câmera de fato no ombro.
+  - O `WeaponVisuals` esconde a arma de 1ª pessoa e tira o clarão da arma do personagem.
+  - O corpo e a arma "Weapon" aparecem: a câmera do Roblox os escondia.
+- **Tiro em 3ª pessoa:**
+  - a bala sai do olho do personagem rumo ao ponto da retícula;
+  - do quadril há dispersão: 1,2° parado, mais 0,5° por m/s e mais 1,2° cansado. Sem isso a
+    retícula viraria mira de ferro grátis;
+  - **servidor:** além da regra de 8 studs da cabeça, se a origem está a mais de 1 m da cabeça e
+    há algo sólido no meio, o tiro sai da cabeça. Isso impede atirar da câmera através da parede.
+
+**Movimentação** (`Shared/Movement`, `Controllers/Movement.client`, testes em `movimento.luau`):
+- **Inércia:** aceleração de 7 m/s² e frenagem de 10 m/s². Do parado ao trote em 0,45 s, da
+  corrida à parada em 0,55 s e meia-volta em 0,75 s. Na lama e no arrozal acelera mais devagar,
+  e no ar quase não há controle.
+  - Nunca passa do teto do servidor (5.000 sorteios no teste).
+- **Fôlego:**
+  - corrida contínua até zerar: 24 s com até 15 kg, 20,5 s para o fuzileiro (21,2 kg) e 16,5 s
+    para o operador de rádio. Subida e arrozal cansam mais;
+  - depois de zerar, só volta a correr acima de 35%;
+  - recupera após uma pausa de 1,2 s e enche em 15,5 s, mais rápido deitado;
+  - cansado, a mira de ferro balança até 3,5 vezes mais.
+- **Peso:** 11 kg de base, mais a arma, os carregadores, as granadas e os curativos do `Kit`, mais
+  um extra por papel.
+- **Chão:**
+  - velocidade: arrozal 62%, lama 72%, areia 85% e mata 93%;
+  - a água pesa pela fundura: ~75% no joelho e ~40% na cintura;
+  - rampa: 20% de subida deixa a 78%;
+  - a chuva enlameia o chão mole (até −10%).
+- **Pulo:** 0,45 m descansado e 0,2 m cansado, menos com peso. Custa 7% de fôlego e tem 0,8 s de
+  intervalo.
+- **Queda:** pulo comum só balança a câmera; uma queda de 3 m freia o soldado e cansa.
+- **Transpor e escalar** (Espaço ou A):
+  - obstáculo de 0,35 a 1,25 m, a até 0,9 m;
+  - transpor leva ~0,6 s (dique) a 0,72 s (sacos de areia), e escalar ~1,28 s;
+  - não se atira durante o movimento, e os outros veem as pernas pelo atributo `Vaulting`.
+- **Mergulho:** segurar "deitar" correndo acima de 3,5 m/s dá um deslize de 0,5 s e chega ao chão
+  em 0,45 s.
+- **Postura:** transição suave de câmera, pernas e inclinar: agachar 0,28 s, deitar 0,8 s e
+  levantar 1,0 s. Deitando ou levantando não se corre nem se atira.
+- **Câmera e som:**
+  - balanço do passo de até ~2 cm;
+  - respiração mais funda quando cansado;
+  - passos com volume por postura, e som de aterrissagem e de transpor.
+- **Servidor (`PostureService`):** não havia anti-trapaça de movimento. Agora há um orçamento de
+  corrida bem mais folgado que o do cliente (36 s, recupera mais rápido e zera no renascimento).
+  Em 10.000 passos aleatórios ele nunca corta a corrida antes do cliente.
+  - A fórmula de velocidade do servidor (`MedicalService`) está espelhada em
+    `Movement.serverSpeed`; se mudar lá, mude aqui.
+- **Não testado no motor:** os números são de projeto.
+
+## D-69 — Céu de foto, recuo normal, inclinar no L3/R3, recarga real e mira nítida (2026-11-11)
+**Pedido do usuário:**
+- "o céu está bugado pixelando muito e trocando conforme eu olho";
+- "diminua recoil das armas faça eles normais";
+- "faça poder se inclinar quando mirar com os botões no controle R e L dos analógicos";
+- "faça um recarregamento real, detalhe melhor a mira está muito pixelado".
+
+**Céu:**
+- **Causa:** as nuvens dinâmicas do Roblox (`Clouds`, D-64) são desenhadas em baixa resolução,
+  com ruído que muda com o giro da câmera; com a névoa forte da D-64 ficava pior.
+- **Agora:**
+  - sem `Clouds` (`TerrainLook` apaga as que houver);
+  - céu de foto no `Sky`: HDRI "pure sky" `kloofendal_48d_partly_cloudy_puresky` do Poly Haven
+    (CC0), cortado em 6 faces de 1024 px por `tools/fetch_sky.py`, com o disco do sol tirado da foto
+    (o Roblox desenha o próprio sol);
+  - a convenção das faces foi conferida no Studio com faces rotuladas: `Ft` é visto olhando para
+    −Z, `Lf` fica em +X e `Rt` em −X, e na `Up` a direita da imagem aponta para −Z e o topo para +X.
+    Sem emenda nos cantos;
+  - névoa (Atmosphere) mais leve: às 07:00, Density 0,31, Haze 1,2 e Glare 0,43 (eram 0,38, 2,5 e
+    0,85). Com a névoa antiga a foto sumia num laranja chapado.
+
+**Recuo:**
+- **Causa (bug):** a conta fazia `math.deg` da velocidade de recuo, dando ~100° de subida por tiro
+  na M14.
+- **Agora:** 0,9° por m/s de recuo livre (impulso do projétil e dos gases contra a massa da arma):
+  M14 ~2,3°, Type 56 ~1,8°, M60 ~1,0° e M1911 ~4,7°, × 0,8 mirando. Sobe rápido e 60% volta
+  sozinho em ~0,25 s; o resto o jogador corrige.
+
+**Inclinar:** mirando, L3 inclina à esquerda e R3 à direita (afundar os analógicos); LB prende a
+respiração e RB segue marcando. Teclado sem mudança (Q/E e Shift).
+
+**Recarga real:**
+- O cliente só anima se o servidor vai aceitar (há carregador e não está recarregando), no tempo do
+  servidor (`CombatService.RELOAD`: fuzil 3 s, metralhadora 7 s, pistola 2,5 s); não atira
+  recarregando.
+- **Mãos e antebraços em 1ª pessoa:** mão direita no punho, esquerda no guarda-mão e antebraço
+  de 27 cm com a manga do uniforme, rumo a um cotovelo fora da tela. Antes a arma flutuava
+  sozinha. A pedido do usuário, a arma no quadril veio para junto do corpo: (0,12; −0,15; −0,23) m
+  da câmera, eram (0,17; −0,19; −0,34) m; assim só antebraço e mãos aparecem.
+- A malha da arma é uma peça só (o carregador não sai dela), então a troca é encenada:
+  - a arma sai do ombro e inclina para mostrar o encaixe;
+  - a mão esquerda puxa um carregador (peça à parte), que cai no chão;
+  - busca outro na cartucheira, encaixa, dá o tapa e puxa o ferrolho.
+
+**Mira nítida:**
+- A alça e a massa ocupam poucos texels da textura de 1024 px da arma inteira.
+- Por cima delas vão peças lisas de aço no ponto medido na malha (D-67): anel de 16 segmentos na
+  M14, entalhe na Type 56 e na SKS, e a lâmina da massa. Ficam 0,4–0,6 mm à frente da malha.
+- `WeaponArt` ganhou `sightKind` e `sightMm` (gerados pelo `weapon_landmarks.py`).
+
+**Não testado no motor:** recarga, braços e mira nítida. O céu foi conferido no Studio.
+
+## D-70 — Uniformes v3, corpo "Man" e equipamento 3D por código (2026-11-11)
+**Pedido do usuário:** "uniformes bem feitos".
+
+**Moldes v3** (`tools/make_clothing_v3.py`, `assets/clothing/v3/`, 9 moldes publicados):
+- **Marines (agosto de 1965):**
+  - utilitário OG-107 de sateen: 2 bolsos de peito com aba de cantos cortados, águia-globo-âncora
+    com "USMC" em estêncil no bolso esquerdo, camiseta verde no decote, camisa por dentro;
+  - calça de 4 bolsos, **sem bolso de carga** (a de carga é do uniforme de selva, posterior);
+    presa por cima da bota preta de couro (a bota de selva também é posterior);
+  - mangas abaixadas; arregaçadas só com o cosmético `us_utility_rolled`.
+- **VC:** cáqui (padrão) e verde (cosmético), gola virada, camisa por fora, calça arregaçada e
+  sandália Ho Chi Minh. Pijama preto (áo bà ba) da guerrilha local em 20% dos bots
+  (`Gear.GUERRILLA_SHARE`); para jogador, só com o cosmético `vc_black` (ainda não existe no
+  Commerce).
+- Com ID 0, o código cai no molde v2.
+
+**Corpo:** pacote "Man" (bundle 238, o mesmo do avatar padrão "Neoclassic Male"), peças da Roblox
+(criador 1), configurável em `Characters.BODY` ("bloco" volta ao corpo antigo). Proporção clássica:
+a caixa de acerto fica perto da atual e a roupa clássica veste melhor. Rthro recusado (cabeça menor,
+roupa esticada).
+
+**Equipamento 3D por código** (`Modules/Gear.luau`):
+- **Marines:** cinto M1961 com 4 porta-carregadores de M14 (o M1956 é do Exército), mochila M1941
+  com a pá M1943, 2 cantis, estojo de curativo e alças sobre o colete. Por papel: rádio PRC-10 com
+  antena, coldre, bolsa médica, estojo de binóculo, kit mínimo para tripulação.
+- **VC:** cinto de lona, cantil de alumínio, granadas de cabo, porta-carregador de peito conforme a
+  arma (10 células no SKS, 3+2 no Type 56), bolsa de tambor do RPD, coldre do Type 54; tubo de
+  arroz só com cosmético pago.
+- **Correção antiga:** capacete e colete do ForgeGUI estavam soldados sem o giro de −90° da D-58 (o
+  colete ficava de lado). Agora `Gear.ART_YAW = −90°`, com tamanho ajustado à cabeça e ao tronco.
+- Capacete, colete, capacete de fibra e chapéu da selva republicados foscos (tinham metal = 1).
+
+**Cores (o dono deixou a decisão comigo, 2026-11-11):** ficam as cores históricas do cáqui e do
+verde, conferidas nas fotos de 1965, mesmo passando dos ±5% de luminância da regra de neutralidade
+do Commerce. Motivo: a fidelidade às fotos é critério do projeto (Parte 9.1), e o dono passou a
+aceitar vender vantagem em Robux (D-72).
+
+**Não testado no motor:** altura com o corpo "Man" (atributo `AlturaM`), frente do colete,
+capacete na cabeça dinâmica e posição das peças 3D.
+
+## D-71 — Lobby na mesa, cursor no controle, recompensa diária e telas de carregamento (2026-11-11)
+**Pedido do usuário:** lobby interativo como a "segunda foto" (mesa de briefing), escolhido no
+controle "como se o analógico fosse o mouse", com cara da guerra do Vietnã; telas animadas de
+carregamento; "carregar o mapa e a pessoa não entrar toda travada"; "daily reward". Layout original
+(regra de não copiar outro jogo).
+
+**Lobby diegético** (`LobbyScene`, `DeployScreen`, `SoldierPreview`):
+- **Antes do lado:** sala de arquivo com os dois dossiês e os dois soldados.
+- **EUA:** barraca de comando dos Marines. **VC:** abrigo de terra com teto de toras.
+- **Objetos da mesa são os botões:** rádio PRC-10 / telefone de campanha (squad), dossiê /
+  documentos e o próprio soldado (papel), carta / croqui (inserção; desenhada com o `MapConfig`),
+  calendário / caderneta (recompensa diária), lata / caixote de munição (loja), capacete (trocar de
+  lado). Realce e etiqueta ao apontar; ao escolher, a câmera vai ao objeto, ele "abre" e o painel
+  entra deslizando. Abas no alto repetem os objetos.
+- **Controle** (`VirtualCursor`): analógico esquerdo move o cursor (zona morta, curva, aceleração e
+  ímã leve), A clica em 2D e 3D, B volta, LB/RB pulam entre objetos ou abas, direcional salta ao
+  alvo mais próximo, analógico direito rola listas. Mouse e toque também.
+
+**Recompensa diária** (`Modules/DailyRewardService.luau`): um resgate por dia UTC (relógio do
+servidor), trilha de 7 dias (18 a 24 de agosto); dia perdido volta ao dia 1, mas o total e os itens
+ficam. Dias 3 e 7 dão cosméticos só daqui (Zippo gravado e cigarros no capacete; sandálias de pneu e
+marmita cà mèn). Gravação atômica (`UpdateAsync`); perfil v2 com migração da v1.
+
+**Telas de carregamento:**
+- **Entrada** (`ReplicatedFirst/LoadingScreen`): filme granulado e carta sendo traçada, com
+  progresso real (jogo, remotes, `PreloadAsync`, `TerrainReady`); "ENTRAR" só com o essencial
+  pronto. O `default.project.json` ganhou o ReplicatedFirst, e a tela aparece desde o 1º quadro.
+- **Inserção** (`SpawnTransition`): escurece, mostra a ordem datilografada com a grade, faz
+  `RequestStreamAroundAsync` antes de pedir o spawn e segura o corpo até haver chão embaixo.
+
+**Não testado no motor:** luz da barraca, orientação dos textos da mesa, animações de abrir,
+enquadramento em 16:9 e 4:3, cursor no controle, inserção com streaming, resgate com DataStore real.
+
+## D-73 — Defeitos do mapa corrigidos no terreno real (2026-11-11)
+**Pedido do usuário:** "comece a corrigir defeitos no mapa em todos os aspectos".
+
+**Como achei:** verificação automática no Studio (base de cada modelo contra o chão nos cantos,
+peças do arrozal contra o chão, plantas perto de construções), passada de câmera por vilas,
+arrozal e borda, e o autoteste.
+
+| Defeito (medido no Studio) | Antes | Depois |
+|---|---|---|
+| Lâmina d'água do arrozal com o topo abaixo do chão (arrozal parecia capim seco) | 1.136 de 1.155 | 3 |
+| Dique enterrado | 594 de 3.261 | 7 |
+| Sebe flutuando (até 0,9 m) | 134 | 0 |
+| Sebe com colisão (parede invisível de 2,3 m na lavoura) | 1.754 | 0 |
+| Construção, cerca ou túmulo com a base no ar em ladeira (até 1,2 m) | ~120 | 0 |
+| Planta da mata dentro de celeiro, poço ou altar | sim | só casas e props com folga |
+
+**Causas e correções (`AssetLoader`):**
+- **Arrozal:** o terreno é gerado em tempo de jogo (voxel de 4 studs) e a superfície sai ~0,44 m
+  acima da altura usada no bake. Agora `fitFeatures` encaixa as peças no terreno real logo depois
+  do `TerrainReady`:
+  - lâmina 6 cm acima da mediana do chão sob ela;
+  - crista do dique 35 cm acima do ponto mais alto do chão ao longo dele;
+  - pé da sebe no chão, e sem colisão.
+- **Ladeira:** a base ia para o ponto mais alto de 5 raios.
+  - Construções e montes ficam na cota mais alta da planta (o chão não entra na casa), e o
+    terreno embaixo é aterrado até a base: o patamar de terra batida das casas da região.
+  - Árvores e cercas vão ao ponto mais baixo sob o pé (a raiz entra na encosta).
+- **Mata dentro de construção:** a mata só desviava das casas. Agora desvia de todo prop já posto
+  (celeiro, poço, altar, túmulo, cerca, bunker, sacos de areia), com raio = meia caixa + 1,5 m.
+- **Raia do campo de tiro:** com o tronco sólido (D-67), a árvore pronta precisa de folga pelo
+  tronco inteiro, que tem 9–11 m de largura com os galhos grossos e o centro fora do pé. O plano
+  tira 41 árvores das raias e da trincheira.
+  - No autoteste, o tiro de 300 m que erra o alvo pela dispersão agora para numa árvore atrás dele
+    (antes seguia sem registrar). Continua 4 de 5, e é erro de tiro, não árvore na raia.
+
+**Autoteste depois das correções:** 10 ok, 0 falhas, 2 pulados (pedem o jogador em campo).
+
+## D-72 — Postos, créditos de intendência, equipamento e renascer onde caiu (2026-11-11)
+**Pedido do usuário:** "ranks para subir", "telas animadas", "comprar itens da melhor qualidade ao
+invés de começar pelado", "pagar e renascer no mesmo lugar". O dono decidiu: **Robux e também a
+moeda do jogo** para equipamento e renascer (exceção à Parte 11, ver `MONETIZATION.md`).
+
+**Regras** (`Shared/Progression.luau`, puro; testes em `progressao.luau`, 12 ok):
+- **Postos:** 13 por lado, um só XP (o servidor troca o jogador de lado para equilibrar).
+  - EUA: escala do USMC, de Private a Colonel (o Lance Corporal existe desde 1958).
+  - VC: designações por função, de Tân binh (recruta) a Trung đoàn trưởng; a Frente não usava
+    postos com insígnia.
+  - Curva: 600, 900, 1.500… XP por degrau (o 2º posto em ~1 partida; o 13º com 75.700 XP).
+  - Promoção paga o soldo: 25 CI × o posto novo. Tela de promoção animada no cliente.
+  - Papéis de especialista pedem posto: comandante, atirador de elite e piloto 3; observador,
+    tripulante de blindado e metralhador de porta 2. Infantaria e líder ficam livres.
+- **XP e créditos de intendência (CI)** por ação: abate 100/10, assistência 50/5, captura 200/20,
+  neutralização 100/10, reanimação 75/8, tratamento 40/4, curativo num companheiro 15/1, minuto
+  em campo 10/2. Fim de partida: vitória 500/60, empate 300/40, derrota 200/25, proporcional ao
+  tempo no time (menos de 3 min não conta).
+  - Teto anti-farm: 800 XP e 60 CI por minuto de ações. Cuidar do mesmo companheiro só rende de
+    novo depois de 1–5 min.
+  - Recompensa diária: 30 CI no 1º dia, +10 por dia da sequência, até 100.
+  - Verba inicial: 300 CI (dá para o 1º item já no começo).
+- **Equipamento** (soma ao kit padrão de 1965 e pesa no corpo): libera para sempre por qualquer
+  caminho:
+  - **posto:** Kit Veterano no 5 (Sergeant), Kit de Elite no 7 (Gunnery Sergeant);
+  - **CI:** item a item (150 a 900 CI);
+  - **Game Pass em Robux:** o nível inteiro (Elite inclui o Veterano); R$ 149 e R$ 299.
+  - Itens EUA: bandoleira M2 (+2 carregadores), 3º cantil (fôlego volta 15% mais rápido),
+    estojo de socorro reforçado (+2 curativos, +1 torniquete), colete M1955 (estilhaço no tronco
+    −40%, não para bala; 4,5 kg), fumaça M18 extra.
+  - Itens VC: peitoral Tipo 56, cantil extra, bolsa de socorro, granada de cabo extra, fumaça
+    extra (o VC não usava colete).
+  - O jogador escolhe levar ou deixar cada item no painel da Intendência.
+- **Renascer onde caiu:** ponto "Onde caiu" na carta de inserção, só para quem caiu na partida.
+  - Paga-se o lugar, nunca o tempo: a espera é a mesma de um ponto de reunião, no mínimo 60 s.
+  - Bloqueado com inimigo a menos de 100 m, a menos de 250 m do QG inimigo, em área inimiga
+    travada, em setor em disputa, na água, fora do mapa, ou depois de 3 usos na partida.
+  - Pagamento: renascer guardado (Robux), ou 60/100/160 CI (sobe a cada uso), ou a compra em
+    Robux (R$ 25, Developer Product). O recibo sempre vira "renascer guardado" no perfil
+    (idempotente): se o renascer ficar impossível na hora, ele espera a próxima queda.
+  - As regras são conferidas no servidor antes de cobrar.
+
+**Servidor:** `ProgressionService` (XP, posto, CI, compra e escolha do equipamento, abate e
+assistência pelo registro de acertos do `MedicalService`, ganchos de captura e fim de partida do
+`MatchService`, recibo do `CommerceService`); `SpawnService` (equipamento ao nascer e o renascer
+onde caiu). Perfil v3 (`ProfileSchema`): XP, CI e renasceres guardados gravados como delta da
+sessão, que nunca apaga o ganho de outro servidor.
+
+**Studio (2026-11-11):** compra da bandoleira com 300 CI, nascimento com +2 carregadores, aviso
+"+10 XP · +2 CI Tempo em campo", ponto "Onde caiu" na carta com a espera certa.
+- **Não criados no Roblox:** os 2 Game Passes e o produto. A chave Open Cloud não tem a
+  permissão (TODO_USUARIO). Com ID 0, só o botão de Robux some.

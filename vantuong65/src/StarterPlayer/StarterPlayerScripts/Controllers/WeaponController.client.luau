@@ -4,6 +4,9 @@
 -- arma (o antitanque tem o lançador como 2ª arma), binóculo, corpo a corpo e baioneta.
 -- Sem retícula, sem hitmarker, sem contador de munição na tela (Parte 1). Entradas pela camada
 -- Input: controle e teclado/mouse têm o MESMO balanço, inércia e recuo (Parte 12.4).
+-- 3ª pessoa (ThirdPerson.client): o tiro sai do OLHO do personagem e vai até o ponto da retícula
+-- (ViewMode), nunca da câmera atrás do ombro; do quadril, com a dispersão de Movement.hipSpreadDeg.
+-- O cansaço (Movement.client, atributo "Stamina") aumenta o balanço da mira de ferro.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -11,6 +14,7 @@ local RunService = game:GetService("RunService")
 local Accessibility = require(ReplicatedStorage.Shared.Accessibility)
 local AssetIds = require(ReplicatedStorage.Shared.AssetIds)
 local Ballistics = require(ReplicatedStorage.Shared.Ballistics)
+local Movement = require(ReplicatedStorage.Shared.Movement)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Rng = require(ReplicatedStorage.Shared.Rng)
 local Weapons = require(ReplicatedStorage.Shared.Weapons)
@@ -18,6 +22,7 @@ local Bus = require(script.Parent.Bus)
 local Haptics = require(script.Parent.Haptics)
 local Input = require(script.Parent.Input)
 local UiKit = require(script.Parent.UiKit)
+local ViewMode = require(script.Parent.ViewMode)
 
 local player = Players.LocalPlayer
 local camera = workspace.CurrentCamera
@@ -34,6 +39,9 @@ local binoculars = false
 local lastShot = 0
 local seedRng = Rng.new(os.time() + player.UserId)
 local recoilPitch, recoilYaw = 0, 0
+local recoilReturn = 0 -- graus que a boca ainda desce sozinha depois da subida
+local RECOIL_DEG_PER_MS = 0.9 -- graus de subida por m/s de recuo livre
+local RECOIL_RETURN = 0.6 -- fração da subida que volta sozinha (o resto o jogador corrige)
 local ZEROS = { 100, 200, 300 }
 local zeroIdx = 1
 local breathUntil, breathReady = 0, 0
@@ -113,8 +121,15 @@ local function equip()
 	player:SetAttribute("EquippedWeapon", if launcher then "launcher" elseif weapon then weapon.id else nil)
 end
 
+local spare = 0
+local reloadUntil = 0
+-- tempo de recarga por tipo de arma: espelha CombatService.RELOAD (o servidor manda)
+local RELOAD_S: { [string]: number } = { rifle = 3.0, mg = 7.0, pistol = 2.5, launcher = 3.0 }
+
 Net.event("Combat_Ammo").OnClientEvent:Connect(function(a)
 	mag = a.mag
+	spare = if type(a.spare) == "number" then a.spare else spare
+	reloadUntil = 0
 end)
 
 -- cor do traçante pela facção da arma e pelo modo daltônico do jogador (Accessibility)
@@ -173,23 +188,43 @@ local function setAim(on: boolean)
 	end
 end
 
+-- transpondo, mergulhando ou deitando/levantando (Movement.client): não dá para atirar
+local function bodyBusy(): boolean
+	return player:GetAttribute("Vaulting") == true or player:GetAttribute("StanceBusy") == true
+end
+
+-- Origem e direção do tiro. 1ª pessoa: a câmera (o olho). 3ª pessoa: do olho até o ponto da
+-- retícula, com a dispersão do quadril (semente própria, derivada da do tiro).
+local function shotRay(seed: number): (Vector3, Vector3)
+	local o, d = ViewMode.aimDirection()
+	if ViewMode.third and not aiming then
+		local r = Rng.new(seed + 7)
+		local spread = math.rad(ViewMode.hipSpread())
+		local ang, rad = r:next() * 2 * math.pi, spread * math.sqrt(r:next())
+		local cf = CFrame.lookAt(Vector3.zero, d) * CFrame.Angles(rad * math.sin(ang), rad * math.cos(ang), 0)
+		d = cf.LookVector
+	end
+	return o, d
+end
+
 local function fire()
 	local wp = weapon
 	local char = player.Character
 	local head = char and char:FindFirstChild("Head") :: BasePart?
-	if seated() or binoculars or not head or player:GetAttribute("Downed") then
+	if seated() or binoculars or not head or player:GetAttribute("Downed") or bodyBusy() then
 		return
 	end
 	if launcher then
 		local now = os.clock()
 		if now - lastShot > 1 then
 			lastShot = now
-			Net.event("Vehicle_Fire"):FireServer({ dir = camera.CFrame.LookVector })
+			local _, dir = ViewMode.aimDirection() -- o foguete sai da cabeça (VehicleService)
+			Net.event("Vehicle_Fire"):FireServer({ dir = dir })
 			Haptics.fire(1.6, false)
 		end
 		return
 	end
-	if not wp then
+	if not wp or os.clock() < reloadUntil then -- recarregando: o servidor recusaria o tiro
 		return
 	end
 	if mag <= 0 then
@@ -205,12 +240,13 @@ local function fire()
 	end
 	lastShot = now
 	mag -= 1
-	local o = camera.CFrame.Position
+	local seed = seedRng:nextU32()
+	local o, look = shotRay(seed)
 	-- alça zerada: o cano sobe o ângulo de zeragem em relação à linha de visada
 	local zero = Ballistics.zeroAngle(wp.id, ZEROS[zeroIdx])
-	local d = (camera.CFrame * CFrame.Angles(zero, 0, 0)).LookVector
-	local seed = seedRng:nextU32()
-	local shot = {
+	local basis = if ViewMode.third then CFrame.lookAt(Vector3.zero, look) else camera.CFrame.Rotation
+	local d = (basis * CFrame.Angles(zero, 0, 0)).LookVector
+	local shot: { [string]: any } = {
 		w = wp.id,
 		ox = o.X,
 		oy = o.Y,
@@ -222,15 +258,21 @@ local function fire()
 		t = workspace:GetServerTimeNow(),
 	}
 	Net.event("Combat_Fire"):FireServer(shot)
+	if ViewMode.third then
+		shot.by = char -- 3ª pessoa: o traçante local sai da arma do corpo (a de 1ª pessoa some)
+	end
 	Bus.fire("shot_fired", shot) -- clarão, recuo da arma e poeira no impacto (WeaponVisuals)
 	playId(SHOT_SOUND[wp.id] or 0, 0.8)
 	if wp.kind == "mg" and seed % 5 == 0 then
 		tracer(shot, tracerColor(wp.faction))
 	end
-	-- recuo físico aproximado: impulso do projétil e dos gases (~1,5x) contra a massa da arma.
-	-- PLACEHOLDER de escala; padrão aleatório com tendência por semente (Parte 10.3)
+	-- Recuo (D-69): velocidade de recuo livre (impulso do projétil e dos gases, ~1,5x, contra a
+	-- massa da arma, em m/s) vira graus de subida da boca. Antes a conta fazia math.deg da
+	-- velocidade: ~100° por tiro na M14, e a câmera ia ao céu ("diminua recoil", usuário).
+	-- Agora: M14 ~2,3°, Type 56 ~1,8°, M60 ~1,0° e M1911 ~4,7° (a pistola volta rápido).
+	-- Padrão aleatório com tendência por semente (Parte 10.3); parte volta sozinha (RECOIL_RETURN).
 	local impulse = (wp.bulletMassG / 1000) * wp.muzzleVelocity * 1.5
-	local kick = math.deg(impulse / wp.massLoadedKg) * 0.9
+	local kick = (impulse / wp.massLoadedKg) * RECOIL_DEG_PER_MS
 	if player:GetAttribute("ArmImpaired") then
 		kick *= 1.5
 	end
@@ -240,6 +282,7 @@ local function fire()
 	local r = Rng.new(seed)
 	recoilPitch += kick
 	recoilYaw += (r:next() - 0.35) * kick * 0.6 -- tendência leve para a direita
+	recoilReturn += kick * RECOIL_RETURN
 	Haptics.fire(kick, wp.modes[modeIdx] == "auto")
 end
 
@@ -263,18 +306,21 @@ Input.on("aim", "release", function()
 		setAim(false)
 	end
 end)
-Input.on("reload", "tap", function()
-	Net.event("Combat_Reload"):FireServer()
-	if weapon then
-		playId(if weapon.faction == "US" then S.reload_m14 else S.reload_type56, 0.7)
+-- Recarga (D-69): pede ao servidor e, se ele vai aceitar (há carregador e não está recarregando),
+-- o WeaponVisuals anima a troca de carregador com as mãos no tempo do servidor.
+local function startReload()
+	local wp = weapon
+	if not wp or os.clock() < reloadUntil or spare <= 0 then
+		return
 	end
-end)
-Input.on("reload", "press", function() -- R no teclado é "press"
+	local dur = RELOAD_S[wp.kind] or 3
+	reloadUntil = os.clock() + dur
 	Net.event("Combat_Reload"):FireServer()
-	if weapon then
-		playId(if weapon.faction == "US" then S.reload_m14 else S.reload_type56, 0.7)
-	end
-end)
+	playId(if wp.faction == "US" then S.reload_m14 else S.reload_type56, 0.7)
+	Bus.fire("reload_start", dur, wp.kind)
+end
+Input.on("reload", "tap", startReload)
+Input.on("reload", "press", startReload) -- R no teclado é "press"
 Input.on("fire_mode", "tap", function()
 	if weapon then
 		modeIdx = modeIdx % #weapon.modes + 1
@@ -314,7 +360,13 @@ local function toggleBinoculars()
 		setAim(false)
 	end
 end
-Input.on("binoculars", "press", toggleBinoculars)
+Input.on("binoculars", "press", toggleBinoculars) -- tecla B
+Input.on("binoculars", "tap", toggleBinoculars) -- direcional ↑ tocar (segurar: trocar ombro)
+-- transpor/mergulhar (Movement.client): a arma sai do ombro e o dedo sai do gatilho
+Bus.on("vault_start", function()
+	firing = false
+	setAim(false)
+end)
 local function melee()
 	Net.event("Combat_Melee"):FireServer({ dir = camera.CFrame.LookVector })
 	Haptics.fire(1.0, false)
@@ -365,13 +417,17 @@ RunService.RenderStepped:Connect(function(dt: number)
 	-- balanço da mira (igual para controle e mouse): menor prendendo a respiração.
 	-- Amplitude PLACEHOLDER (0,12° parado; dobra com o braço ferido).
 	if aiming and wp then
-		swayT += dt
-		local amp = 0.12 * (if player:GetAttribute("ArmImpaired") then 2 else 1)
+		-- cansado (Movement.swayFactor): balança mais e mais rápido, como o peito arfando
+		local st = player:GetAttribute("Stamina")
+		local tired = Movement.swayFactor(if type(st) == "number" then st else 1)
+		local ds = dt * (1 + 0.35 * (tired - 1)) -- o tempo do balanço corre mais rápido (a amplitude fica)
+		swayT += ds
+		local amp = 0.12 * tired * (if player:GetAttribute("ArmImpaired") then 2 else 1)
 		if os.clock() < breathUntil then
 			amp *= 0.2
 		end
-		local dp = math.cos(swayT * 1.3) * amp * 1.3 * dt
-		local dyw = math.cos(swayT * 0.9) * amp * 0.9 * dt
+		local dp = math.cos(swayT * 1.3) * amp * 1.3 * ds
+		local dyw = math.cos(swayT * 0.9) * amp * 0.9 * ds
 		camera.CFrame *= CFrame.Angles(math.rad(dp), math.rad(dyw), 0)
 	end
 	-- aplica e recupera o recuo
@@ -381,6 +437,18 @@ RunService.RenderStepped:Connect(function(dt: number)
 		camera.CFrame *= CFrame.Angles(math.rad(stepP), math.rad(-stepY), 0)
 		recoilPitch -= stepP
 		recoilYaw -= stepY
+		if math.abs(recoilPitch) < 1e-3 and math.abs(recoilYaw) < 1e-3 then
+			recoilPitch, recoilYaw = 0, 0
+		end
+	end
+	-- volta da boca: mais lenta que a subida, só depois que ela termina (~0,25 s)
+	if recoilReturn > 0 and math.abs(recoilPitch) < 0.05 then
+		local back = recoilReturn * math.min(1, dt * 7)
+		camera.CFrame *= CFrame.Angles(math.rad(-back), 0, 0)
+		recoilReturn -= back
+		if recoilReturn < 1e-3 then
+			recoilReturn = 0
+		end
 	end
 end)
 

@@ -176,6 +176,15 @@ local function render()
 				{ "minimal", "off" },
 				{ "mínima", "desligada" }
 			)
+			-- câmera de ombro (ThirdPerson.client); mirando volta à 1ª pessoa. O modo pode proibir.
+			local tpAllowed = workspace:GetAttribute("ThirdPersonAllowed") ~= false
+			choiceRow(
+				if tpAllowed then "Câmera" else "Câmera (3ª pessoa desligada neste modo)",
+				"thirdPerson",
+				{ false, true },
+				{ "1ª pessoa", "3ª pessoa (ombro)" }
+			)
+			choiceRow("Ombro da 3ª pessoa", "shoulderLeft", { false, true }, { "direito", "esquerdo" })
 		elseif S == "Vibração" then
 			choiceRow("Disparo", "hapticFire", { "normal", "low", "off" }, { "normal", "baixa", "desligada" })
 			choiceRow(

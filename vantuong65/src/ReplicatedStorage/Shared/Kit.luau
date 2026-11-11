@@ -59,4 +59,17 @@ function Kit.validate(raw: any, kind: string): Kit
 	return k
 end
 
+export type Bonus = { mags: number, frags: number, smokes: number, bandages: number }
+
+-- Soma o equipamento liberado (Shared/Progression.gearBonus) ao kit escolhido. Vai além do limite de
+-- peso de propósito: o peso a mais pesa no movimento pelos mesmos atributos (KitMags, Smokes...).
+function Kit.withBonus(k: Kit, b: Bonus): Kit
+	return {
+		mags = k.mags + math.max(math.floor(b.mags), 0),
+		frags = k.frags + math.max(math.floor(b.frags), 0),
+		smokes = k.smokes + math.max(math.floor(b.smokes), 0),
+		bandages = k.bandages + math.max(math.floor(b.bandages), 0),
+	}
+end
+
 return Kit
