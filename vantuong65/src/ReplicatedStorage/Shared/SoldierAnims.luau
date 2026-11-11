@@ -29,28 +29,51 @@ SoldierAnims.CLIPS = {
 	andar          = { id = 127399564065374, length = 2.275,  speed = 1.076, cycles = 2, stance = "stand",  loop = true,  layer = "loco" },
 	trote          = { id = 114026505834170, length = 0.75,   speed = 2.663, cycles = 1, stance = "stand",  loop = true,  layer = "loco" },
 	correr         = { id = 133413132642437, length = 0.65,   speed = 3.898, cycles = 1, stance = "stand",  loop = true,  layer = "loco" },
-	agachado       = { id = 118445577592992, length = 3.3667, speed = 0,     cycles = 0, stance = "crouch", loop = true,  layer = "loco" },
-	agachado_andar = { id = 95339992892371, length = 2.5917, speed = 0.756, cycles = 2, stance = "crouch", loop = true,  layer = "loco" },
+	-- D-94: agachados regravados com DROP.crouch 1,03 e recarregar/granada com a pega nova: id 0 até
+	-- subir de novo (os velhos dobrariam o corpo no ar ou levariam a mão longe do fuzil)
+	agachado       = { id = 107203115616695, length = 3.3667, speed = 0,     cycles = 0, stance = "crouch", loop = true,  layer = "loco" },
+	agachado_andar = { id = 74699707687127, length = 2.5917, speed = 0.756, cycles = 2, stance = "crouch", loop = true,  layer = "loco" },
 	deitado        = { id = 77922132925659, length = 2.0,    speed = 0,     cycles = 0, stance = "prone",  loop = true,  layer = "loco" },
 	rastejar       = { id = 106284082412771, length = 1.6,    speed = 0.35,  cycles = 1, stance = "prone",  loop = true,  layer = "loco" },
-	recarregar     = { id = 128492005132870, length = 2.4,    speed = 0,     cycles = 0, stance = "stand",  loop = false, layer = "upper" },
-	granada        = { id = 128233242567217, length = 0.8,    speed = 0,     cycles = 0, stance = "stand",  loop = false, layer = "upper" },
+	recarregar     = { id = 121371190730665, length = 2.4,    speed = 0,     cycles = 0, stance = "stand",  loop = false, layer = "upper" },
+	granada        = { id = 93580140836876, length = 0.8,    speed = 0,     cycles = 0, stance = "stand",  loop = false, layer = "upper" },
+	-- corpo a corpo (D-94, procedurais): faca na mão direita (Shared/Melee), golpe com o fuzil
+	faca_saque     = { id = 128911670737726, length = 0.2833, speed = 0,     cycles = 0, stance = "stand",  loop = false, layer = "upper" },
+	faca_estocada  = { id = 75823411352386, length = 0.55,   speed = 0,     cycles = 0, stance = "stand",  loop = false, layer = "upper" },
+	faca_lado      = { id = 128196368754555, length = 0.6,    speed = 0,     cycles = 0, stance = "stand",  loop = false, layer = "upper" },
+	faca_guardar   = { id = 106728637909412, length = 0.35,   speed = 0,     cycles = 0, stance = "stand",  loop = false, layer = "upper" },
+	baioneta       = { id = 123176623109494, length = 0.9,    speed = 0,     cycles = 0, stance = "stand",  loop = false, layer = "upper" },
 } :: { [string]: Clip }
+
+-- golpe (Shared/Melee) -> clipe de 3ª pessoa; a coronhada usa o do fuzil
+SoldierAnims.MELEE_CLIP = {
+	estocada = "faca_estocada",
+	lado = "faca_lado",
+	baioneta = "baioneta",
+	coronhada = "baioneta",
+}
+SoldierAnims.KNIFE_CLIPS = { "faca_saque", "faca_estocada", "faca_lado", "faca_guardar" }
 
 -- o que o retarget leu do código (tools/anim/retarget.py: ler_postura, HOLD_STAND, BASE_HIP)
 SoldierAnims.BAKED = {
-	drop = { crouch = 2.2, prone = 4.4 }, -- PostureService.DROP (studs)
+	drop = { crouch = 1.03, prone = 4.4 }, -- PostureService.DROP (studs; D-94: agachado 2,2 -> 1,03)
 	minHip = 0.2, -- PostureService.MIN_HIP
 	proneRoot = { y = -0.6, pitchDeg = -85 }, -- PostureService.PRONE_ROOT
-	holdStand = { x = 0.2, y = 0.2, z = -0.7, yawDeg = 15, pitchDeg = -20 }, -- PostureController
+	-- PostureController.HOLD_STAND (D-94: era 0,2/0,2/−0,7, 15°, −20°; braço e coronha dentro do peito)
+	holdStand = { x = 0.25, y = 0.8, z = -1.5, yawDeg = 55, pitchDeg = -20 },
 	baseHip = 2.5, -- HipHeight em pé (2,40 medido com escala 1,2; PLACEHOLDER com 1,25)
 	throwS = 0.8, -- FieldService.THROW_S (gesto inteiro); a granada sai em 0,4 s
 }
 
--- Bots: cada cliente pode animar localmente os bots perto da câmera (o servidor não toca animação
--- neles). Desligado até medir o custo no Studio com 58 bots.
-SoldierAnims.BOTS = false
+-- Bots: cada cliente anima localmente os bots perto da câmera (o servidor não toca animação neles).
+-- D-94: ligado, com nível de detalhe (SoldierAnimations): até BOT_NEAR tudo a cada quadro; até
+-- BOT_RADIUS e visível, a mistura a cada FAR_STEP_S e as correções a cada FAR_POST_S; fora da vista
+-- ou além do raio os clipes param. Custo com 58 bots: medir no Studio (não medido).
+SoldierAnims.BOTS = true
 SoldierAnims.BOT_RADIUS = 300 -- studs (~84 m)
+SoldierAnims.BOT_NEAR = 100 -- studs (~28 m)
+SoldierAnims.FAR_STEP_S = 0.1 -- 10 Hz
+SoldierAnims.FAR_POST_S = 1 / 15
 
 -- Âncoras da mistura de pé: cada clipe tem peso cheio na velocidade do jogo (Shared/Movement).
 SoldierAnims.GAIT = { "andar", "trote", "correr" }

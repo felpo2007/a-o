@@ -247,6 +247,74 @@ function Weapons.get(id: string): Weapon?
 	return Weapons.byId[id]
 end
 
+-- ===== Facas e baionetas (D-94) =====
+-- Fora de Weapons.list (lista das armas de fogo: tela de equipamento, skins e testes). Modelos
+-- feitos no Blender (tools/faca, assets/facas/<chave>.glb), chave do asset em AssetIds.Models.
+-- Pontos medidos na malha (assets/facas/pontos.json), em studs no referencial local da MeshPart
+-- publicada: ponta em −Z, fio em −Y (o importador gira o GLB 180° em Y e centra a peça na caixa).
+-- grip = onde a mão fecha; guard = junção lâmina/guarda; ring = anel de boca (M6); base = articulação
+-- que encosta na boca do fuzil (Tipo 56). Bainha: mouth = boca, loop = presilha do cinto (a malha da
+-- bainha já traz o cabo da faca embainhada).
+export type Knife = {
+	id: string,
+	name: string,
+	faction: string,
+	kind: string, -- "knife" | "bayonet"
+	art: string, -- chave em AssetIds.Models
+	lengthM: number,
+	bladeM: number,
+	size: { number },
+	grip: { number },
+	guard: { number },
+	tip: { number },
+	ring: { number }?,
+	base: { number }?,
+	sheath: { size: { number }, mouth: { number }, loop: { number }, tip: { number } }?,
+	src: { [string]: string },
+}
+
+-- stylua: ignore
+Weapons.knives = {
+	kabar = {
+		id = "kabar", name = "Ka-Bar USMC", faction = "US", kind = "knife", art = "faca_kabar",
+		lengthM = 0.3014, bladeM = 0.1778,
+		size = { 0.0886, 0.2232, 1.0764 }, grip = { 0, 0.0027, 0.3018 }, guard = { 0, 0.0009, 0.0968 },
+		tip = { 0, 0.017, -0.5382 },
+		sheath = { size = { 0.1638, 0.2232, 1.17 }, mouth = { -0.0134, 0.0027, 0.1421 },
+			loop = { 0.0627, -0.0009, 0.3489 }, tip = { -0.0134, -0.0116, -0.585 } },
+		src = { lengthM = "PLACEHOLDER (1219C2: 11 7/8 pol., lâmina 7 pol., de memória)" },
+	},
+	m6 = {
+		id = "m6", name = "Baioneta M6", faction = "US", kind = "bayonet", art = "faca_m6",
+		lengthM = 0.2921, bladeM = 0.1714,
+		size = { 0.1036, 0.2232, 1.0432 }, grip = { 0, -0.0316, 0.2729 }, guard = { 0, -0.0357, 0.0907 },
+		tip = { 0, -0.0348, -0.5216 }, ring = { 0, 0.0598, 0.1014 },
+		sheath = { size = { 0.1289, 0.2232, 1.1666 }, mouth = { -0.0127, -0.0357, 0.1471 },
+			loop = { 0.048, -0.033, 0.4976 }, tip = { -0.0127, -0.0384, -0.5833 } },
+		src = { lengthM = "PLACEHOLDER (lâmina 6 3/4 pol., de memória)" },
+	},
+	type56 = {
+		id = "type56", name = "Baioneta de espigão Tipo 56", faction = "VC", kind = "bayonet", art = "faca_type56",
+		lengthM = 0.2886, bladeM = 0.223,
+		size = { 0.0536, 0.0571, 1.0307 }, grip = { 0, 0, 0.3793 }, guard = { 0, 0, 0.2811 },
+		tip = { 0, 0, -0.5154 }, base = { 0, 0, 0.4882 },
+		src = { lengthM = "PLACEHOLDER (espigão rebatível, 22–24 cm)" },
+	},
+	dao = {
+		id = "dao", name = "Facão (dao)", faction = "VC", kind = "knife", art = "faca_dao",
+		lengthM = 0.5085, bladeM = 0.33,
+		size = { 0.1116, 0.2261, 1.8161 }, grip = { 0, 0.0512, 0.6277 }, guard = { 0, 0.0441, 0.2705 },
+		tip = { 0, 0.0584, -0.908 },
+		sheath = { size = { 0.1234, 0.2614, 1.9018 }, mouth = { -0.0059, 0, 0.3062 },
+			loop = { 0.0377, 0, 0.0455 }, tip = { -0.0059, 0.0161, -0.9509 } },
+		src = { lengthM = "PLACEHOLDER (facão de mato, lâmina 30–35 cm)" },
+	},
+} :: { [string]: Knife }
+
+function Weapons.knife(id: string?): Knife?
+	return if id then Weapons.knives[id] else nil
+end
+
 -- intervalo mínimo entre tiros (s), usado na validação do servidor
 function Weapons.minInterval(wp: Weapon): number
 	return 60 / wp.rpm

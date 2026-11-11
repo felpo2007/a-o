@@ -5,7 +5,7 @@
 --     equilíbrio controle x mouse (Parte 12.4);
 --   marcações e mensagens predefinidas para o squad ou o comando (sem digitar, Parte 12.5);
 --   granadas de fragmentação e de fumaça;
---   corpo a corpo (coronhada ou baioneta).
+--   corpo a corpo: faca, facão, baioneta e coronhada (D-94, Modules/MeleeService + Shared/Melee).
 -- Números marcados PLACEHOLDER estão na D-43.
 local AnalyticsService = game:GetService("AnalyticsService")
 local Players = game:GetService("Players")
@@ -19,9 +19,8 @@ local InputMap = require(ReplicatedStorage.Shared.InputMap)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Rng = require(ReplicatedStorage.Shared.Rng)
 local Smoke = require(ReplicatedStorage.Shared.Smoke)
-local Combatants = require(script.Parent.Combatants)
 local ExplosionService = require(script.Parent.ExplosionService)
-local MedicalService = require(script.Parent.MedicalService)
+local MeleeService = require(script.Parent.MeleeService)
 local PlayerData = require(script.Parent.PlayerData)
 
 local FieldService = {}
@@ -363,45 +362,16 @@ local function onThrow(p: Player, req: any)
 	end)
 end
 
--- ===== corpo a corpo =====
-local BAYONET_OK = { m14 = true, sks = true, type56 = true }
-local function zoneOf(part: Instance): string
-	local n = part.Name
-	if n == "Head" then
-		return "head"
-	elseif string.find(n, "Arm") or string.find(n, "Hand") then
-		return "arm"
-	elseif string.find(n, "Leg") or string.find(n, "Foot") then
-		return "leg"
-	end
-	return "torso"
-end
-
+-- ===== corpo a corpo (D-94) =====
+-- Regras no Shared/Melee; validação, acerto no instante do impacto, bots e efeitos no MeleeService.
+-- Aqui só a porta de entrada: vivo, pedido bem formado e no máximo 8 pedidos por segundo (o
+-- intervalo de cada golpe é conferido lá).
 local function onMelee(p: Player, req: any)
 	local c = alive(p)
-	if not c or type(req) ~= "table" or not finite(req.dir) or not throttle(p, "melee", 0.9) then
+	if not c or type(req) ~= "table" or not finite(req.dir) or not throttle(p, "melee", 0.12) then
 		return
 	end
-	local head = c:FindFirstChild("Head") :: BasePart?
-	if not head then
-		return
-	end
-	local bayonet = c:GetAttribute("Bayonet") == true
-	local reach = (if bayonet then 2.4 else 1.8) / M -- alcance com o fuzil (PLACEHOLDER)
-	local params = RaycastParams.new()
-	params.FilterType = Enum.RaycastFilterType.Exclude
-	params.FilterDescendantsInstances = { c }
-	local hit = workspace:Raycast(head.Position, (req.dir :: Vector3).Unit * reach, params)
-	if not hit then
-		return
-	end
-	local model = hit.Instance:FindFirstAncestorWhichIsA("Model")
-	local e = model and Combatants.get(model)
-	if not e or e.faction == p:GetAttribute("Faction") then
-		return
-	end
-	-- energia transferida (PLACEHOLDER): coronhada não incapacita sozinha; baioneta fere grave
-	MedicalService.hit(e.model, zoneOf(hit.Instance), if bayonet then 900 else 250, rng:next())
+	MeleeService.onRequest(p, req)
 end
 
 function FieldService.start()
@@ -436,6 +406,7 @@ function FieldService.start()
 	Net.event("Squad_Message").OnServerEvent:Connect(onMessage)
 	Net.event("Throw_Request").OnServerEvent:Connect(onThrow)
 	Net.event("Combat_Melee").OnServerEvent:Connect(onMelee)
+	MeleeService.start()
 	Net.event("Posture_Set").OnServerEvent:Connect(function(p, req: any)
 		if type(req) == "table" and type(req.bayonet) == "boolean" then
 			FieldService.setBayonet(p, req.bayonet)
@@ -478,14 +449,20 @@ function FieldService.start()
 	end)
 end
 
--- baioneta: o cliente pede; o servidor confere a arma na mão
+-- baioneta: o cliente pede; o servidor confere a arma na mão (a do chão, se pegou uma) e põe a
+-- baioneta na boca do fuzil (todos veem)
 function FieldService.setBayonet(p: Player, on: boolean)
 	local c = alive(p)
-	local lo = p:GetAttribute("Loadout")
-	local first = if type(lo) == "string" then string.split(lo, ",")[1] else ""
-	if c then
-		c:SetAttribute("Bayonet", on and BAYONET_OK[first] == true)
+	if not c then
+		return
 	end
+	local w = c:FindFirstChild("Weapon")
+	local wid = w and w:GetAttribute("WeaponId")
+	if type(wid) ~= "string" then
+		local lo = p:GetAttribute("Loadout")
+		wid = if type(lo) == "string" then string.split(lo, ",")[1] else nil
+	end
+	MeleeService.setBayonet(c, on, if type(wid) == "string" then wid else nil)
 end
 
 return FieldService

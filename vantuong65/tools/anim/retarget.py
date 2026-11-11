@@ -72,8 +72,11 @@ SOLE_TOE = np.array([0.0, -ANKLE_H, r15.TOE_Z])
 # HumanoidRootPart: HipHeight em pé (medido 2,40 com HeightScale 1,2 -> 2,5 com 1,25; PLACEHOLDER)
 BASE_HIP = 2.5
 
-# Pega do fuzil no peito: a MESMA do PostureController (HOLD_STAND), conferida pelo teste anim.luau
-HOLD_STAND = (np.array([0.2, 0.2, -0.7]), np.radians(15.0), np.radians(-20.0))
+# Pega do fuzil no peito: a MESMA do PostureController (HOLD_STAND), conferida pelo teste anim.luau.
+# D-94: a pega antiga (0,2; 0,2; −0,7; 15°; −20°) deixava o antebraço direito 13 cm dentro do
+# peito e a coronha 20 cm (simulação do Lune, Shared/ArmIK). A nova, com o tronco de lado (BLADE no
+# PostureController), deixa braços e arma fora do corpo em todas as torções e flexões medidas.
+HOLD_STAND = (np.array([0.25, 0.8, -1.5]), np.radians(55.0), np.radians(-20.0))
 # M14 (fuzileiro dos EUA, Shared/WeaponArt): apoio 0,885 stud à frente do punho e 0,036 acima
 SUPPORT_OFF = np.array([0.0, 0.036, -0.885])
 
@@ -376,8 +379,12 @@ def rifle_arms(
     return err
 
 
-POLES_STAND = {"Right": np.array([2.2, -2.0, 1.2]), "Left": np.array([-1.2, -2.6, -0.4])}
+# polos dos cotovelos no UpperTorso: os MESMOS do jogo (Shared/ArmIK.POLES.stand, IKControl.Pole)
+POLES_STAND = {"Right": np.array([3.2, -2.6, 0.4]), "Left": np.array([-3.0, -3.0, -1.2])}
 GRIP = hold_cf(HOLD_STAND)
+# pega de recarga: a MESMA do Shared/ArmIK.HOLDS.reload (conferida pelo tests/luau/faca)
+HOLD_RELOAD = (np.array([0.2, 1.0, -1.3]), np.radians(60.0), np.radians(-20.0))
+GRIP_RELOAD = hold_cf(HOLD_RELOAD)
 
 
 # ===== laço =====
@@ -1163,35 +1170,54 @@ def reload_clip(name: str, base: Clip) -> Clip:
     up = mean_rot(base.w["UpperTorso"])
     hd = mean_rot(base.w["Head"])
     piv0 = base.pivot.mean(axis=0)
-    hp, hr = GRIP
+    # D-94: na recarga o fuzil sobe para a pega de recarga (Shared/ArmIK.HOLDS.reload; o
+    # PostureController faz a mesma troca pelo peso deste clipe)
+    hp, hr = GRIP_RELOAD
     # tudo no espaço do UpperTorso
     sup = hp + hr @ SUPPORT_OFF
     well = hp + hr @ np.array([0.0, -0.3, -0.32])
-    out = well + np.array([0.0, -0.5, -0.05])
-    pouch = np.array([-0.65, -1.2, -0.7])  # porta-carregador no cinto, à frente e à esquerda
+    out = well + np.array([0.0, -0.3, -0.05])
+    # porta-carregador no cinto, à frente e à esquerda. D-94: era (−0,65; −1,2; −0,7); com a pega
+    # nova o braço esquerdo entrava 7,5 cm no tronco (tests/luau/faca). Agora a bolsa fica mais
+    # para fora, a mão passa ao lado do corpo ("lado") na ida e na volta, e o cotovelo tem um polo
+    # por chave (sobe e abre no trabalho do carregador): 2 cm no pior quadro da simulação.
+    pouch = np.array([-1.05, -1.1, -0.9])
+    side = np.array([-0.9, -0.4, -1.6])
     below = well + np.array([0.0, -0.28, 0.0])
-    op = hp + hr @ np.array([0.32, 0.12, -0.5])
-    op_back = hp + hr @ np.array([0.32, 0.12, -0.2])
-    keys = [
-        (0.0, sup),
-        (0.1, well),
-        (0.2, out),
-        (0.32, pouch + [0.1, 0.25, -0.1]),
-        (0.42, pouch),
-        (0.5, pouch),
-        (0.64, below),
-        (0.72, well),
-        (0.77, well),
-        (0.85, op),
-        (0.9, op_back),
-        (1.0, sup),
+    # alavanca de manejo: com a pega nova (D-94) a 0,32 a mão esquerda parava 6 cm antes
+    op = hp + hr @ np.array([0.2, 0.12, -0.5])
+    op_back = hp + hr @ np.array([0.2, 0.12, -0.2])
+    st, up_out, wing, back_out = (
+        POLES_STAND["Left"],
+        np.array([-3.0, 0.0, -1.5]),
+        np.array([-3.0, 2.0, 0.0]),
+        np.array([-3.2, -1.0, 0.0]),
+    )
+    # (tempo, alvo da mão, polo do cotovelo)
+    keys3 = [
+        (0.0, sup, st),
+        (0.1, well, up_out),
+        (0.18, out, up_out),
+        (0.26, side, st),
+        (0.36, pouch + [0.05, 0.2, -0.1], st),
+        (0.42, pouch, st),
+        (0.5, pouch, st),
+        (0.58, side, back_out),
+        (0.66, below, up_out),
+        (0.72, well, up_out),
+        (0.77, well, wing),
+        (0.85, op, st),
+        (0.9, op_back, up_out),
+        (1.0, sup, st),
     ]
+    keys = [(k[0], k[1]) for k in keys3]
+    pole_keys = [(k[0], k[2]) for k in keys3]
     look = [(0.0, 0.0), (0.12, 1.0), (0.82, 1.0), (1.0, 0.0)]
     w = {p: np.repeat(np.eye(3)[None], n + 1, axis=0) for p in PARTS}
     piv = np.repeat(piv0[None], n + 1, axis=0)
     w["LowerTorso"][:] = lo
     w["UpperTorso"][:] = up
-    rifle_arms(w, piv, GRIP, POLES_STAND)
+    rifle_arms(w, piv, GRIP_RELOAD, POLES_STAND)
     ut, _ = chest_frame(lo, up, piv0)
     rifle = up @ hr
     hw = _hand_rot(rifle, "Left")
@@ -1200,7 +1226,9 @@ def reload_clip(name: str, base: Clip) -> Clip:
     for i in range(n + 1):
         t = i / n
         target = ut + up @ _keys(keys, t)
-        wu, wfo, gap = arm_ik(sh, target, hw, ut + up @ np.array([-1.8, -2.6, 0.3]), "Left", up @ X)
+        # polo: o do jogo no fuzil; indo à bolsa, o cotovelo vai para trás (sem raspar no tronco)
+        pole = _keys(pole_keys, t)
+        wu, wfo, gap = arm_ik(sh, target, hw, ut + up @ pole, "Left", up @ X)
         w["LeftUpperArm"][i], w["LeftLowerArm"][i], w["LeftHand"][i] = wu, wfo, hw
         err = max(err, gap)
         k = float(_keys([(a, np.array([b])) for a, b in look], t)[0])
@@ -1296,6 +1324,175 @@ def throw_clip(
         "fonte": f"CMU {take.name}, quadros {i0}-{i1} (soltura no {ir}) a "
         f"{take.fps:g} qps, reescalado para {total} s",
         "soltura_s": release,
+    }
+    return clip
+
+
+# ===== corpo a corpo (D-94): faca na mão direita e golpe com o fuzil =====
+# A faca fica soldada no RightHand com o pivô (punho) em (0, HAND_GRIP_Y, 0), ponta no −Z da mão e
+# fio no −Y: o MESMO do Shared/Melee.HAND_GRIP_Y (servidor, MeleeService). Os quadros-chave dão a
+# faca no espaço do UpperTorso (pivô, direção da lâmina, direção do fio), a guinada e a arfagem do
+# peito e o polo do cotovelo; o braço direito sai por IK, o esquerdo segue no fuzil.
+HAND_GRIP_Y = -0.15
+POLE_KNIFE = np.array([3.0, -2.4, 1.0])
+POLE_CUT = np.array([3.0, 1.0, 0.5])  # golpe de lado: cotovelo para cima e para fora ao armar
+
+
+def knife_hand(blade: np.ndarray, edge: np.ndarray) -> np.ndarray:
+    """Rotação da mão direita (no espaço do peito) com a faca: −Z da mão = lâmina, −Y = fio."""
+    b = unit(blade)
+    e = unit(edge - (edge @ b) * b)
+    return triad(np.array([0.0, 0.0, -1.0]), r15.DOWN, b, e)
+
+
+def _rifle_grip_knife() -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """A mão direita no punho do fuzil, escrita como pivô/lâmina/fio de uma faca imaginária
+    (para o saque partir do fuzil e a guarda voltar a ele)."""
+    hp, hr = GRIP
+    hw = _hand_rot(hr, "Right")
+    return (
+        hp + hw @ np.array([0.0, HAND_GRIP_Y, 0.0]),
+        hw @ np.array([0.0, 0.0, -1.0]),
+        hw @ r15.DOWN,
+    )
+
+
+def _k(t, pos, blade, edge, yaw=0.0, pitch=0.0, pole=POLE_KNIFE):
+    return (
+        t,
+        np.array(pos, float),
+        np.array(blade, float),
+        np.array(edge, float),
+        yaw,
+        pitch,
+        pole,
+    )
+
+
+_RG = _rifle_grip_knife()
+POLE_OUT = np.array([3.2, -1.0, 1.4])  # saque e guarda: o cotovelo por fora, longe da barriga
+POLE_ARC = np.array([2.5, 2.5, -2.5])  # fim do golpe de lado: cotovelo alto e à frente
+# pose -> (pivô, lâmina, fio, polo). D-94: o caminho direto do punho do fuzil à bainha passava o
+# antebraço 7 cm dentro da barriga (tests/luau/faca); a mão sai antes para fora ("fora").
+KNIFE_POSES = {
+    "fuzil": (_RG[0], _RG[1], _RG[2], POLES_STAND["Right"]),
+    "fora": ([1.45, -0.1, -1.45], [0.3, -0.6, -1.0], [0.0, -1.0, 0.0], POLE_OUT),
+    "pronta": ([0.85, -0.45, -1.55], [-0.2, 0.3, -1.0], [0.0, -1.0, 0.3], POLE_KNIFE),
+    "bainha": ([1.05, -1.3, -0.6], [0.05, -1.0, 0.15], [0.0, 0.0, -1.0], POLE_OUT),
+}
+
+
+def _pose(name: str, t: float, yaw: float = 0.0, pitch: float = 0.0):
+    p, b, e, pole = KNIFE_POSES[name]
+    return _k(t, p, b, e, yaw, pitch, pole)
+
+
+# clipe -> (duração, chaves); chave = (tempo, pivô, lâmina, fio, guinada°, arfagem°, polo).
+# Tempos do Shared/Melee (DRAW_S 0,28; estocada 0,55; golpe de lado 0,6; SHEATHE_S 0,35)
+KNIFE_CLIPS = {
+    "faca_saque": (
+        0.28,
+        [_pose("fuzil", 0.0), _pose("fora", 0.07), _pose("bainha", 0.14), _pose("pronta", 0.28)],
+    ),
+    "faca_estocada": (
+        0.55,
+        [
+            _pose("pronta", 0.0),
+            _k(0.10, [1.1, -0.35, -1.0], [-0.1, 0.45, -1.0], [0.0, -1.0, 0.3], 14, -4),
+            _k(0.20, [0.45, 0.05, -1.95], [-0.05, 0.1, -1.0], [0.0, -1.0, 0.1], -12, 12),
+            _k(0.30, [0.5, 0.0, -1.85], [-0.05, 0.05, -1.0], [0.0, -1.0, 0.1], -10, 10),
+            _pose("pronta", 0.55),
+        ],
+    ),
+    "faca_lado": (
+        0.6,
+        [
+            _pose("pronta", 0.0),
+            _k(0.12, [1.55, 0.25, -1.05], [-0.4, 0.3, -1.0], [-1.0, 0.0, 0.0], 22, -2, POLE_CUT),
+            _k(0.24, [0.5, -0.1, -1.85], [0.35, 0.0, -1.0], [-1.0, -0.1, -0.35], -8, 6, POLE_ARC),
+            _k(0.36, [0.2, -0.2, -1.9], [0.9, 0.0, -0.7], [-0.8, -0.1, -0.5], -14, 8, POLE_ARC),
+            _k(0.48, [0.6, -0.25, -1.85], [0.1, 0.1, -1.0], [0.0, -1.0, 0.2], -4, 4),
+            _pose("pronta", 0.6),
+        ],
+    ),
+    "faca_guardar": (
+        0.35,
+        [_pose("pronta", 0.0), _pose("bainha", 0.14), _pose("fora", 0.26), _pose("fuzil", 0.35)],
+    ),
+}
+
+
+def _interp(keys: list, t: float, idx: int) -> np.ndarray:
+    return _keys([(k[0], np.atleast_1d(np.array(k[idx], float))) for k in keys], t)
+
+
+def knife_clip(name: str, base: Clip) -> Clip:
+    """Faca (procedural; a CMU não tem golpe de faca): peito gira e inclina com o golpe, a cabeça
+    segura o olhar, o braço direito leva a faca pelos quadros-chave e o esquerdo fica no fuzil."""
+    dur, keys = KNIFE_CLIPS[name]
+    fps = 60.0
+    n = int(round(dur * fps))
+    lo = mean_rot(base.w["LowerTorso"])
+    up_rel = mean_rot(np.einsum("fji,fjk->fik", base.w["LowerTorso"], base.w["UpperTorso"]))
+    hd = mean_rot(base.w["Head"])
+    piv0 = base.pivot.mean(axis=0)
+    w = {p: np.repeat(np.eye(3)[None], n + 1, axis=0) for p in PARTS}
+    piv = np.repeat(piv0[None], n + 1, axis=0)
+    w["LowerTorso"][:] = lo
+    for i in range(n + 1):
+        t = i / fps
+        yaw = float(_interp(keys, t, 4)[0])
+        pitch = float(_interp(keys, t, 5)[0])
+        w["UpperTorso"][i] = lo @ up_rel @ ry(np.radians(yaw)) @ rx(np.radians(-pitch))
+        w["Head"][i] = ry(np.radians(yaw * 0.25)) @ rx(np.radians(-pitch * 0.4)) @ hd
+    rifle_arms(w, piv, GRIP, POLES_STAND)
+    err = 0.0
+    for i in range(n + 1):
+        t = i / fps
+        up = w["UpperTorso"][i]
+        ut, _ = chest_frame(w["LowerTorso"][i], up, piv[i])
+        pos = _interp(keys, t, 1)
+        hw_ut = knife_hand(_interp(keys, t, 2), _interp(keys, t, 3))
+        # polo interpolado entre as chaves (trocar de uma vez virava o cotovelo para dentro)
+        pole = _interp(keys, t, 6)
+        hw = up @ hw_ut
+        hand = ut + up @ (pos - hw_ut @ np.array([0.0, HAND_GRIP_Y, 0.0]))
+        sh = ut + up @ SHOULDER["Right"]
+        wu, wf, gap = arm_ik(sh, hand, hw, ut + up @ pole, "Right", up @ X)
+        w["RightUpperArm"][i], w["RightLowerArm"][i], w["RightHand"][i] = wu, wf, hw
+        err = max(err, gap)
+    clip = Clip(name, fps, w, piv, False, "stand", 0.0)
+    clip.meta = {
+        "fonte": "procedural (faca na mão direita por IK; Shared/Melee.HAND_GRIP_Y)",
+        "erro_mao_cm": round(err * r15.STUD_M * 100, 2),
+    }
+    return clip
+
+
+def rifle_strike_clip(name: str, base: Clip) -> Clip:
+    """Estocada de baioneta e coronhada: o peito recua e avança com o passo (a arma anda junto no
+    PostureController, pela pega de golpe); as duas mãos seguem no fuzil."""
+    fps, dur = 60.0, 0.9
+    n = int(round(dur * fps))
+    keys = [(0.0, 0.0, 0.0), (0.18, 8.0, -6.0), (0.32, -4.0, 16.0), (0.45, -4.0, 14.0), (0.9, 0, 0)]
+    lo = mean_rot(base.w["LowerTorso"])
+    up_rel = mean_rot(np.einsum("fji,fjk->fik", base.w["LowerTorso"], base.w["UpperTorso"]))
+    hd = mean_rot(base.w["Head"])
+    piv0 = base.pivot.mean(axis=0)
+    w = {p: np.repeat(np.eye(3)[None], n + 1, axis=0) for p in PARTS}
+    piv = np.repeat(piv0[None], n + 1, axis=0)
+    w["LowerTorso"][:] = lo
+    for i in range(n + 1):
+        t = i / fps
+        yaw = float(_keys([(a, np.array([b])) for a, b, _ in keys], t)[0])
+        pitch = float(_keys([(a, np.array([c])) for a, _, c in keys], t)[0])
+        w["UpperTorso"][i] = lo @ up_rel @ ry(np.radians(yaw)) @ rx(np.radians(-pitch))
+        w["Head"][i] = ry(np.radians(yaw * 0.3)) @ rx(np.radians(-pitch * 0.5)) @ hd
+    err = rifle_arms(w, piv, GRIP, POLES_STAND)
+    clip = Clip(name, fps, w, piv, False, "stand", 0.0)
+    clip.meta = {
+        "fonte": "procedural (peito; a arma anda pela pega de golpe do PostureController)",
+        "erro_mao_cm": round(max(err.values()) * r15.STUD_M * 100, 2),
     }
     return clip
 
@@ -1436,13 +1633,15 @@ def build(nome: str, post: Postura) -> Saida:
     elif nome == "agachado":
         s = Saida(kneel_clip("agachado", build("parado", post).clip), GRIP, "Movement")
     elif nome == "agachado_andar":
+        # D-94: quadril mais baixo (0,35 -> 0,57 stud) para a cabeça andar na altura da do agachado
+        # parado (de joelho): a câmera desce DROP.crouch e fica na cabeça nos dois clipes
         clip = gait_clip(
             "agachado_andar",
             take("136_09"),
             2,
             "crouch",
             lo=2.4,
-            extra_drop=0.35,
+            extra_drop=0.57,
             lean=np.radians(-18.0),
         )
         s = Saida(clip, GRIP, "Movement")
@@ -1464,11 +1663,19 @@ def build(nome: str, post: Postura) -> Saida:
         s = Saida(crawl_clip("rastejar", base.clip, base.grip, 0.35, 1.6), base.grip, "Movement")
     elif nome == "recarregar":
         s = Saida(
-            reload_clip("recarregar", build("parado", post).clip), GRIP, "Action", weights=OVERLAY
+            reload_clip("recarregar", build("parado", post).clip),
+            GRIP_RELOAD,
+            "Action",
+            weights=OVERLAY,
         )
     elif nome == "granada":
         t = mirror_take(take("143_22"))
         clip = throw_clip("granada", build("parado", post).clip, t, 5.6, 7.3, 0.8, 0.4)
+        s = Saida(clip, GRIP, "Action", weights=OVERLAY)
+    elif nome in KNIFE_CLIPS:
+        s = Saida(knife_clip(nome, build("parado", post).clip), GRIP, "Action", weights=OVERLAY)
+    elif nome == "baioneta":
+        clip = rifle_strike_clip(nome, build("parado", post).clip)
         s = Saida(clip, GRIP, "Action", weights=OVERLAY)
     else:
         raise SystemExit(f"clipe desconhecido: {nome}")
@@ -1495,6 +1702,11 @@ CLIPES = [
     "rastejar",
     "recarregar",
     "granada",
+    "faca_saque",
+    "faca_estocada",
+    "faca_lado",
+    "faca_guardar",
+    "baioneta",
 ]
 
 

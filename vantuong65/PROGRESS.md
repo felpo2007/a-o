@@ -13,6 +13,22 @@
 | F5 Arte total e otimização | arte nos 5 setores a 100% do plano; 57,1 fps girando a câmera na célula mais densa da mata (D-76) e 59,6 fps no arrozal (D-74). Critério de 60 jogadores **só no Roblox** |
 | F6 Offensive e lançamento | **testado no Studio**: Offensive com relatório pós-ação, progressão. Beta fechado **só você pode rodar** |
 
+## Corpo a corpo, braços e bots animados (2026-11-11, D-94)
+- **Facas de 1965 no Blender** (`tools/faca`): Ka-Bar USMC, baioneta M6, espigão do Tipo 56 e
+  facão do VC, com bainha, atlas PBR de 1024 e prévia no Cycles. GLB e sons no `upload_plan`
+  (chaves em 0 em `AssetIds`); sem eles, faca de peças.
+- **Facadas:** estocada (certeira no tronco derruba), golpe de lado, baioneta e coronhada
+  (`Shared/Melee`); acerto resolvido no servidor no instante do impacto (alcance 1,4–2,1 m, cone e
+  linha livre); bots golpeiam a ≤ 1,5 m. 1ª pessoa com saque, antecipação, follow-through, balanço
+  e tranco no impacto (`KnifeView`); 3ª pessoa com 5 clipes novos (`tools/anim`, a subir).
+- **Braços:** na simulação do Lune o antebraço entrava 13 cm no peito e a coronha 20 cm; com polo
+  de cotovelo, tronco de lado e pega nova, 0 cm nos fuzis e metralhadoras e 1 cm na pistola
+  (`tests/luau/faca`).
+- **Câmera agachada** na cabeça da animação: `DROP.crouch` 2,2 → 1,03 stud.
+- **Bots animados** no cliente com nível de detalhe (`SoldierAnims.BOTS = true`); custo com 58 bots
+  **não medido**.
+- **Não testado no Studio.** Subir: 4 GLB, 4 sons e 9 clipes (TODO na D-94).
+
 ## Sessão 7 (2026-11-11): vida no mapa e teste fase a fase (D-74, D-75)
 - **Arrozal vivo:** arroz em cartões nos 989 tabuleiros plantados (perto: ladrilho de 384
   triângulos; longe: dossel verde). Muda nova e pousio em parte dos tabuleiros. 59,6 fps no meio
@@ -475,6 +491,10 @@ do usuário (opção A).
   itens.
 - A mira das 9 armas foi conferida contra um alvo parado. Atirando em movimento e com recuo, só no
   teste com jogadores.
+- D-93 (água, passo, VC mais rápido, dique do tanque): só Lune. No Studio, ver com
+  `workspace:SetAttribute("VT65DevMov", "info")` e os ganchos `agua`, `fundo`, `arrozal`, `dique`
+  e `veiculo`: estado Running vadeando até o peito, sem boiar; passada assistida no dique agachado;
+  inclinação da câmera; tanque subindo o dique.
 
 ## Como testar no Studio
 1. Abra `vantuong65/place/VanTuong65.rbxl`.

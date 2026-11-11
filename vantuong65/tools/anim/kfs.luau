@@ -152,7 +152,7 @@ if #names == 0 then
 	names = {}
 	for _, f in fs.readDir(DIR) do
 		local n = string.match(f, "^(.+)%.json$")
-		if n then
+		if n and n ~= "ids" then -- ids.json: os IDs publicados (subir.py)
 			table.insert(names, n)
 		end
 	end

@@ -192,5 +192,13 @@
  "Models.clay_lamp": "93656401875800",
  "Models.sandbag_wall": "106761576075393",
  "Models.conical_hat": "102164592744402",
- "Models.bamboo_clothesline": "135761829841967"
+ "Models.bamboo_clothesline": "135761829841967",
+ "Models.faca_kabar": "82895615799153",
+ "Models.faca_m6": "81588565737736",
+ "Models.faca_type56": "105729096442492",
+ "Models.faca_dao": "84372706569103",
+ "Sounds.faca_saque": "111901564575957",
+ "Sounds.faca_corte": "101889458600810",
+ "Sounds.faca_impacto": "103935391429233",
+ "Sounds.baioneta_encaixe": "75358128019094"
 }

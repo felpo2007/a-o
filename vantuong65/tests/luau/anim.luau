@@ -171,16 +171,17 @@ test("pernas na direção do movimento; de costas a passada volta", function()
 end)
 
 test("troca de postura: descida do HRP e correção vertical da mistura", function()
+	local dc = SoldierAnims.BAKED.drop.crouch -- D-94: 1,03 (era 2,2)
 	near(SoldierAnims.bakedDrop("stand"), 0, 1e-9)
-	near(SoldierAnims.bakedDrop("crouch"), 2.2, 1e-9)
+	near(SoldierAnims.bakedDrop("crouch"), dc, 1e-9)
 	near(SoldierAnims.bakedDrop("prone"), 2.3, 1e-9, "deitado: HipHeight preso no MIN_HIP")
 	near(SoldierAnims.rootLift({ stand = 1 }, 0), 0, 1e-9)
-	near(SoldierAnims.rootLift({ crouch = 1 }, 2.2), 0, 1e-9)
+	near(SoldierAnims.rootLift({ crouch = 1 }, dc), 0, 1e-9)
 	near(SoldierAnims.rootLift({ prone = 1 }, 2.3), 0, 1e-9)
 	-- metade da mistura: o clipe de pé sobe o que o HRP desceu, o agachado fica
-	near(SoldierAnims.rootLift({ stand = 0.5, crouch = 0.5 }, 2.2), 1.1, 1e-9)
-	-- o HRP ainda não desceu (falta 2,2): o agachado desce já
-	near(SoldierAnims.rootLift({ crouch = 1 }, 0), -2.2, 1e-9)
+	near(SoldierAnims.rootLift({ stand = 0.5, crouch = 0.5 }, dc), dc / 2, 1e-9)
+	-- o HRP ainda não desceu: o agachado desce já
+	near(SoldierAnims.rootLift({ crouch = 1 }, 0), -dc, 1e-9)
 	near(SoldierAnims.hipLag(-2.2, 0), -2.2, 1e-9)
 	near(SoldierAnims.hipLag(-2.2, -1.5), -0.7, 1e-9)
 	near(SoldierAnims.hipLag(-2.2, -3), 0, 1e-9, "passou do alvo")

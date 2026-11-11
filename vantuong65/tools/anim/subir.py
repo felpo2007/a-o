@@ -42,6 +42,12 @@ CLIPES = [
     "rastejar",
     "recarregar",
     "granada",
+    # corpo a corpo (D-94)
+    "faca_saque",
+    "faca_estocada",
+    "faca_lado",
+    "faca_guardar",
+    "baioneta",
 ]
 DESC = (
     "VAN TUONG 65: soldado com fuzil. Captura de movimento da CMU Graphics Lab Motion Capture "
@@ -90,7 +96,7 @@ def write_luau(ids: dict[str, str]) -> None:
     s = LUAU.read_text("utf-8")
     for name, v in ids.items():
         s = re.sub(rf"(\b{name}\s*=\s*\{{\s*id\s*=\s*)\d+", rf"\g<1>{int(v)}", s, count=1)
-    LUAU.write_text(s, "utf-8")
+    LUAU.write_text(s, "utf-8", newline="\n")  # .luau com LF (o StyLua confere)
 
 
 def main(simular: bool, so: list[str]) -> None:

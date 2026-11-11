@@ -14,6 +14,7 @@ local RunService = game:GetService("RunService")
 local Accessibility = require(ReplicatedStorage.Shared.Accessibility)
 local AssetIds = require(ReplicatedStorage.Shared.AssetIds)
 local Ballistics = require(ReplicatedStorage.Shared.Ballistics)
+local Melee = require(ReplicatedStorage.Shared.Melee)
 local Movement = require(ReplicatedStorage.Shared.Movement)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Rng = require(ReplicatedStorage.Shared.Rng)
@@ -21,6 +22,7 @@ local Weapons = require(ReplicatedStorage.Shared.Weapons)
 local Bus = require(script.Parent.Bus)
 local Haptics = require(script.Parent.Haptics)
 local Input = require(script.Parent.Input)
+local KnifeView = require(script.Parent.KnifeView)
 local Toast = require(script.Parent.Toast)
 local UiKit = require(script.Parent.UiKit)
 local ViewMode = require(script.Parent.ViewMode)
@@ -196,6 +198,10 @@ local function fire()
 	if seated() or binoculars or not head or player:GetAttribute("Downed") or bodyBusy() then
 		return
 	end
+	if KnifeView.busy() then -- faca na mão (D-94): o gatilho a devolve à bainha
+		KnifeView.sheatheNow()
+		return
+	end
 	if launcher then
 		local now = os.clock()
 		if now - lastShot > 1 then
@@ -295,6 +301,10 @@ local function startReload()
 	if not wp or os.clock() < reloadUntil or spare <= 0 then
 		return
 	end
+	if KnifeView.busy() then
+		KnifeView.sheatheNow()
+		return
+	end
 	local dur = RELOAD_S[wp.kind] or 3
 	reloadUntil = os.clock() + dur
 	Net.event("Combat_Reload"):FireServer()
@@ -306,7 +316,7 @@ Input.on("reload", "press", startReload) -- R no teclado é "press"
 Input.on("fire_mode", "tap", function()
 	if weapon then
 		modeIdx = modeIdx % #weapon.modes + 1
-		say("Seletor: " .. string.upper(weapon.modes[modeIdx]))
+		say(string.format("Seletor: %s", string.upper(weapon.modes[modeIdx])))
 	end
 end)
 Input.on("zeroing", "holdStart", function()
@@ -349,11 +359,74 @@ Bus.on("vault_start", function()
 	firing = false
 	setAim(false)
 end)
-local function melee()
-	Net.event("Combat_Melee"):FireServer({ dir = camera.CFrame.LookVector })
-	Haptics.fire(1.0, false)
+-- Corpo a corpo (D-94, Shared/Melee): o toque pede o golpe ao servidor (que decide e confere tudo)
+-- e começa já a animação de 1ª pessoa (KnifeView) e a de 3ª (SoldierAnimations, "melee_start").
+-- Sem baioneta: faca (estocada; 2º toque logo depois = golpe de lado). Com a baioneta: estocada de
+-- baioneta. O cliente espelha o intervalo do servidor só para não pedir à toa.
+local meleeS = { last = nil :: string?, lastAt = -10, nextAt = 0, knifeUntil = 0 }
+local function melee(rifle: boolean?)
+	local char = player.Character
+	if not char or seated() or binoculars or player:GetAttribute("Downed") or bodyBusy() then
+		return
+	end
+	local now = os.clock()
+	if now < meleeS.nextAt or now < reloadUntil then
+		return
+	end
+	local id = Melee.choose(char:GetAttribute("Bayonet") == true, rifle == true, meleeS.last, now - meleeS.lastAt)
+	local a = Melee.get(id)
+	if not a then
+		return
+	end
+	local knifeOut = now < meleeS.knifeUntil
+	local delay = Melee.impactDelay(id, knifeOut)
+	meleeS.nextAt = now + Melee.cooldown(id, knifeOut)
+	meleeS.last, meleeS.lastAt = id, now + delay - a.impact
+	if a.weapon == "knife" then
+		meleeS.knifeUntil = now + delay + a.recover + Melee.SHEATHE_AFTER_S
+	end
+	firing = false
+	setAim(false)
+	Net.event("Combat_Melee"):FireServer({ dir = camera.CFrame.LookVector, rifle = rifle == true })
+	KnifeView.start(id, a.weapon == "knife" and not knifeOut)
+	Bus.fire("melee_start", id, a.weapon == "knife" and not knifeOut)
+	task.delay(delay, function()
+		Haptics.fire(if a.weapon == "knife" then 0.9 else 1.4, false)
+	end)
 end
-Input.on("melee", "press", melee)
+Input.on("melee", "press", function()
+	melee(false)
+end)
+-- Studio: workspace:SetAttribute("VT65DevFaca", "estocada" | "lado" | "baioneta" | "coronhada" |
+-- "laco" | "parar") golpeia em 1ª pessoa (o resto do gancho é do servidor, MeleeService)
+if RunService:IsStudio() then
+	local devLoop = 0
+	workspace:GetAttributeChangedSignal("VT65DevFaca"):Connect(function()
+		local v = workspace:GetAttribute("VT65DevFaca")
+		devLoop += 1
+		local loop = devLoop
+		if v == "estocada" then
+			melee(false)
+		elseif v == "coronhada" then
+			melee(true)
+		elseif v == "lado" then
+			melee(false)
+			task.delay(0.62, melee, false)
+		elseif v == "baioneta" then
+			Net.event("Posture_Set"):FireServer({ bayonet = true })
+			task.delay(0.5, melee, false)
+		elseif v == "laco" then
+			task.spawn(function()
+				while devLoop == loop do
+					melee(false)
+					task.wait(0.62)
+					melee(false)
+					task.wait(2.6)
+				end
+			end)
+		end
+	end)
+end
 local function bayonet()
 	local char = player.Character
 	local on = not (char and char:GetAttribute("Bayonet") == true)

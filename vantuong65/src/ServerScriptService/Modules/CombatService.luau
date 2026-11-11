@@ -87,7 +87,7 @@ spawnPickup = function(pos: Vector3, a: Pickup.Ammo)
 	)
 	gun.Parent = pickups
 	local prompt = Instance.new("ProximityPrompt")
-	prompt.ActionText = "Pegar " .. wp.name
+	prompt.ActionText = string.format("Pegar %s", wp.name)
 	prompt.ObjectText = string.format("%d cartucho(s) no carregador", a.mag)
 	prompt.HoldDuration = 0.6
 	prompt.MaxActivationDistance = 8

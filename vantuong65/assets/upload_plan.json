@@ -943,5 +943,61 @@
   "assetType": "Model",
   "name": "VT65 bamboo_clothesline",
   "description": "VAN TUONG 65 - modelado no Blender"
+ },
+ {
+  "key": "Models.faca_kabar",
+  "file": "assets/facas/kabar.glb",
+  "assetType": "Model",
+  "name": "VT65 faca Ka-Bar USMC",
+  "description": "VAN TUONG 65 - faca de combate USMC (Ka-Bar) e bainha de couro, modelada no Blender (tools/faca)"
+ },
+ {
+  "key": "Models.faca_m6",
+  "file": "assets/facas/m6.glb",
+  "assetType": "Model",
+  "name": "VT65 baioneta M6",
+  "description": "VAN TUONG 65 - baioneta M6 da M14 e bainha M8A1, modelada no Blender (tools/faca)"
+ },
+ {
+  "key": "Models.faca_type56",
+  "file": "assets/facas/type56.glb",
+  "assetType": "Model",
+  "name": "VT65 baioneta Tipo 56",
+  "description": "VAN TUONG 65 - baioneta de espigao do Tipo 56, modelada no Blender (tools/faca)"
+ },
+ {
+  "key": "Models.faca_dao",
+  "file": "assets/facas/dao.glb",
+  "assetType": "Model",
+  "name": "VT65 facao dao",
+  "description": "VAN TUONG 65 - facao do VC e bainha de madeira, modelado no Blender (tools/faca)"
+ },
+ {
+  "key": "Sounds.faca_saque",
+  "file": "assets/facas/sons/faca_saque.mp3",
+  "assetType": "Audio",
+  "name": "VT65 faca saque",
+  "description": "VAN TUONG 65 - faca saindo da bainha (sintese, tools/faca/sons.py)"
+ },
+ {
+  "key": "Sounds.faca_corte",
+  "file": "assets/facas/sons/faca_corte.mp3",
+  "assetType": "Audio",
+  "name": "VT65 faca corte",
+  "description": "VAN TUONG 65 - silvo do golpe (sintese, tools/faca/sons.py)"
+ },
+ {
+  "key": "Sounds.faca_impacto",
+  "file": "assets/facas/sons/faca_impacto.mp3",
+  "assetType": "Audio",
+  "name": "VT65 faca impacto",
+  "description": "VAN TUONG 65 - baque abafado do golpe (sintese, tools/faca/sons.py)"
+ },
+ {
+  "key": "Sounds.baioneta_encaixe",
+  "file": "assets/facas/sons/baioneta_encaixe.mp3",
+  "assetType": "Audio",
+  "name": "VT65 baioneta encaixe",
+  "description": "VAN TUONG 65 - clique da baioneta (sintese, tools/faca/sons.py)"
  }
 ]

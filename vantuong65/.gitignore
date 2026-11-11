@@ -33,6 +33,8 @@ assets/carta/
 assets/ghillie/
 # linha de produção do Blender: GLB refeitos/novos, comparações e trabalho (tools/blender/lote.py)
 assets/blender/
+# facas e baionetas do Blender, sons e prévias (tools/faca, D-94)
+assets/facas/
 # ícones das skins e catálogo exportado para criar os itens de Robux (tools/roblox_cloud.py create-skins)
 assets/skins_icones/
 assets/skins_loja.json

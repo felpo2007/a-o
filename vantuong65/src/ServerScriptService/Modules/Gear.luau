@@ -327,6 +327,8 @@ function Gear.items(faction: string, role: string?, equipped: { [string]: string
 	local byRole = KIT_BY_ROLE[fac]
 	local kit = byRole[role or "rifleman"] or byRole.rifleman
 	local list = table.clone(KITS[fac][kit])
+	-- D-94: todo soldado leva a faca no cinto (Ka-Bar do USMC; facão do VC)
+	table.insert(list, "knife")
 	if fac == "US" then
 		if eq.extra == "us_towel" then
 			table.insert(list, "towel")
@@ -493,8 +495,11 @@ function Gear.layout(faction: string, items: { string }, env: Env): { Piece }
 		end
 	end
 
+	local wantKnife = false
 	for _, item in items do
-		if item == "belt" then
+		if item == "knife" then
+			wantKnife = true -- depois de tudo: vai no primeiro lugar livre do cinto
+		elseif item == "belt" then
 			add(
 				"belt",
 				"LowerTorso",
@@ -794,6 +799,68 @@ function Gear.layout(faction: string, items: { string }, env: Env): { Piece }
 					C.bottle,
 					VERT
 				)
+			end
+		end
+	end
+	if wantKnife then
+		-- D-94: faca na bainha, pendurada no lado do cinto, cabo para cima (a arte publicada troca estas
+		-- peças: Characters.knifeArt). Ka-Bar: bainha de couro de ~20 cm à vista; facão do VC: bainha
+		-- de madeira de ~34 cm (PLACEHOLDER de medida, tools/faca). Primeiro lugar livre do cinto,
+		-- sem encostar em bolsa, coldre, cantil ou granada.
+		local d, w, h = m(if us then 0.03 else 0.035), m(if us then 0.055 else 0.075), m(if us then 0.2 else 0.34)
+		local hl, hd = m(if us then 0.12 else 0.16), m(if us then 0.032 else 0.035)
+		local top = beltTop + 0.02
+		local slots = { { 1, 0.3 * L.z }, { 1, -0.32 * L.z }, { -1, 0 }, { -1, 0.36 * L.z }, { -1, -0.36 * L.z } }
+		local belt: { Piece } = {}
+		for _, p in out do
+			if p.group == "belt" then
+				table.insert(belt, p)
+			end
+		end
+		for _, s in slots do
+			local x = s[1] * (sx + d / 2)
+			local sheath: Piece = {
+				name = "knife_sheath",
+				attach = "LowerTorso",
+				shape = "Block",
+				size = vec(d, h, w),
+				pos = vec(x, top - h / 2, s[2]),
+				rot = vec(0, 0, 0),
+				material = if us then "Leather" else "Wood",
+				color = if us then C.russet else C.vc_wood,
+				shadow = false,
+				group = "belt",
+			}
+			local handle: Piece = {
+				name = "knife_handle",
+				attach = "LowerTorso",
+				shape = "Cylinder",
+				size = vec(hl, hd, hd),
+				pos = vec(x, top + hl / 2, s[2]),
+				rot = VERT,
+				material = if us then "Leather" else "Wood",
+				color = if us then C.russet else C.vc_wood,
+				shadow = false,
+				group = "belt",
+			}
+			local free = true
+			for _, mine in { sheath, handle } do
+				local ea = Gear.extents(mine)
+				for _, p in belt do
+					local eb = Gear.extents(p)
+					if
+						math.abs(mine.pos.x - p.pos.x) < ea.x + eb.x + 0.01
+						and math.abs(mine.pos.y - p.pos.y) < ea.y + eb.y + 0.01
+						and math.abs(mine.pos.z - p.pos.z) < ea.z + eb.z + 0.01
+					then
+						free = false
+					end
+				end
+			end
+			if free then
+				table.insert(out, sheath)
+				table.insert(out, handle)
+				break
 			end
 		end
 	end

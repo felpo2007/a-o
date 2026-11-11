@@ -377,6 +377,41 @@ local function ghillie(model: Model, camo: Skins.Skin?)
 	CollectionService:AddTag(folder, Skins.GHILLIE_TAG)
 end
 
+-- D-94: com a arte das facas publicada (tools/faca; o MeleeService a põe em VT65KnifeArt), a bainha
+-- com a faca (Ka-Bar ou facão) entra no lugar das peças provisórias do cinto (Gear "knife_*"), na
+-- mesma posição: boca no alto da bainha provisória, ponta para baixo, faces planas para os lados.
+local KnifeModel = require(game:GetService("ReplicatedStorage").Shared.KnifeModel)
+local function knifeArt(model: Model, faction: string, lower: BasePart)
+	local eq = model:FindFirstChild("Equipamento")
+	local sheath = eq and eq:FindFirstChild("Eq_knife_sheath") :: BasePart?
+	local id = if faction == "VC" then "dao" else "kabar"
+	if not (eq and sheath and KnifeModel.art(id)) then
+		return
+	end
+	local built = KnifeModel.build(id, true)
+	if not built then
+		return
+	end
+	local m = built :: Model
+	m.Name = "Eq_knife_arte"
+	local mouth = sheath.CFrame * CFrame.new(0, sheath.Size.Y / 2, 0)
+	m:PivotTo(
+		mouth * CFrame.fromMatrix(Vector3.zero, Vector3.new(-1, 0, 0), Vector3.new(0, 0, 1), Vector3.new(0, 1, 0))
+	)
+	KnifeModel.weld(m)
+	local primary = m.PrimaryPart :: BasePart
+	local w = Instance.new("WeldConstraint")
+	w.Part0, w.Part1 = lower, primary
+	w.Parent = primary
+	for _, name in { "Eq_knife_sheath", "Eq_knife_handle" } do
+		local p = eq:FindFirstChild(name)
+		if p then
+			p:Destroy()
+		end
+	end
+	m.Parent = eq
+end
+
 function Characters.dress(model: Model, faction: string, equipped: { [string]: string }?)
 	local eq: { [string]: string } = equipped or {}
 	local C = AssetIds.Clothing
@@ -475,6 +510,7 @@ function Characters.dress(model: Model, faction: string, equipped: { [string]: s
 		local env = Gear.env(size(lower), size(upper), if head then size(head) else nil, vestFit, helmetFit)
 		local pieces = Gear.layout(faction, Gear.items(faction, roleOf(model), eq), env)
 		Gear.build(model, { UpperTorso = upper, LowerTorso = lower, Head = head }, pieces)
+		knifeArt(model, faction, lower)
 	end
 	ghillie(model, skinOfPlayer(model, "SkinCamo", "camo", faction))
 	measureHeight(model)

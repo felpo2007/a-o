@@ -16,6 +16,8 @@ local Net = require(ReplicatedStorage.Shared.Net)
 local Weapons = require(ReplicatedStorage.Shared.Weapons)
 local Bus = require(script.Parent.Bus)
 local Input = require(script.Parent.Input)
+-- faca, baioneta e coronhada em 1ª pessoa (D-94): módulo à parte (limite de locais deste script)
+local KnifeView = require(script.Parent.KnifeView)
 
 local player = Players.LocalPlayer
 local camera = workspace.CurrentCamera
@@ -471,13 +473,16 @@ end
 
 -- No veículo a câmera ainda muda depois daqui (VehicleController, Camera + 3: olho fora da malha).
 -- A arma do assento é posta de novo depois dela (Camera + 4), pela diferença; a pé nada muda.
-local placed = { cf = CFrame.identity, seat = false }
+local placed = { cf = CFrame.identity, seat = false, gripR = nil :: Vector3? }
 
 RunService:BindToRenderStep("VT65ViewModel", Enum.RenderPriority.Camera.Value + 1, function(dt: number)
 	placed.seat = false
 	local inSeat = seated()
 	setView(if inSeat then seatGun() else player:GetAttribute("EquippedWeapon") :: string?)
 	local v = view
+	-- D-94: a faca mexe na câmera (balanço e coice) ANTES de a arma ser posta nela
+	local kv = KnifeView.step(dt, v ~= nil and not inSeat and showView(), placed.gripR)
+	KnifeView.bayonet(v, if inSeat then nil else player:GetAttribute("EquippedWeapon") :: string?)
 	if not v then
 		if arms then
 			arms:PivotTo(CFrame.new(0, -1e4, 0))
@@ -538,7 +543,7 @@ RunService:BindToRenderStep("VT65ViewModel", Enum.RenderPriority.Camera.Value + 
 			0
 		)
 	end
-	local wcf = camera.CFrame * HIP:Lerp(ads, aimT) * bob * recoil * pose
+	local wcf = camera.CFrame * kv.rifle * HIP:Lerp(ads, aimT) * bob * recoil * pose
 	v:PivotTo(wcf)
 	-- braços
 	local rot = wcf.Rotation
@@ -588,6 +593,7 @@ RunService:BindToRenderStep("VT65ViewModel", Enum.RenderPriority.Camera.Value + 
 	-- arremesso: a mão direita larga a arma; a esquerda vai ao pino
 	local _, throwHand, pulling = throwState(handR)
 	local handRot = rot
+	placed.gripR = handR -- o saque e a guarda da faca partem do punho
 	if throwHand then
 		handR = throwHand
 		handRot = camera.CFrame.Rotation
@@ -595,12 +601,16 @@ RunService:BindToRenderStep("VT65ViewModel", Enum.RenderPriority.Camera.Value + 
 			handL = handL:Lerp(throwHand + camera.CFrame:VectorToWorldSpace(Vector3.new(-0.05, 0.03, 0) / M), 0.85)
 		end
 	end
+	if kv.handR then -- faca na mão direita
+		handR = kv.handR :: Vector3
+		handRot = kv.handRot or rot
+	end
 	local mr, ml = armBits.MaoR, armBits.MaoL
 	if mr and ml then
 		mr.CFrame = handRot + handR
 		ml.CFrame = rot + handL
 		local cam = camera.CFrame
-		forearm(handR + rot * Vector3.new(0, -0.03 / M, 0.05 / M), cam * ELBOW_R, "R")
+		forearm(kv.wristR or (handR + rot * Vector3.new(0, -0.03 / M, 0.05 / M)), kv.elbowR or cam * ELBOW_R, "R")
 		forearm(handL + rot * Vector3.new(0, -0.01 / M, 0.05 / M), cam * ELBOW_L, "L")
 	end
 	placed.cf, placed.seat = camera.CFrame, inSeat

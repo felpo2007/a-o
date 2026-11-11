@@ -2632,3 +2632,190 @@ Pedido do dono depois de jogar: ver sempre os aliados, o squad e os objetivos; o
 
 **Studio:** menu na aba Som, cabendo em 671 px; o volume de efeitos foi de 50% para 55% no
 SoundGroup; a música do menu toca e carrega.
+
+## D-93 — Água sem bug, passo com peso, VC mais rápido e veículos mais vivos (2026-11-11)
+**Pedido do dono, depois de jogar:** "a movimentação na água está toda bugada"; "como o mapa é
+grande, faça a movimentação do personagem e dos veículos muito boa"; "faça que os do Vietnã sejam
+mais rápidos também". Referência de sensação (sem copiar jogo): peso ao arrancar e parar, curva com
+inclinação, balanço preso à passada, degrau e aterrissagem amortecidos, corrida firme.
+
+**Causas do bug da água** (`Movement.client`):
+- **Nadar no raso:** o Humanoid entra em Swimming com a água no HumanoidRootPart (em pé ~0,65 m;
+  agachado ou deitado, poucos centímetros). O riacho tem 0,6 m no projeto e varia de 0 a ~1,1 m com
+  os voxels de 4 studs (`TerrainBuilder`). O soldado alternava nadar e andar:
+  - velocidade aos trancos (0,9 m/s nadando);
+  - corpo deitando, e a câmera (presa à HumanoidRootPart) girando junto;
+  - aderência de "no ar" (0,1) enquanto nadava.
+- **Boiar e tremer:** a fundura era medida até o pé. Boiando, o pé subia, a "fundura" caía e o modo
+  trocava de novo.
+- **Arrozal aos trancos:** a lâmina (peça sem colisão) fica 6 cm acima da mediana do chão do
+  tabuleiro, e o capim do terreno fura a lâmina em metade dos pontos. O raio pegava "a primeira
+  coisa": o fator do chão alternava 0,62 e 1 a cada passo.
+
+**Água agora:**
+- Modo pela fundura do LEITO (superfície − fundo), com histerese: seco abaixo de 5 cm; vadeia até
+  1,3 m (peito); nada acima; volta a vadear abaixo de 1,1 m.
+- Vadeando, o estado Swimming fica desligado. Medido no teste: canela 3,10, joelho 2,33, cintura 1,24
+  e peito 0,93 m/s; arranca e vira mais pesado; passada da câmera mais pesada.
+- Nadando: 0,9 m/s, aderência 0,5 e câmera em pé (corrige a inclinação da HumanoidRootPart).
+- Deitado só até 0,3 m d'água e agachado até 0,8 m; nadando, de pé. Mergulho só no seco.
+- Arrozal: lâmina na coluna até 0,3 m abaixo do chão achado = arrozal. A superfície só troca depois
+  de lida igual por 0,3 s, e o fator do chão é suavizado (0,25 s).
+
+**Passo** (`Movement.moveStep`; os bots seguem com `accelStep`):
+- Arrancada de 11 m/s² caindo a 5 m/s² perto da corrida; parada a 12 m/s².
+- Curva: a direção gira até 16 m/s² de aceleração lateral, sem perder velocidade. O modelo vetorial
+  cortava pela corda: numa curva de 90° a velocidade caía a 71%.
+- Medido: parado → andar 0,15 s, → trote 0,35 s; trote → corrida 0,38 s; corrida → parado 0,47 s;
+  meia-volta 0,60 s; 90° no trote 0,32 s e na corrida 0,55 s, mantendo 100% da velocidade.
+- Corrida cheia até ~45° do rumo (W+D), caindo suave até o trote em ~60° (antes, degrau em 53°). Com
+  a corrida ligada, o analógico acima de 70% vale o fim.
+- Parede: a velocidade guardada só cai para a real depois de 0,15 s (antes, todo dique engasgava).
+- Agachado ou deitado parado na face de um degrau baixo: passada assistida sem botão (0,46 s para
+  0,45 m agachado; 0,84 s para 0,35 m deitado).
+
+**Câmera:**
+- Balanço preso à passada das animações da D-88: a cabeça desce no apoio do pé.
+- Cabeça com inércia (mola de 2,2 Hz, até 3,5 cm): para trás ao arrancar, à frente na parada.
+- Inclinação lateral para o lado do passo e para dentro da curva, até 1,4°, aplicada depois do
+  módulo de câmera, só em volta da linha de visada. Mirando e deitado, nada.
+- Degrau (dique, soleira) suavizado em ~0,2 s; numa ladeira, sem atraso.
+- **Opção "movimento da câmera"** (0 a 1) multiplica balanço, respiração, afundada, inércia e
+  inclinação. Lida de `Input.settings.cameraBob`; até o menu ganhar a opção, do atributo local
+  `CameraBob` do jogador.
+
+**Lado** (`Movement.FACTION`, PLACEHOLDER):
+- VC: velocidade ×1,12 em andar, trote, corrida e agachado (trote 3,47, corrida 6,16 m/s);
+  transpor ÷1,1 (dique em 0,54 s contra 0,60 s); base do equipamento de 7 kg contra 11 kg.
+- Mira de ferro, rastejar e nado iguais nos dois lados.
+- Servidor: `MedicalService.apply` usa `Movement.serverSpeed(..., faction)`. Em 10.000 sorteios o
+  cliente nunca passa do teto.
+- Bots: chamam `serverSpeed` sem o lado e ficam na velocidade-base.
+
+**Veículos** (`VehicleDrive`, `VehicleController`; os números da tabela da D-86 não mudaram):
+- **Dique:** a quina segurava o chassi e o comando caía para a velocidade medida: o tanque parava em
+  cima do dique. Com um degrau de até 0,65 m à frente, a lagarta segue empurrando a 1,5 m/s por até 3 s.
+- **Direção:** inércia do giro menor (M48 0,6 → 0,45 s): 90% do giro no lugar em 1,05 s (antes
+  1,38 s). Andando, curva de raio fixo do câmbio cross-drive (M48 12 m, Ontos 7 m, LVTP-5 13 m;
+  PLACEHOLDER): 90° a 31 km/h no capim em 4,5 s (antes 5,5 s). Arrasto da curva menor (M48 0,06 → 0,045).
+- **Comando:** teclado mais rápido (acelerador 0,22 s, volante 0,17 s); no controle, volante 12/s.
+  Encostado em árvore ou casa, o giro comandado fica a 12° do real (antes o AlignOrientation
+  torcia o chassi de uma vez ao soltar).
+- **Travessia de 1 km (M48, modelo):** terra 109 s, capim 123 s, mata 156 s, arrozal 277 s.
+
+**Ganchos só no Studio:** `workspace:SetAttribute("VT65DevMov", X)` com X igual a `agua`, `fundo`,
+`mar`, `arrozal`, `dique` (no assento do motorista, leva o veículo), `info`, `veiculo`, `vc`, `eua`
+ou `nada`.
+
+**Não testado no motor:** tudo acima foi medido no Lune. Falta ver no Studio o empuxo vadeando até o
+peito, a passada assistida no dique, a inclinação da câmera e a subida do tanque no dique.
+
+## D-94 — Facas de 1965, facadas, braços fora do corpo, câmera agachada e bots animados (2026-11-11)
+**Pedido do dono:** "faça facas e animações de facadas ultra-realistas com gráficos absurdos";
+"corrija e melhore a movimentação dos braços do personagem, que ficam atravessando o seu corpo".
+
+**Facas** (`tools/faca`, Blender 5.3; saída em `assets/facas`):
+
+| Chave | O quê | Triângulos (faca + bainha) |
+|---|---|---|
+| `kabar` | faca de combate USMC, bainha de couro com costura e rebites | 5.564 + 6.346 |
+| `m6` | baioneta M6 da M14 (anel de boca), bainha M8A1 | 2.372 + 4.802 |
+| `type56` | espigão rebatível do Tipo 56 (fica no fuzil) | 1.622 |
+| `dao` | facão do VC, bainha de madeira com anéis de rotim | 4.360 + 5.420 |
+
+- Malha procedural com chanfro, sulco, guarda, cabo de arruelas de couro em anéis e pomo; atlas
+  1024 (cor, normal, metal/rugosidade) assado no Cycles a partir de materiais procedurais (aço
+  fosfatizado gasto com riscos e fio claro, couro com grão e escurecido nos sulcos), com a oclusão
+  multiplicada na cor. Prévias renderizadas em `assets/facas/<chave>_previa.png` e `_close.png`.
+- GLB com os nós `Faca` e `Bainha` (a bainha já traz o cabo). Pontos medidos no GLB relido
+  (`pontos.json`) vão para `Shared/Weapons.knives` (o teste `faca` confere).
+- Medidas de memória, PLACEHOLDER até conferir: Ka-Bar 302/178 mm (total/lâmina), M6 292/171,
+  espigão 289/223, facão 509/330.
+- Sons sintetizados (`tools/faca/sons.py`, MP3 pelo FFmpeg do Blender): saque, corte, impacto e
+  encaixe da baioneta.
+- Chaves novas em 0: `AssetIds.Models.faca_kabar|m6|type56|dao` e `AssetIds.Sounds.faca_saque|
+  faca_corte|faca_impacto|baioneta_encaixe`. Sem elas: faca de peças (`Shared/KnifeModel`) e sons
+  substitutos (curativo e impacto na terra, mais graves).
+
+**Golpes** (`Shared/Melee`, puro; números de projeto, PLACEHOLDER até playtest):
+
+| Golpe | Antecipação / impacto / fim (s) | Alcance | Cone (certeiro) | Tronco | Cabeça | Membro |
+|---|---|---|---|---|---|---|
+| estocada (faca) | 0,10 / 0,20 / 0,55 | 1,8 m | 24° (12°) | 1.600 J: caído | 260: caído | 1.500: 20% arterial |
+| golpe de lado (faca) | 0,12 / 0,24 / 0,60 | 1,5 m | 55° | 700: −59 de vida, sangra | 260: caído | 900 |
+| baioneta | 0,18 / 0,32 / 0,90 | 2,1 m | 20° (10°) | 1.800: caído | 280: caído | 1.600 |
+| coronhada | 0,16 / 0,30 / 0,85 | 1,4 m | 35° | 250 | 250: caído | 250 |
+
+- Energia equivalente para o `Medical` (tronco ≥ 1.500 derruba; cabeça < 300 derruba sem matar).
+  Fora do cone certeiro vale o golpe de raspão (estocada → lado; baioneta → coronhada). Caído:
+  golpe ≥ 300 mata (a coronhada não). Facão do VC: estocada ×0,9, golpe de lado ×1,4.
+- Alcance medido do peito de quem golpeia ao ponto mais próximo do corpo do outro.
+- Entrada: "Corpo a corpo" (R3 / botão do meio), sem ação nova. 1º toque = estocada (com o saque de
+  0,28 s se a faca está na bainha); 2º toque até 1,0 s depois = golpe de lado. Com a baioneta armada
+  (Y segurado / K) o toque é a estocada de baioneta. Sem golpe por 1,3 s a faca volta à bainha
+  (0,35 s); atirar ou recarregar com a faca na mão a guarda.
+- **Servidor** (`Modules/MeleeService`, chamado pelo `FieldService`): o cliente só manda a direção.
+  O servidor escolhe o golpe pelo próprio estado, confere vivo, sem assento, transpor ou
+  arremesso, direção finita a ≤ 75° da frente do corpo e ≤ 70° de arfagem, o intervalo do golpe
+  (90% do fim, mais o saque) e no máximo 8 pedidos por segundo. O acerto é resolvido NO IMPACTO com
+  a geometria do servidor: 15 peças do corpo, folga de 0,3 m e linha livre (o que tem colisão
+  bloqueia). Quem sai do alcance na antecipação escapa.
+- **Bots:** reflexo no servidor a 4 Hz: inimigo a ≤ 1,5 m e ≤ 50° da frente, 70% de chance,
+  1,1 s de intervalo; o fuzileiro estoca, o VC corta com o facão. Bots também são golpeados.
+- **Impacto:** pó escuro de pano (5 partículas de 2–7 cm, 0,3 s), nada de sangue; som do golpe e
+  do impacto em 3D até 40 m; quem leva sente um tranco na câmera.
+- **3ª pessoa:** a faca é soldada na mão direita pelo servidor (todos veem) enquanto está fora; o
+  cabo provisório do cinto some. A baioneta vai na boca do fuzil (M6 com o anel no quebra-chamas; o
+  espigão por baixo do cano). Clipes procedurais novos no `tools/anim`: `faca_saque`,
+  `faca_estocada`, `faca_lado`, `faca_guardar` e `baioneta` (camada de cima; a faca solta o IK da
+  mão direita). Bots tocam pelo atributo `MeleeT`.
+- **1ª pessoa** (`Controllers/KnifeView`, chamado pelo `WeaponVisuals`): o fuzil desce para a mão
+  esquerda, a mão direita vai à bainha e volta com a faca; estocada com antecipação (o braço recua e
+  a ponta sobe), golpe rápido com follow-through e volta; golpe de lado com o pulso armado e o fio à
+  frente; baioneta (recua, avança com o passo) e coronhada. A câmera balança com o golpe e, no
+  impacto previsto, dá um tranco de 1,6° com uma pausa de 60 ms (a lâmina "prende").
+- **Cinto:** todo soldado leva a faca (`Gear`, peças "knife_*" no primeiro lugar livre do cinto);
+  com a arte publicada, a bainha do GLB entra no lugar (`Characters`).
+
+**Braços que atravessavam o corpo** (`Shared/ArmIK`, `PostureController`, simulação no Lune):
+- Medida na simulação do R15 (IK de dois ossos com polo, caixas do corpo "Man" aproximadas,
+  PLACEHOLDER até medir no Studio), com cada arma publicada, torções de pelve até 100° e flexões do
+  peito de ±29°. **Antes:** antebraço direito 13,4 cm dentro do peito e a coronha 19–20 cm (fuzis e
+  metralhadoras); pistola 13,4 cm e 5–7 cm. Causa: punho a 0,2 stud da frente do peito, sem polo de
+  cotovelo, e a coronha voltada para dentro do tronco.
+- **Correção:** polo nos dois cotovelos (`IKControl.Pole`: para fora e para baixo); tronco de lado
+  25° (o ombro esquerdo à frente; a cabeça gira de volta; sai no arremesso, com a faca e deitado);
+  pega nova `HOLD_STAND` (0,25; 0,8; −1,5; 55°; −20°): punho na altura do peito, ~27 cm à frente,
+  boca para baixo cruzando 30° à esquerda; pistola com os braços à frente (0; 0,9; −1,85; 20°; −35°);
+  pegas de recarga (o fuzil sobe ao peito), de faca (fuzil baixo na esquerda), de guarda e de
+  estocada de baioneta; a arma presa por uma `Weld` local de C0 mutável.
+- **Depois:** fuzis e metralhadoras 0 cm (braços e arma), pistola 1,0 cm. Clipes gravados (quadro a
+  quadro): passada, parado e agachados 0,1 cm; estocada 0,3; golpe de lado 1,2; saque 2,0; guarda
+  2,2; recarga 2,5; granada 2,4 (captura da CMU); deitado e rastejar 6,3/6,1 (a mão do punho junto
+  do rosto: a cabeça entra como cubo). O teste `faca` imprime a tabela.
+- **Continua:** o corpo não segue a arfagem da mira, e quem olha não vê o fuzil no ombro quando você
+  aponta (já era assim; precisaria replicar a mira).
+
+**Câmera agachada:** `PostureService.DROP.crouch` 2,2 → 1,03 stud, o quanto a cabeça desce nos
+clipes (1,506 m de pé; 1,218 m de joelho; 1,219 m andando agachado, com o quadril 0,22 stud mais
+baixo que antes). A câmera fica a ≤ 1 cm da cabeça (teste `faca`). A dobra de reserva do
+`PostureController` (sem o clipe) foi para coxa 75° e joelho −115°.
+
+**Bots animados** (`SoldierAnims.BOTS = true`): até 100 studs tudo a cada quadro; até 300 studs e
+na tela (margem de 15%, 1 s de folga), a mistura a 10 Hz e as correções a 15 Hz; fora da vista ou
+além do raio, os clipes param. A velocidade é a real (o maior entre a da posição replicada e a do
+corpo) e a postura, os atributos do servidor. **Custo com 58 bots não medido.**
+
+**Regravados** (`tools/anim`): todos os clipes (pega e polos novos). Precisam subir de novo (fora
+do `ids.json`, id 0 no `SoldierAnims` até subir): `agachado`, `agachado_andar`, `recarregar`,
+`granada` e os 5 novos. Os de passada e deitado seguem com os IDs antigos: o IK cobre os braços.
+
+**Ganchos só no Studio** (`workspace:SetAttribute("VT65DevFaca", X)`):
+- 1ª pessoa (qualquer barra): `estocada`, `lado`, `baioneta`, `coronhada`, `laco` (em laço até
+  `parar`).
+- Servidor: `boneco` (inimigo a 1,6 m à frente), `boneco:estocada|lado|baioneta|coronhada` (golpeia
+  em laço, sem dano), `bracos:stand|crouch|prone|sprint|girar`, `arma:m14|m60|m1911|type56|sks|rpd|
+  type54`, `limpar`.
+
+**Falta:** a tela de baixa mostra "origem não identificada" para golpe de faca (precisa de uma
+causa "arma branca" no `Casualty`, arquivo de interface). Nada disto foi testado no Studio.

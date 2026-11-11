@@ -41,6 +41,11 @@ return {
 		incoming = 76773493975605,
 		naval_distant = 84327200976853,
 		radio_squelch = 117911075807959,
+		-- corpo a corpo (D-94; tools/faca/sons.py). 0 = usa um substituto (curativo, impacto na terra)
+		faca_saque = 111901564575957,
+		faca_corte = 101889458600810,
+		faca_impacto = 103935391429233,
+		baioneta_encaixe = 75358128019094,
 	},
 	-- Modelos publicados como "Model" (InsertService:LoadAsset no servidor)
 	Models = {
@@ -105,6 +110,11 @@ return {
 		-- animais com esqueleto e pele feitos no Blender (tools/animais/esqueleto.py, D-79)
 		water_buffalo_skin = 109421966021264,
 		chicken_skin = 89649386620898,
+		-- facas e baionetas de 1965 feitas no Blender (tools/faca, D-94): nós "Faca" e "Bainha"
+		faca_kabar = 82895615799153,
+		faca_m6 = 81588565737736,
+		faca_type56 = 105729096442492,
+		faca_dao = 84372706569103,
 		-- objetos modelados no Blender (tools/blender/novos.py; assets/blender/RELATORIO.md); 0 = o
 		-- jogo continua com a versão em peças (MapLife, GrenadeArt)
 		water_jar = 90887023595576,

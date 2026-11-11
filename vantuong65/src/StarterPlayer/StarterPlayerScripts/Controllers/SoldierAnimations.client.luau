@@ -16,12 +16,19 @@
 --      chegar (os clipes agachados e deitados contam com o HRP já no lugar novo);
 --    - pernas na direção do movimento (até 75°) e tronco na mira; de costas a passada volta;
 --    - na recarga e no arremesso solta o IK da mão que sai do fuzil (VT65IK_L / VT65IK_R).
--- 3. SoldierAnims.BOTS: anima localmente os bots perto da câmera (desligado por padrão).
+-- 3. SoldierAnims.BOTS (D-94: ligado): anima localmente os bots até BOT_RADIUS, com nível de
+--    detalhe: perto, tudo a cada quadro; longe, a mistura a 10 Hz e as correções a 15 Hz; fora da
+--    vista (ou além do raio), os clipes param. A velocidade do bot é a real (posição replicada, o
+--    maior entre ela e a velocidade do corpo) e a postura, os atributos do servidor.
+-- 4. Corpo a corpo (D-94, Shared/Melee): saque, estocada, golpe de lado, guarda e o golpe com o
+--    fuzil, no próprio personagem ("melee_start" do WeaponController) e nos bots ("MeleeT" do
+--    servidor); a faca na mão solta o IK da mão direita.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
 local Joints = require(ReplicatedStorage.Shared.Joints)
+local Melee = require(ReplicatedStorage.Shared.Melee)
 local SoldierAnims = require(ReplicatedStorage.Shared.SoldierAnims)
 local Bus = require(script.Parent.Bus)
 
@@ -81,6 +88,11 @@ type Driver = {
 	bot: boolean,
 	throwAt: number,
 	diveAt: number,
+	lod: string, -- "near" | "far" | "off" (bots)
+	acc: number, -- tempo acumulado entre passos (far)
+	lastPos: Vector3?,
+	vel: Vector3, -- velocidade estimada pela posição (bots)
+	meleeTok: number,
 }
 local drivers: { [Model]: Driver } = {}
 
@@ -148,6 +160,11 @@ local function newDriver(model: Model, hum: Humanoid, root: BasePart, bot: boole
 		bot = bot,
 		throwAt = -10,
 		diveAt = -10,
+		lod = "near",
+		acc = 0,
+		lastPos = nil,
+		vel = Vector3.zero,
+		meleeTok = 0,
 	}
 end
 
@@ -244,6 +261,20 @@ end
 local function stepDriver(d: Driver, dt: number)
 	local model, root = d.model, d.root
 	local v = root.AssemblyLinearVelocity
+	if d.bot then
+		-- bot: a posição replicada diz quanto ele andou de verdade (movido pela física ou pelo
+		-- CFrame); fica o maior entre ela e a velocidade do corpo
+		local p = root.Position
+		local last = d.lastPos
+		if last and dt > 1e-3 then
+			local est = (p - last) / dt
+			d.vel = d.vel:Lerp(Vector3.new(est.X, 0, est.Z), math.min(1, dt / 0.15))
+		end
+		d.lastPos = p
+		if d.vel.Magnitude > Vector3.new(v.X, 0, v.Z).Magnitude then
+			v = Vector3.new(d.vel.X, v.Y, d.vel.Z)
+		end
+	end
 	local flat = Vector3.new(v.X, 0, v.Z)
 	local speed = flat.Magnitude * M
 	local stance = SoldierAnims.stanceOf(model:GetAttribute("Crouched") == true, model:GetAttribute("Prone") == true)
@@ -282,10 +313,64 @@ local function stepDriver(d: Driver, dt: number)
 	keepPhase(d, weights, f, dt)
 end
 
-local function playUpper(d: Driver, name: string, speed: number)
+local function playUpper(d: Driver, name: string, speed: number, fade: number?)
 	local tr = d.tracks[name]
 	if tr and d.hum.Health > 0 then
-		tr:Play(0.12, 1, speed)
+		if tr.IsPlaying then
+			tr:Stop(0) -- golpe repetido: recomeça do início
+		end
+		tr:Play(fade or 0.12, 1, speed)
+	end
+end
+
+-- ===== corpo a corpo (D-94) =====
+local function stopKnife(d: Driver, except: string?)
+	for _, n in SoldierAnims.KNIFE_CLIPS do
+		local tr = d.tracks[n]
+		if tr and tr.IsPlaying and n ~= except then
+			tr:Stop(0.08)
+		end
+	end
+end
+
+-- Saque (se a faca estava na bainha), o golpe e, sem outro golpe em SHEATHE_AFTER_S, a guarda. O
+-- tempo é o do Shared/Melee, o mesmo do servidor e da 1ª pessoa.
+local function meleePlay(d: Driver, id: string, draw: boolean)
+	local a = Melee.get(id)
+	local clip = SoldierAnims.MELEE_CLIP[id]
+	if not (a and clip) or d.bot and d.lod == "off" then
+		return
+	end
+	d.meleeTok += 1
+	local tok = d.meleeTok
+	local knife = a.weapon == "knife"
+	local delay = 0
+	if knife and draw then
+		stopKnife(d)
+		playUpper(d, "faca_saque", CLIPS.faca_saque.length / Melee.DRAW_S, 0.06)
+		delay = Melee.DRAW_S
+	end
+	local function strike()
+		if d.meleeTok ~= tok then
+			return
+		end
+		if knife then
+			stopKnife(d, clip)
+		end
+		playUpper(d, clip, 1, 0.05)
+	end
+	if delay > 0 then
+		task.delay(delay, strike)
+	else
+		strike()
+	end
+	if knife then
+		task.delay(delay + a.recover + Melee.SHEATHE_AFTER_S, function()
+			if d.meleeTok == tok and drivers[d.model] == d then
+				stopKnife(d)
+				playUpper(d, "faca_guardar", 1, 0.08)
+			end
+		end)
 	end
 end
 
@@ -345,6 +430,12 @@ Bus.on("vault_start", function(kind: string)
 		d.diveAt = os.clock()
 	end
 end)
+Bus.on("melee_start", function(id: string, draw: boolean)
+	local d = mine
+	if d and type(id) == "string" then
+		meleePlay(d, id, draw == true)
+	end
+end)
 
 -- ===== bots (opcional) =====
 local function botDriver(m: Model): Driver?
@@ -361,38 +452,86 @@ local function botDriver(m: Model): Driver?
 				playUpper(dd, "granada", 1)
 			end
 		end)
+		-- golpe do bot (servidor, MeleeService): "Melee" e "MeleeT" no modelo
+		m:GetAttributeChangedSignal("MeleeT"):Connect(function()
+			local id = m:GetAttribute("Melee")
+			if drivers[m] == dd and type(id) == "string" then
+				meleePlay(dd, id, m:GetAttribute("MeleeDraw") == true)
+			end
+		end)
 	end
 	return d
 end
 
+-- Nível de detalhe dos bots (2 Hz): perto (≤ NEAR) tudo a cada quadro; longe e visível, a mistura a
+-- 10 Hz e as correções a 15 Hz; fora da vista (com margem e 1 s de folga) ou além do raio, os
+-- clipes param (o Animator deixa de calcular aquele corpo).
+local LOD_NEAR = SoldierAnims.BOT_NEAR
+local LOD_MARGIN = 0.15 -- fração da tela além da borda que ainda conta como visível
+local seenAt: { [Model]: number } = setmetatable({}, { __mode = "k" }) :: any
+
+local function onScreen(p: Vector3): boolean
+	local vp, inFront = camera:WorldToViewportPoint(p)
+	if not inFront or vp.Z <= 0 then
+		return false
+	end
+	local size = camera.ViewportSize
+	local mx, my = size.X * LOD_MARGIN, size.Y * LOD_MARGIN
+	return vp.X >= -mx and vp.X <= size.X + mx and vp.Y >= -my and vp.Y <= size.Y + my
+end
+
+local function setLod(d: Driver, lod: string)
+	if d.lod == lod then
+		return
+	end
+	if lod == "off" then
+		for name, tr in d.tracks do
+			if tr.IsPlaying then
+				tr:Stop(0.2)
+			end
+			d.sent[name] = 0
+		end
+		d.rate = {}
+	end
+	d.lod = lod
+end
+
 local function refreshBots()
 	local folder = workspace:FindFirstChild("Combatants")
-	local near: { [Model]: boolean } = {}
+	local keep: { [Model]: boolean } = {}
+	local cam = camera.CFrame.Position
+	local now = os.clock()
 	if folder then
-		local cam = camera.CFrame.Position
 		for _, m in folder:GetChildren() do
 			if m:IsA("Model") then
 				local r = m:FindFirstChild("HumanoidRootPart") :: BasePart?
-				if r and (r.Position - cam).Magnitude < SoldierAnims.BOT_RADIUS then
-					near[m] = true
+				local dist = if r then (r.Position - cam).Magnitude else math.huge
+				if r and dist < SoldierAnims.BOT_RADIUS then
+					keep[m] = true
+					local d: Driver? = drivers[m]
+					if not d then
+						d = botDriver(m)
+						if d then
+							drivers[m] = d :: Driver
+						end
+					end
+					if d then
+						if dist <= LOD_NEAR or onScreen(r.Position) then
+							seenAt[m] = now
+						end
+						local visible = now - (seenAt[m] or -10) < 1
+						setLod(d, if not visible then "off" elseif dist <= LOD_NEAR then "near" else "far")
+					end
 				end
 			end
 		end
 	end
 	for m, d in drivers do
-		if d.bot and not near[m] then
+		if d.bot and not keep[m] then
 			for _, tr in d.tracks do
 				tr:Stop(0.2)
 			end
 			drivers[m] = nil
-		end
-	end
-	for m in near do
-		if not drivers[m] then
-			local d = botDriver(m)
-			if d then
-				drivers[m] = d
-			end
 		end
 	end
 end
@@ -410,6 +549,7 @@ type Watch = {
 	stanceOf: { [AnimationTrack]: string },
 	reload: AnimationTrack?,
 	throw: AnimationTrack?,
+	knife: { AnimationTrack },
 	lastHip: number,
 	lagDH: number,
 	lagY0: number,
@@ -438,6 +578,7 @@ local function newWatch(m: Model): Watch?
 		stanceOf = {},
 		reload = nil,
 		throw = nil,
+		knife = {},
 		lastHip = hum.HipHeight,
 		lagDH = 0,
 		lagY0 = 0,
@@ -478,6 +619,7 @@ local function scan(w: Watch)
 	table.clear(w.crouch)
 	table.clear(w.loco)
 	table.clear(w.stanceOf)
+	table.clear(w.knife)
 	w.reload, w.throw = nil, nil
 	if not animator then
 		return
@@ -496,6 +638,8 @@ local function scan(w: Watch)
 				w.reload = tr
 			elseif name == "granada" then
 				w.throw = tr
+			elseif string.sub(name, 1, 5) == "faca_" then
+				table.insert(w.knife, tr) -- faca na mão direita: o IK da mão direita solta
 			end
 		end
 	end
@@ -595,14 +739,25 @@ local function legYaw(w: Watch, dt: number, locoW: number)
 	end
 end
 
--- recarga solta a mão esquerda do fuzil; o arremesso, a direita
+-- recarga solta a mão esquerda do fuzil; o arremesso e a faca, a direita
 local function ikWeights(w: Watch)
 	local rw = if w.reload and w.reload.IsPlaying then w.reload.WeightCurrent else 0
 	local tw = if w.throw and w.throw.IsPlaying then w.throw.WeightCurrent else 0
+	for _, tr in w.knife do
+		if tr.IsPlaying then
+			tw = math.max(tw, tr.WeightCurrent)
+		end
+	end
 	if rw <= 0 and tw <= 0 and not w.ikTouched then
 		return
 	end
 	w.ikTouched = rw > 0 or tw > 0
+	-- local (não replica): o PostureController sobe o fuzil para a pega de recarga junto com o clipe
+	local rv = math.floor(math.clamp(rw, 0, 1) * 50 + 0.5) / 50
+	local want = if rv > 0 then rv else nil
+	if w.model:GetAttribute("VT65Recarga") ~= want then
+		w.model:SetAttribute("VT65Recarga", want)
+	end
 	local l = w.hum:FindFirstChild("VT65IK_L") :: IKControl?
 	local r = w.hum:FindFirstChild("VT65IK_R") :: IKControl?
 	if l then
@@ -655,6 +810,7 @@ local function refreshWatched()
 	for m in watched do
 		if not seen[m] or not m.Parent then
 			watched[m] = nil
+			m:SetAttribute("VT65Anim", nil)
 		end
 	end
 	for m in seen do
@@ -667,11 +823,18 @@ local function refreshWatched()
 				watched[m] = w
 			end
 		end
+		-- local (não replica): o PostureController deixa a dobra de reserva do agachado para quem
+		-- não toca os clipes (bot longe ou fora da vista)
+		local d = drivers[m]
+		local animated = not (d and d.bot and d.lod == "off")
+		if m:GetAttribute("VT65Anim") ~= animated then
+			m:SetAttribute("VT65Anim", animated)
+		end
 	end
 end
 
 -- ===== laços =====
-local nextScan, nextList = 0, 0
+local nextScan, nextList, nextFar = 0, 0, 0
 RunService.PreAnimation:Connect(function(dt: number)
 	local now = os.clock()
 	if now >= nextList then
@@ -683,7 +846,15 @@ RunService.PreAnimation:Connect(function(dt: number)
 	end
 	for m, d in drivers do
 		if m.Parent and d.hum.Parent then
-			stepDriver(d, dt)
+			if d.lod == "near" then
+				stepDriver(d, dt)
+			elseif d.lod == "far" then
+				d.acc += dt
+				if d.acc >= SoldierAnims.FAR_STEP_S then
+					stepDriver(d, d.acc)
+					d.acc = 0
+				end
+			end
 		else
 			drivers[m] = nil
 		end
@@ -696,12 +867,20 @@ RunService.PreSimulation:Connect(function(dt: number)
 	if rescan then
 		nextScan = now + 0.25
 	end
-	for _, w in watched do
-		if rescan then
-			scan(w)
-		end
-		if #w.loco > 0 or w.reload or w.throw then
-			post(w, dt)
+	local farTick = now >= nextFar
+	if farTick then
+		nextFar = now + SoldierAnims.FAR_POST_S
+	end
+	for m, w in watched do
+		local d = drivers[m]
+		local lod = if d and d.bot then d.lod else "near"
+		if lod ~= "off" and (lod == "near" or farTick or (w.throw and w.throw.IsPlaying)) then
+			if rescan then
+				scan(w)
+			end
+			if #w.loco > 0 or w.reload or w.throw or #w.knife > 0 then
+				post(w, if lod == "near" then dt else SoldierAnims.FAR_POST_S)
+			end
 		end
 	end
 end)

@@ -124,7 +124,7 @@ def write_asset_ids(ids: dict) -> None:
             count=1,
             flags=re.S,
         )
-    p.write_text(s, "utf-8")
+    p.write_text(s, "utf-8", newline="\n")  # .luau com LF (o StyLua confere)
 
 
 def cmd_upload_assets(prefixes: list[str] | None = None) -> None:
@@ -240,7 +240,7 @@ def cmd_create_store(only: set[str] | None = None) -> None:
     for k, v in ids.items():
         if k.startswith("store."):
             s = re.sub(rf"(\t{k[6:]} = )\d+", rf"\g<1>{int(v)}", s, count=1)
-    p.write_text(s, "utf-8")
+    p.write_text(s, "utf-8", newline="\n")  # .luau com LF (o StyLua confere)
     print("Commerce.IDS atualizado")
 
 
@@ -328,7 +328,7 @@ def cmd_create_skins() -> None:
             k[6:].startswith("PRODUCT_SKIN_") or "PASS_SKIN" in k or "PASS_CAMO" in k
         ):
             s = re.sub(rf"(\b{k[6:]} = )\d+", rf"\g<1>{int(v)}", s, count=1)
-    p.write_text(s, "utf-8")
+    p.write_text(s, "utf-8", newline="\n")  # .luau com LF (o StyLua confere)
     print("Skins.IDS atualizado")
 
 

@@ -16,7 +16,11 @@ local Combatants = require(script.Parent.Combatants)
 local MedicalService = require(script.Parent.MedicalService)
 
 local PostureService = {}
-local DROP = { crouch = 2.2, prone = 4.4 } -- studs que o quadril desce (PLACEHOLDER de pose)
+-- studs que o HumanoidRootPart desce (a câmera desce junto). D-94: agachado 2,2 -> 1,03, o quanto a
+-- cabeça desce nos clipes agachados (tools/anim: de 1,506 m de pé para 1,218 m de joelho e 1,219 m
+-- andando agachado = 0,288 m). Com 2,2 a câmera ficava ~33 cm abaixo da cabeça da animação.
+-- Mudou aqui? Regrave os clipes agachados e deitados no tools/anim (o teste anim confere).
+local DROP = { crouch = 1.03, prone = 4.4 }
 -- HipHeight nunca negativo: com 2,4 − 4,4 = −2 o Humanoid ficava em queda livre o tempo todo e
 -- deitado em encosta virava escorregador (66 m/s no teste do Studio, 2026-11-10).
 local MIN_HIP = 0.2
