@@ -2180,3 +2180,139 @@ escrever), usado por todas as telas.
 
 Só no Studio: `workspace:SetAttribute("VT65DevTela", ...)` com `"carregamento"`, `"escolha"`,
 `"lado"`, `"squad"`, `"papel"`, `"diaria"`, `"insercao"` ou `"transicao"`.
+
+**Defeito achado no Studio e corrigido:**
+- Com as telas novas, o `DeployScreen` ficou com 251 variáveis locais no nível de cima. O limite do
+  Luau é 200, e o lobby não abria ("Out of local registers").
+- O luau-lsp não acusa esse limite. Agora o `tests/luau/run.luau` compila todo o `src/` com o
+  compilador do Luau e acusa.
+
+## D-84 — Idiomas: português, inglês, espanhol e vietnamita (2026-11-11)
+**Pedido do usuário:** "faça o jogo no mínimo em 3 línguas: inglês, português, espanhol e outras".
+
+**Como funciona:** o jogo continua escrito em português. A tradução acontece no texto que vai para
+a tela (`Controllers/Traducao.client`), sem mexer em cada tela:
+- rótulos e botões do PlayerGui e as folhas 3D do lobby;
+- o português de cada rótulo fica guardado, e trocar o idioma retraduz o que está aberto;
+- caixas de texto (o que o jogador digita) nunca são traduzidas.
+
+**Dicionários:** `Shared/LangData/{en,es,vi}.json` (português → tradução). `Shared/Lang` procura, nesta
+ordem:
+1. a frase exata;
+2. a mesma em caixa alta (a tela usa `UiKit.upper`);
+3. modelos com `%d`, `%s`, `%.1f` e o `{a}` do tutorial; o que entra no `%s` também é traduzido;
+4. "Rótulo: valor";
+5. linha a linha;
+6. RichText: o nome vietnamita marcado na fonte Arimo volta marcado.
+
+Sem tradução, fica o português.
+
+**Textos:** `tools/i18n/extrai.py` junta os textos de tela do código (~1.670) e mede quanto de cada
+idioma está traduzido. Texto novo entra rodando o extrator e traduzindo o que falta.
+
+**Idioma:**
+- Opção "Idioma / Language" no menu (sub-aba Acessib.).
+- No padrão, "automático" usa o idioma da conta Roblox. Idioma sem dicionário cai no inglês.
+
+**Limites:**
+- Texto montado aos pedaços com `..` nem sempre casa com o dicionário e fica em português.
+- As fontes de época (SpecialElite) não têm todas as letras vietnamitas.
+
+## D-85 — Skins de arma, de uniforme e camuflagem de mato (2026-11-11)
+**Pedido do usuário:**
+- skins de arma e de personagem, compráveis com o dinheiro do jogo e com Robux;
+- muito mais caras no dinheiro do jogo e proporcionalmente mais baratas em Robux;
+- camuflagem "como se fosse parte do mato, com várias folhas que sobrepõem o personagem";
+- "pode fazer virar vantagem comprada";
+- dinheiro do jogo com o símbolo "$".
+
+**Dinheiro:** `Progression.CUR` passou de "CI" para "$" e `Progression.money(n)` dá "$ 1.250".
+
+**Preços** (PLACEHOLDER): o preço em $ parte de ~$ 300 por partida de Warfare (75 min). O Robux é
+~1,6 R$ por partida equivalente, na mesma proporção entre os itens.
+
+| Grupo | Partidas | $ | R$ (sugestão) |
+|---|---|---|---|
+| Skin de arma comum (madeira, aço gasto) | 25 | 7.500 | 39 |
+| Skin de arma rara (verde-oliva, fita, aço azulado) | 35 | 10.500 | 55 |
+| Uniforme (OG-107 desbotado, tiger stripe, duck hunter; pijama preto do VC) | 50 | 15.000 | 79 |
+| Camuflagem de mato (arrozal, selva, bambu) | 100 | 30.000 | 159 |
+
+Skin de arma é Developer Product; uniforme e camuflagem são Game Pass. Com ID 0, o botão de Robux
+não aparece.
+
+**Camuflagem de mato** (`tools/ghillie.py`):
+- Touceiras de folhas (1.900 triângulos) soldadas em cada parte do corpo, com o rosto livre.
+- Balançam ao vento no cliente, até 70 m.
+- É **vantagem comprada**, por decisão do dono: na vegetação do mesmo tipo, o bot enxerga a 60% da
+  distância; deitado, a ~23% (PLACEHOLDER, `BotBrain`).
+- Contra jogadores, a vantagem é só visual.
+
+**Onde vale:** uniforme e camuflagem no próximo spawn; a skin de arma troca na hora.
+
+**Falta:**
+- criar os 17 Developer Products e os 7 Game Passes (depende da permissão da chave);
+- refazer as armas no Blender com as peças `Madeira`, `GuardaMao` e `Metal`. Hoje cada arma é uma
+  malha só, e a skin de arma só aparece na arma provisória.
+
+## D-86 — Veículos com movimento realista (2026-11-11)
+**Pedido do usuário:** "faça a movimentação dos veículos realista e visualmente agradável, com bons
+gráficos".
+
+A lógica pura fica em `Shared/VehicleDrive` (testada no Lune, `tests/luau/veiculos`), o servidor em
+`VehicleService` e o motorista em `VehicleController`. Os efeitos ficam em `VehicleFx.client` e
+`VehicleLive`.
+
+**Lagarta** (M48A3, Ontos, LVTP-5):
+- O motor demora a encher; duas marchas, com queda de rotação audível na troca.
+- Freio forte e freio-motor brando; a ré funciona como num carro.
+- Gira no lugar e faz curva aberta em movimento, que gasta velocidade.
+- Na ladeira sobe mais devagar; escorrega na lama íngreme.
+- Patina, afunda e derrapa na lama e no arrozal.
+- Para contra parede ou barranco em vez de empurrar.
+- Sobe dique de até 0,6 m.
+
+**Por veículo:**
+- M48A3: passa riacho de até 1,2 m.
+- Ontos: mais leve, gira 40°/s no lugar.
+- LVTP-5: boia e chega a 11 km/h na água (ficha); deriva de lado e desliza antes de parar.
+- UH-34D:
+  - o rotor leva 9 s para pegar rotação;
+  - atitude e subida têm inércia;
+  - perto do chão, a descida é amortecida até 1,2 m/s no toque (ajuda de pouso de projeto);
+  - em velocidade, o nariz acompanha a curva.
+
+**Números medidos no teste:**
+
+| Medida | Valor |
+|---|---|
+| M48 de 0 a 10 / 0 a 30 km/h na estrada | 2,4 s / 12,7 s |
+| Máxima do M48: estrada, terra, capim, mata, areia, lama, arrozal | 48, 36, 31, 24, 19, 16, 13 km/h |
+| Freada no capim a 31 km/h | 2,2 s |
+| Ré | 12 km/h |
+| Giro no lugar: M48 / Ontos | 20 / 40°/s |
+
+Os tetos fora de estrada, as marchas, o giro, o freio, as molas, o calado e o escapamento são
+PLACEHOLDER.
+
+**Visual e som:**
+- **Carroceria:** levanta o nariz na arrancada, mergulha na freada e rola na curva. Acompanha o chão
+  pelas 4 pontas e treme com o motor.
+- **Lagartas:** faixas correm no laço, cada lado na sua velocidade.
+- **Rotores:** disco de desfoque e pás girando.
+- **Partículas, levadas pelo vento, só perto da câmera e reduzidas pela opção de detalhe:**
+  - poeira, capim e folhas;
+  - barro, respingo do arrozal, esteira e espuma na água;
+  - escapamento que engrossa na aceleração;
+  - downwash do helicóptero.
+- **Motor:** tom e volume pela rotação e pela carga, ouvidos pelos outros jogadores. O laço antigo
+  do `AudioController` saiu.
+- **Câmera e controle:** a câmera balança com a carroceria e treme com o chão. No analógico, a
+  direção é mais fina perto do centro; o motor pequeno de vibração sente o chão.
+
+Só no Studio: `workspace:SetAttribute("VT65DevDrive", "m48a3")` (também `"ontos"`, `"lvtp5"`,
+`"uh34d"` e `"sair"`) põe o jogador no assento do motorista.
+
+**Falta:**
+- o som do UH-34D (`uh34d_loop` em 0) e o chocalho da lagarta;
+- separar as pás do UH-34D no Blender: a malha publicada tem pás paradas.

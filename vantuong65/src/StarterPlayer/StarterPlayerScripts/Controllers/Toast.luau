@@ -420,7 +420,7 @@ local function fillText(e: Entry, kind: Kind, title: string, text: string): numb
 	return PAD + TITLE_SIZE + 4 + h + 2 + PAD + FOOT
 end
 
--- formato "ganho": selo, chips "+10 XP" (latão) e "+2 CI" (verde) e o motivo
+-- formato "ganho": selo, chips "+10 XP" (latão) e "+$ 2" (verde) e o motivo
 local function chip(parent: Instance, name: string, bg: Color3, fg: Color3, n: number): TextLabel
 	local c = label(parent, name)
 	c.AutomaticSize = Enum.AutomaticSize.X
@@ -481,7 +481,8 @@ local function fillGain(e: Entry, caption: string, xp: number, cr: number, cur: 
 	local x, c, l = e.xpChip :: TextLabel, e.crChip :: TextLabel, e.caption :: TextLabel
 	x.Text = "+" .. fmt(xp) .. " XP"
 	x.Visible = xp > 0
-	c.Text = "+" .. fmt(cr) .. " " .. cur
+	-- dinheiro do jogo com o símbolo na frente ("+$ 2"); outra moeda segue depois do número
+	c.Text = "+" .. (if cur == "$" then "$ " .. fmt(cr) else fmt(cr) .. " " .. cur)
 	c.Visible = cr > 0
 	l.Text = UiKit.upper(caption)
 	l.FontFace = UiKit.headFont(caption)
@@ -636,7 +637,7 @@ function Toast.show(text: string, kind: string?, opts: Options?)
 	push(e)
 end
 
--- Ganho de XP e créditos (moeda: "CI", ...). Ganhos com o mesmo motivo somam no aviso aberto.
+-- Ganho de XP e créditos (moeda: "$", ...). Ganhos com o mesmo motivo somam no aviso aberto.
 function Toast.reward(caption: string, xp: number, cr: number, cur: string)
 	xp, cr = math.max(xp, 0), math.max(cr, 0)
 	if xp <= 0 and cr <= 0 then
@@ -698,7 +699,7 @@ if RunService:IsStudio() then
 			)
 		end,
 		recompensa = function()
-			Toast.reward("Tempo em campo", 10, 2, "CI")
+			Toast.reward("Tempo em campo", 10, 2, "$")
 		end,
 		alerta = function()
 			Toast.show("Pancada de chuva: visão curta e passos abafados")

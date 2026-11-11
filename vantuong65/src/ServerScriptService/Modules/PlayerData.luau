@@ -77,12 +77,14 @@ local function key(userId: number): string
 	return "u_" .. userId
 end
 
--- progresso que só cresce: a recompensa mais nova e a união dos cosméticos ganhos (dst <- src)
+-- progresso que só cresce: a recompensa mais nova, a união dos cosméticos ganhos e a das skins
+-- compradas (dst <- src)
 local function mergeProgress(dst: Profile, src: Profile)
 	dst.daily = ProfileSchema.newerDaily(dst.daily, src.daily)
 	for id in src.earned do
 		dst.earned[id] = true
 	end
+	ProfileSchema.mergeSkins(dst.skins, src.skins)
 end
 
 function PlayerData.get(player: Player): Profile?
@@ -189,6 +191,8 @@ function PlayerData.applyReceipt(player: Player, purchaseId: string, mutate: (Pr
 		if mem then
 			mem.tips = fresh.tips
 			mem.purchases = fresh.purchases
+			-- skin comprada em Robux (Developer Product): a memória ganha a posse já gravada
+			ProfileSchema.mergeSkins(mem.skins, fresh.skins)
 		end
 	end
 	return true, newData ~= nil

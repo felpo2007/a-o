@@ -126,13 +126,14 @@ def write_asset_ids(ids: dict) -> None:
     p.write_text(s, "utf-8")
 
 
-def cmd_upload_assets() -> None:
+def cmd_upload_assets(prefixes: list[str] | None = None) -> None:
+    """Sobe o que falta do plano. `prefixes`: só as chaves que começam assim (ex.: Clothing.us_)."""
     c = cfg()
     plan = json.loads(PLAN.read_text("utf-8"))
     ids = load_ids()
     for item in plan:
         key, rel, atype = item["key"], item["file"], item["assetType"]
-        if key in ids:
+        if key in ids or (prefixes and not any(key.startswith(p) for p in prefixes)):
             continue
         f = ROOT / rel
         if not f.exists():
@@ -254,7 +255,8 @@ def cmd_publish_place() -> None:
 if __name__ == "__main__":
     cmd = sys.argv[1] if len(sys.argv) > 1 else "help"
     if cmd == "upload-assets":
-        cmd_upload_assets()
+        # upload-assets [PREFIXO ...]: sem prefixo sobe tudo o que falta
+        cmd_upload_assets(sys.argv[2:] or None)
     elif cmd == "create-store":
         # create-store [CHAVE ...]: sem chaves cria tudo o que falta
         cmd_create_store(set(sys.argv[2:]) or None)

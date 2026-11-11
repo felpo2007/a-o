@@ -16,16 +16,26 @@ local Progression = require(
 		then (game :: any):GetService("ReplicatedStorage").Shared.Progression
 		else "../../ReplicatedStorage/Shared/Progression"
 ) :: any
+local Skins = require(
+	if script
+		then (game :: any):GetService("ReplicatedStorage").Shared.Skins
+		else "../../ReplicatedStorage/Shared/Skins"
+) :: any
 
 local ProfileSchema = {}
 
 -- 1: perfil da F2/F6. 2 (2026-11-11): recompensa diária (daily) e cosméticos ganhos (earned).
 -- 3 (2026-11-11): progressão: XP, créditos de intendência, equipamento comprado com créditos, a
 -- escolha do equipamento e os "renasceres guardados" (Developer Product em Robux ainda não usado).
+-- Skins (2026-11-11, Shared/Skins): campo `skins` (posse e escolha por lado). A migração é por
+-- campo, como a das outras versões: perfil sem `skins` (qualquer versão) começa sem nenhuma. O
+-- número fica 3: os testes da F2 e da progressão conferem a versão 3; subir para 4 pede trocar o
+-- número esperado lá (só informativo: nada aqui depende do número).
 ProfileSchema.VERSION = 3
 ProfileSchema.MAX_EARNED = 128
 ProfileSchema.MAX_XP = 1000000000
 ProfileSchema.MAX_RESPAWN_CREDITS = 1000
+ProfileSchema.MAX_SKINS = 256
 
 -- Recompensa diária (a regra fica em Shared/Commerce): dias seguidos, dia UTC do último resgate
 -- (-1 = nunca) e total de selos
@@ -47,7 +57,12 @@ export type Profile = {
 	gear: { [string]: boolean }, -- v3: equipamento comprado com créditos (permanente), id -> true
 	gearOn: { [string]: boolean }, -- v3: escolha do equipamento; só guarda os desmarcados (false)
 	respawnCredits: number, -- v3: renasceres no lugar comprados em Robux e ainda não usados
+	skins: SkinsData, -- skins de arma, uniforme e camuflagem (Shared/Skins)
 }
+
+-- owned: compradas com $ ou por Developer Product (id -> true; o Game Pass não fica aqui).
+-- on: escolha por lado e por encaixe (id da arma, "uniform" ou "camo") -> id da skin.
+export type SkinsData = { owned: { [string]: boolean }, on: { [string]: { [string]: string } } }
 
 -- Valores de progressão já gravados no DataStore (base do "delta" da sessão: PlayerData.save)
 export type Synced = { xp: number, credits: number, respawnCredits: number }
@@ -68,6 +83,7 @@ function ProfileSchema.default(): Profile
 		gear = {},
 		gearOn = {},
 		respawnCredits = 0,
+		skins = { owned = {}, on = { US = {}, VC = {} } },
 	}
 end
 
@@ -130,6 +146,50 @@ function ProfileSchema.sanitizeGear(raw: any, onlyTrue: boolean): { [string]: bo
 	return out
 end
 
+-- Skins: a posse guarda qualquer id de texto curto (uma skin tirada do catálogo não some do perfil
+-- de quem pagou); a escolha só guarda skin conhecida, do lado e no encaixe dela.
+function ProfileSchema.sanitizeSkins(raw: any): SkinsData
+	local out: SkinsData = { owned = {}, on = { US = {}, VC = {} } }
+	if type(raw) ~= "table" then
+		return out
+	end
+	if type(raw.owned) == "table" then
+		local n = 0
+		for k, v in raw.owned do
+			if type(k) == "string" and #k > 0 and #k < 48 and v == true then
+				n += 1
+				if n > ProfileSchema.MAX_SKINS then
+					break
+				end
+				out.owned[k] = true
+			end
+		end
+	end
+	if type(raw.on) == "table" then
+		for _, f in { "US", "VC" } do
+			local slots = raw.on[f]
+			if type(slots) == "table" then
+				for slot, id in slots do
+					local s = if type(slot) == "string" then Skins.get(id) else nil
+					if s and Skins.slotOf(s) == slot and Skins.sideOk(s, f) then
+						out.on[f][slot] = id
+					end
+				end
+			end
+		end
+	end
+	return out
+end
+
+-- Posse das skins: união (dst <- src). Nunca tira o que já está em dst.
+function ProfileSchema.mergeSkins(dst: SkinsData, src: SkinsData)
+	for id, v in src.owned do
+		if v == true then
+			dst.owned[id] = true
+		end
+	end
+end
+
 function ProfileSchema.synced(p: Profile): Synced
 	return { xp = p.xp, credits = p.credits, respawnCredits = p.respawnCredits }
 end
@@ -153,6 +213,14 @@ function ProfileSchema.applySession(rec: Profile, stored: Profile, mem: Profile,
 	rec.xp, rec.credits, rec.respawnCredits = xp, credits, rc
 	rec.gear = gear
 	rec.gearOn = table.clone(mem.gearOn)
+	-- skins: a posse é união (compra noutro servidor ou recibo gravado direto no DataStore); a
+	-- escolha é a da sessão
+	local skins: SkinsData = { owned = table.clone(stored.skins.owned), on = { US = {}, VC = {} } }
+	ProfileSchema.mergeSkins(skins, mem.skins)
+	for f, slots in mem.skins.on do
+		skins.on[f] = table.clone(slots)
+	end
+	rec.skins = skins
 	return { xp = xp, credits = credits, respawnCredits = rc }
 end
 
@@ -221,6 +289,8 @@ function ProfileSchema.migrate(raw: any): Profile
 	p.gear = ProfileSchema.sanitizeGear(raw.gear, true)
 	p.gearOn = ProfileSchema.sanitizeGear(raw.gearOn, false)
 	p.respawnCredits = math.clamp(int(raw.respawnCredits) or 0, 0, ProfileSchema.MAX_RESPAWN_CREDITS)
+	-- sem `skins` (perfil de antes das skins): nada comprado, nada equipado
+	p.skins = ProfileSchema.sanitizeSkins(raw.skins)
 	return p
 end
 

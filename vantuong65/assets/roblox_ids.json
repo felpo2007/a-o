@@ -120,5 +120,15 @@
  "Models.water_buffalo_rig": "115492603708245",
  "Models.chicken_rig": "103660036877609",
  "Models.water_buffalo_skin": "109421966021264",
- "Models.chicken_skin": "89649386620898"
+ "Models.chicken_skin": "89649386620898",
+ "Clothing.us_faded_shirt_v3": "111316643679745",
+ "Clothing.us_faded_pants_v3": "97616181097331",
+ "Clothing.us_tiger_shirt_v3": "98702392122528",
+ "Clothing.us_tiger_pants_v3": "99148306008988",
+ "Clothing.us_duck_shirt_v3": "128390642890074",
+ "Clothing.us_duck_pants_v3": "125772966200340",
+ "Accessories.ghillie": "128051732789048",
+ "Images.ghillie_rice": "76320606331202",
+ "Images.ghillie_jungle": "78596770057163",
+ "Images.ghillie_bamboo": "108180221079119"
 }

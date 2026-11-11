@@ -585,8 +585,91 @@ end
 
 type Seen = { m: Model, d: number }
 
+-- ===== camuflagem de mato (Shared/Skins): em que vegetação o alvo camuflado está =====
+-- Índice das plantas da arte (Map/Art e Map/Art/Jungle; o modelo tem o nome da chave), montado uma
+-- vez depois que a arte foi posta, numa grade com células do tamanho do raio de contagem. A lâmina
+-- d'água do arrozal sai de um raio para baixo. O resultado de cada alvo vale 1 s.
+type Plant = { x: number, z: number, k: string }
+local VEG_R = BotBrain.VEG.radiusM / M
+local vegCells: { [string]: { Plant } }? = nil
+local vegBuilding = false
+local function buildVeg()
+	local map = workspace:FindFirstChild("Map")
+	local art = if map then map:FindFirstChild("Art") else nil
+	if vegCells or vegBuilding or not art or art:GetAttribute("Placed") ~= true then
+		return
+	end
+	vegBuilding = true
+	task.spawn(function()
+		local cells: { [string]: { Plant } } = {}
+		local n = 0
+		local function add(m: Instance)
+			local kind = BotBrain.plantKind(m.Name)
+			if kind and m:IsA("Model") then
+				local p = m:GetPivot().Position
+				local key = math.floor(p.X / VEG_R) .. "," .. math.floor(p.Z / VEG_R)
+				local list = cells[key] or {}
+				cells[key] = list
+				table.insert(list, { x = p.X, z = p.Z, k = kind })
+				n += 1
+				if n % 2000 == 0 then
+					task.wait()
+				end
+			end
+		end
+		for _, c in art:GetChildren() do
+			add(c)
+		end
+		local jungle = art:FindFirstChild("Jungle")
+		for _, c in if jungle then jungle:GetChildren() else {} do
+			add(c)
+		end
+		vegCells = cells
+	end)
+end
+
+local function vegetationAt(pos: Vector3): string
+	local hit = workspace:Raycast(pos + Vector3.new(0, 2, 0), Vector3.new(0, -12 / M, 0), surfaceParams)
+	local surface = if hit and hit.Instance.Name == "PaddyWater" then "paddy" else "ground"
+	local n: { [string]: number } = { jungle = 0, bamboo = 0, grass = 0, rice = 0 }
+	local cells = vegCells
+	if cells then
+		local cx, cz = math.floor(pos.X / VEG_R), math.floor(pos.Z / VEG_R)
+		local r2 = VEG_R * VEG_R
+		for dx = -1, 1 do
+			for dz = -1, 1 do
+				local list = cells[(cx + dx) .. "," .. (cz + dz)]
+				if list then
+					for _, pl in list do
+						local ddx, ddz = pl.x - pos.X, pl.z - pos.Z
+						if ddx * ddx + ddz * ddz <= r2 then
+							n[pl.k] = (n[pl.k] or 0) + 1
+						end
+					end
+				end
+			end
+		end
+	else
+		buildVeg()
+	end
+	return BotBrain.vegetation(surface, { jungle = n.jungle, bamboo = n.bamboo, grass = n.grass, rice = n.rice })
+end
+
+local vegCache: { [Model]: { t: number, v: string } } = setmetatable({}, { __mode = "k" }) :: any
+local function vegOf(model: Model, pos: Vector3): string
+	local now = os.clock()
+	local c = vegCache[model]
+	if c and now - c.t < 1 then
+		return c.v
+	end
+	local v = vegetationAt(pos)
+	vegCache[model] = { t = now, v = v }
+	return v
+end
+
 -- Inimigo ativo mais próximo com linha de visada. Só os C.maxLosChecks mais próximos gastam raio
--- (o alvo atual sempre); deitado e agachado são vistos de mais perto (BotBrain.spotFactor).
+-- (o alvo atual sempre); deitado e agachado são vistos de mais perto, e o camuflado na vegetação do
+-- tipo da camuflagem mais perto ainda (BotBrain.spotFactor).
 local function perceive(bot: Bot, model: Model, root: BasePart, head: BasePart): (Model?, number)
 	-- chuva forte: enxergam até metade da distância (Weather)
 	local rain = ReplicatedStorage:GetAttribute("Rain")
@@ -597,7 +680,14 @@ local function perceive(bot: Bot, model: Model, root: BasePart, head: BasePart):
 			local r = Combatants.root(e)
 			if r then
 				local dd = (r.Position - root.Position).Magnitude
-				if dd < range * BotBrain.spotFactor(bot.diff, stanceOf(e.model), e.model == bot.target) then
+				local tracking = e.model == bot.target
+				local stance = stanceOf(e.model)
+				local f = BotBrain.spotFactor(bot.diff, stance, tracking)
+				local camo = e.model:GetAttribute("Camo")
+				if dd < range * f and type(camo) == "string" and not tracking then
+					f = BotBrain.spotFactor(bot.diff, stance, tracking, camo, vegOf(e.model, r.Position))
+				end
+				if dd < range * f then
 					table.insert(cands, { m = e.model, d = dd })
 				end
 			end

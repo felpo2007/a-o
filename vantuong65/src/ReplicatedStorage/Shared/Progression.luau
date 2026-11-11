@@ -13,9 +13,11 @@
 --   - o renascer onde caiu: regras do servidor e os dois meios de pagamento (CI com preço que sobe
 --     na partida, ou o Developer Product em Robux, que vira um "renascer guardado").
 --
--- Nome da moeda: "créditos de intendência" (CI). Intendência é o serviço de suprimento dos dois
+-- Nome da moeda: "créditos de intendência". Intendência é o serviço de suprimento dos dois
 -- exércitos (Quartermaster dos Marines, hậu cần da Frente), cabe no dossiê datilografado do lobby e
 -- não se confunde com o "suprimento" do time (Logistics), que paga construções e é de todos.
+-- Símbolo (pedido do dono, 2026-11-11): o dinheiro do jogo aparece com o cifrão, "$ 1.250"
+-- (Progression.money). Antes era "CI".
 --
 -- Todos os números são de DESIGN (PLACEHOLDER até o playtest); nenhum foi medido.
 local Kit = require(script and (script :: any).Parent.Kit or "./Kit") :: any
@@ -25,9 +27,18 @@ local Progression = {}
 
 -- ===== moeda =====
 Progression.CURRENCY = "créditos de intendência"
-Progression.CUR = "CI"
+Progression.CUR = "$"
 Progression.START_CREDITS = 300 -- verba inicial: dá para o 1º item do Kit Veterano já no começo
 Progression.MAX_CREDITS = 1000000000
+
+-- Dinheiro do jogo para mostrar: "$ 1.250" (milhar com ponto, sem centavos). Negativo: "-$ 50".
+function Progression.money(n: number): string
+	local v = if n ~= n then 0 else math.floor(math.abs(n) + 0.5)
+	local s = tostring(v)
+	local out = string.reverse((string.gsub(string.reverse(s), "(%d%d%d)", "%1.")))
+	out = string.gsub(out, "^%.", "")
+	return (if n < 0 and v > 0 then "-" else "") .. Progression.CUR .. " " .. out
+end
 
 -- ===== postos =====
 -- Fontes (consultadas em 2026-11-11):
@@ -484,7 +495,7 @@ function Progression.canBuyGear(
 	elseif rank < g.buyRank then
 		return false, "posto " .. g.buyRank .. " para comprar"
 	elseif credits < g.price then
-		return false, string.format("faltam %d %s", g.price - credits, Progression.CUR)
+		return false, "faltam " .. Progression.money(g.price - credits)
 	end
 	return true, nil
 end
@@ -639,7 +650,7 @@ function Progression.inPlacePay(
 		if not price then
 			return false, "limite da partida", nil
 		elseif credits < price then
-			return false, string.format("faltam %d %s", price - credits, Progression.CUR), price
+			return false, "faltam " .. Progression.money(price - credits), price
 		end
 		return true, nil, price
 	elseif method == "robux" then

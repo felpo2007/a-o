@@ -3,7 +3,11 @@
 -- (posto, CI ou Game Pass) e o "renascer guardado" do Developer Product. As regras e os números
 -- ficam em Shared/Progression (puro, testado no Lune); o renascer onde caiu é do SpawnService.
 -- Ganchos (sem dependência circular): MedicalService.onCare, MatchService.onEvent/onEnd,
--- CommerceService.onGrant/onRefresh.
+-- CommerceService.onGrant/onRefresh/onSkin.
+-- Skins (Shared/Skins, 2026-11-11): compra com $ e escolha por lado e encaixe. Usam os remotes do
+-- equipamento: Gear_Buy(skinId) compra com $ e Gear_Equip(skinId, on) equipa ou tira (o id diz se é
+-- skin ou equipamento). O que vale no spawn vai em atributos do jogador: "SkinUniform" e "SkinCamo"
+-- (Characters.dress) e "WeaponSkins" (AssetLoader.attachWeapon e a arma de 1ª pessoa no cliente).
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
@@ -11,6 +15,7 @@ local Commerce = require(ReplicatedStorage.Shared.Commerce)
 local MapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any
 local Net = require(ReplicatedStorage.Shared.Net)
 local Progression = require(ReplicatedStorage.Shared.Progression)
+local Skins = require(ReplicatedStorage.Shared.Skins)
 local Weapons = require(ReplicatedStorage.Shared.Weapons)
 local Combatants = require(script.Parent.Combatants)
 local CommerceService = require(script.Parent.CommerceService)
@@ -88,6 +93,20 @@ local function stateFor(p: Player, extra: { [string]: any }?): { [string]: any }
 		})
 	end
 	local nextName = if rank < Progression.MAX_RANK then Progression.rankName(faction, rank + 1) else nil
+	-- skins: posse (comprada ou por passe) e o que vale no lado atual; o catálogo o cliente lê do
+	-- Shared/Skins
+	local owned: { [string]: string } = {}
+	for _, s in Skins.CATALOG do
+		local ok, how = Skins.owns(s, prof.skins.owned, ps)
+		if ok and how then
+			owned[s.id] = how
+		end
+	end
+	local skins = {
+		owned = owned,
+		on = Skins.equipped(if faction then prof.skins.on[faction] else nil, faction, prof.skins.owned, ps),
+		faction = faction,
+	}
 	return {
 		xp = prof.xp,
 		rank = rank,
@@ -103,10 +122,26 @@ local function stateFor(p: Player, extra: { [string]: any }?): { [string]: any }
 		gear = gear,
 		faction = faction,
 		respawnProductId = Commerce.IDS.PRODUCT_RESPAWN_INPLACE,
+		skins = skins,
 		gain = extra and extra.gain,
 		rankUp = extra and extra.rankUp,
 		result = extra and extra.result,
 	}
+end
+
+-- Skins que valem no lado atual, em atributos do jogador (lidos no spawn e pela arma). Só o que é
+-- dele de fato (Skins.equipped): passe reembolsado ou lado trocado não vestem nada.
+function ProgressionService.applySkins(p: Player)
+	local prof = PlayerData.get(p)
+	local faction = factionOf(p)
+	local on: { [string]: string } = {}
+	if prof and faction then
+		on = Skins.equipped(prof.skins.on[faction], faction, prof.skins.owned, passes(p))
+	end
+	local w = Skins.encodeWeapons(on)
+	p:SetAttribute("SkinUniform", on.uniform)
+	p:SetAttribute("SkinCamo", on.camo)
+	p:SetAttribute("WeaponSkins", if w ~= "" then w else nil)
 end
 
 function ProgressionService.push(p: Player, extra: { [string]: any }?)
@@ -114,6 +149,7 @@ function ProgressionService.push(p: Player, extra: { [string]: any }?)
 	if not prof then
 		return
 	end
+	ProgressionService.applySkins(p)
 	local r = Progression.rankFor(prof.xp)
 	-- atributos lidos pelo lobby (plaqueta do posto), pelo HUD e pelo SpawnService
 	p:SetAttribute("XP", prof.xp)
@@ -249,6 +285,66 @@ local function newSess(p: Player)
 	sess[p] = { window = Progression.newWindow(), pairs = {}, teamSince = nil, faction = factionOf(p) }
 end
 
+-- ===== skins =====
+-- A arma na mão troca de acabamento na hora (a de 3ª pessoa; a de 1ª pessoa o cliente troca pelo
+-- atributo "WeaponSkins"). Uniforme e camuflagem valem no próximo spawn (Characters.dress).
+local function skinWeaponNow(p: Player, weaponId: string)
+	local w = p.Character and p.Character:FindFirstChild("Weapon")
+	if w and w:GetAttribute("WeaponId") == weaponId then
+		Skins.applyWeapon(w, Skins.weaponSkinFrom(p:GetAttribute("WeaponSkins"), weaponId))
+	end
+end
+
+-- Equipa (on) ou tira uma skin. Devolve o resultado para o painel (nil = sem aviso).
+local function equipSkin(p: Player, id: string, on: boolean): string?
+	local prof = PlayerData.get(p)
+	local s = Skins.get(id)
+	if not (prof and s) then
+		return nil
+	end
+	local faction = Skins.factionFor(s, factionOf(p))
+	local slot = Skins.slotOf(s)
+	if on then
+		local ok, why = Skins.canEquip(id, faction, prof.skins.owned, passes(p))
+		if not ok or not faction then
+			return why
+		end
+		prof.skins.on[faction] = prof.skins.on[faction] or {}
+		prof.skins.on[faction][slot] = id
+	elseif faction and prof.skins.on[faction] and prof.skins.on[faction][slot] == id then
+		prof.skins.on[faction][slot] = nil
+	end
+	ProgressionService.applySkins(p)
+	if s.weapon then
+		skinWeaponNow(p, s.weapon)
+	end
+	if s.kind ~= "weapon" and p.Character and faction == factionOf(p) then
+		return if on then s.name .. ": vale no próximo spawn" else "Tirada: vale no próximo spawn"
+	end
+	return nil
+end
+
+-- Compra com $ (dinheiro do jogo), como a do equipamento: confere e desconta sem esperar nada (o
+-- servidor não cede a vez no meio) e grava logo; o saldo vai pelo delta da sessão e a posse é união
+-- (ProfileSchema.applySession). Equipa na hora se a skin for do lado atual.
+local function buySkin(p: Player, id: string)
+	local prof = PlayerData.get(p)
+	if not prof then
+		return
+	end
+	local ok, why = Skins.canBuy(id, prof.skins.owned, passes(p), prof.credits)
+	local s = Skins.get(id)
+	if not ok or not s then
+		push(p, { result = why })
+		return
+	end
+	prof.credits -= s.price
+	prof.skins.owned[id] = true
+	equipSkin(p, id, true)
+	push(p, { result = string.format("%s comprada por %s", s.name, Progression.money(s.price)) })
+	task.spawn(PlayerData.save, p)
+end
+
 function ProgressionService.start()
 	PlayerData.Loaded:Connect(function(p: Player)
 		if not sess[p] then
@@ -370,6 +466,14 @@ function ProgressionService.start()
 			end
 		end
 	end
+	-- skin paga em Robux: equipa se for do lado atual (recibo repetido só atualiza o painel)
+	CommerceService.onSkin = function(p: Player, skinId: string, now: boolean)
+		local s = Skins.get(skinId)
+		if now and s then
+			equipSkin(p, skinId, true)
+		end
+		push(p, { result = if now and s then s.name .. ": é sua" else nil })
+	end
 
 	-- tempo em campo: um minuto vivo e com lado rende um pouco
 	task.spawn(function()
@@ -388,8 +492,12 @@ function ProgressionService.start()
 		return stateFor(p)
 	end
 
-	-- compra permanente com CI (gravada logo; o saldo e a união dos itens vão pelo delta da sessão)
+	-- compra permanente com $ (gravada logo; o saldo e a união dos itens vão pelo delta da sessão).
+	-- O mesmo remote compra skin (id do Shared/Skins).
 	local lastBuy: { [Player]: number } = {}
+	Players.PlayerRemoving:Connect(function(p)
+		lastBuy[p] = nil
+	end)
 	Net.event("Gear_Buy").OnServerEvent:Connect(function(p: Player, id: any)
 		if type(id) ~= "string" then
 			return
@@ -399,6 +507,10 @@ function ProgressionService.start()
 			return
 		end
 		lastBuy[p] = now
+		if Skins.get(id) then
+			buySkin(p, id)
+			return
+		end
 		local prof = PlayerData.get(p)
 		if not prof then
 			return
@@ -413,14 +525,23 @@ function ProgressionService.start()
 		prof.credits -= g.price
 		prof.gear[id] = true
 		prof.gearOn[id] = nil
-		push(p, { result = string.format("%s comprado por %d %s", g.name, g.price, Progression.CUR) })
+		push(p, { result = string.format("%s comprado por %s", g.name, Progression.money(g.price)) })
 		task.spawn(PlayerData.save, p)
 	end)
 
-	-- levar ou deixar um item liberado no próximo spawn (só guarda os desmarcados)
+	-- levar ou deixar um item liberado no próximo spawn (só guarda os desmarcados). Com id de skin:
+	-- equipar (on = true) ou tirar (false); o servidor confere a posse e o lado.
 	Net.event("Gear_Equip").OnServerEvent:Connect(function(p: Player, id: any, on: any)
 		local prof = PlayerData.get(p)
-		if not prof or type(id) ~= "string" or type(on) ~= "boolean" or not Progression.GEAR[id] then
+		if not prof or type(id) ~= "string" or type(on) ~= "boolean" then
+			return
+		end
+		if Skins.get(id) then
+			local msg = equipSkin(p, id, on)
+			push(p, { result = msg })
+			return
+		end
+		if not Progression.GEAR[id] then
 			return
 		end
 		if on then

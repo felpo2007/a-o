@@ -27,3 +27,9 @@ assets/arroz/
 assets/animais/
 # captura de movimento da CMU (tools/anim/fetch_cmu.py) e animações geradas (tools/anim)
 assets/mocap/
+# carta topográfica do mapa tático e os dados exportados pelo Lune (tools/make_carta.py)
+assets/carta/
+# camuflagem de mato das skins: malha e texturas geradas (tools/ghillie.py)
+assets/ghillie/
+# linha de produção do Blender: GLB refeitos/novos, comparações e trabalho (tools/blender/lote.py)
+assets/blender/

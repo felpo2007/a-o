@@ -414,41 +414,6 @@ Net.unreliable("Fire_Launch").OnClientEvent:Connect(function(e)
 	end
 end)
 
--- motor de cada veículo (loop 3D no chassi; tom sobe com a velocidade)
-local ENGINE: { [string]: string } = {
-	m48a3 = "engine_tank",
-	ontos = "engine_tank",
-	lvtp5 = "engine_amtrac",
-	uh34d = "uh34d_loop",
-}
-task.spawn(function()
-	local folder = workspace:WaitForChild("Vehicles", 120)
-	while folder do
-		task.wait(0.5)
-		for _, v in folder:GetChildren() do
-			local chassis = v:FindFirstChild("Chassis") :: BasePart?
-			local id = sid(ENGINE[v:GetAttribute("Spec") :: string] or "")
-			if chassis and id then
-				local snd = chassis:FindFirstChild("Engine") :: Sound?
-				if not snd then
-					local s = Instance.new("Sound")
-					s.Name = "Engine"
-					s.SoundId = id
-					s.Looped = true
-					s.Volume = 0.7
-					s.RollOffMaxDistance = 600 / M
-					s.Parent = chassis
-					s:Play()
-					snd = s
-				end
-				local sp = chassis.AssemblyLinearVelocity.Magnitude * M;
-				(snd :: Sound).PlaybackSpeed = 0.85 + math.min(sp / 15, 0.35)
-				if v:GetAttribute("Destroyed") then
-					(snd :: Sound):Stop()
-				end
-			end
-		end
-	end
-end)
+-- motor dos veículos: VehicleFx.client (tom e volume pela rotação e pela carga, D-86)
 
 local _ = RunService

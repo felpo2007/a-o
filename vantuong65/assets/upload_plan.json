@@ -748,5 +748,103 @@
   "assetType": "Model",
   "name": "VT65 galinha com esqueleto",
   "description": "VAN TUONG 65 - animal com esqueleto e pele feito no Blender (D-79)"
+ },
+ {
+  "key": "Carta.nw",
+  "file": "assets/carta/carta_0_0.png",
+  "assetType": "Decal",
+  "name": "VT65 carta tatica NO",
+  "description": "VAN TUONG 65 - carta topografica do mapa tatico, bloco noroeste (tools/make_carta.py)"
+ },
+ {
+  "key": "Carta.ne",
+  "file": "assets/carta/carta_0_1.png",
+  "assetType": "Decal",
+  "name": "VT65 carta tatica NE",
+  "description": "VAN TUONG 65 - carta topografica do mapa tatico, bloco nordeste (tools/make_carta.py)"
+ },
+ {
+  "key": "Carta.sw",
+  "file": "assets/carta/carta_1_0.png",
+  "assetType": "Decal",
+  "name": "VT65 carta tatica SO",
+  "description": "VAN TUONG 65 - carta topografica do mapa tatico, bloco sudoeste (tools/make_carta.py)"
+ },
+ {
+  "key": "Carta.se",
+  "file": "assets/carta/carta_1_1.png",
+  "assetType": "Decal",
+  "name": "VT65 carta tatica SE",
+  "description": "VAN TUONG 65 - carta topografica do mapa tatico, bloco sudeste (tools/make_carta.py)"
+ },
+ {
+  "key": "Clothing.us_faded_shirt_v3",
+  "file": "assets/clothing/skins/us_faded_shirt_v3.png",
+  "assetType": "Decal",
+  "name": "VT65 us_faded_shirt_v3",
+  "description": "VAN TUONG 65 - skin OG-107 desbotado, camisa (tools/make_clothing_skins.py)"
+ },
+ {
+  "key": "Clothing.us_faded_pants_v3",
+  "file": "assets/clothing/skins/us_faded_pants_v3.png",
+  "assetType": "Decal",
+  "name": "VT65 us_faded_pants_v3",
+  "description": "VAN TUONG 65 - skin OG-107 desbotado, calca (tools/make_clothing_skins.py)"
+ },
+ {
+  "key": "Clothing.us_tiger_shirt_v3",
+  "file": "assets/clothing/skins/us_tiger_shirt_v3.png",
+  "assetType": "Decal",
+  "name": "VT65 us_tiger_shirt_v3",
+  "description": "VAN TUONG 65 - skin tiger stripe, camisa (tools/make_clothing_skins.py)"
+ },
+ {
+  "key": "Clothing.us_tiger_pants_v3",
+  "file": "assets/clothing/skins/us_tiger_pants_v3.png",
+  "assetType": "Decal",
+  "name": "VT65 us_tiger_pants_v3",
+  "description": "VAN TUONG 65 - skin tiger stripe, calca (tools/make_clothing_skins.py)"
+ },
+ {
+  "key": "Clothing.us_duck_shirt_v3",
+  "file": "assets/clothing/skins/us_duck_shirt_v3.png",
+  "assetType": "Decal",
+  "name": "VT65 us_duck_shirt_v3",
+  "description": "VAN TUONG 65 - skin duck hunter, camisa (tools/make_clothing_skins.py)"
+ },
+ {
+  "key": "Clothing.us_duck_pants_v3",
+  "file": "assets/clothing/skins/us_duck_pants_v3.png",
+  "assetType": "Decal",
+  "name": "VT65 us_duck_pants_v3",
+  "description": "VAN TUONG 65 - skin duck hunter, calca (tools/make_clothing_skins.py)"
+ },
+ {
+  "key": "Accessories.ghillie",
+  "file": "assets/ghillie/ghillie.glb",
+  "assetType": "Model",
+  "name": "VT65 camuflagem de mato",
+  "description": "VAN TUONG 65 - feixes de folha e capim por parte do corpo, desenho proprio (tools/ghillie.py)"
+ },
+ {
+  "key": "Images.ghillie_rice",
+  "file": "assets/ghillie/ghillie_arroz.png",
+  "assetType": "Decal",
+  "name": "VT65 camuflagem arrozal",
+  "description": "VAN TUONG 65 - textura de capim e palha da camuflagem (tools/ghillie.py)"
+ },
+ {
+  "key": "Images.ghillie_jungle",
+  "file": "assets/ghillie/ghillie_selva.png",
+  "assetType": "Decal",
+  "name": "VT65 camuflagem selva",
+  "description": "VAN TUONG 65 - textura de folha larga da camuflagem (tools/ghillie.py)"
+ },
+ {
+  "key": "Images.ghillie_bamboo",
+  "file": "assets/ghillie/ghillie_bambu.png",
+  "assetType": "Decal",
+  "name": "VT65 camuflagem bambu",
+  "description": "VAN TUONG 65 - textura de folha de bambu da camuflagem (tools/ghillie.py)"
  }
 ]

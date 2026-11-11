@@ -225,12 +225,90 @@ function BotBrain.reactionTime(d: Difficulty, roll: number, suppression: number,
 	return t + d.suppReactionS * math.clamp(suppression, 0, 1)
 end
 
--- Alcance de detecção relativo pela postura do alvo. Alvo que já está sendo seguido não some.
-function BotBrain.spotFactor(d: Difficulty, stance: string, tracking: boolean): number
+-- Alcance de detecção relativo pela postura do alvo e pela camuflagem de mato (camo: atributo
+-- "Camo" do alvo; veg: vegetação onde ele está, BotBrain.vegetation). Alvo que já está sendo
+-- seguido não some.
+function BotBrain.spotFactor(d: Difficulty, stance: string, tracking: boolean, camo: string?, veg: string?): number
 	if tracking then
 		return 1
 	end
-	return d.spotStance[stance] or 1
+	return (d.spotStance[stance] or 1) * BotBrain.camoFactor(camo, veg, stance)
+end
+
+---------------------------------------------------------------------------------------------
+-- Camuflagem de mato (Shared/Skins; "vantagem comprada" autorizada pelo dono em 2026-11-11)
+---------------------------------------------------------------------------------------------
+-- Quem veste a camuflagem do tipo da vegetação em que está é visto a uma fração da distância
+-- (match) e, deitado, a uma fração menor ainda (prone, além do spotStance que vale para todos).
+-- fit: quanto da vantagem vale em cada vegetação (1 = toda; o bambu parece um pouco com a mata e
+-- o capim alto com o arrozal). Fora disso, nenhuma vantagem (nem desvantagem). PLACEHOLDER.
+BotBrain.CAMO = {
+	match = 0.6, -- PLACEHOLDER: ~60% da distância na vegetação certa
+	prone = 0.75, -- PLACEHOLDER: deitado, mais 25% de corte
+	fit = {
+		rice = { rice = 1, grass = 0.7 },
+		jungle = { jungle = 1, bamboo = 0.5 },
+		bamboo = { bamboo = 1, jungle = 0.5 },
+	} :: { [string]: { [string]: number } },
+}
+
+function BotBrain.camoFactor(camo: string?, veg: string?, stance: string): number
+	if not camo or not veg then
+		return 1
+	end
+	local f = BotBrain.CAMO.fit[camo]
+	local w = if f then f[veg] or 0 else 0
+	if w <= 0 then
+		return 1
+	end
+	local k = 1 - (1 - BotBrain.CAMO.match) * w
+	if stance == "prone" then
+		k *= 1 - (1 - BotBrain.CAMO.prone) * w
+	end
+	return k
+end
+
+-- Planta posta pelo AssetLoader (nome do modelo = chave da arte) -> tipo de vegetação.
+BotBrain.PLANT = {
+	bamboo_clump = "bamboo",
+	melaleuca_grove = "bamboo", -- tràm: touceira fina de baixada, junto do bambu
+	elephant_grass = "grass",
+	rice_patch = "rice",
+	shrub = "jungle",
+	banana = "jungle",
+	taro_fern = "jungle",
+	coconut_palm = "jungle",
+	hill_tree = "jungle",
+	canopy_tree = "jungle",
+	vine_tree = "jungle",
+} :: { [string]: string }
+
+function BotBrain.plantKind(key: string): string?
+	if string.sub(key, 1, 3) == "ph_" then
+		return "jungle" -- árvores prontas do Poly Haven (D-67)
+	end
+	return BotBrain.PLANT[key]
+end
+
+-- Contagem de plantas em volta do alvo (raio radiusM) e quantas fazem cada tipo. PLACEHOLDER: a
+-- conferir no Studio com o alvo parado em cada paisagem.
+BotBrain.VEG = { radiusM = 8, bambooMin = 2, jungleMin = 2, grassMin = 2 }
+export type VegCount = { jungle: number, bamboo: number, grass: number, rice: number }
+
+-- surface: chão sob o alvo (BotService: "paddy" = lâmina d'água do arrozal).
+-- Devolve "rice" | "bamboo" | "jungle" | "grass" | "open".
+function BotBrain.vegetation(surface: string, n: VegCount): string
+	local V = BotBrain.VEG
+	if surface == "paddy" or n.rice > 0 then
+		return "rice"
+	elseif n.bamboo >= V.bambooMin and n.bamboo * 2 >= n.jungle then
+		return "bamboo"
+	elseif n.jungle >= V.jungleMin then
+		return "jungle"
+	elseif n.grass >= V.grassMin then
+		return "grass"
+	end
+	return "open"
 end
 
 export type AimOpts = {

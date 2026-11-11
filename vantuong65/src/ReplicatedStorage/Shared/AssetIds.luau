@@ -121,6 +121,13 @@ return {
 		vc_green_pants_v3 = 136585753172189,
 		vc_black_shirt_v3 = 87527564693316,
 		vc_black_pants_v3 = 135154812229650,
+		-- skins de uniforme (Shared/Skins; tools/make_clothing_skins.py); 0 = cai no molde normal
+		us_faded_shirt_v3 = 111316643679745,
+		us_faded_pants_v3 = 97616181097331,
+		us_tiger_shirt_v3 = 98702392122528,
+		us_tiger_pants_v3 = 99148306008988,
+		us_duck_shirt_v3 = 128390642890074,
+		us_duck_pants_v3 = 125772966200340,
 	},
 	-- Equipamento: MODELOS (GLB) soldados à cabeça/tronco em runtime (Characters.dress)
 	Accessories = {
@@ -128,12 +135,18 @@ return {
 		us_m1955_vest = 101251968560886,
 		vc_pith_helmet = 140572292985058,
 		vc_jungle_hat = 99413247149061,
+		-- camuflagem de mato das skins (tools/ghillie.py): MeshParts "Ghillie_<parte do corpo>"
+		ghillie = 128051732789048,
 	},
 	Images = {
 		gamepass_usmc_1965 = 0,
 		gamepass_vc_1965 = 0,
 		gamepass_unit = 0,
 		gamepass_supporter = 0,
+		-- texturas da camuflagem de mato (TextureID das peças; tools/ghillie.py)
+		ghillie_rice = 76320606331202,
+		ghillie_jungle = 78596770057163,
+		ghillie_bamboo = 108180221079119,
 	},
 	-- Texturas do chão (D-66; Poly Haven, CC0): IDs de DECAL devolvidos pelo Open Cloud. O
 	-- MaterialVariant precisa do ID da IMAGEM de cada decal: fica em GroundImages (resolvido no Studio).
@@ -168,6 +181,22 @@ return {
 		rt = 0,
 		up = 0,
 		dn = 0,
+	},
+	-- Carta topográfica do mapa tático (tools/make_carta.py; 2048 px em 4 blocos de 1024: nw, ne, sw,
+	-- se). IDs de DECAL do Open Cloud; a ImageLabel precisa do ID da IMAGEM (CartaImages). Com a
+	-- imagem em 0 e o decal publicado, o servidor resolve a imagem no início (CartaService); com os
+	-- dois em 0, o mapa tático usa o desenho simples de antes.
+	Carta = {
+		nw = 0,
+		ne = 0,
+		sw = 0,
+		se = 0,
+	},
+	CartaImages = {
+		nw = 0,
+		ne = 0,
+		sw = 0,
+		se = 0,
 	},
 	GroundImages = {
 		forrest_ground_01_cor = 83248274685054,

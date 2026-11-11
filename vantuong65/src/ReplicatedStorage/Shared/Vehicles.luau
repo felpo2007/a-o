@@ -2,6 +2,8 @@
 -- Veículos da F4 (Parte 9.7): ficha com fonte por número, tração por potência/atrito/resistência ao
 -- rolamento por tipo de chão, transição água–areia do LVTP-5 e blindagem por zona.
 -- Fonte das fichas: research/veiculos/wikipedia_infobox_2026-11-09.json (marcado "wiki:").
+local VehicleDrive = require(script and (script :: any).Parent.VehicleDrive or "./VehicleDrive") :: any
+
 local Vehicles = {}
 
 Vehicles.G = 9.80665
@@ -141,56 +143,21 @@ Vehicles.SPECS = {
 -- tem 6 (D-37).
 Vehicles.PASSENGERS = { lvtp5 = 12, uh34d = 8, m48a3 = 0, ontos = 0 }
 
--- Chão → (fator de resistência ao rolamento c_rr, atrito μ, fator de velocidade máxima).
--- Ordem de grandeza de veículos de esteira (estimativa de engenharia, D-36): c_rr 0,03–0,05 em chão
--- firme e 0,1–0,2 em solo mole. A lama do arrozal corta a velocidade.
-Vehicles.SURFACE = {
-	road = { crr = 0.04, mu = 0.8, vmax = 1.0 },
-	earth = { crr = 0.06, mu = 0.7, vmax = 0.85 },
-	sand = { crr = 0.12, mu = 0.5, vmax = 0.6 },
-	paddy = { crr = 0.18, mu = 0.4, vmax = 0.35 },
-	water = { crr = 0, mu = 0, vmax = 0 }, -- só anfíbios: usam waterKmh
-} :: { [string]: { crr: number, mu: number, vmax: number } }
+-- Chão, motor, câmbio, lagarta e água ficam em Shared/VehicleDrive (2026-11-11). Aqui só o atalho
+-- da F4: c_rr, tração e teto por chão (D-36 e PLACEHOLDER, ver VehicleDrive.GROUND).
+Vehicles.SURFACE = VehicleDrive.GROUND
+Vehicles.DRIVE_EFF = VehicleDrive.DRIVE_EFF -- eficiência motor→esteira (estimativa de engenharia, D-36)
 
-Vehicles.DRIVE_EFF = 0.6 -- eficiência motor→esteira (estimativa de engenharia, D-36)
+export type DriveState = { v: number, full: any? }
 
-export type DriveState = { v: number }
-
--- Integra a velocidade longitudinal (m/s). throttle em [-1, 1]. Devolve a nova velocidade.
+-- Velocidade longitudinal (m/s) com o acelerador fixo em chão plano, sem curva. throttle em [-1, 1].
+-- Mesmo modelo do controle (VehicleDrive.step: rotação, conversor, marchas, teto por chão, água).
 function Vehicles.drive(spec: Spec, st: DriveState, throttle: number, surface: string, dt: number): number
-	local s = Vehicles.SURFACE[surface] or Vehicles.SURFACE.earth
-	local m = spec.massKg
-	local vmax: number
-	if surface == "water" then
-		if spec.kind ~= "amphibious" then
-			st.v *= math.max(0, 1 - 2 * dt) -- encalha/afoga: perde tração
-			return st.v
-		end
-		vmax = (spec.waterKmh or 0) * Vehicles.KMH
-	else
-		vmax = spec.maxKmh * Vehicles.KMH * s.vmax
-	end
-	local reverseMax = vmax * 0.35
-	local target = if throttle >= 0 then throttle * vmax else throttle * reverseMax
-	local p = spec.powerHp * 745.7 * Vehicles.DRIVE_EFF
-	local fTraction = math.min(p / math.max(math.abs(st.v), 1.0), s.mu * m * Vehicles.G)
-	if surface == "water" then
-		fTraction = p / math.max(math.abs(st.v), 1.0) * 0.15 -- hélice/esteira na água: pouco empuxo
-	end
-	local fRoll = s.crr * m * Vehicles.G
-	local a: number
-	if math.abs(target - st.v) < 0.05 then
-		a = 0
-	elseif target > st.v then
-		a = (fTraction - fRoll) / m
-	else
-		a = -(fTraction + fRoll) / m -- freio/inversão
-	end
-	local nv = st.v + a * dt
-	if (target - st.v) * (target - nv) < 0 then
-		nv = target
-	end
-	st.v = math.clamp(nv, -reverseMax, vmax)
+	local full = st.full or VehicleDrive.newState()
+	st.full = full
+	full.v = st.v
+	VehicleDrive.step(spec, full, { throttle = throttle, steer = 0 }, { ground = surface }, dt)
+	st.v = full.v
 	return st.v
 end
 

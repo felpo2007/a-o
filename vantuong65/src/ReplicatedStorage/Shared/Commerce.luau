@@ -14,6 +14,9 @@
 --
 -- Regra de neutralidade visual: variações cosméticas não podem mudar silhueta, tamanho nem a
 -- cor média do soldado além de ±5% de luminância. Nada de camuflagem "melhor" à venda.
+-- EXCEÇÃO do dono (2026-11-11): as skins de Shared/Skins (arma, uniforme e camuflagem de mato) ficam
+-- fora desta regra, com catálogo e IDs próprios; a camuflagem de mato dá vantagem contra os bots
+-- ("vantagem comprada" autorizada). Commerce.GAMEPLAY continua com os 3 itens da D-72.
 local Commerce = {}
 
 Commerce.IDS = {
@@ -361,7 +364,7 @@ Commerce.FunnelSteps = { "store_open", "item_view", "prompt", "purchase" }
 --   - o total de dias de serviço e os cosméticos ganhos NUNCA se perdem (só a posição na trilha).
 -- Cada selo é um dia de serviço na caderneta e dá créditos de intendência (a moeda ganha jogando,
 -- Shared/Progression); os dias 3 e 7 dão também um cosmético que só sai daqui (unlock "daily"), nos
--- dois lados. Semana completa: 350 CI.
+-- dois lados. Semana completa: $ 350.
 Commerce.DAY_SECONDS = 86400
 Commerce.TRACK_DAYS = 7
 Commerce.DAILY_FACTIONS = { "US", "VC" } -- ordem fixa dos itens de um dia

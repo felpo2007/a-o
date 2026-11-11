@@ -4,12 +4,17 @@
 -- dress(): depois do spawn aplica os moldes (ShirtTemplate/PantsTemplate: v3 quando o ID existe em
 -- AssetIds.Clothing, senão a v2), solda capacete/colete do ForgeGUI ajustados à cabeça e ao tronco
 -- e monta o equipamento 3D (Modules/Gear). Sem assets publicados, fica o uniforme por cor.
+-- Skins do jogador (Shared/Skins, atributos "SkinUniform" e "SkinCamo" postos pelo
+-- ProgressionService): o uniforme da skin e a camuflagem de mato (feixes de folha soldados em cada
+-- parte do corpo, atributo "Camo" no personagem para a visão dos bots).
 -- Usado pelo SpawnService (jogador), BotService (bots) e PreviewService (manequim do lobby).
+local CollectionService = game:GetService("CollectionService")
 local InsertService = game:GetService("InsertService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local AssetIds = require(ReplicatedStorage.Shared.AssetIds) :: any
+local Skins = require(ReplicatedStorage.Shared.Skins)
 local Gear = require(script.Parent.Gear)
 
 local Characters = {}
@@ -109,12 +114,11 @@ function Characters.describe(faction: string, equipped: { [string]: string }?, s
 	-- o molde v3 é transparente na mão, no antebraço arregaçado, no decote e na canela/pé do VC:
 	-- ali aparece a cor do corpo, que tem de ser a pele
 	local u = Gear.uniform(faction, equipped, AssetIds.Clothing, false)
-	local col = Gear.COLORS[u.colors] or Gear.COLORS.US
-	desc.TorsoColor = if u.skinTorso then skin else rgb(col.shirt)
-	local arms = if u.skinArms then skin else rgb(col.shirt)
+	desc.TorsoColor = if u.skinTorso then skin else rgb(u.shirtRgb)
+	local arms = if u.skinArms then skin else rgb(u.shirtRgb)
 	desc.LeftArmColor = arms
 	desc.RightArmColor = arms
-	local legs = if u.skinLegs then skin else rgb(col.pants)
+	local legs = if u.skinLegs then skin else rgb(u.pantsRgb)
 	desc.LeftLegColor = legs
 	desc.RightLegColor = legs
 	return desc
@@ -298,33 +302,126 @@ local function measureHeight(model: Model)
 	end
 end
 
+-- Skin do jogador num encaixe ("SkinUniform" / "SkinCamo"), se for do lado. Bot e manequim: nil.
+local function skinOfPlayer(model: Model, attr: string, kind: string, faction: string): Skins.Skin?
+	local player = Players:GetPlayerFromCharacter(model)
+	local s = if player then Skins.get(player:GetAttribute(attr)) else nil
+	return if s and s.kind == kind and Skins.sideOk(s, faction) then s else nil
+end
+
+-- ===== camuflagem de mato (ghillie) =====
+-- Uma peça por parte do corpo (Skins.GHILLIE, malha de tools/ghillie.py), escalada pela parte real
+-- e soldada com Weld (o cliente balança o C0 ao vento). Textura do tipo (arrozal, selva, bambu) por
+-- TextureID; o recorte pelo alfa só vale com Transparency > 0. Sem colisão, sem consulta (o tiro
+-- passa para o corpo) e sem massa; a sombra o cliente desliga só no próprio jogador.
+-- Sem a malha publicada (AssetIds.Accessories.ghillie = 0) não aparece nada, mas o atributo "Camo"
+-- (vantagem contra os bots, BotBrain.camoFactor) vale do mesmo jeito: é o que foi comprado.
+local function ghillie(model: Model, camo: Skins.Skin?)
+	local old = model:FindFirstChild("Camuflagem")
+	if old then
+		old:Destroy()
+	end
+	model:SetAttribute("Camo", if camo then camo.camo else nil)
+	local tpl = if camo then template("ghillie") else nil
+	if not (camo and tpl) then
+		return
+	end
+	local texId = if camo.texture then AssetIds.Images[camo.texture] else nil
+	local tex = if type(texId) == "number" and texId ~= 0 then imageUrl(texId) else nil
+	local tint = camo.swatch[1] or { 90, 110, 50 }
+	local fit = Skins.GHILLIE
+	local folder = Instance.new("Folder")
+	folder.Name = "Camuflagem"
+	for name, pc in fit.parts do
+		local body = model:FindFirstChild(name)
+		local src = tpl:FindFirstChild("Ghillie_" .. name, true)
+		local ref = fit.ref[name]
+		if body and body:IsA("BasePart") and src and src:IsA("MeshPart") and ref then
+			local p = src:Clone()
+			for _, c in p:GetChildren() do
+				if c:IsA("SurfaceAppearance") then
+					if tex then
+						c:Destroy() -- a textura do tipo vai no TextureID
+					else
+						-- textura do tipo ainda não publicada: fica a do GLB (arrozal), recortada
+						c.AlphaMode = Enum.AlphaMode.Transparency
+					end
+				end
+			end
+			local k = Vector3.new(body.Size.X / ref[1], body.Size.Y / ref[2], body.Size.Z / ref[3])
+			p.Size = Vector3.new(pc.size[1] * k.X, pc.size[2] * k.Y, pc.size[3] * k.Z)
+			if tex then
+				p.TextureID = tex
+			end
+			p.Color = Color3.fromRGB(tint[1], tint[2], tint[3])
+			p.Transparency = Skins.GHILLIE_TRANSPARENCY
+			p.DoubleSided = true
+			p.Anchored = false
+			p.CanCollide = false
+			p.CanQuery = false
+			p.CanTouch = false
+			p.Massless = true
+			p.CastShadow = true
+			p.Name = "Ghillie_" .. name
+			local w = Instance.new("Weld")
+			w.Name = "Folhas"
+			w.Part0 = body
+			w.Part1 = p
+			w.C0 = CFrame.new(pc.offset[1] * k.X, pc.offset[2] * k.Y, pc.offset[3] * k.Z)
+				* CFrame.Angles(0, Skins.GHILLIE_YAW, 0)
+			w.Parent = p
+			p.Parent = folder
+		end
+	end
+	folder.Parent = model
+	CollectionService:AddTag(folder, Skins.GHILLIE_TAG)
+end
+
 function Characters.dress(model: Model, faction: string, equipped: { [string]: string }?)
 	local eq: { [string]: string } = equipped or {}
 	local C = AssetIds.Clothing
 	local isBot = model:GetAttribute("Bot") == true
 	local seed = seedOf(model)
-	local u = Gear.uniform(faction, eq, C, isBot and Gear.isGuerrilla(seed))
+	-- skin de uniforme: o pijama preto usa a variante que o Gear já veste; as outras, molde próprio
+	local uSkin = skinOfPlayer(model, "SkinUniform", "uniform", faction)
+	local gearSkin: Gear.UniformSkin? = nil
+	if uSkin and uSkin.gearUniform then
+		eq = table.clone(eq)
+		eq.uniform = uSkin.gearUniform
+	elseif uSkin then
+		gearSkin = { id = uSkin.id, shirt = uSkin.shirt, pants = uSkin.pants, rgb = uSkin.rgb }
+	end
+	local u = Gear.uniform(faction, eq, C, isBot and Gear.isGuerrilla(seed), gearSkin)
 	-- O describe não sabe se o bot é guerrilheiro. Se o molde escolhido aqui deixa pele à mostra,
 	-- garante a cor de pele nessas partes (só muda algo quando os moldes v3 foram publicados pela
 	-- metade e o preto caiu num molde diferente do previsto no describe).
 	local skin = skinOf(seed)
 	local bodyColors = model:FindFirstChildOfClass("BodyColors")
-	local function paintSkin(group: string)
+	local function paintSkin(group: string, color: Color3?)
+		local c = color or skin
 		for _, name in LIMB_PARTS[group] do
 			local p = model:FindFirstChild(name)
 			if p and p:IsA("BasePart") then
-				p.Color = skin
+				p.Color = c
 			end
 		end
 		if bodyColors then
 			if group == "arms" then
-				bodyColors.LeftArmColor3, bodyColors.RightArmColor3 = skin, skin
+				bodyColors.LeftArmColor3, bodyColors.RightArmColor3 = c, c
 			elseif group == "legs" then
-				bodyColors.LeftLegColor3, bodyColors.RightLegColor3 = skin, skin
+				bodyColors.LeftLegColor3, bodyColors.RightLegColor3 = c, c
 			else
-				bodyColors.TorsoColor3 = skin
+				bodyColors.TorsoColor3 = c
 			end
 		end
+	end
+	-- skin de uniforme sem molde nenhum publicado: o soldado fica na cor média da skin
+	if gearSkin and not u.shirt then
+		paintSkin("torso", rgb(u.shirtRgb))
+		paintSkin("arms", rgb(u.shirtRgb))
+	end
+	if gearSkin and not u.pants then
+		paintSkin("legs", rgb(u.pantsRgb))
 	end
 	if u.skinArms then
 		paintSkin("arms")
@@ -379,6 +476,7 @@ function Characters.dress(model: Model, faction: string, equipped: { [string]: s
 		local pieces = Gear.layout(faction, Gear.items(faction, roleOf(model), eq), env)
 		Gear.build(model, { UpperTorso = upper, LowerTorso = lower, Head = head }, pieces)
 	end
+	ghillie(model, skinOfPlayer(model, "SkinCamo", "camo", faction))
 	measureHeight(model)
 end
 

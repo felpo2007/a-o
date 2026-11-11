@@ -75,6 +75,16 @@ export type Uniform = {
 	skinTorso: boolean, -- o molde deixa a pele à mostra (decote do VC)
 	skinArms: boolean, -- mãos (e antebraço arregaçado)
 	skinLegs: boolean, -- canela e pé do VC (calça arregaçada, sandália)
+	shirtRgb: { number }, -- cor do corpo por baixo da camisa (Gear.COLORS ou a da skin)
+	pantsRgb: { number },
+}
+-- Skin de uniforme (Shared/Skins): molde novo na frente da lista e a cor do corpo sem molde. Sem
+-- o molde da skin publicado, cai no molde normal do lado.
+export type UniformSkin = {
+	id: string,
+	shirt: string?,
+	pants: string?,
+	rgb: { shirt: { number }, pants: { number } }?,
 }
 
 -- Cor do corpo por baixo do molde (e do soldado inteiro quando não há molde publicado).
@@ -108,12 +118,14 @@ function Gear.isGuerrilla(seed: number): boolean
 	return h < Gear.GUERRILLA_SHARE * 100
 end
 
--- ids = AssetIds.Clothing. guerrilla: só para bots (BotService não passa cosmético).
+-- ids = AssetIds.Clothing. guerrilla: só para bots (BotService não passa cosmético). skin: skin de
+-- uniforme com molde próprio (a do pijama preto vem como equipped.uniform = "vc_black").
 function Gear.uniform(
 	faction: string,
 	equipped: { [string]: string }?,
 	ids: { [string]: any },
-	guerrilla: boolean?
+	guerrilla: boolean?,
+	skin: UniformSkin?
 ): Uniform
 	local eq: { [string]: string } = equipped or {}
 	local variant: string, colors: string, shirts: { string }, pants: { string }
@@ -136,6 +148,20 @@ function Gear.uniform(
 		shirts = { "vc_" .. variant .. "_shirt_v3", "vc_" .. v2 .. "_shirt_v3", "vc_" .. v2 .. "_shirt" }
 		pants = { "vc_" .. variant .. "_pants_v3", "vc_" .. v2 .. "_pants_v3", "vc_" .. v2 .. "_pants" }
 	end
+	local col = Gear.COLORS[colors] or Gear.COLORS.US
+	local shirtRgb, pantsRgb = col.shirt, col.pants
+	if skin then
+		variant = skin.id
+		if skin.shirt then
+			table.insert(shirts, 1, skin.shirt)
+		end
+		if skin.pants then
+			table.insert(pants, 1, skin.pants)
+		end
+		if skin.rgb then
+			shirtRgb, pantsRgb = skin.rgb.shirt, skin.rgb.pants
+		end
+	end
 	local s = firstPublished(ids, shirts)
 	local p = firstPublished(ids, pants)
 	local s3, p3 = isV3(s), isV3(p)
@@ -149,6 +175,8 @@ function Gear.uniform(
 		skinTorso = s3 and faction ~= "US",
 		skinArms = s3,
 		skinLegs = p3 and faction ~= "US",
+		shirtRgb = shirtRgb,
+		pantsRgb = pantsRgb,
 	}
 end
 

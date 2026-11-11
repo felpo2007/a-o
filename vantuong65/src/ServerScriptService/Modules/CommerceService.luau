@@ -1,6 +1,9 @@
 --!strict
 -- Monetização no servidor: posse de passes, Premium, assinatura, recibos de produtos,
 -- equipar cosméticos e funil de análise da loja. Tudo cosmético/apoio (Parte 11).
+-- Skins (Shared/Skins, 2026-11-11): posse dos Game Passes de skin (uniforme e camuflagem) junto dos
+-- outros passes, e o recibo idempotente dos Developer Products de skin de arma (a posse vai para o
+-- perfil, PlayerData.applyReceipt).
 local AnalyticsService = game:GetService("AnalyticsService")
 local MarketplaceService = game:GetService("MarketplaceService")
 local Players = game:GetService("Players")
@@ -8,15 +11,21 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Commerce = require(ReplicatedStorage.Shared.Commerce)
 local Net = require(ReplicatedStorage.Shared.Net)
+local Skins = require(ReplicatedStorage.Shared.Skins)
 local PlayerData = require(script.Parent.PlayerData)
 
 local CommerceService = {}
 local ownership: { [Player]: Commerce.Ownership } = {}
+-- passes comprados nesta sessão: o UserOwnsGamePassAsync guarda a resposta antiga por um tempo e
+-- diria "não" logo depois da compra
+local boughtPasses: { [Player]: { [string]: boolean } } = {}
 -- produto entregue (grants "respawn"/"tip"); `now` = entregue agora (não um recibo repetido).
 -- Posto pelo ProgressionService (D-72).
 CommerceService.onGrant = nil :: ((player: Player, grants: string, now: boolean) -> ())?
 -- passes mudaram (compra de Game Pass, Premium, assinatura)
 CommerceService.onRefresh = nil :: ((player: Player) -> ())?
+-- skin recebida por Robux (recibo de Developer Product ou compra de Game Pass); `now` = agora
+CommerceService.onSkin = nil :: ((player: Player, skinId: string, now: boolean) -> ())?
 
 local function passOwned(player: Player, id: number): boolean
 	if id == 0 then
@@ -75,6 +84,16 @@ function CommerceService.refresh(player: Player)
 		local id = (Commerce.IDS :: any)[pass.key] :: number
 		passes[pass.key] = passOwned(player, id)
 	end
+	-- Game Passes de skin (uniforme e camuflagem); com ID 0 nem consulta
+	for _, key in Skins.passKeys() do
+		passes[key] = passOwned(player, Skins.IDS[key] or 0)
+	end
+	local bought = boughtPasses[player]
+	if bought then
+		for key in bought do
+			passes[key] = true
+		end
+	end
 	ownership[player] = {
 		passes = passes,
 		premium = player.MembershipType == Enum.MembershipType.Premium,
@@ -118,6 +137,32 @@ local function track(player: Player, step: string, item: string?)
 	end)
 end
 
+-- Recibo de skin de arma (Developer Product): a posse vai para o perfil uma única vez por
+-- PurchaseId (gravação atômica). Repetido ou não, a memória fica com a posse.
+local function skinReceipt(player: Player, info: { [string]: any }, skinId: string): Enum.ProductPurchaseDecision
+	local ok, now = PlayerData.applyReceipt(player, tostring(info.PurchaseId), function(p)
+		p.skins.owned[skinId] = true
+	end)
+	if not ok then
+		return Enum.ProductPurchaseDecision.NotProcessedYet
+	end
+	local mem = PlayerData.get(player)
+	if mem then
+		mem.skins.owned[skinId] = true
+	end
+	local s = Skins.get(skinId)
+	local sku = if s then s.robuxKey else skinId
+	if CommerceService.onSkin then
+		task.spawn(CommerceService.onSkin, player, skinId, now)
+	end
+	track(player, "purchase", sku)
+	pcall(function()
+		AnalyticsService:LogCustomEvent(player, "robux_spent", tonumber(info.CurrencySpent) or 0, { sku = sku })
+	end)
+	push(player)
+	return Enum.ProductPurchaseDecision.PurchaseGranted
+end
+
 local function processReceipt(info: { [string]: any }): Enum.ProductPurchaseDecision
 	local player = Players:GetPlayerByUserId(info.PlayerId)
 	if not player or not PlayerData.get(player) then
@@ -125,6 +170,10 @@ local function processReceipt(info: { [string]: any }): Enum.ProductPurchaseDeci
 	end
 	local key = Commerce.productKeyById(info.ProductId)
 	if not key then
+		local skinId = Skins.skinByProductId(info.ProductId)
+		if skinId then
+			return skinReceipt(player, info, skinId)
+		end
 		warn("[Commerce] produto desconhecido", info.ProductId)
 		return Enum.ProductPurchaseDecision.NotProcessedYet
 	end
@@ -162,11 +211,22 @@ function CommerceService.start()
 	end)
 	Players.PlayerRemoving:Connect(function(player)
 		ownership[player] = nil
+		boughtPasses[player] = nil
 	end)
-	MarketplaceService.PromptGamePassPurchaseFinished:Connect(function(player, _passId, purchased)
+	MarketplaceService.PromptGamePassPurchaseFinished:Connect(function(player, passId, purchased)
 		if purchased then
-			track(player, "purchase", "pass")
+			local key = Commerce.passKeyById(passId) or Skins.passKeyById(passId)
+			track(player, "purchase", key or "pass")
+			if key then
+				local b = boughtPasses[player] or {}
+				b[key] = true
+				boughtPasses[player] = b
+			end
 			CommerceService.refresh(player)
+			local skinId = Skins.skinByPassId(passId)
+			if skinId and CommerceService.onSkin then
+				task.spawn(CommerceService.onSkin, player, skinId, true)
+			end
 		end
 	end)
 	Players.PlayerMembershipChanged:Connect(function(player)

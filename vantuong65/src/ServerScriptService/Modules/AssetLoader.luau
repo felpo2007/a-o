@@ -830,7 +830,10 @@ end
 
 -- Arma visível na mão direita (todos veem). Sem asset publicado, usa a provisória (Shared/GunModel):
 -- antes ninguém aparecia armado. Troca a anterior (arma do inimigo pega do chão).
+-- Skin (Shared/Skins): o atributo "WeaponSkins" do dono (ProgressionService.applySkins) diz o
+-- acabamento desta arma; o modelo ganha os atributos "WeaponId" e "Skin". Bot e manequim: de fábrica.
 function AssetLoader.attachWeapon(model: Model, weaponId: string)
+	local Skins = require(ReplicatedStorage.Shared.Skins)
 	local hand = model:FindFirstChild("RightHand") :: BasePart?
 	local wp = Weapons.get(weaponId)
 	if not (hand and wp) then
@@ -854,6 +857,9 @@ function AssetLoader.attachWeapon(model: Model, weaponId: string)
 			d.Massless = true
 		end
 	end
+	local owner = game:GetService("Players"):GetPlayerFromCharacter(model)
+	w:SetAttribute("WeaponId", weaponId)
+	Skins.applyWeapon(w, if owner then Skins.weaponSkinFrom(owner:GetAttribute("WeaponSkins"), weaponId) else nil)
 	local primary = w.PrimaryPart
 	if not primary then
 		return
