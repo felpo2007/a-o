@@ -85,10 +85,11 @@ O `sourcemap.json` não vai para o Git.
     e riacho.
   - O bake usa a mesma paisagem: dique e lâmina d'água só na lavoura.
   - Densidade: `ArtBudget.JUNGLE_DENSITY`.
-- Modelo novo de vegetação:
-  1. gere no ForgeGUI e prepare em studs com `asset_prepare` (pivô na base);
-  2. reduza com `tools/decimate_glb.py`; na folhagem use `--soltar-bordas`, senão as costuras de UV
-     param a redução;
+- Modelo novo (D-66: vegetação e props na malha cheia, de 8 a 20 mil triângulos):
+  1. gere no ForgeGUI e prepare em studs com `asset_prepare` (pivô na base). O preparo é grátis,
+     no máximo 3 de cada vez;
+  2. não reduza; só use `tools/decimate_glb.py` se passar de 20 mil (na folhagem, com
+     `--soltar-bordas`);
   3. registre no `manifest.json` e no `ArtBudget`;
   4. ponha em `FOSCOS` (e em `COLOR_GAIN` se a textura for escura) no `matte_glb`;
   5. suba com `upload-assets`.
@@ -96,6 +97,11 @@ O `sourcemap.json` não vai para o Git.
   travou (`DXGI_ERROR_DEVICE_HUNG`) e isso derruba o jogo dele também.
 - `Terrain.Decoration` (grama animada) só vai no arquivo do place (`tools/bake_place`): script do
   jogo não pode escrever.
+- Chão fotográfico: `MaterialVariant` no bake (texturas do Poly Haven via `tools/fetch_textures.py`).
+  O `MaterialVariant` usa o ID da imagem: resolva o decal com `InsertService:LoadAsset` no Studio e
+  grave em `AssetIds.GroundImages`.
+- Relevo: `tools/relevo_dem.py` (DEM Copernicus, cumes calibrados na carta). Rode depois do
+  `crop_world.py`.
 - Arma nova: acrescente em `tools/weapon_landmarks.py` (frente e frações das mãos, vistas numa
   captura) e rode-o para regenerar `Shared/WeaponArt.luau`. Depois confira a mira no Studio
   (captura mirando): a massa deve aparecer no centro sem nada tapando. Se algo tapar, ajuste
@@ -110,7 +116,7 @@ O `sourcemap.json` não vai para o Git.
 - Segredos só no `.env` (no `.gitignore`), nunca no código nem no chat.
 - ForgeGUI: nunca regenerar um job em `outcome_unknown`. "failed" com `retryable` pode ser
   retomado com `generation_retry`.
-- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-66) e atualize `PROGRESS.md`.
+- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-67) e atualize `PROGRESS.md`.
 - Metas da Parte 2: vegetação ≤ 3 mil triângulos, props ≤ 5 mil, herói ≤ 20 mil (`ArtBudget`,
   conferido pelo teste da F5).
 - Commits no branch acima, com mensagem em português.

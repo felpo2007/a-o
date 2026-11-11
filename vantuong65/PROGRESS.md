@@ -358,6 +358,17 @@ do usuário (opção A).
   - A GPU travou num teste com o FC 26 aberto. Depois disso as sombras caíram para 7,1 mil
     árvores.
   - **fps não medido.**
+
+## Malha cheia, chão fotográfico e relevo (2026-11-11, D-66)
+- **26 modelos na malha cheia** do gerador, sem gastar crédito: 9 de vegetação (8–13,6 mil
+  triângulos) e 17 props (9,6–17 mil).
+- **Chão:** 4 texturas fotográficas (Poly Haven, CC0) no terreno, para mata, capim e arrozal,
+  riacho e terra.
+- **Relevo:** do DEM real com menos suavização. Colina 43 = 43 m e Colina 30 = 30 m, como na
+  carta.
+- **fps (Studio, PC livre):** 45 no ponto mais denso, com o streaming descarregando o que está
+  longe (eram 38).
+- **Autoteste:** 10 ok, 0 falhas. Nenhum modelo ou textura falhou ao carregar.
 - **fps:** 59,3 de média no ponto mais denso, antes dos modelos foscos e da grama. Com o EA FC 26
   aberto em primeiro plano, a medida não vale. **Medir de novo com o PC livre.**
 

@@ -60,9 +60,15 @@ ROUGHNESS = 0.9
 # Ganho de cor (R, G, B) na textura de cor (D-65). Média dos pixels pintados: arbusto (48, 45, 20),
 # quase preto na sombra da mata; árvore de folha larga (72, 76, 59), cinzenta. Alvo: o verde da
 # taioba (96, 120, 46). A textura sai em 1024 px, o máximo que o Roblox usa.
+# D-66: malha cheia (texturas do modelo original, não as do remesh). Médias medidas: arbusto
+# (55, 53, 22), folha larga (81, 88, 68), bananeira (114, 101, 45), emergente (117, 117, 84),
+# tràm (100, 101, 71).
 COLOR_GAIN = {
-    "Models.shrub": (1.7, 2.35, 2.0),
-    "Models.hill_tree": (1.0, 1.32, 0.85),
+    "Models.shrub": (1.6, 2.15, 1.8),
+    "Models.hill_tree": (0.93, 1.2, 0.77),
+    "Models.banana": (0.8, 1.1, 0.85),
+    "Models.canopy_tree": (0.85, 1.05, 0.7),
+    "Models.melaleuca_grove": (0.9, 1.08, 0.8),
 }
 TEXTURE_PX = 1024
 

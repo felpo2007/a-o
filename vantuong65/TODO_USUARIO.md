@@ -43,9 +43,10 @@ Nada rodou dentro do Roblox. Os critérios abaixo exigem o Studio ou o jogo publ
 | F5 | fps no pior setor com a arte. O Output mostra `[VT65] arte setor N` e a fração das sebes |
 | F6 | beta fechado: 2 partidas cheias sem crash (Warfare e Offensive), tutorial e campo de tiro (roteiro em `LANCAMENTO.md`) |
 
-**Mata fechada (D-65): meça o fps com o PC livre**, com o EA FC 26 fechado e o Studio ou o jogo
-em primeiro plano.
-- Com o FC 26 aberto, a GPU de 2 GB travou no Studio (`DXGI_ERROR_DEVICE_HUNG`).
+**Mata com malha cheia (D-66): meça o fps no jogo publicado.**
+- No Studio, com o PC livre, deu 45 fps no ponto mais denso.
+- No jogo, sem o Studio, o número tende a ser maior.
+- Com o FC 26 aberto ao mesmo tempo, a GPU de 2 GB travou no Studio (`DXGI_ERROR_DEVICE_HUNG`).
 - Onde: nasça pelos EUA e entre na mata entre An Thới (2) e Nam Yên (4). Olhe o HUD (F3).
 - Se ficar abaixo de 60, diga o número: eu desço `ArtBudget.JUNGLE_DENSITY`.
 - Se sobrar, dá para pôr mais mata.

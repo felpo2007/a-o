@@ -4,11 +4,16 @@
 -- Metas da Parte 2: vegetação ≤ 3.000, props ≤ 5.000, herói (arma, veículo) ≤ 20.000.
 local ArtBudget = {}
 
-ArtBudget.MAX = { veg = 3000, prop = 5000, hero = 20000 } :: { [string]: number }
+-- D-66 (pedido do usuário): vegetação e props com no mínimo 8 mil triângulos, na malha cheia do
+-- gerador. O teto vira o limite do Roblox por malha (20 mil). Antes: veg ≤ 3 mil e props ≤ 5 mil.
+ArtBudget.MAX = { veg = 20000, prop = 20000, hero = 20000 } :: { [string]: number }
+ArtBudget.MIN_VEG = 8000
 -- teto de arte por setor; PLACEHOLDER até medir fps no Studio com a mata (D-45, D-64, D-65). A
 -- mata fechada da D-65 pede até 35,6 milhões no setor 5 (tools/ArtEstimate, sem teto); o cliente
 -- só carrega o raio de streaming (430 m), não o mapa inteiro.
-ArtBudget.SECTOR_MAX = 40000000
+-- D-66: com a vegetação de 8 mil+ triângulos o plano inteiro soma ~617 milhões (setor 5: 155 mi);
+-- o teto cabe o plano todo. O cliente carrega só o raio de streaming, com o LOD automático do Roblox.
+ArtBudget.SECTOR_MAX = 160000000
 -- multiplica a densidade da mata (Vegetation.plan); 1 = valores de projeto da D-64
 ArtBudget.JUNGLE_DENSITY = 1
 -- chave sem número medido: assume um modelo não reduzido (o pior caso do manifest é ~15,8k)
@@ -68,39 +73,40 @@ ArtBudget.KIND = {
 -- triângulos medidos (manifest.json, campo "triangulos"): remesh do ForgeGUI ou, quando ele terminou
 -- em outcome_unknown, redução local (tools/decimate_glb.py)
 ArtBudget.TRIS = {
-	bamboo_clump = 2800,
-	shrub = 2801,
-	elephant_grass = 1865,
-	banana = 2136,
-	coconut_palm = 1988,
-	hill_tree = 2189,
+	-- vegetação na malha cheia do gerador (D-66; antes, remesh de 1,9–2,8 mil)
+	bamboo_clump = 11456,
+	shrub = 10515,
+	elephant_grass = 7978,
+	banana = 12686,
+	coconut_palm = 13261,
+	hill_tree = 13215,
 	rice_patch = 13066,
-	-- D-65 (medidos no manifest, redução local)
-	canopy_tree = 6000,
-	melaleuca_grove = 4496,
-	taro_fern = 4595,
-	vine_tree = 2189, -- sem modelo (outcome_unknown): o substituto é a hill_tree
-	hut_thatch = 3127,
-	hut_veranda = 3135,
-	hut_kitchen = 3999,
-	house_tile = 3054,
-	granary = 4900,
-	well = 3999,
-	shrine = 3999,
-	grave_mound = 4000,
-	tunnel_entrance = 3239,
-	vc_bunker = 3975,
-	trench_section = 3725,
-	bamboo_fence = 2851,
-	sandbags = 2838,
-	spider_hole = 3467,
-	log_bridge = 3676,
+	canopy_tree = 13636,
+	melaleuca_grove = 10995,
+	taro_fern = 8397,
+	vine_tree = 13215, -- sem modelo (outcome_unknown): o substituto é a hill_tree
+	-- props na malha cheia do gerador (D-66; antes, remesh de 2,8–4,9 mil)
+	hut_thatch = 13030,
+	hut_veranda = 13249,
+	hut_kitchen = 13483,
+	house_tile = 14938,
+	granary = 14106,
+	well = 13615,
+	shrine = 13489,
+	grave_mound = 14278,
+	tunnel_entrance = 13576,
+	vc_bunker = 11287,
+	trench_section = 12072,
+	bamboo_fence = 16418,
+	sandbags = 17067,
+	spider_hole = 9602,
+	log_bridge = 15388,
 	us_m1_helmet = 3000,
 	us_m1955_vest = 3999,
 	vc_pith_helmet = 2999,
 	vc_jungle_hat = 2447,
-	water_buffalo = 3999,
-	chicken = 2000,
+	water_buffalo = 14459,
+	chicken = 16688,
 	m60 = 14933,
 	rpd = 15735,
 	sks = 14683,
@@ -118,11 +124,10 @@ ArtBudget.TRIS = {
 
 -- Acima da meta, com o motivo. O teste falha se um modelo passar da meta sem estar aqui, ou se
 -- uma exceção ficar velha (o modelo já cabe na meta).
-ArtBudget.EXCEPTIONS = {
-	rice_patch = "só 3 canteiros de 8 mudas, perto das vilas; o arrozal é terreno com grama (D-64)",
-	canopy_tree = "emergente de 24 m, ~7 por hectare: com 3 mil a redução tira 2,8 m da copa (D-65)",
-	melaleuca_grove = "5 troncos num modelo; costuras de UV param a redução em ~4,5 mil (D-65)",
-	taro_fern = "folhas largas com costuras de UV param a redução em ~4,6 mil; densidade menor (D-65)",
+ArtBudget.EXCEPTIONS = {} :: { [string]: string }
+-- abaixo do mínimo de 8 mil (D-66), com o motivo
+ArtBudget.BELOW_MIN = {
+	elephant_grass = "a malha cheia do gerador tem 7.978; não há versão maior",
 } :: { [string]: string }
 
 -- variantes sorteadas para as casas (o teste exige que todas caibam na meta)

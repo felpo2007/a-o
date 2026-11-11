@@ -1291,6 +1291,63 @@ requisitos".
   load ... ColorMap"); conferir;
 - o fps com o PC livre.
 
+## D-66 — Malha cheia (8 mil+ triângulos), chão fotográfico e relevo da carta (2026-11-11)
+**Pedido do usuário:**
+- árvores com no mínimo 8 mil triângulos;
+- chão melhor;
+- relevo igual ao real;
+- pesquisar vegetação e "outras coisas" de 8 mil+ para o mapa.
+
+**Modelos (sem gastar crédito):**
+- O gerador do ForgeGUI entrega a malha cheia (8–17 mil triângulos); os 2–5 mil vinham do remesh.
+- Os 26 modelos do mapa voltaram à malha cheia, preparados no mesmo tamanho real:
+  - **9 de vegetação:** de 7.978 (capim elefante) a 13.636 (emergente);
+  - **17 props:** casas, celeiro, poço, altar, túmulo, cerca, ponte, entrada de túnel, trincheira,
+    toca, sacos de areia, bunker, búfalo e galinha, de 9.602 a 17.067.
+- Todos ficaram foscos e foram republicados.
+- O capim elefante fica com 7.978 (a malha cheia; registrado em `ArtBudget.BELOW_MIN`).
+- **Metas:** `ArtBudget.MAX` passa a 20 mil para vegetação e props (o limite do Roblox por
+  malha), e `MIN_VEG` = 8 mil. Antes as metas eram 3 mil e 5 mil.
+- **Ganho de cor** (`matte_glb`) nas texturas escuras da malha cheia: arbusto, folha larga,
+  bananeira, emergente e tràm.
+
+**Chão:**
+- Quatro texturas PBR fotográficas do Poly Haven (CC0; cor, normal e rugosidade em 1k) entram
+  como `MaterialVariant` do terreno, no bake (`tools/bake_place`), com troca do material base:
+  - mata (LeafyGrass): `forrest_ground_01`;
+  - capim e arrozal (Grass): `leafy_grass`;
+  - riacho (Mud): `brown_mud_leaves_01`;
+  - terra (Ground): `forest_ground_06`.
+- Tamanho real da foto (2 m) e padrão "Organic".
+- `tools/fetch_textures.py` baixa as texturas.
+- O Open Cloud devolve ID de decal; os IDs de imagem foram resolvidos no Studio
+  (`AssetIds.GroundImages`).
+
+**Relevo (`tools/relevo_dem.py`):**
+- O relevo já era real: o DEM de satélite Copernicus GLO-30, calibrado nas cotas da carta.
+- O que mudou:
+  - a suavização gaussiana caiu de 15 para 5 m, com a mesma abertura de 70 m que tira copas e
+    casas, e volta o detalhe real de encostas e grotas;
+  - não mexe na lavoura das vilas (diques e lâminas têm altura fixa);
+  - os cumes são calibrados na carta: **Colina 43 = 43,0 m** e **Colina 30 = 30,0 m** (estava a
+    35,1 m).
+- **Medido:** o detalhe somado é de 0,09 m em média, e só 3% das células mudam mais de 0,5 m.
+  A planície de Vạn Tường é plana de verdade; o "relevo igual ao real" já estava lá.
+
+**Desempenho (Studio, PC sem outro jogo):**
+- **Antes do ajuste:** 38 fps no ponto mais denso da mata. O CPU de render gastava 25 ms porque
+  o cliente tinha as 48 mil plantas carregadas: o streaming padrão só descarrega sob pressão de
+  memória.
+- **Depois do ajuste:** com `StreamOutBehavior = Opportunistic`, o cliente fica só com o raio de
+  430 m (12 mil plantas) e chegou a **45 fps** (pior quadro 38 ms). Isso com o Roblox Player do
+  usuário aberto ao lado; num cliente sem o Studio o número tende a subir.
+- **Pendente:** medir no jogo publicado. `ArtBudget.JUNGLE_DENSITY` segue como ajuste.
+- O plano inteiro soma ~617 milhões de triângulos sem LOD; o LOD automático do Roblox reduz os
+  modelos distantes.
+
+**Autoteste:** 10 ok, 0 falhas. Nenhuma textura ou modelo falhou ao carregar; os sacos de areia
+estão resolvidos.
+
 **Medido no Studio:**
 - **fps:** 59,3 de média (pior quadro 26 ms), com 25,4 mil peças de arte no cliente, no ponto
   mais denso do setor 2.

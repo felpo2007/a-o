@@ -85,5 +85,40 @@ if terrain then
 else
 	print("terreno: Workspace sem Terrain no place base")
 end
+-- Chão fotográfico (D-66): texturas PBR do Poly Haven (CC0) como MaterialVariant do terreno, no
+-- tamanho real da foto, com padrão "Organic" para disfarçar a repetição. MaterialService troca o
+-- material base do terreno pela variante (override por nome).
+local AssetIds = require("../src/ReplicatedStorage/Shared/AssetIds") :: any
+local GI = AssetIds.GroundImages
+local CHAO = {
+	{ material = "LeafyGrass", id = "forrest_ground_01", ladoM = 2.0 },
+	{ material = "Grass", id = "leafy_grass", ladoM = 2.0 },
+	{ material = "Mud", id = "brown_mud_leaves_01", ladoM = 1.3 },
+	{ material = "Ground", id = "forest_ground_06", ladoM = 2.11 },
+}
+local ms = game:GetService("MaterialService")
+local nVar, nOverride = 0, 0
+for _, c in CHAO do
+	local cor, normal, rug = GI[c.id .. "_cor"], GI[c.id .. "_normal"], GI[c.id .. "_rugosidade"]
+	if cor and cor ~= 0 then
+		local v = roblox.Instance.new("MaterialVariant")
+		v.Name = "VT65_" .. c.material
+		v.BaseMaterial = (roblox.Enum.Material :: any)[c.material]
+		v.ColorMap = "rbxassetid://" .. cor
+		v.NormalMap = "rbxassetid://" .. normal
+		v.RoughnessMap = "rbxassetid://" .. rug
+		v.StudsPerTile = c.ladoM / 0.28
+		v.MaterialPattern = roblox.Enum.MaterialPattern.Organic
+		v.Parent = ms
+		nVar += 1
+		local ok = pcall(function()
+			(ms :: any)[c.material .. "Name"] = v.Name
+		end)
+		if ok then
+			nOverride += 1
+		end
+	end
+end
+print(string.format("chão: %d variantes de material, %d trocas de material base", nVar, nOverride))
 fs.writeFile("build/VanTuong65_F1.rbxl", roblox.serializePlace(game))
 print("gravado build/VanTuong65_F1.rbxl")

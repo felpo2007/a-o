@@ -41,32 +41,32 @@ return {
 	},
 	-- Modelos publicados como "Model" (InsertService:LoadAsset no servidor)
 	Models = {
-		hut_thatch = 91784099076626,
-		hut_veranda = 108704894302101,
-		hut_kitchen = 119583768283690,
-		house_tile = 83099837864172,
-		shrine = 110189814903587,
-		well = 132977007908383,
-		granary = 88437533572898,
-		grave_mound = 127693041320018,
-		bamboo_fence = 77189674420385,
-		log_bridge = 105484640465096,
-		tunnel_entrance = 74044607029430,
-		trench_section = 123503081864935,
-		spider_hole = 129845165905645,
-		sandbags = 89770024840711,
-		vc_bunker = 93291203743799,
-		bamboo_clump = 122081516623030,
-		coconut_palm = 102968030425425,
-		banana = 100002712193200,
-		shrub = 131409897086783,
-		elephant_grass = 123073879703433,
-		hill_tree = 121233640900450,
+		hut_thatch = 123372127409887,
+		hut_veranda = 92945315831272,
+		hut_kitchen = 137424366497472,
+		house_tile = 120593440110273,
+		shrine = 70871952568587,
+		well = 112064523509360,
+		granary = 120173432796541,
+		grave_mound = 127298435495212,
+		bamboo_fence = 118272877596797,
+		log_bridge = 126447968922363,
+		tunnel_entrance = 139514064636040,
+		trench_section = 76350589057613,
+		spider_hole = 128957989425207,
+		sandbags = 73930638417719,
+		vc_bunker = 83599657179313,
+		bamboo_clump = 110447738024754,
+		coconut_palm = 103008299707252,
+		banana = 84461382552866,
+		shrub = 114005886274948,
+		elephant_grass = 98482841074326,
+		hill_tree = 117136388691741,
 		rice_patch = 134482555063796, -- canteiro 2 x 1,45 m (só 3 canteiros perto das vilas, D-64)
 		-- mata fechada (D-65)
-		canopy_tree = 73770095205881, -- emergente de 24 m
-		melaleuca_grove = 130702304212118, -- tràm, grupo de 5 troncos de 13 m
-		taro_fern = 94455365060774, -- taioba e samambaia de 1,8 m
+		canopy_tree = 75652285495122, -- emergente de 24 m
+		melaleuca_grove = 95774589766161, -- tràm, grupo de 5 troncos de 13 m
+		taro_fern = 131679866372706, -- taioba e samambaia de 1,8 m
 		vine_tree = 0, -- copa tomada de cipó: geração em outcome_unknown (não regerar); usa o substituto
 		m14 = 88428577780253,
 		type56 = 92378317190418,
@@ -85,8 +85,8 @@ return {
 		mortar_82 = 134024579408686,
 		-- animais da vila (Parte 11): estavam no manifest mas fora do plano de upload até o teste com
 		-- a arte publicada (2026-11-10); sem eles o AnimalService não tinha o que mover
-		water_buffalo = 92959897148651,
-		chicken = 95559003974876,
+		water_buffalo = 88948304033404,
+		chicken = 121576862821828,
 	},
 	-- Roupas: IMAGENS dos moldes clássicos (aplicadas em Shirt.ShirtTemplate / Pants.PantsTemplate)
 	Clothing = {
@@ -109,5 +109,35 @@ return {
 		gamepass_vc_1965 = 0,
 		gamepass_unit = 0,
 		gamepass_supporter = 0,
+	},
+	-- Texturas do chão (D-66; Poly Haven, CC0): IDs de DECAL devolvidos pelo Open Cloud. O
+	-- MaterialVariant precisa do ID da IMAGEM de cada decal: fica em GroundImages (resolvido no Studio).
+	Ground = {
+		forrest_ground_01_cor = 73410451748634,
+		forrest_ground_01_normal = 75953669132422,
+		forrest_ground_01_rugosidade = 133696072684495,
+		leafy_grass_cor = 84262456504835,
+		leafy_grass_normal = 122524698568074,
+		leafy_grass_rugosidade = 107138023014777,
+		brown_mud_leaves_01_cor = 84904337801864,
+		brown_mud_leaves_01_normal = 138220549210340,
+		brown_mud_leaves_01_rugosidade = 86185017846727,
+		forest_ground_06_cor = 70592474113049,
+		forest_ground_06_normal = 103100751913983,
+		forest_ground_06_rugosidade = 80664182036978,
+	},
+	GroundImages = {
+		forrest_ground_01_cor = 83248274685054,
+		forrest_ground_01_normal = 139783933313957,
+		forrest_ground_01_rugosidade = 135131185669577,
+		leafy_grass_cor = 125918048123863,
+		leafy_grass_normal = 119938912212224,
+		leafy_grass_rugosidade = 76644537789593,
+		brown_mud_leaves_01_cor = 89006167378554,
+		brown_mud_leaves_01_normal = 78270531709445,
+		brown_mud_leaves_01_rugosidade = 90256973643298,
+		forest_ground_06_cor = 74088955875898,
+		forest_ground_06_normal = 80878862384855,
+		forest_ground_06_rugosidade = 96554687561752,
 	},
 }

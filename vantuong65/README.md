@@ -86,5 +86,8 @@ Para desenvolver ao vivo no Studio: `rojo serve` com o plugin do Rojo.
 - Relevo: Copernicus GLO-30, © DLR e.V. 2010-2014 e © Airbus Defence and Space GmbH 2014-2018,
   fornecido pelo programa COPERNICUS da União Europeia e da ESA.
 - Imagem: Sentinel-2, dados Copernicus modificados (2025).
+- Texturas do chão: Poly Haven (polyhaven.com), licença CC0.
+  - `forrest_ground_01` e `brown_mud_leaves_01`: Rob Tuytel;
+  - `leafy_grass` e `forest_ground_06`: Charlotte Baglioni.
 - Histórico: Andrew Jr., R. *The First Fight: U.S. Marines in Operation Starlite, August 1965*.
   USMC History Division, 2015.
