@@ -3,7 +3,7 @@
 -- "os bots lutam espalhados", "não fica claro o que está em disputa". Módulo puro, testado no Lune
 -- (tests/luau/modo.luau):
 --   - sorteio dos pontos fortes encadeado a partir da frente (o vizinho mais perto tem mais chance);
---   - reunião avançada: um ponto de inserção no setor próprio, a ~250 m do ponto forte atacado
+--   - reunião avançada: um ponto de inserção no setor próprio, a ~125 m do ponto forte atacado
 --     (Parte 4: "pontos de reunião na borda dianteira dos setores dominados");
 --   - ponto de reunião do squad (o líder planta onde está; só o squad nasce nele);
 --   - objetivo do time (atacar ou defender) para o HUD.
@@ -11,16 +11,23 @@
 -- depois de nascer no ponto mais avançado).
 local Front = {}
 
+-- Mapa de 1 x 1 km (2026-11-11): setores de ~200 m (eram ~400 m). As distâncias que dependem do
+-- tamanho do setor caíram junto (antes: 250 / 20 / 30, leque até len + 400 m, 150 m do objetivo e
+-- 300 m do QG); as de combate (inimigo a 100 m) ficaram.
 Front.C = {
-	forwardM = 250, -- reunião avançada: distância mínima até o ponto forte atacado
-	forwardStepM = 20, -- recua de 20 em 20 m até cair dentro do setor próprio
-	insideM = 30, -- e fica 30 m para dentro da fronteira
+	forwardM = 125, -- reunião avançada: distância mínima até o ponto forte atacado
+	forwardStepM = 10, -- recua de 10 em 10 m até cair dentro do setor próprio
+	insideM = 20, -- e fica 20 m para dentro da fronteira
+	searchExtraM = 200, -- procura até a distância do ponto forte próprio mais isto
 	fanDeg = 75, -- leque de rumos em volta da direção do ponto forte próprio
 	pickPower = 2, -- sorteio: peso 1/d² até o ponto já sorteado do setor vizinho (mais perto da frente)
 	squadRallyEnemyM = 100, -- reunião do squad: nenhum inimigo a menos de 100 m
-	squadRallyObjectiveM = 150, -- nem a menos de 150 m de ponto forte ativo que não é do time
+	squadRallyObjectiveM = 100, -- nem a menos de 100 m de ponto forte ativo que não é do time
 	squadRallyCooldownS = 90, -- entre dois plantios do mesmo squad
-	squadRallyHqM = 300, -- longe do QG inimigo
+	squadRallyHqM = 150, -- longe do QG inimigo
+	-- reunião atrás do ponto forte: pelo menos isto para dentro da borda (o ponto e a clareira de 15 m
+	-- em volta dele ficam dentro da área e da imagem da carta)
+	rallyInsetM = 30,
 }
 
 export type Point = { x: number, z: number }
@@ -109,8 +116,14 @@ function Front.forwardRally(
 	ownSp: Point,
 	targetSp: Point,
 	studM: number,
-	sectorAt: (x: number, z: number) -> number?
+	sectorAt: (x: number, z: number) -> number?,
+	bounds: any? -- com ele, o ponto fica a pelo menos rallyInsetM da borda da área (e da carta)
 ): (number?, number?)
+	local edge = Front.C.rallyInsetM / studM
+	local function farFromEdge(x: number, z: number): boolean
+		local b = bounds
+		return b == nil or (x >= b.minX + edge and x <= b.maxX - edge and z >= b.minZ + edge and z <= b.maxZ - edge)
+	end
 	local dx, dz = ownSp.x - targetSp.x, ownSp.z - targetSp.z
 	local len = math.sqrt(dx * dx + dz * dz)
 	if len < 1 then
@@ -119,7 +132,7 @@ function Front.forwardRally(
 	local base = math.atan2(dz, dx)
 	local step = Front.C.forwardStepM / studM
 	local inside = Front.C.insideM / studM
-	local maxD = len + 400 / studM
+	local maxD = len + Front.C.searchExtraM / studM
 	local bestD, bx, bz = math.huge, nil :: number?, nil :: number?
 	for k = -Front.C.fanDeg, Front.C.fanDeg, 15 do
 		local a = base + math.rad(k)
@@ -127,7 +140,7 @@ function Front.forwardRally(
 		local d = Front.C.forwardM / studM
 		while d < math.min(maxD, bestD) do
 			local x, z = targetSp.x + ux * d, targetSp.z + uz * d
-			if sectorAt(x, z) == own and sectorAt(x - ux * inside, z - uz * inside) == own then
+			if sectorAt(x, z) == own and sectorAt(x - ux * inside, z - uz * inside) == own and farFromEdge(x, z) then
 				bestD, bx, bz = d, x, z
 				break
 			end
@@ -135,6 +148,65 @@ function Front.forwardRally(
 		end
 	end
 	return bx, bz
+end
+
+-- Ponto de inserção para dentro da área: pelo menos insetStuds da borda (o mapa de 1 x 1 km tem
+-- pontos fortes a 85 m da borda; a reunião fica 100 m atrás deles).
+function Front.clampInside(b: any, x: number, z: number, insetStuds: number): (number, number)
+	return math.clamp(x, b.minX + insetStuds, b.maxX - insetStuds),
+		math.clamp(z, b.minZ + insetStuds, b.maxZ - insetStuds)
+end
+
+export type SpawnSpot = { x: number, z: number, aimX: number, aimZ: number, kind: string }
+
+-- Todos os lugares onde alguém pode nascer sem plantar nada (pedido do dono, 2026-11-11: os dois
+-- lados nasciam no QG dentro do capim-elefante e não viam nada): os QGs, a reunião atrás de cada
+-- ponto forte para os dois lados (como SpawnService: rallyPosition e clampInside) e a reunião avançada
+-- de todo par de setores vizinhos. aim = para onde o soldado olha ao nascer (o objetivo). A mata
+-- abre uma clareira e uma visada em volta de cada um (Vegetation.spawnClearings). A reunião do squad
+-- é plantada pelo líder em qualquer lugar e fica de fora.
+function Front.spawnSpots(
+	mapConfig: any,
+	studM: number,
+	sectorAt: (x: number, z: number) -> number?,
+	rallyPosition: (x: number, z: number, owner: string, studM: number) -> (number, number),
+	insetM: number
+): { SpawnSpot }
+	local out: { SpawnSpot } = {}
+	local b = mapConfig.Bounds
+	local cx, cz = (b.minX + b.maxX) / 2, (b.minZ + b.maxZ) / 2
+	for _, f in { "US", "VC" } do
+		local hq = mapConfig.HQ[f]
+		if hq then
+			table.insert(out, { x = hq.x, z = hq.z, aimX = cx, aimZ = cz, kind = "hq" })
+		end
+	end
+	local bySector: { [number]: { any } } = {}
+	for _, sp in mapConfig.Strongpoints do
+		for _, f in { "US", "VC" } do
+			local x, z = rallyPosition(sp.x, sp.z, f, studM)
+			x, z = Front.clampInside(b, x, z, insetM / studM)
+			table.insert(out, { x = x, z = z, aimX = sp.x, aimZ = sp.z, kind = "rally" })
+		end
+		bySector[sp.sector] = bySector[sp.sector] or {}
+		table.insert(bySector[sp.sector], sp)
+	end
+	local n = #mapConfig.Sectors
+	for own = 1, n do
+		for _, target in { own - 1, own + 1 } do
+			if bySector[own] and bySector[target] then
+				for _, ownSp in bySector[own] do
+					for _, t in bySector[target] do
+						local x, z = Front.forwardRally(own, ownSp, t, studM, sectorAt, b)
+						if x and z then
+							table.insert(out, { x = x, z = z, aimX = t.x, aimZ = t.z, kind = "forward" })
+						end
+					end
+				end
+			end
+		end
+	end
+	return out
 end
 
 -- Reunião do squad: motivo da recusa (nil = pode). Distâncias em metros.

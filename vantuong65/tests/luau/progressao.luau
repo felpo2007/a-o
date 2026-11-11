@@ -126,7 +126,7 @@ test("renascer onde caiu: regras na ordem e espera mínima", function()
 	c.uses = Progression.INPLACE.maxPerMatch
 	assert(Progression.inPlaceCheck(c) ~= nil)
 	c = table.clone(base)
-	c.enemyHqM = 200
+	c.enemyHqM = 100
 	assert(Progression.inPlaceCheck(c) ~= nil)
 	c = table.clone(base)
 	c.sectorLocked = true

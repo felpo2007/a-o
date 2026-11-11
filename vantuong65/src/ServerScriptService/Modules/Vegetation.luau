@@ -97,15 +97,17 @@ Vegetation.STREAM = {
 	{ key = "banana", p = 0.1, s0 = 0.9, s1 = 1.2 },
 	{ key = "shrub", p = 0.2, s0 = 0.8, s1 = 1.2 },
 } :: { Entry }
--- Fora da área jogável (40 a 100 m da borda): cortina de árvores grandes que esconde o fim do
--- terreno recortado (D-63). Moldura de arte, não é a carta: ninguém joga ali.
+-- Fora da área jogável (40 a 80 m da borda): cortina de árvores grandes que esconde o fim do
+-- terreno recortado (D-63). Moldura de arte, não é a carta: ninguém joga ali. O AssetLoader tira
+-- colisão, consulta de raio e sombra delas. Mapa de 1 x 1 km (2026-11-11): a faixa era de 40 a 100 m
+-- e o bambu (40% da cortina, baixo, atrás das copas) saiu; a cortina caiu de 2.777 plantas (2 x 2
+-- km) para 636 no plano (Vegetation.plan com os dados do mapa, no Lune).
 Vegetation.BORDER = {
 	{ key = "ph_island_tree_01", p = 0.03, s0 = 3.2, s1 = 4.4 },
 	{ key = "ph_tree_small_02", p = 0.02, s0 = 3.6, s1 = 4.6 },
-	{ key = "bamboo_clump", p = 0.04, s0 = 1.3, s1 = 1.8 },
 	{ key = "coconut_palm", p = 0.02, s0 = 1.1, s1 = 1.4 },
 } :: { Entry }
-Vegetation.BORDER_M = { 40, 100 }
+Vegetation.BORDER_M = { 40, 80 }
 -- Sombra só das copas grandes: emergentes e árvores de folha larga a partir de uma escala.
 -- Com sombra em todas as árvores (~18 mil na mata da D-65), a GPU de 2 GB do PC de teste travou no
 -- Studio (DXGI_ERROR_DEVICE_HUNG, 2026-11-10, com um jogo aberto ao lado). Arbusto, capim, bambu,
@@ -182,6 +184,34 @@ function Vegetation.exclusions(mapConfig: any, housesXZ: { number }, tunnelXZ: {
 	return out
 end
 
+-- Clareira dos pontos de nascimento (pedido do dono, 2026-11-11: os dois lados nasciam no QG dentro
+-- do capim-elefante e a tela ficava toda de folha). spots: Front.spawnSpots. Cada ponto ganha um
+-- círculo sem planta de SPAWN_CLEAR_M e uma visada de SPAWN_VIEW_M x 2·SPAWN_VIEW_W_M na direção do
+-- objetivo. O resto da mata fica como está.
+Vegetation.SPAWN_CLEAR_M = 15
+Vegetation.SPAWN_VIEW_M = 35
+Vegetation.SPAWN_VIEW_W_M = 4
+function Vegetation.spawnClearings(spots: { any }): ({ Circle }, { Segment })
+	local circles: { Circle } = {}
+	local lanes: { Segment } = {}
+	for _, s in spots do
+		table.insert(circles, { x = s.x, z = s.z, r = Vegetation.SPAWN_CLEAR_M / M })
+		local dx, dz = s.aimX - s.x, s.aimZ - s.z
+		local len = math.sqrt(dx * dx + dz * dz)
+		if len > 1 then
+			local k = math.min(Vegetation.SPAWN_VIEW_M / M, len) / len
+			table.insert(lanes, {
+				x1 = s.x,
+				z1 = s.z,
+				x2 = s.x + dx * k,
+				z2 = s.z + dz * k,
+				w = Vegetation.SPAWN_VIEW_W_M / M,
+			})
+		end
+	end
+	return circles, lanes
+end
+
 function Vegetation.blocked(input: Input, x: number, z: number): boolean
 	for _, c in input.exclude do
 		local dx, dz = x - c.x, z - c.z
@@ -254,7 +284,7 @@ function Vegetation.plan(input: Input): { Item }
 						local px = x + (rng:next() - 0.5) * cell
 						local pz = z + (rng:next() - 0.5) * cell
 						-- a cortina de fora da borda não atrapalha QG, raia nem veículo: sem exclusão
-						-- (o QG dos EUA fica a 50 m da borda e a zona dele apagava a cortina)
+						-- (os dois QGs ficam a 50–60 m da borda e a zona deles apagava a cortina)
 						if out_d > 0 or not Vegetation.blocked(input, px, pz) then
 							local yaw = rng:range(0, 2 * math.pi)
 							local scale = rng:range(e.s0, e.s1)

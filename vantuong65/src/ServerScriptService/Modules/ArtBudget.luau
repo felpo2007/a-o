@@ -13,6 +13,7 @@ ArtBudget.MIN_VEG = 8000
 -- só carrega o raio de streaming (430 m), não o mapa inteiro.
 -- D-66: com a vegetação de 8 mil+ triângulos o plano inteiro soma ~617 milhões (setor 5: 155 mi);
 -- o teto cabe o plano todo. O cliente carrega só o raio de streaming, com o LOD automático do Roblox.
+-- Mapa de 1 x 1 km (2026-11-11): o plano inteiro cabe com folga (ver tools/ArtEstimate).
 ArtBudget.SECTOR_MAX = 160000000
 -- multiplica a densidade da mata (Vegetation.plan); 1 = valores de projeto da D-64
 ArtBudget.JUNGLE_DENSITY = 1
@@ -69,6 +70,13 @@ ArtBudget.KIND = {
 	-- com esqueleto e pele (Blender, D-79)
 	water_buffalo_skin = "prop",
 	chicken_skin = "prop",
+	-- objetos novos do Blender (assets/blender, 2026-11-11): vila e câmaras dos túneis (MapLife)
+	water_jar = "prop",
+	straw_stack = "prop",
+	ammo_crate = "prop",
+	rice_sack = "prop",
+	conical_hat = "prop",
+	bamboo_clothesline = "prop",
 	m60 = "hero",
 	rpd = "hero",
 	sks = "hero",
@@ -104,22 +112,33 @@ ArtBudget.TRIS = {
 	ph_island_tree_02 = 12599,
 	ph_island_tree_03 = 12554,
 	ph_tree_small_02 = 13736,
-	-- props na malha cheia do gerador (D-66; antes, remesh de 2,8–4,9 mil)
-	hut_thatch = 13030,
-	hut_veranda = 13249,
-	hut_kitchen = 13483,
-	house_tile = 14938,
-	granary = 14106,
-	well = 13615,
-	shrine = 13489,
-	grave_mound = 14278,
-	tunnel_entrance = 13576,
-	vc_bunker = 11287,
+	-- props refeitos no Blender (assets/blender/<chave>/metricas.json, "novo"; publicados em
+	-- 2026-11-11, commit 6ea6bfd): a mesma forma com ~1/3 dos triângulos. Antes, a malha cheia do
+	-- gerador (D-66): 13.030, 13.249, 13.483, 14.938, 14.106, 13.615, 13.489, 14.278, 13.576,
+	-- 11.287, 17.067, 9.602 e 15.388.
+	hut_thatch = 4399,
+	hut_veranda = 3200,
+	hut_kitchen = 5999,
+	house_tile = 4399,
+	granary = 6000,
+	well = 4999,
+	shrine = 2750,
+	grave_mound = 2749,
+	tunnel_entrance = 3750,
+	vc_bunker = 4400,
+	sandbags = 5000,
+	spider_hole = 4999,
+	log_bridge = 4399,
+	-- ficaram os do gerador (o Blender perdeu na comparação, RELATORIO.md)
 	trench_section = 12072,
 	bamboo_fence = 16418,
-	sandbags = 17067,
-	spider_hole = 9602,
-	log_bridge = 15388,
+	-- objetos novos do Blender (metricas.json)
+	water_jar = 2000,
+	straw_stack = 5000,
+	ammo_crate = 2000,
+	rice_sack = 1500,
+	conical_hat = 825,
+	bamboo_clothesline = 2749,
 	us_m1_helmet = 3000,
 	us_m1955_vest = 3999,
 	vc_pith_helmet = 2999,
@@ -154,6 +173,7 @@ ArtBudget.TRIS = {
 -- uma exceção ficar velha (o modelo já cabe na meta).
 ArtBudget.EXCEPTIONS = {} :: { [string]: string }
 -- abaixo do mínimo de 8 mil (D-66), com o motivo
+-- (o mínimo vale para a vegetação; os props refeitos no Blender ficam abaixo de 8 mil de propósito)
 ArtBudget.BELOW_MIN = {
 	elephant_grass = "a malha cheia do gerador tem 7.978; não há versão maior",
 	rice_tile_hi = "ladrilho de cartões: ~1.200 em volta da câmera (D-74)",

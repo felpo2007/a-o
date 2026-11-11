@@ -11,6 +11,7 @@ export type GridSpec = {
 	originX: number,
 	originZ: number,
 	heightOffsetCm: number,
+	streamCarvedCm: number?, -- leito do riacho já aberto pelo crop_world (TerrainBuilder: espelho plano)
 	heightChunks: { string },
 	rowsPerChunk: number,
 	classNames: { string },

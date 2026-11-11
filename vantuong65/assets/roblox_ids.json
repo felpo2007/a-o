@@ -118,10 +118,6 @@
  "Images.ghillie_rice": "76320606331202",
  "Images.ghillie_jungle": "78596770057163",
  "Images.ghillie_bamboo": "108180221079119",
- "Carta.nw": "125482274641488",
- "Carta.ne": "105148744178501",
- "Carta.sw": "97095607126684",
- "Carta.se": "128203928291104",
  "store.PRODUCT_RESPAWN_INPLACE": "3730455499",
  "store.PASS_USMC_1965": "2078234463",
  "store.PASS_VC_1965": "2078306456",
@@ -200,5 +196,13 @@
  "Sounds.faca_saque": "111901564575957",
  "Sounds.faca_corte": "101889458600810",
  "Sounds.faca_impacto": "103935391429233",
- "Sounds.baioneta_encaixe": "75358128019094"
+ "Sounds.baioneta_encaixe": "75358128019094",
+ "Carta.nw_2km": "125482274641488",
+ "Carta.ne_2km": "105148744178501",
+ "Carta.sw_2km": "97095607126684",
+ "Carta.se_2km": "128203928291104",
+ "Carta.nw": "96051185172661",
+ "Carta.ne": "110817410011514",
+ "Carta.sw": "126462727146819",
+ "Carta.se": "79478290824539"
 }

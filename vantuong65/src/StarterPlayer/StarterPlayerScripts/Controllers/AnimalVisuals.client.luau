@@ -18,6 +18,9 @@ local M = 0.28
 local camera = workspace.CurrentCamera
 local VIEW_M = 250 -- cópia local até aqui
 local ANIM_M = 120 -- pernas e cabeça animadas até aqui
+-- Longe (além de ANIM_M) o animal só desliza e vira, sem pernas: passo a 10 Hz em vez de a cada
+-- quadro (o deslocamento por passo é o mesmo, com o dt somado). Perto, a cada quadro.
+local FAR_STEP_S = 0.1
 
 type Leg = { i: number, pivot: Vector3, name: string }
 type BoneInfo = { b: Bone, lat: Vector3, up: Vector3 }
@@ -42,6 +45,7 @@ type Rig = {
 	peckUntil: number,
 	nextPeck: number,
 	seed: number,
+	acc: number, -- dt somado desde o último passo (animal longe)
 }
 
 -- Passo de cada espécie (PLACEHOLDER de animação, não de jogo)
@@ -145,6 +149,7 @@ local function buildSkinned(server: Model, species: string, m: Model): Rig?
 		peckUntil = 0,
 		nextPeck = os.clock() + math.random() * 3,
 		seed = math.random(1, 1000),
+		acc = 0,
 	}
 end
 
@@ -231,6 +236,7 @@ local function build(server: Model, species: string, tpl: Model): Rig?
 		peckUntil = 0,
 		nextPeck = os.clock() + math.random() * 3,
 		seed = math.random(1, 1000),
+		acc = 0,
 	}
 end
 
@@ -420,9 +426,15 @@ RunService.RenderStepped:Connect(function(dt: number)
 		lastSync = now
 		sync(camPos)
 	end
+	local far2 = (ANIM_M / M) ^ 2
 	for m, r in rigs do
 		if m.Parent then
-			step(r, math.min(dt, 0.1), now, camPos)
+			r.acc += dt
+			local d = r.pos - camPos
+			if d:Dot(d) <= far2 or r.acc >= FAR_STEP_S then
+				step(r, math.min(r.acc, 0.2), now, camPos)
+				r.acc = 0
+			end
 		end
 	end
 end)

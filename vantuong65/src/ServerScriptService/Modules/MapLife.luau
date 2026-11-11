@@ -5,7 +5,10 @@
 -- - túneis: escoras de madeira a cada 4 m, lamparinas de barro e as três câmaras mobiliadas
 --   (posto de comando e enfermaria, depósito, cozinha);
 -- - vilas: fumaça de cozinha, potes d'água de barro, medas de palha e lenha.
--- Peças simples (sem malha nova): baratas e fora do teto de triângulos do setor.
+-- Peças simples: baratas e fora do teto de triângulos do setor. Objetos do Blender (2026-11-11,
+-- assets/blender): pote d'água, meda de palha, caixote e saco de arroz usam o modelo publicado
+-- (place: AssetLoader.placeAt, que conta no teto do setor) e voltam para as peças com ID 0; varal e
+-- chapéu cônico só existem como modelo.
 local CollectionService = game:GetService("CollectionService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
@@ -17,6 +20,12 @@ local MapLife = {}
 local M = 0.28
 MapLife.LAMP_TAG = "VT65Lamp" -- o cliente faz a chama tremer (RiceField.client)
 local RICE_KEYS: { [string]: string } = { hi = "rice_tile_hi", lo = "rice_tile_lo" }
+-- Varal de bambu e chapéu cônico (nón lá) nas vilas, com moderação (proporção de projeto)
+MapLife.CLOTHESLINE_P = 0.12
+MapLife.HAT_P = 0.15
+
+-- Coloca um modelo publicado com o meio da base em cf (AssetLoader.placeAt); nil = sem modelo
+export type PlaceAt = (key: string, cf: CFrame, parent: Instance, scale: number?) -> Model?
 
 local WOOD = Color3.fromRGB(88, 62, 40)
 local CLAY = Color3.fromRGB(150, 86, 56)
@@ -158,6 +167,65 @@ function MapLife.animalArt(template: (string) -> Model?): number
 end
 
 ---------------------------------------------------------------------------------------------
+-- Riacho
+---------------------------------------------------------------------------------------------
+
+-- Lugar da ponte de toras: a célula de riacho (classe 5) mais perto de (x, z), até `radius` studs,
+-- e o giro que deixa o X do modelo (o comprimento da ponte) atravessado no leito: perpendicular ao
+-- rumo do riacho medido nas células a até 12 m. nil se não houver riacho perto.
+function MapLife.bridgeSpot(world: any, x: number, z: number, radius: number): (number?, number?, number?)
+	local g = world.grid
+	local cell = g.cellStuds
+	local best, bx, bz = math.huge, nil :: number?, nil :: number?
+	local n = math.ceil(radius / cell)
+	local c0 = math.floor((x - g.originX) / cell)
+	local r0 = math.floor((z - g.originZ) / cell)
+	for dr = -n, n do
+		for dc = -n, n do
+			local cx = g.originX + (c0 + dc + 0.5) * cell
+			local cz = g.originZ + (r0 + dr + 0.5) * cell
+			local d = (cx - x) ^ 2 + (cz - z) ^ 2
+			if d < best and d <= radius * radius and world:classAt(cx, cz) == 5 then
+				best, bx, bz = d, cx, cz
+			end
+		end
+	end
+	if not (bx and bz) then
+		return nil, nil, nil
+	end
+	-- rumo do leito: eixo principal das células de riacho em volta
+	local reach = 12 / M
+	local k = math.ceil(reach / cell)
+	local pts: { Vector3 } = {}
+	local mx, mz = 0, 0
+	local bc = math.floor((bx - g.originX) / cell)
+	local br = math.floor((bz - g.originZ) / cell)
+	for dr = -k, k do
+		for dc = -k, k do
+			local cx = g.originX + (bc + dc + 0.5) * cell
+			local cz = g.originZ + (br + dr + 0.5) * cell
+			if (cx - bx) ^ 2 + (cz - bz) ^ 2 <= reach * reach and world:classAt(cx, cz) == 5 then
+				table.insert(pts, Vector3.new(cx, 0, cz))
+				mx += cx
+				mz += cz
+			end
+		end
+	end
+	mx, mz = mx / #pts, mz / #pts
+	local sxx, szz, sxz = 0, 0, 0
+	for _, p in pts do
+		local dx, dz = p.X - mx, p.Z - mz
+		sxx += dx * dx
+		szz += dz * dz
+		sxz += dx * dz
+	end
+	local along = 0.5 * math.atan2(2 * sxz, sxx - szz) -- ângulo do eixo principal no plano XZ
+	local ax, az = math.cos(along), math.sin(along)
+	local px, pz = -az, ax -- atravessado no leito
+	return bx, bz, math.atan2(-pz, px)
+end
+
+---------------------------------------------------------------------------------------------
 -- Túneis
 ---------------------------------------------------------------------------------------------
 
@@ -233,29 +301,65 @@ local function mats(parent: Instance, cf: CFrame)
 	part("Trouxa", Vector3.new(1.2, 0.5, 0.8), cf * CFrame.new(-1.0, 0.3, -1.9), SACK, Enum.Material.Fabric, parent)
 end
 
+-- Modelo do Blender (AssetLoader.placeAt) da vez: tunnels() e village() guardam aqui o que recebem
+local placeModel: PlaceAt? = nil
+local modelCount = 0
+
+-- Modelo publicado com o meio da base em `base`; sem ele, a peça de antes (centro em `center`).
+local function boxOr(
+	key: string,
+	base: CFrame,
+	scale: number,
+	parent: Instance,
+	name: string,
+	size: Vector3,
+	center: CFrame,
+	color: Color3,
+	material: Enum.Material
+)
+	local place = placeModel
+	if place and place(key, base, parent, scale) then
+		modelCount += 1
+		return
+	end
+	part(name, size, center, color, material, parent)
+end
+
 local function crates(parent: Instance, cf: CFrame)
-	part("Caixote", Vector3.new(2.0, 1.1, 1.2), cf * CFrame.new(0, 0.55, 0), CRATE, Enum.Material.WoodPlanks, parent)
-	part(
+	-- caixote de munição de 0,63 x 0,33 x 0,34 m (ammo_crate); as peças tinham 0,56 x 0,31 x 0,34 m
+	local W, PL = CRATE, Enum.Material.WoodPlanks
+	boxOr("ammo_crate", cf, 1, parent, "Caixote", Vector3.new(2.0, 1.1, 1.2), cf * CFrame.new(0, 0.55, 0), W, PL)
+	local top = cf * CFrame.new(0.2, 1.1, 0.05) * CFrame.Angles(0, 0.1, 0)
+	boxOr("ammo_crate", top, 1, parent, "Caixote", Vector3.new(2.0, 1.1, 1.2), top * CFrame.new(0, 0.55, 0), W, PL)
+	local small = cf * CFrame.new(0, 0, 1.3)
+	boxOr(
+		"ammo_crate",
+		small,
+		0.72,
+		parent,
 		"Caixote",
-		Vector3.new(2.0, 1.1, 1.2),
-		cf * CFrame.new(0.2, 1.65, 0.05) * CFrame.Angles(0, 0.1, 0),
-		CRATE,
-		Enum.Material.WoodPlanks,
-		parent
+		Vector3.new(1.4, 0.8, 1.0),
+		small * CFrame.new(0, 0.4, 0),
+		W,
+		PL
 	)
-	part("Caixote", Vector3.new(1.4, 0.8, 1.0), cf * CFrame.new(0, 0.4, 1.3), CRATE, Enum.Material.WoodPlanks, parent)
 end
 
 local function sacks(parent: Instance, cf: CFrame)
 	for k = 0, 3 do
-		local x, y = (k % 2) * 1.3 - 0.65, if k < 2 then 0.45 else 1.25
-		part(
+		local x, y = (k % 2) * 1.3 - 0.65, if k < 2 then 0 else 0.75
+		local base = cf * CFrame.new(x, y, 0) * CFrame.Angles(0, k * 0.2, 0)
+		-- saco de 0,47 x 0,20 x 0,35 m deitado (rice_sack): comprido em X; a peça era comprida em Z
+		boxOr(
+			"rice_sack",
+			base * CFrame.Angles(0, math.pi / 2, 0),
+			1,
+			parent,
 			"SacoDeArroz",
 			Vector3.new(1.2, 0.9, 1.6),
-			cf * CFrame.new(x, y, 0) * CFrame.Angles(0, k * 0.2, 0),
+			base * CFrame.new(0, 0.45, 0),
 			SACK,
-			Enum.Material.Fabric,
-			parent
+			Enum.Material.Fabric
 		)
 	end
 end
@@ -339,12 +443,13 @@ local FURNITURE: { [string]: { (Instance, CFrame) -> () } } = {
 	J3 = { stove, sacks, mats }, -- cozinha
 }
 
--- Devolve (peças, lamparinas).
-function MapLife.tunnels(map: Instance): (number, number)
+-- Devolve (peças, lamparinas). place: AssetLoader.placeAt (caixote e saco de arroz em modelo).
+function MapLife.tunnels(map: Instance, place: PlaceAt?): (number, number)
 	local folder = map:FindFirstChild("Tunnels")
 	if not folder then
 		return 0, 0
 	end
+	placeModel = place
 	local life = Instance.new("Folder")
 	life.Name = "TunnelLife"
 	local W, H = Tunnels.WIDTH_M / M, Tunnels.HEIGHT_M / M
@@ -409,6 +514,7 @@ function MapLife.tunnels(map: Instance): (number, number)
 			end
 		end
 	end
+	placeModel = nil
 	life.Parent = map
 	return #life:GetChildren(), lamps
 end
@@ -448,7 +554,13 @@ local function smoke(parent: Instance, pos: Vector3)
 	e.Parent = src
 end
 
-local function jar(parent: Instance, x: number, y: number, z: number, s: number)
+local function jar(parent: Instance, x: number, y: number, z: number, s: number, yaw: number)
+	-- pote de barro (chum) com tampa de tábuas e cuia: 0,76 x 0,79 x 0,60 m (water_jar)
+	local place = placeModel
+	if place and place("water_jar", CFrame.new(x, y, z) * CFrame.Angles(0, yaw, 0), parent, s) then
+		modelCount += 1
+		return
+	end
 	local m = Instance.new("Model")
 	m.Name = "PoteDagua"
 	local d = 2.3 * s
@@ -486,10 +598,21 @@ local function jar(parent: Instance, x: number, y: number, z: number, s: number)
 	m.Parent = parent
 end
 
-local function strawStack(parent: Instance, x: number, y: number, z: number, s: number)
+local function strawStack(parent: Instance, x: number, y: number, z: number, s: number, yaw: number)
 	-- meda de palha do arroz em volta de um mastro (a debulha é no quintal)
-	-- domo (bola meio enterrada) e dois capuzes menores; em degraus de cilindro parecia um bolo
-	-- (Studio, 2026-11-11)
+	-- modelo do Blender (straw_stack, 2,05 x 2,84 x 2,04 m) ou, sem ele, o domo (bola meio
+	-- enterrada) e dois capuzes menores; em degraus de cilindro parecia um bolo (Studio, 2026-11-11)
+	local place = placeModel
+	local pm = if place then place("straw_stack", CFrame.new(x, y, z) * CFrame.Angles(0, yaw, 0), parent, s) else nil
+	if pm then
+		modelCount += 1
+		for _, d in pm:GetDescendants() do
+			if d:IsA("BasePart") then
+				d:SetAttribute("Material", "Thatch") -- bala passa como no telhado de palha (CombatService)
+			end
+		end
+		return
+	end
 	local m = Instance.new("Model")
 	m.Name = "MedaDePalha"
 	local top = y
@@ -537,19 +660,24 @@ end
 
 -- houses: modelos das casas já postas. groundAt: altura do terreno (studs) ou nil.
 -- isPaddy: o ponto cai no arrozal (a meda e o pote não vão para dentro d'água).
+-- place: AssetLoader.placeAt (pote, meda, varal e chapéu do Blender); sem ele, só as peças.
 function MapLife.village(
 	houses: { Model },
 	out: Instance,
 	rng: Rng.Rng,
 	groundAt: (number, number) -> number?,
-	isPaddy: (number, number) -> boolean
+	isPaddy: (number, number) -> boolean,
+	place: PlaceAt?
 ): { [string]: number }
-	local count = { smoke = 0, jars = 0, straw = 0, wood = 0 }
+	placeModel = place
+	modelCount = 0
+	local count = { smoke = 0, jars = 0, straw = 0, wood = 0, lines = 0, hats = 0, models = 0 }
 	local fx = Instance.new("Folder")
 	fx.Name = "VidaDaVila"
 	for _, h in houses do
 		local cf, size = h:GetBoundingBox()
 		local kitchen = h.Name == "hut_kitchen"
+		local _, houseYaw, _ = cf:ToOrientation()
 		if kitchen or rng:next() < 0.22 then
 			smoke(fx, (cf * CFrame.new(size.X * 0.2, size.Y / 2 - 0.4, -size.Z * 0.15)).Position)
 			count.smoke += 1
@@ -560,7 +688,7 @@ function MapLife.village(
 				local p = cf * Vector3.new(side * (size.X / 2 + 2.6), 0, size.Z * 0.25 - k * 2.8)
 				local y = groundAt(p.X, p.Z)
 				if y and not isPaddy(p.X, p.Z) then
-					jar(out, p.X, y, p.Z, rng:range(0.85, 1.1))
+					jar(out, p.X, y, p.Z, rng:range(0.85, 1.1), rng:range(0, 2 * math.pi))
 					count.jars += 1
 				end
 			end
@@ -571,8 +699,33 @@ function MapLife.village(
 			local x, z = cf.X + math.cos(a) * r, cf.Z + math.sin(a) * r
 			local y = groundAt(x, z)
 			if y and not isPaddy(x, z) then
-				strawStack(out, x, y, z, rng:range(0.85, 1.2))
+				strawStack(out, x, y, z, rng:range(0.85, 1.2), rng:range(0, 2 * math.pi))
 				count.straw += 1
+			end
+		end
+		-- varal de bambu no terreiro, paralelo à casa, 3–4 m para o lado (só o modelo)
+		if place and rng:next() < MapLife.CLOTHESLINE_P then
+			local side = if rng:next() < 0.5 then 1 else -1
+			local p = cf * Vector3.new(0, 0, side * (size.Z / 2 + rng:range(3, 4) / M))
+			local y = groundAt(p.X, p.Z)
+			if y and not isPaddy(p.X, p.Z) then
+				if place("bamboo_clothesline", CFrame.new(p.X, y, p.Z) * CFrame.Angles(0, houseYaw, 0), out) then
+					count.lines += 1
+					modelCount += 1
+				end
+			end
+		end
+		-- chapéu cônico (nón lá) largado no chão perto da porta (só o modelo)
+		if place and rng:next() < MapLife.HAT_P then
+			local p = cf * Vector3.new(size.X * rng:range(-0.3, 0.3), 0, -(size.Z / 2 + 1.2 / M))
+			local y = groundAt(p.X, p.Z)
+			if y and not isPaddy(p.X, p.Z) then
+				if
+					place("conical_hat", CFrame.new(p.X, y, p.Z) * CFrame.Angles(0, rng:range(0, 2 * math.pi), 0), out)
+				then
+					count.hats += 1
+					modelCount += 1
+				end
 			end
 		end
 		if kitchen or rng:next() < 0.15 then
@@ -585,6 +738,8 @@ function MapLife.village(
 		end
 	end
 	fx.Parent = out
+	count.models = modelCount
+	placeModel = nil
 	return count
 end
 

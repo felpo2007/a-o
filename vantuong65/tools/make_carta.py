@@ -1,6 +1,7 @@
 """Carta topográfica do mapa tático, no estilo das cartas do AMS (série L7014, 1:50.000, 1965).
 
-Desenha a área jogável (2 x 2 km, D-63) a partir dos dados do próprio jogo, exportados pelo Lune
+Desenha a área jogável (1 x 1 km desde 2026-11-11; era 2 x 2 km na D-63) a partir dos dados do
+próprio jogo, exportados pelo Lune
 (tools/carta_dados.luau, que usa WorldData, Landscape, Vegetation e o filtro do FeatureBuilder):
   - sombreado de relevo e curvas de nível com cota;
   - mata (com as manchas de cipó), bosque de vila, baixada com bambu e tràm, clareiras;
@@ -62,6 +63,8 @@ CURVA_MESTRA = (150, 86, 38)
 PRETO = (34, 31, 27)
 GRADE = (30, 30, 34)
 GRADE_FINA = (92, 104, 118)
+# setas da nota de margem (sul, sudoeste, sudeste)
+SETA_S, SETA_SO, SETA_SE = "↓", "↙", "↘"
 
 
 @dataclass
@@ -801,17 +804,25 @@ def cotas(q: Quadro, d: Dados) -> list[tuple[float, float, int]]:
 def nomes(q: Quadro, cam: Image.Image, d: Dados, caixas: list) -> None:
     halo = (*PAPEL, 235)
     f_vila = F_SANS_B(int(24 * SS))
+    pontos = {sp["name"]: sp for sp in d.info["strongpoints"]}
     for loc in d.info["locations"]:
         if loc["name"] not in VILAS:
             continue
         x, z = loc["x"], loc["z"]
         b = d.info["bounds"]
         dy = -40 * SS  # acima das casas (o centro da vila é o meio das casas)
-        if z > b["maxZ"] - 300:
+        if loc["name"] in pontos:
+            # o ponto forte da vila é o casario dentro da área (o rótulo de Nam Yên (4) da carta de
+            # 1965 fica na borda oeste do recorte de 1 x 1 km)
+            x, z = pontos[loc["name"]]["x"], pontos[loc["name"]]["z"]
+        elif z > b["maxZ"] - 300:
             # Lạc Sơn (1) fica 20 m ao sul da borda: o nome entra na carta, a nordeste das casas
             x, z, dy = x + 420, b["maxZ"] - 330, 0
         cx, cy = q.px(x, z)
         im = texto_img(loc["name"], f_vila, (*PRETO, 255), halo, 3 * SS)
+        # o nome inteiro dentro da folha
+        borda = 40 * SS
+        cx = min(max(cx, im.width / 2 + borda), N - im.width / 2 - borda)
         cola(cam, im, cx, cy + dy)
         caixas.append((cx, cy + dy, im.width, im.height))
     # colinas: cota com ponto e o nome usado no jogo
@@ -842,12 +853,32 @@ def nomes(q: Quadro, cam: Image.Image, d: Dados, caixas: list) -> None:
         feitas.append((cx, cy))
         dr.ellipse([cx - 2.5 * SS, cy - 2.5 * SS, cx + 2.5 * SS, cy + 2.5 * SS], fill=(*PRETO, 255))
         cola(cam, texto_img(str(h), f_cota, (*PRETO, 255), halo, 2 * SS), cx + 15 * SS, cy)
-    # riacho a leste de An Cường (2)
+    # riacho a leste de An Cường (2): o nome ao lado do leito mais perto do local da carta, ao longo
+    # dele (o leito é o talvegue do vale, tools/crop_world.py)
+    L = d.info["landscape"]
+    ys, xs = np.nonzero(d.paisagem == L["stream"])
     for loc in d.info["locations"]:
         if loc["name"].startswith("Riacho"):
             cx, cy = q.px(loc["x"], loc["z"])
+            ang = 70.0
+            if len(xs):
+                cel = np.array([q.de_celula(r, c) for r, c in zip(ys, xs, strict=True)])
+                k = int(np.argmin(np.hypot(cel[:, 0] - cx, cel[:, 1] - cy)))
+                perto = cel[np.hypot(cel[:, 0] - cel[k, 0], cel[:, 1] - cel[k, 1]) < 60 * SS]
+                if len(perto) >= 3:
+                    # eixo principal dos pontos do leito; o giro do texto é anti-horário com y para
+                    # cima, e a imagem tem y para baixo
+                    cov = np.cov((perto - perto.mean(axis=0)).T)
+                    val, vec = np.linalg.eigh(cov)
+                    vx, vy = vec[:, int(np.argmax(val))]
+                    ang = math.degrees(math.atan2(-vy, vx))
+                    if ang > 90:
+                        ang -= 180
+                    elif ang <= -90:
+                        ang += 180
+                cx, cy = cel[k, 0] + 22 * SS, cel[k, 1]
             im = texto_img("Suối", F_ITALICO(int(15 * SS)), (*AGUA_TRACO, 255), halo, 2 * SS)
-            cola(cam, im, cx + 26 * SS, cy - 10 * SS, 70)
+            cola(cam, im, cx, cy, ang)
 
 
 # ---------- rosa dos ventos, escala e notas ----------
@@ -915,12 +946,19 @@ def rosa_e_escala(q: Quadro, cam: Image.Image) -> None:
         cx,
         y0 + 18 * SS,
     )
-    # escala gráfica: metros e jardas (como nas cartas do AMS), no tamanho real desta carta
+    # escala gráfica: metros e jardas (como nas cartas do AMS), no tamanho real desta carta; o total
+    # é o maior de 500, 200, 100 e 50 que cabe no quadro (2 x 2 km: 200 m; 1 x 1 km: 100 m)
     f_esc = F_ESTREITA(int(10 * SS))
     bx = x0 + 20 * SS
-    for linha, (unid, total, divs, por) in enumerate(
-        (("METROS", 200, 4, 1.0), ("JARDAS", 200, 4, 0.9144))
-    ):
+
+    def total_que_cabe(por: float) -> int:
+        for t in (500, 200, 100, 50):
+            if q.px_m(t * por) <= w - 30 * SS:
+                return t
+        return 25
+
+    for linha, (unid, por) in enumerate((("METROS", 1.0), ("JARDAS", 0.9144))):
+        total, divs = total_que_cabe(por), 4
         y = y0 + 208 * SS + linha * 36 * SS
         comp = q.px_m(total * por)
         assert comp <= w - 30 * SS, "a escala gráfica não cabe no quadro"
@@ -950,11 +988,21 @@ def notas(q: Quadro, cam: Image.Image, d: Dados) -> None:
     halo = (*PAPEL, 235)
     f = F_ESTREITA_B(int(12 * SS))
     e_marco, n_marco = 268600, 1691133
-    x = q.x_de_E(e_marco)
-    km = (q.Nn(q.z1) - n_marco) / 1000
-    cx, _ = q.px(x, 0)
-    im = texto_img(f"ROTA 523 \u2193 {km:.1f} km".replace(".", ","), f, (*PRETO, 255), halo, 2 * SS)
-    cola(cam, im, cx + im.width / 2, N - 34 * SS)
+    e0, e1, n_sul = q.E(q.x0), q.E(q.x1), q.Nn(q.z1)
+    if e0 <= e_marco <= e1:
+        # marco ao sul da folha: seta para baixo, na coluna do marco
+        km = (n_sul - n_marco) / 1000
+        cx, _ = q.px(q.x_de_E(e_marco), 0)
+        seta = SETA_S
+    else:
+        # marco a sudoeste ou sudeste (recorte de 1 x 1 km): nota no canto, distância do canto
+        canto = e0 if e_marco < e0 else e1
+        km = math.hypot(canto - e_marco, n_sul - n_marco) / 1000
+        seta = SETA_SO if e_marco < e0 else SETA_SE
+        cx = 60 * SS if e_marco < e0 else N - 60 * SS
+    im = texto_img(f"ROTA 523 {seta} {km:.1f} km".replace(".", ","), f, (*PRETO, 255), halo, 2 * SS)
+    x = cx + im.width / 2 if cx < N / 2 else cx - im.width / 2
+    cola(cam, im, x, N - 34 * SS)
 
 
 def envelhece(img: np.ndarray, rng: np.random.Generator) -> np.ndarray:

@@ -24,9 +24,12 @@ CORR_DE, CORR_DN = -18.2, +5.3
 # e não muda, para que as coordenadas de todos os locais, da grade de 1965 e do comandante
 # continuem valendo (D-63).
 WORLD_ING = (268200.0, 1691200.0, 272200.0, 1693600.0)
-# Área JOGÁVEL (D-63, escolha do usuário em 2026-11-10): 2 x 2 km a oeste, da Colina 43 até An
-# Cường (2) e a Colina 30, em escala 1:1. tools/crop_world.py recorta o mundo para ela.
-PLAY_ING = (268350.0, 1691500.0, 270350.0, 1693500.0)
+# Área JOGÁVEL, em escala 1:1. tools/crop_world.py recorta o mundo para ela.
+# - D-63 (2026-11-10): 2 x 2 km da Colina 43 até An Cường (2), E 268,35–270,35 x N 1691,5–1693,5.
+# - 2026-11-11 (pedido do dono: "diminuir ainda mais o mapa e fazer ele 1 km x 1 km"): o canto
+#   nordeste do recorte anterior, de Nam Yên (4) até o vale do riacho a leste de An Cường (2), com a
+#   Colina 30 ao norte. Fica dentro do recorte de 2 x 2 km, então os dados já recortados bastam.
+PLAY_ING = (269350.0, 1692500.0, 270350.0, 1693500.0)
 
 _ing_to_wgsutm = Transformer.from_crs(ING_A_UTM49, "EPSG:32649", always_xy=True)
 _wgsutm_to_ll = Transformer.from_crs("EPSG:32649", "EPSG:4326", always_xy=True)

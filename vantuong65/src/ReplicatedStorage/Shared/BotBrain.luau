@@ -5,6 +5,14 @@
 -- adaptam ao ambiente"): reação ao avistar, mira que piora com a distância e a supressão, rajadas
 -- curtas do abrigo, postura pelo lugar e granada em quem se esconde. O BotService faz os raycasts
 -- e chama estas funções. Testes: tests/luau/bots.luau.
+-- D-90 (pedido do dono, 2026-11-11: "faça os bots entenderem como utilizar os veículos, os locais do
+-- jogo, os túneis, as granadas" e "a movimentação dos bots linear como se fossem jogadores reais"):
+-- percepção com tempo para notar e cone de visão, mira que firma no alvo novo, disciplina de fogo,
+-- passo pela situação (andar, trote, corrida, agachado, rastejando), squad em coluna ou cunha,
+-- túneis do VC, desconfiança dos EUA e blindados com tripulação de bots. TODOS os números novos
+-- ficam aqui (MOVE, SQUAD, NAV, TUNNEL, VEHICLE e os campos novos de DIFFICULTY.medium).
+local Movement = require(script and (script :: any).Parent.Movement or "./Movement") :: any
+
 local BotBrain = {}
 
 BotBrain.C = {
@@ -75,6 +83,24 @@ export type Difficulty = {
 	},
 	rayRate: number, -- raios de abrigo por segundo, por bot
 	rayCap: number,
+	-- D-90: percepção (notar leva tempo; fora do cone da frente, mais ainda; atrás, só ouvindo)
+	noticeS: number, -- s para notar alguém de frente, perto, em pé
+	noticePer100M: number, -- s a mais a cada 100 m
+	noticeStill: number, -- alvo parado e abaixado: multiplica
+	noticeFiring: number, -- alvo atirando (clarão, estampido): multiplica
+	noticeSide: number, -- fora do cone da frente: multiplica
+	fovDeg: number, -- meio ângulo do cone da frente
+	rearDeg: number, -- além disto (das costas) não vê; só ouve
+	hearShotM: number, -- ouve o tiro do inimigo a esta distância e vira para o rumo
+	-- D-90: mira que firma (o 1º tiro num alvo novo é apressado)
+	settleS: number, -- s seguindo o alvo até a mira firmar
+	settleMult: number, -- erro do tiro no instante em que nota o alvo (multiplica)
+	-- D-90: disciplina
+	fireMaxM: { [string]: number }, -- não atira além disto (por tipo de arma)
+	strafeFireM: number, -- atira andando de lado só até esta distância
+	calloutS: { number }, -- s até o squad saber do contato que um viu (aviso de voz)
+	suppressS: { number }, -- fogo de supressão na última posição vista: intervalo entre rajadas
+	suppressMaxAgeS: number, -- só suprime posição vista há até isto
 }
 
 -- Uma tabela por nível. Todos os números são PLACEHOLDER de design (sem fonte), a calibrar em
@@ -124,7 +150,193 @@ BotBrain.DIFFICULTY = {
 		},
 		rayRate = 12,
 		rayCap = 30,
+		-- D-90 (PLACEHOLDER): jogador mediano que vê primeiro ganha o 1 x 1; squad organizado dá
+		-- trabalho (avisa o contato, suprime, avança em lances e joga granada atrás do dique)
+		noticeS = 0.25,
+		noticePer100M = 0.35,
+		noticeStill = 1.8,
+		noticeFiring = 0.4,
+		noticeSide = 2.2,
+		fovDeg = 60,
+		rearDeg = 125,
+		hearShotM = 150,
+		settleS = 1.5,
+		settleMult = 3.0,
+		fireMaxM = { rifle = 320, mg = 450, pistol = 50, launcher = 0 },
+		strafeFireM = 80,
+		calloutS = { 1.0, 2.2 },
+		suppressS = { 3, 6 },
+		suppressMaxAgeS = 6,
 	} :: Difficulty,
+}
+
+---------------------------------------------------------------------------------------------
+-- D-90: números novos (todos PLACEHOLDER de design, a calibrar no Studio). Velocidades em m/s
+-- saem do Shared/Movement (as mesmas âncoras da animação: andar 1,4, trote 3,1, corrida 5,5).
+---------------------------------------------------------------------------------------------
+
+-- Movimento de jogador de verdade (BotMove e BotLocomotion)
+BotBrain.MOVE = {
+	-- giro do corpo (°/s) pelo passo: correndo vira devagar (curva aberta); deitado, quase nada
+	turnDegS = { still = 260, ads = 260, walk = 240, jog = 200, sprint = 150, crouch = 180, prone = 45 } :: {
+		[string]: number,
+	},
+	aimTurnDegS = 300, -- virando para mirar
+	lookaheadS = 0.6, -- perseguição pura: ponto do caminho ~0,6 s à frente
+	lookMinM = 1.2,
+	lookMaxM = 4.0,
+	arriveM = 0.5,
+	stopDecel = 3.0, -- m/s²: freada confortável ao chegar (sem passar do ponto, sem girar no lugar)
+	cornerDeg = 55, -- curva mais fechada que isto nos próximos metros: desacelera para o andar
+	cornerLookM = 3.0,
+	stuckS = 1.5, -- s andando menos que stuckFrac do esperado: preso
+	stuckFrac = 0.25,
+	legM = 70, -- trecho pedido ao PathfindingService
+	prefetchM = 22, -- faltando isto do trecho, já pede o próximo (não para no fim)
+	directM = 10, -- até isto vai direto, se o raio do joelho não bate em nada
+	sprintThreatM = 150, -- inimigo conhecido a menos disto: atravessa o aberto correndo
+	walkCalmM = 120, -- sem contato, a menos disto do objetivo: anda (cauteloso)
+	crawlMaxM = 4, -- deitado só se arrasta até isto; mais longe, levanta
+	crouchMoveMaxM = 8, -- agachado só anda até isto; mais longe, levanta
+	pathEveryS = 2, -- intervalo mínimo entre pedidos de caminho do mesmo bot
+	pathConcurrent = 2, -- cálculos de caminho ao mesmo tempo no servidor
+	scanDeg = 35, -- andando cauteloso, olha ±35° para os lados
+	scanS = { 2.5, 5 },
+}
+
+-- Squad de bots (BotSquads): segue um líder em coluna (mata, vila) ou cunha (aberto)
+BotBrain.SQUAD = {
+	size = 6,
+	spacingM = 6, -- entre homens
+	wedgeSideM = 5, -- afastamento lateral na cunha
+	trailStepM = 1.5, -- rastro do líder: um ponto a cada 1,5 m
+	trailMaxM = 90,
+	catchUpM = 10, -- atrás do lugar mais que isto: trota
+	sprintBehindM = 25, -- ...mais que isto: corre
+	leaderSlowM = 25, -- o último atrasado mais que isto: o líder anda
+	leaderWaitM = 45, -- ...mais que isto: o líder espera
+	regroupM = 60, -- longe do líder mais que isto: vai até ele pelo caminho
+	deployM = 70, -- a esta distância do objetivo o squad se espalha pelos lugares de cada um
+	stagingS = { 4, 8 }, -- parada na base de partida antes do assalto
+	boundS = { 6, 10 }, -- duração de cada lance (metade avança, metade cobre)
+	boundAdvance = 1.6, -- peso do avanço na nota do abrigo de quem está no lance
+	defendArcDeg = 70, -- defesa: arco virado para o inimigo
+	defendR = { 14, 36 },
+	contactShareM = 250, -- contato de um vale para o squad até esta distância
+	routeEveryS = 45, -- refaz a rota estratégica (o objetivo pode ter mudado)
+	offRouteM = 45,
+}
+
+-- Rota estratégica (BotNav), custo por célula de 16 studs (4,48 m, a grade do terreno). O custo
+-- multiplica a distância; 1 = trote em chão firme. Pedido do dono: arrozal alagado caro; dique,
+-- trilha e sebe baratos. As trilhas da carta não existem no chão (D-87): o dique é a trilha.
+BotBrain.NAV = {
+	weight = 1.3, -- A* com heurística inflada (rota até 30% pior, muito menos nós)
+	expandPerFrame = 900, -- nós por quadro (fatia de tempo)
+	frameBudgetS = 0.002, -- e no máximo 2 ms por quadro
+	simplifyLookCells = 40,
+	simplifySlack = 1.06,
+	profiles = {
+		-- infantaria: 1/velocidade do Movement (mata 0,93; arrozal 0,62) + exposição no aberto
+		infantry = {
+			forest = 1.08,
+			grove = 1.05,
+			clear = 1.25,
+			farm = 1.15,
+			paddy = 2.4,
+			dike = 0.85,
+			hedge = 0.9,
+			house = 3,
+			stream = 3.5,
+			sea = math.huge,
+			trench = 0.8,
+			maxGrade = 1.2,
+			upCost = 1.4,
+			downCost = 1.0,
+		},
+		-- lagarta (M48A3, Ontos): 1/"ride" do VehicleDrive (mata 0,5; capim 0,65; arrozal 0,3);
+		-- casa e sebe de bambu param; riacho de 0,6 m: o M48 vadeia (1,2 m), o Ontos não (0,6 m)
+		tracked = {
+			forest = 2.0,
+			grove = 2.4,
+			clear = 1.54,
+			farm = 1.54,
+			paddy = 3.4,
+			hedge = math.huge,
+			house = math.huge,
+			stream = 3,
+			sea = math.huge,
+			trench = 3, -- trincheira de 1 m: passa devagar
+			maxGrade = 0.5,
+			upCost = 2,
+			downCost = 1,
+		},
+		-- LVTP-5: como a lagarta, mas boia (11 km/h na água: ~4,4x o tempo em terra)
+		amphibious = {
+			forest = 2.0,
+			grove = 2.4,
+			clear = 1.54,
+			farm = 1.54,
+			paddy = 3.4,
+			hedge = math.huge,
+			house = math.huge,
+			stream = 2.2,
+			sea = 4.4,
+			trench = 3, -- trincheira de 1 m: passa devagar
+			maxGrade = 0.5,
+			upCost = 2,
+			downCost = 1,
+		},
+	} :: { [string]: any },
+	-- vau de cada lagarta (m): acima disto o riacho de 0,6 m (TerrainBuilder) vira barreira
+	fordM = { m48a3 = 1.2, ontos = 0.6, lvtp5 = 99 } :: { [string]: number },
+	streamDepthM = 0.6,
+}
+
+-- Túneis: só o VC entra (regra do dono, 2026-11-11); os EUA desconfiam das bocas e jogam granada
+BotBrain.TUNNEL = {
+	useWithinM = 60, -- a entrada fica a até 60 m do bot
+	gainM = 80, -- e a saída fica 80 m (ou mais) mais perto do destino que a entrada
+	ambushTriggerM = 45, -- emboscada: sai quando o inimigo chega a até 45 m da saída
+	ambushMaxS = 150, -- espera no máximo isto lá embaixo
+	vanishWithinM = 40, -- ferido ou cercado: some no túnel se a entrada está a até 40 m
+	climbS = 1.6, -- s pela escada do poço de 3 m
+	exitOffsetM = 2.5, -- sai ao lado do poço (não em cima do buraco)
+	spotM = 25, -- os EUA acham a boca camuflada a até 25 m, com visada
+	stumbleM = 8, -- ...ou tropeçando nela
+	alertM = 120, -- EUA a até 120 m quando um VC entra ou sai: a boca fica conhecida
+	grenadeCooldownS = 90, -- por boca, para o time todo
+	scareM = 15, -- granada estoura a até 15 m de quem está lá embaixo: ele foge pelo túnel
+}
+
+-- Blindados com tripulação de bots (só dos EUA; o carro do VC entra depois e usa a mesma lógica)
+BotBrain.VEHICLE = {
+	minTeamBots = 8, -- bots do lado para tripular o 1º blindado (o HEAVY_UNLOCK de 16 é dos squads de jogadores)
+	perCrewBots = 5, -- mais um blindado a cada 5 bots além disso
+	order = { "m48a3", "lvtp5", "ontos" },
+	crewSeats = { "driver", "gunner" },
+	standoffM = { m48a3 = 220, ontos = 180, lvtp5 = 250 } :: { [string]: number },
+	dropM = 180, -- o LVTP-5 desembarca a tropa a esta distância do objetivo
+	coverSearchM = 45, -- procura sebe, casa, dique ou crista para parar atrás
+	behindM = 9, -- e para a esta distância atrás dela
+	arriveM = 7,
+	lookM = { 9, 24 }, -- perseguição pura (m), pela velocidade
+	pivotDeg = 50, -- erro de rumo maior que isto e devagar: gira no lugar (lagarta)
+	steerGain = 2.2, -- volante por radiano de erro
+	speedGain = 0.45, -- acelerador por m/s de erro
+	cruiseFrac = 0.8, -- fração do teto do chão
+	cornerFrac = 0.45, -- teto na curva fechada
+	stuckS = 5,
+	reverseS = 2.5,
+	boardM = 6, -- embarca a esta distância do veículo
+	loadWaitS = 60, -- LVTP-5 espera a tropa no depósito
+	minLoad = 3,
+	gunReaction = { 0.8, 1.6 },
+	coaxVolley = { 6, 12 },
+	mainMinM = 60, -- canhão (HE) só a partir de 60 m
+	mainEveryS = 9,
+	aimToleranceDeg = 2.5,
+	turretDegS = 24, -- se a ficha não tiver (Vehicles.turretDegS)
 }
 
 -- Diferença leve de lado: o VC prefere sebe e emboscada (espera escondido mais tempo); os EUA
@@ -679,13 +891,15 @@ export type ThrowCheck = {
 	friendlyNear: boolean, -- companheiro perto do ponto
 	pinned: boolean,
 	roll: number,
+	covered: boolean?, -- D-90: enxerga, mas ele está atrás de dique ou parede (o tiro para no abrigo)
 }
 
--- Granada: inimigo conhecido a 15-35 m, escondido (sem linha de visada), com recarga e no máximo
--- 2 por vida. Não joga perto de companheiro nem preso pelo fogo.
+-- Granada: inimigo conhecido a 15-35 m, escondido (sem linha de visada) ou atrás de abrigo sólido
+-- (D-90: dique, parede), com recarga e no máximo 2 por vida. Não joga perto de companheiro nem
+-- preso pelo fogo.
 function BotBrain.shouldThrow(d: Difficulty, g: ThrowCheck): boolean
 	local G = d.grenade
-	return not g.los
+	return (not g.los or g.covered == true)
 		and g.distM >= G.minM
 		and g.distM <= G.maxM
 		and g.thrown < G.perLife
@@ -709,6 +923,150 @@ end
 -- Orçamento de raycasts de abrigo (fichas): enche a `rate` por segundo até `cap`.
 function BotBrain.budgetStep(tokens: number, dt: number, rate: number, cap: number): number
 	return math.min(cap, tokens + math.max(dt, 0) * rate)
+end
+
+---------------------------------------------------------------------------------------------
+-- D-90: percepção e mira que firma
+---------------------------------------------------------------------------------------------
+
+-- Tempo (s) com o alvo à vista até notar. offDeg: ângulo entre a frente do corpo e o alvo. Atrás
+-- (além de rearDeg) não vê, a não ser que ele esteja atirando (ouve e vira).
+function BotBrain.noticeTime(
+	d: Difficulty,
+	distM: number,
+	stance: string,
+	still: boolean,
+	firing: boolean,
+	offDeg: number
+): number
+	if offDeg > d.rearDeg and not firing then
+		return math.huge
+	end
+	local t = d.noticeS + d.noticePer100M * math.max(distM, 0) / 100
+	if still and stance ~= "stand" then
+		t *= d.noticeStill
+	end
+	if offDeg > d.fovDeg then
+		t *= d.noticeSide
+	end
+	if firing then
+		t *= d.noticeFiring
+	end
+	return t
+end
+
+-- Erro extra (multiplica) de quem pegou o alvo há trackS segundos: settleMult no instante em que
+-- notou, caindo em linha até 1 em settleS.
+function BotBrain.settleFactor(d: Difficulty, trackS: number): number
+	local k = math.clamp(trackS / d.settleS, 0, 1)
+	return d.settleMult + (1 - d.settleMult) * k
+end
+
+-- Disciplina de fogo: atira nesta distância com este tipo de arma?
+function BotBrain.inRange(d: Difficulty, kind: string, distM: number): boolean
+	return distM <= (d.fireMaxM[kind] or d.fireMaxM.rifle)
+end
+
+---------------------------------------------------------------------------------------------
+-- D-90: passo pela situação (velocidades das âncoras do Movement, as mesmas da animação)
+---------------------------------------------------------------------------------------------
+
+export type GaitCtx = {
+	stance: string, -- postura em que vai andar
+	distM: number, -- até o destino
+	urgent: boolean, -- sob fogo ou cruzando aberto com inimigo perto: corre
+	cautious: boolean, -- perto do objetivo ou de inimigo, sem contato: anda
+	aiming: boolean, -- andando de lado, mirando (atira andando)
+	behindM: number, -- quanto está atrás do seu lugar no squad
+	legImpaired: boolean,
+	waterM: number?, -- fundura da água (riacho): acima do joelho não corre
+}
+
+-- Nome do passo e velocidade-alvo (m/s) em chão firme e plano.
+function BotBrain.gait(c: GaitCtx): (string, number)
+	if c.stance == "prone" then
+		return "prone", Movement.PRONE
+	elseif c.stance == "crouch" then
+		return "crouch", Movement.CROUCH
+	end
+	local S = BotBrain.SQUAD
+	local name: string
+	if c.aiming then
+		name = "ads"
+	elseif (c.urgent and c.distM > 3) or c.behindM > S.sprintBehindM then
+		name = "sprint"
+	elseif c.behindM > S.catchUpM then
+		name = "jog"
+	elseif c.cautious then
+		name = "walk"
+	else
+		name = "jog"
+	end
+	if name == "sprint" and (c.waterM or 0) >= Movement.SPRINT_MAX_WATER_M then
+		name = "jog"
+	end
+	local v = if name == "ads"
+		then Movement.ADS
+		elseif name == "sprint" then Movement.SPRINT
+		elseif name == "walk" then Movement.WALK
+		else Movement.JOG
+	if c.legImpaired and v > Movement.WALK then
+		return "walk", Movement.WALK
+	end
+	return name, v
+end
+
+-- Fator do chão como o do jogador (Movement.targetSpeed): superfície, chuva, água e rampa.
+function BotBrain.groundFactor(surface: string, rain: number, waterM: number, grade: number): number
+	return Movement.surfaceSpeed(surface, rain) * Movement.waterFactor(waterM) * Movement.slopeFactor(grade)
+end
+
+---------------------------------------------------------------------------------------------
+-- D-90: granada sem acertar o próprio squad
+---------------------------------------------------------------------------------------------
+
+-- Ponto de queda livre de companheiro? friends: lista plana x1, z1, x2, z2... (mesma unidade de
+-- clear). Conta também quem está a caminho do ponto (destinos no mesmo formato).
+function BotBrain.grenadeClear(ix: number, iz: number, friends: { number }, clear: number): boolean
+	local c2 = clear * clear
+	for i = 1, #friends - 1, 2 do
+		local dx, dz = friends[i] - ix, friends[i + 1] - iz
+		if dx * dx + dz * dz < c2 then
+			return false
+		end
+	end
+	return true
+end
+
+-- Ponto de mira da granada em quem está atrás de abrigo: um pouco além do abrigo, do lado dele
+-- (a granada que cai na face da frente do dique não pega ninguém). hx, hz: onde o raio bateu no
+-- abrigo; ex, ez: o inimigo. beyond: quanto passar do abrigo (mesma unidade).
+function BotBrain.grenadeAim(hx: number, hz: number, ex: number, ez: number, beyond: number): (number, number)
+	local dx, dz = ex - hx, ez - hz
+	local l = math.sqrt(dx * dx + dz * dz)
+	if l >= beyond or l < 1e-6 then
+		return ex, ez
+	end
+	return hx + dx / l * beyond, hz + dz / l * beyond
+end
+
+---------------------------------------------------------------------------------------------
+-- D-90: túneis (só o VC) e blindados
+---------------------------------------------------------------------------------------------
+
+-- Vale entrar no túnel? Distâncias em metros: do bot até a entrada, e de cada ponta até o destino.
+function BotBrain.tunnelWorth(botToEntryM: number, entryToGoalM: number, exitToGoalM: number): boolean
+	local T = BotBrain.TUNNEL
+	return botToEntryM <= T.useWithinM and entryToGoalM - exitToGoalM >= T.gainM
+end
+
+-- Quantos blindados os bots de um lado tripulam (só lados com blindado: os EUA hoje).
+function BotBrain.crewCount(teamBots: number, available: number): number
+	local V = BotBrain.VEHICLE
+	if teamBots < V.minTeamBots then
+		return 0
+	end
+	return math.min(available, 1 + (teamBots - V.minTeamBots) // V.perCrewBots)
 end
 
 return BotBrain

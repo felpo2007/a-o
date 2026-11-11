@@ -381,6 +381,92 @@ test("orçamento de raios: enche no ritmo, tem teto e cabe uma busca de abrigo",
 	assert(t >= 1.5, "buscas seguidas demais: " .. t)
 end)
 
+-- ===== D-90: percepção, mira que firma, disciplina =====
+test("notar: de frente e perto é rápido; longe, parado e abaixado demora; de costas não vê", function()
+	local t50 = BotBrain.noticeTime(D, 50, "stand", false, false, 0)
+	local t200 = BotBrain.noticeTime(D, 200, "stand", false, false, 0)
+	assert(t50 < t200, "longe demora mais")
+	assert(BotBrain.noticeTime(D, 50, "crouch", true, false, 0) > t50, "parado e agachado demora mais")
+	assert(BotBrain.noticeTime(D, 50, "stand", false, false, 90) > t50, "de lado demora mais")
+	assert(BotBrain.noticeTime(D, 50, "stand", false, false, 170) == math.huge, "de costas não vê")
+	assert(BotBrain.noticeTime(D, 50, "stand", false, true, 170) < math.huge, "atirando: ouve e vê")
+	assert(BotBrain.noticeTime(D, 50, "stand", false, true, 0) < t50, "o clarão denuncia")
+	print(string.format("       notar: 50 m %.2f s, 200 m %.2f s", t50, t200))
+end)
+
+test("mira que firma: o 1º tiro num alvo novo é apressado; firma em settleS", function()
+	assert(BotBrain.settleFactor(D, 0) == D.settleMult)
+	assert(BotBrain.settleFactor(D, D.settleS) == 1 and BotBrain.settleFactor(D, 10) == 1)
+	assert(BotBrain.settleFactor(D, D.settleS / 2) < D.settleMult and BotBrain.settleFactor(D, D.settleS / 2) > 1)
+	-- 1 x 1 a 50 m, de frente: tempo até o 1º acerto do bot (Monte Carlo com as próprias regras)
+	local Rng = require("../../src/ReplicatedStorage/Shared/Rng") :: any
+	local rng = Rng.new(1965)
+	local function firstHit(distM: number): number
+		local notice = BotBrain.noticeTime(D, distM, "stand", false, false, 0)
+		local t = notice + BotBrain.reactionTime(D, rng:next(), 0, false)
+		local track = t - notice
+		for _ = 1, 40 do
+			local n = BotBrain.volleySize(D, "rifle", rng:next())
+			for shot = 1, n do
+				local s = BotBrain.aimError(D, distM, { shot = shot, kind = "rifle" }) * BotBrain.settleFactor(D, track)
+				if rng:next() < BotBrain.hitChance(s, distM, C.torsoHalfM) then
+					return t
+				end
+				local gap = BotBrain.volleyGap(D, "rifle", 725, rng:next())
+				t += gap
+				track += gap
+			end
+			local p = BotBrain.pause(D, "rifle", rng:next())
+			t += p
+			track += p
+		end
+		return t
+	end
+	local function median(distM: number): number
+		local xs = {}
+		for k = 1, 2001 do
+			xs[k] = firstHit(distM)
+		end
+		table.sort(xs)
+		return xs[1001]
+	end
+	local m50, m100 = median(50), median(100)
+	print(
+		string.format(
+			"       bot de frente, em pé: 1º acerto (mediana) a 50 m em %.2f s, a 100 m em %.2f s",
+			m50,
+			m100
+		)
+	)
+	-- piso de projeto (PLACEHOLDER): o jogador que vê primeiro tem mais de 1 s a 50 m
+	assert(m50 >= 1.0, "bot rápido demais a 50 m: " .. m50)
+	assert(m100 > m50)
+end)
+
+test("disciplina: não atira além do alcance; granada atrás do dique mesmo vendo a cabeça", function()
+	assert(BotBrain.inRange(D, "rifle", 300) and not BotBrain.inRange(D, "rifle", 400))
+	assert(not BotBrain.inRange(D, "pistol", 80) and BotBrain.inRange(D, "mg", 420))
+	assert(not throw({ los = true }), "vendo sem abrigo: atira")
+	assert(throw({ los = true, covered = true }), "vendo, mas atrás do dique: granada")
+	-- ponto de mira passa do abrigo e cai do lado dele
+	local ax, az = BotBrain.grenadeAim(0, 0, 0.5, 0, 2)
+	assert(ax == 2 and az == 0, "passa do dique")
+	local bx = BotBrain.grenadeAim(0, 0, 5, 0, 2)
+	assert(bx == 5, "longe do dique: no inimigo")
+	-- não cai no próprio squad (nem em quem vai para lá)
+	assert(BotBrain.grenadeClear(0, 0, { 20, 0, 0, 20 }, 8))
+	assert(not BotBrain.grenadeClear(0, 0, { 20, 0, 5, 5 }, 8))
+end)
+
+test("túnel: vale entrar quando a saída ganha caminho; blindado: um a partir de 8 bots", function()
+	local T = BotBrain.TUNNEL
+	assert(BotBrain.tunnelWorth(30, 300, 150))
+	assert(not BotBrain.tunnelWorth(30, 300, 260), "ganho pequeno")
+	assert(not BotBrain.tunnelWorth(T.useWithinM + 1, 300, 100), "entrada longe")
+	assert(BotBrain.crewCount(7, 3) == 0 and BotBrain.crewCount(8, 3) == 1)
+	assert(BotBrain.crewCount(15, 3) == 2 and BotBrain.crewCount(30, 3) == 3 and BotBrain.crewCount(30, 1) == 1)
+end)
+
 print(string.format("%d ok, %d falhas", passed, failed))
 if failed > 0 then
 	process.exit(1)

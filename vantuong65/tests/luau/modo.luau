@@ -157,7 +157,7 @@ test("sorteio dos pontos fortes: 1 por setor, no setor certo, e a frente fica ma
 	assert(Front.firstSector("Offensive", 5) == 5 and Front.firstSector("Warfare", 5) == 3)
 end)
 
-test("reunião avançada: dentro do setor próprio, a >= 250 m do alvo, e encurta a marcha", function()
+test("reunião avançada: dentro do setor próprio, a >= forwardM do alvo, e encurta a marcha", function()
 	local worstOld, worstNew = 0, 0
 	local sumOld, sumNew, k = 0, 0, 0
 	for _, t in bySector[3] do
@@ -214,6 +214,32 @@ test("Offensive: a reunião avançada dos EUA no S5 deixa o S4 a <= 150 s de mar
 	assert(worstNew / JOG <= 150)
 end)
 
+-- pedido do dono (2026-11-11): o QG dos EUA e a "Reunião — Colina 30" saíam fora da imagem da carta
+test("todo ponto de nascimento cai dentro da área e da carta, a >= 30 m da borda", function()
+	local spots = Front.spawnSpots(MapConfig, M, sectorAt, SpawnRules.rallyPosition, Front.C.rallyInsetM)
+	local b = MapConfig.Bounds
+	local kinds: { [string]: number } = {}
+	local worst = math.huge
+	for _, s in spots do
+		kinds[s.kind] = (kinds[s.kind] or 0) + 1
+		local edge = math.min(s.x - b.minX, b.maxX - s.x, s.z - b.minZ, b.maxZ - s.z) * M
+		worst = math.min(worst, edge)
+		assert(edge >= Front.C.rallyInsetM - 0.5, string.format("%s a %.0f m da borda", s.kind, edge))
+		local u, v = Carta.toUV(b, s.x, s.z)
+		assert(u > 0 and u < 1 and v > 0 and v < 1, "fora da imagem da carta")
+	end
+	print(
+		string.format(
+			"       (%d QGs, %d reuniões, %d reuniões avançadas; o mais perto da borda a %.0f m)",
+			kinds.hq or 0,
+			kinds.rally or 0,
+			kinds.forward or 0,
+			worst
+		)
+	)
+	assert((kinds.hq or 0) == 2 and (kinds.rally or 0) == 30 and (kinds.forward or 0) >= 60)
+end)
+
 test("reunião avançada: pares do Warfare inicial e do Offensive", function()
 	local w = Front.forwardPairs(INIT, ALL, "US")
 	assert(#w == 1 and w[1].own == 4 and w[1].target == 3)
@@ -261,8 +287,12 @@ test("reunião do squad: só o líder, longe do inimigo, do objetivo e do QG, co
 	assert(with("inWater", true))
 	assert(with("inBounds", false))
 	assert(with("nearestEnemyM", 60))
-	assert(with("nearestObjectiveM", 100))
-	assert(with("enemyHqM", 200))
+	assert(with("nearestObjectiveM", Front.C.squadRallyObjectiveM - 10))
+	assert(with("nearestObjectiveM", Front.C.squadRallyObjectiveM) == nil)
+	assert(with("enemyHqM", Front.C.squadRallyHqM - 10))
+	assert(with("enemyHqM", Front.C.squadRallyHqM) == nil)
+	-- mapa de 1 x 1 km: as distâncias cabem num setor de ~200 m (a reunião não fica impossível)
+	assert(Front.C.squadRallyObjectiveM <= 100 and Front.C.squadRallyHqM <= 200)
 	assert(with("lastPlacedAt", 950))
 	assert(with("lastPlacedAt", 1000 - Front.C.squadRallyCooldownS) == nil)
 end)
@@ -331,9 +361,13 @@ test("carta: setores viram retângulos que cobrem o polígono sem sobra (amostra
 	end
 end)
 
-test("carta: fronteira S3/S4 tem a dobra (3 trechos) e S1/S2 é uma reta", function()
-	assert(#Carta.boundary(MapConfig.Sectors, 3, 4) == 3)
-	assert(#Carta.boundary(MapConfig.Sectors, 1, 2) == 1)
+-- mapa de 1 x 1 km (2026-11-11): S1/S2 e S2/S3 dobram ao norte de N 1693,0 (An Thới (2) no S2 e o
+-- morrote no S3); S3/S4 e S4/S5 são retas
+test("carta: fronteiras S1/S2 e S2/S3 têm a dobra (3 trechos); S3/S4 e S4/S5 são retas", function()
+	assert(#Carta.boundary(MapConfig.Sectors, 1, 2) == 3)
+	assert(#Carta.boundary(MapConfig.Sectors, 2, 3) == 3)
+	assert(#Carta.boundary(MapConfig.Sectors, 3, 4) == 1)
+	assert(#Carta.boundary(MapConfig.Sectors, 4, 5) == 1)
 	assert(#Carta.boundary(MapConfig.Sectors, 1, 3) == 0)
 end)
 

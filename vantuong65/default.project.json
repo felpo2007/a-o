@@ -36,8 +36,8 @@
     "Workspace": {
       "$properties": {
         "StreamingEnabled": true,
-        "StreamingMinRadius": 512,
-        "StreamingTargetRadius": 1536,
+        "StreamingMinRadius": 384,
+        "StreamingTargetRadius": 1280,
         "StreamOutBehavior": "Opportunistic"
       }
     },

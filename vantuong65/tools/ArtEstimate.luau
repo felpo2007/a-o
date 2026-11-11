@@ -4,6 +4,8 @@
 -- ArtBudget. É valor esperado: o sorteio real depende da ordem das peças no Roblox. Não é medição.
 local ArtBudget = require("../src/ServerScriptService/Modules/ArtBudget")
 local Animals = require("../src/ReplicatedStorage/Shared/Animals")
+local Front = require("../src/ReplicatedStorage/Shared/Front") :: any
+local SpawnRules = require("../src/ReplicatedStorage/Shared/SpawnRules") :: any
 local Rng = require("../src/ReplicatedStorage/Shared/Rng") :: any
 local Features = require("../src/ServerStorage/VT65Build/Data/Features") :: any
 local Geometry = require("../src/ReplicatedStorage/Shared/Geometry")
@@ -182,6 +184,18 @@ return function(): Result
 		end
 	end
 	local landscape = Landscape.new(world, MapConfig, housesXZ)
+	-- clareira e visada dos pontos de nascimento, como no AssetLoader
+	local spots = Front.spawnSpots(MapConfig, M, function(x: number, z: number): number?
+		return Geometry.sectorAt(MapConfig.Sectors, x, z)
+	end, SpawnRules.rallyPosition, Front.C.rallyInsetM)
+	local spawnCircles, spawnLanes = Vegetation.spawnClearings(spots)
+	local exclude = Vegetation.exclusions(MapConfig, housesXZ, tunnelXZ)
+	for _, c in spawnCircles do
+		table.insert(exclude, c)
+	end
+	for _, s in spawnLanes do
+		table.insert(corridors, s)
+	end
 	local plan = Vegetation.plan({
 		classAt = function(x: number, z: number): number
 			return world:classAt(x, z)
@@ -191,7 +205,7 @@ return function(): Result
 		end,
 		bounds = MapConfig.Bounds,
 		cell = Grid.cellStuds,
-		exclude = Vegetation.exclusions(MapConfig, housesXZ, tunnelXZ),
+		exclude = exclude,
 		corridors = corridors,
 		density = ArtBudget.JUNGLE_DENSITY,
 		seed = 1965,

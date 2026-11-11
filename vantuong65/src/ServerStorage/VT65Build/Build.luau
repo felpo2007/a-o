@@ -36,11 +36,38 @@ local function tunnelBoxes(world: any): { any }
 	end)
 end
 
+-- Tabuleiros do arrozal que existem no place (o mesmo filtro de mata do FeatureBuilder): o terreno
+-- fica plano debaixo de cada lâmina e o AssetLoader põe a lâmina no topo calculado aqui.
+function Build.paddySet(world: WorldData.World): any
+	local TerrainBuilder = require(VT65Build.TerrainBuilder)
+	local features = require(Data.Features) :: any
+	local mapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any
+	local housesXZ = {}
+	for i = 1, #features.houses, 4 do
+		table.insert(housesXZ, features.houses[i])
+		table.insert(housesXZ, features.houses[i + 1])
+	end
+	local landscape = require(VT65Build.Landscape).new(world, mapConfig, housesXZ)
+	local waters: { number } = {}
+	local w = features.waters
+	for i = 1, #w, 6 do
+		if landscape:kindAt(w[i], w[i + 1]) ~= 1 then -- 1 = Landscape.FOREST: sem lâmina
+			for k = 0, 5 do
+				table.insert(waters, w[i + k])
+			end
+		end
+	end
+	return TerrainBuilder.paddySet(world, waters)
+end
+
 function Build.terrain()
 	local TerrainBuilder = require(VT65Build.TerrainBuilder)
 	workspace.Terrain:Clear()
 	local world = Build.world()
-	TerrainBuilder.build(world)
+	TerrainBuilder.build(world, nil, { paddies = Build.paddySet(world) })
+	-- o AssetLoader só põe a lâmina no topo calculado se o terreno saiu aplainado (um place salvo com
+	-- terreno antigo continua com o encaixe pela mediana do chão)
+	workspace.Terrain:SetAttribute("PaddiesFlat", true)
 	local n = TerrainBuilder.carve(tunnelBoxes(world))
 	print("[VT65] túneis e trincheira escavados:", n, "blocos")
 end

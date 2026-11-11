@@ -17,7 +17,7 @@ SpawnRules.C = {
 	roleChange = 4,
 	blockRadiusM = 75,
 	newSectorDelay = 30,
-	rallyBehindM = 100, -- 80-120 m atrás do ponto forte
+	rallyBehindM = 60, -- atrás do ponto forte (D-95: mapa de 1 km; antes 100)
 }
 
 export type Kind = "hq" | "rally" | "rally_captured" | "garrison"

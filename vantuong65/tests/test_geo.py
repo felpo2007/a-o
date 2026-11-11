@@ -83,9 +83,20 @@ def test_export_roblox_relatorio():
     assert total < 40000
 
 
-def test_mapconfig_gerado_tem_area_de_2_por_2_km():
-    """D-63: 2 x 2 km a oeste (Colina 43 -> An Cường 2), origem no centro do mundo gerado."""
+def test_mapconfig_gerado_tem_area_de_1_por_1_km():
+    """2026-11-11: 1 x 1 km de Nam Yên (4) ao vale do riacho a leste de An Cường (2), com a
+    Colina 30; origem no centro do mundo gerado (não mudou desde a D-63)."""
+    assert geo.PLAY_ING == (269350.0, 1692500.0, 270350.0, 1693500.0)
     txt = (ROOT / "src/ReplicatedStorage/Shared/MapConfig.luau").read_text("utf-8")
-    assert "minX = -6607.2, maxX = 535.7" in txt
-    assert "minZ = -3928.6, maxZ = 3214.3" in txt
+    assert "minX = -3035.7, maxX = 535.7" in txt
+    assert "minZ = -3928.6, maxZ = -357.1" in txt
     assert "GridOrigin1965 = { e = 270200.0, n = 1692400.0 }" in txt  # origem não mudou
+
+
+def test_recorte_dentro_dos_dados_de_2_por_2_km():
+    """O recorte de 1 km (com a margem de 150 m) cabe nos dados já recortados para 2 x 2 km (D-63):
+    o crop_world não precisa das fontes grandes (DEM, carta) para refazer."""
+    e0, n0, e1, n1 = geo.PLAY_ING
+    m = 150
+    assert e0 - m >= 268350 - 150 and e1 + m <= 270350 + 150
+    assert n0 - m >= 1691500 - 150 and n1 + m <= 1693500 + 150

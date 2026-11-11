@@ -73,16 +73,34 @@ test("alturas no Luau batem com o Python (fixture)", function()
 	end
 end)
 
-test("Colina 43 chega a 43 m no terreno", function()
-	local sp = MapConfig.Strongpoints[1]
-	assert(sp.name == "Colina 43")
-	near(world:heightAt(sp.x, sp.z) * 0.28, 43.0, 0.5, "cume")
+local function strongpoint(name: string): any
+	for _, sp in MapConfig.Strongpoints do
+		if sp.name == name then
+			return sp
+		end
+	end
+	error("sem ponto forte " .. name)
+end
+local function location(name: string): any
+	for _, l in MapConfig.Locations do
+		if l.name == name then
+			return l
+		end
+	end
+	error("sem local " .. name)
+end
+
+-- mapa de 1 x 1 km (2026-11-11): a Colina 43 ficou fora; a Colina 30 é a cota da carta no recorte
+-- (tools/relevo_dem.py calibra o cume em 30 m)
+test("Colina 30 chega a ~30 m no terreno", function()
+	local sp = strongpoint("Colina 30")
+	near(world:heightAt(sp.x, sp.z) * 0.28, 30.0, 1.0, "cume")
 end)
 
-test("área jogável é 2,0 x 2,0 km (D-63) e o terreno a cobre com margem", function()
+test("área jogável é 1,0 x 1,0 km e o terreno a cobre com margem", function()
 	local b = MapConfig.Bounds
-	near((b.maxX - b.minX) * 0.28, 2000, 1)
-	near((b.maxZ - b.minZ) * 0.28, 2000, 1)
+	near((b.maxX - b.minX) * 0.28, 1000, 1)
+	near((b.maxZ - b.minZ) * 0.28, 1000, 1)
 	-- o terreno recortado (tools/crop_world.py) cobre a área inteira mais ~150 m de margem
 	local g = require("../../src/ServerStorage/VT65Build/Data/Grid") :: any
 	local gx0, gz0 = g.originX, g.originZ
@@ -140,8 +158,64 @@ test("quadro local -> grade de 1965 erra < 3 m em todos os locais", function()
 		local n = MapConfig.GridOrigin1965.n - l.z * 0.28
 		assert(math.abs(e - l.e1965) < 3 and math.abs(n - l.n1965) < 3, l.name)
 	end
-	local h43 = MapConfig.Locations[1]
-	assert(Geometry.gridRef1965(MapConfig.GridOrigin1965, h43.x, h43.z, 0.28) == "BS 685916")
+	local h30 = location("Colina 30 (cume)")
+	assert(Geometry.gridRef1965(MapConfig.GridOrigin1965, h30.x, h30.z, 0.28) == "BS 702934")
+end)
+
+test("lugares que fazem o jogo estão no recorte: vilas, Colina 30, trincheira e riacho", function()
+	for _, name in
+		{ "Nam Yên (4)", "An Cường (2)", "An Thới (2)", "Colina 30 (cume)", "Riacho a leste de An Cường (2)" }
+	do
+		location(name)
+	end
+	for _, name in { "Nam Yên (4)", "An Cường (2)", "An Thới (2)", "Cemitério", "Trincheira sul", "Colina 30" } do
+		local sp = strongpoint(name)
+		assert(Geometry.inBounds(MapConfig.Bounds, sp.x, sp.z), name)
+	end
+	-- QG dos EUA perto da borda leste (a base grande vem depois) e o do VC perto da oeste
+	local b = MapConfig.Bounds
+	assert((b.maxX - MapConfig.HQ.US.x) * 0.28 <= 80, "QG dos EUA longe da borda leste")
+	assert((MapConfig.HQ.VC.x - b.minX) * 0.28 <= 80, "QG do VC longe da borda oeste")
+end)
+
+test("riacho a leste de An Cường (2): leito contínuo de células de riacho, abaixo da margem", function()
+	assert(Grid.streamCarvedCm and Grid.streamCarvedCm > 0, "leito não foi aberto (crop_world)")
+	local l = location("Riacho a leste de An Cường (2)")
+	-- do sul ao norte do vale, toda linha da grade entre N 1692,55 e 1693,0 tem riacho a até 120 m
+	-- a oeste do local da carta
+	local cell = Grid.cellStuds
+	local rows = 0
+	for n = 1692550, 1693000, 10 do
+		local z = (MapConfig.GridOrigin1965.n - n) / 0.28
+		local row = math.floor((z - Grid.originZ) / cell)
+		local col = math.floor((l.x - 120 / 0.28 - Grid.originX) / cell)
+		local last = math.floor((l.x + 40 / 0.28 - Grid.originX) / cell)
+		local function cls(c: number): number
+			return world:classAt(Grid.originX + (c + 0.5) * cell, Grid.originZ + (row + 0.5) * cell)
+		end
+		while col <= last and cls(col) ~= 5 do
+			col += 1
+		end
+		assert(col <= last, "sem riacho em N " .. n)
+		-- trecho de riacho da linha e a primeira célula de chão de cada lado: o espelho d'água (fundo
+		-- + 0,6 m) fica abaixo das duas margens
+		local c1 = col
+		while cls(c1 + 1) == 5 do
+			c1 += 1
+		end
+		local bed = math.huge
+		for c = col, c1 do
+			bed = math.min(bed, world:cellHeight(c, row))
+		end
+		local bank = math.min(world:cellHeight(col - 1, row), world:cellHeight(c1 + 1, row))
+		local surface = bed + 0.6 / 0.28
+		assert(
+			surface <= bank + 0.05 / 0.28,
+			string.format("N %d: espelho %.2f m, margem %.2f m", n, surface * 0.28, bank * 0.28)
+		)
+		rows += 1
+	end
+	assert(rows > 40)
 end)
 
 test("place assado tem as peças e todas ancoradas", function()
@@ -161,15 +235,16 @@ test("place assado tem as peças e todas ancoradas", function()
 		end
 	end
 	assert(unanchored == 0, unanchored .. " peças soltas")
-	-- D-65: diques só na lavoura das vilas (~3,3 mil); com o arrozal todo eram ~9,7 mil (D-63)
-	assert(#map.Dikes:GetChildren() > 2500, "diques")
+	-- D-65: diques só na lavoura das vilas; no mapa de 1 x 1 km são ~1,4 mil (eram ~3,3 mil no de
+	-- 2 x 2 km e ~9,7 mil com o arrozal todo, D-63)
+	assert(#map.Dikes:GetChildren() > 1000, "diques")
 	assert(#map.Strongpoints:GetChildren() == 15, "marcadores")
 	print(string.format("       (%d BaseParts no Map)", n))
 end)
 
-test("TerrainBuilder (WriteVoxels simulado): dimensões, ocupação e cume da Colina 43", function()
+test("TerrainBuilder (WriteVoxels simulado): dimensões, ocupação e cume da Colina 30", function()
 	local TerrainBuilder = require("../../src/ServerStorage/VT65Build/TerrainBuilder")
-	local h43 = MapConfig.Strongpoints[1]
+	local h43 = strongpoint("Colina 30")
 	local calls, topAtHill = 0, -math.huge
 	local mock = {}
 	function mock.WriteVoxels(_, region: any, res: number, mats: any, occs: any)
@@ -215,7 +290,217 @@ test("TerrainBuilder (WriteVoxels simulado): dimensões, ocupação e cume da Co
 		only = { minX = h43.x - r, maxX = h43.x + r, minZ = h43.z - r, maxZ = h43.z + r },
 	})
 	assert(n >= 1 and calls == n, "blocos escritos")
-	near(topAtHill * 0.28, 43.0, 1.2, "topo do voxel no cume")
+	near(topAtHill * 0.28, 30.0, 1.5, "topo do voxel no cume")
+end)
+
+test("TerrainBuilder: o riacho tem água no leito e o espelho não passa da margem", function()
+	local TerrainBuilder = require("../../src/ServerStorage/VT65Build/TerrainBuilder")
+	local sp = strongpoint("Riacho a leste de An Cường (2)")
+	local water, overflow = 0, 0
+	local streamCols: { string } = {}
+	local wetCols: { [string]: boolean } = {}
+	local depths: { number } = {} -- fundura (m) de cada coluna do leito: espelho menos o fundo
+	local mock = {}
+	function mock.WriteVoxels(_, region: any, _res: number, mats: any, occs: any)
+		local size = region.Size
+		local sx, sy, sz = size.X / 4, size.Y / 4, size.Z / 4
+		local minP = region.CFrame.Position - size / 2
+		for ix = 1, sx do
+			for iz = 1, sz do
+				local wx, wz = minP.X + (ix - 0.5) * 4, minP.Z + (iz - 0.5) * 4
+				local key = string.format("%d,%d", wx, wz)
+				local inBed = world:classAt(wx, wz) == 5
+				if inBed then
+					table.insert(streamCols, key)
+				end
+				local groundTop, waterTop = -math.huge, -math.huge
+				for iy = 1, sy do
+					local vb = minP.Y + (iy - 1) * 4
+					local mat, occ = mats[ix][iy][iz], occs[ix][iy][iz]
+					if occ > 0 and mat ~= roblox.Enum.Material.Water and mat ~= roblox.Enum.Material.Air then
+						groundTop = math.max(groundTop, vb + occ * 4)
+					elseif mat == roblox.Enum.Material.Water and occ > 0 then
+						waterTop = math.max(waterTop, vb + occ * 4)
+					end
+				end
+				if inBed and waterTop > groundTop then
+					table.insert(depths, (waterTop - groundTop) * 0.28)
+				end
+				for iy = 1, sy do
+					if mats[ix][iy][iz] == roblox.Enum.Material.Water and occs[ix][iy][iz] > 0 then
+						water += 1
+						wetCols[key] = true
+						-- topo da água contra o chão mais alto a 6 m para os lados
+						local top = minP.Y + (iy - 1) * 4 + occs[ix][iy][iz] * 4
+						local bank = math.max(world:heightAt(wx - 6 / 0.28, wz), world:heightAt(wx + 6 / 0.28, wz))
+						if top > bank + 0.15 / 0.28 then
+							overflow += 1
+						end
+					end
+				end
+			end
+		end
+	end
+	local r = 80
+	TerrainBuilder.build(world, {
+		Enum = roblox.Enum,
+		Vector3 = roblox.Vector3,
+		Region3 = roblox.Region3,
+		terrain = mock,
+		wait = function() end,
+	}, { only = { minX = sp.x - r, maxX = sp.x + r, minZ = sp.z - r, maxZ = sp.z + r } })
+	print(
+		string.format("       (%d voxels de água no riacho perto do ponto forte; %d acima da margem)", water, overflow)
+	)
+	-- toda coluna de voxels do leito tem água (antes, com o fundo no mesmo voxel do espelho, metade
+	-- das colunas ficava seca)
+	local dry = 0
+	for _, c in streamCols do
+		if not wetCols[c] then
+			dry += 1
+		end
+	end
+	-- fundura contínua perto dos 0,6 m do projeto (antes ia de 0 a ~1,1 m de um passo para o outro);
+	-- mais funda só onde a coluna fica entre duas células de leito em degraus diferentes
+	local near06, shallow = 0, 0
+	for _, d in depths do
+		if math.abs(d - 0.6) <= 0.05 then
+			near06 += 1
+		elseif d < 0.55 then
+			shallow += 1
+		end
+	end
+	print(
+		string.format(
+			"       (%d colunas de leito, %d sem água; %d de %d com 0,6 ± 0,05 m, %d mais rasas)",
+			#streamCols,
+			dry,
+			near06,
+			#depths,
+			shallow
+		)
+	)
+	assert(water > 50, "sem água no riacho")
+	assert(dry == 0, dry .. " colunas do leito sem água")
+	assert(overflow <= water * 0.05, "água acima da margem")
+	assert(shallow == 0, shallow .. " colunas do leito com menos de 0,55 m")
+	assert(near06 >= #depths * 0.9, "fundura longe dos 0,6 m em mais de 10% do leito")
+end)
+
+-- Achado no Studio (2026-11-11): o chão do terreno furava a lâmina do arrozal em metade dos pontos
+-- (o soldado andava no capim e o movimento lia "seco"). Amostra de vários tabuleiros: o chão gerado
+-- fica 5–15 cm abaixo do topo da lâmina dentro de cada tabuleiro, e nunca acima.
+test("arrozal: chão plano 5–15 cm abaixo da lâmina em todo ponto amostrado dos tabuleiros", function()
+	local TerrainBuilder = require("../../src/ServerStorage/VT65Build/TerrainBuilder") :: any
+	local Landscape = require("../../src/ServerStorage/VT65Build/Landscape")
+	local Features = require("../../src/ServerStorage/VT65Build/Data/Features") :: any
+	-- o mesmo filtro do Build.paddySet (tabuleiros que existem no place)
+	local houses = {}
+	for i = 1, #Features.houses, 4 do
+		table.insert(houses, Features.houses[i])
+		table.insert(houses, Features.houses[i + 1])
+	end
+	local land = Landscape.new(world, MapConfig, houses)
+	local waters = {}
+	for i = 1, #Features.waters, 6 do
+		if land:kindAt(Features.waters[i], Features.waters[i + 1]) ~= Landscape.FOREST then
+			for k = 0, 5 do
+				table.insert(waters, Features.waters[i + k])
+			end
+		end
+	end
+	local set = TerrainBuilder.paddySet(world, waters)
+	-- topo do chão de cada coluna de voxels gerada (centro da coluna)
+	local tops: { [number]: number } = {}
+	local function key(x: number, z: number): number
+		return math.floor(x / 4) * 100000 + math.floor(z / 4)
+	end
+	local mock = {}
+	function mock.WriteVoxels(_, region: any, _res: number, mats: any, occs: any)
+		local size = region.Size
+		local sx, sy, sz = size.X / 4, size.Y / 4, size.Z / 4
+		local minP = region.CFrame.Position - size / 2
+		for ix = 1, sx do
+			for iz = 1, sz do
+				local top = -math.huge
+				for iy = 1, sy do
+					local m, o = mats[ix][iy][iz], occs[ix][iy][iz]
+					if o > 0 and m ~= roblox.Enum.Material.Water and m ~= roblox.Enum.Material.Air then
+						top = math.max(top, minP.Y + (iy - 1) * 4 + o * 4)
+					end
+				end
+				tops[key(minP.X + (ix - 0.5) * 4, minP.Z + (iz - 0.5) * 4)] = top
+			end
+		end
+	end
+	local env = {
+		Enum = roblox.Enum,
+		Vector3 = roblox.Vector3,
+		Region3 = roblox.Region3,
+		terrain = mock,
+		wait = function() end,
+	}
+	-- três trechos de arrozal: Nam Yên (4), entre as vilas e An Cường (2)
+	local areas = { { 269560, 1692700 }, { 269760, 1692640 }, { 270020, 1692560 } }
+	local sampled, inRange, above, deepest, sheets = 0, 0, 0, 0, {}
+	for _, a in areas do
+		local cx = (a[1] - MapConfig.GridOrigin1965.e) / 0.28
+		local cz = (MapConfig.GridOrigin1965.n - a[2]) / 0.28
+		table.clear(tops)
+		TerrainBuilder.build(
+			world,
+			env,
+			{ only = { minX = cx - 100, maxX = cx + 100, minZ = cz - 100, maxZ = cz + 100 }, paddies = set }
+		)
+		-- pontos em grade de 1 stud dentro de cada tabuleiro do trecho; chão = interpolação das 4
+		-- colunas vizinhas (como a superfície do terreno entre os centros dos voxels)
+		for _, p in set.list do
+			if math.abs(p.x - cx) < 90 and math.abs(p.z - cz) < 90 then
+				sheets[p] = true
+				for lu = -p.hu, p.hu, 1 do
+					for lv = -p.hv, p.hv, 1 do
+						local x = p.x + lu * p.ca + lv * p.sa
+						local z = p.z - lu * p.sa + lv * p.ca
+						local fx, fz = x / 4 - 0.5, z / 4 - 0.5
+						local i0, j0 = math.floor(fx), math.floor(fz)
+						local tx, tz = fx - i0, fz - j0
+						local function t(i: number, j: number): number?
+							return tops[key(i * 4 + 2, j * 4 + 2)]
+						end
+						local a00, a10, a01, a11 = t(i0, j0), t(i0 + 1, j0), t(i0, j0 + 1), t(i0 + 1, j0 + 1)
+						if a00 and a10 and a01 and a11 then
+							local ground = (a00 * (1 - tx) + a10 * tx) * (1 - tz) + (a01 * (1 - tx) + a11 * tx) * tz
+							local depth = (p.top - ground) * 0.28
+							sampled += 1
+							if depth < 0.05 - 1e-6 then
+								above += 1
+							elseif depth <= 0.15 + 1e-6 then
+								inRange += 1
+							end
+							deepest = math.max(deepest, depth)
+						end
+					end
+				end
+			end
+		end
+	end
+	local nSheets = 0
+	for _ in sheets do
+		nSheets += 1
+	end
+	print(
+		string.format(
+			"       (%d tabuleiros, %d pontos: %.1f%% com o chão 5–15 cm abaixo da lâmina, %d acima disso; mais fundo %.2f m)",
+			nSheets,
+			sampled,
+			100 * inRange / math.max(sampled, 1),
+			above,
+			deepest
+		)
+	)
+	assert(nSheets >= 10 and sampled > 1000, "amostra pequena")
+	assert(above == 0, above .. " pontos com o chão a menos de 5 cm da lâmina (ou acima dela)")
+	assert(inRange >= sampled * 0.8, "chão longe dos 10 cm em mais de 20% dos pontos")
 end)
 
 print(string.format("%d ok, %d falhas", passed, failed))

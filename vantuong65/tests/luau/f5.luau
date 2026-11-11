@@ -106,28 +106,73 @@ test("mapa real: menos diques, comprimento preservado (±0,1%)", function()
 	assert(math.abs(l1 - l0) / l0 < 0.001, string.format("comprimento mudou %.3f%%", 100 * (l1 - l0) / l0))
 end)
 
--- orçamento de arte (Parte 2): os números do ArtBudget são os medidos no manifest
+-- orçamento de arte (Parte 2): os números do ArtBudget são os medidos no manifest do ForgeGUI ou,
+-- para os modelos do Blender (refeitos e novos, assets/blender/<chave>/metricas.json), os do novo
 local manifest = serde.decode("json", fs.readFile("assets/forgegui/manifest.json")) :: any
+local robloxIds = serde.decode("json", fs.readFile("assets/roblox_ids.json")) :: any
+local function blenderTris(key: string): number?
+	local path = "assets/blender/" .. key .. "/metricas.json"
+	if not fs.isFile(path) then
+		return nil
+	end
+	local m = serde.decode("json", fs.readFile(path)) :: any
+	return m.novo and m.novo.triangulos
+end
+-- refeito publicado: o ID antigo do ForgeGUI fica guardado como <chave>_forge (commit 6ea6bfd)
+local function replacedByBlender(key: string): boolean
+	return robloxIds["Models." .. key .. "_forge"] ~= nil
+end
+-- assets/blender é gerado (tools/blender) e fica fora do Git: sem a pasta, os números do Blender
+-- não são conferidos (o resto do orçamento continua)
+local haveBlender = fs.isDir("assets/blender")
 
 test("orçamento: cada modelo do manifest tem tipo e o número medido", function()
-	local n = 0
+	local n, refeitos = 0, 0
 	for _, m in manifest.models do
 		local key = m.chave
 		if key then
 			n += 1
 			assert(ArtBudget.KIND[key], key .. " sem tipo (veg/prop/hero)")
-			assert(
-				ArtBudget.TRIS[key] == m.triangulos,
-				string.format(
-					"%s: ArtBudget %s, manifest %s",
-					key,
-					tostring(ArtBudget.TRIS[key]),
-					tostring(m.triangulos)
+			local want = m.triangulos
+			if replacedByBlender(key) then
+				want = if haveBlender then blenderTris(key) else nil
+				refeitos += 1
+			end
+			if want ~= nil or not replacedByBlender(key) then
+				assert(
+					ArtBudget.TRIS[key] == want,
+					string.format("%s: ArtBudget %s, medido %s", key, tostring(ArtBudget.TRIS[key]), tostring(want))
 				)
-			)
+			else
+				assert(ArtBudget.TRIS[key] ~= nil, key .. ": refeito sem número no ArtBudget")
+			end
 		end
 	end
 	assert(n >= 39, "esperava ≥ 39 modelos com chave, veio " .. n)
+	print(string.format("       %d modelos; %d refeitos no Blender com o número do novo", n, refeitos))
+end)
+
+test("orçamento: objeto novo do Blender no ArtBudget tem o número do metricas.json", function()
+	if not haveBlender then
+		print("       sem assets/blender (gerado, fora do Git): pulado")
+		return
+	end
+	local n = 0
+	for key, tris in ArtBudget.TRIS do
+		local b = blenderTris(key)
+		local inManifest = false
+		for _, m in manifest.models do
+			if m.chave == key then
+				inManifest = true
+			end
+		end
+		if b and not inManifest then
+			n += 1
+			assert(tris == b, string.format("%s: ArtBudget %d, metricas %d", key, tris, b))
+			assert(ArtBudget.KIND[key], key .. " sem tipo")
+		end
+	end
+	assert(n >= 6, "esperava os 6 objetos da vila e dos túneis, veio " .. n)
 end)
 
 test("orçamento: acima da meta só com exceção registrada, e nenhuma exceção velha", function()
@@ -155,6 +200,12 @@ test("orçamento: o que o AssetLoader coloca tem número medido; casas só na me
 	end
 	for key in string.gmatch(fs.readFile("src/ServerScriptService/Modules/LogisticsService.luau"), 'place%("([%w_]+)"') do
 		placed[key] = true
+	end
+	-- objetos do Blender que o MapLife põe pelo AssetLoader.placeAt (vila e túneis)
+	for key in string.gmatch(fs.readFile("src/ServerScriptService/Modules/MapLife.luau"), '"([%w_]+)"') do
+		if ArtBudget.KIND[key] then
+			placed[key] = true
+		end
 	end
 	for _, key in ArtBudget.HOUSE_VARIANTS do
 		assert(ArtBudget.within(key), "casa acima da meta no sorteio: " .. key)
@@ -302,10 +353,78 @@ test("mata (D-64/65): determinística, zonas livres, lavoura e clareira abertas,
 			border += 1
 		end
 	end
-	-- D-65: mata fechada em ~2,85 km² (dezenas de milhares de plantas); lavoura e clareira abertas
-	assert(inside > 30000 and border > 500, string.format("dentro %d, cortina %d", inside, border))
+	-- D-65: mata fechada; lavoura e clareira abertas. Mapa de 1 x 1 km (2026-11-11): ~8,3 mil plantas
+	-- na área e ~600 na cortina de fora (eram ~45 mil e ~2,8 mil no de 2 x 2 km)
+	assert(inside > 6000 and border > 300, string.format("dentro %d, cortina %d", inside, border))
 	assert(paddy / inside < 0.03, string.format("%.1f%% das plantas na lavoura/clareira", 100 * paddy / inside))
 	print(string.format("       %d plantas: %d na área, %d na cortina de fora", #a, inside, border))
+end)
+
+test("clareira de nascimento: nenhuma planta da mata a até 15 m de QG ou reunião, visada aberta", function()
+	local M = 0.28
+	local Vegetation = require("../../src/ServerScriptService/Modules/Vegetation")
+	local Front = require("../../src/ReplicatedStorage/Shared/Front") :: any
+	local SpawnRules = require("../../src/ReplicatedStorage/Shared/SpawnRules") :: any
+	local Geometry = require("../../src/ReplicatedStorage/Shared/Geometry") :: any
+	local Rng = require("../../src/ReplicatedStorage/Shared/Rng") :: any
+	local WorldData = require("../../src/ServerStorage/VT65Build/WorldData")
+	local Landscape = require("../../src/ServerStorage/VT65Build/Landscape")
+	local Grid = require("../../src/ServerStorage/VT65Build/Data/Grid") :: any
+	local MapConfig = require("../../src/ReplicatedStorage/Shared/MapConfig") :: any
+	local chunks = {}
+	for _, name in Grid.heightChunks do
+		table.insert(chunks, (require :: any)("../../src/ServerStorage/VT65Build/Data/" .. name))
+	end
+	local world = WorldData.load(Grid, chunks)
+	local houses = {}
+	for i = 1, #Features.houses, 4 do
+		table.insert(houses, Features.houses[i])
+		table.insert(houses, Features.houses[i + 1])
+	end
+	local land = Landscape.new(world, MapConfig, houses)
+	-- os mesmos pontos e a mesma clareira do AssetLoader
+	local spots = Front.spawnSpots(MapConfig, M, function(x: number, z: number): number?
+		return Geometry.sectorAt(MapConfig.Sectors, x, z)
+	end, SpawnRules.rallyPosition, Front.C.rallyInsetM)
+	local circles, lanes = Vegetation.spawnClearings(spots)
+	local exclude = Vegetation.exclusions(MapConfig, houses, {})
+	for _, c in circles do
+		table.insert(exclude, c)
+	end
+	local plan = Vegetation.plan({
+		classAt = function(x: number, z: number): number
+			return world:classAt(x, z)
+		end,
+		kindAt = function(x: number, z: number): number
+			return land:kindAt(x, z)
+		end,
+		bounds = MapConfig.Bounds,
+		cell = Grid.cellStuds,
+		exclude = exclude,
+		corridors = lanes,
+		seed = 1965,
+		rng = Rng.new(19650818 + 64),
+	})
+	local B = MapConfig.Bounds
+	local inLane = 0
+	for _, it in plan do
+		if it.x >= B.minX and it.x <= B.maxX and it.z >= B.minZ and it.z <= B.maxZ then
+			for _, s in spots do
+				local d = math.sqrt((it.x - s.x) ^ 2 + (it.z - s.z) ^ 2) * M
+				assert(d >= Vegetation.SPAWN_CLEAR_M - 0.01, string.format("%s a %.1f m de um %s", it.key, d, s.kind))
+			end
+			for _, l in lanes do
+				local dx, dz = l.x2 - l.x1, l.z2 - l.z1
+				local t = math.clamp(((it.x - l.x1) * dx + (it.z - l.z1) * dz) / (dx * dx + dz * dz), 0, 1)
+				local qx, qz = l.x1 + t * dx - it.x, l.z1 + t * dz - it.z
+				if qx * qx + qz * qz < l.w * l.w then
+					inLane += 1
+				end
+			end
+		end
+	end
+	assert(inLane == 0, inLane .. " plantas na visada de quem nasce")
+	print(string.format("       %d pontos de nascimento com clareira de %d m", #spots, Vegetation.SPAWN_CLEAR_M))
 end)
 
 print(string.format("%d ok, %d falhas", passed, failed))

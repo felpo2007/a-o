@@ -2819,3 +2819,105 @@ do `ids.json`, id 0 no `SoldierAnims` até subir): `agachado`, `agachado_andar`,
 
 **Falta:** a tela de baixa mostra "origem não identificada" para golpe de faca (precisa de uma
 causa "arma branca" no `Casualty`, arquivo de interface). Nada disto foi testado no Studio.
+
+**Studio (2026-11-11):** o boneco do VC golpeia em laço, com o fuzil na mão esquerda e o facão na
+direita; os clipes publicados tocam.
+
+## D-95 — Mapa de 1 x 1 km e jogo mais leve (2026-11-11)
+
+O dono jogou e pediu: "acho que temos que diminuir ainda mais o mapa e fazer ele 1 km x 1 km"; "o
+jogo está bem pesado, as coisas demoram para acontecer". Substitui o tamanho da D-63.
+
+**Recorte:** E 269,35–270,35 x N 1692,5–1693,5 (grade BS), a ponta nordeste do mapa anterior. Reúne:
+- An Cường (2), com os túneis e a trincheira sul;
+- o casario leste de Nam Yên (4) e An Thới (2);
+- o morrote de 34 m, os arrozais com diques e sebes e a Colina 30;
+- o vale do riacho a leste de An Cường (2), o chão mais plano, onde fica a base dos EUA.
+- Nam Yên (3) não cabe junto com An Cường (2) em 1 km.
+- É um recorte, não uma deformação: fora da área sobra só a margem do terreno (150 m de horizonte).
+
+**Riacho:** leito aberto no talvegue do vale, "the streambed just east of An Cuong (2)" (First Fight,
+p. 29). O canal tem 1,1 m e a água 0,6 m em todo o leito, descendo em 7 degraus de 1,12 m.
+
+**Setores (oeste → leste):**
+- S1 Nam Yên (4): Nam Yên (4) ★, Cemitério ★, Capinzal oeste;
+- S2 An Thới (2): An Thới (2) ★, Arrozal central, Encosta norte;
+- S3 Morrote do arrozal: Morrote, Lugarejo a sudoeste de An Cường (2) ★, Arrozal norte;
+- S4 An Cường (2): An Cường (2) ★, Trincheira sul ★, Arrozal ao norte de An Cường (2);
+- S5 Riacho: Colina 30 ★, Riacho a leste de An Cường (2) ★, Encosta sul da Colina 30.
+(★ = local real; o resto é nome de design.)
+
+**QGs:**
+- EUA: E 270,30 / N 1692,95, a 50 m da borda leste, com 140 m sem dique, lâmina nem sebe (espaço
+  para a base). A raia de tiro desce o vale para o sul.
+- VC: E 269,41 / N 1693,43, no morro do noroeste. A raia corre para leste ao longo da borda norte.
+
+**Números que mudaram (de projeto, PLACEHOLDER):**
+- `Front`:
+  - reunião avançada a 125 m (era 250);
+  - passo de 10 m (era 20);
+  - 20 m para dentro do setor (era 30);
+  - busca até a distância do ponto forte próprio + 200 m (era + 400).
+- Reunião do squad:
+  - mínimo de 100 m do ponto forte inimigo (era 150);
+  - 150 m do QG inimigo (era 300).
+- Reunião atrás do ponto forte: 60 m (era 100), a pelo menos 30 m da borda.
+- Renascer onde caiu: bloqueado a menos de 125 m do QG inimigo (era 250).
+- Marcha até o S3: média de 51 s, pior caso 63 s (eram 92 e 119 s).
+- Clareira de nascimento: 15 m sem planta e visada de 35 x 8 m para o objetivo, em 104 pontos.
+- Arrozal: o chão fica 10 cm abaixo da lâmina; o dique, pelo menos 25 cm acima.
+- Streaming: alvo 1280 studs (358 m), mínimo 384 (108 m). Eram 1536 e 512.
+
+**O que pesava (antes → depois):**
+| Item | 2 x 2 km | 1 x 1 km |
+|---|---|---|
+| Blocos de terreno | 1.089 | 361 |
+| Peças do bake (diques, lâminas, sebes, casas) | 6.529 | 2.329 |
+| Plantas da mata | 45.328 + 2.777 de cortina | 8.219 + 620 |
+| Plantas com sombra | 6.133 | 1.239 |
+| Arte (modelos / triângulos somados) | 56.117 / 614,6 mi | 11.131 / 120,5 mi |
+| Raios para assentar planta | ~240 mil | ~9 mil |
+
+Também:
+- a cortina de fora da área ficou sem colisão nem sombra;
+- o `Ambiente` passou a rodar a 15 Hz;
+- animais além de 120 m atualizam a 10 Hz;
+- casas e objetos refeitos no Blender têm 1/3 dos triângulos.
+
+**Studio (2026-11-11):** terreno pronto em 7 s (eram 10–20 s), 1.510 modelos de arte carregados (eram
+3.775), nenhum erro de script, a casa do Blender com textura certa. A carta de 1 x 1 km foi gerada e
+publicada (4 blocos). Fps não medido.
+
+**Ainda pesa (fora deste trabalho):**
+- uns 40 laços por quadro no cliente (HudCampo, VehicleFx, SoldierAnimations, Weather, GameUI);
+- o `BotLocomotion` roda a cada quadro por bot;
+- `Lighting.Technology = Future`.
+
+## D-96 — Bots que usam o mapa, veículos, túneis e granadas (2026-11-11)
+
+Pedido do dono: "faça os bots entenderem como utilizar os veículos, os locais do jogo, os túneis, as
+granadas; nível médio"; "movimentação linear como se fossem jogadores reais".
+
+- **Pernas de jogador** (`BotLocomotion`, `BotMove`): caminho suave, inércia, corpo que vira e passo
+  pela situação.
+  - O VC anda ×1,12, como o jogador (D-93).
+  - Vadeando, o estado de nado fica desligado.
+- **Mapa entendido** (`BotWorld`, `BotNav`):
+  - rota que foge do arrozal alagado e usa dique, sebe e mata;
+  - 1.265 abrigos fixos conhecidos no mapa novo.
+- **Squads** (`BotSquads`): seguem o líder em coluna ou cunha, avisam o contato e avançam em lances.
+- **Combate** (`BotBrain`, puro e testado no Lune):
+  - notar leva tempo (cone de visão);
+  - a mira firma no alvo novo;
+  - disciplina de fogo e supressão na última posição vista;
+  - granada atrás do dique sem acertar o próprio squad;
+  - golpe de faca a até 1,5 m (D-94).
+- **Túneis só do VC** (`BotTunnels`, `TunnelLinks`): o EUA que desce mais de 6,5 studs na galeria é
+  expulso.
+- **Blindados com tripulação de bots dos EUA** (`BotVehicles`, `BotDriver`; API de bot no
+  `VehicleService`):
+  - embarcar, sair, dirigir e atirar do assento;
+  - no Studio, o M48 e o LVTP-5 saíram tripulados por 2 bots cada.
+- **Ganchos no Studio:** `VT65DevBots` com "depurar", "m48", "ontos", "lvtp", "tunel", "cobertura" e
+  "parar".
+- **Falta medir:** o custo com 58 bots; o comportamento numa partida longa.

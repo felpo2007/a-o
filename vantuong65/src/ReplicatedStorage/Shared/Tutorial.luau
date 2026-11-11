@@ -18,11 +18,14 @@ end
 
 -- distâncias dos alvos do campo de tiro (m), ao lado de cada QG
 Tutorial.RANGE_M = { 100, 200, 300 }
--- o campo de tiro fica na retaguarda: sai do QG em direção oposta à frente, ao longo da borda
+-- o campo de tiro fica na retaguarda: sai do QG ao longo da borda, sem atirar para a frente
+-- Mapa de 1 x 1 km (2026-11-11): a 340 m para oeste, a raia dos EUA cruzaria An Cường (2).
 Tutorial.RANGE_LANE = {
-	-- QG no canto sudeste (D-63): ao sul a borda fica a 250 m, então a raia atira para oeste
-	US = { offsetM = { -40, 0 }, dir = { -1, 0 } },
-	VC = { offsetM = { 0, -40 }, dir = { 0, -1 } }, -- retaguarda oeste, para o norte
+	-- QG na borda leste, no vale do riacho: a raia desce o vale para o sul, a 50 m da borda
+	US = { offsetM = { 0, 40 }, dir = { 0, 1 } },
+	-- QG no morro do noroeste: a raia corre para leste ao longo da borda norte (para o sul ela
+	-- passaria pelo Capinzal oeste)
+	VC = { offsetM = { 40, 0 }, dir = { 1, 0 } },
 }
 
 Tutorial.COMMON = {

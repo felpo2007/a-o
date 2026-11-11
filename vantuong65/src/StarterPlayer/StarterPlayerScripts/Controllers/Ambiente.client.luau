@@ -111,14 +111,16 @@ local function underCanopy(pos: Vector3): boolean
 end
 
 -- ===== fumaça de guerra no horizonte =====
--- Fora do mapa de 2 x 2 km (MapConfig.Bounds: X -6607 a 536, Z -3929 a 3214), em volta.
+-- Fora do mapa de 1 x 1 km (MapConfig.Bounds: X -3036 a 536, Z -3929 a -357) e do terreno (150 m
+-- além da borda), a 550–750 m da área, em volta: a oeste Nam Yên (3) e a LZ Blue, ao norte An Thới
+-- (1), ao sul An Phước (1) e a sudeste e leste a costa do desembarque.
 local columns: { ParticleEmitter } = {}
 local COLUMNS = {
-	Vector3.new(-7600, 40, 400),
-	Vector3.new(-2600, 40, -4900),
-	Vector3.new(-4200, 40, 4300),
-	Vector3.new(1400, 30, -2600),
-	Vector3.new(-900, 40, 4200),
+	Vector3.new(-5200, 40, -1900),
+	Vector3.new(-1400, 40, -6300),
+	Vector3.new(-2300, 40, 2300),
+	Vector3.new(2600, 30, -2400),
+	Vector3.new(2200, 40, 1700),
 }
 for i, pos in COLUMNS do
 	local base = anchorPart("ColunaDeFumaca" .. i, Vector3.new(30, 4, 30))
@@ -162,10 +164,18 @@ readDetail()
 player:GetAttributeChangedSignal("GfxDetail"):Connect(readDetail)
 
 -- ===== laço =====
+-- 15 vezes por segundo (antes, a cada quadro): o vento muda devagar (ruído de 3 a 50 s) e a caixa
+-- de poeira e a de folhas só dizem onde nascem as partículas novas, que já flutuam sozinhas.
+local STEP_S = 1 / 15
+local lastStep = 0
 local lastCanopy = 0
 local canopy = false
 RunService.Heartbeat:Connect(function()
 	local t = os.clock()
+	if t - lastStep < STEP_S then
+		return
+	end
+	lastStep = t
 	workspace.GlobalWind = windAt(t)
 	local cf = camera.CFrame
 	local pos = cf.Position

@@ -1,7 +1,7 @@
 --!strict
 -- Ritmo da frente no servidor (pedido do dono, 2026-11-11: primeiro contato em ~5 min e bots
 -- espalhados). Regras puras em Shared/Front:
---   - reunião avançada: ponto de inserção no setor próprio a ~250 m do ponto forte atacado. Os bots
+--   - reunião avançada: ponto de inserção no setor próprio a ~125 m do ponto forte atacado. Os bots
 --     nascem no ponto livre mais perto do objetivo (BotService), então chegam juntos e cedo;
 --   - ponto de reunião do squad: o líder planta onde está (carta aberta: Y; teclado: R); só o squad
 --     nasce nele, com as regras de bloqueio de sempre (inimigo a menos de 75 m);
@@ -47,6 +47,28 @@ local function sectorAt(x: number, z: number): number?
 end
 
 -- ===== reunião avançada =====
+-- A busca (leque de 11 rumos, passos de 10 m, ponto-no-polígono dos 5 setores) roda a cada pedido de
+-- pontos: 1 vez por segundo por jogador esperando, a cada 4 s por jogador em campo e a cada nascer de
+-- bot. O lugar só muda com os pontos fortes sorteados, então fica guardado por par e por partida.
+local rallyCache: { [string]: { x: number?, z: number? } } = {}
+local rallyCacheMatch = -1
+
+local function forwardRallyCached(own: number, ownSp: any, target: number, targetSp: any): (number?, number?)
+	if rallyCacheMatch ~= MatchService.startedAt then
+		rallyCacheMatch = MatchService.startedAt
+		table.clear(rallyCache)
+	end
+	-- chave sem string.format: o extrator de textos de tela (tools/i18n) pegaria o modelo
+	local key = table.concat({ own, target, ownSp.x, ownSp.z, targetSp.x, targetSp.z }, ":")
+	local hit = rallyCache[key]
+	if not hit then
+		local x, z = Front.forwardRally(own, ownSp, targetSp, M, sectorAt, MapConfig.Bounds)
+		hit = { x = x, z = z }
+		rallyCache[key] = hit
+	end
+	return hit.x, hit.z
+end
+
 function FrontService.forwardPoints(faction: string): { SpawnService.Point }
 	local out: { SpawnService.Point } = {}
 	local st = MatchService.state
@@ -56,7 +78,7 @@ function FrontService.forwardPoints(faction: string): { SpawnService.Point }
 	for _, pair in Front.forwardPairs(st.owner, st.active, faction) do
 		local own, target = MatchService.points[pair.own], MatchService.points[pair.target]
 		if own and target then
-			local x, z = Front.forwardRally(pair.own, own, target, M, sectorAt)
+			local x, z = forwardRallyCached(pair.own, own, pair.target, target)
 			if x and z then
 				local initial = MatchService.initialOwner[pair.own] == faction
 				table.insert(out, {

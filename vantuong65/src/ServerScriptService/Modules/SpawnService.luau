@@ -8,6 +8,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Commerce = require(ReplicatedStorage.Shared.Commerce)
+local Front = require(ReplicatedStorage.Shared.Front)
 local Geometry = require(ReplicatedStorage.Shared.Geometry)
 local MapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any
 local Net = require(ReplicatedStorage.Shared.Net)
@@ -76,6 +77,10 @@ function SpawnService.points(faction: string): { Point }
 	for s, sp in MatchService.points do
 		if MatchService.ownerOf(s) == faction then
 			local x, z = SpawnRules.rallyPosition(sp.x, sp.z, faction, M)
+			-- mapa de 1 x 1 km: 100 m atrás de um ponto forte perto da borda (o Cemitério fica a 85 m
+			-- da borda oeste) caía fora da área e o soldado nascia contando os 10 s para morrer. A mata
+			-- abre a clareira no mesmo lugar (Front.spawnSpots, AssetLoader).
+			x, z = Front.clampInside(MapConfig.Bounds, x, z, Front.C.rallyInsetM / M)
 			local initial = MatchService.initialOwner[s] == faction
 			table.insert(out, {
 				id = "rally:" .. s,

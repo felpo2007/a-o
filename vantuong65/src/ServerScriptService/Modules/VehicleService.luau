@@ -22,6 +22,32 @@ local MedicalService = require(script.Parent.MedicalService)
 local SpawnService = require(script.Parent.SpawnService)
 
 local VehicleService = {}
+
+-- D-90: estado do bot motorista (física no servidor) e o que o BotVehicles lê dele
+type BotDrive = {
+	st: VehicleDrive.State,
+	yaw: number?,
+	pitch: number,
+	roll: number,
+	thr: number,
+	steer: number,
+	inThr: number,
+	inSteer: number,
+	ground: string,
+	depth: number?,
+	probeT: number,
+	attT: number,
+	telT: number,
+}
+export type BotDriveState = {
+	v: number, -- m/s à frente
+	yaw: number,
+	ground: string,
+	floating: boolean,
+	slip: number,
+	blocked: boolean,
+	top: number, -- m/s: teto do chão
+}
 local M = MapConfig.STUD_M
 local G = 9.80665
 local rng = Rng.new(1965081)
@@ -106,7 +132,8 @@ local function destroyVehicle(model: Model)
 	end)
 	task.delay(RESPAWN_S, function()
 		if type(spec) == "string" and type(depot) == "number" then
-			VehicleService.spawn(spec, depot)
+			-- (any): o checador antigo ordena as funções e ainda não viu o spawn aqui (D-90)
+			(VehicleService :: any).spawn(spec, depot)
 		end
 	end)
 end
@@ -203,6 +230,43 @@ local function seatOf(player: Player): Seat?
 	return if s and s:IsA("Seat") then s else nil
 end
 
+-- Tiro da arma de um assento (jogador ou bot, D-90): a mesma validação para os dois. Devolve true
+-- se o tiro saiu.
+local function fireFromSeat(seat: Seat, char: Model, player: Player?, dir: Vector3, coax: boolean, now: number): boolean
+	local weapon = seat:GetAttribute("Weapon")
+	local model = seat:FindFirstAncestorWhichIsA("Model") :: Model
+	if type(weapon) ~= "string" or model:GetAttribute("Destroyed") then
+		return false
+	end
+	local origin = seat.Position + Vector3.new(0, 2.5 / M, 0) + dir * (2 / M)
+	-- M60 do assento (porta, cúpula) e a coaxial do atirador do M48 (RB / tecla F)
+	if weapon == "m60" or (coax and weapon == "gun_90") then
+		if now - (lastShot[seat :: any] or 0) < 0.09 then
+			return false -- ~650 tiros/min no máximo (validação; a cadência real vem da ficha da M60)
+		end
+		lastShot[seat :: any] = now
+		CombatService.fire(char, "m60", origin, dir, math.floor(rng:next() * 2 ^ 31), player)
+		return true
+	end
+	if weapon == "gun_90" and model:GetAttribute("Ammo") == "heat" then
+		weapon = "gun_90_heat"
+	end
+	local gun = GUNS[weapon]
+	if not gun or now - (lastShot[seat] or 0) < gun.reloadS then
+		return false
+	end
+	if gun.tubes then
+		local left = (model:GetAttribute("Tubes") :: number?) or 0
+		if left <= 0 then
+			return false
+		end
+		model:SetAttribute("Tubes", left - 1)
+	end
+	lastShot[seat] = now
+	shoot(gun, origin, dir, { model, char })
+	return true
+end
+
 local function onFire(player: Player, req: any)
 	if type(req) ~= "table" or typeof(req.dir) ~= "Vector3" or req.dir.Magnitude < 0.5 then
 		return
@@ -215,37 +279,7 @@ local function onFire(player: Player, req: any)
 	local seat = seatOf(player)
 	local now = os.clock()
 	if seat then
-		local weapon = seat:GetAttribute("Weapon")
-		local model = seat:FindFirstAncestorWhichIsA("Model") :: Model
-		if type(weapon) ~= "string" or model:GetAttribute("Destroyed") then
-			return
-		end
-		local origin = seat.Position + Vector3.new(0, 2.5 / M, 0) + dir * (2 / M)
-		-- M60 do assento (porta, cúpula) e a coaxial do atirador do M48 (RB / tecla F)
-		if weapon == "m60" or (req.coax == true and weapon == "gun_90") then
-			if now - (lastShot[seat :: any] or 0) < 0.09 then
-				return -- ~650 tiros/min no máximo (validação; a cadência real vem da ficha da M60)
-			end
-			lastShot[seat :: any] = now
-			CombatService.fire(char, "m60", origin, dir, math.floor(rng:next() * 2 ^ 31), player)
-			return
-		end
-		if weapon == "gun_90" and model:GetAttribute("Ammo") == "heat" then
-			weapon = "gun_90_heat"
-		end
-		local gun = GUNS[weapon]
-		if not gun or now - (lastShot[seat] or 0) < gun.reloadS then
-			return
-		end
-		if gun.tubes then
-			local left = (model:GetAttribute("Tubes") :: number?) or 0
-			if left <= 0 then
-				return
-			end
-			model:SetAttribute("Tubes", left - 1)
-		end
-		lastShot[seat] = now
-		shoot(gun, origin, dir, { model, char })
+		fireFromSeat(seat, char, player, dir, req.coax == true, now)
 		return
 	end
 	-- foguete de infantaria (papel antitanque, a pé)
@@ -317,6 +351,185 @@ local function hold(model: Model, chassis: BasePart)
 	model:SetAttribute("NetRotor", 0)
 end
 
+---------------------------------------------------------------------------------------------
+-- D-90: bot motorista. O servidor roda a mesma física do motorista jogador (VehicleDrive no
+-- VehicleController: chão por raio, atitude pelas 4 pontas, LinearVelocity e AlignOrientation),
+-- com o acelerador e o volante que o bot manda (BotVehicles). Genérico para veículo de chão: a
+-- lagarta (M48A3, Ontos, LVTP-5) hoje; um carro com rodas do VC, quando existir, usa a mesma
+-- entrada (a física dele é que vai ser outra). Bot não pilota o UH-34D (fica para depois, D-90).
+---------------------------------------------------------------------------------------------
+local botDrives: { [Model]: BotDrive } = {}
+
+local botSolid = RaycastParams.new()
+botSolid.FilterType = Enum.RaycastFilterType.Exclude
+botSolid.RespectCanCollide = true
+local botPaddy = RaycastParams.new()
+botPaddy.FilterType = Enum.RaycastFilterType.Include
+local botGroupSet = false
+
+local function botRays(model: Model)
+	if not botGroupSet then
+		AssetLoader.ensureGroups()
+		botGroupSet = pcall(function()
+			botSolid.CollisionGroup = AssetLoader.VEHICLE_GROUP -- passa pelo tronco, como o chassi
+		end)
+	end
+	local ex: { Instance } = { model }
+	for _, name in { "Combatants", "Effects", "Granadas", "DroppedWeapons" } do
+		local f = workspace:FindFirstChild(name)
+		if f then
+			table.insert(ex, f)
+		end
+	end
+	botSolid.FilterDescendantsInstances = ex
+end
+
+-- Chão debaixo do chassi (como o VehicleLive.probe do cliente): chave do VehicleDrive e fundura (m)
+local function botGround(chassis: BasePart): (string, number?)
+	local top = chassis.Position + Vector3.new(0, chassis.Size.Y / 2, 0)
+	local len = chassis.Size.Y * 1.5 + 8
+	botSolid.IgnoreWater = false
+	local hit = workspace:Raycast(top, Vector3.new(0, -len, 0), botSolid)
+	if not hit then
+		return "earth", nil
+	end
+	if hit.Instance == workspace.Terrain and hit.Material == Enum.Material.Water then
+		botSolid.IgnoreWater = true
+		local bottom = workspace:Raycast(hit.Position + Vector3.new(0, 0.05, 0), Vector3.new(0, -80, 0), botSolid)
+		botSolid.IgnoreWater = false
+		return "water", if bottom then (hit.Position.Y - bottom.Position.Y) * M else 30
+	end
+	local map = workspace:FindFirstChild("Map")
+	local sheet = map and map:FindFirstChild("PaddyWater")
+	if sheet then
+		botPaddy.FilterDescendantsInstances = { sheet }
+		if workspace:Raycast(top, Vector3.new(0, -(top.Y - hit.Position.Y) - 1, 0), botPaddy) then
+			return "paddy", nil
+		end
+	end
+	local attr = hit.Instance:GetAttribute("Material")
+	return VehicleDrive.groundOf(hit.Material.Name, if type(attr) == "string" then attr else nil, hit.Instance.Name),
+		nil
+end
+
+-- Atitude do chão pelas 4 pontas no rumo yaw (pitch + nariz para cima, roll + direita mais alta)
+local function botAttitude(chassis: BasePart, yaw: number): (number?, number?)
+	local half = Vector3.new(chassis.Size.X * 0.42, 0, chassis.Size.Z * 0.45)
+	local base = CFrame.new(chassis.Position) * CFrame.Angles(0, yaw, 0)
+	local hs = {}
+	for i, c in { { -1, -1 }, { 1, -1 }, { -1, 1 }, { 1, 1 } } do
+		local p = (base * CFrame.new(c[1] * half.X, 0, c[2] * half.Z)).Position
+		local r = workspace:Raycast(p + Vector3.new(0, 14, 0), Vector3.new(0, -48, 0), botSolid)
+		if not r then
+			return nil, nil
+		end
+		hs[i] = r.Position.Y
+	end
+	local lim = math.rad(35)
+	local pitch = math.atan2(((hs[1] + hs[2]) - (hs[3] + hs[4])) / 2, half.Z * 2)
+	local roll = math.atan2(((hs[2] + hs[4]) - (hs[1] + hs[3])) / 2, half.X * 2)
+	return math.clamp(pitch, -lim, lim), math.clamp(roll, -lim, lim)
+end
+
+local function approachTo(x: number, target: number, tau: number, dt: number): number
+	return x + (target - x) * (1 - math.exp(-dt / tau))
+end
+
+local function slewTo(x: number, target: number, rate: number, dt: number): number
+	local d = target - x
+	local step = rate * dt
+	return if math.abs(d) <= step then target else x + (if d > 0 then step else -step)
+end
+
+local function botDriveStep(model: Model, chassis: BasePart, spec: any, d: BotDrive, dt: number)
+	-- pedal e volante com curso, como o teclado do jogador
+	d.thr = slewTo(d.thr, d.inThr, if math.abs(d.inThr) > math.abs(d.thr) then 3.2 else 7, dt)
+	d.steer = slewTo(d.steer, d.inSteer, 4.5, dt)
+	botRays(model)
+	d.probeT -= dt
+	if d.probeT <= 0 then
+		d.probeT = 0.1
+		d.ground, d.depth = botGround(chassis)
+	end
+	local _, cy, _ = chassis.CFrame:ToOrientation()
+	local yaw = d.yaw or cy
+	d.attT -= dt
+	if d.attT <= 0 then
+		d.attT = 0.1
+		local p, r = botAttitude(chassis, yaw)
+		if p and r then
+			d.pitch = approachTo(d.pitch, p, 0.1, 0.1)
+			d.roll = approachTo(d.roll, r, 0.1, 0.1)
+		end
+	end
+	local rain = ReplicatedStorage:GetAttribute("Rain")
+	local st = d.st
+	VehicleDrive.step(spec, st, { throttle = d.thr, steer = d.steer }, {
+		ground = d.ground,
+		rain = if type(rain) == "number" then rain else 0,
+		slopeSin = math.sin(d.pitch),
+		sideSin = math.sin(d.roll),
+		waterDepthM = d.depth,
+		engine = ((model:GetAttribute("Engine") :: number?) or 0) / 100,
+		tracks = ((model:GetAttribute("Tracks") :: number?) or 0) / 100,
+	}, dt)
+	local flatCF = CFrame.Angles(0, yaw, 0)
+	local vel = chassis.AssemblyLinearVelocity * M
+	if not st.floating then
+		local measured = Vector3.new(vel.X, 0, vel.Z):Dot(flatCF.LookVector) / math.max(math.cos(d.pitch), 0.5)
+		VehicleDrive.contact(st, measured, dt)
+	end
+	yaw += st.yawRate * dt
+	d.yaw = yaw
+	flatCF = CFrame.Angles(0, yaw, 0)
+	local ao = chassis:FindFirstChild("DriveAttitude") :: AlignOrientation?
+	local lv = chassis:FindFirstChild("DriveVelocity") :: LinearVelocity?
+	if ao and lv then
+		ao.CFrame = flatCF * CFrame.Angles(d.pitch, 0, d.roll)
+		local hv = flatCF.LookVector * st.v * math.cos(d.pitch) + flatCF.RightVector * st.vLat
+		lv.PlaneVelocity = Vector2.new(hv.X, hv.Z) / M
+	end
+	-- motor para os outros ouvirem (como a telemetria do jogador, ~6 por segundo)
+	d.telT -= dt
+	if d.telT <= 0 then
+		d.telT = 1 / 6
+		local function q(v: number): number
+			return math.floor(math.clamp(v, 0, 1) * 20 + 0.5) / 20
+		end
+		local r, l = q(st.rpm), q(st.load)
+		if model:GetAttribute("NetRpm") ~= r then
+			model:SetAttribute("NetRpm", r)
+		end
+		if model:GetAttribute("NetLoad") ~= l then
+			model:SetAttribute("NetLoad", l)
+		end
+	end
+end
+
+local function newBotDrive(chassis: BasePart): BotDrive
+	local _, cy, _ = chassis.CFrame:ToOrientation()
+	return {
+		st = VehicleDrive.newState(),
+		yaw = cy,
+		pitch = 0,
+		roll = 0,
+		thr = 0,
+		steer = 0,
+		inThr = 0,
+		inSteer = 0,
+		ground = "earth",
+		depth = nil,
+		probeT = 0,
+		attT = 0,
+		telT = 0,
+	}
+end
+
+local function isBot(hum: Humanoid?): boolean
+	local c = hum and hum.Parent
+	return c ~= nil and c:GetAttribute("Bot") == true
+end
+
 local function addSeat(
 	model: Model,
 	chassis: BasePart,
@@ -346,6 +559,18 @@ local function addSeat(
 	s:GetPropertyChangedSignal("Occupant"):Connect(function()
 		local hum = s.Occupant
 		local player = hum and Players:GetPlayerFromCharacter(hum.Parent)
+		-- bot (D-90): só do lado do veículo (os blindados são dos EUA); não pilota helicóptero
+		local bot = hum ~= nil and player == nil and isBot(hum)
+		if bot and hum then
+			local okBot = (hum.Parent :: Instance):GetAttribute("Faction") == model:GetAttribute("Faction")
+				and not (id == "driver" and model:GetAttribute("Kind") == "heli")
+			if not okBot then
+				task.defer(function()
+					hum.Sit = false
+				end)
+				return
+			end
+		end
 		if hum and player then
 			local ok = player:GetAttribute("Faction") == model:GetAttribute("Faction")
 				and (role == "any" or player:GetAttribute("Role") == role)
@@ -362,12 +587,23 @@ local function addSeat(
 			if lv and model:GetAttribute("Kind") == "heli" then
 				lv.Enabled = player ~= nil
 			end
-			model:SetAttribute("EngineOn", player ~= nil and ((model:GetAttribute("Engine") :: number?) or 0) > 0)
+			model:SetAttribute(
+				"EngineOn",
+				(player ~= nil or bot) and ((model:GetAttribute("Engine") :: number?) or 0) > 0
+			)
 			if player then
+				botDrives[model] = nil
 				pcall(function()
 					chassis:SetNetworkOwner(player)
 				end)
+			elseif bot then
+				-- bot motorista: o servidor simula (posse do servidor)
+				pcall(function()
+					chassis:SetNetworkOwner(nil)
+				end)
+				botDrives[model] = newBotDrive(chassis)
 			else
+				botDrives[model] = nil
 				hold(model, chassis)
 				pcall(function()
 					chassis:SetNetworkOwner(nil)
@@ -704,10 +940,156 @@ local function validate()
 	end
 end
 
+---------------------------------------------------------------------------------------------
+-- D-90: API dos bots (BotVehicles). Entradas do motorista e do atirador no servidor.
+---------------------------------------------------------------------------------------------
+
+-- Veículos inteiros (não destruídos)
+function VehicleService.vehicles(): { Model }
+	local out: { Model } = {}
+	local list: { Instance } = if folder then folder:GetChildren() else {}
+	for _, m in list do
+		if m:IsA("Model") and not m:GetAttribute("Destroyed") then
+			table.insert(out, m)
+		end
+	end
+	return out
+end
+
+local function seatById(vehicle: Model, seatId: string): Seat?
+	local s = vehicle:FindFirstChild("Seat_" .. seatId)
+	return if s and s:IsA("Seat") then s else nil
+end
+VehicleService.seat = seatById
+
+-- Senta o bot no assento (só do lado do veículo; motorista de helicóptero não). true se sentou.
+function VehicleService.botBoard(vehicle: Model, botModel: Model, seatId: string): boolean
+	if vehicle:GetAttribute("Destroyed") or vehicle.Parent ~= folder then
+		return false
+	end
+	if botModel:GetAttribute("Bot") ~= true or botModel:GetAttribute("Faction") ~= vehicle:GetAttribute("Faction") then
+		return false
+	end
+	if seatId == "driver" and vehicle:GetAttribute("Kind") == "heli" then
+		return false
+	end
+	local seat = seatById(vehicle, seatId)
+	local hum = botModel:FindFirstChildOfClass("Humanoid")
+	if not (seat and hum) or seat.Disabled or seat.Occupant or hum.Health <= 0 then
+		return false
+	end
+	hum.Sit = false
+	botModel:PivotTo(seat.CFrame * CFrame.new(0, 3, 0))
+	seat:Sit(hum)
+	return true
+end
+
+-- Tira o bot do assento e o põe no chão ao lado do veículo (à esquerda, para trás)
+function VehicleService.botLeave(botModel: Model)
+	local hum = botModel:FindFirstChildOfClass("Humanoid")
+	local seat = hum and hum.SeatPart
+	if not (hum and seat) then
+		return
+	end
+	local vehicle = seat:FindFirstAncestorWhichIsA("Model")
+	local chassis = vehicle and vehicle:FindFirstChild("Chassis") :: BasePart?
+	local k = ((botModel:GetAttribute("BotIndex") :: number?) or 0) % 4
+	hum.Sit = false
+	task.defer(function()
+		local weld = seat:FindFirstChild("SeatWeld")
+		if weld then
+			weld:Destroy()
+		end
+		if chassis and botModel.Parent then
+			local side = (chassis.CFrame * CFrame.new(-(chassis.Size.X / 2 + 2.5 / M), 0, (k - 1.5) * 1.2 / M)).Position
+			local y = SpawnService.groundY(side.X, side.Z)
+			botModel:PivotTo(CFrame.new(side.X, y + 4, side.Z))
+		end
+	end)
+end
+
+-- Acelerador e volante (-1..1) do bot motorista
+function VehicleService.botInput(vehicle: Model, throttle: number, steer: number)
+	local d = botDrives[vehicle]
+	if d then
+		d.inThr = math.clamp(throttle, -1, 1)
+		d.inSteer = math.clamp(steer, -1, 1)
+	end
+end
+
+-- Estado do veículo que um bot dirige (nil se não há bot no volante)
+function VehicleService.botState(vehicle: Model): BotDriveState?
+	local d = botDrives[vehicle]
+	local chassis = vehicle:FindFirstChild("Chassis") :: BasePart?
+	local spec = Vehicles.SPECS[vehicle:GetAttribute("Spec") :: string]
+	if not (d and chassis and spec) then
+		return nil
+	end
+	local _, cy, _ = chassis.CFrame:ToOrientation()
+	local rain = ReplicatedStorage:GetAttribute("Rain")
+	return {
+		v = d.st.v,
+		yaw = d.yaw or cy,
+		ground = d.ground,
+		floating = d.st.floating,
+		slip = d.st.slip,
+		blocked = d.st.blockedT > 0.25,
+		top = VehicleDrive.topSpeed(spec, d.ground, if type(rain) == "number" then rain else nil),
+	}
+end
+
+-- Tiro do bot sentado no assento (mesma validação do jogador: cadência, recarga, tubos)
+function VehicleService.botFire(vehicle: Model, seatId: string, dir: Vector3, coax: boolean?): boolean
+	local seat = seatById(vehicle, seatId)
+	local occ = seat and seat.Occupant
+	local char = occ and occ.Parent
+	if not (seat and char and char:IsA("Model") and char:GetAttribute("Bot") == true) or dir.Magnitude < 0.5 then
+		return false
+	end
+	return fireFromSeat(seat, char, nil, dir.Unit, coax == true, os.clock())
+end
+
+-- Arma principal pronta? (recarga do canhão ou do 106)
+function VehicleService.mainReady(vehicle: Model, seatId: string): boolean
+	local seat = seatById(vehicle, seatId)
+	local weapon = seat and seat:GetAttribute("Weapon")
+	if not (seat and type(weapon) == "string") then
+		return false
+	end
+	local key = if weapon == "gun_90" and vehicle:GetAttribute("Ammo") == "heat" then "gun_90_heat" else weapon
+	local gun = GUNS[key]
+	return gun ~= nil and os.clock() - (lastShot[seat] or 0) >= gun.reloadS
+end
+
 function VehicleService.start()
 	folder = Instance.new("Folder")
 	folder.Name = "Vehicles"
 	folder.Parent = workspace
+	-- bots no volante: a física do motorista roda aqui (D-90)
+	RunService.Heartbeat:Connect(function(dt: number)
+		if next(botDrives) == nil then
+			return
+		end
+		dt = math.min(dt, 0.1)
+		for model, d in botDrives do
+			local chassis = model:FindFirstChild("Chassis") :: BasePart?
+			local seat = model:FindFirstChild("Seat_driver")
+			local occ = if seat and seat:IsA("Seat") then seat.Occupant else nil
+			local spec = Vehicles.SPECS[model:GetAttribute("Spec") :: string]
+			if not (chassis and spec and model.Parent and isBot(occ)) or model:GetAttribute("Destroyed") then
+				botDrives[model] = nil
+				continue
+			end
+			local ok, err = pcall(function(): any
+				botDriveStep(model, chassis :: BasePart, spec, d, dt)
+				return nil
+			end)
+			if not ok then
+				warn("[VT65] bot motorista falhou:", err)
+				botDrives[model] = nil
+			end
+		end
+	end)
 	Net.event("Vehicle_Fire").OnServerEvent:Connect(onFire)
 	Net.event("Vehicle_Reload").OnServerEvent:Connect(onReload)
 	-- telemetria do motorista: remote próprio, criado aqui (não está na lista do Net)
