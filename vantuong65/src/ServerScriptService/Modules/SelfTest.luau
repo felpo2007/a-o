@@ -378,6 +378,54 @@ local function animals(): (string, string?)
 	return if #pen:GetChildren() > 0 then "ok" else "FALHA", string.format("%d animais", #pen:GetChildren())
 end
 
+-- Arte no chão: a base de cada modelo deve ficar perto do terreno sob o pivô. Em 2026-11-10 a arte
+-- era posta antes do terreno existir e tudo ia para y = 0 (vilas enterradas até 20 m); este teste
+-- teria pegado. Tolerância de 2 m (encosta e afundamento de túnel e trincheira); animais ficam de fora.
+local function artOnGround(): (string, string?)
+	local art = workspace:FindFirstChild("Map") and (workspace :: any).Map:FindFirstChild("Art")
+	if not art then
+		return "pulado", "sem modelos publicados (AssetIds em 0)"
+	end
+	if not waitFor(function()
+		return art:GetAttribute("Placed") == true
+	end, 240) then
+		return "FALHA", "a arte não terminou de ser posta em 240 s"
+	end
+	local params = RaycastParams.new()
+	params.FilterType = Enum.RaycastFilterType.Include
+	params.FilterDescendantsInstances = { workspace.Terrain }
+	local n, bad, worst, worstName = 0, 0, 0, "-"
+	for i, m in art:GetChildren() do
+		if m:IsA("Model") then
+			local cf, size = m:GetBoundingBox()
+			local p = m:GetPivot().Position
+			local hit = workspace:Raycast(Vector3.new(p.X, 3000, p.Z), Vector3.new(0, -6000, 0), params)
+			if hit then
+				n += 1
+				local off = (cf.Position.Y - size.Y / 2 - hit.Position.Y) * M -- base menos chão (m)
+				if math.abs(off) > 2 then
+					bad += 1
+				end
+				if math.abs(off) > math.abs(worst) then
+					worst, worstName = off, m.Name
+				end
+			end
+		end
+		if i % 500 == 0 then
+			task.wait()
+		end
+	end
+	local ok = n > 0 and bad <= n * 0.03
+	return if ok then "ok" else "FALHA",
+		string.format(
+			"%d de %d modelos com a base a até 2 m do chão; pior %s a %+.1f m",
+			n - bad,
+			n,
+			worstName,
+			worst
+		)
+end
+
 local function rain(): (string, string?)
 	local atm = game:GetService("Lighting"):FindFirstChildOfClass("Atmosphere")
 	local before = if atm then atm.Density else 0
@@ -410,6 +458,7 @@ function SelfTest.run()
 	check("arma caída de bot", droppedWeapon)
 	check("rádio do squad", radio)
 	check("animais da vila", animals)
+	check("arte no chão", artOnGround)
 	check("chuva", rain)
 	check("pá de trincheira", dig)
 	check("medevac", medevac)

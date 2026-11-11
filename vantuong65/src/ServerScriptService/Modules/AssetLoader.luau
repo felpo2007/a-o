@@ -16,6 +16,7 @@ local Tunnels = require(ReplicatedStorage.Shared.Tunnels) :: any
 local Weapons = require(ReplicatedStorage.Shared.Weapons)
 
 local AssetLoader = {}
+AssetLoader.noGround = 0 -- modelos postos sem terreno embaixo (deve ficar 0)
 local cache: { [string]: Model } = {}
 local M = 0.28
 -- F5: arte nos 5 setores, com teto por setor (Parte 2: 60 fps no pior setor). Triângulos por
@@ -113,7 +114,11 @@ local function groundY(x: number, z: number): number
 			best = math.max(best, hit.Position.Y)
 		end
 	end
-	return if best > -math.huge then best else 0
+	if best == -math.huge then
+		AssetLoader.noGround += 1 -- sem terreno sob o ponto: avisado no resumo da arte
+		return 0
+	end
+	return best
 end
 
 -- coloca uma cópia com a base no chão; foliage=true desliga colisão/consulta/sombra (Parte 5)
@@ -153,6 +158,13 @@ function AssetLoader.start()
 	local map = workspace:WaitForChild("Map", 30)
 	if not map then
 		return
+	end
+	-- A arte vai no chão real, então espera o terreno, que é gerado em runtime (~50 s). Antes ela era
+	-- posta junto com a geração: o raio não achava chão e tudo ia para y = 0. As vilas ficavam
+	-- enterradas (até 20 m) sem os placeholders, que já tinham sido apagados, e os animais andavam
+	-- debaixo da terra (teste do mapa no Studio, 2026-11-10).
+	while ReplicatedStorage:GetAttribute("TerrainReady") ~= true do
+		ReplicatedStorage:GetAttributeChangedSignal("TerrainReady"):Wait()
 	end
 	local out = Instance.new("Folder")
 	out.Name = "Art"
@@ -315,6 +327,10 @@ function AssetLoader.start()
 		end
 	end
 	print("[VT65] arte carregada:", #out:GetChildren(), "modelos")
+	if AssetLoader.noGround > 0 then
+		warn(string.format("[VT65] %d modelos de arte sem terreno embaixo (postos em y = 0)", AssetLoader.noGround))
+	end
+	out:SetAttribute("Placed", true) -- o autoteste confere a arte no chão depois disto
 end
 
 -- Arma visível na mão direita (todos veem). Sem asset publicado, usa a provisória (Shared/GunModel):

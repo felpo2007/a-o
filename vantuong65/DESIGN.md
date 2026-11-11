@@ -1043,10 +1043,29 @@ Pesquisa na web em 2026-11-10. Cada número está no código com a fonte ao lado
   (6"/47) cobriram o desembarque (história do USMC "The Landing and the Buildup"). O jogo usa o
   5"/38: 2.500 ft/s, **762 m/s**, com o cano médio (navweaps; 2.600 com o cano novo). A distância
   do navio segue PLACEHOLDER.
-- **Ainda sem fonte:**
+- **Ainda sem fonte (D-61):**
   - cargas incrementais dos morteiros;
   - teto do M48;
   - 90 mm HEAT;
   - raios dos explosivos;
   - distância do navio;
   - giro dos veículos e da torre do Ontos.
+
+## D-62 — A arte espera o terreno (teste do mapa, 2026-11-10)
+- **Defeito:** o servidor dispara a geração do terreno (~50 s) e a colocação da arte ao mesmo
+  tempo. A arte fazia o raio até o chão antes de o terreno existir e ia toda para y = 0.
+  - As vilas ficavam enterradas, até 20 m em An Cường (2).
+  - Os placeholders das casas eram apagados mesmo assim.
+  - Os animais andavam debaixo da terra.
+  - O fps medido "com arte" (59–60) foi na verdade sem arte visível, então não vale.
+- **Regra:**
+  - o `AssetLoader` só põe a arte depois de `TerrainReady`;
+  - um modelo sem chão embaixo gera aviso no Output;
+  - a pasta `Map.Art` ganha o atributo `Placed` ao terminar;
+  - o autoteste "arte no chão" exige que 97% das bases estejam a até 2 m do terreno.
+- **Medido:** a arte fica pronta 17 s depois do terreno; 5.046 de 5.048 modelos a até 2 m do chão.
+- **Pendente (decisão de arte, com o usuário):**
+  - 89% das sebes continuam como caixas, por causa do teto de triângulos;
+  - a `hill_tree` foi destruída pela redução local;
+  - o terreno usa as cores padrão;
+  - o fps com a arte visível precisa ser medido com o PC livre e o Studio em primeiro plano.

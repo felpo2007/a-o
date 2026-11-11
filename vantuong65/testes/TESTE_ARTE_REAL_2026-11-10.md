@@ -11,7 +11,7 @@ bots.
 | Autoteste (`VT65SelfTest`) | **11 ok, 0 falhas, 0 pulados**. É a primeira vez sem pulados: os animais entraram |
 | Arte carregada | 5.044 a 5.151 modelos; setores 1–5 com 2,39 a 2,50 milhões de triângulos (teto 2,5 mi) |
 | Sebes (fração das touceiras que coube) | 19–20 / 38–39 / 24 / 21–22 / 54% nos setores 1–5 |
-| fps no Studio, por setor | 59 / 60 / 60 / 60 / 60. Pior quadro: 72 ms no setor 1, logo após o teleporte; 20–21 ms nos demais |
+| fps no Studio, por setor | ~~59 / 60 / 60 / 60 / 60~~ **não vale**: a arte estava enterrada em y = 0 (ver `TESTE_MAPA_2026-11-10.md`, D-62) |
 | Terreno pronto | 43–53 s |
 | Erros de script | nenhum |
 

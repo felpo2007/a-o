@@ -285,14 +285,22 @@ ao `build/`: 113 scripts e 30.199 instâncias.
 São 82 assets publicados pelo Open Cloud. O place da nuvem foi aberto no Studio, e o relatório está
 em `testes/TESTE_ARTE_REAL_2026-11-10.md`.
 - **Autoteste: 11 ok, 0 falhas, 0 pulados.** É o primeiro sem pulados: 141 animais nas vilas.
-- **fps no Studio, com a arte:** 59 a 60 nos 5 setores. Cada setor tem ~2,4–2,5 milhões de
-  triângulos e ~1.000 modelos.
+- **fps no Studio, com a arte:** a medição de 59–60 fps **não vale**. A arte estava enterrada em
+  y = 0, porque era posta antes de o terreno existir (corrigido na D-62). A medição com a arte
+  visível segue pendente.
 - **Corrigido:**
   - a arma real não aparecia;
   - as armas reais ganharam pontos de boca, mira e mãos, gerados dos GLB (`tools/weapon_landmarks.py`);
   - a mão esquerda não alcançava a arma (nova pega: 7 e 11 cm em pé, 8 e 10 cm deitado);
   - o búfalo e a galinha não tinham sido publicados;
   - animais e veículos andariam de ré, porque o importador gira o modelo 180°.
+- **Teste do mapa (D-62, `testes/TESTE_MAPA_2026-11-10.md`):**
+  - a arte era posta antes do terreno e ia toda para y = 0; agora ela espera o terreno, e o
+    autoteste confere a arte no chão (5.046 de 5.048 modelos);
+  - nas capturas, as casas estão boas;
+  - continuam: a `hill_tree` quebrada pela redução, 89% das sebes ainda como caixas e o terreno
+    com as cores padrão do Roblox;
+  - o fps com a arte visível não foi medido, porque o PC estava ocupado.
 - **Segunda rodada (D-60):** a mira das 9 armas foi conferida por captura. A massa fica no centro da
   tela, e as pistolas ficam com o braço estendido. A Type 54 e a RPD vieram tortas do gerador e
   agora são corrigidas. O autoteste continua 11/11. O place foi publicado de novo.
