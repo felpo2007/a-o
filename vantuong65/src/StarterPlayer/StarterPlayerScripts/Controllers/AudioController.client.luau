@@ -311,7 +311,7 @@ Net.unreliable("Combat_Tracer").OnClientEvent:Connect(function(shot)
 	local dM = (origin - listener).Magnitude * M
 	local delay = dM / Ballistics.SOUND
 	if dM < 2500 then
-		caption("shot:" .. wp.id, "Tiro de " .. (wp.name or wp.id), origin, delay)
+		caption(string.format("shot:%s", wp.id), string.format("Tiro de %s", wp.name or wp.id), origin, delay)
 	end
 	if dM < 60 then
 		play(NEAR[wp.id] or "shot_mid", origin, 1.0, 1500, delay)
@@ -405,7 +405,7 @@ Net.unreliable("Fire_Launch").OnClientEvent:Connect(function(e)
 			then "Disparo de morteiro"
 			elseif e.kind == "naval" then "Tiro naval ao longe"
 			else "Disparo de canhão/foguete"
-		caption("launch:" .. e.kind, what, pos, dM / Ballistics.SOUND)
+		caption(string.format("launch:%s", e.kind), what, pos, dM / Ballistics.SOUND) -- chave, não texto
 		if e.kind == "naval" then
 			play(k, nil, 0.8, nil, dM / Ballistics.SOUND)
 		else

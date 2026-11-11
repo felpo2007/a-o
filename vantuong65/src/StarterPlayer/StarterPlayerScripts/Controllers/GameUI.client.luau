@@ -189,14 +189,13 @@ local function spawnById(id: string): any
 end
 
 local function spawnText(pt: any): string
-	return string.format(
-		"%s — %s",
-		pt.name,
-		if pt.blocked
-			then (pt.why or "bloqueado")
-			elseif (pt.wait or 0) > 0 then string.format("espera %d s", pt.wait)
-			else "PRONTO"
-	)
+	-- lista "nome · estado": o estado é frase ou modelo inteiro (o Lang traduz item a item)
+	if pt.blocked then
+		return string.format("%s · %s", pt.name, pt.why or "bloqueado")
+	elseif (pt.wait or 0) > 0 then
+		return string.format("%s · espera %d s", pt.name, pt.wait)
+	end
+	return string.format("%s · PRONTO", pt.name)
 end
 
 -- Inserção: só ponto PRONTO; a transição carrega a área antes de pedir o spawn (SpawnTransition)
@@ -438,7 +437,7 @@ end)
 Bus.on("map_target", function(ability: string, label: string?)
 	targetAbility = ability
 	mode = "target"
-	status.Text = "ALVO: " .. (label or ability) .. " — mova o cursor e confirme"
+	status.Text = string.format("ALVO: %s — mova o cursor e confirme", label or ability)
 	refresh()
 end)
 Bus.on("map_target_end", function()
@@ -470,24 +469,19 @@ end
 local function statusLine(): string
 	local st = matchState
 	if not st then
-		return "Carta · " .. CartaView.cursorGrid()
+		return string.format("Carta · %s", CartaView.cursorGrid())
 	end
+	-- lista "A · B · C": cada pedaço é frase ou modelo inteiro (o Lang traduz item a item)
 	local t = math.floor(st.timeLeft or 0)
-	local extra = ""
+	local parts = { string.format("%s %02d:%02d", UiKit.upper(st.mode), t // 60, t % 60) }
 	if st.ended then
 		local w = st.winner or ReplicatedStorage:GetAttribute("LastWinner")
-		extra = if w == "US" then " · vitória dos EUA" elseif w == "VC" then " · vitória do VC" else " · empate"
+		table.insert(parts, if w == "US" then "vitória dos EUA" elseif w == "VC" then "vitória do VC" else "empate")
 	elseif st.mode == "Offensive" and st.front and st.front >= 1 then
-		extra = " · frente S" .. st.front
+		table.insert(parts, string.format("frente S%d", st.front))
 	end
-	return string.format(
-		"%s %02d:%02d%s · cursor %s",
-		UiKit.upper(st.mode),
-		t // 60,
-		t % 60,
-		extra,
-		CartaView.cursorGrid()
-	)
+	table.insert(parts, string.format("cursor %s", CartaView.cursorGrid()))
+	return table.concat(parts, " · ")
 end
 
 -- quadro a quadro: zoom, arrasto, cursor e ímã ficam na CartaView
@@ -509,7 +503,7 @@ RunService.RenderStepped:Connect(function(dt: number)
 		elseif mode ~= "target" or targetAbility == nil then
 			status.Text = statusLine()
 		else
-			status.Text = "ALVO " .. CartaView.cursorGrid() .. " — confirme"
+			status.Text = string.format("ALVO %s — confirme", CartaView.cursorGrid())
 		end
 		hints.Text = hintText()
 		if legend.Visible then

@@ -4,9 +4,19 @@ Varre os .luau de src/ e junta os textos em português que podem ir para a tela.
 exato: um texto a mais no dicionário não muda nada (a tradução só mexe no que aparece na tela);
 um a menos fica em português.
 
+Dois grupos:
+- texto de tela: o que o jogador lê. Tem de estar nos três dicionários (en, es, vi), nem que
+  seja igual ao português (siglas e termos iguais entram como tradução idêntica).
+- identificador de código: chave interna, nome de peça, modelo de arma, sigla. Fica em
+  `tools/i18n/ignorar.json` ("exato" = textos; "regex" = padrões) e não conta como falta.
+
+Saídas: `tools/i18n/fontes.json` (texto -> onde aparece) e `tools/i18n/telas.json` (só os textos de
+tela; o teste `tests/luau/idiomas.luau` confere a cobertura por ele).
+
 Uso (de vantuong65/):
-    uv run python tools/i18n/extrai.py            # escreve tools/i18n/fontes.json e o relatório
-    uv run python tools/i18n/extrai.py --faltam en # lista o que falta no dicionário en
+    uv run python tools/i18n/extrai.py             # escreve fontes.json e telas.json e o relatório
+    uv run python tools/i18n/extrai.py --faltam en # texto de tela que falta no dicionário en
+    uv run python tools/i18n/extrai.py --novos     # lista o que nem é tela marcada nem ignorado
 """
 
 from __future__ import annotations
@@ -20,7 +30,10 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 SRC = ROOT / "src"
 DATA = SRC / "ReplicatedStorage" / "Shared" / "LangData"
-OUT = Path(__file__).resolve().parent / "fontes.json"
+HERE = Path(__file__).resolve().parent
+OUT = HERE / "fontes.json"
+TELAS = HERE / "telas.json"
+IGNORAR = HERE / "ignorar.json"
 LANGS = ("en", "es", "vi")
 
 # texto entre aspas duplas ou simples (com escapes)
@@ -34,6 +47,9 @@ API = re.compile(
 )
 SKIP_LINE = re.compile(r"\b(print|warn|error|assert)\s*\(")
 IDENT = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
+
+# módulos fora da interface cujas palavras soltas em minúsculas SÃO texto de tela (rumos, armas...)
+LOWER_OK = ("Casualty.luau",)
 
 
 def unescape(s: str) -> str:
@@ -60,7 +76,12 @@ def is_display(s: str, before: str, rel: str) -> bool:
     words = s.split()
     # palavra solta em minúsculas sem acento: só nas telas (opção "alto"); nos módulos é chave
     # interna ("supply", "leader", "hold")
-    if len(words) == 1 and re.fullmatch(r"[a-z]+", s) and not rel.startswith(UI_DIRS):
+    if (
+        len(words) == 1
+        and re.fullmatch(r"[a-z]+", s)
+        and not rel.startswith(UI_DIRS)
+        and not rel.endswith(LOWER_OK)
+    ):
         return False
     # nome vietnamita (Vạn Tường, TRUNG ĐOÀN 1): fica como está, a não ser que haja frase em volta
     if VIET.search(s):
@@ -110,8 +131,8 @@ def extract() -> dict[str, list[str]]:
     found: dict[str, list[str]] = {}
     for path in sorted(SRC.rglob("*.luau")):
         rel = path.relative_to(ROOT).as_posix()
-        if "/VT65Build/" in rel or rel.endswith(("SelfTest.luau", "Profiler.luau")):
-            continue  # construção do mapa e autoteste (servidor, sem tela)
+        if "/VT65Build/" in rel or rel.endswith(("SelfTest.luau", "Profiler.luau", "/Lang.luau")):
+            continue  # construção do mapa, autoteste (servidor, sem tela) e padrões do próprio Lang
         for n, raw in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
             line = strip_comment(raw)
             if not line.strip() or SKIP_LINE.search(line):
@@ -135,25 +156,63 @@ def load(lang: str) -> dict[str, str]:
     return json.loads(p.read_text(encoding="utf-8")) if p.exists() else {}
 
 
+class Ignorar:
+    """Identificadores, siglas, modelos e nomes próprios que não são traduzidos."""
+
+    def __init__(self) -> None:
+        raw = json.loads(IGNORAR.read_text(encoding="utf-8")) if IGNORAR.exists() else {}
+        self.exato = set(raw.get("exato", []))
+        self.regex = [re.compile(r) for r in raw.get("regex", [])]
+
+    def __call__(self, key: str) -> bool:
+        return key in self.exato or any(r.search(key) for r in self.regex)
+
+
+def telas(found: dict[str, list[str]]) -> list[str]:
+    """Textos de tela: o que foi achado menos os identificadores marcados em ignorar.json."""
+    skip = Ignorar()
+    return sorted(k for k in found if not skip(k))
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--faltam", help="idioma: lista o que falta traduzir (JSON em stdout)")
+    ap.add_argument(
+        "--faltam", help="idioma: lista o texto de tela que falta traduzir (JSON em stdout)"
+    )
+    ap.add_argument(
+        "--novos", action="store_true", help="lista o que falta em algum idioma (sem filtro)"
+    )
     args = ap.parse_args()
     found = extract()
+    screen = telas(found)
     OUT.write_text(
         json.dumps(dict(sorted(found.items())), ensure_ascii=False, indent=1), encoding="utf-8"
     )
+    TELAS.write_text(json.dumps(screen, ensure_ascii=False, indent=1), encoding="utf-8")
     if args.faltam:
         have = load(args.faltam)
-        missing = [k for k in sorted(found) if k not in have]
+        missing = [k for k in screen if k not in have]
         sys.stdout.reconfigure(encoding="utf-8")
         print(json.dumps(missing, ensure_ascii=False, indent=1))
         return 0
-    print(f"{len(found)} textos em {OUT.relative_to(ROOT).as_posix()}")
+    if args.novos:
+        sys.stdout.reconfigure(encoding="utf-8")
+        dicts = {lang: load(lang) for lang in LANGS}
+        skip = Ignorar()
+        out = [k for k in sorted(found) if not skip(k) and any(k not in d for d in dicts.values())]
+        print(json.dumps(out, ensure_ascii=False, indent=1))
+        return 0
+    print(f"{len(found)} textos achados em {OUT.relative_to(ROOT).as_posix()}")
+    print(
+        f"{len(screen)} textos de tela em {TELAS.relative_to(ROOT).as_posix()} "
+        f"({len(found) - len(screen)} identificadores em ignorar.json)"
+    )
     for lang in LANGS:
         have = load(lang)
-        done = sum(1 for k in found if k in have)
-        print(f"  {lang}: {done}/{len(found)} traduzidos")
+        done = sum(1 for k in screen if k in have)
+        print(
+            f"  {lang}: {done}/{len(screen)} traduzidos ({100 * done / max(1, len(screen)):.1f}%)"
+        )
     return 0
 
 

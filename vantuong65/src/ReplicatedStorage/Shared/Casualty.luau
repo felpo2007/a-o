@@ -66,20 +66,24 @@ function Casualty.text(c: Cause?, downed: boolean?): string
 		return if downed then "Ferido — origem não identificada" else "Morto em ação — origem não identificada"
 	end
 	local m = math.sqrt(c.dx * c.dx + c.dz * c.dz) * (c.studM or 0.28)
-	local where = string.format("~%d m a %s", Casualty.roundDistance(m), Casualty.bearing(c.dx, c.dz))
+	local dist = Casualty.roundDistance(m)
+	local bearing = Casualty.bearing(c.dx, c.dz)
+	-- a frase inteira é um modelo (o dicionário de idiomas traduz o modelo, não as peças)
 	if c.kind == "explosion" then
 		local word = Casualty.explosiveWord(c.explosive)
 		if m < 6 then
-			where = "a poucos metros"
+			return if downed
+				then string.format("Ferido por estilhaços de %s, a poucos metros", word)
+				else string.format("Estilhaços de %s, a poucos metros", word)
 		end
-		return string.format("%s de %s, %s", if downed then "Ferido por estilhaços" else "Estilhaços", word, where)
+		return if downed
+			then string.format("Ferido por estilhaços de %s, ~%d m a %s", word, dist, bearing)
+			else string.format("Estilhaços de %s, ~%d m a %s", word, dist, bearing)
 	end
-	return string.format(
-		"%s por %s, %s",
-		if downed then "Ferido" else "Abatido",
-		Casualty.weaponWord(c.weaponKind),
-		where
-	)
+	local weapon = Casualty.weaponWord(c.weaponKind)
+	return if downed
+		then string.format("Ferido por %s, ~%d m a %s", weapon, dist, bearing)
+		else string.format("Abatido por %s, ~%d m a %s", weapon, dist, bearing)
 end
 
 -- Grupo data-hora de 1965 (fuso H = UTC+8, como o AfterAction): dia 18, hora local do jogo.

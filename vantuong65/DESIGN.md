@@ -2214,9 +2214,19 @@ idioma está traduzido. Texto novo entra rodando o extrator e traduzindo o que f
 - Opção "Idioma / Language" no menu (sub-aba Acessib.).
 - No padrão, "automático" usa o idioma da conta Roblox. Idioma sem dicionário cai no inglês.
 
-**Limites:**
-- Texto montado aos pedaços com `..` nem sempre casa com o dicionário e fica em português.
-- As fontes de época (SpecialElite) não têm todas as letras vietnamitas.
+**Cobertura completa** (2026-11-11, depois do pedido "o jogo completamente na língua que foi
+selecionada"):
+- **Dicionários:** cobrem 100% dos textos de tela nos três idiomas (`tools/i18n/telas.json`;
+  identificadores e nomes próprios ficam em `tools/i18n/ignorar.json`). O teste `idiomas` cobra a
+  cobertura.
+- **Mensagens do servidor e telas:** saem como frase inteira (`string.format`), sem pedaços colados.
+- **O `Traducao.client` também cobre:**
+  - ProximityPrompt (ActionText e ObjectText), que o próprio Roblox desenha;
+  - placas e folhas em SurfaceGui e BillboardGui no workspace, numa leitura única em fatias mais o
+    DescendantAdded;
+  - o PlaceholderText das caixas de texto.
+- **Vietnamita:** o texto com letras vietnamitas troca a fonte de época pela Arimo.
+- **Ainda em português:** mensagens do chat do sistema do Roblox (o próprio Roblox traduz pela conta).
 
 ## D-85 — Skins de arma, de uniforme e camuflagem de mato (2026-11-11)
 **Pedido do usuário:**
@@ -2392,6 +2402,53 @@ soldado andando a 1,36 m/s.
 - O fôlego continua mexendo no balanço da mira e na altura do pulo.
 
 O modelo antigo (24 s de corrida até zerar) fica atrás da chave e continua testado no Lune.
+
+## D-90 — Interfaces de época, caveira de abate, pular o tutorial e idioma na entrada (2026-11-11)
+**Pedido do usuário:**
+- "melhore ainda mais todas as interfaces do jogo";
+- "faça uma caveira bem feita quando você mata alguém";
+- "dê a opção de pular o tutorial";
+- "faça o jogo completamente na língua que foi selecionada".
+
+**Caveira de abate** (`Caveira.client`):
+- Aparece no centro quando chega o crédito de abate (aviso "Abate" do `Progress_State`; também
+  com o teto de XP do minuto).
+- Entra como carimbo, um anel de tinta abre e ela some em ~1,2 s.
+- 11% da altura da tela, translúcida para não tapar a mira; sem número e sem som.
+- Arte: estêncil de spray de 1024 px (`tools/make_caveira.py`), enviada (`Images.caveira_abate`); o
+  servidor converte o decal em imagem (`ImagensUi`).
+
+**Pular o tutorial** (`TutorialController`), com confirmação para não pular sem querer:
+- **Teclado:** segurar Backspace 1 s.
+- **Toque e mouse:** tocar duas vezes.
+- **Controle:** os 15 botões já têm ação na infantaria, e um a mais quebraria a regra de conflito.
+  Então segurar View abre o menu já com "Pular" focado; lá, segura-se Y ou aperta-se A duas vezes.
+
+**Idioma na entrada:**
+- Chip "IDIOMA · LANGUAGE" na tela de carregamento e no lobby (Y no controle).
+- O cartão traz as 5 opções, cada uma escrita no próprio idioma.
+- Uma conta nova com idioma automático vê o cartão uma vez.
+
+**Telas novas ou refeitas:**
+- **HUD de campo** (`HudCampo`, novo):
+  - bússola com o objetivo marcado;
+  - cartão da arma e da postura, com carregadores desenhados como pentes, sem contar balas (Parte
+    1), que esmaece depois de 5 s.
+- **Menu do jogo:** dossiê com abas de arquivo e valores ajustados com ◄ ►; mantém o foco e a rolagem
+  ao redesenhar.
+- **Relatório pós-ação:** folha datilografada com seções e carimbo. Só abre depois da ficha de fim.
+- **Loja:** formulário de requisição; não cobre mais a Intendência.
+- **Roda:** mostrador oliva com ponteiro de latão.
+- **Controle desconectado:** ficha com carimbo PAUSADO.
+- **Painel de veículo** (`VehicleHudView`): de época, no lugar do texto em fonte de código.
+- **Escala:** faixa de setores, ficha de fim, telas de ferido e de baixa e avisos encolhem em janela
+  estreita.
+- **Tradução:** todo texto composto virou `string.format` com o modelo inteiro em português, para a
+  tradução casar (D-84). As folhas do lobby estão em português e são traduzidas pelo dicionário.
+
+Ganchos só no Studio: `workspace:SetAttribute("VT65DevTela", X)` com X igual a `caveira`,
+`caveira_desenho`, `menu`, `loja`, `relatorio`, `controle`, `roda`, `idioma`, `hud`, `tutorial`,
+`veiculo` ou `helicoptero`.
 
 **Falta:**
 - o som do UH-34D (`uh34d_loop` em 0) e o chocalho da lagarta;

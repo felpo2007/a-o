@@ -23,6 +23,7 @@ local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 
+local Acabamento = require(game:GetService("ReplicatedFirst"):WaitForChild("Acabamento"))
 local BotBrain = require(ReplicatedStorage.Shared.BotBrain)
 local GunModel = require(ReplicatedStorage.Shared.GunModel)
 local Net = require(ReplicatedStorage.Shared.Net)
@@ -49,11 +50,11 @@ local money = Progression.money
 
 -- ===== promoção: ficha de papel no topo da pilha de avisos, com o carimbo do soldo =====
 local function ceremony(r: { [string]: any })
-	local nameText = tostring(r.name or ("Posto " .. tostring(r.to)))
+	local nameText = if r.name then tostring(r.name) else string.format("Posto %s", tostring(r.to))
 	local headText = if state and state.faction == "VC"
 		then "THĂNG CHỨC  ·  PROMOÇÃO"
 		else "PROMOTION  ·  PROMOÇÃO"
-	local soldo = "SOLDO: +" .. money(tonumber(r.bonus) or 0)
+	local soldo = string.format("SOLDO: +%s", money(tonumber(r.bonus) or 0))
 	Toast.custom(function(card: Frame, lay: Toast.Layout): number
 		local tv = lay.tv
 		local y = lay.pad
@@ -175,12 +176,21 @@ do
 	s.Color = UiKit.KHAKI
 	s.Transparency = 0.65
 	s.Parent = root
+	UiKit.lit(root, 0.78)
+	Acabamento.sombra(root, 22, Vector2.new(0, 8), 0.55)
+	-- janela baixa: o painel encolhe (a lista rola dentro dele)
+	UiKit.fit(screen, root, PW, 420, 12)
 end
 
+-- 2026-11-11: Oswald nos títulos e Arimo no texto, as fontes de época das outras telas (era Gotham)
 local function label(parent: Instance, s: string, size: number, color: Color3, bold: boolean?): TextLabel
 	local t = Instance.new("TextLabel")
 	t.BackgroundTransparency = 1
-	t.Font = if bold then Enum.Font.GothamBold else Enum.Font.Gotham
+	if bold then
+		t.FontFace = UiKit.HEAD_FONT
+	else
+		t.Font = UiKit.BODY_FONT
+	end
 	t.TextSize = UiKit.text(size)
 	t.TextColor3 = color
 	t.TextXAlignment = Enum.TextXAlignment.Left
@@ -328,8 +338,8 @@ local function button(
 	b.AutoButtonColor = style ~= "off"
 	b.BackgroundColor3 = st.bg
 	b.TextColor3 = st.fg
-	b.Font = Enum.Font.GothamBold
-	b.TextSize = UiKit.text(14)
+	b.FontFace = UiKit.headFont(text)
+	b.TextSize = UiKit.text(15)
 	b.TextWrapped = true
 	b.Text = text
 	b.Size = UDim2.new(1, 0, 0, if TV then 44 else 30)
@@ -429,7 +439,7 @@ local priceCache: { [number]: number } = {}
 local priceAsked: { [number]: boolean } = {}
 local function robuxText(s: Skins.Skin): string
 	local id = Skins.robuxId(s)
-	return "R$ " .. tostring(priceCache[id] or s.robux)
+	return string.format("R$ %s", tostring(priceCache[id] or s.robux))
 end
 local function askPrice(s: Skins.Skin)
 	local id = Skins.robuxId(s)
@@ -593,12 +603,13 @@ local function renderGear(s: { [string]: any })
 				line(string.format("• %s  (%.1f kg)", g.name, g.kg), 14, UiKit.KHAKI, true)
 				line(g.effect, 13)
 				if g.unlocked then
+					-- frase inteira por caso (levando/deixado × como liberou): o dicionário traduz a frase
 					local how = if g.how == "rank"
 						then "pelo posto"
 						elseif g.how == "pass" then "pelo passe"
 						else "comprado"
 					fullButton(
-						(if g.on then "LEVANDO" else "DEIXADO") .. " (" .. how .. ") — trocar",
+						string.format(if g.on then "LEVANDO (%s) — trocar" else "DEIXADO (%s) — trocar", how),
 						if g.on then "on" else "normal",
 						"gear:" .. g.id,
 						function()
@@ -615,7 +626,7 @@ local function renderGear(s: { [string]: any })
 				else
 					local can = (tonumber(s.credits) or 0) >= g.price
 					fullButton(
-						"Comprar por " .. money(g.price),
+						string.format("Comprar por %s", money(g.price)),
 						if can then "primary" else "off",
 						"gear:" .. g.id,
 						function()
@@ -702,9 +713,9 @@ local function skinCard(s: Skins.Skin, sk: { [string]: any })
 		local can = have >= s.price
 		local confirming = confirmId == s.id and os.clock() < confirmUntil
 		local txt = if confirming
-			then "CONFIRMAR " .. money(s.price)
-			elseif can then "COMPRAR " .. money(s.price)
-			else "FALTAM " .. money(s.price - have)
+			then string.format("CONFIRMAR %s", money(s.price))
+			elseif can then string.format("COMPRAR %s", money(s.price))
+			else string.format("FALTAM %s", money(s.price - have))
 		button(actions, txt, if can then "primary" else "off", "skin:" .. s.id, function()
 			select(s.id)
 			if not can then
@@ -951,12 +962,12 @@ render = function()
 	clear()
 	order = 0
 	moneyLabel.Text = money(tonumber(s.credits) or 0)
-	rankLabel.Text = string.format("%s  ·  %s XP", tostring(s.rankName), fmt(tonumber(s.xp) or 0))
-		.. (
-			if (tonumber(s.respawnCredits) or 0) > 0
-				then string.format("  ·  renasceres guardados: %d", s.respawnCredits)
-				else ""
-		)
+	-- lista "A · B · C" (o Lang traduz item a item)
+	local rankParts = { tostring(s.rankName), string.format("%s XP", fmt(tonumber(s.xp) or 0)) }
+	if (tonumber(s.respawnCredits) or 0) > 0 then
+		table.insert(rankParts, string.format("renasceres guardados: %d", s.respawnCredits))
+	end
+	rankLabel.Text = table.concat(rankParts, " · ")
 	paintTabs()
 	layoutBody(tab == "skins")
 	if tab == "gear" then

@@ -846,5 +846,12 @@
   "assetType": "Decal",
   "name": "VT65 camuflagem bambu",
   "description": "VAN TUONG 65 - textura de folha de bambu da camuflagem (tools/ghillie.py)"
+ },
+ {
+  "key": "Images.caveira_abate",
+  "file": "assets/ui/caveira_abate.png",
+  "assetType": "Decal",
+  "name": "VT65 caveira de abate",
+  "description": "VAN TUONG 65 - caveira em estencil militar mostrada no abate (tools/make_caveira.py)"
  }
 ]

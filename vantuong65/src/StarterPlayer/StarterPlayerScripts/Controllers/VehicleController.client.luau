@@ -24,6 +24,7 @@ local Input = require(script.Parent.Input)
 local InputMap = require(ReplicatedStorage.Shared.InputMap)
 local Net = require(ReplicatedStorage.Shared.Net)
 local VehicleDrive = require(ReplicatedStorage.Shared.VehicleDrive)
+local VehicleHudView = require(script.Parent.VehicleHudView)
 local VehicleLive = require(script.Parent.VehicleLive)
 local Vehicles = require(ReplicatedStorage.Shared.Vehicles)
 local ViewMode = require(script.Parent.ViewMode)
@@ -44,22 +45,17 @@ local GROUND_PT: { [string]: string } = {
 	water = "água",
 }
 
-local gui = Instance.new("ScreenGui")
-gui.Name = "VehicleHud"
-gui.ResetOnSpawn = false
-local label = Instance.new("TextLabel")
-label.Size = UDim2.fromOffset(360, 92)
-label.Position = UDim2.new(0, 16, 1, -110)
-label.BackgroundTransparency = 0.45
-label.BackgroundColor3 = Color3.fromRGB(20, 22, 16)
-label.TextColor3 = Color3.fromRGB(230, 225, 200)
-label.Font = Enum.Font.Code
-label.TextSize = 14
-label.TextXAlignment = Enum.TextXAlignment.Left
-label.TextYAlignment = Enum.TextYAlignment.Top
-label.Visible = false
-label.Parent = gui
-gui.Parent = player:WaitForChild("PlayerGui")
+-- nome do assento no painel (o SeatId é interno)
+local SEAT_PT: { [string]: string } = {
+	driver = "Motorista",
+	gunner = "Atirador",
+	commander = "Comandante",
+	loader = "Municiador",
+	copilot = "Copiloto",
+}
+
+-- painel de época do veículo (VehicleHudView): este script só calcula e passa os números
+local Hud = VehicleHudView.new()
 
 local function key(k: Enum.KeyCode): number
 	return if UserInputService:IsKeyDown(k) then 1 else 0
@@ -240,20 +236,17 @@ local function groundStep(model: Model, chassis: BasePart, spec: any, dt: number
 	local g = VehicleDrive.GROUND[ctl.ground] or VehicleDrive.GROUND.earth
 	local speedFrac = math.clamp(math.abs(d.v) / 13, 0, 1)
 	Haptics.set("vt_ride", Enum.VibrationMotor.Small, g.rough * speedFrac * 0.3 + d.slip * 0.15)
-	local ds = VehicleDrive.spec(spec.id)
-	local gearTxt = if d.gear < 0 then "ré" elseif d.gear == 0 then "neutro" else d.gear .. "ª"
-	label.Text = string.format(
-		"%s\n%3.0f km/h  %s  %4.0f rpm  chão: %s%s\nintegridade %d  motor %d  esteiras %d",
-		spec.name,
-		d.v * 3.6,
-		gearTxt,
-		d.rpm * ds.rpmMax,
-		GROUND_PT[ctl.ground] or ctl.ground,
-		if d.floating then " (boiando)" elseif d.slip > 0.5 then " (patinando)" else "",
-		model:GetAttribute("Integrity") :: number,
-		model:GetAttribute("Engine") :: number,
-		model:GetAttribute("Tracks") :: number
-	)
+	Hud.ground({
+		name = spec.name,
+		kmh = d.v * 3.6,
+		gear = if d.gear < 0 then "ré" elseif d.gear == 0 then "neutro" else string.format("%dª", d.gear),
+		rpm = d.rpm,
+		ground = GROUND_PT[ctl.ground] or ctl.ground,
+		note = if d.floating then "boiando" elseif d.slip > 0.5 then "patinando" else nil,
+		integrity = model:GetAttribute("Integrity") :: number?,
+		engine = model:GetAttribute("Engine") :: number?,
+		tracks = model:GetAttribute("Tracks") :: number?,
+	})
 end
 
 local function heliStep(model: Model, chassis: BasePart, dt: number)
@@ -368,22 +361,23 @@ local function heliStep(model: Model, chassis: BasePart, dt: number)
 	live.slip, live.gear, live.floating = 0, 0, false
 	sendTelemetry(dt, heli.rotor, heli.collective, heli.rotor)
 	Haptics.set("vt_ride", Enum.VibrationMotor.Small, heli.rotor * 0.08)
-	label.Text = string.format(
-		"UH-34D  %d °C  rotor %3.0f%%\nvelocidade %3.0f nós  altura %4.0f m  subida %+.1f m/s\npotência %4.0f/%4.0f hp (exige %4.0f)  torque %3.0f%%%s",
-		AIR_C,
-		heli.rotor * 100,
-		V * 1.9438,
-		math.max(gearH, 0),
-		heli.vy,
-		pDemand / 745.7,
-		pAvail / 745.7,
-		pReq / 745.7,
-		torque * 100,
-		if heli.rotor < 1 and heli.rotor > 0
-			then "\nrotor acelerando…"
-			elseif pReq > pAvail then "\nSEM POTÊNCIA PARA PAIRAR: corra para ganhar sustentação"
-			else ""
-	)
+	-- o rotor acelerando aparece na linha de baixo (rotor %); o aviso vermelho é só falta de potência
+	-- com o rotor já em rotação de voo
+	Hud.heli({
+		name = "UH-34D",
+		tempC = AIR_C,
+		rotor = heli.rotor,
+		knots = V * 1.9438,
+		altM = math.max(gearH, 0),
+		climb = heli.vy,
+		demandHp = pDemand / 745.7,
+		availHp = pAvail / 745.7,
+		reqHp = pReq / 745.7,
+		torque = torque,
+		warn = if heli.rotor >= 1 and pReq > pAvail
+			then "SEM POTÊNCIA PARA PAIRAR: corra para ganhar sustentação"
+			else nil,
+	})
 end
 
 local state = {
@@ -428,7 +422,7 @@ RunService.Heartbeat:Connect(function(dt: number)
 		end
 		leaveDriver()
 		state.zoom = 0
-		label.Visible = false
+		Hud.hide()
 		return
 	end
 	local chassis = model:FindFirstChild("Chassis") :: BasePart?
@@ -447,7 +441,6 @@ RunService.Heartbeat:Connect(function(dt: number)
 		elseif state.zoom == 1 then (if seat:GetAttribute("Weapon") == "m60" then 50 else 20)
 		else Input.settings.fov
 	camera.FieldOfView += (target - camera.FieldOfView) * math.min(1, dt * 8)
-	label.Visible = true
 	if seat:GetAttribute("SeatId") == "driver" then
 		if state.driving ~= model then
 			leaveDriver()
@@ -469,23 +462,19 @@ RunService.Heartbeat:Connect(function(dt: number)
 		leaveDriver()
 		local w = seat:GetAttribute("Weapon")
 		local _, fireTxt = Input.glyph(if seatRole(seat, spec) == "door" then "v_door_fire" else "v_fire")
-		label.Text = string.format(
-			"%s — %s%s",
-			spec.name,
-			tostring(seat:GetAttribute("SeatId")),
-			if w == "rr_106"
-				then string.format(
-					"\ntubos carregados: %d (recarregar: parado)",
-					(model:GetAttribute("Tubes") :: number?) or 0
-				)
-				elseif w == "gun_90" then string.format(
-					"\nmunição: %s · atirar: %s",
-					tostring(model:GetAttribute("Ammo") or "he"),
-					fireTxt
-				)
-				elseif w then "\narma: " .. tostring(w) .. " · atirar: " .. fireTxt
-				else ""
-		)
+		local seatId = tostring(seat:GetAttribute("SeatId"))
+		local seatName = if spec.kind == "heli" and seatId == "gunner"
+			then "Porta"
+			elseif string.match(seatId, "^p%d+$") then "Passageiro"
+			else SEAT_PT[seatId] or seatId
+		Hud.seat({
+			name = spec.name,
+			seat = seatName,
+			weapon = if type(w) == "string" then w else nil,
+			ammo = if w == "gun_90" then string.upper(tostring(model:GetAttribute("Ammo") or "he")) else nil,
+			fire = fireTxt,
+			tubes = if w == "rr_106" then (model:GetAttribute("Tubes") :: number?) or 0 else nil,
+		})
 	end
 end)
 

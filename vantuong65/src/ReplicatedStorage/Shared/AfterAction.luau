@@ -52,15 +52,50 @@ function AfterAction.total(r: Report, faction: string): number
 end
 
 local TEAM = { US = "USMC", VC = "VC" }
-local VERB = {
-	neutralized = "perde o controle de",
-	captured = "toma",
-	advanced = "a frente passa para",
-	overrun = "toma o último setor:",
+
+-- Cada linha da linha do tempo é um modelo inteiro em português (hora, lado, setor e nome do setor
+-- entram nos %): o dicionário de idiomas traduz o modelo, não as peças.
+local MODELS = {
+	neutralized = {
+		named = "   %s  %s perde o controle de S%d (%s).",
+		plain = "   %s  %s perde o controle de S%d.",
+	},
+	captured = {
+		named = "   %s  %s toma S%d (%s).",
+		plain = "   %s  %s toma S%d.",
+	},
+	overrun = {
+		named = "   %s  %s toma o último setor: S%d (%s).",
+		plain = "   %s  %s toma o último setor: S%d.",
+	},
+	advanced = {
+		named = "   %s  a frente passa para S%d (%s).",
+		plain = "   %s  a frente passa para S%d.",
+	},
 }
 
-local function sectorName(e: Entry): string
-	return if e.name then string.format("S%d (%s)", e.sector or 0, e.name) else "S" .. tostring(e.sector or 0)
+local function entryLine(r: Report, e: Entry): string
+	local when = AfterAction.dtg(r, e.t)
+	local sector = e.sector or 0
+	local who = TEAM[e.team or ""] or (e.team or "?")
+	if e.kind == "neutralized" then
+		return if e.name
+			then string.format(MODELS.neutralized.named, when, who, sector, e.name)
+			else string.format(MODELS.neutralized.plain, when, who, sector)
+	elseif e.kind == "captured" then
+		return if e.name
+			then string.format(MODELS.captured.named, when, who, sector, e.name)
+			else string.format(MODELS.captured.plain, when, who, sector)
+	elseif e.kind == "overrun" then
+		return if e.name
+			then string.format(MODELS.overrun.named, when, who, sector, e.name)
+			else string.format(MODELS.overrun.plain, when, who, sector)
+	elseif e.kind == "advanced" then
+		return if e.name
+			then string.format(MODELS.advanced.named, when, sector, e.name)
+			else string.format(MODELS.advanced.plain, when, sector)
+	end
+	return string.format("   %s  %s", when, e.kind)
 end
 
 -- Linhas do relatório: cabeçalho, linha do tempo (até MAX_ENTRIES, mais recentes por último),
@@ -78,19 +113,7 @@ function AfterAction.lines(r: Report): { string }
 		table.insert(out, string.format("   (%d registros anteriores omitidos)", first - 1))
 	end
 	for i = first, #list do
-		local e = list[i]
-		local who = TEAM[e.team or ""] or (e.team or "?")
-		local text
-		if e.kind == "neutralized" then
-			text = string.format("%s %s %s.", who, VERB.neutralized, sectorName(e))
-		elseif e.kind == "advanced" then
-			text = string.format("%s %s.", VERB.advanced, sectorName(e))
-		elseif VERB[e.kind] then
-			text = string.format("%s %s %s.", who, VERB[e.kind], sectorName(e))
-		else
-			text = e.kind
-		end
-		table.insert(out, string.format("   %s  %s", AfterAction.dtg(r, e.t), text))
+		table.insert(out, entryLine(r, list[i]))
 	end
 	if #list == 0 then
 		table.insert(out, "   Sem mudança de controle nos setores.")
@@ -111,11 +134,16 @@ function AfterAction.lines(r: Report): { string }
 	table.insert(out, "")
 	table.insert(out, "3. RESULTADO")
 	local w = r.winner
-	local res = if w == "US" then "Vitória do USMC." elseif w == "VC" then "Vitória do VC." else "Empate."
-	if r.duration then
-		res ..= string.format(" Duração: %d min.", math.floor(r.duration / 60 + 0.5))
+	local mins = if r.duration then math.floor(r.duration / 60 + 0.5) else nil
+	local res
+	if w == "US" then
+		res = if mins then string.format("   Vitória do USMC. Duração: %d min.", mins) else "   Vitória do USMC."
+	elseif w == "VC" then
+		res = if mins then string.format("   Vitória do VC. Duração: %d min.", mins) else "   Vitória do VC."
+	else
+		res = if mins then string.format("   Empate. Duração: %d min.", mins) else "   Empate."
 	end
-	table.insert(out, "   " .. res)
+	table.insert(out, res)
 	if r.owner then
 		local o = {}
 		for s, own in r.owner do
@@ -124,7 +152,7 @@ function AfterAction.lines(r: Report): { string }
 				string.format("S%d %s", s, if own == "US" then "USMC" elseif own == "VC" then "VC" else "—")
 			)
 		end
-		table.insert(out, "   Setores no fim: " .. table.concat(o, " · "))
+		table.insert(out, string.format("   Setores no fim: %s", table.concat(o, " · ")))
 	end
 	return out
 end

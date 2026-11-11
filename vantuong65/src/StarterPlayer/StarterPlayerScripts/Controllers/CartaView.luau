@@ -1445,7 +1445,7 @@ function CartaView.updateLegend()
 		table.insert(lines, string.format("Frente: S%d (+15 min por setor)", st.front))
 	end
 	local g = CartaView.cursorGrid()
-	table.insert(lines, "Cursor: " .. g)
+	table.insert(lines, string.format("Cursor: %s", g))
 	t.Text = table.concat(lines, "\n")
 end
 

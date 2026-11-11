@@ -205,6 +205,10 @@ function ProgressionService.award(p: Player, kind: string, pairKey: string?)
 	end
 	local gx, gc = Progression.grant(s.window, now, rw.xp, rw.cr)
 	add(p, gx, gc, rw.label)
+	if kind == "kill" and gx <= 0 and gc <= 0 then
+		-- teto do minuto: sem XP, mas o abate conta; o aviso sai igual (a caveira do cliente)
+		push(p, { gain = { label = rw.label, xp = 0, cr = 0 } })
+	end
 end
 local award = ProgressionService.award
 
@@ -319,7 +323,7 @@ local function equipSkin(p: Player, id: string, on: boolean): string?
 		skinWeaponNow(p, s.weapon)
 	end
 	if s.kind ~= "weapon" and p.Character and faction == factionOf(p) then
-		return if on then s.name .. ": vale no próximo spawn" else "Tirada: vale no próximo spawn"
+		return if on then string.format("%s: vale no próximo spawn", s.name) else "Tirada: vale no próximo spawn"
 	end
 	return nil
 end
@@ -346,6 +350,8 @@ local function buySkin(p: Player, id: string)
 end
 
 function ProgressionService.start()
+	-- a caveira do abate (cliente) precisa do ID da imagem, não do decal publicado
+	require(script.Parent.ImagensUi).start()
 	PlayerData.Loaded:Connect(function(p: Player)
 		if not sess[p] then
 			newSess(p)
@@ -447,7 +453,7 @@ function ProgressionService.start()
 				local on = math.min(now - s.teamSince, seconds)
 				local gx, gc = Progression.matchReward(result, on, seconds)
 				local r = Progression.MATCH[result]
-				add(p, gx, gc, "Fim de partida: " .. (if r then r.label else result))
+				add(p, gx, gc, string.format("Fim de partida: %s", if r then r.label else result))
 				s.teamSince = now -- a próxima partida conta do zero
 			end
 			task.spawn(PlayerData.save, p)
@@ -472,7 +478,7 @@ function ProgressionService.start()
 		if now and s then
 			equipSkin(p, skinId, true)
 		end
-		push(p, { result = if now and s then s.name .. ": é sua" else nil })
+		push(p, { result = if now and s then string.format("%s: é sua", s.name) else nil })
 	end
 
 	-- tempo em campo: um minuto vivo e com lado rende um pouco

@@ -40,14 +40,14 @@ local function toggleView()
 	end
 	local on = not Input.settings.thirdPerson
 	Input.setSetting("thirdPerson", on)
-	Bus.fire("toast", if on then "Câmera: 3ª pessoa (" .. shoulderName() .. ")" else "Câmera: 1ª pessoa")
+	Bus.fire("toast", if on then string.format("Câmera: 3ª pessoa (%s)", shoulderName()) else "Câmera: 1ª pessoa")
 end
 Input.on("view_toggle", "press", toggleView) -- tecla O
 Input.on("view_toggle", "holdStart", toggleView) -- direcional → segurado
 
 local function swapShoulder()
 	Input.setSetting("shoulderLeft", not Input.settings.shoulderLeft)
-	Bus.fire("toast", "Câmera: " .. shoulderName())
+	Bus.fire("toast", string.format("Câmera: %s", shoulderName()))
 end
 Input.on("shoulder_swap", "press", swapShoulder) -- tecla I
 Input.on("shoulder_swap", "holdStart", swapShoulder) -- direcional ↑ segurado

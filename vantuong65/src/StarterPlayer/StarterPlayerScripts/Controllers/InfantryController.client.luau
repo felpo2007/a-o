@@ -174,7 +174,7 @@ end
 -- feed e marcadores recebidos
 local hud = UiKit.screen("VT65Comms", 12)
 local feed = Instance.new("Frame")
-feed.Position = UDim2.new(0, 16, 1, -300)
+feed.Position = UDim2.new(0, 16, 1, -330) -- acima do cartão do tutorial (mais alto com o "Pular", D-90)
 feed.Size = UDim2.fromOffset(420, 160)
 feed.BackgroundTransparency = 1
 feed.Parent = hud
@@ -356,7 +356,7 @@ local function openComm()
 	wheelOpen = "comm"
 	Wheel.open(
 		"comm",
-		"Comunicação · " .. (if channel == "squad" then "squad" else "comando"),
+		if channel == "squad" then "Comunicação · squad" else "Comunicação · comando",
 		Comms.COMM,
 		function(id)
 			return id ~= "page_command" or commandAllowed()

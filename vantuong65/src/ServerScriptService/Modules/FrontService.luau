@@ -242,7 +242,7 @@ function FrontService.start()
 			if r.faction == faction then
 				table.insert(out, {
 					id = "squad:" .. sid,
-					name = "Reunião do squad " .. r.name,
+					name = string.format("Reunião do squad %s", r.name),
 					x = r.x,
 					z = r.z,
 					kind = "rally",

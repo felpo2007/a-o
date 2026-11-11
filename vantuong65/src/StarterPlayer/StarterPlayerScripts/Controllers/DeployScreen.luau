@@ -993,7 +993,12 @@ local function chooseFaction(f: string)
 	end
 	local why = joinBlocked(f)
 	if why then
-		notify("Este lado está " .. string.lower(why) .. ": o servidor deve recusar.")
+		-- frase inteira por motivo: o dicionário de idiomas traduz a frase, não os pedaços
+		notify(
+			if why == "LOTADO"
+				then "Este lado está lotado: o servidor deve recusar."
+				else "Este lado está em excesso: o servidor deve recusar."
+		)
 	end
 	Net.event("Team_Choose"):FireServer(f)
 end
@@ -1052,7 +1057,7 @@ local function factionCard(f: string, x: number): FCard
 	t.FontFace = HEAD_B
 	t.Text = info.title
 	local u = txt(b, TYPE, 15, INK, 20, 68, 520, 20)
-	u.Text = info.unit .. " · " .. info.kit
+	u.Text = string.format("%s · %s", info.unit, info.kit)
 	hline(b, UiKit.RULE_RED, 20, 92, 520)
 	local qg = txt(b, TYPE, 14, INK, 20, 98, 520, 20)
 	qg.Text = string.format("QG %s · %s", gridRef(hq.x, hq.z), hq.note)
@@ -1642,7 +1647,7 @@ do
 		LobbyScene.setLoadout(f, if lo then lo[1] else nil)
 		local sid = player:GetAttribute("SquadId")
 		local squadName = if type(sid) == "string" then string.match(sid, ":(.+)$") else nil
-		caption(f, id, if squadName then "Squad " .. squadName else nil)
+		caption(f, id, if squadName then string.format("Squad %s", squadName) else nil)
 	end
 
 	local function chooseRole(id: string)
@@ -1652,7 +1657,11 @@ do
 			return
 		end
 		if c and c.blocked then
-			notify(c.blocked .. ": o servidor deve recusar.")
+			notify(
+				if c.blocked == "SÓ O LÍDER"
+					then "Papel só do líder do squad: o servidor deve recusar."
+					else "Papel ocupado: o servidor deve recusar."
+			)
 		end
 		Net.event("Role_Choose"):FireServer(id)
 	end
@@ -1742,22 +1751,21 @@ do
 		local unit: string? = if sq then sq.unit else unitOfSquad(f, sid)
 		local def = if unit then Roles.units[f][unit] else nil
 		local me = player.UserId
-		local leaderText = ""
+		-- lista "A · B · C": cada pedaço é uma frase ou um modelo inteiro (o Lang traduz item a item)
+		local squadName = string.match(sid, ":(.+)$") or sid
+		local infoParts = { string.format("Squad %s", squadName), if unit then UNIT_NAME[unit] or unit else "?" }
+		if sq and def then
+			table.insert(infoParts, string.format("%d de %d", #sq.members, def.size))
+		end
 		if sq and sq.leader then
 			local lp = Players:GetPlayerByUserId(sq.leader)
-			leaderText = if sq.leader == me
-				then " · líder: você"
-				elseif lp then " · líder: " .. lp.DisplayName
-				else ""
+			if sq.leader == me then
+				table.insert(infoParts, "líder: você")
+			elseif lp then
+				table.insert(infoParts, string.format("líder: %s", lp.DisplayName))
+			end
 		end
-		local squadName = string.match(sid, ":(.+)$") or sid
-		rInfo.Text = string.format(
-			"Squad %s · %s%s%s",
-			squadName,
-			if unit then UNIT_NAME[unit] or unit else "?",
-			if sq and def then string.format(" · %d de %d", #sq.members, def.size) else "",
-			leaderText
-		)
+		rInfo.Text = table.concat(infoParts, " · ")
 		local cur = currentRole()
 		local firstFree: string? = nil
 		local firstId: string? = nil
@@ -1791,7 +1799,7 @@ do
 						free = max - taken
 						card.slots.Text = if sq
 							then string.format("VAGA %d/%d", math.max(free or 0, 0), max)
-							else "VAGA ?/" .. max
+							else string.format("VAGA ?/%d", max)
 					else
 						card.slots.Text = "LIVRE"
 					end
@@ -1880,9 +1888,11 @@ do
 		iCaption.Text = UiKit.upper(if r then r.name else rid)
 		local _, padText = Input.glyph("map_role", "map")
 		local text = Acabamento.viet(table.concat({
-			"SQUAD  " .. squadName .. (if unit then " (" .. (UNIT_NAME[unit] or unit) .. ")" else ""),
-			"ARMAS  " .. weaponNames(lo),
-			"QG     " .. gridRef(hq.x, hq.z),
+			if unit
+				then string.format("SQUAD  %s (%s)", squadName, UNIT_NAME[unit] or unit)
+				else string.format("SQUAD  %s", squadName),
+			string.format("ARMAS  %s", weaponNames(lo)),
+			string.format("QG     %s", gridRef(hq.x, hq.z)),
 			"",
 			"Escolha na carta um ponto PRONTO.",
 			string.format("Trocar de papel: aba PAPEL ou %s (+15 s)", keyName(padText)),
@@ -1917,8 +1927,8 @@ do
 	local dFolder, dInfo = folder(pages.daily, "FICHA · RECOMPENSA DIÁRIA", PANEL_W, PANEL_H)
 	local dRule = txt(dFolder, TYPE, 14, INK, 16, 52, PANEL_W - 32, 40)
 	dRule.TextYAlignment = Enum.TextYAlignment.Top
-	dRule.Text = "Um selo por dia (dia UTC). Pulou um dia, a sequência volta ao dia 1; os selos e os itens já "
-		.. "ganhos ficam com você. Dias 3 e 7: item que só sai daqui."
+	dRule.Text =
+		"Um selo por dia (dia UTC). Pulou um dia, a sequência volta ao dia 1; os selos e os itens já ganhos ficam com você. Dias 3 e 7: item que só sai daqui."
 	local cells: { DCell } = {}
 	for i = 1, Commerce.TRACK_DAYS do
 		local x = 14 + (i - 1) * 94
@@ -1998,7 +2008,7 @@ do
 			return "★ disponível", "★ RESGATAR"
 		elseif daily.claimedToday then
 			local left = dailyLeft()
-			return "volta em " .. string.sub(hms(left), 1, 5), "CARIMBADO ✓"
+			return string.format("volta em %s", string.sub(hms(left), 1, 5)), "CARIMBADO ✓"
 		end
 		return "aguarde", ""
 	end
@@ -2029,7 +2039,7 @@ do
 		local tomorrow = day % Commerce.TRACK_DAYS + 1
 		for i, c in cells do
 			local entry = Commerce.DailyTrack[i]
-			c.day.Text = "DIA " .. i
+			c.day.Text = string.format("DIA %d", i)
 			c.date.Text = entry.date
 			local items = entry.items
 			local mine = items and items[f]
@@ -2071,7 +2081,7 @@ do
 			claimLook.base(STAMP)
 			claimBtn.TextColor3 = CARD
 		elseif d.claimedToday then
-			claimBtn.Text = "CARIMBADO HOJE · próximo selo em " .. hms(dailyLeft()) .. " (UTC)"
+			claimBtn.Text = string.format("CARIMBADO HOJE · próximo selo em %s (UTC)", hms(dailyLeft()))
 			claimLook.base(DRAB)
 			claimBtn.TextColor3 = KHAKI
 		else
@@ -2089,8 +2099,14 @@ do
 			for _, id in (res.newItems or {}) :: { string } do
 				table.insert(list, itemName(id))
 			end
-			dResult.Text = string.format("Selo do dia %d recebido: +1 dia de serviço.", res.day or day)
-				.. (if #list > 0 then " Novo no armário da Intendência: " .. table.concat(list, " e ") .. "." else "")
+			-- duas frases inteiras (com e sem item novo); os itens entram juntos no %s
+			dResult.Text = if #list > 0
+				then string.format(
+					"Selo do dia %d recebido: +1 dia de serviço. Novo no armário da Intendência: %s.",
+					res.day or day,
+					table.concat(list, " · ")
+				)
+				else string.format("Selo do dia %d recebido: +1 dia de serviço.", res.day or day)
 		elseif res and res.reason then
 			dResult.Text = REASON[res.reason] or REASON.error
 		elseif d.broken then
@@ -2305,10 +2321,12 @@ local function renderTabs(f: string, st: any)
 		local sq = findSquad(st, sid)
 		local unit = if sq then sq.unit else unitOfSquad(f, sid)
 		local def = if unit then Roles.units[f][unit] else nil
-		squadText = if sq and def then string.format("✓ %s %d/%d", name, #sq.members, def.size) else "✓ " .. name
+		squadText = if sq and def
+			then string.format("✓ %s %d/%d", name, #sq.members, def.size)
+			else string.format("✓ %s", name)
 	end
 	local rid = currentRole()
-	local roleText = if rid and Roles.roles[rid] then "✓ " .. Roles.roles[rid].name else "escolher"
+	local roleText = if rid and Roles.roles[rid] then string.format("✓ %s", Roles.roles[rid].name) else "escolher"
 	local insertText = if not rid then "falta o papel" elseif alive() then "em campo" else "carta de spawn"
 	local dTab = dailySummary()
 	tabs.squad.info.Text = squadText
@@ -2316,16 +2334,16 @@ local function renderTabs(f: string, st: any)
 	tabs.insert.info.Text = insertText
 	tabs.daily.info.Text = dTab
 	tabs.shop.info.Text = "loja e armário"
-	tabs.faction.info.Text = "agora: " .. FACTION[f].short
+	tabs.faction.info.Text = string.format("agora: %s", FACTION[f].short)
 	tabs.desk.info.Text = "visão geral"
 	for _, t in tabs do
 		tabStyle(t)
 	end
 	-- as mesmas situações nas etiquetas dos objetos da mesa
-	LobbyScene.setSub("squad", "SQUAD · " .. squadText)
-	LobbyScene.setSub("role", "PAPEL · " .. roleText)
-	LobbyScene.setSub("insert", "INSERÇÃO · " .. insertText)
-	LobbyScene.setSub("daily", "RECOMPENSA DIÁRIA · " .. dTab)
+	LobbyScene.setSub("squad", string.format("SQUAD · %s", squadText))
+	LobbyScene.setSub("role", string.format("PAPEL · %s", roleText))
+	LobbyScene.setSub("insert", string.format("INSERÇÃO · %s", insertText))
+	LobbyScene.setSub("daily", string.format("RECOMPENSA DIÁRIA · %s", dTab))
 end
 
 -- textos das peças da mesa (rádio, dossiê, calendário)
@@ -2347,13 +2365,14 @@ local function renderDesk(f: string, st: any)
 	LobbyScene.setText(
 		"dossier",
 		table.concat({
-			"POSTO: " .. (if type(player:GetAttribute("Rank")) == "number"
-				then tostring(player:GetAttribute("Rank"))
-				else "—"),
-			"SQUAD: " .. (squadName or "—"),
-			"PAPEL: " .. (if rid and Roles.roles[rid] then Roles.roles[rid].name else "—"),
-			"ARMAS: " .. (if rid then weaponNames(lo) else "—"),
-			"QG: " .. gridRef(hq.x, hq.z),
+			string.format(
+				"POSTO: %s",
+				if type(player:GetAttribute("Rank")) == "number" then tostring(player:GetAttribute("Rank")) else "—"
+			),
+			string.format("SQUAD: %s", squadName or "—"),
+			string.format("PAPEL: %s", if rid and Roles.roles[rid] then Roles.roles[rid].name else "—"),
+			string.format("ARMAS: %s", if rid then weaponNames(lo) else "—"),
+			string.format("QG: %s", gridRef(hq.x, hq.z)),
 		}, "\n")
 	)
 	local d = daily
@@ -2732,7 +2751,7 @@ task.spawn(function()
 			elseif f then
 				local dTab, note = dailySummary()
 				tabs.daily.info.Text = dTab
-				LobbyScene.setSub("daily", "RECOMPENSA DIÁRIA · " .. dTab)
+				LobbyScene.setSub("daily", string.format("RECOMPENSA DIÁRIA · %s", dTab))
 				LobbyScene.setText("calNote", note)
 				if panel == "daily" then
 					renderDaily(f)

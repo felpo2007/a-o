@@ -6,10 +6,21 @@
 -- (Toast): tarja "TUTORIAL · papel" com o passo (1/9) e uma pauta de progresso; o botão da ação
 -- fica num chip de papel à esquerda e em latão no texto. Na troca de passo o conteúdo sai e entra
 -- deslizando. No veículo, o painel vai para a direita do painel do veículo (VehicleController).
+-- Pular (pedido do dono, 2026-11-11: "dê a opção de pular o tutorial"): o pé do cartão mostra como,
+-- e pede confirmação para não pular sem querer:
+--   - teclado: segurar Backspace por 1 s (a barra de latão enche). Backspace não tem ação nos
+--     contextos de jogo (InputMap.keyConflicts, tests/luau/interface.luau);
+--   - controle: os 15 botões já têm ação na infantaria (tocar e segurar), e qualquer um a mais
+--     quebraria o InputMap.conflicts. Então: segurar View (menu do jogo, que já existe) abre o menu
+--     com a faixa do tutorial no alto e "Pular" focado; lá, segurar Y (livre no menu) ou A duas vezes;
+--   - toque e clique: tocar duas vezes no pé do cartão.
+-- O passo atual vai em atributos locais do jogador ("TutorialPasso", "TutorialTotal",
+-- "TutorialPapel") para a faixa do menu do jogo.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TextService = game:GetService("TextService")
 local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
 
 local InputMap = require(ReplicatedStorage.Shared.InputMap)
 local Net = require(ReplicatedStorage.Shared.Net)
@@ -59,7 +70,7 @@ end
 
 local function glyph(actionId: string): string
 	local _, txt, hold = keyOf(actionId)
-	return if hold then txt .. " (segurar)" else txt
+	return if hold then string.format("%s (segurar)", txt) else txt
 end
 
 -- ===== painel =====
@@ -80,6 +91,8 @@ local BODY_SIZE = UiKit.text(16)
 local BODY_X = PAD + CHIP_W + PAD
 local BODY_W = W - BODY_X - PAD
 local CONTENT_Y = 4 + HEAD_H + 6 + PIP_H + PAD
+local FOOT_H = if TV then 40 else 26 -- pé do cartão: como pular
+local SKIP_HOLD = 1.0 -- s segurando Backspace
 local MAX_STEPS = 12 -- teste da F6: cada papel tem de 3 a 12 passos
 local HOT = UiKit.BRASS -- o botão em destaque
 local HOT_HEX = HOT:ToHex()
@@ -241,6 +254,39 @@ body.TextYAlignment = Enum.TextYAlignment.Center
 body.TextWrapped = true
 body.RichText = true
 
+-- pé do cartão: como pular (chips pelo dispositivo) e a barra de latão do segurar
+local foot = Instance.new("TextButton") -- toque/clique: dois toques pulam
+foot.Name = "Pular"
+foot.AnchorPoint = Vector2.new(0, 1)
+foot.Position = UDim2.new(0, 0, 1, 0)
+foot.Size = UDim2.new(1, 0, 0, FOOT_H)
+foot.BackgroundColor3 = UiKit.NIGHT
+foot.BackgroundTransparency = 0.45
+foot.BorderSizePixel = 0
+foot.AutoButtonColor = false
+foot.Text = ""
+foot.Selectable = false -- no controle o caminho é o menu do jogo (segurar View)
+foot.Parent = panel
+UiKit.corner(foot, 4)
+local footRule = Instance.new("Frame")
+footRule.BackgroundColor3 = UiKit.KHAKI
+footRule.BackgroundTransparency = 0.78
+footRule.BorderSizePixel = 0
+footRule.Size = UDim2.new(1, -2 * PAD, 0, 1)
+footRule.Position = UDim2.fromOffset(PAD, 0)
+footRule.Parent = foot
+local footChips = UiKit.chips(foot, FOOT_H - 6, false, if TV then 22 else 13)
+footChips.frame.Position = UDim2.fromOffset(PAD, 3)
+footChips.frame.Size = UDim2.new(1, -2 * PAD, 0, FOOT_H - 6)
+local skipBar = Instance.new("Frame")
+skipBar.Name = "Segurar"
+skipBar.AnchorPoint = Vector2.new(0, 1)
+skipBar.Position = UDim2.new(0, 0, 1, 0)
+skipBar.Size = UDim2.new(0, 0, 0, if TV then 4 else 3)
+skipBar.BackgroundColor3 = UiKit.BRASS
+skipBar.BorderSizePixel = 0
+skipBar.Parent = foot
+
 -- o que esmaece na troca de passo, com a transparência de projeto
 local fadeItems: { { inst: Instance, prop: string, base: number } } = {
 	{ inst = chip, prop = "BackgroundTransparency", base = 0 },
@@ -290,7 +336,7 @@ local function apply(st: Tutorial.Step): number
 		local i, k, hold = keyOf(st.action)
 		img, key, sub = i, k, if hold then "SEGURAR" else ""
 	elseif st.range then
-		key, sub = tostring(st.range) .. " m", "ALVO"
+		key, sub = string.format("%d m", st.range), "ALVO"
 	end
 	local top = if sub ~= "" then CHIP_H - SUB_H - 2 else CHIP_H
 	chipIcon.Image = img or ""
@@ -309,7 +355,24 @@ local function apply(st: Tutorial.Step): number
 	local ch = math.max(CHIP_H, math.ceil(h) + 4)
 	content.Size = UDim2.new(1, 0, 0, ch)
 	body.Size = UDim2.fromOffset(BODY_W, ch)
-	return CONTENT_Y + ch + PAD
+	return CONTENT_Y + ch + PAD + FOOT_H
+end
+
+-- pé do cartão pelo dispositivo; armed = o primeiro toque já veio (falta confirmar)
+local armedUntil = 0
+local function renderFoot()
+	footChips.clear()
+	local dev = Input.device()
+	if os.clock() < armedUntil then
+		footChips.add(nil, nil, "!", "Toque de novo para pular o tutorial")
+	elseif dev == "gamepad" then
+		local img = UiKit.padImage(Enum.KeyCode.ButtonSelect)
+		footChips.add(img, nil, "View", "segurar: menu → Pular o tutorial")
+	elseif dev == "touch" then
+		footChips.add(nil, nil, "2×", "toque aqui para pular o tutorial")
+	else
+		footChips.add(nil, nil, "Backspace", "segurar: pular o tutorial")
+	end
 end
 
 local SLIDE = TweenInfo.new(0.32, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
@@ -329,6 +392,7 @@ end
 -- aparece entrando pela esquerda
 local function showPanel(st: Tutorial.Step)
 	swapToken += 1
+	renderFoot()
 	root.Size = UDim2.fromOffset(W, apply(st))
 	for _, f in fadeItems do
 		(f.inst :: any)[f.prop] = f.base
@@ -375,7 +439,15 @@ local function casualtyShown(): boolean
 	return false
 end
 
+local function publish()
+	local def = role and Roles.roles[role]
+	player:SetAttribute("TutorialPasso", if index > 0 then index else nil)
+	player:SetAttribute("TutorialTotal", if index > 0 then #steps else nil)
+	player:SetAttribute("TutorialPapel", if index > 0 and def then tostring(def.name) else nil)
+end
+
 local function draw()
+	publish()
 	local st = current()
 	local ctx = Input.context()
 	local hurt = Input.state.downed or not Input.state.alive or casualtyShown()
@@ -408,7 +480,8 @@ local function draw()
 		return
 	end
 	-- o texto entra na chave: trocar de dispositivo ou de tecla redesenha
-	local key = string.format("%s|%d|%s", role or "", index, Tutorial.render(st, glyph))
+	local key = string.format("%s|%d|%s|%s", role or "", index, Tutorial.render(st, glyph), Input.device())
+	renderFoot()
 	if not shown then
 		shownKey = key
 		showPanel(st)
@@ -421,15 +494,63 @@ local function draw()
 	end
 end
 
-local function finish()
+local function finish(skipped: boolean?)
 	if role then
 		done[role] = true
 		Net.event("Tutorial_Done"):FireServer(role)
-		Toast.show("Tutorial concluído. Refazer: menu do jogo → Squad e papel.", "sucesso", { title = "Tutorial" })
+		if skipped then
+			Toast.show("Tutorial pulado. Refazer: menu do jogo → Squad e papel.", "info", { title = "Tutorial" })
+		else
+			Toast.show(
+				"Tutorial concluído. Refazer: menu do jogo → Squad e papel.",
+				"sucesso",
+				{ title = "Tutorial" }
+			)
+		end
 	end
 	index = 0
 	draw()
 end
+
+-- ===== pular =====
+local function skip()
+	if role and index > 0 then
+		armedUntil = 0
+		finish(true)
+	end
+end
+local skipHold = UiKit.hold(skipBar, SKIP_HOLD, skip)
+-- teclado: segurar Backspace com o cartão na tela (nunca numa caixa de texto)
+UserInputService.InputBegan:Connect(function(io: InputObject)
+	if io.KeyCode ~= Enum.KeyCode.Backspace or not shown or UserInputService:GetFocusedTextBox() then
+		return
+	end
+	skipHold.start()
+end)
+UserInputService.InputEnded:Connect(function(io: InputObject)
+	if io.KeyCode == Enum.KeyCode.Backspace then
+		skipHold.stop()
+	end
+end)
+-- toque e clique: o primeiro toque arma (3 s), o segundo pula
+foot.Activated:Connect(function()
+	if not shown then
+		return
+	end
+	if os.clock() < armedUntil then
+		skip()
+		return
+	end
+	armedUntil = os.clock() + 3
+	renderFoot()
+	TweenService:Create(foot, TweenInfo.new(0.15), { BackgroundColor3 = UiKit.STAMP }):Play()
+	task.delay(3.05, function()
+		TweenService:Create(foot, TweenInfo.new(0.3), { BackgroundColor3 = UiKit.NIGHT }):Play()
+		if os.clock() >= armedUntil then
+			renderFoot()
+		end
+	end)
+end)
 
 local function advance(kind: string, value: any)
 	local st = current()
@@ -487,11 +608,7 @@ end)
 Bus.on("tutorial_restart", function()
 	begin(player:GetAttribute("Role") :: string?, true)
 end)
-Bus.on("tutorial_skip", function()
-	if role and index > 0 then
-		finish()
-	end
-end)
+Bus.on("tutorial_skip", skip)
 Input.StateChanged:Connect(function()
 	draw()
 end)
@@ -546,3 +663,19 @@ task.spawn(function()
 		onSpawn()
 	end
 end)
+
+-- gancho de teste (só no Studio): workspace:SetAttribute("VT65DevTela", "tutorial") recomeça o
+-- tutorial do papel atual (ou do fuzileiro) para a foto do cartão com o "Pular"; precisa estar em
+-- campo (no lobby e nos menus o cartão fica escondido)
+if game:GetService("RunService"):IsStudio() then
+	workspace:GetAttributeChangedSignal("VT65DevTela"):Connect(function()
+		if workspace:GetAttribute("VT65DevTela") ~= "tutorial" then
+			return
+		end
+		local r = player:GetAttribute("Role")
+		begin(if type(r) == "string" then r else "rifleman", true)
+		task.defer(function()
+			workspace:SetAttribute("VT65DevTela", nil)
+		end)
+	end)
+end

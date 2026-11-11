@@ -671,34 +671,12 @@ GuiService.MenuClosed:Connect(function()
 	Input.event("roblox_menu_close")
 end)
 
--- controle desconectado: pausa com aviso; volta com o primeiro controle que apertar um botão
-local overlay = Instance.new("ScreenGui")
-overlay.Name = "VT65Reconnect"
-overlay.DisplayOrder = 100
-overlay.ResetOnSpawn = false
-overlay.Enabled = false
-pcall(function()
-	overlay.ScreenInsets = Enum.ScreenInsets.DeviceSafeInsets
-end)
-local msg = Instance.new("TextLabel")
-msg.Size = UDim2.fromScale(1, 1)
-msg.BackgroundTransparency = 0.35
-msg.BackgroundColor3 = Color3.new(0, 0, 0)
-msg.TextColor3 = Color3.new(1, 1, 1)
-msg.Font = Enum.Font.GothamBold
-msg.TextSize = 32
-msg.Text = "Controle desconectado.\nReconecte e aperte qualquer botão."
-msg.Parent = overlay
-overlay.Parent = player:WaitForChild("PlayerGui")
-
+-- controle desconectado: pausa; volta com o primeiro controle que apertar um botão. O aviso na
+-- tela (cartão de época) é do Reconexao.client, que olha Input.state.disconnected.
 UserInputService.GamepadDisconnected:Connect(function(gp)
 	if gp == primaryPad and device == "gamepad" then
 		Input.event("disconnect")
-		overlay.Enabled = true
 	end
-end)
-Input.StateChanged:Connect(function()
-	overlay.Enabled = Input.state.disconnected
 end)
 
 -- vida do personagem → estados
@@ -809,6 +787,10 @@ function Input.replay(events: { any }, sticks: { any }?)
 end
 
 -- ===== início =====
+-- loaded: a configuração da conta já chegou. pendingLang: idioma escolhido antes disso (tela de
+-- entrada, ReplicatedFirst/Idioma); vale por cima do que estava salvo e é gravado.
+Input.loaded = false
+Input.pendingLang = nil :: string?
 rebuildBindings()
 buildIAS()
 readPreferred()
@@ -818,12 +800,23 @@ task.spawn(function()
 		return Net.func("Settings_Get"):InvokeServer()
 	end)
 	if ok and saved then
-		Input.settings = InputMap.validate(saved)
+		local raw = saved :: any
+		local want = Input.pendingLang
+		if want and type(raw) == "table" then
+			raw = table.clone(raw)
+			raw.lang = want
+		end
+		Input.settings = InputMap.validate(raw)
 		rebuildBindings()
 		buildIAS()
 		syncContexts()
 		settingsChanged:Fire(Input.settings)
+		if want then
+			queueSave()
+		end
 	end
+	Input.loaded = true
+	Input.pendingLang = nil
 end)
 
 return Input

@@ -250,6 +250,16 @@ local stack = Instance.new("UIListLayout")
 stack.SortOrder = Enum.SortOrder.LayoutOrder
 stack.HorizontalAlignment = Enum.HorizontalAlignment.Center
 stack.Parent = band
+-- janela estreita (celular, janela pequena): a faixa encolhe inteira, nada passa da borda
+UiKit.fit(screen, band, WIDTH + 8, 1, 8)
+
+-- Avisos que outra tela mostra melhor: intercept(chave, fn) recebe o texto de Toast.show com essa
+-- chave; fn devolve true quando mostrou (o aviso não entra na pilha). O HUD de campo (HudCampo)
+-- mostra os da arma ("arma": seletor, alça, troca) no cartão da arma, embaixo à direita.
+local intercepts: { [string]: (text: string) -> boolean } = {}
+function Toast.intercept(key: string, fn: ((text: string) -> boolean)?)
+	intercepts[key] = fn :: any
+end
 
 type Entry = {
 	form: string, -- "texto", "ganho" ou "livre"
@@ -602,6 +612,13 @@ function Toast.show(text: string, kind: string?, opts: Options?)
 		return
 	end
 	local o: Options = opts or {}
+	local hook = o.key and intercepts[o.key]
+	if hook then
+		local ok, taken = pcall(hook, text)
+		if ok and taken then
+			return
+		end
+	end
 	local k, rest, known = classify(text, kind)
 	local title: string, body: string
 	if o.title then

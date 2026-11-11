@@ -120,7 +120,7 @@ rebuild = function()
 	local role = player:GetAttribute("Role")
 	gridBox.Visible = mode == "fire" and not Input.isGamepad()
 	if mode == "fire" then
-		title.Text = "APOIO DE FOGO — suprimento " .. tostring(player:GetAttribute("Supply") or 0)
+		title.Text = string.format("APOIO DE FOGO — suprimento %s", tostring(player:GetAttribute("Supply") or 0))
 		local n = 0
 		for id, a in FireSupport.ABILITIES do
 			if a.faction == faction and a.who == role then
@@ -139,7 +139,7 @@ rebuild = function()
 			status.Text = "Seu papel não pede fogo (comandante ou morteiro)."
 		end
 	elseif mode == "build" then
-		title.Text = "CONSTRUIR — suprimento " .. tostring(player:GetAttribute("Supply") or 0)
+		title.Text = string.format("CONSTRUIR — suprimento %s", tostring(player:GetAttribute("Supply") or 0))
 		local n = 0
 		for id, b in Logistics.BUILDS do
 			if role and b.role[role :: string] then

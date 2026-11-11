@@ -7,6 +7,7 @@
 local GuiService = game:GetService("GuiService")
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
 
 local Lang = require(game:GetService("ReplicatedStorage").Shared.Lang)
 local Input = require(script.Parent.Input)
@@ -29,9 +30,14 @@ UiKit.RULE_BLUE = Color3.fromRGB(118, 138, 168) -- pauta da ficha
 UiKit.STAMP = Color3.fromRGB(150, 40, 30) -- tinta de carimbo
 UiKit.BRASS = Color3.fromRGB(214, 172, 72) -- latão: recompensa e botão em destaque
 
+UiKit.CARD_DARK = Color3.fromRGB(26, 28, 21) -- cartão oliva quase preto (avisos, HUD)
+UiKit.BRASS_LIGHT = Color3.fromRGB(236, 202, 116) -- título em latão claro sobre oliva
+
 -- tipografia dos avisos e do tutorial, a mesma do lobby: título condensado (Oswald) e texto legível
 UiKit.HEAD_FONT = Font.fromName("Oswald", Enum.FontWeight.Bold)
+UiKit.HEAD_REG = Font.fromName("Oswald", Enum.FontWeight.Regular)
 UiKit.BODY_FONT = Enum.Font.Arimo
+UiKit.TYPE_FONT = Enum.Font.SpecialElite -- máquina de escrever (sem as letras do vietnamita)
 
 -- O Oswald pode não ter as letras do vietnamita (como a máquina de escrever do lobby): texto com
 -- letra fora do Latin-1 vai no Arimo, que tem.
@@ -312,5 +318,284 @@ Input.DeviceChanged:Connect(function(d)
 		GuiService.SelectedObject = nil
 	end
 end)
+
+-- ===== peças de época compartilhadas (pedido do dono, 2026-11-11: "melhore todas as interfaces") =====
+-- Usadas pelas telas refeitas (menu do jogo, relatório pós-ação, roda, loja, HUD, aviso do controle).
+function UiKit.corner(o: Instance, r: number): UICorner
+	local c = Instance.new("UICorner")
+	c.CornerRadius = UDim.new(0, r)
+	c.Parent = o
+	return c
+end
+
+-- filete na borda (não no texto)
+function UiKit.edge(o: Instance, color: Color3, thick: number, tr: number): UIStroke
+	local s = Instance.new("UIStroke")
+	s.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+	s.Color = color
+	s.Thickness = thick
+	s.Transparency = tr
+	s.Parent = o
+	return s
+end
+
+-- luz de cima (o UIGradient só pinta o próprio objeto): low = quanto escurece embaixo
+function UiKit.lit(o: Instance, low: number?, rot: number?): UIGradient
+	local k = low or 0.7
+	local g = Instance.new("UIGradient")
+	g.Rotation = rot or 90
+	g.Color = ColorSequence.new(Color3.new(1, 1, 1), Color3.new(k, k * 0.98, k * 0.94))
+	g.Parent = o
+	return g
+end
+
+-- rótulo sem fundo; font aceita Enum.Font ou Font
+function UiKit.rotulo(parent: Instance, size: number, color: Color3, font: any?): TextLabel
+	local t = Instance.new("TextLabel")
+	t.BackgroundTransparency = 1
+	t.BorderSizePixel = 0
+	t.TextColor3 = color
+	t.TextSize = UiKit.text(size)
+	if typeof(font) == "Font" then
+		t.FontFace = font
+	elseif typeof(font) == "EnumItem" then
+		t.Font = font :: any
+	else
+		t.Font = UiKit.BODY_FONT
+	end
+	t.TextXAlignment = Enum.TextXAlignment.Left
+	t.Parent = parent
+	return t
+end
+
+-- ----- teclas e botões -----
+local KEY_TEXT: { [string]: string } = {
+	MouseLeftButton = "LMB",
+	MouseRightButton = "RMB",
+	MouseMiddleButton = "MMB",
+	LeftShift = "Shift",
+	LeftControl = "Ctrl",
+	Return = "Enter",
+	Space = "Espaço",
+	Backspace = "Backspace",
+	One = "1",
+	Two = "2",
+	Three = "3",
+	Four = "4",
+}
+function UiKit.keyName(code: string): string
+	return KEY_TEXT[code] or code
+end
+
+-- imagem do botão no controle conectado (Xbox, PlayStation...) ou nil
+function UiKit.padImage(code: Enum.KeyCode): string?
+	local img: string? = nil
+	pcall(function()
+		local v = UserInputService:GetImageForKeyCode(code) :: any
+		if type(v) == "string" and v ~= "" then
+			img = v
+		end
+	end)
+	return img
+end
+
+-- ----- dicas de botão em chip -----
+-- Uma fileira de chips reaproveitados: imagem do botão do controle ou tecla em relevo (ficha clara,
+-- filete de tinta, luz de cima) e o que ela faz. light = fileira sobre papel (texto em tinta).
+export type Chips = {
+	frame: Frame,
+	clear: () -> (),
+	add: (img: string?, img2: string?, key: string, label: string) -> (),
+	action: (actionId: string, ctx: string?, label: string) -> (),
+	pair: (a: string, b: string, ctx: string?, label: string) -> (),
+}
+type ChipSlot = { f: Frame, img: ImageLabel, img2: ImageLabel, key: TextLabel, t: TextLabel }
+function UiKit.chips(parent: Instance, height: number, light: boolean?, size: number?): Chips
+	local row = Instance.new("Frame")
+	row.Name = "Dicas"
+	row.BackgroundTransparency = 1
+	row.Size = UDim2.new(1, 0, 0, height)
+	row.Parent = parent
+	local lay = Instance.new("UIListLayout")
+	lay.FillDirection = Enum.FillDirection.Horizontal
+	lay.VerticalAlignment = Enum.VerticalAlignment.Center
+	lay.SortOrder = Enum.SortOrder.LayoutOrder
+	lay.Padding = UDim.new(0, math.floor(height * 0.5))
+	lay.Parent = row
+	local ts = UiKit.text(size or 14)
+	local slots: { ChipSlot } = {}
+	local used = 0
+	local function slot(): ChipSlot
+		used += 1
+		local s = slots[used]
+		if s then
+			s.f.Visible = true
+			return s
+		end
+		local f = Instance.new("Frame")
+		f.BackgroundTransparency = 1
+		f.AutomaticSize = Enum.AutomaticSize.X
+		f.Size = UDim2.fromOffset(0, height)
+		f.LayoutOrder = used
+		f.Parent = row
+		local l = Instance.new("UIListLayout")
+		l.FillDirection = Enum.FillDirection.Horizontal
+		l.VerticalAlignment = Enum.VerticalAlignment.Center
+		l.SortOrder = Enum.SortOrder.LayoutOrder
+		l.Padding = UDim.new(0, 5)
+		l.Parent = f
+		local icon = math.floor(height * 0.86)
+		local img = Instance.new("ImageLabel")
+		img.BackgroundTransparency = 1
+		img.Size = UDim2.fromOffset(icon, icon)
+		img.LayoutOrder = 1
+		img.Parent = f
+		local img2 = img:Clone()
+		img2.LayoutOrder = 2
+		img2.Parent = f
+		local key = Instance.new("TextLabel")
+		key.BackgroundColor3 = UiKit.CARD
+		key.BorderSizePixel = 0
+		key.AutomaticSize = Enum.AutomaticSize.X
+		key.Size = UDim2.fromOffset(0, math.floor(height * 0.78))
+		key.FontFace = UiKit.HEAD_FONT
+		key.TextColor3 = UiKit.INK
+		key.TextSize = ts
+		key.LayoutOrder = 3
+		key.Parent = f
+		UiKit.corner(key, 4)
+		UiKit.lit(key, 0.82)
+		UiKit.edge(key, UiKit.INK, 1, 0.45)
+		local kp = Instance.new("UIPadding")
+		kp.PaddingLeft = UDim.new(0, 7)
+		kp.PaddingRight = UDim.new(0, 7)
+		kp.Parent = key
+		local t = Instance.new("TextLabel")
+		t.BackgroundTransparency = 1
+		t.AutomaticSize = Enum.AutomaticSize.X
+		t.Size = UDim2.fromOffset(0, height)
+		t.Font = UiKit.TYPE_FONT
+		t.TextSize = ts
+		t.TextColor3 = if light then UiKit.INK else UiKit.KHAKI
+		t.LayoutOrder = 4
+		t.Parent = f
+		local made: ChipSlot = { f = f, img = img, img2 = img2, key = key, t = t }
+		slots[used] = made
+		return made
+	end
+	local chips: Chips = {} :: any
+	chips.frame = row
+	function chips.clear()
+		used = 0
+		for _, s in slots do
+			s.f.Visible = false
+		end
+	end
+	function chips.add(img: string?, img2: string?, key: string, label: string)
+		local s = slot()
+		s.img.Visible = img ~= nil
+		s.img.Image = img or ""
+		s.img2.Visible = img2 ~= nil
+		s.img2.Image = img2 or ""
+		s.key.Visible = img == nil and key ~= ""
+		s.key.Text = UiKit.upper(key)
+		s.key.FontFace = UiKit.headFont(key)
+		s.t.Text = label
+		s.t.Font = if string.find(label, "[\196-\225]") then UiKit.BODY_FONT else UiKit.TYPE_FONT
+	end
+	function chips.action(actionId: string, ctx: string?, label: string)
+		local img, txt = Input.glyph(actionId, ctx)
+		chips.add(img, nil, UiKit.keyName(txt), label)
+	end
+	function chips.pair(a: string, b: string, ctx: string?, label: string)
+		local ia, ta = Input.glyph(a, ctx)
+		local ib, tb = Input.glyph(b, ctx)
+		if ia and ib then
+			chips.add(ia, ib, "", label)
+		else
+			chips.add(nil, nil, string.format("%s/%s", UiKit.keyName(ta), UiKit.keyName(tb)), label)
+		end
+	end
+	return chips
+end
+
+-- ----- escala para qualquer tela -----
+-- O quadro de projeto (w x h) cabe na tela com margem: abaixo do tamanho de projeto ele encolhe por
+-- UIScale (nunca cresce; na TV os tamanhos já são os da TV). k() dá a escala atual para quem anima
+-- a entrada (o tween termina em k(), não em 1). Usa o UIScale que o alvo já tiver.
+export type Fit = { scale: UIScale, k: () -> number }
+function UiKit.fit(gui: LayerCollector, target: GuiObject, w: number, h: number, margin: number?, minK: number?): Fit
+	local sc = target:FindFirstChildOfClass("UIScale")
+	if not sc then
+		local s = Instance.new("UIScale")
+		s.Name = "Ajuste"
+		s.Parent = target
+		sc = s
+	end
+	local scale = sc :: UIScale
+	local k = 1
+	local m = margin or 16
+	local function update()
+		local a = gui.AbsoluteSize
+		if a.X < 10 or a.Y < 10 then
+			return
+		end
+		k = math.clamp(math.min((a.X - 2 * m) / w, (a.Y - 2 * m) / h), minK or 0.45, 1)
+		scale.Scale = k
+	end
+	gui:GetPropertyChangedSignal("AbsoluteSize"):Connect(update)
+	update()
+	return {
+		scale = scale,
+		k = function(): number
+			return k
+		end,
+	}
+end
+
+-- ----- segurar para confirmar -----
+-- Barra de latão que enche enquanto o jogador segura; done() roda ao encher. start/stop vêm de
+-- quem lê o botão. Um tween só (nada por quadro).
+export type Hold = { start: () -> (), stop: () -> (), holding: () -> boolean }
+function UiKit.hold(bar: Frame, seconds: number, done: () -> ()): Hold
+	local tw: Tween? = nil
+	local on = false
+	local function reset()
+		local t = tw
+		if t then
+			t:Cancel()
+			tw = nil
+		end
+		bar.Size = UDim2.new(0, 0, bar.Size.Y.Scale, bar.Size.Y.Offset)
+	end
+	return {
+		start = function()
+			if on then
+				return
+			end
+			on = true
+			reset()
+			local t = TweenService:Create(bar, TweenInfo.new(seconds, Enum.EasingStyle.Linear), {
+				Size = UDim2.new(1, 0, bar.Size.Y.Scale, bar.Size.Y.Offset),
+			})
+			tw = t
+			t.Completed:Once(function(state: Enum.PlaybackState)
+				if state == Enum.PlaybackState.Completed and on then
+					on = false
+					done()
+					reset()
+				end
+			end)
+			t:Play()
+		end,
+		stop = function()
+			on = false
+			reset()
+		end,
+		holding = function(): boolean
+			return on
+		end,
+	}
+end
 
 return UiKit

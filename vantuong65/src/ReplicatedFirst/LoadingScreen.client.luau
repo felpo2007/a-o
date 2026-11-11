@@ -34,6 +34,7 @@ pcall(function()
 end)
 
 local Acabamento = require(script.Parent:WaitForChild("Acabamento"))
+local Idioma = require(script.Parent:WaitForChild("Idioma"))
 
 local player = Players.LocalPlayer
 
@@ -453,6 +454,16 @@ enterArrow.TextTransparency = 1
 local enterHint = label(stage, TYPE, 14, KHAKI, 206, 622, 640, 44)
 enterHint.TextTransparency = 0.15
 
+-- ----- idioma (pedido do dono, 2026-11-11): chip no alto à direita; Y no controle -----
+local function openLanguage()
+	if not Idioma.aberto() then
+		Idioma.abrir({ z = 101 })
+	end
+end
+local langChip = Idioma.chip(stage, { onClick = openLanguage, padKey = Enum.KeyCode.ButtonY })
+langChip.button.AnchorPoint = Vector2.new(1, 0)
+langChip.button.Position = UDim2.fromOffset(1180, 46)
+
 gui.Parent = player:WaitForChild("PlayerGui")
 
 -- ===== escala do palco (sem loop por quadro: só quando a janela muda) =====
@@ -604,7 +615,7 @@ local function briefingLoop(my: number)
 			i = i % #BRIEFING + 1
 			local b = BRIEFING[i]
 			briefIdx.Text = string.format("%d/%d", i, #BRIEFING)
-			briefSrc.Text = "Fonte: The First Fight (USMC, 2015), " .. b.pagina
+			briefSrc.Text = string.format("Fonte: The First Fight (USMC, 2015), %s", b.pagina)
 			briefText.TextTransparency = 0
 			local tw = Acabamento.datilografar(briefText, Acabamento.viet(b.texto), 48)
 			briefLine.Size = UDim2.fromOffset(560, 2)
@@ -715,8 +726,7 @@ local function showEnter()
 	end
 	Acabamento.datilografar(
 		enterHint,
-		"Já dá para entrar (clique, toque, Enter ou A). O resto termina no lobby; o spawn só libera com o "
-			.. "terreno pronto.",
+		"Já dá para entrar (clique, toque, Enter ou A). O resto termina no lobby; o spawn só libera com o terreno pronto.",
 		70,
 		0.3
 	)
@@ -746,6 +756,7 @@ local function close()
 		return
 	end
 	closing = true
+	Idioma.fechar()
 	gui:SetAttribute("Saindo", true) -- a mesa do lobby (LobbyScene) começa o travelling de chegada agora
 	local my = alive
 	local cg = Instance.new("CanvasGroup")
@@ -776,16 +787,18 @@ local function close()
 end
 
 enter.Activated:Connect(function()
-	if essentialReady then
+	if essentialReady and not Idioma.recente() then
 		close()
 	end
 end)
 UserInputService.InputBegan:Connect(function(input: InputObject)
-	if not essentialReady or closing or not gui.Enabled then
-		return
+	if closing or not gui.Enabled or Idioma.recente() then
+		return -- com o cartão de idiomas aberto, A e Enter são dele
 	end
 	local kc = input.KeyCode
-	if kc == Enum.KeyCode.Return or kc == Enum.KeyCode.Space or kc == Enum.KeyCode.ButtonA then
+	if kc == Enum.KeyCode.ButtonY then
+		openLanguage()
+	elseif essentialReady and (kc == Enum.KeyCode.Return or kc == Enum.KeyCode.Space or kc == Enum.KeyCode.ButtonA) then
 		close()
 	end
 end)

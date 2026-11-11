@@ -79,7 +79,7 @@ function SpawnService.points(faction: string): { Point }
 			local initial = MatchService.initialOwner[s] == faction
 			table.insert(out, {
 				id = "rally:" .. s,
-				name = "Reunião — " .. sp.name,
+				name = string.format("Reunião — %s", sp.name),
 				x = x,
 				z = z,
 				kind = if initial then "rally" else "rally_captured",
@@ -92,7 +92,7 @@ function SpawnService.points(faction: string): { Point }
 			if en.sector and MatchService.ownerOf(en.sector) == "VC" and not TunnelService.destroyed[en.id] then
 				table.insert(out, {
 					id = "tunnel:" .. en.id,
-					name = "Túnel " .. en.id,
+					name = string.format("Túnel %s", en.id),
 					x = en.x,
 					z = en.z,
 					kind = "garrison",
@@ -413,7 +413,7 @@ function SpawnService.start()
 						if pos then
 							table.insert(list, {
 								id = "inplace",
-								name = "Onde caiu (" .. label .. ")",
+								name = string.format("Onde caiu (%s)", label),
 								x = pos.X,
 								z = pos.Z,
 								wait = wait,

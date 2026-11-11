@@ -102,7 +102,7 @@ local function onDig(p: Player)
 	local ok, why =
 		FieldWork.canDig(owner, p:GetAttribute("Faction") :: string?, onWater, lastDig[p], os.clock(), holes)
 	if not ok then
-		toast(p, "Pá: " .. tostring(why))
+		toast(p, string.format("Pá: %s", tostring(why)))
 		return
 	end
 	digging[p] = true

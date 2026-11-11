@@ -63,6 +63,8 @@ do
 	g.Rotation = 90
 	g.Color = ColorSequence.new(Color3.new(1, 1, 1), Color3.fromRGB(170, 170, 160))
 	g.Parent = strip
+	-- janela estreita: a faixa encolhe inteira (nada passa da borda)
+	UiKit.fit(hud, strip, strip.Size.X.Offset, 1, 8)
 end
 
 local function text(parent: Instance, size: number, color: Color3, head: boolean?): TextLabel
@@ -199,24 +201,41 @@ local function alerts(st: any, old: any)
 		local was, now = old.owner[s], st.owner[s]
 		local name = sectorName(st, s)
 		if was ~= now then
+			-- cada aviso é um modelo inteiro (o nome do setor entra no %s; o dicionário traduz o modelo)
 			if now == f then
-				Toast.show(name .. " é nosso", "sucesso", { title = "Setor tomado" })
+				Toast.show(string.format("%s é nosso", name), "sucesso", { title = "Setor tomado" })
 			elseif now == e then
-				Toast.show(name .. " caiu nas mãos do inimigo", "erro", { title = "Setor perdido" })
+				Toast.show(string.format("%s caiu nas mãos do inimigo", name), "erro", { title = "Setor perdido" })
 			elseif was == f then
-				Toast.show(name .. " foi neutralizado: retome o ponto", "alerta", { title = "Setor neutralizado" })
+				Toast.show(
+					string.format("%s foi neutralizado: retome o ponto", name),
+					"alerta",
+					{ title = "Setor neutralizado" }
+				)
 			else
-				Toast.show(name .. " neutralizado: continue até tomar", "info", { title = "Setor neutralizado" })
+				Toast.show(
+					string.format("%s neutralizado: continue até tomar", name),
+					"info",
+					{ title = "Setor neutralizado" }
+				)
 			end
 		elseif st.active[s] then
 			local cap, oldCap = st.capturing and st.capturing[s], old.capturing and old.capturing[s]
 			local con, oldCon = st.contested and st.contested[s], old.contested and old.contested[s]
 			if con and not oldCon and throttle("disputa" .. s, 45) then
-				Toast.show(name .. ": os dois lados no ponto, a captura parou", "alerta", { title = "Em disputa" })
+				Toast.show(
+					string.format("%s: os dois lados no ponto, a captura parou", name),
+					"alerta",
+					{ title = "Em disputa" }
+				)
 			elseif cap == e and oldCap ~= e and now == f and throttle("ataque" .. s, 45) then
-				Toast.show(name .. " sob ataque", "alerta", { title = "Setor sob ataque", key = "ataque" .. s })
+				Toast.show(
+					string.format("%s sob ataque", name),
+					"alerta",
+					{ title = "Setor sob ataque", key = "ataque" .. s }
+				)
 			elseif cap == f and oldCap ~= f and now ~= f and throttle("tomando" .. s, 60) then
-				Toast.show("Tomando " .. name, "info", { title = "Captura" })
+				Toast.show(string.format("Tomando %s", name), "info", { title = "Captura" })
 			end
 		end
 	end
@@ -377,8 +396,19 @@ do
 	foot.AnchorPoint = Vector2.new(0.5, 1)
 	foot.Position = UDim2.new(0.5, 0, 1, -12)
 	foot.Size = UDim2.new(1, -40, 0, px(20, 28))
-	endParts =
-		{ dim = dim, card = card, scale = sc, stamp = stamp, stampStroke = ss, why = why, table = table_, foot = foot }
+	-- cabe em qualquer janela: a entrada termina na escala de ajuste (fit.k), não em 1
+	local fit = UiKit.fit(endGui, card, card.Size.X.Offset, card.Size.Y.Offset, 16)
+	endParts = {
+		dim = dim,
+		card = card,
+		scale = sc,
+		fit = fit,
+		stamp = stamp,
+		stampStroke = ss,
+		why = why,
+		table = table_,
+		foot = foot,
+	}
 end
 
 local function reason(st: any): string
@@ -414,7 +444,7 @@ local function closeEnd()
 	end
 	local p = endParts
 	local info = TweenInfo.new(0.35, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
-	TweenService:Create(p.scale, info, { Scale = 0.9 }):Play()
+	TweenService:Create(p.scale, info, { Scale = p.fit.k() * 0.9 }):Play()
 	TweenService:Create(p.dim, info, { BackgroundTransparency = 1 }):Play()
 	TweenService:Create(p.card, info, { Position = UDim2.fromScale(0.5, 1.4) }):Play()
 	task.delay(0.36, function()
@@ -464,10 +494,11 @@ local function showEnd(st: any)
 	endGui.Enabled = true
 	-- carimbo: bate de cima e assenta
 	p.card.Position = UDim2.fromScale(0.5, 0.48)
-	p.scale.Scale = 0.85
+	local k = p.fit.k()
+	p.scale.Scale = k * 0.85
 	p.dim.BackgroundTransparency = 1
 	TweenService:Create(p.dim, TweenInfo.new(0.4), { BackgroundTransparency = 0.45 }):Play()
-	TweenService:Create(p.scale, TweenInfo.new(0.45, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = 1 })
+	TweenService:Create(p.scale, TweenInfo.new(0.45, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = k })
 		:Play()
 	p.stamp.TextTransparency = 1
 	p.stamp.Size = UDim2.fromOffset(px(560, 820), px(110, 160))
@@ -535,13 +566,10 @@ RunService.Heartbeat:Connect(function()
 	strip.Visible = inField and not Input.state.map and Input.state.menus == 0 and not endGui.Enabled
 	if endGui.Enabled and endShown then
 		local n = state and state.nextIn
-		endParts.foot.Text = if type(n) == "number"
-			then string.format(
-				"Próxima partida em %d s · %s relatório",
-				math.ceil(n),
-				if Input.isGamepad() then "A:" else "Enter:"
-			)
-			else ""
+		endParts.foot.Text = if type(n) ~= "number"
+			then ""
+			elseif Input.isGamepad() then string.format("Próxima partida em %d s · A: relatório", math.ceil(n))
+			else string.format("Próxima partida em %d s · Enter: relatório", math.ceil(n))
 	end
 	-- disputa: o setor pisca
 	local pulse = 0.5 + 0.5 * math.sin(os.clock() * 5)

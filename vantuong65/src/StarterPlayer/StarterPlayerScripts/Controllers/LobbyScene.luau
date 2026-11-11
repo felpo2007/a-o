@@ -462,7 +462,7 @@ local function drawMap(p: BasePart, style: string)
 		sgText(sg, "VẠN TƯỜNG\nQUẢNG NGÃI", VIET, ink, 0.015, 0.23, 0.19, 0.12)
 		sgText(sg, "Grade UTM\n500 m · BS", TYPE, rgb(70, 96, 140), 0.015, 0.8, 0.19, 0.12)
 		sgText(sg, "■ QG\n● ponto forte\n→ eixo", TYPE, ink, 0.80, 0.05, 0.19, 0.2)
-		sgStamp(sg, "SECRET", red, 0.80, 0.78, 0.18, 0.1, -8)
+		sgStamp(sg, "SECRETO", red, 0.80, 0.78, 0.18, 0.1, -8) -- em português: o dicionário traduz
 	else
 		sgText(sg, "SƠ ĐỒ\nVẠN TƯỜNG", VIET, ink, 0.015, 0.05, 0.19, 0.16)
 		sgText(sg, "Trung đoàn 1\n8 · 1965", VIET, ink, 0.015, 0.8, 0.19, 0.12)
@@ -729,7 +729,7 @@ local function buildUS(): Scene
 		sgText(n, text, font, INK, 0.06, 0.06, 0.88, 0.88)
 		sgBox(n, STAMP, 0.47, 0.02, 0.06, 0.06)
 	end
-	note(0.04, 0.06, 0.42, 0.42, -3, "III MAF · CHU LAI\nOPERATION STARLITE\nD-DAY 18 AUG 65\nH-HOUR 0630", TYPE)
+	note(0.04, 0.06, 0.42, 0.42, -3, "III MAF · CHU LAI\nOPERAÇÃO STARLITE\nDIA D 18 AGO 65\nHORA H 0630", TYPE)
 	note(0.52, 0.08, 0.42, 0.36, 2, "RLT-7\n3/3 · 2/4 · 3/7\nGREEN BEACH\nLZ RED · WHITE · BLUE", TYPE)
 	local ph = sgBox(bsg, rgb(236, 234, 226), 0.08, 0.56, 0.3, 0.38)
 	ph.Rotation = 4
@@ -793,11 +793,11 @@ local function buildUS(): Scene
 	sheet(dos, 0.5, 0.33, 0.12, 0.004, 0.22, -5, MANILA, 0.004)
 	local left = sheet(dos, 0.225, 0.3, 0.005, 0.008, 0.222, -5, CARD)
 	local lsg = surface(left, 300)
-	sgText(lsg, "OPERATION\nSTARLITE", HEAD, INK, 0.08, 0.06, 0.84, 0.26)
-	sgText(lsg, "18 AUG 1965 · RLT-7", TYPE, INK, 0.08, 0.34, 0.84, 0.08)
+	sgText(lsg, "OPERAÇÃO\nSTARLITE", HEAD, INK, 0.08, 0.06, 0.84, 0.26)
+	sgText(lsg, "18 AGO 1965 · RLT-7", TYPE, INK, 0.08, 0.34, 0.84, 0.08)
 	sgBox(lsg, UiKit.RULE_RED, 0.08, 0.44, 0.84, 0.008)
 	sgText(lsg, "Ordem de deslocamento\ndo fuzileiro", TYPE, INK, 0.08, 0.48, 0.84, 0.14)
-	sgStamp(lsg, "SECRET", STAMP, 0.18, 0.72, 0.64, 0.14, -7)
+	sgStamp(lsg, "SECRETO", STAMP, 0.18, 0.72, 0.64, 0.14, -7)
 	local pages = group(dos, "Pagina")
 	local right = sheet(pages, 0.225, 0.3, 0.235, 0.009, 0.202, -5, CARD)
 	local rsg = surface(right, 300)
@@ -1831,7 +1831,7 @@ local function step(dt: number)
 		hoverTag.Visible = false
 	end
 	if nx and nx ~= show and placeTag(nextTag, cam, nx, 12) then
-		nextTitle.Text = "► PRÓXIMO: " .. nx.title
+		nextTitle.Text = string.format("► PRÓXIMO: %s", nx.title)
 		nextTitle.Font = nx.font
 		nextSub.Text = subFor(nx)
 		nextTag.Visible = true

@@ -152,7 +152,7 @@ end
 -- nome do posto no lado do jogador; sem lado, "Posto N"
 function Progression.rankName(faction: string?, rank: number): string
 	if faction ~= "US" and faction ~= "VC" then
-		return "Posto " .. math.clamp(math.floor(rank), 1, Progression.MAX_RANK)
+		return string.format("Posto %d", math.clamp(math.floor(rank), 1, Progression.MAX_RANK))
 	end
 	return Progression.rankDef(faction, rank).name
 end
@@ -493,9 +493,9 @@ function Progression.canBuyGear(
 	elseif Progression.gearUnlocked(id, rank, passes, bought) then
 		return false, "já liberado"
 	elseif rank < g.buyRank then
-		return false, "posto " .. g.buyRank .. " para comprar"
+		return false, string.format("posto %d para comprar", g.buyRank)
 	elseif credits < g.price then
-		return false, "faltam " .. Progression.money(g.price - credits)
+		return false, string.format("faltam %s", Progression.money(g.price - credits))
 	end
 	return true, nil
 end
@@ -650,7 +650,7 @@ function Progression.inPlacePay(
 		if not price then
 			return false, "limite da partida", nil
 		elseif credits < price then
-			return false, "faltam " .. Progression.money(price - credits), price
+			return false, string.format("faltam %s", Progression.money(price - credits)), price
 		end
 		return true, nil, price
 	elseif method == "robux" then

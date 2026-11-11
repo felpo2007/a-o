@@ -257,6 +257,7 @@ do
 	key.Size = UDim2.fromScale(1, 1)
 	key.TextXAlignment = Enum.TextXAlignment.Center
 	key.Parent = ring
+	UiKit.fit(downGui, card, card.Size.X.Offset, card.Size.Y.Offset + px(56, 80), 12) -- janela estreita
 	D = {
 		tint = tint,
 		vin = vin,
@@ -364,7 +365,9 @@ do
 	foot.AnchorPoint = Vector2.new(0, 1)
 	foot.Position = UDim2.new(0, 24, 1, -12)
 	foot.Size = UDim2.new(1, -48, 0, px(20, 28))
-	K = { black = black, card = card, scale = sc, body = body, stamp = stamp, foot = foot, glow = glow }
+	-- cabe em qualquer janela: a entrada termina na escala de ajuste (fit.k), não em 1
+	local fit = UiKit.fit(deathGui, card, card.Size.X.Offset, card.Size.Y.Offset, 20)
+	K = { black = black, card = card, scale = sc, fit = fit, body = body, stamp = stamp, foot = foot, glow = glow }
 end
 
 -- ===== caído =====
@@ -561,16 +564,17 @@ local function showDeath(cause: Casualty.Cause?, where: Vector3?, note: string?)
 	local sid = player:GetAttribute("SquadId")
 	local squad = if type(sid) == "string" then (string.match(sid, ":(.+)$") or sid) else "—"
 	local grid = if where then FireSupport.localToGrid(where.X, where.Z, MapConfig.GridOrigin1965, M, 6) else "—"
+	-- uma linha por modelo inteiro ("Rótulo   %s"): o dicionário traduz o rótulo e o valor conhecido
 	local lines = {
-		"NOME       " .. player.DisplayName,
-		"SQUAD      " .. squad .. " · " .. roleName(),
-		"CAUSA      " .. Casualty.text(cause, false),
-		"LOCAL      " .. grid,
-		"HORA       " .. Casualty.dtg(Lighting.ClockTime),
-		"EM CAMPO   " .. Casualty.duration(os.clock() - S.spawnedAt),
+		string.format("NOME       %s", player.DisplayName),
+		string.format("SQUAD      %s · %s", squad, roleName()),
+		string.format("CAUSA      %s", Casualty.text(cause, false)),
+		string.format("LOCAL      %s", grid),
+		string.format("HORA       %s", Casualty.dtg(Lighting.ClockTime)),
+		string.format("EM CAMPO   %s", Casualty.duration(os.clock() - S.spawnedAt)),
 	}
 	if note then
-		table.insert(lines, "OBS.       " .. note)
+		table.insert(lines, string.format("OBS.       %s", note))
 	end
 	K.body.Text = Acabamento.viet(table.concat(lines, "\n"))
 	K.foot.Text = ""
@@ -581,10 +585,11 @@ local function showDeath(cause: Casualty.Cause?, where: Vector3?, note: string?)
 	TweenService:Create(K.glow, TweenInfo.new(1.2), { ImageTransparency = 0.55 }):Play()
 	K.card.Position = UDim2.fromScale(0.5, 0.42)
 	K.card.Rotation = -4
-	K.scale.Scale = 1.08
+	local k = K.fit.k()
+	K.scale.Scale = k * 1.08
 	local drop = TweenInfo.new(0.55, Enum.EasingStyle.Quint, Enum.EasingDirection.Out, 0, false, 0.35)
 	TweenService:Create(K.card, drop, { Position = UDim2.fromScale(0.5, 0.5), Rotation = 1.2 }):Play()
-	TweenService:Create(K.scale, drop, { Scale = 1 }):Play()
+	TweenService:Create(K.scale, drop, { Scale = k }):Play()
 	K.stamp.TextTransparency = 1
 	K.stamp.Size = UDim2.fromOffset(px(260, 380), px(74, 110))
 	task.delay(1.0, function()

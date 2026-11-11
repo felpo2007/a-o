@@ -1,0 +1,11 @@
+Operação Starlite, agosto de 1965. Tiro tático realista no Vietnã: fuzileiros navais dos EUA contra o 1º Regimento Viet Cong em 2 x 2 km de arrozais, vilas, túneis e colinas da península de Vạn Tường.
+
+• Squads com papéis: fuzileiro, médico, metralhador, operador de rádio, tripulação de blindado
+• Carta topográfica de época, sem minimapa: bússola, carta e rádio
+• Setores, pontos fortes, reforços e reunião do squad (Warfare e Offensive)
+• M48, Ontos, LVTP-5 anfíbio e helicóptero UH-34D com medevac
+• Túneis do VC, arrozais, sebes de bambu, vento, chuva e luz real de 18/08/1965
+• Bots quando faltam jogadores
+• Jogável no controle e no teclado; português, English, Español, Tiếng Việt
+
+Operation Starlite, August 1965. A realistic tactical shooter: US Marines against the Viet Cong 1st Regiment across rice paddies, villages, tunnels and hills of the Vạn Tường peninsula. Squads, period maps, armor, helicopters and bots. Controller and keyboard.

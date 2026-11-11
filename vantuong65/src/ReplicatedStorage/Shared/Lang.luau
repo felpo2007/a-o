@@ -11,8 +11,12 @@
 --   4. modelo com números/textos: a chave pode ter %d, %s, %.1f... ("Equipamento: %.1f de %.1f kg");
 --      o que entra no %s também é traduzido se estiver no dicionário;
 --   5. "Rótulo: valor" com o rótulo no dicionário;
---   6. linha a linha (texto com quebras) e pedaço a pedaço entre as marcas do RichText.
+--   6. linha a linha (texto com quebras) e pedaço a pedaço entre as marcas do RichText;
+--   7. "Rótulo   valor" (colunas de relatório, 2 ou mais espaços) com o rótulo no dicionário;
+--   8. prefixo ou sufixo conhecido ("Desarmar " .. nome, nome .. " (caído)"): a chave termina (ou
+--      começa) em espaço no dicionário e o resto é traduzido à parte.
 -- Sem tradução, o texto fica em português.
+-- (Chaves com modelo ignoram os espaços das pontas: o texto de tela chega sem eles na regra 3.)
 local Lang = {}
 
 Lang.LANGS = { "pt", "en", "es", "vi" }
@@ -55,7 +59,7 @@ function Lang.upper(s: string): string
 end
 
 -- ===== modelos com especificadores do string.format =====
-type Pat = { pat: string, segs: { string }, kinds: { string }, lits: number }
+type Pat = { pat: string, segs: { string }, kinds: { string }, tspecs: { string }, lits: number }
 export type Table = {
 	exact: { [string]: string },
 	upper: { [string]: string },
@@ -67,9 +71,10 @@ export type Table = {
 local SPEC = "%%[%-%+#0]*%d*%.?%d*[dsfiqxg]"
 local MAGIC = "[%^%$%(%)%%%.%[%]%*%+%-%?]"
 
--- Separa um texto de formato em pedaços literais e especificadores ("%%" vira "%").
-local function split(fmt: string): ({ string }, { string })
-	local segs, kinds = {}, {}
+-- Separa um texto de formato em pedaços literais e especificadores ("%%" vira "%"). Devolve também
+-- o especificador inteiro de cada um ("%.1f", "%.0s"...).
+local function split(fmt: string): ({ string }, { string }, { string })
+	local segs, kinds, specs = {}, {}, {}
 	local cur = {}
 	local i = 1
 	while i <= #fmt do
@@ -81,6 +86,7 @@ local function split(fmt: string): ({ string }, { string })
 				table.insert(segs, table.concat(cur))
 				cur = {}
 				table.insert(kinds, "s")
+				table.insert(specs, string.sub(fmt, i, b))
 				i = b + 1
 				continue
 			end
@@ -96,6 +102,7 @@ local function split(fmt: string): ({ string }, { string })
 				table.insert(segs, table.concat(cur))
 				cur = {}
 				table.insert(kinds, string.sub(fmt, b, b))
+				table.insert(specs, string.sub(fmt, i, b))
 				i = b + 1
 				continue
 			end
@@ -104,7 +111,7 @@ local function split(fmt: string): ({ string }, { string })
 		i += 1
 	end
 	table.insert(segs, table.concat(cur))
-	return segs, kinds
+	return segs, kinds, specs
 end
 
 local CAPTURE: { [string]: string } = {
@@ -117,12 +124,34 @@ local CAPTURE: { [string]: string } = {
 	q = "(.-)",
 }
 
+-- letras fixas do modelo: ASCII e latinas acentuadas (UTF-8: \195-\199 e \225 = Vietnamita)
 local function letters(s: string): number
 	local n = 0
-	for _ in string.gmatch(s, "%a") do
+	for _ in string.gmatch(s, "[%a\195-\199\225][\128-\191]*") do
+		n += 1
+	end
+	-- marcas que também fixam o modelo: · — ► ▲ (UTF-8) e o til do "~120 m"
+	for _ in string.gmatch(s, "[\194\226\240~][\128-\191]*") do
 		n += 1
 	end
 	return n
+end
+
+local function trim(s: string): string
+	return (string.gsub(s, "^%s*(.-)%s*$", "%1"))
+end
+
+-- Alguma letra do bloco Latino Estendido (U+0100 a U+1FFF: Ă Ư ờ ạ...) que as fontes de época não têm.
+function Lang.needsWide(s: string): boolean
+	local ok, res = pcall(function(): boolean
+		for _, cp in utf8.codes(s) do
+			if cp >= 0x100 and cp <= 0x1FFF then
+				return true
+			end
+		end
+		return false
+	end)
+	return ok and res
 end
 
 -- Compila um dicionário português -> tradução.
@@ -139,7 +168,9 @@ function Lang.compile(dict: { [string]: string }): Table
 			t.exact[plain] = trPlain
 			t.upper[Lang.upper(plain)] = Lang.upper(trPlain)
 		else
-			local tsegs, tkinds = split(tr)
+			-- o texto de tela chega sem os espaços das pontas (translate corta antes): a chave também
+			segs, kinds = split(trim(pt))
+			local tsegs, tkinds, tspecs = split(trim(tr))
 			local lits = letters(table.concat(segs))
 			if #tkinds == #kinds and lits >= 3 then
 				local parts = {}
@@ -149,10 +180,13 @@ function Lang.compile(dict: { [string]: string }): Table
 						table.insert(parts, CAPTURE[kinds[i]] or "(.-)")
 					end
 				end
-				table.insert(
-					t.pats,
-					{ pat = "^" .. table.concat(parts) .. "$", segs = tsegs, kinds = kinds, lits = lits }
-				)
+				table.insert(t.pats, {
+					pat = "^" .. table.concat(parts) .. "$",
+					segs = tsegs,
+					kinds = kinds,
+					tspecs = tspecs,
+					lits = lits,
+				})
 			end
 		end
 	end
@@ -177,11 +211,57 @@ local function viaPattern(t: Table, text: string): string?
 			for i, s in p.segs do
 				table.insert(out, s)
 				local c = caps[i]
-				if c then
+				-- "%.0s" na tradução engole o valor (o "s" do plural português: "dia%s")
+				if c and p.tspecs[i] ~= "%.0s" then
 					table.insert(out, if p.kinds[i] == "s" then word(t, c) else c)
 				end
 			end
 			return table.concat(out)
+		end
+	end
+	return nil
+end
+
+-- Prefixo ou sufixo conhecido: "Desarmar " .. nome, "SOLDO: +" .. valor, nome .. " (caído)". As
+-- chaves vêm do extrator (cada texto de tela e o seu miolo) e começam ou terminam em espaço ou
+-- pontuação. Vale o prefixo mais longo e o sufixo mais longo (olha só os primeiros e os últimos
+-- AFFIX_SPAN bytes: o resultado fica no cache de Lang.translate).
+local AFFIX_SPAN = 48
+
+local function isBreak(text: string, i: number): boolean
+	local b = string.byte(text, i)
+	return b ~= nil and b < 128 and string.find(string.char(b), "[%s%p]") ~= nil
+end
+
+local function viaAffix(t: Table, text: string, depth: number): string?
+	local n = #text
+	if n < 3 then
+		return nil
+	end
+	local prefix: string? = nil
+	local preEnd = 0
+	for i = math.min(n - 1, AFFIX_SPAN), 2, -1 do
+		if isBreak(text, i) then
+			local pre = string.sub(text, 1, i)
+			local hit = t.exact[pre] or t.upper[pre]
+			if hit then
+				prefix, preEnd = hit, i
+				break
+			end
+		end
+	end
+	if prefix then
+		local rest = string.sub(text, preEnd + 1)
+		return prefix .. (translate(t, rest, depth + 1) or word(t, rest))
+	end
+	for j = math.max(2, n - AFFIX_SPAN), n - 1 do
+		if isBreak(text, j) then
+			local suf = string.sub(text, j)
+			local hit = t.exact[suf] or t.upper[suf]
+			if hit then
+				local rest = string.sub(text, 1, j - 1)
+				return (translate(t, rest, depth + 1) or word(t, rest)) .. hit
+			end
 		end
 	end
 	return nil
@@ -197,6 +277,17 @@ translate = function(t: Table, text: string, depth: number): string?
 	if core and core ~= text and core ~= "" then
 		local c = translate(t, core, depth + 1)
 		return if c then (pre :: string) .. c .. (post :: string) else nil
+	end
+	-- "CAUSA      Abatido por fuzil": rótulo em coluna (2 ou mais espaços); o valor fica na mesma
+	-- coluna. Vem antes dos modelos porque um modelo que começa por %s engoliria a linha.
+	local col, gap, val = string.match(text, "^(.-%S)(  +)(%S.*)$")
+	if col then
+		local tc = t.exact[col] or t.upper[col]
+		if tc then
+			local width = (utf8.len(col :: string) or #(col :: string)) + #(gap :: string)
+			local pad = math.max(1, width - (utf8.len(tc) or #tc))
+			return tc .. string.rep(" ", pad) .. (translate(t, val :: string, depth + 1) or word(t, val :: string))
+		end
 	end
 	local p = viaPattern(t, text)
 	if p then
@@ -276,7 +367,26 @@ translate = function(t: Table, text: string, depth: number): string?
 	if head then
 		local th = t.exact[head] or t.upper[head]
 		if th then
-			return th .. ": " .. word(t, rest :: string)
+			return th .. ": " .. (translate(t, rest :: string, depth + 1) or word(t, rest :: string))
+		end
+	end
+	local viaAff = viaAffix(t, text, depth)
+	if viaAff then
+		return viaAff
+	end
+	-- lista "Alfa · Fuzileiro": peça a peça
+	if string.find(text, " · ", 1, true) then
+		local parts = string.split(text, " · ")
+		local changed = false
+		for i, part in parts do
+			local tp = translate(t, part, depth + 1)
+			if tp then
+				parts[i] = tp
+				changed = true
+			end
+		end
+		if changed then
+			return table.concat(parts, " · ")
 		end
 	end
 	return nil

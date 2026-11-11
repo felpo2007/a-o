@@ -191,8 +191,8 @@ local function handle(player: Player, req: any)
 		end
 		LogisticsService.spend(faction, a.supply)
 		readyAt[faction][a.id] = now + a.cooldownS
-		LogisticsService.tempGarrison(faction, best.x, best.z, "Reforço " .. best.id, 180)
-		reply(player, { info = "reforço aberto na entrada " .. best.id .. " por 180 s" })
+		LogisticsService.tempGarrison(faction, best.x, best.z, string.format("Reforço %s", best.id), 180)
+		reply(player, { info = string.format("reforço aberto na entrada %s por 180 s", best.id) })
 	end
 	broadcastState(faction)
 end

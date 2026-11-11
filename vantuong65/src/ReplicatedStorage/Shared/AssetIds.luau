@@ -147,6 +147,9 @@ return {
 		ghillie_rice = 76320606331202,
 		ghillie_jungle = 78596770057163,
 		ghillie_bamboo = 108180221079119,
+		-- caveira do abate (tools/make_caveira.py): ID do DECAL; o servidor resolve a imagem no início
+		-- (Modules/ImagensUi, atributo "Img_caveira_abate"). Com 0, a caveira é desenhada com frames.
+		caveira_abate = 131470182680103,
 	},
 	-- Texturas do chão (D-66; Poly Haven, CC0): IDs de DECAL devolvidos pelo Open Cloud. O
 	-- MaterialVariant precisa do ID da IMAGEM de cada decal: fica em GroundImages (resolvido no Studio).
