@@ -1138,184 +1138,187 @@ end
 -- vermelho em cada barra é a arma do papel atual. Valores do Shared/Weapons (as fontes estão lá).
 -- Na TV o texto não fica abaixo de 24 px na tela: a ficha cresce (mais larga e mais alta, subindo
 -- a partir do rodapé) para as linhas caberem.
-local TV = UiKit.tv()
-local CAP_W, CAP_H, CAP_M = if TV then 600 else 500, if TV then 210 else 140, 24
-local CAP_Y = 660 - CAP_H
-local CAP_TEXT_W = if TV then 272 else 236 -- coluna das armas
-local STAT_LW = if TV then 112 else 74 -- rótulo da barra
-local STAT_VW = if TV then 66 else 52 -- valor da barra
-local STAT_DY = if TV then 36 else 21 -- entre as barras
 local capHolder = Instance.new("CanvasGroup") -- entra e sai esmaecendo (pequeno: 548 x 188)
-capHolder.Name = "FichaPapel"
-capHolder.BackgroundTransparency = 1
-capHolder.Position = UDim2.fromOffset(40 - CAP_M, CAP_Y - CAP_M)
-capHolder.Size = UDim2.fromOffset(CAP_W + 2 * CAP_M, CAP_H + 2 * CAP_M)
-capHolder.GroupTransparency = 1
-capHolder.Visible = false
-capHolder.Parent = root
-local capCard = box(capHolder, CARD, CAP_M, CAP_M, CAP_W, CAP_H)
-capCard.Active = true
-capCard.ZIndex = 2
-stroke(capCard, INK, 1, 0.6)
-paper(capCard, 90)
-Acabamento.sombra(capCard, 16, Vector2.new(0, 6), 0.55).ZIndex = 1
-local capSeal, capGlyph = seal(capCard, 12, 8, 32, "×")
-local capTitle = txt(capCard, HEAD, 22, INK, 52, 6, CAP_W - 180, 32)
-capTitle.FontFace = HEAD_B
-capTitle.TextYAlignment = Enum.TextYAlignment.Center
-capTitle.TextTruncate = Enum.TextTruncate.AtEnd
-local capMark = stamp(capCard, 15, CAP_W - 116, 8, 104, 26, -4)
-capMark.Visible = false
-hline(capCard, UiKit.RULE_RED, 12, 44, CAP_W - 24)
-local capLines = txt(capCard, TYPE, 14, INK, 12, 50, CAP_TEXT_W, CAP_H - 54)
-capLines.TextYAlignment = Enum.TextYAlignment.Top
-capLines.RichText = true
-
--- maiores valores entre as armas ligadas: a barra cheia é a melhor arma do jogo naquele número
-type Stat = { key: string, label: string, unit: string, max: number, more: boolean }
-local STATS: { Stat } = {
-	{ key = "muzzleVelocity", label = "V0", unit = " m/s", max = 1, more = true },
-	{ key = "rpm", label = "CADÊNCIA", unit = "/min", max = 1, more = true },
-	{ key = "magazine", label = "CARREGADOR", unit = "", max = 1, more = true },
-	{ key = "massLoadedKg", label = "PESO", unit = " kg", max = 1, more = false },
-}
-for _, w in Weapons.list do
-	if w.enabled then
-		for _, s in STATS do
-			s.max = math.max(s.max, (w :: any)[s.key] :: number)
-		end
-	end
-end
-type StatRow = { fill: Frame, ghost: Frame, value: TextLabel }
-local statRows: { StatRow } = {}
-do
-	local lx = 12 + CAP_TEXT_W + 10 -- rótulo
-	local bx = lx + STAT_LW + 2 -- barra
-	local vx = CAP_W - 12 - STAT_VW -- valor
-	local bw = vx - 4 - bx
-	local rowH = if TV then 30 else 18
-	for i, s in STATS do
-		local y = 50 + (i - 1) * STAT_DY
-		local l = txt(capCard, TYPE, 12, INK, lx, y, STAT_LW, rowH)
-		l.Text = s.label
-		l.TextTransparency = 0.2
-		l.TextYAlignment = Enum.TextYAlignment.Center
-		local back = box(capCard, INK, bx, y + math.floor(rowH / 2) - 3, bw, 6, 0.84)
-		corner(back, 2)
-		local fill = box(back, INK, 0, 0, 0, 6, 0.1)
-		fill.Size = UDim2.fromScale(0, 1)
-		corner(fill, 2)
-		local ghost = box(back, STAMP, 0, -3, 2, 12)
-		ghost.AnchorPoint = Vector2.new(0.5, 0)
-		ghost.Visible = false
-		local v = txt(capCard, HEAD, 13, INK, vx, y, STAT_VW, rowH, Enum.TextXAlignment.Right)
-		v.FontFace = HEAD_B
-		v.TextYAlignment = Enum.TextYAlignment.Center
-		statRows[i] = { fill = fill, ghost = ghost, value = v }
-	end
-end
-
-local function statText(s: Stat, x: number): string
-	if s.key == "massLoadedKg" then
-		return string.format("%.1f", x):gsub("%.", ",") .. s.unit
-	end
-	return tostring(math.floor(x + 0.5)) .. s.unit
-end
-
 local capShown = ""
-local function caption(f: string, roleId: string?, extra: string?)
-	local rid = roleId or "rifleman"
-	local key = f .. "|" .. rid .. "|" .. (extra or "") .. "|" .. tostring(player:GetAttribute("Role"))
-	if key == capShown then
-		return -- o mesmo papel: nada a animar (render chama a cada mudança de estado)
-	end
-	capShown = key
-	local r = Roles.roles[rid]
-	local lo = Roles.loadout[f][rid]
-	local cur = player:GetAttribute("Role")
-	local curLo = if type(cur) == "string" then Roles.loadout[f][cur] else nil
-	local isCurrent = cur == rid
-	-- cabeçalho: selo com o glifo do papel e o título datilografado
-	capGlyph.Text = ROLE_GLYPH[rid] or "•"
-	capGlyph.TextColor3 = if rid == "medic" then STAMP else INK
-	local pop = capSeal:FindFirstChild("Pop") :: UIScale?
-	if pop then
-		pop.Scale = 1.3
-		tw(pop, SOFT, { Scale = 1 })
-	end
-	Acabamento.datilografar(capTitle, string.upper(if r then r.name else rid), 70)
-	if isCurrent then
-		stampSet(capMark, "ATUAL", OLIVE_INK)
-	elseif curLo then
-		stampSet(capMark, "TROCA", STAMP) -- escolher este papel troca o equipamento
-	else
-		stampSet(capMark, nil)
-	end
-	-- armas: as que não estão no papel atual vão marcadas (o viet vem antes da marca: o padrão dele
-	-- não pode ver as tags)
-	local lines = {}
-	if lo then
-		for _, id in lo do
-			local w = Weapons.get(id)
-			local line = Acabamento.viet(if w then string.format("%s · %s", w.name, w.cartridge) else id)
-			local new = curLo ~= nil and not isCurrent and not table.find(curLo, id)
-			table.insert(lines, if new then '<font color="#96281E" face="Arimo">►</font> ' .. line else line)
-		end
-	end
-	table.insert(lines, Acabamento.viet(FACTION[f].kit))
-	if extra then
-		table.insert(lines, Acabamento.viet(extra))
-	end
-	Acabamento.datilografar(capLines, table.concat(lines, "\n"), 140, 0.08)
-	-- barras da arma principal (e o traço da arma do papel atual)
-	local w = if lo then Weapons.get(lo[1]) else nil
-	local cw = if curLo and not isCurrent then Weapons.get(curLo[1]) else nil
-	for i, s in STATS do
-		local row = statRows[i]
-		local x = if w then (w :: any)[s.key] :: number else 0
-		local k = math.clamp(x / s.max, 0, 1)
-		local better = cw and (if s.more then x > (cw :: any)[s.key] else x < (cw :: any)[s.key])
-		local worse = cw and (if s.more then x < (cw :: any)[s.key] else x > (cw :: any)[s.key])
-		tw(row.fill, after((i - 1) * 0.04, TweenInfo.new(0.45, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)), {
-			Size = UDim2.fromScale(k, 1),
-			BackgroundColor3 = if better then OLIVE_INK elseif worse then STAMP else INK,
-		})
-		row.value.Text = if w then statText(s, x) else "—"
-		row.ghost.Visible = cw ~= nil
-		if cw then
-			tw(row.ghost, SOFT, {
-				Position = UDim2.fromScale(math.clamp(((cw :: any)[s.key] :: number) / s.max, 0, 1), 0),
-			})
-		end
-	end
-end
-
 local capToken = 0
 local capOn = false
-local function capShow(on: boolean)
-	if on == capOn then
-		return
-	end
-	capOn = on
-	capToken += 1
-	local my = capToken
-	local home = UDim2.fromOffset(40 - CAP_M, CAP_Y - CAP_M)
-	if on then
-		capHolder.Visible = true
-		capHolder.Position = home - UDim2.fromOffset(36, 0)
-		capHolder.GroupTransparency = 1
-		tw(capHolder, PAGE_IN, { Position = home, GroupTransparency = 0 })
-	else
-		tw(capHolder, PAGE_OUT, { Position = home - UDim2.fromOffset(24, 0), GroupTransparency = 1 }).Completed:Once(
-			function()
-				if capToken == my then
-					capHolder.Visible = false
-				end
+local caption: (f: string, roleId: string?, extra: string?) -> ()
+local capShow: (on: boolean) -> ()
+do
+	local TV = UiKit.tv()
+	local CAP_W, CAP_H, CAP_M = if TV then 600 else 500, if TV then 210 else 140, 24
+	local CAP_Y = 660 - CAP_H
+	local CAP_TEXT_W = if TV then 272 else 236 -- coluna das armas
+	local STAT_LW = if TV then 112 else 74 -- rótulo da barra
+	local STAT_VW = if TV then 66 else 52 -- valor da barra
+	local STAT_DY = if TV then 36 else 21 -- entre as barras
+	capHolder.Name = "FichaPapel"
+	capHolder.BackgroundTransparency = 1
+	capHolder.Position = UDim2.fromOffset(40 - CAP_M, CAP_Y - CAP_M)
+	capHolder.Size = UDim2.fromOffset(CAP_W + 2 * CAP_M, CAP_H + 2 * CAP_M)
+	capHolder.GroupTransparency = 1
+	capHolder.Visible = false
+	capHolder.Parent = root
+	local capCard = box(capHolder, CARD, CAP_M, CAP_M, CAP_W, CAP_H)
+	capCard.Active = true
+	capCard.ZIndex = 2
+	stroke(capCard, INK, 1, 0.6)
+	paper(capCard, 90)
+	Acabamento.sombra(capCard, 16, Vector2.new(0, 6), 0.55).ZIndex = 1
+	local capSeal, capGlyph = seal(capCard, 12, 8, 32, "×")
+	local capTitle = txt(capCard, HEAD, 22, INK, 52, 6, CAP_W - 180, 32)
+	capTitle.FontFace = HEAD_B
+	capTitle.TextYAlignment = Enum.TextYAlignment.Center
+	capTitle.TextTruncate = Enum.TextTruncate.AtEnd
+	local capMark = stamp(capCard, 15, CAP_W - 116, 8, 104, 26, -4)
+	capMark.Visible = false
+	hline(capCard, UiKit.RULE_RED, 12, 44, CAP_W - 24)
+	local capLines = txt(capCard, TYPE, 14, INK, 12, 50, CAP_TEXT_W, CAP_H - 54)
+	capLines.TextYAlignment = Enum.TextYAlignment.Top
+	capLines.RichText = true
+
+	-- maiores valores entre as armas ligadas: a barra cheia é a melhor arma do jogo naquele número
+	type Stat = { key: string, label: string, unit: string, max: number, more: boolean }
+	local STATS: { Stat } = {
+		{ key = "muzzleVelocity", label = "V0", unit = " m/s", max = 1, more = true },
+		{ key = "rpm", label = "CADÊNCIA", unit = "/min", max = 1, more = true },
+		{ key = "magazine", label = "CARREGADOR", unit = "", max = 1, more = true },
+		{ key = "massLoadedKg", label = "PESO", unit = " kg", max = 1, more = false },
+	}
+	for _, w in Weapons.list do
+		if w.enabled then
+			for _, s in STATS do
+				s.max = math.max(s.max, (w :: any)[s.key] :: number)
 			end
-		)
+		end
+	end
+	type StatRow = { fill: Frame, ghost: Frame, value: TextLabel }
+	local statRows: { StatRow } = {}
+	do
+		local lx = 12 + CAP_TEXT_W + 10 -- rótulo
+		local bx = lx + STAT_LW + 2 -- barra
+		local vx = CAP_W - 12 - STAT_VW -- valor
+		local bw = vx - 4 - bx
+		local rowH = if TV then 30 else 18
+		for i, s in STATS do
+			local y = 50 + (i - 1) * STAT_DY
+			local l = txt(capCard, TYPE, 12, INK, lx, y, STAT_LW, rowH)
+			l.Text = s.label
+			l.TextTransparency = 0.2
+			l.TextYAlignment = Enum.TextYAlignment.Center
+			local back = box(capCard, INK, bx, y + math.floor(rowH / 2) - 3, bw, 6, 0.84)
+			corner(back, 2)
+			local fill = box(back, INK, 0, 0, 0, 6, 0.1)
+			fill.Size = UDim2.fromScale(0, 1)
+			corner(fill, 2)
+			local ghost = box(back, STAMP, 0, -3, 2, 12)
+			ghost.AnchorPoint = Vector2.new(0.5, 0)
+			ghost.Visible = false
+			local v = txt(capCard, HEAD, 13, INK, vx, y, STAT_VW, rowH, Enum.TextXAlignment.Right)
+			v.FontFace = HEAD_B
+			v.TextYAlignment = Enum.TextYAlignment.Center
+			statRows[i] = { fill = fill, ghost = ghost, value = v }
+		end
+	end
+
+	local function statText(s: Stat, x: number): string
+		if s.key == "massLoadedKg" then
+			return string.format("%.1f", x):gsub("%.", ",") .. s.unit
+		end
+		return tostring(math.floor(x + 0.5)) .. s.unit
+	end
+
+	function caption(f: string, roleId: string?, extra: string?)
+		local rid = roleId or "rifleman"
+		local key = f .. "|" .. rid .. "|" .. (extra or "") .. "|" .. tostring(player:GetAttribute("Role"))
+		if key == capShown then
+			return -- o mesmo papel: nada a animar (render chama a cada mudança de estado)
+		end
+		capShown = key
+		local r = Roles.roles[rid]
+		local lo = Roles.loadout[f][rid]
+		local cur = player:GetAttribute("Role")
+		local curLo = if type(cur) == "string" then Roles.loadout[f][cur] else nil
+		local isCurrent = cur == rid
+		-- cabeçalho: selo com o glifo do papel e o título datilografado
+		capGlyph.Text = ROLE_GLYPH[rid] or "•"
+		capGlyph.TextColor3 = if rid == "medic" then STAMP else INK
+		local pop = capSeal:FindFirstChild("Pop") :: UIScale?
+		if pop then
+			pop.Scale = 1.3
+			tw(pop, SOFT, { Scale = 1 })
+		end
+		Acabamento.datilografar(capTitle, string.upper(if r then r.name else rid), 70)
+		if isCurrent then
+			stampSet(capMark, "ATUAL", OLIVE_INK)
+		elseif curLo then
+			stampSet(capMark, "TROCA", STAMP) -- escolher este papel troca o equipamento
+		else
+			stampSet(capMark, nil)
+		end
+		-- armas: as que não estão no papel atual vão marcadas (o viet vem antes da marca: o padrão dele
+		-- não pode ver as tags)
+		local lines = {}
+		if lo then
+			for _, id in lo do
+				local w = Weapons.get(id)
+				local line = Acabamento.viet(if w then string.format("%s · %s", w.name, w.cartridge) else id)
+				local new = curLo ~= nil and not isCurrent and not table.find(curLo, id)
+				table.insert(lines, if new then '<font color="#96281E" face="Arimo">►</font> ' .. line else line)
+			end
+		end
+		table.insert(lines, Acabamento.viet(FACTION[f].kit))
+		if extra then
+			table.insert(lines, Acabamento.viet(extra))
+		end
+		Acabamento.datilografar(capLines, table.concat(lines, "\n"), 140, 0.08)
+		-- barras da arma principal (e o traço da arma do papel atual)
+		local w = if lo then Weapons.get(lo[1]) else nil
+		local cw = if curLo and not isCurrent then Weapons.get(curLo[1]) else nil
+		for i, s in STATS do
+			local row = statRows[i]
+			local x = if w then (w :: any)[s.key] :: number else 0
+			local k = math.clamp(x / s.max, 0, 1)
+			local better = cw and (if s.more then x > (cw :: any)[s.key] else x < (cw :: any)[s.key])
+			local worse = cw and (if s.more then x < (cw :: any)[s.key] else x > (cw :: any)[s.key])
+			tw(row.fill, after((i - 1) * 0.04, TweenInfo.new(0.45, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)), {
+				Size = UDim2.fromScale(k, 1),
+				BackgroundColor3 = if better then OLIVE_INK elseif worse then STAMP else INK,
+			})
+			row.value.Text = if w then statText(s, x) else "—"
+			row.ghost.Visible = cw ~= nil
+			if cw then
+				tw(row.ghost, SOFT, {
+					Position = UDim2.fromScale(math.clamp(((cw :: any)[s.key] :: number) / s.max, 0, 1), 0),
+				})
+			end
+		end
+	end
+
+	function capShow(on: boolean)
+		if on == capOn then
+			return
+		end
+		capOn = on
+		capToken += 1
+		local my = capToken
+		local home = UDim2.fromOffset(40 - CAP_M, CAP_Y - CAP_M)
+		if on then
+			capHolder.Visible = true
+			capHolder.Position = home - UDim2.fromOffset(36, 0)
+			capHolder.GroupTransparency = 1
+			tw(capHolder, PAGE_IN, { Position = home, GroupTransparency = 0 })
+		else
+			tw(capHolder, PAGE_OUT, { Position = home - UDim2.fromOffset(24, 0), GroupTransparency = 1 }).Completed:Once(
+				function()
+					if capToken == my then
+						capHolder.Visible = false
+					end
+				end
+			)
+		end
 	end
 end
-
 -- ===== squad =====
 type SCard = {
 	btn: TextButton,
@@ -1337,262 +1340,268 @@ type Row = {
 	newCard: SCard,
 }
 
-local sFolder, sInfo = folder(pages.squad, "FICHA 2 · SQUAD", PANEL_W, PANEL_H)
-local sScroll = scroller(sFolder, 16, 56, PANEL_W - 32, PANEL_H - 116)
-local sList = Instance.new("UIListLayout")
-sList.Padding = UDim.new(0, 10)
-sList.SortOrder = Enum.SortOrder.LayoutOrder
-sList.Parent = sScroll
-local sPad = Instance.new("UIPadding") -- folga para o cartão crescer no realce sem cortar
-sPad.PaddingLeft = UDim.new(0, 4)
-sPad.PaddingTop = UDim.new(0, 4)
-sPad.PaddingBottom = UDim.new(0, 10)
-sPad.Parent = sScroll
-local leaveBtn = darkButton(sFolder, "SAIR DO SQUAD", PANEL_W - 236, PANEL_H - 52, 220, 38)
-bindDark(leaveBtn, function()
-	Net.event("Squad_Action"):FireServer({ op = "leave" })
-end)
-local squadHint = txt(sFolder, TYPE, 14, INK, 16, PANEL_H - 50, PANEL_W - 270, 36)
-
-local function squadCard(parent: Instance, isNew: boolean): SCard
-	local base = if isNew then NEW_CARD else CARD
-	local b = cardButton(parent, 104, 92, base)
-	corner(b, 3)
-	paper(b, 90)
-	stroke(b, INK, 1, if isNew then 0.45 else 0.7)
-	local top = txt(b, HEAD, 18, INK, 7, 2, 90, 26)
-	top.FontFace = HEAD_B
-	hline(b, UiKit.RULE_RED, 7, 29, 90)
-	local mid = if isNew then txt(b, TYPE, 15, INK, 7, 34, 90, 30) else txt(b, HEAD, 28, INK, 7, 32, 90, 32)
-	local bottom = txt(b, TYPE, 14, INK, 7, 66, 90, 22)
-	local c: SCard = {
-		btn = b,
-		top = top,
-		mid = mid,
-		bottom = bottom,
-		base = base,
-		hot = false,
-		action = nil,
-		realce = UiKit.realce(b, base, CARD_HOT, 1.05),
-	}
-	bindCard(b, function()
-		local fn = c.action
-		if fn then
-			fn()
-		end
-	end, function(on: boolean)
-		c.hot = on
-		b.ZIndex = if on then 3 else 1 -- o cartão que cresce fica por cima dos vizinhos
-		c.realce.set(on)
+local dealSquad: () -> ()
+local renderSquad: (f: string, st: any) -> { GuiObject }
+do
+	local sFolder, sInfo = folder(pages.squad, "FICHA 2 · SQUAD", PANEL_W, PANEL_H)
+	local sScroll = scroller(sFolder, 16, 56, PANEL_W - 32, PANEL_H - 116)
+	local sList = Instance.new("UIListLayout")
+	sList.Padding = UDim.new(0, 10)
+	sList.SortOrder = Enum.SortOrder.LayoutOrder
+	sList.Parent = sScroll
+	local sPad = Instance.new("UIPadding") -- folga para o cartão crescer no realce sem cortar
+	sPad.PaddingLeft = UDim.new(0, 4)
+	sPad.PaddingTop = UDim.new(0, 4)
+	sPad.PaddingBottom = UDim.new(0, 10)
+	sPad.Parent = sScroll
+	local leaveBtn = darkButton(sFolder, "SAIR DO SQUAD", PANEL_W - 236, PANEL_H - 52, 220, 38)
+	bindDark(leaveBtn, function()
+		Net.event("Squad_Action"):FireServer({ op = "leave" })
 	end)
-	return c
-end
+	local squadHint = txt(sFolder, TYPE, 14, INK, 16, PANEL_H - 50, PANEL_W - 270, 36)
 
-local rows: { [string]: Row } = {}
-local squadCards: { [string]: SCard } = {}
+	local function squadCard(parent: Instance, isNew: boolean): SCard
+		local base = if isNew then NEW_CARD else CARD
+		local b = cardButton(parent, 104, 92, base)
+		corner(b, 3)
+		paper(b, 90)
+		stroke(b, INK, 1, if isNew then 0.45 else 0.7)
+		local top = txt(b, HEAD, 18, INK, 7, 2, 90, 26)
+		top.FontFace = HEAD_B
+		hline(b, UiKit.RULE_RED, 7, 29, 90)
+		local mid = if isNew then txt(b, TYPE, 15, INK, 7, 34, 90, 30) else txt(b, HEAD, 28, INK, 7, 32, 90, 32)
+		local bottom = txt(b, TYPE, 14, INK, 7, 66, 90, 22)
+		local c: SCard = {
+			btn = b,
+			top = top,
+			mid = mid,
+			bottom = bottom,
+			base = base,
+			hot = false,
+			action = nil,
+			realce = UiKit.realce(b, base, CARD_HOT, 1.05),
+		}
+		bindCard(b, function()
+			local fn = c.action
+			if fn then
+				fn()
+			end
+		end, function(on: boolean)
+			c.hot = on
+			b.ZIndex = if on then 3 else 1 -- o cartão que cresce fica por cima dos vizinhos
+			c.realce.set(on)
+		end)
+		return c
+	end
 
-local function unitRow(): Row
-	local fr = Instance.new("Frame")
-	fr.BackgroundTransparency = 1
-	fr.AutomaticSize = Enum.AutomaticSize.Y
-	fr.Size = UDim2.fromOffset(PANEL_W - 44, 92)
-	fr.Parent = sScroll
-	local label = box(fr, CARD, 0, 0, 170, 92, 0.12)
-	corner(label, 3)
-	paper(label, 90)
-	entryParts(label, 3)
-	local _, glyph = seal(label, 8, 4, 26, "×")
-	local name = txt(label, HEAD, 19, INK, 40, 2, 124, 26)
-	name.FontFace = HEAD_B
-	hline(label, UiKit.RULE_RED, 9, 33, 152)
-	local detail = txt(label, TYPE, 13, INK, 9, 38, 156, 52)
-	detail.TextYAlignment = Enum.TextYAlignment.Top
-	local holder = Instance.new("Frame")
-	holder.BackgroundTransparency = 1
-	holder.Position = UDim2.fromOffset(178, 0)
-	holder.Size = UDim2.fromOffset(PANEL_W - 44 - 178, 92)
-	holder.AutomaticSize = Enum.AutomaticSize.Y
-	holder.Parent = fr
-	local grid = Instance.new("UIGridLayout")
-	grid.CellSize = UDim2.fromOffset(104, 92)
-	grid.CellPadding = UDim2.fromOffset(8, 8)
-	grid.SortOrder = Enum.SortOrder.LayoutOrder
-	grid.Parent = holder
-	local nc = squadCard(holder, true)
-	nc.btn.LayoutOrder = 99
-	return { frame = fr, label = label, glyph = glyph, name = name, detail = detail, holder = holder, newCard = nc }
-end
+	local rows: { [string]: Row } = {}
+	local squadCards: { [string]: SCard } = {}
 
--- entrada da ficha de squad: rótulos e cartões pousando, linha por linha
-local function dealSquad()
-	local list: { GuiObject } = {}
-	local ordered: { Row } = {}
-	for _, r in rows do
-		if r.frame.Visible then
-			table.insert(ordered, r)
-		end
+	local function unitRow(): Row
+		local fr = Instance.new("Frame")
+		fr.BackgroundTransparency = 1
+		fr.AutomaticSize = Enum.AutomaticSize.Y
+		fr.Size = UDim2.fromOffset(PANEL_W - 44, 92)
+		fr.Parent = sScroll
+		local label = box(fr, CARD, 0, 0, 170, 92, 0.12)
+		corner(label, 3)
+		paper(label, 90)
+		entryParts(label, 3)
+		local _, glyph = seal(label, 8, 4, 26, "×")
+		local name = txt(label, HEAD, 19, INK, 40, 2, 124, 26)
+		name.FontFace = HEAD_B
+		hline(label, UiKit.RULE_RED, 9, 33, 152)
+		local detail = txt(label, TYPE, 13, INK, 9, 38, 156, 52)
+		detail.TextYAlignment = Enum.TextYAlignment.Top
+		local holder = Instance.new("Frame")
+		holder.BackgroundTransparency = 1
+		holder.Position = UDim2.fromOffset(178, 0)
+		holder.Size = UDim2.fromOffset(PANEL_W - 44 - 178, 92)
+		holder.AutomaticSize = Enum.AutomaticSize.Y
+		holder.Parent = fr
+		local grid = Instance.new("UIGridLayout")
+		grid.CellSize = UDim2.fromOffset(104, 92)
+		grid.CellPadding = UDim2.fromOffset(8, 8)
+		grid.SortOrder = Enum.SortOrder.LayoutOrder
+		grid.Parent = holder
+		local nc = squadCard(holder, true)
+		nc.btn.LayoutOrder = 99
+		return { frame = fr, label = label, glyph = glyph, name = name, detail = detail, holder = holder, newCard = nc }
 	end
-	table.sort(ordered, function(a: Row, b: Row): boolean
-		return a.frame.LayoutOrder < b.frame.LayoutOrder
-	end)
-	for _, r in ordered do
-		table.insert(list, r.label)
-		local cards: { GuiObject } = {}
-		for _, c in r.holder:GetChildren() do
-			if c:IsA("GuiButton") then
-				table.insert(cards, c)
-			end
-		end
-		for _, c in byOrder(cards) do
-			table.insert(list, c)
-		end
-	end
-	deal(list, 0.12, 0.03)
-end
 
--- Desenha a ficha de squad; devolve os cartões que acabaram de aparecer (squad novo formado por
--- alguém, ou o estado do servidor chegando), para pousarem animados.
-local function renderSquad(f: string, st: any): { GuiObject }
-	local before: { [GuiObject]: boolean } = {}
-	for _, r in rows do
-		if r.frame.Visible then
-			before[r.label] = true
-			for _, c in r.holder:GetChildren() do
-				if c:IsA("GuiButton") and c.Visible then
-					before[c] = true
-				end
+	-- entrada da ficha de squad: rótulos e cartões pousando, linha por linha
+	function dealSquad()
+		local list: { GuiObject } = {}
+		local ordered: { Row } = {}
+		for _, r in rows do
+			if r.frame.Visible then
+				table.insert(ordered, r)
 			end
 		end
-	end
-	local size: number? = if st and type(st.size) == "number" then st.size else nil
-	local squads: { any } = if st and type(st.squads) == "table" then st.squads else {}
-	local mySid = player:GetAttribute("SquadId")
-	sInfo.Text = if size
-		then string.format(
-			"Jogadores %s %d/%d · pesados abrem com %d",
-			FACTION[f].short,
-			size,
-			Roles.TEAM_MAX,
-			Roles.HEAVY_UNLOCK
-		)
-		else "Recebendo os squads do servidor…"
-	leaveBtn.Visible = type(mySid) == "string"
-	squadHint.Text = if type(mySid) == "string"
-		then "Trocar de squad tira o papel atual."
-		else "Entre num squad com vaga ou forme um novo."
-	for _, r in rows do
-		r.frame.Visible = false
-	end
-	for _, c in squadCards do
-		c.btn.Visible = false
-	end
-	for order, unit in UNITS_OF[f] do
-		local def = Roles.units[f][unit]
-		local key = f .. ":" .. unit
-		local row = rows[key]
-		if not row then
-			row = unitRow()
-			rows[key] = row
-		end
-		row.frame.Visible = true
-		row.frame.LayoutOrder = order
-		row.name.Text = string.upper(UNIT_NAME[unit] or unit)
-		row.glyph.Text = UNIT_GLYPH[unit] or "•"
-		local locked = def.heavy and (size == nil or size < Roles.HEAVY_UNLOCK)
-		local detail = if def.size == 1 then "1 vaga" else string.format("Squads de %d · até %d", def.size, def.count)
-		if def.heavy then
-			detail ..= if locked
-				then string.format(
-					"\nAbre com %d no time%s",
-					Roles.HEAVY_UNLOCK,
-					if size then string.format(" (agora %d)", size) else ""
-				)
-				else "\nLiberado"
-		end
-		row.detail.Text = detail
-		local used: { [string]: boolean } = {}
-		for _, s in squads do
-			if s.unit == unit and type(s.id) == "string" then
-				used[s.name] = true
-				local c = squadCards[s.id]
-				if not c then
-					c = squadCard(row.holder, false)
-					squadCards[s.id] = c
-				end
-				local card = c :: SCard
-				if card.btn.Parent ~= row.holder then
-					card.btn.Parent = row.holder
-				end
-				local n = if type(s.members) == "table" then #s.members else 0
-				local full = n >= def.size
-				local mine = s.id == mySid
-				card.btn.Visible = true
-				card.btn.LayoutOrder = table.find(def.names, s.name) or 50
-				card.top.Text = tostring(s.name)
-				card.top.Font = if f == "VC" then VIET else HEAD
-				card.mid.Text = string.format("%d/%d", n, def.size)
-				card.bottom.Text = if mine then "SEU SQUAD" elseif full then "CHEIO" else "ENTRAR"
-				card.base = if mine then NEW_CARD elseif full then CARD_OFF else CARD
-				card.realce.base(card.base)
-				local id = s.id
-				card.action = function()
-					if mine then
-						DeployScreen.open("role") -- já é o seu: segue para o papel
-						return
-					end
-					if full then
-						notify("Squad cheio: o servidor deve recusar.")
-					end
-					Net.event("Squad_Action"):FireServer({ op = "join", id = id })
-				end
-			end
-		end
-		local nextName: string? = nil
-		for _, nm in def.names do
-			if not used[nm] then
-				nextName = nm
-				break
-			end
-		end
-		local nc = row.newCard
-		nc.btn.Visible = nextName ~= nil
-		if nextName then
-			nc.top.Text = "+ NOVO"
-			nc.mid.Text = nextName
-			nc.mid.Font = if f == "VC" then VIET else TYPE
-			nc.bottom.Text = if locked then "TRANCADO" else "FORMAR"
-			nc.base = if locked then CARD_OFF else NEW_CARD
-			nc.realce.base(nc.base)
-			nc.action = function()
-				if locked then
-					notify(string.format("Unidade pesada: abre com %d no time.", Roles.HEAVY_UNLOCK))
-					return
-				end
-				Net.event("Squad_Action"):FireServer({ op = "create", unit = unit })
-			end
-		end
-	end
-	local fresh: { GuiObject } = {}
-	for _, r in rows do
-		if r.frame.Visible then
-			if not before[r.label] then
-				table.insert(fresh, r.label)
-			end
+		table.sort(ordered, function(a: Row, b: Row): boolean
+			return a.frame.LayoutOrder < b.frame.LayoutOrder
+		end)
+		for _, r in ordered do
+			table.insert(list, r.label)
 			local cards: { GuiObject } = {}
 			for _, c in r.holder:GetChildren() do
-				if c:IsA("GuiButton") and c.Visible and not before[c] then
+				if c:IsA("GuiButton") then
 					table.insert(cards, c)
 				end
 			end
 			for _, c in byOrder(cards) do
-				table.insert(fresh, c)
+				table.insert(list, c)
 			end
 		end
+		deal(list, 0.12, 0.03)
 	end
-	return fresh
-end
 
--- ===== papel =====
+	-- Desenha a ficha de squad; devolve os cartões que acabaram de aparecer (squad novo formado por
+	-- alguém, ou o estado do servidor chegando), para pousarem animados.
+	function renderSquad(f: string, st: any): { GuiObject }
+		local before: { [GuiObject]: boolean } = {}
+		for _, r in rows do
+			if r.frame.Visible then
+				before[r.label] = true
+				for _, c in r.holder:GetChildren() do
+					if c:IsA("GuiButton") and c.Visible then
+						before[c] = true
+					end
+				end
+			end
+		end
+		local size: number? = if st and type(st.size) == "number" then st.size else nil
+		local squads: { any } = if st and type(st.squads) == "table" then st.squads else {}
+		local mySid = player:GetAttribute("SquadId")
+		sInfo.Text = if size
+			then string.format(
+				"Jogadores %s %d/%d · pesados abrem com %d",
+				FACTION[f].short,
+				size,
+				Roles.TEAM_MAX,
+				Roles.HEAVY_UNLOCK
+			)
+			else "Recebendo os squads do servidor…"
+		leaveBtn.Visible = type(mySid) == "string"
+		squadHint.Text = if type(mySid) == "string"
+			then "Trocar de squad tira o papel atual."
+			else "Entre num squad com vaga ou forme um novo."
+		for _, r in rows do
+			r.frame.Visible = false
+		end
+		for _, c in squadCards do
+			c.btn.Visible = false
+		end
+		for order, unit in UNITS_OF[f] do
+			local def = Roles.units[f][unit]
+			local key = f .. ":" .. unit
+			local row = rows[key]
+			if not row then
+				row = unitRow()
+				rows[key] = row
+			end
+			row.frame.Visible = true
+			row.frame.LayoutOrder = order
+			row.name.Text = string.upper(UNIT_NAME[unit] or unit)
+			row.glyph.Text = UNIT_GLYPH[unit] or "•"
+			local locked = def.heavy and (size == nil or size < Roles.HEAVY_UNLOCK)
+			local detail = if def.size == 1
+				then "1 vaga"
+				else string.format("Squads de %d · até %d", def.size, def.count)
+			if def.heavy then
+				detail ..= if locked
+					then string.format(
+						"\nAbre com %d no time%s",
+						Roles.HEAVY_UNLOCK,
+						if size then string.format(" (agora %d)", size) else ""
+					)
+					else "\nLiberado"
+			end
+			row.detail.Text = detail
+			local used: { [string]: boolean } = {}
+			for _, s in squads do
+				if s.unit == unit and type(s.id) == "string" then
+					used[s.name] = true
+					local c = squadCards[s.id]
+					if not c then
+						c = squadCard(row.holder, false)
+						squadCards[s.id] = c
+					end
+					local card = c :: SCard
+					if card.btn.Parent ~= row.holder then
+						card.btn.Parent = row.holder
+					end
+					local n = if type(s.members) == "table" then #s.members else 0
+					local full = n >= def.size
+					local mine = s.id == mySid
+					card.btn.Visible = true
+					card.btn.LayoutOrder = table.find(def.names, s.name) or 50
+					card.top.Text = tostring(s.name)
+					card.top.Font = if f == "VC" then VIET else HEAD
+					card.mid.Text = string.format("%d/%d", n, def.size)
+					card.bottom.Text = if mine then "SEU SQUAD" elseif full then "CHEIO" else "ENTRAR"
+					card.base = if mine then NEW_CARD elseif full then CARD_OFF else CARD
+					card.realce.base(card.base)
+					local id = s.id
+					card.action = function()
+						if mine then
+							DeployScreen.open("role") -- já é o seu: segue para o papel
+							return
+						end
+						if full then
+							notify("Squad cheio: o servidor deve recusar.")
+						end
+						Net.event("Squad_Action"):FireServer({ op = "join", id = id })
+					end
+				end
+			end
+			local nextName: string? = nil
+			for _, nm in def.names do
+				if not used[nm] then
+					nextName = nm
+					break
+				end
+			end
+			local nc = row.newCard
+			nc.btn.Visible = nextName ~= nil
+			if nextName then
+				nc.top.Text = "+ NOVO"
+				nc.mid.Text = nextName
+				nc.mid.Font = if f == "VC" then VIET else TYPE
+				nc.bottom.Text = if locked then "TRANCADO" else "FORMAR"
+				nc.base = if locked then CARD_OFF else NEW_CARD
+				nc.realce.base(nc.base)
+				nc.action = function()
+					if locked then
+						notify(string.format("Unidade pesada: abre com %d no time.", Roles.HEAVY_UNLOCK))
+						return
+					end
+					Net.event("Squad_Action"):FireServer({ op = "create", unit = unit })
+				end
+			end
+		end
+		local fresh: { GuiObject } = {}
+		for _, r in rows do
+			if r.frame.Visible then
+				if not before[r.label] then
+					table.insert(fresh, r.label)
+				end
+				local cards: { GuiObject } = {}
+				for _, c in r.holder:GetChildren() do
+					if c:IsA("GuiButton") and c.Visible and not before[c] then
+						table.insert(cards, c)
+					end
+				end
+				for _, c in byOrder(cards) do
+					table.insert(fresh, c)
+				end
+			end
+		end
+		return fresh
+	end
+
+	-- ===== papel =====
+end
 type RCard = {
 	btn: TextButton,
 	name: TextLabel,
@@ -1604,648 +1613,671 @@ type RCard = {
 	blocked: string?,
 	realce: UiKit.Realce,
 }
-local rFolder, rInfo = folder(pages.role, "FICHA 3 · PAPEL", PANEL_W, PANEL_H)
-local rScroll = scroller(rFolder, 16, 56, PANEL_W - 32, PANEL_H - 72)
-local rGrid = Instance.new("UIGridLayout")
-rGrid.CellSize = UDim2.fromOffset(196, 150)
-rGrid.CellPadding = UDim2.fromOffset(10, 10)
-rGrid.SortOrder = Enum.SortOrder.LayoutOrder
-rGrid.Parent = rScroll
-local rPad = Instance.new("UIPadding") -- folga para o cartão crescer no realce sem cortar
-rPad.PaddingLeft = UDim.new(0, 4)
-rPad.PaddingTop = UDim.new(0, 4)
-rPad.PaddingBottom = UDim.new(0, 10)
-rPad.Parent = rScroll
-local roleCards: { [string]: RCard } = {}
+local dealRoles: () -> ()
+local findSquad: (st: any, sid: string) -> any
+local unitOfSquad: (f: string, sid: string) -> string?
+local renderRole: (f: string, st: any, sid: string) -> ()
+do
+	local rFolder, rInfo = folder(pages.role, "FICHA 3 · PAPEL", PANEL_W, PANEL_H)
+	local rScroll = scroller(rFolder, 16, 56, PANEL_W - 32, PANEL_H - 72)
+	local rGrid = Instance.new("UIGridLayout")
+	rGrid.CellSize = UDim2.fromOffset(196, 150)
+	rGrid.CellPadding = UDim2.fromOffset(10, 10)
+	rGrid.SortOrder = Enum.SortOrder.LayoutOrder
+	rGrid.Parent = rScroll
+	local rPad = Instance.new("UIPadding") -- folga para o cartão crescer no realce sem cortar
+	rPad.PaddingLeft = UDim.new(0, 4)
+	rPad.PaddingTop = UDim.new(0, 4)
+	rPad.PaddingBottom = UDim.new(0, 10)
+	rPad.Parent = rScroll
+	local roleCards: { [string]: RCard } = {}
 
-local function showRole(id: string?)
-	local f = myFaction()
-	if not f then
-		return
-	end
-	previewRole = id
-	local lo = if id then Roles.loadout[f][id] else nil
-	LobbyScene.setLoadout(f, if lo then lo[1] else nil)
-	local sid = player:GetAttribute("SquadId")
-	local squadName = if type(sid) == "string" then string.match(sid, ":(.+)$") else nil
-	caption(f, id, if squadName then "Squad " .. squadName else nil)
-end
-
-local function chooseRole(id: string)
-	local c = roleCards[id]
-	if id == currentRole() then
-		DeployScreen.open(if alive() then "desk" else "insert") -- o mesmo papel: sem os +15 s
-		return
-	end
-	if c and c.blocked then
-		notify(c.blocked .. ": o servidor deve recusar.")
-	end
-	Net.event("Role_Choose"):FireServer(id)
-end
-
--- ficha de papel: selo com o glifo do papel, nome em negrito, armas datilografadas, vagas e o
--- carimbo (ATUAL, OCUPADO, SÓ O LÍDER)
-local function roleCard(id: string): RCard
-	local b = cardButton(rScroll, 196, 150, CARD)
-	corner(b, 3)
-	paper(b, 90)
-	stroke(b, INK, 1, 0.7)
-	for i = 1, 3 do -- pauta azul
-		hline(b, UiKit.RULE_BLUE, 10, 82 + i * 22, 176, 0.8)
-	end
-	local _, glyph = seal(b, 10, 9, 32, ROLE_GLYPH[id] or "•")
-	if id == "medic" then
-		glyph.TextColor3 = STAMP
-	end
-	local name = txt(b, HEAD, 19, INK, 50, 4, 138, 48)
-	name.FontFace = HEAD_B
-	name.TextYAlignment = Enum.TextYAlignment.Center
-	hline(b, UiKit.RULE_RED, 10, 54, 176)
-	local weapons = txt(b, TYPE, 15, INK, 10, 60, 176, 52)
-	weapons.TextYAlignment = Enum.TextYAlignment.Top
-	local slots = txt(b, TYPE, 15, INK, 10, 118, 176, 26, Enum.TextXAlignment.Right)
-	local mark = stamp(b, 18, 24, 56, 148, 36, -9)
-	mark.Visible = false
-	local c: RCard = {
-		btn = b,
-		name = name,
-		weapons = weapons,
-		slots = slots,
-		mark = mark,
-		base = CARD,
-		hot = false,
-		blocked = nil,
-		realce = UiKit.realce(b, CARD, CARD_HOT, 1.04),
-	}
-	bindCard(b, function()
-		chooseRole(id)
-	end, function(on: boolean)
-		c.hot = on
-		b.ZIndex = if on then 3 else 1
-		c.realce.set(on)
-		if on then
-			showRole(id)
+	local function showRole(id: string?)
+		local f = myFaction()
+		if not f then
+			return
 		end
-	end)
-	return c
-end
-
-local function dealRoles()
-	local list: { GuiObject } = {}
-	for _, c in roleCards do
-		table.insert(list, c.btn)
+		previewRole = id
+		local lo = if id then Roles.loadout[f][id] else nil
+		LobbyScene.setLoadout(f, if lo then lo[1] else nil)
+		local sid = player:GetAttribute("SquadId")
+		local squadName = if type(sid) == "string" then string.match(sid, ":(.+)$") else nil
+		caption(f, id, if squadName then "Squad " .. squadName else nil)
 	end
-	deal(byOrder(list), 0.12, 0.04)
-end
 
-local function findSquad(st: any, sid: string): any
-	if st and type(st.squads) == "table" then
-		for _, s in st.squads do
-			if s.id == sid then
-				return s
+	local function chooseRole(id: string)
+		local c = roleCards[id]
+		if id == currentRole() then
+			DeployScreen.open(if alive() then "desk" else "insert") -- o mesmo papel: sem os +15 s
+			return
+		end
+		if c and c.blocked then
+			notify(c.blocked .. ": o servidor deve recusar.")
+		end
+		Net.event("Role_Choose"):FireServer(id)
+	end
+
+	-- ficha de papel: selo com o glifo do papel, nome em negrito, armas datilografadas, vagas e o
+	-- carimbo (ATUAL, OCUPADO, SÓ O LÍDER)
+	local function roleCard(id: string): RCard
+		local b = cardButton(rScroll, 196, 150, CARD)
+		corner(b, 3)
+		paper(b, 90)
+		stroke(b, INK, 1, 0.7)
+		for i = 1, 3 do -- pauta azul
+			hline(b, UiKit.RULE_BLUE, 10, 82 + i * 22, 176, 0.8)
+		end
+		local _, glyph = seal(b, 10, 9, 32, ROLE_GLYPH[id] or "•")
+		if id == "medic" then
+			glyph.TextColor3 = STAMP
+		end
+		local name = txt(b, HEAD, 19, INK, 50, 4, 138, 48)
+		name.FontFace = HEAD_B
+		name.TextYAlignment = Enum.TextYAlignment.Center
+		hline(b, UiKit.RULE_RED, 10, 54, 176)
+		local weapons = txt(b, TYPE, 15, INK, 10, 60, 176, 52)
+		weapons.TextYAlignment = Enum.TextYAlignment.Top
+		local slots = txt(b, TYPE, 15, INK, 10, 118, 176, 26, Enum.TextXAlignment.Right)
+		local mark = stamp(b, 18, 24, 56, 148, 36, -9)
+		mark.Visible = false
+		local c: RCard = {
+			btn = b,
+			name = name,
+			weapons = weapons,
+			slots = slots,
+			mark = mark,
+			base = CARD,
+			hot = false,
+			blocked = nil,
+			realce = UiKit.realce(b, CARD, CARD_HOT, 1.04),
+		}
+		bindCard(b, function()
+			chooseRole(id)
+		end, function(on: boolean)
+			c.hot = on
+			b.ZIndex = if on then 3 else 1
+			c.realce.set(on)
+			if on then
+				showRole(id)
+			end
+		end)
+		return c
+	end
+
+	function dealRoles()
+		local list: { GuiObject } = {}
+		for _, c in roleCards do
+			table.insert(list, c.btn)
+		end
+		deal(byOrder(list), 0.12, 0.04)
+	end
+
+	function findSquad(st: any, sid: string): any
+		if st and type(st.squads) == "table" then
+			for _, s in st.squads do
+				if s.id == sid then
+					return s
+				end
 			end
 		end
-	end
-	return nil
-end
-
--- unidade pelo nome do squad no id ("US:Alfa"), enquanto o Squad_State não chega
-local function unitOfSquad(f: string, sid: string): string?
-	local name = string.match(sid, ":(.+)$")
-	if not name then
 		return nil
 	end
-	for unit, def in Roles.units[f] do
-		if table.find(def.names, name) then
-			return unit
-		end
-	end
-	return nil
-end
 
-local function renderRole(f: string, st: any, sid: string)
-	local sq = findSquad(st, sid)
-	local unit: string? = if sq then sq.unit else unitOfSquad(f, sid)
-	local def = if unit then Roles.units[f][unit] else nil
-	local me = player.UserId
-	local leaderText = ""
-	if sq and sq.leader then
-		local lp = Players:GetPlayerByUserId(sq.leader)
-		leaderText = if sq.leader == me then " · líder: você" elseif lp then " · líder: " .. lp.DisplayName else ""
-	end
-	local squadName = string.match(sid, ":(.+)$") or sid
-	rInfo.Text = string.format(
-		"Squad %s · %s%s%s",
-		squadName,
-		if unit then UNIT_NAME[unit] or unit else "?",
-		if sq and def then string.format(" · %d de %d", #sq.members, def.size) else "",
-		leaderText
-	)
-	local cur = currentRole()
-	local firstFree: string? = nil
-	local firstId: string? = nil
-	for order, id in ROLE_IDS do
-		local r = Roles.roles[id]
-		local lo = Roles.loadout[f][id]
-		local show = unit ~= nil and r.unit == unit and lo ~= nil
-		local c = roleCards[id]
-		if show and not c then
-			c = roleCard(id)
-			roleCards[id] = c
+	-- unidade pelo nome do squad no id ("US:Alfa"), enquanto o Squad_State não chega
+	function unitOfSquad(f: string, sid: string): string?
+		local name = string.match(sid, ":(.+)$")
+		if not name then
+			return nil
 		end
-		if c then
-			local card = c :: RCard
-			card.btn.Visible = show
-			if show then
-				card.btn.LayoutOrder = order
-				card.name.Text = string.upper(r.name)
-				card.weapons.Text = weaponNames(lo)
-				local max = r.maxPerSquad
-				local free: number? = nil
-				if max then
-					local taken = 0
-					if sq and type(sq.roles) == "table" then
-						for uid, rr in sq.roles do
-							if rr == id and tostring(uid) ~= tostring(me) then
-								taken += 1
+		for unit, def in Roles.units[f] do
+			if table.find(def.names, name) then
+				return unit
+			end
+		end
+		return nil
+	end
+
+	function renderRole(f: string, st: any, sid: string)
+		local sq = findSquad(st, sid)
+		local unit: string? = if sq then sq.unit else unitOfSquad(f, sid)
+		local def = if unit then Roles.units[f][unit] else nil
+		local me = player.UserId
+		local leaderText = ""
+		if sq and sq.leader then
+			local lp = Players:GetPlayerByUserId(sq.leader)
+			leaderText = if sq.leader == me
+				then " · líder: você"
+				elseif lp then " · líder: " .. lp.DisplayName
+				else ""
+		end
+		local squadName = string.match(sid, ":(.+)$") or sid
+		rInfo.Text = string.format(
+			"Squad %s · %s%s%s",
+			squadName,
+			if unit then UNIT_NAME[unit] or unit else "?",
+			if sq and def then string.format(" · %d de %d", #sq.members, def.size) else "",
+			leaderText
+		)
+		local cur = currentRole()
+		local firstFree: string? = nil
+		local firstId: string? = nil
+		for order, id in ROLE_IDS do
+			local r = Roles.roles[id]
+			local lo = Roles.loadout[f][id]
+			local show = unit ~= nil and r.unit == unit and lo ~= nil
+			local c = roleCards[id]
+			if show and not c then
+				c = roleCard(id)
+				roleCards[id] = c
+			end
+			if c then
+				local card = c :: RCard
+				card.btn.Visible = show
+				if show then
+					card.btn.LayoutOrder = order
+					card.name.Text = string.upper(r.name)
+					card.weapons.Text = weaponNames(lo)
+					local max = r.maxPerSquad
+					local free: number? = nil
+					if max then
+						local taken = 0
+						if sq and type(sq.roles) == "table" then
+							for uid, rr in sq.roles do
+								if rr == id and tostring(uid) ~= tostring(me) then
+									taken += 1
+								end
 							end
 						end
+						free = max - taken
+						card.slots.Text = if sq
+							then string.format("VAGA %d/%d", math.max(free or 0, 0), max)
+							else "VAGA ?/" .. max
+					else
+						card.slots.Text = "LIVRE"
 					end
-					free = max - taken
-					card.slots.Text = if sq
-						then string.format("VAGA %d/%d", math.max(free or 0, 0), max)
-						else "VAGA ?/" .. max
-				else
-					card.slots.Text = "LIVRE"
-				end
-				local blocked: string? = nil
-				if id == "squad_leader" and sq and sq.leader ~= me then
-					blocked = "SÓ O LÍDER"
-				elseif free ~= nil and sq and free <= 0 then
-					blocked = "OCUPADO"
-				end
-				card.blocked = blocked
-				local current = cur == id
-				if current then
-					stampSet(card.mark, "ATUAL", OLIVE_INK)
-				elseif blocked then
-					stampSet(card.mark, blocked, STAMP)
-				else
-					stampSet(card.mark, nil)
-				end
-				card.base = if blocked then CARD_OFF else CARD
-				card.realce.base(card.base)
-				if not firstId then
-					firstId = id
-				end
-				if not blocked and not firstFree then
-					firstFree = id
+					local blocked: string? = nil
+					if id == "squad_leader" and sq and sq.leader ~= me then
+						blocked = "SÓ O LÍDER"
+					elseif free ~= nil and sq and free <= 0 then
+						blocked = "OCUPADO"
+					end
+					card.blocked = blocked
+					local current = cur == id
+					if current then
+						stampSet(card.mark, "ATUAL", OLIVE_INK)
+					elseif blocked then
+						stampSet(card.mark, blocked, STAMP)
+					else
+						stampSet(card.mark, nil)
+					end
+					card.base = if blocked then CARD_OFF else CARD
+					card.realce.base(card.base)
+					if not firstId then
+						firstId = id
+					end
+					if not blocked and not firstFree then
+						firstFree = id
+					end
 				end
 			end
 		end
+		-- soldado e legenda: o papel sob o ponteiro; ao entrar, o atual ou o primeiro livre
+		if not (previewRole and roleCards[previewRole] and roleCards[previewRole].btn.Visible) then
+			previewRole = if cur and roleCards[cur] and roleCards[cur].btn.Visible then cur else (firstFree or firstId)
+		end
+		showRole(previewRole)
 	end
-	-- soldado e legenda: o papel sob o ponteiro; ao entrar, o atual ou o primeiro livre
-	if not (previewRole and roleCards[previewRole] and roleCards[previewRole].btn.Visible) then
-		previewRole = if cur and roleCards[cur] and roleCards[cur].btn.Visible then cur else (firstFree or firstId)
-	end
-	showRole(previewRole)
 end
 
 -- ===== inserção (o mapa do GameUI fica à direita) =====
-local iFolder, iInfo = folder(pages.insert, "FICHA 4 · INSERÇÃO", 370, PANEL_H)
-iInfo.Visible = false
--- foto do soldado presa na ficha: papel fotográfico com sombra e duas fitas nos cantos
-local PHOTO_ROT = -1.2 -- presa à mão: nunca reta
-local iPhoto = box(iFolder, CARD, 16, 52, 338, 268)
-iPhoto.Rotation = PHOTO_ROT
-stroke(iPhoto, INK, 1, 0.7)
-paper(iPhoto, 90)
-Acabamento.sombra(iPhoto, 12, Vector2.new(2, 5), 0.5)
-for k, x in { -14, 282 } do
-	local tape = box(iPhoto, Color3.fromRGB(232, 222, 186), x, -6, 70, 18, 0.28)
-	tape.Rotation = if k == 1 then -32 else 32
-	tape.ZIndex = 4
-end
-local iSlot = box(iPhoto, INK, 10, 10, 318, 212)
-local iCaption = txt(iPhoto, HEAD, 22, INK, 10, 226, 318, 36, Enum.TextXAlignment.Center)
-iCaption.FontFace = HEAD_B
-local iLines = txt(iFolder, TYPE, 15, INK, 16, 330, 338, 180)
-iLines.TextYAlignment = Enum.TextYAlignment.Top
-iLines.RichText = true
 local portrait = SoldierPreview.new(0.24, -0.45)
-local portraitFrame = portrait.frame :: Frame
-portraitFrame.Parent = iSlot
-reg(portrait.note :: TextLabel, 16)
-
-local function loadoutNow(f: string): { string }?
-	local loAttr = player:GetAttribute("Loadout")
-	if type(loAttr) == "string" and loAttr ~= "" then
-		return string.split(loAttr, ",")
+local iLines: TextLabel
+local loadoutNow: (f: string) -> { string }?
+local renderInsert: (f: string) -> ()
+local dealInsert: () -> ()
+do
+	local iFolder, iInfo = folder(pages.insert, "FICHA 4 · INSERÇÃO", 370, PANEL_H)
+	iInfo.Visible = false
+	-- foto do soldado presa na ficha: papel fotográfico com sombra e duas fitas nos cantos
+	local PHOTO_ROT = -1.2 -- presa à mão: nunca reta
+	local iPhoto = box(iFolder, CARD, 16, 52, 338, 268)
+	iPhoto.Rotation = PHOTO_ROT
+	stroke(iPhoto, INK, 1, 0.7)
+	paper(iPhoto, 90)
+	Acabamento.sombra(iPhoto, 12, Vector2.new(2, 5), 0.5)
+	for k, x in { -14, 282 } do
+		local tape = box(iPhoto, Color3.fromRGB(232, 222, 186), x, -6, 70, 18, 0.28)
+		tape.Rotation = if k == 1 then -32 else 32
+		tape.ZIndex = 4
 	end
-	return Roles.loadout[f][currentRole() or "rifleman"]
-end
+	local iSlot = box(iPhoto, INK, 10, 10, 318, 212)
+	local iCaption = txt(iPhoto, HEAD, 22, INK, 10, 226, 318, 36, Enum.TextXAlignment.Center)
+	iCaption.FontFace = HEAD_B
+	iLines = txt(iFolder, TYPE, 15, INK, 16, 330, 338, 180)
+	iLines.TextYAlignment = Enum.TextYAlignment.Top
+	iLines.RichText = true
+	local portraitFrame = portrait.frame :: Frame
+	portraitFrame.Parent = iSlot
+	reg(portrait.note :: TextLabel, 16)
 
-local function renderInsert(f: string)
-	local rid = currentRole() or "rifleman"
-	local r = Roles.roles[rid]
-	local lo = loadoutNow(f)
-	SoldierPreview.set(portrait, f, if lo then lo[1] else nil)
-	local sid = player:GetAttribute("SquadId")
-	local squadName = if type(sid) == "string" then (string.match(sid, ":(.+)$") or sid) else "—"
-	local unit = if type(sid) == "string" then unitOfSquad(f, sid) else nil
-	local hq = MapConfig.HQ[f]
-	iCaption.Text = string.upper(if r then r.name else rid)
-	local _, padText = Input.glyph("map_role", "map")
-	local text = Acabamento.viet(table.concat({
-		"SQUAD  " .. squadName .. (if unit then " (" .. (UNIT_NAME[unit] or unit) .. ")" else ""),
-		"ARMAS  " .. weaponNames(lo),
-		"QG     " .. gridRef(hq.x, hq.z),
-		"",
-		"Escolha na carta um ponto PRONTO.",
-		string.format("Trocar de papel: aba PAPEL ou %s (+15 s)", keyName(padText)),
-	}, "\n"))
-	if text ~= iLines.Text then -- datilografa só o que mudou (render roda a cada mudança de estado)
-		Acabamento.datilografar(iLines, text, 160, 0.25)
+	function loadoutNow(f: string): { string }?
+		local loAttr = player:GetAttribute("Loadout")
+		if type(loAttr) == "string" and loAttr ~= "" then
+			return string.split(loAttr, ",")
+		end
+		return Roles.loadout[f][currentRole() or "rifleman"]
 	end
-end
 
--- entrada da ficha de inserção: a foto é presa na pasta (gira e assenta) e a imagem "revela"
-local function dealInsert()
-	iPhoto.Rotation = -7
-	tw(iPhoto, after(0.1, TweenInfo.new(0.6, Enum.EasingStyle.Back, Enum.EasingDirection.Out)), {
-		Rotation = PHOTO_ROT,
-	})
-	local vp = portrait.vp
-	if vp then
-		vp.ImageTransparency = 1
-		tw(vp, after(0.3, TweenInfo.new(0.9, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)), {
-			ImageTransparency = 0,
+	function renderInsert(f: string)
+		local rid = currentRole() or "rifleman"
+		local r = Roles.roles[rid]
+		local lo = loadoutNow(f)
+		SoldierPreview.set(portrait, f, if lo then lo[1] else nil)
+		local sid = player:GetAttribute("SquadId")
+		local squadName = if type(sid) == "string" then (string.match(sid, ":(.+)$") or sid) else "—"
+		local unit = if type(sid) == "string" then unitOfSquad(f, sid) else nil
+		local hq = MapConfig.HQ[f]
+		iCaption.Text = string.upper(if r then r.name else rid)
+		local _, padText = Input.glyph("map_role", "map")
+		local text = Acabamento.viet(table.concat({
+			"SQUAD  " .. squadName .. (if unit then " (" .. (UNIT_NAME[unit] or unit) .. ")" else ""),
+			"ARMAS  " .. weaponNames(lo),
+			"QG     " .. gridRef(hq.x, hq.z),
+			"",
+			"Escolha na carta um ponto PRONTO.",
+			string.format("Trocar de papel: aba PAPEL ou %s (+15 s)", keyName(padText)),
+		}, "\n"))
+		if text ~= iLines.Text then -- datilografa só o que mudou (render roda a cada mudança de estado)
+			Acabamento.datilografar(iLines, text, 160, 0.25)
+		end
+	end
+
+	-- entrada da ficha de inserção: a foto é presa na pasta (gira e assenta) e a imagem "revela"
+	function dealInsert()
+		iPhoto.Rotation = -7
+		tw(iPhoto, after(0.1, TweenInfo.new(0.6, Enum.EasingStyle.Back, Enum.EasingDirection.Out)), {
+			Rotation = PHOTO_ROT,
 		})
+		local vp = portrait.vp
+		if vp then
+			vp.ImageTransparency = 1
+			tw(vp, after(0.3, TweenInfo.new(0.9, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)), {
+				ImageTransparency = 0,
+			})
+		end
 	end
 end
 
 -- ===== recompensa diária: a caderneta de serviço =====
-type DCell = { frame: Frame, day: TextLabel, date: TextLabel, reward: TextLabel, mark: TextLabel }
-local dFolder, dInfo = folder(pages.daily, "FICHA · RECOMPENSA DIÁRIA", PANEL_W, PANEL_H)
-local dRule = txt(dFolder, TYPE, 14, INK, 16, 52, PANEL_W - 32, 40)
-dRule.TextYAlignment = Enum.TextYAlignment.Top
-dRule.Text = "Um selo por dia (dia UTC). Pulou um dia, a sequência volta ao dia 1; os selos e os itens já "
-	.. "ganhos ficam com você. Dias 3 e 7: item que só sai daqui."
-local cells: { DCell } = {}
-for i = 1, Commerce.TRACK_DAYS do
-	local x = 14 + (i - 1) * 94
-	local fr = box(dFolder, CARD, x, 100, 88, 206)
-	corner(fr, 3)
-	paper(fr, 90)
-	stroke(fr, INK, 1, 0.6)
-	entryParts(fr, 3)
-	local d = txt(fr, HEAD, 18, INK, 4, 4, 80, 24, Enum.TextXAlignment.Center)
-	d.FontFace = HEAD_B
-	local dt = txt(fr, TYPE, 13, INK, 4, 28, 80, 18, Enum.TextXAlignment.Center)
-	hline(fr, UiKit.RULE_RED, 6, 48, 76)
-	local rw = txt(fr, TYPE, 13, INK, 5, 54, 78, 96)
-	rw.TextYAlignment = Enum.TextYAlignment.Top
-	rw.TextXAlignment = Enum.TextXAlignment.Center
-	local mk = stamp(fr, 14, 4, 160, 80, 30, -7)
-	mk.Visible = false
-	cells[i] = { frame = fr, day = d, date = dt, reward = rw, mark = mk }
-end
-local claimBtn = Instance.new("TextButton")
-claimBtn.Position = UDim2.fromOffset(14, 320)
-claimBtn.Size = UDim2.fromOffset(PANEL_W - 28, 62)
-claimBtn.BackgroundColor3 = STAMP
-claimBtn.TextColor3 = CARD
-claimBtn.FontFace = HEAD_B
-claimBtn.AutoButtonColor = false
-claimBtn.Selectable = true
-claimBtn.SelectionImageObject = UiKit.FOCUS
-claimBtn.Parent = dFolder
-reg(claimBtn, 24)
-corner(claimBtn, 3)
-paper(claimBtn, 90)
-local claimLook = UiKit.realce(claimBtn, STAMP, nil, 1.02)
-
--- entrada da caderneta: os sete dias pousam em fila
-local function dealDaily()
-	local list: { GuiObject } = {}
-	for _, c in cells do
-		table.insert(list, c.frame)
+local dealDaily: () -> ()
+local dailySummary: () -> (string, string)
+local renderDaily: (f: string) -> ()
+do
+	type DCell = { frame: Frame, day: TextLabel, date: TextLabel, reward: TextLabel, mark: TextLabel }
+	local dFolder, dInfo = folder(pages.daily, "FICHA · RECOMPENSA DIÁRIA", PANEL_W, PANEL_H)
+	local dRule = txt(dFolder, TYPE, 14, INK, 16, 52, PANEL_W - 32, 40)
+	dRule.TextYAlignment = Enum.TextYAlignment.Top
+	dRule.Text = "Um selo por dia (dia UTC). Pulou um dia, a sequência volta ao dia 1; os selos e os itens já "
+		.. "ganhos ficam com você. Dias 3 e 7: item que só sai daqui."
+	local cells: { DCell } = {}
+	for i = 1, Commerce.TRACK_DAYS do
+		local x = 14 + (i - 1) * 94
+		local fr = box(dFolder, CARD, x, 100, 88, 206)
+		corner(fr, 3)
+		paper(fr, 90)
+		stroke(fr, INK, 1, 0.6)
+		entryParts(fr, 3)
+		local d = txt(fr, HEAD, 18, INK, 4, 4, 80, 24, Enum.TextXAlignment.Center)
+		d.FontFace = HEAD_B
+		local dt = txt(fr, TYPE, 13, INK, 4, 28, 80, 18, Enum.TextXAlignment.Center)
+		hline(fr, UiKit.RULE_RED, 6, 48, 76)
+		local rw = txt(fr, TYPE, 13, INK, 5, 54, 78, 96)
+		rw.TextYAlignment = Enum.TextYAlignment.Top
+		rw.TextXAlignment = Enum.TextXAlignment.Center
+		local mk = stamp(fr, 14, 4, 160, 80, 30, -7)
+		mk.Visible = false
+		cells[i] = { frame = fr, day = d, date = dt, reward = rw, mark = mk }
 	end
-	deal(list, 0.12, 0.05)
-end
-local dResult = txt(dFolder, TYPE, 15, INK, 16, 392, PANEL_W - 32, 64)
-dResult.TextYAlignment = Enum.TextYAlignment.Top
-local dNote = txt(dFolder, TYPE, 14, STAMP, 16, 460, PANEL_W - 32, 48)
-dNote.TextYAlignment = Enum.TextYAlignment.Top
+	local claimBtn = Instance.new("TextButton")
+	claimBtn.Position = UDim2.fromOffset(14, 320)
+	claimBtn.Size = UDim2.fromOffset(PANEL_W - 28, 62)
+	claimBtn.BackgroundColor3 = STAMP
+	claimBtn.TextColor3 = CARD
+	claimBtn.FontFace = HEAD_B
+	claimBtn.AutoButtonColor = false
+	claimBtn.Selectable = true
+	claimBtn.SelectionImageObject = UiKit.FOCUS
+	claimBtn.Parent = dFolder
+	reg(claimBtn, 24)
+	corner(claimBtn, 3)
+	paper(claimBtn, 90)
+	local claimLook = UiKit.realce(claimBtn, STAMP, nil, 1.02)
 
-local REASON: { [string]: string } = {
-	already = "Este dia já foi carimbado.",
-	clock = "Aguarde a virada do dia (UTC).",
-	loading = "Seu perfil ainda está carregando: tente de novo em instantes.",
-	readonly = "Seu perfil não carregou neste servidor: o selo não pode ser gravado agora (nada foi perdido).",
-	error = "O registro falhou: tente de novo.",
-}
-
-local function claim()
-	if dailyBusy or not (daily and daily.ready and daily.canClaim) then
-		return
-	end
-	dailyBusy = true
-	Net.event("Daily_Claim"):FireServer()
-	DeployScreen.changed()
-	task.delay(15, function() -- sem resposta: libera o botão (o servidor continua sendo a fonte)
-		if dailyBusy then
-			dailyBusy = false
-			fetchDaily()
-		end
-	end)
-end
-bindCard(claimBtn, claim, claimLook.set)
-
-local function dailySummary(): (string, string)
-	-- texto curto para a aba e para o calendário da mesa
-	if not (daily and daily.ready) then
-		return "…", ""
-	elseif daily.canClaim then
-		return "★ disponível", "★ RESGATAR"
-	elseif daily.claimedToday then
-		local left = dailyLeft()
-		return "volta em " .. string.sub(hms(left), 1, 5), "CARIMBADO ✓"
-	end
-	return "aguarde", ""
-end
-
-local function renderDaily(f: string)
-	local d = daily
-	if not (d and d.ready) then
-		dInfo.Text = "Lendo a caderneta…"
-		claimBtn.Text = "CARREGANDO A CADERNETA…"
-		claimLook.base(DRAB)
-		claimBtn.TextColor3 = KHAKI
+	-- entrada da caderneta: os sete dias pousam em fila
+	function dealDaily()
+		local list: { GuiObject } = {}
 		for _, c in cells do
-			c.mark.Visible = false
+			table.insert(list, c.frame)
 		end
-		fetchDaily()
-		return
+		deal(list, 0.12, 0.05)
 	end
-	local day: number = d.day or 1
-	local run: number = d.run or 0
-	dInfo.Text = string.format(
-		"Sequência: %d dia%s · Total: %d selo%s",
-		run,
-		if run == 1 then "" else "s",
-		d.total or 0,
-		if (d.total or 0) == 1 then "" else "s"
-	)
-	local earned: { [string]: boolean } = if type(d.earned) == "table" then d.earned else {}
-	local tomorrow = day % Commerce.TRACK_DAYS + 1
-	for i, c in cells do
-		local entry = Commerce.DailyTrack[i]
-		c.day.Text = "DIA " .. i
-		c.date.Text = entry.date
-		local items = entry.items
-		local mine = items and items[f]
-		if mine then
-			c.reward.Text = "Selo +\n"
-				.. itemName(mine)
-				.. (if earned[mine] then "\n✔ já é seu" else "\n(e o do outro lado)")
+	local dResult = txt(dFolder, TYPE, 15, INK, 16, 392, PANEL_W - 32, 64)
+	dResult.TextYAlignment = Enum.TextYAlignment.Top
+	local dNote = txt(dFolder, TYPE, 14, STAMP, 16, 460, PANEL_W - 32, 48)
+	dNote.TextYAlignment = Enum.TextYAlignment.Top
+
+	local REASON: { [string]: string } = {
+		already = "Este dia já foi carimbado.",
+		clock = "Aguarde a virada do dia (UTC).",
+		loading = "Seu perfil ainda está carregando: tente de novo em instantes.",
+		readonly = "Seu perfil não carregou neste servidor: o selo não pode ser gravado agora (nada foi perdido).",
+		error = "O registro falhou: tente de novo.",
+	}
+
+	local function claim()
+		if dailyBusy or not (daily and daily.ready and daily.canClaim) then
+			return
+		end
+		dailyBusy = true
+		Net.event("Daily_Claim"):FireServer()
+		DeployScreen.changed()
+		task.delay(15, function() -- sem resposta: libera o botão (o servidor continua sendo a fonte)
+			if dailyBusy then
+				dailyBusy = false
+				fetchDaily()
+			end
+		end)
+	end
+	bindCard(claimBtn, claim, claimLook.set)
+
+	function dailySummary(): (string, string)
+		-- texto curto para a aba e para o calendário da mesa
+		if not (daily and daily.ready) then
+			return "…", ""
+		elseif daily.canClaim then
+			return "★ disponível", "★ RESGATAR"
+		elseif daily.claimedToday then
+			local left = dailyLeft()
+			return "volta em " .. string.sub(hms(left), 1, 5), "CARIMBADO ✓"
+		end
+		return "aguarde", ""
+	end
+
+	function renderDaily(f: string)
+		local d = daily
+		if not (d and d.ready) then
+			dInfo.Text = "Lendo a caderneta…"
+			claimBtn.Text = "CARREGANDO A CADERNETA…"
+			claimLook.base(DRAB)
+			claimBtn.TextColor3 = KHAKI
+			for _, c in cells do
+				c.mark.Visible = false
+			end
+			fetchDaily()
+			return
+		end
+		local day: number = d.day or 1
+		local run: number = d.run or 0
+		dInfo.Text = string.format(
+			"Sequência: %d dia%s · Total: %d selo%s",
+			run,
+			if run == 1 then "" else "s",
+			d.total or 0,
+			if (d.total or 0) == 1 then "" else "s"
+		)
+		local earned: { [string]: boolean } = if type(d.earned) == "table" then d.earned else {}
+		local tomorrow = day % Commerce.TRACK_DAYS + 1
+		for i, c in cells do
+			local entry = Commerce.DailyTrack[i]
+			c.day.Text = "DIA " .. i
+			c.date.Text = entry.date
+			local items = entry.items
+			local mine = items and items[f]
+			if mine then
+				c.reward.Text = "Selo +\n"
+					.. itemName(mine)
+					.. (if earned[mine] then "\n✔ já é seu" else "\n(e o do outro lado)")
+			else
+				c.reward.Text = "Selo de\nserviço"
+			end
+			local done = if d.claimedToday then i <= day else (d.canClaim and i < day)
+			local today = i == day
+			local markText, markColor = "", STAMP
+			if today and d.claimedToday then
+				markText, markColor = "CARIMBADO", OLIVE_INK
+			elseif today and d.canClaim then
+				markText, markColor = "HOJE", STAMP
+			elseif done then
+				markText, markColor = "RECEBIDO", OLIVE_INK
+			elseif d.claimedToday and i == tomorrow then
+				markText, markColor = "AMANHÃ", INK
+			end
+			-- o carimbo novo (o resgate de hoje) cai na ficha; o que já estava fica parado
+			stampSet(c.mark, if markText ~= "" then markText else nil, markColor)
+			c.frame.BackgroundColor3 = if today then CARD_HOT elseif done then Color3.fromRGB(214, 222, 196) else CARD
+			local s = c.frame:FindFirstChildOfClass("UIStroke")
+			if s then
+				s.Color = if today then STAMP else INK
+				s.Thickness = if today then 3 else 1
+				s.Transparency = if today then 0 else 0.6
+			end
+		end
+		if dailyBusy then
+			claimBtn.Text = "REGISTRANDO O SELO…"
+			claimLook.base(DRAB)
+			claimBtn.TextColor3 = KHAKI
+		elseif d.canClaim then
+			claimBtn.Text = string.format("CARIMBAR O DIA %d · RESGATAR", day)
+			claimLook.base(STAMP)
+			claimBtn.TextColor3 = CARD
+		elseif d.claimedToday then
+			claimBtn.Text = "CARIMBADO HOJE · próximo selo em " .. hms(dailyLeft()) .. " (UTC)"
+			claimLook.base(DRAB)
+			claimBtn.TextColor3 = KHAKI
 		else
-			c.reward.Text = "Selo de\nserviço"
+			claimBtn.Text = "AGUARDE A VIRADA DO DIA (UTC)"
+			claimLook.base(DRAB)
+			claimBtn.TextColor3 = KHAKI
 		end
-		local done = if d.claimedToday then i <= day else (d.canClaim and i < day)
-		local today = i == day
-		local markText, markColor = "", STAMP
-		if today and d.claimedToday then
-			markText, markColor = "CARIMBADO", OLIVE_INK
-		elseif today and d.canClaim then
-			markText, markColor = "HOJE", STAMP
-		elseif done then
-			markText, markColor = "RECEBIDO", OLIVE_INK
-		elseif d.claimedToday and i == tomorrow then
-			markText, markColor = "AMANHÃ", INK
+		local res = dailyResult
+		if res and res.ok and d.canClaim then
+			res = nil -- virou o dia: o recibo de ontem sai da folha
+			dailyResult = nil
 		end
-		-- o carimbo novo (o resgate de hoje) cai na ficha; o que já estava fica parado
-		stampSet(c.mark, if markText ~= "" then markText else nil, markColor)
-		c.frame.BackgroundColor3 = if today then CARD_HOT elseif done then Color3.fromRGB(214, 222, 196) else CARD
-		local s = c.frame:FindFirstChildOfClass("UIStroke")
-		if s then
-			s.Color = if today then STAMP else INK
-			s.Thickness = if today then 3 else 1
-			s.Transparency = if today then 0 else 0.6
+		if res and res.ok then
+			local list = {}
+			for _, id in (res.newItems or {}) :: { string } do
+				table.insert(list, itemName(id))
+			end
+			dResult.Text = string.format("Selo do dia %d recebido: +1 dia de serviço.", res.day or day)
+				.. (if #list > 0 then " Novo no armário da Intendência: " .. table.concat(list, " e ") .. "." else "")
+		elseif res and res.reason then
+			dResult.Text = REASON[res.reason] or REASON.error
+		elseif d.broken then
+			dResult.Text = "Um dia passou sem selo: a sequência recomeçou no dia 1."
+		else
+			dResult.Text = ""
 		end
+		dNote.Text = if d.saved == false
+			then "Sessão sem DataStore (perfil não carregou ou Studio): o selo de hoje não fica gravado."
+			else ""
 	end
-	if dailyBusy then
-		claimBtn.Text = "REGISTRANDO O SELO…"
-		claimLook.base(DRAB)
-		claimBtn.TextColor3 = KHAKI
-	elseif d.canClaim then
-		claimBtn.Text = string.format("CARIMBAR O DIA %d · RESGATAR", day)
-		claimLook.base(STAMP)
-		claimBtn.TextColor3 = CARD
-	elseif d.claimedToday then
-		claimBtn.Text = "CARIMBADO HOJE · próximo selo em " .. hms(dailyLeft()) .. " (UTC)"
-		claimLook.base(DRAB)
-		claimBtn.TextColor3 = KHAKI
-	else
-		claimBtn.Text = "AGUARDE A VIRADA DO DIA (UTC)"
-		claimLook.base(DRAB)
-		claimBtn.TextColor3 = KHAKI
-	end
-	local res = dailyResult
-	if res and res.ok and d.canClaim then
-		res = nil -- virou o dia: o recibo de ontem sai da folha
-		dailyResult = nil
-	end
-	if res and res.ok then
-		local list = {}
-		for _, id in (res.newItems or {}) :: { string } do
-			table.insert(list, itemName(id))
-		end
-		dResult.Text = string.format("Selo do dia %d recebido: +1 dia de serviço.", res.day or day)
-			.. (if #list > 0 then " Novo no armário da Intendência: " .. table.concat(list, " e ") .. "." else "")
-	elseif res and res.reason then
-		dResult.Text = REASON[res.reason] or REASON.error
-	elseif d.broken then
-		dResult.Text = "Um dia passou sem selo: a sequência recomeçou no dia 1."
-	else
-		dResult.Text = ""
-	end
-	dNote.Text = if d.saved == false
-		then "Sessão sem DataStore (perfil não carregou ou Studio): o selo de hoje não fica gravado."
-		else ""
 end
 
--- ===== rodapé: dicas de botão e "VOLTAR" para mouse e toque =====
-local hints = Instance.new("Frame")
-hints.BackgroundTransparency = 1
-hints.Position = UDim2.fromOffset(40, 676)
-hints.Size = UDim2.fromOffset(900, 36)
-hints.Parent = root
-local hintsLayout = Instance.new("UIListLayout")
-hintsLayout.FillDirection = Enum.FillDirection.Horizontal
-hintsLayout.Padding = UDim.new(0, 22)
-hintsLayout.VerticalAlignment = Enum.VerticalAlignment.Center
-hintsLayout.SortOrder = Enum.SortOrder.LayoutOrder
-hintsLayout.Parent = hints
--- Cada dica é um chip: o botão do controle (imagem do Roblox para o controle conectado) ou, no
--- teclado e no toque, a tecla em relevo (ficha clara, filete de tinta, luz de cima); depois o texto.
-type Chip = { f: Frame, img: ImageLabel, img2: ImageLabel, key: TextLabel, t: TextLabel }
-local chips: { Chip } = {}
-for i = 1, 6 do
-	local f = Instance.new("Frame")
-	f.BackgroundTransparency = 1
-	f.AutomaticSize = Enum.AutomaticSize.X
-	f.Size = UDim2.fromOffset(0, 36)
-	f.LayoutOrder = i
-	f.Visible = false
-	f.Parent = hints
-	local l = Instance.new("UIListLayout")
-	l.FillDirection = Enum.FillDirection.Horizontal
-	l.Padding = UDim.new(0, 6)
-	l.VerticalAlignment = Enum.VerticalAlignment.Center
-	l.SortOrder = Enum.SortOrder.LayoutOrder
-	l.Parent = f
-	local img = Instance.new("ImageLabel")
-	img.BackgroundTransparency = 1
-	img.Size = UDim2.fromOffset(30, 30)
-	img.LayoutOrder = 1
-	img.Parent = f
-	local img2 = Instance.new("ImageLabel")
-	img2.BackgroundTransparency = 1
-	img2.Size = UDim2.fromOffset(30, 30)
-	img2.LayoutOrder = 2
-	img2.Parent = f
-	local key = Instance.new("TextLabel")
-	key.BackgroundColor3 = CARD
-	key.BorderSizePixel = 0
-	key.AutomaticSize = Enum.AutomaticSize.X
-	key.Size = UDim2.fromOffset(0, 26)
-	key.FontFace = HEAD_B
-	key.TextColor3 = INK
-	key.LayoutOrder = 3
-	key.Parent = f
-	reg(key, 15)
-	corner(key, 4)
-	paper(key, 90)
-	stroke(key, INK, 1, 0.45)
-	local kp = Instance.new("UIPadding")
-	kp.PaddingLeft = UDim.new(0, 8)
-	kp.PaddingRight = UDim.new(0, 8)
-	kp.Parent = key
-	local t = Instance.new("TextLabel")
-	t.BackgroundTransparency = 1
-	t.AutomaticSize = Enum.AutomaticSize.X
-	t.Size = UDim2.fromOffset(0, 36)
-	t.Font = TYPE
-	t.TextColor3 = KHAKI
-	t.LayoutOrder = 4
-	t.Parent = f
-	reg(t, 16)
-	table.insert(chips, { f = f, img = img, img2 = img2, key = key, t = t })
-end
+local renderFooter: (scene: string) -> ()
+do
+	-- ===== rodapé: dicas de botão e "VOLTAR" para mouse e toque =====
+	local hints = Instance.new("Frame")
+	hints.BackgroundTransparency = 1
+	hints.Position = UDim2.fromOffset(40, 676)
+	hints.Size = UDim2.fromOffset(900, 36)
+	hints.Parent = root
+	local hintsLayout = Instance.new("UIListLayout")
+	hintsLayout.FillDirection = Enum.FillDirection.Horizontal
+	hintsLayout.Padding = UDim.new(0, 22)
+	hintsLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+	hintsLayout.SortOrder = Enum.SortOrder.LayoutOrder
+	hintsLayout.Parent = hints
+	-- Cada dica é um chip: o botão do controle (imagem do Roblox para o controle conectado) ou, no
+	-- teclado e no toque, a tecla em relevo (ficha clara, filete de tinta, luz de cima); depois o texto.
+	type Chip = { f: Frame, img: ImageLabel, img2: ImageLabel, key: TextLabel, t: TextLabel }
+	local chips: { Chip } = {}
+	for i = 1, 6 do
+		local f = Instance.new("Frame")
+		f.BackgroundTransparency = 1
+		f.AutomaticSize = Enum.AutomaticSize.X
+		f.Size = UDim2.fromOffset(0, 36)
+		f.LayoutOrder = i
+		f.Visible = false
+		f.Parent = hints
+		local l = Instance.new("UIListLayout")
+		l.FillDirection = Enum.FillDirection.Horizontal
+		l.Padding = UDim.new(0, 6)
+		l.VerticalAlignment = Enum.VerticalAlignment.Center
+		l.SortOrder = Enum.SortOrder.LayoutOrder
+		l.Parent = f
+		local img = Instance.new("ImageLabel")
+		img.BackgroundTransparency = 1
+		img.Size = UDim2.fromOffset(30, 30)
+		img.LayoutOrder = 1
+		img.Parent = f
+		local img2 = Instance.new("ImageLabel")
+		img2.BackgroundTransparency = 1
+		img2.Size = UDim2.fromOffset(30, 30)
+		img2.LayoutOrder = 2
+		img2.Parent = f
+		local key = Instance.new("TextLabel")
+		key.BackgroundColor3 = CARD
+		key.BorderSizePixel = 0
+		key.AutomaticSize = Enum.AutomaticSize.X
+		key.Size = UDim2.fromOffset(0, 26)
+		key.FontFace = HEAD_B
+		key.TextColor3 = INK
+		key.LayoutOrder = 3
+		key.Parent = f
+		reg(key, 15)
+		corner(key, 4)
+		paper(key, 90)
+		stroke(key, INK, 1, 0.45)
+		local kp = Instance.new("UIPadding")
+		kp.PaddingLeft = UDim.new(0, 8)
+		kp.PaddingRight = UDim.new(0, 8)
+		kp.Parent = key
+		local t = Instance.new("TextLabel")
+		t.BackgroundTransparency = 1
+		t.AutomaticSize = Enum.AutomaticSize.X
+		t.Size = UDim2.fromOffset(0, 36)
+		t.Font = TYPE
+		t.TextColor3 = KHAKI
+		t.LayoutOrder = 4
+		t.Parent = f
+		reg(t, 16)
+		table.insert(chips, { f = f, img = img, img2 = img2, key = key, t = t })
+	end
 
-local function padImage(code: Enum.KeyCode): string?
-	local img: string? = nil
-	pcall(function()
-		local v = UserInputService:GetImageForKeyCode(code) :: any
-		if type(v) == "string" and v ~= "" then
-			img = v
+	local function padImage(code: Enum.KeyCode): string?
+		local img: string? = nil
+		pcall(function()
+			local v = UserInputService:GetImageForKeyCode(code) :: any
+			if type(v) == "string" and v ~= "" then
+				img = v
+			end
+		end)
+		return img
+	end
+
+	local hintCount = 0
+	local function chip(img: string?, img2: string?, key: string, label: string)
+		hintCount += 1
+		local c = chips[hintCount]
+		if not c then
+			return
 		end
+		c.f.Visible = true
+		c.img.Visible = img ~= nil
+		c.img.Image = img or ""
+		c.img2.Visible = img2 ~= nil
+		c.img2.Image = img2 or ""
+		c.key.Visible = img == nil and key ~= ""
+		c.key.Text = UiKit.upper(key)
+		c.key.FontFace = UiKit.headFont(key)
+		c.t.Text = label
+	end
+
+	-- ícone do botão certo do controle conectado (Input.glyph usa GetImageForKeyCode)
+	local function actionChip(actionId: string, ctx: string, label: string)
+		local img, text = Input.glyph(actionId, ctx)
+		chip(img, nil, keyName(text), label)
+	end
+
+	local function pairChip(a: string, b: string, ctx: string, label: string)
+		local ia, ta = Input.glyph(a, ctx)
+		local ib, tb = Input.glyph(b, ctx)
+		if ia and ib then
+			chip(ia, ib, "", label)
+		else
+			chip(nil, nil, keyName(ta) .. "/" .. keyName(tb), label)
+		end
+	end
+
+	local backBtn = darkButton(root, "", 960, 674, 280, 40)
+	backBtn.Visible = false
+	bindDark(backBtn, function()
+		DeployScreen.back()
 	end)
-	return img
-end
 
-local hintCount = 0
-local function chip(img: string?, img2: string?, key: string, label: string)
-	hintCount += 1
-	local c = chips[hintCount]
-	if not c then
-		return
-	end
-	c.f.Visible = true
-	c.img.Visible = img ~= nil
-	c.img.Image = img or ""
-	c.img2.Visible = img2 ~= nil
-	c.img2.Image = img2 or ""
-	c.key.Visible = img == nil and key ~= ""
-	c.key.Text = UiKit.upper(key)
-	c.key.FontFace = UiKit.headFont(key)
-	c.t.Text = label
-end
-
--- ícone do botão certo do controle conectado (Input.glyph usa GetImageForKeyCode)
-local function actionChip(actionId: string, ctx: string, label: string)
-	local img, text = Input.glyph(actionId, ctx)
-	chip(img, nil, keyName(text), label)
-end
-
-local function pairChip(a: string, b: string, ctx: string, label: string)
-	local ia, ta = Input.glyph(a, ctx)
-	local ib, tb = Input.glyph(b, ctx)
-	if ia and ib then
-		chip(ia, ib, "", label)
-	else
-		chip(nil, nil, keyName(ta) .. "/" .. keyName(tb), label)
-	end
-end
-
-local backBtn = darkButton(root, "", 960, 674, 280, 40)
-backBtn.Visible = false
-bindDark(backBtn, function()
-	DeployScreen.back()
-end)
-
-local function backLabel(scene: string): string?
-	if scene == "choose" then
-		return if isBrowsing() then "◄ VOLTAR À MESA" else nil
-	elseif panel ~= "desk" then
-		return "◄ VOLTAR À MESA"
-	end
-	return nil
-end
-
-local function renderFooter(scene: string)
-	hintCount = 0
-	local dev = Input.device()
-	local back = backLabel(scene)
-	if panel == "insert" and scene ~= "choose" then
-		if dev == "gamepad" then
-			actionChip("map_next", "map", "Próximo ponto")
-			actionChip("map_select", "map", "Inserir")
-			actionChip("map_mark", "map", "Marcar")
-			actionChip("map_role", "map", "Trocar de papel")
-			actionChip("map_back", "map", "Voltar à mesa")
-		elseif dev == "touch" then
-			chip(nil, nil, "Toque", "no ponto de inserção")
-		else
-			chip(nil, nil, "Clique", "no ponto de inserção")
-			actionChip("map_next", "map", "Próximo ponto")
-			actionChip("map_select", "map", "Inserir")
-			actionChip("map_back", "map", "Voltar à mesa")
+	local function backLabel(scene: string): string?
+		if scene == "choose" then
+			return if isBrowsing() then "◄ VOLTAR À MESA" else nil
+		elseif panel ~= "desk" then
+			return "◄ VOLTAR À MESA"
 		end
-	elseif dev == "gamepad" then
-		chip(padImage(Enum.KeyCode.ButtonA), nil, "A", "Escolher")
-		if back then
-			actionChip("ui_back", "menu", "Voltar")
-		end
-		pairChip("ui_tab_prev", "ui_tab_next", "menu", if scene == "choose" then "Lado" else "Objeto / aba")
-		chip(padImage(Enum.KeyCode.DPadUp), padImage(Enum.KeyCode.DPadRight), "D-pad", "Pular")
-	else
-		chip(nil, nil, if dev == "touch" then "Toque" else "Clique", "num objeto da mesa")
-		if dev ~= "touch" then
+		return nil
+	end
+
+	function renderFooter(scene: string)
+		hintCount = 0
+		local dev = Input.device()
+		local back = backLabel(scene)
+		if panel == "insert" and scene ~= "choose" then
+			if dev == "gamepad" then
+				actionChip("map_next", "map", "Próximo ponto")
+				actionChip("map_select", "map", "Inserir")
+				actionChip("map_mark", "map", "Marcar")
+				actionChip("map_role", "map", "Trocar de papel")
+				actionChip("map_back", "map", "Voltar à mesa")
+			elseif dev == "touch" then
+				chip(nil, nil, "Toque", "no ponto de inserção")
+			else
+				chip(nil, nil, "Clique", "no ponto de inserção")
+				actionChip("map_next", "map", "Próximo ponto")
+				actionChip("map_select", "map", "Inserir")
+				actionChip("map_back", "map", "Voltar à mesa")
+			end
+		elseif dev == "gamepad" then
+			chip(padImage(Enum.KeyCode.ButtonA), nil, "A", "Escolher")
 			if back then
 				actionChip("ui_back", "menu", "Voltar")
 			end
-			if scene ~= "choose" then
-				pairChip("ui_tab_prev", "ui_tab_next", "menu", "Abas")
+			pairChip("ui_tab_prev", "ui_tab_next", "menu", if scene == "choose" then "Lado" else "Objeto / aba")
+			chip(padImage(Enum.KeyCode.DPadUp), padImage(Enum.KeyCode.DPadRight), "D-pad", "Pular")
+		else
+			chip(nil, nil, if dev == "touch" then "Toque" else "Clique", "num objeto da mesa")
+			if dev ~= "touch" then
+				if back then
+					actionChip("ui_back", "menu", "Voltar")
+				end
+				if scene ~= "choose" then
+					pairChip("ui_tab_prev", "ui_tab_next", "menu", "Abas")
+				end
 			end
 		end
+		for i = hintCount + 1, #chips do
+			chips[i].f.Visible = false
+		end
+		backBtn.Visible = back ~= nil and dev ~= "gamepad"
+		backBtn.Text = back or ""
 	end
-	for i = hintCount + 1, #chips do
-		chips[i].f.Visible = false
-	end
-	backBtn.Visible = back ~= nil and dev ~= "gamepad"
-	backBtn.Text = back or ""
 end
 
 -- ===== cabeçalho =====

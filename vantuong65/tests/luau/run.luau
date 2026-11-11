@@ -27,6 +27,27 @@ local function near(a: number, b: number, tol: number, msg: string?)
 	assert(math.abs(a - b) <= tol, string.format("%s: %.4f vs %.4f (tol %.4f)", msg or "", a, b, tol))
 end
 
+-- D-83: o analisador não pega o limite de 200 locais por função; o compilador do Luau pega
+test("todo src/ compila no Luau (limite de locais e sintaxe)", function()
+	local luau = require("@lune/luau")
+	local bad = {}
+	local function walk(dir: string)
+		for _, name in fs.readDir(dir) do
+			local p = dir .. "/" .. name
+			if fs.isDir(p) then
+				walk(p)
+			elseif string.sub(name, -5) == ".luau" then
+				local ok, err = pcall(luau.compile, fs.readFile(p))
+				if not ok then
+					table.insert(bad, p .. ": " .. tostring(err))
+				end
+			end
+		end
+	end
+	walk("src")
+	assert(#bad == 0, table.concat(bad, "; "))
+end)
+
 test("base64 decodifica vetores conhecidos", function()
 	assert(buffer.tostring(Base64.decode("TWFu")) == "Man")
 	assert(buffer.tostring(Base64.decode("TWE=")) == "Ma")
