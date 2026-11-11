@@ -362,10 +362,24 @@ local function swap()
 	end)
 end
 
+-- caído ou morto o tutorial some: a tela de ferido e o relatório de baixa ficam sozinhos (no Studio
+-- o cartão cobria o painel de ferido, D-87)
+local function casualtyShown(): boolean
+	local pg = player:FindFirstChild("PlayerGui")
+	for _, name in { "VT65Caido", "VT65Baixa" } do
+		local g = pg and pg:FindFirstChild(name)
+		if g and g:IsA("ScreenGui") and g.Enabled then
+			return true
+		end
+	end
+	return false
+end
+
 local function draw()
 	local st = current()
 	local ctx = Input.context()
-	local want = st ~= nil and ctx ~= "menu" and ctx ~= "map" and ctx ~= "wheel"
+	local hurt = Input.state.downed or not Input.state.alive or casualtyShown()
+	local want = st ~= nil and ctx ~= "menu" and ctx ~= "map" and ctx ~= "wheel" and not hurt
 	local x = if Input.state.vehicle then VEHICLE_X else MARGIN
 	local moved = x ~= targetX
 	targetX = x
@@ -483,6 +497,19 @@ Input.StateChanged:Connect(function()
 end)
 Input.DeviceChanged:Connect(function()
 	draw()
+end)
+player:GetAttributeChangedSignal("Downed"):Connect(draw)
+task.spawn(function()
+	local pg = player:WaitForChild("PlayerGui")
+	local function watchGui(g: Instance)
+		if g:IsA("ScreenGui") and (g.Name == "VT65Caido" or g.Name == "VT65Baixa") then
+			g:GetPropertyChangedSignal("Enabled"):Connect(draw)
+		end
+	end
+	for _, g in pg:GetChildren() do
+		watchGui(g)
+	end
+	pg.ChildAdded:Connect(watchGui)
 end)
 
 -- o tutorial do papel começa ao nascer com um papel que ainda não foi concluído

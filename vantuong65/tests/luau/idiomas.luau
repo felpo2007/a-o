@@ -93,7 +93,7 @@ test("dicionários: especificadores iguais ao português", function()
 				local function specs(s: string): { string }
 					local out = {}
 					local clean = string.gsub(s, "%%%%", "")
-					for sp in string.gmatch(clean, "%%[%-%+ #0]*%d*%.?%d*[dsfiqxg]") do
+					for sp in string.gmatch(clean, "%%[%-%+#0]*%d*%.?%d*[dsfiqxg]") do
 						table.insert(out, string.sub(sp, -1))
 					end
 					for _ in string.gmatch(clean, "{%a+}") do

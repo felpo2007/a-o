@@ -9,6 +9,11 @@ Capture.C = {
 	regenSeconds = 120, -- defensores sozinhos devolvem o ponto ao dono
 	warfareMinutes = 75,
 	skirmishMinutes = 20,
+	-- Atrito do Warfare (pedido do dono, 2026-11-11: "pontuação de time"): cada lado começa com
+	-- reforços; cada morte gasta 1 e quem tem mais setores ativos sangra o outro por minuto. Zerou,
+	-- perdeu. No fim do tempo, empate em setores é decidido pelos reforços. PLACEHOLDER de design.
+	reinforcements = 300,
+	bleedPerMinute = 3, -- por setor de vantagem
 }
 
 export type Owner = string -- "US" | "VC" | "Neutral"
@@ -121,8 +126,45 @@ function Capture.nextMode(current: string, fixed: boolean, rotation: { string })
 	return rotation[1]
 end
 
--- Vencedor: dono de todos os setores ativos na hora, ou mais setores ao fim do tempo.
-function Capture.winner(st: State, elapsed: number, limitSeconds: number): string?
+-- ===== atrito (Warfare) =====
+export type Score = { US: number, VC: number, acc: { US: number, VC: number } }
+
+function Capture.newScore(n: number?): Score
+	local r = n or Capture.C.reinforcements
+	return { US = r, VC = r, acc = { US = 0, VC = 0 } }
+end
+
+-- uma baixa (morte; o medevac e o reanimado não contam)
+function Capture.casualty(score: Score, faction: string)
+	local sc = score :: any
+	if faction == "US" or faction == "VC" then
+		sc[faction] = math.max(0, sc[faction] - 1)
+	end
+end
+
+-- avança dt segundos: quem tem mais setores ativos sangra o outro (bleedPerMinute por setor de
+-- vantagem). Devolve o lado que sangrou (ou nil).
+function Capture.bleed(score: Score, st: State, dt: number): string?
+	local us, vc = Capture.count(st, "US"), Capture.count(st, "VC")
+	if us == vc then
+		return nil
+	end
+	local loser = if us > vc then "VC" else "US"
+	local acc = score.acc :: any
+	local sc = score :: any
+	acc[loser] += math.abs(us - vc) * Capture.C.bleedPerMinute * dt / 60
+	local whole = math.floor(acc[loser])
+	if whole > 0 then
+		acc[loser] -= whole
+		sc[loser] = math.max(0, sc[loser] - whole)
+	end
+	return loser
+end
+
+-- Vencedor: dono de todos os setores ativos na hora, ou mais setores ao fim do tempo. Com atrito
+-- (score, só Warfare): reforços zerados perdem na hora, e o empate em setores no fim do tempo vai
+-- para quem tem mais reforços.
+function Capture.winner(st: State, elapsed: number, limitSeconds: number, score: Score?): string?
 	local active = 0
 	for _, a in st.active do
 		if a then
@@ -135,15 +177,57 @@ function Capture.winner(st: State, elapsed: number, limitSeconds: number): strin
 	elseif vc == active then
 		return "VC"
 	end
+	if score then
+		if score.US <= 0 and score.VC > 0 then
+			return "VC"
+		elseif score.VC <= 0 and score.US > 0 then
+			return "US"
+		elseif score.US <= 0 and score.VC <= 0 then
+			return "draw"
+		end
+	end
 	if elapsed >= limitSeconds then
 		if us > vc then
 			return "US"
 		elseif vc > us then
 			return "VC"
 		end
+		if score then
+			if score.US > score.VC then
+				return "US"
+			elseif score.VC > score.US then
+				return "VC"
+			end
+		end
 		return "draw"
 	end
 	return nil
+end
+
+-- Quem está tomando cada setor ativo agora (para o HUD e os avisos): "US" | "VC" | nil, e se está em
+-- disputa (os dois no ponto: congela). counts como em Capture.step.
+function Capture.activity(
+	st: State,
+	counts: { { US: number, VC: number } }
+): ({ [number]: string }, { [number]: boolean })
+	local capturing: { [number]: string } = {}
+	local contested: { [number]: boolean } = {}
+	for i = 1, #st.owner do
+		local c = counts[i]
+		if st.active[i] and c then
+			if c.US > 0 and c.VC > 0 then
+				contested[i] = true
+			elseif c.US > 0 or c.VC > 0 then
+				local team = if c.US > 0 then "US" else "VC"
+				local p = st.progress[i]
+				local full = (team == "US" and p >= 1) or (team == "VC" and p <= -1)
+				if not full and (st.owner[i] == team or Capture.attackable(st, i, team)) then
+					capturing[i] = team
+				end
+			end
+		end
+	end
+	return capturing, contested
 end
 
 return Capture

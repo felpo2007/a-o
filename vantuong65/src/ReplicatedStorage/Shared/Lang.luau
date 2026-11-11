@@ -64,7 +64,7 @@ export type Table = {
 	cached: number,
 }
 
-local SPEC = "%%[%-%+ #0]*%d*%.?%d*[dsfiqxg]"
+local SPEC = "%%[%-%+#0]*%d*%.?%d*[dsfiqxg]"
 local MAGIC = "[%^%$%(%)%%%.%[%]%*%+%-%?]"
 
 -- Separa um texto de formato em pedaços literais e especificadores ("%%" vira "%").

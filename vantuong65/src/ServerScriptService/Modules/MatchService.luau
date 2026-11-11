@@ -1,6 +1,15 @@
 --!strict
 -- Partida Warfare/Offensive/Skirmish: sorteio dos pontos fortes, captura, tempo e vitória (Parte 4).
 -- Servidor público alterna Warfare e Offensive; o privado fica no modo escolhido pelo dono.
+-- Ritmo e clareza (pedido do dono, 2026-11-11):
+--   - pontos fortes sorteados em cadeia a partir da frente (Front.pickStrongpoints): a frente
+--     inicial fica compacta;
+--   - atrito no Warfare (Capture.newScore): reforços por lado, -1 por morte, sangria por setor de
+--     vantagem; zerou, perdeu;
+--   - o Match_State leva quem está tomando cada setor, a disputa, as baixas, os reforços e o placar
+--     final (HUD da frente, avisos e tela de fim no cliente);
+--   - reunião avançada, reunião do squad e posições do squad (FrontService) e a imagem da carta
+--     (CartaService) começam aqui: o Main não está na lista de arquivos desta tarefa.
 local Lighting = game:GetService("Lighting")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -8,6 +17,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local AfterAction = require(ReplicatedStorage.Shared.AfterAction)
 local Capture = require(ReplicatedStorage.Shared.Capture)
+local Front = require(ReplicatedStorage.Shared.Front)
 local Geometry = require(ReplicatedStorage.Shared.Geometry)
 local MapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any
 local Net = require(ReplicatedStorage.Shared.Net)
@@ -32,6 +42,10 @@ MatchService.report = nil :: AfterAction.Report? -- relatório pós-ação da pa
 MatchService.shower = nil :: Weather.Shower? -- pancada de chuva sorteada para a partida (ou nenhuma)
 MatchService.rotation = { "Warfare", "Offensive" }
 MatchService.countsOverride = nil :: (() -> { { US: number, VC: number } })? -- só autoteste (Studio)
+MatchService.score = nil :: Capture.Score? -- reforços (atrito), só no Warfare
+MatchService.winner = nil :: string?
+MatchService.endedAt = 0
+MatchService.NEXT_MATCH_S = 30 -- relatório e placar na tela antes da próxima partida
 local pendingMode: string? = nil
 local fixedMode = false -- servidor privado: o dono escolheu o modo
 
@@ -187,11 +201,19 @@ function MatchService.newMatch(mode: string?)
 		bySector[sp.sector] = bySector[sp.sector] or {}
 		table.insert(bySector[sp.sector], sp)
 	end
+	-- um ponto por setor, sorteado em cadeia a partir da frente inicial: o vizinho mais perto do
+	-- ponto já escolhido tem mais chance (peso 1/d²). Antes era um sorteio solto por setor e a frente
+	-- podia começar a 1 km do ponto de reunião (5 min até o primeiro contato no Studio).
+	local n = #MapConfig.Sectors
+	local picked = Front.pickStrongpoints(bySector, n, Front.firstSector(MatchService.mode, n), function()
+		return rng:next()
+	end)
 	MatchService.points = {}
-	for s, list in bySector do
-		local sp = list[1 + math.floor(rng:next() * #list)]
+	for s, sp in picked do
 		MatchService.points[s] = { sector = s, name = sp.name, x = sp.x, z = sp.z, real = sp.real }
 	end
+	MatchService.score = if MatchService.mode == "Warfare" then Capture.newScore() else nil
+	MatchService.winner = nil
 	MatchService.offensive = nil
 	if MatchService.mode == "Offensive" then
 		local o = Offensive.new(5)
@@ -274,17 +296,38 @@ local function publish()
 	for s, sp in MatchService.points do
 		pts[s] = { name = sp.name, x = sp.x, z = sp.z }
 	end
+	-- quem está tomando cada setor e a disputa (o estado do ponto, nunca a posição de ninguém). Vão
+	-- como listas cheias ("" = ninguém): tabela com buraco perde as chaves numéricas no remote.
+	local cap, con = Capture.activity(st, lastCounts)
+	local capturing, contested = {}, {}
+	for s = 1, #st.owner do
+		capturing[s] = cap[s] or ""
+		contested[s] = con[s] == true
+	end
+	local rep = MatchService.report
+	local score = MatchService.score
+	local now = os.clock()
 	Net.event("Match_State"):FireAllClients({
 		mode = MatchService.mode,
 		owner = st.owner,
 		progress = st.progress,
 		active = st.active,
 		points = pts,
-		timeLeft = math.max(0, limitSeconds() - (os.clock() - MatchService.startedAt)),
+		timeLeft = math.max(0, limitSeconds() - (now - MatchService.startedAt)),
+		elapsed = now - MatchService.startedAt,
 		ended = MatchService.ended,
 		front = if MatchService.offensive then MatchService.offensive.front else nil,
+		capturing = capturing,
+		contested = contested,
+		-- atrito (Warfare): reforços de cada lado e o inicial, para a barra do HUD
+		score = if score then { US = score.US, VC = score.VC, max = Capture.C.reinforcements } else nil,
+		kia = if rep then { US = AfterAction.total(rep, "US"), VC = AfterAction.total(rep, "VC") } else nil,
+		winner = MatchService.winner,
+		nextIn = if MatchService.ended
+			then math.max(0, MatchService.NEXT_MATCH_S - (now - MatchService.endedAt))
+			else nil,
 		-- relatório pós-ação: só no fim (texto pronto, ~70 linhas no máximo)
-		report = if MatchService.ended and MatchService.report then AfterAction.lines(MatchService.report) else nil,
+		report = if MatchService.ended and rep then AfterAction.lines(rep) else nil,
 	})
 end
 
@@ -295,6 +338,8 @@ MatchService.onEnd = nil :: ((winner: string, seconds: number) -> ())?
 
 local function endMatch(winner: string)
 	MatchService.ended = true
+	MatchService.winner = winner
+	MatchService.endedAt = os.clock()
 	if MatchService.onEnd then
 		task.spawn(MatchService.onEnd, winner, os.clock() - MatchService.startedAt)
 	end
@@ -304,7 +349,7 @@ local function endMatch(winner: string)
 	end
 	ReplicatedStorage:SetAttribute("LastWinner", winner)
 	publish()
-	task.delay(30, function()
+	task.delay(MatchService.NEXT_MATCH_S, function()
 		MatchService.newMatch()
 	end)
 end
@@ -346,9 +391,18 @@ function MatchService.start()
 			if rep and not evacuated and not MatchService.ended and (e.faction == "US" or e.faction == "VC") then
 				local s = if root then Geometry.sectorAt(MapConfig.Sectors, root.Position.X, root.Position.Z) else nil
 				AfterAction.casualty(rep, e.faction, s)
+				if MatchService.score then
+					Capture.casualty(MatchService.score, e.faction) -- atrito: cada morte gasta um reforço
+				end
 			end
 		end)
 	end)
+	-- reunião avançada, reunião do squad e posições do squad; imagem da carta (decal -> imagem).
+	-- require aqui dentro: os dois dependem do SpawnService, que depende deste módulo.
+	local FrontService = require(script.Parent:WaitForChild("FrontService")) :: any
+	FrontService.start()
+	local CartaService = require(script.Parent:WaitForChild("CartaService")) :: any
+	task.spawn(CartaService.start)
 	task.spawn(function()
 		while true do
 			task.wait(1)
@@ -394,7 +448,11 @@ function MatchService.start()
 				if type(cur) ~= "number" or math.abs(cur - rain) > 0.01 then
 					ReplicatedStorage:SetAttribute("Rain", math.floor(rain * 100 + 0.5) / 100)
 				end
-				local w = if o then Offensive.winner(o, elapsed) else Capture.winner(st, elapsed, limitSeconds())
+				local score = MatchService.score
+				if score then
+					Capture.bleed(score, st, 1) -- atrito: quem tem menos setores sangra reforços
+				end
+				local w = if o then Offensive.winner(o, elapsed) else Capture.winner(st, elapsed, limitSeconds(), score)
 				if w then
 					endMatch(w)
 				end

@@ -2316,3 +2316,86 @@ Só no Studio: `workspace:SetAttribute("VT65DevDrive", "m48a3")` (também `"onto
 **Falta:**
 - o som do UH-34D (`uh34d_loop` em 0) e o chocalho da lagarta;
 - separar as pás do UH-34D no Blender: a malha publicada tem pás paradas.
+
+## D-87 — Modo de jogo com ritmo e clareza; carta de verdade; tela de baixa (2026-11-11)
+**Pedido do usuário:** "melhorar o modo de jogo, além da tela de morte, mapa do jogo"; "o mapa que
+você abre no jogo está simplório, faça um mapa de verdade".
+
+**Problemas vistos no Studio (D-78):**
+- o primeiro contato demorava ~5 min;
+- os bots lutavam espalhados;
+- não ficava claro o que estava em disputa.
+
+**Regras novas** (PLACEHOLDER, `Shared/Capture`, `Shared/Front`, `FrontService`):
+- **Atrito no Warfare:**
+  - 300 reforços por lado, menos 1 por morte (medevac não conta);
+  - quem tem mais setores sangra o outro em 3 por minuto por setor de vantagem; reforço zerado
+    perde;
+  - no fim do tempo, empate em setores vai para quem tem mais reforços.
+- **Sorteio dos pontos fortes:** continua um por setor (D-08/D-63), mas agora em cadeia, com peso
+  1/d², a partir do S3 (Warfare) ou do S5 (Offensive). A distância média de S2 e S4 até o S3 caiu de
+  1.414 para 1.165 m.
+- **Reunião avançada:** a 250 m ou mais do ponto atacado, 30 m para dentro do setor próprio. Marcha
+  até o S3 de 240 s para 92 s em média; pior caso de 398 s para 119 s.
+- **Reunião do squad:**
+  - só o líder planta (Y na carta, R no teclado), uma por squad, a cada 90 s;
+  - precisa de ≥ 100 m de inimigo, ≥ 150 m de ponto forte ativo do outro lado e ≥ 300 m do QG
+    inimigo;
+  - some com inimigo a menos de 15 m.
+
+**Faixa no alto** (`FrontHud`):
+- os 5 setores com dono, quem está tomando e o progresso;
+- reforços, ou a frente no Offensive;
+- o objetivo, com rumo e distância.
+
+Avisos pelo `Toast`: sob ataque, em disputa, tomado, perdido, reforços em 25% e 5 minutos.
+
+**Fim de partida:** ficha com carimbo VITÓRIA, DERROTA ou EMPATE, o motivo e o placar (setores,
+reforços, baixas, duração), por cima do relatório.
+
+**Carta de verdade** (`tools/carta_dados.luau` + `tools/make_carta.py`; `CartaView`):
+- Gerada dos mesmos dados do terreno, no estilo das cartas L7014 de 1965:
+  - relevo sombreado e curvas de 5 m com cota;
+  - mata, bosque de vila e sebe de bambu;
+  - arrozal com lâminas e diques, casas, riacho e trincheira;
+  - grade BS de 1 km com números;
+  - nomes vietnamitas, rosa dos ventos e escala.
+- Imagem de 2048 px em 4 blocos (enviados, `AssetIds.Carta`).
+- **Na carta do jogo:**
+  - setores por dono e linha de contato;
+  - objetivos com anel de 50 m, progresso e o carimbo ATACAR ou DEFENDER;
+  - pontos de inserção, o squad e as marcações a lápis;
+  - você com a seta do rumo, legenda e resumo.
+- **Controle:**
+  - analógico esquerdo: cursor com ímã;
+  - direito: arrastar;
+  - gatilhos: zoom;
+  - L3: você;
+  - R3: a carta inteira.
+- Nunca mostra inimigo (Parte 9.5).
+- As trilhas são traçado de design e não existem no chão.
+
+**Tela de baixa** (`CasualtyScreen`), sem killcam e sem o nome do atirador, como no Hell Let Loose:
+- **Caído:**
+  - a visão escurece e pulsa no ritmo do coração (110–150 bpm, de projeto);
+  - contagem da janela de 60 s;
+  - "Segure B para desistir", com anel enchendo;
+  - aviso de médico a até 80 m.
+- **Morto:** "Relatório de baixa" datilografado, com:
+  - carimbo;
+  - a causa só com o que o soldado perceberia ("Abatido por fuzil, ~120 m a nordeste");
+  - a grade, a hora em data-hora de 1965 e o tempo em campo.
+  Depois desce para a carta de inserção.
+
+**Teste no Studio:** carta, caído, morto e fim de partida aparecem sem erro de script. Ajustes:
+- o carimbo saiu de cima da causa;
+- o motivo saiu de baixo do carimbo;
+- o tutorial some quando caído ou morto.
+
+Ganchos só no Studio:
+- `VT65DevCarta`: "abrir", "zoom", "fechar";
+- `VT65DevQueda`: "caido", "morto", "fim";
+- `VT65DevEnd`: true.
+
+**Falta:** o relatório pós-ação antigo (cinza, sem acentos) aparece por trás da ficha de fim e ainda
+não tem o estilo novo.

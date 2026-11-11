@@ -1,6 +1,8 @@
 --!strict
 -- Corpo e cura no cliente: sem barra de vida. A visão perde cor e escurece com a vida, borra
 -- depois da reanimação e quando caído. Entradas no fim do arquivo (camada Input, Parte 12).
+-- Caído e morto: a tela de queda e a ficha de baixa ficam no CasualtyScreen (2026-11-11); caído, a
+-- visão turva pulsa com o coração dele.
 local Lighting = game:GetService("Lighting")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -9,6 +11,7 @@ local UserInputService = game:GetService("UserInputService")
 
 local Net = require(ReplicatedStorage.Shared.Net)
 local Bus = require(script.Parent.Bus)
+local CasualtyScreen = require(script.Parent.CasualtyScreen)
 local Input = require(script.Parent.Input)
 
 local player = Players.LocalPlayer
@@ -24,6 +27,7 @@ local state: any = nil
 Net.event("Medical_State").OnClientEvent:Connect(function(s)
 	state = s
 	state.recvAt = os.clock()
+	CasualtyScreen.setMedical(s)
 end)
 
 -- aliado mais próximo (jogador ou bot) a até 3 m
@@ -66,6 +70,9 @@ end
 -- aliado (reanimar, tratar, fazer curativo) quando não há outra interação na tela; caído: B
 -- segurado ou H = desistir.
 local function selfOp(op: string)
+	if op == "giveup" then
+		CasualtyScreen.noteGiveUp()
+	end
 	Net.event("Medical_Action"):FireServer({ op = op })
 end
 
@@ -113,6 +120,7 @@ UserInputService.InputBegan:Connect(function(input)
 	if input.KeyCode == Enum.KeyCode.ButtonB and player:GetAttribute("Downed") then
 		bDown = os.clock()
 		local t0 = bDown
+		CasualtyScreen.holdGiveUp(t0) -- o anel da tela de queda enche enquanto segura
 		task.delay(1.0, function()
 			if bDown == t0 and player:GetAttribute("Downed") then
 				selfOp("giveup")
@@ -123,6 +131,7 @@ end)
 UserInputService.InputEnded:Connect(function(input)
 	if input.KeyCode == Enum.KeyCode.ButtonB then
 		bDown = 0
+		CasualtyScreen.holdGiveUp(nil)
 	end
 end)
 
@@ -138,7 +147,15 @@ RunService.RenderStepped:Connect(function()
 	cc.Brightness = -0.25 * (1 - h)
 	local now = os.clock() - (state.recvAt or os.clock()) + (state.now or 0)
 	local blurred = state.downedAt ~= nil or (state.blurUntil or 0) > now
-	blur.Size = if state.downedAt then 18 elseif blurred then 8 else 0
+	-- caído: a visão turva pulsa com o coração (CasualtyScreen.beat, 0..1) e perde ainda mais a cor
+	if state.downedAt then
+		local b = CasualtyScreen.beat()
+		blur.Size = 14 + 8 * b
+		cc.Saturation = -0.95
+		cc.Brightness = -0.28 - 0.06 * b
+	else
+		blur.Size = if blurred then 8 else 0
+	end
 end)
 
 player.CharacterAdded:Connect(function()

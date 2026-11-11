@@ -42,7 +42,21 @@ local function newInfo(): Info
 	return { deaths = {}, roleChanged = false, firstSpawn = true, inplaceUses = 0, matchStart = 0 }
 end
 
-export type Point = { id: string, name: string, x: number, z: number, kind: SpawnRules.Kind, sector: number? }
+-- squad: ponto de reunião do squad (FrontService); só os membros desse squad veem e nascem nele
+export type Point = {
+	id: string,
+	name: string,
+	x: number,
+	z: number,
+	kind: SpawnRules.Kind,
+	sector: number?,
+	squad: string?,
+}
+
+-- o ponto vale para este jogador? (ponto de squad só para o próprio squad)
+local function visibleTo(pt: Point, player: Player): boolean
+	return pt.squad == nil or pt.squad == player:GetAttribute("SquadId")
+end
 
 -- Provedores extras de pontos (postos construídos, reforço por túnel): LogisticsService etc.
 local providers: { (faction: string) -> { Point } } = {}
@@ -138,7 +152,7 @@ function SpawnService.freePoints(faction: string): { Point }
 		local openedAt = if pt.sector then MatchService.capturedAt[pt.sector] else nil
 		local blocked = pt.kind ~= "hq"
 			and SpawnRules.blocked(pt.x * M, pt.z * M, enemiesMeters(faction), contested, openedAt, now)
-		if not blocked then
+		if not blocked and pt.squad == nil then -- bot não tem squad
 			table.insert(out, pt)
 		end
 	end
@@ -353,7 +367,7 @@ function SpawnService.start()
 		end
 		local now = os.clock()
 		for _, pt in SpawnService.points(faction) do
-			if pt.id == pointId then
+			if pt.id == pointId and visibleTo(pt, player) then
 				local wait, blocked = status(player, pt, now)
 				if wait > 0 or blocked then
 					return
@@ -372,8 +386,11 @@ function SpawnService.start()
 			for _, player in Players:GetPlayers() do
 				local faction = player:GetAttribute("Faction") :: string?
 				if faction and not alive(player) then
-					local list = {}
+					local list: { any } = {}
 					for _, pt in SpawnService.points(faction) do
+						if not visibleTo(pt, player) then
+							continue
+						end
 						local wait, blocked, why = status(player, pt, now)
 						local entry = {
 							id = pt.id,
@@ -383,6 +400,8 @@ function SpawnService.start()
 							wait = wait,
 							blocked = blocked,
 							why = why,
+							kind = pt.kind, -- símbolo na carta (QG, reunião, posto, squad)
+							squad = pt.squad ~= nil,
 						}
 						table.insert(list, entry)
 					end
