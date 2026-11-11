@@ -256,12 +256,21 @@ function Movement.newStamina(): Stamina
 	return { value = 1, exhausted = false, rest = Movement.RECOVER_DELAY }
 end
 
+-- D-89 (pedido do dono, 2026-11-11: "permita correr sem perder a stamina"): a corrida não gasta
+-- fôlego. Correndo, o fôlego se comporta como no trote, mas nunca cai (o que pulo, transposição e
+-- mergulho gastaram volta devagar). O modelo antigo (24 s de corrida até zerar) fica atrás da chave.
+Movement.SPRINT_FREE = true
+
 -- Variação do fôlego por segundo (negativa = cansando).
 function Movement.staminaRate(e: Effort): number
 	local load = Movement.loadDrain(e.loadKg)
 	local up = math.max(e.grade, 0)
 	local water = math.max(e.waterM - 0.15, 0)
-	if e.kind == "sprint" then
+	if e.kind == "sprint" and Movement.SPRINT_FREE then
+		local jog = table.clone(e)
+		jog.kind = "jog"
+		return math.max(Movement.staminaRate(jog), 0)
+	elseif e.kind == "sprint" then
 		return -(1 / Movement.SPRINT_S) * load * Movement.surfaceDrain(e.surface) * (1 + 3 * up) * (1 + water)
 	elseif e.kind == "jog" then
 		-- trote: no plano firme recupera devagar; subida, lama e água cansam
@@ -571,7 +580,9 @@ Movement.SERVER_RECOVER = 0.12
 Movement.SERVER_MIN_TO_START = 1e-3
 
 function Movement.serverBudgetStep(b: number, dt: number, sprinting: boolean): number
-	if sprinting then
+	if sprinting and Movement.SPRINT_FREE then
+		return b -- corrida livre (D-89): o servidor não corta
+	elseif sprinting then
 		return math.max(b - dt / Movement.SERVER_SPRINT_S, 0)
 	end
 	return math.min(b + dt * Movement.SERVER_RECOVER, 1)

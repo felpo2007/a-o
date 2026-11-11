@@ -2377,6 +2377,17 @@ soldado andando a 1,36 m/s.
 - **Bots:** ainda deslizam sem animação. `SoldierAnims.BOTS = true` anima os bots perto de cada
   cliente; falta medir o custo com 58 bots.
 
+## D-89 — Correr sem gastar fôlego (2026-11-11)
+**Pedido do usuário:** "permita correr sem perder a stamina".
+
+**Regra nova** (`Movement.SPRINT_FREE = true`):
+- Correndo, o fôlego segue a regra do trote, mas nunca cai: nem com peso, no arrozal ou na subida.
+  O que o pulo, a transposição e o mergulho gastaram volta devagar.
+- O servidor não corta mais a corrida pelo orçamento de fôlego.
+- O fôlego continua mexendo no balanço da mira e na altura do pulo.
+
+O modelo antigo (24 s de corrida até zerar) fica atrás da chave e continua testado no Lune.
+
 **Falta:**
 - o som do UH-34D (`uh34d_loop` em 0) e o chocalho da lagarta;
 - separar as pás do UH-34D no Blender: a malha publicada tem pás paradas.

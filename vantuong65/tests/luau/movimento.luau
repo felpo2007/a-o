@@ -176,75 +176,141 @@ local function sprintFor(kg: number, surface: string?, grade: number?): number
 	return t
 end
 
-test("fôlego: corrida dura ~24 s leve; menos com peso, arrozal e subida", function()
-	local light = sprintFor(15)
-	local rifle = sprintFor(21)
-	local radio = sprintFor(31)
-	local paddy = sprintFor(21, "paddy")
-	local hill = sprintFor(21, "firm", 0.2)
-	print(
-		string.format(
-			"       corrida até zerar: 15 kg %.1f s; 21 kg %.1f s; 31 kg %.1f s; arrozal %.1f s; subida 20%% %.1f s",
-			light,
-			rifle,
-			radio,
-			paddy,
-			hill
-		)
-	)
-	near(light, Movement.SPRINT_S, 0.1, "15 kg")
-	assert(rifle < light and radio < rifle and paddy < rifle and hill < rifle)
-end)
-
-test("fôlego: sem fôlego trava a corrida até 35%; recupera parado depois de uma pausa", function()
-	local s = Movement.newStamina()
-	s.value = 0.01
-	local run = { kind = "sprint", stance = "stand", surface = "firm", grade = 0, loadKg = 15, waterM = 0 }
-	Movement.staminaStep(s, 1, run)
-	assert(s.value == 0 and s.exhausted and not Movement.canSprint(s), "zerou")
-	local rest = { kind = "still", stance = "stand", surface = "firm", grade = 0, loadKg = 15, waterM = 0 }
-	Movement.staminaStep(s, Movement.RECOVER_DELAY * 0.5, rest)
-	assert(s.value == 0, "a pausa vem antes da recuperação")
-	local t = Movement.RECOVER_DELAY * 0.5
-	while s.exhausted do
-		Movement.staminaStep(s, 0.05, rest)
-		t += 0.05
-		assert(t < 30, "não recuperou")
+test("D-89: corrida livre não gasta fôlego (nem com peso, arrozal ou subida)", function()
+	assert(Movement.SPRINT_FREE, "padrão: corrida livre")
+	for _, c in { { 15, "firm", 0 }, { 31, "paddy", 0 }, { 21, "firm", 0.3 } } do
+		local s = Movement.newStamina()
+		s.value = 0.6
+		for _ = 1, 600 do -- 30 s correndo
+			Movement.staminaStep(s, 0.05, {
+				kind = "sprint",
+				stance = "stand",
+				surface = c[2],
+				grade = c[3],
+				loadKg = c[1],
+				waterM = 0,
+			})
+		end
+		assert(s.value >= 0.6 - 1e-9 and Movement.canSprint(s), "corrida gastou fôlego: " .. c[1] .. " kg " .. c[2])
 	end
-	assert(s.value >= Movement.EXHAUSTED_UNTIL - 1e-9 and Movement.canSprint(s))
-	local full = Movement.newStamina()
-	full.value = 0
-	full.rest = 0
-	local tf = 0
-	while full.value < 1 do
-		Movement.staminaStep(full, 0.05, rest)
-		tf += 0.05
-	end
-	print(string.format("       parado: volta a correr em %.1f s; cheio em %.1f s (deitado é mais rápido)", t, tf))
-	assert(tf < 20, "recuperação parado")
-	-- trote no plano recupera devagar; trote em subida ou no arrozal cansa
-	assert(
-		Movement.staminaRate({ kind = "jog", stance = "stand", surface = "firm", grade = 0, loadKg = 20, waterM = 0 })
-			> 0
-	)
-	assert(
-		Movement.staminaRate({ kind = "jog", stance = "stand", surface = "firm", grade = 0.3, loadKg = 20, waterM = 0 })
-			< 0
-	)
-	assert(
-		Movement.staminaRate({ kind = "jog", stance = "stand", surface = "paddy", grade = 0, loadKg = 20, waterM = 0 })
-			< 0
-	)
-	local prone =
-		Movement.staminaRate({ kind = "still", stance = "prone", surface = "firm", grade = 0, loadKg = 20, waterM = 0 })
-	assert(prone > Movement.staminaRate(rest), "deitado recupera mais rápido")
-	-- gasto pontual
+	assert(Movement.serverBudgetStep(1, 10, true) == 1, "servidor não corta")
+	-- pulo ainda custa
 	local g = Movement.newStamina()
 	Movement.spend(g, Movement.COST.jump, 15)
-	near(g.value, 1 - Movement.COST.jump, 1e-9, "pulo")
-	assert(g.rest == 0)
-	assert(Movement.swayFactor(1) == 1 and Movement.swayFactor(0) > 3, "balanço da mira cansado")
+	assert(g.value < 1)
 end)
+
+-- o modelo antigo (fôlego gasto na corrida) continua testado atrás da chave
+local function legacy(fn: () -> ())
+	return function()
+		Movement.SPRINT_FREE = false
+		local ok, err = pcall(fn)
+		Movement.SPRINT_FREE = true
+		assert(ok, err)
+	end
+end
+
+test(
+	"fôlego (modelo antigo): corrida dura ~24 s leve; menos com peso, arrozal e subida",
+	legacy(function()
+		local light = sprintFor(15)
+		local rifle = sprintFor(21)
+		local radio = sprintFor(31)
+		local paddy = sprintFor(21, "paddy")
+		local hill = sprintFor(21, "firm", 0.2)
+		print(
+			string.format(
+				"       corrida até zerar: 15 kg %.1f s; 21 kg %.1f s; 31 kg %.1f s; arrozal %.1f s; subida 20%% %.1f s",
+				light,
+				rifle,
+				radio,
+				paddy,
+				hill
+			)
+		)
+		near(light, Movement.SPRINT_S, 0.1, "15 kg")
+		assert(rifle < light and radio < rifle and paddy < rifle and hill < rifle)
+	end)
+)
+
+test(
+	"fôlego (modelo antigo): sem fôlego trava a corrida até 35%; recupera parado",
+	legacy(function()
+		local s = Movement.newStamina()
+		s.value = 0.01
+		local run = { kind = "sprint", stance = "stand", surface = "firm", grade = 0, loadKg = 15, waterM = 0 }
+		Movement.staminaStep(s, 1, run)
+		assert(s.value == 0 and s.exhausted and not Movement.canSprint(s), "zerou")
+		local rest = { kind = "still", stance = "stand", surface = "firm", grade = 0, loadKg = 15, waterM = 0 }
+		Movement.staminaStep(s, Movement.RECOVER_DELAY * 0.5, rest)
+		assert(s.value == 0, "a pausa vem antes da recuperação")
+		local t = Movement.RECOVER_DELAY * 0.5
+		while s.exhausted do
+			Movement.staminaStep(s, 0.05, rest)
+			t += 0.05
+			assert(t < 30, "não recuperou")
+		end
+		assert(s.value >= Movement.EXHAUSTED_UNTIL - 1e-9 and Movement.canSprint(s))
+		local full = Movement.newStamina()
+		full.value = 0
+		full.rest = 0
+		local tf = 0
+		while full.value < 1 do
+			Movement.staminaStep(full, 0.05, rest)
+			tf += 0.05
+		end
+		print(
+			string.format("       parado: volta a correr em %.1f s; cheio em %.1f s (deitado é mais rápido)", t, tf)
+		)
+		assert(tf < 20, "recuperação parado")
+		-- trote no plano recupera devagar; trote em subida ou no arrozal cansa
+		assert(
+			Movement.staminaRate({
+				kind = "jog",
+				stance = "stand",
+				surface = "firm",
+				grade = 0,
+				loadKg = 20,
+				waterM = 0,
+			}) > 0
+		)
+		assert(
+			Movement.staminaRate({
+				kind = "jog",
+				stance = "stand",
+				surface = "firm",
+				grade = 0.3,
+				loadKg = 20,
+				waterM = 0,
+			}) < 0
+		)
+		assert(
+			Movement.staminaRate({
+				kind = "jog",
+				stance = "stand",
+				surface = "paddy",
+				grade = 0,
+				loadKg = 20,
+				waterM = 0,
+			}) < 0
+		)
+		local prone = Movement.staminaRate({
+			kind = "still",
+			stance = "prone",
+			surface = "firm",
+			grade = 0,
+			loadKg = 20,
+			waterM = 0,
+		})
+		assert(prone > Movement.staminaRate(rest), "deitado recupera mais rápido")
+		-- gasto pontual
+		local g = Movement.newStamina()
+		Movement.spend(g, Movement.COST.jump, 15)
+		near(g.value, 1 - Movement.COST.jump, 1e-9, "pulo")
+		assert(g.rest == 0)
+		assert(Movement.swayFactor(1) == 1 and Movement.swayFactor(0) > 3, "balanço da mira cansado")
+	end)
+)
 
 test("peso: fuzileiro com a dotação padrão (M14, 5 carregadores, 2 granadas, fumaça)", function()
 	local m14 = Weapons.get("m14")
