@@ -51,8 +51,20 @@ FOSCOS = {
     "Models.sandbags": "sacos_areia_studs.glb",
     "Models.water_buffalo": "bufalo_studs.glb",
     "Models.chicken": "galinha_studs.glb",
+    # mata fechada (D-65)
+    "Models.canopy_tree": "arvore_dossel_studs.glb",
+    "Models.melaleuca_grove": "tram_bosque_studs.glb",
+    "Models.taro_fern": "taioba_samambaia_studs.glb",
 }
 ROUGHNESS = 0.9
+# Ganho de cor (R, G, B) na textura de cor (D-65). Média dos pixels pintados: arbusto (48, 45, 20),
+# quase preto na sombra da mata; árvore de folha larga (72, 76, 59), cinzenta. Alvo: o verde da
+# taioba (96, 120, 46). A textura sai em 1024 px, o máximo que o Roblox usa.
+COLOR_GAIN = {
+    "Models.shrub": (1.7, 2.35, 2.0),
+    "Models.hill_tree": (1.0, 1.32, 0.85),
+}
+TEXTURE_PX = 1024
 
 GLB_MAGIC = 0x46546C67
 JSON_CHUNK = 0x4E4F534A
@@ -82,6 +94,45 @@ def write_glb(path: Path, gltf: dict, rest: list[tuple[int, bytes]]) -> None:
         pad = (4 - len(cdata) % 4) % 4
         body += struct.pack("<II", len(cdata) + pad, ctype) + cdata + b"\x00" * pad
     path.write_bytes(struct.pack("<III", GLB_MAGIC, 2, 12 + len(body)) + body)
+
+
+def regrade(gltf: dict, rest: list[tuple[int, bytes]], gain: tuple[float, float, float]) -> list:
+    """Reescreve a textura de cor com ganho por canal (PNG, TEXTURE_PX) e refaz o chunk BIN."""
+    import io
+
+    import numpy as np
+    from PIL import Image
+
+    blob = rest[0][1]
+    views = gltf["bufferViews"]
+    chunks = []
+    for v in views:
+        o = v.get("byteOffset", 0)
+        chunks.append(blob[o : o + v["byteLength"]])
+    for mat in gltf.get("materials", []):
+        tex = mat.get("pbrMetallicRoughness", {}).get("baseColorTexture")
+        if tex is None:
+            continue
+        img = gltf["images"][gltf["textures"][tex["index"]]["source"]]
+        vi = img["bufferView"]
+        im = Image.open(io.BytesIO(chunks[vi])).convert("RGBA")
+        if max(im.size) > TEXTURE_PX:
+            im = im.resize((TEXTURE_PX, TEXTURE_PX), Image.LANCZOS)
+        a = np.asarray(im).astype(np.float32)
+        for c in range(3):
+            a[..., c] = np.clip(a[..., c] * gain[c], 0, 255)
+        out = io.BytesIO()
+        Image.fromarray(a.astype(np.uint8), "RGBA").save(out, "PNG", optimize=True)
+        chunks[vi] = out.getvalue()
+        img["mimeType"] = "image/png"
+    new = b""
+    for v, data in zip(views, chunks, strict=True):
+        new += b"\x00" * ((4 - len(new) % 4) % 4)
+        v["byteOffset"] = len(new)
+        v["byteLength"] = len(data)
+        new += data
+    gltf["buffers"][0]["byteLength"] = len(new)
+    return [(rest[0][0], new), *rest[1:]]
 
 
 def matte(gltf: dict) -> int:
@@ -142,6 +193,8 @@ def main() -> int:
             print(f"{key:24} {describe(gltf)}")
             continue
         n = matte(gltf)
+        if key in COLOR_GAIN:
+            rest = regrade(gltf, rest, COLOR_GAIN[key])
         dst = src.with_name(src.stem + "_fosco.glb")
         write_glb(dst, gltf, rest)
         check, _ = read_glb(dst)

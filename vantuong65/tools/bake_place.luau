@@ -29,7 +29,15 @@ local env = {
 	Enum = roblox.Enum,
 }
 local t0 = os.clock()
-local stats = FeatureBuilder.build(env, Features, MapConfig, world, workspace)
+-- paisagem da D-65: dique, lâmina e sebe de arrozal só na lavoura das vilas e nas clareiras
+local Landscape = require("../src/ServerStorage/VT65Build/Landscape")
+local housesXZ = {}
+for i = 1, #Features.houses, 4 do
+	table.insert(housesXZ, Features.houses[i])
+	table.insert(housesXZ, Features.houses[i + 1])
+end
+local landscape = Landscape.new(world, MapConfig, housesXZ)
+local stats = FeatureBuilder.build(env, Features, MapConfig, world, workspace, landscape)
 local TunnelGeometry = require("../src/ServerStorage/VT65Build/TunnelGeometry")
 local Tunnels = require("../src/ReplicatedStorage/Shared/Tunnels")
 local cx, cz = 0, 0

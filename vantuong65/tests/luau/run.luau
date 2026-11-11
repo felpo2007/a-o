@@ -140,8 +140,8 @@ test("place assado tem as peças e todas ancoradas", function()
 		end
 	end
 	assert(unanchored == 0, unanchored .. " peças soltas")
-	-- D-63: recorte de 2,3 x 2,3 km (área + margem) tem ~9,7 mil diques (eram ~19 mil em 4 x 2,4 km)
-	assert(#map.Dikes:GetChildren() > 8000, "diques")
+	-- D-65: diques só na lavoura das vilas (~3,3 mil); com o arrozal todo eram ~9,7 mil (D-63)
+	assert(#map.Dikes:GetChildren() > 2500, "diques")
 	assert(#map.Strongpoints:GetChildren() == 15, "marcadores")
 	print(string.format("       (%d BaseParts no Map)", n))
 end)

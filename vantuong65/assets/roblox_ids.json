@@ -60,10 +60,8 @@
  "Models.hut_thatch": "91784099076626",
  "Models.coconut_palm": "102968030425425",
  "Models.bamboo_clump": "122081516623030",
- "Models.hill_tree": "125112405205422",
  "Models.rice_patch": "134482555063796",
  "Models.elephant_grass": "123073879703433",
- "Models.shrub": "103079002633133",
  "Models.banana": "100002712193200",
  "Models.spider_hole": "129845165905645",
  "Models.sandbags": "89770024840711",
@@ -80,5 +78,10 @@
  "Models.log_bridge": "105484640465096",
  "Models.vc_bunker": "93291203743799",
  "Models.water_buffalo": "92959897148651",
- "Models.chicken": "95559003974876"
+ "Models.chicken": "95559003974876",
+ "Models.canopy_tree": "73770095205881",
+ "Models.melaleuca_grove": "130702304212118",
+ "Models.taro_fern": "94455365060774",
+ "Models.hill_tree": "121233640900450",
+ "Models.shrub": "131409897086783"
 }

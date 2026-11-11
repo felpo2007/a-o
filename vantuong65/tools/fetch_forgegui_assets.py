@@ -71,7 +71,7 @@ def main() -> None:
         with tempfile.TemporaryDirectory() as tmp:
             src = Path(tmp) / "origem.glb"
             src.write_bytes(data)
-            r = run(src, dst, red["faces"])
+            r = run(src, dst, red["faces"], bool(red.get("soltar_bordas")))
         got = sha(dst.read_bytes())
         if got != m["sha256"]:
             # outra versão do pymeshlab: a malha muda um pouco; a contagem é o que importa

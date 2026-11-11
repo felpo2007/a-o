@@ -443,9 +443,14 @@ function AssetLoader.start()
 			end
 		end
 	end
+	local VT65Build = ServerStorage:WaitForChild("VT65Build")
+	local landscape = (require(VT65Build:WaitForChild("Landscape")) :: any).new(world, MapConfig, housesXZ)
 	local plan = Vegetation.plan({
 		classAt = function(x: number, z: number): number
 			return world:classAt(x, z)
+		end,
+		kindAt = function(x: number, z: number): number
+			return landscape:kindAt(x, z)
 		end,
 		bounds = MapConfig.Bounds,
 		cell = world.grid.cellStuds,
@@ -476,7 +481,12 @@ function AssetLoader.start()
 	for i, it in plan do
 		local s = Geometry.sectorAt(MapConfig.Sectors, it.x, it.z) or 0
 		if jrng:next() < jFactor[s] then
-			if AssetLoader.place(it.key, it.x, it.z, it.yaw, jungle, true, it.scale, it.shadow) then
+			local key, scale = it.key, it.scale
+			local fb = Vegetation.FALLBACK[key]
+			if fb and not AssetLoader.template(key) then
+				key, scale = fb[1], scale * fb[2] -- espécie nova ainda sem ID publicado (D-65)
+			end
+			if AssetLoader.place(key, it.x, it.z, it.yaw, jungle, true, scale, it.shadow) then
 				nJungle += 1
 			end
 		end

@@ -5,9 +5,10 @@
 local ArtBudget = {}
 
 ArtBudget.MAX = { veg = 3000, prop = 5000, hero = 20000 } :: { [string]: number }
--- teto de arte por setor; PLACEHOLDER até medir fps no Studio com a mata (D-45, D-64). O plano
--- inteiro da mata pede até 15,5 milhões no setor 2 (tools/ArtEstimate, sem teto).
-ArtBudget.SECTOR_MAX = 16000000
+-- teto de arte por setor; PLACEHOLDER até medir fps no Studio com a mata (D-45, D-64, D-65). A
+-- mata fechada da D-65 pede até 35,6 milhões no setor 5 (tools/ArtEstimate, sem teto); o cliente
+-- só carrega o raio de streaming (430 m), não o mapa inteiro.
+ArtBudget.SECTOR_MAX = 40000000
 -- multiplica a densidade da mata (Vegetation.plan); 1 = valores de projeto da D-64
 ArtBudget.JUNGLE_DENSITY = 1
 -- chave sem número medido: assume um modelo não reduzido (o pior caso do manifest é ~15,8k)
@@ -21,6 +22,11 @@ ArtBudget.KIND = {
 	coconut_palm = "veg",
 	hill_tree = "veg",
 	rice_patch = "veg",
+	-- mata fechada (D-65)
+	canopy_tree = "veg",
+	vine_tree = "veg",
+	melaleuca_grove = "veg",
+	taro_fern = "veg",
 	hut_thatch = "prop",
 	hut_veranda = "prop",
 	hut_kitchen = "prop",
@@ -69,6 +75,11 @@ ArtBudget.TRIS = {
 	coconut_palm = 1988,
 	hill_tree = 2189,
 	rice_patch = 13066,
+	-- D-65 (medidos no manifest, redução local)
+	canopy_tree = 6000,
+	melaleuca_grove = 4496,
+	taro_fern = 4595,
+	vine_tree = 2189, -- sem modelo (outcome_unknown): o substituto é a hill_tree
 	hut_thatch = 3127,
 	hut_veranda = 3135,
 	hut_kitchen = 3999,
@@ -109,6 +120,9 @@ ArtBudget.TRIS = {
 -- uma exceção ficar velha (o modelo já cabe na meta).
 ArtBudget.EXCEPTIONS = {
 	rice_patch = "só 3 canteiros de 8 mudas, perto das vilas; o arrozal é terreno com grama (D-64)",
+	canopy_tree = "emergente de 24 m, ~7 por hectare: com 3 mil a redução tira 2,8 m da copa (D-65)",
+	melaleuca_grove = "5 troncos num modelo; costuras de UV param a redução em ~4,5 mil (D-65)",
+	taro_fern = "folhas largas com costuras de UV param a redução em ~4,6 mil; densidade menor (D-65)",
 } :: { [string]: string }
 
 -- variantes sorteadas para as casas (o teste exige que todas caibam na meta)

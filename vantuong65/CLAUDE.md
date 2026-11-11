@@ -1,7 +1,8 @@
 # Instruções para o Claude: VẠN TƯỜNG '65 (jogo de Roblox)
 
 Esta pasta é o jogo **VẠN TƯỜNG '65**: FPS tático 30 contra 30 no Roblox, na Operação Starlite
-(agosto de 1965), mapa 1:1 de 2 × 2 km, da Colina 43 a An Cường (2) (D-63). O `CLAUDE.md` da raiz do repositório é de OUTRO projeto
+(agosto de 1965), mapa 1:1 de 2 × 2 km, da Colina 43 a An Cường (2) (D-63), coberto de mata fechada
+com lavoura em volta das vilas (D-65). O `CLAUDE.md` da raiz do repositório é de OUTRO projeto
 (estratégias de trade). Aqui vale este arquivo. Responda sempre em português.
 
 ## Antes de qualquer coisa
@@ -79,8 +80,20 @@ O `sourcemap.json` não vai para o Git.
   não no GLB.
 - Todo GLB do gerador vem com mapa de metal: folha, palha e madeira refletem o céu como cromo.
   Modelo que não é de metal passa por `tools/matte_glb.py` antes de subir (D-64).
-- A mata sai de `Modules/Vegetation.luau` (plano puro por uso do solo; o `tools/ArtEstimate` usa o
-  mesmo plano). Densidade: `ArtBudget.JUNGLE_DENSITY`.
+- A mata sai de `Modules/Vegetation.luau`, um plano puro que o `tools/ArtEstimate` também usa.
+  - O "onde" vem de `VT65Build/Landscape.luau` (D-65): mata, lavoura das vilas, bosque, clareira
+    e riacho.
+  - O bake usa a mesma paisagem: dique e lâmina d'água só na lavoura.
+  - Densidade: `ArtBudget.JUNGLE_DENSITY`.
+- Modelo novo de vegetação:
+  1. gere no ForgeGUI e prepare em studs com `asset_prepare` (pivô na base);
+  2. reduza com `tools/decimate_glb.py`; na folhagem use `--soltar-bordas`, senão as costuras de UV
+     param a redução;
+  3. registre no `manifest.json` e no `ArtBudget`;
+  4. ponha em `FOSCOS` (e em `COLOR_GAIN` se a textura for escura) no `matte_glb`;
+  5. suba com `upload-assets`.
+- Não dá para testar render pesado no Studio com outro jogo aberto: a GPU de 2 GB do PC do dono
+  travou (`DXGI_ERROR_DEVICE_HUNG`) e isso derruba o jogo dele também.
 - `Terrain.Decoration` (grama animada) só vai no arquivo do place (`tools/bake_place`): script do
   jogo não pode escrever.
 - Arma nova: acrescente em `tools/weapon_landmarks.py` (frente e frações das mãos, vistas numa
@@ -97,7 +110,7 @@ O `sourcemap.json` não vai para o Git.
 - Segredos só no `.env` (no `.gitignore`), nunca no código nem no chat.
 - ForgeGUI: nunca regenerar um job em `outcome_unknown`. "failed" com `retryable` pode ser
   retomado com `generation_retry`.
-- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-65) e atualize `PROGRESS.md`.
+- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-66) e atualize `PROGRESS.md`.
 - Metas da Parte 2: vegetação ≤ 3 mil triângulos, props ≤ 5 mil, herói ≤ 20 mil (`ArtBudget`,
   conferido pelo teste da F5).
 - Commits no branch acima, com mensagem em português.

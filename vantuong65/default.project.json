@@ -34,7 +34,7 @@
       "$properties": {
         "StreamingEnabled": true,
         "StreamingMinRadius": 512,
-        "StreamingTargetRadius": 2560
+        "StreamingTargetRadius": 1536
       }
     },
     "Lighting": {

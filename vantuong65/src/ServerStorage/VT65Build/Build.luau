@@ -54,7 +54,14 @@ function Build.features()
 	local env = { Instance = Instance, Vector3 = Vector3, CFrame = CFrame, Color3 = Color3, Enum = Enum }
 	local mapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any
 	local world = Build.world()
-	local stats = FeatureBuilder.build(env, require(Data.Features), mapConfig, world, workspace)
+	local features = require(Data.Features) :: any
+	local housesXZ = {}
+	for i = 1, #features.houses, 4 do
+		table.insert(housesXZ, features.houses[i])
+		table.insert(housesXZ, features.houses[i + 1])
+	end
+	local landscape = require(VT65Build.Landscape).new(world, mapConfig, housesXZ)
+	local stats = FeatureBuilder.build(env, features, mapConfig, world, workspace, landscape)
 	FeatureBuilder.tunnels(env, tunnelBoxes(world), workspace:FindFirstChild("Map"))
 	print(
 		"[VT65] peças:",

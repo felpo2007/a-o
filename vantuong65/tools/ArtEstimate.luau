@@ -12,6 +12,7 @@ local Tunnels = require("../src/ReplicatedStorage/Shared/Tunnels") :: any
 local Tutorial = require("../src/ReplicatedStorage/Shared/Tutorial") :: any
 local Vegetation = require("../src/ServerScriptService/Modules/Vegetation")
 local WorldData = require("../src/ServerStorage/VT65Build/WorldData")
+local Landscape = require("../src/ServerStorage/VT65Build/Landscape")
 local Grid = require("../src/ServerStorage/VT65Build/Data/Grid") :: any
 
 export type Sector = { count: number, tris: number, factor: number, demand: number }
@@ -180,9 +181,13 @@ return function(): Result
 			table.insert(corridors, { x1 = hq.x, z1 = hq.z, x2 = x2, z2 = z2, w = 10 / M })
 		end
 	end
+	local landscape = Landscape.new(world, MapConfig, housesXZ)
 	local plan = Vegetation.plan({
 		classAt = function(x: number, z: number): number
 			return world:classAt(x, z)
+		end,
+		kindAt = function(x: number, z: number): number
+			return landscape:kindAt(x, z)
 		end,
 		bounds = MapConfig.Bounds,
 		cell = Grid.cellStuds,

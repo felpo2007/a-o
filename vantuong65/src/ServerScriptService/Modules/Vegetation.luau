@@ -1,9 +1,10 @@
 --!strict
--- Mata por uso do solo (D-64). Módulo puro: devolve a lista de plantas (chave, posição, giro e
+-- Mata por paisagem (D-64, D-65). Módulo puro: devolve a lista de plantas (chave, posição, giro e
 -- escala); o AssetLoader coloca e o tools/ArtEstimate conta com a mesma lista.
--- Antes só as vilas, as sebes e as duas colinas tinham arte: a mata e o capim eram terreno pelado.
--- A carta de 1965 manda no "onde": arrozal (78% da área) fica aberto, com o arroz da grama do
--- terreno. A densidade é de design, ajustada por captura e fps no Studio.
+-- D-64: mata só onde a carta tem vegetação. D-65 (pedido do usuário, fotos de floresta tropical do
+-- Vietnã): com kindAt (VT65Build/Landscape), o que não é lavoura de vila nem clareira vira mata
+-- fechada em três andares — emergentes, copas tomadas de cipó e sub-bosque. A densidade é de
+-- design, ajustada por captura e fps no Studio.
 local Vegetation = {}
 
 export type Item = { key: string, x: number, z: number, yaw: number, scale: number, shadow: boolean }
@@ -11,6 +12,9 @@ export type Circle = { x: number, z: number, r: number }
 export type Segment = { x1: number, z1: number, x2: number, z2: number, w: number }
 export type Input = {
 	classAt: (x: number, z: number) -> number,
+	-- paisagem da D-65 (Landscape:kindAt): 1 mata, 2 bosque de vila, 3 lavoura, 4 clareira, 5 riacho.
+	-- Sem ela, vale o uso do solo da carta (D-64).
+	kindAt: ((x: number, z: number) -> number)?,
 	bounds: { minX: number, maxX: number, minZ: number, maxZ: number },
 	cell: number, -- studs por célula da grade de uso do solo
 	exclude: { Circle }, -- QGs, casas, pontos fortes, túneis
@@ -23,7 +27,34 @@ export type Input = {
 	yield: (() -> ())?,
 }
 
-type Entry = { key: string, p: number, s0: number, s1: number }
+-- patch: "wet" = manchas de baixada (tràm e bambu); "tangle" = manchas de cipó (copas tomadas)
+type Entry = { key: string, p: number, s0: number, s1: number, patch: string? }
+
+-- Mata fechada (D-65), por célula de 20 m². Em hectare: ~7 emergentes de 24 m, ~15 copas tomadas
+-- de cipó, ~20 árvores de folha larga, tràm e bambu em manchas, e ~70 plantas de sub-bosque.
+-- Captura do Studio (2026-11-10): com copas de 9–16 m a mata parecia um parque (capim entre as
+-- árvores). Copas maiores (1,4–2,3x) fecham o dossel sem mais instâncias; montes de cipó (o arbusto
+-- a 1,8–3x, 3–5 m de altura) fazem o tapete verde das fotos.
+Vegetation.FOREST = {
+	{ key = "canopy_tree", p = 0.008, s0 = 0.9, s1 = 1.2 },
+	{ key = "vine_tree", p = 0.035, s0 = 0.9, s1 = 1.3, patch = "tangle" },
+	{ key = "hill_tree", p = 0.05, s0 = 1.4, s1 = 2.3 },
+	{ key = "shrub", p = 0.03, s0 = 1.8, s1 = 3.0, patch = "tangle" }, -- monte de cipó
+	{ key = "melaleuca_grove", p = 0.012, s0 = 0.9, s1 = 1.2, patch = "wet" },
+	{ key = "bamboo_clump", p = 0.02, s0 = 0.9, s1 = 1.3, patch = "wet" },
+	{ key = "banana", p = 0.008, s0 = 0.9, s1 = 1.3 },
+	{ key = "coconut_palm", p = 0.004, s0 = 1.0, s1 = 1.3 },
+	{ key = "taro_fern", p = 0.03, s0 = 0.8, s1 = 1.3 }, -- 4,6 mil triângulos: metade do previsto
+	{ key = "shrub", p = 0.05, s0 = 0.8, s1 = 1.4, patch = "tangle" },
+	{ key = "elephant_grass", p = 0.03, s0 = 0.9, s1 = 1.3 },
+} :: { Entry }
+-- Modelo novo ainda sem ID publicado: o AssetLoader põe o substituto (chave, fator de escala)
+Vegetation.FALLBACK = {
+	canopy_tree = { "hill_tree", 1.9 },
+	vine_tree = { "hill_tree", 1.6 },
+	melaleuca_grove = { "bamboo_clump", 1.0 },
+	taro_fern = { "shrub", 0.8 },
+} :: { [string]: { any } }
 
 -- plantas por célula de 16 studs (4,5 m; 20 m²), com probabilidade e faixa de escala
 -- 3 = vila/mata: bosque fechado de quintal, bambu, coqueiro, bananeira e árvore de folha larga
@@ -61,9 +92,16 @@ Vegetation.BORDER = {
 	{ key = "coconut_palm", p = 0.02, s0 = 1.1, s1 = 1.4 },
 } :: { Entry }
 Vegetation.BORDER_M = { 40, 100 }
--- árvores fazem sombra (luz manchada da mata); arbusto e capim não (custo das sombras)
-Vegetation.SHADOW =
-	{ hill_tree = true, coconut_palm = true, bamboo_clump = true, banana = true } :: { [string]: boolean }
+-- Sombra só das copas grandes: emergentes e árvores de folha larga a partir de SHADOW_MIN_SCALE.
+-- Com sombra em todas as árvores (~18 mil na mata da D-65), a GPU de 2 GB do PC de teste travou no
+-- Studio (DXGI_ERROR_DEVICE_HUNG, 2026-11-10, com um jogo aberto ao lado). Arbusto, capim, bambu,
+-- bananeira, coqueiro e tràm ficam sem sombra; a luz manchada vem das copas grandes.
+Vegetation.SHADOW = {
+	canopy_tree = true,
+	hill_tree = true,
+	vine_tree = true,
+} :: { [string]: boolean }
+Vegetation.SHADOW_MIN_SCALE = 1.7
 
 local M = 0.28
 
@@ -168,6 +206,15 @@ function Vegetation.plan(input: Input): { Item }
 				if out_d >= b0 and out_d <= b1 then
 					mix = Vegetation.BORDER
 				end
+			elseif input.kindAt then
+				local kind = input.kindAt(x, z)
+				if kind == 1 then
+					mix = Vegetation.FOREST
+				elseif kind == 2 then
+					mix = Vegetation.GROVE
+				elseif kind == 5 then
+					mix = Vegetation.STREAM
+				end -- 3 lavoura e 4 clareira: abertas
 			else
 				local c = input.classAt(x, z)
 				if c == 3 then
@@ -181,20 +228,27 @@ function Vegetation.plan(input: Input): { Item }
 				end
 			end
 			if mix then
+				-- manchas: baixada úmida (tràm, bambu) e emaranhado de cipó, em ruídos de ~120 m
+				local wet = 2.5 * smoothstep(0.5, 0.75, Vegetation.noise(x, z, 120 / M, input.seed + 7))
+				local tangle = 0.5 + 1.5 * smoothstep(0.4, 0.7, Vegetation.noise(x, z, 90 / M, input.seed + 13))
 				for _, e in mix do
-					if rng:next() < e.p * k * f then
+					local pf = if e.patch == "wet" then wet elseif e.patch == "tangle" then tangle else 1
+					if rng:next() < e.p * k * f * pf then
 						local px = x + (rng:next() - 0.5) * cell
 						local pz = z + (rng:next() - 0.5) * cell
 						-- a cortina de fora da borda não atrapalha QG, raia nem veículo: sem exclusão
 						-- (o QG dos EUA fica a 50 m da borda e a zona dele apagava a cortina)
 						if out_d > 0 or not Vegetation.blocked(input, px, pz) then
+							local yaw = rng:range(0, 2 * math.pi)
+							local scale = rng:range(e.s0, e.s1)
 							table.insert(out, {
 								key = e.key,
 								x = px,
 								z = pz,
-								yaw = rng:range(0, 2 * math.pi),
-								scale = rng:range(e.s0, e.s1),
-								shadow = Vegetation.SHADOW[e.key] == true,
+								yaw = yaw,
+								scale = scale,
+								shadow = Vegetation.SHADOW[e.key] == true
+									and (e.key == "canopy_tree" or scale >= Vegetation.SHADOW_MIN_SCALE),
 							})
 						end
 					end

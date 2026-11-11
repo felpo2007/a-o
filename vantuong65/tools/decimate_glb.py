@@ -65,7 +65,7 @@ def load_mesh(js: dict, blob: bytes) -> tuple[np.ndarray, np.ndarray, np.ndarray
     return pos, uv, faces
 
 
-def decimate(pos, uv, faces, target: int):
+def decimate(pos, uv, faces, target: int, free_borders: bool = False):
     import pymeshlab
 
     ms = pymeshlab.MeshSet()
@@ -78,12 +78,14 @@ def decimate(pos, uv, faces, target: int):
     # costura podem ser soldados, senão a borda da costura trava a redução
     ms.compute_texcoord_transfer_vertex_to_wedge()
     ms.meshing_merge_close_vertices(threshold=pymeshlab.PercentageValue(0.001))
+    # Folhagem (D-65) é feita de lâminas abertas: com a borda presa, a redução parava em ~6,5 mil
+    # triângulos (tràm, taioba). free_borders solta a borda; a folha encolhe um pouco na ponta.
     ms.meshing_decimation_quadric_edge_collapse_with_texture(
         targetfacenum=target,
         qualitythr=0.5,
         extratcoordw=1.0,
-        preserveboundary=True,
-        boundaryweight=2.0,
+        preserveboundary=not free_borders,
+        boundaryweight=1.0 if free_borders else 2.0,
         optimalplacement=True,
         preservenormal=True,
         planarquadric=True,
@@ -204,10 +206,10 @@ def bounds_studs(js: dict, blob: bytes) -> list[float]:
     return [round(float(x) * s, 2) for x in (pos.max(axis=0) - pos.min(axis=0))]
 
 
-def run(src: Path, dst: Path, faces: int) -> dict:
+def run(src: Path, dst: Path, faces: int, free_borders: bool = False) -> dict:
     js, blob = read_glb(src)
     pos, uv, f = load_mesh(js, blob)
-    out_pos, out_nrm, out_uv, out_idx = decimate(pos, uv, f, faces)
+    out_pos, out_nrm, out_uv, out_idx = decimate(pos, uv, f, faces, free_borders)
     hmax, hmean = hausdorff_m(pos, f, out_pos, out_idx, node_scale(js))
     data = write_glb(js, blob, dst, out_pos, out_nrm, out_uv, out_idx)
     js2, blob2 = read_glb(dst)
@@ -228,8 +230,9 @@ def main() -> None:
     ap.add_argument("entrada", type=Path)
     ap.add_argument("saida", type=Path)
     ap.add_argument("--faces", type=int, required=True)
+    ap.add_argument("--soltar-bordas", action="store_true", help="folhagem: solta a borda (D-65)")
     a = ap.parse_args()
-    print(json.dumps(run(a.entrada, a.saida, a.faces), ensure_ascii=False))
+    print(json.dumps(run(a.entrada, a.saida, a.faces, a.soltar_bordas), ensure_ascii=False))
 
 
 if __name__ == "__main__":

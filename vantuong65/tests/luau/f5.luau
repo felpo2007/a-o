@@ -238,7 +238,7 @@ test("arte publicada: toda arma com modelo tem pontos coerentes (WeaponArt, D-58
 	assert(n == 9, "esperava 9 armas publicadas, vieram " .. n)
 end)
 
-test("mata (D-64): determinística, respeita as zonas livres, arrozal aberto e cortina só fora", function()
+test("mata (D-64/65): determinística, zonas livres, lavoura e clareira abertas, cortina fora", function()
 	local M = 0.28
 	local Vegetation = require("../../src/ServerScriptService/Modules/Vegetation")
 	local Rng = require("../../src/ReplicatedStorage/Shared/Rng") :: any
@@ -256,10 +256,15 @@ test("mata (D-64): determinística, respeita as zonas livres, arrozal aberto e c
 		table.insert(houses, Features.houses[i])
 		table.insert(houses, Features.houses[i + 1])
 	end
+	local Landscape = require("../../src/ServerStorage/VT65Build/Landscape")
+	local land = Landscape.new(world, MapConfig, houses)
 	local function plan()
 		return Vegetation.plan({
 			classAt = function(x: number, z: number): number
 				return world:classAt(x, z)
+			end,
+			kindAt = function(x: number, z: number): number
+				return land:kindAt(x, z)
 			end,
 			bounds = MapConfig.Bounds,
 			cell = Grid.cellStuds,
@@ -288,17 +293,18 @@ test("mata (D-64): determinística, respeita as zonas livres, arrozal aberto e c
 				local d = math.sqrt((it.x - houses[i]) ^ 2 + (it.z - houses[i + 1]) ^ 2) * M
 				assert(d >= 6.5 - 0.01, string.format("%s dentro de casa (%.1f m)", it.key, d))
 			end
-			-- o jitter (meia célula) pode levar a planta para a célula vizinha; o centro dela não é arrozal
-			if world:classAt(it.x, it.z) == 2 then
+			-- o jitter (meia célula) pode levar a planta para a célula vizinha da lavoura ou clareira
+			local kind = land:kindAt(it.x, it.z)
+			if kind == Landscape.FARM or kind == Landscape.CLEAR then
 				paddy += 1
 			end
-			assert(it.key ~= "hill_tree" or it.scale <= 1.31, "árvore gigante dentro da área")
 		else
 			border += 1
 		end
 	end
-	assert(inside > 4000 and border > 500, string.format("dentro %d, cortina %d", inside, border))
-	assert(paddy / inside < 0.2, string.format("%.0f%% das plantas caíram no arrozal", 100 * paddy / inside))
+	-- D-65: mata fechada em ~2,85 km² (dezenas de milhares de plantas); lavoura e clareira abertas
+	assert(inside > 30000 and border > 500, string.format("dentro %d, cortina %d", inside, border))
+	assert(paddy / inside < 0.03, string.format("%.1f%% das plantas na lavoura/clareira", 100 * paddy / inside))
 	print(string.format("       %d plantas: %d na área, %d na cortina de fora", #a, inside, border))
 end)
 

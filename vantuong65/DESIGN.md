@@ -1221,6 +1221,76 @@ mais mar).
 - **Pendente:** a fonte de máquina de escrever não tem algumas letras do vietnamita, e
   "An Cường" mistura glifos.
 
+## D-65 — Mata fechada no lugar do arrozal (pedido do usuário, 2026-11-10)
+**Pedido:** "mata assim, com alta densidade", com fotos de floresta tropical do Vietnã:
+- dossel contínuo e nebuloso;
+- floresta de tràm do Mekong, com vilas de palha e roça na beira e um canal.
+
+O usuário pediu o máximo de triângulos, com modelos novos se preciso, "mantendo os outros
+requisitos".
+
+**Decisão (`VT65Build/Landscape.luau`, módulo puro):**
+- **Mata** (2,85 km², 71%): arrozal longe das vilas e capim.
+- **Lavoura** (0,84 km²): o arrozal a até 110 m das casas, e 130 m em volta dos pontos fortes de
+  arrozal. Diques, lâmina d'água e sebes de arrozal ficam só nela e nas clareiras: o bake caiu de
+  9.738 para 3.261 diques.
+- **Bosque de vila** (0,15 km²): a classe 3 da carta, como na D-64.
+- **Clareiras** (0,15 km²):
+  - 30 m em todo ponto forte (o mastro e a briga);
+  - LZ Blue com 90 m (pouso de helicóptero);
+  - Athletic field com 70 m;
+  - QGs.
+- Continuam os da carta: vilas, casas, relevo, riachos, setores, pontos fortes e escala 1:1.
+- Isto contraria o uso do solo de 1965 (78% de arrozal); é escolha do dono do projeto.
+
+**Mata em três andares (`Vegetation.FOREST`)**, por hectare:
+- ~4 emergentes de 24 m;
+- ~17 copas tomadas de cipó;
+- ~25 árvores de folha larga a 1,4–2,3x (copas de 13–21 m);
+- montes de cipó (o arbusto a 1,8–3x);
+- tràm e bambu em manchas de baixada (ruído de 120 m);
+- sub-bosque de taioba, arbusto e capim alto.
+- **Total:** 48,4 mil plantas no plano.
+- **Primeira captura:** com copas de 9–16 m a mata parecia um parque; as copas maiores fecharam o
+  dossel sem mais instâncias.
+
+**Modelos novos no ForgeGUI:**
+- **Prontos:** emergente de 24 m, bosque de tràm e taioba com samambaia. Os três foram preparados
+  em studs, reduzidos localmente, ficaram foscos e foram publicados.
+- **Copa de cipó:** ficou em `outcome_unknown` (não regerar); usa a `hill_tree` a 1,6x.
+- **Monte de cipó:** foi recusado por falta de crédito (3.693 de 4.000).
+- A redução local para nas costuras de UV:
+  - a emergente fica com 6 mil (com 3 mil perde 2,8 m de copa);
+  - o tràm, com 4.496, e a taioba, com 4.595, com a borda solta (`decimate_glb --soltar-bordas`).
+  - As três são exceções registradas à meta de 3 mil. A taioba ficou com metade da densidade
+    prevista.
+- O arbusto e a árvore de folha larga tinham textura quase preta (média dos pixels pintados
+  (48, 45, 20) e (72, 76, 59)). Ganharam ganho de cor no `matte_glb` e foram republicados.
+
+**Desempenho:**
+- **Streaming:** o raio caiu de 717 m para 430 m. Na mata fechada e com névoa ninguém vê mais
+  longe, e o cliente só carrega o que está perto.
+- **Teto por setor:** 40 milhões de triângulos. O setor 5 pede 35,6 milhões sem LOD.
+- **Sombra:** só nas emergentes e nas árvores de folha larga a partir de 1,7x (7,1 mil de 48,4
+  mil).
+- **Travamento no teste:** com sombra em todas as árvores, a GPU de 2 GB do PC de teste travou no
+  Studio (`DXGI_ERROR_DEVICE_HUNG`) com o EA FC 26 aberto ao lado.
+- **Sem cortar arbusto em qualidade baixa:** quem joga em gráfico baixo veria através da
+  cobertura, o que seria vantagem injusta. O próprio Roblox reduz sombra e detalhe na qualidade
+  baixa.
+- **fps:** não medido, porque o FC 26 estava em primeiro plano o tempo todo. Ajuste:
+  `ArtBudget.JUNGLE_DENSITY`.
+
+**Capturas no Studio:**
+- de dentro: troncos grossos com sapopemas, cipós, camadas sumindo na névoa;
+- do alto da Colina 43: dossel contínuo até o horizonte, com névoa;
+- antes do ganho de cor, o arbusto aparecia preto na sombra.
+
+**Pendentes:**
+- a textura dos sacos de areia (republicados na D-64) não carregou num dos testes ("Unable to
+  load ... ColorMap"); conferir;
+- o fps com o PC livre.
+
 **Medido no Studio:**
 - **fps:** 59,3 de média (pior quadro 26 ms), com 25,4 mil peças de arte no cliente, no ponto
   mais denso do setor 2.

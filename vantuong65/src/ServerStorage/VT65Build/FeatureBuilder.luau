@@ -125,15 +125,25 @@ function FeatureBuilder.mergeDikes(d: { number }, tolY: number?, tolDeg: number?
 	return out
 end
 
-function FeatureBuilder.build(env: Env, features: any, mapConfig: any, world: any?, parent: any): Stats
+-- landscape (opcional, D-65): onde virou mata fechada não há dique, lâmina d'água nem sebe de
+-- arrozal; ficam só na lavoura das vilas e nas clareiras.
+function FeatureBuilder.build(env: Env, features: any, mapConfig: any, world: any?, parent: any, landscape: any?): Stats
 	local root = folder(env, "Map", parent)
 	local stats = { dikes = 0, hedges = 0, waters = 0, houses = 0, markers = 0 }
 	local C = env.Color3.fromRGB
+	local FOREST = 1 -- Landscape.FOREST
+	local function forest(x: number, z: number): boolean
+		return landscape ~= nil and landscape:kindAt(x, z) == FOREST
+	end
 
 	-- diques de arrozal: x1,z1,x2,z2,yTop,yBase
 	local fd = folder(env, "Dikes", root)
 	local d = FeatureBuilder.mergeDikes(features.dikes)
 	for i = 1, #d, 6 do
+		local mx, mz = (d[i] + d[i + 2]) / 2, (d[i + 1] + d[i + 3]) / 2
+		if forest(mx, mz) and forest(d[i], d[i + 1]) and forest(d[i + 2], d[i + 3]) then
+			continue
+		end
 		local yTop, yBase = d[i + 4], d[i + 5]
 		local cf, len = segmentCFrame(env, d[i], d[i + 1], d[i + 2], d[i + 3], (yTop + yBase) / 2)
 		local p = part(env)
@@ -152,6 +162,9 @@ function FeatureBuilder.build(env: Env, features: any, mapConfig: any, world: an
 	local fw = folder(env, "PaddyWater", root)
 	local w = features.waters
 	for i = 1, #w, 6 do
+		if forest(w[i], w[i + 1]) then
+			continue
+		end
 		local p = part(env)
 		p.Name = "PaddyWater"
 		p.Size = env.Vector3.new(math.max(w[i + 3], 1), WATER_T, math.max(w[i + 4], 1))
@@ -174,6 +187,9 @@ function FeatureBuilder.build(env: Env, features: any, mapConfig: any, world: an
 	local fh = folder(env, "Hedges", root)
 	local hg = features.hedges
 	for i = 1, #hg, 7 do
+		if forest((hg[i] + hg[i + 2]) / 2, (hg[i + 1] + hg[i + 3]) / 2) then
+			continue -- a mata fechada já é a cobertura
+		end
 		local yBase, hh, th = hg[i + 4], hg[i + 5], hg[i + 6]
 		local cf, len = segmentCFrame(env, hg[i], hg[i + 1], hg[i + 2], hg[i + 3], yBase + hh / 2)
 		local p = part(env)

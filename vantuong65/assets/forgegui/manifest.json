@@ -1,765 +1,839 @@
 {
- "nota": "Assets gerados no ForgeGUI (run e5d91d3b-3b75-4ee2-bc39-56db5b3174a7, estilo 861068cf v1). Modelos preparados em escala real e em STUDS (1 unidade = 1 stud): importar no Studio sem conversão de unidade. Baixe com tools/fetch_forgegui_assets.py.",
- "models": [
-  {
-   "arquivo": "models/m14_studs.glb",
-   "job": "f60c2cb7-7144-4ff0-800c-8824906aaf82",
-   "prep": "9a6b0530-2acf-4481-b05a-354e77bcbdd7",
-   "escala": "comprimento 1,126 m (wiki:M14_rifle) = 4,02 studs",
-   "triangulos": 15626,
-   "sha256": "d254b4971cb521f63cb76070cd994237c76e9e10eb6df008218b63ea57f22206",
-   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/9a6b0530-2acf-4481-b05a-354e77bcbdd7/5a9eec86-0db1-4c3f-bc0e-1b3e20d7e431/Model-d254b4971cb521f63cb76070cd994237c76e9e10eb6df008218b63ea57f22206.glb",
-   "dim_studs_xyz": [
-    0.32,
-    1.16,
-    4.02
-   ]
-  },
-  {
-   "arquivo": "models/type56_studs.glb",
-   "job": "6d778185-95f3-4562-92cc-076fdf975855",
-   "prep": "fe1cc6c9-ac34-4adf-889e-7036430020b1",
-   "escala": "comprimento 0,882 m (wiki:Type_56_assault_rifle) = 3,15 studs",
-   "triangulos": 15052,
-   "sha256": "ee9a6717bf31903ec6f5983f63cadf38e3402dd5763b092d2ce214df671bc990",
-   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/fe1cc6c9-ac34-4adf-889e-7036430020b1/e2b8e145-b960-4036-bb38-4f0b26706c50/Model-ee9a6717bf31903ec6f5983f63cadf38e3402dd5763b092d2ce214df671bc990.glb",
-   "dim_studs_xyz": [
-    0.25,
-    1.09,
-    3.15
-   ]
-  },
-  {
-   "arquivo": "models/casa_palha_studs.glb",
-   "job": "6431342a-d90d-48ac-8846-3e267912185e",
-   "prep": "105d5132-24f6-4cbd-bda7-0501cc3c5587",
-   "escala": "7,0 x 5,7 x 5,2 m (projeto)",
-   "triangulos": 3127,
-   "sha256": "af962510a99f0feb059c7d248b36f9cd058cdf590e5aceb0856bd67f2d0f430a",
-   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/105d5132-24f6-4cbd-bda7-0501cc3c5587/b579d8c6-0d3a-4cd8-8860-7100e51c92e2/Model-af962510a99f0feb059c7d248b36f9cd058cdf590e5aceb0856bd67f2d0f430a.glb",
-   "dim_studs_xyz": [
-    20.46,
-    18.56,
-    25.0
-   ],
-   "chave": "hut_thatch",
-   "remesh": "b38f33e7-43df-491e-abf9-1e3276d714d3"
-  },
-  {
-   "arquivo": "models/coqueiro_studs.glb",
-   "job": "1f9588a4-f340-45da-b472-ca8cabb5e53a",
-   "prep": "1736bfaa-79ce-4833-bf8a-701bf7aed05c",
-   "escala": "altura 14,0 m (projeto)",
-   "triangulos": 1988,
-   "sha256": "60183f83037a347db7f5816b6cded3bd0adf0ed71e7916e90b00a24c2be0561e",
-   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/1736bfaa-79ce-4833-bf8a-701bf7aed05c/b8f91c19-c296-4795-bc8a-c52256cb988b/Model-60183f83037a347db7f5816b6cded3bd0adf0ed71e7916e90b00a24c2be0561e.glb",
-   "dim_studs_xyz": [
-    34.71,
-    49.81,
-    35.13
-   ],
-   "chave": "coconut_palm",
-   "remesh": "5f11d090-18da-46de-852d-2c71b712f598"
-  },
-  {
-   "arquivo": "models/bambu_touceira_studs.glb",
-   "job": "a15f97ec-e881-4dc0-93ee-7f9dff23aa99",
-   "prep": "0ecf3212-2972-48b2-88bb-1057aaddc9a3",
-   "escala": "altura 7,7 m, largura 8,0 m (projeto: 6-9 m)",
-   "triangulos": 2800,
-   "sha256": "cce103fc7b0be61ef2a16ced0c6797699582f5056521726f3706e5dd0a2a29d0",
-   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/0ecf3212-2972-48b2-88bb-1057aaddc9a3/2f86aa0e-9292-4090-aefa-1524a9e57f22/Model-719e8cb2cf8d5924bff013278666bd9dc4580fcf669ed7353137b3bd5b5e18a9.glb",
-   "dim_studs_xyz": [
-    27.41,
-    27.55,
-    28.54
-   ],
-   "chave": "bamboo_clump",
-   "remesh": "6efb66d7-e0fa-431d-9b9c-edfb1ef8e7d3",
-   "reducao_local": {
-    "ferramenta": "tools/decimate_glb.py",
-    "pymeshlab": "2025.7.post1",
-    "faces": 2800,
-    "sha256_origem": "719e8cb2cf8d5924bff013278666bd9dc4580fcf669ed7353137b3bd5b5e18a9",
-    "triangulos_origem": 3020,
-    "desvio_max_m": 0.3064,
-    "desvio_medio_m": 0.00377
-   }
-  },
-  {
-   "arquivo": "models/colete_m1955_studs.glb",
-   "chave": "us_m1955_vest",
-   "job": "5cc6460e-11d8-4286-94fb-5c45f7676c79",
-   "prep": "69bcf9ad-bfb5-4ac5-9ab5-163a3eca49b5",
-   "escala": "altura 0,55 m (projeto, colete M1955)",
-   "dim_studs_xyz": [
-    1.16,
-    1.96,
-    1.6
-   ],
-   "triangulos": 3999,
-   "sha256": "c7cea45d44516473d0922674d9fca6b3b4a15bedc21b5ac0fd3c502fe1fdea87",
-   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/69bcf9ad-bfb5-4ac5-9ab5-163a3eca49b5/05c26748-07bb-453b-aabe-9204e3a4aace/Model-f107e96e101a73b18fea54b0f18972b9ffd0b51a499763b129fb1c7cd7d917d4.glb",
-   "reducao_local": {
-    "ferramenta": "tools/decimate_glb.py",
-    "pymeshlab": "2025.7.post1",
-    "faces": 4000,
-    "sha256_origem": "f107e96e101a73b18fea54b0f18972b9ffd0b51a499763b129fb1c7cd7d917d4",
-    "triangulos_origem": 14307,
-    "desvio_max_m": 0.0059,
-    "desvio_medio_m": 0.00085
-   }
-  },
-  {
-   "arquivo": "models/capacete_m1_studs.glb",
-   "chave": "us_m1_helmet",
-   "job": "f23c133a-987f-4adc-8f3b-4f2f6a86219d",
-   "prep": "5191d74b-6f17-472c-8562-fcea4c9d02b7",
-   "escala": "comprimento 0,29 m (projeto, capacete M1)",
-   "dim_studs_xyz": [
-    1.02,
-    0.98,
-    0.88
-   ],
-   "triangulos": 3000,
-   "sha256": "79a8d430701395ee5eef8345d136056f0fd3e1b5442172d20f9bac67ca66951c",
-   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/5191d74b-6f17-472c-8562-fcea4c9d02b7/03a36be3-865d-4a2e-a1d8-e8917ae8f0d6/Model-ca8581cd207a82bb513670fd0f0d3ddcd9a08b4b8648cbaf60480b87ebe6fdc1.glb",
-   "reducao_local": {
-    "ferramenta": "tools/decimate_glb.py",
-    "pymeshlab": "2025.7.post1",
-    "faces": 3000,
-    "sha256_origem": "ca8581cd207a82bb513670fd0f0d3ddcd9a08b4b8648cbaf60480b87ebe6fdc1",
-    "triangulos_origem": 14646,
-    "desvio_max_m": 0.008,
-    "desvio_medio_m": 0.00067
-   }
-  },
-  {
-   "arquivo": "models/arvore_colina_studs.glb",
-   "chave": "hill_tree",
-   "job": "2b0fa422-076d-4d41-8a79-a35241f709b4",
-   "prep": "9210d89f-b42e-4d89-bc65-7ca1bae2559d",
-   "escala": "altura 12 m (projeto)",
-   "dim_studs_xyz": [
-    40.86,
-    41.75,
-    42.01
-   ],
-   "triangulos": 2189,
-   "sha256": "0fa3c8bbb1263715d9293381f640fd2db85ae4204e2b4eb72237c588097dc7d3",
-   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/9210d89f-b42e-4d89-bc65-7ca1bae2559d/0725eb5c-aa94-4c5d-a6f7-b002e47062aa/Model-0fa3c8bbb1263715d9293381f640fd2db85ae4204e2b4eb72237c588097dc7d3.glb",
-   "remesh": "c5e71f38-24e1-42b1-aeb1-49729f635484"
-  },
-  {
-   "arquivo": "models/arroz_canteiro_studs.glb",
-   "chave": "rice_patch",
-   "job": "f3ad8b10-28b2-4715-9802-7d3eda4ed80e",
-   "prep": "206b7a27-a10e-4d24-b65b-914d6ce749a6",
-   "escala": "2,0 m de lado (projeto)",
-   "dim_studs_xyz": [
-    7.14,
-    1.59,
-    5.17
-   ],
-   "triangulos": 13066,
-   "sha256": "455ad97220ab3cc1448d54008888893742161f5cec93f935f999ab03bcc7270f",
-   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/206b7a27-a10e-4d24-b65b-914d6ce749a6/a49ba045-e82e-4e0c-9148-d1de6ad959ab/Model-455ad97220ab3cc1448d54008888893742161f5cec93f935f999ab03bcc7270f.glb"
-  },
-  {
-   "arquivo": "models/capim_elefante_studs.glb",
-   "chave": "elephant_grass",
-   "job": "7f002afa-f9b3-4cb2-a25a-d7233193f1e1",
-   "prep": "b941ed12-5b6f-42ee-a4a5-a76fea8374a0",
-   "escala": "altura 2,5 m (projeto)",
-   "dim_studs_xyz": [
-    6.36,
-    8.9,
-    6.39
-   ],
-   "triangulos": 1865,
-   "sha256": "9f046693f057dbd6d14dfe1ef0f65eb66e5118f2144aa07a94897035899b04da",
-   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/b941ed12-5b6f-42ee-a4a5-a76fea8374a0/9cbc623d-6424-42f7-86f1-37abe76b45c2/Model-9f046693f057dbd6d14dfe1ef0f65eb66e5118f2144aa07a94897035899b04da.glb",
-   "remesh": "a20dbe78-3178-458f-bd7d-63c29563bcb7"
-  },
-  {
-   "arquivo": "models/arbusto_studs.glb",
-   "chave": "shrub",
-   "job": "9d7ff5f9-c41d-436d-b764-195e5998f3d7",
-   "prep": "f8d20cf8-dd6b-4dde-b6a9-7ab60e9aca25",
-   "escala": "largura 1,93 m (projeto 1,8 x 2,5 m)",
-   "dim_studs_xyz": [
-    6.64,
-    6.5,
-    6.68
-   ],
-   "triangulos": 2801,
-   "sha256": "fd433a08b7c7a9d09722fecdaa98b06ba4afd848dffa063db2364c017fac8b02",
-   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/f8d20cf8-dd6b-4dde-b6a9-7ab60e9aca25/dc725f6d-af19-407f-bee1-202d17993995/Model-fd433a08b7c7a9d09722fecdaa98b06ba4afd848dffa063db2364c017fac8b02.glb",
-   "remesh": "47a4dffe-f369-41ea-a869-41cf0e1641a5"
-  },
-  {
-   "arquivo": "models/bananeira_studs.glb",
-   "chave": "banana",
-   "job": "627b9643-d15c-4b09-9edd-27abba9a1337",
-   "prep": "07206aca-9c89-4e51-8b51-733a632c266d",
-   "escala": "altura 4,0 m (projeto)",
-   "dim_studs_xyz": [
-    14.4,
-    14.33,
-    13.37
-   ],
-   "triangulos": 2136,
-   "sha256": "90bb09bb4a6dbc2cef21b9c5a44190343ecf706e678d739d70b5e2cb2da0fb7f",
-   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/07206aca-9c89-4e51-8b51-733a632c266d/5a1bb1d0-6645-4a2d-a4f2-fee414519bda/Model-90bb09bb4a6dbc2cef21b9c5a44190343ecf706e678d739d70b5e2cb2da0fb7f.glb",
-   "remesh": "07c63ef8-fcb3-41eb-ba19-896e1529673f"
-  },
-  {
-   "arquivo": "models/toca_aranha_studs.glb",
-   "chave": "spider_hole",
-   "job": "ea1bd767-0f85-4a6e-b1a6-c1a9cc969330",
-   "prep": "4a79de18-4147-4921-ab3f-fed644e0d1f6",
-   "escala": "diâmetro 0,9 m com tampa (projeto)",
-   "dim_studs_xyz": [
-    3.21,
-    2.32,
-    3.21
-   ],
-   "triangulos": 3467,
-   "sha256": "109d9434e5ff8b7a339cff70d3df190043a03aa7dfebc2ede57d8479106ffd6a",
-   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/4a79de18-4147-4921-ab3f-fed644e0d1f6/4430579d-5879-47dc-abb3-da756b8cbbc2/Model-109d9434e5ff8b7a339cff70d3df190043a03aa7dfebc2ede57d8479106ffd6a.glb",
-   "remesh": "ad5a4f11-ed5b-46b3-8c81-b80ddf4d2b79"
-  },
-  {
-   "arquivo": "models/sacos_areia_studs.glb",
-   "chave": "sandbags",
-   "job": "8e9c234d-70e6-4423-a0b8-22f295a07af1",
-   "prep": "c5ab3028-0b94-424a-90cc-985190d11639",
-   "escala": "comprimento 2,0 m (projeto)",
-   "dim_studs_xyz": [
-    1.67,
-    2.4,
-    7.14
-   ],
-   "triangulos": 2838,
-   "sha256": "0ec205d272b2049ffbc701c79d65ca1ee3c648a6339c03894d6adb13e81aebe1",
-   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/c5ab3028-0b94-424a-90cc-985190d11639/14052590-e3c9-4d62-93c3-510bc8eb20cb/Model-0ec205d272b2049ffbc701c79d65ca1ee3c648a6339c03894d6adb13e81aebe1.glb",
-   "remesh": "32ad4d0a-a946-48fb-871e-9ebb0d7a7b02"
-  },
-  {
-   "arquivo": "models/m60_studs.glb",
-   "chave": "m60",
-   "job": "34b1d53a-ba8a-4713-a4f7-8cecae352d02",
-   "prep": "8d7d3e6e-fd67-402b-ad9e-9e6d944dcdb9",
-   "escala": "comprimento 1,105 m (wiki:M60_machine_gun)",
-   "dim_studs_xyz": [
-    0.56,
-    1.26,
-    3.95
-   ],
-   "triangulos": 14933,
-   "sha256": "34d2316a115dd9444f85073cb301c3b2b574705a0c06193a65a1052c14e9bfe8",
-   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/8d7d3e6e-fd67-402b-ad9e-9e6d944dcdb9/689f2d56-2784-4db4-a127-32affc0ae7e1/Model-34d2316a115dd9444f85073cb301c3b2b574705a0c06193a65a1052c14e9bfe8.glb"
-  },
-  {
-   "arquivo": "models/rpd_studs.glb",
-   "chave": "rpd",
-   "job": "bd430cd8-c697-491d-b902-4393031df167",
-   "prep": "26e3c0f3-2eab-4eb4-8817-cd5e402e41b7",
-   "escala": "comprimento 1,037 m (wiki:RPD_machine_gun)",
-   "dim_studs_xyz": [
-    1.21,
-    1.24,
-    3.7
-   ],
-   "triangulos": 15735,
-   "sha256": "8a0bc297bdc3df4fd0e435714ec4e2a247913da840dc02ad147677bd7043aa7a",
-   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/26e3c0f3-2eab-4eb4-8817-cd5e402e41b7/60a1eafe-e49d-44ec-b3b3-778c8ebcfcf0/Model-8a0bc297bdc3df4fd0e435714ec4e2a247913da840dc02ad147677bd7043aa7a.glb"
-  },
-  {
-   "arquivo": "models/sks_studs.glb",
-   "chave": "sks",
-   "job": "b5bf7352-3cce-4cc8-90bf-f610721a5488",
-   "prep": "56ea6ba9-8b7d-488c-94f2-1f05978731e5",
-   "escala": "comprimento 1,021 m (wiki:SKS)",
-   "dim_studs_xyz": [
-    0.32,
-    0.79,
-    3.65
-   ],
-   "triangulos": 14683,
-   "sha256": "c12da0c02719f32dc3bef191bb000b572307273774141699378ddb3a501b75b7",
-   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/56ea6ba9-8b7d-488c-94f2-1f05978731e5/5a59ddd4-4bae-494d-855c-e6c348af7142/Model-c12da0c02719f32dc3bef191bb000b572307273774141699378ddb3a501b75b7.glb"
-  },
-  {
-   "arquivo": "models/casa_varanda_studs.glb",
-   "chave": "hut_veranda",
-   "job": "ad721418-c9b9-4929-bccf-266dd4d78a12",
-   "prep": "aa2ed662-0005-4cd0-af25-a612475a1f9f",
-   "escala": "comprimento 8,0 m (projeto)",
-   "dim_studs_xyz": [
-    28.62,
-    21.95,
-    28.53
-   ],
-   "triangulos": 3135,
-   "sha256": "22793fdd5df6c4c9243f50f62ba553867af773b3f5d5b3799c14f486aa1cb5ea",
-   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/aa2ed662-0005-4cd0-af25-a612475a1f9f/b56f5a58-7dfb-41b4-8353-f7bb875ba2a2/Model-22793fdd5df6c4c9243f50f62ba553867af773b3f5d5b3799c14f486aa1cb5ea.glb",
-   "remesh": "a3cf63a5-da03-422c-b700-99029a47768b"
-  },
-  {
-   "arquivo": "models/trincheira_secao_studs.glb",
-   "chave": "trench_section",
-   "job": "9f18610a-4b93-43a1-b196-744d0588b52c",
-   "prep": "32c841c0-5c9d-450b-aac2-82ef49f19017",
-   "escala": "comprimento 4,0 m (projeto)",
-   "dim_studs_xyz": [
-    14.26,
-    3.99,
-    7.04
-   ],
-   "triangulos": 3725,
-   "sha256": "c4bf7c22fca9fafe34affc368ea16ab51b5749c9c127215f6a20b33efac4cf83",
-   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/32c841c0-5c9d-450b-aac2-82ef49f19017/723288aa-a2b1-47cd-be0c-1ab78284eb05/Model-c4bf7c22fca9fafe34affc368ea16ab51b5749c9c127215f6a20b33efac4cf83.glb",
-   "remesh": "e11a4f0d-bcfe-49db-8eb6-7400a0d207f3"
-  },
-  {
-   "arquivo": "models/cerca_bambu_studs.glb",
-   "chave": "bamboo_fence",
-   "job": "d9abae47-8540-48c4-81a3-032ba89f62b5",
-   "prep": "2c7252ef-9a88-40d6-840a-573c645fc5a2",
-   "escala": "comprimento 3,0 m (projeto)",
-   "dim_studs_xyz": [
-    1.19,
-    6.51,
-    10.72
-   ],
-   "triangulos": 2851,
-   "sha256": "d591f8292db11d47eb15467340322454a5c412a6d96cd4c8789828c6041ad271",
-   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/2c7252ef-9a88-40d6-840a-573c645fc5a2/e9477c44-ac9c-4971-bc04-37b83445a01e/Model-d591f8292db11d47eb15467340322454a5c412a6d96cd4c8789828c6041ad271.glb",
-   "remesh": "7d6b8a67-5736-48a4-8301-aea8bc9fabaf"
-  },
-  {
-   "arquivo": "models/tumulo_studs.glb",
-   "chave": "grave_mound",
-   "job": "c895bf00-2e35-464e-8d19-6ad720d53007",
-   "prep": "74ad9939-aec2-4192-a2fd-160190249562",
-   "escala": "comprimento 2,5 m (projeto)",
-   "dim_studs_xyz": [
-    8.93,
-    3.96,
-    6.83
-   ],
-   "triangulos": 4000,
-   "sha256": "7d595021caa6c0c2e3c81bc0cffe8406913d5062746e956dd6fef0ca36573613",
-   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/74ad9939-aec2-4192-a2fd-160190249562/a6fb3c7f-f4f4-4f34-98df-98de0fa5c6bd/Model-77e60fc1e6f71956f0a433513c0d4cf8eec909fa2e7e8d775077c19264bd04c7.glb",
-   "reducao_local": {
-    "ferramenta": "tools/decimate_glb.py",
-    "pymeshlab": "2025.7.post1",
-    "faces": 4000,
-    "sha256_origem": "77e60fc1e6f71956f0a433513c0d4cf8eec909fa2e7e8d775077c19264bd04c7",
-    "triangulos_origem": 14278,
-    "desvio_max_m": 0.0608,
-    "desvio_medio_m": 0.0043
-   }
-  },
-  {
-   "arquivo": "models/celeiro_studs.glb",
-   "chave": "granary",
-   "job": "4041e1ff-ce33-4ca8-bab2-9d65edef6704",
-   "prep": "8fe0424f-2bdd-4263-a524-e542136574ac",
-   "escala": "altura 3,5 m (projeto)",
-   "dim_studs_xyz": [
-    11.05,
-    12.56,
-    10.36
-   ],
-   "triangulos": 4900,
-   "sha256": "f9b8285e6f6d5f378dfa9b9553744785add736a224b1f6087194513c479473b6",
-   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/8fe0424f-2bdd-4263-a524-e542136574ac/0b480307-c2b4-4e0b-9781-e1d62c64e650/Model-210b947d8c2963fd25716e4d05d7b938fc762560c274fe618975bf52ce2a9b78.glb",
-   "reducao_local": {
-    "ferramenta": "tools/decimate_glb.py",
-    "pymeshlab": "2025.7.post1",
-    "faces": 4900,
-    "sha256_origem": "210b947d8c2963fd25716e4d05d7b938fc762560c274fe618975bf52ce2a9b78",
-    "triangulos_origem": 14106,
-    "desvio_max_m": 0.1085,
-    "desvio_medio_m": 0.0073
-   }
-  },
-  {
-   "arquivo": "models/poco_studs.glb",
-   "chave": "well",
-   "job": "bac36c8b-9a9e-4f9e-a2fb-6561b629a9e5",
-   "prep": "27c5b7a4-e452-4d73-a1bf-e453eeab3f68",
-   "escala": "largura 1,5 m com travessa (projeto: bocal 1,3 m)",
-   "dim_studs_xyz": [
-    5.36,
-    4.27,
-    5.36
-   ],
-   "triangulos": 3999,
-   "sha256": "063adad1eaa9c5ce6b5dc81260fa6db85eb71e87fdb8cadb0a88839e2f00af74",
-   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/27c5b7a4-e452-4d73-a1bf-e453eeab3f68/c018b1d6-63b5-4a0b-91d4-b954c74a9ce1/Model-dd139f40a2e7dcae0f0c4dd0e4934aa1b48f316eaed1ce00dc2a730aa29e240c.glb",
-   "reducao_local": {
-    "ferramenta": "tools/decimate_glb.py",
-    "pymeshlab": "2025.7.post1",
-    "faces": 4000,
-    "sha256_origem": "dd139f40a2e7dcae0f0c4dd0e4934aa1b48f316eaed1ce00dc2a730aa29e240c",
-    "triangulos_origem": 13615,
-    "desvio_max_m": 0.0294,
-    "desvio_medio_m": 0.00327
-   }
-  },
-  {
-   "arquivo": "models/cozinha_studs.glb",
-   "chave": "hut_kitchen",
-   "job": "ebf12386-a56a-4f4b-8cf4-6346e6cd7a82",
-   "prep": "9a0f00c4-19f4-4019-bcb5-50f72cebd918",
-   "escala": "comprimento 4,0 m (projeto)",
-   "dim_studs_xyz": [
-    14.24,
-    11.92,
-    12.6
-   ],
-   "triangulos": 3999,
-   "sha256": "1763f35dbbc58fc168092ae80f2861164883dc7c0970a7192dbb106d91894247",
-   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/9a0f00c4-19f4-4019-bcb5-50f72cebd918/b8ed50c8-a72f-4991-ae48-4e34b10f71d2/Model-bdf006d634caa8e1fdec145d919a1828738b272417b62effcbae70d8c484f45c.glb",
-   "reducao_local": {
-    "ferramenta": "tools/decimate_glb.py",
-    "pymeshlab": "2025.7.post1",
-    "faces": 4000,
-    "sha256_origem": "bdf006d634caa8e1fdec145d919a1828738b272417b62effcbae70d8c484f45c",
-    "triangulos_origem": 13483,
-    "desvio_max_m": 0.1631,
-    "desvio_medio_m": 0.0115
-   }
-  },
-  {
-   "arquivo": "models/casa_telha_studs.glb",
-   "chave": "house_tile",
-   "job": "d77bfaea-d3df-458e-bd9e-01b1abcf215c",
-   "prep": "ed63dfba-fe52-4da3-a1d7-8b16e232e7ed",
-   "escala": "ajustada a 6 m de largura e 5 m de cumeeira; comprimento sai 7 m (projeto: 9 m)",
-   "dim_studs_xyz": [
-    22.05,
-    17.76,
-    25.04
-   ],
-   "triangulos": 3054,
-   "sha256": "cf4ad9f806c512bda60b30096d12a896231f99e84902b5cbcfaca39452cf1a04",
-   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/ed63dfba-fe52-4da3-a1d7-8b16e232e7ed/756ab7fd-50ab-446d-859f-315e6978092d/Model-cf4ad9f806c512bda60b30096d12a896231f99e84902b5cbcfaca39452cf1a04.glb",
-   "remesh": "e3db2203-40b7-4b88-aff7-3fab3f81fb9b"
-  },
-  {
-   "arquivo": "models/altar_studs.glb",
-   "chave": "shrine",
-   "job": "39ee3f8e-f1d9-4203-8bfe-35d7b3376c93",
-   "prep": "204978c2-8482-4edb-adc6-c959f4d29e18",
-   "escala": "altura 1,7 m (projeto)",
-   "dim_studs_xyz": [
-    4.31,
-    6.07,
-    3.99
-   ],
-   "triangulos": 3999,
-   "sha256": "445cad28123e4acd135477a2ff3453468a640d984f63b402fcfe2bbb0ce576ea",
-   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/204978c2-8482-4edb-adc6-c959f4d29e18/9f8461c5-dbc1-47b5-bc23-fa54afe7322b/Model-2438c751978a6dac6bad9655265e1e99f1e845721623b51862463b64a21a3e18.glb",
-   "reducao_local": {
-    "ferramenta": "tools/decimate_glb.py",
-    "pymeshlab": "2025.7.post1",
-    "faces": 4000,
-    "sha256_origem": "2438c751978a6dac6bad9655265e1e99f1e845721623b51862463b64a21a3e18",
-    "triangulos_origem": 13489,
-    "desvio_max_m": 0.0254,
-    "desvio_medio_m": 0.00201
-   }
-  },
-  {
-   "arquivo": "models/m1911_studs.glb",
-   "chave": "m1911",
-   "job": "9fd40331-fd17-4076-a487-8f43614e6c5d",
-   "prep": "9931198e-e02f-49b6-819b-0bfd15625aef",
-   "escala": "comprimento 0,216 m (wiki:M1911_pistol)",
-   "dim_studs_xyz": [
-    0.12,
-    0.55,
-    0.77
-   ],
-   "triangulos": 15340,
-   "sha256": "4c183b24d03803f232a4962186a8ee97fcb15aec0cb08c17bdf15814dc86ad1d",
-   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/9931198e-e02f-49b6-819b-0bfd15625aef/85e1127e-d89a-4de5-85a6-9118a3c3d953/Model-4c183b24d03803f232a4962186a8ee97fcb15aec0cb08c17bdf15814dc86ad1d.glb"
-  },
-  {
-   "arquivo": "models/type54_studs.glb",
-   "chave": "type54",
-   "job": "ec3c99e6-be45-409a-ad52-8a6bfc2f30c0",
-   "prep": "9160ac09-284c-461b-8735-b76515b09645",
-   "escala": "comprimento 0,195 m (wiki:Type_54_pistol)",
-   "dim_studs_xyz": [
-    0.42,
-    0.54,
-    0.7
-   ],
-   "triangulos": 15316,
-   "sha256": "329cdd04c70ee1d6e8b48b3d26f49888c7878e95e0dd3ba2d05f553c5366f816",
-   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/9160ac09-284c-461b-8735-b76515b09645/34656cbb-8b34-437e-8dce-ed1296cd0ff8/Model-329cdd04c70ee1d6e8b48b3d26f49888c7878e95e0dd3ba2d05f553c5366f816.glb"
-  },
-  {
-   "arquivo": "models/m79_studs.glb",
-   "chave": "m79",
-   "job": "02b6ae46-0cee-4f4d-8795-a170f3ec7047",
-   "prep": "7583e6ab-c805-47c4-8572-d2044fd6cc08",
-   "escala": "comprimento 0,731 m (wiki:M79_grenade_launcher)",
-   "dim_studs_xyz": [
-    0.27,
-    1.12,
-    2.61
-   ],
-   "triangulos": 14756,
-   "sha256": "b5dd8159160bfac65fd5ed243eda28d5b78ae007b775769161b19440c8983a8d",
-   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/7583e6ab-c805-47c4-8572-d2044fd6cc08/be367723-eab6-451e-b257-bb859676756b/Model-b5dd8159160bfac65fd5ed243eda28d5b78ae007b775769161b19440c8983a8d.glb"
-  },
-  {
-   "arquivo": "models/rpg2_studs.glb",
-   "chave": "rpg2",
-   "job": "9fbc759f-93db-4815-930c-0c643f99283f",
-   "prep": "4dd0e607-b804-4efb-b539-76e7c9e733e0",
-   "escala": "comprimento 1,2 m com a ogiva (projeto; conferir wiki:RPG-2)",
-   "dim_studs_xyz": [
-    4.29,
-    1.38,
-    0.66
-   ],
-   "triangulos": 15826,
-   "sha256": "792b8f84b5c248775b52a690cd5d3835cb3fbb09f2ac48ca4fe14fdf4e3d15e2",
-   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/4dd0e607-b804-4efb-b539-76e7c9e733e0/2ea759a6-93b8-447b-ac7d-308c0c517b8f/Model-792b8f84b5c248775b52a690cd5d3835cb3fbb09f2ac48ca4fe14fdf4e3d15e2.glb"
-  },
-  {
-   "arquivo": "models/chapeu_selva_studs.glb",
-   "chave": "vc_jungle_hat",
-   "job": "05eee9ca-4b84-4da9-b3f6-d10704722015",
-   "prep": "232b4b18-8d43-46c5-a83b-a6d0a7ea0df5",
-   "escala": "aba 0,34 m (projeto)",
-   "dim_studs_xyz": [
-    1.14,
-    0.95,
-    1.21
-   ],
-   "triangulos": 2447,
-   "sha256": "dd9a53b31b1f3eea4702ff3fd5914b9c98a529995ce2bc097955828f9a6c5de8",
-   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/232b4b18-8d43-46c5-a83b-a6d0a7ea0df5/b6cd70e7-8f00-4645-9f26-114b0d2a34f4/Model-dd9a53b31b1f3eea4702ff3fd5914b9c98a529995ce2bc097955828f9a6c5de8.glb",
-   "remesh": "a40a6db2-6ecd-4112-af9f-9408fdc77cca"
-  },
-  {
-   "arquivo": "models/capacete_fibra_studs.glb",
-   "chave": "vc_pith_helmet",
-   "job": "c4fee33d-4411-41c4-a505-497177bc6322",
-   "prep": "dc220f3b-441e-4f7f-8cd9-f5a3ac69fbb7",
-   "escala": "comprimento 0,32 m (projeto)",
-   "dim_studs_xyz": [
-    1.14,
-    0.96,
-    0.96
-   ],
-   "triangulos": 2999,
-   "sha256": "afc1ced786384cfd23b74f7483f2a8d6fcade6539a826a9af2d84dc9148b4a11",
-   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/dc220f3b-441e-4f7f-8cd9-f5a3ac69fbb7/c953a451-c4bc-47d4-936e-5b1106216eae/Model-db23f5a340e181027babecbbcd6530facb8362bb9299eec91917ceaf3f5eb8fc.glb",
-   "reducao_local": {
-    "ferramenta": "tools/decimate_glb.py",
-    "pymeshlab": "2025.7.post1",
-    "faces": 3000,
-    "sha256_origem": "db23f5a340e181027babecbbcd6530facb8362bb9299eec91917ceaf3f5eb8fc",
-    "triangulos_origem": 13793,
-    "desvio_max_m": 0.0026,
-    "desvio_medio_m": 0.00037
-   }
-  },
-  {
-   "arquivo": "models/entrada_tunel_studs.glb",
-   "chave": "tunnel_entrance",
-   "job": "9a42011f-0dbc-42b8-ae5d-8ad419863a30",
-   "prep": "19e0637e-4e13-4bd9-a4fc-d1e957838590",
-   "escala": "moldura 1,0 m (projeto; poço 0,6 m)",
-   "dim_studs_xyz": [
-    3.57,
-    3.56,
-    3.56
-   ],
-   "triangulos": 3239,
-   "sha256": "5c2210744ca98f409c0aac7b00ba78d2ca1ad6a95990fa399448e1d18978ec22",
-   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/19e0637e-4e13-4bd9-a4fc-d1e957838590/6b82d1b9-9167-4e66-9c93-e1832e10d1e4/Model-5c2210744ca98f409c0aac7b00ba78d2ca1ad6a95990fa399448e1d18978ec22.glb",
-   "remesh": "883b2d4e-0e8e-435a-8bbf-a8fa8d731d67"
-  },
-  {
-   "arquivo": "models/ponte_troncos_studs.glb",
-   "chave": "log_bridge",
-   "job": "5635420d-f422-4959-b20b-33549c4d2629",
-   "prep": "9b7139f5-a27b-40b1-b509-52c1972afb9f",
-   "escala": "comprimento 6,0 m (projeto)",
-   "dim_studs_xyz": [
-    21.43,
-    5.49,
-    3.24
-   ],
-   "triangulos": 3676,
-   "sha256": "60bd4e5f2b70aea9d556d19e6d3fcc9c57aec4a53548ff3609d1cb191a440419",
-   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/9b7139f5-a27b-40b1-b509-52c1972afb9f/9b747896-e92d-41a3-b3b4-66c623b178f2/Model-60bd4e5f2b70aea9d556d19e6d3fcc9c57aec4a53548ff3609d1cb191a440419.glb",
-   "remesh": "4500d923-7a83-4c9a-bf51-3f5d3385ea4d"
-  },
-  {
-   "arquivo": "models/uh34d_studs.glb",
-   "chave": "uh34d",
-   "job": "f3dd4d6e-5f83-4c97-b2a9-b74e07d15a74",
-   "prep": "ea9d3ec0-a234-413e-b731-cf96ca51b1bb",
-   "escala": "rotor 17,07 m e altura 4,36 m (wiki:Sikorsky_H-34): média geométrica das 3 razões da ficha (proporções do modelo gerado divergem; D-39)",
-   "dim_studs_xyz": [
-    48.09,
-    19.76,
-    47.01
-   ],
-   "triangulos": 15061,
-   "sha256": "edf7f78ba1da25de93e1cf8cd1edc2d1ede59b35adae7ee33ef92a375aab1a06",
-   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/ea9d3ec0-a234-413e-b731-cf96ca51b1bb/691b4008-35d4-4bec-ae08-c1b0f3d3d161/Model-edf7f78ba1da25de93e1cf8cd1edc2d1ede59b35adae7ee33ef92a375aab1a06.glb"
-  },
-  {
-   "arquivo": "models/m48a3_studs.glb",
-   "chave": "m48a3",
-   "job": "ebf03afa-1e02-4f5a-a3e6-895adea6c07c",
-   "prep": "6a5b95e6-5885-452b-bdd2-b5ac37a466fa",
-   "escala": "9,3 x 3,65 x 3,1 m (wiki:M48_Patton): média geométrica das 3 razões da ficha (proporções do modelo gerado divergem; D-39)",
-   "dim_studs_xyz": [
-    28.17,
-    12.67,
-    13.39
-   ],
-   "triangulos": 14684,
-   "sha256": "2033e710dcde3669418d54790bdd75f5bee7e5c0fddc660574dc0d71dd3b98bf",
-   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/6a5b95e6-5885-452b-bdd2-b5ac37a466fa/76c523bf-4175-46c2-af9e-cf96304ab3a1/Model-2033e710dcde3669418d54790bdd75f5bee7e5c0fddc660574dc0d71dd3b98bf.glb"
-  },
-  {
-   "arquivo": "models/lvtp5_studs.glb",
-   "chave": "lvtp5",
-   "job": "1ac68fe5-507e-4c01-9061-7596df8bd286",
-   "prep": "1b31599e-3fb5-4124-8447-99a1c3bec0cf",
-   "escala": "9,04 x 3,57 x 2,92 m (wiki:LVTP-5): média geométrica das 3 razões da ficha (proporções do modelo gerado divergem; D-39)",
-   "dim_studs_xyz": [
-    28.41,
-    12.45,
-    12.14
-   ],
-   "triangulos": 13970,
-   "sha256": "997158b8077a608064d31656ce985ce5617cdbd36b7329413aefe7b607d7d3bd",
-   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/1b31599e-3fb5-4124-8447-99a1c3bec0cf/e2f2597e-605a-4e6c-a369-76ea65d92a23/Model-997158b8077a608064d31656ce985ce5617cdbd36b7329413aefe7b607d7d3bd.glb"
-  },
-  {
-   "arquivo": "models/ontos_studs.glb",
-   "chave": "ontos",
-   "job": "63205ac1-5581-4197-af18-ae4054cbd93c",
-   "prep": "6f4a03ea-bc95-45d4-81b3-eca2829dd8cf",
-   "escala": "3,83 x 2,59 x 2,13 m (wiki:M50_Ontos): média geométrica das 3 razões da ficha (proporções do modelo gerado divergem; D-39)",
-   "dim_studs_xyz": [
-    12.1,
-    10.26,
-    7.75
-   ],
-   "triangulos": 13093,
-   "sha256": "3384526a3198d7623de4d04b31136a266c6b501b14c89f86cd89507b86c888cc",
-   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/6f4a03ea-bc95-45d4-81b3-eca2829dd8cf/0726c964-455c-4d99-9a2f-aedb15c6fad0/Model-3384526a3198d7623de4d04b31136a266c6b501b14c89f86cd89507b86c888cc.glb"
-  },
-  {
-   "arquivo": "models/morteiro_82mm_studs.glb",
-   "chave": "mortar_82",
-   "job": "5dd4815d-6696-4ca5-8497-1ff6f68886ee",
-   "prep": "bb4bd7e0-fca1-4674-8ae6-bf8beb9453c3",
-   "escala": "altura 1,15 m armado (tubo 1,22 m a ~60°; wiki:82-BM-37)",
-   "dim_studs_xyz": [
-    4.09,
-    4.11,
-    3.88
-   ],
-   "triangulos": 14959,
-   "sha256": "f5084d8d893558dc347a84b2ba03f2a19b64b2229c70a5127e13815fe57106fb",
-   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/bb4bd7e0-fca1-4674-8ae6-bf8beb9453c3/8e8c39b8-8a65-4444-aa4e-7f4aca378d75/Model-f5084d8d893558dc347a84b2ba03f2a19b64b2229c70a5127e13815fe57106fb.glb"
-  },
-  {
-   "arquivo": "models/bunker_vc_studs.glb",
-   "chave": "vc_bunker",
-   "job": "f6a47bd7-f1bc-442b-a56a-1e6064b5cc9d",
-   "prep": "f080aa5f-b52e-47c0-9a2c-106dee4916a1",
-   "escala": "comprimento 4,0 m (projeto)",
-   "dim_studs_xyz": [
-    14.29,
-    4.35,
-    12.67
-   ],
-   "triangulos": 3975,
-   "sha256": "7f888d2cad4775d76a9fb556d7979c3f13f06bea612a9f6df1bd05b57267d952",
-   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/f080aa5f-b52e-47c0-9a2c-106dee4916a1/3ac557b1-7630-4482-b150-6938680cd64e/Model-7f888d2cad4775d76a9fb556d7979c3f13f06bea612a9f6df1bd05b57267d952.glb",
-   "remesh": "d8a5862f-908c-4d0f-9b2e-0c76ab3a995d"
-  },
-  {
-   "arquivo": "models/morteiro_m29_studs.glb",
-   "chave": "mortar_81",
-   "job": "81d1176f-1700-4805-9e7b-ee2abf2c5d46",
-   "prep": "58f8aaf2-4c31-4c7e-b7dc-19afa6f165e8",
-   "escala": "altura 1,2 m armado (tubo de ~1,3 m a ~60°; projeto)",
-   "dim_studs_xyz": [
-    4.07,
-    4.29,
-    2.69
-   ],
-   "triangulos": 2884,
-   "sha256": "899655fb1473a8bd3080933cd01518564250e37aaa08d15beff30fadd1b13db6",
-   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/58f8aaf2-4c31-4c7e-b7dc-19afa6f165e8/77a3f7a9-3ce6-4d29-8614-3c6763fe3d35/Model-899655fb1473a8bd3080933cd01518564250e37aaa08d15beff30fadd1b13db6.glb",
-   "remesh": "e9ec1fdd-235e-463d-a839-6547d703d841"
-  },
-  {
-   "arquivo": "models/bufalo_studs.glb",
-   "chave": "water_buffalo",
-   "job": "4ff96eac-8b3f-4984-a3d4-02a08f073bdf",
-   "prep": "bb979f29-e429-4f5d-b302-96a7f660f6ff",
-   "escala": "comprimento 2,6 m (búfalo-do-pântano adulto)",
-   "dim_studs_xyz": [
-    9.29,
-    5.54,
-    4.65
-   ],
-   "triangulos": 3999,
-   "sha256": "11f22be5d585f43c019fc4b1f2ebe78c3d664642d95ca5c519c0d9ae9f327d02",
-   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/bb979f29-e429-4f5d-b302-96a7f660f6ff/39e031a0-bc38-4c06-92af-3a449e5b407d/Model-17d4e24c49ad2518546711b3881efe0171fd96aeb745dbfbad964ab217eba937.glb",
-   "reducao_local": {
-    "ferramenta": "tools/decimate_glb.py",
-    "pymeshlab": "2025.7.post1",
-    "faces": 4000,
-    "sha256_origem": "17d4e24c49ad2518546711b3881efe0171fd96aeb745dbfbad964ab217eba937",
-    "triangulos_origem": 14459,
-    "desvio_max_m": 0.0323,
-    "desvio_medio_m": 0.00323
-   }
-  },
-  {
-   "arquivo": "models/galinha_studs.glb",
-   "chave": "chicken",
-   "job": "ea7ed3ae-7386-445b-a084-5fc36d94c64d",
-   "prep": "1b8f6feb-bc48-41ba-844c-0f7a0ab10a05",
-   "escala": "altura 0,45 m (galo ga ta)",
-   "dim_studs_xyz": [
-    0.7,
-    1.6,
-    1.75
-   ],
-   "triangulos": 2000,
-   "sha256": "55ea7041b2a0674fc8a42e8c383b053a938c430ca2adbb2ec42ce5980e36efb3",
-   "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/1b8f6feb-bc48-41ba-844c-0f7a0ab10a05/0d692fab-2c1e-4ebc-9c07-1fa581ff0e04/Model-3dc5d046ce841e7d6953494b91abb20d92b3f3d93e502f54578204e9cec04418.glb",
-   "reducao_local": {
-    "ferramenta": "tools/decimate_glb.py",
-    "pymeshlab": "2025.7.post1",
-    "faces": 2000,
-    "sha256_origem": "3dc5d046ce841e7d6953494b91abb20d92b3f3d93e502f54578204e9cec04418",
-    "triangulos_origem": 16688,
-    "desvio_max_m": 0.0185,
-    "desvio_medio_m": 0.00205
-   }
-  }
- ]
+  "nota": "Assets gerados no ForgeGUI (run e5d91d3b-3b75-4ee2-bc39-56db5b3174a7, estilo 861068cf v1). Modelos preparados em escala real e em STUDS (1 unidade = 1 stud): importar no Studio sem conversão de unidade. Baixe com tools/fetch_forgegui_assets.py.",
+  "models": [
+    {
+      "arquivo": "models/m14_studs.glb",
+      "job": "f60c2cb7-7144-4ff0-800c-8824906aaf82",
+      "prep": "9a6b0530-2acf-4481-b05a-354e77bcbdd7",
+      "escala": "comprimento 1,126 m (wiki:M14_rifle) = 4,02 studs",
+      "triangulos": 15626,
+      "sha256": "d254b4971cb521f63cb76070cd994237c76e9e10eb6df008218b63ea57f22206",
+      "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/9a6b0530-2acf-4481-b05a-354e77bcbdd7/5a9eec86-0db1-4c3f-bc0e-1b3e20d7e431/Model-d254b4971cb521f63cb76070cd994237c76e9e10eb6df008218b63ea57f22206.glb",
+      "dim_studs_xyz": [
+        0.32,
+        1.16,
+        4.02
+      ]
+    },
+    {
+      "arquivo": "models/type56_studs.glb",
+      "job": "6d778185-95f3-4562-92cc-076fdf975855",
+      "prep": "fe1cc6c9-ac34-4adf-889e-7036430020b1",
+      "escala": "comprimento 0,882 m (wiki:Type_56_assault_rifle) = 3,15 studs",
+      "triangulos": 15052,
+      "sha256": "ee9a6717bf31903ec6f5983f63cadf38e3402dd5763b092d2ce214df671bc990",
+      "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/fe1cc6c9-ac34-4adf-889e-7036430020b1/e2b8e145-b960-4036-bb38-4f0b26706c50/Model-ee9a6717bf31903ec6f5983f63cadf38e3402dd5763b092d2ce214df671bc990.glb",
+      "dim_studs_xyz": [
+        0.25,
+        1.09,
+        3.15
+      ]
+    },
+    {
+      "arquivo": "models/casa_palha_studs.glb",
+      "job": "6431342a-d90d-48ac-8846-3e267912185e",
+      "prep": "105d5132-24f6-4cbd-bda7-0501cc3c5587",
+      "escala": "7,0 x 5,7 x 5,2 m (projeto)",
+      "triangulos": 3127,
+      "sha256": "af962510a99f0feb059c7d248b36f9cd058cdf590e5aceb0856bd67f2d0f430a",
+      "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/105d5132-24f6-4cbd-bda7-0501cc3c5587/b579d8c6-0d3a-4cd8-8860-7100e51c92e2/Model-af962510a99f0feb059c7d248b36f9cd058cdf590e5aceb0856bd67f2d0f430a.glb",
+      "dim_studs_xyz": [
+        20.46,
+        18.56,
+        25.0
+      ],
+      "chave": "hut_thatch",
+      "remesh": "b38f33e7-43df-491e-abf9-1e3276d714d3"
+    },
+    {
+      "arquivo": "models/coqueiro_studs.glb",
+      "job": "1f9588a4-f340-45da-b472-ca8cabb5e53a",
+      "prep": "1736bfaa-79ce-4833-bf8a-701bf7aed05c",
+      "escala": "altura 14,0 m (projeto)",
+      "triangulos": 1988,
+      "sha256": "60183f83037a347db7f5816b6cded3bd0adf0ed71e7916e90b00a24c2be0561e",
+      "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/1736bfaa-79ce-4833-bf8a-701bf7aed05c/b8f91c19-c296-4795-bc8a-c52256cb988b/Model-60183f83037a347db7f5816b6cded3bd0adf0ed71e7916e90b00a24c2be0561e.glb",
+      "dim_studs_xyz": [
+        34.71,
+        49.81,
+        35.13
+      ],
+      "chave": "coconut_palm",
+      "remesh": "5f11d090-18da-46de-852d-2c71b712f598"
+    },
+    {
+      "arquivo": "models/bambu_touceira_studs.glb",
+      "job": "a15f97ec-e881-4dc0-93ee-7f9dff23aa99",
+      "prep": "0ecf3212-2972-48b2-88bb-1057aaddc9a3",
+      "escala": "altura 7,7 m, largura 8,0 m (projeto: 6-9 m)",
+      "triangulos": 2800,
+      "sha256": "cce103fc7b0be61ef2a16ced0c6797699582f5056521726f3706e5dd0a2a29d0",
+      "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/0ecf3212-2972-48b2-88bb-1057aaddc9a3/2f86aa0e-9292-4090-aefa-1524a9e57f22/Model-719e8cb2cf8d5924bff013278666bd9dc4580fcf669ed7353137b3bd5b5e18a9.glb",
+      "dim_studs_xyz": [
+        27.41,
+        27.55,
+        28.54
+      ],
+      "chave": "bamboo_clump",
+      "remesh": "6efb66d7-e0fa-431d-9b9c-edfb1ef8e7d3",
+      "reducao_local": {
+        "ferramenta": "tools/decimate_glb.py",
+        "pymeshlab": "2025.7.post1",
+        "faces": 2800,
+        "sha256_origem": "719e8cb2cf8d5924bff013278666bd9dc4580fcf669ed7353137b3bd5b5e18a9",
+        "triangulos_origem": 3020,
+        "desvio_max_m": 0.3064,
+        "desvio_medio_m": 0.00377
+      }
+    },
+    {
+      "arquivo": "models/colete_m1955_studs.glb",
+      "chave": "us_m1955_vest",
+      "job": "5cc6460e-11d8-4286-94fb-5c45f7676c79",
+      "prep": "69bcf9ad-bfb5-4ac5-9ab5-163a3eca49b5",
+      "escala": "altura 0,55 m (projeto, colete M1955)",
+      "dim_studs_xyz": [
+        1.16,
+        1.96,
+        1.6
+      ],
+      "triangulos": 3999,
+      "sha256": "c7cea45d44516473d0922674d9fca6b3b4a15bedc21b5ac0fd3c502fe1fdea87",
+      "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/69bcf9ad-bfb5-4ac5-9ab5-163a3eca49b5/05c26748-07bb-453b-aabe-9204e3a4aace/Model-f107e96e101a73b18fea54b0f18972b9ffd0b51a499763b129fb1c7cd7d917d4.glb",
+      "reducao_local": {
+        "ferramenta": "tools/decimate_glb.py",
+        "pymeshlab": "2025.7.post1",
+        "faces": 4000,
+        "sha256_origem": "f107e96e101a73b18fea54b0f18972b9ffd0b51a499763b129fb1c7cd7d917d4",
+        "triangulos_origem": 14307,
+        "desvio_max_m": 0.0059,
+        "desvio_medio_m": 0.00085
+      }
+    },
+    {
+      "arquivo": "models/capacete_m1_studs.glb",
+      "chave": "us_m1_helmet",
+      "job": "f23c133a-987f-4adc-8f3b-4f2f6a86219d",
+      "prep": "5191d74b-6f17-472c-8562-fcea4c9d02b7",
+      "escala": "comprimento 0,29 m (projeto, capacete M1)",
+      "dim_studs_xyz": [
+        1.02,
+        0.98,
+        0.88
+      ],
+      "triangulos": 3000,
+      "sha256": "79a8d430701395ee5eef8345d136056f0fd3e1b5442172d20f9bac67ca66951c",
+      "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/5191d74b-6f17-472c-8562-fcea4c9d02b7/03a36be3-865d-4a2e-a1d8-e8917ae8f0d6/Model-ca8581cd207a82bb513670fd0f0d3ddcd9a08b4b8648cbaf60480b87ebe6fdc1.glb",
+      "reducao_local": {
+        "ferramenta": "tools/decimate_glb.py",
+        "pymeshlab": "2025.7.post1",
+        "faces": 3000,
+        "sha256_origem": "ca8581cd207a82bb513670fd0f0d3ddcd9a08b4b8648cbaf60480b87ebe6fdc1",
+        "triangulos_origem": 14646,
+        "desvio_max_m": 0.008,
+        "desvio_medio_m": 0.00067
+      }
+    },
+    {
+      "arquivo": "models/arvore_colina_studs.glb",
+      "chave": "hill_tree",
+      "job": "2b0fa422-076d-4d41-8a79-a35241f709b4",
+      "prep": "9210d89f-b42e-4d89-bc65-7ca1bae2559d",
+      "escala": "altura 12 m (projeto)",
+      "dim_studs_xyz": [
+        40.86,
+        41.75,
+        42.01
+      ],
+      "triangulos": 2189,
+      "sha256": "0fa3c8bbb1263715d9293381f640fd2db85ae4204e2b4eb72237c588097dc7d3",
+      "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/9210d89f-b42e-4d89-bc65-7ca1bae2559d/0725eb5c-aa94-4c5d-a6f7-b002e47062aa/Model-0fa3c8bbb1263715d9293381f640fd2db85ae4204e2b4eb72237c588097dc7d3.glb",
+      "remesh": "c5e71f38-24e1-42b1-aeb1-49729f635484"
+    },
+    {
+      "arquivo": "models/arroz_canteiro_studs.glb",
+      "chave": "rice_patch",
+      "job": "f3ad8b10-28b2-4715-9802-7d3eda4ed80e",
+      "prep": "206b7a27-a10e-4d24-b65b-914d6ce749a6",
+      "escala": "2,0 m de lado (projeto)",
+      "dim_studs_xyz": [
+        7.14,
+        1.59,
+        5.17
+      ],
+      "triangulos": 13066,
+      "sha256": "455ad97220ab3cc1448d54008888893742161f5cec93f935f999ab03bcc7270f",
+      "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/206b7a27-a10e-4d24-b65b-914d6ce749a6/a49ba045-e82e-4e0c-9148-d1de6ad959ab/Model-455ad97220ab3cc1448d54008888893742161f5cec93f935f999ab03bcc7270f.glb"
+    },
+    {
+      "arquivo": "models/capim_elefante_studs.glb",
+      "chave": "elephant_grass",
+      "job": "7f002afa-f9b3-4cb2-a25a-d7233193f1e1",
+      "prep": "b941ed12-5b6f-42ee-a4a5-a76fea8374a0",
+      "escala": "altura 2,5 m (projeto)",
+      "dim_studs_xyz": [
+        6.36,
+        8.9,
+        6.39
+      ],
+      "triangulos": 1865,
+      "sha256": "9f046693f057dbd6d14dfe1ef0f65eb66e5118f2144aa07a94897035899b04da",
+      "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/b941ed12-5b6f-42ee-a4a5-a76fea8374a0/9cbc623d-6424-42f7-86f1-37abe76b45c2/Model-9f046693f057dbd6d14dfe1ef0f65eb66e5118f2144aa07a94897035899b04da.glb",
+      "remesh": "a20dbe78-3178-458f-bd7d-63c29563bcb7"
+    },
+    {
+      "arquivo": "models/arbusto_studs.glb",
+      "chave": "shrub",
+      "job": "9d7ff5f9-c41d-436d-b764-195e5998f3d7",
+      "prep": "f8d20cf8-dd6b-4dde-b6a9-7ab60e9aca25",
+      "escala": "largura 1,93 m (projeto 1,8 x 2,5 m)",
+      "dim_studs_xyz": [
+        6.64,
+        6.5,
+        6.68
+      ],
+      "triangulos": 2801,
+      "sha256": "fd433a08b7c7a9d09722fecdaa98b06ba4afd848dffa063db2364c017fac8b02",
+      "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/f8d20cf8-dd6b-4dde-b6a9-7ab60e9aca25/dc725f6d-af19-407f-bee1-202d17993995/Model-fd433a08b7c7a9d09722fecdaa98b06ba4afd848dffa063db2364c017fac8b02.glb",
+      "remesh": "47a4dffe-f369-41ea-a869-41cf0e1641a5"
+    },
+    {
+      "arquivo": "models/bananeira_studs.glb",
+      "chave": "banana",
+      "job": "627b9643-d15c-4b09-9edd-27abba9a1337",
+      "prep": "07206aca-9c89-4e51-8b51-733a632c266d",
+      "escala": "altura 4,0 m (projeto)",
+      "dim_studs_xyz": [
+        14.4,
+        14.33,
+        13.37
+      ],
+      "triangulos": 2136,
+      "sha256": "90bb09bb4a6dbc2cef21b9c5a44190343ecf706e678d739d70b5e2cb2da0fb7f",
+      "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/07206aca-9c89-4e51-8b51-733a632c266d/5a1bb1d0-6645-4a2d-a4f2-fee414519bda/Model-90bb09bb4a6dbc2cef21b9c5a44190343ecf706e678d739d70b5e2cb2da0fb7f.glb",
+      "remesh": "07c63ef8-fcb3-41eb-ba19-896e1529673f"
+    },
+    {
+      "arquivo": "models/toca_aranha_studs.glb",
+      "chave": "spider_hole",
+      "job": "ea1bd767-0f85-4a6e-b1a6-c1a9cc969330",
+      "prep": "4a79de18-4147-4921-ab3f-fed644e0d1f6",
+      "escala": "diâmetro 0,9 m com tampa (projeto)",
+      "dim_studs_xyz": [
+        3.21,
+        2.32,
+        3.21
+      ],
+      "triangulos": 3467,
+      "sha256": "109d9434e5ff8b7a339cff70d3df190043a03aa7dfebc2ede57d8479106ffd6a",
+      "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/4a79de18-4147-4921-ab3f-fed644e0d1f6/4430579d-5879-47dc-abb3-da756b8cbbc2/Model-109d9434e5ff8b7a339cff70d3df190043a03aa7dfebc2ede57d8479106ffd6a.glb",
+      "remesh": "ad5a4f11-ed5b-46b3-8c81-b80ddf4d2b79"
+    },
+    {
+      "arquivo": "models/sacos_areia_studs.glb",
+      "chave": "sandbags",
+      "job": "8e9c234d-70e6-4423-a0b8-22f295a07af1",
+      "prep": "c5ab3028-0b94-424a-90cc-985190d11639",
+      "escala": "comprimento 2,0 m (projeto)",
+      "dim_studs_xyz": [
+        1.67,
+        2.4,
+        7.14
+      ],
+      "triangulos": 2838,
+      "sha256": "0ec205d272b2049ffbc701c79d65ca1ee3c648a6339c03894d6adb13e81aebe1",
+      "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/c5ab3028-0b94-424a-90cc-985190d11639/14052590-e3c9-4d62-93c3-510bc8eb20cb/Model-0ec205d272b2049ffbc701c79d65ca1ee3c648a6339c03894d6adb13e81aebe1.glb",
+      "remesh": "32ad4d0a-a946-48fb-871e-9ebb0d7a7b02"
+    },
+    {
+      "arquivo": "models/m60_studs.glb",
+      "chave": "m60",
+      "job": "34b1d53a-ba8a-4713-a4f7-8cecae352d02",
+      "prep": "8d7d3e6e-fd67-402b-ad9e-9e6d944dcdb9",
+      "escala": "comprimento 1,105 m (wiki:M60_machine_gun)",
+      "dim_studs_xyz": [
+        0.56,
+        1.26,
+        3.95
+      ],
+      "triangulos": 14933,
+      "sha256": "34d2316a115dd9444f85073cb301c3b2b574705a0c06193a65a1052c14e9bfe8",
+      "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/8d7d3e6e-fd67-402b-ad9e-9e6d944dcdb9/689f2d56-2784-4db4-a127-32affc0ae7e1/Model-34d2316a115dd9444f85073cb301c3b2b574705a0c06193a65a1052c14e9bfe8.glb"
+    },
+    {
+      "arquivo": "models/rpd_studs.glb",
+      "chave": "rpd",
+      "job": "bd430cd8-c697-491d-b902-4393031df167",
+      "prep": "26e3c0f3-2eab-4eb4-8817-cd5e402e41b7",
+      "escala": "comprimento 1,037 m (wiki:RPD_machine_gun)",
+      "dim_studs_xyz": [
+        1.21,
+        1.24,
+        3.7
+      ],
+      "triangulos": 15735,
+      "sha256": "8a0bc297bdc3df4fd0e435714ec4e2a247913da840dc02ad147677bd7043aa7a",
+      "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/26e3c0f3-2eab-4eb4-8817-cd5e402e41b7/60a1eafe-e49d-44ec-b3b3-778c8ebcfcf0/Model-8a0bc297bdc3df4fd0e435714ec4e2a247913da840dc02ad147677bd7043aa7a.glb"
+    },
+    {
+      "arquivo": "models/sks_studs.glb",
+      "chave": "sks",
+      "job": "b5bf7352-3cce-4cc8-90bf-f610721a5488",
+      "prep": "56ea6ba9-8b7d-488c-94f2-1f05978731e5",
+      "escala": "comprimento 1,021 m (wiki:SKS)",
+      "dim_studs_xyz": [
+        0.32,
+        0.79,
+        3.65
+      ],
+      "triangulos": 14683,
+      "sha256": "c12da0c02719f32dc3bef191bb000b572307273774141699378ddb3a501b75b7",
+      "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/56ea6ba9-8b7d-488c-94f2-1f05978731e5/5a59ddd4-4bae-494d-855c-e6c348af7142/Model-c12da0c02719f32dc3bef191bb000b572307273774141699378ddb3a501b75b7.glb"
+    },
+    {
+      "arquivo": "models/casa_varanda_studs.glb",
+      "chave": "hut_veranda",
+      "job": "ad721418-c9b9-4929-bccf-266dd4d78a12",
+      "prep": "aa2ed662-0005-4cd0-af25-a612475a1f9f",
+      "escala": "comprimento 8,0 m (projeto)",
+      "dim_studs_xyz": [
+        28.62,
+        21.95,
+        28.53
+      ],
+      "triangulos": 3135,
+      "sha256": "22793fdd5df6c4c9243f50f62ba553867af773b3f5d5b3799c14f486aa1cb5ea",
+      "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/aa2ed662-0005-4cd0-af25-a612475a1f9f/b56f5a58-7dfb-41b4-8353-f7bb875ba2a2/Model-22793fdd5df6c4c9243f50f62ba553867af773b3f5d5b3799c14f486aa1cb5ea.glb",
+      "remesh": "a3cf63a5-da03-422c-b700-99029a47768b"
+    },
+    {
+      "arquivo": "models/trincheira_secao_studs.glb",
+      "chave": "trench_section",
+      "job": "9f18610a-4b93-43a1-b196-744d0588b52c",
+      "prep": "32c841c0-5c9d-450b-aac2-82ef49f19017",
+      "escala": "comprimento 4,0 m (projeto)",
+      "dim_studs_xyz": [
+        14.26,
+        3.99,
+        7.04
+      ],
+      "triangulos": 3725,
+      "sha256": "c4bf7c22fca9fafe34affc368ea16ab51b5749c9c127215f6a20b33efac4cf83",
+      "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/32c841c0-5c9d-450b-aac2-82ef49f19017/723288aa-a2b1-47cd-be0c-1ab78284eb05/Model-c4bf7c22fca9fafe34affc368ea16ab51b5749c9c127215f6a20b33efac4cf83.glb",
+      "remesh": "e11a4f0d-bcfe-49db-8eb6-7400a0d207f3"
+    },
+    {
+      "arquivo": "models/cerca_bambu_studs.glb",
+      "chave": "bamboo_fence",
+      "job": "d9abae47-8540-48c4-81a3-032ba89f62b5",
+      "prep": "2c7252ef-9a88-40d6-840a-573c645fc5a2",
+      "escala": "comprimento 3,0 m (projeto)",
+      "dim_studs_xyz": [
+        1.19,
+        6.51,
+        10.72
+      ],
+      "triangulos": 2851,
+      "sha256": "d591f8292db11d47eb15467340322454a5c412a6d96cd4c8789828c6041ad271",
+      "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/2c7252ef-9a88-40d6-840a-573c645fc5a2/e9477c44-ac9c-4971-bc04-37b83445a01e/Model-d591f8292db11d47eb15467340322454a5c412a6d96cd4c8789828c6041ad271.glb",
+      "remesh": "7d6b8a67-5736-48a4-8301-aea8bc9fabaf"
+    },
+    {
+      "arquivo": "models/tumulo_studs.glb",
+      "chave": "grave_mound",
+      "job": "c895bf00-2e35-464e-8d19-6ad720d53007",
+      "prep": "74ad9939-aec2-4192-a2fd-160190249562",
+      "escala": "comprimento 2,5 m (projeto)",
+      "dim_studs_xyz": [
+        8.93,
+        3.96,
+        6.83
+      ],
+      "triangulos": 4000,
+      "sha256": "7d595021caa6c0c2e3c81bc0cffe8406913d5062746e956dd6fef0ca36573613",
+      "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/74ad9939-aec2-4192-a2fd-160190249562/a6fb3c7f-f4f4-4f34-98df-98de0fa5c6bd/Model-77e60fc1e6f71956f0a433513c0d4cf8eec909fa2e7e8d775077c19264bd04c7.glb",
+      "reducao_local": {
+        "ferramenta": "tools/decimate_glb.py",
+        "pymeshlab": "2025.7.post1",
+        "faces": 4000,
+        "sha256_origem": "77e60fc1e6f71956f0a433513c0d4cf8eec909fa2e7e8d775077c19264bd04c7",
+        "triangulos_origem": 14278,
+        "desvio_max_m": 0.0608,
+        "desvio_medio_m": 0.0043
+      }
+    },
+    {
+      "arquivo": "models/celeiro_studs.glb",
+      "chave": "granary",
+      "job": "4041e1ff-ce33-4ca8-bab2-9d65edef6704",
+      "prep": "8fe0424f-2bdd-4263-a524-e542136574ac",
+      "escala": "altura 3,5 m (projeto)",
+      "dim_studs_xyz": [
+        11.05,
+        12.56,
+        10.36
+      ],
+      "triangulos": 4900,
+      "sha256": "f9b8285e6f6d5f378dfa9b9553744785add736a224b1f6087194513c479473b6",
+      "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/8fe0424f-2bdd-4263-a524-e542136574ac/0b480307-c2b4-4e0b-9781-e1d62c64e650/Model-210b947d8c2963fd25716e4d05d7b938fc762560c274fe618975bf52ce2a9b78.glb",
+      "reducao_local": {
+        "ferramenta": "tools/decimate_glb.py",
+        "pymeshlab": "2025.7.post1",
+        "faces": 4900,
+        "sha256_origem": "210b947d8c2963fd25716e4d05d7b938fc762560c274fe618975bf52ce2a9b78",
+        "triangulos_origem": 14106,
+        "desvio_max_m": 0.1085,
+        "desvio_medio_m": 0.0073
+      }
+    },
+    {
+      "arquivo": "models/poco_studs.glb",
+      "chave": "well",
+      "job": "bac36c8b-9a9e-4f9e-a2fb-6561b629a9e5",
+      "prep": "27c5b7a4-e452-4d73-a1bf-e453eeab3f68",
+      "escala": "largura 1,5 m com travessa (projeto: bocal 1,3 m)",
+      "dim_studs_xyz": [
+        5.36,
+        4.27,
+        5.36
+      ],
+      "triangulos": 3999,
+      "sha256": "063adad1eaa9c5ce6b5dc81260fa6db85eb71e87fdb8cadb0a88839e2f00af74",
+      "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/27c5b7a4-e452-4d73-a1bf-e453eeab3f68/c018b1d6-63b5-4a0b-91d4-b954c74a9ce1/Model-dd139f40a2e7dcae0f0c4dd0e4934aa1b48f316eaed1ce00dc2a730aa29e240c.glb",
+      "reducao_local": {
+        "ferramenta": "tools/decimate_glb.py",
+        "pymeshlab": "2025.7.post1",
+        "faces": 4000,
+        "sha256_origem": "dd139f40a2e7dcae0f0c4dd0e4934aa1b48f316eaed1ce00dc2a730aa29e240c",
+        "triangulos_origem": 13615,
+        "desvio_max_m": 0.0294,
+        "desvio_medio_m": 0.00327
+      }
+    },
+    {
+      "arquivo": "models/cozinha_studs.glb",
+      "chave": "hut_kitchen",
+      "job": "ebf12386-a56a-4f4b-8cf4-6346e6cd7a82",
+      "prep": "9a0f00c4-19f4-4019-bcb5-50f72cebd918",
+      "escala": "comprimento 4,0 m (projeto)",
+      "dim_studs_xyz": [
+        14.24,
+        11.92,
+        12.6
+      ],
+      "triangulos": 3999,
+      "sha256": "1763f35dbbc58fc168092ae80f2861164883dc7c0970a7192dbb106d91894247",
+      "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/9a0f00c4-19f4-4019-bcb5-50f72cebd918/b8ed50c8-a72f-4991-ae48-4e34b10f71d2/Model-bdf006d634caa8e1fdec145d919a1828738b272417b62effcbae70d8c484f45c.glb",
+      "reducao_local": {
+        "ferramenta": "tools/decimate_glb.py",
+        "pymeshlab": "2025.7.post1",
+        "faces": 4000,
+        "sha256_origem": "bdf006d634caa8e1fdec145d919a1828738b272417b62effcbae70d8c484f45c",
+        "triangulos_origem": 13483,
+        "desvio_max_m": 0.1631,
+        "desvio_medio_m": 0.0115
+      }
+    },
+    {
+      "arquivo": "models/casa_telha_studs.glb",
+      "chave": "house_tile",
+      "job": "d77bfaea-d3df-458e-bd9e-01b1abcf215c",
+      "prep": "ed63dfba-fe52-4da3-a1d7-8b16e232e7ed",
+      "escala": "ajustada a 6 m de largura e 5 m de cumeeira; comprimento sai 7 m (projeto: 9 m)",
+      "dim_studs_xyz": [
+        22.05,
+        17.76,
+        25.04
+      ],
+      "triangulos": 3054,
+      "sha256": "cf4ad9f806c512bda60b30096d12a896231f99e84902b5cbcfaca39452cf1a04",
+      "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/ed63dfba-fe52-4da3-a1d7-8b16e232e7ed/756ab7fd-50ab-446d-859f-315e6978092d/Model-cf4ad9f806c512bda60b30096d12a896231f99e84902b5cbcfaca39452cf1a04.glb",
+      "remesh": "e3db2203-40b7-4b88-aff7-3fab3f81fb9b"
+    },
+    {
+      "arquivo": "models/altar_studs.glb",
+      "chave": "shrine",
+      "job": "39ee3f8e-f1d9-4203-8bfe-35d7b3376c93",
+      "prep": "204978c2-8482-4edb-adc6-c959f4d29e18",
+      "escala": "altura 1,7 m (projeto)",
+      "dim_studs_xyz": [
+        4.31,
+        6.07,
+        3.99
+      ],
+      "triangulos": 3999,
+      "sha256": "445cad28123e4acd135477a2ff3453468a640d984f63b402fcfe2bbb0ce576ea",
+      "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/204978c2-8482-4edb-adc6-c959f4d29e18/9f8461c5-dbc1-47b5-bc23-fa54afe7322b/Model-2438c751978a6dac6bad9655265e1e99f1e845721623b51862463b64a21a3e18.glb",
+      "reducao_local": {
+        "ferramenta": "tools/decimate_glb.py",
+        "pymeshlab": "2025.7.post1",
+        "faces": 4000,
+        "sha256_origem": "2438c751978a6dac6bad9655265e1e99f1e845721623b51862463b64a21a3e18",
+        "triangulos_origem": 13489,
+        "desvio_max_m": 0.0254,
+        "desvio_medio_m": 0.00201
+      }
+    },
+    {
+      "arquivo": "models/m1911_studs.glb",
+      "chave": "m1911",
+      "job": "9fd40331-fd17-4076-a487-8f43614e6c5d",
+      "prep": "9931198e-e02f-49b6-819b-0bfd15625aef",
+      "escala": "comprimento 0,216 m (wiki:M1911_pistol)",
+      "dim_studs_xyz": [
+        0.12,
+        0.55,
+        0.77
+      ],
+      "triangulos": 15340,
+      "sha256": "4c183b24d03803f232a4962186a8ee97fcb15aec0cb08c17bdf15814dc86ad1d",
+      "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/9931198e-e02f-49b6-819b-0bfd15625aef/85e1127e-d89a-4de5-85a6-9118a3c3d953/Model-4c183b24d03803f232a4962186a8ee97fcb15aec0cb08c17bdf15814dc86ad1d.glb"
+    },
+    {
+      "arquivo": "models/type54_studs.glb",
+      "chave": "type54",
+      "job": "ec3c99e6-be45-409a-ad52-8a6bfc2f30c0",
+      "prep": "9160ac09-284c-461b-8735-b76515b09645",
+      "escala": "comprimento 0,195 m (wiki:Type_54_pistol)",
+      "dim_studs_xyz": [
+        0.42,
+        0.54,
+        0.7
+      ],
+      "triangulos": 15316,
+      "sha256": "329cdd04c70ee1d6e8b48b3d26f49888c7878e95e0dd3ba2d05f553c5366f816",
+      "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/9160ac09-284c-461b-8735-b76515b09645/34656cbb-8b34-437e-8dce-ed1296cd0ff8/Model-329cdd04c70ee1d6e8b48b3d26f49888c7878e95e0dd3ba2d05f553c5366f816.glb"
+    },
+    {
+      "arquivo": "models/m79_studs.glb",
+      "chave": "m79",
+      "job": "02b6ae46-0cee-4f4d-8795-a170f3ec7047",
+      "prep": "7583e6ab-c805-47c4-8572-d2044fd6cc08",
+      "escala": "comprimento 0,731 m (wiki:M79_grenade_launcher)",
+      "dim_studs_xyz": [
+        0.27,
+        1.12,
+        2.61
+      ],
+      "triangulos": 14756,
+      "sha256": "b5dd8159160bfac65fd5ed243eda28d5b78ae007b775769161b19440c8983a8d",
+      "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/7583e6ab-c805-47c4-8572-d2044fd6cc08/be367723-eab6-451e-b257-bb859676756b/Model-b5dd8159160bfac65fd5ed243eda28d5b78ae007b775769161b19440c8983a8d.glb"
+    },
+    {
+      "arquivo": "models/rpg2_studs.glb",
+      "chave": "rpg2",
+      "job": "9fbc759f-93db-4815-930c-0c643f99283f",
+      "prep": "4dd0e607-b804-4efb-b539-76e7c9e733e0",
+      "escala": "comprimento 1,2 m com a ogiva (projeto; conferir wiki:RPG-2)",
+      "dim_studs_xyz": [
+        4.29,
+        1.38,
+        0.66
+      ],
+      "triangulos": 15826,
+      "sha256": "792b8f84b5c248775b52a690cd5d3835cb3fbb09f2ac48ca4fe14fdf4e3d15e2",
+      "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/4dd0e607-b804-4efb-b539-76e7c9e733e0/2ea759a6-93b8-447b-ac7d-308c0c517b8f/Model-792b8f84b5c248775b52a690cd5d3835cb3fbb09f2ac48ca4fe14fdf4e3d15e2.glb"
+    },
+    {
+      "arquivo": "models/chapeu_selva_studs.glb",
+      "chave": "vc_jungle_hat",
+      "job": "05eee9ca-4b84-4da9-b3f6-d10704722015",
+      "prep": "232b4b18-8d43-46c5-a83b-a6d0a7ea0df5",
+      "escala": "aba 0,34 m (projeto)",
+      "dim_studs_xyz": [
+        1.14,
+        0.95,
+        1.21
+      ],
+      "triangulos": 2447,
+      "sha256": "dd9a53b31b1f3eea4702ff3fd5914b9c98a529995ce2bc097955828f9a6c5de8",
+      "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/232b4b18-8d43-46c5-a83b-a6d0a7ea0df5/b6cd70e7-8f00-4645-9f26-114b0d2a34f4/Model-dd9a53b31b1f3eea4702ff3fd5914b9c98a529995ce2bc097955828f9a6c5de8.glb",
+      "remesh": "a40a6db2-6ecd-4112-af9f-9408fdc77cca"
+    },
+    {
+      "arquivo": "models/capacete_fibra_studs.glb",
+      "chave": "vc_pith_helmet",
+      "job": "c4fee33d-4411-41c4-a505-497177bc6322",
+      "prep": "dc220f3b-441e-4f7f-8cd9-f5a3ac69fbb7",
+      "escala": "comprimento 0,32 m (projeto)",
+      "dim_studs_xyz": [
+        1.14,
+        0.96,
+        0.96
+      ],
+      "triangulos": 2999,
+      "sha256": "afc1ced786384cfd23b74f7483f2a8d6fcade6539a826a9af2d84dc9148b4a11",
+      "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/dc220f3b-441e-4f7f-8cd9-f5a3ac69fbb7/c953a451-c4bc-47d4-936e-5b1106216eae/Model-db23f5a340e181027babecbbcd6530facb8362bb9299eec91917ceaf3f5eb8fc.glb",
+      "reducao_local": {
+        "ferramenta": "tools/decimate_glb.py",
+        "pymeshlab": "2025.7.post1",
+        "faces": 3000,
+        "sha256_origem": "db23f5a340e181027babecbbcd6530facb8362bb9299eec91917ceaf3f5eb8fc",
+        "triangulos_origem": 13793,
+        "desvio_max_m": 0.0026,
+        "desvio_medio_m": 0.00037
+      }
+    },
+    {
+      "arquivo": "models/entrada_tunel_studs.glb",
+      "chave": "tunnel_entrance",
+      "job": "9a42011f-0dbc-42b8-ae5d-8ad419863a30",
+      "prep": "19e0637e-4e13-4bd9-a4fc-d1e957838590",
+      "escala": "moldura 1,0 m (projeto; poço 0,6 m)",
+      "dim_studs_xyz": [
+        3.57,
+        3.56,
+        3.56
+      ],
+      "triangulos": 3239,
+      "sha256": "5c2210744ca98f409c0aac7b00ba78d2ca1ad6a95990fa399448e1d18978ec22",
+      "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/19e0637e-4e13-4bd9-a4fc-d1e957838590/6b82d1b9-9167-4e66-9c93-e1832e10d1e4/Model-5c2210744ca98f409c0aac7b00ba78d2ca1ad6a95990fa399448e1d18978ec22.glb",
+      "remesh": "883b2d4e-0e8e-435a-8bbf-a8fa8d731d67"
+    },
+    {
+      "arquivo": "models/ponte_troncos_studs.glb",
+      "chave": "log_bridge",
+      "job": "5635420d-f422-4959-b20b-33549c4d2629",
+      "prep": "9b7139f5-a27b-40b1-b509-52c1972afb9f",
+      "escala": "comprimento 6,0 m (projeto)",
+      "dim_studs_xyz": [
+        21.43,
+        5.49,
+        3.24
+      ],
+      "triangulos": 3676,
+      "sha256": "60bd4e5f2b70aea9d556d19e6d3fcc9c57aec4a53548ff3609d1cb191a440419",
+      "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/9b7139f5-a27b-40b1-b509-52c1972afb9f/9b747896-e92d-41a3-b3b4-66c623b178f2/Model-60bd4e5f2b70aea9d556d19e6d3fcc9c57aec4a53548ff3609d1cb191a440419.glb",
+      "remesh": "4500d923-7a83-4c9a-bf51-3f5d3385ea4d"
+    },
+    {
+      "arquivo": "models/uh34d_studs.glb",
+      "chave": "uh34d",
+      "job": "f3dd4d6e-5f83-4c97-b2a9-b74e07d15a74",
+      "prep": "ea9d3ec0-a234-413e-b731-cf96ca51b1bb",
+      "escala": "rotor 17,07 m e altura 4,36 m (wiki:Sikorsky_H-34): média geométrica das 3 razões da ficha (proporções do modelo gerado divergem; D-39)",
+      "dim_studs_xyz": [
+        48.09,
+        19.76,
+        47.01
+      ],
+      "triangulos": 15061,
+      "sha256": "edf7f78ba1da25de93e1cf8cd1edc2d1ede59b35adae7ee33ef92a375aab1a06",
+      "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/ea9d3ec0-a234-413e-b731-cf96ca51b1bb/691b4008-35d4-4bec-ae08-c1b0f3d3d161/Model-edf7f78ba1da25de93e1cf8cd1edc2d1ede59b35adae7ee33ef92a375aab1a06.glb"
+    },
+    {
+      "arquivo": "models/m48a3_studs.glb",
+      "chave": "m48a3",
+      "job": "ebf03afa-1e02-4f5a-a3e6-895adea6c07c",
+      "prep": "6a5b95e6-5885-452b-bdd2-b5ac37a466fa",
+      "escala": "9,3 x 3,65 x 3,1 m (wiki:M48_Patton): média geométrica das 3 razões da ficha (proporções do modelo gerado divergem; D-39)",
+      "dim_studs_xyz": [
+        28.17,
+        12.67,
+        13.39
+      ],
+      "triangulos": 14684,
+      "sha256": "2033e710dcde3669418d54790bdd75f5bee7e5c0fddc660574dc0d71dd3b98bf",
+      "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/6a5b95e6-5885-452b-bdd2-b5ac37a466fa/76c523bf-4175-46c2-af9e-cf96304ab3a1/Model-2033e710dcde3669418d54790bdd75f5bee7e5c0fddc660574dc0d71dd3b98bf.glb"
+    },
+    {
+      "arquivo": "models/lvtp5_studs.glb",
+      "chave": "lvtp5",
+      "job": "1ac68fe5-507e-4c01-9061-7596df8bd286",
+      "prep": "1b31599e-3fb5-4124-8447-99a1c3bec0cf",
+      "escala": "9,04 x 3,57 x 2,92 m (wiki:LVTP-5): média geométrica das 3 razões da ficha (proporções do modelo gerado divergem; D-39)",
+      "dim_studs_xyz": [
+        28.41,
+        12.45,
+        12.14
+      ],
+      "triangulos": 13970,
+      "sha256": "997158b8077a608064d31656ce985ce5617cdbd36b7329413aefe7b607d7d3bd",
+      "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/1b31599e-3fb5-4124-8447-99a1c3bec0cf/e2f2597e-605a-4e6c-a369-76ea65d92a23/Model-997158b8077a608064d31656ce985ce5617cdbd36b7329413aefe7b607d7d3bd.glb"
+    },
+    {
+      "arquivo": "models/ontos_studs.glb",
+      "chave": "ontos",
+      "job": "63205ac1-5581-4197-af18-ae4054cbd93c",
+      "prep": "6f4a03ea-bc95-45d4-81b3-eca2829dd8cf",
+      "escala": "3,83 x 2,59 x 2,13 m (wiki:M50_Ontos): média geométrica das 3 razões da ficha (proporções do modelo gerado divergem; D-39)",
+      "dim_studs_xyz": [
+        12.1,
+        10.26,
+        7.75
+      ],
+      "triangulos": 13093,
+      "sha256": "3384526a3198d7623de4d04b31136a266c6b501b14c89f86cd89507b86c888cc",
+      "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/6f4a03ea-bc95-45d4-81b3-eca2829dd8cf/0726c964-455c-4d99-9a2f-aedb15c6fad0/Model-3384526a3198d7623de4d04b31136a266c6b501b14c89f86cd89507b86c888cc.glb"
+    },
+    {
+      "arquivo": "models/morteiro_82mm_studs.glb",
+      "chave": "mortar_82",
+      "job": "5dd4815d-6696-4ca5-8497-1ff6f68886ee",
+      "prep": "bb4bd7e0-fca1-4674-8ae6-bf8beb9453c3",
+      "escala": "altura 1,15 m armado (tubo 1,22 m a ~60°; wiki:82-BM-37)",
+      "dim_studs_xyz": [
+        4.09,
+        4.11,
+        3.88
+      ],
+      "triangulos": 14959,
+      "sha256": "f5084d8d893558dc347a84b2ba03f2a19b64b2229c70a5127e13815fe57106fb",
+      "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/bb4bd7e0-fca1-4674-8ae6-bf8beb9453c3/8e8c39b8-8a65-4444-aa4e-7f4aca378d75/Model-f5084d8d893558dc347a84b2ba03f2a19b64b2229c70a5127e13815fe57106fb.glb"
+    },
+    {
+      "arquivo": "models/bunker_vc_studs.glb",
+      "chave": "vc_bunker",
+      "job": "f6a47bd7-f1bc-442b-a56a-1e6064b5cc9d",
+      "prep": "f080aa5f-b52e-47c0-9a2c-106dee4916a1",
+      "escala": "comprimento 4,0 m (projeto)",
+      "dim_studs_xyz": [
+        14.29,
+        4.35,
+        12.67
+      ],
+      "triangulos": 3975,
+      "sha256": "7f888d2cad4775d76a9fb556d7979c3f13f06bea612a9f6df1bd05b57267d952",
+      "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/f080aa5f-b52e-47c0-9a2c-106dee4916a1/3ac557b1-7630-4482-b150-6938680cd64e/Model-7f888d2cad4775d76a9fb556d7979c3f13f06bea612a9f6df1bd05b57267d952.glb",
+      "remesh": "d8a5862f-908c-4d0f-9b2e-0c76ab3a995d"
+    },
+    {
+      "arquivo": "models/morteiro_m29_studs.glb",
+      "chave": "mortar_81",
+      "job": "81d1176f-1700-4805-9e7b-ee2abf2c5d46",
+      "prep": "58f8aaf2-4c31-4c7e-b7dc-19afa6f165e8",
+      "escala": "altura 1,2 m armado (tubo de ~1,3 m a ~60°; projeto)",
+      "dim_studs_xyz": [
+        4.07,
+        4.29,
+        2.69
+      ],
+      "triangulos": 2884,
+      "sha256": "899655fb1473a8bd3080933cd01518564250e37aaa08d15beff30fadd1b13db6",
+      "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/58f8aaf2-4c31-4c7e-b7dc-19afa6f165e8/77a3f7a9-3ce6-4d29-8614-3c6763fe3d35/Model-899655fb1473a8bd3080933cd01518564250e37aaa08d15beff30fadd1b13db6.glb",
+      "remesh": "e9ec1fdd-235e-463d-a839-6547d703d841"
+    },
+    {
+      "arquivo": "models/bufalo_studs.glb",
+      "chave": "water_buffalo",
+      "job": "4ff96eac-8b3f-4984-a3d4-02a08f073bdf",
+      "prep": "bb979f29-e429-4f5d-b302-96a7f660f6ff",
+      "escala": "comprimento 2,6 m (búfalo-do-pântano adulto)",
+      "dim_studs_xyz": [
+        9.29,
+        5.54,
+        4.65
+      ],
+      "triangulos": 3999,
+      "sha256": "11f22be5d585f43c019fc4b1f2ebe78c3d664642d95ca5c519c0d9ae9f327d02",
+      "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/bb979f29-e429-4f5d-b302-96a7f660f6ff/39e031a0-bc38-4c06-92af-3a449e5b407d/Model-17d4e24c49ad2518546711b3881efe0171fd96aeb745dbfbad964ab217eba937.glb",
+      "reducao_local": {
+        "ferramenta": "tools/decimate_glb.py",
+        "pymeshlab": "2025.7.post1",
+        "faces": 4000,
+        "sha256_origem": "17d4e24c49ad2518546711b3881efe0171fd96aeb745dbfbad964ab217eba937",
+        "triangulos_origem": 14459,
+        "desvio_max_m": 0.0323,
+        "desvio_medio_m": 0.00323
+      }
+    },
+    {
+      "arquivo": "models/galinha_studs.glb",
+      "chave": "chicken",
+      "job": "ea7ed3ae-7386-445b-a084-5fc36d94c64d",
+      "prep": "1b8f6feb-bc48-41ba-844c-0f7a0ab10a05",
+      "escala": "altura 0,45 m (galo ga ta)",
+      "dim_studs_xyz": [
+        0.7,
+        1.6,
+        1.75
+      ],
+      "triangulos": 2000,
+      "sha256": "55ea7041b2a0674fc8a42e8c383b053a938c430ca2adbb2ec42ce5980e36efb3",
+      "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/1b8f6feb-bc48-41ba-844c-0f7a0ab10a05/0d692fab-2c1e-4ebc-9c07-1fa581ff0e04/Model-3dc5d046ce841e7d6953494b91abb20d92b3f3d93e502f54578204e9cec04418.glb",
+      "reducao_local": {
+        "ferramenta": "tools/decimate_glb.py",
+        "pymeshlab": "2025.7.post1",
+        "faces": 2000,
+        "sha256_origem": "3dc5d046ce841e7d6953494b91abb20d92b3f3d93e502f54578204e9cec04418",
+        "triangulos_origem": 16688,
+        "desvio_max_m": 0.0185,
+        "desvio_medio_m": 0.00205
+      }
+    },
+    {
+      "arquivo": "models/arvore_dossel_studs.glb",
+      "chave": "canopy_tree",
+      "job": "6e52e4ed-5195-4324-ad5f-1c13545d427f",
+      "prep": "4ba93392-1685-4150-96e5-8056116c6eed",
+      "escala": "altura 24 m, copa 13,7 x 12,4 m (projeto, D-65)",
+      "triangulos": 6000,
+      "sha256": "48a4a3841cb0a777feadbc60ea802ad601e28ee9a007bce53792a3c9f4c6f4dc",
+      "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/4ba93392-1685-4150-96e5-8056116c6eed/5b8cf33d-e0f9-4dcc-a8b0-037331e9576e/Model-42e9cd410027c493d018629642592c1a78551e13a59502b9f3d8a85bb84962e5.glb",
+      "dim_studs_xyz": [
+        48.21,
+        85.38,
+        42.97
+      ],
+      "reducao_local": {
+        "ferramenta": "tools/decimate_glb.py",
+        "pymeshlab": "2025.7.post1",
+        "faces": 6000,
+        "sha256_origem": "42e9cd410027c493d018629642592c1a78551e13a59502b9f3d8a85bb84962e5",
+        "triangulos_origem": 13636,
+        "desvio_max_m": 1.4625,
+        "desvio_medio_m": 0.05927
+      }
+    },
+    {
+      "arquivo": "models/tram_bosque_studs.glb",
+      "chave": "melaleuca_grove",
+      "job": "85393e82-f18e-4f54-9b74-7f4f0c40ca7c",
+      "prep": "1e6b7aa5-1cb4-4174-b715-a06cb6d06b1b",
+      "escala": "altura 13 m, grupo de 5 troncos com 10 x 5 m (projeto, D-65)",
+      "triangulos": 4496,
+      "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/1e6b7aa5-1cb4-4174-b715-a06cb6d06b1b/323deda4-f923-4c97-9702-9ae8f13e77a2/Model-6425432e873fb9315ebdbd84a0b3d4c088d3d9198e86ee3832bc9199774afc0d.glb",
+      "dim_studs_xyz": [
+        35.26,
+        46.41,
+        18.38
+      ],
+      "reducao_local": {
+        "ferramenta": "tools/decimate_glb.py",
+        "pymeshlab": "2025.7.post1",
+        "faces": 3000,
+        "soltar_bordas": true,
+        "sha256_origem": "6425432e873fb9315ebdbd84a0b3d4c088d3d9198e86ee3832bc9199774afc0d",
+        "triangulos_origem": 10995,
+        "desvio_max_m": 1.4062,
+        "desvio_medio_m": 0.05175
+      },
+      "sha256": "d6960e58ff8447f718c5e5c61e55852a66900cae28d4b17fd4fdf743109c5c22"
+    },
+    {
+      "arquivo": "models/taioba_samambaia_studs.glb",
+      "chave": "taro_fern",
+      "job": "6cebcdfb-2014-43cc-b89e-a6e19b480464",
+      "prep": "cd4e47da-76e6-49ea-bf6a-1c95d0c7399a",
+      "escala": "altura 1,8 m, 2,2 m de largura (projeto, D-65)",
+      "triangulos": 4595,
+      "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/cd4e47da-76e6-49ea-bf6a-1c95d0c7399a/bec09319-49ec-441f-8cfa-7a347a8aa459/Model-740f6436413f3a2970213ccdf66ee50f1e02dfb4a6359ca75fca64630e2ea8c8.glb",
+      "dim_studs_xyz": [
+        7.5,
+        5.97,
+        7.83
+      ],
+      "reducao_local": {
+        "ferramenta": "tools/decimate_glb.py",
+        "pymeshlab": "2025.7.post1",
+        "faces": 2800,
+        "soltar_bordas": true,
+        "sha256_origem": "740f6436413f3a2970213ccdf66ee50f1e02dfb4a6359ca75fca64630e2ea8c8",
+        "triangulos_origem": 8397,
+        "desvio_max_m": 0.2946,
+        "desvio_medio_m": 0.01481
+      },
+      "sha256": "236b9b5ae327485521bba88e8e54c5d72bc7bf528accd1a5cd1f3070eed0225d"
+    }
+  ]
 }

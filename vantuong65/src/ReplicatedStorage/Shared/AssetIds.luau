@@ -59,10 +59,15 @@ return {
 		bamboo_clump = 122081516623030,
 		coconut_palm = 102968030425425,
 		banana = 100002712193200,
-		shrub = 103079002633133,
+		shrub = 131409897086783,
 		elephant_grass = 123073879703433,
-		hill_tree = 125112405205422,
-		rice_patch = 134482555063796, -- canteiro 2 x 1,45 m (reservado: denso demais para o arrozal inteiro)
+		hill_tree = 121233640900450,
+		rice_patch = 134482555063796, -- canteiro 2 x 1,45 m (só 3 canteiros perto das vilas, D-64)
+		-- mata fechada (D-65)
+		canopy_tree = 73770095205881, -- emergente de 24 m
+		melaleuca_grove = 130702304212118, -- tràm, grupo de 5 troncos de 13 m
+		taro_fern = 94455365060774, -- taioba e samambaia de 1,8 m
+		vine_tree = 0, -- copa tomada de cipó: geração em outcome_unknown (não regerar); usa o substituto
 		m14 = 88428577780253,
 		type56 = 92378317190418,
 		sks = 130539342920510,

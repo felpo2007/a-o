@@ -340,6 +340,24 @@ do usuário (opção A).
 - **Lobby novo:** dossiê de 1965 em 4 passos (lado, squad, papel, inserção), com o soldado em 3D e
   o mapa real desfocado ao fundo. Foi conferido no Studio passo a passo, até o spawn.
 - **Capacete visível:** antes ficava rente à cabeça do avatar.
+
+## Mata fechada (2026-11-10, D-65)
+- **Paisagem:** 71% do mapa virou mata fechada. A lavoura de arroz fica só em volta das vilas,
+  com clareiras nos pontos fortes, na LZ Blue e nos QGs.
+- **Plantas:** 48,4 mil, em três andares: emergentes, copas grandes e montes de cipó, e
+  sub-bosque.
+- **Modelos novos do ForgeGUI publicados:**
+  - árvore emergente de 24 m;
+  - bosque de tràm;
+  - taioba com samambaia.
+- **Não vieram:**
+  - a copa de cipó (`outcome_unknown`, não regerar);
+  - o monte de cipó (acabou o crédito: 3.693 de 4.000).
+- **Texturas escuras corrigidas** no arbusto e na árvore de folha larga.
+- **Studio:** dossel contínuo do alto da Colina 43 e mata fechada por dentro.
+  - A GPU travou num teste com o FC 26 aberto. Depois disso as sombras caíram para 7,1 mil
+    árvores.
+  - **fps não medido.**
 - **fps:** 59,3 de média no ponto mais denso, antes dos modelos foscos e da grama. Com o EA FC 26
   aberto em primeiro plano, a medida não vale. **Medir de novo com o PC livre.**
 
