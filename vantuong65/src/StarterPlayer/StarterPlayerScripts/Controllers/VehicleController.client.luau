@@ -381,7 +381,7 @@ local function heliStep(model: Model, chassis: BasePart, dt: number)
 	local H = VehicleDrive.HELI
 	local atm = HeliModel.atmosphere(AIR_C)
 	-- controle: RT/LT coletivo, analógico esquerdo cíclico, RB/LB pedais; teclado: Espaço/Ctrl, WASD, Q/E;
-	-- toque: analógico flutuante cíclico, alavanca da tela coletivo (posição), botões de pedal
+	-- toque: analógico flutuante cíclico (de lado e devagar, pedal: v39), alavanca da tela coletivo
 	local up, cyc
 	local lever: number? = nil
 	local L = PilotoToque.lever
@@ -431,6 +431,13 @@ local function heliStep(model: Model, chassis: BasePart, dt: number)
 	end
 	local gearH = rotorZ - S.igeZ -- altura das rodas
 	local V = Vector3.new(heli.vel.X, 0, heli.vel.Z).Magnitude
+	-- v39: sem pedais na tela do toque: devagar, o analógico de lado vira o nariz; rápido, inclina
+	local touchPedal = 0
+	if touch then
+		local p, cx = PilotoToque.touchYaw(cyc.X, V)
+		touchPedal = p
+		cyc = Vector2.new(cx, cyc.Y)
+	end
 	-- a sustentação cresce com o rotor²: parado, o motor gira o rotor antes de levantar
 	local pAvail = HeliModel.powerAvailable(atm) * heli.rotor * heli.rotor
 	local pDemand = heli.collective * pAvail
@@ -465,8 +472,9 @@ local function heliStep(model: Model, chassis: BasePart, dt: number)
 	heli.roll, heli.rollV = VehicleDrive.attitude(heli.roll, heli.rollV, tr, dt)
 	-- guinada: pedais, torque sem pedal e, em velocidade, a cauda alinhando o nariz com a curva
 	local torque = HeliModel.torqueFraction(pDemand)
-	local pedal = PilotoToque.pedal(ctl.pedalL, ctl.pedalR)
-	local drift = if torque > 0.92 then (torque - 0.92) * math.rad(200) else 0 -- falta pedal: nariz gira
+	local pedal = if touch then touchPedal else PilotoToque.pedal(ctl.pedalL, ctl.pedalR)
+	-- falta pedal: nariz gira. No toque (sem pedal na tela) o torque é compensado sozinho
+	local drift = if torque > 0.92 and not touch then (torque - 0.92) * math.rad(200) else 0
 	local yawTarget = -(pedal * math.rad(35) * (if onGround then 0.5 else 1) + drift) * math.min(heli.rotor * 2, 1)
 	if not onGround then
 		yawTarget += VehicleDrive.coordinatedYaw(heli.roll, V)

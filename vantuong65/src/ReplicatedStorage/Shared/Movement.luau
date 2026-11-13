@@ -15,6 +15,9 @@
 --   o passo e as posturas ficam rápidos como no Front 44 (arrancada e parada mais secas, agachado
 --   e rastejar mais ágeis, deitar/levantar mais curtos) e o inclinar é o dele (Movement.LEAN). Água,
 --   VC × 1,12, soldado de 2 m e passada assistida continuam.
+-- 2026-11-13 ("copie a movimentação igual a do Front 44", "faça o jogo mais fast paced"): os números
+--   do Front 44 (Config.Movement): velocidades, pulo, deslizar, arrancada quase na hora, posturas mais
+--   rápidas; a câmera balança menos (lá não balança com o passo).
 -- Tudo em metros e segundos (o runtime converte com STUD_M). Os números são de DESIGN, escolhidos
 -- pela fisiologia de referência e pelo ritmo do jogo; NENHUM foi medido em playtest (PLACEHOLDER).
 local Units = require(script and (script :: any).Parent.Units or "./Units") :: any
@@ -30,18 +33,21 @@ Movement.STUD_M = STUD
 local BODY_K: number = Corpo.K
 Movement.BODY_K = BODY_K
 
--- ===== velocidades-base (m/s): as mesmas do servidor (Units.Speed e MedicalService.apply) =====
+-- ===== velocidades-base (m/s): as mesmas do servidor (Movement.serverSpeed, MedicalService.apply) =====
 -- São também as âncoras das animações (SoldierAnims.ANCHOR) e dos bots (BotLocomotion): não mudam
 -- por lado. O lado multiplica por cima (Movement.factionSpeed).
+-- 2026-11-13 (dono: "copie a movimentação igual a do Front 44" e "faça o jogo mais fast paced"): as
+-- velocidades do Front 44 (Config.Movement, studs/s). Lá 1 stud também é 0,28 m e o mundo tem a mesma
+-- escala (portas, muros, mapas): os m/s são os mesmos. O boneco de lá tem 5 studs e o daqui 7,14, mas
+-- o que se sente correndo é o mundo passando. Antes (D-93/D-99): trote 3,1, corrida 5,5, agachado
+-- 1,4, rastejar 0,5, mirando 1,8 m/s. O VC × 1,12 e a perna ferida (1,4) continuam. PLACEHOLDER.
+Movement.F44 = { walk = 14, sprint = 21, crouch = 7, ads = 9, prone = 4, jump = 34, slide = 27 } -- studs/s
 Movement.WALK = Units.Speed.walk * STUD -- 1,4: caminhada (perna ferida)
-Movement.JOG = Units.Speed.jog * STUD -- 3,1: andar padrão do jogo (trote)
-Movement.SPRINT = Units.Speed.sprint * STUD -- 5,5: corrida
--- D-99: agachado e rastejar como no Front 44, que anda agachado a 7 studs/s (2,0 m/s) e rasteja a 4
--- (1,1 m/s). Aqui um meio-termo com a passada das animações (agachado_andar 0,86 m/s e rastejar 0,4
--- m/s no corpo de 2 m, RATE_MAX 2,5): agachado 1,4 (antes 0,84) e rastejar 0,5 (antes 0,35). PLACEHOLDER.
-Movement.CROUCH = Movement.WALK -- 1,4
-Movement.PRONE = 0.5 -- rastejar
-Movement.ADS = 1.8 -- andando com a arma no ombro
+Movement.JOG = Movement.F44.walk * STUD -- 3,92: andar padrão do jogo (o "Walk" do Front 44)
+Movement.SPRINT = Movement.F44.sprint * STUD -- 5,88: corrida
+Movement.CROUCH = Movement.F44.crouch * STUD -- 1,96
+Movement.PRONE = Movement.F44.prone * STUD -- 1,12: rastejar
+Movement.ADS = Movement.F44.ads * STUD -- 2,52: andando com a arma no ombro
 Movement.TRANSITION = 0.6 -- enquanto deita ou levanta
 Movement.SWIM = 0.9
 -- Corrida pela direção do pedido em relação à frente (cosseno): cheia até ~45° (W+D no teclado),
@@ -389,7 +395,9 @@ end
 -- com ele. O jogador usa moveStep (D-93).
 Movement.ACCEL = 7 -- m/s² acelerando: parado → trote em ~0,45 s; trote → corrida em ~0,35 s
 Movement.DECEL = 10 -- m/s² freando: corrida → parado em ~0,55 s
-Movement.AIR_GRIP = 0.1 -- no ar quase não há controle (o embalo continua)
+-- no ar: pouco controle (o embalo continua). 2026-11-13: 0,1 → 0,15 (com a arrancada nova, 6 m/s² no
+-- ar; no Front 44 o Humanoid tem o controle do ar inteiro)
+Movement.AIR_GRIP = 0.15
 
 -- Passo da velocidade horizontal (vx, vz) em direção à alvo (tx, tz), com aceleração limitada.
 -- grip multiplica a aceleração (lama e arrozal pesam e escorregam; no ar, AIR_GRIP).
@@ -414,14 +422,16 @@ end
 --     corrida ~170°/s) SEM perder velocidade. O modelo vetorial cortava caminho pela corda: no
 --     A↔D ou numa curva de 90° a velocidade caía a 70% e o passo parecia patinar;
 --   - meia-volta (mais de ~110°): freia e arranca para o outro lado.
--- D-99 (Front 44): o Humanoid do Front 44 chega à velocidade quase na hora e para seco. Aqui o passo
--- fica perto disso sem perder o embalo: arrancada 16 → 8 m/s² (parado → trote ~0,23 s; trote →
--- corrida ~0,26 s), parada 16 m/s² (trote → parado ~0,2 s) e curva 22 m/s². Antes: 11 → 5, 12 e 16.
-Movement.ACCEL_LOW = 16
-Movement.ACCEL_HIGH = 8
-Movement.DECEL_MOVE = 16
-Movement.TURN_LAT = 22
-Movement.TURN_MAX = 8 -- rad/s (devagar a direção vira quase na hora)
+-- D-99 (Front 44): o Humanoid do Front 44 chega à velocidade quase na hora e para seco (lá o script só
+-- põe o WalkSpeed; a aceleração é a do Humanoid). 2026-11-13 ("copie a movimentação igual a do Front
+-- 44"): agora quase isso, com um resto de suavização para a passada das animações não dar tranco:
+-- arrancada 40 → 30 m/s² (parado → trote ~0,1 s; trote → corrida ~0,06 s), parada 40 m/s² (corrida →
+-- parado ~0,15 s), curva 60 m/s² (90° correndo em ~0,15 s). Antes (D-99): 16 → 8, 16 e 22. PLACEHOLDER.
+Movement.ACCEL_LOW = 40
+Movement.ACCEL_HIGH = 30
+Movement.DECEL_MOVE = 40
+Movement.TURN_LAT = 60
+Movement.TURN_MAX = 16 -- rad/s (devagar a direção vira quase na hora)
 Movement.TURN_MIN_MPS = 0.5 -- abaixo disto a velocidade é tratada como vetor (arrancada)
 Movement.REVERSE_COS = -0.35
 
@@ -474,7 +484,8 @@ Movement.SPRINT_S = 24 -- corrida contínua do descansado até zerar, com até 1
 Movement.EXHAUSTED_UNTIL = 0.35 -- sem fôlego: só volta a correr acima disto
 Movement.RECOVER_DELAY = 1.2 -- s depois do último esforço para começar a recuperar
 Movement.RECOVER = { still = 0.07, crouch = 0.085, prone = 0.1, walk = 0.045, jog = 0.012 }
-Movement.COST = { jump = 0.07, vault = 0.05, mantle = 0.1, dive = 0.08 }
+-- 2026-11-13: pulo 0,07 → 0,03 (no Front 44 não custa; o deslizar também não)
+Movement.COST = { jump = 0.03, vault = 0.05, mantle = 0.1, dive = 0.08, slide = 0 }
 
 export type Effort = {
 	kind: string, -- "sprint" | "jog" | "walk" | "still"
@@ -567,11 +578,15 @@ function Movement.hipSpreadDeg(speedMps: number, stamina: number, stance: string
 end
 
 -- ===== pulo =====
-Movement.JUMP_REST_M = 0.45 -- descansado e com até 15 kg
-Movement.JUMP_TIRED_M = 0.2
-Movement.JUMP_MIN_M = 0.12
-Movement.JUMP_MIN_STAMINA = 0.08
-Movement.JUMP_COOLDOWN = 0.8 -- s depois de aterrissar (sem "coelhinho")
+-- 2026-11-13 (Front 44): JumpPower 34 studs/s com a gravidade padrão do Roblox (196,2 studs/s², a
+-- mesma daqui) = 2,95 studs = 0,825 m e 0,35 s no ar. Antes 0,45 m descansado, 0,2 m cansado e 0,8 s
+-- de intervalo. Fica o que é daqui: cansado e com peso pula menos, e um intervalo curto depois de
+-- aterrissar (no Front 44 só o do Humanoid). PLACEHOLDER.
+Movement.JUMP_REST_M = 0.825 -- descansado e com até 15 kg
+Movement.JUMP_TIRED_M = 0.45
+Movement.JUMP_MIN_M = 0.2
+Movement.JUMP_MIN_STAMINA = 0.05
+Movement.JUMP_COOLDOWN = 0.3 -- s depois de aterrissar (sem "coelhinho")
 
 function Movement.jumpHeight(stamina: number, loadKg: number): number
 	local h = Movement.JUMP_TIRED_M + (Movement.JUMP_REST_M - Movement.JUMP_TIRED_M) * math.clamp(stamina, 0, 1)
@@ -587,12 +602,16 @@ end
 -- ===== aterrissagem =====
 -- Pela altura da queda (m), não pela velocidade: a gravidade do Roblox (196,2 studs/s²) não é a real.
 -- Devolve: afundada da câmera (m), fator de velocidade, duração do fator (s) e gasto de fôlego.
+-- 2026-11-13: com o pulo do Front 44 (0,825 m) o próprio pulo não freia nem cansa: o freio e o gasto
+-- começam acima de LAND_FREE_M (a afundada da câmera continua desde 0,25 m).
+Movement.LAND_FREE_M = 0.95
 function Movement.landing(dropM: number): (number, number, number, number)
 	if dropM < 0.25 then
 		return 0, 1, 0, 0
 	end
-	local k = math.clamp((dropM - 0.25) / 2.5, 0, 1) -- 2,75 m ou mais = pior caso
-	return 0.02 + 0.1 * k, 1 - 0.65 * k, 0.2 + 0.6 * k, 0.12 * k
+	local soft = math.clamp((dropM - 0.25) / 2.5, 0, 1) -- 2,75 m ou mais = pior caso
+	local k = math.clamp((dropM - Movement.LAND_FREE_M) / (2.75 - Movement.LAND_FREE_M), 0, 1)
+	return 0.02 + 0.1 * soft, 1 - 0.65 * k, if k > 0 then 0.2 + 0.6 * k else 0, 0.12 * k
 end
 
 -- ===== transpor / escalar (dique, cerca, sacos de areia, mureta até 1,25 m) =====
@@ -713,15 +732,18 @@ end
 -- ===== postura: tempo da transição (câmera e velocidade) =====
 -- D-99 (Front 44: o quadril vai ao alvo a 10/s agachando e a 5/s deitando, ~0,25 s e ~0,5 s): mais
 -- curtos que antes (0,28 / 0,32 / 0,8 / 1,0 / 0,6 / 0,75 s).
+-- 2026-11-13 ("fast paced", Front 44): 90% do caminho do quadril do Front 44 (ln 10 / taxa): agachar
+-- 0,23 s, deitar 0,46 s; lá não se atira 0,45 s depois de deitar. Antes 0,22 / 0,25 / 0,6 / 0,75 /
+-- 0,5 / 0,55 s. PLACEHOLDER.
 Movement.STANCE_TIME = {
-	["stand>crouch"] = 0.22,
-	["crouch>stand"] = 0.25,
-	["stand>prone"] = 0.6,
-	["prone>stand"] = 0.75,
-	["crouch>prone"] = 0.5,
-	["prone>crouch"] = 0.55,
+	["stand>crouch"] = 0.18,
+	["crouch>stand"] = 0.2,
+	["stand>prone"] = 0.45,
+	["prone>stand"] = 0.5,
+	["crouch>prone"] = 0.4,
+	["prone>crouch"] = 0.4,
 } :: { [string]: number }
-Movement.DIVE_TIME = 0.45 -- mergulho correndo: chega ao chão mais rápido
+Movement.DIVE_TIME = 0.35 -- mergulho correndo: chega ao chão mais rápido (antes 0,45)
 Movement.DIVE_MIN_MPS = 3.5 -- velocidade mínima para mergulhar em vez de deitar
 Movement.DIVE_S = 0.5 -- duração do deslize do mergulho
 
@@ -741,6 +763,21 @@ end
 function Movement.diveSpeed(v0: number, t: number): number
 	local p = math.clamp(t / Movement.DIVE_S, 0, 1)
 	return v0 * (1 - p) ^ 1.5
+end
+
+-- ===== deslizar (Front 44: agachar correndo) =====
+-- Mantém o embalo da corrida e termina agachado: começa a SLIDE_MPS (27 studs/s = 7,56 m/s, mais que
+-- a corrida) e cai até a velocidade de agachado em SLIDE_S (0,8 s), pela curva do Front 44
+-- (SlideSpeed + (Crouch − SlideSpeed) × t²). O VC desliza 12% mais rápido, como corre.
+Movement.SLIDE_MPS = Movement.F44.slide * STUD
+Movement.SLIDE_S = 0.8
+Movement.SLIDE_MIN_MPS = 3.5 -- abaixo disto (andando) agachar só agacha
+Movement.SLIDE_ROLL_DEG = 5 -- a câmera tomba de lado (Front 44 "slideRoll")
+
+function Movement.slideSpeed(t: number, faction: string?): number
+	local k = Movement.factionSpeed(faction)
+	local p = math.clamp(t / Movement.SLIDE_S, 0, 1)
+	return (Movement.SLIDE_MPS + (Movement.CROUCH - Movement.SLIDE_MPS) * p * p) * k
 end
 
 -- ===== câmera: passo, respiração e afundada =====
@@ -764,7 +801,9 @@ function Movement.bob(
 	local wet = math.clamp(((waterM or 0) - 0.15) / 0.85, 0, 1)
 	local ref = Movement.JOG * (if wet > 0 then Movement.waterFactor(waterM :: number) else 1)
 	local k = math.clamp(speedMps / ref, 0, 1.8)
-	local ax, ay = 0.008 * k * (1 + 0.6 * wet), 0.012 * k * (1 + 1.2 * wet) -- trote: 0,8 cm e 1,2 cm
+	-- trote: 0,4 cm de lado e 0,6 cm de altura. 2026-11-13: a metade de antes (0,8 e 1,2 cm): no Front
+	-- 44 a câmera não balança com o passo (só a arma); fica um resto para o passo ter peso
+	local ax, ay = 0.004 * k * (1 + 0.6 * wet), 0.006 * k * (1 + 1.2 * wet)
 	if stance == "crouch" then
 		ax, ay = ax * 0.8, ay * 0.6
 	elseif stance == "prone" then
@@ -820,7 +859,9 @@ end
 -- Cabeça com inércia: massa e mola presas ao corpo. Arrancando, a cabeça fica um pouco para trás;
 -- parando de repente, vai um pouco para a frente e volta; na curva, para fora. ax = aceleração para a
 -- direita, az = para a frente (m/s², no rumo da câmera). Devolve em s.x (direita) e s.z (frente), m.
-Movement.HEAD = { hz = 2.2, zeta = 0.7, gain = 0.4, maxM = 0.035 }
+-- 2026-11-13: ganho 0,4 → 0,15 e teto 3,5 → 2,5 cm: com a arrancada do Front 44 (40 m/s²) a cabeça
+-- batia no teto a cada passo; o Front 44 não tem essa inércia
+Movement.HEAD = { hz = 2.2, zeta = 0.7, gain = 0.15, maxM = 0.025 }
 export type HeadState = { x: number, z: number, vx: number, vz: number }
 
 function Movement.newHead(): HeadState
@@ -845,7 +886,8 @@ end
 -- Inclinação lateral da câmera (rad; > 0 = cabeça para a esquerda, como CFrame.Angles(0, 0, a)):
 -- para o lado do passo lateral e para dentro da curva. Mirando e deitado, nada (a mira de ferro fica
 -- reta); agachado, menos. vRight em m/s, aRight em m/s² (para a direita > 0).
-Movement.ROLL = { perMps = 0.22, perAccel = 0.06, maxDeg = 1.4, tau = 0.12 }
+-- 2026-11-13: perAccel 0,06 → 0,02 (a aceleração agora é ~2,5 vezes a de antes)
+Movement.ROLL = { perMps = 0.22, perAccel = 0.02, maxDeg = 1.4, tau = 0.12 }
 
 function Movement.rollTarget(vRight: number, aRight: number, stance: string, aiming: boolean): number
 	if aiming or stance == "prone" then

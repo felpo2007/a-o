@@ -161,14 +161,15 @@ end, { h = px(48, 66) })
 claimOne.button.Position = UDim2.fromOffset(P, P + px(224, 300))
 claimOne.button.Size = UDim2.new(1, -2 * P, 0, px(48, 66))
 claimOne.label.TextXAlignment = Enum.TextXAlignment.Center
--- embaixo: receber tudo, Veterano e pular nível
-local claimAll = UiKit.action(prev, "RECEBER TUDO", "secondary", function()
+-- embaixo: receber tudo, Veterano e pular nível. Cores de compra (UiKit.PAGAR, 2026-11-13): receber
+-- é grátis (oliva); o Veterano e o pular nível se pagam em Robux (verde); sem ID, apagados
+local claimAll = UiKit.action(prev, "RECEBER TUDO", "free", function()
 	CampanhaCliente.action("claim_all")
 end, { h = px(40, 56) })
 claimAll.button.AnchorPoint = Vector2.new(0, 1)
 claimAll.button.Position = UDim2.new(0, P, 1, -(P + 2 * px(46, 64)))
 claimAll.button.Size = UDim2.new(1, -2 * P, 0, px(40, 56))
-local buyVet = UiKit.action(prev, "", "primary", function()
+local buyVet = UiKit.action(prev, "", "robux", function()
 	Bus.fire("passe_buy", "season")
 end, { h = px(40, 56) })
 buyVet.button.AnchorPoint = Vector2.new(0, 1)
@@ -176,7 +177,7 @@ buyVet.button.Position = UDim2.new(0, P, 1, -(P + px(46, 64)))
 buyVet.button.Size = UDim2.new(1, -2 * P, 0, px(40, 56))
 buyVet.label.TextXAlignment = Enum.TextXAlignment.Center
 buyVet.label.TextSize = UiKit.text(px(16, 22))
-local skip = UiKit.action(prev, "", "secondary", function()
+local skip = UiKit.action(prev, "", "robux", function()
 	Bus.fire("passe_buy", "skip")
 end, { h = px(40, 56) })
 skip.button.AnchorPoint = Vector2.new(0, 1)
@@ -512,6 +513,7 @@ paint = function()
 	local st = cellState(se, sel.track, sel.level)
 	claimOne.button.Visible = st == "ready" or (st == "locked" and not se.veteran)
 	claimOne.label.Text = if st == "locked" then "LIBERAR O VETERANO" else "RECEBER"
+	claimOne.setKind(if st == "locked" then "robux" else "free") -- liberar é a compra do Veterano
 	-- receber tudo: só se há algo para receber
 	local any = false
 	for lvl = 1, math.min(level, MAX) do

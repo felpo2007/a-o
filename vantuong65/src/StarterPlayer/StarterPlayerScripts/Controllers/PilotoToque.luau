@@ -10,14 +10,23 @@
 --     de pedal = guinada; o estabilizador (assistência, não piloto automático) liga ao assumir os
 --     comandos no toque;
 --   - botões: tamanho físico (mm) convertido para px da interface; nada na metade do analógico.
+-- v39 (dono: "muitos botões na tela do celular, deixe somente os importantes; o resto automático"):
+-- na tela só ficam o analógico (dirigir ou cíclico), a alavanca do coletivo, o tiro, LUGAR e SAIR.
+--   - pedais: sem botão. Devagar, o analógico de lado vira o nariz (touchYaw); rápido, ele inclina
+--     e a cauda alinha o nariz (curva coordenada). O torque é compensado sozinho no toque;
+--   - estabilizador: sempre ligado no toque (sem botão);
+--   - canhão (90 mm e 106 mm): segurar o tiro mira pela ótica e soltar dispara (aimOnHold); um toque
+--     rápido dispara sem ótica. Metralhadoras e a arma do ocupante: apertar atira, como antes;
+--   - munição do 90 mm: fica na explosiva; os tubos do Ontos recarregam sozinhos parado (autoReload);
+--   - binóculo, marca, coaxial: só no controle e no teclado.
 local PilotoToque = {}
 
 -- ===== tamanho físico (mm) =====
 -- Mínimo de toque ≈ 9 mm (44 pt / 48 dp); tiro ≈ 16 mm (contrato da Parte 13).
 PilotoToque.MM = {
-	min = 9, -- lugar, sair, munição, estabilizador
-	mid = 11, -- coaxial, ótica, binóculo, marcar, pedais
-	fire = 16, -- tiro principal / porta
+	min = 9, -- lugar e sair (Toque.MIN_MM)
+	mid = 11, -- reserva (coaxial, ótica, pedais saíram da tela na v39)
+	fire = 16, -- tiro principal / porta (Toque.FIRE_MM)
 	leverW = 13,
 	leverMin = 22, -- curso mínimo da alavanca
 	leverMax = 40,
@@ -157,15 +166,50 @@ function PilotoToque.assistOnEnter(current: boolean, touch: boolean): boolean
 	return if touch then true else current
 end
 
+-- v39: sem pedais na tela. O lado do analógico (x, −1..1) vira pedal parado e devagar, e cíclico
+-- lateral rápido (aí a curva coordenada vira o nariz). Mistura linear entre YAW_FULL_MS e
+-- YAW_NONE_MS (PLACEHOLDER de projeto). Devolve (pedal: +1 direito, cíclico lateral).
+PilotoToque.YAW_FULL_MS = 3
+PilotoToque.YAW_NONE_MS = 10
+
+function PilotoToque.touchYaw(x: number, speedMs: number): (number, number)
+	local k =
+		math.clamp((speedMs - PilotoToque.YAW_FULL_MS) / (PilotoToque.YAW_NONE_MS - PilotoToque.YAW_FULL_MS), 0, 1)
+	local v = math.clamp(x, -1, 1)
+	return v * (1 - k), v * k
+end
+
+-- v39: canhão de tiro único no toque: segurar mira pela ótica (passado este tempo), soltar dispara.
+PilotoToque.AIM_HOLD_S = 0.18
+
+function PilotoToque.aimOnHold(weapon: string?): boolean
+	return weapon == "gun_90" or weapon == "rr_106"
+end
+
+-- v39: os tubos do Ontos recarregam sozinhos no toque: faltou tubo, o veículo está parado (a regra
+-- do servidor: até 0,5 m/s), não está recarregando e o último pedido foi há mais de 2 s.
+PilotoToque.RELOAD_RETRY_S = 2
+
+function PilotoToque.autoReload(
+	tubes: number?,
+	maxTubes: number,
+	speedMs: number,
+	reloading: boolean,
+	since: number
+): boolean
+	return tubes ~= nil
+		and tubes < maxTubes
+		and speedMs <= 0.5
+		and not reloading
+		and since >= PilotoToque.RELOAD_RETRY_S
+end
+
 -- ===== disposição dos botões (paisagem, dois polegares) =====
 -- Retângulos em px da interface, origem no canto de cima à esquerda da área segura. Tudo à direita
 -- (a metade esquerda é do analógico flutuante); mirror espelha para canhotos (touchMirror do T1).
 export type Rect = { x: number, y: number, w: number, h: number }
 export type Opts = {
 	fire: boolean, -- tem tiro (atirador com arma, porta)
-	coax: boolean, -- coaxial (canhão de 90 mm)
-	optic: boolean, -- ótica / zoom
-	ammo: boolean, -- trocar munição / recarregar
 	mirror: boolean,
 	avoid: Rect?, -- botão de outro HUD no alto à direita (o rádio do HUD de toque do T1), px sem espelho
 }
@@ -186,11 +230,7 @@ function PilotoToque.layout(role: string, W: number, H: number, o: Opts, px: (mm
 	local function need(margin: number, gap: number): number
 		return if role == "pilot"
 			then 2 * margin + MM.min + 2 * gap + MM.leverMin
-			elseif role == "gunner" or role == "door" or role == "commander" then 2 * margin
-				+ MM.min
-				+ 2 * gap
-				+ MM.mid
-				+ MM.fire
+			elseif (role == "gunner" or role == "door") and o.fire then 2 * margin + MM.min + 2 * gap + MM.fire
 			else 2 * margin + MM.min
 	end
 	-- não cabe: primeiro margens apertadas; ainda não cabe, tudo encolhe por igual (até 70%)
@@ -203,7 +243,7 @@ function PilotoToque.layout(role: string, W: number, H: number, o: Opts, px: (mm
 		return math.floor(px(mm) * k + 0.5)
 	end
 	local m, g = s(margin), s(gap)
-	local S, C, F = s(MM.min), s(MM.mid), s(MM.fire)
+	local S, F = s(MM.min), s(MM.fire)
 	local out: { [string]: Rect } = {}
 	-- todos: sair no alto à direita (à esquerda do rádio do T1, se houver), lugares à esquerda dele
 	local avoid = o.avoid
@@ -221,32 +261,9 @@ function PilotoToque.layout(role: string, W: number, H: number, o: Opts, px: (mm
 		out.lever = { x = W - m - LW, y = y0, w = LW, h = LH }
 		-- rótulo "COLETIVO" no vão logo acima da alavanca
 		out.leverLabel = { x = W - m - LW - g, y = y0 - math.floor(g * 1.75), w = LW + 2 * g, h = math.floor(g * 1.5) }
-		local pr = { x = W - m - LW - g - C, y = H - m - C, w = C, h = C }
-		out.pedalR = pr
-		out.pedalL = { x = pr.x - g - C, y = pr.y, w = C, h = C }
-		out.stab = { x = pr.x + C - S, y = pr.y - g - S, w = S, h = S }
-	elseif role == "gunner" or role == "door" or role == "commander" then
-		local fire = { x = W - m - F, y = H - m - F, w = F, h = F }
-		local side = { x = fire.x - g - C, y = H - m - C, w = C, h = C } -- à esquerda do tiro
-		local top = { x = W - m - C, y = fire.y - g - C, w = C, h = C } -- em cima do tiro
-		if role == "commander" then
-			out.binoc = top
-			out.mark = side
-		else
-			if o.fire then
-				out.fire = fire
-			end
-			if o.optic then
-				out.optic = top
-			end
-			if o.coax and role == "gunner" then
-				out.coax = side
-			end
-			if o.ammo and role == "gunner" then
-				-- na diagonal de cima à esquerda, entre a coaxial e a ótica
-				out.ammo = { x = side.x + C - S, y = top.y + C - S, w = S, h = S }
-			end
-		end
+	elseif (role == "gunner" or role == "door") and o.fire then
+		-- só o tiro, no canto de baixo à direita (arrastar o próprio botão mira)
+		out.fire = { x = W - m - F, y = H - m - F, w = F, h = F }
 	end
 	if o.mirror then
 		for _, r in out do

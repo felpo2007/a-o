@@ -81,6 +81,14 @@ if game:GetService("RunService"):IsStudio() then
 	end)
 end
 
+-- D-107: entrou em campo com o cartão aberto (JOGAR AGORA direto da mesa ou da tela de entrada):
+-- fecha, fica no automático (no teste da v39 o cartão ficava por cima do jogo)
+player.CharacterAdded:Connect(function()
+	if Idioma.aberto() then
+		Idioma.fechar()
+	end
+end)
+
 -- primeira vez: depois que a tela de entrada sai e a configuração da conta chega
 task.spawn(function()
 	local pg = player:WaitForChild("PlayerGui")

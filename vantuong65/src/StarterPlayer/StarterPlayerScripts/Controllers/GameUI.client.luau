@@ -31,6 +31,7 @@ local Bus = require(script.Parent.Bus)
 local CartaView = require(script.Parent.CartaView)
 local DeployScreen = require(script.Parent.DeployScreen)
 local Input = require(script.Parent.Input)
+local JogarAgora = require(script.Parent.JogarAgora)
 local LobbyScene = require(script.Parent.LobbyScene)
 local Marcadores = require(script.Parent.Marcadores)
 local SpawnTransition = require(script.Parent.SpawnTransition)
@@ -396,6 +397,10 @@ Input.on("ui_back", "press", function()
 	if UiKit.top() ~= nil or Input.state.menus > 1 or menusBefore > 1 then
 		return
 	end
+	if JogarAgora.busy() then
+		JogarAgora.cancel() -- jogar agora contando: o voltar só cancela (fica na mesa)
+		return
+	end
 	if side.Visible and not mapWanted then
 		DeployScreen.back()
 	end
@@ -437,6 +442,10 @@ Input.on("map", "press", function() -- M no teclado
 	refresh()
 end)
 local function closeMap()
+	if mode == "spawn" and JogarAgora.busy() then
+		JogarAgora.cancel() -- jogar agora contando: B/M só cancelam (a carta fica para escolher)
+		return
+	end
 	if mode == "target" then
 		Bus.fire("map_target_end")
 	end
@@ -530,7 +539,7 @@ local function hintText(): string
 		return "A marca · gatilhos zoom · R arrasta · L3 você · Y reunião do squad · B fecha"
 	end
 	if mode == "spawn" then
-		return "clique num ponto PRONTO · roda zoom · arraste · R papel · M volta"
+		return "clique num ponto PRONTO · J jogar agora · roda zoom · arraste · R papel · M volta"
 	elseif mode == "target" then
 		return "clique no alvo · roda zoom · arraste · M cancela"
 	end

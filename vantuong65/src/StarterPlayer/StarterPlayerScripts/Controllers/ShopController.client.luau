@@ -511,9 +511,11 @@ do
 		local g = Instance.new("UIGradient")
 		g.Rotation = 0
 		g.Color = ColorSequence.new({
-			ColorSequenceKeypoint.new(0, Color3.new(0.82, 0.82, 0.82)),
-			ColorSequenceKeypoint.new(0.6, Color3.new(1, 1, 1)),
-			ColorSequenceKeypoint.new(1, Color3.new(1.15, 1.15, 1.1)),
+			-- cor do gradiente vai de 0 a 1 (1,15 dava "color value out of range" no console): a mesma
+			-- proporção, com o canto do soldado no branco
+			ColorSequenceKeypoint.new(0, Color3.new(0.71, 0.71, 0.72)),
+			ColorSequenceKeypoint.new(0.6, Color3.new(0.87, 0.87, 0.9)),
+			ColorSequenceKeypoint.new(1, Color3.new(1, 1, 0.96)),
 		})
 		g.Parent = f
 	end
@@ -560,7 +562,8 @@ do
 	desc.Size = UDim2.new(1, -(P + PREV_W + px(12, 16)), 0, px(56, 80))
 	desc.TextTruncate = Enum.TextTruncate.AtEnd
 	hero.desc = desc
-	local buy = UiKit.action(f, "", "primary", function()
+	-- cores de compra (UiKit.PAGAR, 2026-11-13): tudo da vitrine se paga em Robux (verde)
+	local buy = UiKit.action(f, "", "robux", function()
 		local o = hero.offer :: Offer?
 		if o and not o.owned then
 			o.action()
@@ -681,7 +684,6 @@ local function card(parent: Instance, o: Offer, n: number): GuiObject
 		bt.AnchorPoint = Vector2.new(0, 1)
 		bt.Position = UDim2.new(0, P, 1, -P)
 		bt.Size = UDim2.new(1, -2 * P, 0, px(36, 50))
-		bt.BackgroundColor3 = V.OLIVE
 		bt.AutoButtonColor = false
 		bt.FontFace = F.TITLE_MED
 		bt.TextColor3 = V.TEXT
@@ -696,7 +698,7 @@ local function card(parent: Instance, o: Offer, n: number): GuiObject
 				bt.Text = t
 			end
 		end)
-		local r = UiKit.realce(bt, V.OLIVE, V.OLIVE_HI, 1.03)
+		local r = UiKit.payPaint(bt, "robux", 1.03) -- preço em Robux: verde (UiKit.PAGAR)
 		local function both(on: boolean)
 			r.set(on)
 			hot(on)
@@ -1089,6 +1091,7 @@ type PageItem = {
 	price: ((set: (string) -> ()) -> ())?, -- escreve o texto do botão (agora e quando o preço chegar)
 	enabled: boolean,
 	onClick: () -> (),
+	pay: string?, -- forma de pagar (UiKit.PAGAR: "robux", "ci"); nil = ação sem compra (oliva)
 }
 local ITEM_H = px(150, 206)
 local function itemCard(parent: Instance, it: PageItem, n: number): Frame
@@ -1132,7 +1135,7 @@ local function itemCard(parent: Instance, it: PageItem, n: number): Frame
 		t.Position = UDim2.new(0, P, 1, -P)
 		return f
 	end
-	local bt = UiKit.action(f, "", if it.enabled then "primary" else "secondary", function()
+	local bt = UiKit.action(f, "", if it.enabled then (it.pay or "primary") else "secondary", function()
 		if it.enabled then
 			it.onClick()
 		end
@@ -1204,6 +1207,7 @@ local function robuxItem(e: Entry, kind: string, mark: string, accent: Color3, o
 		badge = badge,
 		owned = owned,
 		enabled = e.id ~= 0,
+		pay = "robux",
 		price = function(set: (string) -> ())
 			if e.id == 0 then
 				set("EM BREVE")
@@ -1328,6 +1332,7 @@ local function renderMarket(force: boolean?)
 				badge = badge,
 				owned = mi.owned == true,
 				enabled = not isRobux or id ~= 0,
+				pay = if isRobux then "robux" else "ci",
 				price = function(set: (string) -> ())
 					if not isRobux then
 						set(string.format("COMPRAR · %s", Progression.money(tonumber(mi.price) or 0)))

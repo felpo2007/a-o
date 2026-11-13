@@ -51,6 +51,35 @@ local function swapShoulder()
 end
 Input.on("shoulder_swap", "press", swapShoulder) -- tecla I
 Input.on("shoulder_swap", "holdStart", swapShoulder) -- direcional ↑ segurado
+-- 2026-11-13 ("coloque o botão para 3ª pessoa"): as mesmas funções para quem não passa pelo Input
+-- (botão de toque, menu) e pelo Bus
+ViewMode.toggle = toggleView
+ViewMode.swapShoulder = swapShoulder
+ViewMode.wanted = function(): boolean
+	return Input.settings.thirdPerson == true
+end
+Bus.on("view_toggle", toggleView)
+
+-- Aviso do botão nas duas primeiras entradas em campo (no Front 44 é o H; aqui o H é desistir)
+local hints = 0
+local function hint()
+	hints += 1
+	if hints > 2 or not ViewMode.allowed() then
+		return
+	end
+	task.delay(4, function()
+		local hum = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+		if not hum or hum.Health <= 0 or Input.settings.thirdPerson then
+			return
+		end
+		local text = if Input.touchActive()
+			then "CÂMERA: 1ª / 3ª pessoa"
+			elseif Input.isGamepad() then "Segure → no direcional: 1ª / 3ª pessoa"
+			else "Tecla O: 1ª / 3ª pessoa"
+		Bus.fire("toast", text)
+	end)
+end
+player.CharacterAdded:Connect(hint)
 
 workspace:GetAttributeChangedSignal("ThirdPersonAllowed"):Connect(function()
 	if not ViewMode.allowed() and Input.settings.thirdPerson then

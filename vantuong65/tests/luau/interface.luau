@@ -317,8 +317,9 @@ test("inserção: câmera nivelada (−5° a 0°) em tween curto, antes do voo, 
 end)
 
 -- ===== estilo novo (2026-11-11: "não gosto dessa escrita no papel e dessa ideia") =====
+-- A tela de entrada saiu da lista em 2026-11-13: o dono pediu de volta a tela antiga (película,
+-- briefing datilografado e carta com o carimbo), que é a única com máquina de escrever.
 local REDONE = {
-	"src/ReplicatedFirst/LoadingScreen.client.luau",
 	"src/ReplicatedFirst/Idioma.luau",
 	C .. "CasualtyScreen.luau",
 	C .. "DeployScreen.luau",
@@ -402,7 +403,106 @@ test("baixa: renascer, renascer aqui (créditos e Robux) e voltar, com o motivo 
 	assert(string.find(src, '"RENASCER"', 1, true), "RENASCER")
 	assert(string.find(src, '"inplace", "robux"', 1, true), "Robux pelo servidor (que abre a compra)")
 	assert(string.find(src, '"NO MESMO LUGAR"', 1, true), "linha do mesmo lugar")
-	assert(string.find(src, "SoldierPreview", 1, true), "o próprio soldado")
+	assert(string.find(src, "CenaBaixa.show", 1, true), "o próprio soldado, caído")
+end)
+
+-- ===== tela de baixa de 2026-11-13: soldado caído, renascer rápido, veículo e desistir sempre =====
+test("baixa: RENASCER é o jogar agora; veículo pelo pedido da D-103; carta à parte", function()
+	local src = fs.readFile(C .. "CasualtyScreen.luau")
+	assert(string.find(src, "JogarAgora.start({ vehicle = vehicle })", 1, true), "renascer rápido")
+	assert(string.find(src, '"COM VEÍCULO"', 1, true) and string.find(src, '"ESCOLHER NA CARTA"', 1, true))
+	assert(string.find(src, "FireServer({ spec = o.spec, pay = o.pay })", 1, true), "Vehicle_Order da carta")
+	assert(string.find(src, 'msg.state == "armed"', 1, true), "só renasce com o pedido armado")
+	assert(string.find(src, "CompraVeiculo.productId(spec) ~= 0", 1, true), "Robux só com produto criado")
+	-- desistir: o anel fica sempre na tela; a espera vem do Shared/Medical (pode ser zero ou sumir)
+	assert(string.find(src, "D.ring.Visible = true", 1, true), "anel sempre visível")
+	assert(not string.find(src, "Medical.C.giveUpAfter -", 1, true), "sem conta direta no campo")
+	assert(string.find(src, "tonumber((Medical.C :: any).giveUpAfter) or 0", 1, true), "campo sumido = 0")
+end)
+
+test("baixa: a cena deita o soldado pelas juntas (Motor6D e AnimationConstraint) e larga a arma", function()
+	local src = fs.readFile(C .. "CenaBaixa.luau")
+	for _, j in { "Waist", "Neck", "RightShoulder", "LeftShoulder", "RightHip", "LeftHip", "LeftKnee" } do
+		assert(string.find(src, "\t" .. j .. " = deg(", 1, true), "pose sem " .. j)
+	end
+	assert(string.find(src, 'IsA("AnimationConstraint")', 1, true), "junta nova do avatar")
+	assert(string.find(src, '"RestC0"', 1, true), "C0 de repouso (a postura mexe no C0)")
+	assert(string.find(src, 'FindFirstChild("Weapon")', 1, true), "a arma sai da mão")
+	assert(string.find(src, "VT65Preview", 1, true), "sem retrato: o manequim do lado")
+	assert(not string.find(src, "RenderStepped", 1, true), "nada por quadro")
+end)
+
+-- ===== cores de compra (2026-11-13): Robux, créditos e grátis com cor própria e texto legível =====
+local function lin(c: number): number
+	local s = c / 255
+	return if s <= 0.04045 then s / 12.92 else ((s + 0.055) / 1.055) ^ 2.4
+end
+local function lum(r: number, g: number, b: number): number
+	return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b)
+end
+test("cores de compra: três cores diferentes, texto claro com contraste >= 3:1 (texto grande)", function()
+	local kit = fs.readFile(C .. "UiKit.luau")
+	local est = fs.readFile("src/ReplicatedFirst/Estilo.luau")
+	local function rgb(src: string, pat: string): (number, number, number)
+		local r, g, b = string.match(src, pat)
+		assert(r, "cor não achada: " .. pat)
+		return tonumber(r) :: number, tonumber(g) :: number, tonumber(b) :: number
+	end
+	local tr, tg, tb = rgb(est, "\tTEXT = Color3%.fromRGB%((%d+), (%d+), (%d+)%)")
+	local text = lum(tr, tg, tb)
+	local seen: { [string]: boolean } = {}
+	for _, k in { "robux", "ci" } do
+		local r, g, b = rgb(kit, "\t" .. k .. " = { base = Color3%.fromRGB%((%d+), (%d+), (%d+)%)")
+		local c = (text + 0.05) / (lum(r, g, b) + 0.05)
+		assert(c >= 3, string.format("%s: contraste %.2f", k, c))
+		seen[string.format("%d,%d,%d", r, g, b)] = true
+	end
+	local or_, og, ob = rgb(est, "\tOLIVE = Color3%.fromRGB%((%d+), (%d+), (%d+)%)")
+	assert((text + 0.05) / (lum(or_, og, ob) + 0.05) >= 3, "grátis (oliva)")
+	seen[string.format("%d,%d,%d", or_, og, ob)] = true
+	local n = 0
+	for _ in seen do
+		n += 1
+	end
+	assert(n == 3, "as três formas de pagar com cores diferentes")
+	assert(string.find(kit, "function UiKit.payPaint(", 1, true) and string.find(kit, "setKind = function", 1, true))
+end)
+
+test("cores de compra: baixa, loja, carta de inserção, passe e intendência usam o padrão", function()
+	local function has(file: string, needle: string)
+		assert(string.find(fs.readFile(C .. file), needle, 1, true), file .. ": " .. needle)
+	end
+	has("CasualtyScreen.luau", '"Renascer aqui · Robux", "robux"')
+	has("CasualtyScreen.luau", 'setKind("ci")')
+	has("ShopController.client.luau", 'UiKit.action(f, "", "robux"')
+	has("ShopController.client.luau", 'UiKit.payPaint(bt, "robux"')
+	has("ShopController.client.luau", 'pay = if isRobux then "robux" else "ci"')
+	has("CompraVeiculo.client.luau", 'addRow(name, "robux"')
+	has("CompraVeiculo.client.luau", 'addRow(name, "ci"')
+	has("TelaPasse.client.luau", 'UiKit.action(prev, "", "robux"')
+	has("Progresso.client.luau", "robux = { bg = UiKit.PAGAR.robux.base")
+end)
+
+test("carregamento: o visual antigo (b85331e) com o carregamento completo e o JOGAR AGORA", function()
+	local src = fs.readFile("src/ReplicatedFirst/LoadingScreen.client.luau")
+	for _, t in { "Acabamento.filme", '"SECRET"', "BRIEFING · O QUE O COMANDO SABE", "pontilha" } do
+		assert(string.find(src, t, 1, true), "visual antigo: " .. t)
+	end
+	for _, t in { "scanArt(workspace", "soundList()", "animList()", "TerrainReady", "CAP_S = 90" } do
+		assert(string.find(src, t, 1, true), "carregamento completo: " .. t)
+	end
+	assert(string.find(src, 'gui:SetAttribute("JogarAgora", true)', 1, true), "JOGAR AGORA")
+	local ja = fs.readFile(C .. "JogarAgora.luau")
+	assert(string.find(ja, '"VT65Loading"', 1, true) and string.find(ja, 'GetAttribute("JogarAgora")', 1, true))
+end)
+
+test("comandos: só com teclado e mouse ou controle; no toque nunca; fora da faixa de cima", function()
+	local src = fs.readFile(C .. "PainelComandos.client.luau")
+	assert(string.find(src, "keysMakeSense()", 1, true), "filtro do aparelho")
+	assert(string.find(src, 'if d ~= "kbm" or ToqueUi.active() then', 1, true), "toque nunca")
+	assert(string.find(src, "TouchEnabled and not UserInputService.KeyboardEnabled", 1, true), "celular")
+	assert(string.find(src, "Input.DeviceChanged:Connect(refresh)", 1, true), "troca na hora")
+	assert(string.find(src, "TOP_RESERVE", 1, true) and string.find(src, "Vector2.new(0, 1)", 1, true))
 end)
 
 -- ===== roda: fica aberta enquanto o botão estiver seguro (o dono: "a tela some muito rápido") =====

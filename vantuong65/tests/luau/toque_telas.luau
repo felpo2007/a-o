@@ -250,6 +250,117 @@ test("tutorial no toque: toda ação do tutorial tem o nome do botão na tela (n
 	assert(string.find(tut, "ToqueTelas.touchName", 1, true), "o tutorial usa os nomes no toque")
 end)
 
+-- ===== v39: nada de teclado no toque =====
+local function src(name: string): string
+	return fs.readFile(C .. name)
+end
+
+test("nada de teclado no toque: os nomes são os escritos nos botões; o Input.glyph não dá tecla", function()
+	local Toque = require(S .. "Toque") :: any
+	-- o nome de cada ação que tem botão é o texto do botão (o jogador procura o que lê); os opcionais
+	-- de seta (inclinar, desligados no padrão) ficam de fora
+	local glyphOf: { [string]: string } = {}
+	for _, d in Toque.BUTTONS do
+		if d.spec and d.glyph ~= "" and not d.optional then
+			for _, p in Toque.parseSpec(d.spec) do
+				glyphOf[p.id] = glyphOf[p.id] or d.glyph
+			end
+		end
+	end
+	for id, g in glyphOf do
+		local name = ToqueTelas.TOUCH_NAME[id]
+		assert(name, id .. " sem nome no toque")
+		assert(string.find(name, g, 1, true) == 1, string.format("%s: '%s' não começa com '%s'", id, name, g))
+	end
+	-- o que saiu da tela aponta para onde foi
+	assert(string.find(ToqueTelas.TOUCH_NAME.swap_weapon, "CARTÃO", 1, true))
+	assert(string.find(ToqueTelas.TOUCH_NAME.fire_mode, "CARTÃO", 1, true))
+	assert(ToqueTelas.TOUCH_NAME.view_toggle == "MENU" and ToqueTelas.TOUCH_NAME.mark == "COMUNICAR")
+	-- nenhum nome tem cara de tecla (uma letra, número ou nome de tecla)
+	for id, name in ToqueTelas.TOUCH_NAME do
+		assert(#name > 2, id .. ": nome curto demais (parece tecla)")
+		for _, k in { "Shift", "Ctrl", "Espaço", "Caps", "LMB", "RMB", "Enter", "Backspace" } do
+			assert(not string.find(name, k, 1, true), id .. ": " .. name)
+		end
+	end
+	-- o Input.glyph no toque devolve o nome do botão (tutorial, fichas, avisos), nunca a tecla
+	local input = src("Input.luau")
+	assert(
+		string.find(input, 'if device == "touch" then\n\t\treturn nil, ToqueTelas.TOUCH_NAME[actionId] or ""', 1, true),
+		"Input.glyph sem o ramo do toque"
+	)
+	-- a roda não mostra os números 1–8 no toque; o painel de teclas some no toque
+	assert(string.find(src("Wheel.luau"), "not Input.touchActive() -- as teclas 1–8 são do teclado", 1, true))
+	assert(string.find(src("PainelComandos.client.luau"), "ToqueUi.active()", 1, true))
+	-- no toque os avisos de interação do Roblox (que podem mostrar a tecla) dão lugar ao INTERAGIR
+	local auto = src("ToqueAuto.luau")
+	assert(string.find(auto, "Enum.ProximityPromptStyle.Custom", 1, true), "prompt sem o aviso do Roblox")
+	-- o texto do HUD de toque e dos automáticos não cita tecla
+	for _, f in { "ToqueHud.client.luau", "ToqueAuto.luau", "EditorHud.client.luau" } do
+		for n, l in string.split(src(f), "\n") do
+			local code = string.gsub(l, "%-%-.*$", "")
+			for s in string.gmatch(code, '"([^"]*)"') do
+				for _, k in { "[F]", "(F)", "(R)", "(C)", "(Z)", "(G)", "(V)", "Shift", "Caps Lock" } do
+					assert(not string.find(s, k, 1, true), string.format("%s:%d cita tecla: %s", f, n, s))
+				end
+			end
+		end
+	end
+end)
+
+test("cartão da arma no toque: tocar troca, segurar abre seletor, alça e baioneta; arrastar não", function()
+	assert(ToqueTelas.cardGesture(0.1, 2, true) == "tap", "toque curto troca")
+	assert(ToqueTelas.cardGesture(0.1, 2, false) == nil, "ainda segurando: espera")
+	assert(ToqueTelas.cardGesture(ToqueTelas.CARD_HOLD_S, 2, false) == "hold", "segurou: abre")
+	assert(ToqueTelas.cardGesture(ToqueTelas.CARD_HOLD_S + 1, 2, true) == "hold", "soltou depois: já abriu")
+	assert(ToqueTelas.cardGesture(0.1, 40, true) == nil, "arrastou: era o olhar")
+	assert(ToqueTelas.CARD_HOLD_S > ToqueTelas.TAP_S - 0.01, "segurar é mais longo que o toque")
+	local function same(a: { string }, b: { string }): boolean
+		return table.concat(a, ",") == table.concat(b, ",")
+	end
+	assert(same(ToqueTelas.weaponOptions(2, 3, true), { "mode", "zero_up", "bayonet" }), "M14 com baioneta")
+	assert(same(ToqueTelas.weaponOptions(1, 7, false), { "zero_down", "zero_up" }), "luneta sem baioneta")
+	assert(same(ToqueTelas.weaponOptions(2, 3), { "mode", "zero_up" }), "sem dizer: sem baioneta")
+	local hud = src("HudCampo.client.luau")
+	for _, t in { 'ToqueUi.tap("swap_weapon")', 'ToqueUi.tap("bayonet")', "ToqueTelas.cardGesture(", '"cartao"' } do
+		assert(string.find(hud, t, 1, true), t)
+	end
+	local ids: { [string]: boolean } = {}
+	for _, a in InputMap.ACTIONS do
+		ids[a.id] = true
+	end
+	assert(ids.swap_weapon and ids.bayonet, "as ações do cartão existem")
+end)
+
+test(
+	"zonas livres: cada tela do HUD usa a sua no toque (faixa, bússola, cartão, eventos, avisos, captura, tutorial)",
+	function()
+		local uses = {
+			["FrontHud.client.luau"] = { '"topo"', '"captura"' },
+			["HudCampo.client.luau"] = { '"bussola"', '"cartao"' },
+			["EventosHud.client.luau"] = { '"eventos"' },
+			["Toast.luau"] = { '"avisos"' },
+			["TutorialController.client.luau"] = { '"tutorial"' },
+		}
+		for f, list in uses do
+			local s = src(f)
+			for _, z in list do
+				assert(string.find(s, z, 1, true), f .. " não usa a zona " .. z)
+			end
+		end
+		-- as mensagens do squad no toque vão para os avisos (não ficam soltas no meio da tela)
+		assert(string.find(src("InfantryController.client.luau"), 'key = "squad"', 1, true))
+		-- o HUD de toque publica a área para as zonas
+		local hud = src("ToqueHud.client.luau")
+		for _, a in { '"AreaPos"', '"AreaSize"', '"Espelho"', '"Indicador"', '"Campo"' } do
+			assert(string.find(hud, a, 1, true), a)
+		end
+		-- o rótulo do interagir fica dentro do botão (fora, cobria botões e zonas)
+		local ui = src("ToqueUi.luau")
+		assert(string.find(ui, "l.Position = UDim2.fromScale(0.5, 0.66)", 1, true), "rótulo dentro do círculo")
+	end
+)
+
 -- ===== faixa do alto =====
 test("faixa do alto: o vão entre os botões de cima (os de baixo não contam)", function()
 	local rects = {
@@ -272,11 +383,7 @@ test("faixa do alto: o vão entre os botões de cima (os de baixo não contam)",
 	assert(ToqueTelas.fitScale(560, 100, 1, 0.4) == 0.4, "piso legível")
 end)
 
--- ===== conferências de fonte =====
-local function src(name: string): string
-	return fs.readFile(C .. name)
-end
-
+-- ===== conferências de fonte (src, definido acima) =====
 test("interagir: o botão faz o mesmo que segurar X/F (prompt) e a ação interact (companheiro)", function()
 	local s = src("Interagir.client.luau")
 	assert(string.find(s, ":InputHoldBegin()", 1, true) and string.find(s, ":InputHoldEnd()", 1, true), "prompt")

@@ -311,5 +311,11 @@
  "Carta.nw": "104493161495449",
  "Carta.ne": "104138692476907",
  "Carta.sw": "121760158861185",
- "Carta.se": "109859513987460"
+ "Carta.se": "109859513987460",
+ "Sounds.uh34d_rotor": "81421007464402",
+ "Sounds.uh34d_motor": "127235938186878",
+ "Sounds.vento_cabine": "109349699010800",
+ "Sounds.lagarta": "110839071218227",
+ "Sounds.motor_jipe": "76157418267165",
+ "Sounds.motor_caminhao": "83596451612531"
 }

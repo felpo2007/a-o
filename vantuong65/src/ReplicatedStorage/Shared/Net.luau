@@ -18,7 +18,7 @@ Net.Events = {
 	"Spawn_State", -- s->c: pontos e esperas
 	"Combat_Fire", -- c->s: tiro (origem, direção, t, semente)
 	"Combat_Reload", -- c->s: recarregar
-	"Combat_Ammo", -- s->c: munição autoritativa (sem hitmarker: o servidor não confirma acertos)
+	"Combat_Ammo", -- s->c: munição autoritativa (o acerto vai no Combat_Confirm, D-107)
 	"Medical_Action", -- c->s: { op = "bandage"|"tourniquet"|"treat"|"revive"|"giveup", target? }
 	"Medical_State", -- s->c: estado do próprio corpo
 	"Match_State", -- s->c: setores, pontos fortes, tempo
@@ -44,6 +44,9 @@ Net.Events = {
 	"Throw_Request", -- c->s { kind = "frag" | "smoke", dir }
 	"Combat_Melee", -- c->s { dir }: coronhada ou baioneta
 	"Combat_Hit", -- s->c { x, y, z }: origem do tiro que acertou (vibração do lado do impacto)
+	-- D-107: acerto visto pelo atirador e marcador de acerto (Controllers/Acerto + CombatService)
+	"Combat_Claim", -- c->s { s, v, p, x, y, z }: a bala da semente s pegou a peça p do soldado v
+	"Combat_Confirm", -- s->c { d, zn, k, f, x, y, z }: acerto confirmado, só para quem atirou
 	"Tutorial_Done", -- c->s roleId: tutorial do papel concluído (F6)
 	"Range_Hit", -- s->c { dist, right, up }: acerto no campo de tiro, só para o atirador (cm)
 	"Kit_Set", -- c->s { mags, frags, smokes, bandages }: equipamento por peso (próximo spawn)

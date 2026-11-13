@@ -419,7 +419,17 @@ local targetX = MARGIN
 -- o dedo que ia andar). No toque o cartão fica no alto à esquerda, logo abaixo da fileira de botões
 -- de cima do HUD de toque (ToqueUi.topBand); o corpo do cartão não segura o toque (os botões de
 -- baixo dele continuam valendo), só o pé (dois toques pulam).
+local touchScale = Instance.new("UIScale")
+touchScale.Parent = root
 local function posAt(x: number): UDim2
+	-- toque v39: a zona livre "tutorial" do HUD de toque (coluna da esquerda, acima do polegar; os
+	-- eventos esperam), na escala que cabe (o cartão de 380 px não cabia no celular; piso de 60%)
+	local z = ToqueUi.zoneIn(gui, "tutorial")
+	if z then
+		touchScale.Scale = math.clamp(math.min(z.w / W, z.h / math.max(root.Size.Y.Offset, 1)), 0.6, 1)
+		return UDim2.fromOffset(z.x + x - MARGIN, z.y)
+	end
+	touchScale.Scale = 1
 	if ToqueUi.active() then
 		local _, _, base = ToqueUi.topBand()
 		local y = if base > 0 then base - gui.AbsolutePosition.Y + 8 else 76
@@ -676,6 +686,12 @@ Net.event("Range_Hit").OnClientEvent:Connect(function(h)
 		{ key = "campo_de_tiro" }
 	)
 	advance("range", h.dist)
+end)
+
+-- D-107: a recarga automática (toque e controle) não passa pela ação "reload"; o passo "Recarregar"
+-- conta qualquer recarga que começou
+Bus.on("reload_start", function()
+	advance("action", "reload")
 end)
 
 Bus.on("tutorial_restart", function()

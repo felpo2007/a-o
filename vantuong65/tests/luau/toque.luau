@@ -29,7 +29,9 @@ local D = InputMap.DEFAULTS :: any
 local SCREENS = {
 	{ name = "celular 19,5:9", W = 724, H = 285, short = 311 },
 	{ name = "celular 16:9", W = 640, H = 300, short = 330 },
+	{ name = "celular 20:9", W = 775, H = 299, short = 324 },
 	{ name = "tablet 4:3", W = 1000, H = 700, short = 732 },
+	{ name = "tablet 16:10", W = 1259, H = 743, short = 764 },
 }
 
 -- botões na tela (px) para um contexto
@@ -46,9 +48,79 @@ local function placed(slots: { [string]: any }, sc: any, c: Toque.Ctx): { Toque.
 	return out
 end
 
+-- Tudo o que o HUD de toque põe na tela num contexto: os botões, o anel de repouso do analógico e o
+-- botão contextual de interagir (Interagir.client: 1,5 vez o mínimo de toque; desde a v39 o rótulo
+-- fica dentro do botão, ToqueUi.roundButton).
+type Shape = { id: string, cx: number, cy: number, r: number, label: Toque.Rect? }
+local function report(bad: { string })
+	for i, b in bad do
+		if i > 40 then
+			print(string.format("      ... e mais %d", #bad - 40))
+			break
+		end
+		print("      " .. b)
+	end
+	assert(#bad == 0, string.format("%d problema(s)", #bad))
+end
+local function interactPx(short: number): number
+	local min = math.max(math.floor(Toque.px(9, short) + 0.5), 40)
+	return math.max(Toque.buttonPx(Toque.BY_ID.interact.mm, 1, short), math.floor(min * 1.5))
+end
+local function shapes(slots: { [string]: any }, sc: any, c: Toque.Ctx): { Shape }
+	local out: { Shape } = {}
+	for _, d in Toque.BUTTONS do
+		local sl = slots[d.id]
+		local vis = sl ~= nil and sl.on
+		if vis and d.kind == "slot" then
+			vis = c.foot and not c.downed and not c.vehicle
+		elseif vis then
+			vis = Toque.visible(d, c)
+		end
+		if vis then
+			local size = if d.kind == "slot" then interactPx(sc.short) else Toque.buttonPx(d.mm, sl.scale, sc.short)
+			local cx, cy = Toque.place(sl.x, sl.y, size, sc.W, sc.H)
+			table.insert(out, { id = d.id, cx = cx, cy = cy, r = size / 2 })
+		end
+	end
+	return out
+end
+
 local FOOT: Toque.Ctx = { foot = true, vehicle = false, downed = false, aiming = true, voice = true }
 local DOWNED: Toque.Ctx = { foot = false, vehicle = false, downed = true, aiming = false, voice = true }
 local VEHICLE: Toque.Ctx = { foot = false, vehicle = true, downed = false, aiming = false, voice = true }
+-- a pé com TODOS os contextuais acesos (o pior caso): sem mirar e mirando na luneta
+local FOOT_ALL: Toque.Ctx = {
+	foot = true,
+	vehicle = false,
+	downed = false,
+	aiming = false,
+	voice = true,
+	reload = true,
+	melee = true,
+	breath = true,
+	bleed = true,
+	command = true,
+}
+local AIM_ALL: Toque.Ctx = table.clone(FOOT_ALL)
+AIM_ALL.aiming = true
+local CTXS = { { "a pé", FOOT_ALL }, { "mirando", AIM_ALL }, { "caído", DOWNED }, { "veículo", VEHICLE } }
+
+-- percorre layout pronto x canhoto x tela (o tablet usa o compacto, como o HUD)
+local function eachLayout(fn: (name: string, mirror: boolean, sc: any, slots: { [string]: any }) -> ())
+	for _, name in { "two", "three", "four" } do
+		for _, mirror in { false, true } do
+			for _, sc in SCREENS do
+				local tablet = Toque.isTablet(sc.short)
+				fn(
+					name,
+					mirror,
+					sc,
+					Toque.layout({ touchLayout = name, touchMirror = mirror, touchCustom = {} }, nil, tablet)
+				)
+			end
+		end
+	end
+end
 
 test("tamanho físico: mínimo de 48 px (44 pt / 48 dp ≈ 9 mm), tiro bem maior, teto na tela", function()
 	assert(Toque.MIN_MM >= 9 and Toque.MIN_PX >= 48, "mínimo de toque")
@@ -75,44 +147,134 @@ test("tamanho físico: mínimo de 48 px (44 pt / 48 dp ≈ 9 mm), tiro bem maior
 	near(Toque.mm(Toque.rawPx(12, 390), Toque.dpiGuess(390)), 12, 1e-9, "mm <-> px")
 end)
 
-test("layouts prontos: nenhum botão sobre outro e todos dentro da área, a pé, caído e no veículo", function()
-	for _, name in { "two", "three", "four" } do
-		for _, mirror in { false, true } do
-			local slots = Toque.layout({ touchLayout = name, touchMirror = mirror, touchCustom = {} })
-			for _, sc in SCREENS do
-				for _, c in { FOOT, DOWNED, VEHICLE } do
-					local list = placed(slots, sc, c)
-					for i = 1, #list do
-						local a = list[i]
-						assert(
-							a.cx - a.r >= -0.5
-								and a.cx + a.r <= sc.W + 0.5
-								and a.cy - a.r >= -0.5
-								and a.cy + a.r <= sc.H + 0.5,
-							string.format("%s %s: %s fora da área", name, sc.name, a.id)
-						)
-						for j = i + 1, #list do
-							local b = list[j]
-							local d = math.sqrt((a.cx - b.cx) ^ 2 + (a.cy - b.cy) ^ 2)
-							assert(
-								d >= a.r + b.r - 1,
-								string.format(
-									"%s%s %s: %s e %s se sobrepõem (%.0f < %.0f)",
-									name,
-									if mirror then " (canhoto)" else "",
-									sc.name,
-									a.id,
-									b.id,
-									d,
-									a.r + b.r
-								)
+test(
+	"layouts prontos: nada sobre nada e tudo na área (a pé, mirando, caído, veículo; 16:9 a 20:9 e tablet)",
+	function()
+		local bad = {}
+		eachLayout(function(name, mirror, sc, slots)
+			for _, cc in CTXS do
+				local list = shapes(slots, sc, cc[2])
+				local tag = string.format("%s%s %s %s", name, if mirror then " (canhoto)" else "", sc.name, cc[1])
+				for i = 1, #list do
+					local a = list[i]
+					if a.cx - a.r < -0.5 or a.cx + a.r > sc.W + 0.5 or a.cy - a.r < -0.5 or a.cy + a.r > sc.H + 0.5 then
+						table.insert(bad, string.format("%s: %s fora da área", tag, a.id))
+					end
+					local la = a.label
+					if la and (la.x0 < -0.5 or la.x1 > sc.W + 0.5 or la.y1 > sc.H + 0.5) then
+						table.insert(bad, string.format("%s: rótulo de %s fora da área", tag, a.id))
+					end
+					for j = i + 1, #list do
+						local b = list[j]
+						local d = math.sqrt((a.cx - b.cx) ^ 2 + (a.cy - b.cy) ^ 2)
+						if d < a.r + b.r - 1 then
+							table.insert(
+								bad,
+								string.format("%s: %s e %s se sobrepõem (%.0f < %.0f)", tag, a.id, b.id, d, a.r + b.r)
 							)
 						end
+						local lb = b.label
+						if la and Toque.circleHitsRect(b.cx, b.cy, b.r, la) then
+							table.insert(bad, string.format("%s: rótulo de %s em cima de %s", tag, a.id, b.id))
+						end
+						if lb and Toque.circleHitsRect(a.cx, a.cy, a.r, lb) then
+							table.insert(bad, string.format("%s: rótulo de %s em cima de %s", tag, b.id, a.id))
+						end
+					end
+					-- o miolo da tela é da mira e do marcador de acerto
+					local dc = math.sqrt((a.cx - sc.W / 2) ^ 2 + (a.cy - sc.H / 2) ^ 2)
+					if dc < a.r + sc.H * 0.08 then
+						table.insert(bad, string.format("%s: %s em cima da mira", tag, a.id))
 					end
 				end
 			end
+		end)
+		report(bad)
+	end
+)
+
+test(
+	"zonas livres: faixa, bússola, eventos, avisos, cartão, captura, tutorial e vagas sem botão nem uma na outra",
+	function()
+		local bad = {}
+		local names = {}
+		for n in Toque.ZONES do
+			table.insert(names, n)
+		end
+		table.sort(names)
+		eachLayout(function(name, mirror, sc, slots)
+			local index = slots.fire_left.on
+			local rects: { [string]: Toque.Rect } = {}
+			for _, n in names do
+				rects[n] = Toque.zoneRect(n, sc.W, sc.H, mirror, index) :: Toque.Rect
+			end
+			local tag = string.format("%s%s %s", name, if mirror then " (canhoto)" else "", sc.name)
+			for _, n in names do
+				local z = rects[n]
+				if
+					z.x0 < -0.5
+					or z.y0 < -0.5
+					or z.x1 > sc.W + 0.5
+					or z.y1 > sc.H + 0.5
+					or z.x1 <= z.x0
+					or z.y1 <= z.y0
+				then
+					table.insert(bad, string.format("%s: zona %s fora da área", tag, n))
+				end
+				-- a mira (o centro) nunca fica dentro de uma zona
+				if sc.W / 2 > z.x0 and sc.W / 2 < z.x1 and sc.H / 2 > z.y0 and sc.H / 2 < z.y1 then
+					table.insert(bad, string.format("%s: zona %s cobre a mira", tag, n))
+				end
+				for _, cc in CTXS do
+					for _, s in shapes(slots, sc, cc[2]) do
+						if Toque.circleHitsRect(s.cx, s.cy, s.r, z) then
+							table.insert(bad, string.format("%s %s: %s em cima da zona %s", tag, cc[1], s.id, n))
+						end
+						if s.label and Toque.rectsHit(s.label, z) then
+							table.insert(bad, string.format("%s %s: rótulo de %s na zona %s", tag, cc[1], s.id, n))
+						end
+					end
+				end
+				for _, m in names do
+					local shared = (Toque.ZONE_SHARE[n] and Toque.ZONE_SHARE[n][m])
+						or (Toque.ZONE_SHARE[m] and Toque.ZONE_SHARE[m][n])
+					if m > n and not shared and Toque.rectsHit(z, rects[m]) then
+						table.insert(bad, string.format("%s: zonas %s e %s se cobrem", tag, n, m))
+					end
+				end
+			end
+		end)
+		report(bad)
+		-- canhoto espelha; com o tiro do indicador esquerdo a coluna da esquerda começa depois dele
+		local z = Toque.zoneRect("cartao", 1000, 500, false) :: Toque.Rect
+		local m = Toque.zoneRect("cartao", 1000, 500, true) :: Toque.Rect
+		near(m.x0, 1000 - z.x1, 1e-9)
+		near(m.x1, 1000 - z.x0, 1e-9)
+		assert((Toque.zoneRect("eventos", 1000, 500, false, true) :: Toque.Rect).x0 > 0)
+		assert(Toque.zoneRect("nao_existe", 1000, 500) == nil)
+		-- caber na zona: nunca cresce além do teto, piso legível
+		near(Toque.fitK(560, 52, 280, 52, 1, 0.4), 0.5, 1e-9)
+		assert(Toque.fitK(100, 50, 1000, 1000, 1, 0.4) == 1 and Toque.fitK(1000, 50, 10, 10, 1, 0.4) == 0.4)
+	end
+)
+
+test("tablet: os mesmos botões, mais perto dos cantos de baixo; a fileira do alto não muda", function()
+	local phone = Toque.layout({ touchLayout = "two", touchMirror = false, touchCustom = {} })
+	local tab = Toque.layout({ touchLayout = "two", touchMirror = false, touchCustom = {} }, nil, true)
+	assert(not Toque.isTablet(390) and Toque.isTablet(768))
+	for _, d in Toque.BUTTONS do
+		local p, t = phone[d.id], tab[d.id]
+		assert(p.on == t.on, d.id .. ": o tablet mostra o mesmo")
+		if Toque.TOP_ROW[d.id] then
+			assert(p.x == t.x and p.y == t.y, d.id .. " mudou no alto")
+		else
+			local edgeP = if p.x < 0.5 then p.x else 1 - p.x
+			local edgeT = if t.x < 0.5 then t.x else 1 - t.x
+			assert(edgeT <= edgeP + 1e-9 and 1 - t.y <= 1 - p.y + 1e-9, d.id .. " não foi para o canto")
 		end
 	end
+	-- o rádio fica no alto à direita (a fileira de LUGAR/SAIR do ToqueVeiculo se apoia nele)
+	assert(tab.radio.x > 0.5 and tab.radio.y < 0.2)
 end)
 
 test("zonas: botão sob o dedo, analógico à esquerda embaixo, câmera no resto; canhoto espelha", function()
@@ -498,10 +660,29 @@ test("chaves novas do contrato: padrões, faixas e escolhas", function()
 		touchMirror = false,
 		touchAutoVault = true,
 		batterySaver = false,
+		-- v39: automáticos do toque (o tiro sozinho vem desligado) e a recarga automática (frente de itens)
+		touchAutoLean = true,
+		touchAutoPickup = true,
+		touchAutoBreath = true,
+		touchAssist = true,
+		touchAutoFire = false,
+		autoReload = true,
 	}
 	for k, v in want do
 		assert(D[k] == v, string.format("padrão de %s: %s", k, tostring(D[k])))
 	end
+	local off = InputMap.validate({
+		touchAutoLean = false,
+		touchAutoPickup = false,
+		touchAutoBreath = false,
+		touchAssist = false,
+		touchAutoFire = true,
+	}) :: any
+	assert(
+		not off.touchAutoLean and not off.touchAutoPickup and not off.touchAutoBreath and not off.touchAssist,
+		"dá para desligar cada automático"
+	)
+	assert(off.touchAutoFire == true and InputMap.validate({ touchAutoFire = "sim" }).touchAutoFire == false)
 	local s = InputMap.validate({
 		gyroMode = "girar",
 		gyroSens = 10,
@@ -548,36 +729,321 @@ test("botões: ações que existem, visibilidade por contexto e a especificaçã
 			and parts[3].kind == nil
 	)
 	assert(Toque.specHas("last_item|equip_wheel", "equip_wheel") and not Toque.specHas("crouch|prone", "jump"))
-	-- caído: mapa, menu, comunicação, marcar e desistir; nada de tiro, analógico ou postura
+	-- caído: mapa, menu, comunicação (marcar no toque) e desistir; nada de tiro, analógico ou postura
 	local function vis(id: string, c: Toque.Ctx): boolean
 		return Toque.visible(Toque.BY_ID[id], c)
 	end
-	for _, id in { "map", "menu", "comm", "mark", "give_up" } do
+	for _, id in { "map", "menu", "comm", "give_up" } do
 		assert(vis(id, DOWNED), id .. " some caído")
 	end
-	for _, id in { "fire", "stick", "posture", "jump", "radio" } do
+	for _, id in { "fire", "stick", "posture", "jump", "radio", "reload", "bandage" } do
 		assert(not vis(id, DOWNED), id .. " aparece caído")
 	end
 	-- veículo: o analógico, mapa, menu e rádio ficam; os de infantaria saem (os do veículo são do T3)
 	for _, id in { "stick", "map", "menu", "radio" } do
 		assert(vis(id, VEHICLE), id .. " some no veículo")
 	end
-	for _, id in { "fire", "aim", "reload", "posture", "jump", "comm", "lean_l" } do
+	for _, id in { "fire", "aim", "reload", "posture", "jump", "comm", "lean_l", "melee", "bandage" } do
 		assert(not vis(id, VEHICLE), id .. " aparece no veículo")
 	end
-	-- a pé: prender a respiração só mirando; o rádio só com a voz
-	local noAim = table.clone(FOOT)
-	noAim.aiming = false
-	assert(vis("hold_breath", FOOT) and not vis("hold_breath", noAim))
 	local noVoice = table.clone(FOOT)
 	noVoice.voice = false
-	assert(vis("radio", FOOT) and not vis("radio", noVoice))
-	assert(not vis("interact", FOOT), "a vaga do interagir é desenhada pelo T2")
+	assert(vis("radio", FOOT) and not vis("radio", noVoice), "o rádio só com a voz")
+	assert(not vis("interact", FOOT), "a vaga do interagir é desenhada pelo Interagir.client")
 	-- caído só aceita o que o InputMap deixa (os botões que aparecem caído funcionam)
 	local st = InputMap.newState()
 	InputMap.event(st, "downed")
 	for _, id in { "map", "game_menu", "comm_wheel", "mark", "give_up" } do
 		assert(InputMap.allowed(st, id), id .. " recusado caído")
+	end
+end)
+
+test("tela enxuta: fixos só os do uso o tempo todo; o resto some, vira contextual ou vai para o menu", function()
+	local function vis(id: string, c: Toque.Ctx): boolean
+		return Toque.visible(Toque.BY_ID[id], c)
+	end
+	-- a pé, sem nada acontecendo: só analógico, tiro, mira, pular, agachar, ITEM, COMUNICAR, mapa e
+	-- menu (o cartão da arma é do HudCampo; o interagir, do Interagir.client)
+	local calm: Toque.Ctx = { foot = true, vehicle = false, downed = false, aiming = false, voice = false }
+	local slots = Toque.layout({ touchLayout = "two", touchMirror = false, touchCustom = {} })
+	local shown = {}
+	for _, d in Toque.BUTTONS do
+		if d.kind ~= "slot" and slots[d.id].on and Toque.visible(d, calm) then
+			table.insert(shown, d.id)
+		end
+	end
+	table.sort(shown)
+	assert(
+		table.concat(shown, ",") == "aim,comm,equip,fire,jump,map,menu,posture,stick",
+		"fixos: " .. table.concat(shown, ",")
+	)
+	-- os que saíram da tela: troca de arma e seletor no cartão, marcar no COMUNICAR, câmera no menu,
+	-- canal no RÁDIO
+	for _, id in { "swap", "fire_mode", "mark", "view", "channel" } do
+		assert(Toque.BY_ID[id] == nil, id .. " ainda é botão")
+	end
+	assert(Toque.specHas(Toque.BY_ID.comm.spec :: string, "mark"), "tocar no COMUNICAR marca")
+	assert(Toque.specHas(Toque.BY_ID.comm.spec :: string, "comm_wheel"), "segurar abre a roda")
+	local rp = Toque.parseSpec(Toque.BY_ID.radio.spec :: string)
+	assert(rp[1].id == "radio_channel" and rp[1].kind == "tap" and rp[2].id == "radio_talk" and rp[2].kind == "hold")
+	-- inclinar: opcional (desligado; o automático inclina na quina), o editor liga
+	assert(Toque.BY_ID.lean_l.optional and not slots.lean_l.on and not slots.lean_r.on)
+	-- contextuais: cada um só com o seu motivo
+	local function with(k: string, v: boolean, aiming: boolean?): Toque.Ctx
+		local c = table.clone(calm) :: any
+		c[k] = v
+		c.aiming = aiming == true
+		return c
+	end
+	assert(vis("reload", with("reload", true)) and not vis("reload", calm))
+	assert(vis("melee", with("melee", true)) and not vis("melee", calm))
+	assert(not vis("melee", with("melee", true, true)), "golpe nunca mirando (divide o lugar com o fôlego)")
+	assert(vis("hold_breath", with("breath", true, true)) and not vis("hold_breath", with("breath", true)))
+	assert(vis("bandage", with("bleed", true)) and not vis("bandage", calm))
+	assert(vis("radio", with("command", true)) and not vis("radio", calm), "rádio: quem fala com o comando")
+	local cmdCar = table.clone(VEHICLE)
+	cmdCar.voice, cmdCar.command = false, true
+	assert(not vis("radio", cmdCar), "no veículo o canal não vale: só com a voz")
+	-- golpe e fôlego dividem o lugar e nunca aparecem juntos
+	for _, name in { "two", "three", "four" } do
+		local l = Toque.layout({ touchLayout = name, touchMirror = false, touchCustom = {} })
+		assert(l.melee.x == l.hold_breath.x and l.melee.y == l.hold_breath.y, name)
+	end
+	assert(not (vis("melee", AIM_ALL) and vis("hold_breath", AIM_ALL)))
+	assert(not (vis("melee", FOOT_ALL) and vis("hold_breath", FOOT_ALL)))
+end)
+
+test("layout salvo da v38: continua valendo; botão que saiu do jogo é ignorado sem quebrar", function()
+	local old = {
+		custom1 = {
+			fire = { x = 0.8, y = 0.6, scale = 1.2, alpha = 0.9, on = true },
+			swap = { x = 0.62, y = 0.88, scale = 1, alpha = 1, on = true },
+			fire_mode = { x = 0.52, y = 0.91, scale = 1, alpha = 1, on = true },
+			view = { x = 0.23, y = 0.09, scale = 1, alpha = 1, on = true },
+			mark = { x = 0.8, y = 0.09, scale = 1, alpha = 1, on = true },
+			channel = { x = 0.325, y = 0.09, scale = 1, alpha = 1, on = true },
+			reload = { x = 0.75, y = 0.47, scale = 1.1, alpha = 1, on = true },
+		},
+	}
+	local s = InputMap.validate({ touchLayout = "custom1", touchCustom = old }) :: any
+	local l = Toque.layout(s, false)
+	assert(l.fire.x == 0.8 and l.fire.scale == 1.2, "o tiro salvo vale")
+	assert(l.reload.x == 0.75 and l.reload.scale == 1.1, "a recarga salva vale (contextual)")
+	for _, id in { "swap", "fire_mode", "view", "mark", "channel" } do
+		assert(l[id] == nil, id .. " voltou")
+	end
+	-- no tablet o salvo vale como está (o compacto é só dos prontos)
+	local lt = Toque.layout(s, false, true)
+	assert(lt.fire.x == 0.8 and lt.fire.y == 0.6)
+	-- salvar de novo limpa o que saiu
+	local again = Toque.toCustom(l, false)
+	assert(again.swap == nil and again.view == nil and again.fire ~= nil)
+end)
+
+test("contextuais: recarga (com e sem a automática), golpe à vista e bandagem", function()
+	local base = { mag = 10, size = 20, spare = 40, reloading = false, auto = false, sinceShot = 0 }
+	local function r(over: { [string]: any }): boolean
+		local i = table.clone(base) :: any
+		for k, v in over do
+			i[k] = v
+		end
+		return Toque.showReload(i)
+	end
+	assert(r({}), "sem a automática: carregador gasto mostra")
+	assert(r({ mag = 19 }), "um tiro já mostra")
+	assert(not r({ mag = 20 }), "cheio não mostra")
+	assert(not r({ spare = 0 }), "sem reserva não mostra")
+	assert(not r({ reloading = true }), "recarregando não mostra")
+	assert(
+		not Toque.showReload({ mag = nil, size = 20, spare = 40, reloading = false, auto = false, sinceShot = 0 })
+			and not r({ size = 0 }),
+		"sem arma não mostra"
+	)
+	assert(r({ mag = 0 }), "vazio sem a automática mostra")
+	-- com a automática: só a recarga tática numa pausa
+	assert(not r({ auto = true, mag = 0, sinceShot = 5 }), "vazio: a automática cobre")
+	assert(not r({ auto = true, mag = 15, sinceShot = 5 }), "mais da metade: não")
+	assert(not r({ auto = true, mag = 10, sinceShot = 0.5 }), "atirando: não")
+	assert(r({ auto = true, mag = 10, sinceShot = Toque.RELOAD_PAUSE_S }), "metade, na pausa: sim")
+	-- golpe: à vista, a até 4 m, na frente (o alcance do golpe mais longo é 2,1 m)
+	assert(Toque.meleeNear(2, 10, true) and Toque.meleeNear(Toque.MELEE_M, Toque.MELEE_DEG, true))
+	assert(not Toque.meleeNear(2, 10, false), "atrás da parede não")
+	assert(not Toque.meleeNear(4.5, 10, true) and not Toque.meleeNear(2, 120, true))
+	local Melee = require(S .. "Melee") :: any
+	for _, a in Melee.ATTACKS or {} do
+		assert(a.reachM < Toque.MELEE_M, "golpe alcança além do botão")
+	end
+	-- bandagem
+	assert(Toque.showBandage(0.4, 1, 0) and Toque.showBandage(0.4, 0, 1))
+	assert(not Toque.showBandage(0, 3, 1) and not Toque.showBandage(0.4, 0, 0) and not Toque.showBandage(nil, 3, 3))
+end)
+
+test("inclinar sozinho na quina: só mirando, depois de 0,2 s, para o lado aberto; sai quando a quina acaba", function()
+	local st = Toque.newLean()
+	local i = {
+		enabled = true,
+		aiming = true,
+		blocked = false,
+		manual = false,
+		ahead = true,
+		clearL = false,
+		clearR = true,
+	}
+	local side = 0
+	for _ = 1, 6 do
+		side = Toque.autoLean(st, 1 / 60, i)
+	end
+	assert(side == 0, "passar rente não inclina")
+	for _ = 1, 12 do
+		side = Toque.autoLean(st, 1 / 60, i)
+	end
+	assert(side == 1, "quina com a direita aberta: inclina à direita")
+	-- já inclinado, a quina continua: fica
+	assert(Toque.autoLean(st, 1 / 60, i) == 1)
+	-- a parede à frente acabou (andou): volta
+	local j = table.clone(i)
+	j.ahead = false
+	assert(Toque.autoLean(st, 1 / 60, j) == 0)
+	-- os dois lados abertos (poste fino) ou nenhum: não inclina
+	for _, k in { { true, true }, { false, false } } do
+		local s2 = Toque.newLean()
+		local x = table.clone(i)
+		x.clearL, x.clearR = k[1], k[2]
+		for _ = 1, 60 do
+			assert(Toque.autoLean(s2, 1 / 60, x) == 0)
+		end
+	end
+	-- sem mirar, desligado, correndo/deitado ou com o botão manual: nada
+	for _, key in { "aiming", "enabled" } do
+		local s3 = Toque.newLean()
+		local x = table.clone(i) :: any
+		x[key] = false
+		for _ = 1, 60 do
+			assert(Toque.autoLean(s3, 1 / 60, x) == 0, key)
+		end
+	end
+	for _, key in { "blocked", "manual" } do
+		local s3 = Toque.newLean()
+		local x = table.clone(i) :: any
+		x[key] = true
+		for _ = 1, 60 do
+			assert(Toque.autoLean(s3, 1 / 60, x) == 0, key)
+		end
+	end
+	-- esquerda
+	local s4 = Toque.newLean()
+	local l = table.clone(i)
+	l.clearL, l.clearR = true, false
+	for _ = 1, 30 do
+		side = Toque.autoLean(s4, 1 / 60, l)
+	end
+	assert(side == -1)
+end)
+
+test("ímã leve no toque: só mirando, alvo à vista, mexendo a mira; até 1,5°/s e nunca passa do alvo", function()
+	local dt = 1 / 60
+	local cone = Toque.magnetCone(50)
+	assert(cone > 0 and cone < 5, string.format("cone a 50 m: %.2f°", cone))
+	local pull = Toque.magnet(true, "ads", true, 50, cone * 0.5, true, dt)
+	assert(pull > 0 and pull <= Toque.MAGNET_DEG_S * dt + 1e-9, "puxão pequeno")
+	assert(Toque.magnet(true, "ads", true, 50, 0.001, true, dt) <= 0.001 * 0.25 + 1e-12, "nunca passa do alvo")
+	assert(Toque.magnet(true, "hip", true, 50, cone * 0.5, true, dt) == 0, "quadril: nada")
+	assert(Toque.magnet(true, "ads", false, 50, cone * 0.5, true, dt) == 0, "atrás de mata/fumaça: nada")
+	assert(Toque.magnet(true, "ads", true, 50, cone * 0.5, false, dt) == 0, "parado: não gruda sozinho")
+	assert(Toque.magnet(true, "ads", true, 50, cone * 1.01, true, dt) == 0, "fora do cone")
+	assert(Toque.magnet(true, "ads", true, 200, 0.1, true, dt) == 0, "além de 150 m")
+	assert(Toque.magnet(false, "ads", true, 50, cone * 0.5, true, dt) == 0, "desligado")
+	assert(Toque.ASSIST_RANGE_M == InputMap.ASSIST_RANGE_M, "o mesmo alcance da fricção")
+	-- em 1 s de arrasto o ímã sozinho fecha no máximo 1,5°
+	local total = 0
+	for _ = 1, 60 do
+		total += Toque.magnet(true, "ads", true, 30, 2, true, dt)
+	end
+	assert(total <= Toque.MAGNET_DEG_S + 1e-9)
+end)
+
+test("tiro sozinho (opção desligada): espera a reação, semi em toques espaçados, automático segura", function()
+	local dt = 1 / 60
+	local function run(full: boolean, seconds: number, onTarget: boolean): (number, number)
+		local st = Toque.newAutoFire()
+		local presses, firstAt = 0, -1
+		local t = 0
+		local i = { enabled = true, aiming = true, onTarget = onTarget, full = full, canFire = true }
+		while t < seconds do
+			t += dt
+			local op = Toque.autoFire(st, dt, t, i)
+			if op == "press" then
+				presses += 1
+				if firstAt < 0 then
+					firstAt = t
+				end
+			end
+		end
+		return presses, firstAt
+	end
+	local n, first = run(false, 1.0, true)
+	assert(first >= Toque.AUTOFIRE_REACT_S - 1e-9, string.format("1º tiro em %.2f s", first))
+	assert(n >= 2 and n <= math.ceil((1 - Toque.AUTOFIRE_REACT_S) / Toque.AUTOFIRE_GAP_S) + 1, "semi: " .. n)
+	local na = run(true, 1.0, true)
+	assert(na == 1, "automático: um aperto segurado")
+	assert(run(false, 1.0, false) == 0, "sem alvo, nada")
+	-- solta ao perder o alvo e quando para de mirar
+	local st = Toque.newAutoFire()
+	local i = { enabled = true, aiming = true, onTarget = true, full = true, canFire = true }
+	local held = false
+	for k = 1, 30 do
+		local op = Toque.autoFire(st, dt, k * dt, i)
+		if op == "press" then
+			held = true
+		end
+	end
+	assert(held)
+	i.aiming = false
+	assert(Toque.autoFire(st, dt, 1, i) == "release", "parou de mirar: solta")
+	for _, key in { "enabled", "aiming", "canFire" } do
+		local x = { enabled = true, aiming = true, onTarget = true, full = false, canFire = true } :: any
+		x[key] = false
+		local s2 = Toque.newAutoFire()
+		for k = 1, 120 do
+			assert(Toque.autoFire(s2, dt, k * dt, x) == nil, key)
+		end
+	end
+	assert(D.touchAutoFire == false, "vem desligado")
+end)
+
+test("pegar munição e abrir caixote ao encostar; respiração sozinha solta antes de cansar", function()
+	assert(Toque.autoPickup(true, "ammo", 1, 0.2, 5, 60))
+	assert(Toque.autoPickup(true, "crate", Toque.PICKUP_M, Toque.PICKUP_SPEED, 5, 60))
+	assert(not Toque.autoPickup(true, "weapon", 1, 0, 5, 60), "arma do chão é escolha")
+	assert(not Toque.autoPickup(true, "radio", 1, 0, 5, 60) and not Toque.autoPickup(true, nil, 1, 0, 5, 60))
+	assert(not Toque.autoPickup(true, "ammo", 2.5, 0, 5, 60), "longe")
+	assert(not Toque.autoPickup(true, "ammo", 1, 4, 5, 60), "passando correndo")
+	assert(not Toque.autoPickup(true, "ammo", 1, 0, 0.5, 60), "em combate")
+	assert(not Toque.autoPickup(true, "ammo", 1, 0, 5, 3), "acabou de pegar")
+	assert(not Toque.autoPickup(false, "ammo", 1, 0, 5, 60), "desligado")
+	local Weapons = require(S .. "Weapons") :: any
+	local K = Weapons.BREATH_TIRED_K
+	assert(type(K) == "number" and K > 0 and K <= 1)
+	local len = 4
+	assert(not Toque.breathRelease(1, len, K))
+	assert(Toque.breathRelease(len * K - Toque.BREATH_EARLY_S, len, K), "solta antes do cansaço")
+	assert(len * K - Toque.BREATH_EARLY_S < len * K, "nunca chega ao cansaço")
+end)
+
+test("transpor sozinho também andando firme (obstáculo baixo)", function()
+	local v = Toque.newVault()
+	local i = { enabled = true, sprinting = false, walking = true, forward = true, grounded = true, speedRatio = 0.1 }
+	local fired = 0
+	for n = 1, 60 do
+		if Toque.autoVault(v, 1 / 60, n / 60, i) then
+			fired += 1
+		end
+	end
+	assert(fired == 1, "andando contra o obstáculo: tenta")
+	local w = Toque.newVault()
+	i.walking = false
+	for n = 1, 60 do
+		assert(not Toque.autoVault(w, 1 / 60, n / 60, i), "parado não")
 	end
 end)
 

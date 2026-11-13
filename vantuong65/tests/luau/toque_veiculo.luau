@@ -142,19 +142,64 @@ test("pedais e botões: o toque só aperta ações que existem no InputMap, no c
 		local c = ctxOf[id]
 		assert(c and (c.ground_vehicle or c.helicopter), id .. " não é ação de veículo no InputMap")
 	end
-	assert(used >= 10, "ações do toque: " .. used)
-	for _, id in { "h_pedal_left", "h_pedal_right", "h_stabilize" } do
-		assert(ctxOf[id].helicopter, id)
-		assert(string.find(src, '"' .. id .. '"', 1, true), id .. " sem botão")
+	assert(used >= 5, "ações do toque: " .. used)
+	-- v39: pedais, estabilizador, coaxial, binóculo e marca saíram da tela (automáticos ou só no
+	-- controle e no teclado); continuam no InputMap
+	for _, id in { "h_pedal_left", "h_pedal_right", "h_stabilize", "v_coax", "v_binoculars", "v_mark" } do
+		assert(ctxOf[id], id .. " sumiu do InputMap")
+		assert(not string.find(src, '"' .. id .. '"', 1, true), id .. " ainda tem botão na tela")
 	end
 	-- o VehicleController usa as contas testadas aqui (e não uma cópia)
 	local vc = fs.readFile(C .. "VehicleController.client.luau")
 	for _, f in
-		{ "PilotoToque.collectiveInput(", "PilotoToque.collectiveAssist(", "PilotoToque.pedal(", "PilotoToque.drive(" }
+		{
+			"PilotoToque.collectiveInput(",
+			"PilotoToque.collectiveAssist(",
+			"PilotoToque.pedal(",
+			"PilotoToque.drive(",
+			"PilotoToque.touchYaw(",
+		}
 	do
 		assert(string.find(vc, f, 1, true), "VehicleController sem " .. f)
 	end
 	assert(not string.find(vc, "up * 0.35 * dt", 1, true), "sobrou a conta antiga do coletivo")
+	-- o tiro do canhão e a recarga automática usam as contas daqui
+	for _, f in { "PilotoToque.aimOnHold(", "PilotoToque.autoReload(", "PilotoToque.AIM_HOLD_S" } do
+		assert(string.find(src, f, 1, true), "ToqueVeiculo sem " .. f)
+	end
+end)
+
+-- ===== automáticos do toque (v39) =====
+test("toque: devagar o analógico de lado vira o nariz; rápido, inclina; nunca os dois inteiros", function()
+	local p, c = PilotoToque.touchYaw(1, 0)
+	assert(p == 1 and c == 0, "pairando: pedal inteiro")
+	p, c = PilotoToque.touchYaw(-0.5, PilotoToque.YAW_FULL_MS)
+	assert(p == -0.5 and c == 0, "até 3 m/s: só pedal")
+	p, c = PilotoToque.touchYaw(1, 30)
+	assert(p == 0 and c == 1, "rápido: só cíclico (a curva coordenada vira o nariz)")
+	p, c = PilotoToque.touchYaw(0.8, (PilotoToque.YAW_FULL_MS + PilotoToque.YAW_NONE_MS) / 2)
+	near(p, 0.4, 1e-9, "meio do caminho")
+	near(c, 0.4, 1e-9, "meio do caminho")
+	for _, v in { 0, 2, 5, 7.5, 12 } do
+		local a, b = PilotoToque.touchYaw(1.4, v)
+		near(a + b, 1, 1e-9, "a soma é o analógico (limitado a 1)")
+	end
+	assert(PilotoToque.touchYaw(0, 0) == 0)
+end)
+
+test("toque: canhão mira segurando e dispara soltando; metralhadora atira no aperto", function()
+	assert(PilotoToque.aimOnHold("gun_90") and PilotoToque.aimOnHold("rr_106"))
+	assert(not PilotoToque.aimOnHold("m60") and not PilotoToque.aimOnHold(nil))
+	assert(PilotoToque.AIM_HOLD_S > 0.1 and PilotoToque.AIM_HOLD_S < 0.3, "toque rápido não liga a ótica")
+end)
+
+test("toque: tubos do Ontos recarregam sozinhos só parado, sem repetir o pedido", function()
+	assert(PilotoToque.autoReload(3, 6, 0, false, 10), "faltou tubo, parado")
+	assert(not PilotoToque.autoReload(6, 6, 0, false, 10), "cheio")
+	assert(not PilotoToque.autoReload(0, 6, 2, false, 10), "andando (regra do servidor: até 0,5 m/s)")
+	assert(not PilotoToque.autoReload(0, 6, 0, true, 10), "já recarregando")
+	assert(not PilotoToque.autoReload(0, 6, 0, false, 1), "pedido recente")
+	assert(not PilotoToque.autoReload(nil, 6, 0, false, 10), "sem tubos (não é o Ontos)")
 end)
 
 -- ===== motorista =====
@@ -186,7 +231,7 @@ local SCREENS = {
 	{ 1180, 762, "iPad Air" },
 }
 local ROLES = { "driver", "gunner", "commander", "door", "pilot", "passenger" }
-local FULL = { fire = true, coax = true, optic = true, ammo = true, mirror = false }
+local FULL = { fire = true, mirror = false }
 
 test("botões: cabem na tela, não se encostam e ficam fora da metade do analógico", function()
 	for _, sc in SCREENS do
@@ -256,17 +301,27 @@ test("botões: tamanho físico (mínimo 9 mm, tiro 16 mm) nos celulares e tablet
 	local px = function(mm: number): number
 		return PilotoToque.mmToPx(mm, 311)
 	end
+	-- v39: só o essencial (dono: "deixe somente os importantes; o resto automático")
+	local function names(r: { [string]: any }): string
+		local l = {}
+		for k in r do
+			table.insert(l, k)
+		end
+		table.sort(l)
+		return table.concat(l, ",")
+	end
 	local g = PilotoToque.layout("gunner", 750, 311, FULL, px)
-	assert(g.fire and g.coax and g.optic and g.ammo and g.seat and g.exit, "atirador")
+	assert(names(g) == "exit,fire,seat", "atirador: " .. names(g))
 	local p = PilotoToque.layout("pilot", 750, 311, FULL, px)
-	assert(p.lever and p.pedalL and p.pedalR and p.stab and not p.fire, "piloto")
-	assert(p.pedalL.x < p.pedalR.x, "pedal esquerdo à esquerda")
+	assert(names(p) == "exit,lever,leverLabel,seat", "piloto: " .. names(p))
 	local d = PilotoToque.layout("door", 750, 311, FULL, px)
-	assert(d.fire and d.optic and not d.coax and not d.ammo, "porta: tiro e zoom")
+	assert(names(d) == "exit,fire,seat", "porta: " .. names(d))
 	local c = PilotoToque.layout("commander", 750, 311, FULL, px)
-	assert(c.binoc and c.mark and not c.fire, "comandante")
+	assert(names(c) == "exit,seat", "comandante: " .. names(c))
 	local m = PilotoToque.layout("driver", 750, 311, FULL, px)
-	assert(m.seat and m.exit and not m.fire and not m.lever, "motorista: o analógico dirige")
+	assert(names(m) == "exit,seat", "motorista: o analógico dirige; " .. names(m))
+	local u = PilotoToque.layout("gunner", 750, 311, { fire = false, mirror = false }, px)
+	assert(names(u) == "exit,seat", "lugar sem arma: " .. names(u))
 end)
 
 test("botões: a fileira de lugar/sair fica à esquerda do rádio do HUD de toque (T1)", function()

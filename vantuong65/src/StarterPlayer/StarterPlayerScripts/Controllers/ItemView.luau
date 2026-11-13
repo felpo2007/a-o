@@ -11,10 +11,16 @@
 --   caminho do Shared/ItemAnim, com o objeto na mão (modelo "VT65Item1P" na câmera).
 -- - Todos veem: rádio, binóculo e cantil vão ao servidor (Posture_Set { item }); as ações médicas e
 --   a pá já são do servidor. O PostureController anima o corpo de cada um (IK).
+-- - 2026-11-13: granada e fumaça NA MÃO (vagas 3 e 4, Shared/Equipar; o WeaponController passa a mão
+--   com ItemView.hand): a granada desenhada (Shared/GrenadeArt.hand) na direita, a esquerda tira o
+--   pino (a argola cai), o braço arma e lança (ItemAnim.GRANADA). Os outros veem a granada na mão do
+--   corpo (Modules/ArmaNaMao) e o arremesso do FieldService.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
+local Equipar = require(ReplicatedStorage.Shared.Equipar)
 local FieldWork = require(ReplicatedStorage.Shared.FieldWork)
+local GrenadeArt = require(ReplicatedStorage.Shared.GrenadeArt)
 local ItemAnim = require(ReplicatedStorage.Shared.ItemAnim)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Input = require(script.Parent.Input)
@@ -226,6 +232,107 @@ local function hideProp()
 	end
 end
 
+-- ===== granada na mão (2026-11-13) =====
+local G = {
+	hand = nil :: Equipar.Hand?,
+	model = nil :: Model?,
+	key = "",
+	pins = {} :: { BasePart },
+	dropped = false,
+}
+
+-- O WeaponController passa a granada na mão (nil = nenhuma).
+function ItemView.hand(h: Equipar.Hand?)
+	G.hand = h
+	G.dropped = false
+end
+
+local function grenadeModel(kind: string): Model
+	local faction = player:GetAttribute("Faction")
+	local key = kind .. ":" .. tostring(faction)
+	if G.model and G.model.Parent and G.key == key then
+		return G.model
+	end
+	if G.model then
+		G.model:Destroy()
+	end
+	local m = GrenadeArt.hand(kind, if type(faction) == "string" then faction else nil)
+	m.Name = "VT65Item1P" -- o WeaponVisuals leva junto no inclinar (lista FOLLOW)
+	G.pins = {}
+	for _, d in m:GetDescendants() do
+		if d:IsA("BasePart") and string.sub(d.Name, 1, 4) == "Pino" then
+			table.insert(G.pins, d)
+		end
+	end
+	m.Parent = camera
+	G.model, G.key = m, key
+	return m
+end
+
+local function hideGrenade()
+	if G.model then
+		G.model:PivotTo(FAR)
+	end
+end
+
+-- a argola sai na mão esquerda e cai (só a de 1ª pessoa)
+local function dropRing(at: Vector3)
+	local ring = Instance.new("Part")
+	ring.Shape = Enum.PartType.Cylinder
+	ring.Size = Vector3.new(0.004, 0.024, 0.024) / M
+	ring.Color = Color3.fromRGB(150, 138, 104)
+	ring.Material = Enum.Material.Metal
+	ring.CanCollide, ring.CanQuery, ring.CanTouch, ring.CastShadow = false, false, false, false
+	ring.CFrame = CFrame.new(at)
+	ring.Parent = workspace
+	ring.AssemblyLinearVelocity = camera.CFrame:VectorToWorldSpace(Vector3.new(-0.4, 0.6, -0.2)) / M
+	task.delay(1.2, function()
+		ring:Destroy()
+	end)
+end
+
+local function v3(a: { number }): Vector3
+	return Vector3.new(a[1], a[2], a[3])
+end
+
+local function smoothK(x: number): number
+	x = math.clamp(x, 0, 1)
+	return x * x * (3 - 2 * x)
+end
+
+-- mãos (m, espaço da câmera), pose da esquerda, granada à vista, pino à vista
+local function grenadeHands(h: Equipar.Hand, now: number): (Vector3, Vector3, string, boolean, boolean)
+	local GA, GE = ItemAnim.GRANADA, Equipar.GRENADE
+	local t = Equipar.phaseTime(h, now)
+	local hold = { r = v3(GA.hold.r), l = v3(GA.hold.l) }
+	local cock = { r = v3(GA.cock.r), l = v3(GA.cock.l) }
+	local breath = Vector3.new(0, math.sin(now * 1.6) * 0.004, 0)
+	if h.phase == "saque" then
+		local u = smoothK(t / GE.drawS)
+		return v3(ItemAnim.GR_REST.r):Lerp(hold.r, u), v3(ItemAnim.GR_REST.l):Lerp(hold.l, u), "flat", true, true
+	elseif h.phase == "pronta" then
+		return hold.r + breath, hold.l + breath, "flat", true, true
+	elseif h.phase == "armando" then
+		local r = hold.r:Lerp(cock.r, smoothK((t - 0.08) / (GE.readyS - 0.08)))
+		local pin = v3(GA.pin.l)
+		local l: Vector3
+		if t < 0.12 then
+			l = hold.l:Lerp(pin, smoothK(t / 0.12))
+		elseif t < GE.pinS then
+			l = pin
+		else
+			l = pin:Lerp(cock.l, smoothK((t - GE.pinS) / math.max(GE.readyS - GE.pinS, 0.05)))
+		end
+		return r, l, if t < GE.pinS + 0.04 then "grip" else "flat", true, t < GE.pinS
+	elseif h.phase == "armada" then
+		return cock.r + breath * 0.5, cock.l + breath * 0.5, "flat", true, false
+	elseif h.phase == "lancando" then
+		local r, l = ItemAnim.sample(if h.under then GA.under else GA.throw, t)
+		return v3(r), v3(l), "flat", t < GE.releaseS, false
+	end
+	return v3(ItemAnim.GR_REST.r), v3(ItemAnim.GR_REST.l), "flat", false, false
+end
+
 -- avisa o servidor do item segurado (rádio, binóculo, pá, cantil) para os outros verem
 local function replicate(name: string?)
 	-- a pá vai ao servidor só quando este cliente a soube pela chave "dig_start"
@@ -247,6 +354,44 @@ end
 
 -- Um quadro. firstPerson: a vista de 1ª pessoa com arma (fora dela só a réplica anda).
 function ItemView.step(_dt: number, firstPerson: boolean): Out
+	local h = G.hand
+	if h and h.phase ~= "fim" then
+		replicate(nil) -- rádio/binóculo saem; a granada na mão do corpo é do servidor (ArmaNaMao)
+		hideProp()
+		if not firstPerson then
+			out.active = false
+			hideGrenade()
+			return out
+		end
+		local now = os.clock()
+		local r, l, poseL, showG, showPin = grenadeHands(h, now)
+		local cam = camera.CFrame
+		local rot = cam.Rotation * CFrame.Angles(math.rad(8), 0, math.rad(-12))
+		local pr, pl = cam * (r / M), cam * (l / M)
+		out.active, out.full = true, true
+		out.poseR, out.poseL = "grip", poseL
+		out.cfR = rot + pr
+		out.cfL = cam.Rotation * CFrame.Angles(math.rad(-10), 0, math.rad(15)) + pl
+		out.wristR = pr + rot * (Vector3.new(0, -0.03, 0.05) / M)
+		out.wristL = pl + cam.Rotation * (Vector3.new(0, -0.01, 0.05) / M)
+		out.elbowR = cam * ELBOW_R
+		out.elbowL = cam * ELBOW_L
+		if showG then
+			local m = grenadeModel(h.kind)
+			m:PivotTo(rot + pr)
+			for _, p in G.pins do
+				p.LocalTransparencyModifier = if showPin then 0 else 1
+			end
+			if not showPin and not G.dropped then
+				G.dropped = true
+				dropRing(pl)
+			end
+		else
+			hideGrenade()
+		end
+		return out
+	end
+	hideGrenade()
 	local name, t, D = current()
 	if name == "radio" and not S.radioT0 then
 		S.radioT0 = os.clock()

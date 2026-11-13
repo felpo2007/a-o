@@ -13,6 +13,32 @@
 | F5 Arte total e otimização | arte nos 5 setores a 100% do plano; 57,1 fps girando a câmera na célula mais densa da mata (D-76) e 59,6 fps no arrozal (D-74). Critério de 60 jogadores **só no Roblox** |
 | F6 Offensive e lançamento | **testado no Studio**: Offensive com relatório pós-ação, progressão. Beta fechado **só você pode rodar** |
 
+## v39: lista do dono de 12–13/11 (2026-11-13, D-107)
+- Oito frentes em paralelo: combate, morte e feridos, telas, movimento e 3ª pessoa, itens e
+  fumaça, bots, veículos e som, celular. Mais o vento tirado.
+- **Causa do "tiro não acerta":** o servidor recusava todo tiro de jogador desde 2026-11-09
+  (relógio e semente fora de um limite de 1e7).
+- **Conferido no Studio (Play, 1 jogador):**
+  - carregamento antigo de volta;
+  - 50 contra 50 bots, servidor a 44–52 Hz, teto em 50;
+  - primeiro tiroteio de bots aos 48 s de partida (meta: 3 min);
+  - JOGAR AGORA põe no squad e no ponto;
+  - tiro de jogador aceito (carregador desconta, sem recusa);
+  - acerto num bot a ~17 m confirmado pelo servidor (tronco, 36 de dano) e o bot caiu ferido;
+  - 21 caídos deitados de costas a ~1 cm do chão;
+  - arma em 3ª pessoa nos bots, com capacete encaixado;
+  - tela de baixa com o soldado no chão e os botões coloridos;
+  - HUD de celular forçado só com MAPA, MENU, COMUNICAR, RÁDIO, MIRA, ITEM, FOGO, AGACHAR, PULAR,
+    analógico e cartão, sem dica de tecla.
+- **Corrigido no teste:**
+  - o cartão de idioma da primeira vez ficava por cima do jogo ao entrar direto pelo JOGAR AGORA;
+  - erro antigo "ColorSequence: color value out of range" na loja.
+- **Achado de ferramenta, não do jogo:** a captura de tela do MCP deixa a câmera do Studio em
+  Scriptable (presa); antes de atirar no teste, volte a câmera para Custom.
+- **Não testado:** som (ninguém ouve no teste), celular de verdade, 2 jogadores, voz, pilotar o
+  helicóptero e a compra de veículo na tela de baixa. O desempenho com 100 bots num servidor do
+  Roblox e no celular também não foi medido.
+
 ## v38 testada no Studio e publicada (2026-11-13, D-106)
 - **Publicada** como versão 38 do place (build do commit 95e45b5).
 - **Conferido no Studio:**

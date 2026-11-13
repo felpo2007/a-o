@@ -31,9 +31,16 @@ return {
 		ambience_village = 102127943356580,
 		ambience_beach = 87445401006028,
 		ambience_tunnel = 102752417889249,
-		uh34d_loop = 0,
+		uh34d_loop = 0, -- ForgeGUI em outcome_unknown (não regerar); o UH-34D usa uh34d_rotor/uh34d_motor
 		engine_tank = 86120587573251,
 		engine_amtrac = 136841561608456,
+		-- veículos em laço sem emenda, síntese própria (tools/sons_veiculos.py; 0 = sem som)
+		uh34d_rotor = 81421007464402,
+		uh34d_motor = 127235938186878,
+		vento_cabine = 109349699010800,
+		lagarta = 110839071218227,
+		motor_jipe = 76157418267165,
+		motor_caminhao = 83596451612531,
 		gun_90 = 122293822682317,
 		rr_106 = 111700184968285,
 		mortar_launch = 107258939071090,

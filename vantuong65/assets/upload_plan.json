@@ -1518,5 +1518,47 @@
   "assetType": "Model",
   "name": "VT65 vila_casa_10",
   "description": "VAN TUONG 65 - casa unica da vila Xom Go (Blender)"
+ },
+ {
+  "key": "Sounds.uh34d_rotor",
+  "file": "assets/veiculos_sons/uh34d_rotor.ogg",
+  "assetType": "Audio",
+  "name": "VT65 uh34d_rotor",
+  "description": "VAN TUONG 65 - rotor do UH-34D em laco (tools/sons_veiculos.py)"
+ },
+ {
+  "key": "Sounds.uh34d_motor",
+  "file": "assets/veiculos_sons/uh34d_motor.ogg",
+  "assetType": "Audio",
+  "name": "VT65 uh34d_motor",
+  "description": "VAN TUONG 65 - motor radial do UH-34D em laco (tools/sons_veiculos.py)"
+ },
+ {
+  "key": "Sounds.vento_cabine",
+  "file": "assets/veiculos_sons/vento_cabine.ogg",
+  "assetType": "Audio",
+  "name": "VT65 vento_cabine",
+  "description": "VAN TUONG 65 - vento pela porta da cabine (tools/sons_veiculos.py)"
+ },
+ {
+  "key": "Sounds.lagarta",
+  "file": "assets/veiculos_sons/lagarta.ogg",
+  "assetType": "Audio",
+  "name": "VT65 lagarta",
+  "description": "VAN TUONG 65 - chocalho da lagarta em laco (tools/sons_veiculos.py)"
+ },
+ {
+  "key": "Sounds.motor_jipe",
+  "file": "assets/veiculos_sons/motor_jipe.ogg",
+  "assetType": "Audio",
+  "name": "VT65 motor_jipe",
+  "description": "VAN TUONG 65 - motor de 4 cilindros (M151, Peugeot) (tools/sons_veiculos.py)"
+ },
+ {
+  "key": "Sounds.motor_caminhao",
+  "file": "assets/veiculos_sons/motor_caminhao.ogg",
+  "assetType": "Audio",
+  "name": "VT65 motor_caminhao",
+  "description": "VAN TUONG 65 - motor de 6 cilindros (M35) (tools/sons_veiculos.py)"
  }
 ]

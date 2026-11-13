@@ -56,6 +56,8 @@ export type Weapon = {
 	scope: Scope?,
 	bipod: boolean?, -- bipé integral (M60, RPD)
 	bipodRoles: { string }?, -- bipé só nestes papéis (M14: o bipé M2 do fuzileiro automático)
+	-- D-107: dano no tronco com a energia de boca (vida 100); senão o do tipo (Weapons.DAMAGE)
+	damage: number?,
 }
 
 -- Limite do semi: o gatilho não sai mais rápido que isso (PLACEHOLDER: limite de jogo contra macro;
@@ -63,8 +65,18 @@ export type Weapon = {
 Weapons.SEMI_MIN_S = 0.1
 -- Alça padrão (m)
 Weapons.ZEROS = { 100, 200, 300 }
--- Recarga por tipo (s), PLACEHOLDER (antes em CombatService.RELOAD e WeaponController.RELOAD_S)
-Weapons.RELOAD_S = { rifle = 3.0, mg = 7.0, pistol = 2.5, launcher = 3.0 } :: { [string]: number }
+-- Recarga por tipo (s), PLACEHOLDER (antes em CombatService.RELOAD e WeaponController.RELOAD_S).
+-- D-107 (pedido do dono: "faça o jogo mais fast paced"): fuzil 3,0 -> 2,4, metralhadora 7,0 -> 5,5,
+-- pistola 2,5 -> 2,0, lançador 3,0 -> 2,6.
+Weapons.RELOAD_S = { rifle = 2.4, mg = 5.5, pistol = 2.0, launcher = 2.6 } :: { [string]: number }
+-- D-107 (pedido do dono: "quero 3 ou 4 tiros para morrer", "mais difícil de morrer"): dano no tronco
+-- com a energia de boca, por tipo, quando a arma não tem `damage` (PLACEHOLDER de jogo). A conta do
+-- tiro (zona e queda com a energia) fica no Shared/Medical.shotDamage.
+Weapons.DAMAGE = { rifle = 36, mg = 32, pistol = 25, launcher = 40 } :: { [string]: number }
+
+function Weapons.damageOf(wp: Weapon): number
+	return wp.damage or Weapons.DAMAGE[wp.kind] or 30
+end
 -- Papel que leva a M14 com seletor e bipé (o fuzileiro automático da esquadra de tiro, Roles, só dos
 -- EUA, um por squad). As outras M14 ficam no semi, como a maioria das M14 do USMC em 1965.
 Weapons.AUTO_RIFLEMAN = "automatic_rifleman"
@@ -344,8 +356,9 @@ Weapons.list = {
 		dispersionMoa = 1.0,
 		boltHoldOpen = true,
 		enabled = true,
-		boltS = 1.1, -- manobra do ferrolho e a Unertl puxada de volta (corre para a frente no coice)
-		reloadS = 6.0,
+		boltS = 0.95, -- manobra do ferrolho e a Unertl puxada de volta (D-107: era 1,1)
+		reloadS = 5.0, -- D-107: era 6,0
+		damage = 55, -- D-107: precisão: 2 tiros no tronco até ~270 m, 1 na cabeça
 		zeros = { 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000 },
 		maxFlightS = 3.5,
 		scope = {
@@ -393,8 +406,9 @@ Weapons.list = {
 		dispersionMoa = 1.5,
 		boltHoldOpen = true,
 		enabled = true,
-		boltS = 1.2,
-		reloadS = 6.0,
+		boltS = 1.05, -- D-107: era 1,2
+		reloadS = 5.0, -- D-107: era 6,0
+		damage = 55, -- D-107: precisão: 2 tiros no tronco até ~230 m, 1 na cabeça
 		zeros = { 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1300 },
 		maxFlightS = 3.5,
 		scope = {

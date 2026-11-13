@@ -2,7 +2,7 @@
 -- Validação de tiros no servidor (Parte 7): o cliente manda origem, direção, instante, semente e
 -- modo; o servidor confere tudo (Shared/Gatilho.validate: arma, modo do papel, munição, recarga,
 -- cadência, origem e o lugar do veículo), refaz a MESMA simulação determinística (Ballistics) com
--- raycasts próprios e aplica o dano. Sem hitmarker.
+-- raycasts próprios e aplica o dano.
 -- 2026-11-12 (pedido do dono: "algumas armas não estão atirando"):
 --   - munição por ARMA do equipamento (antes só a 1ª: o granadeiro tinha a M79 desligada na 1ª vaga
 --     e a M1911 na 2ª, e o servidor recusava todo tiro da pistola);
@@ -10,12 +10,24 @@
 --   - M79 atira: granada M406 simulada, arma entre 14 e 27 m e explode (ExplosionService);
 --   - tiro de dentro do veículo no lugar aberto (D-100): o casco do próprio veículo não para a bala;
 --   - Studio: o motivo de cada tiro recusado vai no atributo "VT65TiroRecusado" do jogador.
+-- D-107 (pedido do dono: "os tiros não estão acertando", "concerte o hitbox", "3 ou 4 tiros para
+-- morrer", "mostre quando você acerta o tiro com o dano"):
+--   - o corpo é pego pelas caixas de acerto (Shared/Hitbox: cabeça de bloco pela malha, capacete,
+--     colete); o raio do mundo não para mais nas peças do corpo;
+--   - acerto visto pelo atirador (Combat_Claim): o tiro que não pegou ninguém no servidor guarda a
+--     trajetória por 1 s; o cliente refaz a bala contra os soldados como ele os vê e avisa se pegou; o
+--     servidor confere a trajetória, o caminho livre até o ponto e a distância até o alvo;
+--   - dano de bala por arma, zona e energia que chegou (Medical.shotDamage / applyShot);
+--   - Combat_Confirm: dano, zona e abate só para quem atirou (marcador do Controllers/Acerto). No
+--     Studio, o motivo do aviso recusado vai no atributo "VT65AcertoRecusado" do jogador.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
 local Ballistics = require(ReplicatedStorage.Shared.Ballistics)
 local Gatilho = require(ReplicatedStorage.Shared.Gatilho)
+local Hitbox = require(ReplicatedStorage.Shared.Hitbox)
+local Medical = require(ReplicatedStorage.Shared.Medical)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Pickup = require(ReplicatedStorage.Shared.Pickup)
 local Rng = require(ReplicatedStorage.Shared.Rng)
@@ -32,9 +44,8 @@ local CombatService = {}
 local M = 0.28
 local LOS_CHECK_STUDS = 1.0 / M -- origem mais longe que isto da cabeça precisa de linha livre
 local MAGS = Weapons.MAGS -- PLACEHOLDER de dotação
--- materiais que a bala atravessa perdendo velocidade (fração mantida). PLACEHOLDER até a
--- tabela de penetração em cm por material (Parte 10.7).
-local PASS = { Bamboo = 0.85, Thatch = 0.8, Canvas = 0.9 } -- Canvas: lona das barracas (bases, 2026-11-13)
+-- materiais que a bala atravessa perdendo velocidade (D-107: em Shared/Ballistics.PASS)
+CombatService.PASS = Ballistics.PASS
 
 -- munição de uma arma (a do servidor manda); gate = cadência (Gatilho)
 type Rec = Gatilho.Rec
@@ -181,20 +192,14 @@ spawnPickup = function(pos: Vector3, a: Pickup.Ammo)
 end
 
 local function zoneOf(part: Instance): string
-	local n = part.Name
-	if n == "Head" then
-		return "head"
-	elseif string.find(n, "Arm") or string.find(n, "Hand") then
-		return "arm"
-	elseif string.find(n, "Leg") or string.find(n, "Foot") then
-		return "leg"
-	end
-	return "torso"
+	return Hitbox.ZONE[part.Name] or "torso"
 end
 
 local function num(v: any): number?
 	return if type(v) == "number" and v == v and math.abs(v) < 1e7 then v else nil
 end
+
+local clockOf, seedOf = Ballistics.clockOf, Ballistics.seedOf -- D-107 (relógio e semente do tiro)
 
 -- Granada de 40 mm (M79, M406): voa pela balística com a semente, arma a uma distância sorteada
 -- entre wp.armM (14 a 27 m, FAS) e explode no impacto; antes disso ela só acerta como um projétil
@@ -251,6 +256,115 @@ local function launchGrenade(
 	end)
 end
 
+-- ===== dano da bala e marcador de acerto (D-107) =====
+-- Dano da bala em `victim` (zona e energia que chegou, já com os materiais atravessados). `by`: quem
+-- atirou, se for jogador (abate/assistência e o marcador Combat_Confirm só para ele).
+local function bulletHit(
+	shooter: Model,
+	victim: Model,
+	wp: Weapons.Weapon,
+	zone: string,
+	energy: number,
+	seed: number,
+	origin: Vector3,
+	by: Player?
+)
+	local e = Combatants.get(victim)
+	if not e then
+		return
+	end
+	local s = MedicalService.get(victim)
+	local wasDown, wasDead = s ~= nil and s.downedAt ~= nil, s ~= nil and s.dead
+	local frac = energy / math.max(Ballistics.energy(wp.bulletMassG, wp.muzzleVelocity), 1)
+	local dmg = Medical.shotDamage(Weapons.damageOf(wp), zone, frac)
+	-- o MedicalService.hit é envolvido com a assinatura antiga: o dano da bala vai pelo Medical (e
+	-- sai de lá mesmo se a chamada falhar, para não valer no próximo estilhaço)
+	Medical.nextShot = dmg
+	local roll = Rng.new(seed + 1):next()
+	local ok, err = pcall(function(): any
+		MedicalService.hit(victim, zone, energy, roll, by)
+		return nil
+	end)
+	Medical.nextShot = nil
+	if not ok then
+		error(err, 0)
+	end
+	if e.player then -- vibração do lado do impacto (Parte 12.6)
+		Net.event("Combat_Hit"):FireClient(e.player, { x = origin.X, y = origin.Y, z = origin.Z })
+	end
+	if by and s and not wasDead then
+		-- k: 0 = ferido, 1 = caiu agora, 2 = morreu agora
+		local k = if s.dead then 2 elseif s.downedAt and not wasDown then 1 else 0
+		local root = Combatants.root(e)
+		local pos = if root then root.Position else origin
+		Net.event("Combat_Confirm"):FireClient(by, {
+			d = math.floor(dmg + 0.5),
+			zn = zone,
+			k = k,
+			f = victim:GetAttribute("Faction") == shooter:GetAttribute("Faction"),
+			x = pos.X,
+			y = pos.Y,
+			z = pos.Z,
+		})
+	end
+end
+
+-- Trajetórias dos tiros de jogador que não pegaram ninguém no servidor, para o aviso do cliente
+-- (Combat_Claim), por semente, por Hitbox.CLAIM_S segundos.
+type Kept = {
+	t: number,
+	used: boolean,
+	wp: Weapons.Weapon,
+	shooter: Model,
+	origin: Vector3,
+	seed: number,
+	path: { number },
+	speed: { number },
+	keepAt: { number },
+}
+local kept: { [Player]: { [number]: Kept } } = {}
+
+local function keep(player: Player, k: Kept)
+	local list = kept[player]
+	if not list then
+		list = {}
+		kept[player] = list
+	end
+	for s, old in list do
+		if k.t - old.t > Hitbox.CLAIM_S then
+			list[s] = nil
+		end
+	end
+	list[k.seed] = k
+end
+
+-- Caixas de acerto dos soldados perto da linha do tiro (na posição do servidor) e a lista de todos
+-- os soldados (saem do raio do mundo). claimable: há alguém vivo perto o bastante para um aviso.
+local function nearTargets(shooter: Model, origin: Vector3, dir: Vector3, wp: Weapons.Weapon)
+	local boxes: { Hitbox.Box } = {}
+	local models: { Instance } = {}
+	local claimable = false
+	for _, e in Combatants.list() do
+		local m = e.model
+		if m ~= shooter then
+			table.insert(models, m)
+			local root, hum = Combatants.root(e), Combatants.humanoid(e)
+			if root and hum and hum.Health > 0 then
+				local rel = root.Position - origin
+				if Hitbox.nearRay(rel.X, rel.Y, rel.Z, dir.X, dir.Y, dir.Z, wp.muzzleVelocity, 0) then
+					Hitbox.fromModel(m, boxes)
+					claimable = true
+				elseif
+					Hitbox.nearRay(rel.X, rel.Y, rel.Z, dir.X, dir.Y, dir.Z, wp.muzzleVelocity, Hitbox.CLAIM_MAX)
+				then
+					claimable = true
+				end
+			end
+		end
+	end
+	return boxes, models, claimable
+end
+
 -- Simula o tiro no servidor e aplica o dano. `shooter` é o modelo do personagem (jogador ou bot).
 function CombatService.fire(
 	shooter: Model,
@@ -272,40 +386,28 @@ function CombatService.fire(
 	end
 	params.FilterDescendantsInstances = ignore
 	local wp = Weapons.get(weaponId)
-	local speedFactor = 1
-	local hit = nil
-	if not (wp and wp.kind == "launcher") then
-		hit = Ballistics.trace({
-			ox = origin.X * M,
-			oy = origin.Y * M,
-			oz = origin.Z * M,
-			dx = dir.X,
-			dy = dir.Y,
-			dz = dir.Z,
-			weaponId = weaponId,
-			seed = seed,
-			maxTime = if wp then wp.maxFlightS else nil,
-		}, function(ax, ay, az, bx, by, bz)
-			local from = Vector3.new(ax, ay, az) / M
-			local delta = Vector3.new(bx - ax, by - ay, bz - az) / M
-			for _ = 1, 4 do -- até 4 materiais atravessáveis por segmento
-				local r = workspace:Raycast(from, delta, params)
-				if not r then
-					return nil
-				end
-				local mat = r.Instance:GetAttribute("Material")
-				local keep = if type(mat) == "string" then PASS[mat] else nil
-				if keep then
-					speedFactor *= keep
-					table.insert(ignore, r.Instance)
-					params.FilterDescendantsInstances = ignore
-				else
-					local p = r.Position * M
-					return { x = p.X, y = p.Y, z = p.Z, target = r.Instance }
-				end
-			end
-			return nil
-		end)
+	local traced: Hitbox.Traced? = nil
+	if wp and wp.kind ~= "launcher" then
+		-- D-107: corpo pelas caixas de acerto; os soldados saem do raio do mundo
+		local boxes, models, claimable = nearTargets(shooter, origin, dir, wp)
+		local skip = table.clone(ignore)
+		table.move(models, 1, #models, #skip + 1, skip)
+		local record = exceptPlayer ~= nil and claimable
+		traced = Hitbox.trace(weaponId, origin, dir, seed, wp.maxFlightS, skip, boxes, record)
+		local t = traced :: Hitbox.Traced
+		if exceptPlayer and record and not t.box then
+			keep(exceptPlayer, {
+				t = os.clock(),
+				used = false,
+				wp = wp,
+				shooter = shooter,
+				origin = origin,
+				seed = seed,
+				path = t.path,
+				speed = t.speed,
+				keepAt = t.keepAt,
+			})
+		end
 	end
 	AnimalService.noise(origin, false) -- búfalos e galinhas fogem do tiro (pista de detecção)
 	-- traçante, som e impacto para os outros clientes (eles refazem a trajetória com a semente)
@@ -329,26 +431,85 @@ function CombatService.fire(
 		launchGrenade(shooter, wp, origin, dir, seed, params)
 		return
 	end
-	if hit and hit.target then
-		local t = hit.target :: Instance
-		if t:IsA("BasePart") and t:GetAttribute("RangeTarget") ~= nil then
-			TrainingService.rangeHit(shooter, t, Vector3.new(hit.x, hit.y, hit.z) / M)
+	local t = traced
+	local hit = t and t.hit
+	if not (t and wp and hit) then
+		return
+	end
+	local pos = Vector3.new(hit.x, hit.y, hit.z) / M
+	local box = t.box
+	if box then
+		-- corpo: caixa de acerto (D-107). Quem atirou (se for jogador) vai para o registro de
+		-- abate/assistência (D-72) e recebe o marcador.
+		local victim = box.model :: Model
+		local part = victim:FindFirstChild(box.part)
+		TrainingService.nearMiss(shooter, pos, part or victim)
+		local by = Players:GetPlayerFromCharacter(shooter)
+		bulletHit(shooter, victim, wp, box.zone, hit.energy * t.keep * t.keep, seed, origin, by)
+		return
+	end
+	local target = hit.target
+	if typeof(target) == "Instance" then
+		if target:IsA("BasePart") and target:GetAttribute("RangeTarget") ~= nil then
+			TrainingService.rangeHit(shooter, target, pos)
 			return
 		end
-		TrainingService.nearMiss(shooter, Vector3.new(hit.x, hit.y, hit.z) / M, t)
-		local model = (hit.target :: Instance):FindFirstAncestorOfClass("Model")
-		local victim = Combatants.get(model)
-		if victim then
-			local energy = hit.energy * speedFactor * speedFactor
-			local roll = Rng.new(seed + 1):next()
-			-- quem atirou (se for jogador) vai para o registro de abate/assistência (D-72)
-			local by = Players:GetPlayerFromCharacter(shooter)
-			MedicalService.hit(victim.model, zoneOf(hit.target), energy, roll, by)
-			if victim.player then -- vibração do lado do impacto (Parte 12.6)
-				Net.event("Combat_Hit"):FireClient(victim.player, { x = origin.X, y = origin.Y, z = origin.Z })
-			end
-		end
+		TrainingService.nearMiss(shooter, pos, target)
 	end
+end
+
+-- Studio: motivo do aviso de acerto recusado (atributo do jogador)
+local function claimRefused(player: Player, why: string)
+	if RunService:IsStudio() then
+		player:SetAttribute("VT65AcertoRecusado", why)
+	end
+end
+
+-- Aviso do cliente (Combat_Claim): a bala da semente `s` pegou a peça `p` do soldado `v` no ponto
+-- (x, y, z), como o atirador viu. Vale se: o tiro foi aceito e não pegou ninguém no servidor (está
+-- guardado), o ponto está na trajetória da semente antes do impacto no mundo, e perto da peça do
+-- alvo no servidor (folga pela pose e pelo quanto ele andou na defasagem: Hitbox.tolerance).
+local function onClaim(player: Player, c: any)
+	if type(c) ~= "table" then
+		return
+	end
+	local seed, x, y, z = seedOf(c.s), num(c.x), num(c.y), num(c.z)
+	local list = kept[player]
+	local k = if list and seed then list[seed] else nil
+	if not (k and x and y and z) or k.used or os.clock() - k.t > Hitbox.CLAIM_S then
+		return
+	end
+	k.used = true
+	local v = c.v
+	local e = if typeof(v) == "Instance" then Combatants.get(v) else nil
+	local partName = if type(c.p) == "string" then c.p else ""
+	local zone = Hitbox.ZONE[partName]
+	if not (e and zone) or e.model == k.shooter then
+		claimRefused(player, "dev: alvo ou peça inválida")
+		return
+	end
+	local hum, root = Combatants.humanoid(e), Combatants.root(e)
+	if not (hum and root) or hum.Health <= 0 then
+		return
+	end
+	local dist, seg = Hitbox.near(k.path, x, y, z)
+	if not seg or dist > Hitbox.PATH_TOL then
+		claimRefused(player, string.format("dev: fora da trajetória (%.1f studs)", dist))
+		return
+	end
+	local p = Vector3.new(x, y, z)
+	local part = e.model:FindFirstChild(partName)
+	local ref: BasePart = if part and part:IsA("BasePart") then part else root
+	local tol = Hitbox.tolerance(ref.Size.Magnitude, root.AssemblyLinearVelocity.Magnitude)
+	local off = (p - ref.Position).Magnitude
+	if off > tol then
+		claimRefused(player, string.format("dev: longe do alvo (%.1f de %.1f studs)", off, tol))
+		return
+	end
+	local keepK = k.keepAt[seg] or 1
+	local energy = Ballistics.energy(k.wp.bulletMassG, k.speed[seg] or 0) * keepK * keepK
+	bulletHit(k.shooter, e.model, k.wp, zone, energy, k.seed, k.origin, player)
+	claimRefused(player, "") -- último aviso aceito
 end
 
 -- Arma caída de quem morreu (jogador ou bot): só com o carregador (Pickup.dropOnDeath).
@@ -474,7 +635,10 @@ function CombatService.start()
 	Players.PlayerRemoving:Connect(function(p)
 		ammo[p] = nil
 		extra[p] = nil
+		kept[p] = nil
 	end)
+	-- D-107: acerto visto pelo atirador (Controllers/Acerto)
+	Net.event("Combat_Claim").OnServerEvent:Connect(onClaim)
 
 	-- recarga: { w = arma } (sem w: a principal)
 	Net.event("Combat_Reload").OnServerEvent:Connect(function(player, req)
@@ -521,10 +685,14 @@ function CombatService.start()
 		local rec = recFor(player, shot.w)
 		local ox, oy, oz = num(shot.ox), num(shot.oy), num(shot.oz)
 		local dx, dy, dz = num(shot.dx), num(shot.dy), num(shot.dz)
-		local t, seed = num(shot.t), num(shot.seed)
+		-- D-107: o relógio do tiro é a hora do servidor (época Unix, ~1,8 bilhão de s) e a semente vai
+		-- até 2^32: o num() (limite de 1e7) recusava TODO tiro de jogador, sem aviso
+		local t, seed = clockOf(shot.t), seedOf(shot.seed)
 		if not (rec and ox and oy and oz and dx and dy and dz and t and seed) then
 			if not rec then
 				refused(player, tostring(shot.w), "arma fora do equipamento")
+			else
+				refused(player, rec.weapon, "dev: número inválido no tiro")
 			end
 			return
 		end

@@ -201,10 +201,17 @@ end
 --   M1: casco de ~27 × 30 cm (pedido do dono; PLACEHOLDER até a ficha do capacete);
 --   capacete de medula do VC: ~29 × 34 cm (PLACEHOLDER);
 --   chapéu de mato: aba de ~32 × 34 cm (PLACEHOLDER).
+-- 2026-11-13 ("capacetes bugados no jogo e na animação", dono): na cabeça de bloco (a cabeça clássica
+-- do R15, cilindro de topo arredondado) a copa de 1,06 x a cabeça com o topo a 6% acima dela deixava a
+-- borda de cima da cabeça furar o casco, e a aba caía na linha dos olhos do rosto. Agora com as
+-- proporções do capacete do Front 44 na mesma cabeça (Characters.helmet de lá: cúpula 1,29 x a cabeça,
+-- aba a +0,17 da altura acima do centro, topo a +0,84): copa 1,2 x, aba a +0,17 e topo a +0,34 acima
+-- da cabeça; o chapéu de mato (pano) fica mais baixo. PLACEHOLDER: conferir no Studio.
+-- stylua: ignore
 Gear.HEADGEAR = {
-	us_m1_helmet = { side = 1.06, crown = 0.9, brim = 0.42, brimAt = 0.04, gap = 0.06, widthM = 0.27, lengthM = 0.30 },
-	vc_pith_helmet = { side = 1.04, crown = 0.62, brim = 0.52, brimAt = 0.1, gap = 0.16, widthM = 0.29, lengthM = 0.34 },
-	vc_jungle_hat = { side = 1.03, crown = 0.5, brim = 0.56, brimAt = 0.1, gap = 0.06, widthM = 0.32, lengthM = 0.34 },
+	us_m1_helmet   = { side = 1.2, crown = 0.9, brim = 0.42, brimAt = 0.17, gap = 0.34, widthM = 0.27, lengthM = 0.30 },
+	vc_pith_helmet = { side = 1.18, crown = 0.62, brim = 0.52, brimAt = 0.17, gap = 0.34, widthM = 0.29, lengthM = 0.34 },
+	vc_jungle_hat  = { side = 1.15, crown = 0.5, brim = 0.56, brimAt = 0.15, gap = 0.2, widthM = 0.32, lengthM = 0.34 },
 } :: {
 	[string]: {
 		side: number,
@@ -227,6 +234,17 @@ Gear.vec = vec
 
 local function clamp(x: number, a: number, b: number): number
 	return if x < a then a elseif x > b then b else x
+end
+
+-- Tamanho VISÍVEL da cabeça. A cabeça de bloco do R15 é uma peça de 1,2 de lado (vezes a escala). Uma
+-- cabeça antiga de peça 2 x 1 x 1 com malha "Head" (SpecialMesh, escala 1,25) aparece com ~1,25 de
+-- lado: medida pela caixa da peça, o capacete saía do dobro da largura.
+function Gear.headSize(part: Vec, specialMesh: boolean): Vec
+	if part.x > 1.4 * part.y then
+		local k = if specialMesh then 1.25 else 1
+		return vec(part.y * k, part.y * k, part.z * k)
+	end
+	return part
 end
 
 -- native: caixa do modelo no espaço do modelo (x = frente-trás, z = lado, como no GLB).

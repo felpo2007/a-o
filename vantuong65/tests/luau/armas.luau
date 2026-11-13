@@ -297,11 +297,11 @@ test("vantagens compradas nas armas, com e sem passe (recarga, fôlego, balanço
 	local none = Vantagens.compute({})
 	local all = Vantagens.compute({ [Vantagens.BUNDLE] = true })
 	local m14 = Weapons.get("m14")
-	-- recarga: 3,0 s sem passe; 2,64 s com "Mãos Rápidas" (0,88)
-	near(Weapons.reloadTime(m14, none.reload or 1), 3.0, 1e-9, "recarga sem passe")
-	near(Weapons.reloadTime(m14, all.reload), 2.64, 1e-9, "recarga com passe")
+	-- recarga: 2,4 s sem passe (D-107: era 3,0); 2,112 s com "Mãos Rápidas" (0,88)
+	near(Weapons.reloadTime(m14, none.reload or 1), 2.4, 1e-9, "recarga sem passe")
+	near(Weapons.reloadTime(m14, all.reload), 2.112, 1e-9, "recarga com passe")
 	-- o servidor (Gatilho.validate) só devolve o gatilho depois da recarga de cada um
-	for _, case in { { m = none.reload or 1, okAt = 3.0 }, { m = all.reload, okAt = 2.64 } } do
+	for _, case in { { m = none.reload or 1, okAt = 2.4 }, { m = all.reload, okAt = 2.112 } } do
 		local rec = newRec(m14, 2)
 		rec.reloadUntil = Weapons.reloadTime(m14, case.m)
 		local function at(t: number): boolean

@@ -1,10 +1,15 @@
 --!strict
 -- HUD de toque (Parte 13, "núcleo do toque"). Dois polegares, na horizontal: analógico flutuante à
 -- esquerda (proporcional; a borda para a frente corre; arrastar além até o cadeado trava a corrida),
--- arrastar à direita gira a câmera, tiro grande à direita (arrastar o próprio botão também gira),
--- mira, recarga, postura (tocar agacha, segurar deita, deslizar para cima levanta), pular/transpor,
--- arma, roda de equipamento, inclinar, bandagem, mapa e menu no alto à esquerda, comunicação,
--- marcar e rádio (com a voz) no alto à direita. A vaga do "interagir" é do botão contextual (T2).
+-- arrastar à direita gira a câmera, tiro grande à direita (arrastar o próprio botão também gira).
+-- v39 (dono, no celular: "muitos botões na tela, deixe somente os importantes"): fixos só tiro,
+-- mira, pular, agachar (tocar agacha, segurar deita, deslizar para cima levanta), ITEM (tocar: último
+-- item; segurar: roda), COMUNICAR (tocar: marca; segurar: roda) e, pequenos no alto, mapa e menu. A
+-- troca de arma, o seletor, a alça e a baioneta ficam no cartão da arma (HudCampo); a câmera, no menu.
+-- Aparecem só quando servem (Controllers/ToqueAuto): RECARGA, GOLPE, FÔLEGO, BANDAGEM e RÁDIO
+-- (segurar fala, tocar troca o canal). A vaga do "interagir" é do botão contextual (Interagir.client).
+-- No tablet (lado curto ≥ 600 px) os mesmos botões, mais perto dos cantos. A área do HUD vai nos
+-- atributos AreaPos/AreaSize/Espelho/Indicador para as zonas livres das outras telas (ToqueUi.zoneIn).
 -- Sem minimapa, sem marcador de inimigo: os botões só apertam as mesmas ações do controle
 -- (Input.virtual). Regras puras e layouts no Shared/Toque (testados no Lune).
 -- Cada toque pertence ao controle onde começou: o dedo da câmera que passa por cima de um botão não
@@ -24,7 +29,8 @@
 --   "segurar:<id>:<s>"   segura o botão por s segundos;
 --   "olhar:<dx>,<dy>"    arrasto de câmera em px;
 --   "layout:<nome>"      two | three | four | custom1..3;  "espelho"  canhoto liga/desliga;
---   "estado"             escreve no Output o estado do HUD.
+--   "contexto:<nome>"    acende por 8 s um contextual: reload | melee | breath | bleed | command;
+--   "estado"             escreve no Output o estado do HUD e dos automáticos.
 --   ("giro:<yaw>,<pitch>" é do CameraLook.)
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -34,6 +40,7 @@ local UserInputService = game:GetService("UserInputService")
 local InputMap = require(ReplicatedStorage.Shared.InputMap)
 local Toque = require(ReplicatedStorage.Shared.Toque)
 local Input = require(script.Parent.Input)
+local ToqueAuto = require(script.Parent.ToqueAuto)
 local UiKit = require(script.Parent.UiKit)
 local VozEstado = require(script.Parent.VozEstado)
 
@@ -256,8 +263,13 @@ local function relayout()
 	S.W, S.H = full.X - 2 * m, full.Y - 2 * m
 	S.swipePx = Toque.rawPx(8, S.short)
 	local s = Input.settings
-	S.slots = Toque.layout(s :: any)
+	S.slots = Toque.layout(s :: any, nil, Toque.isTablet(S.short))
 	S.zone = Toque.zone(s.touchMirror)
+	-- a área para as zonas livres das outras telas (ToqueUi.zoneIn): mesma origem do AbsolutePosition
+	gui:SetAttribute("AreaPos", gui.AbsolutePosition + Vector2.new(m, m))
+	gui:SetAttribute("AreaSize", Vector2.new(S.W, S.H))
+	gui:SetAttribute("Espelho", s.touchMirror == true)
+	gui:SetAttribute("Indicador", S.slots.fire_left ~= nil and S.slots.fire_left.on)
 	local opacity = s.touchOpacity
 	for id, b in btns do
 		local sl = S.slots[id]
@@ -289,6 +301,7 @@ local function relayout()
 end
 gui:GetPropertyChangedSignal("AbsoluteSize"):Connect(relayout)
 root:GetPropertyChangedSignal("AbsolutePosition"):Connect(function()
+	gui:SetAttribute("AreaPos", root.AbsolutePosition)
 	local it = S.slots.interact
 	if it then
 		local isz = Toque.buttonPx(Toque.BY_ID.interact.mm, it.scale, S.short)
@@ -311,6 +324,9 @@ local function refresh()
 		and ctx ~= "menu"
 		and ctx ~= "map"
 		and player.Character ~= nil
+	if gui:GetAttribute("Campo") ~= S.active then
+		gui:SetAttribute("Campo", S.active) -- o HUD de toque vale agora (ToqueUi.inField)
+	end
 	local shown = S.active and ctx ~= "wheel"
 	if shown ~= S.shown then
 		S.shown = shown
@@ -325,6 +341,9 @@ local function refresh()
 	c.foot = not c.vehicle and not c.downed
 	c.aiming = st.aiming
 	c.voice = VozEstado.available
+	-- contextuais (v39): o ToqueAuto decide a cada quadro
+	local ac = ToqueAuto.ctx
+	c.reload, c.melee, c.breath, c.bleed, c.command = ac.reload, ac.melee, ac.breath, ac.bleed, ac.command
 	for id, b in btns do
 		local sl = S.slots[id]
 		local vis = sl ~= nil and sl.on and Toque.visible(b.def, c)
@@ -514,6 +533,22 @@ local function buttonUp(b: Btn, t: Touch)
 	paint(b)
 end
 
+-- tiro sozinho (ToqueAuto, opção): conta como mais um dedo no botão de tiro
+ToqueAuto.onFire = function(down: boolean)
+	if down then
+		S.fireCount += 1
+		if S.fireCount == 1 then
+			Toque.unlock(S.stick)
+			Input.virtual("fire", true)
+		end
+	elseif S.fireCount > 0 then
+		S.fireCount -= 1
+		if S.fireCount == 0 then
+			Input.virtual("fire", false)
+		end
+	end
+end
+
 -- ===== toques =====
 local function began(key: any, abs: Vector2)
 	if not S.shown or S.touches[key] then
@@ -591,6 +626,7 @@ end
 
 -- Solta tudo. viaInput = false quando o próprio Input já soltou (app fora de foco).
 local function resetAll(viaInput: boolean)
+	ToqueAuto.stop() -- inclinar, respiração, tiro sozinho e o segurar do prompt
 	if viaInput then
 		for key in S.touches do
 			ended(key)
@@ -726,6 +762,9 @@ local function autoVault(dt: number, y: number)
 	local go = Toque.autoVault(S.vault, dt, os.clock(), {
 		enabled = Input.settings.touchAutoVault and S.shown and S.ctx.foot,
 		sprinting = Input.state.sprinting,
+		-- v39: empurrando firme sem correr (sem fôlego, por exemplo) também sobe o obstáculo baixo;
+		-- mirando não (encostar na mureta para atirar não pode pular por cima dela)
+		walking = y >= 0.85 and not Input.state.aiming,
 		forward = y > 0.7,
 		grounded = hum.FloorMaterial ~= Enum.Material.Air,
 		speedRatio = real / math.max(hum.WalkSpeed, 1),
@@ -817,6 +856,17 @@ RunService.RenderStepped:Connect(function(dt: number)
 		syncSprint()
 		autoVault(dt, y)
 	end
+	-- automáticos e contextuais do toque (v39)
+	local fb, fl = btns.fire, btns.fire_left
+	local ll, lr = btns.lean_l, btns.lean_r
+	ToqueAuto.step({
+		dt = dt,
+		active = S.active and Input.touchActive(),
+		foot = S.ctx.foot,
+		aiming = Input.state.aiming,
+		manualLean = (ll ~= nil and ll.latched) or (lr ~= nil and lr.latched),
+		fingerFire = (fb ~= nil and fb.down) or (fl ~= nil and fl.down),
+	})
 	drawStick(touching and S.stickKey ~= nil, d)
 	-- mira travada que outro sistema desligou (binóculo, transpor, golpe): o botão destrava
 	if S.aimLatched and not Input.state.aiming and os.clock() - S.aimLatchedAt > 0.3 then
@@ -882,6 +932,7 @@ local function devState()
 			table.concat(vis, ", ")
 		)
 	)
+	print("[VT65 TOQUE] " .. ToqueAuto.describe())
 end
 
 if RunService:IsStudio() then
@@ -924,6 +975,9 @@ if RunService:IsStudio() then
 			Input.setSetting("touchLayout", string.sub(v, 8))
 		elseif v == "espelho" then
 			Input.setSetting("touchMirror", not Input.settings.touchMirror)
+		elseif string.sub(v, 1, 9) == "contexto:" then
+			-- acende um contextual por 8 s (reload, melee, breath, bleed, command) para ver o lugar
+			ToqueAuto.devUntil[string.sub(v, 10)] = now + 8
 		elseif v == "estado" then
 			devState()
 			return

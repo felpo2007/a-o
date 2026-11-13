@@ -8,6 +8,9 @@
 -- Input.addLook; o giroscópio (modos desligado / só mirando / sempre) soma por cima. Conta no
 -- Shared/Toque (mm do dedo, sensibilidades separadas de olhar, ferro, luneta e giroscópio,
 -- aceleração opcional, inverter Y); a assistência mínima vale igual à do controle.
+-- v39 (toque): a assistência do toque tem opção própria (touchAssist, Configurações > Toque): a mesma
+-- fricção do controle e um ímã leve (Shared/Toque.magnet: só mirando, alvo à vista, com o jogador
+-- mexendo a mira ou andando, no máximo 1,5°/s, nunca passa do alvo). No mouse, nada.
 -- Studio: workspace:SetAttribute("VT65DevToque", "giro:5,2") gira 5° para a direita e 2° para cima
 -- como se o aparelho tivesse girado (passa pelo modo e pela sensibilidade do giroscópio).
 local ContextActionService = game:GetService("ContextActionService")
@@ -50,11 +53,10 @@ local function enemies(): { Model }
 	return out
 end
 
--- Fator de desaceleração pelo alvo mais alinhado; só consulta visibilidade de um candidato.
-local function assist(mode: string): number
-	if Input.settings.aimAssist ~= "minimal" or mode == "hip" then
-		return 1
-	end
+-- Alvo mais alinhado com a mira (até ASSIST_RANGE_M) e se está à vista; só consulta a visibilidade
+-- de um candidato.
+type Aim = { part: BasePart, ang: number, dist: number, visible: boolean }
+local function aimTarget(): Aim?
 	local cf = camera.CFrame
 	local best: BasePart? = nil
 	local bestAng, bestDist = math.huge, 0
@@ -73,7 +75,7 @@ local function assist(mode: string): number
 		end
 	end
 	if not best then
-		return 1
+		return nil
 	end
 	-- visível de verdade: raio da câmera até o alvo (vegetação, parede) e fumaça
 	local params = RaycastParams.new()
@@ -95,7 +97,19 @@ local function assist(mode: string): number
 			Smoke.clouds(workspace:FindFirstChild("Smoke"))
 		)
 	end
-	return InputMap.assistFactor(Input.settings.aimAssist, mode, bestDist, bestAng, visible, 0.3)
+	return { part = target, ang = bestAng, dist = bestDist, visible = visible }
+end
+
+-- Fator de desaceleração (fricção) com a escolha `setting` ("minimal" | "off") e o alvo usado.
+local function assist(mode: string, setting: string): (number, Aim?)
+	if setting ~= "minimal" or mode == "hip" then
+		return 1, nil
+	end
+	local t = aimTarget()
+	if not t then
+		return 1, nil
+	end
+	return InputMap.assistFactor(setting, mode, t.dist, t.ang, t.visible, 0.3), t
 end
 
 -- D-82: sensibilidade do mouse do jogo, por modo (quadril, mira de ferro, luneta), por cima da
@@ -210,11 +224,27 @@ local function touchLook(dt: number)
 		yaw += gyaw
 		pitch += gpitch
 	end
-	if yaw == 0 and pitch == 0 then
+	-- assistência do toque (touchAssist): a fricção do controle e o ímã leve
+	local on = s.touchAssist ~= false
+	local moving = yaw ~= 0 or pitch ~= 0 or Input.move().Magnitude > 0.2
+	if not moving then
 		return
 	end
-	local f = assist(mode)
-	turn(yaw * f, pitch * f)
+	local f, t = assist(mode, if on then "minimal" else "off")
+	if yaw ~= 0 or pitch ~= 0 then
+		turn(yaw * f, pitch * f)
+	end
+	local pull = if t then Toque.magnet(on, mode, t.visible, t.dist, t.ang, moving, dt) else 0
+	if t and pull > 0 then
+		local cf = camera.CFrame
+		local v = cf:VectorToObjectSpace(t.part.Position - cf.Position)
+		local dyaw = math.deg(math.atan2(v.X, -v.Z))
+		local dpitch = math.deg(math.atan2(v.Y, math.sqrt(v.X * v.X + v.Z * v.Z)))
+		local mag = math.sqrt(dyaw * dyaw + dpitch * dpitch)
+		if mag > 1e-4 then
+			turn(dyaw * pull / mag, dpitch * pull / mag)
+		end
+	end
 end
 
 if RunService:IsStudio() then
@@ -263,6 +293,6 @@ RunService:BindToRenderStep("VT65_Look", Enum.RenderPriority.Camera.Value + 1, f
 	if dyaw == 0 and dpitch == 0 then
 		return
 	end
-	local f = assist(mode)
+	local f = assist(mode, Input.settings.aimAssist)
 	turn(dyaw * f, dpitch * f)
 end)

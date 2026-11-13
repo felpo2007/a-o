@@ -5,7 +5,10 @@ local Capture = {}
 
 Capture.C = {
 	soloSeconds = 90, -- 1 atacante leva 90 s de neutro a dono
-	maxSpeedup = 2.0, -- 4+ atacantes de vantagem: 45 s
+	-- +25% por atacante a mais, até maxSpeedup. D-107 (50 x 50, "mais fast paced"): o teto era 2x (5
+	-- atacantes: 45 s); agora 3x a partir de 9 atacantes (um squad e meio): 30 s de neutro a dono e
+	-- 60 s para tomar um setor inimigo (eram 90 s). Sozinho e com até 5, igual.
+	maxSpeedup = 3.0,
 	regenSeconds = 120, -- defensores sozinhos devolvem o ponto ao dono
 	warfareMinutes = 75,
 	skirmishMinutes = 20,

@@ -18,6 +18,15 @@
 -- - notar leva tempo (cone de visão), a mira firma no alvo novo, disciplina de fogo, supressão na
 --   última posição vista, granada atrás do dique sem acertar o próprio squad;
 -- - túneis só do VC (BotTunnels); blindados com tripulação de bots dos EUA (BotVehicles).
+-- D-107 (pedido do dono, 2026-11-13: "só vejo 10 bots, cadê os 50?", "bots não avançam", "bots não
+-- precisam seguir o líder", "faça o jogo mais fast paced"):
+-- - completa até 50 por lado (BotBrain.CROWD), 2 por lado por segundo, com teto pelo Heartbeat do
+--   servidor (para de pôr abaixo de 45 Hz, tira abaixo de 35 Hz); era 10 (15 no Studio);
+-- - pensa pela distância do humano mais perto (BotBrain.LOD: 0,3 / 0,6 / 1 s), num orçamento por
+--   quadro (BotBrain.BUDGET), sobre um retrato dos combatentes refeito a cada 0,1 s;
+-- - quem ataca avança em lances (BotBrain.PUSH) em vez de trocar tiro de longe ou ficar preso no
+--   abrigo; cada squad tem seu papel na frente (BotSquads); renasce no companheiro de squad como o
+--   jogador (SpawnRules.MATE) ou no ponto livre mais perto do objetivo do squad.
 -- As decisões e os números ficam no BotBrain (puro, testado no Lune); aqui, os raios e o Humanoid.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -70,12 +79,14 @@ local nextId = 0
 local debugOn = false
 local lastFire: { [Model]: number } = setmetatable({}, { __mode = "k" }) :: any -- quem atirou e quando
 
+-- Tamanho de cada time que os bots completam: o atributo BotFill do ReplicatedStorage, se houver;
+-- senão 50 (D-107; era 10, 15 no Studio). O teto pelo desempenho vem depois (crowd).
 function BotService.fill(): number
 	local v = ReplicatedStorage:GetAttribute("BotFill")
 	if type(v) == "number" then
 		return v
 	end
-	return if RunService:IsStudio() then 15 else 10
+	return BotBrain.CROWD.perSide
 end
 
 function BotService.list(): { Bot }
@@ -112,24 +123,24 @@ local function objectivePos(faction: string): (Vector3?, number?)
 	return Vector3.new(sp.x, 0, sp.z), s
 end
 
+-- D-107: ponto forte do squad do bot (cada squad tem seu papel na frente); sem squad, o do lado
+local function squadObjective(bot: Bot): (Vector3?, number?)
+	local p, s = BotSquads.objective(bot)
+	if p and s then
+		return p, s
+	end
+	return objectivePos(bot.faction)
+end
+
 local function flat(a: Vector3, b: Vector3): number
 	return Vector3.new(a.X - b.X, 0, a.Z - b.Z).Magnitude
 end
 
+-- definida na seção dos raios (precisa dos filtros)
+local mateSpot: (bot: Bot) -> (number?, number?, number?)
+
 local function between(r: { number }, roll: number): number
 	return r[1] + (r[2] - r[1]) * roll
-end
-
--- lista de combatentes do quadro (uma por passada do laço, para todos os bots)
-local listCache: { Combatants.Entry } = {}
-local listAt = -1
-local function combatList(): { Combatants.Entry }
-	local now = os.clock()
-	if now - listAt > 0.05 then
-		listCache = Combatants.list()
-		listAt = now
-	end
-	return listCache
 end
 
 -- zera o estado de uma vida nova (chamado no spawn)
@@ -152,6 +163,8 @@ local function resetLife(bot: Bot)
 	bot.goal, bot.goalSector = nil, nil
 	bot.scanAt, bot.scanSide = 0, 0
 	bot.stillSince = nil
+	bot.rushTo, bot.rushUntil, bot.nextRush = nil, 0, 0
+	bot.pinnedSince, bot.fightSince = nil, now
 	BotTunnels.reset(bot)
 end
 
@@ -168,15 +181,90 @@ local function stanceOf(model: Model): string
 	return "stand"
 end
 
+-- D-107: retrato dos combatentes, refeito no máximo a cada 0,1 s e lido por todos os bots (antes cada
+-- pensamento relia os atributos de todos os combatentes: 100 bots x 100 combatentes)
+type Snap = {
+	model: Model,
+	root: BasePart,
+	faction: string,
+	active: boolean, -- vivo e de pé
+	hidden: boolean, -- no túnel
+	stance: string,
+	camo: string?,
+}
+local snapBy: { [string]: { Snap } } = { US = {}, VC = {} }
+local humanPos: { Vector3 } = {} -- humanos vivos em campo (nível de detalhe)
+local snapAt = -math.huge
+local function snapshot()
+	local now = os.clock()
+	if now - snapAt < 0.1 then
+		return
+	end
+	snapAt = now
+	local by: { [string]: { Snap } } = { US = {}, VC = {} }
+	local hp: { Vector3 } = {}
+	for _, e in Combatants.list() do
+		local r = Combatants.root(e)
+		local list = by[e.faction]
+		if r and list then
+			local m = e.model
+			local camo = m:GetAttribute("Camo")
+			local active = Combatants.active(e)
+			table.insert(list, {
+				model = m,
+				root = r,
+				faction = e.faction,
+				active = active,
+				hidden = m:GetAttribute("InTunnel") == true,
+				stance = stanceOf(m),
+				camo = if type(camo) == "string" then camo else nil,
+			})
+			if e.player and (active or m:GetAttribute("Downed")) then
+				table.insert(hp, r.Position)
+			end
+		end
+	end
+	snapBy, humanPos = by, hp
+end
+
+-- combatentes de um lado no retrato (refaz o retrato se ficou velho)
+local function snapOf(faction: string): { Snap }
+	snapshot()
+	local l = snapBy[faction]
+	if l then
+		return l
+	end
+	return {}
+end
+
+local function enemyOf(faction: string): string
+	return if faction == "US" then "VC" else "US"
+end
+
+-- distância (m) do humano vivo mais perto
+local function nearestHumanM(p: Vector3): number
+	snapshot()
+	local best = math.huge
+	for _, h in humanPos do
+		local dx, dz = h.X - p.X, h.Z - p.Z
+		local d2 = dx * dx + dz * dz
+		if d2 < best then
+			best = d2
+		end
+	end
+	return math.sqrt(best) * M
+end
+
 local function spawnModel(bot: Bot)
 	local pts = SpawnService.freePoints(bot.faction)
 	if #pts == 0 then
 		return
 	end
-	local goal = objectivePos(bot.faction)
+	local goal = squadObjective(bot)
 	local atHQ = BotVehicles.spawnAtHQ(bot) -- tripulação e squad do LVTP-5 nascem no QG
-	-- 2026-11-12: bot no squad de um jogador nasce no ponto livre mais perto do humano que segue
-	local near = BotEscolta.spawnAnchor(bot) or goal
+	-- D-107: nasce no ponto livre mais perto do objetivo do SQUAD (reforço chega rápido). O bot do
+	-- squad de jogador também: não segue mais o humano
+	local near = BotSquads.ownGoal(bot) or goal
 	table.sort(pts, function(a, b)
 		if atHQ or not near then
 			return a.kind == "hq" and b.kind ~= "hq"
@@ -217,6 +305,8 @@ local function spawnModel(bot: Bot)
 		hum.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
 		hum.NameDisplayDistance = 0
 		hum.HealthDisplayType = Enum.HumanoidHealthDisplayType.AlwaysOff
+		-- D-107: bot nunca escala (AgentCanClimb = false): um estado a menos para o Humanoid conferir
+		hum:SetStateEnabled(Enum.HumanoidStateType.Climbing, false)
 	end
 	if hum then
 		hum.Died:Connect(function()
@@ -240,10 +330,20 @@ local function spawnModel(bot: Bot)
 			end)
 		end)
 	end
-	local jx, jz = bot.rng:range(-20, 20), bot.rng:range(-20, 20)
-	local y = SpawnService.groundY(pt.x + jx, pt.z + jz)
-	local face = if goal then BotMove.yawTo(goal.X - pt.x, goal.Z - pt.z) else 0
-	model:PivotTo(CFrame.new(pt.x + jx, y + 5, pt.z + jz) * CFrame.Angles(0, face, 0))
+	-- D-107: no companheiro de squad, se ele pode receber (as regras do jogador); senão, no ponto
+	local sx, sy, sz = nil :: number?, nil :: number?, nil :: number?
+	if not atHQ then
+		sx, sy, sz = mateSpot(bot)
+	end
+	local x: number, y: number, z: number
+	if sx and sy and sz then
+		x, y, z = sx, sy + 5, sz
+	else
+		x, z = pt.x + bot.rng:range(-20, 20), pt.z + bot.rng:range(-20, 20)
+		y = SpawnService.groundY(x, z) + 5
+	end
+	local face = if goal then BotMove.yawTo(goal.X - x, goal.Z - z) else 0
+	model:PivotTo(CFrame.new(x, y, z) * CFrame.Angles(0, face, 0))
 	model.Parent = folder
 	local root = model:FindFirstChild("HumanoidRootPart") :: BasePart?
 	if root then
@@ -260,6 +360,7 @@ local function spawnModel(bot: Bot)
 		return
 	end
 	bot.model = model
+	bot.head = model:FindFirstChild("Head") :: BasePart?
 	BotLocomotion.attach(bot, model)
 end
 
@@ -341,6 +442,15 @@ local function newBot(faction: string): Bot
 		scanAt = 0,
 		scanSide = 0,
 		order = nil,
+		nextThink = 0,
+		lod = 3,
+		thinkDt = C.thinkS,
+		head = nil,
+		rushTo = nil,
+		rushUntil = 0,
+		nextRush = 0,
+		pinnedSince = nil,
+		fightSince = 0,
 	}
 	table.insert(bots, bot)
 	BotSquads.assign(bot)
@@ -461,6 +571,86 @@ end
 local function groundAt(x: number, z: number, nearY: number): number
 	local r = cast(Vector3.new(x, nearY + 4 / M, z), Vector3.new(0, -10 / M, 0), terrainParams)
 	return if r then r.Position.Y else nearY
+end
+
+-- D-107: renascer no companheiro de squad com as regras do jogador (SpawnRules.MATE): o líder primeiro,
+-- depois os outros; vivo, de pé, a pé, fora do túnel, sem tiro nem contato há 10 s, sem inimigo a
+-- 50 m e fora de ponto em disputa. O lugar fica 2–4 m atrás dele (do lado oposto ao inimigo mais
+-- perto), com chão a até 1,5 m da altura do pé dele. Devolve x, y do chão, z (studs).
+mateSpot = function(bot: Bot): (number?, number?, number?)
+	local sq = bot.squad
+	if not sq then
+		return nil, nil, nil
+	end
+	local MC = SpawnRules.MATE
+	local now = os.clock()
+	local enemies = snapOf(enemyOf(bot.faction))
+	local order: { Bot } = {}
+	if sq.leader then
+		table.insert(order, sq.leader)
+	end
+	for _, b in sq.members :: { Bot } do
+		if b ~= sq.leader then
+			table.insert(order, b)
+		end
+	end
+	local r2 = MapConfig.CaptureRadiusStuds ^ 2
+	for _, mate in order do
+		local m = mate.model
+		local hum = if m then m:FindFirstChildOfClass("Humanoid") else nil
+		local r = if m then m:FindFirstChild("HumanoidRootPart") :: BasePart? else nil
+		if
+			mate ~= bot
+			and m
+			and hum
+			and r
+			and hum.Health > 0
+			and not m:GetAttribute("Downed")
+			and not hum.SeatPart
+			and not mate.tunnel
+			and not mate.inCombat
+		then
+			local p = r.Position
+			local nearest, ex, ez = math.huge, nil :: number?, nil :: number?
+			for _, e in enemies do
+				if e.active then
+					local d = flat(e.root.Position, p)
+					if d < nearest then
+						nearest, ex, ez = d, e.root.Position.X, e.root.Position.Z
+					end
+				end
+			end
+			local contested = false
+			for s, sp in MatchService.points do
+				if MatchService.isContested(s) and (sp.x - p.X) ^ 2 + (sp.z - p.Z) ^ 2 <= r2 then
+					contested = true
+				end
+			end
+			local since = math.min(now - mate.contactAt, now - (lastFire[m] or -math.huge))
+			local why = SpawnRules.mateCheck({
+				alive = true,
+				downed = false,
+				inBounds = true,
+				inVehicle = false,
+				inTunnel = false,
+				nearestEnemyM = nearest * M,
+				sinceCombatS = since,
+				inContestedCapture = contested,
+			})
+			if not why then
+				local look = r.CFrame.LookVector
+				local bx, bz = SpawnRules.behind(p.X, p.Z, ex, ez, look.X, look.Z)
+				local footY = p.Y - hum.HipHeight - r.Size.Y / 2
+				for _, s in SpawnRules.mateSpots(p.X, p.Z, bx, bz, M) do
+					local hit = workspace:Raycast(Vector3.new(s.x, footY + 6, s.z), Vector3.new(0, -14, 0), coverParams)
+					if hit and math.abs(hit.Position.Y - footY) * M <= MC.floorM then
+						return s.x, hit.Position.Y, s.z
+					end
+				end
+			end
+		end
+	end
+	return nil, nil, nil
 end
 
 -- Mede o abrigo num lugar (Y = chão): nível 0..3, tipo do que tapa e o lado livre para atirar
@@ -731,26 +921,17 @@ local function perceive(bot: Bot, model: Model, root: BasePart, eye: Vector3): (
 	local cap = SENSE * BotBrain.SIGHT_FIRING * weather
 	local now = os.clock()
 	local cands: { Seen } = {}
-	for _, e in combatList() do
-		if e.faction ~= bot.faction and Combatants.active(e) and not e.model:GetAttribute("InTunnel") then
-			local r = Combatants.root(e)
-			if r then
-				local dd = (r.Position - root.Position).Magnitude
-				if dd < cap then
-					local tracking = e.model == bot.target
-					local camo = e.model:GetAttribute("Camo")
-					local firing = now - (lastFire[e.model] or -math.huge) < 2
-					local rangeM = BotBrain.sightRange(
-						bot.diff,
-						vegOf(e.model, r.Position),
-						stanceOf(e.model),
-						tracking,
-						if type(camo) == "string" then camo else nil,
-						firing
-					)
-					if dd < rangeM / M * weather then
-						table.insert(cands, { m = e.model, d = if tracking then -1 else dd })
-					end
+	for _, e in snapOf(enemyOf(bot.faction)) do
+		if e.active and not e.hidden then
+			local r = e.root
+			local dd = (r.Position - root.Position).Magnitude
+			if dd < cap then
+				local tracking = e.model == bot.target
+				local firing = now - (lastFire[e.model] or -math.huge) < 2
+				local rangeM =
+					BotBrain.sightRange(bot.diff, vegOf(e.model, r.Position), e.stance, tracking, e.camo, firing)
+				if dd < rangeM / M * weather then
+					table.insert(cands, { m = e.model, d = if tracking then -1 else dd })
 				end
 			end
 		end
@@ -758,9 +939,11 @@ local function perceive(bot: Bot, model: Model, root: BasePart, eye: Vector3): (
 	table.sort(cands, function(a, b)
 		return a.d < b.d
 	end)
+	-- D-107: longe de humano, menos raios de visada por pensamento (BotBrain.LOD.losChecks)
+	local maxChecks = math.min(C.maxLosChecks, BotBrain.LOD.losChecks[bot.lod] or C.maxLosChecks)
 	local checks = 0
 	for _, c in cands do
-		if checks < C.maxLosChecks or c.m == bot.target then
+		if checks < maxChecks or c.m == bot.target then
 			checks += 1
 			if visible(eye, c.m, model) then
 				local r = c.m:FindFirstChild("HumanoidRootPart") :: BasePart?
@@ -825,8 +1008,29 @@ local function aimPart(target: Model): BasePart?
 end
 
 local function startReload(bot: Bot, now: number)
-	bot.reloadUntil = now + (C.reloadS[bot.weapon.kind] or 3)
+	-- mesma recarga do jogador (Weapons.reloadTime; 2026-11-13 ficou mais curta, fuzil 2,4 s)
+	bot.reloadUntil = now + Weapons.reloadTime(bot.weapon)
 	bot.mag = bot.weapon.magazine
+end
+
+-- D-107: métrica do primeiro tiroteio de bots na partida (meta do dono: nos primeiros 3 min). Fica em
+-- ReplicatedStorage.VT65BotPrimeiroTiroS e numa linha [VT65 METRICA] no Output.
+local firstFireMatch = -1
+local function noteFirstFire(bot: Bot, target: Model)
+	local t0 = MatchService.startedAt
+	if firstFireMatch == t0 then
+		return
+	end
+	firstFireMatch = t0
+	local s = os.clock() - t0
+	ReplicatedStorage:SetAttribute("VT65BotPrimeiroTiroS", math.floor(s + 0.5))
+	local tr = target:FindFirstChild("HumanoidRootPart") :: BasePart?
+	local model = bot.model
+	local r = if model then model:FindFirstChild("HumanoidRootPart") :: BasePart? else nil
+	local d = if tr and r then flat(tr.Position, r.Position) * M else 0
+	print(
+		string.format("[VT65 METRICA] bots: primeiro tiroteio aos %.0f s de partida (%s, a %.0f m)", s, bot.faction, d)
+	)
 end
 
 -- Rajada curta (BotBrain.volleySize) numa tarefa própria, na cadência certa. Cada tiro recalcula o
@@ -836,6 +1040,9 @@ local function fireVolley(bot: Bot, target: Model?, at: Vector3?)
 	local model = bot.model
 	if not model then
 		return
+	end
+	if target then
+		noteFirstFire(bot, target)
 	end
 	local d = bot.diff
 	local kind = bot.weapon.kind
@@ -920,13 +1127,10 @@ end
 -- Posições de companheiros (e para onde vão) em lista plana, para a granada não cair neles
 local function friendsXZ(bot: Bot): { number }
 	local out: { number } = {}
-	for _, e in combatList() do
-		if e.faction == bot.faction and Combatants.active(e) then
-			local er = Combatants.root(e)
-			if er then
-				table.insert(out, er.Position.X)
-				table.insert(out, er.Position.Z)
-			end
+	for _, e in snapOf(bot.faction) do
+		if e.active then
+			table.insert(out, e.root.Position.X)
+			table.insert(out, e.root.Position.Z)
 		end
 	end
 	for _, b in bots do
@@ -1086,7 +1290,7 @@ local function goTo(
 			setStance(model, BotBrain.coverStance("none", 0, true, true, bot.open))
 			BotLocomotion.stop(bot, bot.lastKnown)
 		end
-		bot.moveUntil += C.thinkS
+		bot.moveUntil += bot.thinkDt
 		return false
 	end
 	local ap = if target then aimPart(target) else nil
@@ -1179,6 +1383,7 @@ local function fromCover(
 		bot.mode = "hide"
 		bot.nextPeek = now + 0.3 + 0.4 * bot.rng:next() -- olha logo ao chegar
 		bot.recheckAt = now + d.recheckS
+		bot.fightSince = now -- D-107: conta o tempo parado neste abrigo (lance de assalto)
 	elseif bot.mode == "hold" then
 		bot.mode, bot.peekUntil, bot.peekFired = "peek", now + d.peekMaxS, false
 	end
@@ -1290,6 +1495,80 @@ local function fromCover(
 	end
 end
 
+---------------------------------------------------------------------------------------------
+-- D-107: lance de assalto (BotBrain.PUSH). Quem ataca corre boundM na direção do ponto forte do squad
+-- (ou até o lugar dele no ponto, se já está perto), para o lado protegido de um abrigo conhecido perto
+-- do fim, se houver (BotWorld, sem raio). Ao chegar (ou no tempo máximo), procura abrigo ali.
+---------------------------------------------------------------------------------------------
+local function endRush(bot: Bot, now: number)
+	bot.rushTo = nil
+	bot.mode = "advance"
+	bot.nextRush = now + between(BotBrain.PUSH.restS, bot.rng:next())
+	bot.searchAt = 0 -- procura abrigo já, onde chegou
+	bot.fightSince = now
+end
+
+local function startRush(bot: Bot, root: BasePart, threat: Vector3, now: number): boolean
+	local point = squadObjective(bot)
+	if not point then
+		return false
+	end
+	local here = root.Position
+	local toPoint = flat(here, point)
+	if toPoint < 1 then
+		return false
+	end
+	local len = between(BotBrain.PUSH.boundM, bot.rng:next()) / M
+	local dest: Vector3
+	if toPoint <= len + C.holdRadiusM / M then
+		dest = BotSquads.deployGoal(bot, point)
+	else
+		local dir = Vector3.new(point.X - here.X, 0, point.Z - here.Z).Unit
+		-- um pouco de lado pelo lugar no squad: não correm todos na mesma linha
+		local side = Vector3.new(-dir.Z, 0, dir.X) * (((bot.slot or 0) % 3) - 1) * (4 / M)
+		dest = here + dir * len + side
+	end
+	local best: Vector3? = nil
+	local bestD = math.huge
+	for _, e in BotWorld.coversNear(dest, 8 / M) do
+		local px, pz, nx, nz = BotWorld.closest(e, dest.X, dest.Z)
+		if (threat.X - px) * nx + (threat.Z - pz) * nz > 0 then
+			nx, nz = -nx, -nz -- lado de cá (longe do inimigo)
+		end
+		local back = e.half + C.standoffM / M
+		local p = Vector3.new(px + nx * back, here.Y, pz + nz * back)
+		local dd = flat(p, dest)
+		if dd < bestD and flat(p, point) < toPoint then
+			best, bestD = p, dd
+		end
+	end
+	bot.rushTo = best or Vector3.new(dest.X, here.Y, dest.Z)
+	bot.rushUntil = now + BotBrain.PUSH.rushMaxS
+	bot.cover, bot.coverSector, bot.avoid = nil, nil, nil
+	bot.mode = "rush"
+	return true
+end
+
+-- Lance em curso: corre até o fim. Devolve false quando acabou (e já marcou o fim).
+local function rushStep(bot: Bot, model: Model, root: BasePart, now: number): boolean
+	local to = bot.rushTo
+	if not to then
+		return false
+	end
+	local dist = flat(root.Position, to)
+	if dist <= 2 / M or now >= bot.rushUntil then
+		endRush(bot, now)
+		return false
+	end
+	setStance(model, "stand")
+	BotLocomotion.go(bot, to, "sprint", { direct = dist * M < MOVE.directM * 2, tolerance = 1.5 / M })
+	if BotLocomotion.status(bot) == "failed" then
+		endRush(bot, now) -- caminho fechado (água funda, cercado): procura abrigo onde está
+		return false
+	end
+	return true
+end
+
 local function combat(
 	bot: Bot,
 	model: Model,
@@ -1310,14 +1589,42 @@ local function combat(
 	end
 	if target and targetD * M < d.closeM then
 		-- inimigo colado: luta onde está, ajoelhado
+		if bot.rushTo then
+			endRush(bot, now)
+		end
 		setStance(model, "crouch")
 		BotLocomotion.stop(bot, (target :: Model):GetPivot().Position)
 		tryFire(bot, target, now, targetD)
 		return
 	end
+	-- D-107: lance de assalto em curso; alvo perto (holdM) no caminho: para e luta
+	if bot.rushTo and target and targetD * M < BotBrain.PUSH.holdM then
+		endRush(bot, now)
+	end
+	if rushStep(bot, model, root, now) then
+		return
+	end
+	local point = squadObjective(bot)
+	if
+		BotBrain.shouldRush({
+			attacking = BotSquads.attacking(bot),
+			myBound = BotSquads.advancing(bot),
+			ready = now >= bot.nextRush,
+			wounded = retreating,
+			targetM = if target then targetD * M else nil,
+			toPointM = if point then flat(root.Position, point) * M else math.huge,
+			zoneM = MapConfig.CaptureRadiusStuds * M,
+			pinnedS = if bot.pinnedSince then now - bot.pinnedSince else 0,
+			stillS = now - bot.fightSince,
+		})
+		and startRush(bot, root, threat, now)
+		and rushStep(bot, model, root, now)
+	then
+		return
+	end
 	maybeGrenade(bot, model, root, now, pinned, target)
 	if not bot.cover and now >= bot.searchAt and bot.rays >= C.searchCost then
-		bot.searchAt = now + d.searchEveryS
+		bot.searchAt = now + d.searchEveryS * (BotBrain.LOD.searchMult[bot.lod] or 1)
 		local found = searchCover(bot, hum, root, threat, retreating)
 		if found then
 			bot.coverSector = nil
@@ -1353,13 +1660,14 @@ local function calm(bot: Bot, model: Model, hum: Humanoid, root: BasePart, head:
 	end
 	-- EUA: acham e granadeiam as bocas de túnel (não para o resto)
 	BotTunnels.suspect(bot, model, root, head, now)
-	local point, sector = objectivePos(bot.faction)
+	-- D-107: o ponto forte do squad (papel na frente), não mais o do lado
+	local point, sector = squadObjective(bot)
 	if not (point and sector) then
 		BotLocomotion.stop(bot, nil)
 		return
 	end
-	if pinned then
-		-- tiro ou explosão sem origem conhecida: abaixa onde está
+	if pinned and now - (bot.pinnedSince or now) < BotBrain.PUSH.pinnedMaxS then
+		-- tiro ou explosão sem origem conhecida: abaixa onde está (D-107: por no máximo pinnedMaxS)
 		setStance(model, BotBrain.coverStance("none", 0, true, true, bot.open))
 		BotLocomotion.stop(bot, nil)
 		return
@@ -1374,7 +1682,8 @@ local function calm(bot: Bot, model: Model, hum: Humanoid, root: BasePart, head:
 		BotLocomotion.go(bot, c.pos, "walk", { direct = true })
 		return
 	end
-	-- 2026-11-12: bot no squad de um jogador segue o líder humano (ou a marca dele)
+	-- bot no squad de um jogador: a marca do líder na carta manda (D-107: sem marca, não segue mais o
+	-- humano; vai com o squad de bots dele)
 	if BotEscolta.calm(bot, model, root, now) then
 		return
 	end
@@ -1402,9 +1711,9 @@ local function calm(bot: Bot, model: Model, hum: Humanoid, root: BasePart, head:
 			setStance(model, "stand")
 			return
 		end
-		-- sem líder por perto: vai sozinho, pelo caminho
+		-- sem líder por perto (ou ele parou, D-107): vai sozinho ao seu lugar no objetivo do squad
 		setStance(model, "stand")
-		BotLocomotion.goFar(bot, squadGoal, if threatNear then "walk" else "jog", { tolerance = 6 / M })
+		BotLocomotion.goFar(bot, BotSquads.ownGoal(bot) or squadGoal, "jog", { tolerance = 6 / M })
 		return
 	end
 	-- perto do objetivo: o lugar de cada um. VC defendendo An Cường: os dois últimos do squad
@@ -1414,14 +1723,21 @@ local function calm(bot: Bot, model: Model, hum: Humanoid, root: BasePart, head:
 		bot.faction == "VC"
 		and sqd
 		and not sqd.attack
+		and not sqd.counter
 		and bot.slot >= 4
 		and BotTunnels.defend(bot, root, point, BotSquads.threatYaw(bot.faction, point))
 	then
 		return
 	end
-	if bot.goalSector ~= sector or not bot.goal then
+	-- D-107: contra-ataque (inimigo dentro do ponto guardado): o lugar e o abrigo vão para dentro do raio
+	local rCap = MapConfig.CaptureRadiusStuds
+	local counter = sqd ~= nil and sqd.counter == true
+	if bot.goalSector ~= sector or not bot.goal or (counter and flat(bot.goal :: Vector3, point) > rCap * 0.7) then
 		bot.goal = BotSquads.deployGoal(bot, point)
 		bot.goalSector = sector
+	end
+	if counter and c and flat(c.pos, point) > rCap * 0.8 then
+		bot.cover, bot.coverSector, c = nil, nil, nil
 	end
 	local g = bot.goal :: Vector3
 	if c and bot.coverSector == sector then
@@ -1458,11 +1774,15 @@ local function calm(bot: Bot, model: Model, hum: Humanoid, root: BasePart, head:
 		BotLocomotion.stop(bot, enemyHQ(bot, root))
 		return
 	end
-	-- vai para o seu lugar (cauteloso: o inimigo pode estar perto)
+	-- vai para o seu lugar (cauteloso só no fim: D-107, andava os últimos 40 m)
 	bot.mode = "advance"
 	local dist = flat(root.Position, g) * M
 	setStance(model, "stand")
-	BotLocomotion.go(bot, g, if dist > 40 then "jog" else "walk", { tolerance = 2 / M })
+	if dist > 60 then
+		BotLocomotion.goFar(bot, g, "jog", { tolerance = 4 / M }) -- renasceu longe: por trechos
+	else
+		BotLocomotion.go(bot, g, if dist > 15 then "jog" else "walk", { tolerance = 2 / M })
+	end
 	if BotLocomotion.status(bot) == "failed" then
 		-- caminho não fecha: muda o lugar
 		bot.goal = g + Vector3.new(bot.rng:range(-40, 40), 0, bot.rng:range(-40, 40))
@@ -1472,6 +1792,7 @@ end
 local function enterCombat(bot: Bot, now: number)
 	bot.inCombat = true
 	bot.contactAt = now
+	bot.fightSince = now
 	if bot.mode == "advance" then
 		bot.cover = nil
 	end
@@ -1547,15 +1868,24 @@ local function debugLabel(bot: Bot, model: Model)
 	)
 end
 
+local spawningNow = 0 -- modelos sendo montados agora (D-107: no máximo CROWD.spawnConcurrent)
+
 local function think(bot: Bot, now: number)
 	local model = bot.model
 	if not model then
-		if not bot.removed and not bot.spawning and now >= bot.readyAt then
+		if
+			not bot.removed
+			and not bot.spawning
+			and now >= bot.readyAt
+			and spawningNow < BotBrain.CROWD.spawnConcurrent
+		then
 			-- numa tarefa própria: criar o modelo espera (avatar, arte) e não pode parar os outros
 			bot.spawning = true
+			spawningNow += 1
 			task.spawn(function()
 				pcall(spawnModel, bot)
 				bot.spawning = false
+				spawningNow -= 1
 			end)
 		end
 		return
@@ -1566,10 +1896,17 @@ local function think(bot: Bot, now: number)
 	if not (hum and root and head) or hum.Health <= 0 or model:GetAttribute("Downed") then
 		return
 	end
+	-- D-107: nível de detalhe pela distância do humano vivo mais perto
+	local lod = BotBrain.lodLevel(nearestHumanM(root.Position))
+	if lod ~= bot.lod then
+		bot.lod = lod
+		BotLocomotion.setLod(bot, lod)
+	end
 	debugLabel(bot, model)
 	local d = bot.diff
 	local dt = math.clamp(now - bot.lastThink, 0, 1)
 	bot.lastThink = now
+	bot.thinkDt = math.max(dt, C.thinkS)
 	bot.rays = BotBrain.budgetStep(bot.rays, dt, d.rayRate, d.rayCap)
 	bot.supp = BotBrain.suppressionDecay(d, bot.supp, dt)
 	if hum.Health < bot.lastHealth - 0.5 then
@@ -1590,6 +1927,11 @@ local function think(bot: Bot, now: number)
 		return
 	end
 	local pinned, underFire = BotBrain.pinned(d, bot.supp), BotBrain.underFire(d, bot.supp)
+	if pinned then
+		bot.pinnedSince = bot.pinnedSince or now
+	else
+		bot.pinnedSince = nil
+	end
 	-- percepção: notar leva tempo; a reação conta a partir de quando nota
 	local seen, seenD = perceive(bot, model, root, head.Position)
 	local target = notice(bot, root, seen, seenD, dt, now)
@@ -1641,13 +1983,9 @@ local function think(bot: Bot, now: number)
 	end
 	-- 2026-11-12 ("faça eles avançarem mais em vez de ficarem parados"): quem ataca, sem alvo à vista
 	-- e sem fogo em cima há PRESS.afterS, volta a andar com o squad (os lances vêm do BotSquads); o
-	-- defensor fica no ponto e só reage
-	local sq = bot.squad
+	-- defensor fica no ponto e só reage (D-107: o contra-ataque conta como ataque)
 	local sinceSeen = now - math.max(bot.lastKnownAt, bot.threatAt)
-	if
-		threat
-		and BotBrain.shouldPress(sq ~= nil and sq.attack == true, target ~= nil, underFire, retreating, sinceSeen)
-	then
+	if threat and BotBrain.shouldPress(BotSquads.attacking(bot), target ~= nil, underFire, retreating, sinceSeen) then
 		threat = nil
 		if bot.inCombat then
 			leaveCombat(bot, now)
@@ -1672,6 +2010,9 @@ local function think(bot: Bot, now: number)
 		if bot.inCombat then
 			leaveCombat(bot, now)
 		end
+		if bot.rushTo then
+			endRush(bot, now) -- sem ameaça, o lance acaba: segue com o squad
+		end
 		calm(bot, model, hum, root, head, now, pinned)
 	end
 end
@@ -1691,8 +2032,8 @@ local function onShot(shooter: Model, origin: Vector3, dir: Vector3)
 	lastFire[shooter] = now
 	for _, b in bots do
 		local m = b.model
-		local head = if m then m:FindFirstChild("Head") :: BasePart? else nil
-		if m and head and m ~= shooter and b.faction ~= sf then
+		local head = b.head -- D-107: guardada no spawn (antes um FindFirstChild por bot a cada bala)
+		if m and head and head.Parent == m and m ~= shooter and b.faction ~= sf then
 			local p = head.Position
 			if (p - origin).Magnitude * M <= b.diff.hearShotM then
 				b.heardPos, b.heardAt = origin, now
@@ -1715,21 +2056,78 @@ local function onShot(shooter: Model, origin: Vector3, dir: Vector3)
 	end
 end
 
+-- D-107: lotação. Teto de bots por lado pelo Heartbeat do servidor (BotBrain.crowdStep): a taxa é a
+-- média de ~5 s dos quadros contados no Heartbeat; o teto só vale depois de warmS do terreno pronto.
+local crowd = BotBrain.newCrowd()
+local hz = 60
+local hzFrames = 0
+local hzSince = os.clock()
+local warmFrom: number? = nil
+local crowdState = "add"
+
+-- um passo do teto: taxa do Heartbeat (média de ~avgS) e o lado mais cheio. Fica em
+-- ReplicatedStorage.BotHz e BotCap (para conferir no Studio e no servidor publicado)
+local function crowdTick(now: number)
+	local K = BotBrain.CROWD
+	local inst = hzFrames / math.max(now - hzSince, 1e-3)
+	hzFrames, hzSince = 0, now
+	-- Studio: workspace:SetAttribute("VT65DevBotHz", 30) finge o servidor a 30 Hz (testa o teto); nil volta
+	local fake = if RunService:IsStudio() then workspace:GetAttribute("VT65DevBotHz") else nil
+	if type(fake) == "number" then
+		inst = fake
+	end
+	hz += (inst - hz) * math.min(1, K.stepS / K.avgS)
+	ReplicatedStorage:SetAttribute("BotHz", math.floor(hz + 0.5))
+	if not warmFrom or now - warmFrom < K.warmS then
+		return
+	end
+	local per: { [string]: number } = { US = 0, VC = 0 }
+	for _, b in bots do
+		if not b.removed then
+			per[b.faction] = (per[b.faction] or 0) + 1
+		end
+	end
+	crowdState = BotBrain.crowdStep(crowd, hz, K.stepS, math.max(per.US, per.VC))
+	ReplicatedStorage:SetAttribute("BotCap", crowd.cap)
+end
+
+-- quem sai primeiro quando sobra bot: o que não está em campo, o que não está no squad de um jogador
+-- nem tripulando, o mais longe de humano e, por fim, o mais novo
+local function removeOrder(a: Bot, b: Bot): boolean
+	local function rank(x: Bot): number
+		return (if x.model then 4 else 0) + (if x.playerSquad then 2 else 0) + (if x.crew then 1 else 0)
+	end
+	local ra, rb = rank(a), rank(b)
+	if ra ~= rb then
+		return ra < rb
+	end
+	if a.lod ~= b.lod then
+		return a.lod > b.lod
+	end
+	return a.id > b.id
+end
+
 local function rebalance()
 	local fill = BotService.fill()
+	local maxAdd = BotBrain.CROWD.addPerStep
 	for _, faction in { "US", "VC" } do
 		local h = humans(faction)
-		local want = math.clamp(fill - h, 0, Roles.TEAM_MAX - h)
+		local want = BotBrain.fillWant(fill, h, Roles.TEAM_MAX, crowd.cap)
 		local mine = {}
 		for _, b in bots do
 			if b.faction == faction and not b.removed then
 				table.insert(mine, b)
 			end
 		end
-		for _ = #mine + 1, want do
+		-- entra no máximo addPerStep por conferida (o avatar e a arte de cada um pesam); sai na hora
+		local n = BotBrain.fillStep(#mine, want, maxAdd)
+		for _ = 1, n do
 			newBot(faction)
 		end
-		for i = want + 1, #mine do
+		if n < 0 then
+			table.sort(mine, removeOrder)
+		end
+		for i = 1, -n do
 			local b = mine[i]
 			b.removed = true
 			BotEscolta.forget(b)
@@ -1831,8 +2229,10 @@ local function sceneTunnel()
 	end
 	print(
 		string.format(
-			"[VT65 TESTE] VT65DevBots: %d bots do VC entrando na E1 para emboscar na E3 (saem quando os EUA chegam a 45 m ou em 150 s)",
-			math.min(4, #vc)
+			"[VT65 TESTE] VT65DevBots: %d bots do VC entrando na E1 para emboscar na E3 (saem quando os EUA chegam a %d m ou em %d s)",
+			math.min(4, #vc),
+			BotBrain.TUNNEL.ambushTriggerM,
+			BotBrain.TUNNEL.ambushMaxS
 		)
 	)
 end
@@ -1864,13 +2264,96 @@ local function sceneCover()
 	)
 end
 
+-- D-107: gancho "carga": lotação, teto, Heartbeat, níveis de detalhe, pensamentos e caminhos
+local thinksDone = 0
+local thinksAt = os.clock()
+local function devLoad()
+	local now = os.clock()
+	local n: { [string]: number } = { US = 0, VC = 0 }
+	local alive: { [string]: number } = { US = 0, VC = 0 }
+	local lods = { 0, 0, 0 }
+	for _, b in bots do
+		n[b.faction] = (n[b.faction] or 0) + 1
+		if b.model then
+			alive[b.faction] = (alive[b.faction] or 0) + 1
+			lods[b.lod] = (lods[b.lod] or 0) + 1
+		end
+	end
+	local q, running, done = BotLocomotion.pathStats()
+	print(
+		string.format(
+			"[VT65 TESTE] bots: EUA %d (%d em campo), VC %d (%d em campo); teto %d por lado (%s); Heartbeat %.0f Hz; montando %d",
+			n.US,
+			alive.US,
+			n.VC,
+			alive.VC,
+			crowd.cap,
+			crowdState,
+			hz,
+			spawningNow
+		)
+	)
+	print(
+		string.format(
+			"[VT65 TESTE] bots: nível 1/2/3 = %d/%d/%d; %.0f pensamentos/s; PathfindingService: fila %d, em curso %d, %d feitos; rotas A* na fila %d",
+			lods[1],
+			lods[2],
+			lods[3],
+			thinksDone / math.max(now - thinksAt, 1e-3),
+			q,
+			running,
+			done,
+			BotWorld.pending()
+		)
+	)
+	thinksDone, thinksAt = 0, now
+end
+
+-- D-107: gancho "frente": o papel, a fase e o contato de cada squad de bots
+local function devFront()
+	for _, s in BotSquads.list() do
+		local alive = 0
+		for _, b in s.members do
+			if b.model then
+				alive += 1
+			end
+		end
+		local role = if s.attack then "ataque" elseif s.counter then "contra-ataque" else "guarda"
+		local lm = if s.leader then s.leader.model else nil
+		local lr = if lm then lm:FindFirstChild("HumanoidRootPart") :: BasePart? else nil
+		local sp = if s.sector then MatchService.points[s.sector] else nil
+		local dist = if lr and sp then flat(lr.Position, Vector3.new(sp.x, 0, sp.z)) * M else -1
+		print(
+			string.format(
+				"[VT65 TESTE] squad %d %s%s: S%s %s, %s, %d/%d em campo, líder a %.0f m do ponto, %s",
+				s.id,
+				s.faction,
+				if s.player then " (" .. s.player .. ")" else "",
+				tostring(s.sector),
+				role,
+				s.phase,
+				alive,
+				#s.members,
+				dist,
+				if s.inContact then "em contato" else "sem contato"
+			)
+		)
+	end
+	local t = ReplicatedStorage:GetAttribute("VT65BotPrimeiroTiroS")
+	print(string.format("[VT65 TESTE] bots: primeiro tiroteio da partida aos %s s", tostring(t)))
+end
+
 local function devBots()
 	local v = workspace:GetAttribute("VT65DevBots")
 	if type(v) ~= "string" then
 		return
 	end
 	workspace:SetAttribute("VT65DevBots", nil)
-	if v == "m48" then
+	if v == "carga" then
+		devLoad()
+	elseif v == "frente" then
+		devFront()
+	elseif v == "m48" then
 		sceneVehicle("m48a3")
 	elseif v == "ontos" then
 		sceneVehicle("ontos")
@@ -1941,17 +2424,69 @@ function BotService.start()
 			task.spawn(devBots)
 		end)
 	end
+	-- D-107: lotação a cada CROWD.stepS (era a cada 5 s, todos de uma vez): o teto pelo Heartbeat e
+	-- quem entra ou sai
 	task.spawn(function()
 		while true do
-			if ReplicatedStorage:GetAttribute("TerrainReady") ~= false then
-				rebalance()
+			task.wait(BotBrain.CROWD.stepS)
+			local now = os.clock()
+			local ready = ReplicatedStorage:GetAttribute("TerrainReady") ~= false
+			if ready and not warmFrom then
+				warmFrom = now
 			end
-			task.wait(5)
+			local ok, err = pcall(function(): any
+				crowdTick(now)
+				if ready then
+					rebalance()
+				end
+				return nil
+			end)
+			if not ok then
+				warn("[VT65] bots: lotação falhou:", err)
+			end
 		end
 	end)
+	-- D-107: cérebro no Heartbeat. Cada bot pensa quando chega a vez dele (BotBrain.LOD: 0,3 s perto
+	-- de humano, 0,6 s no meio, 1 s longe), dentro do orçamento do quadro (BotBrain.BUDGET); quem não
+	-- coube pensa no quadro seguinte (a fila gira, ninguém fica para trás)
+	local cursor = 1
+	local lastThinkWarn = -math.huge
+	RunService.Heartbeat:Connect(function()
+		hzFrames += 1
+		local n = #bots
+		if n == 0 then
+			return
+		end
+		local t0 = os.clock()
+		local B = BotBrain.BUDGET
+		local done = 0
+		local k = if cursor > n then 1 else cursor
+		for _ = 1, n do
+			local b = bots[k]
+			k = k % n + 1
+			if b and t0 >= b.nextThink then
+				local ok, err = pcall(function(): any
+					think(b, t0)
+					return nil
+				end)
+				if not ok and t0 - lastThinkWarn > 5 then
+					lastThinkWarn = t0
+					warn("[VT65] bot falhou ao pensar:", err)
+				end
+				local every = if b.model then BotBrain.LOD.thinkS[b.lod] or C.thinkS else BotBrain.LOD.idleThinkS
+				b.nextThink = t0 + every * (0.9 + 0.2 * b.rng:next())
+				done += 1
+				thinksDone += 1
+				if done >= B.maxPerFrame or os.clock() - t0 >= B.frameS then
+					break
+				end
+			end
+		end
+		cursor = k
+	end)
+	-- squads, tripulações e direção dos blindados a cada 0,1 s
 	task.spawn(function()
 		local i = 0
-		local every = math.max(1, math.floor(C.thinkS / 0.1 + 0.5))
 		local lastWarn = -math.huge
 		while true do
 			task.wait(0.1)
@@ -1986,19 +2521,6 @@ function BotService.start()
 			if not okD and now - lastWarn > 5 then
 				lastWarn = now
 				warn("[VT65] bots: direção falhou:", errD)
-			end
-			-- cada bot pensa a cada C.thinkS (escalonado)
-			for k, b in bots do
-				if (k + i) % every == 0 then
-					local ok, err = pcall(function(): any
-						think(b, now)
-						return nil
-					end)
-					if not ok and now - lastWarn > 5 then
-						lastWarn = now
-						warn("[VT65] bot falhou ao pensar:", err)
-					end
-				end
 			end
 			i += 1
 		end

@@ -9,6 +9,7 @@ local serde = require("@lune/serde")
 local S = "../../src/ReplicatedStorage/Shared/"
 local SoldierAnims = require(S .. "SoldierAnims")
 local Movement = require(S .. "Movement")
+local ArmIK = require(S .. "ArmIK")
 
 local passed, failed = 0, 0
 local function test(name: string, fn: () -> ())
@@ -136,11 +137,21 @@ test("velocidade casada: pé apoiado parado no chão em qualquer velocidade real
 			end
 		end
 	end
+	-- 2026-11-13: o trote do Front 44 (3,92 m/s) toca o clipe gravado a 2,663 m/s no corpo de 1,75 m
 	near(
 		SoldierAnims.trackSpeed("trote", SoldierAnims.cycleRate({ trote = 1 }, Movement.JOG)),
-		3.1 / (2.663 * SC),
+		Movement.JOG / (2.663 * SC),
 		1e-3
 	)
+	assert(Movement.JOG / (2.663 * SC) <= SoldierAnims.RATE_MAX, "trote dentro do teto do clipe")
+	-- rastejar e agachado (o VC 12% mais rápido) também dentro do teto: o pé não desliza
+	for _, case in { { "rastejar", "prone" }, { "agachado_andar", "crouch" } } do
+		for _, faction in { "US", "VC" } do
+			local v = Movement.serverSpeed(case[2], false, false, false, faction, 1)
+			local r = SoldierAnims.trackSpeed(case[1], SoldierAnims.cycleRate({ [case[1]] = 1 }, v))
+			near(CLIPS[case[1]].speed * SC * r, v, 1e-6, case[1] .. " " .. faction .. " desliza")
+		end
+	end
 end)
 
 test("mistura em fase: os dois clipes fazem os mesmos ciclos por segundo", function()
@@ -198,7 +209,13 @@ end)
 
 test("tempos de mistura vêm da câmera (Movement.STANCE_TIME), deitar no máximo 0,6 s", function()
 	near(SoldierAnims.fadeTime("stand", "crouch"), Movement.STANCE_TIME["stand>crouch"], 1e-9)
-	near(SoldierAnims.fadeTime("stand", "prone"), 0.6, 1e-9)
+	-- 2026-11-13 (Front 44): deitar ficou em 0,45 s, abaixo do teto de 0,6 s
+	near(
+		SoldierAnims.fadeTime("stand", "prone"),
+		math.min(Movement.STANCE_TIME["stand>prone"], SoldierAnims.FADE_PRONE_MAX),
+		1e-9
+	)
+	assert(SoldierAnims.fadeTime("stand", "prone") <= 0.6)
 	near(SoldierAnims.fadeTime("stand", "prone", true), Movement.DIVE_TIME, 1e-9)
 	near(SoldierAnims.fadeTime("crouch", "crouch"), SoldierAnims.FADE_IDLE, 1e-9)
 	near(SoldierAnims.reloadSpeed(CLIPS.recarregar.length), 1, 1e-9)
@@ -223,24 +240,12 @@ test("valores gravados nos clipes ainda batem com o código (senão: regravar no
 	assert(py and pp, "PRONE_ROOT no PostureService")
 	near(tonumber(py) :: number, B.proneRoot.y * SC, 1e-3, "PRONE_ROOT mudou")
 	assert(tonumber(pp) == B.proneRoot.pitchDeg, "PRONE_ROOT: giro mudou")
-	local pc = src("StarterPlayer/StarterPlayerScripts/Controllers/PostureController.client.luau")
+	-- a pega com que os clipes foram gravados (ArmIK.HOLDS.rifle). 2026-11-13: em jogo a arma vai na
+	-- pose do Front 44 (Shared/Pegada3P) e os braços pelo IK depois do Animator, então a pega gravada só
+	-- vale para os clipes; se ela mudar, regravar
 	local h = B.holdStand
-	assert(
-		string.find(
-			pc,
-			string.format(
-				"CFrame.new(%s, %s, %s) * CFrame.Angles(0, math.rad(%d), 0) * CFrame.Angles(math.rad(%d), 0, 0)",
-				tostring(h.x),
-				tostring(h.y),
-				tostring(h.z),
-				h.yawDeg,
-				h.pitchDeg
-			),
-			1,
-			true
-		),
-		"HOLD_STAND mudou"
-	)
+	local r = ArmIK.HOLDS.rifle
+	assert(r[1] == h.x and r[2] == h.y and r[3] == h.z and r[4] == h.yawDeg and r[5] == h.pitchDeg, "HOLD_STAND mudou")
 	local fsv = src("ServerScriptService/Modules/FieldService.luau")
 	assert(string.find(fsv, "local THROW_S = " .. tostring(B.throwS), 1, true), "THROW_S mudou")
 	assert(string.find(fsv, "local RELEASE_S = 0.4", 1, true), "a granada sai em 0,4 s")

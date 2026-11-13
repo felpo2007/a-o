@@ -288,37 +288,39 @@ function ToqueTelas.turn(yaw: number, deg: number): number
 end
 
 -- ===== nomes dos botões na tela (tutorial e dicas no toque) =====
--- O que o jogador procura na tela do celular para cada ação (o HUD do T1 e as telas deste agente):
--- nunca a tecla do teclado. Ação sem nome aqui cai em "botão na tela".
+-- O que o jogador procura na tela do celular para cada ação (o HUD de toque e as telas): nunca a
+-- tecla do teclado. Ação sem nome aqui cai em "botão na tela". v39: os nomes dos botões que ficaram
+-- (o texto escrito neles) e onde foi parar o que saiu da tela (cartão da arma, COMUNICAR, ITEM, MENU).
+-- O Input.glyph também usa esta tabela no toque (tutorial, avisos, fichas).
 ToqueTelas.TOUCH_NAME = {
-	fire = "TIRO",
+	fire = "FOGO",
 	aim = "MIRA",
 	reload = "RECARGA",
-	sprint = "CORRER",
+	sprint = "ANALÓGICO NA BORDA",
 	jump = "PULAR",
 	crouch = "AGACHAR",
-	prone = "DEITAR",
-	melee = "CORPO A CORPO",
+	prone = "AGACHAR (segurar)",
+	melee = "GOLPE",
 	interact = "INTERAGIR",
-	swap_weapon = "TROCAR ARMA",
-	bayonet = "BAIONETA",
-	last_item = "ÚLTIMO ITEM",
-	equip_wheel = "EQUIPAMENTO",
-	comm_wheel = "COMUNICAÇÃO",
-	mark = "MARCAR",
-	binoculars = "BINÓCULO",
-	quick_bandage = "CURATIVO",
-	tourniquet = "TORNIQUETE",
+	swap_weapon = "CARTÃO DA ARMA", -- tocar no cartão da arma troca de arma (HudCampo)
+	bayonet = "CARTÃO DA ARMA (segurar)",
+	last_item = "ITEM",
+	equip_wheel = "ITEM (segurar)",
+	comm_wheel = "COMUNICAR (segurar)",
+	mark = "COMUNICAR",
+	binoculars = "ITEM (segurar)",
+	quick_bandage = "BANDAGEM",
+	tourniquet = "ITEM (segurar)",
 	give_up = "DESISTIR",
-	radio_talk = "RÁDIO",
-	radio_channel = "CANAL",
-	view_toggle = "CÂMERA",
-	shoulder_swap = "OMBRO",
+	radio_talk = "RÁDIO (segurar)",
+	radio_channel = "RÁDIO",
+	view_toggle = "MENU",
+	shoulder_swap = "MENU",
 	lean_left = "INCLINAR",
 	lean_right = "INCLINAR",
-	hold_breath = "RESPIRAÇÃO",
-	fire_mode = "CARTÃO DA ARMA", -- tocar no cartão da arma abre o seletor (HudCampo)
-	zeroing = "CARTÃO DA ARMA",
+	hold_breath = "FÔLEGO",
+	fire_mode = "CARTÃO DA ARMA (segurar)", -- segurar o cartão da arma abre o seletor e a alça
+	zeroing = "CARTÃO DA ARMA (segurar)",
 	map = "MAPA",
 	game_menu = "MENU",
 	-- veículos (T3)
@@ -339,18 +341,38 @@ end
 -- ===== seletor de tiro e alça =====
 -- Botões do cartão da arma (as ações que já existem): "mode" = seletor (V tocar), "zero_up" = alça
 -- (V segurar), "zero_down" = a arma de um modo só e alça longa (M79, lunetas): tocar V desce a alça.
-function ToqueTelas.weaponOptions(nModes: number, nZeros: number): { string }
-	if nModes <= 1 and nZeros > 3 then
-		return { "zero_down", "zero_up" }
-	end
+-- v39: "bayonet" = armar/recolher a baioneta (B segurar do controle), na arma que leva baioneta.
+function ToqueTelas.weaponOptions(nModes: number, nZeros: number, bayonet: boolean?): { string }
 	local out = {}
-	if nModes > 1 then
-		table.insert(out, "mode")
+	if nModes <= 1 and nZeros > 3 then
+		out = { "zero_down", "zero_up" }
+	else
+		if nModes > 1 then
+			table.insert(out, "mode")
+		end
+		if nZeros > 1 then
+			table.insert(out, "zero_up")
+		end
 	end
-	if nZeros > 1 then
-		table.insert(out, "zero_up")
+	if bayonet then
+		table.insert(out, "bayonet")
 	end
 	return out
+end
+
+-- Cartão da arma no toque (v39): um toque curto troca de arma; segurar parado (CARD_HOLD_S) abre o
+-- seletor, a alça e a baioneta. Arrastar não é nem um nem outro (o dedo foi olhar). Devolve "tap",
+-- "hold" ou nil (ainda não decidiu / nada). ended: o dedo saiu da tela.
+ToqueTelas.CARD_HOLD_S = 0.4
+
+function ToqueTelas.cardGesture(heldS: number, movedPx: number, ended: boolean): string?
+	if movedPx > ToqueTelas.TAP_MOVE_PX then
+		return nil
+	end
+	if heldS >= ToqueTelas.CARD_HOLD_S then
+		return "hold"
+	end
+	return if ended then "tap" else nil
 end
 
 return ToqueTelas

@@ -7,11 +7,14 @@
 -- relógio reescreve o texto 4 vezes por segundo (nada por quadro).
 -- Studio: workspace:SetAttribute("VT65DevTela", "eventos") mostra eventos de exemplo (um em cada fase)
 -- por 20 s, sem o servidor, aqui, na carta e no mundo.
+-- Toque (v39): na zona livre "eventos" do HUD de toque (coluna da esquerda, acima do polegar; à direita
+-- ficam os botões), só as linhas que cabem (no celular, uma). Durante o tutorial a zona fecha.
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 
 local EventosVisual = require(script.Parent.EventosVisual)
 local Input = require(script.Parent.Input)
+local ToqueUi = require(script.Parent.ToqueUi)
 local UiKit = require(script.Parent.UiKit)
 
 local V, F = UiKit.V, UiKit.F
@@ -84,6 +87,30 @@ for i = 1, MAX do
 end
 
 local shown: { EventosVisual.Ev } = {}
+local rowsMax = MAX -- no toque, as linhas que cabem na zona
+
+-- toque: a zona "eventos" (ToqueUi.zoneIn); fora do toque, à direita como sempre
+local function place()
+	if not ToqueUi.active() then
+		rowsMax = MAX
+		if holder.Position.X.Scale ~= 1 then
+			holder.AnchorPoint = Vector2.new(1, 0)
+			holder.Position = UDim2.new(1, -px(16, 24), 0.3, 0)
+			fit.scale.Scale = fit.k()
+		end
+		return
+	end
+	local z = ToqueUi.zoneIn(gui, "eventos")
+	if not z then
+		rowsMax = 0
+		return
+	end
+	local k = math.clamp(math.min(z.w / W, z.h / H), 0.5, 1)
+	rowsMax = math.clamp(math.floor((z.h / k + GAP) / (H + GAP)), 1, MAX)
+	fit.scale.Scale = k
+	holder.AnchorPoint = Vector2.new(0, 0)
+	holder.Position = UDim2.fromOffset(z.x, z.y)
+end
 
 local function clockText(s: number): string
 	local t = math.ceil(s)
@@ -93,7 +120,7 @@ end
 local function paint()
 	shown = EventosVisual.list()
 	for i, r in rows do
-		local ev = shown[i]
+		local ev = if i <= rowsMax then shown[i] else nil
 		if not ev then
 			r.key = nil
 			r.frame.Visible = false
@@ -125,6 +152,7 @@ end
 local function wanted(): boolean
 	local s = Input.state
 	return #shown > 0
+		and rowsMax > 0
 		and s.menus == 0
 		and not s.map
 		and s.alive
@@ -147,10 +175,15 @@ gui.Enabled = wanted()
 task.spawn(function()
 	while true do
 		task.wait(0.25)
+		local before = rowsMax
+		place()
+		if rowsMax ~= before then
+			paint() -- cabem mais ou menos linhas (toque, tela girou, tutorial)
+		end
 		local want = wanted()
 		if gui.Enabled ~= want then
 			gui.Enabled = want
-			if want then
+			if want and not ToqueUi.active() then
 				fit.play(TweenInfo.new(0.2, Enum.EasingStyle.Quint), 1, 0.96)
 			end
 		end

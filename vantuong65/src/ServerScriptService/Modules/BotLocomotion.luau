@@ -12,6 +12,10 @@
 --   - desvio local (raio do joelho a cada 0,25 s, só no trecho reto), pulo onde o caminho pede e
 --     "preso": pula, recalcula, sai de lado e, se nada der, avisa o cérebro (status "failed").
 -- WalkSpeed é a velocidade real (as animações da D-88 leem a velocidade e a postura dos bots).
+-- D-107 (100 bots): nível de detalhe (BotBrain.LOD, posto pelo BotService a cada pensamento): perto
+-- de humano, o passo roda a cada quadro; no meio, a cada 2; longe, a cada 3 e em linha simples (sem
+-- PathfindingService, só o desvio do joelho e o caminho quando empaca). A fila do PathfindingService
+-- atende primeiro quem está perto de humano e tem teto por segundo (BotBrain.BUDGET).
 local PathfindingService = game:GetService("PathfindingService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -75,9 +79,15 @@ export type State = {
 	faction: string?, -- o VC anda 12% mais rápido (Movement.factionSpeed, D-93)
 	waterMode: string, -- Movement.waterMode: "dry" | "wade" | "swim"
 	swimOn: boolean, -- estado Swimming do Humanoid ligado
+	-- D-107: nível de detalhe
+	lod: number, -- 1 perto, 2 meio, 3 longe de humano
+	acc: number, -- tempo acumulado desde o último passo (quadros pulados)
+	phase: number, -- espalha os passos pulados entre os quadros
 }
 
 local states: { [any]: State } = {}
+local LOD = BotBrain.LOD
+local BUDGET = BotBrain.BUDGET
 
 -- Agente do PathfindingService: soldado de 2,0 m (7,14 studs; D-98, Shared/Corpo), com folga; ombros
 -- ~0,45 m. Era 6,5 studs (corpo de 1,75 m).
@@ -141,6 +151,10 @@ end
 type Req = { st: State, token: number, from: Vector3, to: Vector3 }
 local queue: { Req } = {}
 local running = 0
+-- D-107: fichas do PathfindingService (BUDGET.pathPerS por segundo, no servidor todo)
+local pathTokens = BUDGET.pathPerS
+local pathRefillAt = os.clock()
+local pathsDone = 0 -- contador para o gancho "carga" do Studio
 
 local function compute(st: State, from: Vector3, to: Vector3): { BotMove.Point }?
 	local path = st.pathObj
@@ -186,13 +200,32 @@ local function deliver(st: State, token: number, pts: { BotMove.Point }?)
 	end
 end
 
+-- próximo pedido da fila: o do bot mais perto de humano (nível menor); empate, o mais velho
+local function nextReq(): Req?
+	local best, bi = nil :: Req?, 0
+	for i, r in queue do
+		if not best or r.st.lod < (best :: Req).st.lod then
+			best, bi = r, i
+		end
+	end
+	if best then
+		table.remove(queue, bi)
+	end
+	return best
+end
+
 local pump: () -> ()
 pump = function()
-	while running < MOVE.pathConcurrent and #queue > 0 do
-		local req = table.remove(queue, 1) :: Req
+	local now = os.clock()
+	pathTokens = math.min(BUDGET.pathPerS, pathTokens + (now - pathRefillAt) * BUDGET.pathPerS)
+	pathRefillAt = now
+	while running < MOVE.pathConcurrent and #queue > 0 and pathTokens >= 1 do
+		local req = nextReq() :: Req
 		if req.st.token ~= req.token or not req.st.model.Parent then
 			continue
 		end
+		pathTokens -= 1
+		pathsDone += 1
 		running += 1
 		task.spawn(function()
 			local ok, pts = pcall(compute, req.st, req.from, req.to)
@@ -209,14 +242,18 @@ local function request(st: State, to: Vector3, now: number)
 		return
 	end
 	st.wantReq = nil
-	st.reqAt = now
-	st.token += 1
-	st.pending = true
 	for i = #queue, 1, -1 do
 		if queue[i].st == st then
 			table.remove(queue, i)
 		end
 	end
+	if st.lod >= 2 and #queue >= BUDGET.pathQueueMax then
+		st.pending = false
+		return -- D-107: fila cheia e ninguém perto olhando: segue reto (com o desvio do joelho)
+	end
+	st.reqAt = now
+	st.token += 1
+	st.pending = true
 	table.insert(queue, { st = st, token = st.token, from = st.root.Position, to = to })
 	pump()
 end
@@ -287,8 +324,24 @@ function Loco.attach(bot: any, model: Model)
 		faction = if type(bot.faction) == "string" then bot.faction else nil,
 		waterMode = "dry",
 		swimOn = true,
+		lod = if type(bot.lod) == "number" then bot.lod else 1,
+		acc = 0,
+		phase = math.random(0, 5),
 	}
 	bot.loco = states[bot]
+end
+
+-- D-107: nível de detalhe (1 perto, 2 meio, 3 longe de humano), posto pelo cérebro
+function Loco.setLod(bot: any, level: number)
+	local st = states[bot]
+	if st then
+		st.lod = level
+	end
+end
+
+-- D-107: para o gancho "carga" do Studio: pedidos na fila, cálculos em curso e feitos desde o início
+function Loco.pathStats(): (number, number, number)
+	return #queue, running, pathsDone
 end
 
 function Loco.detach(bot: any)
@@ -338,6 +391,21 @@ function Loco.go(bot: any, dest: Vector3, gait: string, opts: GoOpts?)
 	local d = flat(pos, dest)
 	local short = o.direct == true or d <= MOVE.directM / M
 	if short and not kneeHit(st.root, dest.X - pos.X, dest.Z - pos.Z, math.min(d, MOVE.directM / M)) then
+		st.token += 1
+		st.pending = false
+		st.wantReq = nil
+		st.mode = "direct"
+		st.path = straight(pos, dest)
+		st.follow = BotMove.newFollow()
+		return
+	end
+	if st.lod >= 3 then
+		-- D-107: longe de humano, linha simples (o desvio do joelho e, se empacar, o caminho). O
+		-- caminho pedido ao empacar vale até o fim se o destino novo fica perto do dele
+		local near = cur ~= nil and flat(cur, dest) < 8 / M
+		if near and (st.pending or (st.mode == "path" and st.path ~= nil and not st.follow.done)) then
+			return
+		end
 		st.token += 1
 		st.pending = false
 		st.wantReq = nil
@@ -677,17 +745,31 @@ local function stepOne(st: State, dt: number, now: number)
 end
 
 function Loco.start()
+	local frame = 0
 	RunService.Heartbeat:Connect(function(dt: number)
 		local now = os.clock()
 		dt = math.min(dt, 0.1)
+		frame += 1
+		-- D-107: longe de humano, o passo roda a cada 2 ou 3 quadros com o tempo acumulado (o Humanoid
+		-- segue andando com o último Move entre um passo e outro)
 		for _, st in states do
-			local ok, err = pcall(function(): any
-				stepOne(st, dt, now)
-				return nil
-			end)
-			if not ok then
-				warn("[VT65] bots: passo falhou:", err)
+			st.acc += dt
+			local every = LOD.stepEvery[st.lod] or 1
+			if every <= 1 or (frame + st.phase) % every == 0 then
+				local step = math.min(st.acc, 0.2)
+				st.acc = 0
+				local ok, err = pcall(function(): any
+					stepOne(st, step, now)
+					return nil
+				end)
+				if not ok then
+					warn("[VT65] bots: passo falhou:", err)
+				end
 			end
+		end
+		-- fila do PathfindingService esperando fichas
+		if #queue > 0 and running < MOVE.pathConcurrent then
+			pump()
 		end
 	end)
 end

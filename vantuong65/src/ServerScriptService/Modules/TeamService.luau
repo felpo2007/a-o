@@ -1,12 +1,17 @@
 --!strict
 -- Escolha de facção, squad e papel (Parte 4), com limite de 30 por time e equilíbrio.
+-- Jogar agora (2026-11-13): TeamService.quickJoin põe quem pediu num lado, num squad com vaga e num
+-- papel pela última escolha (Shared/JogarAgora); a escolha fica no perfil (campo `unit`) e no
+-- atributo "UltimaEscolha" (a tela mostra o que vai acontecer).
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Teams = game:GetService("Teams")
 
+local JogarAgora = require(ReplicatedStorage.Shared.JogarAgora)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Roles = require(ReplicatedStorage.Shared.Roles)
 local Squads = require(ReplicatedStorage.Shared.Squads)
+local PlayerData = require(script.Parent.PlayerData)
 
 local TeamService = {}
 TeamService.squads = { US = Squads.new("US"), VC = Squads.new("VC") } :: { [string]: Squads.State }
@@ -60,6 +65,113 @@ local function leaveAll(player: Player)
 	setRole(player, nil)
 end
 
+-- troca de lado com a regra de equilíbrio (cheio ou desequilibraria: recusa)
+local function chooseFaction(player: Player, faction: string): boolean
+	if faction ~= "US" and faction ~= "VC" or player:GetAttribute("Faction") == faction then
+		return false
+	end
+	local other = if faction == "US" then "VC" else "US"
+	local mine, theirs = teamSize(faction), teamSize(other)
+	if player:GetAttribute("Faction") == other then
+		theirs -= 1
+	end
+	if mine >= Roles.TEAM_MAX or mine > theirs then
+		return false -- cheio ou desequilibraria
+	end
+	leaveAll(player)
+	player:SetAttribute("Faction", faction)
+	player.Team = teamObjects[faction]
+	local hum = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+	if hum then
+		hum.Health = 0 -- troca de lado: volta para o mapa de spawn
+	end
+	pushSquads(faction)
+	pushSquads(other)
+	return true
+end
+
+-- ===== última escolha (perfil e atributo) =====
+function TeamService.lastChoice(player: Player): JogarAgora.Choice
+	local prof = PlayerData.get(player)
+	local c = JogarAgora.sanitize(if prof then (prof :: any).unit else nil)
+	local pt = player:GetAttribute("UltimoPonto")
+	if type(pt) == "string" then
+		c.pt = JogarAgora.sanitize({ pt = pt }).pt
+	end
+	return c
+end
+
+-- Guarda o lado, o squad, o papel e o último ponto de agora (o perfil grava no próximo save).
+function TeamService.remember(player: Player)
+	local c = TeamService.lastChoice(player)
+	local f = player:GetAttribute("Faction")
+	local sid = player:GetAttribute("SquadId")
+	local role = player:GetAttribute("Role")
+	if type(f) == "string" and TeamService.squads[f] then
+		local sq = if type(sid) == "string" then Squads.find(TeamService.squads[f], sid) else nil
+		c.f = f
+		if sq then
+			c.unit, c.sq = sq.unit, sq.name
+		end
+		if type(role) == "string" then
+			c.role = role
+		end
+	end
+	local clean = JogarAgora.sanitize(JogarAgora.pack(c))
+	local prof = PlayerData.get(player)
+	if prof then
+		(prof :: any).unit = JogarAgora.pack(clean)
+	end
+	player:SetAttribute("UltimaEscolha", JogarAgora.encode(clean))
+end
+
+-- Jogar agora: lado, squad com vaga e papel, pela última escolha ou pelo mais adequado. rank: posto
+-- do jogador (ProgressionService). Devolve nil (pronto) ou o motivo, em texto de tela.
+function TeamService.quickJoin(player: Player, rank: number): string?
+	local last = TeamService.lastChoice(player)
+	local f = player:GetAttribute("Faction")
+	if type(f) ~= "string" or not TeamService.squads[f] then
+		local pick = JogarAgora.pickFaction(last.f, teamSize("US"), teamSize("VC"), Roles.TEAM_MAX)
+		if not pick or not chooseFaction(player, pick) then
+			return "Os dois lados estão cheios"
+		end
+		f = pick
+	end
+	local faction = f :: string
+	local st = TeamService.squads[faction]
+	local sq = Squads.squadOf(st, player.UserId)
+	if not sq then
+		local op, arg = JogarAgora.pickSquad(faction, st.squads :: any, last, teamSize(faction))
+		if op == "join" and arg and Squads.join(st, arg, player.UserId) then
+			player:SetAttribute("SquadId", arg)
+			setRole(player, nil)
+		elseif op == "create" and arg then
+			local made = Squads.create(st, arg, player.UserId, teamSize(faction))
+			if made then
+				player:SetAttribute("SquadId", made.id)
+				setRole(player, nil)
+			end
+		end
+		sq = Squads.squadOf(st, player.UserId)
+		pushSquads(faction)
+		if not sq then
+			return "Nenhum squad com vaga agora"
+		end
+	end
+	local squad = sq :: Squads.Squad
+	local role = player:GetAttribute("Role")
+	if type(role) ~= "string" or squad.roles[player.UserId] ~= role then
+		local r = JogarAgora.pickRole(faction, squad :: any, player.UserId, last, rank)
+		if not r or not Squads.chooseRole(st, player.UserId, r) then
+			return "Nenhum papel livre neste squad"
+		end
+		setRole(player, r)
+		pushSquads(faction)
+	end
+	TeamService.remember(player)
+	return nil
+end
+
 function TeamService.start()
 	for _, faction in { "US", "VC" } do
 		local t = Instance.new("Team")
@@ -70,27 +182,26 @@ function TeamService.start()
 		teamObjects[faction] = t
 	end
 
+	-- a última escolha do perfil vira atributo (a tela do jogar agora mostra o squad e o ponto)
+	local function loaded(player: Player, prof: any)
+		local c = JogarAgora.sanitize(if type(prof) == "table" then prof.unit else nil)
+		player:SetAttribute("UltimaEscolha", JogarAgora.encode(c))
+		if c.pt and player:GetAttribute("UltimoPonto") == nil then
+			player:SetAttribute("UltimoPonto", c.pt)
+		end
+	end
+	PlayerData.Loaded:Connect(loaded)
+	for _, p in Players:GetPlayers() do
+		local prof = PlayerData.get(p)
+		if prof then
+			loaded(p, prof)
+		end
+	end
+
 	Net.event("Team_Choose").OnServerEvent:Connect(function(player, faction)
-		if faction ~= "US" and faction ~= "VC" or player:GetAttribute("Faction") == faction then
-			return
+		if type(faction) == "string" then
+			chooseFaction(player, faction)
 		end
-		local other = if faction == "US" then "VC" else "US"
-		local mine, theirs = teamSize(faction), teamSize(other)
-		if player:GetAttribute("Faction") == other then
-			theirs -= 1
-		end
-		if mine >= Roles.TEAM_MAX or mine > theirs then
-			return -- cheio ou desequilibraria
-		end
-		leaveAll(player)
-		player:SetAttribute("Faction", faction)
-		player.Team = teamObjects[faction]
-		local hum = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
-		if hum then
-			hum.Health = 0 -- troca de lado: volta para o mapa de spawn
-		end
-		pushSquads(faction)
-		pushSquads(other)
 	end)
 
 	Net.event("Squad_Action").OnServerEvent:Connect(function(player, req)
@@ -126,6 +237,7 @@ function TeamService.start()
 		if Squads.chooseRole(TeamService.squads[faction], player.UserId, roleId) then
 			setRole(player, roleId)
 			pushSquads(faction)
+			TeamService.remember(player)
 		end
 	end)
 

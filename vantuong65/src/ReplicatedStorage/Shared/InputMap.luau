@@ -70,8 +70,22 @@ act("crouch", "infantry", "ButtonB", "tap", "C", "tap", "Agachar")
 act("prone", "infantry", "ButtonB", "hold", "C", "hold", "Deitar")
 act("reload", "infantry", "ButtonX", "tap", "R", "press", "Recarregar")
 act("interact", "infantry", "ButtonX", "hold", "F", "hold", "Interagir")
-act("swap_weapon", "infantry", "ButtonY", "tap", "One", "press", "Trocar arma")
+-- 2026-11-13 ("não consigo puxar arma e selecionar os itens"): Y troca entre as armas; no teclado,
+-- as teclas 1 a 0 escolhem a vaga direto (Shared/Equipar: 1 principal, 2 pistola, 3 granada, 4
+-- fumaça, 5 bandagem, 6 torniquete, 7 binóculo, 8 pá, 9 construir, 0 ferramenta do papel) e a roda
+-- do mouse troca de arma (Controllers/Input). No controle os itens seguem na roda de equipamento (LB).
+act("swap_weapon", "infantry", "ButtonY", "tap", nil, "press", "Trocar arma")
 act("bayonet", "infantry", "ButtonY", "hold", "K", "press", "Baioneta")
+act("slot_1", "infantry", nil, "press", "One", "press", "Arma principal")
+act("slot_2", "infantry", nil, "press", "Two", "press", "Arma secundária")
+act("slot_3", "infantry", nil, "press", "Three", "press", "Granada")
+act("slot_4", "infantry", nil, "press", "Four", "press", "Fumaça")
+act("slot_5", "infantry", nil, "press", "Five", "press", "Bandagem")
+act("slot_6", "infantry", nil, "press", "Six", "press", "Torniquete")
+act("slot_7", "infantry", nil, "press", "Seven", "press", "Binóculo")
+act("slot_8", "infantry", nil, "press", "Eight", "press", "Pá de trincheira")
+act("slot_9", "infantry", nil, "press", "Nine", "press", "Construir")
+act("slot_0", "infantry", nil, "press", "Zero", "press", "Ferramenta do papel")
 -- Direcional ↑ e →: tocar mantém a função da Parte 12 (binóculo, canal de rádio); segurar controla a
 -- câmera de 3ª pessoa (pedido do dono, 2026-11-11). No teclado, O e I.
 act("binoculars", "infantry", "DPadUp", "tap", "B", "press", "Binóculo")
@@ -166,6 +180,9 @@ export type Settings = {
 	swapTriggers: boolean,
 	aimAssist: string,
 	aimToggle: boolean,
+	-- 2026-11-13: recarga automática quando o carregador esvazia (WeaponController: no toque e no
+	-- controle; no teclado, como no Front 44, só ao apertar o gatilho vazio, o que vale sempre)
+	autoReload: boolean,
 	sprintToggle: boolean,
 	wheelToggle: boolean,
 	hapticFire: string,
@@ -210,6 +227,12 @@ export type Settings = {
 	touchMirror: boolean, -- canhoto: layout espelhado
 	touchCustom: { [string]: { [string]: TouchSlot } }, -- até 3 layouts próprios (sanitizeTouchCustom)
 	touchAutoVault: boolean, -- correndo contra o obstáculo, transpõe sozinho
+	-- v39 (Shared/Toque, Controllers/ToqueAuto): automáticos do toque, cada um desligável
+	touchAutoLean: boolean, -- mirando colado numa quina, inclina para o lado aberto
+	touchAutoPickup: boolean, -- parado junto da caixa de munição ou do caixote, pega/abre sozinho
+	touchAutoBreath: boolean, -- na luneta, prende a respiração sozinho (solta antes de cansar)
+	touchAssist: boolean, -- fricção e ímã leve na mira de ferro/luneta (só toque)
+	touchAutoFire: boolean, -- mirando com a mira no inimigo à vista, atira sozinho (padrão: desligado)
 	batterySaver: boolean, -- economia de bateria (lido pelo agente de desempenho)
 }
 
@@ -237,6 +260,7 @@ InputMap.DEFAULTS = {
 	swapTriggers = false,
 	aimAssist = "minimal",
 	aimToggle = false,
+	autoReload = true,
 	sprintToggle = true,
 	wheelToggle = false,
 	hapticFire = "normal",
@@ -275,6 +299,11 @@ InputMap.DEFAULTS = {
 	touchMirror = false,
 	touchCustom = {},
 	touchAutoVault = true,
+	touchAutoLean = true,
+	touchAutoPickup = true,
+	touchAutoBreath = true,
+	touchAssist = true,
+	touchAutoFire = false,
 	batterySaver = false,
 } :: Settings
 

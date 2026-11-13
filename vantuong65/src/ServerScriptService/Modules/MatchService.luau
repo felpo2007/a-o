@@ -266,6 +266,16 @@ function MatchService.isContested(sector: number): boolean
 	return c ~= nil and c.US > 0 and c.VC > 0
 end
 
+-- D-107 (bots: contra-ataque): quantos do outro lado estão na área de captura do setor (a contagem do
+-- último segundo, a mesma da captura)
+function MatchService.enemiesIn(sector: number, faction: string): number
+	local c = lastCounts[sector]
+	if not c then
+		return 0
+	end
+	return if faction == "US" then c.VC elseif faction == "VC" then c.US else 0
+end
+
 local function counts(): { { US: number, VC: number } }
 	local out = {}
 	local r2 = MapConfig.CaptureRadiusStuds ^ 2

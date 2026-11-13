@@ -2,6 +2,11 @@
 -- Áudio da F3 (Parte 5 e 10.7): ambiências por zona com crossfade, passos por material (seus e
 -- dos outros, 3D), tiros alheios em camadas por distância com atraso do som (d/349 m/s),
 -- estalo supersônico quando a bala passa perto e impacto por material. Sem asset (ID 0) fica mudo.
+-- D-107 (pedido do dono: "melhore o áudio das armas"): o tiro PRÓPRIO toca aqui (antes era o
+-- WeaponController, um som só): disparo da arma, corpo grave, cauda pelo lugar (eco no aberto,
+-- abafado na mata, reverberação na vila e no túnel), estojo e ferrolho. Os tiros dos outros ganham o
+-- disparo da própria arma de perto, agudos caindo com a distância, a cauda e o zunido da bala que
+-- passa rente. Dados em Shared/SomArmas; quem toca é o Controllers/Som.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -12,10 +17,12 @@ local AssetIds = require(ReplicatedStorage.Shared.AssetIds) :: any
 local Ballistics = require(ReplicatedStorage.Shared.Ballistics)
 local MapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any
 local Net = require(ReplicatedStorage.Shared.Net)
+local SomArmas = require(ReplicatedStorage.Shared.SomArmas)
 local Weapons = require(ReplicatedStorage.Shared.Weapons)
 local Weather = require(ReplicatedStorage.Shared.Weather)
 local Bus = require(script.Parent.Bus)
 local Input = require(script.Parent.Input)
+local Som = require(script.Parent.Som)
 local UiKit = require(script.Parent.UiKit)
 
 local player = Players.LocalPlayer
@@ -241,6 +248,32 @@ local function zoneAt(pos: Vector3): string
 	return "paddy"
 end
 
+-- D-107: lugar de quem ouve, para a cauda dos tiros (SomArmas.lugar): 8 raios de 25 m em volta da
+-- cabeça (tronco, parede, moita) e um para cima (copa ou telhado)
+local lugar = SomArmas.LUGAR
+local placeParams = RaycastParams.new()
+placeParams.FilterType = Enum.RaycastFilterType.Exclude
+local function measurePlace(pos: Vector3, zone: string): string
+	local ignore: { Instance } = { camera }
+	if player.Character then
+		table.insert(ignore, player.Character)
+	end
+	local folder = workspace:FindFirstChild("Combatants")
+	if folder then
+		table.insert(ignore, folder)
+	end
+	placeParams.FilterDescendantsInstances = ignore
+	local hits = 0
+	for i = 0, 7 do
+		local a = i * math.pi / 4
+		if workspace:Raycast(pos, Vector3.new(math.cos(a), 0, math.sin(a)) * (25 / M), placeParams) then
+			hits += 1
+		end
+	end
+	local roof = workspace:Raycast(pos, Vector3.new(0, 15 / M, 0), placeParams) ~= nil
+	return SomArmas.lugar(hits, 8, roof, zone == "village", zone == "tunnel")
+end
+
 task.spawn(function()
 	while true do
 		task.wait(0.5)
@@ -248,6 +281,9 @@ task.spawn(function()
 		-- contrário. A mesa do lobby fica no mundo e contava como "arrozal" (o som de água tocava no menu).
 		local field = inField()
 		local zone = if field then zoneAt(camera.CFrame.Position) else ""
+		if field then
+			lugar = measurePlace(camera.CFrame.Position, zone)
+		end
 		for z, s in loops do
 			local target = if z == zone then 0.2 else 0
 			s.Volume += (target - s.Volume) * 0.35
@@ -384,16 +420,55 @@ Bus.on("vault_start", function()
 	ownStep(0.5)
 end)
 
+-- ===== tiro próprio (D-107) =====
+-- O WeaponController avisa cada tiro que sai (Bus "shot_fired"): disparo da arma (2D), o corpo (o
+-- mesmo disparo uma oitava abaixo, só graves), a cauda pelo lugar e o estojo pulando. Na rajada a
+-- cauda e o estojo não se empilham.
+local lastTail, lastShell = 0, 0
+Bus.on("shot_fired", function(shot: any)
+	local wp = if type(shot) == "table" and type(shot.w) == "string" then Weapons.get(shot.w) else nil
+	if not wp then
+		return
+	end
+	local a = SomArmas.arma(wp.id, wp.kind)
+	local def = SomArmas.LIB[a.tiro]
+	if not def then
+		return
+	end
+	local now = os.clock()
+	local tail = now - lastTail > 0.12
+	if tail then
+		lastTail = now
+	end
+	local jitter = 1 + (math.random() - 0.5) * 0.04
+	Som.play(def, {
+		vol = 0.85 * (a.vol or 1),
+		pitch = a.pitch * jitter,
+		cauda = if tail then SomArmas.CAUDA[lugar] else nil,
+	})
+	if wp.kind ~= "launcher" then
+		Som.play(def, { vol = 0.4 * (a.vol or 1), pitch = a.pitch * 0.55, low = 6, mid = -8, high = -30 })
+	end
+	if a.estojo and now - lastShell > 0.18 then
+		lastShell = now
+		Som.play("mec_estojo", { delay = 0.35 + math.random() * 0.15, vol = 0.6, pitch = 0.9 + math.random() * 0.25 })
+	end
+end)
+
+-- ferrolho manobrado (fuzis de precisão): o som cabe no ciclo da arma
+Bus.on("bolt_cycle", function(dur: number)
+	local def = SomArmas.LIB.mec_ferrolho
+	local d = if type(dur) == "number" and dur > 0 then dur else 1
+	local natural = (def.len or 1.3) / (def.pitch or 1)
+	Som.play(def, { delay = 0.08, pitch = math.clamp(natural / d, 0.85, 1.25) })
+end)
+
 -- ===== tiros dos outros: camadas, atraso do som, estalo e impacto =====
-local NEAR: { [string]: string } = {
-	m14 = "shot_m14",
-	m60 = "shot_m14",
-	m1911 = "shot_m14",
-	type56 = "shot_type56",
-	sks = "shot_type56",
-	rpd = "shot_type56",
-	type54 = "shot_type56",
-}
+local function layer(key: string): SomArmas.Def?
+	local id = SND[key]
+	return if type(id) == "number" and id ~= 0 then { id = id, vol = 1 } else nil
+end
+local MID, FAR = layer("shot_mid"), layer("shot_distant")
 
 Net.unreliable("Combat_Tracer").OnClientEvent:Connect(function(shot)
 	local wp = Weapons.get(shot.w)
@@ -408,21 +483,62 @@ Net.unreliable("Combat_Tracer").OnClientEvent:Connect(function(shot)
 	if dM < 2500 then
 		caption(string.format("shot:%s", wp.id), string.format("Tiro de %s", wp.name or wp.id), origin, delay)
 	end
-	if dM < 60 then
-		play(NEAR[wp.id] or "shot_mid", origin, 1.0, 1500, delay)
-	elseif dM < 300 then
-		play("shot_mid", nil, math.clamp(1.2 - dM / 300, 0.3, 1), nil, delay)
-	elseif dM < 2500 then
-		play("shot_distant", nil, math.clamp(1 - dM / 2500, 0.15, 0.8), nil, delay)
+	-- D-107: disparo da arma de perto (3D), tiros gravados de médio e longe na direção dele (3D sem
+	-- atenuação: o volume é o da camada), agudos caindo com a distância e a cauda do lugar
+	local a = SomArmas.arma(wp.id, wp.kind)
+	local def = SomArmas.LIB[a.tiro]
+	local near, mid, far = SomArmas.camadas(dM)
+	local high = SomArmas.agudos(dM, lugar)
+	local cauda = SomArmas.CAUDA[lugar]
+	local jitter = 1 + (math.random() - 0.5) * 0.04
+	if near > 0.01 and def then
+		Som.play(def, {
+			pos = origin,
+			vol = near * (a.vol or 1),
+			pitch = a.pitch * jitter,
+			delay = delay,
+			minDist = 8 / M,
+			maxDist = 1500 / M,
+			high = high,
+			cauda = cauda,
+		})
+		if dM < 40 and wp.kind ~= "launcher" then
+			Som.play(def, {
+				pos = origin,
+				vol = 0.35 * near * (a.vol or 1),
+				pitch = a.pitch * 0.55,
+				delay = delay,
+				minDist = 8 / M,
+				maxDist = 400 / M,
+				low = 6,
+				mid = -8,
+				high = -30,
+			})
+		end
 	end
-	-- estalo: passagem mais próxima da trajetória (reta) até o ouvinte, se supersônica
+	if mid > 0.01 and MID then
+		Som.play(MID, { pos = origin, vol = mid * 0.8, delay = delay, minDist = 1e5, maxDist = 2e5, high = high * 0.5 })
+	end
+	if far > 0.01 and FAR then
+		Som.play(FAR, { pos = origin, vol = far * 0.7, delay = delay, minDist = 1e5, maxDist = 2e5, cauda = cauda })
+	end
+	-- ferrolho de quem atira perto (fuzil de precisão)
+	if a.ferrolho and dM < 40 then
+		Som.play("mec_ferrolho", { pos = origin, delay = delay + 0.3, vol = 0.8, minDist = 3 / M, maxDist = 60 / M })
+	end
+	-- estalo (supersônica) ou zunido: passagem mais próxima da trajetória (reta) até o ouvinte
 	local t = (listener - origin):Dot(dir)
 	if t > 0 then
 		local closest = (origin + dir * t - listener).Magnitude * M
 		local distM = t * M
 		local tFlight = distM / math.max(wp.muzzleVelocity * 0.85, 1)
-		if closest < 8 and wp.muzzleVelocity > Ballistics.SOUND and distM > 15 then
-			play("crack", nil, math.clamp(1.2 - closest / 8, 0.3, 1.2), nil, tFlight)
+		local what, vol = SomArmas.passagem(closest, wp.muzzleVelocity * 0.85, Ballistics.SOUND)
+		if what and distM > 15 then
+			if what == "bala_estalo" then
+				play("crack", nil, vol, nil, tFlight)
+			else
+				Som.play(what, { delay = tFlight, vol = vol, pitch = 0.9 + math.random() * 0.2 })
+			end
 			caption("crack", "Bala passando perto", nil, tFlight)
 		end
 	end

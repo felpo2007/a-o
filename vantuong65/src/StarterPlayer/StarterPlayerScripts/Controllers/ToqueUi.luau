@@ -5,7 +5,10 @@
 --   - minPx()/firePx(): tamanho físico do contrato (Shared/Toque.px do T1; sem ele, 48 e 84 px);
 --   - press/tap/hold: apertam a ação como o botão físico dela (Input.virtual do T1, protegido);
 --   - slot(nome): o lugar que o HUD do T1 reservou (um GuiObject com esse nome) para um botão nosso;
---   - roundButton(): botão redondo de polegar com glifo, rótulo curto e anel de progresso.
+--   - roundButton(): botão redondo de polegar com glifo, rótulo curto e anel de progresso;
+--   - zoneIn(tela, nome) (v39): a zona livre do HUD no toque (Shared/Toque.ZONES) em px da tela
+--     de quem pede; nil fora do toque ou com a zona fechada (eventos durante o tutorial);
+--   - fitZone(...): põe um quadro dentro de uma zona (posição e escala).
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
@@ -179,6 +182,80 @@ function ToqueUi.topBand(): (number, number, number)
 	return ToqueTelas.topBand(rects, a.X, a.X + sz.X, a.Y + sz.Y * 0.22)
 end
 
+-- ===== zonas livres do HUD no toque (v39, Shared/Toque.ZONES) =====
+-- O HUD de toque publica a área dele (VT65Toque: AreaPos e AreaSize no espaço do AbsolutePosition),
+-- o canhoto (Espelho) e o tiro do indicador esquerdo (Indicador). Sem o HUD: a tela com 12 px de
+-- margem. Durante o tutorial o cartão dele fica com a coluna da esquerda e os eventos esperam.
+export type Box = { x: number, y: number, w: number, h: number }
+
+function ToqueUi.area(): (Vector2, Vector2, boolean, boolean)
+	local pg = player:FindFirstChildOfClass("PlayerGui")
+	local hud = pg and pg:FindFirstChild("VT65Toque")
+	if hud then
+		local p, s = hud:GetAttribute("AreaPos"), hud:GetAttribute("AreaSize")
+		if typeof(p) == "Vector2" and typeof(s) == "Vector2" and s.X > 10 and s.Y > 10 then
+			return p, s, hud:GetAttribute("Espelho") == true, hud:GetAttribute("Indicador") == true
+		end
+	end
+	local vp = viewport()
+	return Vector2.new(12, 12), vp - Vector2.new(24, 24), Input.settings.touchMirror == true, false
+end
+
+-- O HUD de toque está valendo (em campo, vivo, sem menu nem mapa; a roda aberta conta)?
+function ToqueUi.inField(): boolean
+	local pg = player:FindFirstChildOfClass("PlayerGui")
+	local hud = pg and pg:FindFirstChild("VT65Toque")
+	return hud ~= nil and hud:GetAttribute("Campo") == true
+end
+
+-- A zona `name` no espaço da tela `into` (a origem é o AbsolutePosition dela). nil fora do toque.
+function ToqueUi.zoneIn(into: GuiBase2d?, name: string): Box?
+	local T = Toque
+	if not (ToqueUi.active() and T and type(T.zoneRect) == "function") then
+		return nil
+	end
+	if name == "eventos" and player:GetAttribute("TutorialPasso") ~= nil then
+		return nil
+	end
+	local p, s, mirror, index = ToqueUi.area()
+	local ok, z = pcall(T.zoneRect, name, s.X, s.Y, mirror, index)
+	if not ok or type(z) ~= "table" then
+		return nil
+	end
+	local o = if into then into.AbsolutePosition else Vector2.zero
+	return { x = p.X + z.x0 - o.X, y = p.Y + z.y0 - o.Y, w = z.x1 - z.x0, h = z.y1 - z.y0 }
+end
+
+-- Põe o quadro (tamanho de projeto w x h, escala pela UIScale dele) na zona, preso pelo ponto
+-- `align` (0..1 dentro da zona; o AnchorPoint do quadro fica igual). Devolve a escala, ou nil fora do
+-- toque (quem chama volta ao lugar de sempre).
+function ToqueUi.fitZone(
+	obj: GuiObject,
+	scale: UIScale?,
+	name: string,
+	w: number,
+	h: number,
+	align: Vector2,
+	maxK: number?,
+	minK: number?
+): number?
+	local sg = obj:FindFirstAncestorWhichIsA("LayerCollector")
+	local z = ToqueUi.zoneIn(if sg and sg:IsA("GuiBase2d") then sg else nil, name)
+	if not z then
+		return nil
+	end
+	local T = Toque
+	local k = if T and type(T.fitK) == "function"
+		then T.fitK(w, h, z.w, z.h, maxK or 1, minK or 0.4)
+		else math.clamp(math.min(z.w / math.max(w, 1), z.h / math.max(h, 1)), minK or 0.4, maxK or 1)
+	if scale then
+		scale.Scale = k
+	end
+	obj.AnchorPoint = align
+	obj.Position = UDim2.fromOffset(z.x + z.w * align.X, z.y + z.h * align.Y)
+	return k
+end
+
 -- ===== botão redondo de polegar =====
 export type Ring = { frame: Frame, set: (frac: number) -> () }
 
@@ -229,7 +306,8 @@ end
 
 export type Round = { button: TextButton, glyph: TextLabel, label: TextLabel, ring: Ring }
 
--- Botão redondo (lado em px), glifo grande no meio e um rótulo curto embaixo (fora do círculo).
+-- Botão redondo (lado em px), glifo em cima e o rótulo curto DENTRO do círculo, embaixo (v39: fora
+-- do círculo ele cobria os botões e as zonas do HUD ao lado; o texto longo encolhe e quebra a linha).
 function ToqueUi.roundButton(parent: Instance, name: string, size: number, glyph: string): Round
 	local b = Instance.new("TextButton")
 	b.Name = name
@@ -246,24 +324,29 @@ function ToqueUi.roundButton(parent: Instance, name: string, size: number, glyph
 	c.CornerRadius = UDim.new(1, 0)
 	c.Parent = b
 	Estilo.stroke(b, V.KHAKI, 2, 0.25)
-	local g = Estilo.text(b, glyph, math.floor(size * 0.42), V.TEXT, F.TITLE)
+	local g = Estilo.text(b, glyph, math.floor(size * 0.3), V.TEXT, F.TITLE)
 	g.Name = "Glifo"
-	g.Size = UDim2.fromScale(1, 1)
+	g.AnchorPoint = Vector2.new(0.5, 0.5)
+	g.Position = UDim2.fromScale(0.5, 0.32)
+	g.Size = UDim2.fromScale(0.7, 0.34)
 	g.TextXAlignment = Enum.TextXAlignment.Center
 	g.ZIndex = b.ZIndex + 1
-	local l = Estilo.text(b, "", math.max(12, math.floor(size * 0.2)), V.TEXT, F.TITLE_MED)
+	local l = Estilo.text(b, "", math.max(9, math.floor(size * 0.15)), V.TEXT, F.TITLE_MED)
 	l.Name = "Rotulo"
-	l.AnchorPoint = Vector2.new(0.5, 0)
-	l.Position = UDim2.new(0.5, 0, 1, 4)
-	l.AutomaticSize = Enum.AutomaticSize.X
-	l.Size = UDim2.fromOffset(0, math.max(16, math.floor(size * 0.28)))
+	l.AnchorPoint = Vector2.new(0.5, 0.5)
+	l.Position = UDim2.fromScale(0.5, 0.66)
+	l.Size = UDim2.fromScale(0.8, 0.32)
 	l.TextXAlignment = Enum.TextXAlignment.Center
-	l.BackgroundColor3 = V.PANEL
-	l.BackgroundTransparency = 0.2
+	l.TextWrapped = true
+	l.TextScaled = true
+	l.BackgroundTransparency = 1
 	l.TextStrokeColor3 = V.BG
 	l.TextStrokeTransparency = 0.4
-	Estilo.corner(l, 3)
-	Estilo.pad(l, 6)
+	l.ZIndex = b.ZIndex + 1
+	local lim = Instance.new("UITextSizeConstraint")
+	lim.MaxTextSize = math.max(9, math.floor(size * 0.15))
+	lim.MinTextSize = 7
+	lim.Parent = l
 	local r = ToqueUi.ring(b, 20)
 	return { button = b, glyph = g, label = l, ring = r }
 end

@@ -322,6 +322,34 @@ ItemAnim.ANIMS = {
 	},
 } :: { [string]: Anim }
 
+-- Granada e fumaça NA MÃO em 1ª pessoa (2026-11-13; fases do Shared/Equipar, gesto do Front 44:
+-- a direita traz a granada do cinto, a esquerda puxa o pino, o braço arma ao lado da cabeça com a
+-- esquerda apontando e lança; por baixo, o braço vai atrás da coxa e solta à frente da cintura).
+-- Metros no espaço da câmera, como o fp das ações. Fora de ANIMS: em 3ª pessoa a granada vai na mão
+-- do corpo (Modules/ArmaNaMao) e o braço é o arremesso do FieldService. PLACEHOLDER (a olho).
+-- throw/under: 0 = braço armado; releaseS (0,4) = a granada sai; throwS (0,8) = fim.
+local GR_COCK_R, GR_COCK_L = { 0.25, 0.04, -0.12 }, { -0.14, -0.1, -0.5 }
+ItemAnim.GRANADA = {
+	hold = { r = { 0.13, -0.2, -0.33 }, l = { -0.05, -0.27, -0.37 } }, -- na mão, diante do peito
+	pin = { r = { 0.12, -0.17, -0.34 }, l = { 0.07, -0.1, -0.33 } }, -- a esquerda no pino
+	cock = { r = GR_COCK_R, l = GR_COCK_L },
+	throw = {
+		k(0, GR_COCK_R, GR_COCK_L),
+		k(0.15, { 0.28, 0.1, -0.04 }, { -0.16, -0.12, -0.48 }), -- leva o braço mais atrás
+		k(0.4, { 0.05, 0.03, -0.62 }, { -0.2, -0.3, -0.3 }), -- solta: braço estendido à frente
+		k(0.55, { 0.02, -0.2, -0.48 }, { -0.2, -0.4, -0.28 }), -- segue o movimento
+		k(0.8, FP_R0, FP_L0),
+	},
+	under = {
+		k(0, GR_COCK_R, GR_COCK_L),
+		k(0.15, { 0.24, -0.45, 0.02 }, { -0.12, -0.2, -0.45 }), -- o braço desce atrás da coxa
+		k(0.4, { 0.08, -0.22, -0.58 }, { -0.16, -0.32, -0.36 }), -- solta à frente da cintura
+		k(0.55, { 0.06, -0.16, -0.55 }, { -0.18, -0.38, -0.3 }),
+		k(0.8, FP_R0, FP_L0),
+	},
+} :: { [string]: any }
+ItemAnim.GR_REST = { r = FP_R0, l = FP_L0 } -- abaixo da tela (de onde a mão traz a granada)
+
 -- Ações do servidor (atributo "VT65Acao") e itens que o cliente manda (atributo "VT65Item").
 ItemAnim.ACTIONS = { bandage = true, tourniquet = true, bandage_other = true, treat = true, revive = true }
 ItemAnim.ITEMS = { radio = true, binoculars = true, shovel = true, canteen = true }

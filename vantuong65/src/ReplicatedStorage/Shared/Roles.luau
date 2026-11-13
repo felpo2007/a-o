@@ -75,40 +75,46 @@ Roles.units = {
 	},
 } :: { [string]: { [string]: UnitDef } }
 
--- Armas-base por papel (Parte 4). Itens com arma desligada usam a pistola até a F4.
+-- Armas-base por papel (Parte 4): a principal (vaga 1) e a pistola (vaga 2; Shared/Equipar).
+-- 2026-11-13 (pedido do dono: "coloque arma secundária para todos"): todo papel leva a pistola do lado
+-- (M1911A1 nos EUA, Tipo 54 no VC). Os papéis que só tinham a pistola ganharam a arma longa do lado
+-- (comandante, corpsman e morteiro dos EUA com a M14; comandante e morteiro do VC com a SKS, sem mexer
+-- no kit do corpo: PLACEHOLDER, decisão de jogo). Ficam só com a pistola: antitanque (a principal é o lançador, que
+-- o WeaponController põe depois dela), tripulante e piloto (a principal é o veículo; o tanquista de
+-- 1965 levava a M3A1, que o jogo não tem).
 Roles.loadout = {
 	US = {
-		commander = { "m1911" },
-		squad_leader = { "m14" },
-		rifleman = { "m14" },
-		automatic_rifleman = { "m14" }, -- com o seletor aberto e o bipé (Weapons.roleModes/bipodRoles)
+		commander = { "m14", "m1911" },
+		squad_leader = { "m14", "m1911" },
+		rifleman = { "m14", "m1911" },
+		automatic_rifleman = { "m14", "m1911" }, -- com o seletor aberto e o bipé (Weapons.roleModes/bipodRoles)
 		grenadier = { "m79", "m1911" },
-		machine_gunner = { "m60" },
-		anti_tank = { "m1911" }, -- bazuca 3.5" M20 na F4
-		engineer = { "m14" },
-		medic = { "m1911" }, -- corpsman
-		radio_operator = { "m14" }, -- PRC-10 nas costas
-		observer = { "m14" },
-		sniper = { "m70" }, -- Winchester M70 com Unertl 8x (USMC, 1965; Shared/Weapons)
+		machine_gunner = { "m60", "m1911" },
+		anti_tank = { "m1911" }, -- + bazuca 3.5" M20 (vaga "launcher")
+		engineer = { "m14", "m1911" },
+		medic = { "m14", "m1911" }, -- corpsman
+		radio_operator = { "m14", "m1911" }, -- PRC-10 nas costas
+		observer = { "m14", "m1911" },
+		sniper = { "m70", "m1911" }, -- Winchester M70 com Unertl 8x (USMC, 1965; Shared/Weapons)
 		tank_crew = { "m1911" },
 		pilot = { "m1911" },
-		door_gunner = { "m60" },
-		mortar = { "m1911" },
+		door_gunner = { "m60", "m1911" },
+		mortar = { "m14", "m1911" },
 	},
 	VC = {
-		commander = { "type54" },
-		squad_leader = { "type56" },
-		rifleman = { "sks" },
-		grenadier = { "sks" }, -- granadas de cabo na F4
-		machine_gunner = { "rpd" },
-		anti_tank = { "type54" }, -- RPG-2 na F4
-		engineer = { "sks" },
-		medic = { "sks" },
-		radio_operator = { "sks" },
-		observer = { "type56" },
-		sniper = { "mosin" }, -- Mosin-Nagant 91/30 com luneta PU 3,5x (Shared/Weapons)
-		sapper = { "sks" },
-		mortar = { "type54" },
+		commander = { "sks", "type54" },
+		squad_leader = { "type56", "type54" },
+		rifleman = { "sks", "type54" },
+		grenadier = { "sks", "type54" }, -- granadas de cabo na F4
+		machine_gunner = { "rpd", "type54" },
+		anti_tank = { "type54" }, -- + RPG-2 (vaga "launcher")
+		engineer = { "sks", "type54" },
+		medic = { "sks", "type54" },
+		radio_operator = { "sks", "type54" },
+		observer = { "type56", "type54" },
+		sniper = { "mosin", "type54" }, -- Mosin-Nagant 91/30 com luneta PU 3,5x (Shared/Weapons)
+		sapper = { "sks", "type54" },
+		mortar = { "sks", "type54" },
 	},
 } :: { [string]: { [string]: { string } } }
 

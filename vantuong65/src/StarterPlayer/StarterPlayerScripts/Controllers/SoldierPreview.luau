@@ -13,11 +13,17 @@
 --     do próprio jogador, com a farda e a arma dele (CasualtyScreen.snapshot).
 -- Enquadramento sempre pela caixa do modelo (GetBoundingBox), nunca por altura fixa: o soldado muda
 -- de tamanho (2,0 m) e o retrato acompanha.
+-- Pose (2026-11-13): o corpo é refeito pelas juntas (o manequim vem do servidor montado fora do mundo)
+-- na guarda da 3ª pessoa, com a arma nas duas mãos (Shared/Pegada3P); SoldierPreview.setPose(p,
+-- "caido") deita o soldado ferido (tela de baixa). Tudo parado e ancorado: nada roda por quadro no
+-- soldado (só a câmera da mesa giratória).
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 
 local GunModel = require(ReplicatedStorage.Shared.GunModel)
+local Joints = require(ReplicatedStorage.Shared.Joints)
+local Pegada3P = require(ReplicatedStorage.Shared.Pegada3P)
 local Weapons = require(ReplicatedStorage.Shared.Weapons)
 local UiKit = require(script.Parent.UiKit)
 
@@ -45,6 +51,7 @@ export type Preview = {
 	still: boolean, -- retrato parado (câmera posta uma vez, sem mesa giratória)
 	custom: boolean, -- modelo próprio (setModel): o manequim do servidor não entra
 	key: Vector3, -- luz principal no espaço da câmera
+	pose: string?, -- "guarda" (padrão do manequim) | "caido" | nil (o modelo próprio fica como veio)
 }
 
 local FOV = 24 -- teleobjetiva: pouca distorção, cara de retrato
@@ -95,6 +102,259 @@ local function freeze(root: Instance)
 	end
 end
 
+-- ===== pose do manequim (parado, todo ancorado) =====
+-- 2026-11-13 ("as animações nas telas ... tremendo, capacetes bugados", dono): o manequim do servidor é
+-- montado FORA do Workspace (PreviewService), onde as juntas não se resolvem: com a escala do corpo de
+-- bloco as peças ficavam no lugar da escala 1 (o Characters já media 1,45 m ali), e o capacete, o
+-- colete e a arma soldados nelas iam junto, fora do corpo. Aqui o corpo é posto de novo pelas juntas
+-- (C0 · Transform · C1⁻¹ a partir da HumanoidRootPart), com a pose de guarda da 3ª pessoa
+-- (Shared/Pegada3P: tronco de lado, arma baixa nas duas mãos) ou caído (tela de baixa); o que está
+-- soldado no corpo (capacete, colete, equipamento) acompanha a peça em que está soldado.
+type JointRec = { j: Instance, p0: BasePart, p1: BasePart, c0: CFrame, c1: CFrame }
+
+local function jointRec(j: Instance): JointRec?
+	local rest = Joints.rest(j)
+	if j:IsA("Motor6D") then
+		local p0, p1 = j.Part0, j.Part1
+		if p0 and p1 and rest then
+			local r: JointRec = { j = j :: Instance, p0 = p0, p1 = p1, c0 = rest, c1 = j.C1 }
+			return r
+		end
+	elseif j:IsA("AnimationConstraint") then
+		local a0, a1 = j.Attachment0, j.Attachment1
+		local p0 = a0 and a0.Parent
+		local p1 = a1 and a1.Parent
+		if a1 and p0 and p1 and p0:IsA("BasePart") and p1:IsA("BasePart") and rest then
+			local r: JointRec = { j = j :: Instance, p0 = p0, p1 = p1, c0 = rest, c1 = a1.CFrame }
+			return r
+		end
+	end
+	return nil
+end
+
+-- corpo (juntas) e o que está soldado nele, com a peça do corpo de cada coisa soldada
+local function rigOf(m: Model): ({ JointRec }, { [BasePart]: { BasePart } })
+	local recs: { JointRec } = {}
+	local body: { [BasePart]: boolean } = {}
+	local weapon = m:FindFirstChild("Weapon")
+	for _, d in m:GetDescendants() do
+		if (d:IsA("Motor6D") or d:IsA("AnimationConstraint")) and not (weapon and d:IsDescendantOf(weapon)) then
+			local r = jointRec(d)
+			if r then
+				table.insert(recs, r)
+				body[r.p0], body[r.p1] = true, true
+			end
+		end
+	end
+	-- soldas (WeldConstraint/Weld) entre peças, fora a arma: busca a partir das peças do corpo
+	local links: { [BasePart]: { BasePart } } = {}
+	local function link(a: BasePart?, b: BasePart?)
+		if a and b then
+			links[a] = links[a] or {}
+			links[b] = links[b] or {}
+			table.insert(links[a], b)
+			table.insert(links[b], a)
+		end
+	end
+	for _, d in m:GetDescendants() do
+		if (d:IsA("WeldConstraint") or d:IsA("Weld")) and not (weapon and d:IsDescendantOf(weapon)) then
+			local a, b = (d :: any).Part0, (d :: any).Part1
+			if a and b and not (weapon and (a:IsDescendantOf(weapon) or b:IsDescendantOf(weapon))) then
+				link(a, b)
+			end
+		end
+	end
+	local carried: { [BasePart]: { BasePart } } = {}
+	local seen: { [BasePart]: boolean } = {}
+	for part in body do
+		seen[part] = true
+	end
+	for part in body do
+		local list: { BasePart } = {}
+		local queue = { part }
+		while #queue > 0 do
+			local cur = table.remove(queue) :: BasePart
+			local ns = links[cur]
+			if ns then
+				for _, n in ns do
+					if not seen[n] then
+						seen[n] = true
+						table.insert(list, n)
+						table.insert(queue, n)
+					end
+				end
+			end
+		end
+		if #list > 0 then
+			carried[part] = list
+		end
+	end
+	return recs, carried
+end
+
+-- Põe as peças pelas juntas, com os Transform dados (por nome da junta). Devolve false sem raiz.
+local function solveRig(
+	m: Model,
+	recs: { JointRec },
+	carried: { [BasePart]: { BasePart } },
+	t: { [string]: CFrame }
+): boolean
+	local root = m:FindFirstChild("HumanoidRootPart") :: BasePart?
+	if not root then
+		return false
+	end
+	-- o que está soldado guarda o lugar em relação à peça do corpo, antes de mexer
+	local rel: { [BasePart]: CFrame } = {}
+	for part, list in carried do
+		for _, c in list do
+			rel[c] = part.CFrame:ToObjectSpace(c.CFrame)
+		end
+	end
+	local kids: { [BasePart]: { JointRec } } = {}
+	for _, r in recs do
+		kids[r.p0] = kids[r.p0] or {}
+		table.insert(kids[r.p0], r)
+	end
+	local queue = { root }
+	local done: { [BasePart]: boolean } = { [root] = true }
+	while #queue > 0 do
+		local p0 = table.remove(queue, 1) :: BasePart
+		local ks = kids[p0]
+		if ks then
+			for _, r in ks do
+				if not done[r.p1] then
+					done[r.p1] = true
+					r.p1.CFrame = p0.CFrame * r.c0 * (t[r.j.Name] or CFrame.identity) * r.c1:Inverse()
+					table.insert(queue, r.p1)
+				end
+			end
+		end
+	end
+	for part, list in carried do
+		for _, c in list do
+			c.CFrame = part.CFrame * rel[c]
+		end
+	end
+	return true
+end
+
+local function armRig(recs: { JointRec }, m: Model, side: string): (Pegada3P.ArmRig?, { [string]: Instance })
+	local name = if side == "R" then "Right" else "Left"
+	local by: { [string]: JointRec } = {}
+	for _, r in recs do
+		by[r.j.Name] = r
+	end
+	local s, e, w = by[name .. "Shoulder"], by[name .. "Elbow"], by[name .. "Wrist"]
+	local hand = m:FindFirstChild(name .. "Hand")
+	local grip = hand and hand:FindFirstChild(name .. "GripAttachment") :: Attachment?
+	if not (s and e and w and grip) then
+		return nil, {}
+	end
+	return {
+		c0s = s.c0,
+		c1s = s.c1,
+		c0e = e.c0,
+		c1e = e.c1,
+		c0w = w.c0,
+		c1w = w.c1,
+		grip = (grip :: Attachment).CFrame,
+	}, { s = s.j, e = e.j }
+end
+
+-- Pose do manequim: "guarda" (de pé, arma baixa nas duas mãos) ou "caido" (deitado de costas, mão
+-- no peito, arma no chão ao lado). A arma "Weapon" vai para a pose (não fica pendurada na mão).
+local function applyPose(m: Model, name: string)
+	local recs, carried = rigOf(m)
+	local root = m:FindFirstChild("HumanoidRootPart") :: BasePart?
+	local ut = m:FindFirstChild("UpperTorso") :: BasePart?
+	if not (root and ut and #recs > 0) then
+		return
+	end
+	local w = m:FindFirstChild("Weapon") :: Model?
+	local kind = "rifle"
+	if w then
+		local id = w:GetAttribute("WeaponId")
+		local wp = if type(id) == "string" then Weapons.get(id) else nil
+		kind = if wp then wp.kind else "rifle"
+	end
+	local S = Pegada3P.S
+	local t: { [string]: CFrame } = {}
+	if name == "caido" then
+		-- de costas no chão: a bacia gira 90° para trás; cabeça de lado; joelho direito dobrado
+		t.Root = CFrame.Angles(math.rad(90), 0, 0)
+		t.Neck = CFrame.Angles(math.rad(-15), math.rad(25), 0)
+		t.RightHip = CFrame.Angles(math.rad(35), 0, math.rad(-6))
+		t.RightKnee = CFrame.Angles(math.rad(-65), 0, 0)
+		t.LeftHip = CFrame.Angles(math.rad(4), 0, math.rad(8))
+		t.RightShoulder = CFrame.Angles(0, 0, math.rad(18))
+	else
+		local bl = Pegada3P.blade(kind)
+		t.Waist = CFrame.Angles(0, -bl, 0)
+		t.Neck = CFrame.Angles(0, bl, 0)
+	end
+	solveRig(m, recs, carried, t)
+	-- braços (e a arma) pela pose da 3ª pessoa
+	local rigR, jR = armRig(recs, m, "R")
+	local rigL, jL = armRig(recs, m, "L")
+	local gunUT: CFrame? = nil
+	local primary = w and w.PrimaryPart
+	if name ~= "caido" and w and primary then
+		local s = Pegada3P.state(kind)
+		-- soleira (o mais de trás da arma, a partir do punho)
+		local pivot = w:GetPivot()
+		local rear = 0.3
+		for _, d in w:GetDescendants() do
+			if d:IsA("BasePart") and d.Transparency < 1 then
+				local l = pivot:ToObjectSpace(d.CFrame)
+				local h = d.Size / 2
+				local ext = math.abs(l.RightVector.Z) * h.X
+					+ math.abs(l.UpVector.Z) * h.Y
+					+ math.abs(l.LookVector.Z) * h.Z
+				rear = math.max(rear, l.Position.Z + ext)
+			end
+		end
+		s.rear = rear
+		gunUT = Pegada3P.gun(root.CFrame:ToObjectSpace(ut.CFrame), s)
+		local g = gunUT :: CFrame
+		local sup = primary:FindFirstChild("Support") :: Attachment?
+		local supLocal = if sup then (pivot:ToObjectSpace(sup.WorldCFrame)).Position else Vector3.new(0, 0, -0.9)
+		if rigR then
+			local r1, r2 = Pegada3P.arm(rigR, g.Position, Vector3.new(1.6, -1.1, 0.5))
+			t[jR.s.Name], t[jR.e.Name] = r1, r2
+		end
+		if rigL then
+			local a, b = Pegada3P.lengths(rigL)
+			local target = if kind == "pistol"
+				then g * Vector3.new(-0.12, -0.05, 0.05)
+				else g * Pegada3P.support(supLocal, 2.6, g:PointToObjectSpace(rigL.c0s.Position), a + b)
+			local l1, l2 = Pegada3P.arm(rigL, target, Vector3.new(-0.9, -2.2, -0.3))
+			t[jL.s.Name], t[jL.e.Name] = l1, l2
+		end
+	elseif name == "caido" and rigL then
+		-- mão esquerda sobre o peito
+		local l1, l2 = Pegada3P.arm(rigL, Vector3.new(0.15 * S, 0.1 * S, -0.62 * S), Vector3.new(-1, -1, -0.4))
+		t[jL.s.Name], t[jL.e.Name] = l1, l2
+	end
+	solveRig(m, recs, carried, t)
+	if w then
+		if gunUT then
+			w:PivotTo(ut.CFrame * gunUT)
+		else
+			-- caído: a arma no chão, ao lado da mão direita, deitada de lado e com a boca para a cabeça
+			local lower = m:FindFirstChild("LowerTorso") :: BasePart?
+			local at = lower or ut
+			w:PivotTo(
+				at.CFrame
+					* CFrame.fromMatrix(
+						Vector3.new(1.9 * S, 0.9 * S, 0.35 * S),
+						Vector3.new(0, 0, -1),
+						Vector3.new(1, 0, 0)
+					)
+			)
+		end
+	end
+end
+
 local function mountWeapon(p: Preview, id: string)
 	local model = p.model
 	local wp = Weapons.get(id)
@@ -114,10 +374,14 @@ local function mountWeapon(p: Preview, id: string)
 	end
 	freeze(w)
 	w.Name = "Weapon"
+	w:SetAttribute("WeaponId", id)
 	w:PivotTo(hand.CFrame * CFrame.Angles(-math.pi / 2, 0, 0)) -- a mesma pega do AssetLoader.attachWeapon
 	w.Parent = model
 	p.weapon = id
 	p.weaponArt = art ~= nil
+	if p.pose then
+		applyPose(model, p.pose :: string) -- a arma nova vai para as mãos
+	end
 end
 
 -- câmera do retrato no ângulo de agora (mesa giratória a cada quadro; o parado, uma vez)
@@ -192,6 +456,9 @@ local function sync(p: Preview)
 		if src then
 			local m = src:Clone()
 			freeze(m)
+			if p.pose then
+				applyPose(m, p.pose :: string) -- juntas resolvidas, arma nas mãos (antes de pôr no chão)
+			end
 			local stand = p.stand
 			if stand then
 				standModel(m, stand)
@@ -256,6 +523,7 @@ local function blank(world: Instance): Preview
 		still = false,
 		custom = false,
 		key = KEY,
+		pose = "guarda",
 	}
 end
 
@@ -388,6 +656,10 @@ function SoldierPreview.setModel(p: Preview, m: Model?)
 	end
 	p.custom = true
 	freeze(m)
+	if p.pose then
+		-- clone do manequim do lobby (montado fora do mundo) ou do soldado: juntas resolvidas e a pose
+		applyPose(m, p.pose :: string)
+	end
 	m:PivotTo(CFrame.identity)
 	m.Parent = p.world
 	p.model = m
@@ -413,6 +685,24 @@ end
 
 function SoldierPreview.setActive(p: Preview, on: boolean)
 	p.active = on
+end
+
+-- Pose do soldado do retrato: "guarda" (de pé, arma baixa nas duas mãos; padrão do manequim) ou
+-- "caido" (ferido, deitado de costas, mão no peito, arma no chão). Vale para o manequim e para o
+-- modelo próprio (setModel: chame antes ou depois). O enquadramento segue a caixa nova.
+function SoldierPreview.setPose(p: Preview, name: string)
+	if name ~= "guarda" and name ~= "caido" then
+		return
+	end
+	p.pose = name
+	local m = p.model
+	if m then
+		applyPose(m, name)
+		if not p.stand then
+			m:PivotTo(CFrame.identity)
+			frameModel(p)
+		end
+	end
 end
 
 -- mesa giratória: só os retratos ativos; nenhuma tabela ou instância criada por quadro

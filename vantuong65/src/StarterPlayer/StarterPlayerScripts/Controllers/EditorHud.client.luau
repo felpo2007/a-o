@@ -8,6 +8,10 @@
 -- Testar: não há campo de tiro no lobby (o do jogo fica atrás de cada QG, já no mapa), então o teste
 -- é na própria tela: tocar num botão mostra a ação; o analógico mostra andar/correr/trava.
 -- O painel é arrastável pelo título e encolhe (–) para não tapar os botões.
+-- v39: os botões que só aparecem quando servem (recarga, golpe, fôlego, bandagem, rádio, interagir)
+-- aparecem todos aqui para escolher o lugar; "VER" troca entre a pé, mirando (o fôlego no lugar do
+-- golpe) e caído. No tablet o padrão é o compacto (Shared/Toque.compact). Layout salvo com botão que
+-- saiu do jogo (ARMA, SELETOR, MARCAR, CÂMERA, CANAL): o botão é ignorado e some ao salvar de novo.
 -- Studio: workspace:SetAttribute("VT65DevTela", "editorhud") abre o editor.
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -54,7 +58,7 @@ local E = {
 	exitArmed = false,
 	selected = nil :: string?,
 	testing = false,
-	downed = false, -- ver o layout de caído
+	view = "pe", -- o que se vê: "pe" (a pé), "mira" (mirando na luneta) ou "caido"
 	W = 800,
 	H = 360,
 	short = 390,
@@ -160,10 +164,23 @@ local function relayoutArea()
 	panelScale.Scale = math.clamp(math.min(full.X / 760, full.Y / 400), 0.6, 1)
 end
 
+-- todos os contextuais acesos (o lugar de cada um); golpe e fôlego dividem o lugar
 local function shownInView(d: Toque.Def): boolean
-	local c: Toque.Ctx = { foot = not E.downed, vehicle = false, downed = E.downed, aiming = true, voice = true }
+	local downed = E.view == "caido"
+	local c: Toque.Ctx = {
+		foot = not downed,
+		vehicle = false,
+		downed = downed,
+		aiming = E.view == "mira",
+		voice = true,
+		reload = true,
+		melee = true,
+		breath = true,
+		bleed = true,
+		command = true,
+	}
 	if d.kind == "slot" then
-		return not E.downed
+		return not downed
 	end
 	return Toque.visible(d, c)
 end
@@ -267,7 +284,11 @@ local function load(name: string)
 		-- espaço próprio vazio: começa do que está na tela
 		E.dirty = true
 	else
-		E.work = Toque.layout({ touchLayout = name, touchMirror = E.mirror, touchCustom = custom })
+		E.work = Toque.layout(
+			{ touchLayout = name, touchMirror = E.mirror, touchCustom = custom },
+			nil,
+			Toque.isTablet(E.short)
+		)
 		E.dirty = false
 	end
 	E.name = name
@@ -292,8 +313,10 @@ local mirrorBtn = btn(optRow, "CANHOTO: NÃO", "secondary", 118, 1, function()
 	placeAll()
 	refreshPanel()
 end)
+local NEXT_VIEW: { [string]: string } = { pe = "mira", mira = "caido", caido = "pe" }
+local VIEW_TEXT: { [string]: string } = { pe = "VER: A PÉ", mira = "VER: MIRANDO", caido = "VER: CAÍDO" }
 local viewBtn = btn(optRow, "VER: A PÉ", "secondary", 96, 2, function()
-	E.downed = not E.downed
+	E.view = NEXT_VIEW[E.view] or "pe"
 	placeAll()
 	refreshPanel()
 end)
@@ -417,7 +440,7 @@ refreshPanel = function()
 		a.realce.base(if on then V.OLIVE else V.PANEL)
 	end
 	mirrorBtn.label.Text = if E.mirror then "CANHOTO: SIM" else "CANHOTO: NÃO"
-	viewBtn.label.Text = if E.downed then "VER: CAÍDO" else "VER: A PÉ"
+	viewBtn.label.Text = VIEW_TEXT[E.view] or "VER: A PÉ"
 	testBtn.label.Text = if E.testing then "EDITAR" else "TESTAR"
 	local id = E.selected
 	local sl = id and E.work[id]
@@ -425,7 +448,13 @@ refreshPanel = function()
 		local d = Toque.BY_ID[id]
 		selName.Text = d.label
 		selName.FontFace = UiKit.headFont(d.label)
-		showBtn.button.Visible = d.optional == true or d.kind == "slot" or not sl.on
+		-- ocultar: os opcionais, a vaga do interagir e os que só aparecem quando servem
+		local ctxBtn = d.show == "reload"
+			or d.show == "melee"
+			or d.show == "breath"
+			or d.show == "bleed"
+			or d.show == "radio"
+		showBtn.button.Visible = d.optional == true or d.kind == "slot" or ctxBtn or not sl.on
 		showBtn.label.Text = if sl.on then "OCULTAR" else "MOSTRAR"
 		sizeText.Text = string.format("Tamanho: %d%%", math.floor(sl.scale * 100 + 0.5))
 		alphaText.Text = string.format("Transparência: %d%%", math.floor((1 - sl.alpha) * 100 + 0.5))
@@ -625,7 +654,7 @@ local function open()
 	end
 	E.open = true
 	E.mirror = Input.settings.touchMirror
-	E.testing, E.downed, E.selected, E.drag = false, false, nil, nil
+	E.testing, E.view, E.selected, E.drag = false, "pe", nil, nil
 	table.clear(E.test)
 	gui.Enabled = true
 	relayoutArea()

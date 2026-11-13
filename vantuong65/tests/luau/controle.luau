@@ -41,7 +41,9 @@ test("layout: toda ação de jogo tem botão de controle (exceções documentada
 		lean_right = "R3 na camada de mira (D-99: E no teclado a qualquer hora)",
 	}
 	for _, a in InputMap.ACTIONS do
-		if not a.pad then
+		-- 2026-11-13: as vagas 1 a 0 são do teclado; no controle, Y troca a arma e os itens ficam na
+		-- roda de equipamento (LB)
+		if not a.pad and not string.match(a.id, "^slot_%d$") then
 			assert(padless[a.id], a.id .. " sem botão de controle")
 		end
 	end

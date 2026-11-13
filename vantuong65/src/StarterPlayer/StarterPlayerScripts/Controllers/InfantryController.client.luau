@@ -87,8 +87,13 @@ local function stance(): string
 		else "stand"
 end
 Input.on("crouch", "tap", function()
+	local wasRunning = sprinting or (player.Character ~= nil and player.Character:GetAttribute("Sprinting") == true)
 	setSprint(false)
-	Net.event("Posture_Set"):FireServer({ stance = if stance() == "crouch" then "stand" else "crouch" })
+	local st = stance()
+	if st == "stand" and wasRunning then
+		Bus.fire("slide") -- 2026-11-13 (Front 44): correndo, agachar desliza (o Movement confere a velocidade)
+	end
+	Net.event("Posture_Set"):FireServer({ stance = if st == "crouch" then "stand" else "crouch" })
 end)
 Input.on("prone", "holdStart", function()
 	local wasRunning = sprinting or (player.Character ~= nil and player.Character:GetAttribute("Sprinting") == true)
@@ -183,6 +188,12 @@ local layout = Instance.new("UIListLayout")
 layout.VerticalAlignment = Enum.VerticalAlignment.Bottom
 layout.Parent = feed
 local function line(text: string, color: Color3)
+	-- toque v39 ("mensagens do squad no meio da tela"): vão para os avisos (Toast, na zona livre
+	-- "avisos" do HUD de toque), uma de cada vez (a nova troca a anterior)
+	if ToqueUi.active() then
+		Toast.show(text, "info", { key = "squad", fallback = "Squad" })
+		return
+	end
 	-- toque (Parte 13): no alto à esquerda ficam os botões do HUD de toque (mapa, menu...) e, numa
 	-- tela baixa, o feed subia até eles; no toque ele fica no meio à esquerda, mais estreito (só
 	-- rótulos: o dedo do analógico passa por ele)
@@ -279,11 +290,9 @@ local function useItem(id: string)
 	if id == "shovel" then
 		Net.event("Dig_Request"):FireServer()
 	elseif id == "frag" or id == "smoke" then
-		if player.Character and player.Character:GetAttribute("Throwing") then
-			return -- já arremessando
-		end
-		Net.event("Throw_Request"):FireServer({ kind = id, dir = camera.CFrame.LookVector })
-		Bus.fire("grenade_throw", id) -- braço e granada em 1ª pessoa (WeaponVisuals, D-77)
+		-- 2026-11-13: a granada vem para a mão (WeaponController: o gatilho arma e lança, como no
+		-- Front 44); antes saía na hora, sem nada na mão
+		Bus.fire("draw_item", id)
 	elseif id == "build" then
 		Wheel.open("equip", "Construir", buildItems, function(bid: string)
 			local b = Logistics.BUILDS[string.sub(bid, 7)]
@@ -308,6 +317,9 @@ local function useItem(id: string)
 		Bus.fire("equip_item", id) -- bandagem, torniquete, binóculo (Medical/Weapon)
 	end
 end
+
+-- vagas 5 a 0 do teclado e da faixa das vagas (WeaponController, Shared/Equipar): o mesmo uso da roda
+Bus.on("use_item", useItem)
 
 -- só no Studio, para o teste: workspace:SetAttribute("VT65DevItem", "frag") usa o item como a roda
 if game:GetService("RunService"):IsStudio() then

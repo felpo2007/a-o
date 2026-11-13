@@ -3,9 +3,16 @@
 -- Tamanho físico dos botões, layouts prontos (2 polegares, 3 dedos, 4 dedos), espelho do canhoto e
 -- layouts próprios, zonas da tela e dono de cada toque, analógico proporcional com a trava da
 -- corrida, olhar pelo arrasto e pelo giroscópio, regras do botão de mira e o transpor sozinho.
--- Runtime: Controllers/ToqueHud.client (HUD), Controllers/EditorHud.client (editor),
--- Controllers/CameraLook.client (olhar e giroscópio) e Controllers/Input (ações virtuais).
--- Realismo: nada aqui mostra inimigo; o toque só troca a forma de apertar os mesmos botões.
+-- v39 (dono, jogando no celular: "deixe a tela o mais limpa possível", "deixe somente os botões
+-- importantes; o resto automático"): botões fixos só os do uso o tempo todo, os outros aparecem
+-- quando servem (Ctx), zonas livres para o HUD das outras telas (ZONES) e as regras do que é
+-- automático no toque (recarga na pausa, golpe, inclinar na quina, ímã leve, tiro sozinho, pegar
+-- munição, respiração na luneta).
+-- Runtime: Controllers/ToqueHud.client (HUD), Controllers/ToqueAuto (automáticos),
+-- Controllers/EditorHud.client (editor), Controllers/CameraLook.client (olhar, giroscópio e ímã) e
+-- Controllers/Input (ações virtuais).
+-- Realismo: nada aqui mostra inimigo além do que o soldado vê; o toque só troca a forma de apertar
+-- os mesmos botões.
 local Toque = {}
 
 -- ===== tamanho físico =====
@@ -56,12 +63,18 @@ end
 -- "latch" (toca liga, toca de novo desliga: inclinar), "posture" (tocar agacha, segurar deita,
 -- deslizar para cima levanta), "jump", "wheel" (tocar/segurar abre a roda em volta do polegar),
 -- "press" (aperta enquanto o dedo está em cima), "giveup" (segurar 1 s), "slot" (vaga de outro
--- agente: o botão contextual de interagir é do T2).
--- show: quando aparece. "move" a pé e no veículo; "foot" a pé; "aim" mirando; "game" em todo
--- contexto de jogo (até caído); "talk" a pé e caído; "voice" com a voz disponível (a pé e no
--- veículo); "downed" caído; "slot" nunca (quem desenha é o dono da vaga).
+-- agente: o botão contextual de interagir é do Interagir.client).
+-- show: quando aparece. "move" a pé e no veículo; "foot" a pé; "game" em todo contexto de jogo
+-- (até caído); "talk" a pé e caído; "downed" caído; "slot" nunca (quem desenha é o dono da vaga).
+-- Contextuais (v39, só quando servem; o Ctx diz): "reload" (carregador gasto, Toque.showReload),
+-- "melee" (inimigo à vista a poucos metros, sem mirar), "breath" (na luneta, com a respiração
+-- sozinha desligada), "bleed" (sangrando, com bandagem ou torniquete) e "radio" (com a voz do jogo
+-- ou, a pé, para quem fala com o comando).
 -- spec: ações do Input.virtual ("a|b" = um botão com duas ações; "a:tap" fixa o tipo).
 -- glyph: texto curto no botão (frase inteira: o Traducao traduz).
+-- Saíram da tela na v39 (layout salvo com eles: o botão é ignorado): ARMA e SELETOR (o cartão da
+-- arma: tocar troca, segurar abre seletor, alça e baioneta), MARCAR (tocar no COMUNICAR), CÂMERA
+-- (menu: Configurações > Toque > Câmera) e CANAL (tocar no RÁDIO).
 export type Def = {
 	id: string,
 	spec: string?,
@@ -87,7 +100,6 @@ Toque.BUTTONS = {
 		optional = true,
 	},
 	{ id = "aim", spec = "aim", kind = "aim", glyph = "MIRA", label = "Mirar", mm = 12, show = "foot" },
-	{ id = "reload", spec = "reload", kind = "press", glyph = "RECARGA", label = "Recarregar", mm = 10, show = "foot" },
 	{
 		id = "posture",
 		spec = "crouch|prone",
@@ -99,15 +111,6 @@ Toque.BUTTONS = {
 	},
 	{ id = "jump", spec = "jump", kind = "jump", glyph = "PULAR", label = "Pular / transpor", mm = 11, show = "foot" },
 	{
-		id = "swap",
-		spec = "swap_weapon|bayonet",
-		kind = "press",
-		glyph = "ARMA",
-		label = "Trocar arma / baioneta",
-		mm = 10,
-		show = "foot",
-	},
-	{
 		id = "equip",
 		spec = "last_item|equip_wheel",
 		kind = "wheel",
@@ -116,34 +119,72 @@ Toque.BUTTONS = {
 		mm = 10,
 		show = "foot",
 	},
-	{ id = "melee", spec = "melee", kind = "press", glyph = "GOLPE", label = "Corpo a corpo", mm = 9, show = "foot" },
 	{
-		id = "fire_mode",
-		spec = "fire_mode|zeroing",
+		id = "comm",
+		spec = "mark|comm_wheel",
+		kind = "wheel",
+		glyph = "COMUNICAR",
+		label = "Marcar (tocar) / roda de comunicação (segurar)",
+		mm = 10,
+		show = "talk",
+	},
+	{ id = "map", spec = "map", kind = "press", glyph = "MAPA", label = "Mapa", mm = 9, show = "game" },
+	{ id = "menu", spec = "game_menu", kind = "press", glyph = "MENU", label = "Menu", mm = 9, show = "game" },
+	-- contextuais (só quando servem)
+	{
+		id = "reload",
+		spec = "reload",
 		kind = "press",
-		glyph = "SELETOR",
-		label = "Seletor / alça de mira",
-		mm = 9,
-		show = "foot",
+		glyph = "RECARGA",
+		label = "Recarregar (aparece com o carregador gasto)",
+		mm = 10,
+		show = "reload",
+	},
+	{
+		id = "melee",
+		spec = "melee",
+		kind = "press",
+		glyph = "GOLPE",
+		label = "Corpo a corpo (aparece com o inimigo perto)",
+		mm = 10,
+		show = "melee",
 	},
 	{
 		id = "hold_breath",
 		spec = "hold_breath",
 		kind = "press",
 		glyph = "FÔLEGO",
-		label = "Prender a respiração",
+		label = "Prender a respiração (na luneta)",
 		mm = 10,
-		show = "aim",
+		show = "breath",
 	},
 	{
 		id = "bandage",
 		spec = "quick_bandage",
 		kind = "press",
 		glyph = "BANDAGEM",
-		label = "Bandagem rápida",
+		label = "Bandagem rápida (aparece sangrando)",
 		mm = 10,
-		show = "foot",
+		show = "bleed",
 	},
+	{
+		id = "radio",
+		spec = "radio_channel:tap|radio_talk:hold",
+		kind = "press",
+		glyph = "RÁDIO",
+		label = "Rádio: segurar fala, tocar troca o canal",
+		mm = 10,
+		show = "radio",
+	},
+	{
+		id = "interact",
+		kind = "slot",
+		glyph = "",
+		label = "Interagir (aparece perto de algo)",
+		mm = 13.5,
+		show = "slot",
+	},
+	-- opcionais (desligados no padrão; o editor liga): o inclinar é sozinho na quina (ToqueAuto)
 	{
 		id = "lean_l",
 		spec = "lean_left",
@@ -152,6 +193,7 @@ Toque.BUTTONS = {
 		label = "Inclinar à esquerda",
 		mm = 9,
 		show = "foot",
+		optional = true,
 	},
 	{
 		id = "lean_r",
@@ -161,46 +203,7 @@ Toque.BUTTONS = {
 		label = "Inclinar à direita",
 		mm = 9,
 		show = "foot",
-	},
-	{ id = "interact", kind = "slot", glyph = "", label = "Interagir (contextual)", mm = 12, show = "slot" },
-	{ id = "map", spec = "map", kind = "press", glyph = "MAPA", label = "Mapa", mm = 9, show = "game" },
-	{ id = "menu", spec = "game_menu", kind = "press", glyph = "MENU", label = "Menu", mm = 9, show = "game" },
-	{
-		id = "view",
-		spec = "view_toggle:tap|shoulder_swap:hold",
-		kind = "press",
-		glyph = "CÂMERA",
-		label = "1ª/3ª pessoa / trocar ombro",
-		mm = 9,
-		show = "foot",
-	},
-	{
-		id = "comm",
-		spec = "comm_wheel",
-		kind = "wheel",
-		glyph = "COMUNICAR",
-		label = "Roda de comunicação",
-		mm = 10,
-		show = "talk",
-	},
-	{ id = "mark", spec = "mark", kind = "press", glyph = "MARCAR", label = "Marcar", mm = 9, show = "talk" },
-	{
-		id = "radio",
-		spec = "radio_talk",
-		kind = "press",
-		glyph = "RÁDIO",
-		label = "Falar no rádio",
-		mm = 10,
-		show = "voice",
-	},
-	{
-		id = "channel",
-		spec = "radio_channel",
-		kind = "press",
-		glyph = "CANAL",
-		label = "Canal do rádio",
-		mm = 9,
-		show = "foot",
+		optional = true,
 	},
 	{
 		id = "give_up",
@@ -220,48 +223,45 @@ end
 
 -- ===== layouts =====
 -- Centro de cada botão em frações da área segura (x 0 = esquerda, y 0 = alto). Desenhados para o
--- celular deitado (16:9 a 19,5:9); no runtime o centro é preso para o botão inteiro caber.
--- A bússola fica no alto, ao centro (HudCampo): o miolo do alto fica livre.
+-- celular deitado (16:9 a 20:9); no runtime o centro é preso para o botão inteiro caber.
+-- v39: o polegar direito tem o tiro e, em volta dele, mira, pular, agachar, ITEM e os contextuais
+-- (recarga, golpe/fôlego, interagir); o esquerdo, o analógico e a bandagem (sangrando). No alto,
+-- pequenos: mapa e menu à esquerda, COMUNICAR e o rádio à direita. O miolo do alto, a coluna da
+-- esquerda acima do polegar e o pé do meio ficam para o HUD das outras telas (ZONES).
+-- Golpe e fôlego dividem o lugar: o golpe nunca aparece mirando; o fôlego, só na luneta.
 export type Pos = { x: number, y: number, on: boolean? }
 local TWO: { [string]: Pos } = {
-	stick = { x = 0.15, y = 0.70 },
-	fire = { x = 0.855, y = 0.66 },
-	fire_left = { x = 0.30, y = 0.50, on = false },
+	stick = { x = 0.185, y = 0.77 },
+	fire = { x = 0.855, y = 0.68 },
+	fire_left = { x = 0.065, y = 0.36, on = false },
 	aim = { x = 0.955, y = 0.42 },
-	reload = { x = 0.75, y = 0.47 },
-	posture = { x = 0.74, y = 0.93 },
-	jump = { x = 0.955, y = 0.90 },
-	swap = { x = 0.62, y = 0.88 },
-	equip = { x = 0.655, y = 0.64 },
-	melee = { x = 0.84, y = 0.30 },
-	fire_mode = { x = 0.52, y = 0.91 },
-	hold_breath = { x = 0.46, y = 0.40 }, -- só mirando
-	bandage = { x = 0.05, y = 0.36 },
-	lean_l = { x = 0.21, y = 0.33 },
-	lean_r = { x = 0.30, y = 0.33 },
-	interact = { x = 0.58, y = 0.40 },
-	map = { x = 0.04, y = 0.09 },
+	posture = { x = 0.75, y = 0.92 },
+	jump = { x = 0.955, y = 0.92 },
+	equip = { x = 0.72, y = 0.65 },
+	comm = { x = 0.80, y = 0.09 },
+	map = { x = 0.035, y = 0.09 },
 	menu = { x = 0.135, y = 0.09 },
-	view = { x = 0.23, y = 0.09 },
-	channel = { x = 0.325, y = 0.09 },
-	comm = { x = 0.70, y = 0.09 },
-	mark = { x = 0.80, y = 0.09 },
+	reload = { x = 0.735, y = 0.42 },
+	melee = { x = 0.835, y = 0.34 },
+	hold_breath = { x = 0.835, y = 0.34 },
+	bandage = { x = 0.05, y = 0.68 },
 	radio = { x = 0.90, y = 0.09 },
-	give_up = { x = 0.855, y = 0.66 }, -- só caído (o tiro some)
+	interact = { x = 0.61, y = 0.52 },
+	lean_l = { x = 0.30, y = 0.64, on = false },
+	lean_r = { x = 0.40, y = 0.64, on = false },
+	give_up = { x = 0.855, y = 0.68 }, -- só caído (o tiro some)
 }
 -- 3 dedos: o indicador esquerdo atira no alto à esquerda
 local THREE: { [string]: Pos } = {
-	fire_left = { x = 0.10, y = 0.36, on = true },
-	bandage = { x = 0.36, y = 0.55 },
-	stick = { x = 0.18, y = 0.75 },
+	fire_left = { x = 0.065, y = 0.36, on = true },
 }
--- 4 dedos: os dois indicadores no alto (tiro à esquerda, mira à direita)
+-- 4 dedos: os dois indicadores no alto (tiro à esquerda, mira à direita; o golpe e o fôlego vão
+-- para o lugar da mira, perto do polegar)
 local FOUR: { [string]: Pos } = {
-	fire_left = { x = 0.10, y = 0.36, on = true },
-	bandage = { x = 0.36, y = 0.55 },
-	stick = { x = 0.18, y = 0.75 },
-	aim = { x = 0.945, y = 0.34 },
-	melee = { x = 0.82, y = 0.30 },
+	fire_left = { x = 0.065, y = 0.36, on = true },
+	aim = { x = 0.85, y = 0.33 },
+	melee = { x = 0.955, y = 0.42 },
+	hold_breath = { x = 0.955, y = 0.42 },
 }
 local function over(base: { [string]: Pos }, extra: { [string]: Pos }): { [string]: Pos }
 	local out = table.clone(base)
@@ -281,14 +281,37 @@ Toque.CUSTOM = { custom1 = true, custom2 = true, custom3 = true } :: { [string]:
 export type Slot = { x: number, y: number, scale: number, alpha: number, on: boolean }
 export type LayoutSettings = { touchLayout: string, touchMirror: boolean, touchCustom: any }
 
+-- Tablet (lado curto ≥ 600 px de interface): os mesmos botões, mais perto dos cantos de baixo (o
+-- polegar alcança ~6 cm a partir do canto, num tablet a fração do celular ficaria longe demais). A
+-- distância de cada botão até o canto do lado dele encolhe (TABLET_K); a fileira do alto não muda.
+Toque.TABLET_SHORT = 600
+Toque.TABLET_K = { x = 0.62, y = 0.78 } -- PLACEHOLDER (o alcance do polegar não foi medido)
+Toque.TOP_ROW = { map = true, menu = true, comm = true, radio = true } :: { [string]: boolean }
+
+function Toque.isTablet(shortPx: number): boolean
+	return shortPx >= Toque.TABLET_SHORT
+end
+
+function Toque.compact(id: string, p: Pos): Pos
+	if Toque.TOP_ROW[id] then
+		return p
+	end
+	local ax = if p.x < 0.5 then 0 else 1
+	return { x = ax + (p.x - ax) * Toque.TABLET_K.x, y = 1 + (p.y - 1) * Toque.TABLET_K.y, on = p.on }
+end
+
 -- Layout efetivo: o preset (ou o próprio salvo, por cima do de 2 polegares: botão novo ganha o lugar
--- padrão), espelhado para o canhoto.
-function Toque.layout(s: LayoutSettings, mirror: boolean?): { [string]: Slot }
+-- padrão), espelhado para o canhoto. tablet: o preset compacto nos cantos (o salvo vale como está).
+-- Um layout salvo com botão que saiu do jogo (ARMA, SELETOR, MARCAR, CÂMERA, CANAL) é ignorado.
+function Toque.layout(s: LayoutSettings, mirror: boolean?, tablet: boolean?): { [string]: Slot }
 	local name = s.touchLayout
 	local base = Toque.PRESETS[name] or TWO
 	local out: { [string]: Slot } = {}
 	for _, d in Toque.BUTTONS do
 		local p = base[d.id] or TWO[d.id]
+		if tablet then
+			p = Toque.compact(d.id, p)
+		end
 		local on = true
 		if d.optional then
 			on = p.on == true
@@ -346,7 +369,22 @@ function Toque.place(x: number, y: number, size: number, W: number, H: number): 
 end
 
 -- ===== visibilidade =====
-export type Ctx = { foot: boolean, vehicle: boolean, downed: boolean, aiming: boolean, voice: boolean }
+-- Os campos opcionais são os contextuais (v39): reload (Toque.showReload), melee (inimigo à vista a
+-- poucos metros, Toque.meleeNear), breath (na luneta com a respiração sozinha desligada), bleed
+-- (sangrando com bandagem ou torniquete), command (fala com o comando: comandante, morteiro ou quem
+-- carrega o rádio).
+export type Ctx = {
+	foot: boolean,
+	vehicle: boolean,
+	downed: boolean,
+	aiming: boolean,
+	voice: boolean,
+	reload: boolean?,
+	melee: boolean?,
+	breath: boolean?,
+	bleed: boolean?,
+	command: boolean?,
+}
 
 function Toque.visible(d: Def, c: Ctx): boolean
 	local foot = c.foot and not c.downed and not c.vehicle
@@ -355,18 +393,66 @@ function Toque.visible(d: Def, c: Ctx): boolean
 		return (foot or c.vehicle) and not c.downed
 	elseif s == "foot" then
 		return foot
-	elseif s == "aim" then
-		return foot and c.aiming
 	elseif s == "game" then
 		return foot or c.vehicle or c.downed
 	elseif s == "talk" then
 		return (foot or c.downed) and not c.vehicle
-	elseif s == "voice" then
-		return c.voice and (foot or c.vehicle) and not c.downed
 	elseif s == "downed" then
 		return c.downed
+	elseif s == "reload" then
+		return foot and c.reload == true
+	elseif s == "melee" then
+		return foot and c.melee == true and not c.aiming
+	elseif s == "breath" then
+		return foot and c.breath == true and c.aiming
+	elseif s == "bleed" then
+		return foot and c.bleed == true
+	elseif s == "radio" then
+		-- no veículo só a voz (o canal é da infantaria)
+		return not c.downed and ((c.voice and (foot or c.vehicle)) or (c.command == true and foot))
 	end
 	return false
+end
+
+-- ===== contextuais =====
+-- RECARGA: carregador gasto, com reserva e sem recarga correndo. Com a recarga automática ligada (o
+-- WeaponController recarrega sozinho ao esvaziar), só a recarga tática numa pausa: carregador pela
+-- metade ou menos (e não vazio: o vazio a automática cobre) e 1,5 s sem atirar.
+Toque.RELOAD_AUTO_FRAC = 0.5 -- PLACEHOLDER
+Toque.RELOAD_PAUSE_S = 1.5 -- PLACEHOLDER
+
+export type ReloadIn = {
+	mag: number?,
+	size: number?,
+	spare: number?,
+	reloading: boolean,
+	auto: boolean,
+	sinceShot: number,
+}
+
+function Toque.showReload(i: ReloadIn): boolean
+	local mag, size, spare = i.mag, i.size, i.spare
+	if mag == nil or size == nil or size <= 0 or i.reloading or (spare or 0) <= 0 or mag >= size then
+		return false
+	end
+	if i.auto then
+		return mag > 0 and mag <= size * Toque.RELOAD_AUTO_FRAC and i.sinceShot >= Toque.RELOAD_PAUSE_S
+	end
+	return true
+end
+
+-- GOLPE: inimigo vivo À VISTA (raio direto da cabeça, quem chama confere) a até 4 m e na frente. O
+-- alcance do golpe mais longo é 2,1 m (baioneta, Shared/Melee): o botão chega um pouco antes.
+Toque.MELEE_M = 4 -- PLACEHOLDER
+Toque.MELEE_DEG = 70 -- PLACEHOLDER
+
+function Toque.meleeNear(distM: number, angDeg: number, visible: boolean): boolean
+	return visible and distM <= Toque.MELEE_M and angDeg <= Toque.MELEE_DEG
+end
+
+-- BANDAGEM: sangrando e com o que pôr
+function Toque.showBandage(bleed: number?, bandages: number?, tourniquets: number?): boolean
+	return (bleed or 0) > 0 and ((bandages or 0) + (tourniquets or 0)) > 0
 end
 
 -- ===== zonas e dono de cada toque =====
@@ -381,6 +467,75 @@ function Toque.zone(mirror: boolean): Rect
 		return { x0 = 1 - z.x1, y0 = z.y0, x1 = 1 - z.x0, y1 = z.y1 }
 	end
 	return table.clone(z)
+end
+
+-- ===== zonas livres do HUD (v39) =====
+-- Retângulos (frações da área segura, destro) onde as outras telas desenham no toque, sem botão
+-- por baixo nem uma em cima da outra (tests/luau/toque.luau confere em 16:9, 19,5:9, 20:9 e 4:3,
+-- destro e canhoto, nos layouts prontos, com todos os contextuais acesos):
+--   topo      faixa da frente (FrontHud)
+--   bussola   bússola (HudCampo)
+--   eventos   eventos da partida (EventosHud), na coluna da esquerda acima do polegar
+--   avisos    avisos (Toast) e as mensagens do squad (feed do InfantryController)
+--   cartao    cartão da arma (HudCampo): tocar troca de arma, segurar abre seletor, alça e baioneta
+--   captura   painel da captura do setor (FrontHud)
+--   tutorial  cartão do tutorial (TutorialController): cobre eventos e avisos enquanto dura
+--   vagas     faixa das vagas (BarraItens), 2,5 s por cima da faixa e da bússola
+-- O miolo (a mira e o marcador de acerto) fica sempre livre. No celular de 19,5:9 o painel da
+-- captura e o cartão da arma ficam com ~50% do tamanho do PC: conferir a leitura no aparelho.
+-- Frações PLACEHOLDER (o teste garante que nada se cobre; o tamanho bom de ler, só no aparelho).
+Toque.ZONES = {
+	topo = { x0 = 0.19, y0 = 0.00, x1 = 0.74, y1 = 0.14 },
+	bussola = { x0 = 0.25, y0 = 0.14, x1 = 0.64, y1 = 0.27 },
+	eventos = { x0 = 0.00, y0 = 0.27, x1 = 0.40, y1 = 0.40 },
+	avisos = { x0 = 0.00, y0 = 0.40, x1 = 0.46, y1 = 0.56 },
+	cartao = { x0 = 0.46, y0 = 0.80, x1 = 0.66, y1 = 1.00 },
+	captura = { x0 = 0.27, y0 = 0.58, x1 = 0.50, y1 = 0.80 },
+	tutorial = { x0 = 0.00, y0 = 0.27, x1 = 0.46, y1 = 0.56 },
+	vagas = { x0 = 0.19, y0 = 0.00, x1 = 0.74, y1 = 0.27 },
+} :: { [string]: Rect }
+-- com o tiro do indicador esquerdo (3 e 4 dedos) a coluna da esquerda começa depois dele
+Toque.ZONES_INDEX = { eventos = 0.13, avisos = 0.13, tutorial = 0.13 } :: { [string]: number }
+-- zonas que se cobrem de propósito (uma substitui a outra por um tempo)
+Toque.ZONE_SHARE = {
+	tutorial = { eventos = true, avisos = true },
+	vagas = { topo = true, bussola = true },
+} :: { [string]: { [string]: boolean } }
+
+-- Zona em px da área W x H (origem no canto de cima à esquerda da área); mirror: canhoto; index:
+-- o tiro do indicador esquerdo está ligado.
+function Toque.zoneRect(name: string, W: number, H: number, mirror: boolean?, index: boolean?): Rect?
+	local z = Toque.ZONES[name]
+	if not z then
+		return nil
+	end
+	local x0, x1 = z.x0, z.x1
+	if index and Toque.ZONES_INDEX[name] then
+		x0 = math.max(x0, Toque.ZONES_INDEX[name])
+	end
+	if mirror then
+		x0, x1 = 1 - x1, 1 - x0
+	end
+	return { x0 = x0 * W, y0 = z.y0 * H, x1 = x1 * W, y1 = z.y1 * H }
+end
+
+-- Escala para um quadro de w x h caber na zona (nunca cresce além de maxK; piso minK).
+function Toque.fitK(w: number, h: number, zw: number, zh: number, maxK: number, minK: number): number
+	if w <= 0 or h <= 0 then
+		return maxK
+	end
+	return math.clamp(math.min(zw / w, zh / h), minK, maxK)
+end
+
+-- círculo (botão) encosta no retângulo?
+function Toque.circleHitsRect(cx: number, cy: number, r: number, z: Rect): boolean
+	local nx = math.clamp(cx, z.x0, z.x1)
+	local ny = math.clamp(cy, z.y0, z.y1)
+	return (cx - nx) ^ 2 + (cy - ny) ^ 2 < (r - 0.5) ^ 2
+end
+
+function Toque.rectsHit(a: Rect, b: Rect): boolean
+	return a.x0 < b.x1 - 0.5 and b.x0 < a.x1 - 0.5 and a.y0 < b.y1 - 0.5 and b.y0 < a.y1 - 0.5
 end
 
 export type HitButton = { id: string, cx: number, cy: number, r: number }
@@ -533,10 +688,20 @@ function Toque.newVault(): Vault
 	return { t = 0, lastAt = -math.huge }
 end
 
-export type VaultIn = { enabled: boolean, sprinting: boolean, forward: boolean, grounded: boolean, speedRatio: number }
+-- v39: andando firme para a frente (analógico além da metade) também sobe o obstáculo baixo; o
+-- Movement só transpõe se houver obstáculo que dê, senão o "pular" virtual não faz nada.
+export type VaultIn = {
+	enabled: boolean,
+	sprinting: boolean,
+	forward: boolean,
+	grounded: boolean,
+	speedRatio: number,
+	walking: boolean?,
+}
 
 function Toque.autoVault(st: Vault, dt: number, now: number, i: VaultIn): boolean
-	if not (i.enabled and i.sprinting and i.forward and i.grounded) or i.speedRatio >= Toque.VAULT_RATIO then
+	local pushing = i.sprinting or i.walking == true
+	if not (i.enabled and pushing and i.forward and i.grounded) or i.speedRatio >= Toque.VAULT_RATIO then
 		st.t = 0
 		return false
 	end
@@ -645,6 +810,173 @@ function Toque.aimOps(touchToggle: boolean, padToggle: boolean, latched: boolean
 		return { true }, true
 	end
 	return { down }, down
+end
+
+-- ===== automáticos do toque (v39; runtime em Controllers/ToqueAuto, cada um com opção no menu) =====
+-- Limites, para o celular não ficar mais forte que o PC:
+--   - nada atravessa parede, mata ou fumaça: quem chama confere a vista com um raio direto;
+--   - nada no tiro do quadril: ímã e tiro sozinho só mirando, até 150 m (o alcance da fricção);
+--   - o ímã só acompanha quem o jogador já está movendo a mira para seguir (dedo arrastando ou
+--     andando), puxa no máximo 1,5°/s e nunca gruda (a fricção do controle continua a mesma);
+--   - o tiro sozinho espera 0,25 s com a mira no inimigo (o tempo de reação de uma pessoa), no semi
+--     dá um tiro a cada 0,3 s no máximo e vem DESLIGADO;
+--   - inclinar e respirar só fazem o que o PC faz com Q/E e Shift, nos mesmos limites.
+-- Os números desta parte (e os do tablet, das zonas e da recarga e do golpe acima) são PLACEHOLDER:
+-- escolhidos no papel, sem teste em aparelho real.
+
+-- Inclinar sozinho: mirando, colado numa quina (a parede logo à frente do olho, sem inclinar) e com a
+-- vista aberta de um lado só, inclina para esse lado e fica enquanto a quina continuar.
+Toque.LEAN_AHEAD_M = 1.0
+Toque.LEAN_CLEAR_M = 4
+Toque.LEAN_ARM_S = 0.2 -- a quina firme por isto antes de inclinar (passar rente não inclina)
+
+export type Lean = { side: number, want: number, t: number }
+function Toque.newLean(): Lean
+	return { side = 0, want = 0, t = 0 }
+end
+
+export type LeanIn = {
+	enabled: boolean,
+	aiming: boolean,
+	blocked: boolean, -- correndo, deitado, transpondo, no veículo
+	manual: boolean, -- o jogador ligou um botão de inclinar
+	ahead: boolean, -- parede a até LEAN_AHEAD_M à frente do olho sem inclinar
+	clearL: boolean, -- vista aberta (LEAN_CLEAR_M) saindo do olho inclinado à esquerda
+	clearR: boolean,
+}
+
+-- Devolve −1 (esquerda), 0 ou 1.
+function Toque.autoLean(st: Lean, dt: number, i: LeanIn): number
+	if not (i.enabled and i.aiming) or i.blocked or i.manual then
+		st.side, st.want, st.t = 0, 0, 0
+		return 0
+	end
+	if st.side ~= 0 then
+		local open = if st.side < 0 then i.clearL else i.clearR
+		if i.ahead and open then
+			return st.side
+		end
+		st.side = 0
+	end
+	local want = 0
+	if i.ahead and i.clearL ~= i.clearR then
+		want = if i.clearL then -1 else 1
+	end
+	if want ~= st.want then
+		st.want, st.t = want, 0
+	else
+		st.t += dt
+	end
+	if want ~= 0 and st.t >= Toque.LEAN_ARM_S then
+		st.side = want
+	end
+	return st.side
+end
+
+-- Ímã leve (só toque): graus a girar para o alvo neste quadro. Mesmo cone da fricção
+-- (InputMap.assistFactor, alvo de 0,3 m), vezes MAGNET_CONE_K.
+Toque.ASSIST_RANGE_M = 150 -- o mesmo InputMap.ASSIST_RANGE_M
+Toque.MAGNET_DEG_S = 1.5
+Toque.MAGNET_CONE_K = 2
+
+function Toque.magnetCone(distM: number): number
+	return (math.deg(math.atan(0.3 / math.max(distM, 1))) * 1.5 + 0.5) * Toque.MAGNET_CONE_K
+end
+
+function Toque.magnet(
+	enabled: boolean,
+	mode: string,
+	visible: boolean,
+	distM: number,
+	angDeg: number,
+	moving: boolean,
+	dt: number
+): number
+	if not (enabled and visible and moving) or mode == "hip" or distM <= 0 or distM > Toque.ASSIST_RANGE_M then
+		return 0
+	end
+	if angDeg <= 0 or angDeg >= Toque.magnetCone(distM) then
+		return 0
+	end
+	return math.min(Toque.MAGNET_DEG_S * dt, angDeg * 0.25)
+end
+
+-- Tiro sozinho (opção, desligada no padrão): mirando, com a mira EM CIMA de um inimigo à vista.
+Toque.AUTOFIRE_REACT_S = 0.25
+Toque.AUTOFIRE_GAP_S = 0.3
+Toque.AUTOFIRE_LOSE_S = 0.1
+
+export type AutoFire = { onT: number, offT: number, held: boolean, lastTap: number }
+function Toque.newAutoFire(): AutoFire
+	return { onT = 0, offT = 0, held = false, lastTap = -math.huge }
+end
+
+export type AutoFireIn = {
+	enabled: boolean,
+	aiming: boolean,
+	onTarget: boolean,
+	full: boolean, -- automático: segura enquanto estiver no alvo; semi/ferrolho: toques
+	canFire: boolean, -- a pé, sem recarga, sem o dedo do jogador no tiro
+}
+
+-- Devolve "press", "release" ou nil (o aperto virtual do tiro).
+function Toque.autoFire(st: AutoFire, dt: number, now: number, i: AutoFireIn): string?
+	local ok = i.enabled and i.aiming and i.canFire
+	if ok and i.onTarget then
+		st.onT += dt
+		st.offT = 0
+	else
+		st.offT += dt
+		if not ok or st.offT >= Toque.AUTOFIRE_LOSE_S then
+			st.onT = 0
+		end
+	end
+	if st.held then
+		if not i.full or not ok or st.onT <= 0 then
+			st.held = false
+			return "release"
+		end
+		return nil
+	end
+	local gap = if i.full then 0 else Toque.AUTOFIRE_GAP_S
+	if ok and i.onTarget and st.onT >= Toque.AUTOFIRE_REACT_S and now - st.lastTap >= gap then
+		st.held, st.lastTap = true, now
+		return "press"
+	end
+	return nil
+end
+
+-- Pegar munição e abrir caixote ao encostar (opção): parado ou devagar a até 1,6 m, sem atirar há
+-- 2 s; uma vez a cada 20 s por objeto. Arma do chão, rádio, carga e armadilha são escolha: nunca.
+Toque.PICKUP_M = 1.6
+Toque.PICKUP_SPEED = 1.2 -- m/s
+Toque.PICKUP_QUIET_S = 2
+Toque.PICKUP_AGAIN_S = 20
+Toque.PICKUP_KINDS = { ammo = true, crate = true } :: { [string]: boolean }
+
+function Toque.autoPickup(
+	enabled: boolean,
+	kind: string?,
+	distM: number,
+	speedMs: number,
+	sinceShot: number,
+	sinceLast: number
+): boolean
+	return enabled
+		and kind ~= nil
+		and Toque.PICKUP_KINDS[kind] == true
+		and distM <= Toque.PICKUP_M
+		and speedMs <= Toque.PICKUP_SPEED
+		and sinceShot >= Toque.PICKUP_QUIET_S
+		and sinceLast >= Toque.PICKUP_AGAIN_S
+end
+
+-- Respiração sozinha na luneta (opção): prende ao entrar na luneta e solta um pouco antes do ponto
+-- em que segurar cansa (Weapons.BREATH_TIRED_K), como faria quem segura o Shift no PC.
+Toque.BREATH_EARLY_S = 0.15
+
+function Toque.breathRelease(heldS: number, lenS: number, tiredK: number): boolean
+	return heldS >= lenS * tiredK - Toque.BREATH_EARLY_S
 end
 
 -- ===== especificação das ações de um botão =====

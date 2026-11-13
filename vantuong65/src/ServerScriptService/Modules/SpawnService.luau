@@ -6,14 +6,20 @@
 -- 2026-11-12 (pedido do dono: "permita poder nascer com o batalhão"): um ponto por companheiro do
 -- squad em campo (kind "squad", id "mate:<UserId>"), com as regras de SpawnRules.mateCheck e o lugar
 -- livre de SpawnRules.mateSpots conferido com raios (mateSpot).
+-- 2026-11-13 (pedido do dono: "Botão 'jogar agora'"): Spawn_Request("quick", { n, v }) põe o
+-- jogador num lado, squad e papel (TeamService.quickJoin) e responde no atributo "JogarAgora" o
+-- ponto escolhido (Shared/JogarAgora.pickPoint: o último usado ou o melhor); o cliente conta a espera
+-- e pede o ponto como sempre. Todo nascer num ponto grava o "UltimoPonto" (atributo e perfil).
 local MarketplaceService = game:GetService("MarketplaceService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
 local Commerce = require(ReplicatedStorage.Shared.Commerce)
+local CompraVeiculo = require(ReplicatedStorage.Shared.CompraVeiculo)
 local Front = require(ReplicatedStorage.Shared.Front)
 local Geometry = require(ReplicatedStorage.Shared.Geometry)
+local JogarAgora = require(ReplicatedStorage.Shared.JogarAgora)
 local MapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any
 local Net = require(ReplicatedStorage.Shared.Net)
 local Progression = require(ReplicatedStorage.Shared.Progression)
@@ -308,7 +314,8 @@ function SpawnService.hqSpot(faction: string, x: number, z: number): (number, nu
 end
 
 -- Um nascer por vez: carregar o corpo cede a vez, e um segundo Spawn_Request chegava antes do fim.
-local function spawnAt(player: Player, faction: string, x: number, z: number, at: CFrame?)
+-- pointId: o ponto escolhido (vira o "último ponto" do jogar agora); nil no renascer onde caiu.
+local function spawnAt(player: Player, faction: string, x: number, z: number, at: CFrame?, pointId: string?)
 	local inf = info[player]
 	if not inf or inf.busy then
 		return
@@ -321,6 +328,9 @@ local function spawnAt(player: Player, faction: string, x: number, z: number, at
 	inf.busy = false
 	if not ok then
 		warn("[VT65] nascer falhou:", err)
+	elseif pointId and alive(player) then
+		player:SetAttribute("UltimoPonto", pointId)
+		TeamService.remember(player)
 	end
 end
 
@@ -564,7 +574,7 @@ local function mateSpawn(player: Player, faction: string, pointId: string)
 			if info[player] ~= inf or alive(player) or mateWhy(m, enemiesMeters(faction), os.clock()) then
 				return
 			end
-			spawnAt(player, faction, at.X, at.Z, at)
+			spawnAt(player, faction, at.X, at.Z, at, pointId)
 			return
 		end
 	end
@@ -722,6 +732,122 @@ local function inPlace(player: Player, method: string?)
 	spawnAt(player, faction, pos.X, pos.Z)
 end
 
+-- Pontos de quem espera, como vão no Spawn_State. Campos de cada ponto: id, name, kind, x, z
+-- (studs), wait (s), blocked, why, ready (= wait 0 e livre), squad; os de companheiro (kind "squad")
+-- trazem também userId (0 se bot) e bot; o "onde caiu" traz pay.
+local function stateFor(player: Player, faction: string, now: number, enemies: { number }): { any }
+	local list: { any } = {}
+	for _, pt in SpawnService.points(faction) do
+		if not visibleTo(pt, player) then
+			continue
+		end
+		local wait, blocked, why = status(player, pt, now, enemies)
+		table.insert(list, {
+			id = pt.id,
+			name = pt.name,
+			x = pt.x,
+			z = pt.z,
+			wait = wait,
+			blocked = blocked,
+			why = why,
+			ready = wait <= 0 and not blocked,
+			kind = pt.kind, -- símbolo na carta (QG, reunião, posto, squad)
+			squad = pt.squad ~= nil,
+		})
+	end
+	for _, entry in mateEntries(player, now, enemies) do
+		table.insert(list, entry)
+	end
+	-- renascer onde caiu: só para quem tem ponto de queda nesta partida
+	local inf = info[player]
+	if inf and inf.deathPos then
+		local why, wait, pos = inPlaceStatus(player, now)
+		local m, label = payLabel(player)
+		if pos then
+			table.insert(list, {
+				id = "inplace",
+				name = string.format("Onde caiu (%s)", label),
+				x = pos.X,
+				z = pos.Z,
+				wait = wait,
+				blocked = why ~= nil or m == nil,
+				why = why or (if m == nil then label else nil),
+				ready = wait <= 0 and why == nil and m ~= nil,
+				pay = m,
+			})
+		end
+	end
+	return list
+end
+
+-- objetivo do lado agora (studs), para o jogar agora escolher o ponto mais perto da luta
+local function objectiveOf(faction: string): (number?, number?)
+	local st = MatchService.state
+	if not st then
+		return nil, nil
+	end
+	local ok, _, s = pcall(Front.objective, st.owner, st.active, faction)
+	local sp = if ok and s then MatchService.points[s] else nil
+	if sp then
+		return sp.x, sp.z
+	end
+	return nil, nil
+end
+
+-- Jogar agora: lado, squad, papel e o ponto (o último ou o melhor). A resposta vai no atributo
+-- "JogarAgora" ("<id>|<n>" ou "!<motivo>|<n>"); quem entra é o cliente, pelo Spawn_Request normal,
+-- quando a espera do ponto acaba (a transição e a compra do veículo seguem iguais).
+local quickAt: { [Player]: number } = setmetatable({}, { __mode = "k" }) :: any
+local function quickPlay(player: Player, req: any)
+	local n = if type(req) == "table" and type(req.n) == "number" then math.floor(req.n) % 100000 else 0
+	local vehicle = type(req) == "table" and req.v == true
+	local t = os.clock()
+	if t - (quickAt[player] or 0) < 0.4 then
+		return
+	end
+	quickAt[player] = t
+	local function reply(id: string?, why: string?)
+		player:SetAttribute("JogarAgora", JogarAgora.reply(id, why, n))
+	end
+	if alive(player) then
+		reply(nil, "Você já está em campo")
+		return
+	end
+	if ReplicatedStorage:GetAttribute("TerrainReady") == false then
+		reply(nil, "O campo ainda está sendo preparado")
+		return
+	end
+	local why = TeamService.quickJoin(player, ProgressionService.rank(player))
+	if why then
+		reply(nil, why)
+		return
+	end
+	local faction = player:GetAttribute("Faction")
+	if type(faction) ~= "string" then
+		reply(nil, "Sem lado")
+		return
+	end
+	local role = tostring(player:GetAttribute("Role"))
+	if ProgressionService.rank(player) < Roles.minRank(role) then
+		reply(nil, "Papel acima do seu posto")
+		return
+	end
+	local list = stateFor(player, faction, t, enemiesMeters(faction))
+	local ox, oz = objectiveOf(faction)
+	local last = player:GetAttribute("UltimoPonto")
+	local pick = JogarAgora.pickPoint(list, if type(last) == "string" then last else nil, {
+		vehicle = vehicle,
+		allowed = CompraVeiculo.pointAllowed,
+		objX = ox,
+		objZ = oz,
+	})
+	if not pick then
+		reply(nil, if vehicle then "Nenhum QG ou ponto de reunião livre agora" else "Nenhum ponto livre agora")
+		return
+	end
+	reply(pick.id, nil)
+end
+
 function SpawnService.start()
 	Players.CharacterAutoLoads = false
 	hookCombat()
@@ -750,6 +876,10 @@ function SpawnService.start()
 	end)
 
 	Net.event("Spawn_Request").OnServerEvent:Connect(function(player, pointId, method)
+		if pointId == "quick" then
+			quickPlay(player, method) -- jogar agora: lado, squad e papel podem faltar ainda
+			return
+		end
 		local faction = player:GetAttribute("Faction") :: string?
 		if type(pointId) ~= "string" or not faction or not player:GetAttribute("Role") or alive(player) then
 			return
@@ -780,15 +910,13 @@ function SpawnService.start()
 				if pt.kind == "hq" then
 					sx, sz = SpawnService.hqSpot(faction, sx, sz)
 				end
-				spawnAt(player, faction, sx, sz)
+				spawnAt(player, faction, sx, sz, nil, pt.id)
 				return
 			end
 		end
 	end)
 
-	-- estado dos pontos para quem está esperando (uma vez por segundo). Campos de cada ponto:
-	-- id, name, kind, x, z (studs), wait (s), blocked, why, ready (= wait 0 e livre), squad; os pontos
-	-- de companheiro (kind "squad") trazem também userId (0 se bot) e bot.
+	-- estado dos pontos para quem está esperando (uma vez por segundo; campos em stateFor)
 	task.spawn(function()
 		while true do
 			task.wait(1)
@@ -802,49 +930,7 @@ function SpawnService.start()
 						enemies = enemiesMeters(faction)
 						enemyCache[faction] = enemies
 					end
-					local list: { any } = {}
-					for _, pt in SpawnService.points(faction) do
-						if not visibleTo(pt, player) then
-							continue
-						end
-						local wait, blocked, why = status(player, pt, now, enemies)
-						local entry = {
-							id = pt.id,
-							name = pt.name,
-							x = pt.x,
-							z = pt.z,
-							wait = wait,
-							blocked = blocked,
-							why = why,
-							ready = wait <= 0 and not blocked,
-							kind = pt.kind, -- símbolo na carta (QG, reunião, posto, squad)
-							squad = pt.squad ~= nil,
-						}
-						table.insert(list, entry)
-					end
-					for _, entry in mateEntries(player, now, enemies) do
-						table.insert(list, entry)
-					end
-					-- renascer onde caiu: só para quem tem ponto de queda nesta partida
-					local inf = info[player]
-					if inf and inf.deathPos then
-						local why, wait, pos = inPlaceStatus(player, now)
-						local m, label = payLabel(player)
-						if pos then
-							table.insert(list, {
-								id = "inplace",
-								name = string.format("Onde caiu (%s)", label),
-								x = pos.X,
-								z = pos.Z,
-								wait = wait,
-								blocked = why ~= nil or m == nil,
-								why = why or (if m == nil then label else nil),
-								ready = wait <= 0 and why == nil and m ~= nil,
-								pay = m,
-							})
-						end
-					end
-					Net.event("Spawn_State"):FireClient(player, list)
+					Net.event("Spawn_State"):FireClient(player, stateFor(player, faction, now, enemies))
 				end
 			end
 		end

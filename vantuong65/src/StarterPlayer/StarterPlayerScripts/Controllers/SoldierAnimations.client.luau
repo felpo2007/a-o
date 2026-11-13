@@ -15,7 +15,9 @@
 --    - enquanto o HumanoidRootPart desce ou sobe na troca de postura, segura o corpo onde ele vai
 --      chegar (os clipes agachados e deitados contam com o HRP já no lugar novo);
 --    - pernas na direção do movimento (até 75°) e tronco na mira; de costas a passada volta;
---    - na recarga e no arremesso solta o IK da mão que sai do fuzil (VT65IK_L / VT65IK_R).
+--    - na recarga e no arremesso solta o IK da mão que sai do fuzil (VT65IK_L / VT65IK_R, o IK de
+--      longe); o peso da recarga vai no atributo local "VT65Recarga" e, perto, o PostureController
+--      leva a mão esquerda ao carregador pelo IK do Front 44 (Shared/Pegada3P), não pelo clipe.
 -- 3. SoldierAnims.BOTS (D-94: ligado): anima localmente os bots até BOT_RADIUS, com nível de
 --    detalhe: perto, tudo a cada quadro; longe, a mistura a 10 Hz e as correções a 15 Hz; fora da
 --    vista (ou além do raio), os clipes param. A velocidade do bot é a real (posição replicada, o
@@ -26,6 +28,8 @@
 -- 5. Itens (D-99, Shared/ItemAnim): curativo, torniquete, tratar, reanimar, rádio, binóculo, pá e
 --    cantil tocam o clipe "item_*" parado, no instante do relógio do servidor (o tronco e a cabeça;
 --    as mãos vão por IK no PostureController).
+-- 6. D-107: caído e morto ficam fora das correções (a pose do caído é do MorteFx; a queda do morto,
+--    física do servidor); reanimado, a Root levanta suave do C0 de costas ("VT65LevantouT").
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -589,6 +593,7 @@ type Watch = {
 	lagT0: number,
 	yaw: number,
 	ikTouched: boolean,
+	downC0: CFrame?, -- D-107: C0 da Root de costas enquanto caído (para levantar suave)
 }
 local watched: { [Model]: Watch } = {}
 local JOINTS = { "Root", "Waist", "LeftHip", "RightHip", "LeftKnee", "RightKnee", "RightShoulder" }
@@ -618,6 +623,7 @@ local function newWatch(m: Model): Watch?
 		lagT0 = -10,
 		yaw = 0,
 		ikTouched = false,
+		downC0 = nil,
 	}
 	return w
 end
@@ -830,6 +836,43 @@ local function post(w: Watch, dt: number)
 	ikWeights(w)
 end
 
+-- D-107: caído, a pose é do MorteFx (por cima de tudo) e as correções daqui saem; morto, a física
+-- do boneco é do servidor. Reanimado ("VT65LevantouT"), a Root sai do C0 de costas guardado e chega
+-- ao C0 novo (agachado) em DOWNED.getUpS, em vez de pular de pose.
+local function downedNow(w: Watch): boolean
+	if w.hum.Health <= 0 then
+		return true
+	end
+	if w.model:GetAttribute("Downed") ~= true then
+		return false
+	end
+	local j = joint(w, "Root")
+	local c0 = j and Joints.getC0(j)
+	if c0 then
+		w.downC0 = c0
+	end
+	return true
+end
+
+local function getUp(w: Watch)
+	local old = w.downC0
+	local t = w.model:GetAttribute("VT65LevantouT")
+	if not old or type(t) ~= "number" then
+		return
+	end
+	local x = (workspace:GetServerTimeNow() - t) / SoldierAnims.DOWNED.getUpS
+	local j = joint(w, "Root")
+	local c0 = j and Joints.getC0(j)
+	if x >= 1 or x < 0 or not (j and c0) then
+		if x >= 1 then
+			w.downC0 = nil
+		end
+		return
+	end
+	local e = x * x * (3 - 2 * x)
+	setTransform(j, (c0:Inverse() * old):Lerp(CFrame.identity, e) * getTransform(j))
+end
+
 local function refreshWatched()
 	local seen: { [Model]: boolean } = {}
 	for _, p in Players:GetPlayers() do
@@ -909,6 +952,9 @@ RunService.PreSimulation:Connect(function(dt: number)
 	for m, w in watched do
 		local d = drivers[m]
 		local lod = if d and d.bot then d.lod else "near"
+		if downedNow(w) then
+			continue -- caído (MorteFx) ou morto (boneco do servidor)
+		end
 		if lod ~= "off" and (lod == "near" or farTick or (w.throw and w.throw.IsPlaying)) then
 			if rescan then
 				scan(w)
@@ -916,6 +962,9 @@ RunService.PreSimulation:Connect(function(dt: number)
 			if #w.loco > 0 or w.reload or w.throw or #w.knife > 0 then
 				post(w, if lod == "near" then dt else SoldierAnims.FAR_POST_S)
 			end
+		end
+		if w.downC0 then
+			getUp(w)
 		end
 	end
 end)

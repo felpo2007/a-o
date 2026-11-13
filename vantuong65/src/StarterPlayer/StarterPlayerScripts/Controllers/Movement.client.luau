@@ -14,7 +14,8 @@
 --   o estado Swimming do Humanoid fica desligado: o soldado anda no fundo, devagar e com passada
 --   pesada, sem boiar nem alternar nadar/andar; mais fundo, nada (estável, com a câmera em pé);
 -- - pulo baixo; transpor/escalar (A / Espaço); de agachado ou deitado, degrau baixo à frente vira
---   uma passada assistida sem botão; mergulho para deitado correndo (Bus "dive");
+--   uma passada assistida sem botão; mergulho para deitado correndo (Bus "dive"); deslizar
+--   agachando correndo (Bus "slide", 2026-11-13, Front 44);
 -- - câmera: inclinar, postura com transição suave, balanço preso à passada das animações, cabeça com
 --   inércia (arrancar, parar, curva), inclinação lateral nas curvas, degrau suavizado (dique, soleira)
 --   e afundada na aterrissagem. Tudo o que balança multiplica pela opção de movimento da câmera.
@@ -73,6 +74,8 @@ local air = { active = false, maxY = 0, credit = 0 }
 local slow = { factor = 1, untilT = 0, total = 0 }
 local land = { t0 = -10, dip = 0 }
 local dive: { t0: number, dir: Vector3, v0: number }? = nil
+-- deslizar (Front 44: agachar correndo; Bus "slide" do InfantryController)
+local slide: { t0: number, dir: Vector3 }? = nil
 local sprintIdle = 0
 local stopAt = 0
 
@@ -374,6 +377,23 @@ Input.setMoveFilter(function(vec: Vector3, rel: boolean): (Vector3, boolean)
 		end
 		setWalk(h, s / M)
 		return d.dir, false
+	end
+	local sl = slide
+	if sl then
+		local t = now - sl.t0
+		local rv0 = r.AssemblyLinearVelocity
+		-- acaba no tempo, no ar demais ou parado numa parede (a velocidade real caiu)
+		if
+			t >= Movement.SLIDE_S
+			or (t > 0.15 and Vector3.new(rv0.X, 0, rv0.Z).Magnitude * M < Movement.CROUCH * 0.6)
+		then
+			slide = nil
+		else
+			local s = Movement.slideSpeed(t, myFaction())
+			vel = sl.dir * (s / M)
+			setWalk(h, s / M)
+			return sl.dir, false
+		end
 	end
 	local st = stanceOf(c)
 	local grounded = h.FloorMaterial ~= Enum.Material.Air
@@ -775,6 +795,34 @@ Bus.on("dive", function()
 	Bus.fire("vault_start", "dive") -- mesma reação: tira a mira, para o tiro
 end)
 
+-- ===== deslizar (2026-11-13, Front 44: agachar correndo mantém o embalo e termina agachado) =====
+Bus.on("slide", function()
+	local char, hum, root = body()
+	if not (char and hum and root) or vault or dive or slide then
+		return
+	end
+	local speed = vel.Magnitude * M
+	if stanceOf(char :: Model) ~= "stand" or (hum :: Humanoid).FloorMaterial == Enum.Material.Air then
+		return
+	end
+	if speed < Movement.SLIDE_MIN_MPS or water.mode ~= "dry" then
+		return
+	end
+	slide = { t0 = os.clock(), dir = vel.Unit }
+	Movement.spend(stamina, Movement.COST.slide, loadKg)
+	land.t0, land.dip = os.clock(), 0.03 -- o corpo desce para o deslize
+end)
+
+-- tombo de lado da câmera no deslize (Front 44: 5°), de 0 a 5° e de volta
+local function slideRoll(): number
+	local sl = slide
+	if not sl then
+		return 0
+	end
+	local p = math.clamp((os.clock() - sl.t0) / Movement.SLIDE_S, 0, 1)
+	return math.rad(Movement.SLIDE_ROLL_DEG) * math.sin(math.pi * math.min(p * 1.6, 1)) * camScale()
+end
+
 -- ===== câmera (antes do módulo de câmera: CameraOffset; depois dele: inclinação lateral) =====
 local function proneExtra(st: string): number
 	return if st == "prone" then PRONE_EYE else 0
@@ -972,8 +1020,8 @@ end)
 -- inclinação lateral DEPOIS do módulo de câmera, do CameraLook e da 3ª pessoa: só gira em volta da
 -- linha de visada (a mira e a direção do tiro não mudam); desfeita no começo do quadro seguinte
 RunService:BindToRenderStep("VT65MoveRoll", Enum.RenderPriority.Camera.Value + 3, function()
-	-- D-99: mais o giro do inclinar (14° no inclinar inteiro, como no Front 44)
-	local a = camState.roll + Inclinar.state.roll
+	-- D-99: mais o giro do inclinar (14° no inclinar inteiro, como no Front 44) e o do deslize
+	local a = camState.roll + Inclinar.state.roll + slideRoll()
 	if math.abs(a) < 1e-5 or camera.CameraType ~= Enum.CameraType.Custom then
 		return
 	end
@@ -1019,7 +1067,7 @@ local function watch(char: Model)
 		stateConn = nil
 	end
 	stamina = Movement.newStamina()
-	vel, accel, vault, dive = Vector3.zero, Vector3.zero, nil, nil
+	vel, accel, vault, dive, slide = Vector3.zero, Vector3.zero, nil, nil, nil
 	jumpEnabled, jumpReadyAt = nil, 0
 	air.active, air.credit = false, 0
 	camState.lastHip, camState.active, camState.lastY, camState.stepOff = -1, false, nil, 0

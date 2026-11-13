@@ -119,7 +119,9 @@ SoldierAnims.FADE_IDLE = 0.25 -- parado <-> andando na mesma postura
 SoldierAnims.FADE_OUT = 0.15 -- pulo, queda, nado, escada, assento, transpor: a camada sai
 SoldierAnims.FADE_IN = 0.2
 SoldierAnims.FADE_PRONE_MAX = 0.6 -- deitar/levantar: a câmera leva 0,6–1,0 s; o corpo não espera tanto
-SoldierAnims.RATE_MIN, SoldierAnims.RATE_MAX = 0.35, 2.5
+-- 2026-11-13 (movimento do Front 44): rastejar a 1,12 m/s pede 2,8x do clipe (0,35 m/s × SCALE) e o
+-- VC agachado (1,96 × 1,12 = 2,2 m/s) 2,54x; com teto 2,5 o pé deslizava ~11%. 3,0 dá folga.
+SoldierAnims.RATE_MIN, SoldierAnims.RATE_MAX = 0.35, 3.0
 
 function SoldierAnims.id(name: string): number
 	local c = SoldierAnims.CLIPS[name]
@@ -283,5 +285,104 @@ function SoldierAnims.rootLift(weights: { [string]: number }, actualDrop: number
 	end
 	return if total > 1e-6 then lift / total else 0
 end
+
+-- ===== caído (D-107) =====
+-- Pedido do dono: "os feridos estão de pé ao invés de deitados". Causa: o MedicalService só gravava
+-- "Downed" e zerava a velocidade; nada deitava o corpo (o PostureService recusava postura caído) e o
+-- SoldierAnimations tirava a camada de locomoção, ficando o "parado" do Animate em pé.
+-- Agora:
+-- - SERVIDOR (PostureService.setDowned): HipHeight do deitado, junta Root girada DE COSTAS
+--   (pitchDeg) e erguida até as costas encostarem no chão (downedRootY), corpo no grupo do deitado
+--   e a HumanoidRootPart fora das consultas (a bala não acerta a caixa em pé que sobra no ar);
+-- - CLIENTES (Controllers/MorteFx): a pose de ferido (DOWNED_POSE) com respiração curta e mexendo
+--   pouco, e a queda de FALL_S até o chão; ao ser reanimado, levanta em GETUP_S (SoldierAnimations).
+SoldierAnims.DOWNED = {
+	pitchDeg = 90, -- de costas, deitado reto (o bloco do R15 apoia costas, braços e pernas juntos)
+	gap = 0.03, -- studs entre as costas e o chão
+	fallS = 0.7, -- a queda até deitar (s)
+	getUpS = 0.6, -- levantar ao ser reanimado (s)
+}
+
+-- Altura (studs) que a junta Root sobe no C0 deitado de costas: o quadril fica a meia espessura do
+-- tronco acima do chão (a HumanoidRootPart, em pé, tem a base a hipHeight do chão).
+function SoldierAnims.downedRootY(halfDepth: number, hipHeight: number): number
+	return halfDepth + SoldierAnims.DOWNED.gap - hipHeight
+end
+
+-- Pose de ferido de costas (graus X, Y, Z de cada junta, no referencial de repouso do R15; X positivo
+-- leva braço e perna para a frente e cabeça e tronco para TRÁS, Z abre para o lado, Y gira): cabeça
+-- virada e um pouco erguida (o queixo para o peito), a mão esquerda segurando o flanco, o braço
+-- direito largado no chão e o joelho esquerdo dobrado com o pé no chão. Conferida no FK do teste
+-- (tests/luau/corpos.luau): nenhuma peça mais de 0,15 stud abaixo do chão; o pé dobrado fica
+-- apoiado. O lado sai da semente (espelha).
+-- stylua: ignore
+SoldierAnims.DOWNED_POSE = {
+	Waist         = { -1, 0, 0 },
+	Neck          = { -12, 30, 0 },
+	LeftShoulder  = { 0, -20, -5 },
+	LeftElbow     = { 65, 0, 0 },
+	LeftWrist     = { 0, 0, 0 },
+	RightShoulder = { 0, 0, 35 },
+	RightElbow    = { 15, 0, 0 },
+	RightWrist    = { 0, 0, 0 },
+	LeftHip       = { 48, 0, -6 },
+	LeftKnee      = { -110, 0, 0 },
+	LeftAnkle     = { -28, 0, 0 },
+	RightHip      = { 3, 0, 8 },
+	RightKnee     = { -6, 0, 0 },
+	RightAnkle    = { -24, 0, 0 },
+} :: { [string]: { number } }
+
+local function mirrorName(n: string): string
+	if string.sub(n, 1, 4) == "Left" then
+		return "Right" .. string.sub(n, 5)
+	elseif string.sub(n, 1, 5) == "Right" then
+		return "Left" .. string.sub(n, 6)
+	end
+	return n
+end
+
+-- Pose no instante t (s) para a semente: respiração curta (~27/min) no tronco e na mão do flanco,
+-- a cabeça que vira devagar, o joelho que balança e um braço que se mexe de vez em quando. Ímpar:
+-- espelhada (o outro lado). Espelhar troca esquerda e direita e inverte Y e Z.
+function SoldierAnims.downedPose(t: number, seed: number): { [string]: { number } }
+	local ph = (seed % 97) * 0.37 -- fase própria de cada soldado
+	local breath = math.sin(2 * math.pi * 0.45 * t + ph)
+	local slow = math.sin(2 * math.pi * 0.07 * t + ph * 1.7)
+	-- braço solto: um movimento curto a cada ~9 s
+	local twitch = math.max(0, math.sin(2 * math.pi * 0.11 * t + ph * 2.3)) ^ 6
+	local out: { [string]: { number } } = {}
+	for name, a in SoldierAnims.DOWNED_POSE do
+		out[name] = { a[1], a[2], a[3] }
+	end
+	out.Waist[1] += 1 * breath -- −2..0: o peito sobe, nunca entra no chão
+	out.Neck[2] += 8 * slow
+	out.Neck[1] += 2 * breath
+	out.LeftShoulder[1] += 3 * breath
+	out.LeftElbow[1] += 4 * breath
+	out.RightElbow[1] += 25 * twitch
+	out.RightShoulder[3] -= 6 * twitch
+	out.LeftHip[3] += 4 * slow
+	out.LeftKnee[1] += 4 * slow
+	if seed % 2 == 1 then
+		local m: { [string]: { number } } = {}
+		for name, a in out do
+			m[mirrorName(name)] = { a[1], -a[2], -a[3] }
+		end
+		return m
+	end
+	return out
+end
+
+-- Queda até deitar: e (0..1) do tempo desde a queda, suavizado; e o quanto os joelhos e o quadril
+-- dobram no meio do caminho (0..1, zero no começo e no fim).
+function SoldierAnims.fallBlend(elapsed: number): (number, number)
+	local x = math.clamp(elapsed / SoldierAnims.DOWNED.fallS, 0, 1)
+	return x * x * (3 - 2 * x), math.sin(math.pi * x)
+end
+-- dobra extra (graus) da queda, vezes o segundo valor de fallBlend
+SoldierAnims.FALL_BUCKLE = { LeftKnee = -70, RightKnee = -70, LeftHip = 40, RightHip = 40, Waist = -15 } :: {
+	[string]: number,
+}
 
 return SoldierAnims

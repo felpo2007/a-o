@@ -1,14 +1,12 @@
 --!strict
 -- Ambiente vivo (D-80, pedido do dono: "coloque poeira, vento etc." e "as vilas devem fazer parte
 -- do ambiente de guerra"). Tudo local e barato:
--- - vento: brisa do mar vindo do leste (a costa de Van Tuong fica a leste), com rajadas suaves;
---   na chuva sopra mais. Vai em workspace.GlobalWind: mexe o capim do terreno, a fumaça e o
---   arroz (RiceField.client);
--- - poeira no ar: cisco claro flutuando em volta da câmera de dia, levado pelo vento;
+-- - SEM vento (2026-11-13, pedido do dono: "retire o vento do jogo, está pesando demais"): o
+--   workspace.GlobalWind fica zerado, o capim do terreno e o arroz param de balançar;
+-- - poeira no ar: cisco claro flutuando em volta da câmera de dia;
 -- - folhas caindo quando a câmera está debaixo da copa da mata;
--- - fumaça de guerra no horizonte: colunas escuras de vilas e plantações queimando fora do mapa,
---   inclinadas pelo vento (agosto de 1965: a área tinha vilas bombardeadas antes do desembarque).
--- Velocidades de vento são de projeto (brisa de 3 m/s, rajada até ~7 m/s; PLACEHOLDER).
+-- - fumaça de guerra no horizonte: colunas escuras de vilas e plantações queimando fora do mapa
+--   (agosto de 1965: a área tinha vilas bombardeadas antes do desembarque).
 local Lighting = game:GetService("Lighting")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -41,17 +39,8 @@ local function seq(...: number): NumberSequence
 	return NumberSequence.new(keys)
 end
 
--- ===== vento =====
-local BREEZE_MS = 3
-local GUST_MS = 4
-local function windAt(t: number): Vector3
-	local rain = ReplicatedStorage:GetAttribute("Rain")
-	local wet = if type(rain) == "number" then math.clamp(rain, 0, 1) else 0
-	local gust = math.max(0, math.noise(t * 0.07, 3.1)) * 2 + math.noise(t * 0.31, 7.7) * 0.35
-	local speed = (BREEZE_MS + GUST_MS * gust) * (1 + wet)
-	local dirA = math.rad(180 + math.noise(t * 0.02, 1.3) * 25) -- do leste para oeste, oscilando
-	return Vector3.new(math.cos(dirA), 0, math.sin(dirA)) * speed / M
-end
+-- ===== sem vento (2026-11-13) =====
+workspace.GlobalWind = Vector3.zero
 
 -- ===== poeira no ar (em volta da câmera, só de dia e sem chuva) =====
 local dustBox = anchorPart("Poeira", Vector3.new(40, 14, 40))
@@ -205,8 +194,8 @@ task.spawn(function()
 end)
 
 -- ===== laço =====
--- 15 vezes por segundo (antes, a cada quadro): o vento muda devagar (ruído de 3 a 50 s) e a caixa
--- de poeira e a de folhas só dizem onde nascem as partículas novas, que já flutuam sozinhas.
+-- 15 vezes por segundo (antes, a cada quadro): a caixa de poeira e a de folhas só dizem onde nascem
+-- as partículas novas, que já flutuam sozinhas.
 local STEP_S = 1 / 15
 local lastStep = 0
 local lastCanopy = 0
@@ -217,7 +206,6 @@ RunService.Heartbeat:Connect(function()
 		return
 	end
 	lastStep = t
-	workspace.GlobalWind = windAt(t)
 	local cf = camera.CFrame
 	local pos = cf.Position
 	-- poeira à frente da câmera, mais densa no sol e sem chuva

@@ -88,6 +88,16 @@ export type Bot = {
 	-- 2026-11-12: avanço e squad de jogador
 	stillSince: number?, -- parado (sem andar) desde quando, fora de combate (BotBrain.idleExpired)
 	playerSquad: string?, -- SquadId do squad de JOGADOR em que o bot está (atributo no modelo)
+	-- D-107: lotação, nível de detalhe e lance de assalto
+	nextThink: number, -- quando pensa de novo (BotBrain.LOD pela distância do humano mais perto)
+	lod: number, -- 1 perto, 2 meio, 3 longe
+	thinkDt: number, -- intervalo do último pensamento (s)
+	head: BasePart?, -- cabeça do modelo atual (supressão: sem FindFirstChild a cada bala)
+	rushTo: Vector3?, -- lance de assalto em curso: até onde
+	rushUntil: number,
+	nextRush: number, -- descanso entre lances
+	pinnedSince: number?, -- preso pelo fogo desde quando
+	fightSince: number, -- parado lutando no mesmo lugar desde quando (chegou ao abrigo, começou o combate)
 }
 
 -- Ganchos que o BotService preenche no start (os módulos chamam por aqui)

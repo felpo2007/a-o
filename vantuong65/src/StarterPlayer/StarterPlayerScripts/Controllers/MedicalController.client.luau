@@ -9,6 +9,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 
+local InputMap = require(ReplicatedStorage.Shared.InputMap)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Bus = require(script.Parent.Bus)
 local CasualtyScreen = require(script.Parent.CasualtyScreen)
@@ -69,8 +70,16 @@ end
 -- mais urgente: arterial pede torniquete); T ou roda = torniquete; X segurado / F = interagir com
 -- aliado (reanimar, tratar, fazer curativo) quando não há outra interação na tela; caído: B
 -- segurado ou H = desistir.
+-- D-107 ("permita desistir quando morre sempre"): caído desiste A QUALQUER HORA (o servidor não
+-- espera mais os 15 s). O H também vale direto do teclado, com a carta ou um menu aberto (a camada
+-- única só entrega o "give_up" sem tela por cima); o B segurado já era direto.
+local giveUpAt = -10
 local function selfOp(op: string)
 	if op == "giveup" then
+		if os.clock() - giveUpAt < 0.5 then
+			return -- o H chega pela camada e pelo teclado no mesmo quadro: um pedido só
+		end
+		giveUpAt = os.clock()
 		CasualtyScreen.noteGiveUp()
 	end
 	Net.event("Medical_Action"):FireServer({ op = op })
@@ -121,7 +130,19 @@ Bus.on("equip_item", function(id: string)
 end)
 -- caído: B segurado desiste (o B normal agacha/deita, mas caído não há postura)
 local bDown = 0
-UserInputService.InputBegan:Connect(function(input)
+-- tecla do "give_up" no teclado (H, ou a que o jogador escolheu nas configurações)
+local function giveUpKey(): string?
+	for _, a in InputMap.ACTIONS do
+		if a.id == "give_up" then
+			return InputMap.keyFor(a, Input.settings)
+		end
+	end
+	return nil
+end
+UserInputService.InputBegan:Connect(function(input: InputObject, processed: boolean)
+	if not processed and player:GetAttribute("Downed") and input.KeyCode.Name == giveUpKey() then
+		selfOp("giveup") -- direto do teclado, mesmo com a carta aberta (não digitando no chat)
+	end
 	if input.KeyCode == Enum.KeyCode.ButtonB and player:GetAttribute("Downed") then
 		bDown = os.clock()
 		local t0 = bDown

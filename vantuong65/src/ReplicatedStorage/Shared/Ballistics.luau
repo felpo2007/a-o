@@ -12,6 +12,12 @@ Ballistics.G = 9.80665
 Ballistics.RHO = 1.16 -- kg/m³ (ar seco a 30 °C, 1 atm)
 Ballistics.SOUND = 349.0 -- m/s a 30 °C (331,3 * sqrt(1 + 30/273,15))
 Ballistics.LBIN2_TO_KGM2 = 703.0696 -- lb/in² -> kg/m²
+-- Passo da integração dos tiros (o mesmo no servidor e no cliente: Shared/Hitbox.trace)
+Ballistics.SHOT_DT = 1 / 120
+-- Materiais que a bala atravessa perdendo velocidade (fração mantida), pelo atributo "Material" da
+-- peça. PLACEHOLDER até a tabela de penetração em cm por material (Parte 10.7). Canvas: lona das
+-- barracas (bases, 2026-11-13). Antes em CombatService.PASS (D-107: o cliente usa o mesmo).
+Ballistics.PASS = { Bamboo = 0.85, Thatch = 0.8, Canvas = 0.9 } :: { [string]: number }
 
 -- Coeficiente de arrasto do projétil-padrão G1 por número de Mach.
 -- APROXIMADO (pontos de referência da tabela G1/Ingalls); validar com tabela publicada (Parte 9).
@@ -58,6 +64,21 @@ function Ballistics.energy(massG: number, v: number): number
 	return 0.5 * (massG / 1000) * v * v
 end
 
+-- ===== números do tiro vindos da rede (D-107) =====
+-- O servidor conferia tudo com o mesmo limite de posição (|v| < 1e7). O relógio do tiro é a hora do
+-- servidor (workspace:GetServerTimeNow: época Unix, ~1,8 bilhão de s) e a semente vai até 2^32
+-- (Rng.nextU32): TODO tiro de jogador era recusado sem aviso. Esta é a causa de "os tiros não estão
+-- acertando".
+-- Relógio do tiro: número finito (o Gatilho prende na janela de defasagem), ou nil.
+function Ballistics.clockOf(v: any): number?
+	return if type(v) == "number" and v == v and math.abs(v) < 1e12 then v else nil
+end
+
+-- Semente do tiro: inteiro de 0 a 2^32 - 1, ou nil.
+function Ballistics.seedOf(v: any): number?
+	return if type(v) == "number" and v == v and v >= 0 and v < 4294967296 and v == math.floor(v) then v else nil
+end
+
 export type ShotParams = {
 	ox: number,
 	oy: number,
@@ -102,7 +123,7 @@ export type Hit = { x: number, y: number, z: number, t: number, speed: number, e
 function Ballistics.trace(p: ShotParams, cast: (number, number, number, number, number, number) -> any?): (Hit?, number)
 	local wp = Weapons.get(p.weaponId)
 	assert(wp, "arma desconhecida")
-	local dt = p.dt or (1 / 120)
+	local dt = p.dt or Ballistics.SHOT_DT
 	local tmax = p.maxTime or 2.5
 	local x, y, z = p.ox, p.oy, p.oz
 	local vx, vy, vz = Ballistics.initialVelocity(p)

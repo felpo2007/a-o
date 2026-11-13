@@ -306,7 +306,8 @@ openPanel = function()
 		local item = CompraVeiculo.ITEMS[spec]
 		local name = UiKit.upper(specName(spec))
 		n += 1
-		addRow(name, "secondary", n, function()
+		-- cores de compra (UiKit.PAGAR, 2026-11-13): créditos âmbar, Robux verde, apagado sem saldo
+		addRow(name, "ci", n, function()
 			order(spec, "ci")
 		end, function(a: UiKit.Action)
 			local why = blockedWhy()
@@ -328,7 +329,7 @@ openPanel = function()
 		local id = CompraVeiculo.productId(spec)
 		if id ~= 0 then
 			n += 1
-			addRow(name, "secondary", n, function()
+			addRow(name, "robux", n, function()
 				order(spec, "robux")
 			end, function(a: UiKit.Action)
 				local why = blockedWhy()

@@ -20,6 +20,7 @@ local RunService = game:GetService("RunService")
 local TextService = game:GetService("TextService")
 local TweenService = game:GetService("TweenService")
 
+local ToqueUi = require(script.Parent.ToqueUi)
 local UiKit = require(script.Parent.UiKit)
 
 local Toast = {}
@@ -251,7 +252,25 @@ stack.SortOrder = Enum.SortOrder.LayoutOrder
 stack.HorizontalAlignment = Enum.HorizontalAlignment.Center
 stack.Parent = band
 -- janela estreita (celular, janela pequena): a faixa encolhe inteira, nada passa da borda
-UiKit.fit(screen, band, WIDTH + 8, 1, 8)
+local bandFit = UiKit.fit(screen, band, WIDTH + 8, 1, 8)
+
+-- Toque em campo (v39): a pilha vai para a zona livre "avisos" do HUD de toque (coluna da esquerda,
+-- acima do polegar: o alto do meio é da faixa e da bússola), na escala que cabe; o pé da zona é o
+-- limite da pilha. Fora do campo (menus, lobby), o lugar de sempre.
+local touchReach: number? = nil
+local function placeBand()
+	local z = if ToqueUi.inField() then ToqueUi.zoneIn(screen, "avisos") else nil
+	if z then
+		local k = math.clamp(z.w / (WIDTH + 8), 0.55, 1)
+		bandFit.scale.Scale = k
+		band.Position = UDim2.fromOffset(z.x + z.w / 2, z.y)
+		touchReach = z.h / k
+	elseif touchReach then
+		touchReach = nil
+		band.Position = UDim2.new(0.5, 0, 0, TOP)
+		bandFit.scale.Scale = bandFit.k()
+	end
+end
 
 -- Avisos que outra tela mostra melhor: intercept(chave, fn) recebe o texto de Toast.show com essa
 -- chave; fn devolve true quando mostrou (o aviso não entra na pilha). O HUD de campo (HudCampo)
@@ -581,7 +600,8 @@ local function push(e: Entry)
 	e.slot.Parent = band
 	table.insert(live, e)
 	-- no máximo MAX, e a pilha não desce até a mira: sai o mais velho
-	local reach = math.max(screen.AbsoluteSize.Y * REACH - TOP, 0)
+	placeBand()
+	local reach = touchReach or math.max(screen.AbsoluteSize.Y * REACH - TOP, 0)
 	local total = 0
 	for _, o in live do
 		total += o.height + GAP

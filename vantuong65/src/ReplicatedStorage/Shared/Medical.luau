@@ -20,7 +20,7 @@ Medical.C = {
 	reviveHealth = 30,
 	reviveBlur = 20,
 	downWindow = 60,
-	giveUpAfter = 15,
+	giveUpAfter = 0, -- D-107: desiste a qualquer hora caído (era 15 s); a tela de queda lê daqui
 	soldierBandages = 2,
 	soldierTourniquets = 1,
 	medicBandages = 8,
@@ -81,8 +81,97 @@ local function down(s: State, now: number): string
 	return "downed"
 end
 
+-- ===== tiro de arma de fogo (D-107) =====
+-- Pedido do dono: "quero 3 ou 4 tiros para morrer", "faça o jogo mais difícil de morrer". Antes, bala
+-- de fuzil no tronco (>= torsoDownJ) derrubava com UM tiro e qualquer bala na cabeça matava. Agora o
+-- tiro tira vida: dano da arma no tronco (Weapons.damageOf, com a energia de boca) x zona x queda com
+-- a energia que sobrou (curva do Front 44: perde pouco até 3/4 da energia, até 40% no fim do voo).
+-- Fuzil: 3 tiros no tronco de perto, 4 de longe; metralhadora 4; pistola 4 a 5; precisão 2; membro
+-- 5 a 6; cabeça de fuzil e metralhadora mata (até ~300 m), pistola na cabeça 2 (tabela no teste
+-- "combate"). Estilhaço, faca, veículo e armadilha seguem a regra por energia (applyHit).
+-- PLACEHOLDER de jogo.
+Medical.SHOT = {
+	-- cabeça menos tiros (2,5x e a morte na hora em headLethal), membro mais (0,65x)
+	zone = { head = 2.5, torso = 1.0, arm = 0.65, leg = 0.65 } :: { [string]: number },
+	-- fração da energia de boca que sobrou -> fração do dano
+	falloff = { { 0, 0.4 }, { 0.1, 0.5 }, { 0.3, 0.7 }, { 0.5, 0.85 }, { 0.75, 1 }, { 1, 1 } } :: { { number } },
+	headLethal = 70, -- dano na cabeça que mata na hora (sem caído nem reanimação)
+	downedKill = 20, -- caído: tiro com este dano ou mais mata (fuzil sempre; pistola de longe não)
+	arterialMin = 18, -- membro: dano mínimo para a chance de artéria (fuzil e metralhadora)
+	arterialChance = 0.2,
+}
+
+-- Dano de um tiro: base (tronco, energia de boca), zona e fração da energia de boca que chegou.
+function Medical.shotDamage(base: number, zone: string, energyFrac: number): number
+	local curve = Medical.SHOT.falloff
+	local f = math.clamp(energyFrac, 0, 1)
+	local k = curve[#curve][2]
+	for i = 2, #curve do
+		local a, b = curve[i - 1], curve[i]
+		if f <= b[1] then
+			k = a[2] + (b[2] - a[2]) * (f - a[1]) / (b[1] - a[1])
+			break
+		end
+	end
+	return base * (Medical.SHOT.zone[zone] or 1) * k
+end
+
+-- Aplica o dano de um tiro (já calculado por shotDamage). Mesmo retorno de applyHit.
+function Medical.applyShot(s: State, zone: string, damage: number, roll: number, now: number): string
+	if s.dead then
+		return "dead"
+	end
+	local S = Medical.SHOT
+	if s.downedAt then
+		if damage >= S.downedKill then
+			s.dead = true
+			return "killed"
+		end
+		return "downed"
+	end
+	if zone == "head" and damage >= S.headLethal then
+		s.dead = true
+		s.health = 0
+		return "killed"
+	end
+	s.health -= damage
+	if zone == "head" then
+		table.insert(s.wounds, { zone = zone, level = "grave" } :: Wound)
+		if s.health <= 0 then
+			s.dead = true
+			s.health = 0
+			return "killed"
+		end
+	elseif zone == "torso" then
+		table.insert(s.wounds, { zone = zone, level = "grave" } :: Wound)
+	else
+		-- membro: ferida leve (sangra devagar) ou artéria, que pede torniquete
+		local level = if damage >= S.arterialMin and roll < S.arterialChance then "arterial" else "light"
+		table.insert(s.wounds, { zone = zone, level = level } :: Wound)
+		if zone == "arm" then
+			s.armImpaired = true
+		else
+			s.legImpaired = true
+		end
+	end
+	if s.health <= 0 then
+		return down(s, now)
+	end
+	return "wounded"
+end
+
+-- Dano de bala para o próximo applyHit. O MedicalService.hit é envolvido por outros serviços com a
+-- assinatura (vítima, zona, energia, rolagem, quem), que não leva o dano da bala: o CombatService põe
+-- o dano aqui logo antes da chamada (síncrona), o applyHit o consome, e o CombatService limpa depois.
+Medical.nextShot = nil :: number?
+
 -- zone: "head" | "torso" | "arm" | "leg"; roll: número em [0,1) da semente do tiro
 function Medical.applyHit(s: State, zone: string, energyJ: number, roll: number, now: number): string
+	local shot = Medical.nextShot
+	if shot then
+		Medical.nextShot = nil
+		return Medical.applyShot(s, zone, shot, roll, now)
+	end
 	if s.dead then
 		return "dead"
 	end

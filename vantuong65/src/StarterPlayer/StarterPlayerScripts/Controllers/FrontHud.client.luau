@@ -77,6 +77,11 @@ end
 -- caber; a bússola e o cartão da arma (HudCampo) descem logo abaixo dela.
 local function placeStripTouch()
 	local scale = strip:FindFirstChildOfClass("UIScale")
+	-- v39: a zona livre "topo" do HUD de toque (Shared/Toque.ZONES), no alto entre o mapa/menu e o
+	-- COMUNICAR; a bússola desce logo abaixo (zona "bussola", HudCampo)
+	if ToqueUi.fitZone(strip, scale, "topo", strip.Size.X.Offset, strip.Size.Y.Offset, Vector2.new(0.5, 0), 1, 0.4) then
+		return
+	end
 	if ToqueUi.active() then
 		local x0, x1 = ToqueUi.topBand()
 		local k = ToqueTelas.fitScale(strip.Size.X.Offset, x1 - x0 - 12, 1, 0.4)
@@ -427,7 +432,7 @@ cap.Visible = false
 cap.Parent = hud
 UiKit.corner(cap, 4)
 UiKit.stroke(cap, V.LINE, 1, 0.4)
-UiKit.fit(hud, cap, capW, capH, 8)
+local capFit = UiKit.fit(hud, cap, capW, capH, 8)
 local CP = px(12, 16)
 local capName = UiKit.title(cap, "", px(18, 26))
 capName.Position = UDim2.fromOffset(CP, CP - 2)
@@ -990,6 +995,15 @@ RunService.Heartbeat:Connect(function(dt: number)
 	local inField = st ~= nil and mine() ~= nil and hum ~= nil and hum.Health > 0
 	strip.Visible = inField and not Input.state.map and Input.state.menus == 0 and not endGui.Enabled
 	placeStripTouch()
+	-- toque v39: o painel da captura na zona livre "captura" (acima do cartão da arma, longe da mira)
+	if
+		not ToqueUi.fitZone(cap, capFit.scale, "captura", capW, capH, Vector2.new(0.5, 1), 1, 0.4)
+		and cap.Position.X.Scale ~= 0.5
+	then
+		cap.AnchorPoint = Vector2.new(0.5, 0)
+		cap.Position = UDim2.fromScale(0.5, 0.66)
+		capFit.scale.Scale = capFit.k()
+	end
 	updateCapture(false) -- entrei ou saí da área de um setor
 	if endOpen and endShown then
 		local n = state and state.nextIn

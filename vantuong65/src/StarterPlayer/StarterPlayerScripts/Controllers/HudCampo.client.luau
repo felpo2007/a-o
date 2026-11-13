@@ -22,6 +22,9 @@
 -- frente, encolhendo para caber; a ordem do comandante fica só no aviso. Tocar no cartão da arma abre
 -- o seletor de tiro e a alça (as ações que já existem: "fire_mode" tocar e "zeroing" segurar, pelo
 -- Input.virtual). Studio: VT65DevTela = "seletor" abre o seletor de exemplo (com ou sem toque).
+-- v39 (toque, "deixe a tela limpa"): a bússola fica na zona livre "bussola" e o cartão da arma na
+-- "cartao", no pé do meio (Shared/Toque.ZONES, ToqueUi.zoneIn). Tocar no cartão troca de arma (era o
+-- botão ARMA); segurar abre seletor, alça e baioneta (eram SELETOR e o segurar do ARMA).
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -609,7 +612,7 @@ do
 	UiKit.list(pop, true, 8)
 	local h = ToqueUi.minPx()
 	local function mk(name: string, text: string, order: number, kind: string?): TextButton
-		local b = ToqueUi.bigButton(pop, text, kind, math.floor(h * 2.6))
+		local b = ToqueUi.bigButton(pop, text, kind, math.floor(h * 2))
 		b.Name = name
 		b.LayoutOrder = order
 		return b
@@ -617,8 +620,10 @@ do
 	local bMode = mk("Seletor", "SELETOR", 1, "primary")
 	local bDown = mk("AlcaMenos", "ALÇA −", 2)
 	local bUp = mk("AlcaMais", "ALÇA +", 3)
-	local bClose = mk("Fechar", "✕", 4)
+	local bBay = mk("Baioneta", "BAIONETA", 4) -- v39: era o segurar do botão ARMA
+	local bClose = mk("Fechar", "✕", 5)
 	bClose.Size = UDim2.fromOffset(h, h)
+	local BAYONET = (require(ReplicatedStorage.Shared.Melee) :: any).BAYONET
 	local function opts(): { string }
 		local wp = weaponDef()
 		if not wp then
@@ -626,13 +631,14 @@ do
 		end
 		local role = player:GetAttribute("Role")
 		local modes = Weapons.modesFor(wp, if type(role) == "string" then role else nil)
-		return ToqueTelas.weaponOptions(#modes, #Weapons.zeros(wp))
+		return ToqueTelas.weaponOptions(#modes, #Weapons.zeros(wp), BAYONET[W.id] ~= nil)
 	end
 	local function paint()
 		local o = opts()
 		bMode.Visible = table.find(o, "mode") ~= nil
 		bDown.Visible = table.find(o, "zero_down") ~= nil
 		bUp.Visible = table.find(o, "zero_up") ~= nil
+		bBay.Visible = table.find(o, "bayonet") ~= nil
 	end
 	function Sel.setOpen(on: boolean)
 		Sel.open = on
@@ -647,8 +653,44 @@ do
 		Sel.until_ = os.clock() + 6 -- mexeu: fica aberto mais um pouco
 		wake()
 	end
-	tap.Activated:Connect(function()
-		Sel.setOpen(not Sel.open)
+	-- v39: tocar troca de arma; segurar parado abre o seletor (ToqueTelas.cardGesture); com o seletor
+	-- aberto, tocar no cartão fecha
+	local press: { io: InputObject, t0: number, p0: Vector3, held: boolean }? = nil
+	tap.InputBegan:Connect(function(io: InputObject)
+		local t = io.UserInputType
+		if t ~= Enum.UserInputType.Touch and t ~= Enum.UserInputType.MouseButton1 then
+			return
+		end
+		local my = { io = io, t0 = os.clock(), p0 = io.Position, held = false }
+		press = my
+		task.delay(ToqueTelas.CARD_HOLD_S, function()
+			local moved = (io.Position - my.p0).Magnitude
+			if press == my and ToqueTelas.cardGesture(os.clock() - my.t0, moved, false) == "hold" then
+				my.held = true
+				Sel.setOpen(true)
+			end
+		end)
+	end)
+	game:GetService("UserInputService").InputEnded:Connect(function(io: InputObject)
+		local my = press
+		if not (my and (my.io == io or io.UserInputType == Enum.UserInputType.MouseButton1)) then
+			return
+		end
+		press = nil
+		local g = ToqueTelas.cardGesture(os.clock() - my.t0, (io.Position - my.p0).Magnitude, true)
+		if my.held or g ~= "tap" then
+			return
+		end
+		if Sel.open then
+			Sel.setOpen(false)
+		else
+			ToqueUi.tap("swap_weapon")
+			wake()
+		end
+	end)
+	bBay.Activated:Connect(function()
+		touched()
+		ToqueUi.tap("bayonet")
 	end)
 	bMode.Activated:Connect(function()
 		touched()
@@ -670,7 +712,19 @@ do
 	function Sel.update(k: number, onFoot: boolean)
 		local tp: Vector2? = Sel.touchPos
 		local card = A.card :: CanvasGroup
-		if tp then
+		if tp and Sel.below == false then
+			-- v39: o cartão na zona do pé do meio (tp = meio da base) e o seletor logo acima dele, preso
+			-- para caber na largura da tela
+			card.AnchorPoint = Vector2.new(0.5, 1)
+			card.Position = UDim2.fromOffset(tp.X, tp.Y)
+			local half = pop.AbsoluteSize.X / 2
+			local gw = gui.AbsoluteSize.X
+			pop.AnchorPoint = Vector2.new(0.5, 1)
+			pop.Position = UDim2.fromOffset(
+				math.clamp(tp.X, math.min(half + 4, gw / 2), math.max(gw - half - 4, gw / 2)),
+				tp.Y - AH * k - 6
+			)
+		elseif tp then
 			card.AnchorPoint = Vector2.new(0.5, 0)
 			card.Position = UDim2.fromOffset(tp.X, tp.Y)
 			pop.AnchorPoint = Vector2.new(0.5, 0)
@@ -950,7 +1004,20 @@ RunService.RenderStepped:Connect(function()
 		local k = if TV then 1 else math.clamp(size.X / 1280, 0.72, 1)
 		B.scale.Scale = k
 		A.scale.Scale = k
-		if ToqueUi.active() or os.clock() < Sel.dev then
+		local zb, zc = ToqueUi.zoneIn(gui, "bussola"), ToqueUi.zoneIn(gui, "cartao")
+		if zb and zc then
+			-- toque v39: as zonas livres do HUD de toque (Shared/Toque.ZONES): a bússola embaixo da
+			-- faixa da frente; o cartão da arma no pé do meio, preso pela base (o seletor abre acima)
+			local kc = math.clamp(math.min(zb.w / CW, zb.h / CH), 0.45, k)
+			B.scale.Scale = kc
+			B.box.AnchorPoint = Vector2.new(0.5, 0)
+			B.box.Position = UDim2.fromOffset(zb.x + zb.w / 2, zb.y)
+			A.scale.Scale = math.clamp(math.min(zc.w / AW, zc.h / AH), 0.4, math.min(k, 0.8))
+			Sel.touchPos = Vector2.new(zc.x + zc.w / 2, zc.y + zc.h)
+			Sel.below = false
+			compassBlocked = false
+		elseif ToqueUi.active() or os.clock() < Sel.dev then
+			Sel.below = true
 			-- toque (Parte 13): embaixo e nos cantos de cima ficam os botões do HUD de toque. A bússola
 			-- e o cartão da arma sobem para o vão do alto (ToqueUi.topBand), abaixo da faixa da frente,
 			-- encolhendo para caber

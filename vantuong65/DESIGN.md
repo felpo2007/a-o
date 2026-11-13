@@ -3490,3 +3490,96 @@ mostrou o próximo problema. O que mudou:
   - o LVTP-5 leva o squad, desembarca e volta para a baia;
   - testado em dois objetivos (oeste e sudoeste).
 - **Não testado:** objetivos do VC, o Ontos (fica sem tripulação no teste) e o LVTP-5 nº 2.
+
+## D-107 — Lista do dono de 12–13/11: tiros, morte, bots, movimento, itens, telas e celular (v39, 2026-11-13)
+
+Pedidos do dono (lista de 12/11 e fotos do celular de 13/11), feitos em 8 frentes paralelas. Os
+comentários do código citam "D-107" para tudo isto. Números novos são PLACEHOLDER até o Studio e o
+jogo publicado confirmarem.
+
+**Combate** ("os tiros não estão acertando", "concerte o hitbox", "3 ou 4 tiros para morrer",
+"mais difícil de morrer", "mostre quando acerta", "melhore o áudio das armas"):
+- **Causa dos tiros que não acertavam:** o `Combat_Fire` conferia o relógio do tiro
+  (`GetServerTimeNow`, ~1,8 bilhão de s) e a semente (até 2^32) com um limite de 1e7. Todo tiro de
+  jogador era descartado desde 2026-11-09: sem dano, sem munição descontada no servidor, sem tiro
+  visto ou ouvido pelos outros e sem supressão dos bots. Corrigido (`Ballistics.clockOf`/`seedOf`).
+- **Hitbox:** caixas do tamanho do que se vê (`Shared/Hitbox`): cabeça de bloco pela malha,
+  capacete conta como cabeça e colete como tronco. O atirador avisa o acerto que viu
+  (`Combat_Claim`) e o servidor confere a trajetória da semente, o caminho livre e a folga pela
+  velocidade do alvo.
+- **Dano** (`Medical.shotDamage`): arma × zona × energia restante. No tronco: fuzil 3–4 tiros,
+  metralhadora 4, pistola 4–5, precisão 2. Fuzil na cabeça mata; membro 5 ou mais.
+- **Marcador de acerto** só para quem atirou (`Combat_Confirm`, `Acerto.client`): número do dano e
+  som leve; latão na cabeça, vermelho no abate. Exceção ao "sem hitmarker" da D-25.
+- **Som das armas** em camadas (`Shared/SomArmas`), com cauda pelo lugar (aberto, mata, vila,
+  túnel), estalo e zunido da bala, ferrolho e estojo.
+- **Ritmo:** recarga do fuzil 3,0 → 2,4 s (bots iguais); ao ombro em 16/massa; recuo volta mais rápido.
+
+**Morte e feridos** ("os feridos estão de pé", "os mortos não somem nem ficam deitados",
+"animação de morte", "permita desistir sempre"):
+- Caído deita de costas (servidor pela junta Root; clientes com pose de ferido, queda de 0,7 s);
+  reanimado levanta agachado. A HumanoidRootPart do deitado sai das consultas de bala.
+- Morte com boneco de pano no servidor, juntas limitadas, sem voar nem atravessar o chão.
+- Corpo fica 25 s e some em 2,5 s; teto de 24 corpos.
+- Desiste a qualquer hora (`Medical.giveUpAfter = 0`).
+
+**Bots** ("só vejo 10 bots, cadê os 50?", "bots não avançam", "não precisam seguir o líder"):
+- `BotService.fill()` dava 10 (15 no Studio). Agora completa até 50 por lado, 2 por segundo, com
+  teto pelo Heartbeat do servidor: para abaixo de 45 Hz, tira abaixo de 35 Hz, piso de 12
+  (`BotCap`, `BotHz`).
+- Pensamento por distância do humano (0,3 / 0,6 / 1 s) num orçamento de 2,5 ms por quadro; longe
+  de humano andam em linha simples.
+- Cada squad tem papel na frente: ataque; 25% guardam o setor ameaçado, 50% com inimigo no ponto.
+  Quem ataca avança em lances de 15–25 m; preso no máximo 5 s; o squad não espera o líder.
+- Os bots do squad do jogador não o seguem mais; a marca na carta vale 2 min (45 s no lugar).
+- Captura até 3x com 9 ou mais atacantes (setor inimigo em 60 s).
+
+**Movimento e 3ª pessoa** ("copie a movimentação do Front 44", "ajeite a pegada e o tamanho da
+arma", "capacetes bugados", "telas tremendo", "botão de 3ª pessoa"):
+- Velocidades do Front 44 (mesma escala): trote 3,92, corrida 5,88, agachado 1,96, rastejar 1,12,
+  mirando 2,52 m/s; VC ×1,12. Arrancada 40 → 30 m/s², parada 40, pulo de 0,825 m, deslizar
+  agachando correndo (0,8 s), posturas mais rápidas, menos balanço de câmera.
+- Arma em 3ª pessoa com a pose do Front 44 (`Shared/Pegada3P`), IK de dois ossos depois das
+  animações, arma no tamanho real, mão de bloco a 0,55 da largura.
+- Prévias remontadas pelas juntas (fora do Workspace elas não se resolviam); capacete nas
+  proporções do Front 44.
+- 3ª pessoa: tecla O, → segurado no D-pad, e no toque pelo menu.
+
+**Itens** ("não consigo puxar arma e selecionar os itens", "arma secundária para todos", "copie a
+fumaça do Front 44"):
+- Vagas fixas (`Shared/Equipar`): 1 principal, 2 pistola, 3 granada, 4 fumaça, 5–0 itens; teclas,
+  roda do mouse, Y e o cartão da arma no toque. A troca usa o saque do Front 44 e todos veem a arma
+  na mão (`ArmaNaMao`).
+- Pistola para todos (M1911A1 / Tipo 54). Comandante, corpsman e morteiro ganharam arma longa.
+- Granada na mão: o gatilho tira o pino e arma; soltar lança; mirando, vai por baixo.
+- Fumaça do Front 44: 7 sopros cortados por parede, abre em 1,5 s, 60 s de duração, estado no
+  servidor e desenho em cada cliente, véu dentro da nuvem.
+- Recarga automática no gatilho vazio; no toque e no controle, também ao esvaziar.
+
+**Telas** ("Jogar agora", "melhore a tela de morte com a opção de veículo", "cores nos botões de
+compra", "gostava mais da tela de carregamento antiga"):
+- JOGAR AGORA (mesa, carta, baixa, menu, carregamento): lado, squad e papel da última escolha
+  (perfil `unit`) e o último ponto ou o melhor (squad > reunião > QG; 1 s de espera = 18 studs).
+- Tela de baixa: o soldado caído no chão (`CenaBaixa`); RENASCER é o jogar agora; COM VEÍCULO pelo
+  pedido da D-103; desistir sempre visível.
+- Cores de compra (`UiKit.PAGAR`): Robux verde, créditos âmbar, grátis oliva, apagado escuro.
+- Carregamento com o visual do `b85331e` e o carregamento completo da v37.
+
+**Celular** ("comandos do teclado no celular", "deixe a tela limpa", "o resto automático"):
+- Fixos: analógico, FOGO, MIRA, PULAR, AGACHAR, ITEM, COMUNICAR, MAPA e MENU; o cartão da arma troca
+  de arma. RECARGA, GOLPE, FÔLEGO, BANDAGEM e RÁDIO só aparecem quando servem.
+- Automáticos com opção: recarga, transpor, inclinar na quina, respiração na luneta, pegar
+  munição e caixote, assistência de mira. Tiro sozinho existe e vem desligado.
+- Sem dica de tecla no toque; o painel de teclas só aparece com teclado ou controle. O HUD desenha
+  em zonas livres (`Toque.ZONES`), testadas de 16:9 a 20:9 e no tablet.
+
+**Veículos** ("helicóptero sem som", "veículos prontos de qualidade"):
+- O UH-34D era mudo: o laço nunca foi publicado (ID 0). Agora tem sons próprios em camadas
+  (`tools/sons_veiculos.py`): rotor, motor radial, vento, lagarta, jipe e caminhão. O rotor se ouve
+  a 1,5 km e o helicóptero fica sempre replicado.
+- O heliponto fica a 16 m da borda leste: o UH-34D nasce de nariz para oeste.
+- Prontos da Creator Store avaliados (UH-1B, UH-1D, M48A1, M48A5, Ontos, jipe, M35, F100): nenhum
+  entrou. Os bons têm origem duvidosa e modelo de terceiros não carrega no jogo publicado.
+- No toque: só analógico, coletivo, tiro, LUGAR e SAIR; estabilizador sempre ligado.
+
+**Ambiente** ("retire o vento, está pesando"): `GlobalWind` zerado e o arroz parou de balançar.

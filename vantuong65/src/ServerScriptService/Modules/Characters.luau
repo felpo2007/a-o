@@ -525,6 +525,17 @@ local function formatoF44(model: Model, faction: string, skin: Color3, seed: num
 			p.Material = Enum.Material.Fabric
 		end
 	end
+	-- mão mais estreita (Corpo.MAO_K; foto do dono: "mãos enormes" na arma de tamanho real): só a
+	-- largura e a profundidade; o comprimento, o punho e o ponto da pegada (GripAttachment) ficam
+	-- (a mão de bloco tem 1 x 0,3 x 1: com a largura acima de 2,5 vezes o comprimento ela ainda não foi
+	-- estreitada; vale de novo se um ApplyDescription devolver o tamanho)
+	local k = Corpo.MAO_K
+	for _, n in { "LeftHand", "RightHand" } do
+		local p = model:FindFirstChild(n)
+		if p and p:IsA("BasePart") and k < 1 and p.Size.X > 2.5 * p.Size.Y then
+			p.Size = Vector3.new(p.Size.X * k, p.Size.Y, p.Size.Z * k)
+		end
+	end
 	local head = model:FindFirstChild("Head")
 	local id = Corpo.rosto(faction, seed)
 	if head and id ~= 0 then
@@ -620,7 +631,7 @@ function Characters.dress(model: Model, faction: string, equipped: { [string]: s
 		if not head then
 			return nil
 		end
-		local hs = size(head)
+		local hs = Gear.headSize(size(head), head:FindFirstChildOfClass("SpecialMesh") ~= nil)
 		return wear(key, head, model, function(native: Vector3): Gear.Fit?
 			return Gear.headgearFit(key, hs, Gear.vec(native.X, native.Y, native.Z))
 		end)

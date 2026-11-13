@@ -47,17 +47,30 @@ local function ctx(over: { [string]: any }?): Movement.SpeedCtx
 end
 
 -- ===== velocidades =====
+-- 2026-11-13 ("copie a movimentação igual a do Front 44"): os studs/s do Front 44 (Config.Movement:
+-- Walk 14, Sprint 21, Crouch 7, Prone 4) com 1 stud = 0,28 m, lá e aqui (antes 3,1 / 5,5 / 1,4 / 0,5)
+local J, R, C, P = 14 * 0.28, 21 * 0.28, 7 * 0.28, 4 * 0.28
+test("velocidade: as do Front 44 (m/s iguais: 1 stud = 0,28 m nos dois jogos)", function()
+	near(Movement.JOG, 3.92, 1e-9, "trote")
+	near(Movement.SPRINT, 5.88, 1e-9, "corrida")
+	near(Movement.CROUCH, 1.96, 1e-9, "agachado")
+	near(Movement.PRONE, 1.12, 1e-9, "rastejar")
+	near(Movement.ADS, 9 * 0.28, 1e-9, "mirando")
+	near(Movement.WALK, 1.4, 1e-9, "perna ferida (não existe no Front 44)")
+	near(Movement.jumpPower(Movement.JUMP_REST_M, 196.2), 34, 0.01, "pulo: JumpPower 34 do Front 44")
+end)
+
 test("velocidade: bases iguais às do servidor (trote, corrida, agachado, rastejar)", function()
-	near(Movement.targetSpeed(ctx()), 3.1, 1e-6, "trote")
-	near(Movement.targetSpeed(ctx({ sprinting = true })), 5.5, 1e-6, "corrida")
-	near(Movement.targetSpeed(ctx({ stance = "crouch" })), 1.4, 1e-6, "agachado (D-99: era 0,84)")
-	near(Movement.targetSpeed(ctx({ stance = "prone" })), 0.5, 1e-6, "rastejar (D-99: era 0,35)")
+	near(Movement.targetSpeed(ctx()), J, 1e-6, "trote")
+	near(Movement.targetSpeed(ctx({ sprinting = true })), R, 1e-6, "corrida")
+	near(Movement.targetSpeed(ctx({ stance = "crouch" })), C, 1e-6, "agachado (Front 44: 7 studs/s)")
+	near(Movement.targetSpeed(ctx({ stance = "prone" })), P, 1e-6, "rastejar (Front 44: 4 studs/s)")
 	near(Movement.targetSpeed(ctx({ aiming = true })), Movement.ADS, 1e-6, "mirando")
 	near(Movement.targetSpeed(ctx({ legImpaired = true, sprinting = true })), 1.4, 1e-6, "perna ferida")
 	assert(Movement.targetSpeed(ctx({ downed = true })) == 0, "caído")
-	near(Movement.targetSpeed(ctx({ sprinting = true, forward = -1 })), 3.1, 1e-6, "corrida de costas = trote")
-	near(Movement.targetSpeed(ctx({ sprinting = true, forward = 0.3 })), 3.1, 1e-6, "corrida de lado = trote")
-	near(Movement.targetSpeed(ctx({ sprinting = true, waterM = 0.6 })), 3.1 * Movement.waterFactor(0.6), 1e-6)
+	near(Movement.targetSpeed(ctx({ sprinting = true, forward = -1 })), J, 1e-6, "corrida de costas = trote")
+	near(Movement.targetSpeed(ctx({ sprinting = true, forward = 0.3 })), J, 1e-6, "corrida de lado = trote")
+	near(Movement.targetSpeed(ctx({ sprinting = true, waterM = 0.6 })), J * Movement.waterFactor(0.6), 1e-6)
 end)
 
 test("velocidade: o cliente nunca passa do teto do servidor (10.000 sorteios, com lado e chão suavizado)", function()
@@ -90,21 +103,21 @@ test("velocidade: o cliente nunca passa do teto do servidor (10.000 sorteios, co
 		assert(v >= 0 and v <= cap + 1e-9, string.format("sorteio %d: %.3f > teto %.3f", i, v, cap))
 	end
 	-- sem o lado (bots, BotLocomotion): o teto é o de antes
-	near(Movement.serverSpeed("stand", false, false, false), 3.1, 1e-9)
-	near(Movement.serverSpeed("stand", true, false, false), 5.5, 1e-9)
-	near(Movement.serverSpeed("crouch", false, false, false), 1.4, 1e-9)
+	near(Movement.serverSpeed("stand", false, false, false), J, 1e-9)
+	near(Movement.serverSpeed("stand", true, false, false), R, 1e-9)
+	near(Movement.serverSpeed("crouch", false, false, false), C, 1e-9)
 end)
 
 test("D-99: vantagem de velocidade (1,06) no trote e na corrida, com e sem passe, teto do servidor", function()
-	near(Movement.serverSpeed("stand", false, false, false, nil, 1.06), 3.1 * 1.06, 1e-9, "trote")
-	near(Movement.serverSpeed("stand", true, false, false, nil, 1.06), 5.5 * 1.06, 1e-9, "corrida")
-	near(Movement.serverSpeed("stand", true, false, false, "VC", 1.06), 5.5 * 1.12 * 1.06, 1e-9, "VC")
+	near(Movement.serverSpeed("stand", false, false, false, nil, 1.06), J * 1.06, 1e-9, "trote")
+	near(Movement.serverSpeed("stand", true, false, false, nil, 1.06), R * 1.06, 1e-9, "corrida")
+	near(Movement.serverSpeed("stand", true, false, false, "VC", 1.06), R * 1.12 * 1.06, 1e-9, "VC")
 	near(Movement.serverSpeed("crouch", false, false, false, nil, 1.06), Movement.CROUCH, 1e-9, "agachado igual")
 	near(Movement.serverSpeed("prone", false, false, false, nil, 1.06), Movement.PRONE, 1e-9, "rastejar igual")
 	near(Movement.serverSpeed("stand", true, true, false, nil, 1.06), Movement.WALK, 1e-9, "perna ferida igual")
-	near(Movement.serverSpeed("stand", false, false, false, nil, nil), 3.1, 1e-9, "sem passe")
-	near(Movement.serverSpeed("stand", true, false, false, nil, 2), 5.5 * 1.12, 1e-9, "teto de 12%")
-	near(Movement.targetSpeed(ctx({ perkSpeed = 1.06 })), 3.1 * 1.06, 1e-9, "cliente: trote")
+	near(Movement.serverSpeed("stand", false, false, false, nil, nil), J, 1e-9, "sem passe")
+	near(Movement.serverSpeed("stand", true, false, false, nil, 2), R * 1.12, 1e-9, "teto de 12%")
+	near(Movement.targetSpeed(ctx({ perkSpeed = 1.06 })), J * 1.06, 1e-9, "cliente: trote")
 	near(Movement.targetSpeed(ctx({ perkSpeed = 1.06, aiming = true })), Movement.ADS, 1e-9, "mira igual")
 	-- com o passe o cliente passa do teto de quem NÃO tem: o servidor precisa conhecer o multiplicador
 	local fast = Movement.targetSpeed(ctx({ perkSpeed = 1.06, sprinting = true }))
@@ -131,15 +144,15 @@ test("D-93: VC mais leve corre 12% mais; mira, rastejar e nado iguais; teto do s
 	local k = Movement.factionSpeed("VC")
 	near(k, 1.12, 1e-9, "PLACEHOLDER de projeto")
 	assert(Movement.factionSpeed("US") == 1 and Movement.factionSpeed(nil) == 1)
-	near(Movement.targetSpeed(ctx({ faction = "VC" })), 3.1 * k, 1e-9, "trote")
-	near(Movement.targetSpeed(ctx({ faction = "VC", sprinting = true })), 5.5 * k, 1e-9, "corrida")
-	near(Movement.targetSpeed(ctx({ faction = "VC", stance = "crouch" })), 1.4 * k, 1e-9, "agachado")
-	near(Movement.targetSpeed(ctx({ faction = "VC", stance = "prone" })), 0.5, 1e-9, "rastejar igual")
+	near(Movement.targetSpeed(ctx({ faction = "VC" })), J * k, 1e-9, "trote")
+	near(Movement.targetSpeed(ctx({ faction = "VC", sprinting = true })), R * k, 1e-9, "corrida")
+	near(Movement.targetSpeed(ctx({ faction = "VC", stance = "crouch" })), C * k, 1e-9, "agachado")
+	near(Movement.targetSpeed(ctx({ faction = "VC", stance = "prone" })), P, 1e-9, "rastejar igual")
 	near(Movement.targetSpeed(ctx({ faction = "VC", aiming = true })), Movement.ADS, 1e-9, "mirando igual")
 	near(Movement.targetSpeed(ctx({ faction = "VC", swimming = true })), Movement.SWIM, 1e-9, "nado igual")
-	near(Movement.serverSpeed("stand", true, false, false, "VC"), 5.5 * k, 1e-9)
+	near(Movement.serverSpeed("stand", true, false, false, "VC"), R * k, 1e-9)
 	near(Movement.serverSpeed("stand", true, true, false, "VC"), 1.4 * k, 1e-9, "perna ferida")
-	near(Movement.serverSpeed("prone", false, false, false, "VC"), 0.5, 1e-9)
+	near(Movement.serverSpeed("prone", false, false, false, "VC"), P, 1e-9)
 	-- equipamento mais leve: menos peso, pulo e fôlego melhores com a mesma arma
 	local function kit(f: string?): number
 		return Movement.loadKg({
@@ -176,8 +189,8 @@ test("D-93: VC mais leve corre 12% mais; mira, rastejar e nado iguais; teto do s
 	print(
 		string.format(
 			"       VC: trote %.2f m/s, corrida %.2f m/s, agachado %.2f m/s; dique em %.2f s (EUA %.2f s)",
-			3.1 * k,
-			5.5 * k,
+			J * k,
+			R * k,
 			Movement.CROUCH * k,
 			vc.duration,
 			us.duration
@@ -186,10 +199,10 @@ test("D-93: VC mais leve corre 12% mais; mira, rastejar e nado iguais; teto do s
 end)
 
 test("D-93: corrida firme até ~45° do rumo e cai suave até o trote em ~60°", function()
-	near(Movement.targetSpeed(ctx({ sprinting = true, forward = 0.72 })), 5.5, 1e-9, "W+D (45°) corre cheio")
+	near(Movement.targetSpeed(ctx({ sprinting = true, forward = 0.72 })), R, 1e-9, "W+D (45°) corre cheio")
 	local mid = Movement.targetSpeed(ctx({ sprinting = true, forward = 0.6 }))
-	assert(mid > 3.1 + 0.5 and mid < 5.5 - 0.5, "entre trote e corrida")
-	near(Movement.targetSpeed(ctx({ sprinting = true, forward = 0.5 })), 3.1, 1e-9, "60°: trote")
+	assert(mid > J + 0.5 and mid < R - 0.5, "entre trote e corrida")
+	near(Movement.targetSpeed(ctx({ sprinting = true, forward = 0.5 })), J, 1e-9, "60°: trote")
 	local last = 0
 	for i = 0, 100 do
 		local v = Movement.targetSpeed(ctx({ sprinting = true, forward = 0.4 + i * 0.004 }))
@@ -199,10 +212,10 @@ test("D-93: corrida firme até ~45° do rumo e cai suave até o trote em ~60°",
 end)
 
 test("velocidade: fôlego baixo tira a corrida aos poucos; peso pesa mais correndo", function()
-	near(Movement.targetSpeed(ctx({ sprinting = true, stamina = 0.3 })), 5.5, 1e-6, "30% ainda corre cheio")
+	near(Movement.targetSpeed(ctx({ sprinting = true, stamina = 0.3 })), R, 1e-6, "30% ainda corre cheio")
 	local half = Movement.targetSpeed(ctx({ sprinting = true, stamina = 0.15 }))
-	assert(half > 3.1 and half < 5.5, "15%: entre trote e corrida")
-	near(Movement.targetSpeed(ctx({ sprinting = true, stamina = 0 })), 3.1, 1e-6, "zerado = trote")
+	assert(half > J and half < R, "15%: entre trote e corrida")
+	near(Movement.targetSpeed(ctx({ sprinting = true, stamina = 0 })), J, 1e-6, "zerado = trote")
 	assert(Movement.loadFactor(35, true) < Movement.loadFactor(35, false), "peso pesa mais na corrida")
 	near(Movement.loadFactor(15, true), 1, 1e-9, "até 15 kg não pesa")
 	near(Movement.loadFactor(100, true), 0.8, 1e-9, "piso da corrida")
@@ -264,7 +277,7 @@ test("inércia: arranca, freia e vira com aceleração limitada", function()
 	assert(stop > 0.4 and stop < 0.8, "frenagem")
 	assert(turn > stop * 0.5 and turn < 1.2, "meia-volta")
 	assert(timeTo(0, 3.1, 0, Movement.surfaceGrip("paddy")) > start, "arrozal arranca mais devagar")
-	-- no ar quase não muda o embalo
+	-- no ar quase não muda o embalo (modelo dos bots, 10 m/s² × AIR_GRIP)
 	local x = Movement.accelStep(3, 0, -3, 0, 0.1, Movement.AIR_GRIP)
 	assert(x > 2.8, "controle no ar")
 end)
@@ -437,14 +450,18 @@ test("peso: fuzileiro com a dotação padrão (M14, 5 carregadores, 2 granadas, 
 end)
 
 -- ===== pulo e aterrissagem =====
-test("pulo: 0,45 m descansado, menos cansado e com peso; JumpPower bate com a altura", function()
-	near(Movement.jumpHeight(1, 15), 0.45, 1e-9, "descansado")
-	assert(Movement.jumpHeight(0, 15) < 0.25, "cansado")
-	assert(Movement.jumpHeight(1, 30) < 0.45, "com peso")
+test("pulo: 0,825 m descansado (Front 44), menos cansado e com peso; JumpPower bate com a altura", function()
+	near(Movement.jumpHeight(1, 15), 0.825, 1e-9, "descansado")
+	assert(Movement.jumpHeight(0, 15) < 0.5, "cansado")
+	assert(Movement.jumpHeight(1, 30) < 0.825, "com peso")
 	assert(Movement.jumpHeight(0, 200) >= Movement.JUMP_MIN_M, "piso")
 	local g = 196.2
-	local v = Movement.jumpPower(0.45, g)
-	near(v * v / (2 * g) * Movement.STUD_M, 0.45, 1e-9, "altura do JumpPower")
+	local v = Movement.jumpPower(0.825, g)
+	near(v * v / (2 * g) * Movement.STUD_M, 0.825, 1e-9, "altura do JumpPower")
+	near(v, 34, 0.01, "o JumpPower do Front 44")
+	-- o próprio pulo não freia nem cansa na volta ao chão
+	local _, slowF, secs, cost = Movement.landing(Movement.JUMP_REST_M)
+	assert(slowF == 1 and secs == 0 and cost == 0, "pulo comum sem freio")
 end)
 
 test("aterrissagem: pulo só balança; queda de 3 m freia e cansa", function()
@@ -713,9 +730,9 @@ test("D-93: água pelo leito com histerese: vadeia até o peito, nada no fundo, 
 	assert(Movement.waterStance("stand", 1.2) == "stand")
 	-- vadeando: mais devagar e arranca/vira mais pesado
 	local wade = Movement.targetSpeed(ctx({ waterM = 1.0 }))
-	near(wade, 3.1 * Movement.waterFactor(1.0), 1e-9)
+	near(wade, J * Movement.waterFactor(1.0), 1e-9)
 	assert(Movement.wadeGrip(1.0) < Movement.wadeGrip(0.3) and Movement.wadeGrip(0.1) == 1)
-	assert(Movement.targetSpeed(ctx({ sprinting = true, waterM = 0.6 })) <= 3.1 * Movement.waterFactor(0.6) + 1e-9)
+	assert(Movement.targetSpeed(ctx({ sprinting = true, waterM = 0.6 })) <= J * Movement.waterFactor(0.6) + 1e-9)
 	print(
 		string.format(
 			"       vadeando: canela %.2f, joelho %.2f, cintura %.2f, peito %.2f m/s; nadando %.2f m/s",
@@ -739,13 +756,13 @@ local function timeMove(vx: number, tx: number, tz: number, grip: number): numbe
 	return t
 end
 
-test("D-93/D-99: passo responsivo como no Front 44 (arranca rápido, embala na corrida, para seco)", function()
-	local start = timeMove(0, 3.1, 0, 1)
+test("D-93/D-99: passo responsivo como no Front 44 (arranca quase na hora, para seco)", function()
+	local start = timeMove(0, J, 0, 1)
 	local walk = timeMove(0, 1.4, 0, 1)
-	local build = timeMove(3.1, 5.5, 0, 1)
-	local stop = timeMove(5.5, 0, 0, 1)
-	local stopJog = timeMove(3.1, 0, 0, 1)
-	local back = timeMove(3.1, -3.1, 0, 1)
+	local build = timeMove(J, R, 0, 1)
+	local stop = timeMove(R, 0, 0, 1)
+	local stopJog = timeMove(J, 0, 0, 1)
+	local back = timeMove(J, -J, 0, 1)
 	print(
 		string.format(
 			"       parado→andar %.2f s, →trote %.2f s; trote→corrida %.2f s; corrida→parado %.2f s; trote→parado %.2f s; meia-volta %.2f s",
@@ -757,18 +774,18 @@ test("D-93/D-99: passo responsivo como no Front 44 (arranca rápido, embala na c
 			back
 		)
 	)
-	-- D-99: o Front 44 chega à velocidade quase na hora; aqui ~0,2 s (antes 0,25–0,45 s)
-	assert(walk < 0.12, "primeiro passo")
-	assert(start > 0.15 and start < 0.3, "arrancada")
-	assert(build > start * 0.9, "a corrida embala mais devagar que o trote")
-	assert(stop > 0.25 and stop < 0.45 and stopJog < 0.25, "parada")
-	assert(back > stop * 0.5 and back < 0.8, "meia-volta freia e arranca")
+	-- 2026-11-13: o Front 44 chega à velocidade quase na hora (o Humanoid); aqui ~0,1 s (D-99: ~0,23 s)
+	assert(walk < 0.06, "primeiro passo")
+	assert(start > 0.05 and start < 0.15, "arrancada")
+	assert(build < 0.12, "trote -> corrida")
+	assert(stop > 0.1 and stop < 0.2 and stopJog < 0.12, "parada")
+	assert(back > stop * 0.5 and back < 0.35, "meia-volta freia e arranca")
 	assert(
-		timeMove(0, 3.1, 0, Movement.surfaceGrip("paddy") * Movement.wadeGrip(0.5)) > start * 1.5,
+		timeMove(0, J, 0, Movement.surfaceGrip("paddy") * Movement.wadeGrip(0.5)) > start * 1.5,
 		"arrozal e água pesam"
 	)
 	local x = Movement.moveStep(3, 0, -3, 0, 0.1, Movement.AIR_GRIP)
-	assert(x > 2.8, "no ar quase não muda o embalo")
+	assert(x > 2.3, "no ar o embalo continua quase todo")
 end)
 
 test("D-93: curva gira a velocidade sem encolher (antes caía a 70% no meio)", function()
@@ -784,9 +801,9 @@ test("D-93: curva gira a velocidade sem encolher (antes caía a 70% no meio)", f
 		end
 		return t, minS / speed
 	end
-	local tJog, kJog = turn(3.1, 90)
-	local tRun, kRun = turn(5.5, 90)
-	local tStrafe, kStrafe = turn(3.1, 100)
+	local tJog, kJog = turn(J, 90)
+	local tRun, kRun = turn(R, 90)
+	local tStrafe, kStrafe = turn(J, 100)
 	-- o modelo vetorial antigo (bots) para comparar
 	local ox, oz, omin = 3.1, 0, 3.1
 	for _ = 1, 120 do
@@ -899,12 +916,14 @@ test("D-93: câmera: passada pesada na água, degrau suave, cabeça com inércia
 		Movement.headStep(h, 0, 11, 1 / 60)
 	end
 	assert(h.z < 0 and h.z >= -Movement.HEAD.maxM, "arrancando: para trás")
+	-- 2026-11-13: a parada do Front 44 (40 m/s² por ~0,15 s; antes 12 m/s² por 0,5 s)
 	local h2 = Movement.newHead()
 	local fwdMax = 0
-	for _ = 1, 30 do
-		Movement.headStep(h2, 0, -12, 1 / 60)
+	for i = 1, 30 do
+		Movement.headStep(h2, 0, if i <= 9 then -Movement.DECEL_MOVE else 0, 1 / 60)
 		fwdMax = math.max(fwdMax, h2.z)
 	end
+	assert(fwdMax <= Movement.HEAD.maxM + 1e-9, "parada: no máximo o teto")
 	for _ = 1, 120 do
 		Movement.headStep(h2, 0, 0, 1 / 60)
 	end

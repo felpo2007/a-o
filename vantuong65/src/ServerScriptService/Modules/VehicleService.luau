@@ -91,8 +91,11 @@ local DEPOTS: { { spec: string, dx: number, dz: number, yaw: number?, exitM: num
 	{ spec = "lvtp5", dx = -15, dz = -50, yaw = math.pi, exitM = 15 },
 	{ spec = "m48a3", dx = -1, dz = -50, yaw = math.pi, exitM = 15 },
 	{ spec = "ontos", dx = 13, dz = -50, yaw = math.pi, exitM = 15 },
-	{ spec = "uh34d", dx = 34, dz = -30 },
-	{ spec = "uh34d", dx = 34, dz = -5 },
+	-- v39: o UH-34D nasce de nariz para oeste (para dentro do mapa). O heliponto fica a 16 m da borda
+	-- leste (MapConfig.Bounds.maxX): de nariz para o norte, a deriva da decolagem levava o piloto para
+	-- fora da área de combate (morte em 10 s, teste no Studio)
+	{ spec = "uh34d", dx = 34, dz = -30, yaw = math.pi / 2 },
+	{ spec = "uh34d", dx = 34, dz = -5, yaw = math.pi / 2 },
 	{ spec = "m151", dx = 25, dz = -48, yaw = math.pi, exitM = 13 },
 	{ spec = "m35", dx = 31, dz = -48, yaw = math.pi, exitM = 13 },
 	{ spec = "peugeot403", dx = 23.5, dz = -12, yaw = -math.pi / 2 },
@@ -994,8 +997,10 @@ local function build(specId: string, at: Vector3, yaw: number, depot: number?): 
 	end
 	local model = Instance.new("Model")
 	model.Name = spec.name
-	-- o veículo entra e sai do streaming inteiro (o cliente nunca vê chassi sem arte)
-	model.ModelStreamingMode = Enum.ModelStreamingMode.Atomic
+	-- o veículo entra e sai do streaming inteiro (o cliente nunca vê chassi sem arte). v39: o
+	-- helicóptero fica sempre replicado: o rotor se ouve a 1,5 km (VehicleFx), bem além do raio do
+	-- streaming (1.280 studs = 358 m); são só 2 no mapa
+	model.ModelStreamingMode = if heli then Enum.ModelStreamingMode.Persistent else Enum.ModelStreamingMode.Atomic
 	local chassis = Instance.new("Part")
 	chassis.Name = "Chassis"
 	chassis.Size = Vector3.new(if wheeled then W * 0.95 else W, H * 0.55, length)

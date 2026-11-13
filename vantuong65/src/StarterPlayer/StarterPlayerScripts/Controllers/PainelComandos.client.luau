@@ -9,15 +9,24 @@
 -- ou as configurações mudam; a visibilidade é olhada nos eventos da camada Input e, de reserva,
 -- duas vezes por segundo (só leitura de estado).
 -- Os rótulos são os das ações (InputMap), frases do dicionário: o Traducao traduz cada um.
+-- 2026-11-13 (dono: "por que tem os comandos do teclado aparecendo se estou jogando no celular?"):
+-- só com teclado e mouse (as teclas) ou com controle (os botões dele); no toque nunca aparece. Troca
+-- na hora com a última entrada (Input.DeviceChanged).
+-- 2026-11-13 (fotos do dono: a lista do squad do Roblox, com fotos e nomes, ficava por cima da
+-- coluna): a coluna fica embaixo à esquerda, acima do registro de rádio, abaixo de uma faixa
+-- reservada no alto (as listas do Roblox e a ordem do comandante); numa tela baixa ela desce até o
+-- pé e encolhe (UIScale) para caber nessa faixa, em qualquer tamanho de tela.
 -- Studio: workspace:SetAttribute("VT65DevTela", "comandos") mostra a coluna por 8 s (mesmo com o
 -- tutorial aberto).
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
 
 local InputMap = require(ReplicatedStorage.Shared.InputMap)
 local Input = require(script.Parent.Input)
+local ToqueUi = require(script.Parent.ToqueUi)
 local UiKit = require(script.Parent.UiKit)
 
 local player = Players.LocalPlayer
@@ -45,11 +54,19 @@ local HEADER: { [string]: string } = {
 }
 local MAX_ROWS = 10
 
+-- faixas reservadas (px de tela, abaixo da faixa do Roblox): no alto, as listas do Roblox (squad do
+-- Roblox, voz) e a ordem do comandante; embaixo, o registro de rádio (InfantryController: 330 px do
+-- pé) e, mais baixo, o cartão do tutorial e o painel do veículo. PLACEHOLDER: conferir nas fotos.
+local TOP_RESERVE = px(250, 330)
+local FEED_TOP = 338 -- acima do registro de rádio (preferido)
+local LOW_BOTTOM = px(176, 240) -- acima do tutorial e do painel do veículo (tela baixa)
+local MIN_K = 0.6
+
 local gui = UiKit.screen("VT65Comandos", 12) -- junto do HUD, abaixo dos menus
 local col = Instance.new("CanvasGroup")
 col.Name = "Comandos"
-col.AnchorPoint = Vector2.new(0, 0.5)
-col.Position = UDim2.new(0, px(12, 24), 0.42, 0)
+col.AnchorPoint = Vector2.new(0, 1)
+col.Position = UDim2.new(0, px(12, 24), 1, -FEED_TOP)
 col.AutomaticSize = Enum.AutomaticSize.XY
 col.Size = UDim2.new()
 col.BackgroundColor3 = V.PANEL
@@ -62,6 +79,8 @@ UiKit.corner(col, 4)
 UiKit.stroke(col, V.LINE, 1, 0.6)
 UiKit.pad(col, px(10, 14), px(12, 16), px(8, 12))
 UiKit.list(col, false, px(3, 5))
+local colScale = Instance.new("UIScale")
+colScale.Parent = col
 
 local header = UiKit.kicker(col, "A PÉ", px(12, 18))
 header.AutomaticSize = Enum.AutomaticSize.X
@@ -195,6 +214,32 @@ local function draw(ctx: string)
 	end
 end
 
+-- ===== lugar na tela =====
+-- Embaixo à esquerda: o pé da coluna fica acima do registro de rádio se a faixa entre ele e a reserva
+-- do alto couber a coluna; senão desce até acima do tutorial; e, se ainda não couber, encolhe.
+local bottomOff = FEED_TOP
+local function layout()
+	local h = gui.AbsoluteSize.Y
+	local k0 = math.max(colScale.Scale, 0.01)
+	local natural = col.AbsoluteSize.Y / k0
+	if h < 10 or natural < 10 then
+		return
+	end
+	local bottom = FEED_TOP
+	if h - FEED_TOP - TOP_RESERVE < natural then
+		bottom = LOW_BOTTOM
+	end
+	local room = h - bottom - TOP_RESERVE
+	local k = math.clamp(room / natural, MIN_K, 1)
+	if math.abs(k - colScale.Scale) > 0.01 then
+		colScale.Scale = k
+	end
+	bottomOff = bottom
+	col.Position = UDim2.new(col.Position.X.Scale, col.Position.X.Offset, 1, -bottom)
+end
+gui:GetPropertyChangedSignal("AbsoluteSize"):Connect(layout)
+col:GetPropertyChangedSignal("AbsoluteSize"):Connect(layout)
+
 -- ===== mostrar e esconder =====
 local devUntil = 0
 local shown = false
@@ -210,11 +255,12 @@ local function setShown(on: boolean)
 	end
 	if on then
 		col.Visible = true
-		col.Position = UDim2.new(0, px(4, 12), 0.42, 0)
+		col.Position = UDim2.new(0, px(4, 12), 1, -bottomOff)
+		layout()
 	end
 	local t = TweenService:Create(col, TweenInfo.new(0.22, Enum.EasingStyle.Quint), {
 		GroupTransparency = if on then 0 else 1,
-		Position = UDim2.new(0, if on then px(12, 24) else px(4, 12), 0.42, 0),
+		Position = UDim2.new(0, if on then px(12, 24) else px(4, 12), 1, -bottomOff),
 	})
 	fade = t
 	t.Completed:Once(function(s: Enum.PlaybackState)
@@ -236,11 +282,25 @@ local function gameCtx(): string?
 	return nil
 end
 
+-- teclas só com teclado e mouse; botões só com controle; no toque, nada (celular e tablet sem
+-- teclado também, se a camada Input ainda não trocou para o toque)
+local function keysMakeSense(): boolean
+	local d = Input.device()
+	if d == "gamepad" then
+		return true
+	end
+	if d ~= "kbm" or ToqueUi.active() then
+		return false
+	end
+	return not (UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled)
+end
+
 local function refresh()
 	local st = Input.state
 	local dev = os.clock() < devUntil
 	local ctx = gameCtx() or (if dev then "infantry" else nil)
 	local want = ctx ~= nil
+		and keysMakeSense()
 		and (
 			dev
 			or (

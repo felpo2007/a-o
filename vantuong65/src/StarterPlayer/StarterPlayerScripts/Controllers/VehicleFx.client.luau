@@ -13,6 +13,12 @@
 --   tudo levado pelo vento (WindAffectsDrag + workspace.GlobalWind do Ambiente.client);
 -- - som do motor com tom e volume pela rotação e pela carga (AssetIds.Sounds); o laço antigo do
 --   AudioController é calado no veículo para não tocarem dois motores.
+-- - v39 (dono: "helicóptero está sem som"): o UH-34D era mudo porque o laço dele (uh34d_loop) nunca
+--   foi publicado (ID 0) e o updateSound saía antes. Agora cada veículo tem camadas
+--   (tools/sons_veiculos.py): rotor com o tom e o ritmo das pás pela rotação, motor radial que
+--   acorda antes do rotor, chocalho da lagarta pela velocidade, motor próprio dos carros e vento
+--   para quem está na cabine aberta. Longe, o ar corta os agudos (fica o "wop" grave); dentro, o
+--   casco abafa. O UH-34D se ouve a 1,5 km (VehicleService o deixa sempre replicado).
 -- - lote _v2 (modelos do Blender em peças): rodas da lagarta e dos carros, rotores, volante, torre e
 --   cano giram pelas juntas (VehicleService.artJoints); a torre segue a mira do atirador.
 -- Do motorista local vem o estado exato (VehicleLive.drive); dos outros, a telemetria (NetRpm,
@@ -21,6 +27,7 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+local SoundService = game:GetService("SoundService")
 
 local AssetIds = require(ReplicatedStorage.Shared.AssetIds) :: any
 local VehicleDrive = require(ReplicatedStorage.Shared.VehicleDrive)
@@ -38,6 +45,7 @@ local CFG = {
 	nearStuds = 80 / M, -- faixas, 4 pontas, rotor detalhado, sondagem rápida
 	midStuds = 220 / M, -- mola, poeira, fumaça, downwash
 	soundStuds = 600 / M,
+	heliStuds = 1500 / M, -- rotor de helicóptero se ouve longe (PLACEHOLDER)
 	rampStuds = 1.6, -- rampas do VehicleService (o casco vai até a ponta delas)
 	idleRpm = 0.25,
 	-- mola da fuselagem do UH-34D (trem de pouso e balanço sob o rotor): PLACEHOLDER
@@ -54,12 +62,30 @@ local CFG = {
 		m48a3 = "engine_tank",
 		ontos = "engine_tank",
 		lvtp5 = "engine_amtrac",
-		uh34d = "uh34d_loop",
-		-- D-100: carros a gasolina (som próprio a subir; até lá, o do anfíbio a gasolina)
-		m151 = "engine_amtrac",
-		m35 = "engine_amtrac",
-		peugeot403 = "engine_amtrac",
+		uh34d = "uh34d_motor", -- Wright R-1820 radial; o rotor é a camada "rotor"
+		-- v39: carros com motor próprio (4 cilindros no jipe e na picape, 6 no M35)
+		m151 = "motor_jipe",
+		m35 = "motor_caminhao",
+		peugeot403 = "motor_jipe",
 	},
+	-- ganho por arquivo: os da síntese (tools/sons_veiculos.py) saem a -16 dBFS RMS, os do ForgeGUI
+	-- a -20; o ganho iguala a altura
+	soundGain = {
+		engine_tank = 1,
+		engine_amtrac = 1,
+		uh34d_motor = 0.6,
+		uh34d_rotor = 0.95,
+		motor_jipe = 0.6,
+		motor_caminhao = 0.6,
+		lagarta = 0.5,
+		vento_cabine = 0.8,
+	} :: { [string]: number },
+	-- alcance de cada camada (studs): mínimo (volume cheio) e máximo (some)
+	engineMin = 14,
+	engineMaxHeli = 450 / M,
+	rotorMin = 40,
+	trackMax = 300 / M,
+	trackRefMs = 5, -- velocidade do laço da lagarta (30 batidas/s com elo de ~0,17 m)
 	diesel = { m48a3 = true } :: { [string]: boolean }, -- AVDS-1790-2 a diesel; Ontos e LVTP-5 a gasolina
 }
 
@@ -232,6 +258,9 @@ type Emit = {
 	ground: string,
 }
 
+-- camada de som (motor, rotor, lagarta): Sound 3D no chassi com o filtro de ar/casco
+type Layer = { s: Sound, eq: EqualizerSoundEffect, distort: DistortionSoundEffect? }
+
 type Fx = {
 	model: Model,
 	chassis: BasePart,
@@ -278,8 +307,8 @@ type Fx = {
 	tailAng: number,
 	wash: { holder: BasePart, dust: { ParticleEmitter }, bits: { ParticleEmitter }, ground: string }?,
 	wake: { holder: BasePart, bow: ParticleEmitter, spray: ParticleEmitter, foam: { ParticleEmitter } }?,
-	sound: Sound?,
-	distort: DistortionSoundEffect?,
+	sounds: { [string]: Layer },
+	heliEng: number, -- motor do helicóptero (0..1), suavizado: acorda antes do rotor
 	-- D-100: rodas (Motor6D "Roda_*" na ArtRoot, VehicleService): giro e esterço pelo Transform. Lote
 	-- _v2: também as da lagarta; cada uma no raio dela e na velocidade do lado (x = lateral, studs)
 	wheels: { { motor: Motor6D, r: number, steer: boolean, x: number, ang: number } },
@@ -387,8 +416,8 @@ local function newFx(model: Model, chassis: BasePart): Fx
 		tailAng = 0,
 		wash = nil,
 		wake = nil,
-		sound = nil,
-		distort = nil,
+		sounds = {},
+		heliEng = 0,
 		wheels = {},
 		spin = 0,
 		steerAng = 0,
@@ -632,10 +661,10 @@ end
 
 local function teardown(fx: Fx)
 	teardownVisual(fx)
-	if fx.sound then
-		fx.sound:Destroy()
-		fx.sound = nil
+	for _, l in fx.sounds do
+		l.s:Destroy()
 	end
+	table.clear(fx.sounds)
 	fxs[fx.model] = nil
 end
 
@@ -1111,56 +1140,195 @@ local function drawWash(fx: Fx, rain: number)
 	end
 end
 
-local function updateSound(fx: Fx)
+-- camada de som do veículo (cria na 1ª vez; sem ID publicado, nil)
+local function layer(fx: Fx, key: string, soundKey: string, minS: number, maxS: number, distort: boolean): Layer?
+	local l = fx.sounds[key]
+	if l then
+		return l
+	end
+	local id = soundId(soundKey)
+	if not id then
+		return nil
+	end
+	local s = Instance.new("Sound")
+	s.Name = "VT65_" .. key
+	s.SoundId = id
+	s.Looped = true
+	s.Volume = 0
+	s.RollOffMode = Enum.RollOffMode.InverseTapered
+	s.RollOffMinDistance = minS
+	s.RollOffMaxDistance = maxS
+	local eq = Instance.new("EqualizerSoundEffect")
+	eq.LowGain, eq.MidGain, eq.HighGain = 0, 0, 0
+	eq.Priority = 2
+	eq.Parent = s
+	local d: DistortionSoundEffect? = nil
+	if distort then
+		local de = Instance.new("DistortionSoundEffect")
+		de.Level = 0
+		de.Priority = 1
+		de.Parent = s
+		d = de
+	end
+	s.Parent = fx.chassis
+	s:Play()
+	-- dois veículos iguais não tocam o laço em fase
+	s.TimePosition = math.random() * 3
+	local nl: Layer = { s = s, eq = eq, distort = d }
+	fx.sounds[key] = nl
+	return nl
+end
+
+local function dropLayer(fx: Fx, key: string)
+	local l = fx.sounds[key]
+	if l then
+		l.s:Destroy()
+		fx.sounds[key] = nil
+	end
+end
+
+-- Ar e casco: longe, o ar come os agudos e o médio (do helicóptero sobra o "wop" grave); dentro do
+-- veículo, o casco abafa `muffle` dB dos agudos. Faixas de projeto.
+local function airFilter(l: Layer, distM: number, inside: boolean, muffle: number)
+	local far = math.clamp((distM - 25) / 500, 0, 1)
+	l.eq.HighGain = -26 * far - (if inside then muffle else 0)
+	l.eq.MidGain = -10 * math.clamp((distM - 120) / 900, 0, 1) - (if inside then muffle * 0.4 else 0)
+	l.eq.LowGain = 2 * far
+end
+
+local function updateSound(fx: Fx, dt: number, inside: boolean)
 	local chassis = fx.chassis
 	-- o laço antigo do AudioController (só tom pela velocidade): calado aqui para não tocar dois motores
 	local old = chassis:FindFirstChild("Engine")
 	if old and old:IsA("Sound") and old.Playing then
 		old:Stop()
 	end
-	local id = soundId(CFG.engineSound[fx.id])
-	if not id then
-		return -- sem som publicado (UH-34D: uh34d_loop = 0); o gancho fica pronto
-	end
-	local level = if fx.kind == "heli" then fx.rotor else fx.rpm
-	local snd = fx.sound
-	if not snd then
-		if level < 0.02 then
-			return
-		end
-		local s = Instance.new("Sound")
-		s.Name = "VT65Engine"
-		s.SoundId = id
-		s.Looped = true
-		s.Volume = 0
-		s.RollOffMode = Enum.RollOffMode.InverseTapered
-		s.RollOffMinDistance = 14
-		s.RollOffMaxDistance = CFG.soundStuds
-		local d = Instance.new("DistortionSoundEffect")
-		d.Level = 0
-		d.Parent = s
-		s.Parent = chassis
-		s:Play()
-		fx.sound, fx.distort = s, d
-		snd = s
-	end
-	local s = snd :: Sound
-	local pitch, vol
+	local distM = fx.dist * M
+	local gain = CFG.soundGain
 	if fx.kind == "heli" then
-		pitch, vol = 0.45 + 0.55 * fx.rotor, fx.rotor * (0.8 + 0.2 * fx.load)
-	else
-		pitch, vol = VehicleDrive.engineVoice(fx.rpm, fx.load)
+		-- rotor: o laço foi feito em 220 rpm; o tom e o ritmo das pás seguem a rotação. O estalo cresce
+		-- com o coletivo (carga). Dentro da cabine, o rotor fica acima do teto: abafado
+		local r = fx.rotor
+		local l = if r > 0.02 then layer(fx, "rotor", "uh34d_rotor", CFG.rotorMin, CFG.heliStuds, false) else nil
+		if l then
+			l.s.PlaybackSpeed = math.max(0.25, r)
+			l.s.Volume = gain.uh34d_rotor * r * r * (0.75 + 0.35 * fx.load) * (if inside then 0.6 else 1)
+			airFilter(l, distM, inside, 9)
+		elseif r <= 0.02 then
+			dropLayer(fx, "rotor")
+		end
+		-- motor radial: com o motor ligado vai logo à marcha lenta (embreagem) e depois segue o rotor;
+		-- desligado, cala em ~0,5 s enquanto o rotor ainda roda
+		local target = if fx.engineOn then math.max(0.5, r) else 0
+		local tau = if target > fx.heliEng then 0.8 else 0.5
+		fx.heliEng += (target - fx.heliEng) * (1 - math.exp(-dt / tau))
+		local e = fx.heliEng
+		-- além do alcance do motor só o rotor se ouve: a camada nem existe
+		local near = distM < CFG.engineMaxHeli * M * 1.05
+		local m = if e > 0.02 and near
+			then layer(fx, "motor", "uh34d_motor", CFG.engineMin, CFG.engineMaxHeli, true)
+			else nil
+		if m then
+			m.s.PlaybackSpeed = 0.5 + 0.5 * e -- o laço é o radial a 2.400 rpm (e = 1)
+			m.s.Volume = gain.uh34d_motor
+				* math.clamp(e / 0.5, 0, 1)
+				* (0.7 + 0.45 * fx.load)
+				* (if inside then 1.15 else 1)
+			if m.distort then
+				m.distort.Level = 0.05 + 0.2 * fx.load
+			end
+			airFilter(m, distM, inside, 4)
+		else
+			dropLayer(fx, "motor")
+		end
+		return
+	end
+	local key = CFG.engineSound[fx.id]
+	local level = fx.rpm
+	local l = if level >= 0.02 and key then layer(fx, "motor", key, CFG.engineMin, CFG.soundStuds, true) else nil
+	if l then
+		local pitch, vol = VehicleDrive.engineVoice(fx.rpm, fx.load)
 		-- partida: o motor acorda devagar
 		vol *= math.clamp(fx.rpm / CFG.idleRpm, 0, 1)
-	end
-	s.PlaybackSpeed = pitch
-	s.Volume = 0.85 * vol
-	if fx.distort then
-		fx.distort.Level = 0.04 + 0.18 * fx.load
+		l.s.PlaybackSpeed = pitch
+		l.s.Volume = 0.85 * vol * (gain[key :: string] or 1) * (if inside then 0.85 else 1)
+		if l.distort then
+			l.distort.Level = 0.04 + 0.18 * fx.load
+		end
+		airFilter(l, distM, inside, 6)
 	end
 	if level < 0.01 then
-		s:Destroy()
-		fx.sound, fx.distort = nil, nil
+		dropLayer(fx, "motor")
+	end
+	-- lagarta: o chocalho segue a velocidade de cada lado (no giro no lugar as duas andam); boiando,
+	-- nada bate
+	if fx.kind == "tracked" or fx.kind == "amphibious" then
+		local cs = chassis
+		local vF = math.abs(cs.CFrame:VectorToObjectSpace(cs.AssemblyLinearVelocity).Z) * M
+		local yaw = math.abs(cs.AssemblyAngularVelocity:Dot(cs.CFrame.UpVector)) * cs.Size.X * 0.38 * M
+		local v = if fx.floating then 0 else vF + yaw
+		local t = if v > 0.15 and distM < CFG.trackMax * M
+			then layer(fx, "lagarta", "lagarta", 12, CFG.trackMax, false)
+			else nil
+		if t then
+			t.s.PlaybackSpeed = math.clamp(v / CFG.trackRefMs, 0.55, 1.7)
+			t.s.Volume = gain.lagarta * math.clamp(v / 3, 0, 1) ^ 0.7 * (if inside then 0.8 else 1)
+			airFilter(t, distM, inside, 3)
+		elseif v <= 0.1 or distM > CFG.trackMax * M * 1.1 then
+			dropLayer(fx, "lagarta")
+		end
+	end
+end
+
+-- Vento da cabine para quem está sentado (2D, só deste cliente): porta aberta do UH-34D, jipe sem
+-- teto e lugares abertos (caçamba, escotilha). Cresce com a velocidade; no helicóptero, o
+-- downwash do rotor já sopra parado.
+local wind = { s = nil :: Sound? }
+local function updateWind(seated: Model?, dt: number)
+	local fx = seated and fxs[seated]
+	local k = 0
+	local v = 0
+	if fx then
+		local char = player.Character
+		local hum = char and char:FindFirstChildOfClass("Humanoid")
+		local seat = hum and hum.SeatPart
+		local open = seat ~= nil and seat:GetAttribute("Open") == true
+		if fx.kind == "heli" then
+			k = if seat and seat:GetAttribute("SeatId") == "driver" then 0.45 else 1
+		elseif open or fx.id == "m151" then
+			k = 0.7
+		end
+		v = fx.chassis.AssemblyLinearVelocity.Magnitude * M
+		if fx.kind == "heli" then
+			v = math.max(v, 14 * fx.rotor * fx.rotor) -- downwash entrando pela porta
+		end
+	end
+	local target = k * math.clamp((v - 3) / 40, 0, 1) ^ 1.2
+	local s = wind.s
+	if not s then
+		if target < 0.01 then
+			return
+		end
+		local id = soundId("vento_cabine")
+		if not id then
+			return
+		end
+		local snd = Instance.new("Sound")
+		snd.Name = "VT65VentoCabine"
+		snd.SoundId = id
+		snd.Looped = true
+		snd.Volume = 0
+		snd.Parent = SoundService
+		snd:Play()
+		wind.s = snd
+		s = snd
+	end
+	local w = s :: Sound
+	w.Volume += (target * CFG.soundGain.vento_cabine - w.Volume) * (1 - math.exp(-dt / 0.4))
+	w.PlaybackSpeed = 0.8 + 0.45 * math.clamp(v / 50, 0, 1)
+	if target < 0.01 and w.Volume < 0.005 then
+		w:Destroy()
+		wind.s = nil
 	end
 end
 
@@ -1192,13 +1360,15 @@ local function refresh()
 			if chassis and chassis:IsA("BasePart") then
 				local d = (chassis.Position - camPos).Magnitude
 				local fx = fxs[model]
-				if not fx and d < CFG.soundStuds then
+				-- o helicóptero se ouve mais longe (rotor)
+				local range = if model:GetAttribute("Kind") == "heli" then CFG.heliStuds else CFG.soundStuds
+				if not fx and d < range then
 					fx = newFx(model, chassis)
 					fxs[model] = fx
 				end
 				if fx then
 					fx.dist = d
-					if d > CFG.soundStuds * 1.1 then
+					if d > range * 1.1 then
 						teardown(fx)
 					elseif not fx.visual and d < CFG.midStuds then
 						setupVisual(fx)
@@ -1254,11 +1424,13 @@ RunService.PreRender:Connect(function(dt: number)
 	table.clear(bulk.cfs)
 	local rainAttr = ReplicatedStorage:GetAttribute("Rain")
 	local rain = if type(rainAttr) == "number" then math.clamp(rainAttr, 0, 1) else 0
+	local seated = seatedModel()
+	updateWind(seated, dt)
 	for _, fx in fxs do
 		if not fx.chassis.Parent then
 			continue
 		end
-		updateSound(fx)
+		updateSound(fx, dt, fx.model == seated)
 		if not fx.visual then
 			continue
 		end

@@ -13,6 +13,7 @@ local ItemAnim = require(ReplicatedStorage.Shared.ItemAnim)
 local Joints = require(ReplicatedStorage.Shared.Joints)
 local Movement = require(ReplicatedStorage.Shared.Movement)
 local Net = require(ReplicatedStorage.Shared.Net)
+local SoldierAnims = require(ReplicatedStorage.Shared.SoldierAnims)
 local Combatants = require(script.Parent.Combatants)
 local MedicalService = require(script.Parent.MedicalService)
 
@@ -54,10 +55,17 @@ end
 -- ("Ground"), mas os dois continuam colidindo com o grupo padrão, e os raycasts dos tiros (grupo
 -- Default) ainda acertam o corpo. O HumanoidRootPart fica no Default e segura o soldado pelo HipHeight.
 local GROUND, PRONE_BODY = "Ground", "ProneBody"
+-- D-107: deitado (ou caído), a HumanoidRootPart continua EM PÉ (caixa de ~0,8 m acima do quadril) e a
+-- bala do servidor a acertava como "tronco" no ar, acima do corpo deitado. Fora das consultas
+-- enquanto deitado; a visão dos bots mira a cabeça e não muda.
 local function setProneCollision(model: Model, prone: boolean)
 	for _, p in model:GetDescendants() do
-		if p:IsA("BasePart") and p.Name ~= "HumanoidRootPart" then
-			p.CollisionGroup = if prone then PRONE_BODY else "Default"
+		if p:IsA("BasePart") then
+			if p.Name ~= "HumanoidRootPart" then
+				p.CollisionGroup = if prone then PRONE_BODY else "Default"
+			elseif p.Parent == model then
+				p.CanQuery = not prone
+			end
 		end
 	end
 end
@@ -115,6 +123,67 @@ function PostureService.setCrouch(model: Model, on: boolean): boolean
 	return setStance(model, if on then "crouch" else "stand")
 end
 
+-- Caído (D-107, "os feridos estão de pé ao invés de deitados"): o MedicalService chama isto
+-- (gancho onDowned) quando "Downed" muda, para jogador e bot. Caído = deitado DE COSTAS: HipHeight
+-- do deitado, junta Root girada SoldierAnims.DOWNED e erguida até as costas encostarem no chão (no
+-- servidor, sem clipe, é o que a bala acerta), grupo do deitado e "Prone" (câmera baixa, rastejo
+-- zero, bots o veem deitado). A pose dos braços e das pernas é dos clientes (Controllers/MorteFx).
+-- Parado no lugar: sem girar com a câmera (AutoRotate volta ao levantar). Reanimado: de bruços e,
+-- se couber, agachado (o SoldierAnimations levanta suave do C0 de costas).
+-- orig = repouso da Root (no R15, na base da HumanoidRootPart: a base fica a HipHeight do chão);
+-- se o Attachment estiver noutra altura, desconta.
+local function downedRoot(model: Model, hip: number, orig: CFrame): CFrame
+	local lower = model:FindFirstChild("LowerTorso") :: BasePart?
+	local hrp = model:FindFirstChild("HumanoidRootPart") :: BasePart?
+	local half = if lower then lower.Size.Z / 2 else 0.7143
+	local off = if hrp then hrp.Size.Y / 2 + orig.Position.Y else 0
+	local D = SoldierAnims.DOWNED
+	return CFrame.new(0, SoldierAnims.downedRootY(half, hip) - off, 0) * CFrame.Angles(math.rad(D.pitchDeg), 0, 0)
+end
+
+function PostureService.setDowned(model: Model, on: boolean)
+	local hum = model:FindFirstChildOfClass("Humanoid")
+	if not hum or hum.Health <= 0 or hum.SeatPart ~= nil then
+		return -- morto (o CorposService cuida) ou no assento do veículo (fica sentado)
+	end
+	local base = model:GetAttribute("BaseHipHeight")
+	if type(base) ~= "number" then
+		base = hum.HipHeight
+		model:SetAttribute("BaseHipHeight", base)
+	end
+	if on then
+		local hip = math.max((base :: number) - DROP.prone, MIN_HIP)
+		hum.HipHeight = hip
+		local lower = model:FindFirstChild("LowerTorso")
+		local root = lower and Joints.find(lower, "Root")
+		local orig = root and Joints.rest(root)
+		if root and orig then
+			Joints.setC0(root, orig * downedRoot(model, hip, orig))
+		end
+		setProneCollision(model, true)
+		model:SetAttribute("Crouched", false)
+		model:SetAttribute("Prone", true)
+		model:SetAttribute("Sprinting", false)
+		model:SetAttribute("Lean", 0)
+		model:SetAttribute("VT65LevantouT", nil)
+		model:SetAttribute("VT65CaidoT", workspace:GetServerTimeNow()) -- a queda dos clientes começa aqui
+		if model:GetAttribute("VT65GiroAntes") == nil then
+			model:SetAttribute("VT65GiroAntes", hum.AutoRotate)
+		end
+		hum.AutoRotate = false
+		return
+	end
+	model:SetAttribute("VT65CaidoT", nil)
+	local was = model:GetAttribute("VT65GiroAntes")
+	model:SetAttribute("VT65GiroAntes", nil)
+	if type(was) == "boolean" then
+		hum.AutoRotate = was
+	end
+	setProneJoint(model, true) -- de bruços: o deitado de sempre
+	model:SetAttribute("VT65LevantouT", workspace:GetServerTimeNow())
+	setStance(model, "crouch")
+end
+
 -- orçamento de corrida por jogador (0..1), folgado de propósito (ver Movement.SERVER_*)
 local budget: { [Player]: number } = {}
 local cartaAt: { [Player]: number } = {} -- última troca da carta na mão (D-98)
@@ -129,6 +198,7 @@ function PostureService.start()
 	end
 	PhysicsService:CollisionGroupSetCollidable(PRONE_BODY, GROUND, false)
 	workspace.Terrain.CollisionGroup = GROUND
+	MedicalService.onDowned = PostureService.setDowned -- D-107: caído deita de costas
 	Players.PlayerRemoving:Connect(function(p)
 		budget[p] = nil
 		budgetChar[p] = nil

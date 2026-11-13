@@ -290,12 +290,15 @@ local function layoutBody(withPreview: boolean)
 end
 
 -- ===== botões (mouse, toque, A do controle e o cursor virtual do lobby) =====
-type Style = "primary" | "normal" | "off" | "on"
+-- robux e ci: as cores de compra do jogo (UiKit.PAGAR, 2026-11-13: Robux verde, créditos âmbar)
+type Style = "primary" | "normal" | "off" | "on" | "robux" | "ci"
 local STYLE: { [string]: { bg: Color3, fg: Color3 } } = {
 	primary = { bg = V.OLIVE, fg = V.TEXT },
 	normal = { bg = V.PANEL_3, fg = V.TEXT },
 	off = { bg = OFF_BG, fg = OFF_TEXT },
 	on = { bg = V.KHAKI, fg = V.BG },
+	robux = { bg = UiKit.PAGAR.robux.base, fg = V.TEXT },
+	ci = { bg = UiKit.PAGAR.ci.base, fg = V.TEXT },
 }
 local buttons: { [string]: TextButton } = {} -- por chave (refoco depois de redesenhar)
 
@@ -694,7 +697,7 @@ local function renderGear(s: { [string]: any })
 		else
 			line(string.format("De graça no posto %d (%s).", t.rank, tostring(t.rankName)), 13)
 			if (tonumber(t.passId) or 0) > 0 then
-				fullButton("Liberar o nível com Robux", "normal", "tier:" .. t.key, function()
+				fullButton("Liberar o nível com Robux", "robux", "tier:" .. t.key, function()
 					MarketplaceService:PromptGamePassPurchase(player, t.passId)
 				end)
 			end
@@ -735,7 +738,7 @@ local function renderGear(s: { [string]: any })
 					local can = (tonumber(s.credits) or 0) >= g.price
 					fullButton(
 						string.format("Comprar por %s", money(g.price)),
-						if can then "primary" else "off",
+						if can then "ci" else "off",
 						"gear:" .. g.id,
 						function()
 							if can then
@@ -834,7 +837,7 @@ local function skinCard(s: Skins.Skin, sk: { [string]: any })
 			then string.format("CONFIRMAR %s", money(s.price))
 			elseif can then string.format("COMPRAR %s", money(s.price))
 			else string.format("FALTAM %s", money(s.price - have))
-		button(actions, txt, if can then "primary" else "off", "skin:" .. s.id, function()
+		button(actions, txt, if can then "ci" else "off", "skin:" .. s.id, function()
 			select(s.id)
 			if not can then
 				return
@@ -857,7 +860,7 @@ local function skinCard(s: Skins.Skin, sk: { [string]: any })
 		local rid = Skins.robuxId(s)
 		if rid ~= 0 then
 			askPrice(s)
-			button(actions, robuxText(s), "normal", "rbx:" .. s.id, function()
+			button(actions, robuxText(s), "robux", "rbx:" .. s.id, function()
 				select(s.id)
 				Net.event("Commerce_Track"):FireServer("prompt", s.robuxKey)
 				if s.robuxKind == "pass" then

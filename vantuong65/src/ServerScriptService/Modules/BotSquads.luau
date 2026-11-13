@@ -9,7 +9,13 @@
 --   - perto do objetivo o squad se espalha: na defesa, num arco virado para o inimigo; no ataque,
 --     dentro do raio de captura;
 --   - contato: quem vê avisa (o squad fica sabendo em 1–2 s); no ataque, metade avança de abrigo
---     em abrigo enquanto a outra metade cobre, trocando a cada 6–10 s (lances).
+--     em abrigo enquanto a outra metade cobre, trocando a cada 5–8 s (lances).
+-- D-107 ("bots não avançam", "bots não precisam seguir o líder"):
+--   - papel na frente (BotBrain.squadSector): a maioria ataca o setor da vez; uma parte guarda o setor
+--     próprio que o inimigo ataca e, com o inimigo dentro dele, metade volta (contra-ataque);
+--   - o squad não para quando o líder para: com o líder em combate, ou parado sem ser de propósito,
+--     ou longe, cada um vai sozinho ao seu lugar no objetivo do squad;
+--   - squad de jogador (BotEscolta): os bots dele formam um squad de bots próprio (campo `player`).
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local BotBrain = require(ReplicatedStorage.Shared.BotBrain)
@@ -25,6 +31,7 @@ type Bot = BotTypes.Bot
 local BotSquads = {}
 local M = 0.28
 local S = BotBrain.SQUAD
+local LITE_LEG_M = 25 -- D-107: trecho do líder longe de humano (linha simples pela rota)
 
 export type Squad = {
 	id: number,
@@ -56,6 +63,10 @@ export type Squad = {
 	waitSince: number?,
 	boundMoving: boolean,
 	boundPhaseEnd: number,
+	-- D-107
+	player: string?, -- SquadId do squad de jogador que estes bots completam (nil = squad de bots)
+	counter: boolean, -- guarda o setor próprio com o inimigo dentro do ponto: contra-ataca
+	stallSince: number?, -- líder parado sem ser de propósito (combate, preso) desde quando
 }
 
 local squads: { Squad } = {}
@@ -83,12 +94,13 @@ function BotSquads.list(): { Squad }
 	return squads
 end
 
--- Entra num squad do lado com vaga (ou cria um)
-function BotSquads.assign(bot: Bot)
+-- Entra num squad do lado com vaga (ou cria um). player: SquadId do squad de jogador (D-107: os bots
+-- dele ficam num squad de bots só deles)
+function BotSquads.assign(bot: Bot, player: string?)
 	BotSquads.remove(bot)
 	local sq: Squad? = nil
 	for _, s in squads do
-		if s.faction == bot.faction and #s.members < S.size then
+		if s.faction == bot.faction and s.player == player and #s.members < S.size then
 			sq = s
 			break
 		end
@@ -124,6 +136,9 @@ function BotSquads.assign(bot: Bot)
 			waitSince = nil,
 			boundMoving = true,
 			boundPhaseEnd = 0,
+			player = player,
+			counter = false,
+			stallSince = nil,
 		}
 		table.insert(squads, new)
 		sq = new
@@ -210,8 +225,31 @@ local function pickLeader(s: Squad): Bot?
 	return best
 end
 
+-- D-107: setor de ataque e de guarda de cada lado. O "inimigo dentro do ponto" vale por THREAT_HOLD_S
+-- depois da última vez (sem isso, os squads do meio trocariam de papel a cada bot que entra e sai).
+local THREAT_HOLD_S = 20
+local threatUntil: { [string]: number } = {}
+type Front = { attack: number?, defend: number?, threatened: boolean }
+local function frontOf(faction: string, now: number): Front
+	local st = MatchService.state
+	if not st then
+		return { attack = nil, defend = nil, threatened = false }
+	end
+	local defend = BotBrain.defendSector(st.owner, st.active, faction)
+	if defend and MatchService.enemiesIn(defend, faction) > 0 then
+		threatUntil[faction] = now + THREAT_HOLD_S
+	end
+	return {
+		attack = BotBrain.objective(st.owner, st.active, faction),
+		defend = defend,
+		threatened = defend ~= nil and now < (threatUntil[faction] or -math.huge),
+	}
+end
+
 -- Uma vez a cada ~0,5 s: líder, rastro, formação, objetivo, fase, aviso de contato e lances.
+-- objective: objetivo do lado (BotService), se o papel do squad não der um setor.
 function BotSquads.tick(now: number, objective: (string) -> (Vector3?, number?))
+	local fronts: { [string]: Front } = { US = frontOf("US", now), VC = frontOf("VC", now) }
 	for idx, s in squads do
 		local leader = pickLeader(s)
 		if leader ~= s.leader then
@@ -235,8 +273,25 @@ function BotSquads.tick(now: number, objective: (string) -> (Vector3?, number?))
 			BotMove.trailPush(s.trail, lr.Position.X, lr.Position.Z)
 			s.formation = BotMove.formationFor(BotWorld.isOpen(lr.Position))
 		end
-		-- objetivo do squad: o ponto forte, chegando por um rumo próprio (squads não se empilham)
-		local point, sector = objective(s.faction)
+		-- D-107: líder parado sem ser de propósito (em combate, preso): o squad não espera por ele
+		if leader and lr and (leader.inCombat or (s.leaderGait ~= "wait" and BotLocomotion.speed(leader) < 0.3)) then
+			s.stallSince = s.stallSince or now
+		else
+			s.stallSince = nil
+		end
+		-- objetivo do squad: o setor do papel dele (D-107) e o ponto forte, chegando por um rumo próprio
+		-- (squads não se empilham). Squad de jogador vai sempre ao ataque.
+		local fr = fronts[s.faction]
+		local roll = if s.player then 1 else (s.id * 0.618034) % 1
+		local sector: number? = nil
+		if fr then
+			sector = BotBrain.squadSector(fr.attack, fr.defend, fr.threatened, roll)
+		end
+		local sp = if sector then MatchService.points[sector] else nil
+		local point: Vector3? = if sp then Vector3.new(sp.x, 0, sp.z) else nil
+		if not point then
+			point, sector = objective(s.faction)
+		end
 		if point and sector then
 			if s.sector ~= sector or not s.goal then
 				s.sector = sector
@@ -244,8 +299,10 @@ function BotSquads.tick(now: number, objective: (string) -> (Vector3?, number?))
 				local r = BotBrain.C.objectiveSpreadM * 0.6 / M
 				s.goal = point + Vector3.new(math.cos(a) * r, 0, math.sin(a) * r)
 				s.route = nil
+				s.phase = "move" -- o setor mudou: marcha de novo (perto dele, vira "deploy" logo abaixo)
 			end
 			s.attack = MatchService.ownerOf(sector) ~= s.faction
+			s.counter = not s.attack and MatchService.enemiesIn(sector, s.faction) > 0
 			if lr then
 				local d = flat(lr.Position, point) * M
 				if s.phase == "move" and d < S.deployM then
@@ -301,15 +358,21 @@ function BotSquads.sharedThreat(bot: Bot, now: number): Vector3?
 	return c
 end
 
+-- Ataca o ponto do squad (ou contra-ataca o próprio, com o inimigo dentro dele)? D-107
+function BotSquads.attacking(bot: Bot): boolean
+	local s = bot.squad :: Squad?
+	return s ~= nil and (s.attack or s.counter)
+end
+
 -- Lances: no ataque com contato, a equipe da vez avança; a outra cobre.
 function BotSquads.advancing(bot: Bot): boolean
 	local s = bot.squad :: Squad?
-	return s ~= nil and s.attack and s.inContact and bot.team == s.bound
+	return s ~= nil and (s.attack or s.counter) and s.inContact and bot.team == s.bound
 end
 
 function BotSquads.covering(bot: Bot): boolean
 	local s = bot.squad :: Squad?
-	return s ~= nil and s.attack and s.inContact and bot.team ~= s.bound
+	return s ~= nil and (s.attack or s.counter) and s.inContact and bot.team ~= s.bound
 end
 
 function BotSquads.phase(bot: Bot): string
@@ -317,13 +380,38 @@ function BotSquads.phase(bot: Bot): string
 	return if s then s.phase else "deploy"
 end
 
--- Lugar de cada um perto do objetivo (studs): defesa no arco virado para o inimigo; ataque dentro
--- do raio de captura, do lado por onde o squad chegou.
+-- Ponto forte e setor do squad (D-107: cada squad tem o seu, pelo papel na frente)
+function BotSquads.objective(bot: Bot): (Vector3?, number?)
+	local s = bot.squad :: Squad?
+	local sec = if s then s.sector else nil
+	local sp = if sec then MatchService.points[sec] else nil
+	if sec and sp then
+		return Vector3.new(sp.x, 0, sp.z), sec
+	end
+	return nil, nil
+end
+
+-- Lugar de quem vai sozinho ao objetivo do squad (D-107): em volta do destino do squad, cada um no
+-- seu (não se amontoam no mesmo ponto)
+function BotSquads.ownGoal(bot: Bot): Vector3?
+	local s = bot.squad :: Squad?
+	local g = if s then s.goal else nil
+	if not g then
+		return nil
+	end
+	local k = bot.slot or 0
+	local a = k * 2.399 + bot.id
+	local r = (4 + 3 * (k % 3)) / M
+	return g + Vector3.new(math.cos(a) * r, 0, math.sin(a) * r)
+end
+
+-- Lugar de cada um perto do objetivo (studs): defesa no arco virado para o inimigo; ataque (e
+-- contra-ataque, D-107) dentro do raio de captura, do lado por onde o squad chegou.
 function BotSquads.deployGoal(bot: Bot, point: Vector3): Vector3
 	local s = bot.squad :: Squad?
 	local count = if s then #s.members else 1
 	local idx = (bot.slot or 0) + 1
-	if s and not s.attack then
+	if s and not s.attack and not s.counter then
 		local axis = threatAxis(bot.faction, point)
 		local dx, dz = BotMove.defendSlot(idx, count, axis, ((bot.id * 0.618) % 1))
 		return point + Vector3.new(dx, 0, dz)
@@ -397,13 +485,13 @@ function BotSquads.lead(bot: Bot, root: BasePart, now: number, threatNear: boole
 			end
 		end)
 	end
-	-- passo: cauteloso perto do objetivo ou do inimigo; corre no aberto com ameaça perto; anda se o
-	-- squad ficou para trás e espera se ficou muito
+	-- passo: cauteloso só perto do objetivo; corre no aberto com ameaça perto; anda se o squad ficou
+	-- para trás e espera (pouco) se ficou muito. D-107: inimigo conhecido perto não faz mais andar
 	local lag = tailLag(s, root)
 	local gait = "jog"
 	if threatNear and BotWorld.isOpen(pos) then
 		gait = "sprint"
-	elseif distM < BotBrain.MOVE.walkCalmM or threatNear then
+	elseif distM < BotBrain.MOVE.walkCalmM then
 		gait = "walk"
 	end
 	if lag > S.leaderWaitM then
@@ -441,11 +529,13 @@ function BotSquads.lead(bot: Bot, root: BasePart, now: number, threatNear: boole
 		s.boundMoving, s.boundPhaseEnd = true, 0
 	end
 	s.leaderGait = gait
-	-- trecho: até legM à frente na rota (ou direto ao objetivo sem rota)
+	-- trecho: até legM à frente na rota (ou direto ao objetivo sem rota). D-107: longe de humano
+	-- (nível 3), trecho curto em linha simples pela rota estratégica, sem PathfindingService
+	local lite = (bot.lod or 1) >= 3
 	local r = s.route
 	local dest = goal
 	local final = true
-	local legStuds = BotBrain.MOVE.legM / M
+	local legStuds = (if lite then LITE_LEG_M else BotBrain.MOVE.legM) / M
 	if r then
 		local sNow = BotMove.project(r, pos.X, pos.Z, s.routeFollow.seg)
 		local ahead = sNow + legStuds
@@ -465,6 +555,7 @@ function BotSquads.lead(bot: Bot, root: BasePart, now: number, threatNear: boole
 		or BotLocomotion.status(bot) ~= "moving"
 		or (flat(cur, dest) > 12 / M and BotLocomotion.left(bot) < BotBrain.MOVE.prefetchM)
 		or (final and flat(cur, dest) > 3 / M)
+		or (lite and flat(cur, dest) > 8 / M)
 	if need then
 		BotLocomotion.go(bot, dest, gait, { final = final, keep = true, tolerance = 4 / M })
 	else
@@ -478,7 +569,8 @@ function BotSquads.lead(bot: Bot, root: BasePart, now: number, threatNear: boole
 end
 
 -- Seguidor: lugar no rastro do líder (coluna ou cunha). Devolve false se não há líder por perto
--- (o BotService decide sozinho).
+-- (o BotService decide sozinho). D-107: também com o líder em combate ou parado sem ser de propósito
+-- há leaderStallS, ou longe (mais que regroupM): cada um vai sozinho ao objetivo do squad.
 local sideCheck: { [Bot]: { at: number, blocked: boolean } } = setmetatable({}, { __mode = "k" }) :: any
 local rayParams = RaycastParams.new()
 rayParams.FilterType = Enum.RaycastFilterType.Exclude
@@ -494,14 +586,17 @@ function BotSquads.follow(bot: Bot, root: BasePart, now: number): boolean
 	if not (s and leader and leader ~= bot and alive(leader)) then
 		return false
 	end
+	if s.stallSince and now - s.stallSince >= S.leaderStallS then
+		return false -- o líder parou (combate, preso): o squad segue sem ele
+	end
 	local lr = rootOf(leader)
 	if not lr then
 		return false
 	end
 	local pos = root.Position
 	local toLeader = flat(pos, lr.Position) * M
-	if toLeader > S.regroupM * 2.5 then
-		return false -- longe demais: vai sozinho para o objetivo
+	if toLeader > S.regroupM then
+		return false -- longe (renasceu, se perdeu): vai sozinho para o objetivo, sem voltar ao líder
 	end
 	local back, side = BotMove.slot(s.formation, bot.slot)
 	local x, z, dx, dz = BotMove.trailBehind(s.trail, lr.Position.X, lr.Position.Z, back / M)
@@ -539,7 +634,7 @@ function BotSquads.follow(bot: Bot, root: BasePart, now: number): boolean
 		BotLocomotion.stop(bot, pos + Vector3.new(-math.sin(a), 0, -math.cos(a)) * 20)
 		return true
 	end
-	local behind = if toLeader > S.regroupM then toLeader else distM
+	local behind = distM
 	local cautious = s.leaderGait == "walk"
 	local gait = BotBrain.gait({
 		stance = "stand",
@@ -562,12 +657,7 @@ function BotSquads.follow(bot: Bot, root: BasePart, now: number): boolean
 		local a = lookYaw + bot.scanSide * math.rad(BotBrain.MOVE.scanDeg)
 		face = pos + Vector3.new(-math.sin(a), 0, -math.cos(a)) * 20
 	end
-	if toLeader > S.regroupM then
-		-- perdido: volta pelo caminho até o líder
-		BotLocomotion.goFar(bot, lr.Position, gait, { tolerance = 6 / M })
-	else
-		BotLocomotion.go(bot, target, gait, { direct = distM < 15, tolerance = 1.2 / M, face = face })
-	end
+	BotLocomotion.go(bot, target, gait, { direct = distM < 15, tolerance = 1.2 / M, face = face })
 	return true
 end
 

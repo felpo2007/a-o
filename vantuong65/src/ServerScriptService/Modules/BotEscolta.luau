@@ -1,16 +1,17 @@
 --!strict
 -- Bots no squad do jogador (decisão do dono, 2026-11-12: "os bots completam o squad do jogador quando
--- há pouca gente"). Regras e números em BotBrain.FILL (fillPlan, escortSlot, escortHold, markActive).
+-- há pouca gente"). Regras e números em BotBrain.FILL (fillPlan, markActive).
 --   - a cada 2 s: squad de humano de unidade leve (infantaria, recon; os de veículo e morteiro ficam de
 --     fora) com menos de 4 membros recebe bots do mesmo lado até 4, sem passar do tamanho do squad;
 --     entra ou sai um bot por squad por vez. São os bots que já existem (BotFill): o bot sai do squad
---     de bots (BotSquads) e volta para ele quando é liberado;
+--     de bots (BotSquads) e volta para um deles quando é liberado;
 --   - no modelo do bot: SquadId e BotName (o nascer no companheiro do SpawnService lê os dois);
---   - fora de combate: segue o líder humano (se ele não está em campo, o humano do squad que está) a
---     10–30 m, num leque atrás dele; com a marca do líder na carta (Squad_Mark de tipo "map", de quem
---     é líder ou o único humano do squad, como no FieldService), vai até ela e fica em volta; em
---     combate, o BotService cuida como de qualquer bot;
---   - nasce no ponto livre mais perto do humano que segue.
+--   - D-107 (pedido do dono, 2026-11-13: "bots não precisam seguir o líder"): não seguem mais o líder
+--     humano. Os bots do squad de jogador formam um squad de bots próprio (BotSquads, campo `player`)
+--     que vai ao objetivo e luta como os outros, e nascem como os outros (perto do objetivo do squad);
+--   - a marca do líder na carta (Squad_Mark de tipo "map", de quem é líder ou o único humano do squad,
+--     como no FieldService) continua valendo como ordem: fora de combate, vão até ela e ficam em
+--     volta; ela vale 2 min e, depois de chegar, 45 s (BotBrain.markActive). O líder pode sair dali.
 -- Não dirige carro: tripulação de blindado é do BotVehicles, e o bot que vira tripulante sai do squad.
 -- Studio: workspace:SetAttribute("VT65DevBots", "squad") mostra os squads com bots no Output;
 -- "squad0" desliga o enchimento (libera todos) e "squad1" liga de novo.
@@ -36,7 +37,7 @@ local getBots: () -> { Bot } = function()
 	return {}
 end
 
-type Mark = { pos: Vector3, at: number, reached: boolean }
+type Mark = { pos: Vector3, at: number, reachedAt: number? }
 local marks: { [string]: Mark } = {}
 local lastMark: { [Player]: number } = {}
 
@@ -65,33 +66,8 @@ local function rootIfAlive(p: Player?): BasePart?
 	return nil
 end
 
--- Humano que o bot segue: o líder; se ele não está em campo, outro humano do squad em campo.
-function BotEscolta.anchor(bot: Bot): BasePart?
-	local sid = bot.playerSquad
-	local s = if sid then squadOf(bot.faction, sid) else nil
-	if not s then
-		return nil
-	end
-	local lr = if s.leader then rootIfAlive(Players:GetPlayerByUserId(s.leader)) else nil
-	if lr then
-		return lr
-	end
-	for _, uid in s.members :: { number } do
-		local r = rootIfAlive(Players:GetPlayerByUserId(uid))
-		if r then
-			return r
-		end
-	end
-	return nil
-end
-
--- Onde o bot deve nascer perto (o humano que ele segue), se houver.
-function BotEscolta.spawnAnchor(bot: Bot): Vector3?
-	local r = BotEscolta.anchor(bot)
-	return if r then r.Position else nil
-end
-
--- Põe (sid) ou tira (nil) o bot de um squad de jogador.
+-- Põe (sid) ou tira (nil) o bot de um squad de jogador. D-107: com sid, entra no squad de bots próprio
+-- daquele squad de jogador; sem, volta a um squad de bots (tripulante fica fora dos dois).
 function BotEscolta.setSquad(bot: Bot, sid: string?)
 	if bot.playerSquad == sid then
 		return
@@ -101,10 +77,10 @@ function BotEscolta.setSquad(bot: Bot, sid: string?)
 	if m then
 		m:SetAttribute("SquadId", sid)
 	end
-	if sid then
+	if bot.removed or bot.crew then
 		BotSquads.remove(bot)
-	elseif not bot.removed then
-		BotSquads.assign(bot)
+	else
+		BotSquads.assign(bot, sid)
 	end
 	bot.cover, bot.coverSector, bot.goal, bot.goalSector = nil, nil, nil, nil
 end
@@ -138,7 +114,7 @@ local function onMark(p: Player, req: any)
 	if not leader or pos.X < b.minX or pos.X > b.maxX or pos.Z < b.minZ or pos.Z > b.maxZ then
 		return
 	end
-	marks[sid] = { pos = Vector3.new(pos.X, 0, pos.Z), at = now, reached = false }
+	marks[sid] = { pos = Vector3.new(pos.X, 0, pos.Z), at = now, reachedAt = nil }
 end
 
 -- quem sai primeiro do squad de bots: o que ainda não nasceu, depois quem não está em combate
@@ -205,6 +181,13 @@ local function tickFill(bots: { Bot })
 			end
 		end
 	end
+	-- marcas de squads que sumiram
+	for sid in marks do
+		local faction = string.match(sid, "^(%a+):")
+		if faction and not squadOf(faction, sid) then
+			marks[sid] = nil
+		end
+	end
 end
 
 -- lugar do bot entre os bots do mesmo squad de jogador (1, 2, ...)
@@ -221,72 +204,40 @@ local function slotIndex(bot: Bot): number
 	return 1
 end
 
--- Fora de combate, bot de squad de jogador: devolve true se cuidou do movimento.
+-- Fora de combate, bot de squad de jogador com a marca do líder valendo: vai até ela e fica em volta.
+-- Devolve true se cuidou do movimento; sem marca, o BotService o leva com o squad de bots dele.
 function BotEscolta.calm(bot: Bot, model: Model, root: BasePart, now: number): boolean
 	local sid = bot.playerSquad
-	if not sid then
+	local mk: Mark? = if sid then marks[sid] else nil
+	if not (sid and mk) then
 		return false
 	end
-	local anchor = BotEscolta.anchor(bot)
-	local pos = root.Position
-	local mk: Mark? = marks[sid]
-	if mk then
-		local leaderToMark = if anchor then flat(anchor.Position, mk.pos) * M else 0
-		if not BotBrain.markActive(now - mk.at, mk.reached, leaderToMark) then
-			marks[sid] = nil
-			mk = nil
-		end
+	local reachedAt = mk.reachedAt
+	if not BotBrain.markActive(now - mk.at, if reachedAt then now - reachedAt else nil) then
+		marks[sid] = nil
+		return false
 	end
-	local idx = slotIndex(bot)
+	-- cada um num lugar em volta da marca (6 m), olhando para fora
+	local pos = root.Position
+	local a = slotIndex(bot) * 2.399
+	local out = Vector3.new(math.cos(a), 0, math.sin(a))
+	local spot = mk.pos + out * (6 / M)
+	spot = Vector3.new(spot.X, pos.Y, spot.Z)
+	if flat(pos, mk.pos) * M <= F.markReachM and not reachedAt then
+		mk.reachedAt = now
+	end
+	local d = flat(pos, spot) * M
 	local hooks = BotTypes.hooks
-	if mk then
-		-- a marca do líder: vai até ela; lá, cada um num lugar em volta (6 m), olhando para fora
-		local a = idx * 2.399
-		local out = Vector3.new(math.cos(a), 0, math.sin(a))
-		local spot = mk.pos + out * (6 / M)
-		spot = Vector3.new(spot.X, pos.Y, spot.Z)
-		if flat(pos, mk.pos) * M <= F.markReachM then
-			mk.reached = true
-		end
-		local d = flat(pos, spot) * M
+	if d <= 2 then
+		hooks.setStance(model, "crouch")
+		BotLocomotion.stop(bot, spot + out * (20 / M))
+	else
 		hooks.setStance(model, "stand")
-		if d <= 2 then
-			BotLocomotion.stop(bot, spot + out * (20 / M))
-		elseif d > 60 then
+		if d > 60 then
 			BotLocomotion.goFar(bot, spot, "jog", { tolerance = 3 / M })
 		else
 			BotLocomotion.go(bot, spot, if d > 20 then "jog" else "walk", { tolerance = 1.5 / M })
 		end
-		return true
-	end
-	if not anchor then
-		return false -- nenhum humano do squad em campo: vai para o objetivo como qualquer bot
-	end
-	local look = anchor.CFrame.LookVector
-	local dx, dz = BotBrain.escortSlot(idx, look.X, look.Z)
-	local slot = anchor.Position + Vector3.new(dx / M, 0, dz / M)
-	slot = Vector3.new(slot.X, pos.Y, slot.Z)
-	local toLeader = flat(pos, anchor.Position) * M
-	local toSlot = flat(pos, slot) * M
-	hooks.setStance(model, "stand")
-	if BotBrain.escortHold(toLeader, toSlot) then
-		-- no lugar: olha para fora do leque
-		BotLocomotion.stop(bot, pos + Vector3.new(dx, 0, dz).Unit * (20 / M))
-		return true
-	end
-	local gait = BotBrain.gait({
-		stance = "stand",
-		distM = toSlot,
-		urgent = false,
-		cautious = toLeader <= F.maxM,
-		aiming = false,
-		behindM = math.max(toLeader - F.maxM, 0),
-		legImpaired = model:GetAttribute("LegImpaired") == true,
-	})
-	if toSlot > 60 then
-		BotLocomotion.goFar(bot, slot, gait, { tolerance = 3 / M })
-	else
-		BotLocomotion.go(bot, slot, gait, { tolerance = 1.5 / M })
 	end
 	return true
 end

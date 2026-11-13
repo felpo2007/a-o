@@ -788,8 +788,20 @@ end
 Bus.on("tracer", tracer)
 
 -- ===== tiros =====
+-- Arma de 3ª pessoa (PostureController/Pegada3P): o instante e a arfagem do tiro ficam no modelo de
+-- quem atirou (atributos locais): a arma sobe ao ombro e aponta para onde o tiro foi.
+local function markShot(model: any, dy: number?)
+	if typeof(model) == "Instance" and model:IsA("Model") then
+		model:SetAttribute("VT65TiroT", os.clock())
+		if dy and dy == dy then
+			model:SetAttribute("VT65TiroPitch", math.asin(math.clamp(dy, -1, 1)))
+		end
+	end
+end
+
 Bus.on("shot_fired", function(shot: any)
 	kick = 1
+	markShot(player.Character, nil)
 	-- em 3ª pessoa o clarão sai da arma do personagem (a de 1ª pessoa fica escondida)
 	local muzzle = if player:GetAttribute("ThirdPersonView") == true
 		then muzzleOf(player.Character)
@@ -817,6 +829,7 @@ Net.unreliable("Combat_Tracer").OnClientEvent:Connect(function(shot: any)
 	local dM = (origin - camera.CFrame.Position).Magnitude * M
 	if dM < 400 then
 		local dir = Vector3.new(shot.dx, shot.dy, shot.dz).Unit
+		markShot(shot.by, dir.Y)
 		flash(muzzleOf(shot.by) or (origin + dir * (0.8 / M)))
 	end
 	if dM < IMPACT_MAX_M + 50 then

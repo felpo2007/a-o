@@ -5,14 +5,16 @@
 -- UH-34D (VehicleController lê Input.move). Arrastar no resto da tela olha, gira a torre e mira a
 -- porta (é a câmera, como no PC). Cada botão aperta a ação do InputMap pelo Input.virtual, o mesmo
 -- caminho do botão físico: o VehicleController recebe pelos handlers de sempre.
---   motorista: lugar e sair;
---   atirador: tiro (16 mm; arrastar o próprio botão também mira), coaxial (canhão de 90 mm), ótica
---     ou mira (toque liga e desliga com touchAimToggle; sem ele, segurar) e munição/recarga;
---   comandante: binóculo e marcar alvo;
+-- v39 (dono: "muitos botões na tela do celular, deixe somente os importantes; o resto automático"):
+--   motorista e comandante: lugar e sair;
+--   atirador e porta: só o tiro (16 mm; arrastar o próprio botão também mira). No canhão de 90 mm
+--     e no 106 mm, segurar mira pela ótica e soltar dispara; um toque rápido dispara direto. Os tubos
+--     do Ontos recarregam sozinhos com o veículo parado; o 90 mm fica na explosiva;
 --   piloto do UH-34D: alavanca do coletivo à direita (o polegar arrasta de onde ela está; a marca de
---     latão é o pairado), pedais (segurar) e estabilizador (toque alterna; acende ligado);
---   porta: tiro e zoom;
+--     latão é o pairado). Pedais e estabilizador saíram da tela: o analógico de lado vira o nariz
+--     devagar e o estabilizador fica sempre ligado (PilotoToque.touchYaw, VehicleController);
 --   todos: lugar (painel de lugares) e sair (segurar ~0,45 s: ninguém pula do helicóptero sem querer).
+-- Coaxial, binóculo, marcar e trocar a munição ficam no controle e no teclado.
 -- Tamanho físico pelo Shared/Toque do T1 (Toque.rawPx); sem ele, PilotoToque.mmToPx (o mesmo
 -- palpite). Disposição em PilotoToque.layout (testada): tudo na metade direita, à esquerda do rádio
 -- do HUD do T1 no alto, espelhado com touchMirror. Esta tela fica por cima do HUD do T1 (ordem 14 >
@@ -59,15 +61,6 @@ local function virtual(id: string, down: boolean)
 		warned = true
 		warn("[VT65] Input.virtual ainda não existe (T1): os botões de toque do veículo não agem")
 	end
-end
-
--- o botão virtual da ação está apertado? nil = o Input ainda não sabe dizer
-local function virtualDown(id: string): boolean?
-	local f = (Input :: any).virtualDown
-	if type(f) == "function" then
-		return f(id) == true
-	end
-	return nil
 end
 
 local function setting(key: string): any
@@ -136,7 +129,7 @@ type Btn = {
 	marks: { GuiObject }, -- desenho do glifo (retícula, setas)
 	rings: { UIStroke },
 	action: string?,
-	mode: string, -- "hold" | "toggle" | "exit"
+	mode: string, -- "hold" | "exit" | "aimfire" (canhão: segurar mira, soltar dispara)
 	on: boolean, -- ligado (botão de alternar)
 	io: InputObject?, -- o dedo que segura
 	down: boolean,
@@ -223,13 +216,6 @@ local function mark(b: Btn, pos: UDim2, size: UDim2, rot: number?): Frame
 	return f
 end
 
--- seta de pedal desenhada (sem fonte): dir −1 esquerda, 1 direita
-local function chevron(b: Btn, dir: number)
-	local x = 0.5 - 0.06 * dir
-	mark(b, UDim2.fromScale(x, 0.38), UDim2.new(0.36, 0, 0, 5), 45 * dir)
-	mark(b, UDim2.fromScale(x, 0.62), UDim2.new(0.36, 0, 0, 5), -45 * dir)
-end
-
 -- retícula do tiro: anel e quatro traços
 local function reticle(b: Btn)
 	local ring = Instance.new("Frame")
@@ -249,26 +235,13 @@ local function reticle(b: Btn)
 	mark(b, UDim2.fromScale(0.5, 0.5), UDim2.fromOffset(4, 4))
 end
 
+-- v39: só o essencial na tela (o resto é automático ou fica no controle e no teclado)
 make("exit", "SAIR", false, true)
 make("seat", "LUGAR", false)
 reticle(make("fire", "", true, true))
-make("coax", "COAX", true)
-make("optic", "ÓTICA", true)
-make("ammo", "MUNIÇÃO", true)
-make("binoc", "BINÓCULO", true)
-make("mark", "MARCAR", true)
-chevron(make("pedalL", "", true), -1)
-chevron(make("pedalR", "", true), 1)
-make("stab", "ESTAB.", false)
 buttons.exit.mode = "exit"
 buttons.exit.action = "v_exit"
 buttons.seat.action = "v_switch_seat"
-buttons.coax.action = "v_coax"
-buttons.ammo.action = "v_ammo"
-buttons.mark.action = "v_mark"
-buttons.pedalL.action = "h_pedal_left"
-buttons.pedalR.action = "h_pedal_right"
-buttons.stab.action = "h_stabilize"
 
 -- sair: segurar enche a barra; cheia, aperta a ação
 local exitBar = Instance.new("Frame")
@@ -345,7 +318,16 @@ local function pointer(io: InputObject): boolean
 	return io.UserInputType == Enum.UserInputType.Touch or io.UserInputType == Enum.UserInputType.MouseButton1
 end
 
--- ótica e binóculo alternam no toque se o jogador quiser (touchAimToggle, padrão ligado)
+-- v39: canhão no toque: segurar passa de AIM_HOLD_S e liga a ótica; soltar dispara e desliga
+local aim = { pressN = 0, zoom = false }
+
+local function aimRelease()
+	if aim.zoom then
+		aim.zoom = false
+		virtual("v_optic", false)
+	end
+end
+
 local function press(b: Btn, down: boolean)
 	local id = b.action
 	if not id then
@@ -357,12 +339,22 @@ local function press(b: Btn, down: boolean)
 		else
 			exitHold.stop()
 		end
-	elseif b.mode == "toggle" then
+	elseif b.mode == "aimfire" then
+		aim.pressN += 1
 		if down then
-			local now = virtualDown(id)
-			local on = if now == nil then b.on else now
-			virtual(id, not on)
-			b.on = not on
+			local n = aim.pressN
+			task.delay(PilotoToque.AIM_HOLD_S, function()
+				if aim.pressN == n and b.down and not aim.zoom then
+					aim.zoom = true
+					virtual("v_optic", true)
+				end
+			end)
+		else
+			virtual(id, true)
+			task.delay(0.08, function()
+				virtual(id, false)
+			end)
+			aimRelease()
 		end
 	else
 		virtual(id, down)
@@ -460,16 +452,21 @@ end)
 
 -- solta tudo (sumiu, trocou de lugar, abriu menu): nada fica apertado sem dedo
 local function releaseAll()
+	-- sumiu no meio da mira do canhão: não dispara, só desliga a ótica
+	aim.pressN += 1
+	for io, b in held do
+		if b.mode == "aimfire" then
+			held[io] = nil
+			aimFrom[io] = nil
+			b.io = nil
+			b.down = false
+		end
+	end
+	aimRelease()
 	for io in held do
 		endPress(io)
 	end
 	for _, b in buttons do
-		if b.mode == "toggle" then
-			if b.on and b.action then
-				virtual(b.action, false)
-			end
-			b.on = false
-		end
 		if b.lit ~= (b.down or b.on) then
 			paint(b)
 		end
@@ -527,17 +524,15 @@ local function layout(st: SeatInfo)
 		return -- a tela acabou de ligar: o tamanho chega no próximo quadro
 	end
 	local mirror = setting("touchMirror") == true
-	local toggle = setting("touchAimToggle") ~= false
 	local key = string.format(
-		"%s|%s|%s|%s|%d|%d|%s|%s",
+		"%s|%s|%s|%s|%d|%d|%s",
 		st.role,
 		st.kind,
 		st.weapon or "",
 		tostring(st.personal),
 		a.X,
 		a.Y,
-		tostring(mirror),
-		tostring(toggle)
+		tostring(mirror)
 	)
 	if key == laidOut then
 		return
@@ -545,23 +540,14 @@ local function layout(st: SeatInfo)
 	releaseAll()
 	laidOut = key
 	local armed = st.weapon ~= nil or st.personal
-	local big = st.weapon == "gun_90" or st.weapon == "rr_106"
 	local rects = PilotoToque.layout(st.role, a.X, a.Y, {
 		fire = armed or st.role == "door",
-		coax = st.weapon == "gun_90",
-		optic = armed or st.role == "door",
-		ammo = armed,
 		mirror = mirror,
 		avoid = radioRect(a.X, a.Y),
 	}, mmPx)
-	-- ações e rótulos do lugar
+	-- ação do tiro do lugar; canhão: segurar mira, soltar dispara (a arma do ocupante atira no aperto)
 	buttons.fire.action = if st.role == "door" then "v_door_fire" else "v_fire"
-	buttons.optic.action = "v_optic"
-	buttons.optic.label.Text = if st.role == "door" then "ZOOM" elseif big then "ÓTICA" else "MIRA"
-	buttons.ammo.label.Text = if st.weapon == "gun_90" then "MUNIÇÃO" else "RECARGA"
-	buttons.binoc.action = "v_binoculars"
-	buttons.optic.mode = if toggle then "toggle" else "hold"
-	buttons.binoc.mode = if toggle then "toggle" else "hold"
+	buttons.fire.mode = if PilotoToque.aimOnHold(st.weapon) and not st.personal then "aimfire" else "hold"
 	for name, b in buttons do
 		place(b.button, rects[name])
 		paint(b)
@@ -569,6 +555,38 @@ local function layout(st: SeatInfo)
 	place(track, rects.lever)
 	place(trackLabel, rects.leverLabel)
 	paintLever()
+end
+
+-- v39: tubos do Ontos recarregam sozinhos no toque com o veículo parado (o mesmo pedido do X)
+local reload = { last = -math.huge }
+local function autoReload(st: SeatInfo)
+	if st.weapon ~= "rr_106" or st.personal or os.clock() < dev.untilT then
+		return
+	end
+	local char = player.Character
+	local hum = char and char:FindFirstChildOfClass("Humanoid")
+	local seat = hum and hum.SeatPart
+	local model = seat and seat:FindFirstAncestorWhichIsA("Model")
+	local chassis = model and model:FindFirstChild("Chassis")
+	if not (model and chassis and chassis:IsA("BasePart")) then
+		return
+	end
+	local tubes = model:GetAttribute("Tubes")
+	local now = os.clock()
+	local due = PilotoToque.autoReload(
+		if type(tubes) == "number" then tubes else nil,
+		6, -- tubos do M50 (VehicleService.GUNS.rr_106.tubes)
+		chassis.AssemblyLinearVelocity.Magnitude * 0.28,
+		model:GetAttribute("Reloading") == true,
+		now - reload.last
+	)
+	if due then
+		reload.last = now
+		virtual("v_ammo", true)
+		task.delay(0.1, function()
+			virtual("v_ammo", false)
+		end)
+	end
 end
 
 -- ===== laço =====
@@ -586,16 +604,7 @@ RunService.Heartbeat:Connect(function()
 		gui.Enabled = true
 	end
 	layout(st)
-	-- botões de alternar e o estabilizador acendem pelo estado de verdade
-	for _, b in buttons do
-		if b.mode == "toggle" and b.action and b.button.Visible then
-			local now = virtualDown(b.action)
-			if now ~= nil then
-				b.on = now
-			end
-		end
-	end
-	buttons.stab.on = L.assist
+	autoReload(st)
 	for _, b in buttons do
 		if b.button.Visible and b.lit ~= (b.down or b.on) then
 			paint(b)

@@ -26,6 +26,7 @@ local UserInputService = game:GetService("UserInputService")
 local InputMap = require(ReplicatedStorage.Shared.InputMap)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Toque = require(ReplicatedStorage.Shared.Toque)
+local ToqueTelas = require(script.Parent.ToqueTelas) -- nomes dos botões no toque (sem dependências)
 
 local player = Players.LocalPlayer
 local Input = {}
@@ -485,6 +486,18 @@ UserInputService.InputBegan:Connect(function(input: InputObject, processed: bool
 		applyEvent("reconnect")
 	end
 end)
+-- Roda do mouse (2026-11-13): não é tecla (não tem InputBinding nem tocar/segurar); vira as fases
+-- "press" de "weapon_next" (para baixo) e "weapon_prev" (para cima) no jogo a pé, como a troca de
+-- arma (WeaponController). Sobre uma lista da interface (processed) ela rola a lista.
+UserInputService.InputChanged:Connect(function(input: InputObject, processed: boolean)
+	if input.UserInputType ~= Enum.UserInputType.MouseWheel or processed or input.Position.Z == 0 then
+		return
+	end
+	local ctx = InputMap.activeContext(Input.state)
+	if (ctx == "infantry" or ctx == "aim") and InputMap.allowed(Input.state, "swap_weapon") then
+		runPhase(if input.Position.Z < 0 then "weapon_next" else "weapon_prev", "press")
+	end
+end)
 UserInputService.InputEnded:Connect(function(input)
 	local t = input.UserInputType
 	if isGamepad(t) and t == primaryPad then
@@ -658,12 +671,28 @@ local KEY_TEXT: { [string]: string } = {
 	LeftShift = "Shift",
 	Return = "Enter",
 	One = "1",
+	Two = "2",
+	Three = "3",
+	Four = "4",
+	Five = "5",
+	Six = "6",
+	Seven = "7",
+	Eight = "8",
+	Nine = "9",
+	Zero = "0",
 	Space = "Espaço",
 	CapsLock = "Caps Lock",
 }
+-- ação sem tecla própria no teclado, mas com caminho (2026-11-13: trocar arma é 1 e 2 e a roda do mouse)
+local KEY_FALLBACK: { [string]: string } = { swap_weapon = "1 / 2" }
 
 -- Devolve (imagem, texto) para a ação no contexto ativo (ou num contexto dado).
+-- Toque (v39, dono: "por que tem os comandos do teclado se estou jogando no celular?"): nunca a
+-- tecla; o nome do botão na tela (ToqueTelas.TOUCH_NAME) ou "" (o chip mostra só o rótulo).
 function Input.glyph(actionId: string, ctx: string?): (string?, string)
+	if device == "touch" then
+		return nil, ToqueTelas.TOUCH_NAME[actionId] or ""
+	end
 	for _, a in InputMap.ACTIONS do
 		if a.id == actionId and (ctx == nil or a.ctx == ctx) and seatOk(a) then
 			if device == "gamepad" then
@@ -679,6 +708,8 @@ function Input.glyph(actionId: string, ctx: string?): (string?, string)
 				local key = InputMap.keyFor(a, Input.settings)
 				if key then
 					return nil, KEY_TEXT[key] or key
+				elseif KEY_FALLBACK[actionId] then
+					return nil, KEY_FALLBACK[actionId]
 				end
 			end
 		end

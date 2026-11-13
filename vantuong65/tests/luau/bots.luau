@@ -157,7 +157,8 @@ test("abrigo: VC espera mais escondido e dá mais rajadas por abrigo; ferido esp
 		assert(BotBrain.burstsPerCover(D, VC, r, false) >= BotBrain.burstsPerCover(D, US, r, false))
 		assert(math.abs(BotBrain.hideTime(D, US, r, true) - 2 * BotBrain.hideTime(D, US, r, false)) < 1e-9)
 	end
-	assert(BotBrain.burstsPerCover(D, US, 0, false) >= 2 and BotBrain.burstsPerCover(D, US, 0.99, false) <= 4)
+	-- D-107 ("mais fast paced"): 1 a 3 rajadas por abrigo (eram 2 a 4)
+	assert(BotBrain.burstsPerCover(D, US, 0, false) >= 1 and BotBrain.burstsPerCover(D, US, 0.99, false) <= 3)
 	assert(BotBrain.burstsPerCover(D, US, 0.5, true) == math.huge, "ferido não troca de abrigo para avançar")
 end)
 
@@ -594,8 +595,9 @@ test("avançar: atacante sem alvo nem fogo volta a andar; defensor fica; parado 
 	assert(not BotBrain.shouldPress(true, false, true, false, 9), "sob fogo, abriga")
 	assert(not BotBrain.shouldPress(false, false, false, false, 9), "defensor fica no ponto")
 	assert(not BotBrain.shouldPress(true, false, false, true, 9), "ferido recua")
-	assert(BotBrain.idleExpired(21, false, false) and not BotBrain.idleExpired(21, false, true))
-	assert(not BotBrain.idleExpired(21, true, false) and not BotBrain.idleExpired(10, false, false))
+	-- D-107: parado sem contato fora do ponto, no máximo 10 s (era 20)
+	assert(BotBrain.idleExpired(11, false, false) and not BotBrain.idleExpired(11, false, true))
+	assert(not BotBrain.idleExpired(21, true, false) and not BotBrain.idleExpired(8, false, false))
 	assert(BotBrain.squadBounds(true, 120, 10) and not BotBrain.squadBounds(true, 200, 10))
 	assert(not BotBrain.squadBounds(true, 120, 60) and not BotBrain.squadBounds(false, 120, 10))
 	-- menos tempo parado depois do contato (v36: EUA 2–5 s, VC 20–40 s)
@@ -665,24 +667,230 @@ test("squad de jogador: com menos de 4, recebe bots até 4, um por vez, sem pass
 	assert(#add3 == 1, "um bot livre só vai para um squad")
 end)
 
-test("squad de jogador: seguem o líder a 10–30 m, num leque atrás dele; a marca do líder manda", function()
+-- D-107 ("bots não precisam seguir o líder"): sem leque atrás do humano; a marca dele é ordem com prazo
+test("squad de jogador: não segue mais o líder; a marca vale 2 min e 45 s depois de chegar", function()
 	local F = BotBrain.FILL
-	for i = 1, 5 do
-		local dx, dz = BotBrain.escortSlot(i, 0, -1) -- líder olhando para -Z
-		local d = math.sqrt(dx * dx + dz * dz)
-		assert(d >= F.minM and d <= F.maxM, string.format("lugar %d a %.1f m", i, d))
-		assert(dz > -1e-9, string.format("lugar %d na frente do líder", i))
+	assert(BotBrain.escortSlot == nil and BotBrain.escortHold == nil, "o leque atrás do líder humano saiu")
+	assert(F.markTtlS == 120 and F.markHoldS == 45)
+	assert(BotBrain.markActive(10, nil), "marca nova manda")
+	assert(BotBrain.markActive(F.markTtlS - 1, nil), "ainda indo para ela")
+	assert(not BotBrain.markActive(F.markTtlS + 1, nil), "marca velha")
+	assert(BotBrain.markActive(30, 20), "chegou há 20 s: fica")
+	assert(not BotBrain.markActive(80, F.markHoldS + 1), "chegou há mais de 45 s: volta ao objetivo")
+end)
+
+-- ===== D-107: 50 por lado, desempenho, papel na frente e lance de assalto =====
+test("lotação: completa até 50 por lado menos os humanos, 2 por vez; sai na hora", function()
+	local K = BotBrain.CROWD
+	assert(K.perSide == 50, "50 por lado (Roles.TEAM_MAX)")
+	assert(BotBrain.fillWant(50, 0, 50, 50) == 50, "sem humano: 50 bots")
+	assert(BotBrain.fillWant(50, 3, 50, 50) == 47, "3 humanos: 47 bots")
+	assert(BotBrain.fillWant(50, 60, 50, 50) == 0, "time cheio de humanos: nenhum")
+	assert(BotBrain.fillWant(50, 3, 50, 30) == 30, "o teto pelo desempenho manda")
+	assert(BotBrain.fillWant(10, 0, 50, 50) == 10, "BotFill menor vale")
+	assert(BotBrain.fillStep(0, 50, K.addPerStep) == 2, "entram 2 por vez")
+	assert(BotBrain.fillStep(49, 50, K.addPerStep) == 1)
+	assert(BotBrain.fillStep(50, 47, K.addPerStep) == -3, "entrou gente: saem na hora")
+	-- tempo para encher os dois lados (as duas filas andam juntas)
+	local have, t = 0, 0
+	while have < 50 do
+		have += BotBrain.fillStep(have, 50, K.addPerStep)
+		t += K.stepS
 	end
-	local x1, z1 = BotBrain.escortSlot(1, 0, -1)
-	assert(math.abs(x1) < 1e-9 and z1 > 0, "o primeiro fica bem atrás")
-	assert(BotBrain.escortHold(15, 5), "no lugar: fica")
-	assert(not BotBrain.escortHold(35, 5), "longe do líder: vai")
-	assert(not BotBrain.escortHold(8, 5), "colado no líder: abre")
-	assert(not BotBrain.escortHold(20, 15), "longe do lugar: vai")
-	assert(BotBrain.markActive(10, false, 200), "marca nova manda, mesmo com o líder longe")
-	assert(not BotBrain.markActive(F.markTtlS + 1, false, 0), "marca velha")
-	assert(not BotBrain.markActive(30, true, F.markReleaseM + 1), "chegou e o líder seguiu: volta a segui-lo")
-	assert(BotBrain.markActive(30, true, 10), "chegou e o líder está lá: fica")
+	print(
+		string.format("       lotação: 50 por lado em %.0f s (%d por lado a cada %.0f s)", t, K.addPerStep, K.stepS)
+	)
+	assert(t <= 30, "demora demais para encher: " .. t)
+end)
+
+test("teto pelo Heartbeat: para abaixo de 45 Hz, tira abaixo de 35 Hz, volta acima de 52 Hz", function()
+	local K = BotBrain.CROWD
+	local c = BotBrain.newCrowd()
+	assert(c.cap == 50)
+	assert(BotBrain.crowdStep(c, 60, 1, 20) == "add", "servidor folgado: entra gente")
+	-- 45 Hz > x >= 35 Hz: o teto para onde está
+	assert(BotBrain.crowdStep(c, 40, 1, 30) == "hold" and c.cap == 30, "parou em 30")
+	-- abaixo de 35 Hz por dropS: sai dropStep
+	local out = ""
+	for _ = 1, K.dropS do
+		out = BotBrain.crowdStep(c, 30, 1, 30)
+	end
+	assert(out == "drop" and c.cap == 30 - K.dropStep, "tirou " .. K.dropStep .. ": " .. c.cap)
+	-- muito tempo ruim: nunca abaixo de minPerSide
+	for _ = 1, 200 do
+		BotBrain.crowdStep(c, 20, 1, c.cap)
+	end
+	assert(c.cap == K.minPerSide, "piso de " .. K.minPerSide)
+	-- volta a subir devagar com o servidor folgado
+	local t = 0
+	while c.cap < K.perSide do
+		BotBrain.crowdStep(c, 60, 1, c.cap)
+		t += 1
+	end
+	print(string.format("       teto: de %d a %d por lado em %d s com o servidor a 60 Hz", K.minPerSide, K.perSide, t))
+	-- oscilação entre 45 e 52 Hz não sobe nem desce
+	local before = c.cap
+	for i = 1, 30 do
+		BotBrain.crowdStep(c, if i % 2 == 0 then 46 else 51, 1, c.cap)
+	end
+	assert(c.cap == before)
+end)
+
+test("nível de detalhe: 100 bots cabem no orçamento (pensamentos, passos, raios de visada)", function()
+	local L, B = BotBrain.LOD, BotBrain.BUDGET
+	assert(BotBrain.lodLevel(50) == 1 and BotBrain.lodLevel(200) == 2 and BotBrain.lodLevel(400) == 3)
+	assert(BotBrain.lodLevel(math.huge) == 3, "sem humano em campo: longe")
+	assert(L.thinkS[1] == C.thinkS, "perto de humano, pensa como antes")
+	-- sem nível de detalhe (antes): 100 bots pensando a cada 0,3 s e com as pernas a cada quadro
+	local before = { thinks = 100 / C.thinkS, steps = 100 * 60, los = 100 / C.thinkS * C.maxLosChecks }
+	local worst = BotBrain.botLoad({ 100, 0, 0 }) -- todos perto de humanos
+	local typical = BotBrain.botLoad({ 15, 25, 60 }) -- alguns humanos perto da frente
+	local solo = BotBrain.botLoad({ 8, 12, 80 }) -- um humano
+	local function row(name: string, l: any): string
+		return string.format(
+			"%s %.0f pens./s (%.1f por quadro), %.0f passos/s, %.0f raios/s",
+			name,
+			l.thinks,
+			l.thinks / 60,
+			l.steps,
+			l.los
+		)
+	end
+	print("       " .. row("antes:", before))
+	print("       " .. row("todos perto:", worst))
+	print("       " .. row("típico 15/25/60:", typical))
+	print("       " .. row("1 humano 8/12/80:", solo))
+	assert(math.abs(worst.thinks - before.thinks) < 1e-6, "perto de humano, nada muda")
+	assert(worst.thinks / 60 <= B.maxPerFrame, "pior caso cabe no teto de pensamentos por quadro")
+	assert(typical.thinks <= before.thinks * 0.6 and typical.steps <= before.steps * 0.6, "típico: 40% a menos")
+	assert(solo.thinks <= before.thinks * 0.45 and solo.los <= before.los * 0.35)
+	-- PathfindingService: teto do servidor todo (antes não tinha teto por segundo)
+	assert(B.pathPerS <= 10 and BotBrain.MOVE.pathConcurrent <= 2)
+end)
+
+test("papel na frente: a maioria ataca, uma parte guarda; com inimigo no ponto, contra-ataque", function()
+	local ALL = { true, true, true, true, true }
+	local INIT = { "VC", "VC", "Neutral", "US", "US" }
+	-- início: os dois atacam o S3 neutro; ninguém tem setor ameaçado
+	assert(BotBrain.defendSector(INIT, ALL, "US") == nil and BotBrain.defendSector(INIT, ALL, "VC") == nil)
+	-- EUA tomaram o S3: os EUA atacam o S2 e guardam o S3; o VC ataca o S3 e guarda o S2
+	local after = { "VC", "VC", "US", "US", "US" }
+	assert(BotBrain.objective(after, ALL, "US") == 2 and BotBrain.defendSector(after, ALL, "US") == 3)
+	assert(BotBrain.objective(after, ALL, "VC") == 3 and BotBrain.defendSector(after, ALL, "VC") == 2)
+	-- Offensive: o VC só guarda o S4
+	local off = { "VC", "VC", "VC", "VC", "US" }
+	local act = { false, false, false, true, false }
+	local vcA, vcD = BotBrain.objective(off, act, "VC"), BotBrain.defendSector(off, act, "VC")
+	assert(vcD == 4 and BotBrain.squadSector(vcA, vcD, false, 0.9) == 4)
+	-- divisão pelos squads (roll fixo de cada squad: id x 0,618 mod 1)
+	local function share(threatened: boolean): number
+		local def = 0
+		for id = 1, 16 do
+			local _, attack = BotBrain.squadSector(2, 3, threatened, (id * 0.618034) % 1)
+			if not attack then
+				def += 1
+			end
+		end
+		return def / 16
+	end
+	local calmShare, hotShare = share(false), share(true)
+	print(
+		string.format("       16 squads: %.0f%% guardam; com inimigo no ponto, %.0f%%", calmShare * 100, hotShare * 100)
+	)
+	assert(math.abs(calmShare - BotBrain.TASK.defendShare) <= 0.07)
+	assert(math.abs(hotShare - BotBrain.TASK.counterShare) <= 0.07)
+	-- sem setor ameaçado, todos atacam; sem ataque, todos guardam
+	assert(select(2, BotBrain.squadSector(2, nil, true, 0.1)) == true)
+	assert(BotBrain.squadSector(nil, 3, false, 0.9) == 3)
+end)
+
+test("lance de assalto: a equipe da vez avança em vez de trocar tiro de longe ou ficar presa", function()
+	local P = BotBrain.PUSH
+	local function ctx(o: any?): any
+		local c = {
+			attacking = true,
+			myBound = true,
+			ready = true,
+			wounded = false,
+			targetM = nil,
+			toPointM = 150,
+			zoneM = 50,
+			pinnedS = 0,
+			stillS = 0,
+		}
+		for k, v in o or {} do
+			c[k] = v
+		end
+		return c
+	end
+	assert(BotBrain.shouldRush(ctx()), "sem alvo à vista: avança")
+	assert(BotBrain.shouldRush(ctx({ targetM = 120 })), "alvo a 120 m (bot acerta ~4%): avança")
+	assert(not BotBrain.shouldRush(ctx({ targetM = 60 })), "alvo a 60 m: luta um pouco")
+	assert(BotBrain.shouldRush(ctx({ targetM = 60, stillS = P.coverMaxS })), "...e avança depois de coverMaxS")
+	assert(not BotBrain.shouldRush(ctx({ targetM = 20, stillS = 30 })), "alvo perto: luta onde está")
+	assert(not BotBrain.shouldRush(ctx({ myBound = false })), "a outra equipe cobre")
+	assert(BotBrain.shouldRush(ctx({ myBound = false, stillS = P.coverHardMaxS })), "ninguém fica para sempre")
+	assert(BotBrain.shouldRush(ctx({ myBound = false, pinnedS = P.pinnedMaxS })), "preso demais: levanta e vai")
+	assert(not BotBrain.shouldRush(ctx({ attacking = false })), "quem guarda fica")
+	assert(not BotBrain.shouldRush(ctx({ wounded = true })), "ferido recua")
+	assert(not BotBrain.shouldRush(ctx({ ready = false })), "descansa entre lances")
+	assert(not BotBrain.shouldRush(ctx({ toPointM = 25 })), "dentro do ponto: fica e luta")
+	-- ritmo sob fogo: cada equipe avança boundM a cada 2 lances do squad
+	local Movement = require(S .. "Movement") :: any
+	local Sq = BotBrain.SQUAD
+	local bound = (P.boundM[1] + P.boundM[2]) / 2
+	local window = (Sq.boundS[1] + Sq.boundS[2]) / 2
+	local pace = bound / (2 * window)
+	print(
+		string.format(
+			"       sob fogo: lance de %.0f m em %.1f s correndo; o squad anda ~%.1f m/s; 150 m em ~%.0f s",
+			bound,
+			bound / Movement.SPRINT,
+			pace,
+			150 / pace
+		)
+	)
+	assert(bound / Movement.SPRINT <= P.rushMaxS, "o lance cabe no tempo máximo")
+	assert(150 / pace <= 180, "150 m sob fogo em até 3 min")
+end)
+
+test("primeiro tiroteio em até 3 min no Warfare (estimativa com o mapa real)", function()
+	local MapConfig = require(S .. "MapConfig") :: any
+	local Front = require(S .. "Front") :: any
+	local Geometry = require(S .. "Geometry") :: any
+	local Movement = require(S .. "Movement") :: any
+	local M = MapConfig.STUD_M
+	local function sectorAt(x: number, z: number): number?
+		return Geometry.sectorAt(MapConfig.Sectors, x, z)
+	end
+	local by: { [number]: { any } } = {}
+	for _, sp in MapConfig.Strongpoints do
+		by[sp.sector] = by[sp.sector] or {}
+		table.insert(by[sp.sector], sp)
+	end
+	-- terreno pronto no Studio (D-101: 29 s); o 1º squad de cada lado entra em 3 s (2 por segundo)
+	local TERRAIN_S = 29
+	local entryS = 6 / BotBrain.CROWD.addPerStep * BotBrain.CROWD.stepS
+	local zoneM = MapConfig.CaptureRadiusStuds * M
+	local worst = 0
+	for _, t in by[3] do
+		local slow = 0
+		for _, pair in { { own = 2 }, { own = 4 } } do
+			local best = math.huge
+			for _, own in by[pair.own] do
+				local x, z = Front.forwardRally(pair.own, own, t, M, sectorAt, MapConfig.Bounds)
+				if x and z then
+					best = math.min(best, math.sqrt((x - t.x) ^ 2 + (z - t.z) ^ 2) * M)
+				end
+			end
+			-- o squad trota até a borda do ponto (a visão é de 40 m na mata a 120 m no aberto: o contato
+			-- vem antes disso quando os dois chegam juntos)
+			slow = math.max(slow, (best - zoneM) / Movement.JOG)
+		end
+		worst = math.max(worst, TERRAIN_S + entryS + slow)
+	end
+	print(string.format("       pior caso: %.0f s de partida até os dois lados na borda do S3", worst))
+	assert(worst <= 180, string.format("primeiro contato estimado em %.0f s", worst))
 end)
 
 test("soldado de 2 m: olhos do abrigo levados pelo Corpo.K", function()

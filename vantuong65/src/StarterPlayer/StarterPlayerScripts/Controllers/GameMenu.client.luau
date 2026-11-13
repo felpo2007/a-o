@@ -133,6 +133,18 @@ do
 	close.button.Size = UDim2.fromOffset(px(118, 166), px(38, 52))
 	close.button.Selectable = false
 	U.close = close.button
+	-- jogar agora (2026-11-13): fora de campo, entra já (squad com vaga e o último ponto,
+	-- Controllers/JogarAgora pelo Bus); em campo some
+	local quick = UiKit.action(root, "JOGAR AGORA", "free", function()
+		Bus.fire("menu_close_request")
+		Bus.fire("jogar_agora")
+	end, { h = px(38, 52) })
+	quick.button.Name = "JogarAgora"
+	quick.button.AnchorPoint = Vector2.new(1, 0)
+	quick.button.Position = UDim2.new(1, -(L.PAD + px(118, 166) + px(10, 14)), 0, px(20, 28))
+	quick.button.Size = UDim2.fromOffset(px(156, 214), px(38, 52))
+	quick.button.Visible = false
+	U.quick = quick.button
 
 	-- abas (o mouse clica; no controle LB/RB): texto em Oswald, a ativa com o traço oliva embaixo
 	local tabs = Instance.new("Frame")
@@ -703,6 +715,36 @@ local function renderSettings()
 		numberRow("Sensibilidade na luneta", "touchScopeSens", 0.05, "%.2f")
 		choiceRow("Aceleração do olhar", "touchAccel", { false, true }, { "desligada", "ligada" })
 		choiceRow("Inverter Y", "invertY", { false, true }, { "não", "sim" })
+		-- v39 (ToqueAuto, CameraLook): fricção e ímã leve só mirando; o tiro sozinho vem desligado
+		choiceRow("Assistência de mira no toque", "touchAssist", { true, false }, { "ligada", "desligada" })
+		choiceRow("Atirar sozinho com a mira no inimigo", "touchAutoFire", { false, true }, { "desligado", "ligado" })
+		section("Automático no toque")
+		choiceRow("Recarregar sozinho ao esvaziar", "autoReload", { true, false }, { "ligado", "desligado" })
+		choiceRow("Inclinar sozinho na quina (mirando)", "touchAutoLean", { true, false }, { "ligado", "desligado" })
+		choiceRow(
+			"Prender a respiração sozinho na luneta",
+			"touchAutoBreath",
+			{ true, false },
+			{ "ligado", "desligado" }
+		)
+		choiceRow(
+			"Pegar munição e abrir caixote ao encostar",
+			"touchAutoPickup",
+			{ true, false },
+			{ "ligado", "desligado" }
+		)
+		choiceRow("Transpor sozinho ao correr", "touchAutoVault", { true, false }, { "ligado", "desligado" })
+		section("Câmera")
+		-- saiu da tela de toque na v39: a 1ª/3ª pessoa e o ombro ficam aqui (como em Mira > Câmera)
+		choiceRow(
+			if workspace:GetAttribute("ThirdPersonAllowed") ~= false
+				then "Câmera"
+				else "Câmera (3ª pessoa desligada neste modo)",
+			"thirdPerson",
+			{ false, true },
+			{ "1ª pessoa", "3ª pessoa (ombro)" }
+		)
+		choiceRow("Ombro da 3ª pessoa", "shoulderLeft", { false, true }, { "direito", "esquerdo" })
 		section("Giroscópio")
 		choiceRow("Giroscópio", "gyroMode", { "off", "aim", "always" }, { "desligado", "só mirando", "sempre" })
 		numberRow("Sensibilidade do giroscópio", "gyroSens", 0.05, "%.2f")
@@ -722,7 +764,6 @@ local function renderSettings()
 		)
 		choiceRow("Canhoto (espelhado)", "touchMirror", { false, true }, { "não", "sim" })
 		numberRow("Opacidade dos botões", "touchOpacity", 0.05, "%d%%", 100)
-		choiceRow("Transpor sozinho ao correr", "touchAutoVault", { true, false }, { "ligado", "desligado" })
 		action("t:editor", "Editar o HUD de toque", function()
 			Bus.fire("editor_hud_open")
 		end)
@@ -741,6 +782,11 @@ local function renderSettings()
 					"touchLayout",
 					"touchMirror",
 					"touchAutoVault",
+					"touchAssist",
+					"touchAutoFire",
+					"touchAutoLean",
+					"touchAutoBreath",
+					"touchAutoPickup",
 				}
 			do
 				s[k] = (InputMap.DEFAULTS :: any)[k]
@@ -1302,6 +1348,8 @@ local function setOpen(open: boolean)
 		-- baixo: abrir o menu fecha a loja antes
 		Bus.fire("shop_close")
 		gui.Enabled = true
+		local hum = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+		U.quick.Visible = not (hum and hum.Health > 0) -- fora de campo: o jogar agora no cabeçalho
 		UiKit.opened("menu", gui.DisplayOrder)
 		syncCursor()
 		Input.openMenu()

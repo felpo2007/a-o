@@ -288,7 +288,7 @@ function BotVehicles.assign(bots: { Bot }, forced: Model?)
 		for _, c in crews do
 			if c.faction == faction and (Vehicles.PASSENGERS[c.spec] or 0) > 0 and not c.mech then
 				for _, sq in BotSquads.list() do
-					if sq.faction == faction and not sq.mech and #sq.members >= 2 then
+					if sq.faction == faction and not sq.mech and not sq.player and #sq.members >= 2 then
 						c.mech = sq
 						sq.mech = c
 						break

@@ -8,7 +8,6 @@
 -- Também faz tremer a chama das lamparinas dos túneis e do fogão (tag VT65Lamp, MapLife).
 local CollectionService = game:GetService("CollectionService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local RunService = game:GetService("RunService")
 
 local RiceField = require(ReplicatedStorage.Shared.RiceField)
 
@@ -166,48 +165,9 @@ local function flicker(now: number, camPos: Vector3)
 	end
 end
 
--- D-80: o arroz de perto balança com o vento (workspace.GlobalWind, Ambiente.client), a 15 Hz,
--- girando cada ladrilho no pé, para longe do vento, com onda que corre pelo campo.
-local swayParts: { BasePart } = {}
-local swayCFs: { CFrame } = {}
-local lastSway = 0
-RunService.Heartbeat:Connect(function()
-	local now = os.clock()
-	if now - lastSway < 1 / 15 then
-		return
-	end
-	lastSway = now
-	local wind = workspace.GlobalWind
-	local w = wind.Magnitude * 0.28 -- m/s
-	if w < 0.2 or detail() < 0.5 then
-		return -- sem vento ou detalhe baixo: arroz parado
-	end
-	local dir = wind.Unit
-	local axis = Vector3.new(-dir.Z, 0, dir.X) -- horizontal, perpendicular ao vento
-	local amp = math.min(0.05 + 0.012 * w, 0.16)
-	table.clear(swayParts)
-	table.clear(swayCFs)
-	for _, f in fields do
-		if f.active then
-			for _, t in f.tiles do
-				local base, half = t.base, t.half
-				if t.lod == "hi" and base and half then
-					local p = base.Position
-					-- onda: a rajada passa pelo campo na direção do vento
-					local phase = (p.X * dir.X + p.Z * dir.Z) * 0.045 - now * (1.1 + w * 0.12)
-					local a = amp * (0.55 + 0.45 * math.sin(phase))
-					local localAxis = base:VectorToObjectSpace(axis)
-					local pivot = CFrame.new(0, -half, 0)
-					table.insert(swayParts, t.part)
-					table.insert(swayCFs, base * pivot * CFrame.fromAxisAngle(localAxis, a) * pivot:Inverse())
-				end
-			end
-		end
-	end
-	if #swayParts > 0 then
-		workspace:BulkMoveTo(swayParts, swayCFs, Enum.BulkMoveMode.FireCFrameChanged)
-	end
-end)
+-- D-80 tinha o arroz de perto balançando com o vento (15 vezes por segundo, ladrilho por ladrilho).
+-- 2026-11-13: sem vento no jogo (pedido do dono: "retire o vento, está pesando demais"); o arroz
+-- fica parado e o laço saiu.
 
 task.spawn(function()
 	if art and map then

@@ -16,6 +16,20 @@
 --     fuzileiro automático; ferrolho nos fuzis de precisão, com a luneta (Controllers/Luneta);
 --   - lugar aberto de veículo (D-100): o gatilho e a recarga vêm do VehicleController pelo Bus
 --     ("seat_fire", "seat_reload"); o tiro só sai com o atributo local "SeatFire" (ângulo do lugar).
+-- 2026-11-13 (pedido do dono: "não consigo puxar arma e selecionar os itens", "arma secundária para
+-- todos", granada de fumaça do Front 44, recarga automática):
+--   - vagas (Shared/Equipar): teclas 1 a 0 escolhem direto (1 principal, 2 pistola, 3 granada, 4
+--     fumaça, 5–0 itens), a roda do mouse, o Y e o botão ARMA do toque trocam de arma; a arma da mão
+--     desce e a nova sobe (KnifeView.troca, tempos do Front 44) e o servidor põe a arma certa na mão do
+--     corpo (Posture_Set { arma }, Modules/ArmaNaMao: a principal vai às costas);
+--   - granada e fumaça NA MÃO (vagas 3 e 4, roda de equipamento e último item): apertar o gatilho
+--     tira o pino e arma o braço; soltar lança; mirando ao soltar, por baixo (Front 44). Depois volta
+--     para a arma (ItemView desenha as mãos);
+--   - o binóculo e a faca saem com o gatilho (antes o gatilho não fazia nada com o binóculo);
+--   - recarga automática: o gatilho no carregador vazio recarrega (todas as plataformas, como no Front
+--     44); no toque e no controle a recarga também sai sozinha quando o carregador esvazia (opção
+--     autoReload). Para as telas: atributos locais AutoRecarga, Carregador, Reserva, Recarregando,
+--     Vagas, Vaga e ItemNaMao no LocalPlayer.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -23,7 +37,10 @@ local RunService = game:GetService("RunService")
 local Accessibility = require(ReplicatedStorage.Shared.Accessibility)
 local AssetIds = require(ReplicatedStorage.Shared.AssetIds)
 local Ballistics = require(ReplicatedStorage.Shared.Ballistics)
+local Equipar = require(ReplicatedStorage.Shared.Equipar)
 local Gatilho = require(ReplicatedStorage.Shared.Gatilho)
+local InputMap = require(ReplicatedStorage.Shared.InputMap)
+local Logistics = require(ReplicatedStorage.Shared.Logistics)
 local Melee = require(ReplicatedStorage.Shared.Melee)
 local Movement = require(ReplicatedStorage.Shared.Movement)
 local Net = require(ReplicatedStorage.Shared.Net)
@@ -33,6 +50,7 @@ local Weapons = require(ReplicatedStorage.Shared.Weapons)
 local Bus = require(script.Parent.Bus)
 local Haptics = require(script.Parent.Haptics)
 local Input = require(script.Parent.Input)
+local ItemView = require(script.Parent.ItemView)
 local KnifeView = require(script.Parent.KnifeView)
 local Luneta = require(script.Parent.Luneta)
 local Toast = require(script.Parent.Toast)
@@ -53,7 +71,8 @@ local seedRng = Rng.new(os.time() + player.UserId)
 local recoilPitch, recoilYaw = 0, 0
 local recoilReturn = 0 -- graus que a boca ainda desce sozinha depois da subida
 local RECOIL_DEG_PER_MS = 0.9 -- graus de subida por m/s de recuo livre
-local RECOIL_RETURN = 0.6 -- fração da subida que volta sozinha (o resto o jogador corrige)
+-- fração da subida que volta sozinha (o resto o jogador corrige). D-107 ("mais fast paced"): 0,6 -> 0,75
+local RECOIL_RETURN = 0.75
 local swayT = 0
 -- gatilho, munição de reserva e alça (índice em Weapons.zeros) de cada arma
 local triggers: { [string]: Gatilho.Trigger } = {}
@@ -63,6 +82,18 @@ local zeroBy: { [string]: number } = {}
 local breath = { untilT = 0, start = 0, ready = 0, outUntil = 0, len = 4 }
 -- luneta: mistura 0..1 de levar o olho à ocular
 local scope = { blend = 0 }
+-- vagas e mão (2026-11-13, Shared/Equipar): granada na mão, arma para voltar depois do arremesso,
+-- troca em andamento (a última vale), até quando a troca segura o gatilho, o que o servidor sabe da
+-- mão, "mirando" com a granada (por baixo) e a recarga automática pendente
+local inv = {
+	hand = nil :: Equipar.Hand?,
+	prev = 1,
+	token = 0,
+	busyUntil = 0,
+	sent = nil :: string?,
+	under = false,
+	autoAt = 0,
+}
 -- bipé (Weapons.BIPOD): "prone" (armado no chão), "rested" (guarda-mão sobre um apoio) ou nil
 local bipod = { state = nil :: string?, params = RaycastParams.new() }
 bipod.params.FilterType = Enum.RaycastFilterType.Exclude
@@ -155,34 +186,59 @@ local function zeroOf(wp: Weapons.Weapon): number
 	return list[math.clamp(zeroBy[wp.id] or 1, 1, #list)]
 end
 
+-- O servidor põe na mão do corpo o que este cliente tem na mão (Modules/ArmaNaMao): a arma da vaga
+-- ("launcher" para o lançador) ou "frag"/"smoke".
+local function tellServer(id: string?)
+	if id ~= inv.sent then
+		inv.sent = id
+		Net.event("Posture_Set"):FireServer({ arma = id or false })
+	end
+end
+
+-- granada na mão (nil = nenhuma): o ItemView desenha as mãos; a faixa das vagas mostra
+local function setHand(h: Equipar.Hand?)
+	inv.hand = h
+	inv.under = false
+	ItemView.hand(h)
+	player:SetAttribute("ItemNaMao", if h then h.kind else nil)
+end
+
 local function equip()
 	for _, t in triggers do
 		Gatilho.cancel(t)
 	end
 	local s = player:GetAttribute("Loadout")
-	slots = if type(s) == "string" then string.split(s, ",") else {}
-	-- arma pega do chão (servidor) substitui a principal até o próximo spawn
+	-- arma pega do chão (servidor) substitui a principal até o próximo spawn; o lançador do antitanque
+	-- vem depois das armas (Shared/Equipar)
 	local carried = player:GetAttribute("CarriedWeapon")
-	if type(carried) == "string" and #slots > 0 then
-		slots[1] = carried
-	elseif type(carried) == "string" then
-		slots = { carried }
-	end
-	if player:GetAttribute("Role") == "anti_tank" then
-		table.insert(slots, "launcher")
-	end
+	slots = Equipar.weapons(
+		if type(s) == "string" and s ~= "" then string.split(s, ",") else {},
+		myRole(),
+		if type(carried) == "string" then carried else nil
+	)
 	slot = math.clamp(slot, 1, math.max(#slots, 1))
 	local id = slots[slot]
 	launcher = id == "launcher"
 	local wp = if id and not launcher then Weapons.get(id) else nil
 	weapon = if wp and wp.enabled then wp else nil
 	local t = if weapon then triggerFor(weapon) else nil
-	-- local (não replica): a arma em primeira pessoa (WeaponVisuals) segue a arma equipada
-	player:SetAttribute("EquippedWeapon", if launcher then "launcher" elseif weapon then weapon.id else nil)
+	-- local (não replica): a arma em primeira pessoa (WeaponVisuals) segue a arma equipada; o lançador
+	-- mostra a arte que houver (RPG-2 do VC; Equipar.handId)
+	local faction = player:GetAttribute("Faction")
+	local shown = Equipar.handId(
+		if launcher then "launcher" elseif weapon then weapon.id else nil,
+		if type(faction) == "string" then faction else nil
+	)
+	player:SetAttribute("EquippedWeapon", shown)
 	player:SetAttribute("FireMode", if t then t.mode else nil)
+	player:SetAttribute("Vagas", table.concat(slots, ","))
+	player:SetAttribute("Vaga", slot)
 	if weapon then
 		-- o servidor reenvia a munição desta arma (o cartão da arma no HUD mostra a equipada)
 		Net.event("Combat_Ammo"):FireServer({ w = weapon.id })
+	end
+	if not inv.hand and player.Character then
+		tellServer(if launcher then "launcher" elseif weapon then weapon.id else nil)
 	end
 end
 
@@ -227,18 +283,7 @@ Net.unreliable("Combat_Tracer").OnClientEvent:Connect(function(shot)
 end)
 
 local S = AssetIds.Sounds
-local SHOT_SOUND: { [string]: number } = {
-	m14 = S.shot_m14,
-	m60 = S.shot_m14, -- mesmo cartucho 7.62x51 até a camada própria
-	m1911 = S.shot_m14,
-	m70 = S.shot_m14, -- .30-06: PLACEHOLDER até um som próprio
-	m79 = S.mortar_launch, -- "tump" do 40 mm: PLACEHOLDER (som do morteiro)
-	type56 = S.shot_type56,
-	sks = S.shot_type56,
-	rpd = S.shot_type56,
-	type54 = S.shot_type56,
-	mosin = S.shot_type56, -- 7,62x54R: PLACEHOLDER até um som próprio
-}
+-- o som do próprio tiro é do AudioController (Bus "shot_fired", Shared/SomArmas; D-107)
 local function playId(id: number, volume: number)
 	if id == 0 then
 		return
@@ -285,6 +330,10 @@ local function canShoot(): boolean
 	if seated() then
 		return player:GetAttribute("SeatFire") == true
 	end
+	-- granada na mão ou arma subindo/descendo na troca: o dedo não chega ao gatilho
+	if inv.hand or os.clock() < inv.busyUntil then
+		return false
+	end
 	return not KnifeView.busy()
 end
 
@@ -328,8 +377,7 @@ local function shoot(wp: Weapons.Weapon, t: Gatilho.Trigger)
 	if third then
 		shot.by = char -- 3ª pessoa: o traçante local sai da arma do corpo (a de 1ª pessoa some)
 	end
-	Bus.fire("shot_fired", shot) -- clarão, recuo da arma e poeira no impacto (WeaponVisuals)
-	playId(SHOT_SOUND[wp.id] or 0, if wp.kind == "launcher" then 0.5 else 0.8)
+	Bus.fire("shot_fired", shot) -- clarão, recuo e poeira (WeaponVisuals); som (AudioController); acerto (Acerto)
 	if wp.kind == "mg" and seed % 5 == 0 then
 		tracer(shot, tracerColor(wp.faction))
 	end
@@ -372,41 +420,16 @@ local function launchRocket()
 	end
 end
 
--- ===== entradas (camada Input) =====
-local function triggerDown()
-	if launcher and not seated() then
-		launchRocket()
-		return
-	end
-	if not seated() and KnifeView.busy() then -- faca na mão (D-94): o gatilho a devolve à bainha
-		KnifeView.sheatheNow()
-		return
-	end
-	local _, t = active()
-	if t then
-		Gatilho.press(t, os.clock())
-	end
-end
-local function triggerUp()
-	local _, t = active()
-	if t then
-		Gatilho.release(t, os.clock())
-	end
-end
-Input.on("fire", "press", triggerDown)
-Input.on("fire", "release", triggerUp)
-Input.on("aim", "press", function()
-	if Input.settings.aimToggle then
-		setAim(not aiming)
-	else
-		setAim(true)
-	end
-end)
-Input.on("aim", "release", function()
-	if not Input.settings.aimToggle then
+-- binóculo (tecla B, direcional ↑, roda de equipamento, vaga 7)
+local function toggleBinoculars()
+	binoculars = not binoculars
+	binoc.Visible = binoculars
+	player:SetAttribute("Binoculars", binoculars) -- local: a marcação vira "alvo" (área aproximada)
+	if binoculars then
 		setAim(false)
 	end
-end)
+end
+
 -- Recarga (D-69): pede ao servidor e, se ele vai aceitar (há carregador, não está recarregando e
 -- o carregador não está cheio), o WeaponVisuals anima a troca com as mãos no tempo do servidor.
 local function startReload()
@@ -415,10 +438,14 @@ local function startReload()
 	if not (wp and t) or now < t.reloadUntil or (spareBy[wp.id] or 0) <= 0 or t.mag >= wp.magazine then
 		return
 	end
+	if not seated() and (inv.hand or now < inv.busyUntil) then
+		return -- granada na mão ou troca de arma: a recarga espera
+	end
 	if not seated() and KnifeView.busy() then
 		KnifeView.sheatheNow()
 		return
 	end
+	inv.autoAt = 0
 	local dur = Weapons.reloadTime(wp, Vantagens.mult(player, "reload")) -- "Mãos Rápidas" (o servidor confere)
 	-- o servidor manda: o gatilho só volta com a munição nova (Combat_Ammo); a folga cobre a rede
 	t.reloadUntil = now + dur + 1
@@ -482,15 +509,235 @@ end)
 Input.on("zeroing", "holdStart", function()
 	stepZero(1)
 end)
-local function swap()
-	if #slots > 1 then
-		slot = slot % #slots + 1
+-- ===== vagas: trocar de arma e puxar itens (2026-11-13, Shared/Equipar) =====
+local function nameOf(id: string?): string
+	if id == "launcher" then
+		return "Lançador"
+	end
+	local wp = if id then Weapons.get(id) else nil
+	return if wp then wp.name else "—"
+end
+
+-- Põe a arma da vaga i na mão: a atual desce (holsterS), troca lá embaixo e a nova sobe (drawS).
+-- fromHand: vinha da granada (que já saiu da vista); a arma só sobe. A última troca pedida vale.
+local function switchTo(i: number, fromHand: boolean)
+	if i < 1 or i > #slots or seated() then
+		return
+	end
+	if not fromHand and i == slot and not inv.hand and not binoculars then
+		Bus.fire("vagas_mostrar") -- já está na mão: só mostra a faixa
+		return
+	end
+	if binoculars then
+		toggleBinoculars()
+	end
+	for _, t in triggers do
+		Gatilho.cancel(t)
+	end
+	setAim(false)
+	if inv.hand then
+		setHand(nil)
+		fromHand = true
+	end
+	local curId = if launcher then "launcher" elseif weapon then weapon.id else nil
+	local hold = if fromHand then 0 else Equipar.holsterS(curId, weapon and weapon.kind)
+	local newId = slots[i]
+	local nwp = Weapons.get(newId)
+	local draw = Equipar.drawS(newId, if newId == "launcher" then "launcher" elseif nwp then nwp.kind else nil)
+	inv.token += 1
+	local my = inv.token
+	inv.busyUntil = os.clock() + hold + draw
+	KnifeView.troca(hold, draw)
+	Bus.fire("vagas_mostrar")
+	task.delay(hold, function()
+		if inv.token ~= my then
+			return
+		end
+		slot = i
 		equip()
-		say(if launcher then "Lançador" else (if weapon then weapon.name else "—"))
+		say(nameOf(slots[i]))
+	end)
+end
+
+local function counts(): Equipar.Counts
+	local f, s = player:GetAttribute("Frags"), player:GetAttribute("Smokes")
+	return { frags = if type(f) == "number" then f else 0, smokes = if type(s) == "number" then s else 0 }
+end
+
+-- Granada ou fumaça na mão (vagas 3 e 4, roda de equipamento, último item): a arma desce e a
+-- granada vem do cinto; o gatilho arma e lança (Equipar.press/release, RenderStepped).
+local function drawGrenade(kind: string)
+	if seated() or player:GetAttribute("Downed") or bodyBusy() then
+		return
+	end
+	if inv.hand and inv.hand.kind == kind then
+		return
+	end
+	if not Equipar.itemOk(kind, myRole(), counts(), false) then
+		say(if kind == "smoke" then "Sem fumaça" else "Sem granadas")
+		return
+	end
+	if binoculars then
+		toggleBinoculars()
+	end
+	for _, t in triggers do
+		Gatilho.cancel(t)
+	end
+	setAim(false)
+	local curId = if launcher then "launcher" elseif weapon then weapon.id else nil
+	local hold = if inv.hand then 0 else Equipar.holsterS(curId, weapon and weapon.kind)
+	if inv.hand then
+		setHand(nil)
+	end
+	inv.prev = slot
+	inv.token += 1
+	local my = inv.token
+	KnifeView.troca(hold, math.huge) -- a arma desce e fica embaixo até voltar (switchTo)
+	inv.busyUntil = os.clock() + hold
+	Bus.fire("vagas_mostrar")
+	task.delay(hold, function()
+		if inv.token ~= my or seated() then
+			return
+		end
+		setHand(Equipar.newHand(kind, os.clock()))
+		tellServer(kind)
+	end)
+end
+
+-- Usa a vaga n (teclas 1 a 0, toque na faixa das vagas)
+local function useSlot(n: number)
+	local def = Equipar.SLOTS[n]
+	if not def then
+		return
+	end
+	if def.kind == "weapon" then
+		switchTo(n, false)
+	elseif def.kind == "grenade" then
+		drawGrenade(def.id)
+	else
+		-- itens: o mesmo caminho da roda de equipamento (InfantryController.useItem)
+		local canBuild = false
+		for _, b in Logistics.BUILDS do
+			if b.role[myRole() or ""] then
+				canBuild = true
+			end
+		end
+		if not Equipar.itemOk(def.id, myRole(), counts(), canBuild) then
+			say(string.format("%s: indisponível", def.label))
+			return
+		end
+		Bus.fire("use_item", def.id)
 	end
 end
-Input.on("swap_weapon", "tap", swap)
-Input.on("swap_weapon", "press", swap) -- tecla 1
+
+-- Y, botão ARMA do toque, roda do mouse: a próxima arma; com a granada na mão, volta para a arma
+local function cycle(dir: number)
+	if inv.hand then
+		switchTo(slot, true)
+	elseif #slots > 1 then
+		switchTo(Equipar.cycle(#slots, slot, dir), false)
+	end
+end
+Input.on("swap_weapon", "tap", function()
+	cycle(1)
+end)
+Input.on("swap_weapon", "press", function()
+	cycle(1)
+end)
+Input.on("weapon_next", "press", function()
+	cycle(1)
+end)
+Input.on("weapon_prev", "press", function()
+	cycle(-1)
+end)
+for n = 1, #Equipar.SLOTS do
+	Input.on(Equipar.actionOf(n), "press", function()
+		useSlot(n)
+	end)
+end
+-- roda de equipamento e último item (InfantryController): granada e fumaça vêm para a mão
+Bus.on("draw_item", function(kind: string)
+	if kind == "frag" or kind == "smoke" then
+		drawGrenade(kind)
+	end
+end)
+-- faixa das vagas (BarraItens): tocar numa vaga
+Bus.on("vaga_usar", function(n: number)
+	if InputMap.allowed(Input.state, "swap_weapon") then
+		useSlot(n)
+	end
+end)
+
+-- ===== gatilho e mira =====
+local function triggerDown()
+	if binoculars and not seated() then
+		toggleBinoculars() -- o gatilho guarda o binóculo e a arma volta (antes ficava sem arma)
+		return
+	end
+	local h = inv.hand
+	if h and not seated() then
+		Equipar.press(h, os.clock())
+		return
+	end
+	if launcher and not seated() then
+		launchRocket()
+		return
+	end
+	if not seated() and KnifeView.busy() then -- faca na mão (D-94): o gatilho a devolve à bainha
+		KnifeView.sheatheNow()
+		return
+	end
+	local wp, t = active()
+	if not (wp and t) then
+		return
+	end
+	-- carregador vazio: o gatilho recarrega (Front 44; todas as plataformas). A arma sem trava do
+	-- ferrolho (Tipo 56, Parte 10.6) ainda dá o clique.
+	if t.mag <= 0 and (spareBy[wp.id] or 0) > 0 and os.clock() >= t.reloadUntil and not seated() then
+		if not wp.boltHoldOpen then
+			playId(S.dry_click, 0.8)
+		end
+		startReload()
+		return
+	end
+	Gatilho.press(t, os.clock())
+end
+local function triggerUp()
+	local h = inv.hand
+	if h then
+		Equipar.release(h, inv.under)
+		return
+	end
+	local _, t = active()
+	if t then
+		Gatilho.release(t, os.clock())
+	end
+end
+Input.on("fire", "press", triggerDown)
+Input.on("fire", "release", triggerUp)
+-- mirar: com a granada na mão, mirar ao soltar lança por baixo (curta)
+Input.on("aim", "press", function()
+	if inv.hand then
+		inv.under = if Input.settings.aimToggle then not inv.under else true
+		return
+	end
+	if Input.settings.aimToggle then
+		setAim(not aiming)
+	else
+		setAim(true)
+	end
+end)
+Input.on("aim", "release", function()
+	if inv.hand then
+		if not Input.settings.aimToggle then
+			inv.under = false
+		end
+		return
+	end
+	if not Input.settings.aimToggle then
+		setAim(false)
+	end
+end)
 -- prender a respiração: segurar (LB / Shift) até Weapons.BREATH_S (4 s; na luneta, vezes a vantagem
 -- "breath" do passe "Fôlego de Atirador", 1,6); soltar antes acaba
 local function endBreath(at: number)
@@ -514,14 +761,6 @@ Input.on("hold_breath", "release", function()
 		endBreath(now)
 	end
 end)
-local function toggleBinoculars()
-	binoculars = not binoculars
-	binoc.Visible = binoculars
-	player:SetAttribute("Binoculars", binoculars) -- local: a marcação vira "alvo" (área aproximada)
-	if binoculars then
-		setAim(false)
-	end
-end
 Input.on("binoculars", "press", toggleBinoculars) -- tecla B
 Input.on("binoculars", "tap", toggleBinoculars) -- direcional ↑ tocar (segurar: trocar ombro)
 -- transpor/mergulhar (Movement.client): a arma sai do ombro e o dedo sai do gatilho
@@ -538,7 +777,7 @@ end)
 local meleeS = { last = nil :: string?, lastAt = -10, nextAt = 0, knifeUntil = 0 }
 local function melee(rifle: boolean?)
 	local char = player.Character
-	if not char or seated() or binoculars or player:GetAttribute("Downed") or bodyBusy() then
+	if not char or seated() or binoculars or inv.hand or player:GetAttribute("Downed") or bodyBusy() then
 		return
 	end
 	local now = os.clock()
@@ -605,6 +844,45 @@ if RunService:IsStudio() then
 			end)
 		end
 	end)
+	-- 2026-11-13: workspace:SetAttribute("VT65DevGranada", "frag" | "smoke" | "frag:baixo" |
+	-- "smoke:baixo") puxa a granada, arma (0,5 s apertado) e lança (por baixo com ":baixo");
+	-- "vaga:N" usa a vaga N como a tecla; "estado" escreve vagas, mão e munição no Output
+	workspace:GetAttributeChangedSignal("VT65DevGranada"):Connect(function()
+		local v = workspace:GetAttribute("VT65DevGranada")
+		if type(v) ~= "string" then
+			return
+		end
+		local kind, low = string.match(v, "^(%a+):?(%a*)$")
+		if kind == "vaga" then
+			useSlot(tonumber(low) or tonumber(string.match(v, "%d+") or "") or 1)
+		elseif kind == "estado" then
+			local _, t = active()
+			print(
+				string.format(
+					"[VT65 ITENS] vagas %s, vaga %d, mão %s, carregador %s, reserva %s, auto %s",
+					table.concat(slots, ","),
+					slot,
+					if inv.hand then inv.hand.kind .. "/" .. inv.hand.phase else "arma",
+					tostring(t and t.mag),
+					tostring(weapon and spareBy[weapon.id]),
+					tostring(player:GetAttribute("AutoRecarga"))
+				)
+			)
+		elseif kind == "frag" or kind == "smoke" then
+			drawGrenade(kind)
+			task.delay(Equipar.holsterS(nil, "rifle") + Equipar.GRENADE.drawS + 0.1, function()
+				local h = inv.hand
+				if h then
+					Equipar.press(h, os.clock())
+					task.wait(0.5)
+					Equipar.release(h, low == "baixo")
+				end
+			end)
+		end
+		task.defer(function()
+			workspace:SetAttribute("VT65DevGranada", nil)
+		end)
+	end)
 	workspace:GetAttributeChangedSignal("VT65DevRajada"):Connect(function()
 		local secs = workspace:GetAttribute("VT65DevRajada")
 		local wp, t = active()
@@ -659,6 +937,11 @@ Input.StateChanged:Connect(function(cancelled: { string }, ctx: string)
 		binoculars = false
 		binoc.Visible = false
 	end
+	-- menu, mapa, roda, morte: a granada que ainda não saiu volta ao cinto (Front 44)
+	local h = inv.hand
+	if ctx ~= "infantry" and ctx ~= "aim" and h and h.phase ~= "lancando" then
+		switchTo(slot, true)
+	end
 end)
 
 -- roda de equipamento: binóculo
@@ -667,6 +950,60 @@ Bus.on("equip_item", function(id: string)
 		toggleBinoculars()
 	end
 end)
+
+-- Granada na mão neste quadro: o pino, o pedido ao servidor e a volta para a arma.
+local function stepHand(now: number)
+	local h = inv.hand
+	if not h then
+		return
+	end
+	if seated() or not player.Character then
+		setHand(nil)
+		return
+	end
+	local ev = Equipar.handStep(h, now)
+	if ev == "pin" then
+		playId(S.dry_click, 0.35) -- a argola saindo
+	elseif ev == "throw" then
+		local _, dir = ViewMode.aimDirection() -- 3ª pessoa: para o ponto da retícula
+		Net.event("Throw_Request"):FireServer({ kind = h.kind, dir = dir, power = Equipar.throwPower(h.under) })
+		Haptics.fire(0.6, false)
+	elseif ev == "done" then
+		switchTo(inv.prev, true)
+	end
+end
+
+-- Recarga automática quando o carregador esvazia: no toque e no controle (opção autoReload, ligada
+-- por padrão). No teclado vale a do gatilho vazio (Front 44). O estado vai para atributos locais.
+local function autoReloadOn(): boolean
+	return Input.settings.autoReload == true and (Input.isGamepad() or Input.touchActive())
+end
+
+local function setLocal(name: string, v: any)
+	if player:GetAttribute(name) ~= v then
+		player:SetAttribute(name, v)
+	end
+end
+
+local function stepAmmo(wp: Weapons.Weapon?, t: Gatilho.Trigger?, now: number)
+	local auto = autoReloadOn()
+	setLocal("AutoRecarga", auto)
+	setLocal("Carregador", if t then t.mag else nil)
+	setLocal("Reserva", if wp then spareBy[wp.id] else nil)
+	setLocal("Recarregando", t ~= nil and now < t.reloadUntil)
+	if not (wp and t) or t.mag > 0 or now < t.reloadUntil or (spareBy[wp.id] or 0) <= 0 then
+		inv.autoAt = 0
+		return
+	end
+	if auto and not t.held and not KnifeView.busy() and not seated() then
+		-- espera o dedo sair do gatilho e um instante (o último tiro ainda soa)
+		if inv.autoAt == 0 then
+			inv.autoAt = now + 0.25
+		elseif now >= inv.autoAt then
+			startReload()
+		end
+	end
+end
 
 -- Bipé da arma neste quadro: deitado, armado no chão; de pé ou agachado mirando, apoiado se há
 -- superfície até 0,3 m abaixo do guarda-mão (~0,55 m à frente do olho). Sentado, nenhum.
@@ -729,6 +1066,8 @@ RunService.RenderStepped:Connect(function(dt: number)
 			t.queued = 0
 		end
 	end
+	stepHand(now)
+	stepAmmo(wp, t, now)
 	if breath.untilT > 0 and now >= breath.untilT then
 		endBreath(breath.untilT)
 	end
@@ -758,7 +1097,8 @@ RunService.RenderStepped:Connect(function(dt: number)
 			camera.FieldOfView = sc.fov -- a troca fica atrás do piscar da luneta
 		else
 			local target = if binoculars then 10 elseif aiming then base * Weapons.ADS_FOV_K else base
-			local speed = if wp then 10 / math.max(wp.massLoadedKg, 1) else 4
+			-- D-107 ("mais fast paced"): ao ombro mais rápido (era 10 / massa: M14 ~0,5 s, M60 ~1 s)
+			local speed = if wp then math.max(16 / math.max(wp.massLoadedKg, 1), 3) else 4
 			if camera.FieldOfView < base * 0.5 and not binoculars then
 				speed = 10 -- saindo da luneta: o olho desencosta logo, não espera o peso da arma
 			end
@@ -802,7 +1142,7 @@ RunService.RenderStepped:Connect(function(dt: number)
 	-- volta da boca: mais lenta que a subida, só depois que ela termina (~0,25 s)
 	if recoilReturn > 0 and math.abs(recoilPitch) < 0.05 then
 		-- Parte 13: no toque a VOLTA é até 25% mais rápida (Input.recoilReturnK); o chute é o mesmo
-		local back = recoilReturn * math.min(1, dt * 7 * Input.recoilReturnK())
+		local back = recoilReturn * math.min(1, dt * 10 * Input.recoilReturnK())
 		camera.CFrame *= CFrame.Angles(math.rad(-back), 0, 0)
 		recoilReturn -= back
 		if recoilReturn < 1e-3 then
@@ -816,6 +1156,10 @@ player:GetAttributeChangedSignal("CarriedWeapon"):Connect(equip)
 player:GetAttributeChangedSignal("Role"):Connect(equip)
 player.CharacterAdded:Connect(function()
 	slot = 1
+	inv.token += 1 -- troca pendente da vida anterior não vale
+	inv.busyUntil, inv.sent, inv.autoAt = 0, nil, 0
+	setHand(nil)
+	KnifeView.troca(0, 0)
 	aiming, binoculars = false, false
 	binoc.Visible = false
 	breath.untilT, breath.outUntil = 0, 0

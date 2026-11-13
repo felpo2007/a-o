@@ -19,6 +19,19 @@ ViewMode.third = false -- câmera DE FATO em 3ª pessoa
 ViewMode.alpha = 0 -- mistura 0 (1ª) .. 1 (3ª), já suavizada
 ViewMode.eye = Vector3.zero -- olho do personagem (a câmera de 1ª pessoa) neste quadro
 
+-- Botão de 1ª/3ª pessoa (2026-11-13, dono: "coloque o botão para 3ª pessoa"). A ação é "view_toggle"
+-- (InputMap: O no teclado, direcional → segurado no controle; no toque, Input.virtual("view_toggle",
+-- true/false) ou o botão "view" do Shared/Toque). Quem não passa pelo Input chama direto:
+--   ViewMode.toggle()        alterna 1ª/3ª pessoa (salvo na conta; avisa se o modo não deixa)
+--   ViewMode.swapShoulder()  troca o ombro da 3ª pessoa
+--   ViewMode.wanted()        true se o jogador escolheu a 3ª pessoa
+-- O ThirdPerson.client põe as funções aqui ao carregar.
+ViewMode.toggle = (function() end) :: () -> ()
+ViewMode.swapShoulder = (function() end) :: () -> ()
+ViewMode.wanted = function(): boolean
+	return false
+end
+
 -- O servidor pode desligar a 3ª pessoa por modo: workspace:SetAttribute("ThirdPersonAllowed", false).
 function ViewMode.allowed(): boolean
 	return workspace:GetAttribute("ThirdPersonAllowed") ~= false

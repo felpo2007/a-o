@@ -144,6 +144,7 @@ export type Realce = {
 	set: (on: boolean) -> (),
 	base: (color: Color3) -> (),
 	hot: () -> boolean,
+	quente: (color: Color3) -> (), -- troca a cor do realce (botão que muda de forma de pagar)
 }
 function UiKit.realce(b: GuiObject, base: Color3?, quente: Color3?, escala: number?): Realce
 	local sc = b:FindFirstChild("Escala")
@@ -205,7 +206,49 @@ function UiKit.realce(b: GuiObject, base: Color3?, quente: Color3?, escala: numb
 		hot = function(): boolean
 			return on
 		end,
+		quente = function(c: Color3)
+			quente = c
+			if on then
+				paint()
+			end
+		end,
 	}
+end
+
+-- ===== cores de compra (pedido do dono, 2026-11-13: "coloque cores nos botões de compra") =====
+-- Um padrão só em todo o jogo (baixa, loja, carta de inserção, passe, vantagens, intendência):
+--   - robux: verde-esmeralda (o que se paga em Robux);
+--   - ci: âmbar (créditos de intendência, o "$" do jogo);
+--   - free: o oliva da ação (grátis, já pago, pronto para usar);
+--   - apagado: o enabled(false) de sempre (painel escuro e texto fraco).
+-- Contraste do texto claro (V.TEXT) no fundo: robux 4,5:1, ci 4,1:1, free 3,8:1 (rótulos em Oswald
+-- grosso, texto grande: o mínimo é 3:1).
+UiKit.PAGAR = {
+	robux = { base = Color3.fromRGB(20, 120, 92), hot = Color3.fromRGB(32, 148, 114) },
+	ci = { base = Color3.fromRGB(150, 104, 24), hot = Color3.fromRGB(178, 126, 38) },
+	free = { base = Estilo.V.OLIVE, hot = Estilo.V.OLIVE_HI },
+} :: { [string]: { base: Color3, hot: Color3 } }
+
+-- forma de pagar de uma moeda do jogo ("robux", "ci", "credit" do renascer guardado, "free")
+function UiKit.payKind(currency: string?): string
+	if currency == "robux" then
+		return "robux"
+	elseif currency == "ci" or currency == "credits" or currency == "$" then
+		return "ci"
+	end
+	return "free"
+end
+
+-- Pinta um TextButton feito à mão com a cor da forma de pagar (as telas que não usam UiKit.action);
+-- devolve o realce já ligado à cor certa.
+function UiKit.payPaint(b: GuiButton, kind: string, escala: number?): Realce
+	local c = UiKit.PAGAR[kind] or UiKit.PAGAR.free
+	b.BackgroundColor3 = c.base
+	b.BackgroundTransparency = 0
+	if b:IsA("TextButton") then
+		b.TextColor3 = Estilo.V.TEXT
+	end
+	return UiKit.realce(b, c.base, c.hot, escala or 1.03)
 end
 
 -- moldura de foco de alto contraste (amarelo sobre preto, 4 px). Ao trocar de item ela "fecha" sobre
@@ -274,24 +317,62 @@ function UiKit.bind(b: GuiButton, onClick: () -> (), hover: ((boolean) -> ())?)
 end
 
 -- Botão do estilo novo, pronto: forma (Estilo.button), realce (mouse, foco do controle e cursor
--- virtual), clique ligado e foco de alto contraste. kind: "primary", "danger", "secondary", "ghost".
+-- virtual), clique ligado e foco de alto contraste. kind: "primary", "danger", "secondary", "ghost"
+-- ou uma forma de pagar (UiKit.PAGAR: "robux", "ci", "free": cheio, na cor dela).
 -- opts.action/opts.ctx: mostra o botão do controle dessa ação à esquerda (só no controle; troca
 -- sozinho ao trocar de dispositivo). enabled(false) apaga e trava o botão (o clique não roda).
+-- setKind(k) troca a forma de pagar (ou volta a "primary"/"secondary") sem recriar o botão.
 export type Action = Estilo.ButtonParts & {
 	realce: Realce,
 	enabled: (on: boolean) -> (),
 	isEnabled: () -> boolean,
+	setKind: (kind: string) -> (),
 }
 export type ActionOpts = { action: string?, ctx: string?, h: number? }
+
+-- cores de repouso e de realce de cada tipo de botão
+local function kindColors(k: string): (Color3, Color3)
+	local pay = UiKit.PAGAR[k]
+	if pay then
+		return pay.base, pay.hot
+	elseif k == "primary" then
+		return Estilo.V.OLIVE, Estilo.V.OLIVE_HI
+	elseif k == "danger" then
+		return Estilo.V.RED, Estilo.V.RED_HI
+	end
+	return Estilo.V.PANEL, Estilo.V.PANEL_3
+end
+
 function UiKit.action(parent: Instance?, text: string, kind: string?, onClick: () -> (), opts: ActionOpts?): Action
 	local o: ActionOpts = opts or { action = nil, ctx = nil, h = nil }
-	local parts = Estilo.button(parent, text, kind, o.h)
+	local k = kind or "primary"
+	local solid = UiKit.PAGAR[k] ~= nil
+	-- forma de pagar: a forma do botão fino, com o fundo cheio na cor dela (o Estilo não a conhece)
+	local parts = Estilo.button(parent, text, if solid then "secondary" else k, o.h)
 	local b = parts.button
 	b.Selectable = true
 	b.SelectionImageObject = focusFrame
-	local k = kind or "primary"
-	local base = if k == "primary" then Estilo.V.OLIVE elseif k == "danger" then Estilo.V.RED else Estilo.V.PANEL
-	local hot = if k == "primary" then Estilo.V.OLIVE_HI elseif k == "danger" then Estilo.V.RED_HI else Estilo.V.PANEL_3
+	local base, hot = kindColors(k)
+	local edgeLine = b:FindFirstChildOfClass("UIStroke")
+	local function shape(kk: string)
+		if UiKit.PAGAR[kk] then
+			b.BackgroundTransparency = 0
+			if edgeLine then
+				edgeLine.Color = Estilo.V.TEXT
+				edgeLine.Transparency = 0.8
+			end
+		elseif kk == "secondary" then
+			b.BackgroundTransparency = 0.35
+			if edgeLine then
+				edgeLine.Color = Estilo.V.LINE
+				edgeLine.Transparency = 0.1
+			end
+		end
+	end
+	if solid then
+		b.BackgroundColor3 = base
+		shape(k)
+	end
 	local r = UiKit.realce(b, base, hot, if k == "primary" or k == "danger" then 1.015 else 1.025)
 	local on = true
 	local function click()
@@ -333,6 +414,16 @@ function UiKit.action(parent: Instance?, text: string, kind: string?, onClick: (
 	end
 	a.isEnabled = function(): boolean
 		return on
+	end
+	a.setKind = function(kk: string)
+		if kk == k then
+			return
+		end
+		k = kk
+		base, hot = kindColors(kk)
+		shape(kk)
+		r.quente(hot)
+		r.base(if on then base else Estilo.V.PANEL_2)
 	end
 	return a :: Action
 end

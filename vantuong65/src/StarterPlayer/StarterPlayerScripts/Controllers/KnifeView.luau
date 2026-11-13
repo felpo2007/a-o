@@ -341,6 +341,36 @@ function KnifeView.start(id: string, draw: boolean)
 	end)
 end
 
+-- ===== troca de arma (2026-11-13, "não consigo puxar arma") =====
+-- A arma da mão desce girando para baixo e para a direita em holsterS (o WeaponController troca o
+-- modelo lá embaixo, fora da vista) e a nova sobe em drawS (tempos do Front 44, Shared/Equipar).
+-- drawS = math.huge: a arma fica embaixo (granada na mão) até a próxima troca.
+local SWAP_DOWN = CFrame.new(0.06 / M, -0.24 / M, 0.06 / M) * CFrame.Angles(math.rad(-50), math.rad(25), math.rad(20))
+local swap = { t0 = -10, hold = 0, draw = 0 }
+
+function KnifeView.troca(holsterS: number, drawS: number)
+	swap.t0, swap.hold, swap.draw = os.clock(), math.max(holsterS, 0), math.max(drawS, 0)
+end
+
+function KnifeView.trocando(): boolean
+	return os.clock() < swap.t0 + swap.hold + swap.draw
+end
+
+-- quanto a arma está abaixada pela troca agora (0..1)
+local function swapWeight(now: number): number
+	local t = now - swap.t0
+	if t < 0 or t > swap.hold + swap.draw then
+		return 0
+	end
+	if t < swap.hold then
+		return ease(t / swap.hold, "in")
+	end
+	if swap.draw <= 0 then
+		return 1
+	end
+	return 1 - ease((t - swap.hold) / swap.draw, "io")
+end
+
 -- fuzil a guardar já (atirar com a faca na mão a devolve à bainha)
 function KnifeView.sheatheNow()
 	if S.knifeUntil > os.clock() then
@@ -416,6 +446,10 @@ function KnifeView.step(dt: number, visible: boolean, handR0: Vector3?): Out
 	local wantDown = if knifeShown and S.sheathe < Melee.SHEATHE_S * 0.6 then 1 else 0
 	S.weight += (wantDown - S.weight) * math.min(1, dt / 0.09)
 	local rifle = CFrame.identity:Lerp(LOWER, S.weight)
+	local sw = swapWeight(now)
+	if sw > 0 then
+		rifle = rifle * CFrame.identity:Lerp(SWAP_DOWN, sw)
+	end
 	if a and RIFLE[S.id] then
 		local p, r = eval(RIFLE[S.id], S.t)
 		rifle = rifle * CFrame.new(p / M) * rot(r)

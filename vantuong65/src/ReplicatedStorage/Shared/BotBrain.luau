@@ -17,6 +17,10 @@
 -- tronco), visão pela vegetação (SIGHT: 120 m no aberto, 40 m na mata, 15 m no capim alto) e avanço
 -- (PRESS: quem ataca volta a andar sem alvo nem fogo em cima; parado sem contato tem limite).
 -- Medida antes/depois em tests/luau/bots.luau (BotBrain.duelHitChance).
+-- D-107 (pedido do dono, 2026-11-13: "cadê os 50?", "bots não avançam", "bots não precisam seguir o
+-- líder", "faça o jogo mais fast paced"): lotação de 50 por lado com teto pelo desempenho (CROWD),
+-- nível de detalhe pela distância dos humanos (LOD, BUDGET), papel de cada squad na frente (TASK) e
+-- lance de assalto (PUSH). Mira, reação e visão ficam como estavam (nível médio, humano).
 local Movement = require(script and (script :: any).Parent.Movement or "./Movement") :: any
 local Corpo = require(script and (script :: any).Parent.Corpo or "./Corpo") :: any
 
@@ -42,8 +46,6 @@ BotBrain.C = {
 	arriveM = 0.8,
 	holdRadiusM = 10, -- perto do ponto forte: procura abrigo e espera (emboscada)
 	torsoHalfM = 0.25, -- meio tronco (m), alvo da conta de acerto. PLACEHOLDER
-	-- mesmo tempo de recarga do jogador (CombatService.RELOAD, PLACEHOLDER lá)
-	reloadS = { rifle = 3.0, mg = 7.0, pistol = 2.5, launcher = 3.0 } :: { [string]: number },
 	-- custo máximo de uma busca: 1 (chão) + raios em volta + lugar atual (3 + 2) + candidatos (1 + 3 + 2)
 	searchCost = 1 + 8 + 5 + 2 * 6,
 }
@@ -133,9 +135,11 @@ BotBrain.DIFFICULTY = {
 		volley = { rifle = { 1, 3 }, mg = { 3, 5 }, pistol = { 1, 2 }, launcher = { 1, 1 } }, -- era 2–3 / 4–8
 		aimedGap = { 0.5, 0.9 }, -- era 0,35–0,7 s
 		openPause = { rifle = { 1.2, 2.4 }, mg = { 1.0, 2.0 }, pistol = { 0.8, 1.4 }, launcher = { 3, 5 } }, -- era 0,8–1,7 / 0,6–1,4
-		hideTime = { 1.5, 3.0 },
-		burstsPerCover = { 2, 4 },
-		peekMaxS = 2.5,
+		-- D-107 ("mais fast paced"): menos tempo escondido e menos rajadas no mesmo abrigo (era 1,5–3 s,
+		-- 2–4 rajadas e 2,5 s espiando). A mira e a pausa entre rajadas não mudam.
+		hideTime = { 1.0, 2.0 },
+		burstsPerCover = { 1, 3 },
+		peekMaxS = 2.0,
 		closeM = 12,
 		coverSearchM = 15,
 		searchEveryS = 1.5,
@@ -144,7 +148,7 @@ BotBrain.DIFFICULTY = {
 		suppPerRound = 0.22,
 		suppHit = 0.7,
 		suppTauS = 4,
-		pinnedAt = 0.45,
+		pinnedAt = 0.55, -- era 0,45 (D-107): com 50 x 50 há bala perto o tempo todo; preso só sob fogo pesado
 		underFireAt = 0.05,
 		retreatHealth = 55,
 		woundedHideMult = 2,
@@ -205,7 +209,7 @@ BotBrain.MOVE = {
 	prefetchM = 22, -- faltando isto do trecho, já pede o próximo (não para no fim)
 	directM = 10, -- até isto vai direto, se o raio do joelho não bate em nada
 	sprintThreatM = 150, -- inimigo conhecido a menos disto: atravessa o aberto correndo
-	walkCalmM = 60, -- sem contato, a menos disto do objetivo: anda (cauteloso). Era 120 (2026-11-12: avançar)
+	walkCalmM = 30, -- sem contato, a menos disto do objetivo: anda (cauteloso). Era 120, depois 60 (D-107)
 	crawlMaxM = 4, -- deitado só se arrasta até isto; mais longe, levanta
 	crouchMoveMaxM = 8, -- agachado só anda até isto; mais longe, levanta
 	pathEveryS = 2, -- intervalo mínimo entre pedidos de caminho do mesmo bot
@@ -224,15 +228,19 @@ BotBrain.SQUAD = {
 	catchUpM = 10, -- atrás do lugar mais que isto: trota
 	sprintBehindM = 25, -- ...mais que isto: corre
 	leaderSlowM = 25, -- o último atrasado mais que isto: o líder anda
-	leaderWaitM = 45, -- ...mais que isto: o líder espera
-	leaderWaitMaxS = 10, -- 2026-11-12: e espera no máximo isto (depois segue andando; o atrasado alcança)
+	-- D-107 ("bots não precisam seguir o líder"): o líder quase não espera (era 45 m e até 10 s) e o
+	-- squad não para quando ele para: parado sem ser de propósito por leaderStallS, ou em combate, cada
+	-- um segue sozinho para o objetivo do squad
+	leaderWaitM = 60, -- ...mais que isto: o líder espera
+	leaderWaitMaxS = 3, -- e espera no máximo isto (depois segue; o atrasado alcança)
+	leaderStallS = 2,
 	boundZoneM = 150, -- 2026-11-12: a até isto do objetivo atacado, com contato recente, o squad vai em lances
-	boundPauseS = { 2, 4 }, -- ...parando isto entre um lance e outro (o lance dura boundS)
+	boundPauseS = { 1, 2 }, -- ...parando isto entre um lance e outro (o lance dura boundS). Era 2–4 s
 	boundContactS = 30, -- contato com até isto de idade conta como "recente"
 	regroupM = 60, -- longe do líder mais que isto: vai até ele pelo caminho
 	deployM = 70, -- a esta distância do objetivo o squad se espalha pelos lugares de cada um
 	stagingS = { 4, 8 }, -- parada na base de partida antes do assalto
-	boundS = { 6, 10 }, -- duração de cada lance (metade avança, metade cobre)
+	boundS = { 5, 8 }, -- duração de cada lance (metade avança, metade cobre). Era 6–10 s
 	boundAdvance = 1.6, -- peso do avanço na nota do abrigo de quem está no lance
 	defendArcDeg = 70, -- defesa: arco virado para o inimigo
 	defendR = { 14, 36 },
@@ -317,7 +325,7 @@ BotBrain.TUNNEL = {
 	useWithinM = 60, -- a entrada fica a até 60 m do bot
 	gainM = 80, -- e a saída fica 80 m (ou mais) mais perto do destino que a entrada
 	ambushTriggerM = 45, -- emboscada: sai quando o inimigo chega a até 45 m da saída
-	ambushMaxS = 150, -- espera no máximo isto lá embaixo
+	ambushMaxS = 60, -- espera no máximo isto lá embaixo (era 150 s; D-107)
 	vanishWithinM = 40, -- ferido ou cercado: some no túnel se a entrada está a até 40 m
 	climbS = 1.6, -- s pela escada do poço de 3 m
 	exitOffsetM = 2.5, -- sai ao lado do poço (não em cima do buraco)
@@ -373,7 +381,8 @@ export type Style = {
 }
 
 -- 2026-11-12 ("faça eles avançarem mais em vez de ficarem parados"): menos tempo parado depois do
--- combate e esquecendo o inimigo (valores da v36 no comentário).
+-- combate e esquecendo o inimigo. D-107 ("mais fast paced"): de novo menos (valores da v36 e da v38
+-- no comentário).
 BotBrain.STYLE = {
 	US = {
 		solidBonus = 10,
@@ -381,8 +390,8 @@ BotBrain.STYLE = {
 		advanceBias = 0.8, -- era 0,6
 		hideMult = 0.8,
 		burstsMult = 1,
-		forgetS = 6, -- era 8
-		resumeS = { 1, 3 }, -- era 2–5 s
+		forgetS = 5, -- era 8, depois 6
+		resumeS = { 0.5, 1.5 }, -- era 2–5 s, depois 1–3 s
 		holdFireM = nil,
 		holdFireMaxS = 0,
 	} :: Style,
@@ -392,17 +401,17 @@ BotBrain.STYLE = {
 		advanceBias = 0.4, -- era 0,1
 		hideMult = 1.2, -- era 1,4
 		burstsMult = 1.5,
-		forgetS = 10, -- era 20
-		resumeS = { 4, 8 }, -- era 20–40 s: o VC ficava quase um minuto parado depois de cada contato
+		forgetS = 7, -- era 20, depois 10
+		resumeS = { 2, 4 }, -- era 20–40 s, depois 4–8 s
 		holdFireM = 80,
-		holdFireMaxS = 10, -- era 25 s
+		holdFireMaxS = 6, -- era 25 s, depois 10 s
 	} :: Style,
 }
 
--- Avançar em vez de ficar parado (2026-11-12). PLACEHOLDER de design.
+-- Avançar em vez de ficar parado (2026-11-12; D-107 mais curto). PLACEHOLDER de design.
 BotBrain.PRESS = {
-	afterS = 4, -- quem ataca, sem alvo à vista e sem fogo em cima há 4 s, volta a avançar com o squad
-	idleMaxS = 20, -- parado sem contato e fora do ponto mais que isto: sai do lugar
+	afterS = 2.5, -- quem ataca, sem alvo à vista e sem fogo em cima há 2,5 s, volta a avançar (era 4)
+	idleMaxS = 10, -- parado sem contato e fora do ponto mais que isto: sai do lugar (era 20)
 }
 
 -- Volta a avançar? attacking: o squad dele ataca o objetivo; sinceS: desde a última vez que viu o
@@ -425,17 +434,17 @@ end
 ---------------------------------------------------------------------------------------------
 -- Bots no squad do jogador (decisão do dono, 2026-11-12): squad de humano com menos de 4 membros
 -- recebe bots até 4 (nunca passa do tamanho do squad); os bots saem um a um quando entram humanos.
--- Seguem o líder humano a 10–30 m e obedecem à marca do líder na carta. PLACEHOLDER de design.
+-- D-107 ("bots não precisam seguir o líder"): não seguem mais o líder humano. Formam um squad de bots
+-- próprio (BotSquads, com o SquadId do jogador) que vai ao objetivo como os outros; a marca do líder
+-- na carta continua valendo como ordem: vão até ela, ficam em volta e voltam ao objetivo depois de
+-- markHoldS lá (ou markTtlS da marca). PLACEHOLDER de design.
 ---------------------------------------------------------------------------------------------
 BotBrain.FILL = {
 	target = 4, -- membros (humanos + bots) que o squad de jogador deve ter
 	everyS = 2, -- de quanto em quanto tempo o servidor confere (entra/sai um bot por squad por vez)
-	minM = 10, -- distância do líder: no mínimo 10 m
-	maxM = 30, -- e no máximo 30 m
-	slotSlackM = 12, -- longe do lugar mais que isto (mesmo dentro de 10–30 m): vai para o lugar
 	markReachM = 15, -- chegou na marca do líder
-	markTtlS = 180, -- a marca vale no máximo 3 min
-	markReleaseM = 60, -- chegou e o líder já está a mais que isto da marca: volta a segui-lo
+	markTtlS = 120, -- a marca vale no máximo 2 min (era 3)
+	markHoldS = 45, -- e, depois de chegar, os bots ficam nela no máximo isto
 }
 
 export type FillSquad = { id: string, humans: number, size: number, bots: { number } }
@@ -462,34 +471,219 @@ function BotBrain.fillPlan(squads: { FillSquad }, free: { number }): ({ { bot: n
 	return add, remove
 end
 
--- Lugar do bot i (1, 2, ...) atrás do líder, em metros no plano: (dx, dz) a partir dele. lookX/lookZ:
--- para onde o líder olha. Leque atrás dele (0°, ±40°, ±80°), a 14–24 m.
-local ESCORT = { { 0, 14 }, { -40, 18 }, { 40, 18 }, { -80, 24 }, { 80, 24 } }
-function BotBrain.escortSlot(i: number, lookX: number, lookZ: number): (number, number)
-	local len = math.sqrt(lookX * lookX + lookZ * lookZ)
-	local bx, bz = 0, 1
-	if len > 1e-6 then
-		bx, bz = -lookX / len, -lookZ / len
-	end
-	local e = ESCORT[((i - 1) % #ESCORT) + 1]
-	local a = math.rad(e[1])
-	local rx, rz = bx * math.cos(a) - bz * math.sin(a), bx * math.sin(a) + bz * math.cos(a)
-	return rx * e[2], rz * e[2]
-end
-
--- Fica onde está? A 10–30 m do líder e perto do seu lugar.
-function BotBrain.escortHold(toLeaderM: number, toSlotM: number): boolean
-	local F = BotBrain.FILL
-	return toLeaderM >= F.minM and toLeaderM <= F.maxM and toSlotM <= F.slotSlackM
-end
-
--- A marca do líder ainda manda? Vale até markTtlS; depois de chegar, até o líder se afastar dela.
-function BotBrain.markActive(ageS: number, reached: boolean, leaderToMarkM: number): boolean
+-- A marca do líder ainda manda? Vale até markTtlS; depois de chegar (heldS: há quanto tempo chegou,
+-- nil se não chegou), até markHoldS lá. O líder pode se afastar dela: os bots não o seguem.
+function BotBrain.markActive(ageS: number, heldS: number?): boolean
 	local F = BotBrain.FILL
 	if ageS > F.markTtlS then
 		return false
 	end
-	return not (reached and leaderToMarkM > F.markReleaseM)
+	return heldS == nil or heldS <= F.markHoldS
+end
+
+---------------------------------------------------------------------------------------------
+-- D-107: lotação de 50 por lado com teto pelo desempenho. PLACEHOLDER de desempenho, a calibrar no
+-- Studio e no servidor publicado (BotHz e BotCap ficam no ReplicatedStorage).
+---------------------------------------------------------------------------------------------
+BotBrain.CROWD = {
+	perSide = 50, -- completa até 50 por lado (Roles.TEAM_MAX) menos os humanos; era 10 (15 no Studio)
+	stepS = 1, -- a lotação é conferida a cada 1 s
+	addPerStep = 2, -- e entram no máximo 2 por lado por conferida: 50 em ~25 s
+	spawnConcurrent = 4, -- modelos sendo montados ao mesmo tempo no servidor (avatar e arte)
+	warmS = 15, -- o teto só começa a valer 15 s depois do terreno pronto (a montagem pesa)
+	avgS = 5, -- a taxa do Heartbeat do servidor é a média de ~5 s
+	stopHz = 45, -- abaixo de 45 Hz não entra mais ninguém (o teto para onde está)
+	dropHz = 35, -- abaixo de 35 Hz por dropS, sai dropStep por lado
+	dropS = 6,
+	dropStep = 2,
+	riseHz = 52, -- acima de 52 Hz por riseS, o teto sobe dropStep de novo
+	riseS = 5,
+	minPerSide = 12, -- o teto nunca desce abaixo disto (2 squads por lado)
+}
+
+export type Crowd = { cap: number, lowS: number, highS: number }
+
+function BotBrain.newCrowd(): Crowd
+	return { cap = BotBrain.CROWD.perSide, lowS = 0, highS = 0 }
+end
+
+-- Um passo do teto (bots por lado) pela taxa do Heartbeat (Hz, média). have: bots do lado mais cheio
+-- agora. Devolve "add" (pode entrar), "hold" (ninguém entra) ou "drop" (o teto desceu: sai gente).
+function BotBrain.crowdStep(c: Crowd, hz: number, dt: number, have: number): string
+	local K = BotBrain.CROWD
+	if hz < K.dropHz then
+		c.highS = 0
+		c.lowS += dt
+		if c.lowS >= K.dropS then
+			c.lowS = 0
+			c.cap = math.max(K.minPerSide, math.min(c.cap, have) - K.dropStep)
+			return "drop"
+		end
+		c.cap = math.min(c.cap, math.max(have, K.minPerSide))
+		return "hold"
+	end
+	c.lowS = 0
+	if hz < K.stopHz then
+		c.highS = 0
+		c.cap = math.min(c.cap, math.max(have, K.minPerSide))
+		return "hold"
+	end
+	if hz >= K.riseHz then
+		c.highS += dt
+		if c.highS >= K.riseS and c.cap < K.perSide then
+			c.highS = 0
+			c.cap = math.min(K.perSide, c.cap + K.dropStep)
+		end
+	else
+		c.highS = 0
+	end
+	return if have < c.cap then "add" else "hold"
+end
+
+-- Bots que um lado deve ter: completa o time até fill (no máximo teamMax) menos os humanos, até o teto.
+function BotBrain.fillWant(fill: number, humans: number, teamMax: number, cap: number): number
+	return math.clamp(math.min(fill, teamMax) - humans, 0, math.max(cap, 0))
+end
+
+-- Quantos entram (+) ou saem (-) agora: entra no máximo `maxAdd` por vez; sair é na hora.
+function BotBrain.fillStep(have: number, want: number, maxAdd: number): number
+	if have > want then
+		return want - have
+	end
+	return math.min(want - have, maxAdd)
+end
+
+---------------------------------------------------------------------------------------------
+-- D-107: nível de detalhe pela distância do humano vivo mais perto (100 bots sem derrubar o servidor).
+--   1 perto (até nearM): pensa a cada thinkS[1], pernas a cada quadro, PathfindingService;
+--   2 meio (até farM): pensa a cada thinkS[2], pernas a cada 2 quadros;
+--   3 longe ou sem humano em campo: pensa a cada thinkS[3], pernas a cada 3 quadros, anda em linha
+--     simples (rota estratégica + desvio do joelho; PathfindingService só se empacar), menos raios.
+-- PLACEHOLDER de desempenho.
+---------------------------------------------------------------------------------------------
+BotBrain.LOD = {
+	nearM = 150,
+	farM = 300,
+	thinkS = { 0.3, 0.6, 1.0 },
+	stepEvery = { 1, 2, 3 },
+	losChecks = { 4, 3, 2 }, -- raios de visada por pensamento
+	searchMult = { 1, 1.5, 2 }, -- intervalo entre buscas de abrigo (multiplica searchEveryS)
+	idleThinkS = 0.5, -- sem corpo (morto, esperando a vez): confere a volta a cada 0,5 s
+}
+
+function BotBrain.lodLevel(nearestHumanM: number): number
+	local L = BotBrain.LOD
+	if nearestHumanM <= L.nearM then
+		return 1
+	elseif nearestHumanM <= L.farM then
+		return 2
+	end
+	return 3
+end
+
+-- Orçamento do servidor para os bots. PLACEHOLDER de desempenho.
+BotBrain.BUDGET = {
+	frameS = 0.0025, -- pensamentos de bot: no máximo 2,5 ms por quadro (15% de um quadro de 60 Hz)
+	maxPerFrame = 10, -- e no máximo 10 pensamentos por quadro (o resto fica para o próximo)
+	pathPerS = 8, -- PathfindingService: no máximo 8 caminhos por segundo no servidor todo
+	pathQueueMax = 24, -- fila maior que isto: pedido de bot longe de humano vira linha simples
+}
+
+export type Load = { thinks: number, steps: number, los: number }
+
+-- Carga por segundo de n[nível] bots: pensamentos, passos das pernas e raios de visada (no máximo).
+function BotBrain.botLoad(n: { number }): Load
+	local L = BotBrain.LOD
+	local out: Load = { thinks = 0, steps = 0, los = 0 }
+	for lv = 1, 3 do
+		local k = n[lv] or 0
+		out.thinks += k / L.thinkS[lv]
+		out.steps += k * 60 / L.stepEvery[lv]
+		out.los += k / L.thinkS[lv] * L.losChecks[lv]
+	end
+	return out
+end
+
+---------------------------------------------------------------------------------------------
+-- D-107: papel de cada squad na frente. Todos atacavam o mesmo setor e, tomado o setor do meio, os
+-- dois lados se cruzavam (um ia para o setor do outro). Agora: a maioria ataca o setor da vez
+-- (BotBrain.objective); uma parte guarda o setor próprio que o inimigo ataca e, com o inimigo dentro
+-- dele, mais squads voltam (contra-ataque). PLACEHOLDER de design.
+---------------------------------------------------------------------------------------------
+BotBrain.TASK = {
+	defendShare = 0.25, -- squads que guardam o setor ameaçado, sem inimigo dentro do ponto
+	counterShare = 0.5, -- ...e com inimigo dentro do ponto
+}
+
+-- Setor próprio que o inimigo ataca agora (o objetivo dele, se for nosso), ou nil.
+function BotBrain.defendSector(owner: { string }, active: { boolean }, faction: string): number?
+	local enemy = if faction == "US" then "VC" else "US"
+	local t = BotBrain.objective(owner, active, enemy)
+	if t and owner[t] == faction then
+		return t
+	end
+	return nil
+end
+
+-- Setor do squad e se é ataque. roll em [0, 1): fixo por squad (não troca a cada conferida).
+-- threatened: há inimigo na área de captura do setor a guardar.
+function BotBrain.squadSector(attack: number?, defend: number?, threatened: boolean, roll: number): (number?, boolean)
+	if not attack then
+		return defend, false
+	elseif not defend then
+		return attack, true
+	end
+	local share = if threatened then BotBrain.TASK.counterShare else BotBrain.TASK.defendShare
+	if roll < share then
+		return defend, false
+	end
+	return attack, true
+end
+
+---------------------------------------------------------------------------------------------
+-- D-107: lance de assalto. Antes, quem atacava parava no 1º abrigo e trocava tiro de longe (a 100 m o
+-- bot acerta ~4% em 3 s) até o fim; preso pelo fogo, não saía; no aberto, deitava e ficava. Agora a
+-- equipe da vez (BotSquads, lances) corre boundM na direção do objetivo; a outra cobre e suprime.
+-- PLACEHOLDER de design.
+---------------------------------------------------------------------------------------------
+BotBrain.PUSH = {
+	engageM = 80, -- alvo mais longe que isto: a equipe da vez segue avançando em vez de parar e trocar tiro
+	holdM = 35, -- alvo mais perto que isto: luta onde está (não corre na cara dele)
+	boundM = { 15, 25 }, -- cada lance avança isto (corrida de 5,5 m/s: 3–5 s)
+	rushMaxS = 7, -- tempo máximo de um lance
+	restS = { 3, 5 }, -- depois de um lance, no mínimo isto até o próximo
+	coverMaxS = 6, -- a equipe da vez fica no máximo isto parada lutando no mesmo lugar
+	coverHardMaxS = 14, -- ninguém do ataque fica mais que isto parado no mesmo lugar fora do ponto
+	pinnedMaxS = 5, -- preso pelo fogo mais que isto: levanta e avança (atacante) ou ignora (calmo)
+	zoneFrac = 0.6, -- dentro de 60% do raio de captura: fica e luta pelo ponto
+}
+
+export type RushCtx = {
+	attacking: boolean, -- o squad ataca o ponto (ou contra-ataca o próprio)
+	myBound: boolean, -- a equipe dele é a que avança agora
+	ready: boolean, -- já passou o descanso desde o último lance
+	wounded: boolean,
+	targetM: number?, -- alvo à vista (m)
+	toPointM: number, -- até o ponto forte do squad (m)
+	zoneM: number, -- raio de captura (m)
+	pinnedS: number, -- há quanto tempo está preso pelo fogo
+	stillS: number, -- há quanto tempo está parado lutando no mesmo lugar
+}
+
+function BotBrain.shouldRush(c: RushCtx): boolean
+	local P = BotBrain.PUSH
+	if not c.attacking or c.wounded or not c.ready then
+		return false
+	elseif c.toPointM <= c.zoneM * P.zoneFrac then
+		return false
+	elseif c.targetM and c.targetM < P.holdM then
+		return false
+	elseif c.pinnedS >= P.pinnedMaxS or c.stillS >= P.coverHardMaxS then
+		return true
+	elseif not c.myBound then
+		return false
+	end
+	return c.targetM == nil or c.targetM > P.engageM or c.stillS >= P.coverMaxS
 end
 
 -- Lance do squad perto do objetivo atacado, com contato recente.

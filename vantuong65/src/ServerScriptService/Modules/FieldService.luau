@@ -22,6 +22,7 @@ local Rng = require(ReplicatedStorage.Shared.Rng)
 local Smoke = require(ReplicatedStorage.Shared.Smoke)
 local ExplosionService = require(script.Parent.ExplosionService)
 local MeleeService = require(script.Parent.MeleeService)
+local SmokeService = require(script.Parent.SmokeService) -- 2026-11-13: nuvem do Front 44 (frente de itens)
 local PlayerData = require(script.Parent.PlayerData)
 
 local FieldService = {}
@@ -140,13 +141,12 @@ end
 -- - bots arremessam com FieldService.throwFrom (balística para cair no alvo).
 local THROW_MS = 17 -- velocidade de arremesso (PLACEHOLDER; arremesso de granada de 30–40 m)
 local FUSE_S = { US = 4.5, VC = 4.0 } -- espoleta (PLACEHOLDER: M26 4–5 s; cabo chinês ~4 s)
-local SMOKE_FUSE_S = 1.5
+local SMOKE_FUSE_S = Smoke.FUSE_S -- 1,4 s do Front 44 (era 1,5)
 local RELEASE_S = 0.4 -- do pedido à saída da mão
 local THROW_S = 0.8 -- animação inteira
 local G_REAL = 9.81 / M -- studs/s²
 local smokeFolder: Folder
 local grenadeFolder: Folder
-local spawnSmoke: (pos: Vector3) -> () -- definida mais abaixo
 
 -- Núcleo de colisão de 1 stud (invisível): bola menor que ~0,5 stud atravessa o terreno do Roblox
 -- (Studio, 2026-11-11: a de 7 cm caiu a -166). A granada desenhada (Shared/GrenadeArt) é posta
@@ -271,7 +271,7 @@ local function launch(kind: string, faction: string?, from: Vector3, vel: Vector
 		end
 		local pos = core.Position
 		if kind == "smoke" then
-			spawnSmoke(pos)
+			SmokeService.spawn(pos, by)
 			task.delay(Smoke.DURATION_S, function()
 				m:Destroy()
 			end)
@@ -314,30 +314,8 @@ function FieldService.throwFrom(model: Model, faction: string, kind: string, tar
 	return true
 end
 
-spawnSmoke = function(pos: Vector3)
-	local p = Instance.new("Part")
-	p.Name = "Cloud"
-	p.Anchored, p.CanCollide, p.CanQuery, p.CanTouch, p.CastShadow = true, false, false, false, false
-	p.Transparency = 1
-	p.Size = Vector3.one
-	p.Position = pos + Vector3.new(0, 1.5 / M, 0)
-	p:SetAttribute("R", Smoke.RADIUS_M / M)
-	local pe = Instance.new("ParticleEmitter")
-	pe.Rate = 40
-	pe.Lifetime = NumberRange.new(8, 12)
-	pe.Speed = NumberRange.new(1, 3)
-	pe.SpreadAngle = Vector2.new(180, 180)
-	pe.Size = NumberSequence.new({ NumberSequenceKeypoint.new(0, 6), NumberSequenceKeypoint.new(1, 22) })
-	pe.Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.2), NumberSequenceKeypoint.new(1, 1) })
-	pe.Color = ColorSequence.new(Color3.fromRGB(205, 205, 200))
-	pe.Parent = p
-	p.Parent = smokeFolder
-	task.delay(Smoke.DURATION_S, function()
-		pe.Enabled = false
-		task.wait(12)
-		p:Destroy()
-	end)
-end
+-- (2026-11-13: a nuvem da fumaça passou para o Modules/SmokeService: estado no servidor, desenho em
+-- cada cliente, visão que cresce e afina, sopros cortados pela parede)
 
 local function onThrow(p: Player, req: any)
 	local c = alive(p)
@@ -356,6 +334,8 @@ local function onThrow(p: Player, req: any)
 	end
 	local dir: Vector3 = (req.dir :: Vector3).Unit
 	local faction = p:GetAttribute("Faction") :: string?
+	-- 2026-11-13 (Front 44): força 1 por cima; ~0,55 por baixo, curta (mirando ao soltar)
+	local power = math.clamp(tonumber(req.power) or 1, 0.45, 1)
 	throwPose(c)
 	-- sai da mão junto com a animação de 1ª pessoa; da frente da cabeça (o que o jogador mirou)
 	task.delay(RELEASE_S, function()
@@ -364,7 +344,7 @@ local function onThrow(p: Player, req: any)
 			return
 		end
 		local from = head.Position + dir * (0.5 / M) + Vector3.new(0, 0.05 / M, 0)
-		launch(kind, faction, from, (dir + Vector3.new(0, 0.2, 0)).Unit * THROW_MS / M, p)
+		launch(kind, faction, from, (dir + Vector3.new(0, 0.2, 0)).Unit * THROW_MS * power / M, p)
 	end)
 end
 

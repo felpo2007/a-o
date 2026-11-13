@@ -39,6 +39,10 @@ Corpo.FORMATO = "bloco"
 -- 1,25). No "man" é K (tudo por igual); no bloco é 1,25 x K: o tronco fica 25% mais largo e fundo que
 -- o gravado vezes K. Usado onde uma pega encosta no lado ou nas costas (fuzil a tiracolo).
 Corpo.KX = if Corpo.FORMATO == "bloco" then Corpo.BLOCK_SCALE else Corpo.K
+-- Mão de bloco mais estreita (largura e profundidade; o comprimento fica): no R15 de bloco a mão tem a
+-- largura do braço, 40 cm no soldado de 2 m, e engolia o punho e o guarda-mão da arma de tamanho real
+-- (foto do dono, 2026-11-13: "mãos enormes"). 0,55 = 22 cm. PLACEHOLDER: conferir no Studio.
+Corpo.MAO_K = if Corpo.FORMATO == "bloco" then 0.55 else 1
 
 -- Rostos de época (tools/rostos/make_rostos.py -> assets/rostos/*.png, decalques da cabeça de bloco).
 -- Ids das imagens publicadas (0 = ainda não subiu; fica o rosto padrão do Roblox, como nos bots do
