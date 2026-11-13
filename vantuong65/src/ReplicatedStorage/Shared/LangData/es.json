@@ -2442,5 +2442,10 @@
  "Granada rápida": "Granada rápida",
  "esconder": "ocultar",
  "mostrar": "mostrar",
- "× %d": "× %d"
+ "× %d": "× %d",
+ "ESCOLHER OUTRO PONTO": "ELEGIR OTRO PUNTO",
+ "RENASCER COM VEÍCULO": "REAPARECER CON VEHÍCULO",
+ "RENASCER ONDE CAIU": "REAPARECER DONDE CAÍSTE",
+ "Você volta com o squad, no último ponto": "Vuelves con tu escuadra, en el último punto",
+ "Você volta em: %s": "Vuelves en: %s"
 }

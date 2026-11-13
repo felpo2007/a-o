@@ -2449,5 +2449,10 @@
  "Granada rápida": "Lựu đạn nhanh",
  "esconder": "ẩn",
  "mostrar": "hiện",
- "× %d": "× %d"
+ "× %d": "× %d",
+ "ESCOLHER OUTRO PONTO": "CHỌN ĐIỂM KHÁC",
+ "RENASCER COM VEÍCULO": "HỒI SINH CÙNG XE",
+ "RENASCER ONDE CAIU": "HỒI SINH NƠI GỤC NGÃ",
+ "Você volta com o squad, no último ponto": "Bạn trở lại cùng tiểu đội, ở điểm cuối cùng",
+ "Você volta em: %s": "Bạn trở lại tại: %s"
 }

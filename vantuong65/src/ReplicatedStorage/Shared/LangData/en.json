@@ -2449,5 +2449,10 @@
  "Granada rápida": "Quick grenade",
  "esconder": "hide",
  "mostrar": "show",
- "× %d": "× %d"
+ "× %d": "× %d",
+ "ESCOLHER OUTRO PONTO": "PICK ANOTHER POINT",
+ "RENASCER COM VEÍCULO": "RESPAWN WITH VEHICLE",
+ "RENASCER ONDE CAIU": "RESPAWN WHERE YOU FELL",
+ "Você volta com o squad, no último ponto": "You return with your squad, at the last point",
+ "Você volta em: %s": "You return at: %s"
 }

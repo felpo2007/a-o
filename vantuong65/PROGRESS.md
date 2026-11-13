@@ -17,8 +17,8 @@
 - **Lote 1 (v43, D-111): feito.** Caveira com nome e mais baixa, Robux chamativo, FPS, painel de disputa
   mais baixo, menos recuo, pistola útil, idioma só até escolher, controle (RB granada, ↑ câmera,
   → marcar/comunicação), tiros nas folhas, sol, cartão de munição.
-- Lote 2 (telas): tela de morte (boneco caído feio, mais intuitiva); telas mais simples ("uma criança
-  tem que conseguir jogar"); bugs visuais nas telas.
+- **Lote 2 (v44, D-112): tela de baixa feita** (retrato de pé em sépia, rótulos claros). Falta: telas
+  mais simples ("uma criança tem que conseguir jogar") e os bugs visuais das telas (pedir as fotos).
 - Lote 3 (veículos e bots): vidro transparente; mais fáceis e um pouco mais rápidos; helicóptero com a
   traseira aberta; bots parados nos veículos; bots presos nos objetos.
 - Lote 4 (mapa): cabanas e vilas maiores; terra batida nas ruas; objetivos mais perto do centro; mapa
@@ -27,6 +27,13 @@
   tutorial fora do jogo; tela de carregamento até o mapa inteiro.
 - Lote 6: análise do jogo inteiro com ideias em imagens.
 - Perguntas ao dono: a M4 (é de 1994); a mão escorregando (em que vista e momento).
+
+## v44: lote 2, tela de baixa (2026-11-13, D-112)
+- **Conferido no Studio:**
+  - retrato do soldado de frente, capacete e rosto visíveis, em sépia;
+  - rótulos novos e "Você volta em: Alfa · Fuzileiro · QG";
+  - 0 erros de script.
+- **Não testado:** celular, tela de baixa com o manequim do VC.
 
 ## v43: lote 1 (2026-11-13, D-111)
 - **Publicada** como versão 43 do place (build do commit b180846).

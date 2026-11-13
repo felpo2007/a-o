@@ -3796,6 +3796,32 @@ dividia pela capacidade como se fossem balas. O fuzileiro com 8 carregadores via
 mostra as balas em número grande ("20 /20", vermelho no último quarto) e os carregadores em ícones de
 pente com "× 8". Na espingarda, "+N" cartuchos.
 
-**Mão escorregando:** não reproduzido no Studio. Em 1ª pessoa as duas mãos ficaram paradas no espaço
+**Mão escorregando (D-111):** não reproduzido no Studio. Em 1ª pessoa as duas mãos ficaram paradas no espaço
 da arma (variação 0,000 em 147 quadros andando). Nos bots em 3ª pessoa, andando, a mão esquerda ficou
 a 2–5 cm do apoio. Falta saber do dono em que vista e em que momento acontece.
+
+## D-112 — Lote 2: tela de baixa com retrato e rótulos claros (v44, 2026-11-13)
+
+Pedido do dono: "esse bot caído na tela de morte está horrível, melhore essa tela, quero mais
+intuitivo também".
+
+**Retrato:** o soldado deitado (D-107) dependia de girar cada junta do boneco de bloco e saía quebrado.
+Agora é um retrato de identificação (`CenaBaixa.RETRATO`):
+- de pé, de frente, do peito para cima (o quadro mostra 42% da altura do corpo), câmera na altura do
+  peito, um pouco à direita;
+- tom sépia de foto de 1965, luz de cima e da frente, sem o chão de terra;
+- juntas no repouso (`POSE_STAND`), sem a arma da mão.
+- Usa o manequim do lado (o soldado da mesa). O retrato tirado em vida vinha com o repouso do pescoço
+  já inclinado pela mira: no Studio, a cabeça olhava 48° para baixo e o capacete tapava o rosto. Sem o
+  manequim, usa o retrato.
+- A cena de caído continua no código (`RETRATO = false`).
+
+**Rótulos que dizem o que acontece:**
+- "NO MESMO LUGAR" → "RENASCER ONDE CAIU";
+- "COM VEÍCULO" → "RENASCER COM VEÍCULO";
+- "ESCOLHER NA CARTA" → "ESCOLHER OUTRO PONTO";
+- "MESA" → "MENU";
+- embaixo do RENASCER: "Você volta em: squad · papel · ponto".
+
+**Ainda na fila do lote 2:** a revisão das outras telas ("uma criança tem que conseguir jogar") e os
+bugs visuais que o dono viu (falta a foto de cada um).

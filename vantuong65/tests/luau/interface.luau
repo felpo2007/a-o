@@ -402,7 +402,7 @@ test("baixa: renascer, renascer aqui (créditos e Robux) e voltar, com o motivo 
 	local src = fs.readFile(C .. "CasualtyScreen.luau")
 	assert(string.find(src, '"RENASCER"', 1, true), "RENASCER")
 	assert(string.find(src, '"inplace", "robux"', 1, true), "Robux pelo servidor (que abre a compra)")
-	assert(string.find(src, '"NO MESMO LUGAR"', 1, true), "linha do mesmo lugar")
+	assert(string.find(src, '"RENASCER ONDE CAIU"', 1, true), "linha do mesmo lugar (v44: rótulo claro)")
 	assert(string.find(src, "CenaBaixa.show", 1, true), "o próprio soldado, caído")
 end)
 
@@ -410,7 +410,10 @@ end)
 test("baixa: RENASCER é o jogar agora; veículo pelo pedido da D-103; carta à parte", function()
 	local src = fs.readFile(C .. "CasualtyScreen.luau")
 	assert(string.find(src, "JogarAgora.start({ vehicle = vehicle })", 1, true), "renascer rápido")
-	assert(string.find(src, '"COM VEÍCULO"', 1, true) and string.find(src, '"ESCOLHER NA CARTA"', 1, true))
+	assert(
+		string.find(src, '"RENASCER COM VEÍCULO"', 1, true) and string.find(src, '"ESCOLHER OUTRO PONTO"', 1, true),
+		"v44: veículo e carta com rótulos claros"
+	)
 	assert(string.find(src, "FireServer({ spec = o.spec, pay = o.pay })", 1, true), "Vehicle_Order da carta")
 	assert(string.find(src, 'msg.state == "armed"', 1, true), "só renasce com o pedido armado")
 	assert(string.find(src, "CompraVeiculo.productId(spec) ~= 0", 1, true), "Robux só com produto criado")

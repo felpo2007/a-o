@@ -166,11 +166,34 @@ local function partsOf(root: Instance, skip: Instance?): { BasePart }
 	return out
 end
 
+-- v44: em pé para o retrato, braços ao lado do corpo (o repouso do R15) e a cabeça reta, um pouco
+-- erguida. As mesmas juntas da pose de caído (as que não estão aqui ficam no repouso).
+local POSE_STAND: { [string]: CFrame } = {
+	Root = CFrame.identity,
+	Waist = CFrame.identity,
+	Neck = deg(6, 0, 0),
+	RightShoulder = deg(0, 0, 4),
+	RightElbow = CFrame.identity,
+	RightWrist = CFrame.identity,
+	LeftShoulder = deg(0, 0, -4),
+	LeftElbow = CFrame.identity,
+	LeftWrist = CFrame.identity,
+	RightHip = CFrame.identity,
+	RightKnee = CFrame.identity,
+	RightAnkle = CFrame.identity,
+	LeftHip = CFrame.identity,
+	LeftKnee = CFrame.identity,
+	LeftAnkle = CFrame.identity,
+}
+
 -- Deita o modelo (já parado) na pose de caído, com a arma largada ao lado, os pés no chão (y = 0).
-local function lay(m: Model)
+-- v44: rootCF/poses trocam a pose (o retrato em pé usa POSE_STAND e tira a arma).
+local function lay(m: Model, rootCF: CFrame?, poses: { [string]: CFrame }?)
+	local P = poses or POSE
+	local R = rootCF or LYING
 	local root = m:FindFirstChild("HumanoidRootPart")
 	if not (root and root:IsA("BasePart")) then
-		m:PivotTo(LYING)
+		m:PivotTo(R)
 		return
 	end
 	local weapon = m:FindFirstChild("Weapon")
@@ -198,7 +221,7 @@ local function lay(m: Model)
 		end
 	end
 	for _, d in m:GetDescendants() do
-		if (d:IsA("Motor6D") or d:IsA("AnimationConstraint")) and POSE[d.Name] then
+		if (d:IsA("Motor6D") or d:IsA("AnimationConstraint")) and P[d.Name] then
 			local p0, p1 = jointParts(d)
 			link(p0, p1, d)
 		else
@@ -206,7 +229,7 @@ local function lay(m: Model)
 			link(p0, p1, nil)
 		end
 	end
-	local placed: { [BasePart]: CFrame } = { [root] = LYING }
+	local placed: { [BasePart]: CFrame } = { [root] = R }
 	local done: { [BasePart]: boolean } = { [root] = true }
 	local queue: { BasePart } = { root }
 	local head = 1
@@ -226,7 +249,7 @@ local function lay(m: Model)
 					c0, c1 = a0, a1
 				end
 				if j and c0 and c1 then
-					local pose = POSE[j.Name] or CFrame.identity
+					local pose = P[j.Name] or CFrame.identity
 					if e.forward then
 						cf = placed[p] * c0 * pose * c1:Inverse()
 					else
@@ -243,13 +266,15 @@ local function lay(m: Model)
 	-- o que não se liga a nada acompanha a raiz
 	for _, p in parts do
 		if not done[p] then
-			placed[p] = LYING * orig[root]:ToObjectSpace(orig[p])
+			placed[p] = R * orig[root]:ToObjectSpace(orig[p])
 		end
 		p.CFrame = placed[p]
 	end
-	-- a arma largada ao lado da mão direita, deitada de lado, quase paralela ao corpo
+	-- a arma largada ao lado da mão direita, deitada de lado, quase paralela ao corpo (no retrato, sai)
 	local hand = m:FindFirstChild("RightHand")
-	if skip then
+	if skip and poses then
+		skip:Destroy()
+	elseif skip then
 		local w = skip :: Model
 		local at = if hand and hand:IsA("BasePart") then hand.Position else root.Position
 		local out = Vector3.new(at.X - root.Position.X, 0, at.Z - root.Position.Z)
@@ -317,6 +342,49 @@ local function frame(c: Cena)
 	aim(c)
 end
 
+-- ===== v44: retrato de identificação =====
+-- Pedido do dono (2026-11-13: "esse bot caído na tela de morte está horrível, melhore essa tela"): o
+-- soldado deitado dependia de girar cada junta do boneco de bloco e ficava quebrado (braços tortos,
+-- corpo de lado). Agora é um retrato de pé, de frente, do peito para cima, como a foto da ficha do
+-- soldado em 1965: tom sépia, luz de cima e da frente, câmera um pouco abaixo dos olhos. Não depende
+-- de pose; a arma de quem estava com ela na mão sai do quadro. A cena antiga (lay) fica no código.
+CenaBaixa.RETRATO = true
+local PORTRAIT_FOV = 26
+local PORTRAIT_FILL = 0.42 -- metade da altura do corpo que o quadro mostra (do peito para cima, ombros)
+local SEPIA = Color3.fromRGB(255, 226, 186)
+
+local function standPortrait(m: Model)
+	-- de pé, de frente para +Z (a câmera fica em +Z), juntas no repouso (braços ao lado do corpo, sem a
+	-- pose de segurar a arma) e sem a arma da mão; lay() encosta os pés em y = 0
+	lay(m, CFrame.lookAt(Vector3.zero, Vector3.new(0, 0, 1)), POSE_STAND)
+end
+
+local function aimPortrait(c: Cena)
+	local a = (c.angle :: any).Value :: number
+	-- de frente, um pouco à direita do soldado, na altura do peito
+	local dir = CFrame.Angles(0, a, 0):VectorToWorldSpace(Vector3.new(0.22, 0.02, 1).Unit)
+	c.cam.CFrame = CFrame.lookAt(c.center + dir * c.dist, c.center)
+end
+
+local function framePortrait(c: Cena)
+	local m = c.model
+	if not m then
+		return
+	end
+	local lo, hi = bounds(partsOf(m))
+	if lo.X == math.huge then
+		return
+	end
+	local h = hi.Y - lo.Y
+	local size = c.vp.AbsoluteSize
+	local aspect = if size.Y > 1 then math.clamp(size.X / size.Y, 0.3, 3) else 0.8
+	local half = math.rad(PORTRAIT_FOV / 2)
+	local halfW = math.atan(math.tan(half) * aspect)
+	c.center = Vector3.new((lo.X + hi.X) / 2, hi.Y - h * 0.27, (lo.Z + hi.Z) / 2)
+	c.dist = (h * PORTRAIT_FILL) / math.tan(math.min(half, halfW))
+	aimPortrait(c)
+end
+
 function CenaBaixa.new(): Cena
 	local holder = Instance.new("Frame")
 	holder.Name = "CenaBaixa"
@@ -375,12 +443,31 @@ function CenaBaixa.new(): Cena
 	}
 	angle.Changed:Connect(function()
 		if c.model then
-			aim(c)
+			if CenaBaixa.RETRATO then
+				aimPortrait(c)
+			else
+				aim(c)
+			end
 		end
 	end)
 	vp:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
-		frame(c)
+		if CenaBaixa.RETRATO then
+			framePortrait(c)
+		else
+			frame(c)
+		end
 	end)
+	if CenaBaixa.RETRATO then
+		-- foto de 1965: tom sépia, luz de cima e da frente, sem o chão de terra
+		vp.ImageColor3 = SEPIA
+		vp.Ambient = Color3.fromRGB(120, 104, 92)
+		vp.LightDirection = Vector3.new(-0.3, -0.8, -0.55).Unit
+		for _, g in world:GetChildren() do
+			if g:IsA("BasePart") then
+				g.Transparency = 1
+			end
+		end
+	end
 	return c
 end
 
@@ -392,13 +479,26 @@ function CenaBaixa.show(c: Cena, m: Model?, faction: string?)
 		old:Destroy()
 	end
 	c.model = nil
-	local model = m or mannequin(faction)
+	-- v44: o retrato usa o manequim do lado (de pé, juntas no repouso certo); o retrato tirado em vida
+	-- vinha com o repouso do pescoço já inclinado pela mira (cabeça 48° para baixo no Studio)
+	local model: Model? = nil
+	if CenaBaixa.RETRATO then
+		model = mannequin(faction)
+		if model and m then
+			m:Destroy()
+		end
+	end
+	model = model or m or mannequin(faction)
 	if not model then
 		return
 	end
 	freeze(model)
 	local ok, err = pcall(function(): any
-		lay(model)
+		if CenaBaixa.RETRATO then
+			standPortrait(model)
+		else
+			lay(model)
+		end
 		return nil
 	end)
 	if not ok then
@@ -408,7 +508,11 @@ function CenaBaixa.show(c: Cena, m: Model?, faction: string?)
 	c.model = model
 	local val = c.angle :: any
 	val.Value = -DRIFT
-	frame(c)
+	if CenaBaixa.RETRATO then
+		framePortrait(c)
+	else
+		frame(c)
+	end
 	local d = c.drift
 	if d then
 		d:Cancel()

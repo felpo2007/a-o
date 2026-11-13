@@ -13,10 +13,13 @@
 --     1. RENASCER (cheio, enorme): o jogar agora (Controllers/JogarAgora): o squad e o último ponto,
 --        com a contagem e a barra no próprio botão; entra sozinho quando a espera zera. A linha de
 --        baixo diz onde ("Alfa · Fuzileiro · Reunião — Cemitério");
---     2. NO MESMO LUGAR: créditos (âmbar) ou Robux (verde), regras e cobrança no servidor
+--     2. RENASCER ONDE CAIU (v44; era "NO MESMO LUGAR"): créditos (âmbar) ou Robux (verde), regras e
+--        cobrança no servidor
 --        (Progression.inPlaceCheck/inPlacePay pelo SpawnService), com o motivo quando bloqueado;
---     3. COM VEÍCULO (abre as viaturas do lado em créditos ou Robux, D-103: arma o pedido e renasce
---        num ponto onde ele sai) e ESCOLHER NA CARTA (a carta de inserção, como antes);
+--     3. RENASCER COM VEÍCULO (abre as viaturas do lado em créditos ou Robux, D-103: arma o pedido e
+--        renasce num ponto onde ele sai) e ESCOLHER OUTRO PONTO (a carta de inserção, como antes);
+--   v44 (pedido do dono: "esse bot caído está horrível; mais intuitivo"): retrato de pé em sépia
+--   (CenaBaixa.RETRATO), rótulos que dizem o que acontece e "Você volta em: …" embaixo do RENASCER.
 --     4. fileira fina: MESA, LOJA, PASSE, MISSÕES.
 --   Cores de compra do UiKit.PAGAR: Robux verde, créditos âmbar, grátis/pronto oliva, apagado escuro.
 --   Controle: A renascer, X aqui com créditos, Y aqui com Robux, RT veículo, LT carta, B mesa, RB
@@ -468,7 +471,8 @@ do
 	dest.TextTruncate = Enum.TextTruncate.AtEnd
 	-- 2. no mesmo lugar: créditos e Robux, com o motivo à direita
 	local hereHead = pair(3, px(20, 30))
-	local hereKick = UiKit.kicker(hereHead, "NO MESMO LUGAR", px(15, 22), V.DIM)
+	-- v44 (pedido do dono: "mais intuitivo"): rótulos que dizem o que acontece
+	local hereKick = UiKit.kicker(hereHead, "RENASCER ONDE CAIU", px(15, 22), V.DIM)
 	hereKick.Size = UDim2.fromScale(0.45, 1)
 	local hereWhy = UiKit.text2(hereHead, "", px(15, 22), V.KHAKI, F.BODY)
 	hereWhy.AnchorPoint = Vector2.new(1, 0)
@@ -515,11 +519,11 @@ do
 	end
 	-- 3. com veículo e a carta
 	local moreRow = pair(5, BH)
-	local vehicle = UiKit.action(moreRow, "COM VEÍCULO", "secondary", function()
+	local vehicle = UiKit.action(moreRow, "RENASCER COM VEÍCULO", "secondary", function()
 		actions.vehicleMenu()
 	end, { h = BH })
 	half(vehicle, false)
-	local map = UiKit.action(moreRow, "ESCOLHER NA CARTA", "secondary", function()
+	local map = UiKit.action(moreRow, "ESCOLHER OUTRO PONTO", "secondary", function()
 		actions.map()
 	end, { h = BH })
 	half(map, true)
@@ -571,7 +575,7 @@ do
 		a.button.Size = UDim2.new(0.25, -GAP * 3 // 4, 1, 0)
 		return a
 	end
-	local desk = small("MESA", 1, function()
+	local desk = small("MENU", 1, function()
 		actions.desk()
 	end)
 	local shop = small("LOJA", 2, function()
@@ -1068,7 +1072,13 @@ local function paintButtons()
 	end
 	local fill = if w == nil then 0 elseif S.waitMax > 0 then 1 - math.clamp(w / S.waitMax, 0, 1) else 1
 	K.rbar.Size = UDim2.new(fill, 0, 0, K.rbar.Size.Y.Offset)
-	setText(K.dest, if e or S.dev then JogarAgora.summary(vehicleArmed) else "Squad e último ponto de inserção")
+	-- v44 ("mais intuitivo"): diz onde o RENASCER põe o soldado
+	setText(
+		K.dest,
+		if e or S.dev
+			then string.format("Você volta em: %s", JogarAgora.summary(vehicleArmed))
+			else "Você volta com o squad, no último ponto"
+	)
 	K.respawn.enabled(armed)
 	K.map.enabled(armed)
 	K.vehicle.enabled(armed)
@@ -1092,7 +1102,7 @@ local function paintButtons()
 				"COM %s",
 				UiKit.upper(Vehicles.SPECS[S.veh.spec] and Vehicles.SPECS[S.veh.spec].name or S.veh.spec)
 			)
-			else "COM VEÍCULO"
+			else "RENASCER COM VEÍCULO"
 	)
 	local inplace = inplaceEntry()
 	K.hereHead.Visible = inplace ~= nil
