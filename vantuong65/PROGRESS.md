@@ -14,6 +14,7 @@
 | F6 Offensive e lançamento | **testado no Studio**: Offensive com relatório pós-ação, progressão. Beta fechado **só você pode rodar** |
 
 ## v41: bots do Front 44, sem fogo amigo, corrida, celular e carregamento (2026-11-13, D-109)
+- **Publicada** como versão 41 do place (build do commit 8013574).
 - **Feito** (14 pedidos do dono de 13/11, sozinho, sem agentes):
   - celular sem nada por cima (caído, avisos, faixa no alto) e objetivos A–E;
   - sem a parede vermelha (disco do evento) e sem fogo amigo;
