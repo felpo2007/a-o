@@ -188,10 +188,8 @@ def receita():
         o = B.caixa(nome, dim, c, 0.008)
         M.mover(o, fr)
         mt.geo(PB, o, od)
-    for s in (1, -1):
-        o = B.caixa("vidro_pb", (0.012, 0.64, 0.66), (0, s * 0.345, 0.4))
-        M.mover(o, fr)
-        mt.geo(PB, o, vidro)
+    # v45 (D-113): sem os dois vidros. No Roblox o vidro sai opaco (textura única do atlas) e o
+    # motorista via duas placas pretas; fica só a moldura, como nos jipes com o vidro tirado.
     mt.pivo(PB, (X_COWL + 0.02, 0, Z_TUB + 0.02))
     mt.atlas(PB, "a")
     mt.geo(P, B.caixa("painel", (0.14, 1.4, 0.16), (X_COWL - 0.05, 0, 0.9), 0.01), od)

@@ -275,7 +275,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:1490"
  ],
  "%s %s (%s)": [
-  "src/ServerScriptService/Modules/BotVehicles.luau:896"
+  "src/ServerScriptService/Modules/BotVehicles.luau:963"
  ],
  "%s (%d)": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CommanderController.client.luau:160",
@@ -1245,7 +1245,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:1501"
  ],
  "Asphalt": [
-  "src/ReplicatedStorage/Shared/VehicleDrive.luau:88"
+  "src/ReplicatedStorage/Shared/VehicleDrive.luau:112"
  ],
  "Assalto depois do ataque aéreo": [
   "src/ReplicatedStorage/Shared/Eventos.luau:88"
@@ -1569,7 +1569,7 @@
   "src/ReplicatedStorage/Shared/Roles.luau:47"
  ],
  "Brick": [
-  "src/ReplicatedStorage/Shared/VehicleDrive.luau:92"
+  "src/ReplicatedStorage/Shared/VehicleDrive.luau:116"
  ],
  "Brilho": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:698"
@@ -2046,7 +2046,7 @@
   "src/ReplicatedFirst/Idioma.luau:568"
  ],
  "Cobblestone": [
-  "src/ReplicatedStorage/Shared/VehicleDrive.luau:91"
+  "src/ReplicatedStorage/Shared/VehicleDrive.luau:115"
  ],
  "Cobertura": [
   "src/ServerScriptService/Modules/MapLife.luau:795"
@@ -2091,7 +2091,7 @@
   "src/ReplicatedStorage/Shared/Comms.luau:42"
  ],
  "Combatants": [
-  "src/ServerScriptService/Modules/BotVehicles.luau:560",
+  "src/ServerScriptService/Modules/BotVehicles.luau:585",
   "src/ServerScriptService/Modules/Flutua.luau:211",
   "src/ServerScriptService/Modules/SmokeService.luau:31",
   "src/ServerScriptService/Modules/VehicleService.luau:457"
@@ -2125,7 +2125,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Wheel.luau:590"
  ],
  "Concrete": [
-  "src/ReplicatedStorage/Shared/VehicleDrive.luau:90"
+  "src/ReplicatedStorage/Shared/VehicleDrive.luau:114"
  ],
  "Configurações": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:199"
@@ -2487,7 +2487,7 @@
  "Dike": [
   "src/ReplicatedStorage/Shared/BotBrain.luau:1122",
   "src/ReplicatedStorage/Shared/Movement.luau:198",
-  "src/ReplicatedStorage/Shared/VehicleDrive.luau:73",
+  "src/ReplicatedStorage/Shared/VehicleDrive.luau:97",
   "src/ServerScriptService/Modules/BotService.luau:583",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/AudioController.client.luau:332"
  ],
@@ -2638,7 +2638,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehiclePrompt.client.luau:35"
  ],
  "Earth": [
-  "src/ReplicatedStorage/Shared/VehicleDrive.luau:73"
+  "src/ReplicatedStorage/Shared/VehicleDrive.luau:97"
  ],
  "Echo": [
   "src/ReplicatedStorage/Shared/Roles.luau:47"
@@ -3375,7 +3375,7 @@
  ],
  "Grass": [
   "src/ReplicatedStorage/Shared/Movement.luau:206",
-  "src/ReplicatedStorage/Shared/VehicleDrive.luau:85"
+  "src/ReplicatedStorage/Shared/VehicleDrive.luau:109"
  ],
  "Green Beach": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/AudioController.client.luau:223"
@@ -3388,7 +3388,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/PostureController.client.luau:266"
  ],
  "Ground": [
-  "src/ReplicatedStorage/Shared/VehicleDrive.luau:75",
+  "src/ReplicatedStorage/Shared/VehicleDrive.luau:99",
   "src/ServerScriptService/Modules/ArtPlan.luau:162",
   "src/ServerScriptService/Modules/PostureService.luau:57"
  ],
@@ -4259,7 +4259,7 @@
  ],
  "Mud": [
   "src/ReplicatedStorage/Shared/Movement.luau:200",
-  "src/ReplicatedStorage/Shared/VehicleDrive.luau:79"
+  "src/ReplicatedStorage/Shared/VehicleDrive.luau:103"
  ],
  "Mudar": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:1194"
@@ -4981,7 +4981,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/TutorialController.client.luau:175"
  ],
  "Pavement": [
-  "src/ReplicatedStorage/Shared/VehicleDrive.luau:89"
+  "src/ReplicatedStorage/Shared/VehicleDrive.luau:113"
  ],
  "Pe": [
   "src/ServerScriptService/Modules/MapLife.luau:428"
@@ -5628,7 +5628,7 @@
   "src/ServerScriptService/Modules/CaixaMunicaoService.luau:80"
  ],
  "Road": [
-  "src/ReplicatedStorage/Shared/VehicleDrive.luau:75",
+  "src/ReplicatedStorage/Shared/VehicleDrive.luau:99",
   "src/ServerScriptService/Modules/CompraVeiculoService.luau:161",
   "src/ServerScriptService/Modules/CompraVeiculoService.luau:206"
  ],
@@ -5905,7 +5905,7 @@
  ],
  "Sand": [
   "src/ReplicatedStorage/Shared/Movement.luau:202",
-  "src/ReplicatedStorage/Shared/VehicleDrive.luau:81"
+  "src/ReplicatedStorage/Shared/VehicleDrive.luau:105"
  ],
  "Sangramento": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaoJogador.luau:179",
@@ -6852,7 +6852,7 @@
   "src/ServerScriptService/Modules/BotTunnels.luau:292",
   "src/ServerScriptService/Modules/BotTunnels.luau:303",
   "src/ServerScriptService/Modules/BotTunnels.luau:308",
-  "src/ServerScriptService/Modules/BotVehicles.luau:216",
+  "src/ServerScriptService/Modules/BotVehicles.luau:241",
   "src/ServerScriptService/Modules/CaixaMunicaoService.luau:71",
   "src/ServerScriptService/Modules/CaixaMunicaoService.luau:488",
   "src/ServerScriptService/Modules/CampanhaService.luau:99",
@@ -7204,7 +7204,7 @@
   "src/ServerScriptService/Modules/BotTunnels.luau:196",
   "src/ServerScriptService/Modules/BotTunnels.luau:217",
   "src/ServerScriptService/Modules/BotTunnels.luau:255",
-  "src/ServerScriptService/Modules/BotVehicles.luau:216",
+  "src/ServerScriptService/Modules/BotVehicles.luau:241",
   "src/ServerScriptService/Modules/CaixaMunicaoService.luau:489",
   "src/ServerScriptService/Modules/CampanhaService.luau:99",
   "src/ServerScriptService/Modules/CampanhaService.luau:530",
@@ -7429,7 +7429,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Movement.client.luau:1078"
  ],
  "Vehicles": [
-  "src/ServerScriptService/Modules/BotVehicles.luau:560",
+  "src/ServerScriptService/Modules/BotVehicles.luau:585",
   "src/ServerScriptService/Modules/Flutua.luau:211"
  ],
  "Velocidade": [
@@ -7644,7 +7644,7 @@
  ],
  "Water": [
   "src/ReplicatedStorage/Shared/Movement.luau:208",
-  "src/ReplicatedStorage/Shared/VehicleDrive.luau:77"
+  "src/ReplicatedStorage/Shared/VehicleDrive.luau:101"
  ],
  "Wikipedia 'Winchester Model 1912' (Marines: Coreia e começo do Vietnã; 6 + 1; sem": [
   "src/ReplicatedStorage/Shared/Weapons.luau:493"
@@ -7806,7 +7806,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Toast.luau:136"
  ],
  "^Seat_p%d+$": [
-  "src/ServerScriptService/Modules/BotVehicles.luau:593"
+  "src/ServerScriptService/Modules/BotVehicles.luau:618"
  ],
  "^Seletor: (.+)$": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/HudCampo.client.luau:608"
@@ -7847,7 +7847,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:666"
  ],
  "^p(%d+)$": [
-  "src/ReplicatedStorage/Shared/VehicleDrive.luau:1081",
+  "src/ReplicatedStorage/Shared/VehicleDrive.luau:1116",
   "src/ReplicatedStorage/Shared/Vehicles.luau:262",
   "src/ReplicatedStorage/Shared/Vehicles.luau:471"
  ],
@@ -10480,7 +10480,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CasualtyScreen.luau:962",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CasualtyScreen.luau:966",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Caveira.client.luau:159",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/CenaBaixa.luau:283",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/CenaBaixa.luau:308",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:189",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:205",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:394",

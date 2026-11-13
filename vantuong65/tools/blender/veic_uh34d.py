@@ -95,6 +95,7 @@ R_ROT, R_CAUDA = 17.07 / 2, 2.90 / 2
 WHEEL = Vector((4.45, 4.27 / 2, 0.36))
 TWHEEL = Vector((-1.65, 0.0, 0.2))
 PORTA = (2.95, 4.25)  # x da abertura
+PORTA_E = (2.15, 4.25)  # x da abertura da esquerda (v45, liberdade de jogo)
 
 
 def receita():
@@ -121,7 +122,11 @@ def receita():
         return frente or lado
 
     def porta(c, n):
-        return PORTA[0] < c.x < PORTA[1] and 0.85 < c.z < 2.2 and n.y < -0.5
+        direita = PORTA[0] < c.x < PORTA[1] and 0.85 < c.z < 2.2 and n.y < -0.5
+        # v45 (D-113, pedido do dono): o porão da tropa aberto também à esquerda, para quem vai
+        # sentado ver para fora e ser visto (o H-34 real tinha só janelas desse lado)
+        esquerda = PORTA_E[0] < c.x < PORTA_E[1] and 0.85 < c.z < 2.2 and n.y > 0.5
+        return direita or esquerda
 
     def reg_cabine(c, n):
         return 4.15 < c.x < 6.1 and c.z > 2.25
@@ -207,8 +212,8 @@ def receita():
         if s > 0:
             for zz in (1.2, 1.75, 2.3):
                 mt.det(P, B.caixa("degrau", (0.16, 0.012, 0.07), (4.9, 0.845, zz)), aco_esc)
-        # janelas do porão
-        for xx in (2.4, 3.3, 4.3) if s > 0 else (2.25,):
+        # janelas do porão (à esquerda o lado agora é aberto: v45)
+        for xx in () if s > 0 else (2.25,):
             mt.det(P, B.caixa("janela", (0.32, 0.012, 0.3), (xx, s * 0.842, 1.85)), vidro)
         # trem principal: amortecedor até o lado da fuselagem e o V até a barriga
         roda = Vector((WHEEL.x, s * WHEEL.y, WHEEL.z))
@@ -415,6 +420,7 @@ def receita():
             "GLB); o jogo deve soldar as 4 no RotorPrincipal (cubo) e girar o cubo.",
             "Rotor de cauda no lado esquerdo da deriva (PLACEHOLDER: lado conferido só em foto).",
             "Passageiros: na porta da direita (pernas para fora) e no banco de lona da esquerda.",
+            "v45: o porão também é aberto à esquerda (x 2,15 a 4,25 m), liberdade de jogo.",
         ],
     }
     return mt, info

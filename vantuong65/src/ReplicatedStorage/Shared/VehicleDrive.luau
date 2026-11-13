@@ -20,6 +20,30 @@ local HP_W = 745.7
 VehicleDrive.G = G
 VehicleDrive.STUD_M = 0.28
 VehicleDrive.DRIVE_EFF = 0.6 -- eficiência motor→lagarta (D-36)
+-- v45 (pedido do dono: "faça os veículos mais fáceis de controlar e um pouco mais rápidos"): ajuste de
+-- JOGO por cima da ficha (as fichas continuam as reais em Shared/Vehicles):
+--   speedK    teto de velocidade dos de lagarta e do anfíbio x1,2 (o M48 vai a ~58 km/h);
+--   speedKWheeled  dos de roda x1,05 (o jipe já faz 106 km/h na ficha: ~111);
+--   powerK    potência útil x1,3 (arranca e sobe ladeira mais rápido);
+--   steerTauK resposta do volante/cross-drive x0,6 do tempo (vira na hora);
+--   latGK     aderência lateral x1,25 (escorrega menos na curva);
+--   turnK     raio de curva x0,85 (curva mais fechada);
+--   brakeK    freio x1,25.
+VehicleDrive.GAME = {
+	speedK = 1.2,
+	speedKWheeled = 1.05,
+	powerK = 1.3,
+	steerTauK = 0.6,
+	latGK = 1.25,
+	turnK = 0.85,
+	brakeK = 1.25,
+}
+local GAME = VehicleDrive.GAME
+
+-- fator de velocidade do ajuste de jogo (lagarta/anfíbio ou roda)
+function VehicleDrive.speedK(wheeled: boolean?): number
+	return if wheeled then GAME.speedKWheeled else GAME.speedK
+end
 
 -- ===== chão =====
 export type Ground = {
@@ -441,7 +465,8 @@ function VehicleDrive.topSpeed(body: Body, groundKey: string, rain: number?, dep
 		end
 		groundKey = "mud"
 	end
-	return body.maxKmh / 3.6 * VehicleDrive.ground(groundKey, rain, VehicleDrive.spec(body.id).wheeled).ride
+	local wheeled = VehicleDrive.spec(body.id).wheeled
+	return body.maxKmh / 3.6 * VehicleDrive.speedK(wheeled) * VehicleDrive.ground(groundKey, rain, wheeled).ride
 end
 
 -- Um passo da dinâmica de chão (ou de água, no anfíbio). Muda `st` e devolve.
@@ -473,7 +498,7 @@ function VehicleDrive.step(body: Body, st: State, inp: Input, env: Env, dt: numb
 	local slope = math.clamp(env.slopeSin or 0, -0.95, 0.95)
 	local side = math.clamp(env.sideSin or 0, -0.95, 0.95)
 	local cosS = math.sqrt(1 - slope * slope)
-	local vmax = body.maxKmh / 3.6
+	local vmax = body.maxKmh / 3.6 * VehicleDrive.speedK(d.wheeled)
 	local v = st.v
 	local v0 = v
 
@@ -545,7 +570,12 @@ function VehicleDrive.step(body: Body, st: State, inp: Input, env: Env, dt: numb
 
 	-- potência útil e força de tração: o acelerador dosa a potência; o conversor limita a força pela
 	-- rotação do motor (em marcha lenta só arrasta)
-	local P = body.powerHp * HP_W * VehicleDrive.DRIVE_EFF * engine * (0.15 + 0.85 * math.clamp(st.rpm, 0, 1))
+	local P = body.powerHp
+		* HP_W
+		* VehicleDrive.DRIVE_EFF
+		* GAME.powerK
+		* engine
+		* (0.15 + 0.85 * math.clamp(st.rpm, 0, 1))
 	local fConv = d.tractive * W * math.clamp(st.rpm / d.stall, 0, 1) ^ 2
 	local fFull = math.min(P / math.max(math.abs(v), 1.0), fConv)
 	local fDrive = 0
@@ -592,7 +622,7 @@ function VehicleDrive.step(body: Body, st: State, inp: Input, env: Env, dt: numb
 		local roll = (g.crr + d.turnDrag * turnFrac) * W * cosS
 		local brake = 0
 		if braking then
-			brake = math.min(d.brakeG, g.mu) * W * math.abs(throttle)
+			brake = math.min(d.brakeG * GAME.brakeK, g.mu) * W * math.abs(throttle)
 		elseif want == 0 then
 			brake = d.coastG * W
 		end
@@ -654,16 +684,21 @@ function VehicleDrive.step(body: Body, st: State, inp: Input, env: Env, dt: numb
 	if speed > (if wheeled then 0.05 else 0.5) and not floating then
 		-- andando: curva de raio fixo (cross-drive; nas rodas, o volante todo esterçado) até o limite
 		-- da aderência lateral
-		local radius = d.turnRadiusM
+		local radius = if d.turnRadiusM then d.turnRadiusM * GAME.turnK else nil
 		local moving = if radius and wheeled
 			then speed / radius
 			elseif radius then math.max(pivot, speed / radius * math.clamp(g.mu / 0.7, 0.45, 1))
 			else pivot
-		limit = math.min(moving, d.latG * G * math.clamp(g.muLat / 0.6, 0.4, 1) / speed)
+		limit = math.min(moving, d.latG * GAME.latGK * G * math.clamp(g.muLat / 0.6, 0.4, 1) / speed)
 	end
 	local rev = if v < -0.3 then -1 else 1 -- de ré, como carro: a traseira vai para o lado do comando
 	local yawTarget = if mobile and not drowned then -steer * limit * rev else 0
-	st.yawRate = approach(st.yawRate, yawTarget, if floating then (d.water :: WaterSpec).yawTauS else d.yawTauS, dt)
+	st.yawRate = approach(
+		st.yawRate,
+		yawTarget,
+		if floating then (d.water :: WaterSpec).yawTauS else d.yawTauS * GAME.steerTauK,
+		dt
+	)
 
 	-- deriva lateral: a carroceria gira debaixo da velocidade; a lagarta segura até a aderência
 	local dpsi = st.yawRate * dt

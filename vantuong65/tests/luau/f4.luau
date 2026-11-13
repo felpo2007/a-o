@@ -10,6 +10,7 @@ local HeliModel = require(S .. "HeliModel")
 local Logistics = require(S .. "Logistics")
 local Mortar = require(S .. "Mortar")
 local Rng = require(S .. "Rng")
+local VehicleDrive = require(S .. "VehicleDrive")
 local Vehicles = require(S .. "Vehicles")
 
 local ORIGIN = { e = 270200.0, n = 1692400.0 }
@@ -151,7 +152,7 @@ test("veículos: velocidade máxima por chão, M48 não entra na água, LVTP-5 n
 		end
 		return st.v * 3.6
 	end
-	near(run("m48a3", "road", 120), 48, 0.5, "M48 na estrada")
+	near(run("m48a3", "road", 120), 48 * VehicleDrive.GAME.speedK, 0.5, "M48 na estrada (v45)")
 	assert(run("m48a3", "paddy", 120) < 48 * 0.36, "lama do arrozal")
 	near(run("lvtp5", "water", 300), 11, 0.5, "LVTP-5 na água")
 	assert(run("m48a3", "water", 30) < 0.1, "M48 não navega")

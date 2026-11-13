@@ -254,10 +254,7 @@ def receita():
         o = B.caixa(nome, dim, c, 0.008)
         M.mover(o, fr)
         mt.geo(P, o, od)
-    for s in (1, -1):
-        o = B.caixa("vidro", (0.012, 0.93, 0.56), (0, s * 0.49, 0.31))
-        M.mover(o, fr)
-        mt.geo(P, o, vidro)
+    # v45 (D-113): sem os dois vidros (no Roblox saíam pretos, opacos); fica só a moldura
     capota = B.caixa(
         "capota",
         (X_CAB1 - X_CAB0 + 0.05, 2.04, 0.04),

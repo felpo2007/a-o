@@ -57,6 +57,7 @@ export type State = {
 	wantReq: Vector3?, -- pedido de caminho esperando a vez (intervalo mínimo)
 	stuck: BotMove.Stuck,
 	unstick: number,
+	unstickSide: number, -- v45: lado do 1º passo de lado (o 4º vai para o outro)
 	okSince: number,
 	lastPos: Vector3,
 	jumpAt: number,
@@ -302,6 +303,7 @@ function Loco.attach(bot: any, model: Model)
 		wantReq = nil,
 		stuck = BotMove.newStuck(),
 		unstick = 0,
+		unstickSide = 1,
 		okSince = os.clock(),
 		lastPos = root.Position,
 		jumpAt = 0,
@@ -539,11 +541,24 @@ local function unstick(st: State, now: number)
 		st.hum.Jump = true
 		st.jumpAt = now + 1
 	end
+	-- v45 (pedido do dono: "bots estão se prendendo nos objetos"): sai de lado mais tempo, depois dá
+	-- ré e tenta o outro lado antes de desistir (antes: só um passo de lado de 0,8 s)
 	if st.unstick == 2 then
 		-- sai de lado por um instante
-		local a = st.body.yaw + (if math.random() < 0.5 then 1 else -1) * math.pi / 2
+		st.unstickSide = if math.random() < 0.5 then 1 else -1
+		local a = st.body.yaw + st.unstickSide * math.pi / 2
 		st.avoidX, st.avoidZ = -math.sin(a), -math.cos(a)
-		st.avoidUntil = now + 0.8
+		st.avoidUntil = now + 1.2
+	elseif st.unstick == 3 then
+		-- ré: volta pelo caminho que veio
+		local a = st.body.yaw + math.pi
+		st.avoidX, st.avoidZ = -math.sin(a), -math.cos(a)
+		st.avoidUntil = now + 1.0
+	elseif st.unstick == 4 then
+		-- o outro lado
+		local a = st.body.yaw - st.unstickSide * math.pi / 2
+		st.avoidX, st.avoidZ = -math.sin(a), -math.cos(a)
+		st.avoidUntil = now + 1.5
 	end
 	if st.unstick >= 5 then
 		st.status = "failed"

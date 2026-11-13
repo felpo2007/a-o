@@ -64,7 +64,20 @@ export type Crew = {
 	firing: boolean,
 	mech: any, -- squad levado (LVTP-5)
 	logAt: number,
+	-- v45 (pedido do dono: "bots parados nos veículos"): vigia da tripulação
+	noDriverSince: number?, -- desde quando o motorista não está sentado
+	progAt: number, -- último instante em que o veículo andou WATCH_MOVE_M
+	progPos: Vector3?,
 }
+
+-- v45: sem motorista sentado por WATCH_NO_DRIVER_S (morreu, não chegou) ou o veículo parado por
+-- WATCH_STALL_S indo para o objetivo (encalhado na baia, preso no mato): a tripulação se desfaz e todo
+-- mundo desce e segue a pé com o squad. Antes os bots ficavam sentados no veículo para sempre (foto do
+-- dono: quatro em cima do tanque na base). PLACEHOLDER.
+local WATCH_NO_DRIVER_S = 15
+local WATCH_BOARD_S = 90 -- embarque que não acontece (motorista preso, sem caminho até o veículo)
+local WATCH_STALL_S = 60
+local WATCH_MOVE_M = 4
 
 local crews: { Crew } = {}
 local nextId = 0
@@ -119,9 +132,18 @@ end
 
 local function groundVehicles(faction: string): { Model }
 	local out: { Model } = {}
+	local now = os.clock()
 	for _, v in VehicleService.vehicles() do
 		local kind = v:GetAttribute("Kind")
-		if v:GetAttribute("Faction") == faction and kind ~= "heli" and VehicleService.seat(v, "driver") then
+		-- v45: largado pelo vigia há pouco (encalhado): fica 3 min sem tripulação de bot
+		local left = v:GetAttribute("BotAbandonedAt")
+		local abandoned = type(left) == "number" and now - left < 180
+		if
+			v:GetAttribute("Faction") == faction
+			and kind ~= "heli"
+			and VehicleService.seat(v, "driver")
+			and not abandoned
+		then
 			table.insert(out, v)
 		end
 	end
@@ -172,6 +194,9 @@ local function newCrew(vehicle: Model, faction: string): Crew
 		firing = false,
 		mech = nil,
 		logAt = 0,
+		noDriverSince = nil,
+		progAt = os.clock(),
+		progPos = if ch then ch.Position else nil,
 	}
 end
 
@@ -609,11 +634,57 @@ local function setState(c: Crew, st: string, now: number)
 	end
 end
 
+-- v45: vigia (ver WATCH_*). true = a tripulação foi desfeita.
+local function watchdog(c: Crew, ch: BasePart?, driverIn: boolean, now: number): boolean
+	if not ch or c.vehicle:GetAttribute("Destroyed") then
+		return false
+	end
+	if not driverIn then
+		c.noDriverSince = c.noDriverSince or now
+		-- no embarque, o motorista ainda está a caminho: prazo maior (WATCH_BOARD_S)
+		local limit = if c.state == "board" then WATCH_BOARD_S else WATCH_NO_DRIVER_S
+		if now - (c.noDriverSince :: number) > limit then
+			print(string.format("[VT65] bots: %s (tripulação %d) sem motorista: desembarcam", c.spec, c.id))
+			if c.state == "board" then
+				-- não chegaram até ele: sem pausa, a mesma tripulação se formaria de novo em seguida
+				c.vehicle:SetAttribute("BotAbandonedAt", now)
+			end
+			dissolve(c)
+			return true
+		end
+		return false
+	end
+	c.noDriverSince = nil
+	local p = (ch :: BasePart).Position
+	local last = c.progPos
+	if not last or flat(p, last) * M >= WATCH_MOVE_M then
+		c.progPos, c.progAt = p, now
+		return false
+	end
+	-- parado de propósito (carregando a tropa, segurando a posição, largando a tropa): não conta
+	local moving = c.state == "go" or c.state == "back"
+	if not moving then
+		c.progAt = now
+		return false
+	end
+	if now - c.progAt > WATCH_STALL_S then
+		print(
+			string.format("[VT65] bots: %s (tripulação %d) parado há %d s: desembarcam", c.spec, c.id, WATCH_STALL_S)
+		)
+		c.vehicle:SetAttribute("BotAbandonedAt", now)
+		dissolve(c)
+		return true
+	end
+	return false
+end
+
 function BotVehicles.drive(now: number, dt: number)
-	for _, c in crews do
+	for i = #crews, 1, -1 do
+		local c = crews[i]
 		local ch = chassisOf(c.vehicle)
 		local drv = c.members.driver
-		if not ch or not seated(drv, c.vehicle) then
+		local driverIn = seated(drv, c.vehicle)
+		if watchdog(c, ch, driverIn, now) or not ch or not driverIn then
 			continue
 		end
 		local chassis = ch :: BasePart

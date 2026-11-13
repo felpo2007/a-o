@@ -167,9 +167,14 @@ def receita():
         tras = n.x < -0.6 and c.z > 1.05 and abs(c.y) < 0.5
         return lado or frente or tras
 
-    B.pintar_por(cab, janela, vidro)
+    # v45 (D-113): janelas abertas, sem vidro (no Roblox ele saía preto e opaco), com forro por
+    # dentro como a cabine do UH-34D: de fora se vê quem dirige; de dentro, colunas e teto. A
+    # limpeza de faces escondidas apagaria o forro e o interior: o casco fica sem ela.
+    forro = B.abrir_e_forrar(cab, lambda c, n: n.z > -0.5, janela, 0.012, "forro_cab")
     mt.geo(P, cab, None, suave=40)
-    # interior visto pelos vidros (de dentro a cabine some: face única)
+    mt.geo(P, forro, interior, suave=40)
+    mt.sem_limpeza(P)
+    # interior visto pelas janelas
     mt.geo(P, B.caixa("painel", (0.25, 1.4, 0.18), (X_COWL - 0.15, 0, 0.98), 0.03), interior)
     mt.geo(P, B.caixa("banco", (0.5, 1.3, 0.14), (0.05, 0, 0.47), 0.04), banco)
     mt.geo(

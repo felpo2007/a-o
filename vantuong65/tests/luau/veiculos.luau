@@ -129,8 +129,9 @@ test("velocidade máxima: M48A3 48 km/h na estrada (ficha) e bem menos fora dela
 		table.insert(rows, id .. ": " .. table.concat(line, ", "))
 	end
 	local m = spec("m48a3")
-	near(VehicleDrive.topSpeed(m, "road") * 3.6, 48, 0.01, "estrada")
-	assert(VehicleDrive.topSpeed(m, "grass") * 3.6 < 35 and VehicleDrive.topSpeed(m, "paddy") * 3.6 < 17)
+	local K = VehicleDrive.GAME.speedK -- v45: ajuste de jogo por cima da ficha
+	near(VehicleDrive.topSpeed(m, "road") * 3.6, 48 * K, 0.01, "estrada")
+	assert(VehicleDrive.topSpeed(m, "grass") * 3.6 < 35 * K and VehicleDrive.topSpeed(m, "paddy") * 3.6 < 17 * K)
 	for _, r in rows do
 		print("       " .. r .. " km/h")
 	end
@@ -168,7 +169,7 @@ test("freio: freia mais que o freio-motor e não engata a ré sozinho; parado, a
 	assert(braked.v >= -0.01, "o freio para, não inverte")
 	run("m48a3", 8, { throttle = -1, steer = 0 }, env, braked)
 	assert(braked.v < -1 and braked.gear == -1, "parado, segurar a ré anda para trás")
-	near(braked.v * 3.6, -48 * 0.3 * math.min(0.65 / 0.75, 1), 1.0, "ré limitada")
+	near(braked.v * 3.6, -48 * VehicleDrive.GAME.speedK * 0.3 * math.min(0.65 / 0.75, 1), 1.0, "ré limitada")
 	print(
 		string.format(
 			"       capim a %.0f km/h: para em %.1f s freando e %.1f s no freio-motor; ré %.0f km/h",
@@ -394,7 +395,7 @@ test("D-93: direção mais viva (giro chega antes) e curva de raio fixo andando,
 	local f = VehicleDrive.newState()
 	f.v, f.gear, f.rpm = 10, 2, 0.9
 	VehicleDrive.step(spec("m48a3"), f, { throttle = 1, steer = 1 }, { ground = "earth" }, 2)
-	local latLimit = VehicleDrive.DRIVE.m48a3.latG * G / f.v
+	local latLimit = VehicleDrive.DRIVE.m48a3.latG * VehicleDrive.GAME.latGK * G / f.v
 	assert(math.abs(f.yawRate) <= latLimit + 1e-6, "limite da aderência lateral")
 	-- números da D-86 (tabela) continuam: giro no lugar 20/40°/s, ré 12 km/h, freada 2,2 s, máximas
 	assert(VehicleDrive.DRIVE.m48a3.pivotDegS == 20 and VehicleDrive.DRIVE.ontos.pivotDegS == 40)
@@ -759,12 +760,13 @@ test("D-100: rodas — não gira parado, curva pelo raio mínimo, rápido na est
 			VehicleDrive.step(spec(id), s, { throttle = 0.3, steer = 1 }, { ground = "earth" }, DT)
 		end
 		local radius = 2 / math.abs(s.yawRate)
-		near(radius, VehicleDrive.DRIVE[id].turnRadiusM, VehicleDrive.DRIVE[id].turnRadiusM * 0.15, id .. " raio")
+		local r0 = VehicleDrive.DRIVE[id].turnRadiusM * VehicleDrive.GAME.turnK -- v45
+		near(radius, r0, r0 * 0.15, id .. " raio")
 		local road = run(id, 120, { throttle = 1, steer = 0 }, { ground = "road" }).v * 3.6
 		local dirt = run(id, 120, { throttle = 1, steer = 0 }, { ground = "dirt" }).v * 3.6
 		local grass = run(id, 120, { throttle = 1, steer = 0 }, { ground = "grass" }).v * 3.6
 		local paddy = run(id, 60, { throttle = 1, steer = 0 }, { ground = "paddy" }).v * 3.6
-		near(road, spec(id).maxKmh, 1.5, id .. " na estrada")
+		near(road, spec(id).maxKmh * VehicleDrive.speedK(true), 1.5, id .. " na estrada")
 		assert(dirt > grass and grass > paddy, id .. ": estrada de terra > capim > arrozal")
 		assert(paddy > 3, string.format("%s atola no arrozal seco: %.1f km/h", id, paddy))
 		table.insert(
@@ -782,7 +784,7 @@ test("D-100: rodas — não gira parado, curva pelo raio mínimo, rápido na est
 	end
 	-- a lagarta também ganha a estrada de terra (D-86 intacta nos outros chãos)
 	local m48dirt = run("m48a3", 120, { throttle = 1, steer = 0 }, { ground = "dirt" }).v * 3.6
-	near(m48dirt, 48 * 0.9, 0.6, "M48 na estrada de terra")
+	near(m48dirt, 48 * VehicleDrive.speedK(false) * 0.9, 0.6, "M48 na estrada de terra")
 	-- o jipe arranca muito antes do tanque
 	assert(timeTo("m151", 30, "road") < timeTo("m48a3", 30, "road") * 0.6)
 	for _, l in lines do

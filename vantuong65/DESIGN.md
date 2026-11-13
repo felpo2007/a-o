@@ -3825,3 +3825,56 @@ Agora é um retrato de identificação (`CenaBaixa.RETRATO`):
 
 **Ainda na fila do lote 2:** a revisão das outras telas ("uma criança tem que conseguir jogar") e os
 bugs visuais que o dono viu (falta a foto de cada um).
+
+## D-113 — Lote 3: veículos sem vidro preto, mais fáceis, helicóptero aberto e bots que não travam (v45, 2026-11-13)
+
+Pedidos do dono: "bots parados nos veículos"; "bots estão se prendendo nos objetos"; "faça os
+veículos sem janelas ou coloque elas com um vidro que eu possa ver, pq agora está preto o vidro";
+"faça eles mais fáceis de controlar e um pouco mais rápidos"; "no helicóptero faça a parte de trás
+aberta onde os passageiros ficam".
+
+**Vidro:** no Roblox cada peça tem uma textura só (o atlas do bake), então o vidro sai opaco e escuro.
+Em vez de vidro:
+- M151 e M35: o para-brisa fica só com a moldura (muitos rodavam assim no Vietnã);
+- Peugeot 403: janelas abertas, com forro por dentro como a cabine do UH-34D (de fora se vê quem
+  dirige; de dentro, colunas e teto). O casco do Peugeot fica sem a limpeza de faces escondidas,
+  que apagaria o forro e o interior;
+- os IDs antigos ficam guardados como `<chave>_vidro`.
+
+**Helicóptero:** o porão da tropa do UH-34D fica aberto também à esquerda (x de 2,15 a 4,25 m, a mesma
+altura da porta da direita), sem as 3 janelas daquele lado. Liberdade de jogo: o H-34 real só tinha a
+porta da direita. O ID antigo fica como `uh34d_v2_fechado`.
+
+**Direção (`VehicleDrive.GAME`, por cima da ficha, PLACEHOLDER):**
+- velocidade máxima: lagarta e anfíbio ×1,2 (M48A3 de 48 para 57,6 km/h); rodas ×1,05 (o M151 já
+  fazia 106 km/h pela ficha: agora 111);
+- força do motor ×1,3 (arranca mais rápido); freio ×1,25;
+- resposta do volante: constante de tempo ×0,6; aderência lateral ×1,25; raio mínimo de curva ×0,85.
+
+**Bots nos veículos (`BotVehicles`, vigia):**
+- sem motorista sentado por 15 s, a tripulação se desfaz e todos descem e seguem a pé com o squad;
+  no embarque o prazo é de 90 s (o motorista ainda está a caminho; no Studio, a tripulação do Ontos
+  ficou mais de 4 min sem ninguém sentado) e o veículo fica 3 min sem tripulação de bot, para a mesma
+  tripulação não se formar e se desfazer em ciclo;
+- indo para o objetivo ou voltando, se o veículo anda menos de 4 m em 60 s, a tripulação desce e o
+  veículo fica 3 min sem tripulação de bot (`BotAbandonedAt`);
+- antes, os bots ficavam sentados para sempre (foto do dono: quatro em cima do tanque na base).
+
+**Bots presos (`BotLocomotion`):** a saída de quem trava ganhou etapas:
+1. pulo (como antes);
+2. passo de lado por 1,2 s (era 0,8 s);
+3. ré por 1,0 s;
+4. o outro lado por 1,5 s;
+5. só então desiste do caminho e pede outro.
+
+**Conferido no Studio (2026-11-13):**
+- os 9 veículos nascem com os modelos novos; do banco do motorista do M151 a vista sai livre pela
+  moldura; o porão aberto do UH-34D e as janelas do Peugeot aparecem no jogo;
+- o vigia agiu sozinho: o Ontos ficou 60 s parado indo para o objetivo e a tripulação desceu. Com o
+  chassi de um LVTP-5 preso (Anchored), em 58 s a tripulação desceu (0 sentados) e o veículo ficou
+  marcado;
+- 0 erros de script.
+
+**Não testado:** o prazo de 90 s do embarque ao vivo; dirigir com teclado ou controle de verdade (a
+direção nova só foi medida no Lune: M151 a 111 km/h na estrada, M48A3 a 57,6 km/h); o bot preso
+num objeto saindo pelas etapas novas.

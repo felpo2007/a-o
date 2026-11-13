@@ -231,10 +231,6 @@
  "Images.ghillie_bamboo": "74047548891682",
  "Models.m48a3_v2": "85708217037052",
  "Models.ontos_v2": "140388448545182",
- "Models.uh34d_v2": "94633648668065",
- "Models.m151": "121716450551981",
- "Models.m35": "87825246333364",
- "Models.peugeot403": "124675101270786",
  "Models.lvtp5_v2": "106956293397124",
  "Rostos.us_01": "128893734167958",
  "Rostos.us_02": "125710658317222",
@@ -320,5 +316,13 @@
  "Sounds.motor_caminhao": "83596451612531",
  "Models.win12": "90884195431925",
  "Models.caixa_municao_us": "128489958854272",
- "Models.caixa_municao_vc": "70550239273438"
+ "Models.caixa_municao_vc": "70550239273438",
+ "Models.m151_vidro": "121716450551981",
+ "Models.m35_vidro": "87825246333364",
+ "Models.peugeot403_vidro": "124675101270786",
+ "Models.uh34d_v2_fechado": "94633648668065",
+ "Models.uh34d_v2": "110115617078484",
+ "Models.m151": "105050207488338",
+ "Models.m35": "105676392589052",
+ "Models.peugeot403": "124703224666199"
 }

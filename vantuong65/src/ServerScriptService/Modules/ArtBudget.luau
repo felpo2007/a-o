@@ -270,10 +270,10 @@ ArtBudget.TRIS = {
 	m48a3_v2 = 14358,
 	ontos_v2 = 9938,
 	lvtp5_v2 = 14009,
-	uh34d_v2 = 4794,
-	m151 = 3362,
-	m35 = 8012,
-	peugeot403 = 4526,
+	uh34d_v2 = 4742,
+	m151 = 3338,
+	m35 = 8000,
+	peugeot403 = 4639,
 } :: { [string]: number }
 
 -- Acima da meta, com o motivo. O teste falha se um modelo passar da meta sem estar aqui, ou se
