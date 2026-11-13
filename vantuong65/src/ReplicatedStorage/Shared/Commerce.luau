@@ -31,6 +31,25 @@ Commerce.IDS = {
 	PRODUCT_TIP_SMALL = 3730455552, -- "Apoiar o desenvolvimento (pequeno)"
 	PRODUCT_TIP_LARGE = 3730455555, -- "Apoiar o desenvolvimento (grande)"
 	PRODUCT_RESPAWN_INPLACE = 3730455499, -- "Renascer onde caiu" (decisão do dono, 2026-11-11)
+	-- campanha (plano de volta diária, 2026-11-12): Commerce.CampaignPasses / CampaignProducts.
+	-- 0 = ainda não criado (o botão some); o tools/roblox_cloud.py create-store cria e grava aqui.
+	PASS_SEASON_S1 = 2081672426, -- "Passe de Campanha: Veterano (Temporada 1)"
+	PASS_RECRUIT = 2081942423, -- "Pacote de Recruta" (compra única)
+	PASS_PERK_SPEED = 2082356430, -- "Pernas de Maratonista"
+	PASS_PERK_HEALTH = 2081606414, -- "Couro Duro"
+	PASS_PERK_BREATH = 2082974399, -- "Fôlego de Atirador"
+	PASS_PERK_RELOAD = 2081582455, -- "Mãos Rápidas"
+	PASS_PERK_MEDIC = 2082308430, -- "Socorrista Treinado"
+	PASS_PERK_POCKETS = 2082056423, -- "Bolsos Extras"
+	PASS_PERK_EAGLE = 2083364414, -- "Olho de Águia"
+	PASS_PERK_ALL = 2082956450, -- "Pacote Combatente" (as 7)
+	PRODUCT_SEASON_SKIP = 3730606735, -- "Pular um nível do passe"
+	PRODUCT_BOOST_XP_1H = 3730606738, -- "XP dobrado por 1 h"
+	PRODUCT_BOOST_XP_24H = 3730606739, -- "XP dobrado por 24 h"
+	PRODUCT_BOOST_CR_1H = 3730606741, -- "Créditos dobrados por 1 h"
+	PRODUCT_CREDITS_500 = 3730606747, -- "500 créditos"
+	PRODUCT_CREDITS_1200 = 3730606748, -- "1.200 créditos"
+	PRODUCT_CREDITS_3000 = 3730606751, -- "3.000 créditos"
 	-- Experience Subscription (mensal; o criador precisa estar habilitado)
 	SUBSCRIPTION_UNIT_RESERVE = "", -- "Reserva da Unidade"; ex.: "EXP-1234567890"
 }
@@ -106,6 +125,174 @@ Commerce.GAMEPLAY = {
 	PASS_KIT_ELITE = "kit",
 	PRODUCT_RESPAWN_INPLACE = "respawn",
 } :: { [string]: string }
+
+-- ===== campanha (plano de volta diária, 2026-11-12; autorização do dono: "faça você, tem total
+-- autorização") =====
+-- Catálogo próprio, fora das listas acima (o teste da F2 guarda a lista da D-72). Regras do plano:
+-- nada de caixa-surpresa paga (tudo o que se compra é visto antes), nada de pressão falsa, e as
+-- vantagens (Shared/Vantagens) com teto de +12% em combate. suggestedRobux: só para criar o item
+-- (a loja lê o preço ao vivo). PLACEHOLDER: preços a ajustar com o teste.
+-- kind: "season" (trilha Veterano do passe) | "recruit" (Pacote de Recruta, compra única) |
+-- "perk" (uma vantagem) | "perk_bundle" (as 7)
+export type CampaignPass = { key: string, name: string, description: string, kind: string, suggestedRobux: number }
+Commerce.CampaignPasses = {
+	{
+		key = "PASS_SEASON_S1",
+		name = "Passe de Campanha: Veterano",
+		description = "Temporada 1 da Operação Starlite: a trilha Veterano (uniformes, acabamentos, cartões de abate, gestos, música do menu) e 10% a mais de créditos. Quem compra no meio recebe tudo o que já passou.",
+		kind = "season",
+		suggestedRobux = 399,
+	},
+	{
+		key = "PASS_RECRUIT",
+		name = "Pacote de Recruta",
+		description = "Uniforme de época, acabamento de arma, 3 dias de XP dobrado e 1.000 créditos. Compra única.",
+		kind = "recruit",
+		suggestedRobux = 99,
+	},
+	{
+		key = "PASS_PERK_SPEED",
+		name = "Pernas de Maratonista",
+		description = "+6% de velocidade no trote e na corrida. Vale nos dois lados.",
+		kind = "perk",
+		suggestedRobux = 199,
+	},
+	{
+		key = "PASS_PERK_HEALTH",
+		name = "Couro Duro",
+		description = "+12% de vida máxima. Vale nos dois lados.",
+		kind = "perk",
+		suggestedRobux = 249,
+	},
+	{
+		key = "PASS_PERK_BREATH",
+		name = "Fôlego de Atirador",
+		description = "Prende a respiração por +60% do tempo e a mira balança 12% menos na luneta.",
+		kind = "perk",
+		suggestedRobux = 149,
+	},
+	{
+		key = "PASS_PERK_RELOAD",
+		name = "Mãos Rápidas",
+		description = "Recarga 12% mais rápida. Vale nos dois lados.",
+		kind = "perk",
+		suggestedRobux = 199,
+	},
+	{
+		key = "PASS_PERK_MEDIC",
+		name = "Socorrista Treinado",
+		description = "Bandagem e torniquete 35% mais rápidos; o sangramento corre 20% mais devagar.",
+		kind = "perk",
+		suggestedRobux = 99,
+	},
+	{
+		key = "PASS_PERK_POCKETS",
+		name = "Bolsos Extras",
+		description = "+1 carregador e +1 granada (soma com os kits).",
+		kind = "perk",
+		suggestedRobux = 149,
+	},
+	{
+		key = "PASS_PERK_EAGLE",
+		name = "Olho de Águia",
+		description = "O inimigo que você marca fica 50% mais tempo marcado para o squad.",
+		kind = "perk",
+		suggestedRobux = 99,
+	},
+	{
+		key = "PASS_PERK_ALL",
+		name = "Pacote Combatente",
+		description = "As 7 vantagens juntas, com desconto. Nenhum número de combate passa de +12%.",
+		kind = "perk_bundle",
+		suggestedRobux = 799,
+	},
+} :: { CampaignPass }
+
+-- grants: "season_skip" (estrelas até o próximo nível) | "boost_xp" / "boost_cr" (amount em
+-- segundos) | "credits" (amount de $)
+export type CampaignProduct = {
+	key: string,
+	name: string,
+	description: string,
+	grants: string,
+	amount: number?,
+	suggestedRobux: number,
+}
+Commerce.CampaignProducts = {
+	{
+		key = "PRODUCT_SEASON_SKIP",
+		name = "Pular um nível do passe",
+		description = "Sobe um nível do Passe de Campanha na hora (vale para as duas trilhas).",
+		grants = "season_skip",
+		suggestedRobux = 49,
+	},
+	{
+		key = "PRODUCT_BOOST_XP_1H",
+		name = "XP dobrado por 1 h",
+		description = "Dobra o XP por 1 hora de relógio, em qualquer servidor. Soma com o fim de semana.",
+		grants = "boost_xp",
+		amount = 3600,
+		suggestedRobux = 49,
+	},
+	{
+		key = "PRODUCT_BOOST_XP_24H",
+		name = "XP dobrado por 24 h",
+		description = "Dobra o XP por 24 horas de relógio, em qualquer servidor.",
+		grants = "boost_xp",
+		amount = 86400,
+		suggestedRobux = 149,
+	},
+	{
+		key = "PRODUCT_BOOST_CR_1H",
+		name = "Créditos dobrados por 1 h",
+		description = "Dobra os créditos ganhos jogando por 1 hora de relógio.",
+		grants = "boost_cr",
+		amount = 3600,
+		suggestedRobux = 49,
+	},
+	{
+		key = "PRODUCT_CREDITS_500",
+		name = "500 créditos",
+		description = "500 créditos de intendência para o equipamento e as skins.",
+		grants = "credits",
+		amount = 500,
+		suggestedRobux = 5,
+	},
+	{
+		key = "PRODUCT_CREDITS_1200",
+		name = "1.200 créditos",
+		description = "1.200 créditos de intendência (20% a mais que o pacote de 500).",
+		grants = "credits",
+		amount = 1200,
+		suggestedRobux = 10,
+	},
+	{
+		key = "PRODUCT_CREDITS_3000",
+		name = "3.000 créditos",
+		description = "3.000 créditos de intendência (50% a mais que o pacote de 500).",
+		grants = "credits",
+		amount = 3000,
+		suggestedRobux = 20,
+	},
+} :: { CampaignProduct }
+
+function Commerce.campaignProduct(key: string): CampaignProduct?
+	for _, p in Commerce.CampaignProducts do
+		if p.key == key then
+			return p
+		end
+	end
+	return nil
+end
+
+function Commerce.campaignPass(key: string): CampaignPass?
+	for _, p in Commerce.CampaignPasses do
+		if p.key == key then
+			return p
+		end
+	end
+	return nil
+end
 
 -- unlock: "default" | "pass:<KEY>" | "premium" | "subscription"
 export type Cosmetic = { id: string, faction: string, slot: string, name: string, unlock: string, check: string }
@@ -333,10 +520,12 @@ function Commerce.productKeyById(productId: number): string?
 end
 
 function Commerce.passKeyById(passId: number): string?
-	for _, pass in Commerce.Passes do
-		local id = (Commerce.IDS :: any)[pass.key]
-		if type(id) == "number" and id ~= 0 and id == passId then
-			return pass.key
+	for _, list in { Commerce.Passes :: { any }, Commerce.CampaignPasses :: { any } } do
+		for _, pass in list do
+			local id = (Commerce.IDS :: any)[pass.key]
+			if type(id) == "number" and id ~= 0 and id == passId then
+				return pass.key
+			end
 		end
 	end
 	return nil

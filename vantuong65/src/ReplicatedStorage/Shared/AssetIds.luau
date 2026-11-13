@@ -90,6 +90,9 @@ return {
 		type54 = 89276790728567,
 		m79 = 115974893628870,
 		rpg2 = 115951819927247,
+		-- fuzis de precisão feitos no Blender (tools/blender/armas.py, 2026-11-12); 0 = arma provisória
+		m70 = 94218979828986,
+		mosin = 70519343236093,
 		uh34d = 104404673955740,
 		m48a3 = 83880316083319,
 		ontos = 116051447339407,
@@ -128,6 +131,23 @@ return {
 		sandbag_wall = 106761576075393,
 		conical_hat = 102164592744402,
 		bamboo_clothesline = 135761829841967,
+		-- casas únicas da vila central, com interior (Blender, D-98); 0 = o mapa usa as casas atuais
+		-- com variação de rotação, escala e anexos
+		vila_casa_01 = 0,
+		vila_casa_02 = 0,
+		vila_casa_03 = 0,
+		vila_casa_04 = 0,
+		vila_casa_05 = 0,
+		vila_casa_06 = 0,
+		vila_casa_07 = 0,
+		vila_casa_08 = 0,
+		vila_casa_09 = 0,
+		vila_casa_10 = 0,
+		vila_casa_11 = 0,
+		vila_casa_12 = 0,
+		-- mãos de 1ª pessoa (tools/maos, D-99); 0 = mãos montadas com peças
+		maos_us_1p = 115253980298678,
+		maos_vc_1p = 138339736774045,
 	},
 	-- Roupas: IMAGENS dos moldes clássicos (aplicadas em Shirt.ShirtTemplate / Pants.PantsTemplate)
 	Clothing = {
@@ -216,10 +236,10 @@ return {
 	-- imagem em 0 e o decal publicado, o servidor resolve a imagem no início (CartaService); com os
 	-- dois em 0, o mapa tático usa o desenho simples de antes.
 	Carta = {
-		nw = 96051185172661,
-		ne = 110817410011514,
-		sw = 126462727146819,
-		se = 79478290824539,
+		nw = 105053123911769,
+		ne = 126722409626219,
+		sw = 114493143595884,
+		se = 74199313795128,
 	},
 	CartaImages = {
 		nw = 0,

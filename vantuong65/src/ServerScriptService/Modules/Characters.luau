@@ -1,5 +1,5 @@
 --!strict
--- Monta o soldado de cada facção: corpo, escala 1:1 (1,75 m ≈ 6,25 studs), uniforme e equipamento.
+-- Monta o soldado de cada facção: corpo de 2,0 m (≈ 7,14 studs; D-98), uniforme e equipamento.
 -- describe(): HumanoidDescription (partes do corpo, escala e cores; pele onde o molde v3 é transparente).
 -- dress(): depois do spawn aplica os moldes (ShirtTemplate/PantsTemplate: v3 quando o ID existe em
 -- AssetIds.Clothing, senão a v2), solda capacete/colete do ForgeGUI ajustados à cabeça e ao tronco
@@ -14,6 +14,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local AssetIds = require(ReplicatedStorage.Shared.AssetIds) :: any
+local Corpo = require(ReplicatedStorage.Shared.Corpo)
 local Skins = require(ReplicatedStorage.Shared.Skins)
 local Gear = require(script.Parent.Gear)
 
@@ -28,6 +29,10 @@ local Characters = {}
 -- Altura: com HeightScale 1,2 o "Man" mediu 1,68 m no Studio (2026-11-11, atributo AlturaM).
 -- D-77 (pedido do dono: "aumente a altura para ter melhor visão, a grama está alta"): 1,25, que
 -- dá a meta de 1,75 m (1,68 x 1,25 / 1,2).
+-- D-98 (decisão do dono, 2026-11-12: "coloque eles com 2 m de altura"): o corpo de 1,75 m ampliado
+-- por igual por Shared/Corpo.K (8/7): altura 1,25 -> 1,4286, largura, profundidade e cabeça 1 ->
+-- 1,1429. A cabeça cresce junto (com a escala só na altura ela ficava pequena e os capacetes, que
+-- se ajustam a ela, também). Conferir no Studio: atributo AlturaM ~2,00 m.
 export type Body = {
 	Torso: number,
 	RightArm: number,
@@ -47,7 +52,7 @@ Characters.BODIES = {
 		RightLeg = 86500078,
 		Head = 10725826963,
 		MoodAnimation = 10725833199,
-		heightScale = 1.25,
+		heightScale = 1.25 * Corpo.K,
 	},
 	bloco = {
 		Torso = 0,
@@ -57,7 +62,7 @@ Characters.BODIES = {
 		RightLeg = 0,
 		Head = 0,
 		MoodAnimation = 0,
-		heightScale = 1.2,
+		heightScale = 1.2 * Corpo.K,
 	},
 } :: { [string]: Body }
 Characters.BODY = "man"
@@ -68,7 +73,7 @@ end
 
 -- HeightScale para ~6,25 studs (D-30). Mantido por compatibilidade; vem do corpo escolhido.
 Characters.HEIGHT_SCALE = body().heightScale
-Characters.TARGET_HEIGHT_M = 1.75
+Characters.TARGET_HEIGHT_M = Corpo.HEIGHT_M
 
 local SKIN = {
 	Color3.fromRGB(196, 150, 112),
@@ -97,9 +102,9 @@ function Characters.describe(faction: string, equipped: { [string]: string }?, s
 	local b = body()
 	local desc = Instance.new("HumanoidDescription")
 	desc.HeightScale = b.heightScale
-	desc.WidthScale = 1
-	desc.DepthScale = 1
-	desc.HeadScale = 1
+	desc.WidthScale = Corpo.K
+	desc.DepthScale = Corpo.K
+	desc.HeadScale = Corpo.K
 	desc.BodyTypeScale = 0
 	desc.ProportionScale = 0
 	desc.Torso = b.Torso
@@ -349,6 +354,20 @@ local function ghillie(model: Model, camo: Skins.Skin?)
 				end
 			end
 			local k = Vector3.new(body.Size.X / ref[1], body.Size.Y / ref[2], body.Size.Z / ref[3])
+			if name == "Head" then
+				-- D-98: o capacete agora tem o tamanho real do casco (maior que a cabeça); a peça da
+				-- cabeça cresce até cobri-lo, senão as folhas ficavam escondidas dentro dele
+				for _, key in { "us_m1_helmet", "vc_pith_helmet", "vc_jungle_hat" } do
+					local hg = model:FindFirstChild("Gear_" .. key)
+					if hg and hg:IsA("Model") then
+						local _, hs = hg:GetBoundingBox()
+						local r = math.max(hs.X, hs.Z) / math.max(body.Size.X, body.Size.Z)
+						if r > 1 then
+							k *= r
+						end
+					end
+				end
+			end
 			p.Size = Vector3.new(pc.size[1] * k.X, pc.size[2] * k.Y, pc.size[3] * k.Z)
 			if tex then
 				p.TextureID = tex
@@ -412,7 +431,51 @@ local function knifeArt(model: Model, faction: string, lower: BasePart)
 	m.Parent = eq
 end
 
+-- D-99: mãos de 1ª pessoa (tools/maos, assets/blender/maos_1p): com AssetIds.Models.maos_us_1p /
+-- maos_vc_1p publicados, a cópia vai para ReplicatedStorage.VT65MaosArt (o Controllers/Maos1P de cada
+-- cliente usa; sem ela ficam as mãos de peças). Uma vez por servidor, na primeira vestida.
+local handsArtTried = false
+local function handsArt()
+	if handsArtTried then
+		return
+	end
+	handsArtTried = true
+	task.spawn(function()
+		local folder = Instance.new("Folder")
+		folder.Name = "VT65MaosArt"
+		for _, key in { "maos_us_1p", "maos_vc_1p" } do
+			local id = AssetIds.Models and AssetIds.Models[key]
+			if type(id) == "number" and id ~= 0 then
+				local ok, container = pcall(function()
+					return InsertService:LoadAsset(id)
+				end)
+				if ok and container then
+					local m = container:FindFirstChildWhichIsA("Model") or container
+					local out = Instance.new("Model")
+					out.Name = key
+					for _, d in m:GetDescendants() do
+						if d:IsA("BasePart") then
+							d.Anchored = true
+							d.CanCollide, d.CanQuery, d.CanTouch = false, false, false
+							d.Parent = out
+						end
+					end
+					out.Parent = folder
+				else
+					warn("[VT65] mãos de 1ª pessoa não carregaram", key, id)
+				end
+			end
+		end
+		if #folder:GetChildren() > 0 then
+			folder.Parent = ReplicatedStorage
+		else
+			folder:Destroy()
+		end
+	end)
+end
+
 function Characters.dress(model: Model, faction: string, equipped: { [string]: string }?)
+	handsArt()
 	local eq: { [string]: string } = equipped or {}
 	local C = AssetIds.Clothing
 	local isBot = model:GetAttribute("Bot") == true

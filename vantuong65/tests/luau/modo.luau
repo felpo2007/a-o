@@ -417,6 +417,22 @@ test("carta: 4 blocos no plano de upload e grupos novos em AssetIds (valor 0 at�
 	end
 end)
 
+-- 2026-11-12: o dono pediu "coloque 10 s para renascer". Sem onda, a espera não depende de quando a
+-- partida começou nem de quando o soldado caiu: 10 s em qualquer momento (jogadores e bots usam a mesma
+-- conta, SpawnRules.readyAt com MatchService.waveEpoch).
+test("partida: renascer em 10 s exatos em qualquer momento da partida", function()
+	local rng = Rng.new(1965)
+	local worst, best = 0, math.huge
+	for _ = 1, 2000 do
+		local epoch = rng:next() * 600
+		local death = epoch + rng:next() * 3600
+		local w = SpawnRules.readyAt(death, SpawnRules.extraWait("rally", { death }, false), epoch) - death
+		worst, best = math.max(worst, w), math.min(best, w)
+	end
+	near(best, 10, 1e-6, "menor espera")
+	near(worst, 10, 1e-6, "maior espera (antes ia até 15 s com a onda de 5 s)")
+end)
+
 print(string.format("%d ok, %d falhas", passed, failed))
 if failed > 0 then
 	process.exit(1)

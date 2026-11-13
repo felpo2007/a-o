@@ -158,7 +158,8 @@ do
 	goal.TextXAlignment = Enum.TextXAlignment.Center
 	goal.Text = "▼"
 	goal.Visible = false
-	-- o squad na fita (pontos de latão; o líder maior; caído em vermelho)
+	-- o squad na fita (pontos de latão; o líder maior; caído em vermelho); quem fala ganha um anel
+	-- claro em volta (VozEstado, só aliados)
 	local dots: { Frame } = {}
 	for i = 1, 8 do
 		local d = Instance.new("Frame")
@@ -170,10 +171,39 @@ do
 		d.Visible = false
 		d.Parent = view
 		UiKit.corner(d, 99)
+		local ring = UiKit.edge(d, UiKit.V.TEXT, 2, 1)
+		ring.Name = "Fala"
 		dots[i] = d
 	end
-	B = { box = box, scale = sc, tape = tape, letters = letters, deg = deg, goal = goal, dots = dots }
+	-- "no rádio": etiqueta acima da bússola enquanto você transmite (VozEstado.transmitting)
+	local radio = UiKit.tag(box, "● NO RÁDIO", UiKit.V.RED, 13)
+	radio.AnchorPoint = Vector2.new(0.5, 1)
+	radio.Position = UDim2.new(0.5, 0, 0, -px(4, 6))
+	radio.Visible = false
+	B = { box = box, scale = sc, tape = tape, letters = letters, deg = deg, goal = goal, dots = dots, radio = radio }
 end
+
+-- ===== voz (Controllers/VozEstado: escrito pelo Voz.client; só aliados, nunca inimigo) =====
+local VozEstado = require(script.Parent.VozEstado)
+local devVoice = 0 -- gancho "voz": acende a fala dos aliados por 5 s
+local function talking(userId: number?): boolean
+	if os.clock() < devVoice then
+		return true
+	end
+	if not userId then
+		return false
+	end
+	local t, r = VozEstado.get(userId)
+	return t or r
+end
+local function paintRadio()
+	B.radio.Visible = VozEstado.transmitting == true or os.clock() < devVoice
+end
+VozEstado.Changed:Connect(function(userId: number)
+	if userId == 0 then
+		paintRadio()
+	end
+end)
 
 -- pontos cardeais na língua escolhida (atributo "Lang" do Traducao.client)
 local CARDINAL: { [string]: { string } } = {
@@ -375,10 +405,25 @@ local function wake()
 	end
 end
 
+-- nome do modo de tiro na língua do jogo (a ficha da arma usa o código em inglês: "bolt", "single")
+local MODE_NAME: { [string]: string } = {
+	semi = "SEMI",
+	auto = "AUTOMÁTICO",
+	bolt = "FERROLHO",
+	single = "TIRO ÚNICO",
+	burst = "RAJADA",
+}
+local function modeText(m: string): string
+	if m == "" then
+		return "—"
+	end
+	return MODE_NAME[string.lower(m)] or UiKit.upper(m)
+end
+
 local function renderWeapon()
 	local wp = weaponDef()
 	A.name.Text = if W.id == "launcher" then "Lançador" elseif wp then wp.name else "—"
-	A.mode.Text = UiKit.upper(W.mode ~= "" and W.mode or "—")
+	A.mode.Text = modeText(W.mode)
 	A.mode.Visible = wp ~= nil
 	A.zero.Text = string.format("Alça %d m", W.zero)
 	A.zero.Visible = wp ~= nil and wp.kind ~= "launcher"
@@ -413,18 +458,42 @@ local function renderStance()
 			BackgroundColor3 = if i == idx then UiKit.BRASS else UiKit.KHAKI,
 		}):Play()
 	end
-	A.stanceText.Text = if idx == 3 then "DEITADO" elseif idx == 2 then "AGACHADO" else "DE PÉ"
+	local bipod = player:GetAttribute("Bipe")
+	local armed = bipod == "prone" or bipod == "rested"
+	A.stanceText.Text = if armed
+		then "BIPÉ ARMADO"
+		elseif idx == 3 then "DEITADO"
+		elseif idx == 2 then "AGACHADO"
+		else "DE PÉ"
+	A.stanceText.TextColor3 = if armed then UiKit.BRASS_LIGHT else UiKit.V.TEXT
 end
 
 local function equip()
 	local id = player:GetAttribute("EquippedWeapon")
 	W.id = if type(id) == "string" then id else nil
 	local wp = weaponDef()
-	W.mode = if wp and wp.modes and wp.modes[1] then wp.modes[1] else ""
+	-- o modo de verdade é o do seletor (atributo local FireMode do WeaponController); a ficha só
+	-- serve de reserva enquanto o atributo não chega
+	local fm = player:GetAttribute("FireMode")
+	W.mode = if type(fm) == "string" then fm elseif wp and wp.modes and wp.modes[1] then wp.modes[1] else ""
 	renderWeapon()
 	wake()
 end
 player:GetAttributeChangedSignal("EquippedWeapon"):Connect(equip)
+player:GetAttributeChangedSignal("FireMode"):Connect(function()
+	local fm = player:GetAttribute("FireMode")
+	if type(fm) == "string" and fm ~= W.mode then
+		W.mode = fm
+		renderWeapon()
+		wake()
+	end
+end)
+-- bipé armado (atributo local Bipe do WeaponController: "prone" | "rested" | nil): a linha da
+-- postura vira "BIPÉ ARMADO" enquanto valer
+player:GetAttributeChangedSignal("Bipe"):Connect(function()
+	renderStance()
+	wake()
+end)
 
 Net.event("Combat_Ammo").OnClientEvent:Connect(function(a: any)
 	if type(a) ~= "table" then
@@ -560,6 +629,109 @@ local function inField(): boolean
 		and player:GetAttribute("Role") ~= nil
 end
 
+-- ============================================================================================
+-- ordem do comandante (plano de diversão, 2026-11-12): a ordem curta do squad ("tomar o casario",
+-- "segurar o dique") no alto à esquerda, com aviso quando chega e quando é cumprida. Vem do
+-- CampanhaCliente (campo `order`, só do próprio squad). Some fora de campo e depois de cumprida.
+-- ============================================================================================
+local Ordem: { [string]: any } = {}
+do
+	local CampanhaCliente = require(script.Parent.CampanhaCliente)
+	local V, F = UiKit.V, UiKit.F
+	local box = UiKit.panel(holder, V.PANEL, 0.12)
+	box.Name = "Ordem"
+	box.Position = UDim2.fromOffset(px(16, 24), px(12, 18))
+	box.Size = UDim2.fromOffset(px(300, 430), px(56, 80))
+	box.Visible = false
+	local bar = Instance.new("Frame")
+	bar.Size = UDim2.new(0, px(4, 6), 1, 0)
+	bar.BackgroundColor3 = V.BRASS
+	bar.BorderSizePixel = 0
+	bar.Parent = box
+	local kick = UiKit.kicker(box, "ORDEM DO COMANDANTE", px(12, 18), V.BRASS)
+	kick.Position = UDim2.fromOffset(px(14, 20), px(6, 8))
+	kick.Size = UDim2.new(1, -px(70, 96), 0, px(16, 24))
+	local txt = UiKit.text2(box, "", px(16, 23), V.TEXT, F.BODY_B)
+	txt.Position = UDim2.fromOffset(px(14, 20), px(24, 34))
+	txt.Size = UDim2.new(1, -px(70, 96), 0, px(24, 34))
+	txt.TextTruncate = Enum.TextTruncate.AtEnd
+	local sector = UiKit.tag(box, "", V.PANEL_3, px(13, 19))
+	sector.AnchorPoint = Vector2.new(1, 0.5)
+	sector.Position = UDim2.new(1, -px(10, 14), 0.5, 0)
+	local last: { text: string?, done: boolean? } = { text = nil, done = nil }
+	local doneAt = 0
+	local sample: any = nil
+	local devUntil = 0
+	-- o servidor manda o MODELO ("Tomar %s") e o argumento à parte (arg): a frase inteira casa no
+	-- dicionário depois de montada
+	local function sentence(o: any): string
+		if type(o.arg) == "string" or type(o.arg) == "number" then
+			local ok, s = pcall(string.format, o.text, tostring(o.arg))
+			if ok then
+				return s
+			end
+		end
+		return (string.gsub(o.text, "%%s", ""))
+	end
+	function Ordem.current(): any
+		if sample and os.clock() < devUntil then
+			return sample
+		end
+		local s = CampanhaCliente.get()
+		local o = if type(s) == "table" then s.order else nil
+		return if type(o) == "table" and type(o.text) == "string" and o.text ~= "" then o else nil
+	end
+	function Ordem.paint()
+		local o = Ordem.current()
+		if not o then
+			return
+		end
+		txt.Text = sentence(o)
+		sector.Visible = type(o.sector) == "number"
+		sector.Text = if type(o.sector) == "number" then string.format("S%d", o.sector) else ""
+		box.BackgroundColor3 = if o.done then V.BG_OLIVE else V.PANEL
+		kick.Text = if o.done then "ORDEM CUMPRIDA" else "ORDEM DO COMANDANTE"
+	end
+	-- visível em campo, com ordem; cumprida, fica 8 s e sai
+	function Ordem.visible(field: boolean): boolean
+		local o = Ordem.current()
+		if not (field and o) then
+			return false
+		end
+		if o.done and os.clock() - doneAt > 8 then
+			return false
+		end
+		return true
+	end
+	CampanhaCliente.Changed:Connect(function(s: any)
+		local o = if type(s) == "table" then s.order else nil
+		local text = if type(o) == "table" and type(o.text) == "string" and o.text ~= "" then o.text else nil
+		local done = text ~= nil and (o :: any).done == true
+		if text and text ~= last.text and not done then
+			Toast.show(sentence(o), "alerta", { title = "Ordem do comandante", key = "ordem" })
+		elseif text and done and last.done == false and text == last.text then
+			doneAt = os.clock()
+			Toast.show(
+				"Ordem cumprida: bônus para o squad",
+				"sucesso",
+				{ title = "Ordem do comandante", key = "ordem" }
+			)
+		end
+		if done and last.done ~= true then
+			doneAt = os.clock()
+		end
+		last.text, last.done = text, done
+		Ordem.paint()
+	end)
+	function Ordem.dev()
+		sample = { text = "Tomar o casario", sector = 3, untilT = os.time() + 600, done = false }
+		devUntil = os.clock() + 8
+		Ordem.paint()
+		Toast.show(sample.text, "alerta", { title = "Ordem do comandante", key = "ordem" })
+	end
+	Ordem.box = box
+end
+
 local dev = 0
 local lastCheck = 0
 local lastDeg = -1
@@ -567,6 +739,10 @@ local compassBlocked = false -- numa tela estreita, a bússola não cabe entre o
 RunService.RenderStepped:Connect(function()
 	local field = inField() or os.clock() < dev
 	B.box.Visible = field and not compassBlocked
+	local ov = Ordem.visible(field)
+	if Ordem.box.Visible ~= ov then
+		Ordem.box.Visible = ov
+	end
 	local onFoot = field and not Input.state.vehicle
 	if onFoot ~= A.card.Visible then
 		A.card.Visible = onFoot
@@ -621,6 +797,10 @@ RunService.RenderStepped:Connect(function()
 				dot.Size = if s.leader
 					then UDim2.fromOffset(px(8, 12), px(8, 12))
 					else UDim2.fromOffset(px(6, 9), px(6, 9))
+				local ring = dot:FindFirstChild("Fala") :: UIStroke?
+				if ring then
+					ring.Transparency = if talking((s :: any).userId) then 0 else 1
+				end
 			else
 				dot.Visible = false
 			end
@@ -666,6 +846,16 @@ if RunService:IsStudio() then
 			dev = os.clock() + 8
 			W.bright = false
 			wake()
+		elseif v == "ordem" then
+			-- ordem do comandante de exemplo por 8 s (o HUD acende junto)
+			dev = os.clock() + 8
+			Ordem.dev()
+		elseif v == "voz" then
+			-- a fala dos aliados (anel nos pontos do squad) e o "no rádio" por 5 s
+			dev = os.clock() + 5
+			devVoice = os.clock() + 5
+			paintRadio()
+			task.delay(5.1, paintRadio)
 		elseif v == "veiculo" or v == "helicoptero" then
 			local VehicleHudView = require(script.Parent.VehicleHudView)
 			local view = VehicleHudView.demo(v :: string)

@@ -31,6 +31,9 @@ Net.Events = {
 	"Vehicle_Fire", -- c->s: { dir } (arma do assento ou foguete antitanque)
 	"Vehicle_Reload", -- c->s: recarga do Ontos (parado) / troca de munição do 90 mm
 	"Vehicle_SwitchSeat", -- c->s: próximo assento livre permitido ao papel
+	-- D-100: painel do veículo (Controllers/VehiclePrompt)
+	"Vehicle_Board", -- c->s { op = nil|"exit"|"recover", v = Model, seat = seatId, crew = bool }
+	"Vehicle_Notice", -- s->c texto: por que não entrou (lugar ocupado, papel, longe...) ou o que mudou
 	"Input_Type", -- c->s: "gamepad" | "kbm" | "touch" (equilíbrio controle x mouse)
 	"Settings_Save", -- c->s: configurações de controle (saneadas no servidor)
 	"Squad_Mark", -- c->s { x, y, z } / s->c { x, y, z, from, kind }: marcação para o squad
@@ -51,6 +54,14 @@ Net.Events = {
 	"Progress_Report", -- s->c: relatório de serviço ao sair de campo (linhas, XP, CI, subida de posto)
 	"InPlace_Buy", -- c->s: pede a compra em Robux do renascer onde caiu (o servidor confere as regras antes)
 	"InPlace_Ready", -- s->c: o recibo chegou e o renascer guardado pode ser usado agora
+	-- conversa no campo (2026-11-12, Modules/Comunicacao)
+	"Voz_Radio", -- c->s: true/false (segurando o rádio do squad); o servidor valida
+	"Voz_Estado", -- s->c { squad, radio = { UserId que estão no rádio agora } }: só para o próprio squad
+	-- eventos da partida (2026-11-12, Modules/EventosService)
+	"Evento_Aviso", -- s->c { evento, texto, tipo, titulo, chave, duracao }: aviso para o Toast
+	-- campanha: missões, passe, mercado, reforços, medalhas, cartão, vantagens (2026-11-12)
+	"Campanha_State", -- s->c: estado inteiro (Controllers/CampanhaCliente); traz result do último pedido
+	"Campanha_Action", -- c->s { op, ... }: reroll, claim_mission, claim_level, claim_all, market_buy...
 }
 Net.Unreliable = {
 	"Combat_Tracer", -- s->c: traçantes/efeitos de outros jogadores
@@ -64,6 +75,7 @@ Net.Functions = {
 	"Tutorial_Get", -- papéis com o tutorial concluído
 	"Daily_Get", -- caderneta de serviço (recompensa diária) do jogador
 	"Progress_Get", -- estado da progressão (o mesmo do Progress_State)
+	"Campanha_Get", -- estado da campanha (o mesmo do Campanha_State)
 }
 
 local folderName = "VT65Remotes"

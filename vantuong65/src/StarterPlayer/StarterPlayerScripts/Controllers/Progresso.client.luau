@@ -23,6 +23,7 @@ local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 
+local AssetIds = require(ReplicatedStorage.Shared.AssetIds) :: any
 local BotBrain = require(ReplicatedStorage.Shared.BotBrain)
 local GunModel = require(ReplicatedStorage.Shared.GunModel)
 local Net = require(ReplicatedStorage.Shared.Net)
@@ -31,6 +32,7 @@ local Skins = require(ReplicatedStorage.Shared.Skins)
 local Weapons = require(ReplicatedStorage.Shared.Weapons)
 local Bus = require(script.Parent.Bus)
 local Input = require(script.Parent.Input)
+local SoldierPreview = require(script.Parent.SoldierPreview)
 local Toast = require(script.Parent.Toast)
 local UiKit = require(script.Parent.UiKit)
 
@@ -47,7 +49,11 @@ end
 
 local money = Progression.money
 
--- ===== promoção: ficha de papel no topo da pilha de avisos, com o carimbo do soldo =====
+-- ===== promoção: cartão escuro no topo da pilha de avisos =====
+-- Estilo novo (2026-11-11: sai a ficha de papel com carimbo): rótulo pequeno, o posto enorme em
+-- Oswald caixa alta e o soldo como número grande em cáqui, que entra com um pulo curto.
+local V = UiKit.V
+local F = UiKit.F
 local function ceremony(r: { [string]: any })
 	local nameText = if r.name then tostring(r.name) else string.format("Posto %s", tostring(r.to))
 	local headText = if state and state.faction == "VC"
@@ -57,112 +63,71 @@ local function ceremony(r: { [string]: any })
 	Toast.custom(function(card: Frame, lay: Toast.Layout): number
 		local tv = lay.tv
 		local y = lay.pad
-		-- tarja oliva com o título
-		local head = Instance.new("TextLabel")
-		head.Name = "Tarja"
-		head.BackgroundColor3 = UiKit.OLIVE
-		head.BorderSizePixel = 0
+		-- rótulo pequeno (cáqui) e um filete fino
+		local head = UiKit.kicker(card, headText, if tv then 22 else 14, V.KHAKI)
+		head.Name = "Rotulo"
 		head.Position = UDim2.fromOffset(lay.x, y)
-		head.Size = UDim2.fromOffset(lay.w, if tv then 40 else 28)
-		head.FontFace = UiKit.headFont(headText)
-		head.TextColor3 = UiKit.KHAKI
-		head.TextSize = UiKit.text(18)
-		head.Text = headText
-		local hc = Instance.new("UICorner")
-		hc.CornerRadius = UDim.new(0, 2)
-		hc.Parent = head
-		head.Parent = card
-		y += head.Size.Y.Offset + 4
-		-- linha vermelha de cabeçalho da ficha
+		head.Size = UDim2.fromOffset(lay.w, if tv then 30 else 20)
+		y += head.Size.Y.Offset + 2
 		local rule = Instance.new("Frame")
-		rule.BackgroundColor3 = UiKit.RULE_RED
+		rule.BackgroundColor3 = V.LINE
+		rule.BackgroundTransparency = 0.3
 		rule.BorderSizePixel = 0
 		rule.Position = UDim2.fromOffset(lay.x, y)
-		rule.Size = UDim2.fromOffset(lay.w, 2)
+		rule.Size = UDim2.fromOffset(lay.w, 1)
 		rule.Parent = card
 		y += 6
-		-- o posto, grande, e o nome em português
-		local latin = not string.find(nameText, "[\196-\244]")
-		local name = Instance.new("TextLabel")
-		name.BackgroundTransparency = 1
+		-- o posto, enorme, e o nome em português embaixo
+		local name = UiKit.title(card, UiKit.upper(nameText), if tv then 48 else 36)
 		name.Position = UDim2.fromOffset(lay.x, y)
 		name.Size = UDim2.fromOffset(lay.w, if tv then 56 else 42)
-		name.Font = if latin then Enum.Font.Bodoni else Enum.Font.ArimoBold
-		name.TextColor3 = UiKit.INK
-		name.TextSize = if tv then 48 else 36
-		name.TextTruncate = Enum.TextTruncate.AtEnd
-		name.Text = nameText
-		name.Parent = card
 		y += name.Size.Y.Offset
-		local pt = Instance.new("TextLabel")
-		pt.BackgroundTransparency = 1
+		local pt = UiKit.text2(card, tostring(r.pt or ""), 16, V.DIM, F.BODY)
 		pt.Position = UDim2.fromOffset(lay.x, y)
 		pt.Size = UDim2.fromOffset(lay.w, if tv then 30 else 22)
-		pt.Font = UiKit.BODY_FONT
-		pt.TextColor3 = UiKit.INK
-		pt.TextSize = UiKit.text(16)
-		pt.Text = tostring(r.pt or "")
-		pt.Parent = card
+		pt.TextTruncate = Enum.TextTruncate.AtEnd
 		y += pt.Size.Y.Offset + 6
-		-- carimbo: tinta e moldura, torto, cai sobre a ficha logo depois que ela entra
-		local stampH = if tv then 46 else 34
-		local stamp = Instance.new("TextLabel")
-		stamp.AnchorPoint = Vector2.new(0.5, 0.5)
-		stamp.AutomaticSize = Enum.AutomaticSize.X
-		stamp.BackgroundTransparency = 1
-		stamp.Position = UDim2.fromOffset(lay.x + lay.w / 2, y + stampH / 2)
-		stamp.Size = UDim2.fromOffset(0, stampH)
-		stamp.FontFace = UiKit.HEAD_FONT
-		stamp.TextSize = UiKit.text(22)
-		stamp.TextColor3 = UiKit.STAMP
-		stamp.Rotation = -4
-		stamp.TextTransparency = 1
-		stamp.Text = soldo
-		local sp = Instance.new("UIPadding")
-		sp.PaddingLeft = UDim.new(0, 10)
-		sp.PaddingRight = UDim.new(0, 10)
-		sp.Parent = stamp
-		local ink = Instance.new("UIStroke")
-		ink.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-		ink.Color = UiKit.STAMP
-		ink.Thickness = 2
-		ink.Transparency = 1
-		ink.Parent = stamp
+		-- o soldo: número grande em cáqui, entra com um pulo curto depois do cartão
+		local soldoH = if tv then 46 else 34
+		local value = UiKit.text2(card, soldo, if tv then 34 else 26, V.KHAKI, F.TITLE)
+		value.Position = UDim2.fromOffset(lay.x, y)
+		value.Size = UDim2.fromOffset(lay.w, soldoH)
+		value.TextTransparency = 1
 		local sc = Instance.new("UIScale")
-		sc.Scale = 1.6
-		sc.Parent = stamp
-		stamp.Parent = card
-		task.delay(0.55, function()
+		sc.Scale = 1.25
+		sc.Parent = value
+		task.delay(0.45, function()
 			if card.BackgroundTransparency > 0.5 then
-				return -- a ficha já está saindo
+				return -- o cartão já está saindo
 			end
-			local hit = TweenInfo.new(0.16, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
-			TweenService:Create(stamp, hit, { TextTransparency = 0.08, Rotation = -7 }):Play()
-			TweenService:Create(ink, hit, { Transparency = 0.15 }):Play()
-			TweenService:Create(sc, hit, { Scale = 1 }):Play()
+			local pop = TweenInfo.new(0.22, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+			TweenService:Create(value, pop, { TextTransparency = 0 }):Play()
+			TweenService:Create(sc, pop, { Scale = 1 }):Play()
 		end)
-		return y + stampH
-	end, { kind = "recompensa", paper = true, duration = 5, key = "promocao" })
+		return y + soldoH
+	end, { kind = "recompensa", paper = false, duration = 5, key = "promocao" })
 end
 
 -- ============================================================================================
 -- Intendência (D-93, Studio: abria junto com a loja, escura e por cima dela; o Backspace fechava a
 -- loja e a intendência ficava). Agora é uma ABA da ficha da loja (ShopController): a loja monta esta
 -- página dentro da folha dela (Bus "intendencia_show"/"intendencia_hide") e uma tela só abre e
--- fecha. Papel e tinta, como as outras fichas.
+-- fecha. Estilo novo (2026-11-11): linhas escuras, títulos em Oswald, o saldo em número grande.
 -- ============================================================================================
-local HEADER_H = if TV then 78 else 62
-local TABS_H = if TV then 48 else 34
+local HEADER_H = if TV then 84 else 64
+local TABS_H = if TV then 48 else 36
 local PREVIEW_H = if TV then 190 else 150
 local FOOT_H = if TV then 40 else 30
-local CARD_BG = Color3.fromRGB(242, 236, 214) -- ficha clara sobre a folha
-local OFF_BG = Color3.fromRGB(196, 188, 164)
-local OFF_TEXT = Color3.fromRGB(110, 104, 88)
-local P = { -- tinta da página
-	text = UiKit.INK,
-	head = UiKit.RULE_RED,
-	money = Color3.fromRGB(58, 82, 44),
-	accent = UiKit.STAMP,
+local CARD_BG = V.PANEL_2 -- linha escura sobre o painel da loja
+local OFF_BG = V.PANEL
+local OFF_TEXT = V.MUTED
+local P = { -- cores da página
+	text = V.TEXT,
+	dim = V.DIM,
+	head = V.KHAKI,
+	money = V.KHAKI,
+	accent = V.OLIVE_HI,
+	warn = V.RED_HI,
 }
 
 local root = Instance.new("Frame")
@@ -173,12 +138,12 @@ root.BorderSizePixel = 0
 root.Visible = false
 root.Parent = screen
 
--- 2026-11-11: Oswald nos títulos e Arimo no texto, as fontes de época das outras telas (era Gotham)
+-- Oswald nos títulos e Arimo no texto (o Arimo também nos títulos com letra do vietnamita)
 local function label(parent: Instance, s: string, size: number, color: Color3, bold: boolean?): TextLabel
 	local t = Instance.new("TextLabel")
 	t.BackgroundTransparency = 1
 	if bold then
-		t.FontFace = UiKit.HEAD_FONT
+		t.FontFace = UiKit.headFont(s)
 	else
 		t.Font = UiKit.BODY_FONT
 	end
@@ -191,27 +156,38 @@ local function label(parent: Instance, s: string, size: number, color: Color3, b
 	return t
 end
 
--- cabeçalho: nome, dinheiro do jogo em latão e o posto
-local title = label(root, "INTENDÊNCIA", 20, P.text, true)
-title.FontFace = UiKit.HEAD_FONT
-title.Position = UDim2.fromOffset(14, 6)
-title.Size = UDim2.new(0.5, -14, 0, if TV then 36 else 28)
-local moneyLabel = label(root, "", 22, P.money, true)
-moneyLabel.FontFace = UiKit.HEAD_FONT
-moneyLabel.TextXAlignment = Enum.TextXAlignment.Right
-moneyLabel.Position = UDim2.new(0.5, 0, 0, 6)
-moneyLabel.Size = UDim2.new(0.5, -14, 0, if TV then 36 else 28)
-local rankLabel = label(root, "", 13, P.text)
-rankLabel.Position = UDim2.fromOffset(14, if TV then 44 else 36)
-rankLabel.Size = UDim2.new(1, -28, 0, if TV then 28 else 20)
-rankLabel.TextTransparency = 0.15
+-- cabeçalho: o saldo como número grande (rótulo em cima) e, à direita, o posto e o XP. O nome
+-- "INTENDÊNCIA" já é a aba da loja: aqui não se repete.
+local title = UiKit.kicker(root, UiKit.upper("Saldo"), if TV then 22 else 14)
+title.Position = UDim2.fromOffset(14, 4)
+title.Size = UDim2.new(0.5, -14, 0, if TV then 26 else 18)
+local moneyLabel = label(root, "", if TV then 40 else 32, P.money, true)
+moneyLabel.FontFace = F.TITLE
+moneyLabel.TextWrapped = false
+moneyLabel.Position = UDim2.fromOffset(14, if TV then 26 else 20)
+moneyLabel.Size = UDim2.new(0.5, -14, 0, if TV then 48 else 38)
+local rankLabel = label(root, "", 14, P.dim)
+rankLabel.TextXAlignment = Enum.TextXAlignment.Right
+rankLabel.TextYAlignment = Enum.TextYAlignment.Bottom
+rankLabel.Position = UDim2.new(0.5, 0, 0, if TV then 26 else 20)
+rankLabel.Size = UDim2.new(0.5, -14, 0, if TV then 44 else 34)
 
--- abas com o indicador de latão deslizando
+-- abas EQUIPAMENTO | SKINS com o traço oliva deslizando
 local tabsBar = Instance.new("Frame")
 tabsBar.BackgroundTransparency = 1
 tabsBar.Position = UDim2.fromOffset(10, HEADER_H)
 tabsBar.Size = UDim2.new(1, -20, 0, TABS_H)
 tabsBar.Parent = root
+do
+	local rule = Instance.new("Frame")
+	rule.BackgroundColor3 = V.LINE
+	rule.BackgroundTransparency = 0.4
+	rule.BorderSizePixel = 0
+	rule.AnchorPoint = Vector2.new(0, 1)
+	rule.Position = UDim2.fromScale(0, 1)
+	rule.Size = UDim2.new(1, 0, 0, 1)
+	rule.Parent = tabsBar
+end
 local tabLine = Instance.new("Frame")
 tabLine.BackgroundColor3 = P.accent
 tabLine.BorderSizePixel = 0
@@ -224,7 +200,7 @@ tabLine.Parent = tabsBar
 -- prévia da skin (só na aba SKINS)
 local preview = Instance.new("Frame")
 preview.Name = "Previa"
-preview.BackgroundColor3 = UiKit.NIGHT
+preview.BackgroundColor3 = V.BG
 preview.BorderSizePixel = 0
 preview.Position = UDim2.fromOffset(10, HEADER_H + TABS_H + 6)
 preview.Size = UDim2.new(1, -20, 0, PREVIEW_H)
@@ -248,29 +224,36 @@ viewCam.FieldOfView = 24
 viewCam.Parent = view
 view.CurrentCamera = viewCam
 local swatch = Instance.new("Frame")
-swatch.BackgroundColor3 = UiKit.DRAB
+swatch.BackgroundColor3 = V.PANEL_2
 swatch.BorderSizePixel = 0
 swatch.ClipsDescendants = true
 swatch.Position = UDim2.fromOffset(10, 10)
 swatch.Size = UDim2.new(0.58, -20, 1, -20)
 swatch.Parent = preview
-local pvName = label(preview, "", 15, UiKit.KHAKI, true)
+local pvName = label(preview, "", 16, P.text, true)
 pvName.Position = UDim2.new(0.58, 4, 0, 8)
 pvName.Size = UDim2.new(0.42, -12, 0, 0)
 pvName.AutomaticSize = Enum.AutomaticSize.Y
-local pvInfo = label(preview, "", 12, UiKit.KHAKI)
+local pvInfo = label(preview, "", 13, P.dim)
 pvInfo.Position = UDim2.new(0.58, 4, 0, if TV then 60 else 46)
-pvInfo.Size = UDim2.new(0.42, -12, 1, if TV then -64 else -50)
+pvInfo.Size = UDim2.new(0.42, -12, 1, if TV then -110 else -84)
 pvInfo.TextYAlignment = Enum.TextYAlignment.Top
+pvInfo.TextTruncate = Enum.TextTruncate.AtEnd
 pvInfo.TextTransparency = 0.1
+-- nota de baixo (vantagem da camuflagem, "vale no próximo spawn"), em cáqui
+local pvExtra = label(preview, "", 12, P.head)
+pvExtra.AnchorPoint = Vector2.new(0, 1)
+pvExtra.Position = UDim2.new(0.58, 4, 1, -8)
+pvExtra.Size = UDim2.new(0.42, -12, 0, if TV then 40 else 30)
+pvExtra.TextYAlignment = Enum.TextYAlignment.Bottom
 
 -- lista rolável (analógico direito ou roda do mouse)
 local body = Instance.new("ScrollingFrame")
 body.Name = "Lista"
 body.BackgroundTransparency = 1
 body.BorderSizePixel = 0
-body.ScrollBarThickness = 6
-body.ScrollBarImageColor3 = P.text
+body.ScrollBarThickness = 5
+body.ScrollBarImageColor3 = V.LINE
 body.AutomaticCanvasSize = Enum.AutomaticSize.Y
 body.CanvasSize = UDim2.new()
 body.Parent = root
@@ -308,10 +291,10 @@ end
 -- ===== botões (mouse, toque, A do controle e o cursor virtual do lobby) =====
 type Style = "primary" | "normal" | "off" | "on"
 local STYLE: { [string]: { bg: Color3, fg: Color3 } } = {
-	primary = { bg = UiKit.BRASS, fg = UiKit.NIGHT },
-	normal = { bg = UiKit.OLIVE, fg = UiKit.KHAKI },
+	primary = { bg = V.OLIVE, fg = V.TEXT },
+	normal = { bg = V.PANEL_3, fg = V.TEXT },
 	off = { bg = OFF_BG, fg = OFF_TEXT },
-	on = { bg = UiKit.KHAKI, fg = UiKit.NIGHT },
+	on = { bg = V.KHAKI, fg = V.BG },
 }
 local buttons: { [string]: TextButton } = {} -- por chave (refoco depois de redesenhar)
 
@@ -413,7 +396,8 @@ end
 local order = 0
 local function line(text: string, size: number?, color: Color3?, bold: boolean?): TextLabel
 	order += 1
-	local t = label(body, text, size or 14, color or P.text, bold)
+	-- texto miúdo (13 ou menos) sai apagado: a hierarquia fica nos títulos e nos botões
+	local t = label(body, text, size or 14, color or (if (size or 14) <= 13 then P.dim else P.text), bold)
 	t.LayoutOrder = order
 	t.AutomaticSize = Enum.AutomaticSize.Y
 	t.Size = UDim2.new(1, -24, 0, 0)
@@ -559,8 +543,91 @@ local function patchPreview(s: Skins.Skin)
 	end
 end
 
+-- ----- soldado com o uniforme da skin (pedido do dono: prévia do soldado com a skin escolhida) -----
+-- Retrato parado (SoldierPreview.newStill) com um clone do manequim do lobby (VT65Preview, vestido
+-- pelo servidor). O molde de roupa publicado só o servidor resolve; aqui a farda sai nas cores da
+-- skin (rgb do catálogo ou as cores da amostra), pintadas no corpo: é a prévia da cor e do corte.
+local soldier = SoldierPreview.newStill(-0.45)
+do
+	local sf = soldier.frame :: Frame
+	sf.Position = UDim2.fromOffset(4, 4)
+	sf.Size = UDim2.new(0.58, -8, 1, -8)
+	sf.Visible = false
+	sf.Parent = preview
+	local n = soldier.note
+	if n then
+		n.TextSize = UiKit.text(12)
+	end
+end
+local SHIRT_PARTS = { "UpperTorso", "LeftUpperArm", "LeftLowerArm", "RightUpperArm", "RightLowerArm" }
+local PANTS_PARTS = { "LowerTorso", "LeftUpperLeg", "LeftLowerLeg", "RightUpperLeg", "RightLowerLeg" }
+-- o manequim só vale completo (atributo Parts do PreviewService: a replicação chega em pedaços)
+local function mannequin(faction: string?): Model?
+	local folder = ReplicatedStorage:FindFirstChild("VT65Preview")
+	local m = if folder and faction then folder:FindFirstChild(faction) else nil
+	if not (m and m:IsA("Model")) then
+		return nil
+	end
+	local want = m:GetAttribute("Parts")
+	if type(want) == "number" then
+		local n = 0
+		for _, d in m:GetDescendants() do
+			if d:IsA("BasePart") then
+				n += 1
+			end
+		end
+		if n < want then
+			return nil
+		end
+	end
+	return m
+end
+local function rgbOf(c: { number }?): Color3?
+	return if c and #c >= 3 then Color3.fromRGB(c[1], c[2], c[3]) else nil
+end
+-- devolve true se o soldado entrou na prévia
+local function soldierPreview(s: Skins.Skin): boolean
+	local faction = (state and state.skins and state.skins.faction) or player:GetAttribute("Faction")
+	local src = mannequin(if type(faction) == "string" then faction else nil)
+	if not src then
+		return false
+	end
+	local m = src:Clone()
+	local shirt: Color3?, pants: Color3? = nil, nil
+	local rgb = s.rgb
+	if rgb then
+		shirt, pants = rgbOf(rgb.shirt), rgbOf(rgb.pants)
+	else
+		shirt = rgbOf(s.swatch[1])
+		pants = rgbOf(s.swatch[2]) or shirt
+	end
+	if shirt or pants then
+		for _, d in m:GetChildren() do
+			if d:IsA("Shirt") or d:IsA("Pants") then
+				d:Destroy()
+			end
+		end
+		for _, name in SHIRT_PARTS do
+			local part = m:FindFirstChild(name)
+			if part and part:IsA("BasePart") and shirt then
+				part.Color = shirt
+			end
+		end
+		for _, name in PANTS_PARTS do
+			local part = m:FindFirstChild(name)
+			if part and part:IsA("BasePart") and pants then
+				part.Color = pants
+			end
+		end
+	end
+	SoldierPreview.setModel(soldier, m)
+	return true
+end
+
 local function showPreview(id: string?)
 	clearPreview()
+	local sf = soldier.frame :: Frame
+	sf.Visible = false
 	local s = if id then Skins.get(id) else nil
 	if not s then
 		pvName.Text = ""
@@ -569,22 +636,40 @@ local function showPreview(id: string?)
 		return
 	end
 	pvName.Text = s.name
-	local info = s.desc
+	-- a descrição e a nota de baixo em rótulos separados: cada frase inteira casa no dicionário
+	-- (antes as duas iam coladas com "..", e a tradução não achava a frase)
+	pvInfo.Text = s.desc
 	if s.kind == "camo" then
 		local C = BotBrain.CAMO
-		info ..= string.format(
-			"\n\nVantagem: na vegetação certa os bots te veem a %d%% da distância; deitado, a %d%%.",
+		pvExtra.Text = string.format(
+			"Vantagem: na vegetação certa os bots te veem a %d%% da distância; deitado, a %d%%.",
 			math.floor(C.match * 100 + 0.5),
 			math.floor(C.match * C.prone * 100 + 0.5)
 		)
 	elseif s.kind == "uniform" then
-		info ..= "\n\nVale no próximo spawn."
+		pvExtra.Text = "Vale no próximo spawn."
+	else
+		pvExtra.Text = ""
 	end
-	pvInfo.Text = info
 	if s.kind == "weapon" then
 		weaponPreview(s)
+	elseif s.kind == "uniform" and soldierPreview(s) then
+		sf.Visible = true
+		swatch.Visible = false
 	else
 		patchPreview(s)
+		-- camuflagem: a textura publicada das folhas (AssetIds.Images) por cima do retalho desenhado
+		local tex = s.texture and (AssetIds.Images :: any)[s.texture]
+		if type(tex) == "number" and tex ~= 0 then
+			local img = Instance.new("ImageLabel")
+			img.BackgroundTransparency = 1
+			img.Size = UDim2.fromScale(1, 1)
+			img.ScaleType = Enum.ScaleType.Tile
+			img.TileSize = UDim2.fromOffset(96, 96)
+			img.Image = string.format("rbxassetid://%d", tex)
+			img.ImageTransparency = 0.15
+			img.Parent = swatch
+		end
 	end
 end
 
@@ -704,7 +789,7 @@ local function skinCard(s: Skins.Skin, sk: { [string]: any })
 		x.Size = UDim2.new(1, 0, 0, 0)
 		x.LayoutOrder = o
 	end
-	text(s.name, 15, P.text, true, 1)
+	text(UiKit.upper(s.name), 16, P.text, true, 1)
 	local status: string
 	if equipped then
 		status = "EQUIPADA"
@@ -717,7 +802,7 @@ local function skinCard(s: Skins.Skin, sk: { [string]: any })
 			then string.format("%s · %s", money(s.price), robuxText(s))
 			else money(s.price)
 	end
-	text(status, 13, if how then P.money else P.accent, true, 2)
+	text(status, 13, if how then P.money else P.text, true, 2)
 	local actions = rowOf(card, 3)
 	local look = function()
 		select(s.id)
@@ -887,7 +972,7 @@ local function chip(imgs: { string }, keys: string, text: string, o: number)
 		im.LayoutOrder = i
 		im.Parent = f
 	end
-	local t = label(f, if #imgs > 0 then text else string.format("[%s] %s", keys, text), 13, P.text)
+	local t = label(f, if #imgs > 0 then text else string.format("[%s] %s", keys, text), 13, P.dim)
 	t.AutomaticSize = Enum.AutomaticSize.X
 	t.Size = UDim2.fromOffset(0, FOOT_H)
 	t.TextWrapped = false
@@ -938,9 +1023,9 @@ for i, d in { { id = "gear", name = "EQUIPAMENTO" }, { id = "skins", name = "SKI
 	local b = Instance.new("TextButton")
 	b.Name = d.id
 	b.BackgroundTransparency = 1
-	b.FontFace = UiKit.HEAD_FONT
-	b.TextSize = UiKit.text(17)
-	b.TextColor3 = P.text
+	b.FontFace = F.TITLE_MED
+	b.TextSize = UiKit.text(18)
+	b.TextColor3 = P.dim
 	b.Text = d.name
 	b.Size = UDim2.new(0.5, 0, 1, 0)
 	b.Position = UDim2.fromScale((i - 1) * 0.5, 0)
@@ -954,8 +1039,8 @@ for i, d in { { id = "gear", name = "EQUIPAMENTO" }, { id = "skins", name = "SKI
 end
 local function paintTabs()
 	for id, b in tabButtons do
-		b.TextColor3 = if id == tab then P.accent else P.text
-		b.TextTransparency = if id == tab then 0 else 0.25
+		b.TextColor3 = if id == tab then P.text else P.dim
+		b.TextTransparency = 0
 	end
 	UiKit.tween(tabLine, UiKit.SOFT, { Position = UDim2.new(if tab == "gear" then 0 else 0.5, 0, 1, 0) })
 end
@@ -995,7 +1080,7 @@ render = function()
 		renderSkins(s)
 	end
 	if s.result then
-		line(UiKit.capitalize(tostring(s.result)), 14, P.accent, true)
+		line(UiKit.capitalize(tostring(s.result)), 14, P.money, true)
 	end
 	renderChips()
 	local again = if type(focusKey) == "string" then buttons[focusKey] else nil

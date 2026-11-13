@@ -2958,3 +2958,316 @@ sem bugs". Varredura de cada tela no Studio numa janela de 671 x 565 e correçã
 - **Avisos:** esperam a ficha de baixa sair e somam ganhos iguais.
 - **Opção nova:** "Movimento da câmera" (`cameraBob`, 0–100%) em Acessibilidade.
 - **Falta:** o aviso de captura ainda aparece por cima da loja aberta.
+
+## D-98 — Soldado de 2,0 m, capacetes no tamanho real e carta na mão (2026-11-12)
+**Pedido do dono:** "os personagens estão muito pequenos em relação ao mapa; coloque eles com 2 m de
+altura"; "os capacetes estão bugados, estão pequenos"; "coloque o mapa como um item que ele pega e
+abre, e isso aparece para todos"; "coloque um botão no controle para ativar a 3ª pessoa e a 1ª pessoa".
+
+**Soldado de 2,0 m** (decisão do dono, não medida histórica; `Shared/Corpo`):
+- O corpo de 1,75 m ampliado por igual por K = 2,0 / 1,75 = 1,1429 (`Characters`): HeightScale
+  1,25 → 1,4286; largura, profundidade e cabeça 1 → 1,1429. Conferir no Studio: atributo `AlturaM`
+  ~2,00 m (a conta 1,68 × 1,4286 / 1,2 não foi medida).
+- O que foi gravado ou medido no corpo de 1,75 m continua nesses números e vai vezes K no jogo:
+  - `PostureService`: DROP agachado 1,03 → 1,1771 e deitado 4,4 → 5,0286; MIN_HIP 0,2 → 0,2286;
+    descida do PRONE_ROOT −0,6 → −0,6857. O HipHeight de cada postura cresce K;
+  - **clipes sem regravar**: o Animator escala a Root por HipHeight / AuthoredHipHeight (K) e as
+    rotações valem igual. A passada fica K vezes mais longa: a velocidade sem escorregar é a do clipe
+    × K (`SoldierAnims.SCALE`, `cycleRate`). O `tools/anim/retarget.py` lê o PostureService e divide
+    por K (grava sempre no corpo de 1,75 m);
+  - `PostureController`: pegas da arma e da carta e polos dos cotovelos × K (o `ArmIK` segue no corpo
+    da gravação). **Armas e facas ficam no tamanho real** (a M14 segue com 1,126 m). Medido de novo
+    com a arma 1/K menor em relação ao corpo: fuzis e metralhadoras 0 cm, pistola 1,0 cm, guarda da
+    baioneta do Tipo 56 0,6 cm;
+  - `Gear`: equipamento em medidas reais × K (`BODY_K`);
+  - `Movement`: água no peito 1,3 → 1,49 m (nada), volta a dar pé em 1,26 m; agachado até 0,91 m e
+    deitado até 0,34 m de água; transpor com 0,86 m livres, alcance de 1,03 m, de pé em cima com
+    2,06 m; degrau agachado até 0,74 m e deitado até 0,51 m (espaço acima 1,14 / 0,51 m); câmera do
+    ombro × K. As alturas de obstáculo de transpor (0,35–1,25 m) e as velocidades não mudaram;
+  - `Movement.client`: olho deitado −1,6 → −1,83 stud, inclinar 0,35 → 0,40 m, e +0,07 stud em
+    todas as posturas (a câmera do Roblox põe o olho 0,5 stud acima da HRP, número que não cresce).
+    Olho estimado (HipHeight 2,857 e HRP de 2,857 studs, não medidos): de pé ~1,76 m, agachado
+    ~1,43 m, deitado ~0,51 m. O raio da sonda de escalar foi a 2,26 m (antes 2 m: com 2,06 m de
+    espaço pedido, escalar nunca passaria);
+  - `VehicleDrive`: olho da tripulação +0,6 m × (K − 1) = +8,6 cm e da tropa sentada +12,9 cm;
+  - faca na mão (`MeleeService`): o punho desce `HAND_GRIP_Y` × K na mão maior.
+- **Túneis** (`TunnelGeometry`, `TunnelService`): o túnel (1,0 × 1,2 m) não muda; o soldado de 2 m
+  passa nele **deitado, rastejando** (a HRP agachada chega a 1,27 m e bateria no teto).
+  - Poço com no mínimo 1,0 m por dentro (era 0,6 m: a HRP de 0,64 m não cabia ao lado da escada).
+  - Escada (TrussPart de 2 studs) encostada na parede norte, não no meio.
+  - Quem do VC está no túnel fora do poço e não está deitado é deitado (0,3 s). O PostureService
+    não deixa levantar sob o teto.
+  - Precisa assar o place de novo (forro do túnel).
+- **Portas** (agente do mapa): de pé, no mínimo **2,1 m** (7,5 studs; a cabeça colide a 2,0 m);
+  agachado, **1,6 m** (5,7 studs).
+
+**Capacetes** (`Gear.headgearFit`):
+- Só pela cabeça, a copa abraçava a cabeça do "Man" (menor que a do bloco) e o casco ficava do
+  tamanho de um boné.
+- Agora o casco tem no mínimo o tamanho real × K:
+  - M1: 27 × 30 cm (pedido do dono, PLACEHOLDER) → 30,9 × 34,3 cm no jogo;
+  - capacete de medula: 29 × 34 cm → 33,1 × 38,9 cm;
+  - chapéu de mato: 32 × 34 cm → 36,6 × 38,9 cm (os dois PLACEHOLDER).
+- A cabeça também cresceu K. A peça da cabeça da camuflagem de mato cresce até cobrir o capacete.
+
+**Carta na mão** (`Controllers/CartaMao`, `Shared/CartaModel`, `PostureController`, `PostureService`):
+- Abrir o mapa tático pede ao servidor a carta na mão (`Posture_Set { carta }`). O servidor confere
+  vivo, a pé e sem estar caído, aceita no máximo 4 trocas por segundo e grava o atributo `Carta`; caído, sentado ou morto, ela sai.
+- **3ª pessoa** (todos veem): folha de 50 × 36 cm (PLACEHOLDER) dobrada ao meio, cor de papel e a
+  imagem da carta do jogo (`CartaImage_*`), diante do peito e inclinada 50° para os olhos. As duas
+  mãos nas bordas (IK) e o fuzil a tiracolo no ombro direito, boca para cima. Medido: braços 0 cm,
+  fuzil a tiracolo 0 cm dentro do corpo.
+- **1ª pessoa:** o fuzil some, as mãos sobem com a folha em 0,35 s e ficam na parte de baixo da tela,
+  embaixo da `CartaView`.
+- Com a carta aberta não se atira (o contexto do mapa já bloqueia; o `WeaponController` confere).
+
+**1ª/3ª pessoa no controle:** já existe (D-68): **segurar → no direcional** no controle, **O** no
+teclado (e no menu: Configurações › Mira). Não há botão livre no contexto de infantaria (todos os
+botões do controle já têm toque e segurar). Por isso não criei uma ação repetida.
+
+**Ganchos só no Studio:** `VT65DevFaca = "boneco"` e depois `"bracos:carta"` (o boneco abre e fecha a
+carta); os de postura da D-94 continuam.
+
+**Fora dos meus arquivos (precisam do dono de cada um):**
+- `BotLocomotion`: AgentHeight 6,5 studs (1,82 m) para 7,3 (2,05 m);
+- `BotBrain`: altura dos olhos para abrigo, que ainda é a do soldado de 1,75 m;
+- `BotTunnels`: leva o bot agachado no túnel; com 2 m a cabeça passa do teto (fica dentro da terra);
+- `Units.SOLDIER_HEIGHT` e o `DebugHud` ("meta 1,75");
+- o enquadramento do manequim do lobby (`SoldierPreview`/`LobbyScene`).
+
+**Não testado no Studio.**
+
+## D-99 — Inclinar e passo do Front 44, sangramento que demora, curativo que estanca, itens animados e mãos de 1ª pessoa (2026-11-12)
+**Pedido do dono:** "os botões de se inclinar não estão funcionando"; "utilize o mesmo modelo de
+movimentação e inclinação que uso no Front 44"; "o sangramento tem que demorar mais para matar, e
+quando eu utilizar a bandagem ele deve parar"; "faça as animações perfeitas para bandagens etc." e
+"para todos os itens ao utilizá-los"; foto: em 1ª pessoa as mãos da pistola eram "duas bolas laranjas".
+
+**Por que o inclinar não funcionava:** Q/E e L3/R3 existiam só na camada de mira (sem mirar a tecla
+nem chegava); a máquina de estados zerava o inclinar fora da mira; a câmera só andava 0,4 m de lado,
+sem giro; soltar a mira mandava `lean = 0` ao servidor; nada impedia de espiar através da parede.
+
+**Inclinar (modelo do Front 44, `Controllers/Inclinar`, `Movement.LEAN`):**
+- **Q/E** seguram o inclinar a qualquer hora a pé (contexto de infantaria); no **controle, L3/R3
+  mirando** (fora da mira não há botão livre: L3 corre, R3 é o corpo a corpo, o direcional já tem
+  tocar e segurar). As duas teclas contam juntas;
+- o valor anda para o alvo a **8/s** (Front 44); correndo, deitado, nadando, transpondo, sentado ou
+  caído o alvo é 0; a câmera vai **0,35 m** de lado (1,1 stud do Front 44 × K) e gira **14°**; a arma,
+  as mãos, a faca e a carta de 1ª pessoa giram junto (WeaponVisuals); o tronco que os outros veem
+  gira **19,6°** (14 × 1,4);
+- **colisão:** um raio e uma esfera de 12 cm do olho para o lado medem o espaço; a parede limita a
+  câmera, a arma e o tronco (o servidor recebe o inclinar em quartos, arredondado para dentro);
+- o próprio cliente reenvia o inclinar se algo o zerar (soltar a mira); o servidor zera correndo,
+  deitado e caído.
+
+**Passo e posturas (Front 44, que chega à velocidade quase na hora):** arrancada 16 → 8 m/s² (antes
+11 → 5), parada 16 m/s² (antes 12), curva 22 m/s² (antes 16): parado → trote 0,23 s, trote → corrida
+0,25 s, trote → parado 0,2 s. **Agachado 1,4 m/s** (antes 0,84; o Front 44 usa 2,0) e **rastejar
+0,5 m/s** (antes 0,35; Front 44 1,1), no meio-termo com a passada das animações. Deitar 0,6 s e
+levantar 0,75 s (antes 0,8 e 1,0); agachar 0,22 s. Água, VC × 1,12, 2 m e passada assistida ficam.
+PLACEHOLDER.
+
+**Sangramento e curativo (`Shared/Medical`, `MedicalService`):**
+- sangra **~5x mais devagar**: leve 0,1, grave 0,25, arterial 0,8 vida/s (antes 0,5 / 1,5 / 4,0). Até
+  cair: pistola no tronco ~3 min, artéria da perna ~1,5 min, braço ~5 min (hemorragia de membro mata
+  em minutos, não em segundos). PLACEHOLDER;
+- **o curativo estanca:** um curativo fecha todo ferimento que não é arterial (antes o grave virava
+  leve e continuava sangrando). Artéria pede torniquete; sem torniquete, compressão (vira leve);
+- **bandagem rápida (G / ↓)** faz tudo de uma vez: torniquete na artéria (se houver um) e curativo no
+  resto. O `Medical_State` manda `arterial` (o `MedicalController` ainda decide pela taxa antiga, ≥ 4,
+  mas o servidor já aplica o torniquete; o `Haptics` usa ≥ 1,5 para o coração: dono de cada um).
+
+**Itens animados (`Shared/ItemAnim`, `Controllers/ItemView`, `PostureController`):** curativo em si
+(tira da bolsa, rasga, enrola no braço, amarra), torniquete na coxa (passa a tira, gira a haste,
+prende), curativo no companheiro, tratamento e reanimação do médico (compressões), rádio (fone no
+ouvido, só a esquerda), binóculo, pá de trincheira (crava, alavanca, joga a terra) e cantil (abre,
+bebe com a cabeça para trás, guarda).
+- **Todos veem:** o servidor grava `VT65Acao` (ações médicas, com `VT65AcaoT`/`VT65AcaoS` no relógio do
+  servidor) e `VT65Item` (rádio, binóculo, pá, cantil, que o `ItemView` pede pelo `Posture_Set`); o
+  `PostureController` de cada cliente leva as mãos por IK ao caminho do `ItemAnim`, põe o fuzil a
+  tiracolo e o objeto na mão (curativo, haste, fone, binóculo, pá, cantil, nas medidas reais);
+- **1ª pessoa:** o fuzil sai da frente e as mãos novas fazem o mesmo caminho com o objeto; no rádio só
+  a esquerda larga o guarda-mão;
+- **clipes de 3ª pessoa** (`tools/anim`, procedurais com as mesmas chaves: tronco curvado sobre o
+  companheiro, cabeça olhando a ferida, cabeça para trás ao beber): `item_curativo`, `item_torniquete`,
+  `item_curativo_outro`, `item_tratar`, `item_reanimar`, `item_radio`, `item_binoculo`, `item_pa`,
+  `item_cantil`, id 0 até subir; o `SoldierAnimations` os toca parados no instante do servidor;
+- os alvos das mãos foram tirados de dentro do corpo no simulador do `ArmIK`
+  (`tools/anim/itens_fora.luau`, ≤ 1,5 cm por chave) e ficam no alcance do braço (`ItemAnim.reach`);
+- a pá é reconhecida por **chave**, nunca pelo texto da tela (que pode chegar traduzido): o
+  `ItemView` aceita `{ key = "dig_start" | "dig_cancel" }` no `Logistics_State` ou o atributo
+  `VT65Item = "shovel"` posto pelo servidor. **O `FieldWorkService` (não é meu) ainda manda só o
+  texto: até ele mandar a chave, a pá não anima.** Cantil: o jogo não tem a ação de beber; a animação
+  existe e toca pelo gancho do Studio. Granada, fumaça, carta e recarga seguem com as suas (D-77,
+  D-98, D-69).
+
+**Vantagens compradas do corpo (`Shared/Vantagens`, conferidas no servidor pelos atributos `Vant_*`):**
+- `speed` (1,06): trote e corrida no `Movement.serverSpeed` (teto do `WalkSpeed` no `MedicalService`)
+  e no `Movement.targetSpeed` do cliente (o mesmo número; o cliente nunca passa do teto). Agachado,
+  rastejar, mira e perna ferida não mudam;
+- `health` (1,12): vida máxima (`Medical.new`, `Humanoid.MaxHealth`), acompanha o passe se ele chegar
+  depois do nascimento;
+- `bandage` (0,74): tempo do curativo (em si e no companheiro) e do torniquete;
+- `bleed` (0,8): taxa de sangramento (pistola no tronco: 182 s → 287 s até cair).
+- Testado no Lune com e sem passe (`f2`, `movimento`).
+
+**Mãos de 1ª pessoa (`Shared/MaosPose`, `Controllers/Maos1P`, `tools/maos`):** cada pega tem a forma de
+uma mão (palma, quatro dedos, polegar e pulso, com medidas de mão adulta): a direita fecha o punho com
+o indicador no gatilho; a esquerda apoia o guarda-mão, abraça a direita na pistola ou segura o
+carregador; a mão aberta segura a carta. Antebraço com pulso de pele e manga do uniforme (EUA: OG-107
+arregaçada; VC: manga lisa). Sem a arte publicada são cápsulas de peças (bola + cilindro); com
+`AssetIds.Models.maos_us_1p` / `maos_vc_1p` (`assets/blender/maos_1p/*.glb`, feitos no Blender pelas
+mesmas cápsulas fundidas por voxel) o `Characters` põe a cópia em `ReplicatedStorage.VT65MaosArt` e
+entram as malhas; a cor é a da pele da cabeça do soldado.
+
+**Sobras da D-98:** `Units.SOLDIER_HEIGHT` = 2,0 m e a meta do `DebugHud` 2,00 (com as traduções).
+
+**Ganchos só no Studio:** `workspace:SetAttribute("VT65DevLean", -1 | 0 | 1)` (inclina sem tecla, para
+testar a quina); `workspace:SetAttribute("VT65DevItemAnim", "bandage" | "tourniquet" |
+"bandage_other" | "treat" | "revive" | "radio" | "shovel" | "canteen")` (toca a animação de 1ª pessoa).
+
+**Não testado no Studio.**
+
+## D-100 — Pilotar todos os veículos, painel de lugares, tiro de dentro e carros (2026-11-12)
+**Pedido do dono, depois de jogar:**
+- "por que não consigo pilotar tanques, carros e helicópteros?";
+- "coloque a interface do botão para eu entrar neles ou pilotar quando chegar perto";
+- "faça poder atirar de dentro dos veículos";
+- "os veículos conseguem andar em todo o mapa sem bugar? Eu quero isso".
+
+**Por que não dava para pilotar:**
+- todo lugar de blindado pedia `tank_crew` e o UH-34D pedia `pilot` e `door_gunner`. Esses papéis
+  exigem posto 2 ou 3 e um squad pesado, que só abre com 16 jogadores no time (`HEAVY_UNLOCK`);
+- o assento sentava pelo toque: no M48 o jogador caía no lugar que encostasse ("MUNICIADOR ·
+  Passageiro") e não havia como escolher;
+- passageiro não atirava, e a M60 da cúpula do M48 não tinha botão.
+
+**Regra de papel** (`Roles.vehicleSeatRole`, aplicada no servidor):
+- carro e caminhão: qualquer um do lado;
+- blindado e anfíbio: motorista e atirador pedem tripulante; comandante, municiador e tropa não;
+- helicóptero: só o lugar do piloto pede piloto.
+- Faltou o papel e há vaga (mais lugares que pedem o papel do que gente com ele), o painel oferece
+  "Trocar para Tripulante/Piloto e entrar". Vale até morrer (atributo `VehicleCrew`), sem mexer no
+  squad, na arma nem no posto.
+
+**Painel** (`Controllers/VehiclePrompt`, ProximityPrompt `VT65Embarcar` em estilo próprio):
+- perto do veículo do próprio lado: cartão com o nome e os lugares livres; segurar X (F) por 0,4 s
+  ou clicar/tocar abre o painel;
+- lugares em ordem (Motorista ou Piloto, Atirador, Comandante, Municiador, Carona, Tropa), livre,
+  ocupado ou "trocar p/ tripulante"; direcional + A, B fecha;
+- dentro, segurar Y (C) abre o mesmo painel: trocar de lugar, sair e, tombado ou preso, desvirar;
+- o assento não senta mais pelo toque (`CanTouch` false); o servidor valida tudo (`Vehicle_Board`)
+  e explica a recusa (`Vehicle_Notice`).
+- O lugar fica embaixo do olho medido na malha: a cabeça de quem está sentado é a da câmera, e quem
+  sai é posto ao lado do veículo, fora do chassi.
+
+**Atirar de dentro:**
+- lugar aberto (caçamba do M35, M151, teto do LVTP-5, escotilha do comandante do LVTP-5, portas do
+  UH-34D, aba de trás da Peugeot) usa a própria arma, só em 1ª pessoa e no ângulo do lugar
+  (`Vehicles.inArc`): portas ±70° do lado, caçamba ±95°, teto para qualquer lado;
+- fechado (motorista, municiador, cabines) não atira; a M60 da cúpula do M48 ganhou o gatilho (RT).
+- `WeaponController` só recebe o gatilho e a recarga pelo Bus e confere o atributo local
+  `SeatFire`. O servidor (`CombatService`) aceita o tiro sentado como a pé: o ângulo é conferido
+  só no cliente.
+
+**UH-34D:** o voo já existia; o que impedia era o papel. Estabilizador ligado por padrão (nivela,
+segura o pairado; A segurado ou R desliga); no chão, sem coletivo pedido, fica logo abaixo do
+pairado e só decola com Espaço/RT.
+
+**Carros** (medidas dos scripts do Blender, rodas pelo nome das peças, substituto em peças até o
+modelo subir; massa, potência e velocidade "a conferir"):
+
+| Carro | Lugares | Estrada / terra batida / capim / arrozal (km/h, medido no teste) | Raio |
+|---|---|---|---|
+| M151 (EUA) | motorista, carona e 2 atrás | 105 / 84 / 53 / 14 | 5,4 m |
+| M35 (EUA) | motorista, carona e 12 na caçamba | 90 / 72 / 45 / 9 | 10,9 m |
+| Peugeot 403 (VC) | motorista, carona e 6 sob a lona | 114 / 92 / 57 / 15 | 5,2 m |
+
+- Rodas: sem giro parado; curva pelo raio mínimo até a aderência lateral; tração só atrás na
+  Peugeot. Tudo PLACEHOLDER de engenharia (`VehicleDrive.GROUND_WHEELED`, `DRIVE`).
+- Estrada de terra do mapa (terreno `Ground`): chão novo `dirt`; o M48 vai a 43 km/h nela. Os outros
+  números da D-86 não mudaram.
+- Bots não dirigem os carros ainda (`VehicleService.seat` esconde o motorista): o `BotDriver` foi
+  feito para lagarta.
+
+**Não prender:** veículo tombado ou preso (motor acelerando e parado por 3 s, atributo `Stuck`)
+mostra "PRESO: segure Y e escolha Desvirar"; o servidor levanta 1,5 m e põe em pé, um a cada 8 s.
+
+**Ganchos só no Studio:**
+- `VT65DevDrive = "m151"` (ou qualquer ficha) senta no motorista; sem veículo livre, faz um à frente;
+- `VT65DevVeh = "m35"` faz o veículo à frente; `"todos"` faz um de cada; `"tombar"` deita o mais perto;
+- `VT65DevMov = "veiculo"` liga a leitura do motorista no Output.
+
+**Não testado no Studio:** painel, assento sem toque, lugar no olho medido, voo, tiro de dentro,
+rodas girando, desvirar.
+
+## D-101 — v37: STARLITE: Vietnã 1965 (2026-11-12)
+
+O dono jogou a v36 e mandou uma lista longa; liberou testar e publicar e escolheu o nome
+**STARLITE: Vietnã 1965**. Esta entrada junta o que não tem decisão própria (números e fontes nos
+relatórios de cada parte, no código e nos testes).
+
+- **Armas** (`Shared/Gatilho`, `CombatService`, `tests/luau/armas`):
+  - **Por que não atiravam:**
+    - SKS e pistolas: a cadência do semi contava a recarga;
+    - granadeiro: o servidor só municiava a 1ª arma;
+    - automáticas: o servidor media a cadência pela chegada do pacote e recusava 26% da rajada da M60.
+  - **Seletor:** M60, RPD e Tipo 56 com automático; M14 no semi, com o automático só no papel novo
+    **Fuzileiro automático** (EUA, 1 por squad, bipé M2; FM 23-8).
+  - **Mira:** a mira fica mais perto do olho.
+  - **Snipers:** M70 com Unertl 8x (EUA) e Mosin 91/30 com PU 3,5x (VC).
+  - **Explosivos:** M79 voltou; napalm.
+- **Carregamento e telas:** novo estilo escuro, baseado na primeira tela de carregamento. Em resumo:
+  - bandeiras na escolha de idioma;
+  - tela de baixa com renascer aqui (créditos ou Robux) e atalho para a loja;
+  - VC sempre vermelho e EUA sempre azul;
+  - barra de captura;
+  - marcas na carta (a do líder vale para o squad);
+  - coluna de comandos;
+  - a roda do LB/RB não fecha mais sozinha.
+- **Nascimento:**
+  - espera de exatamente 10 s;
+  - nascer ao lado de um companheiro do squad (regras em `SpawnRules.MATE`);
+  - bots completam o squad do jogador até 4;
+  - túnel avançado fixo do VC (Offensive: contato em 30 s).
+- **Comunicação:**
+  - texto por proximidade (40 m), squad e time (TextChatService);
+  - voz por proximidade e rádio do squad (API de áudio);
+  - o dono precisa ligar a voz nas configurações da experiência.
+- **Eventos da partida** (`EventosService`):
+  - apoio naval, ataque aéreo, inserção de UH-34D no minuto 1, morteiro do VC, medevac, depósito e
+    contra-ataque, a cada 2–3 min;
+  - métrica do primeiro contato (`ContatoService`).
+- **Bots:** nível médio de verdade (a 100 m acertam 4% em 3 s, eram 51%), visão curta na vegetação,
+  avançam em lances e não mostram mais o nome.
+- **Mapa:**
+  - diques viraram cômoros de até 0,5 m;
+  - arrozal −87%;
+  - objetivos e o QG do VC mais ao centro;
+  - o morro de 34 m foi deslocado 76 m a leste e 27 m a norte, com a vila nova Xóm Gò (48 casas)
+    em cima: deformação pedida pelo dono;
+  - 2,8 km de estrada principal;
+  - iluminação ShadowMap (era Future), mais leve.
+- **Volta diária e Robux** (`CampanhaService`, `Shared/Missoes`, `Temporada`, `Mercado`, `Reforcos`,
+  `Medalhas`, `Vantagens`):
+  - missões diárias e semanais;
+  - Passe de Campanha de 50 níveis;
+  - mercado do dia;
+  - reforços de XP;
+  - Pacote de Recruta;
+  - medalhas e cartão do jogador;
+  - 7 vantagens compradas com teto de +12% (decisão do dono).
+  - Sem caixa-surpresa paga.
+  - 17 itens criados no Roblox (`Commerce.IDS`).
+- **Testado no Studio:**
+  - o servidor sobe sem erro de script;
+  - terreno em 29 s;
+  - 1.319 modelos de arte;
+  - lobby, idioma com bandeiras, carta e inserção;
+  - nascer em campo com 1,98 m e três bots no squad.
+- **Não testado:** tiro de cada arma em jogo, veículos pilotados, voz, eventos ao vivo.
+- **Falta:**
+  - o terreno ficou mais lento (29 s, eram 7 s);
+  - 18 construções acusam o chão a mais de 0,6 m do patamar;
+  - com um controle ligado, um clique de mouse pode valer como o A do cursor virtual (trocou o
+    idioma no teste).

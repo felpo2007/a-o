@@ -59,15 +59,95 @@ local function decide()
 		if bar then
 			bar.Enabled = want
 		end
+		local tabsCfg = TextChatService:FindFirstChildOfClass("ChannelTabsConfiguration")
+		if tabsCfg then
+			tabsCfg.Enabled = want
+		end
 		StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Chat, want)
 	end)
 end
 
+-- ===== abas dos canais (2026-11-12: canais perto, squad, lado e geral, Modules/Comunicacao) =====
+-- As abas do Roblox mostram o NOME do canal: os canais do jogo (VT65*) ganham, só neste cliente, o
+-- rótulo da aba no idioma do jogador (o servidor continua com o nome dele; o CanaisChat acha o de
+-- perto pelo atributo VT65Canal). Os do Roblox (RBXGeneral, RBXTeam...) ficam como estão: o próprio
+-- Roblox os rotula ("Geral", "Time") no idioma da conta.
+local TAB_NAMES: { [string]: { [string]: string } } = {
+	pt = { perto = "Perto", squad = "Squad", lado = "Time", geral = "Geral" },
+	en = { perto = "Nearby", squad = "Squad", lado = "Team", geral = "General" },
+	es = { perto = "Cerca", squad = "Escuadra", lado = "Equipo", geral = "General" },
+	vi = { perto = "Gần", squad = "Tiểu đội", lado = "Phe", geral = "Chung" },
+}
+local function label(ch: Instance)
+	if not ch:IsA("TextChannel") then
+		return
+	end
+	local kind = ch:GetAttribute("VT65Canal")
+	local orig = ch:GetAttribute("VT65Nome")
+	if type(orig) ~= "string" then
+		if string.sub(ch.Name, 1, 4) ~= "VT65" then
+			return -- canal do Roblox
+		end
+		orig = ch.Name
+		ch:SetAttribute("VT65Nome", orig) -- o nome do servidor, guardado (local)
+	end
+	local lang = player:GetAttribute("Lang")
+	local names = TAB_NAMES[if type(lang) == "string" then lang else "pt"] or TAB_NAMES.pt
+	local want = if type(kind) == "string" then names[kind] else nil
+	if want and ch.Name ~= want then
+		pcall(function()
+			ch.Name = want
+		end)
+	end
+end
+local function watchChannels(folder: Instance)
+	for _, ch in folder:GetChildren() do
+		label(ch)
+	end
+	folder.ChildAdded:Connect(function(ch)
+		label(ch)
+		ch:GetAttributeChangedSignal("VT65Canal"):Connect(function()
+			label(ch)
+		end)
+	end)
+end
+player:GetAttributeChangedSignal("Lang"):Connect(function()
+	local folder = TextChatService:FindFirstChild("TextChannels")
+	if folder then
+		for _, ch in folder:GetChildren() do
+			label(ch)
+		end
+	end
+end)
+
+local function tabs(c: Instance)
+	if not c:IsA("ChannelTabsConfiguration") then
+		return
+	end
+	local w = c :: any
+	for prop, value in
+		{
+			Enabled = true,
+			BackgroundTransparency = 0.72,
+			TextSize = UiKit.text(14),
+			FontFace = Font.fromEnum(Enum.Font.ArimoBold),
+		} :: { [string]: any }
+	do
+		pcall(function()
+			w[prop] = value
+		end)
+	end
+end
+
 local function onConfig(c: Instance)
 	apply(c)
-	if c:IsA("ChatWindowConfiguration") or c:IsA("ChatInputBarConfiguration") then
+	tabs(c)
+	if c:IsA("ChatWindowConfiguration") or c:IsA("ChatInputBarConfiguration") or c:IsA("ChannelTabsConfiguration") then
 		shown = nil -- configuração nova: aplica a decisão de novo
 		decide()
+	end
+	if c.Name == "TextChannels" then
+		watchChannels(c)
 	end
 end
 for _, c in TextChatService:GetChildren() do

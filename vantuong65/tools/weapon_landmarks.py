@@ -279,6 +279,14 @@ def vec(v: list[float]) -> str:
 MEDIDAS: dict[str, dict] = {}
 EYE_ANEL_M = 0.045
 
+# Armas modeladas no Blender (tools/blender/armas.py, 2026-11-12): os pontos não são estimados da
+# malha, são os da construção, medidos no referencial da MeshPart "Arma" relendo o GLB exportado
+# (pontos.json). Também trazem o eixo do ferrolho ("bolt"), animado no WeaponVisuals/Ferrolho.
+BLENDER = {
+    "m70": ROOT / "assets/blender/arma_m70_unertl/pontos.json",
+    "mosin": ROOT / "assets/blender/arma_mosin_pu/pontos.json",
+}
+
 
 def main() -> None:
     import sys
@@ -300,7 +308,8 @@ def main() -> None:
         "-- eyeM = distância (m) do olho ao ponto sight, mirando. yaw = giro extra em Y (rad) de",
         "-- modelo gerado torto; o referencial da arma é TURN[forward] * CFrame.Angles(0, yaw, 0).",
         '-- sightKind = "anel" ou "entalhe" medido na malha (tools/sight_align.py; "" = sem',
-        "-- medida) e sightMm = diâmetro do furo ou fundura do entalhe (mm).",
+        "-- medida) e sightMm = diâmetro do furo ou fundura do entalhe (mm). bolt = um ponto do",
+        "-- eixo do ferrolho (armas do Blender, tools/blender/armas.py: a peça 'Ferrolho' gira).",
         "export type Art = {",
         "\tforward: string,",
         "\tyaw: number,",
@@ -314,6 +323,7 @@ def main() -> None:
         "\teyeM: number,",
         "\tsightKind: string,",
         "\tsightMm: number,",
+        "\tbolt: Vector3?,",
         "}",
         "local WeaponArt: { [string]: Art } = {",
     ]
@@ -334,6 +344,29 @@ def main() -> None:
             f"\t\teyeM = {d['eyeM']},",
             f'\t\tsightKind = "{d["sightKind"]}",',
             f"\t\tsightMm = {d['sightMm']},",
+            "\t},",
+        ]
+    for key, caminho in BLENDER.items():
+        if not caminho.is_file():
+            print("sem pontos (rode tools/blender/armas.py):", key)
+            continue
+        d = json.loads(caminho.read_text("utf-8"))
+        print(key, d)
+        lines += [
+            f"\t{key} = {{",
+            f'\t\tforward = "{d["forward"]}",',
+            "\t\tyaw = 0.0,",
+            f"\t\tmuzzle = {vec(d['muzzle'])},",
+            f"\t\tsight = {vec(d['sight'])},",
+            f"\t\tfront = {vec(d['front'])},",
+            f"\t\tgrip = {vec(d['grip'])},",
+            f"\t\tsupport = {vec(d['support'])},",
+            f"\t\tlowX = {d['lowX']},",
+            f"\t\tlengthM = {d['lengthM']},",
+            f"\t\teyeM = {d['eyeM']},",
+            '\t\tsightKind = "",',
+            "\t\tsightMm = 0.0,",
+            f"\t\tbolt = {vec(d['bolt'])},",
             "\t},",
         ]
     lines += ["}", "", "return WeaponArt", ""]

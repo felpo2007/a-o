@@ -27,6 +27,7 @@ local CartaView = require(script.Parent.CartaView)
 local DeployScreen = require(script.Parent.DeployScreen)
 local Input = require(script.Parent.Input)
 local LobbyScene = require(script.Parent.LobbyScene)
+local Marcadores = require(script.Parent.Marcadores)
 local SpawnTransition = require(script.Parent.SpawnTransition)
 local Toast = require(script.Parent.Toast)
 local UiKit = require(script.Parent.UiKit)
@@ -57,11 +58,13 @@ end
 local side = DeployScreen.root
 side.Parent = stage
 
--- Janela do mapa. Na carta de inserção (morto) fica à direita da ficha do DeployScreen; aberta em
--- campo (ou no alvo do comandante) ocupa o palco, com a legenda à direita.
-local SPAWN_RECT = { x = 430, y = 176, w = 810, h = 486 }
-local VIEW_RECT = { x = 24, y = 64, w = 940, h = 620 }
-local LEGEND_RECT = { x = 980, y = 64, w = 276, h = 620 }
+-- Janela do mapa (estilo novo, 2026-11-11: painel escuro, sem aba datilografada). Na carta de
+-- inserção (morto) ocupa o palco à direita do painel estreito de inserção da DeployScreen (x 40 a
+-- 340, contrato com a tela do lobby); aberta em campo (ou no alvo do comandante) ocupa o palco, com a
+-- legenda curta à direita. A folha é quadrada (1 x 1 km): a altura manda no tamanho.
+local SPAWN_RECT = { x = 356, y = 146, w = 884, h = 520 }
+local VIEW_RECT = { x = 24, y = 64, w = 1000, h = 620 }
+local LEGEND_RECT = { x = 1036, y = 64, w = 220, h = 620 }
 local mapFrame = Instance.new("Frame")
 mapFrame.Name = "Carta"
 mapFrame.BorderSizePixel = 0
@@ -70,48 +73,53 @@ mapFrame.Active = true -- tapa a mesa 3D do lobby atrás da carta (o clique não
 mapFrame.Visible = false
 mapFrame.ZIndex = 2 -- por cima da tela de deslocamento (passo da inserção)
 mapFrame.Parent = stage
-local mapEdge = Instance.new("UIStroke")
-mapEdge.Thickness = 4
-mapEdge.Color = UiKit.DRAB
-mapEdge.Parent = mapFrame
--- aba datilografada em cima da carta (fora do mapFrame, que corta os filhos)
-local mapTab = Instance.new("TextLabel")
-mapTab.Size = UDim2.fromOffset(SPAWN_RECT.w, 28)
-mapTab.BackgroundColor3 = UiKit.DRAB
-mapTab.BorderSizePixel = 0
-mapTab.TextColor3 = UiKit.KHAKI
-mapTab.Font = Enum.Font.SpecialElite
-mapTab.TextXAlignment = Enum.TextXAlignment.Left
-mapTab.TextSize = TS(16)
+UiKit.corner(mapFrame, 4)
+local mapEdge = UiKit.stroke(mapFrame, UiKit.V.LINE, 1, 0.3)
+mapEdge.Name = "Borda"
+-- título da carta em campo, em cima da janela (fora do mapFrame, que corta os filhos); na inserção
+-- quem dá o título é o painel de inserção da DeployScreen
+local mapTab = Instance.new("Frame")
+mapTab.Name = "Titulo"
+mapTab.BackgroundTransparency = 1
+mapTab.Size = UDim2.fromOffset(VIEW_RECT.w, 30)
 mapTab.Visible = false
 mapTab.ZIndex = 2
 mapTab.Parent = stage
-local mapTabPad = Instance.new("UIPadding")
-mapTabPad.PaddingLeft = UDim.new(0, 12)
-mapTabPad.Parent = mapTab
+local mapTitle = UiKit.title(mapTab, "", 20, UiKit.V.TEXT)
+mapTitle.AutomaticSize = Enum.AutomaticSize.X
+mapTitle.Size = UDim2.fromOffset(0, 30)
+mapTitle.ZIndex = 2
+local mapSub = UiKit.kicker(mapTab, "", 14, UiKit.V.DIM)
+mapSub.AnchorPoint = Vector2.new(1, 0)
+mapSub.Position = UDim2.fromScale(1, 0)
+mapSub.Size = UDim2.new(0.6, 0, 0, 30)
+mapSub.TextXAlignment = Enum.TextXAlignment.Right
+mapSub.ZIndex = 2
 -- faixa de estado no pé da carta: modo, relógio e grade do cursor à esquerda; comandos à direita
 local status = Instance.new("TextLabel")
 status.Name = "Estado"
 status.AnchorPoint = Vector2.new(0, 1)
 status.Position = UDim2.new(0, 0, 1, 0)
-status.Size = UDim2.new(1, 0, 0, if UiKit.tv() then 34 else 26)
-status.BackgroundColor3 = UiKit.NIGHT
-status.BackgroundTransparency = 0.15
-status.TextColor3 = UiKit.KHAKI
-status.Font = Enum.Font.SpecialElite
+status.Size = UDim2.new(1, 0, 0, if UiKit.tv() then 36 else 28)
+status.BackgroundColor3 = UiKit.V.PANEL
+status.BackgroundTransparency = 0.1
+status.BorderSizePixel = 0
+status.TextColor3 = UiKit.V.TEXT
+status.FontFace = UiKit.F.TITLE_MED
 status.TextSize = TS(15)
 status.TextXAlignment = Enum.TextXAlignment.Left
+status.TextTruncate = Enum.TextTruncate.AtEnd
 status.ZIndex = 9
 status.Parent = mapFrame
 local statusPad = Instance.new("UIPadding")
-statusPad.PaddingLeft, statusPad.PaddingRight = UDim.new(0, 10), UDim.new(0, 10)
+statusPad.PaddingLeft, statusPad.PaddingRight = UDim.new(0, 12), UDim.new(0, 12)
 statusPad.Parent = status
 local hints = Instance.new("TextLabel")
 hints.Name = "Comandos"
 hints.BackgroundTransparency = 1
 hints.Size = UDim2.fromScale(1, 1)
-hints.TextColor3 = UiKit.KHAKI
-hints.TextTransparency = 0.25
+hints.TextColor3 = UiKit.V.DIM
+hints.TextTransparency = 0
 hints.Font = Enum.Font.Arimo
 hints.TextSize = TS(13)
 hints.TextXAlignment = Enum.TextXAlignment.Right
@@ -194,6 +202,8 @@ local function spawnText(pt: any): string
 		return string.format("%s · %s", pt.name, pt.why or "bloqueado")
 	elseif (pt.wait or 0) > 0 then
 		return string.format("%s · espera %d s", pt.name, pt.wait)
+	elseif pt.ready == false then
+		return string.format("%s · %s", pt.name, pt.why or "espere")
 	end
 	return string.format("%s · PRONTO", pt.name)
 end
@@ -203,7 +213,8 @@ local function insert(pt: any)
 	if SpawnTransition.busy() then
 		return
 	end
-	if pt.blocked or (type(pt.wait) == "number" and pt.wait > 0) then
+	-- todo ponto traz `ready` (o companheiro do squad também: id "mate:...", o mesmo Spawn_Request)
+	if pt.blocked or (type(pt.wait) == "number" and pt.wait > 0) or pt.ready == false then
 		status.Text = spawnText(pt)
 		return
 	end
@@ -219,6 +230,27 @@ local function chooseTarget(u: number, v: number)
 	Bus.fire("map_target_end")
 end
 
+-- Marcar na carta e ser guiado (pedido do dono): em campo, clique, A ou X marcam o ponto. Quem é
+-- líder do squad marca para o squad inteiro (Squad_Mark "map"; o servidor confere e manda com
+-- leader = true só para o squad); os outros põem a marca pessoal (só neste cliente). O Marcadores
+-- mostra a marca no mundo com a distância e a tira quando você chega. Marcar de novo perto da sua
+-- marca a apaga.
+local function markAt(u: number, v: number)
+	local x, z = fromUV(math.clamp(u, 0, 1), math.clamp(v, 0, 1))
+	if player:GetAttribute("Role") == "squad_leader" and player:GetAttribute("SquadId") ~= nil then
+		Net.event("Squad_Mark"):FireServer({ pos = Vector3.new(x, 0, z), kind = "map" })
+		return
+	end
+	local mine = Marcadores.waypoints().mine
+	if mine and math.sqrt((mine.x - x) ^ 2 + (mine.z - z) ^ 2) * (MapConfig.STUD_M or 0.28) < 25 then
+		Marcadores.clearWaypoint()
+		Toast.show("Marca apagada", "info", { title = "Marca", key = "marca_pessoal" })
+	else
+		Marcadores.setWaypoint(x, z)
+		Toast.show("Siga a marca: ela some quando você chegar", "info", { title = "Marca", key = "marca_pessoal" })
+	end
+end
+
 CartaView.setCallbacks(function(pt: any)
 	if mode == "spawn" then
 		insert(pt)
@@ -226,6 +258,8 @@ CartaView.setCallbacks(function(pt: any)
 end, function(u: number, v: number)
 	if mode == "target" and not Input.isGamepad() then
 		chooseTarget(u, v)
+	elseif mode == "view" and alive() then
+		markAt(u, v)
 	end
 end)
 
@@ -236,15 +270,22 @@ local function placeMap()
 	mapFrame.Position = UDim2.fromOffset(r.x, r.y)
 	mapFrame.Size = UDim2.fromOffset(r.w, r.h)
 	CartaView.resize(r.w, r.h)
-	mapTab.Position = UDim2.fromOffset(r.x, r.y - 32)
-	mapTab.Size = UDim2.fromOffset(r.w, 28)
-	mapTab.Visible = mapWanted
+	mapTab.Position = UDim2.fromOffset(r.x, r.y - 34)
+	mapTab.Size = UDim2.fromOffset(r.w, 30)
+	mapTab.Visible = mapWanted and not insertion
 	legend.Visible = mapWanted and not insertion
-	mapTab.Text = if mode == "spawn"
-		then "CARTA DE INSERÇÃO · escolha um ponto PRONTO"
-		elseif mode == "target" then "CARTA TÁTICA · ALVO DA MISSÃO DE FOGO"
-		else "CARTA TÁTICA · VẠN TƯỜNG — série L7014, folha 6739 I · sem inimigos"
-	mapTab.Font = Enum.Font.Arimo
+	-- poucas palavras: o título e uma linha curta
+	if mode == "target" then
+		mapTitle.Text = "ALVO DA MISSÃO DE FOGO"
+		mapSub.Text = "escolha o ponto na carta"
+	elseif mode == "spawn" then
+		mapTitle.Text = "INSERÇÃO"
+		mapSub.Text = "escolha um ponto pronto"
+	else
+		mapTitle.Text = "CARTA TÁTICA"
+		mapSub.Text = "sem inimigos na carta"
+	end
+	mapTitle.FontFace = UiKit.headFont(mapTitle.Text)
 	CartaView.setMode(mode)
 end
 
@@ -414,12 +455,17 @@ Input.on("map_select", "press", function()
 		if pt then
 			insert(pt)
 		end
+	elseif mode == "view" and alive() then
+		local u, v = CartaView.cursorUV()
+		markAt(u, v)
 	end
 end)
 Input.on("map_mark", "press", function()
+	if mode ~= "view" or not alive() then
+		return
+	end
 	local u, v = CartaView.cursorUV()
-	local x, z = fromUV(math.clamp(u, 0, 1), math.clamp(v, 0, 1))
-	Net.event("Squad_Mark"):FireServer({ pos = Vector3.new(x, 0, z), kind = "map" })
+	markAt(u, v)
 end)
 Input.on("map_role", "press", function()
 	if mode == "spawn" and not alive() then
@@ -457,14 +503,14 @@ local function hintText(): string
 		elseif mode == "target" then
 			return "A confirma o alvo · gatilhos zoom · B cancela"
 		end
-		return "gatilhos zoom · R arrasta · L3 você · X marca · Y reunião do squad · B fecha"
+		return "A marca · gatilhos zoom · R arrasta · L3 você · Y reunião do squad · B fecha"
 	end
 	if mode == "spawn" then
 		return "clique num ponto PRONTO · roda zoom · arraste · R papel · M volta"
 	elseif mode == "target" then
 		return "clique no alvo · roda zoom · arraste · M cancela"
 	end
-	return "roda zoom · arraste · X marca · R reunião do squad · M fecha"
+	return "clique marca · roda zoom · arraste · R reunião do squad · M fecha"
 end
 
 local function statusLine(): string
@@ -567,17 +613,18 @@ player.CharacterAdded:Connect(function(char)
 end)
 Input.DeviceChanged:Connect(refresh)
 
--- aviso enquanto o servidor gera o terreno (faixa datilografada à direita dos passos)
+-- aviso enquanto o servidor gera o terreno (faixa escura à direita dos passos)
 local loading = Instance.new("TextLabel")
-loading.Position = UDim2.fromOffset(660, 138) -- entre as abas do lobby e os papéis
-loading.Size = UDim2.fromOffset(580, 20)
-loading.BackgroundColor3 = UiKit.NIGHT
-loading.BackgroundTransparency = 0.35
+loading.Position = UDim2.fromOffset(660, 138) -- entre as abas do lobby e os painéis
+loading.Size = UDim2.fromOffset(580, 22)
+loading.BackgroundColor3 = UiKit.V.PANEL
+loading.BackgroundTransparency = 0.15
 loading.BorderSizePixel = 0
-loading.TextColor3 = UiKit.KHAKI
+loading.TextColor3 = UiKit.V.KHAKI
 loading.TextXAlignment = Enum.TextXAlignment.Right
-loading.Font = Enum.Font.SpecialElite
+loading.FontFace = UiKit.F.TITLE_MED
 loading.TextSize = TS(16)
+UiKit.corner(loading, 3)
 -- sem o tamanho do terreno no texto: o mapa muda (MapConfig.Bounds) e a frase ficava errada
 loading.Text = "● Preparando o campo de batalha…"
 loading.TextTruncate = Enum.TextTruncate.AtEnd
@@ -606,7 +653,8 @@ local function fit()
 	DeployScreen.setScale(k)
 	status.TextSize = TS(15)
 	hints.TextSize = TS(13)
-	mapTab.TextSize = TS(16)
+	mapTitle.TextSize = TS(20)
+	mapSub.TextSize = TS(14)
 	loading.TextSize = TS(16)
 end
 gui:GetPropertyChangedSignal("AbsoluteSize"):Connect(fit)

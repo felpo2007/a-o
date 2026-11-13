@@ -3,9 +3,14 @@
 -- os efeitos no corpo (respiração, visão, mancar). Valores INICIAIS, a calibrar em playtest.
 local Medical = {}
 
+-- D-99 (pedido do dono: "o sangramento tem que demorar mais para matar, e quando eu utilizar a
+-- bandagem ele deve parar"). Sangramento ~5x mais lento (antes 0,5 / 1,5 / 4,0 vida/s). Referência:
+-- hemorragia de membro sem torniquete mata em minutos (a femoral em ~3 a 5 min), não em segundos;
+-- um tiro de pistola no tronco (≈ 45 de vida) leva ~3 min para derrubar, uma artéria da perna
+-- (≈ 75) ~1,5 min. Números de jogo, PLACEHOLDER.
 Medical.C = {
 	health = 100,
-	bleed = { light = 0.5, grave = 1.5, arterial = 4.0 }, -- vida por segundo
+	bleed = { light = 0.1, grave = 0.25, arterial = 0.8 }, -- vida por segundo
 	bandageSelf = 6,
 	bandageOther = 4,
 	tourniquet = 4,
@@ -35,12 +40,20 @@ export type State = {
 	blurUntil: number,
 	bandages: number,
 	tourniquets: number,
+	-- D-99: vantagens compradas (Shared/Vantagens, conferidas no servidor): vida máxima e
+	-- velocidade do sangramento (1 sem passe)
+	maxHealth: number,
+	bleedMult: number,
 }
 
-function Medical.new(isMedic: boolean?): State
+-- healthMult/bleedMult: vantagens "health" (vida máxima, até 1,12) e "bleed" (sangramento, 0,8).
+function Medical.new(isMedic: boolean?, healthMult: number?, bleedMult: number?): State
 	local C = Medical.C
+	local maxH = C.health * math.clamp(healthMult or 1, 0.88, 1.12)
 	return {
-		health = C.health,
+		health = maxH,
+		maxHealth = maxH,
+		bleedMult = math.clamp(bleedMult or 1, 0.5, 1),
 		wounds = {},
 		armImpaired = false,
 		legImpaired = false,
@@ -57,7 +70,7 @@ function Medical.bleedRate(s: State): number
 	for _, w in s.wounds do
 		r += Medical.C.bleed[w.level] or 0
 	end
-	return r
+	return r * (s.bleedMult or 1)
 end
 
 local function down(s: State, now: number): string
@@ -146,21 +159,34 @@ local function worst(s: State, levels: { string }): number?
 	return nil
 end
 
--- curativo: grave -> leve; leve -> estancado (no ferimento mais grave não arterial)
+-- Há ferimento arterial?
+function Medical.arterial(s: State): boolean
+	return worst(s, { "arterial" }) ~= nil
+end
+
+-- D-99: o curativo ESTANCA (antes o grave só virava leve e continuava sangrando). Um curativo de
+-- campanha fecha todos os ferimentos que não são arteriais. Artéria de membro pede torniquete; sem
+-- torniquete, o curativo é de compressão: a artéria vira um ferimento leve (sangra devagar até o
+-- médico tratar). Devolve false quando não havia o que fazer ou não há curativo.
 function Medical.bandage(s: State): boolean
-	if s.bandages <= 0 or s.downedAt or s.dead then
+	if s.bandages <= 0 or s.downedAt or s.dead or #s.wounds == 0 then
 		return false
 	end
-	local i = worst(s, { "grave", "light" })
-	if not i then
-		return false
+	local kept: { Wound } = {}
+	local closed = 0
+	for _, w in s.wounds do
+		if w.level == "arterial" then
+			table.insert(kept, w)
+		else
+			closed += 1
+		end
+	end
+	if closed == 0 then
+		-- só artéria: compressão na pior
+		kept[1].level = "light"
 	end
 	s.bandages -= 1
-	if s.wounds[i].level == "grave" then
-		s.wounds[i].level = "light"
-	else
-		table.remove(s.wounds, i)
-	end
+	s.wounds = kept
 	return true
 end
 
@@ -181,6 +207,14 @@ function Medical.tourniquet(s: State): boolean
 		s.legImpaired = true
 	end
 	return true
+end
+
+-- Bandagem rápida (G / direcional ↓, D-99): o torniquete primeiro, se houver artéria e torniquete,
+-- e o curativo no resto. Devolve se fez alguma coisa e quanto usou de cada (curativos, torniquetes).
+function Medical.quickDress(s: State): (boolean, number, number)
+	local t = if Medical.arterial(s) and Medical.tourniquet(s) then 1 else 0
+	local b = if #s.wounds > 0 and Medical.bandage(s) then 1 else 0
+	return t + b > 0, b, t
 end
 
 -- tratamento completo do médico (10 s): para todo sangramento, imobiliza, vida até 75

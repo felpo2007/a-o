@@ -36,6 +36,7 @@ local M = 0.28
 local AIR_C = 30 -- °C de agosto na costa (mesma premissa da balística, Ballistics.RHO)
 local GROUND_PT: { [string]: string } = {
 	road = "estrada",
+	dirt = "estrada de terra",
 	earth = "terra",
 	grass = "capim",
 	forest = "mata",
@@ -134,12 +135,13 @@ local ctl = {
 	telemetry = nil :: UnreliableRemoteEvent?,
 	pedalL = false,
 	pedalR = false,
-	stabilize = false,
 	stepT = 0, -- próxima sonda de degrau à frente
 	stepM = nil :: number?, -- degrau à frente (m)
 	climbUntil = 0,
 	devInfo = false, -- Studio: workspace "VT65DevMov" = "veiculo"
 	devAt = 0,
+	recovered = nil :: any, -- último "Recovered" visto (o servidor desvirou)
+	assist = true, -- D-100: estabilizador do UH-34D ligado por padrão (A segurado / R alterna)
 }
 local heli = {
 	collective = 0.55,
@@ -169,6 +171,15 @@ local function sendTelemetry(dt: number, rpm: number, load: number, rotor: numbe
 		ctl.telemetryT = 0
 		r:FireServer({ r = rpm, l = load, w = rotor })
 	end
+end
+
+-- D-100: tombado ou preso (o servidor marca "Stuck"): o painel mostra como desvirar
+local function recoverHint(model: Model, chassis: BasePart): string?
+	if chassis.CFrame.UpVector.Y < Vehicles.RECOVER.tippedUpY or model:GetAttribute("Stuck") == true then
+		local _, txt = Input.glyph("v_switch_seat")
+		return string.format("PRESO: segure %s e escolha Desvirar", txt)
+	end
+	return nil
 end
 
 -- Degrau à frente da lagarta (m, + = sobe), no sentido do movimento: o chão logo depois da ponta da
@@ -202,7 +213,8 @@ local function groundStep(model: Model, chassis: BasePart, spec: any, dt: number
 	if Input.isGamepad() then
 		throttle = Input.trigger("right") - Input.trigger("left")
 		local x = Input.move().X
-		steer = math.sign(x) * math.abs(x) ^ 1.4 -- mais precisão perto do centro do analógico
+		-- mais precisão perto do centro do analógico (D-100: no carro, menos curva: o volante é rápido)
+		steer = math.sign(x) * math.abs(x) ^ (if spec.kind == "wheeled" then 1.2 else 1.4)
 	else
 		throttle = key(Enum.KeyCode.W) - key(Enum.KeyCode.S)
 		steer = key(Enum.KeyCode.D) - key(Enum.KeyCode.A)
@@ -217,6 +229,13 @@ local function groundStep(model: Model, chassis: BasePart, spec: any, dt: number
 		slew(ctl.thr, throttle, if math.abs(throttle) > math.abs(ctl.thr) then (if pad then 8 else 4.5) else 7, dt)
 	ctl.steer = slew(ctl.steer, steer, if pad then 12 else 6, dt)
 	prepRays(model)
+	-- D-100: o servidor desvirou o veículo: rumo, atitude e velocidade guardados recomeçam
+	local rec = model:GetAttribute("Recovered")
+	if rec ~= ctl.recovered then
+		ctl.recovered = rec
+		ctl.yaw, ctl.pitch, ctl.roll = nil, 0, 0
+		ctl.drive = VehicleDrive.newState()
+	end
 	ctl.probeT -= dt
 	if ctl.probeT <= 0 then
 		ctl.probeT = 0.1
@@ -260,7 +279,8 @@ local function groundStep(model: Model, chassis: BasePart, spec: any, dt: number
 			ctl.stepT = now + 0.1
 			local h = stepAhead(chassis, yaw, if d.v >= 0 then 1 else -1)
 			ctl.stepM = h
-			if h and h > 0.08 and h <= VehicleDrive.CLIMB_STEP_M then
+			local stepMax = ((VehicleDrive.DRIVE[spec.id] and VehicleDrive.DRIVE[spec.id].stepM) or 0.6) + 0.05
+			if h and h > 0.08 and h <= stepMax then
 				ctl.climbUntil = now + 1.5 -- a frente já em cima: segue valendo até o casco passar
 			end
 		end
@@ -282,7 +302,7 @@ local function groundStep(model: Model, chassis: BasePart, spec: any, dt: number
 	live.slip, live.gear, live.ground, live.floating, live.rotor = d.slip, d.gear, ctl.ground, d.floating, 0
 	sendTelemetry(dt, d.rpm, d.load, 0)
 	-- vibração do chão no motor pequeno do controle (o grande já é o do motor, Haptics)
-	local g = VehicleDrive.GROUND[ctl.ground] or VehicleDrive.GROUND.earth
+	local g = VehicleDrive.ground(ctl.ground, nil, spec.kind == "wheeled")
 	local speedFrac = math.clamp(math.abs(d.v) / 13, 0, 1)
 	Haptics.set("vt_ride", Enum.VibrationMotor.Small, g.rough * speedFrac * 0.3 + d.slip * 0.15)
 	Hud.ground({
@@ -295,6 +315,10 @@ local function groundStep(model: Model, chassis: BasePart, spec: any, dt: number
 		integrity = model:GetAttribute("Integrity") :: number?,
 		engine = model:GetAttribute("Engine") :: number?,
 		tracks = model:GetAttribute("Tracks") :: number?,
+		faction = model:GetAttribute("Faction") :: string?,
+		seat = "Motorista",
+		warn = recoverHint(model, chassis),
+		wheeled = spec.kind == "wheeled",
 	})
 	if ctl.devInfo and os.clock() >= ctl.devAt then
 		ctl.devAt = os.clock() + 0.5
@@ -346,6 +370,13 @@ local function heliStep(model: Model, chassis: BasePart, dt: number)
 		up, cyc = 0, Vector2.zero
 	end
 	prepRays(model)
+	local rec = model:GetAttribute("Recovered")
+	if rec ~= ctl.recovered then -- D-100: o servidor desvirou: recomeça parado e em pé
+		ctl.recovered = rec
+		ctl.yaw = nil
+		heli.vel, heli.vy, heli.yawRate = Vector3.zero, 0, 0
+		heli.pitch, heli.pitchV, heli.roll, heli.rollV = 0, 0, 0, 0
+	end
 	local engineOk = ((model:GetAttribute("Engine") :: number?) or 0) > 0
 	heli.rotor = VehicleDrive.rotorStep(heli.rotor, engineOk, dt)
 	heli.collective = math.clamp(heli.collective + up * 0.35 * dt, 0, 1)
@@ -378,14 +409,21 @@ local function heliStep(model: Model, chassis: BasePart, dt: number)
 	-- cíclico: disco inclina com inércia (2ª ordem); no chão a atitude é a do terreno
 	local tp = -cyc.Y * math.rad(15)
 	local tr = -cyc.X * math.rad(15)
-	-- estabilizar (A segurado): assistência opcional, sem piloto automático — nivela o disco
-	-- contra a deriva e aproxima o coletivo do pairado; o piloto segue no comando.
-	if ctl.stabilize then
+	-- estabilizar: assistência sem piloto automático — nivela o disco contra a deriva e, no ar, segura
+	-- o coletivo no pairado; o piloto segue no comando. D-100: ligada por padrão (quem nunca pilotou
+	-- consegue pairar); A segurado ou R desliga e liga. No chão, sem coletivo pedido, ela fica logo
+	-- abaixo do pairado: o helicóptero só sai do chão com Espaço/RT.
+	if ctl.assist then
 		local localV = CFrame.Angles(0, yaw, 0):VectorToObjectSpace(heli.vel)
 		tp += math.clamp(-localV.Z * 0.02, -0.15, 0.15)
 		tr += math.clamp(localV.X * 0.02, -0.15, 0.15)
 		if up == 0 and pAvail > 0 then
-			heli.collective += ((pReq / pAvail) - heli.collective) * math.min(1, dt * 0.8)
+			local hover = pReq / pAvail
+			if onGround then
+				heli.collective = math.min(heli.collective, math.max(hover - 0.05, 0))
+			else
+				heli.collective += (hover - heli.collective) * math.min(1, dt * 0.8)
+			end
 		end
 	end
 	local live = VehicleLive.drive
@@ -456,7 +494,10 @@ local function heliStep(model: Model, chassis: BasePart, dt: number)
 		torque = torque,
 		warn = if heli.rotor >= 1 and pReq > pAvail
 			then "SEM POTÊNCIA PARA PAIRAR: corra para ganhar sustentação"
-			else nil,
+			elseif heli.rotor < 1 then "Rotor partindo: espere 100% e suba com Espaço / RT"
+			else recoverHint(model, chassis),
+		faction = model:GetAttribute("Faction") :: string?,
+		assist = ctl.assist,
 	})
 end
 
@@ -467,16 +508,26 @@ local state = {
 }
 
 -- tipo de contexto e papel do assento para a camada Input (Parte 12.3)
+-- D-100: lugar aberto (a própria arma) e a M60 montada da cúpula do comandante também atiram: no
+-- chão viram "gunner" (RT atira, LT mira, X recarrega) e no helicóptero "door" (RT atira, LT mira).
 local function seatRole(seat: Seat, spec: any): string?
 	local id = seat:GetAttribute("SeatId")
+	local open = seat:GetAttribute("Open") == true
 	if id == "driver" then
 		return "driver"
-	elseif id == "gunner" then
-		return if spec.kind == "heli" then "door" else "gunner"
+	elseif spec.kind == "heli" then
+		return if id == "gunner" or open then "door" else nil
+	elseif id == "gunner" or open or (id == "commander" and seat:GetAttribute("Mounted") == true) then
+		return "gunner"
 	elseif id == "commander" then
 		return "commander"
 	end
 	return nil
+end
+
+-- a própria arma do ocupante neste lugar (não a montada)
+local function personal(seat: Seat?): boolean
+	return seat ~= nil and seat:GetAttribute("Personal") == true
 end
 
 local function leaveDriver()
@@ -499,6 +550,8 @@ RunService.Heartbeat:Connect(function(dt: number)
 			state.seatNow = nil
 			Input.setVehicle(nil, nil)
 			camera.FieldOfView = Input.settings.fov
+			player:SetAttribute("SeatFire", false)
+			Bus.fire("seat_fire", false)
 		end
 		leaveDriver()
 		state.zoom = 0
@@ -518,6 +571,7 @@ RunService.Heartbeat:Connect(function(dt: number)
 	-- FOV no veículo: ótica do atirador ~20°, binóculo do comandante 10°, zoom leve da porta 50°
 	local target = if state.zoom == 2
 		then 10
+		elseif state.zoom == 1 and personal(seat) then Input.settings.fov * Weapons.ADS_FOV_K -- como mirar a pé
 		elseif state.zoom == 1 then (if seat:GetAttribute("Weapon") == "m60" then 50 else 20)
 		else Input.settings.fov
 	camera.FieldOfView += (target - camera.FieldOfView) * math.min(1, dt * 8)
@@ -543,10 +597,13 @@ RunService.Heartbeat:Connect(function(dt: number)
 		local w = seat:GetAttribute("Weapon")
 		local _, fireTxt = Input.glyph(if seatRole(seat, spec) == "door" then "v_door_fire" else "v_fire")
 		local seatId = tostring(seat:GetAttribute("SeatId"))
-		local seatName = if spec.kind == "heli" and seatId == "gunner"
-			then "Porta"
+		local label = seat:GetAttribute("Label")
+		local seatName = if type(label) == "string"
+			then label
+			elseif spec.kind == "heli" and seatId == "gunner" then "Porta"
 			elseif string.match(seatId, "^p%d+$") then "Passageiro"
 			else SEAT_PT[seatId] or seatId
+		local mine = personal(seat)
 		Hud.seat({
 			name = spec.name,
 			seat = seatName,
@@ -554,6 +611,11 @@ RunService.Heartbeat:Connect(function(dt: number)
 			ammo = if w == "gun_90" then string.upper(tostring(model:GetAttribute("Ammo") or "he")) else nil,
 			fire = fireTxt,
 			tubes = if w == "rr_106" then (model:GetAttribute("Tubes") :: number?) or 0 else nil,
+			faction = model:GetAttribute("Faction") :: string?,
+			personal = mine,
+			canFire = if mine then player:GetAttribute("SeatFire") == true else nil,
+			closed = seat:GetAttribute("Open") ~= true and w == nil,
+			warn = recoverHint(model, chassis),
 		})
 	end
 end)
@@ -584,6 +646,7 @@ local cam = {
 	bodyT = 0,
 	chaseAttr = false,
 	aimAttr = false,
+	fireAttr = false,
 }
 
 -- molduras na tela (atrás do painel do veículo)
@@ -710,6 +773,7 @@ local function offAll()
 	end
 	setLocalAttr("VehicleChase", false, "chaseAttr")
 	setLocalAttr("VehicleAim", false, "aimAttr")
+	setLocalAttr("SeatFire", false, "fireAttr")
 end
 
 RunService:BindToRenderStep("VT65VehicleCamUndo", Enum.RenderPriority.Camera.Value - 1, function()
@@ -798,12 +862,32 @@ RunService:BindToRenderStep("VT65VehicleCam", Enum.RenderPriority.Camera.Value +
 	overlay.binoc.Visible = first and state.zoom == 2
 	overlay.cockpit.Visible = first and heliKind and (seatId == "driver" or seatId == "copilot")
 	-- a M60 em 1ª pessoa mira pela própria alça e massa (como a pé): retícula só na perseguição
+	local mine = seat:GetAttribute("Personal") == true
 	overlay.reticle.Visible = weapon ~= nil
 		and not overlay.optic.Visible
 		and not overlay.binoc.Visible
-		and (not first or weapon ~= "m60")
+		and (not first or (weapon ~= "m60" and not mine))
 	setLocalAttr("VehicleChase", not first, "chaseAttr")
-	setLocalAttr("VehicleAim", first and state.zoom == 1 and weapon == "m60", "aimAttr")
+	setLocalAttr("VehicleAim", first and state.zoom == 1 and (weapon == "m60" or mine), "aimAttr")
+	-- D-100: a própria arma num lugar aberto só atira em 1ª pessoa (o tiro sai do olho) e dentro do
+	-- ângulo do lugar (Vehicles.inArc); o WeaponController lê "SeatFire"
+	local canFire = false
+	if mine and first then
+		local look = rot.LookVector
+		local fl = Vector3.new(look.X, 0, look.Z)
+		local fwd = Vector3.new(cf.LookVector.X, 0, cf.LookVector.Z)
+		if fl.Magnitude > 1e-3 and fwd.Magnitude > 1e-3 then
+			local rel = math.deg(math.atan2(-fl.X, -fl.Z) - math.atan2(-fwd.X, -fwd.Z))
+			local arc: Vehicles.Arc = {
+				yaw = (seat:GetAttribute("ArcYaw") :: number?) or 0,
+				half = (seat:GetAttribute("ArcHalf") :: number?) or 0,
+				down = (seat:GetAttribute("ArcDown") :: number?) or 0,
+				up = (seat:GetAttribute("ArcUp") :: number?) or 0,
+			}
+			canFire = Vehicles.inArc(arc, rel, math.deg(math.asin(math.clamp(look.Y, -1, 1))))
+		end
+	end
+	setLocalAttr("SeatFire", canFire, "fireAttr")
 end)
 
 -- ===== armas e ações dos assentos (camada Input) =====
@@ -853,8 +937,21 @@ local function stopFire()
 	fire.on = false
 end
 
+-- D-100: lugar aberto: o gatilho, a mira e a recarga vão para a própria arma (WeaponController, pelo
+-- Bus); ele confere "SeatFire" (ângulo do lugar e 1ª pessoa) a cada tiro
+local function personalTrigger(on: boolean): boolean
+	if not personal(currentSeat()) then
+		return false
+	end
+	Bus.fire("seat_fire", on)
+	return true
+end
+
 -- atirador do blindado: RT principal, RB coaxial, LT ótica, X munição/recarga
 Input.on("v_fire", "press", function()
+	if personalTrigger(true) then
+		return
+	end
 	local seat = currentSeat()
 	if seat and seat:GetAttribute("Weapon") == "m60" then
 		autoFire(nil)
@@ -862,12 +959,19 @@ Input.on("v_fire", "press", function()
 		fireOnce(nil)
 	end
 end)
-Input.on("v_fire", "release", stopFire)
+Input.on("v_fire", "release", function()
+	personalTrigger(false)
+	stopFire()
+end)
 Input.on("v_coax", "press", function()
 	autoFire({ coax = true })
 end)
 Input.on("v_coax", "release", stopFire)
 Input.on("v_ammo", "press", function()
+	if personal(currentSeat()) then
+		Bus.fire("seat_reload")
+		return
+	end
 	Net.event("Vehicle_Reload"):FireServer({ op = "ammo" })
 end)
 Input.on("v_optic", "press", function()
@@ -899,9 +1003,15 @@ Input.on("v_mark", "press", function()
 end)
 -- atirador de porta: RT atira (automático), LT zoom leve
 Input.on("v_door_fire", "press", function()
+	if personalTrigger(true) then
+		return
+	end
 	autoFire(nil)
 end)
-Input.on("v_door_fire", "release", stopFire)
+Input.on("v_door_fire", "release", function()
+	personalTrigger(false)
+	stopFire()
+end)
 -- piloto: pedais e estabilização
 Input.on("h_pedal_left", "press", function()
 	ctl.pedalL = true
@@ -915,24 +1025,28 @@ end)
 Input.on("h_pedal_right", "release", function()
 	ctl.pedalR = false
 end)
-Input.on("h_stabilize", "holdStart", function()
-	ctl.stabilize = true
-end)
-Input.on("h_stabilize", "holdEnd", function()
-	ctl.stabilize = false
-end)
-Input.on("h_stabilize", "press", function() -- R no teclado: alterna
-	ctl.stabilize = not ctl.stabilize
-end)
--- todos: Y segurado troca de assento; B segurado sai (teclado: C e Y)
+-- D-100: o estabilizador vem ligado; A segurado (controle) ou R (teclado) alterna
+local function toggleAssist()
+	ctl.assist = not ctl.assist
+	Bus.fire("toast", if ctl.assist then "Estabilizador ligado" else "Estabilizador desligado")
+end
+Input.on("h_stabilize", "holdStart", toggleAssist)
+Input.on("h_stabilize", "press", toggleAssist) -- R no teclado
+-- todos: Y segurado abre o painel do veículo (trocar de lugar, sair, desvirar); B segurado sai
+-- (teclado: C e Y). D-100: antes Y passava para o próximo lugar livre, às cegas.
 local function switchSeat()
-	Net.event("Vehicle_SwitchSeat"):FireServer()
+	local seat = currentSeat()
+	local model = seat and vehicleOf(seat)
+	if model then
+		Bus.fire("vehicle_panel", model)
+	end
 end
 local function exitVehicle()
+	-- o servidor tira do lugar e põe ao lado do veículo, fora do chassi
+	Net.event("Vehicle_Board"):FireServer({ op = "exit" })
 	local hum = (player.Character :: Model):FindFirstChildOfClass("Humanoid")
 	if hum then
 		hum.Sit = false
-		hum.Jump = true
 	end
 end
 Input.on("v_switch_seat", "holdStart", switchSeat)
@@ -941,5 +1055,8 @@ Input.on("v_exit", "holdStart", exitVehicle)
 Input.on("v_exit", "press", exitVehicle)
 Input.StateChanged:Connect(function()
 	fire.on = false
-	ctl.pedalL, ctl.pedalR, ctl.stabilize = false, false, false
+	ctl.pedalL, ctl.pedalR = false, false
+	if personal(currentSeat()) then
+		Bus.fire("seat_fire", false)
+	end
 end)

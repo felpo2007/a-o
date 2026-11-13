@@ -150,18 +150,56 @@ for i, pos in COLUMNS do
 end
 
 -- ===== detalhe (D-82, opção de gráficos: 1, 0,6 ou 0,3) =====
+-- 2026-11-12 (pedido do dono: "talvez os ventos e a iluminação estejam pesando"). O vento em si
+-- (workspace.GlobalWind, 15 vezes por segundo) não pesa: é um vetor que o motor já usa no capim do
+-- terreno e nas partículas. O que pesa é a fumaça: cada coluna do horizonte tem ~80 partículas de
+-- até 260 studs, translúcidas e sobrepostas (pixel desenhado muitas vezes na tela inteira), e cada
+-- fumaça de cozinha das vilas ~40. No detalhe baixo as colunas e a fumaça das vilas somem; no médio
+-- ficam pela metade.
 local player = game:GetService("Players").LocalPlayer
 local detail = 1
+-- chave fraca: a fumaça que sai do streaming é coletada sozinha
+local villageSmoke: { [ParticleEmitter]: boolean } = setmetatable({}, { __mode = "k" }) :: any
+local SMOKE_RATE = 4 -- MapLife.smoke
+local function smokeRate(): number
+	return if detail >= 0.9 then 1 elseif detail >= 0.5 then 0.5 else 0
+end
 local function readDetail()
 	local d = player:GetAttribute("GfxDetail")
 	detail = if type(d) == "number" then d else 1
 	dust.Rate = 10 * detail
+	local k = smokeRate()
 	for _, e in columns do
-		e.Rate = 1.6 * math.max(detail, 0.5)
+		e.Rate = 1.6 * k
+		e.Enabled = k > 0
+	end
+	for e in villageSmoke do
+		e.Rate = SMOKE_RATE * k
+		e.Enabled = k > 0
 	end
 end
 readDetail()
 player:GetAttributeChangedSignal("GfxDetail"):Connect(readDetail)
+-- fumaça de cozinha das vilas (Map.Art.VidaDaVila, MapLife): chega por streaming
+task.spawn(function()
+	local map = workspace:WaitForChild("Map", 120)
+	local art = map and map:WaitForChild("Art", 300)
+	if not art then
+		return
+	end
+	local function track(d: Instance)
+		if d:IsA("ParticleEmitter") and d.Parent and d.Parent.Name == "Fumaca" then
+			villageSmoke[d] = true
+			local k = smokeRate()
+			d.Rate = SMOKE_RATE * k
+			d.Enabled = k > 0
+		end
+	end
+	for _, d in art:GetDescendants() do
+		track(d)
+	end
+	art.DescendantAdded:Connect(track)
+end)
 
 -- ===== laço =====
 -- 15 vezes por segundo (antes, a cada quadro): o vento muda devagar (ruído de 3 a 50 s) e a caixa

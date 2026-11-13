@@ -7,7 +7,12 @@
 --     soldado (mesa giratória) e a luz principal acompanha a câmera. Enquanto o manequim não chega,
 --     mostra uma silhueta;
 --   - SoldierPreview.newWorld: o soldado de pé na cena do lobby (LobbyScene), com os pés no ponto
---     dado, de frente para onde o ponto olha. Ilumina-se pelas luzes da cena.
+--     dado, de frente para onde o ponto olha. Ilumina-se pelas luzes da cena;
+--   - SoldierPreview.newStill: retrato parado, fundo transparente (a tela atrás aparece), luz de lado
+--     (tela de baixa). SoldierPreview.setModel põe um modelo próprio no lugar do manequim: o soldado
+--     do próprio jogador, com a farda e a arma dele (CasualtyScreen.snapshot).
+-- Enquadramento sempre pela caixa do modelo (GetBoundingBox), nunca por altura fixa: o soldado muda
+-- de tamanho (2,0 m) e o retrato acompanha.
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
@@ -37,10 +42,14 @@ export type Preview = {
 	angle: number,
 	speed: number, -- rad/s
 	active: boolean,
+	still: boolean, -- retrato parado (câmera posta uma vez, sem mesa giratória)
+	custom: boolean, -- modelo próprio (setModel): o manequim do servidor não entra
+	key: Vector3, -- luz principal no espaço da câmera
 }
 
 local FOV = 24 -- teleobjetiva: pouca distorção, cara de retrato
 local KEY = Vector3.new(0.55, -0.6, -1).Unit -- luz principal no espaço da câmera: de cima e da esquerda
+local SIDE = Vector3.new(1, -0.32, -0.22).Unit -- luz de lado (da esquerda), para o retrato parado
 local list: { Preview } = {}
 
 -- Só devolve o manequim quando todas as peças chegaram (atributo Parts do PreviewService): a
@@ -111,12 +120,35 @@ local function mountWeapon(p: Preview, id: string)
 	p.weaponArt = art ~= nil
 end
 
+-- câmera do retrato no ângulo de agora (mesa giratória a cada quadro; o parado, uma vez)
+local function aim(p: Preview)
+	local cam, vp = p.cam, p.vp
+	if not (cam and vp) then
+		return
+	end
+	local a, c, d = p.angle, p.center, p.dist
+	local cf = CFrame.lookAt(Vector3.new(c.X + math.sin(a) * d, c.Y + d * 0.05, c.Z - math.cos(a) * d), c)
+	cam.CFrame = cf
+	vp.LightDirection = cf:VectorToWorldSpace(p.key)
+end
+
+-- Enquadra pela caixa do modelo: a altura inteira cabe com 12% de folga, qualquer que seja o
+-- tamanho do soldado (a largura também, para a arma não sair do quadro no retrato estreito).
 local function frameModel(p: Preview)
 	local model = p.model :: Model
 	local cf, size = model:GetBoundingBox()
-	local h = math.max(size.Y, 4)
+	local h = math.max(size.Y, 0.5)
+	local vp = p.vp
+	local aspect = 1
+	if vp and vp.AbsoluteSize.Y > 1 then
+		aspect = math.clamp(vp.AbsoluteSize.X / vp.AbsoluteSize.Y, 0.3, 3)
+	end
+	local half = math.max(h * 0.5, math.max(size.X, size.Z) * 0.5 / aspect) * 1.12
 	p.center = cf.Position + Vector3.new(0, h * 0.02, 0)
-	p.dist = (h * 0.5 * 1.12) / math.tan(math.rad(FOV / 2))
+	p.dist = half / math.tan(math.rad(FOV / 2))
+	if p.still then
+		aim(p)
+	end
 end
 
 -- modo mundo: pés no chão do ponto (a arma pendurada na mão não conta como "pé")
@@ -143,6 +175,13 @@ local function standModel(m: Model, stand: CFrame)
 end
 
 local function sync(p: Preview)
+	if p.custom then
+		local sil = p.silhouette
+		if sil then
+			sil.Visible = p.model == nil
+		end
+		return -- modelo próprio (setModel): o manequim do servidor não entra
+	end
 	local f = p.wantFaction
 	if f ~= p.modelFaction then
 		if p.model then
@@ -214,6 +253,9 @@ local function blank(world: Instance): Preview
 		angle = -0.45,
 		speed = 0.24,
 		active = false,
+		still = false,
+		custom = false,
+		key = KEY,
 	}
 end
 
@@ -225,13 +267,13 @@ function SoldierPreview.new(speed: number?, startAngle: number?): Preview
 	frame.BorderSizePixel = 0
 	frame.Size = UDim2.fromScale(1, 1)
 	frame.ClipsDescendants = true
-	-- fundo de estúdio: claro atrás da cabeça, escuro no chão (cor pelo gradiente)
+	-- fundo de estúdio escuro (estilo novo): um pouco mais claro atrás da cabeça, quase preto no chão
 	local grad = Instance.new("UIGradient")
 	grad.Rotation = 90
 	grad.Color = ColorSequence.new({
-		ColorSequenceKeypoint.new(0, Color3.fromRGB(156, 146, 114)),
-		ColorSequenceKeypoint.new(0.6, Color3.fromRGB(92, 92, 70)),
-		ColorSequenceKeypoint.new(1, Color3.fromRGB(38, 40, 30)),
+		ColorSequenceKeypoint.new(0, Color3.fromRGB(70, 76, 58)),
+		ColorSequenceKeypoint.new(0.6, Color3.fromRGB(38, 42, 32)),
+		ColorSequenceKeypoint.new(1, Color3.fromRGB(16, 18, 14)),
 	})
 	grad.Parent = frame
 
@@ -244,8 +286,8 @@ function SoldierPreview.new(speed: number?, startAngle: number?): Preview
 	head.AnchorPoint = Vector2.new(0.5, 0)
 	head.Position = UDim2.fromScale(0.5, 0.16)
 	head.Size = UDim2.fromScale(0.2, 0.2)
-	head.BackgroundColor3 = UiKit.INK
-	head.BackgroundTransparency = 0.55
+	head.BackgroundColor3 = UiKit.V.PANEL_3
+	head.BackgroundTransparency = 0.3
 	head.BorderSizePixel = 0
 	local ar = Instance.new("UIAspectRatioConstraint")
 	ar.AspectRatio = 1
@@ -258,8 +300,8 @@ function SoldierPreview.new(speed: number?, startAngle: number?): Preview
 	body.AnchorPoint = Vector2.new(0.5, 0)
 	body.Position = UDim2.fromScale(0.5, 0.38)
 	body.Size = UDim2.fromScale(0.5, 0.7)
-	body.BackgroundColor3 = UiKit.INK
-	body.BackgroundTransparency = 0.55
+	body.BackgroundColor3 = UiKit.V.PANEL_3
+	body.BackgroundTransparency = 0.3
 	body.BorderSizePixel = 0
 	local bc = Instance.new("UICorner")
 	bc.CornerRadius = UDim.new(0.35, 0)
@@ -270,8 +312,8 @@ function SoldierPreview.new(speed: number?, startAngle: number?): Preview
 	note.Position = UDim2.new(0.5, 0, 1, -8)
 	note.Size = UDim2.new(1, -16, 0, 44)
 	note.BackgroundTransparency = 1
-	note.Font = Enum.Font.SpecialElite
-	note.TextColor3 = UiKit.CARD
+	note.Font = UiKit.BODY_FONT
+	note.TextColor3 = UiKit.V.DIM
 	note.TextWrapped = true
 	note.TextSize = UiKit.text(16)
 	note.Text = "FOTO A CAMINHO…\nequipamento sendo carregado"
@@ -308,6 +350,58 @@ function SoldierPreview.newWorld(parent: Instance, stand: CFrame): Preview
 	return p
 end
 
+-- Retrato parado: fundo transparente (a cor da tela atrás aparece), luz de lado, sem giro. angle:
+-- de onde a câmera olha (0 = de frente; negativo = do lado esquerdo do soldado).
+function SoldierPreview.newStill(angle: number?): Preview
+	local p = SoldierPreview.new(0, angle or -0.5)
+	local frame, vp = p.frame :: Frame, p.vp :: ViewportFrame
+	frame.BackgroundTransparency = 1
+	local g = frame:FindFirstChildOfClass("UIGradient")
+	if g then
+		g:Destroy()
+	end
+	vp.Ambient = Color3.fromRGB(58, 54, 52) -- sombra funda do lado sem luz
+	vp.LightColor = Color3.fromRGB(255, 236, 214)
+	vp.ImageColor3 = Color3.new(1, 1, 1)
+	p.still = true
+	p.key = SIDE
+	-- o quadro mudou de tamanho (janela, entrada): enquadra de novo pela caixa
+	vp:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
+		if p.model then
+			frameModel(p)
+		end
+	end)
+	return p
+end
+
+-- Modelo próprio no retrato (nil volta ao manequim do servidor). O modelo é do retrato a partir de
+-- agora: fica parado, sem scripts, de frente para −Z, e é destruído quando outro chega.
+function SoldierPreview.setModel(p: Preview, m: Model?)
+	if p.model then
+		p.model:Destroy()
+	end
+	p.model, p.modelFaction, p.weapon, p.weaponArt = nil, nil, nil, false
+	if not m then
+		p.custom = false
+		sync(p)
+		return
+	end
+	p.custom = true
+	freeze(m)
+	m:PivotTo(CFrame.identity)
+	m.Parent = p.world
+	p.model = m
+	frameModel(p)
+	local vp = p.vp
+	if vp then
+		vp.ImageTransparency = 1
+		TweenService:Create(vp, TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
+			ImageTransparency = 0,
+		}):Play()
+	end
+	sync(p)
+end
+
 -- facção (nil = nada / silhueta) e arma do papel (nil = a que o servidor montou: a do fuzileiro)
 function SoldierPreview.set(p: Preview, faction: string?, weaponId: string?)
 	if faction == p.wantFaction and weaponId == p.wantWeapon then
@@ -324,14 +418,9 @@ end
 -- mesa giratória: só os retratos ativos; nenhuma tabela ou instância criada por quadro
 RunService.RenderStepped:Connect(function(dt: number)
 	for _, p in list do
-		local cam, vp = p.cam, p.vp
-		if p.active and p.model and cam and vp then
-			local a = (p.angle + dt * p.speed) % (2 * math.pi)
-			p.angle = a
-			local c, d = p.center, p.dist
-			local cf = CFrame.lookAt(Vector3.new(c.X + math.sin(a) * d, c.Y + d * 0.05, c.Z - math.cos(a) * d), c)
-			cam.CFrame = cf
-			vp.LightDirection = cf:VectorToWorldSpace(KEY)
+		if p.active and not p.still and p.model and p.cam and p.vp then
+			p.angle = (p.angle + dt * p.speed) % (2 * math.pi)
+			aim(p)
 		end
 	end
 end)

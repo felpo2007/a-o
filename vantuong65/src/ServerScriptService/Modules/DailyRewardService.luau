@@ -95,6 +95,7 @@ local function claim(player: Player)
 	if status == "ok" and r then
 		CommerceService.earnedChanged(player)
 		ProgressionService.addCredits(player, dailyCredits(tonumber(r.day) or 1), "Dia de serviço")
+		require(script.Parent.CampanhaEventos).fire(player, "daily_seal", { day = r.day }) -- estrelas do passe
 		pcall(function()
 			AnalyticsService:LogCustomEvent(player, "daily_claim", r.day)
 		end)

@@ -55,7 +55,8 @@ test("chão: material do terreno, lâmina do arrozal (PaddyWater), dique e chuva
 	assert(VehicleDrive.groundOf("LeafyGrass", nil, "Dike") == "earth", "dique é terra batida")
 	assert(VehicleDrive.groundOf("Mud") == "mud" and VehicleDrive.groundOf("Sand") == "sand")
 	assert(VehicleDrive.groundOf("LeafyGrass") == "forest" and VehicleDrive.groundOf("Grass") == "grass")
-	assert(VehicleDrive.groundOf("Water") == "water" and VehicleDrive.groundOf("Ground") == "earth")
+	-- D-100: o terreno "Ground" é a estrada de terra do mapa (estrada, beco e praça)
+	assert(VehicleDrive.groundOf("Water") == "water" and VehicleDrive.groundOf("Ground") == "dirt")
 	assert(VehicleDrive.groundOf(nil) == "earth" and VehicleDrive.groundOf("Asphalt") == "road")
 	local dry, wet = VehicleDrive.ground("grass", 0), VehicleDrive.ground("grass", 1)
 	assert(wet.mu < dry.mu and wet.crr > dry.crr and wet.ride < dry.ride, "chuva enlameia o capim")
@@ -519,6 +520,11 @@ end)
 test("vista sentado: todo assento tem olho fora do casco (escotilha, cabine, porta, teto)", function()
 	for id, sp in Vehicles.SPECS do
 		local art = VehicleDrive.ART[id]
+		if not art then
+			-- D-100: carro sem malha medida ainda (substituto em peças): a câmera fica na cabeça
+			assert(Vehicles.WHEELED[id], id .. ": sem malha medida e sem posição de lugar")
+			continue
+		end
 		local box = art.box
 		local seats = {}
 		for _, s in sp.seats do
@@ -562,6 +568,236 @@ test("compatível: Vehicles.drive usa o mesmo modelo", function()
 	end
 	local b = run("m48a3", 5, { throttle = 1, steer = 0 }, { ground = "grass" })
 	near(a.v, b.v, 1e-9)
+end)
+
+-- ===== D-100: pilotar, lugares, atirar de dentro, carros e desvirar =====
+local Roles = require(S .. "Roles") :: any
+local fs = require("@lune/fs")
+
+test("D-100: papel por lugar — carro qualquer um; blindado pede tripulante só no motorista e atirador", function()
+	for _, id in { "m151", "m35", "peugeot403" } do
+		for _, s in Vehicles.seatList(id) do
+			assert(s.role == nil, id .. " " .. s.id .. ": carro não pede papel")
+			assert((Roles.canTakeSeat("wheeled", s.id, "rifleman", nil)), "fuzileiro senta no " .. id)
+		end
+	end
+	for _, kind in { "tracked", "amphibious" } do
+		assert(
+			Roles.vehicleSeatRole(kind, "driver") == "tank_crew"
+				and Roles.vehicleSeatRole(kind, "gunner") == "tank_crew"
+		)
+		assert(Roles.vehicleSeatRole(kind, "commander") == nil and Roles.vehicleSeatRole(kind, "loader") == nil)
+		assert(Roles.vehicleSeatRole(kind, "p1") == nil)
+	end
+	assert(Roles.vehicleSeatRole("heli", "driver") == "pilot")
+	assert(Roles.vehicleSeatRole("heli", "copilot") == nil and Roles.vehicleSeatRole("heli", "gunner") == nil)
+	local ok, need = Roles.canTakeSeat("tracked", "driver", "rifleman", nil)
+	assert(not ok and need == "tank_crew", "fuzileiro não dirige o M48 sem trocar")
+	assert((Roles.canTakeSeat("tracked", "driver", "rifleman", "tank_crew")), "com o papel de campo dirige")
+	assert((Roles.canTakeSeat("tracked", "driver", "tank_crew", nil)), "tripulante do squad dirige")
+	assert(Roles.crewVacancy(4, 3) and not Roles.crewVacancy(4, 4))
+	-- a ficha diz o mesmo que a regra (o VehicleService grava a regra no atributo do assento)
+	for id, sp in Vehicles.SPECS do
+		for _, s in sp.seats do
+			local rule = Roles.vehicleSeatRole(sp.kind, s.id) or "any"
+			assert(s.role == rule, string.format("%s %s: ficha %s, regra %s", id, s.id, s.role, rule))
+		end
+	end
+end)
+
+test("D-100: painel — motivo de cada recusa e a troca de papel com vaga", function()
+	local base = {
+		sameFaction = true,
+		destroyed = false,
+		alive = true,
+		near = true,
+		inOther = false,
+		seatExists = true,
+		seatFree = true,
+		kind = "tracked",
+		seatId = "driver",
+		role = "rifleman",
+		crewRole = nil,
+		wantCrew = false,
+		vacancy = true,
+	}
+	local function check(over: { [string]: any }): (string, string?)
+		local c = table.clone(base)
+		for k, v in over do
+			c[k] = v
+		end
+		return Vehicles.boardCheck(c)
+	end
+	assert(check({ kind = "wheeled" }) == "ok", "carro: entra")
+	local v, need = check({})
+	assert(v == "Este lugar pede tripulante" and need == "tank_crew", v)
+	assert(check({ wantCrew = true }) == "crew", "troca e entra")
+	assert(check({ wantCrew = true, vacancy = false }) == "Sem vaga de tripulante no time")
+	assert(check({ role = "tank_crew" }) == "ok")
+	assert(check({ sameFaction = false }) == "Veículo do outro lado")
+	assert(check({ destroyed = true }) == "Veículo destruído")
+	assert(check({ near = false }) == "Longe demais")
+	assert(check({ seatFree = false }) == "Lugar ocupado")
+	assert(check({ inOther = true }) == "Saia do outro veículo antes")
+	assert(check({ alive = false }) == "Fora de combate")
+	assert(check({ kind = "heli", wantCrew = true }) == "crew", "piloto de campo")
+	assert(check({ kind = "heli", seatId = "gunner" }) == "ok", "porta do UH-34D: qualquer um")
+end)
+
+test("D-100: lugares — ordem, nomes, quem atira de dentro e em que ângulo", function()
+	for id, _ in Vehicles.SPECS do
+		local list = Vehicles.seatList(id)
+		assert(list[1].id == "driver", id .. ": motorista/piloto primeiro")
+		local seen = {}
+		for _, s in list do
+			assert(not seen[s.id], id .. ": lugar repetido " .. s.id)
+			seen[s.id] = true
+			assert(type(s.label) == "string" and #s.label > 0)
+			assert(not (s.weapon and s.open), id .. " " .. s.id .. ": montada ou própria, não as duas")
+		end
+	end
+	assert(Vehicles.seatLabel("uh34d", "driver") == "Piloto" and Vehicles.seatLabel("m48a3", "driver") == "Motorista")
+	assert(Vehicles.seatLabel("m48a3", "loader") == "Municiador" and Vehicles.seatLabel("lvtp5", "p3") == "Tropa 3")
+	-- fechados: motorista, municiador, cabine do caminhão e da picape; abertos: jipe, caçamba, teto, porta
+	assert(Vehicles.seatInfo("m48a3", "loader").open == nil and Vehicles.seatInfo("m35", "passenger").open == nil)
+	assert(Vehicles.seatInfo("m151", "passenger").open ~= nil and Vehicles.seatInfo("m35", "p1").open ~= nil)
+	assert(Vehicles.seatInfo("lvtp5", "p12").open ~= nil and Vehicles.seatInfo("uh34d", "p1").open ~= nil)
+	assert(Vehicles.seatInfo("peugeot403", "p1").open == nil, "sob a lona")
+	assert(Vehicles.seatInfo("peugeot403", "p6").open ~= nil, "a fileira de trás atira pela aba")
+	assert(Vehicles.seatInfo("m48a3", "commander").weapon == "m60", "M60 montada da cúpula")
+	-- porta da direita (ímpar) atira para a direita, não para a esquerda nem por cima da cabine
+	local right = Vehicles.seatInfo("uh34d", "p1").open
+	assert(
+		Vehicles.inArc(right, -90, -20) and not Vehicles.inArc(right, 90, -20) and not Vehicles.inArc(right, -90, 40)
+	)
+	local left = Vehicles.seatInfo("uh34d", "p2").open
+	assert(Vehicles.inArc(left, 100, 0) and not Vehicles.inArc(left, -100, 0))
+	-- volta do ângulo (179° e −179° são vizinhos)
+	local rear = Vehicles.seatInfo("peugeot403", "p6").open
+	assert(Vehicles.inArc(rear, 179, 0) and Vehicles.inArc(rear, -179, 0) and not Vehicles.inArc(rear, 0, 0))
+	assert(Vehicles.inArc(Vehicles.seatInfo("lvtp5", "p1").open, 37, 10), "teto: para qualquer lado")
+end)
+
+test("D-100: carros — medidas do Blender, rodas pelo nome das peças, lugares dentro da caixa", function()
+	local names = {
+		m151 = { "Roda_FE", "Roda_FD", "Roda_TE", "Roda_TD" },
+		m35 = { "Roda_FE", "Roda_FD", "Roda_T1E", "Roda_T1D", "Roda_T2E", "Roda_T2D" },
+		peugeot403 = { "Roda_FE", "Roda_FD", "Roda_TE", "Roda_TD" },
+	}
+	for id, list in names do
+		local sp, wd = spec(id), Vehicles.WHEELED[id]
+		assert(sp.kind == "wheeled" and sp.botDrive == false and VehicleDrive.DRIVE[id].wheeled)
+		local got = {}
+		local front, rear = math.huge, -math.huge
+		for _, w in wd.wheels do
+			got[w.name] = w
+			assert(math.abs(w.x) <= sp.widthM / 2 and math.abs(w.z) <= sp.lengthM / 2, id .. " " .. w.name)
+			assert((string.sub(w.name, 6, 6) == "F") == w.steer, id .. ": só a frente esterça")
+			assert((string.sub(w.name, -1) == "E") == (w.x < 0), id .. ": E = esquerda (−x)")
+			front, rear = math.min(front, w.z), math.max(rear, w.z)
+		end
+		for _, n in list do
+			assert(got[n], id .. ": falta " .. n)
+		end
+		if id ~= "m35" then
+			near(rear - front, wd.wheelbaseM, 1e-6, id .. " entre-eixos")
+		end
+		for _, s in Vehicles.seatList(id) do
+			local at = Vehicles.wheeledSeatAt(id, s.id)
+			assert(at, id .. ": sem posição para " .. s.id)
+			assert(math.abs(at[1]) <= sp.widthM / 2 and at[2] > 0 and at[2] < sp.heightM, id .. " " .. s.id)
+			assert(math.abs(at[3]) <= sp.lengthM / 2, id .. " " .. s.id)
+		end
+		for _, b in wd.body do
+			assert(
+				math.abs(b.at[3]) + b.size[3] / 2 <= sp.lengthM / 2 + 0.05,
+				id .. " " .. b.name .. " cabe no comprimento"
+			)
+			assert(b.at[2] + b.size[2] / 2 <= sp.heightM + 0.05, id .. " " .. b.name .. " cabe na altura")
+		end
+	end
+	assert(Vehicles.PASSENGERS.m151 == 2 and Vehicles.PASSENGERS.m35 == 12 and Vehicles.PASSENGERS.peugeot403 == 6)
+	assert(spec("peugeot403").faction == "VC" and spec("m151").faction == "US" and spec("m35").faction == "US")
+end)
+
+test("D-100: rodas — não gira parado, curva pelo raio mínimo, rápido na estrada e passa o arrozal", function()
+	local lines = {}
+	for _, id in { "m151", "m35", "peugeot403" } do
+		local still = run(id, 3, { throttle = 0, steer = 1 }, { ground = "earth" })
+		assert(
+			math.abs(still.yawRate) < 1e-6 and math.abs(still.v) < 1e-6,
+			id .. ": parado, o volante não gira o carro"
+		)
+		-- devagar, o raio da curva é o mínimo da ficha
+		local s = VehicleDrive.newState()
+		s.v, s.gear, s.rpm = 2, 1, 0.6
+		for _ = 1, 180 do
+			s.v = 2 -- velocidade de manobra fixa
+			VehicleDrive.step(spec(id), s, { throttle = 0.3, steer = 1 }, { ground = "earth" }, DT)
+		end
+		local radius = 2 / math.abs(s.yawRate)
+		near(radius, VehicleDrive.DRIVE[id].turnRadiusM, VehicleDrive.DRIVE[id].turnRadiusM * 0.15, id .. " raio")
+		local road = run(id, 120, { throttle = 1, steer = 0 }, { ground = "road" }).v * 3.6
+		local dirt = run(id, 120, { throttle = 1, steer = 0 }, { ground = "dirt" }).v * 3.6
+		local grass = run(id, 120, { throttle = 1, steer = 0 }, { ground = "grass" }).v * 3.6
+		local paddy = run(id, 60, { throttle = 1, steer = 0 }, { ground = "paddy" }).v * 3.6
+		near(road, spec(id).maxKmh, 1.5, id .. " na estrada")
+		assert(dirt > grass and grass > paddy, id .. ": estrada de terra > capim > arrozal")
+		assert(paddy > 3, string.format("%s atola no arrozal seco: %.1f km/h", id, paddy))
+		table.insert(
+			lines,
+			string.format(
+				"%s: estrada %.0f, terra batida %.0f, capim %.0f, arrozal %.0f km/h; raio %.1f m",
+				id,
+				road,
+				dirt,
+				grass,
+				paddy,
+				radius
+			)
+		)
+	end
+	-- a lagarta também ganha a estrada de terra (D-86 intacta nos outros chãos)
+	local m48dirt = run("m48a3", 120, { throttle = 1, steer = 0 }, { ground = "dirt" }).v * 3.6
+	near(m48dirt, 48 * 0.9, 0.6, "M48 na estrada de terra")
+	-- o jipe arranca muito antes do tanque
+	assert(timeTo("m151", 30, "road") < timeTo("m48a3", 30, "road") * 0.6)
+	for _, l in lines do
+		print("       " .. l)
+	end
+	print(
+		string.format(
+			"       M48 na estrada de terra: %.0f km/h; M151 0–30 km/h em %.1f s",
+			m48dirt,
+			timeTo("m151", 30, "road")
+		)
+	)
+end)
+
+test("D-100: desvirar — só tombado ou preso, quase parado, um a cada 8 s", function()
+	assert(Vehicles.tipped(0.2) and not Vehicles.tipped(0.95))
+	assert((Vehicles.canRecover(0.1, 0.2, false, 60)), "tombado e parado")
+	assert((Vehicles.canRecover(1, 0.2, true, 60)), "preso (motor acelerando e parado)")
+	local ok, why = Vehicles.canRecover(1, 0.2, false, 60)
+	assert(not ok and why == "O veículo não está tombado nem preso")
+	assert(select(2, Vehicles.canRecover(0.1, 5, false, 60)) == "Pare o veículo antes")
+	assert(select(2, Vehicles.canRecover(0.1, 0.2, false, 2)) == "Espere um pouco")
+end)
+
+test("D-100: ligações no jogo (entrar pelo painel, assento sem toque, tiro de dentro)", function()
+	local net = fs.readFile("src/ReplicatedStorage/Shared/Net.luau")
+	assert(string.find(net, '"Vehicle_Board"', 1, true) and string.find(net, '"Vehicle_Notice"', 1, true))
+	local vs = fs.readFile("src/ServerScriptService/Modules/VehicleService.luau")
+	assert(string.find(vs, "s.CanTouch = false", 1, true), "assento não senta pelo toque")
+	assert(string.find(vs, '"VT65Embarcar"', 1, true) and string.find(vs, '"Vehicle_Board"', 1, true))
+	assert(string.find(vs, "Roles.canTakeSeat", 1, true), "o servidor usa a regra de papel")
+	for _, fn in { "botBoard", "botLeave", "botInput", "botState", "botFire", "mainReady", "vehicles", "seat" } do
+		assert(string.find(vs, "function VehicleService." .. fn .. "(", 1, true), "API dos bots: " .. fn)
+	end
+	local prompt = fs.readFile("src/StarterPlayer/StarterPlayerScripts/Controllers/VehiclePrompt.client.luau")
+	assert(string.find(prompt, '"VT65Embarcar"', 1, true) and string.find(prompt, '"Vehicle_Board"', 1, true))
+	local wc = fs.readFile("src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponController.client.luau")
+	assert(string.find(wc, '"SeatFire"', 1, true) and string.find(wc, '"seat_fire"', 1, true), "gatilho sentado")
 end)
 
 print(string.format("%d ok, %d falhas", passed, failed))

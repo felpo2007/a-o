@@ -1,32 +1,30 @@
 --!strict
--- Relatório pós-ação (Parte 11): no fim da partida, uma folha datilografada com linha do tempo,
--- baixas e resultado. Abre como menu (controle: rolar com o analógico direito, B fecha) e some
--- quando a próxima partida começa.
--- Refeito (pedido do dono, 2026-11-11; D-87: "o relatório antigo, cinza e sem acentos, aparece por
--- trás da ficha de fim"): folha de papel com cabeçalho em vermelho, carimbo CONFIDENCIAL no canto do
--- cabeçalho (longe do texto), seções em Oswald com filete, linhas pautadas em máquina de escrever
--- (o vietnamita no Arimo), as linhas entrando uma a uma. Só abre DEPOIS que a ficha de fim
--- (FrontHud, VT65FimDePartida) sai; cada linha do servidor (Shared/AfterAction) é um modelo inteiro,
--- num rótulo próprio, e o dicionário traduz linha a linha. Cabe em qualquer janela (UiKit.fit).
+-- Relatório pós-ação (Parte 11): no fim da partida, o resultado, as baixas e a linha do tempo.
+-- Abre como menu (controle: rolar com o analógico direito, B fecha) e some quando a próxima
+-- partida começa. Só abre DEPOIS que a tela de fim (FrontHud, VT65FimDePartida) sai.
+-- Estilo novo (pedido do dono, 2026-11-11: "não gosto dessa escrita no papel", "telas com muita
+-- escrita, mude"): painel escuro, título em Oswald, o resultado em destaque com números grandes
+-- (baixas dos dois lados e a duração), os setores no fim como etiquetas coloridas e a linha do tempo
+-- recolhida atrás de um botão, em linhas escuras. Sem papel, carimbo nem máquina de escrever.
+-- O texto vem do servidor (Shared/AfterAction) em frases inteiras do dicionário: as linhas que
+-- viram números (baixas, resultado, setores) são lidas do português que chega; o resto aparece
+-- linha a linha, cada uma num rótulo próprio (o Traducao traduz a frase inteira).
+-- Cabe em qualquer janela (UiKit.fit) e encolhe ao conteúdo.
 -- Studio: o VT65DevEnd do servidor encerra a partida; workspace:SetAttribute("VT65DevTela",
 -- "relatorio") abre com um relatório de exemplo.
 local Players = game:GetService("Players")
-local ReplicatedFirst = game:GetService("ReplicatedFirst")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 
 local Net = require(ReplicatedStorage.Shared.Net)
-local Acabamento = require(ReplicatedFirst:WaitForChild("Acabamento"))
 local Input = require(script.Parent.Input)
 local UiKit = require(script.Parent.UiKit)
 
 local player = Players.LocalPlayer
-local TV = UiKit.tv()
-local function px(pc: number, tv: number): number
-	return if TV then tv else pc
-end
-local W, H = px(760, 1040), px(640, 860)
+local V, F = UiKit.V, UiKit.F
+local px = UiKit.px
+local W, H = px(780, 1060), px(640, 860)
 
 local gui = UiKit.screen("VT65AfterAction", 40)
 gui.Enabled = false
@@ -39,167 +37,119 @@ dim.BackgroundTransparency = 1
 dim.BorderSizePixel = 0
 dim.Parent = gui
 
-local sheet = Instance.new("Frame")
-sheet.Name = "Folha"
+-- o painel inteiro esmaece junto (CanvasGroup): entra e sai sem nada piscar
+local sheet = Instance.new("CanvasGroup")
+sheet.Name = "Relatorio"
 sheet.AnchorPoint = Vector2.new(0.5, 0.5)
 sheet.Position = UDim2.fromScale(0.5, 0.5)
 sheet.Size = UDim2.fromOffset(W, H)
-sheet.BackgroundColor3 = UiKit.CARD
+sheet.BackgroundColor3 = V.PANEL
+sheet.BackgroundTransparency = 0.02
 sheet.BorderSizePixel = 0
-sheet.Rotation = 0.5
+sheet.GroupTransparency = 1
 sheet.Active = true
 sheet.Parent = gui
-UiKit.lit(sheet, 0.86)
-UiKit.edge(sheet, UiKit.INK, 1, 0.5)
+UiKit.corner(sheet, 4)
+UiKit.stroke(sheet, V.LINE, 1, 0.45)
 local fit = UiKit.fit(gui, sheet, W, H, 16)
-Acabamento.sombra(sheet, 24, Vector2.new(0, 10), 0.6)
+
+-- faixa de cor no alto: a cor do resultado (oliva, vermelho ou cáqui no empate)
+local accent = Instance.new("Frame")
+accent.Name = "Faixa"
+accent.Size = UDim2.new(1, 0, 0, px(4, 6))
+accent.BackgroundColor3 = V.KHAKI
+accent.BorderSizePixel = 0
+accent.Parent = sheet
 
 local P = px(28, 38)
-local head = UiKit.rotulo(sheet, px(15, 24), UiKit.RULE_RED, UiKit.TYPE_FONT)
-head.Position = UDim2.fromOffset(P, px(18, 26))
-head.Size = UDim2.new(1, -2 * P - px(200, 280), 0, px(20, 30))
-head.Text = "OPERAÇÃO STARLITE · III MAF · 1965"
-local title = UiKit.rotulo(sheet, px(30, 44), UiKit.INK, UiKit.HEAD_FONT)
-title.Position = UDim2.fromOffset(P - 2, px(38, 54))
-title.Size = UDim2.new(1, -2 * P - px(200, 280), 0, px(40, 56))
-title.Text = "RELATÓRIO PÓS-AÇÃO"
-local subtitle = UiKit.rotulo(sheet, px(15, 24), UiKit.INK, UiKit.TYPE_FONT)
-subtitle.Position = UDim2.fromOffset(P, px(78, 110))
-subtitle.Size = UDim2.new(1, -2 * P, 0, px(20, 30))
-subtitle.TextTransparency = 0.2
-local rule = Instance.new("Frame")
-rule.BackgroundColor3 = UiKit.RULE_RED
-rule.BorderSizePixel = 0
-rule.Position = UDim2.fromOffset(P, px(104, 146))
-rule.Size = UDim2.new(1, -2 * P, 0, 2)
-rule.Parent = sheet
--- carimbo no canto do cabeçalho (só o título fica à esquerda dele)
-local stamp = Instance.new("TextLabel")
-stamp.AnchorPoint = Vector2.new(1, 0)
-stamp.Position = UDim2.new(1, -P, 0, px(24, 32))
-stamp.Size = UDim2.fromOffset(px(196, 270), px(46, 64))
-stamp.Rotation = -6
-stamp.BackgroundTransparency = 1
-stamp.FontFace = UiKit.HEAD_FONT
-stamp.TextSize = px(26, 38)
-stamp.TextColor3 = UiKit.STAMP
-stamp.Text = "CONFIDENCIAL"
-stamp.Parent = sheet
-local stampInk = UiKit.edge(stamp, UiKit.STAMP, 3, 0.2)
-local stampScale = Instance.new("UIScale")
-stampScale.Parent = stamp
+local TOP = px(118, 164) -- onde começa a lista
+local kicker = UiKit.kicker(sheet, "OPERAÇÃO STARLITE · III MAF · 1965", px(14, 22))
+kicker.Position = UDim2.fromOffset(P, px(20, 28))
+kicker.Size = UDim2.new(1, -2 * P, 0, px(18, 26))
+local title = UiKit.title(sheet, "RELATÓRIO PÓS-AÇÃO", px(34, 48))
+title.Position = UDim2.fromOffset(P, px(38, 54))
+title.Size = UDim2.new(1, -2 * P, 0, px(44, 62))
+local subtitle = UiKit.text2(sheet, "", px(15, 22), V.DIM)
+subtitle.Position = UDim2.fromOffset(P, px(84, 118))
+subtitle.Size = UDim2.new(1, -2 * P, 0, px(20, 28))
+subtitle.TextTruncate = Enum.TextTruncate.AtEnd
 
-local FOOT = px(54, 76)
+local FOOT = px(64, 88)
 local scroll = Instance.new("ScrollingFrame")
-scroll.Position = UDim2.fromOffset(P - 6, px(112, 156))
-scroll.Size = UDim2.new(1, -2 * (P - 6), 1, -(px(112, 156) + FOOT))
+scroll.Position = UDim2.fromOffset(P - 6, TOP)
+scroll.Size = UDim2.new(1, -2 * (P - 6), 1, -(TOP + FOOT))
 scroll.BackgroundTransparency = 1
 scroll.BorderSizePixel = 0
-scroll.ScrollBarThickness = px(6, 8)
-scroll.ScrollBarImageColor3 = UiKit.INK
-scroll.ScrollBarImageTransparency = 0.5
+scroll.ScrollBarThickness = px(5, 8)
+scroll.ScrollBarImageColor3 = V.DIM
+scroll.ScrollBarImageTransparency = 0.4
 scroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
 scroll.CanvasSize = UDim2.new()
-scroll.Selectable = true -- o analógico rola a folha no controle
+scroll.Selectable = true -- o analógico rola a lista no controle
 scroll.SelectionImageObject = UiKit.FOCUS
 scroll.Parent = sheet
-local list = Instance.new("UIListLayout")
-list.SortOrder = Enum.SortOrder.LayoutOrder
-list.Parent = scroll
-local lp = Instance.new("UIPadding")
-lp.PaddingLeft = UDim.new(0, 6)
-lp.PaddingRight = UDim.new(0, 10)
-lp.PaddingBottom = UDim.new(0, 10)
-lp.Parent = scroll
--- a folha encolhe ao conteúdo (Studio: metade de baixo vazia), centrada; nunca passa da altura de
--- projeto (aí a lista rola)
+local list = UiKit.list(scroll, false, px(10, 14))
+UiKit.pad(scroll, 6, 12, 2, 12)
+-- o painel encolhe ao conteúdo, centrado; nunca passa da altura de projeto (aí a lista rola)
 list:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
 	local k = math.max(fit.scale.Scale, 0.01)
-	local content = list.AbsoluteContentSize.Y / k + px(16, 22)
-	local h = math.clamp(px(112, 156) + content + FOOT, px(320, 440), H)
+	local content = list.AbsoluteContentSize.Y / k + px(18, 26)
+	local h = math.clamp(TOP + content + FOOT, px(340, 460), H)
 	if math.abs(sheet.Size.Y.Offset - h) > 1 then
 		sheet.Size = UDim2.fromOffset(W, h)
 	end
 end)
 
-local foot = UiKit.chips(sheet, px(30, 44), true, px(14, 22))
+-- pé: dicas à esquerda, FECHAR à direita
+local footLine = Instance.new("Frame")
+footLine.AnchorPoint = Vector2.new(0, 1)
+footLine.Position = UDim2.new(0, P, 1, -FOOT + 1)
+footLine.Size = UDim2.new(1, -2 * P, 0, 1)
+footLine.BackgroundColor3 = V.LINE
+footLine.BackgroundTransparency = 0.5
+footLine.BorderSizePixel = 0
+footLine.Parent = sheet
+local foot = UiKit.chips(sheet, px(30, 44), false, px(14, 22))
 foot.frame.AnchorPoint = Vector2.new(0, 1)
-foot.frame.Position = UDim2.new(0, P, 1, -px(12, 16))
-foot.frame.Size = UDim2.new(1, -2 * P - px(200, 280), 0, px(30, 44))
+foot.frame.Position = UDim2.new(0, P, 1, -px(14, 20))
+foot.frame.Size = UDim2.new(1, -2 * P - px(220, 300), 0, px(30, 44))
 
-local close = Instance.new("TextButton")
-close.Name = "Fechar"
-close.AnchorPoint = Vector2.new(1, 1)
-close.Position = UDim2.new(1, -P, 1, -px(10, 14))
-close.Size = UDim2.fromOffset(px(180, 250), px(36, 50))
-close.BackgroundColor3 = UiKit.DRAB
-close.AutoButtonColor = false
-close.FontFace = UiKit.HEAD_FONT
-close.TextColor3 = UiKit.KHAKI
-close.TextSize = UiKit.text(16)
-close.Text = "ARQUIVAR ×"
-close.Selectable = true
-close.SelectionImageObject = UiKit.FOCUS
-close.Parent = sheet
-UiKit.corner(close, 3)
-UiKit.lit(close, 0.72)
+local setOpen: (open: boolean) -> ()
+local close = UiKit.action(sheet, "FECHAR", "secondary", function()
+	setOpen(false)
+end, { action = "ui_back", ctx = "menu", h = px(42, 58) })
+close.button.Name = "Fechar"
+close.button.AnchorPoint = Vector2.new(1, 1)
+close.button.Position = UDim2.new(1, -P, 1, -px(11, 15))
+close.button.Size = UDim2.fromOffset(px(200, 280), px(42, 58))
 
--- ===== conteúdo =====
-local function line(text: string, order: number, parent: Instance?): TextLabel
-	local row = Instance.new("Frame")
-	row.BackgroundTransparency = 1
-	row.LayoutOrder = order
-	row.Size = UDim2.new(1, 0, 0, 0)
-	row.AutomaticSize = Enum.AutomaticSize.Y
-	row.Parent = parent or scroll
-	local t = UiKit.rotulo(row, 15, UiKit.INK, UiKit.TYPE_FONT)
+-- ===== peças do conteúdo =====
+-- uma linha de texto do servidor numa faixa escura (frase inteira: o dicionário traduz)
+local function row(text: string, order: number, parent: Instance, dimmed: boolean?): Frame
+	local r = Instance.new("Frame")
+	r.Name = "Linha"
+	r.LayoutOrder = order
+	r.BackgroundColor3 = V.PANEL_2
+	r.BackgroundTransparency = if dimmed then 0.4 else 0
+	r.BorderSizePixel = 0
+	r.Size = UDim2.new(1, -8, 0, 0)
+	r.AutomaticSize = Enum.AutomaticSize.Y
+	UiKit.corner(r, 3)
+	UiKit.pad(r, px(12, 16), px(12, 16), px(7, 10))
+	local t = UiKit.body(r, text, px(15, 22), if dimmed then V.DIM else V.TEXT)
 	t.Size = UDim2.new(1, 0, 0, 0)
 	t.AutomaticSize = Enum.AutomaticSize.Y
-	t.TextWrapped = true
-	t.RichText = true
-	t.LineHeight = 1.15
-	local trimmed = string.match(text, "^%s*(.-)%s*$") or text
-	local heading = string.match(trimmed, "^%d+%. %S") ~= nil and UiKit.upper(trimmed) == trimmed
-	if trimmed == "" then
-		t.Text = ""
-		row.Size = UDim2.new(1, 0, 0, px(8, 12))
-		row.AutomaticSize = Enum.AutomaticSize.None
-		t.Visible = false
-	elseif heading then
-		t.FontFace = UiKit.HEAD_FONT
-		t.TextSize = UiKit.text(18)
-		t.Text = trimmed
-		local pad = Instance.new("UIPadding")
-		pad.PaddingTop = UDim.new(0, px(6, 8))
-		pad.PaddingBottom = UDim.new(0, px(6, 8))
-		pad.Parent = row
-		local r = Instance.new("Frame")
-		r.AnchorPoint = Vector2.new(0, 1)
-		r.Position = UDim2.fromScale(0, 1)
-		r.Size = UDim2.new(1, 0, 0, 2)
-		r.BackgroundColor3 = UiKit.RULE_RED
-		r.BackgroundTransparency = 0.2
-		r.BorderSizePixel = 0
-		r.Parent = row
-	else
-		-- linha pautada; o vietnamita (nome de vila) no Arimo
-		t.Text = Acabamento.viet(text)
-		local pad = Instance.new("UIPadding")
-		pad.PaddingTop = UDim.new(0, 3)
-		pad.PaddingBottom = UDim.new(0, 3)
-		pad.Parent = row
-		local r = Instance.new("Frame")
-		r.AnchorPoint = Vector2.new(0, 1)
-		r.Position = UDim2.fromScale(0, 1)
-		r.Size = UDim2.new(1, 0, 0, 1)
-		r.BackgroundColor3 = UiKit.RULE_BLUE
-		r.BackgroundTransparency = 0.55
-		r.BorderSizePixel = 0
-		r.Parent = row
-	end
-	return t
+	t.LineHeight = 1.1
+	r.Parent = parent
+	return r
 end
 
+local function trim(s: string): string
+	return string.match(s, "^%s*(.-)%s*$") or s
+end
+
+-- ===== conteúdo =====
+type Sec = { title: string, lines: { string } }
 local function fill(report: { string })
 	for _, c in scroll:GetChildren() do
 		if c:IsA("GuiObject") then
@@ -217,124 +167,156 @@ local function fill(report: { string })
 	else
 		subtitle.Text = ""
 	end
-	-- Menos texto (pedido do dono, 2026-11-11): primeiro o que importa (3. resultado e 2. baixas);
-	-- a linha do tempo (1.) fica dobrada atrás de um botão. As seções vêm numeradas do servidor
-	-- (Shared/AfterAction); o número vale em qualquer idioma.
-	type Sec = { title: string, lines: { string } }
+	-- seções numeradas do servidor: 1 linha do tempo, 2 baixas, 3 resultado
 	local secs: { [number]: Sec } = {}
 	local cur: Sec? = nil
 	for i = first, #report do
 		local raw = report[i]
-		local trimmed = string.match(raw, "^%s*(.-)%s*$") or raw
-		local num = tonumber(string.match(trimmed, "^(%d+)%. %S") or "")
-		if num and UiKit.upper(trimmed) == trimmed then
-			local s: Sec = { title = trimmed, lines = {} }
+		local t = trim(raw)
+		local num = tonumber(string.match(t, "^(%d+)%. %S") or "")
+		if num and UiKit.upper(t) == t then
+			local s: Sec = { title = t, lines = {} }
 			secs[num] = s
 			cur = s
-		elseif cur and trimmed ~= "" then
+		elseif cur and t ~= "" then
 			table.insert(cur.lines, raw)
 		end
 	end
-	local labels: { TextLabel } = {}
-	local order = 0
-	local function add(text: string, parent: Instance?): TextLabel
-		order += 1
-		local t = line(text, order, parent)
-		if t.Visible then
-			table.insert(labels, t)
-		end
-		return t
-	end
-	-- renumeradas na ordem nova (Studio: saíam "3., 2., 1."); "1. RESULTADO" etc. são frases
-	-- inteiras no dicionário
-	local function renum(s: Sec, n: number): string
-		local rest = string.match(s.title, "^%d+%.%s*(.+)$") or s.title
-		return string.format("%d. %s", n, rest)
-	end
-	for newN, n in { 3, 2 } do
+	-- o que vira número e cor (lido do português que chega); o resto fica em linhas
+	local kiaUS, kiaVC, mins, winner = nil :: number?, nil :: number?, nil :: number?, nil :: string?
+	local owners: { { s: number, o: string } } = {}
+	local rest: { string } = {}
+	for _, n in { 3, 2 } do
 		local s = secs[n]
-		if s then
-			add(renum(s, newN))
-			for k, l in s.lines do
-				local t = add(l)
-				if n == 3 and k == 1 then -- o resultado, grande
-					t.FontFace = UiKit.HEAD_FONT
-					t.TextSize = UiKit.text(20)
+		for _, l in (if s then s.lines else {}) :: { string } do
+			local t = trim(l)
+			local a, b = string.match(t, "USMC: (%d+)%s+VC: (%d+)")
+			local own = string.match(t, "^Setores no fim: (.+)$")
+			if a and b then
+				kiaUS, kiaVC = tonumber(a), tonumber(b)
+			elseif
+				string.find(t, "^Vitória do USMC")
+				or string.find(t, "^Vitória do VC")
+				or string.find(t, "^Empate")
+			then
+				winner = if string.find(t, "^Vitória do USMC")
+					then "US"
+					elseif string.find(t, "^Vitória do VC") then "VC"
+					else "draw"
+				mins = tonumber(string.match(t, "Duração: (%d+) min") or "")
+			elseif own then
+				for sn, who in string.gmatch(own, "S(%d+) (%S+)") do
+					table.insert(owners, { s = tonumber(sn) or 0, o = who or "—" })
 				end
+			else
+				table.insert(rest, l)
 			end
-			add("")
 		end
 	end
+	local order = 0
+	local function nextOrder(): number
+		order += 1
+		return order
+	end
+	-- resultado em destaque
+	accent.BackgroundColor3 = if winner == "US" then V.US elseif winner == "VC" then V.VC else V.KHAKI
+	if winner then
+		local hero = UiKit.title(
+			scroll,
+			if winner == "US" then "VITÓRIA DO USMC" elseif winner == "VC" then "VITÓRIA DO VC" else "EMPATE",
+			px(40, 56),
+			if winner == "US" then V.US elseif winner == "VC" then V.VC else V.TEXT
+		)
+		hero.Name = "Resultado"
+		hero.LayoutOrder = nextOrder()
+		hero.Size = UDim2.new(1, -8, 0, px(48, 66))
+	end
+	-- números grandes: baixas dos dois lados e a duração
+	local items: { { string } } = {}
+	if kiaUS and kiaVC then
+		table.insert(items, { "BAIXAS USMC", tostring(kiaUS) })
+		table.insert(items, { "BAIXAS VC", tostring(kiaVC) })
+	end
+	if mins then
+		table.insert(items, { "MINUTOS", tostring(mins) })
+	end
+	if #items > 0 then
+		local sr = UiKit.statRow(scroll, items, px(46, 64))
+		sr.frame.LayoutOrder = nextOrder()
+		if kiaUS and kiaVC then
+			sr.stats[1].value.TextColor3 = V.US
+			sr.stats[2].value.TextColor3 = V.VC
+		end
+	end
+	-- setores no fim: etiquetas na cor do dono
+	if #owners > 0 then
+		local box = Instance.new("Frame")
+		box.Name = "Setores"
+		box.BackgroundTransparency = 1
+		box.LayoutOrder = nextOrder()
+		box.Size = UDim2.new(1, -8, 0, px(48, 66))
+		box.Parent = scroll
+		local k = UiKit.kicker(box, "SETORES NO FIM", px(13, 20))
+		k.Size = UDim2.new(1, 0, 0, px(18, 26))
+		local tags = Instance.new("Frame")
+		tags.BackgroundTransparency = 1
+		tags.Position = UDim2.fromOffset(0, px(22, 32))
+		tags.Size = UDim2.new(1, 0, 0, px(24, 32))
+		tags.Parent = box
+		UiKit.list(tags, true, px(6, 8))
+		for i, it in owners do
+			local c = if it.o == "USMC" then V.US elseif it.o == "VC" then V.VC else V.MUTED
+			local tg = UiKit.tag(tags, string.format("S%d", it.s), c, px(15, 22))
+			tg.LayoutOrder = i
+			tg.Size = UDim2.fromOffset(0, px(24, 32))
+		end
+	end
+	-- o resto (combate mais pesado, linhas que este cliente não conhece)
+	for _, l in rest do
+		row(l, nextOrder(), scroll)
+	end
+	-- linha do tempo recolhida atrás de um botão
 	local tl = secs[1]
 	if tl then
-		add(renum(tl, 3))
-		-- botão que abre e fecha a linha do tempo
-		order += 1
-		local toggle = Instance.new("TextButton")
-		toggle.Name = "LinhaDoTempo"
-		toggle.LayoutOrder = order
-		toggle.Size = UDim2.new(1, -8, 0, px(34, 48))
-		toggle.BackgroundColor3 = UiKit.DRAB
-		toggle.AutoButtonColor = false
-		toggle.Text = ""
-		toggle.Selectable = true
-		toggle.SelectionImageObject = UiKit.FOCUS
-		toggle.Parent = scroll
-		UiKit.corner(toggle, 3)
-		UiKit.lit(toggle, 0.72)
-		local tt = UiKit.rotulo(toggle, 15, UiKit.KHAKI, UiKit.HEAD_FONT)
-		tt.Position = UDim2.fromOffset(px(12, 16), 0)
-		tt.Size = UDim2.new(1, -px(24, 32), 1, 0)
-		order += 1
 		local box = Instance.new("Frame")
 		box.Name = "Registros"
-		box.LayoutOrder = order
 		box.BackgroundTransparency = 1
 		box.Size = UDim2.new(1, 0, 0, 0)
 		box.AutomaticSize = Enum.AutomaticSize.Y
 		box.Visible = false
-		box.Parent = scroll
-		local bl = Instance.new("UIListLayout")
-		bl.SortOrder = Enum.SortOrder.LayoutOrder
-		bl.Parent = box
-		for k, l in tl.lines do
-			line(l, k, box)
-		end
+		UiKit.list(box, false, px(4, 6))
+		local toggleRef: UiKit.Action? = nil
 		local function paint()
+			local tg = toggleRef
+			if not tg then
+				return
+			end
 			local n = #tl.lines
 			if n == 1 then -- singular: frase própria no dicionário
-				tt.Text = if box.Visible
+				tg.label.Text = if box.Visible
 					then "Fechar a linha do tempo (1 registro) ▼"
 					else "Ver a linha do tempo (1 registro) ►"
 			else
-				tt.Text = if box.Visible
+				tg.label.Text = if box.Visible
 					then string.format("Fechar a linha do tempo (%d registros) ▼", n)
 					else string.format("Ver a linha do tempo (%d registros) ►", n)
 			end
 		end
-		paint()
-		local r = UiKit.realce(toggle, UiKit.DRAB, UiKit.OLIVE, 1.01)
-		UiKit.bind(toggle, function()
+		local toggle = UiKit.action(scroll, "", "secondary", function()
 			box.Visible = not box.Visible
 			paint()
-		end, r.set)
-		toggle.MouseEnter:Connect(function()
-			r.set(true)
-		end)
-		toggle.MouseLeave:Connect(function()
-			r.set(false)
-		end)
-	end
-	-- as linhas entram uma a uma (só as primeiras 40 animam; o resto já aparece)
-	for i, t in labels do
-		if i <= 40 then
-			t.TextTransparency = 1
-			TweenService:Create(
-				t,
-				TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.Out, 0, false, 0.45 + i * 0.035),
-				{ TextTransparency = 0 }
-			):Play()
+		end, { h = px(42, 58) })
+		toggle.button.Name = "LinhaDoTempo"
+		toggle.button.LayoutOrder = nextOrder()
+		toggle.button.Size = UDim2.new(1, -8, 0, px(42, 58))
+		toggle.label.FontFace = F.TITLE_MED
+		toggleRef = toggle
+		box.LayoutOrder = nextOrder()
+		box.Parent = scroll
+		for k, l in tl.lines do
+			row(l, k, box, true)
 		end
+		paint()
 	end
 	scroll.CanvasPosition = Vector2.zero
 end
@@ -344,18 +326,16 @@ local function renderFoot()
 	local dev = Input.device()
 	if dev == "gamepad" then
 		foot.add(UiKit.padImage(Enum.KeyCode.Thumbstick2), nil, "R", "Rolar")
-		foot.action("ui_back", "menu", "Arquivar")
 	elseif dev == "touch" then
 		foot.add(nil, nil, "Toque", "e arraste para rolar")
 	else
 		foot.add(nil, nil, "Roda", "rolar")
-		foot.action("ui_back", "menu", "Arquivar")
 	end
 end
 
 -- ===== abrir e fechar =====
 local token = 0
-local function setOpen(open: boolean)
+setOpen = function(open: boolean)
 	if open == gui.Enabled then
 		return
 	end
@@ -368,19 +348,13 @@ local function setOpen(open: boolean)
 		renderFoot()
 		dim.BackgroundTransparency = 1
 		TweenService:Create(dim, TweenInfo.new(0.3), { BackgroundTransparency = 0.45 }):Play()
-		sheet.Position = UDim2.new(0.5, 0, 0.5, 40)
-		TweenService
-			:Create(sheet, TweenInfo.new(0.35, Enum.EasingStyle.Quint), { Position = UDim2.fromScale(0.5, 0.5) })
-			:Play()
-		fit.play(TweenInfo.new(0.35, Enum.EasingStyle.Quint), 1, 0.96)
-		-- o carimbo cai depois da folha
-		stamp.TextTransparency = 1
-		stampInk.Transparency = 1
-		stampScale.Scale = 1.7
-		local hit = TweenInfo.new(0.16, Enum.EasingStyle.Quad, Enum.EasingDirection.In, 0, false, 0.55)
-		TweenService:Create(stamp, hit, { TextTransparency = 0.1 }):Play()
-		TweenService:Create(stampInk, hit, { Transparency = 0.2 }):Play()
-		TweenService:Create(stampScale, hit, { Scale = 1 }):Play()
+		sheet.Position = UDim2.new(0.5, 0, 0.5, 32)
+		sheet.GroupTransparency = 1
+		TweenService:Create(sheet, TweenInfo.new(0.32, Enum.EasingStyle.Quint), {
+			Position = UDim2.fromScale(0.5, 0.5),
+			GroupTransparency = 0,
+		}):Play()
+		fit.play(TweenInfo.new(0.32, Enum.EasingStyle.Quint), 1, 0.96)
 		UiKit.focus(sheet)
 	else
 		Input.closeMenu()
@@ -388,7 +362,7 @@ local function setOpen(open: boolean)
 		UiKit.release(gui)
 		local info = TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
 		TweenService:Create(dim, info, { BackgroundTransparency = 1 }):Play()
-		TweenService:Create(sheet, info, { Position = UDim2.new(0.5, 0, 0.5, 40) }):Play()
+		TweenService:Create(sheet, info, { Position = UDim2.new(0.5, 0, 0.5, 24), GroupTransparency = 1 }):Play()
 		task.delay(0.21, function()
 			if token == my then
 				gui.Enabled = false
@@ -397,9 +371,6 @@ local function setOpen(open: boolean)
 	end
 end
 
-UiKit.bind(close, function()
-	setOpen(false)
-end)
 Input.on("ui_back", "press", function()
 	if gui.Enabled and UiKit.backFor("relatorio") then
 		setOpen(false)
@@ -414,7 +385,7 @@ UiKit.watch(sheet, function()
 	return gui.Enabled
 end)
 
--- abre só depois da ficha de fim (FrontHud): nada fica por trás dela
+-- abre só depois da tela de fim (FrontHud): nada fica por trás dela
 local function endCardUp(): boolean
 	local pg = player:FindFirstChild("PlayerGui")
 	local g = pg and pg:FindFirstChild("VT65FimDePartida")
@@ -426,7 +397,7 @@ local function openWhenFree(report: { string })
 	local my = waitToken
 	fill(report)
 	task.spawn(function()
-		task.wait(0.5) -- a ficha de fim chega no mesmo Match_State
+		task.wait(0.5) -- a tela de fim chega no mesmo Match_State
 		while endCardUp() and waitToken == my do
 			task.wait(0.2)
 		end

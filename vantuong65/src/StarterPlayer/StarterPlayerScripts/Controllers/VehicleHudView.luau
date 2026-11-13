@@ -1,34 +1,32 @@
 --!strict
--- Painel do veículo (pedido do dono, 2026-11-11: "melhore ainda mais todas as interfaces"; o HUD do
--- veículo era um TextLabel em Code com três linhas de texto puro: "M48A3 Patton 13 km/h ...").
--- Este módulo só DESENHA: o VehicleController (de outra pessoa) continua calculando tudo e chama
+-- Painel do veículo. Só DESENHA: o VehicleController calcula tudo e chama
 --   local Hud = VehicleHudView.new()
 --   Hud.ground({ name = spec.name, kmh = d.v * 3.6, gear = gearTxt, rpm = d.rpm, ground = "lama",
---                note = "patinando", integrity = 100, engine = 100, tracks = 100 })
+--                note = "patinando", integrity = 100, engine = 100, tracks = 100,
+--                faction = "US", seat = "Motorista", warn = nil, wheeled = false })
 --   Hud.heli({ name = "UH-34D", tempC = AIR_C, rotor = heli.rotor, knots = V * 1.9438,
 --              altM = gearH, climb = heli.vy, demandHp = .., availHp = .., reqHp = .., torque = ..,
---              warn = "SEM POTÊNCIA PARA PAIRAR: corra para ganhar sustentação" })
+--              warn = "...", faction = "US", assist = true })
 --   Hud.seat({ name = spec.name, seat = "Atirador", weapon = "gun_90", ammo = "he", fire = "RT",
---              tubes = nil })
+--              tubes = nil, faction = "US", personal = false, canFire = nil, closed = false })
 --   Hud.hide()
--- no lugar de label.Text = string.format(...). Mesmo lugar e largura do painel antigo (16 px da
--- esquerda, 360 px: o tutorial fica à direita dele).
--- Visual de época: placa de instrumentos oliva com filete cáqui, nome em Oswald, velocímetro em
--- números grandes, conta-giros em barra com a faixa vermelha, marcha numa etiqueta, chão e avisos em
--- latão/vermelho, e o estado do casco em três barras. Nenhuma instância nova por quadro: cada
--- chamada só troca texto, tamanho e cor do que já existe. Texto em modelos inteiros (string.format)
--- para o dicionário de idiomas.
+-- D-100 (pedido do dono, 2026-11-12, junto com o painel de lugares): no estilo das telas novas
+-- (painel escuro, título em Oswald, cor do lado: EUA azul, VC vermelho), com o nome do lugar, o
+-- estado da própria arma num lugar aberto ("no ângulo" / "fora do ângulo"), o aviso de veículo preso
+-- ou tombado e as teclas de trocar de lugar e sair. Mesmo lugar e largura de antes (16 px da
+-- esquerda, 360 px: o tutorial fica à direita dele). Nenhuma instância nova por quadro.
 local TweenService = game:GetService("TweenService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
+local Weapons = require(ReplicatedStorage.Shared.Weapons) :: any
+local Input = require(script.Parent.Input)
 local UiKit = require(script.Parent.UiKit)
 
 local VehicleHudView = {}
 VehicleHudView.WIDTH = 360 -- o TutorialController põe o cartão à direita: 16 + 360 + 12
 
-local TV = UiKit.tv()
-local function px(pc: number, tv: number): number
-	return if TV then tv else pc
-end
+local V, F = UiKit.V, UiKit.F
+local px = UiKit.px
 
 export type Ground = {
 	name: string,
@@ -40,6 +38,10 @@ export type Ground = {
 	integrity: number?, -- 0..100
 	engine: number?,
 	tracks: number?,
+	faction: string?,
+	seat: string?,
+	warn: string?, -- preso, tombado
+	wheeled: boolean?, -- "Rodas" no lugar de "Esteiras"
 }
 export type Heli = {
 	name: string,
@@ -53,8 +55,22 @@ export type Heli = {
 	reqHp: number,
 	torque: number, -- 0..1
 	warn: string?,
+	faction: string?,
+	assist: boolean?, -- estabilizador
 }
-export type Seat = { name: string, seat: string, weapon: string?, ammo: string?, fire: string?, tubes: number? }
+export type Seat = {
+	name: string,
+	seat: string,
+	weapon: string?,
+	ammo: string?,
+	fire: string?,
+	tubes: number?,
+	faction: string?,
+	personal: boolean?, -- a própria arma do ocupante (lugar aberto)
+	canFire: boolean?, -- no ângulo do lugar e em 1ª pessoa
+	closed: boolean?, -- lugar fechado: não atira
+	warn: string?,
+}
 export type View = {
 	ground: (d: Ground) -> (),
 	heli: (d: Heli) -> (),
@@ -69,53 +85,56 @@ local WEAPON_NAME: { [string]: string } = {
 	m60 = "Metralhadora M60",
 }
 
+local function weaponName(id: string): string
+	local n = WEAPON_NAME[id]
+	if n then
+		return n
+	end
+	local wp = Weapons.get(id)
+	return if wp and wp.name then wp.name else id
+end
+
 local function health(v: number?): Color3
 	local x = math.clamp((v or 100) / 100, 0, 1)
-	return if x > 0.6 then UiKit.KHAKI elseif x > 0.3 then Color3.fromRGB(226, 148, 52) else UiKit.STAMP
+	return if x > 0.6 then V.KHAKI elseif x > 0.3 then Color3.fromRGB(226, 148, 52) else V.RED
 end
 
 function VehicleHudView.new(parent: Instance?): View
 	local gui: Instance = parent or UiKit.screen("VT65Veiculo", 12)
-	local W, H = px(VehicleHudView.WIDTH, 520), px(112, 160)
+	local W, H = px(VehicleHudView.WIDTH, 520), px(138, 196)
 	local root = Instance.new("Frame")
 	root.Name = "PainelVeiculo"
 	root.AnchorPoint = Vector2.new(0, 1)
 	root.Position = UDim2.new(0, 16, 1, -16)
 	root.Size = UDim2.fromOffset(W, H)
-	root.BackgroundColor3 = UiKit.CARD_DARK
-	root.BackgroundTransparency = 0.12
+	root.BackgroundColor3 = V.PANEL
+	root.BackgroundTransparency = 0.08
 	root.BorderSizePixel = 0
 	root.Visible = false
 	root.Parent = gui
 	UiKit.corner(root, 4)
-	UiKit.lit(root, 0.7)
-	UiKit.edge(root, UiKit.KHAKI, 1, 0.72)
-	local bar = Instance.new("Frame")
+	UiKit.stroke(root, V.LINE, 1, 0.5)
+	local bar = Instance.new("Frame") -- cor do lado
 	bar.Size = UDim2.new(0, px(4, 6), 1, 0)
-	bar.BackgroundColor3 = UiKit.BRASS
+	bar.BackgroundColor3 = V.US
 	bar.BorderSizePixel = 0
 	bar.Parent = root
 	local P = px(12, 18)
 
-	local name = UiKit.rotulo(root, 17, UiKit.BRASS_LIGHT, UiKit.HEAD_FONT)
+	local name = UiKit.title(root, "", 17)
 	name.Position = UDim2.fromOffset(P, px(4, 6))
-	name.Size = UDim2.new(1, -P - px(100, 140), 0, px(22, 32))
-	name.TextTruncate = Enum.TextTruncate.AtEnd
-	local tag = UiKit.rotulo(root, 13, UiKit.NIGHT, UiKit.HEAD_FONT)
+	name.Size = UDim2.new(1, -P - px(110, 150), 0, px(22, 32))
+	local tag = UiKit.tag(root, "", V.PANEL_3, 13)
 	tag.AnchorPoint = Vector2.new(1, 0)
 	tag.Position = UDim2.new(1, -P, 0, px(6, 8))
-	tag.Size = UDim2.fromOffset(px(92, 130), px(18, 26))
-	tag.BackgroundColor3 = UiKit.KHAKI
-	tag.BackgroundTransparency = 0
-	tag.TextXAlignment = Enum.TextXAlignment.Center
-	UiKit.corner(tag, 3)
+	tag.Size = UDim2.fromOffset(0, px(20, 28))
 
 	-- número grande (velocidade) e a unidade
-	local big = UiKit.rotulo(root, 34, UiKit.CARD, UiKit.HEAD_FONT)
+	local big = UiKit.text2(root, "", 34, V.TEXT, F.TITLE)
 	big.Position = UDim2.fromOffset(P, px(28, 40))
 	big.Size = UDim2.fromOffset(px(86, 124), px(40, 58))
 	big.TextXAlignment = Enum.TextXAlignment.Right
-	local unit = UiKit.rotulo(root, 12, UiKit.KHAKI, UiKit.HEAD_REG)
+	local unit = UiKit.kicker(root, "", 12)
 	unit.Position = UDim2.fromOffset(P + px(90, 128), px(46, 66))
 	unit.Size = UDim2.fromOffset(px(50, 70), px(18, 26))
 	-- conta-giros / potência: barra com faixa vermelha no fim e a marca da exigência
@@ -123,7 +142,7 @@ function VehicleHudView.new(parent: Instance?): View
 	local gauge = Instance.new("Frame")
 	gauge.Position = UDim2.fromOffset(gx, px(36, 52))
 	gauge.Size = UDim2.new(1, -gx - P, 0, px(10, 14))
-	gauge.BackgroundColor3 = UiKit.DRAB
+	gauge.BackgroundColor3 = V.PANEL_2
 	gauge.BorderSizePixel = 0
 	gauge.Parent = root
 	UiKit.corner(gauge, 2)
@@ -131,13 +150,13 @@ function VehicleHudView.new(parent: Instance?): View
 	red.AnchorPoint = Vector2.new(1, 0)
 	red.Position = UDim2.fromScale(1, 0)
 	red.Size = UDim2.fromScale(0.15, 1)
-	red.BackgroundColor3 = UiKit.STAMP
+	red.BackgroundColor3 = V.RED
 	red.BackgroundTransparency = 0.45
 	red.BorderSizePixel = 0
 	red.Parent = gauge
 	local fill = Instance.new("Frame")
 	fill.Size = UDim2.fromScale(0, 1)
-	fill.BackgroundColor3 = UiKit.BRASS
+	fill.BackgroundColor3 = V.KHAKI
 	fill.BorderSizePixel = 0
 	fill.Parent = gauge
 	UiKit.corner(fill, 2)
@@ -145,20 +164,20 @@ function VehicleHudView.new(parent: Instance?): View
 	mark.AnchorPoint = Vector2.new(0.5, 0)
 	mark.Position = UDim2.new(0, 0, 0, -3)
 	mark.Size = UDim2.new(0, 2, 1, 6)
-	mark.BackgroundColor3 = UiKit.CARD
+	mark.BackgroundColor3 = V.TEXT
 	mark.BorderSizePixel = 0
 	mark.Visible = false
 	mark.Parent = gauge
-	local gaugeText = UiKit.rotulo(root, 12, UiKit.KHAKI, UiKit.BODY_FONT)
+	local gaugeText = UiKit.text2(root, "", 12, V.DIM, F.BODY)
 	gaugeText.Position = UDim2.fromOffset(gx, px(48, 68))
 	gaugeText.Size = UDim2.new(1, -gx - P, 0, px(16, 22))
 	-- linha de baixo: chão / altura e avisos
-	local info = UiKit.rotulo(root, 13, UiKit.CARD, UiKit.BODY_FONT)
+	local info = UiKit.text2(root, "", 13, V.TEXT, F.BODY)
 	info.Position = UDim2.fromOffset(P, px(70, 100))
 	info.Size = UDim2.new(1, -2 * P, 0, px(18, 26))
 	info.TextTruncate = Enum.TextTruncate.AtEnd
 	info.RichText = true
-	-- estado: três barras (casco, motor, esteiras) ou o aviso do helicóptero
+	-- estado: três barras (casco, motor, esteiras/rodas) ou o aviso
 	local stateRow = Instance.new("Frame")
 	stateRow.Position = UDim2.fromOffset(P, px(90, 128))
 	stateRow.Size = UDim2.new(1, -2 * P, 0, px(14, 20))
@@ -168,33 +187,49 @@ function VehicleHudView.new(parent: Instance?): View
 	local bars: { Bar } = {}
 	for i, lbl in { "Casco", "Motor", "Esteiras" } do
 		local x = (i - 1) / 3
-		local l = UiKit.rotulo(stateRow, 11, UiKit.KHAKI, UiKit.HEAD_REG)
+		local l = UiKit.kicker(stateRow, lbl, 11)
 		l.Position = UDim2.new(x, 0, 0, 0)
 		l.Size = UDim2.new(0.13, 0, 1, 0)
-		l.Text = lbl
-		l.TextScaled = false
 		local back = Instance.new("Frame")
 		back.Position = UDim2.new(x + 0.14, 0, 0.3, 0)
 		back.Size = UDim2.new(0.17, 0, 0.4, 0)
-		back.BackgroundColor3 = UiKit.DRAB
+		back.BackgroundColor3 = V.PANEL_2
 		back.BorderSizePixel = 0
 		back.Parent = stateRow
 		local f = Instance.new("Frame")
 		f.Size = UDim2.fromScale(1, 1)
-		f.BackgroundColor3 = UiKit.KHAKI
+		f.BackgroundColor3 = V.KHAKI
 		f.BorderSizePixel = 0
 		f.Parent = back
 		bars[i] = { label = l, back = back, fill = f }
 	end
-	local warn = UiKit.rotulo(root, 13, Color3.fromRGB(240, 124, 104), UiKit.HEAD_FONT)
+	local warn = UiKit.text2(root, "", 13, Color3.fromRGB(240, 124, 104), F.TITLE)
 	warn.Position = UDim2.fromOffset(P, px(88, 126))
 	warn.Size = UDim2.new(1, -2 * P, 0, px(18, 26))
 	warn.TextTruncate = Enum.TextTruncate.AtEnd
 	warn.Visible = false
 	local warnPulse: Tween? = nil
+	-- teclas: trocar de lugar e sair (as do contexto do veículo, controle ou teclado)
+	local hints = UiKit.chips(root, px(20, 30), false, 12)
+	hints.frame.AnchorPoint = Vector2.new(0, 1)
+	hints.frame.Position = UDim2.new(0, P, 1, -px(6, 8))
+	hints.frame.Size = UDim2.new(1, -2 * P, 0, px(20, 30))
+	local hintKey = ""
+	local function refreshHints(heliCtx: boolean)
+		local k = (if heliCtx then "h" else "g") .. (if Input.isGamepad() then "p" else "k")
+		if k == hintKey then
+			return
+		end
+		hintKey = k
+		local ctx = if heliCtx then "helicopter" else "ground_vehicle"
+		hints.clear()
+		hints.action("v_switch_seat", ctx, "Lugares")
+		hints.action("v_exit", ctx, "Sair")
+	end
 
 	local mode = ""
-	local function show(m: string)
+	local function show(m: string, faction: string?)
+		bar.BackgroundColor3 = if faction == "VC" then V.VC else V.US
 		if not root.Visible then
 			root.Visible = true
 			root.Position = UDim2.new(0, -W, 1, -16)
@@ -210,10 +245,14 @@ function VehicleHudView.new(parent: Instance?): View
 			unit.Visible = m ~= "seat"
 			gaugeText.Visible = m ~= "seat"
 		end
+		refreshHints(m == "heli")
 	end
 	local function setWarn(text: string?)
 		local on = text ~= nil and text ~= ""
-		warn.Visible = on and mode == "heli"
+		warn.Visible = on
+		if mode == "ground" then
+			stateRow.Visible = not on
+		end
 		if on then
 			warn.Text = text :: string
 			if not warnPulse then
@@ -231,40 +270,50 @@ function VehicleHudView.new(parent: Instance?): View
 			warn.TextTransparency = 0
 		end
 	end
+	local function setName(text: string)
+		local t = UiKit.upper(text)
+		if name.Text ~= t then
+			name.Text = t
+			name.FontFace = UiKit.headFont(t)
+		end
+	end
 
 	local view: View = {} :: any
 	view.root = root
 	function view.ground(d: Ground)
-		show("ground")
-		setWarn(nil)
-		name.Text = d.name
-		tag.Text = UiKit.upper(d.gear)
+		show("ground", d.faction)
+		setName(d.name)
+		tag.Text = UiKit.upper(if d.seat then string.format("%s · %s", d.seat, d.gear) else d.gear)
 		big.Text = string.format("%d", math.floor(math.abs(d.kmh) + 0.5))
-		unit.Text = "km/h"
+		unit.Text = "KM/H"
 		local r = math.clamp(d.rpm, 0, 1)
 		fill.Size = UDim2.fromScale(r, 1)
-		fill.BackgroundColor3 = if r > 0.85 then UiKit.STAMP else UiKit.BRASS
+		fill.BackgroundColor3 = if r > 0.85 then V.RED else V.KHAKI
 		mark.Visible = false
 		gaugeText.Text = string.format("giro %d%%", math.floor(r * 100 + 0.5))
 		info.Text = if d.note and d.note ~= ""
 			then string.format('Chão: %s · <font color="#ECCA74">%s</font>', d.ground, d.note)
 			else string.format("Chão: %s", d.ground)
+		bars[3].label.Text = if d.wheeled then "Rodas" else "Esteiras"
 		for i, v in { d.integrity, d.engine, d.tracks } do
 			local b = bars[i]
 			local x = math.clamp((v or 100) / 100, 0, 1)
 			b.fill.Size = UDim2.fromScale(x, 1)
 			b.fill.BackgroundColor3 = health(v)
 		end
+		setWarn(d.warn)
 	end
 	function view.heli(d: Heli)
-		show("heli")
-		name.Text = d.name
-		tag.Text = string.format("%d °C", math.floor(d.tempC + 0.5))
+		show("heli", d.faction)
+		setName(d.name)
+		tag.Text = if d.assist == false
+			then string.format("%d °C · MANUAL", math.floor(d.tempC + 0.5))
+			else string.format("%d °C · ESTAB.", math.floor(d.tempC + 0.5))
 		big.Text = string.format("%d", math.floor(d.knots + 0.5))
-		unit.Text = "nós"
+		unit.Text = "NÓS"
 		local avail = math.max(d.availHp, 1)
 		fill.Size = UDim2.fromScale(math.clamp(d.demandHp / avail, 0, 1), 1)
-		fill.BackgroundColor3 = if d.reqHp > d.availHp then UiKit.STAMP else UiKit.BRASS
+		fill.BackgroundColor3 = if d.reqHp > d.availHp then V.RED else V.KHAKI
 		mark.Visible = true
 		mark.Position = UDim2.new(math.clamp(d.reqHp / avail, 0, 1), 0, 0, -3)
 		gaugeText.Text = string.format(
@@ -282,21 +331,31 @@ function VehicleHudView.new(parent: Instance?): View
 		setWarn(d.warn)
 	end
 	function view.seat(d: Seat)
-		show("seat")
-		setWarn(nil)
-		name.Text = d.name
+		show("seat", d.faction)
+		setName(d.name)
 		tag.Text = UiKit.upper(d.seat)
 		local w = d.weapon
 		if w == "rr_106" then
 			info.Text = string.format("Tubos carregados: %d (recarregar: parado)", d.tubes or 0)
+		elseif w and d.personal then
+			info.Text = if d.canFire
+				then string.format(
+					'%s · atirar: %s · <font color="#B4C878">no ângulo</font>',
+					weaponName(w),
+					d.fire or "?"
+				)
+				else string.format('%s · <font color="#F07C68">fora do ângulo do lugar</font>', weaponName(w))
 		elseif w then
-			local wn = WEAPON_NAME[w] or w
+			local wn = weaponName(w)
 			info.Text = if d.ammo
 				then string.format("%s · munição: %s · atirar: %s", wn, d.ammo, d.fire or "?")
 				else string.format("%s · atirar: %s", wn, d.fire or "?")
+		elseif d.closed then
+			info.Text = "Lugar fechado: daqui não se atira"
 		else
 			info.Text = "Passageiro"
 		end
+		setWarn(d.warn)
 	end
 	function view.hide()
 		if root.Visible then
@@ -305,6 +364,12 @@ function VehicleHudView.new(parent: Instance?): View
 			mode = ""
 		end
 	end
+	Input.DeviceChanged:Connect(function()
+		hintKey = ""
+		if mode ~= "" then
+			refreshHints(mode == "heli")
+		end
+	end)
 	return view
 end
 
@@ -324,6 +389,8 @@ function VehicleHudView.demo(kind: string): View
 			reqHp = 1150,
 			torque = 0.87,
 			warn = nil,
+			faction = "US",
+			assist = true,
 		})
 	else
 		v.ground({
@@ -336,6 +403,8 @@ function VehicleHudView.demo(kind: string): View
 			integrity = 92,
 			engine = 70,
 			tracks = 28,
+			faction = "US",
+			seat = "Motorista",
 		})
 	end
 	return v

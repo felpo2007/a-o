@@ -108,6 +108,8 @@ local function onDig(p: Player)
 	digging[p] = true
 	local start = root.Position
 	toast(p, string.format("Cavando… fique parado %d s", C.seconds))
+	-- D-99: a animação da pá (ItemView) segue esta chave, nunca o texto do aviso, que pode vir traduzido
+	Net.event("Logistics_State"):FireClient(p, { key = "dig_start" })
 	task.delay(C.seconds, function()
 		digging[p] = nil
 		local r2 = char:FindFirstChild("HumanoidRootPart") :: BasePart?
@@ -118,6 +120,7 @@ local function onDig(p: Player)
 			or (r2.Position - start).Magnitude * M > C.stillM
 		then
 			toast(p, "Pá: cancelado (você se moveu)")
+			Net.event("Logistics_State"):FireClient(p, { key = "dig_cancel" })
 			return
 		end
 		lastDig[p] = os.clock()

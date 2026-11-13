@@ -501,6 +501,7 @@ local KEY_TEXT: { [string]: string } = {
 	Return = "Enter",
 	One = "1",
 	Space = "Espaço",
+	CapsLock = "Caps Lock",
 }
 
 -- Devolve (imagem, texto) para a ação no contexto ativo (ou num contexto dado).

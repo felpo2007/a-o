@@ -300,9 +300,15 @@ local function publish()
 	-- como listas cheias ("" = ninguém): tabela com buraco perde as chaves numéricas no remote.
 	local cap, con = Capture.activity(st, lastCounts)
 	local capturing, contested = {}, {}
+	-- quantos de cada lado estão na área de captura de cada setor (a contagem do segundo, a mesma da
+	-- captura): a barra de captura do HUD mostra aliados e inimigos a quem está no ponto. É o estado
+	-- do ponto (números), nunca a posição de ninguém. Lista cheia: o remote perde chave com buraco.
+	local inArea = {}
 	for s = 1, #st.owner do
 		capturing[s] = cap[s] or ""
 		contested[s] = con[s] == true
+		local c = lastCounts[s]
+		inArea[s] = { US = if c then c.US else 0, VC = if c then c.VC else 0 }
 	end
 	local rep = MatchService.report
 	local score = MatchService.score
@@ -319,6 +325,7 @@ local function publish()
 		front = if MatchService.offensive then MatchService.offensive.front else nil,
 		capturing = capturing,
 		contested = contested,
+		inArea = inArea,
 		-- atrito (Warfare): reforços de cada lado e o inicial, para a barra do HUD
 		score = if score then { US = score.US, VC = score.VC, max = Capture.C.reinforcements } else nil,
 		kia = if rep then { US = AfterAction.total(rep, "US"), VC = AfterAction.total(rep, "VC") } else nil,

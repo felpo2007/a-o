@@ -11,6 +11,16 @@ Roles.roles = {
 	commander = { id = "commander", name = "Comandante", unit = "command", maxPerSquad = 1 },
 	squad_leader = { id = "squad_leader", name = "Líder de squad", unit = "infantry", maxPerSquad = 1 },
 	rifleman = { id = "rifleman", name = "Fuzileiro", unit = "infantry" },
+	-- só dos EUA (não tem loadout no VC): o fuzileiro automático da esquadra de tiro do USMC, com a M14
+	-- de seletor e bipé M2 (FM 23-8, 1965, par. 3a; Small Arms Review: 1 em automático por esquadra
+	-- de 4 em Chu Lai, 1965). Um por squad: o squad do jogo (6) é menor que o de 1965 (13, com 3
+	-- esquadras). Decisão do dono, 2026-11-12.
+	automatic_rifleman = {
+		id = "automatic_rifleman",
+		name = "Fuzileiro automático",
+		unit = "infantry",
+		maxPerSquad = 1,
+	},
 	grenadier = { id = "grenadier", name = "Granadeiro", unit = "infantry", maxPerSquad = 1 },
 	machine_gunner = { id = "machine_gunner", name = "Metralhador", unit = "infantry", maxPerSquad = 1 },
 	anti_tank = { id = "anti_tank", name = "Antitanque", unit = "infantry", maxPerSquad = 1 },
@@ -71,6 +81,7 @@ Roles.loadout = {
 		commander = { "m1911" },
 		squad_leader = { "m14" },
 		rifleman = { "m14" },
+		automatic_rifleman = { "m14" }, -- com o seletor aberto e o bipé (Weapons.roleModes/bipodRoles)
 		grenadier = { "m79", "m1911" },
 		machine_gunner = { "m60" },
 		anti_tank = { "m1911" }, -- bazuca 3.5" M20 na F4
@@ -78,7 +89,7 @@ Roles.loadout = {
 		medic = { "m1911" }, -- corpsman
 		radio_operator = { "m14" }, -- PRC-10 nas costas
 		observer = { "m14" },
-		sniper = { "m14" }, -- rifle de precisão da época: modelo a confirmar
+		sniper = { "m70" }, -- Winchester M70 com Unertl 8x (USMC, 1965; Shared/Weapons)
 		tank_crew = { "m1911" },
 		pilot = { "m1911" },
 		door_gunner = { "m60" },
@@ -95,7 +106,7 @@ Roles.loadout = {
 		medic = { "sks" },
 		radio_operator = { "sks" },
 		observer = { "type56" },
-		sniper = { "sks" }, -- Mosin-Nagant com luneta na F4
+		sniper = { "mosin" }, -- Mosin-Nagant 91/30 com luneta PU 3,5x (Shared/Weapons)
 		sapper = { "sks" },
 		mortar = { "type54" },
 	},
@@ -128,6 +139,43 @@ end
 function Roles.roleAllowedInUnit(faction: string, roleId: string, unit: string): boolean
 	local r = Roles.roles[roleId]
 	return r ~= nil and r.unit == unit and Roles.loadout[faction][roleId] ~= nil
+end
+
+-- ===== papel nos lugares dos veículos (D-100) =====
+-- Pedido do dono, 2026-11-12: "por que não consigo pilotar tanques, carros e helicópteros?". Antes
+-- todo lugar de blindado pedia "tank_crew" e o UH-34D pedia piloto e atirador de porta; esses papéis
+-- exigem posto 2 ou 3 e um squad pesado, que só abre com 16 jogadores no time. Regra nova:
+--   - carro e caminhão (kind "wheeled"): qualquer um do lado dirige e senta;
+--   - blindado e anfíbio: motorista e atirador pedem tripulante; comandante, municiador e tropa não;
+--   - helicóptero: o lugar do piloto pede piloto; copiloto, porta e tropa não.
+-- Faltou o papel e há vaga no time (mais lugares que pedem o papel do que gente com ele), o próprio
+-- painel do veículo oferece "Trocar para Tripulante/Piloto e entrar": vale até morrer (atributo
+-- "VehicleCrew" do jogador), sem mexer no squad, na arma nem no posto.
+Roles.VEHICLE_SEAT_ROLE = {
+	tracked = { driver = "tank_crew", gunner = "tank_crew" },
+	amphibious = { driver = "tank_crew", gunner = "tank_crew" },
+	heli = { driver = "pilot" },
+} :: { [string]: { [string]: string } }
+Roles.CREW_NAME = { tank_crew = "Tripulante", pilot = "Piloto" } :: { [string]: string }
+
+-- Papel que o lugar pede (nil = qualquer um do lado)
+function Roles.vehicleSeatRole(kind: string, seatId: string): string?
+	local t = Roles.VEHICLE_SEAT_ROLE[kind]
+	return if t then t[seatId] else nil
+end
+
+-- O jogador (papel do squad e papel de campo) pode sentar? Devolve (pode, papel que falta).
+function Roles.canTakeSeat(kind: string, seatId: string, role: string?, crewRole: string?): (boolean, string?)
+	local need = Roles.vehicleSeatRole(kind, seatId)
+	if need == nil or role == need or crewRole == need then
+		return true, nil
+	end
+	return false, need
+end
+
+-- Há vaga para mais um com o papel? seats = lugares do lado que pedem o papel; holders = quem já tem.
+function Roles.crewVacancy(seats: number, holders: number): boolean
+	return holders < seats
 end
 
 return Roles

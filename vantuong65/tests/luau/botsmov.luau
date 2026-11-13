@@ -488,11 +488,11 @@ local function realRoute(fromName: string, toName: string, ox: number, oz: numbe
 	assert(frac(g, pts, F.HOUSE) <= 0.02, "passa por casa")
 end
 
--- mapa de 1 x 1 km (2026-11-11): rotas pelo arrozal entre An Cường (2) (S4), o morrote (S3) e
--- Nam Yên (4) (S1/S2)
+-- mapa de 1 x 1 km (2026-11-11): rotas pelo arrozal entre An Cường (2) (S4), o S3 e Nam Yên (4)
+-- (S1/S2). 2026-11-12: o ponto forte do S3 é a vila grande Xóm Gò, no morrote levado para o centro
 test("rota no mapa real: infantaria do S4 ao S3 foge do arrozal alagado e usa o dique", function()
-	realRoute("Arrozal ao norte de An Cường (2)", "Morrote do arrozal", 0, 0)
-	realRoute("Trincheira sul", "Morrote do arrozal", 0, 0)
+	realRoute("Arrozal ao norte de An Cường (2)", "Xóm Gò", 0, 0)
+	realRoute("Trincheira sul", "Xóm Gò", 0, 0)
 	-- o ponto forte do lugarejo fica em cima da casa da carta: a rota sai 17 m ao norte dela
 	realRoute("Lugarejo a sudoeste de An Cường (2)", "Arrozal central", 0, -60)
 end)
@@ -500,7 +500,7 @@ end)
 test("rota no mapa real: M48A3 do depósito até perto do S3 sem atravessar casa nem sebe", function()
 	local g = buildReal()
 	local hq = MapConfig.HQ.US
-	local b = strongpoint("Morrote do arrozal")
+	local b = strongpoint("Xóm Gò")
 	local p = BotNav.profile("tracked", "m48a3")
 	-- depósito do M48 (VehicleService: 130 m a oeste e 40 m ao norte do QG) até a distância de tiro
 	-- do canhão, a leste do morrote (BotBrain.VEHICLE.standoffM.m48a3 é 220 m; no mapa de 1 km o

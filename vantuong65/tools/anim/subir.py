@@ -48,6 +48,16 @@ CLIPES = [
     "faca_lado",
     "faca_guardar",
     "baioneta",
+    # uso de itens (D-99, procedurais: Shared/ItemAnim)
+    "item_curativo",
+    "item_torniquete",
+    "item_curativo_outro",
+    "item_tratar",
+    "item_reanimar",
+    "item_radio",
+    "item_binoculo",
+    "item_pa",
+    "item_cantil",
 ]
 DESC = (
     "VAN TUONG 65: soldado com fuzil. Captura de movimento da CMU Graphics Lab Motion Capture "

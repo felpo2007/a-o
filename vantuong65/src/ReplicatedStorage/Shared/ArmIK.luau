@@ -9,6 +9,9 @@
 -- corpo "Man" aproximados (r15.SIZES), PLACEHOLDER até despejar um soldado no Studio. As peças do
 -- braço entram como caixas reduzidas a 80% (a malha "Man" é arredondada; a caixa cheia acusaria
 -- penetração nas quinas que não existem).
+-- D-98: tudo aqui está no corpo de 1,75 m (o da gravação dos clipes). O soldado do jogo é esse corpo
+-- ampliado por Shared/Corpo.K; o PostureController multiplica as posições das pegas e dos polos por
+-- K. A arma NÃO cresce: no teste, os pontos da arma entram divididos por K neste espaço.
 local ArmIK = {}
 
 export type V = { number }
@@ -62,6 +65,10 @@ ArmIK.HOLDS = {
 	-- recarga: o fuzil sobe e chega ao peito (o encaixe do carregador à vista); na pega de sempre a
 	-- mão esquerda cruzava o peito para chegar ao encaixe (6 cm dentro do tronco no clipe)
 	reload = { 0.2, 1.0, -1.3, 60, -20 },
+	-- D-98: carta aberta. O fuzil a tiracolo no ombro direito (boca para cima e um pouco para trás,
+	-- por fora do braço) e a carta diante do peito, inclinada 50° para os olhos (centro da folha).
+	slung  = { 1.15, -0.1, 0.45, 0, 102 },
+	map    = { 0, 0.15, -1.55, 0, -50 },
 } :: { [string]: { number } }
 -- Tronco de lado (guinada do peito sobre a pelve, graus; o ombro esquerdo à frente, como quem segura
 -- um fuzil de verdade); a cabeça gira de volta e olha para a frente. Sai no arremesso, na faca e
@@ -77,6 +84,7 @@ ArmIK.BLADE_DEG = 25
 ArmIK.POLES = {
 	stand = { R = { 3.2, -2.6, 0.4 }, L = { -3.0, -3.0, -1.2 } },
 	prone = { R = { 2.4, 0.4, -2.2 }, L = { -2.4, 0.8, -2.2 } }, -- os do retarget deitado (tools/anim)
+	map = { R = { 3.0, -3.0, 0.4 }, L = { -3.0, -3.0, 0.4 } }, -- D-98: carta, cotovelos para fora e para baixo
 } :: { [string]: { R: V, L: V } }
 
 -- ===== vetores e rotações (tabelas {x, y, z}; matriz 3x3 por linhas) =====

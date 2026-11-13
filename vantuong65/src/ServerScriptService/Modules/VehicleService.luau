@@ -6,6 +6,17 @@
 -- pelo Motor6D "ArtMount"; cada cliente balança a arte por ele (mola da carroceria, VehicleFx). Rampas
 -- invisíveis na frente e atrás deixam a lagarta subir dique e barranco baixo. O motorista manda a
 -- rotação e a carga do motor (Vehicle_Telemetry) para os outros ouvirem e verem a fumaça.
+-- D-100 (pedido do dono, 2026-11-12: "por que não consigo pilotar", "coloque a interface do botão
+-- para eu entrar", "faça poder atirar de dentro", "andar em todo o mapa sem bugar"):
+--   - entrar só pelo painel (ProximityPrompt "VT65Embarcar" + Controllers/VehiclePrompt): o assento
+--     não senta mais pelo toque (CanTouch false), e o lugar é escolhido; remote Vehicle_Board
+--     (entrar, trocar, sair, desvirar) com a regra de papel de Roles e a troca de papel de campo;
+--   - o lugar fica no olho medido na malha (VehicleDrive.ART): a cabeça de quem está sentado é a
+--     da câmera, e quem sai é posto ao lado do veículo, fora do chassi;
+--   - lugar aberto: o assento recebe a arma do ocupante ("Weapon" + "Personal") e o ângulo
+--     (Arc*); a M60 e os canhões continuam montados ("Mounted");
+--   - carros M151, M35 e Peugeot 403 (rodas, VehicleDrive), com substituto em peças até o modelo;
+--   - preso ("Stuck") e tombado: desvirar no painel.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -13,6 +24,7 @@ local RunService = game:GetService("RunService")
 local MapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any
 local Net = require(ReplicatedStorage.Shared.Net)
 local Rng = require(ReplicatedStorage.Shared.Rng)
+local Roles = require(ReplicatedStorage.Shared.Roles)
 local VehicleDrive = require(ReplicatedStorage.Shared.VehicleDrive)
 local Vehicles = require(ReplicatedStorage.Shared.Vehicles)
 local AssetLoader = require(script.Parent.AssetLoader)
@@ -57,6 +69,8 @@ local nextId = 0
 -- Depósitos ao redor do QG dos EUA (posições de design, D-37), em metros a partir do QG. 6 veículos =
 -- critério da F4. No mapa de 2 x 2 km (D-63) o QG fica a 50 m da borda leste e a 250 m da sul: os
 -- depósitos ficam a oeste e ao norte dele (antes os LVTP-5 ficavam no mar, 140 m a leste).
+-- D-100: carros dos EUA ao sul do pátio e a picape do VC ao pé do morro do QG dele (posições de
+-- projeto, a conferir no Studio contra casas e árvores).
 local DEPOTS = {
 	{ spec = "lvtp5", dx = -60, dz = -60 },
 	{ spec = "lvtp5", dx = -60, dz = -20 },
@@ -64,6 +78,22 @@ local DEPOTS = {
 	{ spec = "ontos", dx = -130, dz = 0 },
 	{ spec = "uh34d", dx = -20, dz = 70 },
 	{ spec = "uh34d", dx = -90, dz = 70 },
+	{ spec = "m151", dx = -25, dz = -100 },
+	{ spec = "m151", dx = -40, dz = -100 },
+	{ spec = "m35", dx = -95, dz = -100 },
+	{ spec = "peugeot403", dx = 40, dz = 35 },
+	{ spec = "peugeot403", dx = 55, dz = 35 },
+}
+-- olho de quem está sentado acima do assento (studs): o lugar fica embaixo do olho medido na malha
+local EYE_ABOVE_SEAT = 3.2 -- PLACEHOLDER (soldado de 2,0 m sentado, D-98)
+local PAINT: { [string]: Color3 } = {
+	us = Color3.fromRGB(86, 90, 62), -- verde-oliva do USMC
+	civil = Color3.fromRGB(112, 124, 128), -- cinza-azulado civil desbotado (veic_peugeot403.py)
+	paint = Color3.fromRGB(86, 90, 62),
+	canvas = Color3.fromRGB(98, 96, 70),
+	glass = Color3.fromRGB(58, 68, 72),
+	tire = Color3.fromRGB(28, 27, 25),
+	wood = Color3.fromRGB(110, 92, 66),
 }
 local RESPAWN_S = 180 -- design
 -- Giro da arte em relação ao chassi (frente do chassi = -Z). Os GLBs dos veículos têm o eixo longo
@@ -124,6 +154,8 @@ local function destroyVehicle(model: Model)
 			d.Color = Color3.fromRGB(30, 28, 26)
 		elseif d:IsA("Seat") then
 			d.Disabled = true
+		elseif d:IsA("ProximityPrompt") then
+			d.Enabled = false
 		end
 	end
 	local spec, depot = model:GetAttribute("Spec"), model:GetAttribute("Depot")
@@ -230,6 +262,11 @@ local function seatOf(player: Player): Seat?
 	return if s and s:IsA("Seat") then s else nil
 end
 
+local function seatById(vehicle: Model, seatId: string): Seat?
+	local s = vehicle:FindFirstChild("Seat_" .. seatId)
+	return if s and s:IsA("Seat") then s else nil
+end
+
 -- Tiro da arma de um assento (jogador ou bot, D-90): a mesma validação para os dois. Devolve true
 -- se o tiro saiu.
 local function fireFromSeat(seat: Seat, char: Model, player: Player?, dir: Vector3, coax: boolean, now: number): boolean
@@ -237,6 +274,9 @@ local function fireFromSeat(seat: Seat, char: Model, player: Player?, dir: Vecto
 	local model = seat:FindFirstAncestorWhichIsA("Model") :: Model
 	if type(weapon) ~= "string" or model:GetAttribute("Destroyed") then
 		return false
+	end
+	if seat:GetAttribute("Personal") == true then
+		return false -- D-100: a própria arma do ocupante vai pelo CombatService (Combat_Fire)
 	end
 	local origin = seat.Position + Vector3.new(0, 2.5 / M, 0) + dir * (2 / M)
 	-- M60 do assento (porta, cúpula) e a coaxial do atirador do M48 (RB / tecla F)
@@ -530,26 +570,90 @@ local function isBot(hum: Humanoid?): boolean
 	return c ~= nil and c:GetAttribute("Bot") == true
 end
 
-local function addSeat(
-	model: Model,
-	chassis: BasePart,
-	mount: BasePart,
-	id: string,
-	role: string,
-	weapon: string?,
-	offset: Vector3
-)
+-- ===== D-100: sair para fora do chassi =====
+-- O lugar fica embaixo do olho medido na malha (dentro do casco no motorista e no atirador); quem
+-- sai é posto ao lado, no chão, do lado que estiver livre (esquerda, direita, atrás).
+local outParams = RaycastParams.new()
+outParams.FilterType = Enum.RaycastFilterType.Exclude
+outParams.RespectCanCollide = true
+
+local function placeOutside(char: Model, model: Model)
+	local chassis = model:FindFirstChild("Chassis") :: BasePart?
+	local root = char:FindFirstChild("HumanoidRootPart") :: BasePart?
+	if not (chassis and root) or not char.Parent then
+		return
+	end
+	outParams.FilterDescendantsInstances = { model, char }
+	local size = chassis.Size
+	local cf = chassis.CFrame
+	local bottom = (cf * Vector3.new(0, -size.Y / 2, 0)).Y
+	local spots = {
+		Vector3.new(-(size.X / 2 + 1.3 / M), 0, 0),
+		Vector3.new(size.X / 2 + 1.3 / M, 0, 0),
+		Vector3.new(0, 0, size.Z / 2 + 2.2 / M),
+		Vector3.new(0, 0, -(size.Z / 2 + 2.2 / M)),
+	}
+	for _, off in spots do
+		local p = cf * off
+		local top = math.max(p.Y, bottom) + size.Y + 6
+		local hit = workspace:Raycast(Vector3.new(p.X, top, p.Z), Vector3.new(0, -(size.Y + 60), 0), outParams)
+		-- algo sólido acima do chão neste ponto (casa, outro veículo): tenta o próximo
+		local y = if hit then hit.Position.Y else bottom
+		if hit and hit.Position.Y > bottom + 2.5 / M then
+			continue
+		end
+		-- helicóptero no ar: salta da altura da porta
+		if y < bottom - 4 / M then
+			y = bottom
+		end
+		local face = Vector3.new(cf.LookVector.X, 0, cf.LookVector.Z)
+		local at = Vector3.new(p.X, y + 3.2, p.Z)
+		char:PivotTo(CFrame.lookAt(at, at + (if face.Magnitude > 0.1 then face else Vector3.zAxis)))
+		root.AssemblyLinearVelocity = Vector3.zero
+		return
+	end
+	char:PivotTo(CFrame.new(cf.Position + Vector3.new(0, size.Y + 4, 0)))
+end
+
+-- arma principal do jogador (a que o CombatService conhece): a pega do chão ou a 1ª do equipamento
+local function personalWeapon(player: Player): string?
+	local carried = player:GetAttribute("CarriedWeapon")
+	if type(carried) == "string" and carried ~= "" then
+		return carried
+	end
+	local lo = player:GetAttribute("Loadout")
+	local first = if type(lo) == "string" then string.split(lo, ",")[1] else nil
+	return if first and first ~= "" then first else nil
+end
+
+local switching: { [Player]: boolean } = {} -- trocando de lugar pelo servidor: não põe para fora
+local lastOcc: { [Seat]: Humanoid? } = {}
+
+local function addSeat(model: Model, chassis: BasePart, mount: BasePart, info: Vehicles.SeatInfo, cf: CFrame)
+	local id = info.id
+	local kind = tostring(model:GetAttribute("Kind"))
 	local s = Instance.new("Seat")
 	s.Name = "Seat_" .. id
 	s.Size = Vector3.new(0.5, 0.2, 0.5) / M
 	s.Transparency = 1
 	s.CanCollide = false
+	s.CanTouch = false -- D-100: ninguém senta pelo toque (caía no lugar que encostasse); só o painel
 	s.Massless = true
-	s.CFrame = chassis.CFrame * CFrame.new(offset)
+	s.CFrame = cf
 	s:SetAttribute("SeatId", id)
-	s:SetAttribute("Role", role)
-	if weapon then
-		s:SetAttribute("Weapon", weapon)
+	s:SetAttribute("Label", info.label)
+	s:SetAttribute("Role", info.role or "any")
+	if info.weapon then
+		s:SetAttribute("Weapon", info.weapon)
+		s:SetAttribute("Mounted", true)
+	end
+	local arc = info.open
+	if arc then
+		s:SetAttribute("Open", true)
+		s:SetAttribute("ArcYaw", arc.yaw)
+		s:SetAttribute("ArcHalf", arc.half)
+		s:SetAttribute("ArcDown", arc.down)
+		s:SetAttribute("ArcUp", arc.up)
 	end
 	-- preso à arte: quem está sentado balança com a carroceria
 	local w = Instance.new("WeldConstraint")
@@ -559,11 +663,29 @@ local function addSeat(
 	s:GetPropertyChangedSignal("Occupant"):Connect(function()
 		local hum = s.Occupant
 		local player = hum and Players:GetPlayerFromCharacter(hum.Parent)
+		-- saiu: a arma do ocupante sai do lugar, e quem saiu vai para fora do chassi
+		local prev = lastOcc[s]
+		lastOcc[s] = hum
+		if not hum then
+			if s:GetAttribute("Personal") then
+				s:SetAttribute("Weapon", nil)
+				s:SetAttribute("Personal", nil)
+			end
+			local pp = prev and Players:GetPlayerFromCharacter(prev.Parent)
+			if prev and pp and prev.Health > 0 and not switching[pp] then
+				task.delay(0.05, function()
+					local char = prev.Parent
+					if prev.SeatPart == nil and char and char:IsA("Model") then
+						placeOutside(char, model)
+					end
+				end)
+			end
+		end
 		-- bot (D-90): só do lado do veículo (os blindados são dos EUA); não pilota helicóptero
 		local bot = hum ~= nil and player == nil and isBot(hum)
 		if bot and hum then
 			local okBot = (hum.Parent :: Instance):GetAttribute("Faction") == model:GetAttribute("Faction")
-				and not (id == "driver" and model:GetAttribute("Kind") == "heli")
+				and not (id == "driver" and kind == "heli")
 			if not okBot then
 				task.defer(function()
 					hum.Sit = false
@@ -572,13 +694,26 @@ local function addSeat(
 			end
 		end
 		if hum and player then
-			local ok = player:GetAttribute("Faction") == model:GetAttribute("Faction")
-				and (role == "any" or player:GetAttribute("Role") == role)
+			-- D-100: a regra de papel de Roles, com o papel de campo (VehicleCrew)
+			local crew = player:GetAttribute("VehicleCrew")
+			local role = player:GetAttribute("Role")
+			local okRole = Roles.canTakeSeat(
+				kind,
+				id,
+				if type(role) == "string" then role else nil,
+				if type(crew) == "string" then crew else nil
+			)
+			local ok = player:GetAttribute("Faction") == model:GetAttribute("Faction") and okRole
 			if not ok then
 				task.defer(function()
 					hum.Sit = false
 				end)
 				return
+			end
+			if arc and not info.weapon then
+				local wpn = personalWeapon(player)
+				s:SetAttribute("Weapon", wpn)
+				s:SetAttribute("Personal", if wpn then true else nil)
 			end
 		end
 		if id == "driver" then
@@ -629,9 +764,9 @@ local function mainPart(art: Instance): BasePart?
 end
 
 -- Rampas invisíveis na frente e atrás da lagarta: degrau que ela sobe (dique, barranco baixo).
--- 0,6 m: PLACEHOLDER (a ficha do M48 não traz o obstáculo vertical).
+-- 0,6 m: PLACEHOLDER (a ficha do M48 não traz o obstáculo vertical). D-100: o carro sobe o que a
+-- roda dele sobe (VehicleDrive.DRIVE[id].stepM).
 local RAMP_L = 1.6
-local RAMP_H = 0.6 / M
 
 local function weld(a: BasePart, b: BasePart)
 	local w = Instance.new("WeldConstraint")
@@ -639,22 +774,133 @@ local function weld(a: BasePart, b: BasePart)
 	w.Parent = b
 end
 
-function VehicleService.spawn(specId: string, depot: number): Model?
+-- Roda presa à ArtRoot por Motor6D (o VehicleFx gira e esterça pelo Transform): a junta fica no
+-- centro da roda, com os eixos do chassi (X = eixo da roda).
+local function wheelJoint(mount: BasePart, chassis: BasePart, part: BasePart)
+	local joint = CFrame.new(part.Position) * chassis.CFrame.Rotation
+	local m6 = Instance.new("Motor6D")
+	m6.Name = part.Name
+	m6.Part0, m6.Part1 = mount, part
+	m6.C0 = mount.CFrame:ToObjectSpace(joint)
+	m6.C1 = part.CFrame:ToObjectSpace(joint)
+	m6.Parent = mount
+end
+
+local function artPart(name: string, size: Vector3, cf: CFrame, color: Color3): Part
+	local p = Instance.new("Part")
+	p.Name = name
+	p.Size = size
+	p.CFrame = cf
+	p.Color = color
+	p.Material = Enum.Material.SmoothPlastic
+	p.TopSurface = Enum.SurfaceType.Smooth
+	p.BottomSurface = Enum.SurfaceType.Smooth
+	p.Anchored = false
+	p.CanCollide = false
+	p.CanTouch = false
+	p.Massless = true
+	p.CastShadow = true
+	return p
+end
+
+-- D-100: substituto em peças do carro (até o dono publicar o modelo do Blender): caixas do corpo
+-- e as rodas com o nome das peças do modelo. Tudo no referencial do chassi a partir do chão.
+local function placeholderCar(specId: string, chassis: BasePart, mount: BasePart): Model?
+	local wd = Vehicles.WHEELED[specId]
+	if not wd then
+		return nil
+	end
+	local art = Instance.new("Model")
+	art.Name = "Art"
+	local base = mount.CFrame -- centro do chassi, no chão
+	local paint = PAINT[wd.color] or PAINT.us
+	for _, b in wd.body do
+		local c = if b.color == "paint" or b.color == "civil" or b.color == "us" then paint else PAINT[b.color] or paint
+		local p = artPart(
+			b.name,
+			Vector3.new(b.size[1], b.size[2], b.size[3]) / M,
+			base * CFrame.new(b.at[1] / M, b.at[2] / M, b.at[3] / M),
+			c
+		)
+		if b.color == "glass" then
+			p.Transparency = 0.55
+		elseif b.color == "canvas" then
+			p.Material = Enum.Material.Fabric
+		end
+		p.Parent = art
+		weld(mount, p)
+	end
+	for _, w in wd.wheels do
+		local p = artPart(
+			w.name,
+			Vector3.new(wd.wheelW, 2 * wd.wheelR, 2 * wd.wheelR) / M,
+			base * CFrame.new(w.x / M, wd.wheelR / M, w.z / M),
+			PAINT.tire
+		)
+		p.Shape = Enum.PartType.Cylinder -- o eixo do cilindro é o X da peça (= eixo da roda)
+		p.Parent = art
+		wheelJoint(mount, chassis, p)
+	end
+	art.Parent = chassis.Parent
+	return art
+end
+
+-- Onde fica cada lugar (CFrame no mundo, na hora do nascimento). Com a arte medida: embaixo do olho
+-- (VehicleDrive.eyeOf, o mesmo da câmera). Carro: a posição do Blender (Vehicles.WHEELED). Sem nada:
+-- a grade antiga em cima do chassi.
+local function seatCFrame(
+	specId: string,
+	info: Vehicles.SeatInfo,
+	k: number,
+	chassis: BasePart,
+	mount: BasePart,
+	mesh: BasePart?
+): CFrame
+	local rot = chassis.CFrame.Rotation
+	local at = Vehicles.wheeledSeatAt(specId, info.id)
+	if at then
+		return mount.CFrame * CFrame.new(at[1] / M, at[2] / M, at[3] / M)
+	end
+	local art = VehicleDrive.ART[specId]
+	local ex, ey, ez = VehicleDrive.eyeOf(specId, info.id)
+	if mesh and art and ex and ey and ez then
+		local box = art.box
+		local s = mesh.Size / Vector3.new(box[1], box[2], box[3])
+		local eye = mesh.CFrame * Vector3.new(ex * s.X, ey * s.Y, ez * s.Z)
+		return CFrame.new(eye - Vector3.new(0, EYE_ABOVE_SEAT, 0)) * rot
+	end
+	local W = chassis.Size.X
+	local nSeats = #(Vehicles.SPECS[specId] :: any).seats
+	if k <= nSeats then
+		local off =
+			Vector3.new(((k - 1) % 2 - 0.5) * W * 0.4, chassis.Size.Y / 2, -chassis.Size.Z * 0.3 + (k // 2) * 0.8 / M)
+		return chassis.CFrame * CFrame.new(off)
+	end
+	local i = k - nSeats
+	local row = (i - 1) // 2
+	local off = Vector3.new(((i - 1) % 2 - 0.5) * W * 0.5, chassis.Size.Y / 2, chassis.Size.Z * 0.05 + row * 0.7 / M)
+	return chassis.CFrame * CFrame.new(off)
+end
+
+-- Monta o veículo em `at` (chão sob o centro), virado para `yaw`. depot: para renascer (nil = teste).
+local function build(specId: string, at: Vector3, yaw: number, depot: number?): Model?
 	local spec = Vehicles.SPECS[specId]
-	local d = DEPOTS[depot]
-	local hq = MapConfig.HQ.US
-	if not spec or not d then
+	if not spec then
 		return nil
 	end
 	nextId += 1
-	local x, z = hq.x + d.dx / M, hq.z + d.dz / M
+	local x, z = at.X, at.Z
 	local L, W, H = spec.lengthM / M, spec.widthM / M, spec.heightM / M
 	local heli = spec.kind == "heli"
+	local wheeled = spec.kind == "wheeled"
+	local drive = VehicleDrive.DRIVE[specId]
+	local rampH = ((drive and drive.stepM) or 0.6) / M
 	local tpl = AssetLoader.template(specId)
 	local info = VehicleDrive.ART[specId]
 	-- Comprimento do chassi: o do laço da lagarta medido na malha (o canhão do M48 passa muito da
 	-- frente; a caixa antes ficava 1 m adiante do casco), menos as rampas. Sem arte: 75% da ficha.
-	local length = if heli then L * 0.8 else L * 0.75
+	-- Carro: o comprimento todo menos as rampas.
+	local length = if heli then L * 0.8 elseif wheeled then L - 2 * RAMP_L else L * 0.75
 	local hullCenter = 0 -- x da malha que vai para o centro do chassi
 	local tplMesh = if tpl then mainPart(tpl) else nil
 	if not heli and tplMesh and info and info.track then
@@ -673,14 +919,14 @@ function VehicleService.spawn(specId: string, depot: number): Model?
 	model.ModelStreamingMode = Enum.ModelStreamingMode.Atomic
 	local chassis = Instance.new("Part")
 	chassis.Name = "Chassis"
-	chassis.Size = Vector3.new(W, H * 0.55, length)
+	chassis.Size = Vector3.new(if wheeled then W * 0.95 else W, H * 0.55, length)
 	chassis.Color = Color3.fromRGB(86, 90, 62)
 	chassis.Material = Enum.Material.Metal
 	-- densidade < 1 boia na água do terreno: só o anfíbio (e o helicóptero, que não pousa na água).
-	-- O M48 e o Ontos afundam e atolam no riacho fundo em vez de flutuar.
-	local density = if spec.kind == "tracked" then 1.6 else 0.7
+	-- O M48 e o Ontos afundam e atolam no riacho fundo em vez de flutuar; o carro também afunda.
+	local density = if spec.kind == "tracked" or wheeled then 1.6 else 0.7
 	chassis.CustomPhysicalProperties = PhysicalProperties.new(density, 0.6, 0.1)
-	chassis.CFrame = CFrame.new(x, SpawnService.groundY(x, z) + chassis.Size.Y / 2 + 1, z)
+	chassis.CFrame = CFrame.new(x, SpawnService.groundY(x, z) + chassis.Size.Y / 2 + 1, z) * CFrame.Angles(0, yaw, 0)
 	-- passa pelo tronco das árvores da mata (D-67): o tronco só segura gente e bala
 	AssetLoader.ensureGroups()
 	chassis.CollisionGroup = AssetLoader.VEHICLE_GROUP
@@ -690,13 +936,13 @@ function VehicleService.spawn(specId: string, depot: number): Model?
 		for _, sgn in { -1, 1 } do
 			local r = Instance.new("WedgePart")
 			r.Name = if sgn < 0 then "RampFront" else "RampRear"
-			r.Size = Vector3.new(W * 0.95, RAMP_H, RAMP_L)
+			r.Size = Vector3.new(W * 0.95, rampH, RAMP_L)
 			-- frente: rampa virada (alta na ponta, baixa junto ao chassi); atrás, o espelho
 			local turn = if sgn < 0
 				then CFrame.Angles(0, 0, math.pi)
 				else CFrame.Angles(0, math.pi, 0) * CFrame.Angles(0, 0, math.pi)
 			r.CFrame = chassis.CFrame
-				* CFrame.new(0, -chassis.Size.Y / 2 + RAMP_H / 2, sgn * (chassis.Size.Z / 2 + RAMP_L / 2))
+				* CFrame.new(0, -chassis.Size.Y / 2 + rampH / 2, sgn * (chassis.Size.Z / 2 + RAMP_L / 2))
 				* turn
 			r.Transparency = 1
 			r.Massless = true
@@ -724,22 +970,33 @@ function VehicleService.spawn(specId: string, depot: number): Model?
 	motor.Part0, motor.Part1 = chassis, mount
 	motor.C0 = chassis.CFrame:ToObjectSpace(mount.CFrame)
 	motor.Parent = chassis
-	-- arte do ForgeGUI (se publicada): presa à ArtRoot, sem colisão; o chassi vira invisível
+	-- arte do ForgeGUI/Blender (se publicada): presa à ArtRoot, sem colisão; o chassi vira invisível
+	local mesh: BasePart? = nil
+	local wheelNames: { [string]: boolean } = {}
+	local wheeledArt = Vehicles.WHEELED[specId]
+	if wheeledArt then
+		for _, wh in wheeledArt.wheels do
+			wheelNames[wh.name] = true
+		end
+	end
 	if tpl then
 		local art = tpl:Clone()
 		art.Name = "Art"
+		local artYaw = if Vehicles.WHEELED[specId]
+			then math.rad(Vehicles.WHEELED[specId].artYawDeg)
+			else ART_YAW[specId] or 0
 		-- pela caixa (não pelo pivô, que pode estar na base): fundo da arte no fundo do chassi
 		local boxCF, size = art:GetBoundingBox()
 		local pivotInBox = boxCF:ToObjectSpace(art:GetPivot())
 		art:PivotTo(
 			chassis.CFrame
 				* CFrame.new(0, -chassis.Size.Y / 2 + size.Y / 2, 0)
-				* CFrame.Angles(0, ART_YAW[specId] or 0, 0)
+				* CFrame.Angles(0, artYaw, 0)
 				* pivotInBox
 		)
-		local mesh = mainPart(art)
+		mesh = mainPart(art)
 		if mesh and hullCenter ~= 0 then
-			local shift = mesh.CFrame:VectorToWorldSpace(Vector3.new(hullCenter, 0, 0))
+			local shift = (mesh :: BasePart).CFrame:VectorToWorldSpace(Vector3.new(hullCenter, 0, 0))
 			art:PivotTo(CFrame.new(-shift) * art:GetPivot())
 		end
 		for _, p in art:GetDescendants() do
@@ -747,10 +1004,16 @@ function VehicleService.spawn(specId: string, depot: number): Model?
 				p.Anchored = false
 				p.CanCollide = false
 				p.Massless = true
-				weld(mount, p)
+				if wheelNames[p.Name] then
+					wheelJoint(mount, chassis, p) -- roda do modelo: gira e esterça (VehicleFx)
+				else
+					weld(mount, p)
+				end
 			end
 		end
 		art.Parent = model
+		chassis.Transparency = 1
+	elseif wheeled and placeholderCar(specId, chassis, mount) then
 		chassis.Transparency = 1
 	end
 	local att = Instance.new("Attachment")
@@ -779,23 +1042,33 @@ function VehicleService.spawn(specId: string, depot: number): Model?
 	ao.MaxTorque = chassis.AssemblyMass * workspace.Gravity * 50
 	ao.CFrame = chassis.CFrame.Rotation
 	ao.Parent = chassis
-	-- assentos: tripulação na frente, passageiros atrás
-	for i, s in spec.seats do
-		local off =
-			Vector3.new(((i - 1) % 2 - 0.5) * W * 0.4, chassis.Size.Y / 2, -chassis.Size.Z * 0.3 + (i // 2) * 0.8 / M)
-		addSeat(model, chassis, mount, s.id, s.role, s.weapon, off)
-	end
-	for i = 1, Vehicles.PASSENGERS[specId] or 0 do
-		local row = (i - 1) // 2
-		local off =
-			Vector3.new(((i - 1) % 2 - 0.5) * W * 0.5, chassis.Size.Y / 2, chassis.Size.Z * 0.05 + row * 0.7 / M)
-		addSeat(model, chassis, mount, "p" .. i, "any", nil, off)
-	end
+	-- os atributos antes dos assentos: o assento lê o tipo na hora de checar o papel
 	model:SetAttribute("VehicleId", nextId)
 	model:SetAttribute("Spec", specId)
 	model:SetAttribute("Kind", spec.kind)
 	model:SetAttribute("Faction", spec.faction)
 	model:SetAttribute("Depot", depot)
+	-- assentos (D-100: embaixo do olho medido na malha; carro, pela posição do Blender)
+	for k, s in Vehicles.seatList(specId) do
+		addSeat(model, chassis, mount, s, seatCFrame(specId, s, k, chassis, mount, mesh))
+	end
+	-- D-100: painel de entrar (Controllers/VehiclePrompt desenha; o servidor só valida o pedido)
+	local pa = Instance.new("Attachment")
+	pa.Name = "Embarque"
+	pa.Position = Vector3.new(0, chassis.Size.Y / 2, 0)
+	pa.Parent = chassis
+	local pp = Instance.new("ProximityPrompt")
+	pp.Name = "VT65Embarcar"
+	pp.ActionText = "Entrar"
+	pp.ObjectText = spec.name
+	pp.HoldDuration = 0.4 -- o toque curto de X é recarregar (InfantryController)
+	pp.MaxActivationDistance = math.max(chassis.Size.X, chassis.Size.Z) / 2 + 3 / M
+	pp.RequiresLineOfSight = false
+	pp.Style = Enum.ProximityPromptStyle.Custom
+	pp.KeyboardKeyCode = Enum.KeyCode.F
+	pp.GamepadKeyCode = Enum.KeyCode.ButtonX
+	pp.Exclusivity = Enum.ProximityPromptExclusivity.OnePerButton
+	pp.Parent = pa
 	model:SetAttribute("Integrity", 100)
 	model:SetAttribute("Engine", 100)
 	model:SetAttribute("Tracks", 100)
@@ -814,6 +1087,21 @@ function VehicleService.spawn(specId: string, depot: number): Model?
 	end
 	model.Parent = folder
 	return model
+end
+
+function VehicleService.spawn(specId: string, depot: number): Model?
+	local d = DEPOTS[depot]
+	local spec = Vehicles.SPECS[specId]
+	if not spec or not d then
+		return nil
+	end
+	local hq = MapConfig.HQ[spec.faction] or MapConfig.HQ.US
+	return build(specId, Vector3.new(hq.x + d.dx / M, 0, hq.z + d.dz / M), 0, depot)
+end
+
+-- Veículo de teste fora dos depósitos (ganchos do Studio): não renasce
+function VehicleService.spawnAt(specId: string, at: Vector3, yaw: number): Model?
+	return build(specId, at, yaw, nil)
 end
 
 -- Rotação (0..1), carga (0..1) e rotor (0..1) que o motorista manda ~6 vezes por segundo: viram
@@ -848,9 +1136,215 @@ local function onTelemetry(player: Player, msg: any)
 	end
 end
 
+-- ===== D-100: entrar, trocar de lugar, sair e desvirar (remote Vehicle_Board) =====
+local function notice(player: Player, msg: string)
+	Net.event("Vehicle_Notice"):FireClient(player, msg)
+end
+
+local function flatDist(a: Vector3, b: Vector3): number
+	return Vector3.new(a.X - b.X, 0, a.Z - b.Z).Magnitude
+end
+
+-- alcance do painel: a caixa do chassi mais 5 m (o prompt abre a 3 m da caixa)
+local function reachOf(chassis: BasePart): number
+	return math.max(chassis.Size.X, chassis.Size.Z) / 2 + 5 / M
+end
+
+-- Há vaga para mais um com o papel no lado? (lugares que pedem o papel contra quem já tem)
+local function crewVacancy(faction: string, role: string): boolean
+	local seats = 0
+	for _, m in folder:GetChildren() do
+		if m:GetAttribute("Faction") == faction and not m:GetAttribute("Destroyed") then
+			for _, s in m:GetChildren() do
+				if s:IsA("Seat") and s:GetAttribute("Role") == role then
+					seats += 1
+				end
+			end
+		end
+	end
+	local holders = 0
+	for _, p in Players:GetPlayers() do
+		if
+			p:GetAttribute("Faction") == faction
+			and (p:GetAttribute("Role") == role or p:GetAttribute("VehicleCrew") == role)
+		then
+			holders += 1
+		end
+	end
+	return Roles.crewVacancy(seats, holders)
+end
+
+local function sitIn(player: Player, char: Model, hum: Humanoid, seat: Seat)
+	switching[player] = true
+	local cur = hum.SeatPart
+	hum.Sit = false
+	local w = cur and cur:FindFirstChild("SeatWeld")
+	if w then
+		w:Destroy()
+	end
+	task.wait()
+	char:PivotTo(seat.CFrame * CFrame.new(0, 3, 0))
+	seat:Sit(hum)
+	task.delay(0.4, function()
+		switching[player] = nil
+	end)
+end
+
+local recoverAt: { [Model]: number } = {}
+local function recover(player: Player, model: Model, char: Model)
+	local chassis = model:FindFirstChild("Chassis") :: BasePart?
+	local root = char:FindFirstChild("HumanoidRootPart") :: BasePart?
+	if not (chassis and root) or model:GetAttribute("Destroyed") then
+		return
+	end
+	local seat = seatOf(player)
+	local inside = seat ~= nil and seat:FindFirstAncestorWhichIsA("Model") == model
+	if player:GetAttribute("Faction") ~= model:GetAttribute("Faction") then
+		return
+	end
+	if not inside and flatDist(root.Position, chassis.Position) > reachOf(chassis) then
+		notice(player, "Longe demais")
+		return
+	end
+	local now = os.clock()
+	local speed = chassis.AssemblyLinearVelocity.Magnitude * M
+	local ok, why = Vehicles.canRecover(
+		chassis.CFrame.UpVector.Y,
+		speed,
+		model:GetAttribute("Stuck") == true,
+		now - (recoverAt[model] or -1e9)
+	)
+	if not ok then
+		notice(player, why)
+		return
+	end
+	recoverAt[model] = now
+	local driverSeat = seatById(model, "driver")
+	local occ = driverSeat and driverSeat.Occupant
+	local driver = occ and Players:GetPlayerFromCharacter(occ.Parent)
+	pcall(function()
+		chassis:SetNetworkOwner(nil)
+	end)
+	local look = chassis.CFrame.LookVector
+	local flat = Vector3.new(look.X, 0, look.Z)
+	if flat.Magnitude < 0.1 then
+		flat = Vector3.new(chassis.CFrame.UpVector.X, 0, chassis.CFrame.UpVector.Z)
+	end
+	local yaw = if flat.Magnitude > 1e-3 then math.atan2(-flat.X, -flat.Z) else 0
+	local p = chassis.Position
+	local ground = SpawnService.groundY(p.X, p.Z)
+	local y = math.max(p.Y, ground + chassis.Size.Y / 2) + Vehicles.RECOVER.liftM / M
+	local cf = CFrame.new(p.X, y, p.Z) * CFrame.Angles(0, yaw, 0)
+	model:PivotTo(cf)
+	chassis.AssemblyLinearVelocity = Vector3.zero
+	chassis.AssemblyAngularVelocity = Vector3.zero
+	local ao = chassis:FindFirstChild("DriveAttitude") :: AlignOrientation?
+	if ao then
+		ao.CFrame = cf.Rotation
+	end
+	local lv = chassis:FindFirstChild("DriveVelocity") :: LinearVelocity?
+	if lv then
+		lv.PlaneVelocity = Vector2.zero
+		lv.VectorVelocity = Vector3.zero
+	end
+	model:SetAttribute("Stuck", nil)
+	-- o motorista zera o rumo e a velocidade guardados (VehicleController)
+	model:SetAttribute("Recovered", ((model:GetAttribute("Recovered") :: number?) or 0) + 1)
+	task.delay(0.6, function()
+		local o = driverSeat and driverSeat.Occupant
+		if driver and o and o.Parent == driver.Character then
+			pcall(function()
+				chassis:SetNetworkOwner(driver)
+			end)
+		end
+	end)
+	notice(player, "Veículo desvirado")
+end
+
+local boardAt: { [Player]: number } = {}
+local function onBoard(player: Player, req: any)
+	if type(req) ~= "table" then
+		return
+	end
+	local now = os.clock()
+	if now - (boardAt[player] or 0) < 0.3 then
+		return
+	end
+	boardAt[player] = now
+	local char = player.Character
+	local hum = char and char:FindFirstChildOfClass("Humanoid")
+	local root = char and char:FindFirstChild("HumanoidRootPart") :: BasePart?
+	if not (char and hum and root) then
+		return
+	end
+	local cur = seatOf(player)
+	if req.op == "exit" then
+		if cur then
+			hum.Sit = false -- o Occupant põe para fora do chassi (addSeat)
+			local w = cur:FindFirstChild("SeatWeld")
+			if w then
+				w:Destroy()
+			end
+		end
+		return
+	end
+	local model = req.v
+	if typeof(model) ~= "Instance" or not model:IsA("Model") or model.Parent ~= folder then
+		return
+	end
+	if req.op == "recover" then
+		recover(player, model, char)
+		return
+	end
+	local seatId = req.seat
+	local spec = Vehicles.SPECS[tostring(model:GetAttribute("Spec"))]
+	local chassis = model:FindFirstChild("Chassis") :: BasePart?
+	if type(seatId) ~= "string" or not (spec and chassis) then
+		return
+	end
+	local seat = seatById(model, seatId)
+	local inThis = cur ~= nil and cur:FindFirstAncestorWhichIsA("Model") == model
+	local role = player:GetAttribute("Role")
+	local crew = player:GetAttribute("VehicleCrew")
+	local need = Roles.vehicleSeatRole(spec.kind, seatId)
+	local faction = tostring(player:GetAttribute("Faction"))
+	local verdict, missing = Vehicles.boardCheck({
+		sameFaction = faction == model:GetAttribute("Faction"),
+		destroyed = model:GetAttribute("Destroyed") == true,
+		alive = hum.Health > 0 and char:GetAttribute("Downed") ~= true,
+		near = inThis or flatDist(root.Position, chassis.Position) <= reachOf(chassis),
+		inOther = cur ~= nil and not inThis,
+		seatExists = seat ~= nil and not (seat :: Seat).Disabled,
+		seatFree = seat ~= nil and ((seat :: Seat).Occupant == nil or (seat :: Seat).Occupant == hum),
+		kind = spec.kind,
+		seatId = seatId,
+		role = if type(role) == "string" then role else nil,
+		crewRole = if type(crew) == "string" then crew else nil,
+		wantCrew = req.crew == true,
+		vacancy = need == nil or crewVacancy(faction, need),
+	})
+	if verdict ~= "ok" and verdict ~= "crew" then
+		notice(player, verdict)
+		return
+	end
+	if verdict == "crew" and missing then
+		player:SetAttribute("VehicleCrew", missing) -- papel de campo até morrer (Roles)
+		notice(
+			player,
+			string.format("Você agora é %s neste combate", string.lower(Roles.CREW_NAME[missing] or missing))
+		)
+	end
+	local s = seat :: Seat
+	if s.Occupant == hum then
+		return
+	end
+	sitIn(player, char, hum, s)
+end
+
 -- Gancho de teste (só no Studio): workspace:SetAttribute("VT65DevDrive", "m48a3") senta o primeiro
--- jogador no motorista do veículo mais perto com essa ficha ("ontos", "lvtp5", "uh34d"); "sair" tira.
--- Põe a facção e o papel que o assento pede. Melhor com o jogador já em campo (CLAUDE.md, autoteste).
+-- jogador no motorista do veículo mais perto com essa ficha ("ontos", "lvtp5", "uh34d", "m151",
+-- "m35", "peugeot403"); sem nenhum livre, faz um a 12 m à frente do jogador. "sair" tira. Põe a
+-- facção do veículo e o papel de campo que o lugar pede.
 local function devDrive()
 	local want = workspace:GetAttribute("VT65DevDrive")
 	if type(want) ~= "string" then
@@ -903,20 +1397,101 @@ local function devDrive()
 		end
 	end
 	if not best then
+		local r = root :: BasePart
+		local look = Vector3.new(r.CFrame.LookVector.X, 0, r.CFrame.LookVector.Z)
+		local m = VehicleService.spawnAt(want, r.Position + look.Unit * (12 / M), math.atan2(-look.X, -look.Z))
+		local seat = m and m:FindFirstChild("Seat_driver")
+		best = if seat and seat:IsA("Seat") then seat else nil
+		task.wait(0.2)
+	end
+	if not best then
 		warn("[VT65 TESTE] VT65DevDrive: nenhum", want, "livre")
 		return
 	end
 	player:SetAttribute("Faction", spec.faction)
-	player:SetAttribute("Role", best:GetAttribute("Role"))
-	hum.Sit = false
-	task.wait()
-	char:PivotTo(best.CFrame * CFrame.new(0, 3, 0))
-	task.wait()
-	best:Sit(hum)
+	local need = Roles.vehicleSeatRole(spec.kind, "driver")
+	if need then
+		player:SetAttribute("VehicleCrew", need)
+	end
+	sitIn(player, char :: Model, hum :: Humanoid, best :: Seat)
 	print("[VT65 TESTE] VT65DevDrive:", player.Name, "no motorista de", spec.name)
 end
 
--- validação: velocidade acima da ficha (+25% e margem) devolve a posse ao servidor por 3 s
+-- Gancho de teste (só no Studio): workspace:SetAttribute("VT65DevVeh", X), sem sentar ninguém:
+--   "m151" (ou outra ficha) faz o veículo 12 m à frente do primeiro jogador; "todos" faz um de cada
+--   numa fila; "tombar" deita de lado o veículo mais perto (para testar o desvirar).
+local function devVeh()
+	local want = workspace:GetAttribute("VT65DevVeh")
+	if type(want) ~= "string" then
+		return
+	end
+	workspace:SetAttribute("VT65DevVeh", nil)
+	local player = Players:GetPlayers()[1]
+	local root = player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") :: BasePart?
+	if not root then
+		warn("[VT65 TESTE] VT65DevVeh: jogador sem personagem em campo")
+		return
+	end
+	local r = root :: BasePart
+	local look = Vector3.new(r.CFrame.LookVector.X, 0, r.CFrame.LookVector.Z).Unit
+	local right = Vector3.new(-look.Z, 0, look.X)
+	local yaw = math.atan2(-look.X, -look.Z)
+	if want == "tombar" then
+		local best: Model? = nil
+		local bestD = math.huge
+		for _, m in folder:GetChildren() do
+			local ch = m:FindFirstChild("Chassis") :: BasePart?
+			if m:IsA("Model") and ch and not m:GetAttribute("Destroyed") then
+				local d = flatDist(ch.Position, r.Position)
+				if d < bestD then
+					best, bestD = m, d
+				end
+			end
+		end
+		if best then
+			local ch = best:FindFirstChild("Chassis") :: BasePart
+			pcall(function()
+				ch:SetNetworkOwner(nil)
+			end)
+			local cf = ch.CFrame * CFrame.Angles(0, 0, math.rad(100))
+			best:PivotTo(cf + Vector3.new(0, ch.Size.X / 2, 0))
+			local ao = ch:FindFirstChild("DriveAttitude") :: AlignOrientation?
+			if ao then
+				ao.CFrame = cf.Rotation
+			end
+			print("[VT65 TESTE] VT65DevVeh: tombado", best.Name)
+		end
+		return
+	end
+	local list: { string } = {}
+	if want == "todos" then
+		for _, id in { "m151", "m35", "peugeot403", "m48a3", "ontos", "lvtp5", "uh34d" } do
+			table.insert(list, id)
+		end
+	elseif Vehicles.SPECS[want] then
+		table.insert(list, want)
+	else
+		warn("[VT65 TESTE] VT65DevVeh: ficha desconhecida", want)
+		return
+	end
+	local x = 0
+	for i, id in list do
+		local spec = Vehicles.SPECS[id]
+		local half = spec.widthM / M / 2
+		if i > 1 then
+			x += half + 4 / M
+		end
+		local at = r.Position + look * (14 / M) + right * x
+		VehicleService.spawnAt(id, at, yaw)
+		print("[VT65 TESTE] VT65DevVeh:", spec.name, "à frente do jogador")
+		x += half
+		task.wait(0.1)
+	end
+end
+
+-- validação: velocidade acima da ficha (+25% e margem) devolve a posse ao servidor por 3 s.
+-- D-100: preso = motor acelerando (rotação alta) e parado por 3 s; libera o "desvirar" no painel.
+local stuckT: { [Instance]: number } = {}
 local function validate()
 	for _, model in folder:GetChildren() do
 		local chassis = model:FindFirstChild("Chassis") :: BasePart?
@@ -936,6 +1511,19 @@ local function validate()
 					lv.VectorVelocity = Vector3.zero
 				end
 			end
+			local rpm = model:GetAttribute("NetRpm")
+			local pushing = model:GetAttribute("EngineOn") == true and type(rpm) == "number" and rpm >= 0.6
+			local t = if pushing and horiz < 0.4 and spec.kind ~= "heli" then (stuckT[model] or 0) + 0.5 else 0
+			stuckT[model] = t
+			local stuck = t >= Vehicles.RECOVER.stuckS
+			if (model:GetAttribute("Stuck") == true) ~= stuck then
+				model:SetAttribute("Stuck", if stuck then true else nil)
+			end
+		end
+	end
+	for m in stuckT do
+		if m.Parent ~= folder then
+			stuckT[m] = nil
 		end
 	end
 end
@@ -956,11 +1544,15 @@ function VehicleService.vehicles(): { Model }
 	return out
 end
 
-local function seatById(vehicle: Model, seatId: string): Seat?
-	local s = vehicle:FindFirstChild("Seat_" .. seatId)
-	return if s and s:IsA("Seat") then s else nil
+-- Lugar pelo id (API dos bots). D-100: nos carros (botDrive = false) o motorista e o atirador não
+-- aparecem para os bots: o BotDriver foi feito para lagarta (gira no lugar) e o carro não gira parado.
+function VehicleService.seat(vehicle: Model, seatId: string): Seat?
+	local spec = Vehicles.SPECS[tostring(vehicle:GetAttribute("Spec"))]
+	if spec and spec.botDrive == false and (seatId == "driver" or seatId == "gunner") then
+		return nil
+	end
+	return seatById(vehicle, seatId)
 end
-VehicleService.seat = seatById
 
 -- Senta o bot no assento (só do lado do veículo; motorista de helicóptero não). true se sentou.
 function VehicleService.botBoard(vehicle: Model, botModel: Model, seatId: string): boolean
@@ -1104,22 +1696,35 @@ function VehicleService.start()
 	(telemetry :: UnreliableRemoteEvent).OnServerEvent:Connect(onTelemetry)
 	Players.PlayerRemoving:Connect(function(p)
 		lastTelemetry[p] = nil
+		boardAt[p] = nil
+		switching[p] = nil
 	end)
 	if RunService:IsStudio() then
 		workspace:GetAttributeChangedSignal("VT65DevDrive"):Connect(function()
 			task.spawn(devDrive)
 		end)
+		workspace:GetAttributeChangedSignal("VT65DevVeh"):Connect(function()
+			task.spawn(devVeh)
+		end)
 	end
-	-- trocar de assento (Y segurado / C): próximo assento livre que o papel permite
+	-- D-100: painel do veículo (entrar, trocar de lugar, sair, desvirar)
+	Net.event("Vehicle_Board").OnServerEvent:Connect(function(player, req)
+		onBoard(player, req)
+	end)
+	-- trocar de assento (formato antigo): próximo assento livre que a regra de papel permite. O
+	-- controle agora abre o painel (D-100); fica para quem ainda manda este remote.
 	Net.event("Vehicle_SwitchSeat").OnServerEvent:Connect(function(player)
 		local seat = seatOf(player)
-		local hum = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
-		if not seat or not hum then
+		local char = player.Character
+		local hum = char and char:FindFirstChildOfClass("Humanoid")
+		if not seat or not (char and hum) then
 			return
 		end
 		local model = seat:FindFirstAncestorWhichIsA("Model") :: Model
+		local kind = tostring(model:GetAttribute("Kind"))
+		local role, crew = player:GetAttribute("Role"), player:GetAttribute("VehicleCrew")
 		local seats = {}
-		for _, d in model:GetDescendants() do
+		for _, d in model:GetChildren() do
 			if d:IsA("Seat") and not d.Disabled then
 				table.insert(seats, d)
 			end
@@ -1130,19 +1735,24 @@ function VehicleService.start()
 		local i = table.find(seats, seat) or 0
 		for k = 1, #seats - 1 do
 			local cand = seats[(i + k - 1) % #seats + 1]
-			local role = cand:GetAttribute("Role")
-			if not cand.Occupant and (role == "any" or player:GetAttribute("Role") == role) then
-				hum.Sit = false
-				task.wait()
-				cand:Sit(hum)
+			local ok = Roles.canTakeSeat(
+				kind,
+				tostring(cand:GetAttribute("SeatId")),
+				if type(role) == "string" then role else nil,
+				if type(crew) == "string" then crew else nil
+			)
+			if not cand.Occupant and ok then
+				sitIn(player, char, hum, cand)
 				return
 			end
 		end
 	end)
-	-- foguetes do papel antitanque: 3 por vida (PLACEHOLDER)
+	-- foguetes do papel antitanque: 3 por vida (PLACEHOLDER); o papel de campo do veículo (D-100)
+	-- vale uma vida só
 	local function arm(player: Player)
 		player.CharacterAdded:Connect(function()
 			player:SetAttribute("Rockets", if player:GetAttribute("Role") == "anti_tank" then 3 else 0)
+			player:SetAttribute("VehicleCrew", nil)
 		end)
 	end
 	for _, p in Players:GetPlayers() do

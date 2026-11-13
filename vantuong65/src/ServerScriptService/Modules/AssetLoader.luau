@@ -1,16 +1,16 @@
 --!strict
 -- Troca os placeholders do greybox pelos modelos do ForgeGUI publicados no Roblox (AssetIds).
 -- Com ID 0 nada muda. F3 = setor central com arte final; o resto do mapa entra na F5 (D-14).
--- Posicionamento determinístico (semente fixa), sempre no chão real do terreno.
+-- Posicionamento determinístico (semente fixa). 2026-11-12: o lugar e a altura de cada coisa vêm do
+-- plano da arte (ArtPlan), o mesmo que gerou o terreno.
 local InsertService = game:GetService("InsertService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerStorage = game:GetService("ServerStorage")
 
 local AssetIds = require(ReplicatedStorage.Shared.AssetIds) :: any
 local ArtBudget = require(script.Parent.ArtBudget)
+local ArtPlan = require(script.Parent.ArtPlan) :: any
 local Animals = require(ReplicatedStorage.Shared.Animals)
-local Front = require(ReplicatedStorage.Shared.Front)
-local SpawnRules = require(ReplicatedStorage.Shared.SpawnRules)
 local Geometry = require(ReplicatedStorage.Shared.Geometry)
 local GunModel = require(ReplicatedStorage.Shared.GunModel)
 local MapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any
@@ -27,9 +27,7 @@ local M = 0.28
 -- F5: arte nos 5 setores, com teto por setor (Parte 2: 60 fps no pior setor). Triângulos por
 -- instância medidos no manifest (ArtBudget, conferido pelo teste da F5). O teto é conservador até a
 -- medição no Studio (D-45).
-local SLICE_SECTORS = { [1] = true, [2] = true, [3] = true, [4] = true, [5] = true }
 AssetLoader.SECTOR_TRI_BUDGET = ArtBudget.SECTOR_MAX
-type HedgeJob = { part: BasePart, key: string, n: number, sector: number }
 local sectorTris: { [number]: number } = {}
 local sectorCount: { [number]: number } = {}
 -- vilas da carta com gente morando (D-74): canteiro de muda e manada de búfalos no arrozal. Mapa de
@@ -320,13 +318,12 @@ end
 -- no Studio (2026-11-11): 1.136 das 1.155 lâminas d'água do arrozal com o topo abaixo do chão (o
 -- arrozal parecia capim seco), 594 diques enterrados e 134 sebes flutuando até 0,9 m.
 -- - lâmina: 6 cm acima da mediana do chão sob ela;
--- - dique: crista 35 cm acima do ponto mais alto do chão ao longo dele, e o pé abaixo do mais baixo;
 -- - sebe (peça invisível que marca a linha das touceiras): pé no chão e SEM colisão. Era uma parede
 --   invisível de 2,3 m no meio da lavoura.
 -- Mapa de 1 x 1 km (2026-11-11, achado no Studio: o chão furava a lâmina e o movimento lia "seco"):
--- com `paddies` (VT65Build.Build.paddySet), o terreno já sai plano debaixo de cada tabuleiro e a
--- lâmina vai ao topo calculado do tabuleiro, 10 cm acima do chão; o dique fica pelo menos 25 cm
--- acima da lâmina mais alta de cada lado.
+-- com `paddies` (ArtPlan: o plano do terreno), o terreno já sai plano debaixo de cada tabuleiro e a
+-- lâmina vai ao topo calculado do tabuleiro, 10 cm acima do chão. O dique virou lombada do terreno
+-- (2026-11-12, Site.dike).
 function AssetLoader.fitFeatures(map: Instance, paddies: any?): { [string]: number }
 	local TB = if paddies
 		then require(ServerStorage:WaitForChild("VT65Build"):WaitForChild("TerrainBuilder")) :: any
@@ -375,34 +372,9 @@ function AssetLoader.fitFeatures(map: Instance, paddies: any?): { [string]: numb
 			end
 		end
 	end
+	-- 2026-11-12: o dique é lombada do terreno (Site.dike); a peça "Dike" é só o marcador invisível
+	-- dos bots e não precisa de encaixe
 	local line = { { -0.45, 0 }, { -0.2, 0 }, { 0, 0 }, { 0.2, 0 }, { 0.45, 0 } }
-	local dikes = map:FindFirstChild("Dikes")
-	if dikes then
-		for _, p in dikes:GetDescendants() do
-			if p:IsA("BasePart") then
-				tick()
-				local ys = along(p, line)
-				if #ys > 0 then
-					local top = ys[#ys] + 0.35 / M
-					if TB then
-						-- crista acima da lâmina mais alta junto ao dique (o chão sob ele foi aplainado
-						-- no fundo do tabuleiro mais baixo)
-						for _, o in line do
-							local q = p.CFrame * Vector3.new(o[1] * p.Size.X, 0, 0)
-							local wt = TB.paddyTop(paddies, q.X, q.Z, 2 / M)
-							if wt then
-								top = math.max(top, wt + 0.25 / M)
-							end
-						end
-					end
-					local bottom = math.min(ys[1] - 0.2 / M, top - p.Size.Y)
-					p.Size = Vector3.new(p.Size.X, top - bottom, p.Size.Z)
-					setY(p, (top + bottom) / 2)
-					done.dikes += 1
-				end
-			end
-		end
-	end
 	local hedges = map:FindFirstChild("Hedges")
 	if hedges then
 		for _, p in hedges:GetDescendants() do
@@ -420,34 +392,143 @@ function AssetLoader.fitFeatures(map: Instance, paddies: any?): { [string]: numb
 	return done
 end
 
+-- Assentamento pelo plano (2026-11-12, pedido do dono: "plantas onde não deveriam estar, coisas
+-- flutuando, bases de objetos"). O ArtPlan decide onde vai cada coisa e em que altura; o terreno foi
+-- gerado pelo mesmo plano (Build.terrain, atributo SitePlan), com o patamar de cada construção aberto
+-- no chão, o dique em lombada e a estrada no leito. Aqui só se clona e põe:
+-- - construção: o meio da caixa no ponto do plano e a base no patamar (nada de pedestal de terra);
+-- - planta: o pé no ponto mais baixo do chão sob ele, 10 cm abaixo (e o disco do bambu enterrado).
+-- Sem o atributo (place salvo com terreno antigo), a base volta a sair do raio no chão real.
+local PLAN_TOL_M = 0.6 -- plano x chão real no meio da construção: acima disto conta como desvio
+AssetLoader.planMismatch = 0
+
+-- tom da casa da vila sem modelo próprio (ArtPlan.TINTS): multiplica a cor de cada peça
+local function tintModel(m: Model, k: number)
+	local t = ArtPlan.TINTS[k]
+	if not t or (t[1] == 1 and t[2] == 1 and t[3] == 1) then
+		return
+	end
+	local mul = Color3.new(t[1], t[2], t[3])
+	for _, d in m:GetDescendants() do
+		if d:IsA("BasePart") then
+			local c = d.Color
+			d.Color = Color3.new(c.R * t[1], c.G * t[2], c.B * t[3])
+			local sa = d:FindFirstChildOfClass("SurfaceAppearance")
+			if sa then
+				-- SurfaceAppearance.Color multiplica o mapa de cor (sem a propriedade, fica a cor da peça)
+				pcall(function()
+					(sa :: any).Color = mul
+				end)
+			end
+		end
+	end
+end
+
+local function foliageParts(m: Model, shadow: boolean)
+	for _, d in m:GetDescendants() do
+		if d:IsA("BasePart") then
+			-- árvore pronta (D-67): o tronco (Madeira0) é sólido e para a bala; copa e galhos não
+			local trunk = string.sub(d.Name, 1, 8) == "Madeira0"
+			if trunk then
+				AssetLoader.ensureGroups()
+				d.CollisionGroup = AssetLoader.TRUNK_GROUP
+			end
+			d.CanCollide = trunk
+			d.CanTouch = false
+			d.CastShadow = shadow
+			d:SetAttribute("Material", if trunk then "Wood" else "Bamboo")
+		end
+	end
+	if shadow then
+		-- copa com sombra: o cliente liga ou desliga pela opção Sombra das árvores (Graficos.client)
+		m:SetAttribute("PlantShadow", true)
+	end
+end
+
+-- Põe um item do plano (ArtPlan.Item). planned: o terreno é o do plano (atributo SitePlan).
+function AssetLoader.placeItem(it: any, parent: Instance, planned: boolean): Model?
+	if string.sub(it.key, 1, 6) == "parts:" then
+		local cf = CFrame.new(it.x, it.base, it.z) * CFrame.Angles(0, it.yaw, 0)
+		return MapLife.villagePart(string.sub(it.key, 7), parent, cf, it.hx * 2, it.hz * 2)
+	end
+	local tpl = AssetLoader.template(it.key)
+	if not tpl or not budget(it.key, it.x, it.z) then
+		return nil
+	end
+	local m = tpl:Clone()
+	m.Name = it.key
+	if math.abs(it.scale - 1) > 0.01 then
+		m:ScaleTo(m:GetScale() * it.scale)
+	end
+	m:PivotTo(CFrame.Angles(0, it.yaw, 0))
+	local box, size = m:GetBoundingBox()
+	-- com o pivô na origem: o fundo da caixa e (construção) o meio dela
+	local bottom = box.Y - size.Y / 2
+	local ox, oz = 0, 0
+	if not it.foliage then
+		ox, oz = box.X, box.Z
+	end
+	local base = it.base
+	if it.foliage then
+		local y = groundAt(it.x, it.z)
+		if y then
+			base = math.min(base, y - ArtPlan.PLANT_SINK_M / M)
+		elseif not planned then
+			base = groundY(it.x, it.z)
+		end
+	elseif not planned then
+		-- terreno antigo: base no ponto mais alto do chão sob a pegada (como antes)
+		if it.sink then
+			base = groundY(it.x, it.z) - it.sink
+		else
+			local _, hi = footprint(it.x, it.z, it.yaw, it.hx, it.hz)
+			base = hi or groundY(it.x, it.z)
+		end
+	elseif it.padded then
+		local y = groundAt(it.x, it.z)
+		if y and math.abs(y - base) * M > PLAN_TOL_M then
+			AssetLoader.planMismatch += 1
+		end
+	end
+	m:PivotTo(CFrame.new(it.x - ox, base - bottom, it.z - oz) * CFrame.Angles(0, it.yaw, 0))
+	if it.foliage then
+		foliageParts(m, it.shadow == true)
+	end
+	if it.tint then
+		tintModel(m, it.tint)
+	end
+	m.Parent = parent
+	return m
+end
+
 function AssetLoader.start()
 	local map = workspace:WaitForChild("Map", 30)
 	if not map then
 		return
 	end
 	-- A arte vai no chão real, então espera o terreno, que é gerado em runtime (~50 s). Antes ela era
-	-- posta junto com a geração: o raio não achava chão e tudo ia para y = 0. As vilas ficavam
-	-- enterradas (até 20 m) sem os placeholders, que já tinham sido apagados, e os animais andavam
-	-- debaixo da terra (teste do mapa no Studio, 2026-11-10).
+	-- posta junto com a geração: o raio não achava chão e tudo ia para y = 0 (Studio, 2026-11-10).
 	while ReplicatedStorage:GetAttribute("TerrainReady") ~= true do
 		ReplicatedStorage:GetAttributeChangedSignal("TerrainReady"):Wait()
 	end
 	local Build = require(ServerStorage:WaitForChild("VT65Build"):WaitForChild("Build")) :: any
 	local world = Build.world()
-	local paddies = if workspace.Terrain:GetAttribute("PaddiesFlat") == true then Build.paddySet(world) else nil
+	local ctx, structures = Build.plan(world)
+	local planned = workspace.Terrain:GetAttribute("SitePlan") == ArtPlan.VERSION
+	local paddies = if workspace.Terrain:GetAttribute("PaddiesFlat") == true then ctx.paddies else nil
 	local fit = AssetLoader.fitFeatures(map, paddies)
 	print(
 		string.format(
-			"[VT65] arrozal no terreno real: %d lâminas, %d diques, %d sebes",
+			"[VT65] arrozal no terreno real: %d lâminas, %d sebes (plano do chão: %s)",
 			fit.water,
-			fit.dikes,
-			fit.hedges
+			fit.hedges,
+			if planned then "sim" else "não, terreno antigo"
 		)
 	)
 	-- arrozal (D-74): dossel dos tabuleiros plantados e ladrilhos de arroz para o cliente
 	print(string.format("[VT65] arrozal: %d tabuleiros com arroz", MapLife.rice(map, AssetLoader.template)))
 	print(string.format("[VT65] animais em partes para o cliente: %d", MapLife.animalArt(AssetLoader.template)))
-	-- lâminas d'água (studs): a meda, o pote e a manada usam para saber se o ponto é arrozal alagado
+	-- lâminas d'água (studs): a manada usa para saber se o ponto é arrozal alagado
 	local sheets: { { cf: CFrame, hx: number, hz: number } } = {}
 	local waterFolder = map:FindFirstChild("PaddyWater")
 	for _, p in if waterFolder then waterFolder:GetChildren() else {} do
@@ -467,190 +548,56 @@ function AssetLoader.start()
 	local out = Instance.new("Folder")
 	out.Name = "Art"
 	out.Parent = map
-	-- clareira e visada dos pontos de nascimento (QGs e reuniões): nenhuma planta da mata, das sebes,
-	-- dos quintais nem das colinas (pedido do dono, 2026-11-11: nascia-se dentro do capim-elefante)
-	local spawnSpots = Front.spawnSpots(MapConfig, M, function(x: number, z: number): number?
-		return Geometry.sectorAt(MapConfig.Sectors, x, z)
-	end, SpawnRules.rallyPosition, Front.C.rallyInsetM)
-	local spawnCircles, spawnLanes = Vegetation.spawnClearings(spawnSpots)
-	local function spawnBlocked(x: number, z: number): boolean
-		return Vegetation.blocked({ exclude = spawnCircles, corridors = spawnLanes } :: any, x, z)
-	end
 	local rng = Rng.new(19650818)
-	local houseModels: { Model } = {}
-	-- casas: variante por sorteio (só as que cabem na meta); o placeholder some (fica só se não houver modelo)
-	local variants = ArtBudget.HOUSE_VARIANTS
-	local housePos: { number } = {} -- metros, para os animais da vila
-	local houses = map:FindFirstChild("Houses")
-	if houses then
-		for _, h in houses:GetChildren() do
-			local body = h:FindFirstChild("Walls") :: BasePart?
-			if h:IsA("Model") and body then
-				local p = body.Position
-				local _, yaw, _ = body.CFrame:ToOrientation()
-				local key = variants[1 + math.floor(rng:next() * #variants)]
-				table.insert(housePos, p.X * M)
-				table.insert(housePos, p.Z * M)
-				local hm = AssetLoader.place(key, p.X, p.Z, yaw, out)
-				if hm then
-					table.insert(houseModels, hm)
-					h:Destroy()
-					-- quintal: bananeira e coqueiro ao redor (densidade da Parte 5)
-					if rng:next() < 0.35 then
-						local a = rng:range(0, 2 * math.pi)
-						local tx, tz = p.X + math.cos(a) * 30, p.Z + math.sin(a) * 30
-						if not spawnBlocked(tx, tz) then
-							AssetLoader.place("coconut_palm", tx, tz, a, out, true)
-						end
-					end
-					if rng:next() < 0.3 then
-						local a = rng:range(0, 2 * math.pi)
-						local tx, tz = p.X + math.cos(a) * 16, p.Z + math.sin(a) * 16
-						if not spawnBlocked(tx, tz) then
-							AssetLoader.place("banana", tx, tz, a, out, true)
-						end
-					end
-					-- quintal (D-64): celeiro de bambu atrás da casa e cerca de bambu na frente
-					local frame = CFrame.new(p) * CFrame.Angles(0, yaw, 0)
-					if rng:next() < 0.15 then
-						local g = (frame * CFrame.new(0, 0, 8 / M)).Position
-						AssetLoader.place("granary", g.X, g.Z, yaw, out)
-					end
-					if rng:next() < 0.3 then
-						for k = -1, 1 do
-							local f = (frame * CFrame.new(k * 3 / M, 0, -6.5 / M)).Position
-							AssetLoader.place("bamboo_fence", f.X, f.Z, yaw, out)
-						end
-					end
-				end
-			end
-		end
-	end
-	-- túneis e trincheira sul de An Cường (2)
-	local cx, cz = 0, 0
-	for _, l in MapConfig.Locations do
-		if l.name == "An Cường (2)" then
-			cx, cz = l.x, l.z
-		end
-	end
-	for id, n in Tunnels.nodes do
-		if n.entrance then
-			local x, z = Tunnels.toWorld(cx, cz, n.x, n.z)
-			AssetLoader.place("tunnel_entrance", x, z, rng:range(0, 6.28), out)
-			-- bunker de toras ao lado das entradas da vila (não na do arrozal nem na da trincheira)
-			if id == "E1" or id == "E2" or id == "E4" then
-				AssetLoader.place("vc_bunker", x + 9 / M, z + 4 / M, rng:range(0, 6.28), out)
-			end
-		end
-	end
-	-- túneis por dentro (D-74): escoras, lamparinas e câmaras mobiliadas (caixote e saco de arroz do
-	-- Blender quando publicados; senão, Parts)
-	local tParts, tLamps = MapLife.tunnels(map, AssetLoader.placeAt)
-	print(string.format("[VT65] túneis: %d peças de escora e mobília, %d lamparinas", tParts, tLamps))
-	if AssetLoader.template("trench_section") then
-		for i = 1, #Tunnels.trench - 1 do
-			local a, b = Tunnels.trench[i], Tunnels.trench[i + 1]
-			local len = math.sqrt((b[1] - a[1]) ^ 2 + (b[2] - a[2]) ^ 2)
-			local yaw = math.atan2(-(b[2] - a[2]), b[1] - a[1])
-			for k = 0, math.floor(len / 4) - 1 do
-				local t = (k + 0.5) * 4 / len
-				local xm, zm = a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t
-				local x, z = Tunnels.toWorld(cx, cz, xm, zm)
-				AssetLoader.place("trench_section", x, z, yaw + math.pi / 2, out)
-			end
-		end
-	end
-	-- QGs (D-64): antes, uma placa de plástico colorida. EUA: anel de sacos de areia com quatro
-	-- entradas; VC: cerca de bambu, dois celeiros e um bunker de toras.
-	local usHQ, vcHQ = MapConfig.HQ.US, MapConfig.HQ.VC
-	for i = 0, 11 do
-		if i % 3 ~= 0 then
-			local a = i * math.pi / 6
-			AssetLoader.place(
-				"sandbags",
-				usHQ.x + math.cos(a) * 14 / M,
-				usHQ.z + math.sin(a) * 14 / M,
-				-a + math.pi / 2,
-				out
-			)
-		end
-	end
-	for i = 0, 15 do
-		if i % 4 ~= 0 then
-			local a = i * math.pi / 8
-			AssetLoader.place(
-				"bamboo_fence",
-				vcHQ.x + math.cos(a) * 18 / M,
-				vcHQ.z + math.sin(a) * 18 / M,
-				-a + math.pi / 2,
-				out
-			)
-		end
-	end
-	AssetLoader.place("granary", vcHQ.x - 10 / M, vcHQ.z + 8 / M, 0.4, out)
-	AssetLoader.place("granary", vcHQ.x - 12 / M, vcHQ.z - 7 / M, 2.1, out)
-	AssetLoader.place("vc_bunker", vcHQ.x + 11 / M, vcHQ.z - 4 / M, -math.pi / 2, out)
-	-- tocas de atirador (spider hole) em volta dos pontos fortes que começam com o VC ou neutros
-	for _, sp in MapConfig.Strongpoints do
-		if sp.sector <= 3 then
-			for _ = 1, 3 do
-				local a, r = rng:range(0, 2 * math.pi), rng:range(25, 45) / M
-				AssetLoader.place(
-					"spider_hole",
-					sp.x + math.cos(a) * r,
-					sp.z + math.sin(a) * r,
-					rng:range(0, 6.28),
-					out
-				)
-			end
-		end
-	end
-	-- vila: altar e poço no centro de An Cường (2); túmulos no cemitério da carta (S2)
-	AssetLoader.place("shrine", cx + 25, cz + 10, 0, out)
-	AssetLoader.place("well", cx - 18, cz + 22, 0, out)
-	for _, sp in MapConfig.Strongpoints do
-		if sp.name == "Cemitério" then
-			for k = 1, 6 do
-				local a = k * 1.05
-				AssetLoader.place("grave_mound", sp.x + math.cos(a) * 25, sp.z + math.sin(a) * 25, a, out)
-			end
-		end
-	end
-	-- ponte de toras no riacho a leste de An Cường (2): no leito mais perto do local da carta,
-	-- atravessada no riacho (o comprimento do modelo é o X). Antes ia no ponto do local, com giro
-	-- sorteado, e o mapa não tinha o riacho ali (só o vale).
 	local B = MapConfig.Bounds
 	local function inBounds(x: number, z: number): boolean
 		return x >= B.minX and x <= B.maxX and z >= B.minZ and z <= B.maxZ
 	end
-	for _, l in MapConfig.Locations do
-		if string.find(l.name, "Riacho", 1, true) then
-			local bx, bz, yaw = MapLife.bridgeSpot(world, l.x, l.z, 60 / M)
-			AssetLoader.place("log_bridge", bx or l.x, bz or l.z, yaw or 0, out)
+
+	-- ===== construções do plano: casas da carta e quintais, túneis, QGs, tocas, túmulos, ponte e a
+	-- vila grande (casas, anexos, pagode, casa comunal, poço e bancas) =====
+	local placeholders: { { model: Instance, x: number, z: number } } = {}
+	local houses = map:FindFirstChild("Houses")
+	for _, h in if houses then houses:GetChildren() else {} do
+		local body = h:FindFirstChild("Walls")
+		if body and body:IsA("BasePart") then
+			table.insert(placeholders, { model = h, x = body.Position.X, z = body.Position.Z })
 		end
 	end
-	-- árvores da Colina 30: bosque ralo no topo (densidade de design). D-67: árvore pronta (Poly
-	-- Haven) de 9 a 17 m; sem ela, a do ForgeGUI. Fora da área, nada (a cortina de fora cobre).
-	local hillKeys = { "ph_island_tree_01", "ph_island_tree_02" }
-	if AssetLoader.template(hillKeys[1]) or AssetLoader.template("hill_tree") then
-		for _, l in MapConfig.Locations do
-			if string.find(l.name, "Colina") then
-				for i = 1, 60 do
-					local a, r = rng:range(0, 2 * math.pi), math.sqrt(rng:next()) * 110 / M
-					local key, scale = hillKeys[1 + i % 2], rng:range(2.6, 3.4)
-					if not AssetLoader.template(key) then
-						key, scale = "hill_tree", 1
-					end
-					local tx, tz = l.x + math.cos(a) * r, l.z + math.sin(a) * r
-					if inBounds(tx, tz) and not spawnBlocked(tx, tz) then
-						AssetLoader.place(key, tx, tz, a, out, true, scale)
+	local houseModels: { Model } = {}
+	local housePos: { number } = {} -- metros, para os animais da vila
+	local nModels, nParts = 0, 0
+	for i, it in structures do
+		if i % 100 == 0 then
+			task.wait()
+		end
+		local m = AssetLoader.placeItem(it, out, planned)
+		if m then
+			if string.sub(it.key, 1, 6) == "parts:" then
+				nParts += 1
+			else
+				nModels += 1
+			end
+			if it.home then
+				table.insert(housePos, it.x * M)
+				table.insert(housePos, it.z * M)
+			end
+			if it.group == "house" then
+				table.insert(houseModels, m)
+				-- o placeholder do greybox some quando a casa da carta tem modelo
+				for _, ph in placeholders do
+					if math.abs(ph.x - it.x) < 1 and math.abs(ph.z - it.z) < 1 then
+						ph.model:Destroy()
 					end
 				end
 			end
 		end
 	end
-	-- centro de cada vila no mapa: o ponto forte com o nome dela (o casario dentro da área) ou, sem
-	-- ponto forte, o local da carta. O rótulo de Nam Yên (4) fica na borda oeste do recorte.
+	print(string.format("[VT65] construções do plano: %d modelos, %d em peças", nModels, nParts))
+	-- túneis por dentro (D-74): escoras, lamparinas e câmaras mobiliadas
+	local tParts, tLamps = MapLife.tunnels(map, AssetLoader.placeAt)
+	print(string.format("[VT65] túneis: %d peças de escora e mobília, %d lamparinas", tParts, tLamps))
+	-- centro de cada vila no mapa: o ponto forte com o nome dela ou, sem ponto forte, o local da carta
 	local function villageCenter(name: string): (number, number)
 		for _, sp in MapConfig.Strongpoints do
 			if sp.name == name then
@@ -664,16 +611,22 @@ function AssetLoader.start()
 		end
 		return 0, 0
 	end
-	-- animais da vila (Parte 11): antes das sebes no orçamento; o AnimalService os move
+	-- animais da vila (Parte 11): o AnimalService os move
 	if AssetLoader.template("water_buffalo") or AssetLoader.template("chicken") then
 		local pen = Instance.new("Folder")
 		pen.Name = "Animals"
+		local function free(x: number, z: number): boolean
+			return ArtPlan.groundProblem(ctx, x, z, 2 / M) == nil and not ArtPlan.inside(structures, x, z, 1 / M)
+		end
 		for _, sp in
 			Animals.spawns(housePos, function()
 				return rng:next()
 			end)
 		do
-			AssetLoader.place(sp.species, sp.x / M, sp.z / M, rng:range(0, 6.28), pen, true)
+			local x, z = sp.x / M, sp.z / M
+			if free(x, z) or inWater(x, z) then
+				AssetLoader.place(sp.species, x, z, rng:range(0, 6.28), pen, true)
+			end
 		end
 		-- manadas no arrozal alagado perto das vilas (D-74): 2 búfalos e 1 bezerro
 		local herds = 0
@@ -694,9 +647,24 @@ function AssetLoader.start()
 		print(string.format("[VT65] animais postos: %d (%d manadas no arrozal)", #pen:GetChildren(), herds))
 		pen.Parent = out
 	end
-	-- vida nas vilas (D-74): fumaça de cozinha, potes d'água, medas de palha e lenha. Antes da mata,
-	-- que desvia de tudo que já está em Art (zonas livres).
-	local vida = MapLife.village(houseModels, out, rng, groundAt, inWater, AssetLoader.placeAt)
+	-- vida nas casas da carta (D-74): fumaça de cozinha, potes, medas, lenha, varal e chapéu. A vila
+	-- grande já tem os anexos do plano. Só onde o chão aceita (fora da rua, do beco, da lâmina, do
+	-- leito e das outras construções).
+	local vida = MapLife.village(
+		houseModels,
+		out,
+		rng,
+		groundAt,
+		inWater,
+		AssetLoader.placeAt,
+		function(x: number, z: number, r: number): boolean
+			local p = ArtPlan.groundProblem(ctx, x, z, r)
+			if p and p ~= "patamar" and p ~= "clareira" then
+				return false
+			end
+			return not ArtPlan.inside(structures, x, z, r * 0.5)
+		end
+	)
 	print(
 		string.format(
 			"[VT65] vilas: %d fumaças, %d potes, %d medas, %d lenhas, %d varais, %d chapéus (%d em modelo)",
@@ -709,97 +677,14 @@ function AssetLoader.start()
 			vida.models
 		)
 	)
-	-- Sebes por último. O que sobra do teto de cada setor vira um desbaste uniforme no setor (e não
-	-- um corte no meio do mapa). A peça da sebe só fica invisível se TODAS as touceiras dela
-	-- entraram; senão continua como enchimento, para nunca haver cobertura invisível.
-	local hedges = map:FindFirstChild("Hedges")
-	if hedges then
-		local jobs: { HedgeJob } = {}
-		local demand: { [number]: number } = {}
-		for _, hp in hedges:GetChildren() do
-			if hp:IsA("BasePart") and (hp.Name == "BambooHedge" or hp.Name == "PaddyHedge") then
-				local s = Geometry.sectorAt(MapConfig.Sectors, hp.Position.X, hp.Position.Z)
-				if s and SLICE_SECTORS[s] then
-					local tall = hp.Name == "BambooHedge"
-					local key = if tall then "bamboo_clump" elseif rng:next() < 0.5 then "shrub" else "elephant_grass"
-					if AssetLoader.template(key) then
-						local n = ArtBudget.hedgeClumps(hp.Size.X * M, tall)
-						table.insert(jobs, { part = hp, key = key, n = n, sector = s })
-						demand[s] = (demand[s] or 0) + n * ArtBudget.tris(key)
-					end
-				end
-			end
-		end
-		local factor: { [number]: number } = {}
-		for s, d in demand do
-			factor[s] = ArtBudget.factor(sectorTris[s] or 0, d)
-			print(string.format("[VT65] sebes setor %d: %.0f%% das touceiras (teto do setor)", s, 100 * factor[s]))
-		end
-		for k, j in jobs do
-			if k % 100 == 0 then
-				-- com as sebes a 100% (D-64) o laço passou do limite de 10 s de script (Studio, 2026-11-10)
-				task.wait()
-			end
-			local hp = j.part
-			local placed = 0
-			local gapAtSpawn = false
-			for i = 1, j.n do
-				if rng:next() < factor[j.sector] then
-					local t = (i - 0.5) / j.n - 0.5
-					local pos = hp.CFrame * CFrame.new(t * hp.Size.X, 0, 0)
-					local yaw = rng:range(0, 6.28)
-					if spawnBlocked(pos.X, pos.Z) then
-						gapAtSpawn = true -- clareira de nascimento: a sebe abre ali
-					elseif AssetLoader.place(j.key, pos.X, pos.Z, yaw, out, true) then
-						placed += 1
-					end
-				end
-			end
-			if placed == j.n then
-				hp.Transparency = 1
-			elseif gapAtSpawn then
-				-- a sebe cruza a clareira de nascimento: sem enchimento (seria um muro verde na cara de
-				-- quem nasce); as touceiras de fora da clareira ficam
-				hp.Transparency = 1
-				hp.CanQuery = false
-				hp.CanTouch = false
-			end
-		end
-	end
-	-- Mata por uso do solo (D-64), por último: bosque nas vilas e matas, moitas em manchas no capim,
-	-- bambu nos riachos e cortina de árvores fora da borda. Como nas sebes, o que não cabe no teto
-	-- do setor vira desbaste uniforme no setor inteiro.
-	-- canteiros de arroz (rice_patch, 13 mil triângulos cada): um por vila, 2 x 4 mudas na beira do
-	-- arrozal (o viveiro de onde sai a muda do transplante). D-74: em toda vila da carta no mapa.
+
+	-- ===== plantas do plano: quintais, Colina 30, bambuzal da vila, sebes, canteiros e a mata =====
+	-- raias que a mata não fecha: a trincheira sul e o campo de tiro de cada QG
+	local cx, cz = villageCenter("An Cường (2)")
 	for _, l in MapConfig.Locations do
-		if VILLAGES[l.name] then
-			local vx, vz = villageCenter(l.name)
-			for _ = 1, 60 do
-				local a, r = rng:range(0, 2 * math.pi), rng:range(35, 80) / M
-				local x0, z0 = vx + math.cos(a) * r, vz + math.sin(a) * r
-				if inBounds(x0, z0) and world:classAt(x0, z0) == 2 then
-					local plot = CFrame.new(x0, 0, z0) * CFrame.Angles(0, a, 0)
-					for i = 0, 3 do
-						for j = 0, 1 do
-							local t = (plot * CFrame.new(i * 2 / M, 0, j * 1.45 / M)).Position
-							AssetLoader.place("rice_patch", t.X, t.Z, a, out, true)
-						end
-					end
-					break
-				end
-			end
+		if l.name == "An Cường (2)" then
+			cx, cz = l.x, l.z -- a trincheira sai do local da carta (Tunnels.toWorld), não do ponto forte
 		end
-	end
-	local housesXZ: { number } = {}
-	for i = 1, #housePos, 2 do
-		table.insert(housesXZ, housePos[i] / M)
-		table.insert(housesXZ, housePos[i + 1] / M)
-	end
-	local tunnelXZ: { number } = {}
-	for _, n in Tunnels.nodes do
-		local x, z = Tunnels.toWorld(cx, cz, n.x, n.z)
-		table.insert(tunnelXZ, x)
-		table.insert(tunnelXZ, z)
 	end
 	local corridors: { Vegetation.Segment } = {}
 	for i = 1, #Tunnels.trench - 1 do
@@ -808,7 +693,6 @@ function AssetLoader.start()
 		local x2, z2 = Tunnels.toWorld(cx, cz, b[1], b[2])
 		table.insert(corridors, { x1 = x1, z1 = z1, x2 = x2, z2 = z2, w = 4 / M })
 	end
-	-- raias do campo de tiro (TrainingService escolhe a direção com visada livre): do QG a cada alvo
 	local camp = workspace:FindFirstChild("CampoDeTiro") or workspace:WaitForChild("CampoDeTiro", 30)
 	for f, hq in MapConfig.HQ do
 		local lane = camp and camp:FindFirstChild(f)
@@ -821,49 +705,35 @@ function AssetLoader.start()
 			end
 		end
 	end
-	local VT65Build = ServerStorage:WaitForChild("VT65Build")
-	local landscape = (require(VT65Build:WaitForChild("Landscape")) :: any).new(world, MapConfig, housesXZ)
-	-- Zonas livres: além das casas, todo prop já posto (celeiro, poço, altar, túmulo, cerca, bunker,
-	-- sacos de areia). No Studio (2026-11-11) havia coqueiro a 1,4 m do centro de um celeiro e árvore
-	-- dentro de altar: a mata só desviava das casas (D-73).
-	local exclude = Vegetation.exclusions(MapConfig, housesXZ, tunnelXZ)
-	for _, c in spawnCircles do
-		table.insert(exclude, c)
-	end
-	for _, s in spawnLanes do
-		table.insert(corridors, s)
-	end
-	for _, m in out:GetChildren() do
-		if m:IsA("Model") and not m:FindFirstChild("Folhas0_0", true) and m.Name ~= "Jungle" then
-			local cfm, sz = m:GetBoundingBox()
-			local isPlant = m.Name == "coconut_palm" or m.Name == "banana" or string.sub(m.Name, 1, 3) == "ph_"
-			if not isPlant then
-				table.insert(exclude, { x = cfm.X, z = cfm.Z, r = math.max(sz.X, sz.Z) / 2 + 1.5 / M })
+	local plants = ArtPlan.plants(ctx, structures, corridors, Build.has, function()
+		task.wait()
+	end)
+	-- a peça de cada sebe vira só o marcador (sem cor) quando as touceiras têm modelo
+	local hedges = map:FindFirstChild("Hedges")
+	if hedges and AssetLoader.template("bamboo_clump") and AssetLoader.template("shrub") then
+		for _, hp in hedges:GetChildren() do
+			if hp:IsA("BasePart") then
+				hp.Transparency = 1
 			end
 		end
 	end
-	local plan = Vegetation.plan({
-		classAt = function(x: number, z: number): number
-			return world:classAt(x, z)
-		end,
-		kindAt = function(x: number, z: number): number
-			return landscape:kindAt(x, z)
-		end,
-		bounds = MapConfig.Bounds,
-		cell = world.grid.cellStuds,
-		exclude = exclude,
-		corridors = corridors,
-		density = ArtBudget.JUNGLE_DENSITY,
-		seed = 1965,
-		rng = Rng.new(19650818 + 64),
-		yield = function()
-			task.wait()
-		end,
-	})
+	-- O que não cabe no teto de triângulos do setor (D-45) vira desbaste uniforme da mata no setor; o
+	-- resto (quintais, sebes, bambuzal da vila, canteiros) entra antes.
 	local jDemand: { [number]: number } = {}
-	for _, it in plan do
-		local s = Geometry.sectorAt(MapConfig.Sectors, it.x, it.z) or 0
-		jDemand[s] = (jDemand[s] or 0) + ArtBudget.tris(it.key)
+	for _, it in plants do
+		if it.group == "jungle" then
+			local s = Geometry.sectorAt(MapConfig.Sectors, it.x, it.z) or 0
+			jDemand[s] = (jDemand[s] or 0) + ArtBudget.tris(it.key)
+		end
+	end
+	local nPlants = 0
+	for i, it in plants do
+		if i % 300 == 0 then
+			task.wait()
+		end
+		if it.group ~= "jungle" and it.group ~= "border" and AssetLoader.placeItem(it, out, planned) then
+			nPlants += 1
+		end
 	end
 	local jFactor: { [number]: number } = {}
 	for s, d in jDemand do
@@ -874,9 +744,7 @@ function AssetLoader.start()
 	jungle.Name = "Jungle"
 	jungle.Parent = out
 	local jrng = Rng.new(64)
-	local nJungle = 0
-	local nBorder = 0
-	local skippedLane = 0
+	local nJungle, nBorder, skippedLane, nPlanned = 0, 0, 0, 0
 	-- raio do tronco (peça Madeira0, com os galhos grossos) de cada árvore pronta, na escala 1
 	local trunkR: { [string]: number } = {}
 	local function laneClear(key: string, scale: number, x: number, z: number): boolean
@@ -907,52 +775,48 @@ function AssetLoader.start()
 		end
 		return true
 	end
-	for i, it in plan do
-		local s = Geometry.sectorAt(MapConfig.Sectors, it.x, it.z) or 0
-		if jrng:next() < jFactor[s] then
-			local key, scale = it.key, it.scale
-			local fb = Vegetation.FALLBACK[key]
-			if fb and not AssetLoader.template(key) then
-				key, scale = fb[1], scale * fb[2] -- espécie nova ainda sem ID publicado (D-65)
-			end
-			-- árvore pronta: o tronco sólido (D-67) abre galhos grossos de vários metros. O plano só
-			-- afasta o pé 10 m da raia; no autoteste (2026-11-11) um tiro de 300 m parou num tronco.
-			local outside = not inBounds(it.x, it.z)
-			if not laneClear(key, scale, it.x, it.z) then
-				skippedLane += 1
-			else
-				local pm = AssetLoader.place(key, it.x, it.z, it.yaw, jungle, true, scale, it.shadow and not outside)
-				if pm then
-					nJungle += 1
-					if outside then
-						-- cortina de fora da área: só moldura. Ninguém chega nela (morre fora da área
-						-- em 10 s), então sem colisão, sem consulta de raio e sem sombra
-						nBorder += 1
-						for _, d in pm:GetDescendants() do
-							if d:IsA("BasePart") then
-								d.CanCollide = false
-								d.CanQuery = false
-								d.CastShadow = false
+	for i, it in plants do
+		if i % 200 == 0 then
+			task.wait() -- não trava o servidor enquanto planta milhares de modelos
+		end
+		if it.group == "jungle" or it.group == "border" then
+			local s = Geometry.sectorAt(MapConfig.Sectors, it.x, it.z) or 0
+			nPlanned += 1
+			if it.group == "border" or jrng:next() < (jFactor[s] or 1) then
+				if not laneClear(it.key, it.scale, it.x, it.z) then
+					skippedLane += 1
+				else
+					local pm = AssetLoader.placeItem(it, jungle, planned)
+					if pm then
+						nJungle += 1
+						if it.group == "border" then
+							-- cortina de fora da área: só moldura. Ninguém chega nela (morre fora da área
+							-- em 10 s), então sem colisão, sem consulta de raio e sem sombra
+							nBorder += 1
+							for _, d in pm:GetDescendants() do
+								if d:IsA("BasePart") then
+									d.CanCollide = false
+									d.CanQuery = false
+									d.CastShadow = false
+								end
 							end
 						end
 					end
 				end
 			end
 		end
-		if i % 200 == 0 then
-			task.wait() -- não trava o servidor enquanto planta milhares de modelos
-		end
 	end
 	print(
 		string.format(
-			"[VT65] mata: %d plantas de %d no plano (%d na cortina de fora, %d tiradas da raia)",
+			"[VT65] plantas: %d de quintal, sebe e vila; mata %d de %d no plano (%d na cortina de fora, %d tiradas da raia)",
+			nPlants,
 			nJungle,
-			#plan,
+			nPlanned,
 			nBorder,
 			skippedLane
 		)
 	)
-	-- streaming (D-15): cada modelo chega inteiro (o impostor vem do próprio asset; ver acima)
+	-- streaming (D-15): cada modelo chega inteiro
 	for _, folder in { out, jungle } do
 		for _, m in folder:GetChildren() do
 			if m:IsA("Model") then
@@ -975,6 +839,15 @@ function AssetLoader.start()
 	print("[VT65] arte carregada:", #out:GetChildren(), "modelos")
 	if AssetLoader.noGround > 0 then
 		warn(string.format("[VT65] %d modelos de arte sem terreno embaixo (postos em y = 0)", AssetLoader.noGround))
+	end
+	if AssetLoader.planMismatch > 0 then
+		warn(
+			string.format(
+				"[VT65] %d construções com o chão real a mais de %.1f m do patamar do plano",
+				AssetLoader.planMismatch,
+				PLAN_TOL_M
+			)
+		)
 	end
 	out:SetAttribute("Placed", true) -- o autoteste confere a arte no chão depois disto
 end

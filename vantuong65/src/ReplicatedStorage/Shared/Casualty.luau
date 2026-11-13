@@ -44,13 +44,27 @@ local EXPLOSIVE = {
 }
 
 export type Cause = {
-	kind: string, -- "shot" | "explosion" | "unknown"
+	kind: string, -- "shot" | "explosion" | "melee" | "unknown"
 	weaponKind: string?, -- rifle | mg | pistol | launcher (tiro)
 	explosive: string?, -- id do explosivo
+	melee: string?, -- golpe (Shared/Melee: estocada, lado, baioneta, coronhada)
+	blade: string?, -- faca de quem golpeou (Melee.KNIFE: kabar = faca, dao = facão)
 	dx: number?, -- da vítima até a origem (studs)
 	dz: number?,
 	studM: number?,
 }
+
+-- arma branca pelo golpe (D-94): faca ou facão (pela faca do lado), baioneta ou coronhada
+function Casualty.meleeWord(attack: string?, blade: string?): string
+	if attack == "baioneta" then
+		return "baioneta"
+	elseif attack == "coronhada" then
+		return "coronhada"
+	elseif attack == "estocada" or attack == "lado" then
+		return if blade == "dao" then "facão" else "faca"
+	end
+	return "arma branca"
+end
 
 function Casualty.weaponWord(kind: string?): string
 	return if kind then WEAPON[kind] or "arma de fogo" else "arma de fogo"
@@ -62,6 +76,13 @@ end
 
 -- Linha principal da causa. downed = ainda caído (a frase fica no gerúndio do ferimento).
 function Casualty.text(c: Cause?, downed: boolean?): string
+	-- corpo a corpo: sem rumo nem distância (é ali mesmo)
+	if c and c.kind == "melee" then
+		local word = Casualty.meleeWord(c.melee, c.blade)
+		return if downed
+			then string.format("Ferido a %s, corpo a corpo", word)
+			else string.format("Abatido a %s, corpo a corpo", word)
+	end
 	if not c or c.kind == "unknown" or c.dx == nil or c.dz == nil then
 		return if downed then "Ferido — origem não identificada" else "Morto em ação — origem não identificada"
 	end
@@ -84,6 +105,16 @@ function Casualty.text(c: Cause?, downed: boolean?): string
 	return if downed
 		then string.format("Ferido por %s, ~%d m a %s", weapon, dist, bearing)
 		else string.format("Abatido por %s, ~%d m a %s", weapon, dist, bearing)
+end
+
+-- Linha curta das telas de ferido e de baixa (estilo novo, 2026-11-11): o mesmo que text(), mas a
+-- origem desconhecida vira "Causa desconhecida" (curto e honesto; o "origem não identificada" de
+-- text() fica para quem já o usa).
+function Casualty.short(c: Cause?, downed: boolean?): string
+	if not c or c.kind == "unknown" or (c.kind ~= "melee" and (c.dx == nil or c.dz == nil)) then
+		return "Causa desconhecida"
+	end
+	return Casualty.text(c, downed)
 end
 
 -- Grupo data-hora de 1965 (fuso H = UTC+8, como o AfterAction): dia 18, hora local do jogo.

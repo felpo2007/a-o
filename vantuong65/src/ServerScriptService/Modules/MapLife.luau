@@ -658,17 +658,262 @@ local function firewood(parent: Instance, cf: CFrame)
 	m.Parent = parent
 end
 
+---------------------------------------------------------------------------------------------
+-- Vila grande do centro (2026-11-12, Data/Village): varanda, horta, pagode (chùa), casa comunal
+-- (đình) e banca do mercado, em peças. O plano (ArtPlan.structures) dá o centro da base, o giro e a
+-- pegada; a frente (porta) fica no -Z local. Porta com vão livre de DOOR_CLEAR_M (pedido do dono:
+-- pelo menos 2,1 m, o soldado tem 2,0 m). Medidas de projeto (PLACEHOLDER) até os modelos do Blender.
+---------------------------------------------------------------------------------------------
+MapLife.DOOR_CLEAR_M = 2.4
+local TILE = Color3.fromRGB(146, 72, 50) -- telha de barro
+local PLASTER = Color3.fromRGB(206, 192, 160) -- parede caiada, encardida
+local STONE = Color3.fromRGB(124, 116, 100)
+local THATCH = Color3.fromRGB(156, 138, 90)
+local LEAF = Color3.fromRGB(70, 104, 46)
+local EARTH = Color3.fromRGB(104, 82, 58)
+
+-- peça sólida (colisão, raio e sombra) com o material de penetração (CombatService)
+local function solid(p: Part, mat: string?): Part
+	p.CanCollide = true
+	p.CanQuery = true
+	p.CastShadow = true
+	if mat then
+		p:SetAttribute("Material", mat)
+	end
+	return p
+end
+
+-- telhado de duas águas: dois WedgeParts com a cumeeira no meio (ao longo do X local)
+local function roof(m: Model, cf: CFrame, len: number, width: number, h: number, color: Color3, mat: string)
+	for _, sgn in { -1, 1 } do
+		local r = Instance.new("WedgePart")
+		r.Name = "Telhado"
+		r.Anchored = true
+		r.Size = Vector3.new(len, h, width / 2)
+		r.CFrame = cf * CFrame.new(0, h / 2, sgn * width / 4) * CFrame.Angles(0, if sgn > 0 then math.pi else 0, 0)
+		r.Color = color
+		r.Material = if mat == "Thatch" then Enum.Material.Grass else Enum.Material.Slate
+		r.TopSurface = Enum.SurfaceType.Smooth
+		r.BottomSurface = Enum.SurfaceType.Smooth
+		r.CanCollide = true
+		r.CanQuery = true
+		r.CanTouch = false
+		r:SetAttribute("Material", mat)
+		r.Parent = m
+	end
+end
+
+-- parede ao longo do X local de comprimento len, com um vão de largura gap no meio (gap 0: inteira)
+local function wall(m: Model, cf: CFrame, len: number, h: number, t: number, gap: number, gapH: number)
+	if gap <= 0 then
+		solid(
+			part("Parede", Vector3.new(len, h, t), cf * CFrame.new(0, h / 2, 0), PLASTER, Enum.Material.Plaster, m),
+			"MudWall"
+		)
+		return
+	end
+	local side = (len - gap) / 2
+	for _, sgn in { -1, 1 } do
+		solid(
+			part(
+				"Parede",
+				Vector3.new(side, h, t),
+				cf * CFrame.new(sgn * (gap / 2 + side / 2), h / 2, 0),
+				PLASTER,
+				Enum.Material.Plaster,
+				m
+			),
+			"MudWall"
+		)
+	end
+	if h > gapH then
+		solid(
+			part(
+				"Verga",
+				Vector3.new(gap, h - gapH, t),
+				cf * CFrame.new(0, gapH + (h - gapH) / 2, 0),
+				PLASTER,
+				Enum.Material.Plaster,
+				m
+			),
+			"MudWall"
+		)
+	end
+end
+
+local function post(m: Model, cf: CFrame, h: number, d: number, color: Color3)
+	solid(part("Esteio", Vector3.new(d, h, d), cf * CFrame.new(0, h / 2, 0), color, Enum.Material.Wood, m), "Wood")
+end
+
+-- kind: "varanda" | "horta" | "chua" | "dinh" | "banca"; cf: centro da base (no chão), giro da peça;
+-- w, d: pegada (studs). Devolve o modelo (já no parent).
+function MapLife.villagePart(kind: string, parent: Instance, cf: CFrame, w: number, d: number): Model
+	local m = Instance.new("Model")
+	m.Name = "Vila_" .. kind
+	local door = MapLife.DOOR_CLEAR_M / M
+	if kind == "varanda" then
+		-- alpendre de palha na frente da casa: esteios de bambu na beira e telhado inclinado
+		local h = 2.5 / M
+		for _, k in { -1, 0, 1 } do
+			post(m, cf * CFrame.new(k * (w / 2 - 0.3 / M), 0, -d / 2), h, 0.14 / M, BAMBOO)
+		end
+		local slab = part(
+			"Alpendre",
+			Vector3.new(w, 0.15 / M, d + 0.5 / M),
+			cf * CFrame.new(0, h + 0.2 / M, 0),
+			THATCH,
+			Enum.Material.Grass,
+			m
+		)
+		slab.CFrame = slab.CFrame * CFrame.Angles(math.rad(-8), 0, 0)
+		solid(slab, "Thatch")
+	elseif kind == "horta" then
+		-- canteiro de hortaliça: terra fofa um palmo acima do chão e fileiras de folhas
+		part("Canteiro", Vector3.new(w, 0.2 / M, d), cf * CFrame.new(0, 0.05 / M, 0), EARTH, Enum.Material.Ground, m)
+		for k = 0, 3 do
+			part(
+				"Folhas",
+				Vector3.new(w * 0.9, 0.2 / M, 0.25 / M),
+				cf * CFrame.new(0, 0.25 / M, (k - 1.5) * d / 4.5),
+				LEAF,
+				Enum.Material.LeafyGrass,
+				m
+			)
+		end
+	elseif kind == "banca" then
+		-- banca do mercado: quatro esteios, cobertura de palha a 2,4 m e balcão
+		local h = 2.4 / M
+		for _, sx in { -1, 1 } do
+			for _, sz in { -1, 1 } do
+				post(m, cf * CFrame.new(sx * (w / 2 - 0.1 / M), 0, sz * (d / 2 - 0.1 / M)), h, 0.12 / M, BAMBOO)
+			end
+		end
+		solid(
+			part(
+				"Cobertura",
+				Vector3.new(w + 0.4 / M, 0.12 / M, d + 0.4 / M),
+				cf * CFrame.new(0, h + 0.06 / M, 0),
+				THATCH,
+				Enum.Material.Grass,
+				m
+			),
+			"Thatch"
+		)
+		solid(
+			part(
+				"Balcao",
+				Vector3.new(w * 0.8, 0.8 / M, 0.7 / M),
+				cf * CFrame.new(0, 0.4 / M, -d / 2 + 0.6 / M),
+				WOOD,
+				Enum.Material.Wood,
+				m
+			),
+			"Wood"
+		)
+	elseif kind == "chua" then
+		-- pagode da vila: base de pedra com dois degraus, salão caiado com porta larga na frente e janelas
+		-- dos lados, telhado de telha em duas camadas e o altar no fundo
+		local base = 0.4 / M
+		solid(
+			part("Base", Vector3.new(w, base, d), cf * CFrame.new(0, base / 2, 0), STONE, Enum.Material.Cobblestone, m),
+			"Stone"
+		)
+		for k = 1, 2 do
+			local sh = base * k / 3
+			solid(
+				part(
+					"Degrau",
+					Vector3.new(3.4 / M, sh, 0.35 / M),
+					cf * CFrame.new(0, sh / 2, -d / 2 - (3 - k) * 0.35 / M),
+					STONE,
+					Enum.Material.Cobblestone,
+					m
+				),
+				"Stone"
+			)
+		end
+		local top = cf * CFrame.new(0, base, 0)
+		local iw, id, wh, t = w - 4 / M, d - 4 / M, 3.4 / M, 0.3 / M
+		wall(m, top * CFrame.new(0, 0, -id / 2), iw, wh, t, 2.4 / M, door)
+		wall(m, top * CFrame.new(0, 0, id / 2), iw, wh, t, 0, 0)
+		for _, sgn in { -1, 1 } do
+			wall(m, top * CFrame.new(sgn * iw / 2, 0, 0) * CFrame.Angles(0, math.pi / 2, 0), id, wh, t, 1.2 / M, door)
+		end
+		roof(m, top * CFrame.new(0, wh, 0), iw + 1.6 / M, id + 2 / M, 2.0 / M, TILE, "Tile")
+		roof(m, top * CFrame.new(0, wh + 2.0 / M, 0), iw * 0.55, id * 0.55, 1.6 / M, TILE, "Tile")
+		solid(
+			part(
+				"Altar",
+				Vector3.new(2.2 / M, 1.0 / M, 0.9 / M),
+				top * CFrame.new(0, 0.5 / M, id / 2 - 1 / M),
+				WOOD,
+				Enum.Material.Wood,
+				m
+			),
+			"Wood"
+		)
+	elseif kind == "dinh" then
+		-- casa comunal: salão de esteios sobre assoalho de madeira (frente e lados abertos), parede no
+		-- fundo e telhado grande de telha; três degraus na frente
+		local floorH = 0.5 / M
+		solid(
+			part(
+				"Assoalho",
+				Vector3.new(w, floorH, d),
+				cf * CFrame.new(0, floorH / 2, 0),
+				WOOD,
+				Enum.Material.WoodPlanks,
+				m
+			),
+			"Wood"
+		)
+		for k = 1, 3 do
+			local sh = floorH * k / 4
+			solid(
+				part(
+					"Degrau",
+					Vector3.new(4 / M, sh, 0.32 / M),
+					cf * CFrame.new(0, sh / 2, -d / 2 - (4 - k) * 0.32 / M),
+					WOOD,
+					Enum.Material.WoodPlanks,
+					m
+				),
+				"Wood"
+			)
+		end
+		local top = cf * CFrame.new(0, floorH, 0)
+		local ph = 3.2 / M
+		for i = 0, 3 do
+			for j = 0, 2 do
+				local px = (i / 3 - 0.5) * (w - 1 / M)
+				local pz = (j / 2 - 0.5) * (d - 1 / M)
+				post(m, top * CFrame.new(px, 0, pz), ph, 0.32 / M, WOOD)
+			end
+		end
+		wall(m, top * CFrame.new(0, 0, d / 2 - 0.5 / M), w - 1 / M, ph, 0.2 / M, 0, 0)
+		roof(m, top * CFrame.new(0, ph, 0), w + 1.5 / M, d + 2 / M, 3.0 / M, TILE, "Tile")
+	end
+	m.Parent = parent
+	return m
+end
+
 -- houses: modelos das casas já postas. groundAt: altura do terreno (studs) ou nil.
 -- isPaddy: o ponto cai no arrozal (a meda e o pote não vão para dentro d'água).
 -- place: AssetLoader.placeAt (pote, meda, varal e chapéu do Blender); sem ele, só as peças.
+-- free (2026-11-12): o chão aceita o objeto de raio r (ArtPlan: fora da rua, do beco, da lâmina, do
+-- patamar e das outras construções). Sem ele, vale só o arrozal.
 function MapLife.village(
 	houses: { Model },
 	out: Instance,
 	rng: Rng.Rng,
 	groundAt: (number, number) -> number?,
 	isPaddy: (number, number) -> boolean,
-	place: PlaceAt?
+	place: PlaceAt?,
+	free: ((number, number, number) -> boolean)?
 ): { [string]: number }
+	local function ok(x: number, z: number, r: number): boolean
+		return not isPaddy(x, z) and (free == nil or free(x, z, r))
+	end
 	placeModel = place
 	modelCount = 0
 	local count = { smoke = 0, jars = 0, straw = 0, wood = 0, lines = 0, hats = 0, models = 0 }
@@ -687,7 +932,7 @@ function MapLife.village(
 			for k = 0, (if rng:next() < 0.4 then 1 else 0) do
 				local p = cf * Vector3.new(side * (size.X / 2 + 2.6), 0, size.Z * 0.25 - k * 2.8)
 				local y = groundAt(p.X, p.Z)
-				if y and not isPaddy(p.X, p.Z) then
+				if y and ok(p.X, p.Z, 1.4) then
 					jar(out, p.X, y, p.Z, rng:range(0.85, 1.1), rng:range(0, 2 * math.pi))
 					count.jars += 1
 				end
@@ -698,7 +943,7 @@ function MapLife.village(
 			local r = math.max(size.X, size.Z) / 2 + rng:range(5, 9) / M -- terreiro a 5–9 m da casa
 			local x, z = cf.X + math.cos(a) * r, cf.Z + math.sin(a) * r
 			local y = groundAt(x, z)
-			if y and not isPaddy(x, z) then
+			if y and ok(x, z, 4) then
 				strawStack(out, x, y, z, rng:range(0.85, 1.2), rng:range(0, 2 * math.pi))
 				count.straw += 1
 			end
@@ -708,7 +953,7 @@ function MapLife.village(
 			local side = if rng:next() < 0.5 then 1 else -1
 			local p = cf * Vector3.new(0, 0, side * (size.Z / 2 + rng:range(3, 4) / M))
 			local y = groundAt(p.X, p.Z)
-			if y and not isPaddy(p.X, p.Z) then
+			if y and ok(p.X, p.Z, 6) then
 				if place("bamboo_clothesline", CFrame.new(p.X, y, p.Z) * CFrame.Angles(0, houseYaw, 0), out) then
 					count.lines += 1
 					modelCount += 1
@@ -719,7 +964,7 @@ function MapLife.village(
 		if place and rng:next() < MapLife.HAT_P then
 			local p = cf * Vector3.new(size.X * rng:range(-0.3, 0.3), 0, -(size.Z / 2 + 1.2 / M))
 			local y = groundAt(p.X, p.Z)
-			if y and not isPaddy(p.X, p.Z) then
+			if y and ok(p.X, p.Z, 1) then
 				if
 					place("conical_hat", CFrame.new(p.X, y, p.Z) * CFrame.Angles(0, rng:range(0, 2 * math.pi), 0), out)
 				then
@@ -731,7 +976,7 @@ function MapLife.village(
 		if kitchen or rng:next() < 0.15 then
 			local p = cf * Vector3.new(-(size.X / 2 + 1.4), 0, -size.Z * 0.2)
 			local y = groundAt(p.X, p.Z)
-			if y then
+			if y and (free == nil or free(p.X, p.Z, 2)) then
 				firewood(out, CFrame.new(p.X, y, p.Z) * (cf - cf.Position))
 				count.wood += 1
 			end

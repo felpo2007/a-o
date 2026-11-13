@@ -12,6 +12,9 @@ local Geometry = require(ReplicatedStorage.Shared.Geometry)
 local MapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any
 local TunnelLinks = require(ReplicatedStorage.Shared.TunnelLinks)
 local Tunnels = require(ReplicatedStorage.Shared.Tunnels) :: any
+local PostureService = require(script.Parent.PostureService)
+local TunnelGeometry =
+	require(game:GetService("ServerStorage"):WaitForChild("VT65Build"):WaitForChild("TunnelGeometry")) :: any
 
 local TunnelService = {}
 TunnelService.destroyed = {} :: { [string]: boolean }
@@ -186,11 +189,41 @@ local function guard()
 			eject(model, p)
 		end
 	end
+	-- D-98: o soldado de 2 m só passa no túnel (1,0 × 1,2 m) deitado. Quem do VC está no túnel (fora
+	-- do poço, onde dá para ficar de pé e subir) e não está deitado é deitado; o PostureService já
+	-- não deixa levantar sob o teto (headroom). Sem isso, agachado a HRP batia no teto e prendia.
+	local shaftR = TunnelGeometry.shaftM(Tunnels) / M / 2 + 1
+	local function inShaft(p: Vector3): boolean
+		for _, en in TunnelService.entrances() do
+			if Vector3.new(p.X - en.x, 0, p.Z - en.z).Magnitude <= shaftR then
+				return true
+			end
+		end
+		return false
+	end
+	local function crawl(model: Model?)
+		local root = model and model:FindFirstChild("HumanoidRootPart") :: BasePart?
+		if not (model and root) or root.Anchored then
+			return -- bot em trânsito (BotTunnels) anda ancorado
+		end
+		if model:GetAttribute("Prone") == true or model:GetAttribute("Downed") == true then
+			return
+		end
+		local p = root.Position
+		if (Vector3.new(p.X - cx, 0, p.Z - cz)).Magnitude > reachStuds then
+			return
+		end
+		if insideTunnel(p) and not inShaft(p) then
+			PostureService.setStance(model, "prone")
+		end
+	end
 	while true do
 		task.wait(0.3)
 		for _, p in Players:GetPlayers() do
 			if p:GetAttribute("Faction") == "US" then
 				check(p.Character)
+			elseif p:GetAttribute("Faction") == "VC" then
+				crawl(p.Character)
 			end
 		end
 		local folder = workspace:FindFirstChild("Combatants")

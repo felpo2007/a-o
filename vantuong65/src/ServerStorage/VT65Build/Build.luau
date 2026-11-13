@@ -4,6 +4,7 @@
 --   require(game.ServerStorage.VT65Build.Build).features()  -- recria as peças (já vêm no .rbxl)
 local ServerStorage = game:GetService("ServerStorage")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ServerScriptService = game:GetService("ServerScriptService")
 
 local VT65Build = script.Parent
 local WorldData = require(VT65Build.WorldData)
@@ -18,6 +19,36 @@ function Build.world(): WorldData.World
 		table.insert(chunks, require(Data:FindFirstChild(name) :: ModuleScript) :: any)
 	end
 	return WorldData.load(grid, chunks)
+end
+
+-- Dados do mapa para o plano da arte (ArtPlan.load): feições, vila grande e estradas (2026-11-12)
+function Build.data(): any
+	local function opt(name: string): any
+		local m = Data:FindFirstChild(name)
+		return if m then require(m :: ModuleScript) :: any else nil
+	end
+	return {
+		features = require(Data.Features) :: any,
+		village = opt("Village"),
+		roads = opt("Roads"),
+		mapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any,
+	}
+end
+
+-- Modelo publicado (AssetIds.Models diferente de 0)
+function Build.has(key: string): boolean
+	local AssetIds = require(ReplicatedStorage.Shared.AssetIds) :: any
+	local id = AssetIds.Models[key]
+	return type(id) == "number" and id ~= 0
+end
+
+-- Plano do chão e das construções (ArtPlan): o mesmo no terreno e no AssetLoader. Devolve o contexto
+-- (com os patamares das construções já no Site) e a lista de construções.
+function Build.plan(world: any): (any, { any })
+	local ArtPlan = require(ServerScriptService:WaitForChild("Modules"):WaitForChild("ArtPlan")) :: any
+	local ctx = ArtPlan.load(world, Build.data())
+	local structures = ArtPlan.structures(ctx, Build.has)
+	return ctx, structures
 end
 
 local function tunnelBoxes(world: any): { any }
@@ -36,59 +67,54 @@ local function tunnelBoxes(world: any): { any }
 	end)
 end
 
--- Tabuleiros do arrozal que existem no place (o mesmo filtro de mata do FeatureBuilder): o terreno
--- fica plano debaixo de cada lâmina e o AssetLoader põe a lâmina no topo calculado aqui.
+-- Tabuleiros do arrozal que existem no place (o mesmo filtro do plano da arte).
 function Build.paddySet(world: WorldData.World): any
-	local TerrainBuilder = require(VT65Build.TerrainBuilder)
-	local features = require(Data.Features) :: any
-	local mapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any
-	local housesXZ = {}
-	for i = 1, #features.houses, 4 do
-		table.insert(housesXZ, features.houses[i])
-		table.insert(housesXZ, features.houses[i + 1])
-	end
-	local landscape = require(VT65Build.Landscape).new(world, mapConfig, housesXZ)
-	local waters: { number } = {}
-	local w = features.waters
-	for i = 1, #w, 6 do
-		if landscape:kindAt(w[i], w[i + 1]) ~= 1 then -- 1 = Landscape.FOREST: sem lâmina
-			for k = 0, 5 do
-				table.insert(waters, w[i + k])
-			end
-		end
-	end
-	return TerrainBuilder.paddySet(world, waters)
+	local ctx = Build.plan(world)
+	return ctx.paddies
 end
 
+-- 2026-11-12: a coluna do terreno sai do plano da arte (ArtPlan.column: riacho, tabuleiros, diques
+-- em lombada, patamares das construções, estradas, becos e a roça seca). O atributo SitePlan diz ao
+-- AssetLoader que pode assentar cada coisa pela altura do plano.
 function Build.terrain()
 	local TerrainBuilder = require(VT65Build.TerrainBuilder)
+	local ArtPlan = require(ServerScriptService:WaitForChild("Modules"):WaitForChild("ArtPlan")) :: any
 	workspace.Terrain:Clear()
 	local world = Build.world()
-	TerrainBuilder.build(world, nil, { paddies = Build.paddySet(world) })
-	-- o AssetLoader só põe a lâmina no topo calculado se o terreno saiu aplainado (um place salvo com
-	-- terreno antigo continua com o encaixe pela mediana do chão)
+	local ctx = Build.plan(world)
+	TerrainBuilder.build(world, nil, {
+		column = function(x: number, z: number): (number, number, number, string?)
+			return ArtPlan.column(ctx, x, z)
+		end,
+	})
 	workspace.Terrain:SetAttribute("PaddiesFlat", true)
+	workspace.Terrain:SetAttribute("SitePlan", ArtPlan.VERSION)
 	local n = TerrainBuilder.carve(tunnelBoxes(world))
 	print("[VT65] túneis e trincheira escavados:", n, "blocos")
 end
 
 function Build.features()
 	local FeatureBuilder = require(VT65Build.FeatureBuilder) :: any
+	local ArtPlan = require(ServerScriptService:WaitForChild("Modules"):WaitForChild("ArtPlan")) :: any
 	local old = workspace:FindFirstChild("Map")
 	if old then
 		old:Destroy()
 	end
 	local env = { Instance = Instance, Vector3 = Vector3, CFrame = CFrame, Color3 = Color3, Enum = Enum }
-	local mapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any
 	local world = Build.world()
-	local features = require(Data.Features) :: any
-	local housesXZ = {}
-	for i = 1, #features.houses, 4 do
-		table.insert(housesXZ, features.houses[i])
-		table.insert(housesXZ, features.houses[i + 1])
-	end
-	local landscape = require(VT65Build.Landscape).new(world, mapConfig, housesXZ)
-	local stats = FeatureBuilder.build(env, features, mapConfig, world, workspace, landscape)
+	local data = Build.data()
+	local ctx = ArtPlan.load(world, data)
+	local stats = FeatureBuilder.build(
+		env,
+		data.features,
+		data.mapConfig,
+		world,
+		workspace,
+		ctx.landscape,
+		function(x1: number, z1: number, x2: number, z2: number): boolean
+			return ArtPlan.dikeKept(ctx.paddies, x1, z1, x2, z2)
+		end
+	)
 	FeatureBuilder.tunnels(env, tunnelBoxes(world), workspace:FindFirstChild("Map"))
 	print(
 		"[VT65] peças:",

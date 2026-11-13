@@ -46,6 +46,7 @@ RAIZ = AQUI.parents[1]
 MOCAP = RAIZ / "assets" / "mocap" / "cmu"
 SAIDA = RAIZ / "assets" / "mocap" / "soldado"
 POSTURE = RAIZ / "src" / "ServerScriptService" / "Modules" / "PostureService.luau"
+CORPO = RAIZ / "src" / "ReplicatedStorage" / "Shared" / "Corpo.luau"
 
 FPS_SAIDA = 30.0
 M_CMU = np.diag([-1.0, 1.0, -1.0])  # CMU (frente +Z) -> Roblox (frente −Z): 180° em Y
@@ -107,7 +108,19 @@ class Postura:
         return m
 
 
+def escala_corpo(path: Path = CORPO) -> float:
+    """D-98: K do Shared/Corpo (soldado do jogo / corpo de 1,75 m em que se grava)."""
+    s = path.read_text("utf-8")
+    h = re.search(r"Corpo\.HEIGHT_M = ([\d.]+)", s)
+    b = re.search(r"Corpo\.BASE_HEIGHT_M = ([\d.]+)", s)
+    if not (h and b):
+        raise SystemExit(f"não achei HEIGHT_M/BASE_HEIGHT_M em {path}")
+    return float(h[1]) / float(b[1])
+
+
 def ler_postura(path: Path = POSTURE) -> Postura:
+    """Postura do servidor no tamanho da GRAVAÇÃO: o PostureService guarda os valores do corpo do
+    jogo (D-98: vezes Corpo.K); aqui eles voltam ao corpo de 1,75 m dividindo por K."""
     s = path.read_text("utf-8")
     d = re.search(r"local DROP = \{ crouch = ([\d.]+), prone = ([\d.]+) \}", s)
     h = re.search(r"local MIN_HIP = ([\d.]+)", s)
@@ -118,10 +131,15 @@ def ler_postura(path: Path = POSTURE) -> Postura:
     )
     if not (d and h and p):
         raise SystemExit(f"não achei DROP/MIN_HIP/PRONE_ROOT em {path}")
+    k = escala_corpo()
+
+    def r(x: str) -> float:
+        return round(float(x) / k, 3)
+
     return Postura(
-        drop={"crouch": float(d[1]), "prone": float(d[2])},
-        min_hip=float(h[1]),
-        prone_y=float(p[1]),
+        drop={"crouch": r(d[1]), "prone": r(d[2])},
+        min_hip=r(h[1]),
+        prone_y=r(p[1]),
         prone_pitch=float(np.radians(float(p[2]))),
     )
 
@@ -1497,6 +1515,90 @@ def rifle_strike_clip(name: str, base: Clip) -> Clip:
     return clip
 
 
+# ===== itens (D-99) =====
+# Curativo, torniquete, curativo no companheiro, tratar, reanimar, rádio, binóculo, pá e cantil. O
+# caminho das mãos é o do Shared/ItemAnim (tools/anim/itens.luau grava itens.json), o mesmo que o
+# PostureController usa no jogo por IK; o clipe soma o tronco e a cabeça (olhar a ferida, curvar
+# sobre o companheiro, jogar a cabeça para trás ao beber). Tempo nominal do ItemAnim; o jogo
+# (SoldierAnimations) posiciona o clipe pelo relógio do servidor, com o laço do ItemAnim.
+ITENS_JSON = AQUI / "itens.json"
+ITEM_CLIPS = {
+    # clipe: (chave do ItemAnim, tronco à frente (graus), cabeça para baixo, cabeça para a esquerda,
+    #         cabeça inclinada para a esquerda)
+    "item_curativo": ("bandage", 10.0, 30.0, 15.0, 0.0),
+    "item_torniquete": ("tourniquet", 25.0, 35.0, 10.0, 0.0),
+    "item_curativo_outro": ("bandage_other", 35.0, 25.0, 0.0, 0.0),
+    "item_tratar": ("treat", 35.0, 25.0, 0.0, 0.0),
+    "item_reanimar": ("revive", 40.0, 25.0, 0.0, 0.0),
+    "item_radio": ("radio", 0.0, 5.0, 5.0, 6.0),
+    "item_binoculo": ("binoculars", 0.0, 0.0, 0.0, 0.0),
+    "item_pa": ("shovel", 25.0, 20.0, 0.0, 0.0),
+    "item_cantil": ("canteen", -5.0, -10.0, 0.0, 0.0),
+}
+
+
+def item_clip(name: str, base: Clip) -> Clip:
+    """Uso de item (procedural, como a recarga): mãos por IK no caminho do ItemAnim; o tronco
+    curva e a cabeça olha; entra no começo e sai no fim. No cantil a cabeça vai para trás junto com
+    o giro do cantil (chave "tilt")."""
+    chave, tronco, cab_baixo, cab_lado, cab_incl = ITEM_CLIPS[name]
+    dados = json.loads(ITENS_JSON.read_text("utf-8"))
+    a = dados["anims"][chave]
+    # polos dos cotovelos: os do jogo (Shared/ItemAnim.POLES, PostureController)
+    polos = {lado: np.array(dados["poles"][lado[0]], float) for lado in ("Right", "Left")}
+    keys = a["keys"]
+    dur = float(a["dur"])
+    fps = 30.0
+    n = max(int(round(dur * fps)), 2)
+    lo = mean_rot(base.w["LowerTorso"])
+    up_rel = mean_rot(np.einsum("fji,fjk->fik", base.w["LowerTorso"], base.w["UpperTorso"]))
+    hd = mean_rot(base.w["Head"])
+    piv0 = base.pivot.mean(axis=0)
+    w = {p: np.repeat(np.eye(3)[None], n + 1, axis=0) for p in PARTS}
+    piv = np.repeat(piv0[None], n + 1, axis=0)
+    w["LowerTorso"][:] = lo
+    rk = [(k["t"], np.array(k["r"], float)) for k in keys]
+    lk = [(k["t"], np.array(k["l"], float)) for k in keys]
+    tk = [(k["t"], np.array([float(k["tilt"])])) for k in keys]
+    entra = max(min(float(a["loop"][0]), 0.5), 0.2)
+    sai = max(min(dur - float(a["loop"][1]), 0.6), 0.2) if not a["held"] else 0.0
+    for i in range(n + 1):
+        t = i / fps
+        e = float(smoothstep(t / entra))
+        if sai > 0:
+            e *= 1.0 - float(smoothstep((t - (dur - sai)) / sai))
+        beber = float(_keys(tk, t)[0]) / 70.0 if chave == "canteen" else 0.0
+        w["UpperTorso"][i] = lo @ up_rel @ rx(np.radians(-tronco * e))
+        w["Head"][i] = (
+            ry(np.radians(cab_lado * e))
+            @ rx(np.radians(-cab_baixo * e + 35.0 * beber))
+            @ r15.rz(np.radians(cab_incl * e))
+            @ hd
+        )
+    # rádio: a direita segue no fuzil (as duas no fuzil e depois a esquerda vai ao fone)
+    rifle_arms(w, piv, GRIP, POLES_STAND)
+    err = 0.0
+    for i in range(n + 1):
+        t = i / fps
+        up = w["UpperTorso"][i]
+        ut, _ = chest_frame(lo, up, piv0)
+        for lado, kk in (("Right", rk), ("Left", lk)):
+            if not (a["right"] if lado == "Right" else a["left"]):
+                continue
+            alvo = ut + up @ _keys(kk, t)
+            sh = ut + up @ SHOULDER[lado]
+            wu, wf, gap = arm_ik(sh, alvo, up, ut + up @ polos[lado], lado, up @ X)
+            w[f"{lado}UpperArm"][i], w[f"{lado}LowerArm"][i], w[f"{lado}Hand"][i] = wu, wf, up
+            err = max(err, gap)
+    clip = Clip(name, fps, w, piv, False, "stand", 0.0)
+    clip.meta = {
+        "fonte": f"procedural (Shared/ItemAnim.{chave}: mãos por IK, tronco e cabeça)",
+        "erro_mao_cm": round(err * r15.STUD_M * 100, 2),
+        "item": chave,
+    }
+    return clip
+
+
 # ===== saída =====
 def rifle_frames(clip: Clip, grip: tuple) -> list[tuple[np.ndarray, np.ndarray]]:
     hp, hr = grip
@@ -1677,6 +1779,9 @@ def build(nome: str, post: Postura) -> Saida:
     elif nome == "baioneta":
         clip = rifle_strike_clip(nome, build("parado", post).clip)
         s = Saida(clip, GRIP, "Action", weights=OVERLAY)
+    elif nome in ITEM_CLIPS:
+        # D-99: o fuzil vai a tiracolo no jogo (PostureController); a prévia mostra só o corpo
+        s = Saida(item_clip(nome, build("parado", post).clip), None, "Action", weights=OVERLAY)
     else:
         raise SystemExit(f"clipe desconhecido: {nome}")
     _cache[nome] = s
@@ -1707,6 +1812,7 @@ CLIPES = [
     "faca_lado",
     "faca_guardar",
     "baioneta",
+    *ITEM_CLIPS,
 ]
 
 

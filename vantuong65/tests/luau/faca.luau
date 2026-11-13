@@ -176,7 +176,14 @@ end)
 
 test("faca no cinto de todo soldado (Gear), num lugar livre do cinto", function()
 	local Gear = require("../../src/ServerScriptService/Modules/Gear") :: any
-	local env = Gear.env(Gear.vec(1.67, 0.79, 1.04), Gear.vec(1.84, 2.0, 1.07), Gear.vec(1, 1.2, 1.1), nil, nil)
+	local k = Gear.BODY_K -- D-98: corpo de 2 m
+	local env = Gear.env(
+		Gear.vec(1.67 * k, 0.79 * k, 1.04 * k),
+		Gear.vec(1.84 * k, 2.0 * k, 1.07 * k),
+		Gear.vec(1 * k, 1.2 * k, 1.1 * k),
+		nil,
+		nil
+	)
 	for faction, byRole in Gear.KIT_BY_ROLE do
 		for role in byRole do
 			for _, extra in { "", "us_towel", "vc_rice_tube" } do
@@ -222,7 +229,9 @@ local function geo(id: string): Geo
 	end
 	local L = a.lengthM / M
 	local mz = s(a.muzzle) - s(a.grip)
-	return { support = w, buttZ = L - mz, muzzleZ = -mz }
+	-- D-98: o corpo cresce K e a arma não; no espaço do ArmIK (corpo da gravação) a arma encolhe 1/K
+	local k = 1 / SoldierAnims.SCALE
+	return { support = { w[1] * k, w[2] * k, w[3] * k }, buttZ = (L - mz) * k, muzzleZ = -mz * k }
 end
 
 -- arma como um segmento da coronha à boca (coronha 4,8 cm de raio, cano 2,8 cm)
@@ -321,7 +330,8 @@ test("golpe com o fuzil e faca na mão: guarda, estocada e fuzil só na esquerda
 					gp * M * 100
 				)
 			)
-			local lim = if name == "guard" then 0.005 else 0.02
+			-- D-98: com a arma em tamanho real no corpo de 2 m, a guarda do Tipo 56 encosta 0,6 cm
+			local lim = if name == "guard" then 0.01 else 0.02
 			assert(d * M <= lim and wd * M <= lim, id .. " " .. name)
 			assert(gp * M <= (if name == "lunge" then 0.1 else 0.02), id .. " " .. name .. ": alcance")
 		end
@@ -461,10 +471,58 @@ test("clipes gravados: braços fora do corpo quadro a quadro (se existirem)", fu
 	end
 end)
 
+test("D-98: carta na mão (mãos nas bordas, fuzil a tiracolo) sem atravessar o corpo", function()
+	local p, r = ArmIK.hold(ArmIK.HOLDS.map)
+	-- bordas da folha (CartaModel: ±(W/2 − 3 cm), 4 cm abaixo do meio, 2 cm à frente), ÷ K
+	local k = 1 / SoldierAnims.SCALE
+	local ex, ey, ez = (0.25 - 0.03) / M * k, -0.04 / M * k, -0.02 / M * k
+	local right = ArmIK.add(p, ArmIK.mv(r, { ex, ey, ez }))
+	local left = ArmIK.add(p, ArmIK.mv(r, { -ex, ey, ez }))
+	local worst, gap = 0, 0
+	for _, tw in TWISTS do
+		for _, bend in BENDS do
+			local d, gp = ArmIK.measure({
+				grip = right,
+				support = left,
+				poles = ArmIK.POLES.map,
+				twist = math.rad(tw),
+				bend = bend,
+			})
+			worst, gap = math.max(worst, d), math.max(gap, gp)
+		end
+	end
+	local slung = 0
+	for _, id in { "m14", "type56", "sks", "m60", "rpd" } do
+		slung = math.max(slung, weaponDepth(ArmIK.HOLDS.slung, geo(id), 0, 0))
+	end
+	print(
+		string.format(
+			"       carta: braços %.1f cm, sobra %.1f cm; fuzil a tiracolo %.1f cm",
+			worst * M * 100,
+			gap * M * 100,
+			slung * M * 100
+		)
+	)
+	assert(worst * M <= 0.01 and gap * M <= 0.01, "braços na carta")
+	assert(slung * M <= 0.01, "fuzil a tiracolo dentro do corpo")
+end)
+
+test("D-98: soldado de 2,0 m: o mesmo K no Corpo, no Gear e no SoldierAnims", function()
+	local Corpo = require(S .. "Corpo")
+	local Gear = require("../../src/ServerScriptService/Modules/Gear") :: any
+	near(Corpo.HEIGHT_M, 2.0, 1e-9, "altura do dono")
+	near(Corpo.K, 2.0 / 1.75, 1e-12, "K")
+	near(Gear.BODY_K, Corpo.K, 1e-12, "Gear.BODY_K")
+	near(SoldierAnims.SCALE, Corpo.K, 1e-12, "SoldierAnims.SCALE")
+	local VehicleDrive = require(S .. "VehicleDrive") :: any
+	near(VehicleDrive.BODY_K, Corpo.K, 1e-12, "VehicleDrive.BODY_K")
+end)
+
 test("câmera agachada na cabeça da animação: DROP.crouch = descida da cabeça nos clipes", function()
 	local ps = fs.readFile("src/ServerScriptService/Modules/PostureService.luau")
-	local drop = tonumber(string.match(ps, "local DROP = { crouch = ([%d.]+)")) :: number
-	near(drop, SoldierAnims.BAKED.drop.crouch, 1e-9, "BAKED")
+	-- D-98: no código, o DROP do corpo de 2 m; aqui volta ao da gravação (÷ K)
+	local drop = (tonumber(string.match(ps, "local DROP = { crouch = ([%d.]+)")) :: number) / SoldierAnims.SCALE
+	near(drop, SoldierAnims.BAKED.drop.crouch, 1e-3, "BAKED")
 	if not fs.isFile(DIR .. "parado.json") then
 		return
 	end
@@ -483,6 +541,105 @@ test("câmera agachada na cabeça da animação: DROP.crouch = descida da cabeç
 		)
 		assert(math.abs(fall - drop) * M <= 0.02, n .. ": câmera a mais de 2 cm da cabeça")
 	end
+end)
+
+-- ===== D-99: mãos de 1ª pessoa e animação dos itens =====
+local MaosPose = require(S .. "MaosPose")
+local ItemAnim = require(S .. "ItemAnim")
+
+test("D-99: mãos de 1ª pessoa com medidas de mão (não mais elipsoides)", function()
+	for name in MaosPose.POSES do
+		for _, side in { "R", "L" } do
+			local p = MaosPose.get(name, side)
+			assert(p.hand == side, name .. ": lado")
+			assert(#p.chains >= 5, name .. ": dedos e polegar")
+			local lo, hi = MaosPose.bounds(p)
+			for i = 1, 3 do
+				local span = hi[i] - lo[i]
+				assert(span > 0.04 and span < 0.2, string.format("%s %s: eixo %d com %.3f m", name, side, i, span))
+			end
+			for _, ch in p.chains do
+				assert(ch.r >= 0.007 and ch.r <= 0.025, name .. ": raio de dedo/pulso")
+			end
+		end
+		-- espelho: a mão do outro lado é a mesma forma com x trocado
+		local r, l = MaosPose.get(name, "R"), MaosPose.get(name, "L")
+		near(r.chains[2].pts[1][1], -l.chains[2].pts[1][1], 1e-9, name .. ": espelho")
+	end
+	-- a direita fecha o punho: um dedo passa da frente do punho para o lado esquerdo dele
+	local g = MaosPose.get("grip", "R")
+	local left = false
+	for _, ch in g.chains do
+		for _, v in ch.pts do
+			if v[1] < -0.012 - 0.016 + 0.004 then -- além da face esquerda do punho (centro −1,2 cm)
+				left = true
+			end
+		end
+	end
+	assert(left, "os dedos não envolvem o punho")
+end)
+
+test("D-99: itens com caminho completo, laço e alcance do braço", function()
+	local SA = SoldierAnims
+	for name, a in ItemAnim.ANIMS do
+		for _, keys in { a.tp, a.fp } do
+			assert(keys[1].t == 0, name .. ": começa em 0")
+			assert(math.abs(keys[#keys].t - a.dur) < 1e-9, name .. ": termina no fim nominal")
+			for i = 2, #keys do
+				assert(keys[i].t > keys[i - 1].t, name .. ": chaves em ordem")
+			end
+		end
+		assert(a.loop.a >= 0 and a.loop.b <= a.dur and a.loop.b > a.loop.a, name .. ": laço")
+		-- laço: o tempo das chaves nunca sai de [0, dur] e o fim chega ao fim
+		for _, t in { 0, 0.3, 2, 5, 9, 30 } do
+			local tt = ItemAnim.localTime(a, t, if a.held then nil else math.max(a.dur, 12))
+			assert(tt >= 0 and tt <= a.dur + 1e-9, name .. ": tempo fora")
+		end
+		if not a.held then
+			near(ItemAnim.localTime(a, 12, 12), a.dur, 1e-9, name .. ": fim")
+			near(ItemAnim.localTime(a, a.dur, a.dur), a.dur, 1e-9, name .. ": fim nominal")
+		end
+		-- alcance (com ItemAnim.reach): nenhum alvo além do braço do corpo gravado
+		for _, k in a.tp do
+			for side, p in { R = k.r, L = k.l } do
+				local q = ItemAnim.reach(p, side)
+				local s = ItemAnim.SHOULDER[side]
+				local d = math.sqrt((q[1] - s[1]) ^ 2 + (q[2] - s[2]) ^ 2 + (q[3] - s[3]) ^ 2)
+				assert(d <= ItemAnim.REACH + 1e-6, name .. ": alvo fora do alcance")
+			end
+		end
+		if a.prop then
+			assert(ItemAnim.PROPS[a.prop.kind], name .. ": objeto sem medida")
+		end
+		-- clipe de 3ª pessoa com o mesmo tempo (id 0 até subir)
+		local clip = SA.CLIPS[SA.ITEM_CLIP[name]]
+		assert(clip and clip.layer == "upper", name .. ": sem clipe")
+		assert(math.abs(clip.length - a.dur) < 0.04, name .. ": duração do clipe")
+	end
+	for name in ItemAnim.ACTIONS do
+		assert(ItemAnim.ANIMS[name], name)
+	end
+	for name in ItemAnim.ITEMS do
+		assert(ItemAnim.ANIMS[name], name)
+	end
+end)
+
+test("D-99: o que o soldado usa agora vem dos atributos (relógio do servidor)", function()
+	local attrs: { [string]: any } = {}
+	local function get(k: string): any
+		return attrs[k]
+	end
+	assert(ItemAnim.current(get, 100, 8) == nil, "nada")
+	attrs.VT65Acao, attrs.VT65AcaoT, attrs.VT65AcaoS = "bandage", 98, 6
+	local n, t, D = ItemAnim.current(get, 100, 8)
+	assert(n == "bandage" and t == 2 and D == 6, "curativo")
+	assert(ItemAnim.current(get, 103.5, 8) == "bandage" and ItemAnim.current(get, 104.1 + 2, 8) == nil, "acaba")
+	attrs.VT65Acao = nil
+	attrs.VT65Item, attrs.VT65ItemT = "radio", 90
+	local n2, _, D2 = ItemAnim.current(get, 300, 8)
+	assert(n2 == "radio" and D2 == nil, "rádio segurado")
+	attrs.VT65Item = "shovel"
+	assert(ItemAnim.current(get, 97, 8) == "shovel" and ItemAnim.current(get, 99, 8) == nil, "pá dura 8 s")
 end)
 
 print(string.format("%d ok, %d falhas", passed, failed))

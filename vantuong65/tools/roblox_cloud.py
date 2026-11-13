@@ -164,6 +164,37 @@ KIT_DESC = {
 }
 
 
+# Campanha (plano de volta diária, 2026-11-12): descrições curtas (as mesmas de
+# Commerce.CampaignPasses e CampaignProducts); preços = suggestedRobux de lá, PLACEHOLDER
+CAMPAIGN_DESC = {
+    "PASS_SEASON_S1": (
+        "Temporada 1 da Operação Starlite: a trilha Veterano (uniformes, acabamentos, cartões de "
+        "abate, gestos, música do menu) e 10% a mais de créditos. Quem compra no meio recebe tudo "
+        "o que já passou."
+    ),
+    "PASS_RECRUIT": (
+        "Uniforme de época, acabamento de arma, 3 dias de XP dobrado e 1.000 créditos. "
+        "Compra única."
+    ),
+    "PASS_PERK_SPEED": "+6% de velocidade no trote e na corrida. Vale nos dois lados.",
+    "PASS_PERK_HEALTH": "+12% de vida máxima. Vale nos dois lados.",
+    "PASS_PERK_BREATH": (
+        "Prende a respiração por +60% do tempo e a mira balança 12% menos na luneta."
+    ),
+    "PASS_PERK_RELOAD": "Recarga 12% mais rápida. Vale nos dois lados.",
+    "PASS_PERK_MEDIC": (
+        "Bandagem e torniquete 35% mais rápidos; o sangramento corre 20% mais devagar."
+    ),
+    "PASS_PERK_POCKETS": "+1 carregador e +1 granada (soma com os kits).",
+    "PASS_PERK_EAGLE": "O inimigo que você marca fica 50% mais tempo marcado para o squad.",
+    "PASS_PERK_ALL": (
+        "As 7 vantagens juntas, com desconto. Nenhum número de combate passa de +12%."
+    ),
+}
+# passe sem imagem própria: usa a arte da capa do jogo (imagem que já existe no repositório)
+FALLBACK_PASS_IMAGE = "marketing/capa_keyart.jpg"
+
+
 def cmd_create_store(only: set[str] | None = None) -> None:
     """Cria passes e produtos que faltam. `only`: só estas chaves (ex.: itens de jogo da D-72)."""
     c = cfg()
@@ -177,18 +208,34 @@ def cmd_create_store(only: set[str] | None = None) -> None:
         # itens de jogo (decisão do dono, 2026-11-11, D-72); preços = Commerce.suggestedRobux
         ("PASS_KIT_VETERAN", "Kit Veterano", "marketing/gamepass_kit_veterano.jpg", 149),
         ("PASS_KIT_ELITE", "Kit de Elite", "marketing/gamepass_kit_elite.jpg", 299),
+        # campanha (2026-11-12): passe da temporada, Pacote de Recruta e as vantagens (5b)
+        ("PASS_SEASON_S1", "Passe de Campanha: Veterano", None, 399),
+        ("PASS_RECRUIT", "Pacote de Recruta", None, 99),
+        ("PASS_PERK_SPEED", "Pernas de Maratonista", None, 199),
+        ("PASS_PERK_HEALTH", "Couro Duro", None, 249),
+        ("PASS_PERK_BREATH", "Fôlego de Atirador", None, 149),
+        ("PASS_PERK_RELOAD", "Mãos Rápidas", None, 199),
+        ("PASS_PERK_MEDIC", "Socorrista Treinado", None, 99),
+        ("PASS_PERK_POCKETS", "Bolsos Extras", None, 149),
+        ("PASS_PERK_EAGLE", "Olho de Águia", None, 99),
+        ("PASS_PERK_ALL", "Pacote Combatente", None, 799),
     ]
     for key, name, img, price in passes:
         if f"store.{key}" in ids or (only is not None and key not in only):
             continue
+        image = ROOT / "assets/forgegui" / (img or FALLBACK_PASS_IMAGE)
+        if not image.exists():
+            image = ROOT / "assets/forgegui" / FALLBACK_PASS_IMAGE
         body, ctype = multipart(
             {
                 "name": name,
-                "description": KIT_DESC.get(key, "Só visual/apoio. Sem vantagem."),
+                "description": KIT_DESC.get(
+                    key, CAMPAIGN_DESC.get(key, "Só visual/apoio. Sem vantagem.")
+                ),
                 "isForSale": "true",
                 "price": str(price),
             },
-            {"imageFile": ROOT / "assets/forgegui" / img},
+            {"imageFile": image},
         )
         url = f"{API}/game-passes/v1/universes/{u}/game-passes"
         r = request("POST", url, body, {"Content-Type": ctype})
@@ -206,6 +253,49 @@ def cmd_create_store(only: set[str] | None = None) -> None:
             25,
             "Volta a campo onde você caiu, na mesma espera do spawn normal, sem inimigo a menos "
             "de 100 m. Se não der na hora, fica guardado para a próxima queda.",
+        ),
+        # campanha (2026-11-12): preços = Commerce.CampaignProducts.suggestedRobux, PLACEHOLDER
+        (
+            "PRODUCT_SEASON_SKIP",
+            "Pular um nível do passe",
+            49,
+            "Sobe um nível do Passe de Campanha na hora (vale para as duas trilhas).",
+        ),
+        (
+            "PRODUCT_BOOST_XP_1H",
+            "XP dobrado por 1 h",
+            49,
+            "Dobra o XP por 1 hora de relógio, em qualquer servidor. Soma com o fim de semana.",
+        ),
+        (
+            "PRODUCT_BOOST_XP_24H",
+            "XP dobrado por 24 h",
+            149,
+            "Dobra o XP por 24 horas de relógio, em qualquer servidor.",
+        ),
+        (
+            "PRODUCT_BOOST_CR_1H",
+            "Créditos dobrados por 1 h",
+            49,
+            "Dobra os créditos ganhos jogando por 1 hora de relógio.",
+        ),
+        (
+            "PRODUCT_CREDITS_500",
+            "500 créditos",
+            5,
+            "500 créditos de intendência para o equipamento e as skins.",
+        ),
+        (
+            "PRODUCT_CREDITS_1200",
+            "1.200 créditos",
+            10,
+            "1.200 créditos de intendência (20% a mais que o pacote de 500).",
+        ),
+        (
+            "PRODUCT_CREDITS_3000",
+            "3.000 créditos",
+            20,
+            "3.000 créditos de intendência (50% a mais que o pacote de 500).",
         ),
     ]
     for key, name, price, desc in products:

@@ -45,6 +45,24 @@ VehicleDrive.GROUND = {
 	mud = { crr = 0.15, mu = 0.45, muLat = 0.35, ride = 0.4, soft = true, sinkM = 0.15, fx = "mud", rough = 0.45 },
 	paddy = { crr = 0.18, mu = 0.4, muLat = 0.3, ride = 0.3, soft = true, sinkM = 0.22, fx = "paddy", rough = 0.35 },
 	water = { crr = 0, mu = 0, muLat = 0, ride = 0, soft = false, sinkM = 0, fx = "water", rough = 0.1 },
+	-- D-100: estrada de terra batida do agente do mapa (terreno "Ground": estrada, beco e praça).
+	-- Rola como a terra seca da D-36 e aguenta mais velocidade que o campo aberto (PLACEHOLDER).
+	dirt = { crr = 0.05, mu = 0.75, muLat = 0.65, ride = 0.9, soft = true, sinkM = 0.01, fx = "dust", rough = 0.25 },
+} :: { [string]: Ground }
+
+-- D-100: pneu (carros e caminhão). Rola muito melhor na estrada e afunda muito mais no mole que a
+-- lagarta; o teto fora de estrada cai mais (suspensão de molas). Tudo PLACEHOLDER (engenharia).
+-- O arrozal ainda passa devagar até com tração só atrás (0,38 × 0,55 > 0,16), mas não na chuva.
+VehicleDrive.GROUND_WHEELED = {
+	road = { crr = 0.015, mu = 0.85, muLat = 0.8, ride = 1.0, soft = false, sinkM = 0, fx = "dust", rough = 0.08 },
+	dirt = { crr = 0.03, mu = 0.75, muLat = 0.7, ride = 0.8, soft = true, sinkM = 0.01, fx = "dust", rough = 0.3 },
+	earth = { crr = 0.05, mu = 0.65, muLat = 0.6, ride = 0.6, soft = true, sinkM = 0.02, fx = "dust", rough = 0.5 },
+	grass = { crr = 0.06, mu = 0.6, muLat = 0.55, ride = 0.5, soft = true, sinkM = 0.03, fx = "grass", rough = 0.45 },
+	forest = { crr = 0.09, mu = 0.55, muLat = 0.5, ride = 0.3, soft = true, sinkM = 0.04, fx = "leaves", rough = 0.8 },
+	sand = { crr = 0.13, mu = 0.45, muLat = 0.45, ride = 0.35, soft = false, sinkM = 0.08, fx = "sand", rough = 0.3 },
+	mud = { crr = 0.15, mu = 0.4, muLat = 0.35, ride = 0.2, soft = true, sinkM = 0.12, fx = "mud", rough = 0.45 },
+	paddy = { crr = 0.16, mu = 0.38, muLat = 0.3, ride = 0.13, soft = true, sinkM = 0.15, fx = "paddy", rough = 0.35 },
+	water = { crr = 0, mu = 0, muLat = 0, ride = 0, soft = false, sinkM = 0, fx = "water", rough = 0.1 },
 } :: { [string]: Ground }
 
 -- Classifica o chão pelo material do terreno ou da peça (Enum.Material.Name) e pelo atributo
@@ -54,6 +72,8 @@ function VehicleDrive.groundOf(material: string?, attr: string?, partName: strin
 		return "paddy"
 	elseif partName == "Dike" or attr == "MudWall" or attr == "Earth" then
 		return "earth"
+	elseif material == "Ground" or attr == "Road" then
+		return "dirt" -- D-100: estrada de terra do mapa
 	elseif material == "Water" then
 		return "water"
 	elseif material == "Mud" then
@@ -77,8 +97,10 @@ function VehicleDrive.groundOf(material: string?, attr: string?, partName: strin
 end
 
 -- Chão com a chuva (0..1): o mole perde tração e o teto cai, e rola pior (PLACEHOLDER).
-function VehicleDrive.ground(key: string, rain: number?): Ground
-	local g = VehicleDrive.GROUND[key] or VehicleDrive.GROUND.earth
+-- wheeled: a tabela do pneu (D-100).
+function VehicleDrive.ground(key: string, rain: number?, wheeled: boolean?): Ground
+	local tbl = if wheeled then VehicleDrive.GROUND_WHEELED else VehicleDrive.GROUND
+	local g = tbl[key] or tbl.earth
 	local r = math.clamp(rain or 0, 0, 1)
 	if r <= 0 or not g.soft then
 		return g
@@ -139,6 +161,11 @@ export type DriveSpec = {
 	fordM: number, -- fundura que vadeia sem flutuar
 	water: WaterSpec?,
 	spring: SpringParams,
+	-- D-100: rodas. Sem giro no lugar (pivotDegS 0); a guinada é v / raio mínimo de curva até a
+	-- aderência lateral; driven = fração do peso nas rodas motrizes (4x4 e 6x6 = 1; tração atrás ~0,55).
+	wheeled: boolean?,
+	driven: number?,
+	stepM: number?, -- degrau que a rampa do chassi sobe (dique); nil = 0,6 m da lagarta
 }
 
 VehicleDrive.DRIVE = {
@@ -235,6 +262,105 @@ VehicleDrive.DRIVE = {
 			heaveMPerG = 0.05,
 		},
 	},
+	-- ===== D-100: rodas. Câmbio manual (embreagem como "conversor" de estol baixo), raio mínimo de
+	-- curva, aderência e mola: PLACEHOLDER de engenharia; vau do M151 (21 pol) e do M35 (30 pol):
+	-- conferir na ficha. =====
+	m151 = {
+		gears = { 0.2, 0.36, 0.6, 1.0 },
+		reverse = 0.2,
+		shiftS = 0.35,
+		rpmIdle = 600,
+		rpmMax = 4000,
+		stall = 0.55,
+		spoolUpS = 0.3,
+		spoolDownS = 0.35,
+		tractive = 0.75,
+		massFactor = 1.08,
+		brakeG = 0.6,
+		coastG = 0.04,
+		pivotDegS = 0,
+		turnRadiusM = 5.5,
+		yawTauS = 0.18,
+		latG = 0.65,
+		turnDrag = 0.01,
+		fordM = 0.53,
+		wheeled = true,
+		driven = 1,
+		stepM = 0.4,
+		spring = {
+			pitchHz = 1.4,
+			rollHz = 1.3,
+			heaveHz = 1.8,
+			zeta = 0.35,
+			pitchDegPerG = 3.5,
+			rollDegPerG = 4.5,
+			heaveMPerG = 0.07,
+		},
+	},
+	m35 = {
+		gears = { 0.12, 0.22, 0.38, 0.62, 1.0 },
+		reverse = 0.15,
+		shiftS = 0.6,
+		rpmIdle = 500,
+		rpmMax = 3200,
+		stall = 0.5,
+		spoolUpS = 0.6,
+		spoolDownS = 0.6,
+		tractive = 0.6,
+		massFactor = 1.12,
+		brakeG = 0.45,
+		coastG = 0.04,
+		pivotDegS = 0,
+		turnRadiusM = 11,
+		yawTauS = 0.35,
+		latG = 0.45,
+		turnDrag = 0.015,
+		fordM = 0.76,
+		wheeled = true,
+		driven = 1,
+		stepM = 0.5,
+		spring = {
+			pitchHz = 1.0,
+			rollHz = 1.0,
+			heaveHz = 1.4,
+			zeta = 0.3,
+			pitchDegPerG = 3,
+			rollDegPerG = 4,
+			heaveMPerG = 0.06,
+		},
+	},
+	peugeot403 = {
+		gears = { 0.25, 0.45, 0.7, 1.0 },
+		reverse = 0.2,
+		shiftS = 0.4,
+		rpmIdle = 700,
+		rpmMax = 4900,
+		stall = 0.5,
+		spoolUpS = 0.35,
+		spoolDownS = 0.4,
+		tractive = 0.45,
+		massFactor = 1.06,
+		brakeG = 0.55,
+		coastG = 0.04,
+		pivotDegS = 0,
+		turnRadiusM = 5.2,
+		yawTauS = 0.2,
+		latG = 0.7,
+		turnDrag = 0.01,
+		fordM = 0.3,
+		wheeled = true,
+		driven = 0.55, -- tração atrás
+		stepM = 0.3,
+		spring = {
+			pitchHz = 1.2,
+			rollHz = 1.1,
+			heaveHz = 1.5,
+			zeta = 0.3,
+			pitchDegPerG = 4,
+			rollDegPerG = 6,
+			heaveMPerG = 0.08,
+		},
+	},
 } :: { [string]: DriveSpec }
 
 -- Ficha mínima (Shared/Vehicles.Spec serve)
@@ -308,7 +434,7 @@ function VehicleDrive.topSpeed(body: Body, groundKey: string, rain: number?): nu
 	if groundKey == "water" then
 		return (body.waterKmh or 0) / 3.6
 	end
-	return body.maxKmh / 3.6 * VehicleDrive.ground(groundKey, rain).ride
+	return body.maxKmh / 3.6 * VehicleDrive.ground(groundKey, rain, VehicleDrive.spec(body.id).wheeled).ride
 end
 
 -- Um passo da dinâmica de chão (ou de água, no anfíbio). Muda `st` e devolve.
@@ -335,7 +461,8 @@ function VehicleDrive.step(body: Body, st: State, inp: Input, env: Env, dt: numb
 		end
 	end
 	st.floating = floating
-	local g = VehicleDrive.ground(key, env.rain)
+	local wheeled = d.wheeled == true
+	local g = VehicleDrive.ground(key, env.rain, wheeled)
 	local slope = math.clamp(env.slopeSin or 0, -0.95, 0.95)
 	local side = math.clamp(env.sideSin or 0, -0.95, 0.95)
 	local cosS = math.sqrt(1 - slope * slope)
@@ -398,7 +525,7 @@ function VehicleDrive.step(body: Body, st: State, inp: Input, env: Env, dt: numb
 		demand *= 0.15
 	end
 	-- girar no lugar pede motor (a lagarta de dentro freia e a de fora empurra terra)
-	local pivotDemand = math.abs(steer) * (if math.abs(v) < 1.5 then 0.55 else 0.2)
+	local pivotDemand = if wheeled then 0 else math.abs(steer) * (if math.abs(v) < 1.5 then 0.55 else 0.2)
 	if not floating then
 		demand = math.max(demand, pivotDemand)
 	end
@@ -446,7 +573,7 @@ function VehicleDrive.step(body: Body, st: State, inp: Input, env: Env, dt: numb
 	else
 		if want ~= 0 then
 			fDrive = math.min(demand * P / math.max(math.abs(v), 1.0), fConv)
-			local grip = g.mu * W * cosS
+			local grip = g.mu * W * cosS * (d.driven or 1) -- D-100: só o peso nas rodas motrizes
 			if fDrive > grip then
 				slip = (fDrive - grip) / fDrive
 				fDrive = grip
@@ -454,7 +581,7 @@ function VehicleDrive.step(body: Body, st: State, inp: Input, env: Env, dt: numb
 			fDrive *= want
 		end
 		-- resistências: rolamento (mais na curva, a lagarta derrapa), freio e freio-motor
-		local turnFrac = math.min(math.abs(st.yawRate) / math.rad(d.pivotDegS), 1.5)
+		local turnFrac = math.min(math.abs(st.yawRate) / math.rad(math.max(d.pivotDegS, 30)), 1.5)
 		local roll = (g.crr + d.turnDrag * turnFrac) * W * cosS
 		local brake = 0
 		if braking then
@@ -517,10 +644,14 @@ function VehicleDrive.step(body: Body, st: State, inp: Input, env: Env, dt: numb
 	end
 	local speed = math.abs(v)
 	local limit = pivot
-	if speed > 0.5 and not floating then
-		-- andando: curva de raio fixo (cross-drive) até o limite da aderência lateral
+	if speed > (if wheeled then 0.05 else 0.5) and not floating then
+		-- andando: curva de raio fixo (cross-drive; nas rodas, o volante todo esterçado) até o limite
+		-- da aderência lateral
 		local radius = d.turnRadiusM
-		local moving = if radius then math.max(pivot, speed / radius * math.clamp(g.mu / 0.7, 0.45, 1)) else pivot
+		local moving = if radius and wheeled
+			then speed / radius
+			elseif radius then math.max(pivot, speed / radius * math.clamp(g.mu / 0.7, 0.45, 1))
+			else pivot
 		limit = math.min(moving, d.latG * G * math.clamp(g.muLat / 0.6, 0.4, 1) / speed)
 	end
 	local rev = if v < -0.3 then -1 else 1 -- de ré, como carro: a traseira vai para o lado do comando
@@ -540,7 +671,7 @@ function VehicleDrive.step(body: Body, st: State, inp: Input, env: Env, dt: numb
 		local dec = g.muLat * G * cosS * dt
 		st.vLat = if math.abs(st.vLat) <= dec then 0 else st.vLat - sign(st.vLat) * dec
 	end
-	local scrub = if speed < 1.5 then math.abs(st.yawRate) / math.max(pivot, 1e-3) * 0.4 else 0
+	local scrub = if speed < 1.5 and not wheeled then math.abs(st.yawRate) / math.max(pivot, 1e-3) * 0.4 else 0
 	st.slip = math.clamp(math.max(slip, math.abs(st.vLat) / 2, scrub), 0, 1)
 	return st
 end
@@ -841,6 +972,14 @@ VehicleDrive.ART = {
 	},
 } :: { [string]: Art }
 
+-- D-98: a tabela foi feita para o soldado de 1,75 m. O de 2,0 m (Corpo.K = 8/7) senta com o olho
+-- mais alto: a parte do corpo acima do assento cresce K. Tripulação (cabeça ~0,4 m acima da
+-- escotilha ou olho ~0,8 m acima do banco da cabine): +0,6 m × (K − 1); tropa sentada no teto ou
+-- na porta (olho ~0,9 m acima do convés): +0,9 m × (K − 1). Número de projeto (PLACEHOLDER).
+VehicleDrive.BODY_K = 2.0 / 1.75 -- = Shared/Corpo.K (o teste faca confere)
+local CREW_LIFT = 0.6 * (VehicleDrive.BODY_K - 1) / 0.28
+local RIDER_LIFT = 0.9 * (VehicleDrive.BODY_K - 1) / 0.28
+
 -- Olho do assento no referencial da malha (studs): tripulação pela tabela; passageiro "p<n>" na
 -- fileira (n−1)//2, ímpar à direita (−z), par à esquerda (+z). nil = sem olho (fica a cabeça).
 function VehicleDrive.eyeOf(id: string, seatId: string): (number?, number?, number?)
@@ -850,13 +989,13 @@ function VehicleDrive.eyeOf(id: string, seatId: string): (number?, number?, numb
 	end
 	local e = art.eyes and art.eyes[seatId]
 	if e then
-		return e[1], e[2], e[3]
+		return e[1], e[2] + CREW_LIFT, e[3]
 	end
 	local n = tonumber(string.match(seatId, "^p(%d+)$"))
 	local r = art.riders
 	if n and r then
 		local row = (n - 1) // 2
-		return r.x0 + row * r.dx, r.y, (if n % 2 == 1 then -1 else 1) * r.z
+		return r.x0 + row * r.dx, r.y + RIDER_LIFT, (if n % 2 == 1 then -1 else 1) * r.z
 	end
 	return nil, nil, nil
 end

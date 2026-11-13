@@ -34,7 +34,12 @@ test("layout: sem conflito, Start nunca usado, Select só com navegação própr
 end)
 
 test("layout: toda ação de jogo tem botão de controle (exceções documentadas)", function()
-	local padless = { give_up = "B segurado quando caído", tourniquet = "roda de equipamento" }
+	local padless = {
+		give_up = "B segurado quando caído",
+		tourniquet = "roda de equipamento",
+		lean_left = "L3 na camada de mira (D-99: Q no teclado a qualquer hora)",
+		lean_right = "R3 na camada de mira (D-99: E no teclado a qualquer hora)",
+	}
 	for _, a in InputMap.ACTIONS do
 		if not a.pad then
 			assert(padless[a.id], a.id .. " sem botão de controle")
@@ -270,8 +275,9 @@ test("10.000 eventos aleatórios: invariantes nunca quebram", function()
 		if blocked then
 			assert(not s.aiming and not s.sprinting and s.lean == 0 and s.wheel == nil, "segurado preso no passo " .. i)
 		end
+		-- D-99: inclina mirando ou não, mas só a pé (veículo e caído cancelam)
 		if s.lean ~= 0 then
-			assert(s.aiming, "inclinado sem mirar no passo " .. i)
+			assert(s.vehicle == nil and not s.downed and s.alive, "inclinado fora do corpo a pé no passo " .. i)
 		end
 		local ctx = InputMap.activeContext(s)
 		assert(InputMap.CONTEXTS[ctx], "contexto inválido " .. ctx)
@@ -309,7 +315,11 @@ test("layout padrão = tabela da Parte 12 (infantaria, veículos, mapa e menus)"
 		-- 2026-11-11 (3ª pessoa): ↑ e → passaram a tocar/segurar; tocar mantém a função da Parte 12
 		{ "infantry", "binoculars", "DPadUp", "tap" },
 		{ "infantry", "shoulder_swap", "DPadUp", "hold" },
-		{ "infantry", "quick_bandage", "DPadDown", "press" },
+		-- 2026-11-12: ↓ tocar = bandagem rápida; segurar = rádio do squad (em todo contexto de jogo)
+		{ "infantry", "quick_bandage", "DPadDown", "tap" },
+		{ "infantry", "radio_talk", "DPadDown", "hold" },
+		{ "ground_vehicle", "radio_talk", "DPadDown", "hold" },
+		{ "helicopter", "radio_talk", "DPadDown", "hold" },
 		{ "infantry", "fire_mode", "DPadLeft", "tap" },
 		{ "infantry", "zeroing", "DPadLeft", "hold" },
 		{ "infantry", "radio_channel", "DPadRight", "tap" },
@@ -415,8 +425,62 @@ test("troca de contexto: mira não desliga sozinha; M e P não fecham o que abri
 	-- bugs 2 e 7: a tecla que abriu o mapa/menu é consumida (não chega à ação dela lá dentro)
 	assert(not InputMap.survives({ act("map", "global") }, "map"), "M reabria/fechava o mapa")
 	assert(not InputMap.survives({ act("game_menu", "global") }, "menu"), "P abria e fechava o menu")
-	-- inclinar (só na mira) é solto ao voltar para a infantaria
+	-- inclinar no controle (L3, só na mira) é solto ao voltar para a infantaria (L3 lá é correr)
 	assert(not InputMap.survives({ act("lean_left", "aim") }, "infantry"))
+	-- D-99: o Q da infantaria segue inclinando ao mirar e ao parar de mirar
+	assert(InputMap.survives({ act("lean_left", "infantry") }, "aim"), "Q soltava ao mirar")
+end)
+
+test("D-99: inclinar como no Front 44 (Q/E a qualquer hora, L3/R3 mirando, colisão, quartos)", function()
+	local Movement = require(S .. "Movement")
+	local keys: { [string]: string } = {}
+	local pads: { [string]: string } = {}
+	for _, a in InputMap.ACTIONS do
+		if a.id == "lean_left" or a.id == "lean_right" then
+			if a.key then
+				keys[a.ctx .. "." .. a.id] = a.key
+			end
+			if a.pad then
+				pads[a.ctx .. "." .. a.id] = a.pad
+			end
+		end
+	end
+	assert(keys["infantry.lean_left"] == "Q" and keys["infantry.lean_right"] == "E", "Q/E na infantaria")
+	assert(pads["aim.lean_left"] == "ButtonL3" and pads["aim.lean_right"] == "ButtonR3", "L3/R3 mirando")
+	assert(keys["aim.lean_left"] == nil, "a mira não tapa o Q da infantaria")
+	-- sem mirar o pedido vale; soltar a mira não zera
+	local s = InputMap.newState()
+	InputMap.event(s, "lean", -1)
+	assert(s.lean == -1, "inclinou sem mirar")
+	InputMap.event(s, "aim", true)
+	InputMap.event(s, "aim", false)
+	assert(s.lean == -1, "soltar a mira zerava o inclinar")
+	InputMap.event(s, "vehicle_enter", "ground_vehicle")
+	assert(s.lean == 0)
+	InputMap.event(s, "lean", 1)
+	assert(s.lean == 0, "no veículo não inclina")
+	-- o valor anda a 8/s (Front 44), correndo ou deitado o alvo é 0
+	local L = Movement.LEAN
+	assert(L.rollDeg == 14 and math.abs(L.waistDeg - 19.6) < 1e-9 and L.rate == 8, "números do Front 44")
+	assert(Movement.leanTarget(1, true) == 0 and Movement.leanTarget(-1, false) == -1)
+	local v, t = 0, 0
+	while v < 0.95 do
+		v = Movement.leanStep(v, 1, 1 / 60)
+		t += 1 / 60
+	end
+	assert(t > 0.3 and t < 0.45, string.format("inclinar inteiro em %.2f s", t))
+	-- colisão: parede encostada não deixa espiar; longe, inclina inteiro
+	assert(Movement.leanRoom(nil) == 1 and Movement.leanRoom(L.wallM) == 0)
+	near(Movement.leanRoom(L.wallM + L.offsetM * 0.5), 0.5, 1e-9, "meio inclinar")
+	assert(Movement.leanRoom(5) == 1)
+	-- servidor em quartos, sempre para dentro
+	assert(Movement.leanQuant(0.6) == 0.5 and Movement.leanQuant(-0.99) == -0.75 and Movement.leanQuant(1) == 1)
+	assert(Movement.leanQuant(0 / 0) == 0)
+	local offM = L.offsetM
+	print(
+		string.format("       inclinar: %.2f m de lado, %d° de câmera, %.1f° de tronco", offM, L.rollDeg, L.waistDeg)
+	)
+	assert(offM > 0.3 and offM < 0.45, "deslocamento do olho")
 end)
 
 test("D-82: teclado remapeável, mouse e gráficos saneados", function()

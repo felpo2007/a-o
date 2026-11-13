@@ -25,8 +25,9 @@ local US, VC = BotBrain.STYLE.US, BotBrain.STYLE.VC
 local C = BotBrain.C
 
 -- ===== tabela única =====
-test("dificuldade: uma tabela (medium) com reação 0,4-0,8 s e todos os campos", function()
-	assert(D.reaction[1] == 0.4 and D.reaction[2] == 0.8, "reação pedida pelo dono")
+-- 2026-11-12 ("bots estão muito fortes"): reação de 0,8 a 1,4 s (era 0,4–0,8)
+test("dificuldade: uma tabela (medium) com reação 0,8-1,4 s e todos os campos", function()
+	assert(D.reaction[1] == 0.8 and D.reaction[2] == 1.4, "reação de nível médio")
 	for _, k in
 		{
 			"aimBaseRad",
@@ -50,12 +51,12 @@ test("dificuldade: uma tabela (medium) com reação 0,4-0,8 s e todos os campos"
 end)
 
 -- ===== reação =====
-test("reação: 0,4 a 0,8 s; em combate mais rápida; suprimido mais lenta", function()
-	assert(math.abs(BotBrain.reactionTime(D, 0, 0, false) - 0.4) < 1e-9)
-	assert(math.abs(BotBrain.reactionTime(D, 1, 0, false) - 0.8) < 1e-9)
+test("reação: 0,8 a 1,4 s; em combate mais rápida; suprimido mais lenta", function()
+	assert(math.abs(BotBrain.reactionTime(D, 0, 0, false) - 0.8) < 1e-9)
+	assert(math.abs(BotBrain.reactionTime(D, 1, 0, false) - 1.4) < 1e-9)
 	for i = 0, 20 do
 		local t = BotBrain.reactionTime(D, i / 20, 0, false)
-		assert(t >= 0.4 and t <= 0.8, "fora da faixa: " .. t)
+		assert(t >= 0.8 and t <= 1.4, "fora da faixa: " .. t)
 	end
 	assert(BotBrain.reactionTime(D, 0.5, 0, true) < BotBrain.reactionTime(D, 0.5, 0, false))
 	assert(BotBrain.reactionTime(D, 0.5, 1, false) > BotBrain.reactionTime(D, 0.5, 0, false))
@@ -68,7 +69,8 @@ test("detecção: deitado é visto de mais perto; alvo já seguido não some", f
 end)
 
 -- ===== mira =====
-test("mira: acerta bem a 100 m (>= 35% no tronco), mal a 300 m (<= 10%)", function()
+-- 2026-11-12: tiro firme (mira já assentada) no tronco: bom a 50 m, fraco a 100 m, quase nada a 200 m
+test("mira: tiro firme acerta razoável a 50 m (50–80%), pouco a 100 m (10–30%), quase nada a 200 m", function()
 	local h = C.torsoHalfM
 	local p50 = BotBrain.hitChance(BotBrain.aimError(D, 50), 50, h)
 	local p100 = BotBrain.hitChance(BotBrain.aimError(D, 100), 100, h)
@@ -83,8 +85,9 @@ test("mira: acerta bem a 100 m (>= 35% no tronco), mal a 300 m (<= 10%)", functi
 			p300 * 100
 		)
 	)
-	assert(p100 >= 0.35 and p100 <= 0.6, "100 m: " .. p100)
-	assert(p300 <= 0.10, "300 m: " .. p300)
+	assert(p50 >= 0.5 and p50 <= 0.8, "50 m: " .. p50)
+	assert(p100 >= 0.1 and p100 <= 0.3, "100 m: " .. p100)
+	assert(p200 <= 0.05, "200 m: " .. p200)
 	assert(p50 > p100 and p100 > p200 and p200 > p300)
 end)
 
@@ -123,27 +126,28 @@ test("compatibilidade F3: aimSigma, burst e shotDelay continuam valendo", functi
 	assert(BotBrain.aimSigma(100, true, 0.5) > BotBrain.aimSigma(100, false, 0.5))
 	assert(BotBrain.burst("rifle", 0.9) == 1)
 	local b = BotBrain.burst("mg", 0.99)
-	assert(b >= 4 and b <= 8)
+	assert(b >= D.volley.mg[1] and b <= D.volley.mg[2])
 	assert(math.abs(BotBrain.shotDelay("mg", 600, true, 0.5) - 0.1) < 1e-9)
-	assert(math.abs(BotBrain.shotDelay("rifle", 725, false, 0) - 0.8) < 1e-9)
+	assert(math.abs(BotBrain.shotDelay("rifle", 725, false, 0) - D.openPause.rifle[1]) < 1e-9)
 end)
 
 -- ===== rajadas =====
-test("rajadas curtas: fuzil 2-3 tiros, metralhadora 4-8; cadência nunca acima da arma", function()
+-- 2026-11-12: rajadas mais curtas (eram fuzil 2–3 e metralhadora 4–8)
+test("rajadas curtas: fuzil 1-3 tiros, metralhadora 3-5; cadência nunca acima da arma", function()
 	for i = 0, 50 do
 		local r = i / 50
 		local nr, nm = BotBrain.volleySize(D, "rifle", r), BotBrain.volleySize(D, "mg", r)
-		assert(nr >= 2 and nr <= 3, "fuzil " .. nr)
-		assert(nm >= 4 and nm <= 8, "mg " .. nm)
+		assert(nr >= 1 and nr <= 3, "fuzil " .. nr)
+		assert(nm >= 3 and nm <= 5, "mg " .. nm)
 	end
-	assert(BotBrain.volleySize(D, "mg", 0) == 4 and BotBrain.volleySize(D, "mg", 0.999) == 8)
+	assert(BotBrain.volleySize(D, "mg", 0) == 3 and BotBrain.volleySize(D, "mg", 0.999) == 5)
 	local m14, sks, m60 = Weapons.get("m14"), Weapons.get("sks"), Weapons.get("m60")
 	assert(math.abs(BotBrain.volleyGap(D, "mg", m60.rpm, 0.5) - 60 / m60.rpm) < 1e-9, "metralhadora na cadência")
 	local g = BotBrain.volleyGap(D, "rifle", m14.rpm, 0.5)
 	assert(g >= D.aimedGap[1] and g <= D.aimedGap[2], "M14: tiro pensado")
 	assert(BotBrain.volleyGap(D, "rifle", sks.rpm, 0) >= 60 / sks.rpm - 1e-9, "SKS não passa da cadência prática")
 	local p = BotBrain.pause(D, "rifle", 0.5)
-	assert(p >= 0.8 and p <= 1.7, "pausa entre rajadas")
+	assert(p >= 1.2 and p <= 2.4, "pausa entre rajadas")
 end)
 
 test("abrigo: VC espera mais escondido e dá mais rajadas por abrigo; ferido espera o dobro", function()
@@ -444,8 +448,11 @@ test("mira que firma: o 1º tiro num alvo novo é apressado; firma em settleS", 
 end)
 
 test("disciplina: não atira além do alcance; granada atrás do dique mesmo vendo a cabeça", function()
-	assert(BotBrain.inRange(D, "rifle", 300) and not BotBrain.inRange(D, "rifle", 400))
-	assert(not BotBrain.inRange(D, "pistol", 80) and BotBrain.inRange(D, "mg", 420))
+	-- 2026-11-12: fuzil até 180 m e metralhadora até 250 m (eram 320 e 450; a visão vai a 120 m)
+	assert(BotBrain.inRange(D, "rifle", 170) and not BotBrain.inRange(D, "rifle", 200))
+	assert(
+		not BotBrain.inRange(D, "pistol", 80) and BotBrain.inRange(D, "mg", 240) and not BotBrain.inRange(D, "mg", 260)
+	)
 	assert(not throw({ los = true }), "vendo sem abrigo: atira")
 	assert(throw({ los = true, covered = true }), "vendo, mas atrás do dique: granada")
 	-- ponto de mira passa do abrigo e cai do lado dele
@@ -465,6 +472,226 @@ test("túnel: vale entrar quando a saída ganha caminho; blindado: um a partir d
 	assert(not BotBrain.tunnelWorth(T.useWithinM + 1, 300, 100), "entrada longe")
 	assert(BotBrain.crewCount(7, 3) == 0 and BotBrain.crewCount(8, 3) == 1)
 	assert(BotBrain.crewCount(15, 3) == 2 and BotBrain.crewCount(30, 3) == 3 and BotBrain.crewCount(30, 1) == 1)
+end)
+
+-- ===== 2026-11-12: bots menos fortes, visão curta e avanço =====
+-- A tabela da v36 (antes), só os campos que mudaram; o resto é o de hoje.
+local V36 = table.clone(D)
+V36.reaction, V36.alertedReaction, V36.suppReactionS = { 0.4, 0.8 }, 0.7, 0.5
+V36.spotStance = { stand = 1, crouch = 0.75, prone = 0.5 }
+V36.aimBaseRad, V36.aimRangeM, V36.aimSuppression = 0.0022, 500, 2.0
+V36.recoilRad = { rifle = 0.0008, mg = 0.0015, pistol = 0.002, launcher = 0 }
+V36.recoilMaxRad = 0.006
+V36.volley = { rifle = { 2, 3 }, mg = { 4, 8 }, pistol = { 1, 2 }, launcher = { 1, 1 } }
+V36.aimedGap = { 0.35, 0.7 }
+V36.openPause = { rifle = { 0.8, 1.7 }, mg = { 0.6, 1.4 }, pistol = { 0.5, 1.1 }, launcher = { 3, 5 } }
+V36.noticeS, V36.noticePer100M, V36.noticeStill, V36.noticeSide = 0.25, 0.35, 1.8, 2.2
+V36.fovDeg, V36.rearDeg, V36.settleS, V36.settleMult = 60, 125, 1.5, 3.0
+V36.fireMaxM = { rifle = 320, mg = 450, pistol = 50, launcher = 0 }
+
+test("duelo: chance de o bot acertar um jogador parado em 3 s, antes (v36) e depois", function()
+	local Rng = require("../../src/ReplicatedStorage/Shared/Rng") :: any
+	local m14 = Weapons.get("m14")
+	local function chance(diff: any, distM: number, sightM: number): number
+		local rng = Rng.new(1965)
+		return BotBrain.duelHitChance(diff, distM, 3, "rifle", m14.rpm, sightM, 4000, function()
+			return rng:next()
+		end)
+	end
+	local sightNow = BotBrain.sightRange(D, "open", "stand", false, nil, false)
+	local rows = {}
+	for _, dist in { 50, 100, 200 } do
+		local before = chance(V36, dist, 300) -- v36: notava a até 300 m em qualquer lugar
+		local after = chance(D, dist, sightNow)
+		table.insert(rows, string.format("%d m: %.0f%% -> %.0f%%", dist, before * 100, after * 100))
+		assert(after < before, string.format("%d m não ficou mais fraco", dist))
+		if dist == 50 then
+			assert(after >= 0.15 and after <= 0.6, "50 m fora do nível médio: " .. after)
+		elseif dist == 100 then
+			assert(after <= 0.2, "100 m forte demais: " .. after)
+		else
+			assert(after == 0, "200 m: além do que o bot nota no aberto")
+		end
+	end
+	print("       jogador parado, em pé, no aberto, 3 s de exposição (fuzil): " .. table.concat(rows, "; "))
+end)
+
+test("visão: 120 m no aberto, 40 m na mata, 15 m no capim; abaixado e camuflado mais perto", function()
+	assert(BotBrain.sightRange(D, "open", "stand", false, nil, false) == 120)
+	assert(BotBrain.sightRange(D, "rice", "stand", false, nil, false) == 120)
+	assert(BotBrain.sightRange(D, "jungle", "stand", false, nil, false) == 40)
+	assert(BotBrain.sightRange(D, "bamboo", "stand", false, nil, false) == 40)
+	assert(BotBrain.sightRange(D, "grass", "stand", false, nil, false) == 15)
+	assert(BotBrain.sightRange(D, "open", "crouch", false, nil, false) < 120)
+	assert(
+		BotBrain.sightRange(D, "open", "prone", false, nil, false)
+			< BotBrain.sightRange(D, "open", "crouch", false, nil, false)
+	)
+	assert(BotBrain.sightRange(D, "jungle", "stand", false, "jungle", false) < 40, "camuflagem da mata na mata")
+	assert(BotBrain.sightRange(D, "jungle", "stand", false, nil, true) == 60, "atirando: 1,5x")
+	assert(BotBrain.sightRange(D, "jungle", "stand", true, nil, false) == 60, "seguido: 1,5x")
+	assert(BotBrain.sightRange(D, "open", "stand", true, nil, false) == 120, "seguido não passa do teto")
+	assert(C.senseRangeM == 120)
+	-- notar: mais longe, na vegetação e parado abaixado demora mais; cone mais estreito
+	local base = BotBrain.noticeTime(D, 40, "stand", false, false, 0, "open")
+	assert(BotBrain.noticeTime(D, 40, "stand", false, false, 0, "jungle") > base)
+	assert(
+		BotBrain.noticeTime(D, 40, "stand", false, false, 0, "grass")
+			> BotBrain.noticeTime(D, 40, "stand", false, false, 0, "jungle")
+	)
+	assert(
+		BotBrain.noticeTime(D, 40, "prone", true, false, 0, "open")
+			> BotBrain.noticeTime(D, 40, "prone", false, false, 0, "open")
+	)
+	assert(BotBrain.noticeTime(D, 40, "stand", false, false, 110, "open") == math.huge, "além de 100° não vê")
+	print(
+		string.format(
+			"       notar em pé no aberto: 50 m %.2f s (v36 %.2f), 100 m %.2f s (v36 %.2f); deitado parado na mata a 30 m %.2f s",
+			BotBrain.noticeTime(D, 50, "stand", false, false, 0, "open"),
+			BotBrain.noticeTime(V36, 50, "stand", false, false, 0),
+			BotBrain.noticeTime(D, 100, "stand", false, false, 0, "open"),
+			BotBrain.noticeTime(V36, 100, "stand", false, false, 0),
+			BotBrain.noticeTime(D, 30, "prone", true, false, 0, "jungle")
+		)
+	)
+end)
+
+test("mira no tronco em qualquer postura (nada de cabeça em série)", function()
+	for _, st in { "stand", "crouch", "prone" } do
+		assert(BotBrain.aimPartName(st) == "UpperTorso", st)
+	end
+	-- chance de um tiro firme a 50 m cair na cabeça (caixa de 0,24 m, centro 0,55 m acima do ponto
+	-- mirado) de quem está agachado: antes o bot mirava na cabeça
+	local s = BotBrain.aimError(D, 50)
+	local lin = s * 50
+	local function erf(x: number): number
+		local t = 1 / (1 + 0.3275911 * math.abs(x))
+		local y = 1
+			- (((((1.061405429 * t - 1.453152027) * t) + 1.421413741) * t - 0.284496736) * t + 0.254829592)
+				* t
+				* math.exp(-x * x)
+		return if x >= 0 then y else -y
+	end
+	local function band(lo: number, hi: number): number
+		return 0.5 * (erf(hi / (lin * math.sqrt(2))) - erf(lo / (lin * math.sqrt(2))))
+	end
+	local headNow = band(-0.12, 0.12) * band(0.55 - 0.12, 0.55 + 0.12)
+	local headV36 = BotBrain.hitChance(BotBrain.aimError(V36, 50), 50, 0.12)
+	print(
+		string.format(
+			"       tiro na cabeça de quem está agachado a 50 m: %.0f%% (v36) -> %.0f%%",
+			headV36 * 100,
+			headNow * 100
+		)
+	)
+	assert(headNow < headV36 / 4)
+end)
+
+test("avançar: atacante sem alvo nem fogo volta a andar; defensor fica; parado tem limite", function()
+	assert(BotBrain.shouldPress(true, false, false, false, 5), "atacante calmo há 5 s avança")
+	assert(not BotBrain.shouldPress(true, false, false, false, 2), "espera um pouco")
+	assert(not BotBrain.shouldPress(true, true, false, false, 9), "vendo alguém, luta")
+	assert(not BotBrain.shouldPress(true, false, true, false, 9), "sob fogo, abriga")
+	assert(not BotBrain.shouldPress(false, false, false, false, 9), "defensor fica no ponto")
+	assert(not BotBrain.shouldPress(true, false, false, true, 9), "ferido recua")
+	assert(BotBrain.idleExpired(21, false, false) and not BotBrain.idleExpired(21, false, true))
+	assert(not BotBrain.idleExpired(21, true, false) and not BotBrain.idleExpired(10, false, false))
+	assert(BotBrain.squadBounds(true, 120, 10) and not BotBrain.squadBounds(true, 200, 10))
+	assert(not BotBrain.squadBounds(true, 120, 60) and not BotBrain.squadBounds(false, 120, 10))
+	-- menos tempo parado depois do contato (v36: EUA 2–5 s, VC 20–40 s)
+	assert(US.resumeS[2] <= 3 and VC.resumeS[2] <= 8 and VC.forgetS <= 10)
+	assert(BotBrain.SQUAD.leaderWaitMaxS <= 10)
+	-- aproximação dos últimos 125 m (da reunião avançada ao ponto), sem contato: trota até walkCalmM
+	-- do objetivo e anda o resto (v36: andava os últimos 120 m)
+	local Movement = require(S .. "Movement") :: any
+	local function approach(walkM: number): number
+		local walk = math.min(walkM, 125)
+		return (125 - walk) / Movement.JOG + walk / Movement.WALK
+	end
+	local before, after = approach(120), approach(BotBrain.MOVE.walkCalmM)
+	-- e com contato recente, em lances: trota boundS e para boundPauseS (média)
+	local Sq = BotBrain.SQUAD
+	local mv, ps = (Sq.boundS[1] + Sq.boundS[2]) / 2, (Sq.boundPauseS[1] + Sq.boundPauseS[2]) / 2
+	local bounds = 125 / (Movement.JOG * mv / (mv + ps))
+	print(
+		string.format(
+			"       últimos 125 m até o ponto: %.0f s (v36) -> %.0f s; em lances com contato: %.0f s",
+			before,
+			after,
+			bounds
+		)
+	)
+	assert(after < before)
+end)
+
+-- ===== 2026-11-12: bots completam o squad do jogador (decisão do dono) =====
+test("squad de jogador: com menos de 4, recebe bots até 4, um por vez, sem passar do tamanho", function()
+	local F = BotBrain.FILL
+	assert(F.target == 4)
+	-- 1 humano num squad de infantaria (6): 3 bots, um a cada conferida, na ordem dos livres
+	local sq = { id = "US:Alfa", humans = 1, size = 6, bots = {} }
+	local free = { 11, 12, 13, 14 }
+	for tick = 1, 5 do
+		local add, remove = BotBrain.fillPlan({ sq }, free)
+		assert(#remove == 0, "tirou na conferida " .. tick)
+		if tick <= 3 then
+			assert(#add == 1 and add[1].squad == "US:Alfa", "um por vez")
+			table.insert(sq.bots, add[1].bot)
+			table.remove(free, table.find(free, add[1].bot) :: number)
+		else
+			assert(#add == 0, "passou de 4 membros")
+		end
+	end
+	assert(#sq.bots == 3 and sq.bots[1] == 11, "1 humano + 3 bots, o primeiro livre entra antes")
+	-- entram humanos: os bots saem um a um
+	sq.humans = 3
+	local _, rm = BotBrain.fillPlan({ sq }, free)
+	assert(#rm == 1, "sai um por vez")
+	sq.bots = { 11 }
+	_, rm = BotBrain.fillPlan({ sq }, free)
+	assert(#rm == 0, "3 humanos + 1 bot = 4")
+	sq.humans = 4
+	_, rm = BotBrain.fillPlan({ sq }, free)
+	assert(#rm == 1 and rm[1] == 11, "com 4 humanos, nenhum bot")
+	-- squad pequeno (recon, 2): nunca passa do tamanho
+	local recon = { id = "US:Recon", humans = 1, size = 2, bots = { 20 } }
+	local add2 = BotBrain.fillPlan({ recon }, { 21 })
+	assert(#add2 == 0, "recon de 2 já está cheio")
+	-- sem humano: não recebe; sem bot livre: não inventa bot (BotFill não cresce)
+	local empty = { id = "US:Bravo", humans = 0, size = 6, bots = {} }
+	assert(#BotBrain.fillPlan({ empty }, { 30 }) == 0)
+	local a, b = { id = "A", humans = 1, size = 6, bots = {} }, { id = "B", humans = 1, size = 6, bots = {} }
+	local add3 = BotBrain.fillPlan({ a, b }, { 40 })
+	assert(#add3 == 1, "um bot livre só vai para um squad")
+end)
+
+test("squad de jogador: seguem o líder a 10–30 m, num leque atrás dele; a marca do líder manda", function()
+	local F = BotBrain.FILL
+	for i = 1, 5 do
+		local dx, dz = BotBrain.escortSlot(i, 0, -1) -- líder olhando para -Z
+		local d = math.sqrt(dx * dx + dz * dz)
+		assert(d >= F.minM and d <= F.maxM, string.format("lugar %d a %.1f m", i, d))
+		assert(dz > -1e-9, string.format("lugar %d na frente do líder", i))
+	end
+	local x1, z1 = BotBrain.escortSlot(1, 0, -1)
+	assert(math.abs(x1) < 1e-9 and z1 > 0, "o primeiro fica bem atrás")
+	assert(BotBrain.escortHold(15, 5), "no lugar: fica")
+	assert(not BotBrain.escortHold(35, 5), "longe do líder: vai")
+	assert(not BotBrain.escortHold(8, 5), "colado no líder: abre")
+	assert(not BotBrain.escortHold(20, 15), "longe do lugar: vai")
+	assert(BotBrain.markActive(10, false, 200), "marca nova manda, mesmo com o líder longe")
+	assert(not BotBrain.markActive(F.markTtlS + 1, false, 0), "marca velha")
+	assert(not BotBrain.markActive(30, true, F.markReleaseM + 1), "chegou e o líder seguiu: volta a segui-lo")
+	assert(BotBrain.markActive(30, true, 10), "chegou e o líder está lá: fica")
+end)
+
+test("soldado de 2 m: olhos do abrigo levados pelo Corpo.K", function()
+	local Corpo = require(S .. "Corpo") :: any
+	local old = { 0.35, 1.0, 1.6 }
+	for i = 1, 3 do
+		assert(math.abs(C.probeM[i] - old[i] * Corpo.K) < 1e-9, "probe " .. i)
+	end
+	assert(math.abs(C.probeM[3] - 1.829) < 0.01, "olho em pé ~1,83 m")
 end)
 
 print(string.format("%d ok, %d falhas", passed, failed))

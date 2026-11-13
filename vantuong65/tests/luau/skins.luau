@@ -120,8 +120,14 @@ test("realismo de 1965: os acabamentos e uniformes pedidos, sem duplicar o Comme
 			assert(c.name ~= s.name, s.id .. ": mesmo nome de " .. c.id)
 		end
 	end
-	-- e cada arma tem pelo menos uma skin
+	-- e cada arma tem pelo menos uma skin. Fora da conta: os fuzis de precisão do Blender
+	-- (2026-11-12, M70 Unertl e Mosin PU), ainda sem acabamento escolhido pelo dono nem Developer
+	-- Product criado; a loja (Progresso.client) só lista arma que tem skin, então eles não aparecem lá.
+	local SEM_SKIN = { m70 = true, mosin = true }
 	for _, wp in Weapons.list do
+		if SEM_SKIN[wp.id] then
+			continue
+		end
 		local n = 0
 		for _, s in Skins.list("weapon", wp.faction) do
 			if s.weapon == wp.id then

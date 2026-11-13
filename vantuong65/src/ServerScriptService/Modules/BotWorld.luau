@@ -399,7 +399,22 @@ local function build()
 		table.insert(housesXZ, features.houses[i])
 		table.insert(housesXZ, features.houses[i + 1])
 	end
-	local landscape = (require(VT65Build:WaitForChild("Landscape")) :: any).new(world, MapConfig, housesXZ)
+	-- a mesma paisagem do plano da arte (2026-11-12): vila grande e as lâminas que ficaram
+	local villageModule = VT65Build:WaitForChild("Data"):FindFirstChild("Village")
+	local village = if villageModule then require(villageModule :: ModuleScript) :: any else nil
+	if village then
+		for _, h in village.houses do
+			table.insert(housesXZ, h[1])
+			table.insert(housesXZ, h[2])
+		end
+	end
+	local landscape = (require(VT65Build:WaitForChild("Landscape")) :: any).new(
+		world,
+		MapConfig,
+		housesXZ,
+		village,
+		features.waters
+	)
 	local g = BotNav.forWorld(world)
 	local kindAt = function(x: number, z: number): number
 		return landscape:kindAt(x, z)
@@ -408,6 +423,11 @@ local function build()
 	for r = 0, g.h - 1, 4 do
 		BotNav.fillRows(g, world, kindAt, MapConfig.Bounds, r, r + 4)
 		task.wait()
+	end
+	-- estradas de terra batida (2026-11-12, Data/Roads): o blindado de bot anda nelas
+	local roadsModule = VT65Build:WaitForChild("Data"):FindFirstChild("Roads")
+	if roadsModule then
+		BotNav.markRoads(g, require(roadsModule :: ModuleScript) :: any)
 	end
 	local map = workspace:FindFirstChild("Map") or workspace:WaitForChild("Map", 30)
 	if map then

@@ -12,7 +12,8 @@ export type Circle = { x: number, z: number, r: number }
 export type Segment = { x1: number, z1: number, x2: number, z2: number, w: number }
 export type Input = {
 	classAt: (x: number, z: number) -> number,
-	-- paisagem da D-65 (Landscape:kindAt): 1 mata, 2 bosque de vila, 3 lavoura, 4 clareira, 5 riacho.
+	-- paisagem da D-65 (Landscape:kindAt): 1 mata, 2 bosque de vila, 3 lavoura, 4 clareira, 5 riacho,
+	-- 6 roça seca.
 	-- Sem ela, vale o uso do solo da carta (D-64).
 	kindAt: ((x: number, z: number) -> number)?,
 	bounds: { minX: number, maxX: number, minZ: number, maxZ: number },
@@ -90,6 +91,13 @@ Vegetation.THICKET = {
 Vegetation.OPEN = {
 	{ key = "elephant_grass", p = 0.025, s0 = 0.8, s1 = 1.3 },
 	{ key = "shrub", p = 0.015, s0 = 0.7, s1 = 1.2 },
+} :: { Entry }
+-- 6 = roça seca (2026-11-12: o arrozal tirado, 75%): capim baixo do terreno, moita e capim-elefante
+-- ralos em touceiras soltas, uma bananeira de vez em quando. Densidade de design (PLACEHOLDER).
+Vegetation.ROCA = {
+	{ key = "elephant_grass", p = 0.035, s0 = 0.7, s1 = 1.1 },
+	{ key = "shrub", p = 0.025, s0 = 0.6, s1 = 1.0 },
+	{ key = "banana", p = 0.004, s0 = 0.8, s1 = 1.1 },
 } :: { Entry }
 -- 5 = riacho: barranco com bambu e bananeira
 Vegetation.STREAM = {
@@ -261,6 +269,8 @@ function Vegetation.plan(input: Input): { Item }
 					mix = Vegetation.GROVE
 				elseif kind == 5 then
 					mix = Vegetation.STREAM
+				elseif kind == 6 then
+					mix = Vegetation.ROCA
 				end -- 3 lavoura e 4 clareira: abertas
 			else
 				local c = input.classAt(x, z)

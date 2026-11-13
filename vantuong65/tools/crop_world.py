@@ -82,34 +82,58 @@ FRONTEIRAS_ING = [
 SETORES = [
     "S1 Nam Yên (4)",
     "S2 An Thới (2)",
-    "S3 Morrote do arrozal",
+    "S3 Xóm Gò",
     "S4 An Cường (2)",
     "S5 Riacho",
 ]
+# Vila grande do centro (2026-11-12, tools/vila_estradas.py): o ponto forte fica na praça, que o
+# planejamento da vila escolhe no flanco leste do morrote (E e N saem de lá, por isso None aqui)
+VILA_PF = (
+    3,
+    "Xóm Gò",
+    None,
+    None,
+    False,
+    "vila grande de design no morrote do centro (40 a 60 casas); nome de design",
+)
+VILA_BECOS = (
+    3,
+    "Becos de Xóm Gò",
+    None,
+    None,
+    False,
+    "travessa e becos da vila de design (a ~56 m da praça); nome de design",
+)
 # Pontos fortes: (setor, nome, E, N, real?, observação). Três por setor.
+# 2026-11-12 (pedido do dono: "coloque os objetivos mais ao centro do mapa"; meta: troca de tiros
+# nos primeiros 3 minutos): cada ponto forte foi para a parte do setor mais perto do centro do mapa
+# (E 269,85 / N 1693,0), no lugar real mais perto dela quando há um. O Cemitério deixou de ser
+# ponto forte (fica no canto sudoeste; os túmulos continuam) e o Arrozal norte deu lugar aos becos
+# da vila.
 PONTOS_FORTES = [
-    # casario leste da vila (8 casas da carta); o rótulo da carta fica na borda oeste do recorte
-    (1, "Nam Yên (4)", 269470, 1692790, True, "vila da carta"),
-    (1, "Cemitério", 269435, 1692547, True, "símbolo de cemitério da carta"),
+    # casario leste de Nam Yên (4) (8 casas da carta), do lado do centro
+    (1, "Nam Yên (4)", 269540, 1692850, True, "vila da carta"),
+    (1, "Roça de Nam Yên (4)", 269545, 1692700, False, "lavoura seca da vila; nome de design"),
     (
         1,
         "Capinzal oeste",
-        269420,
-        1693070,
+        269480,
+        1692990,
         False,
         "capim da carta no flanco do morro noroeste; nome de design",
     ),
     (2, "An Thới (2)", 269545, 1693221, True, "vila da carta"),
-    (2, "Arrozal central", 269655, 1692700, False, "diques e sebes do arrozal; elemento de design"),
+    (2, "Arrozal central", 269660, 1692860, False, "diques e sebes do arrozal; elemento de design"),
     (
         2,
         "Encosta norte",
-        269630,
-        1693070,
+        269640,
+        1693060,
         False,
         "flanco noroeste do morrote (capim da carta); nome de design",
     ),
-    (3, "Morrote do arrozal", 269765, 1692970, False, "morrote de 34 m no DEM; nome de design"),
+    VILA_PF,
+    VILA_BECOS,
     (
         3,
         "Lugarejo a sudoeste de An Cường (2)",
@@ -118,14 +142,14 @@ PONTOS_FORTES = [
         True,
         "mancha de vila/mata da carta",
     ),
-    (3, "Arrozal norte", 269830, 1693260, False, "diques e sebes do arrozal; elemento de design"),
-    (4, "An Cường (2)", 270030, 1692850, True, "vila fortificada (First Fight p.25)"),
+    # lado oeste de An Cường (2), junto da boca E1 do túnel
+    (4, "An Cường (2)", 269985, 1692870, True, "vila fortificada (First Fight p.25)"),
     (4, "Trincheira sul", 270040, 1692640, True, "'wide, deep trench south of the village' (p.23)"),
     (
         4,
         "Arrozal ao norte de An Cường (2)",
-        270040,
-        1693170,
+        269985,
+        1693060,
         False,
         "diques e sebes do arrozal; elemento de design",
     ),
@@ -133,16 +157,16 @@ PONTOS_FORTES = [
     (
         5,
         "Riacho a leste de An Cường (2)",
-        270198,
-        1692575,
+        270200,
+        1692780,
         True,
         "'the streambed just east of An Cuong (2)' (First Fight p.29)",
     ),
     (
         5,
         "Encosta sul da Colina 30",
-        270240,
-        1693200,
+        270170,
+        1693120,
         False,
         "relevo do DEM (vale do riacho até a Colina 30); nome de design",
     ),
@@ -156,7 +180,11 @@ QGS = {
     # vale do riacho: o chão mais plano do recorte (desvio de 0,6–0,8 m num raio de 120 m), com
     # espaço para a base crescer de N 1692,6 a 1693,05 dos dois lados do riacho
     "US": (270300, 1692950, "borda leste, no vale do riacho a leste de An Cường (2) (setor S5)"),
-    "VC": (269410, 1693430, "morro do noroeste, retaguarda oeste (setor S1)"),
+    # 2026-11-12 (métrica de contato: do QG no morro do noroeste, E 269410 / N 1693430, o VC levava
+    # 304–337 s até a primeira troca de tiros e ninguém chegava em 3 min): o QG desceu para o chão
+    # plano (desnível de 3 m em 60 m) atrás de An Thới (2) e do Capinzal oeste, ainda no setor S1, a
+    # ~380 m da praça de Xóm Gò (eram ~650 m)
+    "VC": (269480, 1693080, "chão plano atrás de An Thới (2), retaguarda oeste (setor S1)"),
 }
 
 
@@ -203,6 +231,8 @@ def read_grid() -> dict:
         raw = base64.b64decode(re.search(r'data = "([^"]*)"', t).group(1))
         heights[r0 : r0 + rows] = np.frombuffer(raw, dtype="<u2").reshape(rows, w)
     carved = re.search(r"\bstreamCarvedCm = (\d+)", s)
+    moved = re.search(r"\bmoundMoved = (\d+)", s)
+    cut = re.search(r"\bpaddyCut = (\d+)", s)
     return {
         "w": w,
         "h": h,
@@ -215,6 +245,8 @@ def read_grid() -> dict:
         "heights": heights,
         "chunks": chunks,
         "carved": int(carved.group(1)) if carved else 0,
+        "moved": int(moved.group(1)) if moved else 0,
+        "paddyCut": int(cut.group(1)) if cut else 0,
     }
 
 
@@ -443,6 +475,12 @@ def write_grid(g: dict) -> None:
             if g.get("carved")
             else ""
         )
+        + (
+            "\tmoundMoved = 1, -- morrote levado para perto do centro (crop_world)\n"
+            if g.get("moved")
+            else ""
+        )
+        + ("\tpaddyCut = 1, -- arrozal reduzido a 25% (crop_world)\n" if g.get("paddyCut") else "")
         + f"\theightChunks = {{{chunk_list}}}, rowsPerChunk = {ROWS_PER},\n"
         f"\tclassNames = {{{names}}},\n"
         f'\tclassesRle = "{base64.b64encode(bytes(rle)).decode()}",\n'
@@ -511,7 +549,8 @@ def write_mapconfig(box) -> None:
         sec_txt.append(f'\t\t{{ id = {k + 1}, name = "{SETORES[k]}", polygon = {poly(ring)} }},')
     sp_txt = []
     for s, nome, e, n, real, obs in PONTOS_FORTES:
-        x, z = ing_local(e, n)
+        # vila do centro: E/N None e a praça (studs) em VILA_XZ, escolhida pelo vila_estradas
+        x, z = VILA_XZ[nome] if e is None else ing_local(e, n)
         sp_txt.append(
             f'\t\t{{ sector = {s}, name = "{nome}", x = {x:.1f}, z = {z:.1f}, '
             f'real = {str(real).lower()}, note = "{obs}" }},'
@@ -600,6 +639,293 @@ def analisar(g: dict, f: dict[str, np.ndarray]) -> None:
                 print(f"   aglomerado de {len(grp)} casas em E {ce:.0f}, N {cn:.0f}")
 
 
+VILA_XZ: dict[str, tuple[float, float]] = {}
+
+# ---------- morro e arrozal (pedido do dono, 2026-11-12) ----------
+# "transfira a montanha para mais perto do centro do mapa, sem atrapalhar a locomoção": o morrote
+# de 34 m (cume em MORRO_DE, D-95) vai para MORRO_PARA, a ~40 m do centro do mapa (E 269,85 /
+# N 1693,0). DEFORMAÇÃO do terreno real, decisão de jogabilidade: o relevo do morro (o que passa do
+# plano do anel em volta) sai de onde estava e entra no lugar novo, com o uso do solo dele (capim).
+# As feições (lâmina, dique, sebe) que ficam no morro novo saem. Feito uma vez: o Grid guarda
+# moundMoved.
+MORRO_DE = (269741.0, 1692964.0)
+MORRO_PARA = (269815.0, 1692990.0)
+MORRO_R = 170.0  # m: raio do morro (o capim dele vai de ~E 269,63 a 269,89)
+MORRO_NUCLEO = 0.55  # fração do raio com o morro inteiro; daí até o raio, transição suave
+# "diminua 75% das plantações de arroz": ficam os tabuleiros mais perto das casas e do riacho
+ARROZ_FRACAO = 0.25
+# Tabuleiro em ladeira sai (achado na varredura de 2026-11-12: com o fundo plano de cada tabuleiro,
+# dois vizinhos ficavam até 1,6 m um acima do outro e a borda até 3 m acima ou abaixo do chão em
+# volta, paredões de terra). Fica o de chão quase plano, e dois vizinhos não passam de um degrau
+# que a lombada do dique cobre.
+ARROZ_DESNIVEL_M = 0.8  # desnível máximo do chão sob a lâmina (5 x 5 pontos)
+ARROZ_DEGRAU_M = 0.35  # diferença máxima de fundo entre dois tabuleiros que se encostam
+
+
+def _peso(d: np.ndarray, r: float) -> np.ndarray:
+    """1 até MORRO_NUCLEO*r, 0 a partir de r, suave no meio"""
+    t = np.clip((d - MORRO_NUCLEO * r) / ((1 - MORRO_NUCLEO) * r), 0, 1)
+    return 1 - t * t * (3 - 2 * t)
+
+
+def move_morro(g: dict, f: dict[str, np.ndarray]) -> dict:
+    if g.get("moved"):
+        return {"movido": False}
+    cell = g["cell"]
+    h = (g["heights"].astype(float) - g["hoff"]) / 100.0
+    rows, cols = np.indices(h.shape)
+    xs = g["ox"] + (cols + 0.5) * cell
+    zs = g["oz"] + (rows + 0.5) * cell
+    ox, oz = ing_local(*MORRO_DE)
+    nx, nz = ing_local(*MORRO_PARA)
+    dx, dz = nx - ox, nz - oz
+    r = MORRO_R / STUD_M
+    d_old = np.hypot(xs - ox, zs - oz)
+    # plano do anel em volta do morro (tira a inclinação geral do terreno)
+    anel = (d_old > r) & (d_old < r + 40 / STUD_M)
+    A = np.column_stack([xs[anel], zs[anel], np.ones(anel.sum())])
+    coef, *_ = np.linalg.lstsq(A, h[anel], rcond=None)
+    plano = coef[0] * xs + coef[1] * zs + coef[2]
+    bump = np.clip(h - plano, 0, None)
+    w_old = _peso(d_old, r)
+    h0 = h - w_old * bump
+    # o morro no lugar novo: amostra do relevo original deslocada (vizinho mais perto: a grade é a
+    # mesma, o deslocamento sai em células inteiras)
+    sc, sr = round(dx / cell), round(dz / cell)
+    src_r = np.clip(rows - sr, 0, h.shape[0] - 1)
+    src_c = np.clip(cols - sc, 0, h.shape[1] - 1)
+    d_new = np.hypot(xs - (ox + sc * cell), zs - (oz + sr * cell))
+    w_new = _peso(d_new, r)
+    novo = h0 + w_new * bump[src_r, src_c]
+    cls = g["cls"]
+    leva = w_new > 0.5
+    novo_cls = cls.copy()
+    novo_cls[leva] = cls[src_r[leva], src_c[leva]]
+    # riacho e casas não entram no morro (nenhum no raio; conferido)
+    novo_cls[cls == 5] = 5
+    g["heights"] = np.clip(np.round(novo * 100 + g["hoff"]), 0, 65535).astype("<u2")
+    g["cls"] = novo_cls
+    g["moved"] = 1
+    # feições no morro novo saem
+    lim = 0.3
+
+    def fora(x, z):
+        return (
+            _peso(np.hypot(np.asarray(x) - (ox + sc * cell), np.asarray(z) - (oz + sr * cell)), r)
+            < lim
+        )
+
+    info = {
+        "movido": True,
+        "deslocamento_m": [round(sc * cell * STUD_M, 1), round(-sr * cell * STUD_M, 1)],
+    }
+    for key in ("dikes", "hedges"):
+        a = f[key]
+        m = fora((a[:, 0] + a[:, 2]) / 2, (a[:, 1] + a[:, 3]) / 2)
+        info[f"{key}_no_morro"] = int((~m).sum())
+        f[key] = a[m]
+    w = f["waters"]
+    m = fora(w[:, 0], w[:, 1])
+    info["waters_no_morro"] = int((~m).sum())
+    f["waters"] = w[m]
+    gy, gx = np.gradient(novo, cell * STUD_M)
+    info["rampa_max_no_morro"] = round(float(np.hypot(gx, gy)[w_new > 0.05].max()), 3)
+    info["cume_m"] = round(float(novo[w_new > 0.5].max()), 1)
+    return info
+
+
+def _fundo_e_desnivel(g: dict, w: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    """fundo (m) de cada tabuleiro como o TerrainBuilder.paddySet (mediana de 9 pontos) e o desnível
+    do chão sob a lâmina (5 x 5 pontos)"""
+    import vila_estradas
+
+    t = vila_estradas.Terreno(g)
+    nove = [
+        (0, 0),
+        (0.35, 0),
+        (-0.35, 0),
+        (0, 0.35),
+        (0, -0.35),
+        (0.35, 0.35),
+        (-0.35, -0.35),
+        (0.35, -0.35),
+        (-0.35, 0.35),
+    ]
+    grade = [(a, b) for a in np.linspace(-0.5, 0.5, 5) for b in np.linspace(-0.5, 0.5, 5)]
+    fundo, desnivel = np.zeros(len(w)), np.zeros(len(w))
+    for i, (x, z, _y, su, sv, ang) in enumerate(w):
+        ca, sa = math.cos(ang), math.sin(ang)
+
+        def pts(offs, x=x, z=z, su=su, sv=sv, ca=ca, sa=sa):
+            lu = np.array([o[0] for o in offs]) * su
+            lv = np.array([o[1] for o in offs]) * sv
+            return x + lu * ca + lv * sa, z - lu * sa + lv * ca
+
+        fundo[i] = np.sort(t.altura(*pts(nove)))[4]
+        h = t.altura(*pts(grade))
+        desnivel[i] = h.max() - h.min()
+    return fundo, desnivel
+
+
+def _vizinhos(w: np.ndarray) -> list[tuple[int, int]]:
+    """pares de tabuleiros que se encostam (o meio entre os centros cai nos dois, folga de 2 m)"""
+    pares = []
+    folga = 2.0 / STUD_M
+
+    def cobre(r, x, z):
+        ca, sa = math.cos(r[5]), math.sin(r[5])
+        dx, dz = x - r[0], z - r[1]
+        return (
+            abs(dx * ca - dz * sa) <= r[3] / 2 + folga
+            and abs(dx * sa + dz * ca) <= r[4] / 2 + folga
+        )
+
+    for i in range(len(w)):
+        for j in range(i + 1, len(w)):
+            a, b = w[i], w[j]
+            if (
+                math.hypot(a[0] - b[0], a[1] - b[1])
+                > (math.hypot(a[3], a[4]) + math.hypot(b[3], b[4])) / 2 + folga
+            ):
+                continue
+            mx, mz = (a[0] + b[0]) / 2, (a[1] + b[1]) / 2
+            if cobre(a, mx, mz) and cobre(b, mx, mz):
+                pares.append((i, j))
+    return pares
+
+
+def reduz_arrozal(g: dict, f: dict[str, np.ndarray], casas_xz: np.ndarray) -> dict:
+    """fica ARROZ_FRACAO dos tabuleiros, os mais perto das casas e do riacho, só em chão quase plano
+    (ARROZ_DESNIVEL_M) e sem degrau maior que ARROZ_DEGRAU_M entre dois que se encostam; os diques
+    que não encostam num tabuleiro que ficou saem; as sebes baixas longe dele também"""
+    w = f["waters"]
+    if len(w) == 0:
+        return {}
+    cell = g["cell"]
+    rr, cc = np.nonzero(g["cls"] == 5)
+    rio = np.column_stack([g["ox"] + (cc + 0.5) * cell, g["oz"] + (rr + 0.5) * cell])
+    nota = []
+    for x, z, *_ in w:
+        dc = np.hypot(casas_xz[:, 0] - x, casas_xz[:, 1] - z).min() if len(casas_xz) else 1e9
+        dr = np.hypot(rio[:, 0] - x, rio[:, 1] - z).min() if len(rio) else 1e9
+        nota.append(min(dc, dr))
+    nota = np.array(nota)
+    n = max(1, int(round(len(w) * ARROZ_FRACAO)))
+    if g.get("paddyCut"):
+        n = len(w)  # já reduzido: rodar de novo não tira mais nada
+    fundo, desnivel = _fundo_e_desnivel(g, w)
+    plano = desnivel <= ARROZ_DESNIVEL_M
+    ordem = [i for i in np.argsort(nota, kind="stable") if plano[i]]
+    fica = np.zeros(len(w), bool)
+    fica[ordem[:n]] = True
+    # degrau entre vizinhos: sai o de chão mais inclinado até nenhum par passar do limite
+    idx = np.nonzero(fica)[0]
+    pares = [(idx[a], idx[b]) for a, b in _vizinhos(w[idx])]
+    degrau = 0
+    while True:
+        ruins = [
+            (i, j)
+            for i, j in pares
+            if fica[i] and fica[j] and abs(fundo[i] - fundo[j]) > ARROZ_DEGRAU_M
+        ]
+        if not ruins:
+            break
+        i, j = max(ruins, key=lambda p: abs(fundo[p[0]] - fundo[p[1]]))
+        fica[i if desnivel[i] >= desnivel[j] else j] = False
+        degrau += 1
+    kept = w[fica]
+    info = {
+        "laminas_antes": int(len(w)),
+        "laminas_em_ladeira": int((~plano).sum()),
+        "laminas_por_degrau": degrau,
+        "laminas_ficam": int(fica.sum()),
+    }
+    f["waters"] = kept
+
+    def perto(x, z, folga):
+        for kx, kz, _y, su, sv, ang in kept:
+            ca, sa = math.cos(ang), math.sin(ang)
+            ddx, ddz = x - kx, z - kz
+            lu = ddx * ca - ddz * sa
+            lv = ddx * sa + ddz * ca
+            if abs(lu) <= su / 2 + folga and abs(lv) <= sv / 2 + folga:
+                return True
+        return False
+
+    d = f["dikes"]
+    m = np.array([perto((r_[0] + r_[2]) / 2, (r_[1] + r_[3]) / 2, 2.5 / STUD_M) for r_ in d], bool)
+    info["diques_antes"], info["diques_ficam"] = int(len(d)), int(m.sum())
+    f["dikes"] = d[m]
+    hg = f["hedges"]
+    alta = hg[:, 5] > 3 / STUD_M
+    m = np.array(
+        [
+            alta[i] or perto((r_[0] + r_[2]) / 2, (r_[1] + r_[3]) / 2, 12 / STUD_M)
+            for i, r_ in enumerate(hg)
+        ],
+        bool,
+    )
+    info["sebes_antes"], info["sebes_ficam"] = int(len(hg)), int(m.sum())
+    f["hedges"] = hg[m]
+    g["paddyCut"] = 1
+    return info
+
+
+def _poligono_setor(k: int) -> list[tuple[float, float]]:
+    """anel do setor k (0..4) em studs, igual ao do MapConfig"""
+    e0, n0, e1, n1 = PLAY_ING
+    linhas = [[(e0, n0), (e0, n1)]] + FRONTEIRAS_ING + [[(e1, n0), (e1, n1)]]
+    return [ing_local(*p) for p in linhas[k]] + [ing_local(*p) for p in linhas[k + 1]][::-1]
+
+
+def _dentro(poly: list[tuple[float, float]], x: float, z: float) -> bool:
+    dentro = False
+    j = len(poly) - 1
+    for i in range(len(poly)):
+        xi, zi = poly[i]
+        xj, zj = poly[j]
+        if (zi > z) != (zj > z) and x < (xj - xi) * (z - zi) / (zj - zi) + xi:
+            dentro = not dentro
+        j = i
+    return dentro
+
+
+def vila_e_estradas(g: dict, f: dict) -> dict:
+    """vila grande no setor 3 e estradas entre os QGs e os pontos fortes (tools/vila_estradas.py)"""
+    import vila_estradas
+
+    s3 = _poligono_setor(2)
+    margem = 12.0 / STUD_M
+
+    def setor3(x: float, z: float) -> bool:
+        # o lote inteiro no setor: o centro e quatro pontos a 12 m
+        return all(
+            _dentro(s3, x + dx, z + dz)
+            for dx, dz in ((0, 0), (margem, 0), (-margem, 0), (0, margem), (0, -margem))
+        )
+
+    nos = {"QG_US": QGS["US"][:2], "QG_VC": QGS["VC"][:2]}
+    for _s, nome, e, n, _real, _obs in PONTOS_FORTES:
+        if e is not None:
+            nos[nome] = (e, n)
+
+    def arrozal(vila: dict) -> dict:
+        casas = [tuple(p) for p in f["houses"][:, :2]] + [(c["x"], c["z"]) for c in vila["casas"]]
+        return {"arrozal": reduz_arrozal(g, f, np.array(casas, float))}
+
+    info, vila = vila_estradas.aplica(g, f, ing_local, nos, setor3, PLAY_ING, HEAD, arrozal)
+    VILA_XZ[VILA_PF[1]] = (vila["x"], vila["z"])
+    # segundo ponto da vila: o cruzamento da rua com a travessa mais perto do centro do mapa (luta
+    # nos becos, longe o bastante da praça para ser outro objetivo)
+    cx, cz = ing_local((PLAY_ING[0] + PLAY_ING[2]) / 2, (PLAY_ING[1] + PLAY_ING[3]) / 2)
+    pts = []
+    for u in vila_estradas.TRAVESSAS:
+        dx, dz = vila_estradas.gira(u, 0.0, vila["ang"])
+        pts.append((vila["x"] + dx, vila["z"] + dz))
+    VILA_XZ[VILA_BECOS[1]] = min(pts, key=lambda p: math.hypot(p[0] - cx, p[1] - cz))
+    return info
+
+
 def main() -> None:
     box = crop_box()
     g = read_grid()
@@ -611,6 +937,8 @@ def main() -> None:
     fc = crop_features(f, crop_box(FEICOES_M), crop_box(0.0))
     riacho = abre_riacho(gc, fc)
     base = limpa_base(fc)
+    morro = move_morro(gc, fc)
+    vila_info = vila_e_estradas(gc, fc)
     write_grid(gc)
     write_features(fc)
     write_mapconfig(crop_box(LOCAIS_TOL_M))
@@ -623,6 +951,8 @@ def main() -> None:
                 **{k: [len(f[k]), len(fc[k])] for k in f},
                 "riacho": riacho,
                 "base_eua_sem": base,
+                "morro": morro,
+                "vila_e_estradas": vila_info,
                 "pontos_do_fixture": n_fx,
             },
             ensure_ascii=False,

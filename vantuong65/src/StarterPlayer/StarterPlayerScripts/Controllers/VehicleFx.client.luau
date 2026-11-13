@@ -48,7 +48,16 @@ local CFG = {
 		rollDegPerG = 2,
 		heaveMPerG = 0.08,
 	} :: VehicleDrive.SpringParams,
-	engineSound = { m48a3 = "engine_tank", ontos = "engine_tank", lvtp5 = "engine_amtrac", uh34d = "uh34d_loop" },
+	engineSound = {
+		m48a3 = "engine_tank",
+		ontos = "engine_tank",
+		lvtp5 = "engine_amtrac",
+		uh34d = "uh34d_loop",
+		-- D-100: carros a gasolina (som próprio a subir; até lá, o do anfíbio a gasolina)
+		m151 = "engine_amtrac",
+		m35 = "engine_amtrac",
+		peugeot403 = "engine_amtrac",
+	},
 	diesel = { m48a3 = true } :: { [string]: boolean }, -- AVDS-1790-2 a diesel; Ontos e LVTP-5 a gasolina
 }
 
@@ -59,6 +68,7 @@ end
 local COLORS = {
 	dust = {
 		road = rgb(176, 160, 132),
+		dirt = rgb(164, 124, 90), -- estrada de terra batida (D-100)
 		earth = rgb(156, 116, 84), -- laterita avermelhada da costa
 		grass = rgb(164, 152, 114),
 		forest = rgb(126, 108, 82),
@@ -69,6 +79,7 @@ local COLORS = {
 	} :: { [string]: Color3 },
 	debris = {
 		road = rgb(120, 104, 84),
+		dirt = rgb(116, 88, 62),
 		earth = rgb(112, 84, 60),
 		grass = rgb(104, 118, 56),
 		forest = rgb(96, 82, 50),
@@ -260,6 +271,10 @@ type Fx = {
 	wake: { holder: BasePart, bow: ParticleEmitter, spray: ParticleEmitter, foam: { ParticleEmitter } }?,
 	sound: Sound?,
 	distort: DistortionSoundEffect?,
+	-- D-100: rodas (Motor6D "Roda_*" na ArtRoot, VehicleService): giro e esterço pelo Transform
+	wheels: { { motor: Motor6D, r: number, steer: boolean } },
+	spin: number,
+	steerAng: number,
 }
 
 local fxs: { [Model]: Fx } = {}
@@ -349,7 +364,20 @@ local function newFx(model: Model, chassis: BasePart): Fx
 		wake = nil,
 		sound = nil,
 		distort = nil,
+		wheels = {},
+		spin = 0,
+		steerAng = 0,
 	}
+	local wd = Vehicles.WHEELED[id]
+	local mountPart = model:FindFirstChild("ArtRoot")
+	if wd and mountPart then
+		for _, w in wd.wheels do
+			local m6 = mountPart:FindFirstChild(w.name)
+			if m6 and m6:IsA("Motor6D") then
+				table.insert(fx.wheels, { motor = m6, r = wd.wheelR / M, steer = w.steer })
+			end
+		end
+	end
 	local motor = chassis:FindFirstChild("ArtMount")
 	local art = model:FindFirstChild("Art")
 	local mesh = art and mainPart(art)
@@ -540,6 +568,11 @@ local function teardownVisual(fx: Fx)
 	if motor and motor.Parent then
 		motor.Transform = CFrame.identity
 	end
+	for _, w in fx.wheels do
+		if w.motor.Parent then
+			w.motor.Transform = CFrame.identity
+		end
+	end
 end
 
 local function teardown(fx: Fx)
@@ -676,6 +709,37 @@ local function updatePose(fx: Fx, dt: number)
 	local motor = fx.motor
 	if motor then
 		motor.Transform = fx.pose
+	end
+end
+
+-- D-100: rodas giram pela velocidade e as da frente esterçam (o do motorista local pelo volante; o
+-- dos outros pela guinada: ângulo = atan(entre-eixos × guinada / velocidade)). Motor6D.Transform.
+local function updateWheels(fx: Fx, dt: number)
+	if #fx.wheels == 0 then
+		return
+	end
+	local chassis = fx.chassis
+	local vFwd = -chassis.CFrame:VectorToObjectSpace(chassis.AssemblyLinearVelocity).Z -- studs/s
+	local r = fx.wheels[1].r
+	fx.spin = (fx.spin - vFwd / math.max(r, 0.1) * dt) % (2 * math.pi)
+	local wd = Vehicles.WHEELED[fx.id]
+	local drive = VehicleDrive.DRIVE[fx.id]
+	local lock = if wd and drive and drive.turnRadiusM then math.atan(wd.wheelbaseM / drive.turnRadiusM) else 0.5
+	local target
+	if mine(fx) then
+		target = -VehicleLive.drive.steer * lock
+	else
+		local yawRate = chassis.AssemblyAngularVelocity:Dot(chassis.CFrame.UpVector)
+		local v = vFwd * M
+		target = if math.abs(v) > 0.5 and wd then math.clamp(math.atan(wd.wheelbaseM * yawRate / v), -lock, lock) else 0
+	end
+	fx.steerAng += (target - fx.steerAng) * (1 - math.exp(-dt / 0.08))
+	local spinCF = CFrame.Angles(fx.spin, 0, 0)
+	local steerCF = CFrame.Angles(0, fx.steerAng, 0) * spinCF
+	for _, w in fx.wheels do
+		if w.motor.Parent then
+			w.motor.Transform = if w.steer then steerCF else spinCF
+		end
 	end
 end
 
@@ -1023,6 +1087,7 @@ RunService.PreSimulation:Connect(function(dt: number)
 		if fx.visual then
 			updateGround(fx, dt)
 			updatePose(fx, dt)
+			updateWheels(fx, dt)
 		end
 		if model == seated then
 			local view = VehicleLive.view

@@ -13,6 +13,33 @@
 | F5 Arte total e otimização | arte nos 5 setores a 100% do plano; 57,1 fps girando a câmera na célula mais densa da mata (D-76) e 59,6 fps no arrozal (D-74). Critério de 60 jogadores **só no Roblox** |
 | F6 Offensive e lançamento | **testado no Studio**: Offensive com relatório pós-ação, progressão. Beta fechado **só você pode rodar** |
 
+## Inclinar do Front 44, curativo que estanca, itens animados e mãos de 1ª pessoa (2026-11-12, D-99)
+- **Inclinar:** Q/E a qualquer hora a pé (controle: L3/R3 mirando), como no Front 44: 8/s, câmera
+  0,35 m de lado e 14° de giro, arma de 1ª pessoa junto, tronco replicado (19,6°) e colisão com a
+  parede (não espia através dela). Antes só existia na camada de mira e era zerado fora dela.
+- **Passo do Front 44:** arrancada e parada mais secas, agachado 1,4 m/s e rastejar 0,5 m/s, deitar
+  e levantar mais curtos.
+- **Sangramento ~5x mais lento** (pistola no tronco ~3 min até cair) e **o curativo estanca**; a
+  bandagem rápida põe o torniquete na artéria junto.
+- **Itens animados** em 1ª e 3ª pessoa (todos veem): curativo, torniquete, curativo no companheiro,
+  tratar, reanimar, rádio, binóculo, pá e cantil; 9 clipes novos (`tools/anim`, a subir).
+- **Mãos de 1ª pessoa** com dedos, palma e manga (peças); malhas do Blender em
+  `assets/blender/maos_1p` (a subir).
+- **Vantagens do corpo** aplicadas no servidor: velocidade (trote e corrida), vida máxima, tempo de
+  curativo e sangramento.
+- **Não testado no Studio.**
+
+## Soldado de 2 m, capacetes e carta na mão (2026-11-12, D-98)
+- **Soldado de 2,0 m** (decisão do dono): o corpo de 1,75 m ampliado por igual (K = 1,1429).
+  Postura, câmera, água, degraus, câmera do ombro, olhos nos veículos e equipamento acompanham.
+  Os clipes tocam sem regravar; armas e facas ficam no tamanho real.
+- **Capacetes** com no mínimo o tamanho real do casco (M1: 27 × 30 cm × K).
+- **Carta na mão:** abrir o mapa põe a carta nas duas mãos e o fuzil a tiracolo; todos veem
+  (atributo "Carta" do servidor). Em 1ª pessoa, as mãos com a carta ficam embaixo da carta grande.
+- **Túneis:** o soldado de 2 m passa deitado; o poço ficou com 1,0 m e a escada na parede.
+  Precisa assar o place de novo.
+- **Não testado no Studio.**
+
 ## Corpo a corpo, braços e bots animados (2026-11-11, D-94)
 - **Facas de 1965 no Blender** (`tools/faca`): Ka-Bar USMC, baioneta M6, espigão do Tipo 56 e
   facão do VC, com bainha, atlas PBR de 1024 e prévia no Cycles. GLB e sons no `upload_plan`
@@ -508,6 +535,9 @@ do usuário (opção A).
   `workspace:SetAttribute("VT65DevMov", "info")` e os ganchos `agua`, `fundo`, `arrozal`, `dique`
   e `veiculo`: estado Running vadeando até o peito, sem boiar; passada assistida no dique agachado;
   inclinação da câmera; tanque subindo o dique.
+- D-100 (pilotar todos os veículos, painel de lugares, tiro de dentro, carros M151/M35/Peugeot,
+  desvirar): só Lune e luau-lsp. No Studio: `VT65DevVeh = "todos"` e `"tombar"`, `VT65DevDrive`
+  com cada ficha; ver o painel no controle, o lugar no olho, o voo do UH-34D e o tiro pela porta.
 
 ## Como testar no Studio
 1. Abra `vantuong65/place/VanTuong65.rbxl`.

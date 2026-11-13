@@ -6,7 +6,8 @@
 -- eyeM = distância (m) do olho ao ponto sight, mirando. yaw = giro extra em Y (rad) de
 -- modelo gerado torto; o referencial da arma é TURN[forward] * CFrame.Angles(0, yaw, 0).
 -- sightKind = "anel" ou "entalhe" medido na malha (tools/sight_align.py; "" = sem
--- medida) e sightMm = diâmetro do furo ou fundura do entalhe (mm).
+-- medida) e sightMm = diâmetro do furo ou fundura do entalhe (mm). bolt = um ponto do
+-- eixo do ferrolho (armas do Blender, tools/blender/armas.py: a peça 'Ferrolho' gira).
 export type Art = {
 	forward: string,
 	yaw: number,
@@ -20,6 +21,7 @@ export type Art = {
 	eyeM: number,
 	sightKind: string,
 	sightMm: number,
+	bolt: Vector3?,
 }
 local WeaponArt: { [string]: Art } = {
 	m14 = {
@@ -147,6 +149,36 @@ local WeaponArt: { [string]: Art } = {
 		eyeM = 0.09,
 		sightKind = "",
 		sightMm = 0.0,
+	},
+	m70 = {
+		forward = "-Z",
+		yaw = 0.0,
+		muzzle = Vector3.new(-0.0, 0.1304, -2.0179),
+		sight = Vector3.new(-0.0, 0.3089, 1.0821),
+		front = Vector3.new(-0.0, 0.3089, -1.0464),
+		grip = Vector3.new(-0.0, -0.1125, 1.0357),
+		support = Vector3.new(-0.0, -0.0339, 0.1429),
+		lowX = -0.0929,
+		lengthM = 1.13,
+		eyeM = 0.075,
+		sightKind = "",
+		sightMm = 0.0,
+		bolt = Vector3.new(-0.0, 0.1304, 0.9464),
+	},
+	mosin = {
+		forward = "-Z",
+		yaw = 0.0,
+		muzzle = Vector3.new(0.0036, 0.1554, -2.2),
+		sight = Vector3.new(0.0036, 0.3625, 0.9821),
+		front = Vector3.new(0.0036, 0.3625, 0.4179),
+		grip = Vector3.new(0.0036, -0.0304, 1.1286),
+		support = Vector3.new(0.0036, 0.0304, 0.2357),
+		lowX = -0.0822,
+		lengthM = 1.232,
+		eyeM = 0.072,
+		sightKind = "",
+		sightMm = 0.0,
+		bolt = Vector3.new(0.0036, 0.1554, 1.0571),
 	},
 }
 

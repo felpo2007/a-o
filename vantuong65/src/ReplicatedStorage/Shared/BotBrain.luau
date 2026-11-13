@@ -11,19 +11,27 @@
 -- passo pela situação (andar, trote, corrida, agachado, rastejando), squad em coluna ou cunha,
 -- túneis do VC, desconfiança dos EUA e blindados com tripulação de bots. TODOS os números novos
 -- ficam aqui (MOVE, SQUAD, NAV, TUNNEL, VEHICLE e os campos novos de DIFFICULTY.medium).
+-- 2026-11-12 (pedido do dono depois da v36: "bots estão muito fortes", "eles vêm de muito longe; faça
+-- eles avançarem mais em vez de ficarem parados", "os bots enxergam de muito longe"): nível médio de
+-- verdade (reação maior, mira pior com a distância e firmando devagar, rajadas curtas, mira no
+-- tronco), visão pela vegetação (SIGHT: 120 m no aberto, 40 m na mata, 15 m no capim alto) e avanço
+-- (PRESS: quem ataca volta a andar sem alvo nem fogo em cima; parado sem contato tem limite).
+-- Medida antes/depois em tests/luau/bots.luau (BotBrain.duelHitChance).
 local Movement = require(script and (script :: any).Parent.Movement or "./Movement") :: any
+local Corpo = require(script and (script :: any).Parent.Corpo or "./Corpo") :: any
 
 local BotBrain = {}
 
 BotBrain.C = {
-	senseRangeM = 300, -- alcance de detecção com linha de visada
+	senseRangeM = 120, -- teto do alcance de notar (o de cada alvo sai de BotBrain.sightRange); era 300
 	objectiveSpreadM = 30, -- espalhamento em volta do ponto forte
 	stuckSeconds = 3,
 	thinkS = 0.3, -- cada bot pensa a cada 0,3 s (escalonado). PLACEHOLDER de desempenho
 	maxLosChecks = 4, -- raios de visada por pensamento: só os inimigos mais próximos. PLACEHOLDER
-	-- Altura dos olhos (m) para medir o abrigo: deitado, agachado, em pé. Soldado de 1,75 m
-	-- (Characters) e quadril que desce 0,62 m agachado (PostureService.DROP). PLACEHOLDER de pose.
-	probeM = { 0.35, 1.0, 1.6 },
+	-- Altura dos olhos (m) para medir o abrigo: deitado, agachado, em pé. Medidas no soldado de 1,75 m
+	-- (0,35 / 1,0 / 1,6 m) levadas ao de 2,0 m pelo Corpo.K (D-98; PostureService.DROP também foi
+	-- multiplicado por K). PLACEHOLDER de pose.
+	probeM = { 0.35 * Corpo.K, 1.0 * Corpo.K, 1.6 * Corpo.K },
 	probeLenM = 4, -- o obstáculo precisa estar a até 4 m do lugar, na direção do inimigo
 	scanHeightM = 0.3, -- altura dos raios em volta: pega dique baixo, tronco, parede e moita
 	coverRays = 8, -- raios em volta do bot na busca de abrigo
@@ -104,25 +112,27 @@ export type Difficulty = {
 }
 
 -- Uma tabela por nível. Todos os números são PLACEHOLDER de design (sem fonte), a calibrar em
--- partida no Studio. Pedido do dono: reação de 0,4 a 0,8 s; acerta bem a 100 m e mal a 300 m.
+-- partida no Studio. 2026-11-12 ("bots estão muito fortes"): os valores da v36 ficam no comentário
+-- de cada linha; a chance de acertar um jogador parado em 3 s, antes e depois, sai do teste bots.luau.
 BotBrain.DIFFICULTY = {
 	medium = {
-		reaction = { 0.4, 0.8 },
-		alertedReaction = 0.7,
-		suppReactionS = 0.5,
-		spotStance = { stand = 1, crouch = 0.75, prone = 0.5 },
-		-- 2,2 mrad e dobra a cada 500 m: ~43% no tronco a 100 m, ~4% a 300 m (teste bots.luau)
-		aimBaseRad = 0.0022,
-		aimRangeM = 500,
+		reaction = { 0.8, 1.4 }, -- era 0,4–0,8 s
+		alertedReaction = 0.8, -- era 0,7
+		suppReactionS = 0.8, -- era 0,5
+		spotStance = { stand = 1, crouch = 0.6, prone = 0.35 }, -- era 1 / 0,75 / 0,5
+		-- 3 mrad e dobra a cada 200 m (era 2,2 mrad dobrando a cada 500 m): a mira piora rápido longe.
+		-- Tiro firme no tronco: 50 m ~67%, 100 m ~18%, 200 m ~3% (antes 93 / 43 / 10%; teste bots.luau)
+		aimBaseRad = 0.003,
+		aimRangeM = 200,
 		aimMoving = 2.0,
-		aimSuppression = 2.0,
+		aimSuppression = 3.0, -- era 2: sob fogo, a mira abre bem mais
 		aimStance = { stand = 1, crouch = 0.85, prone = 0.7 },
 		aimArmHurt = 1.5,
-		recoilRad = { rifle = 0.0008, mg = 0.0015, pistol = 0.002, launcher = 0 },
-		recoilMaxRad = 0.006,
-		volley = { rifle = { 2, 3 }, mg = { 4, 8 }, pistol = { 1, 2 }, launcher = { 1, 1 } },
-		aimedGap = { 0.35, 0.7 },
-		openPause = { rifle = { 0.8, 1.7 }, mg = { 0.6, 1.4 }, pistol = { 0.5, 1.1 }, launcher = { 3, 5 } },
+		recoilRad = { rifle = 0.0015, mg = 0.003, pistol = 0.003, launcher = 0 }, -- era 0,8 / 1,5 / 2 mrad
+		recoilMaxRad = 0.012, -- era 6 mrad
+		volley = { rifle = { 1, 3 }, mg = { 3, 5 }, pistol = { 1, 2 }, launcher = { 1, 1 } }, -- era 2–3 / 4–8
+		aimedGap = { 0.5, 0.9 }, -- era 0,35–0,7 s
+		openPause = { rifle = { 1.2, 2.4 }, mg = { 1.0, 2.0 }, pistol = { 0.8, 1.4 }, launcher = { 3, 5 } }, -- era 0,8–1,7 / 0,6–1,4
 		hideTime = { 1.5, 3.0 },
 		burstsPerCover = { 2, 4 },
 		peekMaxS = 2.5,
@@ -152,17 +162,17 @@ BotBrain.DIFFICULTY = {
 		rayCap = 30,
 		-- D-90 (PLACEHOLDER): jogador mediano que vê primeiro ganha o 1 x 1; squad organizado dá
 		-- trabalho (avisa o contato, suprime, avança em lances e joga granada atrás do dique)
-		noticeS = 0.25,
-		noticePer100M = 0.35,
-		noticeStill = 1.8,
+		noticeS = 0.5, -- era 0,25 s
+		noticePer100M = 1.0, -- era 0,35 s a cada 100 m
+		noticeStill = 2.5, -- era 1,8: agachado ou deitado e parado demora mais a ser notado
 		noticeFiring = 0.4,
-		noticeSide = 2.2,
-		fovDeg = 60,
-		rearDeg = 125,
+		noticeSide = 2.5, -- era 2,2
+		fovDeg = 50, -- era 60: cone da frente mais estreito
+		rearDeg = 100, -- era 125: além de 100° da frente não vê (só ouve)
 		hearShotM = 150,
-		settleS = 1.5,
+		settleS = 3.0, -- era 1,5 s: a mira firma devagar no mesmo alvo
 		settleMult = 3.0,
-		fireMaxM = { rifle = 320, mg = 450, pistol = 50, launcher = 0 },
+		fireMaxM = { rifle = 180, mg = 250, pistol = 50, launcher = 0 }, -- era 320 / 450
 		strafeFireM = 80,
 		calloutS = { 1.0, 2.2 },
 		suppressS = { 3, 6 },
@@ -195,7 +205,7 @@ BotBrain.MOVE = {
 	prefetchM = 22, -- faltando isto do trecho, já pede o próximo (não para no fim)
 	directM = 10, -- até isto vai direto, se o raio do joelho não bate em nada
 	sprintThreatM = 150, -- inimigo conhecido a menos disto: atravessa o aberto correndo
-	walkCalmM = 120, -- sem contato, a menos disto do objetivo: anda (cauteloso)
+	walkCalmM = 60, -- sem contato, a menos disto do objetivo: anda (cauteloso). Era 120 (2026-11-12: avançar)
 	crawlMaxM = 4, -- deitado só se arrasta até isto; mais longe, levanta
 	crouchMoveMaxM = 8, -- agachado só anda até isto; mais longe, levanta
 	pathEveryS = 2, -- intervalo mínimo entre pedidos de caminho do mesmo bot
@@ -215,6 +225,10 @@ BotBrain.SQUAD = {
 	sprintBehindM = 25, -- ...mais que isto: corre
 	leaderSlowM = 25, -- o último atrasado mais que isto: o líder anda
 	leaderWaitM = 45, -- ...mais que isto: o líder espera
+	leaderWaitMaxS = 10, -- 2026-11-12: e espera no máximo isto (depois segue andando; o atrasado alcança)
+	boundZoneM = 150, -- 2026-11-12: a até isto do objetivo atacado, com contato recente, o squad vai em lances
+	boundPauseS = { 2, 4 }, -- ...parando isto entre um lance e outro (o lance dura boundS)
+	boundContactS = 30, -- contato com até isto de idade conta como "recente"
 	regroupM = 60, -- longe do líder mais que isto: vai até ele pelo caminho
 	deployM = 70, -- a esta distância do objetivo o squad se espalha pelos lugares de cada um
 	stagingS = { 4, 8 }, -- parada na base de partida antes do assalto
@@ -230,6 +244,8 @@ BotBrain.SQUAD = {
 -- Rota estratégica (BotNav), custo por célula de 16 studs (4,48 m, a grade do terreno). O custo
 -- multiplica a distância; 1 = trote em chão firme. Pedido do dono: arrozal alagado caro; dique,
 -- trilha e sebe baratos. As trilhas da carta não existem no chão (D-87): o dique é a trilha.
+-- 2026-11-12: estradas de terra batida (Data/Roads) com custo próprio (road): o blindado prefere a
+-- estrada; no riacho a estrada passa por aterro (o custo do riacho não vale nela).
 BotBrain.NAV = {
 	weight = 1.3, -- A* com heurística inflada (rota até 30% pior, muito menos nós)
 	expandPerFrame = 900, -- nós por quadro (fatia de tempo)
@@ -250,6 +266,7 @@ BotBrain.NAV = {
 			stream = 3.5,
 			sea = math.huge,
 			trench = 0.8,
+			road = 1.0, -- estrada: firme, mas exposta
 			maxGrade = 1.2,
 			upCost = 1.4,
 			downCost = 1.0,
@@ -267,6 +284,7 @@ BotBrain.NAV = {
 			stream = 3,
 			sea = math.huge,
 			trench = 3, -- trincheira de 1 m: passa devagar
+			road = 1.0, -- estrada de terra batida (2026-11-12)
 			maxGrade = 0.5,
 			upCost = 2,
 			downCost = 1,
@@ -283,6 +301,7 @@ BotBrain.NAV = {
 			stream = 2.2,
 			sea = 4.4,
 			trench = 3, -- trincheira de 1 m: passa devagar
+			road = 1.0,
 			maxGrade = 0.5,
 			upCost = 2,
 			downCost = 1,
@@ -353,30 +372,131 @@ export type Style = {
 	holdFireMaxS: number, -- e no máximo por este tempo de contato
 }
 
+-- 2026-11-12 ("faça eles avançarem mais em vez de ficarem parados"): menos tempo parado depois do
+-- combate e esquecendo o inimigo (valores da v36 no comentário).
 BotBrain.STYLE = {
 	US = {
 		solidBonus = 10,
 		concealBonus = 0,
-		advanceBias = 0.6,
+		advanceBias = 0.8, -- era 0,6
 		hideMult = 0.8,
 		burstsMult = 1,
-		forgetS = 8,
-		resumeS = { 2, 5 },
+		forgetS = 6, -- era 8
+		resumeS = { 1, 3 }, -- era 2–5 s
 		holdFireM = nil,
 		holdFireMaxS = 0,
 	} :: Style,
 	VC = {
 		solidBonus = 3,
 		concealBonus = 10,
-		advanceBias = 0.1,
-		hideMult = 1.4,
+		advanceBias = 0.4, -- era 0,1
+		hideMult = 1.2, -- era 1,4
 		burstsMult = 1.5,
-		forgetS = 20,
-		resumeS = { 20, 40 },
+		forgetS = 10, -- era 20
+		resumeS = { 4, 8 }, -- era 20–40 s: o VC ficava quase um minuto parado depois de cada contato
 		holdFireM = 80,
-		holdFireMaxS = 25,
+		holdFireMaxS = 10, -- era 25 s
 	} :: Style,
 }
+
+-- Avançar em vez de ficar parado (2026-11-12). PLACEHOLDER de design.
+BotBrain.PRESS = {
+	afterS = 4, -- quem ataca, sem alvo à vista e sem fogo em cima há 4 s, volta a avançar com o squad
+	idleMaxS = 20, -- parado sem contato e fora do ponto mais que isto: sai do lugar
+}
+
+-- Volta a avançar? attacking: o squad dele ataca o objetivo; sinceS: desde a última vez que viu o
+-- inimigo ou levou tiro. Quem defende o ponto fica (mas reage: só o atacante segue).
+function BotBrain.shouldPress(
+	attacking: boolean,
+	hasTarget: boolean,
+	underFire: boolean,
+	retreating: boolean,
+	sinceS: number
+): boolean
+	return attacking and not hasTarget and not underFire and not retreating and sinceS >= BotBrain.PRESS.afterS
+end
+
+-- Ficou parado demais sem contato? holdingPoint: no lugar dele no objetivo (tomando ou guardando).
+function BotBrain.idleExpired(stillS: number, inCombat: boolean, holdingPoint: boolean): boolean
+	return not inCombat and not holdingPoint and stillS >= BotBrain.PRESS.idleMaxS
+end
+
+---------------------------------------------------------------------------------------------
+-- Bots no squad do jogador (decisão do dono, 2026-11-12): squad de humano com menos de 4 membros
+-- recebe bots até 4 (nunca passa do tamanho do squad); os bots saem um a um quando entram humanos.
+-- Seguem o líder humano a 10–30 m e obedecem à marca do líder na carta. PLACEHOLDER de design.
+---------------------------------------------------------------------------------------------
+BotBrain.FILL = {
+	target = 4, -- membros (humanos + bots) que o squad de jogador deve ter
+	everyS = 2, -- de quanto em quanto tempo o servidor confere (entra/sai um bot por squad por vez)
+	minM = 10, -- distância do líder: no mínimo 10 m
+	maxM = 30, -- e no máximo 30 m
+	slotSlackM = 12, -- longe do lugar mais que isto (mesmo dentro de 10–30 m): vai para o lugar
+	markReachM = 15, -- chegou na marca do líder
+	markTtlS = 180, -- a marca vale no máximo 3 min
+	markReleaseM = 60, -- chegou e o líder já está a mais que isto da marca: volta a segui-lo
+}
+
+export type FillSquad = { id: string, humans: number, size: number, bots: { number } }
+
+-- Plano de uma conferida: quais bots entram em qual squad e quais saem. Um por squad por vez (entra
+-- ou sai), na ordem da lista `free` (o primeiro sai antes). squads: só os que podem ter bot.
+function BotBrain.fillPlan(squads: { FillSquad }, free: { number }): ({ { bot: number, squad: string } }, { number })
+	local F = BotBrain.FILL
+	local add: { { bot: number, squad: string } } = {}
+	local remove: { number } = {}
+	local pool = table.clone(free)
+	for _, s in squads do
+		local want = 0
+		if s.humans > 0 and s.humans < F.target then
+			want = math.max(math.min(F.target, s.size) - s.humans, 0)
+		end
+		local have = #s.bots
+		if have > want then
+			table.insert(remove, s.bots[have])
+		elseif have < want and #pool > 0 then
+			table.insert(add, { bot = table.remove(pool, 1) :: number, squad = s.id })
+		end
+	end
+	return add, remove
+end
+
+-- Lugar do bot i (1, 2, ...) atrás do líder, em metros no plano: (dx, dz) a partir dele. lookX/lookZ:
+-- para onde o líder olha. Leque atrás dele (0°, ±40°, ±80°), a 14–24 m.
+local ESCORT = { { 0, 14 }, { -40, 18 }, { 40, 18 }, { -80, 24 }, { 80, 24 } }
+function BotBrain.escortSlot(i: number, lookX: number, lookZ: number): (number, number)
+	local len = math.sqrt(lookX * lookX + lookZ * lookZ)
+	local bx, bz = 0, 1
+	if len > 1e-6 then
+		bx, bz = -lookX / len, -lookZ / len
+	end
+	local e = ESCORT[((i - 1) % #ESCORT) + 1]
+	local a = math.rad(e[1])
+	local rx, rz = bx * math.cos(a) - bz * math.sin(a), bx * math.sin(a) + bz * math.cos(a)
+	return rx * e[2], rz * e[2]
+end
+
+-- Fica onde está? A 10–30 m do líder e perto do seu lugar.
+function BotBrain.escortHold(toLeaderM: number, toSlotM: number): boolean
+	local F = BotBrain.FILL
+	return toLeaderM >= F.minM and toLeaderM <= F.maxM and toSlotM <= F.slotSlackM
+end
+
+-- A marca do líder ainda manda? Vale até markTtlS; depois de chegar, até o líder se afastar dela.
+function BotBrain.markActive(ageS: number, reached: boolean, leaderToMarkM: number): boolean
+	local F = BotBrain.FILL
+	if ageS > F.markTtlS then
+		return false
+	end
+	return not (reached and leaderToMarkM > F.markReleaseM)
+end
+
+-- Lance do squad perto do objetivo atacado, com contato recente.
+function BotBrain.squadBounds(attack: boolean, toObjectiveM: number, contactAgeS: number): boolean
+	local S = BotBrain.SQUAD
+	return attack and toObjectiveM <= S.boundZoneM and contactAgeS <= S.boundContactS
+end
 
 local function lerp(r: { number }, t: number): number
 	return r[1] + (r[2] - r[1]) * math.clamp(t, 0, 1)
@@ -480,6 +600,48 @@ function BotBrain.camoFactor(camo: string?, veg: string?, stance: string): numbe
 	return k
 end
 
+-- Alcance de notar (m) pela vegetação onde o alvo está (2026-11-12, "os bots enxergam de muito
+-- longe"; o raio de visada passa pelas folhas, que não têm colisão). PLACEHOLDER de design.
+BotBrain.SIGHT = {
+	open = 120,
+	rice = 120,
+	jungle = 40,
+	bamboo = 40,
+	grass = 15, -- capim-elefante
+} :: { [string]: number }
+BotBrain.SIGHT_FIRING = 1.5 -- quem atirou há pouco (clarão, estampido) é notado até 1,5x mais longe
+BotBrain.SIGHT_TRACKING = 1.5 -- o alvo que já está sendo seguido some só a 1,5x (até o teto do aberto)
+-- tempo para notar (multiplica) pela vegetação do alvo
+BotBrain.NOTICE_VEG = { open = 1, rice = 1, jungle = 1.5, bamboo = 1.5, grass = 1.8 } :: { [string]: number }
+
+-- Até onde o bot nota este alvo (m): vegetação, postura, camuflagem, se está atirando e se já é o
+-- alvo seguido. veg nil = aberto.
+function BotBrain.sightRange(
+	d: Difficulty,
+	veg: string?,
+	stance: string,
+	tracking: boolean,
+	camo: string?,
+	firing: boolean
+): number
+	local open = BotBrain.SIGHT.open
+	local base = BotBrain.SIGHT[veg or "open"] or open
+	if tracking then
+		return math.min(base * BotBrain.SIGHT_TRACKING, open)
+	end
+	local r = base * BotBrain.spotFactor(d, stance, false, camo, veg)
+	if firing then
+		r = math.max(r, base) * BotBrain.SIGHT_FIRING
+	end
+	return r
+end
+
+-- Onde o bot mira: sempre o meio do tronco, de qualquer postura (antes mirava na cabeça de quem
+-- estava abaixado e acertava cabeça em série).
+function BotBrain.aimPartName(_stance: string): string
+	return "UpperTorso"
+end
+
 -- Planta posta pelo AssetLoader (nome do modelo = chave da arte) -> tipo de vegetação.
 BotBrain.PLANT = {
 	bamboo_clump = "bamboo",
@@ -570,6 +732,48 @@ function BotBrain.hitChance(sigmaRad: number, distM: number, halfM: number): num
 	local lin = math.max(sigmaRad * distM, 1e-9)
 	local p = erf(halfM / (lin * math.sqrt(2)))
 	return p * p
+end
+
+-- Calibração (2026-11-12, "bots estão muito fortes"): chance de o bot acertar pelo menos uma vez um
+-- jogador PARADO e em pé, de frente, no aberto, a distM, nos windowS segundos depois que ele aparece.
+-- Conta o tempo de notar (noticeTime), a reação, a mira que firma (settleFactor), as rajadas
+-- (volleySize, volleyGap, pause) e o recuo; o bot parado e em pé, sem supressão. sightM: além disto
+-- não nota (0 de chance). Alvo: o quadrado do tronco (C.torsoHalfM). Média de `trials` sorteios.
+function BotBrain.duelHitChance(
+	d: Difficulty,
+	distM: number,
+	windowS: number,
+	kind: string,
+	rpm: number,
+	sightM: number,
+	trials: number,
+	roll: () -> number
+): number
+	if distM > sightM then
+		return 0
+	end
+	local sum = 0
+	for _ = 1, trials do
+		local tNotice = BotBrain.noticeTime(d, distM, "stand", true, false, 0)
+		local t = tNotice + BotBrain.reactionTime(d, roll(), 0, false)
+		local miss = 1
+		while t <= windowS do
+			local n = BotBrain.volleySize(d, kind, roll())
+			for i = 1, n do
+				if t > windowS then
+					break
+				end
+				local s = BotBrain.aimError(d, distM, { shot = i, kind = kind }) * BotBrain.settleFactor(d, t - tNotice)
+				miss *= 1 - BotBrain.hitChance(s, distM, BotBrain.C.torsoHalfM)
+				if i < n then
+					t += BotBrain.volleyGap(d, kind, rpm, roll())
+				end
+			end
+			t += BotBrain.pause(d, kind, roll())
+		end
+		sum += 1 - miss
+	end
+	return sum / math.max(trials, 1)
 end
 
 -- Compatibilidade (teste da F3): erro de um bot médio em pé, parado ou andando. skill 0,5 = médio.
@@ -748,6 +952,8 @@ function BotBrain.coverKind(partName: string, modelName: string?, material: stri
 		return "wall"
 	elseif string.sub(m, 1, 4) == "hut_" or string.sub(m, 1, 6) == "house_" then
 		return "wall"
+	elseif string.sub(m, 1, 10) == "vila_casa_" or m == "Vila_chua" or m == "Vila_dinh" then
+		return "wall" -- vila grande do centro (2026-11-12): casas únicas, pagode e casa comunal
 	end
 	return "solid"
 end
@@ -937,12 +1143,14 @@ function BotBrain.noticeTime(
 	stance: string,
 	still: boolean,
 	firing: boolean,
-	offDeg: number
+	offDeg: number,
+	veg: string?
 ): number
 	if offDeg > d.rearDeg and not firing then
 		return math.huge
 	end
 	local t = d.noticeS + d.noticePer100M * math.max(distM, 0) / 100
+	t *= BotBrain.NOTICE_VEG[veg or "open"] or 1
 	if still and stance ~= "stand" then
 		t *= d.noticeStill
 	end

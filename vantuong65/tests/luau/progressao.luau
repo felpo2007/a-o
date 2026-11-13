@@ -165,7 +165,7 @@ end)
 
 test("perfil v3: migração da v2 dá a verba inicial uma vez; lixo vira seguro", function()
 	local p = ProfileSchema.migrate({ schema = 2, daily = { run = 2, lastDay = 10, total = 5 } })
-	assert(p.schema == 3 and p.xp == 0 and p.credits == Progression.START_CREDITS and p.respawnCredits == 0)
+	assert(p.schema == 4 and p.xp == 0 and p.credits == Progression.START_CREDITS and p.respawnCredits == 0)
 	p = ProfileSchema.migrate({ xp = "x", credits = "y", gear = { us_vest = true, hack = true }, respawnCredits = -5 })
 	assert(p.xp == 0 and p.credits == 0 and p.gear.us_vest == true and p.gear.hack == nil and p.respawnCredits == 0)
 end)

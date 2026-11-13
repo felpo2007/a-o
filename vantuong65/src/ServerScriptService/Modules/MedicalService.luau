@@ -8,6 +8,7 @@ local Medical = require(ReplicatedStorage.Shared.Medical)
 local Movement = require(ReplicatedStorage.Shared.Movement)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Units = require(ReplicatedStorage.Shared.Units)
+local Vantagens = require(ReplicatedStorage.Shared.Vantagens)
 local Combatants = require(script.Parent.Combatants)
 
 local MedicalService = {}
@@ -34,6 +35,21 @@ local function apply(model: Model)
 	end
 	local e = Combatants.get(model)
 	local player = e and e.player
+	-- D-99: vantagens compradas (atributos Vant_* que o servidor grava no jogador; 1 sem passe):
+	-- vida máxima e sangramento acompanham o passe mesmo se ele chegar depois do nascimento
+	local who: Instance = player or model
+	local maxH = Medical.C.health * Vantagens.mult(who, "health")
+	if math.abs(maxH - s.maxHealth) > 1e-6 then
+		if not s.downedAt and not s.dead and maxH > s.maxHealth then
+			s.health += maxH - s.maxHealth
+		end
+		s.maxHealth = maxH
+		s.health = math.min(s.health, maxH)
+	end
+	s.bleedMult = Vantagens.mult(who, "bleed")
+	if hum.MaxHealth ~= maxH then
+		hum.MaxHealth = maxH
+	end
 	if s.dead then
 		hum.Health = 0
 		return
@@ -44,7 +60,7 @@ local function apply(model: Model)
 		hum.WalkSpeed = 0
 		hum.JumpPower = 0
 	else
-		hum.Health = math.clamp(s.health, 1, 100)
+		hum.Health = math.clamp(s.health, 1, maxH)
 		-- postura e corrida (PostureService): deitado rasteja, agachado anda devagar, correndo só
 		-- de pé e sem perna ferida. Teto único em Shared/Movement.serverSpeed (o cliente nunca passa
 		-- dele, teste "movimento"); o VC, mais leve, tem teto 12% maior (D-93).
@@ -58,7 +74,8 @@ local function apply(model: Model)
 			model:GetAttribute("Sprinting") == true,
 			s.legImpaired,
 			false,
-			if type(faction) == "string" then faction else nil
+			if type(faction) == "string" then faction else nil,
+			Vantagens.mult(who, "speed") -- D-99: trote e corrida (o cliente usa o mesmo)
 		) / Units.STUD_M
 		hum.JumpPower = if s.legImpaired then 0 else 30
 	end
@@ -69,7 +86,9 @@ local function apply(model: Model)
 		player:SetAttribute("ArmImpaired", s.armImpaired)
 		Net.event("Medical_State"):FireClient(player, {
 			health = s.health,
+			maxHealth = s.maxHealth,
 			bleed = Medical.bleedRate(s),
+			arterial = Medical.arterial(s), -- D-99: a taxa mudou; quem decide pelo arterial lê isto
 			downedAt = s.downedAt,
 			now = os.clock(),
 			blurUntil = s.blurUntil,
@@ -102,7 +121,11 @@ function MedicalService.hit(victim: Model, zone: string, energyJ: number, roll: 
 		attackers[victim] = attackers[victim] or {}
 		attackers[victim][by] = os.clock()
 	end
-	busy[victim] = nil -- levar dano interrompe a ação
+	if busy[victim] then
+		busy[victim] = nil -- levar dano interrompe a ação (e a animação dela, D-99)
+		victim:SetAttribute("ActionUntil", nil)
+		victim:SetAttribute("VT65Acao", nil)
+	end
 	Medical.applyHit(s, zone, energyJ, roll, os.clock())
 	apply(victim)
 end
@@ -112,16 +135,22 @@ local function still(model: Model): boolean
 	return r ~= nil and Vector3.new(r.AssemblyLinearVelocity.X, 0, r.AssemblyLinearVelocity.Z).Magnitude < 1
 end
 
--- ação com tempo; cancela se mexer, levar dano ou o alvo sair do alcance
-local function timed(actor: Model, target: Model, seconds: number, fn: () -> boolean, op: string?)
+-- ação com tempo; cancela se mexer, levar dano ou o alvo sair do alcance. D-99: o atributo
+-- "VT65Acao" (curativo, torniquete, tratar, reanimar) replica para todos; o SoldierAnimations e o
+-- ItemView animam o soldado e as mãos de 1ª pessoa pela duração de "ActionUntil".
+local function timed(actor: Model, target: Model, seconds: number, fn: () -> boolean, op: string?, anim: string)
 	local token = os.clock()
 	busy[actor] = token
 	actor:SetAttribute("ActionUntil", os.clock() + seconds)
+	actor:SetAttribute("VT65AcaoT", workspace:GetServerTimeNow()) -- relógio comum a todos
+	actor:SetAttribute("VT65AcaoS", seconds)
+	actor:SetAttribute("VT65Acao", anim)
 	task.delay(seconds, function()
-		actor:SetAttribute("ActionUntil", nil)
 		if busy[actor] ~= token then
 			return
 		end
+		actor:SetAttribute("ActionUntil", nil)
+		actor:SetAttribute("VT65Acao", nil)
 		busy[actor] = nil
 		local ra, rt = root(actor), root(target)
 		if not (ra and rt) or (ra.Position - rt.Position).Magnitude > REACH or not still(actor) then
@@ -140,7 +169,10 @@ end
 
 function MedicalService.start()
 	Combatants.Added:Connect(function(e: Combatants.Entry)
-		states[e.model] = Medical.new(Combatants.role(e) == "medic")
+		-- D-99: vantagens "health" e "bleed" (1 sem passe; bots não têm)
+		local who: Instance = e.player or e.model
+		states[e.model] =
+			Medical.new(Combatants.role(e) == "medic", Vantagens.mult(who, "health"), Vantagens.mult(who, "bleed"))
 		local kb = e.player and e.player:GetAttribute("KitBandages")
 		if type(kb) == "number" then
 			-- médico mantém a dotação de médico se ela for maior; os outros levam o que escolheram
@@ -193,13 +225,24 @@ function MedicalService.start()
 		end
 		local C = Medical.C
 		local isMedic = player:GetAttribute("Role") == "medic"
+		-- D-99: vantagem "bandage" (0,74 do tempo de curativo e torniquete; 1 sem passe)
+		local quick = Vantagens.mult(player, "bandage")
 		if req.op == "giveup" and target == actor and Medical.canGiveUp(mine, os.clock()) then
 			mine.dead = true
 			apply(actor)
 		elseif mine.downedAt then
 			return -- caído não faz nada além de desistir
+		elseif req.op == "bandage" and target == actor then
+			-- D-99: a bandagem rápida estanca: torniquete na artéria (se houver um) e curativo no resto
+			if #mine.wounds == 0 or (mine.bandages <= 0 and not (Medical.arterial(mine) and mine.tourniquets > 0)) then
+				return
+			end
+			local anim = if Medical.arterial(mine) and mine.tourniquets > 0 then "tourniquet" else "bandage"
+			timed(actor, actor, C.bandageSelf * quick, function()
+				return (Medical.quickDress(mine))
+			end, nil, anim)
 		elseif req.op == "bandage" then
-			timed(actor, target, if target == actor then C.bandageSelf else C.bandageOther, function()
+			timed(actor, target, C.bandageOther * quick, function()
 				if mine.bandages <= 0 then
 					return false
 				end
@@ -211,19 +254,22 @@ function MedicalService.start()
 					mine.bandages -= 1
 				end
 				return ok
-			end, "bandage")
+			end, "bandage", "bandage_other")
 		elseif req.op == "tourniquet" and target == actor then
-			timed(actor, actor, C.tourniquet, function()
+			if not (Medical.arterial(mine) and mine.tourniquets > 0) then
+				return
+			end
+			timed(actor, actor, C.tourniquet * quick, function()
 				return Medical.tourniquet(mine)
-			end)
+			end, nil, "tourniquet")
 		elseif req.op == "treat" and isMedic and target ~= actor then
 			timed(actor, target, C.medicTreat, function()
 				return Medical.treat(ts)
-			end, "treat")
+			end, "treat", "treat")
 		elseif req.op == "revive" and isMedic and target ~= actor then
 			timed(actor, target, C.reviveTime, function()
 				return Medical.revive(ts, os.clock())
-			end, "revive")
+			end, "revive", "revive")
 		end
 	end)
 

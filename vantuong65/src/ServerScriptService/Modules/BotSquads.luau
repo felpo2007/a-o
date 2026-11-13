@@ -52,6 +52,10 @@ export type Squad = {
 	inContact: boolean,
 	order: string?, -- cena do Studio
 	mech: any, -- BotVehicles: LVTP-5 que leva este squad
+	-- 2026-11-12: espera do líder com teto e lances perto do objetivo atacado
+	waitSince: number?,
+	boundMoving: boolean,
+	boundPhaseEnd: number,
 }
 
 local squads: { Squad } = {}
@@ -117,6 +121,9 @@ function BotSquads.assign(bot: Bot)
 			inContact = false,
 			order = nil,
 			mech = nil,
+			waitSince = nil,
+			boundMoving = true,
+			boundPhaseEnd = 0,
 		}
 		table.insert(squads, new)
 		sq = new
@@ -400,11 +407,38 @@ function BotSquads.lead(bot: Bot, root: BasePart, now: number, threatNear: boole
 		gait = "walk"
 	end
 	if lag > S.leaderWaitM then
-		s.leaderGait = "wait"
-		BotLocomotion.stop(bot, nil)
-		return "wait"
-	elseif lag > S.leaderSlowM and gait ~= "sprint" then
+		-- 2026-11-12: espera no máximo leaderWaitMaxS; depois segue andando (quem ficou alcança)
+		s.waitSince = s.waitSince or now
+		if now - (s.waitSince :: number) < S.leaderWaitMaxS then
+			s.leaderGait = "wait"
+			BotLocomotion.stop(bot, nil)
+			return "wait"
+		end
 		gait = "walk"
+	else
+		s.waitSince = nil
+		if lag > S.leaderSlowM and gait ~= "sprint" then
+			gait = "walk"
+		end
+	end
+	-- 2026-11-12: perto do objetivo atacado e com contato recente, vai em lances: anda boundS, para
+	-- boundPauseS (os outros param junto, olhando para fora); fora disso, segue direto
+	if BotBrain.squadBounds(s.attack, distM, now - s.contactAt) then
+		if now >= s.boundPhaseEnd then
+			s.boundMoving = not s.boundMoving
+			local r = if s.boundMoving then S.boundS else S.boundPauseS
+			s.boundPhaseEnd = now + r[1] + (r[2] - r[1]) * math.random()
+		end
+		if not s.boundMoving then
+			s.leaderGait = "wait"
+			BotLocomotion.stop(bot, goal)
+			return "wait"
+		end
+		if gait == "walk" and lag <= S.leaderSlowM then
+			gait = "jog" -- no lance, trota
+		end
+	else
+		s.boundMoving, s.boundPhaseEnd = true, 0
 	end
 	s.leaderGait = gait
 	-- trecho: até legM à frente na rota (ou direto ao objetivo sem rota)

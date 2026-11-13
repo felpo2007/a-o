@@ -17,6 +17,7 @@ local Net = require(ReplicatedStorage.Shared.Net)
 local Progression = require(ReplicatedStorage.Shared.Progression)
 local Skins = require(ReplicatedStorage.Shared.Skins)
 local Weapons = require(ReplicatedStorage.Shared.Weapons)
+local CampanhaEventos = require(script.Parent.CampanhaEventos)
 local Combatants = require(script.Parent.Combatants)
 local CommerceService = require(script.Parent.CommerceService)
 local MatchService = require(script.Parent.MatchService)
@@ -35,6 +36,10 @@ local sess: { [Player]: Sess } = {}
 
 -- avisado quando um renascer guardado chega (o SpawnService põe o jogador onde caiu)
 ProgressionService.onRespawnCredit = nil :: ((player: Player) -> ())?
+-- campanha (2026-11-12, CampanhaService): multiplicadores de XP e créditos (reforços, fim de
+-- semana, amigo no squad, Veterano) e o aviso de cada ganho (placar da semana)
+ProgressionService.mult = nil :: ((player: Player) -> (number, number))?
+ProgressionService.onGain = nil :: ((player: Player, xp: number, cr: number) -> ())?
 
 local function passes(p: Player): { [string]: boolean }
 	return (CommerceService.ownership(p).passes :: any) or {}
@@ -165,11 +170,23 @@ end
 local push = ProgressionService.push
 
 -- Soma XP e CI já liberados pelo teto (ou do fim de partida, que fica fora do teto). Promoção dá o
--- soldo do posto novo.
-local function add(p: Player, gx: number, gc: number, label: string)
+-- soldo do posto novo. Os multiplicadores da campanha valem no que se ganha jogando; `raw` (bônus
+-- de missão, nível do passe, convite) entra sem eles.
+local function add(p: Player, gx: number, gc: number, label: string, raw: boolean?)
 	local prof = PlayerData.get(p)
 	if not prof or (gx <= 0 and gc <= 0) then
 		return
+	end
+	local m = ProgressionService.mult
+	if m and not raw then
+		local ok, mx, mc = pcall(m, p)
+		if ok and type(mx) == "number" and type(mc) == "number" then
+			gx = math.floor(gx * mx + 0.5)
+			gc = math.floor(gc * mc + 0.5)
+		end
+	end
+	if ProgressionService.onGain then
+		task.spawn(ProgressionService.onGain, p, gx, gc)
 	end
 	local before = Progression.rankFor(prof.xp)
 	prof.xp = math.min(prof.xp + gx, 1000000000)
@@ -191,8 +208,9 @@ local function add(p: Player, gx: number, gc: number, label: string)
 end
 
 -- Recompensa por ação (Progression.REWARDS), com teto por minuto e, para cuidar de alguém, espera
--- por par (quem ajuda, quem é ajudado).
-function ProgressionService.award(p: Player, kind: string, pairKey: string?)
+-- por par (quem ajuda, quem é ajudado). A ação que passa da espera vira evento da campanha
+-- (missões e medalhas contam mesmo com o teto de XP do minuto cheio).
+function ProgressionService.award(p: Player, kind: string, pairKey: string?, data: { [string]: any }?)
 	local s = sess[p]
 	local rw = Progression.REWARDS[kind]
 	if not (s and rw and PlayerData.get(p)) then
@@ -203,6 +221,7 @@ function ProgressionService.award(p: Player, kind: string, pairKey: string?)
 	if pairKey and cd and not Progression.pairReady(s.pairs, kind .. ":" .. pairKey, now, cd) then
 		return
 	end
+	CampanhaEventos.fire(p, kind, data)
 	local gx, gc = Progression.grant(s.window, now, rw.xp, rw.cr)
 	add(p, gx, gc, rw.label)
 	if kind == "kill" and gx <= 0 and gc <= 0 then
@@ -238,6 +257,12 @@ end
 -- CI fora do teto por minuto (recompensa diária)
 function ProgressionService.addCredits(p: Player, amount: number, label: string)
 	add(p, 0, math.max(math.floor(amount), 0), label)
+end
+
+-- XP e CI de bônus (missão, nível do passe, ordem do comandante, convite): fora do teto e sem os
+-- multiplicadores da campanha
+function ProgressionService.bonus(p: Player, xp: number, cr: number, label: string)
+	add(p, math.max(math.floor(xp), 0), math.max(math.floor(cr), 0), label, true)
 end
 
 -- Gasta CI (renascer onde caiu). Devolve false se não houver saldo.
@@ -405,7 +430,18 @@ function ProgressionService.start()
 				end
 			end
 			if killer then
-				award(killer, "kill")
+				-- a arma na mão de quem abateu (missões por classe de arma); sem ela, a do papel
+				local held = killer.Character and killer.Character:FindFirstChild("Weapon")
+				local attr = held and held:GetAttribute("WeaponId")
+				local wid: string = if type(attr) == "string"
+					then attr
+					else string.split(tostring(killer:GetAttribute("Loadout") or ""), ",")[1]
+				local wp = Weapons.get(wid)
+				award(killer, "kill", nil, {
+					weapon = wid,
+					kind = if wp then wp.kind else "rifle",
+					victimBot = Players:GetPlayerFromCharacter(e.model) == nil,
+				})
 			end
 			for who, t in hits do
 				if
@@ -424,7 +460,10 @@ function ProgressionService.start()
 	MedicalService.onCare = function(actor: Player, target: Model, op: string)
 		local tp = Players:GetPlayerFromCharacter(target)
 		local key = if tp then tostring(tp.UserId) else target.Name
-		award(actor, op, key)
+		award(actor, op, key, { target = if tp then tp.UserId else 0 })
+		if op == "revive" and tp then
+			CampanhaEventos.fire(tp, "was_revived") -- Purple Heart: ferido e de volta à luta
+		end
 	end
 
 	-- captura (quem capturou) e neutralização (o lado que atacava)
@@ -454,6 +493,7 @@ function ProgressionService.start()
 				local gx, gc = Progression.matchReward(result, on, seconds)
 				local r = Progression.MATCH[result]
 				add(p, gx, gc, string.format("Fim de partida: %s", if r then r.label else result))
+				CampanhaEventos.fire(p, "match_end", { result = result, seconds = on, faction = f })
 				s.teamSince = now -- a próxima partida conta do zero
 			end
 			task.spawn(PlayerData.save, p)
@@ -497,6 +537,11 @@ function ProgressionService.start()
 	Net.func("Progress_Get").OnServerInvoke = function(p: Player)
 		return stateFor(p)
 	end
+
+	-- campanha (missões, passe, mercado, reforços, medalhas, vantagens): depois dos ganchos acima.
+	-- Pedido na hora (o CampanhaService usa este módulo; sem ciclo no carregamento)
+	local campanha: any = (require :: any)(script.Parent:WaitForChild("CampanhaService"))
+	campanha.start()
 
 	-- compra permanente com $ (gravada logo; o saldo e a união dos itens vão pelo delta da sessão).
 	-- O mesmo remote compra skin (id do Shared/Skins).

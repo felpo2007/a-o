@@ -11,6 +11,7 @@ local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 
 local InputMap = require(game:GetService("ReplicatedStorage").Shared.InputMap)
+local Bus = require(script.Parent.Bus)
 local Input = require(script.Parent.Input)
 local UiKit = require(script.Parent.UiKit)
 
@@ -166,6 +167,7 @@ local selected: number? = nil
 local cursor = Vector2.zero -- teclado/mouse: deslocamento acumulado do mouse
 local drawnSel: number? = -1
 local needleAngle = 0
+local holdCodes: { Enum.KeyCode } = {} -- botões que abriram a roda segurando (vazio: sem segurar)
 
 local function paintSlot(i: number, s: Slot, it: Item)
 	local on = enabledFn(it.id)
@@ -224,11 +226,16 @@ end
 local function renderHint()
 	-- frases inteiras (o dicionário traduz a frase, não o verbo solto)
 	local toggle = Input.settings.wheelToggle
+	local free = not toggle and #holdCodes == 0 -- página aberta depois de soltar (ex.: "Comando ►")
 	if Input.isGamepad() then
-		hint.Text = if toggle then "Toque de novo para escolher · B cancela" else "Solte para escolher · B cancela"
+		hint.Text = if toggle
+			then "Toque de novo para escolher · B cancela"
+			elseif free then "A escolhe · B cancela"
+			else "Solte para escolher · B cancela"
 	else
 		hint.Text = if toggle
 			then "Toque de novo para escolher · 1–8 · Backspace cancela"
+			elseif free then "Clique ou Enter escolhe · 1–8 · Backspace cancela"
 			else "Solte para escolher · 1–8 · Backspace cancela"
 	end
 end
@@ -236,8 +243,51 @@ end
 -- aberta de fato (a ScreenGui fica ligada mais 0,1 s na saída, só para o encolher)
 local isOpen = false
 local openToken = 0
+local openedAt = 0
 function Wheel.isOpen(): boolean
 	return isOpen
+end
+
+-- ===== segurar o botão (D-94, o dono: "não consigo trocar de equipamento nem me comunicar; a tela
+-- some muito rápido") =====
+-- Ao abrir, o contexto vira "wheel", que não tem a ação que abriu a roda: o Input solta o botão
+-- seguro (holdEnd) no mesmo instante e a roda fechava sem escolha. Agora a roda sabe quais botões a
+-- abriram (os da ação, no controle e no teclado) e só a soltura FÍSICA deles confirma; o holdEnd
+-- falso de quem chama é ignorado enquanto o botão segue apertado (Wheel.heldDown).
+function Wheel.heldDown(): boolean
+	for _, kc in holdCodes do
+		local name = kc.Name
+		if string.sub(name, 1, 6) == "Button" or string.sub(name, 1, 4) == "DPad" then
+			for _, pad in UserInputService:GetConnectedGamepads() do
+				if UserInputService:IsGamepadButtonDown(pad, kc) then
+					return true
+				end
+			end
+		elseif UserInputService:IsKeyDown(kc) then
+			return true
+		end
+	end
+	return false
+end
+
+local function codesFor(actionId: string?): { Enum.KeyCode }
+	local out: { Enum.KeyCode } = {}
+	if not actionId then
+		return out
+	end
+	for _, a in InputMap.ACTIONS do
+		if a.id == actionId then
+			for _, name in { InputMap.padFor(a, Input.settings) or "", InputMap.keyFor(a, Input.settings) or "" } do
+				local ok, kc = pcall(function()
+					return (Enum.KeyCode :: any)[name]
+				end)
+				if name ~= "" and ok and typeof(kc) == "EnumItem" then
+					table.insert(out, kc :: Enum.KeyCode)
+				end
+			end
+		end
+	end
+	return out
 end
 
 local function hide(animated: boolean)
@@ -270,10 +320,14 @@ local function reset(label: string, list: { Item })
 	render()
 end
 
-function Wheel.open(name: string, label: string, list: { Item }, enabled: ((string) -> boolean)?)
+-- holdAction: a ação que abriu a roda segurando ("equip_wheel", "comm_wheel"); sem ela (página
+-- aberta depois de soltar), A, Enter ou o clique confirmam
+function Wheel.open(name: string, label: string, list: { Item }, enabled: ((string) -> boolean)?, holdAction: string?)
 	enabledFn = enabled or function()
 		return true
 	end
+	holdCodes = codesFor(holdAction)
+	openedAt = os.clock()
 	openToken += 1
 	isOpen = true
 	gui.Enabled = true
@@ -299,6 +353,7 @@ function Wheel.close(confirm: boolean): string?
 	if not isOpen then
 		return nil
 	end
+	holdCodes = {}
 	hide(true)
 	Input.event("wheel_close")
 	local it = selected and items[selected]
@@ -358,6 +413,39 @@ UserInputService.InputBegan:Connect(function(input)
 	if n and items[n] then
 		selected = n
 		render()
+	end
+end)
+
+-- soltar o botão que abriu a roda confirma (com folga: a escolha feita até ali vale, mesmo que o
+-- analógico já tenha voltado ao centro); quem confirma é o dono da roda (Bus "wheel_confirm")
+UserInputService.InputEnded:Connect(function(input: InputObject)
+	if not isOpen or Input.settings.wheelToggle or #holdCodes == 0 then
+		return
+	end
+	if table.find(holdCodes, input.KeyCode) and not Wheel.heldDown() then
+		task.defer(function()
+			if isOpen then
+				Bus.fire("wheel_confirm")
+			end
+		end)
+	end
+end)
+-- sem botão seguro (página aberta depois de soltar, ou "alternar"): A, Enter ou clique confirmam
+UserInputService.InputBegan:Connect(function(input: InputObject)
+	if not isOpen or os.clock() - openedAt < 0.15 or Wheel.heldDown() then
+		return
+	end
+	if not Input.settings.wheelToggle and #holdCodes > 0 then
+		return -- segurando: quem confirma é a soltura
+	end
+	local k = input.KeyCode
+	if
+		k == Enum.KeyCode.ButtonA
+		or k == Enum.KeyCode.Return
+		or k == Enum.KeyCode.KeypadEnter
+		or input.UserInputType == Enum.UserInputType.MouseButton1
+	then
+		Bus.fire("wheel_confirm")
 	end
 end)
 

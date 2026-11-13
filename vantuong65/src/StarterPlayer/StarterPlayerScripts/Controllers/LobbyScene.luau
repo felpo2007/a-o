@@ -51,8 +51,8 @@ local B = MapConfig.Bounds
 -- as cenas ficam no alto e fora da área jogável: ninguém as vê do mapa e o mapa não aparece nelas
 local BASE = Vector3.new((B.minX + B.maxX) / 2, 2600, B.maxZ + 3000)
 
-local HEAD, TYPE, VIET = Enum.Font.Oswald, Enum.Font.SpecialElite, Enum.Font.Arimo
-local INK, CARD, MANILA, KHAKI, STAMP = UiKit.INK, UiKit.CARD, UiKit.MANILA, UiKit.KHAKI, UiKit.STAMP
+local HEAD, TYPE, VIET = Enum.Font.Oswald, Enum.Font.Arimo, Enum.Font.Arimo -- sem máquina de escrever
+local INK, CARD, MANILA, STAMP = UiKit.INK, UiKit.CARD, UiKit.MANILA, UiKit.STAMP -- cores dos objetos da mesa
 local function rgb(r: number, g: number, b: number): Color3
 	return Color3.fromRGB(r, g, b)
 end
@@ -216,6 +216,12 @@ local function sgBox(parent: Instance, color: Color3, x: number, y: number, w: n
 	return f
 end
 
+-- Texto nos papéis 3D: SAIU (o dono não gostou do papel datilografado, 2026-11-11: "não gosto dessa
+-- escrita no papel e dessa ideia"). As folhas, a carta, o calendário e os documentos ficam na mesa
+-- como objetos lisos (o desenho da carta, sem rótulos, continua); o texto é criado escondido para o
+-- LobbyScene.setText do DeployScreen seguir funcionando sem mudar nada. Só ficam os símbolos que
+-- não são escrita (a estrela da bandeira).
+local SYMBOLS: { [string]: boolean } = { ["★"] = true }
 local function sgText(
 	parent: Instance,
 	text: string,
@@ -229,6 +235,7 @@ local function sgText(
 	maxSize: number?
 ): TextLabel
 	local t = Instance.new("TextLabel")
+	t.Visible = SYMBOLS[text] == true
 	t.BackgroundTransparency = 1
 	t.BorderSizePixel = 0
 	t.Font = font
@@ -1393,11 +1400,15 @@ local function makeTag(hot: boolean): (Frame, TextLabel, TextLabel)
 	local fr = Instance.new("Frame")
 	fr.AnchorPoint = Vector2.new(0.5, 1)
 	fr.AutomaticSize = Enum.AutomaticSize.XY
-	fr.BackgroundColor3 = if hot then CARD else UiKit.DRAB
+	-- estilo novo: painel escuro, filete fino (oliva na etiqueta do objeto sob o ponteiro), título
+	-- em Oswald e a situação em Arimo
+	fr.BackgroundColor3 = UiKit.V.PANEL
+	fr.BackgroundTransparency = if hot then 0.04 else 0.15
 	fr.BorderSizePixel = 0
 	fr.Visible = false
+	UiKit.corner(fr, 4)
 	local pad = Instance.new("UIPadding")
-	pad.PaddingLeft, pad.PaddingRight = UDim.new(0, 10), UDim.new(0, 10)
+	pad.PaddingLeft, pad.PaddingRight = UDim.new(0, 12), UDim.new(0, 12)
 	pad.PaddingTop, pad.PaddingBottom = UDim.new(0, 4), UDim.new(0, 6)
 	pad.Parent = fr
 	local lay = Instance.new("UIListLayout")
@@ -1405,30 +1416,27 @@ local function makeTag(hot: boolean): (Frame, TextLabel, TextLabel)
 	lay.HorizontalAlignment = Enum.HorizontalAlignment.Center
 	lay.Parent = fr
 	local st = Instance.new("UIStroke")
-	st.Color = if hot then STAMP else KHAKI
-	st.Thickness = 2
-	st.Transparency = 0.2
+	st.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+	st.Color = if hot then UiKit.V.OLIVE_HI else UiKit.V.LINE
+	st.Thickness = if hot then 2 else 1
+	st.Transparency = if hot then 0 else 0.3
 	st.Parent = fr
-	local light = Instance.new("UIGradient") -- papel com luz de cima, como as fichas
-	light.Rotation = 90
-	light.Color = ColorSequence.new(Color3.new(1, 1, 1), rgb(206, 200, 186))
-	light.Parent = fr
 	local pop = Instance.new("UIScale")
 	pop.Name = "Pop"
 	pop.Parent = fr
 	local t1 = Instance.new("TextLabel")
 	t1.BackgroundTransparency = 1
 	t1.AutomaticSize = Enum.AutomaticSize.XY
-	t1.Font = HEAD
-	t1.TextColor3 = if hot then INK else KHAKI
+	t1.FontFace = UiKit.F.TITLE
+	t1.TextColor3 = if hot then UiKit.V.TEXT else UiKit.V.KHAKI
 	t1.TextSize = UiKit.text(if hot then 22 else 16)
 	t1.LayoutOrder = 1
 	t1.Parent = fr
 	local t2 = Instance.new("TextLabel")
 	t2.BackgroundTransparency = 1
 	t2.AutomaticSize = Enum.AutomaticSize.XY
-	t2.Font = TYPE
-	t2.TextColor3 = if hot then STAMP else KHAKI
+	t2.Font = Enum.Font.Arimo
+	t2.TextColor3 = UiKit.V.DIM
 	t2.TextSize = UiKit.text(15)
 	t2.LayoutOrder = 2
 	t2.Parent = fr

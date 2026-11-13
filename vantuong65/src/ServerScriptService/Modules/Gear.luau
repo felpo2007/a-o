@@ -25,6 +25,10 @@ local Gear = {}
 
 Gear.STUD_M = 0.28 -- 1 stud = 0,28 m (Units)
 Gear.SMALL = 1.1 -- peças pequenas 10% maiores para lerem à distância
+-- D-98: o soldado é o de 1,75 m ampliado para 2,0 m (Shared/Corpo.K; o teste faca confere que é o
+-- mesmo número). O equipamento em medidas reais cresce junto, para ficar na proporção do corpo.
+-- Fica aqui como número (a parte pura deste módulo carrega no Lune sem o ReplicatedStorage).
+Gear.BODY_K = 2.0 / 1.75
 Gear.MAX_PIECES = 20 -- teto de peças por soldado (60 soldados × 20 = 1.200 Parts no pior caso)
 -- Fração dos bots VC vestidos de guerrilha local (pijama preto). Os jogadores só usam o preto
 -- com o cosmético "vc_black" (ainda não existe no Commerce). 0 desliga.
@@ -190,11 +194,28 @@ end
 --   side: largura da copa / largura da cabeça; brimAt: aba acima do centro da cabeça (× altura);
 --   gap: folga do topo acima da cabeça (× altura). A cabeça do Roblox é um cubo grande: com a
 --   proporção do modelo a aba cairia nos olhos, então a altura é achatada (squash, 0,6 a 1,2).
+-- D-98 ("os capacetes estão bugados, estão pequenos", dono): só pela cabeça, a copa abraçava a
+-- cabeça do "Man" (que é menor que a do bloco) e o casco ficava do tamanho de um boné. Agora o casco
+-- tem no mínimo o tamanho real (widthM × lengthM, largura e comprimento por fora, aba incluída),
+-- ampliado por BODY_K como o resto do corpo:
+--   M1: casco de ~27 × 30 cm (pedido do dono; PLACEHOLDER até a ficha do capacete);
+--   capacete de medula do VC: ~29 × 34 cm (PLACEHOLDER);
+--   chapéu de mato: aba de ~32 × 34 cm (PLACEHOLDER).
 Gear.HEADGEAR = {
-	us_m1_helmet = { side = 1.06, crown = 0.9, brim = 0.42, brimAt = 0.04, gap = 0.06 },
-	vc_pith_helmet = { side = 1.04, crown = 0.62, brim = 0.52, brimAt = 0.1, gap = 0.16 },
-	vc_jungle_hat = { side = 1.03, crown = 0.5, brim = 0.56, brimAt = 0.1, gap = 0.06 },
-} :: { [string]: { side: number, crown: number, brim: number, brimAt: number, gap: number } }
+	us_m1_helmet = { side = 1.06, crown = 0.9, brim = 0.42, brimAt = 0.04, gap = 0.06, widthM = 0.27, lengthM = 0.30 },
+	vc_pith_helmet = { side = 1.04, crown = 0.62, brim = 0.52, brimAt = 0.1, gap = 0.16, widthM = 0.29, lengthM = 0.34 },
+	vc_jungle_hat = { side = 1.03, crown = 0.5, brim = 0.56, brimAt = 0.1, gap = 0.06, widthM = 0.32, lengthM = 0.34 },
+} :: {
+	[string]: {
+		side: number,
+		crown: number,
+		brim: number,
+		brimAt: number,
+		gap: number,
+		widthM: number,
+		lengthM: number,
+	},
+}
 
 -- Colete M1955 sobre o UpperTorso: largura, profundidade e altura relativas ao tronco.
 Gear.VEST = { width = 1.08, depth = 1.3, height = 1.06, lift = 0.03 }
@@ -214,13 +235,17 @@ function Gear.headgearFit(key: string, head: Vec, native: Vec): Fit?
 	if not c or native.x <= 0 or native.y <= 0 or native.z <= 0 then
 		return nil
 	end
-	local k = c.side * head.x / (native.z * c.crown)
+	-- pela cabeça (copa um pouco mais larga que ela) ou pelo tamanho real do casco, o que for maior
+	local wantW = c.widthM * Gear.BODY_K / Gear.STUD_M
+	local wantL = c.lengthM * Gear.BODY_K / Gear.STUD_M
+	local k = math.max(c.side * head.x / (native.z * c.crown), wantW / native.z)
 	local brimY = c.brimAt * head.y
 	local wantTop = head.y / 2 + c.gap * head.y
 	local squash = clamp((wantTop - brimY) / ((1 - c.brim) * native.y * k), 0.6, 1.2)
 	local sy = native.y * k * squash
 	local sz = native.z * k
-	local sx = math.max(native.x * k, head.z * 1.04) -- cobre a cabeça de frente a trás
+	-- de frente a trás: o comprimento real e, no mínimo, a cabeça inteira
+	local sx = math.max(native.x * k, wantL, head.z * 1.04)
 	local offsetY = brimY + (0.5 - c.brim) * sy
 	return {
 		size = vec(sx, sy, sz),
@@ -369,7 +394,7 @@ local C = {
 
 -- metros reais -> studs (k: fator de leitura; 1 para as peças grandes)
 local function m(meters: number, k: number?): number
-	return meters / Gear.STUD_M * (k or Gear.SMALL)
+	return meters / Gear.STUD_M * (k or Gear.SMALL) * Gear.BODY_K -- D-98: na escala do corpo
 end
 
 function Gear.layout(faction: string, items: { string }, env: Env): { Piece }

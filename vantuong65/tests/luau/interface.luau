@@ -316,6 +316,119 @@ test("inserção: câmera nivelada (−5° a 0°) em tween curto, antes do voo, 
 	assert(math.abs(last - pT) < 1e-9)
 end)
 
+-- ===== estilo novo (2026-11-11: "não gosto dessa escrita no papel e dessa ideia") =====
+local REDONE = {
+	"src/ReplicatedFirst/LoadingScreen.client.luau",
+	"src/ReplicatedFirst/Idioma.luau",
+	C .. "CasualtyScreen.luau",
+	C .. "DeployScreen.luau",
+	C .. "LobbyScene.luau",
+	C .. "CartaView.luau",
+	C .. "GameUI.client.luau",
+	C .. "SpawnTransition.luau",
+	C .. "GameMenu.client.luau",
+	C .. "ShopController.client.luau",
+	C .. "Progresso.client.luau",
+	C .. "FrontHud.client.luau",
+	C .. "AfterActionController.client.luau",
+	C .. "CommanderController.client.luau",
+}
+test("estilo novo: nenhuma tela refeita usa máquina de escrever, fonte Code ou texto datilografado", function()
+	local bad = {}
+	for _, f in REDONE do
+		for n, l in string.split(fs.readFile(f), "\n") do
+			local code = string.gsub(l, "%-%-.*$", "")
+			for _, w in { "SpecialElite", "TYPE_OLD", "datilografar", "Enum.Font.Code", "PatrickHand" } do
+				if string.find(code, w, 1, true) then
+					table.insert(bad, string.format("%s:%d (%s)", f, n, w))
+				end
+			end
+		end
+	end
+	assert(#bad == 0, table.concat(bad, ", "))
+end)
+
+test("estilo novo: tokens e peças num lugar só (Estilo no ReplicatedFirst, reexportado pelo UiKit)", function()
+	local est = fs.readFile("src/ReplicatedFirst/Estilo.luau")
+	for _, k in { "BG", "PANEL", "TEXT", "DIM", "OLIVE", "KHAKI", "RED" } do
+		assert(string.find(est, "\n\t" .. k .. " = Color3", 1, true), "Estilo.V." .. k)
+	end
+	assert(string.find(est, 'Font.fromName("Oswald"', 1, true) and string.find(est, "Enum.Font.Arimo", 1, true))
+	local kit = fs.readFile(C .. "UiKit.luau")
+	for _, k in { "panel", "title", "titleBox", "statRow", "itemCard", "backdrop" } do
+		assert(string.find(kit, string.format("UiKit.%s = Estilo.%s", k, k), 1, true), "UiKit." .. k)
+	end
+	assert(string.find(kit, "function UiKit.action(", 1, true), "botão com entrada")
+	-- cada tela refeita usa o estilo (UiKit.V/F ou o Estilo direto, no ReplicatedFirst)
+	for _, f in REDONE do
+		local src = fs.readFile(f)
+		assert(
+			string.find(src, "UiKit.V", 1, true) or string.find(src, "Estilo", 1, true),
+			f .. " não usa o estilo novo"
+		)
+	end
+end)
+
+test("idioma: bandeiras desenhadas (sem imagem) para PT, EN, ES, VI e o globo do automático", function()
+	local src = fs.readFile("src/ReplicatedFirst/Bandeiras.luau")
+	for _, c in { "pt", "en", "es", "vi", "auto" } do
+		assert(string.find(src, '"' .. c .. '"', 1, true) or string.find(src, c .. " =", 1, true), "bandeira " .. c)
+	end
+	assert(not string.find(src, "rbxassetid://", 1, true), "bandeira com imagem")
+	assert(string.find(src, "UIGradient", 1, true), "desenho com UIGradient")
+	assert(
+		string.find(fs.readFile("src/ReplicatedFirst/Idioma.luau"), "Bandeiras", 1, true),
+		"o cartão usa as bandeiras"
+	)
+end)
+
+test("carregamento: pré-carga de verdade (sons, animações, arte) e ENTRAR só no fim, com teto", function()
+	local src = fs.readFile("src/ReplicatedFirst/LoadingScreen.client.luau")
+	assert(string.find(src, "PreloadAsync", 1, true), "PreloadAsync")
+	assert(string.find(src, "Sounds", 1, true), "sons do AssetIds")
+	assert(string.find(src, "SoldierAnims", 1, true), "animações")
+	assert(string.find(src, "90", 1, true), "teto de segurança de ~90 s")
+end)
+
+test("carta: túneis só para o VC e pontos do squad (kind = squad)", function()
+	local src = fs.readFile(C .. "CartaView.luau")
+	assert(string.find(src, "TunnelLinks", 1, true), "rede de túneis")
+	assert(string.find(src, '"VC"', 1, true), "túneis condicionados ao lado VC")
+	assert(string.find(src, '"squad"', 1, true), "pontos de nascer no squad")
+end)
+
+test("baixa: renascer, renascer aqui (créditos e Robux) e voltar, com o motivo do bloqueio", function()
+	local src = fs.readFile(C .. "CasualtyScreen.luau")
+	assert(string.find(src, '"RENASCER"', 1, true), "RENASCER")
+	assert(string.find(src, '"inplace", "robux"', 1, true), "Robux pelo servidor (que abre a compra)")
+	assert(string.find(src, '"NO MESMO LUGAR"', 1, true), "linha do mesmo lugar")
+	assert(string.find(src, "SoldierPreview", 1, true), "o próprio soldado")
+end)
+
+-- ===== roda: fica aberta enquanto o botão estiver seguro (o dono: "a tela some muito rápido") =====
+test("roda: o contexto da roda solta o botão que a abriu; a soltura física é que confirma", function()
+	-- a causa: no contexto "wheel" a ação que abriu a roda não existe, então o Input a solta na hora
+	local opener = {}
+	for _, a in InputMap.ACTIONS do
+		if a.id == "equip_wheel" or a.id == "comm_wheel" then
+			table.insert(opener, a)
+		end
+	end
+	assert(#opener >= 2, "ações das rodas")
+	assert(not InputMap.survives(opener, "wheel"), "se sobrevivesse, o holdEnd falso não existiria")
+	-- a correção: a roda sabe quem a abriu e quem chama ignora o holdEnd com o botão ainda apertado
+	local wheel = fs.readFile(C .. "Wheel.luau")
+	assert(string.find(wheel, "function Wheel.heldDown", 1, true), "Wheel.heldDown")
+	assert(string.find(wheel, "InputEnded", 1, true) and string.find(wheel, 'Bus.fire("wheel_confirm")', 1, true))
+	local inf = fs.readFile(C .. "InfantryController.client.luau")
+	assert(
+		string.find(inf, '"equip_wheel")', 1, true) and string.find(inf, '"comm_wheel"', 1, true),
+		"abre dizendo quem segura"
+	)
+	local _, guards = string.gsub(inf, "and not Wheel%.heldDown%(%)", "")
+	assert(guards >= 2, "os dois holdEnd ignoram a soltura falsa")
+end)
+
 -- ===== menos texto: 1ª frase e o resto, sem quebrar o RichText =====
 local Texto = require("../../" .. C .. "Texto")
 test("menos texto: a 1ª frase sai inteira, com o botão em RichText", function()

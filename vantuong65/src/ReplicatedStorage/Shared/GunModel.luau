@@ -19,6 +19,8 @@ local LENGTH_M: { [string]: number } = {
 	m1911 = 0.216,
 	type54 = 0.196,
 	rpg2 = 0.95,
+	m70 = 1.13, -- Winchester M70 de cano de 24 pol. (tools/blender/armas.py; total PLACEHOLDER)
+	mosin = 1.232, -- Mosin-Nagant 91/30 (wiki)
 }
 local WOOD = Color3.fromRGB(96, 66, 42)
 local STEEL = Color3.fromRGB(44, 45, 47)

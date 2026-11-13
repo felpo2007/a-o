@@ -28,6 +28,7 @@ local Kit = require(ReplicatedStorage.Shared.Kit)
 local Movement = require(ReplicatedStorage.Shared.Movement)
 local Net = require(ReplicatedStorage.Shared.Net)
 local SoldierAnims = require(ReplicatedStorage.Shared.SoldierAnims)
+local Vantagens = require(ReplicatedStorage.Shared.Vantagens)
 local Weapons = require(ReplicatedStorage.Shared.Weapons)
 local Bus = require(script.Parent.Bus)
 local Input = require(script.Parent.Input)
@@ -36,8 +37,14 @@ local ViewMode = require(script.Parent.ViewMode)
 local player = Players.LocalPlayer
 local camera = workspace.CurrentCamera
 local M = Movement.STUD_M
-local PRONE_EYE = -1.6 -- studs: câmera de quem está de bruços (~0,3 m do chão; antes no InfantryController)
-local LEAN = 0.35 / M -- inclinar: câmera 0,35 m para o lado (D-42)
+-- D-98 (soldado de 2,0 m, Movement.BODY_K): o olho da câmera do Roblox é HipHeight + HRP + 0,5 stud;
+-- o HipHeight e a HRP crescem com o corpo, os 0,5 não. EYE_FIX devolve 0,5 × (K − 1) (2 cm) para o
+-- olho ficar onde ficaria no corpo ampliado por igual; deitado e inclinado também vão vezes K.
+local BODY_K = Movement.BODY_K
+local EYE_FIX = 0.5 * (BODY_K - 1)
+local PRONE_EYE = -1.6 * BODY_K -- studs: câmera de quem está de bruços (antes no InfantryController)
+-- inclinar (D-99, modelo do Front 44): Controllers/Inclinar (teclas, colisão, giro, servidor)
+local Inclinar = require(script.Parent.Inclinar)
 local SWIMMING = Enum.HumanoidStateType.Swimming
 
 -- ===== estado =====
@@ -394,6 +401,7 @@ Input.setMoveFilter(function(vec: Vector3, rel: boolean): (Vector3, boolean)
 		swimming = swimming,
 		faction = myFaction(),
 		groundK = probe.groundK,
+		perkSpeed = Vantagens.mult(player, "speed"), -- D-99: o servidor usa o mesmo (MedicalService)
 	})
 	if now < slow.untilT then
 		-- aterrissagem forte: volta ao normal ao longo do tempo
@@ -456,7 +464,8 @@ local function isCharacter(inst: Instance): boolean
 	return model ~= nil and model:FindFirstChildOfClass("Humanoid") ~= nil
 end
 
-local VAULT_LIFT = 2.2 -- studs do topo até o centro do HumanoidRootPart (só tronco e cabeça colidem)
+-- studs do topo até o centro do HumanoidRootPart (só tronco e cabeça colidem); D-98: × K
+local VAULT_LIFT = 2.2 * BODY_K
 
 local function probeVault(char: Model, hum: Humanoid, root: BasePart): (Movement.VaultPlan?, VaultRun?)
 	vaultParams.FilterDescendantsInstances = ignoreList(char)
@@ -508,8 +517,10 @@ local function probeVault(char: Model, hum: Humanoid, root: BasePart): (Movement
 	local h = (topY - feetY) * M
 	probeT.height = h
 	-- espaço: para cima a partir do topo, e para a frente na altura em que o corpo passa
-	local upR = workspace:Raycast(top.Position + up * 0.05, up * (2 / M), vaultParams)
-	probeT.headroom = if upR then (upR.Position.Y - topY) * M else 2
+	-- D-98: o raio vai além do espaço para ficar de pé em cima (2,06 m no soldado de 2 m)
+	local reachUp = math.max(2, Movement.MANTLE_HEADROOM_M + 0.2)
+	local upR = workspace:Raycast(top.Position + up * 0.05, up * (reachUp / M), vaultParams)
+	probeT.headroom = if upR then (upR.Position.Y - topY) * M else reachUp
 	local pass = Vector3.new(root.Position.X, topY + 0.45 / M, root.Position.Z)
 	local passR = workspace:Raycast(pass, fwd * (face + 1.2 / M), vaultParams)
 	probeT.clearance = if passR then math.min(probeT.headroom, 0.3) else probeT.headroom
@@ -881,11 +892,13 @@ RunService:BindToRenderStep("VT65MoveCamera", Enum.RenderPriority.Camera.Value -
 	local char, hum, root = body()
 	if not (char and hum and root) then
 		camState.roll = 0
+		Inclinar.reset()
 		return
 	end
 	local c, h, r = char :: Model, hum :: Humanoid, root :: BasePart
 	if h.SeatPart ~= nil then
 		camState.roll, camState.lastY = 0, nil
+		Inclinar.reset()
 		if h.CameraOffset ~= Vector3.zero then
 			h.CameraOffset = Vector3.zero -- veículo: como antes (sem inclinar nem deitar)
 		end
@@ -894,8 +907,6 @@ RunService:BindToRenderStep("VT65MoveCamera", Enum.RenderPriority.Camera.Value -
 	local now = os.clock()
 	local st = stanceOf(c)
 	local comp, extra = stanceCamera(st, h.HipHeight, r, now)
-	-- inclinar (só mirando, Input.state.lean), suave
-	camState.lean += (Input.state.lean * LEAN - camState.lean) * (1 - math.exp(-dt / 0.1))
 	local state = h:GetState()
 	local grounded = h.FloorMaterial ~= Enum.Material.Air
 	local swim = state == SWIMMING
@@ -942,11 +953,11 @@ RunService:BindToRenderStep("VT65MoveCamera", Enum.RenderPriority.Camera.Value -
 	local rollT = if quiet then 0 else Movement.rollTarget((vel * M):Dot(right), aR, st, aiming) * sk
 	camState.roll = Movement.approach(camState.roll, rollT, Movement.ROLL.tau, dt)
 	-- deslocamento no rumo do corpo (x direita, y cima, z para trás), em studs
-	local offset = Vector3.new(
-		camState.lean + (bx * sk + camState.head.x * scale) / M,
-		comp + extra + (by * sk + camState.stepOff) / M,
-		-camState.head.z * scale / M
-	)
+	local oy = comp + extra + EYE_FIX + (by * sk + camState.stepOff) / M
+	-- inclinar (D-99, Front 44): a qualquer hora a pé; o espaço é medido do olho sem inclinar
+	camState.lean = Inclinar.step(dt, c, h, r, st, quiet, Vector3.new(0, headOffsetY(h, r) + oy, 0))
+	local offset =
+		Vector3.new(camState.lean + (bx * sk + camState.head.x * scale) / M, oy, -camState.head.z * scale / M)
 	-- a HumanoidRootPart inclinada (nadando): o olho fica em pé acima dela
 	if r.CFrame.UpVector.Y < 0.995 then
 		local H = Vector3.new(0, headOffsetY(h, r), 0)
@@ -961,7 +972,8 @@ end)
 -- inclinação lateral DEPOIS do módulo de câmera, do CameraLook e da 3ª pessoa: só gira em volta da
 -- linha de visada (a mira e a direção do tiro não mudam); desfeita no começo do quadro seguinte
 RunService:BindToRenderStep("VT65MoveRoll", Enum.RenderPriority.Camera.Value + 3, function()
-	local a = camState.roll
+	-- D-99: mais o giro do inclinar (14° no inclinar inteiro, como no Front 44)
+	local a = camState.roll + Inclinar.state.roll
 	if math.abs(a) < 1e-5 or camera.CameraType ~= Enum.CameraType.Custom then
 		return
 	end

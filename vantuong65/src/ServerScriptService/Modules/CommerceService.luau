@@ -11,7 +11,9 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Commerce = require(ReplicatedStorage.Shared.Commerce)
 local Net = require(ReplicatedStorage.Shared.Net)
+local Reforcos = require(ReplicatedStorage.Shared.Reforcos)
 local Skins = require(ReplicatedStorage.Shared.Skins)
+local Temporada = require(ReplicatedStorage.Shared.Temporada)
 local PlayerData = require(script.Parent.PlayerData)
 
 local CommerceService = {}
@@ -26,6 +28,10 @@ CommerceService.onGrant = nil :: ((player: Player, grants: string, now: boolean)
 CommerceService.onRefresh = nil :: ((player: Player) -> ())?
 -- skin recebida por Robux (recibo de Developer Product ou compra de Game Pass); `now` = agora
 CommerceService.onSkin = nil :: ((player: Player, skinId: string, now: boolean) -> ())?
+-- campanha (2026-11-12): posse dos passes relida (Veterano, Recruta, vantagens) e produto da
+-- campanha entregue (pular nível, reforço, créditos); postos pelo CampanhaService
+CommerceService.onPasses = nil :: ((player: Player) -> ())?
+CommerceService.onCampaign = nil :: ((player: Player, key: string, now: boolean) -> ())?
 
 local function passOwned(player: Player, id: number): boolean
 	if id == 0 then
@@ -88,6 +94,10 @@ function CommerceService.refresh(player: Player)
 	for _, key in Skins.passKeys() do
 		passes[key] = passOwned(player, Skins.IDS[key] or 0)
 	end
+	-- campanha: passe da temporada, Pacote de Recruta e vantagens
+	for _, pass in Commerce.CampaignPasses do
+		passes[pass.key] = passOwned(player, (Commerce.IDS :: any)[pass.key] or 0)
+	end
 	local bought = boughtPasses[player]
 	if bought then
 		for key in bought do
@@ -114,6 +124,9 @@ function CommerceService.refresh(player: Player)
 	push(player)
 	if CommerceService.onRefresh then
 		task.spawn(CommerceService.onRefresh, player)
+	end
+	if CommerceService.onPasses then
+		task.spawn(CommerceService.onPasses, player)
 	end
 end
 
@@ -163,12 +176,66 @@ local function skinReceipt(player: Player, info: { [string]: any }, skinId: stri
 	return Enum.ProductPurchaseDecision.PurchaseGranted
 end
 
+-- Produto da campanha num perfil (gravado ou em memória). Estrelas e reforços se juntam por máximo
+-- entre servidores (ProfileSchema.mergeCampaign): aplicar no gravado e na memória não dá em dobro.
+-- Créditos só no gravado (a memória anda junto pelo PlayerData.bump).
+function CommerceService.applyCampaignGrant(p: any, cp: Commerce.CampaignProduct, now: number)
+	local c = p.campaign
+	if cp.grants == "season_skip" then
+		c.season.stars += Temporada.skipStars(c.season.stars)
+	elseif cp.grants == "boost_xp" then
+		Reforcos.extend(c.boosts, "xp", cp.amount or 0, now)
+	elseif cp.grants == "boost_cr" then
+		Reforcos.extend(c.boosts, "cr", cp.amount or 0, now)
+	elseif cp.grants == "credits" then
+		p.credits = math.min(p.credits + (cp.amount or 0), 1000000000)
+	end
+end
+
+-- Recibo de produto da campanha: uma única vez por PurchaseId (gravação atômica), como os outros.
+local function campaignReceipt(
+	player: Player,
+	info: { [string]: any },
+	cp: Commerce.CampaignProduct
+): Enum.ProductPurchaseDecision
+	local now = os.time()
+	local ok, applied = PlayerData.applyReceipt(player, tostring(info.PurchaseId), function(p)
+		CommerceService.applyCampaignGrant(p, cp, now)
+	end)
+	if not ok then
+		return Enum.ProductPurchaseDecision.NotProcessedYet
+	end
+	if applied then
+		if cp.grants == "credits" then
+			PlayerData.bump(player, "credits", cp.amount or 0)
+		else
+			local mem = PlayerData.get(player)
+			if mem then
+				CommerceService.applyCampaignGrant(mem, cp, now)
+			end
+		end
+	end
+	if CommerceService.onCampaign then
+		task.spawn(CommerceService.onCampaign, player, cp.key, applied)
+	end
+	track(player, "purchase", cp.key)
+	pcall(function()
+		AnalyticsService:LogCustomEvent(player, "robux_spent", tonumber(info.CurrencySpent) or 0, { sku = cp.key })
+	end)
+	push(player)
+	return Enum.ProductPurchaseDecision.PurchaseGranted
+end
+
 local function processReceipt(info: { [string]: any }): Enum.ProductPurchaseDecision
 	local player = Players:GetPlayerByUserId(info.PlayerId)
 	if not player or not PlayerData.get(player) then
 		return Enum.ProductPurchaseDecision.NotProcessedYet
 	end
 	local key = Commerce.productKeyById(info.ProductId)
+	local cp = if key then Commerce.campaignProduct(key) else nil
+	if cp then
+		return campaignReceipt(player, info, cp)
+	end
 	if not key then
 		local skinId = Skins.skinByProductId(info.ProductId)
 		if skinId then

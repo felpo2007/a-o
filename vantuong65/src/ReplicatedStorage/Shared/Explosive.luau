@@ -4,6 +4,18 @@
 -- reduzindo a exposição) é o que importa para o jogo e fica travado em teste.
 local Explosive = {}
 
+-- Incendiário (2026-11-12, napalm do ataque aéreo do A-4): mancha de fogo em elipse no chão, ao longo
+-- do rumo do avião, que queima durationS. Quem fica dentro acumula exposição: a 1ª vez se queima
+-- (ferimento), e com lethalS acumulados cai. A borda (fora da elipse até edgeM) só queima.
+export type Burn = {
+	lengthM: number, -- comprimento da mancha (ao longo do rumo)
+	widthM: number,
+	durationS: number,
+	lethalS: number, -- exposição acumulada dentro da mancha que incapacita
+	edgeM: number, -- faixa em volta que queima sem matar
+	burnJ: number, -- energia do ferimento de queimadura (J), como a de um estilhaço
+}
+
 export type Type = {
 	id: string,
 	name: string,
@@ -12,6 +24,7 @@ export type Type = {
 	craterM: number, -- raio da cratera no terreno (0 = sem cratera)
 	fragJ: number, -- energia típica de um fragmento que fere (J)
 	src: string,
+	burn: Burn?,
 }
 
 Explosive.TYPES = {
@@ -105,7 +118,47 @@ Explosive.TYPES = {
 		fragJ = 550,
 		src = "PLACEHOLDER",
 	},
+	-- bomba incendiária (napalm) do A-4: quase sem sopro; o dano é o fogo (Explosive.burnAt)
+	napalm = {
+		id = "napalm",
+		name = "bomba incendiária (napalm)",
+		lethalM = 0,
+		casualtyM = 0,
+		craterM = 0,
+		fragJ = 0,
+		src = "PLACEHOLDER (mancha, duração e exposição: números de jogo, sem ficha)",
+		burn = { lengthM = 70, widthM = 22, durationS = 25, lethalS = 2.0, edgeM = 6, burnJ = 600 },
+	},
 } :: { [string]: Type }
+
+-- Fogo da mancha num ponto: "core" (dentro da elipse), "edge" (na faixa da borda) ou nil.
+-- dx, dz: posição relativa ao centro (m); hx, hz: rumo do avião (unitário no plano).
+function Explosive.burnAt(b: Burn, dx: number, dz: number, hx: number, hz: number): string?
+	local along = dx * hx + dz * hz
+	local across = -dx * hz + dz * hx
+	local a, c = b.lengthM / 2, b.widthM / 2
+	local q = (along / a) ^ 2 + (across / c) ^ 2
+	if q <= 1 then
+		return "core"
+	end
+	local qe = (along / (a + b.edgeM)) ^ 2 + (across / (c + b.edgeM)) ^ 2
+	return if qe <= 1 then "edge" else nil
+end
+
+-- Exposição acumulada (s) -> o que acontece agora: "burn" (1ª queimadura), "lethal" ou nil.
+-- already: o que já aconteceu com este corpo nesta mancha ("burn" | "lethal" | nil).
+function Explosive.burnStep(b: Burn, zone: string?, exposedS: number, already: string?): string?
+	if not zone or already == "lethal" then
+		return nil
+	end
+	if zone == "core" and exposedS >= b.lethalS then
+		return "lethal"
+	end
+	if already == nil then
+		return "burn"
+	end
+	return nil
+end
 
 -- Exposição: 1 em pé e à vista; postura e cobertura reduzem (fatores de design).
 Explosive.CROUCH = 0.6

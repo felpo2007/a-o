@@ -19,6 +19,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
 local KnifeModel = require(ReplicatedStorage.Shared.KnifeModel)
+local Corpo = require(ReplicatedStorage.Shared.Corpo)
 local Melee = require(ReplicatedStorage.Shared.Melee)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Rng = require(ReplicatedStorage.Shared.Rng)
@@ -205,7 +206,8 @@ local function setHandKnife(model: Model, on: boolean)
 	end
 	local knife = k :: Model
 	knife.Name = "FacaMao"
-	knife:PivotTo(hand.CFrame * CFrame.new(0, Melee.HAND_GRIP_Y, 0))
+	-- D-98: a mão do soldado de 2 m é K vezes maior; o punho da faca desce junto
+	knife:PivotTo(hand.CFrame * CFrame.new(0, Melee.HAND_GRIP_Y * Corpo.K, 0))
 	KnifeModel.weld(knife)
 	local w = Instance.new("WeldConstraint")
 	local kp = knife.PrimaryPart :: BasePart
@@ -555,7 +557,11 @@ local function devHook()
 		elseif arg == "sprint" then
 			PostureService.setStance(d, "stand")
 			d:SetAttribute("Sprinting", true)
+		elseif arg == "carta" then
+			-- D-98: o boneco abre a carta (a pose que os outros veem)
+			d:SetAttribute("Carta", if d:GetAttribute("Carta") then nil else true)
 		else
+			d:SetAttribute("Carta", nil)
 			PostureService.setStance(d, arg)
 		end
 	elseif cmd == "arma" and Weapons.get(arg) then

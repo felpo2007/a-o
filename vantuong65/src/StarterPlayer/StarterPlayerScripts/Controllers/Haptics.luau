@@ -149,7 +149,8 @@ Net.unreliable("Fire_Impact").OnClientEvent:Connect(function(e)
 	end
 end)
 Net.event("Medical_State").OnClientEvent:Connect(function(st)
-	heartbeatOn = (type(st.bleed) == "number" and st.bleed >= 1.5) or player:GetAttribute("Downed") == true
+	-- D-99: com o sangramento ~5x mais lento, o coração bate com ferimento arterial ou caído
+	heartbeatOn = st.arterial == true or player:GetAttribute("Downed") == true
 end)
 
 -- veículo: motor constante e suave; helicóptero transmite o ritmo do rotor

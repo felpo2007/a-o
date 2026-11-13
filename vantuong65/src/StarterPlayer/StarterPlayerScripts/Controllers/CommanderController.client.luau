@@ -24,9 +24,12 @@ gui.Enabled = false
 local frame = Instance.new("Frame")
 frame.Size = UDim2.fromOffset(if UiKit.tv() then 540 else 440, if UiKit.tv() then 520 else 420)
 frame.Position = UDim2.new(1, if UiKit.tv() then -560 else -460, 0.5, -210)
-frame.BackgroundColor3 = Color3.fromRGB(46, 44, 34)
-frame.BackgroundTransparency = 0.1
+-- estilo novo (UiKit.V): painel escuro com filete, texto em Arimo (sem a fonte Code)
+frame.BackgroundColor3 = UiKit.V.PANEL
+frame.BackgroundTransparency = 0.06
 frame.Parent = gui
+UiKit.corner(frame, 4)
+UiKit.edge(frame, UiKit.V.LINE, 1, 0.5)
 local layout = Instance.new("UIListLayout")
 layout.Padding = UDim.new(0, 6)
 layout.SortOrder = Enum.SortOrder.LayoutOrder
@@ -39,8 +42,8 @@ local function text(t: string, h: number, order: number): TextLabel
 	local l = Instance.new("TextLabel")
 	l.Size = UDim2.new(1, 0, 0, h)
 	l.BackgroundTransparency = 1
-	l.TextColor3 = Color3.fromRGB(235, 228, 200)
-	l.Font = Enum.Font.Code
+	l.TextColor3 = UiKit.V.TEXT
+	l.Font = Enum.Font.Arimo
 	l.TextSize = UiKit.text(14)
 	l.TextWrapped = true
 	l.TextXAlignment = Enum.TextXAlignment.Left
@@ -54,9 +57,10 @@ local title = text("", 22, 1)
 local myGrid = text("", 20, 2)
 local gridBox = Instance.new("TextBox")
 gridBox.Size = UDim2.new(1, 0, 0, 28)
-gridBox.BackgroundColor3 = Color3.fromRGB(220, 212, 180)
-gridBox.TextColor3 = Color3.fromRGB(20, 20, 16)
-gridBox.Font = Enum.Font.Code
+gridBox.BackgroundColor3 = UiKit.V.PANEL_2
+gridBox.TextColor3 = UiKit.V.TEXT
+gridBox.PlaceholderColor3 = UiKit.V.MUTED
+gridBox.Font = Enum.Font.Arimo
 gridBox.TextSize = UiKit.text(15)
 gridBox.PlaceholderText = "opcional (teclado): grade, ex. BS 7003 9285"
 gridBox.Text = ""

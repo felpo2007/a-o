@@ -20,7 +20,8 @@ Units.Speed = {
 	sprint = 5.5 / Units.STUD_M, -- corrida com fôlego (F2)
 }
 
--- Soldado de 1,75 m = 6,25 studs (prompt, Parte 2)
-Units.SOLDIER_HEIGHT = 1.75 / Units.STUD_M
+-- Soldado de 2,0 m = 7,14 studs (D-98, decisão do dono; era 1,75 m da Parte 2). O mesmo de
+-- Shared/Corpo.HEIGHT_M (aqui sem o require, para não criar ciclo).
+Units.SOLDIER_HEIGHT = 2.0 / Units.STUD_M
 
 return Units

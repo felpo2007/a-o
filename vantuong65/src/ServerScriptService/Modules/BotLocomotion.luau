@@ -79,10 +79,11 @@ export type State = {
 
 local states: { [any]: State } = {}
 
--- Agente do PathfindingService: soldado de 1,75 m (6,25 studs), ombros ~0,45 m
+-- Agente do PathfindingService: soldado de 2,0 m (7,14 studs; D-98, Shared/Corpo), com folga; ombros
+-- ~0,45 m. Era 6,5 studs (corpo de 1,75 m).
 local AGENT = {
 	AgentRadius = 1.6,
-	AgentHeight = 6.5,
+	AgentHeight = 7.3,
 	AgentCanJump = true,
 	AgentCanClimb = false,
 	WaypointSpacing = 6,

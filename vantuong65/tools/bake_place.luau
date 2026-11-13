@@ -29,15 +29,19 @@ local env = {
 	Enum = roblox.Enum,
 }
 local t0 = os.clock()
--- paisagem da D-65: dique, lâmina e sebe de arrozal só na lavoura das vilas e nas clareiras
-local Landscape = require("../src/ServerStorage/VT65Build/Landscape")
-local housesXZ = {}
-for i = 1, #Features.houses, 4 do
-	table.insert(housesXZ, Features.houses[i])
-	table.insert(housesXZ, Features.houses[i + 1])
-end
-local landscape = Landscape.new(world, MapConfig, housesXZ)
-local stats = FeatureBuilder.build(env, Features, MapConfig, world, workspace, landscape)
+-- paisagem da D-65 (dique, lâmina e sebe de arrozal só na lavoura das vilas e nas clareiras) pelo
+-- plano da arte (2026-11-12): a mesma do servidor, com a vila grande e as lâminas que ficaram; o
+-- dique é marcador invisível só onde encosta num tabuleiro (a lombada é do terreno)
+local ArtPlan = (require :: any)("../src/ServerScriptService/Modules/ArtPlan")
+local ctx = ArtPlan.load(world, {
+	features = Features,
+	village = (require :: any)("../src/ServerStorage/VT65Build/Data/Village"),
+	roads = (require :: any)("../src/ServerStorage/VT65Build/Data/Roads"),
+	mapConfig = MapConfig,
+})
+local stats = FeatureBuilder.build(env, Features, MapConfig, world, workspace, ctx.landscape, function(x1, z1, x2, z2)
+	return ArtPlan.dikeKept(ctx.paddies, x1, z1, x2, z2)
+end)
 local TunnelGeometry = require("../src/ServerStorage/VT65Build/TunnelGeometry")
 local Tunnels = require("../src/ReplicatedStorage/Shared/Tunnels")
 local cx, cz = 0, 0

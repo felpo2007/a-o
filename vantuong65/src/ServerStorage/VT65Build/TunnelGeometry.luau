@@ -6,6 +6,17 @@ local TunnelGeometry = {}
 
 local M = 0.28
 
+-- D-98 (soldado de 2,0 m): o poço de 0,6 m (Tunnels.SHAFT_M) não cabia a HumanoidRootPart do corpo
+-- novo (0,64 × 0,32 m) ao lado da escada (TrussPart de 2 studs = 0,56 m, a menor que o Roblox faz).
+-- O poço passa a ter no mínimo 1,0 m por dentro, com a escada encostada na parede norte: sobram
+-- 0,44 m de fundo e 1,0 m de largura para o corpo subir e descer. O túnel (1,0 × 1,2 m) não muda:
+-- o soldado de 2 m passa nele deitado, rastejando (de pé ou agachado a cabeça e a HRP batem no
+-- teto; o TunnelService deita quem entra no túnel e o PostureService não deixa levantar lá).
+TunnelGeometry.SHAFT_MIN_M = 1.0
+function TunnelGeometry.shaftM(Tunnels: any): number
+	return math.max(Tunnels.SHAFT_M, TunnelGeometry.SHAFT_MIN_M)
+end
+
 export type Box = { cf: any, size: any, kind: string, name: string }
 
 -- center: posição (studs) do centro de An Cường (2); heightAt: altura do chão (studs) em (x, z)
@@ -19,7 +30,7 @@ function TunnelGeometry.build(
 	local V, CF = env.Vector3, env.CFrame
 	local W, H = Tunnels.WIDTH_M / M, Tunnels.HEIGHT_M / M
 	local DEPTH = Tunnels.DEPTH_M / M
-	local S = Tunnels.SHAFT_M / M
+	local S = TunnelGeometry.shaftM(Tunnels) / M
 	local T = 1 -- espessura do forro (studs)
 	local boxes: { Box } = {}
 	local function floorAt(name: string): any
@@ -66,7 +77,8 @@ function TunnelGeometry.build(
 			local top = heightAt(x, z)
 			local h = top - f.Y + 0.5
 			local mid = CF.new(x, f.Y + h / 2, z)
-			table.insert(boxes, { cf = mid, size = V.new(4.5, h + 2, 4.5), kind = "carve", name = "Shaft_" .. name })
+			local cw = math.max(4.5, S + 2)
+			table.insert(boxes, { cf = mid, size = V.new(cw, h + 2, cw), kind = "carve", name = "Shaft_" .. name })
 			for _, o in
 				{
 					{ S / 2 + 0.5, 0, 1, S + 2 },
@@ -85,10 +97,13 @@ function TunnelGeometry.build(
 					name = "Shaft_" .. name,
 				})
 			end
-			table.insert(
-				boxes,
-				{ cf = CF.new(x, f.Y + h / 2, z), size = V.new(2, h, 2), kind = "truss", name = "Shaft_" .. name }
-			)
+			-- escada encostada na parede norte (−z), não no meio: o corpo sobe ao lado dela
+			table.insert(boxes, {
+				cf = CF.new(x, f.Y + h / 2, z - (S / 2 - 1)),
+				size = V.new(2, h, 2),
+				kind = "truss",
+				name = "Shaft_" .. name,
+			})
 			table.insert(
 				boxes,
 				{ cf = CF.new(x, top + 0.1, z), size = V.new(S + 2, 0.2, S + 2), kind = "entrance", name = name }

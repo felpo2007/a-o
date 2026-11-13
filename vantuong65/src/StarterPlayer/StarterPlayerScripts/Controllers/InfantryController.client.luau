@@ -208,60 +208,19 @@ Net.event("Squad_Message").OnClientEvent:Connect(function(m)
 		Color3.fromRGB(220, 235, 200)
 	)
 end)
+-- O marcador no mundo é do Marcadores (2026-11-11: as marcas iguais se juntam e as próximas não se
+-- empilham; aqui cada marca criava o seu e a mesma área saía repetida). Aqui fica só a linha no feed.
 Net.event("Squad_Mark").OnClientEvent:Connect(function(m)
-	local a = Instance.new("Part")
-	a.Anchored, a.CanCollide, a.CanQuery, a.CanTouch = true, false, false, false
-	a.Transparency = 1
-	a.Size = Vector3.one
-	a.Position = Vector3.new(m.x, m.y, m.z)
-	local bb = Instance.new("BillboardGui")
-	bb.Size = UDim2.fromOffset(120, 40)
-	bb.AlwaysOnTop = true
-	bb.StudsOffset = Vector3.new(0, 4, 0)
-	local t = Instance.new("TextLabel")
-	t.Size = UDim2.fromScale(1, 1)
-	t.BackgroundTransparency = 1
-	t.TextColor3 = if m.kind == "target" then Color3.fromRGB(255, 120, 90) else Color3.fromRGB(255, 220, 90)
-	t.TextStrokeTransparency = 0.3
-	t.Font = Enum.Font.GothamBold
-	t.TextSize = UiKit.text(16)
-	t.Text = "▼ " .. tostring(m.from)
-	t.Parent = bb
-	bb.Parent = a
-	a.Parent = workspace
-	if m.kind == "target" and type(m.r) == "number" and type(m.ttl) == "number" then
-		-- área aproximada no chão, que esmaece até sumir (Comms.markAlpha)
-		local disc = Instance.new("Part")
-		disc.Shape = Enum.PartType.Cylinder
-		disc.Anchored, disc.CanCollide, disc.CanQuery, disc.CanTouch = true, false, false, false
-		disc.Material = Enum.Material.Neon
-		disc.Color = Color3.fromRGB(255, 120, 90)
-		disc.Size = Vector3.new(0.3, 2 * m.r / M, 2 * m.r / M)
-		disc.CFrame = CFrame.new(m.x, m.y, m.z) * CFrame.Angles(0, 0, math.pi / 2)
-		disc.Parent = a
-		t.Text = string.format("≈ inimigo (±%d m) — %s", math.floor(m.r + 0.5), tostring(m.from))
-		local born = os.clock()
-		task.spawn(function()
-			while a.Parent do
-				local alpha = Comms.markAlpha(os.clock() - born)
-				disc.Transparency = 1 - 0.35 * alpha
-				t.TextTransparency = 1 - alpha
-				if alpha <= 0 then
-					break
-				end
-				task.wait(0.5)
-			end
-			a:Destroy()
-		end)
+	if type(m) ~= "table" or m.leader then
+		return -- a marca do líder avisa pelo Toast (Marcadores)
+	end
+	if m.kind == "target" and type(m.r) == "number" then
 		line(
 			string.format("%s marcou inimigo (área de ±%d m)", m.from, math.floor(m.r + 0.5)),
 			Color3.fromRGB(255, 160, 120)
 		)
 		return
 	end
-	task.delay(10, function()
-		a:Destroy()
-	end)
 	line(string.format("%s marcou um ponto", m.from), Color3.fromRGB(255, 220, 90))
 end)
 
@@ -347,7 +306,7 @@ end
 local wheelOpen: string? = nil
 local function openEquip()
 	wheelOpen = "equip"
-	Wheel.open("equip", "Equipamento", Comms.EQUIP, equipEnabled)
+	Wheel.open("equip", "Equipamento", Comms.EQUIP, equipEnabled, "equip_wheel")
 end
 local function commandAllowed(): boolean
 	return Radio.canTalkToCommand(role(), player:GetAttribute("Radio") == true)
@@ -360,7 +319,8 @@ local function openComm()
 		Comms.COMM,
 		function(id)
 			return id ~= "page_command" or commandAllowed()
-		end
+		end,
+		"comm_wheel"
 	)
 end
 local function confirmWheel()
@@ -392,15 +352,17 @@ local function confirmWheel()
 end
 
 -- segurar abre; soltar confirma. Com "alternar rodas", o toque abre e o próximo toque confirma.
+-- O holdEnd chega também quando a roda abre (o contexto "wheel" solta o botão seguro): com o botão
+-- ainda apertado ele é ignorado, e a soltura de verdade confirma pela própria roda (wheel_confirm).
 Input.on("equip_wheel", "holdStart", openEquip)
 Input.on("equip_wheel", "holdEnd", function()
-	if not Input.settings.wheelToggle and Wheel.isOpen() then
+	if not Input.settings.wheelToggle and Wheel.isOpen() and not Wheel.heldDown() then
 		confirmWheel()
 	end
 end)
 Input.on("comm_wheel", "holdStart", openComm)
 Input.on("comm_wheel", "holdEnd", function()
-	if not Input.settings.wheelToggle and Wheel.isOpen() then
+	if not Input.settings.wheelToggle and Wheel.isOpen() and not Wheel.heldDown() then
 		confirmWheel()
 	end
 end)

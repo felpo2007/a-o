@@ -5,10 +5,12 @@ próprio jogo, exportados pelo Lune
 (tools/carta_dados.luau, que usa WorldData, Landscape, Vegetation e o filtro do FeatureBuilder):
   - sombreado de relevo e curvas de nível com cota;
   - mata (com as manchas de cipó), bosque de vila, baixada com bambu e tràm, clareiras;
-  - arrozal da vila com as lâminas d'água e o traçado dos diques que existem no place;
+  - arrozal da vila com as lâminas d'água e o traçado dos diques que existem no place, e a roça
+    seca onde o arrozal saiu (2026-11-12);
   - casas, sebes de bambu, riacho, trincheira sul de An Cường (2) e cemitério;
-  - trilhas entre as vilas (traçado de DESIGN: caminho de menor custo pelo terreno, sem marca no
-    chão do jogo) e a nota da Rota 523, que passa ao sul, fora da área;
+  - a vila grande Xóm Gò (casas, pagode, casa comunal, becos e o nome) e as estradas de terra
+    batida do jogo (Data/Roads: a principal em traço duplo com miolo, as secundárias em traço
+    duplo tracejado), e a nota da Rota 523, que passa ao sul, fora da área;
   - grade militar de 1 km (quadrado BS) com os números, marcas de 100 m nas bordas, nomes das
     vilas e colinas, cotas, rosa dos ventos e escala gráfica.
 Saída: assets/carta/carta_2048.png (prévia inteira) e 4 blocos de 1024 px (limite de imagem do
@@ -34,7 +36,6 @@ from pathlib import Path
 import numpy as np
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 from scipy import ndimage
-from skimage.graph import MCP_Geometric
 from skimage.measure import find_contours
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -51,7 +52,9 @@ MATA = (196, 214, 166)
 MATA_DENSA = (178, 201, 148)
 BOSQUE = (166, 194, 140)
 LAVOURA = (240, 235, 214)
+ROCA = (236, 226, 196)  # roça seca: o arrozal tirado (capim baixo e terra)
 CLAREIRA = (233, 224, 192)
+ESTRADA = (196, 92, 58)  # miolo da estrada de terra (vermelho-tijolo das cartas do AMS)
 AGUA = (176, 205, 218)
 AGUA_TRACO = (52, 108, 160)
 VERDE_SIMB = (74, 118, 62)
@@ -262,7 +265,8 @@ def tintas(q: Quadro, d: Dados) -> tuple[np.ndarray, dict[int, np.ndarray]]:
     """cor de fundo por paisagem (bordas orgânicas: máscaras suavizadas antes de reamostrar)"""
     L = d.info["landscape"]
     mascaras = {}
-    for k in (L["forest"], L["grove"], L["farm"], L["clear"], L["stream"]):
+    roca = L.get("roca", -1)
+    for k in (L["forest"], L["grove"], L["farm"], L["clear"], L["stream"], roca):
         m = ndimage.gaussian_filter((d.paisagem == k).astype(np.float32), 0.9)
         mascaras[k] = q.amostra(m, N)
     soma = sum(mascaras.values()) + 1e-6
@@ -277,6 +281,7 @@ def tintas(q: Quadro, d: Dados) -> tuple[np.ndarray, dict[int, np.ndarray]]:
         + mascaras[L["farm"]][..., None] * np.array(LAVOURA, np.float32)
         + mascaras[L["clear"]][..., None] * np.array(CLAREIRA, np.float32)
         + mascaras[L["stream"]][..., None] * np.array(MATA, np.float32)
+        + mascaras[roca][..., None] * np.array(ROCA, np.float32)
     )
     return cor, mascaras
 
@@ -368,6 +373,19 @@ def simbolos_area(
                 fill=(*VERDE_ESCURO, 200),
                 width=s,
             )
+    # roça seca: pontilhado ralo (capim baixo e terra)
+    roca = L.get("roca", -1)
+    if roca in mascaras:
+        passo = 11 * s
+        for lin, y in enumerate(range(passo // 2, N, passo)):
+            off = (passo // 2) if lin % 2 else 0
+            for x in range(passo // 2 + off, N, passo):
+                if em(mascaras[roca], x, y) < 0.55:
+                    continue
+                cx, cy = x + rng.uniform(-3, 3) * s, y + rng.uniform(-3, 3) * s
+                dr.ellipse(
+                    [cx - 0.8 * s, cy - 0.8 * s, cx + 0.8 * s, cy + 0.8 * s], fill=(*DIQUE, 150)
+                )
     # bosque de vila: copas redondas
     passo = 13 * s
     for lin, y in enumerate(range(passo // 2, N, passo)):
@@ -508,28 +526,113 @@ def trincheira(q: Quadro, dr: ImageDraw.ImageDraw, d: Dados) -> None:
 
 
 def cemiterio(q: Quadro, cam: Image.Image, d: Dados) -> None:
-    for sp in d.info["strongpoints"]:
-        if sp["name"] == "Cemitério":
-            cx, cy = q.px(sp["x"], sp["z"])
-            dr = ImageDraw.Draw(cam)
-            r = 9 * SS
-            dr.rectangle(
-                [cx - r, cy - r * 0.75, cx + r, cy + r * 0.75], outline=(*PRETO, 255), width=SS
+    # o símbolo da carta de 1965 (deixou de ser ponto forte em 2026-11-12; os túmulos ficam)
+    cem = d.info.get("cemetery")
+    lugares = [cem] if cem else [sp for sp in d.info["strongpoints"] if sp["name"] == "Cemitério"]
+    for sp in lugares:
+        cx, cy = q.px(sp["x"], sp["z"])
+        dr = ImageDraw.Draw(cam)
+        r = 9 * SS
+        dr.rectangle(
+            [cx - r, cy - r * 0.75, cx + r, cy + r * 0.75], outline=(*PRETO, 255), width=SS
+        )
+        for dx in (-4.5, 0, 4.5):
+            x = cx + dx * SS
+            dr.line([(x, cy - 3.6 * SS), (x, cy + 3.6 * SS)], fill=(*PRETO, 255), width=SS)
+            dr.line(
+                [(x - 2 * SS, cy - 1.4 * SS), (x + 2 * SS, cy - 1.4 * SS)],
+                fill=(*PRETO, 255),
+                width=SS,
             )
-            for dx in (-4.5, 0, 4.5):
-                x = cx + dx * SS
-                dr.line([(x, cy - 3.6 * SS), (x, cy + 3.6 * SS)], fill=(*PRETO, 255), width=SS)
-                dr.line(
-                    [(x - 2 * SS, cy - 1.4 * SS), (x + 2 * SS, cy - 1.4 * SS)],
+        cola(
+            cam,
+            texto_img("Cem", F_ITALICO(int(12 * SS)), (*PRETO, 255), (*PAPEL, 230), SS),
+            cx + 22 * SS,
+            cy,
+        )
+
+
+def _ret(
+    q: Quadro, x: float, z: float, yaw: float, w: float, dd: float
+) -> list[tuple[float, float]]:
+    """retângulo girado (studs, giro do Roblox) em pixels"""
+    ca, sa = math.cos(yaw), math.sin(yaw)
+    pts = []
+    for su, sv in ((-1, -1), (1, -1), (1, 1), (-1, 1)):
+        lx, lz = su * w / 2, sv * dd / 2
+        pts.append(q.px(x + lx * ca + lz * sa, z - lx * sa + lz * ca))
+    return pts
+
+
+def estradas(q: Quadro, dr: ImageDraw.ImageDraw, d: Dados) -> None:
+    """estradas de terra do jogo (Data/Roads). Principal e rua da vila: traço duplo com miolo
+    vermelho-tijolo; secundária: traço duplo tracejado (estrada de carro de boi); becos da vila:
+    tracejado fino"""
+    k = q.px_m(1.0)  # px por metro
+    for faixa in ("secundaria", "principal"):
+        for r in d.info.get("roads", []):
+            tipo = "principal" if r["kind"] in ("principal", "rua") else "secundaria"
+            if tipo != faixa:
+                continue
+            pts = [q.px(x, z) for x, z in r["pts"]]
+            larg = max(r["w"] * k * 0.6, 3.5 * SS)  # o símbolo da carta, não a largura real
+            if tipo == "principal":
+                dr.line(pts, fill=(*PRETO, 255), width=int(larg + 2.4 * SS), joint="curve")
+                dr.line(pts, fill=(*ESTRADA, 255), width=int(larg), joint="curve")
+            else:
+                dr.line(pts, fill=(*PAPEL, 255), width=int(larg + 2.4 * SS), joint="curve")
+                for lado in (-1, 1):
+                    off = []
+                    for i, (x, y) in enumerate(pts):
+                        a = pts[max(i - 1, 0)]
+                        b = pts[min(i + 1, len(pts) - 1)]
+                        dx, dy = b[0] - a[0], b[1] - a[1]
+                        n = math.hypot(dx, dy) or 1.0
+                        off.append((x - dy / n * lado * larg / 2, y + dx / n * lado * larg / 2))
+                    tracejado_linha(dr, off, (*PRETO, 235), int(1.4 * SS), 10 * SS, 4 * SS)
+    for a, b in d.info.get("lanes", []):
+        tracejado(dr, q.px(*a), q.px(*b), (*PRETO, 200), max(1, int(0.8 * SS)), 4 * SS, 3 * SS)
+
+
+def vila_grande(q: Quadro, cam: Image.Image, d: Dados) -> None:
+    """casas da vila grande (pegada do plano), pagode e casa comunal (contorno grosso), poço e o
+    nome da vila"""
+    v = d.info.get("village")
+    if not v:
+        return
+    dr = ImageDraw.Draw(cam)
+    for x, z, yaw, w, dd in v["houses"]:
+        dr.polygon(_ret(q, x, z, yaw, w * 1.15, dd * 1.15), fill=(*PRETO, 255))
+    halo = (*PAPEL, 235)
+    for s in v["specials"]:
+        if s["kind"] in ("chua", "dinh"):
+            dr.polygon(_ret(q, s["x"], s["z"], s["yaw"], s["w"], s["d"]), fill=(*PRETO, 255))
+            if s["kind"] == "chua":
+                # pagode: a bandeirola do símbolo de templo
+                cx, cy = q.px(s["x"], s["z"])
+                dr.line([(cx, cy), (cx, cy - 14 * SS)], fill=(*PRETO, 255), width=int(1.4 * SS))
+                dr.polygon(
+                    [(cx, cy - 14 * SS), (cx + 8 * SS, cy - 11 * SS), (cx, cy - 8 * SS)],
                     fill=(*PRETO, 255),
-                    width=SS,
                 )
-            cola(
-                cam,
-                texto_img("Cem", F_ITALICO(int(12 * SS)), (*PRETO, 255), (*PAPEL, 230), SS),
-                cx + 22 * SS,
-                cy,
+                cola(
+                    cam,
+                    texto_img("Chùa", F_ITALICO(int(12 * SS)), (*PRETO, 255), halo, SS),
+                    cx + 26 * SS,
+                    cy - 10 * SS,
+                )
+        elif s["kind"] == "poco":
+            cx, cy = q.px(s["x"], s["z"])
+            dr.ellipse(
+                [cx - 2.5 * SS, cy - 2.5 * SS, cx + 2.5 * SS, cy + 2.5 * SS],
+                outline=(*PRETO, 255),
+                width=SS,
             )
+    # o nome ao lado da vila (a rua corre de norte a sul: o nome fica a oeste das casas)
+    xs = [h[0] for h in v["houses"]]
+    cx, cy = q.px(min(xs) if xs else v["x"], v["z"])
+    im = texto_img(v["name"], F_SANS_B(int(24 * SS)), (*PRETO, 255), halo, 3 * SS)
+    cola(cam, im, cx - im.width / 2 - 26 * SS, cy)
 
 
 def campo(q: Quadro, cam: Image.Image, d: Dados) -> None:
@@ -591,116 +694,6 @@ def tracejado_linha(dr, pts, cor, larg: int, traco: float, vao: float) -> None:
             if resto <= 1e-6:
                 desenhando = not desenhando
                 resto = traco if desenhando else vao
-
-
-# ---------- trilhas (DESIGN) ----------
-def vilas(d: Dados, raio_m: float = 120.0) -> list[tuple[float, float, int]]:
-    """agrupa as casas em vilas (casas a menos de raio_m de outra); devolve (x, z, nº de casas)"""
-    hs = np.array([(x, z) for x, z, _ in d.info["houses"]], dtype=float)
-    n = len(hs)
-    pai = list(range(n))
-
-    def raiz(i: int) -> int:
-        while pai[i] != i:
-            pai[i] = pai[pai[i]]
-            i = pai[i]
-        return i
-
-    lim = raio_m / d.info["studM"]
-    for i in range(n):
-        for j in range(i + 1, n):
-            if np.hypot(*(hs[i] - hs[j])) < lim:
-                pai[raiz(i)] = raiz(j)
-    grupos: dict[int, list[int]] = {}
-    for i in range(n):
-        grupos.setdefault(raiz(i), []).append(i)
-    return [(float(hs[g, 0].mean()), float(hs[g, 1].mean()), len(g)) for g in grupos.values()]
-
-
-def trilhas(q: Quadro, d: Dados) -> list[list[tuple[float, float]]]:
-    """caminho de menor custo entre as vilas e os QGs (lavoura e clareira baratas, mata cara)"""
-    L = d.info["landscape"]
-    custo = np.full(d.paisagem.shape, 5.0, np.float64)
-    custo[d.paisagem == L["farm"]] = 1.0
-    custo[d.paisagem == L["clear"]] = 1.0
-    custo[d.paisagem == L["grove"]] = 1.6
-    custo[d.paisagem == L["stream"]] = 25.0
-    gy, gx = np.gradient(ndimage.gaussian_filter(d.alturas, 1.0), d.cell * q.m)
-    custo *= 1.0 + 14.0 * np.hypot(gx, gy)
-    b = d.info["bounds"]
-    nos = [(x, z) for x, z, n in vilas(d) if n >= 3]
-    for hq in d.info["hq"].values():
-        nos.append((hq["x"], hq["z"]))
-    for loc in d.info["locations"]:
-        if loc["name"] in ("Athletic field", "LZ Blue"):
-            nos.append((loc["x"], loc["z"]))
-    dentro = [
-        (x, z)
-        for x, z in nos
-        if b["minX"] - 50 <= x <= b["maxX"] + 50 and b["minZ"] - 300 <= z <= b["maxZ"] + 300
-    ]
-    # árvore geradora mínima (Prim) + a 2ª ligação mais curta de cada nó: rede com alguns laços
-    n = len(dentro)
-    dist = np.array([[math.dist(a, c) for c in dentro] for a in dentro])
-    usados, arestas = {0}, set()
-    while len(usados) < n:
-        best = None
-        for i in usados:
-            for j in range(n):
-                if j not in usados and (best is None or dist[i, j] < dist[best[0], best[1]]):
-                    best = (i, j)
-        assert best
-        usados.add(best[1])
-        arestas.add(tuple(sorted(best)))
-    for i in range(n):
-        ordem = np.argsort(dist[i])
-        if len(ordem) > 2:
-            j = int(ordem[2])
-            if dist[i, j] < 900 / q.m:
-                arestas.add(tuple(sorted((i, j))))
-
-    def cel(x: float, z: float) -> tuple[int, int]:
-        r, c = q.celula(np.array(x), np.array(z))
-        return int(np.clip(round(float(r)), 0, d.h - 1)), int(np.clip(round(float(c)), 0, d.w - 1))
-
-    caminhos: list[list[tuple[float, float]]] = []
-    caminhos_cel: list[list[tuple[int, int]]] = []
-    trilha = np.zeros(d.paisagem.shape, bool)
-    # as mais curtas primeiro; trilha já traçada fica barata, e a seguinte se junta a ela em vez de
-    # correr paralela a poucos metros
-    for i, j in sorted(arestas, key=lambda e: dist[e[0], e[1]]):
-        a, c = cel(*dentro[i]), cel(*dentro[j])
-        mcp = MCP_Geometric(custo, fully_connected=True)
-        mcp.find_costs([a], [c])
-        rota = mcp.traceback(c)
-        if len(rota) < 4:
-            continue
-        # só os trechos novos (o que já é trilha não se desenha de novo)
-        trechos: list[list[tuple[int, int]]] = [[]]
-        for r, cc in rota:
-            if trilha[r, cc]:
-                if trechos[-1]:
-                    trechos[-1].append((r, cc))
-                    trechos.append([])
-            else:
-                trechos[-1].append((r, cc))
-        for r, cc in rota:
-            custo[r, cc] = min(custo[r, cc], 0.35)
-            trilha[r, cc] = True
-        for t in trechos:
-            if len(t) >= 4:
-                caminhos_cel.append(t)
-    for t in caminhos_cel:
-        pts = np.array([q.de_celula(r, cc) for r, cc in t], dtype=float)
-        # suaviza (média móvel) e simplifica
-        k = 7
-        if len(pts) > k:
-            ker = np.ones(k) / k
-            sx = np.convolve(np.pad(pts[:, 0], k // 2, mode="edge"), ker, mode="valid")
-            sy = np.convolve(np.pad(pts[:, 1], k // 2, mode="edge"), ker, mode="valid")
-            pts = np.column_stack([sx, sy])
-        caminhos.append([tuple(p) for p in pts[::2]] + [tuple(pts[-1])])
-    return caminhos
 
 
 # ---------- grade militar ----------
@@ -1062,9 +1055,9 @@ def main() -> None:
     riachos(q, topo, d)
     dt = ImageDraw.Draw(topo)
     sebes(q, dt, d)
-    for caminho in trilhas(q, d):
-        tracejado_linha(dt, caminho, (*PRETO, 225), int(1.3 * SS), 9 * SS, 5 * SS)
+    estradas(q, dt, d)
     casas(q, dt, d)
+    vila_grande(q, topo, d)
     trincheira(q, dt, d)
     cemiterio(q, topo, d)
     campo(q, topo, d)

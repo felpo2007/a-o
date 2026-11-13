@@ -8,20 +8,25 @@
 --   - FeatureBuilder.mergeDikes e o mesmo filtro de mata do bake (só os diques, lâminas d'água e
 --     sebes que existem no place);
 --   - casas, trincheira sul de An Cường (2) e o MapConfig (limites, grade, locais, setores, QGs).
+-- 2026-11-12: o plano da arte (ArtPlan) dá a paisagem (com a roça seca), os diques e lâminas que
+-- ficaram, a vila grande (casas, pagode, casa comunal, nome) e as estradas (Data/Roads).
 -- Uso (a partir de vantuong65/): lune run tools/carta_dados.luau
 -- Saída em assets/carta/dados/ (fora do Git): alturas.bin (u16, cm + offset, por célula),
 -- paisagem.bin, classes.bin, baixada.bin e cipo.bin (u8 por célula) e dados.json.
 local fs = require("@lune/fs")
 local serde = require("@lune/serde")
 
-local FeatureBuilder = require("../src/ServerStorage/VT65Build/FeatureBuilder")
 local Landscape = require("../src/ServerStorage/VT65Build/Landscape")
 local WorldData = require("../src/ServerStorage/VT65Build/WorldData")
 local Features = require("../src/ServerStorage/VT65Build/Data/Features") :: any
+local Village = require("../src/ServerStorage/VT65Build/Data/Village") :: any
+local Roads = require("../src/ServerStorage/VT65Build/Data/Roads") :: any
 local Grid = require("../src/ServerStorage/VT65Build/Data/Grid") :: any
 local MapConfig = require("../src/ReplicatedStorage/Shared/MapConfig") :: any
 local Tunnels = require("../src/ReplicatedStorage/Shared/Tunnels") :: any
+local AssetIds = require("../src/ReplicatedStorage/Shared/AssetIds") :: any
 local Vegetation = require("../src/ServerScriptService/Modules/Vegetation")
+local ArtPlan = require("../src/ServerScriptService/Modules/ArtPlan") :: any
 
 local M = 0.28
 local OUT = "assets/carta/dados"
@@ -34,12 +39,12 @@ for _, name in Grid.heightChunks do
 end
 local world = WorldData.load(Grid, chunks)
 
-local housesXZ = {}
-for i = 1, #Features.houses, 4 do
-	table.insert(housesXZ, Features.houses[i])
-	table.insert(housesXZ, Features.houses[i + 1])
-end
-local landscape = Landscape.new(world, MapConfig, housesXZ)
+local ctx = ArtPlan.load(world, { features = Features, village = Village, roads = Roads, mapConfig = MapConfig })
+local structures = ArtPlan.structures(ctx, function(k: string): boolean
+	local id = AssetIds.Models[k]
+	return type(id) == "number" and id ~= 0
+end)
+local landscape = ctx.landscape
 
 local w, h, cell = Grid.width, Grid.height, Grid.cellStuds
 local kinds = buffer.create(w * h)
@@ -58,39 +63,47 @@ for row = 0, h - 1 do
 	end
 end
 
-local FOREST = Landscape.FOREST
-local function forest(x: number, z: number): boolean
-	return landscape:kindAt(x, z) == FOREST
-end
-
--- diques, lâminas e sebes: o mesmo filtro do FeatureBuilder.build (o que existe no place)
-local dikes = {}
-local d = FeatureBuilder.mergeDikes(Features.dikes)
-for i = 1, #d, 6 do
-	local mx, mz = (d[i] + d[i + 2]) / 2, (d[i + 1] + d[i + 3]) / 2
-	if not (forest(mx, mz) and forest(d[i], d[i + 1]) and forest(d[i + 2], d[i + 3])) then
-		table.insert(dikes, { d[i], d[i + 1], d[i + 2], d[i + 3] })
-	end
-end
+-- diques, lâminas e sebes: os do plano da arte (o que existe no place)
+local dikes = ctx.dikes
 local waters = {}
-local wt = Features.waters
-for i = 1, #wt, 6 do
-	if not forest(wt[i], wt[i + 1]) then
-		table.insert(waters, { wt[i], wt[i + 1], wt[i + 3], wt[i + 4], wt[i + 5] })
-	end
+for _, p in ctx.paddies.list do
+	-- o tabuleiro guarda a meia medida e o giro em cos/sin
+	table.insert(waters, { p.x, p.z, p.hu * 2, p.hv * 2, math.atan2(p.sa, p.ca) })
 end
 local hedges = {}
-local hg = Features.hedges
-for i = 1, #hg, 7 do
-	if not forest((hg[i] + hg[i + 2]) / 2, (hg[i + 1] + hg[i + 3]) / 2) then
-		table.insert(hedges, { hg[i], hg[i + 1], hg[i + 2], hg[i + 3], hg[i + 5] * M })
-	end
+for _, hd in ctx.hedges do
+	table.insert(hedges, { hd.x1, hd.z1, hd.x2, hd.z2, hd.h * M })
 end
 local houses = {}
 local hs = Features.houses
 for i = 1, #hs, 4 do
 	table.insert(houses, { hs[i], hs[i + 1], hs[i + 3] })
 end
+-- vila grande: casas (pegada do plano), pagode, casa comunal, poço e bancas
+local villageHouses, specials = {}, {}
+for _, s in structures do
+	if s.group == "village" and s.home then
+		table.insert(villageHouses, { s.x, s.z, s.yaw, s.hx * 2, s.hz * 2 })
+	elseif s.group == "special" then
+		table.insert(
+			specials,
+			{ kind = string.gsub(s.key, "parts:", ""), x = s.x, z = s.z, yaw = s.yaw, w = s.hx * 2, d = s.hz * 2 }
+		)
+	end
+end
+local roads = {}
+for _, r in Roads.roads do
+	local pts = {}
+	for i = 1, #r.pts - 2, 3 do
+		table.insert(pts, { r.pts[i], r.pts[i + 1] })
+	end
+	table.insert(roads, { kind = r.kind, w = Roads.width[r.kind] * M, pts = pts })
+end
+local lanes = {}
+for _, l in Village.lanes do
+	table.insert(lanes, { { l[1], l[2] }, { l[3], l[4] } })
+end
+local gx, gz = ArtPlan.cemetery(MapConfig)
 -- trincheira sul de An Cường (2) (Tunnels.trench, traçado de design já posto no mundo)
 local cx, cz = 0, 0
 for _, l in MapConfig.Locations do
@@ -127,12 +140,17 @@ local info = {
 		farm = Landscape.FARM,
 		clear = Landscape.CLEAR,
 		stream = Landscape.STREAM,
+		roca = Landscape.ROCA,
 	},
 	dikes = dikes,
 	waters = waters,
 	hedges = hedges,
 	houses = houses,
 	trench = trench,
+	village = { name = Village.name, x = Village.x, z = Village.z, houses = villageHouses, specials = specials },
+	roads = roads,
+	lanes = lanes,
+	cemetery = { x = gx, z = gz },
 }
 
 if not fs.isDir(OUT) then
@@ -146,13 +164,15 @@ fs.writeFile(OUT .. "/cipo.bin", tangle)
 fs.writeFile(OUT .. "/dados.json", serde.encode("json", info, false))
 print(
 	string.format(
-		"carta: grade %d x %d; %d diques, %d lâminas, %d sebes, %d casas (%.1f s) -> %s",
+		"carta: grade %d x %d; %d diques, %d lâminas, %d sebes, %d casas da carta, %d da vila, %d estradas (%.1f s) -> %s",
 		w,
 		h,
 		#dikes,
 		#waters,
 		#hedges,
 		#houses,
+		#villageHouses,
+		#roads,
 		os.clock() - t0,
 		OUT
 	)

@@ -55,9 +55,9 @@ test("base64 decodifica vetores conhecidos", function()
 	assert(buffer.tostring(Base64.decode("")) == "")
 end)
 
-test("unidades: 1 stud = 0,28 m; soldado 6,25 studs", function()
+test("unidades: 1 stud = 0,28 m; soldado de 2,0 m (D-98) = 7,14 studs", function()
 	near(Units.toStuds(2000), 7142.857, 0.01)
-	near(Units.SOLDIER_HEIGHT, 6.25, 0.001)
+	near(Units.SOLDIER_HEIGHT, 7.1429, 0.001)
 end)
 
 local chunks = {}
@@ -168,14 +168,25 @@ test("lugares que fazem o jogo estão no recorte: vilas, Colina 30, trincheira e
 	do
 		location(name)
 	end
-	for _, name in { "Nam Yên (4)", "An Cường (2)", "An Thới (2)", "Cemitério", "Trincheira sul", "Colina 30" } do
+	-- 2026-11-12: o Cemitério deixou de ser ponto forte (objetivos no centro); a vila grande Xóm Gò é o
+	-- ponto forte do S3
+	for _, name in { "Nam Yên (4)", "An Cường (2)", "An Thới (2)", "Xóm Gò", "Trincheira sul", "Colina 30" } do
 		local sp = strongpoint(name)
 		assert(Geometry.inBounds(MapConfig.Bounds, sp.x, sp.z), name)
 	end
-	-- QG dos EUA perto da borda leste (a base grande vem depois) e o do VC perto da oeste
+	-- QG dos EUA perto da borda leste (a base grande vem depois). O do VC (2026-11-12, métrica de
+	-- contato) saiu da borda oeste: retaguarda, a oeste de todos os pontos fortes do S2 e a até 420 m
+	-- da praça de Xóm Gò
 	local b = MapConfig.Bounds
 	assert((b.maxX - MapConfig.HQ.US.x) * 0.28 <= 80, "QG dos EUA longe da borda leste")
-	assert((MapConfig.HQ.VC.x - b.minX) * 0.28 <= 80, "QG do VC longe da borda oeste")
+	local vc = MapConfig.HQ.VC
+	for _, sp in MapConfig.Strongpoints do
+		if sp.sector == 2 then
+			assert(vc.x < sp.x, "QG do VC na frente de " .. sp.name)
+		end
+	end
+	local praca = strongpoint("Xóm Gò")
+	assert(math.sqrt((vc.x - praca.x) ^ 2 + (vc.z - praca.z) ^ 2) * 0.28 <= 420, "QG do VC longe do centro")
 end)
 
 test("riacho a leste de An Cường (2): leito contínuo de células de riacho, abaixo da margem", function()
@@ -235,9 +246,15 @@ test("place assado tem as peças e todas ancoradas", function()
 		end
 	end
 	assert(unanchored == 0, unanchored .. " peças soltas")
-	-- D-65: diques só na lavoura das vilas; no mapa de 1 x 1 km são ~1,4 mil (eram ~3,3 mil no de
-	-- 2 x 2 km e ~9,7 mil com o arrozal todo, D-63)
-	assert(#map.Dikes:GetChildren() > 1000, "diques")
+	-- D-65: diques só na lavoura das vilas. 2026-11-12: arrozal a ~15% (o dono pediu -75%; os
+	-- tabuleiros em ladeira também saíram) e o dique virou lombada do terreno: a peça é só o marcador
+	-- dos bots, invisível, sem colisão e fora do raio (era a "parede" de que o dono reclamou)
+	local nDikes = 0
+	for _, d in map.Dikes:GetChildren() do
+		assert(d.Transparency == 1 and not d.CanCollide and not d.CanQuery, "dique visível ou sólido")
+		nDikes += 1
+	end
+	assert(nDikes > 100 and nDikes < 1000, "diques: " .. nDikes)
 	assert(#map.Strongpoints:GetChildren() == 15, "marcadores")
 	print(string.format("       (%d BaseParts no Map)", n))
 end)
@@ -390,26 +407,29 @@ end)
 -- Achado no Studio (2026-11-11): o chão do terreno furava a lâmina do arrozal em metade dos pontos
 -- (o soldado andava no capim e o movimento lia "seco"). Amostra de vários tabuleiros: o chão gerado
 -- fica 5–15 cm abaixo do topo da lâmina dentro de cada tabuleiro, e nunca acima.
+-- 2026-11-12: o terreno sai do plano da arte (Build.terrain -> ArtPlan.column), com o dique em
+-- lombada; a amostra é de tabuleiros espalhados pelo mapa (o arrozal ficou a ~15%), fora da lombada
+-- do dique, da estrada e dos patamares.
 test("arrozal: chão plano 5–15 cm abaixo da lâmina em todo ponto amostrado dos tabuleiros", function()
 	local TerrainBuilder = require("../../src/ServerStorage/VT65Build/TerrainBuilder") :: any
-	local Landscape = require("../../src/ServerStorage/VT65Build/Landscape")
-	local Features = require("../../src/ServerStorage/VT65Build/Data/Features") :: any
-	-- o mesmo filtro do Build.paddySet (tabuleiros que existem no place)
-	local houses = {}
-	for i = 1, #Features.houses, 4 do
-		table.insert(houses, Features.houses[i])
-		table.insert(houses, Features.houses[i + 1])
+	local Site = require("../../src/ServerStorage/VT65Build/Site") :: any
+	local ArtPlan = (require :: any)("../../src/ServerScriptService/Modules/ArtPlan")
+	local ctx = ArtPlan.load(world, {
+		features = require("../../src/ServerStorage/VT65Build/Data/Features") :: any,
+		village = (require :: any)("../../src/ServerStorage/VT65Build/Data/Village"),
+		roads = (require :: any)("../../src/ServerStorage/VT65Build/Data/Roads"),
+		mapConfig = MapConfig,
+	})
+	ArtPlan.structures(ctx, function(k: string): boolean
+		return string.sub(k, 1, 9) ~= "vila_casa"
+	end)
+	local set = ctx.paddies
+	local function plain(x: number, z: number): boolean
+		local h = world:heightAt(x, z)
+		return Site.dike(ctx.site, x, z, h) == nil
+			and Site.road(ctx.site, x, z) == nil
+			and select(1, Site.pad(ctx.site, x, z)) == nil
 	end
-	local land = Landscape.new(world, MapConfig, houses)
-	local waters = {}
-	for i = 1, #Features.waters, 6 do
-		if land:kindAt(Features.waters[i], Features.waters[i + 1]) ~= Landscape.FOREST then
-			for k = 0, 5 do
-				table.insert(waters, Features.waters[i + k])
-			end
-		end
-	end
-	local set = TerrainBuilder.paddySet(world, waters)
 	-- topo do chão de cada coluna de voxels gerada (centro da coluna)
 	local tops: { [number]: number } = {}
 	local function key(x: number, z: number): number
@@ -440,46 +460,53 @@ test("arrozal: chão plano 5–15 cm abaixo da lâmina em todo ponto amostrado d
 		terrain = mock,
 		wait = function() end,
 	}
-	-- três trechos de arrozal: Nam Yên (4), entre as vilas e An Cường (2)
-	local areas = { { 269560, 1692700 }, { 269760, 1692640 }, { 270020, 1692560 } }
 	local sampled, inRange, above, deepest, sheets = 0, 0, 0, 0, {}
-	for _, a in areas do
-		local cx = (a[1] - MapConfig.GridOrigin1965.e) / 0.28
-		local cz = (MapConfig.GridOrigin1965.n - a[2]) / 0.28
+	local column = function(x: number, z: number): (number, number, number, string?)
+		return ArtPlan.column(ctx, x, z)
+	end
+	-- 8 tabuleiros espalhados pela lista
+	for idx = 1, #set.list, math.max(1, #set.list // 8) do
+		local p0 = set.list[idx]
+		local r = math.sqrt(p0.hu * p0.hu + p0.hv * p0.hv) + 12
 		table.clear(tops)
-		TerrainBuilder.build(
-			world,
-			env,
-			{ only = { minX = cx - 100, maxX = cx + 100, minZ = cz - 100, maxZ = cz + 100 }, paddies = set }
-		)
-		-- pontos em grade de 1 stud dentro de cada tabuleiro do trecho; chão = interpolação das 4
-		-- colunas vizinhas (como a superfície do terreno entre os centros dos voxels)
-		for _, p in set.list do
-			if math.abs(p.x - cx) < 90 and math.abs(p.z - cz) < 90 then
-				sheets[p] = true
-				for lu = -p.hu, p.hu, 1 do
-					for lv = -p.hv, p.hv, 1 do
-						local x = p.x + lu * p.ca + lv * p.sa
-						local z = p.z - lu * p.sa + lv * p.ca
-						local fx, fz = x / 4 - 0.5, z / 4 - 0.5
-						local i0, j0 = math.floor(fx), math.floor(fz)
-						local tx, tz = fx - i0, fz - j0
-						local function t(i: number, j: number): number?
-							return tops[key(i * 4 + 2, j * 4 + 2)]
-						end
-						local a00, a10, a01, a11 = t(i0, j0), t(i0 + 1, j0), t(i0, j0 + 1), t(i0 + 1, j0 + 1)
-						if a00 and a10 and a01 and a11 then
-							local ground = (a00 * (1 - tx) + a10 * tx) * (1 - tz) + (a01 * (1 - tx) + a11 * tx) * tz
-							local depth = (p.top - ground) * 0.28
-							sampled += 1
-							if depth < 0.05 - 1e-6 then
-								above += 1
-							elseif depth <= 0.15 + 1e-6 then
-								inRange += 1
-							end
-							deepest = math.max(deepest, depth)
-						end
+		TerrainBuilder.build(world, env, {
+			only = { minX = p0.x - r, maxX = p0.x + r, minZ = p0.z - r, maxZ = p0.z + r },
+			column = column,
+		})
+		-- pontos em grade de 1 stud dentro do tabuleiro (fora da lombada do dique, da estrada e do
+		-- patamar); chão = interpolação das 4 colunas vizinhas (a superfície do terreno entre os
+		-- centros dos voxels)
+		local p = p0
+		sheets[p] = true
+		for lu = -p.hu, p.hu, 1 do
+			for lv = -p.hv, p.hv, 1 do
+				local x = p.x + lu * p.ca + lv * p.sa
+				local z = p.z - lu * p.sa + lv * p.ca
+				if not plain(x, z) or TerrainBuilder.paddyTop(set, x, z, 0) ~= p.top then
+					continue -- lombada, estrada, patamar ou outro tabuleiro por cima
+				end
+				local fx, fz = x / 4 - 0.5, z / 4 - 0.5
+				local i0, j0 = math.floor(fx), math.floor(fz)
+				local tx, tz = fx - i0, fz - j0
+				local function t(i: number, j: number): number?
+					return tops[key(i * 4 + 2, j * 4 + 2)]
+				end
+				local a00, a10, a01, a11 = t(i0, j0), t(i0 + 1, j0), t(i0, j0 + 1), t(i0 + 1, j0 + 1)
+				-- as quatro colunas vizinhas também fora da lombada (a superfície interpola entre elas)
+				local clean = plain(i0 * 4 + 2, j0 * 4 + 2)
+					and plain(i0 * 4 + 6, j0 * 4 + 2)
+					and plain(i0 * 4 + 2, j0 * 4 + 6)
+					and plain(i0 * 4 + 6, j0 * 4 + 6)
+				if clean and a00 and a10 and a01 and a11 then
+					local ground = (a00 * (1 - tx) + a10 * tx) * (1 - tz) + (a01 * (1 - tx) + a11 * tx) * tz
+					local depth = (p.top - ground) * 0.28
+					sampled += 1
+					if depth < 0.05 - 1e-6 then
+						above += 1
+					elseif depth <= 0.15 + 1e-6 then
+						inRange += 1
 					end
+					deepest = math.max(deepest, depth)
 				end
 			end
 		end
@@ -498,7 +525,7 @@ test("arrozal: chão plano 5–15 cm abaixo da lâmina em todo ponto amostrado d
 			deepest
 		)
 	)
-	assert(nSheets >= 10 and sampled > 1000, "amostra pequena")
+	assert(nSheets >= 8 and sampled > 1000, "amostra pequena")
 	assert(above == 0, above .. " pontos com o chão a menos de 5 cm da lâmina (ou acima dela)")
 	assert(inRange >= sampled * 0.8, "chão longe dos 10 cm em mais de 20% dos pontos")
 end)

@@ -76,7 +76,11 @@ act("bayonet", "infantry", "ButtonY", "hold", "K", "press", "Baioneta")
 -- câmera de 3ª pessoa (pedido do dono, 2026-11-11). No teclado, O e I.
 act("binoculars", "infantry", "DPadUp", "tap", "B", "press", "Binóculo")
 act("shoulder_swap", "infantry", "DPadUp", "hold", "I", "press", "Trocar ombro (3ª pessoa)")
-act("quick_bandage", "infantry", "DPadDown", "press", "G", "press", "Bandagem rápida")
+act("quick_bandage", "infantry", "DPadDown", "tap", "G", "press", "Bandagem rápida")
+-- Rádio do squad (2026-11-12): segurar para falar com o squad em qualquer lugar (Controllers/Voz.client).
+-- No controle não sobrava botão: ↓ tocar segue a bandagem rápida e segurar abre o rádio. No teclado,
+-- Caps Lock (B é o binóculo; N e J são atalhos do CommanderController; L, da loja).
+act("radio_talk", "infantry", "DPadDown", "hold", "CapsLock", "press", "Rádio do squad (segurar)")
 act("fire_mode", "infantry", "DPadLeft", "tap", "V", "tap", "Seletor de tiro")
 act("zeroing", "infantry", "DPadLeft", "hold", "V", "hold", "Alça de mira")
 act("radio_channel", "infantry", "DPadRight", "tap", "U", "press", "Canal de rádio")
@@ -85,10 +89,15 @@ act("map", "global", "ButtonSelect", "tap", "M", "press", "Mapa tático")
 act("game_menu", "global", "ButtonSelect", "hold", "P", "press", "Menu do jogo")
 act("give_up", "infantry", nil, "press", "H", "press", "Desistir (caído: segure B)")
 act("tourniquet", "infantry", nil, "press", "T", "press", "Torniquete (também na roda)")
--- Camada de mira: L3/R3 (afundar os analógicos) inclinam enquanto mira, a pedido do usuário (D-69);
--- LB prende a respiração; RB segue marcando. Q/E no teclado a qualquer hora.
-act("lean_left", "aim", "ButtonL3", "press", "Q", "press", "Inclinar à esquerda")
-act("lean_right", "aim", "ButtonR3", "press", "E", "press", "Inclinar à direita")
+-- D-99 (inclinar do Front 44): Q/E no teclado a qualquer hora a pé, segurando. Antes ficavam só na
+-- camada de mira e sem mirar a tecla não chegava ("os botões de se inclinar não estão funcionando").
+act("lean_left", "infantry", nil, "press", "Q", "press", "Inclinar à esquerda")
+act("lean_right", "infantry", nil, "press", "E", "press", "Inclinar à direita")
+-- Camada de mira: L3/R3 (afundar os analógicos) inclinam enquanto mira, a pedido do usuário (D-69):
+-- no controle não sobra botão fora da mira (L3 corre, R3 é o corpo a corpo, o direcional tem
+-- tocar/segurar). LB prende a respiração; RB segue marcando. O teclado usa o Q/E da infantaria.
+act("lean_left", "aim", "ButtonL3", "press", nil, "press", "Inclinar à esquerda")
+act("lean_right", "aim", "ButtonR3", "press", nil, "press", "Inclinar à direita")
 act("hold_breath", "aim", "ButtonL1", "press", "LeftShift", "press", "Prender a respiração")
 
 -- Veículo terrestre (Parte 12.3). Direção: analógico esquerdo (ou A/D); acelerar/frear: gatilhos
@@ -102,6 +111,7 @@ act("v_mark", "ground_vehicle", "ButtonR1", "press", "F", "press", "Marcar alvo"
 act("v_door_fire", "ground_vehicle", "ButtonR2", "press", "MouseLeftButton", "press", "Atirar", "door")
 act("v_switch_seat", "ground_vehicle", "ButtonY", "hold", "C", "press", "Trocar de assento")
 act("v_exit", "ground_vehicle", "ButtonB", "hold", "Y", "press", "Sair")
+act("radio_talk", "ground_vehicle", "DPadDown", "hold", "CapsLock", "press", "Rádio do squad (segurar)")
 -- Helicóptero. Cíclico: analógico esquerdo (WASD); coletivo: RT/LT (Espaço/Ctrl) como eixo.
 act("h_pedal_left", "helicopter", "ButtonL1", "press", "Q", "press", "Pedal esquerdo", "driver")
 act("h_pedal_right", "helicopter", "ButtonR1", "press", "E", "press", "Pedal direito", "driver")
@@ -110,6 +120,7 @@ act("v_door_fire", "helicopter", "ButtonR2", "press", "MouseLeftButton", "press"
 act("v_optic", "helicopter", "ButtonL2", "press", "MouseRightButton", "press", "Zoom leve", "door")
 act("v_switch_seat", "helicopter", "ButtonY", "hold", "C", "press", "Trocar de assento")
 act("v_exit", "helicopter", "ButtonB", "hold", "Y", "press", "Sair")
+act("radio_talk", "helicopter", "DPadDown", "hold", "CapsLock", "press", "Rádio do squad (segurar)")
 
 -- Roda radial: soltar o botão confirma; B cancela.
 act("wheel_cancel", "wheel", "ButtonB", "press", "Backspace", "press", "Cancelar")
@@ -173,6 +184,7 @@ export type Settings = {
 	virtualCursor: boolean, -- cursor virtual no analógico esquerdo nos menus
 	gfxDetail: string, -- "high" | "medium" | "low": densidade de efeitos e alcance do detalhe
 	gfxShadows: boolean, -- sombras do sol
+	gfxPlantShadows: boolean, -- sombra das árvores e da vegetação (Graficos.client); padrão desligada
 	gfxPost: string, -- "full" | "light" | "off": brilho, raios de sol e correção de cor
 	gfxBrightness: number, -- ajuste de brilho (−0,2 a 0,2)
 	lang: string, -- D-84: "auto" (idioma da conta) | "pt" | "en" | "es" | "vi"
@@ -183,6 +195,8 @@ export type Settings = {
 	-- movimento da câmera (balanço da passada, inércia da cabeça, inclinação nas curvas), 0 a 1;
 	-- lido pelo Movement.client (acessibilidade: enjoo de movimento)
 	cameraBob: number,
+	-- coluna de comandos na lateral da tela (Controllers/PainelComandos); booleana, o validate saneia
+	hintsPanel: boolean,
 }
 
 InputMap.DEFAULTS = {
@@ -222,13 +236,15 @@ InputMap.DEFAULTS = {
 	virtualCursor = false,
 	gfxDetail = "high",
 	gfxShadows = true,
-	gfxPost = "full",
+	gfxPlantShadows = false, -- pedido do agente do mapa (2026-11-12): sombra das plantas pesa
+	gfxPost = "light", -- era "full" (2026-11-12: o leve é o padrão; o completo fica na opção)
 	gfxBrightness = 0,
 	lang = "auto",
 	volEffects = 0.5,
 	volAmbient = 0.6,
 	volMusic = 0.35,
 	cameraBob = 1,
+	hintsPanel = true,
 } :: Settings
 
 -- Configurações que mudam os botões (o runtime refaz os bindings só quando uma delas muda).
@@ -682,14 +698,12 @@ function InputMap.event(s: State, ev: string, arg: any?): { string }
 		s.awaitRelease = false
 	elseif ev == "aim" then
 		s.aiming = arg == true
-		if not s.aiming and s.lean ~= 0 then
-			s.lean = 0
-			return { "lean" }
-		end
 	elseif ev == "sprint" then
 		s.sprinting = arg == true
 	elseif ev == "lean" then
-		s.lean = if s.aiming or arg == 0 then arg :: number else 0
+		-- D-99: a pé, mirando ou não (correndo ou deitado o corpo não inclina: Controllers/Inclinar)
+		local ok = s.alive and not s.downed and s.vehicle == nil and InputMap.acceptsGame(s)
+		s.lean = if arg == 0 or ok then math.clamp(tonumber(arg) or 0, -1, 1) else 0
 	elseif ev == "wheel_open" then
 		s.wheel = arg
 	elseif ev == "wheel_close" then

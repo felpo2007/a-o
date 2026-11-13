@@ -395,10 +395,11 @@ function BotTunnels.think(bot: Bot, model: Model, hum: Humanoid, root: BasePart,
 		local p = if away.Magnitude > 1 then c + away.Unit * (1.5 / M) else c
 		local d = flat(root.Position, p) * M
 		if d <= 0.9 then
-			-- desce: agacha, ancora e vai para o pé do poço
-			BotTypes.hooks.setStance(model, "crouch")
+			-- desce: deita, ancora e vai para o pé do poço. 2026-11-12: com o soldado de 2,0 m (D-98) o
+			-- agachado não cabe na galeria; o bot passa só deitado (o jogador do VC também é posto deitado)
+			BotTypes.hooks.setStance(model, "prone")
 			BotLocomotion.stop(bot, nil)
-			-- raiz acima dos pés com o HipHeight do agachado (a raiz ainda está descendo)
+			-- raiz acima dos pés com o HipHeight do deitado (a raiz ainda está descendo)
 			tr.hipY = hum.HipHeight + root.Size.Y / 2
 			tr.top = BotWorld.heightAt(a.x, a.z)
 			root.Anchored = true
@@ -482,7 +483,7 @@ local function stepTransit(bot: Bot, tr: Transit, dt: number, now: number)
 		end
 		local a, b = tr.pts[i], tr.pts[i + 1]
 		local len = math.sqrt((b.x - a.x) ^ 2 + (b.z - a.z) ^ 2)
-		tr.s += Movement.CROUCH / M * dt
+		tr.s += Movement.PRONE / M * dt -- rastejando (era o passo agachado)
 		if tr.s >= len then
 			tr.s -= len
 			tr.seg += 1

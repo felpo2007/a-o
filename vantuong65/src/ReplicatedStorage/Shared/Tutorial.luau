@@ -46,6 +46,7 @@ Tutorial.RANGE = {
 Tutorial.RIFLE_ROLES = {
 	squad_leader = true,
 	rifleman = true,
+	automatic_rifleman = true,
 	machine_gunner = true,
 	engineer = true,
 	observer = true,
@@ -69,6 +70,9 @@ Tutorial.ROLE = {
 		act("equip_wheel", "Construir o posto de reunião do squad (perto de suprimento): {a}."),
 	},
 	rifleman = { GRENADES },
+	automatic_rifleman = {
+		act("fire_mode", "Seletor da M14: {a} (semi ou automático). Deitado, o bipé firma a rajada."),
+	},
 	grenadier = { GRENADES },
 	machine_gunner = { act("fire_mode", "Modo de tiro: {a}. Deitado, a rajada fica controlável.") },
 	anti_tank = { act("swap_weapon", "Lançador: {a}. A blindagem da frente é grossa: mire no lado.") },
@@ -84,7 +88,9 @@ Tutorial.ROLE = {
 		act("binoculars", "Binóculo: {a}."),
 		act("mark", "Marcar o alvo para o comandante e o morteiro: {a}."),
 	},
-	sniper = { act("zeroing", "Alça de mira (100, 200, 300 m): {a}.") },
+	-- luneta (2026-11-12): alça de 100 em 100 m (até 1.000 na Unertl e 1.300 na PU); o toque no
+	-- seletor desce (o ferrolho não tem seletor)
+	sniper = { act("zeroing", "Alça da luneta, 100 m a mais: {a}. Tocar o seletor desce.") },
 	mortar = {
 		act("equip_wheel", "Construir a posição de morteiro: {a}."),
 		act("comm_wheel", "Roda de comunicação: {a}. A página Comando pede a missão de fogo pela grade."),

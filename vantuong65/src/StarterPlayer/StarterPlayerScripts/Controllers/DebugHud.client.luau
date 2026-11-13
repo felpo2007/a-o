@@ -107,7 +107,7 @@ RunService.RenderStepped:Connect(function(dt)
 		heightM = (char :: Model):GetExtentsSize().Y * MapConfig.STUD_M
 	end
 	text.Text = string.format(
-		"VT65 — medição\nfps médio %.1f | p99 %.1f ms (meta <= 16,7)\n%s\n%s\nX %.0f Z %.0f studs | soldado %.2f m (meta 1,75)\nSol: az %.1f° el %.1f° (ajuste %.2f°)",
+		"VT65 — medição\nfps médio %.1f | p99 %.1f ms (meta <= 16,7)\n%s\n%s\nX %.0f Z %.0f studs | soldado %.2f m (meta 2,00)\nSol: az %.1f° el %.1f° (ajuste %.2f°)",
 		N / sum,
 		p99 * 1000,
 		line2,

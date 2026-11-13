@@ -92,19 +92,106 @@ test("tronco: fuzil incapacita, pistola fere; cabeça de fuzil mata", function()
 	assert(Medical.applyHit(c, "head", 2000, 0.5, 0) == "killed" and c.dead)
 end)
 
-test("sangramento, curativo e torniquete", function()
+test("sangramento, curativo e torniquete (D-99: o curativo estanca)", function()
 	local s = Medical.new()
 	Medical.applyHit(s, "leg", 3400, 0.1, 0) -- roll < 0,2 com fuzil: arterial
 	assert(s.wounds[1].level == "arterial" and s.legImpaired)
-	near(Medical.bleedRate(s), 4.0, 1e-9)
-	assert(not Medical.bandage(s), "curativo não para arterial")
-	assert(Medical.tourniquet(s) and Medical.bleedRate(s) == 0)
+	near(Medical.bleedRate(s), Medical.C.bleed.arterial, 1e-9)
+	assert(Medical.arterial(s))
+	assert(Medical.tourniquet(s) and Medical.bleedRate(s) == 0, "torniquete para a artéria")
+	-- um curativo para TODO sangramento que não é arterial (antes: grave virava leve e sangrava)
 	local t = Medical.new()
 	Medical.applyHit(t, "arm", 2000, 0.9, 0)
-	assert(t.wounds[1].level == "grave")
-	assert(Medical.bandage(t) and t.wounds[1].level == "light")
-	assert(Medical.bandage(t) and #t.wounds == 0)
-	assert(not Medical.bandage(t), "sem curativos (2 por soldado)")
+	Medical.applyHit(t, "torso", 480, 0.5, 0)
+	assert(#t.wounds == 2 and Medical.bleedRate(t) > 0)
+	assert(Medical.bandage(t) and #t.wounds == 0 and Medical.bleedRate(t) == 0, "curativo estanca")
+	assert(t.bandages == 1, "gastou um")
+	assert(not Medical.bandage(t), "nada para tratar")
+	-- artéria sem torniquete: compressão (vira leve, sangra devagar)
+	local u = Medical.new()
+	u.tourniquets = 0
+	Medical.applyHit(u, "leg", 3400, 0.1, 0)
+	assert(Medical.bandage(u) and u.wounds[1].level == "light")
+	-- bandagem rápida: torniquete na artéria e curativo no resto, de uma vez
+	local q = Medical.new()
+	Medical.applyHit(q, "leg", 3400, 0.1, 0)
+	Medical.applyHit(q, "torso", 480, 0.5, 0)
+	local ok, b, tq = Medical.quickDress(q)
+	assert(ok and b == 1 and tq == 1 and Medical.bleedRate(q) == 0, "bandagem rápida estanca tudo")
+	-- sem curativo nem torniquete: nada
+	local n = Medical.new()
+	n.bandages, n.tourniquets = 0, 0
+	Medical.applyHit(n, "arm", 2000, 0.9, 0)
+	assert(not Medical.quickDress(n))
+end)
+
+test("D-99: vantagens do corpo (vida 1,12, sangramento 0,8, curativo 0,74) com e sem passe", function()
+	local Vantagens = require(S .. "Vantagens")
+	-- jogador de mentira: só GetAttribute e IsA (o servidor grava Vant_<chave> no Player)
+	local function who(attrs: { [string]: any }): any
+		return {
+			GetAttribute = function(_, k: string): any
+				return attrs[k]
+			end,
+			IsA = function(_, _c: string): boolean
+				return false
+			end,
+		}
+	end
+	local sem, com = who({}), who({ Vant_health = 1.12, Vant_bleed = 0.8, Vant_bandage = 0.74, Vant_speed = 1.06 })
+	for _, k in { "health", "bleed", "bandage", "speed" } do
+		assert(Vantagens.mult(sem, k) == 1, "sem passe: " .. k)
+	end
+	near(Vantagens.mult(com, "bandage"), 0.74, 1e-9, "curativo")
+	near(Vantagens.mult(who({ Vant_health = 1.5 }), "health"), 1.12, 1e-9, "teto de combate")
+	-- vida máxima e sangramento (o MedicalService passa os mesmos números)
+	local a = Medical.new(false, Vantagens.mult(sem, "health"), Vantagens.mult(sem, "bleed"))
+	local b = Medical.new(false, Vantagens.mult(com, "health"), Vantagens.mult(com, "bleed"))
+	assert(a.maxHealth == 100 and a.health == 100 and a.bleedMult == 1, "sem passe igual")
+	near(b.maxHealth, 112, 1e-9, "vida máxima")
+	Medical.applyHit(a, "torso", 480, 0.5, 0)
+	Medical.applyHit(b, "torso", 480, 0.5, 0)
+	near(Medical.bleedRate(b), Medical.bleedRate(a) * 0.8, 1e-9, "sangra 20% mais devagar")
+	local function untilDown(s: any): number
+		local t = 0
+		while not s.downedAt and t < 3600 do
+			t += 1
+			Medical.tick(s, 1, t)
+		end
+		return t
+	end
+	local ta, tb = untilDown(a), untilDown(b)
+	print(string.format("       pistola no tronco: sem passe %d s, com o passe %d s", ta, tb))
+	assert(tb > ta * 1.3, "com o passe demora mais")
+	-- tempo do curativo (MedicalService: C.bandageSelf × mult)
+	near(Medical.C.bandageSelf * Vantagens.mult(com, "bandage"), Medical.C.bandageSelf * 0.74, 1e-9)
+end)
+
+test("D-99: sangrar demora minutos, não segundos", function()
+	local function untilDown(zone: string, j: number, roll: number): number
+		local s = Medical.new()
+		Medical.applyHit(s, zone, j, roll, 0)
+		local t = 0
+		while not s.downedAt and t < 3600 do
+			t += 1
+			Medical.tick(s, 1, t)
+		end
+		return t
+	end
+	local pistolTorso = untilDown("torso", 480, 0.5)
+	local arteryLeg = untilDown("leg", 3400, 0.1)
+	local graveArm = untilDown("arm", 2000, 0.9)
+	print(
+		string.format(
+			"       até cair: pistola no tronco %.0f s, artéria da perna %.0f s, braço %.0f s",
+			pistolTorso,
+			arteryLeg,
+			graveArm
+		)
+	)
+	assert(pistolTorso > 120 and pistolTorso < 300, "tronco de pistola: ~3 min")
+	assert(arteryLeg > 60 and arteryLeg < 150, "artéria: ~1,5 min")
+	assert(graveArm > pistolTorso, "braço mais lento que o tronco")
 end)
 
 test("janela de 60 s, desistir após 15 s, reanimar com 30 de vida", function()
@@ -128,10 +215,28 @@ test("tratamento do médico devolve até 75 e para o sangramento", function()
 end)
 
 -- Spawn ------------------------------------------------------------------------------------
-test("D-91: espera mínima de 10 s alinhada às ondas de 5 s", function()
+test("espera de 10 s exatos contados da queda, sem onda (2026-11-12)", function()
+	assert(SpawnRules.C.minWait == 10 and SpawnRules.C.wave == 0)
 	near(SpawnRules.readyAt(0, 0, 0), 10, 1e-9)
-	near(SpawnRules.readyAt(3, 0, 0), 15, 1e-9) -- 13 -> próxima onda em 15
-	near(SpawnRules.readyAt(5, 5, 0), 20, 1e-9)
+	near(SpawnRules.readyAt(3, 0, 0), 13, 1e-9) -- antes: 15 (próxima onda de 5 s)
+	near(SpawnRules.readyAt(7.3, 0, 2.1), 17.3, 1e-9) -- o início da partida não mexe mais na espera
+	near(SpawnRules.readyAt(5, 5, 0), 20, 1e-9) -- extra de 5 s (reunião capturada) por cima
+	-- com onda (wave > 0) o alinhamento antigo continua disponível
+	SpawnRules.C.wave = 5
+	near(SpawnRules.readyAt(3, 0, 0), 15, 1e-9)
+	SpawnRules.C.wave = 0
+end)
+
+test("espera por tipo de ponto: 10 s sem extra; reunião capturada 15, guarnição 18, troca de papel +4", function()
+	local function waitOf(kind: string, roleChanged: boolean): number
+		return SpawnRules.readyAt(100, SpawnRules.extraWait(kind, { 100 }, roleChanged), 0) - 100
+	end
+	for _, kind in { "hq", "rally", "squad" } do
+		near(waitOf(kind, false), 10, 1e-9, kind)
+	end
+	near(waitOf("rally_captured", false), 15, 1e-9, "reunião capturada")
+	near(waitOf("garrison", false), 18, 1e-9, "guarnição (túnel)")
+	near(waitOf("hq", true), 14, 1e-9, "troca de papel")
 end)
 
 test("extras: setor capturado, sequência de mortes (máx. 12) e troca de papel", function()
@@ -330,10 +435,10 @@ test("diária: item novo só na primeira vez; relógio voltando não deixa resga
 end)
 
 test("perfil v1 → atual: ganha a caderneta zerada; valores corrompidos voltam ao seguro", function()
-	assert(ProfileSchema.VERSION == 3) -- v3 (D-72): progressão; a migração v2 → v3 está em progressao.luau
+	assert(ProfileSchema.VERSION == 4) -- v4 (2026-11-12): campanha; v3 (D-72): progressão (progressao.luau)
 	local v1 = { schema = 1, tips = 2, purchases = { x = 5 }, tutorial = { rifleman = true } }
 	local p = ProfileSchema.migrate(v1)
-	assert(p.schema == 3 and p.tips == 2 and p.purchases.x == 5 and p.tutorial.rifleman)
+	assert(p.schema == 4 and p.tips == 2 and p.purchases.x == 5 and p.tutorial.rifleman)
 	assert(p.daily.run == 0 and p.daily.lastDay == -1 and p.daily.total == 0 and next(p.earned) == nil)
 	local bad = ProfileSchema.migrate({
 		schema = 2,

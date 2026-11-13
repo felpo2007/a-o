@@ -8,10 +8,16 @@
 -- - BAKED: o que o retarget leu do código ao gravar os clipes. Os agachados e deitados são gravados
 --   em relação à postura do servidor (o HipHeight cai DROP; deitado, o C0 da Root gira PRONE_ROOT);
 --   o teste confere que PostureService e PostureController ainda têm esses valores.
+-- - D-98: os clipes foram gravados no corpo de 1,75 m; o soldado do jogo é o mesmo corpo ampliado por
+--   SCALE (Shared/Corpo.K). As rotações valem igual; a Root o Animator escala por HipHeight /
+--   AuthoredHipHeight; a passada fica SCALE vezes mais longa (perna mais longa), então a velocidade
+--   em que o pé não escorrega é speed × SCALE. BAKED segue no tamanho da gravação.
 local Movement = require(script and (script :: any).Parent.Movement or "./Movement") :: any
+local Corpo = require(script and (script :: any).Parent.Corpo or "./Corpo") :: any
 
 local SoldierAnims = {}
 SoldierAnims.STUD_M = Movement.STUD_M
+SoldierAnims.SCALE = Corpo.K -- tamanho do jogo / tamanho da gravação
 
 export type Clip = {
 	id: number, -- asset de Animation (0 = não publicado)
@@ -43,7 +49,31 @@ SoldierAnims.CLIPS = {
 	faca_lado      = { id = 128196368754555, length = 0.6,    speed = 0,     cycles = 0, stance = "stand",  loop = false, layer = "upper" },
 	faca_guardar   = { id = 106728637909412, length = 0.35,   speed = 0,     cycles = 0, stance = "stand",  loop = false, layer = "upper" },
 	baioneta       = { id = 123176623109494, length = 0.9,    speed = 0,     cycles = 0, stance = "stand",  loop = false, layer = "upper" },
+	-- D-99: uso de itens (procedurais, Shared/ItemAnim): tronco e cabeça; as mãos vão por IK
+	-- (PostureController). Tocados parados e posicionados pelo relógio do servidor (ItemAnim.localTime).
+	item_curativo       = { id = 97278159777784, length = 6.0,  speed = 0, cycles = 0, stance = "stand", loop = false, layer = "upper" },
+	item_torniquete     = { id = 115753692053828, length = 4.0,  speed = 0, cycles = 0, stance = "stand", loop = false, layer = "upper" },
+	item_curativo_outro = { id = 79700784293465, length = 4.0,  speed = 0, cycles = 0, stance = "stand", loop = false, layer = "upper" },
+	item_tratar         = { id = 97893886554554, length = 10.0, speed = 0, cycles = 0, stance = "stand", loop = false, layer = "upper" },
+	item_reanimar       = { id = 137339494942552, length = 8.0,  speed = 0, cycles = 0, stance = "stand", loop = false, layer = "upper" },
+	item_radio          = { id = 116108976413773, length = 1.3333, speed = 0, cycles = 0, stance = "stand", loop = false, layer = "upper" },
+	item_binoculo       = { id = 81042080978575, length = 2.4,  speed = 0, cycles = 0, stance = "stand", loop = false, layer = "upper" },
+	item_pa             = { id = 84255439050425, length = 8.0,  speed = 0, cycles = 0, stance = "stand", loop = false, layer = "upper" },
+	item_cantil         = { id = 84448631326434, length = 3.5,  speed = 0, cycles = 0, stance = "stand", loop = false, layer = "upper" },
 } :: { [string]: Clip }
+
+-- D-99: ação/item (Shared/ItemAnim) -> clipe de 3ª pessoa
+SoldierAnims.ITEM_CLIP = {
+	bandage = "item_curativo",
+	tourniquet = "item_torniquete",
+	bandage_other = "item_curativo_outro",
+	treat = "item_tratar",
+	revive = "item_reanimar",
+	radio = "item_radio",
+	binoculars = "item_binoculo",
+	shovel = "item_pa",
+	canteen = "item_cantil",
+} :: { [string]: string }
 
 -- golpe (Shared/Melee) -> clipe de 3ª pessoa; a coronhada usa o do fuzil
 SoldierAnims.MELEE_CLIP = {
@@ -173,7 +203,7 @@ function SoldierAnims.cycleRate(weights: { [string]: number }, speed: number): n
 	for name, v in weights do
 		local c = SoldierAnims.CLIPS[name]
 		if c and c.cycles > 0 then
-			stride += v * c.speed * c.length / c.cycles
+			stride += v * c.speed * SoldierAnims.SCALE * c.length / c.cycles
 		end
 	end
 	return if stride > 0 then speed / stride else 0
@@ -229,14 +259,15 @@ function SoldierAnims.hipLag(dH: number, moved: number): number
 	return dH - m
 end
 
--- Quanto o HRP estava abaixo da altura de pé quando o clipe da postura foi gravado (studs).
+-- Quanto o HRP fica abaixo da altura de pé na postura do clipe, no corpo do jogo (studs): o da
+-- gravação vezes SCALE (o Animator escala a Root na mesma proporção).
 function SoldierAnims.bakedDrop(stance: string): number
 	local b = SoldierAnims.BAKED
 	local d = b.drop[stance]
 	if not d then
 		return 0
 	end
-	return b.baseHip - math.max(b.baseHip - d, b.minHip)
+	return (b.baseHip - math.max(b.baseHip - d, b.minHip)) * SoldierAnims.SCALE
 end
 
 -- Correção vertical da Root (studs, > 0 sobe) para a mistura de posturas que está tocando: cada

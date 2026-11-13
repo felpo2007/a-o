@@ -187,6 +187,83 @@ function ArtBudget.tris(key: string): number
 	return ArtBudget.TRIS[key] or ArtBudget.DEFAULT
 end
 
+-- Caixa de cada modelo na escala 1 (studs X, Y, Z), medida no GLB preparado: manifest do ForgeGUI
+-- (dim_studs_xyz) e metricas.json do Blender (novo). O plano da arte (ArtPlan) usa para a pegada:
+-- assentar no chão, abrir o patamar no terreno e não pôr uma coisa dentro da outra, antes de o
+-- modelo carregar. O teste da F5 confere com os arquivos.
+ArtBudget.DIMS = {
+	hut_thatch = { 20.49, 18.55, 24.98 },
+	hut_veranda = { 28.58, 21.92, 28.49 },
+	hut_kitchen = { 14.27, 11.92, 12.59 },
+	house_tile = { 21.86, 17.72, 24.83 },
+	granary = { 11.11, 12.56, 10.41 },
+	well = { 5.36, 4.26, 5.36 },
+	shrine = { 4.31, 6.07, 3.98 },
+	grave_mound = { 8.75, 3.91, 6.62 },
+	vc_bunker = { 14.48, 4.35, 12.8 },
+	sandbags = { 1.66, 2.4, 7.11 },
+	bamboo_fence = { 1.19, 6.51, 10.72 },
+	spider_hole = { 3.18, 2.31, 3.18 },
+	tunnel_entrance = { 3.58, 3.56, 3.56 },
+	trench_section = { 14.2, 3.99, 7.02 },
+	log_bridge = { 21.24, 5.47, 3.22 },
+	rice_patch = { 7.14, 1.59, 5.17 },
+	water_jar = { 2.72, 2.83, 2.14 },
+	straw_stack = { 7.33, 10.14, 7.28 },
+	ammo_crate = { 2.25, 1.17, 1.22 },
+	rice_sack = { 1.69, 0.7, 1.27 },
+	conical_hat = { 1.45, 0.68, 1.45 },
+	bamboo_clothesline = { 11.58, 7.18, 2.68 },
+} :: { [string]: { number } }
+
+-- Raio do pé de cada planta no chão (studs, escala 1): o tronco das árvores, a touceira do bambu e o
+-- tufo do arbusto e do capim. É o que não pode cair na lâmina d'água, no dique, na estrada, no leito
+-- do riacho nem dentro de construção. Estimado pela caixa (dim_studs_xyz) e pelas prévias: a copa é
+-- bem mais larga que o pé.
+ArtBudget.BASE_R = {
+	ph_island_tree_01 = 0.8,
+	ph_island_tree_02 = 0.8,
+	ph_island_tree_03 = 0.7,
+	ph_tree_small_02 = 0.5,
+	hill_tree = 1.8,
+	canopy_tree = 2,
+	vine_tree = 1.8,
+	coconut_palm = 1.2,
+	banana = 1.4,
+	bamboo_clump = 4,
+	melaleuca_grove = 5,
+	shrub = 2.2,
+	elephant_grass = 2,
+	taro_fern = 2.2,
+	rice_patch = 1.5,
+} :: { [string]: number }
+
+-- Pé enterrado além do PLANT_SINK_M do plano (fração da altura do modelo, studs na escala 1).
+-- bamboo_clump (pedido do dono, 2026-11-12: "não gosto desse negócio marrom embaixo do bambu"): o GLB
+-- publicado tem um monte de terra marrom liso na base, nos 8% de baixo da altura (raio de até ~2,4 m,
+-- medido no GLB). A touceira desce isso até o republicar sem o disco (pedido ao agente do Blender).
+ArtBudget.BASE_SINK = {
+	bamboo_clump = { frac = 0.08, height = 27.56 },
+} :: { [string]: { frac: number, height: number } }
+
+-- Casas da vila grande (2026-11-12, Data/Village): modelos únicos do Blender, com interior e porta de
+-- pelo menos 2,1 m (7,5 studs) para o soldado de 2,0 m. Com o ID em 0, a vila usa as casas de hoje
+-- variando giro, escala, cor e anexos.
+ArtBudget.VILLAGE_HOUSES = {
+	"vila_casa_01",
+	"vila_casa_02",
+	"vila_casa_03",
+	"vila_casa_04",
+	"vila_casa_05",
+	"vila_casa_06",
+	"vila_casa_07",
+	"vila_casa_08",
+	"vila_casa_09",
+	"vila_casa_10",
+	"vila_casa_11",
+	"vila_casa_12",
+}
+
 -- Touceiras ao longo de uma sebe de lenM metros: bambu a cada 7 m (touceira de ~7,7 m, contínua);
 -- sebe de arrozal a cada 3 m (arbusto/capim de ~1,8 m).
 function ArtBudget.hedgeClumps(lenM: number, tall: boolean): number

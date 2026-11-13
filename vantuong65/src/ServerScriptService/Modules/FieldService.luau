@@ -14,6 +14,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Comms = require(ReplicatedStorage.Shared.Comms)
 local Kit = require(ReplicatedStorage.Shared.Kit)
 local Radio = require(ReplicatedStorage.Shared.Radio)
+local Vantagens = require(ReplicatedStorage.Shared.Vantagens)
 local Weapons = require(ReplicatedStorage.Shared.Weapons)
 local InputMap = require(ReplicatedStorage.Shared.InputMap)
 local Net = require(ReplicatedStorage.Shared.Net)
@@ -87,6 +88,11 @@ local function onMark(p: Player, req: any)
 	end
 	local kind = if req.kind == "target" or req.kind == "map" then req.kind else "point"
 	local msg = { x = pos.X, y = pos.Y, z = pos.Z, from = p.DisplayName, kind = kind } :: any
+	-- marca do líder na carta: vale para o squad inteiro como marca guiada (o cliente a mostra com a
+	-- distância e um aviso). Conferido aqui: só quem é líder do squad
+	if kind == "map" and p:GetAttribute("Role") == "squad_leader" and p:GetAttribute("SquadId") ~= nil then
+		msg.leader = true
+	end
 	if kind == "target" and root then
 		-- inimigo: área aproximada (erro cresce com a distância); quem recebe não sabe o ponto exato
 		local r = Comms.markError((pos - root.Position).Magnitude * M)
@@ -432,7 +438,15 @@ function FieldService.start()
 			-- + equipamento liberado (D-72, ProgressionService.applyGear)
 			local gf, gs = p:GetAttribute("GearFrags"), p:GetAttribute("GearSmokes")
 			local kf, ks = p:GetAttribute("KitFrags"), p:GetAttribute("KitSmokes")
-			p:SetAttribute("Frags", (if type(kf) == "number" then kf else 2) + (if type(gf) == "number" then gf else 0))
+			-- + vantagem "Bolsos Extras" (Vant_grenades, gravada pelo servidor com a posse do passe)
+			p:SetAttribute(
+				"Frags",
+				Weapons.grenadesFor(
+					if type(kf) == "number" then kf else nil,
+					if type(gf) == "number" then gf else nil,
+					Vantagens.extra(p, "grenades")
+				)
+			)
 			p:SetAttribute(
 				"Smokes",
 				(if type(ks) == "number" then ks else 1) + (if type(gs) == "number" then gs else 0)

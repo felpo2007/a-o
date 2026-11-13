@@ -21,10 +21,16 @@ end
 
 local v = Gear.vec
 -- R15 em bloco com HeightScale 1,2 (D-30) e um corpo de outras medidas (o "Man" não foi medido
--- fora do Studio: o layout tem de se ajustar a qualquer caixa)
+-- fora do Studio: o layout tem de se ajustar a qualquer caixa). D-98: ampliados por Gear.BODY_K
+-- (soldado de 2,0 m), como no jogo; o corpo "Man" pequeno de cabeça fica no terceiro.
+local K = Gear.BODY_K
+local function vk(x: number, y: number, z: number): any
+	return v(x * K, y * K, z * K)
+end
 local BODIES = {
-	bloco = { lower = v(2, 0.48, 1), upper = v(2, 1.92, 1), head = v(1.2, 1.2, 1.2) },
-	outro = { lower = v(1.7, 0.55, 0.9), upper = v(1.8, 1.9, 0.95), head = v(1.05, 1.25, 1.1) },
+	bloco = { lower = vk(2, 0.48, 1), upper = vk(2, 1.92, 1), head = vk(1.2, 1.2, 1.2) },
+	outro = { lower = vk(1.7, 0.55, 0.9), upper = vk(1.8, 1.9, 0.95), head = vk(1.05, 1.25, 1.1) },
+	cabeca_pequena = { lower = vk(1.67, 0.6, 1.04), upper = vk(1.84, 1.75, 1.07), head = vk(0.8, 1.0, 0.85) },
 }
 -- caixas dos modelos do ForgeGUI em studs (espaço do modelo; x = frente-trás, z = lado), dos GLB
 local NATIVE = {
@@ -328,6 +334,10 @@ test("capacete/chapéu: cobre a cabeça, aba acima do centro e abaixo do topo, a
 			assert(f.squash >= 0.6 and f.squash <= 1.2, tag .. ": achatamento " .. f.squash)
 			-- espaço do modelo x/z trocado com o do corpo (giro de 90°)
 			assert(f.size.x == f.body.z and f.size.z == f.body.x, tag .. ": eixos")
+			-- D-98: no mínimo o tamanho real do casco, na escala do corpo de 2 m
+			local c = Gear.HEADGEAR[key]
+			assert(f.body.x * Gear.STUD_M >= c.widthM * K - 1e-6, tag .. ": casco estreito demais")
+			assert(f.body.z * Gear.STUD_M >= c.lengthM * K - 1e-6, tag .. ": casco curto demais")
 		end
 	end
 	assert(Gear.headgearFit("nao_existe", BODIES.bloco.head, NATIVE.us_m1_helmet) == nil)

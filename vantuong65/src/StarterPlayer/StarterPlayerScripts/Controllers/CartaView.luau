@@ -2,13 +2,15 @@
 -- Carta tática de verdade (pedido do dono, 2026-11-11: "o mapa que você abre no jogo está
 -- simplório, faça um mapa de verdade"). O GameUI continua dono das telas e das entradas do mapa;
 -- este módulo desenha dentro da janela do mapa:
---   - a folha: a carta topográfica (tools/make_carta.py) em 4 blocos de 1024 px, com vincos de
---     dobra, sombra sobre a prancheta e o papel; sem imagem publicada, papel liso com a quadrícula
---     de 1 km (o desenho simples de antes);
---   - por cima, a lápis de cor: setores com dono (azul = nosso, vermelho = do inimigo, grafite =
---     neutro), a frente, os objetivos com o progresso e a disputa, os pontos de inserção do lado do
---     jogador, o squad, as marcações do squad e "você" com a seta do rumo. NUNCA inimigo (Parte 9.5):
---     as marcas de área aproximada são do próprio squad e envelhecem (D-48);
+--   - a folha: a carta topográfica (tools/make_carta.py) em 4 blocos de 1024 px; sem imagem
+--     publicada, um fundo escuro com a quadrícula de 1 km;
+--   - por cima, no estilo novo (Estilo/UiKit, 2026-11-11: sem papel datilografado, lápis nem vincos):
+--     setores com dono (azul = nosso, vermelho = do inimigo, cinza = neutro), a frente, os objetivos
+--     com o progresso e a disputa, os pontos de inserção do lado do jogador (símbolo forte, estado
+--     pela cor: verde = pronto, cáqui = esperando, vermelho = bloqueado), os pontos de nascer no
+--     squad (com o nome do companheiro), os túneis do VC (só para o VC: bocas e para onde levam), o
+--     squad, as marcações do squad e "você" com a seta do rumo. NUNCA inimigo (Parte 9.5): as marcas
+--     de área aproximada são do próprio squad e envelhecem (D-48);
 --   - zoom e arrasto suaves: no controle, analógico esquerdo = cursor, direito = arrastar, gatilhos =
 --     zoom, direcional = passo de arrasto, L3 = você, R3 = carta inteira; no mouse, roda = zoom no
 --     ponteiro e arrastar com o botão esquerdo; no teclado, setas e +/-;
@@ -28,9 +30,14 @@ local FireSupport = require(ReplicatedStorage.Shared.FireSupport)
 local Front = require(ReplicatedStorage.Shared.Front)
 local InputMap = require(ReplicatedStorage.Shared.InputMap)
 local MapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any
+local TunnelLinks = require(ReplicatedStorage.Shared.TunnelLinks)
+local Vantagens = require(ReplicatedStorage.Shared.Vantagens)
 local Acabamento = require(ReplicatedFirst:WaitForChild("Acabamento"))
+local EventosVisual = require(script.Parent.EventosVisual)
 local Input = require(script.Parent.Input)
+local Marcadores = require(script.Parent.Marcadores)
 local UiKit = require(script.Parent.UiKit)
+local VozEstado = require(script.Parent.VozEstado)
 
 local CartaView = {}
 
@@ -38,19 +45,33 @@ local player = Players.LocalPlayer
 local B = MapConfig.Bounds
 local M = MapConfig.STUD_M
 local SIDE_M = (B.maxX - B.minX) * M -- lado da carta em metros (sempre dos Bounds de agora)
+local V, F = UiKit.V, UiKit.F
 
--- lápis de cor sobre a carta: azul = nosso, vermelho = do inimigo, grafite = neutro/anotação
+-- cores sobre a carta (legíveis na carta clara e no fundo escuro de reserva: símbolo cheio com
+-- contorno escuro). Cor FIXA por lado (pedido do dono): EUA sempre azul, VC sempre vermelho, cinza =
+-- neutro; "nosso" e "do inimigo" só por texto ou ícone, nunca pela cor.
 local COR = {
-	nosso = Color3.fromRGB(38, 72, 150),
-	inimigo = Color3.fromRGB(168, 38, 30),
-	neutro = Color3.fromRGB(78, 74, 64),
-	papel = Color3.fromRGB(232, 224, 198),
-	prancheta = Color3.fromRGB(40, 36, 26),
-	tinta = UiKit.INK,
-	latao = UiKit.BRASS,
+	us = V.US,
+	vc = V.VC,
+	frente = V.KHAKI, -- a linha da frente não é de lado nenhum
+	inimigo = V.RED_HI, -- só a área aproximada de inimigo marcada pelo squad (D-48)
+	neutro = Color3.fromRGB(128, 128, 114),
+	papel = V.TEXT, -- texto claro
+	prancheta = V.BG, -- contorno e fundo escuros
+	tinta = V.DIM, -- quadrícula do fundo de reserva
+	latao = V.BRASS,
+	pronto = Color3.fromRGB(124, 178, 84), -- ponto pronto
+	espera = V.KHAKI, -- ponto esperando a onda
+	bloqueado = V.RED, -- ponto bloqueado
+	squad = V.BRASS, -- o squad (e nascer num companheiro): latão, como nos marcadores do mundo
+	mine = Color3.fromRGB(120, 214, 176), -- sua marca pessoal
+	lead = Color3.fromRGB(236, 120, 200), -- marca do líder para o squad
+	me = V.TEXT, -- você
+	tunel = Color3.fromRGB(214, 130, 64), -- túneis do VC
+	lz = Color3.fromRGB(150, 196, 236), -- LZ da inserção de helicóptero (ponto "lz:<n>")
 }
-local TYPE = Enum.Font.SpecialElite -- máquina de escrever (rótulos oficiais)
-local HAND = Enum.Font.PatrickHand -- lápis (anotações do squad)
+local TYPE = F.TITLE_MED -- rótulos (Oswald)
+local HAND = F.TITLE_MED -- anotações do squad (antes a lápis; agora o mesmo Oswald)
 
 -- estado (uma tabela só: o Luau limita 200 locais por função, e o módulo é uma função)
 local S = {
@@ -81,6 +102,13 @@ local S = {
 	marks = {} :: { any },
 	focused = nil :: InputMap.MagnetPoint?,
 	hoverPoint = nil :: string?, -- ponto de inserção sob o mouse (o nome aparece só nele)
+	prefer = nil :: string?, -- ponto pronto mais perto do objetivo do time (a carta de inserção abre nele)
+	preferShown = false, -- a vista já foi levada até ele nesta abertura
+	eventWidgets = {} :: { [string]: any }, -- raio dos eventos da partida, por nome do marcador
+	tunnelSig = "", -- túneis desenhados para (lado): refeitos só quando o lado muda
+	tunnelDest = {} :: { [string]: { string } }, -- boca -> bocas a que leva (do mais perto)
+	key = nil :: Frame?, -- legenda curta da carta de inserção
+	wp = {} :: { [string]: Frame }, -- marcadores guiados na carta: "mine" (sua marca) e "lead" (líder)
 	sig = "",
 	spawnSig = "",
 	objWidgets = {} :: { [number]: any },
@@ -113,13 +141,18 @@ local function frame(parent: Instance, name: string, z: number?): Frame
 	return f
 end
 
-local function label(parent: Instance, text: string, size: number, color: Color3, font: Enum.Font?): TextLabel
+-- font: Font (Oswald/Arimo do estilo) ou Enum.Font (símbolos ◆ ▲ ◄, que o Oswald não tem)
+local function label(parent: Instance, text: string, size: number, color: Color3, font: any?): TextLabel
 	local t = Instance.new("TextLabel")
 	t.BackgroundTransparency = 1
 	t.BorderSizePixel = 0
 	t.AutomaticSize = Enum.AutomaticSize.XY
 	t.Size = UDim2.new()
-	t.Font = font or TYPE
+	if typeof(font) == "EnumItem" then
+		t.Font = font :: any
+	else
+		t.FontFace = if typeof(font) == "Font" then font :: Font else TYPE
+	end
 	t.TextSize = S.ts(size)
 	t.TextColor3 = color
 	t.RichText = true
@@ -162,16 +195,17 @@ local function myFaction(): string?
 	return if type(f) == "string" then f else nil
 end
 
--- cor de um dono do ponto de vista de quem olha a carta
+-- cor do dono: fixa por lado (EUA azul, VC vermelho), cinza = neutro
 local function ownerColor(owner: string?): Color3
-	local f = myFaction()
-	if owner == "US" or owner == "VC" then
-		return if owner == f then COR.nosso else COR.inimigo
+	if owner == "US" then
+		return COR.us
+	elseif owner == "VC" then
+		return COR.vc
 	end
 	return COR.neutro
 end
 
--- linha a lápis entre dois pontos da folha (u, v): traço duplo levemente deslocado
+-- linha reta entre dois pontos da folha (u, v), em px (não engrossa com o zoom)
 local function pencil(
 	parent: Instance,
 	u1: number,
@@ -180,24 +214,41 @@ local function pencil(
 	v2: number,
 	color: Color3,
 	px: number,
-	z: number?
-)
+	z: number?,
+	tr: number?
+): Frame?
 	local du, dv = u2 - u1, v2 - v1
 	local len = math.sqrt(du * du + dv * dv)
 	if len < 1e-6 then
-		return
+		return nil
 	end
-	for k = 0, 1 do
-		local f = Instance.new("Frame")
-		f.AnchorPoint = Vector2.new(0.5, 0.5)
-		f.BackgroundColor3 = color
-		f.BackgroundTransparency = if k == 0 then 0.12 else 0.6
-		f.BorderSizePixel = 0
-		f.Rotation = math.deg(math.atan2(dv, du))
-		f.Position = UDim2.new((u1 + u2) / 2, k, (v1 + v2) / 2, k)
-		f.Size = UDim2.new(len, 0, 0, px)
-		f.ZIndex = z or 1
-		f.Parent = parent
+	local f = Instance.new("Frame")
+	f.AnchorPoint = Vector2.new(0.5, 0.5)
+	f.BackgroundColor3 = color
+	f.BackgroundTransparency = tr or 0.1
+	f.BorderSizePixel = 0
+	f.Rotation = math.deg(math.atan2(dv, du))
+	f.Position = UDim2.fromScale((u1 + u2) / 2, (v1 + v2) / 2)
+	f.Size = UDim2.new(len, 0, 0, px)
+	f.ZIndex = z or 1
+	f.Parent = parent
+	return f
+end
+
+-- tracejado (n trechos) entre dois pontos da folha
+local function dashed(
+	parent: Instance,
+	u1: number,
+	v1: number,
+	u2: number,
+	v2: number,
+	color: Color3,
+	px: number,
+	n: number
+)
+	for k = 0, n - 1, 2 do
+		local t0, t1 = k / n, (k + 1) / n
+		pencil(parent, u1 + (u2 - u1) * t0, v1 + (v2 - v1) * t0, u1 + (u2 - u1) * t1, v1 + (v2 - v1) * t1, color, px)
 	end
 end
 
@@ -210,23 +261,19 @@ function CartaView.mount(parent: Frame, ts: (n: number) -> number, toLocal: (Vec
 	S.root = parent
 	S.ts = ts
 	S.toLocal = toLocal
-	parent.BackgroundColor3 = COR.prancheta
+	-- painel escuro em volta da folha (estilo novo: nada de prancheta nem papel)
+	parent.BackgroundColor3 = V.BG_NIGHT
 	parent.BackgroundTransparency = 0
-	-- prancheta: madeira escura com luz de cima
-	local light = Instance.new("UIGradient")
-	light.Rotation = 90
-	light.Color = ColorSequence.new(Color3.fromRGB(255, 244, 220), Color3.fromRGB(150, 140, 120))
-	light.Parent = parent
 
 	local sheet = frame(parent, "Folha", 2)
 	sheet.AnchorPoint = Vector2.new(0.5, 0.5)
-	sheet.BackgroundColor3 = COR.papel
+	sheet.BackgroundColor3 = V.PANEL_2 -- sem a carta publicada: fundo escuro com a quadrícula
 	sheet.BackgroundTransparency = 0
 	sheet.ClipsDescendants = false
 	S.sheet = sheet
-	Acabamento.sombra(sheet, 14, Vector2.new(4, 8), 0.65)
+	UiKit.stroke(sheet, V.LINE, 1, 0.3)
 
-	-- blocos da carta (imagem) e o papel liso de reserva com a quadrícula de 1 km
+	-- blocos da carta (imagem) e o fundo de reserva com a quadrícula de 1 km
 	for _, t in Carta.TILES do
 		local img = Instance.new("ImageLabel")
 		img.Name = "Carta_" .. t.key
@@ -241,72 +288,29 @@ function CartaView.mount(parent: Frame, ts: (n: number) -> number, toLocal: (Vec
 		img.Parent = sheet
 		table.insert(S.tiles, img)
 	end
-	local plain = frame(sheet, "PapelLiso", 1)
+	local plain = frame(sheet, "FundoLiso", 1)
 	S.plain = plain
 	local g = MapConfig.GridOrigin1965
 	for e = math.ceil((g.e + B.minX * M) / 1000) * 1000, g.e + B.maxX * M, 1000 do
 		local u = select(1, uv((e - g.e) / M, 0))
-		pencil(plain, u, 0, u, 1, COR.tinta, 1)
+		pencil(plain, u, 0, u, 1, V.LINE, 1, nil, 0.3)
 		local t = label(plain, tostring((e // 1000) % 100), 14, COR.tinta)
 		t.Position = UDim2.new(u, 4, 0, 4)
 	end
 	for n = math.ceil((g.n - B.maxZ * M) / 1000) * 1000, g.n - B.minZ * M, 1000 do
 		local v = select(2, uv(0, (g.n - n) / M))
-		pencil(plain, 0, v, 1, v, COR.tinta, 1)
+		pencil(plain, 0, v, 1, v, V.LINE, 1, nil, 0.3)
 		local t = label(plain, tostring((n // 1000) % 100), 14, COR.tinta)
 		t.Position = UDim2.new(0, 4, v, 2)
 	end
 
-	-- vincos da folha dobrada em quatro (sombra larga e fio claro, em px: não engrossam com o zoom)
-	local creases = frame(sheet, "Vincos", 2)
-	for _, vertical in { true, false } do
-		local band = Instance.new("Frame")
-		band.BorderSizePixel = 0
-		band.BackgroundColor3 = Color3.new(0, 0, 0)
-		band.AnchorPoint = Vector2.new(0.5, 0.5)
-		band.Position = UDim2.fromScale(0.5, 0.5)
-		band.Size = if vertical then UDim2.new(0, 22, 1, 0) else UDim2.new(1, 0, 0, 22)
-		band.ZIndex = 2
-		local gr = Instance.new("UIGradient")
-		gr.Rotation = if vertical then 0 else 90
-		gr.Transparency = NumberSequence.new({
-			NumberSequenceKeypoint.new(0, 1),
-			NumberSequenceKeypoint.new(0.42, 0.9),
-			NumberSequenceKeypoint.new(0.5, 0.72),
-			NumberSequenceKeypoint.new(0.56, 0.95),
-			NumberSequenceKeypoint.new(1, 1),
-		})
-		gr.Parent = band
-		band.Parent = creases
-		local lit = Instance.new("Frame")
-		lit.BorderSizePixel = 0
-		lit.BackgroundColor3 = Color3.new(1, 1, 1)
-		lit.BackgroundTransparency = 0.55
-		lit.AnchorPoint = Vector2.new(0.5, 0.5)
-		lit.Position = if vertical then UDim2.new(0.5, 2, 0.5, 0) else UDim2.new(0.5, 0, 0.5, 2)
-		lit.Size = if vertical then UDim2.new(0, 1, 1, 0) else UDim2.new(1, 0, 0, 1)
-		lit.ZIndex = 3
-		lit.Parent = creases
-	end
-	-- camadas do lápis (ordem de baixo para cima)
-	for i, name in { "setores", "linhas", "objetivos", "pontos", "marcas", "squad", "voce" } do
+	-- camadas (ordem de baixo para cima); "tuneis" só ganha peças para o VC; "eventos": o raio dos
+	-- eventos da partida (EventosVisual), por baixo dos objetivos e dos pontos
+	for i, name in { "setores", "linhas", "eventos", "tuneis", "objetivos", "pontos", "marcas", "squad", "voce" } do
 		S.layers[name] = frame(sheet, name, 3 + i)
 	end
 
-	-- luz da sala sobre a carta: vinheta fraca nas bordas da janela (a carta fica "na mesa")
-	local vin = Instance.new("ImageLabel")
-	vin.Name = "Luz"
-	vin.BackgroundTransparency = 1
-	vin.Image = Acabamento.VINHETA
-	vin.ImageTransparency = 0.45
-	vin.Size = UDim2.fromScale(1, 1)
-	vin.ZIndex = 4
-	pcall(function()
-		vin.Interactable = false
-	end)
-	vin.Parent = parent
-
-	-- HUD da janela: escala gráfica, norte, zoom
+	-- HUD da janela: escala gráfica, norte, zoom (texto claro com contorno escuro: lê na carta clara)
 	local hud = frame(parent, "Instrumentos", 5)
 	pcall(function()
 		hud.Interactable = false
@@ -316,35 +320,86 @@ function CartaView.mount(parent: Frame, ts: (n: number) -> number, toLocal: (Vec
 	bar.AnchorPoint = Vector2.new(0, 1)
 	bar.Position = UDim2.new(0, 14, 1, -40)
 	bar.Size = UDim2.fromOffset(100, 6)
-	bar.BackgroundColor3 = COR.tinta
+	bar.BackgroundColor3 = V.BG
 	bar.BorderSizePixel = 0
 	bar.Parent = hud
-	stroke(bar, COR.papel, 1.5, 0.2)
+	stroke(bar, V.TEXT, 1.5, 0.1)
 	local half = Instance.new("Frame")
-	half.BackgroundColor3 = COR.papel
+	half.BackgroundColor3 = V.TEXT
 	half.BorderSizePixel = 0
 	half.Position = UDim2.new(0.5, 0, 0, 1)
 	half.Size = UDim2.new(0.5, -1, 1, -2)
 	half.Parent = bar
-	local barText = label(hud, "100 m", 13, COR.papel)
+	local barText = label(hud, "100 m", 14, V.TEXT, F.TITLE_MED)
 	barText.AnchorPoint = Vector2.new(0, 1)
 	barText.Position = UDim2.new(0, 14, 1, -48)
-	barText.TextStrokeTransparency = 0.4
+	barText.TextStrokeColor3 = V.BG
+	barText.TextStrokeTransparency = 0.25
 	S.hud.bar, S.hud.barText = bar, barText
-	local north = label(hud, "▲\nN", 15, COR.papel, Enum.Font.GothamBold)
+	local north = label(hud, "▲\nN", 15, V.TEXT, Enum.Font.GothamBold)
 	north.AnchorPoint = Vector2.new(1, 0)
 	north.Position = UDim2.new(1, -14, 0, 10)
-	north.TextStrokeTransparency = 0.3
+	north.TextStrokeColor3 = V.BG
+	north.TextStrokeTransparency = 0.2
 	north.TextXAlignment = Enum.TextXAlignment.Center
-	local zoomText = label(hud, "", 13, COR.papel)
+	local zoomText = label(hud, "", 14, V.TEXT, F.TITLE_MED)
 	zoomText.AnchorPoint = Vector2.new(1, 0)
 	zoomText.Position = UDim2.new(1, -14, 0, 54)
-	zoomText.TextStrokeTransparency = 0.4
+	zoomText.TextStrokeColor3 = V.BG
+	zoomText.TextStrokeTransparency = 0.25
 	S.hud.zoom = zoomText
 
-	-- abertura: o papel clareia e assenta
+	-- legenda curta da carta de inserção (canto de cima à esquerda): as cores dos pontos
+	do
+		local key = UiKit.panel(hud, V.PANEL, 0.12)
+		key.Name = "LegendaCurta"
+		key.Position = UDim2.fromOffset(12, 10)
+		key.AutomaticSize = Enum.AutomaticSize.XY
+		key.Size = UDim2.new()
+		key.Visible = false
+		UiKit.pad(key, 10, 12, 6)
+		UiKit.list(key, true, 12)
+		local function item(order: number, color: Color3, text: string, name: string?, glyph: string?)
+			local f = Instance.new("Frame")
+			f.Name = name or "Item"
+			f.BackgroundTransparency = 1
+			f.AutomaticSize = Enum.AutomaticSize.XY
+			f.Size = UDim2.new()
+			f.LayoutOrder = order
+			UiKit.list(f, true, 6)
+			local sw = Instance.new("Frame")
+			sw.Size = if glyph then UDim2.fromOffset(22, 14) else UDim2.fromOffset(12, 12)
+			sw.BackgroundColor3 = color
+			sw.BorderSizePixel = 0
+			sw.LayoutOrder = 1
+			corner(sw, 3)
+			stroke(sw, V.BG, 1.5)
+			sw.Parent = f
+			if glyph then
+				-- símbolo próprio (LZ) escrito na amostra, como no ponto da carta
+				local g = UiKit.text2(sw, glyph, 11, V.BG, F.TITLE)
+				g.Size = UDim2.fromScale(1, 1)
+				g.TextXAlignment = Enum.TextXAlignment.Center
+			end
+			local t = UiKit.kicker(f, text, 13, V.TEXT)
+			t.AutomaticSize = Enum.AutomaticSize.XY
+			t.Size = UDim2.new()
+			t.LayoutOrder = 2
+			f.Parent = key
+		end
+		item(1, COR.pronto, "PRONTO")
+		item(2, COR.espera, "ESPERANDO")
+		item(3, COR.bloqueado, "BLOQUEADO")
+		item(4, COR.squad, "SQUAD")
+		item(5, COR.tunel, "TÚNEL", "Tunel")
+		-- LZ da inserção de helicóptero (EventosService): só aparece quando houver uma
+		item(6, COR.lz, "HELICÓPTERO", "LZ", "LZ")
+		S.key = key
+	end
+
+	-- abertura: a janela escurece e a carta assenta
 	local flash = frame(parent, "Abertura", 8)
-	flash.BackgroundColor3 = COR.papel
+	flash.BackgroundColor3 = V.BG
 	flash.BackgroundTransparency = 1
 	S.hud.flash = flash
 	local scale = Instance.new("UIScale")
@@ -395,12 +450,38 @@ function CartaView.resize(w: number, h: number)
 	S.uT, S.vT = Carta.clampCenter(S.uT, S.vT, S.zoomT, w, h)
 end
 
+-- legenda curta: só na carta de inserção; o "túnel" só para o VC
+local function paintKey()
+	local key = S.key
+	if key then
+		key.Visible = S.mode == "spawn"
+		local t = key:FindFirstChild("Tunel")
+		if t and t:IsA("GuiObject") then
+			t.Visible = myFaction() == "VC"
+		end
+		local lz = key:FindFirstChild("LZ")
+		if lz and lz:IsA("GuiObject") then
+			local any = false
+			for _, pt in S.spawns do
+				if type(pt.id) == "string" and string.sub(pt.id, 1, 3) == "lz:" then
+					any = true
+					break
+				end
+			end
+			lz.Visible = any
+		end
+	end
+end
+
 function CartaView.setMode(mode: string)
 	if mode ~= S.mode then
 		S.mode = mode
 		S.sig, S.spawnSig = "", ""
+		S.preferShown = false -- entrou na carta de inserção: abre no ponto sugerido
 		CartaView.redraw()
+		CartaView.drawPoints()
 	end
+	paintKey()
 end
 
 -- ponto da folha sob o cursor (com o ímã do controle, o ponto focado)
@@ -556,6 +637,7 @@ end
 function CartaView.setSpawns(list: { any })
 	S.spawns = list or {}
 	CartaView.drawPoints()
+	paintKey()
 end
 
 function CartaView.setInserts(list: { any })
@@ -568,12 +650,57 @@ function CartaView.setSquad(list: { any })
 	CartaView.drawSquad()
 end
 
--- marcação do squad (Squad_Mark do servidor): ponto, ponto pela carta ou área de inimigo aproximada
+-- marcação do squad (Squad_Mark do servidor): ponto, ponto pela carta ou área de inimigo aproximada.
+-- Iguais se juntam (no Studio a mesma área de inimigo saía repetida, uma em cima da outra): área de
+-- inimigo a menos de MERGE_M de outra vira uma só (com os nomes de quem marcou); ponto do mesmo
+-- autor troca o anterior. A marca do líder para o squad é o marcador guiado (Marcadores), não daqui.
+local MERGE_M = 25
+-- Olho de Águia (vantagem "mark"): a área de inimigo marcada por quem tem o passe dura mais para o
+-- squad todo. O atributo Vant_mark fica no Player (replica para todos): acha o autor pelo nome.
+local function markMult(from: string): number
+	for _, p in Players:GetPlayers() do
+		if p.DisplayName == from or p.Name == from then
+			return Vantagens.mult(p, "mark")
+		end
+	end
+	return 1
+end
 function CartaView.addMark(m: any)
-	if type(m) ~= "table" or type(m.x) ~= "number" or type(m.z) ~= "number" then
+	if type(m) ~= "table" or type(m.x) ~= "number" or type(m.z) ~= "number" or m.leader then
 		return
 	end
-	table.insert(S.marks, { x = m.x, z = m.z, r = m.r, kind = m.kind, from = m.from, t = os.clock(), w = nil })
+	local from = tostring(m.from)
+	for _, mk in S.marks do
+		local near = math.sqrt((mk.x - m.x) ^ 2 + (mk.z - m.z) ^ 2) * M < MERGE_M
+		local same = if m.kind == "target"
+			then mk.kind == "target" and near
+			else mk.kind ~= "target" and mk.from == from
+		if same then
+			mk.x, mk.z, mk.r, mk.t = m.x, m.z, m.r, os.clock()
+			mk.mult = math.max(mk.mult or 1, markMult(from))
+			if not table.find(mk.froms, from) then
+				table.insert(mk.froms, from)
+			end
+			mk.from = table.concat(mk.froms, ", ")
+			if mk.w then
+				mk.w:Destroy()
+				mk.w = nil
+			end
+			CartaView.drawMarks()
+			return
+		end
+	end
+	table.insert(S.marks, {
+		x = m.x,
+		z = m.z,
+		r = m.r,
+		kind = m.kind,
+		from = from,
+		froms = { from },
+		t = os.clock(),
+		w = nil,
+		mult = markMult(from),
+	})
 	while #S.marks > 24 do
 		local old = table.remove(S.marks, 1)
 		if old and old.w then
@@ -621,20 +748,22 @@ local function drawSectors(st: any)
 			table.insert(xs, s.polygon[i])
 		end
 		local cu = select(1, uv((math.min(table.unpack(xs)) + math.max(table.unpack(xs))) / 2, B.minZ))
-		local t = label(sect, string.format("S%d", s.id), 22, color, HAND)
+		-- só o número do setor, grande; o dono é a cor (a legenda diz qual é qual); fora de jogo, apagado
+		local t = label(sect, string.format("S%d", s.id), 24, color, F.TITLE)
 		t.AnchorPoint = Vector2.new(0.5, 0)
 		t.Position = UDim2.new(cu, 0, 0, 30)
-		t.TextTransparency = if active then 0.05 else 0.45
-		local lock = if not active and st.mode == "Offensive" and owner == "US" then " ✓" else ""
-		local sub = label(
-			sect,
-			(if owner == "Neutral" then "neutro" elseif owner == myFaction() then "nosso" else "inimigo") .. lock,
-			13,
-			color,
-			HAND
-		)
-		sub.AnchorPoint = Vector2.new(0.5, 0)
-		sub.Position = UDim2.new(cu, 0, 0, 56)
+		t.TextTransparency = if active then 0 else 0.4
+		t.TextStrokeColor3 = V.BG
+		t.TextStrokeTransparency = 0.35
+		-- o que é nosso vai por texto (a cor é a do lado, a mesma para os dois jogadores)
+		if owner == myFaction() then
+			local mine = label(sect, "NOSSO", 12, V.TEXT, F.TITLE_MED)
+			mine.AnchorPoint = Vector2.new(0.5, 0)
+			mine.Position = UDim2.new(cu, 0, 0, 58)
+			mine.TextStrokeColor3 = V.BG
+			mine.TextStrokeTransparency = 0.3
+			mine.TextTransparency = if active then 0 else 0.4
+		end
 	end
 	-- fronteiras: tracejado fino; entre donos diferentes, a linha de contato
 	for a = 1, #MapConfig.Sectors - 1 do
@@ -646,7 +775,7 @@ local function drawSectors(st: any)
 			local u1, v1 = uv(e.x1, e.z1)
 			local u2, v2 = uv(e.x2, e.z2)
 			if frontLine then
-				pencil(lines, u1, v1, u2, v2, COR.inimigo, 4)
+				pencil(lines, u1, v1, u2, v2, COR.frente, 4)
 			elseif contact then
 				-- traço duplo: a cor de cada lado do lado dele
 				local du = if math.abs(u1 - u2) < 1e-6 then 0.0016 else 0
@@ -654,19 +783,7 @@ local function drawSectors(st: any)
 				pencil(lines, u1 - du, v1 - dv, u2 - du, v2 - dv, ownerColor(oa), 2)
 				pencil(lines, u1 + du, v1 + dv, u2 + du, v2 + dv, ownerColor(ob), 2)
 			else
-				local n = 28
-				for k = 0, n - 1, 2 do
-					local t0, t1 = k / n, (k + 1) / n
-					pencil(
-						lines,
-						u1 + (u2 - u1) * t0,
-						v1 + (v2 - v1) * t0,
-						u1 + (u2 - u1) * t1,
-						v1 + (v2 - v1) * t1,
-						COR.neutro,
-						1
-					)
-				end
+				dashed(lines, u1, v1, u2, v2, COR.neutro, 1, 28)
 			end
 		end
 		if frontLine then
@@ -683,14 +800,16 @@ local function drawSectors(st: any)
 				local _, v2 = uv(e.x2, e.z2)
 				for k = 1, 3 do
 					local vv = v1 + (v2 - v1) * k / 4
-					local arrow = label(lines, "◄", 18, COR.inimigo, Enum.Font.GothamBold)
+					local arrow = label(lines, "◄", 18, COR.us, Enum.Font.GothamBold) -- os EUA atacam
 					arrow.AnchorPoint = Vector2.new(1, 0.5)
 					arrow.Position = UDim2.new(u1, -6, vv, 0)
 				end
-				local tag = label(lines, "FRENTE", 15, COR.inimigo, TYPE)
+				local tag = label(lines, "FRENTE", 16, COR.frente, F.TITLE)
 				tag.AnchorPoint = Vector2.new(0, 0.5)
 				tag.Rotation = -90
 				tag.Position = UDim2.new(u1, 10, (v1 + v2) / 2, 0)
+				tag.TextStrokeColor3 = V.BG
+				tag.TextStrokeTransparency = 0.35
 			end
 		end
 	end
@@ -732,11 +851,11 @@ local function drawObjectives(st: any)
 		card.Position = UDim2.new(u, 0, v, 14)
 		card.AutomaticSize = Enum.AutomaticSize.XY
 		card.Size = UDim2.new()
-		card.BackgroundColor3 = COR.papel
-		card.BackgroundTransparency = if active then 0.08 else 0.35
+		card.BackgroundColor3 = V.PANEL
+		card.BackgroundTransparency = if active then 0.1 else 0.4
 		card.BorderSizePixel = 0
 		corner(card, 3)
-		stroke(card, color, 1, 0.35)
+		stroke(card, color, 1.5, 0.15)
 		local pad = Instance.new("UIPadding")
 		pad.PaddingLeft, pad.PaddingRight = UDim.new(0, 6), UDim.new(0, 6)
 		pad.PaddingTop, pad.PaddingBottom = UDim.new(0, 3), UDim.new(0, 4)
@@ -747,37 +866,38 @@ local function drawObjectives(st: any)
 		list.Padding = UDim.new(0, 2)
 		list.Parent = card
 		card.Parent = layer
-		local name = label(card, string.format("S%d · %s", s, UiKit.upper(p.name)), 13, COR.tinta, TYPE)
+		local name = label(card, string.format("S%d · %s", s, UiKit.upper(p.name)), 13, V.TEXT, TYPE)
 		name.LayoutOrder = 1
 		local bar = Instance.new("Frame")
-		bar.Size = UDim2.fromOffset(84, 6)
-		bar.BackgroundColor3 = Color3.fromRGB(196, 186, 156)
+		bar.Size = UDim2.fromOffset(84, 5)
+		bar.BackgroundColor3 = V.PANEL_3
 		bar.BorderSizePixel = 0
 		bar.LayoutOrder = 2
 		bar.Visible = active
-		stroke(bar, COR.tinta, 1, 0.5)
 		local fill = Instance.new("Frame")
 		fill.BorderSizePixel = 0
 		fill.Parent = bar
 		local mid = Instance.new("Frame")
 		mid.BorderSizePixel = 0
-		mid.BackgroundColor3 = COR.tinta
+		mid.BackgroundColor3 = V.DIM
 		mid.Position = UDim2.new(0.5, 0, 0, -1)
 		mid.Size = UDim2.new(0, 1, 1, 2)
 		mid.Parent = bar
 		bar.Parent = card
-		local status = label(card, "", 13, COR.tinta, HAND)
+		-- estado só quando conta (disputa, captura, fora de jogo); o dono já é a cor
+		local status = label(card, "", 12, V.DIM, HAND)
 		status.LayoutOrder = 3
-		-- papel do time: ATACAR / DEFENDER, carimbado a lápis ao lado
+		status.Visible = false
+		-- papel do time: ATACAR / DEFENDER, numa etiqueta cáqui ao lado
 		if s == target and role then
-			local tag = label(layer, if role == "attack" then "ATACAR" else "DEFENDER", 15, COR.nosso, TYPE)
+			local tag = label(layer, if role == "attack" then "ATACAR" else "DEFENDER", 15, V.BG, F.TITLE)
 			tag.AnchorPoint = Vector2.new(0, 1)
 			tag.Position = UDim2.new(u, 12, v, -10)
-			tag.Rotation = -6
-			stroke(tag, COR.nosso, 1.5, 0.1).ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-			tag.BackgroundTransparency = 1
+			tag.BackgroundTransparency = 0
+			tag.BackgroundColor3 = V.KHAKI
+			corner(tag, 3)
 			local tp = Instance.new("UIPadding")
-			tp.PaddingLeft, tp.PaddingRight = UDim.new(0, 4), UDim.new(0, 4)
+			tp.PaddingLeft, tp.PaddingRight = UDim.new(0, 6), UDim.new(0, 6)
 			tp.Parent = tag
 		end
 		S.objWidgets[s] = { ring = ring, stroke = rs, fill = fill, status = status, color = color, active = active }
@@ -790,7 +910,7 @@ local function updateObjectives(st: any)
 	local sign = if f == "VC" then -1 else 1 -- progresso do ponto de vista de quem olha (+ = nosso)
 	for s, w in S.objWidgets do
 		local p = (st.progress[s] or 0) * sign
-		w.fill.BackgroundColor3 = if p >= 0 then COR.nosso else COR.inimigo
+		w.fill.BackgroundColor3 = if p >= 0 then COR.us else COR.vc
 		if p >= 0 then
 			w.fill.Position = UDim2.fromScale(0.5, 0)
 			w.fill.Size = UDim2.fromScale(0.5 * p, 1)
@@ -801,20 +921,19 @@ local function updateObjectives(st: any)
 		local cap = st.capturing and st.capturing[s]
 		local contested = st.contested and st.contested[s]
 		local owner = st.owner[s]
-		local text, color = "", COR.tinta
+		local text, color = "", V.DIM
 		if not w.active then
 			text = if st.mode == "Offensive" and owner == "US" then "tomado" else "fora de jogo"
 		elseif contested then
-			text, color = "⚔ EM DISPUTA", COR.inimigo
+			text, color = "⚔ EM DISPUTA", V.KHAKI
 		elseif cap and cap == f then
-			text, color = if owner == f then "▲ reforçando" else "▲ tomando", COR.nosso
+			text, color = if owner == f then "▲ reforçando" else "▲ tomando", V.TEXT
 		elseif cap then
-			text, color = if owner == f then "▼ sob ataque" else "▼ inimigo reforça", COR.inimigo
-		else
-			text = if owner == "Neutral" then "neutro" elseif owner == f then "nosso" else "do inimigo"
+			text, color = if owner == f then "▼ sob ataque" else "▼ inimigo reforça", V.TEXT
 		end
 		w.status.Text = text
 		w.status.TextColor3 = color
+		w.status.Visible = text ~= ""
 		w.contested = contested == true
 	end
 end
@@ -836,16 +955,27 @@ function CartaView.redraw()
 	end
 end
 
--- símbolo e nome curto de cada tipo de ponto de inserção
+-- símbolo de cada tipo de ponto de inserção
 local KIND = {
-	hq = { "QG", "QG" },
-	rally = { "R", "Reunião" },
-	rally_captured = { "R", "Reunião" },
-	garrison = { "P", "Posto" },
+	hq = "QG",
+	rally = "R",
+	rally_captured = "R",
+	garrison = "P",
+	squad = "●", -- companheiro do squad: símbolo próprio (a bolinha do squad), com o nome sempre
 }
+-- LZ da inserção de helicóptero (EventosService: kind "rally", id "lz:<n>")
+local function isLZ(pt: any): boolean
+	return type(pt.id) == "string" and string.sub(pt.id, 1, 3) == "lz:"
+end
+
 local function pointGlyph(pt: any): string
+	if pt.kind == "squad" then
+		return KIND.squad
+	end
 	if type(pt.id) == "string" then
-		if string.sub(pt.id, 1, 8) == "forward:" then
+		if isLZ(pt) then
+			return "LZ"
+		elseif string.sub(pt.id, 1, 8) == "forward:" then
 			return "RA"
 		elseif string.sub(pt.id, 1, 6) == "squad:" then
 			return "SQ"
@@ -855,8 +985,232 @@ local function pointGlyph(pt: any): string
 			return "×"
 		end
 	end
-	local k = KIND[pt.kind or ""]
-	return if k then k[1] else "R"
+	return KIND[pt.kind or ""] or "R"
+end
+
+-- Nascer num companheiro do squad (Spawn_State, formato do servidor: id "mate:<UserId>" ou
+-- "mate:bot:<n>", kind "squad", name = o companheiro, userId, bot, ready, squad = true). O ponto anda
+-- com ele: a posição muda sem redesenhar o ponto (só o lugar).
+local function squadMate(pt: any): string?
+	if pt.kind ~= "squad" then
+		return nil
+	end
+	local n = pt.name
+	return if type(n) == "string" and n ~= "" then n else nil
+end
+
+-- pronto de verdade: sem bloqueio, sem espera e (quando o servidor manda) ready
+local function pointReady(pt: any): boolean
+	return not pt.blocked and (pt.wait or 0) <= 0 and pt.ready ~= false
+end
+
+-- ===== túneis do VC =====
+-- Só para quem é do VC (regra do dono: só o VC usa os túneis). Para os EUA a camada fica vazia:
+-- nada é desenhado, nem escondido. Galerias tracejadas, bocas (E1..E5) e, no ponto de inserção do
+-- túnel em foco, para onde ele leva (Shared/TunnelLinks.links()).
+local function tunnelCenter(): (number?, number?)
+	for _, l in MapConfig.Locations or {} do
+		if l.name == "An Cường (2)" then
+			return l.x, l.z
+		end
+	end
+	return nil, nil
+end
+
+local function drawTunnels()
+	if not S.mounted then
+		return
+	end
+	local f = myFaction()
+	local sig = tostring(f)
+	if sig == S.tunnelSig then
+		return
+	end
+	S.tunnelSig = sig
+	clearLayer("tuneis")
+	table.clear(S.tunnelDest)
+	paintKey()
+	if f ~= "VC" then
+		return
+	end
+	local cx, cz = tunnelCenter()
+	if not (cx and cz) then
+		return
+	end
+	local layer = S.layers.tuneis
+	-- galerias: cada aresta da rede uma vez (a adjacência traz as duas mãos)
+	local done: { [string]: boolean } = {}
+	for a, list in TunnelLinks.adjacency() do
+		for _, nb in list do
+			local k = if a < nb.id then a .. "|" .. nb.id else nb.id .. "|" .. a
+			if not done[k] then
+				done[k] = true
+				local pts = TunnelLinks.toWorld({ a, nb.id }, cx, cz)
+				local u1, v1 = uv(pts[1].x, pts[1].z)
+				local u2, v2 = uv(pts[2].x, pts[2].z)
+				dashed(layer, u1, v1, u2, v2, COR.tunel, 2, 12)
+			end
+		end
+	end
+	-- bocas
+	for _, en in TunnelLinks.entrances() do
+		local p = TunnelLinks.toWorld({ en.id }, cx, cz)[1]
+		local u, v = uv(p.x, p.z)
+		local dot = Instance.new("Frame")
+		dot.Name = en.id
+		dot.AnchorPoint = Vector2.new(0.5, 0.5)
+		dot.Position = UDim2.fromScale(u, v)
+		dot.Size = UDim2.fromOffset(9, 9)
+		dot.BackgroundColor3 = COR.tunel
+		dot.BorderSizePixel = 0
+		corner(dot, 2)
+		stroke(dot, V.BG, 1.5)
+		dot.Parent = layer
+		local t = label(layer, en.id, 12, COR.tunel, F.TITLE)
+		t.AnchorPoint = Vector2.new(0, 0.5)
+		t.Position = UDim2.new(u, 8, v, 0)
+		t.TextStrokeColor3 = V.BG
+		t.TextStrokeTransparency = 0.3
+	end
+	-- destinos de cada boca (do mais perto ao mais longe)
+	for id, list in TunnelLinks.links() do
+		local to = {}
+		for _, l in list do
+			table.insert(to, l.to)
+		end
+		S.tunnelDest[id] = to
+	end
+end
+
+-- ===== eventos da partida (EventosVisual) =====
+-- O raio de cada evento na cor da fase (aviso, em curso, carga armada, janela, fim) e o ícone no
+-- meio. Um círculo por evento, reaproveitado; muda só quando o EventosVisual avisa.
+local function drawEvents()
+	if not S.mounted then
+		return
+	end
+	local layer = S.layers.eventos
+	local seen: { [string]: boolean } = {}
+	local spanX, spanZ = B.maxX - B.minX, B.maxZ - B.minZ
+	for _, ev in EventosVisual.list() do
+		seen[ev.key] = true
+		local w = S.eventWidgets[ev.key]
+		if not w then
+			local ring = Instance.new("Frame")
+			ring.Name = ev.key
+			ring.AnchorPoint = Vector2.new(0.5, 0.5)
+			ring.BorderSizePixel = 0
+			corner(ring)
+			local st = stroke(ring, V.KHAKI, 2, 0.1)
+			local lim = Instance.new("UISizeConstraint")
+			lim.MinSize = Vector2.new(16, 16)
+			lim.Parent = ring
+			ring.Parent = layer
+			local icon = label(layer, "", 16, V.TEXT, Enum.Font.GothamBold)
+			icon.AnchorPoint = Vector2.new(0.5, 0.5)
+			icon.TextStrokeColor3 = V.BG
+			icon.TextStrokeTransparency = 0.2
+			w = { ring = ring, stroke = st, icon = icon }
+			S.eventWidgets[ev.key] = w
+		end
+		local u, v = uv(ev.x, ev.z)
+		local r = EventosVisual.radiusStuds(ev)
+		local c = EventosVisual.color(ev.fase)
+		local over = ev.fase == "fim"
+		w.ring.Position = UDim2.fromScale(u, v)
+		w.ring.Size = UDim2.fromScale(2 * r / spanX, 2 * r / spanZ)
+		w.ring.BackgroundColor3 = c
+		w.ring.BackgroundTransparency = if over then 0.94 else 0.82
+		w.stroke.Color = c
+		w.stroke.Transparency = if over then 0.6 else 0.1
+		w.icon.Position = UDim2.fromScale(u, v)
+		w.icon.Text = EventosVisual.icon(ev.id)
+		w.icon.TextTransparency = if over then 0.5 else 0
+	end
+	for key, w in S.eventWidgets do
+		if not seen[key] then
+			w.ring:Destroy()
+			w.icon:Destroy()
+			S.eventWidgets[key] = nil
+		end
+	end
+end
+
+-- ===== ponto escolhido ao abrir a carta de inserção =====
+-- O ponto PRONTO mais perto do objetivo do time (Front.objective, como o HUD): a carta abre nele (o
+-- ímã do controle gruda; no mouse ele fica realçado). Nunca nasce sozinho: só leva a vista e o foco.
+local function objectiveXZ(): (number?, number?)
+	local st = S.match
+	local f = myFaction()
+	if not (st and f and type(st.owner) == "table" and type(st.points) == "table") then
+		return nil, nil
+	end
+	local cap: { [number]: string } = {}
+	if type(st.capturing) == "table" then
+		for i, c in st.capturing do
+			if type(c) == "string" and c ~= "" then
+				cap[i] = c
+			end
+		end
+	end
+	local ok, _, target = pcall(Front.objective, st.owner, st.active or {}, f, cap)
+	local p = if ok and target then st.points[target] else nil
+	if type(p) == "table" and type(p.x) == "number" and type(p.z) == "number" then
+		return p.x, p.z
+	end
+	return nil, nil
+end
+
+local function preferredPoint(list: { any }): string?
+	local ox, oz = objectiveXZ()
+	if not (ox and oz) then
+		return nil
+	end
+	local best: string? = nil
+	local bestD = math.huge
+	for _, pt in list do
+		-- o "onde caiu" custa créditos ou Robux: nunca é a sugestão
+		if pointReady(pt) and pt.id ~= "inplace" and type(pt.x) == "number" and type(pt.z) == "number" then
+			local d = (pt.x - ox) ^ 2 + (pt.z - oz) ^ 2
+			if d < bestD then
+				best, bestD = tostring(pt.id), d
+			end
+		end
+	end
+	return best
+end
+
+-- texto do ponto (nome e estado); o túnel em foco diz para onde leva
+local function pointText(pt: any, spawnMode: boolean): string
+	local mate = squadMate(pt)
+	local name = if mate then mate else tostring(pt.name)
+	if not spawnMode then
+		return Acabamento.viet(name)
+	end
+	local state = if pt.blocked
+		then (pt.why or "bloqueado")
+		elseif (pt.wait or 0) > 0 then string.format("%d s", pt.wait)
+		elseif pt.ready == false then (pt.why or "espere")
+		else "PRONTO"
+	local text = string.format("%s · %s", name, state)
+	local tid = if type(pt.id) == "string" and string.sub(pt.id, 1, 7) == "tunnel:" then string.sub(pt.id, 8) else nil
+	local dest = tid and S.tunnelDest[tid]
+	if dest and #dest > 0 then
+		-- 2ª linha à parte: o Lang traduz linha a linha ("leva a %s" é um modelo inteiro)
+		text = string.format("%s\n%s", text, string.format("leva a %s", table.concat(dest, ", ")))
+	end
+	return Acabamento.viet(text)
+end
+
+local function stateColor(pt: any, spawnMode: boolean): Color3
+	if not spawnMode then
+		return V.KHAKI
+	elseif pt.blocked then
+		return COR.bloqueado
+	elseif not pointReady(pt) then
+		return COR.espera
+	end
+	return if pt.kind == "squad" then COR.squad elseif isLZ(pt) then COR.lz else COR.pronto
 end
 
 -- pontos de inserção: na carta de spawn com espera e PRONTO (botões); em campo, só o símbolo
@@ -864,11 +1218,20 @@ function CartaView.drawPoints()
 	if not S.mounted then
 		return
 	end
+	drawTunnels()
 	local spawnMode = S.mode == "spawn"
 	local list: { any } = if spawnMode then S.spawns else S.inserts
 	local sigParts = { S.mode }
 	for _, pt in list do
-		table.insert(sigParts, string.format("%s@%d,%d", tostring(pt.id), math.floor(pt.x), math.floor(pt.z)))
+		-- o companheiro do squad anda: a posição dele fica fora da assinatura (muda só o lugar)
+		if pt.kind == "squad" then
+			table.insert(sigParts, string.format("%s:squad", tostring(pt.id)))
+		else
+			table.insert(
+				sigParts,
+				string.format("%s@%d,%d:%s", tostring(pt.id), math.floor(pt.x), math.floor(pt.z), tostring(pt.kind))
+			)
+		end
 	end
 	local sig = table.concat(sigParts, "|")
 	if sig ~= S.spawnSig then
@@ -884,47 +1247,52 @@ function CartaView.drawPoints()
 			holder.AutoButtonColor = false
 			holder.Selectable = false -- no controle, o cursor com ímã escolhe
 			holder.AnchorPoint = Vector2.new(0.5, 1)
-			holder.Position = UDim2.new(u, 0, v, 2)
+			holder.Position = UDim2.new(u, 0, v, -4)
 			holder.AutomaticSize = Enum.AutomaticSize.XY
 			holder.Size = UDim2.new()
-			holder.BackgroundColor3 = COR.prancheta
-			holder.BackgroundTransparency = if spawnMode then 0.08 else 0.25
+			holder.BackgroundTransparency = 1
 			holder.BorderSizePixel = 0
-			corner(holder, 3)
-			local edge = stroke(holder, COR.latao, 0, 0)
-			local pad = Instance.new("UIPadding")
-			pad.PaddingLeft, pad.PaddingRight = UDim.new(0, 5), UDim.new(0, 6)
-			pad.PaddingTop, pad.PaddingBottom = UDim.new(0, 2), UDim.new(0, 2)
-			pad.Parent = holder
-			local row = Instance.new("UIListLayout")
-			row.FillDirection = Enum.FillDirection.Horizontal
-			row.VerticalAlignment = Enum.VerticalAlignment.Center
-			row.Padding = UDim.new(0, 5)
-			row.SortOrder = Enum.SortOrder.LayoutOrder
-			row.Parent = holder
-			local glyph = label(holder, pointGlyph(pt), 13, COR.prancheta, Enum.Font.GothamBold)
+			-- símbolo forte: letra escura sobre a cor do estado, contorno escuro (lê nos dois fundos)
+			local g = pointGlyph(pt)
+			local glyph = label(holder, g, 14, V.BG, if string.find(g, "^%a+$") then F.TITLE else Enum.Font.GothamBold)
+			glyph.AutomaticSize = Enum.AutomaticSize.X
+			glyph.Size = UDim2.fromOffset(0, S.ts(22))
+			glyph.TextXAlignment = Enum.TextXAlignment.Center
 			glyph.BackgroundTransparency = 0
-			glyph.BackgroundColor3 = COR.latao
-			glyph.LayoutOrder = 1
-			corner(glyph, 2)
+			glyph.BackgroundColor3 = stateColor(pt, spawnMode)
+			corner(glyph, 3)
+			local edge = stroke(glyph, V.BG, 1.5, 0)
 			local gp = Instance.new("UIPadding")
-			gp.PaddingLeft, gp.PaddingRight = UDim.new(0, 3), UDim.new(0, 3)
+			gp.PaddingLeft, gp.PaddingRight = UDim.new(0, 5), UDim.new(0, 5)
 			gp.Parent = glyph
-			-- o nome (e a espera) só no ponto em foco, sob o mouse ou com zoom: todos abertos ao mesmo
-			-- tempo trombavam com as fichas dos setores (Studio, D-93). O estado fica na cor do símbolo.
-			local text = label(holder, "", 12, COR.papel, Enum.Font.GothamMedium)
-			text.LayoutOrder = 2
+			-- nome (e a espera) numa etiqueta escura à direita do símbolo, fora do botão: aparecer não
+			-- mexe no símbolo sob o mouse (senão ele pulava e o realce piscava). Só no ponto em foco,
+			-- sob o mouse, com zoom ou no companheiro do squad (todos abertos trombavam com os objetivos)
+			local text = label(layer, "", 13, V.TEXT, F.TITLE_MED)
+			text.AnchorPoint = Vector2.new(0, 1)
+			text.Position = UDim2.new(u, S.ts(22), v, -4)
 			text.Visible = false
+			pcall(function()
+				text.Interactable = false
+			end)
+			text.BackgroundTransparency = 0.08
+			text.BackgroundColor3 = V.PANEL
+			text.TextXAlignment = Enum.TextXAlignment.Left
+			corner(text, 3)
+			local tpad = Instance.new("UIPadding")
+			tpad.PaddingLeft, tpad.PaddingRight = UDim.new(0, 6), UDim.new(0, 6)
+			tpad.PaddingTop, tpad.PaddingBottom = UDim.new(0, 2), UDim.new(0, 2)
+			tpad.Parent = text
 			holder.Parent = layer
 			-- pino no chão do ponto
 			local pin = Instance.new("Frame")
 			pin.AnchorPoint = Vector2.new(0.5, 0.5)
 			pin.Position = UDim2.fromScale(u, v)
-			pin.Size = UDim2.fromOffset(7, 7)
-			pin.BackgroundColor3 = COR.latao
+			pin.Size = UDim2.fromOffset(8, 8)
+			pin.BackgroundColor3 = stateColor(pt, spawnMode)
 			pin.BorderSizePixel = 0
 			corner(pin)
-			stroke(pin, COR.prancheta, 1.5)
+			stroke(pin, V.BG, 1.5)
 			pin.Parent = layer
 			local id = tostring(pt.id)
 			holder.Activated:Connect(function()
@@ -943,44 +1311,71 @@ function CartaView.drawPoints()
 					CartaView.drawPoints()
 				end
 			end)
-			S.spawnWidgets[id] = { holder = holder, text = text, edge = edge, glyph = glyph, pt = pt }
+			S.spawnWidgets[id] =
+				{ holder = holder, text = text, edge = edge, glyph = glyph, pin = pin, scale = nil, pt = pt }
 		end
 	end
-	-- textos que mudam todo segundo (espera)
+	-- o ponto sugerido (pronto, mais perto do objetivo): a carta de inserção abre nele, uma vez por
+	-- abertura (os pontos podem chegar depois de abrir: vale quando chegarem)
+	S.prefer = if spawnMode then preferredPoint(list) else nil
+	if spawnMode and S.visible and not S.preferShown and S.prefer then
+		for _, pt in list do
+			if tostring(pt.id) == S.prefer then
+				S.preferShown = true
+				local u, v = uv(pt.x, pt.z)
+				CartaView.goTo(u, v, math.max(S.zoomT, 1.5))
+				break
+			end
+		end
+	end
+	-- textos e cores que mudam todo segundo (espera)
 	for _, pt in list do
 		local w = S.spawnWidgets[tostring(pt.id)]
 		if w then
 			w.pt = pt
-			if spawnMode then
-				local state = if pt.blocked
-					then (pt.why or "bloqueado")
-					elseif (pt.wait or 0) > 0 then string.format("%d s", pt.wait)
-					else "PRONTO"
-				w.text.Text = Acabamento.viet(string.format("%s · %s", pt.name, state))
-				w.text.TextColor3 = if pt.blocked
-					then Color3.fromRGB(232, 140, 120)
-					elseif (pt.wait or 0) > 0 then COR.papel
-					else Color3.fromRGB(176, 214, 130)
-			else
-				w.text.Text = Acabamento.viet(pt.name)
+			if pt.kind == "squad" then
+				-- o companheiro andou: só o lugar muda (nada é recriado)
+				local u, v = uv(pt.x, pt.z)
+				w.holder.Position = UDim2.new(u, 0, v, -4)
+				w.pin.Position = UDim2.fromScale(u, v)
+				w.text.Position = UDim2.new(u, S.ts(22), v, -4)
 			end
+			w.text.Text = pointText(pt, spawnMode)
+			w.text.TextColor3 = if spawnMode and pt.blocked then Color3.fromRGB(240, 150, 130) else V.TEXT
 			local id = tostring(pt.id)
-			local hot = (S.focused ~= nil and S.focused.id == "spawn:" .. id) or S.hoverPoint == id
-			w.edge.Thickness = if hot then 2.5 else 0
-			w.text.Visible = hot or S.zoom >= 2
+			-- em foco (ímã), sob o mouse ou, sem nenhum dos dois, o sugerido
+			local hot = (S.focused ~= nil and S.focused.id == "spawn:" .. id)
+				or S.hoverPoint == id
+				or (S.focused == nil and S.hoverPoint == nil and S.prefer == id)
+			w.edge.Color = if hot then V.BRASS else V.BG
+			w.edge.Thickness = if hot then 2.5 else 1.5
+			w.text.Visible = hot or S.zoom >= 2 or (spawnMode and squadMate(pt) ~= nil)
 			-- o em foco passa por cima dos vizinhos e das fichas
 			w.holder.ZIndex = if hot then 3 else 1
-			-- estado no símbolo: latão = pronto, papel = esperando, vermelho = bloqueado
-			w.glyph.BackgroundColor3 = if not spawnMode
-				then COR.latao
-				elseif pt.blocked then Color3.fromRGB(196, 92, 72)
-				elseif (pt.wait or 0) > 0 then Color3.fromRGB(170, 162, 136)
-				else COR.latao
+			w.text.ZIndex = if hot then 4 else 2
+			local c = stateColor(pt, spawnMode)
+			w.glyph.BackgroundColor3 = c
+			w.pin.BackgroundColor3 = c
 		end
 	end
 end
 
--- o próprio squad (FrontService, a cada 2 s): bolinha azul com a inicial; líder com estrela
+-- ícone de quem fala no squad da carta: 🔊 de perto, 📻 pelo rádio (só aliados: VozEstado)
+local function paintVoice(w: any, talking: boolean, radio: boolean)
+	local v = w.voice :: TextLabel?
+	if v then
+		v.Visible = talking or radio
+		v.Text = if radio then "📻" else "🔊"
+	end
+end
+VozEstado.Changed:Connect(function(uid: number, talking: boolean, radio: boolean)
+	local w = S.squadWidgets[uid]
+	if w then
+		paintVoice(w, talking, radio)
+	end
+end)
+
+-- o próprio squad (FrontService, a cada 2 s): bolinha de latão com o nome; líder com estrela
 function CartaView.drawSquad()
 	if not S.mounted then
 		return
@@ -997,25 +1392,35 @@ function CartaView.drawSquad()
 			local dot = Instance.new("Frame")
 			dot.AnchorPoint = Vector2.new(0.5, 0.5)
 			dot.Size = UDim2.fromOffset(12, 12)
-			dot.BackgroundColor3 = COR.nosso
+			dot.BackgroundColor3 = COR.squad
 			dot.BorderSizePixel = 0
 			corner(dot)
-			stroke(dot, COR.papel, 1.5)
+			stroke(dot, V.BG, 2)
 			dot.Parent = layer
-			local name = label(dot, "", 12, COR.nosso, HAND)
+			local name = label(dot, "", 13, V.TEXT, F.TITLE_MED)
 			name.AnchorPoint = Vector2.new(0, 0.5)
-			name.Position = UDim2.new(1, 4, 0.5, 0)
-			name.TextStrokeColor3 = COR.papel
-			name.TextStrokeTransparency = 0.3
-			w = { dot = dot, name = name }
+			name.Position = UDim2.new(1, 5, 0.5, 0)
+			name.TextStrokeColor3 = V.BG
+			name.TextStrokeTransparency = 0.2
+			-- quem fala (VozEstado): o alto-falante à esquerda da bolinha; muda pelo evento
+			local voice = label(dot, "🔊", 13, V.TEXT, Enum.Font.GothamBold)
+			voice.AnchorPoint = Vector2.new(1, 0.5)
+			voice.Position = UDim2.new(0, -4, 0.5, 0)
+			voice.Visible = false
+			w = { dot = dot, name = name, voice = voice }
 			S.squadWidgets[m.id] = w
+			local talking, radio = VozEstado.get(tonumber(m.id) or 0)
+			paintVoice(w, talking, radio)
 		end
 		local u, v = uv(m.x, m.z)
 		w.dot.Position = UDim2.fromScale(u, v)
-		w.dot.BackgroundColor3 = if m.downed then COR.inimigo else COR.nosso
-		w.name.Text = (if m.role == "squad_leader" then "★ " else "")
-			.. tostring(m.name)
-			.. (if m.downed then " (caído)" else "")
+		-- caído: cinza com "(caído)" no nome (vermelho é a cor do VC)
+		w.dot.BackgroundColor3 = if m.downed then V.MUTED else COR.squad
+		local nm = tostring(m.name)
+		if m.role == "squad_leader" then
+			nm = string.format("★ %s", nm)
+		end
+		w.name.Text = if m.downed then string.format("%s (caído)", nm) else nm
 	end
 	for id, w in S.squadWidgets do
 		if not seen[id] then
@@ -1025,17 +1430,27 @@ function CartaView.drawSquad()
 	end
 end
 
--- marcações do squad a lápis: X grafite (ponto) e círculo vermelho tracejado (área aproximada)
+-- marcações do squad: X cinza (ponto) e círculo vermelho (área aproximada do inimigo marcada pelo squad)
 function CartaView.drawMarks()
 	if not S.mounted then
 		return
 	end
 	local layer = S.layers.marcas
+	-- o inimigo marcado é do outro lado: a cor dele (fixa por lado); "inimigo" vai no texto
+	local enemy = if myFaction() == "VC" then COR.us else COR.vc
 	for _, mk in S.marks do
 		if mk.w then
 			continue
 		end
 		local u, v = uv(mk.x, mk.z)
+		-- marcas perto umas das outras: o rótulo sobe um degrau por vizinha já desenhada (não se
+		-- empilham uma em cima da outra)
+		local k = 0
+		for _, o in S.marks do
+			if o ~= mk and o.w and math.sqrt((o.x - mk.x) ^ 2 + (o.z - mk.z) ^ 2) * M < 40 then
+				k += 1
+			end
+		end
 		local holder = frame(layer, "Marca")
 		holder.Size = UDim2.fromScale(1, 1)
 		if mk.kind == "target" and type(mk.r) == "number" then
@@ -1044,10 +1459,10 @@ function CartaView.drawMarks()
 			ring.AnchorPoint = Vector2.new(0.5, 0.5)
 			ring.Position = UDim2.fromScale(u, v)
 			ring.Size = UDim2.fromScale(2 * rr, 2 * rr)
-			ring.BackgroundColor3 = COR.inimigo
+			ring.BackgroundColor3 = enemy
 			ring.BackgroundTransparency = 0.82
 			corner(ring)
-			local st = stroke(ring, COR.inimigo, 2, 0.1)
+			local st = stroke(ring, enemy, 2, 0.1)
 			st.LineJoinMode = Enum.LineJoinMode.Round
 			local sz = Instance.new("UISizeConstraint")
 			sz.MinSize = Vector2.new(14, 14)
@@ -1057,17 +1472,21 @@ function CartaView.drawMarks()
 				holder,
 				string.format("≈ inimigo ±%d m · %s", math.floor(mk.r + 0.5), tostring(mk.from)),
 				13,
-				COR.inimigo,
+				V.TEXT,
 				HAND
 			)
 			t.AnchorPoint = Vector2.new(0.5, 1)
-			t.Position = UDim2.new(u, 0, v, -10)
+			t.Position = UDim2.new(u, 0, v, -10 - k * S.ts(16))
+			t.TextStrokeColor3 = V.BG
+			t.TextStrokeTransparency = 0.3
 		else
 			pencil(holder, u - 0.004, v - 0.004, u + 0.004, v + 0.004, COR.neutro, 2.5)
 			pencil(holder, u - 0.004, v + 0.004, u + 0.004, v - 0.004, COR.neutro, 2.5)
-			local t = label(holder, tostring(mk.from), 13, COR.neutro, HAND)
+			local t = label(holder, tostring(mk.from), 13, V.TEXT, HAND)
 			t.AnchorPoint = Vector2.new(0, 0.5)
-			t.Position = UDim2.new(u, 10, v, 0)
+			t.Position = UDim2.new(u, 10, v, k * S.ts(16))
+			t.TextStrokeColor3 = V.BG
+			t.TextStrokeTransparency = 0.3
 		end
 		holder.Rotation = 0
 		mk.w = holder
@@ -1078,7 +1497,8 @@ local function fadeMarks()
 	local now = os.clock()
 	for i = #S.marks, 1, -1 do
 		local mk = S.marks[i]
-		local ttl = if mk.kind == "target" then Comms.MARK_TTL_S else 90
+		-- a área de inimigo dura mais com o Olho de Águia de quem marcou (mult, 1 sem o passe)
+		local ttl = if mk.kind == "target" then Comms.MARK_TTL_S * (mk.mult or 1) else 90
 		local a = math.clamp(1 - (now - mk.t) / ttl, 0, 1)
 		if a <= 0 then
 			if mk.w then
@@ -1091,6 +1511,57 @@ local function fadeMarks()
 					d.TextTransparency = 1 - a
 				elseif d:IsA("UIStroke") then
 					d.Transparency = 1 - 0.9 * a
+				end
+			end
+		end
+	end
+end
+
+-- marcadores guiados (Marcadores: a sua marca e a do líder para o squad), reaproveitados
+local function drawWaypoints()
+	local layer = S.layers.marcas
+	local now = Marcadores.waypoints()
+	for _, k in { "mine", "lead" } do
+		local wpt = (now :: any)[k]
+		local f = S.wp[k]
+		if wpt and not f then
+			local nf = Instance.new("Frame")
+			nf.Name = if k == "mine" then "SuaMarca" else "MarcaDoLider"
+			nf.AnchorPoint = Vector2.new(0.5, 0.5)
+			nf.Size = UDim2.fromOffset(26, 26)
+			nf.BackgroundTransparency = 1
+			nf.ZIndex = 3
+			nf.Parent = layer
+			local g = label(
+				nf,
+				if k == "mine" then "◆" else "★",
+				22,
+				if k == "mine" then COR.mine else COR.lead,
+				Enum.Font.GothamBold
+			)
+			g.AnchorPoint = Vector2.new(0.5, 0.5)
+			g.Position = UDim2.fromScale(0.5, 0.5)
+			g.TextStrokeColor3 = V.BG
+			g.TextStrokeTransparency = 0
+			g.ZIndex = 3
+			local t = label(nf, "", 13, V.TEXT, F.TITLE_MED)
+			t.Name = "Nome"
+			t.AnchorPoint = Vector2.new(0.5, 0)
+			t.Position = UDim2.new(0.5, 0, 1, 0)
+			t.TextStrokeColor3 = V.BG
+			t.TextStrokeTransparency = 0.2
+			t.ZIndex = 3
+			S.wp[k] = nf
+			f = nf
+		end
+		if f then
+			f.Visible = wpt ~= nil
+			if wpt then
+				local u, v = uv(wpt.x, wpt.z)
+				f.Position = UDim2.fromScale(u, v)
+				local t = f:FindFirstChild("Nome") :: TextLabel?
+				if t then
+					t.Text = if k == "lead" and wpt.from then tostring(wpt.from) else ""
 				end
 			end
 		end
@@ -1111,7 +1582,7 @@ local function drawMe()
 		halo.AnchorPoint = Vector2.new(0.5, 0.5)
 		halo.Position = UDim2.fromScale(0.5, 0.5)
 		halo.Size = UDim2.fromOffset(16, 16)
-		halo.BackgroundColor3 = COR.latao
+		halo.BackgroundColor3 = COR.me
 		halo.BorderSizePixel = 0
 		corner(halo)
 		stroke(halo, COR.prancheta, 2)
@@ -1121,15 +1592,15 @@ local function drawMe()
 		arrow.AnchorPoint = Vector2.new(0.5, 0.5)
 		arrow.Position = UDim2.fromScale(0.5, 0.5)
 		arrow.Size = UDim2.fromOffset(30, 30)
-		arrow.TextStrokeColor3 = COR.latao
+		arrow.TextStrokeColor3 = COR.me
 		arrow.TextStrokeTransparency = 0
 		arrow.ZIndex = 2
 		S.me, S.meArrow = me, arrow
-		local tag = label(me, "VOCÊ", 12, COR.prancheta, Enum.Font.GothamBold)
+		local tag = label(me, "VOCÊ", 13, V.BRASS, F.TITLE)
 		tag.AnchorPoint = Vector2.new(0.5, 0)
 		tag.Position = UDim2.new(0.5, 0, 1, 0)
-		tag.TextStrokeColor3 = COR.papel
-		tag.TextStrokeTransparency = 0.2
+		tag.TextStrokeColor3 = V.BG
+		tag.TextStrokeTransparency = 0.15
 		local p = TweenService:Create(
 			halo,
 			TweenInfo.new(0.9, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true),
@@ -1258,6 +1729,7 @@ function CartaView.step(dt: number, pad: boolean)
 		end
 	end
 	fadeMarks()
+	drawWaypoints()
 	drawMe()
 end
 
@@ -1289,25 +1761,27 @@ function CartaView.setVisible(on: boolean)
 	local flash = S.hud.flash :: Frame
 	local scale = S.hud.scale :: UIScale
 	if on then
-		-- a carta "desdobra": entra um pouco menor e torta, o papel clareia e assenta
-		S.zoom = S.zoomT * 0.92
-		scale.Scale = 0.96
-		flash.BackgroundTransparency = 0.15
+		-- a carta entra um pouco menor e assenta, saindo de um véu escuro (0,3 s)
+		S.zoom = S.zoomT * 0.94
+		scale.Scale = 0.97
+		flash.BackgroundTransparency = 0.2
 		local sheet = S.sheet :: Frame
-		sheet.Rotation = -1.4
-		local info = TweenInfo.new(0.42, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
+		sheet.Rotation = 0
+		local info = TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
 		TweenService:Create(scale, info, { Scale = 1 }):Play()
-		TweenService:Create(sheet, info, { Rotation = 0 }):Play()
-		TweenService:Create(flash, TweenInfo.new(0.35, Enum.EasingStyle.Quad), { BackgroundTransparency = 1 }):Play()
+		TweenService:Create(flash, TweenInfo.new(0.25, Enum.EasingStyle.Quad), { BackgroundTransparency = 1 }):Play()
 		S.spawnSig = ""
+		S.preferShown = false
 		CartaView.drawPoints()
 		CartaView.drawMarks()
+		drawEvents()
+		paintKey()
 	else
 		S.drag = nil
 	end
 end
 
--- dobra a carta (fecha): o GameUI esconde a janela depois de `tempo` s
+-- fecha a carta (encolhe e escurece): o GameUI esconde a janela depois de `tempo` s
 function CartaView.foldOut(tempo: number)
 	if not S.mounted then
 		return
@@ -1315,55 +1789,46 @@ function CartaView.foldOut(tempo: number)
 	local flash = S.hud.flash :: Frame
 	local scale = S.hud.scale :: UIScale
 	local info = TweenInfo.new(tempo, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
-	TweenService:Create(scale, info, { Scale = 0.95 }):Play()
-	TweenService:Create(S.sheet :: Frame, info, { Rotation = 1.2 }):Play()
-	TweenService:Create(flash, info, { BackgroundTransparency = 0.1 }):Play()
+	TweenService:Create(scale, info, { Scale = 0.97 }):Play()
+	TweenService:Create(flash, info, { BackgroundTransparency = 0.15 }):Play()
 end
 
--- ===== legenda (painel de papel ao lado da carta, em campo) =====
+-- ===== legenda (painel escuro ao lado da carta, em campo) =====
+-- Curta (pedido do dono: "telas com muita escrita, mude"): as cores e os símbolos que importam e um
+-- resumo de números. Os detalhes do desenho da carta (mata, arrozal, curva de nível) saíram.
 function CartaView.buildLegend(parent: Instance, x: number, y: number, w: number, h: number): Frame
-	local panel = Instance.new("Frame")
+	local panel = UiKit.panel(parent, V.PANEL, 0.06)
 	panel.Name = "Legenda"
 	panel.Position = UDim2.fromOffset(x, y)
 	panel.Size = UDim2.fromOffset(w, h)
-	panel.BackgroundColor3 = UiKit.CARD
-	panel.BorderSizePixel = 0
 	panel.ZIndex = 2
 	panel.Visible = false
-	panel.Parent = parent
-	stroke(panel, UiKit.DRAB, 3)
-	Acabamento.sombra(panel, 12, Vector2.new(3, 6), 0.55)
-	local pad = Instance.new("UIPadding")
-	pad.PaddingLeft, pad.PaddingRight = UDim.new(0, 12), UDim.new(0, 10)
-	pad.PaddingTop = UDim.new(0, 10)
-	pad.Parent = panel
-	local list = Instance.new("UIListLayout")
-	list.SortOrder = Enum.SortOrder.LayoutOrder
-	list.Padding = UDim.new(0, 3)
-	list.Parent = panel
+	UiKit.pad(panel, 14, 12, 12)
+	UiKit.list(panel, false, 4)
 	local n = 0
-	local function row(sw: (Frame) -> (), text: string, size: number?)
+	local function row(sw: (Frame) -> (), text: string): Frame
 		n += 1
 		local r = Instance.new("Frame")
 		r.BackgroundTransparency = 1
-		r.Size = UDim2.new(1, 0, 0, S.ts(size or 15) + 4)
+		r.Size = UDim2.new(1, 0, 0, S.ts(15) + 6)
 		r.LayoutOrder = n
 		r.ZIndex = 2
 		r.Parent = panel
 		local box = Instance.new("Frame")
 		box.BackgroundTransparency = 1
-		box.Size = UDim2.fromOffset(34, S.ts(size or 15))
-		box.Position = UDim2.fromOffset(0, 2)
+		box.Size = UDim2.fromOffset(30, S.ts(15))
+		box.Position = UDim2.fromOffset(0, 3)
 		box.ZIndex = 2
 		box.Parent = r
 		sw(box)
-		local t = label(r, text, size or 14, UiKit.INK, Enum.Font.Arimo)
-		t.Position = UDim2.fromOffset(42, 0)
+		local t = label(r, text, 14, V.TEXT, F.BODY)
+		t.Position = UDim2.fromOffset(40, 2)
 		t.ZIndex = 2
+		return r
 	end
 	local function title(text: string)
 		n += 1
-		local t = label(panel, text, 15, UiKit.RULE_RED, TYPE)
+		local t = label(panel, text, 16, V.DIM, F.TITLE)
 		t.LayoutOrder = n
 		t.ZIndex = 2
 	end
@@ -1371,65 +1836,69 @@ function CartaView.buildLegend(parent: Instance, x: number, y: number, w: number
 		return function(b: Frame)
 			b.BackgroundColor3 = color
 			b.BackgroundTransparency = tr
-			stroke(b, UiKit.INK, 1, 0.6)
+			corner(b, 2)
+			stroke(b, color, 1, 0.2)
 		end
 	end
 	local function glyph(text: string, color: Color3, bg: Color3?): (Frame) -> ()
 		return function(b: Frame)
-			local t = label(b, text, 14, color, Enum.Font.GothamBold)
+			local t = label(b, text, 14, color, if string.find(text, "^%a+$") then F.TITLE else Enum.Font.GothamBold)
 			t.AnchorPoint = Vector2.new(0.5, 0.5)
 			t.Position = UDim2.fromScale(0.5, 0.5)
 			t.ZIndex = 3
 			if bg then
 				t.BackgroundTransparency = 0
 				t.BackgroundColor3 = bg
+				corner(t, 3)
+				local p = Instance.new("UIPadding")
+				p.PaddingLeft, p.PaddingRight = UDim.new(0, 4), UDim.new(0, 4)
+				p.Parent = t
 			end
 		end
 	end
-	local function line(color: Color3, px: number, dashed: boolean?): (Frame) -> ()
+	local function line(color: Color3, px: number): (Frame) -> ()
 		return function(b: Frame)
-			local k = if dashed then 4 else 1
-			for i = 0, k - 1 do
-				local l = Instance.new("Frame")
-				l.BorderSizePixel = 0
-				l.BackgroundColor3 = color
-				l.AnchorPoint = Vector2.new(0, 0.5)
-				l.Position = UDim2.new(i / k, 0, 0.5, 0)
-				l.Size = UDim2.new(if dashed then 0.6 / k else 1, 0, 0, px)
-				l.ZIndex = 3
-				l.Parent = b
-			end
+			local l = Instance.new("Frame")
+			l.BorderSizePixel = 0
+			l.BackgroundColor3 = color
+			l.AnchorPoint = Vector2.new(0, 0.5)
+			l.Position = UDim2.fromScale(0, 0.5)
+			l.Size = UDim2.new(1, 0, 0, px)
+			l.ZIndex = 3
+			l.Parent = b
 		end
 	end
 	title("LEGENDA")
-	row(fill(COR.nosso, 0.6), "Setor nosso")
-	row(fill(COR.inimigo, 0.6), "Setor do inimigo")
-	row(fill(COR.neutro, 0.85), "Setor neutro")
-	row(line(COR.inimigo, 4), "Frente / linha de contato")
-	row(glyph("◆", COR.nosso), "Objetivo (raio de 50 m)")
-	row(glyph("QG", COR.prancheta, COR.latao), "QG · R reunião · RA avançada")
-	row(glyph("SQ", COR.prancheta, COR.latao), "Reunião do squad · P posto")
-	row(glyph("▲", COR.prancheta, COR.latao), "Você e o rumo")
-	row(glyph("●", COR.nosso), "Seu squad (★ líder)")
-	row(glyph("×", COR.neutro), "Marca do squad (lápis)")
-	row(fill(COR.inimigo, 0.8), "Inimigo marcado: área aproximada")
-	title("CARTA (1:50 000, ampliada)")
-	row(fill(Color3.fromRGB(196, 214, 166), 0), "Mata")
-	row(fill(Color3.fromRGB(166, 194, 140), 0), "Bosque de vila e sebe de bambu")
-	row(fill(Color3.fromRGB(205, 220, 222), 0), "Arrozal com diques")
-	row(glyph("ψ", Color3.fromRGB(48, 86, 44)), "Baixada: bambu e tràm")
-	row(glyph("■", UiKit.INK), "Casa")
-	row(line(UiKit.INK, 2, true), "Trilha")
-	row(line(Color3.fromRGB(168, 104, 52), 2), "Curva de nível (5 m)")
-	row(line(Color3.fromRGB(52, 108, 160), 3), "Riacho")
+	row(fill(COR.us, 0.45), "Setor dos EUA")
+	row(fill(COR.vc, 0.45), "Setor do VC")
+	row(fill(COR.neutro, 0.7), "Setor neutro")
+	row(line(COR.frente, 4), "Frente")
+	row(glyph("◆", V.TEXT), "Objetivo (cor do dono)")
+	row(glyph("QG", V.BG, V.KHAKI), "Ponto de inserção")
+	row(glyph("●", COR.squad), "Seu squad")
+	row(glyph("▲", COR.me), "Você")
+	row(glyph("◆", COR.mine), "Sua marca")
+	row(glyph("★", COR.lead), "Marca do líder")
+	row(glyph("×", COR.neutro), "Marca do squad")
+	-- só o VC vê os túneis (a linha some para os EUA; updateLegend acompanha o lado)
+	local tunnelRow = row(line(COR.tunel, 2), "Túnel")
+	tunnelRow.Visible = myFaction() == "VC"
+	S.hud.legendTunnel = tunnelRow
+	n += 1
+	local gap = Instance.new("Frame")
+	gap.BackgroundTransparency = 1
+	gap.Size = UDim2.new(1, 0, 0, 8)
+	gap.LayoutOrder = n
+	gap.Parent = panel
 	title("RESUMO")
 	n += 1
-	local score = label(panel, "", 14, UiKit.INK, TYPE)
+	local score = label(panel, "", 14, V.TEXT, F.BODY)
 	score.LayoutOrder = n
 	score.TextWrapped = true
 	score.AutomaticSize = Enum.AutomaticSize.Y
 	score.Size = UDim2.new(1, 0, 0, 0)
 	score.TextXAlignment = Enum.TextXAlignment.Left
+	score.LineHeight = 1.15
 	score.ZIndex = 2
 	S.legend, S.legendScore = panel, score
 	CartaView.updateLegend()
@@ -1437,6 +1906,10 @@ function CartaView.buildLegend(parent: Instance, x: number, y: number, w: number
 end
 
 function CartaView.updateLegend()
+	local tr = S.hud.legendTunnel
+	if tr then
+		tr.Visible = myFaction() == "VC"
+	end
 	local t = S.legendScore
 	local st = S.match
 	if not (t and st) then
@@ -1470,5 +1943,8 @@ function CartaView.updateLegend()
 	table.insert(lines, string.format("Cursor: %s", g))
 	t.Text = table.concat(lines, "\n")
 end
+
+-- eventos da partida: o círculo muda só quando o EventosVisual avisa (marcador novo, fase, fim)
+EventosVisual.Changed:Connect(drawEvents)
 
 return CartaView

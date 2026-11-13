@@ -43,29 +43,32 @@ end
 
 -- medidas de projeto (o UiKit.fit encolhe tudo numa janela menor)
 local L = {
-	W = px(840, 1120),
+	W = px(860, 1140),
 	H = px(600, 800),
-	HEAD = px(72, 98),
-	TAB_H = px(38, 54),
+	HEAD = px(78, 106),
+	TAB_H = px(40, 56),
 	FOOT = px(50, 70),
-	ROW = px(42, 60),
-	BANNER = px(58, 82),
-	SUB = px(40, 56),
-	PAD = px(16, 22),
+	ROW = px(44, 62),
+	BANNER = px(60, 84),
+	SUB = px(42, 58),
+	PAD = px(20, 28),
 }
+-- estilo novo (2026-11-11: o dono não gostou do papel datilografado): painel escuro sólido, títulos
+-- em Oswald, corpo em Arimo, o oliva só na ação e o vermelho só no perigo
+local V = UiKit.V
+local F = UiKit.F
 local C = {
-	ink = UiKit.INK,
-	card = UiKit.CARD,
-	hot = Color3.fromRGB(250, 244, 226),
-	manila = UiKit.MANILA,
-	tabOff = Color3.fromRGB(170, 148, 102),
-	drab = UiKit.DRAB,
-	khaki = UiKit.KHAKI,
-	brass = UiKit.BRASS,
-	stamp = UiKit.STAMP,
-	red = UiKit.RULE_RED,
-	blue = UiKit.RULE_BLUE,
-	olive = UiKit.OLIVE,
+	text = V.TEXT,
+	dim = V.DIM,
+	panel = V.PANEL,
+	row = V.PANEL_2,
+	hot = V.PANEL_3,
+	line = V.LINE,
+	olive = V.OLIVE,
+	oliveHi = V.OLIVE_HI,
+	khaki = V.KHAKI,
+	red = V.RED,
+	redHi = V.RED_HI,
 }
 
 -- ===== tela =====
@@ -84,55 +87,54 @@ do
 	dim.Parent = gui
 	U.dim = dim
 
+	-- painel escuro e sólido sobre o jogo escurecido (sai a pasta parda de dossiê)
 	local root = Instance.new("Frame")
-	root.Name = "Dossie"
+	root.Name = "Painel"
 	root.AnchorPoint = Vector2.new(0.5, 0.5)
 	root.Position = UDim2.fromScale(0.5, 0.5)
 	root.Size = UDim2.fromOffset(L.W, L.H)
-	root.BackgroundColor3 = C.manila
+	root.BackgroundColor3 = C.panel
+	root.BackgroundTransparency = 0.04
 	root.BorderSizePixel = 0
 	root.Active = true
 	root.Parent = gui
-	UiKit.corner(root, 5)
-	UiKit.lit(root, 0.8)
-	UiKit.edge(root, C.ink, 1, 0.55)
+	UiKit.corner(root, 4)
+	UiKit.edge(root, C.line, 1, 0.35)
 	U.root = root
 	U.fit = UiKit.fit(gui, root, L.W, L.H, 12)
 	Acabamento.sombra(root, 26, Vector2.new(0, 10), 0.6)
+	-- filete de acento no alto (oliva): a única cor de época do cabeçalho
+	local accent = Instance.new("Frame")
+	accent.BackgroundColor3 = C.olive
+	accent.BorderSizePixel = 0
+	accent.Size = UDim2.new(1, 0, 0, px(3, 4))
+	accent.Parent = root
+	UiKit.corner(accent, 2)
 
-	-- cabeçalho: rubrica datilografada e o título da aba com carimbo
-	local kicker = UiKit.rotulo(root, px(14, 22), C.ink, UiKit.TYPE_FONT)
-	kicker.Position = UDim2.fromOffset(L.PAD + 6, px(10, 14))
-	kicker.Size = UDim2.fromOffset(px(420, 560), px(18, 26))
-	kicker.TextTransparency = 0.3
-	kicker.Text = "MENU DO JOGO · OPERAÇÃO STARLITE · 1965"
-	local title = UiKit.rotulo(root, px(30, 44), C.ink, UiKit.HEAD_FONT)
-	title.Position = UDim2.fromOffset(L.PAD + 4, px(26, 36))
-	title.Size = UDim2.fromOffset(px(420, 560), px(40, 56))
+	-- cabeçalho: rótulo pequeno e o título grande da aba (Oswald, caixa alta)
+	local kicker = UiKit.kicker(root, UiKit.upper("Menu do jogo"), px(14, 22))
+	kicker.Position = UDim2.fromOffset(L.PAD, px(12, 16))
+	kicker.Size = UDim2.fromOffset(px(320, 440), px(18, 26))
+	local title = UiKit.title(root, "", px(36, 50))
+	title.Position = UDim2.fromOffset(L.PAD, px(30, 42))
+	title.Size = UDim2.fromOffset(px(420, 560), px(42, 58))
 	U.title = title
 	local titleScale = Instance.new("UIScale")
 	titleScale.Parent = title
 	U.titleScale = titleScale
 
-	-- fechar (mouse e toque; no controle é o B)
-	local close = Instance.new("TextButton")
-	close.Name = "Fechar"
-	close.AnchorPoint = Vector2.new(1, 0)
-	close.Position = UDim2.new(1, -L.PAD, 0, px(16, 22))
-	close.Size = UDim2.fromOffset(px(112, 160), px(36, 50))
-	close.BackgroundColor3 = C.drab
-	close.AutoButtonColor = false
-	close.FontFace = UiKit.HEAD_FONT
-	close.TextColor3 = C.khaki
-	close.TextSize = UiKit.text(16)
-	close.Text = "FECHAR ×"
-	close.Selectable = false
-	close.Parent = root
-	UiKit.corner(close, 3)
-	UiKit.lit(close, 0.72)
-	U.close = close
+	-- fechar (mouse e toque; no controle é o B): botão fino, só contorno
+	local close = UiKit.action(root, "FECHAR ×", "secondary", function()
+		Bus.fire("menu_close_request")
+	end, { h = px(38, 52) })
+	close.button.Name = "Fechar"
+	close.button.AnchorPoint = Vector2.new(1, 0)
+	close.button.Position = UDim2.new(1, -L.PAD, 0, px(20, 28))
+	close.button.Size = UDim2.fromOffset(px(118, 166), px(38, 52))
+	close.button.Selectable = false
+	U.close = close.button
 
-	-- abas de arquivo (o mouse clica; no controle LB/RB)
+	-- abas (o mouse clica; no controle LB/RB): texto em Oswald, a ativa com o traço oliva embaixo
 	local tabs = Instance.new("Frame")
 	tabs.Name = "Abas"
 	tabs.BackgroundTransparency = 1
@@ -143,34 +145,40 @@ do
 	tl.FillDirection = Enum.FillDirection.Horizontal
 	tl.VerticalAlignment = Enum.VerticalAlignment.Bottom
 	tl.SortOrder = Enum.SortOrder.LayoutOrder
-	tl.Padding = UDim.new(0, 4)
+	tl.Padding = UDim.new(0, px(22, 30))
 	tl.Parent = tabs
 	U.tabs = tabs
+	local tabRule = Instance.new("Frame")
+	tabRule.BackgroundColor3 = C.line
+	tabRule.BackgroundTransparency = 0.4
+	tabRule.BorderSizePixel = 0
+	tabRule.Position = UDim2.fromOffset(L.PAD, L.HEAD + L.TAB_H)
+	tabRule.Size = UDim2.new(1, -2 * L.PAD, 0, 1)
+	tabRule.Parent = root
 
-	-- folha pautada
+	-- conteúdo (sem folha pautada: as linhas escuras ficam direto no painel)
 	local sheet = Instance.new("Frame")
-	sheet.Name = "Folha"
-	sheet.Position = UDim2.fromOffset(L.PAD - 4, L.HEAD + L.TAB_H)
-	sheet.Size = UDim2.new(1, -2 * (L.PAD - 4), 1, -(L.HEAD + L.TAB_H + L.FOOT))
-	sheet.BackgroundColor3 = C.card
+	sheet.Name = "Conteudo"
+	sheet.Position = UDim2.fromOffset(L.PAD - 8, L.HEAD + L.TAB_H + 4)
+	sheet.Size = UDim2.new(1, -2 * (L.PAD - 8), 1, -(L.HEAD + L.TAB_H + L.FOOT + 4))
+	sheet.BackgroundTransparency = 1
 	sheet.BorderSizePixel = 0
 	sheet.ClipsDescendants = true
 	sheet.Parent = root
-	UiKit.corner(sheet, 3)
-	UiKit.lit(sheet, 0.9)
-	UiKit.edge(sheet, C.ink, 1, 0.6)
 	U.sheet = sheet
-	local redRule = Instance.new("Frame")
-	redRule.BackgroundColor3 = C.red
-	redRule.BorderSizePixel = 0
-	redRule.Position = UDim2.fromOffset(0, 3)
-	redRule.Size = UDim2.new(1, 0, 0, 2)
-	redRule.Parent = sheet
 
-	-- pé: dicas de botão
-	local foot = UiKit.chips(root, px(30, 44), true, px(14, 22))
+	-- pé: dicas de botão (chips escuros), sobre um filete
+	local footRule = Instance.new("Frame")
+	footRule.AnchorPoint = Vector2.new(0, 1)
+	footRule.BackgroundColor3 = C.line
+	footRule.BackgroundTransparency = 0.4
+	footRule.BorderSizePixel = 0
+	footRule.Position = UDim2.new(0, L.PAD, 1, -L.FOOT)
+	footRule.Size = UDim2.new(1, -2 * L.PAD, 0, 1)
+	footRule.Parent = root
+	local foot = UiKit.chips(root, px(30, 44), false, px(14, 22))
 	foot.frame.AnchorPoint = Vector2.new(0, 1)
-	foot.frame.Position = UDim2.new(0, L.PAD + 4, 1, -px(10, 14))
+	foot.frame.Position = UDim2.new(0, L.PAD, 1, -px(10, 14))
 	foot.frame.Size = UDim2.new(1, -2 * L.PAD, 0, px(30, 44))
 	U.foot = foot
 end
@@ -241,27 +249,27 @@ end
 
 -- ===== faixa do tutorial =====
 do
+	-- faixa escura com o traço cáqui (atenção) e o botão vermelho de pular
 	local banner = Instance.new("Frame")
 	banner.Name = "Tutorial"
-	banner.BackgroundColor3 = C.drab
+	banner.BackgroundColor3 = C.row
 	banner.BorderSizePixel = 0
 	banner.Position = UDim2.fromOffset(10, 12)
 	banner.Size = UDim2.new(1, -20, 0, L.BANNER - 8)
 	banner.Visible = false
 	banner.Parent = U.sheet
 	UiKit.corner(banner, 3)
-	UiKit.lit(banner, 0.72)
+	UiKit.edge(banner, C.line, 1, 0.5)
 	local bar = Instance.new("Frame")
-	bar.BackgroundColor3 = C.brass
+	bar.BackgroundColor3 = C.khaki
 	bar.BorderSizePixel = 0
-	bar.Size = UDim2.new(0, px(5, 7), 1, 0)
+	bar.Size = UDim2.new(0, px(4, 6), 1, 0)
 	bar.Parent = banner
-	local head = UiKit.rotulo(banner, px(13, 22), UiKit.BRASS_LIGHT, UiKit.HEAD_FONT)
-	head.Position = UDim2.fromOffset(px(16, 22), px(4, 6))
+	local head = UiKit.kicker(banner, "TUTORIAL EM ANDAMENTO", px(13, 22), C.khaki)
+	head.Position = UDim2.fromOffset(px(16, 22), px(5, 7))
 	head.Size = UDim2.new(1, -px(300, 420), 0, px(20, 28))
-	head.Text = "TUTORIAL EM ANDAMENTO"
-	local info = UiKit.rotulo(banner, px(15, 24), C.card, UiKit.BODY_FONT)
-	info.Position = UDim2.fromOffset(px(16, 22), px(24, 34))
+	local info = UiKit.rotulo(banner, px(15, 24), C.text, UiKit.BODY_FONT)
+	info.Position = UDim2.fromOffset(px(16, 22), px(25, 35))
 	info.Size = UDim2.new(1, -px(300, 420), 0, px(22, 32))
 	info.TextTruncate = Enum.TextTruncate.AtEnd
 	local skip = Instance.new("TextButton")
@@ -269,17 +277,16 @@ do
 	skip.AnchorPoint = Vector2.new(1, 0.5)
 	skip.Position = UDim2.new(1, -px(10, 14), 0.5, 0)
 	skip.Size = UDim2.fromOffset(px(270, 390), L.BANNER - 22)
-	skip.BackgroundColor3 = C.stamp
+	skip.BackgroundColor3 = C.red
 	skip.AutoButtonColor = false
 	skip.Text = ""
 	skip.Selectable = true
 	skip.SelectionImageObject = UiKit.FOCUS
 	skip.Parent = banner
 	UiKit.corner(skip, 3)
-	UiKit.lit(skip, 0.75)
-	local skipText = UiKit.rotulo(skip, px(16, 26), C.card, UiKit.HEAD_FONT)
+	local skipText = UiKit.rotulo(skip, px(17, 26), C.text, F.TITLE)
 	skipText.Size = UDim2.new(1, -px(46, 64), 1, 0)
-	skipText.Position = UDim2.fromOffset(px(10, 14), 0)
+	skipText.Position = UDim2.fromOffset(px(12, 16), 0)
 	local skipKey = Instance.new("ImageLabel")
 	skipKey.BackgroundTransparency = 1
 	skipKey.AnchorPoint = Vector2.new(1, 0.5)
@@ -290,7 +297,7 @@ do
 	fill.AnchorPoint = Vector2.new(0, 1)
 	fill.Position = UDim2.new(0, 0, 1, 0)
 	fill.Size = UDim2.new(0, 0, 0, px(4, 5))
-	fill.BackgroundColor3 = C.brass
+	fill.BackgroundColor3 = C.text
 	fill.BorderSizePixel = 0
 	fill.Parent = skip
 	U.banner, U.bannerInfo, U.skip, U.skipText, U.skipKey, U.skipFill = banner, info, skip, skipText, skipKey, fill
@@ -337,13 +344,13 @@ do
 	body.BorderSizePixel = 0
 	body.AutomaticCanvasSize = Enum.AutomaticSize.Y
 	body.CanvasSize = UDim2.new()
-	body.ScrollBarThickness = px(6, 8)
-	body.ScrollBarImageColor3 = C.ink
-	body.ScrollBarImageTransparency = 0.5
+	body.ScrollBarThickness = px(5, 7)
+	body.ScrollBarImageColor3 = C.line
+	body.ScrollBarImageTransparency = 0.2
 	body.Selectable = false
 	body.Parent = U.sheet
 	local list = Instance.new("UIListLayout")
-	list.Padding = UDim.new(0, 2)
+	list.Padding = UDim.new(0, px(4, 6))
 	list.SortOrder = Enum.SortOrder.LayoutOrder
 	list.HorizontalAlignment = Enum.HorizontalAlignment.Center
 	list.Parent = body
@@ -383,7 +390,7 @@ local function rowShell(key: string, labelText: string): (TextButton, TextLabel)
 	b.Name = key
 	b.LayoutOrder = S.order
 	b.Size = UDim2.new(1, -16, 0, L.ROW)
-	b.BackgroundColor3 = C.card
+	b.BackgroundColor3 = C.row
 	b.BackgroundTransparency = 0
 	b.BorderSizePixel = 0
 	b.AutoButtonColor = false
@@ -391,21 +398,13 @@ local function rowShell(key: string, labelText: string): (TextButton, TextLabel)
 	b.Selectable = true
 	b.SelectionImageObject = UiKit.FOCUS
 	b.Parent = U.body
-	UiKit.corner(b, 2)
-	local rule = Instance.new("Frame")
-	rule.AnchorPoint = Vector2.new(0, 1)
-	rule.Position = UDim2.new(0, 6, 1, 0)
-	rule.Size = UDim2.new(1, -12, 0, 1)
-	rule.BackgroundColor3 = C.blue
-	rule.BackgroundTransparency = 0.55
-	rule.BorderSizePixel = 0
-	rule.Parent = b
-	local l = UiKit.rotulo(b, 16, C.ink, UiKit.BODY_FONT)
-	l.Position = UDim2.fromOffset(px(12, 16), 0)
-	l.Size = UDim2.new(0.58, -px(12, 16), 1, 0)
+	UiKit.corner(b, 3)
+	local l = UiKit.rotulo(b, 16, C.text, UiKit.BODY_FONT)
+	l.Position = UDim2.fromOffset(px(14, 18), 0)
+	l.Size = UDim2.new(0.58, -px(14, 18), 1, 0)
 	l.TextTruncate = Enum.TextTruncate.AtEnd
 	l.Text = labelText
-	local r = UiKit.realce(b, C.card, C.hot, 1.008)
+	local r = UiKit.realce(b, C.row, C.hot, 1.008)
 	b.MouseEnter:Connect(function()
 		r.set(true)
 	end)
@@ -434,13 +433,13 @@ local function valueTag(
 	tag.AnchorPoint = Vector2.new(1, 0.5)
 	tag.Position = UDim2.new(1, -px(8, 12), 0.5, 0)
 	tag.Size = UDim2.new(0.4, 0, 1, -px(10, 14))
-	tag.BackgroundColor3 = if waiting then C.stamp else C.drab
+	tag.BackgroundColor3 = if waiting then C.red else C.panel
 	tag.BorderSizePixel = 0
 	tag.Parent = b
 	UiKit.corner(tag, 3)
-	UiKit.lit(tag, 0.74)
+	UiKit.edge(tag, C.line, 1, 0.55)
 	local inner = px(28, 40)
-	local t = UiKit.rotulo(tag, 15, C.card, UiKit.HEAD_FONT)
+	local t = UiKit.rotulo(tag, 16, C.text, F.TITLE_MED)
 	t.Size = UDim2.new(1, -2 * inner, 1, 0)
 	t.Position = UDim2.fromOffset(inner, 0)
 	t.TextXAlignment = Enum.TextXAlignment.Center
@@ -486,26 +485,28 @@ local function section(text: string)
 	local f = Instance.new("Frame")
 	f.BackgroundTransparency = 1
 	f.LayoutOrder = S.order
-	f.Size = UDim2.new(1, -16, 0, px(34, 48))
+	f.Size = UDim2.new(1, -16, 0, px(36, 50))
 	f.Parent = U.body
-	-- sem caixa alta forçada: o modelo "Teclas · %s" só casa no dicionário como foi escrito
-	local t = UiKit.rotulo(f, 16, C.ink, UiKit.HEAD_FONT)
-	t.Position = UDim2.fromOffset(px(10, 14), px(8, 12))
-	t.Size = UDim2.new(1, -20, 0, px(22, 30))
+	-- cabeçalho de seção: Oswald cáqui com um filete fino (sem a linha vermelha da ficha). Sem caixa
+	-- alta forçada: o modelo "Teclas · %s" só casa no dicionário como foi escrito
+	local t = UiKit.rotulo(f, 15, C.khaki, F.TITLE_MED)
+	t.Position = UDim2.fromOffset(px(6, 8), px(10, 14))
+	t.Size = UDim2.new(1, -12, 0, px(22, 30))
 	t.Text = text
-	t.FontFace = UiKit.headFont(text)
+	t.FontFace = UiKit.Estilo.headFont(text, F.TITLE_MED)
 	local r = Instance.new("Frame")
 	r.AnchorPoint = Vector2.new(0, 1)
-	r.Position = UDim2.new(0, px(10, 14), 1, 0)
-	r.Size = UDim2.new(1, -2 * px(10, 14), 0, 2)
-	r.BackgroundColor3 = C.red
+	r.Position = UDim2.new(0, px(6, 8), 1, -2)
+	r.Size = UDim2.new(1, -2 * px(6, 8), 0, 1)
+	r.BackgroundColor3 = C.line
+	r.BackgroundTransparency = 0.3
 	r.BorderSizePixel = 0
 	r.Parent = f
 end
 
 local function note(text: string, color: Color3?)
 	S.order += 1
-	local t = UiKit.rotulo(U.body, 14, color or C.olive, UiKit.TYPE_FONT)
+	local t = UiKit.rotulo(U.body, 14, color or C.dim, UiKit.BODY_FONT)
 	t.LayoutOrder = S.order
 	t.Size = UDim2.new(1, -36, 0, 0)
 	t.AutomaticSize = Enum.AutomaticSize.Y
@@ -521,11 +522,10 @@ end
 local function action(key: string, text: string, onClick: () -> (), danger: boolean?)
 	local b, l = rowShell(key, text)
 	l.Size = UDim2.new(1, -px(24, 32), 1, 0)
-	l.FontFace = UiKit.HEAD_FONT
 	l.Text = UiKit.upper(text)
 	l.FontFace = UiKit.headFont(text)
-	l.TextColor3 = if danger then C.stamp else C.ink
-	local arrow = UiKit.rotulo(b, 14, if danger then C.stamp else C.olive, Enum.Font.ArimoBold)
+	l.TextColor3 = if danger then C.redHi else C.text
+	local arrow = UiKit.rotulo(b, 14, if danger then C.redHi else C.oliveHi, Enum.Font.ArimoBold)
 	arrow.AnchorPoint = Vector2.new(1, 0)
 	arrow.Position = UDim2.new(1, -px(14, 20), 0, 0)
 	arrow.Size = UDim2.new(0, px(20, 30), 1, 0)
@@ -639,7 +639,7 @@ local function renderSettings()
 		numberRow("Mouse na luneta/binóculo (fração)", "mouseScope", 0.05, "%.2f")
 		local conflicts = InputMap.keyConflicts(Input.settings)
 		if #conflicts > 0 then
-			note(conflictText(conflicts[1], true), C.stamp)
+			note(conflictText(conflicts[1], true), C.redHi)
 		end
 		local last = ""
 		for _, ctx in CTX_ORDER do
@@ -675,6 +675,8 @@ local function renderSettings()
 			{ "alto", "médio", "baixo" }
 		)
 		choiceRow("Sombras do sol", "gfxShadows", { true, false }, { "ligadas", "desligadas (mais rápido)" })
+		-- sombra das árvores e da vegetação (Graficos.client; pesa: padrão desligada)
+		choiceRow("Sombra das árvores", "gfxPlantShadows", { false, true }, { "desligada", "ligada" })
 		choiceRow(
 			"Efeitos de tela",
 			"gfxPost",
@@ -685,7 +687,7 @@ local function renderSettings()
 		note("A qualidade geral fica no menu do Roblox (Esc > Configurações).")
 		action("g:reset", "Restaurar gráficos padrão", function()
 			local s = table.clone(Input.settings) :: any
-			for _, k in { "gfxDetail", "gfxShadows", "gfxPost", "gfxBrightness" } do
+			for _, k in { "gfxDetail", "gfxShadows", "gfxPlantShadows", "gfxPost", "gfxBrightness" } do
 				s[k] = (InputMap.DEFAULTS :: any)[k]
 			end
 			Input.setSettings(s)
@@ -749,13 +751,16 @@ local function renderSettings()
 			Accessibility.MODE_NAMES.tritan,
 		})
 		choiceRow("Legendas de som", "captions", { false, true }, { "desligadas", "ligadas" })
+		-- painel lateral com os comandos do momento (o fork FIM cria o painel e a chave no InputMap;
+		-- sem a chave ainda, a linha mostra "ligado", o padrão)
+		choiceRow("Painel de comandos na tela", "hintsPanel", { true, false }, { "ligado", "desligado" })
 		action("a:reset", "Restaurar padrões", function()
 			Input.setSettings(nil)
 		end, true)
 	elseif SUB == "Botões" then
 		local conflicts = InputMap.conflicts(Input.settings)
 		if #conflicts > 0 then
-			note(conflictText(conflicts[1], false), C.stamp)
+			note(conflictText(conflicts[1], false), C.redHi)
 		end
 		local last = ""
 		for _, ctx in CTX_ORDER do
@@ -859,18 +864,25 @@ local function renderShop()
 	end
 	section("Sua ficha")
 	if s then
-		-- linhas só de leitura: fora do foco do controle (o A nelas não faria nada)
-		for _, row in
-			{
-				{ "l:money", "Saldo", Progression.money(tonumber(s.credits) or 0) },
-				{ "l:rank", "Posto", tostring(s.rankName or "—") },
-				{ "l:respawn", "Renasceres guardados", string.format("%d", tonumber(s.respawnCredits) or 0) },
-			}
-		do
-			local b = rowShell(row[1], row[2])
-			b.Selectable = false
-			valueTag(b, row[3])
-		end
+		-- três números grandes, rótulo em cima, separados por barras inclinadas (só leitura: fora do
+		-- foco do controle)
+		S.order += 1
+		local holder = Instance.new("Frame")
+		holder.Name = "Resumo"
+		holder.LayoutOrder = S.order
+		holder.BackgroundColor3 = C.row
+		holder.BorderSizePixel = 0
+		holder.Size = UDim2.new(1, -16, 0, px(96, 132))
+		holder.Parent = U.body
+		UiKit.corner(holder, 3)
+		local row = UiKit.statRow(holder, {
+			{ UiKit.upper("Saldo"), Progression.money(tonumber(s.credits) or 0) },
+			{ UiKit.upper("Posto"), UiKit.upper(tostring(s.rankName or "—")) },
+			{ UiKit.upper("Renasceres guardados"), string.format("%d", tonumber(s.respawnCredits) or 0) },
+		}, px(38, 52))
+		row.frame.AnchorPoint = Vector2.new(0, 0.5)
+		row.frame.Position = UDim2.new(0, px(18, 24), 0.5, 0)
+		row.stats[1].value.TextColor3 = C.khaki
 	else
 		note("Recebendo a ficha do servidor…")
 	end
@@ -884,6 +896,20 @@ local function renderShop()
 		Bus.fire("shop_open", "intendencia")
 	end)
 	note("Atalho: tecla L abre e fecha a loja.")
+	-- campanha (2026-11-12): passe, missões e cartão abrem por cima (o menu fecha antes)
+	section("Campanha")
+	action("l:pass", "Passe de Campanha", function()
+		Bus.fire("menu_close_request")
+		Bus.fire("passe_open")
+	end)
+	action("l:missions", "Missões do dia e da semana", function()
+		Bus.fire("menu_close_request")
+		Bus.fire("missoes_open")
+	end)
+	action("l:card", "Cartão do jogador e medalhas", function()
+		Bus.fire("menu_close_request")
+		Bus.fire("cartao_open")
+	end)
 end
 Net.event("Progress_State").OnClientEvent:Connect(function(s: any)
 	if type(s) ~= "table" then
@@ -943,21 +969,29 @@ local function renderTabs()
 			nb.AutoButtonColor = false
 			nb.AutomaticSize = Enum.AutomaticSize.X
 			nb.Size = UDim2.fromOffset(0, L.TAB_H)
-			nb.BackgroundColor3 = C.tabOff
+			nb.BackgroundTransparency = 1
 			nb.BorderSizePixel = 0
-			nb.FontFace = UiKit.HEAD_FONT
-			nb.TextSize = UiKit.text(17)
-			nb.TextColor3 = C.ink
+			nb.FontFace = F.TITLE_MED
+			nb.TextSize = UiKit.text(19)
+			nb.TextColor3 = C.dim
 			nb.Selectable = false
 			nb.LayoutOrder = i
 			nb.Parent = U.tabs
-			UiKit.corner(nb, 4)
-			UiKit.lit(nb, 0.86)
 			local p = Instance.new("UIPadding")
-			p.PaddingLeft = UDim.new(0, px(18, 24))
-			p.PaddingRight = UDim.new(0, px(18, 24))
-			p.PaddingBottom = UDim.new(0, 4)
+			p.PaddingLeft = UDim.new(0, px(2, 4))
+			p.PaddingRight = UDim.new(0, px(2, 4))
+			p.PaddingBottom = UDim.new(0, px(6, 8))
 			p.Parent = nb
+			-- traço da aba ativa (oliva), colado ao filete de baixo
+			local mark = Instance.new("Frame")
+			mark.Name = "Marca"
+			mark.AnchorPoint = Vector2.new(0.5, 1)
+			mark.Position = UDim2.new(0.5, 0, 1, px(6, 8))
+			mark.Size = UDim2.new(1, px(4, 8), 0, px(3, 4))
+			mark.BackgroundColor3 = C.oliveHi
+			mark.BackgroundTransparency = 1
+			mark.BorderSizePixel = 0
+			mark.Parent = nb
 			local idx = i
 			UiKit.bind(nb, function()
 				if S.tab ~= idx and not busy() then
@@ -970,12 +1004,13 @@ local function renderTabs()
 		end
 		b.Visible = true
 		b.Text = UiKit.upper(name)
+		b.FontFace = UiKit.Estilo.headFont(name, F.TITLE_MED)
 		local on = i == S.tab
-		TweenService:Create(b, UiKit.QUICK, {
-			BackgroundColor3 = if on then C.card else C.tabOff,
-			Size = UDim2.fromOffset(0, if on then L.TAB_H + 4 else L.TAB_H - 4),
-		}):Play()
-		b.TextColor3 = if on then C.stamp else C.ink
+		TweenService:Create(b, UiKit.QUICK, { TextColor3 = if on then C.text else C.dim }):Play()
+		local mark = b:FindFirstChild("Marca")
+		if mark and mark:IsA("Frame") then
+			TweenService:Create(mark, UiKit.QUICK, { BackgroundTransparency = if on then 0 else 1 }):Play()
+		end
 	end
 	for i = #tabs + 1, #tabButtons do
 		tabButtons[i].Visible = false
@@ -999,7 +1034,8 @@ local function renderSubs()
 			nb.AutomaticSize = Enum.AutomaticSize.X
 			nb.Size = UDim2.fromOffset(0, L.SUB - 14)
 			nb.BorderSizePixel = 0
-			nb.FontFace = UiKit.HEAD_FONT
+			nb.BackgroundColor3 = C.olive
+			nb.FontFace = F.TITLE_MED
 			nb.TextSize = UiKit.text(15)
 			nb.Selectable = false
 			nb.LayoutOrder = i
@@ -1021,10 +1057,10 @@ local function renderSubs()
 			b = nb
 		end
 		local on = i == S.sub
+		-- pílula oliva na sub-aba ativa; as outras só o texto apagado
 		TweenService:Create(b, UiKit.QUICK, {
-			BackgroundColor3 = if on then C.stamp else C.card,
 			BackgroundTransparency = if on then 0 else 1,
-			TextColor3 = if on then C.card else C.ink,
+			TextColor3 = if on then C.text else C.dim,
 		}):Play()
 	end
 	-- a sub-aba ativa sempre à vista na faixa
@@ -1159,8 +1195,8 @@ local function skipPress()
 	end
 	S.armedUntil = os.clock() + 3
 	renderBanner()
-	U.skip.BackgroundColor3 = Color3.fromRGB(190, 58, 42)
-	TweenService:Create(U.skip, TweenInfo.new(0.4), { BackgroundColor3 = C.stamp }):Play()
+	U.skip.BackgroundColor3 = C.redHi
+	TweenService:Create(U.skip, TweenInfo.new(0.3), { BackgroundColor3 = C.red }):Play()
 	task.delay(3.05, function()
 		if gui.Enabled then
 			renderBanner()
@@ -1194,10 +1230,13 @@ local function syncCursor()
 end
 
 local closeToken = 0
+local menuOpen = false -- aberto de fato (na saída a tela ainda fica ligada 0,17 s)
 local function setOpen(open: boolean)
-	if open == gui.Enabled then
+	-- fechar duas vezes na mesma saída (B e o FECHAR juntos) descontava o contador de menus em dobro
+	if open == menuOpen then
 		return
 	end
+	menuOpen = open
 	closeToken += 1
 	local my = closeToken
 	S.listening = nil
@@ -1232,7 +1271,7 @@ local function setOpen(open: boolean)
 		if U.dim.BackgroundTransparency >= 0.99 then
 			U.root.Position = UDim2.new(0.5, 0, 0.5, 26)
 		end
-		TweenService:Create(U.dim, TweenInfo.new(0.22), { BackgroundTransparency = 0.42 }):Play()
+		TweenService:Create(U.dim, TweenInfo.new(0.22), { BackgroundTransparency = 0.48 }):Play()
 		TweenService
 			:Create(U.root, TweenInfo.new(0.3, Enum.EasingStyle.Quint), { Position = UDim2.fromScale(0.5, 0.5) })
 			:Play()
@@ -1292,9 +1331,7 @@ do
 	chip.button.Position = UDim2.new(1, -(L.PAD + px(124, 174)), 0, px(17, 23))
 	U.langChip = chip
 end
-UiKit.bind(U.close, function()
-	setOpen(false)
-end)
+-- o FECHAR já está ligado (UiKit.action → menu_close_request → setOpen(false))
 
 Input.on("game_menu", "holdStart", function()
 	setOpen(true)
@@ -1303,7 +1340,7 @@ Input.on("game_menu", "press", function() -- P no teclado
 	if Idioma.aberto() then
 		return
 	end
-	setOpen(not gui.Enabled)
+	setOpen(not menuOpen)
 end)
 Input.on("ui_back", "press", function()
 	if not gui.Enabled or Idioma.recente() then

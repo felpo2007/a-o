@@ -23,10 +23,15 @@
 -- 4. Corpo a corpo (D-94, Shared/Melee): saque, estocada, golpe de lado, guarda e o golpe com o
 --    fuzil, no próprio personagem ("melee_start" do WeaponController) e nos bots ("MeleeT" do
 --    servidor); a faca na mão solta o IK da mão direita.
+-- 5. Itens (D-99, Shared/ItemAnim): curativo, torniquete, tratar, reanimar, rádio, binóculo, pá e
+--    cantil tocam o clipe "item_*" parado, no instante do relógio do servidor (o tronco e a cabeça;
+--    as mãos vão por IK no PostureController).
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
+local FieldWork = require(ReplicatedStorage.Shared.FieldWork)
+local ItemAnim = require(ReplicatedStorage.Shared.ItemAnim)
 local Joints = require(ReplicatedStorage.Shared.Joints)
 local Melee = require(ReplicatedStorage.Shared.Melee)
 local SoldierAnims = require(ReplicatedStorage.Shared.SoldierAnims)
@@ -93,6 +98,7 @@ type Driver = {
 	lastPos: Vector3?,
 	vel: Vector3, -- velocidade estimada pela posição (bots)
 	meleeTok: number,
+	item: string?, -- clipe de item tocando (D-99)
 }
 local drivers: { [Model]: Driver } = {}
 
@@ -165,6 +171,7 @@ local function newDriver(model: Model, hum: Humanoid, root: BasePart, bot: boole
 		lastPos = nil,
 		vel = Vector3.zero,
 		meleeTok = 0,
+		item = nil,
 	}
 end
 
@@ -258,6 +265,31 @@ local function keepPhase(d: Driver, weights: { [string]: number }, f: number, dt
 	end
 end
 
+-- D-99: uso de item: o clipe "item_*" parado no instante certo (relógio do servidor, laço do ItemAnim)
+local function itemStep(d: Driver)
+	local model = d.model
+	local name, t, D = ItemAnim.current(function(a: string): any
+		return model:GetAttribute(a)
+	end, workspace:GetServerTimeNow(), FieldWork.DIG.seconds)
+	local want = if name and d.active and model:GetAttribute("Prone") ~= true then SoldierAnims.ITEM_CLIP[name] else nil
+	if d.item and d.item ~= want then
+		local old = d.tracks[d.item]
+		if old and old.IsPlaying then
+			old:Stop(0.25)
+		end
+	end
+	d.item = want
+	local tr = if want then d.tracks[want] else nil
+	if not (tr and name and want) then
+		return
+	end
+	if not tr.IsPlaying then
+		tr:Play(0.2, 1, 0)
+	end
+	local tt = ItemAnim.localTime(ItemAnim.ANIMS[name], t, D)
+	tr.TimePosition = math.clamp(tt, 0, math.max(CLIPS[want].length - 1e-3, 0))
+end
+
 local function stepDriver(d: Driver, dt: number)
 	local model, root = d.model, d.root
 	local v = root.AssemblyLinearVelocity
@@ -311,6 +343,7 @@ local function stepDriver(d: Driver, dt: number)
 		end
 	end
 	keepPhase(d, weights, f, dt)
+	itemStep(d)
 end
 
 local function playUpper(d: Driver, name: string, speed: number, fade: number?)
@@ -691,7 +724,9 @@ local function lagLeft(w: Watch): number
 end
 
 local B = SoldierAnims.BAKED
-local PRONE_ROOT = CFrame.new(0, B.proneRoot.y, 0) * CFrame.Angles(math.rad(B.proneRoot.pitchDeg), 0, 0)
+-- D-98: o PRONE_ROOT do servidor é o da gravação vezes SCALE (soldado de 2,0 m)
+local PRONE_ROOT = CFrame.new(0, B.proneRoot.y * SoldierAnims.SCALE, 0)
+	* CFrame.Angles(math.rad(B.proneRoot.pitchDeg), 0, 0)
 
 -- Root: cada clipe foi gravado contra a postura dele (HRP baixado bakedDrop; deitado, C0 com
 -- PRONE_ROOT). Na mistura de posturas e enquanto o HRP desce, corrige para a postura de AGORA:
@@ -707,7 +742,7 @@ local function rootFix(w: Watch, byStance: { [string]: number })
 		return
 	end
 	local base = w.model:GetAttribute("BaseHipHeight")
-	local baseHip = if type(base) == "number" then base else B.baseHip
+	local baseHip = if type(base) == "number" then base else B.baseHip * SoldierAnims.SCALE
 	local actual = (baseHip - w.hum.HipHeight) + lagLeft(w)
 	local lift = SoldierAnims.rootLift(byStance, actual)
 	local kmix = CFrame.identity:Lerp(PRONE_ROOT, (byStance.prone or 0) / total)

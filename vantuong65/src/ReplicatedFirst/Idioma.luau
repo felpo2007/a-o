@@ -1,21 +1,27 @@
 --!strict
 -- Escolha do idioma (pedido do dono, 2026-11-11: "faça o jogo completamente na língua que foi
--- selecionada"). Cartão de época com as 5 opções (automático, português, English, Español, Tiếng
--- Việt) e um chip "IDIOMA · LANGUAGE" que o abre. Fica no ReplicatedFirst porque a tela de entrada
--- (LoadingScreen) usa antes de tudo; o lobby (IdiomaLobby.client) e o menu do jogo (GameMenu) também.
+-- selecionada"; depois: "coloque as bandeiras dos países na hora de escolher o idioma"). Cartão com
+-- as 5 opções em cartões grandes com a bandeira (ReplicatedFirst/Bandeiras: Brasil, EUA, Espanha,
+-- Vietnã e um globo para o automático), o nome no próprio idioma e o código; e um chip "IDIOMA ·
+-- LANGUAGE" com a bandeira atual que o abre. Estilo novo (ReplicatedFirst/Estilo): painel escuro,
+-- títulos em Oswald, nada de papel.
+-- Fica no ReplicatedFirst porque a tela de entrada (LoadingScreen) usa antes de tudo; o lobby
+-- (IdiomaLobby.client) e o menu do jogo (GameMenu) também.
 -- Gravar: Input.setSetting("lang", código), e o Traducao.client retraduz o que está aberto. Na tela
 -- de entrada o módulo Input ainda pode não existir (os Controllers chegam depois): a escolha espera
 -- por ele, e o Input a mantém por cima da configuração salva que chega do servidor (Input.pendingLang).
 -- Os nomes dos idiomas ficam no próprio idioma (endônimo) e não passam pela tradução: vão em TextBox
 -- só de leitura, que o Traducao.client nunca traduz. O resto do cartão é traduzido normalmente.
--- Navegação: clique e toque; teclado (setas, Enter, Esc/Backspace); controle (direcional ou
+-- Navegação: clique e toque; teclado (← → ou ↑ ↓, Enter, Esc/Backspace); controle (direcional ou
 -- analógico, A, B). Com o cursor virtual do lobby (opcoes.cursor = true), o A e o direcional são do
 -- cursor (os botões chegam registrados por opcoes.bind).
-local GuiService = game:GetService("GuiService")
 local LocalizationService = game:GetService("LocalizationService")
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
+
+local Bandeiras = require(script.Parent:WaitForChild("Bandeiras"))
+local Estilo = require(script.Parent:WaitForChild("Estilo"))
 
 local Idioma = {}
 
@@ -29,29 +35,8 @@ Idioma.OPCOES = {
 } :: { Opcao }
 local NOME: { [string]: string } = { pt = "Português", en = "English", es = "Español", vi = "Tiếng Việt" }
 
-local CARD = Color3.fromRGB(234, 226, 200)
-local CARD_HOT = Color3.fromRGB(250, 244, 226)
-local INK = Color3.fromRGB(40, 36, 28)
-local DRAB = Color3.fromRGB(46, 50, 36)
-local KHAKI = Color3.fromRGB(201, 186, 140)
-local BRASS = Color3.fromRGB(214, 172, 72)
-local STAMP = Color3.fromRGB(150, 40, 30)
-local RULE_RED = Color3.fromRGB(176, 62, 48)
-local HEAD = Font.fromName("Oswald", Enum.FontWeight.Bold)
-local BODY = Font.fromEnum(Enum.Font.Arimo)
-local BODY_B = Font.fromEnum(Enum.Font.ArimoBold)
-local TYPE = Font.fromEnum(Enum.Font.SpecialElite)
-
-local function isTv(): boolean
-	local ok, v = pcall(function()
-		return GuiService:IsTenFootInterface()
-	end)
-	return ok and v == true
-end
-local TV = isTv()
-local function px(pc: number, tv: number): number
-	return if TV then tv else pc
-end
+local V, F = Estilo.V, Estilo.F
+local px = Estilo.px
 
 -- ===== idioma atual e gravação =====
 local function inputModule(wait: boolean): any
@@ -116,41 +101,12 @@ function Idioma.aplicar(code: string)
 end
 
 -- ===== peças =====
-local function corner(o: Instance, r: number)
-	local c = Instance.new("UICorner")
-	c.CornerRadius = UDim.new(0, r)
-	c.Parent = o
-end
-local function edge(o: Instance, color: Color3, t: number, tr: number): UIStroke
-	local s = Instance.new("UIStroke")
-	s.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-	s.Color = color
-	s.Thickness = t
-	s.Transparency = tr
-	s.Parent = o
-	return s
-end
-local function lit(o: Instance, low: number)
-	local g = Instance.new("UIGradient")
-	g.Rotation = 90
-	g.Color = ColorSequence.new(Color3.new(1, 1, 1), Color3.new(low, low * 0.98, low * 0.94))
-	g.Parent = o
-end
-local function label(parent: Instance, font: Font, size: number, color: Color3): TextLabel
-	local t = Instance.new("TextLabel")
-	t.BackgroundTransparency = 1
-	t.FontFace = font
-	t.TextSize = size
-	t.TextColor3 = color
-	t.TextXAlignment = Enum.TextXAlignment.Left
-	t.Parent = parent
-	return t
-end
--- texto que a tradução não toca (endônimos e o título em várias línguas): TextBox só de leitura
+-- texto que a tradução não toca (endônimos, códigos e o título em várias línguas): TextBox só de
+-- leitura. Com letra do vietnamita vai no Arimo Bold (o Oswald não tem).
 local function fixed(parent: Instance, font: Font, size: number, color: Color3, text: string): TextBox
 	local t = Instance.new("TextBox")
 	t.BackgroundTransparency = 1
-	t.FontFace = font
+	t.FontFace = Estilo.headFont(text, font)
 	t.TextSize = size
 	t.TextColor3 = color
 	t.TextXAlignment = Enum.TextXAlignment.Left
@@ -180,6 +136,17 @@ local function usingPad(): boolean
 	return string.sub(UserInputService:GetLastInputType().Name, 1, 7) == "Gamepad"
 end
 
+local function tween(
+	o: Instance,
+	t: number,
+	props: { [string]: any },
+	style: Enum.EasingStyle?,
+	dir: Enum.EasingDirection?
+)
+	TweenService:Create(o, TweenInfo.new(t, style or Enum.EasingStyle.Quint, dir or Enum.EasingDirection.Out), props)
+		:Play()
+end
+
 -- ===== chip "IDIOMA · LANGUAGE" =====
 export type Chip = { button: TextButton, atualizar: () -> () }
 -- padKey: botão do controle que também abre (a imagem dele aparece no chip quando se joga no controle)
@@ -189,18 +156,18 @@ export type ChipOpcoes = {
 	padKey: Enum.KeyCode?,
 }
 function Idioma.chip(parent: Instance, o: ChipOpcoes): Chip
+	local H = px(34, 48)
 	local b = Instance.new("TextButton")
 	b.Name = "Idioma"
 	b.AutoButtonColor = false
 	b.Text = ""
-	b.BackgroundColor3 = DRAB
+	b.BackgroundColor3 = V.PANEL
 	b.BackgroundTransparency = 0.08
-	b.Size = UDim2.fromOffset(px(236, 330), px(34, 48))
+	b.Size = UDim2.fromOffset(px(236, 330), H)
 	b.Selectable = false
 	b.Parent = parent
-	corner(b, 3)
-	lit(b, 0.72)
-	local e = edge(b, KHAKI, 1, 0.55)
+	Estilo.corner(b, 4)
+	local e = Estilo.stroke(b, V.LINE, 1, 0.3)
 	local sc = Instance.new("UIScale")
 	sc.Parent = b
 	local key = Instance.new("ImageLabel")
@@ -210,19 +177,39 @@ function Idioma.chip(parent: Instance, o: ChipOpcoes): Chip
 	key.Size = UDim2.fromOffset(px(26, 38), px(26, 38))
 	key.Visible = false
 	key.Parent = b
-	local head = fixed(b, HEAD, px(13, 22), KHAKI, "IDIOMA · LANGUAGE")
-	head.Position = UDim2.fromOffset(px(10, 14), 0)
-	head.Size = UDim2.new(0, px(120, 170), 1, 0)
-	local cur = fixed(b, HEAD, px(16, 26), CARD, "")
-	cur.Position = UDim2.new(0, px(128, 186), 0, 0)
-	cur.Size = UDim2.new(1, -px(138, 196), 1, 0)
+	-- a bandeira do idioma de agora, à esquerda
+	local FH = H - px(14, 20)
+	local flagSlot = Instance.new("Frame")
+	flagSlot.Name = "Bandeira"
+	flagSlot.BackgroundTransparency = 1
+	flagSlot.AnchorPoint = Vector2.new(0, 0.5)
+	flagSlot.Position = UDim2.new(0, px(8, 12), 0.5, 0)
+	flagSlot.Size = UDim2.fromOffset(math.floor(FH * 1.5), FH)
+	flagSlot.Parent = b
+	local x = px(8, 12) + math.floor(FH * 1.5) + px(8, 10)
+	local head = fixed(b, F.TITLE_REG, px(13, 20), V.DIM, "IDIOMA · LANGUAGE")
+	head.Position = UDim2.fromOffset(x, 0)
+	head.Size = UDim2.new(0, px(104, 150), 1, 0)
+	local cur = fixed(b, F.TITLE, px(15, 24), V.TEXT, "")
+	cur.AnchorPoint = Vector2.new(1, 0)
+	cur.Position = UDim2.new(1, -px(10, 14), 0, 0)
+	cur.Size = UDim2.new(1, -(x + px(104, 150) + px(14, 20)), 1, 0)
 	cur.TextXAlignment = Enum.TextXAlignment.Right
 	cur.TextTruncate = Enum.TextTruncate.AtEnd
+	local shownFlag = ""
 	local function atualizar()
 		local c = Idioma.atual()
 		local n = Idioma.nome(c)
-		cur.Text = if c == "auto" then string.format("AUTO · %s ▼", n) else string.format("%s ▼", n)
-		cur.FontFace = if string.find(n, "[\196-\225]") then BODY_B else HEAD
+		cur.Text = string.format("%s ▼", n)
+		cur.FontFace = Estilo.headFont(n)
+		if shownFlag ~= c then
+			shownFlag = c
+			for _, ch in flagSlot:GetChildren() do
+				ch:Destroy()
+			end
+			local fl = Bandeiras.criar(c, flagSlot.Size.X.Offset, FH)
+			fl.Parent = flagSlot
+		end
 		local img = if o.padKey and usingPad() then padImage(o.padKey) else nil
 		key.Image = img or ""
 		key.Visible = img ~= nil
@@ -235,14 +222,9 @@ function Idioma.chip(parent: Instance, o: ChipOpcoes): Chip
 		atualizar()
 	end)
 	local function hover(on: boolean)
-		TweenService:Create(sc, TweenInfo.new(0.2, Enum.EasingStyle.Quint), { Scale = if on then 1.04 else 1 }):Play()
-		TweenService
-			:Create(
-				e,
-				TweenInfo.new(0.14),
-				{ Color = if on then BRASS else KHAKI, Transparency = if on then 0 else 0.55 }
-			)
-			:Play()
+		tween(sc, 0.2, { Scale = if on then 1.04 else 1 })
+		tween(e, 0.14, { Color = if on then V.BRASS else V.LINE, Transparency = if on then 0 else 0.3 })
+		tween(b, 0.14, { BackgroundColor3 = if on then V.PANEL_3 else V.PANEL })
 	end
 	b.MouseEnter:Connect(function()
 		hover(true)
@@ -264,7 +246,7 @@ export type AbrirOpcoes = {
 	parent: Instance?, -- dentro de uma tela que já existe (senão cria a sua)
 	cursor: boolean?, -- o cursor virtual do lobby cuida do A e do direcional
 	bind: ((b: GuiButton, fn: () -> (), hover: ((boolean) -> ())?) -> ())?,
-	primeiraVez: boolean?, -- texto de boas-vindas no alto
+	primeiraVez: boolean?, -- uma linha de boas-vindas no alto
 	aoFechar: (() -> ())?,
 }
 
@@ -313,20 +295,21 @@ function Idioma.abrir(o: AbrirOpcoes?)
 	layer.ZIndex = 50
 	layer.Parent = host
 
-	local W, ROW = px(520, 760), px(58, 84)
-	local H = px(118, 170) + #Idioma.OPCOES * (ROW + 8) + px(46, 66)
-	local card = Instance.new("Frame")
+	-- medidas: cinco cartões lado a lado
+	local PAD, GAP = px(24, 34), px(12, 16)
+	local CW, CH = px(132, 190), px(176, 248)
+	local HEAD_H = px(58, 82)
+	local INTRO_H = if op.primeiraVez then px(30, 42) else 0
+	local FOOT_H = px(46, 64)
+	local n = #Idioma.OPCOES
+	local W = 2 * PAD + n * CW + (n - 1) * GAP
+	local H = HEAD_H + INTRO_H + CH + FOOT_H + px(18, 24)
+	local card = Estilo.panel(layer, V.PANEL, 0, true)
 	card.Name = "Cartao"
 	card.AnchorPoint = Vector2.new(0.5, 0.5)
 	card.Position = UDim2.fromScale(0.5, 0.5)
 	card.Size = UDim2.fromOffset(W, H)
-	card.BackgroundColor3 = CARD
-	card.BorderSizePixel = 0
 	card.ZIndex = 51
-	card.Rotation = -0.6
-	card.Parent = layer
-	lit(card, 0.86)
-	edge(card, INK, 1, 0.5)
 	local scale = Instance.new("UIScale")
 	scale.Parent = card
 	-- cabe na tela (janela estreita)
@@ -341,35 +324,27 @@ function Idioma.abrir(o: AbrirOpcoes?)
 		scale.Scale = fitK()
 	end)
 
-	local head = Instance.new("Frame")
-	head.BackgroundColor3 = DRAB
-	head.BorderSizePixel = 0
-	head.Size = UDim2.new(1, 0, 0, px(46, 66))
-	head.ZIndex = 52
-	head.Parent = card
-	lit(head, 0.7)
-	local title = fixed(head, BODY_B, px(18, 28), KHAKI, "IDIOMA · LANGUAGE · IDIOMA · NGÔN NGỮ")
-	title.Position = UDim2.fromOffset(px(18, 26), 0)
-	title.Size = UDim2.new(1, -px(36, 52), 1, 0)
-	title.ZIndex = 53
+	-- cabeçalho: o título nas quatro línguas e um filete oliva
+	local title = fixed(card, F.BODY_B, px(20, 30), V.TEXT, "IDIOMA · LANGUAGE · IDIOMA · NGÔN NGỮ")
+	title.Position = UDim2.fromOffset(PAD, 0)
+	title.Size = UDim2.new(1, -2 * PAD, 0, HEAD_H - px(6, 8))
+	title.ZIndex = 52
 	local rule = Instance.new("Frame")
-	rule.BackgroundColor3 = RULE_RED
+	rule.BackgroundColor3 = V.OLIVE
 	rule.BorderSizePixel = 0
-	rule.Position = UDim2.fromOffset(px(18, 26), px(50, 72))
-	rule.Size = UDim2.new(1, -px(36, 52), 0, 2)
+	rule.Position = UDim2.fromOffset(PAD, HEAD_H - px(6, 8))
+	rule.Size = UDim2.fromOffset(px(64, 90), px(3, 4))
 	rule.ZIndex = 52
 	rule.Parent = card
-	local intro = label(card, TYPE, px(15, 24), INK)
-	intro.Position = UDim2.fromOffset(px(18, 26), px(58, 82))
-	intro.Size = UDim2.new(1, -px(36, 52), 0, px(52, 80))
-	intro.TextWrapped = true
-	intro.TextYAlignment = Enum.TextYAlignment.Top
-	intro.ZIndex = 52
-	intro.Text = if op.primeiraVez
-		then "Escolha o idioma do jogo. Dá para trocar depois no lobby ou no menu do jogo."
-		else "O jogo inteiro muda na hora. Automático segue o idioma da sua conta Roblox."
+	if op.primeiraVez then
+		local intro = Estilo.text(card, "Escolha o idioma. Dá para trocar depois.", px(16, 24), V.DIM, F.BODY)
+		intro.Position = UDim2.fromOffset(PAD, HEAD_H + px(4, 6))
+		intro.Size = UDim2.new(1, -2 * PAD, 0, INTRO_H - px(4, 6))
+		intro.TextTruncate = Enum.TextTruncate.AtEnd
+		intro.ZIndex = 52
+	end
 
-	type Row = { b: TextButton, code: string, mark: TextLabel, sc: UIScale, e: UIStroke }
+	type Row = { b: TextButton, code: string, cur: Frame, sc: UIScale, e: UIStroke }
 	local rows: { Row } = {}
 	local sel = 1
 	local atual = Idioma.atual()
@@ -384,14 +359,13 @@ function Idioma.abrir(o: AbrirOpcoes?)
 	local function paint()
 		for i, r in rows do
 			local hot = i == sel
-			TweenService:Create(r.b, TweenInfo.new(0.14), { BackgroundColor3 = if hot then CARD_HOT else CARD }):Play()
-			TweenService:Create(r.sc, TweenInfo.new(0.22, Enum.EasingStyle.Quint), { Scale = if hot then 1.02 else 1 })
-				:Play()
-			TweenService:Create(r.e, TweenInfo.new(0.14), {
-				Color = if hot then BRASS else INK,
+			tween(r.b, 0.14, { BackgroundColor3 = if hot then V.PANEL_3 else V.PANEL_2 })
+			tween(r.sc, 0.22, { Scale = if hot then 1.04 else 1 })
+			tween(r.e, 0.14, {
+				Color = if hot then V.BRASS else V.LINE,
 				Thickness = if hot then 2 else 1,
-				Transparency = if hot then 0 else 0.7,
-			}):Play()
+				Transparency = if hot then 0 else 0.45,
+			})
 		end
 	end
 
@@ -405,13 +379,9 @@ function Idioma.abrir(o: AbrirOpcoes?)
 		for _, c in conns do
 			c:Disconnect()
 		end
-		TweenService:Create(layer, TweenInfo.new(0.2), { BackgroundTransparency = 1 }):Play()
-		TweenService:Create(card, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
-			Position = UDim2.new(0.5, 0, 0.5, 24),
-		}):Play()
-		TweenService:Create(scale, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
-			Scale = fitK() * 0.94,
-		}):Play()
+		tween(layer, 0.2, { BackgroundTransparency = 1 }, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
+		tween(card, 0.2, { Position = UDim2.new(0.5, 0, 0.5, 24) }, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
+		tween(scale, 0.2, { Scale = fitK() * 0.94 }, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
 		task.delay(0.21, function()
 			layer:Destroy()
 			if own then
@@ -432,74 +402,84 @@ function Idioma.abrir(o: AbrirOpcoes?)
 		paint()
 		local code = Idioma.OPCOES[i].code
 		for _, r in rows do
-			r.mark.Text = if r.code == code then "■" else ""
+			r.cur.Visible = r.code == code
 		end
 		Idioma.aplicar(code)
-		-- o carimbo cai na linha escolhida e o cartão fecha
-		local m = rows[i].mark
-		local ms = m:FindFirstChildOfClass("UIScale") :: UIScale
-		ms.Scale = 1.8
-		TweenService:Create(ms, TweenInfo.new(0.25, Enum.EasingStyle.Quint), { Scale = 1 }):Play()
-		task.delay(0.45, close)
+		-- o cartão escolhido pulsa e o cartão fecha
+		local sc = rows[i].sc
+		sc.Scale = 1.1
+		tween(sc, 0.25, { Scale = 1.04 })
+		task.delay(0.35, close)
 	end
 
+	local y0 = HEAD_H + INTRO_H + px(6, 8)
+	local FLAG_W = CW - 2 * px(14, 20)
+	local FLAG_H = math.floor(FLAG_W * 2 / 3 + 0.5)
 	for i, opc in Idioma.OPCOES do
 		local b = Instance.new("TextButton")
 		b.Name = opc.code
 		b.AutoButtonColor = false
 		b.Text = ""
-		b.BackgroundColor3 = CARD
+		b.BackgroundColor3 = V.PANEL_2
 		b.BorderSizePixel = 0
-		b.Position = UDim2.fromOffset(px(18, 26), px(112, 164) + (i - 1) * (ROW + 8))
-		b.Size = UDim2.new(1, -px(36, 52), 0, ROW)
+		b.Position = UDim2.fromOffset(PAD + (i - 1) * (CW + GAP), y0)
+		b.Size = UDim2.fromOffset(CW, CH)
 		b.Selectable = false
 		b.ZIndex = 52
 		b.Parent = card
-		corner(b, 3)
-		local e = edge(b, INK, 1, 0.7)
+		Estilo.corner(b, 4)
+		local e = Estilo.stroke(b, V.LINE, 1, 0.45)
 		local sc = Instance.new("UIScale")
 		sc.Parent = b
-		local tag = Instance.new("TextLabel")
-		tag.BackgroundColor3 = DRAB
-		tag.BorderSizePixel = 0
-		tag.Position = UDim2.fromOffset(px(10, 14), px(10, 14))
-		tag.Size = UDim2.fromOffset(px(58, 84), ROW - px(20, 28))
-		tag.FontFace = HEAD
-		tag.TextSize = px(16, 24)
-		tag.TextColor3 = KHAKI
-		tag.Text = opc.tag
-		tag.ZIndex = 53
-		tag.Parent = b
-		corner(tag, 2)
-		local x = px(82, 116)
+		local flag = Bandeiras.criar(opc.code, FLAG_W, FLAG_H)
+		flag.AnchorPoint = Vector2.new(0.5, 0)
+		flag.Position = UDim2.new(0.5, 0, 0, px(14, 20))
+		flag.ZIndex = 53
+		flag.Parent = b
+		local ny = px(14, 20) + FLAG_H + px(10, 14)
 		if opc.code == "auto" then
-			local n = label(b, HEAD, px(20, 30), INK)
-			n.Position = UDim2.fromOffset(x, px(4, 6))
-			n.Size = UDim2.new(1, -x - px(48, 70), 0, px(28, 40))
-			n.Text = "AUTOMÁTICO"
-			n.ZIndex = 53
-			local s = label(b, BODY, px(13, 22), INK)
-			s.Position = UDim2.fromOffset(x, px(30, 44))
-			s.Size = UDim2.new(1, -x - px(48, 70), 0, px(20, 30))
-			s.TextTransparency = 0.25
-			s.Text = string.format("Idioma da conta Roblox: %s", Idioma.nome("auto"))
-			s.ZIndex = 53
+			local nm = Estilo.text(b, "AUTOMÁTICO", px(18, 26), V.TEXT, F.TITLE)
+			nm.Position = UDim2.fromOffset(px(6, 8), ny)
+			nm.Size = UDim2.new(1, -2 * px(6, 8), 0, px(26, 36))
+			nm.TextXAlignment = Enum.TextXAlignment.Center
+			nm.TextScaled = true
+			nm.ZIndex = 53
+			local lim = Instance.new("UITextSizeConstraint")
+			lim.MaxTextSize = px(18, 26)
+			lim.Parent = nm
+			local acc = fixed(b, F.BODY, px(13, 20), V.DIM, Idioma.nome("auto"))
+			acc.Position = UDim2.fromOffset(px(6, 8), ny + px(26, 36))
+			acc.Size = UDim2.new(1, -2 * px(6, 8), 0, px(20, 28))
+			acc.TextXAlignment = Enum.TextXAlignment.Center
+			acc.ZIndex = 53
 		else
-			local n = fixed(b, if string.find(opc.nome, "[\196-\225]") then BODY_B else HEAD, px(22, 32), INK, opc.nome)
-			n.Position = UDim2.fromOffset(x, 0)
-			n.Size = UDim2.new(1, -x - px(48, 70), 1, 0)
-			n.ZIndex = 53
+			local nm = fixed(b, F.TITLE, px(20, 28), V.TEXT, opc.nome)
+			nm.Position = UDim2.fromOffset(px(6, 8), ny)
+			nm.Size = UDim2.new(1, -2 * px(6, 8), 0, px(26, 36))
+			nm.TextXAlignment = Enum.TextXAlignment.Center
+			nm.TextScaled = true
+			nm.ZIndex = 53
+			local lim = Instance.new("UITextSizeConstraint")
+			lim.MaxTextSize = px(20, 28)
+			lim.Parent = nm
+			local codeText = fixed(b, F.TITLE_REG, px(13, 20), V.DIM, opc.tag)
+			codeText.Position = UDim2.fromOffset(px(6, 8), ny + px(26, 36))
+			codeText.Size = UDim2.new(1, -2 * px(6, 8), 0, px(20, 28))
+			codeText.TextXAlignment = Enum.TextXAlignment.Center
+			codeText.ZIndex = 53
 		end
-		local mark = label(b, BODY_B, px(22, 32), STAMP)
-		mark.AnchorPoint = Vector2.new(1, 0)
-		mark.Position = UDim2.new(1, -px(14, 20), 0, 0)
-		mark.Size = UDim2.new(0, px(30, 44), 1, 0)
-		mark.TextXAlignment = Enum.TextXAlignment.Center
-		mark.Text = if opc.code == atual then "■" else ""
-		mark.ZIndex = 53
-		local msc = Instance.new("UIScale")
-		msc.Parent = mark
-		local row: Row = { b = b, code = opc.code, mark = mark, sc = sc, e = e }
+		-- o idioma de agora: faixa oliva embaixo do cartão
+		local cur = Instance.new("Frame")
+		cur.Name = "Atual"
+		cur.AnchorPoint = Vector2.new(0, 1)
+		cur.Position = UDim2.fromScale(0, 1)
+		cur.Size = UDim2.new(1, 0, 0, px(5, 7))
+		cur.BackgroundColor3 = V.OLIVE_HI
+		cur.BorderSizePixel = 0
+		cur.Visible = opc.code == atual
+		cur.ZIndex = 54
+		cur.Parent = b
+		local row: Row = { b = b, code = opc.code, cur = cur, sc = sc, e = e }
 		table.insert(rows, row)
 		local function hover(on: boolean)
 			if on and not closing then
@@ -525,16 +505,11 @@ function Idioma.abrir(o: AbrirOpcoes?)
 	local foot = Instance.new("Frame")
 	foot.BackgroundTransparency = 1
 	foot.AnchorPoint = Vector2.new(0, 1)
-	foot.Position = UDim2.new(0, px(18, 26), 1, -px(10, 14))
-	foot.Size = UDim2.new(1, -px(36, 52), 0, px(28, 40))
+	foot.Position = UDim2.new(0, PAD, 1, -px(10, 14))
+	foot.Size = UDim2.new(1, -2 * PAD, 0, px(28, 40))
 	foot.ZIndex = 52
 	foot.Parent = card
-	local fl = Instance.new("UIListLayout")
-	fl.FillDirection = Enum.FillDirection.Horizontal
-	fl.VerticalAlignment = Enum.VerticalAlignment.Center
-	fl.SortOrder = Enum.SortOrder.LayoutOrder
-	fl.Padding = UDim.new(0, 6)
-	fl.Parent = foot
+	Estilo.list(foot, true, px(6, 8))
 	local aImg = padImage(Enum.KeyCode.ButtonA)
 	local bImg = padImage(Enum.KeyCode.ButtonB)
 	local function refreshFoot()
@@ -543,21 +518,19 @@ function Idioma.abrir(o: AbrirOpcoes?)
 				c:Destroy()
 			end
 		end
-		local function txt(s: string, n: number)
-			local t = label(foot, TYPE, px(14, 22), INK)
+		local function txt(s: string, k: number)
+			local t = Estilo.text(foot, s, px(14, 22), V.DIM, F.BODY)
 			t.AutomaticSize = Enum.AutomaticSize.X
 			t.Size = UDim2.fromOffset(0, px(28, 40))
-			t.TextTransparency = 0.2
-			t.Text = s
-			t.LayoutOrder = n
+			t.LayoutOrder = k
 			t.ZIndex = 53
 		end
-		local function img(im: string, n: number)
+		local function img(im: string, k: number)
 			local il = Instance.new("ImageLabel")
 			il.BackgroundTransparency = 1
 			il.Image = im
 			il.Size = UDim2.fromOffset(px(24, 36), px(24, 36))
-			il.LayoutOrder = n
+			il.LayoutOrder = k
 			il.ZIndex = 53
 			il.Parent = foot
 		end
@@ -570,15 +543,19 @@ function Idioma.abrir(o: AbrirOpcoes?)
 		elseif UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled then
 			txt("Toque num idioma · toque fora para fechar", 1)
 		else
-			txt("Clique ou ↑ ↓ e Enter · Esc fecha", 1)
+			txt("Clique ou ← → e Enter · Esc fecha", 1)
 		end
 	end
 	refreshFoot()
 
-	-- teclado e controle (sem o cursor virtual): ↑ ↓, Enter/A, Esc/B
+	-- teclado e controle (sem o cursor virtual): ← → ↑ ↓, Enter/A, Esc/B
 	local STEP: { [Enum.KeyCode]: number } = {
+		[Enum.KeyCode.Left] = -1,
+		[Enum.KeyCode.Right] = 1,
 		[Enum.KeyCode.Up] = -1,
 		[Enum.KeyCode.Down] = 1,
+		[Enum.KeyCode.DPadLeft] = -1,
+		[Enum.KeyCode.DPadRight] = 1,
 		[Enum.KeyCode.DPadUp] = -1,
 		[Enum.KeyCode.DPadDown] = 1,
 	}
@@ -609,12 +586,12 @@ function Idioma.abrir(o: AbrirOpcoes?)
 			if op.cursor or io.KeyCode ~= Enum.KeyCode.Thumbstick1 then
 				return
 			end
-			local y = io.Position.Y
-			if math.abs(y) < 0.35 then
+			local x = io.Position.X
+			if math.abs(x) < 0.35 then
 				stickReady = true
-			elseif stickReady and math.abs(y) > 0.6 then
+			elseif stickReady and math.abs(x) > 0.6 then
 				stickReady = false
-				sel = (sel - 1 + (if y > 0 then -1 else 1)) % #rows + 1
+				sel = (sel - 1 + (if x > 0 then 1 else -1)) % #rows + 1
 				paint()
 			end
 		end)
@@ -631,14 +608,18 @@ function Idioma.abrir(o: AbrirOpcoes?)
 		end
 	end)
 
-	-- entra: o véu escurece e o cartão sobe e assenta
+	-- entra: o véu escurece, o cartão sobe e assenta e os cartões de idioma chegam em fila
 	local k = fitK()
 	scale.Scale = k * 0.95
-	card.Position = UDim2.new(0.5, 0, 0.5, 28)
-	TweenService:Create(layer, TweenInfo.new(0.25), { BackgroundTransparency = 0.42 }):Play()
-	TweenService:Create(card, TweenInfo.new(0.34, Enum.EasingStyle.Quint), { Position = UDim2.fromScale(0.5, 0.5) })
-		:Play()
-	TweenService:Create(scale, TweenInfo.new(0.34, Enum.EasingStyle.Quint), { Scale = k }):Play()
+	card.Position = UDim2.new(0.5, 0, 0.5, 24)
+	tween(layer, 0.25, { BackgroundTransparency = 0.45 })
+	tween(card, 0.3, { Position = UDim2.fromScale(0.5, 0.5) })
+	tween(scale, 0.3, { Scale = k })
+	local list: { GuiObject } = {}
+	for _, r in rows do
+		table.insert(list, r.b)
+	end
+	Estilo.enter(list, px(12, 16), 0.03, 0.05)
 	paint()
 	aberto = close
 end

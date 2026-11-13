@@ -23,8 +23,9 @@ BotNav.F = {
 	TRENCH = 64,
 	BLOCK = 128, -- fora da área de combate
 }
--- Paisagem (VT65Build/Landscape): 1 mata, 2 vila/mata, 3 lavoura, 4 clareira, 5 riacho
-BotNav.K = { FOREST = 1, GROVE = 2, FARM = 3, CLEAR = 4, STREAM = 5 }
+-- Paisagem (VT65Build/Landscape): 1 mata, 2 vila/mata, 3 lavoura, 4 clareira, 5 riacho, 6 roça seca;
+-- 7 estrada de terra batida (Data/Roads, marcada por cima com markRoad; 2026-11-12)
+BotNav.K = { FOREST = 1, GROVE = 2, FARM = 3, CLEAR = 4, STREAM = 5, ROCA = 6, ROAD = 7 }
 
 local F = BotNav.F
 local INF = math.huge
@@ -136,6 +137,43 @@ function BotNav.markBox(g: Grid, cx: number, cz: number, sx: number, sz: number,
 	end
 end
 
+-- Estrada (Data/Roads): as células do leito (meia largura half, studs) viram paisagem ROAD.
+-- roads: o módulo Data/Roads (width por tipo, roads = { kind, pts = x, z, y... }).
+function BotNav.markRoads(g: Grid, roads: any): number
+	local n = 0
+	for _, r in roads.roads do
+		local half = (roads.width[r.kind] or 20) / 2
+		local p = r.pts
+		for i = 1, #p - 5, 3 do
+			local x1, z1, x2, z2 = p[i], p[i + 1], p[i + 3], p[i + 4]
+			local y1, y2 = p[i + 2], p[i + 5]
+			local len = math.sqrt((x2 - x1) ^ 2 + (z2 - z1) ^ 2)
+			if len > 0 then
+				local nx, nz = -(z2 - z1) / len, (x2 - x1) / len
+				local steps = math.max(1, math.ceil(len / (g.cell * 0.5)))
+				local across = math.max(1, math.ceil(2 * half / (g.cell * 0.5)))
+				for k = 0, steps do
+					local t = k / steps
+					local cx, cz = x1 + (x2 - x1) * t, z1 + (z2 - z1) * t
+					for a = 0, across do
+						local o = (a / across - 0.5) * 2 * half
+						local idx = BotNav.index(g, cx + nx * o, cz + nz * o)
+						if idx and not bit32.btest(buffer.readu8(g.flags, idx), F.BLOCK) then
+							if buffer.readu8(g.kind, idx) ~= BotNav.K.ROAD then
+								n += 1
+							end
+							buffer.writeu8(g.kind, idx, BotNav.K.ROAD)
+							-- altura do leito (a rampa da estrada, não a do chão natural)
+							buffer.writef32(g.height, idx * 4, y1 + (y2 - y1) * t)
+						end
+					end
+				end
+			end
+		end
+	end
+	return n
+end
+
 -- Grade do tamanho da do terreno (WorldData.grid): mesma origem e célula.
 function BotNav.forWorld(world: any): Grid
 	local gs = world.grid
@@ -178,6 +216,7 @@ export type Profile = {
 	stream: number,
 	sea: number,
 	trench: number?,
+	road: number?,
 	maxGrade: number,
 	upCost: number,
 	downCost: number,
@@ -201,6 +240,15 @@ end
 local function cellCost(g: Grid, i: number, p: Profile): number
 	local f = buffer.readu8(g.flags, i)
 	local k = buffer.readu8(g.kind, i)
+	local road = p.road
+	if k == 7 and road then
+		-- estrada (BotNav.K.ROAD): leito firme; no riacho passa por aterro, então só a borda da área,
+		-- a casa e a sebe ainda valem
+		if bit32.btest(f, F.BLOCK) or (bit32.btest(f, F.HOUSE) and p.house >= INF) then
+			return INF
+		end
+		return road
+	end
 	local c = if k == 1 then p.forest elseif k == 2 then p.grove elseif k == 4 then p.clear else p.farm
 	if f == 0 then
 		return c
@@ -256,6 +304,9 @@ local function minCost(p: Profile): number
 	end
 	if p.trench then
 		m = math.min(m, p.trench)
+	end
+	if p.road then
+		m = math.min(m, p.road)
 	end
 	return math.max(m, 0.05)
 end

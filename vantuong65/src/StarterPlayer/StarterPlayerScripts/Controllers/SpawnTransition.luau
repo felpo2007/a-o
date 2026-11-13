@@ -1,20 +1,20 @@
 --!strict
 -- Inserção sem entrar travado (pedido do dono, 2026-11-11). Ao escolher o ponto de spawn:
---   1. a tela escurece numa "ordem de inserção" de 1965 (texto datilografado, carta com o eixo a
---      lápis vermelho correndo do QG até o ponto, que pisca, película e barra de progresso) e os
+--   1. a tela escurece numa "ordem de inserção" (estilo novo, 2026-11-11: painel escuro, o nome do
+--      ponto grande, grade, hora e lado em números, uma linha da etapa e a barra fina com o progresso
+--      real; ao lado, a carta pequena com o eixo correndo do QG até o ponto, que pisca) e os
 --      controles ficam parados (Input.openMenu);
 --   2. o cliente pede o streaming da área do ponto (RequestStreamAroundAsync) e só DEPOIS pede o
 --      spawn ao servidor (o servidor valida tudo de novo);
 --   3. espera o corpo novo chegar no ponto, segura o HumanoidRootPart parado (só no cliente, dono da
 --      física do próprio corpo), pede o streaming em volta dele e confere que há chão embaixo;
---   4. solta o corpo, carimba "EM CAMPO" e, ainda por baixo da ordem, nivela a câmera (tween curto
+--   4. solta o corpo, marca "EM CAMPO" e, ainda por baixo da ordem, nivela a câmera (tween curto
 --      até −3°, rumo no objetivo do time); a ordem esmaece enquanto a câmera desce do alto até o
 --      lugar dela (voo de grua); só então devolve o controle.
--- Se o servidor recusar (o corpo não chega), a ordem é carimbada "RECUSADA" e o lobby volta.
+-- Se o servidor recusar (o corpo não chega), a ordem é marcada "RECUSADA" e o lobby volta.
 -- Tempos-limite são de segurança: nunca deixam o jogador preso aqui.
--- Acabamento (pedido do dono: "mais fluido e com uma qualidade gráfica melhor", realismo de época):
--- a mesma linguagem da tela de entrada (Acabamento: película, sombra de papel, máquina de escrever,
--- linha de avanço, marca piscando). A barra é um NumberValue em tween: anda suave e nunca volta.
+-- A barra é um NumberValue em tween: anda suave e nunca volta. Do Acabamento ficam só a linha de
+-- avanço e a marca que pisca na carta pequena (sem película, papel nem máquina de escrever).
 -- Voo de câmera sem brigar com a câmera do jogo: a câmera do Roblox, a de ombro (ThirdPerson) e o
 -- resto continuam calculando a câmera "de verdade" a cada quadro; antes deles ela é devolvida
 -- (prioridade Camera - 2) e, depois de todos (Last), só a imagem é deslocada para o alto. No fim do
@@ -42,12 +42,8 @@ local player = Players.LocalPlayer
 
 export type Point = { id: string, name: string, x: number, z: number }
 
-local HEAD, TYPE = Enum.Font.Oswald, Enum.Font.SpecialElite
-local HEAD_B = Font.fromName("Oswald", Enum.FontWeight.Bold)
-local INK, CARD, KHAKI, STAMP, DRAB = UiKit.INK, UiKit.CARD, UiKit.KHAKI, UiKit.STAMP, UiKit.DRAB
+local V, F = UiKit.V, UiKit.F
 local TV = UiKit.tv()
-local MAP_PAPER = Color3.fromRGB(222, 218, 188)
-local GRID = Color3.fromRGB(70, 96, 140)
 local B = MapConfig.Bounds
 
 local STREAM_POINT_S = 8 -- s máximos esperando a área do ponto
@@ -60,7 +56,7 @@ local FLY_RISE = 18 -- studs acima da câmera de verdade no começo (~5 m)
 local FLY_PITCH = math.rad(32) -- olhando mais para baixo no começo
 local FLY_HANDOFF = 0.8 -- fração do voo em que o controle volta (a imagem já está a ~1 stud)
 
-local DESIGN_W, DESIGN_H = 930, 420 -- palco da ordem (cartão + carta + folga das sombras)
+local DESIGN_W, DESIGN_H = 880, 360 -- palco da ordem (painel + carta pequena)
 
 local function tween(
 	o: Instance,
@@ -91,29 +87,9 @@ pcall(function()
 	gui.ScreenInsets = Enum.ScreenInsets.None
 end)
 
-local bg = Instance.new("Frame")
-bg.Name = "Fundo"
-bg.Size = UDim2.fromScale(1, 1)
-bg.BackgroundColor3 = UiKit.NIGHT
+-- fundo de cor única, escura (nada atrás recebe clique durante a inserção)
+local bg = UiKit.backdrop(gui, V.BG_NIGHT)
 bg.BackgroundTransparency = 1
-bg.BorderSizePixel = 0
-bg.Active = true -- nada atrás recebe clique durante a inserção
-bg.Parent = gui
-do -- lona escura, mais clara em cima, onde bate o lampião
-	local g = Instance.new("UIGradient")
-	g.Rotation = 90
-	g.Color = ColorSequence.new({
-		ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 236, 210)),
-		ColorSequenceKeypoint.new(0.6, Color3.fromRGB(150, 148, 138)),
-		ColorSequenceKeypoint.new(1, Color3.fromRGB(90, 90, 84)),
-	})
-	g.Parent = bg
-end
-
--- película por cima de tudo (vinheta, grão a 24 quadros, riscos, tremor) e a luz quente no alto
-local film =
-	Acabamento.filme(gui, { vinheta = 0.95, grao = 0.55, poeira = 30, riscos = 2, tremor = 0.5, lampiao = 0.4, z = 40 })
-Acabamento.luz(film, UDim2.fromScale(0.3, 0.05), 1.5)
 
 -- palco da ordem: CanvasGroup (entra e sai esmaecendo inteiro), escala com a tela
 local holder = Instance.new("CanvasGroup")
@@ -127,139 +103,55 @@ holder.Parent = bg
 local fit = Instance.new("UIScale")
 fit.Parent = holder
 
-local function label(
-	parent: Instance,
-	font: Enum.Font,
-	size: number,
-	color: Color3,
-	x: number,
-	y: number,
-	w: number,
-	h: number
-): TextLabel
-	local t = Instance.new("TextLabel")
-	t.BackgroundTransparency = 1
-	t.Font = font
-	t.TextSize = UiKit.text(size)
-	t.TextColor3 = color
-	t.TextXAlignment = Enum.TextXAlignment.Left
-	t.TextYAlignment = Enum.TextYAlignment.Top
-	t.TextWrapped = true
-	t.Text = ""
-	t.Position = UDim2.fromOffset(x, y)
-	t.Size = UDim2.fromOffset(w, h)
-	t.Parent = parent
-	return t
+local function place(o: GuiObject, x: number, y: number, w: number, h: number): GuiObject
+	o.Position = UDim2.fromOffset(x, y)
+	o.Size = UDim2.fromOffset(w, h)
+	return o
 end
 
-local function box(parent: Instance, color: Color3, x: number, y: number, w: number, h: number, tr: number?): Frame
-	local f = Instance.new("Frame")
-	f.BackgroundColor3 = color
-	f.BackgroundTransparency = tr or 0
-	f.BorderSizePixel = 0
-	f.Position = UDim2.fromOffset(x, y)
-	f.Size = UDim2.fromOffset(w, h)
-	f.Parent = parent
-	return f
-end
-
-local function paperLight(o: Instance, rot: number)
-	local g = Instance.new("UIGradient")
-	g.Rotation = rot
-	g.Color = ColorSequence.new(Color3.new(1, 1, 1), Color3.fromRGB(212, 206, 192))
-	g.Parent = o
-end
-
--- ----- a ordem (papel datilografado) -----
-local card = box(holder, CARD, 20, 40, 560, 330)
-card.Name = "Ordem"
-card.Rotation = -0.8 -- papel posto à mão na mesa
-paperLight(card, 80)
-do
-	local s = Instance.new("UIStroke")
-	s.Color = INK
-	s.Transparency = 0.6
-	s.Parent = card
-end
-Acabamento.sombra(card, 18, Vector2.new(0, 8), 0.6)
-
-local head = label(card, HEAD, 28, INK, 22, 12, 380, 36)
-head.FontFace = HEAD_B
-head.Text = "ORDEM DE INSERÇÃO"
-box(card, UiKit.RULE_RED, 22, 52, 516, 2) -- linha de cabeçalho da ficha
-box(card, UiKit.BRASS, 22, 57, 360, 1, 0.3) -- filete de latão
-local body = label(card, TYPE, 18, INK, 22, 68, 516, 140)
-body.RichText = true
-local stageText = label(card, TYPE, 15, INK, 22, 252, 420, 26)
-stageText.RichText = true
-stageText.TextWrapped = false
-stageText.TextTruncate = Enum.TextTruncate.AtEnd
-local percent = label(card, HEAD, 20, INK, 440, 250, 98, 28)
-percent.FontFace = HEAD_B
-percent.TextXAlignment = Enum.TextXAlignment.Right
-percent.Text = "0%"
-local barBack = box(card, DRAB, 22, 284, 516, 12)
-barBack.ClipsDescendants = true
-do
-	local c = Instance.new("UICorner")
-	c.CornerRadius = UDim.new(0, 2)
-	c.Parent = barBack
-end
-local barFill = box(barBack, STAMP, 0, 0, 0, 12)
-barFill.Size = UDim2.fromScale(0, 1)
-do
-	local g = Instance.new("UIGradient")
-	g.Rotation = 90
-	g.Color = ColorSequence.new(Color3.new(1, 1, 1), Color3.fromRGB(180, 176, 168))
-	g.Parent = barFill
-end
-local nib = box(barFill, UiKit.BRASS, 0, 0, 2, 12, 0.1) -- ponta de tinta que anda com a barra
-nib.AnchorPoint = Vector2.new(1, 0)
-nib.Position = UDim2.fromScale(1, 0)
-nib.Size = UDim2.new(0, 2, 1, 0)
-for i = 1, 9 do -- régua de contador de filme
-	local m = box(barBack, KHAKI, 0, 0, 1, 12, 0.55)
-	m.Position = UDim2.new(i / 10, 0, 0, 0)
-	m.Size = UDim2.new(0, 1, 1, 0)
-	m.ZIndex = 2
-end
-local note = label(card, TYPE, 13, INK, 22, 302, 516, if TV then 26 else 20)
-note.TextTransparency = 0.35
-note.TextWrapped = false
-note.TextTruncate = Enum.TextTruncate.AtEnd
-note.Text = "Na chegada, qualquer botão pula a descida da câmera."
-
--- carimbo final ("EM CAMPO" ou "RECUSADA"): cai na ordem
-local done = label(card, HEAD, 34, STAMP, 330, 150, 210, 56)
-done.FontFace = HEAD_B
-done.TextXAlignment = Enum.TextXAlignment.Center
-done.TextYAlignment = Enum.TextYAlignment.Center
-done.Rotation = -8
+-- ----- a ordem: painel escuro, o ponto grande, três números, a etapa e a barra -----
+local PW = 520
+local card = UiKit.panel(holder, V.PANEL, 0)
+card.Name = "Painel"
+place(card, 0, 0, PW, DESIGN_H)
+local head = UiKit.kicker(card, "ORDEM DE INSERÇÃO", 16, V.DIM)
+place(head, 28, 22, PW - 200, 22)
+-- etiqueta do fim ("EM CAMPO" / "RECUSADA"): entra com um pulo, no canto de cima
+local done = UiKit.tag(card, "", V.OLIVE, 16)
+done.AnchorPoint = Vector2.new(1, 0)
+done.Position = UDim2.new(1, -24, 0, 20)
+done.Size = UDim2.fromOffset(0, UiKit.px(28, 38))
 done.Visible = false
 done.ZIndex = 3
-local doneEdge = Instance.new("UIStroke")
-doneEdge.Color = STAMP
-doneEdge.Thickness = 3
-doneEdge.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-doneEdge.Parent = done
 local doneHit = Instance.new("UIScale")
 doneHit.Parent = done
+local pointName = UiKit.title(card, "", 40, V.TEXT)
+place(pointName, 26, 48, PW - 52, 54)
+local numbers = UiKit.statRow(card, { { "GRADE", "—" }, { "HORA", "—" }, { "LADO", "—" } }, 26)
+numbers.frame.Position = UDim2.fromOffset(28, 112)
+local gridValue, clockValue, sideValue = numbers.stats[1].value, numbers.stats[2].value, numbers.stats[3].value
+local stageText = UiKit.body(card, "", 16, V.TEXT)
+place(stageText, 28, 214, PW - 150, 24)
+stageText.TextWrapped = false
+stageText.TextTruncate = Enum.TextTruncate.AtEnd
+stageText.TextYAlignment = Enum.TextYAlignment.Center
+local percent = UiKit.title(card, "0%", 26, V.TEXT)
+place(percent, PW - 140, 208, 112, 34)
+percent.TextXAlignment = Enum.TextXAlignment.Right
+local barBack, barFill = UiKit.bar(card, 6, V.OLIVE_HI)
+place(barBack, 28, 250, PW - 56, 6)
+local note = UiKit.body(card, "Na chegada, qualquer botão pula a descida da câmera.", 13, V.MUTED)
+place(note, 28, DESIGN_H - 48, PW - 56, if TV then 26 else 20)
+note.TextWrapped = false
+note.TextTruncate = Enum.TextTruncate.AtEnd
 
--- ----- carta com o ponto -----
-local MAP = 280
-local map = box(holder, MAP_PAPER, 600, 40, MAP, MAP)
+-- ----- carta pequena com o ponto -----
+local MAP = DESIGN_H
+local map = UiKit.panel(holder, V.PANEL_2, 0)
 map.Name = "Carta"
-map.ClipsDescendants = true -- reta: carta girada não corta os filhos no Roblox
-paperLight(map, 70)
-do
-	local s = Instance.new("UIStroke")
-	s.Color = INK
-	s.Thickness = 2
-	s.Transparency = 0.15
-	s.Parent = map
-end
-Acabamento.sombra(map, 20, Vector2.new(4, 10), 0.6)
--- setores da carta (faixas de mata alternadas), como a carta da mesa
+place(map, DESIGN_W - MAP, 0, MAP, MAP)
+map.ClipsDescendants = true
+-- setores da carta (faixas alternadas, escuras)
 for i, s in MapConfig.Sectors do
 	local x0, x1 = math.huge, -math.huge
 	for k = 1, #s.polygon, 2 do
@@ -268,37 +160,56 @@ for i, s in MapConfig.Sectors do
 	end
 	local u0 = (x0 - B.minX) / (B.maxX - B.minX)
 	local u1 = (x1 - B.minX) / (B.maxX - B.minX)
-	local band =
-		box(map, if i % 2 == 0 then Color3.fromRGB(170, 196, 140) else Color3.fromRGB(190, 206, 156), 0, 0, 0, 0, 0.55)
+	local band = Instance.new("Frame")
+	band.BorderSizePixel = 0
+	band.BackgroundColor3 = if i % 2 == 0 then Color3.fromRGB(44, 52, 36) else Color3.fromRGB(36, 42, 30)
 	band.Position = UDim2.fromScale(math.clamp(u0, 0, 1), 0)
 	band.Size = UDim2.fromScale(math.clamp(u1 - u0, 0, 1), 1)
+	band.Parent = map
 end
 local gridLines: { { f: Frame, full: UDim2, from: UDim2 } } = {}
 for i = 1, 7 do
-	local v = box(map, GRID, 0, 0, 0, 0, 0.45)
-	v.Position = UDim2.fromScale(i / 8, 0)
-	v.ZIndex = 2
-	table.insert(gridLines, { f = v, full = UDim2.new(0, 1, 1, 0), from = UDim2.new(0, 1, 0, 0) })
-	local h = box(map, GRID, 0, 0, 0, 0, 0.45)
-	h.Position = UDim2.fromScale(0, i / 8)
-	h.ZIndex = 2
-	table.insert(gridLines, { f = h, full = UDim2.new(1, 0, 0, 1), from = UDim2.new(0, 0, 0, 1) })
+	for _, vertical in { true, false } do
+		local l = Instance.new("Frame")
+		l.BorderSizePixel = 0
+		l.BackgroundColor3 = V.LINE
+		l.BackgroundTransparency = 0.45
+		l.Position = if vertical then UDim2.fromScale(i / 8, 0) else UDim2.fromScale(0, i / 8)
+		l.ZIndex = 2
+		l.Parent = map
+		table.insert(gridLines, {
+			f = l,
+			full = if vertical then UDim2.new(0, 1, 1, 0) else UDim2.new(1, 0, 0, 1),
+			from = if vertical then UDim2.new(0, 1, 0, 0) else UDim2.new(0, 0, 0, 1),
+		})
+	end
 end
--- QG do lado (quadrado de tinta) e o eixo a lápis vermelho do QG até o ponto
-local hqMark = box(map, Color3.fromRGB(40, 70, 140), 0, 0, 16, 12, 0.1)
+-- QG do lado (quadrado na cor do lado) e o eixo do QG até o ponto
+local hqMark = Instance.new("Frame")
 hqMark.AnchorPoint = Vector2.new(0.5, 0.5)
+hqMark.Size = UDim2.fromOffset(16, 12)
+hqMark.BorderSizePixel = 0
 hqMark.ZIndex = 4
 hqMark.Visible = false
-local axis = Acabamento.linha(map, STAMP, 3, 14, 5)
-local marker = Acabamento.marca(map, STAMP, 20, 6)
+hqMark.Parent = map
+UiKit.corner(hqMark, 2)
+UiKit.stroke(hqMark, V.BG, 1.5)
+local axis = Acabamento.linha(map, V.KHAKI, 3, 14, 5)
+local marker = Acabamento.marca(map, V.BRASS, 20, 6)
 marker.raiz.Visible = false
 local STRIP = if TV then 32 else 26
-local mapStrip = box(map, MAP_PAPER, 0, MAP - STRIP, MAP, STRIP, 0.08)
+local mapStrip = Instance.new("Frame")
+mapStrip.BackgroundColor3 = V.PANEL
+mapStrip.BackgroundTransparency = 0.1
+mapStrip.BorderSizePixel = 0
+mapStrip.Position = UDim2.new(0, 0, 1, -STRIP)
+mapStrip.Size = UDim2.new(1, 0, 0, STRIP)
 mapStrip.ZIndex = 7
-local mapName = label(mapStrip, TYPE, 14, INK, 8, 3, MAP - 16, STRIP - 4)
+mapStrip.Parent = map
+local mapName = UiKit.kicker(mapStrip, "", 14, V.TEXT)
+mapName.Position = UDim2.fromOffset(10, 0)
+mapName.Size = UDim2.new(1, -20, 1, 0)
 mapName.ZIndex = 7
-mapName.RichText = true
-mapName.TextTruncate = Enum.TextTruncate.AtEnd
 
 task.spawn(function()
 	gui.Parent = player:WaitForChild("PlayerGui")
@@ -355,22 +266,26 @@ local function setTarget(p: number)
 	tween(prog, 0.5, { Value = p }, Enum.EasingStyle.Quad)
 end
 
+-- a etapa entra deslizando um pouco (sem máquina de escrever)
 local function setStage(text: string, p: number)
-	Acabamento.datilografar(stageText, Acabamento.viet(text), 70)
+	stageText.Text = Acabamento.viet(text)
+	stageText.TextTransparency = 1
+	stageText.Position = UDim2.fromOffset(36, 214)
+	tween(stageText, 0.25, { TextTransparency = 0, Position = UDim2.fromOffset(28, 214) })
 	setTarget(p)
 end
 
+-- etiqueta do fim: "EM CAMPO" (oliva) ou "RECUSADA" (vermelho), com um pulo curto
 local function stampDone(text: string, color: Color3)
 	done.Text = text
-	done.TextColor3 = color
-	doneEdge.Color = color
+	done.FontFace = UiKit.Estilo.headFont(text, F.TITLE_MED)
+	done.BackgroundColor3 = color
 	done.Visible = true
 	done.TextTransparency = 1
-	doneEdge.Transparency = 1
-	doneHit.Scale = 1.6
-	tween(doneHit, 0.24, { Scale = 1 })
-	tween(done, 0.18, { TextTransparency = 0.05 }, Enum.EasingStyle.Quad)
-	tween(doneEdge, 0.18, { Transparency = 0.15 }, Enum.EasingStyle.Quad)
+	done.BackgroundTransparency = 1
+	doneHit.Scale = 1.25
+	tween(doneHit, 0.24, { Scale = 1 }, Enum.EasingStyle.Back)
+	tween(done, 0.18, { TextTransparency = 0, BackgroundTransparency = 0 }, Enum.EasingStyle.Quad)
 end
 
 local function show(pt: Point)
@@ -379,30 +294,30 @@ local function show(pt: Point)
 	marker.raiz.Position = UDim2.fromScale(u, v)
 	marker.raiz.Visible = false
 	Acabamento.pulsar(marker, false)
-	mapName.Text = Acabamento.viet("◎ " .. pt.name .. " · " .. gridRef(pt.x, pt.z))
+	local grid = gridRef(pt.x, pt.z)
+	mapName.Text = grid
 	target = 0
 	prog.Value = 0
 	done.Visible = false
 	stageText.Text = ""
 	gui.Enabled = true
 	refit()
-	-- entra: lona escurece, película liga, a ordem sobe esmaecendo
+	-- entra: o fundo escurece e a ordem sobe esmaecendo
 	tween(bg, 0.3, { BackgroundTransparency = 0 }, Enum.EasingStyle.Sine)
-	Acabamento.ligar(film, true, 0.3)
-	holder.Position = UDim2.new(0.5, 0, 0.5, 26)
+	holder.Position = UDim2.new(0.5, 0, 0.5, 20)
 	holder.GroupTransparency = 1
 	tween(
 		holder,
-		0.5,
+		0.35,
 		{ Position = UDim2.fromScale(0.5, 0.5), GroupTransparency = 0 },
 		Enum.EasingStyle.Quint,
 		nil,
-		0.08
+		0.06
 	)
 	-- a grade se desenha, o eixo corre do QG até o ponto e o ponto pisca
 	for i, gl in gridLines do
 		gl.f.Size = gl.from
-		tween(gl.f, 0.55, { Size = gl.full }, Enum.EasingStyle.Quad, nil, 0.1 + i * 0.025)
+		tween(gl.f, 0.45, { Size = gl.full }, Enum.EasingStyle.Quad, nil, 0.08 + i * 0.012)
 	end
 	local f = player:GetAttribute("Faction")
 	local hq = if type(f) == "string" then MapConfig.HQ[f] else nil
@@ -410,37 +325,30 @@ local function show(pt: Point)
 	if hq then
 		local hu, hv = uv(hq.x, hq.z)
 		hqMark.Position = UDim2.fromScale(hu, hv)
-		hqMark.BackgroundColor3 = if f == "VC" then STAMP else Color3.fromRGB(40, 70, 140)
+		hqMark.BackgroundColor3 = if f == "VC" then V.VC else V.US
 		hqMark.Visible = true
-		Acabamento.tracar(axis, hu, hv, u, v, 1.1, 0.5)
+		Acabamento.tracar(axis, hu, hv, u, v, 0.9, 0.35)
 	else
 		hqMark.Visible = false
 		Acabamento.apagar(axis)
 	end
-	task.delay(if hq then 1.6 else 0.6, function()
+	task.delay(if hq then 1.25 else 0.5, function()
 		if showToken == my and gui.Enabled then
 			marker.raiz.Visible = true
 			Acabamento.pulsar(marker, true)
 		end
 	end)
-	local side = if f == "US" then "EUA" elseif f == "VC" then "VC" else "?"
-	Acabamento.datilografar(
-		body,
-		Acabamento.viet(
-			string.format(
-				"PONTO: %s\nGRADE: %s\nHORA:  %sH · 18 AGO 1965\nLADO:  %s",
-				pt.name,
-				gridRef(pt.x, pt.z),
-				clock(),
-				side
-			)
-		),
-		60,
-		0.25
-	)
+	-- o ponto grande e os três números (grade, hora, lado)
+	pointName.Text = Acabamento.viet(UiKit.upper(pt.name))
+	pointName.RichText = true
+	pointName.FontFace = UiKit.headFont(pt.name)
+	gridValue.Text = grid
+	clockValue.Text = clock()
+	sideValue.Text = if f == "US" then "EUA" elseif f == "VC" then "VC" else "?"
+	UiKit.enter({ pointName :: GuiObject, numbers.frame }, 10, 0.06, 0.12)
 end
 
--- some esmaecendo (a lona, a película e a ordem); `after` em s
+-- some esmaecendo (o fundo e a ordem); `after` em s
 local function hide(after: number)
 	local my = showToken
 	task.delay(after, function()
@@ -449,14 +357,13 @@ local function hide(after: number)
 		end
 		tween(
 			holder,
-			0.5,
-			{ Position = UDim2.new(0.5, 0, 0.5, -18), GroupTransparency = 1 },
+			0.35,
+			{ Position = UDim2.new(0.5, 0, 0.5, -14), GroupTransparency = 1 },
 			Enum.EasingStyle.Sine,
 			Enum.EasingDirection.In
 		)
-		tween(bg, 0.6, { BackgroundTransparency = 1 }, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut)
-		Acabamento.ligar(film, false, 0.6)
-		task.delay(0.62, function()
+		tween(bg, 0.5, { BackgroundTransparency = 1 }, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut)
+		task.delay(0.52, function()
 			if showToken == my and not busy then
 				Acabamento.pulsar(marker, false)
 				Acabamento.apagar(axis)
@@ -672,7 +579,7 @@ end
 
 -- O fim de toda ordem que deu certo: carimbo, a ordem esmaece com a câmera descendo, controle volta.
 local function arrive()
-	stampDone("EM CAMPO", STAMP)
+	stampDone("EM CAMPO", V.OLIVE)
 	settleCamera()
 	busy = false
 	local flying = startFlight()
@@ -746,7 +653,7 @@ function SpawnTransition.go(pt: Point, fire: () -> ()): boolean
 		local char, root = newBody(old, BODY_S)
 		if not (char and root) then
 			setStage("Inserção recusada pelo comando (o ponto mudou?). Escolha outro.", 0.6)
-			stampDone("RECUSADA", STAMP)
+			stampDone("RECUSADA", V.RED)
 			busy = false
 			hide(1.6)
 			Input.closeMenu()
@@ -816,7 +723,7 @@ if RunService:IsStudio() then
 			setStage("Firmando o terreno sob os pés…", 0.82)
 			task.wait(0.8)
 			setStage("Em posição.", 1)
-			stampDone("EM CAMPO", STAMP)
+			stampDone("EM CAMPO", V.OLIVE)
 			-- segura para a foto até o atributo mudar
 			while workspace:GetAttribute("VT65DevTela") == "transicao" do
 				task.wait(0.2)

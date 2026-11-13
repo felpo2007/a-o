@@ -10,12 +10,41 @@ local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 
 local Lang = require(game:GetService("ReplicatedStorage").Shared.Lang)
+local Estilo = require(game:GetService("ReplicatedFirst"):WaitForChild("Estilo"))
 local Input = require(script.Parent.Input)
 local Texto = require(script.Parent.Texto)
 local VirtualCursor = require(script.Parent.VirtualCursor)
 
 local UiKit = {}
 local player = Players.LocalPlayer
+
+-- ===== linguagem visual nova (ReplicatedFirst/Estilo, 2026-11-11) =====
+-- Painéis escuros, títulos em Oswald caixa alta, números grandes, corpo em Arimo, acentos de época.
+-- Toda tela nova usa estes tokens e peças; os tokens antigos de papel (CARD, INK, MANILA, STAMP)
+-- ficam só para o que ainda não foi refeito.
+UiKit.Estilo = Estilo
+UiKit.V = Estilo.V
+UiKit.F = Estilo.F
+UiKit.px = Estilo.px
+UiKit.ts = Estilo.ts
+UiKit.pad = Estilo.pad
+UiKit.list = Estilo.list
+UiKit.stroke = Estilo.stroke
+UiKit.text2 = Estilo.text
+UiKit.panel = Estilo.panel
+UiKit.backdrop = Estilo.backdrop
+UiKit.title = Estilo.title
+UiKit.kicker = Estilo.kicker
+UiKit.body = Estilo.body
+UiKit.titleBox = Estilo.titleBox
+UiKit.slash = Estilo.slash
+UiKit.stat = Estilo.stat
+UiKit.statRow = Estilo.statRow
+UiKit.tag = Estilo.tag
+UiKit.bar = Estilo.bar
+UiKit.itemCard = Estilo.itemCard
+UiKit.enter = Estilo.enter
+UiKit.setGlyph = Estilo.setGlyph
 
 UiKit.PAPER = Color3.fromRGB(214, 203, 170)
 UiKit.INK = Color3.fromRGB(40, 36, 28)
@@ -38,7 +67,10 @@ UiKit.BRASS_LIGHT = Color3.fromRGB(236, 202, 116) -- título em latão claro sob
 UiKit.HEAD_FONT = Font.fromName("Oswald", Enum.FontWeight.Bold)
 UiKit.HEAD_REG = Font.fromName("Oswald", Enum.FontWeight.Regular)
 UiKit.BODY_FONT = Enum.Font.Arimo
-UiKit.TYPE_FONT = Enum.Font.SpecialElite -- máquina de escrever (sem as letras do vietnamita)
+-- A máquina de escrever saiu (o dono não gostou do papel datilografado): o nome antigo continua,
+-- agora no Arimo, para as telas que ainda o usam. TYPE_OLD só para um detalhe mínimo, se houver.
+UiKit.TYPE_FONT = Enum.Font.Arimo
+UiKit.TYPE_OLD = Enum.Font.SpecialElite
 
 -- O Oswald pode não ter as letras do vietnamita (como a máquina de escrever do lobby): texto com
 -- letra fora do Latin-1 vai no Arimo, que tem.
@@ -239,6 +271,70 @@ end
 function UiKit.bind(b: GuiButton, onClick: () -> (), hover: ((boolean) -> ())?)
 	b.Activated:Connect(onClick)
 	VirtualCursor.bind(b, onClick, hover)
+end
+
+-- Botão do estilo novo, pronto: forma (Estilo.button), realce (mouse, foco do controle e cursor
+-- virtual), clique ligado e foco de alto contraste. kind: "primary", "danger", "secondary", "ghost".
+-- opts.action/opts.ctx: mostra o botão do controle dessa ação à esquerda (só no controle; troca
+-- sozinho ao trocar de dispositivo). enabled(false) apaga e trava o botão (o clique não roda).
+export type Action = Estilo.ButtonParts & {
+	realce: Realce,
+	enabled: (on: boolean) -> (),
+	isEnabled: () -> boolean,
+}
+export type ActionOpts = { action: string?, ctx: string?, h: number? }
+function UiKit.action(parent: Instance?, text: string, kind: string?, onClick: () -> (), opts: ActionOpts?): Action
+	local o: ActionOpts = opts or { action = nil, ctx = nil, h = nil }
+	local parts = Estilo.button(parent, text, kind, o.h)
+	local b = parts.button
+	b.Selectable = true
+	b.SelectionImageObject = focusFrame
+	local k = kind or "primary"
+	local base = if k == "primary" then Estilo.V.OLIVE elseif k == "danger" then Estilo.V.RED else Estilo.V.PANEL
+	local hot = if k == "primary" then Estilo.V.OLIVE_HI elseif k == "danger" then Estilo.V.RED_HI else Estilo.V.PANEL_3
+	local r = UiKit.realce(b, base, hot, if k == "primary" or k == "danger" then 1.015 else 1.025)
+	local on = true
+	local function click()
+		if on then
+			onClick()
+		end
+	end
+	UiKit.bind(b, click, r.set)
+	b.MouseEnter:Connect(function()
+		r.set(true)
+	end)
+	b.MouseLeave:Connect(function()
+		r.set(false)
+	end)
+	b.SelectionGained:Connect(function()
+		r.set(true)
+	end)
+	b.SelectionLost:Connect(function()
+		r.set(false)
+	end)
+	local function glyph()
+		if o.action and Input.isGamepad() then
+			local img = Input.glyph(o.action, o.ctx)
+			Estilo.setGlyph(parts, img)
+		else
+			Estilo.setGlyph(parts, nil)
+		end
+	end
+	glyph()
+	Input.DeviceChanged:Connect(glyph)
+	local a = parts :: any
+	a.realce = r
+	a.enabled = function(v: boolean)
+		on = v
+		b.AutoButtonColor = false
+		parts.label.TextTransparency = if v then 0 else 0.55
+		parts.sub.TextTransparency = if v then 0.15 else 0.6
+		r.base(if v then base else Estilo.V.PANEL_2)
+	end
+	a.isEnabled = function(): boolean
+		return on
+	end
+	return a :: Action
 end
 
 function UiKit.label(parent: Instance, text: string, size: number?, height: number?): TextLabel
@@ -499,19 +595,19 @@ function UiKit.chips(parent: Instance, height: number, light: boolean?, size: nu
 		local img2 = img:Clone()
 		img2.LayoutOrder = 2
 		img2.Parent = f
+		-- estilo novo: tecla escura com filete claro, texto em Arimo (sem papel nem máquina de escrever)
 		local key = Instance.new("TextLabel")
-		key.BackgroundColor3 = UiKit.CARD
+		key.BackgroundColor3 = if light then Estilo.V.TEXT else Estilo.V.PANEL_3
 		key.BorderSizePixel = 0
 		key.AutomaticSize = Enum.AutomaticSize.X
 		key.Size = UDim2.fromOffset(0, math.floor(height * 0.78))
-		key.FontFace = UiKit.HEAD_FONT
-		key.TextColor3 = UiKit.INK
+		key.FontFace = Estilo.F.TITLE_MED
+		key.TextColor3 = if light then Estilo.V.BG else Estilo.V.TEXT
 		key.TextSize = ts
 		key.LayoutOrder = 3
 		key.Parent = f
 		UiKit.corner(key, 4)
-		UiKit.lit(key, 0.82)
-		UiKit.edge(key, UiKit.INK, 1, 0.45)
+		UiKit.edge(key, Estilo.V.LINE, 1, 0.2)
 		local kp = Instance.new("UIPadding")
 		kp.PaddingLeft = UDim.new(0, 7)
 		kp.PaddingRight = UDim.new(0, 7)
@@ -520,9 +616,9 @@ function UiKit.chips(parent: Instance, height: number, light: boolean?, size: nu
 		t.BackgroundTransparency = 1
 		t.AutomaticSize = Enum.AutomaticSize.X
 		t.Size = UDim2.fromOffset(0, height)
-		t.Font = UiKit.TYPE_FONT
+		t.Font = UiKit.BODY_FONT
 		t.TextSize = ts
-		t.TextColor3 = if light then UiKit.INK else UiKit.KHAKI
+		t.TextColor3 = if light then UiKit.INK else Estilo.V.DIM
 		t.LayoutOrder = 4
 		t.Parent = f
 		local made: ChipSlot = { f = f, img = img, img2 = img2, key = key, t = t }
@@ -547,7 +643,6 @@ function UiKit.chips(parent: Instance, height: number, light: boolean?, size: nu
 		s.key.Text = UiKit.upper(key)
 		s.key.FontFace = UiKit.headFont(key)
 		s.t.Text = label
-		s.t.Font = if string.find(label, "[\196-\225]") then UiKit.BODY_FONT else UiKit.TYPE_FONT
 	end
 	function chips.action(actionId: string, ctx: string?, label: string)
 		local img, txt = Input.glyph(actionId, ctx)

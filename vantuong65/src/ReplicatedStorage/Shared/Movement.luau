@@ -11,14 +11,24 @@
 --   - câmera: balanço preso à passada, inclinação nas curvas, cabeça com inércia, degrau suavizado,
 --     tudo multiplicado pela opção de movimento da câmera (acessibilidade);
 --   - lado: o VC, mais leve, anda, trota e corre 12% mais rápido (PLACEHOLDER).
+-- D-99 (pedido do dono: "utilize o mesmo modelo de movimentação e inclinação que uso no Front 44"):
+--   o passo e as posturas ficam rápidos como no Front 44 (arrancada e parada mais secas, agachado
+--   e rastejar mais ágeis, deitar/levantar mais curtos) e o inclinar é o dele (Movement.LEAN). Água,
+--   VC × 1,12, soldado de 2 m e passada assistida continuam.
 -- Tudo em metros e segundos (o runtime converte com STUD_M). Os números são de DESIGN, escolhidos
 -- pela fisiologia de referência e pelo ritmo do jogo; NENHUM foi medido em playtest (PLACEHOLDER).
 local Units = require(script and (script :: any).Parent.Units or "./Units") :: any
 local Weather = require(script and (script :: any).Parent.Weather or "./Weather") :: any
+local Corpo = require(script and (script :: any).Parent.Corpo or "./Corpo") :: any
 
 local Movement = {}
 local STUD: number = Units.STUD_M
 Movement.STUD_M = STUD
+-- D-98: soldado de 2,0 m (decisão do dono). O que depende do tamanho do corpo (fundura da água no
+-- peito, espaço para passar, alcance do braço, câmera do ombro, degraus agachado e deitado) é o
+-- número do corpo de 1,75 m vezes BODY_K. Velocidades e alturas de obstáculo de transpor ficam.
+local BODY_K: number = Corpo.K
+Movement.BODY_K = BODY_K
 
 -- ===== velocidades-base (m/s): as mesmas do servidor (Units.Speed e MedicalService.apply) =====
 -- São também as âncoras das animações (SoldierAnims.ANCHOR) e dos bots (BotLocomotion): não mudam
@@ -26,8 +36,11 @@ Movement.STUD_M = STUD
 Movement.WALK = Units.Speed.walk * STUD -- 1,4: caminhada (perna ferida)
 Movement.JOG = Units.Speed.jog * STUD -- 3,1: andar padrão do jogo (trote)
 Movement.SPRINT = Units.Speed.sprint * STUD -- 5,5: corrida
-Movement.CROUCH = Movement.WALK * 0.6 -- 0,84
-Movement.PRONE = Movement.WALK * 0.25 -- 0,35: rastejar
+-- D-99: agachado e rastejar como no Front 44, que anda agachado a 7 studs/s (2,0 m/s) e rasteja a 4
+-- (1,1 m/s). Aqui um meio-termo com a passada das animações (agachado_andar 0,86 m/s e rastejar 0,4
+-- m/s no corpo de 2 m, RATE_MAX 2,5): agachado 1,4 (antes 0,84) e rastejar 0,5 (antes 0,35). PLACEHOLDER.
+Movement.CROUCH = Movement.WALK -- 1,4
+Movement.PRONE = 0.5 -- rastejar
 Movement.ADS = 1.8 -- andando com a arma no ombro
 Movement.TRANSITION = 0.6 -- enquanto deita ou levanta
 Movement.SWIM = 0.9
@@ -66,24 +79,39 @@ function Movement.factionAgility(faction: string?): number
 	return if f then f.agility else 1
 end
 
+-- D-99: vantagem comprada "speed" (Shared/Vantagens, passe "Pernas de Maratonista": 1,06, teto de
+-- combate 1,12): multiplica SÓ o trote e a corrida (agachado, rastejar, mira e perna ferida ficam).
+-- O servidor lê Vantagens.mult no jogador e passa aqui; o cliente passa o mesmo número no
+-- SpeedCtx.perkSpeed (o atributo Vant_speed replica), então o cliente nunca passa do teto.
+local function perkK(perk: number?): number
+	if type(perk) ~= "number" or perk ~= perk then
+		return 1
+	end
+	return math.clamp(perk, 0.88, 1.12)
+end
+Movement.perkK = perkK
+
 -- Velocidade máxima que o SERVIDOR aplica no WalkSpeed (MedicalService.apply chama esta função), em
--- m/s. `faction` é opcional (os bots chamam com 4 argumentos e ficam na velocidade-base).
+-- m/s. `faction` é opcional (os bots chamam com 4 argumentos e ficam na velocidade-base); `perk` é o
+-- multiplicador "speed" das vantagens (1 sem passe).
 function Movement.serverSpeed(
 	stance: string,
 	sprinting: boolean,
 	legImpaired: boolean,
 	downed: boolean,
-	faction: string?
+	faction: string?,
+	perk: number?
 ): number
 	if downed then
 		return 0
 	end
 	local k = Movement.factionSpeed(faction)
+	local p = perkK(perk)
 	local v = if stance == "prone"
 		then Movement.PRONE
 		elseif stance == "crouch" then Movement.CROUCH * k
-		elseif sprinting then Movement.SPRINT * k
-		else Movement.JOG * k
+		elseif sprinting then Movement.SPRINT * k * p
+		else Movement.JOG * k * p
 	return if legImpaired then math.min(v, Movement.WALK * k) else v
 end
 
@@ -253,13 +281,14 @@ end
 -- Antes a fundura era medida até o pé: boiando, o pé subia, a "fundura" caía e o soldado alternava
 -- nadar e andar. Vadeando (até o peito), o runtime desliga o estado Swimming do Humanoid: o soldado
 -- anda no fundo, mais devagar e com passada pesada. Acima de SWIM_IN_M nada; volta a vadear abaixo
--- de SWIM_OUT_M (histerese). Soldado de 1,75 m: cintura ~1,0 m, peito ~1,3 m.
+-- de SWIM_OUT_M (histerese). Soldado de 1,75 m: cintura ~1,0 m, peito ~1,3 m; D-98: o de 2,0 m
+-- (× BODY_K) tem cintura ~1,14 m e peito ~1,49 m.
 Movement.WADE_MIN_M = 0.05
-Movement.SWIM_IN_M = 1.3
-Movement.SWIM_OUT_M = 1.1
+Movement.SWIM_IN_M = 1.3 * BODY_K
+Movement.SWIM_OUT_M = 1.1 * BODY_K
 Movement.WATER_GRIP = 0.5 -- nadando: arranca e vira devagar, mas não como no ar
-Movement.PRONE_MAX_WATER_M = 0.3 -- deitado, a cabeça fica fora até aqui
-Movement.CROUCH_MAX_WATER_M = 0.8 -- agachado, até aqui
+Movement.PRONE_MAX_WATER_M = 0.3 * BODY_K -- deitado, a cabeça fica fora até aqui
+Movement.CROUCH_MAX_WATER_M = 0.8 * BODY_K -- agachado, até aqui
 
 -- "dry" | "wade" | "swim". bedM = math.huge quando há água sem fundo ao alcance.
 function Movement.waterMode(prev: string, bedM: number): string
@@ -313,6 +342,7 @@ export type SpeedCtx = {
 	swimming: boolean,
 	faction: string?, -- "VC" corre mais (Movement.FACTION)
 	groundK: number?, -- fator do chão já suavizado (no lugar de superfície × água × rampa)
+	perkSpeed: number?, -- D-99: vantagem "speed" (trote e corrida; 1 sem passe)
 }
 
 -- Velocidade-alvo em m/s (para pedido de movimento cheio; o analógico escala).
@@ -321,6 +351,7 @@ function Movement.targetSpeed(c: SpeedCtx): number
 		return 0
 	end
 	local k = Movement.factionSpeed(c.faction)
+	local p = perkK(c.perkSpeed)
 	local dirK = Movement.sprintDir(c.forward)
 	local v
 	local sprint = false
@@ -330,10 +361,10 @@ function Movement.targetSpeed(c: SpeedCtx): number
 		v = Movement.CROUCH * k
 	elseif c.sprinting and not c.aiming and dirK > 0 and c.waterM < Movement.SPRINT_MAX_WATER_M then
 		local st = math.clamp(c.stamina / Movement.SPRINT_FULL_AT, 0, 1)
-		v = (Movement.JOG + (Movement.SPRINT - Movement.JOG) * st * dirK) * k
+		v = (Movement.JOG + (Movement.SPRINT - Movement.JOG) * st * dirK) * k * p
 		sprint = true
 	else
-		v = Movement.JOG * k
+		v = Movement.JOG * k * p
 	end
 	if c.aiming then
 		v = math.min(v, Movement.ADS)
@@ -383,10 +414,13 @@ end
 --     corrida ~170°/s) SEM perder velocidade. O modelo vetorial cortava caminho pela corda: no
 --     A↔D ou numa curva de 90° a velocidade caía a 70% e o passo parecia patinar;
 --   - meia-volta (mais de ~110°): freia e arranca para o outro lado.
-Movement.ACCEL_LOW = 11
-Movement.ACCEL_HIGH = 5
-Movement.DECEL_MOVE = 12
-Movement.TURN_LAT = 16
+-- D-99 (Front 44): o Humanoid do Front 44 chega à velocidade quase na hora e para seco. Aqui o passo
+-- fica perto disso sem perder o embalo: arrancada 16 → 8 m/s² (parado → trote ~0,23 s; trote →
+-- corrida ~0,26 s), parada 16 m/s² (trote → parado ~0,2 s) e curva 22 m/s². Antes: 11 → 5, 12 e 16.
+Movement.ACCEL_LOW = 16
+Movement.ACCEL_HIGH = 8
+Movement.DECEL_MOVE = 16
+Movement.TURN_LAT = 22
 Movement.TURN_MAX = 8 -- rad/s (devagar a direção vira quase na hora)
 Movement.TURN_MIN_MPS = 0.5 -- abaixo disto a velocidade é tratada como vetor (arrancada)
 Movement.REVERSE_COS = -0.35
@@ -564,11 +598,12 @@ end
 -- ===== transpor / escalar (dique, cerca, sacos de areia, mureta até 1,25 m) =====
 Movement.VAULT_MIN_M = 0.35 -- abaixo disto é passo ou pulo
 Movement.VAULT_MAX_M = 1.25
-Movement.VAULT_REACH_M = 0.9 -- distância máxima até a face do obstáculo
-Movement.VAULT_CLEAR_M = 0.75 -- espaço livre acima do topo para o corpo passar
+-- D-98: alcance do braço, espaço para o corpo passar e para ficar de pé em cima vezes BODY_K
+Movement.VAULT_REACH_M = 0.9 * BODY_K -- distância máxima até a face do obstáculo
+Movement.VAULT_CLEAR_M = 0.75 * BODY_K -- espaço livre acima do topo para o corpo passar
 Movement.VAULT_MAX_DEPTH_M = 1.6 -- topo mais fundo que isto vira escalar (subir em cima)
 Movement.VAULT_MAX_DROP_M = 2.5 -- queda máxima do outro lado
-Movement.MANTLE_HEADROOM_M = 1.8 -- em cima, de pé
+Movement.MANTLE_HEADROOM_M = 1.8 * BODY_K -- em cima, de pé (2,06 m no soldado de 2 m)
 
 export type VaultProbe = {
 	height: number?, -- m do topo acima dos pés (nil = nada à frente)
@@ -635,9 +670,10 @@ end
 -- ~0,65 m; agachado ou deitado, um degrau baixo à frente vira uma passada assistida curta, sem
 -- botão, na mesma postura.
 Movement.STEP_MIN_M = 0.1
-Movement.STEP_MAX_M = { crouch = 0.65, prone = 0.45 } :: { [string]: number }
-Movement.STEP_REACH_M = 0.6
-Movement.STEP_HEAD_M = { crouch = 1.0, prone = 0.45 } :: { [string]: number } -- espaço acima do topo
+-- D-98: degrau, alcance e espaço acima do topo vezes BODY_K (perna e corpo do soldado de 2 m)
+Movement.STEP_MAX_M = { crouch = 0.65 * BODY_K, prone = 0.45 * BODY_K } :: { [string]: number }
+Movement.STEP_REACH_M = 0.6 * BODY_K
+Movement.STEP_HEAD_M = { crouch = 1.0 * BODY_K, prone = 0.45 * BODY_K } :: { [string]: number } -- espaço acima do topo
 Movement.STEP_TIME = { crouch = 0.38, prone = 0.75 } :: { [string]: number }
 
 export type StepProbe = {
@@ -675,13 +711,15 @@ function Movement.stepPlan(p: StepProbe): (VaultPlan?, string)
 end
 
 -- ===== postura: tempo da transição (câmera e velocidade) =====
+-- D-99 (Front 44: o quadril vai ao alvo a 10/s agachando e a 5/s deitando, ~0,25 s e ~0,5 s): mais
+-- curtos que antes (0,28 / 0,32 / 0,8 / 1,0 / 0,6 / 0,75 s).
 Movement.STANCE_TIME = {
-	["stand>crouch"] = 0.28,
-	["crouch>stand"] = 0.32,
-	["stand>prone"] = 0.8,
-	["prone>stand"] = 1.0,
-	["crouch>prone"] = 0.6,
-	["prone>crouch"] = 0.75,
+	["stand>crouch"] = 0.22,
+	["crouch>stand"] = 0.25,
+	["stand>prone"] = 0.6,
+	["prone>stand"] = 0.75,
+	["crouch>prone"] = 0.5,
+	["prone>crouch"] = 0.55,
 } :: { [string]: number }
 Movement.DIVE_TIME = 0.45 -- mergulho correndo: chega ao chão mais rápido
 Movement.DIVE_MIN_MPS = 3.5 -- velocidade mínima para mergulhar em vez de deitar
@@ -818,13 +856,59 @@ function Movement.rollTarget(vRight: number, aRight: number, stance: string, aim
 	return math.rad(if stance == "crouch" then deg * 0.6 else deg)
 end
 
+-- ===== inclinar (D-99: o modelo do Front 44) =====
+-- Front 44 (Config.Movement e Client/Controller): LeanStuds 1,1 e LeanDegrees 14; o valor anda para o
+-- alvo a 8/s (S.Lean += (alvo − S.Lean) × min(1, dt × 8)); correndo ou deitado o alvo é 0; o tronco
+-- dos outros gira 14 × 1,4°. Aqui o deslocamento vai vezes BODY_K (soldado de 2 m) e o obstáculo do
+-- lado limita tudo (câmera, arma e tronco): não se espia através da parede.
+Movement.LEAN = {
+	offsetM = 1.1 * 0.28 * BODY_K, -- 0,35 m de lado no soldado de 2 m (o Front 44 usa 1,1 stud)
+	rollDeg = 14, -- giro da câmera (e da arma de 1ª pessoa)
+	waistDeg = 14 * 1.4, -- giro do tronco que os outros veem
+	rate = 8, -- 1/s
+	wallM = 0.12, -- folga do olho até a parede
+	step = 0.25, -- o servidor guarda em quartos (o cliente de cada um suaviza)
+}
+
+-- Alvo do inclinar: o pedido (−1 esquerda, 1 direita) ou 0 quando o corpo não deixa (correndo,
+-- deitado, nadando, transpondo, sentado).
+function Movement.leanTarget(intent: number, blocked: boolean): number
+	if blocked or intent ~= intent then
+		return 0
+	end
+	return math.clamp(intent, -1, 1)
+end
+
+function Movement.leanStep(cur: number, target: number, dt: number): number
+	return cur + (target - cur) * math.min(1, math.max(dt, 0) * Movement.LEAN.rate)
+end
+
+-- Quanto do inclinar cabe (0..1) com o obstáculo a hitM metros do olho, do lado do inclinar (nil: livre).
+function Movement.leanRoom(hitM: number?): number
+	if hitM == nil or hitM ~= hitM then
+		return 1
+	end
+	return math.clamp((hitM - Movement.LEAN.wallM) / Movement.LEAN.offsetM, 0, 1)
+end
+
+-- Valor mandado ao servidor: em quartos, arredondado para dentro (nunca passa do que cabe).
+function Movement.leanQuant(v: number): number
+	if v ~= v then
+		return 0
+	end
+	local s = Movement.LEAN.step
+	local a = math.floor(math.abs(math.clamp(v, -1, 1)) / s + 1e-6) * s
+	return if v < 0 then -a else a
+end
+
 -- ===== 3ª pessoa (câmera de ombro) =====
 -- Deslocamento a partir do olho (m): lado (ombro direito > 0), altura e distância para trás.
 export type Shoulder = { side: number, up: number, back: number }
+-- D-98: vezes BODY_K (ombro mais largo e mais alto no soldado de 2 m; o enquadramento fica igual)
 Movement.SHOULDER = {
-	stand = { side = 0.55, up = 0.12, back = 2.1 },
-	crouch = { side = 0.5, up = 0.15, back = 1.9 },
-	prone = { side = 0.42, up = 0.38, back = 1.7 },
+	stand = { side = 0.55 * BODY_K, up = 0.12 * BODY_K, back = 2.1 * BODY_K },
+	crouch = { side = 0.5 * BODY_K, up = 0.15 * BODY_K, back = 1.9 * BODY_K },
+	prone = { side = 0.42 * BODY_K, up = 0.38 * BODY_K, back = 1.7 * BODY_K },
 } :: { [string]: Shoulder }
 Movement.CAM_RADIUS_M = 0.15 -- esfera da colisão da câmera
 Movement.CAM_MARGIN_M = 0.08 -- folga da parede

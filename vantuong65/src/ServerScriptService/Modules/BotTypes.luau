@@ -85,6 +85,9 @@ export type Bot = {
 	scanAt: number,
 	scanSide: number,
 	order: string?, -- gancho do Studio: cena forçada
+	-- 2026-11-12: avanço e squad de jogador
+	stillSince: number?, -- parado (sem andar) desde quando, fora de combate (BotBrain.idleExpired)
+	playerSquad: string?, -- SquadId do squad de JOGADOR em que o bot está (atributo no modelo)
 }
 
 -- Ganchos que o BotService preenche no start (os módulos chamam por aqui)

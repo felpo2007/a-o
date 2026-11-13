@@ -127,7 +127,16 @@ end
 
 -- landscape (opcional, D-65): onde virou mata fechada não há dique, lâmina d'água nem sebe de
 -- arrozal; ficam só na lavoura das vilas e nas clareiras.
-function FeatureBuilder.build(env: Env, features: any, mapConfig: any, world: any?, parent: any, landscape: any?): Stats
+-- keepDike (opcional, ArtPlan.dikeKept): o dique encosta num tabuleiro que ficou.
+function FeatureBuilder.build(
+	env: Env,
+	features: any,
+	mapConfig: any,
+	world: any?,
+	parent: any,
+	landscape: any?,
+	keepDike: ((number, number, number, number) -> boolean)?
+): Stats
 	local root = folder(env, "Map", parent)
 	local stats = { dikes = 0, hedges = 0, waters = 0, houses = 0, markers = 0 }
 	local C = env.Color3.fromRGB
@@ -137,22 +146,32 @@ function FeatureBuilder.build(env: Env, features: any, mapConfig: any, world: an
 	end
 
 	-- diques de arrozal: x1,z1,x2,z2,yTop,yBase
+	-- 2026-11-12 (pedido do dono: "essas paredes da plantação de arroz não me deixam passar e jogar o
+	-- jogo; tire elas do mapa"): o dique é uma lombada do terreno (Site.dike, terra com a textura de
+	-- chão). A peça "Dike" ficou só como marcador invisível, sem colisão e fora do raio: os bots leem a
+	-- linha dela (BotWorld: abrigo baixo e custo do caminho). Antes era uma caixa de capim esticada
+	-- até a altura do peito onde o chão variava.
 	local fd = folder(env, "Dikes", root)
 	local d = FeatureBuilder.mergeDikes(features.dikes)
 	for i = 1, #d, 6 do
 		local mx, mz = (d[i] + d[i + 2]) / 2, (d[i + 1] + d[i + 3]) / 2
-		if forest(mx, mz) and forest(d[i], d[i + 1]) and forest(d[i + 2], d[i + 3]) then
+		if keepDike then
+			if not keepDike(d[i], d[i + 1], d[i + 2], d[i + 3]) then
+				continue
+			end
+		elseif forest(mx, mz) and forest(d[i], d[i + 1]) and forest(d[i + 2], d[i + 3]) then
 			continue
 		end
-		local yTop, yBase = d[i + 4], d[i + 5]
-		local cf, len = segmentCFrame(env, d[i], d[i + 1], d[i + 2], d[i + 3], (yTop + yBase) / 2)
+		local yTop = d[i + 4]
+		local cf, len = segmentCFrame(env, d[i], d[i + 1], d[i + 2], d[i + 3], yTop - 0.5)
 		local p = part(env)
 		p.Name = "Dike"
-		p.Size = env.Vector3.new(len + DIKE_W, math.max(yTop - yBase, 0.5), DIKE_W)
+		p.Size = env.Vector3.new(len + DIKE_W, 1, DIKE_W)
 		p.CFrame = cf
-		-- dique de várzea em agosto: terra batida coberta de capim (D-64; antes, terra lisa #6E5E44)
-		p.Material = env.Enum.Material.LeafyGrass
-		p.Color = C(104, 102, 62)
+		p.Transparency = 1
+		p.CanCollide = false
+		p.CanQuery = false
+		p.CanTouch = false
 		p.CastShadow = false
 		p.Parent = fd
 		stats.dikes += 1

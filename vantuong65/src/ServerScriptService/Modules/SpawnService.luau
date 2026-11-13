@@ -3,9 +3,13 @@
 -- D-72: equipamento liberado aplicado ao nascer (ProgressionService.applyGear) e o "renascer onde
 -- caiu" (ponto "inplace" na carta, só para quem caiu): pago com um renascer guardado (Robux), com
 -- créditos de intendência ou abrindo a compra em Robux. Regras em Shared/Progression.INPLACE.
+-- 2026-11-12 (pedido do dono: "permita poder nascer com o batalhão"): um ponto por companheiro do
+-- squad em campo (kind "squad", id "mate:<UserId>"), com as regras de SpawnRules.mateCheck e o lugar
+-- livre de SpawnRules.mateSpots conferido com raios (mateSpot).
 local MarketplaceService = game:GetService("MarketplaceService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 
 local Commerce = require(ReplicatedStorage.Shared.Commerce)
 local Front = require(ReplicatedStorage.Shared.Front)
@@ -17,8 +21,10 @@ local Roles = require(ReplicatedStorage.Shared.Roles)
 local SpawnRules = require(ReplicatedStorage.Shared.SpawnRules)
 local AssetLoader = require(script.Parent.AssetLoader)
 local Characters = require(script.Parent.Characters)
+local CombatService = require(script.Parent.CombatService)
 local Combatants = require(script.Parent.Combatants)
 local MatchService = require(script.Parent.MatchService)
+local MedicalService = require(script.Parent.MedicalService)
 local PlayerData = require(script.Parent.PlayerData)
 local ProgressionService = require(script.Parent.ProgressionService)
 local TeamService = require(script.Parent.TeamService)
@@ -36,11 +42,12 @@ type Info = {
 	inplaceUses: number, -- renasceres no lugar nesta partida
 	matchStart: number, -- MatchService.startedAt quando os usos foram contados
 	buyAt: number?, -- pediu a compra em Robux do renascer no lugar (os.clock)
+	busy: boolean, -- nascendo agora (carregando o corpo ou o mapa em volta): pedido repetido é ignorado
 }
 local info: { [Player]: Info } = {}
 
 local function newInfo(): Info
-	return { deaths = {}, roleChanged = false, firstSpawn = true, inplaceUses = 0, matchStart = 0 }
+	return { deaths = {}, roleChanged = false, firstSpawn = true, inplaceUses = 0, matchStart = 0, busy = false }
 end
 
 -- squad: ponto de reunião do squad (FrontService); só os membros desse squad veem e nascem nele
@@ -52,6 +59,7 @@ export type Point = {
 	kind: SpawnRules.Kind,
 	sector: number?,
 	squad: string?,
+	blockM: number?, -- raio próprio de bloqueio por inimigo (túnel avançado do VC); sem setor em disputa
 }
 
 -- o ponto vale para este jogador? (ponto de squad só para o próprio squad)
@@ -63,6 +71,23 @@ end
 local providers: { (faction: string) -> { Point } } = {}
 function SpawnService.addProvider(fn: (faction: string) -> { Point })
 	table.insert(providers, fn)
+end
+
+-- Bloqueios temporários de área (EventosService: barragem avisada). fn(x, z, lado) em studs devolve o
+-- motivo ou nil. Vale para todo ponto menos o QG, para o companheiro do squad e para o "onde caiu":
+-- ninguém nasce dentro de uma barragem que já foi avisada.
+local blockers: { (x: number, z: number, faction: string) -> string? } = {}
+function SpawnService.addBlocker(fn: (x: number, z: number, faction: string) -> string?)
+	table.insert(blockers, fn)
+end
+local function blockedBy(x: number, z: number, faction: string): string?
+	for _, fn in blockers do
+		local why = fn(x, z, faction)
+		if why then
+			return why
+		end
+	end
+	return nil
 end
 
 function SpawnService.points(faction: string): { Point }
@@ -93,6 +118,36 @@ function SpawnService.points(faction: string): { Point }
 		end
 	end
 	if faction == "VC" then
+		-- 2026-11-12: túnel avançado, reunião permanente do VC na boca mais perto do objetivo dele
+		-- (SpawnRules.vcForward): sem o extra de guarnição, bloqueado só com inimigo a VC_FORWARD.blockM
+		local st = MatchService.state
+		local goal: number? = nil
+		if st then
+			local _, s = Front.objective(st.owner, st.active, "VC")
+			goal = s
+		end
+		local gsp = if goal then MatchService.points[goal] else nil
+		if st and gsp then
+			local mouths: { SpawnRules.TunnelMouth } = {}
+			for _, en in TunnelService.entrances() do
+				table.insert(
+					mouths,
+					{ id = en.id, x = en.x, z = en.z, sector = en.sector, open = not TunnelService.destroyed[en.id] }
+				)
+			end
+			local us, vc = MapConfig.HQ.US, MapConfig.HQ.VC
+			local m, fx, fz = SpawnRules.vcForward(mouths, st.owner, gsp.x, gsp.z, us.x, us.z, vc.x, vc.z, M)
+			if m and fx and fz then
+				table.insert(out, {
+					id = "vcfront:" .. m.id,
+					name = string.format("Túnel avançado %s", m.id),
+					x = fx,
+					z = fz,
+					kind = "rally",
+					blockM = SpawnRules.VC_FORWARD.blockM,
+				})
+			end
+		end
 		for _, en in TunnelService.entrances() do
 			if en.sector and MatchService.ownerOf(en.sector) == "VC" and not TunnelService.destroyed[en.id] then
 				table.insert(out, {
@@ -122,21 +177,39 @@ function SpawnService.enemiesMeters(faction: string): { number }
 end
 local enemiesMeters = SpawnService.enemiesMeters
 
-local function status(player: Player, pt: Point, now: number): (number, boolean, string?)
+-- segundos até poder nascer num ponto deste tipo (0 = já pode)
+local function waitFor(player: Player, kind: SpawnRules.Kind, now: number): number
 	local inf = info[player]
-	local faction = player:GetAttribute("Faction") :: string
 	local ready = now
 	if inf and inf.lastDeath and not inf.firstSpawn then
-		local extra = SpawnRules.extraWait(pt.kind, inf.deaths, inf.roleChanged)
+		local extra = SpawnRules.extraWait(kind, inf.deaths, inf.roleChanged)
 		ready = SpawnRules.readyAt(inf.lastDeath, extra, MatchService.waveEpoch)
 	end
+	return math.max(0, ready - now)
+end
+
+-- enemies: a lista do lado (enemiesMeters), quando o chamador já a tem
+local function status(player: Player, pt: Point, now: number, enemies: { number }?): (number, boolean, string?)
+	local faction = player:GetAttribute("Faction") :: string
 	local contested = pt.sector ~= nil and MatchService.isContested(pt.sector)
 	local openedAt = if pt.sector then MatchService.capturedAt[pt.sector] else nil
 	local blocked, why = false, nil
 	if pt.kind ~= "hq" then
-		blocked, why = SpawnRules.blocked(pt.x * M, pt.z * M, enemiesMeters(faction), contested, openedAt, now)
+		blocked, why = SpawnRules.blocked(
+			pt.x * M,
+			pt.z * M,
+			enemies or enemiesMeters(faction),
+			contested,
+			openedAt,
+			now,
+			pt.blockM
+		)
+		if not blocked then
+			why = blockedBy(pt.x, pt.z, faction)
+			blocked = why ~= nil
+		end
 	end
-	return math.max(0, ready - now), blocked, why
+	return waitFor(player, pt.kind, now), blocked, why
 end
 
 function SpawnService.groundY(x: number, z: number): number
@@ -156,7 +229,10 @@ function SpawnService.freePoints(faction: string): { Point }
 		local contested = pt.sector ~= nil and MatchService.isContested(pt.sector)
 		local openedAt = if pt.sector then MatchService.capturedAt[pt.sector] else nil
 		local blocked = pt.kind ~= "hq"
-			and SpawnRules.blocked(pt.x * M, pt.z * M, enemiesMeters(faction), contested, openedAt, now)
+			and (
+				SpawnRules.blocked(pt.x * M, pt.z * M, enemiesMeters(faction), contested, openedAt, now, pt.blockM)
+				or blockedBy(pt.x, pt.z, faction) ~= nil
+			)
 		if not blocked and pt.squad == nil then -- bot não tem squad
 			table.insert(out, pt)
 		end
@@ -170,7 +246,8 @@ local function alive(player: Player): boolean
 end
 
 -- Põe o personagem no chão em (x, z), com uniforme, equipamento e arma. Registra a morte.
-local function spawnAt(player: Player, faction: string, x: number, z: number)
+-- at: lugar e rumo exatos (nascer no companheiro); sem ele, o chão do terreno em (x, z).
+local function placeBody(player: Player, faction: string, x: number, z: number, at: CFrame?)
 	local inf = info[player]
 	inf.firstSpawn, inf.roleChanged = false, false
 	inf.deathPos = nil
@@ -182,8 +259,11 @@ local function spawnAt(player: Player, faction: string, x: number, z: number)
 	if not char then
 		return
 	end
-	local y = groundY(x, z)
-	char:PivotTo(CFrame.new(x, y + 5, z))
+	if at then
+		char:PivotTo(at)
+	else
+		char:PivotTo(CFrame.new(x, groundY(x, z) + 5, z))
+	end
 	Combatants.register(char, faction, player)
 	Characters.dress(char, faction, equipped)
 	local lo = player:GetAttribute("Loadout")
@@ -204,6 +284,296 @@ local function spawnAt(player: Player, faction: string, x: number, z: number)
 			inf.deathPos = if root and char:GetAttribute("Evacuated") ~= true then root.Position else nil
 		end)
 	end
+end
+
+-- Um nascer por vez: carregar o corpo cede a vez, e um segundo Spawn_Request chegava antes do fim.
+local function spawnAt(player: Player, faction: string, x: number, z: number, at: CFrame?)
+	local inf = info[player]
+	if not inf or inf.busy then
+		return
+	end
+	inf.busy = true
+	local ok, err = pcall(function(): any
+		placeBody(player, faction, x, z, at)
+		return nil
+	end)
+	inf.busy = false
+	if not ok then
+		warn("[VT65] nascer falhou:", err)
+	end
+end
+
+-- ===== nascer no companheiro do squad =====
+-- Último tiro dado ou dano levado por modelo (jogador ou bot), para a regra "não está em combate".
+-- Os ganchos envolvem CombatService.fire (todo tiro validado: jogador, bot, assento de veículo) e
+-- MedicalService.hit (todo dano: tiro, estilhaço, faca, armadilha), chamadas pela tabela, como a
+-- supressão do BotService já faz. Só anotam a hora; o tiro e o dano seguem iguais.
+local lastCombat: { [Model]: number } = setmetatable({}, { __mode = "k" }) :: any
+local function markCombat(m: Instance?)
+	if m and m:IsA("Model") then
+		lastCombat[m] = os.clock()
+	end
+end
+
+local function hookCombat()
+	local fire0 = CombatService.fire
+	CombatService.fire = function(
+		shooter: Model,
+		weaponId: string,
+		origin: Vector3,
+		dir: Vector3,
+		seed: number,
+		exceptPlayer: Player?
+	)
+		fire0(shooter, weaponId, origin, dir, seed, exceptPlayer)
+		markCombat(shooter)
+	end
+	local hit0 = MedicalService.hit
+	MedicalService.hit = function(victim: Model, zone: string, energyJ: number, roll: number, by: Player?)
+		hit0(victim, zone, energyJ, roll, by)
+		markCombat(victim)
+		if by then
+			markCombat(by.Character)
+		end
+	end
+end
+
+-- Companheiro em campo. Bots valem se o BotService os puser no squad do jogador com o atributo
+-- "SquadId" no modelo (hoje os bots têm squads próprios; o gancho VT65DevSquadBots faz isso no Studio).
+type Mate = { id: string, name: string, userId: number, bot: boolean, model: Model }
+local botIds: { [Model]: number } = setmetatable({}, { __mode = "k" }) :: any
+local nextBotId = 0
+local noRoom: { [Model]: number } = setmetatable({}, { __mode = "k" }) :: any
+
+local function squadMates(player: Player): { Mate }
+	local out: { Mate } = {}
+	local sid = player:GetAttribute("SquadId")
+	local faction = player:GetAttribute("Faction")
+	if type(sid) ~= "string" then
+		return out
+	end
+	for _, e in Combatants.list() do
+		local hum = Combatants.humanoid(e)
+		if e.faction ~= faction or e.player == player or not hum or hum.Health <= 0 then
+			continue
+		end
+		local p = e.player
+		if p then
+			if p:GetAttribute("SquadId") == sid and p.Character == e.model then
+				table.insert(out, {
+					id = "mate:" .. p.UserId,
+					name = p.DisplayName,
+					userId = p.UserId,
+					bot = false,
+					model = e.model,
+				})
+			end
+		elseif e.model:GetAttribute("SquadId") == sid then
+			local n = botIds[e.model]
+			if not n then
+				nextBotId += 1
+				n = nextBotId
+				botIds[e.model] = n
+			end
+			local bn = e.model:GetAttribute("BotName")
+			table.insert(out, {
+				id = "mate:bot:" .. n,
+				name = if type(bn) == "string" then bn else e.model.Name,
+				userId = 0,
+				bot = true,
+				model = e.model,
+			})
+		end
+	end
+	table.sort(out, function(a, b)
+		return a.name < b.name
+	end)
+	return out
+end
+
+-- terreno bem acima da raiz: está numa galeria do túnel (a mesma ideia do TunnelService)
+local function underground(pos: Vector3): boolean
+	local params = RaycastParams.new()
+	params.FilterType = Enum.RaycastFilterType.Include
+	params.FilterDescendantsInstances = { workspace.Terrain }
+	local hit = workspace:Raycast(pos + Vector3.new(0, 150, 0), Vector3.new(0, -150, 0), params)
+	return hit ~= nil and (hit.Position.Y - pos.Y) * M > SpawnRules.MATE.tunnelRoofM
+end
+
+local function nearestEnemy(pos: Vector3, enemies: { number }): (number, number?, number?)
+	local mx, mz = pos.X * M, pos.Z * M
+	local best, ex, ez = math.huge, nil :: number?, nil :: number?
+	for i = 1, #enemies, 2 do
+		local d = (enemies[i] - mx) ^ 2 + (enemies[i + 1] - mz) ^ 2
+		if d < best then
+			best, ex, ez = d, enemies[i] / M, enemies[i + 1] / M
+		end
+	end
+	return math.sqrt(best), ex, ez
+end
+
+-- motivo de não poder nascer nele agora (nil = pode)
+local function mateWhy(m: Mate, enemies: { number }, now: number): string?
+	local model = m.model
+	local hum = model:FindFirstChildOfClass("Humanoid")
+	local root = model:FindFirstChild("HumanoidRootPart") :: BasePart?
+	local living = hum ~= nil and root ~= nil and hum.Health > 0 and model.Parent ~= nil
+	local pos = if root then root.Position else Vector3.zero
+	local pts = {}
+	local st = MatchService.state
+	for s, sp in MatchService.points do
+		if st and st.active[s] then
+			table.insert(pts, { x = sp.x, z = sp.z, contested = MatchService.isContested(s) })
+		end
+	end
+	local last = lastCombat[model]
+	local why = SpawnRules.mateCheck({
+		alive = living,
+		downed = model:GetAttribute("Downed") == true,
+		inBounds = Geometry.inBounds(MapConfig.Bounds, pos.X, pos.Z),
+		inVehicle = hum ~= nil and (hum.SeatPart ~= nil or hum.Sit),
+		inTunnel = living and (model:GetAttribute("InTunnel") ~= nil or underground(pos)),
+		nearestEnemyM = (nearestEnemy(pos, enemies)),
+		sinceCombatS = if last then now - last else math.huge,
+		inContestedCapture = SpawnRules.inContestedCapture(pos.X, pos.Z, pts, MapConfig.CaptureRadiusStuds),
+	})
+	if not why and noRoom[model] and now - noRoom[model] < SpawnRules.MATE.noRoomS then
+		return "sem lugar livre perto dele"
+	end
+	if not why and living then
+		local f = model:GetAttribute("Faction")
+		why = blockedBy(pos.X, pos.Z, if type(f) == "string" then f else "")
+	end
+	return why
+end
+
+-- Lugar livre a 2–4 m dele, atrás em relação ao inimigo mais próximo (sem inimigo: nas costas dele).
+-- Cada candidato (SpawnRules.mateSpots, na ordem) precisa de: chão a até 1,5 m da altura do pé dele
+-- (sem telhado nem barranco), linha livre do peito dele ao peito do novo (nada de parede, sebe ou
+-- tronco no meio), água rasa e uma caixa de 0,8 x 1,8 x 0,8 m vazia para o corpo. Rumo: o dele.
+local function mateSpot(m: Mate, enemies: { number }): CFrame?
+	local C = SpawnRules.MATE
+	local model = m.model
+	local root = model:FindFirstChild("HumanoidRootPart") :: BasePart?
+	local hum = model:FindFirstChildOfClass("Humanoid")
+	if not (root and hum) then
+		return nil
+	end
+	local pos = root.Position
+	local _, ex, ez = nearestEnemy(pos, enemies)
+	local look = root.CFrame.LookVector
+	local bx, bz = SpawnRules.behind(pos.X, pos.Z, ex, ez, look.X, look.Z)
+	local footY = pos.Y - hum.HipHeight - root.Size.Y / 2
+	local skip: { Instance } = {}
+	for _, e in Combatants.list() do
+		table.insert(skip, e.model)
+	end
+	for _, name in { "SquadRallies", "DroppedWeapons" } do
+		local f = workspace:FindFirstChild(name)
+		if f then
+			table.insert(skip, f)
+		end
+	end
+	local solid = RaycastParams.new()
+	solid.FilterType = Enum.RaycastFilterType.Exclude
+	solid.FilterDescendantsInstances = skip
+	solid.RespectCanCollide = true -- folha e capim sem colisão não contam
+	solid.IgnoreWater = true
+	local water = RaycastParams.new()
+	water.FilterType = Enum.RaycastFilterType.Include
+	water.FilterDescendantsInstances = { workspace.Terrain }
+	water.IgnoreWater = false
+	local body = OverlapParams.new()
+	body.FilterType = Enum.RaycastFilterType.Exclude
+	local skipBody = table.clone(skip)
+	table.insert(skipBody, workspace.Terrain) -- a encosta pode raspar a caixa; o chão já foi medido
+	body.FilterDescendantsInstances = skipBody
+	body.RespectCanCollide = true
+	local chest = pos + Vector3.new(0, 0.3 / M, 0)
+	local size = Vector3.new(0.8, 1.8, 0.8) / M
+	local top = footY + (C.floorM + 0.5) / M
+	local drop = Vector3.new(0, -(2 * C.floorM + 0.5) / M, 0)
+	for _, c in SpawnRules.mateSpots(pos.X, pos.Z, bx, bz, M) do
+		local down = workspace:Raycast(Vector3.new(c.x, top, c.z), drop, solid)
+		if not down or math.abs(down.Position.Y - footY) * M > C.floorM then
+			continue
+		end
+		local floorY = down.Position.Y
+		local head = Vector3.new(c.x, floorY + 1.2 / M, c.z)
+		if workspace:Raycast(chest, head - chest, solid) then
+			continue
+		end
+		local w = workspace:Raycast(Vector3.new(c.x, top, c.z), drop, water)
+		if w and w.Material == Enum.Material.Water and (w.Position.Y - floorY) * M > C.deepWaterM then
+			continue
+		end
+		if #workspace:GetPartBoundsInBox(CFrame.new(c.x, floorY + 1.0 / M, c.z), size, body) > 0 then
+			continue
+		end
+		local at = Vector3.new(c.x, floorY + 4, c.z)
+		return CFrame.lookAt(at, at + Vector3.new(look.X, 0, look.Z))
+	end
+	return nil
+end
+
+local function mateSpawn(player: Player, faction: string, pointId: string)
+	local inf = info[player]
+	if not inf or inf.busy then
+		return
+	end
+	local now = os.clock()
+	local enemies = enemiesMeters(faction)
+	for _, m in squadMates(player) do
+		if m.id == pointId then
+			if waitFor(player, "squad", now) > 0 or mateWhy(m, enemies, now) then
+				return
+			end
+			local at = mateSpot(m, enemies)
+			if not at then
+				noRoom[m.model] = now
+				return
+			end
+			-- o cliente recebe o chão em volta antes do corpo (streaming: o lugar pode estar longe)
+			inf.busy = true
+			pcall(function()
+				player:RequestStreamAroundAsync(at.Position, 2)
+			end)
+			inf.busy = false
+			-- até 2 s se passaram: ele pode ter caído ou entrado em combate
+			if info[player] ~= inf or alive(player) or mateWhy(m, enemiesMeters(faction), os.clock()) then
+				return
+			end
+			spawnAt(player, faction, at.X, at.Z, at)
+			return
+		end
+	end
+end
+
+-- pontos dos companheiros para a carta de inserção (mesmo formato dos outros pontos)
+local function mateEntries(player: Player, now: number, enemies: { number }): { any }
+	local out = {}
+	local wait = waitFor(player, "squad", now)
+	for _, m in squadMates(player) do
+		local root = m.model:FindFirstChild("HumanoidRootPart") :: BasePart?
+		if root then
+			local why = mateWhy(m, enemies, now)
+			table.insert(out, {
+				id = m.id,
+				name = m.name,
+				kind = "squad",
+				userId = m.userId,
+				bot = m.bot,
+				x = math.floor(root.Position.X),
+				z = math.floor(root.Position.Z),
+				wait = wait,
+				blocked = why ~= nil,
+				why = why,
+				ready = wait <= 0 and why == nil,
+				squad = true,
+			})
+		end
+	end
+	return out
 end
 
 -- ===== renascer onde caiu (D-72) =====
@@ -256,6 +626,9 @@ local function inPlaceStatus(player: Player, now: number): (string?, number, Vec
 		z = z * M,
 		enemies = SpawnService.enemiesMeters(faction),
 	})
+	if not why and pos then
+		why = blockedBy(pos.X, pos.Z, faction)
+	end
 	return why, wait, pos
 end
 
@@ -330,6 +703,7 @@ end
 
 function SpawnService.start()
 	Players.CharacterAutoLoads = false
+	hookCombat()
 	Players.PlayerAdded:Connect(function(p)
 		info[p] = newInfo()
 	end)
@@ -370,6 +744,10 @@ function SpawnService.start()
 			inPlace(player, if type(method) == "string" then method else nil)
 			return
 		end
+		if string.sub(pointId, 1, 5) == "mate:" then
+			mateSpawn(player, faction, pointId)
+			return
+		end
 		local now = os.clock()
 		for _, pt in SpawnService.points(faction) do
 			if pt.id == pointId and visibleTo(pt, player) then
@@ -383,20 +761,28 @@ function SpawnService.start()
 		end
 	end)
 
-	-- estado dos pontos para quem está esperando (uma vez por segundo)
+	-- estado dos pontos para quem está esperando (uma vez por segundo). Campos de cada ponto:
+	-- id, name, kind, x, z (studs), wait (s), blocked, why, ready (= wait 0 e livre), squad; os pontos
+	-- de companheiro (kind "squad") trazem também userId (0 se bot) e bot.
 	task.spawn(function()
 		while true do
 			task.wait(1)
 			local now = os.clock()
+			local enemyCache: { [string]: { number } } = {}
 			for _, player in Players:GetPlayers() do
 				local faction = player:GetAttribute("Faction") :: string?
 				if faction and not alive(player) then
+					local enemies = enemyCache[faction]
+					if not enemies then
+						enemies = enemiesMeters(faction)
+						enemyCache[faction] = enemies
+					end
 					local list: { any } = {}
 					for _, pt in SpawnService.points(faction) do
 						if not visibleTo(pt, player) then
 							continue
 						end
-						local wait, blocked, why = status(player, pt, now)
+						local wait, blocked, why = status(player, pt, now, enemies)
 						local entry = {
 							id = pt.id,
 							name = pt.name,
@@ -405,9 +791,13 @@ function SpawnService.start()
 							wait = wait,
 							blocked = blocked,
 							why = why,
+							ready = wait <= 0 and not blocked,
 							kind = pt.kind, -- símbolo na carta (QG, reunião, posto, squad)
 							squad = pt.squad ~= nil,
 						}
+						table.insert(list, entry)
+					end
+					for _, entry in mateEntries(player, now, enemies) do
 						table.insert(list, entry)
 					end
 					-- renascer onde caiu: só para quem tem ponto de queda nesta partida
@@ -424,6 +814,7 @@ function SpawnService.start()
 								wait = wait,
 								blocked = why ~= nil or m == nil,
 								why = why or (if m == nil then label else nil),
+								ready = wait <= 0 and why == nil and m ~= nil,
 								pay = m,
 							})
 						end
@@ -433,6 +824,36 @@ function SpawnService.start()
 			end
 		end
 	end)
+
+	-- Gancho do Studio: workspace:SetAttribute("VT65DevSquadBots", n) põe n bots (true = 2) do lado do
+	-- primeiro jogador com squad no squad dele, só pelo atributo SquadId no modelo (os bots continuam
+	-- no squad deles), para ver os pontos de companheiro na carta de inserção (VT65DevTela = "insercao").
+	-- 0 ou false tira.
+	if RunService:IsStudio() then
+		workspace:GetAttributeChangedSignal("VT65DevSquadBots"):Connect(function()
+			local v = workspace:GetAttribute("VT65DevSquadBots")
+			local want = if type(v) == "number" then v elseif v == true then 2 else 0
+			for _, e in Combatants.list() do
+				if e.bot and e.model:GetAttribute("SquadId") ~= nil then
+					e.model:SetAttribute("SquadId", nil)
+				end
+			end
+			for _, p in Players:GetPlayers() do
+				local sid = p:GetAttribute("SquadId")
+				if type(sid) == "string" then
+					local n = 0
+					for _, e in Combatants.list() do
+						if n < want and e.bot and e.faction == p:GetAttribute("Faction") and Combatants.active(e) then
+							e.model:SetAttribute("SquadId", sid)
+							n += 1
+						end
+					end
+					print(string.format("[VT65 TESTE] %d bot(s) no squad %s de %s", n, sid, p.Name))
+					break
+				end
+			end
+		end)
+	end
 end
 
 return SpawnService

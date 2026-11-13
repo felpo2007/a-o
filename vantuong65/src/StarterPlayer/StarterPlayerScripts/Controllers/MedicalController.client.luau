@@ -77,7 +77,9 @@ local function selfOp(op: string)
 end
 
 local function quickBandage()
-	local arterial = state and type(state.bleed) == "number" and state.bleed >= 4
+	-- D-99: o servidor diz se há ferimento arterial (a taxa de sangramento caiu ~5x e o limiar antigo
+	-- de 4 nunca mais dispararia)
+	local arterial = state ~= nil and state.arterial == true
 	if arterial and (state.tourniquets or 0) > 0 then
 		selfOp("tourniquet")
 	else
@@ -99,7 +101,8 @@ local function interactAlly()
 	end
 end
 
-Input.on("quick_bandage", "press", quickBandage)
+Input.on("quick_bandage", "press", quickBandage) -- tecla G
+Input.on("quick_bandage", "tap", quickBandage) -- ↓ tocar (segurar: rádio do squad)
 Input.on("tourniquet", "press", function()
 	selfOp("tourniquet")
 end)

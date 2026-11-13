@@ -123,18 +123,24 @@ test("clipe sem id: a postura sai da camada e a mistura se ajusta", function()
 	end)
 end)
 
+-- D-98: o corpo do jogo é o da gravação ampliado por SCALE; a passada também
+local SC = SoldierAnims.SCALE
 test("velocidade casada: pé apoiado parado no chão em qualquer velocidade real", function()
 	for name, c in CLIPS do
 		if c.cycles > 0 then
 			for _, k in { 0.8, 1, 1.3 } do
-				local v = c.speed * k
+				local v = c.speed * SC * k
 				local r = SoldierAnims.trackSpeed(name, SoldierAnims.cycleRate({ [name] = 1 }, v))
-				-- tocando a r, o chão do clipe anda a speed * r: tem de ser a velocidade real
-				near(c.speed * r, v, 1e-6, name)
+				-- tocando a r, o chão do clipe (no corpo ampliado) anda a speed * SCALE * r
+				near(c.speed * SC * r, v, 1e-6, name)
 			end
 		end
 	end
-	near(SoldierAnims.trackSpeed("trote", SoldierAnims.cycleRate({ trote = 1 }, Movement.JOG)), 3.1 / 2.663, 1e-3)
+	near(
+		SoldierAnims.trackSpeed("trote", SoldierAnims.cycleRate({ trote = 1 }, Movement.JOG)),
+		3.1 / (2.663 * SC),
+		1e-3
+	)
 end)
 
 test("mistura em fase: os dois clipes fazem os mesmos ciclos por segundo", function()
@@ -149,7 +155,7 @@ test("mistura em fase: os dois clipes fazem os mesmos ciclos por segundo", funct
 	local stride = 0
 	for name, k in w do
 		local c = CLIPS[name]
-		stride += k * c.speed * c.length / c.cycles
+		stride += k * c.speed * SC * c.length / c.cycles
 	end
 	near(f * stride, v, 1e-9, "ciclos x passada")
 end)
@@ -171,13 +177,15 @@ test("pernas na direção do movimento; de costas a passada volta", function()
 end)
 
 test("troca de postura: descida do HRP e correção vertical da mistura", function()
-	local dc = SoldierAnims.BAKED.drop.crouch -- D-94: 1,03 (era 2,2)
+	-- D-94: 1,03 na gravação (era 2,2); D-98: vezes SCALE no corpo de 2 m
+	local dc = SoldierAnims.BAKED.drop.crouch * SC
+	local dp = 2.3 * SC -- deitado: HipHeight preso no MIN_HIP
 	near(SoldierAnims.bakedDrop("stand"), 0, 1e-9)
 	near(SoldierAnims.bakedDrop("crouch"), dc, 1e-9)
-	near(SoldierAnims.bakedDrop("prone"), 2.3, 1e-9, "deitado: HipHeight preso no MIN_HIP")
+	near(SoldierAnims.bakedDrop("prone"), dp, 1e-9, "deitado: HipHeight preso no MIN_HIP")
 	near(SoldierAnims.rootLift({ stand = 1 }, 0), 0, 1e-9)
 	near(SoldierAnims.rootLift({ crouch = 1 }, dc), 0, 1e-9)
-	near(SoldierAnims.rootLift({ prone = 1 }, 2.3), 0, 1e-9)
+	near(SoldierAnims.rootLift({ prone = 1 }, dp), 0, 1e-9)
 	-- metade da mistura: o clipe de pé sobe o que o HRP desceu, o agachado fica
 	near(SoldierAnims.rootLift({ stand = 0.5, crouch = 0.5 }, dc), dc / 2, 1e-9)
 	-- o HRP ainda não desceu: o agachado desce já
@@ -204,29 +212,17 @@ end
 test("valores gravados nos clipes ainda batem com o código (senão: regravar no tools/anim)", function()
 	local B = SoldierAnims.BAKED
 	local ps = src("ServerScriptService/Modules/PostureService.luau")
-	assert(
-		string.find(
-			ps,
-			string.format("local DROP = { crouch = %s, prone = %s }", tostring(B.drop.crouch), tostring(B.drop.prone)),
-			1,
-			true
-		),
-		"PostureService.DROP mudou"
-	)
-	assert(string.find(ps, "local MIN_HIP = " .. tostring(B.minHip), 1, true), "MIN_HIP mudou")
-	assert(
-		string.find(
-			ps,
-			string.format(
-				"CFrame.new(0, %s, 0) * CFrame.Angles(math.rad(%d), 0, 0)",
-				tostring(B.proneRoot.y),
-				B.proneRoot.pitchDeg
-			),
-			1,
-			true
-		),
-		"PRONE_ROOT mudou"
-	)
+	-- D-98: o servidor usa os valores da gravação vezes SCALE (corpo de 2 m); 4 casas no código
+	local dc, dp = string.match(ps, "local DROP = { crouch = ([%d.]+), prone = ([%d.]+) }")
+	assert(dc and dp, "DROP no PostureService")
+	near(tonumber(dc) :: number, B.drop.crouch * SC, 1e-3, "PostureService.DROP.crouch mudou")
+	near(tonumber(dp) :: number, B.drop.prone * SC, 1e-3, "PostureService.DROP.prone mudou")
+	local mh = tonumber(string.match(ps, "local MIN_HIP = ([%d.]+)"))
+	near(mh :: number, B.minHip * SC, 1e-3, "MIN_HIP mudou")
+	local py, pp = string.match(ps, "CFrame%.new%(0, (%-?[%d.]+), 0%) %* CFrame%.Angles%(math%.rad%((%-?%d+)%), 0, 0%)")
+	assert(py and pp, "PRONE_ROOT no PostureService")
+	near(tonumber(py) :: number, B.proneRoot.y * SC, 1e-3, "PRONE_ROOT mudou")
+	assert(tonumber(pp) == B.proneRoot.pitchDeg, "PRONE_ROOT: giro mudou")
 	local pc = src("StarterPlayer/StarterPlayerScripts/Controllers/PostureController.client.luau")
 	local h = B.holdStand
 	assert(
