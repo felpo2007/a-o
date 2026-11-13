@@ -468,19 +468,16 @@ test("equipamento por peso: padrão cabe; trocar item por item; passar do limite
 end)
 
 test("rádio: só o rádio do squad fala com o comandante; caído, só o mesmo lado pega", function()
-	assert(Radio.canTalkToCommand("commander", false) and Radio.canTalkToCommand("mortar", false))
-	assert(not Radio.canTalkToCommand("squad_leader", false), "líder sem rádio não fala com o comando")
+	-- D-108: o líder nasce com o rádio (o operador de rádio e a equipe de morteiro saíram)
+	assert(Radio.canTalkToCommand("commander", false) and not Radio.canTalkToCommand("mortar", false))
+	assert(not Radio.canTalkToCommand("squad_leader", false), "líder que perdeu o rádio não fala com o comando")
 	assert(Radio.canTalkToCommand("rifleman", true), "quem pegou o rádio fala")
-	assert(Radio.startsWithRadio("radio_operator") and not Radio.startsWithRadio("squad_leader"))
+	assert(Radio.startsWithRadio("squad_leader") and not Radio.startsWithRadio("rifleman"))
 	assert(Radio.canPickUp("US", "US", true) and not Radio.canPickUp("US", "VC", true))
 	assert(not Radio.canPickUp("US", "US", false), "caído não pega")
 	assert(not Radio.squadLinked({ { carries = false }, { carries = false } }))
 	assert(Radio.squadLinked({ { carries = false }, { carries = true } }))
-	assert(
-		Roles.roles.radio_operator.unit == "infantry"
-			and Roles.loadout.US.radio_operator
-			and Roles.loadout.VC.radio_operator
-	)
+	assert(Roles.roles[Radio.ROLE].unit == "infantry" and Roles.loadout.US[Radio.ROLE] and Roles.loadout.VC[Radio.ROLE])
 end)
 
 test("pá: só em setor próprio, fora da água, 1 por minuto e com teto no mapa", function()

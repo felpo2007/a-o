@@ -11,7 +11,9 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
 local Ballistics = require(ReplicatedStorage.Shared.Ballistics)
+local Corpo = require(ReplicatedStorage.Shared.Corpo)
 local GunModel = require(ReplicatedStorage.Shared.GunModel)
+local Pegada3P = require(ReplicatedStorage.Shared.Pegada3P)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Weapons = require(ReplicatedStorage.Shared.Weapons)
 local Bus = require(script.Parent.Bus)
@@ -42,9 +44,15 @@ local EYE_TO_SIGHT_M = 0.09 -- olho até a alça, mirando
 local view: Model? = nil
 local viewId: string? = nil
 local viewSight = Vector3.zero -- posição da alça no espaço da arma (punho na origem)
-local viewEye = EYE_TO_SIGHT_M -- olho até a alça (m); a arma publicada traz o seu (EyeM: pistola 0,45)
--- giro que deixa a linha alça → massa (Sight → SightFront) no centro da tela, para onde o tiro vai.
--- Na arma provisória a linha já é paralela ao cano (sem giro).
+-- D-108 ("aumente o tamanho das armas", dono): a arma de 1ª pessoa, as mãos, a faca, a granada e os
+-- itens são Corpo.ARMA_K maiores (no Studio, workspace "VT65DevArmaK" troca ao vivo). No quadril a
+-- alça fica onde estava e a arma cresce em volta dela; na mira o olho também fica ARMA_K mais longe, e
+-- a imagem é a da arma real (Pegada3P.quadril1P / mira1P). Os desvios em metros perto da arma e das
+-- mãos vão vezes viewK.
+local viewK = Corpo.ARMA_K
+local viewHip = HIP -- quadril com a arma escalada
+-- mira: olho na linha alça → massa (Sight → SightFront), no centro da tela, para onde o tiro vai; o
+-- olho a EyeM (pistola 0,45) ou ao da ficha (Weapons.adsEye). Na provisória a linha é paralela ao cano.
 local viewAlign = CFrame.identity
 local aimT = 0 -- 0 = quadril, 1 = ombro
 local kick = 0 -- recuo visual, volta em ~0,15 s
@@ -141,8 +149,8 @@ local MAG_SIZE: { [string]: Vector3 } = {
 -- quadros-chave da mão esquerda: tempo (fração), espaço ("w" arma, "c" câmera), ponto
 type Key = { t: number, s: string, p: Vector3 }
 local function reloadKeys(): { Key }
-	local down = Vector3.new(0, -1, 0) / M
-	local back = Vector3.new(0, 0, 1) / M
+	local down = Vector3.new(0, -viewK, 0) / M
+	local back = Vector3.new(0, 0, viewK) / M
 	return {
 		{ t = 0.0, s = "w", p = supportL },
 		{ t = 0.13, s = "w", p = magL + down * 0.02 },
@@ -169,7 +177,7 @@ local function magPart(kind: string): BasePart
 	p.Anchored, p.CanCollide, p.CanQuery, p.CanTouch, p.CastShadow = true, false, false, false, false
 	p.Material = Enum.Material.Metal
 	p.Color = STEEL
-	p.Size = (MAG_SIZE[kind] or MAG_SIZE.rifle) / M
+	p.Size = (MAG_SIZE[kind] or MAG_SIZE.rifle) * viewK / M
 	p.Parent = camera
 	return p
 end
@@ -186,6 +194,9 @@ local function clearMags()
 end
 
 Bus.on("reload_start", function(dur: number, _kind: string)
+	if _kind == "shotgun" then
+		return -- D-108: espingarda sem carregador; cartucho a cartucho no Ferrolho
+	end
 	clearMags()
 	reloadT0, reloadDur = os.clock(), dur
 	magDropped = false
@@ -228,13 +239,14 @@ local function heldGrenade(kind: string): BasePart
 		p.Color = Color3.fromRGB(74, 80, 48)
 		p.Material = Enum.Material.Metal
 	end
+	p.Size *= viewK -- D-108: do tamanho da mão
 	p.Parent = fx
 	return p
 end
 local function dropPin(at: Vector3)
 	local ring = Instance.new("Part")
 	ring.Shape = Enum.PartType.Cylinder
-	ring.Size = Vector3.new(0.004, 0.03, 0.03) / M
+	ring.Size = Vector3.new(0.004, 0.03, 0.03) * viewK / M
 	ring.Color = Color3.fromRGB(160, 160, 150)
 	ring.Material = Enum.Material.Metal
 	ring.CanCollide, ring.CanQuery, ring.CanTouch, ring.CastShadow = false, false, false, false
@@ -296,7 +308,7 @@ local function throwState(handR: Vector3): (number, Vector3?, boolean)
 	local pulling = tp >= 0.18 and tp < 0.3 and throwKind ~= "smoke"
 	if tp >= 0.27 and not pinDone then
 		pinDone = true
-		dropPin(hand + cam.LookVector * 0.02 / M)
+		dropPin(hand + cam.LookVector * 0.02 * viewK / M)
 	end
 	return down, hand, pulling
 end
@@ -311,7 +323,10 @@ end
 local function setView(id: string?)
 	-- a chave inclui "arte": se o modelo publicado chegar depois, a provisória é trocada
 	local art = if id then artFor(id) else nil
-	local key = if id then id .. (if art then ":arte" else "") else nil
+	-- D-108: escala da 1ª pessoa (gancho do Studio para regular ao vivo)
+	local dev = if RunService:IsStudio() then workspace:GetAttribute("VT65DevArmaK") else nil
+	local k = if type(dev) == "number" and dev >= 0.5 and dev <= 3 then dev else Corpo.ARMA_K
+	local key = if id then id .. (if art then ":arte" else "") .. ":" .. k else nil
 	if key == viewId then
 		return
 	end
@@ -326,33 +341,40 @@ local function setView(id: string?)
 	end
 	local m = if art then art:Clone() else GunModel.build(id, wp.kind)
 	m:PivotTo(CFrame.identity)
+	-- o molde vem na escala da 3ª pessoa: volta ao real, põe a mira limpa (medida no real) e escala
+	GunModel.scale(m, 1, 1)
 	local primary = m.PrimaryPart :: BasePart
 	local sight = primary:FindFirstChild("Sight") :: Attachment?
+	local front = primary:FindFirstChild("SightFront") :: Attachment?
+	local kind = m:GetAttribute("SightKind")
+	local mm = m:GetAttribute("SightMm")
+	if sight and front and type(kind) == "string" and type(mm) == "number" and kind ~= "" then
+		crispSights(m, sight.WorldPosition, front.WorldPosition, kind, mm)
+	end
+	GunModel.scale(m, k, k)
+	m:SetAttribute("VT65Escala", k) -- Ferrolho: eixo e curso do ferrolho na arma escalada
+	viewK = k
+	Maos1P.setScale(k)
 	viewSight = if sight then sight.WorldPosition else Vector3.zero -- a arma está na origem (punho)
 	local eye = m:GetAttribute("EyeM")
 	-- 2026-11-12: a ficha pode corrigir o olho (pistola e SKS mais perto; luneta no alívio de olho)
-	viewEye = Weapons.adsEye(id) or (if type(eye) == "number" then eye else EYE_TO_SIGHT_M)
-	local front = primary:FindFirstChild("SightFront") :: Attachment?
-	local los = if front then front.WorldPosition - viewSight else Vector3.new(0, 0, -1)
-	viewAlign = if los.Z < -1e-3 then CFrame.lookAt(Vector3.zero, los):Inverse() else CFrame.identity
-	-- mãos, carregador e ferrolho (espaço da arma; a arma está na origem)
+	local eyeM = Weapons.adsEye(id) or (if type(eye) == "number" then eye else EYE_TO_SIGHT_M)
+	viewAlign = Pegada3P.mira1P(viewSight, if front then front.WorldPosition else nil, eyeM / M, k)
+	viewHip = Pegada3P.quadril1P(HIP, viewSight, k)
+	-- mãos, carregador e ferrolho (espaço da arma; a arma está na origem); desvios em m vezes k
 	local g = primary:FindFirstChild("Grip") :: Attachment?
 	local s = primary:FindFirstChild("Support") :: Attachment?
 	gripL = if g then g.WorldPosition else Vector3.zero
-	supportL = if s then s.WorldPosition else gripL + Vector3.new(0, 0, -0.3 / M)
+	supportL = if s then s.WorldPosition else gripL + Vector3.new(0, 0, -0.3 * k / M)
 	viewKind = wp.kind
+	local km = k / M
 	if wp.kind == "pistol" then
-		supportL = gripL + Vector3.new(-0.025 / M, -0.01 / M, -0.01 / M) -- a esquerda abraça a direita
-		magL = gripL + Vector3.new(0, -0.07 / M, 0.01 / M)
-		chargeL = viewSight + Vector3.new(0, 0.01 / M, 0.02 / M) -- ferrolho (corrediça)
+		supportL = gripL + Vector3.new(-0.025, -0.01, -0.01) * km -- a esquerda abraça a direita
+		magL = gripL + Vector3.new(0, -0.07, 0.01) * km
+		chargeL = viewSight + Vector3.new(0, 0.01, 0.02) * km -- ferrolho (corrediça)
 	else
-		magL = gripL:Lerp(supportL, 0.5) + Vector3.new(0, -0.04 / M, 0)
-		chargeL = gripL:Lerp(supportL, 0.25) + Vector3.new(0.035 / M, 0.06 / M, 0)
-	end
-	local kind = m:GetAttribute("SightKind")
-	local mm = m:GetAttribute("SightMm")
-	if front and type(kind) == "string" and type(mm) == "number" and kind ~= "" then
-		crispSights(m, viewSight, front.WorldPosition, kind, mm)
+		magL = gripL:Lerp(supportL, 0.5) + Vector3.new(0, -0.04, 0) * km
+		chargeL = gripL:Lerp(supportL, 0.25) + Vector3.new(0.035, 0.06, 0) * km
 	end
 	for _, d in m:GetDescendants() do
 		if d:IsA("BasePart") then
@@ -475,7 +497,7 @@ RunService:BindToRenderStep("VT65ViewModel", Enum.RenderPriority.Camera.Value + 
 		and not reloading
 	aimT += ((if aiming then 1 else 0) - aimT) * math.min(1, dt * 12)
 	kick = math.max(0, kick - dt * 7)
-	local ads = CFrame.new(0, 0, -viewEye / M) * viewAlign * CFrame.new(-viewSight)
+	local ads = viewAlign
 	local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart") :: BasePart?
 	local speed = if root
 		then Vector3.new(root.AssemblyLinearVelocity.X, 0, root.AssemblyLinearVelocity.Z).Magnitude * M
@@ -510,12 +532,13 @@ RunService:BindToRenderStep("VT65ViewModel", Enum.RenderPriority.Camera.Value + 
 			0
 		)
 	end
-	local wcf = camera.CFrame * kv.rifle * HIP:Lerp(ads, aimT) * bob * recoil * pose
+	local wcf = camera.CFrame * kv.rifle * viewHip:Lerp(ads, aimT) * bob * recoil * pose
 	v:PivotTo(wcf)
-	-- braços
+	-- braços (desvios das mãos do tamanho delas, D-108)
 	local rot = wcf.Rotation
-	local handR = wcf * (gripL + Vector3.new(0.012 / M, 0, 0.015 / M))
-	local handL = wcf * (supportL + Vector3.new(0, -0.025 / M, 0))
+	local km = viewK / M
+	local handR = wcf * (gripL + Vector3.new(0.012, 0, 0.015) * km)
+	local handL = wcf * (supportL + Vector3.new(0, -0.025, 0) * km)
 	if reloading then
 		local keys = reloadKeys()
 		local function world(k: Key): Vector3
@@ -530,7 +553,7 @@ RunService:BindToRenderStep("VT65ViewModel", Enum.RenderPriority.Camera.Value + 
 		end
 		-- carregador velho: sai com a mão (0,13–0,25) e cai; o novo vem da cartucheira (0,40–0,64)
 		if viewKind ~= "launcher" then
-			local magOff = Vector3.new(0, 0.07 / M, 0)
+			local magOff = Vector3.new(0, 0.07, 0) * km
 			if rp >= 0.13 and rp < 0.25 then
 				oldMag = oldMag or magPart(viewKind)
 				local om = oldMag :: BasePart
@@ -565,7 +588,7 @@ RunService:BindToRenderStep("VT65ViewModel", Enum.RenderPriority.Camera.Value + 
 		handR = throwHand
 		handRot = camera.CFrame.Rotation
 		if pulling then
-			handL = handL:Lerp(throwHand + camera.CFrame:VectorToWorldSpace(Vector3.new(-0.05, 0.03, 0) / M), 0.85)
+			handL = handL:Lerp(throwHand + camera.CFrame:VectorToWorldSpace(Vector3.new(-0.05, 0.03, 0) * km), 0.85)
 		end
 	end
 	if kv.handR then -- faca na mão direita
@@ -583,9 +606,9 @@ RunService:BindToRenderStep("VT65ViewModel", Enum.RenderPriority.Camera.Value + 
 	end
 	Maos1P.hand("R", handRot + handR, "grip")
 	Maos1P.hand("L", cfL, poseL)
-	forearm(kv.wristR or (handR + rot * Vector3.new(0, -0.03 / M, 0.05 / M)), kv.elbowR or cam * ELBOW_R, "R")
+	forearm(kv.wristR or (handR + rot * Vector3.new(0, -0.03, 0.05) * km), kv.elbowR or cam * ELBOW_R, "R")
 	forearm(
-		handL + cfL.Rotation * Vector3.new(0, -0.01 / M, 0.05 / M),
+		handL + cfL.Rotation * Vector3.new(0, -0.01, 0.05) * km,
 		if iv.active then iv.elbowL else cam * ELBOW_L,
 		"L"
 	)

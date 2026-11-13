@@ -101,7 +101,7 @@ export type Ability = {
 	id: string,
 	name: string,
 	faction: string,
-	who: string, -- "commander" | "mortar"
+	who: string, -- "commander" (D-108: o tiro de morteiro também)
 	kind: string, -- "salvo" | "line" | "supply" | "tunnel"
 	explosive: string?,
 	rounds: number?,
@@ -120,7 +120,7 @@ FireSupport.ABILITIES = {
 		id = "us_mortar_81",
 		name = "Morteiro 81 mm (seção)",
 		faction = "US",
-		who = "mortar",
+		who = "commander", -- D-108: o comandante pede o morteiro (a equipe de morteiro saiu)
 		kind = "salvo",
 		explosive = "mortar_81",
 		rounds = 6,
@@ -179,7 +179,7 @@ FireSupport.ABILITIES = {
 		id = "vc_mortar_82",
 		name = "Cối 82 mm",
 		faction = "VC",
-		who = "mortar",
+		who = "commander", -- D-108: o comandante pede o morteiro (a equipe de morteiro saiu)
 		kind = "salvo",
 		explosive = "mortar_82",
 		rounds = 4,

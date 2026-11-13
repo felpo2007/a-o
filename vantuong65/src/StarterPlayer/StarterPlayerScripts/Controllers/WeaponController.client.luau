@@ -381,8 +381,9 @@ local function shoot(wp: Weapons.Weapon, t: Gatilho.Trigger)
 	if wp.kind == "mg" and seed % 5 == 0 then
 		tracer(shot, tracerColor(wp.faction))
 	end
-	if t.mode == "bolt" then
-		Bus.fire("bolt_cycle", Weapons.interval(wp, "bolt")) -- ferrolho na 1ª pessoa (WeaponVisuals)
+	if t.mode == "bolt" or t.mode == "pump" then
+		-- ferrolho na 1ª pessoa (WeaponVisuals/Ferrolho); D-108: a bomba da espingarda também
+		Bus.fire("bolt_cycle", Weapons.interval(wp, t.mode), wp.id)
 	end
 	-- Recuo (D-69): velocidade de recuo livre (impulso do projétil e dos gases, ~1,5x, contra a
 	-- massa da arma, em m/s) vira graus de subida da boca. Antes a conta fazia math.deg da
@@ -390,7 +391,7 @@ local function shoot(wp: Weapons.Weapon, t: Gatilho.Trigger)
 	-- Agora: M14 ~2,3°, Type 56 ~2,1°, M60 ~1,0°, M1911 ~4,6°, M70 ~2,1°, Mosin ~2,4° e M79 ~8°.
 	-- Padrão aleatório com tendência por semente (Parte 10.3); parte volta sozinha (RECOIL_RETURN).
 	-- No automático a subida soma tiro a tiro (a volta só começa quando a rajada para).
-	local impulse = (wp.bulletMassG / 1000) * wp.muzzleVelocity * 1.5
+	local impulse = ((wp.chargeG or wp.bulletMassG) / 1000) * wp.muzzleVelocity * 1.5 -- D-108: 9 bagos
 	local kick = (impulse / wp.massLoadedKg) * RECOIL_DEG_PER_MS
 	if player:GetAttribute("ArmImpaired") then
 		kick *= 1.5
@@ -446,13 +447,17 @@ local function startReload()
 		return
 	end
 	inv.autoAt = 0
-	local dur = Weapons.reloadTime(wp, Vantagens.mult(player, "reload")) -- "Mãos Rápidas" (o servidor confere)
+	-- "Mãos Rápidas" (o servidor confere); D-108: a espingarda carrega cartucho a cartucho
+	local spare = spareBy[wp.id] or 0
+	local dur = Weapons.reloadTime(wp, Vantagens.mult(player, "reload"), t.mag, spare)
 	-- o servidor manda: o gatilho só volta com a munição nova (Combat_Ammo); a folga cobre a rede
 	t.reloadUntil = now + dur + 1
 	Gatilho.cancel(t)
 	Net.event("Combat_Reload"):FireServer({ w = wp.id })
-	playId(if wp.faction == "US" then S.reload_m14 else S.reload_type56, 0.7)
-	Bus.fire("reload_start", dur, wp.kind)
+	if wp.feed ~= "tube" then -- a espingarda: o som de cada cartucho (Ferrolho)
+		playId(if wp.faction == "US" then S.reload_m14 else S.reload_type56, 0.7)
+	end
+	Bus.fire("reload_start", dur, wp.kind, Weapons.tubeShells(wp, t.mag, spare), t.mag <= 0, wp.id)
 end
 Input.on("reload", "tap", startReload)
 Input.on("reload", "press", startReload) -- R no teclado é "press"
@@ -670,6 +675,11 @@ end)
 
 -- ===== gatilho e mira =====
 local function triggerDown()
+	-- D-108: prévia da caixa de munição do suporte (Controllers/CaixaMunicao.client): o gatilho põe
+	if player:GetAttribute("PondoCaixa") == true and not seated() then
+		Bus.fire("caixa_por")
+		return
+	end
 	if binoculars and not seated() then
 		toggleBinoculars() -- o gatilho guarda o binóculo e a arma volta (antes ficava sem arma)
 		return

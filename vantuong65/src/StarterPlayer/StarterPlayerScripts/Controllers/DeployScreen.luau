@@ -95,63 +95,38 @@ local function after(delay: number, info: TweenInfo): TweenInfo
 end
 
 -- selos: um glifo por papel e por unidade (sinais de carta militar, do que o Arimo tem)
+-- D-108 (classes mais simples): 8 papéis em 2 unidades (Shared/Roles)
 local ROLE_GLYPH: { [string]: string } = {
 	commander = "♦",
 	squad_leader = "▲",
 	rifleman = "×", -- o X do símbolo de infantaria
-	automatic_rifleman = "‡", -- fuzileiro automático (EUA, 2026-11-12)
-	grenadier = "⁂",
+	support = "▣", -- caixa de munição
 	machine_gunner = "≡", -- fita de munição
 	anti_tank = "►",
-	engineer = "⌂",
 	medic = "+",
-	radio_operator = "≈",
-	observer = "∞", -- binóculo
 	sniper = "◙",
-	sapper = "▼",
-	mortar = "∩", -- trajetória curva
 	tank_crew = "▬",
 	pilot = "┼", -- rotor visto de cima
-	door_gunner = "◄",
 }
 local UNIT_GLYPH: { [string]: string } = {
 	command = "♦",
 	infantry = "×",
-	recon = "∞",
-	sapper = "▼",
-	mortar = "∩",
-	armor = "▬",
-	helicopter = "┼",
 }
 
-local UNIT_ORDER = { "infantry", "command", "recon", "sapper", "mortar", "armor", "helicopter" }
+local UNIT_ORDER = { "infantry", "command" }
 local UNIT_NAME: { [string]: string } = {
 	command = "Comando",
 	infantry = "Infantaria",
-	recon = "Reconhecimento",
-	sapper = "Sapadores",
-	mortar = "Morteiro",
-	armor = "Blindado",
-	helicopter = "Helicóptero",
 }
 local ROLE_ORDER = {
 	"squad_leader",
 	"rifleman",
-	"automatic_rifleman",
-	"grenadier",
+	"support",
+	"medic",
 	"machine_gunner",
 	"anti_tank",
-	"engineer",
-	"medic",
-	"radio_operator",
-	"commander",
-	"observer",
 	"sniper",
-	"sapper",
-	"mortar",
-	"tank_crew",
-	"pilot",
-	"door_gunner",
+	"commander",
 }
 
 -- textos das facções: nomes e unidades de Starlite (research/F0_FONTES.md: RLT-7 com 3/3, 2/4 e 3/7;
@@ -748,6 +723,21 @@ local function currentRole(): string?
 	return if type(r) == "string" then r else nil
 end
 
+-- D-108: arma principal escolhida por papel (um toque no cartão troca; Roles.PRIMARY). O papel atual
+-- começa na do servidor (atributo "Primaria").
+local primaryPref: { [string]: string } = {}
+local function primaryOf(f: string, rid: string): string?
+	local pref: string? = primaryPref[rid]
+	if not pref and rid == currentRole() then
+		local a = player:GetAttribute("Primaria")
+		pref = if type(a) == "string" then a else nil
+	end
+	return Roles.primaryFor(f, rid, pref)
+end
+local function chosenLoadout(f: string, rid: string): { string }?
+	return Roles.loadoutFor(f, rid, primaryOf(f, rid))
+end
+
 -- painel ao abrir o lobby: morto com papel vai direto à inserção; o resto começa na mesa
 local function defaultPanel(): string
 	if myFaction() and currentRole() and hasSquad() and not alive() then
@@ -1286,9 +1276,13 @@ do
 		end
 		capShown = key
 		local r = Roles.roles[rid]
-		local lo = Roles.loadout[f][rid]
+		local lo = chosenLoadout(f, rid)
 		local cur = player:GetAttribute("Role")
-		local curLo = if type(cur) == "string" then Roles.loadout[f][cur] else nil
+		local loAttr = player:GetAttribute("Loadout")
+		local curLo = if type(cur) ~= "string"
+			then nil
+			elseif type(loAttr) == "string" and loAttr ~= "" then string.split(loAttr, ",")
+			else Roles.loadout[f][cur]
 		local isCurrent = cur == rid
 		-- cabeçalho: selo com o glifo do papel e o título datilografado
 		capGlyph.Text = ROLE_GLYPH[rid] or "•"
@@ -1671,6 +1665,7 @@ type RCard = {
 	btn: TextButton,
 	name: TextLabel,
 	weapons: TextLabel,
+	swap: TextButton, -- D-108: troca a arma principal (só papel com mais de uma)
 	slots: TextLabel,
 	mark: TextLabel,
 	base: Color3,
@@ -1704,7 +1699,7 @@ do
 			return
 		end
 		previewRole = id
-		local lo = if id then Roles.loadout[f][id] else nil
+		local lo = if id then chosenLoadout(f, id) else nil
 		LobbyScene.setLoadout(f, if lo then lo[1] else nil)
 		local sid = player:GetAttribute("SquadId")
 		local squadName = if type(sid) == "string" then string.match(sid, ":(.+)$") else nil
@@ -1724,7 +1719,34 @@ do
 					else "Papel ocupado: o servidor deve recusar."
 			)
 		end
-		Net.event("Role_Choose"):FireServer(id)
+		local f = myFaction()
+		Net.event("Role_Choose"):FireServer(id, if f then primaryOf(f, id) else nil)
+	end
+
+	-- D-108: um toque no botão da arma troca a principal do papel (a do papel atual vale no próximo
+	-- nascimento, sem os +15 s)
+	local function swapPrimary(id: string)
+		local f = myFaction()
+		if not f then
+			return
+		end
+		local list = Roles.primaries(f, id)
+		if #list < 2 then
+			return
+		end
+		local i = table.find(list, primaryOf(f, id) or "") or 1
+		local nextId = list[i % #list + 1]
+		primaryPref[id] = nextId
+		local c = roleCards[id]
+		if c then
+			c.weapons.Text = weaponNames(chosenLoadout(f, id))
+		end
+		capShown = ""
+		showRole(id)
+		if id == currentRole() then
+			Net.event("Role_Choose"):FireServer(id, nextId)
+			notify(string.format("%s no próximo nascimento.", weaponLine(nextId)))
+		end
 	end
 
 	-- ficha de papel: selo com o glifo do papel, nome em negrito, armas datilografadas, vagas e o
@@ -1744,6 +1766,35 @@ do
 		local weapons = txt(b, TYPE, 14, V.DIM, 10, 60, 176, 52)
 		weapons.TextYAlignment = Enum.TextYAlignment.Top
 		weapons.TextTruncate = Enum.TextTruncate.AtEnd
+		-- D-108: botão da arma (papel com mais de uma principal): um toque troca
+		local swap = Instance.new("TextButton")
+		swap.Name = "TrocarArma"
+		swap.AutoButtonColor = false
+		swap.BackgroundColor3 = V.PANEL_2
+		swap.BackgroundTransparency = 0.6
+		swap.BorderSizePixel = 0
+		swap.Position = UDim2.fromOffset(6, 58)
+		swap.Size = UDim2.fromOffset(184, 56)
+		swap.Text = ""
+		swap.ZIndex = 5
+		swap.Visible = false
+		swap.Parent = b
+		corner(swap, 3)
+		local arrows = Instance.new("TextLabel")
+		arrows.BackgroundTransparency = 1
+		arrows.AnchorPoint = Vector2.new(1, 1)
+		arrows.Position = UDim2.new(1, -4, 1, -2)
+		arrows.Size = UDim2.fromOffset(60, 18)
+		arrows.Font = Enum.Font.GothamBold
+		arrows.TextSize = 13
+		arrows.TextXAlignment = Enum.TextXAlignment.Right
+		arrows.TextColor3 = V.KHAKI
+		arrows.Text = "⇄ ARMA"
+		arrows.ZIndex = 5
+		arrows.Parent = swap
+		swap.Activated:Connect(function()
+			swapPrimary(id)
+		end)
 		local slots = txt(b, HEAD, 15, V.TEXT, 100, 120, 86, 24, Enum.TextXAlignment.Right)
 		slots.FontFace = F.TITLE_MED
 		-- estado (ATUAL, OCUPADO, SÓ O LÍDER) numa etiqueta embaixo, sem cobrir as armas
@@ -1753,6 +1804,7 @@ do
 			btn = b,
 			name = name,
 			weapons = weapons,
+			swap = swap,
 			slots = slots,
 			mark = mark,
 			base = CARD,
@@ -1843,7 +1895,7 @@ do
 		local firstId: string? = nil
 		for order, id in ROLE_IDS do
 			local r = Roles.roles[id]
-			local lo = Roles.loadout[f][id]
+			local lo = chosenLoadout(f, id)
 			local show = unit ~= nil and r.unit == unit and lo ~= nil
 			local c = roleCards[id]
 			if show and not c then
@@ -1857,6 +1909,7 @@ do
 					card.btn.LayoutOrder = order
 					card.name.Text = UiKit.upper(r.name)
 					card.weapons.Text = weaponNames(lo)
+					card.swap.Visible = #Roles.primaries(f, id) > 1
 					local max = r.maxPerSquad
 					local free: number? = nil
 					if max then

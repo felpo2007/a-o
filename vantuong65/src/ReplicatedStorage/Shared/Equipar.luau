@@ -98,8 +98,9 @@ Equipar.DRAW_S = {
 	mosin = 0.7,
 	launcher = 0.9,
 	rpg2 = 0.9,
+	win12 = 0.55, -- D-108: como a M1897 do Front 44
 } :: { [string]: number }
-Equipar.DRAW_KIND = { rifle = 0.6, mg = 1.0, pistol = 0.3, launcher = 0.9 } :: { [string]: number }
+Equipar.DRAW_KIND = { rifle = 0.6, mg = 1.0, pistol = 0.3, launcher = 0.9, shotgun = 0.55 } :: { [string]: number }
 
 function Equipar.drawS(id: string?, kind: string?): number
 	return (id and Equipar.DRAW_S[id]) or (kind and Equipar.DRAW_KIND[kind]) or 0.6
@@ -112,7 +113,8 @@ end
 -- ===== item que dá para usar agora (mesma regra da roda de equipamento) =====
 -- frags/smokes: o que sobra (atributos Frags/Smokes); canBuild: o papel tem alguma construção.
 export type Counts = { frags: number, smokes: number }
-Equipar.ROLE_TOOL = { commander = true, mortar = true, anti_tank = true, medic = true, engineer = true } :: {
+-- D-108: a ferramenta do suporte é a caixa de munição (Controllers/CaixaMunicao.client: prévia e pôr)
+Equipar.ROLE_TOOL = { commander = true, anti_tank = true, medic = true, support = true } :: {
 	[string]: boolean,
 }
 

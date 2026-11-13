@@ -289,6 +289,21 @@ local function buildRange(faction: string, folder: Folder)
 		Color3.fromRGB(214, 203, 170)
 	)
 	sign(board, "LINHA DE TIRO\nalvos a 100, 200 e 300 m")
+	-- pernas da placa até o chão (2026-11-13, "conserte tudo que esteja flutuando": a placa ficava no
+	-- ar, com o fundo a 0,8 m do chão e nada embaixo)
+	for _, sx in { -0.55, 0.55 } do
+		local p = (look * CFrame.new((-2.6 + sx) / M, 0, -0.06 / M)).Position
+		local gy = groundY(p.X, p.Z, ignore)
+		local top = y0 + 1.6 / M
+		local h = math.max(top - gy, 0.2 / M)
+		part(
+			folder,
+			"PernaPlaca",
+			Vector3.new(0.08 / M, h, 0.08 / M),
+			CFrame.new(p.X, top - h / 2, p.Z) * look.Rotation,
+			Color3.fromRGB(90, 70, 48)
+		)
+	end
 	local plates: { BasePart } = {}
 	for i, m in Tutorial.RANGE_M do
 		local x, z = targetXZ(x0, z0, dx, dz, i, m)

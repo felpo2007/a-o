@@ -1,61 +1,56 @@
 --!strict
 -- Estrutura dos times e papéis (Parte 4). 50 por time (D-91: o servidor do Roblox aceita até 100
 -- jogadores); as vagas somam mais que 50 de propósito.
+-- D-108 (pedido do dono, 2026-11-13: "faça classes mais simples, tem muitas"): de 16 papéis em 7
+-- unidades para 8 papéis em 2 unidades. Cada squad de infantaria (6) tem Líder, Médico, Suporte,
+-- Metralhador, Antitanque e Atirador de elite (1 de cada) e Fuzileiros. O que saiu foi junto:
+--   - granadeiro -> fuzileiro (a M79 é uma arma do fuzileiro dos EUA);
+--   - fuzileiro automático -> metralhador (a M14 de seletor e bipé é uma arma do metralhador dos EUA);
+--   - engenheiro e sapador de túnel -> suporte (constrói, arma e desarma armadilhas, explode túnel);
+--   - operador de rádio -> líder (o líder leva o rádio do squad: Shared/Radio);
+--   - observador -> atirador de elite (binóculo na vaga 7, como todos);
+--   - morteiro -> comandante (pede o tiro) e suporte (constrói a posição);
+--   - tripulante, piloto e atirador de porta: o lugar do veículo dá o papel (D-100), sem squad.
+-- O papel salvo de antes vira o novo pelo Roles.migrate (perfil, jogar agora, tutorial).
 local Roles = {}
 
 Roles.TEAM_MAX = 50
-Roles.HEAVY_UNLOCK = 16 -- blindado, helicóptero e morteiro só com o time a partir de 16
+Roles.HEAVY_UNLOCK = 16 -- unidade pesada só com o time a partir de 16 (D-108: nenhuma unidade pesada hoje)
 
 export type RoleDef = { id: string, name: string, unit: string, maxPerSquad: number? }
 Roles.roles = {
 	commander = { id = "commander", name = "Comandante", unit = "command", maxPerSquad = 1 },
 	squad_leader = { id = "squad_leader", name = "Líder de squad", unit = "infantry", maxPerSquad = 1 },
 	rifleman = { id = "rifleman", name = "Fuzileiro", unit = "infantry" },
-	-- só dos EUA (não tem loadout no VC): o fuzileiro automático da esquadra de tiro do USMC, com a M14
-	-- de seletor e bipé M2 (FM 23-8, 1965, par. 3a; Small Arms Review: 1 em automático por esquadra
-	-- de 4 em Chu Lai, 1965). Um por squad: o squad do jogo (6) é menor que o de 1965 (13, com 3
-	-- esquadras). Decisão do dono, 2026-11-12.
-	automatic_rifleman = {
-		id = "automatic_rifleman",
-		name = "Fuzileiro automático",
-		unit = "infantry",
-		maxPerSquad = 1,
-	},
-	grenadier = { id = "grenadier", name = "Granadeiro", unit = "infantry", maxPerSquad = 1 },
+	medic = { id = "medic", name = "Médico", unit = "infantry", maxPerSquad = 1 },
+	-- D-108: caixa de munição no chão (Shared/CaixaMunicao), construções e armadilhas
+	support = { id = "support", name = "Suporte", unit = "infantry", maxPerSquad = 1 },
 	machine_gunner = { id = "machine_gunner", name = "Metralhador", unit = "infantry", maxPerSquad = 1 },
 	anti_tank = { id = "anti_tank", name = "Antitanque", unit = "infantry", maxPerSquad = 1 },
-	engineer = { id = "engineer", name = "Engenheiro/sapador", unit = "infantry", maxPerSquad = 1 },
-	medic = { id = "medic", name = "Médico", unit = "infantry", maxPerSquad = 1 },
-	radio_operator = { id = "radio_operator", name = "Operador de rádio", unit = "infantry", maxPerSquad = 1 },
-	observer = { id = "observer", name = "Observador", unit = "recon", maxPerSquad = 1 },
-	sniper = { id = "sniper", name = "Atirador de elite", unit = "recon", maxPerSquad = 1 },
-	tank_crew = { id = "tank_crew", name = "Tripulante de blindado", unit = "armor", maxPerSquad = 3 },
-	pilot = { id = "pilot", name = "Piloto", unit = "helicopter", maxPerSquad = 1 },
-	door_gunner = { id = "door_gunner", name = "Atirador de porta", unit = "helicopter", maxPerSquad = 1 },
-	mortar = { id = "mortar", name = "Morteiro", unit = "mortar", maxPerSquad = 3 },
-	sapper = { id = "sapper", name = "Sapador de túnel", unit = "sapper", maxPerSquad = 4 },
+	-- D-108: saiu do squad de reconhecimento (2 vagas por lado, posto 3): 1 por squad de infantaria
+	sniper = { id = "sniper", name = "Atirador de elite", unit = "infantry", maxPerSquad = 1 },
+	-- papéis de lugar de veículo (D-100): o painel do veículo dá ("VehicleCrew"); não se escolhem
+	tank_crew = { id = "tank_crew", name = "Tripulante de blindado", unit = "vehicle" },
+	pilot = { id = "pilot", name = "Piloto", unit = "vehicle" },
 } :: { [string]: RoleDef }
 
--- unidades por facção: quantidade máxima e tamanho
+-- unidades por facção: quantidade máxima e tamanho. D-108: só comando e infantaria; 9 squads de 6 (54
+-- vagas + o comandante) para caber os 50 de cada lado com folga.
 export type UnitDef = { count: number, size: number, heavy: boolean, names: { string } }
 Roles.units = {
 	US = {
 		command = { count = 1, size = 1, heavy = false, names = { "Comando" } },
 		infantry = {
-			count = 7,
+			count = 9,
 			size = 6,
 			heavy = false,
-			names = { "Alfa", "Bravo", "Charlie", "Delta", "Echo", "Foxtrot", "Golf" },
+			names = { "Alfa", "Bravo", "Charlie", "Delta", "Echo", "Foxtrot", "Golf", "Hotel", "India" },
 		},
-		recon = { count = 1, size = 2, heavy = false, names = { "Recon" } },
-		armor = { count = 1, size = 3, heavy = true, names = { "Blindado" } },
-		helicopter = { count = 1, size = 2, heavy = true, names = { "Helicóptero" } },
-		mortar = { count = 1, size = 3, heavy = true, names = { "Morteiro" } },
 	},
 	VC = {
 		command = { count = 1, size = 1, heavy = false, names = { "Chỉ huy" } },
 		infantry = {
-			count = 8,
+			count = 9,
 			size = 6,
 			heavy = false,
 			names = {
@@ -67,67 +62,136 @@ Roles.units = {
 				"Tiểu đội 6",
 				"Tiểu đội 7",
 				"Tiểu đội 8",
+				"Tiểu đội 9",
 			},
 		},
-		recon = { count = 1, size = 2, heavy = false, names = { "Trinh sát" } },
-		sapper = { count = 1, size = 4, heavy = false, names = { "Đặc công" } },
-		mortar = { count = 1, size = 3, heavy = true, names = { "Cối" } },
 	},
 } :: { [string]: { [string]: UnitDef } }
 
--- Armas-base por papel (Parte 4): a principal (vaga 1) e a pistola (vaga 2; Shared/Equipar).
--- 2026-11-13 (pedido do dono: "coloque arma secundária para todos"): todo papel leva a pistola do lado
--- (M1911A1 nos EUA, Tipo 54 no VC). Os papéis que só tinham a pistola ganharam a arma longa do lado
--- (comandante, corpsman e morteiro dos EUA com a M14; comandante e morteiro do VC com a SKS, sem mexer
--- no kit do corpo: PLACEHOLDER, decisão de jogo). Ficam só com a pistola: antitanque (a principal é o lançador, que
--- o WeaponController põe depois dela), tripulante e piloto (a principal é o veículo; o tanquista de
--- 1965 levava a M3A1, que o jogo não tem).
+-- Armas-base por papel (Parte 4): a principal (vaga 1) e a pistola (vaga 2; Shared/Equipar). Todo
+-- papel leva a pistola do lado (M1911A1 nos EUA, Tipo 54 no VC). O antitanque só tem a pistola: a
+-- principal é o lançador, que o WeaponController põe depois dela.
 Roles.loadout = {
 	US = {
 		commander = { "m14", "m1911" },
-		squad_leader = { "m14", "m1911" },
+		squad_leader = { "m14", "m1911" }, -- + rádio (Shared/Radio, D-108)
 		rifleman = { "m14", "m1911" },
-		automatic_rifleman = { "m14", "m1911" }, -- com o seletor aberto e o bipé (Weapons.roleModes/bipodRoles)
-		grenadier = { "m79", "m1911" },
+		medic = { "m14", "m1911" }, -- corpsman
+		support = { "m14", "m1911" },
 		machine_gunner = { "m60", "m1911" },
 		anti_tank = { "m1911" }, -- + bazuca 3.5" M20 (vaga "launcher")
-		engineer = { "m14", "m1911" },
-		medic = { "m14", "m1911" }, -- corpsman
-		radio_operator = { "m14", "m1911" }, -- PRC-10 nas costas
-		observer = { "m14", "m1911" },
 		sniper = { "m70", "m1911" }, -- Winchester M70 com Unertl 8x (USMC, 1965; Shared/Weapons)
-		tank_crew = { "m1911" },
-		pilot = { "m1911" },
-		door_gunner = { "m60", "m1911" },
-		mortar = { "m14", "m1911" },
 	},
 	VC = {
 		commander = { "sks", "type54" },
 		squad_leader = { "type56", "type54" },
 		rifleman = { "sks", "type54" },
-		grenadier = { "sks", "type54" }, -- granadas de cabo na F4
+		medic = { "sks", "type54" },
+		support = { "sks", "type54" },
 		machine_gunner = { "rpd", "type54" },
 		anti_tank = { "type54" }, -- + RPG-2 (vaga "launcher")
-		engineer = { "sks", "type54" },
-		medic = { "sks", "type54" },
-		radio_operator = { "sks", "type54" },
-		observer = { "type56", "type54" },
 		sniper = { "mosin", "type54" }, -- Mosin-Nagant 91/30 com luneta PU 3,5x (Shared/Weapons)
-		sapper = { "sks", "type54" },
-		mortar = { "sks", "type54" },
 	},
 } :: { [string]: { [string]: { string } } }
 
--- Posto mínimo por papel (progressão, 2026-11-11; Shared/Progression). Só papéis de especialista: os
--- de infantaria e o líder de squad ficam no posto 1, para um servidor novo (todos no posto 1) não
--- ficar sem squad nem construção. PLACEHOLDER até o playtest.
+-- D-108: arma principal à escolha no cartão do papel (um toque troca; vale no próximo nascimento). A
+-- 1ª é a padrão (a do Roles.loadout). EUA: o fuzileiro leva a M14, a espingarda Winchester 12 ou a
+-- M79 (o antigo granadeiro); o suporte, a M14 ou a espingarda; o metralhador, a M60 ou a M14 de
+-- seletor e bipé (o antigo fuzileiro automático: Weapons.roleModes). VC: SKS ou Tipo 56.
+Roles.PRIMARY = {
+	US = {
+		rifleman = { "m14", "win12", "m79" },
+		support = { "m14", "win12" },
+		machine_gunner = { "m60", "m14" },
+	},
+	VC = {
+		rifleman = { "sks", "type56" },
+		support = { "sks", "type56" },
+	},
+} :: { [string]: { [string]: { string } } }
+
+-- Armas principais que o papel pode escolher (sempre ao menos a padrão)
+function Roles.primaries(faction: string, roleId: string): { string }
+	local byF = Roles.PRIMARY[faction]
+	local list = byF and byF[roleId]
+	if list then
+		return list
+	end
+	local lo = Roles.loadout[faction] and Roles.loadout[faction][roleId]
+	return if lo and #lo > 1 then { lo[1] } else {}
+end
+
+-- A principal pedida vale para o papel? (nil ou fora da lista: a padrão)
+function Roles.primaryFor(faction: string, roleId: string, primary: string?): string?
+	local list = Roles.primaries(faction, roleId)
+	if primary and table.find(list, primary) then
+		return primary
+	end
+	return list[1]
+end
+
+-- Equipamento do papel com a principal escolhida (a pistola fica)
+function Roles.loadoutFor(faction: string, roleId: string, primary: string?): { string }?
+	local lo = Roles.loadout[faction] and Roles.loadout[faction][roleId]
+	if not lo then
+		return nil
+	end
+	local out = table.clone(lo)
+	local p = Roles.primaryFor(faction, roleId, primary)
+	if p and #out > 1 then
+		out[1] = p
+	end
+	return out
+end
+
+-- ===== papel de antes (D-108) =====
+-- Papel salvo antes da D-108 -> (papel novo, principal sugerida). O papel que ainda existe fica.
+Roles.MIGRATE = {
+	automatic_rifleman = { "machine_gunner", "m14" },
+	grenadier = { "rifleman", "m79" },
+	engineer = { "support" },
+	sapper = { "support" },
+	radio_operator = { "squad_leader" },
+	observer = { "sniper" },
+	mortar = { "support" },
+	door_gunner = { "machine_gunner" },
+	tank_crew = { "rifleman" },
+	pilot = { "rifleman" },
+} :: { [string]: { string } }
+Roles.UNIT_MIGRATE = {
+	recon = "infantry",
+	armor = "infantry",
+	helicopter = "infantry",
+	mortar = "infantry",
+	sapper = "infantry",
+} :: { [string]: string }
+
+function Roles.migrate(roleId: string?): (string?, string?)
+	if type(roleId) ~= "string" then
+		return nil, nil
+	end
+	local m = Roles.MIGRATE[roleId]
+	if m then
+		return m[1], m[2]
+	end
+	local r = Roles.roles[roleId]
+	if r and r.unit ~= "vehicle" then
+		return roleId, nil
+	end
+	return nil, nil
+end
+
+function Roles.migrateUnit(unit: string?): string?
+	if type(unit) ~= "string" then
+		return nil
+	end
+	return Roles.UNIT_MIGRATE[unit] or unit
+end
+
+-- Posto mínimo por papel (progressão, 2026-11-11; Shared/Progression). D-108: só o comandante (o
+-- atirador de elite ficou livre, 1 por squad: pedido do dono). PLACEHOLDER até o playtest.
 Roles.MIN_RANK = {
 	commander = 3,
-	sniper = 3,
-	pilot = 3,
-	observer = 2,
-	tank_crew = 2,
-	door_gunner = 2,
 } :: { [string]: number }
 
 function Roles.minRank(roleId: string): number
@@ -144,7 +208,7 @@ end
 
 function Roles.roleAllowedInUnit(faction: string, roleId: string, unit: string): boolean
 	local r = Roles.roles[roleId]
-	return r ~= nil and r.unit == unit and Roles.loadout[faction][roleId] ~= nil
+	return r ~= nil and r.unit == unit and Roles.loadout[faction] ~= nil and Roles.loadout[faction][roleId] ~= nil
 end
 
 -- ===== papel nos lugares dos veículos (D-100) =====

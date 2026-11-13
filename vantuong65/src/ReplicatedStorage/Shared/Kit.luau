@@ -7,7 +7,8 @@
 -- curativo individual ~0,1 kg. O cantil fica de fora enquanto o jogo não tiver sede/fadiga.
 local Kit = {}
 
-Kit.MAG_KG = { rifle = 0.75, mg = 2.9, pistol = 0.25, launcher = 0.23 } :: { [string]: number }
+-- D-108: espingarda em "cargas" de 7 cartuchos de 12 (~45 g cada, PLACEHOLDER)
+Kit.MAG_KG = { rifle = 0.75, mg = 2.9, pistol = 0.25, launcher = 0.23, shotgun = 0.32 } :: { [string]: number }
 Kit.ITEMS = {
 	{ id = "mags", name = "Carregadores", min = 1, max = 10 },
 	{ id = "frags", name = "Granadas", kg = 0.45, min = 0, max = 4 },
@@ -15,7 +16,7 @@ Kit.ITEMS = {
 	{ id = "bandages", name = "Curativos", kg = 0.1, min = 1, max = 6 },
 }
 -- padrão = o que o jogo já dava por vida (CombatService MAGS, FieldService e Medical)
-Kit.DEFAULT_MAGS = { rifle = 6, mg = 2, pistol = 3, launcher = 6 } :: { [string]: number }
+Kit.DEFAULT_MAGS = { rifle = 6, mg = 2, pistol = 3, launcher = 6, shotgun = 5 } :: { [string]: number }
 Kit.MARGIN_KG = 1.0 -- limite = peso do kit padrão + 1 kg: trocar um item por outro, não somar tudo
 
 export type Kit = { mags: number, frags: number, smokes: number, bandages: number }

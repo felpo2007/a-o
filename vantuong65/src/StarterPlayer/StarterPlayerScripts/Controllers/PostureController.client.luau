@@ -853,7 +853,9 @@ local function holdWeapon(char: Model, b: Blend, dt: number, far: boolean): Goal
 	local busy = s.busy
 	local lw = 1
 	if busy > 0 and kind ~= "pistol" then
-		local mag = info.grip + Vector3.new(0, -0.3 - 0.12 * math.abs(math.sin(os.clock() * 5)), -0.35)
+		-- D-108: o carregador desce e avança com a arma maior (Pegada3P.G / L)
+		local mag = info.grip
+			+ Vector3.new(0, (-0.3 - 0.12 * math.abs(math.sin(os.clock() * 5))) * Pegada3P.G, -0.35 * Pegada3P.L)
 		leftGun = leftGun:Lerp(mag, smooth(busy))
 	else
 		local ikL = hum:FindFirstChild("VT65IK_L") :: IKControl?

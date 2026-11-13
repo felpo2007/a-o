@@ -293,7 +293,7 @@ test("tomar setor inimigo: neutraliza e depois captura; vitória", function()
 end)
 
 -- Squads e papéis -----------------------------------------------------------------------------
-test("squads: nomes, limite de 6, papéis únicos e blindado só com 16", function()
+test("squads: nomes, limite de 6, papéis únicos e só comando e infantaria (D-108)", function()
 	local st = Squads.new("US")
 	local a = Squads.create(st, "infantry", 1, 10) :: any
 	assert(a and a.name == "Alfa" and a.leader == 1)
@@ -307,9 +307,11 @@ test("squads: nomes, limite de 6, papéis únicos e blindado só com 16", functi
 	assert(Squads.chooseRole(st, 2, "medic"))
 	assert(not Squads.chooseRole(st, 3, "medic"), "1 médico por squad")
 	assert(not Squads.chooseRole(st, 3, "pilot"), "piloto não é de infantaria")
-	local arm, e2 = Squads.create(st, "armor", 8, 15)
-	assert(arm == nil and e2 ~= nil)
-	assert(Squads.create(st, "armor", 8, 16))
+	-- D-108: o blindado é lugar do veículo (D-100), não squad
+	local arm, e2 = Squads.create(st, "armor", 8, 16)
+	assert(arm == nil and e2 == "unidade inexistente")
+	assert(Squads.chooseRole(st, 3, "support") and not Squads.chooseRole(st, 4, "support"), "1 suporte por squad")
+	assert(Squads.chooseRole(st, 4, "sniper") and not Squads.chooseRole(st, 5, "sniper"), "1 atirador por squad")
 	Squads.leave(st, 1)
 	assert(a.leader == 2, "liderança passa adiante")
 	assert(Roles.loadout.VC.machine_gunner[1] == "rpd")

@@ -14,6 +14,7 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
+local Corpo = require(ReplicatedStorage.Shared.Corpo)
 local Equipar = require(ReplicatedStorage.Shared.Equipar)
 local GrenadeArt = require(ReplicatedStorage.Shared.GrenadeArt)
 local Net = require(ReplicatedStorage.Shared.Net)
@@ -90,7 +91,8 @@ function ArmaNaMao.back(char: Model, id: string?)
 		return
 	end
 	local a = math.rad(35)
-	local pos = Vector3.new(0, -0.05 / M, ut.Size.Z / 2 + 0.12 / M)
+	-- D-108: a arma é Corpo.ARMA_K mais grossa (GunModel.fit): o vão das costas cresce junto
+	local pos = Vector3.new(0, -0.05 / M, ut.Size.Z / 2 + 0.12 / M * Corpo.ARMA_K)
 	-- eixos da arma: +X para a direita-baixo, +Y (alto da arma) para fora das costas, boca (−Z)
 	-- para cima e para a direita
 	local cf = CFrame.fromMatrix(pos, Vector3.new(math.cos(a), -math.sin(a), 0), Vector3.new(0, 0, 1))
@@ -116,6 +118,7 @@ function ArmaNaMao.grenade(char: Model, kind: string?, faction: string?)
 	end
 	local m = GrenadeArt.hand(kind, faction)
 	m:SetAttribute("Kind", kind)
+	m:ScaleTo(m:GetScale() * Corpo.ARMA_K) -- D-108: granada maior, como as armas (em volta do pivô)
 	-- na palma: logo abaixo do centro da mão de bloco
 	m:PivotTo(hand.CFrame * CFrame.new(0, -hand.Size.Y * 0.45, 0))
 	weldAll(m, hand)

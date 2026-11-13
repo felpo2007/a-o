@@ -20,11 +20,14 @@
 --   - dano de bala por arma, zona e energia que chegou (Medical.shotDamage / applyShot);
 --   - Combat_Confirm: dano, zona e abate só para quem atirou (marcador do Controllers/Acerto). No
 --     Studio, o motivo do aviso recusado vai no atributo "VT65AcertoRecusado" do jogador.
+-- D-108: espingarda (9 bagos por tiro, firePellets; reserva em cartuchos e recarga um a um) e a caixa
+-- de munição do Suporte (ammoNeed/resupply, Modules/CaixaMunicaoService).
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
 local Ballistics = require(ReplicatedStorage.Shared.Ballistics)
+local CaixaMunicao = require(ReplicatedStorage.Shared.CaixaMunicao)
 local Gatilho = require(ReplicatedStorage.Shared.Gatilho)
 local Hitbox = require(ReplicatedStorage.Shared.Hitbox)
 local Medical = require(ReplicatedStorage.Shared.Medical)
@@ -52,14 +55,30 @@ type Rec = Gatilho.Rec
 local ammo: { [Player]: Rec } = {} -- arma principal (a 1ª do equipamento ou a pega do chão)
 local extra: { [Player]: { [string]: Rec } } = {} -- as outras do equipamento (pistola do granadeiro)
 
+-- D-108: na espingarda (depósito tubular) a reserva é de cartuchos soltos: (cargas - 1) x capacidade
+local function spareOf(wp: Weapons.Weapon, mags: number): number
+	return CaixaMunicao.spareFull(mags, wp.magazine, wp.feed == "tube")
+end
+
 local function newRec(wp: Weapons.Weapon, mags: number): Rec
 	return {
 		weapon = wp.id,
 		mag = wp.magazine,
-		spare = math.max(mags - 1, 0),
+		spare = spareOf(wp, mags),
 		reloadUntil = 0,
 		gate = Gatilho.newGate(),
 	}
+end
+
+-- carregadores por vida da arma principal (kit, equipamento liberado e vantagem)
+local function mainMags(player: Player, wp: Weapons.Weapon): number
+	local km, gm = player:GetAttribute("KitMags"), player:GetAttribute("GearMags")
+	return Weapons.magsFor(
+		wp,
+		if type(km) == "number" then km else nil,
+		if type(gm) == "number" then gm else nil,
+		Vantagens.extra(player, "mags")
+	)
 end
 
 local function loadout(player: Player): { string }
@@ -96,14 +115,7 @@ local function resetAmmo(player: Player)
 				-- equipamento por peso (Kit_Set): carregadores escolhidos; senão a dotação padrão;
 				-- + equipamento liberado (D-72, ProgressionService.applyGear): bandoleira/peitoral;
 				-- + vantagem "Bolsos Extras" (Vant_mags, gravada pelo servidor com a posse do passe)
-				local km, gm = player:GetAttribute("KitMags"), player:GetAttribute("GearMags")
-				local mags = Weapons.magsFor(
-					wp,
-					if type(km) == "number" then km else nil,
-					if type(gm) == "number" then gm else nil,
-					Vantagens.extra(player, "mags")
-				)
-				ammo[player] = newRec(wp, mags)
+				ammo[player] = newRec(wp, mainMags(player, wp))
 			elseif not others[id] then
 				others[id] = newRec(wp, MAGS[wp.kind] or 3)
 			end
@@ -267,7 +279,8 @@ local function bulletHit(
 	energy: number,
 	seed: number,
 	origin: Vector3,
-	by: Player?
+	by: Player?,
+	total: number? -- D-108: dano já somado (bagos da espingarda no mesmo soldado)
 )
 	local e = Combatants.get(victim)
 	if not e then
@@ -276,7 +289,7 @@ local function bulletHit(
 	local s = MedicalService.get(victim)
 	local wasDown, wasDead = s ~= nil and s.downedAt ~= nil, s ~= nil and s.dead
 	local frac = energy / math.max(Ballistics.energy(wp.bulletMassG, wp.muzzleVelocity), 1)
-	local dmg = Medical.shotDamage(Weapons.damageOf(wp), zone, frac)
+	local dmg = total or Medical.shotDamage(Weapons.damageOf(wp), zone, frac)
 	-- o MedicalService.hit é envolvido com a assinatura antiga: o dano da bala vai pelo Medical (e
 	-- sai de lá mesmo se a chamada falhar, para não valer no próximo estilhaço)
 	Medical.nextShot = dmg
@@ -340,7 +353,7 @@ end
 
 -- Caixas de acerto dos soldados perto da linha do tiro (na posição do servidor) e a lista de todos
 -- os soldados (saem do raio do mundo). claimable: há alguém vivo perto o bastante para um aviso.
-local function nearTargets(shooter: Model, origin: Vector3, dir: Vector3, wp: Weapons.Weapon)
+local function nearTargets(shooter: Model, origin: Vector3, dir: Vector3, wp: Weapons.Weapon, extra: number?)
 	local boxes: { Hitbox.Box } = {}
 	local models: { Instance } = {}
 	local claimable = false
@@ -351,7 +364,7 @@ local function nearTargets(shooter: Model, origin: Vector3, dir: Vector3, wp: We
 			local root, hum = Combatants.root(e), Combatants.humanoid(e)
 			if root and hum and hum.Health > 0 then
 				local rel = root.Position - origin
-				if Hitbox.nearRay(rel.X, rel.Y, rel.Z, dir.X, dir.Y, dir.Z, wp.muzzleVelocity, 0) then
+				if Hitbox.nearRay(rel.X, rel.Y, rel.Z, dir.X, dir.Y, dir.Z, wp.muzzleVelocity, extra or 0) then
 					Hitbox.fromModel(m, boxes)
 					claimable = true
 				elseif
@@ -363,6 +376,78 @@ local function nearTargets(shooter: Model, origin: Vector3, dir: Vector3, wp: We
 		end
 	end
 	return boxes, models, claimable
+end
+
+-- ===== espingarda (D-108) =====
+-- Cada bago é uma bala com a semente própria (Weapons.pelletSeed): o padrão sai da dispersão de cada
+-- um. Os bagos que pegam o mesmo soldado somam e entram como um ferimento (Medical.pelletDamage); o
+-- marcador mostra o total. O bago que não pegou ninguém fica guardado para o aviso do cliente.
+local PELLET_REACH = 1.0 / M -- folga do padrão (1 m) na escolha dos soldados perto da linha
+local function firePellets(
+	shooter: Model,
+	wp: Weapons.Weapon,
+	origin: Vector3,
+	dir: Vector3,
+	seed: number,
+	skip: { Instance },
+	boxes: { Hitbox.Box },
+	record: boolean,
+	player: Player?
+)
+	type Acc = { list: { Medical.PelletHit }, energy: number }
+	local acc: { [Model]: Acc } = {}
+	local order: { Model } = {}
+	local e0 = math.max(Ballistics.energy(wp.bulletMassG, wp.muzzleVelocity), 1)
+	local ranged = false
+	for i = 0, Weapons.pelletsOf(wp) - 1 do
+		local s = Weapons.pelletSeed(seed, i)
+		local t = Hitbox.trace(wp.id, origin, dir, s, wp.maxFlightS, skip, boxes, record)
+		local hit, box = t.hit, t.box
+		if hit and box then
+			local victim = box.model :: Model
+			local energy = hit.energy * t.keep * t.keep
+			local a = acc[victim]
+			if not a then
+				a = { list = {}, energy = 0 }
+				acc[victim] = a
+				table.insert(order, victim)
+			end
+			table.insert(a.list, { zone = box.zone, frac = energy / e0 })
+			a.energy = math.max(a.energy, energy)
+		else
+			if player and record then
+				keep(player, {
+					t = os.clock(),
+					used = false,
+					wp = wp,
+					shooter = shooter,
+					origin = origin,
+					seed = s,
+					path = t.path,
+					speed = t.speed,
+					keepAt = t.keepAt,
+				})
+			end
+			local target = hit and hit.target
+			if hit and typeof(target) == "Instance" then
+				local pos = Vector3.new(hit.x, hit.y, hit.z) / M
+				if target:IsA("BasePart") and target:GetAttribute("RangeTarget") ~= nil then
+					if not ranged then
+						ranged = true
+						TrainingService.rangeHit(shooter, target, pos)
+					end
+				elseif i == 0 then
+					TrainingService.nearMiss(shooter, pos, target)
+				end
+			end
+		end
+	end
+	local by = Players:GetPlayerFromCharacter(shooter)
+	for _, victim in order do
+		local a = acc[victim]
+		local total, zone = Medical.pelletDamage(Weapons.damageOf(wp), a.list)
+		bulletHit(shooter, victim, wp, zone, a.energy, seed, origin, by, total)
+	end
 end
 
 -- Simula o tiro no servidor e aplica o dano. `shooter` é o modelo do personagem (jogador ou bot).
@@ -387,7 +472,14 @@ function CombatService.fire(
 	params.FilterDescendantsInstances = ignore
 	local wp = Weapons.get(weaponId)
 	local traced: Hitbox.Traced? = nil
-	if wp and wp.kind ~= "launcher" then
+	local pellets = if wp then Weapons.pelletsOf(wp) else 1
+	if wp and wp.kind ~= "launcher" and pellets > 1 then
+		-- D-108: espingarda, bago a bago (o traçante e o som abaixo saem uma vez)
+		local boxes, models, claimable = nearTargets(shooter, origin, dir, wp, PELLET_REACH)
+		local skip = table.clone(ignore)
+		table.move(models, 1, #models, #skip + 1, skip)
+		firePellets(shooter, wp, origin, dir, seed, skip, boxes, exceptPlayer ~= nil and claimable, exceptPlayer)
+	elseif wp and wp.kind ~= "launcher" then
 		-- D-107: corpo pelas caixas de acerto; os soldados saem do raio do mundo
 		local boxes, models, claimable = nearTargets(shooter, origin, dir, wp)
 		local skip = table.clone(ignore)
@@ -531,6 +623,57 @@ function CombatService.refill(player: Player)
 	resetAmmo(player)
 end
 
+-- D-108: caixa de munição do Suporte (Modules/CaixaMunicaoService). O que falta para a reserva cheia
+-- da dotação: (reserva da principal, reserva cheia, outra arma abaixo da dotação). A arma do outro
+-- lado (pega do chão) não conta.
+function CombatService.ammoNeed(player: Player): (number, number, boolean)
+	local a = ammo[player]
+	local wp = a and Weapons.get(a.weapon)
+	local spare, full = 0, 0
+	if a and wp and Pickup.canRefill(wp.faction, player:GetAttribute("Faction") :: string?) then
+		spare, full = a.spare, spareOf(wp, mainMags(player, wp))
+	end
+	local others = false
+	local ex = extra[player]
+	if ex then
+		for _, rec in ex do
+			local w = Weapons.get(rec.weapon)
+			if w and rec.spare < spareOf(w, MAGS[w.kind] or 3) then
+				others = true
+			end
+		end
+	end
+	return spare, full, others
+end
+
+-- Enche a reserva até a dotação (o carregador da arma fica como está). Devolve se mudou algo.
+function CombatService.resupply(player: Player): boolean
+	local changed = false
+	local a = ammo[player]
+	local wp = a and Weapons.get(a.weapon)
+	if a and wp and Pickup.canRefill(wp.faction, player:GetAttribute("Faction") :: string?) then
+		local full = spareOf(wp, mainMags(player, wp))
+		if a.spare < full then
+			a.spare = full
+			changed = true
+			sendAmmo(player, a)
+		end
+	end
+	local ex = extra[player]
+	if ex then
+		for _, rec in ex do
+			local w = Weapons.get(rec.weapon)
+			local full = if w then spareOf(w, MAGS[w.kind] or 3) else 0
+			if w and rec.spare < full then
+				rec.spare = full
+				changed = true
+				sendAmmo(player, rec)
+			end
+		end
+	end
+	return changed
+end
+
 -- Lugar do veículo de quem atira (nil = a pé), para o Gatilho.validate
 local function seatInfo(hum: Humanoid, dir: Vector3): Gatilho.SeatInfo?
 	local seat = hum.SeatPart
@@ -648,12 +791,19 @@ function CombatService.start()
 			return
 		end
 		-- vantagem "Mãos Rápidas" (Vant_reload, 0,88): o gatilho só volta depois desta recarga
-		local dur = Weapons.reloadTime(wp, Vantagens.mult(player, "reload"))
+		-- D-108: espingarda, cartucho a cartucho (o tempo depende de quantos entram)
+		local dur = Weapons.reloadTime(wp, Vantagens.mult(player, "reload"), rec.mag, rec.spare)
 		rec.reloadUntil = os.clock() + dur
 		task.delay(dur, function()
 			if recFor(player, rec.weapon) == rec then
-				rec.spare -= 1
-				rec.mag = wp.magazine
+				if wp.feed == "tube" then
+					local n = Weapons.tubeShells(wp, rec.mag, rec.spare)
+					rec.spare -= n
+					rec.mag += n
+				else
+					rec.spare -= 1
+					rec.mag = wp.magazine
+				end
 				sendAmmo(player, rec)
 			end
 		end)

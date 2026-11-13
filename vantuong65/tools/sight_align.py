@@ -15,6 +15,9 @@ exato), para cada arma:
    túnel ficam de fora).
 3. olho (no tools/weapon_landmarks.py): na reta alça → massa, atrás da alça: anel a 4,5 cm;
    entalhe sobre o punho.
+"conta" (espingarda do Blender, 2026-11-13): sem alça; a "alça" é o topo da caixa da culatra perto
+do plano do cano e a massa é o topo da conta de latão (também mede o diâmetro da conta). O GLB é o
+do Blender (`glb`), só o nó da arma (`no`); o olho fica no eyeM do pontos.json.
 
 Uso:
   uv run python tools/sight_align.py --side          (vistas de lado com grade, para achar janelas)
@@ -51,6 +54,18 @@ CFG: dict[str, dict] = {
         "half_m": 0.006,
     },
     "sks": {"kind": "entalhe", "rear": (0.415, 0.44), "front": (0.03, 0.055), "capuz": True},
+    # Armas do Blender com GLB próprio (tools/blender/espingarda.py): só o nó "Arma" (a MeshPart
+    # que recebe os pontos), boca em -Z. "conta": espingarda sem alça; a massa é a conta de latão
+    # na boca e a "alça" é o topo de trás da caixa da culatra (o olho alinha a conta com ele).
+    "win12": {
+        "kind": "conta",
+        "glb": ROOT / "assets/blender/arma_win12/arma_win12.glb",
+        "no": "Arma",
+        "forward": "-Z",
+        "rear": (0.646, 0.666),  # d 0,335–0,355 m da soleira: o topo plano da caixa da culatra
+        "front": (0.012, 0.028),  # a conta (d 0,983 m) sobre o anel do adaptador de baioneta
+        "half_m": 0.004,
+    },
 }
 # M60, RPD, M79, pistolas e RPG-2 seguem com a linha de visada da D-60 (tools/weapon_landmarks.py):
 # na M60 a fatia da alça (u 0,705–0,73, até 11 cm acima do cano) não mostrou furo fechado.
@@ -59,7 +74,9 @@ PX_M = 0.0002  # 0,2 mm por pixel na fatia
 POST_HALF_M = 0.003  # meia largura da faixa da massa
 
 
-def load_tris(path: Path) -> tuple[np.ndarray, np.ndarray]:
+def load_tris(path: Path, so_no: str | None = None) -> tuple[np.ndarray, np.ndarray]:
+    """Triângulos do GLB no espaço da MeshPart (giro de 180° em Y, centro da caixa). Com `so_no`,
+    só a malha desse nó (o modelo do Blender tem as peças móveis em nós à parte)."""
     data = path.read_bytes()
     off = 12
     js: dict | None = None
@@ -104,7 +121,7 @@ def load_tris(path: Path) -> tuple[np.ndarray, np.ndarray]:
             m[:3, :3] = r * np.array(n.get("scale", [1, 1, 1]))
             m[:3, 3] = n.get("translation", [0, 0, 0])
         world = parent @ m
-        if "mesh" in n:
+        if "mesh" in n and (so_no is None or n.get("name") == so_no):
             for prim in js["meshes"][n["mesh"]]["primitives"]:
                 p = acc(prim["attributes"]["POSITION"]).astype(np.float64)
                 pts.append((np.c_[p, np.ones(len(p))] @ world.T)[:, :3])
@@ -126,8 +143,12 @@ class Arma:
 
     def __init__(self, key: str):
         self.key = key
-        fwd = FORWARD[key]
-        mesh, self.tri = load_tris(MODELS / f"{key}_studs.glb")
+        cfg = CFG.get(key, {})
+        fwd = cfg.get("forward") or FORWARD[key]
+        if "glb" in cfg:  # arma do Blender: GLB próprio, só o nó da arma
+            mesh, self.tri = load_tris(cfg["glb"], cfg.get("no"))
+        else:
+            mesh, self.tri = load_tris(MODELS / f"{key}_studs.glb")
         self.rot = ry(yaw_fix(mesh, fwd))
         self.p = mesh @ self.rot.T
         self.ax = 0 if fwd[1] == "X" else 2
@@ -206,6 +227,22 @@ def medir(key: str, cfg: dict) -> dict:
             raise SystemExit(f"{key}: nenhum furo fechado na janela da alça {cfg['rear']}")
         rear = (melhor[1], melhor[2])
         out["furo_mm"] = round(2 * np.sqrt(melhor[3] / np.pi) * PX_M * 1000, 2)
+    elif cfg["kind"] == "conta":
+        # sem alça: o ponto mais alto perto do plano do cano (topo da caixa da culatra)
+        topo = np.full(w, np.nan)
+        for j in range(w):
+            col = np.nonzero(sol[:, j])[0]
+            if len(col):
+                topo[j] = ys[col.min()]
+        meio = np.abs(xs - cfg.get("center_m", 0.0)) < cfg.get("half_m", 0.004)
+        perfil = np.where(meio, topo, np.nan)
+        if np.isnan(perfil).all():
+            OUT_DIR.mkdir(parents=True, exist_ok=True)
+            Image.fromarray((sol * 255).astype(np.uint8)).save(OUT_DIR / f"{key}_alca.png")
+            raise SystemExit(f"{key}: nada perto do plano do cano na janela {cfg['rear']}")
+        y_top = float(np.nanmax(perfil))
+        cols = np.nonzero(meio & (topo >= y_top - 0.0002))[0]
+        rear = (float(xs[cols].mean()), y_top)
     else:
         topo = np.full(w, np.nan)
         for j in range(w):
@@ -250,6 +287,25 @@ def medir(key: str, cfg: dict) -> dict:
     front_y = float(ys[topo_f])
     jcols = np.nonzero(colf & solf[topo_f])[0]
     front_x = float(xs[jcols].mean())
+    if cfg["kind"] == "conta":
+        # diâmetro da conta: a largura sólida contínua em volta do centro, no meio da conta
+        # (a até 3,5 mm abaixo do topo, a maior largura achada antes de chegar ao anel)
+        larg = 0.0
+        jc = int(np.argmin(np.abs(xs - front_x)))
+        for dk in range(1, int(0.0035 / PX_M)):
+            linha = solf[min(topo_f + dk, h - 1)]
+            if not linha[jc]:
+                break
+            j0 = jc
+            while j0 > 0 and linha[j0 - 1]:
+                j0 -= 1
+            j1 = jc
+            while j1 < w - 1 and linha[j1 + 1]:
+                j1 += 1
+            larg = max(larg, (j1 - j0 + 1) * PX_M)
+            if larg > 0.008:  # já é o anel do adaptador
+                break
+        out["conta_mm"] = round(larg * 1000, 2)
     # posição ao longo do cano: média dos u dos vértices da massa perto do topo
     tu = a.u
     near = (

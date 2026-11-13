@@ -20,8 +20,12 @@ export type BuildDef = {
 	minEnemyM: number, -- distância mínima de inimigos vivos
 	nearSupplyM: number?, -- precisa de caixote a esta distância (nil = não precisa)
 	limit: number, -- por facção
+	faction: string?, -- só deste lado (nil = os dois)
 }
 
+-- D-108 (classes mais simples): o engenheiro e o sapador viraram o Suporte; o morteiro, o comandante
+-- (pede o tiro) e o suporte (constrói a posição). A "Caixa de munição" construída com suprimento saiu:
+-- a caixa agora é a do Suporte (Shared/CaixaMunicao), sem custo, pega ao passar perto.
 Logistics.BUILDS = {
 	garrison = {
 		id = "garrison",
@@ -36,7 +40,7 @@ Logistics.BUILDS = {
 		id = "mg_nest",
 		name = "Ninho de metralhadora (sacos de areia)",
 		cost = 30,
-		role = { engineer = true, squad_leader = true },
+		role = { support = true, squad_leader = true },
 		minEnemyM = 60,
 		nearSupplyM = 50,
 		limit = 6,
@@ -45,40 +49,38 @@ Logistics.BUILDS = {
 		id = "mortar_pit",
 		name = "Posição de morteiro",
 		cost = 40,
-		role = { mortar = true },
+		role = { support = true, commander = true },
 		minEnemyM = 200,
 		nearSupplyM = nil,
 		limit = 2,
 	},
-	ammo = {
-		id = "ammo",
-		name = "Caixa de munição",
-		cost = 20,
-		role = { squad_leader = true, engineer = true },
-		minEnemyM = 60,
-		nearSupplyM = 50,
-		limit = 6,
-	},
-	-- armadilhas VC (Parte 11): só o sapador; escondidas, sem caixote por perto
+	-- armadilhas VC (Parte 11): só o suporte do VC (era o sapador); escondidas, sem caixote por perto
 	punji = {
 		id = "punji",
 		name = "Estacas punji (armadilha)",
 		cost = 10,
-		role = { sapper = true },
+		role = { support = true },
 		minEnemyM = 40,
 		nearSupplyM = nil,
 		limit = 20,
+		faction = "VC",
 	},
 	tripwire = {
 		id = "tripwire",
 		name = "Granada com fio (armadilha)",
 		cost = 15,
-		role = { sapper = true },
+		role = { support = true },
 		minEnemyM = 40,
 		nearSupplyM = nil,
 		limit = 12,
+		faction = "VC",
 	},
 } :: { [string]: BuildDef }
+
+-- O papel deste lado pode fazer a obra? (a lista da roda de construir usa a mesma regra)
+function Logistics.roleCan(b: BuildDef, role: string?, faction: string?): boolean
+	return role ~= nil and b.role[role] == true and (b.faction == nil or b.faction == faction)
+end
 
 -- capacidade de caixotes por veículo (design): LVTP-5 traz da praia, UH-34D lança de cima
 Logistics.CARRY = { lvtp5 = 3, uh34d = 2, m48a3 = 0, ontos = 0 }
@@ -131,6 +133,9 @@ function Logistics.canBuild(
 	end
 	if not b.role[role] then
 		return false, "papel não pode construir"
+	end
+	if b.faction and b.faction ~= faction then
+		return false, "construção do outro lado"
 	end
 	if count >= b.limit then
 		return false, "limite atingido"

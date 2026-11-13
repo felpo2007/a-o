@@ -68,6 +68,9 @@ Net.Events = {
 	-- campanha: missões, passe, mercado, reforços, medalhas, cartão, vantagens (2026-11-12)
 	"Campanha_State", -- s->c: estado inteiro (Controllers/CampanhaCliente); traz result do último pedido
 	"Campanha_Action", -- c->s { op, ... }: reroll, claim_mission, claim_level, claim_all, market_buy...
+	-- D-108: caixa de munição do Suporte (Modules/CaixaMunicaoService + Controllers/CaixaMunicao.client)
+	"Caixa_Por", -- c->s { x, y, z, yaw }: pôr a caixa ali (o servidor confere tudo)
+	"Caixa_Aviso", -- s->c { msg, ok?, w? }: recusa, caixa posta ou o que pegou da caixa
 }
 Net.Unreliable = {
 	"Combat_Tracer", -- s->c: traçantes/efeitos de outros jogadores

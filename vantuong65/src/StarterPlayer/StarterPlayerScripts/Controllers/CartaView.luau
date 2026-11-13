@@ -1824,6 +1824,65 @@ local function drawWaypoints()
 	end
 end
 
+-- D-108: caixas de munição do Suporte do próprio lado (Workspace.CaixasMunicao): ▣ latão com o
+-- estoque, a cada quadro da carta (são poucas: uma por suporte)
+local caixaW: { [Instance]: Frame } = {}
+function CartaView.drawCaixas()
+	if not S.mounted then
+		return
+	end
+	local layer = S.layers.marcas
+	local folder = Workspace:FindFirstChild("CaixasMunicao")
+	local mine = myFaction()
+	local seen: { [Instance]: boolean } = {}
+	if folder and mine then
+		for _, m in folder:GetChildren() do
+			if m:IsA("Model") and m:GetAttribute("Faction") == mine then
+				seen[m] = true
+				local f = caixaW[m]
+				if not f then
+					local nf = Instance.new("Frame")
+					nf.Name = "CaixaMunicao"
+					nf.AnchorPoint = Vector2.new(0.5, 0.5)
+					nf.Size = UDim2.fromOffset(20, 20)
+					nf.BackgroundTransparency = 1
+					nf.ZIndex = 3
+					nf.Parent = layer
+					local g = label(nf, "▣", 17, COR.latao, Enum.Font.GothamBold)
+					g.AnchorPoint = Vector2.new(0.5, 0.5)
+					g.Position = UDim2.fromScale(0.5, 0.5)
+					g.TextStrokeColor3 = V.BG
+					g.TextStrokeTransparency = 0
+					g.ZIndex = 3
+					local t = label(nf, "", 12, V.TEXT, F.TITLE_MED)
+					t.Name = "Estoque"
+					t.AnchorPoint = Vector2.new(0, 0.5)
+					t.Position = UDim2.new(1, 2, 0.5, 0)
+					t.TextStrokeColor3 = V.BG
+					t.TextStrokeTransparency = 0.2
+					t.ZIndex = 3
+					caixaW[m] = nf
+					f = nf
+				end
+				local p = (m :: Model):GetPivot().Position
+				local u, v = uv(p.X, p.Z)
+				local fr = f :: Frame
+				fr.Position = UDim2.fromScale(u, v)
+				local t = fr:FindFirstChild("Estoque") :: TextLabel?
+				if t then
+					t.Text = string.format("%d", tonumber(m:GetAttribute("Stock")) or 0)
+				end
+			end
+		end
+	end
+	for m, f in caixaW do
+		if not seen[m] then
+			f:Destroy()
+			caixaW[m] = nil
+		end
+	end
+end
+
 -- você: ponto com a seta do rumo (para onde a câmera olha)
 local function drawMe()
 	local layer = S.layers.voce
@@ -1989,6 +2048,7 @@ function CartaView.step(dt: number, pad: boolean)
 	end
 	fadeMarks()
 	drawWaypoints()
+	CartaView.drawCaixas()
 	drawMe()
 end
 
@@ -2142,6 +2202,7 @@ function CartaView.buildLegend(parent: Instance, x: number, y: number, w: number
 	row(glyph("◆", COR.mine), "Sua marca")
 	row(glyph("★", COR.lead), "Marca do líder")
 	row(glyph("×", COR.neutro), "Marca do squad")
+	row(glyph("▣", COR.latao), "Caixa de munição") -- D-108
 	-- só o VC vê os túneis (a linha some para os EUA; updateLegend acompanha o lado)
 	local tunnelRow = row(line(COR.tunel, 2), "Túnel")
 	tunnelRow.Visible = myFaction() == "VC"

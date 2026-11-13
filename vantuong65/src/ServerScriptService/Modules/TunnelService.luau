@@ -270,8 +270,9 @@ function TunnelService.start()
 			prompt.RequiresLineOfSight = false
 			prompt.Parent = p
 			prompt.Triggered:Connect(function(player: Player)
-				-- só engenheiro dos EUA (a carga é placeholder até os explosivos da F4)
-				if player:GetAttribute("Faction") == "US" and player:GetAttribute("Role") == "engineer" then
+				-- só o suporte dos EUA (D-108: era o engenheiro; a carga é placeholder até os explosivos)
+				local role = player:GetAttribute("Role")
+				if player:GetAttribute("Faction") == "US" and (role == "support" or role == "engineer") then
 					collapse(id, p)
 				end
 			end)

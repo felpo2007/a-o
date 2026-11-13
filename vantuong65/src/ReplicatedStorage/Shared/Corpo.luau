@@ -9,7 +9,7 @@
 -- posição no jogo. As animações seguem sem regravar: o Animator escala a translação da Root por
 -- HipHeight / AuthoredHipHeight, e o HipHeight cresce junto com o corpo (PostureService.DROP e
 -- MIN_HIP também foram multiplicados por K).
--- Armas e facas ficam no tamanho real (a M14 continua com 1,126 m).
+-- Armas e facas ficavam no tamanho real (a M14 com 1,126 m); D-108: crescem ARMA_K (abaixo).
 local Corpo = {}
 
 Corpo.HEIGHT_M = 2.0 -- altura do soldado no jogo (decisão do dono)
@@ -43,6 +43,20 @@ Corpo.KX = if Corpo.FORMATO == "bloco" then Corpo.BLOCK_SCALE else Corpo.K
 -- largura do braço, 40 cm no soldado de 2 m, e engolia o punho e o guarda-mão da arma de tamanho real
 -- (foto do dono, 2026-11-13: "mãos enormes"). 0,55 = 22 cm. PLACEHOLDER: conferir no Studio.
 Corpo.MAO_K = if Corpo.FORMATO == "bloco" then 0.55 else 1
+
+-- ===== armas maiores (D-108) =====
+-- Pedido do dono (2026-11-13): "aumente o tamanho das armas tanto em primeira pessoa como em 3ª
+-- pessoa, estão pequenas". Comprimento da arma / altura do soldado: aqui M14 1,126 / 2,04 m = 0,55;
+-- fuzileiro real 1,126 / 1,75 = 0,64; Front 44 (arma 1,3x num boneco de 1,43 m) ~1,0. Na grossura o
+-- bloco pesa mais: braço de 40 cm contra a caixa da culatra de 5 cm (8 : 1; no Front 44, com a arma
+-- 1,3 x 1,5 mais grossa, ~3 : 1). ARMA_K = 1,4 fica entre o real e o Front 44, sem caricatura.
+-- - 1ª pessoa: arma, mãos, faca, granada e itens ARMA_K vezes maiores (WeaponVisuals, Maos1P);
+-- - 3ª pessoa: a arma engrossa ARMA_K (largura e altura), a pistola e a granada crescem por inteiro;
+--   o COMPRIMENTO das armas longas fica em ARMA_COMPRIMENTO_3P: com a coronha no ombro, o braço do
+--   boneco de bloco já usa 96% do alcance na M60 (correndo) e passaria de 97% com 5% a mais
+--   (tests/luau/pegada.luau). PLACEHOLDER: conferir no Studio.
+Corpo.ARMA_K = 1.4
+Corpo.ARMA_COMPRIMENTO_3P = 1.0
 
 -- Rostos de época (tools/rostos/make_rostos.py -> assets/rostos/*.png, decalques da cabeça de bloco).
 -- Ids das imagens publicadas (0 = ainda não subiu; fica o rosto padrão do Roblox, como nos bots do

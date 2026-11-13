@@ -13,6 +13,7 @@ local AfterAction = require(ReplicatedStorage.Shared.AfterAction)
 local Ballistics = require(ReplicatedStorage.Shared.Ballistics)
 local Geometry = require(ReplicatedStorage.Shared.Geometry)
 local MapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any
+local Radio = require(ReplicatedStorage.Shared.Radio)
 local Rng = require(ReplicatedStorage.Shared.Rng)
 local Combatants = require(script.Parent.Combatants)
 local ExplosionService = require(script.Parent.ExplosionService)
@@ -410,7 +411,7 @@ local function radio(): (string, string?)
 	end
 	local role = p:GetAttribute("Role")
 	local has = p:GetAttribute("Radio") == true
-	if role == "radio_operator" then
+	if role == Radio.ROLE then -- D-108: o líder do squad leva o rádio
 		local c = p.Character
 		local ant = c and c:FindFirstChild("RadioAntenna")
 		return if has and ant then "ok" else "FALHA",

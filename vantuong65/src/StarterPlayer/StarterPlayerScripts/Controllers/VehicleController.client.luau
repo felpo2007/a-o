@@ -376,6 +376,8 @@ if RunService:IsStudio() then
 	end)
 end
 
+local LAND_ASSIST_M = 1.5 -- PLACEHOLDER de design: abaixo disto (rodas), soltar o coletivo pousa
+
 local function heliStep(model: Model, chassis: BasePart, dt: number)
 	local S = HeliModel.SPEC
 	local H = VehicleDrive.HELI
@@ -422,14 +424,19 @@ local function heliStep(model: Model, chassis: BasePart, dt: number)
 	end
 	local mass = S.emptyKg + 400 + occ * 100
 	local rotorZ = 400
+	-- cubo do rotor acima das rodas (4,36 m): o igeZ é o cubo com as rodas a 5 ft do chão
+	local hubM = S.igeZ - 5 * 0.3048
 	do
 		local r = workspace:Raycast(chassis.Position, Vector3.new(0, -400, 0), rays.solid)
-		local hub = chassis.Position.Y + (S.igeZ - 1.52) / M - chassis.Size.Y / 2
+		local hub = chassis.Position.Y + hubM / M - chassis.Size.Y / 2
 		if r then
 			rotorZ = (hub - r.Position.Y) * M
 		end
 	end
-	local gearH = rotorZ - S.igeZ -- altura das rodas
+	-- altura das rodas (fundo do chassi = fundo das rodas). Pedido do dono (2026-11-13: "helicópteros
+	-- flutuando no chão"): era rotorZ − igeZ, a altura das rodas menos os 5 ft do pairado IGE; o pouso
+	-- parava com as rodas a 1,81 m do chão (medido no Studio) e ficava ali enquanto houvesse piloto
+	local gearH = rotorZ - hubM
 	local V = Vector3.new(heli.vel.X, 0, heli.vel.Z).Magnitude
 	-- v39: sem pedais na tela do toque: devagar, o analógico de lado vira o nariz; rápido, inclina
 	local touchPedal = 0
@@ -458,8 +465,12 @@ local function heliStep(model: Model, chassis: BasePart, dt: number)
 		tr += math.clamp(localV.X * 0.02, -0.15, 0.15)
 	end
 	local hover = if pAvail > 0 then pReq / pAvail else nil
+	-- pouso (2026-11-13, "helicópteros flutuando no chão"): sem comando no coletivo, com as rodas a
+	-- menos de LAND_ASSIST_M e devagar, o estabilizador age como no chão (fica abaixo do pairado) e o
+	-- helicóptero assenta. Antes ele pairava onde o piloto soltasse a tecla, com as rodas no ar
+	local settle = onGround or (gearH < LAND_ASSIST_M and V < 3)
 	heli.collective =
-		PilotoToque.collectiveAssist(heli.collective, up ~= 0 or lever ~= nil, ctl.assist, hover, onGround, dt)
+		PilotoToque.collectiveAssist(heli.collective, up ~= 0 or lever ~= nil, ctl.assist, hover, settle, dt)
 	L.hover, L.assist = hover, ctl.assist
 	PilotoToque.follow(L, heli.collective)
 	local live = VehicleLive.drive
@@ -501,7 +512,9 @@ local function heliStep(model: Model, chassis: BasePart, dt: number)
 	-- A subida vem do modelo (calibrado em 600 e 1.100 ft/min, D-61); 20 m/s é só rede de segurança.
 	local vy = VehicleDrive.heliVertical(heli.vy, climb, gearH, dt)
 	if onGround then
-		vy = math.max(vy, 0)
+		-- rodas a menos de 0,3 m e sem subida: assenta devagar até encostar, depois fica (antes a
+		-- descida parava ali e o helicóptero pairava com as rodas no ar)
+		vy = if gearH > 0.03 then math.clamp(vy, -0.6, -0.3) else math.max(vy, 0)
 	end
 	heli.vy = math.clamp(vy, -10, 20)
 	heli.vel = Vector3.new(hv.X, heli.vy, hv.Z)

@@ -419,14 +419,14 @@ function FieldService.start()
 			local gf, gs = p:GetAttribute("GearFrags"), p:GetAttribute("GearSmokes")
 			local kf, ks = p:GetAttribute("KitFrags"), p:GetAttribute("KitSmokes")
 			-- + vantagem "Bolsos Extras" (Vant_grenades, gravada pelo servidor com a posse do passe)
-			p:SetAttribute(
-				"Frags",
-				Weapons.grenadesFor(
-					if type(kf) == "number" then kf else nil,
-					if type(gf) == "number" then gf else nil,
-					Vantagens.extra(p, "grenades")
-				)
+			local frags = Weapons.grenadesFor(
+				if type(kf) == "number" then kf else nil,
+				if type(gf) == "number" then gf else nil,
+				Vantagens.extra(p, "grenades")
 			)
+			p:SetAttribute("Frags", frags)
+			-- D-108: a caixa de munição do Suporte devolve granadas até as do nascimento
+			p:SetAttribute("FragsMax", frags)
 			p:SetAttribute(
 				"Smokes",
 				(if type(ks) == "number" then ks else 1) + (if type(gs) == "number" then gs else 0)

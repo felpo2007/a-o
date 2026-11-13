@@ -24,6 +24,8 @@ local GrenadeArt = require(ReplicatedStorage.Shared.GrenadeArt)
 local ItemAnim = require(ReplicatedStorage.Shared.ItemAnim)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Input = require(script.Parent.Input)
+-- D-108: objeto e granada do tamanho das mãos de 1ª pessoa (Maos1P.scale = Corpo.ARMA_K)
+local Maos1P = require(script.Parent.Maos1P)
 
 local ItemView = {}
 local player = Players.LocalPlayer
@@ -168,7 +170,8 @@ end
 
 -- objeto da mão em 1ª pessoa
 local function prop(kind: string): Model
-	if S.model and S.model.Parent and S.modelKind == kind then
+	local key = kind .. ":" .. Maos1P.scale()
+	if S.model and S.model.Parent and S.modelKind == key then
 		return S.model
 	end
 	if S.model then
@@ -221,8 +224,9 @@ local function prop(kind: string): Model
 	end
 	m.PrimaryPart = main
 	main.PivotOffset = main.CFrame:Inverse() -- pivô na origem do desenho (a mão)
+	m:ScaleTo(Maos1P.scale())
 	m.Parent = camera
-	S.model, S.modelKind = m, kind
+	S.model, S.modelKind = m, key
 	return m
 end
 
@@ -249,7 +253,7 @@ end
 
 local function grenadeModel(kind: string): Model
 	local faction = player:GetAttribute("Faction")
-	local key = kind .. ":" .. tostring(faction)
+	local key = kind .. ":" .. tostring(faction) .. ":" .. Maos1P.scale()
 	if G.model and G.model.Parent and G.key == key then
 		return G.model
 	end
@@ -257,6 +261,7 @@ local function grenadeModel(kind: string): Model
 		G.model:Destroy()
 	end
 	local m = GrenadeArt.hand(kind, if type(faction) == "string" then faction else nil)
+	m:ScaleTo(m:GetScale() * Maos1P.scale())
 	m.Name = "VT65Item1P" -- o WeaponVisuals leva junto no inclinar (lista FOLLOW)
 	G.pins = {}
 	for _, d in m:GetDescendants() do
@@ -279,7 +284,7 @@ end
 local function dropRing(at: Vector3)
 	local ring = Instance.new("Part")
 	ring.Shape = Enum.PartType.Cylinder
-	ring.Size = Vector3.new(0.004, 0.024, 0.024) / M
+	ring.Size = Vector3.new(0.004, 0.024, 0.024) * Maos1P.scale() / M
 	ring.Color = Color3.fromRGB(150, 138, 104)
 	ring.Material = Enum.Material.Metal
 	ring.CanCollide, ring.CanQuery, ring.CanTouch, ring.CastShadow = false, false, false, false
@@ -372,8 +377,9 @@ function ItemView.step(_dt: number, firstPerson: boolean): Out
 		out.poseR, out.poseL = "grip", poseL
 		out.cfR = rot + pr
 		out.cfL = cam.Rotation * CFrame.Angles(math.rad(-10), 0, math.rad(15)) + pl
-		out.wristR = pr + rot * (Vector3.new(0, -0.03, 0.05) / M)
-		out.wristL = pl + cam.Rotation * (Vector3.new(0, -0.01, 0.05) / M)
+		local km = Maos1P.scale() / M
+		out.wristR = pr + rot * (Vector3.new(0, -0.03, 0.05) * km)
+		out.wristL = pl + cam.Rotation * (Vector3.new(0, -0.01, 0.05) * km)
 		out.elbowR = cam * ELBOW_R
 		out.elbowL = cam * ELBOW_L
 		if showG then
@@ -434,8 +440,9 @@ function ItemView.step(_dt: number, firstPerson: boolean): Out
 	out.poseR, out.poseL = anim.poseR, anim.poseL
 	out.cfR = rotR + pr
 	out.cfL = rotL + pl
-	out.wristR = pr + rotR * (Vector3.new(0, -0.03, 0.05) / M)
-	out.wristL = pl + rotL * (Vector3.new(0, -0.01, 0.05) / M)
+	local km = Maos1P.scale() / M
+	out.wristR = pr + rotR * (Vector3.new(0, -0.03, 0.05) * km)
+	out.wristL = pl + rotL * (Vector3.new(0, -0.01, 0.05) * km)
 	out.elbowR = cam * ELBOW_R
 	out.elbowL = cam * ELBOW_L
 	-- objeto na mão
@@ -444,13 +451,13 @@ function ItemView.step(_dt: number, firstPerson: boolean): Out
 		local m = prop(p.kind)
 		local at: CFrame
 		if p.kind == "binoculo" then
-			at = cam.Rotation + (pr + pl) / 2 + cam.LookVector * (0.02 / M)
+			at = cam.Rotation + (pr + pl) / 2 + cam.LookVector * (0.02 * km)
 		elseif p.kind == "pa" then
 			at = CFrame.lookAt(pr, pr + (pl - pr).Unit * 2)
 		elseif p.hand == "L" then
-			at = rotL + (pl + rotL * (Vector3.new(0, 0.02, -0.01) / M))
+			at = rotL + (pl + rotL * (Vector3.new(0, 0.02, -0.01) * km))
 		else
-			at = rotR * CFrame.Angles(0, 0, math.rad(90)) + (pr + rotR * (Vector3.new(-0.005, 0.0, -0.01) / M))
+			at = rotR * CFrame.Angles(0, 0, math.rad(90)) + (pr + rotR * (Vector3.new(-0.005, 0.0, -0.01) * km))
 		end
 		m:PivotTo(at)
 	else

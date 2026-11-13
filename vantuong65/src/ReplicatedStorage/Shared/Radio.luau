@@ -4,13 +4,14 @@
 -- Módulo puro: as regras. O RadioService põe a antena nas costas e cuida do rádio caído.
 local Radio = {}
 
-Radio.ROLE = "radio_operator"
-Radio.TTL_S = 300 -- o rádio caído some em 5 min (o squad fica sem link até outro operador nascer)
+-- D-108 (classes mais simples): o operador de rádio saiu; o líder do squad nasce com o rádio.
+Radio.ROLE = "squad_leader"
+Radio.TTL_S = 300 -- o rádio caído some em 5 min (o squad fica sem link até o líder nascer de novo)
 
--- Fala no canal Comando? O comandante sempre; a equipe de morteiro tem a própria rede de tiro;
--- de resto, só quem carrega o rádio.
+-- Fala no canal Comando? O comandante sempre; de resto, só quem carrega o rádio (D-108: a equipe de
+-- morteiro saiu; o tiro de morteiro é do comandante).
 function Radio.canTalkToCommand(role: string?, carriesRadio: boolean): boolean
-	return role == "commander" or role == "mortar" or carriesRadio
+	return role == "commander" or carriesRadio
 end
 
 -- Nasce com o rádio?

@@ -34,6 +34,7 @@ local RunService = game:GetService("RunService")
 
 local BotBrain = require(ReplicatedStorage.Shared.BotBrain)
 local BotMove = require(ReplicatedStorage.Shared.BotMove)
+local CaixaMunicao = require(ReplicatedStorage.Shared.CaixaMunicao)
 local MapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any
 local Rng = require(ReplicatedStorage.Shared.Rng)
 local Smoke = require(ReplicatedStorage.Shared.Smoke)
@@ -49,6 +50,7 @@ local BotTunnels = require(script.Parent.BotTunnels)
 local BotTypes = require(script.Parent.BotTypes)
 local BotVehicles = require(script.Parent.BotVehicles)
 local BotWorld = require(script.Parent.BotWorld)
+local CaixaMunicaoService = require(script.Parent.CaixaMunicaoService)
 local Characters = require(script.Parent.Characters)
 local CombatService = require(script.Parent.CombatService)
 local Combatants = require(script.Parent.Combatants)
@@ -92,6 +94,9 @@ end
 function BotService.list(): { Bot }
 	return bots
 end
+
+-- D-108: papel pelo lugar no squad de 6 de bots (o 1º é o líder)
+BotService.ROLE_BY_SLOT = { "squad_leader", "rifleman", "support", "rifleman", "sniper", "machine_gunner" }
 
 -- 2026-11-12: põe (sid) ou tira (nil) o bot de um squad de JOGADOR (BotEscolta: os bots completam o
 -- squad do jogador até 4). O atributo SquadId do modelo liga o "nascer no companheiro" (SpawnService)
@@ -144,10 +149,17 @@ local function between(r: { number }, roll: number): number
 end
 
 -- zera o estado de uma vida nova (chamado no spawn)
+-- D-108: munição de sobra do bot pela dotação (a do jogador: Weapons.MAGS; espingarda em cartuchos)
+local function fullSpare(bot: Bot): number
+	local wp = bot.weapon
+	return CaixaMunicao.spareFull(Weapons.MAGS[wp.kind] or 3, wp.magazine, wp.feed == "tube")
+end
+
 local function resetLife(bot: Bot)
 	local now = os.clock()
 	bot.life += 1
 	bot.mag = bot.weapon.magazine
+	bot.spare, bot.dryAt, bot.boxCheckAt = fullSpare(bot), nil, 0
 	bot.reloadUntil, bot.nextVolley, bot.firing = 0, 0, false
 	bot.target, bot.reactAt, bot.trackSince = nil, 0, 0
 	bot.noticeTarget, bot.noticeAcc, bot.heardPos, bot.heardAt = nil, 0, nil, -math.huge
@@ -372,10 +384,17 @@ local function newBot(faction: string): Bot
 			idx += 1
 		end
 	end
-	-- squad de 6: líder, 4 fuzileiros e a metralhadora
-	local role = if idx % 6 == 5 then "machine_gunner" elseif idx % 6 == 0 then "squad_leader" else "rifleman"
-	local wid = Roles.loadout[faction][role][1]
-	local wp = Weapons.get(wid) :: Weapons.Weapon
+	-- squad de 6 (D-108, classes mais simples): líder, fuzileiro, suporte (caixa de munição), fuzileiro
+	-- (nos EUA, em squad ímpar, com a espingarda), atirador de elite (squad par; fuzileiro no ímpar) e
+	-- metralhador
+	local slot, squadN = idx % 6, idx // 6
+	local role = BotService.ROLE_BY_SLOT[slot + 1]
+	if role == "sniper" and squadN % 2 == 1 then
+		role = "rifleman"
+	end
+	local primary = if faction == "US" and slot == 3 and squadN % 2 == 1 then "win12" else nil
+	local lo = Roles.loadoutFor(faction, role, primary) or Roles.loadout[faction].rifleman
+	local wp = Weapons.get(lo[1]) :: Weapons.Weapon
 	local diff = BotBrain.DIFFICULTY.medium
 	local bot: Bot = {
 		id = nextId,
@@ -389,6 +408,9 @@ local function newBot(faction: string): Bot
 		spawning = false,
 		life = 0,
 		mag = wp.magazine,
+		spare = CaixaMunicao.spareFull(Weapons.MAGS[wp.kind] or 3, wp.magazine, wp.feed == "tube"),
+		dryAt = nil,
+		boxCheckAt = 0,
 		reloadUntil = 0,
 		nextVolley = 0,
 		firing = false,
@@ -1008,9 +1030,26 @@ local function aimPart(target: Model): BasePart?
 end
 
 local function startReload(bot: Bot, now: number)
+	-- D-108: sem munição de sobra, não recarrega (vai à caixa do Suporte; sem caixa, depois de
+	-- BOT_CATAR_S acha 1 carregador dos caídos)
+	if bot.spare <= 0 then
+		bot.dryAt = bot.dryAt or now
+		if now - (bot.dryAt :: number) < CaixaMunicao.BOT_CATAR_S then
+			return
+		end
+		bot.spare = if bot.weapon.feed == "tube" then bot.weapon.magazine else 1
+		bot.dryAt = nil
+	end
 	-- mesma recarga do jogador (Weapons.reloadTime; 2026-11-13 ficou mais curta, fuzil 2,4 s)
-	bot.reloadUntil = now + Weapons.reloadTime(bot.weapon)
-	bot.mag = bot.weapon.magazine
+	bot.reloadUntil = now + Weapons.reloadTime(bot.weapon, nil, bot.mag, bot.spare)
+	if bot.weapon.feed == "tube" then
+		local n = Weapons.tubeShells(bot.weapon, bot.mag, bot.spare)
+		bot.spare -= n
+		bot.mag += n
+	else
+		bot.spare -= 1
+		bot.mag = bot.weapon.magazine
+	end
 end
 
 -- D-107: métrica do primeiro tiroteio de bots na partida (meta do dono: nos primeiros 3 min). Fica em
@@ -1111,6 +1150,11 @@ local function tryFire(bot: Bot, target: Model, now: number, distStuds: number?)
 		return false
 	end
 	if distStuds and not BotBrain.inRange(bot.diff, bot.weapon.kind, distStuds * M) then
+		return false
+	end
+	-- D-108: espingarda só de perto (Weapons.effectiveM)
+	local eff = bot.weapon.effectiveM
+	if distStuds and eff and distStuds * M > eff then
 		return false
 	end
 	local aim = aimPart(target)
@@ -1651,6 +1695,49 @@ local function combat(
 	end
 end
 
+-- ===== caixa de munição do Suporte (D-108) =====
+-- Sem munição de sobra e com pouco no carregador: vai à caixa do lado mais perto (a até
+-- CaixaMunicao.BOT_BUSCA_M); ao chegar, o CaixaMunicaoService reabastece (botRefill).
+local function seekBox(bot: Bot, model: Model, root: BasePart): boolean
+	if not CaixaMunicao.botWants(bot.spare, bot.mag, bot.weapon.magazine) then
+		return false
+	end
+	local b = CaixaMunicaoService.nearest(bot.faction, root.Position, CaixaMunicao.BOT_BUSCA_M)
+	if not b then
+		return false
+	end
+	local to = Vector3.new(b.x, b.y, b.z)
+	setStance(model, "stand")
+	if flat(root.Position, to) * M > 60 then
+		BotLocomotion.goFar(bot, to, "jog", { tolerance = 1.2 / M })
+	else
+		BotLocomotion.go(bot, to, "jog", { tolerance = 1.2 / M })
+	end
+	return true
+end
+
+-- O bot suporte põe a caixa atrás de si quando o squad chegou ao lugar (fora da marcha), se a dele
+-- está longe (CaixaMunicao.BOT_LONGE_M) e a espera de pôr outra passou.
+local function supportBox(bot: Bot, root: BasePart, now: number)
+	if bot.role ~= "support" or now < bot.boxCheckAt or BotSquads.phase(bot) == "move" then
+		return
+	end
+	bot.boxCheckAt = now + 5
+	local owner = "b:" .. bot.id
+	if CaixaMunicaoService.sinceLast(owner) < CaixaMunicao.RECARGA_S then
+		return
+	end
+	local mine = CaixaMunicaoService.ownerBox(owner)
+	if mine and flat(root.Position, Vector3.new(mine.x, mine.y, mine.z)) * M < CaixaMunicao.BOT_LONGE_M then
+		return
+	end
+	local at = root.Position - root.CFrame.LookVector * (1.5 / M)
+	local gy = SpawnService.groundY(at.X, at.Z)
+	-- a frente da caixa (−Z) para o bot: ela fica atrás dele, então o mesmo rumo dele
+	local _, ry = root.CFrame:ToOrientation()
+	CaixaMunicaoService.place(owner, bot.faction, Vector3.new(at.X, gy, at.Z), ry, nil)
+end
+
 -- Perto do objetivo: o lugar de cada um (arco de defesa ou dentro do raio no ataque), abrigo virado
 -- para o inimigo e espera de olho (emboscada). Longe: segue o squad. Logo depois de um combate,
 -- fica um tempo no abrigo (o VC, bem mais).
@@ -1658,6 +1745,11 @@ local function calm(bot: Bot, model: Model, hum: Humanoid, root: BasePart, head:
 	if BotVehicles.calm(bot, model, root) then
 		return
 	end
+	-- D-108: munição na caixa do Suporte; o suporte põe a dele
+	if seekBox(bot, model, root) then
+		return
+	end
+	supportBox(bot, root, now)
 	-- EUA: acham e granadeiam as bocas de túnel (não para o resto)
 	BotTunnels.suspect(bot, model, root, head, now)
 	-- D-107: o ponto forte do squad (papel na frente), não mais o do lado
@@ -2000,6 +2092,10 @@ local function think(bot: Bot, now: number)
 		bot.stillSince = nil
 	elseif not bot.stillSince then
 		bot.stillSince = now
+	end
+	-- D-108: sem munição nenhuma no meio do combate, corre para a caixa do Suporte (se há uma perto)
+	if threat and bot.mag <= 0 and bot.spare <= 0 and not bot.tunnel and seekBox(bot, model, root) then
+		return
 	end
 	if threat and not (bot.tunnel and bot.tunnel.phase == "approach") then
 		if not bot.inCombat then
@@ -2390,6 +2486,28 @@ function BotService.start()
 	BotTypes.hooks.objective = objectivePos
 	BotTypes.hooks.bots = function(): { Bot }
 		return bots
+	end
+	-- D-108: caixa de munição do Suporte (CaixaMunicaoService): o bot pega como o jogador
+	local function botOf(model: Model): Bot?
+		for _, b in bots do
+			if b.model == model then
+				return b
+			end
+		end
+		return nil
+	end
+	CaixaMunicaoService.botNeeds = function(model: Model): boolean
+		local b = botOf(model)
+		return b ~= nil and (b.spare < fullSpare(b) or b.grenades > 0)
+	end
+	CaixaMunicaoService.botRefill = function(model: Model): boolean
+		local b = botOf(model)
+		if not b then
+			return false
+		end
+		b.spare, b.dryAt = fullSpare(b), nil
+		b.grenades = math.max(b.grenades - CaixaMunicao.GRANADAS, 0)
+		return true
 	end
 	BotWorld.start()
 	BotLocomotion.start()

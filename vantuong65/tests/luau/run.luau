@@ -287,7 +287,9 @@ test("TerrainBuilder (WriteVoxels simulado): dimensões, ocupação e cume da Co
 						for iy = 1, sy do
 							local o = occs[ix][iy][iz]
 							if o > 0 and mats[ix][iy][iz] ~= roblox.Enum.Material.Water then
-								topAtHill = math.max(topAtHill, minP.Y + (iy - 1) * 4 + o * 4)
+								-- superfície que o Roblox desenha (medida no Studio, 2026-11-13)
+								topAtHill =
+									math.max(topAtHill, TerrainBuilder.surfaceOf(minP.Y + (iy - 1) * 4, o, false))
 							end
 						end
 					end
@@ -308,6 +310,23 @@ test("TerrainBuilder (WriteVoxels simulado): dimensões, ocupação e cume da Co
 	})
 	assert(n >= 1 and calls == n, "blocos escritos")
 	near(topAtHill * 0.28, 30.0, 1.5, "topo do voxel no cume")
+end)
+
+-- Achado no Studio (2026-11-13, "conserte tudo que esteja flutuando"): o chão saía 2 studs acima do
+-- plano em todo o mapa (o Roblox desenha meio voxel acima da conta linear). Coluna cheia até h: a
+-- superfície desenhada fica em h, também na divisa de voxel.
+test("TerrainBuilder: a superfície do chão que o Roblox desenha fica na altura do plano", function()
+	local TerrainBuilder = require("../../src/ServerStorage/VT65Build/TerrainBuilder")
+	for _, h in { 40, 41, 42, 42.5, 43, 43.99, 44, 45.3, -10.7 } do
+		local top = -math.huge
+		for vb = -40, 80, 4 do
+			local o = TerrainBuilder.groundOcc(h, vb)
+			if o > 0 then
+				top = math.max(top, TerrainBuilder.surfaceOf(vb, o, false))
+			end
+		end
+		near(top, h, 1e-6, "superfície para h = " .. h)
+	end
 end)
 
 test("TerrainBuilder: o riacho tem água no leito e o espelho não passa da margem", function()
@@ -334,10 +353,12 @@ test("TerrainBuilder: o riacho tem água no leito e o espelho não passa da marg
 				for iy = 1, sy do
 					local vb = minP.Y + (iy - 1) * 4
 					local mat, occ = mats[ix][iy][iz], occs[ix][iy][iz]
+					-- superfícies que o Roblox desenha (medidas no Studio, 2026-11-13): o chão fica meio
+					-- voxel acima da conta linear, a água não
 					if occ > 0 and mat ~= roblox.Enum.Material.Water and mat ~= roblox.Enum.Material.Air then
-						groundTop = math.max(groundTop, vb + occ * 4)
+						groundTop = math.max(groundTop, TerrainBuilder.surfaceOf(vb, occ, false))
 					elseif mat == roblox.Enum.Material.Water and occ > 0 then
-						waterTop = math.max(waterTop, vb + occ * 4)
+						waterTop = math.max(waterTop, TerrainBuilder.surfaceOf(vb, occ, true))
 					end
 				end
 				if inBed and waterTop > groundTop then
@@ -447,7 +468,8 @@ test("arrozal: chão plano 5–15 cm abaixo da lâmina em todo ponto amostrado d
 				for iy = 1, sy do
 					local m, o = mats[ix][iy][iz], occs[ix][iy][iz]
 					if o > 0 and m ~= roblox.Enum.Material.Water and m ~= roblox.Enum.Material.Air then
-						top = math.max(top, minP.Y + (iy - 1) * 4 + o * 4)
+						-- superfície que o Roblox desenha (medida no Studio, 2026-11-13)
+						top = math.max(top, TerrainBuilder.surfaceOf(minP.Y + (iy - 1) * 4, o, false))
 					end
 				end
 				tops[key(minP.X + (ix - 0.5) * 4, minP.Z + (iz - 0.5) * 4)] = top

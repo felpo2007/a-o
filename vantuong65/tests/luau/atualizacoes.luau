@@ -35,30 +35,33 @@ test("armadilhas: andar com cuidado reduz a chance; detectada não dispara", fun
 	assert(Traps.triggerChance(3, true) == 0)
 end)
 
-test("armadilhas: só o engenheiro inimigo detecta (perto e devagar) e desarma", function()
-	assert(Traps.detects("engineer", "US", "VC", 5, 0.8))
-	assert(not Traps.detects("engineer", "US", "VC", 8, 0.8), "longe demais")
-	assert(not Traps.detects("engineer", "US", "VC", 5, 3), "correndo não percebe")
-	assert(not Traps.detects("rifleman", "US", "VC", 2, 0), "só o engenheiro")
-	assert(not Traps.detects("engineer", "VC", "VC", 2, 0), "a própria armadilha não conta")
-	assert(Traps.canDisarm("engineer", "US", "VC", true) and not Traps.canDisarm("engineer", "US", "VC", false))
+-- D-108: o engenheiro (EUA) e o sapador (VC) viraram o Suporte
+test("armadilhas: só o suporte inimigo detecta (perto e devagar) e desarma", function()
+	assert(Traps.detects("support", "US", "VC", 5, 0.8))
+	assert(not Traps.detects("support", "US", "VC", 8, 0.8), "longe demais")
+	assert(not Traps.detects("support", "US", "VC", 5, 3), "correndo não percebe")
+	assert(not Traps.detects("rifleman", "US", "VC", 2, 0), "só o suporte")
+	assert(not Traps.detects("support", "VC", "VC", 2, 0), "a própria armadilha não conta")
+	assert(Traps.canDisarm("support", "US", "VC", true) and not Traps.canDisarm("support", "US", "VC", false))
 end)
 
-test("armadilhas: só o sapador constrói, com custo e limite", function()
+test("armadilhas: só o suporte do VC constrói, com custo e limite", function()
 	for _, id in { "punji", "tripwire" } do
 		local b = Logistics.BUILDS[id]
-		assert(b and b.role.sapper and not b.role.engineer and not b.role.squad_leader, id)
+		assert(b and b.role.support and not b.role.squad_leader and b.faction == "VC", id)
 		assert(b.cost > 0 and b.limit > 0 and b.nearSupplyM == nil)
 		assert(Traps.KINDS[id], "regra de " .. id)
+		assert(Logistics.roleCan(b, "support", "VC") and not Logistics.roleCan(b, "support", "US"))
 	end
 	local s = Logistics.new()
-	local ok = Logistics.canBuild(s, "VC", "sapper", "punji", 0, 100, math.huge)
-	assert(ok, "sapador com suprimento e sem inimigo perto deveria construir")
+	local ok = Logistics.canBuild(s, "VC", "support", "punji", 0, 100, math.huge)
+	assert(ok, "suporte com suprimento e sem inimigo perto deveria construir")
 	assert(not Logistics.canBuild(s, "VC", "rifleman", "punji", 0, 100, math.huge))
-	assert(not Logistics.canBuild(s, "VC", "sapper", "punji", 0, 10, math.huge), "inimigo a 10 m")
+	assert(not Logistics.canBuild(s, "US", "support", "punji", 0, 100, math.huge), "armadilha é do VC")
+	assert(not Logistics.canBuild(s, "VC", "support", "punji", 0, 10, math.huge), "inimigo a 10 m")
 end)
 
-test("tutorial do sapador ensina as armadilhas; o do engenheiro, a detecção", function()
+test("tutorial do suporte ensina a caixa de munição e a detecção de armadilhas", function()
 	local function has(role: string, word: string): boolean
 		for _, st in Tutorial.steps(role) do
 			if string.find(st.text, word, 1, true) then
@@ -67,7 +70,7 @@ test("tutorial do sapador ensina as armadilhas; o do engenheiro, a detecção", 
 		end
 		return false
 	end
-	assert(has("sapper", "armadilhas") and has("engineer", "armadilhas inimigas"))
+	assert(has("support", "Caixa de munição") and has("support", "armadilhas inimigas"))
 end)
 
 test("chuva: ~1 partida em 4, nunca nos primeiros 10 min, cabe na partida", function()

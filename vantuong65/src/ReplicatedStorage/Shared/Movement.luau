@@ -132,6 +132,10 @@ Movement.ROLE_KG = {
 	sapper = 2,
 	mortar = 8, -- parte do morteiro e granadas
 	anti_tank = 8, -- lançador e foguetes (a 2ª arma não está em Weapons)
+	-- D-108 (classes mais simples): o líder leva o rádio do squad e o suporte, a caixa de munição e as
+	-- ferramentas. PLACEHOLDER de jogo: o rádio inteiro (10 kg) deixava o líder para trás do squad.
+	squad_leader = 5,
+	support = 6,
 } :: { [string]: number }
 Movement.LOAD_FREE_KG = 15 -- até aqui o peso não muda a velocidade nem o fôlego
 

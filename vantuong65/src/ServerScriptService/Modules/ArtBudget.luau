@@ -78,6 +78,9 @@ ArtBudget.KIND = {
 	sandbag_wall = "prop", -- muro de sacos (o ponto de combustível da base dos EUA)
 	conical_hat = "prop",
 	bamboo_clothesline = "prop",
+	-- caixas de munição do suporte (tools/blender/caixa_municao.py, 2026-11-13)
+	caixa_municao_us = "prop",
+	caixa_municao_vc = "prop",
 	-- bases dos dois lados (Blender, 2026-11-13; Data/Bases): assets/blender/<chave>/metricas.json
 	us_tent_gp_medium = "prop",
 	us_tent_gp_large = "prop",
@@ -193,6 +196,8 @@ ArtBudget.TRIS = {
 	sandbag_wall = 7999,
 	conical_hat = 825,
 	bamboo_clothesline = 2749,
+	caixa_municao_us = 4800,
+	caixa_municao_vc = 3600,
 	-- bases dos dois lados (metricas.json, "novo"; tools/bases_dados.py imprime a lista)
 	us_armor_revetment = 3539,
 	us_bunker = 1744,
@@ -317,6 +322,8 @@ ArtBudget.DIMS = {
 	sandbag_wall = { 7.4, 5.3, 2.28 },
 	conical_hat = { 1.45, 0.68, 1.45 },
 	bamboo_clothesline = { 11.58, 7.18, 2.68 },
+	caixa_municao_us = { 2.66, 1.93, 1.62 },
+	caixa_municao_vc = { 2.52, 1.53, 1.64 },
 	-- bases dos dois lados (metricas.json "dim_studs_xyz"; com cordas e estais das barracas)
 	us_armor_revetment = { 47.14, 5.67, 52.77 },
 	us_bunker = { 14.07, 9.84, 18.71 },

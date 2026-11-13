@@ -148,7 +148,8 @@ for _, wp in Weapons.list do
 			return (t % 0.15) < 0.04
 		end, 1.2)
 		local expect: number
-		if mode == "bolt" then
+		local manual = mode == "bolt" or mode == "pump" -- D-108: a bomba da espingarda segura como o ferrolho
+		if manual then
 			expect = 1 + math.floor(1.2 / iv) -- o ferrolho segura o ritmo; o toque guardado sai logo depois
 		elseif mode == "single" then
 			expect = 1 -- tiro único: carregador de 1
@@ -156,7 +157,7 @@ for _, wp in Weapons.list do
 			expect = math.min(8, wp.magazine)
 		end
 		assert(
-			math.abs(taps.shots - expect) <= (if mode == "bolt" then 1 else 0),
+			math.abs(taps.shots - expect) <= (if manual then 1 else 0),
 			string.format("toques: %d tiros, esperado %d", taps.shots, expect)
 		)
 		assert(taps.accepted == taps.shots, string.format("toques: servidor recusou (%s)", refusedText(taps)))
@@ -223,7 +224,17 @@ test("granadeiro: as duas armas do equipamento estão ligadas (a M79 desligada m
 			end
 		end
 	end
-	assert(Roles.loadout.US.grenadier[1] == "m79" and Roles.loadout.US.grenadier[2] == "m1911")
+	-- D-108: o granadeiro virou a M79 do fuzileiro (arma principal à escolha); todas as escolhas ligadas
+	for _, f in { "US", "VC" } do
+		for role, list in Roles.PRIMARY[f] do
+			for _, id in list do
+				local wp = Weapons.get(id)
+				assert(wp and wp.enabled, role .. ": " .. id)
+			end
+		end
+	end
+	local g = Roles.loadoutFor("US", "rifleman", "m79")
+	assert(g[1] == "m79" and g[2] == "m1911")
 end)
 
 test(
@@ -252,40 +263,37 @@ test(
 	end
 )
 
-test("fuzileiro automático (EUA): papel, 1 por squad, M14 com seletor e bipé, posto do fuzileiro", function()
+-- D-108 (classes mais simples): o fuzileiro automático virou o metralhador dos EUA com a M14
+test("fuzileiro automático -> metralhador com a M14 (EUA): 1 por squad, seletor e bipé, posto livre", function()
 	local Squads = require(S .. "Squads") :: any
 	local Tutorial = require(S .. "Tutorial") :: any
-	local r = Roles.roles.automatic_rifleman
-	assert(r and r.unit == "infantry" and r.maxPerSquad == 1, "papel")
-	assert(Weapons.AUTO_RIFLEMAN == "automatic_rifleman")
-	assert(Roles.loadout.US.automatic_rifleman[1] == "m14", "M14")
-	assert(Roles.loadout.VC.automatic_rifleman == nil, "só dos EUA")
-	assert(Roles.roleAllowedInUnit("US", "automatic_rifleman", "infantry"))
-	assert(not Roles.roleAllowedInUnit("VC", "automatic_rifleman", "infantry"))
-	assert(Roles.minRank("automatic_rifleman") == Roles.minRank("rifleman"), "posto mínimo do fuzileiro")
+	assert(Roles.roles.automatic_rifleman == nil, "o papel saiu")
+	assert(Roles.migrate("automatic_rifleman") == "machine_gunner")
+	assert(select(2, Roles.migrate("automatic_rifleman")) == "m14", "com a M14")
+	assert(Weapons.AUTO_RIFLEMAN == "machine_gunner")
+	assert(table.find(Roles.primaries("US", "machine_gunner"), "m14"), "M14 no metralhador dos EUA")
+	assert(not table.find(Roles.primaries("VC", "machine_gunner"), "m14"), "só dos EUA")
+	assert(Roles.minRank("machine_gunner") == Roles.minRank("rifleman"), "posto mínimo do fuzileiro")
 	-- um por squad
 	local st = Squads.new("US")
 	local sq = Squads.create(st, "infantry", 1, 10) :: any
 	assert(Squads.join(st, sq.id, 2) and Squads.join(st, sq.id, 3))
-	assert(Squads.chooseRole(st, 2, "automatic_rifleman"))
-	local ok, why = Squads.chooseRole(st, 3, "automatic_rifleman")
-	assert(not ok and why == "vaga ocupada", "segundo fuzileiro automático no squad")
-	local vc = Squads.new("VC")
-	local vsq = Squads.create(vc, "infantry", 9, 10) :: any
-	assert(not Squads.chooseRole(vc, 9, "automatic_rifleman") and vsq, "VC sem o papel")
+	assert(Squads.chooseRole(st, 2, "machine_gunner"))
+	local ok, why = Squads.chooseRole(st, 3, "machine_gunner")
+	assert(not ok and why == "vaga ocupada", "segundo metralhador no squad")
 	-- arma: seletor e bipé só nele; M60 e RPD têm bipé integral
 	local m14 = Weapons.get("m14")
-	assert(Weapons.hasBipod(m14, "automatic_rifleman") and not Weapons.hasBipod(m14, "rifleman"))
+	assert(Weapons.hasBipod(m14, "machine_gunner") and not Weapons.hasBipod(m14, "rifleman"))
 	assert(Weapons.hasBipod(Weapons.get("m60"), nil) and Weapons.hasBipod(Weapons.get("rpd"), nil))
 	assert(not Weapons.hasBipod(Weapons.get("type56"), "squad_leader"))
 	local B = Weapons.BIPOD
 	assert(B.prone.kick < B.rested.kick and B.rested.kick < 1 and B.prone.sway < 1, "bipé firma")
 	-- tutorial: campo de tiro e o passo do seletor
-	assert(Tutorial.RIFLE_ROLES.automatic_rifleman, "campo de tiro")
-	local steps = Tutorial.steps("automatic_rifleman")
+	assert(Tutorial.RIFLE_ROLES.machine_gunner, "campo de tiro")
+	local steps = Tutorial.steps("machine_gunner")
 	assert(steps[#steps].action == "fire_mode", "passo do seletor")
-	-- rajada de 1 s da M14 do fuzileiro automático: cadência cíclica (725/min), servidor aceita tudo
-	local rr = run(m14, "auto", "automatic_rifleman", function()
+	-- rajada de 1 s da M14 do metralhador: cadência cíclica (725/min), servidor aceita tudo
+	local rr = run(m14, "auto", "machine_gunner", function()
 		return true
 	end, 1.0)
 	assert(rr.shots >= 12 and rr.shots <= 14 and rr.accepted == rr.shots, rr.shots .. " / " .. rr.accepted)
@@ -570,7 +578,8 @@ test("recuo por tiro (graus de subida da boca, a fórmula do WeaponController)",
 	local out = {}
 	for _, wp in Weapons.list do
 		if wp.enabled then
-			local kick = (wp.bulletMassG / 1000) * wp.muzzleVelocity * 1.5 / wp.massLoadedKg * 0.9
+			-- D-108: a espingarda empurra a carga inteira (9 bagos: chargeG), como no WeaponController
+			local kick = ((wp.chargeG or wp.bulletMassG) / 1000) * wp.muzzleVelocity * 1.5 / wp.massLoadedKg * 0.9
 			assert(kick > 0.5 and kick < 10, wp.id .. string.format(": %.2f°", kick))
 			table.insert(out, string.format("%s %.1f°", wp.id, kick))
 		end

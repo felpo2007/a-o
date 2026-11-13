@@ -27,9 +27,15 @@ end
 test("perfil: só o que existe passa (lado, unidade, squad do lado, papel com arma, ponto)", function()
 	local c = J.sanitize({ f = "US", id = "infantry", sq = "Bravo", role = "medic", pt = "rally:3" })
 	assert(c.f == "US" and c.unit == "infantry" and c.sq == "Bravo" and c.role == "medic" and c.pt == "rally:3")
-	-- lixo: lado, unidade de outro lado, squad inventado, papel sem arma no lado, ponto pago
+	-- lixo: unidade e papel de antes da D-108 viram os de agora; squad de outro lado e ponto pago, não
 	local d = J.sanitize({ f = "VC", id = "armor", sq = "Alfa", role = "automatic_rifleman", pt = "inplace" })
-	assert(d.f == "VC" and d.unit == nil and d.sq == nil and d.role == nil and d.pt == nil)
+	assert(d.f == "VC" and d.unit == "infantry" and d.sq == nil and d.role == "machine_gunner" and d.pt == nil)
+	assert(d.w == nil, "a M14 não é arma do VC")
+	assert(
+		J.sanitize({ f = "VC", id = "x", role = "tank_crew" }).role == "rifleman",
+		"lugar de veículo vira fuzileiro"
+	)
+	assert(J.sanitize({ f = "US", role = "inventado" }).role == nil)
 	assert(next(J.sanitize(nil)) == nil and next(J.sanitize("x")) == nil)
 	assert(J.sanitize({ pt = "quick" }).pt == nil, "o pedido não vira ponto")
 	assert(J.sanitize({ pt = string.rep("a", 80) }).pt == nil, "ponto comprido demais")
@@ -79,12 +85,14 @@ test("squad: o da última vez com vaga; senão o mais cheio da unidade; senão u
 	assert(op == "join" and arg == "VC:Tiểu đội 1")
 end)
 
-test("squad: unidade pesada trancada (time < 16) e nomes esgotados voltam para a infantaria", function()
+test("squad: unidade antiga (blindado) vira infantaria e nomes esgotados não abrem squad", function()
+	-- D-108: só comando e infantaria
 	local last = J.sanitize({ f = "US", id = "armor" })
+	assert(last.unit == "infantry")
 	local op, arg = J.pickSquad("US", {}, last, 5)
-	assert(op == "create" and arg == "infantry", "blindado trancado")
+	assert(op == "create" and arg == "infantry", "blindado virou infantaria")
 	op, arg = J.pickSquad("US", {}, last, Roles.HEAVY_UNLOCK)
-	assert(op == "create" and arg == "armor", "liberado com 16")
+	assert(op == "create" and arg == "infantry")
 	-- todos os squads de infantaria existem e cheios: nada
 	local all = {}
 	for _, n in Roles.units.US.infantry.names do
@@ -97,7 +105,11 @@ end)
 -- ===== 3. papel =====
 test("papel: o da última vez se cabe (vaga, posto, líder); senão fuzileiro; senão o 1º livre", function()
 	local s = { unit = "infantry", leader = 7, roles = { [9] = "medic" } }
-	assert(J.pickRole("US", s, 5, J.sanitize({ f = "US", role = "grenadier" }), 1) == "grenadier")
+	-- D-108: o granadeiro salvo vira o fuzileiro com a M79
+	local g = J.sanitize({ f = "US", role = "grenadier" })
+	assert(g.role == "rifleman" and g.w == "m79")
+	assert(J.pickRole("US", s, 5, g, 1) == "rifleman")
+	assert(J.pickRole("US", s, 5, J.sanitize({ f = "US", role = "support" }), 1) == "support")
 	assert(J.pickRole("US", s, 5, J.sanitize({ f = "US", role = "medic" }), 1) == "rifleman", "médico ocupado")
 	assert(J.pickRole("US", s, 5, J.sanitize({ f = "US", role = "squad_leader" }), 1) == "rifleman", "só o líder")
 	assert(J.pickRole("US", s, 7, J.sanitize({ f = "US", role = "squad_leader" }), 1) == "squad_leader")
@@ -111,11 +123,15 @@ test("papel: o da última vez se cabe (vaga, posto, líder); senão fuzileiro; s
 			1
 		) == "medic"
 	)
-	-- posto: atirador de elite pede 3
-	local recon = { unit = "recon", leader = 5, roles = {} }
-	assert(J.pickRole("US", recon, 5, J.sanitize({ f = "US", role = "sniper" }), 3) == "sniper")
-	assert(J.pickRole("US", recon, 5, J.sanitize({ f = "US", role = "sniper" }), 1) == nil, "observador pede 2")
-	assert(J.pickRole("US", recon, 5, J.sanitize({ f = "US", role = "sniper" }), 2) == "observer")
+	-- D-108: atirador de elite no squad de infantaria, sem posto; 1 por squad; o observador vira ele
+	assert(J.pickRole("US", s, 5, J.sanitize({ f = "US", role = "sniper" }), 1) == "sniper")
+	assert(J.pickRole("US", s, 5, J.sanitize({ f = "US", role = "observer" }), 1) == "sniper")
+	local taken = { unit = "infantry", leader = 7, roles = { [9] = "sniper" } }
+	assert(J.pickRole("US", taken, 5, J.sanitize({ f = "US", role = "sniper" }), 1) == "rifleman", "vaga ocupada")
+	-- posto: o comandante pede 3
+	local cmd = { unit = "command", leader = 5, roles = {} }
+	assert(J.pickRole("US", cmd, 5, J.sanitize({ f = "US", role = "commander" }), 3) == "commander")
+	assert(J.pickRole("US", cmd, 5, J.sanitize({ f = "US", role = "commander" }), 1) == nil, "comandante pede 3")
 end)
 
 -- ===== 4. ponto =====

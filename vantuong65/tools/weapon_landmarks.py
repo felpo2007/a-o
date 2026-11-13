@@ -285,7 +285,13 @@ EYE_ANEL_M = 0.045
 BLENDER = {
     "m70": ROOT / "assets/blender/arma_m70_unertl/pontos.json",
     "mosin": ROOT / "assets/blender/arma_mosin_pu/pontos.json",
+    # Winchester Model 12 Trench Gun (tools/blender/espingarda.py, 2026-11-13): sem ferrolho que
+    # gira; traz a telha que corre (pump, pumpM), a janela de ejeção (eject), a portinhola de carga
+    # (load) e o pino do gatilho (trigger). A mira (conta) é medida na malha pelo sight_align.py.
+    "win12": ROOT / "assets/blender/arma_win12/pontos.json",
 }
+# pontos opcionais das armas do Blender (Vector3 no espaço da malha publicada)
+BLENDER_PONTOS = ("bolt", "pump", "eject", "load", "trigger")
 
 
 def main() -> None:
@@ -295,6 +301,9 @@ def main() -> None:
     from sight_align import CFG, medir  # importa este módulo: só aqui, para não virar ciclo
 
     for k, cfg in CFG.items():
+        if "glb" in cfg and not cfg["glb"].is_file():
+            print("sem medida (GLB do Blender ausente):", k)
+            continue
         try:
             MEDIDAS[k] = medir(k, cfg)
         except SystemExit as e:  # alça não achada: fica a linha de visada da D-60
@@ -310,6 +319,10 @@ def main() -> None:
         '-- sightKind = "anel" ou "entalhe" medido na malha (tools/sight_align.py; "" = sem',
         "-- medida) e sightMm = diâmetro do furo ou fundura do entalhe (mm). bolt = um ponto do",
         "-- eixo do ferrolho (armas do Blender, tools/blender/armas.py: a peça 'Ferrolho' gira).",
+        "-- Espingarda do Blender (tools/blender/espingarda.py): pump = ponto do eixo da peça",
+        "-- 'Telha' (ela e a 'Culatra' recuam pumpM metros, para +Z da malha, e voltam), eject =",
+        "-- janela de ejeção (direita), load = portinhola de carga (embaixo), trigger = pino da",
+        "-- peça 'Gatilho'.",
         "export type Art = {",
         "\tforward: string,",
         "\tyaw: number,",
@@ -324,6 +337,11 @@ def main() -> None:
         "\tsightKind: string,",
         "\tsightMm: number,",
         "\tbolt: Vector3?,",
+        "\tpump: Vector3?,",
+        "\tpumpM: number?,",
+        "\teject: Vector3?,",
+        "\tload: Vector3?,",
+        "\ttrigger: Vector3?,",
         "}",
         "local WeaponArt: { [string]: Art } = {",
     ]
@@ -351,6 +369,12 @@ def main() -> None:
             print("sem pontos (rode tools/blender/armas.py):", key)
             continue
         d = json.loads(caminho.read_text("utf-8"))
+        if key in MEDIDAS:
+            # mira medida na malha (sight_align.py); a da construção fica no pontos.json. O
+            # sightKind fica vazio: o WeaponVisuals só desenha anel e entalhe (a conta é da malha)
+            med = MEDIDAS[key]
+            print(key, "mira medida:", med)
+            d["sight"], d["front"] = med["sight"], med["front"]
         print(key, d)
         lines += [
             f"\t{key} = {{",
@@ -366,9 +390,11 @@ def main() -> None:
             f"\t\teyeM = {d['eyeM']},",
             '\t\tsightKind = "",',
             "\t\tsightMm = 0.0,",
-            f"\t\tbolt = {vec(d['bolt'])},",
-            "\t},",
         ]
+        lines += [f"\t\t{p} = {vec(d[p])}," for p in BLENDER_PONTOS if p in d]
+        if "pumpM" in d:
+            lines.append(f"\t\tpumpM = {d['pumpM']},")
+        lines.append("\t},")
     lines += ["}", "", "return WeaponArt", ""]
     OUT.write_text("\n".join(lines), encoding="utf-8", newline="\n")
     print("escrito", OUT.relative_to(ROOT))

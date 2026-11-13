@@ -3583,3 +3583,53 @@ compra", "gostava mais da tela de carregamento antiga"):
 - No toque: só analógico, coletivo, tiro, LUGAR e SAIR; estabilizador sempre ligado.
 
 **Ambiente** ("retire o vento, está pesando"): `GlobalWind` zerado e o arroz parou de balançar.
+
+## D-108 — Classes simples, Suporte com caixa de munição, espingarda, armas maiores e nada flutuando (v40, 2026-11-13)
+
+Pedidos do dono de 13/11 (14:00–14:05), feitos em 4 frentes. Números novos são PLACEHOLDER.
+
+**Classes** ("faça classes mais simples, tem muitas"; "você já fez a sniper e a classe de sniper?"):
+- De 16 papéis em 7 unidades para 8 papéis em 2 unidades (comando e infantaria). O squad de 6 tem
+  Líder, Médico, Suporte, Metralhador, Antitanque e Atirador de elite (1 de cada) e Fuzileiros.
+  São 9 squads por lado (55 vagas). Só o comandante pede posto (3).
+- O que foi juntado: o granadeiro vira a M79 do fuzileiro; o fuzileiro automático vira a M14 do
+  metralhador; engenheiro, sapador e morteiro viram o Suporte; o rádio vai para o líder; o
+  observador vira o atirador de elite. Tripulante e piloto são só lugar de veículo (D-100).
+- Arma principal à escolha no cartão do papel ("⇄ ARMA", vale no próximo nascimento).
+- Papel e unidade antigos migram (`Roles.migrate`, `migrateUnit`): perfil, JOGAR AGORA e bots.
+
+**Caixa de munição do Suporte** (`Shared/CaixaMunicao`, `CaixaMunicaoService`):
+- Prévia verde ou vermelha com a malha do Blender e a pegada no chão. Até 4 m, rampa até 35°, sem
+  água. Uma por suporte, outra só depois de 30 s.
+- Quem é do lado e passa a 3 m pega sem tecla: reserva cheia, +1 granada e +1 foguete do
+  antitanque. Cada um pega a cada 20 s; 8 pegadas; some em 4 min. XP "Reabastecimento" para quem pôs.
+- Ícone ▣ com o estoque para o time (4 a 250 m) e marca na carta. Bots têm reserva de munição, vão à
+  caixa e o bot suporte põe a caixa.
+- Arte no Blender: `caixa_municao_us` (caixote verde-oliva com latas M19A1, carregadores de M14 e
+  M26, estêncil de 1965) e `caixa_municao_vc` (caixote chinês com carregadores do Tipo 56 e
+  granadas de cabo).
+
+**Espingarda** ("faça a arma doze com sons realistas e dano bom"): Winchester Model 12 Trench Gun
+(`win12`), a do USMC em 1965 (a Ithaca 37 chegou em quantidade só em 1966).
+- 6+1 cartuchos, bomba de 0,7 s, recarga cartucho a cartucho. 9 bagos de 00 por tiro, cada um um
+  raio; os bagos que pegam o mesmo soldado somam. Mata em 1 tiro até ~10 m, em 2 a 20–30 m, em 4 a
+  50 m.
+- Modelo do Blender em 5 peças (Arma, Telha, Culatra, Gatilho, Cartucho), mira de conta medida pelo
+  `sight_align` (tipo "conta"). Sons de disparo, bomba e cartucho do Front 44.
+
+**Armas maiores** ("estão pequenas"): `Corpo.ARMA_K = 1,4`.
+- Em 1ª pessoa, arma, mãos e itens ficam 1,4x maiores. Mirando, o olho fica 1,4x mais longe, então
+  a imagem da mira é a da arma real.
+- Em 3ª pessoa a arma engrossa 1,4x e o comprimento fica (`ARMA_COMPRIMENTO_3P = 1,0`): com a coronha
+  no ombro, a M60 já usa 96% do alcance do braço. O RPG-2 vai com o tubo no ombro.
+- A balística não muda.
+
+**Nada flutuando** ("helicópteros estão flutuando", "conserte tudo que esteja flutuando"):
+- O Roblox desenha o chão meio voxel (0,56 m) acima da ocupação linear. O `TerrainBuilder` passou a
+  descontar isso (`groundOcc`): construções, chapa do heliponto e pé das plantas deixam de ficar
+  enterrados, a lâmina do arrozal fica 10 cm acima do fundo e o riacho volta aos 0,6 m.
+- Todo patamar é de terra batida. Objeto sem patamar e planta assentam pelo mais baixo entre o
+  plano e o chão real.
+- UH-34D: a altura das rodas descontava 1,52 m a mais e o pouso parava a 1,81 m do chão. Abaixo de
+  1,5 m, sem comando no coletivo, o helicóptero assenta.
+- Gancho de medição: `VT65DevFlutua`.

@@ -100,6 +100,13 @@ return {
 		-- fuzis de precisão feitos no Blender (tools/blender/armas.py, 2026-11-12); 0 = arma provisória
 		m70 = 94218979828986,
 		mosin = 70519343236093,
+		-- espingarda Winchester Model 12 Trench Gun (tools/blender/espingarda.py, 2026-11-13): nós
+		-- Arma, Telha, Culatra, Gatilho e Cartucho; 0 = arma provisória
+		win12 = 90884195431925,
+		-- caixas de munição do suporte (tools/blender/caixa_municao.py, 2026-11-13): nó Caixa e
+		-- Colisao_Caixa; 0 = o CaixaMunicaoService usa o ammo_crate ou a caixa em peças
+		caixa_municao_us = 128489958854272,
+		caixa_municao_vc = 70550239273438,
 		uh34d = 104404673955740,
 		m48a3 = 83880316083319,
 		ontos = 116051447339407,

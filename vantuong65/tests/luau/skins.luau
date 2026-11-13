@@ -123,7 +123,8 @@ test("realismo de 1965: os acabamentos e uniformes pedidos, sem duplicar o Comme
 	-- e cada arma tem pelo menos uma skin. Fora da conta: os fuzis de precisão do Blender
 	-- (2026-11-12, M70 Unertl e Mosin PU), ainda sem acabamento escolhido pelo dono nem Developer
 	-- Product criado; a loja (Progresso.client) só lista arma que tem skin, então eles não aparecem lá.
-	local SEM_SKIN = { m70 = true, mosin = true }
+	-- D-108: a espingarda Winchester 12 também (modelo da frente de Blender ainda a subir).
+	local SEM_SKIN = { m70 = true, mosin = true, win12 = true }
 	for _, wp in Weapons.list do
 		if SEM_SKIN[wp.id] then
 			continue

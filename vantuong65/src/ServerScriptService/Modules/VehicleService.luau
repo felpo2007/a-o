@@ -1255,7 +1255,9 @@ local function buildCauseways()
 		local dir = Vector3.new(dx, 0, dz)
 		for i = iA, iB do
 			local t = (i - iA) / (iB - iA)
-			local top = prof[iA] + (prof[iB] - prof[iA]) * t
+			-- o Roblox desenha o chão do FillBlock meio voxel (2 studs) acima do bloco (medido no Studio,
+			-- 2026-11-13): sem o desconto, o aterro saía 0,56 m acima dos barrancos
+			local top = prof[iA] + (prof[iB] - prof[iA]) * t - 2
 			local bottom = hMin - 2
 			local pos = Vector3.new(ax + dx * (i - 1) * STEP, (top + bottom) / 2, az + dz * (i - 1) * STEP)
 			workspace.Terrain:FillBlock(

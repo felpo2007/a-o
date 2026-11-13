@@ -13,6 +13,18 @@
 | F5 Arte total e otimização | arte nos 5 setores a 100% do plano; 57,1 fps girando a câmera na célula mais densa da mata (D-76) e 59,6 fps no arrozal (D-74). Critério de 60 jogadores **só no Roblox** |
 | F6 Offensive e lançamento | **testado no Studio**: Offensive com relatório pós-ação, progressão. Beta fechado **só você pode rodar** |
 
+## v40: classes simples, Suporte com caixa, espingarda, armas maiores e nada flutuando (2026-11-13, D-108)
+- **Conferido no Studio (Play, 1 jogador):**
+  - 50 contra 50 bots, servidor a 56 Hz, primeiro tiroteio aos 51 s;
+  - gancho `VT65DevFlutua`: 0 bases e 0 casas no ar, mata e objetos com 1 canto cada (≤ 0,23 m),
+    veículos parados a ≤ 0,10 m do chão (UH-34D a −0,01 m);
+  - Winchester 12 em 1ª pessoa maior; a 8 m um tiro somou 108 de dano (9 bagos) e derrubou o bot;
+  - caixa de munição do Suporte posta pelo gancho `VT65DevCaixa`, no chão;
+  - nenhum erro de script no cliente nem no servidor.
+- **Achado:** a caixa (0,54 m) some em parte no capim alto do terreno. Fica para a v41.
+- **Não testado:** prévia de colocação pela tecla 0, pegar da caixa, mira de cada arma com a escala
+  1,4, troca de arma no cartão, migração de perfil antigo, celular de verdade, 2 jogadores, sons.
+
 ## v39: lista do dono de 12–13/11 (2026-11-13, D-107)
 - **Publicada** como versão 39 do place (build do commit d1288ae).
 - Oito frentes em paralelo: combate, morte e feridos, telas, movimento e 3ª pessoa, itens e

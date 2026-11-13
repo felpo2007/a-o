@@ -349,6 +349,27 @@
   "description": "VAN TUONG 65 - Mosin-Nagant 91/30 com luneta PU 3,5x, modelado no Blender (tools/blender/armas.py)"
  },
  {
+  "key": "Models.win12",
+  "file": "assets/blender/arma_win12/arma_win12.glb",
+  "assetType": "Model",
+  "name": "VT65 win12 Trench",
+  "description": "VAN TUONG 65 - Winchester Model 12 Trench Gun (calibre 12, USMC 1965), modelada no Blender (tools/blender/espingarda.py)"
+ },
+ {
+  "key": "Models.caixa_municao_us",
+  "file": "assets/blender/caixa_municao_us/caixa_municao_us.glb",
+  "assetType": "Model",
+  "name": "VT65 caixa_municao_us",
+  "description": "VAN TUONG 65 - caixa de municao do suporte (EUA), modelada no Blender (tools/blender/caixa_municao.py)"
+ },
+ {
+  "key": "Models.caixa_municao_vc",
+  "file": "assets/blender/caixa_municao_vc/caixa_municao_vc.glb",
+  "assetType": "Model",
+  "name": "VT65 caixa_municao_vc",
+  "description": "VAN TUONG 65 - caixa de municao do suporte (VC), modelada no Blender (tools/blender/caixa_municao.py)"
+ },
+ {
   "key": "Accessories.vc_jungle_hat",
   "file": "assets/forgegui/models/chapeu_selva_studs_fosco.glb",
   "assetType": "Model",

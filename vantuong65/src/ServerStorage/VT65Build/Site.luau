@@ -224,7 +224,10 @@ function Site.addPad(
 		hx = hx,
 		hz = hz,
 		level = level or math.max(lo, hi - Site.PAD_CUT_MAX),
-		ground = ground,
+		-- 2026-11-13: terra batida em todo patamar (só a banca do mercado pede capim, ground = false).
+		-- Com o chão no nível do plano (TerrainBuilder.groundOcc) o piso das barracas, das casas e a
+		-- chapa do heliponto ficam rentes ao chão, e o capim animado (só no Grass) atravessava o piso
+		ground = if ground == nil then true else ground,
 	}
 	table.insert(self.padList, pad)
 	local r = math.sqrt(hx * hx + hz * hz) + Site.PAD_MARGIN + Site.PAD_BLEND

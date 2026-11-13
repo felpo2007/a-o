@@ -421,6 +421,7 @@ local MODE_NAME: { [string]: string } = {
 	semi = "SEMI",
 	auto = "AUTOMÁTICO",
 	bolt = "FERROLHO",
+	pump = "BOMBA", -- D-108: espingarda
 	single = "TIRO ÚNICO",
 	burst = "RAJADA",
 }

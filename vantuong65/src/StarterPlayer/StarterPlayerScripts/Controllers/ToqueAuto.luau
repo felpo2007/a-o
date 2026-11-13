@@ -306,10 +306,10 @@ local function promptKind(p: ProximityPrompt): (string?, BasePart?)
 	if par:GetAttribute("Faction") ~= player:GetAttribute("Faction") then
 		return nil, nil
 	end
+	-- D-108: a caixa de munição do Suporte não tem aviso: o servidor entrega ao passar perto (em todo
+	-- aparelho, CaixaMunicaoService); a "Caixa de munição" construída saiu da logística
 	if par.Name == "Crate" then
 		return "crate", par
-	elseif par:GetAttribute("Build") == "ammo" then
-		return "ammo", par
 	end
 	return nil, nil
 end

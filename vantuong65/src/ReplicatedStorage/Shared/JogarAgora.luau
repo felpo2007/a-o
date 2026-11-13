@@ -20,24 +20,15 @@ local JogarAgora = {}
 -- espera (s) pesada como caminhada até o objetivo: 1 s de espera vale 18 studs (~5 m/s correndo).
 -- PLACEHOLDER de design.
 JogarAgora.WAIT_STUDS = 18
--- ordem dos papéis quando o da última vez não serve (o fuzileiro sempre antes)
+-- ordem dos papéis quando o da última vez não serve (o fuzileiro sempre antes). D-108: os 8 papéis
 JogarAgora.ROLE_ORDER = {
 	"rifleman",
 	"squad_leader",
-	"automatic_rifleman",
-	"grenadier",
+	"support",
+	"medic",
 	"machine_gunner",
 	"anti_tank",
-	"engineer",
-	"medic",
-	"radio_operator",
-	"sapper",
-	"observer",
 	"sniper",
-	"mortar",
-	"tank_crew",
-	"pilot",
-	"door_gunner",
 	"commander",
 }
 
@@ -47,6 +38,7 @@ export type Choice = {
 	sq: string?, -- nome do squad ("Alfa", "Tiểu đội 2")
 	role: string?, -- papel
 	pt: string?, -- id do último ponto de inserção
+	w: string?, -- D-108: arma principal escolhida no cartão do papel (Roles.PRIMARY)
 }
 
 local function str(v: any, max: number): string?
@@ -65,7 +57,8 @@ function JogarAgora.sanitize(raw: any): Choice
 	local f = raw.f
 	if f == "US" or f == "VC" then
 		c.f = f
-		local unit = str(raw.id, 24)
+		-- D-108: unidade e papel de antes das classes mais simples viram os de agora (Roles.migrate)
+		local unit = Roles.migrateUnit(str(raw.id, 24))
 		if unit and Roles.units[f][unit] then
 			c.unit = unit
 			local sq = str(raw.sq, 40)
@@ -73,9 +66,13 @@ function JogarAgora.sanitize(raw: any): Choice
 				c.sq = sq
 			end
 		end
-		local role = str(raw.role, 32)
+		local role, wNew = Roles.migrate(str(raw.role, 32))
 		if role and Roles.roles[role] and Roles.loadout[f][role] then
 			c.role = role
+			local w = str(raw.w, 24) or wNew
+			if w and table.find(Roles.primaries(f, role), w) then
+				c.w = w
+			end
 		end
 	end
 	local pt = str(raw.pt, 60)
@@ -93,12 +90,13 @@ function JogarAgora.pack(c: Choice): { [string]: string }
 	out.sq = c.sq :: any
 	out.role = c.role :: any
 	out.pt = c.pt :: any
+	out.w = c.w :: any
 	return out
 end
 
 -- Texto curto "f|unidade|squad|papel" para o atributo do jogador (a tela mostra o que vai acontecer)
 function JogarAgora.encode(c: Choice): string
-	return table.concat({ c.f or "", c.unit or "", c.sq or "", c.role or "" }, "|")
+	return table.concat({ c.f or "", c.unit or "", c.sq or "", c.role or "", c.w or "" }, "|")
 end
 
 function JogarAgora.decode(s: any): Choice
@@ -106,7 +104,7 @@ function JogarAgora.decode(s: any): Choice
 		return {}
 	end
 	local p = string.split(s, "|")
-	return JogarAgora.sanitize({ f = p[1], id = p[2], sq = p[3], role = p[4] })
+	return JogarAgora.sanitize({ f = p[1], id = p[2], sq = p[3], role = p[4], w = p[5] })
 end
 
 -- ===== 1. lado =====

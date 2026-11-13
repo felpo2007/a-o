@@ -53,8 +53,10 @@ local BODY = {
 local rigR, rigL = Pegada3P.blockArm("R", K), Pegada3P.blockArm("L", K)
 local a, b = Pegada3P.lengths(rigR)
 local REACH = a + b
--- M14 (WeaponArt): punho -> soleira 1,046 stud, apoio 0,885 à frente, boca 2,98
-local M14 = { rear = 1.046, support = Vector3.new(0, 0.036, -0.885), front = 2.976 }
+-- M14 (WeaponArt): punho -> soleira 1,046 stud, apoio 0,885 à frente, boca 2,98; D-108: na escala da
+-- 3ª pessoa (comprimento L3, grossura G3)
+local L3, G3 = Pegada3P.fatores3P("rifle")
+local M14 = { rear = 1.046 * L3, support = Vector3.new(0, 0.036 * G3, -0.885 * L3), front = 2.976 * L3 }
 
 type Result = {
 	errR: number,
@@ -71,12 +73,13 @@ local function v(t: { number }): any
 	return Vector3.new(t[1], t[2], t[3])
 end
 
-local function run(st: any, torso: any, prone: boolean, aim: any): Result
+local function run(st: any, torso: any, prone: boolean, aim: any, geo: any?): Result
+	local W = geo or M14
 	local g = Pegada3P.gun(torso, st)
 	local gripT = g.Position
 	local sup = if st.kind == "pistol"
 		then Vector3.new(-0.12, -0.05, 0.05)
-		else Pegada3P.support(M14.support, M14.front - 0.4, g:PointToObjectSpace(rigL.c0s.Position), REACH)
+		else Pegada3P.support(W.support, W.front - 0.4, g:PointToObjectSpace(rigL.c0s.Position), REACH)
 	local supT = g:PointToWorldSpace(sup)
 	local poles = Pegada3P.POLES[if prone then "prone" else "stand"]
 	local r1, r2 = Pegada3P.arm(rigR, gripT, v(poles.R))
@@ -106,8 +109,8 @@ local function run(st: any, torso: any, prone: boolean, aim: any): Result
 	-- linha do cano, da soleira à boca
 	local gun = 0
 	for i = 0, 20 do
-		local z = st.rear - (st.rear + M14.front) * i / 20
-		local p = g:PointToWorldSpace(Vector3.new(0, 0.13, z))
+		local z = st.rear - (st.rear + W.front) * i / 20
+		local p = g:PointToWorldSpace(Vector3.new(0, W.dy or 0.13 * G3, z))
 		for _, bb in BODY do
 			gun = math.max(gun, -sd(p, bb))
 		end
@@ -220,12 +223,210 @@ test("pistola: as duas mãos no cabo, braços à frente", function()
 	assert(math.deg(bl) < math.deg(BLADE), "pistola com o tronco menos de lado")
 end)
 
-test("mão de bloco mais estreita só no boneco de bloco; arma no tamanho real", function()
+test("mão de bloco mais estreita só no boneco de bloco", function()
 	assert(Corpo.FORMATO ~= "bloco" or (Corpo.MAO_K > 0.4 and Corpo.MAO_K < 0.8), "mão de bloco estreitada")
 	assert(Pegada3P.HAND_K == Corpo.MAO_K)
 	-- com a mão estreitada as duas mãos não se cruzam na M14 (guarda): mais que a largura da mão
 	local st, torso, aim = stand({})
 	assert(run(st, torso, false, aim).hands >= Corpo.MAO_K * K, "mãos separadas")
+end)
+
+-- ===== D-108: armas maiores =====
+local fs = require("@lune/fs")
+local luau = require("@lune/luau")
+local WeaponArt = luau.load(
+	fs.readFile("src/ReplicatedStorage/Shared/WeaponArt.luau"),
+	{ debugName = "WeaponArt", environment = { Vector3 = Vector3 } }
+)() :: any
+local WS = require("../../src/ReplicatedStorage/Shared/Weapons") :: any
+local TURN = {
+	["-Z"] = CFrame.identity,
+	["+Z"] = CFrame.Angles(0, math.pi, 0),
+	["-X"] = CFrame.Angles(0, -math.pi / 2, 0),
+	["+X"] = CFrame.Angles(0, math.pi / 2, 0),
+}
+local AXIS = {
+	["-Z"] = Vector3.new(0, 0, -1),
+	["+Z"] = Vector3.new(0, 0, 1),
+	["-X"] = Vector3.new(-1, 0, 0),
+	["+X"] = Vector3.new(1, 0, 0),
+}
+-- pontos da arte no espaço da arma (punho na origem, boca em −Z), como o GunModel.fit, escalados
+local function artPoints(id: string, l: number, g: number): { [string]: any }
+	local art = WeaponArt[id]
+	local inv = (TURN[art.forward] * CFrame.Angles(0, art.yaw, 0)):Inverse()
+	local out = {}
+	for _, name in { "muzzle", "sight", "front", "grip", "support" } do
+		out[name] = Pegada3P.escalaPonto(inv * (art[name] - art.grip), l, g)
+	end
+	-- soleira: comprimento da malha menos a boca, ao longo do cano
+	out.rear = (art.lengthM / 0.28 - (art.muzzle - art.grip):Dot(AXIS[art.forward])) * l
+	return out
+end
+
+test("D-108: fator da arma entre o real e o Front 44, sem caricatura", function()
+	near(Corpo.ARMA_K, 1.4, 1e-9, "ARMA_K")
+	near(Pegada3P.G, Corpo.ARMA_K, 1e-12, "grossura da 3ª pessoa")
+	near(Pegada3P.L, Corpo.ARMA_COMPRIMENTO_3P, 1e-12, "comprimento da 3ª pessoa")
+	-- comprimento / altura: M14 no soldado de 2,04 m; real (1,75 m); Front 44 (1,3x num boneco de 1,43 m)
+	local aqui, real, f44 = 1.126 / 2.04, 1.126 / 1.75, 1.107 * 1.3 / (2.04 / Corpo.BLOCK_SCALE)
+	print(string.format("         comprimento/altura: aqui %.2f, real %.2f, Front 44 %.2f", aqui, real, f44))
+	-- grossura relativa ao corpo (real = 1): aqui G x 1,75 / 2,04; Front 44 1,3 x 1,5 no boneco dele
+	local gq, gf = Corpo.ARMA_K * 1.75 / 2.04, 1.3 * 1.5 * 1.75 / (2.04 / Corpo.BLOCK_SCALE)
+	print(string.format("         grossura/corpo (real = 1): aqui %.2f, Front 44 %.2f", gq, gf))
+	assert(gq > 1 and gq < gf, "mais grossa que a real, menos que o Front 44")
+	local l, g = Pegada3P.fatores3P("pistol")
+	assert(l == Corpo.ARMA_K and g == Corpo.ARMA_K, "pistola cresce por inteiro")
+end)
+
+test("D-108: escala da arma em volta do punho (peças e pontos) e volta ao real", function()
+	local p = Vector3.new(0.1, 0.2, -2)
+	local s = Pegada3P.escalaPonto(p, 1.0, 1.4)
+	near((s - Vector3.new(0.14, 0.28, -2)).Magnitude, 0, 1e-9, "ponto")
+	-- peça alinhada: exata; peça de pé (eixo Y ao longo do cano): o eixo Y ganha o comprimento
+	local sz = Pegada3P.escalaTamanho(Vector3.new(1, 2, 3), CFrame.identity, 1.0, 1.4)
+	near((sz - Vector3.new(1.4, 2.8, 3)).Magnitude, 0, 1e-9, "alinhada")
+	local rz = Pegada3P.escalaTamanho(Vector3.new(1, 2, 3), CFrame.Angles(math.pi / 2, 0, 0), 1.0, 1.4)
+	near((rz - Vector3.new(1.4, 2, 4.2)).Magnitude, 0, 1e-5, "girada 90°")
+	-- volta ao real: a medida de agora dividida pelos fatores de agora (GunModel.scale)
+	local k = Pegada3P.escalaTamanho(Vector3.new(1, 1, 1), CFrame.Angles(0.3, 0.2, 0), 1.0, 1.4)
+	local back = Pegada3P.escalaTamanho(Vector3.new(1, 2, 3) / k, CFrame.Angles(0.3, 0.2, 0), 1.0, 1.4)
+	near((back - Vector3.new(1, 2, 3)).Magnitude, 0, 1e-5, "ida e volta")
+end)
+
+local LONGAS = { "m14", "type56", "sks", "m60", "rpd", "m70", "mosin", "m79" }
+test("D-108: 3ª pessoa com cada arma escalada: mãos no punho e no guarda-mão, cano fora do corpo", function()
+	for _, id in LONGAS do
+		local kind = WS.get(id).kind
+		local l, g = Pegada3P.fatores3P(kind)
+		local P = artPoints(id, l, g)
+		local geo = { rear = P.rear, support = P.support, front = -P.muzzle.Z, dy = 0.13 * g }
+		local bl = Pegada3P.blade(kind)
+		local worst = { r = 0, l = 0, gun = 0, bone = 0, hands = math.huge, where = "" }
+		local function case(name: string, fields: { [string]: any }, lean: number?, prone: boolean?)
+			local st = Pegada3P.state(kind)
+			st.rear = geo.rear
+			for k2, v2 in fields do
+				(st :: any)[k2] = v2
+			end
+			local torso = if prone
+				then CFrame.Angles(math.rad(-85), 0, 0)
+				else CFrame.Angles(st.pitch * 0.35, 0, 0) * CFrame.Angles(0, -bl * (1 - st.sprint), 0) * CFrame.Angles(
+					0,
+					0,
+					-(lean or 0)
+				)
+			local r = run(st, torso, prone == true, CFrame.Angles(st.pitch, 0, 0), geo)
+			if r.reachR > worst.r then
+				worst.r, worst.where = r.reachR, name
+			end
+			worst.l = math.max(worst.l, r.errL)
+			worst.gun = math.max(worst.gun, r.gun)
+			worst.bone = math.max(worst.bone, r.bone)
+			worst.hands = math.min(worst.hands, r.hands)
+			assert(r.errR < 1e-3, id .. " " .. name .. ": mão direita fora do punho")
+		end
+		case("guarda", {})
+		for _, deg in { -60, -40, -20, 20, 40, 60 } do
+			case("guarda " .. deg, { pitch = math.rad(deg) })
+			case("ombro " .. deg, { pitch = math.rad(deg), ads = 1 })
+		end
+		case("correndo", { sprint = 1, moving = 1, swing = 0.7, lift = 0.7 })
+		case("correndo (outro passo)", { sprint = 1, moving = 1, swing = -0.7, lift = 0.7 })
+		case("recarga", { busy = 1 })
+		case("inclinado", {}, math.rad(19.6))
+		case("deitado", { prone = 1 }, nil, true)
+		print(
+			string.format(
+				"         %-7s %.2f m  dir %3.0f%% (%s)  esq %4.1f cm  mãos %.2f  cano %4.1f cm  braço %4.1f cm",
+				id,
+				WeaponArt[id].lengthM * l,
+				worst.r * 100,
+				worst.where,
+				worst.l * 28,
+				worst.hands,
+				worst.gun * 28,
+				worst.bone * 28
+			)
+		)
+		assert(worst.r <= Pegada3P.REACH_USE + 1e-6, id .. ": braço direito esticado demais em " .. worst.where)
+		assert(worst.gun * 0.28 <= 0.05, id .. string.format(": cano %.1f cm dentro do corpo", worst.gun * 28))
+		assert(worst.bone * 0.28 <= 0.11, id .. string.format(": braço %.1f cm dentro do corpo", worst.bone * 28))
+		-- a M79 tem o guarda-mão curto e o tronco quase de frente (8°): as mãos ficam juntas, como já
+		-- eram no tamanho real
+		if id ~= "m79" then
+			assert(worst.l < 0.02 / 0.28, id .. string.format(": mão esquerda %.1f cm aquém", worst.l * 28))
+			assert(worst.hands >= 0.6, id .. ": mãos encostadas")
+		end
+	end
+end)
+
+test("D-108: lança-rojão (RPG-2) com o tubo no ombro: mão no punho, tubo fora da cabeça e do tronco", function()
+	local l, g = Pegada3P.fatores3P("launcher")
+	local P = artPoints("rpg2", l, g)
+	assert(P.rear > Pegada3P.TUBE_REAR * l, "o RPG-2 é de tubo")
+	local m79 = artPoints("m79", l, g)
+	assert(m79.rear < Pegada3P.TUBE_REAR * l, "a M79 fica na pega de coronha")
+	local geo = { rear = P.rear, support = P.support, front = -P.muzzle.Z, dy = Pegada3P.TUBE.dy * g }
+	local bl = Pegada3P.blade("launcher")
+	local worstR, worstGun = 0, 0
+	for _, deg in { -40, -20, 0, 10, 30 } do
+		for _, ads in { 0, 1 } do
+			local st = Pegada3P.state("launcher")
+			st.rear, st.pitch, st.ads = geo.rear, math.rad(deg), ads
+			local torso = CFrame.Angles(st.pitch * 0.35, 0, 0) * CFrame.Angles(0, -bl, 0)
+			local r = run(st, torso, false, CFrame.Angles(st.pitch, 0, 0), geo)
+			assert(r.errR < 1e-3, "mão direita no punho")
+			worstR, worstGun = math.max(worstR, r.reachR), math.max(worstGun, r.gun)
+		end
+	end
+	print(
+		string.format(
+			"         rpg2: braço direito %.0f%% do alcance, tubo %.1f cm dentro do corpo",
+			worstR * 100,
+			worstGun * 28
+		)
+	)
+	assert(worstR <= Pegada3P.REACH_USE, "braço direito alcança o punho")
+	assert(worstGun * 0.28 <= 0.05, string.format("tubo %.1f cm dentro do corpo", worstGun * 28))
+end)
+
+test("D-108: 1ª pessoa: alça e massa no centro com a arma maior, imagem da mira igual à real", function()
+	local k = Corpo.ARMA_K
+	local HIP = CFrame.new(0.12 / 0.28, -0.15 / 0.28, -0.23 / 0.28) * CFrame.Angles(0, math.rad(3), 0)
+	for _, id in { "m14", "type56", "sks", "m60", "rpd", "m79", "m1911", "type54" } do
+		local real, big = artPoints(id, 1, 1), artPoints(id, k, k)
+		local eye = (WS.adsEye(id) or WeaponArt[id].eyeM) / 0.28
+		local ads1 = Pegada3P.mira1P(real.sight, real.front, eye, 1)
+		local adsK = Pegada3P.mira1P(big.sight, big.front, eye, k)
+		-- alça no eixo do olho, a eye x k; a massa exatamente no centro (direção −Z)
+		local s, f = adsK * big.sight, adsK * big.front
+		near(s.X, 0, 1e-4, id .. " alça x")
+		near(s.Y, 0, 1e-4, id .. " alça y")
+		near(s.Z, -eye * k, 1e-4, id .. " olho")
+		local d = (f - Vector3.new(0, 0, 0)).Unit
+		near(d.X, 0, 1e-4, id .. " massa x")
+		near(d.Y, 0, 1e-4, id .. " massa y")
+		-- mesma imagem: cada ponto da arma maior é o da real ampliado k vezes em volta do olho
+		for _, name in { "muzzle", "grip", "support" } do
+			local p1, pk = ads1 * real[name], adsK * big[name]
+			near((pk - p1 * k).Magnitude, 0, 1e-3, id .. " " .. name)
+		end
+		-- quadril: a alça fica onde estava (D-69) e o resto cresce em volta dela
+		local hk = Pegada3P.quadril1P(HIP, big.sight, k)
+		near((hk * big.sight - HIP * real.sight).Magnitude, 0, 1e-4, id .. " alça no quadril")
+		assert((hk * big.muzzle - hk * big.grip).Magnitude > (HIP * real.muzzle - HIP * real.grip).Magnitude, "maior")
+	end
+end)
+
+test("D-108: a bala não muda: o tiro sai do olho (câmera), nunca da boca da arma desenhada", function()
+	local wc = fs.readFile("src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponController.client.luau")
+	local body = string.match(wc, "local function shotRay%(.-\nend") :: string
+	assert(body and string.find(body, "ViewMode.aimDirection", 1, true), "origem = olho")
+	assert(not string.find(body, "Muzzle", 1, true), "a origem não vem da arma")
+	-- e o servidor confere a origem contra a cabeça (Gatilho), não contra a arma
+	local cs = fs.readFile("src/ServerScriptService/Modules/CombatService.luau")
+	assert(string.find(cs, "originStuds = (origin - head.Position).Magnitude", 1, true), "origem x cabeça")
 end)
 
 test("capacete na cabeça de bloco: a borda de cima da cabeça fica dentro do casco", function()

@@ -26,6 +26,10 @@ export type Bot = {
 	life: number, -- conta as vidas: tarefa atrasada da vida anterior não mexe na nova
 	-- tiro
 	mag: number,
+	-- D-108: carregadores de sobra (cartuchos na espingarda) e a caixa de munição do Suporte
+	spare: number,
+	dryAt: number?, -- desde quando está sem munição de sobra (acha 1 carregador em BOT_CATAR_S)
+	boxCheckAt: number, -- próxima busca de caixa
 	reloadUntil: number,
 	nextVolley: number,
 	firing: boolean,

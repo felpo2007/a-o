@@ -7,7 +7,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Logistics = require(ReplicatedStorage.Shared.Logistics)
 local Net = require(ReplicatedStorage.Shared.Net)
 local AssetLoader = require(script.Parent.AssetLoader)
-local CombatService = require(script.Parent.CombatService)
+local CaixaMunicaoService = require(script.Parent.CaixaMunicaoService)
 local Combatants = require(script.Parent.Combatants)
 local MatchService = require(script.Parent.MatchService)
 local SpawnService = require(script.Parent.SpawnService)
@@ -19,6 +19,7 @@ LogisticsService.state = Logistics.new()
 
 type Built = { id: string, kind: string, faction: string, pos: Vector3, model: Instance }
 local built: { Built } = {}
+local mortarPos: { [string]: Vector3 } = {}
 local temp: { { faction: string, x: number, z: number, name: string, untilT: number, id: string } } = {}
 local folder: Folder
 
@@ -112,23 +113,14 @@ local function place(kind: string, faction: string, pos: Vector3, yaw: number): 
 		local m = AssetLoader.place(key, pos.X, pos.Z, yaw, folder)
 		out = m or Instance.new("Model")
 	else
+		-- posto de reunião (D-108: a "Caixa de munição" construída saiu; a caixa é a do Suporte,
+		-- Modules/CaixaMunicaoService)
 		local p = Instance.new("Part")
-		p.Size = if kind == "garrison" then Vector3.new(1.2, 2.2, 0.1) / M else Vector3.new(0.6, 0.4, 0.4) / M
+		p.Size = Vector3.new(1.2, 2.2, 0.1) / M
 		p.Color = Color3.fromRGB(80, 70, 50)
 		p.Anchored = true
 		p.CFrame = CFrame.new(pos.X, SpawnService.groundY(pos.X, pos.Z) + p.Size.Y / 2, pos.Z)
 			* CFrame.Angles(0, yaw, 0)
-		if kind == "ammo" then
-			local prompt = Instance.new("ProximityPrompt")
-			prompt.ActionText = "Pegar munição"
-			prompt.HoldDuration = 2
-			prompt.Parent = p
-			prompt.Triggered:Connect(function(player)
-				if player:GetAttribute("Faction") == faction then
-					CombatService.refill(player)
-				end
-			end)
-		end
 		out = p
 	end
 	if out:IsA("Model") and not out.Parent then
@@ -173,7 +165,23 @@ local function handleBuild(player: Player, req: any)
 	if kind == "mortar_pit" then
 		player:SetAttribute("MortarX", pos.X)
 		player:SetAttribute("MortarZ", pos.Z)
+		-- D-108: o suporte constrói e o comandante pede o tiro: a posição é do lado
+		mortarPos[faction] = pos
 	end
+end
+
+-- D-108: posição de morteiro mais recente do lado (o CommanderService usa quando quem pede não construiu)
+function LogisticsService.mortarAt(faction: string): (number?, number?)
+	local p = mortarPos[faction]
+	if not p then
+		return nil, nil
+	end
+	for _, b in built do
+		if b.kind == "mortar_pit" and b.faction == faction and b.model.Parent and b.pos == p then
+			return p.X, p.Z
+		end
+	end
+	return nil, nil
 end
 
 -- ponto de reunião temporário (reforço pelo túnel do comandante VC)
@@ -189,6 +197,7 @@ function LogisticsService.start()
 	folder.Name = "Logistics"
 	folder.Parent = workspace
 	Net.event("Build_Request").OnServerEvent:Connect(handleBuild)
+	CaixaMunicaoService.start() -- D-108: caixa de munição do Suporte
 	SpawnService.addProvider(function(faction: string)
 		local out = {}
 		for _, b in built do

@@ -75,7 +75,8 @@ end
 -- Ferrolho ainda manobrando (para a animação e para o aviso)
 function Gatilho.cycling(t: Trigger, now: number): boolean
 	local wp = Weapons.get(t.weapon)
-	return t.mode == "bolt" and wp ~= nil and now - t.last < Weapons.interval(wp, "bolt")
+	-- D-108: a bomba da espingarda também ("pump")
+	return (t.mode == "bolt" or t.mode == "pump") and wp ~= nil and now - t.last < Weapons.interval(wp, t.mode)
 end
 
 -- Passo do quadro: "fire" (sai um tiro: o chamador manda ao servidor), "dry" (clique sem munição)

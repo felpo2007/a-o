@@ -288,9 +288,12 @@ local function knifeId(): string
 	return if player:GetAttribute("Faction") == "VC" then Melee.KNIFE.VC else Melee.KNIFE.US
 end
 
+-- D-108: faca e baioneta de 1ª pessoa do tamanho da arma e das mãos (Maos1P.scale = Corpo.ARMA_K)
+local Maos1P = require(script.Parent.Maos1P)
+
 local function ensureModel(): Model?
 	local id = knifeId()
-	local key = id .. (if KnifeModel.art(id) then ":arte" else "")
+	local key = id .. (if KnifeModel.art(id) then ":arte" else "") .. ":" .. Maos1P.scale()
 	if model and key == modelKey then
 		return model
 	end
@@ -307,6 +310,7 @@ local function ensureModel(): Model?
 			d.Anchored = true
 		end
 	end
+	m:ScaleTo(m:GetScale() * Maos1P.scale()) -- em volta do pivô (a pegada)
 	m.Name = "VT65Faca1P"
 	m.Parent = camera
 	model = m
@@ -507,9 +511,10 @@ function KnifeView.step(dt: number, visible: boolean, handR0: Vector3?): Out
 	local breath = math.sin(now * 1.7) * 0.004
 	local kcf = cam * CFrame.new((p + Vector3.new(0, breath, 0)) / M) * rot(r)
 	m:PivotTo(kcf)
-	out.handR = kcf * Vector3.new(0, 0.006 / M, 0)
+	local km = Maos1P.scale() / M
+	out.handR = kcf * (Vector3.new(0, 0.006, 0) * km)
 	out.handRot = kcf.Rotation
-	out.wristR = kcf * Vector3.new(0, -0.012 / M, 0.075 / M)
+	out.wristR = kcf * (Vector3.new(0, -0.012, 0.075) * km)
 	-- cotovelo: atrás e abaixo da mão; mais para trás com o braço estendido
 	local ext = math.clamp((-p.Z - 0.34) / 0.3, 0, 1)
 	local elbow = p + Vector3.new(0.1, -0.2, 0.3):Lerp(Vector3.new(0.06, -0.12, 0.32), ext)
@@ -542,6 +547,10 @@ function KnifeView.bayonet(view: Model?, weaponId: string?)
 	end
 	local bm = b :: Model
 	bm.Name = "Baioneta"
+	-- D-108: do tamanho do fuzil de 1ª pessoa (WeaponVisuals grava "VT65Escala")
+	local esc = view:GetAttribute("VT65Escala")
+	local k = if type(esc) == "number" then esc else 1
+	bm:ScaleTo(bm:GetScale() * k)
 	local pivot = bm:GetPivot()
 	local cf: CFrame
 	if bid == "m6" then
@@ -549,7 +558,7 @@ function KnifeView.bayonet(view: Model?, weaponId: string?)
 		cf = muzzle.WorldCFrame * CFrame.new(-ring)
 	else
 		local tip = pivot:PointToObjectSpace(KnifeModel.at(bm, "Tip"))
-		cf = muzzle.WorldCFrame * CFrame.new(0, -0.03 / M, -0.16 / M) * CFrame.new(-tip)
+		cf = muzzle.WorldCFrame * CFrame.new(Vector3.new(0, -0.03, -0.16) * k / M) * CFrame.new(-tip)
 	end
 	bm:PivotTo(cf)
 	for _, d in bm:GetDescendants() do

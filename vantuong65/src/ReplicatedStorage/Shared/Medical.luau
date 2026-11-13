@@ -116,6 +116,23 @@ function Medical.shotDamage(base: number, zone: string, energyFrac: number): num
 	return base * (Medical.SHOT.zone[zone] or 1) * k
 end
 
+-- D-108: espingarda. Cada bago é uma bala (dano da ficha de UM bago, Weapons.damageOf); os bagos que
+-- pegam o mesmo soldado no mesmo tiro somam e entram como UM ferimento: o dano total e a zona do bago
+-- que mais feriu (a cabeça ganha no empate). Assim 9 bagos no tronco não abrem 9 sangramentos graves,
+-- e 3 bagos na cabeça (3 x 37,5) passam do headLethal. hits = { zona, fração da energia de boca }.
+export type PelletHit = { zone: string, frac: number }
+function Medical.pelletDamage(base: number, hits: { PelletHit }): (number, string)
+	local total, best, zone = 0, -1, "torso"
+	for _, h in hits do
+		local d = Medical.shotDamage(base, h.zone, h.frac)
+		total += d
+		if d > best or (d == best and h.zone == "head") then
+			best, zone = d, h.zone
+		end
+	end
+	return total, zone
+end
+
 -- Aplica o dano de um tiro (já calculado por shotDamage). Mesmo retorno de applyHit.
 function Medical.applyShot(s: State, zone: string, damage: number, roll: number, now: number): string
 	if s.dead then

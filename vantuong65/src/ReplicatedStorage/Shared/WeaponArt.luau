@@ -8,6 +8,10 @@
 -- sightKind = "anel" ou "entalhe" medido na malha (tools/sight_align.py; "" = sem
 -- medida) e sightMm = diâmetro do furo ou fundura do entalhe (mm). bolt = um ponto do
 -- eixo do ferrolho (armas do Blender, tools/blender/armas.py: a peça 'Ferrolho' gira).
+-- Espingarda do Blender (tools/blender/espingarda.py): pump = ponto do eixo da peça
+-- 'Telha' (ela e a 'Culatra' recuam pumpM metros, para +Z da malha, e voltam), eject =
+-- janela de ejeção (direita), load = portinhola de carga (embaixo), trigger = pino da
+-- peça 'Gatilho'.
 export type Art = {
 	forward: string,
 	yaw: number,
@@ -22,6 +26,11 @@ export type Art = {
 	sightKind: string,
 	sightMm: number,
 	bolt: Vector3?,
+	pump: Vector3?,
+	pumpM: number?,
+	eject: Vector3?,
+	load: Vector3?,
+	trigger: Vector3?,
 }
 local WeaponArt: { [string]: Art } = {
 	m14 = {
@@ -179,6 +188,25 @@ local WeaponArt: { [string]: Art } = {
 		sightKind = "",
 		sightMm = 0.0,
 		bolt = Vector3.new(0.0036, 0.1554, 1.0571),
+	},
+	win12 = {
+		forward = "-Z",
+		yaw = 0.0,
+		muzzle = Vector3.new(-0.0, 0.275, -1.7911),
+		sight = Vector3.new(0.0, 0.343, 0.5588),
+		front = Vector3.new(0.0, 0.3401, -1.7196),
+		grip = Vector3.new(-0.0, 0.0893, 0.7696),
+		support = Vector3.new(-0.0, 0.1536, -0.1304),
+		lowX = -0.0786,
+		lengthM = 1.003,
+		eyeM = 0.12,
+		sightKind = "",
+		sightMm = 0.0,
+		pump = Vector3.new(-0.0, 0.1768, -0.7304),
+		eject = Vector3.new(0.0564, 0.275, 0.1411),
+		load = Vector3.new(-0.0, 0.1321, 0.1982),
+		trigger = Vector3.new(-0.0, 0.1286, 0.5125),
+		pumpM = 0.09,
 	},
 }
 

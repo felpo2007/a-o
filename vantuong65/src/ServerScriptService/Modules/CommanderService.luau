@@ -125,6 +125,10 @@ local function handle(player: Player, req: any)
 		if mortarId then
 			local mx, mz = player:GetAttribute("MortarX"), player:GetAttribute("MortarZ")
 			if type(mx) ~= "number" or type(mz) ~= "number" then
+				-- D-108: o suporte constrói a posição e o comandante pede o tiro (a do lado)
+				mx, mz = LogisticsService.mortarAt(faction)
+			end
+			if type(mx) ~= "number" or type(mz) ~= "number" then
 				reply(player, { error = "construa a posição de morteiro primeiro (tecla J)" })
 				return
 			end

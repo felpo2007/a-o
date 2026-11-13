@@ -82,7 +82,8 @@ Bus.on("shot_fired", function(shot: any)
 		local root = m:FindFirstChild("HumanoidRootPart")
 		if hum and hum.Health > 0 and root and root:IsA("BasePart") then
 			local rel = root.Position - origin
-			if Hitbox.nearRay(rel.X, rel.Y, rel.Z, dir.X, dir.Y, dir.Z, wp.muzzleVelocity, 0) then
+			local extra = if Weapons.pelletsOf(wp) > 1 then 1 / M else 0 -- o padrão dos bagos (1 m)
+			if Hitbox.nearRay(rel.X, rel.Y, rel.Z, dir.X, dir.Y, dir.Z, wp.muzzleVelocity, extra) then
 				Hitbox.fromModel(m, boxes)
 			end
 		end
@@ -90,17 +91,21 @@ Bus.on("shot_fired", function(shot: any)
 	if #boxes == 0 then
 		return -- ninguém perto da linha do tiro
 	end
-	local t = Hitbox.trace(wp.id, origin, dir, shot.seed, wp.maxFlightS, skip, boxes, false)
-	local box, hit = t.box, t.hit
-	if box and hit then
-		Net.event("Combat_Claim"):FireServer({
-			s = shot.seed,
-			v = box.model,
-			p = box.part,
-			x = hit.x / M,
-			y = hit.y / M,
-			z = hit.z / M,
-		})
+	-- D-108: espingarda, bago a bago (a semente de cada um: Weapons.pelletSeed, como no servidor)
+	for i = 0, Weapons.pelletsOf(wp) - 1 do
+		local s = Weapons.pelletSeed(shot.seed, i)
+		local t = Hitbox.trace(wp.id, origin, dir, s, wp.maxFlightS, skip, boxes, false)
+		local box, hit = t.box, t.hit
+		if box and hit then
+			Net.event("Combat_Claim"):FireServer({
+				s = s,
+				v = box.model,
+				p = box.part,
+				x = hit.x / M,
+				y = hit.y / M,
+				z = hit.z / M,
+			})
+		end
 	end
 end)
 

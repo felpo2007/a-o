@@ -455,12 +455,20 @@ Bus.on("shot_fired", function(shot: any)
 	end
 end)
 
--- ferrolho manobrado (fuzis de precisão): o som cabe no ciclo da arma
-Bus.on("bolt_cycle", function(dur: number)
-	local def = SomArmas.LIB.mec_ferrolho
+-- ferrolho manobrado (fuzis de precisão): o som cabe no ciclo da arma. D-108: a bomba da espingarda
+-- (SomArmas.mecanica) e o estojo de plástico caindo depois dela
+Bus.on("bolt_cycle", function(dur: number, weaponId: string?)
+	local key = SomArmas.mecanica(weaponId)
+	local def = SomArmas.LIB[key] or SomArmas.LIB.mec_ferrolho
 	local d = if type(dur) == "number" and dur > 0 then dur else 1
 	local natural = (def.len or 1.3) / (def.pitch or 1)
 	Som.play(def, { delay = 0.08, pitch = math.clamp(natural / d, 0.85, 1.25) })
+	if key == "mec_bomba" then
+		Som.play(
+			"mec_cartucho_cai",
+			{ delay = 0.5 + math.random() * 0.15, vol = 0.6, pitch = 0.9 + math.random() * 0.2 }
+		)
+	end
 end)
 
 -- ===== tiros dos outros: camadas, atraso do som, estalo e impacto =====

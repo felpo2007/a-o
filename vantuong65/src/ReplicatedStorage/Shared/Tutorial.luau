@@ -43,16 +43,15 @@ Tutorial.RANGE = {
 }
 
 -- papéis que usam fuzil ou metralhadora: passam pelo campo de tiro
+-- D-108 (classes mais simples): Líder, Fuzileiro, Médico, Suporte, Metralhador, Antitanque e Atirador
+-- de elite no squad; os papéis que saíram viraram estes (Roles.MIGRATE)
 Tutorial.RIFLE_ROLES = {
 	squad_leader = true,
 	rifleman = true,
-	automatic_rifleman = true,
 	machine_gunner = true,
-	engineer = true,
-	observer = true,
+	support = true,
+	medic = true,
 	sniper = true,
-	sapper = true,
-	radio_operator = true,
 }
 
 -- veículos: o tutorial começa ao entrar (interagir perto do veículo)
@@ -64,46 +63,36 @@ Tutorial.ROLE = {
 		act("comm_wheel", "Roda de comunicação: {a}. A página Comando pede fogo de apoio no mapa."),
 		act("binoculars", "Binóculo: {a}."),
 	},
+	-- D-108: o líder leva o rádio do squad (era do operador de rádio)
 	squad_leader = {
 		act("mark", "Marcar um ponto para o squad: {a}."),
-		act("comm_wheel", "Mensagens rápidas ao squad: {a}."),
+		act(
+			"comm_wheel",
+			"Rádio: {a}. Só você fala com o comandante (página Comando). Se cair, um aliado pega o rádio."
+		),
 		act("equip_wheel", "Construir o posto de reunião do squad (perto de suprimento): {a}."),
 	},
 	rifleman = { GRENADES },
-	automatic_rifleman = {
-		act("fire_mode", "Seletor da M14: {a} (semi ou automático). Deitado, o bipé firma a rajada."),
-	},
-	grenadier = { GRENADES },
 	machine_gunner = { act("fire_mode", "Modo de tiro: {a}. Deitado, a rajada fica controlável.") },
 	anti_tank = { act("swap_weapon", "Lançador: {a}. A blindagem da frente é grossa: mire no lado.") },
-	engineer = {
-		act("equip_wheel", "Construir ninho de metralhadora ou caixa de munição: {a}."),
+	-- D-108: a caixa de munição (Ferramenta do papel) e as obras do engenheiro, do sapador e do morteiro
+	support = {
+		act(
+			"equip_wheel",
+			"Caixa de munição: {a}, Ferramenta do papel. Ponha no chão perto do squad: quem passa pega munição e 1 granada."
+		),
 		act("crouch", "Agachado, perto, você percebe armadilhas inimigas: {a}. Para desarmar, segure Interagir."),
 	},
 	medic = {
 		act("quick_bandage", "Bandagem no seu sangramento mais urgente: {a}."),
 		act("interact", "Tratar ou reanimar um ferido: {a}, perto dele."),
 	},
-	observer = {
-		act("binoculars", "Binóculo: {a}."),
-		act("mark", "Marcar o alvo para o comandante e o morteiro: {a}."),
-	},
 	-- luneta (2026-11-12): alça de 100 em 100 m (até 1.000 na Unertl e 1.300 na PU); o toque no
-	-- seletor desce (o ferrolho não tem seletor)
-	sniper = { act("zeroing", "Alça da luneta, 100 m a mais: {a}. Tocar o seletor desce.") },
-	mortar = {
-		act("equip_wheel", "Construir a posição de morteiro: {a}."),
-		act("comm_wheel", "Roda de comunicação: {a}. A página Comando pede a missão de fogo pela grade."),
-	},
-	sapper = {
-		GRENADES,
-		act("equip_wheel", "Construir armadilhas (estacas punji, granada com fio) longe do inimigo: {a}."),
-	},
-	radio_operator = {
-		act(
-			"comm_wheel",
-			"Rádio: {a}. Só você fala com o comandante (página Comando). Se cair, um aliado pega o rádio."
-		),
+	-- seletor desce (o ferrolho não tem seletor). D-108: o binóculo do observador e a respiração
+	sniper = {
+		act("zeroing", "Alça da luneta, 100 m a mais: {a}. Tocar o seletor desce."),
+		act("hold_breath", "Prender a respiração na luneta: {a}. Segure pouco: depois o fôlego falta."),
+		act("binoculars", "Binóculo: {a}."),
 	},
 	tank_crew = {
 		ENTER,
@@ -116,14 +105,13 @@ Tutorial.ROLE = {
 		act("h_stabilize", "Estabilizar o pairado: {a}. Calor e peso roubam potência: decole correndo."),
 		act("v_exit", "Sair do helicóptero, já pousado: {a}."),
 	},
-	door_gunner = { ENTER, act("v_door_fire", "Atirar com a M60 da porta: {a}.") },
 } :: { [string]: { Step } }
 
 -- Passos do papel: comuns de infantaria + campo de tiro (fuzil) + específicos. Tripulantes e
 -- pilotos começam pelo veículo (o comum de infantaria vem depois, mais curto: mapa).
 function Tutorial.steps(role: string): { Step }
 	local out: { Step } = {}
-	local vehicle = role == "tank_crew" or role == "pilot" or role == "door_gunner"
+	local vehicle = role == "tank_crew" or role == "pilot"
 	if vehicle then
 		for _, s in Tutorial.ROLE[role] do
 			table.insert(out, s)
@@ -174,15 +162,32 @@ function Tutorial.placeholders(step: Step): { string }
 	return out
 end
 
--- Papéis concluídos vindos do perfil: só ids de papel conhecidos, só true.
+-- D-108: papel concluído antes das classes mais simples -> o papel que o substituiu (o mesmo de
+-- Roles.MIGRATE; aqui sem o require, o módulo fica puro)
+Tutorial.MIGRATE = {
+	automatic_rifleman = "machine_gunner",
+	grenadier = "rifleman",
+	engineer = "support",
+	sapper = "support",
+	radio_operator = "squad_leader",
+	observer = "sniper",
+	mortar = "support",
+	door_gunner = "machine_gunner",
+} :: { [string]: string }
+
+-- Papéis concluídos vindos do perfil: só ids de papel conhecidos, só true. O papel antigo conta como
+-- o novo (D-108).
 function Tutorial.sanitize(raw: any, roles: { [string]: any }): { [string]: boolean }
 	local out = {}
 	if type(raw) ~= "table" then
 		return out
 	end
 	for k, v in raw do
-		if type(k) == "string" and roles[k] and v == true then
-			out[k] = true
+		if type(k) == "string" and v == true then
+			local id = if roles[k] then k else Tutorial.MIGRATE[k]
+			if id and roles[id] then
+				out[id] = true
+			end
 		end
 	end
 	return out

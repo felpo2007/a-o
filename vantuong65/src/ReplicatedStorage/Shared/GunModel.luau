@@ -5,8 +5,72 @@
 -- detalhe. Origem no punho; a frente é −Z (LookVector). Tem os Attachments "Muzzle" (boca do
 -- cano) e "Sight" (linha de visada, na alça), usados pela arma em primeira pessoa e pelos efeitos.
 local WeaponArt = require(script.Parent.WeaponArt)
+local Pegada3P = require(script.Parent.Pegada3P)
+local Weapons = require(script.Parent.Weapons)
 
 local GunModel = {}
+
+-- ===== tamanho da arma (D-108, Shared/Corpo.ARMA_K) =====
+-- Escala a arma em volta do punho (pivô): comprimento l ao longo do cano e grossura g (largura e
+-- altura). Reversível: a 1ª chamada guarda a medida real de cada peça e ponto (atributos VT65Base*) e
+-- as seguintes partem dela. O molde sai de fit/build na escala da 3ª pessoa (Pegada3P.fatores3P), para
+-- todos os clientes; a 1ª pessoa (WeaponVisuals) volta ao real e aplica a sua.
+function GunModel.scale(model: Model, l: number, g: number)
+	local cl, cg = model:GetAttribute("VT65EscalaL"), model:GetAttribute("VT65EscalaG")
+	local l0 = if type(cl) == "number" then cl else 1
+	local g0 = if type(cg) == "number" then cg else 1
+	local piv = model:GetPivot()
+	-- medida real (escala 1) de quem ainda não tem: a de agora desfeita pela escala de agora
+	local function baseOf(inst: Instance, cf: CFrame): CFrame
+		local b = inst:GetAttribute("VT65Base")
+		if typeof(b) == "CFrame" then
+			return b
+		end
+		local rel = piv:ToObjectSpace(cf)
+		local p = rel.Position
+		local base = CFrame.new(p.X / g0, p.Y / g0, p.Z / l0) * rel.Rotation
+		inst:SetAttribute("VT65Base", base)
+		return base
+	end
+	local function at(base: CFrame): CFrame
+		return piv * (CFrame.new(Pegada3P.escalaPonto(base.Position, l, g)) * base.Rotation)
+	end
+	-- os pontos são lidos antes de as peças mexerem
+	local atts: { { a: Attachment, base: CFrame } } = {}
+	for _, d in model:GetDescendants() do
+		if d:IsA("Attachment") then
+			table.insert(atts, { a = d, base = baseOf(d, d.WorldCFrame) })
+		end
+	end
+	for _, d in model:GetDescendants() do
+		if d:IsA("BasePart") then
+			local base = baseOf(d, d.CFrame)
+			local bs = d:GetAttribute("VT65BaseSize")
+			if typeof(bs) ~= "Vector3" then
+				bs = d.Size / Pegada3P.escalaTamanho(Vector3.one, base.Rotation, l0, g0)
+				d:SetAttribute("VT65BaseSize", bs)
+			end
+			d.Size = Pegada3P.escalaTamanho(bs :: Vector3, base.Rotation, l, g)
+			d.CFrame = at(base)
+		end
+	end
+	for _, it in atts do
+		it.a.WorldCFrame = at(it.base)
+	end
+	local primary = model.PrimaryPart
+	if primary then
+		primary.PivotOffset = primary.CFrame:ToObjectSpace(piv)
+	end
+	model:SetAttribute("VT65EscalaL", l)
+	model:SetAttribute("VT65EscalaG", g)
+end
+
+-- Escala da 3ª pessoa pelo tipo da arma (meia largura do lado, LowX, acompanha a grossura).
+local function scale3P(model: Model, kind: string?, lowX: number)
+	local l, g = Pegada3P.fatores3P(kind)
+	GunModel.scale(model, l, g)
+	model:SetAttribute("LowX", lowX * g)
+end
 
 local M = 0.28
 local LENGTH_M: { [string]: number } = {
@@ -21,6 +85,7 @@ local LENGTH_M: { [string]: number } = {
 	rpg2 = 0.95,
 	m70 = 1.13, -- Winchester M70 de cano de 24 pol. (tools/blender/armas.py; total PLACEHOLDER)
 	mosin = 1.232, -- Mosin-Nagant 91/30 (wiki)
+	win12 = 1.003, -- Winchester Model 12 Trench Gun, cano de 20 pol. (tools/blender/espingarda.py)
 }
 local WOOD = Color3.fromRGB(96, 66, 42)
 local STEEL = Color3.fromRGB(44, 45, 47)
@@ -93,7 +158,8 @@ function GunModel.build(weaponId: string, kind: string?): Model
 	support.CFrame = receiver.CFrame:ToObjectSpace(CFrame.new(0, 0, -(if kind == "pistol" then 0 else L * 0.22) / M))
 	support.Parent = receiver
 	model.WorldPivot = CFrame.identity -- punho
-	model:SetAttribute("LowX", -0.025 / M) -- meia largura da caixa da culatra (arma caída de lado)
+	-- meia largura da caixa da culatra (arma caída de lado); D-108: na escala da 3ª pessoa
+	scale3P(model, kind, -0.025 / M)
 	return model
 end
 
@@ -149,8 +215,10 @@ function GunModel.fit(model: Model, weaponId: string): boolean
 	model.PrimaryPart = mesh
 	mesh.PivotOffset = CFrame.new(art.grip) * inv
 	model:SetAttribute("WeaponId", weaponId)
-	model:SetAttribute("LowX", art.lowX)
-	model:SetAttribute("EyeM", art.eyeM) -- olho até o ponto Sight, mirando (WeaponVisuals)
+	-- D-108: o molde (mão, costas, chão, prévias, para todos) na escala da 3ª pessoa
+	local wp = Weapons.get(weaponId)
+	scale3P(model, if wp then wp.kind else nil, art.lowX)
+	model:SetAttribute("EyeM", art.eyeM) -- olho até o ponto Sight, mirando (WeaponVisuals; tamanho real)
 	-- alça medida na malha (D-69): o WeaponVisuals desenha anel/entalhe e massa limpos por cima
 	model:SetAttribute("SightKind", art.sightKind)
 	model:SetAttribute("SightMm", art.sightMm)

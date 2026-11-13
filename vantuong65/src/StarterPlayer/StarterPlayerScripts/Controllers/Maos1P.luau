@@ -14,6 +14,7 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
+local Corpo = require(ReplicatedStorage.Shared.Corpo)
 local MaosPose = require(ReplicatedStorage.Shared.MaosPose)
 
 local Maos1P = {}
@@ -50,6 +51,9 @@ local S = {
 	cur = { R = "", L = "" } :: { [string]: string },
 	fore = {} :: { [string]: Fore },
 	hidden = false,
+	-- D-108: mãos e antebraços do tamanho da arma de 1ª pessoa (Corpo.ARMA_K): a pega foi desenhada
+	-- no punho de tamanho real, e com a arma maior os dedos entrariam nele
+	k = Corpo.ARMA_K,
 }
 
 local function bare(p: BasePart)
@@ -68,7 +72,7 @@ local function part(shape: Enum.PartType, size: Vector3, color: Color3, mat: Enu
 end
 
 local function v3(t: { number }): Vector3
-	return Vector3.new(t[1], t[2], t[3]) / M
+	return Vector3.new(t[1], t[2], t[3]) * S.k / M
 end
 
 -- cápsulas de peças: bola em cada ponto (afinando para a ponta) e cilindro entre eles
@@ -86,7 +90,7 @@ local function buildParts(pose: MaosPose.Pose, parent: Model): Group
 		local n = #ch.pts
 		local radii = {}
 		for i = 1, n do
-			radii[i] = ch.r * (1 - 0.14 * (i - 1) / math.max(n - 1, 1)) / M
+			radii[i] = ch.r * S.k * (1 - 0.14 * (i - 1) / math.max(n - 1, 1)) / M
 		end
 		for i = 1, n do
 			local d = radii[i] * 2
@@ -123,6 +127,7 @@ local function buildArt(meshName: string, parent: Model): Group?
 		end
 	end
 	bare(p)
+	p.Size *= S.k
 	p.Color = S.skin
 	p.Material = Enum.Material.SmoothPlastic
 	p.Parent = parent
@@ -162,12 +167,13 @@ local function buildFore(m: Model): Fore
 			end
 		end
 		bare(p)
+		p.Size *= S.k
 		p.Color = SLEEVE_COLOR[S.faction] or SLEEVE_COLOR.US
 		p.Material = Enum.Material.Fabric
 		p.Parent = m
 		local w = part(Enum.PartType.Cylinder, Vector3.one, S.skin, Enum.Material.SmoothPlastic)
 		w.Parent = m
-		return { wrist = w, sleeve = p, cuff = nil, art = true, artLen = ART_POINTS.Manga.size[1] }
+		return { wrist = w, sleeve = p, cuff = nil, art = true, artLen = ART_POINTS.Manga.size[1] * S.k }
 	end
 	local w = part(Enum.PartType.Cylinder, Vector3.one, S.skin, Enum.Material.SmoothPlastic)
 	w.Parent = m
@@ -192,7 +198,7 @@ function Maos1P.ensure()
 	local skin = if head then head.Color else Color3.fromRGB(196, 150, 112)
 	local folder = ReplicatedStorage:FindFirstChild("VT65MaosArt")
 	local art = folder and folder:FindFirstChild(if fac == "VC" then "maos_vc_1p" else "maos_us_1p")
-	local key = fac .. ":" .. skin:ToHex() .. ":" .. tostring(art ~= nil)
+	local key = fac .. ":" .. skin:ToHex() .. ":" .. tostring(art ~= nil) .. ":" .. S.k
 	if S.model and S.model.Parent and key == S.key then
 		return
 	end
@@ -242,14 +248,15 @@ function Maos1P.forearm(wrist: Vector3, elbow: Vector3, side: string)
 		return
 	end
 	local u = dir / len
-	len = math.min(len, MaosPose.FOREARM_M / M)
+	local k = S.k
+	len = math.min(len, MaosPose.FOREARM_M * k / M)
 	local sl = MaosPose.SLEEVE[S.faction] or MaosPose.SLEEVE.US
-	local wl = math.min(MaosPose.WRIST.len / M, len * 0.3)
+	local wl = math.min(MaosPose.WRIST.len * k / M, len * 0.3)
 	local wEnd = wrist + u * wl
 	local function along(a: Vector3, b: Vector3): CFrame
 		return CFrame.lookAt((a + b) / 2, b) * CFrame.Angles(0, math.pi / 2, 0)
 	end
-	local wr = MaosPose.WRIST.r * 2 / M
+	local wr = MaosPose.WRIST.r * 2 * k / M
 	f.wrist.Size = Vector3.new(wl + wr * 0.3, wr, wr)
 	f.wrist.CFrame = along(wrist - u * wr * 0.15, wEnd)
 	local slen = len - wl
@@ -259,13 +266,13 @@ function Maos1P.forearm(wrist: Vector3, elbow: Vector3, side: string)
 		f.sleeve.CFrame = along(wEnd, wrist + u * len)
 		return
 	end
-	local rs = (sl.r0 + sl.r1) / M -- diâmetro médio
+	local rs = (sl.r0 + sl.r1) * k / M -- diâmetro médio
 	f.sleeve.Size = Vector3.new(slen, rs, rs)
 	f.sleeve.CFrame = along(wEnd, wrist + u * len)
 	local cuff = f.cuff
 	if cuff then
-		local cl = math.min(sl.cuffLen / M, slen * 0.4)
-		local cd = sl.cuff * 2 / M
+		local cl = math.min(sl.cuffLen * k / M, slen * 0.4)
+		local cd = sl.cuff * 2 * k / M
 		cuff.Size = Vector3.new(cl, cd, cd)
 		cuff.CFrame = along(wEnd, wEnd + u * cl)
 	end
@@ -282,6 +289,15 @@ end
 
 function Maos1P.model(): Model?
 	return S.model
+end
+
+-- D-108: escala das mãos de 1ª pessoa (a da arma). Mudou: refaz no próximo ensure().
+function Maos1P.setScale(k: number)
+	S.k = k
+end
+
+function Maos1P.scale(): number
+	return S.k
 end
 
 return Maos1P

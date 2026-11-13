@@ -34,9 +34,17 @@ SomArmas.LIB = {
 	metralhadora = { id = 9116335315, start = 0.06, len = 0.3, vol = 0.85, pitch = 1.05, alt = "shot_m14" },
 	pistola = { id = 9117396996, start = 0.03, len = 0.32, vol = 0.75, pitch = 1, alt = "shot_m14" },
 	lancador = { id = 12222065, start = 0, len = 1.8, vol = 1, pitch = 1, alt = "mortar_launch" },
+	-- D-108: espingarda calibre 12 (F44 Shots.Shotgun: o disparo grave e largo, com eco)
+	espingarda = { id = 9112910245, start = 0.04, len = 0.8, vol = 1, pitch = 1, alt = "shot_m14" },
 	-- mecânica (F44 Bolt, Shell)
 	mec_ferrolho = { id = 9116357355, start = 0, len = 1.3, vol = 0.55, pitch = 1.15 },
 	mec_estojo = { id = 9113633058, start = 0.18, len = 0.22, vol = 0.3, pitch = 1 },
+	-- D-108: bomba da espingarda (F44 Pump: o mesmo arquivo do disparo, logo depois dele: telha para
+	-- trás e para a frente) e cartucho entrando no depósito (F44 Reload, só o estalo do começo,
+	-- mais agudo: PLACEHOLDER, ouvir no Studio). Estojo de plástico vermelho caindo: F44 Shell grave.
+	mec_bomba = { id = 9112910245, start = 0.84, len = 0.7, vol = 0.7, pitch = 1 },
+	mec_cartucho = { id = 9117889191, start = 1.0, len = 0.28, vol = 0.5, pitch = 1.35 },
+	mec_cartucho_cai = { id = 9113633058, start = 0.18, len = 0.22, vol = 0.32, pitch = 0.62 },
 	-- bala passando (F44 Whiz); o estalo supersônico é o do jogo (AssetIds.Sounds.crack)
 	bala_zunido = { id = 9118168273, start = 0, len = 0.4, vol = 0.7, pitch = 1, alt = "crack" },
 	-- marcador de acerto (F44 Hit, HeadHit, Kill): leve, 2D, só para quem atirou
@@ -59,6 +67,8 @@ export type Arma = {
 	vol: number?,
 	ferrolho: boolean?, -- manobra entre tiros (som de ferrolho)
 	estojo: boolean?, -- estojo pulando (semi e automático)
+	mecanica: string?, -- D-108: som da manobra entre tiros (chave em LIB; senão mec_ferrolho)
+	cartucho: string?, -- D-108: som de cada cartucho entrando na recarga um a um (chave em LIB)
 }
 
 -- Por arma (ajuste de tom como o PerWeapon do Front 44: calibre maior, tom mais baixo)
@@ -73,6 +83,16 @@ SomArmas.ARMA = {
 	type54 = { tiro = "pistola", pitch = 1.18 }, -- 7,62x25: estalo seco (o F44 usa 1,18 na TT-33)
 	m70 = { tiro = "fuzil_cheio", pitch = 0.96, ferrolho = true },
 	mosin = { tiro = "fuzil_cheio", pitch = 1.05, ferrolho = true }, -- o F44 usa 1,05 no Mosin
+	-- D-108: 12 de cano curto, um tom abaixo da M1897 do F44 (mais carga de pólvora no 00 militar:
+	-- PLACEHOLDER de ouvido); bomba entre os tiros e cartucho a cartucho na recarga
+	win12 = {
+		tiro = "espingarda",
+		pitch = 0.94,
+		vol = 1.05,
+		ferrolho = true,
+		mecanica = "mec_bomba",
+		cartucho = "mec_cartucho",
+	},
 } :: { [string]: Arma }
 
 -- Arma sem linha própria (as que vierem): pela classe
@@ -81,7 +101,14 @@ SomArmas.CLASSE = {
 	mg = { tiro = "metralhadora", pitch = 1, estojo = true },
 	pistol = { tiro = "pistola", pitch = 1 },
 	launcher = { tiro = "lancador", pitch = 1.35, vol = 0.8 },
+	shotgun = { tiro = "espingarda", pitch = 1, ferrolho = true, mecanica = "mec_bomba", cartucho = "mec_cartucho" },
 } :: { [string]: Arma }
+
+-- Som da manobra entre tiros da arma (ferrolho ou bomba)
+function SomArmas.mecanica(id: string?, kind: string?): string
+	local a = SomArmas.arma(id or "", kind)
+	return a.mecanica or "mec_ferrolho"
+end
 
 function SomArmas.arma(id: string, kind: string?): Arma
 	return SomArmas.ARMA[id] or SomArmas.CLASSE[kind or "rifle"] or SomArmas.CLASSE.rifle

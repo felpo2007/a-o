@@ -5,7 +5,8 @@
 -- SoldierPreview (manequins do menu, parados).
 --
 -- Copiado do Front 44 (Client/Poses.luau: pose() e armIK(); Config.Bodies.BlockyHold), levado ao
--- boneco daqui (Corpo.BLOCK_SCALE = 1,4286 vezes o de lá) com a arma no TAMANHO REAL:
+-- boneco daqui (Corpo.BLOCK_SCALE = 1,4286 vezes o de lá) com a arma no TAMANHO REAL (D-108: mais
+-- grossa, Corpo.ARMA_K; o comprimento é o que o braço alcança com a coronha no ombro):
 -- - lá a arma é 1,3 vez a real e o pivô fica dentro do peito; aqui a coronha encosta no bolso do
 --   ombro direito, na frente do peito, e a arma gira em volta dela;
 -- - a arma aponta para onde o soldado mira: o giro do tronco (postura de lado, inclinar, deitado,
@@ -35,18 +36,73 @@ Pegada3P.S = S
 -- engolia o punho e o guarda-mão da arma de tamanho real
 Pegada3P.HAND_K = Corpo.MAO_K
 
+-- ===== armas maiores (D-108, Shared/Corpo.ARMA_K) =====
+-- Arma de 3ª pessoa: comprimento L (ao longo do cano) e grossura G (largura e altura). A pistola cresce
+-- por inteiro (o cabo fica na mão e o braço não estica). Soleira, punho, apoio e boca chegam medidos no
+-- modelo já escalado (PostureController.infoOf); aqui escalam as medidas da arma escritas em número.
+Pegada3P.L = Corpo.ARMA_COMPRIMENTO_3P
+Pegada3P.G = Corpo.ARMA_K
+
+-- (comprimento, grossura) da arma de 3ª pessoa pelo tipo
+function Pegada3P.fatores3P(kind: string?): (number, number)
+	if kind == "pistol" then
+		return Pegada3P.G, Pegada3P.G
+	end
+	return Pegada3P.L, Pegada3P.G
+end
+
+-- Ponto no espaço da arma (punho na origem, boca em −Z) com a arma escalada.
+function Pegada3P.escalaPonto(p: Vector3, l: number, g: number): Vector3
+	return V3.new(p.X * g, p.Y * g, p.Z * l)
+end
+
+-- Tamanho de uma peça de giro `rot` (no espaço da arma) com a arma escalada: cada eixo da peça estica
+-- pelo comprimento que ele ganha (Front 44, GunModels.thicken; exato nas peças alinhadas à arma).
+function Pegada3P.escalaTamanho(size: Vector3, rot: CFrame, l: number, g: number): Vector3
+	local function k(x: number, y: number, z: number): number
+		local d = rot:VectorToWorldSpace(V3.new(x, y, z))
+		return math.sqrt((d.X * g) ^ 2 + (d.Y * g) ^ 2 + (d.Z * l) ^ 2)
+	end
+	return V3.new(size.X * k(1, 0, 0), size.Y * k(0, 1, 0), size.Z * k(0, 0, 1))
+end
+
+-- ===== 1ª pessoa (WeaponVisuals): a arma k vezes maior por inteiro =====
+-- Quadril: a alça fica onde ficava com a arma real (D-69) e a arma cresce em volta dela; o punho e a
+-- mão descem um pouco. `sight` = alça na arma JÁ escalada (punho na origem), studs.
+function Pegada3P.quadril1P(hip: CFrame, sight: Vector3, k: number): CFrame
+	return hip * CF.new(-sight * ((k - 1) / k))
+end
+
+-- Mira: o olho a eye x k da alça e a linha alça -> massa no centro da tela (D-60). Com a arma k vezes
+-- maior e o olho k vezes mais longe, a imagem é a da arma real (ampliação em volta do olho): alça,
+-- massa, anel e o que fica embaixo deles aparecem como na D-67. eye = olho até a alça (studs, real).
+function Pegada3P.mira1P(sight: Vector3, front: Vector3?, eye: number, k: number): CFrame
+	local los = if front then front - sight else V3.new(0, 0, -1)
+	-- giro mínimo que leva a linha a −Z (o CFrame.lookAt do Lune erra; no Roblox dá o mesmo a 0,01°).
+	-- Sem o corte do fromTo: a linha da M14 está a 0,23° do cano e precisa girar.
+	local align = CF.identity
+	if los.Z < -1e-3 then
+		local u, fwd = los.Unit, V3.new(0, 0, -1)
+		local ax = u:Cross(fwd)
+		if ax.Magnitude > 1e-9 then
+			align = CF.fromAxisAngle(ax.Unit, math.acos(math.clamp(u:Dot(fwd), -1, 1)))
+		end
+	end
+	return CF.new(0, 0, -eye * k) * align * CF.new(-sight)
+end
+
 -- ===== pose da arma (PLACEHOLDER: conferir no Studio) =====
 -- Coronha no bolso do ombro direito, na frente do peito (o tronco de bloco tem meia profundidade 0,5 x S).
 -- Escolhidas no simulador (tests/luau/pegada.luau): as duas mãos no alcance, o cano fora do tronco.
 Pegada3P.BUTT = { 0.25, 0.40, -0.53 } -- x S
 Pegada3P.BUTT_PRONE = { 0.15, 0.40, -0.80 } -- deitado: abaixo da cabeça, rente ao chão
-Pegada3P.BUTT_DY = 0.13 -- studs: centro da soleira acima do punho (M14: cano 0,18 stud acima)
+Pegada3P.BUTT_DY = 0.13 -- studs (x G): centro da soleira acima do punho (M14: cano 0,18 stud acima)
 -- Front 44 (x S): na mira a arma sobe até o rosto; guarda baixa; corrida de assalto; recarga perto do peito
 Pegada3P.RAISE = 0.45
 Pegada3P.GUARD = { pos = { 0, -0.18, 0.05 }, rot = { -22, 8, -6 } }
--- corrida: Front 44 (−0,42; 0,05; 0,05) e (48°, 38°, 32°); para o lado só −0,32 (com −0,42 o braço
--- direito ia a 98% do alcance na arma mais curta)
-Pegada3P.PORT = { pos = { -0.32, 0.05, 0.05 }, rot = { 48, 38, 32 }, pump = 7, lift = 0.08 }
+-- corrida: Front 44 (−0,42; 0,05; 0,05) e (48°, 38°, 32°); para o lado só −0,24 (com −0,42 o braço
+-- direito ia a 98% do alcance na arma mais curta; com −0,32, a 100% na M60, D-108)
+Pegada3P.PORT = { pos = { -0.24, 0.05, 0.05 }, rot = { 48, 38, 32 }, pump = 7, lift = 0.08 }
 Pegada3P.RELOAD = { pos = { -0.1, -0.1, 0.1 }, rot = { 8, 0, 0 } } -- z 0,3 do Front 44 enterrava a coronha
 -- pistola: as duas mãos no cabo, braços quase esticados (Front 44 BlockyHold.Pivot + PistolGrip; o
 -- −1,35 de lá deixava o braço direito a 97% do alcance aqui)
@@ -64,8 +120,15 @@ Pegada3P.POLES = {
 -- tocam); fica antes da boca. Fora do alcance do braço (mira muito alta ou baixa), escorrega para
 -- trás ao longo do cano (Front 44, Poses "slideBack") até SUPPORT_BACK, junto do carregador.
 Pegada3P.SUPPORT_MIN = 1.0
-Pegada3P.SUPPORT_BACK = 0.62
+Pegada3P.SUPPORT_BACK = 0.62 -- studs (x L)
 Pegada3P.REACH_USE = 0.97
+-- Lança-rojão (RPG-2): atrás do punho o tubo é bem mais comprido que uma coronha (2,57 studs; a M79 tem
+-- 1,1) e vai APOIADO EM CIMA do ombro direito, por fora da cabeça, com o punho à frente do ombro. Antes a
+-- ponta de trás ia ao bolso do ombro e o punho ficava a ~72 cm dele: a mão direita não chegava (137% do
+-- alcance). pos: apoio no ombro (x S); dy: eixo do tubo acima do punho (studs, x G); ahead: punho à
+-- frente do apoio (x S); pitch: arfagem que o tubo acompanha sem entrar no ombro (graus). PLACEHOLDER.
+Pegada3P.TUBE_REAR = 1.6 -- studs (x L): soleira mais longe que isso = tubo no ombro
+Pegada3P.TUBE = { pos = { 0.82, 0.92, -0.42 }, dy = 0.32, ahead = 0.6, pitch = { -20, 12 }, guard = -6 }
 
 local function v(t: { number }, k: number?): Vector3
 	local m = k or 1
@@ -150,6 +213,15 @@ function Pegada3P.gun(torso: CFrame, s: State): CFrame
 	local reload = CF.new(v(R.pos, S * busy)) * rot(R.rot, busy)
 	local k = math.clamp(s.kick, 0, 1)
 	local kick = CF.new(0, 0.02 * S * k, 0.14 * S * k) * CF.Angles(math.rad(5) * k, 0, 0)
+	if Pegada3P.tubo(s) then
+		-- tubo no ombro: gira no apoio, sem corrida atravessada nem recarga no peito (D-108)
+		local T = Pegada3P.TUBE
+		local tp = math.clamp(s.pitch, math.rad(T.pitch[1]), math.rad(T.pitch[2]))
+		local tAim = torso.Rotation:Inverse() * CF.Angles(tp, 0, 0)
+		local droop = CF.Angles(math.rad(T.guard) * (1 - ads), 0, 0)
+		local base = v(T.pos, S):Lerp(v(Pegada3P.BUTT_PRONE, S), p)
+		return CF.new(base) * tAim * droop * life * kick * CF.new(0, -T.dy * Pegada3P.G, -T.ahead * S)
+	end
 	if s.kind == "pistol" then
 		local pivot = v(Pegada3P.PISTOL_PIVOT, S) + V3.new(0, Pegada3P.RAISE * S * ads * 0.5, 0)
 		return CF.new(pivot) * aim * lowered * port * reload * life * kick * CF.new(v(Pegada3P.PISTOL_GRIP, S))
@@ -163,7 +235,12 @@ function Pegada3P.gun(torso: CFrame, s: State): CFrame
 		* reload
 		* life
 		* kick
-		* CF.new(0, -Pegada3P.BUTT_DY, -math.max(s.rear, 0.3))
+		* CF.new(0, -Pegada3P.BUTT_DY * Pegada3P.G, -math.max(s.rear, 0.3))
+end
+
+-- Lança-rojão de tubo (RPG-2): vai no ombro, não na pega de coronha.
+function Pegada3P.tubo(s: State): boolean
+	return s.kind == "launcher" and s.rear > Pegada3P.TUBE_REAR * Pegada3P.L
 end
 
 -- Alvo da mão esquerda (espaço da arma, a partir do punho): o apoio da arma, empurrado para a frente
@@ -175,7 +252,7 @@ function Pegada3P.support(base: Vector3, maxZ: number, shoulder: Vector3, reach:
 	local pos = V3.new(base.X, base.Y, -z)
 	local lim = reach * Pegada3P.REACH_USE
 	if (pos - shoulder).Magnitude > lim then
-		local lo, hi = math.min(Pegada3P.SUPPORT_BACK, -base.Z), z
+		local lo, hi = math.min(Pegada3P.SUPPORT_BACK * Pegada3P.L, -base.Z), z
 		for _ = 1, 12 do
 			local mid = (lo + hi) / 2
 			if (V3.new(base.X, base.Y, -mid) - shoulder).Magnitude > lim then

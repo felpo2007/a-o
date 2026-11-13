@@ -23,6 +23,8 @@ Traps.DETECT_M = 6 -- o engenheiro EUA percebe a armadilha a esta distância...
 Traps.DETECT_SLOW_MS = 1.2 -- ...andando devagar (agachado/deitado ou parado)
 Traps.CAREFUL_MS = 0.6 -- abaixo disto, quem passa por cima tem metade da chance de disparar
 Traps.DISARM_S = 4
+-- D-108: o engenheiro dos EUA virou o Suporte (Roles); o id antigo fica para quem ainda o tem
+Traps.ROLES = { support = true, engineer = true } :: { [string]: boolean }
 
 -- Chance de disparar ao pisar (dentro do raio). Detectada não dispara para quem a detectou.
 function Traps.triggerChance(speedMs: number, detected: boolean): number
@@ -42,7 +44,8 @@ end
 
 -- O engenheiro EUA detecta: perto, devagar e de lado inimigo.
 function Traps.detects(role: string?, faction: string?, trapFaction: string, distM: number, speedMs: number): boolean
-	return role == "engineer"
+	return role ~= nil
+		and Traps.ROLES[role] == true
 		and faction ~= nil
 		and faction ~= trapFaction
 		and distM <= Traps.DETECT_M
@@ -51,7 +54,7 @@ end
 
 -- Pode desarmar: engenheiro do outro lado, com a armadilha já detectada.
 function Traps.canDisarm(role: string?, faction: string?, trapFaction: string, detected: boolean): boolean
-	return role == "engineer" and faction ~= nil and faction ~= trapFaction and detected
+	return role ~= nil and Traps.ROLES[role] == true and faction ~= nil and faction ~= trapFaction and detected
 end
 
 return Traps

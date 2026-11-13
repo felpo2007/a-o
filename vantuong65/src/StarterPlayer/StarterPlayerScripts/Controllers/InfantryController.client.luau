@@ -10,6 +10,7 @@ local ProximityPromptService = game:GetService("ProximityPromptService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Comms = require(ReplicatedStorage.Shared.Comms)
+local Equipar = require(ReplicatedStorage.Shared.Equipar)
 local Radio = require(ReplicatedStorage.Shared.Radio)
 local Logistics = require(ReplicatedStorage.Shared.Logistics)
 local Net = require(ReplicatedStorage.Shared.Net)
@@ -259,14 +260,14 @@ local function equipEnabled(id: string): boolean
 		return ((player:GetAttribute("Smokes") :: number?) or 0) > 0
 	elseif id == "build" then
 		for _, b in Logistics.BUILDS do
-			if b.role[role()] then
+			if Logistics.roleCan(b, role(), player:GetAttribute("Faction") :: string?) then
 				return true
 			end
 		end
 		return false
 	elseif id == "role_tool" then
-		local r = role()
-		return r == "commander" or r == "mortar" or r == "anti_tank" or r == "medic" or r == "engineer"
+		-- D-108: a ferramenta do suporte é a caixa de munição (Shared/Equipar.ROLE_TOOL)
+		return Equipar.ROLE_TOOL[role()] == true
 	end
 	return true
 end
@@ -296,18 +297,20 @@ local function useItem(id: string)
 	elseif id == "build" then
 		Wheel.open("equip", "Construir", buildItems, function(bid: string)
 			local b = Logistics.BUILDS[string.sub(bid, 7)]
-			return b ~= nil and b.role[role()] == true
+			return b ~= nil and Logistics.roleCan(b, role(), player:GetAttribute("Faction") :: string?)
 		end)
 		return
 	elseif string.sub(id, 1, 6) == "build:" then
 		Net.event("Build_Request"):FireServer({ kind = string.sub(id, 7) })
 	elseif id == "role_tool" then
 		local r = role()
-		if r == "commander" or r == "mortar" then
+		if r == "commander" then
 			Bus.fire("command_page")
+		elseif r == "support" then
+			Bus.fire("caixa_municao") -- D-108: prévia da caixa no chão (Controllers/CaixaMunicao.client)
 		elseif r == "anti_tank" then
 			Bus.fire("toast", if touch then "Lançador: troque de arma" else "Lançador: troque de arma (Y)")
-		elseif r == "medic" or r == "engineer" then
+		elseif r == "medic" then
 			Bus.fire(
 				"toast",
 				if touch then "Use o botão de interagir perto do alvo" else "Segure X perto do alvo para agir"

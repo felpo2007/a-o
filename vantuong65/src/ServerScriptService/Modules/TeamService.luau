@@ -46,11 +46,19 @@ local function pushSquads(faction: string)
 	end
 end
 
-local function setRole(player: Player, roleId: string?)
+-- D-108: a arma principal escolhida no cartão do papel (Roles.PRIMARY), guardada no atributo
+-- "Primaria" (vale no próximo nascimento: o CombatService lê o "Loadout" ao nascer)
+local function applyLoadout(player: Player, roleId: string?, primary: string?)
 	local faction = player:GetAttribute("Faction") :: string?
-	player:SetAttribute("Role", roleId)
-	local loadout = if roleId and faction then Roles.loadout[faction][roleId] else nil
+	local loadout = if roleId and faction then Roles.loadoutFor(faction, roleId, primary) else nil
 	player:SetAttribute("Loadout", if loadout then table.concat(loadout, ",") else nil)
+	local p = if roleId and faction then Roles.primaryFor(faction, roleId, primary) else nil
+	player:SetAttribute("Primaria", if p and #Roles.primaries(faction :: string, roleId :: string) > 1 then p else nil)
+end
+
+local function setRole(player: Player, roleId: string?, primary: string?)
+	player:SetAttribute("Role", roleId)
+	applyLoadout(player, roleId, primary)
 	roleChanged:Fire(player, roleId)
 end
 
@@ -115,6 +123,8 @@ function TeamService.remember(player: Player)
 		end
 		if type(role) == "string" then
 			c.role = role
+			local w = player:GetAttribute("Primaria")
+			c.w = if type(w) == "string" then w else nil
 		end
 	end
 	local clean = JogarAgora.sanitize(JogarAgora.pack(c))
@@ -165,7 +175,7 @@ function TeamService.quickJoin(player: Player, rank: number): string?
 		if not r or not Squads.chooseRole(st, player.UserId, r) then
 			return "Nenhum papel livre neste squad"
 		end
-		setRole(player, r)
+		setRole(player, r, if r == last.role then last.w else nil)
 		pushSquads(faction)
 	end
 	TeamService.remember(player)
@@ -229,13 +239,21 @@ function TeamService.start()
 		pushSquads(faction)
 	end)
 
-	Net.event("Role_Choose").OnServerEvent:Connect(function(player, roleId)
+	-- (papel, arma principal?) D-108: o mesmo papel com outra arma só troca o equipamento (sem os +15 s
+	-- da troca de papel); vale no próximo nascimento
+	Net.event("Role_Choose").OnServerEvent:Connect(function(player, roleId, primary)
 		local faction = player:GetAttribute("Faction") :: string?
 		if not faction or type(roleId) ~= "string" then
 			return
 		end
+		local w = if type(primary) == "string" and #primary <= 24 then primary else nil
+		if player:GetAttribute("Role") == roleId and Squads.squadOf(TeamService.squads[faction], player.UserId) then
+			applyLoadout(player, roleId, w)
+			TeamService.remember(player)
+			return
+		end
 		if Squads.chooseRole(TeamService.squads[faction], player.UserId, roleId) then
-			setRole(player, roleId)
+			setRole(player, roleId, w)
 			pushSquads(faction)
 			TeamService.remember(player)
 		end

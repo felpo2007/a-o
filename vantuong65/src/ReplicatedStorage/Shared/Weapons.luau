@@ -30,7 +30,7 @@ export type Weapon = {
 	id: string,
 	name: string,
 	faction: string,
-	kind: string, -- "rifle" | "mg" | "pistol" | "launcher"
+	kind: string, -- "rifle" | "mg" | "pistol" | "launcher" | "shotgun" (D-108)
 	cartridge: string,
 	muzzleVelocity: number, -- m/s
 	rpm: number, -- cadência cíclica (tiros/min); arma sem automático: cadência prática (bots)
@@ -38,7 +38,7 @@ export type Weapon = {
 	massLoadedKg: number,
 	bulletMassG: number,
 	bcG1: number, -- coeficiente balístico G1 (lb/in²)
-	modes: { string }, -- "semi" | "auto" | "single" | "bolt"; o 1º é o padrão
+	modes: { string }, -- "semi" | "auto" | "single" | "bolt" | "pump"; o 1º é o padrão
 	dispersionMoa: number,
 	boltHoldOpen: boolean,
 	enabled: boolean, -- false: entra numa fase posterior
@@ -58,6 +58,16 @@ export type Weapon = {
 	bipodRoles: { string }?, -- bipé só nestes papéis (M14: o bipé M2 do fuzileiro automático)
 	-- D-107: dano no tronco com a energia de boca (vida 100); senão o do tipo (Weapons.DAMAGE)
 	damage: number?,
+	-- D-108 (espingarda): bagos por tiro (cada um é uma bala com a semente própria, Shared/Chumbo; a
+	-- ficha balística e o dano são de UM bago), depósito tubular (recarga cartucho a cartucho),
+	-- carga total para o recuo e alcance eficaz (bots)
+	pellets: number?,
+	feed: string?, -- "tube": a reserva é de cartuchos soltos e a recarga é um a um
+	reloadStartS: number?, -- tubular: levar a arma à posição de carregar (s)
+	shellS: number?, -- tubular: por cartucho (s)
+	reloadEndS: number?, -- tubular: bombear para câmara, se a arma estava vazia (s)
+	chargeG: number?, -- massa de tudo o que sai da boca (g), para o recuo
+	effectiveM: number?, -- alcance em que os bots atiram (m)
 }
 
 -- Limite do semi: o gatilho não sai mais rápido que isso (PLACEHOLDER: limite de jogo contra macro;
@@ -68,18 +78,20 @@ Weapons.ZEROS = { 100, 200, 300 }
 -- Recarga por tipo (s), PLACEHOLDER (antes em CombatService.RELOAD e WeaponController.RELOAD_S).
 -- D-107 (pedido do dono: "faça o jogo mais fast paced"): fuzil 3,0 -> 2,4, metralhadora 7,0 -> 5,5,
 -- pistola 2,5 -> 2,0, lançador 3,0 -> 2,6.
-Weapons.RELOAD_S = { rifle = 2.4, mg = 5.5, pistol = 2.0, launcher = 2.6 } :: { [string]: number }
+Weapons.RELOAD_S = { rifle = 2.4, mg = 5.5, pistol = 2.0, launcher = 2.6, shotgun = 4.6 } :: { [string]: number }
 -- D-107 (pedido do dono: "quero 3 ou 4 tiros para morrer", "mais difícil de morrer"): dano no tronco
 -- com a energia de boca, por tipo, quando a arma não tem `damage` (PLACEHOLDER de jogo). A conta do
 -- tiro (zona e queda com a energia) fica no Shared/Medical.shotDamage.
-Weapons.DAMAGE = { rifle = 36, mg = 32, pistol = 25, launcher = 40 } :: { [string]: number }
+Weapons.DAMAGE = { rifle = 36, mg = 32, pistol = 25, launcher = 40, shotgun = 12 } :: { [string]: number }
 
 function Weapons.damageOf(wp: Weapon): number
 	return wp.damage or Weapons.DAMAGE[wp.kind] or 30
 end
--- Papel que leva a M14 com seletor e bipé (o fuzileiro automático da esquadra de tiro, Roles, só dos
--- EUA, um por squad). As outras M14 ficam no semi, como a maioria das M14 do USMC em 1965.
-Weapons.AUTO_RIFLEMAN = "automatic_rifleman"
+-- Papel que leva a M14 com seletor e bipé (o fuzileiro automático da esquadra de tiro, só dos EUA,
+-- um por squad). D-108: o fuzileiro automático virou o metralhador com a M14 (Roles.PRIMARY); o id
+-- antigo fica na lista para o gancho do Studio ("m14:automatic_rifleman"). As outras M14 ficam no
+-- semi, como a maioria das M14 do USMC em 1965.
+Weapons.AUTO_RIFLEMAN = "machine_gunner"
 -- FOV mirando (fração do FOV base): fecha um pouco, sem lupa (pedido do dono). Era 55/70 = 0,786.
 -- PLACEHOLDER de jogo.
 Weapons.ADS_FOV_K = 0.72
@@ -111,8 +123,8 @@ Weapons.list = {
 		modes = { "semi", "auto" },
 		-- semi travado na maioria; seletor só no fuzileiro automático (FM 23-8, 1965: "When employed as
 		-- an automatic rifle, the selector and bipod M2 must be installed")
-		roleModes = { auto = { "automatic_rifleman" } },
-		bipodRoles = { "automatic_rifleman" }, -- bipé M2 (FM 23-8, 1965, par. 3a)
+		roleModes = { auto = { "machine_gunner", "automatic_rifleman" } },
+		bipodRoles = { "machine_gunner", "automatic_rifleman" }, -- bipé M2 (FM 23-8, 1965, par. 3a)
 		dispersionMoa = 3,
 		boltHoldOpen = true,
 		enabled = true,
@@ -441,6 +453,58 @@ Weapons.list = {
 			reloadS = "PLACEHOLDER (cartucho a cartucho com a PU montada: a confirmar)",
 		},
 	}),
+	-- ===== espingarda calibre 12 (D-108; pedido do dono: "faça a arma doze também, com sons realistas,
+	-- dano bom") =====
+	-- Winchester Model 12 "trench gun": a espingarda dos fuzileiros na Coreia e no começo do Vietnã. A
+	-- Ithaca 37 chegou ao USMC em quantidade com o pedido de maio de 1966 e a Remington 870 Mk 1 foi
+	-- pedida em 1966 e padronizada em 1969 (fontes em src.uso; escolha em tools/blender/ESPINGARDA.txt).
+	-- A ficha balística e o dano são de UM bago de chumbo 00 (9 por cartucho): cada bago é um raio com a
+	-- semente própria (Weapons.pelletSeed) e o padrão sai da dispersão de cada bago.
+	w({
+		id = "win12",
+		name = "Winchester 12 (espingarda)",
+		faction = "US",
+		kind = "shotgun",
+		cartridge = "12 ga 2¾ pol. 00 Buck (9 bagos)",
+		muzzleVelocity = 400, -- 00 buck padrão ~1.325 ft/s (404 m/s)
+		rpm = 40, -- tiros mirados por minuto (bots)
+		magazine = 7, -- 6 no depósito + 1 na câmara
+		massLoadedKg = 4.2, -- 3,9 kg vazia + 7 cartuchos
+		bulletMassG = 3.49, -- um bago 00 (53,8 gr, 8,38 mm)
+		bcG1 = 0.05,
+		modes = { "pump" },
+		dispersionMoa = 60, -- de cada bago: ~40 cm de padrão a 10 m (cano cilíndrico)
+		boltHoldOpen = true,
+		enabled = true,
+		boltS = 0.7, -- bombear (a próxima sai depois disso)
+		pellets = 9,
+		feed = "tube",
+		reloadStartS = 0.4,
+		shellS = 0.55,
+		reloadEndS = 0.5,
+		chargeG = 31.4, -- 9 bagos de 3,49 g
+		effectiveM = 40,
+		damage = 12, -- por bago no tronco: 9 bagos = 108 de perto (tests/luau/classes: 1 tiro até ~10 m)
+		zeros = { 25 }, -- só a massa de latão na boca: sem alça
+		maxFlightS = 1.0,
+		src = {
+			uso = "Wikipedia 'Winchester Model 1912' (Marines: Coreia e começo do Vietnã; 6 + 1; sem "
+				.. "desconector: atira ao fechar com o gatilho apertado); American Rifleman 'The Ithaca Model "
+				.. "37 In U.S. Military Service' (22.000 para o Vietnã do Sul em 1962-63; 3.000 para a Marinha "
+				.. "e o USMC em maio de 1966); MCB Camp Pendleton 'Evolution of shotguns in the Marine Corps' "
+				.. "(870 pedida em 1966)",
+			massLoadedKg = "modernfirearms.net (3,9 kg vazia, 1.003 mm, cano de 20 pol.); cartuchos PLACEHOLDER",
+			cartridge = "American Rifleman 'Combat Shotguns Of The Vietnam War' (M19 de latão e XM162 de "
+				.. "plástico, 00 buck)",
+			bulletMassG = "Front 44 Data/Weapons.json 12ga_00Buck (3,49 g, 8,38 mm, 9 bagos)",
+			muzzleVelocity = "Front 44 (400 m/s); 00 buck comercial ~1.325 ft/s: a conferir no TM 43-0001-27",
+			bcG1 = "Front 44 (0,05): esfera de chumbo de 0,33 pol., PLACEHOLDER",
+			dispersionMoa = "PLACEHOLDER (regra de campo: ~1 pol. de padrão por jarda no cano cilíndrico)",
+			boltS = "PLACEHOLDER (Front 44 M1897: 0,8 s)",
+			shellS = "Front 44 M1897 (ReloadSingleStart 0,4; por cartucho 0,55; fim 0,5)",
+			damage = "PLACEHOLDER de jogo (Front 44: BaseDamage 15 por bago; aqui 12 com a vida 100 da D-107)",
+		},
+	}),
 } :: { Weapon }
 
 Weapons.byId = {} :: { [string]: Weapon }
@@ -482,8 +546,8 @@ end
 function Weapons.interval(wp: Weapon, mode: string): number
 	if mode == "auto" then
 		return 60 / wp.rpm
-	elseif mode == "bolt" then
-		return wp.boltS or 1.2
+	elseif mode == "bolt" or mode == "pump" then
+		return wp.boltS or 1.2 -- ferrolho manobrado ou telha bombeada (espingarda, D-108)
 	end
 	local t = wp.triggerS or Weapons.SEMI_MIN_S
 	if table.find(wp.modes, "auto") then
@@ -512,12 +576,43 @@ end
 
 -- Recarga (s). mult: vantagem "reload" (Shared/Vantagens.mult(player, "reload"); 1 sem o passe),
 -- a mesma no cliente (animação) e no servidor (o gatilho só volta depois dela).
-function Weapons.reloadTime(wp: Weapon, mult: number?): number
+-- D-108: depósito tubular (espingarda) carrega cartucho a cartucho: o tempo depende de quantos entram
+-- (mag = cartuchos na arma, spare = cartuchos soltos; sem eles, o tubo inteiro) e, vazia, bombeia no
+-- fim para pôr um na câmara.
+function Weapons.reloadTime(wp: Weapon, mult: number?, mag: number?, spare: number?): number
+	if wp.feed == "tube" then
+		local n = Weapons.tubeShells(wp, mag or 0, spare or wp.magazine)
+		local t = (wp.reloadStartS or 0.4) + n * (wp.shellS or 0.55)
+		if (mag or 0) <= 0 then
+			t += wp.reloadEndS or 0.5
+		end
+		return t * (mult or 1)
+	end
 	return (wp.reloadS or Weapons.RELOAD_S[wp.kind] or 3) * (mult or 1)
 end
 
--- Dotação por vida (PLACEHOLDER; antes em CombatService.MAGS, igual a Kit.DEFAULT_MAGS)
-Weapons.MAGS = { rifle = 6, mg = 2, pistol = 3, launcher = 6 } :: { [string]: number }
+-- Cartuchos que entram numa recarga do depósito tubular (o que falta, até o que há solto)
+function Weapons.tubeShells(wp: Weapon, mag: number, spare: number): number
+	return math.max(math.min(wp.magazine - mag, spare), 0)
+end
+
+-- Bagos por tiro (1 nas balas)
+function Weapons.pelletsOf(wp: Weapon): number
+	return math.max(wp.pellets or 1, 1)
+end
+
+-- Semente do bago i (0 = a do tiro): cada bago tem a própria dispersão (Ballistics.initialVelocity),
+-- a mesma conta no servidor (CombatService) e no cliente (Acerto)
+function Weapons.pelletSeed(seed: number, i: number): number
+	if i <= 0 then
+		return seed
+	end
+	return (seed + i * 2654435761) % 4294967296
+end
+
+-- Dotação por vida (PLACEHOLDER; antes em CombatService.MAGS, igual a Kit.DEFAULT_MAGS). Espingarda:
+-- cargas do tubo (5 x 7 = 35 cartuchos: 7 na arma e 28 soltos, PLACEHOLDER).
+Weapons.MAGS = { rifle = 6, mg = 2, pistol = 3, launcher = 6, shotgun = 5 } :: { [string]: number }
 
 -- Carregadores da arma principal ao nascer: os do kit (Kit_Set) ou a dotação, + equipamento liberado
 -- (D-72, GearMags) + vantagem "mags" (Vantagens.extra; 0 sem o passe).

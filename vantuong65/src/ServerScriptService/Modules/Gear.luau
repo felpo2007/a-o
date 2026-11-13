@@ -300,10 +300,12 @@ end
 -- ------------------------------------------------------------------------------------------
 -- Equipamento por facção e papel
 -- ------------------------------------------------------------------------------------------
+-- D-108 (classes mais simples): suporte e líder com o rádio; os papéis antigos ficam (perfil velho)
 local KIT_BY_ROLE = {
 	US = {
+		support = "rifle",
 		rifleman = "rifle",
-		squad_leader = "leader",
+		squad_leader = "radio",
 		engineer = "rifle",
 		observer = "leader",
 		sniper = "rifle",
@@ -319,6 +321,7 @@ local KIT_BY_ROLE = {
 		mortar = "crew",
 	},
 	VC = {
+		support = "grenadier", -- peitoral e as 4 granadas de cabo (era do granadeiro)
 		rifleman = "sks",
 		engineer = "sks",
 		sniper = "sks",

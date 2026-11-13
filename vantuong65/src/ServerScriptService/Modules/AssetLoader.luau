@@ -313,10 +313,15 @@ function AssetLoader.place(
 		base = lo or groundY(x, z)
 	else
 		local lo, hi = footprint(x, z, yaw, size.X / 2, size.Z / 2)
-		base = hi or groundY(x, z)
+		-- construção com patamar: no mais alto (o patamar aterra o resto). Objeto sem patamar (morteiro
+		-- da logística): no mais baixo, entrando no lado de cima da ladeira; no mais alto ficava com o
+		-- canto de baixo no ar (2026-11-13, "conserte tudo que esteja flutuando")
+		base = (if PLATFORM[key] then hi else lo) or groundY(x, z)
 		-- patamar de terra sob a construção, do ponto mais baixo até a base (só se houver vão)
 		if PLATFORM[key] and lo and hi and (hi - lo) * M > 0.1 then
-			local top = base - 0.02 / M
+			-- o Roblox desenha o chão do FillBlock meio voxel (2 studs) acima do bloco (Studio,
+			-- 2026-11-13): sem o desconto o patamar cobria 0,5 m da base (sacos de areia da pá)
+			local top = base - 0.02 / M - 2
 			local bottom = lo - 0.6 / M
 			workspace.Terrain:FillBlock(
 				CFrame.new(x, (top + bottom) / 2, z) * CFrame.Angles(0, yaw, 0),
@@ -436,6 +441,28 @@ end
 local PLAN_TOL_M = 0.6 -- plano x chão real no meio da construção: acima disto conta como desvio
 AssetLoader.planMismatch = 0
 
+-- Chão REAL mais baixo sob o objeto sem patamar (2026-11-13, "conserte tudo que esteja flutuando").
+-- Medido no Studio com o terreno no plano: na encosta forte da Colina 30 e na beira do riacho o chão
+-- desenhado (interpolado entre as colunas de 4 studs) sai até 0,5 m abaixo do plano num lado; a toca
+-- ficava 0,5 m no ar, a ponte com as cabeceiras a 0,3–0,55 m das margens e algumas plantas com um
+-- lado do pé no ar. O objeto vai ao menor entre o plano e o chão real (entra no lado de cima).
+-- Boca de túnel e trincheira ficam fora: assentam no poço e na vala escavados.
+local OVER_HOLE: { [string]: boolean } = { tunnel_entrance = true, trench_section = true }
+local FOOT5 = { { 0, 0 }, { 0.9, 0.9 }, { -0.9, 0.9 }, { 0.9, -0.9 }, { -0.9, -0.9 } }
+local BRIDGE_ENDS = { { 0.8, 0 }, { -0.8, 0 } } -- cabeceiras da ponte (eixo X do plano)
+local PLANT5 = { { 0, 0 }, { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } }
+local function realLow(x: number, z: number, yaw: number, hx: number, hz: number, pts: { { number } }): number?
+	local lo: number? = nil
+	for _, o in pts do
+		local px, pz = ArtPlan.rot(x, z, yaw, o[1] * hx, o[2] * hz)
+		local y = groundAt(px, pz)
+		if y and (lo == nil or y < lo) then
+			lo = y
+		end
+	end
+	return lo
+end
+
 -- tom da casa da vila sem modelo próprio (ArtPlan.TINTS): multiplica a cor de cada peça
 local function tintModel(m: Model, k: number)
 	local t = ArtPlan.TINTS[k]
@@ -506,11 +533,21 @@ function AssetLoader.placeItem(it: any, parent: Instance, planned: boolean): Mod
 	end
 	local base = it.base
 	if it.foliage then
-		local y = groundAt(it.x, it.z)
+		-- pé: o mais baixo do chão real no meio e a 0,3–0,6 m em cruz (antes só o meio)
+		local rr = math.clamp(it.hx * 0.35, 0.3 / M, 0.6 / M)
+		local y = realLow(it.x, it.z, 0, rr, rr, PLANT5)
 		if y then
 			base = math.min(base, y - ArtPlan.PLANT_SINK_M / M)
 		elseif not planned then
 			base = groundY(it.x, it.z)
+		end
+	elseif planned and not it.padded and not OVER_HOLE[it.key] then
+		-- objeto sem patamar (caixote, saco, toca, cerca de arame, ponte): o menor entre o plano e o
+		-- chão real sob a pegada
+		local pts = if it.key == "log_bridge" then BRIDGE_ENDS else FOOT5
+		local y = realLow(it.x, it.z, it.yaw, it.hx, it.hz, pts)
+		if y then
+			base = math.min(base, y - (it.sink or 0))
 		end
 	elseif not planned then
 		-- terreno antigo: base no ponto mais alto do chão sob a pegada (como antes)
@@ -893,6 +930,8 @@ function AssetLoader.start()
 		)
 	end
 	out:SetAttribute("Placed", true) -- o autoteste confere a arte no chão depois disto
+	-- Studio: workspace:SetAttribute("VT65DevFlutua", true) mede o que flutua no mapa (Flutua.luau)
+	require(script.Parent.Flutua).hook()
 end
 
 -- Arma visível na mão direita (todos veem). Sem asset publicado, usa a provisória (Shared/GunModel):

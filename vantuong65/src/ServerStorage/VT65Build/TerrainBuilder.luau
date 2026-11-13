@@ -23,6 +23,25 @@ local SEA_MIN_M, SEA_MAX_M = 0.4, 8
 
 -- classes: 0 mar | 1 areia | 2 arrozal | 3 vila/mata | 4 capim | 5 riacho
 
+-- Ocupação do voxel e a superfície que o Roblox desenha (medido no Studio em 2026-11-13, raio e
+-- imagem; pedido do dono "conserte tudo que esteja flutuando"):
+--   - chão: superfície = base do voxel de cima + VOXEL/2 + VOXEL × ocupação (meio voxel acima do que
+--     a conta linear dava). Até 2026-11-13 a ocupação era (h − base)/VOXEL e o chão saía 2 studs
+--     (0,56 m) acima do plano em TODO o mapa: as construções, a chapa dos helipontos e o pé das
+--     plantas ficavam 0,56 m enterrados, as lâminas do arrozal 0,46 m debaixo do chão e o riacho com
+--     0–4 cm de água em vez de 0,6 m. O FillBlock do próprio Roblox faz igual (bloco até 8 → chão em 10);
+--   - água: superfície = base + VOXEL × ocupação (a conta linear vale).
+-- groundOcc põe a superfície do chão na altura h do plano.
+function TerrainBuilder.groundOcc(h: number, vb: number): number
+	return math.clamp((h - vb) / VOXEL - 0.5, 0, 1)
+end
+
+-- Superfície (studs) que o Roblox desenha para o voxel mais alto de chão (base vb, ocupação occ > 0)
+-- ou de água: para os testes, que simulam o WriteVoxels.
+function TerrainBuilder.surfaceOf(vb: number, occ: number, water: boolean): number
+	return if water then vb + VOXEL * occ else vb + VOXEL / 2 + VOXEL * occ
+end
+
 export type Env = {
 	Enum: any,
 	Vector3: any,
@@ -331,7 +350,7 @@ function TerrainBuilder.build(world: any, envIn: Env?, opts: Options?): number
 					local h, wl, mat = surf[k], water[k], special[k] or MATERIAL[cls[k]] or Enum.Material.Ground
 					for iy = 1, ny do
 						local vb = yb + (iy - 1) * VOXEL
-						local occ = math.clamp((h - vb) / VOXEL, 0, 1)
+						local occ = TerrainBuilder.groundOcc(h, vb)
 						if occ > 0 then
 							mcol[iy][iz] = mat
 							ocol[iy][iz] = occ
