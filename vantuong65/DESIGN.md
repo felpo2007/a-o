@@ -3747,3 +3747,55 @@ Pendentes da v40 e da v41, com o "sim, siga" do dono.
 
 **Fica como está:** o soldado com 2,08 m medidos contra os 2,00 m da D-98. Acertar mexe na escala do
 corpo, no alcance dos braços e nas pegadas testadas (`tests/luau/pegada.luau`).
+
+## D-111 — Lote 1 da lista de 13/11 à tarde: abate, Robux, FPS, munição, controle, folhas, sol, recuo e pistola (v43, 2026-11-13)
+
+A lista de 13/11 (14:49–15:22, 30 pedidos) vai em lotes pequenos, um por versão ("faça isso de pouco em
+pouco"). A fila completa está no PROGRESS. Este é o lote 1.
+
+**Abate:** a caveira vai para 62% da altura (abaixo da mira) e ganha o nome de quem caiu. O servidor
+manda `Combat_Kill { name, w }` para quem levou o crédito; bot usa o `BotName` ("Fuzileiro 23").
+
+**Renascer com Robux:** o botão fica verde vivo do Robux com borda dourada que pulsa. Travado (regra do
+setor, espera), fica num verde escuro, sem virar o painel apagado.
+
+**FPS e ping** no canto de baixo à esquerda (`Controllers/Fps`), com a cor pela faixa: ≥ 50 verde,
+30–49 latão, < 30 vermelho. Liga e desliga em Configurações > Gráficos (`showFps`, padrão: mostrar).
+
+**Painel de disputa mais baixo:** no PC a 74% da altura (era 66%); no toque, zona `captura` y 0,64–0,86
+(era 0,58–0,80).
+
+**Menos recuo:** `RECOIL_DEG_PER_MS` 0,9 → 0,6 (M14 ~1,5° por tiro), volta sozinha 0,75 → 0,85, desvio
+para o lado 0,6 → 0,45.
+
+**Pistola útil:** dano 25 → 34 (3 a 4 tiros no tronco até 50 m; 1 na cabeça de perto). Os testes de
+dano da pistola mudaram junto.
+
+**Idioma:** o chip da tela de entrada e da mesa só aparece enquanto o idioma está no automático e
+some na hora da escolha (`Idioma.soAteEscolher`). O menu do jogo (Configurações) mantém o seu.
+
+**Controle:**
+- RB: granada rápida. Apertar puxa; segurando quando ela chega, arma; soltar lança.
+- Direcional ↑: tocar troca 1ª/3ª pessoa; segurar troca o ombro.
+- Direcional →: tocar marca; segurar abre a roda de comunicação.
+- O binóculo fica na roda de equipamento (LB) e na tecla B. O canal de rádio fica na tecla U e no botão
+  RÁDIO do toque.
+
+**Tiros nas folhas:** no traçado comum (`Hitbox.trace`, servidor e cliente), peça sem colisão (folha,
+cartão de capim, parte visual de modelo com colisão própria) deixa a bala passar, perdendo 2%. A lâmina
+do arrozal continua parando. Antes eram 4 peças vazáveis por trecho de voo; na mata fechada a 5ª folha
+encerrava o trecho sem olhar o soldado atrás. Agora são 16, e o soldado no trecho é acertado mesmo
+assim.
+
+**Sol:** a partida começa às 08:30 (era 07:00, com o sol a 6,2° no olho de quem olha para o leste). No
+Studio o sol ficou a 28,3°. O brilho em volta do sol caiu a 1/3 (Glare 0,10), o disco do sol de 16 para
+10, os raios de sol e o brilho (bloom) mais fracos.
+
+**Munição no cartão** ("está muito bugado"): o servidor manda a reserva em carregadores, mas o cartão
+dividia pela capacidade como se fossem balas. O fuzileiro com 8 carregadores via "1". Agora o cartão
+mostra as balas em número grande ("20 /20", vermelho no último quarto) e os carregadores em ícones de
+pente com "× 8". Na espingarda, "+N" cartuchos.
+
+**Mão escorregando:** não reproduzido no Studio. Em 1ª pessoa as duas mãos ficaram paradas no espaço
+da arma (variação 0,000 em 147 quadros andando). Nos bots em 3ª pessoa, andando, a mão esquerda ficou
+a 2–5 cm do apoio. Falta saber do dono em que vista e em que momento acontece.

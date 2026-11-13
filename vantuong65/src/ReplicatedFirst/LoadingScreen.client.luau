@@ -519,6 +519,7 @@ end
 local langChip = Idioma.chip(stage, { onClick = openLanguage, padKey = Enum.KeyCode.ButtonY })
 langChip.button.AnchorPoint = Vector2.new(1, 0)
 langChip.button.Position = UDim2.fromOffset(1180, 46)
+Idioma.soAteEscolher(langChip.button) -- v43: só enquanto o idioma não foi escolhido
 
 gui.Parent = player:WaitForChild("PlayerGui")
 
@@ -909,7 +910,7 @@ UserInputService.InputBegan:Connect(function(input: InputObject)
 		return -- com o cartão de idiomas aberto, A e Enter são dele
 	end
 	local kc = input.KeyCode
-	if kc == Enum.KeyCode.ButtonY then
+	if kc == Enum.KeyCode.ButtonY and langChip.button.Visible then
 		openLanguage()
 	elseif not allReady or UserInputService:GetFocusedTextBox() then
 		return

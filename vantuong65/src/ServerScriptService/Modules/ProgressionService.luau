@@ -437,10 +437,17 @@ function ProgressionService.start()
 					then attr
 					else string.split(tostring(killer:GetAttribute("Loadout") or ""), ",")[1]
 				local wp = Weapons.get(wid)
+				local victimP = Players:GetPlayerFromCharacter(e.model)
 				award(killer, "kill", nil, {
 					weapon = wid,
 					kind = if wp then wp.kind else "rifle",
-					victimBot = Players:GetPlayerFromCharacter(e.model) == nil,
+					victimBot = victimP == nil,
+				})
+				-- v43 (pedido do dono: "coloque o nome da kill também"): o nome de quem caiu para a caveira
+				local bn = e.model:GetAttribute("BotName")
+				Net.event("Combat_Kill"):FireClient(killer, {
+					name = if victimP then victimP.DisplayName elseif type(bn) == "string" then bn else "inimigo",
+					w = wid,
 				})
 			end
 			for who, t in hits do

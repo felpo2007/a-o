@@ -320,7 +320,7 @@ test("fuzil no tronco: 3 a 4 tiros de 10 a 400 m; 3 de perto (pedido do dono)", 
 	end
 end)
 
-test("metralhadora 4 no tronco (até 300 m), pistola 4 a 5 (até 50 m), precisão 2 (até 200 m)", function()
+test("metralhadora 4 no tronco (até 300 m), pistola 3 a 4 (até 50 m, v43), precisão 2 (até 200 m)", function()
 	for _, id in { "m60", "rpd" } do
 		for _, d in { 10, 50, 100, 200, 300 } do
 			assert(shots(id, "torso", d) == 4, string.format("%s a %d m: %d", id, d, shots(id, "torso", d)))
@@ -329,7 +329,7 @@ test("metralhadora 4 no tronco (até 300 m), pistola 4 a 5 (até 50 m), precisã
 	for _, id in { "m1911", "type54" } do
 		for _, d in { 10, 25, 50 } do
 			local n = shots(id, "torso", d)
-			assert(n >= 4 and n <= 5, string.format("%s a %d m: %d", id, d, n))
+			assert(n >= 3 and n <= 4, string.format("%s a %d m: %d", id, d, n))
 		end
 	end
 	for _, id in { "m70", "mosin" } do
@@ -340,27 +340,31 @@ test("metralhadora 4 no tronco (até 300 m), pistola 4 a 5 (até 50 m), precisã
 	end
 end)
 
-test("cabeça menos tiros (fuzil e precisão matam com 1 até 300 m; pistola 2), membro mais (5+)", function()
-	for _, id in { "m14", "type56", "sks", "m70", "mosin" } do
-		for _, d in { 10, 100, 200, 300 } do
-			assert(shots(id, "head", d) == 1, string.format("%s cabeça a %d m", id, d))
+test(
+	"cabeça menos tiros (fuzil e precisão matam com 1 até 300 m; pistola 1 de perto, v43), membro mais (5+)",
+	function()
+		for _, id in { "m14", "type56", "sks", "m70", "mosin" } do
+			for _, d in { 10, 100, 200, 300 } do
+				assert(shots(id, "head", d) == 1, string.format("%s cabeça a %d m", id, d))
+			end
+		end
+		for _, id in { "m60", "rpd" } do
+			for _, d in { 10, 100, 200 } do
+				assert(shots(id, "head", d) == 1, string.format("%s cabeça a %d m", id, d))
+			end
+		end
+		for _, id in { "m1911", "type54" } do
+			local h = shots(id, "head", 10)
+			assert(h >= 1 and h <= 2, string.format("%s: pistola na cabeça = %d", id, h))
+		end
+		for _, id in { "m14", "type56", "sks", "m60", "rpd" } do
+			for _, d in DIST do
+				assert(shots(id, "arm", d) >= 5, string.format("%s braço a %d m: %d", id, d, shots(id, "arm", d)))
+				assert(shots(id, "leg", d) >= 5, string.format("%s perna a %d m", id, d))
+			end
 		end
 	end
-	for _, id in { "m60", "rpd" } do
-		for _, d in { 10, 100, 200 } do
-			assert(shots(id, "head", d) == 1, string.format("%s cabeça a %d m", id, d))
-		end
-	end
-	for _, id in { "m1911", "type54" } do
-		assert(shots(id, "head", 10) == 2, id .. ": pistola na cabeça = 2")
-	end
-	for _, id in { "m14", "type56", "sks", "m60", "rpd" } do
-		for _, d in DIST do
-			assert(shots(id, "arm", d) >= 5, string.format("%s braço a %d m: %d", id, d, shots(id, "arm", d)))
-			assert(shots(id, "leg", d) >= 5, string.format("%s perna a %d m", id, d))
-		end
-	end
-end)
+)
 
 test("cabeça: a bala que mata na hora não deixa caído; a que não mata fere e soma", function()
 	local s = Medical.new()

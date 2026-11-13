@@ -64,8 +64,13 @@ act("aim", "infantry", "ButtonL2", "press", "MouseRightButton", "press", "Mirar"
 act("fire", "infantry", "ButtonR2", "press", "MouseLeftButton", "press", "Atirar")
 act("last_item", "infantry", "ButtonL1", "tap", "X", "tap", "Último item")
 act("equip_wheel", "infantry", "ButtonL1", "hold", "X", "hold", "Roda de equipamento")
-act("mark", "infantry", "ButtonR1", "tap", "Z", "tap", "Marcar")
-act("comm_wheel", "infantry", "ButtonR1", "hold", "Z", "hold", "Roda de comunicação")
+-- v43 (pedido do dono: "coloque o botão RB para lançar a granada e troque o de comunicação"): RB é a
+-- granada rápida (apertar puxa e arma, soltar lança; WeaponController); marcar e a roda de comunicação
+-- foram para o direcional → (tocar marca, segurar abre a roda). No teclado continua o Z; a granada é
+-- a tecla 3 (vaga) ou a roda.
+act("quick_grenade", "infantry", "ButtonR1", "press", nil, "press", "Granada rápida")
+act("mark", "infantry", "DPadRight", "tap", "Z", "tap", "Marcar")
+act("comm_wheel", "infantry", "DPadRight", "hold", "Z", "hold", "Roda de comunicação")
 act("crouch", "infantry", "ButtonB", "tap", "C", "tap", "Agachar")
 act("prone", "infantry", "ButtonB", "hold", "C", "hold", "Deitar")
 act("reload", "infantry", "ButtonX", "tap", "R", "press", "Recarregar")
@@ -86,9 +91,11 @@ act("slot_7", "infantry", nil, "press", "Seven", "press", "Binóculo")
 act("slot_8", "infantry", nil, "press", "Eight", "press", "Pá de trincheira")
 act("slot_9", "infantry", nil, "press", "Nine", "press", "Construir")
 act("slot_0", "infantry", nil, "press", "Zero", "press", "Ferramenta do papel")
--- Direcional ↑ e →: tocar mantém a função da Parte 12 (binóculo, canal de rádio); segurar controla a
--- câmera de 3ª pessoa (pedido do dono, 2026-11-11). No teclado, O e I.
-act("binoculars", "infantry", "DPadUp", "tap", "B", "press", "Binóculo")
+-- Direcional ↑ (v43, pedido do dono: "onde está o botão para 3ª pessoa? coloque em uma das setas do
+-- controle"): tocar troca 1ª/3ª pessoa, segurar troca o ombro. O binóculo segue na roda de
+-- equipamento (LB) e na tecla B. No teclado, O e I.
+act("binoculars", "infantry", nil, "press", "B", "press", "Binóculo")
+act("view_toggle", "infantry", "DPadUp", "tap", "O", "press", "1ª / 3ª pessoa")
 act("shoulder_swap", "infantry", "DPadUp", "hold", "I", "press", "Trocar ombro (3ª pessoa)")
 act("quick_bandage", "infantry", "DPadDown", "tap", "G", "press", "Bandagem rápida")
 -- Rádio do squad (2026-11-12): segurar para falar com o squad em qualquer lugar (Controllers/Voz.client).
@@ -97,8 +104,8 @@ act("quick_bandage", "infantry", "DPadDown", "tap", "G", "press", "Bandagem ráp
 act("radio_talk", "infantry", "DPadDown", "hold", "CapsLock", "press", "Rádio do squad (segurar)")
 act("fire_mode", "infantry", "DPadLeft", "tap", "V", "tap", "Seletor de tiro")
 act("zeroing", "infantry", "DPadLeft", "hold", "V", "hold", "Alça de mira")
-act("radio_channel", "infantry", "DPadRight", "tap", "U", "press", "Canal de rádio")
-act("view_toggle", "infantry", "DPadRight", "hold", "O", "press", "1ª / 3ª pessoa")
+-- canal de rádio: tecla U e o botão RÁDIO do toque (v43: o → do controle virou marcar/comunicação)
+act("radio_channel", "infantry", nil, "press", "U", "press", "Canal de rádio")
 act("map", "global", "ButtonSelect", "tap", "M", "press", "Mapa tático")
 act("game_menu", "global", "ButtonSelect", "hold", "P", "press", "Menu do jogo")
 act("give_up", "infantry", nil, "press", "H", "press", "Desistir (caído: segure B)")
@@ -234,6 +241,7 @@ export type Settings = {
 	touchAssist: boolean, -- fricção e ímã leve na mira de ferro/luneta (só toque)
 	touchAutoFire: boolean, -- mirando com a mira no inimigo à vista, atira sozinho (padrão: desligado)
 	batterySaver: boolean, -- economia de bateria (lido pelo agente de desempenho)
+	showFps: boolean, -- v43 (pedido do dono): quadros por segundo e ping no canto (Controllers/Fps)
 }
 
 -- Um botão de um layout próprio de toque: centro (frações da área segura, sempre o lado destro),
@@ -305,6 +313,7 @@ InputMap.DEFAULTS = {
 	touchAssist = true,
 	touchAutoFire = false,
 	batterySaver = false,
+	showFps = true,
 } :: Settings
 
 -- Configurações que mudam os botões (o runtime refaz os bindings só quando uma delas muda).

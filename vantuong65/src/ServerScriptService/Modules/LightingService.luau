@@ -13,7 +13,10 @@ LightingService.DATE = { 1965, 8, 18 }
 LightingService.TZ = 8 -- hora de Saigon em 1965 (UTC+8) — confirmar (DESIGN D-27)
 LightingService.LAT, LightingService.LON = 15.30, 108.85
 
-LightingService.START_HOUR = 7.0 -- sol a 6,2° no leste-nordeste: contraluz para quem olha para o leste
+-- v43 (pedido do dono: "o sol está atrapalhando um pouco a visão"): 08:30 (era 07:00, o sol a 6,2° no
+-- leste-nordeste, contraluz no olho de quem olha para o leste). Às 08:30 ele já está bem mais alto; o
+-- desembarque foi às 06:30 e o combate seguiu o dia todo.
+LightingService.START_HOUR = 8.5
 local startHour = LightingService.START_HOUR
 local t0 = os.clock()
 local lastC, lastL = startHour, 15
@@ -67,7 +70,8 @@ applyAtmosphere = function()
 		local r = if type(rain) == "number" then rain else 0
 		atm.Density = 0.34 - 0.08 * k + 0.25 * r
 		atm.Haze = 1.4 - 0.6 * k + 2.0 * r
-		atm.Glare = 0.5 * (1.0 - 0.4 * k) * (1 - r)
+		-- v43: o brilho em volta do sol caiu a 1/3 (era 0,5 × (1 − 0,4k): 0,3 depois das 08:00)
+		atm.Glare = 0.17 * (1.0 - 0.4 * k) * (1 - r)
 	end
 end
 

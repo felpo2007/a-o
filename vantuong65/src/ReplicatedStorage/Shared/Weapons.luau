@@ -82,7 +82,9 @@ Weapons.RELOAD_S = { rifle = 2.4, mg = 5.5, pistol = 2.0, launcher = 2.6, shotgu
 -- D-107 (pedido do dono: "quero 3 ou 4 tiros para morrer", "mais difícil de morrer"): dano no tronco
 -- com a energia de boca, por tipo, quando a arma não tem `damage` (PLACEHOLDER de jogo). A conta do
 -- tiro (zona e queda com a energia) fica no Shared/Medical.shotDamage.
-Weapons.DAMAGE = { rifle = 36, mg = 32, pistol = 25, launcher = 40, shotgun = 12 } :: { [string]: number }
+-- v43 (pedido do dono: "pistola tem que dar mais dano, ela tem que ser uma arma útil"): pistola 25 -> 34
+-- (3 tiros no tronco de perto, como o fuzil; a queda com a energia continua, a .45 perde rápido)
+Weapons.DAMAGE = { rifle = 36, mg = 32, pistol = 34, launcher = 40, shotgun = 12 } :: { [string]: number }
 
 function Weapons.damageOf(wp: Weapon): number
 	return wp.damage or Weapons.DAMAGE[wp.kind] or 30

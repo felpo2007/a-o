@@ -39,6 +39,8 @@ test("layout: toda ação de jogo tem botão de controle (exceções documentada
 		tourniquet = "roda de equipamento",
 		lean_left = "L3 na camada de mira (D-99: Q no teclado a qualquer hora)",
 		lean_right = "R3 na camada de mira (D-99: E no teclado a qualquer hora)",
+		binoculars = "roda de equipamento (v43: o ↑ é a câmera)",
+		radio_channel = "botão RÁDIO do toque e tecla U (v43: o → é marcar e a comunicação)",
 	}
 	for _, a in InputMap.ACTIONS do
 		-- 2026-11-13: as vagas 1 a 0 são do teclado; no controle, Y troca a arma e os itens ficam na
@@ -303,8 +305,10 @@ test("layout padrão = tabela da Parte 12 (infantaria, veículos, mapa e menus)"
 		{ "infantry", "fire", "ButtonR2", "press" },
 		{ "infantry", "equip_wheel", "ButtonL1", "hold" },
 		{ "infantry", "last_item", "ButtonL1", "tap" },
-		{ "infantry", "comm_wheel", "ButtonR1", "hold" },
-		{ "infantry", "mark", "ButtonR1", "tap" },
+		-- v43 (pedido do dono): RB é a granada rápida; marcar e a roda de comunicação vão para o →
+		{ "infantry", "quick_grenade", "ButtonR1", "press" },
+		{ "infantry", "comm_wheel", "DPadRight", "hold" },
+		{ "infantry", "mark", "DPadRight", "tap" },
 		{ "aim", "lean_left", "ButtonL3", "press" },
 		{ "aim", "lean_right", "ButtonR3", "press" },
 		{ "aim", "hold_breath", "ButtonL1", "press" },
@@ -314,8 +318,9 @@ test("layout padrão = tabela da Parte 12 (infantaria, veículos, mapa e menus)"
 		{ "infantry", "interact", "ButtonX", "hold" },
 		{ "infantry", "swap_weapon", "ButtonY", "tap" },
 		{ "infantry", "bayonet", "ButtonY", "hold" },
-		-- 2026-11-11 (3ª pessoa): ↑ e → passaram a tocar/segurar; tocar mantém a função da Parte 12
-		{ "infantry", "binoculars", "DPadUp", "tap" },
+		-- v43 (pedido do dono: "coloque a 3ª pessoa em uma das setas"): ↑ tocar = 1ª/3ª pessoa, segurar =
+		-- ombro; o binóculo fica na roda de equipamento (LB)
+		{ "infantry", "view_toggle", "DPadUp", "tap" },
 		{ "infantry", "shoulder_swap", "DPadUp", "hold" },
 		-- 2026-11-12: ↓ tocar = bandagem rápida; segurar = rádio do squad (em todo contexto de jogo)
 		{ "infantry", "quick_bandage", "DPadDown", "tap" },
@@ -324,8 +329,6 @@ test("layout padrão = tabela da Parte 12 (infantaria, veículos, mapa e menus)"
 		{ "helicopter", "radio_talk", "DPadDown", "hold" },
 		{ "infantry", "fire_mode", "DPadLeft", "tap" },
 		{ "infantry", "zeroing", "DPadLeft", "hold" },
-		{ "infantry", "radio_channel", "DPadRight", "tap" },
-		{ "infantry", "view_toggle", "DPadRight", "hold" },
 		{ "infantry", "jump", "ButtonA", "press" }, -- pular ou transpor dique (contextual, Parte 12.2)
 		{ "global", "map", "ButtonSelect", "tap" },
 		{ "global", "game_menu", "ButtonSelect", "hold" },

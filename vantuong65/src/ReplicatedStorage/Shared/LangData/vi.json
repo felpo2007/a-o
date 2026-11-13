@@ -2442,5 +2442,12 @@
  "M70 (luneta)": "M70 (ống ngắm)",
  "Mosin PU": "Mosin PU",
  "atacar": "tấn công",
- "defender": "phòng thủ"
+ "defender": "phòng thủ",
+ "%d FPS": "%d FPS",
+ "%d FPS · %d ms": "%d FPS · %d ms",
+ "FPS e ping na tela": "FPS và ping trên màn hình",
+ "Granada rápida": "Lựu đạn nhanh",
+ "esconder": "ẩn",
+ "mostrar": "hiện",
+ "× %d": "× %d"
 }

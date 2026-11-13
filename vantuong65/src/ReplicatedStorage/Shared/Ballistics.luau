@@ -18,6 +18,9 @@ Ballistics.SHOT_DT = 1 / 120
 -- peça. PLACEHOLDER até a tabela de penetração em cm por material (Parte 10.7). Canvas: lona das
 -- barracas (bases, 2026-11-13). Antes em CombatService.PASS (D-107: o cliente usa o mesmo).
 Ballistics.PASS = { Bamboo = 0.85, Thatch = 0.8, Canvas = 0.9 } :: { [string]: number }
+-- v43: peça sem colisão (folha, cartão de capim, parte visual) que a bala atravessa (Hitbox.trace)
+Ballistics.LEAF_KEEP = 0.98
+Ballistics.PASS_PER_SEGMENT = 16 -- peças atravessadas por trecho de voo (eram 4)
 
 -- Coeficiente de arrasto do projétil-padrão G1 por número de Mach.
 -- APROXIMADO (pontos de referência da tabela G1/Ingalls); validar com tabela publicada (Parte 9).

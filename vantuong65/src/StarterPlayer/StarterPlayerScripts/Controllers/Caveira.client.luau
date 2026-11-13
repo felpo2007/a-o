@@ -1,10 +1,10 @@
 --!strict
 -- Caveira do abate (pedido do dono, 2026-11-11: "faça uma caveira bem feita quando você mata
 -- alguém"). Quando o servidor dá o crédito do abate (ProgressionService.award(killer, "kill"), que
--- chega no Progress_State com o ganho "Abate"), uma caveira de estêncil militar aparece no centro da
--- tela por ~1,2 s: cai como carimbo (escala e giro assentam), um anel de tinta abre e some, e ela
--- esmaece. Sem número, sem nome, sem som: o realismo pede contido (Parte 1: sem hitmarker; o abate
--- já é do servidor, não do tiro).
+-- chega no Progress_State com o ganho "Abate"), uma caveira de estêncil militar aparece abaixo da
+-- mira por ~1,2 s: cai como carimbo (escala e giro assentam), um anel de tinta abre e some, e ela
+-- esmaece. v43 (pedido do dono): fica a 62% da altura, com o nome de quem caiu embaixo (Combat_Kill).
+-- Sem som: o abate é do servidor, não do tiro.
 -- Arte: assets/ui/caveira_abate.png (tools/make_caveira.py, 1024 px com alfa), tingida de osso. O
 -- servidor resolve o decal publicado no ID da imagem (Modules/ImagensUi, atributo
 -- "Img_caveira_abate"); sem ele, a caveira é desenhada com frames (reserva vetorial).
@@ -29,12 +29,15 @@ local LABEL = "Abate" -- Progression.REWARDS.kill.label
 local gui = UiKit.screen("VT65Caveira", 16) -- acima do HUD (12 a 15), abaixo dos menus (20+)
 gui.IgnoreGuiInset = true -- o centro da tela é o centro da mira
 
+-- v43 (pedido do dono: "coloque a caveira para baixo da tela e coloque o nome da kill também"): abaixo
+-- da mira (a 62% da altura, sai da frente do alvo; o nome fica a ~70%, acima do cartão do tutorial e da
+-- bússola) e um pouco menor, com o nome de quem caiu embaixo
 local holder = Instance.new("Frame")
 holder.Name = "Caveira"
 holder.AnchorPoint = Vector2.new(0.5, 0.5)
-holder.Position = UDim2.fromScale(0.5, 0.5)
+holder.Position = UDim2.fromScale(0.5, 0.62)
 holder.SizeConstraint = Enum.SizeConstraint.RelativeYY
-holder.Size = UDim2.fromScale(0.11, 0.11)
+holder.Size = UDim2.fromScale(0.09, 0.09)
 holder.BackgroundTransparency = 1
 holder.Visible = false
 holder.Parent = gui
@@ -46,6 +49,23 @@ do
 end
 local scale = Instance.new("UIScale")
 scale.Parent = holder
+
+-- nome de quem caiu (Combat_Kill), logo abaixo da caveira
+local nameLabel = Instance.new("TextLabel")
+nameLabel.Name = "Nome"
+nameLabel.AnchorPoint = Vector2.new(0.5, 0)
+nameLabel.Position = UDim2.new(0.5, 0, 1, 6)
+nameLabel.Size = UDim2.new(4, 0, 0, UiKit.text(20))
+nameLabel.BackgroundTransparency = 1
+nameLabel.FontFace = UiKit.HEAD_FONT
+nameLabel.TextSize = UiKit.text(18)
+nameLabel.TextColor3 = BONE
+nameLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
+nameLabel.TextStrokeTransparency = 1
+nameLabel.TextTransparency = 1
+nameLabel.Text = ""
+nameLabel.ZIndex = 4
+nameLabel.Parent = holder
 
 -- anel de tinta (a pancada do carimbo): abre e some
 local ring = Instance.new("Frame")
@@ -176,7 +196,7 @@ local function play(
 	tw:Play()
 end
 
-local function show(forceVector: boolean?)
+local function show(forceVector: boolean?, victim: string?)
 	token += 1
 	local my = token
 	for _, tw in running do
@@ -188,6 +208,12 @@ local function show(forceVector: boolean?)
 	shadow.Visible = useImg
 	vector.Visible = not useImg
 	holder.Visible = true
+	nameLabel.Text = if victim and victim ~= "" then string.upper(victim) else ""
+	nameLabel.TextTransparency = 1
+	nameLabel.TextStrokeTransparency = 1
+	if nameLabel.Text ~= "" then
+		play(nameLabel, 0.15, { TextTransparency = 0.05, TextStrokeTransparency = 0.45 }, Enum.EasingStyle.Quad)
+	end
 	-- entra: cai como carimbo, um pouco torta, e assenta
 	scale.Scale = 1.24
 	holder.Rotation = -7
@@ -218,6 +244,13 @@ local function show(forceVector: boolean?)
 			return
 		end
 		play(scale, OUT, { Scale = 0.94 }, Enum.EasingStyle.Sine, Enum.EasingDirection.In)
+		play(
+			nameLabel,
+			OUT,
+			{ TextTransparency = 1, TextStrokeTransparency = 1 },
+			Enum.EasingStyle.Sine,
+			Enum.EasingDirection.In
+		)
 		if useImg then
 			play(img, OUT, { ImageTransparency = 1 }, Enum.EasingStyle.Sine, Enum.EasingDirection.In)
 			play(shadow, OUT, { ImageTransparency = 1 }, Enum.EasingStyle.Sine, Enum.EasingDirection.In)
@@ -235,10 +268,24 @@ local function show(forceVector: boolean?)
 end
 
 -- ===== o crédito do abate =====
+-- O ganho "Abate" (Progress_State) e o nome (Combat_Kill, v43) saem juntos do servidor; a caveira
+-- espera um instante pelo nome, que pode chegar depois.
+local lastName, lastNameAt = "", -math.huge
+Net.event("Combat_Kill").OnClientEvent:Connect(function(k: any)
+	if type(k) == "table" and type(k.name) == "string" then
+		lastName, lastNameAt = k.name, os.clock()
+		if holder.Visible and nameLabel.Text == "" then
+			nameLabel.Text = string.upper(k.name)
+			play(nameLabel, 0.15, { TextTransparency = 0.05, TextStrokeTransparency = 0.45 }, Enum.EasingStyle.Quad)
+		end
+	end
+end)
 Net.event("Progress_State").OnClientEvent:Connect(function(s: any)
 	local g = type(s) == "table" and s.gain
 	if type(g) == "table" and g.label == LABEL then
-		show()
+		task.delay(0.05, function()
+			show(nil, if os.clock() - lastNameAt < 0.6 then lastName else nil)
+		end)
 	end
 end)
 
@@ -247,7 +294,7 @@ if RunService:IsStudio() then
 	workspace:GetAttributeChangedSignal("VT65DevTela"):Connect(function()
 		local v = workspace:GetAttribute("VT65DevTela")
 		if v == "caveira" or v == "caveira_desenho" then
-			show(v == "caveira_desenho")
+			show(v == "caveira_desenho", "Fuzileiro 23")
 			task.defer(function()
 				workspace:SetAttribute("VT65DevTela", nil) -- local: no cliente, o mesmo valor repete
 			end)

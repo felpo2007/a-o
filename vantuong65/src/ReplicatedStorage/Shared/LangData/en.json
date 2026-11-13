@@ -2442,5 +2442,12 @@
  "M70 (luneta)": "M70 (scope)",
  "Mosin PU": "Mosin PU",
  "atacar": "attack",
- "defender": "defend"
+ "defender": "defend",
+ "%d FPS": "%d FPS",
+ "%d FPS · %d ms": "%d FPS · %d ms",
+ "FPS e ping na tela": "FPS and ping on screen",
+ "Granada rápida": "Quick grenade",
+ "esconder": "hide",
+ "mostrar": "show",
+ "× %d": "× %d"
 }

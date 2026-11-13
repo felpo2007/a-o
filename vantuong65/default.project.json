@@ -103,7 +103,7 @@
       "Sky": {
         "$className": "Sky",
         "$properties": {
-          "SunAngularSize": 16,
+          "SunAngularSize": 10,
           "MoonAngularSize": 9,
           "StarCount": 1500,
           "SkyboxFt": "rbxassetid://98142843504803",
@@ -130,16 +130,16 @@
       "Bloom": {
         "$className": "BloomEffect",
         "$properties": {
-          "Intensity": 0.55,
+          "Intensity": 0.35,
           "Size": 24,
-          "Threshold": 1.25
+          "Threshold": 1.4
         }
       },
       "SunRays": {
         "$className": "SunRaysEffect",
         "$properties": {
-          "Intensity": 0.11,
-          "Spread": 0.75
+          "Intensity": 0.05,
+          "Spread": 0.6
         }
       }
     }

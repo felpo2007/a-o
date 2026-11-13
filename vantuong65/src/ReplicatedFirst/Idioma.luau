@@ -78,6 +78,28 @@ function Idioma.atual(): string
 	return "auto"
 end
 
+-- v43 (pedido do dono: "quando você já escolheu a língua do jogo no início não precisa mais ficar
+-- aparecendo a opção para alterá-la; apenas nas configurações"): o chip da tela de entrada e da mesa
+-- só aparece enquanto o idioma está no automático (nunca escolhido) e some na hora da escolha. Começa
+-- escondido e espera a configuração salva da conta chegar (Input.loaded, até 20 s). O menu do jogo
+-- (Configurações) mantém o seu chip sempre.
+function Idioma.soAteEscolher(button: GuiObject)
+	button.Visible = false
+	Idioma.Mudou:Connect(function(code: string)
+		if code ~= "auto" then
+			button.Visible = false
+		end
+	end)
+	task.spawn(function()
+		local I = inputModule(true)
+		local t0 = os.clock()
+		while I and not I.loaded and os.clock() - t0 < 20 do
+			task.wait(0.25)
+		end
+		button.Visible = Idioma.atual() == "auto"
+	end)
+end
+
 function Idioma.nome(code: string): string
 	return NOME[if code == "auto" then Idioma.daConta() else code] or code
 end

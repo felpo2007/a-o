@@ -445,7 +445,10 @@ local capW, capH = px(330, 460), px(92, 128)
 local cap = Instance.new("CanvasGroup")
 cap.Name = "Captura"
 cap.AnchorPoint = Vector2.new(0.5, 0)
-cap.Position = UDim2.fromScale(0.5, 0.66)
+-- v43 (pedido do dono: "coloque a tela de disputa do objetivo mais para baixo"): 0,74 (era 0,66),
+-- acima da bússola do pé
+local CAP_Y = 0.74
+cap.Position = UDim2.fromScale(0.5, CAP_Y)
 cap.Size = UDim2.fromOffset(capW, capH)
 cap.BackgroundColor3 = V.PANEL
 cap.BackgroundTransparency = 0.1
@@ -1025,7 +1028,7 @@ RunService.Heartbeat:Connect(function(dt: number)
 		and cap.Position.X.Scale ~= 0.5
 	then
 		cap.AnchorPoint = Vector2.new(0.5, 0)
-		cap.Position = UDim2.fromScale(0.5, 0.66)
+		cap.Position = UDim2.fromScale(0.5, CAP_Y)
 		capFit.scale.Scale = capFit.k()
 	end
 	updateCapture(false) -- entrei ou saí da área de um setor

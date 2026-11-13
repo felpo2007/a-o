@@ -361,6 +361,34 @@ do
 	more.LayoutOrder = 99
 	more.AutomaticSize = Enum.AutomaticSize.X
 	more.Size = UDim2.fromOffset(0, px(12, 16))
+	-- v43 (pedido do dono: "melhore a aparência de quantos pentes tem na arma, balas etc; está muito
+	-- bugado"): as balas no carregador em número grande ("17 /20", vermelho no fim) e os carregadores de
+	-- reserva em ícones de pente com "× N" ao lado (na espingarda, "+N" cartuchos). Sai a barra de 4
+	-- pedaços com "cheio"/"no fim", que ficava apertada e se sobrepunha aos pentes.
+	magBox.Visible = false
+	magText.Visible = false
+	local count = UiKit.rotulo(card, 30, UiKit.CARD, UiKit.HEAD_FONT)
+	count.Position = UDim2.fromOffset(P, px(62, 86))
+	count.Size = UDim2.fromOffset(px(46, 64), px(38, 52))
+	count.TextXAlignment = Enum.TextXAlignment.Right
+	local capLabel = UiKit.rotulo(card, 15, UiKit.KHAKI, UiKit.HEAD_REG)
+	capLabel.Position = UDim2.fromOffset(P + px(50, 70), px(78, 108))
+	capLabel.Size = UDim2.fromOffset(px(40, 56), px(18, 26))
+	spareRow.Position = UDim2.fromOffset(P + px(96, 134), px(72, 100))
+	spareRow.Size = UDim2.new(1, -P - px(110, 154), 0, px(20, 28))
+	srl.VerticalAlignment = Enum.VerticalAlignment.Center
+	srl.Padding = UDim.new(0, px(3, 4))
+	for _, p in pips do
+		p.Size = UDim2.fromOffset(px(9, 12), px(18, 26))
+		p.BackgroundColor3 = UiKit.BRASS
+		local tip = Instance.new("Frame") -- a boca do pente (mais clara), como um carregador de verdade
+		tip.Size = UDim2.new(1, 0, 0, px(3, 4))
+		tip.BackgroundColor3 = UiKit.BRASS_LIGHT
+		tip.BorderSizePixel = 0
+		tip.Parent = p
+	end
+	more.Size = UDim2.fromOffset(0, px(20, 28))
+	more.TextSize = UiKit.text(17)
 	-- recarga: barra que corre embaixo; aviso curto da arma no alto à direita
 	local reload = Instance.new("Frame")
 	reload.AnchorPoint = Vector2.new(0, 1)
@@ -385,6 +413,8 @@ do
 		zero = zero,
 		cells = cells,
 		magText = magText,
+		count = count,
+		capLabel = capLabel,
 		pips = pips,
 		more = more,
 		reload = reload,
@@ -443,7 +473,7 @@ local function renderWeapon()
 	A.zero.Text = string.format("Alça %d m", W.zero)
 	A.zero.Visible = wp ~= nil and wp.kind ~= "launcher"
 	local size = if wp and type(wp.magazine) == "number" then wp.magazine else 0
-	-- carregador na arma em 4 níveis, sem número (Parte 1)
+	-- carregador na arma em 4 níveis (Parte 1; v43: escondido, o número grande abaixo mostra as balas)
 	local frac = if size > 0 and W.mag >= 0 then math.clamp(W.mag / size, 0, 1) else 0
 	local lvl = if W.mag < 0 then 0 else math.ceil(frac * 4 - 1e-6)
 	for i, c in A.cells :: { Frame } do
@@ -456,12 +486,24 @@ local function renderWeapon()
 		elseif frac >= 0.4 then "pela metade"
 		elseif W.mag > 0 then "no fim"
 		else "vazio"
-	-- reservas: um pente por carregador cheio que sobra
-	local spareMags = if size > 0 and W.spare >= 0 then math.ceil(W.spare / size - 1e-6) else 0
+	-- v43: número de balas e "/capacidade"; vermelho no último quarto
+	local low = size > 0 and W.mag >= 0 and W.mag <= math.max(1, math.floor(size * 0.25))
+	A.count.Text = if W.mag < 0 or size <= 0 then "—" else tostring(W.mag)
+	A.count.TextColor3 = if low then UiKit.STAMP else UiKit.CARD
+	A.capLabel.Text = if size > 0 then string.format("/%d", size) else ""
+	-- reservas (CaixaMunicao.spareFull): espingarda (tubo) em cartuchos soltos; o resto já vem em
+	-- CARREGADORES de sobra. v43: antes o cartão dividia pela capacidade como se fossem balas e o
+	-- fuzileiro com 7 carregadores via 1 ("está muito bugado")
+	local tube = wp ~= nil and wp.feed == "tube"
+	local spareMags = if not tube and W.spare >= 0 then W.spare else 0
 	for i, p in A.pips :: { Frame } do
-		p.Visible = i <= math.min(spareMags, 10)
+		p.Visible = not tube and i <= math.min(spareMags, 4)
 	end
-	A.more.Text = if spareMags > 10 then string.format("+%d", spareMags - 10) else ""
+	A.more.Text = if W.spare < 0 or size <= 0
+		then ""
+		elseif tube then string.format("+%d", W.spare)
+		else string.format("× %d", spareMags)
+	A.more.TextColor3 = if not tube and spareMags == 0 and W.spare >= 0 then UiKit.STAMP else UiKit.CARD
 end
 
 local function renderStance()

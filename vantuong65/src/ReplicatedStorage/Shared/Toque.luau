@@ -494,7 +494,8 @@ Toque.ZONES = {
 	eventos = { x0 = 0.00, y0 = 0.27, x1 = 0.30, y1 = 0.40 },
 	avisos = { x0 = 0.00, y0 = 0.40, x1 = 0.34, y1 = 0.56 },
 	cartao = { x0 = 0.46, y0 = 0.80, x1 = 0.66, y1 = 1.00 },
-	captura = { x0 = 0.27, y0 = 0.58, x1 = 0.50, y1 = 0.80 },
+	-- v43 (pedido do dono: "coloque a tela de disputa do objetivo mais para baixo"): era y 0,58–0,80
+	captura = { x0 = 0.27, y0 = 0.64, x1 = 0.46, y1 = 0.86 },
 	tutorial = { x0 = 0.00, y0 = 0.27, x1 = 0.46, y1 = 0.56 },
 	vagas = { x0 = 0.19, y0 = 0.00, x1 = 0.74, y1 = 0.27 },
 	-- v41 (pedido do dono: "botoes estao em cima da outros"): o cartão de caído (CasualtyScreen) no

@@ -47,6 +47,7 @@ Net.Events = {
 	-- D-107: acerto visto pelo atirador e marcador de acerto (Controllers/Acerto + CombatService)
 	"Combat_Claim", -- c->s { s, v, p, x, y, z }: a bala da semente s pegou a peça p do soldado v
 	"Combat_Confirm", -- s->c { d, zn, k, f, x, y, z }: acerto confirmado, só para quem atirou
+	"Combat_Kill", -- s->c { name, w }: v43, o abate creditado (nome de quem caiu e a arma), para a caveira
 	"Tutorial_Done", -- c->s roleId: tutorial do papel concluído (F6)
 	"Range_Hit", -- s->c { dist, right, up }: acerto no campo de tiro, só para o atirador (cm)
 	"Kit_Set", -- c->s { mags, frags, smokes, bandages }: equipamento por peso (próximo spawn)

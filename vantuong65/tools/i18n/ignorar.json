@@ -1119,7 +1119,8 @@
   "veículo ",
   "vida da vila",
   "C Xóm Gò",
-  "^%u%f[%s]"
+  "^%u%f[%s]",
+  "Fuzileiro 23"
  ],
  "regex": []
 }

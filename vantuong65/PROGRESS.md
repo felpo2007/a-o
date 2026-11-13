@@ -13,6 +13,34 @@
 | F5 Arte total e otimização | arte nos 5 setores a 100% do plano; 57,1 fps girando a câmera na célula mais densa da mata (D-76) e 59,6 fps no arrozal (D-74). Critério de 60 jogadores **só no Roblox** |
 | F6 Offensive e lançamento | **testado no Studio**: Offensive com relatório pós-ação, progressão. Beta fechado **só você pode rodar** |
 
+## Fila do dono de 13/11 à tarde (30 pedidos, em lotes pequenos)
+- **Lote 1 (v43, D-111): feito.** Caveira com nome e mais baixa, Robux chamativo, FPS, painel de disputa
+  mais baixo, menos recuo, pistola útil, idioma só até escolher, controle (RB granada, ↑ câmera,
+  → marcar/comunicação), tiros nas folhas, sol, cartão de munição.
+- Lote 2 (telas): tela de morte (boneco caído feio, mais intuitiva); telas mais simples ("uma criança
+  tem que conseguir jogar"); bugs visuais nas telas.
+- Lote 3 (veículos e bots): vidro transparente; mais fáceis e um pouco mais rápidos; helicóptero com a
+  traseira aberta; bots parados nos veículos; bots presos nos objetos.
+- Lote 4 (mapa): cabanas e vilas maiores; terra batida nas ruas; objetivos mais perto do centro; mapa
+  500 x 500 m; 40 x 40 jogadores.
+- Lote 5 (menu): menu animado com o mapa e o soldado (JOGAR, CONFIGURAÇÕES, LOJA, PASSE, TUTORIAL) e o
+  tutorial fora do jogo; tela de carregamento até o mapa inteiro.
+- Lote 6: análise do jogo inteiro com ideias em imagens.
+- Perguntas ao dono: a M4 (é de 1994); a mão escorregando (em que vista e momento).
+
+## v43: lote 1 (2026-11-13, D-111)
+- **Conferido no Studio:**
+  - caveira a 62% da altura com o nome;
+  - botão do Robux verde com borda dourada;
+  - FPS no canto ("60 FPS · 1 ms");
+  - cartão "20 /20 × 8";
+  - sol a 28,3° (Glare 0,10);
+  - chip de idioma na entrada com o idioma no automático (regra certa);
+  - mãos da 1ª pessoa paradas na arma;
+  - 0 erros de script.
+- **Não testado:** controle de verdade (RB, ↑, →), a tiro nas folhas da mata fechada contra um alvo,
+  celular.
+
 ## v42: caixa de munição à vista no capim e rodas do UH-34D (2026-11-13, D-110)
 - **Publicada** como versão 42 do place (build do commit 704c3c2).
 - **Feito:**

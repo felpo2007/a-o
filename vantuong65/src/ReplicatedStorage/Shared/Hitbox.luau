@@ -353,7 +353,12 @@ function Hitbox.trace(
 		end
 		local fb, bb = Hitbox.first(A.X, A.Y, A.Z, B.X, B.Y, B.Z, boxes)
 		local dd = delta:Dot(delta)
-		for _ = 1, 4 do -- até 4 materiais atravessáveis por segmento
+		-- v43 (pedido do dono: "os tiros estão parando em folhas"): peça SEM colisão (folha e galho das
+		-- árvores, cartões de capim e de bambu, a parte visual dos modelos que têm colisão própria) deixa
+		-- a bala passar quase sem perder (Ballistics.LEAF_KEEP); a lâmina do arrozal continua sendo onde a
+		-- bala bate. Antes eram até 4 peças vazáveis por trecho e, na mata fechada, a 5ª folha encerrava o
+		-- trecho sem olhar o soldado atrás dela.
+		for _ = 1, Ballistics.PASS_PER_SEGMENT do
 			local r = workspace:Raycast(A, delta, params)
 			local fw = if r and dd > 1e-12 then (r.Position - A):Dot(delta) / dd else math.huge
 			if fb and bb and fb <= fw then
@@ -364,16 +369,26 @@ function Hitbox.trace(
 			if not r then
 				return nil
 			end
-			local mat = r.Instance:GetAttribute("Material")
+			local inst = r.Instance
+			local mat = inst:GetAttribute("Material")
 			local keep = if type(mat) == "string" then Ballistics.PASS[mat] else nil
+			if not keep and inst:IsA("BasePart") and not inst.CanCollide and inst.Name ~= "PaddyWater" then
+				keep = Ballistics.LEAF_KEEP
+			end
 			if keep then
 				out.keep *= keep
-				table.insert(list, r.Instance)
+				table.insert(list, inst)
 				params.FilterDescendantsInstances = list
 			else
 				local p = r.Position * M
-				return { x = p.X, y = p.Y, z = p.Z, target = r.Instance }
+				return { x = p.X, y = p.Y, z = p.Z, target = inst }
 			end
+		end
+		-- muita folha no mesmo trecho: o soldado no trecho ainda é acertado
+		if fb and bb then
+			out.box = bb
+			local p = (A + delta * fb) * M
+			return { x = p.X, y = p.Y, z = p.Z, target = nil }
 		end
 		return nil
 	end)

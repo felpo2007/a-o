@@ -698,6 +698,8 @@ local function renderSettings()
 		numberRow("Brilho", "gfxBrightness", 0.02, "%+.2f")
 		-- Parte 13: menos efeitos e quadros no celular (quem aplica é o agente de desempenho)
 		choiceRow("Economia de bateria", "batterySaver", { false, true }, { "desligada", "ligada" })
+		-- v43 (pedido do dono: "coloque os dados de fps no jogo"): FPS e ping no canto (Controllers/Fps)
+		choiceRow("FPS e ping na tela", "showFps", { true, false }, { "mostrar", "esconder" })
 		note("A qualidade geral fica no menu do Roblox (Esc > Configurações).")
 		action("g:reset", "Restaurar gráficos padrão", function()
 			local s = table.clone(Input.settings) :: any

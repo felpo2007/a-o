@@ -71,9 +71,13 @@ local lastLaunch = 0
 local seedRng = Rng.new(os.time() + player.UserId)
 local recoilPitch, recoilYaw = 0, 0
 local recoilReturn = 0 -- graus que a boca ainda desce sozinha depois da subida
-local RECOIL_DEG_PER_MS = 0.9 -- graus de subida por m/s de recuo livre
--- fração da subida que volta sozinha (o resto o jogador corrige). D-107 ("mais fast paced"): 0,6 -> 0,75
-local RECOIL_RETURN = 0.75
+-- graus de subida por m/s de recuo livre. v43 (pedido do dono: "diminua o recoil das armas"): 0,9 -> 0,6
+-- (M14 ~1,5° por tiro, Type 56 ~1,4°, M60 ~0,7°, M1911 ~3,1°)
+local RECOIL_DEG_PER_MS = 0.6
+-- fração da subida que volta sozinha (o resto o jogador corrige). D-107 ("mais fast paced"): 0,6 -> 0,75;
+-- v43: 0,85
+local RECOIL_RETURN = 0.85
+local RECOIL_YAW = 0.45 -- desvio para o lado (fração da subida); era 0,6
 local swayT = 0
 -- gatilho, munição de reserva e alça (índice em Weapons.zeros) de cada arma
 local triggers: { [string]: Gatilho.Trigger } = {}
@@ -408,7 +412,7 @@ local function shoot(wp: Weapons.Weapon, t: Gatilho.Trigger)
 	end
 	local r = Rng.new(seed)
 	recoilPitch += kick
-	recoilYaw += (r:next() - 0.35) * kick * 0.6 -- tendência leve para a direita
+	recoilYaw += (r:next() - 0.35) * kick * RECOIL_YAW -- tendência leve para a direita
 	recoilReturn += kick * RECOIL_RETURN
 	Haptics.fire(kick, t.mode == "auto")
 end
@@ -727,6 +731,37 @@ local function triggerUp()
 end
 Input.on("fire", "press", triggerDown)
 Input.on("fire", "release", triggerUp)
+-- v43 (pedido do dono: "coloque o botão RB para lançar a granada"): granada rápida. Apertar puxa a
+-- granada do cinto; segurando quando ela chega na mão, arma; soltar lança (como o gatilho). Solto
+-- antes de chegar, ela fica na mão: o próximo RB (ou o gatilho) arma e lança.
+local quickHeld = false
+Input.on("quick_grenade", "press", function()
+	quickHeld = true
+	local h = inv.hand
+	if h and h.kind == "frag" then
+		triggerDown()
+		return
+	end
+	drawGrenade("frag")
+	task.spawn(function()
+		local t0 = os.clock()
+		while quickHeld and os.clock() - t0 < 2 do
+			local hh = inv.hand
+			if hh and hh.kind == "frag" then
+				triggerDown()
+				return
+			end
+			task.wait()
+		end
+	end)
+end)
+Input.on("quick_grenade", "release", function()
+	quickHeld = false
+	local h = inv.hand
+	if h and h.kind == "frag" then
+		triggerUp()
+	end
+end)
 -- mirar: com a granada na mão, mirar ao soltar lança por baixo (curta)
 Input.on("aim", "press", function()
 	if inv.hand then
@@ -774,7 +809,7 @@ Input.on("hold_breath", "release", function()
 	end
 end)
 Input.on("binoculars", "press", toggleBinoculars) -- tecla B
-Input.on("binoculars", "tap", toggleBinoculars) -- direcional ↑ tocar (segurar: trocar ombro)
+-- (v43: no controle o binóculo fica na roda de equipamento; o ↑ é a câmera)
 -- transpor/mergulhar (Movement.client): a arma sai do ombro e o dedo sai do gatilho
 Bus.on("vault_start", function()
 	for _, t in triggers do

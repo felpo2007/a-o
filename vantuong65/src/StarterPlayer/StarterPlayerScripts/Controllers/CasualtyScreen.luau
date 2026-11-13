@@ -486,6 +486,33 @@ do
 		actions.here("robux")
 	end, { h = BH })
 	half(hereRbx, true)
+	-- v43 (pedido do dono: "coloque o botão de renascer ali com Robux com cor chamativa"): verde vivo do
+	-- Robux com borda dourada que pulsa. Travado (regra do setor, espera), fica num verde mais escuro
+	-- com a borda, sem virar o painel apagado dos outros botões.
+	do
+		local GREEN, GREEN_HOT = Color3.fromRGB(0, 168, 104), Color3.fromRGB(18, 198, 128)
+		local GREEN_OFF = Color3.fromRGB(24, 92, 66)
+		local GOLD = Color3.fromRGB(255, 202, 64)
+		local edge = hereRbx.button:FindFirstChildOfClass("UIStroke")
+		if edge then
+			edge.Color = GOLD
+			edge.Thickness = px(2, 3)
+			edge.Transparency = 0
+			TweenService:Create(
+				edge,
+				TweenInfo.new(0.9, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true),
+				{ Transparency = 0.55 }
+			):Play()
+		end
+		hereRbx.realce.quente(GREEN_HOT)
+		hereRbx.realce.base(GREEN)
+		local plainEnabled = hereRbx.enabled
+		hereRbx.enabled = function(v: boolean)
+			plainEnabled(v)
+			hereRbx.realce.base(if v then GREEN else GREEN_OFF)
+			hereRbx.label.TextTransparency = if v then 0 else 0.25
+		end
+	end
 	-- 3. com veículo e a carta
 	local moreRow = pair(5, BH)
 	local vehicle = UiKit.action(moreRow, "COM VEÍCULO", "secondary", function()

@@ -43,7 +43,7 @@ local function toggleView()
 	Bus.fire("toast", if on then string.format("Câmera: 3ª pessoa (%s)", shoulderName()) else "Câmera: 1ª pessoa")
 end
 Input.on("view_toggle", "press", toggleView) -- tecla O
-Input.on("view_toggle", "holdStart", toggleView) -- direcional → segurado
+Input.on("view_toggle", "tap", toggleView) -- v43: direcional ↑ tocado
 
 local function swapShoulder()
 	Input.setSetting("shoulderLeft", not Input.settings.shoulderLeft)

@@ -52,10 +52,17 @@ else
 	chip.button.Position = UDim2.fromOffset(612, 14)
 end
 chip.button.ZIndex = 4
+Idioma.soAteEscolher(chip.button) -- v43: escolhido o idioma, só nas Configurações do menu do jogo
 
 -- Y no controle, com a mesa por cima de tudo (nenhum menu aberto sobre o lobby)
 UserInputService.InputBegan:Connect(function(io: InputObject)
-	if io.KeyCode == Enum.KeyCode.ButtonY and root.Visible and Input.state.menus <= 1 and not Idioma.aberto() then
+	if
+		io.KeyCode == Enum.KeyCode.ButtonY
+		and chip.button.Visible
+		and root.Visible
+		and Input.state.menus <= 1
+		and not Idioma.aberto()
+	then
 		open(false)
 	end
 end)
