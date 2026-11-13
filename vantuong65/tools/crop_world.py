@@ -913,7 +913,28 @@ def vila_e_estradas(g: dict, f: dict) -> dict:
         casas = [tuple(p) for p in f["houses"][:, :2]] + [(c["x"], c["z"]) for c in vila["casas"]]
         return {"arrozal": reduz_arrozal(g, f, np.array(casas, float))}
 
-    info, vila = vila_estradas.aplica(g, f, ing_local, nos, setor3, PLAY_ING, HEAD, arrozal)
+    # bases dos dois lados (tools/bases_dados.py, layouts do Blender): a estrada do mapa chega à
+    # entrada de cada base e não entra nela; a via da base entra no Roads
+    bases = []
+    arq = Path(__file__).resolve().parent / "bases_mapa.json"
+    if arq.is_file():
+        for fac, b in json.loads(arq.read_text("utf-8")).items():
+            hx, hz = ing_local(*QGS[fac][:2])
+            x0, x1, z0, z1 = b["area_studs"]
+            via = b["via"]
+            bases.append(
+                {
+                    "no": f"QG_{fac}",
+                    "entrada": (hx + b["entrada_studs"][0], hz + b["entrada_studs"][1]),
+                    "area": (hx + x0, hx + x1, hz + z0, hz + z1),
+                    "via": {
+                        "kind": via["kind"],
+                        "a": (hx + via["a"][0], hz + via["a"][1]),
+                        "b": (hx + via["b"][0], hz + via["b"][1]),
+                    },
+                }
+            )
+    info, vila = vila_estradas.aplica(g, f, ing_local, nos, setor3, PLAY_ING, HEAD, arrozal, bases)
     VILA_XZ[VILA_PF[1]] = (vila["x"], vila["z"])
     # segundo ponto da vila: o cruzamento da rua com a travessa mais perto do centro do mapa (luta
     # nos becos, longe o bastante da praça para ser outro objetivo)

@@ -21,7 +21,8 @@ function Build.world(): WorldData.World
 	return WorldData.load(grid, chunks)
 end
 
--- Dados do mapa para o plano da arte (ArtPlan.load): feições, vila grande e estradas (2026-11-12)
+-- Dados do mapa para o plano da arte (ArtPlan.load): feições, vila grande, estradas (2026-11-12) e
+-- bases
 function Build.data(): any
 	local function opt(name: string): any
 		local m = Data:FindFirstChild(name)
@@ -31,6 +32,7 @@ function Build.data(): any
 		features = require(Data.Features) :: any,
 		village = opt("Village"),
 		roads = opt("Roads"),
+		bases = opt("Bases"), -- 2026-11-13: as bases dos dois lados (tools/bases_dados.py)
 		mapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any,
 	}
 end

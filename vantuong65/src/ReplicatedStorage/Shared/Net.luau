@@ -34,6 +34,9 @@ Net.Events = {
 	-- D-100: painel do veículo (Controllers/VehiclePrompt)
 	"Vehicle_Board", -- c->s { op = nil|"exit"|"recover", v = Model, seat = seatId, crew = bool }
 	"Vehicle_Notice", -- s->c texto: por que não entrou (lugar ocupado, papel, longe...) ou o que mudou
+	-- D-103: veículo ao nascer (Controllers/CompraVeiculo + CompraVeiculoService)
+	"Vehicle_Order", -- c->s { spec, pay = "ci"|"robux" } | { op = "cancel" } | { op = "get" }
+	"Vehicle_OrderState", -- s->c { spec?, pay?, state, msg?, cooldown?, mine?, team?, ids }
 	"Input_Type", -- c->s: "gamepad" | "kbm" | "touch" (equilíbrio controle x mouse)
 	"Settings_Save", -- c->s: configurações de controle (saneadas no servidor)
 	"Squad_Mark", -- c->s { x, y, z } / s->c { x, y, z, from, kind }: marcação para o squad

@@ -10,6 +10,7 @@ local RunService = game:GetService("RunService")
 
 local ArmIK = require(ReplicatedStorage.Shared.ArmIK)
 local CartaModel = require(ReplicatedStorage.Shared.CartaModel)
+local Corpo = require(ReplicatedStorage.Shared.Corpo)
 local FieldWork = require(ReplicatedStorage.Shared.FieldWork)
 local ItemAnim = require(ReplicatedStorage.Shared.ItemAnim)
 local Joints = require(ReplicatedStorage.Shared.Joints)
@@ -66,7 +67,14 @@ end
 local HOLD_PISTOL = holdCF(ArmIK.HOLDS.pistol)
 -- Carta na mão (D-98, atributo "Carta" do servidor): o fuzil a tiracolo no ombro direito, boca para
 -- cima, e as duas mãos nas bordas da carta aberta diante do peito, inclinada para os olhos.
-local HOLD_SLUNG = holdCF(ArmIK.HOLDS.slung)
+-- D-102: no boneco de bloco (formato do Front 44) o tronco é 25% mais largo e fundo que o corpo gravado
+-- vezes K: o fuzil a tiracolo vai para fora junto (Corpo.KX na largura e na profundidade), senão
+-- afundava no ombro e nas costas.
+local HOLD_SLUNG = (function(): CFrame
+	local h = ArmIK.HOLDS.slung
+	local cf = CFrame.new(h[1], h[2], h[3]) * CFrame.Angles(0, math.rad(h[4]), 0) * CFrame.Angles(math.rad(h[5]), 0, 0)
+	return cf.Rotation + Vector3.new(cf.X * Corpo.KX, cf.Y * K, cf.Z * Corpo.KX)
+end)()
 local MAP_AT = holdCF(ArmIK.HOLDS.map)
 -- Golpe com o fuzil (baioneta e coronhada): em guarda (boca para a frente) e a estocada com o passo;
 -- o peito avança no clipe "baioneta" (tools/anim). Com a faca: o fuzil baixo na mão esquerda.

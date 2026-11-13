@@ -23,9 +23,16 @@
         "$path": "src/ServerScriptService/Modules"
       }
     },
+    "StarterGui": {
+      "$properties": {
+        "ScreenOrientation": "LandscapeSensor"
+      }
+    },
     "StarterPlayer": {
       "$properties": {
-        "CharacterWalkSpeed": 11.07
+        "CharacterWalkSpeed": 11.07,
+        "DevTouchMovementMode": "Scriptable",
+        "DevTouchCameraMovementMode": "Classic"
       },
       "StarterPlayerScripts": {
         "Controllers": {

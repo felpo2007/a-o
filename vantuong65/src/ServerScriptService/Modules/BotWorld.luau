@@ -166,9 +166,160 @@ function BotWorld.villageCenter(): (number, number)
 	return 0, 0
 end
 
+-- ===== eixo das estradas =====
+-- A rota sai da grade em centros de célula (16 studs): na rua da base o blindado andava 8 studs fora
+-- do eixo e batia na guarita do portão (vão de 22 studs para um casco de 13; teste da v38). Os
+-- pontos da rota de VEÍCULO que caem no leito de uma estrada vão para o eixo dela.
+type RoadSeg = { x1: number, z1: number, x2: number, z2: number, half: number }
+local roadSegs: { RoadSeg } = {}
+local ROAD_SNAP_EXTRA = 4 -- studs além da meia largura do leito
+local DENSIFY = 24 -- studs entre pontos da rota de veículo antes de alinhar
+
+local function loadRoadSegs(roads: any)
+	for _, r in roads.roads do
+		local half = (roads.width[r.kind] or 20) / 2
+		local p = r.pts
+		for i = 1, #p - 5, 3 do
+			table.insert(roadSegs, { x1 = p[i], z1 = p[i + 1], x2 = p[i + 3], z2 = p[i + 4], half = half })
+		end
+	end
+end
+
+local function snapToRoad(x: number, z: number): (number, number)
+	local bx, bz, bd = x, z, math.huge
+	for _, s in roadSegs do
+		local lim = s.half + ROAD_SNAP_EXTRA
+		if
+			x < math.min(s.x1, s.x2) - lim
+			or x > math.max(s.x1, s.x2) + lim
+			or z < math.min(s.z1, s.z2) - lim
+			or z > math.max(s.z1, s.z2) + lim
+		then
+			continue
+		end
+		local dx, dz = s.x2 - s.x1, s.z2 - s.z1
+		local l2 = dx * dx + dz * dz
+		local t = if l2 > 1e-6 then math.clamp(((x - s.x1) * dx + (z - s.z1) * dz) / l2, 0, 1) else 0
+		local px, pz = s.x1 + dx * t, s.z1 + dz * t
+		local d = (x - px) ^ 2 + (z - pz) ^ 2
+		if d < bd and d <= lim * lim then
+			bd, bx, bz = d, px, pz
+		end
+	end
+	return bx, bz
+end
+
+-- Trecho de estrada feito no jogo (aterro da saída da base, VehicleService): entra no alinhamento
+-- das rotas e, na grade, vira leito de estrada (agora ou quando a grade ficar pronta).
+local pendingRoads: { any } = {}
+function BotWorld.addRoad(x1: number, z1: number, x2: number, z2: number, widthStuds: number)
+	table.insert(roadSegs, { x1 = x1, z1 = z1, x2 = x2, z2 = z2, half = widthStuds / 2 })
+	local roads = { width = { aterro = widthStuds }, roads = { { kind = "aterro", pts = { x1, z1, 0, x2, z2, 0 } } } }
+	local g = BotWorld.grid
+	if g then
+		BotNav.markRoads(g, roads)
+	else
+		table.insert(pendingRoads, roads)
+	end
+end
+
+-- Pontos onde veículo não passa (leito de vala ao lado de um aterro, VehicleService): marca de sebe,
+-- que só pesa para a lagarta e o anfíbio; a estrada por cima continua aberta.
+local pendingBlocks: { Vector3 } = {}
+function BotWorld.blockForVehicles(points: { Vector3 })
+	local g = BotWorld.grid
+	for _, p in points do
+		if g then
+			BotNav.markPoint(g, p.X, p.Z, F.HEDGE)
+		else
+			table.insert(pendingBlocks, p)
+		end
+	end
+end
+
+-- Pontos a cada DENSIFY studs; os do meio que estão no leito vão para o eixo (o primeiro e o último
+-- ficam: são o veículo e o destino).
+local function alignVehicleRoute(pts: { { x: number, z: number } }): { { x: number, z: number } }
+	if #roadSegs == 0 or #pts < 2 then
+		return pts
+	end
+	local out: { { x: number, z: number } } = { pts[1] }
+	for k = 2, #pts do
+		local a, b = pts[k - 1], pts[k]
+		local len = math.sqrt((b.x - a.x) ^ 2 + (b.z - a.z) ^ 2)
+		local n = math.max(1, math.ceil(len / DENSIFY))
+		for j = 1, n do
+			local t = j / n
+			local x, z = a.x + (b.x - a.x) * t, a.z + (b.z - a.z) * t
+			if not (k == #pts and j == n) then
+				x, z = snapToRoad(x, z)
+			end
+			table.insert(out, { x = x, z = z })
+		end
+	end
+	return out
+end
+
+-- ===== obstáculo aprendido =====
+-- Veículo de bot preso contra uma peça fixa que a grade não conhece (poste, mureta, tronco que o
+-- markTrunks não pegou; teste da v38: o M48 e o LVTP-5 paravam num tronco e a rota nova passava no
+-- mesmo lugar). A célula do obstáculo ganha a marca de sebe: o veículo não passa e a infantaria
+-- não sente. Nunca no leito da estrada (o portão e as pontes ficam abertos) nem dentro das bases
+-- (lá a grade já tem as peças certas) e com teto, para um erro não fechar o mapa.
+local LEARN_MAX = 300
+local LEARN_BASE_R = 65 / M -- raio das bases a partir do QG (studs)
+local learned = 0
+
+-- dir: 1 = estava indo para a frente, -1 = de ré. ignore: o próprio veículo e o que se mexe.
+function BotWorld.learnObstacle(chassis: BasePart, dir: number, ignore: { Instance }): number
+	local g = BotWorld.grid
+	if not g or learned >= LEARN_MAX then
+		return 0
+	end
+	local pos = chassis.Position
+	for _, hq in MapConfig.HQ do
+		if (pos.X - hq.x) ^ 2 + (pos.Z - hq.z) ^ 2 < LEARN_BASE_R ^ 2 then
+			return 0
+		end
+	end
+	local probe = chassis.CFrame * CFrame.new(0, 0, -dir * (chassis.Size.Z / 2 + 3))
+	local params = OverlapParams.new()
+	params.FilterType = Enum.RaycastFilterType.Exclude
+	params.FilterDescendantsInstances = ignore
+	local n = 0
+	for _, h in workspace:GetPartBoundsInBox(probe, Vector3.new(chassis.Size.X + 2, chassis.Size.Y, 6), params) do
+		if h ~= workspace.Terrain and h.CanCollide and h.Anchored then
+			-- ponto da peça mais perto do veículo (uma casa grande tem o centro longe)
+			local rel = h.CFrame:PointToObjectSpace(pos)
+			local half = h.Size / 2
+			local near = h.CFrame:PointToWorldSpace(
+				Vector3.new(
+					math.clamp(rel.X, -half.X, half.X),
+					math.clamp(rel.Y, -half.Y, half.Y),
+					math.clamp(rel.Z, -half.Z, half.Z)
+				)
+			)
+			if BotNav.kindAt(g, near.X, near.Z) ~= BotNav.K.ROAD then
+				if h.Size.X < 30 and h.Size.Z < 30 then
+					local _, yaw, _ = h.CFrame:ToOrientation()
+					BotNav.markBox(g, h.Position.X, h.Position.Z, h.Size.X, h.Size.Z, yaw, F.HEDGE)
+				end
+				BotNav.markPoint(g, near.X, near.Z, F.HEDGE)
+				n += 1
+				if n >= 4 then
+					break
+				end
+			end
+		end
+	end
+	learned += n
+	return n
+end
+
 -- ===== fila de rotas =====
 type Job = {
 	key: string,
+	vehicle: boolean,
 	profile: BotNav.Profile,
 	from: Vector3,
 	to: Vector3,
@@ -200,7 +351,15 @@ function BotWorld.route(
 			break
 		end
 	end
-	table.insert(jobs, { key = key, profile = BotNav.profile(kind, spec), from = from, to = to, cb = cb, search = nil })
+	table.insert(jobs, {
+		key = key,
+		vehicle = kind ~= "infantry",
+		profile = BotNav.profile(kind, spec),
+		from = from,
+		to = to,
+		cb = cb,
+		search = nil,
+	})
 end
 
 function BotWorld.pending(): number
@@ -209,6 +368,9 @@ end
 
 local function finish(job: Job, ok: boolean, pts: { { x: number, z: number } }?)
 	local out: { Vector3 }? = nil
+	if pts and job.vehicle then
+		pts = alignVehicleRoute(pts)
+	end
 	if pts and #pts > 0 then
 		local list: { Vector3 } = {}
 		for _, p in pts do
@@ -354,10 +516,71 @@ local function markMapParts(g: BotNav.Grid, map: Instance)
 	end
 end
 
+-- Peças das bases (2026-11-13) que o bot contorna mas que não são abrigo: a lona e o bambu deixam a
+-- bala passar, mas seguram quem anda (a colisão Colisao_* do Blender). O arame em concertina e o
+-- gerador também (teste da v38: sem eles na grade, a rota do blindado de bot cortava a cerca e
+-- empacava no arame em vez de sair pelo portão da base).
+local NAV_BLOCK: { [string]: boolean } = {
+	us_tent_gp_medium = true,
+	us_tent_gp_large = true,
+	us_command_tent = true,
+	us_mess_tent = true,
+	us_concertina = true,
+	us_flagpole = true,
+	us_generator = true,
+	us_fuel_drums = true,
+	us_water_trailer = true,
+	vc_lean_to = true,
+	vc_hoang_cam_kitchen = true,
+	vc_car_shelter = true,
+}
+
+-- Tronco de árvore com colisão (Madeira0_0 das árvores prontas, D-67): célula com a marca de sebe,
+-- que para o veículo (hedge = infinito na lagarta e no anfíbio) e não pesa para a infantaria. Teste
+-- da v38: a mata e o bosque eram só "caros" para o blindado de bot, e a rota atravessava capões de
+-- árvore no meio do campo, onde o tanque encalhava entre os troncos.
+local function markTrunks(g: BotNav.Grid, folder: Instance): number
+	local n = 0
+	for i, m in folder:GetChildren() do
+		if i % 300 == 0 then
+			task.wait()
+		end
+		if m:IsA("Model") and BotBrain.plantKind(m.Name) then
+			local trunk = m:FindFirstChild("Madeira0_0", true)
+			if trunk and trunk:IsA("BasePart") and trunk.CanCollide then
+				-- a peça do tronco leva os galhos grossos: a pegada dela (até 24 studs), não só o centro
+				-- (no teste o LVTP-5 encalhou num tronco inclinado com o centro na célula do lado)
+				local _, yaw, _ = trunk.CFrame:ToOrientation()
+				BotNav.markBox(
+					g,
+					trunk.Position.X,
+					trunk.Position.Z,
+					math.min(trunk.Size.X, 24),
+					math.min(trunk.Size.Z, 24),
+					yaw,
+					F.HEDGE
+				)
+				n += 1
+			end
+		end
+	end
+	return n
+end
+
 -- Arte posta pelo AssetLoader (casas, celeiros, sacos, bunkers, cerca): casa na grade e abrigo
 local function markArt(g: BotNav.Grid, art: Instance)
 	local n = 0
+	local trunks = markTrunks(g, art)
+	local jungle = art:FindFirstChild("Jungle")
+	if jungle then
+		trunks += markTrunks(g, jungle)
+	end
+	print(string.format("[VT65] bots: %d troncos de árvore barram os veículos", trunks))
 	for _, m in art:GetChildren() do
+		if m:IsA("Model") and NAV_BLOCK[m.Name] then
+			local cf, size = m:GetBoundingBox()
+			BotNav.markBox(g, cf.X, cf.Z, size.X, size.Z, yawOf(cf), F.HOUSE)
+		end
 		if m:IsA("Model") and not BotBrain.plantKind(m.Name) then
 			local kind = BotBrain.coverKind("MeshPart", m.Name, nil, false)
 			if kind ~= "solid" and kind ~= "grass" then
@@ -427,13 +650,23 @@ local function build()
 	-- estradas de terra batida (2026-11-12, Data/Roads): o blindado de bot anda nelas
 	local roadsModule = VT65Build:WaitForChild("Data"):FindFirstChild("Roads")
 	if roadsModule then
-		BotNav.markRoads(g, require(roadsModule :: ModuleScript) :: any)
+		local roads = require(roadsModule :: ModuleScript) :: any
+		BotNav.markRoads(g, roads)
+		loadRoadSegs(roads)
 	end
 	local map = workspace:FindFirstChild("Map") or workspace:WaitForChild("Map", 30)
 	if map then
 		markMapParts(g, map)
 	end
 	BotWorld.grid = g
+	for _, roads in pendingRoads do
+		BotNav.markRoads(g, roads)
+	end
+	table.clear(pendingRoads)
+	for _, p in pendingBlocks do
+		BotNav.markPoint(g, p.X, p.Z, F.HEDGE)
+	end
+	table.clear(pendingBlocks)
 	BotWorld.ready = true
 	print(string.format("[VT65] bots: mapa pronto em %.1f s (%d abrigos fixos)", os.clock() - t0, coverCount))
 	-- arte (casas de verdade, sacos, bunkers): espera o AssetLoader terminar (até 3 min)

@@ -6,12 +6,16 @@
 --   1. Input Action System: um InputContext por contexto do InputMap (prioridade e Sink), uma
 --      InputAction por botão lógico, com InputBinding do controle e do teclado/mouse;
 --   2. UserInputService, como reserva para bindings que falhem no IAS (há relatos com Thumbstick1
---      e ButtonA).
+--      e ButtonA);
+--   3. Parte 13 (toque): botões virtuais do HUD de toque (Controllers/ToqueHud) por
+--      Input.virtual(ação, apertado): o mesmo caminho do botão físico (tocar x segurar do InputMap,
+--      contexto ativo, os mesmos handlers de Input.on).
 -- Analógicos e gatilhos são lidos de GetGamepadState a cada quadro, com zona morta, curva e
--- limiar do InputMap.
--- Também cuida de: dispositivo preferido (PreferredInput), ícones certos por controle
--- (GetImageForKeyCode), tocar x segurar, máquina de estados (menus, mapa, menu do Roblox,
--- desconexão, morte, veículo), configurações salvas na conta e o gravador/reprodutor de entradas.
+-- limiar do InputMap; no toque, os analógicos são os virtuais (Input.setVirtualStick).
+-- Também cuida de: dispositivo preferido (PreferredInput; controle conectado manda, o toque fica de
+-- reserva para a interface), ícones certos por controle (GetImageForKeyCode), tocar x segurar,
+-- máquina de estados (menus, mapa, menu do Roblox, desconexão, morte, veículo, app fora de foco),
+-- configurações salvas na conta e o gravador/reprodutor de entradas.
 local GuiService = game:GetService("GuiService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -21,6 +25,7 @@ local UserInputService = game:GetService("UserInputService")
 
 local InputMap = require(ReplicatedStorage.Shared.InputMap)
 local Net = require(ReplicatedStorage.Shared.Net)
+local Toque = require(ReplicatedStorage.Shared.Toque)
 
 local player = Players.LocalPlayer
 local Input = {}
@@ -42,6 +47,12 @@ local stateChanged = Instance.new("BindableEvent")
 Input.StateChanged = stateChanged.Event -- (cancelled: {string}, ctx)
 local settingsChanged = Instance.new("BindableEvent")
 Input.SettingsChanged = settingsChanged.Event
+-- Parte 13: botão virtual apertado/solto pelo dedo (spec, down) e "solte tudo" do toque (motivo:
+-- "focus" = app saiu de foco, "back" = voltou, "device" = o toque deixou de ser a entrada)
+local virtualChanged = Instance.new("BindableEvent")
+Input.VirtualChanged = virtualChanged.Event
+local touchReset = Instance.new("BindableEvent")
+Input.TouchReset = touchReset.Event
 
 -- ===== handlers =====
 type Fn = () -> ()
@@ -55,17 +66,86 @@ function Input.on(actionId: string, phase: string, fn: Fn)
 	table.insert(h[phase], fn)
 end
 
-local function fire(a: InputMap.Action, phase: string)
-	if InputMap.CONTEXTS[a.ctx].game and not InputMap.allowed(Input.state, a.id) then
-		return
-	end
-	local h = handlers[a.id]
+local function runPhase(id: string, phase: string)
+	local h = handlers[id]
 	local list = h and h[phase]
 	if list then
 		for _, fn in list do
 			task.spawn(fn)
 		end
 	end
+end
+
+local function hasPhase(id: string, phase: string): boolean
+	local h = handlers[id]
+	local list = h and h[phase]
+	return list ~= nil and #list > 0
+end
+
+local function fire(a: InputMap.Action, phase: string)
+	if InputMap.CONTEXTS[a.ctx].game and not InputMap.allowed(Input.state, a.id) then
+		return
+	end
+	runPhase(a.id, phase)
+end
+
+-- Botão virtual (toque): a fase pedida vira a que os consumidores da ação escutam. Os handlers
+-- foram escritos para o controle e o teclado (ex.: a recarga escuta "tap" e "press"; a câmera de
+-- 3ª pessoa, "press" e "holdStart"); um botão de toque dedicado aperta pela fase que existe, uma
+-- vez só. Soltar sempre passa (nada fica preso).
+type FireFn = (InputMap.Action, string) -> ()
+
+local function fireVirtual(a: InputMap.Action, phase: string)
+	local ending = phase == "release" or phase == "holdEnd"
+	if not ending and InputMap.CONTEXTS[a.ctx].game and not InputMap.allowed(Input.state, a.id) then
+		return
+	end
+	local id = a.id
+	local press, tap, hold = hasPhase(id, "press"), hasPhase(id, "tap"), hasPhase(id, "holdStart")
+	if phase == "tap" then
+		if tap then
+			runPhase(id, "tap")
+		elseif press then
+			runPhase(id, "press")
+			runPhase(id, "release")
+		elseif hold then
+			runPhase(id, "holdStart")
+			runPhase(id, "holdEnd")
+		end
+	elseif phase == "press" then
+		if press then
+			runPhase(id, "press")
+		elseif tap then
+			runPhase(id, "tap")
+		elseif hold then
+			runPhase(id, "holdStart")
+		end
+	elseif phase == "release" then
+		if press then
+			runPhase(id, "release")
+		elseif not tap and hold then
+			runPhase(id, "holdEnd")
+		end
+	elseif phase == "holdStart" then
+		if hold then
+			runPhase(id, "holdStart")
+		elseif press then
+			runPhase(id, "press")
+		elseif tap then
+			runPhase(id, "tap")
+		end
+	elseif phase == "holdEnd" then
+		if hold then
+			runPhase(id, "holdEnd")
+		elseif press then
+			runPhase(id, "release")
+		end
+	end
+end
+
+-- soltura sem conferir o contexto (troca de contexto, app fora de foco)
+local function fireRaw(a: InputMap.Action, phase: string)
+	runPhase(a.id, phase)
 end
 
 -- ===== resolução de botões =====
@@ -125,7 +205,7 @@ local function resolve(code: string, isPad: boolean): Entry?
 	return nil
 end
 
-type Pressed = { entry: Entry, t0: number, held: boolean, token: number }
+type Pressed = { entry: Entry, t0: number, held: boolean, token: number, virt: boolean, tapDone: boolean }
 local pressed: { [string]: Pressed } = {}
 -- Teclas que estavam apertadas na troca de contexto: ficam "consumidas" até soltar. Sem isso, a
 -- segunda fonte (IAS) entregava de novo a tecla que abriu o mapa (M) ou o menu (P), e a ação dela
@@ -136,6 +216,68 @@ local token = 0
 -- Gravador (Parte 12.7): eventos de botão do controle com tempo relativo.
 local recording: { { t: number, code: string, down: boolean } }? = nil
 local recordT0 = 0
+
+-- Aperto de um botão (físico ou virtual) já resolvido. Tocar x segurar como no InputMap; no
+-- virtual, um botão de uma função só (sem segurar) vale já ao apertar (resposta imediata no toque).
+local function pressDown(id: string, e: Entry, virt: boolean)
+	local fireP: FireFn = if virt then fireVirtual else fire
+	token += 1
+	local p: Pressed = { entry = e, t0 = os.clock(), held = false, token = token, virt = virt, tapDone = false }
+	pressed[id] = p
+	for _, a in e.press do
+		fireP(a, "press")
+	end
+	if #e.hold > 0 then
+		if #e.tap == 0 then
+			p.held = true -- só segurar: começa já
+			for _, a in e.hold do
+				fireP(a, "holdStart")
+			end
+		else
+			local my = p.token
+			task.delay(Input.settings.holdTime, function()
+				local cur = pressed[id]
+				if cur and cur.token == my and not cur.held then
+					cur.held = true
+					for _, a in e.hold do
+						fireP(a, "holdStart")
+					end
+				end
+			end)
+		end
+	elseif virt and #e.tap > 0 then
+		p.tapDone = true
+		for _, a in e.tap do
+			fireP(a, "tap")
+		end
+	end
+end
+
+local function pressUp(id: string)
+	local p = pressed[id]
+	if not p then
+		return
+	end
+	pressed[id] = nil
+	local fireP: FireFn = if p.virt then fireVirtual else fire
+	for _, a in p.entry.press do
+		fireP(a, "release")
+	end
+	if p.held then
+		for _, a in p.entry.hold do
+			fireP(a, "holdEnd")
+		end
+	elseif not p.tapDone then
+		for _, a in p.entry.tap do
+			fireP(a, "tap")
+		end
+	end
+end
+
+local function blockedNow(): boolean
+	local s = Input.state
+	return s.disconnected or s.robloxMenu or s.awaitRelease or s.unfocused
+end
 
 local function onButton(code: string, down: boolean, isPad: boolean)
 	if isPad and Input.settings.swapTriggers and SWAP_TRIG[code] then
@@ -155,56 +297,30 @@ local function onButton(code: string, down: boolean, isPad: boolean)
 		if pressed[id] then
 			return -- a outra fonte já entregou este aperto
 		end
-		local s = Input.state
-		if s.disconnected or s.robloxMenu or s.awaitRelease then
+		if blockedNow() then
 			return
 		end
 		local e = resolve(code, isPad)
 		if not e then
 			return
 		end
-		token += 1
-		local p: Pressed = { entry = e, t0 = os.clock(), held = false, token = token }
-		pressed[id] = p
-		for _, a in e.press do
-			fire(a, "press")
-		end
-		if #e.hold > 0 then
-			if #e.tap == 0 then
-				p.held = true -- só segurar: começa já
-				for _, a in e.hold do
-					fire(a, "holdStart")
-				end
-			else
-				local my = p.token
-				task.delay(Input.settings.holdTime, function()
-					local cur = pressed[id]
-					if cur and cur.token == my and not cur.held then
-						cur.held = true
-						for _, a in e.hold do
-							fire(a, "holdStart")
-						end
-					end
-				end)
-			end
-		end
+		pressDown(id, e, false)
 	else
-		local p = pressed[id]
-		if not p then
-			return
-		end
-		pressed[id] = nil
-		for _, a in p.entry.press do
-			fire(a, "release")
-		end
-		if p.held then
-			for _, a in p.entry.hold do
-				fire(a, "holdEnd")
-			end
-		else
-			for _, a in p.entry.tap do
-				fire(a, "tap")
-			end
+		pressUp(id)
+	end
+end
+
+-- Solta (release/holdEnd) e consome um aperto.
+local function dropPressed(id: string, p: Pressed)
+	pressed[id] = nil
+	consumed[id] = true
+	local fireP: FireFn = if p.virt then fireVirtual else fireRaw
+	for _, a in p.entry.press do
+		fireP(a, "release")
+	end
+	if p.held then
+		for _, a in p.entry.hold do
+			fireP(a, "holdEnd")
 		end
 	end
 end
@@ -222,23 +338,14 @@ local function releaseAll()
 		if InputMap.survives(all, ctx) then
 			continue
 		end
-		pressed[id] = nil
-		consumed[id] = true
-		local function run(a: InputMap.Action, phase: string)
-			local h = handlers[a.id]
-			local list: { Fn } = if h and h[phase] then h[phase] else {}
-			for _, fn in list do
-				task.spawn(fn)
-			end
-		end
-		for _, a in p.entry.press do
-			run(a, "release")
-		end
-		if p.held then
-			for _, a in p.entry.hold do
-				run(a, "holdEnd")
-			end
-		end
+		dropPressed(id, p)
+	end
+end
+
+-- App fora de foco (Parte 13): solta tudo, em qualquer contexto.
+local function releaseEverything()
+	for id, p in pressed do
+		dropPressed(id, p)
 	end
 end
 
@@ -325,6 +432,17 @@ end
 -- como "processado", e a reserva perderia o Espaço do transpor. Caixa de texto em foco continua vetando.
 local CAS_KEYS: { [Enum.KeyCode]: boolean } = { [Enum.KeyCode.Space] = true }
 
+-- Parte 13: há controle conectado? (controle conectado é a entrada principal)
+local function padConnected(): boolean
+	local ok, list = pcall(function()
+		return UserInputService:GetConnectedGamepads()
+	end)
+	return ok and #list > 0
+end
+
+-- definidos mais abaixo (dispositivo)
+local setDevice: (string) -> () = function(_: string) end
+
 UserInputService.InputBegan:Connect(function(input: InputObject, processed: boolean)
 	local t = input.UserInputType
 	if isGamepad(t) then
@@ -361,6 +479,10 @@ UserInputService.InputBegan:Connect(function(input: InputObject, processed: bool
 		end
 	elseif MOUSE[t] and not processed then
 		onButton(MOUSE[t], true, false)
+	elseif t == Enum.UserInputType.Touch and Input.state.disconnected and not padConnected() then
+		-- Parte 13: o controle caiu num aparelho de toque: o toque assume (o cartão de reconexão sai)
+		setDevice("touch")
+		applyEvent("reconnect")
 	end
 end)
 UserInputService.InputEnded:Connect(function(input)
@@ -378,6 +500,8 @@ end)
 
 -- ===== analógicos e gatilhos =====
 local virtualPad: { [string]: Vector3 }? = nil -- reprodutor de entradas
+-- Parte 13: analógicos virtuais do toque (−1..1, y para cima)
+local virtStick: { [string]: Vector2 } = { left = Vector2.zero, right = Vector2.zero }
 
 local function padValue(code: Enum.KeyCode): Vector3
 	if virtualPad then
@@ -391,8 +515,12 @@ local function padValue(code: Enum.KeyCode): Vector3
 	return Vector3.zero
 end
 
--- Analógico cru (x direita, y para cima), já com a troca de analógicos (canhoto).
+-- Analógico cru (x direita, y para cima), já com a troca de analógicos (canhoto). No toque, o
+-- analógico virtual (o espelho do canhoto já fica no layout de toque).
 function Input.stickRaw(which: string): Vector2
+	if device == "touch" then
+		return virtStick[if which == "left" then "left" else "right"]
+	end
 	local code = if which == "left" then Enum.KeyCode.Thumbstick1 else Enum.KeyCode.Thumbstick2
 	if Input.settings.swapSticks then
 		code = if which == "left" then Enum.KeyCode.Thumbstick2 else Enum.KeyCode.Thumbstick1
@@ -401,9 +529,13 @@ function Input.stickRaw(which: string): Vector2
 	return Vector2.new(p.X, p.Y)
 end
 
--- Movimento: zona morta radial do analógico esquerdo (resposta linear).
+-- Movimento: zona morta radial do analógico esquerdo (resposta linear). No toque, o analógico
+-- virtual já vem com a zona morta e a proporção do Shared/Toque.
 function Input.move(): Vector2
 	local r = Input.stickRaw("left")
+	if device == "touch" then
+		return r
+	end
 	local x, y = InputMap.radialDeadzone(r.X, r.Y, Input.settings.moveInner, Input.settings.moveOuter)
 	return Vector2.new(x, y)
 end
@@ -427,13 +559,27 @@ function Input.isGamepad(): boolean
 	return device == "gamepad"
 end
 
+-- Parte 13: o toque é a entrada principal agora (PreferredInput = Touch e nenhum controle).
+function Input.touchActive(): boolean
+	return device == "touch"
+end
+
 -- ===== dispositivo =====
 local lastReport = 0
-local function setDevice(d: string)
+local devTouch = false -- Studio: VT65DevToque "forcar" (HUD de toque sem aparelho)
+setDevice = function(d: string)
+	if devTouch and d ~= "touch" then
+		return
+	end
 	if d == device then
 		return
 	end
+	local was = device
 	device = d
+	if was == "touch" then
+		virtStick.left, virtStick.right = Vector2.zero, Vector2.zero
+		touchReset:Fire("device")
+	end
 	deviceChanged:Fire(d)
 	if os.clock() - lastReport > 2 then
 		lastReport = os.clock()
@@ -442,6 +588,10 @@ local function setDevice(d: string)
 end
 
 local function readPreferred()
+	if devTouch then
+		setDevice("touch")
+		return
+	end
 	local ok, pref = pcall(function()
 		return UserInputService.PreferredInput
 	end)
@@ -449,7 +599,8 @@ local function readPreferred()
 		if pref == Enum.PreferredInput.Gamepad or pref == Enum.PreferredInput.MicroGamepad then
 			setDevice("gamepad")
 		elseif pref == Enum.PreferredInput.Touch then
-			setDevice("touch")
+			-- controle conectado é a entrada principal; o toque fica de reserva para a interface
+			setDevice(if padConnected() then "gamepad" else "touch")
 		elseif device ~= "gamepad" then
 			setDevice("kbm") -- do controle para o teclado só por tecla, clique ou mouse andando (abaixo)
 		end
@@ -487,8 +638,15 @@ UserInputService.LastInputTypeChanged:Connect(function(t)
 		setDevice("kbm")
 	elseif t == Enum.UserInputType.MouseMovement and device ~= "gamepad" then
 		setDevice("kbm") -- do controle, só pelo InputChanged acima
-	elseif t == Enum.UserInputType.Touch then
-		setDevice("touch")
+	elseif t == Enum.UserInputType.Touch and not padConnected() then
+		setDevice("touch") -- com controle conectado, tocar na tela não tira o controle
+	end
+end)
+-- controle ligado num aparelho de toque: vira a entrada principal
+UserInputService.GamepadConnected:Connect(function(gp)
+	if device == "touch" and not devTouch then
+		primaryPad = gp
+		setDevice("gamepad")
 	end
 end)
 
@@ -544,10 +702,11 @@ task.spawn(function()
 	end)
 	if ok and pm then
 		controls = pm:GetControls()
-		-- movimento no controle com a zona morta do jogo (aplicada antes de qualquer lógica)
+		-- movimento no controle com a zona morta do jogo (aplicada antes de qualquer lógica); no
+		-- toque, o analógico virtual
 		local orig = controls.moveFunction
 		controls.moveFunction = function(plr: Player, vec: Vector3, rel: boolean)
-			if device == "gamepad" then
+			if device == "gamepad" or device == "touch" then
 				local mv = Input.move()
 				vec, rel = Vector3.new(mv.X, 0, -mv.Y), true
 			end
@@ -564,6 +723,19 @@ task.spawn(function()
 			end
 			orig(plr, vec, rel)
 		end
+	end
+end)
+
+-- Parte 13: com o movimento de toque programável (StarterPlayer.DevTouchMovementMode = Scriptable)
+-- o PlayerModule não tem controlador no toque e não chama o moveFunction: chamamos nós, a cada
+-- quadro, logo depois dele (o filtro do Movement continua valendo).
+RunService:BindToRenderStep("VT65_ToqueMove", Enum.RenderPriority.Input.Value + 1, function()
+	if device ~= "touch" or not controls then
+		return
+	end
+	local ac = controls.activeController
+	if ac == nil or ac.enabled ~= true then
+		controls.moveFunction(player, Vector3.zero, true)
 	end
 end)
 
@@ -640,8 +812,200 @@ function Input.closeMenu()
 	Input.event("menu_close")
 end
 
+-- ===== toque: botões e analógicos virtuais (Parte 13; contrato com os agentes T2 e T3) =====
+-- spec: uma ação ("reload") ou várias no mesmo botão ("crouch|prone": tocar agacha, segurar deita,
+-- como o B do controle); "acao:tap"/"acao:hold"/"acao:press" fixa o tipo. Cada spec é um botão.
+type Held = { start: Vector2?, pos: Vector2? }
+local virtHeld: { [string]: Held } = {}
+local lookAcc = Vector2.zero
+
+-- Ação pelo id no contexto ativo. A camada de baixo primeiro: o lean_left da infantaria vale
+-- mirando e depois de mirar (o da camada de mira seria solto ao parar de mirar).
+local function actionFor(id: string): InputMap.Action?
+	local layers = InputMap.layers(InputMap.activeContext(Input.state))
+	for i = #layers, 1, -1 do
+		for _, a in InputMap.ACTIONS do
+			if a.id == id and a.ctx == layers[i] and seatOk(a) then
+				return a
+			end
+		end
+	end
+	return nil
+end
+
+local function virtualEntry(spec: string): Entry?
+	local e: Entry = { press = {}, tap = {}, hold = {} }
+	local n = 0
+	for _, part in Toque.parseSpec(spec) do
+		local a = actionFor(part.id)
+		if a then
+			local kind = part.kind or a.padPress
+			local list = if kind == "tap" then e.tap elseif kind == "hold" then e.hold else e.press
+			table.insert(list, a)
+			n += 1
+		end
+	end
+	return if n > 0 then e else nil
+end
+
+-- Aperta/solta o botão virtual (dedo na tela). pos: onde está o dedo (px da tela, para a roda em
+-- volta do polegar). Devolve true se o aperto entrou (contexto e estado aceitaram).
+function Input.virtual(spec: string, down: boolean, pos: Vector2?): boolean
+	local id = "touch:" .. spec
+	if down then
+		local h = virtHeld[spec]
+		if h then
+			h.pos = pos or h.pos
+		else
+			virtHeld[spec] = { start = pos, pos = pos }
+			virtualChanged:Fire(spec, true)
+		end
+		if pressed[id] or consumed[id] or blockedNow() then
+			return false
+		end
+		local e = virtualEntry(spec)
+		if not e then
+			return false
+		end
+		pressDown(id, e, true)
+		return true
+	end
+	local was = virtHeld[spec] ~= nil
+	virtHeld[spec] = nil
+	consumed[id] = nil
+	pressUp(id)
+	if was then
+		virtualChanged:Fire(spec, false)
+	end
+	return true
+end
+
+-- O dedo está no botão, mas a ação ainda não foi apertada (ex.: DESISTIR, que só manda depois de 1 s
+-- segurando): Input.virtualDown já responde que sim (a tela de queda enche o anel). Soltar:
+-- Input.virtual(spec, false).
+function Input.virtualHold(spec: string, pos: Vector2?)
+	if not virtHeld[spec] then
+		virtHeld[spec] = { start = pos, pos = pos }
+		virtualChanged:Fire(spec, true)
+	end
+end
+
+-- O dedo andou (a roda escolhe pela direção do polegar).
+function Input.virtualMove(spec: string, pos: Vector2)
+	local h = virtHeld[spec]
+	if h then
+		h.pos = pos
+	end
+end
+
+-- Desiste do aperto sem o tocar/segurar (o dedo continua na tela). Ex.: deslizar para cima no
+-- botão de postura levanta em vez de agachar.
+function Input.virtualCancel(spec: string)
+	local id = "touch:" .. spec
+	local p = pressed[id]
+	if p then
+		pressed[id] = nil
+		for _, a in p.entry.press do
+			fireVirtual(a, "release")
+		end
+	end
+	consumed[id] = true
+end
+
+-- O botão virtual desta ação está apertado (o dedo está nele)?
+function Input.virtualDown(actionId: string): boolean
+	for spec in virtHeld do
+		if Toque.specHas(spec, actionId) then
+			return true
+		end
+	end
+	return false
+end
+
+-- Onde o dedo começou e onde está (px da tela) no botão virtual desta ação.
+function Input.virtualPoint(actionId: string): (Vector2?, Vector2?)
+	for spec, h in virtHeld do
+		if Toque.specHas(spec, actionId) then
+			return h.start, h.pos
+		end
+	end
+	return nil, nil
+end
+
+-- Analógico virtual (−1..1, y para cima); Input.stickRaw devolve este no toque.
+function Input.setVirtualStick(which: string, v: Vector2)
+	if v.Magnitude > 1 then
+		v = v.Unit
+	end
+	virtStick[if which == "left" then "left" else "right"] = v
+end
+
+-- Arrasto de olhar (px) acumulado no quadro; o CameraLook consome com takeLook.
+function Input.addLook(d: Vector2)
+	lookAcc += d
+end
+
+function Input.takeLook(): Vector2
+	local d = lookAcc
+	lookAcc = Vector2.zero
+	return d
+end
+
+-- A volta da arma ao ponto de mira pode ser até 25% mais rápida no toque (o chute é o mesmo em
+-- todas as plataformas). Lido pelo WeaponController na volta do recuo.
+Input.TOUCH_RECOIL_RETURN = 1.25
+function Input.recoilReturnK(): number
+	return if device == "touch" then Input.TOUCH_RECOIL_RETURN else 1
+end
+
+-- App em segundo plano, ligação, notificação: solta tudo (o dedo some sem o fim do toque) e só
+-- volta ao jogo com tudo solto (relê o estado).
+local function clearTouch()
+	table.clear(virtHeld)
+	for id in consumed do
+		if string.sub(id, 1, 6) == "touch:" then
+			consumed[id] = nil
+		end
+	end
+	virtStick.left, virtStick.right = Vector2.zero, Vector2.zero
+	lookAcc = Vector2.zero
+end
+
+function Input.focusLost()
+	releaseEverything()
+	clearTouch()
+	touchReset:Fire("focus")
+	applyEvent("focus_lost")
+end
+
+function Input.focusBack()
+	clearTouch()
+	readPreferred()
+	applyEvent("focus_back")
+	touchReset:Fire("back")
+end
+
+UserInputService.WindowFocusReleased:Connect(Input.focusLost)
+UserInputService.WindowFocused:Connect(Input.focusBack)
+
+-- Studio: força o modo de toque (VT65DevToque "forcar"/"normal", no ToqueHud)
+function Input.devForceTouch(on: boolean)
+	if not RunService:IsStudio() then
+		return
+	end
+	devTouch = on
+	if on then
+		setDevice("touch")
+	else
+		readPreferred()
+	end
+end
+
 -- volta ao jogo: só depois de todos os botões soltos (relê o estado real do controle)
 local function anyDown(): boolean
+	if device == "touch" and next(virtHeld) ~= nil then
+		return true
+	end
 	for _, k in Enum.KeyCode:GetEnumItems() do
 		local n = k.Name
 		if
@@ -675,6 +1039,9 @@ RunService.Heartbeat:Connect(function()
 	end
 	if Input.state.awaitRelease and not anyDown() then
 		table.clear(pressed)
+		-- nada apertado de fato: o que estava "consumido" já foi solto (inclusive fora de foco, quando
+		-- o fim da tecla ou do toque não chega)
+		table.clear(consumed)
 		Input.event("buttons_released")
 	end
 end)
@@ -686,8 +1053,9 @@ GuiService.MenuClosed:Connect(function()
 	Input.event("roblox_menu_close")
 end)
 
--- controle desconectado: pausa; volta com o primeiro controle que apertar um botão. O aviso na
--- tela (cartão de época) é do Reconexao.client, que olha Input.state.disconnected.
+-- controle desconectado: pausa; volta com o primeiro controle que apertar um botão (ou, num
+-- aparelho de toque, com um toque na tela). O aviso na tela (cartão de época) é do
+-- Reconexao.client, que olha Input.state.disconnected.
 UserInputService.GamepadDisconnected:Connect(function(gp)
 	if gp == primaryPad and device == "gamepad" then
 		Input.event("disconnect")

@@ -94,6 +94,15 @@ local function weaponName(id: string): string
 	return if wp and wp.name then wp.name else id
 end
 
+-- toque como entrada principal (contrato da Parte 13: Input.touchActive do T1)
+local function touchOn(): boolean
+	local f = (Input :: any).touchActive
+	if type(f) == "function" then
+		return f() == true
+	end
+	return Input.device() == "touch"
+end
+
 local function health(v: number?): Color3
 	local x = math.clamp((v or 100) / 100, 0, 1)
 	return if x > 0.6 then V.KHAKI elseif x > 0.3 then Color3.fromRGB(226, 148, 52) else V.RED
@@ -214,6 +223,40 @@ function VehicleHudView.new(parent: Instance?): View
 	hints.frame.AnchorPoint = Vector2.new(0, 1)
 	hints.frame.Position = UDim2.new(0, P, 1, -px(6, 8))
 	hints.frame.Size = UDim2.new(1, -2 * P, 0, px(20, 30))
+	-- Toque (Parte 13): o canto de baixo à esquerda é do analógico flutuante. O painel sobe para o
+	-- alto à esquerda, logo abaixo do mapa e do menu do HUD de toque (T1: centro a 9% da altura,
+	-- 9 mm), um pouco menor e sem a fileira de teclas: os botões de lugar e sair estão na tela
+	-- (ToqueVeiculo.client). O painel não pega toque (o analógico funciona por baixo dele).
+	local scale = Instance.new("UIScale")
+	scale.Parent = root
+	local hintsH = px(26, 38)
+	local docked = ""
+	local function touchTop(): number
+		local a = if gui:IsA("GuiBase2d") then gui.AbsoluteSize else Vector2.new(800, 360)
+		local short = math.min(a.X, a.Y)
+		local ppm = (if short >= 600 then 132 else 160) / 25.4 -- px por mm (o palpite do Shared/Toque)
+		local size = math.max(9 * ppm, 48)
+		return math.floor(math.max(a.Y * 0.09, size / 2) + size / 2 + 2.5 * ppm + 0.5)
+	end
+	local function dock(): (UDim2, UDim2) -- lugar de repouso e de onde entra
+		local touch = touchOn()
+		local top = if touch then touchTop() else 0
+		local d = if touch then string.format("touch%d", top) else "pc"
+		if d ~= docked then
+			docked = d
+			root.AnchorPoint = if touch then Vector2.zero else Vector2.new(0, 1)
+			root.Size = UDim2.fromOffset(W, if touch then H - hintsH else H)
+			scale.Scale = if touch then 0.85 else 1
+			hints.frame.Visible = not touch
+			if root.Visible then
+				root.Position = if touch then UDim2.fromOffset(16, top) else UDim2.new(0, 16, 1, -16)
+			end
+		end
+		if touch then
+			return UDim2.fromOffset(16, top), UDim2.fromOffset(-W, top)
+		end
+		return UDim2.new(0, 16, 1, -16), UDim2.new(0, -W, 1, -16)
+	end
 	local hintKey = ""
 	local function refreshHints(heliCtx: boolean)
 		local k = (if heliCtx then "h" else "g") .. (if Input.isGamepad() then "p" else "k")
@@ -230,12 +273,11 @@ function VehicleHudView.new(parent: Instance?): View
 	local mode = ""
 	local function show(m: string, faction: string?)
 		bar.BackgroundColor3 = if faction == "VC" then V.VC else V.US
+		local rest, from = dock()
 		if not root.Visible then
 			root.Visible = true
-			root.Position = UDim2.new(0, -W, 1, -16)
-			TweenService
-				:Create(root, TweenInfo.new(0.3, Enum.EasingStyle.Quint), { Position = UDim2.new(0, 16, 1, -16) })
-				:Play()
+			root.Position = from
+			TweenService:Create(root, TweenInfo.new(0.3, Enum.EasingStyle.Quint), { Position = rest }):Play()
 		end
 		if m ~= mode then
 			mode = m
@@ -338,18 +380,18 @@ function VehicleHudView.new(parent: Instance?): View
 		if w == "rr_106" then
 			info.Text = string.format("Tubos carregados: %d (recarregar: parado)", d.tubes or 0)
 		elseif w and d.personal then
-			info.Text = if d.canFire
-				then string.format(
-					'%s · atirar: %s · <font color="#B4C878">no ângulo</font>',
-					weaponName(w),
-					d.fire or "?"
-				)
+			-- fire nil: toque (o botão de tiro está na tela, sem tecla para citar)
+			info.Text = if d.canFire and d.fire
+				then string.format('%s · atirar: %s · <font color="#B4C878">no ângulo</font>', weaponName(w), d.fire)
+				elseif d.canFire then string.format('%s · <font color="#B4C878">no ângulo</font>', weaponName(w))
 				else string.format('%s · <font color="#F07C68">fora do ângulo do lugar</font>', weaponName(w))
 		elseif w then
 			local wn = weaponName(w)
-			info.Text = if d.ammo
-				then string.format("%s · munição: %s · atirar: %s", wn, d.ammo, d.fire or "?")
-				else string.format("%s · atirar: %s", wn, d.fire or "?")
+			info.Text = if d.ammo and d.fire
+				then string.format("%s · munição: %s · atirar: %s", wn, d.ammo, d.fire)
+				elseif d.ammo then string.format("%s · munição: %s", wn, d.ammo)
+				elseif d.fire then string.format("%s · atirar: %s", wn, d.fire)
+				else wn
 		elseif d.closed then
 			info.Text = "Lugar fechado: daqui não se atira"
 		else
@@ -366,6 +408,7 @@ function VehicleHudView.new(parent: Instance?): View
 	end
 	Input.DeviceChanged:Connect(function()
 		hintKey = ""
+		dock()
 		if mode ~= "" then
 			refreshHints(mode == "heli")
 		end

@@ -1737,13 +1737,53 @@ UserInputService.InputBegan:Connect(function(input: InputObject, processed: bool
 end)
 
 -- toque: tocar escolhe; os dossiês de lado pedem um 2º toque (o 1º mostra a ficha)
+-- Parte 13 (celular): o objeto pequeno da mesa (dossiê, calendário, caderneta) tem alvo do tamanho
+-- do dedo: errando por pouco, procura num círculo do mínimo de toque em volta (o mais perto vence);
+-- o toque que o "dedo gordo" da interface vai dar a um botão 2D não escolhe nada na mesa; e tocar
+-- na etiqueta do objeto já escolhido confirma (antes o raio passava por ela e desmarcava).
+local GuiService = game:GetService("GuiService")
+local ToqueUi = require(script.Parent.ToqueUi)
+local function touchPick(cam: Camera, p: Vector2): Obj?
+	local o = raycastAt(cam:ScreenPointToRay(p.X, p.Y))
+	if o then
+		return o
+	end
+	local r = ToqueUi.minPx() / 2
+	for ring = 1, 2 do
+		for i = 0, 7 do
+			local a = i * math.pi / 4
+			local q = p + Vector2.new(math.cos(a), math.sin(a)) * r * ring / 2
+			local hit = raycastAt(cam:ScreenPointToRay(q.X, q.Y))
+			if hit then
+				return hit
+			end
+		end
+	end
+	return nil
+end
+local function onTag(p: Vector2): boolean
+	if not hoverTag.Visible then
+		return false
+	end
+	local a, s = hoverTag.AbsolutePosition, hoverTag.AbsoluteSize
+	return p.X >= a.X - 8 and p.X <= a.X + s.X + 8 and p.Y >= a.Y - 8 and p.Y <= a.Y + s.Y + 8
+end
 UserInputService.TouchTap:Connect(function(positions: { Vector2 }, processed: boolean)
 	local cam = camera()
 	if processed or not (deskOn and lobbyOpen and cam) or #positions == 0 then
 		return
 	end
 	local p = positions[1]
-	local o = raycastAt(cam:ScreenPointToRay(p.X, p.Y))
+	if VirtualCursor.touchSnap(p + GuiService:GetGuiInset()) then
+		return -- o dedo era de um botão da interface (VirtualCursor aciona)
+	end
+	local sel = touchSel
+	if sel and onTag(p) then
+		touchSel = nil
+		activate(sel)
+		return
+	end
+	local o = touchPick(cam, p)
 	if not o then
 		touchSel = nil
 		setHovered(nil)
@@ -1865,7 +1905,8 @@ local function step(dt: number)
 	if show and placeTag(hoverTag, cam, show, 16) then
 		hoverTitle.Text = show.title
 		hoverTitle.Font = show.font
-		hoverSub.Text = subFor(show)
+		-- toque: o 1º toque no dossiê só mostra; a etiqueta diz o que fazer para confirmar
+		hoverSub.Text = if touchSel == show and show.confirmTouch then "toque de novo para confirmar" else subFor(show)
 		hoverTag.Visible = true
 	else
 		hoverTag.Visible = false

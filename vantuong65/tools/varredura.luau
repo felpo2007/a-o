@@ -31,7 +31,9 @@ for _, name in Grid.heightChunks do
 end
 local world = WorldData.load(Grid, chunks)
 local t0 = os.clock()
-local ctx = ArtPlan.load(world, { features = Features, village = Village, roads = Roads, mapConfig = MapConfig })
+local Bases = R("../src/ServerStorage/VT65Build/Data/Bases")
+local ctx =
+	ArtPlan.load(world, { features = Features, village = Village, roads = Roads, bases = Bases, mapConfig = MapConfig })
 local function has(key: string): boolean
 	local id = AssetIds.Models[key]
 	return type(id) == "number" and id ~= 0
@@ -100,7 +102,7 @@ for _, it in plants do
 			count.planta_beco += 1
 		end
 		for _, s in structures do
-			if (s.padded or s.group == "house") and inRect(it.x, it.z, s, r) then
+			if (s.padded or s.group == "house" or s.group == "base") and inRect(it.x, it.z, s, r) then
 				count.planta_construcao += 1
 				break
 			end

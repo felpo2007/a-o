@@ -29,6 +29,8 @@ local Tutorial = require(ReplicatedStorage.Shared.Tutorial)
 local Bus = require(script.Parent.Bus)
 local Input = require(script.Parent.Input)
 local Toast = require(script.Parent.Toast)
+local ToqueTelas = require(script.Parent.ToqueTelas)
+local ToqueUi = require(script.Parent.ToqueUi)
 local UiKit = require(script.Parent.UiKit)
 
 local player = Players.LocalPlayer
@@ -57,7 +59,11 @@ for _, a in InputMap.ACTIONS do
 end
 
 -- botão da ação no dispositivo do jogador: (imagem do controle, texto curto, pede segurar?)
+-- Toque (Parte 13): o nome do botão na tela (ToqueTelas.TOUCH_NAME), nunca a tecla do teclado.
 local function keyOf(actionId: string): (string?, string, boolean)
+	if ToqueUi.active() then
+		return nil, ToqueTelas.touchName(actionId), false
+	end
 	local img, txt = Input.glyph(actionId)
 	local pad = Input.isGamepad()
 	if pad then
@@ -396,7 +402,7 @@ local function renderFoot()
 	elseif dev == "gamepad" then
 		local img = UiKit.padImage(Enum.KeyCode.ButtonSelect)
 		footChips.add(img, nil, "View", "segurar: menu → Pular o tutorial")
-	elseif dev == "touch" then
+	elseif dev == "touch" or ToqueUi.active() then
 		footChips.add(nil, nil, "2×", "toque aqui para pular o tutorial")
 	else
 		footChips.add(nil, nil, "Backspace", "segurar: pular o tutorial")
@@ -408,6 +414,22 @@ local shown = false
 local shownKey = ""
 local swapToken = 0
 local targetX = MARGIN
+
+-- Toque (Parte 13): embaixo à esquerda é o analógico do polegar (e o pé do cartão, um botão, pegava
+-- o dedo que ia andar). No toque o cartão fica no alto à esquerda, logo abaixo da fileira de botões
+-- de cima do HUD de toque (ToqueUi.topBand); o corpo do cartão não segura o toque (os botões de
+-- baixo dele continuam valendo), só o pé (dois toques pulam).
+local function posAt(x: number): UDim2
+	if ToqueUi.active() then
+		local _, _, base = ToqueUi.topBand()
+		local y = if base > 0 then base - gui.AbsolutePosition.Y + 8 else 76
+		return UDim2.new(0, x, 0, math.max(y, 8))
+	end
+	return UDim2.new(0, x, 1, -MARGIN)
+end
+local function anchorNow()
+	root.AnchorPoint = if ToqueUi.active() then Vector2.new(0, 0) else Vector2.new(0, 1)
+end
 
 -- a tradução chegou (o rótulo escondido mudou): divide de novo e acerta a altura do cartão
 UiKit.resumo(body, function(hd: string, rest: string)
@@ -440,10 +462,11 @@ local function showPanel(st: Tutorial.Step)
 		(f.inst :: any)[f.prop] = f.base
 	end
 	content.Position = UDim2.fromOffset(0, CONTENT_Y)
-	root.Position = UDim2.new(0, -W - 40, 1, -MARGIN)
+	anchorNow()
+	root.Position = posAt(-W - 40)
 	root.Visible = true
 	shown = true
-	TweenService:Create(root, SLIDE, { Position = UDim2.new(0, targetX, 1, -MARGIN) }):Play()
+	TweenService:Create(root, SLIDE, { Position = posAt(targetX) }):Play()
 end
 
 -- troca de passo: o conteúdo sai pela esquerda, o painel muda de altura e o novo entra
@@ -497,7 +520,8 @@ local function draw()
 	local hurt = Input.state.downed or not Input.state.alive or casualtyShown()
 	local want = st ~= nil and ctx ~= "menu" and ctx ~= "map" and ctx ~= "wheel" and not hurt
 	local x = if Input.state.vehicle then VEHICLE_X else MARGIN
-	local moved = x ~= targetX
+	local wantAnchor = if ToqueUi.active() then 0 else 1
+	local moved = x ~= targetX or root.AnchorPoint.Y ~= wantAnchor -- trocou de lugar (veículo, toque)
 	targetX = x
 	if not want or not st then
 		swapToken += 1
@@ -509,7 +533,7 @@ local function draw()
 				local tw = TweenService:Create(
 					root,
 					TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.In),
-					{ Position = UDim2.new(0, -W - 40, 1, -MARGIN) }
+					{ Position = posAt(-W - 40) }
 				)
 				tw.Completed:Once(function()
 					if not shown then
@@ -534,7 +558,12 @@ local function draw()
 		swap()
 	end
 	if moved then
-		TweenService:Create(root, SLIDE, { Position = UDim2.new(0, targetX, 1, -MARGIN) }):Play()
+		if root.AnchorPoint.Y ~= wantAnchor then
+			anchorNow()
+			root.Position = posAt(targetX) -- trocou de canto: vai direto (deslizar cruzaria a tela)
+		else
+			TweenService:Create(root, SLIDE, { Position = posAt(targetX) }):Play()
+		end
 	end
 end
 

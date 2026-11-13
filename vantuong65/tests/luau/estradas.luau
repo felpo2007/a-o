@@ -42,7 +42,9 @@ for _, name in Grid.heightChunks do
 	table.insert(chunks, R("../../src/ServerStorage/VT65Build/Data/" .. name))
 end
 local world = WorldData.load(Grid, chunks)
-local ctx = ArtPlan.load(world, { features = Features, village = Village, roads = Roads, mapConfig = MapConfig })
+local Bases = R("../../src/ServerStorage/VT65Build/Data/Bases")
+local ctx =
+	ArtPlan.load(world, { features = Features, village = Village, roads = Roads, bases = Bases, mapConfig = MapConfig })
 local structures = ArtPlan.structures(ctx, function(k: string): boolean
 	local id = AssetIds.Models[k]
 	return type(id) == "number" and id ~= 0
@@ -89,7 +91,7 @@ local function blockedGrid(halfM: number): { boolean }
 	local blk = table.create(N, false) :: { boolean }
 	local pad = halfM / M
 	for _, s in structures do
-		if s.padded or s.group == "house" or s.group == "village" or s.group == "special" then
+		if s.padded or s.group == "house" or s.group == "village" or s.group == "special" or s.group == "base" then
 			local ca, sa = math.cos(s.yaw), math.sin(s.yaw)
 			local ex, ez = s.hx + pad, s.hz + pad
 			local rr = math.sqrt(ex * ex + ez * ez)

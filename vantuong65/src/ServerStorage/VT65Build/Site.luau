@@ -196,7 +196,17 @@ end
 -- Patamar de uma construção: pegada (meias medidas hx, hz em studs, giro yaw do Roblox). O nível é
 -- o ponto mais baixo do chão sob a pegada; se a encosta passar de PAD_CUT_MAX, o nível sobe até o
 -- mais alto menos PAD_CUT_MAX (aterro do lado de baixo). Devolve o patamar (já posto no Site).
-function Site.addPad(self: Site, x: number, z: number, yaw: number, hx: number, hz: number, ground: boolean?): Pad
+-- level (opcional): o nível do patamar já decidido (o anexo no mesmo terraço da casa do lote).
+function Site.addPad(
+	self: Site,
+	x: number,
+	z: number,
+	yaw: number,
+	hx: number,
+	hz: number,
+	ground: boolean?,
+	level: number?
+): Pad
 	local ca, sa = math.cos(yaw), math.sin(yaw)
 	local lo, hi = math.huge, -math.huge
 	for i = -2, 2 do
@@ -213,7 +223,7 @@ function Site.addPad(self: Site, x: number, z: number, yaw: number, hx: number, 
 		sa = sa,
 		hx = hx,
 		hz = hz,
-		level = math.max(lo, hi - Site.PAD_CUT_MAX),
+		level = level or math.max(lo, hi - Site.PAD_CUT_MAX),
 		ground = ground,
 	}
 	table.insert(self.padList, pad)

@@ -600,6 +600,10 @@ local function toggleMedal(i: number)
 	local c = medalCards[i]
 	local id = c and c.id
 	if not id then
+		-- medalha ainda não ganha (Parte 13): o toque diz a condição inteira (no cartão ela é cortada)
+		if c and c.cond.Text ~= "" then
+			Toast.show(c.cond.Text, "info", { title = c.name.Text, key = "medalha" })
+		end
 		return
 	end
 	local at = table.find(pick.medals, id)

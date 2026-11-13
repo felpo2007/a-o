@@ -34,6 +34,7 @@ local Bus = require(script.Parent.Bus)
 local Input = require(script.Parent.Input)
 local SoldierPreview = require(script.Parent.SoldierPreview)
 local Toast = require(script.Parent.Toast)
+local ToqueUi = require(script.Parent.ToqueUi)
 local UiKit = require(script.Parent.UiKit)
 
 local player = Players.LocalPlayer
@@ -702,9 +703,10 @@ local function renderGear(s: { [string]: any })
 			if g.tier == t.tier then
 				line(string.format("• %s  (%.1f kg)", g.name, g.kg), 14, P.text, true)
 				local eff = line(g.effect, 13)
-				eff.Visible = false
+				-- toque (Parte 13): sem "passar o mouse", o efeito fica sempre à vista
+				eff.Visible = ToqueUi.active()
 				local function showEffect(on: boolean)
-					eff.Visible = on
+					eff.Visible = on or ToqueUi.active()
 				end
 				if g.unlocked then
 					-- frase inteira por caso (levando/deixado × como liberou): o dicionário traduz a frase
@@ -808,12 +810,19 @@ local function skinCard(s: Skins.Skin, sk: { [string]: any })
 		select(s.id)
 	end
 	if how then
+		-- toque (Parte 13): sem "passar o mouse", o toque também mostra a skin na prévia
 		if equipped then
 			button(actions, "TIRAR", "normal", "skin:" .. s.id, function()
+				if ToqueUi.active() then
+					select(s.id)
+				end
 				Net.event("Gear_Equip"):FireServer(s.id, false)
 			end, look)
 		else
 			button(actions, "EQUIPAR", "primary", "skin:" .. s.id, function()
+				if ToqueUi.active() then
+					select(s.id)
+				end
 				Net.event("Gear_Equip"):FireServer(s.id, true)
 			end, look)
 		end

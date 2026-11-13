@@ -47,6 +47,7 @@ local Input = require(script.Parent.Input)
 local SoldierPreview = require(script.Parent.SoldierPreview)
 local SpawnTransition = require(script.Parent.SpawnTransition)
 local Toast = require(script.Parent.Toast)
+local ToqueUi = require(script.Parent.ToqueUi)
 local UiKit = require(script.Parent.UiKit)
 local VirtualCursor = require(script.Parent.VirtualCursor)
 
@@ -291,6 +292,11 @@ do
 		key = key,
 	}
 end
+
+-- toque (Parte 13): o botão DESISTIR do HUD de toque (ToqueHud, segurar 1 s, no lugar do tiro) aperta
+-- a ação "give_up"; aqui o texto diz isso e o anel do cartão enche enquanto o dedo está nele
+-- (Input.virtualDown). Sem o HUD de toque (Input.virtual ausente), não há botão: o texto fica o do PC.
+local touchHoldAt: number? = nil
 
 -- ===== baixa (morto) =====
 local deathGui = UiKit.screen("VT65Baixa", 25) -- acima da tela de inserção (20), abaixo dos avisos
@@ -618,6 +624,7 @@ end
 local medicCheck = 0
 RunService.RenderStepped:Connect(function()
 	if not downGui.Enabled then
+		touchHoldAt = nil
 		return
 	end
 	local t = downedFor()
@@ -637,22 +644,35 @@ RunService.RenderStepped:Connect(function()
 		D.clock.TextColor3 = if left < 15 then V.RED_HI else V.TEXT
 	end
 	D.fill.Size = UDim2.fromScale(left / window, 1)
-	-- desistir: depois de 15 s (Medical.C.giveUpAfter), segurando B (1 s) ou H
+	-- desistir: depois de 15 s (Medical.C.giveUpAfter), segurando B (1 s) ou H; no toque, segurando
+	-- o botão DESISTIR do HUD de toque (1 s)
 	local pad = Input.isGamepad()
+	local touch = ToqueUi.active() and ToqueUi.hasVirtual()
 	local wait = math.max(0, Medical.C.giveUpAfter - t)
-	D.key.Text = if pad then "B" else "H"
+	D.key.Text = if pad then "B" elseif touch then "✕" else "H"
 	local give: string
+	-- o dedo no DESISTIR do toque: o anel conta daqui (o HUD manda a ação ao fim de 1 s)
+	local vd = (Input :: any).virtualDown
+	local fingerOn = touch and type(vd) == "function" and vd("give_up") == true
+	if fingerOn and not touchHoldAt then
+		touchHoldAt = os.clock()
+	elseif not fingerOn then
+		touchHoldAt = nil
+	end
 	if wait > 0 then
 		give = string.format("Desistir em %d s", math.ceil(wait))
 		D.ringGrad.Rotation = -90
 		D.ring.Visible = false
 	else
 		D.ring.Visible = true
-		local holding = pad and S.holdAt ~= nil
-		local p = if holding then math.clamp((os.clock() - (S.holdAt :: number)) / 1.0, 0, 1) else 0
+		local at = if pad then S.holdAt else touchHoldAt
+		local holding = (pad or touch) and at ~= nil
+		local p = if holding then math.clamp((os.clock() - (at :: number)) / 1.0, 0, 1) else 0
 		D.ringGrad.Rotation = -90 + 360 * p
-		give = if pad
-			then (if holding then "Desistindo…" else "<b>Segure B</b> para desistir")
+		give = if holding
+			then "Desistindo…"
+			elseif pad then "<b>Segure B</b> para desistir"
+			elseif touch then "<b>Segure DESISTIR</b> para desistir"
 			else "<b>H</b> para desistir"
 	end
 	if D.giveup.Text ~= give then

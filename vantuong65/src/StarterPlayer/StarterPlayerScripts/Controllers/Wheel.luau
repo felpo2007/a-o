@@ -5,12 +5,17 @@
 -- bússola oliva com filete cáqui, ponteiro de latão que gira até o item, fichas em volta (a
 -- escolhida acende em latão e cresce), o nome do item escolhido no miolo e as dicas em chip. Entra
 -- crescendo do centro. Por quadro só se lê o analógico; o desenho muda só quando a escolha muda.
+-- Parte 13 (toque): segurar o botão da roda no HUD de toque abre a roda em volta do polegar;
+-- deslizar escolhe pela direção (zona morta de 40% de ~12 mm), soltar confirma e soltar no centro
+-- cancela. Aberta sem segurar (alternar, página "Comando ►"): tocar no item escolhe, tocar fora
+-- cancela. O botão virtual conta como o físico (Input.virtualDown / Input.VirtualChanged).
 -- Studio: workspace:SetAttribute("VT65DevTela", "roda") abre a roda de comunicação por 4 s.
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 
 local InputMap = require(game:GetService("ReplicatedStorage").Shared.InputMap)
+local Toque = require(game:GetService("ReplicatedStorage").Shared.Toque)
 local Bus = require(script.Parent.Bus)
 local Input = require(script.Parent.Input)
 local UiKit = require(script.Parent.UiKit)
@@ -32,6 +37,16 @@ local CARD_W, CARD_H = px(136, 190), px(58, 80)
 
 local gui = UiKit.screen("VT65Wheel", 40)
 gui.Enabled = false
+-- toque: referência de coordenadas (o dedo vem em px de tela) e o véu que cancela ao tocar fora
+local area = Instance.new("TextButton")
+area.Name = "Veu"
+area.Size = UDim2.fromScale(1, 1)
+area.BackgroundTransparency = 1
+area.Text = ""
+area.AutoButtonColor = false
+area.Selectable = false
+area.ZIndex = 0
+area.Parent = gui
 local center = Instance.new("Frame")
 center.AnchorPoint = Vector2.new(0.5, 0.5)
 center.Position = UDim2.fromScale(0.5, 0.5)
@@ -168,6 +183,7 @@ local cursor = Vector2.zero -- teclado/mouse: deslocamento acumulado do mouse
 local drawnSel: number? = -1
 local needleAngle = 0
 local holdCodes: { Enum.KeyCode } = {} -- botões que abriram a roda segurando (vazio: sem segurar)
+local holdAction: string? = nil -- a ação que abriu segurando (o botão virtual do toque também conta)
 
 local function paintSlot(i: number, s: Slot, it: Item)
 	local on = enabledFn(it.id)
@@ -178,7 +194,7 @@ local function paintSlot(i: number, s: Slot, it: Item)
 	s.on, s.hot = on, hot
 	s.t.Text = it.label
 	s.t.FontFace = UiKit.headFont(it.label)
-	s.n.Visible = not Input.isGamepad()
+	s.n.Visible = not Input.isGamepad() and not Input.touchActive() -- as teclas 1–8 são do teclado
 	TweenService:Create(s.f, UiKit.QUICK, {
 		BackgroundColor3 = if hot and on then UiKit.OLIVE elseif hot then UiKit.STAMP else UiKit.DRAB,
 		BackgroundTransparency = if on or hot then 0.05 else 0.45,
@@ -227,7 +243,12 @@ local function renderHint()
 	-- frases inteiras (o dicionário traduz a frase, não o verbo solto)
 	local toggle = Input.settings.wheelToggle
 	local free = not toggle and #holdCodes == 0 -- página aberta depois de soltar (ex.: "Comando ►")
-	if Input.isGamepad() then
+	if Input.touchActive() then
+		local holding = not toggle and holdAction ~= nil and Input.virtualDown(holdAction)
+		hint.Text = if holding
+			then "Deslize e solte para escolher · no centro cancela"
+			else "Toque num item · toque fora cancela"
+	elseif Input.isGamepad() then
 		hint.Text = if toggle
 			then "Toque de novo para escolher · B cancela"
 			elseif free then "A escolhe · B cancela"
@@ -255,6 +276,9 @@ end
 -- abriram (os da ação, no controle e no teclado) e só a soltura FÍSICA deles confirma; o holdEnd
 -- falso de quem chama é ignorado enquanto o botão segue apertado (Wheel.heldDown).
 function Wheel.heldDown(): boolean
+	if holdAction and Input.virtualDown(holdAction) then
+		return true -- o dedo segue no botão do HUD de toque
+	end
 	for _, kc in holdCodes do
 		local name = kc.Name
 		if string.sub(name, 1, 6) == "Button" or string.sub(name, 1, 4) == "DPad" then
@@ -320,17 +344,39 @@ local function reset(label: string, list: { Item })
 	render()
 end
 
+-- Toque: a roda nasce em volta do polegar (presa para caber na tela); fora do toque, no centro.
+local function placeCenter()
+	local s = if holdAction and Input.touchActive() then Input.virtualPoint(holdAction) else nil
+	if not s then
+		center.Position = UDim2.fromScale(0.5, 0.5)
+		return
+	end
+	local k = fit.k()
+	local hw, hh = (RX + CARD_W * 0.55) * k, SIZE / 2 * k
+	local a = area.AbsoluteSize
+	if a.X < 10 or a.Y < 10 then
+		a = workspace.CurrentCamera.ViewportSize
+	end
+	local p = s - area.AbsolutePosition
+	center.Position = UDim2.fromOffset(
+		math.clamp(p.X, math.min(hw, a.X / 2), math.max(a.X - hw, a.X / 2)),
+		math.clamp(p.Y, math.min(hh, a.Y / 2), math.max(a.Y - hh, a.Y / 2))
+	)
+end
+
 -- holdAction: a ação que abriu a roda segurando ("equip_wheel", "comm_wheel"); sem ela (página
 -- aberta depois de soltar), A, Enter ou o clique confirmam
-function Wheel.open(name: string, label: string, list: { Item }, enabled: ((string) -> boolean)?, holdAction: string?)
+function Wheel.open(name: string, label: string, list: { Item }, enabled: ((string) -> boolean)?, holdBy: string?)
 	enabledFn = enabled or function()
 		return true
 	end
-	holdCodes = codesFor(holdAction)
+	holdCodes = codesFor(holdBy)
+	holdAction = holdBy
 	openedAt = os.clock()
 	openToken += 1
 	isOpen = true
 	gui.Enabled = true
+	placeCenter()
 	Input.event("wheel_open", name)
 	reset(label, list)
 	-- entra crescendo do centro
@@ -354,6 +400,7 @@ function Wheel.close(confirm: boolean): string?
 		return nil
 	end
 	holdCodes = {}
+	holdAction = nil
 	hide(true)
 	Input.event("wheel_close")
 	local it = selected and items[selected]
@@ -371,6 +418,32 @@ for i, s in slots do
 			render()
 		end
 	end)
+	-- toque: tocar na ficha escolhe e confirma (roda aberta sem o polegar segurando)
+	s.f.Activated:Connect(function(input: InputObject)
+		if not isOpen or not items[i] or input.UserInputType ~= Enum.UserInputType.Touch then
+			return
+		end
+		if holdAction and Input.virtualDown(holdAction) and not Input.settings.wheelToggle then
+			return -- segurando: quem escolhe é o polegar
+		end
+		selected = i
+		render()
+		Bus.fire("wheel_confirm")
+	end)
+end
+-- toque fora da roda cancela
+area.Activated:Connect(function(input: InputObject)
+	if isOpen and input.UserInputType == Enum.UserInputType.Touch and os.clock() - openedAt > 0.15 then
+		if not (holdAction and Input.virtualDown(holdAction)) or Input.settings.wheelToggle then
+			Wheel.close(false)
+		end
+	end
+end)
+
+-- raio do gesto do polegar (~12 mm; a zona morta é 40% dele)
+local function thumbR(): number
+	local vp = workspace.CurrentCamera.ViewportSize
+	return Toque.rawPx(12, math.min(vp.X, vp.Y))
 end
 
 RunService.RenderStepped:Connect(function()
@@ -378,7 +451,23 @@ RunService.RenderStepped:Connect(function()
 		return
 	end
 	local idx: number?
-	if Input.isGamepad() then
+	if Input.touchActive() then
+		-- polegar no botão: a direção do dedo desde onde começou escolhe; no centro, nada
+		local s: Vector2?, cur: Vector2? = nil, nil
+		if holdAction then
+			s, cur = Input.virtualPoint(holdAction)
+		end
+		if s and cur then
+			local d = cur - s
+			local r = thumbR()
+			idx = InputMap.wheelIndex(d.X / r, -d.Y / r, #items)
+			if idx ~= selected then
+				selected = idx
+				render()
+			end
+		end
+		return
+	elseif Input.isGamepad() then
 		local r = Input.stickRaw("right")
 		idx = InputMap.wheelIndex(r.X, r.Y, #items)
 	else
@@ -446,6 +535,27 @@ UserInputService.InputBegan:Connect(function(input: InputObject)
 		or input.UserInputType == Enum.UserInputType.MouseButton1
 	then
 		Bus.fire("wheel_confirm")
+	end
+end)
+
+-- toque: soltar o polegar do botão que abriu a roda confirma (como soltar o botão físico)
+Input.VirtualChanged:Connect(function(spec: string, down: boolean)
+	if down or not isOpen or Input.settings.wheelToggle or not holdAction then
+		return
+	end
+	if Toque.specHas(spec, holdAction :: string) and not Wheel.heldDown() then
+		if selected == nil and os.clock() - openedAt < 0.3 then
+			-- toque curto: a roda fica aberta para escolher tocando no item (toque fora cancela)
+			holdAction = nil
+			holdCodes = {}
+			renderHint()
+			return
+		end
+		task.defer(function()
+			if isOpen then
+				Bus.fire("wheel_confirm")
+			end
+		end)
 	end
 end)
 

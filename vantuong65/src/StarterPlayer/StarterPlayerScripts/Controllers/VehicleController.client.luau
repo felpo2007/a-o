@@ -11,6 +11,9 @@
 -- LT binóculo, RB marca o alvo; piloto — analógico esquerdo cíclico, RT/LT coletivo, RB/LB
 -- pedais, A segurado estabiliza (assistência opcional); porta — RT atira, LT zoom; todos — Y
 -- segurado troca de assento, B segurado sai. Teclado: WASD, Espaço/Ctrl, Q/E, mouse, C, Y.
+-- Toque (Parte 13): o analógico flutuante da esquerda (Input.move) dirige e é o cíclico; a alavanca
+-- do coletivo, os pedais e os botões dos assentos ficam no ToqueVeiculo.client (PilotoToque) e
+-- disparam as mesmas ações pelo Input.virtual; arrastar à direita olha / gira a torre.
 -- Limite do Roblox: 200 locais por função contando o nível de cima. O estado fica em tabelas.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -23,6 +26,7 @@ local Haptics = require(script.Parent.Haptics)
 local Input = require(script.Parent.Input)
 local InputMap = require(ReplicatedStorage.Shared.InputMap)
 local Net = require(ReplicatedStorage.Shared.Net)
+local PilotoToque = require(script.Parent.PilotoToque)
 local VehicleDrive = require(ReplicatedStorage.Shared.VehicleDrive)
 local VehicleHudView = require(script.Parent.VehicleHudView)
 local VehicleLive = require(script.Parent.VehicleLive)
@@ -60,6 +64,16 @@ local Hud = VehicleHudView.new()
 
 local function key(k: Enum.KeyCode): number
 	return if UserInputService:IsKeyDown(k) then 1 else 0
+end
+
+-- toque como entrada principal (contrato da Parte 13: Input.touchActive do T1; antes dele existir,
+-- o dispositivo "touch")
+local function touchOn(): boolean
+	local f = (Input :: any).touchActive
+	if type(f) == "function" then
+		return f() == true
+	end
+	return Input.device() == "touch"
 end
 
 local function approach(x: number, target: number, tau: number, dt: number): number
@@ -176,6 +190,9 @@ end
 -- D-100: tombado ou preso (o servidor marca "Stuck"): o painel mostra como desvirar
 local function recoverHint(model: Model, chassis: BasePart): string?
 	if chassis.CFrame.UpVector.Y < Vehicles.RECOVER.tippedUpY or model:GetAttribute("Stuck") == true then
+		if touchOn() then
+			return "PRESO: toque em LUGAR e escolha Desvirar"
+		end
 		local _, txt = Input.glyph("v_switch_seat")
 		return string.format("PRESO: segure %s e escolha Desvirar", txt)
 	end
@@ -208,13 +225,18 @@ local function stepAhead(chassis: BasePart, yaw: number, dirSign: number): numbe
 end
 
 local function groundStep(model: Model, chassis: BasePart, spec: any, dt: number)
-	-- controle: RT acelera, LT freia/ré, analógico esquerdo dirige (Parte 12.3); teclado: WASD
+	-- controle: RT acelera, LT freia/ré, analógico esquerdo dirige (Parte 12.3); teclado: WASD;
+	-- toque: o analógico flutuante faz os dois (frente acelera, trás freia/ré, lado esterça)
 	local throttle, steer
+	local touch = touchOn()
 	if Input.isGamepad() then
 		throttle = Input.trigger("right") - Input.trigger("left")
 		local x = Input.move().X
 		-- mais precisão perto do centro do analógico (D-100: no carro, menos curva: o volante é rápido)
 		steer = math.sign(x) * math.abs(x) ^ (if spec.kind == "wheeled" then 1.2 else 1.4)
+	elseif touch then
+		local mv = Input.move()
+		throttle, steer = PilotoToque.drive(mv.X, mv.Y, spec.kind == "wheeled")
 	else
 		throttle = key(Enum.KeyCode.W) - key(Enum.KeyCode.S)
 		steer = key(Enum.KeyCode.D) - key(Enum.KeyCode.A)
@@ -223,8 +245,9 @@ local function groundStep(model: Model, chassis: BasePart, spec: any, dt: number
 		throttle, steer = 0, 0
 	end
 	-- pedal e volante têm curso: tecla sobe em ~0,22 s e solta em ~0,15 s; analógico quase direto
-	-- (D-93: o teclado subia em 0,3 s e o volante em 0,22 s; somado ao motor, a resposta atrasava)
-	local pad = Input.isGamepad()
+	-- (D-93: o teclado subia em 0,3 s e o volante em 0,22 s; somado ao motor, a resposta atrasava).
+	-- O analógico do toque é analógico: curso do controle.
+	local pad = Input.isGamepad() or touch
 	ctl.thr =
 		slew(ctl.thr, throttle, if math.abs(throttle) > math.abs(ctl.thr) then (if pad then 8 else 4.5) else 7, dt)
 	ctl.steer = slew(ctl.steer, steer, if pad then 12 else 6, dt)
@@ -357,17 +380,25 @@ local function heliStep(model: Model, chassis: BasePart, dt: number)
 	local S = HeliModel.SPEC
 	local H = VehicleDrive.HELI
 	local atm = HeliModel.atmosphere(AIR_C)
-	-- controle: RT/LT coletivo, analógico esquerdo cíclico, RB/LB pedais; teclado: Espaço/Ctrl, WASD, Q/E
+	-- controle: RT/LT coletivo, analógico esquerdo cíclico, RB/LB pedais; teclado: Espaço/Ctrl, WASD, Q/E;
+	-- toque: analógico flutuante cíclico, alavanca da tela coletivo (posição), botões de pedal
 	local up, cyc
+	local lever: number? = nil
+	local L = PilotoToque.lever
+	local touch = touchOn()
 	if Input.isGamepad() then
 		up = Input.trigger("right") - Input.trigger("left")
 		cyc = Input.move()
+	elseif touch then
+		up = 0
+		cyc = Input.move()
+		lever = PilotoToque.command(L)
 	else
 		up = key(Enum.KeyCode.Space) - key(Enum.KeyCode.LeftControl)
 		cyc = Vector2.new(key(Enum.KeyCode.D) - key(Enum.KeyCode.A), key(Enum.KeyCode.W) - key(Enum.KeyCode.S))
 	end
 	if not InputMap.acceptsGame(Input.state) then
-		up, cyc = 0, Vector2.zero
+		up, cyc, lever = 0, Vector2.zero, nil
 	end
 	prepRays(model)
 	local rec = model:GetAttribute("Recovered")
@@ -379,7 +410,7 @@ local function heliStep(model: Model, chassis: BasePart, dt: number)
 	end
 	local engineOk = ((model:GetAttribute("Engine") :: number?) or 0) > 0
 	heli.rotor = VehicleDrive.rotorStep(heli.rotor, engineOk, dt)
-	heli.collective = math.clamp(heli.collective + up * 0.35 * dt, 0, 1)
+	heli.collective = PilotoToque.collectiveInput(heli.collective, up, lever, dt)
 	local _, cy, _ = chassis.CFrame:ToOrientation()
 	local yaw = ctl.yaw or cy
 	-- carga: vazio + 2 pilotos + ocupantes + combustível (PLACEHOLDER 400 kg)
@@ -412,20 +443,18 @@ local function heliStep(model: Model, chassis: BasePart, dt: number)
 	-- estabilizar: assistência sem piloto automático — nivela o disco contra a deriva e, no ar, segura
 	-- o coletivo no pairado; o piloto segue no comando. D-100: ligada por padrão (quem nunca pilotou
 	-- consegue pairar); A segurado ou R desliga e liga. No chão, sem coletivo pedido, ela fica logo
-	-- abaixo do pairado: o helicóptero só sai do chão com Espaço/RT.
+	-- abaixo do pairado: o helicóptero só sai do chão com Espaço/RT (no toque, a alavanca). A conta do
+	-- coletivo mora no PilotoToque (testada no Lune): polegar na alavanca conta como comando.
 	if ctl.assist then
 		local localV = CFrame.Angles(0, yaw, 0):VectorToObjectSpace(heli.vel)
 		tp += math.clamp(-localV.Z * 0.02, -0.15, 0.15)
 		tr += math.clamp(localV.X * 0.02, -0.15, 0.15)
-		if up == 0 and pAvail > 0 then
-			local hover = pReq / pAvail
-			if onGround then
-				heli.collective = math.min(heli.collective, math.max(hover - 0.05, 0))
-			else
-				heli.collective += (hover - heli.collective) * math.min(1, dt * 0.8)
-			end
-		end
 	end
+	local hover = if pAvail > 0 then pReq / pAvail else nil
+	heli.collective =
+		PilotoToque.collectiveAssist(heli.collective, up ~= 0 or lever ~= nil, ctl.assist, hover, onGround, dt)
+	L.hover, L.assist = hover, ctl.assist
+	PilotoToque.follow(L, heli.collective)
 	local live = VehicleLive.drive
 	live.cyclicX, live.cyclicY = tr, tp
 	if onGround then
@@ -436,7 +465,7 @@ local function heliStep(model: Model, chassis: BasePart, dt: number)
 	heli.roll, heli.rollV = VehicleDrive.attitude(heli.roll, heli.rollV, tr, dt)
 	-- guinada: pedais, torque sem pedal e, em velocidade, a cauda alinhando o nariz com a curva
 	local torque = HeliModel.torqueFraction(pDemand)
-	local pedal = (if ctl.pedalR then 1 else 0) - (if ctl.pedalL then 1 else 0)
+	local pedal = PilotoToque.pedal(ctl.pedalL, ctl.pedalR)
 	local drift = if torque > 0.92 then (torque - 0.92) * math.rad(200) else 0 -- falta pedal: nariz gira
 	local yawTarget = -(pedal * math.rad(35) * (if onGround then 0.5 else 1) + drift) * math.min(heli.rotor * 2, 1)
 	if not onGround then
@@ -494,6 +523,7 @@ local function heliStep(model: Model, chassis: BasePart, dt: number)
 		torque = torque,
 		warn = if heli.rotor >= 1 and pReq > pAvail
 			then "SEM POTÊNCIA PARA PAIRAR: corra para ganhar sustentação"
+			elseif heli.rotor < 1 and touch then "Rotor partindo: espere 100% e suba com a alavanca"
 			elseif heli.rotor < 1 then "Rotor partindo: espere 100% e suba com Espaço / RT"
 			else recoverHint(model, chassis),
 		faction = model:GetAttribute("Faction") :: string?,
@@ -586,6 +616,15 @@ RunService.Heartbeat:Connect(function(dt: number)
 			-- rotor já girando (troca de piloto no ar): continua de onde os outros veem
 			local net = model:GetAttribute("NetRotor")
 			heli.rotor = if type(net) == "number" then net else 0
+			-- toque: a alavanca começa solta e o estabilizador liga ao assumir os comandos
+			PilotoToque.release(PilotoToque.lever)
+			if spec.kind == "heli" then
+				local was = ctl.assist
+				ctl.assist = PilotoToque.assistOnEnter(ctl.assist, touchOn())
+				if ctl.assist and not was then
+					Bus.fire("toast", "Estabilizador ligado")
+				end
+			end
 		end
 		if spec.kind == "heli" then
 			heliStep(model, chassis, dt)
@@ -595,7 +634,9 @@ RunService.Heartbeat:Connect(function(dt: number)
 	else
 		leaveDriver()
 		local w = seat:GetAttribute("Weapon")
+		-- no toque o botão de tiro está na tela: o painel não cita tecla
 		local _, fireTxt = Input.glyph(if seatRole(seat, spec) == "door" then "v_door_fire" else "v_fire")
+		local fireKey: string? = if touchOn() then nil else fireTxt
 		local seatId = tostring(seat:GetAttribute("SeatId"))
 		local label = seat:GetAttribute("Label")
 		local seatName = if type(label) == "string"
@@ -609,7 +650,7 @@ RunService.Heartbeat:Connect(function(dt: number)
 			seat = seatName,
 			weapon = if type(w) == "string" then w else nil,
 			ammo = if w == "gun_90" then string.upper(tostring(model:GetAttribute("Ammo") or "he")) else nil,
-			fire = fireTxt,
+			fire = fireKey,
 			tubes = if w == "rr_106" then (model:GetAttribute("Tubes") :: number?) or 0 else nil,
 			faction = model:GetAttribute("Faction") :: string?,
 			personal = mine,
@@ -781,6 +822,18 @@ RunService:BindToRenderStep("VT65VehicleCamUndo", Enum.RenderPriority.Camera.Val
 		camera.CFrame = camera.CFrame * cam.applied:Inverse()
 		cam.applied = CFrame.identity
 	end
+	-- Parte 13: na ótica do canhão (~20°) e no binóculo (10°) o olhar usa a sensibilidade de luneta
+	-- (arrastar no toque, analógico, mouse); a M60 e a própria arma, a de mira. Antes do CameraLook
+	-- (Camera + 1), que lê Input.aimMode neste quadro; sem zoom, quem decide é o WeaponController.
+	if state.zoom > 0 then
+		local seat = currentSeat()
+		if seat then
+			local w = seat:GetAttribute("Weapon")
+			Input.aimMode = if state.zoom == 2 or ((w == "gun_90" or w == "rr_106") and not personal(seat))
+				then "scope"
+				else "ads"
+		end
+	end
 end)
 
 RunService:BindToRenderStep("VT65VehicleCam", Enum.RenderPriority.Camera.Value + 3, function(dt: number)
@@ -917,8 +970,14 @@ local function fireOnce(extra: { [string]: any }?)
 	end
 	Net.event("Vehicle_Fire"):FireServer(req)
 	local seat = currentSeat()
-	if seat and seat:GetAttribute("Weapon") == "m60" and not (extra and extra.coax) then
+	local coax = extra ~= nil and extra.coax == true
+	if seat and seat:GetAttribute("Weapon") == "m60" and not coax then
 		Bus.fire("vehicle_shot") -- coice e clarão na M60 do assento (WeaponVisuals)
+	end
+	-- vibração das metralhadoras (controle e celular); a do canhão vem do disparo de verdade
+	-- (Fire_Launch do servidor, no Haptics), não do aperto: recarregando, o botão não vibra
+	if coax or (seat and seat:GetAttribute("Weapon") == "m60") then
+		Haptics.fire(0.5, true)
 	end
 end
 local function autoFire(extra: { [string]: any }?)
@@ -1025,9 +1084,25 @@ end)
 Input.on("h_pedal_right", "release", function()
 	ctl.pedalR = false
 end)
+-- Um aperto vale uma vez: estas ações têm "segurar" no controle e "apertar" no teclado, e o botão
+-- de toque (Input.virtual) não pode alternar duas vezes nem abrir e fechar o painel no mesmo toque.
+local once: { [string]: number } = {}
+local function first(id: string): boolean
+	local now = os.clock()
+	if now - (once[id] or -1) < 0.3 then
+		return false
+	end
+	once[id] = now
+	return true
+end
+
 -- D-100: o estabilizador vem ligado; A segurado (controle) ou R (teclado) alterna
 local function toggleAssist()
+	if not first("assist") then
+		return
+	end
 	ctl.assist = not ctl.assist
+	PilotoToque.lever.assist = ctl.assist
 	Bus.fire("toast", if ctl.assist then "Estabilizador ligado" else "Estabilizador desligado")
 end
 Input.on("h_stabilize", "holdStart", toggleAssist)
@@ -1035,6 +1110,9 @@ Input.on("h_stabilize", "press", toggleAssist) -- R no teclado
 -- todos: Y segurado abre o painel do veículo (trocar de lugar, sair, desvirar); B segurado sai
 -- (teclado: C e Y). D-100: antes Y passava para o próximo lugar livre, às cegas.
 local function switchSeat()
+	if not first("seat") then
+		return
+	end
 	local seat = currentSeat()
 	local model = seat and vehicleOf(seat)
 	if model then
@@ -1042,6 +1120,9 @@ local function switchSeat()
 	end
 end
 local function exitVehicle()
+	if not first("exit") then
+		return
+	end
 	-- o servidor tira do lugar e põe ao lado do veículo, fora do chassi
 	Net.event("Vehicle_Board"):FireServer({ op = "exit" })
 	local hum = (player.Character :: Model):FindFirstChildOfClass("Humanoid")
@@ -1056,6 +1137,7 @@ Input.on("v_exit", "press", exitVehicle)
 Input.StateChanged:Connect(function()
 	fire.on = false
 	ctl.pedalL, ctl.pedalR = false, false
+	PilotoToque.release(PilotoToque.lever)
 	if personal(currentSeat()) then
 		Bus.fire("seat_fire", false)
 	end

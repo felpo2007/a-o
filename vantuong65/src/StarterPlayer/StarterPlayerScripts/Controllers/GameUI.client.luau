@@ -13,6 +13,11 @@
 -- A navegação automática do Roblox fica desligada no mapa (a nossa assume).
 -- Modos: "spawn" (morto), "view" (aberto em jogo) e "target" (comandante escolhendo o alvo).
 -- Tudo fica num "palco" de projeto de 1280 x 720 que escala para caber na tela (UIScale).
+-- Toque (Parte 13): a carta ocupa a tela inteira; um dedo arrasta, a pinça dá zoom (CartaView);
+-- tocar escolhe o ponto (raio do dedo) e o botão grande de baixo insere, com a espera escrita
+-- ("ESPERA 12 s" até ficar "INSERIR"); no alvo do comandante, tocar põe a mira e "CONFIRMAR ALVO"
+-- manda; ✕ / ◄ MESA fecham; + e − dão zoom; ◎ volta para você. Botões no tamanho de toque
+-- (ToqueUi.minPx), numa tela própria sem escala (VT65CartaToque).
 local GuiService = game:GetService("GuiService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -30,6 +35,8 @@ local LobbyScene = require(script.Parent.LobbyScene)
 local Marcadores = require(script.Parent.Marcadores)
 local SpawnTransition = require(script.Parent.SpawnTransition)
 local Toast = require(script.Parent.Toast)
+local ToqueTelas = require(script.Parent.ToqueTelas)
+local ToqueUi = require(script.Parent.ToqueUi)
 local UiKit = require(script.Parent.UiKit)
 local VirtualCursor = require(script.Parent.VirtualCursor)
 
@@ -72,6 +79,7 @@ mapFrame.ClipsDescendants = true
 mapFrame.Active = true -- tapa a mesa 3D do lobby atrás da carta (o clique não atravessa)
 mapFrame.Visible = false
 mapFrame.ZIndex = 2 -- por cima da tela de deslocamento (passo da inserção)
+mapFrame:SetAttribute("VT65SemIma", true) -- o toque na carta é da CartaView (sem o dedo gordo)
 mapFrame.Parent = stage
 UiKit.corner(mapFrame, 4)
 local mapEdge = UiKit.stroke(mapFrame, UiKit.V.LINE, 1, 0.3)
@@ -267,13 +275,21 @@ end)
 local function placeMap()
 	local insertion = mode == "spawn" and side.Visible
 	local r = if insertion then SPAWN_RECT else VIEW_RECT
+	local touch = ToqueUi.active()
+	if touch then
+		-- toque: a carta cobre a tela inteira (abaixo da faixa do Roblox), em qualquer modo
+		local vp = gui.AbsoluteSize
+		local top = GuiService:GetGuiInset().Y
+		local x, y, w, h = ToqueTelas.fullRect(vp.X, vp.Y, stageScale.Scale, DESIGN_W, DESIGN_H, top, 0)
+		r = { x = math.floor(x), y = math.floor(y), w = math.floor(w), h = math.floor(h) }
+	end
 	mapFrame.Position = UDim2.fromOffset(r.x, r.y)
 	mapFrame.Size = UDim2.fromOffset(r.w, r.h)
 	CartaView.resize(r.w, r.h)
 	mapTab.Position = UDim2.fromOffset(r.x, r.y - 34)
 	mapTab.Size = UDim2.fromOffset(r.w, 30)
-	mapTab.Visible = mapWanted and not insertion
-	legend.Visible = mapWanted and not insertion
+	mapTab.Visible = mapWanted and not insertion and not touch
+	legend.Visible = mapWanted and not insertion and not touch
 	-- poucas palavras: o título e uma linha curta
 	if mode == "target" then
 		mapTitle.Text = "ALVO DA MISSÃO DE FOGO"
@@ -497,6 +513,14 @@ end)
 
 -- comandos na faixa de estado, pelo dispositivo
 local function hintText(): string
+	if ToqueUi.active() then
+		if mode == "spawn" then
+			return "toque num ponto · pinça zoom · arraste"
+		elseif mode == "target" then
+			return "toque no alvo e confirme · pinça zoom · arraste"
+		end
+		return "toque marca · pinça zoom · arraste"
+	end
 	if Input.isGamepad() then
 		if mode == "spawn" then
 			return "LB/RB pontos · A inserir · gatilhos zoom · Y papel · B volta"
@@ -531,14 +555,137 @@ local function statusLine(): string
 	return table.concat(parts, " · ")
 end
 
+-- ===== toque (Parte 13): botões de polegar sobre a carta =====
+-- Uma tela própria (sem a escala do palco): os botões ficam no tamanho físico de toque.
+local T: { [string]: any } = {}
+do
+	-- 22: acima da carta (20) e do cartão de compra de veículo da inserção (21, CompraVeiculo, à
+	-- direita); por isso o zoom fica à esquerda
+	local tg = UiKit.screen("VT65CartaToque", 22)
+	tg.Enabled = false
+	T.gui = tg
+	local m = 10
+	local size = ToqueUi.minPx()
+	local function square(text: string, kind: string?): TextButton
+		local b = ToqueUi.bigButton(tg, text, kind, size)
+		b.Size = UDim2.fromOffset(size, size)
+		b.TextSize = math.floor(size * 0.5)
+		return b
+	end
+	T.close = ToqueUi.bigButton(tg, "✕", "secondary", math.floor(size * 2.4))
+	T.close.AnchorPoint = Vector2.new(1, 0)
+	T.close.Position = UDim2.new(1, -m, 0, m)
+	T.zin = square("+")
+	T.zin.AnchorPoint = Vector2.new(0, 1)
+	T.zin.Position = UDim2.new(0, m, 0.5, -4)
+	T.zout = square("−")
+	T.zout.AnchorPoint = Vector2.new(0, 0)
+	T.zout.Position = UDim2.new(0, m, 0.5, 4)
+	T.me = square("◎")
+	T.me.AnchorPoint = Vector2.new(0, 0)
+	T.me.Position = UDim2.new(0, m, 0.5, size + 12)
+	-- confirmar: grande, embaixo ao centro (acima da faixa de estado da carta); a linha de baixo diz
+	-- o ponto escolhido ou o motivo da espera
+	local cw = math.floor(size * 6)
+	T.confirm = ToqueUi.bigButton(tg, "INSERIR", "primary", cw)
+	T.confirm.AnchorPoint = Vector2.new(0.5, 1)
+	T.confirm.Position = UDim2.new(0.5, 0, 1, -(m + 24))
+	T.sub = UiKit.text2(T.confirm, "", math.max(12, math.floor(size * 0.26)), UiKit.V.TEXT, UiKit.F.TITLE_REG)
+	T.sub.AnchorPoint = Vector2.new(0.5, 1)
+	T.sub.Position = UDim2.new(0.5, 0, 0, -2)
+	T.sub.Size = UDim2.new(1, 0, 0, math.floor(size * 0.36))
+	T.sub.TextXAlignment = Enum.TextXAlignment.Center
+	T.sub.TextStrokeColor3 = UiKit.V.BG
+	T.sub.TextStrokeTransparency = 0.3
+	T.sub.TextTruncate = Enum.TextTruncate.AtEnd
+	-- à esquerda do confirmar: PAPEL (inserção) ou REUNIÃO (líder em campo)
+	T.side = ToqueUi.bigButton(tg, "PAPEL", "secondary", math.floor(size * 2.6))
+	T.side.AnchorPoint = Vector2.new(1, 1)
+	T.side.Position = UDim2.new(0.5, -(cw / 2 + 12), 1, -(m + 24))
+
+	T.close.Activated:Connect(function()
+		closeMap()
+	end)
+	T.zin.Activated:Connect(function()
+		CartaView.zoomBy(1.6)
+	end)
+	T.zout.Activated:Connect(function()
+		CartaView.zoomBy(1 / 1.6)
+	end)
+	T.me.Activated:Connect(function()
+		CartaView.centerOnMe()
+	end)
+	T.confirm.Activated:Connect(function()
+		local f = CartaView.touchPick()
+		if not f then
+			return
+		end
+		if mode == "spawn" then
+			local pt = spawnById(f.id)
+			if pt then
+				insert(pt)
+			end
+		elseif mode == "target" then
+			chooseTarget(f.x, f.y)
+		end
+	end)
+	T.side.Activated:Connect(function()
+		if mode == "spawn" and not alive() then
+			DeployScreen.open("role")
+		elseif mode == "view" and alive() and player:GetAttribute("Role") == "squad_leader" then
+			Net.event("SquadRally_Place"):FireServer()
+		end
+	end)
+end
+
+-- estado dos botões (10 vezes por segundo, com a carta aberta)
+local function touchUpdate()
+	local on = mapWanted and ToqueUi.active()
+	T.gui.Enabled = on
+	if not on then
+		return
+	end
+	local spawnMode = mode == "spawn"
+	T.close.Text = if spawnMode and side.Visible then "◄ MESA" else "✕"
+	T.me.Visible = not spawnMode
+	local f = CartaView.touchPick()
+	if spawnMode then
+		local pt = if f then spawnById(f.id) else nil
+		local sb = ToqueTelas.spawnButton(pt)
+		T.confirm.Visible = true
+		T.confirm.Text = sb.text
+		T.sub.Text = sb.sub
+		T.confirm.BackgroundColor3 = if sb.ready then UiKit.V.OLIVE else UiKit.V.PANEL_2
+		T.confirm.TextTransparency = if sb.ready then 0 else 0.3
+		T.side.Visible = not alive()
+		T.side.Text = "PAPEL"
+	elseif mode == "target" then
+		T.confirm.Visible = true
+		T.confirm.Text = "CONFIRMAR ALVO"
+		T.sub.Text = if f then CartaView.cursorGrid() else "toque no alvo"
+		T.confirm.BackgroundColor3 = if f then UiKit.V.RED else UiKit.V.PANEL_2
+		T.confirm.TextTransparency = if f then 0 else 0.3
+		T.side.Visible = false
+	else
+		T.confirm.Visible = false
+		T.side.Visible = alive() and player:GetAttribute("Role") == "squad_leader"
+		T.side.Text = "REUNIÃO"
+	end
+end
+CartaView.setTouchCallback(touchUpdate)
+
 -- quadro a quadro: zoom, arrasto, cursor e ímã ficam na CartaView
 local lastStatus = 0
 RunService.RenderStepped:Connect(function(dt: number)
 	if not mapWanted then
+		if T.gui.Enabled then
+			T.gui.Enabled = false
+		end
 		return
 	end
 	local pad = Input.isGamepad() and not (Input.state.disconnected or Input.state.robloxMenu)
 	CartaView.step(dt, pad)
+	cursorUI.Visible = pad or (ToqueUi.active() and mode == "target" and CartaView.touchPick() ~= nil)
 	cursorUI.Position = UDim2.fromOffset(CartaView.cursorPx().X, CartaView.cursorPx().Y)
 	local now = os.clock()
 	if now - lastStatus > 0.1 then
@@ -556,6 +703,7 @@ RunService.RenderStepped:Connect(function(dt: number)
 		if legend.Visible then
 			CartaView.updateLegend()
 		end
+		touchUpdate()
 	end
 end)
 
@@ -656,6 +804,9 @@ local function fit()
 	mapTitle.TextSize = TS(20)
 	mapSub.TextSize = TS(14)
 	loading.TextSize = TS(16)
+	if ToqueUi.active() then
+		placeMap() -- toque: a carta em tela cheia acompanha a janela (girar o aparelho)
+	end
 end
 gui:GetPropertyChangedSignal("AbsoluteSize"):Connect(fit)
 fit()

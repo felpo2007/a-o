@@ -429,10 +429,17 @@ local function approach(x: number, target: number, tau: number, dt: number): num
 	return x + (target - x) * (1 - math.exp(-dt / math.max(tau, 1e-3)))
 end
 
--- Teto de velocidade à frente (m/s) no chão, pela ficha e pelo "ride"
-function VehicleDrive.topSpeed(body: Body, groundKey: string, rain: number?): number
+-- Teto de velocidade à frente (m/s) no chão, pela ficha e pelo "ride". depthM: fundura da água
+-- (m); água rasa conta como lama, como no step (teste da v38: numa lâmina de 3 cm o bot motorista
+-- do M48 lia teto 0 e parava de vez).
+function VehicleDrive.topSpeed(body: Body, groundKey: string, rain: number?, depthM: number?): number
 	if groundKey == "water" then
-		return (body.waterKmh or 0) / 3.6
+		local d = VehicleDrive.spec(body.id)
+		local w = d.water
+		if depthM == nil or depthM >= (if w then w.draftM else d.fordM) then
+			return (body.waterKmh or 0) / 3.6
+		end
+		groundKey = "mud"
 	end
 	return body.maxKmh / 3.6 * VehicleDrive.ground(groundKey, rain, VehicleDrive.spec(body.id).wheeled).ride
 end
@@ -897,78 +904,158 @@ export type Art = {
 	-- no UH-34D. Alturas de convés e teto: mapa de alturas da malha (2026-11-11); o resto é projeto.
 	eyes: { [string]: { number } }?,
 	riders: Riders?,
+	pivots: { [string]: { number } }?, -- peça móvel (nome do nó do GLB) -> junta (studs, malha)
+	aim: { seat: string, down: number, up: number }?, -- torre e cano: lugar que aponta e elevação (°)
+	steerTiltDeg: number?, -- coluna do volante, da vertical para trás
 }
 
+-- Lote dos _v2 (2026-11-12): os 7 modelos do Blender na medida real (assets/blender/RELATORIO.md,
+-- "Tabela ART nova"); os antigos estavam 10 a 35% fora. Referencial da malha nova: studs, centro da
+-- caixa, nariz em −X, esquerda (lado do motorista) em +Z. pivots: junta de cada peça móvel (Motor6D
+-- no VehicleService; o VehicleFx anima), na tabela "Nomes das partes" do relatório. aim: lugar que
+-- aponta a torre e o cano e os limites de elevação (graus; PLACEHOLDER, sem fonte aqui).
+-- steerTiltDeg: coluna do volante inclinada da vertical para trás (veic_<carro>.py).
 VehicleDrive.ART = {
 	m48a3 = {
-		box = { 28.17, 12.67, 13.39 },
+		box = { 31.18, 11.61, 13.04 },
 		track = {
-			zIn = 4.2,
-			zOut = 6.45,
-			circles = { { -6.9, -2.3, 1.55 }, { -3.9, -5.15, 1.15 }, { 10.3, -5.15, 1.15 }, { 12.55, -2.55, 1.55 } },
-			bars = 34,
+			zIn = 3.95,
+			zOut = 6.48,
+			circles = { { -5.62, -2.91, 1.55 }, { -2.62, -4.32, 1.45 }, { 11.66, -4.32, 1.45 }, { 13.91, -2.63, 1.38 } },
+			bars = 32,
 		},
-		exhaust = { { 13.4, -0.2, 3.0 }, { 13.4, -0.2, -3.0 } },
-		-- convés da frente y ≈ 0 (o tubo do canhão passa em z ≈ 0, y ≈ 2,5); teto da torre 3,8–5,0;
-		-- cúpula do comandante à direita atrás (≈ 4,9); escotilha do municiador à esquerda (≈ 5,4)
+		exhaust = { { 15.45, -0.59, 2.68 }, { 15.45, -0.59, -2.68 } },
 		eyes = {
-			-- escotilha na frente do casco, à esquerda do tubo. No Studio, em x = −7 o olho ficava em
-			-- cima da quina da frente e o casco não aparecia; raios na malha deram o convés em y ≈ 0,3
-			-- (malha) de x = −6,4 a −3,4 e a frente da torre em x ≈ −2,4: o olho vai ~1,8 stud à frente
-			-- dela, com a cabeça 1,5 stud (0,4 m) acima do convés
-			driver = { -4.2, 1.8, 2.2 },
-			gunner = { -0.8, 4.9, -2.4 }, -- periscópio da mira no teto, frente direita da torre
-			commander = { 4.6, 6.6, -1.6 }, -- cabeça fora da cúpula
-			loader = { 3.2, 6.8, 2.8 },
+			driver = { -2.5, 2.02, 1.18 },
+			gunner = { 0.04, 4.73, -2.14 },
+			commander = { 4.04, 6.41, -2.07 },
+			loader = { 3.86, 5.59, 2 },
 		},
+		pivots = {
+			Torre = { 2.25, 0.59, 0 },
+			Cano = { -1.14, 2.27, 0 },
+			Escotilha_Motorista = { -2.57, 0.8, 0.96 },
+			Escotilha_Comandante = { 5.25, 5.16, -2.07 },
+			Escotilha_Municiador = { 4.93, 4.02, 2 },
+		},
+		aim = { seat = "gunner", down = -9, up = 19 },
 	},
 	ontos = {
-		box = { 12.1, 10.26, 7.75 },
+		box = { 14.43, 7.64, 9.28 },
 		track = {
-			zIn = 2.4,
-			zOut = 3.8,
-			circles = { { -4.6, -2.9, 1.2 }, { -3.2, -4.1, 1.0 }, { 3.4, -4.1, 1.0 }, { 4.7, -2.9, 1.2 } },
-			bars = 22,
+			zIn = 2.39,
+			zOut = 4.21,
+			circles = { { -5.25, -1.61, 1.01 }, { -2.23, -2.68, 1.14 }, { 3.02, -2.68, 1.14 }, { 5.64, -2.68, 1.14 } },
+			bars = 19,
 		},
-		exhaust = { { 5.7, -0.6, -2.0 } },
-		-- convés da frente y ≈ 0,3; teto do meio ≈ 3,3; os 6 tubos dos dois lados sobem até ≈ 5,1
+		exhaust = { { 5.5, -0.07, -3.39 } },
 		eyes = {
-			driver = { -4.6, 2.2, 1.6 }, -- escotilha da frente, à esquerda
-			gunner = { 0.0, 4.8, 0.0 }, -- cabeça fora, entre os tubos
-			loader = { 3.4, 4.8, 0.0 },
+			driver = { -2.09, 2.54, 1.5 },
+			gunner = { 2.84, 4.64, 0 },
+			loader = { 5.34, 3.32, 0 },
 		},
+		pivots = {
+			Torre = { 2.3, 1.54, 0 },
+			Cano = { 1.94, 2.61, 0 },
+			Escotilha_Motorista = { -1.52, 1.37, 1.5 },
+			Escotilha_Torre = { 3.62, 3.21, 0 },
+			Escotilha_TraseiraE = { 6.57, 0.39, 1.75 },
+			Escotilha_TraseiraD = { 6.57, 0.39, -1.75 },
+		},
+		aim = { seat = "gunner", down = -10, up = 20 },
 	},
 	lvtp5 = {
-		box = { 28.41, 12.45, 12.14 },
+		box = { 32.27, 11.2, 13.11 },
 		track = {
-			zIn = 4.0,
-			zOut = 6.05,
-			circles = { { -9.6, -3.0, 1.3 }, { -6.6, -5.0, 1.2 }, { 10.1, -5.0, 1.2 }, { 12.0, -3.2, 1.3 } },
-			bars = 36,
+			zIn = 4.35,
+			zOut = 6.23,
+			circles = { { -13.83, -1.01, 1.3 }, { -9.19, -4.56, 0.91 }, { 10.81, -4.56, 0.91 }, { 14.1, -2.08, 1.39 } },
+			bars = 44,
 		},
-		exhaust = { { 13.9, 3.6, 3.6 }, { 13.9, 3.6, -3.6 } },
-		-- convés y ≈ 3,2–3,9; cúpula da metralhadora na frente, no meio (≈ 6,2)
+		exhaust = { { 13.38, 4.42, 3.43 }, { 13.38, 4.42, -3.43 } },
 		eyes = {
-			driver = { -9.6, 5.2, 3.4 },
-			gunner = { -6.0, 7.6, 0.1 },
-			commander = { -9.6, 5.2, -3.4 },
+			driver = { -10.79, 5.85, 3.39 },
+			gunner = { -10.44, 6.46, 0 },
+			commander = { -10.79, 5.85, -3.39 },
 		},
 		-- a tropa vai sentada em cima (no Vietnã os fuzileiros andavam no teto do amtrac por causa das
-		-- minas): olho a ~0,9 m acima do convés
-		riders = { x0 = 0.0, dx = 2.2, y = 6.9, z = 3.0 },
+		-- minas)
+		riders = { x0 = -5.08, dx = 2.21, y = 6.92, z = 3.57 },
+		pivots = {
+			Torre = { -10.79, 3.88, 0 },
+			Escotilha_Rampa = { -16.01, -1.05, 0 },
+			Escotilha_Tropa = { -0.79, 4.13, 2.14 },
+			Escotilha_TropaE = { 5.1, 4.13, 4.14 },
+			Escotilha_TropaD = { 5.1, 4.13, -4.14 },
+			Escotilha_Motorista = { -9.94, 4.6, 3.39 },
+			Escotilha_Comandante = { -9.94, 4.6, -3.39 },
+		},
+		aim = { seat = "gunner", down = -15, up = 45 },
 	},
 	uh34d = {
-		box = { 48.09, 19.76, 47.01 },
-		rotor = { x = -6.2, y = 8.7, z = 0, r = 23.5 },
-		tail = { x = 21.8, y = 4.37, z = -0.06, r = 2.24 },
-		-- cabine alta sobre o motor do nariz (teto ≈ 7,4 em x ≈ −16,5); pele da direita em z ≈ −4,9
+		box = { 63.24, 17.32, 44.07 },
+		rotor = { x = -9.59, y = 7.59, z = 0, r = 30.48 },
+		tail = { x = 26.66, y = 3.48, z = 1.21, r = 5.18 },
+		-- cabine alta sobre o motor do nariz; atirador debruçado na porta da direita
 		eyes = {
-			driver = { -15.5, 6.3, -1.7 }, -- piloto à direita
-			copilot = { -15.5, 6.3, 1.7 },
-			gunner = { -6.0, -1.0, -5.4 }, -- porta da direita aberta, debruçado para fora
+			driver = { -14.41, 2.73, -1.36 },
+			copilot = { -14.41, 2.73, 1.36 },
+			gunner = { -10.12, -2.52, -3.57 },
 		},
-		-- tropa sentada nas portas, pernas para fora (a da esquerda é licença: o H-34 só tem a da direita)
-		riders = { x0 = -10.0, dx = 2.4, y = -2.2, z = 5.3 },
+		-- tropa dentro do porão com forro (antes caía fora da fuselagem de 1,68 m)
+		riders = { x0 = -11.2, dx = 1.29, y = -2.88, z = 2.79 },
+		pivots = {
+			RotorPrincipal = { -9.59, 7.59, 0 },
+			RotorCauda = { 26.66, 3.48, 1.21 },
+			Escotilha_Porta = { -5.02, -3.3, -3.17 },
+		},
+	},
+	m151 = {
+		box = { 12.66, 6.36, 5.79 },
+		eyes = {
+			driver = { 0.2, 2.09, 1.29 },
+			passenger = { 0.2, 2.09, -1.29 },
+		},
+		riders = { x0 = 3.49, dx = 1.79, y = 2.16, z = 1.29 },
+		pivots = {
+			ParaBrisa = { -2.37, 0.44, 0 },
+			Volante = { -1.37, 0.66, 1.29 },
+		},
+		steerTiltDeg = 58,
+	},
+	m35 = {
+		box = { 25.42, 10.23, 10.07 },
+		-- soldado de 2,0 m: 19 cm da cabeça ao teto da cabine (relatório)
+		eyes = {
+			driver = { -2.54, 3.07, 1.61 },
+			passenger = { -2.54, 3.07, -1.61 },
+		},
+		riders = { x0 = 0.78, dx = 1.96, y = 3.79, z = 3.04 },
+		pivots = {
+			Porta_E = { -5.07, 0.29, 3.57 },
+			Porta_D = { -5.07, 0.29, -3.57 },
+			Tampa_Traseira = { 12.35, -0.53, 0 },
+			Volante = { -3.68, 1.47, 1.61 },
+		},
+		steerTiltDeg = 50,
+	},
+	peugeot403 = {
+		box = { 16.96, 6.56, 6.82 },
+		-- Cabine baixa como num 403 de verdade: com o olho do Blender (y 1,45) o soldado de 2,0 m batia
+		-- 9 cm no teto (relatório). O olho desce 0,30 stud (8 cm): a cabeça fica ~2 cm abaixo do teto e o
+		-- corpo se encolhe no banco.
+		eyes = {
+			driver = { -0.39, 1.15, 1.36 },
+			passenger = { -0.39, 1.15, -1.36 },
+		},
+		riders = { x0 = 2.71, dx = 1.79, y = 1.77, z = 1.79 },
+		pivots = {
+			Porta_E = { -2.86, -0.99, 3.03 },
+			Porta_D = { -2.86, -0.99, -3.03 },
+			Tampa_Traseira = { 8.2, -1.33, 0 },
+			Volante = { -1.46, 0.27, 1.36 },
+		},
+		steerTiltDeg = 55,
 	},
 } :: { [string]: Art }
 

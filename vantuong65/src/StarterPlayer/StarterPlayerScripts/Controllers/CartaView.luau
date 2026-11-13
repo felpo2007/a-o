@@ -15,7 +15,12 @@
 --     zoom, direcional = passo de arrasto, L3 = você, R3 = carta inteira; no mouse, roda = zoom no
 --     ponteiro e arrastar com o botão esquerdo; no teclado, setas e +/-;
 --   - escala gráfica que acompanha o zoom, seta do norte, grade do cursor ("BS 693 928") e legenda.
+--   - toque (Parte 13): um dedo arrasta, dois dedos fazem pinça (zoom no meio dos dedos, e a carta
+--     anda junto); tocar escolhe o ponto de inserção mais perto num raio do tamanho do dedo (não
+--     insere: o GameUI mostra o botão de inserir com a espera) ou o alvo do comandante; em campo,
+--     tocar marca (como o clique).
 -- Tudo em unidades de projeto do palco do GameUI (1280 x 720 com UIScale).
+local GuiService = game:GetService("GuiService")
 local Players = game:GetService("Players")
 local ReplicatedFirst = game:GetService("ReplicatedFirst")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -36,6 +41,8 @@ local Acabamento = require(ReplicatedFirst:WaitForChild("Acabamento"))
 local EventosVisual = require(script.Parent.EventosVisual)
 local Input = require(script.Parent.Input)
 local Marcadores = require(script.Parent.Marcadores)
+local ToqueTelas = require(script.Parent.ToqueTelas)
+local ToqueUi = require(script.Parent.ToqueUi)
 local UiKit = require(script.Parent.UiKit)
 local VozEstado = require(script.Parent.VozEstado)
 
@@ -127,6 +134,12 @@ local S = {
 	visible = false,
 	legend = nil :: Frame?,
 	legendScore = nil :: TextLabel?,
+	-- toque (Parte 13): dedos na carta (px da janela), pinça e o ponto escolhido por toque
+	touches = {} :: { [InputObject]: Vector2 },
+	touchT0 = 0,
+	pinch = nil :: any,
+	touchPick = nil :: InputMap.MagnetPoint?,
+	onTouch = nil :: (() -> ())?,
 }
 
 -- ===== peças =====
@@ -476,6 +489,7 @@ end
 function CartaView.setMode(mode: string)
 	if mode ~= S.mode then
 		S.mode = mode
+		S.touchPick = nil
 		S.sig, S.spawnSig = "", ""
 		S.preferShown = false -- entrou na carta de inserção: abre no ponto sugerido
 		CartaView.redraw()
@@ -536,12 +550,237 @@ local function inside(screen: Vector2): (boolean, Vector2)
 	return p.X >= 0 and p.Y >= 0 and p.X <= S.viewW and p.Y <= S.viewH, p
 end
 
+-- ===== toque (Parte 13) =====
+-- posição do dedo em px da janela (a mesma conta do GetMouseLocation, com a faixa do Roblox)
+local function touchScreen(io: InputObject): Vector2
+	return Vector2.new(io.Position.X, io.Position.Y) + GuiService:GetGuiInset()
+end
+
+-- unidades da janela do mapa por px da tela (o palco do GameUI tem UIScale)
+local function unitsPerPx(): number
+	local root = S.root
+	local w = if root then root.AbsoluteSize.X else 0
+	return if w > 1 then S.viewW / w else 1
+end
+
+-- toque curto na carta: escolhe o ponto de inserção (raio do dedo) ou o alvo; em campo, marca
+local function touchTap(p: Vector2)
+	if S.mode == "spawn" then
+		local x0, y0, size = Carta.layout(S.u, S.v, S.zoom, S.viewW, S.viewH)
+		local pts: { ToqueTelas.Point } = {}
+		for _, pt in S.spawns do
+			local u, v = uv(pt.x, pt.z)
+			table.insert(pts, { id = pt, x = x0 + u * size, y = y0 + v * size })
+		end
+		local near = ToqueTelas.nearest(p.X, p.Y, pts, ToqueUi.minPx() * 0.8 * unitsPerPx())
+		if near then
+			local pt = near.id
+			local u, v = uv(pt.x, pt.z)
+			S.touchPick = { id = "spawn:" .. tostring(pt.id), x = u, y = v }
+		else
+			S.touchPick = nil
+		end
+		CartaView.drawPoints()
+	elseif S.mode == "target" then
+		local u, v = Carta.pick(S.u, S.v, S.zoom, S.viewW, S.viewH, p.X, p.Y)
+		S.touchPick = { id = "alvo", x = math.clamp(u, 0, 1), y = math.clamp(v, 0, 1) }
+		S.cursor = p
+	else
+		local u, v = Carta.pick(S.u, S.v, S.zoom, S.viewW, S.viewH, p.X, p.Y)
+		if u >= 0 and v >= 0 and u <= 1 and v <= 1 and S.onClick then
+			S.onClick(u, v)
+		end
+	end
+	local cb = S.onTouch
+	if cb then
+		task.spawn(cb)
+	end
+end
+
+local function touchCount(): number
+	local n = 0
+	for _ in S.touches do
+		n += 1
+	end
+	return n
+end
+
+-- os dois primeiros dedos (posição local na janela do mapa)
+local function twoFingers(): (Vector2?, Vector2?)
+	local a: Vector2?, b: Vector2? = nil, nil
+	local toLocal = S.toLocal
+	if not toLocal then
+		return nil, nil
+	end
+	for _, sp in S.touches do
+		local lp = toLocal(sp)
+		if not a then
+			a = lp
+		elseif not b then
+			b = lp
+			break
+		end
+	end
+	return a, b
+end
+
+-- o dedo caiu num botão de outra tela por cima da carta (os botões de toque do GameUI, o cartão de
+-- compra de veículo): o toque é dele, não da carta (senão o "+" do zoom também marcava o ponto)
+local function overOtherButton(io: InputObject): boolean
+	local pg = player:FindFirstChildOfClass("PlayerGui")
+	local root = S.root
+	if not (pg and root) then
+		return false
+	end
+	local ok, list = pcall(function()
+		return pg:GetGuiObjectsAtPosition(io.Position.X, io.Position.Y)
+	end)
+	if not ok or type(list) ~= "table" then
+		return false
+	end
+	for _, o in list :: { GuiObject } do
+		if o:IsA("GuiButton") and not o:IsDescendantOf(root) then
+			local cur: Instance? = o
+			local shown = true
+			while cur and not cur:IsA("LayerCollector") do
+				if cur:IsA("GuiObject") and not cur.Visible then
+					shown = false
+					break
+				end
+				cur = cur.Parent
+			end
+			if shown and cur and cur:IsA("LayerCollector") and cur.Enabled then
+				return true
+			end
+		end
+	end
+	return false
+end
+
+local function touchBegan(io: InputObject)
+	local sp = touchScreen(io)
+	local ok, p = inside(sp)
+	if not ok and touchCount() == 0 then
+		return -- o dedo começou fora da carta (botão, legenda): não é da carta
+	end
+	if touchCount() == 0 and overOtherButton(io) then
+		return
+	end
+	S.touches[io] = sp
+	local n = touchCount()
+	if n == 1 then
+		S.drag = { start = p, u = S.uT, v = S.vT }
+		S.dragged = false
+		S.touchT0 = os.clock()
+	elseif n == 2 then
+		local a, b = twoFingers()
+		if a and b then
+			S.pinch = { d0 = (a - b).Magnitude, z0 = S.zoomT, mid0 = (a + b) / 2, u0 = S.uT, v0 = S.vT }
+			S.dragged = true -- dois dedos nunca são toque
+		end
+	end
+end
+
+local function touchMoved(io: InputObject)
+	if not S.touches[io] then
+		return
+	end
+	S.touches[io] = touchScreen(io)
+	local pin = S.pinch
+	if pin then
+		local a, b = twoFingers()
+		if a and b then
+			local mid = (a + b) / 2
+			local z2 = ToqueTelas.pinch(pin.z0, pin.d0, (a - b).Magnitude, Carta.ZOOM_MIN, Carta.ZOOM_MAX)
+			-- volta ao começo da pinça e refaz: zoom no meio inicial dos dedos e a carta anda com eles
+			S.uT, S.vT, S.zoomT = pin.u0, pin.v0, pin.z0
+			zoomAt(z2, pin.mid0.X, pin.mid0.Y)
+			panPx(pin.mid0.X - mid.X, pin.mid0.Y - mid.Y)
+		end
+		return
+	end
+	local d = S.drag
+	local toLocal = S.toLocal
+	if d and toLocal then
+		local p = toLocal(S.touches[io])
+		local delta = p - d.start
+		if delta.Magnitude * (1 / unitsPerPx()) > ToqueTelas.TAP_MOVE_PX then
+			S.dragged = true
+		end
+		if S.dragged then
+			local size = Carta.base(S.viewW, S.viewH) * S.zoomT
+			S.uT, S.vT = Carta.clampCenter(d.u - delta.X / size, d.v - delta.Y / size, S.zoomT, S.viewW, S.viewH)
+		end
+	end
+end
+
+local function touchEnded(io: InputObject)
+	if not S.touches[io] then
+		return
+	end
+	S.touches[io] = nil
+	local n = touchCount()
+	if S.pinch then
+		if n < 2 then
+			S.pinch = nil
+			-- sobrou um dedo: ele continua arrastando dali (sem pulo)
+			local rest = next(S.touches)
+			local toLocal = S.toLocal
+			if rest and toLocal then
+				S.drag = { start = toLocal(S.touches[rest]), u = S.uT, v = S.vT }
+			end
+		end
+		if n == 0 then
+			S.drag = nil
+			task.defer(function()
+				S.dragged = false
+			end)
+		end
+		return
+	end
+	if n > 0 then
+		return
+	end
+	local d = S.drag
+	S.drag = nil
+	if d and S.visible and not S.dragged and os.clock() - S.touchT0 <= 0.6 then
+		touchTap(d.start)
+	end
+	task.defer(function()
+		S.dragged = false
+	end)
+end
+
+-- o GameUI ouve o toque na carta (ponto escolhido, alvo) para mostrar o botão de confirmar
+function CartaView.setTouchCallback(fn: (() -> ())?)
+	S.onTouch = fn
+end
+
+-- ponto ou alvo escolhido por toque (nil: nenhum)
+function CartaView.touchPick(): InputMap.MagnetPoint?
+	return S.touchPick
+end
+
+function CartaView.clearTouchPick()
+	if S.touchPick then
+		S.touchPick = nil
+		CartaView.drawPoints()
+	end
+end
+
+-- zoom por botão (toque: + e −), no meio da janela
+function CartaView.zoomBy(f: number)
+	zoomAt(S.zoomT * f, S.viewW / 2, S.viewH / 2)
+end
+
 function CartaView.bindMouse()
 	UserInputService.InputChanged:Connect(function(io: InputObject)
 		if not S.visible then
 			return
 		end
-		if io.UserInputType == Enum.UserInputType.MouseWheel then
+		if io.UserInputType == Enum.UserInputType.Touch then
+			touchMoved(io)
+		elseif io.UserInputType == Enum.UserInputType.MouseWheel then
 			local ok, p = inside(UserInputService:GetMouseLocation())
 			if ok then
 				zoomAt(S.zoomT * (if io.Position.Z > 0 then 1.35 else 1 / 1.35), p.X, p.Y)
@@ -570,7 +809,9 @@ function CartaView.bindMouse()
 			return
 		end
 		local t = io.UserInputType
-		if t == Enum.UserInputType.MouseButton1 or t == Enum.UserInputType.Touch then
+		if t == Enum.UserInputType.Touch then
+			touchBegan(io)
+		elseif t == Enum.UserInputType.MouseButton1 then
 			local ok, p = inside(UserInputService:GetMouseLocation())
 			if ok then
 				S.drag = { start = p, u = S.uT, v = S.vT }
@@ -595,7 +836,9 @@ function CartaView.bindMouse()
 	end)
 	UserInputService.InputEnded:Connect(function(io: InputObject)
 		local t = io.UserInputType
-		if t == Enum.UserInputType.MouseButton1 or t == Enum.UserInputType.Touch then
+		if t == Enum.UserInputType.Touch then
+			touchEnded(io)
+		elseif t == Enum.UserInputType.MouseButton1 then
 			local d = S.drag
 			S.drag = nil
 			if d and S.visible and not S.dragged and S.onClick then
@@ -1297,6 +1540,19 @@ function CartaView.drawPoints()
 			local id = tostring(pt.id)
 			holder.Activated:Connect(function()
 				local w = S.spawnWidgets[id]
+				if ToqueUi.active() then
+					-- toque: só escolhe (o botão de inserir do GameUI mostra a espera e confirma)
+					if w and not S.dragged and spawnMode then
+						local pu, pv = uv(w.pt.x, w.pt.z)
+						S.touchPick = { id = "spawn:" .. id, x = pu, y = pv }
+						CartaView.drawPoints()
+						local cb = S.onTouch
+						if cb then
+							task.spawn(cb)
+						end
+					end
+					return
+				end
 				if w and not S.dragged and spawnMode and S.onSpawn then
 					S.onSpawn(w.pt) -- o ponto com a espera de agora (atualizado a cada segundo)
 				end
@@ -1704,8 +1960,11 @@ function CartaView.step(dt: number, pad: boolean)
 	-- ímã (controle) e realce
 	local f: InputMap.MagnetPoint? = nil
 	if pad then
+		S.touchPick = nil
 		local cu, cv = Carta.pick(S.u, S.v, S.zoom, W, H, S.cursor.X, S.cursor.Y)
 		f = InputMap.magnet(cu, cv, magnetPoints(), 0.03 / S.zoom)
+	elseif S.touchPick then
+		f = S.touchPick -- toque: o ponto (ou o alvo) escolhido fica em foco até outro toque
 	end
 	if (f and f.id) ~= (S.focused and S.focused.id) then
 		S.focused = f
@@ -1778,6 +2037,9 @@ function CartaView.setVisible(on: boolean)
 		paintKey()
 	else
 		S.drag = nil
+		S.pinch = nil
+		S.touchPick = nil
+		table.clear(S.touches)
 	end
 end
 

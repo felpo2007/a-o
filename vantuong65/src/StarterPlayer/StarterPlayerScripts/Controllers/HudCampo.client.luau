@@ -17,6 +17,11 @@
 -- do rumo quando muda; o resto é tween ou evento. Escala para a janela (UIScale) e foge do cartão do
 -- tutorial numa tela estreita.
 -- Studio: workspace:SetAttribute("VT65DevTela", "hud") acende o cartão da arma.
+-- Toque (Parte 13): embaixo e nos cantos de cima ficam os botões do HUD de toque (T1). A bússola e o
+-- cartão da arma sobem para o vão do alto, entre os botões (ToqueUi.topBand), abaixo da faixa da
+-- frente, encolhendo para caber; a ordem do comandante fica só no aviso. Tocar no cartão da arma abre
+-- o seletor de tiro e a alça (as ações que já existem: "fire_mode" tocar e "zeroing" segurar, pelo
+-- Input.virtual). Studio: VT65DevTela = "seletor" abre o seletor de exemplo (com ou sem toque).
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -29,6 +34,8 @@ local Bus = require(script.Parent.Bus)
 local Input = require(script.Parent.Input)
 local Marcadores = require(script.Parent.Marcadores) -- liga os marcadores de aliados e objetivos
 local Toast = require(script.Parent.Toast)
+local ToqueTelas = require(script.Parent.ToqueTelas)
+local ToqueUi = require(script.Parent.ToqueUi)
 local UiKit = require(script.Parent.UiKit)
 
 local player = Players.LocalPlayer
@@ -387,6 +394,7 @@ local W = {
 	id = nil :: string?,
 	mode = "",
 	zero = 100,
+	zeroOf = {} :: { [string]: number }, -- alça de cada arma (a troca de arma mostrava a da anterior)
 	mag = -1,
 	spare = -1,
 	lastActive = 0,
@@ -476,6 +484,9 @@ local function equip()
 	-- serve de reserva enquanto o atributo não chega
 	local fm = player:GetAttribute("FireMode")
 	W.mode = if type(fm) == "string" then fm elseif wp and wp.modes and wp.modes[1] then wp.modes[1] else ""
+	-- a alça desta arma (a última que ela teve; nova: a 1ª da escala, como o WeaponController)
+	local zs = if wp then Weapons.zeros(wp) else nil
+	W.zero = (W.id and W.zeroOf[W.id]) or (if zs and zs[1] then zs[1] else 100)
 	renderWeapon()
 	wake()
 end
@@ -551,6 +562,9 @@ Toast.intercept("arma", function(text: string): boolean
 		W.mode = string.lower(sel)
 	elseif zero then
 		W.zero = tonumber(zero) or W.zero
+		if W.id then
+			W.zeroOf[W.id] = W.zero
+		end
 	else
 		flash(text)
 	end
@@ -566,6 +580,115 @@ Toast.intercept("arma", function(text: string): boolean
 	wake()
 	return true
 end)
+
+-- ===== toque (Parte 13): seletor de tiro e alça pelo cartão da arma =====
+-- O cartão é um CanvasGroup (não recebe toque): um botão transparente por cima abre, embaixo dele,
+-- os botões das ações que já existem (ToqueTelas.weaponOptions): SELETOR (fire_mode tocar), ALÇA +
+-- (zeroing segurar) e, na arma de um modo só e alça longa (M79, luneta), ALÇA − (fire_mode tocar).
+-- O cartão mostra o resultado (o aviso "arma" do WeaponController passa pelo Toast.intercept acima).
+local Sel: { [string]: any } = { open = false, until_ = 0, dev = 0, touchPos = nil, last = 0 }
+do
+	local V = UiKit.V
+	local tap = Instance.new("TextButton")
+	tap.Name = "ToqueArma"
+	tap.Text = ""
+	tap.AutoButtonColor = false
+	tap.BackgroundTransparency = 1
+	tap.Selectable = false
+	tap.AnchorPoint = Vector2.new(0.5, 0)
+	tap.Visible = false
+	tap.Parent = holder
+	local pop = UiKit.panel(holder, V.PANEL, 0.08)
+	pop.Name = "Seletor"
+	pop.AnchorPoint = Vector2.new(0.5, 0)
+	pop.AutomaticSize = Enum.AutomaticSize.XY
+	pop.Size = UDim2.new()
+	pop.Visible = false
+	pop.Active = true
+	UiKit.pad(pop, 8, 8, 8, 8)
+	UiKit.list(pop, true, 8)
+	local h = ToqueUi.minPx()
+	local function mk(name: string, text: string, order: number, kind: string?): TextButton
+		local b = ToqueUi.bigButton(pop, text, kind, math.floor(h * 2.6))
+		b.Name = name
+		b.LayoutOrder = order
+		return b
+	end
+	local bMode = mk("Seletor", "SELETOR", 1, "primary")
+	local bDown = mk("AlcaMenos", "ALÇA −", 2)
+	local bUp = mk("AlcaMais", "ALÇA +", 3)
+	local bClose = mk("Fechar", "✕", 4)
+	bClose.Size = UDim2.fromOffset(h, h)
+	local function opts(): { string }
+		local wp = weaponDef()
+		if not wp then
+			return {}
+		end
+		local role = player:GetAttribute("Role")
+		local modes = Weapons.modesFor(wp, if type(role) == "string" then role else nil)
+		return ToqueTelas.weaponOptions(#modes, #Weapons.zeros(wp))
+	end
+	local function paint()
+		local o = opts()
+		bMode.Visible = table.find(o, "mode") ~= nil
+		bDown.Visible = table.find(o, "zero_down") ~= nil
+		bUp.Visible = table.find(o, "zero_up") ~= nil
+	end
+	function Sel.setOpen(on: boolean)
+		Sel.open = on
+		pop.Visible = on
+		if on then
+			paint()
+			Sel.until_ = os.clock() + 6
+			wake()
+		end
+	end
+	local function touched()
+		Sel.until_ = os.clock() + 6 -- mexeu: fica aberto mais um pouco
+		wake()
+	end
+	tap.Activated:Connect(function()
+		Sel.setOpen(not Sel.open)
+	end)
+	bMode.Activated:Connect(function()
+		touched()
+		ToqueUi.tap("fire_mode")
+	end)
+	bDown.Activated:Connect(function()
+		touched()
+		ToqueUi.tap("fire_mode") -- a arma de um modo só: o toque do seletor desce a alça
+	end)
+	bUp.Activated:Connect(function()
+		touched()
+		ToqueUi.hold("zeroing")
+	end)
+	bClose.Activated:Connect(function()
+		Sel.setOpen(false)
+	end)
+	-- 4 vezes por segundo (RenderStepped): no toque o cartão fica no vão do alto, abaixo da bússola
+	-- (Sel.touchPos, posto pelo bloco de escala), com o botão por cima e o seletor logo abaixo
+	function Sel.update(k: number, onFoot: boolean)
+		local tp: Vector2? = Sel.touchPos
+		local card = A.card :: CanvasGroup
+		if tp then
+			card.AnchorPoint = Vector2.new(0.5, 0)
+			card.Position = UDim2.fromOffset(tp.X, tp.Y)
+			pop.AnchorPoint = Vector2.new(0.5, 0)
+			pop.Position = UDim2.fromOffset(tp.X, tp.Y + AH * k + 6)
+		else
+			card.AnchorPoint = Vector2.new(1, 1)
+			card.Position = UDim2.new(1, -px(18, 28), 1, -px(16, 26))
+		end
+		local show = tp ~= nil and onFoot and card.Visible
+		tap.Visible = show
+		tap.AnchorPoint = card.AnchorPoint
+		tap.Position = card.Position
+		tap.Size = UDim2.fromOffset(AW * k, AH * k)
+		if Sel.open and (not show or os.clock() > Sel.until_) then
+			Sel.setOpen(false)
+		end
+	end
+end
 
 -- ===== objetivo do time (o mesmo da faixa da frente) =====
 local goalPos: Vector3? = nil
@@ -739,7 +862,9 @@ local compassBlocked = false -- numa tela estreita, a bússola não cabe entre o
 RunService.RenderStepped:Connect(function()
 	local field = inField() or os.clock() < dev
 	B.box.Visible = field and not compassBlocked
-	local ov = Ordem.visible(field)
+	-- toque (Parte 13): o alto à esquerda é dos botões do HUD de toque (mapa, menu...); a ordem chega
+	-- pelo aviso (Toast "Ordem do comandante") e o cartão fixo não aparece
+	local ov = Ordem.visible(field) and not ToqueUi.active()
 	if Ordem.box.Visible ~= ov then
 		Ordem.box.Visible = ov
 	end
@@ -750,6 +875,11 @@ RunService.RenderStepped:Connect(function()
 			W.bright = false
 			wake()
 		end
+	end
+	local nowSel = os.clock()
+	if nowSel - (Sel.last or 0) > 0.25 or (not onFoot and Sel.open) then
+		Sel.last = nowSel
+		Sel.update(A.scale.Scale, onFoot)
 	end
 	if not field then
 		return
@@ -820,20 +950,46 @@ RunService.RenderStepped:Connect(function()
 		local k = if TV then 1 else math.clamp(size.X / 1280, 0.72, 1)
 		B.scale.Scale = k
 		A.scale.Scale = k
-		local x = size.X / 2
-		local pg = player:FindFirstChild("PlayerGui")
-		local tg = pg and pg:FindFirstChild("VT65Tutorial")
-		local tc = tg and tg:FindFirstChild("Tutorial")
-		local half = CW * k / 2
-		if tc and tc:IsA("GuiObject") and tc.Visible then
-			local right = tc.AbsolutePosition.X + tc.AbsoluteSize.X + 16
-			if x - half < right then
-				x = right + half
+		if ToqueUi.active() or os.clock() < Sel.dev then
+			-- toque (Parte 13): embaixo e nos cantos de cima ficam os botões do HUD de toque. A bússola
+			-- e o cartão da arma sobem para o vão do alto (ToqueUi.topBand), abaixo da faixa da frente,
+			-- encolhendo para caber
+			local x0, x1 = ToqueUi.topBand()
+			local gap = x1 - x0 - 8
+			local mid = (x0 + x1) / 2 - gui.AbsolutePosition.X
+			local top = px(6, 8)
+			local fg = player.PlayerGui:FindFirstChild("VT65Frente")
+			local strip = fg and fg:FindFirstChild("Faixa")
+			if strip and strip:IsA("GuiObject") and strip.Visible then
+				top = strip.AbsolutePosition.Y + strip.AbsoluteSize.Y - gui.AbsolutePosition.Y + 4
 			end
+			local kc = ToqueTelas.fitScale(CW, gap, k, 0.45)
+			B.scale.Scale = kc
+			B.box.AnchorPoint = Vector2.new(0.5, 0)
+			B.box.Position = UDim2.fromOffset(mid, top)
+			local ka = ToqueTelas.fitScale(AW, gap, math.min(k, 0.62), 0.45)
+			A.scale.Scale = ka
+			Sel.touchPos = Vector2.new(mid, top + CH * kc + 4)
+			compassBlocked = false
+		else
+			Sel.touchPos = nil
+			B.box.AnchorPoint = Vector2.new(0.5, 1)
+			local x = size.X / 2
+			local pg = player:FindFirstChild("PlayerGui")
+			local tg = pg and pg:FindFirstChild("VT65Tutorial")
+			local tc = tg and tg:FindFirstChild("Tutorial")
+			local half = CW * k / 2
+			-- só se o cartão do tutorial estiver embaixo (no toque ele fica no alto)
+			if tc and tc:IsA("GuiObject") and tc.Visible and tc.AnchorPoint.Y > 0.5 then
+				local right = tc.AbsolutePosition.X + tc.AbsoluteSize.X + 16
+				if x - half < right then
+					x = right + half
+				end
+			end
+			local cardLeft = size.X - px(18, 28) - AW * k - 12
+			compassBlocked = A.card.Visible and x + half > cardLeft
+			B.box.Position = UDim2.new(0, x, 1, -px(16, 26))
 		end
-		local cardLeft = size.X - px(18, 28) - AW * k - 12
-		compassBlocked = A.card.Visible and x + half > cardLeft
-		B.box.Position = UDim2.new(0, x, 1, -px(16, 26))
 	end
 end)
 
@@ -846,6 +1002,13 @@ if RunService:IsStudio() then
 			dev = os.clock() + 8
 			W.bright = false
 			wake()
+		elseif v == "seletor" then
+			-- o cartão no lugar do toque e o seletor aberto por 8 s (com ou sem toque)
+			dev = os.clock() + 8
+			Sel.dev = os.clock() + 8
+			Sel.update(A.scale.Scale, true)
+			Sel.setOpen(true)
+			Sel.until_ = os.clock() + 8
 		elseif v == "ordem" then
 			-- ordem do comandante de exemplo por 8 s (o HUD acende junto)
 			dev = os.clock() + 8

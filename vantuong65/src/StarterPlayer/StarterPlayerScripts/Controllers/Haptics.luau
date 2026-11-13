@@ -2,12 +2,21 @@
 -- Vibração (Parte 12.6). Respeita a intensidade do jogador (desligada, baixa, normal; separada
 -- para disparo e para dano) e confere IsMotorSupported antes de cada motor. Explosões usam
 -- HapticEffect quando o tipo existe. Motores de gatilho só se o controle disser que suporta.
+-- Celular (Parte 13): HapticService:SetMotor é do controle; no celular quem vibra é o HapticEffect
+-- (instância nova do Roblox: celulares Android e iOS com vibração, controles PlayStation e Xbox, Quest;
+-- controle ligado ao celular não vibra). Só pulsos, pelas regras do Aparelho (testadas no Lune):
+-- disparo leve, atingido forte, explosão forte e caindo com a distância; intervalo mínimo por tipo;
+-- nada contínuo (motor, rotor, batimento); economia de bateria tira o pulso do disparo. Forma de onda
+-- própria (Custom, tempo em ms, intensidade 0..1, abaixo de 0,1 alguns aparelhos não vibram); se o
+-- aparelho recusar, cai para o tipo pronto (UIClick, GameplayCollision, GameplayExplosion); sem
+-- HapticEffect, não vibra.
 local HapticService = game:GetService("HapticService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
 local Net = require(ReplicatedStorage.Shared.Net)
+local Aparelho = require(script.Parent.Aparelho)
 local Input = require(script.Parent.Input)
 
 local Haptics = {}
@@ -37,8 +46,82 @@ local function add(motor: Enum.VibrationMotor, v: number, seconds: number)
 	table.insert(pulses, { motor = motor, v = math.clamp(v, 0, 1), untilT = os.clock() + seconds })
 end
 
+-- ===== celular: HapticEffect =====
+local function touchOn(): boolean
+	local f = (Input :: any).touchActive
+	if type(f) == "function" then
+		return f() == true
+	end
+	return Input.device() == "touch"
+end
+
+local touch = {
+	fx = {} :: { [string]: any }, -- um efeito por tipo, reaproveitado
+	last = {} :: { [string]: number }, -- hora do último pulso por tipo (Aparelho.gate)
+	missing = false, -- este cliente não tem HapticEffect
+	custom = true, -- a forma de onda própria funciona (senão, o tipo pronto)
+}
+
+local function effect(kind: string): any
+	local fx = touch.fx[kind]
+	if fx and fx.Parent then
+		return fx
+	end
+	if touch.missing then
+		return nil
+	end
+	local ok, made = pcall(function(): any
+		local e = Instance.new("HapticEffect" :: any) :: any
+		e.Name = string.format("VT65Vibra_%s", kind)
+		e.Parent = workspace -- como nos exemplos da documentação
+		return e
+	end)
+	if not ok then
+		touch.missing = true
+		return nil
+	end
+	touch.fx[kind] = made
+	return made
+end
+
+-- kind: "fire" | "hit" | "explosion"; x: coice (graus) ou distância (m)
+local function touchPulse(kind: string, level: string, x: number)
+	if not touchOn() then
+		return
+	end
+	local p = Aparelho.pulse(kind, level, x, (Input.settings :: any).batterySaver == true)
+	if not p or not Aparelho.gate(touch.last, kind, os.clock()) then
+		return
+	end
+	local fx = effect(kind)
+	if not fx then
+		return
+	end
+	local pulse = p :: Aparelho.Pulse
+	if touch.custom then
+		local ok = pcall(function()
+			fx:Stop()
+			fx.Type = (Enum :: any).HapticEffectType.Custom
+			local key = (FloatCurveKey :: any).new
+			local lin = Enum.KeyInterpolationMode.Linear
+			fx:SetWaveformKeys({ key(0, pulse.amp, lin), key(pulse.ms, 0, lin) })
+			fx:Play()
+		end)
+		if ok then
+			return
+		end
+		touch.custom = false
+	end
+	pcall(function()
+		fx:Stop()
+		fx.Type = ((Enum :: any).HapticEffectType :: any)[pulse.preset]
+		fx:Play()
+	end)
+end
+
 -- disparo: proporcional ao recuo (kick em graus do WeaponController)
 function Haptics.fire(kickDeg: number, auto: boolean)
+	touchPulse("fire", Input.settings.hapticFire, kickDeg)
 	local lv = LEVEL[Input.settings.hapticFire] or 1
 	local v = math.clamp(kickDeg / 1.6, 0.15, 1) * lv
 	add(Enum.VibrationMotor.Small, v, if auto then 0.05 else 0.08)
@@ -50,6 +133,7 @@ end
 
 -- explosão perto: forte e caindo com a distância
 function Haptics.explosion(distM: number)
+	touchPulse("explosion", Input.settings.hapticDamage, distM)
 	local lv = LEVEL[Input.settings.hapticDamage] or 1
 	local v = math.clamp(1 - distM / 120, 0, 1) ^ 1.5 * lv
 	if v <= 0 then
@@ -61,6 +145,7 @@ end
 
 -- tiro recebido: vibra do lado do impacto (motores da mão esquerda/direita quando houver)
 function Haptics.hit(fromPos: Vector3)
+	touchPulse("hit", Input.settings.hapticDamage, 0)
 	local lv = LEVEL[Input.settings.hapticDamage] or 1
 	local rel = camera.CFrame:PointToObjectSpace(fromPos)
 	local left = rel.X < 0
@@ -146,6 +231,18 @@ Net.unreliable("Fire_Impact").OnClientEvent:Connect(function(e)
 				fx:Destroy()
 			end)
 		end)
+	end
+end)
+-- tiro do canhão do próprio veículo (90 mm, 106 mm): o disparo de verdade, do servidor; quem está
+-- sentado a menos de 12 m da boca sente (atirador e o resto da tripulação; o tubo do M48 tem ~5 m)
+Net.unreliable("Fire_Launch").OnClientEvent:Connect(function(e)
+	local char = player.Character
+	local hum = char and char:FindFirstChildOfClass("Humanoid")
+	local seat = hum and hum.SeatPart
+	if seat and type(e) == "table" and type(e.x) == "number" and type(e.y) == "number" and type(e.z) == "number" then
+		if (Vector3.new(e.x, e.y, e.z) - seat.Position).Magnitude * M < 12 then
+			Haptics.fire(1.6, false)
+		end
 	end
 end)
 Net.event("Medical_State").OnClientEvent:Connect(function(st)

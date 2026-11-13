@@ -50,6 +50,11 @@ Commerce.IDS = {
 	PRODUCT_CREDITS_500 = 3730606747, -- "500 créditos"
 	PRODUCT_CREDITS_1200 = 3730606748, -- "1.200 créditos"
 	PRODUCT_CREDITS_3000 = 3730606751, -- "3.000 créditos"
+	-- veículo ao nascer (D-103, pedido do dono 2026-11-12): Commerce.VehicleProducts. 0 = ainda não
+	-- criado (o botão de Robux some; o de CI continua)
+	PRODUCT_VEH_M151 = 3730793969, -- "Veículo ao nascer: M151 MUTT"
+	PRODUCT_VEH_M35 = 3730793971, -- "Veículo ao nascer: caminhão M35"
+	PRODUCT_VEH_PEUGEOT403 = 3730793973, -- "Veículo ao nascer: Peugeot 403"
 	-- Experience Subscription (mensal; o criador precisa estar habilitado)
 	SUBSCRIPTION_UNIT_RESERVE = "", -- "Reserva da Unidade"; ex.: "EXP-1234567890"
 }
@@ -278,6 +283,47 @@ Commerce.CampaignProducts = {
 
 function Commerce.campaignProduct(key: string): CampaignProduct?
 	for _, p in Commerce.CampaignProducts do
+		if p.key == key then
+			return p
+		end
+	end
+	return nil
+end
+
+-- ===== veículo ao nascer (D-103; pedido do dono, 2026-11-12: "coloque a opção de comprar um veículo
+-- quando nascer e ele spawnar do seu lado") =====
+-- Catálogo próprio, fora de Commerce.GAMEPLAY (a lista da D-72 continua com 3). Só viaturas sem arma
+-- montada; o mesmo veículo sai com créditos de intendência (Shared/CompraVeiculo: preço em CI e
+-- regras). O prompt de Robux só abre com o lugar ao lado do jogador já achado e reservado; recibo
+-- que não vira veículo vira CI (CompraVeiculo.refundCredits). suggestedRobux: PLACEHOLDER, só para
+-- criar o item (a loja lê o preço ao vivo).
+export type VehicleProduct = { key: string, spec: string, name: string, description: string, suggestedRobux: number }
+Commerce.VehicleProducts = {
+	{
+		key = "PRODUCT_VEH_M151",
+		spec = "m151",
+		name = "Veículo ao nascer: M151 MUTT",
+		description = "Um jipe M151 ao seu lado quando você entra em campo por uma base ou ponto de reunião. Um por vez; some se ficar abandonado. Sem lugar livre, nada é cobrado.",
+		suggestedRobux = 10,
+	},
+	{
+		key = "PRODUCT_VEH_M35",
+		spec = "m35",
+		name = "Veículo ao nascer: caminhão M35",
+		description = "Um caminhão M35 (motorista e 12 na carroceria) ao seu lado quando você entra em campo por uma base ou ponto de reunião. Um por vez; some se ficar abandonado. Sem lugar livre, nada é cobrado.",
+		suggestedRobux = 15,
+	},
+	{
+		key = "PRODUCT_VEH_PEUGEOT403",
+		spec = "peugeot403",
+		name = "Veículo ao nascer: Peugeot 403",
+		description = "Uma picape Peugeot 403 ao seu lado quando você entra em campo por uma base ou ponto de reunião. Um por vez; some se ficar abandonada. Sem lugar livre, nada é cobrado.",
+		suggestedRobux = 10,
+	},
+} :: { VehicleProduct }
+
+function Commerce.vehicleProduct(key: string): VehicleProduct?
+	for _, p in Commerce.VehicleProducts do
 		if p.key == key then
 			return p
 		end

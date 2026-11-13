@@ -136,6 +136,19 @@ test("velocidade máxima: M48A3 48 km/h na estrada (ficha) e bem menos fora dela
 	end
 end)
 
+test("teto na água: lâmina rasa conta como lama; funda para o tanque e o anfíbio nada", function()
+	local m, l = spec("m48a3"), spec("lvtp5")
+	local mud = VehicleDrive.topSpeed(m, "mud")
+	near(VehicleDrive.topSpeed(m, "water", nil, 0.03), mud, 1e-6, "M48 em lâmina de 3 cm")
+	assert(VehicleDrive.topSpeed(m, "water", nil, 2) == 0, "M48 em 2 m de água: afoga")
+	assert(VehicleDrive.topSpeed(m, "water") == 0, "fundura desconhecida: como funda")
+	near(VehicleDrive.topSpeed(l, "water", nil, 0.5), VehicleDrive.topSpeed(l, "mud"), 1e-6, "LVTP-5 no raso")
+	assert(VehicleDrive.topSpeed(l, "water", nil, 3) > 0, "LVTP-5 nada")
+	-- o passo faz o mesmo: o M48 anda na lâmina rasa
+	local v = run("m48a3", 30, { throttle = 1, steer = 0 }, { ground = "water", waterDepthM = 0.03 }).v
+	assert(v > 1, string.format("M48 na lâmina rasa: %.2f m/s", v))
+end)
+
 test("freio: freia mais que o freio-motor e não engata a ré sozinho; parado, a ré anda", function()
 	local env = { ground = "grass" }
 	local s = run("m48a3", 40, { throttle = 1, steer = 0 }, env)
@@ -427,7 +440,8 @@ test("4 pontas: chão mais baixo na frente abaixa o nariz; à direita, rola para
 end)
 
 test("laço da lagarta: comprimento medido na malha, contínuo, ramo de baixo andando em +x", function()
-	for id, len in { m48a3 = 50.35, ontos = 26.77, lvtp5 = 52.55 } do
+	-- lote _v2 (modelos do Blender na medida real): antes 50,35 / 26,77 / 52,55
+	for id, len in { m48a3 = 49.15, ontos = 28.81, lvtp5 = 65.84 } do
 		local art = VehicleDrive.ART[id]
 		local b = VehicleDrive.belt(art.track.circles)
 		near(b.length, len, 0.2, id .. " comprimento")
@@ -551,10 +565,19 @@ test("vista sentado: todo assento tem olho fora do casco (escotilha, cabine, por
 			end
 		end
 	end
-	-- UH-34D: piloto acima do meio da altura (cabine alta), atirador fora da pele da direita (z ≈ −4,9)
+	-- UH-34D (_v2, medida real): cabine alta acima do porão; atirador debruçado para fora da pele da
+	-- direita (meia largura da fuselagem 0,84 m); a tropa DENTRO do porão (antes caía fora)
+	local half = 0.84 / 0.28
 	local _, py = VehicleDrive.eyeOf("uh34d", "driver")
+	local _, ry, rz = VehicleDrive.eyeOf("uh34d", "p1")
 	local _, _, gz = VehicleDrive.eyeOf("uh34d", "gunner")
-	assert((py :: number) > 5 and (gz :: number) < -4.9)
+	assert((py :: number) > (ry :: number) + 3, "cabine acima do porão")
+	assert((gz :: number) < -half, "atirador para fora da porta")
+	for i = 1, Vehicles.PASSENGERS.uh34d do
+		local _, _, z = VehicleDrive.eyeOf("uh34d", "p" .. i)
+		assert(math.abs(z :: number) < half, "passageiro fora da fuselagem: p" .. i)
+	end
+	assert(math.abs(rz :: number) < half)
 	assert(VehicleDrive.eyeOf("m48a3", "p1") == nil, "M48 não leva passageiro")
 	local dHeli = VehicleDrive.chaseOf("heli", 40)
 	local dTank = VehicleDrive.chaseOf("ground", 22.6)
@@ -798,6 +821,66 @@ test("D-100: ligações no jogo (entrar pelo painel, assento sem toque, tiro de 
 	assert(string.find(prompt, '"VT65Embarcar"', 1, true) and string.find(prompt, '"Vehicle_Board"', 1, true))
 	local wc = fs.readFile("src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponController.client.luau")
 	assert(string.find(wc, '"SeatFire"', 1, true) and string.find(wc, '"seat_fire"', 1, true), "gatilho sentado")
+end)
+
+test("lote _v2: modelo do Blender, peças móveis, olho do soldado de 2 m e orçamento", function()
+	local AssetIds = require(S .. "AssetIds") :: any
+	local ArtBudget = require("../../src/ServerScriptService/Modules/ArtBudget") :: any
+	for id in Vehicles.SPECS do
+		local key = Vehicles.modelKey(id)
+		local art = VehicleDrive.ART[id]
+		assert(type(AssetIds.Models[key]) == "number" and AssetIds.Models[key] > 0, id .. ": sem ID em " .. key)
+		assert(ArtBudget.KIND[key] == "hero" and ArtBudget.within(key), id .. ": orçamento de " .. key)
+		assert(art and art.pivots, id .. ": sem juntas na tabela ART")
+		-- toda junta dentro da caixa da malha (+ meio stud de folga)
+		for name, p in art.pivots do
+			for k = 1, 3 do
+				assert(math.abs(p[k]) <= art.box[k] / 2 + 0.5, id .. ": junta fora da caixa " .. name)
+			end
+		end
+	end
+	assert(Vehicles.modelKey("m48a3") == "m48a3_v2" and Vehicles.modelKey("uh34d") == "uh34d_v2")
+	-- quem gira: torre e cano nos três blindados (o LVTP-5 só a cúpula), rotores no UH-34D, volante nos carros
+	for _, id in { "m48a3", "ontos" } do
+		local a = VehicleDrive.ART[id]
+		assert(a.pivots.Torre and a.pivots.Cano and a.aim and a.aim.seat == "gunner" and a.aim.up > a.aim.down)
+	end
+	assert(VehicleDrive.ART.lvtp5.pivots.Torre and VehicleDrive.ART.lvtp5.aim)
+	local h = VehicleDrive.ART.uh34d
+	assert(h.pivots.RotorPrincipal and h.pivots.RotorCauda)
+	near(h.pivots.RotorPrincipal[1], h.rotor.x, 1e-9, "cubo do rotor")
+	near(h.pivots.RotorCauda[3], h.tail.z, 1e-9, "rotor de cauda")
+	for _, id in { "m151", "m35", "peugeot403" } do
+		local a = VehicleDrive.ART[id]
+		assert(a.pivots.Volante and a.steerTiltDeg and a.steerTiltDeg > 30 and a.steerTiltDeg < 70, id)
+		-- o volante fica do lado do motorista (+z = esquerda) e à frente do olho dele
+		assert(a.pivots.Volante[3] > 0 and a.pivots.Volante[1] < a.eyes.driver[1], id .. ": volante")
+	end
+	-- soldado de 2,0 m (metricas.json do Blender, "soldado_2m": cabeça 0,12 m acima do olho; teto
+	-- medido acima do olho): no Peugeot a cabeça não atravessa o teto; no M35 e no UH-34D sobra espaço
+	local HEAD = 0.12 / 0.28
+	local roofs = {
+		peugeot403 = 1.86 + (0.12 - 0.094) / 0.28, -- olho de 2 m do Blender + cabeça + folga (−9 cm)
+		m35 = 3.07 + (2.764 - 2.292) / 0.28, -- olho da tabela + (teto − olho), em m do chão
+		uh34d = 2.73 + (3.457 - 3.189) / 0.28,
+	}
+	for id, roof in roofs do
+		local _, y = VehicleDrive.eyeOf(id, "driver")
+		assert(
+			(y :: number) + HEAD < roof,
+			string.format("%s: cabeça em %.2f, teto %.2f", id, (y :: number) + HEAD, roof)
+		)
+	end
+	-- ligações: o VehicleService pega o modelo novo e monta as juntas; o VehicleFx gira pelos nomes
+	local vs = fs.readFile("src/ServerScriptService/Modules/VehicleService.luau")
+	assert(string.find(vs, "AssetLoader.template(Vehicles.modelKey(specId))", 1, true))
+	assert(string.find(vs, "artJoints(art, mount, chassis, mesh, info)", 1, true))
+	assert(string.find(vs, '"^Pa_%d+$"', 1, true), "pás soldadas no cubo")
+	local vfx = fs.readFile("src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleFx.client.luau")
+	for _, name in { "Torre", "Cano", "RotorPrincipal", "RotorCauda", "Volante" } do
+		assert(string.find(vfx, name .. ' = "', 1, true), "VehicleFx sem a junta " .. name)
+	end
+	assert(string.find(vfx, '"Vehicle_Aim"', 1, true) and string.find(vs, '"Vehicle_Aim"', 1, true))
 end)
 
 print(string.format("%d ok, %d falhas", passed, failed))

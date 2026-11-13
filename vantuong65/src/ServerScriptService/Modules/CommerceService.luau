@@ -10,6 +10,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Commerce = require(ReplicatedStorage.Shared.Commerce)
+local CompraVeiculo = require(ReplicatedStorage.Shared.CompraVeiculo)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Reforcos = require(ReplicatedStorage.Shared.Reforcos)
 local Skins = require(ReplicatedStorage.Shared.Skins)
@@ -32,6 +33,11 @@ CommerceService.onSkin = nil :: ((player: Player, skinId: string, now: boolean) 
 -- campanha entregue (pular nível, reforço, créditos); postos pelo CampanhaService
 CommerceService.onPasses = nil :: ((player: Player) -> ())?
 CommerceService.onCampaign = nil :: ((player: Player, key: string, now: boolean) -> ())?
+-- D-103: veículo ao nascer pago em Robux (postos pelo CompraVeiculoService). vehicleReady: o lugar
+-- reservado para esta viatura ainda vale (o recibo vira o veículo); vehicleGrant: recibo novo
+-- aplicado, deliver = entregar no lugar reservado (false = virou CI no perfil).
+CommerceService.vehicleReady = nil :: ((player: Player, spec: string) -> boolean)?
+CommerceService.vehicleGrant = nil :: ((player: Player, spec: string, deliver: boolean, credits: number) -> ())?
 
 local function passOwned(player: Player, id: number): boolean
 	if id == 0 then
@@ -226,6 +232,42 @@ local function campaignReceipt(
 	return Enum.ProductPurchaseDecision.PurchaseGranted
 end
 
+-- Recibo do veículo ao nascer (D-103), uma única vez por PurchaseId como os outros. O prompt só abriu
+-- com o lugar achado e reservado: se a reserva ainda vale, o recibo vira o veículo (nada no perfil
+-- além do PurchaseId); se não (morreu, a reserva venceu, recibo repetido noutro servidor), vira CI no
+-- perfil na mesma gravação atômica. Recibo repetido não entrega nada (nem veículo nem CI).
+local function vehicleReceipt(
+	player: Player,
+	info: { [string]: any },
+	vp: Commerce.VehicleProduct
+): Enum.ProductPurchaseDecision
+	local ready = CommerceService.vehicleReady
+	local deliver = ready ~= nil and ready(player, vp.spec)
+	local credits = if deliver then 0 else CompraVeiculo.refundCredits(vp.spec, tonumber(info.CurrencySpent))
+	local ok, applied = PlayerData.applyReceipt(player, tostring(info.PurchaseId), function(p)
+		if credits > 0 then
+			p.credits = math.min(p.credits + credits, 1000000000)
+		end
+	end)
+	if not ok then
+		return Enum.ProductPurchaseDecision.NotProcessedYet
+	end
+	if applied then
+		if credits > 0 then
+			PlayerData.bump(player, "credits", credits)
+		end
+		if CommerceService.vehicleGrant then
+			task.spawn(CommerceService.vehicleGrant, player, vp.spec, deliver, credits)
+		end
+	end
+	track(player, "purchase", vp.key)
+	pcall(function()
+		AnalyticsService:LogCustomEvent(player, "robux_spent", tonumber(info.CurrencySpent) or 0, { sku = vp.key })
+	end)
+	push(player)
+	return Enum.ProductPurchaseDecision.PurchaseGranted
+end
+
 local function processReceipt(info: { [string]: any }): Enum.ProductPurchaseDecision
 	local player = Players:GetPlayerByUserId(info.PlayerId)
 	if not player or not PlayerData.get(player) then
@@ -235,6 +277,10 @@ local function processReceipt(info: { [string]: any }): Enum.ProductPurchaseDeci
 	local cp = if key then Commerce.campaignProduct(key) else nil
 	if cp then
 		return campaignReceipt(player, info, cp)
+	end
+	local vp = if key then Commerce.vehicleProduct(key) else nil
+	if vp then
+		return vehicleReceipt(player, info, vp)
 	end
 	if not key then
 		local skinId = Skins.skinByProductId(info.ProductId)

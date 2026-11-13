@@ -28,6 +28,7 @@ local Bus = require(script.Parent.Bus)
 local CampanhaCliente = require(script.Parent.CampanhaCliente)
 local Input = require(script.Parent.Input)
 local SoldierPreview = require(script.Parent.SoldierPreview)
+local ToqueUi = require(script.Parent.ToqueUi)
 local UiKit = require(script.Parent.UiKit)
 
 local player = Players.LocalPlayer
@@ -606,6 +607,7 @@ end
 
 -- ----- cartão da grade -----
 local CARD_H = px(176, 236)
+local lastHot: ((on: boolean) -> ())? = nil -- toque: o cartão aceso por último (apaga ao tocar outro)
 local function card(parent: Instance, o: Offer, n: number): GuiObject
 	local f = Instance.new("Frame")
 	f.Name = o.key
@@ -648,6 +650,26 @@ local function card(parent: Instance, o: Offer, n: number): GuiObject
 	f.MouseLeave:Connect(function()
 		hot(false)
 	end)
+	-- toque (Parte 13): sem "passar o mouse", tocar no cartão (fora do preço) mostra o item no
+	-- destaque (descrição e soldado); antes, só abrindo a compra dava para ler. Vale para os já seus.
+	if ToqueUi.active() then
+		local ver = Instance.new("TextButton")
+		ver.Name = "Ver"
+		ver.Text = ""
+		ver.AutoButtonColor = false
+		ver.BackgroundTransparency = 1
+		ver.Selectable = false
+		ver.Size = UDim2.fromScale(1, 1)
+		ver.ZIndex = 0 -- por baixo do botão do preço
+		ver.Parent = f
+		ver.Activated:Connect(function()
+			if lastHot and lastHot ~= hot then
+				lastHot(false)
+			end
+			lastHot = hot
+			hot(true)
+		end)
+	end
 	if o.owned then
 		local t = UiKit.tag(f, "✔ SEU", V.OLIVE, px(14, 20))
 		t.AnchorPoint = Vector2.new(0, 1)
@@ -743,7 +765,7 @@ local function renderFoot()
 		foot.pair("ui_tab_prev", "ui_tab_next", "menu", "Abas")
 		foot.add(UiKit.padImage(Enum.KeyCode.ButtonA), nil, "A", "Escolher")
 		foot.action("ui_back", "menu", "Fechar")
-	elseif dev == "touch" then
+	elseif dev == "touch" or ToqueUi.active() then
 		foot.add(nil, nil, "Toque", "na aba ou no item")
 	else
 		foot.pair("ui_tab_prev", "ui_tab_next", "menu", "Abas")

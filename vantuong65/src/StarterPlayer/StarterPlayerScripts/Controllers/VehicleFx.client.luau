@@ -13,6 +13,8 @@
 --   tudo levado pelo vento (WindAffectsDrag + workspace.GlobalWind do Ambiente.client);
 -- - som do motor com tom e volume pela rotação e pela carga (AssetIds.Sounds); o laço antigo do
 --   AudioController é calado no veículo para não tocarem dois motores.
+-- - lote _v2 (modelos do Blender em peças): rodas da lagarta e dos carros, rotores, volante, torre e
+--   cano giram pelas juntas (VehicleService.artJoints); a torre segue a mira do atirador.
 -- Do motorista local vem o estado exato (VehicleLive.drive); dos outros, a telemetria (NetRpm,
 -- NetLoad) e a física replicada. Detalhe gráfico (Input.settings.gfxDetail) reduz partículas e faixas.
 -- Limite do Roblox: 200 locais por função contando o nível de cima. O estado fica em tabelas.
@@ -107,7 +109,14 @@ end
 
 local function gfx(): number
 	local d = Input.settings.gfxDetail
-	return if d == "low" then 0.35 elseif d == "medium" then 0.65 else 1
+	local k = if d == "low" then 0.35 elseif d == "medium" then 0.65 else 1
+	-- Parte 13: o perfil do celular e a economia de bateria (Graficos.client) baixam o atributo local
+	-- (1, 0,6 ou 0,3 → a escala daqui)
+	local a = player:GetAttribute("GfxDetail")
+	if type(a) == "number" then
+		k = math.min(k, if a >= 0.99 then 1 elseif a >= 0.5 then 0.65 else 0.35)
+	end
+	return k
 end
 
 local function soundId(key: string?): string?
@@ -271,13 +280,29 @@ type Fx = {
 	wake: { holder: BasePart, bow: ParticleEmitter, spray: ParticleEmitter, foam: { ParticleEmitter } }?,
 	sound: Sound?,
 	distort: DistortionSoundEffect?,
-	-- D-100: rodas (Motor6D "Roda_*" na ArtRoot, VehicleService): giro e esterço pelo Transform
-	wheels: { { motor: Motor6D, r: number, steer: boolean } },
+	-- D-100: rodas (Motor6D "Roda_*" na ArtRoot, VehicleService): giro e esterço pelo Transform. Lote
+	-- _v2: também as da lagarta; cada uma no raio dela e na velocidade do lado (x = lateral, studs)
+	wheels: { { motor: Motor6D, r: number, steer: boolean, x: number, ang: number } },
 	spin: number,
 	steerAng: number,
+	-- lote _v2: juntas das peças móveis (VehicleService.artJoints)
+	joints: { torre: Motor6D?, cano: Motor6D?, rotor: Motor6D?, tail: Motor6D?, volante: Motor6D? },
+	aimYaw: number,
+	aimPitch: number,
+	aimSent: number,
+	hubAng: number,
+	hubTail: number,
 }
 
 local fxs: { [Model]: Fx } = {}
+-- nome da junta (VehicleService.artJoints) -> campo de Fx.joints
+local JOINT_KEY: { [string]: string } = {
+	Torre = "torre",
+	Cano = "cano",
+	RotorPrincipal = "rotor",
+	RotorCauda = "tail",
+	Volante = "volante",
+}
 
 local function mainPart(art: Instance): BasePart?
 	local best: BasePart? = nil
@@ -367,14 +392,43 @@ local function newFx(model: Model, chassis: BasePart): Fx
 		wheels = {},
 		spin = 0,
 		steerAng = 0,
+		joints = {},
+		aimYaw = 0,
+		aimPitch = 0,
+		aimSent = 0,
+		hubAng = 0,
+		hubTail = 0,
 	}
+	-- rodas: todo Motor6D "Roda_*" da ArtRoot. Carro: raio e esterço da ficha (Vehicles.WHEELED);
+	-- lagarta: raio = metade da maior medida da peça (relatório do Blender), sem esterço
 	local wd = Vehicles.WHEELED[id]
-	local mountPart = model:FindFirstChild("ArtRoot")
-	if wd and mountPart then
+	local steerOf: { [string]: boolean } = {}
+	if wd then
 		for _, w in wd.wheels do
-			local m6 = mountPart:FindFirstChild(w.name)
-			if m6 and m6:IsA("Motor6D") then
-				table.insert(fx.wheels, { motor = m6, r = wd.wheelR / M, steer = w.steer })
+			steerOf[w.name] = w.steer
+		end
+	end
+	local mountPart = model:FindFirstChild("ArtRoot")
+	if mountPart then
+		for _, m6 in mountPart:GetChildren() do
+			local p1 = if m6:IsA("Motor6D") then m6.Part1 else nil
+			if p1 and string.sub(m6.Name, 1, 5) == "Roda_" then
+				local s = p1.Size
+				table.insert(fx.wheels, {
+					motor = m6 :: Motor6D,
+					r = if wd then wd.wheelR / M else math.max(s.X, s.Y, s.Z) / 2,
+					steer = steerOf[m6.Name] == true,
+					x = (m6 :: Motor6D).C0.Position.X,
+					ang = 0,
+				})
+			end
+		end
+	end
+	for _, d in model:GetDescendants() do
+		if d:IsA("Motor6D") then
+			local key = JOINT_KEY[d.Name]
+			if key then
+				(fx.joints :: any)[key] = d
 			end
 		end
 	end
@@ -383,7 +437,8 @@ local function newFx(model: Model, chassis: BasePart): Fx
 	local mesh = art and mainPart(art)
 	if motor and motor:IsA("Motor6D") and motor.Part1 then
 		fx.motor = motor
-		if mesh and fx.art then
+		-- substituto em peças (sem malha medida): sem olho nem faixas na malha
+		if mesh and fx.art and model:GetAttribute("ArtPlaceholder") ~= true then
 			fx.meshRel = (motor.Part1 :: BasePart).CFrame:ToObjectSpace(mesh.CFrame)
 			local box = (fx.art :: VehicleDrive.Art).box
 			fx.scale = mesh.Size / Vector3.new(box[1], box[2], box[3])
@@ -720,8 +775,12 @@ local function updateWheels(fx: Fx, dt: number)
 	end
 	local chassis = fx.chassis
 	local vFwd = -chassis.CFrame:VectorToObjectSpace(chassis.AssemblyLinearVelocity).Z -- studs/s
-	local r = fx.wheels[1].r
-	fx.spin = (fx.spin - vFwd / math.max(r, 0.1) * dt) % (2 * math.pi)
+	-- lote _v2: cada roda no raio dela e na velocidade do lado (na curva e no giro no lugar da
+	-- lagarta os dois lados andam diferente: v + guinada × lateral)
+	local yawRate = chassis.AssemblyAngularVelocity:Dot(chassis.CFrame.UpVector)
+	for _, w in fx.wheels do
+		w.ang = (w.ang - (vFwd + yawRate * w.x) / math.max(w.r, 0.1) * dt) % (2 * math.pi)
+	end
 	local wd = Vehicles.WHEELED[fx.id]
 	local drive = VehicleDrive.DRIVE[fx.id]
 	local lock = if wd and drive and drive.turnRadiusM then math.atan(wd.wheelbaseM / drive.turnRadiusM) else 0.5
@@ -729,17 +788,96 @@ local function updateWheels(fx: Fx, dt: number)
 	if mine(fx) then
 		target = -VehicleLive.drive.steer * lock
 	else
-		local yawRate = chassis.AssemblyAngularVelocity:Dot(chassis.CFrame.UpVector)
 		local v = vFwd * M
 		target = if math.abs(v) > 0.5 and wd then math.clamp(math.atan(wd.wheelbaseM * yawRate / v), -lock, lock) else 0
 	end
 	fx.steerAng += (target - fx.steerAng) * (1 - math.exp(-dt / 0.08))
-	local spinCF = CFrame.Angles(fx.spin, 0, 0)
-	local steerCF = CFrame.Angles(0, fx.steerAng, 0) * spinCF
+	local steerCF = CFrame.Angles(0, fx.steerAng, 0)
 	for _, w in fx.wheels do
 		if w.motor.Parent then
-			w.motor.Transform = if w.steer then steerCF else spinCF
+			local spinCF = CFrame.Angles(w.ang, 0, 0)
+			w.motor.Transform = if w.steer then steerCF * spinCF else spinCF
 		end
+	end
+end
+
+-- Lote _v2: peças móveis (VehicleService.artJoints), no referencial da malha (nariz −X, esquerda +Z,
+-- em cima +Y). Rotor principal gira em Y e inclina como o disco; o de cauda, no eixo lateral; volante
+-- na coluna (12 voltas do esterço das rodas: PLACEHOLDER); torre e cano para a mira do atirador: o
+-- atirador local pela câmera (e manda ao servidor ~8 vezes por segundo, Vehicle_Aim); os outros pelos
+-- atributos AimYaw/AimPitch. Giro da torre na velocidade da ficha (turretDegS).
+local aimRemote: UnreliableRemoteEvent? = nil
+local function updateJoints(fx: Fx, dt: number)
+	local j = fx.joints
+	local art = fx.art
+	local rot, tail = j.rotor, j.tail
+	if rot or tail then
+		local H = VehicleDrive.HELI
+		fx.hubAng = (fx.hubAng + fx.rotor * H.rotorRpm / 60 * 2 * math.pi * dt) % (2 * math.pi)
+		fx.hubTail = (fx.hubTail + fx.rotor * H.tailRpm / 60 * 2 * math.pi * dt) % (2 * math.pi)
+		if rot then
+			local a = fx.chassis.CFrame:VectorToObjectSpace(fx.acc)
+			local tiltF = math.clamp(-a.Z / VehicleDrive.G * 0.35, -0.08, 0.08)
+			local tiltR = math.clamp(a.X / VehicleDrive.G * 0.35, -0.08, 0.08)
+			rot.Transform = CFrame.Angles(-tiltR, 0, tiltF) * CFrame.Angles(0, fx.hubAng, 0)
+		end
+		if tail then
+			tail.Transform = CFrame.Angles(0, 0, fx.hubTail)
+		end
+	end
+	local vol = j.volante
+	if vol and art and art.steerTiltDeg then
+		local t = math.rad(art.steerTiltDeg)
+		vol.Transform = CFrame.fromAxisAngle(Vector3.new(math.sin(t), math.cos(t), 0), fx.steerAng * 12)
+	end
+	local torre, cano = j.torre, j.cano
+	local aim = art and art.aim
+	if not ((torre or cano) and aim) then
+		return
+	end
+	local wantYaw, wantPitch = fx.aimYaw, fx.aimPitch
+	local char = player.Character
+	local hum = char and char:FindFirstChildOfClass("Humanoid")
+	local seat = hum and hum.SeatPart
+	local mcf = meshCF(fx)
+	if seat and seat:IsDescendantOf(fx.model) and seat:GetAttribute("SeatId") == aim.seat and mcf then
+		-- atirador local: a câmera, no referencial da malha (com a mola)
+		local look = camera.CFrame.LookVector
+		local d = (mcf :: CFrame):VectorToObjectSpace(look)
+		local f = (mcf :: CFrame):VectorToObjectSpace(fx.chassis.CFrame.LookVector)
+		wantYaw = math.atan2(f.Z * d.X - f.X * d.Z, f.X * d.X + f.Z * d.Z)
+		wantPitch = math.asin(math.clamp(d.Y, -1, 1))
+		fx.aimSent -= dt
+		if fx.aimSent <= 0 then
+			fx.aimSent = 0.125
+			local r = aimRemote
+			if not r then
+				local folder = ReplicatedStorage:FindFirstChild("VT65Remotes")
+				local found = folder and folder:FindFirstChild("Vehicle_Aim")
+				r = if found and found:IsA("UnreliableRemoteEvent") then found else nil
+				aimRemote = r
+			end
+			if r then
+				r:FireServer(look)
+			end
+		end
+	else
+		local ay, ap = fx.model:GetAttribute("AimYaw"), fx.model:GetAttribute("AimPitch")
+		wantYaw = if type(ay) == "number" then ay else 0
+		wantPitch = if type(ap) == "number" then ap else 0
+	end
+	wantPitch = math.clamp(wantPitch, math.rad(aim.down), math.rad(aim.up))
+	local degS = (fx.body and fx.body.turretDegS) or 30
+	local maxYaw = math.rad(degS) * dt
+	local dy = (wantYaw - fx.aimYaw + math.pi) % (2 * math.pi) - math.pi
+	fx.aimYaw += math.clamp(dy, -maxYaw, maxYaw)
+	fx.aimPitch += math.clamp(wantPitch - fx.aimPitch, -math.rad(20) * dt, math.rad(20) * dt)
+	if torre then
+		torre.Transform = CFrame.Angles(0, fx.aimYaw, 0)
+	end
+	if cano then
+		-- nariz em −X: elevar o cano gira em −Z
+		cano.Transform = CFrame.Angles(0, 0, -fx.aimPitch)
 	end
 end
 
@@ -811,12 +949,15 @@ local function drawRotor(fx: Fx, dt: number)
 		* CFrame.Angles(-tiltR * fx.fwdSign, 0, tiltF * fx.fwdSign)
 	local R = rot.r * s.X
 	local blur = math.clamp((rotor - 0.3) / 0.5, 0, 1)
+	-- lote _v2: as pás da malha giram de verdade (junta RotorPrincipal/RotorCauda); as de peça somem
+	-- e fica só o disco de desfoque
+	local meshBlades = fx.joints.rotor ~= nil
 	parts[1].Transparency = if show then 1 - 0.22 * blur else 1
 	table.insert(bulk.parts, parts[1])
 	table.insert(bulk.cfs, hub * CFrame.Angles(0, 0, math.pi / 2))
 	for k = 1, 4 do
 		local p = parts[1 + k]
-		p.Transparency = if show then 0.25 + 0.65 * math.clamp(rotor / 0.6, 0, 1) else 1
+		p.Transparency = if show and not meshBlades then 0.25 + 0.65 * math.clamp(rotor / 0.6, 0, 1) else 1
 		table.insert(bulk.parts, p)
 		table.insert(
 			bulk.cfs,
@@ -829,7 +970,7 @@ local function drawRotor(fx: Fx, dt: number)
 	table.insert(bulk.cfs, tcf * CFrame.Angles(0, math.pi / 2, 0))
 	for k = 1, 2 do
 		local p = parts[6 + k]
-		p.Transparency = if show then 0.3 + 0.6 * math.clamp(rotor / 0.5, 0, 1) else 1
+		p.Transparency = if show and fx.joints.tail == nil then 0.3 + 0.6 * math.clamp(rotor / 0.5, 0, 1) else 1
 		table.insert(bulk.parts, p)
 		table.insert(bulk.cfs, tcf * CFrame.Angles(0, 0, fx.tailAng + (k - 1) * math.pi / 2))
 	end
@@ -1088,6 +1229,7 @@ RunService.PreSimulation:Connect(function(dt: number)
 			updateGround(fx, dt)
 			updatePose(fx, dt)
 			updateWheels(fx, dt)
+			updateJoints(fx, dt)
 		end
 		if model == seated then
 			local view = VehicleLive.view

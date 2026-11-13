@@ -75,6 +75,12 @@ ArtPlan.HOUSE_FALLBACK = {
 	"house_tile",
 	"hut_veranda",
 }
+-- GANCHO DO STUDIO: a frente das casas únicas da vila fica em -Z do modelo depois do giro do
+-- importador (D-58). Se no Studio a porta aparecer de costas para a rua, ligue isto (meia volta).
+ArtPlan.VILLAGE_FRONT_FLIP = false
+-- GANCHO DO STUDIO: o mesmo para as peças das bases (giro do layout = -rumo, frente em -Z): se as
+-- barracas e o portão aparecerem de costas para a rua, ligue isto
+ArtPlan.BASE_FRONT_FLIP = false
 -- tons das casas sem modelo próprio (Color de cada peça, multiplicado pela textura quando há)
 ArtPlan.TINTS = {
 	{ 1, 1, 1 },
@@ -101,6 +107,11 @@ export type Item = {
 	home: boolean?, -- casa de morar (da carta ou da vila): fumaça, animais
 	fallback: boolean?, -- casa da vila sem o modelo único (usa o de hoje)
 	sink: number?, -- studs abaixo do chão (boca de túnel, trincheira)
+	-- peça das bases (Data/Bases): facção, id do layout, nó a manter (placa) e a peça que a contém
+	side: string?,
+	id: string?,
+	node: string?,
+	inside: string?,
 }
 
 export type Ctx = {
@@ -109,6 +120,7 @@ export type Ctx = {
 	features: any,
 	village: any?,
 	roads: any?,
+	bases: any?, -- Data/Bases (as bases dos dois lados)
 	landscape: any,
 	paddies: any,
 	site: any,
@@ -212,12 +224,23 @@ function ArtPlan.load(world: any, data: any): Ctx
 		return Geometry.sectorAt(MC.Sectors, x, z)
 	end, SpawnRules.rallyPosition, Front.C.rallyInsetM)
 	local circles, lanes = Vegetation.spawnClearings(spots)
+	-- pontos de nascer das bases (Data/Bases, SpawnService): 3 m sem planta em volta de cada um
+	if data.bases then
+		for fac, hq in MC.HQ do
+			local base = data.bases[fac]
+			local s = base and base.spawns or {}
+			for i = 1, #s - 1, 2 do
+				table.insert(circles, { x = hq.x + s[i], z = hq.z + s[i + 1], r = 3 / M })
+			end
+		end
+	end
 	return {
 		world = world,
 		mapConfig = MC,
 		features = F,
 		village = V,
 		roads = data.roads,
+		bases = data.bases,
 		landscape = landscape,
 		paddies = paddies,
 		site = site,
@@ -297,7 +320,8 @@ function ArtPlan.structures(ctx: Ctx, has: (string) -> boolean): { Item }
 		-- padGrow: o patamar passa da pegada na frente (-Z): a varanda fica no mesmo chão da casa
 		local grow = if extra and extra.padGrow then extra.padGrow else 0
 		local px, pz = rot(x, z, yaw, 0, -grow / 2)
-		local pad = Site.addPad(ctx.site, px, pz, yaw, hx, hz + grow / 2, extra and extra.ground)
+		local pad =
+			Site.addPad(ctx.site, px, pz, yaw, hx, hz + grow / 2, extra and extra.ground, extra and extra.padLevel)
 		local it: Item = {
 			key = key,
 			x = x,
@@ -439,30 +463,86 @@ function ArtPlan.structures(ctx: Ctx, has: (string) -> boolean): { Item }
 			sunk("trench_section", x, z, yaw + math.pi / 2, Tunnels.TRENCH_D_M)
 		end
 	end
-	-- QGs: sacos de areia (EUA); cerca, celeiros e bunker (VC)
-	local us, vc = MC.HQ.US, MC.HQ.VC
-	for i = 0, 11 do
-		if i % 3 ~= 0 then
-			local a = i * math.pi / 6
-			padded("sandbags", us.x + math.cos(a) * 14 / M, us.z + math.sin(a) * 14 / M, -a + math.pi / 2, 1, "prop")
+	-- QGs (2026-11-13): as bases do Blender (Data/Bases, layouts relativos ao QG): base dos EUA em
+	-- Chu Lai (barracas, posto de comando, refeitório, garagem, baias, helipontos, torres, bunkers,
+	-- portão, concertina e o estande de 25 m) e o acampamento do VC (abrigos, cozinha Hoàng Cầm,
+	-- redes, armeiros, abrigo do carro, estande de 23 m e estacas punji). Barraca, bunker, garagem e
+	-- baia com patamar no terreno; o resto assenta no chão mais baixo da pegada; caixote e saco de
+	-- arroz que ficam dentro de outra peça vão no chão dela.
+	local bases = ctx.bases
+	if bases then
+		for _, fac in { "US", "VC" } do
+			local base, hq = bases[fac], MC.HQ[fac]
+			if base and hq then
+				local byId: { [string]: Item } = {}
+				local flip = if ArtPlan.BASE_FRONT_FLIP then math.pi else 0
+				for _, b in base.items do
+					if b.inside == "" then
+						local extra = { side = fac, id = b.id, node = if b.node ~= "" then b.node else nil }
+						local x, z = hq.x + b.x, hq.z + b.z
+						byId[b.id] = if b.padded
+							then padded(b.key, x, z, b.yaw + flip, 1, "base", extra)
+							else seated(b.key, x, z, b.yaw + flip, 1, "base", extra)
+					end
+				end
+				for _, b in base.items do
+					local host: Item? = if b.inside ~= "" then byId[b.inside] else nil
+					if host then
+						local hx, hz = half(b.key, 1)
+						table.insert(out, {
+							key = b.key,
+							x = hq.x + b.x,
+							z = hq.z + b.z,
+							yaw = b.yaw + flip,
+							scale = 1,
+							hx = hx,
+							hz = hz,
+							base = host.base,
+							group = "base",
+							foliage = false,
+							shadow = true,
+							padded = false,
+							side = fac,
+							id = b.id,
+							inside = b.inside,
+						})
+					end
+				end
+			end
 		end
-	end
-	for i = 0, 15 do
-		if i % 4 ~= 0 then
-			local a = i * math.pi / 8
-			padded(
-				"bamboo_fence",
-				vc.x + math.cos(a) * 18 / M,
-				vc.z + math.sin(a) * 18 / M,
-				-a + math.pi / 2,
-				1,
-				"prop"
-			)
+	else
+		-- sem os dados das bases: sacos de areia (EUA); cerca, celeiros e bunker (VC)
+		local us, vc = MC.HQ.US, MC.HQ.VC
+		for i = 0, 11 do
+			if i % 3 ~= 0 then
+				local a = i * math.pi / 6
+				padded(
+					"sandbags",
+					us.x + math.cos(a) * 14 / M,
+					us.z + math.sin(a) * 14 / M,
+					-a + math.pi / 2,
+					1,
+					"prop"
+				)
+			end
 		end
+		for i = 0, 15 do
+			if i % 4 ~= 0 then
+				local a = i * math.pi / 8
+				padded(
+					"bamboo_fence",
+					vc.x + math.cos(a) * 18 / M,
+					vc.z + math.sin(a) * 18 / M,
+					-a + math.pi / 2,
+					1,
+					"prop"
+				)
+			end
+		end
+		padded("granary", vc.x - 10 / M, vc.z + 8 / M, 0.4, 1, "prop")
+		padded("granary", vc.x - 12 / M, vc.z - 7 / M, 2.1, 1, "prop")
+		padded("vc_bunker", vc.x + 11 / M, vc.z - 4 / M, -math.pi / 2, 1, "prop")
 	end
-	padded("granary", vc.x - 10 / M, vc.z + 8 / M, 0.4, 1, "prop")
-	padded("granary", vc.x - 12 / M, vc.z - 7 / M, 2.1, 1, "prop")
-	padded("vc_bunker", vc.x + 11 / M, vc.z - 4 / M, -math.pi / 2, 1, "prop")
 	-- tocas de atirador em volta dos pontos fortes do VC e neutros (fora de casa, estrada e lâmina)
 	for _, sp in MC.Strongpoints do
 		if sp.sector <= 3 then
@@ -525,18 +605,27 @@ function ArtPlan.structures(ctx: Ctx, has: (string) -> boolean): { Item }
 			local key = if unique and has(unique) then unique else ArtPlan.HOUSE_FALLBACK[variant]
 			local s = if key == unique then 1 else scale
 			local it: Item
-			-- com varanda, o patamar da casa cresce 1,25 m (a varanda fica no chão da casa)
+			-- com varanda, o patamar da casa cresce 1,25 m (a varanda fica no chão da casa). A casa
+			-- única (2026-11-13) tem a varanda e os anexos dela no modelo: sem a varanda de peças.
+			local isUnique = key == unique
+			if isUnique then
+				attach = bit32.band(attach, bit32.bnot(1))
+			end
 			local grow = if bit32.btest(attach, 1) then 1.25 / M else 0
-			if key == unique then
-				-- modelo único (pegada de projeto: até houseMax de lado)
+			if isUnique then
+				-- modelo único (pegada de projeto: até houseMax de lado, pivô no meio da caixa e no
+				-- chão). O patamar é o quadrado inteiro: o piso de terra batida da casa fica 0,15 m acima
+				-- dele (degrau de 0,54 stud na porta). A porta principal (Data/Bases.houseDoors) vira
+				-- para a rua: o giro da casa soma o da porta no modelo.
 				local hm = V.houseMax / 2
-				local px, pz = rot(x, z, yaw, 0, -grow / 2)
-				local pad = Site.addPad(ctx.site, px, pz, yaw, hm, hm + grow / 2)
+				local pad = Site.addPad(ctx.site, x, z, yaw, hm, hm)
+				local door = ctx.bases and ctx.bases.houseDoors and ctx.bases.houseDoors[key]
+				local turn = if door then math.atan2(door[1], -door[2]) else 0
 				it = {
 					key = key,
 					x = x,
 					z = z,
-					yaw = yaw,
+					yaw = yaw + turn + (if ArtPlan.VILLAGE_FRONT_FLIP then math.pi else 0),
 					scale = 1,
 					hx = hm,
 					hz = hm,
@@ -589,22 +678,31 @@ function ArtPlan.structures(ctx: Ctx, has: (string) -> boolean): { Item }
 			end
 			if on(2) then -- cozinha no fundo, à esquerda
 				local kx, kz = rot(x, z, yaw, -3.5 / M, back)
-				padded("hut_kitchen", kx, kz, yaw, 0.85, "village", { village = i })
+				padded("hut_kitchen", kx, kz, yaw, 0.85, "village", { village = i, padLevel = it.base })
 			end
 			if on(4) then -- celeiro no fundo, à direita
 				local gx, gz = rot(x, z, yaw, 3.5 / M, back)
-				padded("granary", gx, gz, yaw, 0.85, "village", { village = i })
+				padded("granary", gx, gz, yaw, 0.85, "village", { village = i, padLevel = it.base })
 			end
-			-- o que fica no quintal ganha um patamarzinho (a vila fica na encosta do morrote: assentado
-			-- pelo ponto mais baixo, o varal e a cerca entravam até 0,9 m no chão do lado de cima)
+			-- o que fica no quintal ganha um patamarzinho no nível da casa (o lote é um terraço só: a vila
+			-- fica na encosta do morrote; assentado pelo ponto mais baixo, o varal e a cerca entravam até
+			-- 0,9 m no chão do lado de cima, e com o nível próprio o patamar dele e o da casa se cruzavam)
 			if on(8) and not on(2) then -- horta no fundo, à esquerda (onde não há cozinha)
 				local gx, gz = rot(x, z, yaw, -3.5 / M, back)
-				padded("parts:horta", gx, gz, yaw, 1, "village", { village = i })
+				padded("parts:horta", gx, gz, yaw, 1, "village", { village = i, padLevel = it.base })
 			end
 			if on(16) then -- cerca na frente do lote, com a entrada no meio
 				for _, k in { -1, 1 } do
 					local fx, fz = rot(x, z, yaw, k * 3.7 / M, front)
-					padded("bamboo_fence", fx, fz, yaw + math.pi / 2, 0.75, "village", { village = i })
+					padded(
+						"bamboo_fence",
+						fx,
+						fz,
+						yaw + math.pi / 2,
+						0.75,
+						"village",
+						{ village = i, padLevel = it.base }
+					)
 				end
 			end
 			if on(32) then -- pote d'água ao lado da porta
@@ -613,11 +711,11 @@ function ArtPlan.structures(ctx: Ctx, has: (string) -> boolean): { Item }
 			end
 			if on(64) and not on(4) then -- meda de palha no fundo, à direita (onde não há celeiro)
 				local mx, mz = rot(x, z, yaw, 3.5 / M, back)
-				padded("straw_stack", mx, mz, yaw, 0.85, "village", { village = i })
+				padded("straw_stack", mx, mz, yaw, 0.85, "village", { village = i, padLevel = it.base })
 			end
 			if on(128) then -- varal no meio do fundo
 				local vx, vz = rot(x, z, yaw, 0, back)
-				padded("bamboo_clothesline", vx, vz, yaw, 0.9, "village", { village = i })
+				padded("bamboo_clothesline", vx, vz, yaw, 0.9, "village", { village = i, padLevel = it.base })
 			end
 		end
 		-- pagode, casa comunal, poço e bancas do mercado
@@ -745,7 +843,7 @@ end
 -- (x, z) cai dentro da pegada de uma construção com patamar ou casa, com folga `pad` (studs)
 function ArtPlan.inside(structures: { Item }, x: number, z: number, pad: number): boolean
 	for _, s in structures do
-		if s.padded or s.group == "house" then
+		if s.padded or s.group == "house" or s.group == "base" then
 			local dx, dz = x - s.x, z - s.z
 			local lim = math.sqrt(s.hx * s.hx + s.hz * s.hz) + pad
 			if dx * dx + dz * dz < lim * lim then

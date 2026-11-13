@@ -34,7 +34,7 @@ local LOS_CHECK_STUDS = 1.0 / M -- origem mais longe que isto da cabeça precisa
 local MAGS = Weapons.MAGS -- PLACEHOLDER de dotação
 -- materiais que a bala atravessa perdendo velocidade (fração mantida). PLACEHOLDER até a
 -- tabela de penetração em cm por material (Parte 10.7).
-local PASS = { Bamboo = 0.85, Thatch = 0.8 }
+local PASS = { Bamboo = 0.85, Thatch = 0.8, Canvas = 0.9 } -- Canvas: lona das barracas (bases, 2026-11-13)
 
 -- munição de uma arma (a do servidor manda); gate = cadência (Gatilho)
 type Rec = Gatilho.Rec

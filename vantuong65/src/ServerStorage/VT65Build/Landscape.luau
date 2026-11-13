@@ -29,7 +29,9 @@ Landscape.CLEAR_NAMED_M = {
 }
 -- pontos fortes de arrozal: em volta deles a lavoura continua (o nome é a paisagem)
 Landscape.FARM_STRONGPOINT_M = 130
-Landscape.HQ_CLEAR_M = { US = 150, VC = 100 }
+-- 2026-11-13: o acampamento do VC (Data/Bases) fica sob a mata: sem clareira em volta do QG (o plano
+-- da arte tira só as plantas de dentro das pegadas e em volta dos pontos de nascer)
+Landscape.HQ_CLEAR_M = { US = 150, VC = 0 }
 
 export type Landscape = {
 	kindAt: (self: Landscape, x: number, z: number) -> number,

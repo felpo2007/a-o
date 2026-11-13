@@ -28,6 +28,8 @@ local MapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any
 local Net = require(ReplicatedStorage.Shared.Net)
 local Input = require(script.Parent.Input)
 local Toast = require(script.Parent.Toast)
+local ToqueTelas = require(script.Parent.ToqueTelas)
+local ToqueUi = require(script.Parent.ToqueUi)
 local UiKit = require(script.Parent.UiKit)
 
 local player = Players.LocalPlayer
@@ -47,6 +49,7 @@ local C = {
 }
 
 local hud = UiKit.screen("VT65Frente", 14)
+local stripFit: UiKit.Fit? = nil
 local strip = Instance.new("Frame")
 strip.Name = "Faixa"
 strip.AnchorPoint = Vector2.new(0.5, 0)
@@ -66,7 +69,27 @@ do
 	s.Transparency = 0.45
 	s.Parent = strip
 	-- janela estreita: a faixa encolhe inteira (nada passa da borda)
-	UiKit.fit(hud, strip, strip.Size.X.Offset, 1, 8)
+	stripFit = UiKit.fit(hud, strip, strip.Size.X.Offset, 1, 8)
+end
+
+-- Toque (Parte 13): os cantos de cima são dos botões do HUD de toque (mapa, menu, câmera... e
+-- comunicar, marcar, rádio). A faixa vai para o vão entre eles (ToqueUi.topBand), encolhendo para
+-- caber; a bússola e o cartão da arma (HudCampo) descem logo abaixo dela.
+local function placeStripTouch()
+	local scale = strip:FindFirstChildOfClass("UIScale")
+	if ToqueUi.active() then
+		local x0, x1 = ToqueUi.topBand()
+		local k = ToqueTelas.fitScale(strip.Size.X.Offset, x1 - x0 - 12, 1, 0.4)
+		if scale then
+			scale.Scale = k
+		end
+		strip.Position = UDim2.fromOffset((x0 + x1) / 2 - hud.AbsolutePosition.X, px(6, 8))
+	elseif strip.Position.X.Scale ~= 0.5 then
+		strip.Position = UDim2.new(0.5, 0, 0, px(6, 8))
+		if scale and stripFit then
+			scale.Scale = stripFit.k()
+		end
+	end
 end
 
 local function text(parent: Instance, size: number, color: Color3, head: boolean?): TextLabel
@@ -917,6 +940,7 @@ UserInputService.InputBegan:Connect(function(io: InputObject)
 		or k == Enum.KeyCode.Return
 		or k == Enum.KeyCode.Space
 		or io.UserInputType == Enum.UserInputType.MouseButton1
+		or io.UserInputType == Enum.UserInputType.Touch -- toque (Parte 13): tocar em qualquer lugar, como o clique
 	then
 		closeEnd()
 	end
@@ -965,6 +989,7 @@ RunService.Heartbeat:Connect(function(dt: number)
 	local hum = char and char:FindFirstChildOfClass("Humanoid")
 	local inField = st ~= nil and mine() ~= nil and hum ~= nil and hum.Health > 0
 	strip.Visible = inField and not Input.state.map and Input.state.menus == 0 and not endGui.Enabled
+	placeStripTouch()
 	updateCapture(false) -- entrei ou saí da área de um setor
 	if endOpen and endShown then
 		local n = state and state.nextIn

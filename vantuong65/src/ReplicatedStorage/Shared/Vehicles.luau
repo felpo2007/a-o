@@ -224,6 +224,23 @@ Vehicles.SPECS = {
 -- tem 6 (D-37). D-100: M151 com 2 atrás, M35 com 12 na caçamba e a Peugeot com 6 sob a lona.
 Vehicles.PASSENGERS = { lvtp5 = 12, uh34d = 8, m48a3 = 0, ontos = 0, m151 = 2, m35 = 12, peugeot403 = 6 }
 
+-- Modelo publicado de cada ficha (chave de AssetIds.Models). Lote dos _v2 (2026-11-12): os blindados e
+-- o UH-34D refeitos no Blender na medida real, em peças; as chaves antigas (m48a3, ontos, lvtp5,
+-- uh34d) continuam com os modelos velhos. Os números da malha estão em VehicleDrive.ART.
+Vehicles.MODEL = {
+	m48a3 = "m48a3_v2",
+	ontos = "ontos_v2",
+	lvtp5 = "lvtp5_v2",
+	uh34d = "uh34d_v2",
+	m151 = "m151",
+	m35 = "m35",
+	peugeot403 = "peugeot403",
+} :: { [string]: string }
+
+function Vehicles.modelKey(specId: string): string
+	return Vehicles.MODEL[specId] or specId
+end
+
 -- ===== lugares: nome, papel e ângulo de tiro =====
 local LABEL: { [string]: string } = {
 	driver = "Motorista",

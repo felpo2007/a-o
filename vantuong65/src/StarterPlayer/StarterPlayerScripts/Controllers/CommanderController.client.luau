@@ -5,6 +5,9 @@
 --   Correções do observador vêm da roda ("Mais 100", "Direita 50"...) e o "perigo próximo" é
 --   confirmado num botão. No teclado, a grade digitada ("BS 7003 9285") continua opcional.
 --   Construir: roda de equipamento → "Construir" (ou tecla J).
+--   Toque (Parte 13): a grade digitada some (nada de teclado na tela); o alvo é escolhido na carta
+--   em tela cheia com o dedo e "CONFIRMAR ALVO" (GameUI); construir abre a prévia com girar,
+--   confirmar e cancelar (ObraToque); o painel tem FECHAR e cabe na tela do celular (UiKit.fit).
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UserInputService = game:GetService("UserInputService")
@@ -15,15 +18,18 @@ local MapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any
 local Net = require(ReplicatedStorage.Shared.Net)
 local Bus = require(script.Parent.Bus)
 local Input = require(script.Parent.Input)
+local ToqueUi = require(script.Parent.ToqueUi)
 local UiKit = require(script.Parent.UiKit)
 
 local player = Players.LocalPlayer
 local gui = UiKit.screen("CommanderPanel", 32)
 gui.Enabled = false
 
+local FW, FH = if UiKit.tv() then 540 else 440, if UiKit.tv() then 560 else 460
 local frame = Instance.new("Frame")
-frame.Size = UDim2.fromOffset(if UiKit.tv() then 540 else 440, if UiKit.tv() then 520 else 420)
-frame.Position = UDim2.new(1, if UiKit.tv() then -560 else -460, 0.5, -210)
+frame.Size = UDim2.fromOffset(FW, FH)
+frame.AnchorPoint = Vector2.new(1, 0.5)
+frame.Position = UDim2.new(1, -20, 0.5, 0)
 -- estilo novo (UiKit.V): painel escuro com filete, texto em Arimo (sem a fonte Code)
 frame.BackgroundColor3 = UiKit.V.PANEL
 frame.BackgroundTransparency = 0.06
@@ -79,6 +85,8 @@ grid.CellPadding = UDim2.fromOffset(6, 6)
 grid.SortOrder = Enum.SortOrder.LayoutOrder
 grid.Parent = buttons
 local status = text("", 60, 5)
+-- celular: o painel encolhe para caber (o dedo gordo do VirtualCursor cobre os botões menores)
+UiKit.fit(gui, frame, FW + 20, FH, 12)
 
 local mode = "fire" -- "fire" | "build" | "confirm"
 local lastAbility: string? = nil
@@ -122,7 +130,8 @@ rebuild = function()
 	end
 	local faction = player:GetAttribute("Faction")
 	local role = player:GetAttribute("Role")
-	gridBox.Visible = mode == "fire" and not Input.isGamepad()
+	-- a grade digitada é opcional e só no teclado (no toque abriria o teclado da tela)
+	gridBox.Visible = mode == "fire" and not Input.isGamepad() and not ToqueUi.active()
 	if mode == "fire" then
 		title.Text = string.format("APOIO DE FOGO — suprimento %s", tostring(player:GetAttribute("Supply") or 0))
 		local n = 0
@@ -149,6 +158,11 @@ rebuild = function()
 			if role and b.role[role :: string] then
 				n += 1
 				addButton(string.format("%s (%d)", b.name, b.cost), n, function()
+					if ToqueUi.active() then
+						close()
+						Bus.fire("build_preview", id) -- toque: a prévia antes (ObraToque)
+						return
+					end
 					Net.event("Build_Request"):FireServer({ kind = id })
 				end)
 			end
@@ -218,6 +232,12 @@ Net.event("Logistics_State").OnClientEvent:Connect(function(msg)
 end)
 
 Input.on("ui_back", "press", close)
+-- fechar visível (no toque não há B nem Backspace)
+do
+	local b = UiKit.button(frame, "FECHAR", close, 6)
+	b.BackgroundColor3 = UiKit.V.PANEL_2
+	b.TextSize = UiKit.text(14)
+end
 UiKit.watch(buttons, function()
 	return gui.Enabled
 end)

@@ -14,6 +14,10 @@
 -- Coordenadas: pixels da janela (as de GetMouseLocation e ViewportPointToRay). A interface 2D usa as
 -- mesmas menos o GuiInset (é o espaço do AbsolutePosition e do GetGuiObjectsAtPosition).
 -- Com o mouse e no toque nada daqui aparece: o ponteiro é o próprio mouse (VirtualCursor.pointer).
+-- No toque (Parte 13), o mesmo registro dá o "dedo gordo": um toque curto que cai perto de um botão
+-- registrado (no vão entre dois, na borda arredondada, num botão pequeno da tela encolhida) aciona
+-- o botão cujo alvo, aumentado até o mínimo de toque (ToqueUi.minPx), contém o dedo. Só com tela
+-- aberta (menu, mapa, morto); o toque em cima de um botão de verdade fica com o próprio botão.
 local GuiService = game:GetService("GuiService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -22,6 +26,8 @@ local UserInputService = game:GetService("UserInputService")
 
 local InputMap = require(ReplicatedStorage.Shared.InputMap)
 local Input = require(script.Parent.Input)
+local ToqueTelas = require(script.Parent.ToqueTelas)
+local ToqueUi = require(script.Parent.ToqueUi)
 
 local VirtualCursor = {}
 local player = Players.LocalPlayer
@@ -501,6 +507,95 @@ UserInputService.InputBegan:Connect(function(input: InputObject)
 		click()
 	elseif DPAD[kc] then
 		jump(DPAD[kc])
+	end
+end)
+
+-- ===== toque: dedo gordo (Parte 13) =====
+-- Peças que não querem ímã (a carta do mapa trata o toque dela): atributo VT65SemIma no caminho.
+local function noSnap(o: Instance): boolean
+	local cur: Instance? = o
+	while cur and not cur:IsA("LayerCollector") do
+		if cur:GetAttribute("VT65SemIma") then
+			return true
+		end
+		cur = cur.Parent
+	end
+	return false
+end
+
+-- Botão registrado que um toque em p (pixels da janela) quis, ou nil: o dedo em cima de um botão de
+-- verdade (qualquer GuiButton ou caixa de texto) fica com ele; senão, o alvo aumentado mais perto.
+function VirtualCursor.touchSnap(p: Vector2): GuiObject?
+	if not ToqueUi.active() then
+		return nil
+	end
+	local s = Input.state
+	if not (s.menus > 0 or s.map or not s.alive) then
+		return nil -- em jogo, o toque é do HUD e da câmera
+	end
+	local pg = player:FindFirstChildOfClass("PlayerGui")
+	if not pg then
+		return nil
+	end
+	local gp = p - inset()
+	local ok, list = pcall(function()
+		return pg:GetGuiObjectsAtPosition(gp.X, gp.Y)
+	end)
+	if not ok or type(list) ~= "table" then
+		return nil
+	end
+	for _, o in list :: { GuiObject } do
+		if o:IsDescendantOf(gui) or not shownAt(o, gp) then
+			continue
+		end
+		if o:IsA("GuiButton") or o:IsA("TextBox") or bound[o] or noSnap(o) then
+			return nil
+		end
+	end
+	local min = ToqueUi.minPx()
+	local rects: { ToqueTelas.Rect } = {}
+	for o in bound do
+		if o.Parent == nil or not o.Visible then
+			continue
+		end
+		local a, sz = o.AbsolutePosition, o.AbsoluteSize
+		local ex, ey, ew, eh = ToqueTelas.expand(a.X, a.Y, sz.X, sz.Y, min, min)
+		if gp.X < ex or gp.X > ex + ew or gp.Y < ey or gp.Y > ey + eh then
+			continue
+		end
+		-- de verdade na tela: a cadeia visível e o botão por cima no próprio centro
+		local c = a + sz / 2
+		if shownAt(o, c) and VirtualCursor.guiAt(c + inset()) == o then
+			table.insert(rects, { id = o, x = a.X, y = a.Y, w = sz.X, h = sz.Y })
+		end
+	end
+	return ToqueTelas.pick(gp.X, gp.Y, rects, min)
+end
+
+local touches: { [InputObject]: { p: Vector2, t: number } } = {}
+UserInputService.InputBegan:Connect(function(io: InputObject)
+	if io.UserInputType == Enum.UserInputType.Touch then
+		touches[io] = { p = Vector2.new(io.Position.X, io.Position.Y), t = os.clock() }
+	end
+end)
+UserInputService.InputEnded:Connect(function(io: InputObject)
+	if io.UserInputType ~= Enum.UserInputType.Touch then
+		return
+	end
+	local t0 = touches[io]
+	touches[io] = nil
+	if not t0 then
+		return
+	end
+	local p = Vector2.new(io.Position.X, io.Position.Y)
+	local d = p - t0.p
+	if not ToqueTelas.isTap(os.clock() - t0.t, d.X, d.Y) then
+		return
+	end
+	local b = VirtualCursor.touchSnap(p + inset())
+	local bd = b and bound[b]
+	if bd then
+		task.spawn(bd.activate)
 	end
 end)
 

@@ -23,6 +23,8 @@ local Progression = require(ReplicatedStorage.Shared.Progression)
 local Bus = require(script.Parent.Bus)
 local CampanhaCliente = require(script.Parent.CampanhaCliente)
 local Input = require(script.Parent.Input)
+local ToqueTelas = require(script.Parent.ToqueTelas)
+local ToqueUi = require(script.Parent.ToqueUi)
 local UiKit = require(script.Parent.UiKit)
 
 local player = Players.LocalPlayer
@@ -354,6 +356,7 @@ local function claimSelected()
 end
 Bus.on("passe_claim_selected", claimSelected)
 
+local cellTap = ToqueTelas.newTap2() -- toque: 1º toque mostra, 2º resgata
 local function makeCell(parent: Instance, x: number, lvl: number, track: string): Cell
 	local b = Instance.new("TextButton")
 	b.Name = track
@@ -408,6 +411,11 @@ local function makeCell(parent: Instance, x: number, lvl: number, track: string)
 	end)
 	UiKit.bind(b, function()
 		choose(lvl, track)
+		-- toque (Parte 13): sem "passar o mouse", o 1º toque só mostra a recompensa; o 2º na mesma
+		-- célula resgata (ou abre a compra do Veterano). Antes, ver já resgatava ou abria a compra.
+		if ToqueUi.active() and not ToqueTelas.secondTap(cellTap, string.format("%s:%d", track, lvl), os.clock()) then
+			return
+		end
 		claimSelected()
 	end, hover)
 	return { button = b, mark = mark, name = name, sub = sub, tag = tag, edge = edge }
@@ -545,8 +553,9 @@ local function renderFoot()
 		foot.pair("ui_sub_prev", "ui_sub_next", "menu", "Trilha")
 		foot.add(UiKit.padImage(Enum.KeyCode.ButtonA), nil, "A", "Receber")
 		foot.action("ui_back", "menu", "Fechar")
-	elseif Input.device() == "touch" then
-		foot.add(nil, nil, "Toque", "no nível")
+	elseif Input.device() == "touch" or ToqueUi.active() then
+		foot.add(nil, nil, "Toque", "no nível para ver")
+		foot.add(nil, nil, "2×", "para receber")
 	else
 		foot.add(nil, nil, "Clique", "no nível")
 		foot.action("ui_back", "menu", "Fechar")

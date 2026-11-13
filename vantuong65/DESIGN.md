@@ -3271,3 +3271,222 @@ relatórios de cada parte, no código e nos testes).
   - 18 construções acusam o chão a mais de 0,6 m do patamar;
   - com um controle ligado, um clique de mouse pode valer como o A do cursor virtual (trocou o
     idioma no teste).
+
+## D-102 — Soldados no formato do Front 44: boneco de bloco (2026-11-12)
+**Pedido do dono:** "faça os personagens do mesmo formato do Front 44".
+
+**O formato do Front 44 hoje** (`ServerScriptService/F44/Main.server` e `Characters`, `Config.Bodies`):
+desde a 0.28.0 (a D-102 de lá, "voltar com os bonecos do roblox") `Blocky = true` e `Realistic = false`.
+O soldado é o **boneco de bloco clássico do R15**: tronco, braços, pernas e cabeça padrão (0), as
+escalas de altura, largura, profundidade e cabeça **iguais** (1 lá; tipo de corpo e proporção 0),
+cabeça de bloco com o rosto em decalque (o do avatar do jogador; o bot fica com o rosto padrão), pele
+lisa na cabeça e nas mãos (tons do claro ao escuro), farda em Shirt/Pants clássicos com as peças em
+tecido, botas escuras, capacete de malha própria ajustado à cabeça e equipamento em peças por cima. O
+boneco tem 5 studs (~1,4 m na escala da arma; lá a arma em 3ª pessoa é reduzida). Os soldados
+realistas (malha do Sketchfab cortada nas 15 partes, Avatar Setup com FACS e os rostos pintados do
+`tools/make_faces.py`) estão **desligados** lá.
+
+**O que mudou aqui (`Shared/Corpo`, `Characters`):**
+- corpo padrão = **"bloco"** (`Corpo.FORMATO`): peças e cabeça padrão, as quatro escalas iguais a
+  **1,25 × K = 1,4286** (as proporções do boneco do Front 44 na escala do soldado de 2 m). Altura
+  **2,04 m** (a cabeça de bloco é 4 cm mais alta que a do "Man"); dá para ficar nos 2,0 m, então a
+  altura da D-98 ficou;
+- **0,80 m de ombro a ombro** (antes 0,64 m): o tronco de bloco tem 2 studs de largura por 5 de altura.
+  Tudo que se ajusta à caixa das peças acompanha (equipamento do `Gear`, colete, capacete, ghillie); o
+  fuzil a tiracolo vai para fora junto (`Corpo.KX`, `PostureController`);
+- **cabeça de bloco** (1,5 × K de lado, 0,48 m): o capacete cresce com ela, como no Front 44;
+- **pele lisa** na cabeça e nas mãos, **tecido** nas peças da farda; tons por lado (`Corpo.PELE`: 5
+  nos EUA, do claro ao escuro; 4 no VC);
+- **rostos de época** em decalque (`tools/rostos/make_rostos.py` → `assets/rostos`, 12 por lado):
+  olhos, sobrancelhas, nariz e boca sérios; barba por fazer, bigode, olheira, sujeira ou cicatriz em
+  alguns; a mesma geometria para os dois lados (sem caricatura). Ids em `Corpo.ROSTOS` (0 até subir;
+  sem eles fica o rosto padrão do Roblox, como nos bots do Front 44);
+- jogador, bots e prévias (lobby e loja) passam todos pelo `Characters.describe`/`dress`; o
+  `SoldierPreview` enquadra pela caixa do modelo. O "man" fica de reserva (`Corpo.FORMATO = "man"`).
+- Fica tudo o que é nosso: fardas de 1965 (moldes v3), capacetes, kits, skins, ghillie, carta, pegas
+  e animações (gravadas no esqueleto do bloco do R15, o `tools/anim/r15.py`; agora o corpo é o mesmo).
+
+**O que olhar no Studio:** altura (`AlturaM` ~2,04), largura nas portas e nas entradas dos túneis
+(0,8 m de ombro), capacete na cabeça de bloco, fuzil a tiracolo e mãos na carta, caixa de acerto da
+cabeça (maior que a do "Man"), o rosto padrão até subir os decalques.
+
+**Não testado no Studio.**
+
+## D-103 — Veículo ao nascer: comprar na carta e ele sai ao seu lado (2026-11-12)
+**Pedido do dono:** "coloque a opção de comprar um veículo quando nascer e ele spawnar do seu lado".
+
+**O que se compra** (`Shared/CompraVeiculo`): só viaturas sem arma montada. EUA: M151 e M35; VC:
+Peugeot 403. **Blindado e helicóptero ficam fora**: os EUA já têm 6 nos depósitos (renascem em
+180 s) e o VC de 1965 não tinha nenhum; vender mais seria comprar vantagem contra um lado sem resposta.
+
+**Preços (PLACEHOLDER, a ajustar no teste):**
+
+| viatura | CI | Robux sugerido | produto (`Commerce.IDS`) |
+|---|---|---|---|
+| M151 MUTT | 150 | 15 | `PRODUCT_VEH_M151` = 0 |
+| caminhão M35 | 250 | 25 | `PRODUCT_VEH_M35` = 0 |
+| Peugeot 403 | 150 | 15 | `PRODUCT_VEH_PEUGEOT403` = 0 |
+
+ID 0 = o botão de Robux não aparece (o de CI funciona). Catálogo próprio `Commerce.VehicleProducts`,
+fora do `Commerce.GAMEPLAY` (a lista da D-72 continua com 3). Pela taxa do pacote de 500 CI = 5 R$,
+15 R$ valem 1.500 CI: o Robux aqui é conveniência e sai mais caro que o CI (decisão de preço do dono).
+
+**Regras (PLACEHOLDER, testadas no Lune, `tests/luau/compraveiculo.luau`):**
+- um comprado vivo por jogador; **6** comprados vivos por lado ao mesmo tempo; **120 s** entre duas
+  entregas do mesmo jogador;
+- abandonado **90 s** (ninguém dentro e nenhum jogador vivo a 30 m) some; destruído não volta e não
+  tem reembolso; não renasce em depósito;
+- só sai no **QG, reunião de setor ou reunião avançada**; em túnel, no companheiro, no ponto do squad
+  ou onde caiu o pedido fica para a próxima inserção (nada é cobrado);
+- bots não compram (o remote é só de jogador).
+
+**Entrega e cobrança (`CompraVeiculoService`):** o pedido é armado na carta (morto) e nada é
+cobrado. Ao nascer, o servidor procura o lugar a **4-10 m** do soldado (centro da caixa; folga de
+1,5 m até ele), ao lado primeiro: raios no chão sob a caixa inteira (terreno ou estrada, sem água,
+lama nem arrozal alagado; desnível ≤ 0,6 m e no nível do pé ±2 m), caixa livre de casa, árvore,
+veículo e gente, dentro do mapa, sem teto em cima do soldado. O veículo fica **virado para o
+objetivo** do lado (`Front.objective`; sem partida, o QG inimigo). Achou: em CI cobra
+(`spendCredits`) e entrega; em **Robux o prompt só abre com o lugar achado e reservado** (90 s). Sem
+lugar: avisa e não cobra.
+
+**Recibo (`CommerceService.vehicleReceipt`):** uma vez por PurchaseId (`applyReceipt`). Reserva
+ainda valendo: o recibo vira o veículo. Senão (morreu, reserva venceu, recibo repetido noutro
+servidor): vira CI no perfil na mesma gravação, `max(preço em CI, Robux gastos × 100)`. Recibo
+repetido não entrega nada.
+
+**Tela (`Controllers/CompraVeiculo.client`):** cartão escuro na margem direita da carta de inserção
+("A PÉ" ou a viatura, título Oswald, faixa da cor do lado); o painel lista as viaturas do lado em CI
+e em Robux com o motivo quando não dá (falta CI, espera, já tem um, lado no teto). Controle: **X**
+na carta abre (o X não marcava nada na inserção; a dica do rodapé virou "Levar veículo"),
+direcional + A escolhe, B fecha; mouse e toque: clique no cartão. Gancho único na `DeployScreen`:
+`Bus.fire("insercao_painel", …)` no desenho da pasta.
+
+**Ganchos de Studio:** `workspace:SetAttribute("VT65DevCompra", "m151")` (em campo: procura o lugar
+e entrega sem cobrar, e escreve a distância ou o motivo; morto: arma o pedido sem cobrança),
+`"m151:ci"` (pedido de verdade em CI), `"abandono"` (os comprados somem em 5 s), `"estado"`.
+
+**Não testado no Studio** (nem a compra em Robux, que precisa dos produtos criados).
+
+## D-104 — Veículos do Blender na medida real, em peças (lote dos _v2, 2026-11-12)
+Os 7 modelos novos do Blender estão publicados (`AssetIds.Models`): `m48a3_v2`, `ontos_v2`,
+`lvtp5_v2`, `uh34d_v2`, `m151`, `m35`, `peugeot403`. Os antigos estavam 10 a 35% fora da medida.
+- **Modelo:** `Vehicles.MODEL`/`modelKey` (as chaves antigas ficam com os modelos velhos). O
+  substituto em peças dos carros só sobra se o modelo não carregar (atributo `ArtPlaceholder`).
+- **`VehicleDrive.ART` nova** (tabela do `assets/blender/RELATORIO.md`): caixa, lagarta (laço:
+  M48 49,15, Ontos 28,81, LVTP-5 65,84 studs), escapamentos, olhos, tropa, rotores e as juntas
+  (`pivots`) de cada peça móvel. Frente +X do GLB, esquerda −Z, pivô no centro da caixa no chão;
+  depois do importador, nariz em −X: giro do chassi −90° nos 7.
+- **Peças móveis em Motor6D** (`VehicleService.artJoints`): Torre (giro em Y) e Cano (elevação, preso
+  na Torre); RotorPrincipal com as pás `Pa_1…Pa_4` soldadas no cubo; RotorCauda; `Roda_*` (também as
+  da lagarta) na ArtRoot; escotilhas, portas, tampa traseira, para-brisa e volante na junta do
+  relatório (paradas). O `VehicleFx` gira as rodas (cada uma no raio dela e na velocidade do lado),
+  os rotores (as pás de peça somem; fica o disco de desfoque), o volante na coluna e a torre e o cano
+  para a mira do atirador (`AimYaw`/`AimPitch` no veículo, do tiro e do `Vehicle_Aim` ~8/s; giro na
+  velocidade da ficha). Elevação: M48 −9°/+19°, Ontos −10°/+20°, cúpula do LVTP-5 −15°/+45°
+  (PLACEHOLDER). As faixas animadas da lagarta continuam por cima da `Esteira_E/D` parada.
+- **Assentos:** os carros agora sentam no olho medido (como os blindados). UH-34D: os 8 da tropa
+  dentro do porão (antes fora da fuselagem). Peugeot: o olho desce 0,30 stud (8 cm): com o do
+  Blender a cabeça do soldado de 2,0 m batia 9 cm no teto; fica ~2 cm abaixo e o corpo se encolhe no
+  banco. M35 (19 cm) e UH-34D (4 cm) como estão.
+- **ArtBudget:** os 7 como "hero", triângulos do `metricas.json` (14.358, 9.938, 14.009, 4.794,
+  3.362, 8.012, 4.526).
+- **Atenção (D-102):** a folga do teto acima é do corpo "Man" de 2,0 m; o boneco de bloco tem a
+  cabeça maior. Conferir no Studio a cabeça no teto do UH-34D e do Peugeot.
+
+**Ganchos de Studio:** `VT65DevVeh = "todos"` (um de cada), `"pecas"` (por veículo: modelo, juntas
+criadas e peças móveis que o importador não trouxe), `"mira"` (torre e cano de todos a 40° e 10°),
+`VT65DevDrive` com cada ficha.
+
+**Não testado no Studio** (importador com nós em várias peças, pivôs e sentidos de giro).
+
+## D-105 — Celular e tablet, bases dos dois lados e vila de casas únicas (v38, 2026-11-13)
+
+**Celular e tablet** (Parte 13 do dono; `ToqueHud`, `Shared/Toque`, testes `toque`, `toque_telas` e
+`toque_veiculo`):
+- **Base técnica:**
+  - tela na horizontal (`LandscapeSensor`);
+  - `DevTouchMovementMode = Scriptable`, sem o analógico e o pulo do Roblox;
+  - o controle conectado vira a entrada principal;
+  - cada toque pertence ao botão onde começou;
+  - perder o foco solta tudo.
+- **HUD de dois polegares:**
+  - analógico flutuante e proporcional; a borda corre e o cadeado trava a corrida;
+  - tiro grande que gira a câmera; agachar tocando, deitar segurando;
+  - botões em tamanho físico (mínimo de 9 mm, tiro de 16 mm). O DPI é estimado: PLACEHOLDER até
+    medir em aparelho real.
+- **Mira:** giroscópio (desligado, só mirando, sempre) e sensibilidades separadas. A volta ao ponto de
+  mira é 25% mais rápida no toque; o chute de cada tiro é o mesmo.
+- **Ações e telas:**
+  - rodas em volta do polegar e botão contextual com anel de progresso;
+  - seletor e alça pelo cartão da arma;
+  - mapa com pinça e INSERIR;
+  - nas fichas, o primeiro toque mostra e o segundo confirma.
+- **Veículos:** motorista, atirador, piloto (coletivo e pedais, estabilizador ligado) e atirador de
+  porta, com LUGAR e SAIR.
+- **Editor de HUD:** mover, 60–150% e transparência; layouts de 2 polegares, 3 e 4 dedos, canhoto e 3
+  espaços próprios na conta.
+- **Desempenho e outros:**
+  - perfil de celular sem mexer na vegetação que esconde nem nos soldados;
+  - "economia de bateria" (o script não trava o fps; só reduz o gráfico);
+  - vibração por `HapticEffect`;
+  - reconexão.
+- **Não testado em aparelho real:** tamanho físico, giroscópio, foco em ligação e notificação, fps,
+  calor e memória.
+
+**Bases** (`tools/bases_dados.py` gera `Data/Bases.luau` dos layouts do Blender, relativos ao QG):
+- **EUA:** 85 objetos em ~91 x 122 m (barracas GP, comando, refeitório, garagem, torre, portão,
+  concertina, helipontos AM-2, baias, estande de tiro, depósito de combustível).
+- **VC:** 34 objetos em ~47 x 39 m sob a mata (abrigos, cozinha Hoàng Cầm, rede, armeiro, estande e
+  abrigo do carro).
+- **Colisão:** nós `Colisao_*` com material; a lona deixa passar a bala (`Canvas = 0,9` no `PASS`).
+- **Estacas punji:** −20 de vida e mancando, não no VC, a cada 3 s no máximo (PLACEHOLDER).
+- **Raias:** cada lado tem a própria raia de tiro dentro da base; a de antes atravessaria as barracas.
+- **Veículos:** os depósitos usam as vagas das bases (`VehicleService.DEPOTS`):
+  - EUA: 2 LVTP-5, 1 M48, 1 Ontos, 2 UH-34D, 1 M151, 1 M35;
+  - VC: 1 Peugeot 403 (eram 2).
+
+**Vila Xóm Gò:**
+- 38 das 48 casas são os 10 modelos únicos do Blender, com interior e porta de 2,30 m; as outras 10
+  usam as casas variadas de antes até as casas 11 e 12 existirem;
+- duas casas a menos de 30 m nunca repetem o modelo.
+
+**Rostos:** os 24 rostos de época (D-102) estão publicados; o `Corpo.ROSTOS` guarda os IDs de imagem
+lidos no Studio.
+
+**Ghillie v2:** substitui a v1 com o mesmo encaixe.
+
+## D-106 — Blindados de bot saindo das baias e chegando ao objetivo (v38, 2026-11-13)
+
+O teste da v38 no Studio achou o M48 e os LVTP-5 de bot parados na base: com as baias da D-105, a
+rota ia reto para oeste, atravessava o talude e empacava. Depois disso, cada trecho do caminho
+mostrou o próximo problema. O que mudou:
+- **Vaga e saída:** as baias e a garagem abrem para o sul. O veículo nasce de frente para a boca
+  (`DEPOTS.yaw`) e o bot sai em linha reta até a faixa livre (`exitM`, 13–15 m) antes de pedir rota.
+  Na volta, para na frente da baia (a grade marca a baia inteira como obstáculo).
+- **Picape do VC:** fica na frente do abrigo de palha, de frente para a trilha. O poste da cumeeira
+  no meio da boca do abrigo não deixa carro nenhum sair de dentro dele.
+- **Portão:** o braço erguido da cancela e o garfo de apoio ficam sem colisão. O vão do portão é
+  de 21,6 studs; com os dois, sobravam 10,8 para um M48 de 13.
+- **Grade de rota:**
+  - concertina, mastros, gerador, tambores e reboque d'água contam como obstáculo (a rota cortava a
+    cerca em vez de usar o portão);
+  - o tronco de cada árvore com colisão (2.214 no mapa) barra só o veículo (marca de sebe); a mata
+    era só "cara" e o tanque encalhava entre os troncos;
+  - obstáculo aprendido: o veículo preso contra uma peça fixa fora das bases e da estrada marca a
+    célula dela (teto de 300).
+- **Estrada:** os pontos da rota de veículo que caem no leito vão para o eixo da estrada. Os centros
+  de célula (16 studs) punham o casco 8 studs fora do eixo, contra a guarita.
+- **Água rasa:** o teto de velocidade que o bot lê trata lâmina rasa como lama, igual à física. Numa
+  lâmina de 3 cm o M48 lia teto 0 e parava de vez.
+- **Encalhe:** "preso" usa a velocidade real do casco. A do motor oscila contra o obstáculo e a ré
+  nunca acontecia. Na 3ª ré no mesmo lugar, o bot desencalha como o jogador (sobe e recua 6 m). A
+  menos de 40 m do destino, fica ali mesmo (o transporte desembarca a tropa).
+- **Aterro na saída da base:** 20 m fora do portão dos EUA corre um riacho de 2 m de fundo, com
+  barranco e lama. Na ida o blindado passava no embalo; na volta não subia. Pelo eixo da rua da
+  base, a primeira vala (até 40 m de boca) vira um aterro de terra batida da largura da rua mais
+  1 m. O leito da vala até 110 m para cada lado fica fechado para veículo de bot.
+- **Resultado no Studio:**
+  - o M48 chega ao ponto de apoio e fica;
+  - o LVTP-5 leva o squad, desembarca e volta para a baia;
+  - testado em dois objetivos (oeste e sudoeste).
+- **Não testado:** objetivos do VC, o Ontos (fica sem tripulação no teste) e o LVTP-5 nº 2.

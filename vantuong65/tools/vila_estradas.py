@@ -58,12 +58,13 @@ N_TONS = 4
 ANEXOS = ("varanda", "cozinha", "celeiro", "horta", "cerca", "pote", "meda", "varal")
 
 # ---------- estradas ----------
-LARGURA = {"principal": 7.0, "secundaria": 5.0, "rua": 6.0, "beco": 2.5}
+LARGURA = {"principal": 7.0, "secundaria": 5.0, "rua": 6.0, "beco": 2.5, "trilha": 3.0}
 GRADE_MAX = 0.15  # rampa máxima do leito (15%, 8,5°)
 GRADE_PROIBIDA = 0.30  # terreno mais íngreme que isto não recebe estrada
 TALUDE_M = 3.0  # faixa de cada lado onde o leito se junta ao terreno
 BORDA_M = 25.0  # estrada a pelo menos isto da borda da área
 ANEL_M = 70.0  # as voltas por fora correm a esta distância da borda
+BASE_FOLGA_M = 1.0  # a estrada do mapa passa a pelo menos isto da área de cada base
 
 
 def _lin(a, b, t):
@@ -282,7 +283,9 @@ def planeja_vila(t: Terreno, ing_local, dentro) -> dict:
 
 
 # ---------- estradas ----------
-def custo_base(t: Terreno, casas_xz: list, vila: dict, dentro_borda) -> np.ndarray:
+def custo_base(
+    t: Terreno, casas_xz: list, vila: dict, dentro_borda, bloqueios: list | None = None
+) -> np.ndarray:
     gy, gx = np.gradient(t.h, t.cell * STUD_M)
     grade = np.hypot(gx, gy)
     custo = 1.0 + 25.0 * np.clip(grade - 0.08, 0, None)
@@ -299,6 +302,10 @@ def custo_base(t: Terreno, casas_xz: list, vila: dict, dentro_borda) -> np.ndarr
     for a, b in [vila["rua"]] + vila["travessas"]:
         d = _dist_seg(xs, zs, a, b) * STUD_M
         custo[d < 3.0] = 0.25
+    # bases dos dois lados (2026-11-13): a estrada do mapa não entra; chega à entrada de cada uma
+    for x0, x1, z0, z1 in bloqueios or []:
+        m = BASE_FOLGA_M / STUD_M
+        custo[(xs > x0 - m) & (xs < x1 + m) & (zs > z0 - m) & (zs < z1 + m)] = np.inf
     return custo
 
 
@@ -510,7 +517,7 @@ def _clip_segs(segs: np.ndarray, corredores: list, ncols: int) -> tuple[np.ndarr
     return arr, cortados
 
 
-def limpa_feicoes(f: dict, estradas: list, vila: dict) -> dict:
+def limpa_feicoes(f: dict, estradas: list, vila: dict, bloqueios: list | None = None) -> dict:
     corredores = []
     for e in estradas:
         meia = (LARGURA[e["kind"]] / 2 + 1.5) / STUD_M
@@ -528,6 +535,15 @@ def limpa_feicoes(f: dict, estradas: list, vila: dict) -> dict:
     area.append(((vila["x"], vila["z"]), (vila["x"], vila["z"]), (PRACA_U + 3) / STUD_M))
     for a, b in vila["becos"] + vila["travessas"]:
         area.append((a, b, (LARGURA["beco"] / 2 + 1) / STUD_M))
+    # bases: o retângulo vira uma cápsula no eixo comprido (com 2 m de folga)
+    for x0, x1, z0, z1 in bloqueios or []:
+        cx, cz = (x0 + x1) / 2, (z0 + z1) / 2
+        hx, hz = (x1 - x0) / 2, (z1 - z0) / 2
+        meia = min(hx, hz) + 2 / STUD_M
+        if hx >= hz:
+            area.append(((cx - hx + hz, cz), (cx + hx - hz, cz), meia))
+        else:
+            area.append(((cx, cz - hz + hx), (cx, cz + hz - hx), meia))
     todos = corredores + area
     info = {}
     f["dikes"], info["diques_cortados"] = _clip_segs(f["dikes"], todos, 6)
@@ -608,17 +624,14 @@ def escreve(vila: dict, estradas: list, head: str) -> None:
 
     out = [head + "-- Estradas de terra batida (tools/vila_estradas.py).\n"]
     out.append(
-        "-- kind: principal | secundaria | rua; w = largura (studs);"
+        "-- kind: principal | secundaria | rua | trilha; w = largura (studs);"
         " pts = x, z, y (leito) por vértice\n"
     )
     out.append("return {\n")
     for kind, w in LARGURA.items():
         out.append(f"\t-- {kind}: {w:g} m\n")
-    out.append(
-        f"\twidth = {{ principal = {_num(LARGURA['principal'] / STUD_M)}, secundaria = "
-        f"{_num(LARGURA['secundaria'] / STUD_M)}, rua = {_num(LARGURA['rua'] / STUD_M)}, "
-        f"beco = {_num(LARGURA['beco'] / STUD_M)} }},\n"
-    )
+    larguras = ", ".join(f"{k} = {_num(w / STUD_M)}" for k, w in LARGURA.items())
+    out.append(f"\twidth = {{ {larguras} }},\n")
     out.append(f"\tshoulder = {_num(TALUDE_M / STUD_M)}, gradeMax = {GRADE_MAX},\n\troads = {{\n")
     for e in estradas:
         p = e["pts"]
@@ -628,13 +641,50 @@ def escreve(vila: dict, estradas: list, head: str) -> None:
     (DATA / "Roads.luau").write_text("".join(out), encoding="utf-8", newline="\n")
 
 
+def estrada_reta(t: Terreno, a, b, kind: str, estradas: list) -> dict:
+    """trecho reto de a até b (studs), com o leito em rampa máxima de GRADE_MAX; a ponta `a` presa
+    na altura da estrada que já chega ali (a entrada da base)"""
+    comp = math.hypot(b[0] - a[0], b[1] - a[1])
+    n = max(2, int(comp / (2.0 / STUD_M)) + 1)
+    s = np.linspace(0, 1, n)
+    xs, zs = a[0] + (b[0] - a[0]) * s, a[1] + (b[1] - a[1]) * s
+    y = t.altura(xs, zs) / STUD_M
+    if len(y) > 6:
+        k = 7
+        y = np.convolve(np.pad(y, k // 2, mode="edge"), np.ones(k) / k, mode="valid")
+    perto, melhor = None, 12.0 / STUD_M
+    for e in estradas:
+        p = e["pts"]
+        d = np.hypot(p[:, 0] - a[0], p[:, 1] - a[1])
+        i = int(np.argmin(d))
+        if d[i] < melhor:
+            perto, melhor = float(p[i, 2]), float(d[i])
+    if perto is not None:
+        y[0] = perto
+    lim = comp / (n - 1) * GRADE_MAX
+    for i in range(1, n):
+        y[i] = np.clip(y[i], y[i - 1] - lim, y[i - 1] + lim)
+    return {"kind": kind, "pts": np.column_stack([xs, zs, y])}
+
+
 def aplica(
-    g: dict, f: dict, ing_local, nos_ing: dict, setor3, bounds_ing, head: str, depois_da_vila=None
+    g: dict,
+    f: dict,
+    ing_local,
+    nos_ing: dict,
+    setor3,
+    bounds_ing,
+    head: str,
+    depois_da_vila=None,
+    bases: list | None = None,
 ) -> tuple[dict, dict]:
     """vila + estradas sobre os dados já recortados; muda f (feições) e escreve Village e Roads.
     nos_ing: nome -> (E, N) dos QGs ("QG_US", "QG_VC") e dos pontos fortes; a praça da vila entra
     sozinha. setor3(x, z): o ponto (studs) cai no setor da vila. depois_da_vila(vila): chamado com a
-    vila pronta, antes das estradas (o crop_world reduz o arrozal ali, pelas casas da vila)."""
+    vila pronta, antes das estradas (o crop_world reduz o arrozal ali, pelas casas da vila).
+    bases (2026-11-13): por base, {"no": "QG_US", "entrada": (x, z), "area": (x0, x1, z0, z1),
+    "via": {"kind", "a", "b"}} em studs: a estrada do mapa chega à entrada (não ao meio do QG),
+    não entra na área, e a via da base (rua dos EUA, trilha do VC) entra no Roads."""
     t = Terreno(g)
     e0, n0, e1, n1 = bounds_ing
     xa, za = ing_local(e0, n1)
@@ -656,12 +706,17 @@ def aplica(
         for s in vila["especiais"]
         if s["kind"] in ("chua", "dinh")
     ]
-    custo0 = custo_base(t, casas, vila, dentro_borda)
+    bloqueios = [b["area"] for b in bases or []]
+    custo0 = custo_base(t, casas, vila, dentro_borda, bloqueios)
     nos = {k: ing_local(*v) for k, v in nos_ing.items()}
+    for b in bases or []:
+        nos[b["no"]] = b["entrada"]
     nos["vila"] = (vila["x"], vila["z"])
     trechos = traca_estradas(t, nos, custo0, vila, ing_local, (xa, xb, za, zb))
     estradas = suaviza(t, trechos)
-    info = limpa_feicoes(f, estradas, vila)
+    for b in bases or []:
+        estradas.append(estrada_reta(t, b["via"]["a"], b["via"]["b"], b["via"]["kind"], estradas))
+    info = limpa_feicoes(f, estradas, vila, bloqueios)
     escreve(vila, estradas, head)
     comp = {}
     for e in estradas:

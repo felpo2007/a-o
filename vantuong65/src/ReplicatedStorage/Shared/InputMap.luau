@@ -197,7 +197,25 @@ export type Settings = {
 	cameraBob: number,
 	-- coluna de comandos na lateral da tela (Controllers/PainelComandos); booleana, o validate saneia
 	hintsPanel: boolean,
+	-- Parte 13 (celular e tablet; Shared/Toque, Controllers/ToqueHud e EditorHud)
+	touchAimToggle: boolean, -- mirar no toque: um toque liga, outro desliga (false: segurar)
+	gyroMode: string, -- "off" | "aim" (só mirando) | "always"
+	gyroSens: number,
+	touchLookSens: number, -- olhar pelo arrasto (quadril)
+	touchAdsSens: number, -- mira de ferro
+	touchScopeSens: number, -- luneta/binóculo
+	touchAccel: boolean, -- arrasto rápido gira mais
+	touchOpacity: number, -- opacidade geral dos botões
+	touchLayout: string, -- "two" | "three" | "four" | "custom1" | "custom2" | "custom3"
+	touchMirror: boolean, -- canhoto: layout espelhado
+	touchCustom: { [string]: { [string]: TouchSlot } }, -- até 3 layouts próprios (sanitizeTouchCustom)
+	touchAutoVault: boolean, -- correndo contra o obstáculo, transpõe sozinho
+	batterySaver: boolean, -- economia de bateria (lido pelo agente de desempenho)
 }
+
+-- Um botão de um layout próprio de toque: centro (frações da área segura, sempre o lado destro),
+-- escala do editor (60–150%) e opacidade própria; on = mostrar (botões opcionais).
+export type TouchSlot = { x: number, y: number, scale: number, alpha: number, on: boolean? }
 
 InputMap.DEFAULTS = {
 	holdTime = 0.3,
@@ -245,6 +263,19 @@ InputMap.DEFAULTS = {
 	volMusic = 0.35,
 	cameraBob = 1,
 	hintsPanel = true,
+	touchAimToggle = true,
+	gyroMode = "off",
+	gyroSens = 1,
+	touchLookSens = 1,
+	touchAdsSens = 0.6,
+	touchScopeSens = 0.4,
+	touchAccel = false,
+	touchOpacity = 0.75,
+	touchLayout = "two",
+	touchMirror = false,
+	touchCustom = {},
+	touchAutoVault = true,
+	batterySaver = false,
 } :: Settings
 
 -- Configurações que mudam os botões (o runtime refaz os bindings só quando uma delas muda).
@@ -289,8 +320,15 @@ local RANGES: { [string]: { number } } = {
 	volAmbient = { 0, 1 },
 	volMusic = { 0, 1 },
 	cameraBob = { 0, 1 },
+	gyroSens = { 0.2, 3 },
+	touchLookSens = { 0.2, 3 },
+	touchAdsSens = { 0.1, 2 },
+	touchScopeSens = { 0.1, 2 },
+	touchOpacity = { 0.2, 1 },
 }
 local CHOICES: { [string]: { [string]: boolean } } = {
+	gyroMode = { off = true, aim = true, always = true },
+	touchLayout = { two = true, three = true, four = true, custom1 = true, custom2 = true, custom3 = true },
 	gfxDetail = { high = true, medium = true, low = true },
 	gfxPost = { full = true, light = true, off = true },
 	lang = { auto = true, pt = true, en = true, es = true, vi = true },
@@ -301,14 +339,70 @@ local CHOICES: { [string]: { [string]: boolean } } = {
 	colorblind = { off = true, protan = true, deutan = true, tritan = true },
 }
 
+-- Layouts próprios do toque (Parte 13): só "custom1".."custom3"; em cada um até 40 botões de nome
+-- curto (letras, números e _), centro preso em 0..1, escala 0,6–1,5, opacidade 0,1–1, "on"
+-- booleano. Lixo (tipo errado, NaN, nome estranho) sai; layout vazio some.
+InputMap.TOUCH_CUSTOM_SLOTS = { "custom1", "custom2", "custom3" }
+
+local function num(v: any, lo: number, hi: number, def: number): number
+	if type(v) ~= "number" or v ~= v then
+		return def
+	end
+	return math.clamp(v, lo, hi)
+end
+
+function InputMap.sanitizeTouchCustom(raw: any): { [string]: { [string]: TouchSlot } }
+	local out: { [string]: { [string]: TouchSlot } } = {}
+	if type(raw) ~= "table" then
+		return out
+	end
+	for _, name in InputMap.TOUCH_CUSTOM_SLOTS do
+		local lay = raw[name]
+		if type(lay) == "table" then
+			local t: { [string]: TouchSlot } = {}
+			local n = 0
+			for id, e in lay do
+				if
+					type(id) == "string"
+					and #id <= 24
+					and string.match(id, "^[%w_]+$") ~= nil
+					and type(e) == "table"
+					and type(e.x) == "number"
+					and type(e.y) == "number"
+					and e.x == e.x
+					and e.y == e.y
+				then
+					n += 1
+					if n > 40 then
+						break
+					end
+					t[id] = {
+						x = math.clamp(e.x, 0, 1),
+						y = math.clamp(e.y, 0, 1),
+						scale = num(e.scale, 0.6, 1.5, 1),
+						alpha = num(e.alpha, 0.1, 1, 1),
+						on = if type(e.on) == "boolean" then e.on else nil,
+					}
+				end
+			end
+			if next(t) ~= nil then
+				out[name] = t
+			end
+		end
+	end
+	return out
+end
+
 -- Saneia configurações vindas do cliente ou do DataStore (o servidor também chama).
 function InputMap.validate(raw: any): Settings
 	local out = table.clone(InputMap.DEFAULTS) :: any
 	out.remap = {}
 	out.keymap = {}
+	out.touchCustom = {}
 	if type(raw) ~= "table" then
 		return out
 	end
+	out.touchCustom = InputMap.sanitizeTouchCustom(raw.touchCustom)
 	for k, v in raw do
 		local def = (InputMap.DEFAULTS :: any)[k]
 		if type(k) ~= "string" or def == nil then
@@ -589,10 +683,13 @@ export type State = {
 	sprinting: boolean,
 	lean: number,
 	wheel: string?,
+	-- Parte 13: o app saiu de foco (segundo plano, ligação, notificação, outra janela)
+	unfocused: boolean,
 }
 
 function InputMap.newState(): State
 	return {
+		unfocused = false,
 		menus = 0,
 		map = false,
 		robloxMenu = false,
@@ -657,6 +754,14 @@ function InputMap.event(s: State, ev: string, arg: any?): { string }
 	elseif ev == "reconnect" then
 		s.disconnected = false
 		s.awaitRelease = true
+	elseif ev == "focus_lost" then
+		-- Parte 13: segundo plano, ligação, notificação: o que estava segurado é solto (o dedo
+		-- some sem o fim do toque)
+		s.unfocused = true
+		return cancelHolds(s)
+	elseif ev == "focus_back" then
+		s.unfocused = false
+		s.awaitRelease = true -- relê o estado: só volta com tudo solto
 	elseif ev == "die" then
 		s.alive, s.downed = false, false
 		s.vehicle = nil
@@ -730,7 +835,7 @@ end
 
 -- O jogo aceita comandos de jogo agora?
 function InputMap.acceptsGame(s: State): boolean
-	return not (s.disconnected or s.robloxMenu or s.awaitRelease or s.menus > 0 or s.map or not s.alive)
+	return not (s.disconnected or s.robloxMenu or s.awaitRelease or s.unfocused or s.menus > 0 or s.map or not s.alive)
 end
 
 -- Caído só aceita olhar, desistir e chamar ajuda (roda de comunicação).

@@ -49,9 +49,13 @@ export type Crew = {
 	routeAt: number,
 	dest: Vector3?,
 	depot: Vector3,
+	exit: Vector3?, -- frente da boca da baia (VehicleService.depotExit); nil = depósito aberto
+	leftDepot: boolean, -- já saiu da baia em linha reta (só então pede rota)
 	sector: number?,
 	forceSector: number?, -- gancho do Studio
 	stuckT: number,
+	stuckN: number, -- ré seguidas no mesmo lugar
+	stuckAt: Vector3?,
 	reverseUntil: number,
 	turret: number,
 	target: Model?,
@@ -134,6 +138,9 @@ end
 local function newCrew(vehicle: Model, faction: string): Crew
 	nextId += 1
 	local ch = chassisOf(vehicle)
+	local exit, spot = VehicleService.depotExit(vehicle)
+	-- ainda na vaga da baia (a menos de 4 m dela): sai reto até a frente da boca
+	local inBay = exit ~= nil and spot ~= nil and ch ~= nil and flat(ch.Position, spot) * M < 4
 	return {
 		id = nextId,
 		vehicle = vehicle,
@@ -150,9 +157,13 @@ local function newCrew(vehicle: Model, faction: string): Crew
 		routeAt = -math.huge,
 		dest = nil,
 		depot = if ch then ch.Position else Vector3.zero,
+		exit = exit,
+		leftDepot = not inBay,
 		sector = nil,
 		forceSector = nil,
 		stuckT = 0,
+		stuckN = 0,
+		stuckAt = nil,
 		reverseUntil = 0,
 		turret = 0,
 		target = nil,
@@ -478,7 +489,16 @@ local function brake(c: Crew, ch: BasePart, vs: VehicleService.BotDriveState, fa
 	VehicleService.botInput(c.vehicle, thr, steer)
 end
 
-local function driveTo(c: Crew, ch: BasePart, dest: Vector3?, now: number, dt: number, faceAt: Vector3?): boolean
+-- direct: em linha reta, sem rota nem freada de chegada (saída da baia; quem chama vê a chegada)
+local function driveTo(
+	c: Crew,
+	ch: BasePart,
+	dest: Vector3?,
+	now: number,
+	dt: number,
+	faceAt: Vector3?,
+	direct: boolean?
+): boolean
 	local vs = VehicleService.botState(c.vehicle)
 	if not vs then
 		return false
@@ -489,11 +509,13 @@ local function driveTo(c: Crew, ch: BasePart, dest: Vector3?, now: number, dt: n
 		return true
 	end
 	local distM = flat(pos, dest) * M
-	if distM <= V.arriveM then
+	if distM <= V.arriveM and not direct then
 		brake(c, ch, vs, faceAt)
 		return math.abs(vs.v) < 0.5
 	end
-	wantRoute(c, pos, dest, now)
+	if not direct then
+		wantRoute(c, pos, dest, now)
+	end
 	local caps = BotDriver.caps(c.kind)
 	-- preso (barranco, casa, outro veículo): ré e rota nova
 	if now < c.reverseUntil then
@@ -501,9 +523,10 @@ local function driveTo(c: Crew, ch: BasePart, dest: Vector3?, now: number, dt: n
 		return false
 	end
 	local tx, tz = dest.X, dest.Z
-	local left = distM
+	-- na reta da baia não freia para parar no ponto: chega devagar e segue
+	local left = if direct then distM + V.arriveM else distM
 	local corner = 0
-	local r = c.route
+	local r = if direct then nil else c.route
 	if r then
 		local s = BotMove.project(r, pos.X, pos.Z, c.routeFollow.seg)
 		local look = math.clamp(math.abs(vs.v) * 1.8, V.lookM[1], V.lookM[2]) / M
@@ -514,8 +537,12 @@ local function driveTo(c: Crew, ch: BasePart, dest: Vector3?, now: number, dt: n
 	local want = BotDriver.desiredSpeed(vs.top, left, corner, 1.5)
 	local thr, steer = BotDriver.control(vs.yaw, vs.v, pos.X, pos.Z, tx, tz, want, caps)
 	VehicleService.botInput(c.vehicle, thr, steer)
-	-- preso: acelerando e não sai do lugar (girar no lugar não conta)
-	if vs.blocked or (math.abs(thr) > 0.3 and math.abs(vs.v) < 0.4) then
+	-- preso: acelerando e não sai do lugar (girar no lugar não conta). A velocidade é a do casco: a
+	-- do motor (vs.v) oscila contra o obstáculo (sobe, o contato derruba, sobe de novo) e o "preso"
+	-- nunca fechava (teste da v38: tanque parado 2 min contra um tronco sem dar ré)
+	local vel = ch.AssemblyLinearVelocity
+	local realV = math.sqrt(vel.X * vel.X + vel.Z * vel.Z) * M
+	if vs.blocked or (math.abs(thr) > 0.3 and math.min(math.abs(vs.v), realV) < 0.4) then
 		c.stuckT += dt
 	else
 		c.stuckT = 0
@@ -525,6 +552,30 @@ local function driveTo(c: Crew, ch: BasePart, dest: Vector3?, now: number, dt: n
 		c.reverseUntil = now + V.reverseS
 		c.route = nil
 		c.routeAt = -math.huge
+		if direct then
+			c.leftDepot = true -- boca da baia tapada (outro veículo): desiste da reta e pede rota
+		else
+			-- o que segurou (tronco, poste) entra na grade: a rota nova contorna
+			local ignore: { Instance } = { c.vehicle }
+			for _, name in { "Vehicles", "Combatants" } do
+				local f = workspace:FindFirstChild(name)
+				if f then
+					table.insert(ignore, f)
+				end
+			end
+			BotWorld.learnObstacle(ch, if thr < 0 then -1 else 1, ignore)
+			-- a ré não tirou: na 3ª vez no mesmo lugar, desencalha (como o jogador) e recua 6 m
+			local here = ch.Position
+			local again = c.stuckAt ~= nil and flat(here, c.stuckAt :: Vector3) * M < 6
+			c.stuckN = if again then c.stuckN + 1 else 1
+			c.stuckAt = here
+			if c.stuckN >= 3 then
+				c.stuckN = 0
+				c.reverseUntil = 0
+				VehicleService.botRecover(c.vehicle, if thr < 0 then -6 else 6)
+				print(string.format("[VT65] bots: %s desencalhado (tripulação %d)", c.spec, c.id))
+			end
+		end
 	end
 	return false
 end
@@ -552,6 +603,8 @@ local function setState(c: Crew, st: string, now: number)
 		c.stateAt = now
 		c.route = nil
 		c.routeGoal = nil
+		c.stuckN = 0
+		c.stuckAt = nil
 		print(string.format("[VT65] bots: %s (tripulação %d) -> %s", c.spec, c.id, st))
 	end
 end
@@ -585,6 +638,14 @@ function BotVehicles.drive(now: number, dt: number)
 				setState(c, "go", now)
 			end
 			driveTo(c, chassis, nil, now, dt)
+		elseif (c.state == "go" or c.state == "hold") and not c.leftDepot and c.exit then
+			-- sai da baia em linha reta até a frente da boca; a rota (que não entra nos taludes)
+			-- começa dali
+			local ex = c.exit :: Vector3
+			if flat(chassis.Position, ex) * M <= 2.5 then
+				c.leftDepot = true
+			end
+			driveTo(c, chassis, ex, now, dt, nil, true)
 		elseif c.state == "go" or c.state == "hold" then
 			if not point then
 				driveTo(c, chassis, nil, now, dt)
@@ -600,6 +661,11 @@ function BotVehicles.drive(now: number, dt: number)
 				end
 			end
 			local arrived = driveTo(c, chassis, c.dest, now, dt, p)
+			-- encalhado perto do destino (outro veículo parado na vaga, mata): fica ali mesmo
+			local dd = c.dest
+			if not arrived and c.stuckN >= 2 and dd and flat(chassis.Position, dd) * M < 40 then
+				arrived = true
+			end
 			if arrived and c.state == "go" then
 				setState(c, if transport and #passengers(c) > 0 then "drop" else "hold", now)
 			end
@@ -612,7 +678,8 @@ function BotVehicles.drive(now: number, dt: number)
 				setState(c, "back", now)
 			end
 		elseif c.state == "back" then
-			if driveTo(c, chassis, c.depot, now, dt) then
+			-- volta para a frente da baia (a grade de rota marca a baia inteira como obstáculo)
+			if driveTo(c, chassis, c.exit or c.depot, now, dt) then
 				c.dest = nil
 				setState(c, "load", now)
 			end

@@ -52,6 +52,8 @@ local Bus = require(script.Parent.Bus)
 local Input = require(script.Parent.Input)
 local LobbyScene = require(script.Parent.LobbyScene)
 local SoldierPreview = require(script.Parent.SoldierPreview)
+local ToqueTelas = require(script.Parent.ToqueTelas)
+local ToqueUi = require(script.Parent.ToqueUi)
 local UiKit = require(script.Parent.UiKit)
 local VirtualCursor = require(script.Parent.VirtualCursor)
 
@@ -1694,6 +1696,7 @@ do
 	rPad.PaddingBottom = UDim.new(0, 10)
 	rPad.Parent = rScroll
 	local roleCards: { [string]: RCard } = {}
+	local roleTap = ToqueTelas.newTap2() -- toque: 1º toque mostra, 2º escolhe
 
 	local function showRole(id: string?)
 		local f = myFaction()
@@ -1758,6 +1761,18 @@ do
 			realce = UiKit.realce(b, CARD, CARD_HOT, 1.04),
 		}
 		bindCard(b, function()
+			-- toque (Parte 13): sem "passar o mouse", o 1º toque mostra o papel (armas, barras e o
+			-- soldado) e o 2º no mesmo cartão escolhe; trocar custa +15 s, então nada de escolher sem ver
+			if ToqueUi.active() and id ~= currentRole() and not ToqueTelas.secondTap(roleTap, id, os.clock()) then
+				for oid, oc in roleCards do
+					oc.hot = oid == id
+					oc.btn.ZIndex = if oid == id then 3 else 1
+					oc.realce.set(oid == id)
+				end
+				showRole(id)
+				notify("Toque de novo no cartão para escolher este papel.")
+				return
+			end
 			chooseRole(id)
 		end, function(on: boolean)
 			c.hot = on
@@ -1962,7 +1977,10 @@ do
 			iLines,
 			table.concat({
 				"Escolha na carta um ponto PRONTO.",
-				string.format("Trocar de papel: aba PAPEL ou %s (+15 s)", keyName(padText)),
+				-- toque: não há tecla (o botão PAPEL fica na carta)
+				if ToqueUi.active()
+					then "Trocar de papel: aba PAPEL (+15 s)"
+					else string.format("Trocar de papel: aba PAPEL ou %s (+15 s)", keyName(padText)),
 			}, "\n")
 		)
 	end
@@ -2358,7 +2376,7 @@ do
 			if dev == "gamepad" then
 				actionChip("map_next", "map", "Próximo ponto")
 				actionChip("map_select", "map", "Inserir")
-				actionChip("map_mark", "map", "Marcar")
+				actionChip("map_mark", "map", "Levar veículo")
 				actionChip("map_role", "map", "Trocar de papel")
 				actionChip("map_back", "map", "Voltar à mesa")
 			elseif dev == "touch" then
@@ -2676,6 +2694,7 @@ function DeployScreen.render(st: any)
 		dealInsert()
 	end
 	SoldierPreview.setActive(portrait, not onChoose and panel == "insert")
+	Bus.fire("insercao_painel", not onChoose and panel == "insert") -- D-103: Controllers/CompraVeiculo
 	placeLobbyCamera(scene)
 	renderFooter(scene)
 end

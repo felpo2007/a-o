@@ -31,6 +31,8 @@ local BODIES = {
 	bloco = { lower = vk(2, 0.48, 1), upper = vk(2, 1.92, 1), head = vk(1.2, 1.2, 1.2) },
 	outro = { lower = vk(1.7, 0.55, 0.9), upper = vk(1.8, 1.9, 0.95), head = vk(1.05, 1.25, 1.1) },
 	cabeca_pequena = { lower = vk(1.67, 0.6, 1.04), upper = vk(1.84, 1.75, 1.07), head = vk(0.8, 1.0, 0.85) },
+	-- D-102: o boneco de bloco do formato do Front 44 (as quatro escalas iguais, 1,25 x K)
+	front44 = { lower = vk(2.5, 0.6, 1.25), upper = vk(2.5, 2.4, 1.25), head = vk(1.5, 1.5, 1.5) },
 }
 -- caixas dos modelos do ForgeGUI em studs (espaço do modelo; x = frente-trás, z = lado), dos GLB
 local NATIVE = {
@@ -365,6 +367,51 @@ test("extents: cilindro em pé e caixa girada", function()
 	assert(math.abs(eq.x - 2) < 1e-6 and math.abs(eq.z - 1) < 1e-6)
 end)
 
+test("D-102: formato do Front 44 (boneco de bloco, escalas iguais, pele e rostos de época)", function()
+	local Corpo = require("../../src/ReplicatedStorage/Shared/Corpo") :: any
+	local fs = require("@lune/fs")
+	assert(Corpo.FORMATO == "bloco", "corpo padrão é o bloco do Front 44")
+	assert(math.abs(Corpo.BLOCK_SCALE - 1.25 * Corpo.K) < 1e-12, "1,25 x K em todos os eixos")
+	assert(Corpo.KX == Corpo.BLOCK_SCALE, "largura do bloco")
+	-- altura do boneco de bloco: pernas 2, quadril-cintura 0,4, tronco 1,6, pescoço e cabeça 1,1 (x escala)
+	local alturaM = 5.1 * Corpo.BLOCK_SCALE * 0.28
+	print(
+		string.format(
+			"       boneco de bloco: %.2f m de altura, %.2f m de ombro a ombro",
+			alturaM,
+			2 * Corpo.BLOCK_SCALE * 0.28
+		)
+	)
+	assert(math.abs(alturaM - Corpo.HEIGHT_M) < 0.06, "fica nos 2 m (D-98)")
+	for _, lado in { "US", "VC" } do
+		assert(#Corpo.PELE[lado] >= 3, lado .. ": tons de pele")
+		for _, c in Corpo.PELE[lado] do
+			assert(c[1] >= c[2] and c[2] >= c[3], lado .. ": tom de pele (R >= G >= B)")
+		end
+		assert(#Corpo.ROSTOS[lado] == 12, lado .. ": 12 rostos")
+		for i = 1, 12 do
+			local f = string.format("assets/rostos/rosto_%s_%02d.png", string.lower(lado), i)
+			assert(fs.isFile(f), "falta " .. f .. " (uv run python tools/rostos/make_rostos.py)")
+		end
+		-- a mesma semente dá sempre o mesmo soldado; sementes diferentes variam
+		local seen = {}
+		for seed = 0, 59 do
+			local c = Corpo.pele(lado, seed)
+			seen[c[1] * 65536 + c[2] * 256 + c[3]] = true
+			assert(Corpo.pele(lado, seed) == c, "determinístico")
+		end
+		local n = 0
+		for _ in seen do
+			n += 1
+		end
+		assert(n == #Corpo.PELE[lado], lado .. ": todos os tons aparecem")
+	end
+	-- o equipamento se ajusta ao bloco mais largo (o capacete cobre a cabeça maior)
+	local b = BODIES.front44
+	local env = envFor("US", b, "us_m1_helmet")
+	local pieces = Gear.layout("US", Gear.items("US", "rifleman", nil), env)
+	assert(#pieces > 10, "equipamento no bloco")
+end)
 print(string.format("%d ok, %d falhas", passed, failed))
 if failed > 0 then
 	process.exit(1)

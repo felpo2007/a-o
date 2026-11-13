@@ -118,9 +118,10 @@ local function blenderTris(key: string): number?
 	local m = serde.decode("json", fs.readFile(path)) :: any
 	return m.novo and m.novo.triangulos
 end
--- refeito publicado: o ID antigo do ForgeGUI fica guardado como <chave>_forge (commit 6ea6bfd)
+-- refeito publicado: o ID antigo do ForgeGUI fica guardado como <chave>_forge (commit 6ea6bfd) ou,
+-- no bambu sem o disco da base (2026-11-12), como <chave>_disco
 local function replacedByBlender(key: string): boolean
-	return robloxIds["Models." .. key .. "_forge"] ~= nil
+	return robloxIds["Models." .. key .. "_forge"] ~= nil or robloxIds["Models." .. key .. "_disco"] ~= nil
 end
 -- assets/blender é gerado (tools/blender) e fica fora do Git: sem a pasta, os números do Blender
 -- não são conferidos (o resto do orçamento continua)
@@ -337,10 +338,11 @@ test("mata (D-64/65): determinística, zonas livres, lavoura e clareira abertas,
 		local isIn = it.x >= B.minX and it.x <= B.maxX and it.z >= B.minZ and it.z <= B.maxZ
 		if isIn then
 			inside += 1
-			for f, hq in MapConfig.HQ do
-				local d = math.sqrt((it.x - hq.x) ^ 2 + (it.z - hq.z) ^ 2) * M
-				assert(d >= (if f == "US" then 150 else 100) - 3, string.format("%s a %.0f m do QG %s", it.key, d, f))
-			end
+			-- 2026-11-13: só o QG dos EUA abre clareira (o acampamento do VC fica sob a mata; o plano da
+			-- arte abre as pegadas e os pontos de nascer)
+			local hq = MapConfig.HQ.US
+			local d = math.sqrt((it.x - hq.x) ^ 2 + (it.z - hq.z) ^ 2) * M
+			assert(d >= 150 - 3, string.format("%s a %.0f m do QG US", it.key, d))
 			for i = 1, #houses, 2 do
 				local d = math.sqrt((it.x - houses[i]) ^ 2 + (it.z - houses[i + 1]) ^ 2) * M
 				assert(d >= 6.5 - 0.01, string.format("%s dentro de casa (%.1f m)", it.key, d))

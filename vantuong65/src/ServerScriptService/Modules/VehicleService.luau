@@ -17,6 +17,11 @@
 --     (Arc*); a M60 e os canhões continuam montados ("Mounted");
 --   - carros M151, M35 e Peugeot 403 (rodas, VehicleDrive), com substituto em peças até o modelo;
 --   - preso ("Stuck") e tombado: desvirar no painel.
+-- Lote _v2 (2026-11-12): os modelos do Blender na medida real (Vehicles.modelKey: m48a3_v2,
+-- ontos_v2, lvtp5_v2, uh34d_v2 e os 3 carros), em peças: torre, cano, rotores, rodas, escotilhas e
+-- portas em Motor6D (artJoints); o substituto em peças dos carros só sobra se o modelo não carregar.
+-- D-103: o veículo comprado ao nascer é o mesmo spawnAt (sem depósito: não renasce), com o atributo
+-- "BoughtBy"; pedido, lugar, cobrança e abandono no CompraVeiculoService.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -28,6 +33,7 @@ local Roles = require(ReplicatedStorage.Shared.Roles)
 local VehicleDrive = require(ReplicatedStorage.Shared.VehicleDrive)
 local Vehicles = require(ReplicatedStorage.Shared.Vehicles)
 local AssetLoader = require(script.Parent.AssetLoader)
+local BotWorld = require(script.Parent.BotWorld)
 local CombatService = require(script.Parent.CombatService)
 local ExplosionService = require(script.Parent.ExplosionService)
 local MedicalService = require(script.Parent.MedicalService)
@@ -71,18 +77,25 @@ local nextId = 0
 -- depósitos ficam a oeste e ao norte dele (antes os LVTP-5 ficavam no mar, 140 m a leste).
 -- D-100: carros dos EUA ao sul do pátio e a picape do VC ao pé do morro do QG dele (posições de
 -- projeto, a conferir no Studio contra casas e árvores).
-local DEPOTS = {
-	{ spec = "lvtp5", dx = -60, dz = -60 },
-	{ spec = "lvtp5", dx = -60, dz = -20 },
-	{ spec = "m48a3", dx = -130, dz = -40 },
-	{ spec = "ontos", dx = -130, dz = 0 },
-	{ spec = "uh34d", dx = -20, dz = 70 },
-	{ spec = "uh34d", dx = -90, dz = 70 },
-	{ spec = "m151", dx = -25, dz = -100 },
-	{ spec = "m151", dx = -40, dz = -100 },
-	{ spec = "m35", dx = -95, dz = -100 },
-	{ spec = "peugeot403", dx = 40, dz = 35 },
-	{ spec = "peugeot403", dx = 55, dz = 35 },
+-- vagas das bases (assets/blender/bases/layout_*.json, D-105): metros a partir do QG de cada lado.
+-- EUA: baias dos blindados, helipontos e garagem (2 carros); VC: o abrigo de palha do carro.
+-- yaw: rumo do veículo (CFrame.Angles; 0 = frente para o norte, -Z). As baias e a garagem abrem
+-- para o sul (+Z, rua da base): o veículo nasce de frente para a boca e sai reto, sem manobra entre
+-- os taludes (teste da v38: virado para o fundo, o bot motorista empacava na baia). exitM: metros em
+-- linha reta até a faixa livre na frente da boca (z = -125 studs, entre as baias e os contêineres);
+-- o bot motorista vai até lá antes de pedir rota (BotVehicles) e volta para lá, não para dentro.
+-- A picape do VC fica na frente do abrigo de palha, de frente para a trilha (leste): o poste da
+-- cumeeira no meio da boca do abrigo não deixa carro nenhum sair de dentro dele.
+local DEPOTS: { { spec: string, dx: number, dz: number, yaw: number?, exitM: number? } } = {
+	{ spec = "lvtp5", dx = -29, dz = -50, yaw = math.pi, exitM = 15 },
+	{ spec = "lvtp5", dx = -15, dz = -50, yaw = math.pi, exitM = 15 },
+	{ spec = "m48a3", dx = -1, dz = -50, yaw = math.pi, exitM = 15 },
+	{ spec = "ontos", dx = 13, dz = -50, yaw = math.pi, exitM = 15 },
+	{ spec = "uh34d", dx = 34, dz = -30 },
+	{ spec = "uh34d", dx = 34, dz = -5 },
+	{ spec = "m151", dx = 25, dz = -48, yaw = math.pi, exitM = 13 },
+	{ spec = "m35", dx = 31, dz = -48, yaw = math.pi, exitM = 13 },
+	{ spec = "peugeot403", dx = 23.5, dz = -12, yaw = -math.pi / 2 },
 }
 -- olho de quem está sentado acima do assento (studs): o lugar fica embaixo do olho medido na malha
 local EYE_ABOVE_SEAT = 3.2 -- PLACEHOLDER (soldado de 2,0 m sentado, D-98)
@@ -99,7 +112,8 @@ local RESPAWN_S = 180 -- design
 -- Giro da arte em relação ao chassi (frente do chassi = -Z). Os GLBs dos veículos têm o eixo longo
 -- em X com a frente em +X, mas o importador do Roblox gira o modelo 180° em Y: no Studio (teste com a
 -- arte publicada, 2026-11-10) o canhão do M48, os tubos do Ontos, a proa do LVTP-5 e o nariz do
--- UH-34D apontam para -X. O palpite antigo (+90°) punha todos andando de ré.
+-- UH-34D apontam para -X. O palpite antigo (+90°) punha todos andando de ré. Os _v2 e os carros do
+-- Blender seguem a mesma convenção (relatório do Blender, item 6): −90° nos 7.
 local ART_YAW: { [string]: number } = {
 	m48a3 = math.rad(-90),
 	ontos = math.rad(-90),
@@ -267,6 +281,26 @@ local function seatById(vehicle: Model, seatId: string): Seat?
 	return if s and s:IsA("Seat") then s else nil
 end
 
+-- Lote _v2: torre e cano apontam para onde o atirador mira. Atributos "AimYaw" e "AimPitch" (rad,
+-- relativos ao casco: giro para a esquerda +, elevação +) que o VehicleFx de todo cliente aplica nas
+-- juntas. Vêm do tiro (jogador e bot) e do Vehicle_Aim que o VehicleFx do atirador manda ~8 vezes
+-- por segundo. Só o lugar de VehicleDrive.ART[id].aim.seat aponta.
+local lastAim: { [Instance]: number } = {}
+local function setAim(model: Model, seat: Seat, dir: Vector3)
+	local art = VehicleDrive.ART[tostring(model:GetAttribute("Spec"))]
+	local aim = art and art.aim
+	local chassis = model:FindFirstChild("Chassis") :: BasePart?
+	local mag = dir.Magnitude
+	if not (aim and chassis) or seat:GetAttribute("SeatId") ~= aim.seat or not (mag >= 0.5 and mag < 1e6) then
+		return -- (NaN do cliente falha no >=)
+	end
+	local l = (chassis :: BasePart).CFrame:VectorToObjectSpace(dir.Unit)
+	local yaw = math.atan2(-l.X, -l.Z)
+	local pitch = math.clamp(math.asin(math.clamp(l.Y, -1, 1)), math.rad(aim.down), math.rad(aim.up))
+	model:SetAttribute("AimYaw", math.floor(yaw * 200 + 0.5) / 200)
+	model:SetAttribute("AimPitch", math.floor(pitch * 200 + 0.5) / 200)
+end
+
 -- Tiro da arma de um assento (jogador ou bot, D-90): a mesma validação para os dois. Devolve true
 -- se o tiro saiu.
 local function fireFromSeat(seat: Seat, char: Model, player: Player?, dir: Vector3, coax: boolean, now: number): boolean
@@ -275,6 +309,7 @@ local function fireFromSeat(seat: Seat, char: Model, player: Player?, dir: Vecto
 	if type(weapon) ~= "string" or model:GetAttribute("Destroyed") then
 		return false
 	end
+	setAim(model, seat, dir)
 	if seat:GetAttribute("Personal") == true then
 		return false -- D-100: a própria arma do ocupante vai pelo CombatService (Combat_Fire)
 	end
@@ -845,9 +880,53 @@ local function placeholderCar(specId: string, chassis: BasePart, mount: BasePart
 	return art
 end
 
+-- Lote _v2 (2026-11-12): peças móveis do modelo do Blender (VehicleDrive.ART[id].pivots). Torre (giro
+-- em Y) e Cano (elevação, preso na Torre) a partir do Casco; rotor principal com as pás Pa_* soldadas
+-- no cubo, e o de cauda; escotilhas, portas, tampa, para-brisa e volante na junta do relatório
+-- (paradas até alguém animar); rodas Roda_* (também as da lagarta) na ArtRoot com os eixos do chassi.
+-- O VehicleFx de cada cliente gira pelo Transform. O resto fica soldado na ArtRoot. Sem o nó com o
+-- nome (modelo velho, importador que juntou as peças), tudo solda como antes.
+local function artJoints(art: Model, mount: BasePart, chassis: BasePart, mesh: BasePart?, info: VehicleDrive.Art?)
+	local pivots: { [string]: { number } } = if info and info.pivots then info.pivots else {}
+	local byName: { [string]: BasePart } = {}
+	local parts: { BasePart } = {}
+	for _, p in art:GetDescendants() do
+		if p:IsA("BasePart") then
+			p.Anchored = false
+			p.CanCollide = false
+			p.Massless = true
+			byName[p.Name] = byName[p.Name] or p
+			table.insert(parts, p)
+		end
+	end
+	local casco = byName.Casco or mesh
+	local hub = byName.RotorPrincipal
+	local s = if mesh and info then mesh.Size / Vector3.new(info.box[1], info.box[2], info.box[3]) else Vector3.one
+	for _, p in parts do
+		local name = p.Name
+		local piv = pivots[name]
+		if string.sub(name, 1, 5) == "Roda_" then
+			wheelJoint(mount, chassis, p) -- gira (e as da frente do carro esterçam) no VehicleFx
+		elseif hub and p ~= hub and string.match(name, "^Pa_%d+$") then
+			weld(hub, p)
+		elseif piv and mesh and casco and p ~= casco then
+			local part0 = if name == "Cano" and byName.Torre then byName.Torre else casco :: BasePart
+			local at = (mesh :: BasePart).CFrame * CFrame.new(piv[1] * s.X, piv[2] * s.Y, piv[3] * s.Z)
+			local m6 = Instance.new("Motor6D")
+			m6.Name = name
+			m6.Part0, m6.Part1 = part0, p
+			m6.C0 = part0.CFrame:ToObjectSpace(at)
+			m6.C1 = p.CFrame:ToObjectSpace(at)
+			m6.Parent = part0
+		else
+			weld(mount, p)
+		end
+	end
+end
+
 -- Onde fica cada lugar (CFrame no mundo, na hora do nascimento). Com a arte medida: embaixo do olho
--- (VehicleDrive.eyeOf, o mesmo da câmera). Carro: a posição do Blender (Vehicles.WHEELED). Sem nada:
--- a grade antiga em cima do chassi.
+-- (VehicleDrive.eyeOf, o mesmo da câmera; lote _v2: os carros também). Carro com o substituto em
+-- peças: a posição do Blender (Vehicles.WHEELED). Sem nada: a grade antiga em cima do chassi.
 local function seatCFrame(
 	specId: string,
 	info: Vehicles.SeatInfo,
@@ -857,10 +936,6 @@ local function seatCFrame(
 	mesh: BasePart?
 ): CFrame
 	local rot = chassis.CFrame.Rotation
-	local at = Vehicles.wheeledSeatAt(specId, info.id)
-	if at then
-		return mount.CFrame * CFrame.new(at[1] / M, at[2] / M, at[3] / M)
-	end
 	local art = VehicleDrive.ART[specId]
 	local ex, ey, ez = VehicleDrive.eyeOf(specId, info.id)
 	if mesh and art and ex and ey and ez then
@@ -868,6 +943,10 @@ local function seatCFrame(
 		local s = mesh.Size / Vector3.new(box[1], box[2], box[3])
 		local eye = mesh.CFrame * Vector3.new(ex * s.X, ey * s.Y, ez * s.Z)
 		return CFrame.new(eye - Vector3.new(0, EYE_ABOVE_SEAT, 0)) * rot
+	end
+	local at = Vehicles.wheeledSeatAt(specId, info.id)
+	if at then
+		return mount.CFrame * CFrame.new(at[1] / M, at[2] / M, at[3] / M)
 	end
 	local W = chassis.Size.X
 	local nSeats = #(Vehicles.SPECS[specId] :: any).seats
@@ -895,7 +974,7 @@ local function build(specId: string, at: Vector3, yaw: number, depot: number?): 
 	local wheeled = spec.kind == "wheeled"
 	local drive = VehicleDrive.DRIVE[specId]
 	local rampH = ((drive and drive.stepM) or 0.6) / M
-	local tpl = AssetLoader.template(specId)
+	local tpl = AssetLoader.template(Vehicles.modelKey(specId)) -- lote _v2: m48a3_v2, ontos_v2...
 	local info = VehicleDrive.ART[specId]
 	-- Comprimento do chassi: o do laço da lagarta medido na malha (o canhão do M48 passa muito da
 	-- frente; a caixa antes ficava 1 m adiante do casco), menos as rampas. Sem arte: 75% da ficha.
@@ -972,13 +1051,6 @@ local function build(specId: string, at: Vector3, yaw: number, depot: number?): 
 	motor.Parent = chassis
 	-- arte do ForgeGUI/Blender (se publicada): presa à ArtRoot, sem colisão; o chassi vira invisível
 	local mesh: BasePart? = nil
-	local wheelNames: { [string]: boolean } = {}
-	local wheeledArt = Vehicles.WHEELED[specId]
-	if wheeledArt then
-		for _, wh in wheeledArt.wheels do
-			wheelNames[wh.name] = true
-		end
-	end
 	if tpl then
 		local art = tpl:Clone()
 		art.Name = "Art"
@@ -999,22 +1071,12 @@ local function build(specId: string, at: Vector3, yaw: number, depot: number?): 
 			local shift = (mesh :: BasePart).CFrame:VectorToWorldSpace(Vector3.new(hullCenter, 0, 0))
 			art:PivotTo(CFrame.new(-shift) * art:GetPivot())
 		end
-		for _, p in art:GetDescendants() do
-			if p:IsA("BasePart") then
-				p.Anchored = false
-				p.CanCollide = false
-				p.Massless = true
-				if wheelNames[p.Name] then
-					wheelJoint(mount, chassis, p) -- roda do modelo: gira e esterça (VehicleFx)
-				else
-					weld(mount, p)
-				end
-			end
-		end
+		artJoints(art, mount, chassis, mesh, info)
 		art.Parent = model
 		chassis.Transparency = 1
 	elseif wheeled and placeholderCar(specId, chassis, mount) then
 		chassis.Transparency = 1
+		model:SetAttribute("ArtPlaceholder", true) -- sem malha medida: o VehicleFx não põe o olho nela
 	end
 	local att = Instance.new("Attachment")
 	att.Name = "Drive"
@@ -1096,7 +1158,137 @@ function VehicleService.spawn(specId: string, depot: number): Model?
 		return nil
 	end
 	local hq = MapConfig.HQ[spec.faction] or MapConfig.HQ.US
-	return build(specId, Vector3.new(hq.x + d.dx / M, 0, hq.z + d.dz / M), 0, depot)
+	return build(specId, Vector3.new(hq.x + d.dx / M, 0, hq.z + d.dz / M), d.yaw or 0, depot)
+end
+
+-- Ponto (studs, y = 0) na frente da boca da baia ou da garagem do depósito do veículo e a vaga
+-- dele; nil quando o depósito não tem baia (heliponto, picape do VC) ou o veículo não é de depósito.
+function VehicleService.depotExit(vehicle: Model): (Vector3?, Vector3?)
+	local depot = vehicle:GetAttribute("Depot")
+	local d = if type(depot) == "number" then DEPOTS[depot] else nil
+	local spec = d and Vehicles.SPECS[d.spec]
+	if not (d and spec and d.exitM) then
+		return nil, nil
+	end
+	local hq = MapConfig.HQ[spec.faction] or MapConfig.HQ.US
+	-- frente do CFrame.Angles(0, yaw, 0): (-sen yaw, 0, -cos yaw)
+	local yaw = d.yaw or 0
+	local x = hq.x + (d.dx - math.sin(yaw) * d.exitM) / M
+	local z = hq.z + (d.dz - math.cos(yaw) * d.exitM) / M
+	return Vector3.new(x, 0, z), Vector3.new(hq.x + d.dx / M, 0, hq.z + d.dz / M)
+end
+
+-- Aterro na saída das bases (teste da v38): a rua da base acaba no portão e, 20 m fora do dos EUA,
+-- um riacho de barranco de 2 m e fundo de lama corta o caminho para oeste. O blindado descia no
+-- embalo e não subia de volta. Pelo eixo da rua, do portão para fora, a primeira vala (mais de 1 m
+-- abaixo dos barrancos e até 40 m de boca) vira aterro de terra batida da largura da rua mais 1 m,
+-- em rampa reta de um barranco ao outro; a grade dos bots ganha o trecho como estrada.
+local function terrainY(x: number, z: number): number?
+	local rp = RaycastParams.new()
+	rp.FilterType = Enum.RaycastFilterType.Include
+	rp.FilterDescendantsInstances = { workspace.Terrain }
+	rp.IgnoreWater = true
+	local hit = workspace:Raycast(Vector3.new(x, 2000, z), Vector3.new(0, -4000, 0), rp)
+	return if hit then hit.Position.Y else nil
+end
+
+local function buildCauseways()
+	local okB, bases = pcall(function(): any
+		local data = game:GetService("ServerStorage"):WaitForChild("VT65Build"):WaitForChild("Data")
+		local mod = data:WaitForChild("Bases")
+		return require(mod :: ModuleScript) :: any
+	end)
+	if not okB or type(bases) ~= "table" then
+		return
+	end
+	local STEP = 4 -- studs
+	for faction, hq in MapConfig.HQ do
+		local b = bases[faction]
+		local r = type(b) == "table" and b.road
+		if type(r) ~= "table" then
+			continue
+		end
+		local dx, dz = r.ax - r.bx, r.az - r.bz
+		local len = math.sqrt(dx * dx + dz * dz)
+		if len < 1 then
+			continue
+		end
+		dx, dz = dx / len, dz / len
+		local ax, az = hq.x + r.ax, hq.z + r.az
+		local prof: { number } = {}
+		local n = math.floor(80 / M / STEP)
+		for i = 0, n do
+			prof[i + 1] = terrainY(ax + dx * i * STEP, az + dz * i * STEP) or math.huge
+		end
+		-- fundo nos primeiros 60 m; barrancos: de lá para cada lado enquanto sobe mais de 0,3 stud a cada passo
+		local iMin, hMin = 1, math.huge
+		for i = 1, math.min(#prof, math.floor(60 / M / STEP) + 1) do
+			if prof[i] < hMin then
+				iMin, hMin = i, prof[i]
+			end
+		end
+		-- fundo chato (leito do riacho): atravessa o fundo antes de subir cada barranco
+		local iA, iB = iMin, iMin
+		while iA > 1 and prof[iA - 1] <= hMin + 0.5 do
+			iA -= 1
+		end
+		while iB < #prof and prof[iB + 1] <= hMin + 0.5 do
+			iB += 1
+		end
+		local floorA, floorB = iA, iB
+		while iA > 1 and prof[iA - 1] > prof[iA] + 0.3 do
+			iA -= 1
+		end
+		while iB < #prof and prof[iB + 1] > prof[iB] + 0.3 do
+			iB += 1
+		end
+		local depth = math.min(prof[iA], prof[iB]) - hMin
+		if iA == floorA or iB == floorB or depth * M < 1 or (iB - iA) * STEP * M > 40 then
+			continue
+		end
+		local width = (r.widthM + 1) / M
+		local dir = Vector3.new(dx, 0, dz)
+		for i = iA, iB do
+			local t = (i - iA) / (iB - iA)
+			local top = prof[iA] + (prof[iB] - prof[iA]) * t
+			local bottom = hMin - 2
+			local pos = Vector3.new(ax + dx * (i - 1) * STEP, (top + bottom) / 2, az + dz * (i - 1) * STEP)
+			workspace.Terrain:FillBlock(
+				CFrame.lookAt(pos, pos + dir),
+				Vector3.new(width, top - bottom, STEP + 1),
+				Enum.Material.Ground
+			)
+		end
+		local x1, z1 = ax + dx * (iA - 1) * STEP, az + dz * (iA - 1) * STEP
+		local x2, z2 = ax + dx * (iB - 1) * STEP, az + dz * (iB - 1) * STEP
+		BotWorld.addRoad(x1, z1, x2, z2, width)
+		-- o leito da vala ao lado (até 110 m para cada lado, com as curvas dela) fica fechado para
+		-- veículo de bot: a rota de volta atravessava 15 m ao lado do aterro e encalhava (teste da v38)
+		local bank = math.min(prof[iA], prof[iB])
+		local mid = (iA + iB) / 2 - 1
+		local cx, cz = ax + dx * mid * STEP, az + dz * mid * STEP
+		local blocks: { Vector3 } = {}
+		for s = -400, 400, 8 do
+			if math.abs(s) > width / 2 + 6 then
+				for a = -80, 80, 8 do
+					local x, z = cx - dz * s + dx * a, cz + dx * s + dz * a
+					local y = terrainY(x, z)
+					if y and y < bank - 1 / M then
+						table.insert(blocks, Vector3.new(x, 0, z))
+					end
+				end
+			end
+		end
+		BotWorld.blockForVehicles(blocks)
+		print(
+			string.format(
+				"[VT65] aterro na saída da base %s: vala de %.1f m de fundo e %.0f m de boca",
+				faction,
+				depth * M,
+				(iB - iA) * STEP * M
+			)
+		)
+	end
 end
 
 -- Veículo de teste fora dos depósitos (ganchos do Studio): não renasce
@@ -1259,6 +1451,36 @@ local function recover(player: Player, model: Model, char: Model)
 		end
 	end)
 	notice(player, "Veículo desvirado")
+end
+
+-- Bot motorista encalhado de vez (várias ré seguidas no mesmo lugar, entre troncos ou contra outro
+-- veículo; teste da v38): como o "desencalhar" do jogador, o veículo sobe um pouco e recua backM
+-- metros no rumo dele; a rota é refeita por quem chama.
+function VehicleService.botRecover(model: Model, backM: number): boolean
+	local chassis = model:FindFirstChild("Chassis") :: BasePart?
+	if not chassis or model:GetAttribute("Destroyed") then
+		return false
+	end
+	local look = chassis.CFrame.LookVector
+	local flat = Vector3.new(look.X, 0, look.Z)
+	if flat.Magnitude < 0.1 then
+		return false
+	end
+	flat = flat.Unit
+	local yaw = math.atan2(-flat.X, -flat.Z)
+	local p = chassis.Position - flat * (backM / M)
+	local ground = SpawnService.groundY(p.X, p.Z)
+	local cf = CFrame.new(p.X, ground + chassis.Size.Y / 2 + Vehicles.RECOVER.liftM / M, p.Z) * CFrame.Angles(0, yaw, 0)
+	model:PivotTo(cf)
+	chassis.AssemblyLinearVelocity = Vector3.zero
+	chassis.AssemblyAngularVelocity = Vector3.zero
+	local d = botDrives[model]
+	if d then
+		d.st.v = 0
+		d.yaw = yaw
+	end
+	model:SetAttribute("Stuck", nil)
+	return true
 end
 
 local boardAt: { [Player]: number } = {}
@@ -1463,6 +1685,42 @@ local function devVeh()
 		end
 		return
 	end
+	-- lote _v2: "pecas" lista, de cada veículo, o modelo, as juntas criadas e as peças móveis que o
+	-- importador não trouxe; "mira" vira torre e cano de todos (40° à esquerda, 10° acima)
+	if want == "pecas" or want == "mira" then
+		for _, m in folder:GetChildren() do
+			local spec = tostring(m:GetAttribute("Spec"))
+			if want == "mira" then
+				m:SetAttribute("AimYaw", math.rad(40))
+				m:SetAttribute("AimPitch", math.rad(10))
+				continue
+			end
+			local joints, missing = {}, {}
+			for _, d in m:GetDescendants() do
+				if d:IsA("Motor6D") and d.Name ~= "ArtMount" then
+					table.insert(joints, d.Name)
+				end
+			end
+			local art = VehicleDrive.ART[spec]
+			for name in (if art and art.pivots then art.pivots else {}) :: { [string]: any } do
+				if not m:FindFirstChild(name, true) then
+					table.insert(missing, name)
+				end
+			end
+			table.sort(joints)
+			print(
+				string.format(
+					"[VT65 TESTE] %s (%s): juntas %s | faltando %s | substituto %s",
+					spec,
+					Vehicles.modelKey(spec),
+					table.concat(joints, ","),
+					if #missing > 0 then table.concat(missing, ",") else "-",
+					tostring(m:GetAttribute("ArtPlaceholder") == true)
+				)
+			)
+		end
+		return
+	end
 	local list: { string } = {}
 	if want == "todos" then
 		for _, id in { "m151", "m35", "peugeot403", "m48a3", "ontos", "lvtp5", "uh34d" } do
@@ -1626,7 +1884,7 @@ function VehicleService.botState(vehicle: Model): BotDriveState?
 		floating = d.st.floating,
 		slip = d.st.slip,
 		blocked = d.st.blockedT > 0.25,
-		top = VehicleDrive.topSpeed(spec, d.ground, if type(rain) == "number" then rain else nil),
+		top = VehicleDrive.topSpeed(spec, d.ground, if type(rain) == "number" then rain else nil, d.depth),
 	}
 end
 
@@ -1694,8 +1952,29 @@ function VehicleService.start()
 		telemetry = r
 	end
 	(telemetry :: UnreliableRemoteEvent).OnServerEvent:Connect(onTelemetry)
+	-- lote _v2: a mira do atirador (VehicleFx) para a torre e o cano de todo mundo; remote próprio
+	local aimRemote = remotes:FindFirstChild("Vehicle_Aim") :: UnreliableRemoteEvent?
+	if not aimRemote then
+		local r = Instance.new("UnreliableRemoteEvent")
+		r.Name = "Vehicle_Aim"
+		r.Parent = remotes
+		aimRemote = r
+	end
+	(aimRemote :: UnreliableRemoteEvent).OnServerEvent:Connect(function(player: Player, dir: any)
+		local now = os.clock()
+		if typeof(dir) ~= "Vector3" or now - (lastAim[player] or 0) < 0.1 then
+			return
+		end
+		lastAim[player] = now
+		local seat = seatOf(player)
+		local model = seat and seat:FindFirstAncestorWhichIsA("Model")
+		if seat and model and model.Parent == folder and not model:GetAttribute("Destroyed") then
+			setAim(model, seat, dir)
+		end
+	end)
 	Players.PlayerRemoving:Connect(function(p)
 		lastTelemetry[p] = nil
+		lastAim[p] = nil
 		boardAt[p] = nil
 		switching[p] = nil
 	end)
@@ -1763,6 +2042,13 @@ function VehicleService.start()
 		while ReplicatedStorage:GetAttribute("TerrainReady") ~= true do
 			ReplicatedStorage:GetAttributeChangedSignal("TerrainReady"):Wait()
 		end
+		local okC, errC = pcall(function(): any
+			buildCauseways()
+			return nil
+		end)
+		if not okC then
+			warn("[VT65] aterro da saída da base falhou:", errC)
+		end
 		for i, d in DEPOTS do
 			VehicleService.spawn(d.spec, i)
 		end
@@ -1775,6 +2061,11 @@ function VehicleService.start()
 			validate()
 		end
 	end)
+	-- D-103: veículo ao nascer (comprado na carta de inserção); o Main não muda
+	require(script.Parent.CompraVeiculoService).start({
+		spawnAt = VehicleService.spawnAt,
+		vehicles = VehicleService.vehicles,
+	})
 end
 
 return VehicleService

@@ -173,12 +173,15 @@ local function outside(b: any, x: number, z: number): number
 	return math.sqrt(dx * dx + dz * dz)
 end
 
--- Zonas sem mata (studs): QGs com os depósitos de veículos (EUA 150 m, VC 100 m), o mastro de cada
+-- Zonas sem mata (studs): QG dos EUA com os depósitos de veículos (150 m), o mastro de cada
 -- ponto forte (8 m), as casas (6,5 m) e as bocas de túnel (5 m). housesXZ e tunnelXZ: x1, z1, x2, z2…
 function Vegetation.exclusions(mapConfig: any, housesXZ: { number }, tunnelXZ: { number }): { Circle }
 	local out: { Circle } = {}
+	-- 2026-11-13: o acampamento do VC fica sob a mata (só as pegadas e os pontos de nascer abrem)
 	for f, hq in mapConfig.HQ do
-		table.insert(out, { x = hq.x, z = hq.z, r = (if f == "US" then 150 else 100) / M })
+		if f == "US" then
+			table.insert(out, { x = hq.x, z = hq.z, r = 150 / M })
+		end
 	end
 	for _, sp in mapConfig.Strongpoints do
 		table.insert(out, { x = sp.x, z = sp.z, r = 8 / M })

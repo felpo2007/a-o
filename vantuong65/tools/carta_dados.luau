@@ -39,7 +39,9 @@ for _, name in Grid.heightChunks do
 end
 local world = WorldData.load(Grid, chunks)
 
-local ctx = ArtPlan.load(world, { features = Features, village = Village, roads = Roads, mapConfig = MapConfig })
+local Bases = require("../src/ServerStorage/VT65Build/Data/Bases") :: any
+local ctx =
+	ArtPlan.load(world, { features = Features, village = Village, roads = Roads, bases = Bases, mapConfig = MapConfig })
 local structures = ArtPlan.structures(ctx, function(k: string): boolean
 	local id = AssetIds.Models[k]
 	return type(id) == "number" and id ~= 0
@@ -80,9 +82,12 @@ for i = 1, #hs, 4 do
 	table.insert(houses, { hs[i], hs[i + 1], hs[i + 3] })
 end
 -- vila grande: casas (pegada do plano), pagode, casa comunal, poço e bancas
-local villageHouses, specials = {}, {}
+local villageHouses, specials, baseItems = {}, {}, {}
 for _, s in structures do
-	if s.group == "village" and s.home then
+	if s.group == "base" and s.padded then
+		-- bases dos dois lados (2026-11-13): as construções com patamar
+		table.insert(baseItems, { key = s.key, x = s.x, z = s.z, yaw = s.yaw, w = s.hx * 2, d = s.hz * 2 })
+	elseif s.group == "village" and s.home then
 		table.insert(villageHouses, { s.x, s.z, s.yaw, s.hx * 2, s.hz * 2 })
 	elseif s.group == "special" then
 		table.insert(
@@ -150,6 +155,7 @@ local info = {
 	village = { name = Village.name, x = Village.x, z = Village.z, houses = villageHouses, specials = specials },
 	roads = roads,
 	lanes = lanes,
+	bases = baseItems,
 	cemetery = { x = gx, z = gz },
 }
 

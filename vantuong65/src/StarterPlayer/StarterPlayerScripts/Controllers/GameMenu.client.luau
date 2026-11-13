@@ -185,7 +185,7 @@ end
 
 -- ===== estado =====
 local BASE_TABS = { "Configurações", "Squad e papel", "Loja" }
-local SUBS = { "Controle", "Mira", "Mouse/teclado", "Gráficos", "Som", "Vibração", "Acessib.", "Botões" }
+local SUBS = { "Controle", "Mira", "Mouse/teclado", "Toque", "Gráficos", "Som", "Vibração", "Acessib.", "Botões" }
 -- servidor privado: só o dono vê a aba "Servidor" (modo e horário; o servidor revalida)
 local MODES = { "Warfare", "Offensive", "Skirmish" }
 local MODE_NAMES = { "Warfare (5 setores, 75 min)", "Offensive (EUA atacam do leste)", "Skirmish (1 setor, 20 min)" }
@@ -684,13 +684,68 @@ local function renderSettings()
 			{ "completos", "leves (sem brilho)", "desligados" }
 		)
 		numberRow("Brilho", "gfxBrightness", 0.02, "%+.2f")
+		-- Parte 13: menos efeitos e quadros no celular (quem aplica é o agente de desempenho)
+		choiceRow("Economia de bateria", "batterySaver", { false, true }, { "desligada", "ligada" })
 		note("A qualidade geral fica no menu do Roblox (Esc > Configurações).")
 		action("g:reset", "Restaurar gráficos padrão", function()
 			local s = table.clone(Input.settings) :: any
-			for _, k in { "gfxDetail", "gfxShadows", "gfxPlantShadows", "gfxPost", "gfxBrightness" } do
+			for _, k in { "gfxDetail", "gfxShadows", "gfxPlantShadows", "gfxPost", "gfxBrightness", "batterySaver" } do
 				s[k] = (InputMap.DEFAULTS :: any)[k]
 			end
 			Input.setSettings(s)
+		end)
+	elseif SUB == "Toque" then
+		-- Parte 13 (celular e tablet): Shared/Toque, ToqueHud e EditorHud
+		section("Mira no toque")
+		choiceRow("Mirar no toque", "touchAimToggle", { true, false }, { "alternar", "segurar" })
+		numberRow("Sensibilidade do olhar", "touchLookSens", 0.05, "%.2f")
+		numberRow("Sensibilidade na mira de ferro", "touchAdsSens", 0.05, "%.2f")
+		numberRow("Sensibilidade na luneta", "touchScopeSens", 0.05, "%.2f")
+		choiceRow("Aceleração do olhar", "touchAccel", { false, true }, { "desligada", "ligada" })
+		choiceRow("Inverter Y", "invertY", { false, true }, { "não", "sim" })
+		section("Giroscópio")
+		choiceRow("Giroscópio", "gyroMode", { "off", "aim", "always" }, { "desligado", "só mirando", "sempre" })
+		numberRow("Sensibilidade do giroscópio", "gyroSens", 0.05, "%.2f")
+		local gyroOk = false
+		pcall(function()
+			gyroOk = UserInputService.GyroscopeEnabled
+		end)
+		if not gyroOk then
+			note("Este aparelho não tem giroscópio.")
+		end
+		section("Botões")
+		choiceRow(
+			"Layout",
+			"touchLayout",
+			{ "two", "three", "four", "custom1", "custom2", "custom3" },
+			{ "2 polegares", "3 dedos", "4 dedos", "Meu 1", "Meu 2", "Meu 3" }
+		)
+		choiceRow("Canhoto (espelhado)", "touchMirror", { false, true }, { "não", "sim" })
+		numberRow("Opacidade dos botões", "touchOpacity", 0.05, "%d%%", 100)
+		choiceRow("Transpor sozinho ao correr", "touchAutoVault", { true, false }, { "ligado", "desligado" })
+		action("t:editor", "Editar o HUD de toque", function()
+			Bus.fire("editor_hud_open")
+		end)
+		action("t:reset", "Restaurar o toque padrão", function()
+			local s = table.clone(Input.settings) :: any
+			for _, k in
+				{
+					"touchAimToggle",
+					"gyroMode",
+					"gyroSens",
+					"touchLookSens",
+					"touchAdsSens",
+					"touchScopeSens",
+					"touchAccel",
+					"touchOpacity",
+					"touchLayout",
+					"touchMirror",
+					"touchAutoVault",
+				}
+			do
+				s[k] = (InputMap.DEFAULTS :: any)[k]
+			end
+			Input.setSettings(s) -- os layouts próprios (Meu 1–3) ficam guardados
 		end)
 	elseif SUB == "Mira" then
 		section("Sensibilidade no controle")

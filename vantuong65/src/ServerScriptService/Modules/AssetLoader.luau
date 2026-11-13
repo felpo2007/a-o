@@ -74,6 +74,19 @@ function AssetLoader.ensureGroups()
 	groupsReady = true
 end
 
+-- Data/Bases (as bases dos dois lados e as casas únicas da vila), carregado na primeira vez
+local bases: any = nil
+local function baseData(): any
+	if bases == nil then
+		local ok, m = pcall(function(): any
+			local data = ServerStorage:WaitForChild("VT65Build"):WaitForChild("Data"):FindFirstChild("Bases")
+			return if data then (require :: any)(data) else false
+		end)
+		bases = if ok then m else false
+	end
+	return if bases then bases else nil
+end
+
 -- Carrega o modelo publicado (uma vez) e devolve um template ancorado, sem colisão de folhagem.
 function AssetLoader.template(key: string): Model?
 	if cache[key] then
@@ -127,6 +140,19 @@ function AssetLoader.template(key: string): Model?
 		copy.Name = key
 		copy.Parent = shared
 	end
+	-- objetos das bases e casas únicas da vila (Blender, 2026-11-13): nós visuais sem colisão,
+	-- Colisao_* invisíveis com o Material, Zona_* só toque (MapLife.baseTemplate)
+	local data = baseData()
+	local rules = data and data.nodes and data.nodes[key]
+	if rules then
+		local rangeM: number? = nil
+		if key == "us_range_target" then
+			rangeM = data.US.range.targetM
+		elseif key == "vc_range_target" then
+			rangeM = data.VC.range.targetM
+		end
+		MapLife.baseTemplate(tpl, rules, rangeM)
+	end
 	cache[key] = tpl
 	return tpl
 end
@@ -176,6 +202,14 @@ local PLATFORM: { [string]: boolean } = {
 	hut_veranda = true,
 	hut_kitchen = true,
 	house_tile = true,
+	-- bases (2026-11-13): barracas, bunker, garagem e baias (no plano: Data/Bases, padded)
+	us_tent_gp_medium = true,
+	us_tent_gp_large = true,
+	us_command_tent = true,
+	us_mess_tent = true,
+	us_bunker = true,
+	us_motor_pool = true,
+	us_armor_revetment = true,
 	granary = true,
 	shrine = true,
 	well = true,
@@ -443,6 +477,8 @@ local function foliageParts(m: Model, shadow: boolean)
 		-- copa com sombra: o cliente liga ou desliga pela opção Sombra das árvores (Graficos.client)
 		m:SetAttribute("PlantShadow", true)
 	end
+	-- planta: a raia do campo de tiro pode tirar (TrainingService); construção, não
+	m:SetAttribute("Foliage", true)
 end
 
 -- Põe um item do plano (ArtPlan.Item). planned: o terreno é o do plano (atributo SitePlan).
@@ -496,6 +532,13 @@ function AssetLoader.placeItem(it: any, parent: Instance, planned: boolean): Mod
 	end
 	if it.tint then
 		tintModel(m, it.tint)
+	end
+	-- bases e casas únicas: placa certa, cancela no pino, fumaça da cozinha, escada da torre e do
+	-- jirau, estacas punji (MapLife.baseInstance; cf = o meio da base da caixa, com o giro)
+	local data = baseData()
+	if data and data.nodes and data.nodes[it.key] then
+		local cf = CFrame.new(it.x, base, it.z) * CFrame.Angles(0, it.yaw, 0)
+		MapLife.baseInstance(m, it.key, cf, it.node, data.extras and data.extras[it.key])
 	end
 	m.Parent = parent
 	return m

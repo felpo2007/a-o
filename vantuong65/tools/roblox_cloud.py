@@ -297,6 +297,28 @@ def cmd_create_store(only: set[str] | None = None) -> None:
             20,
             "3.000 créditos de intendência (50% a mais que o pacote de 500).",
         ),
+        # veículo ao nascer (D-103); preço do coordenador, perto do valor em créditos (PLACEHOLDER)
+        (
+            "PRODUCT_VEH_M151",
+            "Veículo ao nascer: M151 MUTT",
+            10,
+            "Um jipe M151 aparece ao seu lado na próxima inserção (QG ou reunião). Só cobra se "
+            "houver lugar.",
+        ),
+        (
+            "PRODUCT_VEH_M35",
+            "Veículo ao nascer: caminhão M35",
+            15,
+            "Um caminhão M35 aparece ao seu lado na próxima inserção (QG ou reunião). Só cobra se "
+            "houver lugar.",
+        ),
+        (
+            "PRODUCT_VEH_PEUGEOT403",
+            "Veículo ao nascer: Peugeot 403",
+            10,
+            "Uma picape Peugeot 403 aparece ao seu lado na próxima inserção (QG ou reunião). Só "
+            "cobra se houver lugar.",
+        ),
     ]
     for key, name, price, desc in products:
         if f"store.{key}" in ids or (only is not None and key not in only):

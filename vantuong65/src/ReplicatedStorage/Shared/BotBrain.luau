@@ -954,6 +954,10 @@ function BotBrain.coverKind(partName: string, modelName: string?, material: stri
 		return "wall"
 	elseif string.sub(m, 1, 10) == "vila_casa_" or m == "Vila_chua" or m == "Vila_dinh" then
 		return "wall" -- vila grande do centro (2026-11-12): casas únicas, pagode e casa comunal
+	elseif m == "us_bunker" or m == "us_armor_revetment" or m == "us_range_berm" then
+		return "earth" -- bases (2026-11-13): sacos de areia e barranco de terra
+	elseif m == "us_conex" or m == "us_motor_pool" or m == "us_watchtower" then
+		return "wall"
 	end
 	return "solid"
 end

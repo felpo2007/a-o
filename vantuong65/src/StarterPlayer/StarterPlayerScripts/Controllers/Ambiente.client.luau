@@ -174,7 +174,8 @@ local function readDetail()
 		e.Enabled = k > 0
 	end
 	for e in villageSmoke do
-		e.Rate = SMOKE_RATE * k
+		local base = e:GetAttribute("BaseRate")
+		e.Rate = (if type(base) == "number" then base else SMOKE_RATE) * k
 		e.Enabled = k > 0
 	end
 end
@@ -191,7 +192,9 @@ task.spawn(function()
 		if d:IsA("ParticleEmitter") and d.Parent and d.Parent.Name == "Fumaca" then
 			villageSmoke[d] = true
 			local k = smokeRate()
-			d.Rate = SMOKE_RATE * k
+			-- fumaça de cozinha das vilas (4/s) ou a rala do fogão do VC (BaseRate do servidor)
+			local base = d:GetAttribute("BaseRate")
+			d.Rate = (if type(base) == "number" then base else SMOKE_RATE) * k
 			d.Enabled = k > 0
 		end
 	end

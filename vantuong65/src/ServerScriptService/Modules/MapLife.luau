@@ -523,7 +523,7 @@ end
 -- Vilas
 ---------------------------------------------------------------------------------------------
 
-local function smoke(parent: Instance, pos: Vector3)
+local function smoke(parent: Instance, pos: Vector3): Part
 	local src = part(
 		"Fumaca",
 		Vector3.new(0.5, 0.5, 0.5),
@@ -551,7 +551,9 @@ local function smoke(parent: Instance, pos: Vector3)
 	e.LightInfluence = 1
 	e.RotSpeed = NumberRange.new(-15, 15)
 	e.Rotation = NumberRange.new(0, 360)
+	e:SetAttribute("BaseRate", e.Rate) -- o Ambiente.client reduz a partir disto (detalhe)
 	e.Parent = src
+	return src
 end
 
 local function jar(parent: Instance, x: number, y: number, z: number, s: number, yaw: number)
@@ -895,6 +897,188 @@ function MapLife.villagePart(kind: string, parent: Instance, cf: CFrame, w: numb
 	end
 	m.Parent = parent
 	return m
+end
+
+---------------------------------------------------------------------------------------------
+-- Bases dos dois lados (2026-11-13; objetos do Blender, layouts em Data/Bases)
+---------------------------------------------------------------------------------------------
+-- Material de colisão que a bala atravessa perdendo energia (CombatService.PASS): a peça
+-- Colisao_* dele fica consultável mesmo com a bala "passa" (a lona esconde, mas não segura o tiro).
+local PASS_MATERIAL: { [string]: boolean } = { Bamboo = true, Thatch = true, Canvas = true }
+-- GANCHOS DO STUDIO (o giro do importador, D-58, não dá para conferir fora dele):
+-- cancela aberta a este ângulo em volta do pino (se baixar em vez de subir, troque o sinal)
+MapLife.GATE_OPEN_DEG = 70
+-- escada da torre: TrussPart invisível junto dos degraus (Colisao_Degrau*), caso o Humanoid não
+-- suba pelos degraus de 0,30 m (false = só os degraus)
+MapLife.TOWER_TRUSS = true
+-- estacas punji: ferimento na perna de quem pisa (não o VC, que sabe onde elas estão), no máximo
+-- um a cada PUNJI_COOLDOWN_S por pessoa. PLACEHOLDER de design (pequeno: o de um membro sem energia)
+MapLife.PUNJI_COOLDOWN_S = 3
+-- fumaça rala do fogão Hoàng Cầm (o duto espalha rente ao chão)
+MapLife.KITCHEN_SMOKE_RATE = 1.2
+
+-- Template de cada chave (uma vez; as cópias herdam): nós visuais sem colisão, consulta nem toque;
+-- Colisao_* invisíveis, com colisão e o atributo Material (consulta só onde a bala para, ou no
+-- material que ela atravessa perdendo energia); Zona_* só com toque. rules: Data/Bases.nodes[key].
+-- rangeM: o alvo do estande (Silhueta e a colisão dela ganham o atributo RangeTarget).
+function MapLife.baseTemplate(tpl: Model, rules: { [string]: any }?, rangeM: number?)
+	for _, d in tpl:GetDescendants() do
+		if d:IsA("BasePart") then
+			local name = d.Name
+			if string.sub(name, 1, 8) == "Colisao_" then
+				local r = rules and rules[name]
+				local stop = if r then r.stop == true else true
+				local mat = if r and r.material ~= "" then r.material else "Wood"
+				d.Transparency = 1
+				d.CanCollide = true
+				d.CastShadow = false
+				d.CanTouch = false
+				d.CanQuery = stop or PASS_MATERIAL[mat] == true
+				d:SetAttribute("Material", mat)
+				if rangeM then
+					d:SetAttribute("RangeTarget", rangeM)
+				end
+			elseif string.sub(name, 1, 5) == "Zona_" then
+				d.Transparency = 1
+				d.CanCollide = false
+				d.CanQuery = false
+				d.CanTouch = true
+			else
+				d.CanCollide = false
+				d.CanTouch = false
+				d.CanQuery = rangeM ~= nil and name == "Silhueta"
+				if d.CanQuery then
+					d:SetAttribute("RangeTarget", rangeM)
+				end
+			end
+		end
+	end
+end
+
+local punjiLast: { [Model]: number } = setmetatable({}, { __mode = "k" }) :: any
+local function punjiTouched(hit: BasePart)
+	local char = hit:FindFirstAncestorWhichIsA("Model")
+	if not char or char:GetAttribute("Faction") == nil or char:GetAttribute("Faction") == "VC" then
+		return
+	end
+	local now = os.clock()
+	if now - (punjiLast[char] or -math.huge) < MapLife.PUNJI_COOLDOWN_S then
+		return
+	end
+	punjiLast[char] = now
+	-- carregado aqui: o MedicalService não pode entrar no require do AssetLoader (ciclo)
+	local MedicalService = require(script.Parent:WaitForChild("MedicalService")) :: any
+	MedicalService.hit(char, "leg", 0, 1, nil)
+end
+
+-- Cada cópia posta (cf: o meio da base da caixa no chão, com o giro). it: o item do plano
+-- (ArtPlan, com node = a placa que fica). extras: Data/Bases.extras[key].
+function MapLife.baseInstance(model: Model, key: string, cf: CFrame, node: string?, extras: any?)
+	-- placas de distância: fica só a do item (Placa25, Placa100…)
+	if node then
+		for _, d in model:GetDescendants() do
+			if d:IsA("BasePart") and string.match(d.Name, "^Placa%d+$") and d.Name ~= node then
+				d:Destroy()
+			end
+		end
+	end
+	-- cancela: gira em volta do pino (eixo do modelo), junto com a colisão dela
+	if extras and extras.gatePivot then
+		local p = extras.gatePivot
+		local pivot = cf * CFrame.new(p[1], p[2], p[3])
+		local a = math.rad(MapLife.GATE_OPEN_DEG)
+		local turn = if extras.gateAxis == "X"
+			then CFrame.Angles(a, 0, 0)
+			elseif extras.gateAxis == "Y" then CFrame.Angles(0, a, 0)
+			else CFrame.Angles(0, 0, a)
+		local rot = pivot * turn * pivot:Inverse()
+		for _, d in model:GetDescendants() do
+			if d:IsA("BasePart") and (d.Name == "Cancela" or d.Name == "Colisao_Cancela") then
+				d.CFrame = rot * d.CFrame
+			end
+			-- o braço erguido e o garfo de apoio (poste fino) não seguram veículo: com eles, o vão
+			-- entre o garfo e a cancela era de 10,8 studs e o M48 tem 13 (teste da v38); a guarita,
+			-- o pilar e as placas continuam sólidos e dão o vão de 21,6 studs do portão
+			if d:IsA("BasePart") and (d.Name == "Colisao_Cancela" or d.Name == "Colisao_Garfo") then
+				d.CanCollide = false
+			end
+		end
+	end
+	-- fumaça rala da cozinha do VC: 3 saídas do duto (o Ambiente.client acha a peça "Fumaca" e reduz
+	-- pelo detalhe a partir do BaseRate)
+	if extras and extras.smoke then
+		for _, p in extras.smoke do
+			local src = smoke(model, (cf * CFrame.new(p[1], p[2], p[3])).Position)
+			local e = src:FindFirstChildOfClass("ParticleEmitter")
+			if e then
+				e.Rate = MapLife.KITCHEN_SMOKE_RATE
+				e:SetAttribute("BaseRate", MapLife.KITCHEN_SMOKE_RATE)
+				e.Speed = NumberRange.new(0.3, 0.8) -- o fogão Hoàng Cầm solta a fumaça rente ao chão
+				e.Acceleration = Vector3.new(0.6, 0.05, 0.3)
+				e.Size = NumberSequence.new({ NumberSequenceKeypoint.new(0, 2), NumberSequenceKeypoint.new(1, 10) })
+				e.Transparency = NumberSequence.new({
+					NumberSequenceKeypoint.new(0, 0.75),
+					NumberSequenceKeypoint.new(1, 1),
+				})
+			end
+		end
+	end
+	-- escada da torre: TrussPart invisível do pé ao alto dos degraus
+	if key == "us_watchtower" and MapLife.TOWER_TRUSS then
+		local lo, hi = Vector3.new(math.huge, math.huge, math.huge), Vector3.new(-math.huge, -math.huge, -math.huge)
+		for _, d in model:GetDescendants() do
+			if d:IsA("BasePart") and string.sub(d.Name, 1, 14) == "Colisao_Degrau" then
+				lo, hi = lo:Min(d.Position - d.Size / 2), hi:Max(d.Position + d.Size / 2)
+			end
+		end
+		if lo.Y < hi.Y then
+			local t = Instance.new("TrussPart")
+			t.Name = "EscadaTruss"
+			t.Anchored = true
+			t.Transparency = 1
+			t.CanQuery = false
+			t.CastShadow = false
+			t.Size = Vector3.new(2, math.max(2, math.floor((hi.Y - lo.Y) / 2 + 0.5) * 2), 2)
+			local c = (lo + hi) / 2
+			t.CFrame = CFrame.new(c.X, lo.Y + t.Size.Y / 2, c.Z) * (cf - cf.Position)
+			t.Parent = model
+		end
+	end
+	-- jirau da casa 09 (vila Xóm Gò): o Humanoid não sobe pela escada visual. TrussPart invisível do
+	-- piso ao alto do jirau, encostada no lado dele que dá para o meio da casa (GANCHO DO STUDIO:
+	-- conferir que fica na escada)
+	if key == "vila_casa_09" then
+		local loft = model:FindFirstChild("Colisao_gac", true)
+		if loft and loft:IsA("BasePart") then
+			local l = loft.CFrame:PointToObjectSpace(cf.Position)
+			local sx, sz = loft.Size.X / 2, loft.Size.Z / 2
+			-- o lado do jirau mais perto do meio da casa
+			local off = if math.abs(l.X) / sx > math.abs(l.Z) / sz
+				then Vector3.new(math.sign(l.X) * (sx + 1), 0, 0)
+				else Vector3.new(0, 0, math.sign(l.Z) * (sz + 1))
+			local top = loft.Position.Y + loft.Size.Y / 2
+			local floor = cf.Position.Y + 0.54
+			local h = math.max(2, math.floor((top - floor) / 2 + 0.5) * 2)
+			local t = Instance.new("TrussPart")
+			t.Name = "EscadaJirau"
+			t.Anchored = true
+			t.Transparency = 1
+			t.CanQuery = false
+			t.CastShadow = false
+			t.Size = Vector3.new(2, h, 2)
+			local p = loft.CFrame * off
+			t.CFrame = CFrame.new(p.X, floor + h / 2, p.Z) * (loft.CFrame - loft.CFrame.Position)
+			t.Parent = model
+		end
+	end
+	-- estacas punji: o toque na zona fere quem não é do VC
+	if key == "vc_punji" then
+		for _, d in model:GetDescendants() do
+			if d:IsA("BasePart") and string.sub(d.Name, 1, 5) == "Zona_" then
+				d.Touched:Connect(punjiTouched)
+			end
+		end
+	end
 end
 
 -- houses: modelos das casas já postas. groundAt: altura do terreno (studs) ou nil.

@@ -13,6 +13,39 @@
 | F5 Arte total e otimização | arte nos 5 setores a 100% do plano; 57,1 fps girando a câmera na célula mais densa da mata (D-76) e 59,6 fps no arrozal (D-74). Critério de 60 jogadores **só no Roblox** |
 | F6 Offensive e lançamento | **testado no Studio**: Offensive com relatório pós-ação, progressão. Beta fechado **só você pode rodar** |
 
+## v38 testada no Studio (2026-11-13, D-106)
+- **Conferido no Studio:**
+  - servidor sem erro de script; terreno em 15 s; 1.382 modelos de arte;
+  - os 9 veículos nas vagas das bases;
+  - base dos EUA, acampamento do VC e casas novas da vila no lugar;
+  - boneco de bloco do Front 44 no menu.
+- **Blindados de bot (D-106):** antes empacavam na baia. Agora saem, passam pelo portão, chegam ao
+  objetivo (M48 em apoio; LVTP-5 desembarca o squad) e voltam. Testado em dois objetivos.
+- **Avisos que ficam:**
+  - soldado com 2,07 m (meta 2,00 m);
+  - 15 construções mais de 0,6 m fora do patamar;
+  - o Studio avisa malhas sem representação alternativa (ruído do Studio).
+- **Não testado:** compra de veículo, pilotar, celular real, voz.
+
+## Veículos do Blender na medida real, em peças (2026-11-12, D-104)
+- Os 7 modelos novos (m48a3_v2, ontos_v2, lvtp5_v2, uh34d_v2, m151, m35, peugeot403)
+  com a tabela ART nova; torre, cano, rotores, rodas, escotilhas e portas em Motor6D; rodas,
+  rotores, volante e torre (pela mira do atirador) animados no VehicleFx.
+- Tropa do UH-34D dentro do porão; olho do Peugeot 8 cm mais baixo (cabeça sob o teto).
+- **Não testado no Studio.**
+
+## Veículo ao nascer (2026-11-12, D-103)
+- Na carta de inserção, "Levar veículo": EUA M151 ou M35, VC Peugeot 403, em CI ou Robux (3
+  Developer Products a criar, ID 0 em Commerce.IDS). Sai a 4-10 m, virado para o objetivo; só
+  cobra depois de achar o lugar.
+- Regras no Lune (	ests/luau/compraveiculo.luau, 10 testes). **Não testado no Studio.**
+
+## Soldados no formato do Front 44 (2026-11-12, D-102)
+- Boneco de bloco do R15 com as quatro escalas iguais (as proporções do Front 44) na altura de 2 m
+  (2,04 m, 0,8 m de ombro), pele lisa, farda de tecido, capacete na cabeça de bloco.
+- 24 rostos de época em `assets/rostos` (a subir; ids em `Corpo.ROSTOS`).
+- **Não testado no Studio.**
+
 ## Inclinar do Front 44, curativo que estanca, itens animados e mãos de 1ª pessoa (2026-11-12, D-99)
 - **Inclinar:** Q/E a qualquer hora a pé (controle: L3/R3 mirando), como no Front 44: 8/s, câmera
   0,35 m de lado e 14° de giro, arma de 1ª pessoa junto, tronco replicado (19,6°) e colisão com a
@@ -538,6 +571,13 @@ do usuário (opção A).
 - D-100 (pilotar todos os veículos, painel de lugares, tiro de dentro, carros M151/M35/Peugeot,
   desvirar): só Lune e luau-lsp. No Studio: `VT65DevVeh = "todos"` e `"tombar"`, `VT65DevDrive`
   com cada ficha; ver o painel no controle, o lugar no olho, o voo do UH-34D e o tiro pela porta.
+- D-103 (veículo ao nascer): só Lune e luau-lsp. No Studio: morto na carta, X / clique no cartão,
+  escolher em CI; nascer no QG e ver o veículo a 4-10 m virado para o objetivo e o CI descontado;
+  nascer num túnel (o pedido espera); VT65DevCompra = "m151" em campo em vários lugares (casa,
+  arrozal, mata, ladeira) para ver onde acha e onde recusa; "abandono". Robux: só com os produtos.
+- D-104 (modelos _v2 em peças): só Lune e luau-lsp. No Studio: VT65DevVeh = "todos" e depois
+  "pecas" (as juntas que o importador deixou), "mira" (torre e cano), VT65DevDrive com cada
+  ficha (rodas girando, rotores, volante, olho e cabeça no teto do Peugeot e do UH-34D).
 
 ## Como testar no Studio
 1. Abra `vantuong65/place/VanTuong65.rbxl`.

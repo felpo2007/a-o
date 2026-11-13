@@ -170,9 +170,10 @@
  },
  {
   "key": "Models.bamboo_clump",
-  "file": "assets/forgegui/models/bambu_touceira_studs_fosco.glb",
+  "file": "assets/blender/bamboo_clump/bamboo_clump.glb",
   "assetType": "Model",
-  "name": "VT65 bamboo_clump fosco"
+  "name": "VT65 bamboo_clump sem disco",
+  "description": "VAN TUONG 65 - touceira de bambu sem o disco da base"
  },
  {
   "key": "Accessories.us_m1955_vest",
@@ -848,31 +849,31 @@
  },
  {
   "key": "Accessories.ghillie",
-  "file": "assets/ghillie/ghillie.glb",
+  "file": "assets/blender/ghillie/ghillie.glb",
   "assetType": "Model",
-  "name": "VT65 camuflagem de mato",
-  "description": "VAN TUONG 65 - feixes de folha e capim por parte do corpo, desenho proprio (tools/ghillie.py)"
+  "name": "VT65 ghillie v2",
+  "description": "VAN TUONG 65 - camuflagem de mato v2 (Blender)"
  },
  {
   "key": "Images.ghillie_rice",
-  "file": "assets/ghillie/ghillie_arroz.png",
+  "file": "assets/ghillie/ghillie2_arroz.png",
   "assetType": "Decal",
-  "name": "VT65 camuflagem arrozal",
-  "description": "VAN TUONG 65 - textura de capim e palha da camuflagem (tools/ghillie.py)"
+  "name": "VT65 ghillie2 arroz",
+  "description": "VAN TUONG 65 - textura da camuflagem de mato v2"
  },
  {
   "key": "Images.ghillie_jungle",
-  "file": "assets/ghillie/ghillie_selva.png",
+  "file": "assets/ghillie/ghillie2_selva.png",
   "assetType": "Decal",
-  "name": "VT65 camuflagem selva",
-  "description": "VAN TUONG 65 - textura de folha larga da camuflagem (tools/ghillie.py)"
+  "name": "VT65 ghillie2 selva",
+  "description": "VAN TUONG 65 - textura da camuflagem de mato v2"
  },
  {
   "key": "Images.ghillie_bamboo",
-  "file": "assets/ghillie/ghillie_bambu.png",
+  "file": "assets/ghillie/ghillie2_bambu.png",
   "assetType": "Decal",
-  "name": "VT65 camuflagem bambu",
-  "description": "VAN TUONG 65 - textura de folha de bambu da camuflagem (tools/ghillie.py)"
+  "name": "VT65 ghillie2 bambu",
+  "description": "VAN TUONG 65 - textura da camuflagem de mato v2"
  },
  {
   "key": "Images.caveira_abate",
@@ -1027,5 +1028,495 @@
   "assetType": "Model",
   "name": "VT65 maos_vc_1p",
   "description": "VAN TUONG 65 - maos de 1a pessoa (Blender)"
+ },
+ {
+  "key": "Models.m48a3_v2",
+  "file": "assets/blender/m48a3/m48a3.glb",
+  "assetType": "Model",
+  "name": "VT65 m48a3_v2",
+  "description": "VAN TUONG 65 - veiculo na medida real, feito no Blender"
+ },
+ {
+  "key": "Models.ontos_v2",
+  "file": "assets/blender/ontos/ontos.glb",
+  "assetType": "Model",
+  "name": "VT65 ontos_v2",
+  "description": "VAN TUONG 65 - veiculo na medida real, feito no Blender"
+ },
+ {
+  "key": "Models.lvtp5_v2",
+  "file": "assets/blender/lvtp5/lvtp5.glb",
+  "assetType": "Model",
+  "name": "VT65 lvtp5_v2",
+  "description": "VAN TUONG 65 - veiculo na medida real, feito no Blender"
+ },
+ {
+  "key": "Models.uh34d_v2",
+  "file": "assets/blender/uh34d/uh34d.glb",
+  "assetType": "Model",
+  "name": "VT65 uh34d_v2",
+  "description": "VAN TUONG 65 - veiculo na medida real, feito no Blender"
+ },
+ {
+  "key": "Models.m151",
+  "file": "assets/blender/m151/m151.glb",
+  "assetType": "Model",
+  "name": "VT65 m151",
+  "description": "VAN TUONG 65 - veiculo na medida real, feito no Blender"
+ },
+ {
+  "key": "Models.m35",
+  "file": "assets/blender/m35/m35.glb",
+  "assetType": "Model",
+  "name": "VT65 m35",
+  "description": "VAN TUONG 65 - veiculo na medida real, feito no Blender"
+ },
+ {
+  "key": "Models.peugeot403",
+  "file": "assets/blender/peugeot403/peugeot403.glb",
+  "assetType": "Model",
+  "name": "VT65 peugeot403",
+  "description": "VAN TUONG 65 - veiculo na medida real, feito no Blender"
+ },
+ {
+  "key": "Rostos.us_01",
+  "file": "assets/rostos/rosto_us_01.png",
+  "assetType": "Decal",
+  "name": "VT65 rosto us 01",
+  "description": "VAN TUONG 65 - rosto de soldado (D-102)"
+ },
+ {
+  "key": "Rostos.us_02",
+  "file": "assets/rostos/rosto_us_02.png",
+  "assetType": "Decal",
+  "name": "VT65 rosto us 02",
+  "description": "VAN TUONG 65 - rosto de soldado (D-102)"
+ },
+ {
+  "key": "Rostos.us_03",
+  "file": "assets/rostos/rosto_us_03.png",
+  "assetType": "Decal",
+  "name": "VT65 rosto us 03",
+  "description": "VAN TUONG 65 - rosto de soldado (D-102)"
+ },
+ {
+  "key": "Rostos.us_04",
+  "file": "assets/rostos/rosto_us_04.png",
+  "assetType": "Decal",
+  "name": "VT65 rosto us 04",
+  "description": "VAN TUONG 65 - rosto de soldado (D-102)"
+ },
+ {
+  "key": "Rostos.us_05",
+  "file": "assets/rostos/rosto_us_05.png",
+  "assetType": "Decal",
+  "name": "VT65 rosto us 05",
+  "description": "VAN TUONG 65 - rosto de soldado (D-102)"
+ },
+ {
+  "key": "Rostos.us_06",
+  "file": "assets/rostos/rosto_us_06.png",
+  "assetType": "Decal",
+  "name": "VT65 rosto us 06",
+  "description": "VAN TUONG 65 - rosto de soldado (D-102)"
+ },
+ {
+  "key": "Rostos.us_07",
+  "file": "assets/rostos/rosto_us_07.png",
+  "assetType": "Decal",
+  "name": "VT65 rosto us 07",
+  "description": "VAN TUONG 65 - rosto de soldado (D-102)"
+ },
+ {
+  "key": "Rostos.us_08",
+  "file": "assets/rostos/rosto_us_08.png",
+  "assetType": "Decal",
+  "name": "VT65 rosto us 08",
+  "description": "VAN TUONG 65 - rosto de soldado (D-102)"
+ },
+ {
+  "key": "Rostos.us_09",
+  "file": "assets/rostos/rosto_us_09.png",
+  "assetType": "Decal",
+  "name": "VT65 rosto us 09",
+  "description": "VAN TUONG 65 - rosto de soldado (D-102)"
+ },
+ {
+  "key": "Rostos.us_10",
+  "file": "assets/rostos/rosto_us_10.png",
+  "assetType": "Decal",
+  "name": "VT65 rosto us 10",
+  "description": "VAN TUONG 65 - rosto de soldado (D-102)"
+ },
+ {
+  "key": "Rostos.us_11",
+  "file": "assets/rostos/rosto_us_11.png",
+  "assetType": "Decal",
+  "name": "VT65 rosto us 11",
+  "description": "VAN TUONG 65 - rosto de soldado (D-102)"
+ },
+ {
+  "key": "Rostos.us_12",
+  "file": "assets/rostos/rosto_us_12.png",
+  "assetType": "Decal",
+  "name": "VT65 rosto us 12",
+  "description": "VAN TUONG 65 - rosto de soldado (D-102)"
+ },
+ {
+  "key": "Rostos.vc_01",
+  "file": "assets/rostos/rosto_vc_01.png",
+  "assetType": "Decal",
+  "name": "VT65 rosto vc 01",
+  "description": "VAN TUONG 65 - rosto de soldado (D-102)"
+ },
+ {
+  "key": "Rostos.vc_02",
+  "file": "assets/rostos/rosto_vc_02.png",
+  "assetType": "Decal",
+  "name": "VT65 rosto vc 02",
+  "description": "VAN TUONG 65 - rosto de soldado (D-102)"
+ },
+ {
+  "key": "Rostos.vc_03",
+  "file": "assets/rostos/rosto_vc_03.png",
+  "assetType": "Decal",
+  "name": "VT65 rosto vc 03",
+  "description": "VAN TUONG 65 - rosto de soldado (D-102)"
+ },
+ {
+  "key": "Rostos.vc_04",
+  "file": "assets/rostos/rosto_vc_04.png",
+  "assetType": "Decal",
+  "name": "VT65 rosto vc 04",
+  "description": "VAN TUONG 65 - rosto de soldado (D-102)"
+ },
+ {
+  "key": "Rostos.vc_05",
+  "file": "assets/rostos/rosto_vc_05.png",
+  "assetType": "Decal",
+  "name": "VT65 rosto vc 05",
+  "description": "VAN TUONG 65 - rosto de soldado (D-102)"
+ },
+ {
+  "key": "Rostos.vc_06",
+  "file": "assets/rostos/rosto_vc_06.png",
+  "assetType": "Decal",
+  "name": "VT65 rosto vc 06",
+  "description": "VAN TUONG 65 - rosto de soldado (D-102)"
+ },
+ {
+  "key": "Rostos.vc_07",
+  "file": "assets/rostos/rosto_vc_07.png",
+  "assetType": "Decal",
+  "name": "VT65 rosto vc 07",
+  "description": "VAN TUONG 65 - rosto de soldado (D-102)"
+ },
+ {
+  "key": "Rostos.vc_08",
+  "file": "assets/rostos/rosto_vc_08.png",
+  "assetType": "Decal",
+  "name": "VT65 rosto vc 08",
+  "description": "VAN TUONG 65 - rosto de soldado (D-102)"
+ },
+ {
+  "key": "Rostos.vc_09",
+  "file": "assets/rostos/rosto_vc_09.png",
+  "assetType": "Decal",
+  "name": "VT65 rosto vc 09",
+  "description": "VAN TUONG 65 - rosto de soldado (D-102)"
+ },
+ {
+  "key": "Rostos.vc_10",
+  "file": "assets/rostos/rosto_vc_10.png",
+  "assetType": "Decal",
+  "name": "VT65 rosto vc 10",
+  "description": "VAN TUONG 65 - rosto de soldado (D-102)"
+ },
+ {
+  "key": "Rostos.vc_11",
+  "file": "assets/rostos/rosto_vc_11.png",
+  "assetType": "Decal",
+  "name": "VT65 rosto vc 11",
+  "description": "VAN TUONG 65 - rosto de soldado (D-102)"
+ },
+ {
+  "key": "Rostos.vc_12",
+  "file": "assets/rostos/rosto_vc_12.png",
+  "assetType": "Decal",
+  "name": "VT65 rosto vc 12",
+  "description": "VAN TUONG 65 - rosto de soldado (D-102)"
+ },
+ {
+  "key": "Models.us_armor_revetment",
+  "file": "assets/blender/us_armor_revetment/us_armor_revetment.glb",
+  "assetType": "Model",
+  "name": "VT65 us_armor_revetment",
+  "description": "VAN TUONG 65 - base (Blender)"
+ },
+ {
+  "key": "Models.us_bunker",
+  "file": "assets/blender/us_bunker/us_bunker.glb",
+  "assetType": "Model",
+  "name": "VT65 us_bunker",
+  "description": "VAN TUONG 65 - base (Blender)"
+ },
+ {
+  "key": "Models.us_command_tent",
+  "file": "assets/blender/us_command_tent/us_command_tent.glb",
+  "assetType": "Model",
+  "name": "VT65 us_command_tent",
+  "description": "VAN TUONG 65 - base (Blender)"
+ },
+ {
+  "key": "Models.us_concertina",
+  "file": "assets/blender/us_concertina/us_concertina.glb",
+  "assetType": "Model",
+  "name": "VT65 us_concertina",
+  "description": "VAN TUONG 65 - base (Blender)"
+ },
+ {
+  "key": "Models.us_conex",
+  "file": "assets/blender/us_conex/us_conex.glb",
+  "assetType": "Model",
+  "name": "VT65 us_conex",
+  "description": "VAN TUONG 65 - base (Blender)"
+ },
+ {
+  "key": "Models.us_flagpole",
+  "file": "assets/blender/us_flagpole/us_flagpole.glb",
+  "assetType": "Model",
+  "name": "VT65 us_flagpole",
+  "description": "VAN TUONG 65 - base (Blender)"
+ },
+ {
+  "key": "Models.us_fuel_drums",
+  "file": "assets/blender/us_fuel_drums/us_fuel_drums.glb",
+  "assetType": "Model",
+  "name": "VT65 us_fuel_drums",
+  "description": "VAN TUONG 65 - base (Blender)"
+ },
+ {
+  "key": "Models.us_gate",
+  "file": "assets/blender/us_gate/us_gate.glb",
+  "assetType": "Model",
+  "name": "VT65 us_gate",
+  "description": "VAN TUONG 65 - base (Blender)"
+ },
+ {
+  "key": "Models.us_generator",
+  "file": "assets/blender/us_generator/us_generator.glb",
+  "assetType": "Model",
+  "name": "VT65 us_generator",
+  "description": "VAN TUONG 65 - base (Blender)"
+ },
+ {
+  "key": "Models.us_helipad",
+  "file": "assets/blender/us_helipad/us_helipad.glb",
+  "assetType": "Model",
+  "name": "VT65 us_helipad",
+  "description": "VAN TUONG 65 - base (Blender)"
+ },
+ {
+  "key": "Models.us_jerrycans",
+  "file": "assets/blender/us_jerrycans/us_jerrycans.glb",
+  "assetType": "Model",
+  "name": "VT65 us_jerrycans",
+  "description": "VAN TUONG 65 - base (Blender)"
+ },
+ {
+  "key": "Models.us_mess_tent",
+  "file": "assets/blender/us_mess_tent/us_mess_tent.glb",
+  "assetType": "Model",
+  "name": "VT65 us_mess_tent",
+  "description": "VAN TUONG 65 - base (Blender)"
+ },
+ {
+  "key": "Models.us_motor_pool",
+  "file": "assets/blender/us_motor_pool/us_motor_pool.glb",
+  "assetType": "Model",
+  "name": "VT65 us_motor_pool",
+  "description": "VAN TUONG 65 - base (Blender)"
+ },
+ {
+  "key": "Models.us_range_bench",
+  "file": "assets/blender/us_range_bench/us_range_bench.glb",
+  "assetType": "Model",
+  "name": "VT65 us_range_bench",
+  "description": "VAN TUONG 65 - base (Blender)"
+ },
+ {
+  "key": "Models.us_range_berm",
+  "file": "assets/blender/us_range_berm/us_range_berm.glb",
+  "assetType": "Model",
+  "name": "VT65 us_range_berm",
+  "description": "VAN TUONG 65 - base (Blender)"
+ },
+ {
+  "key": "Models.us_range_sign",
+  "file": "assets/blender/us_range_sign/us_range_sign.glb",
+  "assetType": "Model",
+  "name": "VT65 us_range_sign",
+  "description": "VAN TUONG 65 - base (Blender)"
+ },
+ {
+  "key": "Models.us_range_target",
+  "file": "assets/blender/us_range_target/us_range_target.glb",
+  "assetType": "Model",
+  "name": "VT65 us_range_target",
+  "description": "VAN TUONG 65 - base (Blender)"
+ },
+ {
+  "key": "Models.us_tent_gp_large",
+  "file": "assets/blender/us_tent_gp_large/us_tent_gp_large.glb",
+  "assetType": "Model",
+  "name": "VT65 us_tent_gp_large",
+  "description": "VAN TUONG 65 - base (Blender)"
+ },
+ {
+  "key": "Models.us_tent_gp_medium",
+  "file": "assets/blender/us_tent_gp_medium/us_tent_gp_medium.glb",
+  "assetType": "Model",
+  "name": "VT65 us_tent_gp_medium",
+  "description": "VAN TUONG 65 - base (Blender)"
+ },
+ {
+  "key": "Models.us_watchtower",
+  "file": "assets/blender/us_watchtower/us_watchtower.glb",
+  "assetType": "Model",
+  "name": "VT65 us_watchtower",
+  "description": "VAN TUONG 65 - base (Blender)"
+ },
+ {
+  "key": "Models.us_water_trailer",
+  "file": "assets/blender/us_water_trailer/us_water_trailer.glb",
+  "assetType": "Model",
+  "name": "VT65 us_water_trailer",
+  "description": "VAN TUONG 65 - base (Blender)"
+ },
+ {
+  "key": "Models.vc_car_shelter",
+  "file": "assets/blender/vc_car_shelter/vc_car_shelter.glb",
+  "assetType": "Model",
+  "name": "VT65 vc_car_shelter",
+  "description": "VAN TUONG 65 - base (Blender)"
+ },
+ {
+  "key": "Models.vc_hammock",
+  "file": "assets/blender/vc_hammock/vc_hammock.glb",
+  "assetType": "Model",
+  "name": "VT65 vc_hammock",
+  "description": "VAN TUONG 65 - base (Blender)"
+ },
+ {
+  "key": "Models.vc_hoang_cam_kitchen",
+  "file": "assets/blender/vc_hoang_cam_kitchen/vc_hoang_cam_kitchen.glb",
+  "assetType": "Model",
+  "name": "VT65 vc_hoang_cam_kitchen",
+  "description": "VAN TUONG 65 - base (Blender)"
+ },
+ {
+  "key": "Models.vc_lean_to",
+  "file": "assets/blender/vc_lean_to/vc_lean_to.glb",
+  "assetType": "Model",
+  "name": "VT65 vc_lean_to",
+  "description": "VAN TUONG 65 - base (Blender)"
+ },
+ {
+  "key": "Models.vc_punji",
+  "file": "assets/blender/vc_punji/vc_punji.glb",
+  "assetType": "Model",
+  "name": "VT65 vc_punji",
+  "description": "VAN TUONG 65 - base (Blender)"
+ },
+ {
+  "key": "Models.vc_range_rest",
+  "file": "assets/blender/vc_range_rest/vc_range_rest.glb",
+  "assetType": "Model",
+  "name": "VT65 vc_range_rest",
+  "description": "VAN TUONG 65 - base (Blender)"
+ },
+ {
+  "key": "Models.vc_range_target",
+  "file": "assets/blender/vc_range_target/vc_range_target.glb",
+  "assetType": "Model",
+  "name": "VT65 vc_range_target",
+  "description": "VAN TUONG 65 - base (Blender)"
+ },
+ {
+  "key": "Models.vc_weapon_rack",
+  "file": "assets/blender/vc_weapon_rack/vc_weapon_rack.glb",
+  "assetType": "Model",
+  "name": "VT65 vc_weapon_rack",
+  "description": "VAN TUONG 65 - base (Blender)"
+ },
+ {
+  "key": "Models.vila_casa_01",
+  "file": "assets/blender/vila_casa_01/vila_casa_01.glb",
+  "assetType": "Model",
+  "name": "VT65 vila_casa_01",
+  "description": "VAN TUONG 65 - casa unica da vila Xom Go (Blender)"
+ },
+ {
+  "key": "Models.vila_casa_02",
+  "file": "assets/blender/vila_casa_02/vila_casa_02.glb",
+  "assetType": "Model",
+  "name": "VT65 vila_casa_02",
+  "description": "VAN TUONG 65 - casa unica da vila Xom Go (Blender)"
+ },
+ {
+  "key": "Models.vila_casa_03",
+  "file": "assets/blender/vila_casa_03/vila_casa_03.glb",
+  "assetType": "Model",
+  "name": "VT65 vila_casa_03",
+  "description": "VAN TUONG 65 - casa unica da vila Xom Go (Blender)"
+ },
+ {
+  "key": "Models.vila_casa_04",
+  "file": "assets/blender/vila_casa_04/vila_casa_04.glb",
+  "assetType": "Model",
+  "name": "VT65 vila_casa_04",
+  "description": "VAN TUONG 65 - casa unica da vila Xom Go (Blender)"
+ },
+ {
+  "key": "Models.vila_casa_05",
+  "file": "assets/blender/vila_casa_05/vila_casa_05.glb",
+  "assetType": "Model",
+  "name": "VT65 vila_casa_05",
+  "description": "VAN TUONG 65 - casa unica da vila Xom Go (Blender)"
+ },
+ {
+  "key": "Models.vila_casa_06",
+  "file": "assets/blender/vila_casa_06/vila_casa_06.glb",
+  "assetType": "Model",
+  "name": "VT65 vila_casa_06",
+  "description": "VAN TUONG 65 - casa unica da vila Xom Go (Blender)"
+ },
+ {
+  "key": "Models.vila_casa_07",
+  "file": "assets/blender/vila_casa_07/vila_casa_07.glb",
+  "assetType": "Model",
+  "name": "VT65 vila_casa_07",
+  "description": "VAN TUONG 65 - casa unica da vila Xom Go (Blender)"
+ },
+ {
+  "key": "Models.vila_casa_08",
+  "file": "assets/blender/vila_casa_08/vila_casa_08.glb",
+  "assetType": "Model",
+  "name": "VT65 vila_casa_08",
+  "description": "VAN TUONG 65 - casa unica da vila Xom Go (Blender)"
+ },
+ {
+  "key": "Models.vila_casa_09",
+  "file": "assets/blender/vila_casa_09/vila_casa_09.glb",
+  "assetType": "Model",
+  "name": "VT65 vila_casa_09",
+  "description": "VAN TUONG 65 - casa unica da vila Xom Go (Blender)"
+ },
+ {
+  "key": "Models.vila_casa_10",
+  "file": "assets/blender/vila_casa_10/vila_casa_10.glb",
+  "assetType": "Model",
+  "name": "VT65 vila_casa_10",
+  "description": "VAN TUONG 65 - casa unica da vila Xom Go (Blender)"
  }
 ]

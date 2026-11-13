@@ -286,6 +286,27 @@ local function placeBody(player: Player, faction: string, x: number, z: number, 
 	end
 end
 
+-- Nascer no QG (2026-11-13): num dos pontos de nascer da base (layout do Blender, Data/Bases), em
+-- rodízio, fora das barracas e da rua. Sem os dados, o meio do QG, como antes.
+local hqTurn: { [string]: number } = {}
+local baseSpawns: any = nil
+function SpawnService.hqSpot(faction: string, x: number, z: number): (number, number)
+	if baseSpawns == nil then
+		local data = game:GetService("ServerStorage"):FindFirstChild("VT65Build")
+		local mod = data and data:FindFirstChild("Data") and data.Data:FindFirstChild("Bases")
+		baseSpawns = if mod then (require :: any)(mod) else false
+	end
+	local base = baseSpawns and baseSpawns[faction]
+	local s = base and base.spawns
+	local hq = MapConfig.HQ[faction]
+	if not (s and hq and #s >= 2) then
+		return x, z
+	end
+	hqTurn[faction] = (hqTurn[faction] or 0) % (#s // 2) + 1
+	local i = hqTurn[faction] * 2 - 1
+	return hq.x + s[i], hq.z + s[i + 1]
+end
+
 -- Um nascer por vez: carregar o corpo cede a vez, e um segundo Spawn_Request chegava antes do fim.
 local function spawnAt(player: Player, faction: string, x: number, z: number, at: CFrame?)
 	local inf = info[player]
@@ -755,7 +776,11 @@ function SpawnService.start()
 				if wait > 0 or blocked then
 					return
 				end
-				spawnAt(player, faction, pt.x, pt.z)
+				local sx, sz = pt.x, pt.z
+				if pt.kind == "hq" then
+					sx, sz = SpawnService.hqSpot(faction, sx, sz)
+				end
+				spawnAt(player, faction, sx, sz)
 				return
 			end
 		end

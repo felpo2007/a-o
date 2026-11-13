@@ -16,6 +16,7 @@ local Net = require(ReplicatedStorage.Shared.Net)
 local Bus = require(script.Parent.Bus)
 local Input = require(script.Parent.Input)
 local Toast = require(script.Parent.Toast)
+local ToqueUi = require(script.Parent.ToqueUi)
 local UiKit = require(script.Parent.UiKit)
 local ViewMode = require(script.Parent.ViewMode)
 local Wheel = require(script.Parent.Wheel)
@@ -182,6 +183,13 @@ local layout = Instance.new("UIListLayout")
 layout.VerticalAlignment = Enum.VerticalAlignment.Bottom
 layout.Parent = feed
 local function line(text: string, color: Color3)
+	-- toque (Parte 13): no alto à esquerda ficam os botões do HUD de toque (mapa, menu...) e, numa
+	-- tela baixa, o feed subia até eles; no toque ele fica no meio à esquerda, mais estreito (só
+	-- rótulos: o dedo do analógico passa por ele)
+	local touch = ToqueUi.active()
+	feed.Position = if touch then UDim2.new(0, 90, 0.66, -96) else UDim2.new(0, 16, 1, -330)
+	feed.Size = if touch then UDim2.fromOffset(320, 96) else UDim2.fromOffset(420, 160)
+	feed.ClipsDescendants = touch -- no toque, só as últimas linhas (não sobem até os botões)
 	local l = Instance.new("TextLabel")
 	l.Size = UDim2.new(1, 0, 0, if UiKit.tv() then 30 else 22)
 	l.BackgroundTransparency = 0.5
@@ -262,6 +270,12 @@ end)
 
 local function useItem(id: string)
 	lastItem = id
+	-- toque (Parte 13): pá e obras passam pela prévia (ObraToque: girar, confirmar, cancelar)
+	local touch = ToqueUi.active()
+	if touch and (id == "shovel" or string.sub(id, 1, 6) == "build:") then
+		Bus.fire("build_preview", if id == "shovel" then "dig" else string.sub(id, 7))
+		return
+	end
 	if id == "shovel" then
 		Net.event("Dig_Request"):FireServer()
 	elseif id == "frag" or id == "smoke" then
@@ -283,9 +297,12 @@ local function useItem(id: string)
 		if r == "commander" or r == "mortar" then
 			Bus.fire("command_page")
 		elseif r == "anti_tank" then
-			Bus.fire("toast", "Lançador: troque de arma (Y)")
+			Bus.fire("toast", if touch then "Lançador: troque de arma" else "Lançador: troque de arma (Y)")
 		elseif r == "medic" or r == "engineer" then
-			Bus.fire("toast", "Segure X perto do alvo para agir")
+			Bus.fire(
+				"toast",
+				if touch then "Use o botão de interagir perto do alvo" else "Segure X perto do alvo para agir"
+			)
 		end
 	else
 		Bus.fire("equip_item", id) -- bandagem, torniquete, binóculo (Medical/Weapon)

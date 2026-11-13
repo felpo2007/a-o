@@ -59,6 +59,16 @@ end
 -- 25 cm para cada lado); peça do greybox no caminho (sebe, dique, casa) sai. O terreno não dá
 -- para tirar: se ele bloquear, avisa no Output. No teste do Studio (2026-11-10) uma sebe de
 -- arrozal a 21 m tapava o alvo de 100 m dos EUA.
+-- 2026-11-13: só sai planta (modelo com o atributo Foliage do AssetLoader) e peça do greybox; casa,
+-- barraca e o resto das bases e da vila ficam (o raio passa por eles e conta como barrado).
+local function removable(inst: Instance, map: Instance): boolean
+	local model = inst:FindFirstAncestorWhichIsA("Model")
+	if model and model:IsDescendantOf(map) then
+		return model:GetAttribute("Foliage") == true
+	end
+	return inst:IsDescendantOf(map)
+end
+
 local function clearLane(folder: Instance, from: Vector3, look: CFrame, plates: { BasePart })
 	local map = workspace:FindFirstChild("Map")
 	if not map then
@@ -78,7 +88,13 @@ local function clearLane(folder: Instance, from: Vector3, look: CFrame, plates: 
 					if not r then
 						break
 					end
-					if r.Instance:IsDescendantOf(map) then
+					if r.Instance:IsDescendantOf(map) and not removable(r.Instance, map) then
+						-- construção no caminho: fica, e o raio segue por ela
+						local model = r.Instance:FindFirstAncestorWhichIsA("Model")
+						table.insert(ignore, model or r.Instance)
+						params.FilterDescendantsInstances = ignore
+						blocked += 1
+					elseif r.Instance:IsDescendantOf(map) then
 						r.Instance:Destroy()
 						removed += 1
 					else
@@ -94,7 +110,7 @@ local function clearLane(folder: Instance, from: Vector3, look: CFrame, plates: 
 	if removed > 0 or blocked > 0 then
 		print(
 			string.format(
-				"[VT65] raia %s: %d peças removidas; %d raios barrados pelo terreno",
+				"[VT65] raia %s: %d peças removidas; %d raios barrados (terreno ou construção)",
 				folder.Name,
 				removed,
 				blocked
@@ -132,9 +148,62 @@ local function inside(x: number, z: number): boolean
 	return x > b.minX and x < b.maxX and z > b.minZ and z < b.maxZ
 end
 
+-- Bases dos dois lados (Data/Bases, 2026-11-13): o estande de cada base (alvos do Blender a 25 m nos
+-- EUA e a 23 m no VC, com RangeTarget) fica dentro dela; a raia longa (100, 200 e 300 m) sai na
+-- mesma direção, 4 m depois da cerca, e nunca começa dentro de uma base.
+local basesData: any = nil
+local function bases(): any
+	if basesData == nil then
+		local vt = game:GetService("ServerStorage"):FindFirstChild("VT65Build")
+		local mod = vt and vt:FindFirstChild("Data") and vt.Data:FindFirstChild("Bases")
+		basesData = if mod then (require :: any)(mod) else false
+	end
+	return if basesData then basesData else nil
+end
+
+local function inBase(x: number, z: number): boolean
+	local data = bases()
+	if not data then
+		return false
+	end
+	local m = 5 / M
+	for f, hq in MapConfig.HQ do
+		local a = data[f] and data[f].area
+		if
+			a
+			and x > hq.x + a.minX - m
+			and x < hq.x + a.maxX + m
+			and z > hq.z + a.minZ - m
+			and z < hq.z + a.maxZ + m
+		then
+			return true
+		end
+	end
+	return false
+end
+
+-- Raia longa da facção: direção do estande da base e origem logo depois da cerca (metros a partir do
+-- QG, como Tutorial.RANGE_LANE). nil sem os dados das bases.
+local function baseLane(faction: string): any?
+	local data = bases()
+	local b = data and data[faction]
+	if not (b and b.range and b.area) then
+		return nil
+	end
+	local r, a = b.range, b.area
+	local cx, cz = (r.x1 + r.x2) / 2, (r.z1 + r.z2) / 2
+	local ox, oz = cx, cz
+	if r.dirZ ~= 0 then
+		oz = (if r.dirZ > 0 then a.maxZ else a.minZ) + r.dirZ * 4 / M
+	else
+		ox = (if r.dirX > 0 then a.maxX else a.minX) + r.dirX * 4 / M
+	end
+	return { offsetM = { ox * M, oz * M }, dir = { r.dirX, r.dirZ } }
+end
+
 local function laneClear(x0: number, z0: number, dx: number, dz: number): boolean
 	local g0 = terrainAt(x0, z0)
-	if not (g0 and inside(x0, z0)) or g0.Material == Enum.Material.Water then
+	if not (g0 and inside(x0, z0)) or g0.Material == Enum.Material.Water or inBase(x0, z0) then
 		return false
 	end
 	for i, m in Tutorial.RANGE_M do
@@ -183,7 +252,7 @@ end
 -- Constrói o campo de tiro de uma facção. Devolve a pasta.
 local function buildRange(faction: string, folder: Folder)
 	local hq = MapConfig.HQ[faction]
-	local lane = Tutorial.RANGE_LANE[faction]
+	local lane = baseLane(faction) or Tutorial.RANGE_LANE[faction]
 	if not (hq and lane) then
 		return
 	end

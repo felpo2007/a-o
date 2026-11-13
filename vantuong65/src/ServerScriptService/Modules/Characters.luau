@@ -33,6 +33,11 @@ local Characters = {}
 -- por igual por Shared/Corpo.K (8/7): altura 1,25 -> 1,4286, largura, profundidade e cabeça 1 ->
 -- 1,1429. A cabeça cresce junto (com a escala só na altura ela ficava pequena e os capacetes, que
 -- se ajustam a ela, também). Conferir no Studio: atributo AlturaM ~2,00 m.
+-- D-102 (pedido do dono: "faça os personagens do mesmo formato do Front 44"): o corpo padrão passa a
+-- ser o "bloco", o boneco de bloco clássico do R15 que o Front 44 usa hoje (Shared/Corpo, formato do
+-- Front 44): peças e cabeça padrão, as quatro escalas iguais (Corpo.BLOCK_SCALE = 1,25 x K), rosto em
+-- decalque (Corpo.ROSTOS), pele lisa na cabeça e nas mãos, tecido na farda. O "man" fica de reserva
+-- (Characters.BODY = Corpo.FORMATO -- D-102: "bloco", o formato do Front 44 volta a ele).
 export type Body = {
 	Torso: number,
 	RightArm: number,
@@ -42,6 +47,9 @@ export type Body = {
 	Head: number,
 	MoodAnimation: number,
 	heightScale: number,
+	widthScale: number,
+	depthScale: number,
+	headScale: number,
 }
 Characters.BODIES = {
 	man = {
@@ -53,6 +61,9 @@ Characters.BODIES = {
 		Head = 10725826963,
 		MoodAnimation = 10725833199,
 		heightScale = 1.25 * Corpo.K,
+		widthScale = Corpo.K,
+		depthScale = Corpo.K,
+		headScale = Corpo.K,
 	},
 	bloco = {
 		Torso = 0,
@@ -62,10 +73,14 @@ Characters.BODIES = {
 		RightLeg = 0,
 		Head = 0,
 		MoodAnimation = 0,
-		heightScale = 1.2 * Corpo.K,
+		-- formato do Front 44: as quatro escalas iguais (proporções do boneco de bloco)
+		heightScale = Corpo.BLOCK_SCALE,
+		widthScale = Corpo.BLOCK_SCALE,
+		depthScale = Corpo.BLOCK_SCALE,
+		headScale = Corpo.BLOCK_SCALE,
 	},
 } :: { [string]: Body }
-Characters.BODY = "man"
+Characters.BODY = Corpo.FORMATO -- D-102: "bloco", o formato do Front 44
 
 local function body(): Body
 	return Characters.BODIES[Characters.BODY] or Characters.BODIES.bloco
@@ -87,8 +102,10 @@ local function rgb(c: { number }): Color3
 end
 
 -- mesma pele no describe e no dress: a semente é o UserId do jogador, o número do bot ou 0
-local function skinOf(seed: number?): Color3
-	return SKIN[1 + (math.floor(seed or 0) % #SKIN)]
+local function skinOf(faction: string?, seed: number?): Color3
+	-- D-102: tons do formato do Front 44, por lado (Shared/Corpo.PELE); SKIN é o de antes (reserva)
+	local c = Corpo.pele(faction, seed)
+	return if c then rgb(c) else SKIN[1 + (math.floor(seed or 0) % #SKIN)]
 end
 
 local LIMB_PARTS = {
@@ -102,9 +119,9 @@ function Characters.describe(faction: string, equipped: { [string]: string }?, s
 	local b = body()
 	local desc = Instance.new("HumanoidDescription")
 	desc.HeightScale = b.heightScale
-	desc.WidthScale = Corpo.K
-	desc.DepthScale = Corpo.K
-	desc.HeadScale = Corpo.K
+	desc.WidthScale = b.widthScale
+	desc.DepthScale = b.depthScale
+	desc.HeadScale = b.headScale
 	desc.BodyTypeScale = 0
 	desc.ProportionScale = 0
 	desc.Torso = b.Torso
@@ -114,7 +131,8 @@ function Characters.describe(faction: string, equipped: { [string]: string }?, s
 	desc.RightLeg = b.RightLeg
 	desc.Head = b.Head
 	desc.MoodAnimation = b.MoodAnimation
-	local skin = skinOf(seed)
+	desc.Face = 0 -- D-102: o rosto é o decalque de época (Characters.dress), como no Front 44
+	local skin = skinOf(faction, seed)
 	desc.HeadColor = skin
 	-- o molde v3 é transparente na mão, no antebraço arregaçado, no decote e na canela/pé do VC:
 	-- ali aparece a cor do corpo, que tem de ser a pele
@@ -474,6 +492,55 @@ local function handsArt()
 	end)
 end
 
+-- D-102: acabamento do formato do Front 44 (o Characters.Dress de lá, nos bonecos de bloco): cabeça e
+-- mãos de pele lisa no tom do soldado, farda com tecido nas peças, rosto de época em decalque na cabeça
+-- de bloco (Corpo.ROSTOS; sem o id publicado fica o rosto padrão, como nos bots do Front 44).
+local SKIN_SMOOTH = { "Head", "LeftHand", "RightHand" }
+local FABRIC = {
+	"UpperTorso",
+	"LowerTorso",
+	"LeftUpperArm",
+	"LeftLowerArm",
+	"RightUpperArm",
+	"RightLowerArm",
+	"LeftUpperLeg",
+	"LeftLowerLeg",
+	"RightUpperLeg",
+	"RightLowerLeg",
+}
+local function formatoF44(model: Model, faction: string, skin: Color3, seed: number?)
+	if Characters.BODY ~= "bloco" then
+		return
+	end
+	for _, n in SKIN_SMOOTH do
+		local p = model:FindFirstChild(n)
+		if p and p:IsA("BasePart") then
+			p.Color = skin
+			p.Material = Enum.Material.SmoothPlastic
+		end
+	end
+	for _, n in FABRIC do
+		local p = model:FindFirstChild(n)
+		if p and p:IsA("BasePart") then
+			p.Material = Enum.Material.Fabric
+		end
+	end
+	local head = model:FindFirstChild("Head")
+	local id = Corpo.rosto(faction, seed)
+	if head and id ~= 0 then
+		local face = head:FindFirstChild("face")
+		if not (face and face:IsA("Decal")) then
+			local d = Instance.new("Decal")
+			d.Name = "face"
+			d.Face = Enum.NormalId.Front
+			d.Parent = head
+			face = d
+		end
+		(face :: Decal).Texture = "rbxassetid://" .. id
+	end
+	model:SetAttribute("Formato", "front44")
+end
+
 function Characters.dress(model: Model, faction: string, equipped: { [string]: string }?)
 	handsArt()
 	local eq: { [string]: string } = equipped or {}
@@ -493,7 +560,7 @@ function Characters.dress(model: Model, faction: string, equipped: { [string]: s
 	-- O describe não sabe se o bot é guerrilheiro. Se o molde escolhido aqui deixa pele à mostra,
 	-- garante a cor de pele nessas partes (só muda algo quando os moldes v3 foram publicados pela
 	-- metade e o preto caiu num molde diferente do previsto no describe).
-	local skin = skinOf(seed)
+	local skin = skinOf(faction, seed)
 	local bodyColors = model:FindFirstChildOfClass("BodyColors")
 	local function paintSkin(group: string, color: Color3?)
 		local c = color or skin
@@ -543,6 +610,7 @@ function Characters.dress(model: Model, faction: string, equipped: { [string]: s
 		p.Parent = model
 	end
 	model:SetAttribute("Uniforme", u.variant)
+	formatoF44(model, faction, skin, seed)
 
 	local head = model:FindFirstChild("Head") :: BasePart?
 	local upper = model:FindFirstChild("UpperTorso") :: BasePart?

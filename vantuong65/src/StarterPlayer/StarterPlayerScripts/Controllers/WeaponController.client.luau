@@ -801,7 +801,8 @@ RunService.RenderStepped:Connect(function(dt: number)
 	end
 	-- volta da boca: mais lenta que a subida, só depois que ela termina (~0,25 s)
 	if recoilReturn > 0 and math.abs(recoilPitch) < 0.05 then
-		local back = recoilReturn * math.min(1, dt * 7)
+		-- Parte 13: no toque a VOLTA é até 25% mais rápida (Input.recoilReturnK); o chute é o mesmo
+		local back = recoilReturn * math.min(1, dt * 7 * Input.recoilReturnK())
 		camera.CFrame *= CFrame.Angles(math.rad(-back), 0, 0)
 		recoilReturn -= back
 		if recoilReturn < 1e-3 then

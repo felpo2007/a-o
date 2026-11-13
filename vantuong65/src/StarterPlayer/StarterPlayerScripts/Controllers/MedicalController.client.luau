@@ -110,6 +110,8 @@ Input.on("give_up", "press", function()
 	selfOp("giveup")
 end)
 Input.on("interact", "holdStart", interactAlly)
+-- toque (Parte 13): o botão contextual (Interagir) chama o mesmo, quando o Input.virtual não existe
+Bus.on("interact_ally", interactAlly)
 Bus.on("equip_item", function(id: string)
 	if id == "bandage" then
 		quickBandage()

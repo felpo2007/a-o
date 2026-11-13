@@ -418,6 +418,7 @@ test("arrozal: chão plano 5–15 cm abaixo da lâmina em todo ponto amostrado d
 		features = require("../../src/ServerStorage/VT65Build/Data/Features") :: any,
 		village = (require :: any)("../../src/ServerStorage/VT65Build/Data/Village"),
 		roads = (require :: any)("../../src/ServerStorage/VT65Build/Data/Roads"),
+		bases = (require :: any)("../../src/ServerStorage/VT65Build/Data/Bases"),
 		mapConfig = MapConfig,
 	})
 	ArtPlan.structures(ctx, function(k: string): boolean

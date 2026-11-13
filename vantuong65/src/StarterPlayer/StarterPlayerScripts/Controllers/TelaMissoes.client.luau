@@ -83,11 +83,20 @@ type Row = {
 local rows: { Row } = {}
 local sectionLabels: { TextLabel } = {}
 local resetLabels: { TextLabel } = {}
-local body = Instance.new("Frame")
+-- lista rolável (Parte 13): 2 seções e 6 linhas (~558 px) não cabiam nos ~434 px do corpo; a
+-- última linha passava por baixo do FECHAR. Rola no dedo, na roda do mouse e no analógico direito.
+local body = Instance.new("ScrollingFrame")
 body.Name = "Corpo"
 body.BackgroundTransparency = 1
+body.BorderSizePixel = 0
 body.Position = UDim2.fromOffset(P, px(96, 130))
 body.Size = UDim2.new(1, -2 * P, 1, -px(96, 130) - px(70, 96))
+body.CanvasSize = UDim2.new()
+body.AutomaticCanvasSize = Enum.AutomaticSize.Y
+body.ScrollingDirection = Enum.ScrollingDirection.Y
+body.ScrollBarThickness = px(4, 6)
+body.ScrollBarImageColor3 = V.LINE
+body.Selectable = false
 body.Parent = panel
 UiKit.list(body, false, px(6, 8))
 

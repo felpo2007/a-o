@@ -37,6 +37,7 @@ local ctx = ArtPlan.load(world, {
 	features = Features,
 	village = (require :: any)("../src/ServerStorage/VT65Build/Data/Village"),
 	roads = (require :: any)("../src/ServerStorage/VT65Build/Data/Roads"),
+	bases = (require :: any)("../src/ServerStorage/VT65Build/Data/Bases"),
 	mapConfig = MapConfig,
 })
 local stats = FeatureBuilder.build(env, Features, MapConfig, world, workspace, ctx.landscape, function(x1, z1, x2, z2)

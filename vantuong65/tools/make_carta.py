@@ -569,8 +569,15 @@ def estradas(q: Quadro, dr: ImageDraw.ImageDraw, d: Dados) -> None:
     vermelho-tijolo; secundária: traço duplo tracejado (estrada de carro de boi); becos da vila:
     tracejado fino"""
     k = q.px_m(1.0)  # px por metro
+    for r in d.info.get("roads", []):
+        if r["kind"] == "trilha":
+            # trilha de terra do acampamento do VC até a estrada (tracejado simples)
+            pts = [q.px(x, z) for x, z in r["pts"]]
+            tracejado_linha(dr, pts, (*PRETO, 235), int(1.3 * SS), 6 * SS, 3 * SS)
     for faixa in ("secundaria", "principal"):
         for r in d.info.get("roads", []):
+            if r["kind"] == "trilha":
+                continue
             tipo = "principal" if r["kind"] in ("principal", "rua") else "secundaria"
             if tipo != faixa:
                 continue
@@ -592,6 +599,19 @@ def estradas(q: Quadro, dr: ImageDraw.ImageDraw, d: Dados) -> None:
                     tracejado_linha(dr, off, (*PRETO, 235), int(1.4 * SS), 10 * SS, 4 * SS)
     for a, b in d.info.get("lanes", []):
         tracejado(dr, q.px(*a), q.px(*b), (*PRETO, 200), max(1, int(0.8 * SS)), 4 * SS, 3 * SS)
+
+
+def bases(q: Quadro, dr: ImageDraw.ImageDraw, d: Dados) -> None:
+    """bases dos dois lados (2026-11-13): barracas, bunkers, garagem e abrigos em preto; heliponto
+    e baia de blindado só no contorno (a carta de 1965 marca construção, não área aberta)"""
+    for b in d.info.get("bases", []):
+        pts = _ret(q, b["x"], b["z"], b["yaw"], b["w"] * 0.85, b["d"] * 0.85)
+        if b["key"] in ("us_helipad", "us_armor_revetment", "us_range_berm"):
+            dr.polygon(pts, outline=(*PRETO, 230), width=SS)
+        elif b["key"] in ("us_concertina", "us_range_bench", "vc_punji", "vc_range_rest"):
+            continue
+        else:
+            dr.polygon(pts, fill=(*PRETO, 255))
 
 
 def vila_grande(q: Quadro, cam: Image.Image, d: Dados) -> None:
@@ -1058,6 +1078,7 @@ def main() -> None:
     estradas(q, dt, d)
     casas(q, dt, d)
     vila_grande(q, topo, d)
+    bases(q, dt, d)
     trincheira(q, dt, d)
     cemiterio(q, topo, d)
     campo(q, topo, d)
