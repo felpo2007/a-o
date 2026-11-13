@@ -13,7 +13,8 @@
 | F5 Arte total e otimização | arte nos 5 setores a 100% do plano; 57,1 fps girando a câmera na célula mais densa da mata (D-76) e 59,6 fps no arrozal (D-74). Critério de 60 jogadores **só no Roblox** |
 | F6 Offensive e lançamento | **testado no Studio**: Offensive com relatório pós-ação, progressão. Beta fechado **só você pode rodar** |
 
-## v38 testada no Studio (2026-11-13, D-106)
+## v38 testada no Studio e publicada (2026-11-13, D-106)
+- **Publicada** como versão 38 do place (build do commit 95e45b5).
 - **Conferido no Studio:**
   - servidor sem erro de script; terreno em 15 s; 1.382 modelos de arte;
   - os 9 veículos nas vagas das bases;
