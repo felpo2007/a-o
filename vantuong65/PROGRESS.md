@@ -29,6 +29,7 @@
 - Perguntas ao dono: a M4 (é de 1994); a mão escorregando (em que vista e momento).
 
 ## v43: lote 1 (2026-11-13, D-111)
+- **Publicada** como versão 43 do place (build do commit b180846).
 - **Conferido no Studio:**
   - caveira a 62% da altura com o nome;
   - botão do Robux verde com borda dourada;
