@@ -264,6 +264,15 @@ function CaixaMunicaoService.place(
 	m:SetAttribute("Until", workspace:GetServerTimeNow() + CaixaMunicao.DURACAO_S)
 	m:SetAttribute("BoxId", b.id)
 	m.Parent = folder
+	-- v41/v42 (achado da v40: a caixa de 0,54 m some no capim alto do terreno): o capim em volta vira
+	-- terra pisada (a grama animada do terreno só nasce no Grass); ~2 voxels de 1,12 m, como o napalm
+	pcall(function()
+		local ext = Vector3.new(1.2, 1.5, 1.2) / M
+		local region = Region3.new(pos - ext, pos + ext):ExpandToGrid(4)
+		for _, mat in { Enum.Material.Grass, Enum.Material.LeafyGrass } do
+			workspace.Terrain:ReplaceMaterial(region, 4, mat, Enum.Material.Ground)
+		end
+	end)
 	lastPlaced[owner] = now
 	table.insert(boxes, b)
 	models[b.id] = m

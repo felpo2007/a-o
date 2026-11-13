@@ -13,6 +13,17 @@
 | F5 Arte total e otimização | arte nos 5 setores a 100% do plano; 57,1 fps girando a câmera na célula mais densa da mata (D-76) e 59,6 fps no arrozal (D-74). Critério de 60 jogadores **só no Roblox** |
 | F6 Offensive e lançamento | **testado no Studio**: Offensive com relatório pós-ação, progressão. Beta fechado **só você pode rodar** |
 
+## v42: caixa de munição à vista no capim e rodas do UH-34D (2026-11-13, D-110)
+- **Feito:**
+  - a caixa de munição abre uma clareira de terra pisada no capim do terreno (cerca de 1,2 m);
+  - as rodas principais do UH-34D v2 passam a se chamar Roda_E e Roda_D (antes, as duas eram Roda_E).
+- **Conferido no Studio:**
+  - Ground sob a caixa e a 0,8 m; capim a 2,5 m; na foto, a caixa aparece numa clareira;
+  - rodas Roda_E (x = −7,6), Roda_D (x = +7,6) e Roda_Cauda nos dois helicópteros;
+  - 0 erros de script.
+- **Pendente:** o soldado com 2,08 m (a meta da D-98 é 2,00 m). Mexe na escala do corpo e nas pegadas;
+  fica para quando o dono pedir.
+
 ## v41: bots do Front 44, sem fogo amigo, corrida, celular e carregamento (2026-11-13, D-109)
 - **Publicada** como versão 41 do place (build do commit 8013574).
 - **Feito** (14 pedidos do dono de 13/11, sozinho, sem agentes):
@@ -39,8 +50,8 @@
   34% / 16% (automática / semi).
 - **Não testado:** celular de verdade (fps e carregamento), a metralhadora do tanque atirada por um
   jogador, investigar e granada dos bots vistos de perto, 2 jogadores.
-- **Pendente:** a caixa de munição no capim alto; as duas rodas "Roda_E" do uh34d_v2; o soldado com
-  2,08 m.
+- **Pendente** (os dois primeiros feitos na v42): a caixa de munição no capim alto; as duas rodas
+  "Roda_E" do uh34d_v2; o soldado com 2,08 m.
 
 ## v40: classes simples, Suporte com caixa, espingarda, armas maiores e nada flutuando (2026-11-13, D-108)
 - **Publicada** como versão 40 do place (build do commit 1ef8480).

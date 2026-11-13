@@ -3725,3 +3725,25 @@ na qualidade 1, com 1,3 milhão de índices.
   do ponto antes de pôr o soldado.
 - As malhas vão como peça. O id em texto era pedido como imagem: 511 avisos "Asset type does not
   match" que não baixavam nada; ficaram 7, de roupas do catálogo.
+
+## D-110 — Caixa de munição à vista no capim e rodas do UH-34D (v42, 2026-11-13)
+
+Pendentes da v40 e da v41, com o "sim, siga" do dono.
+
+**Caixa de munição no capim alto** (achado da v40: a caixa de 0,54 m sumia no capim do terreno):
+- Ao pôr a caixa, o capim do terreno em volta (Grass e LeafyGrass, cerca de 1,2 m para cada lado,
+  na grade de voxel) vira terra pisada (Ground), como o napalm faz. A grama animada do Roblox só nasce
+  no Grass.
+- O terreno fica pisado depois que a caixa some.
+- Medido no Studio: Ground sob a caixa e a 0,8 m dela; capim a 2,5 m. Na foto a caixa aparece numa
+  clareira.
+
+**Rodas do UH-34D** (o `uh34d_v2` veio do Blender com as duas rodas principais "Roda_E"):
+- Na montagem (`VehicleService.artJoints`), a repetida que fica à direita do chassi vira "Roda_D".
+  Sem lado claro, ganha um número.
+- O giro já pegava as duas (o VehicleFx usa todo "Roda_*"); o nome repetido confundia a medição e a
+  depuração.
+- No Studio: Roda_E em x = −7,6, Roda_D em x = +7,6 e Roda_Cauda, nos dois helicópteros.
+
+**Fica como está:** o soldado com 2,08 m medidos contra os 2,00 m da D-98. Acertar mexe na escala do
+corpo, no alcance dos braços e nas pegadas testadas (`tests/luau/pegada.luau`).

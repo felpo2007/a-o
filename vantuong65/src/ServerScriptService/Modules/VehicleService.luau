@@ -903,6 +903,38 @@ local function artJoints(art: Model, mount: BasePart, chassis: BasePart, mesh: B
 			table.insert(parts, p)
 		end
 	end
+	-- v42: o uh34d_v2 veio do Blender com as duas rodas principais "Roda_E". A repetida que fica à
+	-- direita (X > 0 no chassi, frente em −Z) vira "Roda_D"; sem lado claro, ganha um número.
+	local function isRight(q: BasePart): boolean
+		return chassis.CFrame:PointToObjectSpace(q.Position).X > 0
+	end
+	local wheelFirst: { [string]: BasePart } = {}
+	local taken: { [string]: boolean } = {}
+	for _, p in parts do
+		local base = p.Name
+		if string.sub(base, 1, 5) == "Roda_" then
+			local first = wheelFirst[base]
+			if not first then
+				wheelFirst[base] = p
+				taken[base] = true
+			else
+				local mover = if isRight(p) or not isRight(first) then p else first
+				local target = if string.sub(base, -2) == "_E" and isRight(mover)
+					then string.sub(base, 1, -3) .. "_D"
+					else base .. "_2"
+				local n = 2
+				while taken[target] do
+					n += 1
+					target = string.format("%s_%d", base, n)
+				end
+				mover.Name = target
+				taken[target] = true
+				if mover == first then
+					wheelFirst[base] = p
+				end
+			end
+		end
+	end
 	local casco = byName.Casco or mesh
 	local hub = byName.RotorPrincipal
 	local s = if mesh and info then mesh.Size / Vector3.new(info.box[1], info.box[2], info.box[3]) else Vector3.one
