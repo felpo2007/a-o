@@ -29,6 +29,7 @@
 - Perguntas ao dono: a M4 (é de 1994); a mão escorregando (em que vista e momento).
 
 ## v44: lote 2, tela de baixa (2026-11-13, D-112)
+- **Publicada** como versão 44 do place (build do commit cf5bf6c).
 - **Conferido no Studio:**
   - retrato do soldado de frente, capacete e rosto visíveis, em sépia;
   - rótulos novos e "Você volta em: Alfa · Fuzileiro · QG";
