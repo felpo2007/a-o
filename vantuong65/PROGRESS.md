@@ -14,6 +14,7 @@
 | F6 Offensive e lançamento | **testado no Studio**: Offensive com relatório pós-ação, progressão. Beta fechado **só você pode rodar** |
 
 ## v40: classes simples, Suporte com caixa, espingarda, armas maiores e nada flutuando (2026-11-13, D-108)
+- **Publicada** como versão 40 do place (build do commit 1ef8480).
 - **Conferido no Studio (Play, 1 jogador):**
   - 50 contra 50 bots, servidor a 56 Hz, primeiro tiroteio aos 51 s;
   - gancho `VT65DevFlutua`: 0 bases e 0 casas no ar, mata e objetos com 1 canto cada (≤ 0,23 m),
