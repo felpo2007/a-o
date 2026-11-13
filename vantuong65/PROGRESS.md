@@ -14,6 +14,7 @@
 | F6 Offensive e lançamento | **testado no Studio**: Offensive com relatório pós-ação, progressão. Beta fechado **só você pode rodar** |
 
 ## v42: caixa de munição à vista no capim e rodas do UH-34D (2026-11-13, D-110)
+- **Publicada** como versão 42 do place (build do commit 704c3c2).
 - **Feito:**
   - a caixa de munição abre uma clareira de terra pisada no capim do terreno (cerca de 1,2 m);
   - as rodas principais do UH-34D v2 passam a se chamar Roda_E e Roda_D (antes, as duas eram Roda_E).
