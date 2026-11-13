@@ -19,14 +19,34 @@
   → marcar/comunicação), tiros nas folhas, sol, cartão de munição.
 - **Lote 2 (v44, D-112): tela de baixa feita** (retrato de pé em sépia, rótulos claros). Falta: telas
   mais simples ("uma criança tem que conseguir jogar") e os bugs visuais das telas (pedir as fotos).
-- Lote 3 (veículos e bots): vidro transparente; mais fáceis e um pouco mais rápidos; helicóptero com a
-  traseira aberta; bots parados nos veículos; bots presos nos objetos.
+- **Lote 3 (v45, D-113): feito.** Sem vidro preto (M151 e M35 só com a moldura, Peugeot com as
+  janelas abertas), direção mais fácil e um pouco mais rápida, UH-34D com o porão aberto dos dois
+  lados, vigia das tripulações de bot e saída melhor de quem trava.
 - Lote 4 (mapa): cabanas e vilas maiores; terra batida nas ruas; objetivos mais perto do centro; mapa
   500 x 500 m; 40 x 40 jogadores.
 - Lote 5 (menu): menu animado com o mapa e o soldado (JOGAR, CONFIGURAÇÕES, LOJA, PASSE, TUTORIAL) e o
   tutorial fora do jogo; tela de carregamento até o mapa inteiro.
 - Lote 6: análise do jogo inteiro com ideias em imagens.
 - Perguntas ao dono: a M4 (é de 1994); a mão escorregando (em que vista e momento).
+
+## v45: lote 3, veículos e bots (2026-11-13, D-113)
+- **Publicada** como versão 45 do place (build do commit ae18867).
+- **Feito:**
+  - vidro: M151 e M35 sem os vidros do para-brisa; Peugeot 403 com as janelas abertas e forro por
+    dentro. Modelos refeitos no Blender e subidos de novo (IDs antigos como `<chave>_vidro`);
+  - UH-34D: porão da tropa aberto também à esquerda (ID antigo como `uh34d_v2_fechado`);
+  - direção (`VehicleDrive.GAME`): M151 de 106 para 111 km/h, M48A3 de 48 para 57,6 km/h (Lune);
+    motor ×1,3, freio ×1,25, volante e aderência melhores, curva mais fechada;
+  - bots: vigia das tripulações (sem motorista 15 s, embarque 90 s, parado 60 s) e saída de quem
+    trava em 4 etapas (pulo, lado, ré, outro lado);
+  - triângulos novos: M151 3.338, M35 8.000, Peugeot 4.639, UH-34D 4.742.
+- **Conferido no Studio:**
+  - os 9 veículos com os modelos novos; vista livre do banco do motorista do M151; porão aberto e
+    janelas do Peugeot à vista no jogo;
+  - vigia: o Ontos parado 60 s e um LVTP-5 preso de propósito: as duas tripulações desceram;
+  - 0 erros de script.
+- **Não testado:** o prazo do embarque ao vivo, dirigir com teclado ou controle, bot preso num
+  objeto saindo pelas etapas novas.
 
 ## v44: lote 2, tela de baixa (2026-11-13, D-112)
 - **Publicada** como versão 44 do place (build do commit cf5bf6c).
