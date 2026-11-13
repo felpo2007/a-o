@@ -3925,8 +3925,9 @@ D An Cường (2) (100 m), E Vale do riacho (120 m). A vila passou do setor 3 pa
 - campo de tiro longo: alvos a 50, 100 e 150 m (eram 100, 200 e 300; o de 300 m caía fora);
 - estradas: voltas por fora a 45 m da borda (eram 70).
 
-**40 x 40:** `Roles.TEAM_MAX` e `BotBrain.CROWD.perSide` = 40 (eram 50, D-91); servidor de 80
-(`roblox_cloud.py server-size 80`).
+**40 x 40:** `Roles.TEAM_MAX` e `BotBrain.CROWD.perSide` = 40 (eram 50, D-91). O servidor de 80
+fica com o dono: a chave não tem a permissão (`server-size 80` respondeu "Scope not authorized";
+`TODO_USUARIO.md`). Até lá o jogo limita 40 por lado.
 
 **Carta:** refeita para o recorte novo (`tools/make_carta.py`) e publicada em 4 blocos; os IDs da de
 1 km ficam como `Carta.<bloco>_1km`.

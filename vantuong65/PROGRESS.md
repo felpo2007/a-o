@@ -22,12 +22,31 @@
 - **Lote 3 (v45, D-113): feito.** Sem vidro preto (M151 e M35 só com a moldura, Peugeot com as
   janelas abertas), direção mais fácil e um pouco mais rápida, UH-34D com o porão aberto dos dois
   lados, vigia das tripulações de bot e saída melhor de quem trava.
-- Lote 4 (mapa): cabanas e vilas maiores; terra batida nas ruas; objetivos mais perto do centro; mapa
-  500 x 500 m; 40 x 40 jogadores.
+- **Lote 4a (v46, D-114): feito.** Mapa de 500 x 500 m (Xóm Gò até An Cường (2)), objetivos perto
+  do centro e 40 x 40. Falta o dono pôr o servidor em 80 (TODO_USUARIO).
+- Lote 4b (v47): cabanas e vilas maiores; terra batida nas ruas.
 - Lote 5 (menu): menu animado com o mapa e o soldado (JOGAR, CONFIGURAÇÕES, LOJA, PASSE, TUTORIAL) e o
   tutorial fora do jogo; tela de carregamento até o mapa inteiro.
 - Lote 6: análise do jogo inteiro com ideias em imagens.
 - Perguntas ao dono: a M4 (é de 1994); a mão escorregando (em que vista e momento).
+
+## v46: lote 4a, mapa de 500 x 500 m e 40 x 40 (2026-11-13, D-114)
+- **Publicada** como versão 46 do place (build do commit 25b61b7).
+- **Feito:**
+  - recorte E 269,66–270,16 x N 1692,64–1693,14: a vila de Xóm Gò no morro do centro e An Cường (2)
+    com os túneis e a trincheira; saem Nam Yên (4), An Thới (2), a Colina 30 e o riacho;
+  - QG do VC no pé oeste do morro, QG dos EUA a nordeste de An Cường (2); setores A–E de 70 a 120 m;
+  - 15 objetivos a até 110 m da linha do meio (o do norte da base, 145 m); raio de captura 35 m;
+  - distâncias do jogo à metade (reunião, renascer, blindados dos bots, clareira da base, campo de
+    tiro de 50/100/150 m);
+  - 40 por lado; carta tática refeita e publicada.
+- **Conferido no Studio:**
+  - terreno em 3 s, mata a 100% nos 5 setores, os 9 veículos dentro da área;
+  - primeiro tiroteio aos 15 s de partida (era 46 s);
+  - 40 bots do VC e 37 dos EUA mais o jogador, servidor a 60 Hz;
+  - 0 erros de script.
+- **Pendente do dono:** servidor de 80 jogadores (a chave não tem a permissão).
+- **Não testado:** partida inteira, celular, 40 jogadores de verdade.
 
 ## v45: lote 3, veículos e bots (2026-11-13, D-113)
 - **Publicada** como versão 45 do place (build do commit ae18867).
