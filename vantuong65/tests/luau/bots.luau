@@ -902,6 +902,60 @@ test("soldado de 2 m: olhos do abrigo levados pelo Corpo.K", function()
 	assert(math.abs(C.probeM[3] - 1.829) < 0.01, "olho em pé ~1,83 m")
 end)
 
+-- v41 ("copie exatamente os bots do Front 44"): os números do Config.Bots e do Bots.luau de lá
+test("v41: combate do Front 44 (visão, reação, mira, rajadas, movimento) com os números de lá", function()
+	local F = BotBrain.F44
+	assert(F.on == true, "ligado")
+	assert(F.STUD_M == 0.28 and F.sightStuds == 160 and F.coneDeg == 130 and F.nearStuds == 22)
+	assert(F.reactionS == 0.45 and F.reactionK[1] == 0.8 and F.reactionK[2] == 1.3)
+	assert(F.aimStartDeg == 4.5 and F.aimEndDeg == 1.1 and F.aimSettleS == 1.2 and F.aimPerStudDeg == 0.008)
+	assert(F.headChance == 0.18 and F.leadK == 0.85 and F.aimMovingK == 1.5)
+	assert(F.burst[1] == 3 and F.burst[2] == 7 and F.burstPauseS[1] == 0.25 and F.burstPauseS[2] == 0.7)
+	assert(F.strafeStuds == 9 and F.farStuds == 70 and F.retreatHealth == 0.35 and F.retreatS == 3.5)
+	assert(F.investigateS == 8 and F.hearStuds == 110 and F.grenadeChance == 0.25 and F.grenadeEveryS == 12)
+	-- visão: 160 studs (44,8 m) ou menos, se a vegetação tapa antes
+	assert(math.abs(BotBrain.f44SightM(120) - 44.8) < 1e-9 and BotBrain.f44SightM(15) == 15)
+	assert(BotBrain.f44Sees(64, 40) and not BotBrain.f44Sees(70, 40) and BotBrain.f44Sees(170, 6))
+	-- reação 0,36–0,585 s; mira 4,5° → 1,1° em 1,2 s, +0,008° por stud
+	assert(math.abs(BotBrain.f44Reaction(0) - 0.36) < 1e-9 and math.abs(BotBrain.f44Reaction(1) - 0.585) < 1e-9)
+	assert(math.abs(BotBrain.f44AimDeg(0, false, 0) - 4.5) < 1e-9)
+	assert(math.abs(BotBrain.f44AimDeg(5, false, 28) - (1.1 + 0.8)) < 1e-9, "100 studs: +0,8°")
+	assert(math.abs(BotBrain.f44AimDeg(5, true, 0) - 1.65) < 1e-9, "andando ×1,5")
+	-- rajadas 3–7 na automática; tiro a tiro no resto; pausa
+	for _, r in { 0, 0.3, 0.6, 0.99 } do
+		local b = BotBrain.f44Burst(true, r)
+		assert(b >= 3 and b <= 7, "rajada " .. b)
+		assert(BotBrain.f44Burst(false, r) == 1)
+	end
+	assert(BotBrain.f44Pause(false, 1.5, 0) == 1.5, "ferrolho: a cadência manda")
+	assert(math.abs(BotBrain.f44Pause(true, 0.1, 1) - 0.7) < 1e-9)
+	assert(
+		BotBrain.f44TooFar("shotgun", 12)
+			and not BotBrain.f44TooFar("shotgun", 10)
+			and not BotBrain.f44TooFar("rifle", 44)
+	)
+	-- disco dentro do quadrado: perto, tudo; longe, área ÷ área
+	assert(BotBrain.f44ShotChance(1.1, 5, 0.25) == 1)
+	local far = BotBrain.f44ShotChance(2, 40, 0.25)
+	assert(far > 0 and far < 0.2, "40 m: " .. far)
+	-- medida (sem número inventado): chance de acertar ao menos 1 vez um jogador parado em 3 s
+	local seed = 1
+	local function roll(): number
+		seed = (seed * 1103515245 + 12345) % 2147483648
+		return seed / 2147483648
+	end
+	local line = {}
+	for _, dm in { 10, 25, 40, 50 } do
+		local auto = BotBrain.f44DuelHitChance(dm, 3, true, 600, 2000, roll)
+		local semi = BotBrain.f44DuelHitChance(dm, 3, false, 600, 2000, roll)
+		table.insert(line, string.format("%d m: auto %.0f%%, semi %.0f%%", dm, auto * 100, semi * 100))
+		if dm == 50 then
+			assert(auto == 0 and semi == 0, "além de 44,8 m não vê")
+		end
+	end
+	print("       Front 44 em 3 s: " .. table.concat(line, "; "))
+end)
+
 print(string.format("%d ok, %d falhas", passed, failed))
 if failed > 0 then
 	process.exit(1)

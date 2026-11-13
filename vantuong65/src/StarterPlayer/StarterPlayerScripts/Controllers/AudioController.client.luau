@@ -274,6 +274,23 @@ local function measurePlace(pos: Vector3, zone: string): string
 	return SomArmas.lugar(hits, 8, roof, zone == "village", zone == "tunnel")
 end
 
+-- v41 ("jogo está bem pesado ainda"): o laço calado fica pausado (no Studio, com 100 bots, eram ~97
+-- canais tocando; as quatro ambiências e a música do menu tocavam o tempo todo com volume 0)
+local function quiet(s: Sound, target: number)
+	if target <= 0 and s.Volume < 0.002 then
+		s.Volume = 0
+		if s.IsPlaying then
+			s:Pause()
+		end
+	elseif target > 0 and not s.IsPlaying then
+		if s.IsPaused then
+			s:Resume()
+		else
+			s:Play()
+		end
+	end
+end
+
 task.spawn(function()
 	while true do
 		task.wait(0.5)
@@ -287,11 +304,13 @@ task.spawn(function()
 		for z, s in loops do
 			local target = if z == zone then 0.2 else 0
 			s.Volume += (target - s.Volume) * 0.35
+			quiet(s, target)
 		end
 		local m = music
 		if m then
 			local target = if field then 0 else 0.5
 			m.Volume += (target - m.Volume) * 0.25
+			quiet(m, target)
 		end
 	end
 end)
@@ -425,8 +444,8 @@ end)
 -- mesmo disparo uma oitava abaixo, só graves), a cauda pelo lugar e o estojo pulando. Na rajada a
 -- cauda e o estojo não se empilham.
 local lastTail, lastShell = 0, 0
-Bus.on("shot_fired", function(shot: any)
-	local wp = if type(shot) == "table" and type(shot.w) == "string" then Weapons.get(shot.w) else nil
+local function ownShot(weaponId: string?)
+	local wp = if type(weaponId) == "string" then Weapons.get(weaponId) else nil
 	if not wp then
 		return
 	end
@@ -453,6 +472,15 @@ Bus.on("shot_fired", function(shot: any)
 		lastShell = now
 		Som.play("mec_estojo", { delay = 0.35 + math.random() * 0.15, vol = 0.6, pitch = 0.9 + math.random() * 0.25 })
 	end
+end
+Bus.on("shot_fired", function(shot: any)
+	ownShot(if type(shot) == "table" then shot.w else nil)
+end)
+-- v41 (pedido do dono: "a arma do tanque n sai som"): a metralhadora do assento (coaxial do atirador do
+-- M48, M60 da cúpula e da porta) atirada por mim. O servidor manda o traçante e o som só para os OUTROS
+-- (CombatService.fire, exceptPlayer) e o VehicleController só fazia o clarão: quem atirava não ouvia.
+Bus.on("vehicle_mg_shot", function()
+	ownShot("m60")
 end)
 
 -- ferrolho manobrado (fuzis de precisão): o som cabe no ciclo da arma. D-108: a bomba da espingarda
@@ -478,6 +506,22 @@ local function layer(key: string): SomArmas.Def?
 end
 local MID, FAR = layer("shot_mid"), layer("shot_distant")
 
+-- v41 ("jogo está bem pesado ainda"): o disparo de quem está a mais de 100 m tem teto de 16 por
+-- segundo (balde de 8). No Studio, com 100 bots, eram 33 sons de tiro tocando juntos; o tiroteio
+-- longe continua soando cheio, e o de perto e a bala passando perto não entram no teto.
+local FAR_RATE, FAR_CAP = 16, 8
+local farBudget, farAt = FAR_CAP, os.clock()
+local function farOk(): boolean
+	local now = os.clock()
+	farBudget = math.min(FAR_CAP, farBudget + (now - farAt) * FAR_RATE)
+	farAt = now
+	if farBudget >= 1 then
+		farBudget -= 1
+		return true
+	end
+	return false
+end
+
 Net.unreliable("Combat_Tracer").OnClientEvent:Connect(function(shot)
 	local wp = Weapons.get(shot.w)
 	if not wp then
@@ -499,7 +543,8 @@ Net.unreliable("Combat_Tracer").OnClientEvent:Connect(function(shot)
 	local high = SomArmas.agudos(dM, lugar)
 	local cauda = SomArmas.CAUDA[lugar]
 	local jitter = 1 + (math.random() - 0.5) * 0.04
-	if near > 0.01 and def then
+	local layers = dM <= 100 or farOk()
+	if layers and near > 0.01 and def then
 		Som.play(def, {
 			pos = origin,
 			vol = near * (a.vol or 1),
@@ -524,10 +569,10 @@ Net.unreliable("Combat_Tracer").OnClientEvent:Connect(function(shot)
 			})
 		end
 	end
-	if mid > 0.01 and MID then
+	if layers and mid > 0.01 and MID then
 		Som.play(MID, { pos = origin, vol = mid * 0.8, delay = delay, minDist = 1e5, maxDist = 2e5, high = high * 0.5 })
 	end
-	if far > 0.01 and FAR then
+	if layers and far > 0.01 and FAR then
 		Som.play(FAR, { pos = origin, vol = far * 0.7, delay = delay, minDist = 1e5, maxDist = 2e5, cauda = cauda })
 	end
 	-- ferrolho de quem atira perto (fuzil de precisão)

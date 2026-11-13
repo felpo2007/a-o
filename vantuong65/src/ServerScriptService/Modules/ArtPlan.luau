@@ -481,8 +481,8 @@ function ArtPlan.structures(ctx: Ctx, has: (string) -> boolean): { Item }
 						local extra = { side = fac, id = b.id, node = if b.node ~= "" then b.node else nil }
 						local x, z = hq.x + b.x, hq.z + b.z
 						byId[b.id] = if b.padded
-							then padded(b.key, x, z, b.yaw + flip, 1, "base", extra)
-							else seated(b.key, x, z, b.yaw + flip, 1, "base", extra)
+							then padded(b.key, x, z, b.yaw + flip, b.scale or 1, "base", extra) -- v41: barracas 1,5x
+							else seated(b.key, x, z, b.yaw + flip, b.scale or 1, "base", extra)
 					end
 				end
 				for _, b in base.items do

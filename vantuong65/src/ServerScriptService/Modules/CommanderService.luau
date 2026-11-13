@@ -172,7 +172,7 @@ local function handle(player: Player, req: any)
 				Net.unreliable("Fire_Incoming"):FireAllClients({ x = p.X, y = p.Y, z = p.Z })
 			end)
 			task.delay(tImpact, function()
-				ExplosionService.detonate(a.explosive :: string, groundAt(imp.x, imp.z))
+				ExplosionService.detonate(a.explosive :: string, groundAt(imp.x, imp.z), nil, faction) -- v41: sem fogo amigo
 			end)
 		end
 	elseif a.kind == "supply" then

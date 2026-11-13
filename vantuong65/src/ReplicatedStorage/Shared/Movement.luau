@@ -575,7 +575,8 @@ function Movement.swayFactor(stamina: number): number
 	return 1 + 2.5 * t * t
 end
 
--- Dispersão do tiro do quadril em 3ª pessoa (graus): a retícula não pode virar mira de ferro.
+-- Dispersão do tiro do quadril (graus; 3ª pessoa e, desde a v41, 1ª): a retícula não pode virar
+-- mira de ferro.
 function Movement.hipSpreadDeg(speedMps: number, stamina: number, stance: string): number
 	local base = if stance == "prone" then 0.6 elseif stance == "crouch" then 0.9 else 1.2
 	return base + 0.5 * math.clamp(speedMps, 0, 6) + 1.2 * (1 - math.clamp(stamina, 0, 1))

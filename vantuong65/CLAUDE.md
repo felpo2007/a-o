@@ -134,7 +134,7 @@ O `sourcemap.json` não vai para o Git.
 - Segredos só no `.env` (no `.gitignore`), nunca no código nem no chat.
 - ForgeGUI: nunca regenerar um job em `outcome_unknown`. "failed" com `retryable` pode ser
   retomado com `generation_retry`.
-- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-109) e atualize `PROGRESS.md`.
+- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-110) e atualize `PROGRESS.md`.
 - Metas da Parte 2: vegetação ≤ 3 mil triângulos, props ≤ 5 mil, herói ≤ 20 mil (`ArtBudget`,
   conferido pelo teste da F5).
 - Commits no branch acima, com mensagem em português.

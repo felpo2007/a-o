@@ -43,6 +43,111 @@ SEM_PATAMAR = {
 # distância do alvo de cada base (nó Silhueta com RangeTarget), do layout
 ALVO_M = {"US": 25, "VC": 23}
 LARGURA_TRILHA_M = 3.0
+# v41 (pedido do dono, 2026-11-13: "aumente 1,5x o tamanho das barracas nas bases, estão mt
+# pequenas"): as barracas dos dois lados crescem 1,5x. O layout do Blender foi feito no tamanho
+# antigo: a barraca maior é afastada das vizinhas (afastar), sem sair da área da base, sem cobrir a
+# rua ou a trilha, os pontos de nascer e o estande; o que fica dentro dela (caixote, saco) vai
+# junto.
+ESCALA = {
+    "us_tent_gp_medium": 1.5,
+    "us_tent_gp_large": 1.5,
+    "us_mess_tent": 1.5,
+    "us_command_tent": 1.5,
+    "vc_lean_to": 1.5,
+}
+# entre pegadas (a pegada já conta as cordas e as estacas; com 1 m não cabia na base dos EUA)
+FOLGA_M = 0.5
+
+
+def meia_pegada(it: dict, escala: float) -> tuple[float, float]:
+    """Meia pegada (x, z) em studs, girada pelo yaw (múltiplos de 90°)."""
+    dx, dz = it["pegada_m"][0] / STUD * escala, it["pegada_m"][1] / STUD * escala
+    if 45 < it["yaw_graus"] % 180 < 135:
+        dx, dz = dz, dx
+    return dx / 2, dz / 2
+
+
+def afastar(b: dict) -> list[str]:
+    """Escala as barracas (ESCALA) e afasta as que passam a encostar em algo. Muda b["itens"] no
+    lugar e devolve o relatório (uma linha por peça movida)."""
+    folga = FOLGA_M / STUD
+    a = b["area"]
+    area = (a["x_min_m"] / STUD, a["x_max_m"] / STUD, a["z_min_m"] / STUD, a["z_max_m"] / STUD)
+    topo = [it for it in b["itens"] if not it.get("dentro_de")]
+    crescem = [it for it in topo if it["chave"] in ESCALA]
+    orig = {it["id"]: (it["x_studs"], it["z_studs"]) for it in crescem}
+    # obstáculos fixos (cx, cz, hx, hz): as outras peças, a rua ou a trilha, os pontos de nascer e o
+    # estande (da linha de tiro até o alvo)
+    fixos = []
+    for it in topo:
+        if it["chave"] not in ESCALA:
+            hx, hz = meia_pegada(it, 1)
+            fixos.append((it["x_studs"], it["z_studs"], hx, hz))
+    via = b.get("estrada") or b.get("trilha")
+    if via:
+        (ax, az), (bx, bz) = via["de_studs"], via["ate_studs"]
+        w = (via.get("largura_m") or LARGURA_TRILHA_M) / STUD / 2
+        fixos.append(((ax + bx) / 2, (az + bz) / 2, abs(bx - ax) / 2 + w, abs(bz - az) / 2 + w))
+    for x, z in b["pontos_de_spawn_studs"]:
+        fixos.append((x, z, 1.5 / STUD, 1.5 / STUD))
+    c = b["campo_de_tiro"]
+    (x1, z1), (x2, z2) = c["linha_studs"]
+    meio = 45 / STUD / 2  # do banco até depois do alvo (25 m) e do barranco
+    fixos.append(((x1 + x2) / 2, (z1 + z2) / 2 + meio, abs(x2 - x1) / 2 + 1, meio))
+
+    def caixa(it: dict) -> tuple[float, float, float, float]:
+        hx, hz = meia_pegada(it, ESCALA[it["chave"]])
+        return it["x_studs"], it["z_studs"], hx, hz
+
+    def livre(hx: float, hz: float, x: float, z: float, outros: list) -> bool:
+        if x - hx < area[0] or x + hx > area[1] or z - hz < area[2] or z + hz > area[3]:
+            return False
+        for ox, oz, ohx, ohz in outros:
+            if abs(x - ox) < hx + ohx + folga and abs(z - oz) < hz + ohz + folga:
+                return False
+        return True
+
+    # da maior para a menor: cada uma fica onde está se couber; senão vai à vaga livre mais perto
+    # (anéis de 1 stud em volta do lugar do layout)
+    postas: list = []
+    for it in sorted(crescem, key=lambda t: -t["pegada_m"][0] * t["pegada_m"][1]):
+        x0, z0, hx, hz = caixa(it)
+        outros = fixos + postas
+        if not livre(hx, hz, x0, z0, outros):
+            achou = None
+            for r in range(1, 400):
+                melhor = None
+                for i in range(-r, r + 1):
+                    anel = ((x0 + i, z0 - r), (x0 + i, z0 + r), (x0 - r, z0 + i), (x0 + r, z0 + i))
+                    for x, z in anel:
+                        d = (x - x0) ** 2 + (z - z0) ** 2
+                        if (melhor is None or d < melhor[0]) and livre(hx, hz, x, z, outros):
+                            melhor = (d, x, z)
+                if melhor:
+                    achou = melhor
+                    break
+            if not achou:
+                raise SystemExit(f"{b['base']}: sem lugar para {it['id']} em 1,5x")
+            it["x_studs"], it["z_studs"] = achou[1], achou[2]
+        postas.append(caixa(it))
+    rel = []
+    por_id = {it["id"]: it for it in crescem}
+    for it in b["itens"]:
+        dono = por_id.get(it.get("dentro_de") or "")
+        if dono:
+            # dentro da barraca: o afastamento do centro cresce junto e acompanha o movimento dela
+            ox, oz = orig[dono["id"]]
+            k = ESCALA[dono["chave"]]
+            it["x_studs"] = dono["x_studs"] + (it["x_studs"] - ox) * k
+            it["z_studs"] = dono["z_studs"] + (it["z_studs"] - oz) * k
+    for it in crescem:
+        ox, oz = orig[it["id"]]
+        if abs(it["x_studs"] - ox) > 0.01 or abs(it["z_studs"] - oz) > 0.01:
+            rel.append(
+                f"{it['id']}: ({ox:.1f}, {oz:.1f}) -> "
+                f"({it['x_studs']:.1f}, {it['z_studs']:.1f}) studs"
+            )
+    return rel
 
 
 def n(v: float) -> str:
@@ -58,6 +163,8 @@ def main() -> None:
     bases = {}
     for f, arq in (("US", "layout_us.json"), ("VC", "layout_vc.json")):
         bases[f] = json.loads((BLENDER / "bases" / arq).read_text("utf-8"))
+        for linha in afastar(bases[f]):
+            print(f"{f} afastada (barraca 1,5x): {linha}")
     chaves = sorted({it["chave"] for b in bases.values() for it in b["itens"]})
     met = {k: metricas(k) for k in chaves}
     # casas únicas da vila (Blender, 2026-11-13): colisão por nó e a porta principal
@@ -91,6 +198,7 @@ def main() -> None:
             ]
             # todos os campos em todo item (o tipo da tabela no --!strict); "" = sem
             pad = it["chave"] not in SEM_PATAMAR and not it.get("dentro_de")
+            campos.append(f"scale = {n(ESCALA.get(it['chave'], 1))}")
             campos.append(f"padded = {'true' if pad else 'false'}")
             campos.append(f'node = "{it.get("no") or ""}"')
             campos.append(f'inside = "{it.get("dentro_de") or ""}"')

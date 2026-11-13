@@ -259,7 +259,11 @@ local bandFit = UiKit.fit(screen, band, WIDTH + 8, 1, 8)
 -- limite da pilha. Fora do campo (menus, lobby), o lugar de sempre.
 local touchReach: number? = nil
 local function placeBand()
-	local z = if ToqueUi.inField() then ToqueUi.zoneIn(screen, "avisos") else nil
+	-- v41: caído também (o HUD de toque sai de "Campo"; no centro do alto o aviso grande cobria a
+	-- faixa da frente, visto no Studio). A zona não encosta na do cartão de caído (Shared/Toque).
+	local char = game:GetService("Players").LocalPlayer.Character
+	local downed = char ~= nil and char:GetAttribute("Downed") == true
+	local z = if ToqueUi.inField() or (downed and ToqueUi.active()) then ToqueUi.zoneIn(screen, "avisos") else nil
 	if z then
 		local k = math.clamp(z.w / (WIDTH + 8), 0.55, 1)
 		bandFit.scale.Scale = k

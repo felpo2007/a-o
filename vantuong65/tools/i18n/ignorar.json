@@ -1117,7 +1117,9 @@
   "tube",
   "veículo",
   "veículo ",
-  "vida da vila"
+  "vida da vila",
+  "C Xóm Gò",
+  "^%u%f[%s]"
  ],
  "regex": []
 }

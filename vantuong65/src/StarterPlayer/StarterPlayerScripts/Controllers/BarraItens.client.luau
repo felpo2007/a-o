@@ -95,12 +95,10 @@ local function role(): string?
 	return if type(r) == "string" then r else nil
 end
 
+-- v41: nome curto (Weapons.shortName: as duas Winchester distintas, a bazuca dos EUA com nome)
 local function weaponName(id: string?): string
-	if id == "launcher" then
-		return "Lançador"
-	end
-	local wp = if id then Weapons.get(id) else nil
-	return if wp then wp.name else ""
+	local f = player:GetAttribute("Faction")
+	return Weapons.shortName(id, if type(f) == "string" then f else nil)
 end
 
 local function render()

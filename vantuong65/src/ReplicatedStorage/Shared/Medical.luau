@@ -182,6 +182,15 @@ end
 -- o dano aqui logo antes da chamada (síncrona), o applyHit o consome, e o CombatService limpa depois.
 Medical.nextShot = nil :: number?
 
+-- v41 (pedido do dono, 2026-11-13: "retire dano aliado"): sem fogo amigo. Bala, estilhaço, fogo e
+-- golpe de quem é do mesmo lado da vítima não fazem nada; o dano em si mesmo (a própria granada) vale.
+-- fromFaction: o lado de quem causou (nil = ninguém: destroço de veículo, armadilha, queda).
+Medical.FRIENDLY_FIRE = false
+
+function Medical.blocked(victimFaction: string?, fromFaction: string?, self: boolean): boolean
+	return not Medical.FRIENDLY_FIRE and not self and fromFaction ~= nil and victimFaction == fromFaction
+end
+
 -- zone: "head" | "torso" | "arm" | "leg"; roll: número em [0,1) da semente do tiro
 function Medical.applyHit(s: State, zone: string, energyJ: number, roll: number, now: number): string
 	local shot = Medical.nextShot

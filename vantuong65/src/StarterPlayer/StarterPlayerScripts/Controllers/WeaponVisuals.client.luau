@@ -57,6 +57,16 @@ local viewAlign = CFrame.identity
 local aimT = 0 -- 0 = quadril, 1 = ombro
 local kick = 0 -- recuo visual, volta em ~0,15 s
 local bobT = 0
+-- v41 (pedido do dono: "faça a corrida igual a do front 44, onde quando ele corre a arma fica de lado
+-- no corpo"): correndo, a arma vai atravessada no peito, a boca para cima e para a esquerda — a
+-- "posição de assalto" da 1ª pessoa do Front 44 (SprintHighPort: 12 cm para trás, 3 cm à esquerda e
+-- 7 cm abaixo, girada 28° para cima, 28° para a esquerda e 30° no eixo do cano), com o balanço da
+-- passada no ritmo dos braços (15% do giro, SprintSway1P). Mirando, recarregando, arremessando ou
+-- sentado, não. Pistola e lançador também (no Front 44, todas as armas).
+local SPRINT_POS = Vector3.new(-0.03, -0.07, 0.12) -- m no espaço da câmera (direita, cima, trás)
+local SPRINT_ROT = Vector3.new(28, 28, 30) -- graus (para cima, para a esquerda, giro)
+local SPRINT_SWAY = 0.15
+local sprintT = 0 -- 0..1
 -- pontos no espaço da arma (punho na origem, boca em −Z, +Y para cima), lidos em setView
 local gripL, supportL, magL, chargeL = Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero
 local viewKind = "rifle"
@@ -505,6 +515,28 @@ RunService:BindToRenderStep("VT65ViewModel", Enum.RenderPriority.Camera.Value + 
 	bobT += dt * math.clamp(speed, 0, 6) * 2.2
 	local amp = math.clamp(speed / 3, 0, 1) * (1 - aimT) * 0.008 / M
 	local bob = CFrame.new(math.sin(bobT) * amp, math.abs(math.cos(bobT)) * amp, 0)
+	-- corrida (v41, Front 44): a arma atravessada no peito
+	local char = player.Character
+	local running = char ~= nil
+		and char:GetAttribute("Sprinting") == true
+		and not aiming
+		and not reloading
+		and throwT0 < 0
+		and not inSeat
+	sprintT += ((if running then 1 else 0) - sprintT) * math.min(1, dt * 7)
+	local sp = smooth(sprintT)
+	local port = CFrame.identity
+	if sp > 0.001 then
+		local s1, c2 = math.sin(bobT), math.cos(bobT * 2)
+		local k = sp * SPRINT_SWAY
+		local swing = Vector3.new(s1 * 1.6, -(0.5 + 0.5 * c2) * 1.4, math.abs(s1) * 0.8) * 0.01 * k
+		port = CFrame.new((SPRINT_POS * sp + swing) / M)
+			* CFrame.Angles(
+				math.rad(SPRINT_ROT.X * sp - 3 * c2 * k),
+				math.rad(SPRINT_ROT.Y * sp + 5 * s1 * k),
+				math.rad(SPRINT_ROT.Z * sp + 7 * s1 * k)
+			)
+	end
 	-- D-81: mirando, o coice só empurra a arma para trás (a subida da boca já vai na câmera,
 	-- WeaponController). Antes a arma girava até 4° acima da câmera: o tiro seguinte saía no centro
 	-- da tela e não onde a massa de mira mostrava ("a bala tem que sair em cima do risquinho").
@@ -532,7 +564,9 @@ RunService:BindToRenderStep("VT65ViewModel", Enum.RenderPriority.Camera.Value + 
 			0
 		)
 	end
-	local wcf = camera.CFrame * kv.rifle * viewHip:Lerp(ads, aimT) * bob * recoil * pose
+	-- a posição de assalto no espaço da câmera (deslocamento) e girada no punho, como no Front 44
+	local portPos = CFrame.new(port.Position)
+	local wcf = camera.CFrame * portPos * kv.rifle * viewHip:Lerp(ads, aimT) * port.Rotation * bob * recoil * pose
 	v:PivotTo(wcf)
 	-- braços (desvios das mãos do tamanho delas, D-108)
 	local rot = wcf.Rotation

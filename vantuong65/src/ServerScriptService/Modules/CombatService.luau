@@ -254,16 +254,17 @@ local function launchGrenade(
 	local pos = Vector3.new(hit.x, hit.y, hit.z) / M
 	local flownM = (pos - origin).Magnitude * M
 	local by = Players:GetPlayerFromCharacter(shooter)
+	local from = shooter:GetAttribute("Faction") :: string?
 	task.delay(tFlight, function()
 		if flownM >= arm then
 			-- um palmo antes do ponto de impacto, para o efeito não nascer dentro do chão
-			ExplosionService.detonate(wp.explosive or "grenade_us", pos - dir.Unit * (0.1 / M), by)
+			ExplosionService.detonate(wp.explosive or "grenade_us", pos - dir.Unit * (0.1 / M), by, from)
 			return
 		end
 		local t = target
 		local victim = t and Combatants.get(t:FindFirstAncestorOfClass("Model"))
 		if t and victim then
-			MedicalService.hit(victim.model, zoneOf(t), hit.energy, Rng.new(seed + 1):next(), by)
+			MedicalService.hit(victim.model, zoneOf(t), hit.energy, Rng.new(seed + 1):next(), by, from)
 		end
 	end)
 end
@@ -283,8 +284,9 @@ local function bulletHit(
 	total: number? -- D-108: dano já somado (bagos da espingarda no mesmo soldado)
 )
 	local e = Combatants.get(victim)
-	if not e then
-		return
+	local from = shooter:GetAttribute("Faction") :: string?
+	if not e or MedicalService.friendly(victim, by, from) then
+		return -- v41: sem fogo amigo (nem a vibração nem o marcador de acerto)
 	end
 	local s = MedicalService.get(victim)
 	local wasDown, wasDead = s ~= nil and s.downedAt ~= nil, s ~= nil and s.dead
@@ -295,7 +297,7 @@ local function bulletHit(
 	Medical.nextShot = dmg
 	local roll = Rng.new(seed + 1):next()
 	local ok, err = pcall(function(): any
-		MedicalService.hit(victim, zone, energy, roll, by)
+		MedicalService.hit(victim, zone, energy, roll, by, from)
 		return nil
 	end)
 	Medical.nextShot = nil

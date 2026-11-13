@@ -32,6 +32,15 @@ Front.C = {
 
 export type Point = { x: number, z: number }
 
+-- Nome curto do setor no jogo (v41, pedido do dono: "troque os objetivos por A B C D E"): 1 -> "A",
+-- 2 -> "B"... Os dados e o código continuam numerando os setores de 1 a 5 (MapConfig.Sectors.id).
+function Front.letra(s: number?): string
+	if type(s) ~= "number" or s < 1 or s > 26 then
+		return "?"
+	end
+	return string.char(64 + math.floor(s))
+end
+
 -- Sorteio dos pontos fortes (1 por setor). first: setor sorteado sem peso (a frente inicial); os
 -- outros, em cadeia para fora, com peso 1/d^pickPower até o ponto do vizinho já escolhido. Assim a
 -- frente começa compacta e o próximo objetivo fica perto do anterior. roll() em [0, 1).

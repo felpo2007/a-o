@@ -175,8 +175,18 @@ local function hook()
 		pcall(onShot, shooter, origin, dir)
 	end
 	local hit0 = MedicalService.hit
-	MedicalService.hit = function(victim: Model, zone: string, energyJ: number, roll: number, by: Player?)
-		hit0(victim, zone, energyJ, roll, by)
+	MedicalService.hit = function(
+		victim: Model,
+		zone: string,
+		energyJ: number,
+		roll: number,
+		by: Player?,
+		from: string?
+	)
+		if MedicalService.friendly(victim, by, from) then
+			return -- sem fogo amigo (v41)
+		end
+		hit0(victim, zone, energyJ, roll, by, from)
 		if shooting then
 			pcall(onHit, victim)
 		end

@@ -17,6 +17,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 
+local Front = require(ReplicatedStorage.Shared.Front)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Input = require(script.Parent.Input)
 local UiKit = require(script.Parent.UiKit)
@@ -266,7 +267,7 @@ local function fill(report: { string })
 		UiKit.list(tags, true, px(6, 8))
 		for i, it in owners do
 			local c = if it.o == "USMC" then V.US elseif it.o == "VC" then V.VC else V.MUTED
-			local tg = UiKit.tag(tags, string.format("S%d", it.s), c, px(15, 22))
+			local tg = UiKit.tag(tags, Front.letra(it.s), c, px(15, 22))
 			tg.LayoutOrder = i
 			tg.Size = UDim2.fromOffset(0, px(24, 32))
 		end

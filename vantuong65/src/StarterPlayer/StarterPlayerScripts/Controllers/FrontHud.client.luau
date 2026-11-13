@@ -77,6 +77,29 @@ end
 -- caber; a bússola e o cartão da arma (HudCampo) descem logo abaixo dela.
 local function placeStripTouch()
 	local scale = strip:FindFirstChildOfClass("UIScale")
+	-- v41 (pedido do dono, foto do celular: "coloque isso mais para cima como era antes"): no toque a
+	-- faixa sobe para a linha da barra do Roblox, no vão livre à direita dos botões dele
+	-- (GuiService.TopbarInset), centrada na tela quando cabe. A bússola sobe para o alto da área do
+	-- HUD (zona "bussola"). Sem a barra (Studio antigo, inset vazio), fica a zona "topo" da v39.
+	if ToqueUi.active() then
+		local ok, tb = pcall(function(): Rect
+			return GuiService.TopbarInset
+		end)
+		local cam = workspace.CurrentCamera
+		if ok and tb and cam and tb.Width > 160 then
+			local vp = cam.ViewportSize
+			local w0 = strip.Size.X.Offset
+			local k = ToqueTelas.fitScale(w0, math.min(tb.Width - 12, vp.X * 0.5), 1, 0.4)
+			if scale then
+				scale.Scale = k
+			end
+			local half = w0 * k / 2
+			local cx = math.clamp(vp.X / 2, tb.Min.X + half + 6, math.max(tb.Max.X - half - 6, tb.Min.X + half + 6))
+			strip.AnchorPoint = Vector2.new(0.5, 0)
+			strip.Position = UDim2.fromOffset(cx - hud.AbsolutePosition.X, tb.Min.Y + 2 - hud.AbsolutePosition.Y)
+			return
+		end
+	end
 	-- v39: a zona livre "topo" do HUD de toque (Shared/Toque.ZONES), no alto entre o mapa/menu e o
 	-- COMUNICAR; a bússola desce logo abaixo (zona "bussola", HudCampo)
 	if ToqueUi.fitZone(strip, scale, "topo", strip.Size.X.Offset, strip.Size.Y.Offset, Vector2.new(0.5, 0), 1, 0.4) then
@@ -161,7 +184,7 @@ do
 		st.Parent = f
 		local name = text(f, px(13, 20), Color3.fromRGB(246, 240, 222), true)
 		name.Size = UDim2.new(1, 0, 1, -4)
-		name.Text = "S" .. i
+		name.Text = Front.letra(i)
 		name.TextStrokeTransparency = 0.6
 		local bar = Instance.new("Frame")
 		bar.AnchorPoint = Vector2.new(0, 1)
@@ -228,7 +251,7 @@ end
 
 local function sectorName(st: any, s: number): string
 	local p = st.points and st.points[s]
-	return if p then string.format("S%d %s", s, p.name) else "S" .. s
+	return if p then string.format("%s %s", Front.letra(s), p.name) else Front.letra(s)
 end
 
 local function throttle(key: string, seconds: number): boolean
@@ -360,7 +383,7 @@ local function render(st: any)
 			st.score.VC or 0
 		)
 	elseif st.mode == "Offensive" and type(st.front) == "number" and st.front >= 1 then
-		scoreText.Text = string.format("FRENTE S%d", st.front)
+		scoreText.Text = string.format("FRENTE %s", Front.letra(st.front))
 	else
 		scoreText.Text = ""
 	end
@@ -557,7 +580,8 @@ local function updateCapture(fromState: boolean)
 		end
 	end
 	capSector = if show then s else nil
-	setCapVisible(show and strip.Visible)
+	-- caído o painel some (v41: no celular ele cobria o cartão de caído)
+	setCapVisible(show and strip.Visible and not Input.state.downed)
 end
 
 -- ===== fim de partida =====

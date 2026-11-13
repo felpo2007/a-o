@@ -102,6 +102,16 @@ export type Bot = {
 	nextRush: number, -- descanso entre lances
 	pinnedSince: number?, -- preso pelo fogo desde quando
 	fightSince: number, -- parado lutando no mesmo lugar desde quando (chegou ao abrigo, começou o combate)
+	-- v41: combate do Front 44 (BotBrain.F44)
+	strafeAt: number, -- próxima troca de lado
+	strafeSign: number, -- −1 ou 1
+	strafeTo: Vector3?, -- ponto do passo de lado em curso
+	retreatUntil: number, -- recuando (vida baixa) até quando
+	duelCover: Vector3?, -- abrigo da recarga
+	duelCoverAt: number, -- próxima busca de abrigo para recarregar
+	duelCoverUntil: number,
+	aimHead: boolean, -- esta rajada vai na cabeça
+	invClearedAt: number, -- chegou ao último contato: nada antes disto é investigado
 }
 
 -- Ganchos que o BotService preenche no start (os módulos chamam por aqui)

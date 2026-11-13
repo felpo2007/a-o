@@ -43,7 +43,7 @@ local ZONES = { "torso", "torso", "arm", "leg", "leg", "head" }
 -- chamusca: capim do terreno vira terra (Terrain:ReplaceMaterial), sem mexer no relevo nem nas
 -- peças do mapa, no máximo 6 manchas por minuto.
 local burnBudget = Explosive.newBudget(6)
-function ExplosionService.ignite(pos: Vector3, heading: Vector3?, by: Player?, id: string?)
+function ExplosionService.ignite(pos: Vector3, heading: Vector3?, by: Player?, id: string?, from: string?)
 	local t = Explosive.TYPES[id or "napalm"]
 	local b = t and t.burn
 	if not b then
@@ -121,10 +121,17 @@ function ExplosionService.ignite(pos: Vector3, heading: Vector3?, by: Player?, i
 					local what = Explosive.burnStep(b, zone, exposed[model] or 0, done[model])
 					if what == "lethal" then
 						done[model] = "lethal"
-						MedicalService.hit(model, "torso", 2000, rng:next(), by)
+						MedicalService.hit(model, "torso", 2000, rng:next(), by, from)
 					elseif what == "burn" then
 						done[model] = "burn"
-						MedicalService.hit(model, ZONES[1 + math.floor(rng:next() * #ZONES)], b.burnJ, rng:next(), by)
+						MedicalService.hit(
+							model,
+							ZONES[1 + math.floor(rng:next() * #ZONES)],
+							b.burnJ,
+							rng:next(),
+							by,
+							from
+						)
 					end
 				end
 			end
@@ -141,8 +148,9 @@ function ExplosionService.ignite(pos: Vector3, heading: Vector3?, by: Player?, i
 	end)
 end
 
--- by: quem lançou (granada, morteiro pedido por jogador), para o abate e a assistência (D-72)
-function ExplosionService.detonate(id: string, pos: Vector3, by: Player?)
+-- by: quem lançou (granada, morteiro pedido por jogador), para o abate e a assistência (D-72).
+-- from: o lado de quem lançou (v41, sem fogo amigo); nil = de ninguém (destroço, armadilha)
+function ExplosionService.detonate(id: string, pos: Vector3, by: Player?, from: string?)
 	local t = Explosive.TYPES[id]
 	if not t then
 		return
@@ -150,7 +158,7 @@ function ExplosionService.detonate(id: string, pos: Vector3, by: Player?)
 	Net.unreliable("Fire_Impact"):FireAllClients({ id = id, x = pos.X, y = pos.Y, z = pos.Z })
 	AnimalService.noise(pos, true)
 	if t.burn then
-		ExplosionService.ignite(pos, nil, by, id)
+		ExplosionService.ignite(pos, nil, by, id, from)
 		return
 	end
 	local origin = pos + Vector3.new(0, 1, 0)
@@ -168,10 +176,11 @@ function ExplosionService.detonate(id: string, pos: Vector3, by: Player?)
 				local ff = e.player and e.player:GetAttribute("FragFactor")
 				local vest = if type(ff) == "number" then math.clamp(ff, 0.1, 1) else 1
 				if result == "lethal" then
-					MedicalService.hit(e.model, "torso", energy * vest, rng:next(), by)
+					MedicalService.hit(e.model, "torso", energy * vest, rng:next(), by, from)
 				elseif result == "wound" then
 					local zone = ZONES[1 + math.floor(rng:next() * #ZONES)]
-					MedicalService.hit(e.model, zone, if zone == "torso" then energy * vest else energy, rng:next(), by)
+					local j = if zone == "torso" then energy * vest else energy
+					MedicalService.hit(e.model, zone, j, rng:next(), by, from)
 				end
 			end
 		end

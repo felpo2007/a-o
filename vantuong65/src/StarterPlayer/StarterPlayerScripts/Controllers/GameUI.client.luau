@@ -24,6 +24,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
 local Carta = require(ReplicatedStorage.Shared.Carta)
+local Front = require(ReplicatedStorage.Shared.Front)
 local InputMap = require(ReplicatedStorage.Shared.InputMap)
 local MapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any
 local Net = require(ReplicatedStorage.Shared.Net)
@@ -558,7 +559,7 @@ local function statusLine(): string
 		local w = st.winner or ReplicatedStorage:GetAttribute("LastWinner")
 		table.insert(parts, if w == "US" then "vitória dos EUA" elseif w == "VC" then "vitória do VC" else "empate")
 	elseif st.mode == "Offensive" and st.front and st.front >= 1 then
-		table.insert(parts, string.format("frente S%d", st.front))
+		table.insert(parts, string.format("frente %s", Front.letra(st.front)))
 	end
 	table.insert(parts, string.format("cursor %s", CartaView.cursorGrid()))
 	return table.concat(parts, " · ")

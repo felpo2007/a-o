@@ -142,7 +142,7 @@ local function setBody(v: number)
 	end
 end
 
--- ===== retícula simples (só em 3ª pessoa) =====
+-- ===== retícula simples (3ª pessoa; v41: também a do quadril em 1ª pessoa) =====
 local gui = Instance.new("ScreenGui")
 gui.Name = "VT65ThirdPerson"
 gui.ResetOnSpawn = false
@@ -316,7 +316,16 @@ RunService:BindToRenderStep("VT65ThirdPerson", Enum.RenderPriority.Camera.Value 
 	ViewMode.eye = cf.Position -- a câmera de 1ª pessoa, antes do deslocamento: o olho
 	if a <= 0 or not (custom and char and root) then
 		setView(false)
-		gui.Enabled = false
+		-- v41 (pedido do dono): em 1ª pessoa, a mesma retícula no tiro do quadril (arma de fogo
+		-- pronta, sem mirar e sem correr: o WeaponController liga o HipReticle)
+		local hip = custom
+			and player:GetAttribute("HipReticle") == true
+			and Input.state.menus == 0
+			and not Input.state.map
+		gui.Enabled = hip
+		if hip then
+			updateReticle()
+		end
 		boom = -1 -- próxima entrada começa já na distância livre (a transição é a mistura)
 		if bodyShown and custom then
 			setBody(1) -- 1ª pessoa: corpo escondido de novo, como a câmera do Roblox deixa

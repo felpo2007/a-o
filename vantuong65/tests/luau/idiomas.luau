@@ -136,7 +136,7 @@ local OBRIGATORIAS = {
 	"fuzil",
 	"metralhadora",
 	"morteiro",
-	"%s  %s perde o controle de S%d (%s).",
+	"%s  %s perde o controle de %s (%s).",
 	"Vitória do USMC. Duração: %d min.",
 }
 
@@ -217,22 +217,22 @@ test("texto montado inteiro: relatório pós-ação sai traduzido", function()
 	local lines = AfterAction.lines(r)
 	local want = {
 		en = {
-			"   180631H AUG 65  VC loses control of S1 (Hill 43).",
-			"   180633H AUG 65  USMC captures S1 (Hill 43).",
-			"   180635H AUG 65  the front moves to S2.",
+			"   180631H AUG 65  VC loses control of A (Hill 43).",
+			"   180633H AUG 65  USMC captures A (Hill 43).",
+			"   180635H AUG 65  the front moves to B.",
 			"   USMC victory. Duration: 60 min.",
-			"   Sectors at the end: S1 USMC · S2 VC",
+			"   Sectors at the end: A USMC · B VC",
 		},
 		es = {
-			"   180631H AUG 65  VC pierde el control de S1 (Colina 43).",
-			"   180633H AUG 65  USMC toma S1 (Colina 43).",
-			"   180635H AUG 65  el frente pasa a S2.",
+			"   180631H AUG 65  VC pierde el control de A (Colina 43).",
+			"   180633H AUG 65  USMC toma A (Colina 43).",
+			"   180635H AUG 65  el frente pasa a B.",
 			"   Victoria del USMC. Duración: 60 min.",
 		},
 		vi = {
-			"   180631H AUG 65  VC mất quyền kiểm soát S1 (Đồi 43).",
-			"   180633H AUG 65  USMC chiếm S1 (Đồi 43).",
-			"   Giao tranh ác liệt nhất: S1 (1 tử trận).",
+			"   180631H AUG 65  VC mất quyền kiểm soát A (Đồi 43).",
+			"   180633H AUG 65  USMC chiếm A (Đồi 43).",
+			"   Giao tranh ác liệt nhất: A (1 tử trận).",
 			"   USMC chiến thắng. Thời lượng: 60 phút.",
 		},
 	}

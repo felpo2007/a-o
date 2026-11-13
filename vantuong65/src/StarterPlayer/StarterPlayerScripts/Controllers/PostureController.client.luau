@@ -81,7 +81,16 @@ local HOLD_LUNGE = holdCF(ArmIK.HOLDS.lunge)
 local HOLD_KNIFE = holdCF(ArmIK.HOLDS.knife)
 local STRIKE_KEYS = { { 0, 0 }, { 0.18, 1 }, { 0.32, 2 }, { 0.45, 2 }, { 0.9, 0 } } -- 0 base, 1 guarda, 2 estocada
 
+-- v41 ("jogo está bem pesado ainda"): a lista é montada 4 vezes por segundo (antes, duas vezes por
+-- quadro, com os ~100 soldados). Quem saiu nesse meio tempo é pulado nos laços (sem raiz/juntas).
+local charList: { Model } = {}
+local charListAt = -math.huge
 local function characters(): { Model }
+	local now = os.clock()
+	if now - charListAt < 0.25 then
+		return charList
+	end
+	charListAt = now
 	local list = {}
 	for _, p in Players:GetPlayers() do
 		if p.Character then
@@ -96,8 +105,12 @@ local function characters(): { Model }
 			end
 		end
 	end
+	charList = list
 	return list
 end
+-- v41: longe da câmera a pose anda em menos quadros, com o dt somado (perto: todo quadro)
+local LOD_MID = 60 / 0.28
+local frameN = 0
 
 local function motor(char: Model, name: string): (Instance?, CFrame)
 	local m = Joints.find(char, name)
@@ -387,6 +400,8 @@ type Blend = {
 	pos: Vector3?,
 	goals: Goals?,
 	near: boolean,
+	accH: number, -- v41: dt guardado dos quadros pulados (pose do tronco longe da câmera)
+	accP: number, -- v41: idem para a arma de quem está além do LOD_FAR
 }
 local blend: { [Model]: Blend } = setmetatable({}, { __mode = "k" }) :: any
 
@@ -410,6 +425,8 @@ local function newBlend(): Blend
 		pos = nil,
 		goals = nil,
 		near = true,
+		accH = 0,
+		accP = 0,
 	}
 end
 
@@ -907,13 +924,30 @@ local function bladeOf(char: Model): number
 	return Pegada3P.blade(if w then kindOf(w) else "rifle")
 end
 
-RunService.Heartbeat:Connect(function(dt: number)
-	for _, char in characters() do
+RunService.Heartbeat:Connect(function(frameDt: number)
+	frameN += 1
+	local cam = camera.CFrame.Position
+	for i, char in characters() do
 		local b = blend[char]
 		if not b then
 			b = newBlend()
 			blend[char] = b
 		end
+		-- v41 (desempenho): além de 60 m, a cada 2 quadros; além do LOD_FAR, a cada 4 (escalonado)
+		b.accH += frameDt
+		if char ~= player.Character then
+			local r = char:FindFirstChild("HumanoidRootPart") :: BasePart?
+			if not r then
+				continue
+			end
+			local d = (r.Position - cam).Magnitude
+			local k = if d > LOD_FAR then 4 elseif d > LOD_MID then 2 else 1
+			if k > 1 and (frameN + i) % k ~= 0 then
+				continue
+			end
+		end
+		local dt = math.min(b.accH, 0.25)
+		b.accH = 0
 		local bent = char:GetAttribute("Crouched") == true or char:GetAttribute("Vaulting") == true
 		-- com o clipe agachado tocando (SoldierAnimations marca "VT65Anim", local), as pernas são dele
 		if bent and SoldierAnims.id("agachado") ~= 0 and char:GetAttribute("VT65Anim") == true then
@@ -961,9 +995,9 @@ end)
 
 -- Arma e braços DEPOIS do Animator (clipes) e antes da física: o C0 da arma e o Transform dos braços
 -- deste quadro saem juntos na mesma posição (antes: Heartbeat + IKControl, um quadro de atraso).
-RunService.PreSimulation:Connect(function(dt: number)
+RunService.PreSimulation:Connect(function(frameDt: number)
 	local cam = camera.CFrame.Position
-	for _, char in characters() do
+	for i, char in characters() do
 		local b = blend[char]
 		if not b then
 			b = newBlend()
@@ -977,6 +1011,13 @@ RunService.PreSimulation:Connect(function(dt: number)
 		local d = (root.Position - cam).Magnitude
 		local far = d > (if b.near then LOD_FAR * 1.1 else LOD_FAR)
 		b.near = not far
+		-- v41 (desempenho): além do LOD_FAR (o IKControl faz os braços), a arma a cada 3 quadros
+		b.accP += frameDt
+		if far and (frameN + i) % 3 ~= 0 then
+			continue
+		end
+		local dt = math.min(b.accP, 0.25)
+		b.accP = 0
 		local goals = holdWeapon(char, b, dt, far)
 		if far or not goals then
 			continue

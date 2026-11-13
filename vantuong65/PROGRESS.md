@@ -13,6 +13,34 @@
 | F5 Arte total e otimização | arte nos 5 setores a 100% do plano; 57,1 fps girando a câmera na célula mais densa da mata (D-76) e 59,6 fps no arrozal (D-74). Critério de 60 jogadores **só no Roblox** |
 | F6 Offensive e lançamento | **testado no Studio**: Offensive com relatório pós-ação, progressão. Beta fechado **só você pode rodar** |
 
+## v41: bots do Front 44, sem fogo amigo, corrida, celular e carregamento (2026-11-13, D-109)
+- **Feito** (14 pedidos do dono de 13/11, sozinho, sem agentes):
+  - celular sem nada por cima (caído, avisos, faixa no alto) e objetivos A–E;
+  - sem a parede vermelha (disco do evento) e sem fogo amigo;
+  - corrida com a arma de lado (1ª pessoa), retícula do quadril e bots com o combate do Front 44;
+  - som da metralhadora do tanque para quem atira, barracas 1,5x e nomes curtos das armas;
+  - mais leve e o mapa carregado na tela de início.
+- **Conferido no Studio (Play, 1 jogador, 100 bots):**
+  - letras A–E na faixa e nos nomes; barracas maiores na base;
+  - corrida em 1ª pessoa com a arma atravessada no peito;
+  - retícula do quadril ligada em 1ª pessoa (pelo estado: a captura do MCP troca a câmera e ela some
+    da foto);
+  - tiro de M14 num aliado a 10 m: vida 100 → 100; no inimigo: 100 → 62,6;
+  - som do canhão de 90 mm carregado e tocando (5,0 s); nenhum disco de evento no mundo;
+  - caído no modo toque: cartão no canto de baixo à esquerda, DESISTIR livre, "Segure DESISTIR"
+    legível, avisos pequenos à esquerda, captura escondida;
+  - tela de carregamento com as etapas novas; avisos de tipo de asset de 511 para 7; 0 erros de
+    script;
+  - primeiro tiroteio dos bots aos 46 s, a 29 m;
+  - servidor a 60 Hz. Cliente a 15 fps no Studio deste PC (render de 66,8 ms na qualidade 1; script
+    2,2 ms).
+- **Medido no Lune:** bot do Front 44 contra jogador parado em 3 s: 10 m 100%; 25 m 81% / 50%; 40 m
+  34% / 16% (automática / semi).
+- **Não testado:** celular de verdade (fps e carregamento), a metralhadora do tanque atirada por um
+  jogador, investigar e granada dos bots vistos de perto, 2 jogadores.
+- **Pendente:** a caixa de munição no capim alto; as duas rodas "Roda_E" do uh34d_v2; o soldado com
+  2,08 m.
+
 ## v40: classes simples, Suporte com caixa, espingarda, armas maiores e nada flutuando (2026-11-13, D-108)
 - **Publicada** como versão 40 do place (build do commit 1ef8480).
 - **Conferido no Studio (Play, 1 jogador):**

@@ -83,7 +83,7 @@ function FrontService.forwardPoints(faction: string): { SpawnService.Point }
 				local initial = MatchService.initialOwner[pair.own] == faction
 				table.insert(out, {
 					id = string.format("forward:%d:%d", pair.own, pair.target),
-					name = string.format("Reunião avançada — S%d", pair.own),
+					name = string.format("Reunião avançada — %s", Front.letra(pair.own)),
 					x = x,
 					z = z,
 					kind = if initial then "rally" else "rally_captured",

@@ -243,7 +243,8 @@ ExplosionService.onVehicles = function(pos: Vector3, id: string)
 end
 
 -- projétil balístico simulado no servidor (gravidade; o arrasto é desprezado a essas distâncias)
-local function shoot(gun: any, origin: Vector3, dir: Vector3, ignore: { Instance })
+-- from: o lado de quem atirou (v41: sem fogo amigo)
+local function shoot(gun: any, origin: Vector3, dir: Vector3, ignore: { Instance }, from: string?)
 	local params = RaycastParams.new()
 	params.FilterType = Enum.RaycastFilterType.Exclude
 	params.FilterDescendantsInstances = ignore
@@ -263,7 +264,7 @@ local function shoot(gun: any, origin: Vector3, dir: Vector3, ignore: { Instance
 				if chassis then
 					hitVehicle(chassis.Parent :: Model, chassis, gun.pen, step)
 				end
-				ExplosionService.detonate(gun.explosive, hit.Position)
+				ExplosionService.detonate(gun.explosive, hit.Position, nil, from)
 				return
 			end
 			pos += step
@@ -341,7 +342,7 @@ local function fireFromSeat(seat: Seat, char: Model, player: Player?, dir: Vecto
 		model:SetAttribute("Tubes", left - 1)
 	end
 	lastShot[seat] = now
-	shoot(gun, origin, dir, { model, char })
+	shoot(gun, origin, dir, { model, char }, model:GetAttribute("Faction") :: string?)
 	return true
 end
 
@@ -375,7 +376,7 @@ local function onFire(player: Player, req: any)
 	end
 	player:SetAttribute("Rockets", left - 1)
 	lastShot[player :: any] = now
-	shoot(GUNS[key], head.Position + dir * (1.5 / M), dir, { char })
+	shoot(GUNS[key], head.Position + dir * (1.5 / M), dir, { char }, player:GetAttribute("Faction") :: string?)
 end
 
 -- recarga do Ontos: os tubos são carregados por fora; só com o veículo parado (10 s por tubo, D-36)

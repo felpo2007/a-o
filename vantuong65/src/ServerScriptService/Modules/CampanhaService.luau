@@ -563,7 +563,7 @@ end
 -- ===== ordens do comandante =====
 local function pointName(sector: number): string
 	local sp = MatchService.points[sector]
-	return if sp and sp.name then sp.name else string.format("S%d", sector)
+	return if sp and sp.name then sp.name else Front.letra(sector)
 end
 
 local function squadPlayers(faction: string, sq: any): { Player }

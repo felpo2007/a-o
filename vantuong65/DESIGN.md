@@ -3633,3 +3633,95 @@ Pedidos do dono de 13/11 (14:00–14:05), feitos em 4 frentes. Números novos s�
 - UH-34D: a altura das rodas descontava 1,52 m a mais e o pouso parava a 1,81 m do chão. Abaixo de
   1,5 m, sem comando no coletivo, o helicóptero assenta.
 - Gancho de medição: `VT65DevFlutua`.
+
+## D-109 — Bots do Front 44, sem fogo amigo, corrida com a arma de lado, celular sem nada por cima e carregamento do mapa (v41, 2026-11-13)
+
+Pedidos do dono de 13/11 (14:13–14:27, fotos do celular na v39). Feito sem agentes em paralelo.
+
+**Celular: nada em cima de nada** ("botões estão em cima dos outros"):
+- Caído no toque, o cartão vai para a zona nova `caido` do `Shared/Toque` (pé da tela, à esquerda do
+  DESISTIR, que fica no lugar do tiro). O teste da zona confere só os botões de quem está caído
+  (`Toque.ZONE_CTX`). O painel da captura some com o soldado caído.
+- Os avisos (Toast) também usam a zona do canto com o soldado caído; antes voltavam grandes ao alto
+  do meio, por cima da faixa.
+- A faixa da frente sobe para a barra do Roblox ("como era antes"); a bússola vai ao alto.
+- Eventos e avisos mais estreitos e encostados no canto esquerdo ("mais para o canto e menor").
+
+**Objetivos A B C D E** (`Front.letra`): setores, faixa, carta, marcadores, relatórios, avisos e
+falas. Os nomes no `crop_world.py` e no `MapConfig` começam pela letra. O tradutor ordena os padrões
+pelas letras fixas e, no empate, pelos caracteres fixos ("captura A (Colina 43)" não pega o modelo
+sem nome).
+
+**Marcador do objetivo** ("esse atacar enorme está atrapalhando"): sem o quadro; a letra grande na cor
+do papel e "atacar · 230 m" pequeno, a 45% de transparência.
+
+**Sem a parede vermelha** ("tire essa parede vermelha do jogo"): era o disco do evento (e o da área
+marcada), um plano na altura do centro do evento. Com o centro num morro, quem estava embaixo via o
+disco acima dos olhos, vermelho até o horizonte. Os dois discos saíram; ficam o marcador e o raio na
+carta.
+
+**Sem fogo amigo** ("retire dano aliado"): `Medical.FRIENDLY_FIRE = false` e `Medical.blocked`.
+- O `MedicalService.hit` recebe o lado de quem causou o dano. Bala, granada, explosão, napalm, golpe,
+  canhão de veículo, artilharia pedida e barragem de evento passam o lado.
+- O dano em si mesmo (a própria granada) vale. Dano sem dono (destroço de veículo, armadilha) também.
+- Medido no Studio: tiro de M14 a 10 m num aliado deixou a vida em 100; no inimigo, 100 → 62,6.
+
+**Corrida do Front 44** ("quando ele corre a arma fica de lado no corpo"): em 1ª pessoa, correndo, a
+arma vai atravessada no peito com a boca para cima e para a esquerda. São os números do Front 44
+(`SprintHighPort`): 12 cm para trás, 3 cm à esquerda e 7 cm abaixo; giro de 28°, 28° e 30°; balanço de
+15%. Mirando, recarregando, arremessando e sentado, não. A 3ª pessoa já tinha a pose (`Pegada3P.PORT`).
+
+**Bots do Front 44** ("os bots são ruins, copie exatamente os bots do Front 44"): o combate de
+`F44/Bots.luau` e `Config.Bots` (v0.30), com distâncias em metros (stud de 0,28 m nos dois jogos).
+`BotBrain.F44`:
+- ver: cone de 130° ou a menos de 22 studs; até 160 studs (44,8 m), ou menos se a vegetação tapa;
+- reagir: 0,45 s × 0,8–1,3;
+- mirar: erro máximo de 4,5° que fecha em 1,1° em 1,2 s, ×1,5 andando, +0,008° por stud,
+  antecipação do alvo e 18% das rajadas na cabeça;
+- atirar: rajadas de 3 a 7 na automática com pausa de 0,25–0,7 s; tiro a tiro no resto;
+- mover: de lado 9 studs (troca a cada 1,8–2,6 s); longe (> 70 studs), parado e agachado; recarrega
+  num abrigo perto; com menos de 35% da vida, recua 3,5 s;
+- sem alvo: investiga o último contato (8 s; quem o acertou, 7 s; tiro ouvido a até 110 studs, 6 s) e
+  joga granada em quem sumiu (25%, uma a cada 12 s); depois volta ao objetivo do squad.
+- Ficam daqui: navegação, squads, objetivo, veículos, túneis, caixa do Suporte e o orçamento (LOD).
+- O combate antigo fica atrás de `workspace:SetAttribute("VT65BotsF44", false)` no Studio.
+- Medido (`f44DuelHitChance`, jogador parado, 3 s): 10 m 100%; 25 m 81% (automática) e 50% (semi);
+  40 m 34% e 16%; além de 44,8 m não vê. No Studio, o primeiro tiroteio foi aos 46 s, a 29 m.
+
+**Mira do quadril** ("coloque uma mira quando você não está mirando"): a retícula da 3ª pessoa
+também em 1ª, com arma de fogo pronta, sem mirar e sem correr. A abertura é a dispersão do quadril
+(`Movement.hipSpreadDeg`), que passou a valer em 1ª pessoa (sem ela, mirar não valeria nada).
+
+**Som da arma do tanque** ("a arma do tanque não sai som"): a metralhadora do assento (coaxial do M48 e
+M60 da cúpula) atirada pelo jogador não tinha som para ele. O servidor manda o som só para os outros e
+o cliente só fazia o clarão. Agora o `VehicleController` avisa o `AudioController`. O canhão de 90 mm
+tocava: conferido no Studio (5,0 s, carregado).
+
+**Barracas 1,5x** ("estão muito pequenas"): as barracas dos dois lados (GP média e grande, refeitório,
+posto de comando e abrigos do VC).
+- `tools/bases_dados.py` (`ESCALA`, `afastar`): cada barraca maior vai à vaga livre mais perto, a
+  0,5 m das vizinhas, sem sair da base nem cobrir rua, trilha, pontos de nascer e estande.
+- O posto de comando e o refeitório dos EUA mudaram de lugar.
+
+**Nomes das armas** ("coloque o nome certo nas armas certas"): `Weapons.shortName` no cartão, nas
+vagas e no aviso de troca.
+- As duas Winchester apareciam cortadas e iguais. Agora são "M70 (luneta)" e "Escopeta 12".
+- O lançador dos EUA é a "Bazuca M20"; o do VC, o "RPG-2".
+
+**Mais leve** ("jogo está bem pesado ainda"). Medido no Studio com 100 bots: servidor a 60 Hz; o
+cliente gasta 2,2 ms por quadro em script. O gargalo é a renderização: 66,8 ms por quadro no PC do dono
+na qualidade 1, com 1,3 milhão de índices.
+- A pose dos soldados longe da câmera roda em menos quadros: além de 60 m a cada 2 e além de 150 m a
+  cada 4; a arma além de 150 m a cada 3. A lista de soldados é montada 4 vezes por segundo, não duas
+  por quadro.
+- Os laços de som calados ficam pausados.
+- O disparo dos tiros de mais de 100 m tem teto de 16 por segundo (eram 33 sons de tiro ao mesmo
+  tempo).
+- A mata não muda por aparelho (regra da D-82).
+
+**Carregar tudo na tela de início** ("carregue todo o jogo perfeitamente na tela de início"):
+- A etapa 7 espera o terreno e a arte do servidor e pede o streaming em volta dos dois QGs e dos
+  cinco objetivos. Depois baixa a arte do que chegou. Ao nascer, o servidor pede o streaming em volta
+  do ponto antes de pôr o soldado.
+- As malhas vão como peça. O id em texto era pedido como imagem: 511 avisos "Asset type does not
+  match" que não baixavam nada; ficaram 7, de roupas do catálogo.

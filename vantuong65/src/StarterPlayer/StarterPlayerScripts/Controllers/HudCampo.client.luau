@@ -434,7 +434,10 @@ end
 
 local function renderWeapon()
 	local wp = weaponDef()
-	A.name.Text = if W.id == "launcher" then "Lançador" elseif wp then wp.name else "—"
+	-- v41: nome curto (Weapons.shortName: as duas Winchester distintas, a bazuca dos EUA com nome)
+	local fac = player:GetAttribute("Faction")
+	local nm = Weapons.shortName(W.id, if type(fac) == "string" then fac else nil)
+	A.name.Text = if nm ~= "" then nm else "—"
 	A.mode.Text = modeText(W.mode)
 	A.mode.Visible = wp ~= nil
 	A.zero.Text = string.format("Alça %d m", W.zero)
@@ -866,7 +869,7 @@ do
 		end
 		txt.Text = sentence(o)
 		sector.Visible = type(o.sector) == "number"
-		sector.Text = if type(o.sector) == "number" then string.format("S%d", o.sector) else ""
+		sector.Text = if type(o.sector) == "number" then Front.letra(o.sector) else ""
 		box.BackgroundColor3 = if o.done then V.BG_OLIVE else V.PANEL
 		kick.Text = if o.done then "ORDEM CUMPRIDA" else "ORDEM DO COMANDANTE"
 	end

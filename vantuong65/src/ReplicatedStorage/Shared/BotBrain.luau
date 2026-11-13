@@ -1475,4 +1475,182 @@ function BotBrain.crewCount(teamBots: number, available: number): number
 	return math.min(available, 1 + (teamBots - V.minTeamBots) // V.perCrewBots)
 end
 
+---------------------------------------------------------------------------------------------
+-- v41 (pedido do dono, 2026-11-13: "os bots são ruins / copie exatamente os bots do Front 44, eles
+-- estão melhores"): o combate dos bots do Front 44 (ServerScriptService/F44/Bots.luau e Config.Bots,
+-- versão 0.30). Lá as distâncias são em studs de 0,28 m; aqui vão em metros (× STUD_M). Fica daqui:
+-- a navegação (BotLocomotion), os squads e o objetivo, veículos, túneis, a vegetação que tapa a vista
+-- (o alcance é o menor entre o do Front 44 e o da vegetação) e o orçamento de desempenho (LOD).
+-- O combate antigo (abrigo, espiar, supressão, lance) fica atrás de F44.on = false (gancho do Studio
+-- workspace "VT65BotsF44" = false), para comparar.
+--   ver: cone de 130° na frente e tudo a menos de 22 studs; até 160 studs; o mais perto que se vê
+--   reagir: 0,45 s × (0,8 a 1,3) do avistar ao 1º tiro
+--   mirar: erro (cone, distribuição uniforme no disco) de 4,5° que fecha em 1,1° em 1,2 s seguindo o
+--          alvo; × 1,5 andando; + 0,008° por stud de distância; antecipa o alvo (voo × 0,85); 18% das
+--          rajadas na cabeça, o resto no tronco
+--   atirar: automática em rajadas de 3 a 7 com pausa de 0,25 a 0,7 s; semiautomática, ferrolho e
+--           bomba um tiro a cada max(cadência, 0,28 a 0,58 s); escopeta até 40 studs, pistola até 70
+--   mover: em combate anda de lado mirando (9 studs, troca de lado a cada 1,8 a 2,6 s, 70% do andar);
+--          longe (mais de 70 studs) fica parado e agachado; sem bala ou recarregando, abrigo perto e
+--          recarrega agachado (até 5 s); vida abaixo de 35%, recua 3,5 s de costas atirando
+--   sem alvo: vai ao último contato (visto há até 8 s; tiro ouvido a até 110 studs; quem o acertou) e,
+--             se o inimigo sumiu a 14–70 studs há mais de 1,2 s, 25% de granada (uma a cada 12 s);
+--             recarrega abaixo da metade; longe do destino (mais de 30 studs) corre; depois, o objetivo
+---------------------------------------------------------------------------------------------
+BotBrain.F44 = {
+	on = true,
+	STUD_M = 0.28, -- Front 44: Config.StudsPerMeter = 1 / 0,28
+	sightStuds = 160,
+	coneDeg = 130,
+	nearStuds = 22,
+	reactionS = 0.45,
+	reactionK = { 0.8, 1.3 },
+	aimStartDeg = 4.5,
+	aimEndDeg = 1.1,
+	aimSettleS = 1.2,
+	aimMovingK = 1.5,
+	aimPerStudDeg = 0.008,
+	leadK = 0.85,
+	headChance = 0.18,
+	burst = { 3, 7 },
+	burstPauseS = { 0.25, 0.7 },
+	semiGapS = { 0.28, 0.58 },
+	tooFarStuds = { shotgun = 40, pistol = 70, smg = 110 } :: { [string]: number },
+	strafeStuds = 9,
+	strafeS = { 1.8, 2.6 },
+	farStuds = 70,
+	coverHoldS = 5,
+	coverRetryS = 1.5,
+	retreatHealth = 0.35,
+	retreatS = 3.5,
+	retreatStuds = 12,
+	investigateS = 8,
+	hitInvestigateS = 7, -- quem me acertou: visto "1 s atrás" (OnDamaged)
+	heardInvestigateS = 6, -- tiro ouvido: "2 s atrás"
+	hearStuds = 110,
+	arriveStuds = 6,
+	grenadeChance = 0.25,
+	grenadeMinStuds = 14,
+	grenadeMaxStuds = 70,
+	grenadeAfterS = 1.2,
+	grenadeEveryS = 12,
+	reloadBelow = 0.5,
+	sprintStuds = 30,
+}
+
+local function f44M(studs: number): number
+	return studs * BotBrain.F44.STUD_M
+end
+BotBrain.f44M = f44M
+
+-- Alcance de visão (m): o menor entre o do Front 44 (160 studs = 44,8 m) e o da vegetação daqui.
+function BotBrain.f44SightM(vegM: number): number
+	return math.min(f44M(BotBrain.F44.sightStuds), vegM)
+end
+
+-- Vê quem está no cone da frente (130°) ou a menos de 22 studs (6,2 m) em qualquer direção.
+function BotBrain.f44Sees(offDeg: number, distM: number): boolean
+	local F = BotBrain.F44
+	return distM < f44M(F.nearStuds) or offDeg <= F.coneDeg / 2
+end
+
+function BotBrain.f44Reaction(roll: number): number
+	local F = BotBrain.F44
+	return F.reactionS * (F.reactionK[1] + (F.reactionK[2] - F.reactionK[1]) * math.clamp(roll, 0, 1))
+end
+
+-- Erro máximo da mira (graus): o tiro cai uniforme num disco desse raio angular.
+function BotBrain.f44AimDeg(trackS: number, moving: boolean, distM: number): number
+	local F = BotBrain.F44
+	local settle = math.clamp(trackS / F.aimSettleS, 0, 1)
+	local e = F.aimStartDeg + (F.aimEndDeg - F.aimStartDeg) * settle
+	if moving then
+		e *= F.aimMovingK
+	end
+	return e + (distM / F.STUD_M) * F.aimPerStudDeg
+end
+
+-- Ângulo (rad) e giro de um tiro com erro máximo errDeg (disco uniforme: raio × √sorteio).
+function BotBrain.f44Spread(errDeg: number, rollR: number, rollA: number): (number, number)
+	return math.rad(errDeg) * math.sqrt(math.clamp(rollR, 0, 1)), rollA * 2 * math.pi
+end
+
+-- Tiros da rajada: automática 3 a 7; o resto, 1.
+function BotBrain.f44Burst(auto: boolean, roll: number): number
+	if not auto then
+		return 1
+	end
+	local b = BotBrain.F44.burst
+	return math.min(b[1] + math.floor(math.clamp(roll, 0, 0.9999) * (b[2] - b[1] + 1)), b[2])
+end
+
+-- Espera depois da rajada (ou do tiro): automática 0,25–0,7 s; o resto, max(cadência, 0,28–0,58 s).
+function BotBrain.f44Pause(auto: boolean, intervalS: number, roll: number): number
+	local F = BotBrain.F44
+	local r = math.clamp(roll, 0, 1)
+	if auto then
+		return F.burstPauseS[1] + (F.burstPauseS[2] - F.burstPauseS[1]) * r
+	end
+	return math.max(intervalS, F.semiGapS[1] + (F.semiGapS[2] - F.semiGapS[1]) * r)
+end
+
+-- Longe demais para a arma (escopeta 40 studs, pistola 70, submetralhadora 110)?
+function BotBrain.f44TooFar(kind: string, distM: number): boolean
+	local s = BotBrain.F44.tooFarStuds[kind]
+	return s ~= nil and distM > f44M(s)
+end
+
+-- Chance de um tiro com erro máximo errDeg cair no quadrado do tronco (meio lado halfM) a distM:
+-- área do disco dentro do quadrado ÷ área do disco.
+function BotBrain.f44ShotChance(errDeg: number, distM: number, halfM: number): number
+	local R = math.tan(math.rad(errDeg)) * distM
+	local h = halfM
+	if R <= h then
+		return 1
+	end
+	local disc = math.pi * R * R
+	if R >= h * math.sqrt(2) then
+		return (2 * h) ^ 2 / disc
+	end
+	local seg = R * R * math.acos(h / R) - h * math.sqrt(R * R - h * h)
+	return (disc - 4 * seg) / disc
+end
+
+-- Calibração: chance de acertar pelo menos uma vez um jogador parado, em pé, de frente, no aberto,
+-- a distM, nos windowS segundos depois que ele aparece no cone (bot parado; rpm da arma).
+function BotBrain.f44DuelHitChance(
+	distM: number,
+	windowS: number,
+	auto: boolean,
+	rpm: number,
+	trials: number,
+	roll: () -> number
+): number
+	if distM > f44M(BotBrain.F44.sightStuds) then
+		return 0
+	end
+	local interval = 60 / math.max(rpm, 1)
+	local sum = 0
+	for _ = 1, trials do
+		local t = BotBrain.f44Reaction(roll())
+		local miss = 1
+		while t <= windowS do
+			local n = BotBrain.f44Burst(auto, roll())
+			for i = 1, n do
+				if t > windowS then
+					break
+				end
+				local e = BotBrain.f44AimDeg(t, false, distM)
+				miss *= 1 - BotBrain.f44ShotChance(e, distM, BotBrain.C.torsoHalfM)
+				if i < n then
+					t += interval
+				end
+			end
+			t += BotBrain.f44Pause(auto, interval, roll())
+		end
+		sum += 1 - miss
+	end
+	return sum / math.max(trials, 1)
+end
+
 return BotBrain

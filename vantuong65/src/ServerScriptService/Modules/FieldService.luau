@@ -277,7 +277,7 @@ local function launch(kind: string, faction: string?, from: Vector3, vel: Vector
 			end)
 		else
 			m:Destroy()
-			ExplosionService.detonate(if faction == "VC" then "grenade_vc" else "grenade_us", pos, by)
+			ExplosionService.detonate(if faction == "VC" then "grenade_vc" else "grenade_us", pos, by, faction)
 		end
 	end)
 end

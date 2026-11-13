@@ -225,8 +225,10 @@ test(
 				if sc.W / 2 > z.x0 and sc.W / 2 < z.x1 and sc.H / 2 > z.y0 and sc.H / 2 < z.y1 then
 					table.insert(bad, string.format("%s: zona %s cobre a mira", tag, n))
 				end
+				local only = Toque.ZONE_CTX[n]
 				for _, cc in CTXS do
-					for _, s in shapes(slots, sc, cc[2]) do
+					local skip = only == "downed" and not cc[2].downed
+					for _, s in (if skip then {} else shapes(slots, sc, cc[2])) do
 						if Toque.circleHitsRect(s.cx, s.cy, s.r, z) then
 							table.insert(bad, string.format("%s %s: %s em cima da zona %s", tag, cc[1], s.id, n))
 						end

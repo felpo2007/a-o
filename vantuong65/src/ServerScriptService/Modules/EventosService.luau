@@ -94,7 +94,10 @@ end
 
 local function sectorLabel(s: number?): string
 	local sp = if s then MatchService.points[s] else nil
-	return if s and sp then string.format("S%d %s", s, sp.name) elseif s then "S" .. s else "a área marcada"
+	return if s and sp
+		then string.format("%s %s", Front.letra(s), sp.name)
+		elseif s then Front.letra(s)
+		else "a área marcada"
 end
 
 local function notify(faction: string, ev: Ev, text: string, kind: string, duration: number?)
@@ -399,7 +402,7 @@ local function startBarrage(id: string, side: string): Ev?
 		end)
 		task.delay(tImpact, function()
 			if ev.phase ~= "fim" then
-				ExplosionService.detonate(def.explosive :: string, ground(imp.x, imp.z))
+				ExplosionService.detonate(def.explosive :: string, ground(imp.x, imp.z), nil, side) -- v41: sem fogo amigo
 			end
 		end)
 	end
@@ -841,11 +844,12 @@ local function startDepot(side: string): Ev?
 		if blowAt and now >= blowAt then
 			local by = e.data.armedBy :: Player?
 			local pos = g + Vector3.new(0, 0.5 / M, 0)
-			ExplosionService.detonate(def.explosive :: string, pos, by)
+			ExplosionService.detonate(def.explosive :: string, pos, by, "US")
 			for k, dt in { 1.2, 2.4 } do
 				task.delay(dt, function()
 					local a = k * 2.1
-					ExplosionService.detonate("mortar_82", pos + Vector3.new(math.cos(a), 0, math.sin(a)) * 5 / M, by)
+					local at = pos + Vector3.new(math.cos(a), 0, math.sin(a)) * 5 / M
+					ExplosionService.detonate("mortar_82", at, by, "US")
 				end)
 			end
 			award(e, by, true)

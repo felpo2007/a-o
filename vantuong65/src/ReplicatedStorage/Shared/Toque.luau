@@ -486,20 +486,32 @@ end
 -- Frações PLACEHOLDER (o teste garante que nada se cobre; o tamanho bom de ler, só no aparelho).
 Toque.ZONES = {
 	topo = { x0 = 0.19, y0 = 0.00, x1 = 0.74, y1 = 0.14 },
-	bussola = { x0 = 0.25, y0 = 0.14, x1 = 0.64, y1 = 0.27 },
-	eventos = { x0 = 0.00, y0 = 0.27, x1 = 0.40, y1 = 0.40 },
-	avisos = { x0 = 0.00, y0 = 0.40, x1 = 0.46, y1 = 0.56 },
+	-- v41: a faixa da frente subiu para a barra do Roblox (FrontHud) e a bússola subiu para o alto
+	-- da área ("como era antes"); a zona "topo" ficou de reserva (Studio sem a barra)
+	bussola = { x0 = 0.25, y0 = 0.00, x1 = 0.64, y1 = 0.13 },
+	-- v41 (pedido do dono: "coloque isso mais para o canto da tela e um pouco menor"): eventos e
+	-- avisos mais estreitos (a escala sai da largura da zona), encostados na esquerda
+	eventos = { x0 = 0.00, y0 = 0.27, x1 = 0.30, y1 = 0.40 },
+	avisos = { x0 = 0.00, y0 = 0.40, x1 = 0.34, y1 = 0.56 },
 	cartao = { x0 = 0.46, y0 = 0.80, x1 = 0.66, y1 = 1.00 },
 	captura = { x0 = 0.27, y0 = 0.58, x1 = 0.50, y1 = 0.80 },
 	tutorial = { x0 = 0.00, y0 = 0.27, x1 = 0.46, y1 = 0.56 },
 	vagas = { x0 = 0.19, y0 = 0.00, x1 = 0.74, y1 = 0.27 },
+	-- v41 (pedido do dono: "botoes estao em cima da outros"): o cartão de caído (CasualtyScreen) no
+	-- pé, à esquerda do DESISTIR (que fica no lugar do tiro); caído não há analógico nem cartão da arma
+	caido = { x0 = 0.03, y0 = 0.62, x1 = 0.74, y1 = 1.00 },
 } :: { [string]: Rect }
+-- zonas que só existem num contexto (o teste confere os botões só dele): o cartão de caído só caído
+Toque.ZONE_CTX = { caido = "downed" } :: { [string]: string }
 -- com o tiro do indicador esquerdo (3 e 4 dedos) a coluna da esquerda começa depois dele
 Toque.ZONES_INDEX = { eventos = 0.13, avisos = 0.13, tutorial = 0.13 } :: { [string]: number }
 -- zonas que se cobrem de propósito (uma substitui a outra por um tempo)
 Toque.ZONE_SHARE = {
 	tutorial = { eventos = true, avisos = true },
 	vagas = { topo = true, bussola = true },
+	bussola = { topo = true },
+	-- caído o painel da captura e o cartão da arma somem (FrontHud, HudCampo)
+	caido = { captura = true, cartao = true },
 } :: { [string]: { [string]: boolean } }
 
 -- Zona em px da área W x H (origem no canto de cima à esquerda da área); mirror: canhoto; index:

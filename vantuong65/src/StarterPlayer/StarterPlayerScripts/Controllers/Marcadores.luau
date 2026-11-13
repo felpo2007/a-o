@@ -131,7 +131,10 @@ local function newGoalMark(): Goal
 	bb.ResetOnSpawn = false
 	bb.AlwaysOnTop = true
 	bb.LightInfluence = 0
-	bb.Size = UDim2.fromOffset(px(176, 250), px(64, 90))
+	-- v41 (pedido do dono: "esse atacar enorme está atrapalhando: só coloque as letras do objetivo
+	-- em outra cor e escreva atacar pequeno e meio transparente"): sem quadro; a LETRA do setor
+	-- grande na cor do dono e, embaixo, "atacar · 230 m" pequeno e meio transparente
+	bb.Size = UDim2.fromOffset(px(120, 170), px(58, 82))
 	bb.StudsOffsetWorldSpace = Vector3.new(0, 14, 0)
 	bb.Adornee = att
 	bb.Enabled = false
@@ -139,23 +142,24 @@ local function newGoalMark(): Goal
 	card.AnchorPoint = Vector2.new(0.5, 0)
 	card.Position = UDim2.fromScale(0.5, 0)
 	card.Size = UDim2.new(1, 0, 0, px(44, 62))
-	card.BackgroundColor3 = UiKit.CARD_DARK
-	card.BackgroundTransparency = 0.25
+	card.BackgroundTransparency = 1
 	card.BorderSizePixel = 0
 	card.Parent = bb
-	UiKit.corner(card, 3)
-	local edge = UiKit.edge(card, C.neutral, 1.5, 0.2)
-	local verb = label(card, 15, C.neutral, UiKit.HEAD_FONT)
-	verb.Size = UDim2.new(1, 0, 0, px(20, 28))
-	verb.Position = UDim2.fromOffset(0, 2)
-	local info = label(card, 13, UiKit.CARD, UiKit.BODY_FONT)
-	info.Position = UDim2.fromOffset(4, px(21, 30))
-	info.Size = UDim2.new(1, -8, 0, px(18, 26))
+	local edge = UiKit.edge(card, C.neutral, 1, 1) -- sem moldura (fica para quem pinta a cor)
+	local verb = label(card, 26, C.neutral, UiKit.HEAD_FONT) -- a letra do setor
+	verb.Size = UDim2.new(1, 0, 0, px(28, 40))
+	verb.Position = UDim2.fromOffset(0, 0)
+	local info = label(card, 11, UiKit.CARD, UiKit.BODY_FONT) -- "atacar · 230 m"
+	info.Position = UDim2.fromOffset(0, px(27, 38))
+	info.Size = UDim2.new(1, 0, 0, px(14, 20))
+	info.TextTransparency = 0.45
+	info.TextStrokeTransparency = 0.75
 	info.TextTruncate = Enum.TextTruncate.AtEnd
-	local pin = label(bb, 14, C.neutral, Enum.Font.ArimoBold)
+	local pin = label(bb, 11, C.neutral, Enum.Font.ArimoBold)
 	pin.Name = "Ponta"
-	pin.Position = UDim2.fromOffset(0, px(44, 62))
-	pin.Size = UDim2.new(1, 0, 0, px(18, 26))
+	pin.Position = UDim2.fromOffset(0, px(41, 58))
+	pin.Size = UDim2.new(1, 0, 0, px(14, 20))
+	pin.TextTransparency = 0.3
 	pin.Text = "▼"
 	bb.Parent = pg
 	return { bb = bb, verb = verb, info = info, card = card, edge = edge, att = att }
@@ -501,20 +505,18 @@ local function paintGoals(myPos: Vector3, faction: string)
 		goal.att.WorldPosition = tpos
 		-- a cor do dono do setor (fixa por lado; neutro em cáqui); atacar/defender vai no texto
 		local color = sideColor(st.owner[target])
-		goal.verb.Text = if role == "attack" then "ATACAR" else "DEFENDER"
+		goal.verb.Text = Front.letra(target)
 		goal.verb.TextColor3 = color
 		goal.edge.Color = color
 		local pin = goal.bb:FindFirstChild("Ponta") :: TextLabel?
 		if pin then
 			pin.TextColor3 = color
 		end
-		local p = st.points[target]
 		local d = (Vector3.new(tpos.X, myPos.Y, tpos.Z) - myPos).Magnitude * M
-		local name = string.format("S%d %s", target, tostring(p.name or ""))
+		local verb = if role == "attack" then "atacar" else "defender"
 		goal.info.Text = if d < 50
-			then string.format("%s · você está nele", name)
-			else string.format("%s · %d m", name, math.floor(d / 10 + 0.5) * 10)
-		goal.info.Font = if string.find(name, "[\196-\225]") then Enum.Font.Arimo else UiKit.BODY_FONT
+			then string.format("%s · você está nele", verb)
+			else string.format("%s · %d m", verb, math.floor(d / 10 + 0.5) * 10)
 		goal.bb.Enabled = true
 	else
 		goal.bb.Enabled = false
@@ -538,7 +540,7 @@ local function paintGoals(myPos: Vector3, faction: string)
 				local owner = st.owner[s]
 				seal.t.TextColor3 = sideColor(owner)
 				local d = (Vector3.new(pos.X, myPos.Y, pos.Z) - myPos).Magnitude * M
-				seal.t.Text = string.format("S%d · %d m", s, math.floor(d / 10 + 0.5) * 10)
+				seal.t.Text = string.format("%s · %d m", Front.letra(s), math.floor(d / 10 + 0.5) * 10)
 				seal.bb.Enabled = true
 			end
 		end
@@ -639,7 +641,6 @@ type WorldMark = {
 	att: Attachment,
 	bb: BillboardGui,
 	t: TextLabel,
-	disc: Part?,
 	mult: number, -- Olho de Águia de quem marcou (vantagem "mark"): a área dura mult × o tempo
 }
 local wmarks: { WorldMark } = {}
@@ -672,12 +673,6 @@ local function paintWorldMark(w: WorldMark)
 		w.t.TextColor3 = C.point
 	end
 	w.att.WorldPosition = Vector3.new(w.x, w.y, w.z)
-	local disc = w.disc
-	if disc and w.r then
-		disc.Size = Vector3.new(0.3, 2 * w.r / M, 2 * w.r / M)
-		disc.CFrame = CFrame.new(w.x, w.y, w.z) * CFrame.Angles(0, 0, math.pi / 2)
-		disc.Color = enemyColor()
-	end
 end
 
 -- as próximas sobem um degrau por vizinha (a mais velha fica embaixo)
@@ -699,9 +694,6 @@ local function removeWorldMark(i: number)
 	if w then
 		w.bb:Destroy()
 		w.att:Destroy()
-		if w.disc then
-			w.disc:Destroy()
-		end
 	end
 end
 
@@ -755,18 +747,8 @@ local function onSquadMark(m: any)
 	t.Size = UDim2.fromScale(1, 1)
 	t.TextTruncate = Enum.TextTruncate.AtEnd
 	bb.Parent = pg
-	local disc: Part? = nil
-	if kind == "target" and type(m.r) == "number" then
-		-- área aproximada no chão, que esmaece até sumir (Comms.markAlpha)
-		local d = Instance.new("Part")
-		d.Name = "AreaMarcada"
-		d.Shape = Enum.PartType.Cylinder
-		d.Anchored, d.CanCollide, d.CanQuery, d.CanTouch = true, false, false, false
-		d.Material = Enum.Material.Neon
-		d.Transparency = 0.65
-		d.Parent = workspace.Terrain
-		disc = d
-	end
+	-- v41: sem o disco da área no chão (o mesmo defeito do anel dos eventos: no morro, uma parede
+	-- vermelha); o raio fica no texto do marcador ("±N m")
 	local w: WorldMark = {
 		kind = kind,
 		x = m.x,
@@ -778,7 +760,6 @@ local function onSquadMark(m: any)
 		att = att,
 		bb = bb,
 		t = t,
-		disc = disc,
 		mult = markMult(from),
 	}
 	table.insert(wmarks, w)
@@ -809,10 +790,6 @@ task.spawn(function()
 			else
 				w.t.TextTransparency = 1 - a
 				w.t.TextStrokeTransparency = 0.35 + 0.65 * (1 - a)
-				local disc = w.disc
-				if disc then
-					disc.Transparency = 1 - 0.35 * a
-				end
 			end
 		end
 		if changed then
@@ -822,22 +799,22 @@ task.spawn(function()
 end)
 
 -- ===== eventos da partida no mundo (EventosVisual: barragem, ataque aéreo, LZ, morteiro...) =====
--- Um anel translúcido no chão do tamanho do raio, na cor da fase, e um marcador sempre visível no
--- centro com o ícone, o nome e a distância. Criado quando o evento aparece, apagado quando some; a
+-- Um marcador sempre visível no centro com o ícone (na cor da fase), o nome e a distância (o raio
+-- está na carta). Criado quando o evento aparece, apagado quando some; a
 -- distância e a visibilidade (só em campo) mudam 4 vezes por segundo.
+-- v41 (pedido do dono: "tire essa parede vermelha do jogo"): sem o anel no chão. Era um disco plano
+-- na altura do centro do evento; com o centro num morro, quem estava embaixo via o disco acima dos
+-- olhos, uma parede vermelha translúcida até o horizonte. Fica o marcador.
 type EvMark = {
 	att: Attachment,
 	bb: BillboardGui,
 	icon: TextLabel,
 	name: TextLabel,
 	dist: TextLabel,
-	disc: Part,
-	tr: number, -- transparência do anel em campo
 	x: number,
 	z: number,
 }
 local evMarks: { [string]: EvMark } = {}
-local evField = true
 
 local function newEvMark(): EvMark
 	local att = Instance.new("Attachment")
@@ -861,15 +838,7 @@ local function newEvMark(): EvMark
 	dist.Position = UDim2.fromOffset(0, px(39, 56))
 	dist.Size = UDim2.new(1, 0, 0, px(16, 24))
 	bb.Parent = pg
-	local disc = Instance.new("Part")
-	disc.Name = "AreaDoEvento"
-	disc.Shape = Enum.PartType.Cylinder
-	disc.Anchored, disc.CanCollide, disc.CanQuery, disc.CanTouch = true, false, false, false
-	disc.CastShadow = false
-	disc.Material = Enum.Material.Neon
-	disc.Transparency = 1
-	disc.Parent = workspace.Terrain
-	return { att = att, bb = bb, icon = icon, name = name, dist = dist, disc = disc, tr = 0.82, x = 0, z = 0 }
+	return { att = att, bb = bb, icon = icon, name = name, dist = dist, x = 0, z = 0 }
 end
 
 local function syncEvents()
@@ -883,13 +852,7 @@ local function syncEvents()
 		end
 		local y = groundY(ev.x, ev.z)
 		mk.att.WorldPosition = Vector3.new(ev.x, y, ev.z)
-		local r = EventosVisual.radiusStuds(ev)
-		mk.disc.Size = Vector3.new(0.25, 2 * r, 2 * r)
-		mk.disc.CFrame = CFrame.new(ev.x, y + 0.2, ev.z) * CFrame.Angles(0, 0, math.pi / 2)
 		local c = EventosVisual.color(ev.fase)
-		mk.disc.Color = c
-		mk.tr = if ev.fase == "fim" then 0.95 else 0.82
-		mk.disc.Transparency = if evField then mk.tr else 1
 		mk.icon.Text = EventosVisual.icon(ev.id)
 		mk.icon.TextColor3 = c
 		mk.name.Text = UiKit.upper(ev.name)
@@ -900,7 +863,6 @@ local function syncEvents()
 		if not seen[key] then
 			mk.bb:Destroy()
 			mk.att:Destroy()
-			mk.disc:Destroy()
 			evMarks[key] = nil
 		end
 	end
@@ -913,10 +875,8 @@ task.spawn(function()
 		task.wait(0.25)
 		local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart") :: BasePart?
 		local field = root ~= nil and (inField() or os.clock() < dev)
-		evField = field
 		for _, mk in evMarks do
 			mk.bb.Enabled = field
-			mk.disc.Transparency = if field then mk.tr else 1
 			if field and root then
 				local d = Vector3.new(mk.x - root.Position.X, 0, mk.z - root.Position.Z).Magnitude * M
 				local dm = if d < 100 then math.floor(d + 0.5) else math.floor(d / 10 + 0.5) * 10

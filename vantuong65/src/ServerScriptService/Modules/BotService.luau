@@ -66,6 +66,12 @@ local M = 0.28
 local C = BotBrain.C
 local MOVE = BotBrain.MOVE
 local SENSE = C.senseRangeM / M
+local F44 = BotBrain.F44
+
+-- v41: combate do Front 44 (BotBrain.F44). No Studio, workspace "VT65BotsF44" = false volta ao antigo.
+local function f44(): boolean
+	return F44.on and workspace:GetAttribute("VT65BotsF44") ~= false
+end
 local PROBE = C.probeM
 local MAX_SHOT = 1000 / M -- bala não voa mais que isto (Ballistics: 2,5 s)
 local PASS_THROUGH = { Bamboo = true, Thatch = true } :: { [string]: boolean } -- CombatService.PASS
@@ -177,6 +183,9 @@ local function resetLife(bot: Bot)
 	bot.stillSince = nil
 	bot.rushTo, bot.rushUntil, bot.nextRush = nil, 0, 0
 	bot.pinnedSince, bot.fightSince = nil, now
+	bot.strafeAt, bot.strafeTo, bot.retreatUntil = 0, nil, 0
+	bot.duelCover, bot.duelCoverAt, bot.duelCoverUntil = nil, 0, 0
+	bot.aimHead, bot.invClearedAt = false, -math.huge
 	BotTunnels.reset(bot)
 end
 
@@ -473,6 +482,15 @@ local function newBot(faction: string): Bot
 		nextRush = 0,
 		pinnedSince = nil,
 		fightSince = 0,
+		strafeAt = 0,
+		strafeSign = if nextId % 2 == 0 then 1 else -1,
+		strafeTo = nil,
+		retreatUntil = 0,
+		duelCover = nil,
+		duelCoverAt = 0,
+		duelCoverUntil = 0,
+		aimHead = false,
+		invClearedAt = -math.huge,
 	}
 	table.insert(bots, bot)
 	BotSquads.assign(bot)
@@ -942,6 +960,7 @@ local function perceive(bot: Bot, model: Model, root: BasePart, eye: Vector3): (
 	-- aberto, 40 m na mata, 15 m no capim), da postura, da camuflagem e de estar atirando
 	local cap = SENSE * BotBrain.SIGHT_FIRING * weather
 	local now = os.clock()
+	local useF44 = f44()
 	local cands: { Seen } = {}
 	for _, e in snapOf(enemyOf(bot.faction)) do
 		if e.active and not e.hidden then
@@ -952,6 +971,9 @@ local function perceive(bot: Bot, model: Model, root: BasePart, eye: Vector3): (
 				local firing = now - (lastFire[e.model] or -math.huge) < 2
 				local rangeM =
 					BotBrain.sightRange(bot.diff, vegOf(e.model, r.Position), e.stance, tracking, e.camo, firing)
+				if useF44 then
+					rangeM = BotBrain.f44SightM(rangeM) -- v41: até 160 studs, como no Front 44
+				end
 				if dd < rangeM / M * weather then
 					table.insert(cands, { m = e.model, d = if tracking then -1 else dd })
 				end
@@ -981,6 +1003,17 @@ local function notice(bot: Bot, root: BasePart, seen: Model?, seenD: number, dt:
 	if not seen or seen == bot.target then
 		bot.noticeTarget, bot.noticeAcc = nil, 0
 		return seen
+	end
+	if f44() then
+		-- v41 (Front 44): vê na hora quem está no cone de 130° ou a menos de 22 studs; o tempo até o
+		-- 1º tiro é o da reação (BotBrain.f44Reaction)
+		local tr = seen:FindFirstChild("HumanoidRootPart") :: BasePart?
+		local off = if tr then math.deg(BotLocomotion.facingError(bot, tr.Position)) else 0
+		if BotBrain.f44Sees(off, seenD * M) then
+			bot.noticeTarget, bot.noticeAcc = nil, 0
+			return seen
+		end
+		return nil
 	end
 	if bot.noticeTarget ~= seen then
 		bot.noticeTarget, bot.noticeAcc = seen, 0
@@ -1085,17 +1118,28 @@ local function fireVolley(bot: Bot, target: Model?, at: Vector3?)
 	end
 	local d = bot.diff
 	local kind = bot.weapon.kind
-	local n = math.min(BotBrain.volleySize(d, kind, bot.rng:next()), bot.mag)
+	-- v41 (Front 44): automática em rajada de 3 a 7, o resto tiro a tiro; 18% das rajadas na cabeça
+	local useF44 = f44()
+	local modes = bot.weapon.modes
+	local auto = kind == "mg" or (type(modes) == "table" and modes[1] == "auto")
+	local interval = 60 / math.max(bot.weapon.rpm or 600, 1)
+	local n = math.min(
+		if useF44 then BotBrain.f44Burst(auto, bot.rng:next()) else BotBrain.volleySize(d, kind, bot.rng:next()),
+		bot.mag
+	)
 	if n <= 0 then
 		return
 	end
+	bot.aimHead = useF44 and target ~= nil and bot.rng:next() < F44.headChance
 	bot.firing = true
 	local life = bot.life
 	task.spawn(function()
 		for i = 1, n do
 			local hum = model:FindFirstChildOfClass("Humanoid")
 			local head = model:FindFirstChild("Head") :: BasePart?
-			local aim = if target then aimPart(target) else nil
+			local aim = if target
+				then (if bot.aimHead then target:FindFirstChild("Head") :: BasePart? else nil) or aimPart(target)
+				else nil
 			local te = if target then Combatants.get(target) else nil
 			local aimPos = if aim then aim.Position else at
 			if
@@ -1109,32 +1153,51 @@ local function fireVolley(bot: Bot, target: Model?, at: Vector3?)
 			then
 				break
 			end
-			local to = (aimPos :: Vector3) - (head :: BasePart).Position
+			local eye = (head :: BasePart).Position
 			local r = model:FindFirstChild("HumanoidRootPart") :: BasePart?
-			local sigma = BotBrain.aimError(d, to.Magnitude * M, {
-				moving = r ~= nil and r.AssemblyLinearVelocity.Magnitude > 2,
-				suppression = bot.supp,
-				stance = stanceOf(model),
-				armHurt = model:GetAttribute("ArmImpaired") == true,
-				shot = i,
-				kind = kind,
-			}) * BotBrain.settleFactor(d, if target then os.clock() - bot.trackSince else 0)
-			CombatService.fire(
-				model,
-				bot.weapon.id,
-				(head :: BasePart).Position,
-				perturb(to.Unit, sigma, bot.rng),
-				bot.rng:nextU32(),
-				nil
-			)
+			local dir: Vector3
+			if useF44 then
+				-- Front 44: antecipa o alvo (voo × 0,85); erro máximo que fecha seguindo o alvo, disco
+				-- uniforme; × 1,5 andando (mais de 4 studs/s)
+				local p = aimPos :: Vector3
+				local tr = if target then target:FindFirstChild("HumanoidRootPart") :: BasePart? else nil
+				if tr then
+					-- m ÷ m/s (o piso de 50 studs/s do Front 44 = 14 m/s)
+					local flight = (p - eye).Magnitude * M / math.max(bot.weapon.muzzleVelocity, 50 * F44.STUD_M)
+					p += tr.AssemblyLinearVelocity * flight * F44.leadK
+				end
+				local to = p - eye
+				local moving = r ~= nil and r.AssemblyLinearVelocity.Magnitude > 4
+				local err =
+					BotBrain.f44AimDeg(if target then os.clock() - bot.trackSince else 0, moving, to.Magnitude * M)
+				local ang, spin = BotBrain.f44Spread(err, bot.rng:next(), bot.rng:next())
+				dir = (CFrame.lookAt(Vector3.zero, to.Unit) * CFrame.Angles(0, 0, spin) * CFrame.Angles(ang, 0, 0)).LookVector
+			else
+				local to = (aimPos :: Vector3) - eye
+				local sigma = BotBrain.aimError(d, to.Magnitude * M, {
+					moving = r ~= nil and r.AssemblyLinearVelocity.Magnitude > 2,
+					suppression = bot.supp,
+					stance = stanceOf(model),
+					armHurt = model:GetAttribute("ArmImpaired") == true,
+					shot = i,
+					kind = kind,
+				}) * BotBrain.settleFactor(d, if target then os.clock() - bot.trackSince else 0)
+				dir = perturb(to.Unit, sigma, bot.rng)
+			end
+			CombatService.fire(model, bot.weapon.id, eye, dir, bot.rng:nextU32(), nil)
 			bot.mag -= 1
 			if i < n then
-				task.wait(BotBrain.volleyGap(d, kind, bot.weapon.rpm, bot.rng:next()))
+				task.wait(if useF44 then interval else BotBrain.volleyGap(d, kind, bot.weapon.rpm, bot.rng:next()))
 			end
 		end
 		if bot.life == life then
 			bot.firing = false
-			bot.nextVolley = os.clock() + BotBrain.pause(d, kind, bot.rng:next())
+			bot.nextVolley = os.clock()
+				+ (
+					if useF44
+						then BotBrain.f44Pause(auto, interval, bot.rng:next())
+						else BotBrain.pause(d, kind, bot.rng:next())
+				)
 		end
 	end)
 end
@@ -1155,6 +1218,10 @@ local function tryFire(bot: Bot, target: Model, now: number, distStuds: number?)
 	-- D-108: espingarda só de perto (Weapons.effectiveM)
 	local eff = bot.weapon.effectiveM
 	if distStuds and eff and distStuds * M > eff then
+		return false
+	end
+	-- v41 (Front 44): escopeta até 40 studs, pistola até 70
+	if distStuds and f44() and BotBrain.f44TooFar(bot.weapon.kind, distStuds * M) then
 		return false
 	end
 	local aim = aimPart(target)
@@ -1695,6 +1762,136 @@ local function combat(
 	end
 end
 
+---------------------------------------------------------------------------------------------
+-- v41: combate do Front 44 (BotBrain.F44). Com o alvo à vista: mira nele (o corpo vira), recarrega
+-- num abrigo perto agachado, recua com a vida baixa e, no resto do tempo, anda de lado (perto) ou fica
+-- parado e agachado (longe), atirando. Sem alvo: vai ao último contato e joga granada em quem sumiu.
+---------------------------------------------------------------------------------------------
+local function duel(bot: Bot, model: Model, hum: Humanoid, root: BasePart, now: number, target: Model, targetD: number)
+	if bot.rushTo then
+		endRush(bot, now)
+	end
+	local tpos = target:GetPivot().Position
+	local distM = targetD * M
+	-- sem bala no carregador (ou já recarregando): abrigo perto e recarrega agachado
+	if bot.mag <= 0 and now >= bot.reloadUntil and not bot.firing then
+		startReload(bot, now)
+	end
+	local reloading = now < bot.reloadUntil
+	if reloading and not bot.duelCover and now >= bot.duelCoverAt and bot.rays >= C.searchCost then
+		bot.duelCoverAt = now + F44.coverRetryS
+		local th = target:FindFirstChild("Head") :: BasePart?
+		local c = searchCover(bot, hum, root, if th then th.Position else tpos, false)
+		bot.duelCover = if c then c.pos else nil
+		bot.duelCoverUntil = now + F44.coverHoldS
+	end
+	local cp = bot.duelCover
+	if cp and (now > bot.duelCoverUntil or not reloading) then
+		bot.duelCover, cp = nil, nil
+	end
+	if cp then
+		if flat(root.Position, cp) > 1.8 then
+			setStance(model, "stand")
+			BotLocomotion.go(bot, cp, "sprint", { direct = true, tolerance = 0.5 / M })
+		else
+			setStance(model, "crouch")
+			BotLocomotion.stop(bot, tpos)
+		end
+		bot.strafeTo = nil
+		return
+	end
+	-- vida abaixo de 35%: recua 3,5 s de costas para o inimigo, atirando
+	if hum.Health / math.max(hum.MaxHealth, 1) < F44.retreatHealth and now > bot.retreatUntil then
+		bot.retreatUntil = now + F44.retreatS
+	end
+	if now < bot.retreatUntil then
+		local away = Vector3.new(root.Position.X - tpos.X, 0, root.Position.Z - tpos.Z)
+		if away.Magnitude > 1e-3 then
+			setStance(model, "stand")
+			BotLocomotion.go(bot, root.Position + away.Unit * F44.retreatStuds, "ads", { direct = true, face = tpos })
+		end
+		bot.strafeTo = nil
+	elseif now > bot.strafeAt then
+		-- de lado numa faixa fixa, vai e volta; longe, parado e agachado para acertar
+		bot.strafeAt = now + between(F44.strafeS, bot.rng:next())
+		bot.strafeSign = -bot.strafeSign
+		if distM > BotBrain.f44M(F44.farStuds) then
+			setStance(model, "crouch")
+			bot.strafeTo = nil
+		else
+			setStance(model, "stand")
+			bot.strafeTo = root.Position + root.CFrame.RightVector * bot.strafeSign * F44.strafeStuds
+		end
+	end
+	local st = bot.strafeTo
+	if now >= bot.retreatUntil then
+		if st then
+			BotLocomotion.go(bot, st, "ads", { direct = true, face = tpos, tolerance = 0.5 })
+		else
+			BotLocomotion.stop(bot, tpos)
+		end
+	end
+	tryFire(bot, target, now, targetD)
+end
+
+-- Último contato a investigar: o inimigo visto (até 8 s), quem atirou em mim (7 s) ou o tiro ouvido a
+-- até 110 studs (6 s); o mais recente. Ao chegar perto dele, larga.
+local function investigatePos(bot: Bot, root: BasePart, now: number): (Vector3?, number)
+	local best: Vector3? = nil
+	local bestAt = -math.huge
+	local function consider(p: Vector3?, at: number, keepS: number)
+		if p and at > bot.invClearedAt and now - at < keepS and at > bestAt then
+			best, bestAt = p, at
+		end
+	end
+	consider(bot.lastKnown, bot.lastKnownAt, F44.investigateS)
+	consider(bot.threatPos, bot.threatAt, F44.hitInvestigateS)
+	local hp = bot.heardPos
+	if hp and flat(root.Position, hp) <= F44.hearStuds then
+		consider(hp, bot.heardAt, F44.heardInvestigateS)
+	end
+	return best, bestAt
+end
+
+local function investigate(bot: Bot, model: Model, root: BasePart, head: BasePart, now: number, pos: Vector3): boolean
+	local dist = flat(root.Position, pos)
+	if dist < F44.arriveStuds then
+		bot.invClearedAt = now
+		return false
+	end
+	-- sumiu atrás de algo a 14–70 studs há mais de 1,2 s: 25% de granada (uma a cada 12 s)
+	local lk = bot.lastKnown
+	local since = now - bot.lastKnownAt
+	if lk and since > F44.grenadeAfterS and since < F44.investigateS and now >= bot.nextGrenade then
+		local toward = (lk - head.Position).Magnitude
+		if toward > F44.grenadeMinStuds and toward < F44.grenadeMaxStuds and bot.rng:next() < F44.grenadeChance then
+			if botThrow(bot, lk) then
+				bot.nextGrenade = now + F44.grenadeEveryS
+			end
+		end
+	end
+	-- recarrega abaixo da metade (andando, como o jogador)
+	if
+		bot.mag < bot.weapon.magazine * F44.reloadBelow
+		and bot.spare > 0
+		and now >= bot.reloadUntil
+		and not bot.firing
+	then
+		startReload(bot, now)
+	end
+	setStance(model, "stand")
+	local far = dist > F44.sprintStuds and now >= bot.reloadUntil
+	if dist * M > 60 then
+		BotLocomotion.goFar(bot, pos, if far then "sprint" else "walk", { tolerance = 4 / M })
+	else
+		BotLocomotion.go(bot, pos, if far then "sprint" else "walk", { tolerance = 1.5 / M })
+	end
+	if BotLocomotion.status(bot) == "failed" then
+		bot.invClearedAt = now -- não chega lá (água funda, cercado): volta ao objetivo
+	end
+	return true
+end
+
 -- ===== caixa de munição do Suporte (D-108) =====
 -- Sem munição de sobra e com pouco no carregador: vai à caixa do lado mais perto (a até
 -- CaixaMunicao.BOT_BUSCA_M); ao chegar, o CaixaMunicaoService reabastece (botRefill).
@@ -2036,7 +2233,12 @@ local function think(bot: Bot, now: number)
 		end
 		bot.lastKnownAt = now
 		if bot.target ~= target then
-			bot.reactAt = now + BotBrain.reactionTime(d, bot.rng:next(), bot.supp, bot.inCombat)
+			bot.reactAt = now
+				+ (
+					if f44()
+						then BotBrain.f44Reaction(bot.rng:next())
+						else BotBrain.reactionTime(d, bot.rng:next(), bot.supp, bot.inCombat)
+				)
 			bot.trackSince = now
 		end
 	end
@@ -2095,6 +2297,44 @@ local function think(bot: Bot, now: number)
 	end
 	-- D-108: sem munição nenhuma no meio do combate, corre para a caixa do Suporte (se há uma perto)
 	if threat and bot.mag <= 0 and bot.spare <= 0 and not bot.tunnel and seekBox(bot, model, root) then
+		return
+	end
+	-- v41: combate do Front 44 (alvo à vista: duelo; sem alvo: último contato; depois, o objetivo)
+	if f44() and not bot.tunnel then
+		if target then
+			if not bot.inCombat then
+				enterCombat(bot, now)
+			end
+			-- VC ferido com boca de túnel perto: some lá dentro (D-90, daqui)
+			if retreating and bot.faction == "VC" and threat and BotTunnels.vanish(bot, root, threat) then
+				return
+			end
+			duel(bot, model, hum, root, now, target, targetD)
+			return
+		end
+		bot.strafeTo, bot.duelCover = nil, nil
+		local inv = investigatePos(bot, root, now)
+		if inv and investigate(bot, model, root, head, now, inv) then
+			if not bot.inCombat then
+				enterCombat(bot, now)
+			end
+			return
+		end
+		if bot.inCombat then
+			leaveCombat(bot, now)
+		end
+		if bot.rushTo then
+			endRush(bot, now)
+		end
+		if
+			bot.mag < bot.weapon.magazine * F44.reloadBelow
+			and bot.spare > 0
+			and now >= bot.reloadUntil
+			and not bot.firing
+		then
+			startReload(bot, now)
+		end
+		calm(bot, model, hum, root, head, now, pinned)
 		return
 	end
 	if threat and not (bot.tunnel and bot.tunnel.phase == "approach") then

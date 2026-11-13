@@ -9,9 +9,11 @@
 -- por 20 s, sem o servidor, aqui, na carta e no mundo.
 -- Toque (v39): na zona livre "eventos" do HUD de toque (coluna da esquerda, acima do polegar; à direita
 -- ficam os botões), só as linhas que cabem (no celular, uma). Durante o tutorial a zona fecha.
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 
+local Front = require(ReplicatedStorage.Shared.Front)
 local EventosVisual = require(script.Parent.EventosVisual)
 local Input = require(script.Parent.Input)
 local ToqueUi = require(script.Parent.ToqueUi)
@@ -137,7 +139,7 @@ local function paint()
 		r.phase.Text = EventosVisual.PHASE_TEXT[ev.fase] or ""
 		r.phase.TextColor3 = c
 		-- onde: o setor (S3) e a grade de 1965; sem setor, só a grade
-		r.where.Text = if ev.sector then string.format("S%d · %s", ev.sector, ev.grade) else ev.grade
+		r.where.Text = if ev.sector then string.format("%s · %s", Front.letra(ev.sector), ev.grade) else ev.grade
 		r.clock.Text = clockText(EventosVisual.left(ev))
 		r.clock.TextColor3 = if ev.fase == "fim" then V.MUTED else V.TEXT
 		if fresh then

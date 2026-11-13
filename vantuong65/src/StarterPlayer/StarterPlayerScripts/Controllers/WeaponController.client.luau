@@ -2,7 +2,8 @@
 -- Arma (F2 + Parte 12): disparo com semente, mira (FOV), recarga, seletor, alça de mira,
 -- balanço com "prender a respiração", recuo com tendência aleatória, troca de arma (o antitanque tem
 -- o lançador como 2ª arma), binóculo, corpo a corpo e baioneta.
--- Sem retícula, sem hitmarker, sem contador de munição na tela (Parte 1). Entradas pela camada
+-- Sem contador de munição na tela (Parte 1); o marcador de acerto veio na D-107 e a retícula do
+-- quadril em 1ª pessoa na v41 (pedido do dono; mirando, só a alça e a massa). Entradas pela camada
 -- Input: controle e teclado/mouse têm o MESMO balanço, inércia e recuo (Parte 12.4).
 -- 3ª pessoa (ThirdPerson.client): o tiro sai do OLHO do personagem e vai até o ponto da retícula
 -- (ViewMode), nunca da câmera atrás do ombro; do quadril, com a dispersão de Movement.hipSpreadDeg.
@@ -338,10 +339,11 @@ local function canShoot(): boolean
 end
 
 -- Origem e direção do tiro. 1ª pessoa: a câmera (o olho). 3ª pessoa: do olho até o ponto da
--- retícula, com a dispersão do quadril (semente própria, derivada da do tiro).
+-- retícula. Sem mirar, a dispersão do quadril (semente própria, derivada da do tiro); v41: também em
+-- 1ª pessoa, que ganhou a retícula do quadril (sem ela, mirar não valeria nada com a retícula na tela).
 local function shotRay(seed: number): (Vector3, Vector3)
 	local o, d = ViewMode.aimDirection()
-	if ViewMode.third and not aiming and not seated() then
+	if not aiming and not seated() then
 		local r = Rng.new(seed + 7)
 		local spread = math.rad(ViewMode.hipSpread())
 		local ang, rad = r:next() * 2 * math.pi, spread * math.sqrt(r:next())
@@ -359,7 +361,8 @@ local function shoot(wp: Weapons.Weapon, t: Gatilho.Trigger)
 	-- alça zerada: o cano sobe o ângulo de zeragem em relação à linha de visada
 	local zero = Ballistics.zeroAngle(wp.id, zeroOf(wp))
 	local third = ViewMode.third and not seated()
-	local basis = if third then CFrame.lookAt(Vector3.zero, look) else camera.CFrame.Rotation
+	local hipSpread = not aiming and not seated() -- a direção já tem a dispersão do quadril
+	local basis = if third or hipSpread then CFrame.lookAt(Vector3.zero, look) else camera.CFrame.Rotation
 	local d = (basis * CFrame.Angles(zero, 0, 0)).LookVector
 	local shot: { [string]: any } = {
 		w = wp.id,
@@ -516,11 +519,10 @@ Input.on("zeroing", "holdStart", function()
 end)
 -- ===== vagas: trocar de arma e puxar itens (2026-11-13, Shared/Equipar) =====
 local function nameOf(id: string?): string
-	if id == "launcher" then
-		return "Lançador"
-	end
-	local wp = if id then Weapons.get(id) else nil
-	return if wp then wp.name else "—"
+	-- v41: o mesmo nome curto do cartão e das vagas (Weapons.shortName)
+	local f = player:GetAttribute("Faction")
+	local n = Weapons.shortName(id, if type(f) == "string" then f else nil)
+	return if n ~= "" then n else "—"
 end
 
 -- Põe a arma da vaga i na mão: a atual desce (holsterS), troca lá embaixo e a nova sobe (drawS).
@@ -1099,6 +1101,19 @@ RunService.RenderStepped:Connect(function(dt: number)
 		player:SetAttribute("Scoped", scoped) -- local: a arma de 1ª pessoa some (WeaponVisuals)
 	end
 	Input.aimMode = if binoculars or scoped then "scope" elseif aimNow then "ads" else "hip"
+	-- v41 (pedido do dono: "coloque uma mira quando vc n esta mirando no hipfire"): a retícula do
+	-- quadril (desenhada pelo ThirdPerson.client, em 1ª e 3ª pessoa) com arma de fogo pronta, sem
+	-- mirar e sem correr (correndo a arma vai para o lado)
+	local char = player.Character
+	local hip = wp ~= nil
+		and not aiming
+		and not binoculars
+		and not seated()
+		and not (char and char:GetAttribute("Sprinting") == true)
+		and canShoot()
+	if player:GetAttribute("HipReticle") ~= hip then
+		player:SetAttribute("HipReticle", hip) -- local
+	end
 	if not seated() then
 		-- mira: levar ao ombro leva tempo proporcional ao peso (Parte 10.4); binóculo 7x ≈ 10°
 		-- FOV base ajustável (acessibilidade); a mira fecha um pouco (Weapons.ADS_FOV_K)

@@ -122,10 +122,18 @@ function MedicalService.attackers(victim: Model): { [Player]: number }
 	return attackers[victim] or {}
 end
 
--- chamado pelo CombatService após validar o tiro (by = quem atirou, se for jogador)
-function MedicalService.hit(victim: Model, zone: string, energyJ: number, roll: number, by: Player?)
+-- Fogo amigo (v41: desligado, Medical.FRIENDLY_FIRE): o dano de `by` (jogador) ou do lado `from`
+-- (bot, artilharia pedida, canhão de veículo) na vítima do mesmo lado não vale.
+function MedicalService.friendly(victim: Model, by: Player?, from: string?): boolean
+	local f = from or (if by then by:GetAttribute("Faction") :: string? else nil)
+	return Medical.blocked(victim:GetAttribute("Faction") :: string?, f, by ~= nil and by.Character == victim)
+end
+
+-- chamado pelo CombatService após validar o tiro (by = quem atirou, se for jogador; from = o lado de
+-- quem causou o dano, quando não é jogador)
+function MedicalService.hit(victim: Model, zone: string, energyJ: number, roll: number, by: Player?, from: string?)
 	local s = states[victim]
-	if not s then
+	if not s or MedicalService.friendly(victim, by, from) then
 		return
 	end
 	if by and by.Character ~= victim then

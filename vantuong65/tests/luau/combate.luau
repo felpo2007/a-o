@@ -485,6 +485,37 @@ test("fast paced: recarga mais curta (fuzil 2,4 s, metralhadora 5,5 s, pistola 2
 	assert(Ballistics.PASS.Bamboo and Ballistics.PASS.Thatch and Ballistics.PASS.Canvas, "PASS")
 end)
 
+test("v41: sem fogo amigo (o mesmo lado não fere; a própria granada e o dano sem dono valem)", function()
+	assert(Medical.FRIENDLY_FIRE == false)
+	assert(Medical.blocked("US", "US", false), "aliado")
+	assert(Medical.blocked("VC", "VC", false), "aliado VC")
+	assert(not Medical.blocked("US", "VC", false), "inimigo")
+	assert(not Medical.blocked("US", "US", true), "a própria granada")
+	assert(not Medical.blocked("US", nil, false), "sem dono (destroço, armadilha)")
+	-- o serviço passa o lado de quem causou em todas as fontes (bala, explosão, fogo, golpe, canhão)
+	local fs = require("@lune/fs")
+	local base = "src/ServerScriptService/Modules/"
+	local med = fs.readFile(base .. "MedicalService.luau")
+	assert(string.find(med, "MedicalService.friendly(victim, by, from)", 1, true), "MedicalService.hit confere")
+	local function count(src: string, plain: string): number
+		local n, at = 0, 1
+		while true do
+			local i = string.find(src, plain, at, true)
+			if not i then
+				return n
+			end
+			n += 1
+			at = i + #plain
+		end
+	end
+	for file, n in { CombatService = 3, ExplosionService = 4, MeleeService = 1, VehicleService = 1 } do
+		-- sem espaços nem quebras (o StyLua quebra as chamadas longas em várias linhas)
+		local src = string.gsub(fs.readFile(base .. file .. ".luau"), "%s", "")
+		local k = count(src, "by,from)") + count(src, "nil,from)") + count(src, 'Faction")::string?)')
+		assert(k >= n, string.format("%s: %d chamadas com o lado (esperado ≥ %d)", file, k, n))
+	end
+end)
+
 print(string.format("%d ok, %d falhas", passed, failed))
 if failed > 0 then
 	process.exit(1)

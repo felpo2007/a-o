@@ -53,30 +53,35 @@ end
 
 local TEAM = { US = "USMC", VC = "VC" }
 
+-- letra do setor (v41, pedido do dono: "troque os objetivos por A B C D E"; Shared/Front.letra)
+local function letra(s: number): string
+	return if s >= 1 and s <= 26 then string.char(64 + s) else "?"
+end
+
 -- Cada linha da linha do tempo é um modelo inteiro em português (hora, lado, setor e nome do setor
 -- entram nos %): o dicionário de idiomas traduz o modelo, não as peças.
 local MODELS = {
 	neutralized = {
-		named = "   %s  %s perde o controle de S%d (%s).",
-		plain = "   %s  %s perde o controle de S%d.",
+		named = "   %s  %s perde o controle de %s (%s).",
+		plain = "   %s  %s perde o controle de %s.",
 	},
 	captured = {
-		named = "   %s  %s toma S%d (%s).",
-		plain = "   %s  %s toma S%d.",
+		named = "   %s  %s toma %s (%s).",
+		plain = "   %s  %s toma %s.",
 	},
 	overrun = {
-		named = "   %s  %s toma o último setor: S%d (%s).",
-		plain = "   %s  %s toma o último setor: S%d.",
+		named = "   %s  %s toma o último setor: %s (%s).",
+		plain = "   %s  %s toma o último setor: %s.",
 	},
 	advanced = {
-		named = "   %s  a frente passa para S%d (%s).",
-		plain = "   %s  a frente passa para S%d.",
+		named = "   %s  a frente passa para %s (%s).",
+		plain = "   %s  a frente passa para %s.",
 	},
 }
 
 local function entryLine(r: Report, e: Entry): string
 	local when = AfterAction.dtg(r, e.t)
-	local sector = e.sector or 0
+	local sector = letra(e.sector or 0)
 	local who = TEAM[e.team or ""] or (e.team or "?")
 	if e.kind == "neutralized" then
 		return if e.name
@@ -129,7 +134,7 @@ function AfterAction.lines(r: Report): { string }
 		end
 	end
 	if worst then
-		table.insert(out, string.format("   Combate mais pesado: S%d (%d mortos).", worst, worstN))
+		table.insert(out, string.format("   Combate mais pesado: %s (%d mortos).", letra(worst), worstN))
 	end
 	table.insert(out, "")
 	table.insert(out, "3. RESULTADO")
@@ -149,7 +154,7 @@ function AfterAction.lines(r: Report): { string }
 		for s, own in r.owner do
 			table.insert(
 				o,
-				string.format("S%d %s", s, if own == "US" then "USMC" elseif own == "VC" then "VC" else "—")
+				string.format("%s %s", letra(s), if own == "US" then "USMC" elseif own == "VC" then "VC" else "—")
 			)
 		end
 		table.insert(out, string.format("   Setores no fim: %s", table.concat(o, " · ")))

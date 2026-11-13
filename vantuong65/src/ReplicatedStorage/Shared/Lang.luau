@@ -59,7 +59,7 @@ function Lang.upper(s: string): string
 end
 
 -- ===== modelos com especificadores do string.format =====
-type Pat = { pat: string, segs: { string }, kinds: { string }, tspecs: { string }, lits: number }
+type Pat = { pat: string, segs: { string }, kinds: { string }, tspecs: { string }, lits: number, chars: number }
 export type Table = {
 	exact: { [string]: string },
 	upper: { [string]: string },
@@ -186,13 +186,18 @@ function Lang.compile(dict: { [string]: string }): Table
 					kinds = kinds,
 					tspecs = tspecs,
 					lits = lits,
+					chars = #table.concat(segs),
 				})
 			end
 		end
 	end
-	-- os mais específicos (mais letras fixas) primeiro
+	-- os mais específicos (mais letras fixas) primeiro; no empate, o de mais texto fixo (v41: com a
+	-- letra do setor em %s, "toma %s." também casava com "toma A (Colina 43)." e o nome não traduzia)
 	table.sort(t.pats, function(a: Pat, b: Pat): boolean
-		return a.lits > b.lits
+		if a.lits ~= b.lits then
+			return a.lits > b.lits
+		end
+		return a.chars > b.chars
 	end)
 	return t
 end

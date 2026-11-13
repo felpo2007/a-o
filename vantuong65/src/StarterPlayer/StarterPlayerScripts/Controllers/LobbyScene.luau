@@ -378,7 +378,8 @@ local function drawMap(p: BasePart, style: string)
 		if i > 1 then
 			sgBox(area, ink, u0, 0, 0.002, 1, 0.5)
 		end
-		sgText(area, string.match(s.name, "^S%d") or "", HEAD, ink, u0 + 0.01, 0.01, 0.08, 0.04)
+		-- a letra do setor no começo do nome (v41: "A Nam Yên (4)")
+		sgText(area, string.match(s.name, "^%u%f[%s]") or "", HEAD, ink, u0 + 0.01, 0.01, 0.08, 0.04)
 	end
 	-- grade UTM de 500 m (origem de 1965 do MapConfig)
 	if us then

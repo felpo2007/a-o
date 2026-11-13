@@ -17,10 +17,12 @@
 --   4. todos os sons do AssetIds.Sounds;
 --   5. as animações do soldado (Shared/SoldierAnims);
 --   6. os manequins do lobby e a arte das armas (o PreviewService marca Ready) e
---   7. a arte que já está no cliente: malhas, texturas, decalques, SurfaceAppearance, imagens,
---      partículas, roupas, céu e MaterialVariant do ReplicatedStorage, do Workspace já replicado,
---      do Lighting e do MaterialService (cada id uma vez só);
---   8. o terreno (atributo TerrainReady: o servidor só avisa quando acaba).
+--   7. o mapa (v41): espera o terreno (TerrainReady) e a arte do servidor (Map/Art "Placed"), pede o
+--      streaming em volta dos dois QGs e dos cinco objetivos e depois baixa a arte que chegou:
+--      malhas, texturas, decalques, SurfaceAppearance, imagens, partículas, roupas, céu e
+--      MaterialVariant do ReplicatedStorage, do Workspace, do Lighting e do MaterialService (cada id
+--      uma vez só). Ao nascer, o servidor ainda pede o streaming em volta do ponto (SpawnService);
+--   8. o terreno (já pronto no 7; fica para o teto de segurança).
 -- Só com tudo pronto aparecem os dois botões: JOGAR AGORA (carimbo vermelho; A, Enter, Espaço ou
 -- toque: entra direto no squad e no último ponto, Controllers/JogarAgora pelo atributo "JogarAgora"
 -- desta tela) e MESA DE CAMPANHA (B, Backspace: o lobby, como antes; a contagem de 10 s entra nela
@@ -964,12 +966,20 @@ local function scanArt(root: Instance?, list: { any })
 		return
 	end
 	local all = root:GetDescendants()
+	-- v41: malha vai como a PEÇA (uma por MeshId): o id em texto era pedido como imagem e cada um
+	-- dava "Asset type does not match requested type" (511 avisos com o mapa todo) sem baixar a malha
+	local function addMesh(inst: Instance, id: any)
+		if type(id) == "string" and id ~= "" and not seen[id] then
+			seen[id] = true
+			table.insert(list, inst)
+		end
+	end
 	for k, d in all do
 		if d:IsA("MeshPart") then
-			addId(list, prop(d, "MeshId"))
+			addMesh(d, prop(d, "MeshId"))
 			addId(list, prop(d, "TextureID"))
 		elseif d:IsA("SpecialMesh") then
-			addId(list, prop(d, "MeshId"))
+			addMesh(d, prop(d, "MeshId"))
 			addId(list, prop(d, "TextureId"))
 		elseif d:IsA("Decal") then -- Texture também
 			addId(list, prop(d, "Texture"))
@@ -1188,7 +1198,44 @@ local function run()
 		setFrac(6, if total > 0 then done / total else 1)
 	end)
 	setFrac(6, 1)
-	-- 7. o resto da arte que já está no cliente
+	-- 7. o mapa (v41, pedido do dono: "carregue todo o jogo perfeitamente na tela de início"): o
+	-- terreno e a arte que o servidor põe, e o streaming em volta dos QGs e dos cinco objetivos (com o
+	-- StreamingEnabled, o que fica longe da mesa de campanha só chegava depois de nascer); depois, a
+	-- arte de tudo que chegou
+	setStep("Abrindo o mapa de Vạn Tường…")
+	setWaiting(true)
+	while ReplicatedStorage:GetAttribute("TerrainReady") ~= true and alive == my do
+		task.wait(0.25)
+	end
+	local a0 = os.clock()
+	while alive == my and os.clock() - a0 < 30 do
+		local mapF = workspace:FindFirstChild("Map")
+		local artF = mapF and mapF:FindFirstChild("Art")
+		if artF and artF:GetAttribute("Placed") == true then
+			break
+		end
+		task.wait(0.25)
+	end
+	setWaiting(false)
+	local mc = sharedModule("MapConfig")
+	local spots: { Vector3 } = {}
+	if type(mc) == "table" then
+		for _, hq in (if type(mc.HQ) == "table" then mc.HQ else {}) :: any do
+			table.insert(spots, Vector3.new(hq.x, 20, hq.z))
+		end
+		for _, sp in (if type(mc.Strongpoints) == "table" then mc.Strongpoints else {}) :: any do
+			table.insert(spots, Vector3.new(sp.x, 20, sp.z))
+		end
+	end
+	for k, p in spots do
+		if alive ~= my then
+			return
+		end
+		pcall(function()
+			player:RequestStreamAroundAsync(p, 8)
+		end)
+		setFrac(7, 0.4 * k / #spots)
+	end
 	setStep("Revelando a arte do mapa…")
 	local art: { any } = {}
 	scanArt(ReplicatedStorage, art)
@@ -1198,7 +1245,7 @@ local function run()
 		scanArt(game:GetService("MaterialService"), art)
 	end)
 	preload(art, function(done: number, total: number)
-		setFrac(7, if total > 0 then done / total else 1)
+		setFrac(7, 0.4 + 0.6 * (if total > 0 then done / total else 1))
 	end)
 	setFrac(7, 1)
 	-- 8. terreno (sem número: o servidor só avisa quando acaba)

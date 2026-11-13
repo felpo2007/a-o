@@ -260,6 +260,12 @@ local function placeBody(player: Player, faction: string, x: number, z: number, 
 	ProgressionService.applyGear(player) -- antes do personagem: o kit lê os atributos ao nascer
 	local prof = PlayerData.get(player)
 	local equipped = if prof then prof.equipped[faction] else nil
+	-- v41 ("carregue todo o jogo perfeitamente"): com o StreamingEnabled, o mapa em volta do ponto
+	-- chega ANTES do soldado (sem isto o chão, as casas e a mata apareciam aos pedaços depois de nascer)
+	local dest = if at then at.Position else Vector3.new(x, groundY(x, z) + 5, z)
+	pcall(function()
+		player:RequestStreamAroundAsync(dest, 6)
+	end)
 	player:LoadCharacterWithHumanoidDescriptionAsync(Characters.describe(faction, equipped, player.UserId))
 	local char = player.Character
 	if not char then
@@ -360,8 +366,18 @@ local function hookCombat()
 		markCombat(shooter)
 	end
 	local hit0 = MedicalService.hit
-	MedicalService.hit = function(victim: Model, zone: string, energyJ: number, roll: number, by: Player?)
-		hit0(victim, zone, energyJ, roll, by)
+	MedicalService.hit = function(
+		victim: Model,
+		zone: string,
+		energyJ: number,
+		roll: number,
+		by: Player?,
+		from: string?
+	)
+		if MedicalService.friendly(victim, by, from) then
+			return -- sem fogo amigo (v41): nem conta como combate
+		end
+		hit0(victim, zone, energyJ, roll, by, from)
 		markCombat(victim)
 		if by then
 			markCombat(by.Character)

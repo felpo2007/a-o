@@ -995,6 +995,9 @@ local function fireOnce(extra: { [string]: any }?)
 	if seat and seat:GetAttribute("Weapon") == "m60" and not coax then
 		Bus.fire("vehicle_shot") -- coice e clarão na M60 do assento (WeaponVisuals)
 	end
+	if coax or (seat and seat:GetAttribute("Weapon") == "m60") then
+		Bus.fire("vehicle_mg_shot") -- v41: o som do tiro para quem atira (AudioController)
+	end
 	-- vibração das metralhadoras (controle e celular); a do canhão vem do disparo de verdade
 	-- (Fire_Launch do servidor, no Haptics), não do aperto: recarregando, o botão não vibra
 	if coax or (seat and seat:GetAttribute("Weapon") == "m60") then

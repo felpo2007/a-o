@@ -288,7 +288,7 @@ function MeleeService.attack(model: Model, dir: Vector3, wantRifle: boolean?): s
 			local knife = if a.weapon == "knife" then MeleeService.knifeOf(model) else nil
 			local energy = Melee.energy(id, hit.zone, hit.precise, knife)
 			if not s.dev then
-				MedicalService.hit(victim, hit.zone, energy, rng:next(), by)
+				MedicalService.hit(victim, hit.zone, energy, rng:next(), by, model:GetAttribute("Faction") :: string?)
 			end
 			broadcast(hit.pos, {
 				k = "impacto",

@@ -516,6 +516,37 @@ function Weapons.get(id: string): Weapon?
 	return Weapons.byId[id]
 end
 
+-- v41 (pedido do dono, 2026-11-13: "coloque o nome certo nas armas certas"): o nome curto do HUD
+-- (cartão da arma e faixa das vagas). Os compridos eram cortados no cartão e as duas Winchester
+-- apareciam iguais ("Winchester…"); o lançador dos EUA aparecia só como "Lançador" (é a bazuca M20
+-- de 3,5 pol., VehicleService "rocket_35"; o do VC, o RPG-2). O nome completo segue na ficha.
+Weapons.SHORT = {
+	m14 = "M14",
+	m60 = "M60",
+	m1911 = "M1911A1",
+	m79 = "M79",
+	type56 = "Type 56",
+	sks = "SKS",
+	rpd = "RPD",
+	type54 = "Type 54",
+	rpg2 = "RPG-2",
+	m70 = "M70 (luneta)",
+	mosin = "Mosin PU",
+	win12 = "Escopeta 12",
+} :: { [string]: string }
+Weapons.LAUNCHER_NAME = { US = "Bazuca M20", VC = "RPG-2" } :: { [string]: string }
+
+function Weapons.shortName(id: string?, faction: string?): string
+	if id == "launcher" then
+		return Weapons.LAUNCHER_NAME[faction or ""] or "Lançador"
+	end
+	if not id or id == "" then
+		return ""
+	end
+	local wp = Weapons.byId[id]
+	return Weapons.SHORT[id] or (if wp then wp.name else id)
+end
+
 -- ===== modos, cadência, recarga e alça (2026-11-12) =====
 
 -- O papel tem este modo? (M14: automático só para o fuzileiro automático)

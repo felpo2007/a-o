@@ -992,7 +992,7 @@ local function drawSectors(st: any)
 		end
 		local cu = select(1, uv((math.min(table.unpack(xs)) + math.max(table.unpack(xs))) / 2, B.minZ))
 		-- só o número do setor, grande; o dono é a cor (a legenda diz qual é qual); fora de jogo, apagado
-		local t = label(sect, string.format("S%d", s.id), 24, color, F.TITLE)
+		local t = label(sect, Front.letra(s.id), 24, color, F.TITLE)
 		t.AnchorPoint = Vector2.new(0.5, 0)
 		t.Position = UDim2.new(cu, 0, 0, 30)
 		t.TextTransparency = if active then 0 else 0.4
@@ -1109,7 +1109,7 @@ local function drawObjectives(st: any)
 		list.Padding = UDim.new(0, 2)
 		list.Parent = card
 		card.Parent = layer
-		local name = label(card, string.format("S%d · %s", s, UiKit.upper(p.name)), 13, V.TEXT, TYPE)
+		local name = label(card, string.format("%s · %s", Front.letra(s), UiKit.upper(p.name)), 13, V.TEXT, TYPE)
 		name.LayoutOrder = 1
 		local bar = Instance.new("Frame")
 		bar.Size = UDim2.fromOffset(84, 5)
@@ -2260,7 +2260,7 @@ function CartaView.updateLegend()
 		table.insert(lines, string.format("Baixas: nossas %d · inimigo %d", st.kia[f] or 0, st.kia[enemy] or 0))
 	end
 	if st.mode == "Offensive" and type(st.front) == "number" and st.front >= 1 then
-		table.insert(lines, string.format("Frente: S%d (+15 min por setor)", st.front))
+		table.insert(lines, string.format("Frente: %s (+15 min por setor)", Front.letra(st.front)))
 	end
 	local g = CartaView.cursorGrid()
 	table.insert(lines, string.format("Cursor: %s", g))

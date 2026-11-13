@@ -79,12 +79,13 @@ FRONTEIRAS_ING = [
     [(269935, 1692500), (269935, 1693500)],
     [(270145, 1692500), (270145, 1693500)],
 ]
+# letra do setor no jogo (v41, pedido do dono: "troque os objetivos por A B C D E"; Front.letra)
 SETORES = [
-    "S1 Nam Yên (4)",
-    "S2 An Thới (2)",
-    "S3 Xóm Gò",
-    "S4 An Cường (2)",
-    "S5 Riacho",
+    "A Nam Yên (4)",
+    "B An Thới (2)",
+    "C Xóm Gò",
+    "D An Cường (2)",
+    "E Riacho",
 ]
 # Vila grande do centro (2026-11-12, tools/vila_estradas.py): o ponto forte fica na praça, que o
 # planejamento da vila escolhe no flanco leste do morrote (E e N saem de lá, por isso None aqui)

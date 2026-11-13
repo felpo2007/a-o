@@ -301,8 +301,11 @@ do
 	drainBack.Position = UDim2.new(0, P, 1, -px(10, 14))
 	drainBack.Size = UDim2.new(1, -2 * P, 0, px(4, 6))
 	fill.Size = UDim2.fromScale(1, 1)
-	UiKit.fit(downGui, card, CW, CH + px(56, 80), 12) -- janela estreita
+	local fit = UiKit.fit(downGui, card, CW, CH + px(56, 80), 12) -- janela estreita
 	D = {
+		fit = fit,
+		w = CW,
+		h = CH,
 		tint = tint,
 		vin = vin,
 		vin2 = vin2,
@@ -674,6 +677,18 @@ local function nearestMedicM(): number?
 	return best
 end
 
+-- Lugar do cartão. No toque (v41, pedido do dono: "botoes estao em cima da outros"), a zona "caido"
+-- do Shared/Toque, no pé à esquerda do DESISTIR (que fica no lugar do tiro); fora dele, embaixo no
+-- meio, como sempre.
+local function cardHome(): UDim2
+	if ToqueUi.fitZone(D.card, D.fit.scale, "caido", D.w, D.h, Vector2.new(0.5, 1), 1, 0.4) then
+		return D.card.Position
+	end
+	D.card.AnchorPoint = Vector2.new(0.5, 1)
+	D.fit.scale.Scale = D.fit.k()
+	return UDim2.new(0.5, 0, 1, -px(56, 80))
+end
+
 local function showDowned(on: boolean)
 	if on == downGui.Enabled then
 		return
@@ -695,12 +710,11 @@ local function showDowned(on: boolean)
 				end
 			end
 		end)
-		D.card.Position = UDim2.new(0.5, 0, 1, px(80, 120))
-		TweenService:Create(
-			D.card,
-			TweenInfo.new(0.45, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
-			{ Position = UDim2.new(0.5, 0, 1, -px(56, 80)) }
-		):Play()
+		local home = cardHome()
+		D.card.Position = home + UDim2.fromOffset(0, D.h + px(136, 200))
+		TweenService
+			:Create(D.card, TweenInfo.new(0.45, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { Position = home })
+			:Play()
 	else
 		S.downedAt = nil
 	end
@@ -766,6 +780,10 @@ RunService.RenderStepped:Connect(function()
 	local now = os.clock()
 	if now - medicCheck > 0.5 then
 		medicCheck = now
+		-- a tela girou ou o layout de toque mudou: o cartão volta ao lugar (depois da entrada)
+		if S.downedAt and now - S.downedAt > 0.5 then
+			D.card.Position = cardHome()
+		end
 		local d = nearestMedicM()
 		D.medic.Text = if d
 			then string.format(
