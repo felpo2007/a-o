@@ -14,6 +14,7 @@
 | F6 Offensive e lançamento | **testado no Studio**: Offensive com relatório pós-ação, progressão. Beta fechado **só você pode rodar** |
 
 ## v39: lista do dono de 12–13/11 (2026-11-13, D-107)
+- **Publicada** como versão 39 do place (build do commit d1288ae).
 - Oito frentes em paralelo: combate, morte e feridos, telas, movimento e 3ª pessoa, itens e
   fumaça, bots, veículos e som, celular. Mais o vento tirado.
 - **Causa do "tiro não acerta":** o servidor recusava todo tiro de jogador desde 2026-11-09
