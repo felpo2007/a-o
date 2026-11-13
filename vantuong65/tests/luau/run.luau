@@ -90,17 +90,32 @@ local function location(name: string): any
 	error("sem local " .. name)
 end
 
--- mapa de 1 x 1 km (2026-11-11): a Colina 43 ficou fora; a Colina 30 é a cota da carta no recorte
--- (tools/relevo_dem.py calibra o cume em 30 m)
-test("Colina 30 chega a ~30 m no terreno", function()
-	local sp = strongpoint("Colina 30")
-	near(world:heightAt(sp.x, sp.z) * 0.28, 30.0, 1.0, "cume")
+-- mapa de 500 x 500 m (D-114): a Colina 30 ficou fora; o ponto mais alto é o morro de Xóm Gò (o
+-- morrote de 34 m da D-95, levado para o centro em 2026-11-12), no setor da vila
+local function summit(): (number, number, number)
+	local b = MapConfig.Bounds
+	local best, bx, bz = -math.huge, 0, 0
+	for x = b.minX, b.maxX, 4 do
+		for z = b.minZ, b.maxZ, 4 do
+			local h = world:heightAt(x, z)
+			if h > best then
+				best, bx, bz = h, x, z
+			end
+		end
+	end
+	return bx, bz, best
+end
+
+test("morro de Xóm Gò: o ponto mais alto da área, ~36 m, no setor da vila", function()
+	local x, z, h = summit()
+	near(h * 0.28, 35.7, 1.0, "cume")
+	assert(Geometry.sectorAt(MapConfig.Sectors, x, z) == 2, "o cume fora do setor da vila")
 end)
 
-test("área jogável é 1,0 x 1,0 km e o terreno a cobre com margem", function()
+test("área jogável é 0,5 x 0,5 km e o terreno a cobre com margem", function()
 	local b = MapConfig.Bounds
-	near((b.maxX - b.minX) * 0.28, 1000, 1)
-	near((b.maxZ - b.minZ) * 0.28, 1000, 1)
+	near((b.maxX - b.minX) * 0.28, 500, 1)
+	near((b.maxZ - b.minZ) * 0.28, 500, 1)
 	-- o terreno recortado (tools/crop_world.py) cobre a área inteira mais ~150 m de margem
 	local g = require("../../src/ServerStorage/VT65Build/Data/Grid") :: any
 	local gx0, gz0 = g.originX, g.originZ
@@ -109,7 +124,9 @@ test("área jogável é 1,0 x 1,0 km e o terreno a cobre com margem", function()
 	assert(gz0 <= b.minZ - 100 / 0.28 and gz1 >= b.maxZ + 100 / 0.28, "terreno cobre norte-sul")
 end)
 
-test("15 pontos fortes, 3 por setor, cada um dentro do seu setor e com >= 1 real", function()
+-- D-114: no recorte de 500 m só An Cường (2) e o casario a sudeste dela são lugares da carta; os
+-- outros pontos fortes têm nome de design (antes: um real por setor)
+test("15 pontos fortes, 3 por setor, cada um dentro do seu setor; An Cường (2) é real", function()
 	assert(#MapConfig.Strongpoints == 15, "total")
 	local count, real = {}, {}
 	for _, sp in MapConfig.Strongpoints do
@@ -123,8 +140,29 @@ test("15 pontos fortes, 3 por setor, cada um dentro do seu setor e com >= 1 real
 	end
 	for s = 1, 5 do
 		assert(count[s] == 3, "setor " .. s .. " tem " .. tostring(count[s]))
-		assert(real[s], "setor " .. s .. " sem local real")
 	end
+	assert(real[4] and strongpoint("An Cường (2)").real, "An Cường (2) devia ser real")
+end)
+
+-- D-114 (pedido do dono: "deixe os objetivos mais perto do centro do mapa, alguns estão lá
+-- embaixo"): todo ponto forte a até 150 m da linha do meio (norte-sul; só o do norte da base dos EUA passa de 110 m) e a pelo menos 45 m da borda;
+-- dois pontos de setores vizinhos não dividem o raio de captura
+test("pontos fortes perto do meio, longe da borda e sem raio de captura em comum", function()
+	local b = MapConfig.Bounds
+	local midZ = (b.minZ + b.maxZ) / 2
+	local R = MapConfig.CaptureRadiusStuds
+	for _, sp in MapConfig.Strongpoints do
+		assert(math.abs(sp.z - midZ) * 0.28 <= 150, sp.name .. " longe da linha do meio")
+		local edge = math.min(sp.x - b.minX, b.maxX - sp.x, sp.z - b.minZ, b.maxZ - sp.z) * 0.28
+		assert(edge >= 45, string.format("%s a %.0f m da borda", sp.name, edge))
+		for _, o in MapConfig.Strongpoints do
+			if math.abs(o.sector - sp.sector) == 1 then
+				local d = math.sqrt((o.x - sp.x) ^ 2 + (o.z - sp.z) ^ 2)
+				assert(d > 2 * R, sp.name .. " e " .. o.name .. " dividem o raio de captura")
+			end
+		end
+	end
+	near(R * 0.28, 35, 1e-6, "raio de captura")
 end)
 
 test("QGs: EUA no setor 5, VC no setor 1", function()
@@ -158,40 +196,58 @@ test("quadro local -> grade de 1965 erra < 3 m em todos os locais", function()
 		local n = MapConfig.GridOrigin1965.n - l.z * 0.28
 		assert(math.abs(e - l.e1965) < 3 and math.abs(n - l.n1965) < 3, l.name)
 	end
-	local h30 = location("Colina 30 (cume)")
-	assert(Geometry.gridRef1965(MapConfig.GridOrigin1965, h30.x, h30.z, 0.28) == "BS 702934")
+	local ac = location("An Cường (2)")
+	assert(Geometry.gridRef1965(MapConfig.GridOrigin1965, ac.x, ac.z, 0.28) == "BS 700928")
 end)
 
-test("lugares que fazem o jogo estão no recorte: vilas, Colina 30, trincheira e riacho", function()
-	for _, name in
-		{ "Nam Yên (4)", "An Cường (2)", "An Thới (2)", "Colina 30 (cume)", "Riacho a leste de An Cường (2)" }
-	do
-		location(name)
-	end
-	-- 2026-11-12: o Cemitério deixou de ser ponto forte (objetivos no centro); a vila grande Xóm Gò é o
-	-- ponto forte do S3
-	for _, name in { "Nam Yên (4)", "An Cường (2)", "An Thới (2)", "Xóm Gò", "Trincheira sul", "Colina 30" } do
-		local sp = strongpoint(name)
-		assert(Geometry.inBounds(MapConfig.Bounds, sp.x, sp.z), name)
-	end
-	-- QG dos EUA perto da borda leste (a base grande vem depois). O do VC (2026-11-12, métrica de
-	-- contato) saiu da borda oeste: retaguarda, a oeste de todos os pontos fortes do S2 e a até 420 m
-	-- da praça de Xóm Gò
+-- D-114: An Cường (2) com os túneis e a trincheira sul, e a vila de Xóm Gò, dentro da área
+test("lugares que fazem o jogo estão no recorte: An Cường (2), túneis, trincheira e Xóm Gò", function()
+	location("An Cường (2)")
 	local b = MapConfig.Bounds
+	for _, name in { "An Cường (2)", "Xóm Gò", "Becos de Xóm Gò", "Ponta norte de Xóm Gò" } do
+		local sp = strongpoint(name)
+		assert(Geometry.inBounds(b, sp.x, sp.z), name)
+	end
+	-- bocas dos túneis e a trincheira (metros a partir do centro de An Cường (2)) a pelo menos 15 m da
+	-- borda: ninguém sai de um túnel para fora da área
+	local Tunnels = require("../../src/ReplicatedStorage/Shared/Tunnels") :: any
+	local ac = strongpoint("An Cường (2)")
+	local pts = {}
+	for _, n in Tunnels.nodes or {} do
+		table.insert(pts, { n.x, n.z })
+	end
+	for _, p in Tunnels.trench do
+		table.insert(pts, p)
+	end
+	assert(#pts >= 5, "sem túneis nem trincheira")
+	for _, p in pts do
+		local x, z = ac.x + p[1] / 0.28, ac.z + p[2] / 0.28
+		local edge = math.min(x - b.minX, b.maxX - x, z - b.minZ, b.maxZ - z) * 0.28
+		assert(edge >= 15, string.format("túnel ou trincheira a %.0f m da borda", edge))
+	end
+	-- QG dos EUA perto da borda leste e o do VC perto da oeste, a oeste de todos os pontos fortes do S2
 	assert((b.maxX - MapConfig.HQ.US.x) * 0.28 <= 80, "QG dos EUA longe da borda leste")
 	local vc = MapConfig.HQ.VC
+	assert((vc.x - b.minX) * 0.28 <= 50, "QG do VC longe da borda oeste")
 	for _, sp in MapConfig.Strongpoints do
 		if sp.sector == 2 then
 			assert(vc.x < sp.x, "QG do VC na frente de " .. sp.name)
 		end
 	end
 	local praca = strongpoint("Xóm Gò")
-	assert(math.sqrt((vc.x - praca.x) ^ 2 + (vc.z - praca.z) ^ 2) * 0.28 <= 420, "QG do VC longe do centro")
+	assert(math.sqrt((vc.x - praca.x) ^ 2 + (vc.z - praca.z) ^ 2) * 0.28 <= 200, "QG do VC longe do centro")
 end)
+
+-- O riacho fica a leste da área (D-114), na margem do terreno: o leito em N 1692,80 passa em
+-- E 270,215 (o local da carta, BS 702929, é E 270,20)
+local RIACHO = {
+	x = (270215 - MapConfig.GridOrigin1965.e) / 0.28,
+	z = (MapConfig.GridOrigin1965.n - 1692800) / 0.28,
+}
 
 test("riacho a leste de An Cường (2): leito contínuo de células de riacho, abaixo da margem", function()
 	assert(Grid.streamCarvedCm and Grid.streamCarvedCm > 0, "leito não foi aberto (crop_world)")
-	local l = location("Riacho a leste de An Cường (2)")
+	local l = RIACHO
 	-- do sul ao norte do vale, toda linha da grade entre N 1692,55 e 1693,0 tem riacho a até 120 m
 	-- a oeste do local da carta
 	local cell = Grid.cellStuds
@@ -254,14 +310,16 @@ test("place assado tem as peças e todas ancoradas", function()
 		assert(d.Transparency == 1 and not d.CanCollide and not d.CanQuery, "dique visível ou sólido")
 		nDikes += 1
 	end
-	assert(nDikes > 100 and nDikes < 1000, "diques: " .. nDikes)
+	-- D-114: no mapa de 500 m sobram ~17 diques (os 5 tabuleiros perto de An Cường (2)); eram ~460
+	assert(nDikes > 10 and nDikes < 1000, "diques: " .. nDikes)
 	assert(#map.Strongpoints:GetChildren() == 15, "marcadores")
 	print(string.format("       (%d BaseParts no Map)", n))
 end)
 
-test("TerrainBuilder (WriteVoxels simulado): dimensões, ocupação e cume da Colina 30", function()
+test("TerrainBuilder (WriteVoxels simulado): dimensões, ocupação e cume do morro de Xóm Gò", function()
 	local TerrainBuilder = require("../../src/ServerStorage/VT65Build/TerrainBuilder")
-	local h43 = strongpoint("Colina 30")
+	local sx0, sz0, sh = summit()
+	local h43 = { x = sx0, z = sz0 }
 	local calls, topAtHill = 0, -math.huge
 	local mock = {}
 	function mock.WriteVoxels(_, region: any, res: number, mats: any, occs: any)
@@ -309,7 +367,8 @@ test("TerrainBuilder (WriteVoxels simulado): dimensões, ocupação e cume da Co
 		only = { minX = h43.x - r, maxX = h43.x + r, minZ = h43.z - r, maxZ = h43.z + r },
 	})
 	assert(n >= 1 and calls == n, "blocos escritos")
-	near(topAtHill * 0.28, 30.0, 1.5, "topo do voxel no cume")
+	-- o cume pode ter patamar de casa ou estrada da vila: a superfície fica perto da altura do plano
+	near(topAtHill * 0.28, sh * 0.28, 1.5, "topo do voxel no cume")
 end)
 
 -- Achado no Studio (2026-11-13, "conserte tudo que esteja flutuando"): o chão saía 2 studs acima do
@@ -331,7 +390,7 @@ end)
 
 test("TerrainBuilder: o riacho tem água no leito e o espelho não passa da margem", function()
 	local TerrainBuilder = require("../../src/ServerStorage/VT65Build/TerrainBuilder")
-	local sp = strongpoint("Riacho a leste de An Cường (2)")
+	local sp = RIACHO
 	local water, overflow = 0, 0
 	local streamCols: { string } = {}
 	local wetCols: { [string]: boolean } = {}
@@ -548,7 +607,8 @@ test("arrozal: chão plano 5–15 cm abaixo da lâmina em todo ponto amostrado d
 			deepest
 		)
 	)
-	assert(nSheets >= 8 and sampled > 1000, "amostra pequena")
+	-- D-114: no recorte de 500 m sobraram 5 tabuleiros (eram 25 no de 1 km)
+	assert(nSheets >= 4 and sampled > 1000, "amostra pequena")
 	assert(above == 0, above .. " pontos com o chão a menos de 5 cm da lâmina (ou acima dela)")
 	assert(inRange >= sampled * 0.8, "chão longe dos 10 cm em mais de 20% dos pontos")
 end)

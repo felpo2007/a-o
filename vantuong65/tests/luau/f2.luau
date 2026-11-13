@@ -247,9 +247,9 @@ test("extras: setor capturado, sequência de mortes (máx. 12) e troca de papel"
 	assert(SpawnRules.extraWait("hq", { 0, 300 }, false) == 0)
 end)
 
-test("bloqueio: inimigo a 75 m, setor em disputa, setor recém-capturado", function()
-	assert(SpawnRules.blocked(0, 0, { 50, 0 }, false, nil, 0))
-	assert(not SpawnRules.blocked(0, 0, { 80, 0 }, false, nil, 0))
+test("bloqueio: inimigo a 60 m (D-114), setor em disputa, setor recém-capturado", function()
+	assert(SpawnRules.blocked(0, 0, { 59, 0 }, false, nil, 0))
+	assert(not SpawnRules.blocked(0, 0, { 61, 0 }, false, nil, 0))
 	assert(SpawnRules.blocked(0, 0, {}, true, nil, 0))
 	assert(SpawnRules.blocked(0, 0, {}, false, 100, 120))
 	assert(not SpawnRules.blocked(0, 0, {}, false, 100, 131))

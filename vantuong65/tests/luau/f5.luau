@@ -328,7 +328,7 @@ test("mata (D-64/65): determinística, zonas livres, lavoura e clareira abertas,
 		})
 	end
 	local a, b = plan(), plan()
-	assert(#a == #b and #a > 5000, "plano com " .. #a .. " plantas")
+	assert(#a == #b and #a > 1500, "plano com " .. #a .. " plantas") -- D-114: mapa de 500 m
 	for i = 1, #a, 97 do
 		assert(a[i].key == b[i].key and a[i].x == b[i].x and a[i].z == b[i].z, "não determinístico")
 	end
@@ -342,7 +342,7 @@ test("mata (D-64/65): determinística, zonas livres, lavoura e clareira abertas,
 			-- arte abre as pegadas e os pontos de nascer)
 			local hq = MapConfig.HQ.US
 			local d = math.sqrt((it.x - hq.x) ^ 2 + (it.z - hq.z) ^ 2) * M
-			assert(d >= 150 - 3, string.format("%s a %.0f m do QG US", it.key, d))
+			assert(d >= Vegetation.US_BASE_CLEAR_M - 3, string.format("%s a %.0f m do QG US", it.key, d))
 			for i = 1, #houses, 2 do
 				local d = math.sqrt((it.x - houses[i]) ^ 2 + (it.z - houses[i + 1]) ^ 2) * M
 				assert(d >= 6.5 - 0.01, string.format("%s dentro de casa (%.1f m)", it.key, d))
@@ -357,9 +357,12 @@ test("mata (D-64/65): determinística, zonas livres, lavoura e clareira abertas,
 		end
 	end
 	-- D-65: mata fechada; lavoura e clareira abertas. Mapa de 1 x 1 km (2026-11-11): ~8,3 mil plantas
-	-- na área e ~600 na cortina de fora (eram ~45 mil e ~2,8 mil no de 2 x 2 km)
-	assert(inside > 6000 and border > 300, string.format("dentro %d, cortina %d", inside, border))
-	assert(paddy / inside < 0.03, string.format("%.1f%% das plantas na lavoura/clareira", 100 * paddy / inside))
+	-- na área e ~600 na cortina de fora (eram ~45 mil e ~2,8 mil no de 2 x 2 km). D-114 (500 x 500 m):
+	-- ~1/4 da área, ~2,2 mil na área e ~350 na cortina
+	assert(inside > 1500 and border > 150, string.format("dentro %d, cortina %d", inside, border))
+	-- D-114: no mapa de 500 m a vila e as clareiras são uma parte maior da área e o jitter de meia célula
+	-- leva mais plantas da borda para dentro delas (3,2%; eram < 3% no de 1 km)
+	assert(paddy / inside < 0.04, string.format("%.1f%% das plantas na lavoura/clareira", 100 * paddy / inside))
 	print(string.format("       %d plantas: %d na área, %d na cortina de fora", #a, inside, border))
 end)
 

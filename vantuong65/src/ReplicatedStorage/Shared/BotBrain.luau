@@ -342,8 +342,10 @@ BotBrain.VEHICLE = {
 	perCrewBots = 5, -- mais um blindado a cada 5 bots além disso
 	order = { "m48a3", "lvtp5", "ontos" },
 	crewSeats = { "driver", "gunner" },
-	standoffM = { m48a3 = 220, ontos = 180, lvtp5 = 250 } :: { [string]: number },
-	dropM = 180, -- o LVTP-5 desembarca a tropa a esta distância do objetivo
+	-- D-114 (mapa de 500 m, QG dos EUA a ~130 m de An Cường (2) e ~280 m da praça de Xóm Gò): a
+	-- metade de antes (220 / 180 / 250 e 180 m), senão o blindado parava atrás da própria base
+	standoffM = { m48a3 = 110, ontos = 90, lvtp5 = 120 } :: { [string]: number },
+	dropM = 90, -- o LVTP-5 desembarca a tropa a esta distância do objetivo
 	coverSearchM = 45, -- procura sebe, casa, dique ou crista para parar atrás
 	behindM = 9, -- e para a esta distância atrás dela
 	arriveM = 7,
@@ -486,7 +488,7 @@ end
 -- Studio e no servidor publicado (BotHz e BotCap ficam no ReplicatedStorage).
 ---------------------------------------------------------------------------------------------
 BotBrain.CROWD = {
-	perSide = 50, -- completa até 50 por lado (Roles.TEAM_MAX) menos os humanos; era 10 (15 no Studio)
+	perSide = 40, -- completa até 40 por lado (Roles.TEAM_MAX, D-114) menos os humanos; era 50 (D-91)
 	stepS = 1, -- a lotação é conferida a cada 1 s
 	addPerStep = 2, -- e entram no máximo 2 por lado por conferida: 50 em ~25 s
 	spawnConcurrent = 4, -- modelos sendo montados ao mesmo tempo no servidor (avatar e arte)

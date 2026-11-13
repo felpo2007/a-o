@@ -570,7 +570,7 @@ Progression.INPLACE = {
 	prices = { 60, 100, 160 },
 	maxPerMatch = 3,
 	enemyM = 100,
-	enemyHqM = 125, -- D-95: mapa de 1 km (antes 250, ¼ da largura)
+	enemyHqM = 60, -- D-114: mapa de 500 m (D-95: 125 no de 1 km; antes 250, ¼ da largura)
 	minWaitS = 10, -- D-91: igual à espera normal (antes 60)
 	buyTimeoutS = 120, -- s que o servidor espera o recibo para renascer na hora
 }

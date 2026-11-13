@@ -3878,3 +3878,66 @@ porta da direita. O ID antigo fica como `uh34d_v2_fechado`.
 **Não testado:** o prazo de 90 s do embarque ao vivo; dirigir com teclado ou controle de verdade (a
 direção nova só foi medida no Lune: M151 a 111 km/h na estrada, M48A3 a 57,6 km/h); o bot preso
 num objeto saindo pelas etapas novas.
+
+## D-114 — Lote 4a: mapa de 500 x 500 m, objetivos perto do centro e 40 x 40 (v46, 2026-11-13)
+
+Pedidos do dono: "acho que podemos diminuir ainda mais o mapa, talvez 500m x 500m" (confirmado:
+"Sim, 500 m"); "deixe os objetivos mais perto do centro do mapa, alguns estão lá embaixo"; "faça o
+jogo 40x40 jogadores". Substitui o tamanho da D-95. As cabanas e vilas maiores e a terra batida nas
+ruas ficam para o lote 4b (v47).
+
+**Recorte** (`geo.PLAY_ING`): E 269,66–270,16 x N 1692,64–1693,14, dentro do de 1 km (os dados já
+recortados bastam). Varredura de chão plano para as duas bases (`crop_world`, 2026-11-13):
+- fica a vila de Xóm Gò inteira no morro do centro (cume de 35,7 m), An Cường (2) com as 5 bocas
+  de túnel e a trincheira sul (a 18–26 m da borda sul) e o casario a sudeste dela;
+- saem Nam Yên (4), An Thới (2), a Colina 30, o cemitério de 1965 e o riacho (fica 50–75 m a leste,
+  na margem do terreno).
+
+**QGs:**
+- VC: E 269,688 / N 1692,89, no pé oeste do morro (desnível de 0,9 m na área da base);
+- EUA: E 270,105 / N 1692,935, a nordeste de An Cường (2), a 40 m da boca E2 (desnível de ~4 m,
+  que os patamares cortam). A base leva tudo junto (posições relativas ao QG).
+
+**Setores (oeste → leste):** A Encosta oeste (110 m), B Xóm Gò (100 m), C Sopé do morro (70 m),
+D An Cường (2) (100 m), E Vale do riacho (120 m). A vila passou do setor 3 para o 2
+(`crop_world.SETOR_VILA`).
+
+**Pontos fortes (3 por setor):**
+- todos a até 110 m da linha do meio, menos o do norte da base dos EUA (145 m), e a 45 m ou mais da
+  borda;
+- dois de setores vizinhos ficam a 74 m ou mais um do outro;
+- B: a praça de Xóm Gò, os becos (travessa do lado do centro) e a ponta norte (a outra travessa);
+- D: An Cường (2), a sebe ao norte (boca E4) e o arrozal ao sul (boca E3). A Trincheira sul deixou
+  de ser ponto forte (a 20 m da borda), mas continua no mapa;
+- reais: An Cường (2) e o casario a sudeste dela. Os outros são nomes de design (antes, um real por
+  setor; no recorte de 500 m não há mais lugares da carta).
+
+**Números que mudaram (PLACEHOLDER de projeto):**
+- raio de captura: 35 m (era 50; o prompt pedia 40–60 m para setores de 200–400 m);
+- `Front`: reunião avançada a 60 m (era 125), passo de 5 m, 10 m para dentro, busca + 100 m,
+  reunião do squad sem inimigo a 60 m (era 100), 50 m do objetivo, 75 m do QG inimigo, 20 m da borda;
+- reunião atrás do ponto forte: 30 m (era 60); bloqueio por inimigo: 60 m (era 75; o túnel do VC
+  segue com 50);
+- renascer onde caiu: bloqueado a menos de 60 m do QG inimigo (era 125);
+- blindados dos bots: param a 110 m (M48), 90 m (Ontos) e 120 m (LVTP-5) do alvo; o LVTP-5
+  desembarca a 90 m (eram 220, 180 e 250 m, e 180 m);
+- clareira da base dos EUA na mata: 80 m (era 150, que pelaria An Cường (2));
+- campo de tiro longo: alvos a 50, 100 e 150 m (eram 100, 200 e 300; o de 300 m caía fora);
+- estradas: voltas por fora a 45 m da borda (eram 70).
+
+**40 x 40:** `Roles.TEAM_MAX` e `BotBrain.CROWD.perSide` = 40 (eram 50, D-91); servidor de 80
+(`roblox_cloud.py server-size 80`).
+
+**Carta:** refeita para o recorte novo (`tools/make_carta.py`) e publicada em 4 blocos; os IDs da de
+1 km ficam como `Carta.<bloco>_1km`.
+
+**Medido:**
+- recorte: grade de 179 x 180 células; 19 diques, 5 tabuleiros, 126 sebes, 5 casas da carta e as 48
+  de Xóm Gò; estradas: 1,1 km de principal e 1,1 km de voltas por fora;
+- Lune: plano da mata com 2.573 plantas (2.248 na área, 325 na cortina); rotas dos bots de An Cường
+  (2) até Xóm Gò sem desvio (166 e 223 m);
+- Studio: terreno em 3 s (144 blocos), mata a 100% nos 5 setores, os 9 veículos dentro da área,
+  primeiro tiroteio aos 15 s de partida (era 46 s), 40 bots do VC e 37 dos EUA mais o jogador,
+  servidor a 60 Hz, 0 erros de script.
+
+**Não testado:** partida inteira até o fim, celular, 40 jogadores de verdade num servidor.

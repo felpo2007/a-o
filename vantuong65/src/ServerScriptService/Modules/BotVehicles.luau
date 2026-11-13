@@ -725,7 +725,7 @@ function BotVehicles.drive(now: number, dt: number)
 			local p = point :: Vector3
 			if sector ~= c.sector or not c.dest then
 				c.sector = sector
-				local stand = if transport then V.dropM else (V.standoffM[c.spec] or 200)
+				local stand = if transport then V.dropM else (V.standoffM[c.spec] or 100) -- D-114: era 200
 				c.dest = standoffSpot(c, p, chassis.Position, stand)
 				if c.state == "hold" then
 					setState(c, "go", now)

@@ -14,20 +14,22 @@ local Front = {}
 -- Mapa de 1 x 1 km (2026-11-11): setores de ~200 m (eram ~400 m). As distâncias que dependem do
 -- tamanho do setor caíram junto (antes: 250 / 20 / 30, leque até len + 400 m, 150 m do objetivo e
 -- 300 m do QG); as de combate (inimigo a 100 m) ficaram.
+-- Mapa de 500 x 500 m (D-114): setores de 70 a 120 m. Tudo caiu à metade, também o inimigo perto da
+-- reunião do squad (100 -> 60 m: com os QGs a ~420 m um do outro, 100 m travava quase todo plantio).
 Front.C = {
-	forwardM = 125, -- reunião avançada: distância mínima até o ponto forte atacado
-	forwardStepM = 10, -- recua de 10 em 10 m até cair dentro do setor próprio
-	insideM = 20, -- e fica 20 m para dentro da fronteira
-	searchExtraM = 200, -- procura até a distância do ponto forte próprio mais isto
+	forwardM = 60, -- reunião avançada: distância mínima até o ponto forte atacado
+	forwardStepM = 5, -- recua de 5 em 5 m até cair dentro do setor próprio
+	insideM = 10, -- e fica 10 m para dentro da fronteira
+	searchExtraM = 100, -- procura até a distância do ponto forte próprio mais isto
 	fanDeg = 75, -- leque de rumos em volta da direção do ponto forte próprio
 	pickPower = 2, -- sorteio: peso 1/d² até o ponto já sorteado do setor vizinho (mais perto da frente)
-	squadRallyEnemyM = 100, -- reunião do squad: nenhum inimigo a menos de 100 m
-	squadRallyObjectiveM = 100, -- nem a menos de 100 m de ponto forte ativo que não é do time
+	squadRallyEnemyM = 60, -- reunião do squad: nenhum inimigo a menos de 60 m
+	squadRallyObjectiveM = 50, -- nem a menos de 50 m de ponto forte ativo que não é do time
 	squadRallyCooldownS = 90, -- entre dois plantios do mesmo squad
-	squadRallyHqM = 150, -- longe do QG inimigo
+	squadRallyHqM = 75, -- longe do QG inimigo
 	-- reunião atrás do ponto forte: pelo menos isto para dentro da borda (o ponto e a clareira de 15 m
 	-- em volta dele ficam dentro da área e da imagem da carta)
-	rallyInsetM = 30,
+	rallyInsetM = 20,
 }
 
 export type Point = { x: number, z: number }

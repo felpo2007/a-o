@@ -679,10 +679,11 @@ test("squad de jogador: não segue mais o líder; a marca vale 2 min e 45 s depo
 	assert(not BotBrain.markActive(80, F.markHoldS + 1), "chegou há mais de 45 s: volta ao objetivo")
 end)
 
--- ===== D-107: 50 por lado, desempenho, papel na frente e lance de assalto =====
-test("lotação: completa até 50 por lado menos os humanos, 2 por vez; sai na hora", function()
+-- ===== D-107: 50 por lado (D-114: 40), desempenho, papel na frente e lance de assalto =====
+test("lotação: completa até 40 por lado menos os humanos, 2 por vez; sai na hora", function()
 	local K = BotBrain.CROWD
-	assert(K.perSide == 50, "50 por lado (Roles.TEAM_MAX)")
+	local Roles = require("../../src/ReplicatedStorage/Shared/Roles") :: any
+	assert(K.perSide == 40 and Roles.TEAM_MAX == 40, "40 por lado (Roles.TEAM_MAX, D-114)")
 	assert(BotBrain.fillWant(50, 0, 50, 50) == 50, "sem humano: 50 bots")
 	assert(BotBrain.fillWant(50, 3, 50, 50) == 47, "3 humanos: 47 bots")
 	assert(BotBrain.fillWant(50, 60, 50, 50) == 0, "time cheio de humanos: nenhum")
@@ -706,7 +707,7 @@ end)
 test("teto pelo Heartbeat: para abaixo de 45 Hz, tira abaixo de 35 Hz, volta acima de 52 Hz", function()
 	local K = BotBrain.CROWD
 	local c = BotBrain.newCrowd()
-	assert(c.cap == 50)
+	assert(c.cap == K.perSide)
 	assert(BotBrain.crowdStep(c, 60, 1, 20) == "add", "servidor folgado: entra gente")
 	-- 45 Hz > x >= 35 Hz: o teto para onde está
 	assert(BotBrain.crowdStep(c, 40, 1, 30) == "hold" and c.cap == 30, "parou em 30")

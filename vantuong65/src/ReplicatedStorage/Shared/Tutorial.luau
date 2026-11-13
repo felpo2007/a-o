@@ -16,8 +16,9 @@ local function target(m: number, text: string): Step
 	return { id = "range_" .. m, range = m, text = text }
 end
 
--- distâncias dos alvos do campo de tiro (m), ao lado de cada QG
-Tutorial.RANGE_M = { 100, 200, 300 }
+-- distâncias dos alvos do campo de tiro (m), ao lado de cada QG. D-114 (mapa de 500 m): 50, 100 e 150
+-- m (eram 100, 200 e 300: o alvo de 300 m caía fora do mapa ou no meio da área de combate)
+Tutorial.RANGE_M = { 50, 100, 150 }
 -- o campo de tiro fica na retaguarda: sai do QG ao longo da borda, sem atirar para a frente
 -- Mapa de 1 x 1 km (2026-11-11): a 340 m para oeste, a raia dos EUA cruzaria An Cường (2).
 Tutorial.RANGE_LANE = {
@@ -37,9 +38,9 @@ Tutorial.COMMON = {
 }
 
 Tutorial.RANGE = {
-	target(100, "Campo de tiro, ao lado do QG: acerte o alvo de 100 m."),
-	target(200, "Acerte o alvo de 200 m. A bala cai com a distância: ajuste a alça com {zeroing}."),
-	target(300, "Acerte o alvo de 300 m. Mirando, prenda a respiração com {hold_breath}."),
+	target(50, "Campo de tiro, ao lado do QG: acerte o alvo de 50 m."),
+	target(100, "Acerte o alvo de 100 m. A bala cai com a distância: ajuste a alça com {zeroing}."),
+	target(150, "Acerte o alvo de 150 m. Mirando, prenda a respiração com {hold_breath}."),
 }
 
 -- papéis que usam fuzil ou metralhadora: passam pelo campo de tiro

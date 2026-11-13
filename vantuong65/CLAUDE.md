@@ -1,8 +1,8 @@
 # Instruções para o Claude: VẠN TƯỜNG '65 (jogo de Roblox)
 
-Esta pasta é o jogo **VẠN TƯỜNG '65**: FPS tático 50 contra 50 no Roblox (D-91), na Operação
-Starlite (agosto de 1965), mapa 1:1 de 1 × 1 km de Nam Yên (4) à Colina 30 e An Cường (2) (D-95),
-coberto de mata fechada com lavoura em volta das vilas (D-65). O `CLAUDE.md` da raiz do
+Esta pasta é o jogo **VẠN TƯỜNG '65**: FPS tático 40 contra 40 no Roblox (D-114), na Operação
+Starlite (agosto de 1965), mapa 1:1 de 500 × 500 m da vila de Xóm Gò, no morro do centro, até An
+Cường (2) com os túneis (D-114), coberto de mata fechada com lavoura em volta das vilas (D-65). O `CLAUDE.md` da raiz do
 repositório é de OUTRO projeto (estratégias de trade). Aqui vale este arquivo. Responda sempre em português.
 
 ## Antes de qualquer coisa
@@ -134,7 +134,7 @@ O `sourcemap.json` não vai para o Git.
 - Segredos só no `.env` (no `.gitignore`), nunca no código nem no chat.
 - ForgeGUI: nunca regenerar um job em `outcome_unknown`. "failed" com `retryable` pode ser
   retomado com `generation_retry`.
-- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-114) e atualize `PROGRESS.md`.
+- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-115) e atualize `PROGRESS.md`.
 - Metas da Parte 2: vegetação ≤ 3 mil triângulos, props ≤ 5 mil, herói ≤ 20 mil (`ArtBudget`,
   conferido pelo teste da F5).
 - Commits no branch acima, com mensagem em português.

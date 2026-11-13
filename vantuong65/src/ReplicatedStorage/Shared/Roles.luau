@@ -14,7 +14,7 @@
 -- O papel salvo de antes vira o novo pelo Roles.migrate (perfil, jogar agora, tutorial).
 local Roles = {}
 
-Roles.TEAM_MAX = 50
+Roles.TEAM_MAX = 40 -- D-114 (pedido do dono: "faça o jogo 40x40"); era 50 (D-91)
 Roles.HEAVY_UNLOCK = 16 -- unidade pesada só com o time a partir de 16 (D-108: nenhuma unidade pesada hoje)
 
 export type RoleDef = { id: string, name: string, unit: string, maxPerSquad: number? }

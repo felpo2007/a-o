@@ -286,13 +286,15 @@ test("reunião do squad: só o líder, longe do inimigo, do objetivo e do QG, co
 	assert(with("alive", false))
 	assert(with("inWater", true))
 	assert(with("inBounds", false))
-	assert(with("nearestEnemyM", 60))
+	assert(with("nearestEnemyM", Front.C.squadRallyEnemyM - 10))
+	assert(with("nearestEnemyM", Front.C.squadRallyEnemyM) == nil)
 	assert(with("nearestObjectiveM", Front.C.squadRallyObjectiveM - 10))
 	assert(with("nearestObjectiveM", Front.C.squadRallyObjectiveM) == nil)
 	assert(with("enemyHqM", Front.C.squadRallyHqM - 10))
 	assert(with("enemyHqM", Front.C.squadRallyHqM) == nil)
-	-- mapa de 1 x 1 km: as distâncias cabem num setor de ~200 m (a reunião não fica impossível)
-	assert(Front.C.squadRallyObjectiveM <= 100 and Front.C.squadRallyHqM <= 200)
+	-- mapa de 500 x 500 m (D-114): as distâncias cabem num setor de ~100 m (a reunião não fica
+	-- impossível)
+	assert(Front.C.squadRallyObjectiveM <= 50 and Front.C.squadRallyHqM <= 100 and Front.C.squadRallyEnemyM <= 60)
 	assert(with("lastPlacedAt", 950))
 	assert(with("lastPlacedAt", 1000 - Front.C.squadRallyCooldownS) == nil)
 end)
@@ -361,11 +363,10 @@ test("carta: setores viram retângulos que cobrem o polígono sem sobra (amostra
 	end
 end)
 
--- mapa de 1 x 1 km (2026-11-11): S1/S2 e S2/S3 dobram ao norte de N 1693,0 (An Thới (2) no S2 e o
--- morrote no S3); S3/S4 e S4/S5 são retas
-test("carta: fronteiras S1/S2 e S2/S3 têm a dobra (3 trechos); S3/S4 e S4/S5 são retas", function()
-	assert(#Carta.boundary(MapConfig.Sectors, 1, 2) == 3)
-	assert(#Carta.boundary(MapConfig.Sectors, 2, 3) == 3)
+-- mapa de 500 x 500 m (D-114): as quatro fronteiras são retas (no de 1 km, S1/S2 e S2/S3 dobravam)
+test("carta: as fronteiras dos setores são retas (1 trecho cada)", function()
+	assert(#Carta.boundary(MapConfig.Sectors, 1, 2) == 1)
+	assert(#Carta.boundary(MapConfig.Sectors, 2, 3) == 1)
 	assert(#Carta.boundary(MapConfig.Sectors, 3, 4) == 1)
 	assert(#Carta.boundary(MapConfig.Sectors, 4, 5) == 1)
 	assert(#Carta.boundary(MapConfig.Sectors, 1, 3) == 0)

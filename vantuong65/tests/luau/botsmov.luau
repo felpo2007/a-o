@@ -490,22 +490,23 @@ end
 
 -- mapa de 1 x 1 km (2026-11-11): rotas pelo arrozal entre An Cường (2) (S4), o S3 e Nam Yên (4)
 -- (S1/S2). 2026-11-12: o ponto forte do S3 é a vila grande Xóm Gò, no morrote levado para o centro
-test("rota no mapa real: infantaria do S4 ao S3 foge do arrozal alagado e usa o dique", function()
-	realRoute("Arrozal ao norte de An Cường (2)", "Xóm Gò", 0, 0)
-	realRoute("Trincheira sul", "Xóm Gò", 0, 0)
-	-- o ponto forte do lugarejo fica em cima da casa da carta: a rota sai 17 m ao norte dela
-	realRoute("Lugarejo a sudoeste de An Cường (2)", "Arrozal central", 0, -60)
+-- D-114 (mapa de 500 m): de An Cường (2) e do casario (S4/S5) até a vila de Xóm Gò (S2) e o capim
+-- ao pé do morro (S1)
+test("rota no mapa real: infantaria do S4 ao S2 foge do arrozal alagado e usa o dique", function()
+	realRoute("Sebe ao norte de An Cường (2)", "Xóm Gò", 0, 0)
+	realRoute("Arrozal ao sul de An Cường (2)", "Xóm Gò", 0, 0)
+	realRoute("Casario sudeste de An Cường (2)", "Capinzal oeste", 0, 0)
 end)
 
-test("rota no mapa real: M48A3 do depósito até perto do S3 sem atravessar casa nem sebe", function()
+test("rota no mapa real: M48A3 da saída da base até o pé do morro sem atravessar casa nem sebe", function()
 	local g = buildReal()
 	local hq = MapConfig.HQ.US
 	local b = strongpoint("Xóm Gò")
 	local p = BotNav.profile("tracked", "m48a3")
-	-- depósito do M48 (VehicleService: 130 m a oeste e 40 m ao norte do QG) até a distância de tiro
-	-- do canhão, a leste do morrote (BotBrain.VEHICLE.standoffM.m48a3 é 220 m; no mapa de 1 km o
-	-- morrote fica a ~400 m do QG, então o alvo é 150 m a leste dele)
-	local s = BotNav.search(g, p, hq.x - 130 / STUD, hq.z - 40 / STUD, b.x + 150 / STUD, b.z)
+	-- D-114 (mapa de 500 m): da entrada da base dos EUA (a oeste do QG, tools/bases_mapa.json: -48 m)
+	-- até o pé leste do morro, 90 m a leste da praça de Xóm Gò (no de 1 km o alvo ficava 150 m a leste
+	-- do morrote, a ~400 m do QG; agora a praça fica a ~280 m dele)
+	local s = BotNav.search(g, p, hq.x - 55 / STUD, hq.z, b.x + 90 / STUD, b.z)
 	local t0 = os.clock()
 	BotNav.run(s, 1e9)
 	print(string.format("       M48: %s, %d nós, %.0f ms", s.status, s.expanded, (os.clock() - t0) * 1000))

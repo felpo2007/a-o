@@ -63,7 +63,13 @@ GRADE_MAX = 0.15  # rampa máxima do leito (15%, 8,5°)
 GRADE_PROIBIDA = 0.30  # terreno mais íngreme que isto não recebe estrada
 TALUDE_M = 3.0  # faixa de cada lado onde o leito se junta ao terreno
 BORDA_M = 25.0  # estrada a pelo menos isto da borda da área
-ANEL_M = 70.0  # as voltas por fora correm a esta distância da borda
+ANEL_M = 45.0  # as voltas por fora correm a esta distância da borda (D-114; 70 no mapa de 1 km)
+# pontos de passagem (E, N da grade de 1965) das voltas por fora, do QG do VC ao dos EUA, pelo
+# norte e pelo sul (D-114, mapa de 500 m: ao norte da ponta da vila e ao norte da trincheira sul)
+ANEL_PONTOS = (
+    [(269760, 1693095), (270030, 1693095)],
+    [(269750, 1692690), (269890, 1692700), (270060, 1692700)],
+)
 BASE_FOLGA_M = 1.0  # a estrada do mapa passa a pelo menos isto da área de cada base
 
 
@@ -410,10 +416,7 @@ def traca_estradas(
     borda = np.minimum.reduce([xs - xa, xb - xs, zs - za, zb - zs]) * STUD_M
     anel = custo0 * (1.0 + 3.0 * np.abs(borda - ANEL_M) / ANEL_M)
     custo_anel = np.where(estrada, np.minimum(anel, 1.0), anel)
-    for e_n_lista in (
-        [(269700, 1693430), (270000, 1693430)],
-        [(269420, 1692570), (269800, 1692570), (270200, 1692580)],
-    ):
+    for e_n_lista in ANEL_PONTOS:
         pts = [celulas["QG_VC"]] + [
             _livre(custo0, _cel(t, *ing_local(e, n_))) for e, n_ in e_n_lista
         ]

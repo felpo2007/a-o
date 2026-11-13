@@ -18,9 +18,9 @@ SpawnRules.C = {
 	streakMax = 12,
 	streakWindow = 120,
 	roleChange = 4,
-	blockRadiusM = 75,
+	blockRadiusM = 60, -- D-114: mapa de 500 m (era 75); o túnel avançado do VC segue com 50
 	newSectorDelay = 30,
-	rallyBehindM = 60, -- atrás do ponto forte (D-95: mapa de 1 km; antes 100)
+	rallyBehindM = 30, -- atrás do ponto forte (D-114: mapa de 500 m; D-95: 60 no de 1 km; antes 100)
 }
 
 -- "squad": nascer junto de um companheiro do squad (espera igual à da reunião, sem extra)

@@ -309,11 +309,12 @@ test("túnel avançado: regra pura (boca do lado do VC, fora do ponto e de setor
 	local c = SpawnRules.vcForward({ mouths[1], mouths[3], mouths[4] }, owner, 0, 0, 5000, 0, -5000, 0, M)
 	assert(c and c.id == "C", "sem opção do lado do VC: a de qualquer lado")
 	assert(SpawnRules.vcForward({ mouths[1], mouths[4], mouths[5] }, owner, 0, 0, 5000, 0, -5000, 0, M) == nil)
-	-- bloqueio próprio: inimigo a 49 m bloqueia, a 51 m não (o raio comum é 75 m)
+	-- bloqueio próprio: inimigo a 49 m bloqueia, a 51 m não (o raio comum é 60 m: D-114)
 	local R = SpawnRules.VC_FORWARD.blockM
 	assert(SpawnRules.blocked(0, 0, { R - 1, 0 }, false, nil, 0, R))
 	assert(not SpawnRules.blocked(0, 0, { R + 1, 0 }, false, nil, 0, R))
-	assert(SpawnRules.blocked(0, 0, { R + 1, 0 }, false, nil, 0), "sem raio próprio vale o de 75 m")
+	assert(R < SpawnRules.C.blockRadiusM, "o raio do túnel é menor que o comum")
+	assert(SpawnRules.blocked(0, 0, { R + 1, 0 }, false, nil, 0), "sem raio próprio vale o comum")
 end)
 
 print(string.format("%d ok, %d falhas", passed, failed))

@@ -1,6 +1,6 @@
 --!strict
 -- Campo de tiro e tutorial por papel (Parte 9, "Aprendizado"; F6, D-47).
--- Campo de tiro: na retaguarda de cada QG, linha de tiro e alvos de silhueta a 100, 200 e 300 m,
+-- Campo de tiro: na retaguarda de cada QG, linha de tiro e alvos de silhueta a 50, 100 e 150 m (D-114),
 -- no chão real do terreno. Acerto num alvo avisa SÓ o atirador (o jogo não tem hitmarker; o campo
 -- de tiro é a exceção, para ensinar alça e queda).
 -- Tutorial: o perfil guarda os papéis concluídos (ProfileSchema.tutorial).
@@ -149,7 +149,7 @@ local function inside(x: number, z: number): boolean
 end
 
 -- Bases dos dois lados (Data/Bases, 2026-11-13): o estande de cada base (alvos do Blender a 25 m nos
--- EUA e a 23 m no VC, com RangeTarget) fica dentro dela; a raia longa (100, 200 e 300 m) sai na
+-- EUA e a 23 m no VC, com RangeTarget) fica dentro dela; a raia longa (50, 100 e 150 m) sai na
 -- mesma direção, 4 m depois da cerca, e nunca começa dentro de uma base.
 local basesData: any = nil
 local function bases(): any
@@ -288,7 +288,7 @@ local function buildRange(faction: string, folder: Folder)
 		look * CFrame.new(-2.6 / M, 1.2 / M, 0) * CFrame.Angles(0, math.pi, 0),
 		Color3.fromRGB(214, 203, 170)
 	)
-	sign(board, "LINHA DE TIRO\nalvos a 100, 200 e 300 m")
+	sign(board, "LINHA DE TIRO\nalvos a 50, 100 e 150 m")
 	-- pernas da placa até o chão (2026-11-13, "conserte tudo que esteja flutuando": a placa ficava no
 	-- ar, com o fundo a 0,8 m do chão e nada embaixo)
 	for _, sx in { -0.55, 0.55 } do
@@ -421,7 +421,7 @@ function TrainingService.start()
 			sub.Parent = folder
 			buildRange(f, sub)
 		end
-		print("[VT65] campos de tiro prontos (100, 200 e 300 m ao lado de cada QG)")
+		print("[VT65] campos de tiro prontos (50, 100 e 150 m ao lado de cada QG)")
 	end)
 end
 

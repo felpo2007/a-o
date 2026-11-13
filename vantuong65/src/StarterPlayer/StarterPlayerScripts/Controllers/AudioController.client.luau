@@ -224,6 +224,12 @@ for _, l in MapConfig.Locations do
 		beachX = l.x - 120 / M
 	end
 end
+-- D-114: a vila grande de Xóm Gò (ponto forte de design, sem local da carta) também soa como vila
+for _, sp in MapConfig.Strongpoints do
+	if sp.name == "Xóm Gò" then
+		table.insert(villages, Vector3.new(sp.x, 0, sp.z))
+	end
+end
 
 local function underground(pos: Vector3): boolean
 	local params = RaycastParams.new()

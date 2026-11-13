@@ -32,6 +32,7 @@ local sectorTris: { [number]: number } = {}
 local sectorCount: { [number]: number } = {}
 -- vilas da carta com gente morando (D-74): canteiro de muda e manada de búfalos no arrozal. Mapa de
 -- 1 x 1 km (2026-11-11): Nam Yên (4), An Thới (2) e An Cường (2) (as outras ficaram fora do recorte).
+-- D-114 (500 x 500 m): só An Cường (2) segue no mapa; as outras duas ficam aqui sem efeito.
 local VILLAGES: { [string]: boolean } = {
 	["An Cường (2)"] = true,
 	["Nam Yên (4)"] = true,

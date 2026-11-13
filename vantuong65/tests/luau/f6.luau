@@ -185,7 +185,7 @@ test("tutorial: 'Construir' só para papéis que constroem algo na logística", 
 	end
 end)
 
-test("tutorial: campo de tiro (100/200/300 m) só para quem usa fuzil", function()
+test("tutorial: campo de tiro (50/100/150 m, D-114) só para quem usa fuzil", function()
 	for id in Roles.roles do
 		local ranges = {}
 		for _, st in Tutorial.steps(id) do
@@ -194,7 +194,7 @@ test("tutorial: campo de tiro (100/200/300 m) só para quem usa fuzil", function
 			end
 		end
 		if Tutorial.RIFLE_ROLES[id] then
-			assert(#ranges == 3 and ranges[1] == 100 and ranges[2] == 200 and ranges[3] == 300, id)
+			assert(#ranges == 3 and ranges[1] == 50 and ranges[2] == 100 and ranges[3] == 150, id)
 		else
 			assert(#ranges == 0, id .. " não usa fuzil e foi ao campo de tiro")
 		end
@@ -212,7 +212,7 @@ test("tutorial: texto final troca os botões; avanço por ação ou alvo; perfil
 	end
 	assert(string.find(Tutorial.render(st[4], glyph), "%(segurar%)"), "deitar é segurar no controle")
 	assert(Tutorial.done(st[1], "action", "aim") and not Tutorial.done(st[1], "action", "fire"))
-	assert(Tutorial.done(st[6], "range", 100) and not Tutorial.done(st[6], "range", 200))
+	assert(Tutorial.done(st[6], "range", 50) and not Tutorial.done(st[6], "range", 100))
 	local clean = Tutorial.sanitize({ rifleman = true, medic = "sim", hacker = true, [1] = true }, Roles.roles)
 	assert(clean.rifleman and not clean.medic and not clean.hacker)
 end)

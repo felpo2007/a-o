@@ -560,10 +560,14 @@ function ArtPlan.structures(ctx: Ctx, has: (string) -> boolean): { Item }
 	-- em 2026-11-12, quando os objetivos foram para o centro; os túmulos ficam no lugar da carta)
 	padded("shrine", cx + 25, cz + 10, 0, 1, "prop")
 	padded("well", cx - 18, cz + 22, 0, 1, "prop")
+	-- D-114: no mapa de 500 m o cemitério da carta fica fora da área (e do terreno): sem túmulos
 	local cemX, cemZ = ArtPlan.cemetery(MC)
-	for k = 1, 6 do
-		local a = k * 1.05
-		padded("grave_mound", cemX + math.cos(a) * 25, cemZ + math.sin(a) * 25, a, 1, "prop")
+	local CB = MC.Bounds
+	if cemX > CB.minX and cemX < CB.maxX and cemZ > CB.minZ and cemZ < CB.maxZ then
+		for k = 1, 6 do
+			local a = k * 1.05
+			padded("grave_mound", cemX + math.cos(a) * 25, cemZ + math.sin(a) * 25, a, 1, "prop")
+		end
 	end
 	-- ponte de toras no riacho, atravessada no leito, apoiada nas duas margens
 	for _, l in MC.Locations do
