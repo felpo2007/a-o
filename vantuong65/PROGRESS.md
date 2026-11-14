@@ -37,7 +37,10 @@
 ## Fila do dono de 13/11 à noite (depois da v50, um lote por vez)
 - **Lote 7 (v51, D-119): feito.** A mira da RPD e da M60 medidas na malha (massa e alça de
   verdade no centro da tela), a mão no punho de pistola e a esquerda da RPD fora da visada.
-- **Lote 8, telas:**
+- **Lote 8 (v52, D-120): feito, menos a mesa.** Tela de baixa com quatro botões; loja e passe fora
+  do menu do jogo. A câmera da mesa 3D (escolha de lado) ainda tira a mesa do quadro em tela
+  estreita: pergunta ao dono.
+- **Lote 8, telas (pedido original):**
   - tela de baixa só com RENASCER AQUI (abre duas opções: créditos ou Robux, o Robux colorido),
     ESCOLHER OUTRO PONTO, RENASCER COM VEÍCULO e MENU. Saem LOJA, PASSE, MISSÕES e também o
     RENASCER grátis grande (resposta do dono): voltar de graça é pelo ESCOLHER OUTRO PONTO;
@@ -53,6 +56,20 @@
 - **Lote 11, passe e loja:** o passe em linha do tempo horizontal, da esquerda para a direita; a loja
   atraente, com imagens, cores e design bonito.
 - **Lote 12, análise:** bots, gráficos, armas, tiros e veículos (junto do lote 6).
+
+## v52: lote 8, tela de baixa e loja e passe fora do menu do jogo (2026-11-14, D-120)
+- **Feito:**
+  - tela de baixa só com RENASCER AQUI (abre "Pagar $ 60" e "Pagar 25 Robux", o Robux em verde
+    vivo), RENASCER COM VEÍCULO, ESCOLHER OUTRO PONTO e MENU;
+  - mesa sem a aba INTENDÊNCIA, sem o PASSE e sem a oferta da loja; a caixa de munição 3D não abre
+    mais a loja;
+  - menu do jogo: aba Campanha no lugar da Loja, com "Menu principal (loja, passe e tutorial)", que
+    reabre o menu principal.
+- **Conferido no Studio:** os quatro botões, a linha de pagar, o motivo do bloqueio numa baixa de
+  verdade e a mesa sem loja e passe.
+- **Achado:** a câmera da mesa 3D tira a mesa do quadro em tela estreita (no Studio, a mesa do VC
+  ficou fora da tela). Falta o dono decidir: consertar a câmera ou trocar a mesa por uma tela 2D.
+- **Não testado:** compra em Robux de verdade; controle e celular na tela de baixa.
 
 ## v51: lote 7, a mira da RPD e da M60 (2026-11-13, D-119)
 - **Publicada** como versão 51 do place (build do commit dc5d00f).

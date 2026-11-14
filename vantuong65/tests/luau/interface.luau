@@ -398,12 +398,39 @@ test("carta: túneis só para o VC e pontos do squad (kind = squad)", function()
 	assert(string.find(src, '"squad"', 1, true), "pontos de nascer no squad")
 end)
 
-test("baixa: renascer, renascer aqui (créditos e Robux) e voltar, com o motivo do bloqueio", function()
+test("baixa: renascer aqui (créditos e Robux) e voltar, com o motivo do bloqueio", function()
 	local src = fs.readFile(C .. "CasualtyScreen.luau")
-	assert(string.find(src, '"RENASCER"', 1, true), "RENASCER")
+	assert(string.find(src, '"RENASCER AQUI"', 1, true), "RENASCER AQUI")
 	assert(string.find(src, '"inplace", "robux"', 1, true), "Robux pelo servidor (que abre a compra)")
-	assert(string.find(src, '"RENASCER ONDE CAIU"', 1, true), "linha do mesmo lugar (v44: rótulo claro)")
+	assert(string.find(src, '"COMO PAGAR"', 1, true), "linha de pagar com rótulo claro")
 	assert(string.find(src, "CenaBaixa.show", 1, true), "o próprio soldado, caído")
+end)
+
+-- D-120 (lote 8, dono: "não quero nenhum outro botão além desses"): RENASCER AQUI, que abre as duas
+-- formas de pagar, ESCOLHER OUTRO PONTO, RENASCER COM VEÍCULO e MENU; mais nenhum
+test("baixa: só os quatro botões; o RENASCER AQUI abre créditos e Robux", function()
+	local src = fs.readFile(C .. "CasualtyScreen.luau")
+	local labels = {}
+	for label in string.gmatch(src, 'UiKit%.action%([%w%.]+, "([^"]+)"') do
+		table.insert(labels, label)
+	end
+	local want = {
+		["RENASCER AQUI"] = true,
+		["Pagar com créditos"] = true,
+		["Pagar com Robux"] = true,
+		["RENASCER COM VEÍCULO"] = true,
+		["ESCOLHER OUTRO PONTO"] = true,
+		["MENU"] = true,
+		["◄ VOLTAR"] = true, -- volta das viaturas
+		[""] = true, -- as viaturas (o nome entra depois)
+	}
+	for _, l in labels do
+		assert(want[l], "botão a mais na tela de baixa: " .. l)
+	end
+	assert(#labels >= 7, "botões achados: " .. #labels)
+	assert(string.find(src, "K.hereRow.Visible = S.hereOpen", 1, true), "a linha de pagar só depois do botão")
+	assert(not string.find(src, 'Bus.fire("passe_open")', 1, true), "sem passe na baixa")
+	assert(not string.find(src, 'Bus.fire("missoes_open")', 1, true), "sem missões na baixa")
 end)
 
 -- ===== tela de baixa de 2026-11-13: soldado caído, renascer rápido, veículo e desistir sempre =====
@@ -475,7 +502,7 @@ test("cores de compra: baixa, loja, carta de inserção, passe e intendência us
 	local function has(file: string, needle: string)
 		assert(string.find(fs.readFile(C .. file), needle, 1, true), file .. ": " .. needle)
 	end
-	has("CasualtyScreen.luau", '"Renascer aqui · Robux", "robux"')
+	has("CasualtyScreen.luau", '"Pagar com Robux", "robux"')
 	has("CasualtyScreen.luau", 'setKind("ci")')
 	has("ShopController.client.luau", 'UiKit.action(f, "", "robux"')
 	has("ShopController.client.luau", 'UiKit.payPaint(bt, "robux"')

@@ -2544,5 +2544,16 @@
  "Segure LT para mirar e aperte RT para atirar: a bala vai para onde a alça da arma aponta. Recarregue quando as balas acabarem.": "Hold LT to aim and press RT to shoot: the bullet goes where the weapon's sight points. Reload when you run out of bullets.",
  "Toque em AGACHAR para abaixar; segure para deitar. Abaixado ou deitado, você é um alvo menor e erra menos.": "Tap CROUCH to crouch; hold it to go prone. Crouched or prone, you are a smaller target and miss less.",
  "Toque em MAPA, no alto à esquerda, para ver os objetivos e o seu squad. Toque em COMUNICAR para marcar o inimigo.": "Tap MAP, top left, to see the objectives and your squad. Tap COMMS to mark the enemy.",
- "Toque em MIRA e depois em FOGO: a bala vai para onde a alça da arma aponta. Quando as balas acabam, o botão RECARGA aparece.": "Tap AIM and then FIRE: the bullet goes where the weapon's sight points. When you run out of bullets, the RELOAD button appears."
+ "Toque em MIRA e depois em FOGO: a bala vai para onde a alça da arma aponta. Quando as balas acabam, o botão RECARGA aparece.": "Tap AIM and then FIRE: the bullet goes where the weapon's sight points. When you run out of bullets, the RELOAD button appears.",
+ "COMO PAGAR": "HOW TO PAY",
+ "Campanha": "Campaign",
+ "Menu principal (loja, passe e tutorial)": "Main menu (shop, pass and tutorial)",
+ "Pagar %d Robux": "Pay %d Robux",
+ "Pagar %s": "Pay %s",
+ "Pagar com Robux": "Pay with Robux",
+ "Pagar com créditos": "Pay with credits",
+ "RENASCER AQUI": "RESPAWN HERE",
+ "Usar o guardado": "Use a saved one",
+ "aqui não dá: escolha outro ponto": "not here: choose another point",
+ "créditos ou Robux": "credits or Robux"
 }

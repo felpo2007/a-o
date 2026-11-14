@@ -334,10 +334,8 @@ function CartaoJogador.lobby(parent: Instance, x: number, y: number, w: number):
 		Bus.fire("missoes_open")
 	end, { h = 44 })
 	missions.button.LayoutOrder = 3
-	local pass = UiKit.action(col, "PASSE DE CAMPANHA", "secondary", function()
-		Bus.fire("passe_open")
-	end, { h = 44 })
-	pass.button.LayoutOrder = 4
+	-- lote 8 (D-120, dono: "o passe e a loja não devem aparecer no menu do jogo"): sem o atalho do
+	-- passe e sem a oferta do Pacote de Recruta (que levava à loja); os dois ficam no menu principal
 	-- vantagens ativas
 	local perksBox = UiKit.panel(col, V.PANEL, 0.12)
 	perksBox.LayoutOrder = 5
@@ -392,9 +390,7 @@ function CartaoJogador.lobby(parent: Instance, x: number, y: number, w: number):
 	see.button.Position = UDim2.fromOffset(12, 90)
 	see.button.Size = UDim2.new(1, -24, 0, 30)
 	see.label.TextXAlignment = Enum.TextXAlignment.Center
-	local dismissed = false
 	local x0 = UiKit.action(offer, "×", "ghost", function()
-		dismissed = true
 		offer.Visible = false
 	end, { h = 28 })
 	x0.button.AnchorPoint = Vector2.new(1, 0)
@@ -402,7 +398,6 @@ function CartaoJogador.lobby(parent: Instance, x: number, y: number, w: number):
 	x0.button.Size = UDim2.fromOffset(28, 28)
 	x0.label.TextXAlignment = Enum.TextXAlignment.Center
 
-	local seenSent = false
 	local visible = false
 	local function paint(s: any)
 		placa.paint(s)
@@ -417,10 +412,6 @@ function CartaoJogador.lobby(parent: Instance, x: number, y: number, w: number):
 			end
 		end
 		missions.sub.Text = if total > 0 then string.format("%d/%d", done, total) else ""
-		local season = if type(s) == "table" then s.season else nil
-		pass.sub.Text = if type(season) == "table" and season.level
-			then string.format("NÍVEL %d", tonumber(season.level) or 0)
-			else ""
 		local boosts = if type(s) == "table" then s.boosts else nil
 		weekend.Visible = type(boosts) == "table" and boosts.weekend == true
 		local lines = CartaoJogador.perkLines(if type(s) == "table" then s.perks else nil)
@@ -434,13 +425,8 @@ function CartaoJogador.lobby(parent: Instance, x: number, y: number, w: number):
 				r[2].Text = ln[2]
 			end
 		end
-		local rec = if type(s) == "table" then s.recruit else nil
-		local want = type(rec) == "table" and rec.offer == true and rec.owned ~= true and not dismissed
-		offer.Visible = want
-		if want and visible and not seenSent then
-			seenSent = true -- uma vez por sessão no lobby: o servidor conta as partidas
-			CampanhaCliente.action("recruit_seen")
-		end
+		-- a oferta não aparece mais na mesa (lote 8); o painel fica escondido
+		offer.Visible = false
 	end
 	CampanhaCliente.Changed:Connect(function(s: any)
 		paint(s)
@@ -459,7 +445,7 @@ function CartaoJogador.lobby(parent: Instance, x: number, y: number, w: number):
 			col.Visible = on
 			if on then
 				paint(CampanhaCliente.get())
-				UiKit.enter({ placa.frame, missions.button, pass.button }, 10, 0.04)
+				UiKit.enter({ placa.frame, missions.button }, 10, 0.04)
 			end
 		end,
 	}

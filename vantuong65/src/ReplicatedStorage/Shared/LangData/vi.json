@@ -2544,5 +2544,16 @@
  "Segure LT para mirar e aperte RT para atirar: a bala vai para onde a alça da arma aponta. Recarregue quando as balas acabarem.": "Giữ LT để ngắm và bấm RT để bắn: viên đạn bay theo hướng thước ngắm của súng. Hết đạn thì nạp đạn.",
  "Toque em AGACHAR para abaixar; segure para deitar. Abaixado ou deitado, você é um alvo menor e erra menos.": "Chạm CÚI để cúi xuống; giữ để nằm. Khi ngồi hoặc nằm, bạn là mục tiêu nhỏ hơn và bắn chính xác hơn.",
  "Toque em MAPA, no alto à esquerda, para ver os objetivos e o seu squad. Toque em COMUNICAR para marcar o inimigo.": "Chạm BẢN ĐỒ, góc trên bên trái, để xem mục tiêu và tiểu đội của bạn. Chạm LIÊN LẠC để đánh dấu địch.",
- "Toque em MIRA e depois em FOGO: a bala vai para onde a alça da arma aponta. Quando as balas acabam, o botão RECARGA aparece.": "Chạm NGẮM rồi chạm BẮN: viên đạn bay theo hướng thước ngắm của súng. Khi hết đạn, nút NẠP ĐẠN hiện ra."
+ "Toque em MIRA e depois em FOGO: a bala vai para onde a alça da arma aponta. Quando as balas acabam, o botão RECARGA aparece.": "Chạm NGẮM rồi chạm BẮN: viên đạn bay theo hướng thước ngắm của súng. Khi hết đạn, nút NẠP ĐẠN hiện ra.",
+ "COMO PAGAR": "CÁCH TRẢ",
+ "Campanha": "Chiến dịch",
+ "Menu principal (loja, passe e tutorial)": "Menu chính (cửa hàng, thẻ chiến dịch và hướng dẫn)",
+ "Pagar %d Robux": "Trả %d Robux",
+ "Pagar %s": "Trả %s",
+ "Pagar com Robux": "Trả bằng Robux",
+ "Pagar com créditos": "Trả bằng tín dụng",
+ "RENASCER AQUI": "HỒI SINH TẠI ĐÂY",
+ "Usar o guardado": "Dùng lượt đã lưu",
+ "aqui não dá: escolha outro ponto": "không được ở đây: chọn điểm khác",
+ "créditos ou Robux": "tín dụng hoặc Robux"
 }

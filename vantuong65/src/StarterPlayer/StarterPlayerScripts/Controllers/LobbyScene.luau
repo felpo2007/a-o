@@ -653,6 +653,12 @@ local function addObj(
 		open = nil,
 		confirmTouch = false,
 	}
+	-- lote 8 (D-120, dono: "a loja não deve aparecer no menu do jogo"): a caixa de munição fica na mesa
+	-- só de enfeite; sem a peça de clique nem o rótulo "INTENDÊNCIA (LOJA)"
+	if id == "shop" then
+		hit.CanQuery = false
+		return o
+	end
 	table.insert(sc.objects, o)
 	sc.byHit[hit] = o
 	return o

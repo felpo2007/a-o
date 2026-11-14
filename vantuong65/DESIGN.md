@@ -4186,3 +4186,51 @@ a textura (SurfaceAppearance); fica para a análise do lote 12.
 
 **Não testado:** a RPD e a M60 em 3ª pessoa com a mão nova (o dono jogava na sessão do Studio do
 teste); controle e celular mirando.
+
+## D-120 — Lote 8: tela de baixa com quatro botões; loja e passe fora do menu do jogo (v52, 2026-11-14)
+
+Pedidos do dono:
+- "na tela de morte deixe só o botão de renascer aqui e depois aparecem duas opções de pagar com
+  dinheiro do jogo ou Robux, e o Robux vai estar colorido; o outro botão vai ser o de escolher outro
+  ponto, menu e nascer com veículo. Não quero nenhum outro botão além desses";
+- o RENASCER grátis grande sai também (resposta do dono);
+- "o passe e a loja não devem aparecer no menu": no menu do jogo (lado e squad); no menu principal
+  continuam (resposta do dono).
+
+**Tela de baixa** (`Controllers/CasualtyScreen`):
+- **RENASCER AQUI**, grande, em cima. No próprio botão, uma linha: o motivo da regra ("inimigo a
+  menos de 100 m"), a espera ou "créditos ou Robux". Com regra, fica apagado.
+- O clique abre **COMO PAGAR**, com duas opções:
+  - "Pagar $ 60", em âmbar ("Usar o guardado" se já pagou em Robux);
+  - "Pagar 25 Robux", em verde vivo com a borda dourada que pulsa.
+- **RENASCER COM VEÍCULO** e **ESCOLHER OUTRO PONTO**. A carta é o renascer de graça, no ponto que o
+  jogador escolher.
+- **MENU**: a mesa.
+- Saíram o RENASCER grátis (jogar agora), LOJA, PASSE e MISSÕES.
+- Controle: A renascer aqui, X créditos, Y Robux, RT veículo, LT carta, B menu.
+- Teclado: Enter renascer aqui, V veículo, M carta, Backspace menu.
+
+**Loja e passe fora do menu do jogo:**
+- mesa: saiu a aba INTENDÊNCIA (loja e armário). A caixa de munição da mesa 3D ficou só de enfeite:
+  sem o clique e sem o rótulo "INTENDÊNCIA (LOJA)";
+- cartão do jogador na mesa: saíram o PASSE DE CAMPANHA e a oferta do Pacote de Recruta ("VER NA
+  LOJA");
+- menu do jogo: a 3ª aba virou **Campanha** (ficha, missões e cartão). No lugar da loja, do armário
+  e do passe ficou "Menu principal (loja, passe e tutorial)", que reabre o menu principal (Bus
+  `menu_principal_open`). Em campo, o JOGAR de lá só fecha o menu (o Jogar agora não faz nada com o
+  soldado vivo);
+- a tecla L continua abrindo a loja em campo: é um atalho, não um item de menu.
+
+**Conferido no Studio:**
+- a tela de baixa mostra só os quatro botões;
+- o RENASCER AQUI abre "Pagar $ 60" e "Pagar 25 Robux";
+- numa baixa de verdade, o botão fica apagado com "inimigo a menos de 100 m";
+- o MENU abre a mesa sem a aba INTENDÊNCIA e sem o PASSE.
+
+**Achado na mesa ("conserte a tela do menu do jogo para selecionar o lado"):**
+- a câmera da mesa 3D tira os objetos do quadro em tela estreita;
+- no Studio (proporção 1,19), a mesa do VC caiu fora da tela (x = −130 px) e a câmera ficou a 1,3 m
+  dela, em vez dos ~2,5 m do plano. O fundo vira um borrão marrom, sem nenhum objeto da mesa;
+- falta decidir com o dono se a câmera da mesa é consertada ou se a mesa vira uma tela 2D simples.
+
+**Não testado:** a compra em Robux de verdade, controle e celular na tela de baixa.

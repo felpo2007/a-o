@@ -196,7 +196,9 @@ do
 end
 
 -- ===== estado =====
-local BASE_TABS = { "Configurações", "Squad e papel", "Loja" }
+-- lote 8 (D-120, dono: "o passe e a loja não devem aparecer no menu do jogo"): a 3ª aba virou
+-- Campanha (ficha, missões e cartão); loja e passe ficam no menu principal, que abre daqui
+local BASE_TABS = { "Configurações", "Squad e papel", "Campanha" }
 local SUBS = { "Controle", "Mira", "Mouse/teclado", "Toque", "Gráficos", "Som", "Vibração", "Acessib.", "Botões" }
 -- servidor privado: só o dono vê a aba "Servidor" (modo e horário; o servidor revalida)
 local MODES = { "Warfare", "Offensive", "Skirmish" }
@@ -989,21 +991,12 @@ local function renderShop()
 	else
 		note("Recebendo a ficha do servidor…")
 	end
-	section("Abrir")
-	action("l:open", "Loja e armário (skins, passes, apoio)", function()
-		Bus.fire("menu_close_request")
-		Bus.fire("shop_open", "loja")
-	end)
-	action("l:quarter", "Intendência (equipamento de campo)", function()
-		Bus.fire("menu_close_request")
-		Bus.fire("shop_open", "intendencia")
-	end)
-	note("Atalho: tecla L abre e fecha a loja.")
-	-- campanha (2026-11-12): passe, missões e cartão abrem por cima (o menu fecha antes)
+	-- campanha (2026-11-12): missões e cartão abrem por cima (o menu fecha antes). Lote 8: loja e passe
+	-- saíram daqui; o menu principal (que tem LOJA e PASSE) abre de novo por este botão
 	section("Campanha")
-	action("l:pass", "Passe de Campanha", function()
+	action("l:main", "Menu principal (loja, passe e tutorial)", function()
 		Bus.fire("menu_close_request")
-		Bus.fire("passe_open")
+		Bus.fire("menu_principal_open")
 	end)
 	action("l:missions", "Missões do dia e da semana", function()
 		Bus.fire("menu_close_request")

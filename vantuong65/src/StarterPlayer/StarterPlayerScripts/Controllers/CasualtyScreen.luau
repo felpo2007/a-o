@@ -9,22 +9,23 @@
 --   que coloque a opção de spawnar com o carro aqui"; "faça o jogo mais fast paced"): fundo vermelho
 --   escuro; à direita o próprio soldado CAÍDO no chão, com a arma largada (CenaBaixa); à esquerda,
 --   de cima para baixo, quem era, BAIXA, a causa numa linha, três números (abates / assistências /
---   tempo) e os ganhos (só se houver). Embaixo, os botões por ordem de uso:
---     1. RENASCER (cheio, enorme): o jogar agora (Controllers/JogarAgora): o squad e o último ponto,
---        com a contagem e a barra no próprio botão; entra sozinho quando a espera zera. A linha de
---        baixo diz onde ("Alfa · Fuzileiro · Reunião — Cemitério");
---     2. RENASCER ONDE CAIU (v44; era "NO MESMO LUGAR"): créditos (âmbar) ou Robux (verde), regras e
---        cobrança no servidor
---        (Progression.inPlaceCheck/inPlacePay pelo SpawnService), com o motivo quando bloqueado;
+--   tempo) e os ganhos (só se houver). Embaixo, os botões (lote 8, D-120, pedido do dono: "deixe só o
+--   botão de renascer aqui e depois aparecem duas opções de pagar com dinheiro do jogo ou Robux, e o
+--   Robux vai estar colorido; os outros são escolher outro ponto, menu e nascer com veículo. Não quero
+--   nenhum outro botão além desses"):
+--     1. RENASCER AQUI (cheio, grande): abre a linha de pagar; no próprio botão, o motivo da regra
+--        (inimigo perto, QG...) ou a espera;
+--     2. a linha de pagar: créditos (âmbar; "Usar o guardado" se já pago em Robux) ou Robux (verde vivo
+--        com a borda dourada que pulsa). Regras e cobrança no servidor (Progression.inPlaceCheck/
+--        inPlacePay pelo SpawnService);
 --     3. RENASCER COM VEÍCULO (abre as viaturas do lado em créditos ou Robux, D-103: arma o pedido e
---        renasce num ponto onde ele sai) e ESCOLHER OUTRO PONTO (a carta de inserção, como antes);
---   v44 (pedido do dono: "esse bot caído está horrível; mais intuitivo"): retrato de pé em sépia
---   (CenaBaixa.RETRATO), rótulos que dizem o que acontece e "Você volta em: …" embaixo do RENASCER.
---     4. fileira fina: MESA, LOJA, PASSE, MISSÕES.
+--        renasce num ponto onde ele sai) e ESCOLHER OUTRO PONTO (a carta de inserção: o renascer de
+--        graça, no ponto que escolher);
+--     4. MENU (a mesa: lado, squad, papel).
+--   Saíram o RENASCER grátis (jogar agora), LOJA, PASSE e MISSÕES.
 --   Cores de compra do UiKit.PAGAR: Robux verde, créditos âmbar, grátis/pronto oliva, apagado escuro.
---   Controle: A renascer, X aqui com créditos, Y aqui com Robux, RT veículo, LT carta, B mesa, RB
---   loja, LB missões, direcional para cima passe. Teclado: Enter/Espaço renascer, V veículo, M carta,
---   L loja, Backspace/Esc mesa. Mouse e toque: os botões.
+--   Controle: A renascer aqui, X créditos, Y Robux, RT veículo, LT carta, B menu. Teclado: Enter/Espaço
+--   renascer aqui, V veículo, M carta, Backspace/Esc menu. Mouse e toque: os botões.
 --   A causa: tiro (arma pelo som, rumo e distância), explosão, arma branca (faca, facão, baioneta,
 --   coronhada: Combat_Melee com este corpo como alvo) ou "Causa desconhecida".
 -- De onde vem a causa, sem mexer no servidor: o Combat_Hit (origem do tiro que acertou) casa com o
@@ -53,7 +54,6 @@ local Roles = require(ReplicatedStorage.Shared.Roles) :: any
 local Vehicles = require(ReplicatedStorage.Shared.Vehicles) :: any
 local Weapons = require(ReplicatedStorage.Shared.Weapons) :: any
 local Acabamento = require(ReplicatedFirst:WaitForChild("Acabamento"))
-local Bus = require(script.Parent.Bus)
 local CenaBaixa = require(script.Parent.CenaBaixa)
 local DeployScreen = require(script.Parent.DeployScreen)
 local Input = require(script.Parent.Input)
@@ -115,7 +115,7 @@ local S = {
 	vehWant = nil :: { spec: string, pay: string, at: number }?,
 	vehOpen = false,
 	vehMsg = nil :: string?,
-	waitMax = 0, -- a maior espera vista nesta baixa (a barra do RENASCER)
+	hereOpen = false, -- a linha de pagar do RENASCER AQUI aberta (lote 8)
 }
 
 -- ===== de onde veio =====
@@ -448,31 +448,19 @@ do
 		a.button.Position = UDim2.fromScale(if right then 1 else 0, 0)
 		a.button.Size = UDim2.new(0.5, -GAP // 2, 1, 0)
 	end
-	-- 1. RENASCER: o jogar agora (squad e último ponto), com a espera e a barra no botão
+	-- 1. RENASCER AQUI (lote 8, pedido do dono: "na tela de morte deixe só o botão de renascer aqui e
+	-- depois aparecem duas opções de pagar com dinheiro do jogo ou Robux, e o Robux vai estar
+	-- colorido"): o botão grande abre a linha de pagar; o motivo de não poder vai no próprio botão
 	local RH = px(72, 96)
-	local respawn = UiKit.action(buttons, "RENASCER", "primary", function()
-		actions.respawn()
+	local respawn = UiKit.action(buttons, "RENASCER AQUI", "primary", function()
+		actions.hereMenu()
 	end, { h = RH })
 	respawn.button.LayoutOrder = 1
-	respawn.sub.TextSize = UiKit.text(px(26, 36))
-	respawn.sub.FontFace = F.TITLE
-	local rbar = Instance.new("Frame")
-	rbar.Name = "Espera"
-	rbar.AnchorPoint = Vector2.new(0, 1)
-	rbar.Position = UDim2.fromScale(0, 1)
-	rbar.Size = UDim2.new(0, 0, 0, px(5, 7))
-	rbar.BackgroundColor3 = V.TEXT
-	rbar.BackgroundTransparency = 0.2
-	rbar.BorderSizePixel = 0
-	rbar.Parent = respawn.button
-	local dest = UiKit.text2(buttons, "", px(15, 22), V.DIM, F.BODY)
-	dest.LayoutOrder = 2
-	dest.Size = UDim2.new(1, 0, 0, px(20, 30))
-	dest.TextTruncate = Enum.TextTruncate.AtEnd
-	-- 2. no mesmo lugar: créditos e Robux, com o motivo à direita
+	respawn.sub.TextSize = UiKit.text(px(20, 28))
+	respawn.sub.FontFace = F.TITLE_MED
+	-- 2. as duas formas de pagar (só depois do RENASCER AQUI), com o motivo à direita
 	local hereHead = pair(3, px(20, 30))
-	-- v44 (pedido do dono: "mais intuitivo"): rótulos que dizem o que acontece
-	local hereKick = UiKit.kicker(hereHead, "RENASCER ONDE CAIU", px(15, 22), V.DIM)
+	local hereKick = UiKit.kicker(hereHead, "COMO PAGAR", px(15, 22), V.DIM)
 	hereKick.Size = UDim2.fromScale(0.45, 1)
 	local hereWhy = UiKit.text2(hereHead, "", px(15, 22), V.KHAKI, F.BODY)
 	hereWhy.AnchorPoint = Vector2.new(1, 0)
@@ -482,11 +470,11 @@ do
 	hereWhy.TextTruncate = Enum.TextTruncate.AtEnd
 	local BH = px(46, 64)
 	local hereRow = pair(4, BH)
-	local hereCi = UiKit.action(hereRow, "Renascer aqui · créditos", "ci", function()
+	local hereCi = UiKit.action(hereRow, "Pagar com créditos", "ci", function()
 		actions.here("ci")
 	end, { h = BH })
 	half(hereCi, false)
-	local hereRbx = UiKit.action(hereRow, "Renascer aqui · Robux", "robux", function()
+	local hereRbx = UiKit.action(hereRow, "Pagar com Robux", "robux", function()
 		actions.here("robux")
 	end, { h = BH })
 	half(hereRbx, true)
@@ -565,28 +553,13 @@ do
 		actions.vehicleMenu()
 	end, { h = px(44, 60) })
 	vehBack.button.LayoutOrder = 9
-	-- 4. a fileira fina: mesa, loja, passe e missões
-	local LH = px(36, 50)
-	local lowRow = pair(8, LH)
-	UiKit.list(lowRow, true, GAP)
-	local function small(text: string, order: number, fn: () -> ()): any
-		local a = UiKit.action(lowRow, text, "secondary", fn, { h = LH })
-		a.button.LayoutOrder = order
-		a.button.Size = UDim2.new(0.25, -GAP * 3 // 4, 1, 0)
-		return a
-	end
-	local desk = small("MENU", 1, function()
+	-- 4. MENU (a mesa: lado, squad, papel). Lote 8: saíram LOJA, PASSE e MISSÕES ("não quero nenhum
+	-- outro botão além desses")
+	local LH = px(40, 56)
+	local desk = UiKit.action(buttons, "MENU", "secondary", function()
 		actions.desk()
-	end)
-	local shop = small("LOJA", 2, function()
-		actions.shop()
-	end)
-	local pass = small("PASSE", 3, function()
-		actions.pass()
-	end)
-	local missions = small("MISSÕES", 4, function()
-		actions.missions()
-	end)
+	end, { h = LH })
+	desk.button.LayoutOrder = 8
 
 	K = {
 		bg = bg,
@@ -605,8 +578,6 @@ do
 		pool = pool,
 		buttons = buttons,
 		respawn = respawn,
-		rbar = rbar,
-		dest = dest,
 		hereHead = hereHead,
 		hereWhy = hereWhy,
 		hereRow = hereRow,
@@ -622,9 +593,6 @@ do
 		vehBack = vehBack,
 		vehOpts = {} :: { { spec: string, pay: string } },
 		desk = desk,
-		shop = shop,
-		pass = pass,
-		missions = missions,
 		actions = actions,
 		ciMethod = "ci",
 	}
@@ -1057,38 +1025,19 @@ local function paintVehicles(armed: boolean)
 	setText(K.vehWhy, status)
 end
 
--- botões, a espera do RENASCER e o porquê do "no mesmo lugar" (4 vezes por segundo, tela aberta)
+-- botões e o porquê do RENASCER AQUI (4 vezes por segundo, tela aberta)
 local function paintButtons()
 	local armed = os.clock() >= S.skipFrom
 	local vehicleArmed = S.veh.state == "armed"
-	-- 1. renascer: a espera do ponto do jogar agora e a barra que enche
-	local e, w = JogarAgora.preview(vehicleArmed)
-	if w then
-		S.waitMax = math.max(S.waitMax, w)
-	end
-	local sub = if w == nil then "" elseif w > 0.5 then string.format("%d s", math.ceil(w)) else "PRONTO"
-	if K.respawn.sub.Text ~= sub then
-		K.respawn.sub.Text = sub
-	end
-	local fill = if w == nil then 0 elseif S.waitMax > 0 then 1 - math.clamp(w / S.waitMax, 0, 1) else 1
-	K.rbar.Size = UDim2.new(fill, 0, 0, K.rbar.Size.Y.Offset)
-	-- v44 ("mais intuitivo"): diz onde o RENASCER põe o soldado
-	setText(
-		K.dest,
-		if e or S.dev
-			then string.format("Você volta em: %s", JogarAgora.summary(vehicleArmed))
-			else "Você volta com o squad, no último ponto"
-	)
-	K.respawn.enabled(armed)
 	K.map.enabled(armed)
 	K.vehicle.enabled(armed)
 	K.desk.enabled(armed)
-	K.shop.enabled(armed)
-	-- 2/3. o painel das viaturas fica no lugar do "mesmo lugar" e da linha do veículo
+	-- o painel das viaturas fica no lugar do RENASCER AQUI, da linha de pagar e da linha do veículo
 	local open = S.vehOpen
 	K.vehHead.Visible = open
 	K.vehGrid.Visible = open
 	K.moreRow.Visible = not open
+	K.respawn.button.Visible = not open
 	if open then
 		K.hereHead.Visible = false
 		K.hereRow.Visible = false
@@ -1105,11 +1054,16 @@ local function paintButtons()
 			else "RENASCER COM VEÍCULO"
 	)
 	local inplace = inplaceEntry()
-	K.hereHead.Visible = inplace ~= nil
-	K.hereRow.Visible = inplace ~= nil
 	if not inplace then
+		K.respawn.enabled(false)
+		setText(K.respawn.sub, "aqui não dá: escolha outro ponto")
+		K.hereHead.Visible = false
+		K.hereRow.Visible = false
 		return
 	end
+	-- a linha de pagar só aparece depois do RENASCER AQUI
+	K.hereHead.Visible = S.hereOpen
+	K.hereRow.Visible = S.hereOpen
 	local wait = math.max(0, (tonumber(inplace.wait) or 0) - (if inplace.dev then 0 else os.clock() - S.spawnsAt))
 	local why: string? = if type(inplace.why) == "string" then inplace.why else nil
 	-- bloqueio só de pagamento ("60 $: faltam 20") ou de regra (inimigo perto, QG, limite...)
@@ -1123,20 +1077,22 @@ local function paintButtons()
 	local raw = string.match(tostring(inplace.name or ""), PRICE_PAT) or string.match(why or "", PRICE_PAT)
 	local price: number? = if raw then tonumber(raw :: any) else nil
 	local ready = armed and not rule and wait <= 0 and not SpawnTransition.busy() and not S.bought
+	-- o botão grande: abre a linha de pagar; com regra (inimigo perto, QG...) fica apagado com o motivo
+	K.respawn.enabled(armed and not rule)
 	if stored >= 1 then
 		K.ciMethod = "credit" -- já pago (comprado em Robux antes): usa o guardado, sem cobrar
 		K.hereCi.setKind("free")
-		setLabel(K.hereCi, "Renascer aqui · guardado")
+		setLabel(K.hereCi, "Usar o guardado")
 		K.hereCi.enabled(ready)
 	elseif price then
 		K.ciMethod = "ci"
 		K.hereCi.setKind("ci")
-		setLabel(K.hereCi, string.format("Renascer aqui · %s", Progression.money(price)))
+		setLabel(K.hereCi, string.format("Pagar %s", Progression.money(price)))
 		K.hereCi.enabled(ready and credits >= price)
 	else
 		K.ciMethod = "ci"
 		K.hereCi.setKind("ci")
-		setLabel(K.hereCi, "Renascer aqui · créditos")
+		setLabel(K.hereCi, "Pagar com créditos")
 		K.hereCi.enabled(false)
 	end
 	-- Robux só com o produto criado (ID 0: o botão de créditos ocupa a linha inteira)
@@ -1144,7 +1100,7 @@ local function paintButtons()
 	K.hereRbx.button.Visible = rbxOn
 	K.hereCi.button.Size = if rbxOn then UDim2.new(0.5, -px(8, 12) // 2, 1, 0) else UDim2.fromScale(1, 1)
 	local rp = S.robuxPrice
-	setLabel(K.hereRbx, if rp then string.format("Renascer aqui · %d Robux", rp) else "Renascer aqui · Robux")
+	setLabel(K.hereRbx, if rp then string.format("Pagar %d Robux", rp) else "Pagar com Robux")
 	K.hereRbx.enabled(ready and rbxOn and S.buying == nil)
 	local status: string
 	if S.buying then
@@ -1161,6 +1117,12 @@ local function paintButtons()
 		status = ""
 	end
 	setText(K.hereWhy, status)
+	-- no botão grande: o motivo da regra, a espera ou "créditos ou Robux"
+	local sub = if rule and why
+		then why
+		elseif wait > 0 then string.format("pronto em %d s", math.ceil(wait))
+		else "créditos ou Robux"
+	setText(K.respawn.sub, sub)
 end
 
 -- botão do controle de cada ação; depois do UiKit, que limpa
@@ -1175,9 +1137,6 @@ local function paintGlyphs()
 	g(K.vehicle, Enum.KeyCode.ButtonR2)
 	g(K.map, Enum.KeyCode.ButtonL2)
 	g(K.desk, Enum.KeyCode.ButtonB)
-	g(K.shop, Enum.KeyCode.ButtonR1)
-	g(K.pass, Enum.KeyCode.DPadUp)
-	g(K.missions, Enum.KeyCode.ButtonL1)
 end
 Input.DeviceChanged:Connect(function()
 	task.defer(paintGlyphs)
@@ -1244,8 +1203,20 @@ respawnQuick = function(vehicle: boolean)
 	closeDeath(false)
 	JogarAgora.start({ vehicle = vehicle })
 end
-K.actions.respawn = function()
-	respawnQuick(S.veh.state == "armed")
+-- RENASCER AQUI: abre (ou fecha) as duas formas de pagar; o foco do controle vai para a de créditos
+local hereToggledAt = 0
+K.actions.hereMenu = function()
+	if not (canAct() and K.respawn.isEnabled()) then
+		return
+	end
+	-- Enter com o botão em foco chega duas vezes (o clique do foco e a tecla): só a primeira vale
+	if os.clock() - hereToggledAt < 0.3 then
+		return
+	end
+	hereToggledAt = os.clock()
+	S.hereOpen = not S.hereOpen
+	paintButtons()
+	focusOn(if S.hereOpen then K.hereCi.button else K.respawn.button)
 end
 -- a carta de inserção, para escolher o ponto (como antes)
 K.actions.map = function()
@@ -1266,31 +1237,7 @@ K.actions.desk = function()
 	end
 	closeDeath(true)
 end
--- atalho para a loja: a tela de baixa sai antes (nada de menu aberto por baixo da loja); no lobby
--- a câmera vai para a caixa de munição (painel "shop" da mesa), e a loja abre na aba da loja
-K.actions.shop = function()
-	if not canAct() then
-		return
-	end
-	local dev = S.dev
-	closeDeath(true)
-	if not dev then
-		DeployScreen.open("shop")
-	end
-	Bus.fire("shop_open", "loja")
-end
--- o passe e as missões ficam por cima da tela de baixa (pilha do UiKit): fechar volta aqui
-K.actions.pass = function()
-	if canAct() then
-		Bus.fire("passe_open")
-	end
-end
-K.actions.missions = function()
-	if canAct() then
-		Bus.fire("missoes_open")
-	end
-end
--- abre e fecha as viaturas (no lugar do "mesmo lugar")
+-- abre e fecha as viaturas (no lugar do RENASCER AQUI)
 K.actions.vehicleMenu = function()
 	if not canAct() then
 		return
@@ -1441,7 +1388,7 @@ local function showDeath(cause: Casualty.Cause?, _where: Vector3?, note: string?
 	end
 	S.deathCard = true
 	S.vehOpen, S.vehWant, S.vehMsg = false, nil, nil
-	S.waitMax = 0
+	S.hereOpen = false
 	deathToken += 1
 	local my = deathToken
 	deathGui.Enabled = true
@@ -1520,7 +1467,7 @@ UserInputService.InputBegan:Connect(function(io: InputObject)
 	local k = io.KeyCode
 	if k == Enum.KeyCode.Return or k == Enum.KeyCode.KeypadEnter or k == Enum.KeyCode.Space then
 		if not typing then
-			K.actions.respawn()
+			K.actions.hereMenu()
 		end
 	elseif k == Enum.KeyCode.ButtonX then
 		K.actions.here("ci")
@@ -1530,12 +1477,6 @@ UserInputService.InputBegan:Connect(function(io: InputObject)
 		K.actions.vehicleMenu()
 	elseif k == Enum.KeyCode.ButtonL2 or (k == Enum.KeyCode.M and not typing) then
 		K.actions.map()
-	elseif k == Enum.KeyCode.ButtonR1 or (k == Enum.KeyCode.L and not typing) then
-		K.actions.shop() -- RB no controle; L no teclado (o mesmo atalho da loja em campo)
-	elseif k == Enum.KeyCode.ButtonL1 then
-		K.actions.missions() -- LB: missões
-	elseif k == Enum.KeyCode.DPadUp then
-		K.actions.pass() -- direcional para cima: passe
 	end
 end)
 Input.on("ui_back", "press", function()

@@ -842,6 +842,12 @@ task.spawn(function()
 	end
 end)
 
+-- lote 8 (D-120): o menu do jogo não tem mais loja nem passe; o "Menu principal" de lá abre este de
+-- novo (em campo, o JOGAR só fecha: o Jogar agora não faz nada com o soldado vivo)
+Bus.on("menu_principal_open", function()
+	setOpen(true)
+end)
+
 if RunService:IsStudio() then
 	workspace:GetAttributeChangedSignal("VT65DevTela"):Connect(function()
 		if workspace:GetAttribute("VT65DevTela") == "menu_principal" then

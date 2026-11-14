@@ -938,10 +938,10 @@ local TAB_DEFS: { { id: string, name: string, w: number } } = {
 	{ id = "role", name = "2 · PAPEL", w = 160 },
 	{ id = "insert", name = "3 · INSERÇÃO", w = 168 },
 	{ id = "daily", name = "RECOMPENSA DIÁRIA", w = 226 },
-	{ id = "shop", name = "INTENDÊNCIA", w = 160 },
 	{ id = "faction", name = "TROCAR DE LADO", w = 160 },
 }
-local CYCLE = { "squad", "role", "insert", "daily", "shop" }
+-- lote 8 (D-120): a aba INTENDÊNCIA (loja e armário) saiu da mesa; loja e passe ficam no menu principal
+local CYCLE = { "squad", "role", "insert", "daily" }
 local tabsFrame = Instance.new("Frame")
 tabsFrame.BackgroundTransparency = 1
 tabsFrame.Position = UDim2.fromOffset(40, 84)
@@ -2506,7 +2506,6 @@ local function renderTabs(f: string, st: any)
 	tabs.role.info.Text = roleText
 	tabs.insert.info.Text = insertText
 	tabs.daily.info.Text = dTab
-	tabs.shop.info.Text = "loja e armário"
 	tabs.faction.info.Text = string.format("agora: %s", FACTION[f].short)
 	tabs.desk.info.Text = "visão geral"
 	for _, t in tabs do
@@ -2797,10 +2796,10 @@ function DeployScreen.open(name: string)
 	if name == "role" then
 		previewRole = nil
 	end
-	panel = name
 	if name == "shop" then
-		Bus.fire("shop_open")
+		return -- lote 8: a loja não abre mais pela mesa
 	end
+	panel = name
 	DeployScreen.changed()
 end
 
