@@ -134,6 +134,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
   - a cadência abaixo de 12 fps medida num aparelho lento.
 
 ## v73: lote 28, pistola no quadril e a Type 54 (2026-11-14, D-143)
+- **Publicada** (versão 73 do place, commit 7b6fc5f).
 - **Pistola no quadril:** pose própria, com os braços estendidos. O punho fica a 40 cm do olho (era
   23 cm, colado no rosto, com as mãos cortadas pela borda). As duas mãos ficam no punho.
 - **Type 54:** conferida e sem bug. É preta (aço oxidado) com o punho marrom; a textura carrega na 1ª
