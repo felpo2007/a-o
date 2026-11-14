@@ -1707,5 +1707,12 @@
   "assetType": "Decal",
   "name": "VT65 vc_tiger_pants_v3",
   "description": "VAN TUONG 65 - skin tiger stripe capturado, calça (tools/make_clothing_skins.py)"
+ },
+ {
+  "key": "Sounds.a4_mergulho",
+  "file": "assets/veiculos_sons/a4_mergulho.ogg",
+  "assetType": "Audio",
+  "name": "VT65 a4_mergulho",
+  "description": "VAN TUONG 65 - A-4 em mergulho no ataque aéreo (tools/som_ataque_aereo.py)"
  }
 ]

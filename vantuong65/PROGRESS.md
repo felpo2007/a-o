@@ -84,8 +84,13 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
   com cores vivas.
 - **Lote 17 (v62, D-131): feito.** Quatro uniformes de camuflagem novos: tigrado tadpole e lagarto
   (EUA), áo bà ba marrom e tigrado capturado (VC); com $ do jogo (Robux espera o preço do dono).
-- **Lote 18:** vila menos quadrada e mais espalhada; entrar em todas as casas da vila.
-- **Lote 19:** vegetação com 6 mil triângulos (pedido novo; a D-66 pedia no mínimo 8 mil).
+- Pedidos novos do dono (14/11 à tarde), antes da vila e da vegetação:
+  - **Lote 18 (v63, D-132): feito.** O ataque aéreo cai no objetivo, pega os dois lados e tem o som
+    do A-4 chegando em mergulho.
+  - **Lote 19:** caixas de munição com o dobro do tamanho; na escolha do lado, a bandeira de cada
+    país esticada sobre a mesa, detalhada e com textura; botões em caixas do tamanho deles.
+- **Lote 20:** vila menos quadrada e mais espalhada; entrar em todas as casas da vila.
+- **Lote 21:** vegetação com 6 mil triângulos (pedido novo; a D-66 pedia no mínimo 8 mil).
 - "jogo de poder roblox": engano (resposta do dono), nada a fazer.
 
 - **Próximos (ideias da análise, esperando o dono):**
@@ -95,6 +100,21 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
   - base do VC sob a mata; nomes do equipamento da Intendência sem tradução; Type 54 em 3ª pessoa;
   - a pá do autoteste na 1ª rodada de cada sessão;
   - as teclas agem por baixo da tela de carregamento (a pá cavou durante o carregamento, D-129).
+
+## v63: lote 18, ataque aéreo no objetivo, nos dois lados e com som (2026-11-14, D-132)
+- **A publicar.**
+- **Feito:**
+  - o evento "Ataque aéreo (A-4)" cai em cima do objetivo (antes recuava até 80 m dos amigos);
+  - as bombas ferem os dois lados; os dois recebem o alerta; aviso de 10 s;
+  - som novo `a4_mergulho` (`tools/som_ataque_aereo.py`): o A-4 chegando em mergulho, com Doppler,
+    andando pelo céu na reta do avião até passar sobre o objetivo.
+- **Conferido no Studio:** centro a 0,0 m de C; o americano no ponto morreu nas bombas; um boneco
+  do VC no ponto caiu e o americano a 150 m ficou inteiro; o som tocou em sincronia com o relógio
+  do servidor (até 0,06 s).
+- **Testes:** Lune todos ok (eventos com o teste novo); pytest 54; ruff ok; luau-lsp 0 erros;
+  traduções 100%.
+- **Não testado:** o som de ouvido (medido pelo espectro) e num servidor do Roblox; o ataque aéreo
+  do comandante não mudou.
 
 ## v62: lote 17, camuflagens novas (2026-11-14, D-131)
 - **Publicada** como versão 62 do place (build do commit 534080e).

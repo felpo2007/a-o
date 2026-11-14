@@ -322,7 +322,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:1713"
  ],
  "%s retomado no contra-ataque.": [
-  "src/ServerScriptService/Modules/EventosService.luau:913"
+  "src/ServerScriptService/Modules/EventosService.luau:931"
  ],
  "%s sob ataque": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/FrontHud.client.luau:308"
@@ -601,7 +601,7 @@
   "src/ReplicatedStorage/Shared/Explosive.luau:78"
  ],
  "109 armas (mais de 40 na Colina 43). O depósito em si é de design": [
-  "src/ReplicatedStorage/Shared/Eventos.luau:145"
+  "src/ReplicatedStorage/Shared/Eventos.luau:152"
  ],
  "12 ga 2¾ pol. 00 Buck (9 bagos)": [
   "src/ReplicatedStorage/Shared/Weapons.luau:470"
@@ -864,8 +864,8 @@
  "A temporada termina em %d dias.": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:793"
  ],
- "A-4 em ataque sobre %s (%s) em %d s. Fumaça violeta: fique longe.": [
-  "src/ServerScriptService/Modules/EventosService.luau:349"
+ "A-4 em mergulho sobre %s (%s) em %d s! As bombas pegam todo mundo: saia da fumaça violeta.": [
+  "src/ServerScriptService/Modules/EventosService.luau:357"
  ],
  "ABATES": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CasualtyScreen.luau:407"
@@ -1201,7 +1201,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:909"
  ],
  "Apoio naval": [
-  "src/ReplicatedStorage/Shared/Eventos.luau:60",
+  "src/ReplicatedStorage/Shared/Eventos.luau:62",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/EventosVisual.luau:177"
  ],
  "Aqui só visual, apoio e os kits (que também saem jogando). Vantagens: aba própria, com teto.": [
@@ -1281,13 +1281,13 @@
   "src/ReplicatedStorage/Shared/VehicleDrive.luau:112"
  ],
  "Assalto depois do ataque aéreo": [
-  "src/ReplicatedStorage/Shared/Eventos.luau:88"
+  "src/ReplicatedStorage/Shared/Eventos.luau:95"
  ],
  "Assalto depois do morteiro": [
-  "src/ReplicatedStorage/Shared/Eventos.luau:117"
+  "src/ReplicatedStorage/Shared/Eventos.luau:124"
  ],
  "Assalto depois do tiro naval": [
-  "src/ReplicatedStorage/Shared/Eventos.luau:70"
+  "src/ReplicatedStorage/Shared/Eventos.luau:72"
  ],
  "Assinatura": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:930"
@@ -1317,14 +1317,14 @@
   "src/ServerScriptService/Modules/MapLife.luau:416"
  ],
  "Ataque aéreo (A-4)": [
-  "src/ReplicatedStorage/Shared/Eventos.luau:77",
+  "src/ReplicatedStorage/Shared/Eventos.luau:79",
   "src/ReplicatedStorage/Shared/FireSupport.luau:153"
  ],
  "Ataque à LZ": [
-  "src/ReplicatedStorage/Shared/Eventos.luau:101"
+  "src/ReplicatedStorage/Shared/Eventos.luau:108"
  ],
  "Atendido no resgate": [
-  "src/ReplicatedStorage/Shared/Eventos.luau:129"
+  "src/ReplicatedStorage/Shared/Eventos.luau:136"
  ],
  "Atenção": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Toast.luau:95"
@@ -1364,8 +1364,11 @@
  "Aviso": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Toast.luau:74"
  ],
+ "Avião em mergulho: ataque aéreo chegando": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/AudioController.client.luau:734"
+ ],
  "Aviões! Bombas em %s (%s) em %d s. Saia da área marcada.": [
-  "src/ServerScriptService/Modules/EventosService.luau:356"
+  "src/ServerScriptService/Modules/EventosService.luau:368"
  ],
  "B Mata fechada": [
   "src/ReplicatedStorage/Shared/MapConfig.luau:21"
@@ -1524,7 +1527,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/LobbyScene.luau:746"
  ],
  "Barragem terminou: tome %s agora (%d s).": [
-  "src/ServerScriptService/Modules/EventosService.luau:415"
+  "src/ServerScriptService/Modules/EventosService.luau:433"
  ],
  "Barrel": [
   "src/ReplicatedStorage/Shared/GunModel.luau:133"
@@ -1967,13 +1970,13 @@
   "src/ReplicatedStorage/Shared/Medalhas.luau:42"
  ],
  "Carga desarmada. Segure o depósito.": [
-  "src/ServerScriptService/Modules/EventosService.luau:826"
+  "src/ServerScriptService/Modules/EventosService.luau:844"
  ],
  "Carga no depósito %s! Desarme ou afaste-se: %d s.": [
-  "src/ServerScriptService/Modules/EventosService.luau:814"
+  "src/ServerScriptService/Modules/EventosService.luau:832"
  ],
  "Carga plantada no depósito: explode em %d s. Afaste-se.": [
-  "src/ServerScriptService/Modules/EventosService.luau:807"
+  "src/ServerScriptService/Modules/EventosService.luau:825"
  ],
  "Carona": [
   "src/ReplicatedStorage/Shared/Vehicles.luau:251"
@@ -2242,13 +2245,13 @@
   "src/ReplicatedStorage/Shared/Comms.luau:13"
  ],
  "Contra-ataque": [
-  "src/ReplicatedStorage/Shared/Eventos.luau:149"
+  "src/ReplicatedStorage/Shared/Eventos.luau:156"
  ],
  "Contra-ataque contido em %s.": [
-  "src/ServerScriptService/Modules/EventosService.luau:920"
+  "src/ServerScriptService/Modules/EventosService.luau:938"
  ],
  "Contra-ataque: retome %s em %d s (recompensa de retomada).": [
-  "src/ServerScriptService/Modules/EventosService.luau:894"
+  "src/ServerScriptService/Modules/EventosService.luau:912"
  ],
  "Controle": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:202",
@@ -2496,7 +2499,7 @@
   "src/ServerScriptService/Modules/PostureService.luau:65"
  ],
  "Defenda o depósito de munição em %s por %d s.": [
-  "src/ServerScriptService/Modules/EventosService.luau:838"
+  "src/ServerScriptService/Modules/EventosService.luau:856"
  ],
  "Defender": [
   "src/ReplicatedStorage/Shared/Comms.luau:37"
@@ -2522,24 +2525,24 @@
   "src/ReplicatedStorage/Shared/Roles.luau:47"
  ],
  "Depósito de munição do VC": [
-  "src/ReplicatedStorage/Shared/Eventos.luau:136",
-  "src/ServerScriptService/Modules/EventosService.luau:779",
+  "src/ReplicatedStorage/Shared/Eventos.luau:143",
+  "src/ServerScriptService/Modules/EventosService.luau:797",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/EventosVisual.luau:179"
  ],
  "Depósito de munição do VC achado em %s: plante a carga (segure a interação).": [
-  "src/ServerScriptService/Modules/EventosService.luau:834"
+  "src/ServerScriptService/Modules/EventosService.luau:852"
  ],
  "Depósito defendido": [
-  "src/ReplicatedStorage/Shared/Eventos.luau:142"
+  "src/ReplicatedStorage/Shared/Eventos.luau:149"
  ],
  "Depósito defendido: +60 de suprimento para o time.": [
-  "src/ServerScriptService/Modules/EventosService.luau:868"
+  "src/ServerScriptService/Modules/EventosService.luau:886"
  ],
  "Depósito do VC destruído": [
-  "src/ReplicatedStorage/Shared/Eventos.luau:143"
+  "src/ReplicatedStorage/Shared/Eventos.luau:150"
  ],
  "Depósito do VC destruído.": [
-  "src/ServerScriptService/Modules/EventosService.luau:859"
+  "src/ServerScriptService/Modules/EventosService.luau:877"
  ],
  "Derrota": [
   "src/ReplicatedStorage/Shared/Progression.luau:183"
@@ -2551,17 +2554,17 @@
   "src/ServerScriptService/Modules/TrapService.luau:58"
  ],
  "Desarmar carga": [
-  "src/ServerScriptService/Modules/EventosService.luau:799"
+  "src/ServerScriptService/Modules/EventosService.luau:817"
  ],
  "Desembarcando…": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/SpawnTransition.luau:663",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/SpawnTransition.luau:721"
  ],
  "Design: o artigo não descreve contra-ataque formal; o mais perto é o socorro à coluna de": [
-  "src/ReplicatedStorage/Shared/Eventos.luau:156"
+  "src/ReplicatedStorage/Shared/Eventos.luau:163"
  ],
  "Design: o artigo não descreve contra-ataque formal; o mais perto é o socorro à coluna de ": [
-  "src/ReplicatedStorage/Shared/Eventos.luau:156"
+  "src/ReplicatedStorage/Shared/Eventos.luau:163"
  ],
  "Desistindo…": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CasualtyScreen.luau:771"
@@ -2902,7 +2905,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:856"
  ],
  "Escolta de ferido": [
-  "src/ReplicatedStorage/Shared/Eventos.luau:130"
+  "src/ReplicatedStorage/Shared/Eventos.luau:137"
  ],
  "Escopeta 12": [
   "src/ReplicatedStorage/Shared/Weapons.luau:537"
@@ -3434,7 +3437,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:202"
  ],
  "Galveston e Orleck vão bater em %s (%s) em %d s. Fique fora da fumaça vermelha e assalte depois.": [
-  "src/ServerScriptService/Modules/EventosService.luau:329"
+  "src/ServerScriptService/Modules/EventosService.luau:335"
  ],
  "Gamepad": [
   "src/ReplicatedFirst/Idioma.luau:158",
@@ -3593,7 +3596,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehiclePrompt.client.luau:32"
  ],
  "Helicópteros pousando na LZ %s! Ataque a LZ antes que o reforço avance.": [
-  "src/ServerScriptService/Modules/EventosService.luau:563"
+  "src/ServerScriptService/Modules/EventosService.luau:581"
  ],
  "Herói de Starlite": [
   "src/ReplicatedStorage/Shared/Temporada.luau:65"
@@ -3706,11 +3709,11 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:2179"
  ],
  "Inserção de helicóptero": [
-  "src/ReplicatedStorage/Shared/Eventos.luau:95",
+  "src/ReplicatedStorage/Shared/Eventos.luau:102",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/EventosVisual.luau:180"
  ],
  "Inserção pela LZ": [
-  "src/ReplicatedStorage/Shared/Eventos.luau:100"
+  "src/ReplicatedStorage/Shared/Eventos.luau:107"
  ],
  "Inserção recusada pelo comando (o ponto mudou?). Escolha outro.": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/SpawnTransition.luau:655"
@@ -3932,7 +3935,7 @@
   "src/ReplicatedFirst/LoadingScreen.client.luau:247"
  ],
  "LZ — inserção (%s)": [
-  "src/ServerScriptService/Modules/EventosService.luau:1081"
+  "src/ServerScriptService/Modules/EventosService.luau:1099"
  ],
  "Lado": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:2187"
@@ -4259,7 +4262,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaoJogador.luau:121"
  ],
  "Medevac: UH-34D pousado em %s por %d s. Feridos a até %d m são atendidos; caídos, evacuados.": [
-  "src/ServerScriptService/Modules/EventosService.luau:658"
+  "src/ServerScriptService/Modules/EventosService.luau:676"
  ],
  "Menos": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:476"
@@ -4392,11 +4395,11 @@
   "src/ReplicatedStorage/Shared/Mortar.luau:50"
  ],
  "Morteiro do VC": [
-  "src/ReplicatedStorage/Shared/Eventos.luau:107",
+  "src/ReplicatedStorage/Shared/Eventos.luau:114",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/EventosVisual.luau:178"
  ],
  "Morteiro! Granadas caindo em %s (%s) em %d s. Abrigue-se fora da área.": [
-  "src/ServerScriptService/Modules/EventosService.luau:376"
+  "src/ServerScriptService/Modules/EventosService.luau:391"
  ],
  "Morto em ação — origem não identificada": [
   "src/ReplicatedStorage/Shared/Casualty.luau:87"
@@ -4666,7 +4669,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/FrontHud.client.luau:738"
  ],
  "O VC desarmou a carga no depósito.": [
-  "src/ServerScriptService/Modules/EventosService.luau:827"
+  "src/ServerScriptService/Modules/EventosService.luau:845"
  ],
  "O campo ainda está sendo preparado": [
   "src/ServerScriptService/Modules/SpawnService.luau:833"
@@ -4678,10 +4681,10 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaoJogador.luau:601"
  ],
  "O depósito de munição foi destruído.": [
-  "src/ServerScriptService/Modules/EventosService.luau:860"
+  "src/ServerScriptService/Modules/EventosService.luau:878"
  ],
  "O depósito do VC ficou de pé.": [
-  "src/ServerScriptService/Modules/EventosService.luau:869"
+  "src/ServerScriptService/Modules/EventosService.luau:887"
  ],
  "O inimigo achou o ponto de reunião do squad": [
   "src/ServerScriptService/Modules/FrontService.luau:301"
@@ -4691,7 +4694,7 @@
   "src/ReplicatedStorage/Shared/Vantagens.luau:80"
  ],
  "O inimigo vai contra-atacar %s: segure por %d s.": [
-  "src/ServerScriptService/Modules/EventosService.luau:901"
+  "src/ServerScriptService/Modules/EventosService.luau:919"
  ],
  "O mercado abre quando o servidor mandar a lista do dia.": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:1477"
@@ -4788,7 +4791,7 @@
  ],
  "Offensive": [
   "src/ReplicatedStorage/Shared/Front.luau:93",
-  "src/ServerScriptService/Modules/EventosService.luau:880",
+  "src/ServerScriptService/Modules/EventosService.luau:898",
   "src/ServerScriptService/Modules/MatchService.luau:43",
   "src/ServerScriptService/Modules/MatchService.luau:81",
   "src/ServerScriptService/Modules/MatchService.luau:245",
@@ -4878,7 +4881,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/FrontHud.client.luau:742"
  ],
  "Os tubos de 82 mm abriram fogo sobre %s (%s): impacto em %d s. Avance depois.": [
-  "src/ServerScriptService/Modules/EventosService.luau:365"
+  "src/ServerScriptService/Modules/EventosService.luau:380"
  ],
  "Os uniformes de época ficam no armário da loja.": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Progresso.client.luau:963"
@@ -5305,8 +5308,8 @@
   "src/ReplicatedStorage/Shared/Medalhas.luau:83"
  ],
  "Plantar carga": [
-  "src/ServerScriptService/Modules/EventosService.luau:778",
-  "src/ServerScriptService/Modules/EventosService.luau:820"
+  "src/ServerScriptService/Modules/EventosService.luau:796",
+  "src/ServerScriptService/Modules/EventosService.luau:838"
  ],
  "Poeira": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Ambiente.client.luau:46"
@@ -5337,13 +5340,13 @@
   "src/ReplicatedStorage/Shared/Progression.luau:171"
  ],
  "Ponto mantido sob bombardeio": [
-  "src/ReplicatedStorage/Shared/Eventos.luau:89"
+  "src/ReplicatedStorage/Shared/Eventos.luau:96"
  ],
  "Ponto mantido sob morteiro": [
-  "src/ReplicatedStorage/Shared/Eventos.luau:118"
+  "src/ReplicatedStorage/Shared/Eventos.luau:125"
  ],
  "Ponto mantido sob tiro naval": [
-  "src/ReplicatedStorage/Shared/Eventos.luau:71"
+  "src/ReplicatedStorage/Shared/Eventos.luau:73"
  ],
  "Porta": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:665"
@@ -5383,7 +5386,7 @@
   "src/ServerScriptService/Modules/LogisticsService.luau:209"
  ],
  "Posto de socorro aberto em %s por %d s: feridos a até %d m são atendidos.": [
-  "src/ServerScriptService/Modules/EventosService.luau:672"
+  "src/ServerScriptService/Modules/EventosService.luau:690"
  ],
  "Pote": [
   "src/ServerScriptService/Modules/MapLife.luau:570"
@@ -5810,7 +5813,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:928"
  ],
  "Resgate de feridos": [
-  "src/ReplicatedStorage/Shared/Eventos.luau:124"
+  "src/ReplicatedStorage/Shared/Eventos.luau:131"
  ],
  "Restaurar botões padrão": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:897"
@@ -6306,10 +6309,10 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/FrontHud.client.luau:283"
  ],
  "Setor retomado no contra-ataque": [
-  "src/ReplicatedStorage/Shared/Eventos.luau:154"
+  "src/ReplicatedStorage/Shared/Eventos.luau:161"
  ],
  "Setor segurado no contra-ataque": [
-  "src/ReplicatedStorage/Shared/Eventos.luau:155"
+  "src/ReplicatedStorage/Shared/Eventos.luau:162"
  ],
  "Setor sob ataque": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/FrontHud.client.luau:310"
@@ -6760,7 +6763,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/AudioController.client.luau:676"
  ],
  "Tiro naval chegando em %s (%s)! Saia da área marcada: %d s.": [
-  "src/ServerScriptService/Modules/EventosService.luau:340"
+  "src/ServerScriptService/Modules/EventosService.luau:346"
  ],
  "Tiro principal": [
   "src/ReplicatedStorage/Shared/InputMap.luau:126"
@@ -7000,7 +7003,7 @@
   "src/ReplicatedStorage/Shared/Vehicles.luau:135"
  ],
  "UH-34D pousando reforços na LZ %s, a %d m de %s. Nasça na LZ.": [
-  "src/ServerScriptService/Modules/EventosService.luau:552"
+  "src/ServerScriptService/Modules/EventosService.luau:570"
  ],
  "UNIFORME": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Progresso.client.luau:790"
@@ -7048,14 +7051,14 @@
   "src/ReplicatedStorage/Shared/CompraVeiculo.luau:29",
   "src/ReplicatedStorage/Shared/Corpo.luau:106",
   "src/ReplicatedStorage/Shared/Corpo.luau:111",
-  "src/ReplicatedStorage/Shared/Eventos.luau:61",
-  "src/ReplicatedStorage/Shared/Eventos.luau:78",
-  "src/ReplicatedStorage/Shared/Eventos.luau:96",
-  "src/ReplicatedStorage/Shared/Eventos.luau:182",
-  "src/ReplicatedStorage/Shared/Eventos.luau:182",
-  "src/ReplicatedStorage/Shared/Eventos.luau:196",
-  "src/ReplicatedStorage/Shared/Eventos.luau:196",
-  "src/ReplicatedStorage/Shared/Eventos.luau:326",
+  "src/ReplicatedStorage/Shared/Eventos.luau:63",
+  "src/ReplicatedStorage/Shared/Eventos.luau:80",
+  "src/ReplicatedStorage/Shared/Eventos.luau:103",
+  "src/ReplicatedStorage/Shared/Eventos.luau:189",
+  "src/ReplicatedStorage/Shared/Eventos.luau:189",
+  "src/ReplicatedStorage/Shared/Eventos.luau:203",
+  "src/ReplicatedStorage/Shared/Eventos.luau:203",
+  "src/ReplicatedStorage/Shared/Eventos.luau:333",
   "src/ReplicatedStorage/Shared/FireSupport.luau:122",
   "src/ReplicatedStorage/Shared/FireSupport.luau:138",
   "src/ReplicatedStorage/Shared/FireSupport.luau:154",
@@ -7144,22 +7147,22 @@
   "src/ServerScriptService/Modules/CompraVeiculoService.luau:223",
   "src/ServerScriptService/Modules/CompraVeiculoService.luau:223",
   "src/ServerScriptService/Modules/Comunicacao.luau:171",
-  "src/ServerScriptService/Modules/EventosService.luau:652",
-  "src/ServerScriptService/Modules/EventosService.luau:730",
-  "src/ServerScriptService/Modules/EventosService.luau:797",
-  "src/ServerScriptService/Modules/EventosService.luau:805",
-  "src/ServerScriptService/Modules/EventosService.luau:827",
-  "src/ServerScriptService/Modules/EventosService.luau:832",
-  "src/ServerScriptService/Modules/EventosService.luau:847",
-  "src/ServerScriptService/Modules/EventosService.luau:852",
-  "src/ServerScriptService/Modules/EventosService.luau:856",
-  "src/ServerScriptService/Modules/EventosService.luau:859",
-  "src/ServerScriptService/Modules/EventosService.luau:869",
-  "src/ServerScriptService/Modules/EventosService.luau:955",
-  "src/ServerScriptService/Modules/EventosService.luau:1038",
-  "src/ServerScriptService/Modules/EventosService.luau:1130",
-  "src/ServerScriptService/Modules/EventosService.luau:1136",
-  "src/ServerScriptService/Modules/EventosService.luau:1136",
+  "src/ServerScriptService/Modules/EventosService.luau:670",
+  "src/ServerScriptService/Modules/EventosService.luau:748",
+  "src/ServerScriptService/Modules/EventosService.luau:815",
+  "src/ServerScriptService/Modules/EventosService.luau:823",
+  "src/ServerScriptService/Modules/EventosService.luau:845",
+  "src/ServerScriptService/Modules/EventosService.luau:850",
+  "src/ServerScriptService/Modules/EventosService.luau:865",
+  "src/ServerScriptService/Modules/EventosService.luau:870",
+  "src/ServerScriptService/Modules/EventosService.luau:874",
+  "src/ServerScriptService/Modules/EventosService.luau:877",
+  "src/ServerScriptService/Modules/EventosService.luau:887",
+  "src/ServerScriptService/Modules/EventosService.luau:973",
+  "src/ServerScriptService/Modules/EventosService.luau:1056",
+  "src/ServerScriptService/Modules/EventosService.luau:1148",
+  "src/ServerScriptService/Modules/EventosService.luau:1154",
+  "src/ServerScriptService/Modules/EventosService.luau:1154",
   "src/ServerScriptService/Modules/FieldService.luau:158",
   "src/ServerScriptService/Modules/FieldService.luau:267",
   "src/ServerScriptService/Modules/FieldWorkService.luau:177",
@@ -7424,11 +7427,11 @@
   "src/ReplicatedStorage/Shared/Commerce.luau:493",
   "src/ReplicatedStorage/Shared/Commerce.luau:606",
   "src/ReplicatedStorage/Shared/CompraVeiculo.luau:30",
-  "src/ReplicatedStorage/Shared/Eventos.luau:108",
-  "src/ReplicatedStorage/Shared/Eventos.luau:137",
-  "src/ReplicatedStorage/Shared/Eventos.luau:182",
-  "src/ReplicatedStorage/Shared/Eventos.luau:196",
-  "src/ReplicatedStorage/Shared/Eventos.luau:326",
+  "src/ReplicatedStorage/Shared/Eventos.luau:115",
+  "src/ReplicatedStorage/Shared/Eventos.luau:144",
+  "src/ReplicatedStorage/Shared/Eventos.luau:189",
+  "src/ReplicatedStorage/Shared/Eventos.luau:203",
+  "src/ReplicatedStorage/Shared/Eventos.luau:333",
   "src/ReplicatedStorage/Shared/FireSupport.luau:181",
   "src/ReplicatedStorage/Shared/FireSupport.luau:197",
   "src/ReplicatedStorage/Shared/FireSupport.luau:208",
@@ -7502,18 +7505,18 @@
   "src/ServerScriptService/Modules/CommanderService.luau:213",
   "src/ServerScriptService/Modules/CompraVeiculoService.luau:223",
   "src/ServerScriptService/Modules/Comunicacao.luau:171",
-  "src/ServerScriptService/Modules/EventosService.luau:737",
-  "src/ServerScriptService/Modules/EventosService.luau:747",
-  "src/ServerScriptService/Modules/EventosService.luau:812",
-  "src/ServerScriptService/Modules/EventosService.luau:818",
-  "src/ServerScriptService/Modules/EventosService.luau:826",
-  "src/ServerScriptService/Modules/EventosService.luau:838",
-  "src/ServerScriptService/Modules/EventosService.luau:860",
-  "src/ServerScriptService/Modules/EventosService.luau:864",
-  "src/ServerScriptService/Modules/EventosService.luau:865",
-  "src/ServerScriptService/Modules/EventosService.luau:868",
-  "src/ServerScriptService/Modules/EventosService.luau:956",
-  "src/ServerScriptService/Modules/EventosService.luau:1136",
+  "src/ServerScriptService/Modules/EventosService.luau:755",
+  "src/ServerScriptService/Modules/EventosService.luau:765",
+  "src/ServerScriptService/Modules/EventosService.luau:830",
+  "src/ServerScriptService/Modules/EventosService.luau:836",
+  "src/ServerScriptService/Modules/EventosService.luau:844",
+  "src/ServerScriptService/Modules/EventosService.luau:856",
+  "src/ServerScriptService/Modules/EventosService.luau:878",
+  "src/ServerScriptService/Modules/EventosService.luau:882",
+  "src/ServerScriptService/Modules/EventosService.luau:883",
+  "src/ServerScriptService/Modules/EventosService.luau:886",
+  "src/ServerScriptService/Modules/EventosService.luau:974",
+  "src/ServerScriptService/Modules/EventosService.luau:1154",
   "src/ServerScriptService/Modules/FieldService.luau:250",
   "src/ServerScriptService/Modules/FieldService.luau:280",
   "src/ServerScriptService/Modules/FrontService.luau:204",
@@ -7909,40 +7912,40 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ComoJogar.luau:205"
  ],
  "W: A-4 e F-4 dos MAG-11 e MAG-12 lançaram 18 t de bombas e napalm nas LZs antes do pouso;": [
-  "src/ReplicatedStorage/Shared/Eventos.luau:90"
+  "src/ReplicatedStorage/Shared/Eventos.luau:97"
  ],
  "W: A-4 e F-4 dos MAG-11 e MAG-12 lançaram 18 t de bombas e napalm nas LZs antes do pouso; ": [
-  "src/ReplicatedStorage/Shared/Eventos.luau:90"
+  "src/ReplicatedStorage/Shared/Eventos.luau:97"
  ],
  "W: An Cường (2) tinha túneis interligados; os fuzileiros explodiram túneis e recolheram": [
-  "src/ReplicatedStorage/Shared/Eventos.luau:144"
+  "src/ReplicatedStorage/Shared/Eventos.luau:151"
  ],
  "W: An Cường (2) tinha túneis interligados; os fuzileiros explodiram túneis e recolheram ": [
-  "src/ReplicatedStorage/Shared/Eventos.luau:144"
+  "src/ReplicatedStorage/Shared/Eventos.luau:151"
  ],
  "W: UH-34 dos HMM-261 e HMM-361 levaram o 2/4 às LZs Red, White e Blue; a Cia I do 3/7": [
-  "src/ReplicatedStorage/Shared/Eventos.luau:102"
+  "src/ReplicatedStorage/Shared/Eventos.luau:109"
  ],
  "W: UH-34 dos HMM-261 e HMM-361 levaram o 2/4 às LZs Red, White e Blue; a Cia I do 3/7 ": [
-  "src/ReplicatedStorage/Shared/Eventos.luau:102"
+  "src/ReplicatedStorage/Shared/Eventos.luau:109"
  ],
  "W: helicópteros do MAG-16 evacuaram os feridos (foto no artigo); esquadras da Cia I foram": [
-  "src/ReplicatedStorage/Shared/Eventos.luau:131"
+  "src/ReplicatedStorage/Shared/Eventos.luau:138"
  ],
  "W: helicópteros do MAG-16 evacuaram os feridos (foto no artigo); esquadras da Cia I foram ": [
-  "src/ReplicatedStorage/Shared/Eventos.luau:131"
+  "src/ReplicatedStorage/Shared/Eventos.luau:138"
  ],
  "W: morteiros e canhões sem recuo do VC atingiram a coluna de suprimento; duas granadas": [
-  "src/ReplicatedStorage/Shared/Eventos.luau:119"
+  "src/ReplicatedStorage/Shared/Eventos.luau:126"
  ],
  "W: morteiros e canhões sem recuo do VC atingiram a coluna de suprimento; duas granadas ": [
-  "src/ReplicatedStorage/Shared/Eventos.luau:119"
+  "src/ReplicatedStorage/Shared/Eventos.luau:126"
  ],
  "W: os contratorpedeiros USS Orleck e USS Prichett e o cruzador USS Galveston deram apoio de": [
-  "src/ReplicatedStorage/Shared/Eventos.luau:72"
+  "src/ReplicatedStorage/Shared/Eventos.luau:74"
  ],
  "W: os contratorpedeiros USS Orleck e USS Prichett e o cruzador USS Galveston deram apoio de ": [
-  "src/ReplicatedStorage/Shared/Eventos.luau:72"
+  "src/ReplicatedStorage/Shared/Eventos.luau:74"
  ],
  "WASD": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ComoJogar.luau:205",
@@ -8282,6 +8285,9 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ToqueVeiculo.client.luau:458",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ToqueVeiculo.client.luau:550"
  ],
+ "air": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/AudioController.client.luau:697"
+ ],
  "alerta": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaoJogador.luau:601",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/FrontHud.client.luau:287",
@@ -8441,7 +8447,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/FrontHud.client.luau:310"
  ],
  "ataques aéreos sobre Nam Yên e a Colina 30. Aqui só bombas (o jogo não tem tipo de napalm)": [
-  "src/ReplicatedStorage/Shared/Eventos.luau:91"
+  "src/ReplicatedStorage/Shared/Eventos.luau:98"
  ],
  "atirou num inimigo": [
   "src/ServerScriptService/Modules/ContatoService.luau:130"
@@ -8531,7 +8537,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ToqueTelas.luau:190"
  ],
  "barragem chegando": [
-  "src/ServerScriptService/Modules/EventosService.luau:1069"
+  "src/ServerScriptService/Modules/EventosService.luau:1087"
  ],
  "bayonet": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/HudCampo.client.luau:687",
@@ -8740,7 +8746,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Progresso.client.luau:1321"
  ],
  "chegou depois pelo HMM-163. A LZ Blue pousou em cima do 60º Batalhão do VC": [
-  "src/ReplicatedStorage/Shared/Eventos.luau:103"
+  "src/ReplicatedStorage/Shared/Eventos.luau:110"
  ],
  "cheio": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/HudCampo.client.luau:485"
@@ -9030,7 +9036,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CasualtyScreen.luau:200"
  ],
  "de 60 mm caíram sobre a tropa que avançava em An Cường": [
-  "src/ReplicatedStorage/Shared/Eventos.luau:120"
+  "src/ReplicatedStorage/Shared/Eventos.luau:127"
  ],
  "de costas": [
   "src/ServerScriptService/Modules/MedicalService.luau:384"
@@ -9411,7 +9417,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Movement.client.luau:1223"
  ],
  "evacuadas da Colina 30. O posto de socorro do VC é de design": [
-  "src/ReplicatedStorage/Shared/Eventos.luau:132"
+  "src/ReplicatedStorage/Shared/Eventos.luau:139"
  ],
  "evento": [
   "src/ServerScriptService/Modules/EventosService.luau:111"
@@ -9563,7 +9569,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ToqueHud.client.luau:665"
  ],
  "fogo; Galveston e Orleck cobriram o desembarque de 18/08/1965": [
-  "src/ReplicatedStorage/Shared/Eventos.luau:73"
+  "src/ReplicatedStorage/Shared/Eventos.luau:75"
  ],
  "foguete": [
   "src/ReplicatedStorage/Shared/Casualty.luau:40",
@@ -10455,12 +10461,12 @@
   "src/ReplicatedStorage/Shared/Gatilho.luau:202"
  ],
  "lz": [
-  "src/ServerScriptService/Modules/EventosService.luau:1080",
+  "src/ServerScriptService/Modules/EventosService.luau:1098",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaView.luau:479",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaView.luau:1211"
  ],
  "lz:": [
-  "src/ServerScriptService/Modules/EventosService.luau:1080",
+  "src/ServerScriptService/Modules/EventosService.luau:1098",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaView.luau:479",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaView.luau:1211"
  ],
@@ -10860,6 +10866,11 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/AudioController.client.luau:424",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/AudioController.client.luau:497",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/AudioController.client.luau:511",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/AudioController.client.luau:702",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/AudioController.client.luau:702",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/AudioController.client.luau:702",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/AudioController.client.luau:711",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/AudioController.client.luau:711",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/BarraItens.client.luau:90",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CampanhaCliente.luau:66",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaView.luau:437",
@@ -12492,7 +12503,7 @@
   "src/ServerScriptService/Modules/CommanderService.luau:183"
  ],
  "suprimento emboscada (W)": [
-  "src/ReplicatedStorage/Shared/Eventos.luau:157"
+  "src/ReplicatedStorage/Shared/Eventos.luau:164"
  ],
  "suprimento insuficiente": [
   "src/ReplicatedStorage/Shared/FireSupport.luau:243",

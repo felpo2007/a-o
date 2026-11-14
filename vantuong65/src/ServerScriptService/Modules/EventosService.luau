@@ -291,6 +291,12 @@ local function barrageTarget(def: Eventos.Def, side: string): (number?, number?,
 		table.insert(friends, { x = f.pos.X, z = f.pos.Z })
 	end
 	local ax, az = axis(side)
+	if def.onTarget then
+		-- D-132: o ataque aéreo cai no objetivo, com quem estiver lá (dos dois lados); só não chega
+		-- perto dos QGs
+		local tx, tz = Eventos.safeCenter(sp.x, sp.z, ax, az, {}, 0, { MapConfig.HQ.US, MapConfig.HQ.VC }, M)
+		return tx, tz, s
+	end
 	local danger = 2 * (def.cepM or 0) + (if def.line then 60 else 0) + t.lethalM
 	local x, z = Eventos.safeCenter(sp.x, sp.z, ax, az, friends, danger, { MapConfig.HQ.US, MapConfig.HQ.VC }, M)
 	return x, z, s
@@ -343,11 +349,17 @@ local function startBarrage(id: string, side: string): Ev?
 		)
 	elseif id == "air" then
 		smoke(ev, x, z, Color3.fromRGB(150, 70, 170))
+		-- D-132: as bombas pegam os dois lados: os dois recebem o alerta
 		notify(
 			side,
 			ev,
-			string.format("A-4 em ataque sobre %s (%s) em %d s. Fumaça violeta: fique longe.", where, g, warnS),
-			"info",
+			string.format(
+				"A-4 em mergulho sobre %s (%s) em %d s! As bombas pegam todo mundo: saia da fumaça violeta.",
+				where,
+				g,
+				warnS
+			),
+			"alerta",
 			warnS
 		)
 		notify(
@@ -357,6 +369,9 @@ local function startBarrage(id: string, side: string): Ev?
 			"alerta",
 			warnS
 		)
+		-- rumo do avião (de onde vem para onde vai), para o som andar pelo céu no cliente
+		ev.marker:SetAttribute("RumoX", ax)
+		ev.marker:SetAttribute("RumoZ", az)
 	else
 		notify(
 			side,
@@ -402,7 +417,10 @@ local function startBarrage(id: string, side: string): Ev?
 		end)
 		task.delay(tImpact, function()
 			if ev.phase ~= "fim" then
-				ExplosionService.detonate(def.explosive :: string, ground(imp.x, imp.z), nil, side) -- v41: sem fogo amigo
+				-- v41: sem fogo amigo (o lado de quem pediu não leva dano). D-132: o ataque aéreo pega
+				-- os dois lados (lado nil = ninguém, como destroço e armadilha)
+				local from = if def.hitsAll then nil else side
+				ExplosionService.detonate(def.explosive :: string, ground(imp.x, imp.z), nil, from)
 			end
 		end)
 	end

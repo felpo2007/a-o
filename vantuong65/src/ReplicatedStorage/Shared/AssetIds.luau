@@ -47,6 +47,7 @@ return {
 		explosion = 108327124183058,
 		incoming = 76773493975605,
 		naval_distant = 84327200976853,
+		a4_mergulho = 92915361935434, -- D-132: A-4 do ataque aéreo (tools/som_ataque_aereo.py)
 		radio_squelch = 117911075807959,
 		-- corpo a corpo (D-94; tools/faca/sons.py). 0 = usa um substituto (curativo, impacto na terra)
 		faca_saque = 111901564575957,

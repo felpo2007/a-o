@@ -49,6 +49,8 @@ export type Def = {
 	cepM: number?,
 	intervalS: number?,
 	line: boolean?, -- impactos em linha de 120 m (FireSupport.impacts)
+	onTarget: boolean?, -- D-132: cai em cima do objetivo (sem recuar para longe dos amigos)
+	hitsAll: boolean?, -- D-132: fere os dois lados (o fogo amigo desligado da v41 não vale aqui)
 	reward: Reward, -- para o lado favorecido
 	rewardOther: Reward, -- para o outro lado (quem resiste, ataca a LZ, defende o depósito)
 	source: string,
@@ -79,12 +81,17 @@ Eventos.DEFS = {
 		kind = "barrage",
 		rotation = true,
 		durationS = 0,
-		warnS = 8,
+		-- D-132 (dono: "o ataque aéreo deve ser nos objetivos e deve afetar os dois lados e deve ter
+		-- um som específico quando vai acontecer"): 10 s de aviso, o tempo do A-4 chegar em mergulho
+		-- (som a4_mergulho, que passa sobre o alvo aos ~9,7 s)
+		warnS = 10,
 		explosive = "bomb_250lb",
 		rounds = 4,
 		cepM = 20,
 		intervalS = 0.3,
 		line = true,
+		onTarget = true,
+		hitsAll = true,
 		reward = { xp = 120, cr = 12, label = "Assalto depois do ataque aéreo" },
 		rewardOther = { xp = 120, cr = 12, label = "Ponto mantido sob bombardeio" },
 		source = "W: A-4 e F-4 dos MAG-11 e MAG-12 lançaram 18 t de bombas e napalm nas LZs antes do pouso; "

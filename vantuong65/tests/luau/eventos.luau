@@ -189,6 +189,27 @@ test("servidor: avisos pelo remote, marcador por atributo e nenhum nascimento de
 	assert(string.find(net, '"Evento_Aviso"', 1, true))
 end)
 
+test("D-132: ataque aéreo no objetivo, nos dois lados e com o som do A-4", function()
+	local air = Eventos.DEFS.air
+	assert(air.onTarget and air.hitsAll and air.warnS == 10, "regras do ataque aéreo")
+	-- as outras barragens seguem sem fogo amigo e recuando dos amigos
+	for _, id in { "naval", "mortar" } do
+		assert(not Eventos.DEFS[id].hitsAll and not Eventos.DEFS[id].onTarget, id)
+	end
+	-- no objetivo: sem amigos na conta, o centro é o próprio ponto (longe dos QGs)
+	local sp = MapConfig.Strongpoints[3]
+	local x, z = Eventos.safeCenter(sp.x, sp.z, 1, 0, {}, 0, { MapConfig.HQ.US, MapConfig.HQ.VC }, M)
+	assert(x == sp.x and z == sp.z, "cai em cima de C")
+	local svc = fs.readFile("src/ServerScriptService/Modules/EventosService.luau")
+	assert(string.find(svc, "if def.hitsAll then nil else side", 1, true), "lado nil: fere todos")
+	assert(string.find(svc, 'SetAttribute("RumoX"', 1, true), "rumo do avião no marcador")
+	local audio = fs.readFile("src/StarterPlayer/StarterPlayerScripts/Controllers/AudioController.client.luau")
+	assert(string.find(audio, 'sid("a4_mergulho")', 1, true), "o som do A-4 toca no cliente")
+	local ids = fs.readFile("src/ReplicatedStorage/Shared/AssetIds.luau")
+	local id = string.match(ids, "a4_mergulho = (%d+)")
+	assert(id and tonumber(id) ~= 0, "som publicado")
+end)
+
 print(string.format("%d ok, %d falhas", passed, failed))
 if failed > 0 then
 	process.exit(1)

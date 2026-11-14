@@ -684,6 +684,84 @@ Net.unreliable("Fire_Launch").OnClientEvent:Connect(function(e)
 	end
 end)
 
+-- ===== D-132: o A-4 do ataque aéreo (dono: "deve ter um som específico quando vai acontecer") =====
+-- O evento "air" (Modules/EventosService) põe o marcador em ReplicatedStorage.VT65Eventos com o alvo
+-- (X, Z), o rumo do avião (RumoX, RumoZ) e o início do aviso (Inicio, relógio do servidor). O som
+-- a4_mergulho (tools/som_ataque_aereo.py) já traz o Doppler de quem está no alvo; aqui ele anda pelo
+-- céu na mesma reta (200 m/s, 250 m de altura, sobre o alvo aos 9 s), para vir de onde o avião vem.
+-- Pelo marcador (replicado sempre), e não por remote: quem entra no meio ouve do ponto certo.
+local A4 = { speedM = 200, altM = 250, passS = 9, clipS = 12 }
+local flying: { [Instance]: boolean } = {}
+local function airPass(marker: Instance)
+	local id = sid("a4_mergulho")
+	if not id or flying[marker] or marker:GetAttribute("Evento") ~= "air" then
+		return
+	end
+	local x, z = marker:GetAttribute("X"), marker:GetAttribute("Z")
+	local t0 = marker:GetAttribute("Inicio")
+	if type(x) ~= "number" or type(z) ~= "number" or type(t0) ~= "number" then
+		return
+	end
+	local elapsed = workspace:GetServerTimeNow() - t0
+	if elapsed > A4.clipS - 1 then
+		return -- já passou
+	end
+	flying[marker] = true
+	local rx, rz = marker:GetAttribute("RumoX"), marker:GetAttribute("RumoZ")
+	local dir = Vector3.new(if type(rx) == "number" then rx else 1, 0, if type(rz) == "number" then rz else 0)
+	dir = if dir.Magnitude > 1e-3 then dir.Unit else Vector3.new(1, 0, 0)
+	local target = Vector3.new(x, 0, z)
+	local hit = workspace:Raycast(target + Vector3.new(0, 500, 0), Vector3.new(0, -1000, 0))
+	local gy = if hit then hit.Position.Y else 0
+	local a = Instance.new("Attachment")
+	a.Name = "A4"
+	a.Parent = workspace.Terrain
+	local s = Instance.new("Sound")
+	s.SoundId = id
+	s.Volume = 1.6
+	s.SoundGroup = sfxGroup
+	s.RollOffMode = Enum.RollOffMode.InverseTapered
+	s.RollOffMinDistance = 300 / M -- o clipe já traz a distância: o Roblox só abafa de muito longe
+	s.RollOffMaxDistance = 3000 / M
+	s.Parent = a
+	local function place(t: number)
+		local along = (t - A4.passS) * A4.speedM / M
+		a.WorldPosition = Vector3.new(target.X, gy + A4.altM / M, target.Z) + dir * along
+	end
+	place(math.max(elapsed, 0))
+	s.TimePosition = math.max(elapsed, 0)
+	s:Play()
+	caption("a4", "Avião em mergulho: ataque aéreo chegando", a.WorldPosition)
+	local con: RBXScriptConnection
+	con = RunService.Heartbeat:Connect(function()
+		local t = workspace:GetServerTimeNow() - t0
+		if t > A4.clipS or not s.Parent then
+			con:Disconnect()
+			a:Destroy()
+			flying[marker] = nil
+			return
+		end
+		place(t)
+		-- o clipe pode começar atrasado (carregando): no Studio ficou ~1,2 s atrás da posição.
+		-- Ressincroniza para a passagem do som bater com a do ponto no céu
+		if s.IsPlaying and math.abs(s.TimePosition - t) > 0.3 then
+			s.TimePosition = t
+		end
+	end)
+end
+task.spawn(function()
+	local folder = ReplicatedStorage:WaitForChild("VT65Eventos", 60)
+	if not folder then
+		return
+	end
+	folder.ChildAdded:Connect(function(m: Instance)
+		task.defer(airPass, m) -- os atributos chegam junto; o defer espera o quadro
+	end)
+	for _, m in folder:GetChildren() do
+		airPass(m)
+	end
+end)
+
 -- motor dos veículos: VehicleFx.client (tom e volume pela rotação e pela carga, D-86)
 
 local _ = RunService

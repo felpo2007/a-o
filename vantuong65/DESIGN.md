@@ -4731,3 +4731,48 @@ Entraram mais quatro, dois por lado, com padrões que existiam em 1965 (`Shared/
 **Não testado:**
 - a compra com $ até o fim (o soldado de teste tinha $ 1.306);
 - o uniforme do VC num soldado do VC: as cópias usaram o corpo dos EUA, só para ver o pano.
+
+## D-132 — Lote 18: ataque aéreo no objetivo, nos dois lados e com o som do A-4 (v63, 2026-11-14)
+
+Pedido do dono: "o ataque aéreo deve ser nos objetivos e deve afetar os dois lados e deve ter um
+som específico quando vai acontecer". Vale para o evento da partida "Ataque aéreo (A-4)"
+(`Shared/Eventos`, `Modules/EventosService`). O ataque aéreo pedido pelo comandante
+(`FireSupport.us_air_strike`) não mudou.
+
+**No objetivo:**
+- antes, o centro recuava até 80 m para longe da tropa de quem pedia (`Eventos.safeCenter`), e as
+  bombas podiam cair fora do ponto;
+- agora (`onTarget`) cai em cima do ponto forte que os EUA atacam, com quem estiver lá. Só a
+  distância mínima dos QGs continua;
+- as outras barragens (naval e morteiro) seguem recuando dos amigos.
+
+**Nos dois lados** (`hitsAll`):
+- as bombas explodem sem lado (`from = nil`, como destroço e armadilha), então o fogo amigo
+  desligado da v41 não vale aqui;
+- os dois lados recebem o alerta: "As bombas pegam todo mundo: saia da fumaça violeta";
+- o aviso passou de 8 para 10 s, o tempo do avião chegar.
+
+**Som do A-4** (`tools/som_ataque_aereo.py`, `Sounds.a4_mergulho`, 12 s):
+- **Síntese:** turbojato chegando em mergulho, sintetizado em numpy:
+  - rugido abafado de longe que clareia na chegada;
+  - assobio do compressor e da turbina com o Doppler (agudo chegando, grave indo embora);
+  - reflexo no chão.
+- **Medida:** o centroide do espectro sobe de 770 Hz (1 s) para 3.400 Hz (8,8 s); a passagem fica
+  a −3,6 dBFS e o começo a −39 dBFS.
+- **No jogo:** o cliente (`AudioController`) lê o marcador do evento (alvo, rumo `RumoX/RumoZ` e
+  início no relógio do servidor) e faz o som andar pelo céu na reta do avião, vindo do lado dos EUA
+  e passando sobre o objetivo. Quem entra no meio ouve do ponto certo. O clipe se ressincroniza com
+  o relógio do servidor (começava ~1,2 s atrasado enquanto carregava).
+- **Legenda:** "Avião em mergulho: ataque aéreo chegando".
+
+**Conferido no Studio:**
+- o centro do ataque caiu a 0,0 m do ponto forte de C;
+- o soldado americano parado no ponto morreu nas bombas do próprio ataque;
+- um boneco do VC no ponto caiu, e o americano a 150 m ficou inteiro;
+- o som carregou, tocou e passou a ~280 m do soldado; depois do ajuste, o clipe ficou a até 0,06 s
+  do relógio do servidor.
+
+**Achado:** um evento disparado durante a contagem de início é cancelado quando a partida começa
+(`resetMatch`). Isso já acontecia; na partida normal o primeiro evento só vem no minuto 1.
+
+**Não testado:** o som de ouvido (só medido) e num servidor do Roblox.
