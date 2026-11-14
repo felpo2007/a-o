@@ -243,7 +243,8 @@ end
 -- acessível"): em volta dos pontos fortes de nome DENSE_NAMES, a mata fica DENSE_K vezes mais cheia
 -- até DENSE_M e volta ao normal suave até 1,5 x DENSE_M. Densidade de design (PLACEHOLDER).
 -- D-128: pelo nome do ponto (era o setor 1; com cinco setores a mata fechada é o B)
-Vegetation.DENSE_NAMES = { ["Mata fechada"] = true } :: { [string]: boolean }
+-- lote 26: o objetivo da mata fechada é a Serraria (B, noroeste; era a "Mata fechada")
+Vegetation.DENSE_NAMES = { ["Serraria"] = true } :: { [string]: boolean }
 Vegetation.DENSE_M = 70
 Vegetation.DENSE_K = 1.8
 function Vegetation.denseCircles(mapConfig: any): { Circle }

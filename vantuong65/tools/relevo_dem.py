@@ -122,7 +122,7 @@ def main() -> None:
     peso = rampa(d_casa, *VILA_M)
     for sp in PONTOS_FORTES:
         nome, e, n = sp[1], sp[2], sp[3]
-        if "arrozal" in nome.lower():
+        if "arroz" in nome.lower():  # lote 26: "Arrozais"
             sx, sz = ing_local(e, n)
             peso = np.minimum(peso, rampa(np.hypot(X - sx, Z - sz) * STUD_M, *ARROZAL_M))
     novo_m = atual_m + detalhe * peso

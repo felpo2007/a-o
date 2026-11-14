@@ -29,11 +29,13 @@ Landscape.CLEAR_STRONGPOINT_M = 30
 Landscape.CLEAR_NAMED_M = {
 	["LZ Blue"] = 90, -- zona de pouso de helicóptero da operação: aberta
 	["Athletic field"] = 70,
-	-- D-123 (dono: "o outro em uma floresta densa e pouco acessível"): o objetivo A é mata fechada; com
+	-- D-123 (dono: "o outro em uma floresta densa e pouco acessível"): o objetivo da mata fechada; com
 	-- os 30 m de praxe o ponto virava uma clareira no meio da mata. Fica só a roda da bandeira.
-	["Mata fechada"] = 10,
+	-- Lote 26: é a Serraria (B, noroeste; era a "Mata fechada")
+	["Serraria"] = 10,
 }
--- pontos fortes de arrozal: em volta deles a lavoura continua (o nome é a paisagem)
+-- pontos fortes de arrozal: em volta deles a lavoura continua (o nome é a paisagem; lote 26: "arroz"
+-- pega "Arrozais" e "Arrozal")
 Landscape.FARM_STRONGPOINT_M = 130
 -- 2026-11-13: o acampamento do VC (Data/Bases) fica sob a mata: sem clareira em volta do QG (o plano
 -- da arte tira só as plantas de dentro das pegadas e em volta dos pontos de nascer)
@@ -129,7 +131,7 @@ function Landscape.new(world: any, mapConfig: any, housesXZ: { number }, village
 	end
 	for _, sp in mapConfig.Strongpoints do
 		add(clear, sp.x, sp.z, Landscape.CLEAR_NAMED_M[sp.name] or Landscape.CLEAR_STRONGPOINT_M)
-		if string.find(string.lower(sp.name), "arrozal", 1, true) then
+		if string.find(string.lower(sp.name), "arroz", 1, true) then
 			add(farm, sp.x, sp.z, Landscape.FARM_STRONGPOINT_M)
 		end
 	end

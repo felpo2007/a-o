@@ -240,7 +240,7 @@ test("lugares que fazem o jogo estão no recorte: An Cường (2), túneis, trin
 	location("An Cường (2)")
 	local b = MapConfig.Bounds
 	-- D-128: a praça de Xóm Gò é o objetivo C; An Cường (2) segue como local da carta
-	for _, name in { "Xóm Gò", "Arrozal ao sul de An Cường (2)" } do
+	for _, name in { "Xóm Gò", "Ponte e Cais" } do -- lote 26: a Ponte e Cais (era o Arrozal ao sul)
 		local sp = strongpoint(name)
 		assert(Geometry.inBounds(b, sp.x, sp.z), name)
 	end

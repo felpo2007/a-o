@@ -83,19 +83,22 @@ FRONTEIRAS_ING = [
     [(270040, 1692580), (270040, 1693280)],
 ]
 # letra do setor no jogo (v41, pedido do dono: "troque os objetivos por A B C D E"; Front.letra)
+# Lote 26 (ideia de mapa do dono: A Arrozais a sudoeste, B Serraria a noroeste, C a vila no centro,
+# D Ponte e Cais a sudeste, E Engenho a nordeste; "mantenha 1 objetivo na floresta densa e deixe as
+# bases mais longe dos objetivos"; o mapa continua de 700 x 700 m)
 SETORES = [
-    "A Baixada sudoeste",
-    "B Mata fechada",
+    "A Arrozais",
+    "B Serraria",
     "C Xóm Gò",
-    "D An Cường (2)",
-    "E Vau do riacho",
+    "D Ponte e Cais",
+    "E Engenho",
 ]
 SETOR_VILA = 3  # setor da vila de Xóm Gò (D-128: era o 2 no mapa de 3 setores)
 # dono de cada setor no começo (D-128): cada lado com dois setores e o centro (Xóm Gò) disputado.
 # Com três neutros no meio, o VC ia para o B (noroeste) e os EUA para o D (sudeste), em cantos
 # opostos, e ninguém se achava até o centro (tests/luau/contato: a LZ do minuto 1 sem contato)
 INICIAL = ["VC", "VC", "Neutral", "US", "US"]
-SEM_ESTRADA = {"Mata fechada"}  # o ponto da mata fechada: sem estrada até ele
+SEM_ESTRADA = {"Serraria"}  # o objetivo da mata fechada: sem estrada até ele (lote 26)
 # Vila grande do centro (2026-11-12, tools/vila_estradas.py): o ponto forte fica na praça, que o
 # planejamento da vila escolhe no flanco leste do morrote (E e N saem de lá, por isso None aqui)
 VILA_PF = (
@@ -126,24 +129,21 @@ VILA_PONTA = (
 # Pontos fortes: (setor, nome, E, N, real?, observação). Cada partida sorteia um por setor.
 # D-128: um ponto só em cada setor (o sorteio podia juntar os cinco perto do meio), nos cantos:
 # sudoeste, noroeste, centro, sudeste e nordeste.
+# Lote 26 ("deixe as bases mais longe dos objetivos"): os quatro dos cantos foram para mais perto
+# das bordas norte e sul e para longe da borda da própria base. Do QG mais perto: A 296 m (era
+# 270), B 294 m (266), D 318 m (252), E 291 m (254).
 PONTOS_FORTES = [
-    # S1: baixada a sudoeste da base do VC (~13 m de altitude, mata)
-    (1, "Baixada sudoeste", 269545, 1692660, False, "baixada de mata a sudoeste; nome de design"),
-    # S2: mata fechada a noroeste do morro, longe das casas e das estradas (D-123)
-    (2, "Mata fechada", 269680, 1693150, False, "mata cerrada a noroeste do morro; nome de design"),
+    # S1: arrozais a sudoeste, a 55 m da borda sul (era a Baixada sudoeste)
+    (1, "Arrozais", 269555, 1692635, False, "arrozais a sudoeste; nome de design"),
+    # S2: serraria na mata fechada a noroeste, longe das casas e sem estrada (D-123; era a Mata
+    # fechada). A ~65 m da volta de estrada do norte
+    (2, "Serraria", 269700, 1693170, False, "serraria na mata fechada a noroeste; nome de design"),
     # S3: a praça da vila de Xóm Gò
     VILA_PF,
-    # S4: o arrozal ao sul de An Cường (2)
-    (
-        4,
-        "Arrozal ao sul de An Cường (2)",
-        269990,
-        1692720,
-        False,
-        "arrozal ao sul da vila; nome de design",
-    ),
-    # S5: o vau do riacho a nordeste, ao norte da base dos EUA
-    (5, "Vau do riacho", 270085, 1693180, False, "vau do riacho a nordeste; nome de design"),
+    # S4: a ponte e o cais, a sudeste (era o Arrozal ao sul de An Cường (2))
+    (4, "Ponte e Cais", 270000, 1692640, False, "ponte e cais a sudeste; nome de design"),
+    # S5: o engenho a nordeste, ao norte da base dos EUA (era o Vau do riacho)
+    (5, "Engenho", 270070, 1693215, False, "engenho a nordeste; nome de design"),
 ]
 # Base dos EUA (pedido do dono: "o QG dos EUA vai virar uma base grande depois; deixe espaço
 # plano"): sem diques, lâminas d'água e sebes a até BASE_M do QG. D-114: a base (90 x 122 m) cabe
@@ -201,6 +201,7 @@ def read_grid() -> dict:
         raw = base64.b64decode(re.search(r'data = "([^"]*)"', t).group(1))
         heights[r0 : r0 + rows] = np.frombuffer(raw, dtype="<u2").reshape(rows, w)
     carved = re.search(r"\bstreamCarvedCm = (\d+)", s)
+    relief = re.search(r"\breliefAdded = (\d+)", s)
     moved = re.search(r"\bmoundMoved = (\d+)", s)
     cut = re.search(r"\bpaddyCut = (\d+)", s)
     ham = re.search(r"\bhamletAdded = (\d+)", s)
@@ -219,6 +220,7 @@ def read_grid() -> dict:
         "moved": int(moved.group(1)) if moved else 0,
         "paddyCut": int(cut.group(1)) if cut else 0,
         "hamletAdded": int(ham.group(1)) if ham else 0,
+        "reliefAdded": int(relief.group(1)) if relief else 0,
     }
 
 
@@ -456,6 +458,11 @@ def write_grid(g: dict) -> None:
         + (
             "\thamletAdded = 1, -- casario de An Cường (2) acrescentado (crop_world, D-115)\n"
             if g.get("hamletAdded")
+            else ""
+        )
+        + (
+            "\treliefAdded = 1, -- morros e grotas na mata (crop_world, lote 26)\n"
+            if g.get("reliefAdded")
             else ""
         )
         + f"\theightChunks = {{{chunk_list}}}, rowsPerChunk = {ROWS_PER},\n"
@@ -782,11 +789,17 @@ def reduz_arrozal(g: dict, f: dict[str, np.ndarray], casas_xz: np.ndarray) -> di
     cell = g["cell"]
     rr, cc = np.nonzero(g["cls"] == 5)
     rio = np.column_stack([g["ox"] + (cc + 0.5) * cell, g["oz"] + (rr + 0.5) * cell])
+    # lote 26: o objetivo dos Arrozais (A) também guarda os tabuleiros em volta dele
+    arroz = np.array(
+        [ing_local(e, n) for _s, nm, e, n, _r, _o in PONTOS_FORTES if e and "arroz" in nm.lower()],
+        float,
+    ).reshape(-1, 2)
     nota = []
     for x, z, *_ in w:
         dc = np.hypot(casas_xz[:, 0] - x, casas_xz[:, 1] - z).min() if len(casas_xz) else 1e9
         dr = np.hypot(rio[:, 0] - x, rio[:, 1] - z).min() if len(rio) else 1e9
-        nota.append(min(dc, dr))
+        da = np.hypot(arroz[:, 0] - x, arroz[:, 1] - z).min() if len(arroz) else 1e9
+        nota.append(min(dc, dr, da))
     nota = np.array(nota)
     n = max(1, int(round(len(w) * ARROZ_FRACAO)))
     if g.get("paddyCut"):
@@ -866,6 +879,148 @@ def _dentro(poly: list[tuple[float, float]], x: float, z: float) -> bool:
             dentro = not dentro
         j = i
     return dentro
+
+
+# ---------- mais relevo na mata (lote 26) ----------
+# Pedido do dono: "faça mais relevos no jogo para que fique mais realístico". O relevo real (DEM,
+# D-66) tem só ~23 m de desnível no mapa de 700 m e a mata parecia plana. Aqui entram morros e
+# grotas suaves de design (PLACEHOLDER: amplitude e tamanho de olho), só onde nada precisa de chão
+# plano: o peso vai a zero perto das feições com altura própria (casas, lâminas, diques, sebes), do
+# riacho, da vila do centro, das bases, dos objetivos e dos túneis. Fora da área jogável
+# (horizonte) o relevo é 50% maior. Determinístico; feito uma vez (o Grid guarda reliefAdded).
+RELEVO_AMP_M = 10.0  # ~95% dos pontos entre -10 e +10 m
+RELEVO_SIGMA_M = 40.0  # suavização do campo: morros de ~80 m de raio
+# Diques, sebes e lâminas só aparecem na lavoura (FeatureBuilder pula os da mata: "a mata fechada já
+# é a cobertura"). Protegidos: os da lavoura, isto é, a até FARM_M + 20 m de uma casa
+# (Landscape.FARM_M = 45) ou a até 150 m de um objetivo de arrozal (FARM_STRONGPOINT_M = 130)
+RELEVO_LAVOURA_CASA_M = 65.0
+RELEVO_LAVOURA_ARROZ_M = (130.0, 160.0)
+RELEVO_HORIZONTE = 1.5
+RELEVO_SEMENTE = 1965818
+# rampas (m): peso 0 até d0 da coisa, 1 a partir de d1
+RELEVO_FOLGA = {
+    "feicao": (12.0, 40.0),
+    "casa": (25.0, 60.0),
+    "riacho": (15.0, 40.0),
+    "objetivo": (35.0, 70.0),
+    "tunel": (20.0, 50.0),
+}
+RELEVO_VILA_M = (150.0, 200.0)  # da praça de Xóm Gò (a vila inteira fica no morro)
+RELEVO_BASE_M = (BASE_M, BASE_M + 40.0)
+
+
+def mais_relevo(g: dict, f: dict[str, np.ndarray]) -> dict:
+    if g.get("reliefAdded"):
+        return {"ja_feito": True}
+    from scipy import ndimage
+
+    cell = g["cell"]
+    cm = cell * STUD_M  # metros por célula
+    shape = g["heights"].shape
+    rows, cols = np.indices(shape)
+    xs = g["ox"] + (cols + 0.5) * cell
+    zs = g["oz"] + (rows + 0.5) * cell
+
+    def celula(x: float, z: float) -> tuple[int, int] | None:
+        r, c = int((z - g["oz"]) / cell), int((x - g["ox"]) / cell)
+        return (r, c) if 0 <= r < shape[0] and 0 <= c < shape[1] else None
+
+    def peso_de(marcas: np.ndarray, d0: float, d1: float) -> np.ndarray:
+        if not marcas.any():
+            return np.ones(shape)
+        d = ndimage.distance_transform_edt(~marcas) * cm
+        t = np.clip((d - d0) / (d1 - d0), 0, 1)
+        return t * t * (3 - 2 * t)
+
+    def marca_pontos(pts) -> np.ndarray:
+        m = np.zeros(shape, bool)
+        for x, z in pts:
+            rc = celula(x, z)
+            if rc:
+                m[rc] = True
+        return m
+
+    def marca_segmentos(a: np.ndarray) -> np.ndarray:
+        m = np.zeros(shape, bool)
+        for x1, z1, x2, z2, *_ in a:
+            n = max(2, int(math.hypot(x2 - x1, z2 - z1) / cell) + 2)
+            for t in np.linspace(0, 1, n):
+                rc = celula(x1 + (x2 - x1) * t, z1 + (z2 - z1) * t)
+                if rc:
+                    m[rc] = True
+        return m
+
+    peso = np.ones(shape)
+    # feições com altura própria, só as da lavoura (as da mata o jogo não põe)
+    casas = f["houses"][:, :2]
+    arroz = [
+        ing_local(e, n) for _s, nm, e, n, _r, _o in PONTOS_FORTES if e and "arroz" in nm.lower()
+    ]
+
+    def na_lavoura(x: float, z: float) -> bool:
+        if len(casas) and np.hypot(casas[:, 0] - x, casas[:, 1] - z).min() * STUD_M <= (
+            RELEVO_LAVOURA_CASA_M
+        ):
+            return True
+        return any(
+            math.hypot(ax - x, az - z) * STUD_M <= RELEVO_LAVOURA_ARROZ_M[1] for ax, az in arroz
+        )
+
+    def da_lavoura(a: np.ndarray) -> np.ndarray:
+        if len(a) == 0:
+            return a
+        m = [na_lavoura((r_[0] + r_[2]) / 2, (r_[1] + r_[3]) / 2) for r_ in a]
+        return a[np.array(m, bool)]
+
+    feicoes = marca_segmentos(da_lavoura(f["dikes"])) | marca_segmentos(da_lavoura(f["hedges"]))
+    for x, z, _y, su, sv, _a in f["waters"]:  # lâmina: o centro e o raio da caixa
+        if na_lavoura(x, z):
+            r = math.hypot(su, sv) / 2
+            feicoes |= np.hypot(xs - x, zs - z) <= r
+    peso = np.minimum(peso, peso_de(feicoes, *RELEVO_FOLGA["feicao"]))
+    peso = np.minimum(peso, peso_de(marca_pontos(f["houses"][:, :2]), *RELEVO_FOLGA["casa"]))
+    peso = np.minimum(peso, peso_de(g["cls"] == 5, *RELEVO_FOLGA["riacho"]))
+    bocas, vala = _tuneis_ing()
+    peso = np.minimum(peso, peso_de(marca_pontos(bocas + vala), *RELEVO_FOLGA["tunel"]))
+    objs = [ing_local(e, n) for _s, _nm, e, n, _r, _o in PONTOS_FORTES if e is not None]
+    peso = np.minimum(peso, peso_de(marca_pontos(objs), *RELEVO_FOLGA["objetivo"]))
+
+    def rampa_disco(cx: float, cz: float, d0: float, d1: float) -> np.ndarray:
+        t = np.clip((np.hypot(xs - cx, zs - cz) * STUD_M - d0) / (d1 - d0), 0, 1)
+        return t * t * (3 - 2 * t)
+
+    vx, vz = ing_local(*MORRO_PARA)
+    peso = np.minimum(peso, rampa_disco(vx, vz, *RELEVO_VILA_M))
+    for ax, az in arroz:  # a lavoura dos Arrozais (Landscape.FARM_STRONGPOINT_M) fica plana
+        peso = np.minimum(peso, rampa_disco(ax, az, *RELEVO_LAVOURA_ARROZ_M))
+    for e, n, _ in QGS.values():
+        bx, bz = ing_local(e, n)
+        peso = np.minimum(peso, rampa_disco(bx, bz, *RELEVO_BASE_M))
+    # horizonte: fora da área jogável o relevo cresce
+    xa, xb, za, zb = crop_box(0.0)
+    fora = (xs < xa) | (xs > xb) | (zs < za) | (zs > zb)
+    ganho = np.where(fora, RELEVO_HORIZONTE, 1.0)
+    # campo suave determinístico, ~N(0, 1)
+    rng = np.random.default_rng(RELEVO_SEMENTE)
+    campo = ndimage.gaussian_filter(rng.normal(size=shape), RELEVO_SIGMA_M / cm, mode="reflect")
+    campo /= campo.std()
+    delta = RELEVO_AMP_M / 2 * campo * peso * ganho
+    h = (g["heights"].astype(float) - g["hoff"]) / 100.0
+    antes = h.copy()
+    h = h + delta
+    g["heights"] = np.clip(np.round(h * 100 + g["hoff"]), 0, 65535).astype("<u2")
+    g["reliefAdded"] = 1
+    dentro = ~fora
+    gy, gx = np.gradient(h, cm)
+    rampa = np.hypot(gx, gy)
+    return {
+        "desnivel_antes_m": round(float(antes[dentro].max() - antes[dentro].min()), 1),
+        "desnivel_depois_m": round(float(h[dentro].max() - h[dentro].min()), 1),
+        "mexe_max_m": round(float(np.abs(delta[dentro]).max()), 1),
+        "area_com_relevo": round(float((peso[dentro] > 0.5).mean()), 2),
+        "rampa_max": round(float(rampa[dentro].max()), 3),
+        "rampa_p95": round(float(np.percentile(rampa[dentro], 95)), 3),
+    }
 
 
 # ---------- casario de An Cường (2) (D-115) ----------
@@ -1059,6 +1214,7 @@ def main() -> None:
     base = limpa_base(fc)
     morro = move_morro(gc, fc)
     casario = casario_an_cuong(gc, fc)
+    relevo = mais_relevo(gc, fc)  # lote 26: antes da vila e das estradas, que se ajustam ao chão
     vila_info = vila_e_estradas(gc, fc)
     write_grid(gc)
     write_features(fc)
@@ -1074,6 +1230,7 @@ def main() -> None:
                 "base_eua_sem": base,
                 "morro": morro,
                 "casario_an_cuong": casario,
+                "mais_relevo": relevo,
                 "vila_e_estradas": vila_info,
                 "pontos_do_fixture": n_fx,
             },

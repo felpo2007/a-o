@@ -491,12 +491,13 @@ end
 -- mapa de 1 x 1 km (2026-11-11): rotas pelo arrozal entre An Cường (2) (S4), o S3 e Nam Yên (4)
 -- (S1/S2). 2026-11-12: o ponto forte do S3 é a vila grande Xóm Gò, no morrote levado para o centro
 -- D-128 (cinco setores, um ponto em cada canto): do nordeste ao sudeste, do sudeste à vila do centro, da
--- vila à mata fechada e da baixada do VC à mata fechada
+-- vila à mata fechada e da baixada do VC à mata fechada. Lote 26: os mesmos cantos com os nomes novos
+-- (Engenho, Ponte e Cais, Xóm Gò, Serraria e Arrozais)
 test("rota no mapa real: infantaria entre os objetivos vizinhos foge do arrozal alagado e usa o dique", function()
-	realRoute("Vau do riacho", "Arrozal ao sul de An Cường (2)", 0, 0)
-	realRoute("Arrozal ao sul de An Cường (2)", "Xóm Gò", 0, 0)
-	realRoute("Xóm Gò", "Mata fechada", 0, 0)
-	realRoute("Baixada sudoeste", "Mata fechada", 0, 0)
+	realRoute("Engenho", "Ponte e Cais", 0, 0)
+	realRoute("Ponte e Cais", "Xóm Gò", 0, 0)
+	realRoute("Xóm Gò", "Serraria", 0, 0)
+	realRoute("Arrozais", "Serraria", 0, 0)
 end)
 
 test("rota no mapa real: M48A3 da saída da base até o pé do morro sem atravessar casa nem sebe", function()

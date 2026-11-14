@@ -5119,3 +5119,75 @@ escolhido é **STARLITE: Vietnã 1965** (D-101); as imagens são as capas do don
 
 **Não feito:** as miniaturas da página inicial (Thumbnail Personalization); pedem outra permissão
 (`universe.thumbnail:write`).
+
+## D-140 — Lote 26a: objetivos novos, bases mais longe e mais relevo (v70, 2026-11-14)
+
+Pedidos do dono:
+- (com uma imagem de mapa) "ideia de mapa para você, porém mantenha 1 objetivo na floresta densa e
+  deixe as bases mais longe dos objetivos";
+- "faça mais relevos no jogo para que fique mais realístico".
+
+Comecei a aumentar o mapa para 1 km, porque a imagem dizia "1.000 m x 1.000 m". O dono corrigiu: "não
+quero mapa de 1 km, quero de 700 m x 700 m, só estou dando ideia dos objetivos". O mapa continua o da
+D-123. Da imagem vieram os objetivos e os cantos.
+
+**Objetivos** (`tools/crop_world.py`; as cinco faixas de setor da D-128 não mudaram):
+
+| Setor | Objetivo | Canto | Era | QG mais perto |
+|---|---|---|---|---|
+| A | Arrozais | sudoeste | Baixada sudoeste | 296 m (era 270) |
+| B | Serraria | noroeste, na mata fechada | Mata fechada | 294 m (era 266) |
+| C | Xóm Gò | centro | Xóm Gò | 295 m |
+| D | Ponte e Cais | sudeste | Arrozal ao sul de An Cường (2) | 318 m (era 252) |
+| E | Engenho | nordeste | Vau do riacho | 291 m (era 254) |
+
+- **Bases mais longe:** os quatro objetivos dos cantos foram para perto das bordas norte e sul (55 a
+  65 m delas) e para longe da borda da própria base. As bases ficaram onde estavam (no meio das
+  bordas oeste e leste): a dos EUA já vai a 7 m da borda.
+- **Lados:** a imagem punha os EUA a oeste. Ficaram a leste, do lado do mar (os fuzileiros
+  desembarcaram pela Green Beach).
+- **Mata fechada:** é a Serraria. `Vegetation.DENSE_NAMES` e a clareira de 10 m
+  (`Landscape.CLEAR_NAMED_M`) seguem o nome; ela continua sem estrada (145 m da estrada principal) e
+  com 25 plantas a até 25 m.
+- **Arrozais:** o Landscape e o `relevo_dem` reconhecem o objetivo de arrozal por "arroz" (era
+  "arrozal", que não pega "Arrozais"). A lavoura fica em volta dele (0 plantas a até 25 m) e a carta
+  mostra os tabuleiros no sudoeste.
+- **Menu principal:** os planos ficam na praça, na Serraria e nos Arrozais.
+- Os nomes estão traduzidos (en, es, vi).
+- **Pendente (lote 26b):** a ponte, o cais, a serraria e o engenho ainda não têm construção (por
+  enquanto há só a bandeira); falta o rio no sul ligando os Arrozais à Ponte e Cais.
+
+**Mais relevo** (`crop_world.mais_relevo`, antes da vila e das estradas, que se ajustam ao chão):
+- O relevo real (DEM, D-66) tem só ~23 m de desnível no mapa; a mata parecia plana.
+- **O que entra:** morros e grotas de design, um campo aleatório suavizado (semente fixa, desvio de
+  40 m), até ±10 m (95% dos pontos), 50% maior fora da área jogável.
+- **Onde não entra:** o peso vai a zero perto do que precisa de chão plano:
+  - casas: de 25 a 60 m;
+  - feições da lavoura (diques, sebes e lâminas): de 12 a 40 m. As da mata o jogo nem põe
+    (FeatureBuilder);
+  - riacho: de 15 a 40 m;
+  - objetivos: de 35 a 70 m;
+  - túneis: de 20 a 50 m;
+  - vila de Xóm Gò: de 150 a 200 m;
+  - bases: de 80 a 120 m;
+  - lavoura dos Arrozais: de 130 a 160 m.
+- **Resultado:** 38% da área ganhou relevo novo, de até 8,3 m; o desnível foi de 23,2 para 26,8 m.
+  Rampa do chão: 95% abaixo de 26%. Fica gravado no Grid (`reliefAdded`): rodar de novo não soma.
+- **Estradas:** principal com 1.501 m e secundária com 1.463 m (eram 1.247 e 1.662). O leito
+  continua com rampa até 15%; o M48 vai e volta do QG a todos os objetivos (99,8% das células).
+
+**Carta:** refeita e reenviada (os blocos antigos ficaram como `Carta.*_v69`).
+
+**Testes:** o `modo.luau` comparava a distância "antes" e "agora" do sorteio de pontos com `<`; com um
+ponto por setor as duas são iguais e o teste só passava por arredondamento. Agora aceita igual.
+
+**Conferido no Studio** (fotos em `testes/lote26/`):
+- os nomes dos setores no `MapConfig`;
+- as distâncias de cada objetivo ao QG mais perto, medidas no jogo;
+- a mata cerrada na Serraria e a lavoura nos Arrozais;
+- o HUD com A a E;
+- a carta tática com os objetivos novos nos cantos;
+- o menu principal na Serraria.
+
+**Não testado:** a partida inteira; o relevo de perto, no chão (as fotos de cima mostram pouco); o
+celular.

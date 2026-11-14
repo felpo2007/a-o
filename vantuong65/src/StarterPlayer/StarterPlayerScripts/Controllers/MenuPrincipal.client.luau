@@ -61,8 +61,9 @@ type Shot = {
 }
 local SHOTS: { Shot } = {
 	-- D-128 (cinco objetivos, um por setor): os Becos e a Sebe deixaram de ser pontos fortes. Os planos
-	-- ficam na praça de Xóm Gò, na mata fechada e no arrozal ao sul de An Cường (2); "An Cường (2)" é
-	-- um local da carta (MapConfig.Locations)
+	-- ficam na praça de Xóm Gò, na mata fechada e no arrozal; "An Cường (2)" é um local da carta
+	-- (MapConfig.Locations). Lote 26 (mapa de 1 km): a mata fechada é a Serraria e o arrozal são os
+	-- Arrozais, a sudoeste
 	{ -- de frente para o grupo na praça da vila (luz do sol de lado)
 		place = "Xóm Gò",
 		anchor = "Xóm Gò",
@@ -75,8 +76,8 @@ local SHOTS: { Shot } = {
 		fov = 38,
 	},
 	{ -- por cima do ombro: o VC, na beira da mata fechada, olha para a vila
-		place = "Mata fechada",
-		anchor = "Mata fechada",
+		place = "Serraria",
+		anchor = "Serraria",
 		toward = "Xóm Gò",
 		faction = "VC",
 		n = 3,
@@ -85,10 +86,10 @@ local SHOTS: { Shot } = {
 		look = Vector3.new(-8, 1.5, 40),
 		fov = 45,
 	},
-	{ -- a câmera sobe atrás dos fuzileiros no arrozal: An Cường (2) à frente
-		place = "Arrozal ao sul de An Cường (2)",
-		anchor = "Arrozal ao sul de An Cường (2)",
-		toward = "An Cường (2)",
+	{ -- a câmera sobe atrás dos fuzileiros nos arrozais: Xóm Gò à frente
+		place = "Arrozais",
+		anchor = "Arrozais",
+		toward = "Xóm Gò",
 		faction = "US",
 		n = 2,
 		cam0 = Vector3.new(-2.5, 1.8, -6.5),

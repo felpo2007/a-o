@@ -108,12 +108,11 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
   - **Lote 25 (D-139): ícone e 8 miniaturas enviados.** O nome (STARLITE: Vietnã 1965) espera a
     permissão `universe.place:write` na chave (ou a troca à mão; `TODO_USUARIO.md`). A descrição nova
     (`marketing/descricao.txt`) espera o aceite do dono.
-  - **Lote 26:** mapa novo pela imagem do dono:
-    - 5 objetivos: arrozais (SO), serraria (NO), vila (centro), ponte e cais (SE), engenho (NE);
-      rio; base dos EUA a oeste e do VC a leste;
-    - um objetivo fica na mata fechada;
-    - bases mais longe dos objetivos;
-    - mais relevo.
+  - **Lote 26a (v70, D-140): feito.** Objetivos da ideia do dono no mapa de 700 m (A Arrozais, B
+    Serraria na mata fechada, C Xóm Gò, D Ponte e Cais, E Engenho), a 291–318 m das bases (eram
+    252–270), e morros e grotas na mata. O dono confirmou: o mapa fica de 700 x 700 m.
+  - **Lote 26b:** as construções da serraria, do engenho, da ponte e do cais, e o rio no sul ligando
+    os Arrozais à Ponte e Cais.
   - **Lote 27:** correção de bugs de textura, gráficos, movimentação, tiros e granadas.
 
 - **Próximos (ideias da análise, esperando o dono):**
@@ -123,6 +122,18 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
   - base do VC sob a mata; nomes do equipamento da Intendência sem tradução; Type 54 em 3ª pessoa;
   - a pá do autoteste na 1ª rodada de cada sessão;
   - as teclas agem por baixo da tela de carregamento (a pá cavou durante o carregamento, D-129).
+
+## v70: lote 26a, objetivos novos, bases mais longe e mais relevo (2026-11-14, D-140)
+- **A publicar.**
+- **Objetivos novos**, no mesmo mapa de 700 m: A Arrozais, B Serraria (na mata fechada), C Xóm Gò,
+  D Ponte e Cais, E Engenho. Cada um fica a 291–318 m do QG mais perto (eram 252–270).
+- **Mais relevo:** morros e grotas de até ±10 m na mata, longe de casas, lavoura, riacho, vila,
+  bases, objetivos e túneis. 38% da área mudou, até 8,3 m.
+- Estradas, vila e carta refeitas; nomes traduzidos.
+- **Conferido no Studio:** distâncias, mata cerrada na Serraria, HUD A–E, carta e menu; fotos em
+  `testes/lote26/`.
+- **Testes:** Lune todos ok; pytest; ruff; luau-lsp.
+- **Falta (26b):** construções da serraria, do engenho, da ponte e do cais; o rio no sul.
 
 ## Lote 25: página do jogo (2026-11-14, D-139)
 - Sem mudança no place (sem versão nova).

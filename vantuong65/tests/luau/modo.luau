@@ -155,7 +155,9 @@ test("sorteio dos pontos fortes: 1 por setor, no setor certo, e a frente fica ma
 	end
 	local avgNew = sumNew / n
 	print(string.format("       (vizinhos até o S%d: %.0f m em média antes, %.0f m agora)", MID, sumOld, avgNew))
-	assert(avgNew < sumOld, "a cadeia deveria aproximar os pontos")
+	-- D-128: com um ponto só por setor não há o que aproximar (antes e agora dão a mesma conta; a
+	-- comparação estrita passava só pelo arredondamento e caiu com as posições do lote 26)
+	assert(avgNew <= sumOld + 1e-6, "a cadeia deveria aproximar os pontos")
 	assert(Front.firstSector("Offensive", NS) == NS and Front.firstSector("Warfare", NS) == MID)
 end)
 

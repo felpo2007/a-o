@@ -85,7 +85,7 @@ return function(): Result
 	for _, sp in MapConfig.Strongpoints do
 		if sp.name == "Cemitério" then
 			add("grave_mound", at(sp.x, sp.z), 6)
-		elseif sp.name == "Vau do riacho" then
+		elseif sp.name == "Ponte e Cais" then -- lote 26 (era o Vau do riacho)
 			add("log_bridge", at(sp.x, sp.z), 1)
 		end
 	end
