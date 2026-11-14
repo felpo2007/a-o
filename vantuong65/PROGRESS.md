@@ -78,7 +78,7 @@
   - a pá do autoteste na 1ª rodada de cada sessão.
 
 ## v58: metade dos arbustos e capim mais claro (2026-11-14, D-127)
-- **Publicação:** pendente (ver o commit "v58 publicada").
+- **Publicada** como versão 58 do place (build do commit 61df564).
 - **Feito** (escolhas do dono depois do lote 13):
   - metade dos arbustos da mata sai; o resto da mata fica igual, planta por planta (teste na F5);
   - capim mais claro: (100, 134, 74), com o relevo e os diques à vista;
