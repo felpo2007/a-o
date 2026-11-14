@@ -1,0 +1,243 @@
+--!strict
+-- Arma provisória feita de peças, enquanto o modelo do ForgeGUI não está publicado (AssetIds em 0).
+-- Antes, sem asset, ninguém aparecia segurando arma e a arma caída era uma tábua.
+-- Comprimento total real de cada arma (fichas públicas); o resto é proporção, sem pretensão de
+-- detalhe. Origem no punho; a frente é −Z (LookVector). Tem os Attachments "Muzzle" (boca do
+-- cano) e "Sight" (linha de visada, na alça), usados pela arma em primeira pessoa e pelos efeitos.
+local WeaponArt = require(script.Parent.WeaponArt)
+local Pegada3P = require(script.Parent.Pegada3P)
+local Weapons = require(script.Parent.Weapons)
+
+local GunModel = {}
+
+-- ===== tamanho da arma (D-108, Shared/Corpo.ARMA_K) =====
+-- Escala a arma em volta do punho (pivô): comprimento l ao longo do cano e grossura g (largura e
+-- altura). Reversível: a 1ª chamada guarda a medida real de cada peça e ponto (atributos VT65Base*) e
+-- as seguintes partem dela. O molde sai de fit/build na escala da 3ª pessoa (Pegada3P.fatores3P), para
+-- todos os clientes; a 1ª pessoa (WeaponVisuals) volta ao real e aplica a sua.
+function GunModel.scale(model: Model, l: number, g: number)
+	local cl, cg = model:GetAttribute("VT65EscalaL"), model:GetAttribute("VT65EscalaG")
+	local l0 = if type(cl) == "number" then cl else 1
+	local g0 = if type(cg) == "number" then cg else 1
+	local piv = model:GetPivot()
+	-- medida real (escala 1) de quem ainda não tem: a de agora desfeita pela escala de agora
+	local function baseOf(inst: Instance, cf: CFrame): CFrame
+		local b = inst:GetAttribute("VT65Base")
+		if typeof(b) == "CFrame" then
+			return b
+		end
+		local rel = piv:ToObjectSpace(cf)
+		local p = rel.Position
+		local base = CFrame.new(p.X / g0, p.Y / g0, p.Z / l0) * rel.Rotation
+		inst:SetAttribute("VT65Base", base)
+		return base
+	end
+	local function at(base: CFrame): CFrame
+		return piv * (CFrame.new(Pegada3P.escalaPonto(base.Position, l, g)) * base.Rotation)
+	end
+	-- os pontos são lidos antes de as peças mexerem
+	local atts: { { a: Attachment, base: CFrame } } = {}
+	for _, d in model:GetDescendants() do
+		if d:IsA("Attachment") then
+			table.insert(atts, { a = d, base = baseOf(d, d.WorldCFrame) })
+		end
+	end
+	for _, d in model:GetDescendants() do
+		if d:IsA("BasePart") then
+			local base = baseOf(d, d.CFrame)
+			local bs = d:GetAttribute("VT65BaseSize")
+			if typeof(bs) ~= "Vector3" then
+				bs = d.Size / Pegada3P.escalaTamanho(Vector3.one, base.Rotation, l0, g0)
+				d:SetAttribute("VT65BaseSize", bs)
+			end
+			d.Size = Pegada3P.escalaTamanho(bs :: Vector3, base.Rotation, l, g)
+			d.CFrame = at(base)
+		end
+	end
+	for _, it in atts do
+		it.a.WorldCFrame = at(it.base)
+	end
+	local primary = model.PrimaryPart
+	if primary then
+		primary.PivotOffset = primary.CFrame:ToObjectSpace(piv)
+	end
+	model:SetAttribute("VT65EscalaL", l)
+	model:SetAttribute("VT65EscalaG", g)
+end
+
+-- Escala da 3ª pessoa pelo tipo da arma (meia largura do lado, LowX, acompanha a grossura).
+local function scale3P(model: Model, kind: string?, lowX: number)
+	local l, g = Pegada3P.fatores3P(kind)
+	GunModel.scale(model, l, g)
+	model:SetAttribute("LowX", lowX * g)
+end
+
+local M = 0.28
+local LENGTH_M: { [string]: number } = {
+	m14 = 1.126,
+	type56 = 0.882,
+	sks = 1.02,
+	m60 = 1.105,
+	rpd = 1.037,
+	m79 = 0.737,
+	m1911 = 0.216,
+	type54 = 0.196,
+	rpg2 = 0.95,
+	m70 = 1.13, -- Winchester M70 de cano de 24 pol. (tools/blender/armas.py; total PLACEHOLDER)
+	mosin = 1.232, -- Mosin-Nagant 91/30 (wiki)
+	win12 = 1.003, -- Winchester Model 12 Trench Gun, cano de 20 pol. (tools/blender/espingarda.py)
+}
+local WOOD = Color3.fromRGB(96, 66, 42)
+local STEEL = Color3.fromRGB(44, 45, 47)
+
+local function piece(model: Model, name: string, sizeM: Vector3, zM: number, yM: number, color: Color3): Part
+	local p = Instance.new("Part")
+	p.Name = name
+	p.Size = sizeM / M
+	p.CFrame = CFrame.new(0, yM / M, -zM / M)
+	p.Color = color
+	p.Material = if color == WOOD then Enum.Material.Wood else Enum.Material.Metal
+	p.TopSurface = Enum.SurfaceType.Smooth
+	p.BottomSurface = Enum.SurfaceType.Smooth
+	p.CanCollide = false
+	p.CanQuery = false
+	p.CanTouch = false
+	p.CastShadow = false
+	p.Massless = true
+	p.Parent = model
+	return p
+end
+
+function GunModel.length(weaponId: string, kind: string?): number
+	return LENGTH_M[weaponId] or (if kind == "pistol" then 0.21 else 1.0)
+end
+
+-- Monta a arma (peças soltas, sem solda: quem usa decide ancorar ou soldar com GunModel.weld).
+function GunModel.build(weaponId: string, kind: string?): Model
+	local L = GunModel.length(weaponId, kind)
+	local model = Instance.new("Model")
+	model.Name = "Weapon"
+	model:SetAttribute("WeaponId", weaponId)
+	model:SetAttribute("Kind", kind or "rifle")
+	local receiver: Part
+	local muzzleZ, sightY, sightZ = 0, 0, 0
+	if kind == "pistol" then
+		receiver = piece(model, "Slide", Vector3.new(0.028, 0.034, L), L * 0.4, 0.03, STEEL)
+		piece(model, "Grip", Vector3.new(0.026, 0.11, 0.035), 0, -0.035, STEEL)
+		muzzleZ, sightY, sightZ = L * 0.9, 0.055, L * 0.0
+	else
+		-- coronha atrás do punho, caixa da culatra, guarda-mão e cano até a boca (−30% a +70% de L)
+		piece(model, "Stock", Vector3.new(0.042, 0.10, L * 0.28), -L * 0.16, -0.015, WOOD)
+		receiver = piece(model, "Receiver", Vector3.new(0.05, 0.07, L * 0.27), L * 0.115, 0.02, STEEL)
+		piece(model, "Handguard", Vector3.new(0.048, 0.052, L * 0.22), L * 0.36, 0.018, WOOD)
+		piece(model, "Barrel", Vector3.new(0.02, 0.02, L * 0.23), L * 0.585, 0.025, STEEL)
+		piece(model, "Grip", Vector3.new(0.03, 0.09, 0.04), 0, -0.04, WOOD)
+		local magH = if kind == "mg" then 0.1 else 0.13
+		piece(model, "Magazine", Vector3.new(0.028, magH, 0.06), L * 0.1, -0.02 - magH / 2, STEEL)
+		piece(model, "FrontSight", Vector3.new(0.006, 0.03, 0.006), L * 0.68, 0.05, STEEL)
+		piece(model, "RearSight", Vector3.new(0.03, 0.025, 0.012), L * 0.2, 0.065, STEEL)
+		muzzleZ, sightY, sightZ = L * 0.7, 0.067, L * 0.2
+	end
+	model.PrimaryPart = receiver
+	local muzzle = Instance.new("Attachment")
+	muzzle.Name = "Muzzle"
+	muzzle.CFrame = receiver.CFrame:ToObjectSpace(CFrame.new(0, 0.025 / M, -muzzleZ / M))
+	muzzle.Parent = receiver
+	local sight = Instance.new("Attachment")
+	sight.Name = "Sight"
+	sight.CFrame = receiver.CFrame:ToObjectSpace(CFrame.new(0, sightY / M, -sightZ / M))
+	sight.Parent = receiver
+	-- mãos (IK no PostureController): direita no punho; esquerda logo à frente do carregador, a
+	-- 22% do comprimento. O braço esquerdo alcança ~0,58 m: a 36% (meio do guarda-mão) não chegava.
+	local grip = Instance.new("Attachment")
+	grip.Name = "Grip"
+	grip.CFrame = receiver.CFrame:ToObjectSpace(CFrame.identity)
+	grip.Parent = receiver
+	local support = Instance.new("Attachment")
+	support.Name = "Support"
+	support.CFrame = receiver.CFrame:ToObjectSpace(CFrame.new(0, 0, -(if kind == "pistol" then 0 else L * 0.22) / M))
+	support.Parent = receiver
+	model.WorldPivot = CFrame.identity -- punho
+	-- meia largura da caixa da culatra (arma caída de lado); D-108: na escala da 3ª pessoa
+	scale3P(model, kind, -0.025 / M)
+	return model
+end
+
+-- Rotação que leva o eixo da malha que aponta para a boca a −Z (convenção da arma provisória).
+local TURN: { [string]: CFrame } = {
+	["-Z"] = CFrame.identity,
+	["+Z"] = CFrame.Angles(0, math.pi, 0),
+	["-X"] = CFrame.Angles(0, -math.pi / 2, 0),
+	["+X"] = CFrame.Angles(0, math.pi / 2, 0),
+}
+
+-- Prepara o modelo PUBLICADO da arma com a mesma convenção da provisória: pivô no punho, boca em
+-- −Z e os Attachments Muzzle/Sight/Grip/Support na peça principal. O asset chega centrado na caixa,
+-- aninhado (Model > Model > Model > MeshPart) e sem pontos; os pontos vêm de Shared/WeaponArt,
+-- gerado dos GLB por tools/weapon_landmarks.py. Devolve false se a arma não tem pontos.
+function GunModel.fit(model: Model, weaponId: string): boolean
+	local art = WeaponArt[weaponId]
+	local axis = art and TURN[art.forward]
+	if not (art and axis) then
+		return false
+	end
+	-- yaw: modelo gerado torto em guinada (Type 54 ~27°, RPD ~7°; tools/weapon_landmarks.py)
+	local turn = axis * CFrame.Angles(0, art.yaw, 0)
+	-- a malha da arma é a maior peça (a bandoleira e afins, se vierem separadas, ficam soldadas)
+	local mesh: BasePart? = nil
+	for _, d in model:GetDescendants() do
+		if d:IsA("BasePart") and (mesh == nil or d.Size.Magnitude > (mesh :: BasePart).Size.Magnitude) then
+			mesh = d
+		end
+	end
+	if not mesh then
+		return false
+	end
+	local inv = turn:Inverse()
+	-- SightFront: topo da massa de mira; a mira em primeira pessoa alinha Sight → SightFront ao centro
+	local points: { [string]: Vector3 } = {
+		Muzzle = art.muzzle,
+		Sight = art.sight,
+		SightFront = art.front,
+		Grip = art.grip,
+		Support = art.support,
+	}
+	for name, pos in points do
+		local old = mesh:FindFirstChild(name)
+		if old then
+			old:Destroy()
+		end
+		local a = Instance.new("Attachment")
+		a.Name = name
+		a.CFrame = CFrame.new(pos) * inv -- LookVector = boca, como na provisória
+		a.Parent = mesh
+	end
+	model.PrimaryPart = mesh
+	mesh.PivotOffset = CFrame.new(art.grip) * inv
+	model:SetAttribute("WeaponId", weaponId)
+	-- D-108: o molde (mão, costas, chão, prévias, para todos) na escala da 3ª pessoa
+	local wp = Weapons.get(weaponId)
+	scale3P(model, if wp then wp.kind else nil, art.lowX)
+	model:SetAttribute("EyeM", art.eyeM) -- olho até o ponto Sight, mirando (WeaponVisuals; tamanho real)
+	-- alça medida na malha (D-69): o WeaponVisuals desenha anel/entalhe e massa limpos por cima
+	model:SetAttribute("SightKind", art.sightKind)
+	model:SetAttribute("SightMm", art.sightMm)
+	return true
+end
+
+-- Solda todas as peças na principal (para a arma presa na mão ou solta no chão).
+function GunModel.weld(model: Model)
+	local primary = model.PrimaryPart
+	if not primary then
+		return
+	end
+	for _, d in model:GetDescendants() do
+		if d:IsA("BasePart") and d ~= primary then
+			local w = Instance.new("WeldConstraint")
+			w.Part0, w.Part1 = primary, d
+			w.Parent = d
+		end
+	end
+end
+
+return GunModel

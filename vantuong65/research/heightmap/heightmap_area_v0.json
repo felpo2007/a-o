@@ -1,0 +1,36 @@
+{
+ "fonte": "Copernicus GLO-30 DSM (tile N15 E108), (c) DLR e.V. 2010-2014 e (c) Airbus Defence and Space GmbH 2014-2018, Copernicus/ESA",
+ "processamento": "reprojeção cúbica p/ WGS84 UTM49N; abertura 70 m; gauss 15 m; min -3 m",
+ "centro_wgs84_utm49": [
+  269680.0,
+  1692741.4
+ ],
+ "area_jogavel_m": [
+  4000.0,
+  2400.0
+ ],
+ "margem_m": 500.0,
+ "tamanho_m": [
+  5000.0,
+  3400.0
+ ],
+ "tamanho_studs": [
+  17857,
+  12143
+ ],
+ "metros_por_px": 2.24,
+ "studs_por_px": 8,
+ "datum_vertical": "EGM2008 (nível médio do mar ~0 m)",
+ "status": "v0 provisório (DSM); substituir pelo DTM das curvas de 1965",
+ "arquivo": "heightmap_area_v0.png",
+ "bits": 16,
+ "largura_px": 2232,
+ "altura_px": 1518,
+ "altura_min_m": -0.22,
+ "altura_max_m": 77.98,
+ "altura_min_studs": -0.8,
+ "altura_max_studs": 278.5,
+ "valor_0": "altura_min",
+ "valor_65535": "altura_max",
+ "orientacao": "norte para cima (-Z no Roblox), leste para a direita (+X)"
+}

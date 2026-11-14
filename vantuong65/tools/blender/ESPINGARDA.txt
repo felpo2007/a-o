@@ -1,0 +1,46 @@
+ESPINGARDA CALIBRE 12 (frente de classes, 2026-11-13) - para a frente de Blender modelar
+
+ESCOLHA: Winchester Model 12 "Trench Gun" (versao militar da Segunda Guerra/Coreia)
+CHAVE DA ARMA (Shared/Weapons, AssetIds.Models): win12
+  - arquivo sugerido: assets/blender/arma_win12.glb (mesmo padrao do arma_m70 e do arma_mosin)
+  - AssetIds.Models.win12 (como m70 e mosin: a chave da arte e o id da arma; 0 = arma
+    provisoria em pecas do GunModel), GunModel.LENGTH_M.win12 = 1.003 e WeaponArt.win12 pelo
+    tools/weapon_landmarks.py
+
+POR QUE ESTA (e nao a Ithaca 37 nem a Remington 870):
+  - USMC em agosto de 1965 (Operacao Starlite): o Model 12 era a espingarda dos fuzileiros na
+    Coreia e no comeco do Vietna (Wikipedia "Winchester Model 1912": "During the Korean War, the
+    Marines used the Model 12 extensively"; usada no Vietna "particularly its early part").
+  - Ithaca 37: o contrato de 1962 (22.000 riot guns) foi para o Exercito do Vietna do Sul; para a
+    Marinha e o USMC o pedido grande e de maio de 1966 (American Rifleman, "The Ithaca Model 37 In
+    U.S. Military Service").
+  - Remington 870 Mk 1: pedido do USMC em 1966, padronizada em 1969 (Marine Corps Base Camp
+    Pendleton, "Evolution of shotguns in the Marine Corps"; American Rifleman).
+
+MEDIDAS (a conferir na foto de referencia; fonte secundaria):
+  - comprimento total: 1.003 mm (39,5 pol.)                      [modernfirearms.net]
+  - cano: 508 mm (20 pol.), cilindrico (sem choke)                [modernfirearms.net]
+  - massa vazia: 3,9 kg                                           [modernfirearms.net]
+  - calibre 12, cartucho de 2 3/4 pol. (70 mm), cartucho de plastico vermelho (XM162) ou de
+    latao (M19)                                                   [American Rifleman]
+  - deposito tubular sob o cano: 6 cartuchos + 1 na camara        [Wikipedia]
+  - acao de bomba (telha de madeira corre ~10 cm para tras e volta), ferrolho basculante,
+    ejecao pela DIREITA (janela no lado direito da caixa da culatra), carregamento por baixo
+    (portinhola na frente do guarda-mato)
+
+APARENCIA (trench gun, versao da Segunda Guerra):
+  - capa de calor de aco perfurada cobrindo ~3/4 do cano, com 4 fileiras de furos (6 na
+    versao da Primeira Guerra) [Wikipedia]
+  - adaptador de baioneta M1917 sob a boca do cano (a baioneta nao precisa vir)
+  - coronha e telha de nogueira; telha com sulcos (corncob/ribbed)
+  - acabamento: aco oxidado (parkerizado nas da Segunda Guerra), fosco
+  - zarelhos de bandoleira (bandoleira de lona verde-oliva)
+  - mira: so a massa (conta de latao) na boca do cano; sem alca
+
+PONTOS PARA O weapon_landmarks.py:
+  - mao direita no punho da coronha, mao esquerda na telha (que corre na bomba: se der, telha
+    como peca separada com o nome "Telha" para a animacao de bombear)
+  - janela de ejecao na direita da caixa da culatra; portinhola de carga embaixo
+  - massa: conta de latao no topo da boca
+
+Duvidas: falar com a frente de classes (Shared/Weapons.luau, entrada "win12").

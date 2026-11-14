@@ -1,0 +1,40 @@
+# Fontes e rasters grandes: reproduzíveis com tools/fetch_sources.sh
+research/src/
+research/dem/
+research/carta/
+research/sat/
+.venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+assets/forgegui/models/
+# config por usuário (IDs da experiência)
+cloud.json
+# gerado pelo rojo para o luau-lsp
+sourcemap.json
+
+# especificação original do dono (prompts): só local, nunca no repositório público
+especificacao/
+assets/texturas/
+# árvores do Poly Haven (tools/fetch_trees.py + tools/prep_trees.py) e conferência da mira
+assets/arvores_src/
+assets/arvores/
+assets/miras/
+assets/ceu/
+# arroz em cartões gerado (tools/make_rice.py, D-74)
+assets/arroz/
+# animais em partes (tools/rig_animals.py, D-77)
+assets/animais/
+# captura de movimento da CMU (tools/anim/fetch_cmu.py) e animações geradas (tools/anim)
+assets/mocap/
+# carta topográfica do mapa tático e os dados exportados pelo Lune (tools/make_carta.py)
+assets/carta/
+# camuflagem de mato das skins: malha e texturas geradas (tools/ghillie.py)
+assets/ghillie/
+# linha de produção do Blender: GLB refeitos/novos, comparações e trabalho (tools/blender/lote.py)
+assets/blender/
+# facas e baionetas do Blender, sons e prévias (tools/faca, D-94)
+assets/facas/
+# ícones das skins e catálogo exportado para criar os itens de Robux (tools/roblox_cloud.py create-skins)
+assets/skins_icones/
+assets/skins_loja.json

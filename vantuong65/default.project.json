@@ -1,0 +1,147 @@
+{
+  "name": "VanTuong65",
+  "tree": {
+    "$className": "DataModel",
+    "ReplicatedFirst": {
+      "$path": "src/ReplicatedFirst"
+    },
+    "ReplicatedStorage": {
+      "Shared": {
+        "$path": "src/ReplicatedStorage/Shared"
+      }
+    },
+    "ServerStorage": {
+      "VT65Build": {
+        "$path": "src/ServerStorage/VT65Build"
+      }
+    },
+    "ServerScriptService": {
+      "Services": {
+        "$path": "src/ServerScriptService/Services"
+      },
+      "Modules": {
+        "$path": "src/ServerScriptService/Modules"
+      }
+    },
+    "StarterGui": {
+      "$properties": {
+        "ScreenOrientation": "LandscapeSensor"
+      }
+    },
+    "StarterPlayer": {
+      "$properties": {
+        "CharacterWalkSpeed": 11.07,
+        "DevTouchMovementMode": "Scriptable",
+        "DevTouchCameraMovementMode": "Classic"
+      },
+      "StarterPlayerScripts": {
+        "Controllers": {
+          "$path": "src/StarterPlayer/StarterPlayerScripts/Controllers"
+        }
+      }
+    },
+    "VoiceChatService": {
+      "$properties": {
+        "UseAudioApi": "Enabled",
+        "EnableDefaultVoice": false
+      }
+    },
+    "TextChatService": {
+      "$properties": {
+        "ChatVersion": "TextChatService"
+      }
+    },
+    "Workspace": {
+      "$properties": {
+        "StreamingEnabled": true,
+        "StreamingMinRadius": 384,
+        "StreamingTargetRadius": 1280,
+        "StreamOutBehavior": "Opportunistic"
+      }
+    },
+    "Lighting": {
+      "$properties": {
+        "Technology": "ShadowMap",
+        "ClockTime": 7.0,
+        "GeographicLatitude": 15.3,
+        "GlobalShadows": true,
+        "EnvironmentDiffuseScale": 1,
+        "EnvironmentSpecularScale": 1,
+        "Brightness": 3.2,
+        "ExposureCompensation": 0.1,
+        "ShadowSoftness": 0.18,
+        "OutdoorAmbient": [
+          0.55,
+          0.48,
+          0.38
+        ],
+        "Ambient": [
+          0.16,
+          0.15,
+          0.13
+        ]
+      },
+      "Atmosphere": {
+        "$className": "Atmosphere",
+        "$properties": {
+          "Density": 0.3,
+          "Offset": 0.3,
+          "Haze": 1.1,
+          "Glare": 0.4,
+          "Color": [
+            0.86,
+            0.8,
+            0.7
+          ],
+          "Decay": [
+            0.62,
+            0.52,
+            0.4
+          ]
+        }
+      },
+      "Sky": {
+        "$className": "Sky",
+        "$properties": {
+          "SunAngularSize": 10,
+          "MoonAngularSize": 9,
+          "StarCount": 1500,
+          "SkyboxFt": "rbxassetid://98142843504803",
+          "SkyboxBk": "rbxassetid://73889296552932",
+          "SkyboxLf": "rbxassetid://71387812681789",
+          "SkyboxRt": "rbxassetid://99209067058568",
+          "SkyboxUp": "rbxassetid://83892443850885",
+          "SkyboxDn": "rbxassetid://79510939689941"
+        }
+      },
+      "ColorCorrection": {
+        "$className": "ColorCorrectionEffect",
+        "$properties": {
+          "Saturation": -0.05,
+          "Contrast": 0.15,
+          "Brightness": 0.01,
+          "TintColor": [
+            1.0,
+            0.93,
+            0.83
+          ]
+        }
+      },
+      "Bloom": {
+        "$className": "BloomEffect",
+        "$properties": {
+          "Intensity": 0.35,
+          "Size": 24,
+          "Threshold": 1.4
+        }
+      },
+      "SunRays": {
+        "$className": "SunRaysEffect",
+        "$properties": {
+          "Intensity": 0.05,
+          "Spread": 0.6
+        }
+      }
+    }
+  }
+}
