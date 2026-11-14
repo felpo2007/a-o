@@ -120,7 +120,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
   - as teclas agem por baixo da tela de carregamento (a pá cavou durante o carregamento, D-129).
 
 ## v67: lote 22, bandeiras iguais, grama mais baixa e contagem de 10 s (2026-11-14, D-136)
-- **A publicar.**
+- **Publicada** (versão 67 do place, commit f0b7a5a).
 - **Feito:**
   - bandeiras dos EUA e da Frente no mesmo retângulo de 5:3, na mesa e nas fichas; imagens
     refeitas nessa proporção e reenviadas (as antigas como `Images.bandeira_*_v66`);
