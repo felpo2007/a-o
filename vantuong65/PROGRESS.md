@@ -65,7 +65,7 @@
 - **Lote 12, análise:** bots, gráficos, armas, tiros e veículos (junto do lote 6).
 
 ## v56: lote 11, passe em linha do tempo e loja com imagens (2026-11-14, D-124)
-- **Publicação:** pendente (ver o commit "v56 publicada").
+- **Publicada** como versão 56 do place (build do commit dc892ea).
 - **Feito:**
   - passe: os 50 níveis numa rota da esquerda para a direita, com um marco por nível (maior de 10 em
     10), o trecho andado em latão e o marco atual pulsando; Veterano em cima, Grátis embaixo; a ficha
