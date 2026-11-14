@@ -54,6 +54,27 @@ CFG: dict[str, dict] = {
         "half_m": 0.006,
     },
     "sks": {"kind": "entalhe", "rear": (0.415, 0.44), "front": (0.03, 0.055), "capuz": True},
+    # Lote 7 (2026-11-13, dono: "a RPD não atira onde a mira aponta"): a massa da RPD fica ~5 cm
+    # acima do cano a 12–15% da boca e a alça a 65–68%; a linha da D-60 usava a ponta do cano
+    "rpd": {
+        "kind": "entalhe",
+        "rear": (0.655, 0.68),
+        "front": (0.115, 0.15),
+        "janela_m": (-0.04, 0.04, -0.01, 0.08),
+        "capuz": True,  # massa num capuz de anel aberto em cima: a ponta é o poste dentro dele
+    },
+    # M60: massa com capuz a 8–12% da boca (~11 cm acima do cano). A alça da malha não tem entalhe
+    # limpo (três dentes, o do meio fora da linha da massa): "topo" = o olho passa rente ao dente
+    # que fica na linha da massa (2 mm à esquerda do cano)
+    "m60": {
+        "kind": "topo",
+        "rear": (0.70, 0.73),
+        "front": (0.08, 0.12),
+        "janela_m": (-0.05, 0.05, 0.0, 0.14),
+        "center_m": -0.002,
+        "half_m": 0.004,
+        "capuz": True,
+    },
     # Armas do Blender com GLB próprio (tools/blender/espingarda.py): só o nó "Arma" (a MeshPart
     # que recebe os pontos), boca em -Z. "conta": espingarda sem alça; a massa é a conta de latão
     # na boca e a "alça" é o topo de trás da caixa da culatra (o olho alinha a conta com ele).
@@ -197,7 +218,7 @@ def raster(tris2d: np.ndarray, lo: np.ndarray, hi: np.ndarray, px: float) -> np.
 
 def medir(key: str, cfg: dict) -> dict:
     a = Arma(key)
-    out: dict = {"key": key}
+    out: dict = {"key": key, "kind": cfg["kind"]}
     # ---- alça ----
     t = a.fatia(*cfg["rear"])
     jx0, jx1, jy0, jy1 = cfg.get("janela_m", (-0.03, 0.03, -0.01, 0.06))
@@ -227,7 +248,7 @@ def medir(key: str, cfg: dict) -> dict:
             raise SystemExit(f"{key}: nenhum furo fechado na janela da alça {cfg['rear']}")
         rear = (melhor[1], melhor[2])
         out["furo_mm"] = round(2 * np.sqrt(melhor[3] / np.pi) * PX_M * 1000, 2)
-    elif cfg["kind"] == "conta":
+    elif cfg["kind"] in ("conta", "topo"):
         # sem alça: o ponto mais alto perto do plano do cano (topo da caixa da culatra)
         topo = np.full(w, np.nan)
         for j in range(w):

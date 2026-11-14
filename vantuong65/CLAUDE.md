@@ -102,7 +102,7 @@ O `sourcemap.json` não vai para o Git.
 - Armas: `tools/armas_parker.py` gera `<arma>_studs_parker.glb` (aço fosco, texturas de 1024) a
   partir do GLB do gerador; é ele que sobe. Rode depois do `fetch_forgegui_assets.py`.
 - Mira (D-67): `tools/sight_align.py` mede o centro do anel ou do entalhe e a ponta da massa na
-  malha (M14, Type 56, SKS); o `weapon_landmarks.py` usa. `--side` desenha a arma de lado para
+  malha (M14, Type 56, SKS, RPD, M60; na M60 o modo "topo", D-119); o `weapon_landmarks.py` usa. `--side` desenha a arma de lado para
   achar as janelas de uma arma nova.
 - Céu (D-69): `uv run python tools/fetch_sky.py` corta o HDRI em 6 faces (`assets/ceu/`). Os IDs de
   imagem vão no `Sky` do `default.project.json` (resolvidos no Studio, como os do chão). Para conferir
@@ -134,7 +134,7 @@ O `sourcemap.json` não vai para o Git.
 - Segredos só no `.env` (no `.gitignore`), nunca no código nem no chat.
 - ForgeGUI: nunca regenerar um job em `outcome_unknown`. "failed" com `retryable` pode ser
   retomado com `generation_retry`.
-- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-119) e atualize `PROGRESS.md`.
+- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-120) e atualize `PROGRESS.md`.
 - Metas da Parte 2: vegetação ≤ 3 mil triângulos, props ≤ 5 mil, herói ≤ 20 mil (`ArtBudget`,
   conferido pelo teste da F5).
 - Commits no branch acima, com mensagem em português.

@@ -123,9 +123,13 @@ def yaw_fix(p: np.ndarray, fwd: str) -> float:
 # centro da mão abaixo da linha do cano (m). Estatística de vértices não serve aqui: bandoleira,
 # bipé e tambor puxam a média, e o meio de um tubo reto nem tem vértice (RPG-2). A arma provisória
 # tinha o punho 2,5 cm abaixo do cano; aqui a mão desce até o punho de pistola ou o delgado.
-GRIP_DROP_M = {"m1911": 0.06, "type54": 0.06, "rpg2": 0.09}
+# Lote 7 (2026-11-13): na RPD e na M60 a mão ficava rente à caixa (5 cm), fora do punho de pistola
+# (que começa ~10 cm abaixo do cano nessas malhas); mirando, ela tapava meia tela (Studio)
+GRIP_DROP_M = {"m1911": 0.06, "type54": 0.06, "rpg2": 0.09, "rpd": 0.13, "m60": 0.12}
 GRIP_DROP_DEFAULT = 0.05
-SUPPORT_DROP_M = {"rpg2": 0.05}
+# RPD: a linha de visada sobe da alça (rente ao cano) à massa (4 cm acima); com a mão esquerda a
+# 4 cm abaixo do cano, os dedos apareciam atrás da massa e tapavam o alvo (Studio, lote 7)
+SUPPORT_DROP_M = {"rpg2": 0.05, "rpd": 0.08}
 SUPPORT_DROP_DEFAULT = 0.04
 
 
@@ -247,9 +251,15 @@ def landmarks(key: str) -> dict:
         if "furo_mm" in med:
             eye_m = EYE_ANEL_M
             sight_kind, sight_mm = "anel", float(med["furo_mm"])
+        elif med.get("kind") == "topo":
+            # alça sem entalhe limpo (M60): olho sobre o punho, sem a alça e a massa desenhadas
+            eye_m = round(float(max(0.06, (gu - med["rear_u"]) * length * M)), 3)
         else:
             eye_m = round(float(max(0.06, (gu - med["rear_u"]) * length * M)), 3)
             sight_kind, sight_mm = "entalhe", float(med["entalhe_mm"])
+        # alça em cima do punho (RPD, M60): com o olho a 6 cm dela, a mão direita ficava colada na
+        # câmera; o olho recua até a mão ficar ~9 cm à frente dele
+        eye_m = EYE_SIGHT_M.get(key, eye_m)
     grip = at(gu, bore_y - GRIP_DROP_M.get(key, GRIP_DROP_DEFAULT) / M, bore_lat)
     support_drop = SUPPORT_DROP_M.get(key, SUPPORT_DROP_DEFAULT)
     support = grip if pistol else at(SUPPORT_U[key], bore_y - support_drop / M, bore_lat)
@@ -278,6 +288,7 @@ def vec(v: list[float]) -> str:
 
 MEDIDAS: dict[str, dict] = {}
 EYE_ANEL_M = 0.045
+EYE_SIGHT_M = {"rpd": 0.12, "m60": 0.12}  # olho até a alça medida (m), quando o padrão não serve
 
 # Armas modeladas no Blender (tools/blender/armas.py, 2026-11-12): os pontos não são estimados da
 # malha, são os da construção, medidos no referencial da MeshPart "Arma" relendo o GLB exportado

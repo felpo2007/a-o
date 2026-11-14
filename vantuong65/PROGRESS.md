@@ -35,8 +35,8 @@
 - Perguntas ao dono: a M4 (é de 1994); a mão escorregando (em que vista e momento).
 
 ## Fila do dono de 13/11 à noite (depois da v50, um lote por vez)
-- **Lote 7, armas:** a RPD não atira onde a mira aponta. Conferir todas as armas: pegada, aparência e
-  a saída da bala no cano, alinhada com a mira.
+- **Lote 7 (v51, D-119): feito.** A mira da RPD e da M60 medidas na malha (massa e alça de
+  verdade no centro da tela), a mão no punho de pistola e a esquerda da RPD fora da visada.
 - **Lote 8, telas:**
   - tela de baixa só com RENASCER AQUI (abre duas opções: créditos ou Robux, o Robux colorido),
     ESCOLHER OUTRO PONTO, RENASCER COM VEÍCULO e MENU. Saem LOJA, PASSE, MISSÕES e também o
@@ -53,6 +53,20 @@
 - **Lote 11, passe e loja:** o passe em linha do tempo horizontal, da esquerda para a direita; a loja
   atraente, com imagens, cores e design bonito.
 - **Lote 12, análise:** bots, gráficos, armas, tiros e veículos (junto do lote 6).
+
+## v51: lote 7, a mira da RPD e da M60 (2026-11-13, D-119)
+- **Feito:**
+  - RPD: a massa estimada era a ponta do cano; agora são a massa (4,3 cm acima do cano, no capuz) e
+    o entalhe de 6,4 mm medidos na malha;
+  - M60: a massa no capuz (10,7 cm acima do cano) e o dente da alça na linha dela (modo "topo" no
+    `tools/sight_align.py`);
+  - pegada: a mão direita no punho de pistola (12 a 13 cm abaixo do cano); o olho a 12 cm da alça; a
+    mão esquerda da RPD fora da visada;
+  - teste novo em `armas.luau`.
+- **Conferido no Studio:** a alça e a massa no centro da tela (RPD 1 px, M60 0,2 px, M1911 0,1 px); as
+  mãos 19° a 61° abaixo do centro, fora da visada; a RPD sem mirar com bipé e as duas mãos.
+- **Não testado:** 3ª pessoa com a mão nova; controle e celular mirando. A Type 54 cinza-clara fica
+  para o lote 12.
 
 ## v50: menu em planos de cinema e tutorial por aparelho (2026-11-13, D-118)
 - **Publicada** como versão 50 do place (build do commit 77c9d80).

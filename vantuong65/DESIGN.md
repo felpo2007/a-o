@@ -4140,3 +4140,49 @@ jogando. Melhore essa tela do lobby, não gostei do personagem e do fundo".
 
 **Não testado:** celular de verdade e controle de verdade no menu, além do controle ligado no PC do
 dono, que mexia nos menus durante o teste.
+
+## D-119 — Lote 7: a mira da RPD e da M60 no lugar certo (v51, 2026-11-13)
+
+Pedido do dono: "a arma RPD está ruim, as balas não estão saindo aonde está a mira; conserte todas as
+armas nesse sentido, incluindo pegada, aparência e local correto de saída das balas".
+
+**Causa:**
+- a bala vai para o centro da tela (a câmera); mirando, a arma em 1ª pessoa gira até a linha
+  alça → massa cair nesse centro;
+- só M14, Type 56, SKS e a espingarda tinham alça e massa medidas na malha (D-67). Nas outras, a
+  linha era estimada: paralela ao cano, na altura do ponto mais alto perto da boca;
+- na RPD esse ponto era a ponta do cano, 1,4 cm acima dele. A massa de verdade fica 4,3 cm acima do
+  cano, dentro de um capuz, a 14% do comprimento a partir da boca, e a alça fica rente ao cano.
+  Mirando, a massa que o jogador via ficava acima do centro: ele punha a massa no alvo e a bala ia
+  baixo;
+- na M60 a massa estimada também não era a massa (ela fica 11 cm acima do cano, num capuz).
+
+**Correção** (`tools/sight_align.py` e `tools/weapon_landmarks.py`, que geram o `Shared/WeaponArt`):
+- RPD: entalhe de 6,4 mm medido na alça e a ponta do poste dentro do capuz;
+- M60: a alça da malha não tem entalhe limpo (são três dentes). No modo novo "topo", o olho passa
+  rente ao dente que fica na linha da massa (1 mm do plano do cano) e a massa é a ponta do poste no
+  capuz (10,7 cm acima do cano);
+- pegada: nas duas, a mão direita desceu ao punho de pistola, 12 a 13 cm abaixo do cano (antes,
+  5 cm, rente à caixa). Mirando, ela ficava a 2 cm da câmera e tapava meia tela;
+- o olho fica a 12 cm da alça (a alça das duas malhas fica em cima do punho);
+- na RPD, a mão esquerda desceu para 8 cm abaixo do cano: os dedos apareciam atrás da massa e
+  tapavam o alvo;
+- a boca do cano (clarão e começo do traçante) já saía do eixo do cano medido na malha e não mudou.
+
+**Conferido no Studio:**
+- mirando, a alça e a massa ficam no centro da tela: RPD a 1 px, M60 a 0,2 px e M1911 a 0,1 px;
+- na mira da RPD, a mão esquerda fica 19° abaixo do centro e a direita 61°; na M60, 20° e 55°;
+- com os braços escondidos, a massa da RPD aparece limpa no meio do entalhe;
+- sem mirar, a RPD aparece inteira, com o bipé e as duas mãos.
+
+**As outras armas:**
+- M14, Type 56, SKS e a espingarda já eram medidas;
+- nas pistolas, a alça e a massa ficam na mesma altura da linha estimada, e a M1911 alinha no centro;
+- a M79 e o RPG-2 têm a linha própria da D-60;
+- M70 e Mosin miram pela luneta.
+
+**Visto e não corrigido:** a Type 54 em 1ª pessoa parece cinza-clara sob o sol forte. A malha tem
+a textura (SurfaceAppearance); fica para a análise do lote 12.
+
+**Não testado:** a RPD e a M60 em 3ª pessoa com a mão nova (o dono jogava na sessão do Studio do
+teste); controle e celular mirando.

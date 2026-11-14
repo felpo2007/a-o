@@ -587,6 +587,45 @@ test("recuo por tiro (graus de subida da boca, a fórmula do WeaponController)",
 	print("       (" .. table.concat(out, ", ") .. ")")
 end)
 
+-- Lote 7 (dono: "a RPD não atira onde a mira aponta"): a linha de visada da RPD e da M60 sai da alça
+-- e da massa medidas na malha (tools/sight_align.py). Antes a "massa" da RPD era a ponta do cano e a
+-- linha passava paralela a ele; a massa de verdade fica ~4 cm acima, então ela aparecia fora do centro
+-- da tela, que é para onde a bala vai. A mão direita desceu ao punho de pistola (mirando, ela ficava
+-- colada na câmera) e a esquerda da RPD saiu de trás da massa.
+test("RPD e M60: massa medida acima do cano, mão no punho de pistola e olho atrás da mão", function()
+	-- o WeaponArt usa Vector3 (global do Roblox, que o Lune não dá ao módulo): lê os números do texto
+	local fs = require("@lune/fs")
+	local src = fs.readFile("src/ReplicatedStorage/Shared/WeaponArt.luau")
+	local Art: { [string]: any } = {}
+	for id, body in string.gmatch(src, "\n\t(%w+) = (%b{})") do
+		local a: { [string]: any } = {}
+		for k, x, y, z in string.gmatch(body, "(%w+) = Vector3%.new%(([%-%d%.]+), ([%-%d%.]+), ([%-%d%.]+)%)") do
+			a[k] = { X = tonumber(x), Y = tonumber(y), Z = tonumber(z) }
+		end
+		for k, v in string.gmatch(body, "(%w+) = ([%-%d%.]+),") do
+			a[k] = tonumber(v)
+		end
+		for k, v in string.gmatch(body, '(%w+) = "(%w*)"') do
+			a[k] = v
+		end
+		Art[id] = a
+	end
+	local M = 0.28
+	for _, id in { "rpd", "m60" } do
+		local a = Art[id]
+		assert(a, id)
+		local frontUp = (a.front.Y - a.muzzle.Y) * M
+		assert(frontUp > 0.03, string.format("%s: massa só %.3f m acima da boca", id, frontUp))
+		local gripDown = (a.muzzle.Y - a.grip.Y) * M
+		assert(gripDown > 0.10, string.format("%s: mão só %.3f m abaixo do cano", id, gripDown))
+		assert(a.eyeM >= 0.12, id .. ": olho colado na alça")
+	end
+	assert(Art.rpd.sightKind == "entalhe" and Art.rpd.sightMm > 3, "RPD: entalhe medido")
+	-- a mão esquerda da RPD fica abaixo da linha de visada (não aparece atrás da massa)
+	local r = Art.rpd
+	assert((r.sight.Y - r.support.Y) * M > 0.08, "RPD: mão de apoio baixa")
+end)
+
 print(string.format("%d ok, %d falhas", passed, failed))
 if failed > 0 then
 	process.exit(1)
