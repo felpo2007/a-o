@@ -2638,5 +2638,21 @@
  "Você caiu": "Caíste",
  "Você correu": "Corriste",
  "Você entrou num veículo": "Subiste a un vehículo",
- "Você foi atingido": "Te alcanzaron"
+ "Você foi atingido": "Te alcanzaron",
+ "+ item único": "+ objeto único",
+ "CADERNETA DE SERVIÇO": "LIBRETA DE SERVICIO",
+ "CONTINUAR": "CONTINUAR",
+ "DIAS SEGUIDOS": "DÍAS SEGUIDOS",
+ "Este dia já foi resgatado.": "Este día ya fue reclamado.",
+ "LENDO A CADERNETA…": "LEYENDO LA LIBRETA…",
+ "REGISTRANDO…": "REGISTRANDO…",
+ "RESGATAR": "RECLAMAR",
+ "RESGATAR O DIA %d": "RECLAMAR EL DÍA %d",
+ "Recebido: +$ %d de crédito e um item novo no armário: %s.": "Recibido: +$ %d de crédito y un objeto nuevo en el armario: %s.",
+ "Recebido: +$ %d de crédito. Volte amanhã para o dia seguinte.": "Recibido: +$ %d de crédito. Vuelve mañana para el día siguiente.",
+ "Sessão sem DataStore (perfil não carregou ou Studio): o prêmio de hoje não fica gravado.": "Sesión sin DataStore (el perfil no cargó o Studio): el premio de hoy no se guarda.",
+ "Seu perfil não carregou neste servidor: o prêmio não pode ser gravado agora (nada foi perdido).": "Tu perfil no cargó en este servidor: el premio no se puede guardar ahora (no se perdió nada).",
+ "Um dia passou sem prêmio: a sequência recomeçou no dia 1.": "Pasó un día sin premio: la racha volvió al día 1.",
+ "Você já resgatou hoje. O próximo prêmio sai em %s.": "Ya reclamaste hoy. El próximo premio sale en %s.",
+ "Volte todo dia: o prêmio cresce. Pulou um dia, volta ao dia 1.": "Vuelve cada día: el premio crece. Si faltas un día, vuelves al día 1."
 }

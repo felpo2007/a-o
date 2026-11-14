@@ -923,6 +923,13 @@ task.spawn(function()
 	end
 	if not opened and not inField() then
 		setOpen(true)
+		-- lote 16 (D-130, dono: "a recompensa diária deve aparecer toda vez que entro no jogo"): a
+		-- caderneta abre por cima do menu, depois que ele assenta (Controllers/DiariaEntrada.client)
+		task.delay(1.2, function()
+			if open then
+				Bus.fire("diaria_entrada")
+			end
+		end)
 	end
 end)
 

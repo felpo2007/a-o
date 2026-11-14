@@ -599,7 +599,8 @@ Commerce.FunnelSteps = { "store_open", "item_view", "prompt", "purchase" }
 --   - o total de dias de serviço e os cosméticos ganhos NUNCA se perdem (só a posição na trilha).
 -- Cada selo é um dia de serviço na caderneta e dá créditos de intendência (a moeda ganha jogando,
 -- Shared/Progression); os dias 3 e 7 dão também um cosmético que só sai daqui (unlock "daily"), nos
--- dois lados. Semana completa: $ 350.
+-- dois lados. D-130: os créditos de cada dia são os que o servidor paga desde a D-72 (30 no 1º dia,
+-- +10 por dia; antes ficavam aqui outros números, 25 a 100, que ninguém lia). Semana completa: $ 420.
 Commerce.DAY_SECONDS = 86400
 Commerce.TRACK_DAYS = 7
 Commerce.DAILY_FACTIONS = { "US", "VC" } -- ordem fixa dos itens de um dia
@@ -612,23 +613,23 @@ export type DailyDay = {
 	items: { [string]: string }?,
 }
 Commerce.DailyTrack = {
-	{ day = 1, date = "18 AGO", label = "Selo de serviço", credits = 25 },
-	{ day = 2, date = "19 AGO", label = "Selo de serviço", credits = 30 },
+	{ day = 1, date = "18 AGO", label = "Selo de serviço", credits = 30 },
+	{ day = 2, date = "19 AGO", label = "Selo de serviço", credits = 40 },
 	{
 		day = 3,
 		date = "20 AGO",
 		label = "Selo + item",
-		credits = 40,
+		credits = 50,
 		items = { US = "us_zippo", VC = "vc_tire_sandals" },
 	},
-	{ day = 4, date = "21 AGO", label = "Selo de serviço", credits = 45 },
-	{ day = 5, date = "22 AGO", label = "Selo de serviço", credits = 50 },
-	{ day = 6, date = "23 AGO", label = "Selo de serviço", credits = 60 },
+	{ day = 4, date = "21 AGO", label = "Selo de serviço", credits = 60 },
+	{ day = 5, date = "22 AGO", label = "Selo de serviço", credits = 70 },
+	{ day = 6, date = "23 AGO", label = "Selo de serviço", credits = 80 },
 	{
 		day = 7,
 		date = "24 AGO",
 		label = "Selo + item",
-		credits = 100,
+		credits = 90,
 		items = { US = "us_cigarette_band", VC = "vc_mess_tin" },
 	},
 } :: { DailyDay }

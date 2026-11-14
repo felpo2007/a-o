@@ -4645,3 +4645,53 @@ controle (a roda e o botão de bandagem usam o mesmo caminho).
 
 **Achado de passagem:** as teclas funcionam por baixo da tela de carregamento. A pá cavou durante o
 "Recebendo o mapa inteiro". Fica para a lista.
+
+## D-130 — Lote 16: diária ao entrar, bandeiras na escolha do lado e passe colorido (v61, 2026-11-14)
+
+Pedidos do dono:
+- "recompensa diária deve aparecer toda vez que entro no jogo", "não precisa ter um local para ela";
+- "na escolha do lado coloque uma bandeira do EUA e outra do Vietnã" (a do VC é a da Frente, resposta
+  do dono);
+- "coloque mais cores vivas no passe".
+
+**Diária ao entrar** (`Controllers/DiariaEntrada.client`):
+- abre sozinha por cima do menu principal, na primeira vez que ele abre na sessão (o MenuPrincipal
+  dispara `Bus "diaria_entrada"` 1,2 s depois);
+- mostra os 7 dias com o crédito de cada um, o de hoje em destaque e o item dos dias 3 e 7 do lado do
+  jogador;
+- um botão só: RESGATAR O DIA n (+$) ou CONTINUAR. Já resgatou hoje? Mostra quanto falta para o
+  próximo prêmio. Enter, A, toque ou clique; B ou Backspace fecham;
+- a aba RECOMPENSA DIÁRIA saiu da mesa do lobby, e o calendário e a caderneta da mesa ficaram só de
+  enfeite, como a caixa da loja na D-120.
+
+**Créditos da trilha:** a `Commerce.DailyTrack` guardava 25, 30, 40, 45, 50, 60 e 100, que ninguém
+lia. O servidor pagava outra conta: 30 no 1º dia e +10 por dia (D-72). Agora a trilha tem os números
+que o servidor já pagava (30 a 90, $ 420 a semana) e o servidor lê dela. O pagamento não mudou. Os
+multiplicadores da campanha continuam valendo (+$ 33 no lugar de 30 com o passe), e a janela mostra
+o que entrou de fato (`ProgressionService.addCredits` devolve o valor).
+
+**Bandeiras** (`Controllers/Bandeiras`, em peças de interface, sem imagem para subir):
+- EUA de agosto de 1965: 50 estrelas em 9 fileiras de 6 e 5, 13 listras e o cantão de 7 listras;
+- Frente Nacional de Libertação: vermelho em cima, azul embaixo e a estrela amarela;
+- o pano tem uma sombra de dobra que corre devagar. Ficam no alto à direita de cada ficha de
+  alistamento.
+
+**Passe** (`TelaPasse`):
+- cada tipo de prêmio com uma cor cheia no ícone: créditos verde, emblema ouro, camuflagem lima,
+  título azul, uniforme laranja, cartão de abate vermelho, gesto roxo, música ciano;
+- os cartões do Veterano em dourado e os grátis em verde;
+- a rota andada e a barra de estrelas em degradê de ouro a laranja; o cabeçalho em degradê quente;
+- antes era tudo oliva e latão apagados.
+
+**Conferido no Studio** (capturas em `testes/lote16/`):
+- a diária abriu sozinha depois do carregamento;
+- RESGATAR deu o dia 1 (RECEBIDO, AMANHÃ no dia 2) e o aviso "+$ 33 Dia de serviço";
+- aberta de novo, mostrou "Você já resgatou hoje", com a contagem;
+- as duas bandeiras nas fichas de alistamento;
+- o passe colorido.
+
+No arquivo local do Studio não há DataStore (PlaceId 0): o resgate fica só na memória e a janela
+avisa (a nota de "sem DataStore" agora aparece também nesse caso).
+
+**Não testado:** o resgate num servidor do Roblox (DataStore de verdade); celular e controle na
+janela da diária.

@@ -172,10 +172,11 @@ local push = ProgressionService.push
 -- Soma XP e CI já liberados pelo teto (ou do fim de partida, que fica fora do teto). Promoção dá o
 -- soldo do posto novo. Os multiplicadores da campanha valem no que se ganha jogando; `raw` (bônus
 -- de missão, nível do passe, convite) entra sem eles.
-local function add(p: Player, gx: number, gc: number, label: string, raw: boolean?)
+-- Devolve os créditos que entraram de fato (com os multiplicadores; D-130: a caderneta mostra este)
+local function add(p: Player, gx: number, gc: number, label: string, raw: boolean?): number
 	local prof = PlayerData.get(p)
 	if not prof or (gx <= 0 and gc <= 0) then
-		return
+		return 0
 	end
 	local m = ProgressionService.mult
 	if m and not raw then
@@ -205,6 +206,7 @@ local function add(p: Player, gx: number, gc: number, label: string, raw: boolea
 		}
 	end
 	push(p, extra)
+	return gc
 end
 
 -- Recompensa por ação (Progression.REWARDS), com teto por minuto e, para cuidar de alguém, espera
@@ -255,8 +257,8 @@ function ProgressionService.applyGear(p: Player): { string }
 end
 
 -- CI fora do teto por minuto (recompensa diária)
-function ProgressionService.addCredits(p: Player, amount: number, label: string)
-	add(p, 0, math.max(math.floor(amount), 0), label)
+function ProgressionService.addCredits(p: Player, amount: number, label: string): number
+	return add(p, 0, math.max(math.floor(amount), 0), label)
 end
 
 -- XP e CI de bônus (missão, nível do passe, ordem do comandante, convite): fora do teto e sem os

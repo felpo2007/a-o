@@ -79,9 +79,9 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
 - **Lote 15 (v60, D-129): feito.** Todos os itens da roda testados. A bandagem não cancela mais
   andando, devolve 30 de vida e serve sem sangrar. Cada item avisa por que não fez nada, por que
   parou ou que deu certo. Lançador e Socorrer agem pela vaga 0.
-- **Lote 16:** recompensa diária aparece toda vez que entra no jogo (sem lugar próprio para ela);
-  bandeiras na escolha do lado (EUA e a da Frente para o VC, resposta do dono); passe com cores
-  mais vivas.
+- **Lote 16 (v61, D-130): feito.** A recompensa diária abre sozinha ao entrar no jogo (a aba e o
+  calendário da mesa saíram); bandeiras dos EUA e da Frente nas fichas de escolha do lado; passe
+  com cores vivas.
 - **Lote 17:** camuflagens diferentes (tigrado etc.).
 - **Lote 18:** vila menos quadrada e mais espalhada; entrar em todas as casas da vila.
 - **Lote 19:** vegetação com 6 mil triângulos (pedido novo; a D-66 pedia no mínimo 8 mil).
@@ -94,6 +94,23 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
   - base do VC sob a mata; nomes do equipamento da Intendência sem tradução; Type 54 em 3ª pessoa;
   - a pá do autoteste na 1ª rodada de cada sessão;
   - as teclas agem por baixo da tela de carregamento (a pá cavou durante o carregamento, D-129).
+
+## v61: lote 16, diária ao entrar, bandeiras e passe colorido (2026-11-14, D-130)
+- **A publicar.**
+- **Feito:**
+  - a caderneta da recompensa diária abre sozinha por cima do menu principal toda vez que o jogador
+    entra; um botão (RESGATAR ou CONTINUAR); a aba e o calendário da mesa saíram;
+  - os créditos da trilha agora são os que o servidor paga (30 a 90 por dia, $ 420 a semana); a
+    janela mostra o que entrou de fato, com o bônus da campanha;
+  - bandeiras desenhadas em peças de interface: EUA de 1965 (50 estrelas, 13 listras) e a da
+    Frente, nas duas fichas de alistamento;
+  - passe com uma cor viva por tipo de prêmio, cartões dourados (Veterano) e verdes (grátis), rota
+    e cabeçalho em degradê.
+- **Conferido no Studio:** a diária abriu sozinha; o resgate deu o dia 1 (+$ 33 com o bônus); já
+  resgatada, mostra a contagem; as bandeiras; o passe. Capturas em `testes/lote16/`.
+- **Testes:** Lune todos ok (f2 com os créditos da trilha, interface com o caminho novo); pytest 54;
+  ruff ok; luau-lsp 0 erros; traduções 100%.
+- **Não testado:** o resgate num servidor do Roblox (DataStore de verdade); celular e controle.
 
 ## v60: lote 15, todos os itens da roda funcionando (2026-11-14, D-129)
 - **Publicada** como versão 60 do place (build do commit 9478a16).

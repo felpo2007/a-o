@@ -2645,5 +2645,21 @@
  "Você caiu": "You went down",
  "Você correu": "You sprinted",
  "Você entrou num veículo": "You got into a vehicle",
- "Você foi atingido": "You were hit"
+ "Você foi atingido": "You were hit",
+ "+ item único": "+ unique item",
+ "CADERNETA DE SERVIÇO": "SERVICE RECORD",
+ "CONTINUAR": "CONTINUE",
+ "DIAS SEGUIDOS": "DAYS IN A ROW",
+ "Este dia já foi resgatado.": "This day was already claimed.",
+ "LENDO A CADERNETA…": "READING THE RECORD…",
+ "REGISTRANDO…": "SAVING…",
+ "RESGATAR": "CLAIM",
+ "RESGATAR O DIA %d": "CLAIM DAY %d",
+ "Recebido: +$ %d de crédito e um item novo no armário: %s.": "Received: +$ %d credit and a new item in your locker: %s.",
+ "Recebido: +$ %d de crédito. Volte amanhã para o dia seguinte.": "Received: +$ %d credit. Come back tomorrow for the next day.",
+ "Sessão sem DataStore (perfil não carregou ou Studio): o prêmio de hoje não fica gravado.": "Session without DataStore (profile did not load, or Studio): today's reward is not saved.",
+ "Seu perfil não carregou neste servidor: o prêmio não pode ser gravado agora (nada foi perdido).": "Your profile did not load on this server: the reward cannot be saved now (nothing was lost).",
+ "Um dia passou sem prêmio: a sequência recomeçou no dia 1.": "A day went by without a reward: the streak restarted at day 1.",
+ "Você já resgatou hoje. O próximo prêmio sai em %s.": "You already claimed today. The next reward is in %s.",
+ "Volte todo dia: o prêmio cresce. Pulou um dia, volta ao dia 1.": "Come back every day: the reward grows. Skip a day and you go back to day 1."
 }

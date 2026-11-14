@@ -15,10 +15,11 @@ local PlayerData = require(script.Parent.PlayerData)
 local ProgressionService = require(script.Parent.ProgressionService)
 
 local DailyRewardService = {}
--- créditos de intendência por dia de serviço resgatado (D-72): 30 CI + 10 por dia da sequência,
--- até 100 no 7º dia
+-- créditos de intendência por dia de serviço resgatado (D-72: 30 CI + 10 por dia da sequência). D-130:
+-- o valor mora na trilha (Commerce.DailyTrack), que a janela da entrada também mostra
 local function dailyCredits(day: number): number
-	return math.min(30 + 10 * math.max(day - 1, 0), 100)
+	local entry = Commerce.DailyTrack[day]
+	return if entry then entry.credits else Commerce.DailyTrack[1].credits
 end
 
 local MIN_INTERVAL = 1.5 -- s entre pedidos do mesmo jogador
@@ -62,7 +63,8 @@ function DailyRewardService.view(player: Player, result: { [string]: any }?): { 
 		total = p.daily.total,
 		earned = trackItems(p.earned),
 		resetIn = Commerce.secondsToNextDay(os.time()),
-		saved = player:GetAttribute("DataReadOnly") ~= true,
+		-- D-130: arquivo local no Studio (PlaceId 0) não tem DataStore: o resgate fica só na memória
+		saved = player:GetAttribute("DataReadOnly") ~= true and game.PlaceId ~= 0,
 		result = result,
 	}
 end
@@ -94,12 +96,14 @@ local function claim(player: Player)
 	end
 	if status == "ok" and r then
 		CommerceService.earnedChanged(player)
-		ProgressionService.addCredits(player, dailyCredits(tonumber(r.day) or 1), "Dia de serviço")
+		-- D-130: o que entrou de fato (com os multiplicadores da campanha) vai no resultado: a caderneta
+		-- mostra o mesmo número do aviso
+		local got = ProgressionService.addCredits(player, dailyCredits(tonumber(r.day) or 1), "Dia de serviço")
 		require(script.Parent.CampanhaEventos).fire(player, "daily_seal", { day = r.day }) -- estrelas do passe
 		pcall(function()
 			AnalyticsService:LogCustomEvent(player, "daily_claim", r.day)
 		end)
-		push(player, { ok = true, day = r.day, run = r.run, items = r.items, newItems = r.newItems })
+		push(player, { ok = true, day = r.day, run = r.run, items = r.items, newItems = r.newItems, credits = got })
 	else
 		push(player, { ok = false, reason = status })
 	end

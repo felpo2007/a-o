@@ -8,16 +8,17 @@
 --   - sala de arquivo (antes do lado, ou "trocar de lado"): os dois dossiês na mesa e as duas fichas
 --     de alistamento embaixo;
 --   - mesa do lado: visão geral; rádio/telefone = SQUAD, dossiê/documentos e o soldado = PAPEL,
---     carta/croqui = INSERÇÃO (o mapa de spawn do GameUI), calendário/caderneta = RECOMPENSA
---     DIÁRIA, munição = INTENDÊNCIA (a loja), capacete = TROCAR DE LADO.
+--     carta/croqui = INSERÇÃO (o mapa de spawn do GameUI), capacete = TROCAR DE LADO. Munição
+--     (a loja, D-120) e calendário/caderneta (a diária, D-130: abre ao entrar, DiariaEntrada) são
+--     só enfeite.
 -- Abas no alto repetem os objetos (mouse, toque, LB/RB e Q/E). Ao escolher, a câmera vai até o
 -- objeto e o painel abre do lado dele. Fluxo: lado → mesa → squad → papel → inserção (avança
 -- sozinho); morto com papel, o lobby já abre na inserção. B / VOLTAR: painel → mesa; sala de arquivo
 -- (trocando de lado) → mesa.
 -- Construída uma vez: render() só troca textos, cores e visibilidade (os cartões ficam num
 -- reservatório por chave). Só dados reais: Roles, Weapons, MapConfig, efetivo pelo atributo
--- "Faction" (a conta do TeamService) e a caderneta do servidor (Daily_State).
--- Remotes: Team_Choose, Squad_Action {op = create/join/leave}, Role_Choose, Daily_Get/Daily_Claim.
+-- "Faction" (a conta do TeamService).
+-- Remotes: Team_Choose, Squad_Action {op = create/join/leave}, Role_Choose.
 -- Movimento e acabamento (pedido do dono, 2026-11-11: "mais fluido e com uma qualidade gráfica
 -- melhor ... faça com maestria", realismo de época):
 --   - troca de pasta em crossfade: a que sai esmaece e recua, a que entra desliza e abre; durante a
@@ -31,7 +32,7 @@
 --     em barras que deslizam, com a diferença para o papel atual;
 --   - abas com indicador deslizando; dicas de botão em chip (imagem do botão do controle ou tecla).
 -- Gancho de teste (só no Studio): workspace:SetAttribute("VT65DevTela", "escolha") abre o passo
--- de escolha (lado, se não há; senão squad ou papel); também "lado", "squad", "papel", "diaria" e
+-- de escolha (lado, se não há; senão squad ou papel); também "lado", "squad", "papel" e
 -- "insercao" (completa lado, squad e papel pelos remotes e abre a ficha de inserção). Ver o fim do
 -- arquivo.
 local GuiService = game:GetService("GuiService")
@@ -43,7 +44,7 @@ local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 
 local Acabamento = require(ReplicatedFirst:WaitForChild("Acabamento"))
-local Commerce = require(ReplicatedStorage.Shared.Commerce)
+local Bandeiras = require(script.Parent.Bandeiras)
 local MapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any
 local Net = require(ReplicatedStorage.Shared.Net)
 local Roles = require(ReplicatedStorage.Shared.Roles)
@@ -200,11 +201,6 @@ end
 
 local function keyName(code: string): string
 	return (string.gsub(code, "^Button", ""))
-end
-
-local function hms(s: number): string
-	s = math.max(0, math.floor(s))
-	return string.format("%02d:%02d:%02d", s // 3600, (s % 3600) // 60, s % 60)
 end
 
 -- ===== tamanho de texto (projeto 1280 x 720; na TV, nunca abaixo de 24 px na tela) =====
@@ -684,7 +680,7 @@ local function notify(msg: string)
 end
 
 -- ===== estado =====
-local panel = "desk" -- "desk" | "squad" | "role" | "insert" | "daily" | "shop"
+local panel = "desk" -- "desk" | "squad" | "role" | "insert" | "shop"
 local browsing = false -- na sala de arquivo para trocar de lado (vale enquanto o lado não muda)
 local browsingFaction: string? = nil
 local wasVisible = false
@@ -792,43 +788,6 @@ local function joinBlocked(f: string): string?
 	return nil
 end
 
--- ===== recompensa diária (estado do servidor) =====
-local daily: any = nil
-local dailyAt = 0 -- os.clock() da chegada (contagem regressiva local)
-local dailyBusy = false
-local dailyResult: any = nil
-local dailyAsked = 0
-
-local function fetchDaily()
-	local now = os.clock()
-	if now - dailyAsked < 3 then
-		return
-	end
-	dailyAsked = now
-	task.spawn(function()
-		local ok, s = pcall(function()
-			return Net.func("Daily_Get"):InvokeServer()
-		end)
-		if ok and type(s) == "table" then
-			daily = s
-			dailyAt = os.clock()
-			DeployScreen.changed()
-		end
-	end)
-end
-
-local function dailyLeft(): number
-	if not (daily and type(daily.resetIn) == "number") then
-		return 0
-	end
-	return daily.resetIn - (os.clock() - dailyAt)
-end
-
-local function itemName(id: string): string
-	local c = Commerce.find(id)
-	return if c then c.name else id
-end
-
 -- ===== painéis =====
 local function page(x: number, y: number, w: number, h: number): Frame
 	local p = Instance.new("Frame")
@@ -843,7 +802,6 @@ local CHOOSE_Y = 396 -- a sala de arquivo só usa a faixa de baixo (as fichas); 
 local pages: { [string]: Frame } = {
 	squad = page(PANEL_X, PANEL_Y, PANEL_W, PANEL_H),
 	role = page(PANEL_X, PANEL_Y, PANEL_W, PANEL_H),
-	daily = page(PANEL_X, PANEL_Y, PANEL_W, PANEL_H),
 	insert = page(40, PANEL_Y, 300, PANEL_H), -- estreito: a carta de spawn vai de x 356 a 1240
 	choose = page(0, CHOOSE_Y, DESIGN_W, 300),
 }
@@ -937,11 +895,11 @@ local TAB_DEFS: { { id: string, name: string, w: number } } = {
 	{ id = "squad", name = "1 · SQUAD", w = 160 },
 	{ id = "role", name = "2 · PAPEL", w = 160 },
 	{ id = "insert", name = "3 · INSERÇÃO", w = 168 },
-	{ id = "daily", name = "RECOMPENSA DIÁRIA", w = 226 },
 	{ id = "faction", name = "TROCAR DE LADO", w = 160 },
 }
--- lote 8 (D-120): a aba INTENDÊNCIA (loja e armário) saiu da mesa; loja e passe ficam no menu principal
-local CYCLE = { "squad", "role", "insert", "daily" }
+-- lote 8 (D-120): a aba INTENDÊNCIA (loja e armário) saiu da mesa; loja e passe ficam no menu principal.
+-- Lote 16 (D-130): a aba RECOMPENSA DIÁRIA também; a diária abre sozinha ao entrar (DiariaEntrada)
+local CYCLE = { "squad", "role", "insert" }
 local tabsFrame = Instance.new("Frame")
 tabsFrame.BackgroundTransparency = 1
 tabsFrame.Position = UDim2.fromOffset(40, 84)
@@ -1073,7 +1031,14 @@ local function factionCard(f: string, x: number): FCard
 	if f == "VC" then
 		k.Font = VIET
 	end
-	local t = txt(b, HEAD, 30, V.TEXT, 26, 32, 516, 40)
+	-- lote 16 (D-130, dono: "na escolha do lado coloque uma bandeira do EUA e outra do Vietnã"): a
+	-- bandeira no alto à direita (a do VC é a da Frente); o texto fica à esquerda dela
+	local FLAG_H = 76
+	local flag = Bandeiras.of(f, b, FLAG_H, 2)
+	flag.AnchorPoint = Vector2.new(1, 0)
+	flag.Position = UDim2.fromOffset(560 - 22, 16)
+	local textW = 560 - 22 - flag.Size.X.Offset - 14 - 26
+	local t = txt(b, HEAD, 30, V.TEXT, 26, 32, textW, 40)
 	t.FontFace = HEAD_B
 	t.TextWrapped = false
 	t.TextScaled = true
@@ -1083,7 +1048,7 @@ local function factionCard(f: string, x: number): FCard
 		lim.Parent = t
 	end
 	t.Text = info.title
-	local u = txt(b, TYPE, 15, V.DIM, 26, 74, 516, 20)
+	local u = txt(b, TYPE, 15, V.DIM, 26, 74, textW, 20)
 	u.TextTruncate = Enum.TextTruncate.AtEnd
 	u.Text = info.unit
 	local pk = txt(b, HEAD, 13, V.DIM, 26, 104, 200, 16)
@@ -2053,232 +2018,6 @@ do
 	end
 end
 
--- ===== recompensa diária: a caderneta de serviço =====
-local dealDaily: () -> ()
-local dailySummary: () -> (string, string)
-local renderDaily: (f: string) -> ()
-do
-	type DCell = { frame: Frame, day: TextLabel, date: TextLabel, reward: TextLabel, mark: TextLabel }
-	-- Studio (D-93): a ficha sobrava embaixo, a regra ocupava três linhas e o "HOJE" era miúdo.
-	-- Agora a regra é uma linha, a ficha é do tamanho do conteúdo e o carimbo do dia é maior.
-	-- Estilo novo: a sequência e o total em números grandes, a regra numa linha, os sete dias em
-	-- cartões com o número do dia grande e o estado numa etiqueta; o botão cheio de oliva.
-	local DAILY_H = 470
-	local dFolder, dInfo = folder(pages.daily, "RECOMPENSA DIÁRIA", PANEL_W, DAILY_H)
-	local dRun: TextLabel, dTotal: TextLabel
-	do
-		local nums: { TextLabel } = {}
-		for i, k in { "SEQUÊNCIA", "SELOS" } do
-			local x = 18 + (i - 1) * 170
-			local kl = txt(dFolder, HEAD, 13, V.DIM, x, 54, 140, 16)
-			kl.FontFace = F.TITLE_REG
-			kl.Text = k
-			local n = txt(dFolder, HEAD, 40, V.TEXT, x, 68, 140, 44)
-			n.FontFace = HEAD_B
-			n.TextWrapped = false
-			nums[i] = n
-			if i == 1 then
-				local sl = box(dFolder, V.LINE, x + 150, 60, 3, 48)
-				sl.Rotation = 18
-			end
-		end
-		dRun, dTotal = nums[1], nums[2]
-	end
-	local dRule = txt(dFolder, TYPE, 14, V.DIM, 16, 112, PANEL_W - 32, 20)
-	dRule.TextWrapped = false
-	dRule.TextTruncate = Enum.TextTruncate.AtEnd
-	dRule.Text = "Um selo por dia (UTC). Pulou um dia, volta ao dia 1. Dias 3 e 7: item único."
-	local cells: { DCell } = {}
-	for i = 1, Commerce.TRACK_DAYS do
-		local x = 14 + (i - 1) * 94
-		local fr = box(dFolder, CARD, x, 138, 88, 176)
-		corner(fr, 3)
-		stroke(fr, V.LINE, 1, 0.5)
-		entryParts(fr, 3)
-		local dk = txt(fr, HEAD, 12, V.DIM, 4, 6, 80, 14, Enum.TextXAlignment.Center)
-		dk.FontFace = F.TITLE_REG
-		dk.Text = "DIA"
-		local d = txt(fr, HEAD, 30, INK, 4, 18, 80, 34, Enum.TextXAlignment.Center)
-		d.FontFace = HEAD_B
-		d.TextWrapped = false
-		local dt = txt(fr, TYPE, 12, V.DIM, 4, 52, 80, 16, Enum.TextXAlignment.Center)
-		hline(fr, UiKit.RULE_RED, 8, 72, 72)
-		local rw = txt(fr, TYPE, 12, V.DIM, 5, 78, 78, 62)
-		rw.TextYAlignment = Enum.TextYAlignment.Top
-		rw.TextXAlignment = Enum.TextXAlignment.Center
-		rw.TextTruncate = Enum.TextTruncate.AtEnd
-		local mk = stamp(fr, 13, 4, 146, 80, 24, 0)
-		mk.Visible = false
-		cells[i] = { frame = fr, day = d, date = dt, reward = rw, mark = mk }
-	end
-	local claimBtn = Instance.new("TextButton")
-	claimBtn.Position = UDim2.fromOffset(14, 324)
-	claimBtn.Size = UDim2.fromOffset(PANEL_W - 28, 56)
-	claimBtn.BackgroundColor3 = V.OLIVE
-	claimBtn.TextColor3 = V.TEXT
-	claimBtn.FontFace = HEAD_B
-	claimBtn.AutoButtonColor = false
-	claimBtn.Selectable = true
-	claimBtn.SelectionImageObject = UiKit.FOCUS
-	claimBtn.Parent = dFolder
-	reg(claimBtn, 24)
-	corner(claimBtn, 4)
-	local claimLook = UiKit.realce(claimBtn, V.OLIVE, nil, 1.02)
-
-	-- entrada da caderneta: os sete dias pousam em fila
-	function dealDaily()
-		local list: { GuiObject } = {}
-		for _, c in cells do
-			table.insert(list, c.frame)
-		end
-		deal(list, 0.12, 0.05)
-	end
-	local dResult = txt(dFolder, TYPE, 15, INK, 16, 388, PANEL_W - 32, 44)
-	dResult.TextYAlignment = Enum.TextYAlignment.Top
-	local dNote = txt(dFolder, TYPE, 13, V.RED_HI, 16, 434, PANEL_W - 32, 30)
-	dNote.TextYAlignment = Enum.TextYAlignment.Top
-
-	local REASON: { [string]: string } = {
-		already = "Este dia já foi carimbado.",
-		clock = "Aguarde a virada do dia (UTC).",
-		loading = "Seu perfil ainda está carregando: tente de novo em instantes.",
-		readonly = "Seu perfil não carregou neste servidor: o selo não pode ser gravado agora (nada foi perdido).",
-		error = "O registro falhou: tente de novo.",
-	}
-
-	local function claim()
-		if dailyBusy or not (daily and daily.ready and daily.canClaim) then
-			return
-		end
-		dailyBusy = true
-		Net.event("Daily_Claim"):FireServer()
-		DeployScreen.changed()
-		task.delay(15, function() -- sem resposta: libera o botão (o servidor continua sendo a fonte)
-			if dailyBusy then
-				dailyBusy = false
-				fetchDaily()
-			end
-		end)
-	end
-	bindCard(claimBtn, claim, claimLook.set)
-
-	function dailySummary(): (string, string)
-		-- texto curto para a aba e para o calendário da mesa
-		if not (daily and daily.ready) then
-			return "…", ""
-		elseif daily.canClaim then
-			return "★ disponível", "★ RESGATAR"
-		elseif daily.claimedToday then
-			local left = dailyLeft()
-			return string.format("volta em %s", string.sub(hms(left), 1, 5)), "CARIMBADO ✓"
-		end
-		return "aguarde", ""
-	end
-
-	function renderDaily(f: string)
-		local d = daily
-		if not (d and d.ready) then
-			dInfo.Text = "Lendo a caderneta…"
-			dRun.Text, dTotal.Text = "—", "—"
-			claimBtn.Text = "CARREGANDO A CADERNETA…"
-			claimLook.base(DRAB)
-			claimBtn.TextColor3 = V.DIM
-			for _, c in cells do
-				c.mark.Visible = false
-			end
-			fetchDaily()
-			return
-		end
-		local day: number = d.day or 1
-		local run: number = d.run or 0
-		dInfo.Text = ""
-		dRun.Text = tostring(run)
-		dTotal.Text = tostring(d.total or 0)
-		local earned: { [string]: boolean } = if type(d.earned) == "table" then d.earned else {}
-		local tomorrow = day % Commerce.TRACK_DAYS + 1
-		for i, c in cells do
-			local entry = Commerce.DailyTrack[i]
-			c.day.Text = tostring(i)
-			c.date.Text = entry.date
-			local items = entry.items
-			local mine = items and items[f]
-			if mine then
-				c.reward.Text = "Selo +\n"
-					.. itemName(mine)
-					.. (if earned[mine] then "\n✔ já é seu" else "\n(e o do outro lado)")
-			else
-				c.reward.Text = "Selo de\nserviço"
-			end
-			local done = if d.claimedToday then i <= day else (d.canClaim and i < day)
-			local today = i == day
-			local markText, markColor = "", STAMP
-			if today and d.claimedToday then
-				markText, markColor = "CARIMBADO", OLIVE_INK
-			elseif today and d.canClaim then
-				markText, markColor = "HOJE", STAMP
-			elseif done then
-				markText, markColor = "RECEBIDO", OLIVE_INK
-			elseif d.claimedToday and i == tomorrow then
-				markText, markColor = "AMANHÃ", INK
-			end
-			-- a etiqueta nova (o resgate de hoje) aparece; a que já estava fica parada
-			stampSet(c.mark, if markText ~= "" then markText else nil, markColor)
-			c.frame.BackgroundColor3 = if today then CARD_HOT elseif done then NEW_CARD else CARD
-			local s = c.frame:FindFirstChildOfClass("UIStroke")
-			if s then
-				s.Color = if today then V.OLIVE_HI else V.LINE
-				s.Thickness = if today then 2 else 1
-				s.Transparency = if today then 0 else 0.5
-			end
-		end
-		if dailyBusy then
-			claimBtn.Text = "REGISTRANDO O SELO…"
-			claimLook.base(DRAB)
-			claimBtn.TextColor3 = V.DIM
-		elseif d.canClaim then
-			claimBtn.Text = string.format("CARIMBAR O DIA %d · RESGATAR", day)
-			claimLook.base(V.OLIVE)
-			claimBtn.TextColor3 = V.TEXT
-		elseif d.claimedToday then
-			claimBtn.Text = string.format("CARIMBADO HOJE · próximo selo em %s (UTC)", hms(dailyLeft()))
-			claimLook.base(DRAB)
-			claimBtn.TextColor3 = V.DIM
-		else
-			claimBtn.Text = "AGUARDE A VIRADA DO DIA (UTC)"
-			claimLook.base(DRAB)
-			claimBtn.TextColor3 = V.DIM
-		end
-		local res = dailyResult
-		if res and res.ok and d.canClaim then
-			res = nil -- virou o dia: o recibo de ontem sai da folha
-			dailyResult = nil
-		end
-		if res and res.ok then
-			local list = {}
-			for _, id in (res.newItems or {}) :: { string } do
-				table.insert(list, itemName(id))
-			end
-			-- duas frases inteiras (com e sem item novo); os itens entram juntos no %s
-			dResult.Text = if #list > 0
-				then string.format(
-					"Selo do dia %d recebido: +1 dia de serviço. Novo no armário da Intendência: %s.",
-					res.day or day,
-					table.concat(list, " · ")
-				)
-				else string.format("Selo do dia %d recebido: +1 dia de serviço.", res.day or day)
-		elseif res and res.reason then
-			dResult.Text = REASON[res.reason] or REASON.error
-		elseif d.broken then
-			dResult.Text = "Um dia passou sem selo: a sequência recomeçou no dia 1."
-		else
-			dResult.Text = ""
-		end
-		dNote.Text = if d.saved == false
-			then "Sessão sem DataStore (perfil não carregou ou Studio): o selo de hoje não fica gravado."
-			else ""
-	end
-end
-
 local renderFooter: (scene: string) -> ()
 do
 	-- ===== rodapé: dicas de botão e "VOLTAR" para mouse e toque =====
@@ -2501,11 +2240,9 @@ local function renderTabs(f: string, st: any)
 	local rid = currentRole()
 	local roleText = if rid and Roles.roles[rid] then string.format("✓ %s", Roles.roles[rid].name) else "escolher"
 	local insertText = if not rid then "falta o papel" elseif alive() then "em campo" else "carta de spawn"
-	local dTab = dailySummary()
 	tabs.squad.info.Text = squadText
 	tabs.role.info.Text = roleText
 	tabs.insert.info.Text = insertText
-	tabs.daily.info.Text = dTab
 	tabs.faction.info.Text = string.format("agora: %s", FACTION[f].short)
 	tabs.desk.info.Text = "visão geral"
 	for _, t in tabs do
@@ -2515,7 +2252,6 @@ local function renderTabs(f: string, st: any)
 	LobbyScene.setSub("squad", string.format("SQUAD · %s", squadText))
 	LobbyScene.setSub("role", string.format("PAPEL · %s", roleText))
 	LobbyScene.setSub("insert", string.format("INSERÇÃO · %s", insertText))
-	LobbyScene.setSub("daily", string.format("RECOMPENSA DIÁRIA · %s", dTab))
 end
 
 -- textos das peças da mesa (rádio, dossiê, calendário)
@@ -2547,11 +2283,7 @@ local function renderDesk(f: string, st: any)
 			string.format("QG: %s", gridRef(hq.x, hq.z)),
 		}, "\n")
 	)
-	local d = daily
-	local day = if d and d.ready and d.day then d.day else 1
-	local _, note = dailySummary()
-	LobbyScene.setText("calDay", tostring(17 + day))
-	LobbyScene.setText("calNote", note)
+	-- lote 16 (D-130): o calendário e a caderneta da mesa são só enfeite (a diária abre na entrada)
 	-- soldado da mesa com a arma do papel (fora do painel de papel, o papel atual)
 	if panel ~= "role" then
 		LobbyScene.setLoadout(f, if lo then lo[1] else nil)
@@ -2588,7 +2320,7 @@ local function placeLobbyCamera(scene: string)
 end
 
 -- ordem das pastas no caminho até o campo: a pasta seguinte chega da direita, a anterior da esquerda
-local PAGE_ORDER: { [string]: number } = { squad = 1, role = 2, insert = 3, daily = 4 }
+local PAGE_ORDER: { [string]: number } = { squad = 1, role = 2, insert = 3 }
 local lastPage: string? = nil
 
 -- Troca de pasta em crossfade (pageShow). Devolve a pasta que acabou de entrar (para a entrada
@@ -2681,7 +2413,6 @@ function DeployScreen.render(st: any)
 		wasVisible = true
 		panel = defaultPanel()
 		resetLook()
-		fetchDaily()
 	end
 	local f = myFaction()
 	if st and st.faction ~= f then
@@ -2723,8 +2454,6 @@ function DeployScreen.render(st: any)
 			renderRole(f, st, tostring(sid))
 		elseif panel == "insert" then
 			renderInsert(f)
-		elseif panel == "daily" then
-			renderDaily(f)
 		end
 	end
 	-- ficha do soldado (papel): entra depois de desenhada, esmaecendo
@@ -2740,8 +2469,6 @@ function DeployScreen.render(st: any)
 		dealSquad()
 	elseif entered == "role" then
 		dealRoles()
-	elseif entered == "daily" then
-		dealDaily()
 	elseif entered == "insert" then
 		dealInsert()
 	end
@@ -2790,14 +2517,11 @@ function DeployScreen.open(name: string)
 			return
 		end
 	end
-	if name == "daily" then
-		fetchDaily()
-	end
 	if name == "role" then
 		previewRole = nil
 	end
-	if name == "shop" then
-		return -- lote 8: a loja não abre mais pela mesa
+	if name == "shop" or name == "daily" then
+		return -- lote 8: a loja não abre mais pela mesa; lote 16 (D-130): nem a diária
 	end
 	panel = name
 	DeployScreen.changed()
@@ -2900,23 +2624,6 @@ Bus.on("shop_closed", function()
 	end
 end)
 
--- ===== recompensa diária: estado do servidor =====
-task.spawn(function()
-	Net.event("Daily_State").OnClientEvent:Connect(function(s: any)
-		if type(s) ~= "table" then
-			return
-		end
-		daily = s
-		dailyAt = os.clock()
-		if s.result then
-			dailyResult = s.result
-			dailyBusy = false
-		end
-		DeployScreen.changed()
-	end)
-	fetchDaily()
-end)
-
 -- ===== atributos: o caminho avança sozinho =====
 player:GetAttributeChangedSignal("SquadId"):Connect(function()
 	previewRole = nil
@@ -2942,28 +2649,15 @@ player:GetAttributeChangedSignal("Faction"):Connect(function()
 	DeployScreen.changed()
 end)
 
--- efetivo dos lados e contagem da caderneta: só textos, uma vez por segundo com a tela aberta
+-- efetivo dos lados: só textos, uma vez por segundo com a tela aberta
 task.spawn(function()
 	while true do
 		task.wait(1)
 		if root.Visible then
 			local f = myFaction()
 			updateHeader(f)
-			local scene = sceneId()
-			if scene == "choose" then
+			if sceneId() == "choose" then
 				renderChoose()
-			elseif f then
-				local dTab, note = dailySummary()
-				tabs.daily.info.Text = dTab
-				LobbyScene.setSub("daily", string.format("RECOMPENSA DIÁRIA · %s", dTab))
-				LobbyScene.setText("calNote", note)
-				if panel == "daily" then
-					renderDaily(f)
-				end
-			end
-			-- virou o dia UTC com a tela aberta: pede o estado novo
-			if daily and daily.ready and daily.claimedToday and dailyLeft() <= 0 then
-				fetchDaily()
 			end
 		end
 	end
@@ -2972,7 +2666,7 @@ end)
 -- ===== gancho de teste (só no Studio): fotos da escolha e da inserção =====
 -- workspace:SetAttribute("VT65DevTela", x), com o jogador no lobby (sem corpo em campo):
 --   - "escolha": o passo de escolha que falta (lado; com lado, o squad; com squad, o papel);
---   - "lado", "squad", "papel", "diaria": aquela ficha (com lado escolhido, "lado" abre a sala de
+--   - "lado", "squad", "papel": aquela ficha (com lado escolhido, "lado" abre a sala de
 --     arquivo do "trocar de lado");
 --   - "insercao": completa o caminho pelos remotes, como o jogador faria (EUA se não há lado, squad
 --     de infantaria, fuzileiro) e abre a ficha de inserção com a carta de spawn.
@@ -3012,7 +2706,7 @@ if RunService:IsStudio() then
 		task.wait(0.2) -- deixa o refresh do GameUI rodar com o papel novo
 		DeployScreen.open("insert")
 	end
-	local DEV_PANEL: { [string]: string } = { squad = "squad", papel = "role", diaria = "daily" }
+	local DEV_PANEL: { [string]: string } = { squad = "squad", papel = "role" } -- "diaria": DiariaEntrada
 	workspace:GetAttributeChangedSignal("VT65DevTela"):Connect(function()
 		local v = workspace:GetAttribute("VT65DevTela")
 		if type(v) ~= "string" or v == "carregamento" or v == "transicao" then

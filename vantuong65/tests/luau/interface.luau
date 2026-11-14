@@ -748,6 +748,25 @@ test("D-124: passe em linha do tempo de lado e loja com as imagens dos modelos",
 	end
 end)
 
+test("D-130: a diária abre ao entrar, sem lugar na mesa; bandeiras na escolha do lado", function()
+	local menu = fs.readFile(C .. "MenuPrincipal.client.luau")
+	assert(string.find(menu, 'Bus.fire("diaria_entrada")', 1, true), "o menu principal abre a caderneta")
+	local janela = fs.readFile(C .. "DiariaEntrada.client.luau")
+	assert(string.find(janela, 'Bus.on("diaria_entrada"', 1, true), "a janela escuta o menu")
+	assert(string.find(janela, "Commerce.DailyTrack", 1, true), "créditos da trilha, os que o servidor paga")
+	local mesa = fs.readFile(C .. "DeployScreen.luau")
+	assert(not string.find(mesa, '{ id = "daily"', 1, true), "sem a aba RECOMPENSA DIÁRIA")
+	assert(not string.find(mesa, "Daily_Claim", 1, true), "a mesa não resgata mais")
+	local cena = fs.readFile(C .. "LobbyScene.luau")
+	assert(string.find(cena, 'id == "shop" or id == "daily"', 1, true), "calendário e caderneta só de enfeite")
+	assert(string.find(mesa, "Bandeiras.of(f, b, FLAG_H", 1, true), "bandeira em cada ficha de alistamento")
+	local band = fs.readFile(C .. "Bandeiras.luau")
+	assert(string.find(band, "for row = 1, 9 do", 1, true), "EUA de 1965: 9 fileiras (50 estrelas)")
+	assert(string.find(band, "for i = 0, 12 do", 1, true), "13 listras")
+	local svc = fs.readFile("src/ServerScriptService/Modules/DailyRewardService.luau")
+	assert(string.find(svc, "credits = got", 1, true), "o resultado leva o que entrou de fato")
+end)
+
 print(string.format("%d ok, %d falhas", passed, failed))
 if failed > 0 then
 	process.exit(1)

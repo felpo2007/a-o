@@ -654,8 +654,10 @@ local function addObj(
 		confirmTouch = false,
 	}
 	-- lote 8 (D-120, dono: "a loja não deve aparecer no menu do jogo"): a caixa de munição fica na mesa
-	-- só de enfeite; sem a peça de clique nem o rótulo "INTENDÊNCIA (LOJA)"
-	if id == "shop" then
+	-- só de enfeite; sem a peça de clique nem o rótulo "INTENDÊNCIA (LOJA)". Lote 16 (D-130, dono: "a
+	-- recompensa diária não precisa ter um local"): o calendário e a caderneta também; a diária abre
+	-- sozinha ao entrar no jogo (Controllers/DiariaEntrada.client)
+	if id == "shop" or id == "daily" then
 		hit.CanQuery = false
 		return o
 	end

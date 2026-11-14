@@ -50,8 +50,21 @@ local CARD_H = px(116, 154)
 local NODE_ROW = px(52, 70)
 local NODE_D = px(30, 40)
 local LINE_H = px(4, 6)
-local VET_BG = Color3.fromRGB(46, 39, 22) -- cartão do Veterano: oliva puxado para o latão
-local VET_BG_HI = Color3.fromRGB(62, 52, 28)
+-- D-130 (lote 16, dono: "coloque mais cores vivas no passe"): cores cheias. Cada tipo de prêmio tem a
+-- sua (KIND_MARK), a trilha grátis é verde e a do Veterano é dourada, a rota andada vai em degradê de
+-- ouro e a faixa do alto, de ouro a vermelho. Antes tudo era oliva e latão apagados.
+local VIVO = {
+	GOLD = Color3.fromRGB(255, 196, 40),
+	GOLD_HI = Color3.fromRGB(255, 222, 90),
+	ORANGE = Color3.fromRGB(240, 120, 30),
+	RED = Color3.fromRGB(220, 50, 40),
+	GREEN = Color3.fromRGB(86, 204, 92),
+	GREEN_DEEP = Color3.fromRGB(40, 150, 70),
+}
+local VET_BG = Color3.fromRGB(78, 54, 14) -- cartão do Veterano: dourado escuro
+local VET_BG_HI = Color3.fromRGB(110, 78, 22)
+local FREE_BG = Color3.fromRGB(22, 58, 34) -- cartão grátis: verde escuro
+local FREE_BG_HI = Color3.fromRGB(34, 84, 48)
 
 -- ===== montagem =====
 local gui = UiKit.screen("VT65Passe", 38) -- acima da loja (30) e do menu (35)
@@ -71,22 +84,47 @@ panel.AnchorPoint = Vector2.new(0.5, 0.5)
 panel.Position = UDim2.fromScale(0.5, 0.5)
 panel.Size = UDim2.fromOffset(W, H)
 local fit = UiKit.fit(gui, panel, W, H, 12)
-do -- faixa de latão no alto (o passe é a "recompensa")
+do -- D-130: o cabeçalho num degradê quente (ouro, laranja, vermelho) e a faixa do alto cheia
+	local band = Instance.new("Frame")
+	band.Name = "Cabecalho"
+	band.BackgroundColor3 = Color3.new(1, 1, 1)
+	band.BackgroundTransparency = 0.55
+	band.BorderSizePixel = 0
+	band.Size = UDim2.new(1, 0, 0, HEAD_H)
+	band.Parent = panel
+	local bg = Instance.new("UIGradient")
+	bg.Color = ColorSequence.new({
+		ColorSequenceKeypoint.new(0, Color3.fromRGB(150, 96, 10)),
+		ColorSequenceKeypoint.new(0.5, Color3.fromRGB(150, 60, 16)),
+		ColorSequenceKeypoint.new(1, Color3.fromRGB(120, 24, 24)),
+	})
+	bg.Transparency = NumberSequence.new({
+		NumberSequenceKeypoint.new(0, 0.1),
+		NumberSequenceKeypoint.new(1, 0.45),
+	})
+	bg.Parent = band
 	local a = Instance.new("Frame")
-	a.BackgroundColor3 = V.BRASS
+	a.BackgroundColor3 = Color3.new(1, 1, 1)
 	a.BorderSizePixel = 0
-	a.Size = UDim2.new(1, 0, 0, px(3, 4))
+	a.Size = UDim2.new(1, 0, 0, px(4, 6))
 	a.Parent = panel
+	local ag = Instance.new("UIGradient")
+	ag.Color = ColorSequence.new({
+		ColorSequenceKeypoint.new(0, VIVO.GOLD_HI),
+		ColorSequenceKeypoint.new(0.5, VIVO.ORANGE),
+		ColorSequenceKeypoint.new(1, VIVO.RED),
+	})
+	ag.Parent = a
 end
 
 -- cabeçalho: rótulo, nome da temporada, nível grande, barra de estrelas e o fim real
-local kick = UiKit.kicker(panel, "PASSE DE CAMPANHA", px(14, 20), V.BRASS)
+local kick = UiKit.kicker(panel, "PASSE DE CAMPANHA", px(14, 20), VIVO.GOLD_HI)
 kick.Position = UDim2.fromOffset(PAD, px(14, 18))
 kick.Size = UDim2.fromOffset(px(300, 400), px(20, 28))
 local title = UiKit.title(panel, "", px(30, 42))
 title.Position = UDim2.fromOffset(PAD, px(34, 46))
 title.Size = UDim2.new(1, -(PAD + px(330, 440)), 0, px(40, 54))
-local ends = UiKit.kicker(panel, "", px(13, 19))
+local ends = UiKit.kicker(panel, "", px(13, 19), V.TEXT)
 ends.Position = UDim2.fromOffset(PAD, px(76, 102))
 ends.Size = UDim2.fromOffset(px(420, 560), px(18, 26))
 local levelStat = UiKit.stat(panel, "NÍVEL", "0", px(40, 56))
@@ -98,9 +136,14 @@ starsBox.AnchorPoint = Vector2.new(1, 0)
 starsBox.Position = UDim2.new(1, -PAD, 0, px(46, 62))
 starsBox.Size = UDim2.fromOffset(px(160, 214), px(56, 76))
 starsBox.Parent = panel
-local starsLabel = UiKit.kicker(starsBox, "", px(13, 19), V.KHAKI)
+local starsLabel = UiKit.kicker(starsBox, "", px(13, 19), VIVO.GOLD_HI)
 starsLabel.Size = UDim2.new(1, 0, 0, px(20, 28))
-local starsBack, starsFill = UiKit.bar(starsBox, px(8, 12), V.BRASS)
+local starsBack, starsFill = UiKit.bar(starsBox, px(8, 12), VIVO.GOLD)
+do
+	local g = Instance.new("UIGradient")
+	g.Color = ColorSequence.new(VIVO.GOLD_HI, VIVO.ORANGE)
+	g.Parent = starsFill
+end
 starsBack.Position = UDim2.fromOffset(0, px(24, 32))
 
 -- fechar
@@ -155,8 +198,8 @@ local function trackLabel(y: number, name: string, color: Color3): TextLabel
 	sub.ZIndex = 3
 	return sub
 end
-local vetSub = trackLabel(TOP_Y, "VETERANO", V.BRASS)
-local freeSub = trackLabel(FREE_Y, "GRÁTIS", V.OLIVE_HI)
+local vetSub = trackLabel(TOP_Y, "VETERANO", VIVO.GOLD)
+local freeSub = trackLabel(FREE_Y, "GRÁTIS", VIVO.GREEN)
 freeSub.Text = "PARA TODOS"
 do -- o marco do rótulo na altura da linha
 	local t = UiKit.kicker(gutter, "NÍVEL", px(12, 17), V.DIM)
@@ -204,13 +247,18 @@ route.Parent = list
 UiKit.corner(route, LINE_H // 2)
 local walked = Instance.new("Frame")
 walked.Name = "Andado"
-walked.BackgroundColor3 = V.BRASS
+walked.BackgroundColor3 = Color3.new(1, 1, 1)
 walked.BorderSizePixel = 0
 walked.Position = route.Position
 walked.Size = UDim2.fromOffset(0, LINE_H)
 walked.ZIndex = 2
 walked.Parent = list
 UiKit.corner(walked, LINE_H // 2)
+do -- D-130: o trecho andado em degradê de ouro a laranja
+	local g = Instance.new("UIGradient")
+	g.Color = ColorSequence.new(VIVO.GOLD_HI, VIVO.ORANGE)
+	g.Parent = walked
+end
 
 -- setas dos lados (mouse): andam 4 níveis
 local scrollBy: (cols: number) -> () = function(_cols: number) end
@@ -363,17 +411,18 @@ local KIND_NAME: { [string]: string } = {
 	boost = "Reforço",
 	stars = "Estrelas",
 }
+-- D-130: uma cor viva por tipo de prêmio (o ícone vai cheio dela; a letra fica branca por cima)
 local KIND_MARK: { [string]: { text: string, color: Color3 } } = {
-	credits = { text = "$", color = V.KHAKI },
-	emblem = { text = "★", color = V.BRASS },
-	camo = { text = "C", color = V.OLIVE_HI },
-	title = { text = "T", color = V.TEXT },
-	uniform = { text = "U", color = V.KHAKI },
-	killcard = { text = "K", color = V.RED_HI },
-	gesture = { text = "G", color = V.TEXT },
-	music = { text = "♪", color = V.TEXT },
-	boost = { text = "×2", color = V.BRASS },
-	stars = { text = "★", color = V.BRASS },
+	credits = { text = "$", color = Color3.fromRGB(70, 196, 90) },
+	emblem = { text = "★", color = Color3.fromRGB(255, 186, 30) },
+	camo = { text = "C", color = Color3.fromRGB(150, 210, 60) },
+	title = { text = "T", color = Color3.fromRGB(70, 160, 255) },
+	uniform = { text = "U", color = Color3.fromRGB(255, 130, 40) },
+	killcard = { text = "K", color = Color3.fromRGB(240, 64, 56) },
+	gesture = { text = "G", color = Color3.fromRGB(200, 100, 255) },
+	music = { text = "♪", color = Color3.fromRGB(40, 200, 215) },
+	boost = { text = "×2", color = Color3.fromRGB(255, 160, 20) },
+	stars = { text = "★", color = Color3.fromRGB(255, 214, 60) },
 }
 local function rewardName(r: Reward?): string
 	if not r then
@@ -535,7 +584,7 @@ Bus.on("passe_claim_selected", claimSelected)
 
 local cellTap = ToqueTelas.newTap2() -- toque: 1º toque mostra, 2º resgata
 local function makeCell(parent: Instance, y: number, lvl: number, track: string): Cell
-	local base = if track == "vet" then VET_BG else V.PANEL_2
+	local base = if track == "vet" then VET_BG else FREE_BG
 	local b = Instance.new("TextButton")
 	b.Name = track
 	b.AutoButtonColor = false
@@ -550,6 +599,12 @@ local function makeCell(parent: Instance, y: number, lvl: number, track: string)
 	b.Parent = parent
 	UiKit.corner(b, 4)
 	local edge = UiKit.edge(b, V.LINE, 1, 0.55)
+	do -- D-130: luz caindo de cima no cartão (a cor da trilha fica mais viva no alto)
+		local lg = Instance.new("UIGradient")
+		lg.Rotation = 90
+		lg.Color = ColorSequence.new(Color3.new(1, 1, 1), Color3.new(0.7, 0.7, 0.7))
+		lg.Parent = b
+	end
 	-- o ícone: quadrado com a cor do tipo de recompensa e a luz caindo de cima
 	local IC = px(46, 62)
 	local icon = Instance.new("Frame")
@@ -588,7 +643,7 @@ local function makeCell(parent: Instance, y: number, lvl: number, track: string)
 	tag.AnchorPoint = Vector2.new(1, 0)
 	tag.Position = UDim2.new(1, -px(5, 7), 0, px(5, 7))
 	tag.ZIndex = 3
-	local r = UiKit.realce(b, base, if track == "vet" then VET_BG_HI else V.PANEL_3, 1.03)
+	local r = UiKit.realce(b, base, if track == "vet" then VET_BG_HI else FREE_BG_HI, 1.03)
 	local function hover(on: boolean)
 		r.set(on)
 		if on then
@@ -682,17 +737,18 @@ local function build()
 end
 
 local STATE_TAG: { [string]: { text: string, color: Color3 } } = {
-	ready = { text = "RECEBER", color = V.OLIVE },
+	ready = { text = "RECEBER", color = VIVO.GREEN_DEEP },
 	claimed = { text = "✔", color = V.PANEL_3 },
-	locked = { text = "VETERANO", color = Color3.fromRGB(120, 96, 40) },
+	locked = { text = "VETERANO", color = Color3.fromRGB(176, 120, 20) },
 }
 local function paintCell(c: Cell, se: { [string]: any }, track: string, lvl: number)
 	local r: Reward? = at(if track == "vet" then se.vet else se.free, lvl)
 	local st = cellState(se, track, lvl)
 	local km = KIND_MARK[(r and r.kind) or ""]
 	c.mark.Text = if r then (if km then km.text else "★") else ""
-	c.mark.TextColor3 = if km then km.color else V.KHAKI
-	c.icon.BackgroundColor3 = if km then km.color:Lerp(V.PANEL, 0.72) else V.PANEL_3
+	-- D-130: o ícone cheio da cor do prêmio, a letra branca
+	c.mark.TextColor3 = V.TEXT
+	c.icon.BackgroundColor3 = if km then km.color else VIVO.GOLD
 	c.name.Text = if r then rewardName(r) else "—"
 	c.sub.Text = if r then UiKit.upper(KIND_NAME[r.kind or ""] or "Item") else ""
 	local tg = STATE_TAG[st]
@@ -703,13 +759,17 @@ local function paintCell(c: Cell, se: { [string]: any }, track: string, lvl: num
 	end
 	local dimmed = st == "future" or st == "locked" or st == "claimed"
 	c.name.TextColor3 = if dimmed then V.DIM else V.TEXT
-	c.mark.TextTransparency = if st == "future" or st == "locked" then 0.45 else 0
-	c.icon.BackgroundTransparency = if st == "claimed" then 0.5 else 0
+	c.mark.TextTransparency = if st == "future" or st == "locked" then 0.3 else 0
+	c.icon.BackgroundTransparency = if st == "claimed" then 0.55 elseif st == "future" or st == "locked" then 0.3 else 0
 	local on = sel.level == lvl and sel.track == track
-	-- o Veterano com o filete de latão: a trilha paga se distingue de longe
-	c.edge.Color = if on then V.BRASS elseif st == "ready" then V.OLIVE_HI elseif track == "vet" then V.BRASS else V.LINE
+	-- o Veterano com o filete dourado, o grátis com o verde: a trilha se distingue de longe
+	c.edge.Color = if on
+		then VIVO.GOLD_HI
+		elseif st == "ready" then VIVO.GREEN
+		elseif track == "vet" then VIVO.GOLD
+		else VIVO.GREEN_DEEP
 	c.edge.Thickness = if on then 2 else 1
-	c.edge.Transparency = if on or st == "ready" then 0 elseif track == "vet" then 0.6 else 0.55
+	c.edge.Transparency = if on or st == "ready" then 0 else 0.35
 end
 
 local pulse: Tween? = nil
@@ -743,8 +803,9 @@ paint = function()
 			paintCell(c.vet, se, "vet", lvl)
 			local here = lvl == level
 			local done = lvl <= level
-			c.node.BackgroundColor3 = if here then V.BRASS elseif done then Color3.fromRGB(96, 80, 40) else V.PANEL
-			c.nodeEdge.Color = if done then V.BRASS elseif lvl % 10 == 0 then V.KHAKI else V.LINE
+			-- D-130: marcos andados em laranja e ouro, o atual em ouro claro
+			c.node.BackgroundColor3 = if here then VIVO.GOLD_HI elseif done then VIVO.ORANGE else V.PANEL
+			c.nodeEdge.Color = if done then VIVO.GOLD elseif lvl % 10 == 0 then VIVO.GOLD else V.LINE
 			c.nodeText.TextColor3 = if here then V.BG elseif done then V.TEXT else V.DIM
 		end
 		-- o marco atual pulsa (um só tween, no contorno)
@@ -770,12 +831,12 @@ paint = function()
 	local rw: Reward? = at(if sel.track == "vet" then se.vet else se.free, sel.level)
 	local km = KIND_MARK[(rw and rw.kind) or ""]
 	prevMark.Text = if km then km.text else "★"
-	prevMark.TextColor3 = if km then km.color else V.BRASS
-	local tint = if km then km.color else V.BRASS
-	prevThumb.BackgroundColor3 = tint:Lerp(V.PANEL, 0.7)
+	prevMark.TextColor3 = V.TEXT
+	-- D-130: a miniatura cheia da cor do prêmio
+	prevThumb.BackgroundColor3 = if km then km.color else VIVO.GOLD
 	prevGlow.Color = ColorSequence.new(Color3.new(1, 1, 1), Color3.new(0.6, 0.6, 0.6))
 	prevKind.Text = UiKit.upper(KIND_NAME[(rw and rw.kind) or ""] or "Item")
-	prevKind.TextColor3 = if sel.track == "vet" then V.BRASS else V.OLIVE_HI
+	prevKind.TextColor3 = if sel.track == "vet" then VIVO.GOLD else VIVO.GREEN
 	prevName.Text = UiKit.upper(rewardName(rw))
 	prevName.FontFace = UiKit.headFont(prevName.Text)
 	local st = cellState(se, sel.track, sel.level)

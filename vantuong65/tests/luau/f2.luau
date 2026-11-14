@@ -444,12 +444,17 @@ test("diária: item novo só na primeira vez; relógio voltando não deixa resga
 	local back = Commerce.dailyClaim({ run = 3, lastDay = 60, total = 10 }, 59, {})
 	assert(not back.ok and back.reason == "clock", "último resgate no futuro: espera")
 	-- os itens da trilha existem no catálogo, são "extra" e não saem por passe
+	local week = 0
 	for _, d in Commerce.DailyTrack do
 		for _, id in d.items or {} do
 			local c = Commerce.find(id)
 			assert(c and c.unlock == "daily" and c.slot == "extra", id)
 		end
+		-- D-130: os créditos da trilha são os que o servidor paga (D-72: 30 no 1º dia, +10 por dia)
+		assert(d.credits == 30 + 10 * (d.day - 1), "créditos do dia " .. d.day)
+		week += d.credits
 	end
+	assert(week == 420, "semana completa")
 	local none = { passes = {}, premium = false, subscription = false }
 	assert(not Commerce.canEquip("us_zippo", "US", "extra", none), "sem ganhar, não equipa")
 	local won = { passes = {}, premium = false, subscription = false, earned = { us_zippo = true } }

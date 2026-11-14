@@ -2645,5 +2645,21 @@
  "Você caiu": "Bạn bị hạ",
  "Você correu": "Bạn đã chạy",
  "Você entrou num veículo": "Bạn đã lên xe",
- "Você foi atingido": "Bạn bị trúng đạn"
+ "Você foi atingido": "Bạn bị trúng đạn",
+ "+ item único": "+ vật phẩm độc nhất",
+ "CADERNETA DE SERVIÇO": "SỔ QUÂN VỤ",
+ "CONTINUAR": "TIẾP TỤC",
+ "DIAS SEGUIDOS": "NGÀY LIÊN TIẾP",
+ "Este dia já foi resgatado.": "Ngày này đã nhận rồi.",
+ "LENDO A CADERNETA…": "ĐANG ĐỌC SỔ…",
+ "REGISTRANDO…": "ĐANG LƯU…",
+ "RESGATAR": "NHẬN",
+ "RESGATAR O DIA %d": "NHẬN NGÀY %d",
+ "Recebido: +$ %d de crédito e um item novo no armário: %s.": "Đã nhận: +$ %d tín dụng và một vật phẩm mới trong tủ: %s.",
+ "Recebido: +$ %d de crédito. Volte amanhã para o dia seguinte.": "Đã nhận: +$ %d tín dụng. Ngày mai quay lại để nhận ngày tiếp theo.",
+ "Sessão sem DataStore (perfil não carregou ou Studio): o prêmio de hoje não fica gravado.": "Phiên không có DataStore (hồ sơ chưa tải hoặc Studio): phần thưởng hôm nay không được lưu.",
+ "Seu perfil não carregou neste servidor: o prêmio não pode ser gravado agora (nada foi perdido).": "Hồ sơ của bạn chưa tải trên máy chủ này: chưa thể lưu phần thưởng (không mất gì cả).",
+ "Um dia passou sem prêmio: a sequência recomeçou no dia 1.": "Đã bỏ lỡ một ngày: chuỗi bắt đầu lại từ ngày 1.",
+ "Você já resgatou hoje. O próximo prêmio sai em %s.": "Hôm nay bạn đã nhận rồi. Phần thưởng tiếp theo sau %s.",
+ "Volte todo dia: o prêmio cresce. Pulou um dia, volta ao dia 1.": "Quay lại mỗi ngày: phần thưởng tăng dần. Bỏ một ngày là quay về ngày 1."
 }
