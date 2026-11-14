@@ -133,6 +133,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
   - a cadência abaixo de 12 fps medida num aparelho lento.
 
 ## v72: lote 27, bugs de textura, gráficos, movimento, tiros e granadas (2026-11-14, D-142)
+- **Publicada** (versão 72 do place, commit 19b3f1b).
 - **Tiros:**
   - os sons das armas de fora (17 ids) nunca tocavam: eram conferidos como imagem e davam falha.
     Agora tocam o disparo, o ferrolho, o estojo e o baque na carne;
