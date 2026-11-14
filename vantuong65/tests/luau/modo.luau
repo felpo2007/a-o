@@ -129,39 +129,41 @@ end
 local function distM(a: any, b: any): number
 	return math.sqrt((a.x - b.x) ^ 2 + (a.z - b.z) ^ 2) * M
 end
+-- D-123: setores do mapa (3 no de 700 m) e o do meio
+local NS = #MapConfig.Sectors
+local MID = math.ceil(NS / 2)
 
 test("sorteio dos pontos fortes: 1 por setor, no setor certo, e a frente fica mais compacta", function()
 	local rng = Rng.new(7)
 	local sumNew, sumOld, n = 0, 0, 2000
 	for _ = 1, n do
-		local p = Front.pickStrongpoints(bySector, 5, Front.firstSector("Warfare", 5), function()
+		local p = Front.pickStrongpoints(bySector, NS, Front.firstSector("Warfare", NS), function()
 			return rng:next()
 		end)
-		for s = 1, 5 do
+		for s = 1, NS do
 			assert(p[s] and p[s].sector == s, "setor " .. s)
 		end
-		sumNew += distM(p[2], p[3]) + distM(p[4], p[3])
+		sumNew += distM(p[MID - 1], p[MID]) + distM(p[MID + 1], p[MID])
 		-- sorteio solto (antes): média exata das distâncias
 	end
-	for _, a in bySector[3] do
-		for _, b in bySector[2] do
-			sumOld += distM(a, b) / (3 * 3)
-		end
-		for _, b in bySector[4] do
-			sumOld += distM(a, b) / (3 * 3)
+	for _, a in bySector[MID] do
+		for _, side in { MID - 1, MID + 1 } do
+			for _, b in bySector[side] do
+				sumOld += distM(a, b) / (#bySector[MID] * #bySector[side])
+			end
 		end
 	end
 	local avgNew = sumNew / n
-	print(string.format("       (S2+S4 até o S3: %.0f m em média antes, %.0f m agora)", sumOld, avgNew))
+	print(string.format("       (vizinhos até o S%d: %.0f m em média antes, %.0f m agora)", MID, sumOld, avgNew))
 	assert(avgNew < sumOld, "a cadeia deveria aproximar os pontos")
-	assert(Front.firstSector("Offensive", 5) == 5 and Front.firstSector("Warfare", 5) == 3)
+	assert(Front.firstSector("Offensive", NS) == NS and Front.firstSector("Warfare", NS) == MID)
 end)
 
 test("reunião avançada: dentro do setor próprio, a >= forwardM do alvo, e encurta a marcha", function()
 	local worstOld, worstNew = 0, 0
 	local sumOld, sumNew, k = 0, 0, 0
-	for _, t in bySector[3] do
-		for _, pair in { { own = 2, f = "VC" }, { own = 4, f = "US" } } do
+	for _, t in bySector[MID] do
+		for _, pair in { { own = MID - 1, f = "VC" }, { own = MID + 1, f = "US" } } do
 			for _, own in bySector[pair.own] do
 				local x, z = Front.forwardRally(pair.own, own, t, M, sectorAt)
 				assert(x and z, "sem lugar para a reunião avançada")
@@ -182,7 +184,7 @@ test("reunião avançada: dentro do setor próprio, a >= forwardM do alvo, e enc
 	end
 	print(
 		string.format(
-			"       (marcha até o S3 em corrida leve: média %.0f s -> %.0f s; pior caso %.0f s -> %.0f s)",
+			"       (marcha até o setor do meio em corrida leve: média %.0f s -> %.0f s; pior caso %.0f s -> %.0f s)",
 			sumOld / k / JOG,
 			sumNew / k / JOG,
 			worstOld / JOG,
@@ -192,12 +194,12 @@ test("reunião avançada: dentro do setor próprio, a >= forwardM do alvo, e enc
 	assert(worstNew / JOG <= 150, "a meta da Parte 4 é contato em 90–150 s depois de nascer")
 end)
 
-test("Offensive: a reunião avançada dos EUA no S5 deixa o S4 a <= 150 s de marcha", function()
+test("Offensive: a reunião avançada dos EUA no último setor deixa o penúltimo a <= 150 s de marcha", function()
 	local worstOld, worstNew = 0, 0
-	for _, t in bySector[4] do
-		for _, own in bySector[5] do
-			local x, z = Front.forwardRally(5, own, t, M, sectorAt)
-			assert(x and z and sectorAt(x, z) == 5)
+	for _, t in bySector[NS - 1] do
+		for _, own in bySector[NS] do
+			local x, z = Front.forwardRally(NS, own, t, M, sectorAt)
+			assert(x and z and sectorAt(x, z) == NS)
 			local rx, rz = SpawnRules.rallyPosition(own.x, own.z, "US", M)
 			local old = math.min(distM({ x = rx, z = rz }, t), distM(MapConfig.HQ.US, t))
 			worstOld = math.max(worstOld, old)
@@ -237,7 +239,9 @@ test("todo ponto de nascimento cai dentro da área e da carta, a >= 30 m da bord
 			worst
 		)
 	)
-	assert((kinds.hq or 0) == 2 and (kinds.rally or 0) == 30 and (kinds.forward or 0) >= 60)
+	-- uma reunião de cada lado por ponto forte (D-123: 8 pontos no mapa de 700 m, eram 15)
+	local nSp = #MapConfig.Strongpoints
+	assert((kinds.hq or 0) == 2 and (kinds.rally or 0) == 2 * nSp and (kinds.forward or 0) >= 4 * nSp - 4)
 end)
 
 test("reunião avançada: pares do Warfare inicial e do Offensive", function()
@@ -363,12 +367,11 @@ test("carta: setores viram retângulos que cobrem o polígono sem sobra (amostra
 	end
 end)
 
--- mapa de 500 x 500 m (D-114): as quatro fronteiras são retas (no de 1 km, S1/S2 e S2/S3 dobravam)
+-- D-123 (mapa de 700 m, 3 setores): as fronteiras entre vizinhos são retas; setores longe não encostam
 test("carta: as fronteiras dos setores são retas (1 trecho cada)", function()
-	assert(#Carta.boundary(MapConfig.Sectors, 1, 2) == 1)
-	assert(#Carta.boundary(MapConfig.Sectors, 2, 3) == 1)
-	assert(#Carta.boundary(MapConfig.Sectors, 3, 4) == 1)
-	assert(#Carta.boundary(MapConfig.Sectors, 4, 5) == 1)
+	for s = 1, NS - 1 do
+		assert(#Carta.boundary(MapConfig.Sectors, s, s + 1) == 1, "fronteira " .. s)
+	end
 	assert(#Carta.boundary(MapConfig.Sectors, 1, 3) == 0)
 end)
 

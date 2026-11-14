@@ -1697,4 +1697,28 @@ if RunService:IsStudio() then
 	end)
 end
 
+-- D-123: o menu principal (28) deixa a cena aparecer; aberto da tela de baixa (MENU > Menu principal), a
+-- baixa (25) e o caído (13) apareciam por baixo dele (Studio, v55). Enquanto ele está aberto, o que há
+-- nelas fica escondido (o Enabled delas é o estado da tela e não muda).
+local underMenu: { [GuiObject]: boolean } = {}
+local function coverForMenu()
+	local on = player:GetAttribute("MenuPrincipal") == true
+	for _, g in { deathGui, downGui } do
+		for _, c in g:GetChildren() do
+			if c:IsA("GuiObject") then
+				if on then
+					if underMenu[c] == nil then
+						underMenu[c] = c.Visible
+						c.Visible = false
+					end
+				elseif underMenu[c] ~= nil then
+					c.Visible = underMenu[c]
+					underMenu[c] = nil
+				end
+			end
+		end
+	end
+end
+player:GetAttributeChangedSignal("MenuPrincipal"):Connect(coverForMenu)
+
 return CasualtyScreen

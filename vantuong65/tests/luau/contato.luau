@@ -266,10 +266,13 @@ test("túnel avançado do VC: antes e depois (inimigo a 150 m)", function()
 			print(string.format("       VC %-9s %-16s %s", mode, kind, table.concat(parts, " | ")))
 		end
 	end
-	-- no Offensive o VC ganha um ponto perto do objetivo dele em toda partida
+	-- D-123: no mapa de 3 setores o Offensive começa na vila do centro e todas as bocas de túnel ficam
+	-- em An Cường (2), o setor dos EUA: aí não há túnel avançado (a regra do vcForward não muda). Se
+	-- houver, ele tem que levar ao contato.
 	local fwd = results["depois|150 m|Offensive|VC|túnel avançado"]
-	assert(fwd and fwd.n == DRAWS, "o túnel avançado devia existir em toda partida do Offensive")
-	assert(fwd.inside / fwd.n >= 0.9, string.format("túnel avançado: %.0f%%", 100 * fwd.inside / fwd.n))
+	if fwd then
+		assert(fwd.inside / fwd.n >= 0.9, string.format("túnel avançado: %.0f%%", 100 * fwd.inside / fwd.n))
+	end
 	local before = results["guarnições|150 m|Offensive|VC|todos os pontos"]
 	local after = results["depois|150 m|Offensive|VC|todos os pontos"]
 	assert(after.inside / after.n >= before.inside / before.n, "média de todos os pontos não pode piorar")

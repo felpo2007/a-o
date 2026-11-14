@@ -223,24 +223,28 @@ end
 -- Offensive pelo laço real da partida + relatório pós-ação.
 local function offensive(): (string, string?)
 	MatchService.newMatch("Offensive")
+	MatchService.prepUntil = 0 -- D-122: o autoteste não espera a contagem do começo
 	local o = MatchService.offensive
-	if not o or o.front ~= 4 then
-		return "FALHA", "Offensive não começou com a frente em S4"
+	-- D-123: a frente começa no penúltimo setor (S4 no mapa de 5 setores, S2 no de 3)
+	local nS = #(require(game:GetService("ReplicatedStorage").Shared.MapConfig) :: any).Sectors
+	local f0 = nS - 1
+	if not o or o.front ~= f0 then
+		return "FALHA", "Offensive não começou com a frente em S" .. f0
 	end
 	MatchService.countsOverride = function()
 		local c = {}
-		for s = 1, 5 do
+		for s = 1, nS do
 			c[s] = { US = 0, VC = 0 }
 		end
-		c[4] = { US = 5, VC = 0 } -- 5 fuzileiros sozinhos no ponto: 90 s de VC a EUA
+		c[f0] = { US = 5, VC = 0 } -- 5 fuzileiros sozinhos no ponto: 90 s de VC a EUA
 		return c
 	end
 	local took = waitFor(function()
-		return o.front == 3
+		return o.front == f0 - 1
 	end, 100)
 	MatchService.countsOverride = nil
 	if not took then
-		return "FALHA", string.format("S4 não caiu em 100 s (progresso %.2f)", o.capture.progress[4])
+		return "FALHA", string.format("S%d não caiu em 100 s (progresso %.2f)", f0, o.capture.progress[f0])
 	end
 	workspace:SetAttribute("VT65DevEnd", true)
 	local ended = waitFor(function()
@@ -248,7 +252,7 @@ local function offensive(): (string, string?)
 	end, 5)
 	local rep = MatchService.report
 	local text = if rep then table.concat(AfterAction.lines(rep), "\n") else ""
-	local hasCapture = string.find(text, "USMC toma S4", 1, true) ~= nil
+	local hasCapture = string.find(text, "USMC toma S" .. f0, 1, true) ~= nil
 	MatchService.newMatch("Warfare")
 	return if ended and hasCapture then "ok" else "FALHA",
 		string.format(

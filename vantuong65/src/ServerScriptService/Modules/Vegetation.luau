@@ -21,6 +21,7 @@ export type Input = {
 	exclude: { Circle }, -- QGs, casas, pontos fortes, túneis
 	corridors: { Segment }?, -- raias do campo de tiro
 	density: number?, -- multiplica todas as probabilidades (1 = projeto)
+	dense: { Circle }?, -- D-123: mata cerrada em volta do objetivo da mata (Vegetation.denseCircles)
 	seed: number, -- semente do ruído das manchas de moita
 	rng: any, -- Shared/Rng (next, range)
 	-- chamado a cada poucas colunas: no Roblox, task.wait. Sem isso o plano (~200 mil células) passou
@@ -232,6 +233,34 @@ function Vegetation.spawnClearings(spots: { any }): ({ Circle }, { Segment })
 	return circles, lanes
 end
 
+-- Mata cerrada do objetivo da mata (D-123, pedido do dono: "outro numa floresta densa e pouco
+-- acessível"): em volta dos pontos fortes do setor DENSE_SECTOR, a mata fica DENSE_K vezes mais cheia
+-- até DENSE_M e volta ao normal suave até 1,5 x DENSE_M. Densidade de design (PLACEHOLDER).
+Vegetation.DENSE_SECTOR = 1
+Vegetation.DENSE_M = 70
+Vegetation.DENSE_K = 1.8
+function Vegetation.denseCircles(mapConfig: any): { Circle }
+	local out: { Circle } = {}
+	for _, sp in mapConfig.Strongpoints do
+		if sp.sector == Vegetation.DENSE_SECTOR then
+			table.insert(out, { x = sp.x, z = sp.z, r = Vegetation.DENSE_M / M })
+		end
+	end
+	return out
+end
+local function denseAt(circles: { Circle }?, x: number, z: number): number
+	if not circles then
+		return 1
+	end
+	local best = 1
+	for _, c in circles do
+		local d = math.sqrt((x - c.x) ^ 2 + (z - c.z) ^ 2)
+		local t = 1 - smoothstep(c.r, c.r * 1.5, d)
+		best = math.max(best, 1 + (Vegetation.DENSE_K - 1) * t)
+	end
+	return best
+end
+
 function Vegetation.blocked(input: Input, x: number, z: number): boolean
 	for _, c in input.exclude do
 		local dx, dz = x - c.x, z - c.z
@@ -277,6 +306,7 @@ function Vegetation.plan(input: Input): { Item }
 				local kind = input.kindAt(x, z)
 				if kind == 1 then
 					mix = Vegetation.FOREST
+					f = denseAt(input.dense, x, z) -- D-123: mata cerrada do objetivo da mata
 				elseif kind == 2 then
 					mix = Vegetation.GROVE
 				elseif kind == 5 then

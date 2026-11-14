@@ -377,7 +377,8 @@ local function refresh()
 			mode = "view"
 		end
 	end
-	showMap(insertion or pinned or targeting)
+	-- D-123: a carta aberta (M) também fica atrás do menu principal; ela aparecia através dele (Studio, v55)
+	showMap((insertion or pinned or targeting) and not menuPrincipal)
 	placeMap()
 	local faction = player:GetAttribute("Faction")
 	LobbyScene.update(side.Visible, if type(faction) == "string" then faction else nil)

@@ -1134,7 +1134,26 @@
   "talk",
   "teclado",
   "toque",
-  "Cabide"
+  "Cabide",
+  "mata cerrada a noroeste do morro; nome de design",
+  "meio da borda leste, a leste de An Cường (2) (setor S3)",
+  "meio da borda oeste, retaguarda do VC (setor S1)",
+  "trilha estreita na mata a sudoeste; nome de design",
+  "a:reset",
+  "b:reset",
+  "g:reset",
+  "k:reset",
+  "l:card",
+  "l:main",
+  "l:missions",
+  "notify",
+  "p:apply",
+  "s:leave",
+  "s:role",
+  "s:tutorial",
+  "t:editor",
+  "t:reset",
+  "v:reset"
  ],
  "regex": []
 }

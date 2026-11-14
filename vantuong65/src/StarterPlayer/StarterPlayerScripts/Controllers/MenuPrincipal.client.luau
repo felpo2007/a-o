@@ -71,9 +71,11 @@ local SHOTS: { Shot } = {
 		look = Vector3.new(2.0, 1.3, -1.5), -- o grupo fica à direita, longe dos botões
 		fov = 38,
 	},
-	{ -- por cima do ombro: o VC olha a vila, de frente para o sol baixo
-		place = "Quintal oeste de An Cường (2)",
-		anchor = "Quintal oeste de An Cường (2)",
+	-- D-123: o mapa de 700 m não tem mais o Quintal oeste nem a Encosta leste (o menu ficava só no
+	-- primeiro plano); os outros dois saem da sebe ao norte e do arrozal ao sul de An Cường (2)
+	{ -- por cima do ombro: o VC, na sebe da boca do túnel, olha a vila com o sol baixo de lado
+		place = "Sebe ao norte de An Cường (2)",
+		anchor = "Sebe ao norte de An Cường (2)",
 		toward = "An Cường (2)",
 		faction = "VC",
 		n = 3,
@@ -82,10 +84,10 @@ local SHOTS: { Shot } = {
 		look = Vector3.new(-8, 1.5, 40),
 		fov = 45,
 	},
-	{ -- a câmera sobe atrás dos fuzileiros: o morro de Xóm Gò contra o sol
-		place = "Encosta leste",
-		anchor = "Encosta leste",
-		toward = "Xóm Gò",
+	{ -- a câmera sobe atrás dos fuzileiros no arrozal: An Cường (2) à frente
+		place = "Arrozal ao sul de An Cường (2)",
+		anchor = "Arrozal ao sul de An Cường (2)",
+		toward = "An Cường (2)",
 		faction = "US",
 		n = 2,
 		cam0 = Vector3.new(-2.5, 1.8, -6.5),
@@ -559,6 +561,72 @@ local function orbitCam(cam: Camera)
 	end
 end
 
+-- D-123: no mapa de 700 m os Becos de Xóm Gò ficam no objetivo B, onde os bots brigam; um soldado de
+-- verdade passava de costas na frente da câmera do menu (Studio, v55). Enquanto o menu está aberto,
+-- quem estiver a até HIDE_M do grupo do plano some só nesta tela (o próprio jogador fica de fora: o
+-- corpo dele é da câmera de primeira pessoa).
+local HIDE_M = 40
+local hidden: { [Model]: boolean } = {}
+local nextHide = 0
+local function setHidden(m: Model, on: boolean)
+	local v = if on then 1 else 0
+	for _, d in m:GetDescendants() do
+		if d:IsA("BasePart") then
+			d.LocalTransparencyModifier = v
+		elseif d:IsA("Decal") then
+			d.LocalTransparencyModifier = v
+		end
+	end
+end
+local function showAll()
+	for m in hidden do
+		if m.Parent then
+			setHidden(m, false)
+		end
+	end
+	table.clear(hidden)
+end
+local function hideNear(focus: Vector3)
+	local now = os.clock()
+	if now < nextHide then
+		return
+	end
+	nextHide = now + 0.25
+	local r2 = (HIDE_M / M) ^ 2
+	local seen: { [Model]: boolean } = {}
+	local function check(m: Instance)
+		if not m:IsA("Model") or m == player.Character then
+			return
+		end
+		local pp = m.PrimaryPart or m:FindFirstChild("HumanoidRootPart")
+		if not (pp and pp:IsA("BasePart")) then
+			return
+		end
+		local d = pp.Position - focus
+		if d.X * d.X + d.Z * d.Z < r2 then
+			seen[m] = true
+			setHidden(m, true) -- de novo a cada volta: arma trocada traz peça nova
+		end
+	end
+	local folder = workspace:FindFirstChild("Combatants")
+	if folder then
+		for _, m in folder:GetChildren() do
+			check(m)
+		end
+	end
+	for _, p in Players:GetPlayers() do
+		if p.Character then
+			check(p.Character)
+		end
+	end
+	for m in hidden do
+		if not seen[m] and m.Parent then
+			setHidden(m, false)
+		end
+	end
+	hidden = seen
+end
+
 local function camStep()
 	local cam = workspace.CurrentCamera
 	if not (open and cam) then
@@ -568,9 +636,11 @@ local function camStep()
 	cam.CameraType = Enum.CameraType.Scriptable
 	local s = cur
 	if not s then
+		showAll()
 		orbitCam(cam)
 		return
 	end
+	hideNear(s.focus)
 	local now = os.clock()
 	local k = math.clamp((now - s.t0) / SHOT_S, 0, 1)
 	local e = (1 - math.cos(math.pi * k)) / 2
@@ -737,6 +807,7 @@ local function setOpen(on: boolean)
 		RunService:UnbindFromRenderStep("VT65MenuCam")
 		cur = nil
 		hideCrew()
+		showAll()
 		if cc then
 			cc:Destroy()
 			cc = nil

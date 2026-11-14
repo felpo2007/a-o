@@ -38,9 +38,10 @@ LANGS = ("en", "es", "vi")
 
 # texto entre aspas duplas ou simples (com escapes)
 STRING = re.compile(r'"((?:[^"\\\n]|\\.)*)"|\'((?:[^\'\\\n]|\\.)*)\'')
-# chamadas cujo argumento nunca é texto de tela
+# chamadas cujo argumento nunca é texto de tela. D-123: com \b na frente; sem ele o "on(" do fim
+# pegava section(, makeButton(, footButton( e o texto dessas telas nunca entrava na lista
 API = re.compile(
-    r"(GetAttribute|SetAttribute|GetAttributeChangedSignal|FindFirstChild\w*|WaitForChild|"
+    r"\b(GetAttribute|SetAttribute|GetAttributeChangedSignal|FindFirstChild\w*|WaitForChild|"
     r"FindFirstAncestor\w*|Instance\.new|IsA|GetService|GetPropertyChangedSignal|require|"
     r"Net\.\w+|event|func|unreliable|BindAction\w*|UnbindAction|BindToRenderStep|"
     r"UnbindFromRenderStep|HasTag|AddTag|RemoveTag|GetTagged|Connect|fire|on)\s*\(\s*$"

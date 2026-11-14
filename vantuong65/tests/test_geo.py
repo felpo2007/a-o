@@ -83,13 +83,13 @@ def test_export_roblox_relatorio():
     assert total < 40000
 
 
-def test_mapconfig_gerado_tem_area_de_500_por_500_m():
-    """D-114 (2026-11-13): 500 x 500 m de Xóm Gò, no morro do centro, até An Cường (2) com os
-    túneis; origem no centro do mundo gerado (não mudou desde a D-63)."""
-    assert geo.PLAY_ING == (269660.0, 1692640.0, 270160.0, 1693140.0)
+def test_mapconfig_gerado_tem_area_de_700_por_700_m():
+    """D-123 (2026-11-14): 700 x 700 m centrados em Xóm Gò, com An Cường (2) e os túneis a leste;
+    origem no centro do mundo gerado (não mudou desde a D-63)."""
+    assert geo.PLAY_ING == (269480.0, 1692580.0, 270180.0, 1693280.0)
     txt = (ROOT / "src/ReplicatedStorage/Shared/MapConfig.luau").read_text("utf-8")
-    assert "minX = -1928.6, maxX = -142.9" in txt
-    assert "minZ = -2642.9, maxZ = -857.1" in txt
+    assert "minX = -2571.4, maxX = -71.4" in txt
+    assert "minZ = -3142.9, maxZ = -642.9" in txt
     assert "GridOrigin1965 = { e = 270200.0, n = 1692400.0 }" in txt  # origem não mudou
 
 

@@ -243,15 +243,18 @@ function MatchService.newMatch(mode: string?)
 	MatchService.winner = nil
 	MatchService.offensive = nil
 	if MatchService.mode == "Offensive" then
-		local o = Offensive.new(5)
+		local o = Offensive.new(#MapConfig.Sectors)
 		MatchService.offensive = o
 		MatchService.state = o.capture
 		MatchService.initialOwner = table.clone(o.capture.owner)
 	else
 		local initial = table.clone(MapConfig.InitialOwner)
-		local active = { true, true, true, true, true }
+		-- D-123: quantos setores o mapa tiver (3 no mapa de 700 m); no Skirmish, só o do meio
+		local nS = #MapConfig.Sectors
+		local active = table.create(nS, true)
 		if MatchService.mode == "Skirmish" then
-			active = { false, false, true, false, false }
+			active = table.create(nS, false)
+			active[math.ceil(nS / 2)] = true
 		end
 		MatchService.state = Capture.new(initial, active)
 		MatchService.initialOwner = initial
@@ -308,7 +311,7 @@ end
 local function counts(): { { US: number, VC: number } }
 	local out = {}
 	local r2 = MapConfig.CaptureRadiusStuds ^ 2
-	for s = 1, 5 do
+	for s = 1, #MapConfig.Sectors do
 		out[s] = { US = 0, VC = 0 }
 	end
 	for _, e in Combatants.list() do

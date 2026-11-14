@@ -48,7 +48,7 @@ type Card = {
 ComoJogar.CARDS = {
 	{
 		title = "O OBJETIVO",
-		text = "Dois lados lutam pelo mapa: os Fuzileiros dos EUA e o Viet Cong. Há cinco objetivos, de A a E. O que pisca no alto da tela é o da vez: entre no círculo dele e fique lá até ele ser seu.",
+		text = "Dois lados lutam pelo mapa: os Fuzileiros dos EUA e o Viet Cong. Há três objetivos: A, B e C. O que pisca no alto da tela é o da vez: entre no círculo dele e fique lá até ele ser seu.",
 		chips = {},
 		objectives = true,
 	},
@@ -314,7 +314,7 @@ devBox.Size = UDim2.fromOffset(DEV_W, DEV_H)
 devBox.Parent = panel
 
 -- pé: anterior, pontos, próximo; fechar no canto
-local function footButton(text: string, x: number, w: number, kind: string): TextButton
+local function botaoRodape(text: string, x: number, w: number, kind: string): TextButton
 	local b = Instance.new("TextButton")
 	b.AutoButtonColor = false
 	b.Text = text
@@ -345,11 +345,11 @@ local function footButton(text: string, x: number, w: number, kind: string): Tex
 	end)
 	return b
 end
-local prevB = footButton("◄  ANTERIOR", 40, 230, "secondary")
+local prevB = botaoRodape("◄  ANTERIOR", 40, 230, "secondary")
 prevB.Name = "Anterior"
-local nextB = footButton("PRÓXIMO  ►", W - 40 - 260, 260, "primary")
+local nextB = botaoRodape("PRÓXIMO  ►", W - 40 - 260, 260, "primary")
 nextB.Name = "Proximo"
-local closeB = footButton("FECHAR", W - 40 - 170, 170, "secondary")
+local closeB = botaoRodape("FECHAR", W - 40 - 170, 170, "secondary")
 closeB.Name = "Fechar"
 closeB.Position = UDim2.fromOffset(W - 40 - 170, 28)
 closeB.Size = UDim2.fromOffset(170, 50)
@@ -447,8 +447,9 @@ end
 
 -- 1º cartão: a barra dos objetivos (as cores do HUD da frente: azul dos EUA, vermelho do VC)
 local function objectivesBar()
-	local owners = { V.VC, V.VC, V.MUTED, V.US, V.US }
-	for i, letter in { "A", "B", "C", "D", "E" } do
+	-- D-123: três objetivos (A do VC, B neutro no centro, C dos EUA)
+	local owners = { V.VC, V.MUTED, V.US }
+	for i, letter in { "A", "B", "C" } do
 		local b = Instance.new("Frame")
 		b.Size = UDim2.fromOffset(84, 84)
 		b.BackgroundColor3 = owners[i]
@@ -456,7 +457,7 @@ local function objectivesBar()
 		b.LayoutOrder = i
 		b.Parent = art
 		UiKit.corner(b, 8)
-		if i == 3 then
+		if i == 2 then
 			UiKit.edge(b, UiKit.BRASS, 4, 0) -- o da vez
 		end
 		local t = Instance.new("TextLabel")

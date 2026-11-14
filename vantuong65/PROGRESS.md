@@ -49,7 +49,10 @@
 - **Lote 9 (v54, D-122): feito.** 30 contra 30 e começo na base com contagem de 30 s.
 - **Lote 9, partida (pedido original):** 30 contra 30. Cada um começa na sua base, com contagem regressiva; depois a
   partida começa e os pontos são disputados.
-- **Lote 10, mapa de 700 x 700 m:**
+- **Lote 10 (v55, D-123): feito.** Mapa de 700 x 700 m com as bases no meio da borda de cada lado e
+  três objetivos: A na mata fechada (oeste), B em Xóm Gò (centro) e C em An Cường (2) (leste); a terra
+  das ruas sem o vermelho.
+- **Lote 10, mapa (pedido original):**
   - bases no meio da borda de cada lado;
   - três objetivos (resposta do dono), espalhados: um no centro, numa vila maior; outro numa mata
     fechada e de difícil acesso; o terceiro à escolha;
@@ -57,6 +60,30 @@
 - **Lote 11, passe e loja:** o passe em linha do tempo horizontal, da esquerda para a direita; a loja
   atraente, com imagens, cores e design bonito.
 - **Lote 12, análise:** bots, gráficos, armas, tiros e veículos (junto do lote 6).
+
+## v55: lote 10, mapa de 700 x 700 m, três objetivos e o solo (2026-11-14, D-123)
+- **Publicação:** pendente (ver o commit "v55 publicada").
+- **Feito:**
+  - área de 700 x 700 m com Xóm Gò no meio; QGs no meio das bordas oeste (VC) e leste (EUA), 50 m
+    para dentro;
+  - três setores: A Mata fechada (VC; mata 1,8 vez mais cheia até 70 m dos pontos, sem clareira e
+    sem estrada até eles), B Xóm Gò (neutro, a vila grande) e C An Cường (2) (EUA);
+  - o código aceita qualquer número de setores (Offensive, Skirmish, chips do HUD, autoteste);
+  - solo: a cor do chão de terra (`TerrainLook`) neutraliza o laranja da textura; as ruas saíam
+    vermelho-escuras;
+  - carta tática refeita para a área nova;
+  - menu principal: os três planos em pontos que existem (dois tinham saído com o mapa); bots perto
+    do plano somem só nesta tela; a tela de baixa e a carta não aparecem mais através dele;
+  - tradução: o extrator pulava `section(` e outras funções terminadas em "on("; 22 textos de tela
+    traduzidos (en, es, vi), mais os nomes novos do mapa.
+- **Conferido no Studio:** os três chips A, B e C; a contagem com o jogador a 7 m do QG dos EUA;
+  o objetivo A debaixo da mata (antes, uma clareira de 30 m); a rua cinza-terra no menu; os três
+  planos do menu girando; 28 bots de cada lado em campo 2 min depois; a baixa escondida atrás do
+  menu.
+- **Achado no teste:** um controle ligado ao PC do dono está com o analógico esquerdo preso
+  (−0,76; 0,83) e abria menus sozinho no Studio. Vale conferir o controle.
+- **Não testado:** a partida inteira no mapa novo; celular; fps no setor A com a mata mais cheia; o
+  terceiro plano do menu só pela posição da câmera e pela legenda (o controle atrapalhou a captura).
 
 ## v54: lote 9, 30 contra 30 e começo na base com contagem (2026-11-14, D-122)
 - **Publicada** como versão 54 do place (build do commit 23b1b63).

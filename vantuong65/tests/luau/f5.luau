@@ -233,7 +233,9 @@ end)
 test("estimativa do mapa: nenhum setor passa do teto; sebes desbastadas por igual", function()
 	local estimate = require("../../tools/ArtEstimate")
 	local r = estimate()
-	for s = 1, 5 do
+	-- D-123: quantos setores o mapa tiver (3 no mapa de 700 m)
+	local nS = #(require("../../src/ReplicatedStorage/Shared/MapConfig") :: any).Sectors
+	for s = 1, nS do
 		local x = r.sectors[s]
 		assert(x, "setor " .. s .. " sem arte")
 		assert(x.tris <= ArtBudget.SECTOR_MAX + 1, string.format("setor %d: %.0f triângulos", s, x.tris))

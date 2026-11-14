@@ -31,7 +31,10 @@ WORLD_ING = (268200.0, 1691200.0, 272200.0, 1693600.0)
 #   Colina 30 ao norte. Fica dentro do recorte de 2 x 2 km, então os dados já recortados bastam.
 # - 2026-11-13 (pedido do dono: "talvez 500m x 500m"; D-114): de Xóm Gò, no morro do centro, até An
 #   Cường (2) com os túneis, E 269,66–270,16 x N 1692,64–1693,14. Fica dentro do de 1 x 1 km.
-PLAY_ING = (269660.0, 1692640.0, 270160.0, 1693140.0)
+# - 2026-11-14 (pedido do dono: "aumente o mapa para 700 x 700 m"; D-123): centrado em Xóm Gò (a
+#   vila grande do centro), de E 269,48 a 270,18 e N 1692,58 a 1693,28; o riacho fica logo fora da
+#   borda leste.
+PLAY_ING = (269480.0, 1692580.0, 270180.0, 1693280.0)
 
 _ing_to_wgsutm = Transformer.from_crs(ING_A_UTM49, "EPSG:32649", always_xy=True)
 _wgsutm_to_ll = Transformer.from_crs("EPSG:32649", "EPSG:4326", always_xy=True)

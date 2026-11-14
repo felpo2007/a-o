@@ -8,8 +8,11 @@ local TerrainLook = {}
 TerrainLook.COLORS = {
 	Grass = Color3.fromRGB(72, 92, 42), -- arroz e capim de agosto; mais claro parecia gramado
 	LeafyGrass = Color3.fromRGB(92, 90, 54), -- chão de mata: folhas secas sobre capim
-	Ground = Color3.fromRGB(108, 86, 60), -- chão de mata e de vila, folhas secas
-	Mud = Color3.fromRGB(96, 76, 54), -- barranco de riacho
+	-- D-123 (dono: "conserte o solo"): o terreno multiplica a textura pela cor. A terra batida (dirt_floor,
+	-- D-115) tem média (182, 140, 100), alaranjada; com (108, 86, 60) as ruas saíam vermelho-escuro
+	-- (~77, 47, 23). Este tom puxa para azul e dá ~(107, 92, 78), terra seca acinzentada (Studio, v55).
+	Ground = Color3.fromRGB(150, 168, 200), -- terra batida das ruas, becos, praça e quintais
+	Mud = Color3.fromRGB(90, 80, 64), -- barranco de riacho (D-123: menos vermelho)
 	Sand = Color3.fromRGB(188, 168, 126),
 	Rock = Color3.fromRGB(112, 104, 92),
 }

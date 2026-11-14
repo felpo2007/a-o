@@ -4300,3 +4300,84 @@ contagem regressiva; após isso a partida começa e os jogadores vão dominar os
 
 **Não testado:** a contagem entre uma partida e a seguinte (depois do relatório pós-ação), vários
 jogadores ao mesmo tempo e o celular.
+
+## D-123 — Lote 10: mapa de 700 x 700 m, três objetivos e o solo (v55, 2026-11-14)
+
+Pedidos do dono: "aumente o mapa para 700 x 700 m. As bases devem ser bem na ponta central de cada
+lado do mapa e os objetivos bem distribuídos pelo mapa, sendo um bem no centro numa vila maior, o
+outro em uma floresta densa e pouco acessível e o outro a sua escolha" (três objetivos, resposta do
+dono) e "conserte o solo, os terrenos".
+
+**Área** (`tools/geo.py` `PLAY_ING` = 269480–270180 E, 1692580–1693280 N; `tools/crop_world.py`):
+- 700 x 700 m (2.500 x 2.500 studs), com Xóm Gò no meio. A origem local não mudou (centro do mundo
+  gerado, D-63): `Bounds` x de −2.571,4 a −71,4 e z de −3.142,9 a −642,9;
+- três setores em faixas norte-sul, divididos em E 269750 e E 269920:
+
+  | Setor | Dono no começo | Pontos fortes |
+  |---|---|---|
+  | A Mata fechada | VC | Mata fechada; Picada na mata |
+  | B Xóm Gò (centro) | neutro | Xóm Gò; Becos de Xóm Gò; Ponta norte de Xóm Gò |
+  | C An Cường (2) | EUA | An Cường (2); Sebe ao norte; Arrozal ao sul |
+
+- os QGs ficam no meio da borda de cada lado, 50 m para dentro (no canto, a área da base dos EUA saía
+  do mapa): EUA em (270130, 1692930), VC em (269530, 1692930);
+- os nomes da mata são de design (`real = false`), como os outros pontos inventados.
+
+**Objetivo A, mata fechada e de difícil acesso:**
+- `Vegetation.DENSE_SECTOR` = 1: até 70 m dos pontos fortes do setor A a mata fica 1,8 vez mais cheia,
+  voltando ao normal até 105 m (densidade de design, PLACEHOLDER);
+- a clareira dos dois pontos caiu de 30 m para 10 m (`Landscape.CLEAR_NAMED_M`). Com 30 m, o objetivo
+  virava um descampado no meio da mata (Studio). A roda de captura (35 m) fica debaixo das árvores;
+- sem estrada até os pontos do setor A (`crop_world.SEM_ESTRADA`): o teste de estradas exige 60 m ou
+  mais da estrada principal. Viatura chega perto, mas o último trecho é a pé entre os troncos.
+
+**Código para qualquer número de setores** (antes, vários lugares supunham 5):
+- `MatchService`: o Offensive usa `#MapConfig.Sectors`; o Skirmish usa só o setor do meio;
+- `FrontHud`: um chip por setor (A, B e C);
+- `SelfTest` e os testes `modo`, `run`, `bots`, `botsmov`, `contato`, `estradas` e `f5` também.
+
+**Ruas e construções:** a folga da estrada para a base passou de 1 m para 5 m
+(`tools/vila_estradas.py` `BASE_FOLGA_M`); uma rua cortava o canto da base do VC. O celeiro que caía
+em cima da estrada principal agora sai do plano (`ArtPlan`, conferido pela `Site.road`).
+
+**Solo** (`Modules/TerrainLook.luau`):
+- o terreno multiplica a textura pela cor do material. A terra batida (`dirt_floor`, D-115) tem cor
+  média (182, 140, 100), medida na textura; com a cor antiga (108, 86, 60) as ruas saíam
+  vermelho-escuras, perto de (77, 47, 23);
+- `Ground` = (150, 168, 200): o tom puxa para o azul e o resultado fica perto de (107, 92, 78), terra
+  seca acinzentada. `Mud` = (90, 80, 64), um pouco menos vermelho;
+- conferido no Studio: no menu (sol baixo) a rua ficou cinza-terra; de manhã, na base, ela fica
+  bege-alaranjada pela luz.
+
+**Menu principal** (achados no teste):
+- dois dos três planos ancoravam em pontos fortes que saíram (Quintal oeste de An Cường (2) e Encosta
+  leste) e o menu ficava num plano só. Agora: Becos de Xóm Gò (EUA), Sebe ao norte de An Cường (2)
+  (VC) e Arrozal ao sul de An Cường (2) (EUA). Um teste novo (`run.luau`) exige que todo plano ancore
+  num ponto forte que existe;
+- os Becos agora ficam no objetivo B, onde os bots brigam, e um soldado passou de costas na frente da
+  câmera. Com o menu aberto, quem está a até 40 m do grupo do plano some só nesta tela
+  (`LocalTransparencyModifier`; o próprio jogador fica de fora);
+- aberto da tela de baixa (MENU > Menu principal), a baixa e a carta tática apareciam através dele.
+  Agora as duas ficam escondidas enquanto ele está aberto.
+
+**Tradução:** o `tools/i18n/extrai.py` pulava o texto de toda função terminada em "on("
+(`section(`, `makeButton(`, `footButton(`), porque faltava o limite de palavra antes de `on` e `fire`
+na lista de chamadas sem texto de tela. Com o conserto, apareceram 22 textos sem tradução (títulos
+das configurações, JOGAR, CONFIGURAÇÕES, "◄ ANTERIOR" do tutorial, seções da loja e das missões).
+Todos foram traduzidos para inglês, espanhol e vietnamita, além dos nomes novos do mapa.
+
+**Carta:** refeita para a área nova (`tools/make_carta.py`) e enviada (4 blocos; os antigos ficaram em
+`roblox_ids.json` como `Carta.*_v47`).
+
+**Medido:**
+- simulação (`contato.luau`): o VC que sai do QG troca tiro em 80 s; saindo do melhor ponto, em 0 a
+  14 s;
+- rotas (`botsmov.luau`): Sebe ao norte → Xóm Gò 166 m; Arrozal ao sul → Xóm Gò 224 m; An Cường (2)
+  → Mata fechada 372 m;
+- Studio: terreno em 15 s (210 blocos); 6.258 plantas da mata de 6.319 no plano; o jogador nasceu a
+  7 m do QG dos EUA com a contagem; 2 min depois, 28 bots de cada lado em campo; numa das partidas o
+  VC tomou o B primeiro.
+
+**Não testado:** a partida inteira até o fim no mapa novo; celular; o desempenho (fps) no setor A com
+a mata 1,8 vez mais cheia. O Studio avisa 1 construção com o chão a mais de 0,6 m do patamar do
+plano; entre as construções carregadas, nenhuma passou disso na medida pelo raio no meio da peça.

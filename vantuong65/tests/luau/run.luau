@@ -112,10 +112,10 @@ test("morro de Xóm Gò: o ponto mais alto da área, ~36 m, no setor da vila", f
 	assert(Geometry.sectorAt(MapConfig.Sectors, x, z) == 2, "o cume fora do setor da vila")
 end)
 
-test("área jogável é 0,5 x 0,5 km e o terreno a cobre com margem", function()
+test("área jogável é 0,7 x 0,7 km e o terreno a cobre com margem", function()
 	local b = MapConfig.Bounds
-	near((b.maxX - b.minX) * 0.28, 500, 1)
-	near((b.maxZ - b.minZ) * 0.28, 500, 1)
+	near((b.maxX - b.minX) * 0.28, 700, 1) -- D-123 (era 500 m na D-114)
+	near((b.maxZ - b.minZ) * 0.28, 700, 1)
 	-- o terreno recortado (tools/crop_world.py) cobre a área inteira mais ~150 m de margem
 	local g = require("../../src/ServerStorage/VT65Build/Data/Grid") :: any
 	local gx0, gz0 = g.originX, g.originZ
@@ -124,10 +124,10 @@ test("área jogável é 0,5 x 0,5 km e o terreno a cobre com margem", function()
 	assert(gz0 <= b.minZ - 100 / 0.28 and gz1 >= b.maxZ + 100 / 0.28, "terreno cobre norte-sul")
 end)
 
--- D-114: no recorte de 500 m só An Cường (2) e o casario a sudeste dela são lugares da carta; os
--- outros pontos fortes têm nome de design (antes: um real por setor)
-test("15 pontos fortes, 3 por setor, cada um dentro do seu setor; An Cường (2) é real", function()
-	assert(#MapConfig.Strongpoints == 15, "total")
+-- D-123: três setores (a mata fechada, a vila do centro e An Cường (2)); 2 pontos na mata e 3 em
+-- cada vila. Só An Cường (2) é lugar da carta; os outros têm nome de design
+test("3 setores e 8 pontos fortes, cada um dentro do seu setor; An Cường (2) é real", function()
+	assert(#MapConfig.Sectors == 3 and #MapConfig.Strongpoints == 8, "total")
 	local count, real = {}, {}
 	for _, sp in MapConfig.Strongpoints do
 		local s = Geometry.sectorAt(MapConfig.Sectors, sp.x, sp.z)
@@ -138,10 +138,8 @@ test("15 pontos fortes, 3 por setor, cada um dentro do seu setor; An Cường (2
 			real[s] = true
 		end
 	end
-	for s = 1, 5 do
-		assert(count[s] == 3, "setor " .. s .. " tem " .. tostring(count[s]))
-	end
-	assert(real[4] and strongpoint("An Cường (2)").real, "An Cường (2) devia ser real")
+	assert(count[1] == 2 and count[2] == 3 and count[3] == 3, "pontos por setor")
+	assert(real[3] and strongpoint("An Cường (2)").real, "An Cường (2) devia ser real")
 end)
 
 -- D-114 (pedido do dono: "deixe os objetivos mais perto do centro do mapa, alguns estão lá
@@ -165,9 +163,27 @@ test("pontos fortes perto do meio, longe da borda e sem raio de captura em comum
 	near(R * 0.28, 35, 1e-6, "raio de captura")
 end)
 
-test("QGs: EUA no setor 5, VC no setor 1", function()
-	assert(Geometry.sectorAt(MapConfig.Sectors, MapConfig.HQ.US.x, MapConfig.HQ.US.z) == 5)
+test("QGs: EUA no último setor, VC no setor 1, no meio da borda de cada lado", function()
+	assert(Geometry.sectorAt(MapConfig.Sectors, MapConfig.HQ.US.x, MapConfig.HQ.US.z) == #MapConfig.Sectors)
+	local b = MapConfig.Bounds
+	local midZ = (b.minZ + b.maxZ) / 2
+	for _, f in { "US", "VC" } do
+		assert(math.abs(MapConfig.HQ[f].z - midZ) * 0.28 <= 5, f .. " fora do meio da borda")
+	end
 	assert(Geometry.sectorAt(MapConfig.Sectors, MapConfig.HQ.VC.x, MapConfig.HQ.VC.z) == 1)
+end)
+
+test("menu principal: todo plano ancora em ponto forte que existe (D-123)", function()
+	-- com o mapa de 700 m dois planos apontavam para pontos que saíram e o menu ficava num plano só
+	local src = fs.readFile("src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau")
+	local n = 0
+	for key, name in string.gmatch(src, '\n%s*(%a+) = "([^"]+)",') do
+		if key == "anchor" or key == "toward" then
+			assert(strongpoint(name) ~= nil, "plano do menu sem ponto forte: " .. name)
+			n += 1
+		end
+	end
+	assert(n >= 6, "planos do menu não achados no arquivo")
 end)
 
 test("setores cobrem a área sem buraco nem sobreposição (amostra de 50 m)", function()
@@ -225,17 +241,19 @@ test("lugares que fazem o jogo estão no recorte: An Cường (2), túneis, trin
 		local edge = math.min(x - b.minX, b.maxX - x, z - b.minZ, b.maxZ - z) * 0.28
 		assert(edge >= 15, string.format("túnel ou trincheira a %.0f m da borda", edge))
 	end
-	-- QG dos EUA perto da borda leste e o do VC perto da oeste, a oeste de todos os pontos fortes do S2
-	assert((b.maxX - MapConfig.HQ.US.x) * 0.28 <= 80, "QG dos EUA longe da borda leste")
+	-- D-123: QG dos EUA na borda leste e o do VC na oeste (50 m para dentro), a oeste de todos os pontos
+	-- fortes do S2
+	assert((b.maxX - MapConfig.HQ.US.x) * 0.28 <= 55, "QG dos EUA longe da borda leste")
 	local vc = MapConfig.HQ.VC
-	assert((vc.x - b.minX) * 0.28 <= 50, "QG do VC longe da borda oeste")
+	assert((vc.x - b.minX) * 0.28 <= 55, "QG do VC longe da borda oeste")
 	for _, sp in MapConfig.Strongpoints do
 		if sp.sector == 2 then
 			assert(vc.x < sp.x, "QG do VC na frente de " .. sp.name)
 		end
 	end
 	local praca = strongpoint("Xóm Gò")
-	assert(math.sqrt((vc.x - praca.x) ^ 2 + (vc.z - praca.z) ^ 2) * 0.28 <= 200, "QG do VC longe do centro")
+	-- a praça de Xóm Gò é o centro do mapa (D-123: o mapa de 700 m é centrado na vila)
+	near((praca.x - (b.minX + b.maxX) / 2) * 0.28, 0, 15, "Xóm Gò fora do centro")
 end)
 
 -- O riacho fica a leste da área (D-114), na margem do terreno: o leito em N 1692,80 passa em
@@ -312,7 +330,8 @@ test("place assado tem as peças e todas ancoradas", function()
 	end
 	-- D-114: no mapa de 500 m sobram ~17 diques (os 5 tabuleiros perto de An Cường (2)); eram ~460
 	assert(nDikes > 10 and nDikes < 1000, "diques: " .. nDikes)
-	assert(#map.Strongpoints:GetChildren() == 15, "marcadores")
+	-- um marcador por ponto forte (D-123: 8; eram 15)
+	assert(#map.Strongpoints:GetChildren() == #MapConfig.Strongpoints, "marcadores")
 	print(string.format("       (%d BaseParts no Map)", n))
 end)
 

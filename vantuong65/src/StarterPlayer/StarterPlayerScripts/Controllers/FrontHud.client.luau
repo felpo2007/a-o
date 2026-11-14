@@ -164,9 +164,11 @@ do
 	row.BackgroundTransparency = 1
 	row.AnchorPoint = Vector2.new(0.5, 0)
 	row.Position = UDim2.new(0.5, 0, 0, 4)
-	row.Size = UDim2.fromOffset(5 * CHIP_W + 4 * 4, CHIP_H)
+	-- D-123: um chip por setor do mapa (3 no mapa de 700 m)
+	local nS = #MapConfig.Sectors
+	row.Size = UDim2.fromOffset(nS * CHIP_W + (nS - 1) * 4, CHIP_H)
 	row.Parent = strip
-	for i = 1, 5 do
+	for i = 1, nS do
 		local f = Instance.new("Frame")
 		f.Position = UDim2.fromOffset((i - 1) * (CHIP_W + 4), 0)
 		f.Size = UDim2.fromOffset(CHIP_W, CHIP_H)
@@ -1063,8 +1065,8 @@ if RunService:IsStudio() then
 			ended = true,
 			winner = w,
 			mode = "Warfare",
-			owner = { "US", "US", "VC", "US", "VC" },
-			active = { true, true, true, true, true },
+			owner = { "VC", "US", "US" },
+			active = { true, true, true },
 			score = { US = if w == "US" then 132 else 0, VC = if w == "VC" then 132 else 0, max = 400 },
 			kia = { US = 31, VC = 58 },
 			elapsed = 1512,

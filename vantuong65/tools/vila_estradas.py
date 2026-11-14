@@ -75,7 +75,9 @@ ANEL_PONTOS = (
     [(269760, 1693095), (270030, 1693095)],
     [(269750, 1692690), (269890, 1692700), (270060, 1692700)],
 )
-BASE_FOLGA_M = 1.0  # a estrada do mapa passa a pelo menos isto da área de cada base
+# a estrada do mapa passa a pelo menos isto da área de cada base (D-123: com 1 m, a suavização do
+# traçado cortava o canto da base do VC no mapa de 700 m)
+BASE_FOLGA_M = 5.0
 
 
 def _lin(a, b, t):

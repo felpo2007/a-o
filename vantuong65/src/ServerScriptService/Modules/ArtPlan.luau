@@ -434,7 +434,11 @@ function ArtPlan.structures(ctx: Ctx, has: (string) -> boolean): { Item }
 		end
 		if rng:next() < 0.15 then
 			local gx, gz = rot(x, z, yaw, 0, hz + 3 * HS / M)
-			padded("granary", gx, gz, yaw, HS, "prop")
+			-- D-123: celeiro em cima da estrada não (no mapa de 700 m a principal passava por um em
+			-- An Cường (2)); o sorteio acima fica igual para não mudar o resto do quintal
+			if Site.road(ctx.site, gx, gz) == nil then
+				padded("granary", gx, gz, yaw, HS, "prop")
+			end
 		end
 		if rng:next() < 0.3 then
 			for k = -1, 1 do
@@ -1045,6 +1049,7 @@ function ArtPlan.plants(
 		exclude = exclude,
 		corridors = lanes,
 		density = ArtBudget.JUNGLE_DENSITY,
+		dense = Vegetation.denseCircles(ctx.mapConfig), -- D-123: mata cerrada do objetivo da mata
 		seed = 1965,
 		rng = Rng.new(19650818 + 64),
 		yield = yield,

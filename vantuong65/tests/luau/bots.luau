@@ -874,9 +874,11 @@ test("primeiro tiroteio em até 3 min no Warfare (estimativa com o mapa real)", 
 	local entryS = 6 / BotBrain.CROWD.addPerStep * BotBrain.CROWD.stepS
 	local zoneM = MapConfig.CaptureRadiusStuds * M
 	local worst = 0
-	for _, t in by[3] do
+	-- D-123: o setor do meio (o 2 no mapa de 3 setores; era o 3 de 5), atacado dos dois vizinhos
+	local mid = math.ceil(#MapConfig.Sectors / 2)
+	for _, t in by[mid] do
 		local slow = 0
-		for _, pair in { { own = 2 }, { own = 4 } } do
+		for _, pair in { { own = mid - 1 }, { own = mid + 1 } } do
 			local best = math.huge
 			for _, own in by[pair.own] do
 				local x, z = Front.forwardRally(pair.own, own, t, M, sectorAt, MapConfig.Bounds)
@@ -890,7 +892,7 @@ test("primeiro tiroteio em até 3 min no Warfare (estimativa com o mapa real)", 
 		end
 		worst = math.max(worst, TERRAIN_S + entryS + slow)
 	end
-	print(string.format("       pior caso: %.0f s de partida até os dois lados na borda do S3", worst))
+	print(string.format("       pior caso: %.0f s de partida até os dois lados na borda do S%d", worst, mid))
 	assert(worst <= 180, string.format("primeiro contato estimado em %.0f s", worst))
 end)
 

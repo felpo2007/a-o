@@ -302,8 +302,13 @@ test("estradas: leito com rampa até 15%, largura do M48 e a principal passa por
 		end
 		return best
 	end
+	-- D-123: a mata fechada fica sem estrada (o dono pediu "pouco acessível"); os outros, perto dela
 	for _, sp in MapConfig.Strongpoints do
-		assert(dist(sp.x, sp.z) <= 40, sp.name .. string.format(" a %.0f m da estrada principal", dist(sp.x, sp.z)))
+		if sp.sector ~= 1 then
+			assert(dist(sp.x, sp.z) <= 40, sp.name .. string.format(" a %.0f m da estrada principal", dist(sp.x, sp.z)))
+		else
+			assert(dist(sp.x, sp.z) >= 60, sp.name .. " (mata fechada) perto demais da estrada principal")
+		end
 	end
 	for f, hq in MapConfig.HQ do
 		assert(dist(hq.x, hq.z) <= 40, "QG " .. f .. " longe da estrada principal")
@@ -331,6 +336,26 @@ test("estradas no chão gerado: leito sem água, sem construção e sem planta, 
 				end
 				if blk[cellOf(x, z)] and r.kind ~= "rua" then
 					inHouse += 1
+					if inHouse == 1 then
+						local near, nd = nil, math.huge
+						for _, st in structures do
+							local d = math.sqrt((st.x - x) ^ 2 + (st.z - z) ^ 2)
+							if d < nd then
+								near, nd = st, d
+							end
+						end
+						print(
+							string.format(
+								"       1º ponto em construção: %s em (%.0f, %.0f), perto de %s (%s) a %.1f m",
+								r.kind,
+								x,
+								z,
+								near and near.key or "?",
+								near and near.group or "?",
+								nd * M
+							)
+						)
+					end
 				end
 				if prev then
 					worst = math.max(worst, math.abs(h - prev) * M / (len / k * M))

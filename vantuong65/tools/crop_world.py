@@ -67,28 +67,26 @@ RIACHO_N = (1692350.0, 1693250.0)
 RIACHO_PASSO = 2  # células por linha
 CANAL_M = 1.1
 
-# Fronteiras de setor, polilinhas sul -> norte em ING-A (500 x 500 m, D-114). Faixas de 70 a 120 m
-# do QG do VC (oeste) ao dos EUA (leste); cada lugar fica inteiro num setor:
-#  - S1 (110 m): a base do VC no pé oeste do morro e a encosta oeste;
-#  - S2 (100 m): a vila de Xóm Gò inteira (rua, lotes e quintais: E 269,79–269,86);
-#  - S3 (70 m): a encosta leste do morro e a boca E1 do túnel;
-#  - S4 (100 m): An Cường (2), as bocas E2 a E5 e a trincheira sul;
-#  - S5 (120 m): a base dos EUA e o casario a sudeste de An Cường (2).
+# Fronteiras de setor, polilinhas sul -> norte em ING-A. D-123 (mapa de 700 x 700 m; pedido do
+# dono: "as bases bem na ponta central de cada lado do mapa e os objetivos bem distribuídos, um bem
+# no centro numa vila maior, outro numa floresta densa e pouco acessível e o outro à sua
+# escolha"): três faixas do QG do VC (meio da borda oeste) ao dos EUA (meio da borda leste):
+#  - S1 (270 m): a base do VC e a mata fechada a oeste do morro;
+#  - S2 (170 m): a vila de Xóm Gò inteira, no morro do centro;
+#  - S3 (260 m): a encosta leste, An Cường (2) com os túneis e a base dos EUA.
 FRONTEIRAS_ING = [
-    [(269770, 1692640), (269770, 1693140)],
-    [(269870, 1692640), (269870, 1693140)],
-    [(269940, 1692640), (269940, 1693140)],
-    [(270040, 1692640), (270040, 1693140)],
+    [(269750, 1692580), (269750, 1693280)],
+    [(269920, 1692580), (269920, 1693280)],
 ]
 # letra do setor no jogo (v41, pedido do dono: "troque os objetivos por A B C D E"; Front.letra)
 SETORES = [
-    "A Encosta oeste",
+    "A Mata fechada",
     "B Xóm Gò",
-    "C Sopé do morro",
-    "D An Cường (2)",
-    "E Vale do riacho",
+    "C An Cường (2)",
 ]
 SETOR_VILA = 2  # setor da vila de Xóm Gò (era o 3 no mapa de 1 km)
+INICIAL = ["VC", "Neutral", "US"]  # dono de cada setor no começo (D-123: o do meio é neutro)
+SEM_ESTRADA = {"Mata fechada", "Picada na mata"}  # pontos da mata fechada: sem estrada até eles
 # Vila grande do centro (2026-11-12, tools/vila_estradas.py): o ponto forte fica na praça, que o
 # planejamento da vila escolhe no flanco leste do morrote (E e N saem de lá, por isso None aqui)
 VILA_PF = (
@@ -116,41 +114,21 @@ VILA_PONTA = (
     False,
     "travessa da vila de design do lado do pagode (a ~56 m da praça); nome de design",
 )
-# Pontos fortes: (setor, nome, E, N, real?, observação). Três por setor.
-# D-114 (mapa de 500 m; pedido do dono: "deixe os objetivos mais perto do centro do mapa, alguns
-# estão lá embaixo"): todos a até ~110 m da linha do meio (N 1692,89) e longe da borda; a Trincheira
-# sul (a 20 m da borda sul) deixou de ser ponto forte, mas continua no mapa com a boca E5.
+# Pontos fortes: (setor, nome, E, N, real?, observação). Cada partida sorteia um por setor.
+# D-123: três objetivos (resposta do dono): a mata fechada (S1), a vila grande do centro (S2) e An
+# Cường (2) com os túneis (S3, a escolha: a vila fortificada da batalha de verdade).
 PONTOS_FORTES = [
-    # S1: a encosta oeste do morro, entre a base do VC e Xóm Gò
-    (
-        1,
-        "Trilha do morro",
-        269752,
-        1692885,
-        False,
-        "subida da base do VC até a vila; nome de design",
-    ),
-    (1, "Encosta oeste", 269750, 1692955, False, "flanco oeste do morro de Xóm Gò; nome de design"),
-    (1, "Capinzal oeste", 269740, 1692815, False, "capim ao pé do morro; nome de design"),
+    # S1: mata fechada entre a base do VC e o morro, longe das casas e das estradas
+    (1, "Mata fechada", 269650, 1693000, False, "mata cerrada a noroeste do morro; nome de design"),
+    (1, "Picada na mata", 269625, 1692790, False, "trilha na mata a sudoeste; nome de design"),
     # S2: a vila de Xóm Gò (praça e as duas travessas)
     VILA_PF,
     VILA_BECOS,
     VILA_PONTA,
-    # S3: a encosta leste do morro, de frente para An Cường (2)
+    # S3: An Cường (2)
+    (3, "An Cường (2)", 269985, 1692870, True, "vila fortificada (First Fight p.25)"),
     (
         3,
-        "Quintal oeste de An Cường (2)",
-        269905,
-        1692880,
-        False,
-        "quintal a oeste da vila; nome de design",
-    ),
-    (3, "Encosta leste", 269900, 1692975, False, "flanco leste do morro de Xóm Gò; nome de design"),
-    (3, "Sopé sul do morro", 269895, 1692800, False, "pé do morro ao sul da vila; nome de design"),
-    # S4: An Cường (2)
-    (4, "An Cường (2)", 269985, 1692870, True, "vila fortificada (First Fight p.25)"),
-    (
-        4,
         "Sebe ao norte de An Cường (2)",
         269985,
         1692975,
@@ -158,37 +136,12 @@ PONTOS_FORTES = [
         "sebe junto da boca E4 do túnel; nome de design",
     ),
     (
-        4,
+        3,
         "Arrozal ao sul de An Cường (2)",
         269990,
         1692780,
         False,
         "arrozal ao sul da vila; nome de design",
-    ),
-    # S5: em volta da base dos EUA (ao norte e ao sul dela)
-    (
-        5,
-        "Casario sudeste de An Cường (2)",
-        270070,
-        1692775,
-        True,
-        "casas da carta de 1965 a sudeste da vila",
-    ),
-    (
-        5,
-        "Capinzal do vale",
-        270110,
-        1692795,
-        False,
-        "vale do riacho ao sul da base; nome de design",
-    ),
-    (
-        5,
-        "Vale ao norte da base",
-        270100,
-        1693035,
-        False,
-        "vale ao norte da base, junto do riacho; nome de design",
     ),
 ]
 # Base dos EUA (pedido do dono: "o QG dos EUA vai virar uma base grande depois; deixe espaço
@@ -196,13 +149,11 @@ PONTOS_FORTES = [
 # num raio de 77 m; eram 140 m no mapa de 1 km, que no de 500 m limpariam An Cường (2).
 BASE_M = 80.0
 QGS = {
-    # D-114: a nordeste de An Cường (2), entre a vila e o riacho; a área da base
-    # (E 270,058–270,148 x N 1692,874–1692,996) tem desnível de ~4 m (os patamares das
-    # construções cortam) e fica a 40 m da boca E2 do túnel
-    "US": (270105, 1692935, "borda leste, a nordeste de An Cường (2) (setor S5)"),
-    # D-114: pé oeste do morro de Xóm Gò, o chão mais plano da borda oeste (desnível de 0,9 m
-    # na área da base)
-    "VC": (269688, 1692890, "pé oeste do morro de Xóm Gò, retaguarda oeste (setor S1)"),
+    # D-123: no meio da borda leste (50 m para dentro: a base vai 43 m a leste do QG), a leste de
+    # An Cường (2) e a oeste do riacho
+    "US": (270130, 1692930, "meio da borda leste, a leste de An Cường (2) (setor S3)"),
+    # D-123: no meio da borda oeste (50 m para dentro)
+    "VC": (269530, 1692930, "meio da borda oeste, retaguarda do VC (setor S1)"),
 }
 
 
@@ -569,7 +520,7 @@ def write_mapconfig(box) -> None:
 
     lines = [[(e0, n0), (e0, n1)]] + FRONTEIRAS_ING + [[(e1, n0), (e1, n1)]]
     sec_txt = []
-    for k in range(5):
+    for k in range(len(SETORES)):
         ring = [snap(*p) for p in lines[k]] + [snap(*p) for p in lines[k + 1]][::-1]
         sec_txt.append(f'\t\t{{ id = {k + 1}, name = "{SETORES[k]}", polygon = {poly(ring)} }},')
     sp_txt = []
@@ -617,8 +568,8 @@ def write_mapconfig(box) -> None:
         "MapConfig.Strongpoints = {\n" + "\n".join(sp_txt) + "\n}\n"
         "MapConfig.HQ = {\n" + "\n".join(qg_txt) + "\n}\n"
         "MapConfig.Locations = {\n" + "\n".join(loc_txt) + "\n}\n"
-        "-- EUA começam com S4-S5, VC com S1-S2, S3 neutro (prompt, Parte 3)\n"
-        'MapConfig.InitialOwner = { "VC", "VC", "Neutral", "US", "US" }\n\n'
+        "-- D-123: o VC começa com o S1, os EUA com o último, o do meio neutro\n"
+        "MapConfig.InitialOwner = { " + ", ".join(f'"{o}"' for o in INICIAL) + " }\n\n"
         "return MapConfig\n",
     )
 
@@ -1048,7 +999,8 @@ def vila_e_estradas(g: dict, f: dict) -> dict:
 
     nos = {"QG_US": QGS["US"][:2], "QG_VC": QGS["VC"][:2]}
     for _s, nome, e, n, _real, _obs in PONTOS_FORTES:
-        if e is not None:
+        # D-123: a mata fechada fica sem estrada (o dono pediu "pouco acessível")
+        if e is not None and nome not in SEM_ESTRADA:
             nos[nome] = (e, n)
 
     def arrozal(vila: dict) -> dict:
