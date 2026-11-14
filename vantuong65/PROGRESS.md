@@ -97,7 +97,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
   - as teclas agem por baixo da tela de carregamento (a pá cavou durante o carregamento, D-129).
 
 ## v62: lote 17, camuflagens novas (2026-11-14, D-131)
-- **A publicar.**
+- **Publicada** como versão 62 do place (build do commit 534080e).
 - **Feito:**
   - quatro skins de uniforme novas, dois por lado: tigrado tadpole e lagarto dos paraquedistas
     (EUA), áo bà ba marrom e tigrado capturado do ARVN (VC);
