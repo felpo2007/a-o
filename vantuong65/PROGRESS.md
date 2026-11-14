@@ -58,6 +58,7 @@
 - **Lote 12, análise:** bots, gráficos, armas, tiros e veículos (junto do lote 6).
 
 ## v52: lote 8, tela de baixa e loja e passe fora do menu do jogo (2026-11-14, D-120)
+- **Publicada** como versão 52 do place (build do commit 343edba).
 - **Feito:**
   - tela de baixa só com RENASCER AQUI (abre "Pagar $ 60" e "Pagar 25 Robux", o Robux em verde
     vivo), RENASCER COM VEÍCULO, ESCOLHER OUTRO PONTO e MENU;
