@@ -58,7 +58,23 @@ TRAVESSAS = (-56.0 * ESCALA_CASA, 56.0 * ESCALA_CASA)  # u (m) das travessas: os
 PRACA_U = 21.0 * ESCALA_CASA  # meia largura da praça ao longo da rua
 CORTE_MAX = 2.6 * ESCALA_CASA  # m: desnível máximo dentro da pegada da casa (o patamar corta)
 VIZINHO_M = 30.0 * ESCALA_CASA  # duas casas a menos disto nunca saem iguais
-N_VARIANTES = 12
+# D-134 (dono: "ainda não posso entrar em todas as casas da vila"): só as 10 casas únicas do Blender
+# (vila_casa_01..10, com porta e interior); a 11 e a 12 não têm modelo e caíam na cabana fechada
+N_VARIANTES = 10
+# D-134 (dono: "deixe a vila menos quadrada e mais esporádica"): as casas saem da grade. Cada uma
+# anda ao longo da rua, recua por um tanto diferente e gira; alguns lotes ficam vazios e umas casas
+# soltas vão para fora das fileiras. Becos retos saíram: cada casa ganha a sua trilha até a rua.
+ESPALHO_U = 0.32  # fração do passo entre lotes que a casa anda ao longo da rua
+RECUO_FRENTE = (0.0, 6.0)  # m a mais de recuo (fileira da frente)
+RECUO_FUNDO = (-1.5, 9.0)  # m (fileira do fundo)
+GIRO_FRENTE = 18.0  # graus de giro livre (frente)
+GIRO_FUNDO = 38.0  # graus (fundo)
+DE_LADO = 0.2  # fração das casas do fundo viradas de lado (±90°)
+VAZIOS = 0.12  # lotes que ficam vazios (roça ou quintal)
+SOLTAS = 10  # casas soltas fora das fileiras
+SOLTAS_V = (50.0, 78.0)  # m da rua
+DIST_CASAS = 17.0  # m entre centros (a diagonal da casa de 8,5 m x 1,3 é 15,6 m)
+DIST_SOLTAS = 24.0  # m das casas soltas para as outras
 N_TONS = 4
 ANEXOS = ("varanda", "cozinha", "celeiro", "horta", "cerca", "pote", "meda", "varal")
 
@@ -72,7 +88,9 @@ ANEL_M = 45.0  # as voltas por fora correm a esta distância da borda (D-114; 70
 # pontos de passagem (E, N da grade de 1965) das voltas por fora, do QG do VC ao dos EUA, pelo
 # norte e pelo sul (D-114, mapa de 500 m: ao norte da ponta da vila e ao norte da trincheira sul)
 ANEL_PONTOS = (
-    [(269760, 1693095), (270030, 1693095)],
+    # D-134: os do norte foram para a faixa da beira (N 1693230, a ~50 m da borda): logo acima da
+    # ponta da vila, com as casas espalhadas, a volta encurtava pela rua da vila e sumia do norte
+    [(269760, 1693230), (270030, 1693230)],
     [(269750, 1692690), (269890, 1692700), (270060, 1692700)],
 )
 # a estrada do mapa passa a pelo menos isto da área de cada base (D-123: com 1 m, a suavização do
@@ -201,6 +219,152 @@ def _lotes(cx, cz, ang):
     return lotes, especiais
 
 
+def _quadro(cx, cz, ang, x, z) -> tuple[float, float]:
+    """mundo (studs) -> quadro da vila (u ao longo da rua, v de lado; m). Inverso do `gira`."""
+    dx, dz = x - cx, z - cz
+    ca, sa = math.cos(ang), math.sin(ang)
+    return (dx * ca + dz * sa) * STUD_M, (-dx * sa + dz * ca) * STUD_M
+
+
+def _gira_roblox(vx: float, vz: float, th: float) -> tuple[float, float]:
+    """vetor do mundo girado por th em Y como no Roblox (a mesma conta do `pegada`)"""
+    c, s = math.cos(th), math.sin(th)
+    return vx * c + vz * s, -vx * s + vz * c
+
+
+def _dist_ponto_seg(px, pz, a, b) -> float:
+    return float(_dist_seg(np.array([px]), np.array([pz]), a, b)[0])
+
+
+def _espalha(t: Terreno, cx, cz, ang, bons, especiais, dentro, rnd) -> tuple[list, list]:
+    """D-134: casas fora da grade (andam, recuam, giram; lotes vazios; casas soltas) e a trilha de
+    cada porta até a rua. Devolve (casas com x, z, yaw, lx, lz; trilhas em pares de pontas)."""
+    yaw0 = yaw_de(ang)
+    vb = RUA_W / 2 + 1 + LOTE_D + 1.5  # onde ficava o beco
+    u0 = (SLOTS - 1) / 2 * PASSO_U + LOTE_W / 2
+    trav_v = vb + LOTE_D + 1.5
+    recuo_lote = (RUA_W / 2 + 1 + LOTE_D / 2) - (RUA_W / 2 + 1 + 1.5 + CASA_MAX / 2)
+
+    def cabe(x, z, yaw, outras, dmin) -> bool:
+        p = pegada(x, z, yaw, CASA_MAX, CASA_MAX)
+        h = t.altura(p[:, 0], p[:, 1])
+        if float(h.max() - h.min()) > CORTE_MAX or (t.classe(p[:, 0], p[:, 1]) == 5).any():
+            return False
+        for px, pz in p:
+            if not dentro(px, pz):
+                return False
+            u, v = _quadro(cx, cz, ang, px, pz)
+            if abs(v) < RUA_W / 2 + 1.0:
+                return False  # na rua
+            if abs(u) <= PRACA_U + 1.0 and abs(v) <= PRACA_U * 0.6 + 1.0:
+                return False  # na praça
+            for tu in TRAVESSAS:
+                if abs(u - tu) < LARGURA["rua"] / 2 + 1.0 and abs(v) <= trav_v + 1.0:
+                    return False  # na travessa
+        for s in especiais:
+            folga = max(s["w"], s["d"]) / 2 + CASA_MAX * 0.75
+            if math.hypot(x - s["x"], z - s["z"]) * STUD_M < folga:
+                return False
+        return all(math.hypot(x - c["x"], z - c["z"]) * STUD_M >= dmin for c in outras)
+
+    casas: list = []
+
+    def poe(x, z, lado, giro, solta):
+        base = yaw0 + (math.pi if lado < 0 else 0.0)
+        bx, bz = gira(0.0, float(lado), ang)  # "para trás" (longe da rua) da casa sem giro
+        n = math.hypot(bx, bz)
+        bx, bz = _gira_roblox(bx / n, bz / n, giro)
+        casas.append(
+            {
+                "x": x,
+                "z": z,
+                "yaw": base + giro,
+                "lx": x + bx * recuo_lote / STUD_M,
+                "lz": z + bz * recuo_lote / STUD_M,
+                "lado": lado,
+                "frente": (-bx, -bz),
+                "solta": solta,
+            }
+        )
+
+    for lote in bons:
+        if rnd.random() < VAZIOS:
+            continue
+        lado = lote["lado"]
+        fundo = lote["fileira"] == "fundo"
+        uc, vc = _quadro(cx, cz, ang, lote["x"], lote["z"])
+        base = yaw0 + (math.pi if lado < 0 else 0.0)
+        feito = None
+        for _ in range(40):
+            du = rnd.uniform(-ESPALHO_U, ESPALHO_U) * PASSO_U
+            rec = rnd.uniform(*(RECUO_FUNDO if fundo else RECUO_FRENTE))
+            if fundo and rnd.random() < DE_LADO:
+                giro = math.radians(float(rnd.choice([-90.0, 90.0])) + rnd.uniform(-15, 15))
+            else:
+                g = GIRO_FUNDO if fundo else GIRO_FRENTE
+                giro = math.radians(rnd.uniform(-g, g))
+            gx, gz = gira(uc + du, vc + lado * rec, ang)
+            x, z = cx + gx, cz + gz
+            if cabe(x, z, base + giro, casas, DIST_CASAS):
+                feito = (x, z, giro)
+                break
+        if feito is None and cabe(lote["x"], lote["z"], base, casas, DIST_CASAS):
+            feito = (lote["x"], lote["z"], 0.0)
+        if feito is not None:
+            poe(feito[0], feito[1], lado, feito[2], False)
+    # casas soltas, mais longe da rua
+    soltas = 0
+    for _ in range(800):
+        if soltas >= SOLTAS:
+            break
+        lado = 1 if rnd.random() < 0.5 else -1
+        u = rnd.uniform(-u0, u0)
+        v = lado * rnd.uniform(*SOLTAS_V)
+        giro = math.radians(rnd.uniform(-35, 35))
+        gx, gz = gira(u, v, ang)
+        x, z = cx + gx, cz + gz
+        if cabe(x, z, yaw0 + (math.pi if lado < 0 else 0.0) + giro, casas, DIST_SOLTAS):
+            poe(x, z, lado, giro, True)
+            soltas += 1
+    # trilha de cada porta: até a beira da rua; se passar por cima de outra casa, até a porta da
+    # vizinha mais perto; senão, nada
+    meia = CASA_MAX / 2
+    portas = [
+        (
+            c["x"] + c["frente"][0] * (meia + 0.6) / STUD_M,
+            c["z"] + c["frente"][1] * (meia + 0.6) / STUD_M,
+        )
+        for c in casas
+    ]
+
+    def livre(a, b, i, j=None) -> bool:
+        for k, c in enumerate(casas):
+            lim = meia + 0.3 if k in (i, j) else CASA_MAX * 0.72
+            if _dist_ponto_seg(c["x"], c["z"], a, b) * STUD_M < lim:
+                return False
+        return True
+
+    trilhas = []
+    for i, c in enumerate(casas):
+        a = portas[i]
+        u, _v = _quadro(cx, cz, ang, a[0], a[1])
+        ex, ez = gira(u, c["lado"] * (RUA_W / 2), ang)
+        b = (cx + ex, cz + ez)
+        if livre(a, b, i):
+            trilhas.append([a, b])
+            continue
+        viz = sorted(
+            (math.hypot(portas[j][0] - a[0], portas[j][1] - a[1]), j)
+            for j in range(len(casas))
+            if j != i
+        )
+        for _d, j in viz[:3]:
+            if livre(a, portas[j], i, j):
+                trilhas.append([a, portas[j]])
+                break
+    return casas, trilhas
+
+
 def _avalia(t: Terreno, cx, cz, ang, dentro):
     lotes, _ = _lotes(cx, cz, ang)
     bons, corte = [], 0.0
@@ -233,10 +397,14 @@ def planeja_vila(t: Terreno, ing_local, dentro) -> dict:
     _, cx, cz, ang, bons = melhor
     _, especiais = _lotes(cx, cz, ang)
     yaw = yaw_de(ang)
+    # D-134: as casas saem da grade (o centro e o rumo da rua continuam os da busca acima)
+    espalhadas, trilhas = _espalha(
+        t, cx, cz, ang, bons, especiais, dentro, np.random.default_rng(19650818)
+    )
     # variante, tom, escala e anexos: nenhuma casa igual a outra a menos de VIZINHO_M
     rnd = np.random.default_rng(1965)
     casas = []
-    for lote in bons:
+    for lote in espalhadas:
         viz = [
             c
             for c in casas
@@ -252,9 +420,7 @@ def planeja_vila(t: Terreno, ing_local, dentro) -> dict:
             if (variante, tom, anexos) not in assinaturas:
                 break
         escala = float(round(rnd.uniform(0.92, 1.08), 3))
-        giro = (
-            yaw + (math.pi if lote["lado"] < 0 else 0.0) + math.radians(float(rnd.uniform(-6, 6)))
-        )
+        giro = lote["yaw"]  # D-134: o giro já vem do espalhamento
         casas.append(
             {
                 "x": lote["x"],
@@ -268,14 +434,10 @@ def planeja_vila(t: Terreno, ing_local, dentro) -> dict:
                 "anexos": anexos,
             }
         )
-    # becos (pedestres): atrás das fileiras da frente, dos dois lados
+    # D-134: os becos retos atrás das fileiras saíram; no lugar, a trilha de cada porta até a rua
     vb = RUA_W / 2 + 1 + LOTE_D + 1.5
     u0 = (SLOTS - 1) / 2 * PASSO_U + LOTE_W / 2
-    becos = []
-    for lado in (-1, 1):
-        a = gira(-u0, lado * vb, ang)
-        b = gira(u0, lado * vb, ang)
-        becos.append([(cx + a[0], cz + a[1]), (cx + b[0], cz + b[1])])
+    becos = trilhas
     travessas = []
     for u in TRAVESSAS:
         a = gira(u, -(vb + LOTE_D + 1.5), ang)

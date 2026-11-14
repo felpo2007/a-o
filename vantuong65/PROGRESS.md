@@ -90,7 +90,8 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
   - **Lote 19 (v64, D-133): feito.** Caixa de munição do Suporte com o dobro do tamanho; bandeiras
     de pano detalhadas esticadas na mesa da escolha de lado (no lugar dos dossiês); ALISTAR-SE do
     tamanho do texto.
-- **Lote 20:** vila menos quadrada e mais espalhada; entrar em todas as casas da vila.
+- **Lote 20 (v65, D-134): feito.** Xóm Gò fora da grade (casas deslocadas, giradas, lotes vazios,
+  casas soltas, uma trilha por porta) e as 53 casas com porta e interior.
 - **Lote 21:** vegetação com 6 mil triângulos (pedido novo; a D-66 pedia no mínimo 8 mil).
 - "jogo de poder roblox": engano (resposta do dono), nada a fazer.
 
@@ -101,6 +102,22 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
   - base do VC sob a mata; nomes do equipamento da Intendência sem tradução; Type 54 em 3ª pessoa;
   - a pá do autoteste na 1ª rodada de cada sessão;
   - as teclas agem por baixo da tela de carregamento (a pá cavou durante o carregamento, D-129).
+
+## v65: lote 20, vila espalhada e todas as casas abertas (2026-11-14, D-134)
+- **A publicar.**
+- **Causa das casas fechadas:** 10 das 48 casas eram das variantes 11 e 12, sem modelo do Blender, e
+  caíam na cabana fechada do ForgeGUI. Agora só as 10 casas únicas com porta e interior.
+- **Feito:**
+  - vila fora da grade: deslocadas e recuadas, giradas (algumas de lado), 12% dos lotes vazios, 10
+    casas soltas; 53 casas, 24 recuos diferentes, 22 giradas;
+  - uma trilha de terra de cada porta até a rua (no lugar dos becos retos);
+  - pontos de passagem da volta do norte na beira norte (a volta continua inteira);
+  - carta refeita e reenviada.
+- **Conferido no Studio:** caminho para dentro nas 53 casas (PathfindingService) e um boneco de
+  2,08 m entrando pela porta principal nas 53. Fotos em `testes/lote20/`.
+- **Testes:** Lune todos ok (bases com o teste novo da vila); pytest 54; ruff ok; luau-lsp 0 erros.
+- **Não testado:** um jogador de verdade entrando; celular. As 28 casas fora de Xóm Gò seguem
+  fechadas.
 
 ## v64: lote 19, caixa de munição maior, bandeiras na mesa e botões do tamanho (2026-11-14, D-133)
 - **Publicada** como versão 64 do place (build do commit cc871c4).

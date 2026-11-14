@@ -4823,3 +4823,59 @@ embaixo a barra da espera e o resumo do lado e do squad.
 cobrindo o meio da mesa durante a preparação. Isso já acontecia e fica para a lista.
 
 **Não testado:** celular e controle na sala de arquivo; num servidor do Roblox.
+
+## D-134 — Lote 20: a vila de Xóm Gò espalhada e todas as casas abertas (v65, 2026-11-14)
+
+Pedidos do dono: "deixe a vila menos quadrada e mais esporádica"; "ainda não posso entrar em todas
+as casas da vila".
+
+**Por que algumas casas não abriam:**
+- a vila sorteava 12 variantes de casa, mas só as 10 casas únicas do Blender (`vila_casa_01..10`)
+  têm porta e interior;
+- a 11 e a 12 estão com ID 0 e caíam na cabana do ForgeGUI, que é fechada: eram 10 das 48 casas;
+- agora o gerador só sorteia as 10 (`vila_estradas.N_VARIANTES = 10`).
+
+**A vila fora da grade** (`tools/vila_estradas.py`, `_espalha`). O centro, o rumo da rua, a praça, o
+pagode, a casa comunal, o poço, as bancas e as travessas continuam onde estavam. As casas saem das
+quatro fileiras retas:
+- cada uma anda até 32% do passo ao longo da rua e recua um tanto diferente: a fileira da frente de
+  0 a 6 m, a do fundo de −1,5 a 9 m;
+- cada uma gira até 18° na frente e até 38° no fundo; 20% das do fundo ficam de lado (±90°);
+- 12% dos lotes ficam vazios (roça ou quintal);
+- 10 casas soltas ficam mais longe da rua (50 a 78 m), a 24 m das outras;
+- cada posição é conferida:
+  - corte do terreno e água;
+  - dentro da área, fora da rua, da praça e das travessas;
+  - folga do pagode e da casa comunal;
+  - 17 m entre centros (a diagonal da casa é 15,6 m);
+- os becos retos atrás das fileiras saíram. Cada casa ganha a trilha dela, da porta até a rua; se
+  essa trilha passar por outra casa, vai até a porta da vizinha.
+
+Resultado: 53 casas (eram 48), 24 recuos diferentes, 22 casas giradas mais de 12° e 40 trilhas.
+
+**Estradas:** com as casas espalhadas, a volta do norte encurtava pela rua da vila e sumia da beira
+norte. Os pontos de passagem dela foram para a faixa da beira (N 1693230, a ~50 m da borda). A volta
+ficou contínua pela beira norte: 1.662 m de secundária, contra 1.806 antes; a diferença é o desvio
+até a ponta da vila, que saiu. A principal e a rua não mudaram (1.247 e 399 m). Na lavoura, um ponto de dique e um trecho de cerca
+viva se ajustaram à estrada nova (4 de 1.362 valores dos diques; 1.708 → 1.715 nas cercas).
+
+**Carta tática:** refeita, com as casas giradas e as trilhas; os 4 blocos foram reenviados (os
+antigos ficaram como `Carta.*_v64`).
+
+**Antes de mexer:** o pipeline (`git checkout e36ea6d -- Data MapConfig fixture` e
+`crop_world.py`) reproduziu os dados atuais byte a byte; só o `MapConfig` difere na formatação do
+StyLua.
+
+**Conferido no Studio:**
+- **Caminhos:** o `PathfindingService` achou caminho de fora para dentro pela porta (agente de
+  1,4 stud de raio e 7,4 de altura) nas **53 de 53** casas.
+- **Boneco:** um boneco de 2,08 m (o corpo dos soldados), andando com o `MoveTo` do Roblox, entrou
+  pela porta principal nas **53 de 53**.
+- **Fotos** (`testes/lote20/`): a vila vista de cima e o interior de uma casa olhando pela porta; as
+  plantas de antes e de depois e a carta.
+
+**Fica como estava:** as 28 casas espalhadas pelo resto do mapa, inclusive as de An Cường (2),
+seguem com as cabanas fechadas do ForgeGUI.
+
+**Não testado:** um jogador de verdade entrando (o controle de movimento do jogo anula o `MoveTo`
+do teste; o boneco usa o mesmo corpo); celular.

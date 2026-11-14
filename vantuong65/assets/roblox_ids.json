@@ -355,10 +355,6 @@
  "Carta.ne_v55": "118375191387311",
  "Carta.sw_v55": "94288570292198",
  "Carta.se_v55": "73429230339166",
- "Carta.nw": "104254003024502",
- "Carta.ne": "76766363879279",
- "Carta.sw": "102761004638511",
- "Carta.se": "74157663825470",
  "Clothing.us_tadpole_shirt_v3": "113700478076538",
  "Clothing.us_tadpole_pants_v3": "134434345084085",
  "Clothing.us_lizard_shirt_v3": "127729411325942",
@@ -369,5 +365,13 @@
  "Clothing.vc_tiger_pants_v3": "107937294744885",
  "Sounds.a4_mergulho": "92915361935434",
  "Images.bandeira_eua": "104461985345184",
- "Images.bandeira_frente": "127727970793387"
+ "Images.bandeira_frente": "127727970793387",
+ "Carta.nw_v64": "104254003024502",
+ "Carta.ne_v64": "76766363879279",
+ "Carta.sw_v64": "102761004638511",
+ "Carta.se_v64": "74157663825470",
+ "Carta.nw": "131065821268951",
+ "Carta.ne": "87544389682657",
+ "Carta.sw": "118986486865053",
+ "Carta.se": "140278832727529"
 }

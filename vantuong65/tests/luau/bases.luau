@@ -208,6 +208,8 @@ test("vila Xóm Gò: casas únicas publicadas, porta para a rua, vizinhas nunca 
 	end
 	print(string.format("       %d casas: %d únicas (vila_casa_01..10), %d variadas", #homes, unique, fallback))
 	assert(unique >= 30, "poucas casas únicas")
+	-- D-134 (dono: "ainda não posso entrar em todas as casas da vila"): nenhuma casa fechada
+	assert(fallback == 0, "casa sem porta na vila (variante sem modelo único)")
 	for i, a in homes do
 		for j = i + 1, #homes do
 			local b = homes[j]
@@ -223,6 +225,40 @@ test("vila Xóm Gò: casas únicas publicadas, porta para a rua, vizinhas nunca 
 	local nx, nz =
 		door[1] * math.cos(turn) + door[2] * math.sin(turn), -door[1] * math.sin(turn) + door[2] * math.cos(turn)
 	assert(math.abs(nx) < 1e-9 and math.abs(nz + 1) < 1e-9, "giro da porta não leva para -Z")
+end)
+
+test("D-134: a vila fora da grade (recuos e giros variados, casas soltas) e sem casa na rua", function()
+	-- quadro da vila: u ao longo da rua, v de lado (m)
+	local ang = -Village.yaw
+	local ca, sa = math.cos(ang), math.sin(ang)
+	local recuos: { [number]: boolean } = {}
+	local nRecuos, girados, soltas = 0, 0, 0
+	for _, h in Village.houses do
+		local dx, dz = h[1] - Village.x, h[2] - Village.z
+		local v = (-dx * sa + dz * ca) * M
+		local k = math.floor(math.abs(v) + 0.5)
+		if not recuos[k] then
+			recuos[k] = true
+			nRecuos += 1
+		end
+		-- giro em relação à rua (a casa do outro lado tem meia volta)
+		local rel = (h[3] - Village.yaw) % math.pi
+		local d = math.min(rel, math.pi - rel)
+		if d > math.rad(12) then
+			girados += 1
+		end
+		if math.abs(v) > 48 then
+			soltas += 1
+		end
+		assert(math.abs(v) > Village.streetW * M / 2 + 4, "casa em cima da rua")
+		assert(h[4] >= 1 and h[4] <= 10, "variante sem modelo único")
+	end
+	print(string.format("       %d recuos diferentes, %d casas giradas, %d soltas", nRecuos, girados, soltas))
+	assert(nRecuos >= 12, "recuos iguais: a vila continua em fileiras")
+	assert(girados >= #Village.houses // 4, "casas alinhadas demais com a rua")
+	assert(soltas >= 5, "faltam casas soltas fora das fileiras")
+	-- cada casa com uma trilha (a maioria): lanes = trilhas + 2 travessas
+	assert(#Village.lanes >= #Village.houses * 0.6, "poucas trilhas")
 end)
 
 print(string.format("%d ok, %d falhas", passed, failed))
