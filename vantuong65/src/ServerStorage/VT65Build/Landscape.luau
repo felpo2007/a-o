@@ -32,7 +32,6 @@ Landscape.CLEAR_NAMED_M = {
 	-- D-123 (dono: "o outro em uma floresta densa e pouco acessível"): o objetivo A é mata fechada; com
 	-- os 30 m de praxe o ponto virava uma clareira no meio da mata. Fica só a roda da bandeira.
 	["Mata fechada"] = 10,
-	["Picada na mata"] = 10,
 }
 -- pontos fortes de arrozal: em volta deles a lavoura continua (o nome é a paisagem)
 Landscape.FARM_STRONGPOINT_M = 130

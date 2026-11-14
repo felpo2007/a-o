@@ -48,7 +48,7 @@ type Card = {
 ComoJogar.CARDS = {
 	{
 		title = "O OBJETIVO",
-		text = "Dois lados lutam pelo mapa: os Fuzileiros dos EUA e o Viet Cong. Há três objetivos: A, B e C. O que pisca no alto da tela é o da vez: entre no círculo dele e fique lá até ele ser seu.",
+		text = "Dois lados lutam pelo mapa: os Fuzileiros dos EUA e o Viet Cong. Há cinco objetivos, de A a E. O que pisca no alto da tela é o da vez: entre no círculo dele e fique lá até ele ser seu.",
 		chips = {},
 		objectives = true,
 	},
@@ -447,9 +447,9 @@ end
 
 -- 1º cartão: a barra dos objetivos (as cores do HUD da frente: azul dos EUA, vermelho do VC)
 local function objectivesBar()
-	-- D-123: três objetivos (A do VC, B neutro no centro, C dos EUA)
-	local owners = { V.VC, V.MUTED, V.US }
-	for i, letter in { "A", "B", "C" } do
+	-- D-128: cinco objetivos (A e B do VC, C neutro no centro, D e E dos EUA; o da vez é o C)
+	local owners = { V.VC, V.VC, V.MUTED, V.US, V.US }
+	for i, letter in { "A", "B", "C", "D", "E" } do
 		local b = Instance.new("Frame")
 		b.Size = UDim2.fromOffset(84, 84)
 		b.BackgroundColor3 = owners[i]
@@ -457,7 +457,7 @@ local function objectivesBar()
 		b.LayoutOrder = i
 		b.Parent = art
 		UiKit.corner(b, 8)
-		if i == 2 then
+		if i == 3 then
 			UiKit.edge(b, UiKit.BRASS, 4, 0) -- o da vez
 		end
 		local t = Instance.new("TextLabel")

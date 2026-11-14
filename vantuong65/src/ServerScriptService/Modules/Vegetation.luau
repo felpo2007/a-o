@@ -238,15 +238,16 @@ function Vegetation.spawnClearings(spots: { any }): ({ Circle }, { Segment })
 end
 
 -- Mata cerrada do objetivo da mata (D-123, pedido do dono: "outro numa floresta densa e pouco
--- acessível"): em volta dos pontos fortes do setor DENSE_SECTOR, a mata fica DENSE_K vezes mais cheia
+-- acessível"): em volta dos pontos fortes de nome DENSE_NAMES, a mata fica DENSE_K vezes mais cheia
 -- até DENSE_M e volta ao normal suave até 1,5 x DENSE_M. Densidade de design (PLACEHOLDER).
-Vegetation.DENSE_SECTOR = 1
+-- D-128: pelo nome do ponto (era o setor 1; com cinco setores a mata fechada é o B)
+Vegetation.DENSE_NAMES = { ["Mata fechada"] = true } :: { [string]: boolean }
 Vegetation.DENSE_M = 70
 Vegetation.DENSE_K = 1.8
 function Vegetation.denseCircles(mapConfig: any): { Circle }
 	local out: { Circle } = {}
 	for _, sp in mapConfig.Strongpoints do
-		if sp.sector == Vegetation.DENSE_SECTOR then
+		if Vegetation.DENSE_NAMES[sp.name] then
 			table.insert(out, { x = sp.x, z = sp.z, r = Vegetation.DENSE_M / M })
 		end
 	end

@@ -144,7 +144,7 @@ end)
 
 test("LZ: a 140 m do alvo, do lado de quem chega, dentro da área", function()
 	local b = MapConfig.Bounds
-	local sp = MapConfig.Strongpoints[8]
+	local sp = MapConfig.Strongpoints[3] -- D-128: a praça de Xóm Gò, o objetivo do meio (eram 8 pontos)
 	local hq = MapConfig.HQ.US
 	local x, z = Eventos.towards(sp.x, sp.z, hq.x, hq.z, Eventos.C.lzFromTargetM, M, b, 30)
 	near(math.sqrt((x - sp.x) ^ 2 + (z - sp.z) ^ 2) * M, 140, 1, "distância do alvo")

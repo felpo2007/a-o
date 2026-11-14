@@ -70,12 +70,45 @@
   - A mata custa ~10 fps e a sombra do sol ~4. O corte das plantas baixas longe não ganhou nada e
     saiu.
   - O dono escolheu metade dos arbustos (v58, D-127): +2–3 fps nas mesmas vistas.
+## Fila do dono de 14/11 (depois da v58, um lote por vez, na ordem dele)
+Pedido: "faça isso [a imagem dos objetivos] e depois isso [a lista]". A imagem é a tela de outro
+jogo: vale só a ideia (objetivos espalhados), nada da tela.
+- **Lote 14 (v59, D-128): feito.** 5 objetivos (resposta do dono), um por faixa do mapa, nos cantos
+  alternados: A baixada sudoeste e B mata fechada (VC), C Xóm Gò (neutro), D arrozal ao sul de An
+  Cường (2) e E vau do riacho (EUA).
+- **Lote 15:** todos os itens da roda funcionando ("a bandagem não está funcionando").
+- **Lote 16:** recompensa diária aparece toda vez que entra no jogo (sem lugar próprio para ela);
+  bandeiras na escolha do lado (EUA e a da Frente para o VC, resposta do dono); passe com cores
+  mais vivas.
+- **Lote 17:** camuflagens diferentes (tigrado etc.).
+- **Lote 18:** vila menos quadrada e mais espalhada; entrar em todas as casas da vila.
+- **Lote 19:** vegetação com 6 mil triângulos (pedido novo; a D-66 pedia no mínimo 8 mil).
+- "jogo de poder roblox": engano (resposta do dono), nada a fazer.
+
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;
   - respondido pelo dono: a M14 fica como está; o capim clareou (v58);
   - gatilho que recupera a cadência abaixo de 12 fps; mão de apoio das pistolas no quadril;
   - base do VC sob a mata; nomes do equipamento da Intendência sem tradução; Type 54 em 3ª pessoa;
   - a pá do autoteste na 1ª rodada de cada sessão.
+
+## v59: lote 14, cinco objetivos nos cantos do mapa (2026-11-14, D-128)
+- **A publicar.**
+- **Feito:**
+  - 5 setores e 5 pontos fortes, um em cada, nos cantos alternados (sudoeste, noroeste, centro,
+    sudeste, nordeste); a Baixada sudoeste e o Vau do riacho são novos;
+  - no começo, A e B do VC, C neutro, D e E dos EUA: com três neutros, a simulação acusou 15 min sem
+    contato; agora os dois lados vão para C;
+  - carta tática refeita (estradas novas até a baixada e o vau) e reenviada;
+  - menu principal: planos na praça de Xóm Gò, na mata fechada e no arrozal, com o grupo 12 m atrás
+    do mastro;
+  - tutorial com "cinco objetivos, de A a E"; nomes novos em inglês, espanhol e vietnamita.
+- **Conferido no Studio:** as 5 fichas no HUD (A e B vermelhas, C neutra, D e E azuis); os 10 squads
+  de bots atacam C logo depois da contagem; LZ do minuto 1 a 140 m de C; a carta com os objetivos
+  nos cantos; os três planos do menu girando. Capturas em `testes/lote14/`.
+- **Testes:** Lune todos ok; pytest 54; ruff ok; luau-lsp 0 erros.
+- **Não testado:** a partida inteira até o fim; o Offensive de cinco setores no Studio (só no Lune);
+  celular.
 
 ## v58: metade dos arbustos e capim mais claro (2026-11-14, D-127)
 - **Publicada** como versão 58 do place (build do commit 61df564).

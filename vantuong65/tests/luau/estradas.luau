@@ -304,7 +304,7 @@ test("estradas: leito com rampa até 15%, largura do M48 e a principal passa por
 	end
 	-- D-123: a mata fechada fica sem estrada (o dono pediu "pouco acessível"); os outros, perto dela
 	for _, sp in MapConfig.Strongpoints do
-		if sp.sector ~= 1 then
+		if sp.name ~= "Mata fechada" then -- D-128: pelo nome (com cinco setores a mata fechada é o B)
 			assert(dist(sp.x, sp.z) <= 40, sp.name .. string.format(" a %.0f m da estrada principal", dist(sp.x, sp.z)))
 		else
 			assert(dist(sp.x, sp.z) >= 60, sp.name .. " (mata fechada) perto demais da estrada principal")

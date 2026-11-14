@@ -60,10 +60,13 @@ type Shot = {
 	fov: number,
 }
 local SHOTS: { Shot } = {
-	{ -- de frente para o grupo que entra na vila (luz do sol de lado)
-		place = "Becos de Xóm Gò",
-		anchor = "Becos de Xóm Gò",
-		toward = "Xóm Gò",
+	-- D-128 (cinco objetivos, um por setor): os Becos e a Sebe deixaram de ser pontos fortes. Os planos
+	-- ficam na praça de Xóm Gò, na mata fechada e no arrozal ao sul de An Cường (2); "An Cường (2)" é
+	-- um local da carta (MapConfig.Locations)
+	{ -- de frente para o grupo na praça da vila (luz do sol de lado)
+		place = "Xóm Gò",
+		anchor = "Xóm Gò",
+		toward = "An Cường (2)",
 		faction = "US",
 		n = 3,
 		cam0 = Vector3.new(-3.6, 1.5, 9.5),
@@ -71,12 +74,10 @@ local SHOTS: { Shot } = {
 		look = Vector3.new(2.0, 1.3, -1.5), -- o grupo fica à direita, longe dos botões
 		fov = 38,
 	},
-	-- D-123: o mapa de 700 m não tem mais o Quintal oeste nem a Encosta leste (o menu ficava só no
-	-- primeiro plano); os outros dois saem da sebe ao norte e do arrozal ao sul de An Cường (2)
-	{ -- por cima do ombro: o VC, na sebe da boca do túnel, olha a vila com o sol baixo de lado
-		place = "Sebe ao norte de An Cường (2)",
-		anchor = "Sebe ao norte de An Cường (2)",
-		toward = "An Cường (2)",
+	{ -- por cima do ombro: o VC, na beira da mata fechada, olha para a vila
+		place = "Mata fechada",
+		anchor = "Mata fechada",
+		toward = "Xóm Gò",
 		faction = "VC",
 		n = 3,
 		cam0 = Vector3.new(1.8, 1.7, -8.5),
@@ -112,6 +113,12 @@ local function spXZ(name: string): Vector3?
 	for _, sp in MapConfig.Strongpoints do
 		if sp.name == name then
 			return Vector3.new(sp.x, 0, sp.z)
+		end
+	end
+	-- D-128: também os locais da carta (An Cường (2) deixou de ser ponto forte)
+	for _, l in MapConfig.Locations do
+		if l.name == name then
+			return Vector3.new(l.x, 0, l.z)
 		end
 	end
 	return nil
@@ -502,6 +509,12 @@ local function build(s: Shot): Built?
 	if not (a and b) then
 		return nil
 	end
+	-- D-128: com um objetivo por setor, todo ponto forte tem o mastro da bandeira; o grupo fica 12 m
+	-- atrás dele (no Studio, o mastro atravessava a cabeça do soldado no plano da mata)
+	local back = Vector3.new(a.X - b.X, 0, a.Z - b.Z)
+	if back.Magnitude > 1 then
+		a = a + back.Unit * (12 / M)
+	end
 	local origin = freeSpot(a.X, a.Z, 12)
 	if not origin then
 		return nil
@@ -561,7 +574,7 @@ local function orbitCam(cam: Camera)
 	end
 end
 
--- D-123: no mapa de 700 m os Becos de Xóm Gò ficam no objetivo B, onde os bots brigam; um soldado de
+-- D-123: no mapa de 700 m os Becos de Xóm Gò ficavam no objetivo B, onde os bots brigam; um soldado de
 -- verdade passava de costas na frente da câmera do menu (Studio, v55). Enquanto o menu está aberto,
 -- quem estiver a até HIDE_M do grupo do plano some só nesta tela (o próprio jogador fica de fora: o
 -- corpo dele é da câmera de primeira pessoa).

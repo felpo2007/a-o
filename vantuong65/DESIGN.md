@@ -4535,3 +4535,53 @@ sai perto de (59, 70, 26) em vez de (43, 47, 15), e o relevo e os diques aparece
 `testes/lote12/09_capim_v58.jpg`).
 
 **M14:** fica como está (o olho a 6,3 cm da alça de anel, D-67).
+
+## D-128 — Lote 14: cinco objetivos, um em cada canto (v59, 2026-11-14)
+
+Pedido do dono (com a imagem da tela de outro jogo): "quero os objetivos do mapa igual o da imagem bem
+separados em todos os cantos do mapa"; cinco objetivos (resposta do dono). Da imagem vale só a ideia
+de espalhar os objetivos; nada da tela foi copiado.
+
+**Setores e objetivos** (`tools/crop_world.py`; dados e `MapConfig` regenerados):
+
+| Setor | Faixa (E, ING-A) | Objetivo | Canto | Dono no começo |
+|---|---|---|---|---|
+| A Baixada sudoeste | 269480–269600 | Baixada sudoeste | sudoeste | VC |
+| B Mata fechada | 269600–269750 | Mata fechada | noroeste | VC |
+| C Xóm Gò | 269750–269920 | Xóm Gò (praça) | centro | neutro |
+| D An Cường (2) | 269920–270040 | Arrozal ao sul de An Cường (2) | sudeste | EUA |
+| E Vau do riacho | 270040–270180 | Vau do riacho | nordeste | EUA |
+
+- Um ponto forte por setor, sem sorteio: com o sorteio, os pontos podiam cair juntos perto do meio.
+  Os Becos e a Ponta norte de Xóm Gò, a Picada na mata, An Cường (2) e a Sebe ao norte deixaram de
+  ser objetivos. An Cường (2) segue no mapa, com os túneis, como local da carta.
+- A Baixada sudoeste e o Vau do riacho são pontos novos, com nome de design. A Mata fechada foi 150 m
+  para o norte.
+- **Dono no começo:** cada lado com dois setores e o centro disputado. Com três neutros no meio, o VC
+  ia para o B (noroeste) e os EUA para o D (sudeste), em cantos opostos, e ninguém se achava. A
+  simulação de contato acusou: a LZ do minuto 1 ficou 15 min sem contato. Agora os 10 squads de bots
+  atacam o C logo depois da contagem (Studio).
+- A mata cerrada vale pelo nome do ponto (`Vegetation.DENSE_NAMES`); antes era o setor 1. A Mata
+  fechada continua sem estrada; os outros quatro têm estrada a até 40 m.
+
+**Menu principal:** planos na praça de Xóm Gò, na mata fechada e no arrozal ao sul de An Cường (2). O
+`spXZ` também acha os locais da carta. O grupo fica 12 m atrás do mastro da bandeira: com um objetivo
+por setor, todo ponto tem mastro, e ele atravessava a cabeça do soldado.
+
+**Tutorial:** "Há cinco objetivos, de A a E", com a barra A B (VC), C (o da vez) e D E (EUA).
+
+**Carta tática:** refeita, com as estradas novas até a baixada e o vau; os 4 blocos foram reenviados
+(os antigos ficaram como `Carta.*_v55`).
+
+**Testes:** o `run.luau` confere 5 setores, um ponto em cada, os cantos alternados e a distância das
+bordas. O `modo.luau` conta as reuniões avançadas por par de setores vizinhos (8). O `estradas.luau`,
+o `botsmov.luau` e o `eventos.luau` usam os pontos novos.
+
+**Conferido no Studio:**
+- as 5 fichas no HUD;
+- a carta com os objetivos nos cantos;
+- a LZ do minuto 1 a 140 m de C;
+- os três planos do menu girando.
+
+**Não testado:** a partida inteira até o fim; o Offensive com cinco setores no Studio (o teste do
+Lune passa).

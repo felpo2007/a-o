@@ -109,7 +109,7 @@ end
 test("morro de Xóm Gò: o ponto mais alto da área, ~36 m, no setor da vila", function()
 	local x, z, h = summit()
 	near(h * 0.28, 35.7, 1.0, "cume")
-	assert(Geometry.sectorAt(MapConfig.Sectors, x, z) == 2, "o cume fora do setor da vila")
+	assert(Geometry.sectorAt(MapConfig.Sectors, x, z) == 3, "o cume fora do setor da vila") -- D-128: C
 end)
 
 test("área jogável é 0,7 x 0,7 km e o terreno a cobre com margem", function()
@@ -124,33 +124,38 @@ test("área jogável é 0,7 x 0,7 km e o terreno a cobre com margem", function()
 	assert(gz0 <= b.minZ - 100 / 0.28 and gz1 >= b.maxZ + 100 / 0.28, "terreno cobre norte-sul")
 end)
 
--- D-123: três setores (a mata fechada, a vila do centro e An Cường (2)); 2 pontos na mata e 3 em
--- cada vila. Só An Cường (2) é lugar da carta; os outros têm nome de design
-test("3 setores e 8 pontos fortes, cada um dentro do seu setor; An Cường (2) é real", function()
-	assert(#MapConfig.Sectors == 3 and #MapConfig.Strongpoints == 8, "total")
-	local count, real = {}, {}
+-- D-128 (pedido do dono: "os objetivos bem separados em todos os cantos do mapa", cinco objetivos):
+-- cinco setores e um ponto forte em cada (sem sorteio)
+test("5 setores e 5 pontos fortes, um em cada setor", function()
+	assert(#MapConfig.Sectors == 5 and #MapConfig.Strongpoints == 5, "total")
+	local count = {}
 	for _, sp in MapConfig.Strongpoints do
 		local s = Geometry.sectorAt(MapConfig.Sectors, sp.x, sp.z)
 		assert(s == sp.sector, sp.name .. " caiu no setor " .. tostring(s))
 		assert(Geometry.inBounds(MapConfig.Bounds, sp.x, sp.z), sp.name .. " fora da área")
 		count[s] = (count[s] or 0) + 1
-		if sp.real then
-			real[s] = true
-		end
 	end
-	assert(count[1] == 2 and count[2] == 3 and count[3] == 3, "pontos por setor")
-	assert(real[3] and strongpoint("An Cường (2)").real, "An Cường (2) devia ser real")
+	for s = 1, 5 do
+		assert(count[s] == 1, "setor " .. s .. " com " .. tostring(count[s]) .. " pontos")
+	end
 end)
 
--- D-114 (pedido do dono: "deixe os objetivos mais perto do centro do mapa, alguns estão lá
--- embaixo"): todo ponto forte a até 150 m da linha do meio (norte-sul; só o do norte da base dos EUA passa de 110 m) e a pelo menos 45 m da borda;
--- dois pontos de setores vizinhos não dividem o raio de captura
-test("pontos fortes perto do meio, longe da borda e sem raio de captura em comum", function()
+-- D-128: os cantos alternam (A sudoeste, B noroeste, C no centro, D sudeste, E nordeste), cada um a
+-- pelo menos 45 m da borda; dois pontos de setores vizinhos não dividem o raio de captura
+test("pontos fortes nos cantos, longe da borda e sem raio de captura em comum", function()
 	local b = MapConfig.Bounds
 	local midZ = (b.minZ + b.maxZ) / 2
 	local R = MapConfig.CaptureRadiusStuds
+	-- +1 = ao sul da linha do meio (z maior), −1 = ao norte, 0 = no meio
+	local lado = { 1, -1, 0, 1, -1 }
 	for _, sp in MapConfig.Strongpoints do
-		assert(math.abs(sp.z - midZ) * 0.28 <= 150, sp.name .. " longe da linha do meio")
+		local dz = (sp.z - midZ) * 0.28
+		local want = lado[sp.sector]
+		if want == 0 then
+			assert(math.abs(dz) <= 40, sp.name .. " longe do centro")
+		else
+			assert(dz * want >= 75, string.format("%s a %.0f m da linha do meio, do lado errado", sp.name, dz))
+		end
 		local edge = math.min(sp.x - b.minX, b.maxX - sp.x, sp.z - b.minZ, b.maxZ - sp.z) * 0.28
 		assert(edge >= 45, string.format("%s a %.0f m da borda", sp.name, edge))
 		for _, o in MapConfig.Strongpoints do
@@ -173,13 +178,27 @@ test("QGs: EUA no último setor, VC no setor 1, no meio da borda de cada lado", 
 	assert(Geometry.sectorAt(MapConfig.Sectors, MapConfig.HQ.VC.x, MapConfig.HQ.VC.z) == 1)
 end)
 
-test("menu principal: todo plano ancora em ponto forte que existe (D-123)", function()
-	-- com o mapa de 700 m dois planos apontavam para pontos que saíram e o menu ficava num plano só
+test("menu principal: todo plano ancora em ponto forte ou local da carta que existe (D-123)", function()
+	-- com o mapa de 700 m dois planos apontavam para pontos que saíram e o menu ficava num plano só;
+	-- D-128: o spXZ do menu também acha os locais da carta (An Cường (2))
 	local src = fs.readFile("src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau")
+	local function exists(name: string): boolean
+		for _, sp in MapConfig.Strongpoints do
+			if sp.name == name then
+				return true
+			end
+		end
+		for _, l in MapConfig.Locations do
+			if l.name == name then
+				return true
+			end
+		end
+		return false
+	end
 	local n = 0
 	for key, name in string.gmatch(src, '\n%s*(%a+) = "([^"]+)",') do
 		if key == "anchor" or key == "toward" then
-			assert(strongpoint(name) ~= nil, "plano do menu sem ponto forte: " .. name)
+			assert(exists(name), "plano do menu sem ponto forte nem local: " .. name)
 			n += 1
 		end
 	end
@@ -220,10 +239,13 @@ end)
 test("lugares que fazem o jogo estão no recorte: An Cường (2), túneis, trincheira e Xóm Gò", function()
 	location("An Cường (2)")
 	local b = MapConfig.Bounds
-	for _, name in { "An Cường (2)", "Xóm Gò", "Becos de Xóm Gò", "Ponta norte de Xóm Gò" } do
+	-- D-128: a praça de Xóm Gò é o objetivo C; An Cường (2) segue como local da carta
+	for _, name in { "Xóm Gò", "Arrozal ao sul de An Cường (2)" } do
 		local sp = strongpoint(name)
 		assert(Geometry.inBounds(b, sp.x, sp.z), name)
 	end
+	local acL = location("An Cường (2)")
+	assert(Geometry.inBounds(b, acL.x, acL.z), "An Cường (2)")
 	-- bocas dos túneis e a trincheira (metros a partir do LOCAL da carta de An Cường (2), como o jogo:
 	-- Tunnels.toWorld) a pelo menos 15 m da borda: ninguém sai de um túnel para fora da área
 	local Tunnels = require("../../src/ReplicatedStorage/Shared/Tunnels") :: any

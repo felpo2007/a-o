@@ -804,16 +804,16 @@
   "src/ReplicatedFirst/Acabamento.luau:428"
  ],
  "A  ESCOLHER     ↑ ↓  ANDAR": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:411"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:418"
+ ],
+ "A Baixada sudoeste": [
+  "src/ReplicatedStorage/Shared/MapConfig.luau:16"
  ],
  "A CARTA": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ComoJogar.luau:93"
  ],
  "A Colina 30, ao norte de An Cường (2), domina a zona de pouso.": [
   "src/ReplicatedFirst/LoadingScreen.client.luau:248"
- ],
- "A Mata fechada": [
-  "src/ReplicatedStorage/Shared/MapConfig.luau:16"
  ],
  "A PARTIDA COMEÇA EM": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Contagem.client.luau:60"
@@ -1269,9 +1269,9 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/EditorHud.client.luau:662"
  ],
  "Arrozal ao sul de An Cường (2)": [
-  "src/ReplicatedStorage/Shared/MapConfig.luau:85",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:88",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:89"
+  "src/ReplicatedStorage/Shared/MapConfig.luau:59",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:89",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:90"
  ],
  "As 7 juntas": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:1612"
@@ -1378,8 +1378,8 @@
  "Aviões! Bombas em %s (%s) em %d s. Saia da área marcada.": [
   "src/ServerScriptService/Modules/EventosService.luau:356"
  ],
- "B Xóm Gò": [
-  "src/ReplicatedStorage/Shared/MapConfig.luau:19"
+ "B Mata fechada": [
+  "src/ReplicatedStorage/Shared/MapConfig.luau:21"
  ],
  "BACKSPACE": [
   "src/ReplicatedFirst/LoadingScreen.client.luau:781"
@@ -1434,10 +1434,10 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/EventosVisual.luau:192"
  ],
  "BS 695932": [
-  "src/ReplicatedStorage/Shared/MapConfig.luau:98"
+  "src/ReplicatedStorage/Shared/MapConfig.luau:80"
  ],
  "BS 700928": [
-  "src/ReplicatedStorage/Shared/MapConfig.luau:97"
+  "src/ReplicatedStorage/Shared/MapConfig.luau:79"
  ],
  "BT": [
   "src/ReplicatedStorage/Shared/Geometry.luau:45"
@@ -1468,6 +1468,9 @@
  ],
  "Baioneta recolhida": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponController.client.luau:966"
+ ],
+ "Baixada sudoeste": [
+  "src/ReplicatedStorage/Shared/MapConfig.luau:35"
  ],
  "Baixas: nossas %d · inimigo %d": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaView.luau:2260"
@@ -1545,11 +1548,6 @@
  ],
  "Bazuca M20": [
   "src/ReplicatedStorage/Shared/Weapons.luau:539"
- ],
- "Becos de Xóm Gò": [
-  "src/ReplicatedStorage/Shared/MapConfig.luau:53",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:64",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:65"
  ],
  "Binóculo": [
   "src/ReplicatedStorage/Shared/Comms.luau:28",
@@ -1633,6 +1631,9 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:884",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Input.luau:1043",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Wheel.luau:284"
+ ],
+ "C Xóm Gò": [
+  "src/ReplicatedStorage/Shared/MapConfig.luau:24"
  ],
  "CADÊNCIA": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:1222"
@@ -1782,7 +1783,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Reconexao.client.luau:194"
  ],
  "CONFIGURAÇÕES": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:392"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:399"
  ],
  "CONFIRMAR %s": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Progresso.client.luau:839"
@@ -2621,7 +2622,7 @@
  "Documentos": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/LobbyScene.luau:1080"
  ],
- "Dois lados lutam pelo mapa: os Fuzileiros dos EUA e o Viet Cong. Há três objetivos: A, B e C. O que pisca no alto da tela é o da vez: entre no círculo dele e fique lá até ele ser seu.": [
+ "Dois lados lutam pelo mapa: os Fuzileiros dos EUA e o Viet Cong. Há cinco objetivos, de A a E. O que pisca no alto da tela é o da vez: entre no círculo dele e fique lá até ele ser seu.": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ComoJogar.luau:51"
  ],
  "Dossel": [
@@ -2638,6 +2639,9 @@
  ],
  "Duração: (%d+) min": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/AfterActionController.client.luau:207"
+ ],
+ "E Vau do riacho": [
+  "src/ReplicatedStorage/Shared/MapConfig.luau:30"
  ],
  "EDITAR": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/EditorHud.client.luau:444"
@@ -2679,7 +2683,7 @@
   "src/ReplicatedFirst/LoadingScreen.client.luau:780"
  ],
  "ENTER  ESCOLHER     ↑ ↓  ANDAR": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:415"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:422"
  ],
  "ENTRANDO": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/JogarAgora.luau:454"
@@ -2831,7 +2835,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:611"
  ],
  "Entra num squad e vai direto para o campo.": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:390"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:397"
  ],
  "Entrar": [
   "src/ServerScriptService/Modules/VehicleService.luau:1162",
@@ -3117,7 +3121,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/FrontHud.client.luau:388"
  ],
  "FUZILEIROS DOS EUA": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:104"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:105"
  ],
  "FUZILEIROS NAVAIS DOS EUA": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:138",
@@ -3753,7 +3757,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:1091"
  ],
  "JOGAR": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:386"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:393"
  ],
  "JOGAR AGORA": [
   "src/ReplicatedFirst/LoadingScreen.client.luau:509",
@@ -3868,7 +3872,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:606"
  ],
  "LOJA": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:393"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:400"
  ],
  "LOJA E ARMÁRIO": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:45"
@@ -4205,7 +4209,10 @@
   "src/ServerScriptService/Modules/MapLife.luau:632"
  ],
  "Mata fechada": [
-  "src/ReplicatedStorage/Shared/MapConfig.luau:29"
+  "src/ReplicatedStorage/Shared/MapConfig.luau:43",
+  "src/ServerScriptService/Modules/Vegetation.luau:244",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:78",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:79"
  ],
  "Maço de cigarros na tira do capacete": [
   "src/ReplicatedStorage/Shared/Commerce.luau:462"
@@ -4554,7 +4561,7 @@
  "Neutral": [
   "src/ReplicatedStorage/Shared/Capture.luau:94",
   "src/ReplicatedStorage/Shared/Capture.luau:95",
-  "src/ReplicatedStorage/Shared/MapConfig.luau:101",
+  "src/ReplicatedStorage/Shared/MapConfig.luau:83",
   "src/ServerScriptService/Modules/MatchService.luau:158",
   "src/ServerScriptService/Modules/MatchService.luau:291",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaView.luau:981",
@@ -4787,7 +4794,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/FrontHud.client.luau:1005"
  ],
  "Operação Starlite · Vạn Tường · agosto de 1965": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:314"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:321"
  ],
  "Operação Starlite · Vạn Tường, 18–24 ago 1965": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:608"
@@ -4877,7 +4884,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:160"
  ],
  "PASSE": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:394"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:401"
  ],
  "PASSE DE CAMPANHA": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:83",
@@ -5232,9 +5239,6 @@
  "Phe": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/JanelaChat.client.luau:79"
  ],
- "Picada na mata": [
-  "src/ReplicatedStorage/Shared/MapConfig.luau:37"
- ],
  "Pijama preto (áo bà ba)": [
   "src/ReplicatedStorage/Shared/Skins.luau:450"
  ],
@@ -5268,9 +5272,6 @@
  "Ponta": [
   "src/ReplicatedStorage/Shared/GrenadeArt.luau:143",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Luneta.luau:79"
- ],
- "Ponta norte de Xóm Gò": [
-  "src/ReplicatedStorage/Shared/MapConfig.luau:61"
  ],
  "Ponto": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Luneta.luau:77"
@@ -6041,7 +6042,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:2544"
  ],
  "STARLITE": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:300"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:307"
  ],
  "STARLITE: VIETNÃ 1965": [
   "src/ReplicatedFirst/LoadingScreen.client.luau:220"
@@ -6107,11 +6108,6 @@
  ],
  "Sangrou sem socorro": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CasualtyScreen.luau:1603"
- ],
- "Sebe ao norte de An Cường (2)": [
-  "src/ReplicatedStorage/Shared/MapConfig.luau:77",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:77",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:78"
  ],
  "Sebes de bambu e árvores de 1,8 a 2,4 m dividem cada arrozal.": [
   "src/ReplicatedFirst/LoadingScreen.client.luau:245"
@@ -6569,7 +6565,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/LobbyScene.luau:1182"
  ],
  "TUTORIAL": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:395"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:402"
  ],
  "TUTORIAL EM ANDAMENTO": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:282"
@@ -7016,7 +7012,8 @@
   "src/ReplicatedStorage/Shared/JogarAgora.luau:123",
   "src/ReplicatedStorage/Shared/JogarAgora.luau:124",
   "src/ReplicatedStorage/Shared/JogarAgora.luau:124",
-  "src/ReplicatedStorage/Shared/MapConfig.luau:101",
+  "src/ReplicatedStorage/Shared/MapConfig.luau:83",
+  "src/ReplicatedStorage/Shared/MapConfig.luau:83",
   "src/ReplicatedStorage/Shared/Mortar.luau:51",
   "src/ReplicatedStorage/Shared/Offensive.luau:27",
   "src/ReplicatedStorage/Shared/Offensive.luau:47",
@@ -7150,7 +7147,7 @@
   "src/ServerScriptService/Modules/TunnelService.luau:223",
   "src/ServerScriptService/Modules/TunnelService.luau:231",
   "src/ServerScriptService/Modules/TunnelService.luau:275",
-  "src/ServerScriptService/Modules/Vegetation.luau:192",
+  "src/ServerScriptService/Modules/Vegetation.luau:196",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/AfterActionController.client.luau:204",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/AfterActionController.client.luau:223",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/AfterActionController.client.luau:227",
@@ -7211,8 +7208,8 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Maos1P.luau:47",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Maos1P.luau:196",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Marcadores.luau:71",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:67",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:91",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:70",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:92",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Movement.client.luau:1224",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:1033",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/SpawnTransition.luau:347",
@@ -7388,7 +7385,8 @@
   "src/ReplicatedStorage/Shared/JogarAgora.luau:124",
   "src/ReplicatedStorage/Shared/Logistics.luau:66",
   "src/ReplicatedStorage/Shared/Logistics.luau:76",
-  "src/ReplicatedStorage/Shared/MapConfig.luau:101",
+  "src/ReplicatedStorage/Shared/MapConfig.luau:83",
+  "src/ReplicatedStorage/Shared/MapConfig.luau:83",
   "src/ReplicatedStorage/Shared/Melee.luau:218",
   "src/ReplicatedStorage/Shared/Mortar.luau:37",
   "src/ReplicatedStorage/Shared/Offensive.luau:27",
@@ -7555,7 +7553,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Maos1P.luau:200",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Marcadores.luau:71",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Marcadores.luau:663",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:80",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:81",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Movement.client.luau:1224",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Progresso.client.luau:60",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Progresso.client.luau:1287",
@@ -7608,10 +7606,10 @@
   "src/ReplicatedFirst/Idioma.luau:34"
  ],
  "VIET CONG": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:104"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:105"
  ],
  "VIETNÃ 1965": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:304"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:311"
  ],
  "VIEW": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ComoJogar.luau:167"
@@ -7668,6 +7666,9 @@
  ],
  "Vara": [
   "src/ServerScriptService/Modules/MapLife.luau:399"
+ ],
+ "Vau do riacho": [
+  "src/ReplicatedStorage/Shared/MapConfig.luau:67"
  ],
  "Vaulting": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Movement.client.luau:694",
@@ -7958,11 +7959,13 @@
   "src/ReplicatedStorage/Shared/Commerce.luau:244"
  ],
  "Xóm Gò": [
-  "src/ReplicatedStorage/Shared/MapConfig.luau:45",
+  "src/ReplicatedStorage/Shared/MapConfig.luau:51",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/AudioController.client.luau:229",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/LobbyScene.luau:448",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:66",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:119"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:67",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:68",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:80",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:126"
  ],
  "Zero": [
   "src/ReplicatedStorage/Shared/Equipar.luau:27",
@@ -8345,7 +8348,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:49"
  ],
  "arrozal ao sul da vila; nome de design": [
-  "src/ReplicatedStorage/Shared/MapConfig.luau:89"
+  "src/ReplicatedStorage/Shared/MapConfig.luau:63"
  ],
  "asking": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/JogarAgora.luau:51",
@@ -8431,6 +8434,9 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CasualtyScreen.luau:1483",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:833",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:834"
+ ],
+ "baixada de mata a sudoeste; nome de design": [
+  "src/ReplicatedStorage/Shared/MapConfig.luau:39"
  ],
  "baixo": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:689",
@@ -10448,7 +10454,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:46"
  ],
  "mata cerrada a noroeste do morro; nome de design": [
-  "src/ReplicatedStorage/Shared/MapConfig.luau:33"
+  "src/ReplicatedStorage/Shared/MapConfig.luau:47"
  ],
  "mate": [
   "src/ServerScriptService/Modules/SpawnService.luau:411",
@@ -10481,10 +10487,10 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleFx.client.luau:138"
  ],
  "meio da borda leste, a leste de An Cường (2) (setor S3)": [
-  "src/ReplicatedStorage/Shared/MapConfig.luau:93"
+  "src/ReplicatedStorage/Shared/MapConfig.luau:75"
  ],
  "meio da borda oeste, retaguarda do VC (setor S1)": [
-  "src/ReplicatedStorage/Shared/MapConfig.luau:94"
+  "src/ReplicatedStorage/Shared/MapConfig.luau:76"
  ],
  "melee": [
   "src/ReplicatedStorage/Shared/Casualty.luau:80",
@@ -11746,9 +11752,6 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleHudView.luau:288",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleHudView.luau:376"
  ],
- "sebe junto da boca E4 do túnel; nome de design": [
-  "src/ReplicatedStorage/Shared/MapConfig.luau:81"
- ],
  "secondary": [
   "src/ReplicatedFirst/Estilo.luau:325",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/AfterActionController.client.luau:119",
@@ -12884,12 +12887,6 @@
  "trava": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ToqueHud.client.luau:962"
  ],
- "travessa da vila de design do lado do pagode (a ~56 m da praça); nome de design": [
-  "src/ReplicatedStorage/Shared/MapConfig.luau:65"
- ],
- "travessa e becos da vila de design (a ~56 m da praça); nome de design": [
-  "src/ReplicatedStorage/Shared/MapConfig.luau:57"
- ],
  "travessia L->O: %.0f s (%.1f min)": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DebugHud.client.luau:100"
  ],
@@ -12902,9 +12899,6 @@
  "treat": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/MedicalController.client.luau:107",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ToqueTelas.luau:188"
- ],
- "trilha estreita na mata a sudoeste; nome de design": [
-  "src/ReplicatedStorage/Shared/MapConfig.luau:41"
  ],
  "tritanopia (vermelho x verde)": [
   "src/ReplicatedStorage/Shared/Accessibility.luau:19"
@@ -13018,6 +13012,9 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:1651",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:1819"
  ],
+ "vau do riacho a nordeste; nome de design": [
+  "src/ReplicatedStorage/Shared/MapConfig.luau:71"
+ ],
  "vault": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Movement.client.luau:576",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Movement.client.luau:596",
@@ -13089,11 +13086,8 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameUI.client.luau:521",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameUI.client.luau:648"
  ],
- "vila fortificada (First Fight p.25)": [
-  "src/ReplicatedStorage/Shared/MapConfig.luau:73"
- ],
  "vila grande de design no morrote do centro (40 a 60 casas); nome de design": [
-  "src/ReplicatedStorage/Shared/MapConfig.luau:49"
+  "src/ReplicatedStorage/Shared/MapConfig.luau:55"
  ],
  "village": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/AudioController.client.luau:251",

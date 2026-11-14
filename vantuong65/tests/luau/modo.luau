@@ -239,9 +239,19 @@ test("todo ponto de nascimento cai dentro da área e da carta, a >= 30 m da bord
 			worst
 		)
 	)
-	-- uma reunião de cada lado por ponto forte (D-123: 8 pontos no mapa de 700 m, eram 15)
+	-- uma reunião de cada lado por ponto forte; uma avançada por par de pontos de setores vizinhos, nos
+	-- dois sentidos (D-128: um ponto por setor, 5 setores: 8 pares)
 	local nSp = #MapConfig.Strongpoints
-	assert((kinds.hq or 0) == 2 and (kinds.rally or 0) == 2 * nSp and (kinds.forward or 0) >= 4 * nSp - 4)
+	local per: { [number]: number } = {}
+	for _, sp in MapConfig.Strongpoints do
+		per[sp.sector] = (per[sp.sector] or 0) + 1
+	end
+	local pairsN = 0
+	for s = 1, #MapConfig.Sectors - 1 do
+		pairsN += 2 * (per[s] or 0) * (per[s + 1] or 0)
+	end
+	assert((kinds.hq or 0) == 2 and (kinds.rally or 0) == 2 * nSp, "QGs e reuniões")
+	assert((kinds.forward or 0) == pairsN, string.format("avançadas %d de %d", kinds.forward or 0, pairsN))
 end)
 
 test("reunião avançada: pares do Warfare inicial e do Offensive", function()
