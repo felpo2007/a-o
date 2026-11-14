@@ -31,6 +31,16 @@
 - Lote 6: análise do jogo inteiro com ideias em imagens.
 - Perguntas ao dono: a M4 (é de 1994); a mão escorregando (em que vista e momento).
 
+## v48: a grama de volta e mais árvores (2026-11-13, D-116)
+- **Publicada** como versão 48 do place (build do commit 4ae4d8a).
+- **Feito:** roça seca até 45 m das casas (era 110), clareira da base dos EUA de 80 m (era 150),
+  menos manchas de terra nua no capim, árvores da mata 40% mais frequentes e árvores soltas na roça.
+- **Medido no Lune:** mata de 30% para 47% da área, terra nua de 8,7% para 2,3%, árvores de 435
+  para 847.
+- **Conferido no Studio:** mata com 2.401 plantas (eram 1.751), 54 fps no chão, servidor a 60 Hz,
+  0 erros de script.
+- **Não testado:** fps num celular ou num PC fraco.
+
 ## v47: lote 4b, cabanas e vilas maiores e terra batida (2026-11-13, D-115)
 - **Publicada** como versão 47 do place (build do commit b8cd422).
 - **Feito:**
