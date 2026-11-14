@@ -55,6 +55,7 @@
 - **Lote 12, análise:** bots, gráficos, armas, tiros e veículos (junto do lote 6).
 
 ## v51: lote 7, a mira da RPD e da M60 (2026-11-13, D-119)
+- **Publicada** como versão 51 do place (build do commit dc5d00f).
 - **Feito:**
   - RPD: a massa estimada era a ponta do cano; agora são a massa (4,3 cm acima do cano, no capuz) e
     o entalhe de 6,4 mm medidos na malha;
