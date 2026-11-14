@@ -107,7 +107,8 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     ferir; em cima da granada ou no anel, com a direção e a distância.
   - **Lote 25 (D-139): feito.** Ícone e 8 miniaturas enviados. O nome **STARLITE: Vietnã 1965** e a
     descrição para crianças (aprovada pelo dono) foram trocados no Creator Dashboard, com o dono logado
-    no navegador do app (a chave não tem `universe.place:write`).
+    no navegador do app (a chave não tem `universe.place:write`). No mesmo caminho, o servidor passou
+    de 100 para 60 jogadores (30 x 30, D-122).
   - **Lote 26a (v70, D-140): feito.** Objetivos da ideia do dono no mapa de 700 m (A Arrozais, B
     Serraria na mata fechada, C Xóm Gò, D Ponte e Cais, E Engenho), a 291–318 m das bases (eram
     252–270), e morros e grotas na mata. O dono confirmou: o mapa fica de 700 x 700 m.
