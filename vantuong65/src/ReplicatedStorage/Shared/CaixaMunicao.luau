@@ -27,20 +27,30 @@ CaixaMunicao.POR_MAX_M = 4 -- até 4 m do soldado
 CaixaMunicao.INCLINACAO_MAX = 35 -- graus
 CaixaMunicao.GRANADAS = 1 -- por pegada
 CaixaMunicao.FOGUETES_MAX = 3 -- antitanque: o mesmo 3 do nascimento (VehicleService, "Rockets")
+-- D-133 (dono: "dobre o tamanho das caixas de munição"): a caixa do jogo é a do Blender vezes ESCALA
+-- (o modelo publicado é escalado no CaixaMunicaoService; as medidas abaixo já saem escaladas)
+CaixaMunicao.ESCALA = 2
 -- medidas do modelo do Blender (assets/blender/caixa_municao_*/metricas.json): largura, altura e
 -- fundo (m); pegada no chão (studs, x e z) e o ponto do ícone acima da base (studs). A frente é −Z.
-CaixaMunicao.TAMANHO_M = {
-	US = { 0.75, 0.54, 0.45 },
-	VC = { 0.71, 0.43, 0.46 },
-} :: { [string]: { number } }
-CaixaMunicao.PEGADA_STUDS = {
-	US = { 2.5, 1.58 },
-	VC = { 2.35, 1.94 },
-} :: { [string]: { number } }
-CaixaMunicao.ICONE_STUDS = {
-	US = { 0, 2.772, -0.19 },
-	VC = { 0, 2.851, -0.203 },
-} :: { [string]: { number } }
+CaixaMunicao.BLENDER = {
+	tamanhoM = { US = { 0.75, 0.54, 0.45 }, VC = { 0.71, 0.43, 0.46 } },
+	pegadaStuds = { US = { 2.5, 1.58 }, VC = { 2.35, 1.94 } },
+	iconeStuds = { US = { 0, 2.772, -0.19 }, VC = { 0, 2.851, -0.203 } },
+}
+local function vezes(t: { [string]: { number } }, k: number): { [string]: { number } }
+	local out: { [string]: { number } } = {}
+	for side, v in t do
+		local w = {}
+		for i, x in v do
+			w[i] = x * k
+		end
+		out[side] = w
+	end
+	return out
+end
+CaixaMunicao.TAMANHO_M = vezes(CaixaMunicao.BLENDER.tamanhoM, CaixaMunicao.ESCALA)
+CaixaMunicao.PEGADA_STUDS = vezes(CaixaMunicao.BLENDER.pegadaStuds, CaixaMunicao.ESCALA)
+CaixaMunicao.ICONE_STUDS = vezes(CaixaMunicao.BLENDER.iconeStuds, CaixaMunicao.ESCALA)
 
 -- largura, altura e fundo da caixa do lado (m)
 function CaixaMunicao.size(faction: string?): (number, number, number)

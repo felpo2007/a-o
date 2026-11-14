@@ -4776,3 +4776,50 @@ som específico quando vai acontecer". Vale para o evento da partida "Ataque aé
 (`resetMatch`). Isso já acontecia; na partida normal o primeiro evento só vem no minuto 1.
 
 **Não testado:** o som de ouvido (só medido) e num servidor do Roblox.
+
+## D-133 — Lote 19: caixa de munição maior, bandeiras de pano na mesa e botões do tamanho (v64, 2026-11-14)
+
+Pedidos do dono: "dobre o tamanho das caixas de munição"; "para escolher o lado quero a bandeira de
+cada país esticada sobre a mesa, bem detalhadas e texturizadas"; "coloque os botões em caixas que
+são do seu tamanho".
+
+**Caixa de munição do Suporte com o dobro do tamanho** (`Shared/CaixaMunicao.ESCALA = 2`):
+- as medidas do Blender ficam em `CaixaMunicao.BLENDER`; tamanho, pegada e ícone do jogo saem delas
+  vezes 2;
+- o `CaixaMunicaoService` escala o modelo publicado a partir do meio da base;
+- o espaço livre exigido para pôr a caixa também dobra. O alcance para pegar munição (3 m do centro)
+  não mudou;
+- no Studio: 1,49 × 1,08 × 0,91 m (era 0,75 × 0,54 × 0,45);
+- os caixotes de enfeite das bases ficam do tamanho real: o pedido foi lido como a caixa que o
+  jogador põe e usa.
+
+**Bandeiras esticadas sobre a mesa:**
+- **Imagens** (`tools/bandeiras_textura.py`, `assets/bandeiras/`, publicadas como decal):
+  - EUA de 1965 na geometria da Executive Order 10834: 50 estrelas bordadas em 9 fileiras, 13
+    listras costuradas, a tira de lona do mastro com dois ilhoses;
+  - a da Frente: metades costuradas e a estrela aplicada com pesponto;
+  - nas duas: trama de algodão, vincos de bandeira guardada dobrada, bainha, poeira e sol.
+- **Imagem no jogo:** o `ImagensUi` resolve o decal no servidor e põe o ID da imagem em
+  `Img_bandeira_*`. O `Controllers/Bandeiras` usa a imagem quando ela chega, e o desenho em peças
+  fica de reserva. As bandeiras das fichas de alistamento também ganharam a textura.
+- **Na mesa** (`LobbyScene`, sala de arquivo):
+  - os dois dossiês saíram, e no lugar ficam as duas bandeiras de pano (Fabric) estendidas, EUA à
+    esquerda e a da Frente à direita;
+  - clicar na bandeira escolhe o lado;
+  - a câmera olha o meio da mesa de cima e de perto. Antes mirava 0,3 m atrás da mesa, e a mesa
+    ficava escondida sob as fichas.
+
+**Botões do tamanho:** o "ALISTAR-SE ►" das fichas virou uma caixa do tamanho do texto, no meio da
+faixa de baixo; antes era a faixa inteira de 560 px. O JOGAR AGORA ficou como estava, porque mostra
+embaixo a barra da espera e o resumo do lado e do squad.
+
+**Conferido no Studio** (capturas em `testes/lote19/`):
+- as imagens resolvidas (`Img_bandeira_eua` e `Img_bandeira_frente`);
+- as duas bandeiras nítidas sobre a mesa, com estrelas, listras, trama e vincos;
+- o ALISTAR-SE do tamanho do texto;
+- a caixa de munição com o dobro, cercada pelos bots pegando munição.
+
+**Achado:** a contagem de início ("A PARTIDA COMEÇA EM") aparece por cima da sala de arquivo,
+cobrindo o meio da mesa durante a preparação. Isso já acontecia e fica para a lista.
+
+**Não testado:** celular e controle na sala de arquivo; num servidor do Roblox.

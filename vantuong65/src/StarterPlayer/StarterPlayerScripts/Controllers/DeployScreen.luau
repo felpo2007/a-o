@@ -1058,8 +1058,21 @@ local function factionCard(f: string, x: number): FCard
 	count.FontFace = HEAD_B
 	count.TextWrapped = false
 	local avail = stamp(b, 15, 400, 126, 140, 28, 0)
-	local cta = box(b, V.PANEL_3, 0, 172, 560, 44)
-	local ctaText = txt(cta, HEAD, 22, V.TEXT, 0, 0, 560, 44, Enum.TextXAlignment.Center)
+	-- D-133 (dono: "coloque os botões em caixas que são do seu tamanho"): o ALISTAR-SE é uma caixa do
+	-- tamanho do texto, no meio da faixa de baixo (antes, a faixa inteira de 560 px)
+	local cta = box(b, V.PANEL_3, 280, 172, 0, 38)
+	cta.AnchorPoint = Vector2.new(0.5, 0)
+	cta.AutomaticSize = Enum.AutomaticSize.X
+	corner(cta, 4)
+	do
+		local pad = Instance.new("UIPadding")
+		pad.PaddingLeft = UDim.new(0, 28)
+		pad.PaddingRight = UDim.new(0, 28)
+		pad.Parent = cta
+	end
+	local ctaText = txt(cta, HEAD, 22, V.TEXT, 0, 0, 0, 38, Enum.TextXAlignment.Center)
+	ctaText.AutomaticSize = Enum.AutomaticSize.X
+	ctaText.TextWrapped = false
 	ctaText.FontFace = HEAD_B
 	local c: FCard = {
 		btn = b,

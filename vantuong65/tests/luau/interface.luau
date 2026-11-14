@@ -767,6 +767,24 @@ test("D-130: a diária abre ao entrar, sem lugar na mesa; bandeiras na escolha d
 	assert(string.find(svc, "credits = got", 1, true), "o resultado leva o que entrou de fato")
 end)
 
+test("D-133: bandeiras de pano esticadas na mesa, com a imagem detalhada; ALISTAR-SE do tamanho", function()
+	local cena = fs.readFile(C .. "LobbyScene.luau")
+	assert(string.find(cena, 'flagOnTable("US"', 1, true) and string.find(cena, 'flagOnTable("VC"', 1, true))
+	assert(not string.find(cena, '"DossieEUA"', 1, true), "os dossiês saíram")
+	assert(string.find(cena, "Enum.Material.Fabric", 1, true), "pano")
+	local band = fs.readFile(C .. "Bandeiras.luau")
+	assert(string.find(band, '"Img_" .. key', 1, true), "imagem resolvida pelo servidor")
+	local img = fs.readFile("src/ServerScriptService/Modules/ImagensUi.luau")
+	assert(string.find(img, '"bandeira_eua", "bandeira_frente"', 1, true), "o servidor resolve as bandeiras")
+	local ids = fs.readFile("src/ReplicatedStorage/Shared/AssetIds.luau")
+	for _, k in { "bandeira_eua", "bandeira_frente" } do
+		local v = string.match(ids, k .. " = (%d+)")
+		assert(v and tonumber(v) ~= 0, k .. " publicada")
+	end
+	local mesa = fs.readFile(C .. "DeployScreen.luau")
+	assert(string.find(mesa, "cta.AutomaticSize = Enum.AutomaticSize.X", 1, true), "botão do tamanho do texto")
+end)
+
 print(string.format("%d ok, %d falhas", passed, failed))
 if failed > 0 then
 	process.exit(1)

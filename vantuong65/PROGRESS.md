@@ -87,8 +87,9 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
 - Pedidos novos do dono (14/11 à tarde), antes da vila e da vegetação:
   - **Lote 18 (v63, D-132): feito.** O ataque aéreo cai no objetivo, pega os dois lados e tem o som
     do A-4 chegando em mergulho.
-  - **Lote 19:** caixas de munição com o dobro do tamanho; na escolha do lado, a bandeira de cada
-    país esticada sobre a mesa, detalhada e com textura; botões em caixas do tamanho deles.
+  - **Lote 19 (v64, D-133): feito.** Caixa de munição do Suporte com o dobro do tamanho; bandeiras
+    de pano detalhadas esticadas na mesa da escolha de lado (no lugar dos dossiês); ALISTAR-SE do
+    tamanho do texto.
 - **Lote 20:** vila menos quadrada e mais espalhada; entrar em todas as casas da vila.
 - **Lote 21:** vegetação com 6 mil triângulos (pedido novo; a D-66 pedia no mínimo 8 mil).
 - "jogo de poder roblox": engano (resposta do dono), nada a fazer.
@@ -100,6 +101,22 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
   - base do VC sob a mata; nomes do equipamento da Intendência sem tradução; Type 54 em 3ª pessoa;
   - a pá do autoteste na 1ª rodada de cada sessão;
   - as teclas agem por baixo da tela de carregamento (a pá cavou durante o carregamento, D-129).
+
+## v64: lote 19, caixa de munição maior, bandeiras na mesa e botões do tamanho (2026-11-14, D-133)
+- **A publicar.**
+- **Feito:**
+  - a caixa de munição do Suporte com o dobro do tamanho (`CaixaMunicao.ESCALA = 2`);
+  - bandeiras com textura (`tools/bandeiras_textura.py`): EUA de 1965 e a da Frente, com trama,
+    costuras, vincos e desgaste; publicadas e resolvidas pelo `ImagensUi`;
+  - na sala de arquivo, as duas bandeiras de pano esticadas na mesa no lugar dos dossiês; clicar
+    escolhe o lado; câmera de cima e de perto;
+  - as bandeiras das fichas também com a textura; o ALISTAR-SE é uma caixa do tamanho do texto.
+- **Conferido no Studio:** imagens resolvidas; bandeiras nítidas na mesa; botão novo; caixa de
+  1,49 × 1,08 × 0,91 m (era 0,75 × 0,54 × 0,45). Capturas em `testes/lote19/`.
+- **Testes:** Lune todos ok (classes e interface com o teste novo); pytest 54; ruff ok; luau-lsp 0
+  erros; traduções 100%.
+- **Não testado:** celular e controle na sala de arquivo; num servidor do Roblox.
+- **Achado:** a contagem de início cobre o meio da mesa durante a preparação (já acontecia).
 
 ## v63: lote 18, ataque aéreo no objetivo, nos dois lados e com som (2026-11-14, D-132)
 - **Publicada** como versão 63 do place (build do commit d52c68f).

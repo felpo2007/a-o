@@ -191,10 +191,15 @@ test("caixa: só o suporte põe, no chão perto, sem água, rampa nem obstáculo
 	local ok, why = place({ sinceLastS = CaixaMunicao.RECARGA_S - 10 })
 	assert(not ok and why == "caixa nova em 10 s", tostring(why))
 	assert(math.abs(CaixaMunicao.slope(0, 1, 0)) < 1e-9 and math.abs(CaixaMunicao.slope(1, 1, 0) - 45) < 1e-6)
-	-- medidas do modelo do Blender (metricas.json): EUA 0,75 x 0,54 x 0,45 m; VC 0,71 x 0,43 x 0,46 m
+	-- medidas do modelo do Blender (metricas.json): EUA 0,75 x 0,54 x 0,45 m; VC 0,71 x 0,43 x 0,46 m.
+	-- D-133 (dono: "dobre o tamanho das caixas de munição"): no jogo, o dobro
+	assert(CaixaMunicao.ESCALA == 2)
 	local w, h, d = CaixaMunicao.size("VC")
-	assert(w == 0.71 and h == 0.43 and d == 0.46 and select(1, CaixaMunicao.size(nil)) == 0.75)
-	assert(CaixaMunicao.PEGADA_STUDS.US[1] == 2.5 and CaixaMunicao.ICONE_STUDS.VC[2] > 2.5)
+	assert(w == 0.71 * 2 and h == 0.43 * 2 and d == 0.46 * 2 and select(1, CaixaMunicao.size(nil)) == 0.75 * 2)
+	assert(CaixaMunicao.BLENDER.tamanhoM.US[1] == 0.75, "a medida do Blender fica guardada")
+	assert(CaixaMunicao.PEGADA_STUDS.US[1] == 2.5 * 2 and CaixaMunicao.ICONE_STUDS.VC[2] > 5)
+	local svc = fs.readFile("src/ServerScriptService/Modules/CaixaMunicaoService.luau")
+	assert(string.find(svc, "m:ScaleTo(m:GetScale() * CaixaMunicao.ESCALA)", 1, true), "o modelo publicado cresce")
 end)
 
 test("caixa: alcance, intervalo por pessoa, estoque, tempo, uma por suporte e XP de quem pôs", function()

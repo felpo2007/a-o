@@ -261,6 +261,10 @@ return {
 		-- caveira do abate (tools/make_caveira.py): ID do DECAL; o servidor resolve a imagem no início
 		-- (Modules/ImagensUi, atributo "Img_caveira_abate"). Com 0, a caveira é desenhada com frames.
 		caveira_abate = 131470182680103,
+		-- D-133: bandeiras da escolha de lado (tools/bandeiras_textura.py); Decal, o ImagensUi resolve
+		-- a imagem (atributo "Img_bandeira_eua"/"Img_bandeira_frente"). Com 0, a bandeira em peças
+		bandeira_eua = 104461985345184,
+		bandeira_frente = 127727970793387,
 	},
 	-- Texturas do chão (D-66; Poly Haven, CC0): IDs de DECAL devolvidos pelo Open Cloud. O
 	-- MaterialVariant precisa do ID da IMAGEM de cada decal: fica em GroundImages (resolvido no Studio).

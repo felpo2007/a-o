@@ -35,6 +35,7 @@ local UserInputService = game:GetService("UserInputService")
 
 local Acabamento = require(ReplicatedFirst:WaitForChild("Acabamento"))
 local MapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any
+local Bandeiras = require(script.Parent.Bandeiras)
 local SoldierPreview = require(script.Parent.SoldierPreview)
 local UiKit = require(script.Parent.UiKit)
 local VirtualCursor = require(script.Parent.VirtualCursor)
@@ -1239,58 +1240,54 @@ local function buildChoose(): Scene
 	local shade = cyl(f, 0.1, 0.26, at(0, 1.12, 0) * UPRIGHT, rgb(46, 52, 40), Enum.Material.Metal)
 	shade.Transparency = 0.1
 	flicker(sc, light(bulb, rgb(255, 216, 168), 5.0, 2.2, true))
-	-- dossiê dos EUA
-	local us = group(f, "DossieEUA")
-	local usSheet = sheet(us, 0.25, 0.32, -0.34, 0.004, 0.12, 7, MANILA, 0.008)
-	local usg = surface(usSheet, 300)
-	sgText(usg, "UNITED STATES\nMARINE CORPS", HEAD, INK, 0.08, 0.06, 0.84, 0.2, Enum.TextXAlignment.Center)
-	sgStamp(usg, "USMC", STAMP, 0.18, 0.32, 0.64, 0.16, -6)
-	sgText(
-		usg,
-		"RLT-7 · 3/3 · 2/4 · 3/7\nOPERATION STARLITE",
-		TYPE,
-		INK,
-		0.08,
-		0.6,
-		0.84,
-		0.2,
-		Enum.TextXAlignment.Center
-	)
+	-- D-133 (dono: "para escolher o lado quero a bandeira de cada país esticada sobre a mesa, bem
+	-- detalhadas e texturizadas"): no lugar dos dois dossiês, as bandeiras de pano estendidas na
+	-- mesa, cada uma de um lado (EUA à esquerda, a da Frente à direita). Pano (Fabric) com a imagem
+	-- detalhada (Controllers/Bandeiras: trama, vincos, costuras; o desenho em peças de reserva).
+	-- Clicar na bandeira escolhe o lado (pick_US e pick_VC).
+	local FLAG_D = 0.38 -- altura da bandeira (m), no fundo da mesa
+	local function flagOnTable(faction: string, x: number, yaw: number): (Model, number)
+		local g = group(f, if faction == "US" then "BandeiraEUA" else "BandeiraFrente")
+		local w = FLAG_D * Bandeiras.RATIO[faction]
+		local cloth = sheet(g, w, FLAG_D, x, 0.002, 0.1, yaw, rgb(200, 200, 196), 0.003)
+		cloth.Material = Enum.Material.Fabric
+		local pps = 380
+		local sg = surface(cloth, pps)
+		sg.LightInfluence = 1 -- o pano pega a luz da lâmpada como o resto da mesa
+		local flag = Bandeiras.of(faction, sg, math.floor(FLAG_D / M * pps), 1)
+		flag.Position = UDim2.fromScale(0, 0)
+		flag.Size = UDim2.fromScale(1, 1)
+		return g, w
+	end
+	local us, usW = flagOnTable("US", -0.41, 3)
 	local o = addObj(
 		sc,
 		"pick_US",
 		us,
-		Vector3.new(0.3, 0.05, 0.36),
-		at(-0.34, 0.02, 0.12, 7),
+		Vector3.new(usW, 0.04, FLAG_D),
+		at(-0.41, 0.02, 0.1, 3),
 		"FUZILEIROS NAVAIS DOS EUA",
 		"RLT-7 · alistar-se",
-		shot(-0.34, 0.2, -0.3, 0.12, 0.45, 1, 2.0)
+		shot(-0.41, 0.2, -0.3, 0.12, 0.45, 1, 2.0)
 	)
 	o.confirmTouch = true
-	-- maço do VC
-	local vc = group(f, "MacoVC")
-	sheet(vc, 0.27, 0.34, 0.34, 0.004, 0.12, -5, rgb(160, 120, 80), 0.02)
-	local vcTop = sheet(vc, 0.25, 0.32, 0.34, 0.024, 0.12, -5, rgb(214, 196, 150))
-	local vsg = surface(vcTop, 300)
-	sgText(vsg, "MẶT TRẬN DÂN TỘC\nGIẢI PHÓNG", VIET, INK, 0.08, 0.06, 0.84, 0.2, Enum.TextXAlignment.Center)
-	sgStamp(vsg, "QUÂN GIẢI PHÓNG", STAMP, 0.08, 0.32, 0.84, 0.14, 5)
-	sgText(vsg, "TRUNG ĐOÀN 1\nchủ lực", VIET, INK, 0.08, 0.6, 0.84, 0.2, Enum.TextXAlignment.Center)
-	part(vc, 0.3, 0.006, 0.012, at(0.34, 0.03, 0.12, -5), rgb(140, 70, 50), Enum.Material.Fabric)
-	part(vc, 0.012, 0.006, 0.37, at(0.34, 0.03, 0.12, -5), rgb(140, 70, 50), Enum.Material.Fabric)
+	local vc, vcW = flagOnTable("VC", 0.42, -3)
 	o = addObj(
 		sc,
 		"pick_VC",
 		vc,
-		Vector3.new(0.3, 0.06, 0.38),
-		at(0.34, 0.02, 0.12, -5),
+		Vector3.new(vcW, 0.04, FLAG_D),
+		at(0.42, 0.02, 0.1, -3),
 		"1º REGIMENTO VIET CONG",
 		"Força principal · alistar-se",
-		shot(0.34, 0.2, -0.3, -0.12, 0.45, 1, 2.0)
+		shot(0.42, 0.2, -0.3, -0.12, 0.45, 1, 2.0)
 	)
 	o.confirmTouch = true
 	-- D-121 (dono: "tire os soldados dali"): os dois soldados atrás da mesa saíram; o lado se escolhe
-	-- pelos dossiês sobre a mesa (pick_US e pick_VC, acima)
-	sc.overview = shot(0, 0.28, -0.3, 0, 0.4, 1, 2.5)
+	-- pelas bandeiras sobre a mesa (pick_US e pick_VC, acima)
+	-- D-133: a câmera olha o meio da mesa de cima (45°) e de perto: as bandeiras aparecem grandes,
+	-- no foco e acima das fichas (antes mirava 0,3 m atrás da mesa e a mesa ficava sob as fichas)
+	sc.overview = shot(0, 0, 0.08, 0, 1.0, 1, 1.55)
 	return sc
 end
 

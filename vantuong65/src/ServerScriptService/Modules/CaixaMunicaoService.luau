@@ -150,6 +150,8 @@ local function template(faction: string): Model
 		m:PivotTo(CFrame.new())
 		local box, size = m:GetBoundingBox()
 		m.WorldPivot = CFrame.new(box.X, box.Y - size.Y / 2, box.Z)
+		-- D-133: o dobro do tamanho (CaixaMunicao.ESCALA), crescendo a partir do meio da base
+		m:ScaleTo(m:GetScale() * CaixaMunicao.ESCALA)
 	else
 		m = partsBox(faction)
 	end

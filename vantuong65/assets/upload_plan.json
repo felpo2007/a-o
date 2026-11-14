@@ -1714,5 +1714,19 @@
   "assetType": "Audio",
   "name": "VT65 a4_mergulho",
   "description": "VAN TUONG 65 - A-4 em mergulho no ataque aéreo (tools/som_ataque_aereo.py)"
+ },
+ {
+  "key": "Images.bandeira_eua",
+  "file": "assets/bandeiras/bandeira_eua.png",
+  "assetType": "Decal",
+  "name": "VT65 bandeira_eua",
+  "description": "VAN TUONG 65 - bandeira (EUA, 1965) da escolha de lado (tools/bandeiras_textura.py)"
+ },
+ {
+  "key": "Images.bandeira_frente",
+  "file": "assets/bandeiras/bandeira_frente.png",
+  "assetType": "Decal",
+  "name": "VT65 bandeira_frente",
+  "description": "VAN TUONG 65 - bandeira (Frente de Libertação) da escolha de lado (tools/bandeiras_textura.py)"
  }
 ]

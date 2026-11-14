@@ -12,7 +12,8 @@ local AssetIds = require(ReplicatedStorage.Shared.AssetIds) :: any
 
 local ImagensUi = {}
 
-ImagensUi.KEYS = { "caveira_abate" }
+-- D-133: as bandeiras da escolha de lado (Controllers/Bandeiras: a imagem por cima do desenho)
+ImagensUi.KEYS = { "caveira_abate", "bandeira_eua", "bandeira_frente" }
 
 local function imageOf(decalId: number): number?
 	local ok, model = pcall(function()

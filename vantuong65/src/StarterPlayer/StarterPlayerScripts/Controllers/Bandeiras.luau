@@ -8,12 +8,26 @@
 --   - Frente Nacional de Libertação do Vietnã do Sul (Mặt trận Dân tộc Giải phóng miền Nam Việt Nam,
 --     1960): metade de cima vermelha, de baixo azul, estrela amarela de cinco pontas no meio; 2:3.
 -- O pano tem uma sombra de dobra que corre devagar (UIGradient.Offset), como se o vento mexesse.
+-- D-133 (dono: "bem detalhadas e texturizadas"): quando a imagem publicada chega (tools/
+-- bandeiras_textura.py; o ImagensUi põe "Img_bandeira_eua"/"Img_bandeira_frente" no
+-- ReplicatedStorage), ela cobre o desenho: pano com trama, vincos, costuras e, nos EUA, a lona do
+-- mastro. O desenho em peças fica de reserva.
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 
 local Bandeiras = {}
 
--- proporção (largura / altura) de cada bandeira
-Bandeiras.RATIO = { US = 1.9, VC = 1.5 } :: { [string]: number }
+-- proporção (largura / altura) de cada bandeira; a dos EUA conta a lona do mastro da imagem
+-- (1.023 x 522 px)
+Bandeiras.RATIO = { US = 1023 / 522, VC = 1.5 } :: { [string]: number }
+Bandeiras.IMAGE_KEY = { US = "bandeira_eua", VC = "bandeira_frente" } :: { [string]: string }
+
+-- ID da imagem publicada da bandeira do lado (nil enquanto o servidor não resolveu o decal)
+function Bandeiras.imageId(faction: string): number?
+	local key = Bandeiras.IMAGE_KEY[faction]
+	local id = if key then ReplicatedStorage:GetAttribute("Img_" .. key) else nil
+	return if type(id) == "number" and id ~= 0 then id else nil
+end
 
 local US_RED = Color3.fromRGB(178, 34, 52)
 local US_WHITE = Color3.fromRGB(255, 255, 255)
@@ -140,8 +154,42 @@ function Bandeiras.nlf(parent: Instance, h: number, z: number?): Frame
 end
 
 -- A bandeira do lado ("US" ou "VC").
+-- A bandeira do lado ("US" ou "VC"): o desenho e, quando chega, a imagem detalhada por cima.
 function Bandeiras.of(faction: string, parent: Instance, h: number, z: number?): Frame
-	return if faction == "VC" then Bandeiras.nlf(parent, h, z) else Bandeiras.us(parent, h, z)
+	local f = if faction == "VC" then Bandeiras.nlf(parent, h, z) else Bandeiras.us(parent, h, z)
+	local zz = z or 1
+	local function apply()
+		local id = Bandeiras.imageId(faction)
+		if not id or f:FindFirstChild("Imagem") then
+			return
+		end
+		local il = Instance.new("ImageLabel")
+		il.Name = "Imagem"
+		il.BackgroundTransparency = 1
+		il.BorderSizePixel = 0
+		il.Size = UDim2.fromScale(1, 1)
+		il.ScaleType = Enum.ScaleType.Stretch
+		il.Image = "rbxassetid://" .. id
+		il.ZIndex = zz + 5
+		il.Parent = f
+		local dobras = f:FindFirstChild("Dobras")
+		if dobras and dobras:IsA("GuiObject") then
+			dobras.Visible = false -- a imagem já traz os vincos
+		end
+	end
+	apply()
+	local key = Bandeiras.IMAGE_KEY[faction]
+	if key then
+		local con: RBXScriptConnection
+		con = ReplicatedStorage:GetAttributeChangedSignal("Img_" .. key):Connect(function()
+			if f.Parent == nil then
+				con:Disconnect()
+				return
+			end
+			apply()
+		end)
+	end
+	return f
 end
 
 return Bandeiras
