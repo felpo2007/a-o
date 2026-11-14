@@ -64,6 +64,12 @@
   a direita; a loja atraente, com imagens, cores e design bonito.
 - **Lote 12 (v57, D-125): feito.** Análise em `testes/ANALISE_LOTE12_2026-11-14.md` (com capturas em
   `testes/lote12/`); corrigido o embarque em loop dos bots no LVTP-5 e três falhas do autoteste.
+- **Lote 13 (D-126): medido, sem mudança no jogo.** `testes/DESEMPENHO_2026-11-14.md`.
+  - Com o Studio na frente e sem bots: 38–51 fps olhando a mata e 60 fora dela. Os 7–15 fps de antes
+    eram o limite do Studio em segundo plano.
+  - A mata custa ~10 fps e a sombra do sol ~4. O corte das plantas baixas longe não ganhou nada e
+    saiu.
+  - Esperando o dono: menos árvores ou arbustos? Sombra do sol desligada por padrão?
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;
   - perguntas: afastar o olho da alça da M14? clarear o capim?

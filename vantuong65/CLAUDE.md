@@ -73,6 +73,12 @@ O `sourcemap.json` não vai para o Git.
   `LocalPlayer:RequestStreamAroundAsync(pos)` no cliente, senão a foto sai vazia.
 - Depois do autoteste, a câmera pode ficar em Scriptable longe do soldado (o MCP desfaz a troca de
   tipo). Aí o servidor recusa tiros por "origem": é do teste, não do jogo.
+- Medir fps (D-126):
+  - o Studio atrás de outra janela limita o jogo a 15 fps. Traga-o para a frente antes:
+    `(New-Object -ComObject WScript.Shell).AppActivate(<pid do RobloxStudioBeta>)`;
+  - os bots do servidor dividem a CPU com o cliente. `ReplicatedStorage:SetAttribute("BotFill", 0)`
+    tira os bots (`nil` devolve);
+  - leia também `Stats.RenderCPUFrameTime` e `RenderGPUFrameTime`.
 
 ## Assets no Roblox (publicados em 2026-11-10)
 - 82 assets publicados; os IDs estão em `Shared/AssetIds.luau` e `assets/roblox_ids.json`. Faltam
@@ -146,7 +152,7 @@ O `sourcemap.json` não vai para o Git.
 - Segredos só no `.env` (no `.gitignore`), nunca no código nem no chat.
 - ForgeGUI: nunca regenerar um job em `outcome_unknown`. "failed" com `retryable` pode ser
   retomado com `generation_retry`.
-- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-126) e atualize `PROGRESS.md`.
+- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-127) e atualize `PROGRESS.md`.
 - Metas da Parte 2: vegetação ≤ 3 mil triângulos, props ≤ 5 mil, herói ≤ 20 mil (`ArtBudget`,
   conferido pelo teste da F5).
 - Commits no branch acima, com mensagem em português.

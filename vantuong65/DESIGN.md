@@ -4482,3 +4482,31 @@ lote 6: análise com ideias em imagens). Relatório completo, com números e cap
 
 **Aberto:** a pá do autoteste falha na 1ª rodada de cada sessão do Studio (cava, mas a sonda não vê o
 buraco) e passa na 2ª.
+
+## D-126 — Lote 13: medida de desempenho; nada muda na mata sem o dono (2026-11-14)
+
+Pedido do dono: "um lote de desempenho (medir e aliviar a mata)". Relatório:
+`testes/DESEMPENHO_2026-11-14.md`.
+
+**Método** (vale para toda medida de fps no Studio):
+- o Studio em segundo plano limita o jogo a 15 fps. Os "7–15 fps" da análise do lote 12 vinham disso;
+  com a janela na frente, a mesma sessão foi a 55,8 fps;
+- os bots do servidor dividem a CPU com o cliente no Studio; `BotFill` = 0 isola o desenho.
+
+**Medido** (Studio na frente, sem bots, PC do dono):
+- 38–51 fps olhando a mata e 60 fps fora dela;
+- o gargalo é a CPU de desenho (18–21 ms por quadro; a GPU fica em 7–9 ms);
+- a mata custa ~10 fps (árvores 6–11, arbustos ~4–5), a sombra do sol ~4 e a interface ~1;
+- com 24 bots no mesmo processo, 24–42 fps.
+
+**Tentado e retirado:** não desenhar as plantas baixas a mais de 200 m da câmera. O ganho ficou no
+ruído (±2 fps) e o custo de jogo era real (soldado deitado à vista a distância).
+
+**Decisão:** nada muda na mata agora. O que alivia de verdade mexe no visual ou num pedido anterior
+(D-66: no mínimo 8 mil triângulos; D-123: mata do objetivo A 1,8 vez mais cheia). As opções vão ao
+dono:
+- menos árvores (−30%, ~2–3 fps estimados);
+- menos arbustos (−50%, ~2 fps estimados);
+- sombra do sol desligada por padrão (~4 fps medidos).
+
+Falta medir num celular e no servidor do Roblox.
