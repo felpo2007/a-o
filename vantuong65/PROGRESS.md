@@ -125,6 +125,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
   - as teclas agem por baixo da tela de carregamento (a pá cavou durante o carregamento, D-129).
 
 ## v71: lote 26b, construções dos objetivos e o rio do sul (2026-11-14, D-141)
+- **Publicada** (versão 71 do place, commit e4dcbe6).
 - **Rio do sul** (`crop_world.abre_rio`): 12 m de largura, espelho a 9,6 m, margens em rampa; 233
   células de leito na área; passa 25 m ao sul da Ponte e Cais e recebe o riacho fora da área.
 - **Construções**, em peças (`MapLife.objectivePart`) e com modelos que já existiam:
