@@ -4,10 +4,11 @@ Fiz sozinho tudo o que não depende da sua conta Roblox, de dinheiro, de decisã
 Studio. A lista abaixo segue a ordem de prioridade. O que está em **negrito** destrava a maior parte
 do resto.
 
-## 0. Nome do jogo na página: STARLITE: Vietnã 1965 (lote 25, 2026-11-14)
-O ícone e as 8 miniaturas novas já foram enviados (as suas capas). O nome não foi, porque a chave
-não tem a permissão de editar o place (o Roblox respondeu "Scope not authorized"). Escolha um dos
-caminhos:
+## 0. ~~Nome do jogo na página: STARLITE: Vietnã 1965~~ (feito em 2026-11-14)
+Você entrou na conta no navegador do app e eu troquei no Creator Dashboard (Game details): o nome
+**STARLITE: Vietnã 1965** e a descrição para crianças que você aprovou (`marketing/descricao.txt`).
+Conferido depois de recarregar a página. A chave continua sem `universe.place:write`; para as
+próximas mudanças pela API, os caminhos eram:
 1. **Dar a permissão à chave** (5 min): Creator Dashboard → Open Cloud → API Keys → a chave do
    VT65 → em Access Permissions, adicione **universe.place** com **escrita**
    (`universe.place:write`) na experiência → Save. Depois me avise: eu rodo

@@ -5120,6 +5120,17 @@ escolhido é **STARLITE: Vietnã 1965** (D-101); as imagens são as capas do don
 **Não feito:** as miniaturas da página inicial (Thumbnail Personalization); pedem outra permissão
 (`universe.thumbnail:write`).
 
+**Concluído no mesmo dia, depois da v73:**
+- O dono pediu "uma descrição para crianças gostarem". O texto novo de `marketing/descricao.txt`
+  tem frases curtas e emojis, mostra o que dá para fazer (5 bandeiras, os lugares do mapa, os
+  papéis, veículos, eventos, pá e túneis) e os prêmios (diária que cresce, presente surpresa,
+  camuflagens, passe, posto e medalhas). Tem 957 de 1000 caracteres e uma linha em inglês no fim.
+  Só promete o que existe: o ataque aéreo e o apoio naval são eventos da partida, e o comandante
+  pede ataque aéreo e suprimentos (EUA) ou reforço pelos túneis e carregadores (VC).
+- O dono aprovou. A API recusou de novo (HTTP 403). O dono entrou na conta no navegador do app, e
+  o nome **STARLITE: Vietnã 1965** e a descrição foram trocados no Creator Dashboard (Game
+  details → Save). Conferido depois de recarregar a página.
+
 ## D-140 — Lote 26a: objetivos novos, bases mais longe e mais relevo (v70, 2026-11-14)
 
 Pedidos do dono:

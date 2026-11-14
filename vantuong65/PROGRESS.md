@@ -105,9 +105,9 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     - moedas voando ao receber.
   - **Lote 24 (v69, D-138): feito.** Símbolo de granada perto: vermelho = vai matar, branco = vai
     ferir; em cima da granada ou no anel, com a direção e a distância.
-  - **Lote 25 (D-139): ícone e 8 miniaturas enviados.** O nome (STARLITE: Vietnã 1965) espera a
-    permissão `universe.place:write` na chave (ou a troca à mão; `TODO_USUARIO.md`). A descrição nova
-    (`marketing/descricao.txt`) espera o aceite do dono.
+  - **Lote 25 (D-139): feito.** Ícone e 8 miniaturas enviados. O nome **STARLITE: Vietnã 1965** e a
+    descrição para crianças (aprovada pelo dono) foram trocados no Creator Dashboard, com o dono logado
+    no navegador do app (a chave não tem `universe.place:write`).
   - **Lote 26a (v70, D-140): feito.** Objetivos da ideia do dono no mapa de 700 m (A Arrozais, B
     Serraria na mata fechada, C Xóm Gò, D Ponte e Cais, E Engenho), a 291–318 m das bases (eram
     252–270), e morros e grotas na mata. O dono confirmou: o mapa fica de 700 x 700 m.
