@@ -58,6 +58,7 @@
 - **Lote 12, análise:** bots, gráficos, armas, tiros e veículos (junto do lote 6).
 
 ## v53: mesa 3D consertada e sem soldados (2026-11-14, D-121)
+- **Publicada** como versão 53 do place (build do commit 3505354).
 - **Feito:**
   - a câmera da mesa não recua mais em tela estreita (abre o campo de visão);
   - ela roda depois dos outros scripts de câmera e fica sempre em Scriptable;
