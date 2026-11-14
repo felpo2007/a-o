@@ -358,5 +358,13 @@
  "Carta.nw": "104254003024502",
  "Carta.ne": "76766363879279",
  "Carta.sw": "102761004638511",
- "Carta.se": "74157663825470"
+ "Carta.se": "74157663825470",
+ "Clothing.us_tadpole_shirt_v3": "113700478076538",
+ "Clothing.us_tadpole_pants_v3": "134434345084085",
+ "Clothing.us_lizard_shirt_v3": "127729411325942",
+ "Clothing.us_lizard_pants_v3": "86344292039650",
+ "Clothing.vc_brown_shirt_v3": "135938198441175",
+ "Clothing.vc_brown_pants_v3": "131357842269638",
+ "Clothing.vc_tiger_shirt_v3": "113808314201475",
+ "Clothing.vc_tiger_pants_v3": "107937294744885"
 }

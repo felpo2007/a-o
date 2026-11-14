@@ -27,6 +27,10 @@ do resto.
      Depois me mande os 3 IDs: eu colo em `Shared/Commerce.luau` e publico.
   Enquanto os IDs forem 0, tudo funciona com os créditos do jogo e pelo posto; só o botão de
   Robux fica escondido.
+- **Uniformes novos da D-131 em Robux** (opcional): tigrado tadpole, lagarto, áo bà ba marrom e
+  tigrado capturado já saem com $ do jogo. Para vender em Robux, decida o preço (a sugestão é a dos
+  outros uniformes, R$ 79) e me diga: eu rodo `create-store PASS_SKIN_US_TADPOLE PASS_SKIN_US_LIZARD
+  PASS_SKIN_VC_BROWN PASS_SKIN_VC_TIGER`, ou você cria à mão e me manda os 4 IDs.
 - **Perfil salvando nos testes do Studio** (opcional, 1 min). É configuração de segurança, por isso
   fica com você. Sem ela, o Output avisa "Studio access to APIs is not allowed" e o perfil não salva
   no Studio; no jogo publicado não muda nada.

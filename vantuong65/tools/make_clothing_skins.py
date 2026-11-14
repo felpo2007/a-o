@@ -1,4 +1,5 @@
-"""Moldes das skins de uniforme (Shared/Skins): OG-107 desbotado, tiger stripe e duck hunter.
+"""Moldes das skins de uniforme (Shared/Skins): OG-107 desbotado, tiger stripe e duck hunter; na
+D-131, tiger stripe "tadpole", lagarto (EUA), áo bà ba marrom e tiger stripe capturado (VC).
 
 Mesmo molde clássico de 585 × 559 e a mesma alfaiataria da v3 (`tools/make_clothing_v3.py`):
 este script importa a v3 e só troca o tecido de base antes das costuras, bolsos, dobras, sol, suor
@@ -56,21 +57,44 @@ TIGER_SUN = (170, 160, 118)
 # duck hunter: fundo cáqui claro, verde, marrom e pontos escuros
 DUCK = ((164, 150, 110), (102, 108, 68), (110, 86, 58), (58, 48, 36))
 DUCK_SUN = (184, 172, 134)
+# D-131 (lote 17, dono: "coloque umas camuflagens diferentes tipo tigrado etc"):
+# tiger stripe "tadpole" (o esparso do começo dos anos 60, Rangers e assessores): muito fundo claro
+# e traços curtos e finos com "cabeça" (girino)
+TADPOLE = ((156, 150, 104), (70, 92, 52), (98, 74, 46), (28, 28, 26))
+TADPOLE_SUN = (178, 170, 128)
+# lagarto (TAP 47 francês; os paraquedistas sul-vietnamitas e os assessores deles no começo dos anos
+# 60): pinceladas verticais curtas, verde e marrom, sobre fundo verde-claro
+LIZARD = ((134, 140, 96), (68, 96, 56), (110, 82, 52))
+LIZARD_SUN = (160, 162, 122)
+# VC: áo bà ba tingido de củ nâu (o tubérculo que dá o marrom-avermelhado do camponês do Sul)
+BROWN = (92, 62, 44)
+BROWN_SUN = (128, 96, 72)
+# VC: tiger stripe capturado do ARVN, gasto e encardido (mais escuro que o dos assessores)
+TIGER_WORN = ((128, 120, 82), (72, 86, 50), (82, 64, 40), (28, 28, 26))
+TIGER_WORN_SUN = (150, 140, 104)
 
 
 @dataclass(frozen=True)
 class Skin:
     spec: v3.Spec
-    pattern: str  # "plain" | "tiger" | "duck"
+    pattern: str  # "plain" | "tiger" | "duck" | "tadpole" | "lizard"
     layers: tuple[Color, ...]  # cores por cima do fundo (spec.cloth), na ordem de pintura
     stencil: Color | None  # cor do estêncil USMC (None: sem estêncil)
     sun: float
 
 
-def _spec(kind: str, cloth: Color, faded: Color, weave: str, seed: int) -> v3.Spec:
+def _spec(
+    kind: str,
+    cloth: Color,
+    faded: Color,
+    weave: str,
+    seed: int,
+    style: str = "usmc",
+    sleeves: str = "down",
+) -> v3.Spec:
     if kind == "shirt":
-        return v3.Spec("shirt", "usmc", cloth, faded, weave, "down", seed)
-    return v3.Spec("pants", "usmc", cloth, faded, weave, seed=seed)
+        return v3.Spec("shirt", style, cloth, faded, weave, sleeves, seed)
+    return v3.Spec("pants", style, cloth, faded, weave, seed=seed)
 
 
 # Chaves = nomes em AssetIds.Clothing e em Skins.CATALOG (shirt/pants).
@@ -93,11 +117,57 @@ OUTFITS: dict[str, Skin] = {
     "us_duck_pants_v3": Skin(
         _spec("pants", DUCK[0], DUCK_SUN, "plain", 5302), "duck", DUCK[1:], None, 0.7
     ),
+    # D-131 (lote 17)
+    "us_tadpole_shirt_v3": Skin(
+        _spec("shirt", TADPOLE[0], TADPOLE_SUN, "plain", 5401), "tadpole", TADPOLE[1:], None, 0.7
+    ),
+    "us_tadpole_pants_v3": Skin(
+        _spec("pants", TADPOLE[0], TADPOLE_SUN, "plain", 5402), "tadpole", TADPOLE[1:], None, 0.7
+    ),
+    "us_lizard_shirt_v3": Skin(
+        _spec("shirt", LIZARD[0], LIZARD_SUN, "plain", 5501), "lizard", LIZARD[1:], None, 0.7
+    ),
+    "us_lizard_pants_v3": Skin(
+        _spec("pants", LIZARD[0], LIZARD_SUN, "plain", 5502), "lizard", LIZARD[1:], None, 0.7
+    ),
+    "vc_brown_shirt_v3": Skin(
+        _spec("shirt", BROWN, BROWN_SUN, "plain", 5601, "ao_ba_ba", "forearm"),
+        "plain",
+        (),
+        None,
+        1.2,
+    ),
+    "vc_brown_pants_v3": Skin(
+        _spec("pants", (88, 60, 42), BROWN_SUN, "plain", 5602, "ao_ba_ba"), "plain", (), None, 1.0
+    ),
+    "vc_tiger_shirt_v3": Skin(
+        _spec("shirt", TIGER_WORN[0], TIGER_WORN_SUN, "plain", 5701, "vc_uniform"),
+        "tiger",
+        TIGER_WORN[1:],
+        None,
+        0.9,
+    ),
+    "vc_tiger_pants_v3": Skin(
+        _spec("pants", TIGER_WORN[0], TIGER_WORN_SUN, "plain", 5702, "vc_uniform"),
+        "tiger",
+        TIGER_WORN[1:],
+        None,
+        0.9,
+    ),
 }
 SETS = [
     ("OG-107 desbotado (skin_us_faded)", "us_faded_shirt_v3", "us_faded_pants_v3", "usmc"),
     ("Tiger stripe, assessores (skin_us_tiger)", "us_tiger_shirt_v3", "us_tiger_pants_v3", "usmc"),
     ("Duck hunter (skin_us_duck)", "us_duck_shirt_v3", "us_duck_pants_v3", "usmc"),
+    (
+        "Tiger stripe tadpole (skin_us_tadpole)",
+        "us_tadpole_shirt_v3",
+        "us_tadpole_pants_v3",
+        "usmc",
+    ),
+    ("Lagarto, paraquedistas (skin_us_lizard)", "us_lizard_shirt_v3", "us_lizard_pants_v3", "usmc"),
+    ("Áo bà ba marrom (skin_vc_brown)", "vc_brown_shirt_v3", "vc_brown_pants_v3", "vc"),
+    ("Tiger stripe capturado (skin_vc_tiger)", "vc_tiger_shirt_v3", "vc_tiger_pants_v3", "vc"),
 ]
 
 
@@ -127,6 +197,23 @@ def pattern_masks(skin: Skin, seed: int) -> list[np.ndarray]:
         brown = aniso_noise(rng, shape, 46 * SS, 6 * SS) + 0.3 * rough
         black = aniso_noise(rng, shape, 70 * SS, 4 * SS) + 0.25 * rough
         return [edge(green, 0.25), edge(brown, 0.55), edge(black, 1.05, 0.05)]
+    if skin.pattern == "tadpole":
+        # D-131: o esparso: traços mais curtos e finos, com mais fundo à mostra; a "cabeça" do
+        # girino é uma mancha curta na ponta do traço preto
+        green = aniso_noise(rng, shape, 34 * SS, 5 * SS) + 0.3 * rough
+        brown = aniso_noise(rng, shape, 28 * SS, 4 * SS) + 0.3 * rough
+        black = aniso_noise(rng, shape, 40 * SS, 3 * SS) + 0.25 * rough
+        heads = aniso_noise(rng, shape, 9 * SS, 5 * SS) + 0.2 * rough
+        return [
+            edge(green, 0.7),
+            edge(brown, 0.95),
+            np.maximum(edge(black, 1.25, 0.05), edge(heads, 1.6, 0.05)),
+        ]
+    if skin.pattern == "lizard":
+        # D-131: pinceladas verticais curtas (célula estreita e alta), o verde por baixo do marrom
+        green = aniso_noise(rng, shape, 4 * SS, 26 * SS) + 0.35 * rough
+        brown = aniso_noise(rng, shape, 3 * SS, 20 * SS) + 0.35 * rough
+        return [edge(green, 0.55), edge(brown, 0.85)]
     # duck hunter: manchas redondas de tamanhos diferentes e pontos escuros
     green = v3.smooth_noise(rng, shape, 14 * SS) + 0.25 * rough
     brown = v3.smooth_noise(rng, shape, 10 * SS) + 0.25 * rough

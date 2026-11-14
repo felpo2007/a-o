@@ -4695,3 +4695,39 @@ avisa (a nota de "sem DataStore" agora aparece também nesse caso).
 
 **Não testado:** o resgate num servidor do Roblox (DataStore de verdade); celular e controle na
 janela da diária.
+
+## D-131 — Lote 17: camuflagens novas, tigrado e outras (v62, 2026-11-14)
+
+Pedido do dono: "coloque umas camuflagens diferentes tipo tigrado etc". O jogo já tinha três skins de
+uniforme nos EUA (OG-107 desbotado, tigrado dos assessores e duck hunter) e o pijama preto no VC.
+Entraram mais quatro, dois por lado, com padrões que existiam em 1965 (`Shared/Skins`,
+`tools/make_clothing_skins.py`):
+
+| Skin | Lado | Padrão |
+|---|---|---|
+| Tiger stripe tadpole | EUA | o tigrado esparso do começo dos anos 60 (Rangers e assessores): traços finos e curtos com "cabeça", muito fundo claro |
+| Lagarto (paraquedistas) | EUA | o TAP 47 francês dos paraquedistas sul-vietnamitas e dos assessores: pinceladas verticais verdes e marrons sobre verde-claro |
+| Áo bà ba marrom | VC | a roupa do camponês do Sul tingida de củ nâu, marrom-avermelhado, no corte do pijama |
+| Tiger stripe capturado | VC | tigrado do ARVN tomado em combate, gasto e encardido, no corte do uniforme do VC |
+
+- **Fidelidade:** as cores são de olho (PLACEHOLDER até a foto). O tigrado no VC é raro nas fotos:
+  fica com `check = "foto + consultor"`.
+- **Moldes:** clássicos de 585 × 559, com a alfaiataria da v3 (costuras, bolsos, sol, suor, lama e
+  mãos transparentes). O gerador ganhou os padrões "tadpole" e "lizard" e aceita o corte do VC. Os
+  moldes antigos saíram idênticos (o gerador é determinístico).
+- **Publicação:** 8 decals (`upload-assets Clothing.`). O `Characters.imageUrl` abre o decal no
+  servidor e usa a imagem, como nos uniformes de antes.
+- **Venda:** com $ do jogo ($ 15.000, o preço de uniforme). Ainda sem Game Pass em Robux: as chaves
+  `PASS_SKIN_*` estão em 0, e o botão de Robux fica escondido até o dono decidir o preço
+  (TODO_USUARIO).
+- **Prévia:** a Intendência desenha o retalho de cada padrão (`Skin.pattern`: listras finas no
+  tadpole, traços verticais no lagarto, liso no marrom).
+
+**Conferido no Studio** (capturas em `testes/lote17/`):
+- o soldado nasceu com a skin "skin_us_tadpole": camisa e calça com as imagens do tadpole;
+- quatro cópias do soldado, cada uma com um dos moldes novos, mostram os padrões no corpo;
+- a Intendência lista os novos, com nome, descrição e preço.
+
+**Não testado:**
+- a compra com $ até o fim (o soldado de teste tinha $ 1.306);
+- o uniforme do VC num soldado do VC: as cópias usaram o corpo dos EUA, só para ver o pano.

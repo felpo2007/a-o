@@ -75,6 +75,11 @@ Skins.IDS = {
 	PASS_SKIN_US_TIGER = 2079944452,
 	PASS_SKIN_US_DUCK = 2078516472,
 	PASS_SKIN_VC_BLACK = 2078786461,
+	-- D-131 (lote 17): ainda sem Game Pass (0 = só com $; o dono cria e cola o número aqui)
+	PASS_SKIN_US_TADPOLE = 0,
+	PASS_SKIN_US_LIZARD = 0,
+	PASS_SKIN_VC_BROWN = 0,
+	PASS_SKIN_VC_TIGER = 0,
 	-- camuflagem de mato
 	PASS_CAMO_RICE = 2078852467,
 	PASS_CAMO_JUNGLE = 2078126473,
@@ -151,6 +156,7 @@ export type Skin = {
 	shirt: string?, -- uniforme: molde novo (chave em AssetIds.Clothing)
 	pants: string?,
 	rgb: { shirt: { number }, pants: { number } }?, -- uniforme: cor do corpo sem molde publicado
+	pattern: string?, -- uniforme: desenho da prévia ("tiger" | "tadpole" | "lizard" | "duck" | "plain")
 	camo: string?, -- camuflagem: "rice" | "jungle" | "bamboo" (atributo "Camo", BotBrain)
 	texture: string?, -- camuflagem: chave da textura em AssetIds.Images
 }
@@ -388,6 +394,11 @@ Skins.CATALOG = {
 -- - Duck hunter: padrão comercial de caça, usado por assessores e Forças Especiais no começo da
 --   década de 1960 (e o "frogskin" dos fuzileiros no Pacífico, 1943-44). Sem estêncil.
 -- - Pijama preto (áo bà ba): a guerrilha local; o molde já existe (vc_black_*_v3, publicado).
+-- D-131 (lote 17, dono: "coloque umas camuflagens diferentes tipo tigrado etc"):
+-- - Tiger stripe "tadpole": a variante esparsa do começo dos anos 60 (Rangers e assessores).
+-- - Lagarto (TAP 47 francês): dos paraquedistas sul-vietnamitas e dos assessores deles.
+-- - Áo bà ba marrom: o camponês do Sul tingido de củ nâu, a cor mais comum depois do preto.
+-- - Tiger stripe capturado: o do ARVN tomado em combate (raro; conferir com consultor).
 local function uniform(
 	id: string,
 	side: string,
@@ -397,7 +408,8 @@ local function uniform(
 	swatch: { { number } },
 	shirt: string?,
 	pants: string?,
-	gearUniform: string?
+	gearUniform: string?,
+	pattern: string?
 ): Skin
 	local s = base(id, "uniform", side, "uniform", key, name, desc)
 	s.swatch = swatch
@@ -405,6 +417,7 @@ local function uniform(
 	s.pants = pants
 	s.gearUniform = gearUniform
 	s.rgb = { shirt = swatch[1], pants = swatch[1] }
+	s.pattern = pattern
 	return s
 end
 
@@ -430,7 +443,8 @@ for _, s in
 			{ { 146, 138, 92 }, { 84, 98, 58 }, { 92, 72, 44 }, { 30, 30, 28 } },
 			"us_tiger_shirt_v3",
 			"us_tiger_pants_v3",
-			nil
+			nil,
+			"tiger"
 		),
 		uniform(
 			"skin_us_duck",
@@ -441,7 +455,8 @@ for _, s in
 			{ { 164, 150, 110 }, { 102, 108, 68 }, { 110, 86, 58 }, { 58, 48, 36 } },
 			"us_duck_shirt_v3",
 			"us_duck_pants_v3",
-			nil
+			nil,
+			"duck"
 		),
 		uniform(
 			"skin_vc_black",
@@ -453,6 +468,55 @@ for _, s in
 			nil,
 			nil,
 			"vc_black"
+		),
+		-- D-131 (lote 17)
+		uniform(
+			"skin_us_tadpole",
+			"US",
+			"PASS_SKIN_US_TADPOLE",
+			"Tiger stripe tadpole",
+			"O tigrado esparso do começo dos anos 60: traços finos e curtos, muito fundo claro.",
+			{ { 156, 150, 104 }, { 70, 92, 52 }, { 98, 74, 46 }, { 28, 28, 26 } },
+			"us_tadpole_shirt_v3",
+			"us_tadpole_pants_v3",
+			nil,
+			"tadpole"
+		),
+		uniform(
+			"skin_us_lizard",
+			"US",
+			"PASS_SKIN_US_LIZARD",
+			"Lagarto (paraquedistas)",
+			"Pinceladas verticais verdes e marrons do padrão francês dos paraquedistas sul-vietnamitas.",
+			{ { 134, 140, 96 }, { 68, 96, 56 }, { 110, 82, 52 } },
+			"us_lizard_shirt_v3",
+			"us_lizard_pants_v3",
+			nil,
+			"lizard"
+		),
+		uniform(
+			"skin_vc_brown",
+			"VC",
+			"PASS_SKIN_VC_BROWN",
+			"Áo bà ba marrom",
+			"O camponês do Sul tingido de củ nâu: marrom-avermelhado, mangas arregaçadas, sandália.",
+			{ { 92, 62, 44 }, { 128, 96, 72 } },
+			"vc_brown_shirt_v3",
+			"vc_brown_pants_v3",
+			nil,
+			"plain"
+		),
+		uniform(
+			"skin_vc_tiger",
+			"VC",
+			"PASS_SKIN_VC_TIGER",
+			"Tiger stripe capturado",
+			"Tigrado tomado do ARVN, gasto e encardido, no corte do uniforme do VC.",
+			{ { 128, 120, 82 }, { 72, 86, 50 }, { 82, 64, 40 }, { 28, 28, 26 } },
+			"vc_tiger_shirt_v3",
+			"vc_tiger_pants_v3",
+			nil,
+			"tiger"
 		),
 	}
 do
@@ -507,6 +571,8 @@ local byId: { [string]: Skin } = {}
 for _, s in Skins.CATALOG do
 	byId[s.id] = s
 end
+-- D-131: o tigrado capturado é raro nas fotos do VC: conferir com consultor antes do Game Pass
+byId.skin_vc_tiger.check = "foto + consultor"
 
 -- ===== consulta =====
 function Skins.get(id: any): Skin?

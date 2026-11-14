@@ -82,7 +82,8 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
 - **Lote 16 (v61, D-130): feito.** A recompensa diária abre sozinha ao entrar no jogo (a aba e o
   calendário da mesa saíram); bandeiras dos EUA e da Frente nas fichas de escolha do lado; passe
   com cores vivas.
-- **Lote 17:** camuflagens diferentes (tigrado etc.).
+- **Lote 17 (v62, D-131): feito.** Quatro uniformes de camuflagem novos: tigrado tadpole e lagarto
+  (EUA), áo bà ba marrom e tigrado capturado (VC); com $ do jogo (Robux espera o preço do dono).
 - **Lote 18:** vila menos quadrada e mais espalhada; entrar em todas as casas da vila.
 - **Lote 19:** vegetação com 6 mil triângulos (pedido novo; a D-66 pedia no mínimo 8 mil).
 - "jogo de poder roblox": engano (resposta do dono), nada a fazer.
@@ -94,6 +95,21 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
   - base do VC sob a mata; nomes do equipamento da Intendência sem tradução; Type 54 em 3ª pessoa;
   - a pá do autoteste na 1ª rodada de cada sessão;
   - as teclas agem por baixo da tela de carregamento (a pá cavou durante o carregamento, D-129).
+
+## v62: lote 17, camuflagens novas (2026-11-14, D-131)
+- **A publicar.**
+- **Feito:**
+  - quatro skins de uniforme novas, dois por lado: tigrado tadpole e lagarto dos paraquedistas
+    (EUA), áo bà ba marrom e tigrado capturado do ARVN (VC);
+  - moldes gerados pelo `tools/make_clothing_skins.py`, com dois padrões novos e o corte do VC; 8
+    decals publicados;
+  - à venda com $ do jogo ($ 15.000); Game Pass em Robux espera o preço do dono (TODO_USUARIO);
+  - a Intendência desenha o retalho de cada padrão.
+- **Conferido no Studio:** o soldado vestiu o tadpole com as imagens certas; os quatro padrões no
+  corpo; a Intendência lista os novos. Capturas em `testes/lote17/`.
+- **Testes:** Lune todos ok (skins com os uniformes novos); pytest 54; ruff ok; luau-lsp 0 erros;
+  traduções 100%.
+- **Não testado:** a compra com $ até o fim; o uniforme do VC num soldado do VC.
 
 ## v61: lote 16, diária ao entrar, bandeiras e passe colorido (2026-11-14, D-130)
 - **Publicada** como versão 61 do place (build do commit 337f2ee).

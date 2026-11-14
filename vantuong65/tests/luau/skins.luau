@@ -106,6 +106,16 @@ test("realismo de 1965: os acabamentos e uniformes pedidos, sem duplicar o Comme
 	for _, id in { "skin_us_faded", "skin_us_tiger", "skin_us_duck", "skin_vc_black" } do
 		assert(Skins.get(id) and Skins.get(id).kind == "uniform", id)
 	end
+	-- D-131 (lote 17, "camuflagens diferentes tipo tigrado"): dois padrões novos para cada lado,
+	-- cada um com o desenho da prévia
+	for id, pat in
+		{ skin_us_tadpole = "tadpole", skin_us_lizard = "lizard", skin_vc_brown = "plain", skin_vc_tiger = "tiger" }
+	do
+		local s = Skins.get(id)
+		assert(s and s.kind == "uniform" and s.pattern == pat, id)
+		assert(s.shirt and s.pants and AssetIds.Clothing[s.shirt] ~= 0, id .. ": molde publicado")
+	end
+	assert(Skins.get("skin_vc_tiger").check == "foto + consultor", "tigrado no VC: conferir")
 	for _, kind in { "rice", "jungle", "bamboo" } do
 		local found = false
 		for _, s in Skins.list("camo") do
@@ -261,7 +271,13 @@ test("lista por tipo e lado: o de ambos entra nos dois", function()
 		assert(s.side == "US" and s.kind == "weapon")
 	end
 	assert(#Skins.list("camo", "US") == 3 and #Skins.list("camo", "VC") == 3)
-	assert(#Skins.list("uniform", "VC") == 1 and Skins.list("uniform", "VC")[1].id == "skin_vc_black")
+	-- D-131: o VC tem o preto, o marrom e o tigrado capturado; os EUA, cinco
+	local vc = {}
+	for _, s in Skins.list("uniform", "VC") do
+		vc[s.id] = true
+	end
+	assert(vc.skin_vc_black and vc.skin_vc_brown and vc.skin_vc_tiger and #Skins.list("uniform", "VC") == 3)
+	assert(#Skins.list("uniform", "US") == 5)
 end)
 
 -- Perfil --------------------------------------------------------------------------------------

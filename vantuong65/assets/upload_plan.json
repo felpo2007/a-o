@@ -1651,5 +1651,61 @@
   "assetType": "Decal",
   "name": "VT65 loja peugeot403",
   "description": "VAN TUONG 65 - Peugeot 403, veiculo ao nascer (tools/blender/loja.py)"
+ },
+ {
+  "key": "Clothing.us_tadpole_shirt_v3",
+  "file": "assets/clothing/skins/us_tadpole_shirt_v3.png",
+  "assetType": "Decal",
+  "name": "VT65 us_tadpole_shirt_v3",
+  "description": "VAN TUONG 65 - skin tiger stripe tadpole, camisa (tools/make_clothing_skins.py)"
+ },
+ {
+  "key": "Clothing.us_tadpole_pants_v3",
+  "file": "assets/clothing/skins/us_tadpole_pants_v3.png",
+  "assetType": "Decal",
+  "name": "VT65 us_tadpole_pants_v3",
+  "description": "VAN TUONG 65 - skin tiger stripe tadpole, calça (tools/make_clothing_skins.py)"
+ },
+ {
+  "key": "Clothing.us_lizard_shirt_v3",
+  "file": "assets/clothing/skins/us_lizard_shirt_v3.png",
+  "assetType": "Decal",
+  "name": "VT65 us_lizard_shirt_v3",
+  "description": "VAN TUONG 65 - skin lagarto (paraquedistas), camisa (tools/make_clothing_skins.py)"
+ },
+ {
+  "key": "Clothing.us_lizard_pants_v3",
+  "file": "assets/clothing/skins/us_lizard_pants_v3.png",
+  "assetType": "Decal",
+  "name": "VT65 us_lizard_pants_v3",
+  "description": "VAN TUONG 65 - skin lagarto (paraquedistas), calça (tools/make_clothing_skins.py)"
+ },
+ {
+  "key": "Clothing.vc_brown_shirt_v3",
+  "file": "assets/clothing/skins/vc_brown_shirt_v3.png",
+  "assetType": "Decal",
+  "name": "VT65 vc_brown_shirt_v3",
+  "description": "VAN TUONG 65 - skin áo bà ba marrom, camisa (tools/make_clothing_skins.py)"
+ },
+ {
+  "key": "Clothing.vc_brown_pants_v3",
+  "file": "assets/clothing/skins/vc_brown_pants_v3.png",
+  "assetType": "Decal",
+  "name": "VT65 vc_brown_pants_v3",
+  "description": "VAN TUONG 65 - skin áo bà ba marrom, calça (tools/make_clothing_skins.py)"
+ },
+ {
+  "key": "Clothing.vc_tiger_shirt_v3",
+  "file": "assets/clothing/skins/vc_tiger_shirt_v3.png",
+  "assetType": "Decal",
+  "name": "VT65 vc_tiger_shirt_v3",
+  "description": "VAN TUONG 65 - skin tiger stripe capturado, camisa (tools/make_clothing_skins.py)"
+ },
+ {
+  "key": "Clothing.vc_tiger_pants_v3",
+  "file": "assets/clothing/skins/vc_tiger_pants_v3.png",
+  "assetType": "Decal",
+  "name": "VT65 vc_tiger_pants_v3",
+  "description": "VAN TUONG 65 - skin tiger stripe capturado, calça (tools/make_clothing_skins.py)"
  }
 ]

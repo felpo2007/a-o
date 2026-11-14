@@ -527,7 +527,7 @@ local function patchPreview(s: Skins.Skin)
 			local c = cols[rng:NextInteger(1, #cols)]
 			piece(c, rng:NextNumber(0, 1), rng:NextNumber(0, 1), w, h, rng:NextNumber(-40, 40), 0.5)
 		end
-	elseif string.find(s.id, "tiger", 1, true) then
+	elseif s.pattern == "tiger" or string.find(s.id, "tiger", 1, true) then
 		for _ = 1, 16 do
 			local c = cols[rng:NextInteger(2, #cols)]
 			piece(
@@ -540,6 +540,37 @@ local function patchPreview(s: Skins.Skin)
 				0.5
 			)
 		end
+	elseif s.pattern == "tadpole" then
+		-- D-131: traços finos e curtos, com o fundo claro à mostra
+		for _ = 1, 22 do
+			local c = cols[rng:NextInteger(2, #cols)]
+			piece(
+				c,
+				rng:NextNumber(0, 1),
+				rng:NextNumber(0, 1),
+				rng:NextNumber(0.12, 0.3),
+				0.03,
+				rng:NextNumber(-6, 6),
+				0.5
+			)
+		end
+	elseif s.pattern == "lizard" then
+		-- D-131: pinceladas verticais curtas
+		for _ = 1, 30 do
+			local c = cols[rng:NextInteger(2, #cols)]
+			piece(
+				c,
+				rng:NextNumber(0, 1),
+				rng:NextNumber(0, 1),
+				0.035,
+				rng:NextNumber(0.12, 0.26),
+				rng:NextNumber(-6, 6),
+				0.5
+			)
+		end
+	elseif s.pattern == "plain" then
+		-- liso: só a cor do pano (sem manchas)
+		swatch.BackgroundColor3 = Color3.fromRGB(cols[1][1], cols[1][2], cols[1][3])
 	elseif #cols > 1 then
 		for _ = 1, 14 do
 			local c = cols[rng:NextInteger(2, #cols)]

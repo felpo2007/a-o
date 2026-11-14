@@ -228,6 +228,16 @@ return {
 		us_tiger_pants_v3 = 99148306008988,
 		us_duck_shirt_v3 = 128390642890074,
 		us_duck_pants_v3 = 125772966200340,
+		-- D-131 (lote 17): tigrado tadpole, lagarto, áo bà ba marrom e tigrado capturado (Decal; o
+		-- Characters.imageUrl abre o decal e usa a imagem)
+		us_tadpole_shirt_v3 = 113700478076538,
+		us_tadpole_pants_v3 = 134434345084085,
+		us_lizard_shirt_v3 = 127729411325942,
+		us_lizard_pants_v3 = 86344292039650,
+		vc_brown_shirt_v3 = 135938198441175,
+		vc_brown_pants_v3 = 131357842269638,
+		vc_tiger_shirt_v3 = 113808314201475,
+		vc_tiger_pants_v3 = 107937294744885,
 	},
 	-- Equipamento: MODELOS (GLB) soldados à cabeça/tronco em runtime (Characters.dress)
 	Accessories = {
