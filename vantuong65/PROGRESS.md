@@ -93,7 +93,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
   - a pá do autoteste na 1ª rodada de cada sessão.
 
 ## v59: lote 14, cinco objetivos nos cantos do mapa (2026-11-14, D-128)
-- **A publicar.**
+- **Publicada** como versão 59 do place (build do commit 0edbe35).
 - **Feito:**
   - 5 setores e 5 pontos fortes, um em cada, nos cantos alternados (sudoeste, noroeste, centro,
     sudeste, nordeste); a Baixada sudoeste e o Vau do riacho são novos;
