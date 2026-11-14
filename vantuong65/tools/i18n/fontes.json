@@ -275,7 +275,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:788"
  ],
  "%s %s (%s)": [
-  "src/ServerScriptService/Modules/BotVehicles.luau:975"
+  "src/ServerScriptService/Modules/BotVehicles.luau:978"
  ],
  "%s (%d)": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CommanderController.client.luau:160",

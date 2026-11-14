@@ -845,10 +845,13 @@ function BotVehicles.seatedThink(bot: Bot, model: Model, now: number)
 			c = cc
 		end
 	end
-	local carrying = c ~= nil
-		and (c.state == "load" or c.state == "go")
-		and seated(c.members.driver, vehicle)
-		and not BotBrain.underFire(bot.diff, bot.supp)
+	-- D-125 (lote 12): o passageiro espera sentado enquanto a tripulação embarca ("board") ou o squad
+	-- carrega ("load"); só na marcha ("go") o motorista precisa estar no lugar. Antes o calm o sentava
+	-- no "board" e aqui ele descia (sem motorista e fora de "load"/"go"): no Studio, um bot "embarcou"
+	-- 47 vezes no mesmo lugar, um teletransporte a cada ~0,6 s.
+	local waiting = c ~= nil and (c.state == "board" or c.state == "load")
+	local moving = c ~= nil and c.state == "go" and seated(c.members.driver, vehicle)
+	local carrying = (waiting or moving) and not BotBrain.underFire(bot.diff, bot.supp)
 	if not carrying then
 		VehicleService.botLeave(model)
 	end

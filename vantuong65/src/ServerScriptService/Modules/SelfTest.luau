@@ -220,10 +220,24 @@ local function prone(): (string, string?)
 		)
 end
 
+-- D-125 (lote 12): o autoteste não espera a contagem do começo (D-122). Na contagem a chuva não muda,
+-- a captura não anda e quem passa de 60 m do QG volta para a base: a pá cavava longe do QG e era
+-- puxada de volta, e o relatório do Offensive ficava sem a captura (o relógio só começava no fim da
+-- contagem). Fecha a contagem e o relógio começa agora.
+local function endPrep()
+	if MatchService.prepUntil > os.clock() then
+		MatchService.prepUntil = 0
+	end
+	if MatchService.startedAt > os.clock() then
+		MatchService.startedAt = os.clock()
+		MatchService.waveEpoch = MatchService.startedAt
+	end
+end
+
 -- Offensive pelo laço real da partida + relatório pós-ação.
 local function offensive(): (string, string?)
 	MatchService.newMatch("Offensive")
-	MatchService.prepUntil = 0 -- D-122: o autoteste não espera a contagem do começo
+	endPrep() -- D-122: o autoteste não espera a contagem do começo
 	local o = MatchService.offensive
 	-- D-123: a frente começa no penúltimo setor (S4 no mapa de 5 setores, S2 no de 3)
 	local nS = #(require(game:GetService("ReplicatedStorage").Shared.MapConfig) :: any).Sectors
@@ -252,11 +266,14 @@ local function offensive(): (string, string?)
 	end, 5)
 	local rep = MatchService.report
 	local text = if rep then table.concat(AfterAction.lines(rep), "\n") else ""
-	local hasCapture = string.find(text, "USMC toma S" .. f0, 1, true) ~= nil
+	-- D-125: o relatório escreve a letra do setor (AfterAction: "USMC toma B (Xóm Gò)"); era "toma S2"
+	local letter = string.char(64 + f0)
+	local hasCapture = string.find(text, "USMC toma " .. letter, 1, true) ~= nil
 	MatchService.newMatch("Warfare")
 	return if ended and hasCapture then "ok" else "FALHA",
 		string.format(
-			"frente S3, prazo %d min, fim=%s, relatório %s",
+			"frente %s, prazo %d min, fim=%s, relatório %s",
+			letter,
 			o.deadline // 60,
 			tostring(ended),
 			if hasCapture then "com a captura" else "SEM a captura"
@@ -668,9 +685,11 @@ local function mapLife(): (string, string?)
 	local fx = art:FindFirstChild("VidaDaVila")
 	local stacks, jars, calves = 0, 0, 0
 	for _, m in art:GetChildren() do
-		if m.Name == "MedaDePalha" then
+		-- D-125: as medas e os potes viraram modelos do Blender (straw_stack, water_jar); os nomes
+		-- antigos ficam para o place sem a arte nova
+		if m.Name == "MedaDePalha" or m.Name == "straw_stack" then
 			stacks += 1
-		elseif m.Name == "PoteDagua" then
+		elseif m.Name == "PoteDagua" or m.Name == "water_jar" then
 			jars += 1
 		end
 	end
@@ -681,7 +700,8 @@ local function mapLife(): (string, string?)
 		end
 	end
 	local nRice = if rice then #rice:GetChildren() else 0
-	local ok = nRice > 500
+	-- D-114: o arrozal ficou em ~15% (37 tabuleiros no mapa de 700 m); eram mais de 500
+	local ok = nRice >= 10
 		and hi ~= nil
 		and hi.Transparency > 0
 		and life ~= nil
@@ -729,6 +749,7 @@ end
 function SelfTest.run()
 	okN, failN, skipN = 0, 0, 0
 	print("[VT65 TESTE] início")
+	endPrep()
 	check("terreno", terrain)
 	check("bots", botsUp)
 	check("campo de tiro (raia e balística)", range)

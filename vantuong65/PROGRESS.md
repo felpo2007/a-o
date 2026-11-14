@@ -62,7 +62,29 @@
   cores por item e a capa no destaque.
 - **Lote 11, passe e loja (pedido original):** o passe em linha do tempo horizontal, da esquerda para
   a direita; a loja atraente, com imagens, cores e design bonito.
-- **Lote 12, análise:** bots, gráficos, armas, tiros e veículos (junto do lote 6).
+- **Lote 12 (v57, D-125): feito.** Análise em `testes/ANALISE_LOTE12_2026-11-14.md` (com capturas em
+  `testes/lote12/`); corrigido o embarque em loop dos bots no LVTP-5 e três falhas do autoteste.
+- **Próximos (ideias da análise, esperando o dono):**
+  - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;
+  - perguntas: afastar o olho da alça da M14? clarear o capim?
+  - gatilho que recupera a cadência abaixo de 12 fps; mão de apoio das pistolas no quadril;
+  - base do VC sob a mata; nomes do equipamento da Intendência sem tradução; Type 54 em 3ª pessoa;
+  - a pá do autoteste na 1ª rodada de cada sessão.
+
+## v57: lote 12, análise de bots, gráficos, armas, tiros e veículos (2026-11-14, D-125)
+- **Publicação:** pendente (ver o commit "v57 publicada").
+- **Feito:**
+  - relatório com números e 8 capturas (`testes/ANALISE_LOTE12_2026-11-14.md`);
+  - bots: o passageiro do LVTP-5 espera sentado enquanto a tripulação embarca (antes ele entrava e
+    saía sem parar: um bot "embarcou" 47 vezes);
+  - autoteste: fecha a contagem ao rodar; nomes novos das medas e potes; letra do setor no relatório.
+- **Conferido no Studio:**
+  - autoteste 17 ok e 1 falha (eram 14 e 4);
+  - no máximo 2 embarques por bot numa sessão de ~8 min;
+  - as 10 armas medidas com a mira no centro (0,1 px);
+  - M151 a 34 km/h em ~3 s;
+  - bots andando e tomando pontos, primeiro tiroteio aos 86 s.
+- **Não testado:** desempenho num celular e num servidor do Roblox; a pá do autoteste na 1ª rodada.
 
 ## v56: lote 11, passe em linha do tempo e loja com imagens (2026-11-14, D-124)
 - **Publicada** como versão 56 do place (build do commit dc892ea).

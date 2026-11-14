@@ -4443,3 +4443,42 @@ na vitrine, o cubo cinza não conta e as 7 imagens têm ID.
 
 **Não testado:** o cartão do veículo com a imagem numa inserção de verdade (o Studio só conferiu que
 a imagem existe e fica escondida sem veículo escolhido); celular; compra de verdade.
+
+## D-125 — Lote 12: análise de bots, gráficos, armas, tiros e veículos (v57, 2026-11-14)
+
+Pedido do dono: "analise tudo do principal do jogo: bots, gráficos, armas, tiros, veículos" (junto do
+lote 6: análise com ideias em imagens). Relatório completo, com números e capturas:
+`testes/ANALISE_LOTE12_2026-11-14.md` e `testes/lote12/`.
+
+**Corrigido:**
+- **Embarque em loop no LVTP-5** (`BotVehicles.seatedThink`): o passageiro entrava com a tripulação
+  no estado "board" e descia na hora (só podia ficar em "load"/"go" com o motorista sentado); o `calm`
+  o sentava de novo. Um bot chegou a "embarcar" 47 vezes no mesmo lugar, um teletransporte a cada
+  ~0,6 s. Agora ele espera sentado em "board" e "load"; na marcha ("go"), o motorista continua
+  obrigatório. Depois: no máximo 2 embarques por bot numa sessão de ~8 min.
+- **Autoteste** (`SelfTest.luau`), três falhas que eram do teste:
+  - fecha a contagem do começo ao rodar (a chuva não mudava na contagem e o relógio do Offensive
+    só começava depois dela);
+  - conta as medas e os potes pelos nomes novos (`straw_stack`, `water_jar`) e aceita o arrozal de
+    37 tabuleiros (D-114);
+  - procura a letra do setor no relatório ("USMC toma B").
+  Resultado: 17 ok e 1 falha (eram 14 e 4).
+
+**Medido, sem mudança:**
+- as 10 armas medidas têm alça e massa a 0,1 px do centro da tela e a linha a até 0,02° da direção
+  do tiro; como o tiro sai do olho pelo centro, ele vai onde se mira;
+- o gatilho solta no máximo um tiro por quadro: abaixo de ~12 fps a cadência cai (RPD 9 tiros/s
+  contra 11,7 da ficha, com o Studio a ~10 fps);
+- teto de bots em 22–24 por lado com o servidor do Studio a 34–35 Hz (a lotação baixa sozinha);
+- bots em 180 s: mediana de 38 m andados, só 2 parados (guardando objetivo); primeiro tiroteio aos
+  86 s;
+- M151: 0 → 34 km/h em ~3 s.
+
+**Perguntas ao dono** (não mudei sem resposta):
+- M14: o olho a 6,3 cm da alça de anel (escolha de 2026-11-11) deixa as orelhas da alça tapando ~70%
+  da tela. Afastar o olho?
+- Capim: a cor (72, 92, 42) com a textura dá um verde quase preto e chapado; (100, 134, 74) mostra o
+  relevo. O código diz que o mais claro "parecia gramado". Clarear?
+
+**Aberto:** a pá do autoteste falha na 1ª rodada de cada sessão do Studio (cava, mas a sonda não vê o
+buraco) e passa na 2ª.

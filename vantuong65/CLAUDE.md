@@ -69,6 +69,10 @@ O `sourcemap.json` não vai para o Git.
 - O `execute_luau` do MCP roda em outra VM: `require` de módulo do jogo devolve uma CÓPIA. Use
   os ganchos acima ou observe por atributos e remotes.
 - Relatórios de teste ficam em `testes/`.
+- Captura longe do soldado (D-125): a arte chega ao cliente por distância; antes, peça
+  `LocalPlayer:RequestStreamAroundAsync(pos)` no cliente, senão a foto sai vazia.
+- Depois do autoteste, a câmera pode ficar em Scriptable longe do soldado (o MCP desfaz a troca de
+  tipo). Aí o servidor recusa tiros por "origem": é do teste, não do jogo.
 
 ## Assets no Roblox (publicados em 2026-11-10)
 - 82 assets publicados; os IDs estão em `Shared/AssetIds.luau` e `assets/roblox_ids.json`. Faltam
@@ -142,7 +146,7 @@ O `sourcemap.json` não vai para o Git.
 - Segredos só no `.env` (no `.gitignore`), nunca no código nem no chat.
 - ForgeGUI: nunca regenerar um job em `outcome_unknown`. "failed" com `retryable` pode ser
   retomado com `generation_retry`.
-- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-125) e atualize `PROGRESS.md`.
+- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-126) e atualize `PROGRESS.md`.
 - Metas da Parte 2: vegetação ≤ 3 mil triângulos, props ≤ 5 mil, herói ≤ 20 mil (`ArtBudget`,
   conferido pelo teste da F5).
 - Commits no branch acima, com mensagem em português.
