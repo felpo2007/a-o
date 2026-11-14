@@ -45,6 +45,8 @@ type Entry = { key: string, p: number, s0: number, s1: number, patch: string? }
 -- cresce junto (25 a 65 cm), como a das árvores de folha larga da região.
 -- D-116 (pedido do dono: "coloque um pouco mais de árvores"): as quatro árvores 40% mais frequentes
 -- (eram 0,010 / 0,035 / 0,035 / 0,012); o sub-bosque fica igual.
+-- D-135 (pedido do dono: vegetação com 6 mil triângulos): todo modelo de planta tem até 6 mil
+-- (ArtBudget.MAX.veg); a mesma quantidade e as mesmas posições, só a malha mais leve.
 Vegetation.FOREST = {
 	{ key = "ph_tree_small_02", p = 0.014, s0 = 3.6, s1 = 4.6 },
 	{ key = "ph_island_tree_01", p = 0.049, s0 = 2.2, s1 = 3.4 },
@@ -55,7 +57,7 @@ Vegetation.FOREST = {
 	{ key = "bamboo_clump", p = 0.02, s0 = 0.9, s1 = 1.3, patch = "wet" },
 	{ key = "banana", p = 0.008, s0 = 0.9, s1 = 1.3 },
 	{ key = "coconut_palm", p = 0.004, s0 = 1.0, s1 = 1.3 },
-	{ key = "taro_fern", p = 0.03, s0 = 0.8, s1 = 1.3 }, -- 4,6 mil triângulos: metade do previsto
+	{ key = "taro_fern", p = 0.03, s0 = 0.8, s1 = 1.3 }, -- metade da densidade prevista (D-65)
 	{ key = "shrub", p = 0.05, s0 = 0.8, s1 = 1.4, patch = "tangle" },
 	{ key = "elephant_grass", p = 0.03, s0 = 0.9, s1 = 1.3 },
 } :: { Entry }

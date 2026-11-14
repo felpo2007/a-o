@@ -47,11 +47,23 @@ TEX_PX = 1024
 # triângulos de madeira, galho_m (galho menor que isso, em m de diagonal, sai) e soltar (redução
 # com a borda solta). O jacarandá (24 m) ficou de fora: a redução dos 1,2 milhão de triângulos de
 # galho parava em 167 mil.
+# D-135 (pedido do dono: vegetação com 6 mil triângulos): eram 4.800 a 5.200 folhas e 2.800 a
+# 3.200 de madeira (12,5 a 13,7 mil). Com 2.050 folhas cada cartão cresce ~1,6x e a copa cobre o
+# mesmo volume; a madeira fica no meio-termo entre o tronco e a folha (prévias testadas: 2.200/1.550
+# facetava o tronco).
 ESPECIES: dict[str, dict] = {
-    "ph_island_tree_01": {"id": "island_tree_01", "folhas": 5200, "madeira": 3200, "galho_m": 0.5},
-    "ph_island_tree_02": {"id": "island_tree_02", "folhas": 4800, "madeira": 3000, "galho_m": 0.45},
-    "ph_island_tree_03": {"id": "island_tree_03", "folhas": 4800, "madeira": 3000, "galho_m": 0.45},
-    "ph_tree_small_02": {"id": "tree_small_02", "folhas": 5200, "madeira": 2800, "galho_m": 0.4},
+    "ph_island_tree_01": {"id": "island_tree_01", "folhas": 2050, "madeira": 1850, "galho_m": 0.5},
+    "ph_island_tree_02": {"id": "island_tree_02", "folhas": 2050, "madeira": 1850, "galho_m": 0.45},
+    "ph_island_tree_03": {"id": "island_tree_03", "folhas": 2050, "madeira": 1850, "galho_m": 0.45},
+    # o tronco para nas costuras de UV: 1.796 com a borda presa, 1.339 com ela solta; a conta
+    # fecha com menos folhas
+    "ph_tree_small_02": {
+        "id": "tree_small_02",
+        "folhas": 1800,
+        "madeira": 1850,
+        "galho_m": 0.4,
+        "soltar": True,
+    },
 }
 
 CT = {

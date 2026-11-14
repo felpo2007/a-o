@@ -92,7 +92,8 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     tamanho do texto.
 - **Lote 20 (v65, D-134): feito.** Xóm Gò fora da grade (casas deslocadas, giradas, lotes vazios,
   casas soltas, uma trilha por porta) e as 53 casas com porta e interior.
-- **Lote 21:** vegetação com 6 mil triângulos (pedido novo; a D-66 pedia no mínimo 8 mil).
+- **Lote 21 (v66, D-135): feito.** Vegetação com até 6 mil triângulos por modelo (14 modelos
+  reduzidos e reenviados; a D-66 pedia no mínimo 8 mil).
 - "jogo de poder roblox": engano (resposta do dono), nada a fazer.
 
 - **Próximos (ideias da análise, esperando o dono):**
@@ -102,6 +103,26 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
   - base do VC sob a mata; nomes do equipamento da Intendência sem tradução; Type 54 em 3ª pessoa;
   - a pá do autoteste na 1ª rodada de cada sessão;
   - as teclas agem por baixo da tela de carregamento (a pá cavou durante o carregamento, D-129).
+
+## v66: lote 21, vegetação com até 6 mil triângulos (2026-11-14, D-135)
+- **A publicar.**
+- **Feito:**
+  - 14 modelos de planta reduzidos a 5.948–6.000 triângulos (eram 7.978–13.736) e reenviados;
+  - as mesmas 4.835 plantas, nas mesmas posições;
+  - `ArtBudget.MAX.veg` = 6.000; o mínimo de 8 mil da D-66 saiu.
+- **Como:**
+  - ForgeGUI: `tools/vegetacao_6k.py`, com a `reducao_local` no manifest;
+  - bambu: `bambu_sem_disco.py` reduz no fim;
+  - árvores do Poly Haven: `prep_trees.py` com 2.050 folhas e 1.850 de madeira.
+- **Medido no Studio** (mesmo script, sem bots, Studio na frente; v65 → v66):
+  - base dos EUA: 54,0 → 59,4 fps;
+  - GPU 0,1 a 1,9 ms menor por quadro e CPU 0,4 a 2,2 ms menor nas seis vistas;
+  - nas vistas de mata o fps já batia no teto de 60 do Studio;
+  - tabela na D-135.
+- **Visual:** as copas cobrem o mesmo volume, com folhas maiores; o arbusto perdeu algumas
+  folhas. Fotos lado a lado em `testes/lote21/`.
+- **Testes:** Lune todos ok (F5: 0 modelos acima da meta); pytest; ruff; luau-lsp.
+- **Não testado:** celular e num servidor do Roblox.
 
 ## v65: lote 20, vila espalhada e todas as casas abertas (2026-11-14, D-134)
 - **Publicada** (versão 65 do place, commit dad4e6b).

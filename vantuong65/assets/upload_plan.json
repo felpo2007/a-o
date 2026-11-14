@@ -166,13 +166,13 @@
   "key": "Models.coconut_palm",
   "file": "assets/forgegui/models/coqueiro_studs_fosco.glb",
   "assetType": "Model",
-  "name": "VT65 coconut_palm fosco"
+  "name": "VT65 coconut_palm fosco 6k"
  },
  {
   "key": "Models.bamboo_clump",
   "file": "assets/blender/bamboo_clump/bamboo_clump.glb",
   "assetType": "Model",
-  "name": "VT65 bamboo_clump sem disco",
+  "name": "VT65 bamboo_clump sem disco 6k",
   "description": "VAN TUONG 65 - touceira de bambu sem o disco da base"
  },
  {
@@ -191,31 +191,31 @@
   "key": "Models.hill_tree",
   "file": "assets/forgegui/models/arvore_colina_studs_fosco.glb",
   "assetType": "Model",
-  "name": "VT65 hill_tree fosco"
+  "name": "VT65 hill_tree fosco 6k"
  },
  {
   "key": "Models.rice_patch",
   "file": "assets/forgegui/models/arroz_canteiro_studs_fosco.glb",
   "assetType": "Model",
-  "name": "VT65 rice_patch fosco"
+  "name": "VT65 rice_patch fosco 6k"
  },
  {
   "key": "Models.elephant_grass",
   "file": "assets/forgegui/models/capim_elefante_studs_fosco.glb",
   "assetType": "Model",
-  "name": "VT65 elephant_grass fosco"
+  "name": "VT65 elephant_grass fosco 6k"
  },
  {
   "key": "Models.shrub",
   "file": "assets/forgegui/models/arbusto_studs_fosco.glb",
   "assetType": "Model",
-  "name": "VT65 shrub fosco"
+  "name": "VT65 shrub fosco 6k"
  },
  {
   "key": "Models.banana",
   "file": "assets/forgegui/models/bananeira_studs_fosco.glb",
   "assetType": "Model",
-  "name": "VT65 banana fosco"
+  "name": "VT65 banana fosco 6k"
  },
  {
   "key": "Models.spider_hole",
@@ -546,19 +546,19 @@
   "key": "Models.canopy_tree",
   "file": "assets/forgegui/models/arvore_dossel_studs_fosco.glb",
   "assetType": "Model",
-  "name": "VT65 arvore_dossel fosco"
+  "name": "VT65 arvore_dossel fosco 6k"
  },
  {
   "key": "Models.melaleuca_grove",
   "file": "assets/forgegui/models/tram_bosque_studs_fosco.glb",
   "assetType": "Model",
-  "name": "VT65 tram_bosque fosco"
+  "name": "VT65 tram_bosque fosco 6k"
  },
  {
   "key": "Models.taro_fern",
   "file": "assets/forgegui/models/taioba_samambaia_studs_fosco.glb",
   "assetType": "Model",
-  "name": "VT65 taioba_samambaia fosco"
+  "name": "VT65 taioba_samambaia fosco 6k"
  },
  {
   "key": "Ground.forrest_ground_01_cor",
@@ -657,28 +657,28 @@
   "key": "Models.ph_island_tree_01",
   "file": "assets/arvores/ph_island_tree_01.glb",
   "assetType": "Model",
-  "name": "VT65 arvore ph_island_tree_01",
+  "name": "VT65 arvore ph_island_tree_01 6k",
   "description": "VAN TUONG 65 - arvore Poly Haven (CC0), cartoes de folha (D-67)"
  },
  {
   "key": "Models.ph_island_tree_02",
   "file": "assets/arvores/ph_island_tree_02.glb",
   "assetType": "Model",
-  "name": "VT65 arvore ph_island_tree_02",
+  "name": "VT65 arvore ph_island_tree_02 6k",
   "description": "VAN TUONG 65 - arvore Poly Haven (CC0), cartoes de folha (D-67)"
  },
  {
   "key": "Models.ph_island_tree_03",
   "file": "assets/arvores/ph_island_tree_03.glb",
   "assetType": "Model",
-  "name": "VT65 arvore ph_island_tree_03",
+  "name": "VT65 arvore ph_island_tree_03 6k",
   "description": "VAN TUONG 65 - arvore Poly Haven (CC0), cartoes de folha (D-67)"
  },
  {
   "key": "Models.ph_tree_small_02",
   "file": "assets/arvores/ph_tree_small_02.glb",
   "assetType": "Model",
-  "name": "VT65 arvore ph_tree_small_02",
+  "name": "VT65 arvore ph_tree_small_02 6k",
   "description": "VAN TUONG 65 - arvore Poly Haven (CC0), cartoes de folha (D-67)"
  },
  {

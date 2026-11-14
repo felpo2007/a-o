@@ -72,23 +72,25 @@ return {
 		spider_hole = 127802021928282,
 		sandbags = 81076281447670,
 		vc_bunker = 124630957324366,
-		bamboo_clump = 81521268867622,
-		coconut_palm = 103008299707252,
-		banana = 84461382552866,
-		shrub = 114005886274948,
-		elephant_grass = 98482841074326,
-		hill_tree = 117136388691741,
-		rice_patch = 134482555063796, -- canteiro 2 x 1,45 m (só 3 canteiros perto das vilas, D-64)
+		-- vegetação com até 6 mil triângulos (D-135, 2026-11-14): os IDs anteriores ficaram no
+		-- assets/roblox_ids.json como Models.<chave>_v65
+		bamboo_clump = 135232924313766,
+		coconut_palm = 75583484050226,
+		banana = 128413229501340,
+		shrub = 135710946573160,
+		elephant_grass = 99015715379707,
+		hill_tree = 77815761595506,
+		rice_patch = 120737482620033, -- canteiro 2 x 1,45 m (só 3 canteiros perto das vilas, D-64)
 		-- mata fechada (D-65)
-		canopy_tree = 75652285495122, -- emergente de 24 m
-		melaleuca_grove = 95774589766161, -- tràm, grupo de 5 troncos de 13 m
-		taro_fern = 131679866372706, -- taioba e samambaia de 1,8 m
+		canopy_tree = 118383525652009, -- emergente de 24 m
+		melaleuca_grove = 128284382829701, -- tràm, grupo de 5 troncos de 13 m
+		taro_fern = 100405614156804, -- taioba e samambaia de 1,8 m
 		vine_tree = 0, -- copa tomada de cipó: geração em outcome_unknown (não regerar); usa o substituto
 		-- árvores prontas do Poly Haven (CC0), folha em cartão recortado (tools/prep_trees.py, D-67)
-		ph_island_tree_01 = 129507217098430,
-		ph_island_tree_02 = 94197688304927,
-		ph_island_tree_03 = 94525275658839,
-		ph_tree_small_02 = 86317806051129,
+		ph_island_tree_01 = 108883282677578,
+		ph_island_tree_02 = 115337725271232,
+		ph_island_tree_03 = 124431449352730,
+		ph_tree_small_02 = 113866418888385,
 		m14 = 89317219190262,
 		type56 = 130417403055419,
 		sks = 97318124582467,

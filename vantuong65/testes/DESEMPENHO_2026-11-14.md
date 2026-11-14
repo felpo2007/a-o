@@ -69,3 +69,13 @@ O dono escolheu menos arbustos (−50%). As mesmas vistas, com o Studio na frent
 
 Ganho de ~2–3 fps, como estimado. No cliente ficaram 775 arbustos (eram 1.585), e a mata do objetivo
 A continua fechada (`testes/lote12/10_mata_a_v58.jpg`).
+
+## Malha mais leve na vegetação (lote 21, v66, D-135)
+O item 4 acima entrou a pedido do dono ("diminua a vegetação para 6 mil triângulos"). Todo modelo de
+planta tem até 6 mil triângulos.
+
+Medida: o mesmo script nas duas versões (8 s de espera por vista, mediana de 4 amostras, interface e
+efeitos do menu desligados).
+- **Base dos EUA:** 54,0 → 59,4 fps.
+- **Seis vistas:** GPU de 0,1 a 1,9 ms e CPU de 0,4 a 2,2 ms a menos por quadro.
+- **Tabela completa:** D-135 no `DESIGN.md`.

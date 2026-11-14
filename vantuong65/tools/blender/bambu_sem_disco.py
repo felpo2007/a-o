@@ -8,11 +8,13 @@ base nascem em cima dele. Esta ferramenta:
    alto tem o pé esticado até o chão (os 0,6 m de baixo, em rampa), para sair direto do chão;
 3. mantém o resto como está: mesma malha, UV, normais, texturas, materiais, nós e pivô.
 
-Sem redução nem rebake: a touceira é de cartões finos (folhas e colmos), que a redução e o
-rebake dos refeitos estragam (o `rice_patch` perdeu para o antigo por isso).
+Sem rebake: a touceira é de cartões finos (folhas e colmos), que o rebake dos refeitos estraga (o
+`rice_patch` perdeu para o antigo por isso).
+4. D-135 (pedido do dono: vegetação com 6 mil triângulos): no fim, redução por quádricas
+   (`tools/decimate_glb.py`, mesmas UV e texturas) até `ALVO` triângulos.
 
 Roda fora do Blender:
-    uv run python tools/blender/bambu_sem_disco.py
+    uv run --group arte python tools/blender/bambu_sem_disco.py
 Saída: `assets/blender/bamboo_clump/bamboo_clump.glb` e `metricas.json` (a comparação sai do
 `comparar_chao.py`).
 """
@@ -21,12 +23,18 @@ from __future__ import annotations
 
 import json
 import struct
+import sys
+import tempfile
 from pathlib import Path
 
 import numpy as np
 
 AQUI = Path(__file__).resolve().parent
 RAIZ = AQUI.parents[1]
+sys.path.insert(0, str(RAIZ / "tools"))
+from decimate_glb import run as reduzir  # noqa: E402
+
+ALVO = 6000
 ORIGEM = RAIZ / "assets" / "forgegui" / "models" / "bambu_touceira_studs_fosco.glb"
 PASTA = RAIZ / "assets" / "blender" / "bamboo_clump"
 STUD = 0.28
@@ -172,7 +180,15 @@ def main() -> None:
     acc_idx["count"] = int(tri_novo.size)
     js["asset"]["generator"] = js["asset"].get("generator", "") + " + VT65 bambu_sem_disco.py"
     saida = PASTA / "bamboo_clump.glb"
-    total = escrever_glb(js, views, saida)
+    with tempfile.TemporaryDirectory() as tmp:
+        sem_disco = Path(tmp) / "sem_disco.glb"
+        escrever_glb(js, views, sem_disco)
+        # borda presa primeiro; se a redução parar acima do alvo, borda solta (cartões abertos)
+        red = reduzir(sem_disco, saida, ALVO, False)
+        solta = red["tris"] > ALVO
+        if solta:
+            red = reduzir(sem_disco, saida, ALVO, True)
+    total = saida.stat().st_size
 
     def dims(p_m, vs):
         lo, hi = p_m[vs].min(axis=0), p_m[vs].max(axis=0)
@@ -184,10 +200,11 @@ def main() -> None:
         "chave": "bamboo_clump",
         "tipo": "refeito",
         "classe": "veg",
-        "classe_artbudget": "veg (≥ 8.000 triângulos: MIN_VEG da D-66; teto 20 mil)",
-        "pedido": "sem o disco marrom da base; colmos saindo direto do chão (dono, 2026-11-12)",
+        "classe_artbudget": "veg (até 6.000 triângulos: D-135)",
+        "pedido": "sem o disco marrom da base; colmos saindo direto do chão (dono, 2026-11-12); "
+        "vegetação com 6 mil triângulos (dono, 2026-11-14)",
         "metodo": "edição do GLB do jogo: tira a peça do disco e leva ao chão o que nascia em "
-        "cima dele; sem redução nem rebake (cartões finos), mesma UV, normais e texturas",
+        "cima dele; depois redução por quádricas (decimate_glb), mesma UV e texturas, sem rebake",
         "antigo": {
             "arquivo_jogo": f"assets/forgegui/models/{ORIGEM.name}",
             "triangulos": int(len(tri)),
@@ -198,12 +215,20 @@ def main() -> None:
         },
         "novo": {
             "arquivo": f"assets/blender/bamboo_clump/{saida.name}",
-            "triangulos": int(len(tri_novo)),
-            "triangulos_glb": int(len(tri_novo)),
+            "triangulos": red["tris"],
+            "triangulos_glb": red["tris"],
             "texturas_px": {"cor": texturas[0] if texturas else None, "todas": texturas},
             "mb": round(total / 2**20, 3),
-            "dim_m_xyz": [d1[0], d1[1], d1[2]],
+            "dim_m_xyz": [round(x * STUD, 3) for x in red["dim_studs_xyz"]],
             "base_y_m": base1,
+        },
+        "sem_disco": {"triangulos": int(len(tri_novo)), "dim_m_xyz": [d1[0], d1[1], d1[2]]},
+        "reducao": {
+            "ferramenta": "tools/decimate_glb.py",
+            "faces": ALVO,
+            "soltar_bordas": solta,
+            "desvio_max_m": red["desvio_max_m"],
+            "desvio_medio_m": red["desvio_medio_m"],
         },
         "disco_removido": disco_info,
         "pecas_descidas_ate_o_chao": descidas,

@@ -6,8 +6,9 @@ local ArtBudget = {}
 
 -- D-66 (pedido do usuário): vegetação e props com no mínimo 8 mil triângulos, na malha cheia do
 -- gerador. O teto vira o limite do Roblox por malha (20 mil). Antes: veg ≤ 3 mil e props ≤ 5 mil.
-ArtBudget.MAX = { veg = 20000, prop = 20000, hero = 20000 } :: { [string]: number }
-ArtBudget.MIN_VEG = 8000
+-- D-135 (pedido do dono, 2026-11-14: "diminua a vegetação para 6 mil triângulos"): a vegetação
+-- volta a ter teto, de 6 mil por modelo, e o mínimo de 8 mil da D-66 saiu.
+ArtBudget.MAX = { veg = 6000, prop = 20000, hero = 20000 } :: { [string]: number }
 -- teto de arte por setor; PLACEHOLDER até medir fps no Studio com a mata (D-45, D-64, D-65). A
 -- mata fechada da D-65 pede até 35,6 milhões no setor 5 (tools/ArtEstimate, sem teto); o cliente
 -- só carrega o raio de streaming (430 m), não o mapa inteiro.
@@ -149,25 +150,30 @@ ArtBudget.KIND = {
 -- triângulos medidos (manifest.json, campo "triangulos"): remesh do ForgeGUI ou, quando ele terminou
 -- em outcome_unknown, redução local (tools/decimate_glb.py)
 ArtBudget.TRIS = {
-	-- vegetação na malha cheia do gerador (D-66; antes, remesh de 1,9–2,8 mil). bamboo_clump: o GLB
-	-- do gerador sem o disco marrom da base (Blender, 2026-11-12; o ID antigo ficou como
-	-- bamboo_clump_disco): 11.428 (eram 11.456)
-	bamboo_clump = 11428,
-	shrub = 10515,
-	elephant_grass = 7978,
-	banana = 12686,
-	coconut_palm = 13261,
-	hill_tree = 13215,
-	rice_patch = 13066,
-	canopy_tree = 13636,
-	melaleuca_grove = 10995,
-	taro_fern = 8397,
-	vine_tree = 13215, -- sem modelo (outcome_unknown): o substituto é a hill_tree
-	-- árvores prontas (tools/prep_trees.py, D-67): madeira reduzida + folha em cartão (2 por folha)
-	ph_island_tree_01 = 13599,
-	ph_island_tree_02 = 12599,
-	ph_island_tree_03 = 12554,
-	ph_tree_small_02 = 13736,
+	-- vegetação (D-135): a malha cheia do gerador (D-66: 8 a 13,6 mil) reduzida a 6 mil por
+	-- quádricas (tools/vegetacao_6k.py; manifest, "reducao_local"). bamboo_clump: o GLB do gerador
+	-- sem o disco marrom da base (tools/blender/bambu_sem_disco.py, que também reduz; o ID com disco
+	-- ficou como bamboo_clump_disco). Antes da D-135: bambu 11.428, arbusto 10.515, capim 7.978,
+	-- bananeira 12.686, coqueiro 13.261, colina 13.215, canteiro 13.066, emergente 13.636, tràm
+	-- 10.995 e taioba 8.397.
+	bamboo_clump = 6000,
+	shrub = 6000,
+	elephant_grass = 6000,
+	banana = 6000,
+	coconut_palm = 5999,
+	hill_tree = 5999,
+	rice_patch = 6000,
+	canopy_tree = 6000,
+	melaleuca_grove = 6000,
+	taro_fern = 5999,
+	vine_tree = 5999, -- sem modelo (outcome_unknown): o substituto é a hill_tree
+	-- árvores prontas (tools/prep_trees.py, D-67): madeira reduzida + folha em cartão (2 por folha).
+	-- D-135: 2.050 folhas (1.800 na tree_small_02) e 1.850 de madeira; eram 13.599, 12.599, 12.554
+	-- e 13.736
+	ph_island_tree_01 = 5949,
+	ph_island_tree_02 = 5949,
+	ph_island_tree_03 = 5948,
+	ph_tree_small_02 = 5955,
 	-- props refeitos no Blender (assets/blender/<chave>/metricas.json, "novo"; publicados em
 	-- 2026-11-11, commit 6ea6bfd): a mesma forma com ~1/3 dos triângulos. Antes, a malha cheia do
 	-- gerador (D-66): 13.030, 13.249, 13.483, 14.938, 14.106, 13.615, 13.489, 14.278, 13.576,
@@ -279,13 +285,6 @@ ArtBudget.TRIS = {
 -- Acima da meta, com o motivo. O teste falha se um modelo passar da meta sem estar aqui, ou se
 -- uma exceção ficar velha (o modelo já cabe na meta).
 ArtBudget.EXCEPTIONS = {} :: { [string]: string }
--- abaixo do mínimo de 8 mil (D-66), com o motivo
--- (o mínimo vale para a vegetação; os props refeitos no Blender ficam abaixo de 8 mil de propósito)
-ArtBudget.BELOW_MIN = {
-	elephant_grass = "a malha cheia do gerador tem 7.978; não há versão maior",
-	rice_tile_hi = "ladrilho de cartões: ~1.200 em volta da câmera (D-74)",
-	rice_tile_lo = "ladrilho de cartões: ~1.200 em volta da câmera (D-74)",
-} :: { [string]: string }
 
 -- variantes sorteadas para as casas (o teste exige que todas caibam na meta)
 ArtBudget.HOUSE_VARIANTS = { "hut_thatch", "hut_veranda", "hut_thatch", "hut_kitchen", "house_tile" }
@@ -314,7 +313,7 @@ ArtBudget.DIMS = {
 	tunnel_entrance = { 3.58, 3.56, 3.56 },
 	trench_section = { 14.2, 3.99, 7.02 },
 	log_bridge = { 21.24, 5.47, 3.22 },
-	rice_patch = { 7.14, 1.59, 5.17 },
+	rice_patch = { 7.1, 1.59, 5.01 }, -- D-135: reduzido (era 7,14 x 1,59 x 5,17)
 	water_jar = { 2.72, 2.83, 2.14 },
 	straw_stack = { 7.33, 10.14, 7.28 },
 	ammo_crate = { 2.25, 1.17, 1.22 },

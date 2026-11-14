@@ -96,10 +96,11 @@ O `sourcemap.json` não vai para o Git.
     e riacho.
   - O bake usa a mesma paisagem: dique e lâmina d'água só na lavoura.
   - Densidade: `ArtBudget.JUNGLE_DENSITY`.
-- Modelo novo (D-66: vegetação e props na malha cheia, de 8 a 20 mil triângulos):
+- Modelo novo (props na malha cheia, até 20 mil triângulos, D-66; vegetação até 6 mil, D-135):
   1. gere no ForgeGUI e prepare em studs com `asset_prepare` (pivô na base). O preparo é grátis,
      no máximo 3 de cada vez;
-  2. não reduza; só use `tools/decimate_glb.py` se passar de 20 mil (na folhagem, com
+  2. planta: reduza a 6 mil com `tools/vegetacao_6k.py` (põe a `reducao_local` no manifest);
+     prop: só use `tools/decimate_glb.py` se passar de 20 mil (na folhagem, com
      `--soltar-bordas`);
   3. registre no `manifest.json` e no `ArtBudget`;
   4. ponha em `FOSCOS` (e em `COLOR_GAIN` se a textura for escura) no `matte_glb`;
@@ -152,7 +153,7 @@ O `sourcemap.json` não vai para o Git.
 - Segredos só no `.env` (no `.gitignore`), nunca no código nem no chat.
 - ForgeGUI: nunca regenerar um job em `outcome_unknown`. "failed" com `retryable` pode ser
   retomado com `generation_retry`.
-- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-135) e atualize `PROGRESS.md`.
-- Metas da Parte 2: vegetação ≤ 3 mil triângulos, props ≤ 5 mil, herói ≤ 20 mil (`ArtBudget`,
+- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-136) e atualize `PROGRESS.md`.
+- Tetos de triângulos por modelo: vegetação ≤ 6 mil (D-135), props e herói ≤ 20 mil (`ArtBudget`,
   conferido pelo teste da F5).
 - Commits no branch acima, com mensagem em português.

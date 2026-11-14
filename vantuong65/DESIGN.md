@@ -4879,3 +4879,73 @@ seguem com as cabanas fechadas do ForgeGUI.
 
 **Não testado:** um jogador de verdade entrando (o controle de movimento do jogo anula o `MoveTo`
 do teste; o boneco usa o mesmo corpo); celular.
+
+## D-135 — Lote 21: vegetação com até 6 mil triângulos (v66, 2026-11-14)
+
+Pedido do dono: "diminua a vegetação para 6 mil triângulos". Isso troca a regra da D-66 (vegetação
+com no mínimo 8 mil, na malha cheia do gerador): agora a vegetação tem teto de 6 mil por modelo
+(`ArtBudget.MAX.veg = 6000`; o `MIN_VEG` e a lista `BELOW_MIN` saíram). As quantidades, as escalas e
+as posições das plantas não mudaram (o plano é o mesmo: 4.835 plantas no servidor).
+
+**Como cada modelo foi reduzido:**
+- **9 plantas do ForgeGUI** (`tools/vegetacao_6k.py`): arbusto, capim-elefante, bananeira,
+  coqueiro, tràm, taioba, canteiro de arroz e as duas árvores que só servem de substituto (colina
+  e emergente).
+  - Redução por quádricas (`decimate_glb`) preservando as costuras de UV. Primeiro com a borda
+    presa; se parar acima do alvo, com a borda solta.
+  - O manifest ganhou o bloco `reducao_local` e o `fetch_forgegui_assets.py` refaz a mesma redução.
+- **Bambu sem o disco:** o `tools/blender/bambu_sem_disco.py` tira o disco e depois reduz.
+- **4 árvores do Poly Haven** (`tools/prep_trees.py`): 2.050 cartões de folha (eram 4.800 a
+  5.200) e 1.850 triângulos de madeira (eram 2.800 a 3.200).
+  - Cada cartão cresce ~1,6x e a copa cobre o mesmo volume.
+  - Testei também 2.200/1.550 e 1.900/2.150 (`testes/lote21/07_*`); 2.200/1.550 facetava o tronco.
+  - Na `ph_tree_small_02`, o tronco para nas costuras de UV (1.339 com a borda solta), então ela
+    tem 1.800 folhas.
+
+| Modelo | Antes | Depois | Desvio médio / máximo |
+|---|---|---|---|
+| arbusto | 10.515 | 6.000 | 3,6 mm / 8 cm |
+| capim-elefante | 7.978 | 6.000 | 1,9 mm / 6 cm |
+| bananeira | 12.686 | 6.000 | 9 mm / 8 cm |
+| coqueiro | 13.261 | 5.999 | 1,0 cm / 16 cm |
+| tràm | 10.995 | 6.000 | 2,7 cm / 52 cm |
+| taioba | 8.397 | 5.999 | 7 mm / 23 cm |
+| canteiro de arroz | 13.066 | 6.000 | 3 mm / 13 cm |
+| bambu (sem disco) | 11.428 | 6.000 | 1,4 cm / 1,14 m |
+| colina (substituto) | 13.215 | 5.999 | 4,9 cm / 99 cm |
+| emergente (substituto) | 13.636 | 6.000 | 6,0 cm / 1,46 m |
+| árvores do Poly Haven | 12.554 a 13.736 | 5.948 a 5.955 | (folha refeita em cartões) |
+
+O desvio é a distância de Hausdorff entre a malha original e a reduzida. Nas prévias de lado
+(`testes/lote21/04_*`, `06_*`), o arbusto e a emergente perderam algumas folhas; o resto ficou quase
+igual.
+
+**IDs:** os 14 modelos foram reenviados. Os IDs antigos ficaram no `assets/roblox_ids.json` como
+`Models.<chave>_v65`.
+
+**Desempenho no Studio:**
+- **Como:** PC do dono, Studio na frente, sem bots, interface e efeitos do menu desligados.
+- **Mesmo script nas duas versões:** 8 s de espera em cada vista e mediana de 4 amostras de 120
+  quadros; nos giros, 4 voltas de 8 direções.
+- **Rodadas:** duas na v65 e uma na v66. Na tabela, a v65 é a da primeira rodada; a segunda deu
+  números parecidos (base 54,5 fps; GPU de 5,2 a 9,6 ms).
+
+| Vista | v65: fps, CPU, GPU | v66: fps, CPU, GPU |
+|---|---|---|
+| base dos EUA olhando a oeste | 54,0; 17,3 ms; 9,8 ms | 59,4; 15,1 ms; 7,9 ms |
+| Xóm Gò olhando a mata A | 60; 12,5 ms; 6,5 ms | 60; 10,8 ms; 5,3 ms |
+| borda da mata A | 60; 11,4 ms; 5,6 ms | 60; 10,1 ms; 4,4 ms |
+| giro na célula mais densa (79 plantas em 60 m) | 58,3; 13,2 ms; 6,8 ms | 60,0; 11,0 ms; 5,2 ms |
+| giro na 2ª célula mais densa | 57,1; 11,9 ms; 5,8 ms | 58,8; 11,5 ms; 5,7 ms |
+| por cima do dossel | 60; 13,4 ms; 7,6 ms | 60; 11,2 ms; 5,8 ms |
+
+- **O que mudou:** o tempo de GPU caiu de 0,1 a 1,9 ms por quadro e o de CPU, de 0,4 a 2,2 ms.
+- **fps:** o Studio trava o jogo em 60 fps, então o fps só mostra a diferença onde não bate no
+  teto: +5,4 fps na base dos EUA e +1,7 fps nos giros.
+- **Ruído:** a primeira amostra logo depois de mover a câmera sai baixa (a arte ainda chegando): a
+  base deu de 47,5 a 57 fps entre rodadas sem essa espera.
+
+**Fotos** (`testes/lote21/01_*` a `03_*`): mesmas vistas, FOV 70 e 13h, v65 à esquerda e v66 à
+direita.
+
+**Não testado:** celular e num servidor do Roblox.
