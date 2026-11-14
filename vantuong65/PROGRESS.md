@@ -103,7 +103,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
   - as teclas agem por baixo da tela de carregamento (a pá cavou durante o carregamento, D-129).
 
 ## v64: lote 19, caixa de munição maior, bandeiras na mesa e botões do tamanho (2026-11-14, D-133)
-- **A publicar.**
+- **Publicada** como versão 64 do place (build do commit cc871c4).
 - **Feito:**
   - a caixa de munição do Suporte com o dobro do tamanho (`CaixaMunicao.ESCALA = 2`);
   - bandeiras com textura (`tools/bandeiras_textura.py`): EUA de 1965 e a da Frente, com trama,
