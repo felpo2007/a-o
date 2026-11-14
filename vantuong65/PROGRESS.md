@@ -124,7 +124,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
   - as teclas agem por baixo da tela de carregamento (a pá cavou durante o carregamento, D-129).
 
 ## v69: lote 24, aviso de granada perto (2026-11-14, D-138)
-- **A publicar.**
+- **Publicada** (versão 69 do place, commit 986929b).
 - **Feito:**
   - símbolo da granada na tela: vermelho e pulsando dentro do raio letal (EUA 5 m, VC 4 m),
     branco até o raio de baixas (15/12 m), com a distância;
