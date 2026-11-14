@@ -29,8 +29,45 @@
 - **Lote 5 (v49, D-117): feito.** Menu principal animado (mapa girando em Xóm Gò, o soldado, JOGAR,
   CONFIGURAÇÕES, LOJA, PASSE e TUTORIAL), tutorial fora da partida (COMO JOGAR) e carregamento até
   o mapa inteiro.
-- Lote 6: análise do jogo inteiro com ideias em imagens.
+- **v50 (D-118): feita.** Menu em planos de cinema no fim da tarde (sem o retrato do soldado) e
+  COMO JOGAR que segue o aparelho (celular, controle, computador).
+- Lote 6: análise do jogo inteiro com ideias em imagens (entra no lote 12 abaixo).
 - Perguntas ao dono: a M4 (é de 1994); a mão escorregando (em que vista e momento).
+
+## Fila do dono de 13/11 à noite (depois da v50, um lote por vez)
+- **Lote 7, armas:** a RPD não atira onde a mira aponta. Conferir todas as armas: pegada, aparência e
+  a saída da bala no cano, alinhada com a mira.
+- **Lote 8, telas:**
+  - tela de baixa só com RENASCER AQUI (abre duas opções: créditos ou Robux, o Robux colorido),
+    ESCOLHER OUTRO PONTO, RENASCER COM VEÍCULO e MENU. Saem LOJA, PASSE, MISSÕES e também o
+    RENASCER grátis grande (resposta do dono): voltar de graça é pelo ESCOLHER OUTRO PONTO;
+  - menu do jogo (lado e squad): arrumar a escolha do lado; loja e passe saem dele (resposta do
+    dono). No menu principal, LOJA e PASSE continuam.
+- **Lote 9, partida:** 30 contra 30. Cada um começa na sua base, com contagem regressiva; depois a
+  partida começa e os pontos são disputados.
+- **Lote 10, mapa de 700 x 700 m:**
+  - bases no meio da borda de cada lado;
+  - três objetivos (resposta do dono), espalhados: um no centro, numa vila maior; outro numa mata
+    fechada e de difícil acesso; o terceiro à escolha;
+  - arrumar o solo e o terreno.
+- **Lote 11, passe e loja:** o passe em linha do tempo horizontal, da esquerda para a direita; a loja
+  atraente, com imagens, cores e design bonito.
+- **Lote 12, análise:** bots, gráficos, armas, tiros e veículos (junto do lote 6).
+
+## v50: menu em planos de cinema e tutorial por aparelho (2026-11-13, D-118)
+- **Feito:**
+  - menu principal: saíram o retrato do soldado e a volta da câmera. O fundo são três planos de 11 s
+    no fim da tarde (sol de 18/08/1965 às 18:06): fuzileiros nos becos de Xóm Gò, o VC no quintal de
+    An Cường (2) e fuzileiros na encosta leste;
+  - COMO JOGAR com a etiqueta do aparelho (NO CELULAR, NO CONTROLE, NO COMPUTADOR), frases próprias
+    para toque e controle e o desenho do aparelho com o botão aceso;
+  - os avisos da partida e o cartão de veículo não aparecem por cima do menu principal.
+- **Conferido no Studio:**
+  - menu em 62 a 71 s; soldados virados para o lado certo em cada plano, a 5 a 13 m da câmera;
+  - tutorial nas três versões; o JOGAR põe em campo e tudo volta ao normal;
+  - 0 erros de script.
+- **Não testado:** celular e controle de verdade (um controle ligado no PC do dono mexia nos menus
+  durante o teste).
 
 ## v49: lote 5, menu principal e tutorial fora da partida (2026-11-13, D-117)
 - **Publicada** como versão 49 do place (build do commit cae28e8).

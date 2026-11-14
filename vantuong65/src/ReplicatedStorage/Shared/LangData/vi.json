@@ -2528,5 +2528,21 @@
  "direcional": "cần điều khiển",
  "CLIQUE DIREITO": "CHUỘT PHẢI",
  "CLIQUE ESQUERDO": "CHUỘT TRÁI",
- "RODINHA": "CON LĂN"
+ "RODINHA": "CON LĂN",
+ "A granada fica no botão ITEM. Bem perto do inimigo, aparece o botão GOLPE para usar a faca.": "Lựu đạn nằm ở nút VẬT PHẨM. Khi ở rất gần địch, nút CẬN CHIẾN hiện ra để dùng dao.",
+ "A tela do seu celular: o botão aceso é este": "Màn hình điện thoại của bạn: nút sáng là nút này",
+ "Ande com o analógico esquerdo e aperte ele para correr. Pule para passar por cima de muretas e sebes.": "Đi bằng cần analog trái và nhấn nó để chạy. Nhảy để vượt qua tường thấp và hàng rào.",
+ "Arraste o polegar no analógico, embaixo à esquerda, para andar; leve até a borda para correr. Toque em PULAR para passar por cima de muretas.": "Kéo ngón cái trên cần analog, góc dưới bên trái, để đi; kéo ra tận mép để chạy. Chạm NHẢY để vượt qua tường thấp.",
+ "Chegue perto de um jipe, caminhão, tanque ou helicóptero: o botão para entrar aparece no meio da tela.": "Lại gần xe jeep, xe tải, xe tăng hoặc trực thăng: nút để lên xe hiện ra ở giữa màn hình.",
+ "ESPAÇO": "CÁCH",
+ "Ferido, você sangra: toque em BANDAGEM, que aparece à esquerda. Se cair, espere um médico do seu lado ou escolha renascer.": "Bị thương, bạn chảy máu: chạm BĂNG GẠC, nút hiện ở bên trái. Nếu ngã xuống, hãy chờ quân y phe mình hoặc chọn hồi sinh.",
+ "NO CELULAR": "TRÊN ĐIỆN THOẠI",
+ "NO COMPUTADOR": "TRÊN MÁY TÍNH",
+ "NO CONTROLE": "TRÊN TAY CẦM",
+ "O seu controle: o botão aceso é este": "Tay cầm của bạn: nút sáng là nút này",
+ "O seu teclado e o mouse: o que está aceso é o botão": "Bàn phím và chuột của bạn: phần sáng là nút cần bấm",
+ "Segure LT para mirar e aperte RT para atirar: a bala vai para onde a alça da arma aponta. Recarregue quando as balas acabarem.": "Giữ LT để ngắm và bấm RT để bắn: viên đạn bay theo hướng thước ngắm của súng. Hết đạn thì nạp đạn.",
+ "Toque em AGACHAR para abaixar; segure para deitar. Abaixado ou deitado, você é um alvo menor e erra menos.": "Chạm CÚI để cúi xuống; giữ để nằm. Khi ngồi hoặc nằm, bạn là mục tiêu nhỏ hơn và bắn chính xác hơn.",
+ "Toque em MAPA, no alto à esquerda, para ver os objetivos e o seu squad. Toque em COMUNICAR para marcar o inimigo.": "Chạm BẢN ĐỒ, góc trên bên trái, để xem mục tiêu và tiểu đội của bạn. Chạm LIÊN LẠC để đánh dấu địch.",
+ "Toque em MIRA e depois em FOGO: a bala vai para onde a alça da arma aponta. Quando as balas acabam, o botão RECARGA aparece.": "Chạm NGẮM rồi chạm BẮN: viên đạn bay theo hướng thước ngắm của súng. Khi hết đạn, nút NẠP ĐẠN hiện ra."
 }

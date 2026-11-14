@@ -4069,3 +4069,74 @@ até o JOGAR.
 
 **Não testado:** controle de verdade e celular no menu; o menu num servidor com o carregamento lento
 (o teto de 4 min).
+
+## D-118 — Menu principal em planos de cinema e tutorial que segue o aparelho (v50, 2026-11-13)
+
+Pedido do dono, sobre a v49: "o tutorial tem que se adaptar conforme o local que a pessoa está
+jogando. Melhore essa tela do lobby, não gostei do personagem e do fundo".
+
+**Menu principal** (`Controllers/MenuPrincipal`):
+- saíram o retrato grande do soldado, a etiqueta do lado e a volta da câmera por cima do morro;
+- o fundo é o mapa em planos de cinema, sempre no fim de tarde:
+  - a hora é o sol real de 18/08/1965 às 18:06 (UTC+8): baixo no oés-noroeste, luz dourada e sombras
+    compridas;
+  - enquanto o menu está aberto, o cliente segura essa hora contra o acerto do servidor (a cada 15 s);
+  - ao fechar, volta a hora da partida;
+- três planos de 11 s, com corte pelo preto de 0,7 s:
+  1. fuzileiros nos becos de Xóm Gò, a câmera de frente, baixa, chegando perto;
+  2. o Viet Cong no quintal oeste de An Cường (2), por cima do ombro, olhando a vila;
+  3. fuzileiros na encosta leste, a câmera subindo atrás deles, com o morro de Xóm Gò contra o sol;
+- os soldados são o manequim que o servidor vestiu (`SoldierPreview.newWorld`), em pé no chão do
+  mapa. Cada plano:
+  - procura chão livre para eles (sem casa, muro ou tronco), numa espiral de até 12 m do ponto;
+  - tira a câmera de trás do que tapar o grupo;
+  - foca no grupo e desfoca o resto;
+- um balanço pequeno de câmera na mão, faixas pretas em cima e embaixo, vinheta à esquerda para o
+  texto e o nome do lugar no canto de baixo à direita;
+- sem terreno no cliente ainda, a câmera dá a volta em Xóm Gò como na v49 e tenta os planos de novo;
+- os botões, o título e os atalhos não mudaram.
+
+**COMO JOGAR segue o aparelho** (`Controllers/ComoJogar`):
+- uma etiqueta no alto diz onde: NO CELULAR, NO CONTROLE ou NO COMPUTADOR;
+- a frase do cartão tem versão para o celular e para o controle quando o jeito de fazer muda (no
+  celular, "Toque em MIRA e depois em FOGO"; no controle, "Segure LT para mirar e aperte RT");
+- os chips mostram o botão daquele aparelho. A granada é a tecla 3 no computador e o botão ITEM no
+  celular;
+- ao lado dos chips, o desenho do aparelho com o botão do assunto aceso e pulsando:
+  - o celular deitado, com os botões do layout de toque padrão (`Toque.PRESETS.two`) no lugar deles;
+  - o controle: gatilhos, botões de ombro, analógicos, direcional, A B X Y;
+  - o lado esquerdo do teclado e o mouse;
+- trocou de aparelho com o tutorial aberto (pegou o controle, tocou na tela): o cartão se refaz na
+  hora.
+- Teste novo (`interface.luau`): todo chip tem botão no layout de toque e está no desenho do teclado
+  e do controle.
+
+**Também nesta versão:**
+- enquanto o menu principal está aberto, os avisos da partida ("setor perdido", "contra-ataque") e o
+  cartão de veículo da carta de inserção não aparecem por cima dele nem do COMO JOGAR. A loja e o
+  passe abertos do menu mostram os avisos deles.
+
+**Conferido no Studio:**
+- o menu abre entre 62 e 71 s;
+- nos becos, os fuzileiros ficam de frente para a câmera; no quintal e na encosta, de costas, por cima
+  do ombro, a 5 a 13 m da câmera. Isso foi medido pela direção do rosto de cada soldado;
+- o COMO JOGAR muda na hora entre NO CONTROLE (L e A acesos), NO CELULAR (toque forçado; o analógico e
+  o PULAR acesos no desenho do celular) e NO COMPUTADOR (R e os dois botões do mouse acesos);
+- o JOGAR põe em campo (EUA, fuzileiro); a hora, a cor, o desfoque e os avisos voltam ao normal e os
+  soldados da cena somem;
+- 0 erros de script;
+- o FPS no Studio ficou entre 7 e 15, tanto no menu quanto em campo, então o menu não pesa mais que o
+  jogo. É a mesma máquina rodando o servidor e os bots.
+
+**Ajustes vindos do teste:**
+- a vinheta passou de vinho para preta, e a cor do menu ficou menos saturada (a terra batida no sol
+  baixo ficava vermelha);
+- folha e capim não puxam mais a câmera para perto do grupo;
+- a câmera por cima do ombro fica atrás do grupo inteiro (antes passava a 0,9 m de um soldado);
+- o grupo fica à direita da tela, longe dos botões;
+- sem a imagem do analógico, o chip "Andar" do controle mostra "L".
+
+**Visto e deixado para o lote 10:** em campo, a terra batida também parece vermelha.
+
+**Não testado:** celular de verdade e controle de verdade no menu, além do controle ligado no PC do
+dono, que mexia nos menus durante o teste.

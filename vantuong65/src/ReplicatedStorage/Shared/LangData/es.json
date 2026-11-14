@@ -2521,5 +2521,21 @@
  "direcional": "joystick",
  "CLIQUE DIREITO": "CLIC DERECHO",
  "CLIQUE ESQUERDO": "CLIC IZQUIERDO",
- "RODINHA": "RUEDA"
+ "RODINHA": "RUEDA",
+ "A granada fica no botão ITEM. Bem perto do inimigo, aparece o botão GOLPE para usar a faca.": "La granada está en el botón OBJETO. Muy cerca del enemigo aparece el botón GOLPE para usar el cuchillo.",
+ "A tela do seu celular: o botão aceso é este": "La pantalla de tu móvil: el botón iluminado es este",
+ "Ande com o analógico esquerdo e aperte ele para correr. Pule para passar por cima de muretas e sebes.": "Camina con el stick izquierdo y púlsalo para correr. Salta para pasar por encima de muretes y setos.",
+ "Arraste o polegar no analógico, embaixo à esquerda, para andar; leve até a borda para correr. Toque em PULAR para passar por cima de muretas.": "Arrastra el pulgar en el stick, abajo a la izquierda, para caminar; llévalo hasta el borde para correr. Toca SALTAR para pasar por encima de muretes.",
+ "Chegue perto de um jipe, caminhão, tanque ou helicóptero: o botão para entrar aparece no meio da tela.": "Acércate a un jeep, camión, tanque o helicóptero: el botón para subir aparece en el centro de la pantalla.",
+ "ESPAÇO": "ESPACIO",
+ "Ferido, você sangra: toque em BANDAGEM, que aparece à esquerda. Se cair, espere um médico do seu lado ou escolha renascer.": "Herido, sangras: toca VENDAJE, que aparece a la izquierda. Si caes, espera a un médico de tu bando o elige reaparecer.",
+ "NO CELULAR": "EN EL MÓVIL",
+ "NO COMPUTADOR": "EN PC",
+ "NO CONTROLE": "CON MANDO",
+ "O seu controle: o botão aceso é este": "Tu mando: el botón iluminado es este",
+ "O seu teclado e o mouse: o que está aceso é o botão": "Tu teclado y ratón: lo iluminado es el botón",
+ "Segure LT para mirar e aperte RT para atirar: a bala vai para onde a alça da arma aponta. Recarregue quando as balas acabarem.": "Mantén LT para apuntar y pulsa RT para disparar: la bala va adonde apunta la mira del arma. Recarga cuando se acaben las balas.",
+ "Toque em AGACHAR para abaixar; segure para deitar. Abaixado ou deitado, você é um alvo menor e erra menos.": "Toca AGACHARSE para agacharte; mantén para tumbarte. Agachado o tumbado eres un blanco más pequeño y fallas menos.",
+ "Toque em MAPA, no alto à esquerda, para ver os objetivos e o seu squad. Toque em COMUNICAR para marcar o inimigo.": "Toca MAPA, arriba a la izquierda, para ver los objetivos y tu escuadra. Toca COMUNICAR para marcar al enemigo.",
+ "Toque em MIRA e depois em FOGO: a bala vai para onde a alça da arma aponta. Quando as balas acabam, o botão RECARGA aparece.": "Toca MIRA y después FUEGO: la bala va adonde apunta la mira del arma. Cuando se acaban las balas, aparece el botón RECARGA."
 }

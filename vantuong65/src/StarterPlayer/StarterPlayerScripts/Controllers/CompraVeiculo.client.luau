@@ -422,6 +422,7 @@ RunService.Heartbeat:Connect(function(dt: number)
 	local f = faction()
 	local top = UiKit.top()
 	local show = insertOpen
+		and player:GetAttribute("MenuPrincipal") ~= true -- a carta fica atrás do menu principal (D-118)
 		and not alive()
 		and f ~= nil
 		and CompraVeiculo.ORDER[f] ~= nil

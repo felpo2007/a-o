@@ -254,6 +254,21 @@ stack.Parent = band
 -- janela estreita (celular, janela pequena): a faixa encolhe inteira, nada passa da borda
 local bandFit = UiKit.fit(screen, band, WIDTH + 8, 1, 8)
 
+-- Menu principal (D-118): os avisos da partida (setor perdido, contra-ataque) não aparecem por cima
+-- da tela inicial nem do COMO JOGAR aberto dali; a loja e o passe abertos do menu mostram os deles.
+local Players = game:GetService("Players")
+local localPlayer = Players.LocalPlayer
+task.spawn(function()
+	while true do
+		local top = UiKit.top()
+		local menuOnly = localPlayer:GetAttribute("MenuPrincipal") == true and (top == nil or top == "como_jogar")
+		if screen.Enabled == menuOnly then
+			screen.Enabled = not menuOnly
+		end
+		task.wait(0.25)
+	end
+end)
+
 -- Toque em campo (v39): a pilha vai para a zona livre "avisos" do HUD de toque (coluna da esquerda,
 -- acima do polegar: o alto do meio é da faixa e da bússola), na escala que cabe; o pé da zona é o
 -- limite da pilha. Fora do campo (menus, lobby), o lugar de sempre.

@@ -618,6 +618,15 @@ function SoldierPreview.newWorld(parent: Instance, stand: CFrame): Preview
 	return p
 end
 
+-- Modo mundo: leva o soldado para outro ponto (o menu principal usa o mesmo grupo em cada plano).
+function SoldierPreview.place(p: Preview, stand: CFrame)
+	p.stand = stand
+	local m = p.model
+	if m then
+		standModel(m, stand)
+	end
+end
+
 -- Retrato parado: fundo transparente (a cor da tela atrás aparece), luz de lado, sem giro. angle:
 -- de onde a câmera olha (0 = de frente; negativo = do lado esquerdo do soldado).
 function SoldierPreview.newStill(angle: number?): Preview

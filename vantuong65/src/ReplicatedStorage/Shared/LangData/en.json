@@ -2528,5 +2528,21 @@
  "direcional": "joystick",
  "CLIQUE DIREITO": "RIGHT CLICK",
  "CLIQUE ESQUERDO": "LEFT CLICK",
- "RODINHA": "WHEEL"
+ "RODINHA": "WHEEL",
+ "A granada fica no botão ITEM. Bem perto do inimigo, aparece o botão GOLPE para usar a faca.": "The grenade is on the ITEM button. Right next to an enemy, the MELEE button appears so you can use the knife.",
+ "A tela do seu celular: o botão aceso é este": "Your phone screen: it's the lit button",
+ "Ande com o analógico esquerdo e aperte ele para correr. Pule para passar por cima de muretas e sebes.": "Walk with the left stick and press it to run. Jump to get over low walls and hedges.",
+ "Arraste o polegar no analógico, embaixo à esquerda, para andar; leve até a borda para correr. Toque em PULAR para passar por cima de muretas.": "Drag your thumb on the stick, bottom left, to walk; push it to the edge to run. Tap JUMP to get over low walls.",
+ "Chegue perto de um jipe, caminhão, tanque ou helicóptero: o botão para entrar aparece no meio da tela.": "Get close to a jeep, truck, tank or helicopter: the button to get in appears in the middle of the screen.",
+ "ESPAÇO": "SPACE",
+ "Ferido, você sangra: toque em BANDAGEM, que aparece à esquerda. Se cair, espere um médico do seu lado ou escolha renascer.": "Wounded, you bleed: tap BANDAGE, which appears on the left. If you fall, wait for a medic from your side or choose to respawn.",
+ "NO CELULAR": "ON PHONE",
+ "NO COMPUTADOR": "ON PC",
+ "NO CONTROLE": "ON CONTROLLER",
+ "O seu controle: o botão aceso é este": "Your controller: it's the lit button",
+ "O seu teclado e o mouse: o que está aceso é o botão": "Your keyboard and mouse: the lit one is the button",
+ "Segure LT para mirar e aperte RT para atirar: a bala vai para onde a alça da arma aponta. Recarregue quando as balas acabarem.": "Hold LT to aim and press RT to shoot: the bullet goes where the weapon's sight points. Reload when you run out of bullets.",
+ "Toque em AGACHAR para abaixar; segure para deitar. Abaixado ou deitado, você é um alvo menor e erra menos.": "Tap CROUCH to crouch; hold it to go prone. Crouched or prone, you are a smaller target and miss less.",
+ "Toque em MAPA, no alto à esquerda, para ver os objetivos e o seu squad. Toque em COMUNICAR para marcar o inimigo.": "Tap MAP, top left, to see the objectives and your squad. Tap COMMS to mark the enemy.",
+ "Toque em MIRA e depois em FOGO: a bala vai para onde a alça da arma aponta. Quando as balas acabam, o botão RECARGA aparece.": "Tap AIM and then FIRE: the bullet goes where the weapon's sight points. When you run out of bullets, the RELOAD button appears."
 }

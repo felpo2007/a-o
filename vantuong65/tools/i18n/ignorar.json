@@ -1123,7 +1123,17 @@
   "Fuzileiro 23",
   "move",
   "W A S D",
-  "STARLITE"
+  "STARLITE",
+  "Alt",
+  "Tab",
+  "CAPS",
+  "WASD",
+  "VIEW",
+  "foot",
+  "game",
+  "talk",
+  "teclado",
+  "toque"
  ],
  "regex": []
 }

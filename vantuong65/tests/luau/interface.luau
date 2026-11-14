@@ -543,11 +543,73 @@ test("tutorial fora da partida: não começa ao nascer; COMO JOGAR com ações d
 		ids[a.id] = true
 	end
 	local n = 0
-	for id in string.gmatch(cj, '{ id = "([%w_]+)", label = ') do
+	for id in string.gmatch(cj, '{ id = "([%w_]+)",[^}]*label = ') do
 		n += 1
 		assert(id == "move" or ids[id], "ação que não existe no InputMap: " .. id)
 	end
 	assert(n >= 12, "poucos botões nos cartões: " .. n)
+end)
+
+-- D-118: o COMO JOGAR segue o aparelho (celular, controle, computador) e acende o botão no desenho
+test("tutorial por aparelho: todo chip tem botão no celular, no controle e no teclado desenhados", function()
+	local cj = fs.readFile(C .. "ComoJogar.luau")
+	local Toque = require("../../src/ReplicatedStorage/Shared/Toque") :: any
+	for _, t in { '"NO CELULAR"', '"NO CONTROLE"', '"NO COMPUTADOR"', "Input.DeviceChanged:Connect", "drawPhone(lit)" } do
+		assert(string.find(cj, t, 1, true), "tutorial por aparelho: " .. t)
+	end
+	local byId: { [string]: any } = {}
+	for _, a in InputMap.ACTIONS do
+		byId[a.id] = byId[a.id] or a
+	end
+	-- o mesmo caminho do ComoJogar: ação -> botão de toque pelo spec
+	local touchBtn: { [string]: string } = { move = "stick", sprint = "stick", interact = "interact" }
+	for _, d in Toque.BUTTONS do
+		for part in string.gmatch(d.spec or "", "[^|]+") do
+			local id = string.match(part, "^([%w_]+)")
+			if id and touchBtn[id] == nil then
+				touchBtn[id] = d.id
+			end
+		end
+	end
+	-- teclas e botões que o desenho tem
+	local keyName = {
+		LeftShift = "Shift",
+		Space = "Espaço",
+		CapsLock = "Caps Lock",
+		Three = "3",
+	} :: { [string]: string }
+	local mouse = { MouseLeftButton = true, MouseRightButton = true, MouseMiddleButton = true }
+	local alias = { ButtonL3 = "Thumbstick1", ButtonR3 = "Thumbstick2" } :: { [string]: string }
+	local rows = assert(string.match(cj, "local KEY_ROWS: { { string } } = (%b{})"), "teclado desenhado")
+	local nChips = 0
+	for id, rest in string.gmatch(cj, '{ id = "([%w_]+)",([^}]*)}') do
+		if string.find(rest, "label = ", 1, true) then
+			nChips += 1
+			local over: { [string]: string } = {}
+			for k, v in string.gmatch(rest, '(%a+) = "([%w_]+)"') do
+				over[k] = v
+			end
+			-- celular: o botão existe no layout padrão
+			local tid = over.touch or id
+			local b = touchBtn[tid]
+			assert(b and Toque.PRESETS.two[b], "sem botão de toque para " .. tid)
+			if id ~= "move" then
+				-- teclado: a tecla está no desenho (ou é botão do mouse)
+				local ka = assert(byId[over.kbm or id], "ação do teclado: " .. (over.kbm or id))
+				local key = assert(InputMap.keyFor(ka, nil), "sem tecla: " .. ka.id)
+				if not mouse[key] then
+					local name = keyName[key] or key
+					assert(string.find(rows, '"' .. name .. '"', 1, true), "tecla fora do desenho: " .. name)
+				end
+				-- controle: o botão está no desenho
+				local pa = assert(byId[over.pad or id], "ação do controle")
+				local pad = assert(InputMap.padFor(pa, nil), "sem botão no controle: " .. pa.id)
+				pad = alias[pad] or pad
+				assert(string.find(cj, 'code = "' .. pad .. '"', 1, true), "botão fora do desenho: " .. pad)
+			end
+		end
+	end
+	assert(nChips >= 15, "chips lidos: " .. nChips)
 end)
 
 test("comandos: só com teclado e mouse ou controle; no toque nunca; fora da faixa de cima", function()
