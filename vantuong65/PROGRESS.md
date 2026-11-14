@@ -96,7 +96,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
   - as teclas agem por baixo da tela de carregamento (a pá cavou durante o carregamento, D-129).
 
 ## v61: lote 16, diária ao entrar, bandeiras e passe colorido (2026-11-14, D-130)
-- **A publicar.**
+- **Publicada** como versão 61 do place (build do commit 337f2ee).
 - **Feito:**
   - a caderneta da recompensa diária abre sozinha por cima do menu principal toda vez que o jogador
     entra; um botão (RESGATAR ou CONTINUAR); a aba e o calendário da mesa saíram;
