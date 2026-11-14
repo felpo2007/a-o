@@ -5049,3 +5049,40 @@ crianças e deixe as escritas e principalmente as recompensas escritas maiores".
 **Não testado:**
 - o brilho dos prêmios prontos do passe (a conta de teste estava no nível 0);
 - celular e TV (só a janela do Studio, de 671 x 564 px).
+
+## D-138 — Lote 24: aviso de granada perto (v69, 2026-11-14)
+
+Pedido do dono: "coloque símbolo de granada perto: vermelho que vai matar você e branco que vai dar
+dano".
+
+**Regra** (`Shared/GrenadeWarn`, módulo puro, testado em `tests/luau/combate.luau`):
+- **Vermelho:** dentro do raio letal da granada (`Explosive.TYPES`), contado em pé: EUA 5 m, VC 4 m.
+  Em pé é o pior caso (agachado ou atrás de cobertura o raio real é menor, `ExplosionService`),
+  então o vermelho nunca falta quando a explosão mataria. O teste confere que, dentro do vermelho,
+  `Explosive.effect` dá "lethal" em pé.
+- **Branco:** do raio letal até o raio de baixas (EUA 15 m, VC 12 m), onde os estilhaços ferem.
+- **Nada:**
+  - mais longe que o raio de baixas;
+  - granada de fumaça;
+  - granada do próprio lado, que não fere (fogo amigo desligado, `Medical.blocked`).
+- **A sua própria granada fere você e aparece.** O `FieldService` agora marca a granada com o
+  `UserId` de quem jogou (atributo `By`).
+
+**Tela** (`Controllers/AvisoGranada`, acima do HUD de campo):
+- **Símbolo:** a granada desenhada (corpo redondo, alavanca e anel do pino), com a distância
+  ("4 m"). O vermelho pulsa; o branco fica parado.
+- **Granada à vista:** o símbolo fica em cima dela na tela.
+- **Granada fora da vista:** o símbolo vai para um anel em volta do meio da tela (30% do menor lado),
+  na direção dela, com uma seta para fora e a distância do lado de dentro.
+- **Limites:** até 4 granadas (as mais perto); some fora de campo e quando ela explode.
+- **Câmera:** a de cada quadro (o jogo troca de câmera entre o menu e o campo).
+
+**Conferido no Studio** (`testes/lote24/01_aviso_de_granada.jpg`):
+- três granadas do VC postas paradas:
+  - 9 m à frente: branca, em cima dela;
+  - 8 m à direita: branca, no anel com a seta para a direita;
+  - 3 m atrás: vermelha, embaixo no anel;
+- a granada jogada por mim: o aviso acompanhou o voo, vermelho de 1 a 5 m, branco de 7 a 15 m, e
+  sumiu depois.
+
+**Não testado:** celular e TV; várias granadas na mesma direção (os símbolos do anel se sobrepõem).

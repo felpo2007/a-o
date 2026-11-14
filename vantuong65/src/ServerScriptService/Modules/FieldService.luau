@@ -233,6 +233,11 @@ FieldService.throwRot = throwRot -- teste
 
 local function launch(kind: string, faction: string?, from: Vector3, vel: Vector3, by: Player?)
 	local m, core = grenadeModel(kind, faction)
+	-- lote 24: quem jogou (UserId). A granada do próprio lado não fere, mas a sua fere você: o aviso de
+	-- granada perto (Controllers/AvisoGranada) precisa saber de quem é
+	if by then
+		m:SetAttribute("By", by.UserId)
+	end
 	m:PivotTo(CFrame.lookAt(from, from + vel) * CFrame.Angles(0, math.pi / 2, 0))
 	m.Parent = grenadeFolder
 	-- gravidade real: o Roblox puxa com workspace.Gravity; a força devolve a diferença

@@ -103,7 +103,8 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     - letras ~1,4x maiores e valores grandes em dourado;
     - botão verde que pulsa;
     - moedas voando ao receber.
-  - **Lote 24:** símbolo de granada perto: vermelho = vai matar, branco = vai ferir.
+  - **Lote 24 (v69, D-138): feito.** Símbolo de granada perto: vermelho = vai matar, branco = vai
+    ferir; em cima da granada ou no anel, com a direção e a distância.
   - **Lote 25:** nome do jogo (STARLITE: Vietnã 1965, D-101) e imagens da página (capas em
     `marketing/capas`). O dono vai dar o acesso.
   - **Lote 26:** mapa novo pela imagem do dono:
@@ -121,6 +122,19 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
   - base do VC sob a mata; nomes do equipamento da Intendência sem tradução; Type 54 em 3ª pessoa;
   - a pá do autoteste na 1ª rodada de cada sessão;
   - as teclas agem por baixo da tela de carregamento (a pá cavou durante o carregamento, D-129).
+
+## v69: lote 24, aviso de granada perto (2026-11-14, D-138)
+- **A publicar.**
+- **Feito:**
+  - símbolo da granada na tela: vermelho e pulsando dentro do raio letal (EUA 5 m, VC 4 m),
+    branco até o raio de baixas (15/12 m), com a distância;
+  - em cima da granada quando ela está à vista; num anel com seta quando está fora;
+  - a granada do próprio lado não aparece (não fere); a sua própria aparece (o servidor marca quem
+    jogou).
+- **Conferido no Studio:** três granadas do VC (frente, direita e atrás) e uma jogada por mim
+  (vermelho de 1 a 5 m, branco de 7 a 15 m); foto em `testes/lote24/`.
+- **Testes:** Lune todos ok (combate com o teste do lote 24, 22 ok); pytest; ruff; luau-lsp.
+- **Não testado:** celular e TV; várias granadas na mesma direção.
 
 ## v68: lote 23, recompensa diária e passe para crianças (2026-11-14, D-137)
 - **Publicada** (versão 68 do place, commit 828c92e).

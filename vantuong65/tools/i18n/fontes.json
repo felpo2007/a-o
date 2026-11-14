@@ -159,6 +159,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaView.luau:2037"
  ],
  "%d m": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/AvisoGranada.client.luau:241",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaView.luau:2038",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Marcadores.luau:623",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Marcadores.luau:883",
@@ -1089,7 +1090,8 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:1188"
  ],
  "Alavanca": [
-  "src/ReplicatedStorage/Shared/GrenadeArt.luau:82"
+  "src/ReplicatedStorage/Shared/GrenadeArt.luau:82",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/AvisoGranada.client.luau:77"
  ],
  "Alca": [
   "src/ServerScriptService/Modules/CaixaMunicaoService.luau:89"
@@ -2291,7 +2293,8 @@
  "Corpo": [
   "src/ReplicatedStorage/Shared/GrenadeArt.luau:123",
   "src/ServerScriptService/Modules/CaixaMunicaoService.luau:77",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/AnimalVisuals.client.luau:364"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/AnimalVisuals.client.luau:364",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/AvisoGranada.client.luau:70"
  ],
  "Corpo a corpo": [
   "src/ReplicatedStorage/Shared/InputMap.luau:62"
@@ -3366,7 +3369,7 @@
  ],
  "Frags": [
   "src/ServerScriptService/Modules/ArmaNaMao.luau:136",
-  "src/ServerScriptService/Modules/FieldService.luau:326",
+  "src/ServerScriptService/Modules/FieldService.luau:331",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/BarraItens.client.luau:108",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/BarraItens.client.luau:194"
  ],
@@ -5302,6 +5305,7 @@
   "src/ReplicatedStorage/Shared/Skins.luau:490"
  ],
  "Pino": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/AvisoGranada.client.luau:85",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ItemView.luau:268"
  ],
  "Pistola comercial de oxidação azul com talas de nogueira, trazida por conta própria.": [
@@ -6402,8 +6406,8 @@
  ],
  "Smokes": [
   "src/ServerScriptService/Modules/ArmaNaMao.luau:136",
-  "src/ServerScriptService/Modules/FieldService.luau:326",
-  "src/ServerScriptService/Modules/FieldService.luau:431",
+  "src/ServerScriptService/Modules/FieldService.luau:331",
+  "src/ServerScriptService/Modules/FieldService.luau:436",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/BarraItens.client.luau:108",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/BarraItens.client.luau:194"
  ],
@@ -7160,7 +7164,7 @@
   "src/ServerScriptService/Modules/EventosService.luau:1154",
   "src/ServerScriptService/Modules/EventosService.luau:1154",
   "src/ServerScriptService/Modules/FieldService.luau:158",
-  "src/ServerScriptService/Modules/FieldService.luau:267",
+  "src/ServerScriptService/Modules/FieldService.luau:272",
   "src/ServerScriptService/Modules/FieldWorkService.luau:177",
   "src/ServerScriptService/Modules/FrontService.luau:131",
   "src/ServerScriptService/Modules/FrontService.luau:142",
@@ -7435,6 +7439,7 @@
   "src/ReplicatedStorage/Shared/Front.luau:189",
   "src/ReplicatedStorage/Shared/Front.luau:197",
   "src/ReplicatedStorage/Shared/GrenadeArt.luau:180",
+  "src/ReplicatedStorage/Shared/GrenadeWarn.luau:20",
   "src/ReplicatedStorage/Shared/JogarAgora.luau:58",
   "src/ReplicatedStorage/Shared/JogarAgora.luau:120",
   "src/ReplicatedStorage/Shared/JogarAgora.luau:123",
@@ -7514,8 +7519,8 @@
   "src/ServerScriptService/Modules/EventosService.luau:886",
   "src/ServerScriptService/Modules/EventosService.luau:974",
   "src/ServerScriptService/Modules/EventosService.luau:1154",
-  "src/ServerScriptService/Modules/FieldService.luau:250",
-  "src/ServerScriptService/Modules/FieldService.luau:280",
+  "src/ServerScriptService/Modules/FieldService.luau:255",
+  "src/ServerScriptService/Modules/FieldService.luau:285",
   "src/ServerScriptService/Modules/FrontService.luau:204",
   "src/ServerScriptService/Modules/Gear.luau:372",
   "src/ServerScriptService/Modules/MapLife.luau:961",
@@ -10184,6 +10189,9 @@
  ],
  "kg": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:1202"
+ ],
+ "kill": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/AvisoGranada.client.luau:198"
  ],
  "killcard": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:1072"

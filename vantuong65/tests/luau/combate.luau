@@ -19,6 +19,8 @@ local Medical = require(S .. "Medical") :: any
 local Weapons = require(S .. "Weapons") :: any
 local SomArmas = require(S .. "SomArmas") :: any
 local Corpo = require(S .. "Corpo") :: any
+local GrenadeWarn = require(S .. "GrenadeWarn") :: any
+local Explosive = require(S .. "Explosive") :: any
 
 local passed, failed = 0, 0
 local function test(name: string, fn: () -> ())
@@ -518,6 +520,51 @@ test("v41: sem fogo amigo (o mesmo lado não fere; a própria granada e o dano s
 		local k = count(src, "by,from)") + count(src, "nil,from)") + count(src, 'Faction")::string?)')
 		assert(k >= n, string.format("%s: %d chamadas com o lado (esperado ≥ %d)", file, k, n))
 	end
+end)
+
+-- Lote 24 (dono: "coloque símbolo de granada perto: vermelho que vai matar você e branco que vai dar
+-- dano"): a regra do aviso bate com o dano da explosão (Explosive.TYPES e Medical.blocked)
+test("lote 24: aviso de granada — vermelho mata, branco fere, nada longe ou do próprio lado", function()
+	local us, vc = Explosive.TYPES.grenade_us, Explosive.TYPES.grenade_vc
+	-- granada inimiga (VC) perto de um fuzileiro (US)
+	assert(GrenadeWarn.level(1, "frag", "VC", "US", false) == "kill", "colado: mata")
+	assert(GrenadeWarn.level(vc.lethalM, "frag", "VC", "US", false) == "kill", "na borda do letal: mata")
+	assert(GrenadeWarn.level(vc.lethalM + 0.1, "frag", "VC", "US", false) == "hurt", "logo fora: fere")
+	assert(GrenadeWarn.level(vc.casualtyM, "frag", "VC", "US", false) == "hurt", "na borda: fere")
+	assert(GrenadeWarn.level(vc.casualtyM + 0.1, "frag", "VC", "US", false) == nil, "longe: nada")
+	-- a dos EUA tem raios maiores
+	assert(GrenadeWarn.level(us.lethalM, "frag", "US", "VC", false) == "kill")
+	assert(GrenadeWarn.level(us.casualtyM, "frag", "US", "VC", false) == "hurt")
+	-- vermelho = o explosivo mata em pé nessa distância; branco = só fere
+	for _, d in { 0.5, 2, 4, 4.9, 5 } do
+		local r = Explosive.effect("grenade_us", d, 1, 0)
+		assert(r == "lethal", "dentro do vermelho a explosão mata em pé: " .. d)
+	end
+	assert(Explosive.effect("grenade_us", 5.5, 1, 0) == "wound", "no branco: fere")
+	-- fumaça, do próprio lado (sem fogo amigo) e a própria granada
+	assert(GrenadeWarn.level(1, "smoke", "VC", "US", false) == nil, "fumaça não avisa")
+	assert(not Medical.FRIENDLY_FIRE, "o teste conta sem fogo amigo")
+	assert(GrenadeWarn.level(1, "frag", "US", "US", false) == nil, "a do companheiro não fere")
+	assert(GrenadeWarn.level(1, "frag", "US", "US", true) == "kill", "a sua própria granada fere você")
+	-- anel: à frente em cima, à direita à direita, atrás embaixo (câmera olhando para o norte, −Z)
+	local a0 = GrenadeWarn.ringAngle(0, -1, 0, -5)
+	local aR = GrenadeWarn.ringAngle(0, -1, 5, 0)
+	local aB = GrenadeWarn.ringAngle(0, -1, 0, 5)
+	near(a0, 0, 1e-9, "à frente")
+	near(aR, math.pi / 2, 1e-9, "à direita (+X)")
+	near(math.abs(aB), math.pi, 1e-9, "atrás")
+	local x, y = GrenadeWarn.ringPoint(aR, 500, 300, 100)
+	near(x, 600, 1e-6, "ponto à direita")
+	near(y, 300, 1e-6)
+	x, y = GrenadeWarn.ringPoint(a0, 500, 300, 100)
+	near(x, 500, 1e-6)
+	near(y, 200, 1e-6, "à frente fica em cima")
+	-- o servidor marca de quem é a granada e o cliente desenha
+	local fs = require("@lune/fs")
+	local field = fs.readFile("src/ServerScriptService/Modules/FieldService.luau")
+	assert(string.find(field, 'm:SetAttribute("By", by.UserId)', 1, true), "granada com o dono")
+	local aviso = fs.readFile("src/StarterPlayer/StarterPlayerScripts/Controllers/AvisoGranada.client.luau")
+	assert(string.find(aviso, "GrenadeWarn.level(", 1, true), "o aviso usa a regra")
 end)
 
 print(string.format("%d ok, %d falhas", passed, failed))
