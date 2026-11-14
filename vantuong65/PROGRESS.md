@@ -37,9 +37,9 @@
 ## Fila do dono de 13/11 à noite (depois da v50, um lote por vez)
 - **Lote 7 (v51, D-119): feito.** A mira da RPD e da M60 medidas na malha (massa e alça de
   verdade no centro da tela), a mão no punho de pistola e a esquerda da RPD fora da visada.
-- **Lote 8 (v52, D-120): feito, menos a mesa.** Tela de baixa com quatro botões; loja e passe fora
-  do menu do jogo. A câmera da mesa 3D (escolha de lado) ainda tira a mesa do quadro em tela
-  estreita: pergunta ao dono.
+- **Lote 8 (v52 e v53, D-120 e D-121): feito.** Tela de baixa com quatro botões; loja e passe fora
+  do menu do jogo; mesa 3D consertada e sem soldados (resposta do dono: "3D, porém tire os soldados
+  dali").
 - **Lote 8, telas (pedido original):**
   - tela de baixa só com RENASCER AQUI (abre duas opções: créditos ou Robux, o Robux colorido),
     ESCOLHER OUTRO PONTO, RENASCER COM VEÍCULO e MENU. Saem LOJA, PASSE, MISSÕES e também o
@@ -56,6 +56,15 @@
 - **Lote 11, passe e loja:** o passe em linha do tempo horizontal, da esquerda para a direita; a loja
   atraente, com imagens, cores e design bonito.
 - **Lote 12, análise:** bots, gráficos, armas, tiros e veículos (junto do lote 6).
+
+## v53: mesa 3D consertada e sem soldados (2026-11-14, D-121)
+- **Feito:**
+  - a câmera da mesa não recua mais em tela estreita (abre o campo de visão);
+  - ela roda depois dos outros scripts de câmera e fica sempre em Scriptable;
+  - sem soldados: um cabide de equipamento no lugar do "papel e equipamento"; a escolha do lado
+    pelos dossiês.
+- **Conferido no Studio:** a mesa do VC no quadro, a 2,1 m (antes, fora da tela); sem soldados.
+- **Não testado:** a barraca dos EUA e a sala de escolha depois da mudança; celular em pé.
 
 ## v52: lote 8, tela de baixa e loja e passe fora do menu do jogo (2026-11-14, D-120)
 - **Publicada** como versão 52 do place (build do commit 343edba).

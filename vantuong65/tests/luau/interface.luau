@@ -406,6 +406,21 @@ test("baixa: renascer aqui (créditos e Robux) e voltar, com o motivo do bloquei
 	assert(string.find(src, "CenaBaixa.show", 1, true), "o próprio soldado, caído")
 end)
 
+-- D-121 (dono: "3D, porém tire os soldados dali"): a mesa sem soldados; a câmera roda depois dos
+-- outros scripts de câmera e, em tela estreita, abre o campo de visão em vez de recuar (recuando, saía
+-- do abrigo do VC pelo teto)
+test("mesa 3D: sem soldados, câmera por último e campo de visão em tela estreita", function()
+	local src = fs.readFile(C .. "LobbyScene.luau")
+	assert(not string.find(src, "SoldierPreview.newWorld", 1, true), "soldado na mesa")
+	assert(
+		string.find(src, 'equipRack(sc, "US"', 1, true) and string.find(src, 'equipRack(sc, "VC"', 1, true),
+		"cabide"
+	)
+	assert(string.find(src, "RenderPriority.Camera.Value + 20, step", 1, true), "câmera da mesa por último")
+	assert(string.find(src, "local function fovFor(aspect: number)", 1, true), "campo de visão em tela estreita")
+	assert(not string.find(src, "math.clamp(1.6 / math.max(aspect, 0.4), 1, 1.4)", 1, true), "recuo antigo")
+end)
+
 -- D-120 (lote 8, dono: "não quero nenhum outro botão além desses"): RENASCER AQUI, que abre as duas
 -- formas de pagar, ESCOLHER OUTRO PONTO, RENASCER COM VEÍCULO e MENU; mais nenhum
 test("baixa: só os quatro botões; o RENASCER AQUI abre créditos e Robux", function()

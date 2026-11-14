@@ -702,16 +702,37 @@ local function table_(parent: Instance, w: number, d: number, color: Color3, mat
 	return t
 end
 
--- soldado de pé (prévia do servidor), dentro de um grupo próprio: o realce do objeto pega o boneco
-local function soldier(sc: Scene, side: string, x: number, z: number, yaw: number): Model
-	local holder = group(sc.folder, "Soldado" .. side)
-	-- a prévia tem a frente em −Z (SoldierPreview) e a câmera olha da frente da mesa (+Z): sem os
-	-- 180°, os soldados ficavam de costas (Studio, 2026-11-11)
-	local stand = W(at(x, -0.76, z, yaw + 180))
-	local pv = SoldierPreview.newWorld(holder, stand)
-	sc.previews[side] = pv
-	SoldierPreview.set(pv, side, nil)
-	return holder
+-- Cabide de equipamento (D-121, dono: "tire os soldados dali"): no lugar do soldado de pé, o objeto
+-- "papel e equipamento" é um cabide de madeira com a túnica do lado, o cinto de lona e o cantil.
+-- Chão da cena em y = −0,79 (tampo da mesa em 0); medidas em metros.
+local function equipRack(sc: Scene, side: string, x: number, z: number, yaw: number): Model
+	local g = group(sc.folder, "Cabide" .. side)
+	local wood = rgb(78, 60, 42)
+	local cloth = if side == "US" then rgb(86, 92, 62) else rgb(44, 44, 40) -- verde-oliva; preto do VC
+	local web = if side == "US" then rgb(122, 114, 78) else rgb(92, 74, 48)
+	local base = at(x, 0, z, yaw)
+	local function p(
+		sx: number,
+		sy: number,
+		sz: number,
+		ox: number,
+		oy: number,
+		oz: number,
+		c: Color3,
+		m: Enum.Material
+	)
+		return part(g, sx, sy, sz, base * CFrame.new(ox, oy, oz), c, m)
+	end
+	for _, s in { -1, 1 } do
+		p(0.04, 1.5, 0.04, s * 0.26, -0.04, 0, wood, Enum.Material.Wood) -- pé
+		p(0.06, 0.03, 0.34, s * 0.26, -0.775, 0, wood, Enum.Material.Wood) -- base
+		p(0.08, 0.44, 0.08, s * 0.21, 0.32, 0.03, cloth, Enum.Material.Fabric) -- manga
+	end
+	p(0.62, 0.04, 0.04, 0, 0.7, 0, wood, Enum.Material.Wood) -- travessa
+	p(0.34, 0.56, 0.1, 0, 0.38, 0.03, cloth, Enum.Material.Fabric) -- túnica
+	p(0.36, 0.05, 0.12, 0, 0.1, 0.04, web, Enum.Material.Fabric) -- cinto de lona
+	p(0.09, 0.14, 0.06, 0.12, -0.0, 0.1, rgb(70, 74, 54), Enum.Material.Metal) -- cantil
+	return g
 end
 
 -- ---------- EUA: barraca de comando ----------
@@ -974,11 +995,11 @@ local function buildUS(): Scene
 	addObj(
 		sc,
 		"role",
-		soldier(sc, "US", 0.78, -1.05, -18),
-		Vector3.new(0.62, 1.8, 0.5),
-		at(0.78, 0.14, -1.05),
-		"SEU FUZILEIRO",
+		equipRack(sc, "US", 0.78, -1.05, -18),
+		Vector3.new(0.62, 1.55, 0.4),
+		at(0.78, -0.02, -1.05),
 		"PAPEL E EQUIPAMENTO",
+		"escolher o papel",
 		shot(0.78, 0.42, -1.05, -0.45, 0.12, 1, 2.35)
 	)
 	sc.overview = shot(0.02, 0, -0.04, 0, 1.12, 1, 1.95)
@@ -1170,11 +1191,11 @@ local function buildVC(): Scene
 	addObj(
 		sc,
 		"role",
-		soldier(sc, "VC", 0.75, -1.0, -18),
-		Vector3.new(0.6, 1.75, 0.5),
-		at(0.75, 0.12, -1.0),
-		"SEU COMBATENTE",
+		equipRack(sc, "VC", 0.75, -1.0, -18),
+		Vector3.new(0.62, 1.55, 0.4),
+		at(0.75, -0.02, -1.0),
 		"PAPEL E EQUIPAMENTO",
+		"escolher o papel",
 		shot(0.75, 0.42, -1.0, -0.45, 0.12, 1, 2.3)
 	)
 	sc.overview = shot(0.02, 0, -0.04, 0, 1.12, 1, 1.85)
@@ -1265,32 +1286,8 @@ local function buildChoose(): Scene
 		shot(0.34, 0.2, -0.3, -0.12, 0.45, 1, 2.0)
 	)
 	o.confirmTouch = true
-	-- os dois soldados atrás da mesa, com um foco de luz cada
-	for _, side in { "US", "VC" } do
-		local x = if side == "US" then -0.7 else 0.7
-		local body = soldier(sc, side, x, -0.8, if x < 0 then 12 else -12)
-		local lampHolder = part(f, 0.05, 0.05, 0.05, at(x, 1.4, -0.4), rgb(20, 20, 20))
-		lampHolder.Transparency = 1
-		local sp = Instance.new("SpotLight")
-		sp.Face = Enum.NormalId.Bottom
-		sp.Angle = 50
-		sp.Range = 3.4 / M
-		sp.Brightness = 0.6
-		sp.Color = rgb(255, 226, 186)
-		sp.Parent = lampHolder
-		sc.spots[side] = sp
-		local who = addObj(
-			sc,
-			"pick_" .. side,
-			body,
-			Vector3.new(0.6, 1.8, 0.5),
-			at(x, 0.14, -0.8),
-			if side == "US" then "FUZILEIROS NAVAIS DOS EUA" else "1º REGIMENTO VIET CONG",
-			"alistar-se",
-			shot(x, 0.3, -0.8, 0, 0.3, 1, 2.2)
-		)
-		who.confirmTouch = true
-	end
+	-- D-121 (dono: "tire os soldados dali"): os dois soldados atrás da mesa saíram; o lado se escolhe
+	-- pelos dossiês sobre a mesa (pick_US e pick_VC, acima)
 	sc.overview = shot(0, 0.28, -0.3, 0, 0.4, 1, 2.5)
 	return sc
 end
@@ -1532,14 +1529,28 @@ local function objById(sc: Scene, id: string): Obj?
 	return nil
 end
 
--- câmera para um enquadramento: foco no ponto da tela (NDC) pedido
-local function shotCF(s: Shot, ndc: Vector2): CFrame
+-- Tela estreita (4:3, janela do Studio, celular em pé): abre o campo de visão para caber a mesma
+-- largura, em vez de recuar a câmera. Recuando até 40%, ela saía do abrigo do VC pelo teto e a mesa
+-- ficava atrás das toras (Studio, D-121).
+local function fovFor(aspect: number): number
+	if aspect >= 1.6 then
+		return FOV
+	end
+	local h = math.tan(math.rad(FOV / 2)) * 1.6 / math.max(aspect, 0.4)
+	return math.min(2 * math.deg(math.atan(h)), 75)
+end
+
+local function aspectNow(): number
 	local cam = camera()
 	local vp = if cam then cam.ViewportSize else Vector2.new(1280, 720)
-	local aspect = vp.X / math.max(vp.Y, 1)
-	local tanV = math.tan(math.rad(FOV / 2))
-	-- tela estreita (4:3, celular em pé): afasta um pouco para caber na largura, sem sair da sala
-	local dist = s.dist * math.clamp(1.6 / math.max(aspect, 0.4), 1, 1.4)
+	return vp.X / math.max(vp.Y, 1)
+end
+
+-- câmera para um enquadramento: foco no ponto da tela (NDC) pedido
+local function shotCF(s: Shot, ndc: Vector2): CFrame
+	local aspect = aspectNow()
+	local tanV = math.tan(math.rad(fovFor(aspect) / 2))
+	local dist = s.dist
 	local eye = s.focus + s.view * dist
 	local cf = CFrame.lookAt(eye, s.focus)
 	return cf * CFrame.Angles(0, math.atan(ndc.X * tanV * aspect), 0) * CFrame.Angles(-math.atan(ndc.Y * tanV), 0, 0)
@@ -1848,6 +1859,14 @@ local function step(dt: number)
 	if not (cam and sc) then
 		return
 	end
+	-- o menu principal aberto por cima é dono da câmera (D-117); fechado, ele devolve "Custom" e a
+	-- mesa retoma aqui: a câmera da mesa é sempre Scriptable (D-121)
+	if player:GetAttribute("MenuPrincipal") == true then
+		return
+	end
+	if cam.CameraType ~= Enum.CameraType.Scriptable then
+		cam.CameraType = Enum.CameraType.Scriptable
+	end
 	local now = os.clock()
 	local t = now - t0
 	-- ponteiro: mouse ou cursor virtual (o toque escolhe por toque)
@@ -1946,9 +1965,9 @@ local function step(dt: number)
 		end
 		wasCovered = covered
 		if arriving then
-			-- travelling de chegada: de 22% mais longe e um pouco mais alto até o enquadramento (a
-			-- folga do shotCF para tela estreita é de até 40%: o recuo não sai da barraca). Com a
-			-- tela de entrada por cima, a câmera espera parada no ponto de partida.
+			-- travelling de chegada: de 22% mais longe e um pouco mais alto até o enquadramento (tela
+			-- estreita abre o campo de visão no shotCF, D-121: a câmera não recua mais). Com a tela de
+			-- entrada por cima, a câmera espera parada no ponto de partida.
 			local dist = (s.focus - target.Position).Magnitude
 			camFrom = target * CFrame.new(0, dist * 0.06, dist * 0.22)
 			camT, camDur = 0, ARRIVE_TIME
@@ -1965,7 +1984,7 @@ local function step(dt: number)
 		else
 			cam.CFrame = target
 		end
-		cam.FieldOfView = FOV
+		cam.FieldOfView = fovFor(aspectNow())
 		local d = dof
 		if d then
 			local dist = (s.focus - cam.CFrame.Position).Magnitude
@@ -2004,7 +2023,9 @@ local function setDesk(on: boolean)
 			rainWas = pe.Enabled
 			pe.Enabled = false -- chuva não entra na barraca (WeatherController só mexe no Rate)
 		end
-		RunService:BindToRenderStep("VT65LobbyCam", Enum.RenderPriority.Camera.Value + 2, step)
+		-- D-121: depois de todos os scripts de câmera (o giro do corpo em +3 e o tremor em +5 mexiam nela
+		-- depois da mesa; no Studio a mesa saía do quadro)
+		RunService:BindToRenderStep("VT65LobbyCam", Enum.RenderPriority.Camera.Value + 20, step)
 	else
 		RunService:UnbindFromRenderStep("VT65LobbyCam")
 		local sc = current

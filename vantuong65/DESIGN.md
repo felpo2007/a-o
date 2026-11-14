@@ -4234,3 +4234,30 @@ Pedidos do dono:
 - falta decidir com o dono se a câmera da mesa é consertada ou se a mesa vira uma tela 2D simples.
 
 **Não testado:** a compra em Robux de verdade, controle e celular na tela de baixa.
+
+## D-121 — Mesa 3D consertada e sem soldados (v53, 2026-11-14)
+
+Resposta do dono à pergunta da D-120: "3D, porém tire os soldados dali".
+
+**Câmera da mesa** (`Controllers/LobbyScene`):
+- em tela estreita, a câmera recuava até 40% para caber a mesma largura. No abrigo do VC ela saía
+  pelo teto e a mesa ficava atrás das toras: o fundo virava um borrão marrom, sem nenhum objeto;
+- agora a câmera fica na distância do plano e abre o campo de visão: 50° em 16:9 e até 75° em tela
+  estreita (`fovFor`);
+- a câmera da mesa roda depois de todos os scripts de câmera (Camera + 20; antes, + 2, com o giro do
+  corpo em + 3 e o tremor em + 5 depois dela);
+- ela reafirma o tipo Scriptable a cada quadro (o menu principal, ao fechar, devolve "Custom");
+- com o menu principal aberto por cima, ela não mexe.
+
+**Sem soldados:**
+- na barraca dos EUA e no abrigo do VC, o soldado de pé (o objeto "papel e equipamento") virou um
+  cabide de madeira com a túnica do lado, o cinto de lona e o cantil;
+- na sala de escolha do lado, saíram os dois soldados atrás da mesa. O lado se escolhe pelos dossiês
+  sobre a mesa, que já eram os objetos de escolha.
+
+**Conferido no Studio** (janela 671 × 565, proporção 1,19):
+- antes: a mesa do VC ficava fora da tela, em x = −130 px;
+- depois: a mesa aparece no quadro, em (410, 358), a 2,1 m da câmera, com FOV de 67°, os papéis, a
+  lamparina e o abrigo, e nenhum soldado.
+
+**Não testado:** a barraca dos EUA e a sala de escolha do lado depois da mudança; celular em pé.
