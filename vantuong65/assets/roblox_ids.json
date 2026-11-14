@@ -350,8 +350,6 @@
  "Clothing.vc_tiger_shirt_v3": "113808314201475",
  "Clothing.vc_tiger_pants_v3": "107937294744885",
  "Sounds.a4_mergulho": "92915361935434",
- "Images.bandeira_eua": "104461985345184",
- "Images.bandeira_frente": "127727970793387",
  "Carta.nw_v64": "104254003024502",
  "Carta.ne_v64": "76766363879279",
  "Carta.sw_v64": "102761004638511",
@@ -387,5 +385,9 @@
  "Models.ph_island_tree_01": "108883282677578",
  "Models.ph_island_tree_02": "115337725271232",
  "Models.ph_island_tree_03": "124431449352730",
- "Models.ph_tree_small_02": "113866418888385"
+ "Models.ph_tree_small_02": "113866418888385",
+ "Images.bandeira_eua_v66": "104461985345184",
+ "Images.bandeira_frente_v66": "127727970793387",
+ "Images.bandeira_eua": "81433016721243",
+ "Images.bandeira_frente": "113462893009049"
 }

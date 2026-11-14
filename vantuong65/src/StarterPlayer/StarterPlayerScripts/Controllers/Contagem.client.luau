@@ -5,6 +5,9 @@
 --   - "A PARTIDA COMEÇA EM", o número grande e "Espere na sua base" (os 5 últimos pulsam);
 --   - no zero, "VALENDO!" em latão por 2,5 s, com "Tome os pontos".
 -- Some com o menu principal aberto (ele tem a tela toda) e não pede clique.
+-- Lote 22 (contagem de 10 s com os veículos): embaixo, "Pegue um veículo e espere na base"; quem o
+-- servidor puxa de volta (PreparoService: atributo PrepVolta do Player) vê "Não saia da base!" em
+-- vermelho por 2,5 s.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
@@ -50,9 +53,25 @@ local sub = label(156, 30, F.BODY, 22, V.TEXT)
 local shown = -1
 local goUntil = 0
 local lastPrep = 0
+local backUntil = 0 -- até quando mostra o "Não saia da base!"
+local AVISO_COR = Color3.fromRGB(255, 96, 80)
 
 local function menuOpen(): boolean
 	return player:GetAttribute("MenuPrincipal") == true
+end
+
+-- Lote 22: a contagem é de quem já está em campo. Na mesa (escolha de lado, squad e papel: o
+-- VT65LobbyBackdrop ligado) ela tapava as bandeiras; ali a partida espera cheia (MatchService) e o
+-- número ficava parado em 10.
+local function inField(): boolean
+	local pg = player:FindFirstChildOfClass("PlayerGui")
+	local lobby = pg and pg:FindFirstChild("VT65LobbyBackdrop")
+	if lobby and lobby:IsA("ScreenGui") and lobby.Enabled then
+		return false
+	end
+	local c = player.Character
+	local h = c and c:FindFirstChildOfClass("Humanoid")
+	return h ~= nil and h.Health > 0 and player:GetAttribute("Role") ~= nil
 end
 
 local function paint(prep: number)
@@ -61,7 +80,13 @@ local function paint(prep: number)
 		top.TextColor3 = V.KHAKI
 		num.Text = string.format("%d", prep)
 		num.TextColor3 = if prep <= 5 then UiKit.BRASS_LIGHT else V.TEXT
-		sub.Text = "Espere na sua base"
+		if os.clock() < backUntil then
+			sub.Text = "Não saia da base!"
+			sub.TextColor3 = AVISO_COR
+		else
+			sub.Text = "Pegue um veículo e espere na base"
+			sub.TextColor3 = V.TEXT
+		end
 		if prep ~= shown then
 			shown = prep
 			-- cada segundo: o número cresce e assenta (os 5 últimos com mais força)
@@ -75,8 +100,17 @@ local function paint(prep: number)
 		num.Text = "VALENDO!"
 		num.TextColor3 = UiKit.BRASS_LIGHT
 		sub.Text = "Tome os pontos"
+		sub.TextColor3 = V.TEXT
 	end
 end
+
+-- o servidor puxou este jogador de volta para a base: avisa já, sem esperar o próximo Match_State
+player:GetAttributeChangedSignal("PrepVolta"):Connect(function()
+	backUntil = os.clock() + 2.5
+	if gui.Enabled and lastPrep > 0 then
+		paint(lastPrep)
+	end
+end)
 
 Net.event("Match_State").OnClientEvent:Connect(function(st: any)
 	if type(st) ~= "table" then
@@ -94,7 +128,7 @@ Net.event("Match_State").OnClientEvent:Connect(function(st: any)
 		}):Play()
 	end
 	lastPrep = prep
-	local on = (prep > 0 or os.clock() < goUntil) and not menuOpen()
+	local on = (prep > 0 or os.clock() < goUntil) and not menuOpen() and inField()
 	gui.Enabled = on
 	if on then
 		paint(prep)
@@ -108,7 +142,7 @@ end)
 task.spawn(function()
 	while true do
 		task.wait(0.25)
-		if gui.Enabled and lastPrep <= 0 and os.clock() >= goUntil then
+		if gui.Enabled and ((lastPrep <= 0 and os.clock() >= goUntil) or not inField()) then
 			gui.Enabled = false
 		end
 	end

@@ -17,9 +17,11 @@ local TweenService = game:GetService("TweenService")
 
 local Bandeiras = {}
 
--- proporção (largura / altura) de cada bandeira; a dos EUA conta a lona do mastro da imagem
--- (1.023 x 522 px)
-Bandeiras.RATIO = { US = 1023 / 522, VC = 1.5 } :: { [string]: number }
+-- proporção (largura / altura) de cada bandeira. Lote 22 (dono: "deixa as bandeiras na escolha de
+-- lado do mesmo tamanho"): as duas em 5:3, a proporção comercial da bandeira dos EUA (3 x 5 pés), e
+-- as imagens desenhadas assim (tools/bandeiras_textura.py, 1.020 x 612 px; a lona do mastro fica
+-- dentro). Antes: EUA 1.023/522 (1,96) e Frente 3:2.
+Bandeiras.RATIO = { US = 5 / 3, VC = 5 / 3 } :: { [string]: number }
 Bandeiras.IMAGE_KEY = { US = "bandeira_eua", VC = "bandeira_frente" } :: { [string]: string }
 
 -- ID da imagem publicada da bandeira do lado (nil enquanto o servidor não resolveu o decal)
@@ -109,7 +111,7 @@ local function base(parent: Instance, w: number, h: number, z: number): Frame
 	return f
 end
 
--- Bandeira dos EUA de h px de altura (largura pela proporção 1,9).
+-- Bandeira dos EUA de h px de altura (largura pela proporção RATIO.US; cantão em 2/5 dela).
 function Bandeiras.us(parent: Instance, h: number, z: number?): Frame
 	local zz = z or 1
 	local w = math.floor(h * Bandeiras.RATIO.US + 0.5)
@@ -139,7 +141,7 @@ function Bandeiras.us(parent: Instance, h: number, z: number?): Frame
 	return f
 end
 
--- Bandeira da Frente (VC) de h px de altura (2:3).
+-- Bandeira da Frente (VC) de h px de altura (largura pela proporção RATIO.VC).
 function Bandeiras.nlf(parent: Instance, h: number, z: number?): Frame
 	local zz = z or 1
 	local w = math.floor(h * Bandeiras.RATIO.VC + 0.5)

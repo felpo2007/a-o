@@ -50,7 +50,9 @@ MatchService.NEXT_MATCH_S = 30 -- relatório e placar na tela antes da próxima 
 -- depois a partida começa e os jogadores vão dominar os pontos"): cada partida nova abre com PREP_S
 -- de preparo. Nele não há captura nem sangria de reforços, o relógio da partida não anda, todo mundo
 -- nasce no QG e fica perto dele (PreparoService) e os bots esperam na base.
-MatchService.PREP_S = 30
+-- Lote 22 (dono: "faça de 10 seg a contagem regressiva onde os jogadores podem pegar os veículos"):
+-- eram 30 s
+MatchService.PREP_S = 10
 MatchService.prepUntil = 0
 
 function MatchService.inPrep(): boolean

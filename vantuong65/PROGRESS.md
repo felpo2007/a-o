@@ -95,6 +95,21 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
 - **Lote 21 (v66, D-135): feito.** Vegetação com até 6 mil triângulos por modelo (14 modelos
   reduzidos e reenviados; a D-66 pedia no mínimo 8 mil).
 - "jogo de poder roblox": engano (resposta do dono), nada a fazer.
+- Pedidos novos do dono (14/11, 15h57 a 16h41), em lotes:
+  - **Lote 22 (v67, D-136): feito.** Bandeiras do mesmo tamanho na escolha de lado; grama 1/3 mais
+    baixa; contagem de 10 s em que dá para pegar veículo, mas não sair da base.
+  - **Lote 23:** recompensa diária e passe mais atraentes para crianças, com letras maiores
+    (principalmente as das recompensas).
+  - **Lote 24:** símbolo de granada perto: vermelho = vai matar, branco = vai ferir.
+  - **Lote 25:** nome do jogo (STARLITE: Vietnã 1965, D-101) e imagens da página (capas em
+    `marketing/capas`). O dono vai dar o acesso.
+  - **Lote 26:** mapa novo pela imagem do dono:
+    - 5 objetivos: arrozais (SO), serraria (NO), vila (centro), ponte e cais (SE), engenho (NE);
+      rio; base dos EUA a oeste e do VC a leste;
+    - um objetivo fica na mata fechada;
+    - bases mais longe dos objetivos;
+    - mais relevo.
+  - **Lote 27:** correção de bugs de textura, gráficos, movimentação, tiros e granadas.
 
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;
@@ -103,6 +118,29 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
   - base do VC sob a mata; nomes do equipamento da Intendência sem tradução; Type 54 em 3ª pessoa;
   - a pá do autoteste na 1ª rodada de cada sessão;
   - as teclas agem por baixo da tela de carregamento (a pá cavou durante o carregamento, D-129).
+
+## v67: lote 22, bandeiras iguais, grama mais baixa e contagem de 10 s (2026-11-14, D-136)
+- **A publicar.**
+- **Feito:**
+  - bandeiras dos EUA e da Frente no mesmo retângulo de 5:3, na mesa e nas fichas; imagens
+    refeitas nessa proporção e reenviadas (as antigas como `Images.bandeira_*_v66`);
+  - grama do terreno 1/3 mais baixa (`GrassLength` 1 → 0,67, no bake);
+  - contagem do começo de 10 s (eram 30). O veículo com gente dentro que passa de 60 m do QG volta
+    para a borda, parado e de frente para o QG. Quem é puxado de volta vê "Não saia da base!" em
+    vermelho; o texto normal é "Pegue um veículo e espere na base";
+  - a contagem não aparece mais por cima da mesa de escolha de lado; só em campo.
+- **Conferido no Studio:**
+  - mesa com as duas bandeiras do mesmo tamanho e sem a contagem por cima;
+  - a pé, levado a 80 m: voltou para 58 m;
+  - no jipe, levado a 90 m: voltou para 54 m em 1,2 s, sentado, parado e de frente para o QG
+    (cosseno 0,98);
+  - o aviso em vermelho na tela;
+  - a contagem em campo de 9 a 1 e depois "VALENDO!";
+  - `GrassLength` 0,67 no place.
+- **Testes:** Lune todos ok (interface com o teste novo das bandeiras e o da contagem atualizado);
+  pytest; ruff; luau-lsp.
+- **Não testado:** um jogador de verdade dirigindo para fora da base (o teste moveu o jipe pelo
+  servidor); celular.
 
 ## v66: lote 21, vegetação com até 6 mil triângulos (2026-11-14, D-135)
 - **Publicada** (versão 66 do place, commit e9a3d6e).

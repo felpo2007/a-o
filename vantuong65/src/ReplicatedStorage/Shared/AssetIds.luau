@@ -265,8 +265,8 @@ return {
 		caveira_abate = 131470182680103,
 		-- D-133: bandeiras da escolha de lado (tools/bandeiras_textura.py); Decal, o ImagensUi resolve
 		-- a imagem (atributo "Img_bandeira_eua"/"Img_bandeira_frente"). Com 0, a bandeira em peças
-		bandeira_eua = 104461985345184,
-		bandeira_frente = 127727970793387,
+		bandeira_eua = 81433016721243,
+		bandeira_frente = 113462893009049,
 	},
 	-- Texturas do chão (D-66; Poly Haven, CC0): IDs de DECAL devolvidos pelo Open Cloud. O
 	-- MaterialVariant precisa do ID da IMAGEM de cada decal: fica em GroundImages (resolvido no Studio).

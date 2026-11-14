@@ -71,6 +71,8 @@ print(
 -- arquivo; o script do jogo leva "lacking capability PluginOrOpenCloud" (teste no Studio, 2026-11-10).
 -- O place do Rojo vem sem Terrain (o Studio cria um vazio ao abrir): criamos aqui, com as
 -- propriedades, e o servidor gera os voxels em runtime (TerrainRuntime).
+-- Lote 22 (dono: "diminua 1/3 da altura da grama"): GrassLength de 1 para 2/3.
+local GRASS_LENGTH = 0.67
 local terrain = workspace:FindFirstChildOfClass("Terrain")
 if not terrain then
 	local ok, t = pcall(function()
@@ -84,9 +86,13 @@ end
 if terrain then
 	local ok, err = pcall(function()
 		(terrain :: any).Decoration = true;
-		(terrain :: any).GrassLength = 1
+		(terrain :: any).GrassLength = GRASS_LENGTH
 	end)
-	print(if ok then "terreno: grama animada ligada" else "terreno: sem grama animada (" .. tostring(err) .. ")")
+	print(
+		if ok
+			then string.format("terreno: grama animada ligada (GrassLength %.2f)", GRASS_LENGTH)
+			else "terreno: sem grama animada (" .. tostring(err) .. ")"
+	)
 else
 	print("terreno: Workspace sem Terrain no place base")
 end

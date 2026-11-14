@@ -4949,3 +4949,50 @@ igual.
 direita.
 
 **Não testado:** celular e num servidor do Roblox.
+
+## D-136 — Lote 22: bandeiras iguais, grama mais baixa e contagem de 10 s (v67, 2026-11-14)
+
+Pedidos do dono:
+- "deixa as bandeiras na escolha de lado do mesmo tamanho";
+- "diminua 1/3 da altura da grama";
+- "faça de 10 seg a contagem regressiva onde os jogadores podem pegar os veículos etc, porém não
+  podem sair da base".
+
+**Bandeiras:**
+- Antes, a dos EUA era 1,96:1 (1,9:1 mais a lona do mastro) e a da Frente 3:2, e a dos EUA ficava
+  bem mais larga na mesa.
+- Agora as duas usam o mesmo retângulo de 5:3, a proporção comercial da bandeira dos EUA (3 x 5 pés),
+  com a lona do mastro dentro. Nada foi esticado:
+  - `tools/bandeiras_textura.py` desenha as duas já em 1.020 x 612 px;
+  - cantão em 2/5 do comprimento;
+  - a estrela da Frente com o mesmo raio.
+- `Bandeiras.RATIO` = 5:3 para as duas. A mesa (`LobbyScene.flagOnTable`) e as fichas de alistamento
+  usam a proporção comum.
+- Imagens reenviadas; as antigas ficaram como `Images.bandeira_*_v66`.
+
+**Grama:** `Terrain.GrassLength` de 1 para 0,67 no bake (`tools/bake_place.luau`, `GRASS_LENGTH`). Só
+o plugin ou o arquivo do place escreve essa propriedade.
+
+**Contagem** (`MatchService.PREP_S` 30 → 10; `PreparoService`):
+- Pegar veículo já era livre na contagem. O que faltava era prender o veículo: quem estava sentado
+  saía da base dirigindo.
+- Agora, a cada 0,5 s, o veículo com gente dentro que passou de 60 m do QG volta 6 m para dentro do
+  raio. Ele volta na mesma altura sobre o chão (o helicóptero no ar), de frente para o QG, parado e
+  com quem está sentado.
+- Quem é puxado de volta (a pé ou no veículo) ganha +1 no atributo `PrepVolta` do Player. A contagem
+  mostra "Não saia da base!" em vermelho por 2,5 s; o texto normal é "Pegue um veículo e espere na
+  base" (traduções em en, es e vi).
+- **Contagem fora da mesa:** a contagem aparecia por cima da mesa de escolha de lado e tapava as
+  bandeiras; ali o número ficava parado em 10, porque a partida espera cheia até alguém nascer. Agora
+  só aparece em campo: personagem vivo, papel escolhido e o `VT65LobbyBackdrop` desligado.
+
+**Conferido no Studio:**
+- a pé, levado a 80 m: voltou para 58 m;
+- no jipe M151, levado a 90 m: voltou para 54 m em 1,2 s, sentado, parado e de frente para o QG
+  (cosseno 0,98);
+- nascendo no QG ninguém é puxado (o ponto de nascer fica dentro dos 60 m);
+- em campo, a contagem vai de 9 a 1 e mostra "VALENDO!";
+- fotos em `testes/lote22/`.
+
+**Não testado:** um jogador de verdade dirigindo para fora (o teste moveu o jipe pelo servidor);
+celular.

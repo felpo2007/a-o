@@ -2,10 +2,10 @@
 quero a bandeira de cada país esticada sobre a mesa, bem detalhadas e texturizadas").
 
 Uso: `uv run --group arte python tools/bandeiras_textura.py`
-Saídas em `assets/bandeiras/`: `bandeira_eua.png` (1023 x 522: 1,9:1 mais a lona do mastro) e
-`bandeira_frente.png` (1024 x 683, 3:2), desenhadas a 2x e reduzidas (borda limpa). O Roblox
-reduz imagem a 1024 px de lado; por isso este tamanho. Também `testes/conferencia_bandeiras.png`,
-as duas lado a lado.
+Saídas em `assets/bandeiras/`: `bandeira_eua.png` e `bandeira_frente.png`, as duas com 1020 x 612
+(5:3, lote 22: o mesmo tamanho na mesa; a dos EUA com a lona do mastro dentro), desenhadas a 2x e
+reduzidas (borda limpa). O Roblox reduz imagem a 1024 px de lado; por isso este tamanho. Também
+`testes/conferencia_bandeiras.png`, as duas lado a lado.
 
 Geometria:
 - EUA (Executive Order 10834, 1959, a bandeira de 1965): altura 1, comprimento 1,9; 13 listras
@@ -37,6 +37,11 @@ RAIZ = Path(__file__).resolve().parents[1]
 SAIDA = RAIZ / "assets" / "bandeiras"
 CONF = RAIZ / "testes" / "conferencia_bandeiras.png"
 K = 2  # supersample
+# Lote 22 (dono: "deixa as bandeiras na escolha de lado do mesmo tamanho"): as duas no mesmo
+# retângulo de 5:3, a proporção comercial da bandeira dos EUA (3 x 5 pés). A dos EUA era 1,9:1
+# mais a lona; a da Frente, 3:2. Cada desenho é refeito na proporção nova (nada esticado).
+PROPORCAO = 5 / 3
+ALTURA = 612  # px na imagem final: 1.020 x 612 (o Roblox reduz acima de 1.024)
 rng = np.random.default_rng(1965818)
 
 US_RED = (178, 34, 52)
@@ -116,9 +121,9 @@ def costura(
 
 
 def bandeira_eua() -> Image.Image:
-    H = 522 * K  # com a lona, 1.023 px de largura (o Roblox reduz acima de 1.024)
-    W = int(round(H * 1.9))
-    lona = int(0.06 * H)  # tira de lona do mastro (fora da proporção da bandeira)
+    H = ALTURA * K
+    lona = int(0.06 * H)  # tira de lona do mastro, dentro dos 5:3
+    W = int(round(H * PROPORCAO)) - lona
     img = Image.new("RGB", (W + lona, H), US_WHITE)
     d = ImageDraw.Draw(img)
     x0 = lona
@@ -129,7 +134,8 @@ def bandeira_eua() -> Image.Image:
     # costura entre as listras
     for i in range(1, 13):
         costura(d, [(x0, i * faixa), (x0 + W, i * faixa)], (120, 30, 38), 1.2 * K)
-    ch, cw = 7 * faixa, 0.76 * H
+    # cantão: 0,76/1,9 = 2/5 do comprimento (a regra das bandeiras de 3 x 5 pés)
+    ch, cw = 7 * faixa, W * 0.76 / 1.9
     d.rectangle([x0, 0, x0 + cw, ch], fill=US_BLUE)
     costura(d, [(x0 + cw, 0), (x0 + cw, ch), (x0, ch)], (40, 38, 70), 1.2 * K)
     # 50 estrelas (bordadas: sombra fina embaixo à direita e o corpo claro)
@@ -158,8 +164,8 @@ def bandeira_eua() -> Image.Image:
 
 
 def bandeira_frente() -> Image.Image:
-    H = 683 * K
-    W = int(round(H * 1.5))
+    H = ALTURA * K
+    W = int(round(H * PROPORCAO))
     img = Image.new("RGB", (W, H), NLF_RED)
     d = ImageDraw.Draw(img)
     d.rectangle([0, H / 2, W, H], fill=NLF_BLUE)

@@ -412,7 +412,8 @@ end)
 test("contagem do começo: preparo no servidor, base, bots parados e a contagem na tela", function()
 	local S = "src/ServerScriptService/Modules/"
 	local ms = fs.readFile(S .. "MatchService.luau")
-	assert(string.find(ms, "MatchService.PREP_S = 30", 1, true), "30 s de contagem")
+	-- lote 22 (dono: "faça de 10 seg a contagem"): eram 30 s
+	assert(string.find(ms, "MatchService.PREP_S = 10", 1, true), "10 s de contagem")
 	assert(string.find(ms, "MatchService.startedAt = MatchService.prepUntil", 1, true), "relógio depois da contagem")
 	assert(string.find(ms, "elseif st and not MatchService.ended then", 1, true), "sem captura na contagem")
 	assert(string.find(ms, "prep = math.ceil(MatchService.prepLeft())", 1, true), "contagem no Match_State")
@@ -423,6 +424,9 @@ test("contagem do começo: preparo no servidor, base, bots parados e a contagem 
 	assert(string.find(fs.readFile(S .. "BotVehicles.luau"), "MatchService.inPrep()", 1, true), "viaturas paradas")
 	local ct = fs.readFile(C .. "Contagem.client.luau")
 	assert(string.find(ct, "st.prep", 1, true) and string.find(ct, '"VALENDO!"', 1, true), "contagem na tela")
+	-- lote 22: o veículo com gente dentro também volta para a base, e a tela avisa quem foi puxado
+	assert(string.find(pr, "leashVehicle(v, hq, r)", 1, true), "veículo preso na base")
+	assert(string.find(pr, '"PrepVolta"', 1, true) and string.find(ct, '"PrepVolta"', 1, true), "aviso de volta")
 end)
 
 -- D-121 (dono: "3D, porém tire os soldados dali"): a mesa sem soldados; a câmera roda depois dos
@@ -783,6 +787,15 @@ test("D-133: bandeiras de pano esticadas na mesa, com a imagem detalhada; ALISTA
 	end
 	local mesa = fs.readFile(C .. "DeployScreen.luau")
 	assert(string.find(mesa, "cta.AutomaticSize = Enum.AutomaticSize.X", 1, true), "botão do tamanho do texto")
+end)
+
+test("lote 22: as duas bandeiras do mesmo tamanho (5:3)", function()
+	local band = fs.readFile(C .. "Bandeiras.luau")
+	local us, vc = string.match(band, "Bandeiras%.RATIO = { US = ([%d%./ ]+), VC = ([%d%./ ]+) }")
+	assert(us and vc, "RATIO não achado")
+	assert(us == vc, "proporções diferentes: " .. us .. " e " .. vc)
+	local cena = fs.readFile(C .. "LobbyScene.luau")
+	assert(string.find(cena, "local w = FLAG_D * Bandeiras.RATIO[faction]", 1, true), "a mesa usa a proporção comum")
 end)
 
 print(string.format("%d ok, %d falhas", passed, failed))
