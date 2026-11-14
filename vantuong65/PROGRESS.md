@@ -32,6 +32,22 @@
 - Lote 6: análise do jogo inteiro com ideias em imagens.
 - Perguntas ao dono: a M4 (é de 1994); a mão escorregando (em que vista e momento).
 
+## v49: lote 5, menu principal e tutorial fora da partida (2026-11-13, D-117)
+- **Publicada** como versão 49 do place (build do commit cae28e8).
+- **Feito:**
+  - menu principal: o mapa girando em Xóm Gò, o soldado à direita e os botões JOGAR,
+    CONFIGURAÇÕES, LOJA, PASSE e TUTORIAL;
+  - COMO JOGAR em nove cartões com os botões do aparelho de agora; o tutorial não começa mais na
+    partida;
+  - a tela de carregamento espera o mapa inteiro (95% das peças, teto de 4 min) e entrega para o
+    menu.
+- **Conferido no Studio:**
+  - 69 a 72 s até o menu, com 99,9% das peças do mapa no cliente;
+  - os cinco botões abrem as telas certas;
+  - o JOGAR põe em campo sem o painel de tutorial;
+  - 0 erros de script.
+- **Não testado:** controle de verdade e celular no menu.
+
 ## v48: a grama de volta e mais árvores (2026-11-13, D-116)
 - **Publicada** como versão 48 do place (build do commit 4ae4d8a).
 - **Feito:** roça seca até 45 m das casas (era 110), clareira da base dos EUA de 80 m (era 150),
