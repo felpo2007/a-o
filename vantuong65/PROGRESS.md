@@ -62,7 +62,7 @@
 - **Lote 12, análise:** bots, gráficos, armas, tiros e veículos (junto do lote 6).
 
 ## v55: lote 10, mapa de 700 x 700 m, três objetivos e o solo (2026-11-14, D-123)
-- **Publicação:** pendente (ver o commit "v55 publicada").
+- **Publicada** como versão 55 do place (build do commit 69ce5df).
 - **Feito:**
   - área de 700 x 700 m com Xóm Gò no meio; QGs no meio das bordas oeste (VC) e leste (EUA), 50 m
     para dentro;
