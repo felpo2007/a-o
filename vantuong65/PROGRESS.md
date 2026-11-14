@@ -102,7 +102,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
   - as teclas agem por baixo da tela de carregamento (a pá cavou durante o carregamento, D-129).
 
 ## v63: lote 18, ataque aéreo no objetivo, nos dois lados e com som (2026-11-14, D-132)
-- **A publicar.**
+- **Publicada** como versão 63 do place (build do commit d52c68f).
 - **Feito:**
   - o evento "Ataque aéreo (A-4)" cai em cima do objetivo (antes recuava até 80 m dos amigos);
   - as bombas ferem os dois lados; os dois recebem o alerta; aviso de 10 s;
