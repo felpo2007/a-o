@@ -266,6 +266,9 @@ return {
 		forest_ground_06_cor = 70592474113049,
 		forest_ground_06_normal = 103100751913983,
 		forest_ground_06_rugosidade = 80664182036978,
+		dirt_floor_cor = 133674721891264,
+		dirt_floor_normal = 81507668993389,
+		dirt_floor_rugosidade = 129686912768261,
 	},
 	-- Céu de foto (D-69; Poly Haven kloofendal_48d_partly_cloudy_puresky, CC0; tools/fetch_sky.py):
 	-- IDs de DECAL do Open Cloud; o Sky precisa do ID da IMAGEM (SkyImages, resolvido no Studio).
@@ -290,10 +293,10 @@ return {
 	-- imagem em 0 e o decal publicado, o servidor resolve a imagem no início (CartaService); com os
 	-- dois em 0, o mapa tático usa o desenho simples de antes.
 	Carta = {
-		nw = 86194536561052,
-		ne = 102305020169422,
-		sw = 97202618798918,
-		se = 93805403997434,
+		nw = 121148499597546,
+		ne = 87001449934100,
+		sw = 89264760629643,
+		se = 81408069465446,
 	},
 	CartaImages = {
 		nw = 0,
@@ -314,5 +317,8 @@ return {
 		forest_ground_06_cor = 74088955875898,
 		forest_ground_06_normal = 80878862384855,
 		forest_ground_06_rugosidade = 96554687561752,
+		dirt_floor_cor = 76029631233105,
+		dirt_floor_normal = 109768166470823,
+		dirt_floor_rugosidade = 75775835318235,
 	},
 }

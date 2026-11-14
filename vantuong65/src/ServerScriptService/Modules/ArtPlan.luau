@@ -57,7 +57,11 @@ local FeatureBuilder = mod(function()
 end, "../../ServerStorage/VT65Build/FeatureBuilder")
 
 local M = 0.28
-ArtPlan.VERSION = 2 -- o terreno gerado guarda isto (atributo SitePlan): base pelo plano só se bater
+ArtPlan.VERSION = 3 -- o terreno gerado guarda isto (atributo SitePlan): base pelo plano só se bater
+-- D-115 (pedido do dono: "aumente as cabanas de todo jogo"; "cabanas muito pequenas no mapa"): casas
+-- da carta e celeiros 30% maiores (o soldado tem 2,0 m, D-98; o beiral ficava na altura da cabeça).
+-- As da vila grande seguem Data/Village.houseScale (tools/vila_estradas.ESCALA_CASA, o mesmo 1,3).
+ArtPlan.HOUSE_SCALE = 1.3
 ArtPlan.PLANT_SINK_M = 0.10 -- pé da planta abaixo do ponto mais baixo do chão sob ele
 ArtPlan.DIKE_HALF_M = 0.9 -- meia largura da lombada do dique (Site: crista 0,3 m e metade da rampa)
 ArtPlan.ROAD_CLEAR_M = 1.0 -- planta a pelo menos isto da beira da estrada
@@ -404,11 +408,12 @@ function ArtPlan.structures(ctx: Ctx, has: (string) -> boolean): { Item }
 	-- casas da carta: variante sorteada, quintal (coqueiro, bananeira, celeiro, cerca)
 	local rng = Rng.new(19650818)
 	local variants = ArtBudget.HOUSE_VARIANTS
+	local HS = ArtPlan.HOUSE_SCALE
 	for i = 1, #F.houses, 4 do
 		local x, z, yaw = F.houses[i], F.houses[i + 1], F.houses[i + 3]
 		local key = variants[1 + math.floor(rng:next() * #variants)]
-		local hx, hz = half(key, 1)
-		padded(key, x, z, yaw, 1, "house", { home = true })
+		local hx, hz = half(key, HS)
+		padded(key, x, z, yaw, HS, "house", { home = true })
 		local diag = math.sqrt(hx * hx + hz * hz)
 		if rng:next() < 0.35 then
 			local a = rng:range(0, 2 * math.pi)
@@ -427,12 +432,12 @@ function ArtPlan.structures(ctx: Ctx, has: (string) -> boolean): { Item }
 			)
 		end
 		if rng:next() < 0.15 then
-			local gx, gz = rot(x, z, yaw, 0, hz + 3 / M)
-			padded("granary", gx, gz, yaw, 1, "prop")
+			local gx, gz = rot(x, z, yaw, 0, hz + 3 * HS / M)
+			padded("granary", gx, gz, yaw, HS, "prop")
 		end
 		if rng:next() < 0.3 then
 			for k = -1, 1 do
-				local fx, fz = rot(x, z, yaw, k * 3 / M, -(hz + 2.2 / M))
+				local fx, fz = rot(x, z, yaw, k * 3 * HS / M, -(hz + 2.2 / M))
 				padded("bamboo_fence", fx, fz, yaw, 1, "prop")
 			end
 		end
@@ -601,13 +606,15 @@ function ArtPlan.structures(ctx: Ctx, has: (string) -> boolean): { Item }
 	local V = ctx.village
 	if V then
 		local vyaw = V.yaw
+		-- D-115: casas, lotes e anexos na escala da vila (Village.houseScale; 1 nos dados antigos)
+		local K = V.houseScale or 1
 		-- praça do mercado: patamar de terra batida
 		Site.addPad(ctx.site, V.x, V.z, vyaw, V.plazaHalf, V.plazaHalf * 0.6, true)
 		for i, h in V.houses do
 			local x, z, yaw, variant, tint, scale, attach = h[1], h[2], h[3], h[4], h[5], h[6], h[7]
 			local unique = ArtBudget.VILLAGE_HOUSES[variant]
 			local key = if unique and has(unique) then unique else ArtPlan.HOUSE_FALLBACK[variant]
-			local s = if key == unique then 1 else scale
+			local s = if key == unique then K else scale * K
 			local it: Item
 			-- com varanda, o patamar da casa cresce 1,25 m (a varanda fica no chão da casa). A casa
 			-- única (2026-11-13) tem a varanda e os anexos dela no modelo: sem a varanda de peças.
@@ -615,7 +622,7 @@ function ArtPlan.structures(ctx: Ctx, has: (string) -> boolean): { Item }
 			if isUnique then
 				attach = bit32.band(attach, bit32.bnot(1))
 			end
-			local grow = if bit32.btest(attach, 1) then 1.25 / M else 0
+			local grow = if bit32.btest(attach, 1) then 1.25 * K / M else 0
 			if isUnique then
 				-- modelo único (pegada de projeto: até houseMax de lado, pivô no meio da caixa e no
 				-- chão). O patamar é o quadrado inteiro: o piso de terra batida da casa fica 0,15 m acima
@@ -630,7 +637,7 @@ function ArtPlan.structures(ctx: Ctx, has: (string) -> boolean): { Item }
 					x = x,
 					z = z,
 					yaw = yaw + turn + (if ArtPlan.VILLAGE_FRONT_FLIP then math.pi else 0),
-					scale = 1,
+					scale = s,
 					hx = hm,
 					hz = hm,
 					base = pad.level,
@@ -659,19 +666,20 @@ function ArtPlan.structures(ctx: Ctx, has: (string) -> boolean): { Item }
 			end
 			-- anexos no quadro da casa (+Z para longe da rua; frente = -Z). Lote de 12 x 14 m com a casa
 			-- (até 8,5 m) a 1,5 m da frente: o meio do quintal do fundo fica a 6,25 m do centro da casa e
-			-- a frente do lote a 5,75 m (tools/vila_estradas.py)
-			local back = 6.25 / M
-			local front = -5.5 / M
+			-- a frente do lote a 5,75 m (tools/vila_estradas.py). D-115: tudo vezes K.
+			local back = 6.25 * K / M
+			local front = -5.5 * K / M
+			local side = 3.5 * K / M
 			if on(1) then -- varanda de palha na frente
-				local px, pz = rot(x, z, yaw, 0, -(hz + 0.6 / M))
+				local px, pz = rot(x, z, yaw, 0, -(hz + 0.6 * K / M))
 				table.insert(out, {
 					key = "parts:varanda",
 					x = px,
 					z = pz,
 					yaw = yaw,
-					scale = 1,
+					scale = K,
 					hx = hx,
-					hz = 0.6 / M,
+					hz = 0.6 * K / M,
 					base = it.base,
 					group = "village",
 					foliage = false,
@@ -681,23 +689,23 @@ function ArtPlan.structures(ctx: Ctx, has: (string) -> boolean): { Item }
 				})
 			end
 			if on(2) then -- cozinha no fundo, à esquerda
-				local kx, kz = rot(x, z, yaw, -3.5 / M, back)
-				padded("hut_kitchen", kx, kz, yaw, 0.85, "village", { village = i, padLevel = it.base })
+				local kx, kz = rot(x, z, yaw, -side, back)
+				padded("hut_kitchen", kx, kz, yaw, 0.85 * K, "village", { village = i, padLevel = it.base })
 			end
 			if on(4) then -- celeiro no fundo, à direita
-				local gx, gz = rot(x, z, yaw, 3.5 / M, back)
-				padded("granary", gx, gz, yaw, 0.85, "village", { village = i, padLevel = it.base })
+				local gx, gz = rot(x, z, yaw, side, back)
+				padded("granary", gx, gz, yaw, 0.85 * K, "village", { village = i, padLevel = it.base })
 			end
 			-- o que fica no quintal ganha um patamarzinho no nível da casa (o lote é um terraço só: a vila
 			-- fica na encosta do morrote; assentado pelo ponto mais baixo, o varal e a cerca entravam até
 			-- 0,9 m no chão do lado de cima, e com o nível próprio o patamar dele e o da casa se cruzavam)
 			if on(8) and not on(2) then -- horta no fundo, à esquerda (onde não há cozinha)
-				local gx, gz = rot(x, z, yaw, -3.5 / M, back)
-				padded("parts:horta", gx, gz, yaw, 1, "village", { village = i, padLevel = it.base })
+				local gx, gz = rot(x, z, yaw, -side, back)
+				padded("parts:horta", gx, gz, yaw, K, "village", { village = i, padLevel = it.base })
 			end
 			if on(16) then -- cerca na frente do lote, com a entrada no meio
 				for _, k in { -1, 1 } do
-					local fx, fz = rot(x, z, yaw, k * 3.7 / M, front)
+					local fx, fz = rot(x, z, yaw, k * 3.7 * K / M, front)
 					padded(
 						"bamboo_fence",
 						fx,
@@ -714,8 +722,8 @@ function ArtPlan.structures(ctx: Ctx, has: (string) -> boolean): { Item }
 				seated("water_jar", jx, jz, yaw, 1, "village", { village = i })
 			end
 			if on(64) and not on(4) then -- meda de palha no fundo, à direita (onde não há celeiro)
-				local mx, mz = rot(x, z, yaw, 3.5 / M, back)
-				padded("straw_stack", mx, mz, yaw, 0.85, "village", { village = i, padLevel = it.base })
+				local mx, mz = rot(x, z, yaw, side, back)
+				padded("straw_stack", mx, mz, yaw, 0.85 * K, "village", { village = i, padLevel = it.base })
 			end
 			if on(128) then -- varal no meio do fundo
 				local vx, vz = rot(x, z, yaw, 0, back)

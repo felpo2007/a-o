@@ -633,6 +633,27 @@
   "name": "VT65 chao forest_ground_06 rugosidade"
  },
  {
+  "key": "Ground.dirt_floor_cor",
+  "file": "assets/texturas/dirt_floor_cor.jpg",
+  "assetType": "Decal",
+  "name": "VT65 chao dirt_floor cor",
+  "description": "VAN TUONG 65 - terra batida das ruas e quintais (Poly Haven dirt_floor, CC0)"
+ },
+ {
+  "key": "Ground.dirt_floor_normal",
+  "file": "assets/texturas/dirt_floor_normal.jpg",
+  "assetType": "Decal",
+  "name": "VT65 chao dirt_floor normal",
+  "description": "VAN TUONG 65 - terra batida das ruas e quintais (Poly Haven dirt_floor, CC0)"
+ },
+ {
+  "key": "Ground.dirt_floor_rugosidade",
+  "file": "assets/texturas/dirt_floor_rugosidade.jpg",
+  "assetType": "Decal",
+  "name": "VT65 chao dirt_floor rugosidade",
+  "description": "VAN TUONG 65 - terra batida das ruas e quintais (Poly Haven dirt_floor, CC0)"
+ },
+ {
   "key": "Models.ph_island_tree_01",
   "file": "assets/arvores/ph_island_tree_01.glb",
   "assetType": "Model",

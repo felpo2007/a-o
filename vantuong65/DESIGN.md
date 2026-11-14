@@ -3942,3 +3942,49 @@ fica com o dono: a chave não tem a permissão (`server-size 80` respondeu "Scop
   servidor a 60 Hz, 0 erros de script.
 
 **Não testado:** partida inteira até o fim, celular, 40 jogadores de verdade num servidor.
+
+## D-115 — Lote 4b: cabanas e vilas maiores, terra batida nas ruas (v47, 2026-11-13)
+
+Pedidos do dono: "aumente as cabanas de todo jogo e o tamanho das vilas"; "cabanas muito pequenas
+no mapa"; "dê um aspecto de terra batida para o chão do jogo nas ruas".
+
+**Cabanas 30% maiores** (`ArtPlan.HOUSE_SCALE` e `Village.houseScale` = 1,3, PLACEHOLDER): no
+Studio, a casa da vila tinha 8,3 x 8,3 m e 4,8 m até a cumeeira, e o beiral ficava na altura da
+cabeça do soldado de 2,0 m (D-98). Agora:
+- casas da vila 10,8 x 10,8 x 6,2 m; casas da carta (a de varanda: 10,4 x 10,4 x 8,0 m);
+- cozinha, celeiro, meda, horta e varanda na mesma escala, e os anexos do quintal na medida do lote
+  novo;
+- a vila de Xóm Gò cresce junto (`vila_estradas.ESCALA_CASA`): lotes de 15,6 x 18,2 m, passo de
+  18,2 m, travessas a ±72,8 m da praça, praça, pagode e casa comunal 30% maiores. Continuam as 48
+  casas, numa rua de ~327 m (era ~255 m);
+- a busca do lugar da vila ficou com passo de 7,5 m (era 15) e a margem do setor é meio lote + 1 m
+  (era 12 m fixos): com os lotes maiores a vila fica justa no setor B.
+
+**An Cường (2) virou vila:** no recorte de 500 m ela tinha só as 5 casas da carta.
+`crop_world.casario_an_cuong` acrescenta 18 casas de design em volta dela:
+- como os xóm do litoral de Quảng Ngãi: casas soltas a 20 m ou mais umas das outras, viradas para o
+  sul ou para o norte, com até 15° de folga;
+- fora das bocas de túnel e da trincheira (12 m), da base dos EUA (15 m), do mastro dos pontos fortes
+  (12 m), do riacho e de chão com mais de 1,6 m de desnível;
+- feito uma vez (`Grid.hamletAdded`). As estradas desviam delas.
+
+**Túneis:** a boca E5 e a trincheira sul ficaram 20 m mais perto da vila (185 m do centro; eram
+205). Os túneis partem do local da carta de An Cường (2) (E 270,030 / N 1692,850), e a 205 m metade
+da trincheira caía fora do mapa de 500 m. Agora ela fica a 18–26 m da borda sul. Galeria: 454 m (era
+474). O teste da borda passou a usar o mesmo centro do jogo; antes conferia pelo ponto forte.
+
+**Terra batida:** ruas, becos, praça, quintais, patamares e diques usam o material Ground. Ele levava
+a foto `forest_ground_06` (terra escura de mata: de cima e na rua parecia quase preto). Agora leva
+`dirt_floor` (Poly Haven, CC0, 2,07 m por ladrilho), terra clara compactada. Os 3 mapas foram
+publicados, e os IDs das imagens estão em `AssetIds.GroundImages`.
+
+**Carta:** refeita e publicada (a da v46 ficou como `Carta.<bloco>_v46`).
+
+**Conferido no Studio:**
+- a rua de Xóm Gò e os quintais aparecem em terra batida;
+- as casas aparecem na escala 1,30;
+- o casario de An Cường (2) aparece com quintais e estradas de terra;
+- primeiro tiroteio aos 17 s, servidor a 60 Hz, 0 erros de script.
+
+**Não testado:** o soldado entrando pela porta de cada modelo de casa (a foto em terceira pessoa não
+saiu: a câmera de primeira pessoa volta por cima) e o celular.

@@ -1979,7 +1979,7 @@
   "src/ServerScriptService/Modules/FieldWorkService.luau:110"
  ],
  "Cemitério": [
-  "src/ServerScriptService/Modules/ArtPlan.luau:262",
+  "src/ServerScriptService/Modules/ArtPlan.luau:266",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/LobbyScene.luau:336"
  ],
  "Centro": [
@@ -2046,7 +2046,7 @@
   "src/ReplicatedStorage/Shared/Progression.luau:330"
  ],
  "Colina": [
-  "src/ServerScriptService/Modules/ArtPlan.luau:912"
+  "src/ServerScriptService/Modules/ArtPlan.luau:920"
  ],
  "Colina 30": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/LobbyScene.luau:336"
@@ -3370,7 +3370,7 @@
  ],
  "Ground": [
   "src/ReplicatedStorage/Shared/VehicleDrive.luau:99",
-  "src/ServerScriptService/Modules/ArtPlan.luau:162",
+  "src/ServerScriptService/Modules/ArtPlan.luau:166",
   "src/ServerScriptService/Modules/PostureService.luau:57"
  ],
  "Gráficos": [
@@ -4326,7 +4326,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/AudioController.client.luau:215"
  ],
  "Nam Yên (4)": [
-  "src/ServerScriptService/Modules/ArtPlan.luau:992",
+  "src/ServerScriptService/Modules/ArtPlan.luau:1000",
   "src/ServerScriptService/Modules/AssetLoader.luau:38"
  ],
  "Navy Cross": [
@@ -5587,7 +5587,7 @@
   "src/ReplicatedFirst/LoadingScreen.client.luau:1240"
  ],
  "Riacho": [
-  "src/ServerScriptService/Modules/ArtPlan.luau:574"
+  "src/ServerScriptService/Modules/ArtPlan.luau:579"
  ],
  "Right": [
   "src/ReplicatedStorage/Shared/SoldierAnims.luau:338",
@@ -6813,7 +6813,7 @@
   "src/ReplicatedStorage/Shared/Weapons.luau:468",
   "src/ReplicatedStorage/Shared/Weapons.luau:711",
   "src/ReplicatedStorage/Shared/Weapons.luau:720",
-  "src/ServerScriptService/Modules/ArtPlan.luau:474",
+  "src/ServerScriptService/Modules/ArtPlan.luau:479",
   "src/ServerScriptService/Modules/BotEscolta.luau:133",
   "src/ServerScriptService/Modules/BotEscolta.luau:251",
   "src/ServerScriptService/Modules/BotService.luau:262",
@@ -7166,7 +7166,7 @@
   "src/ReplicatedStorage/Shared/Weapons.luau:410",
   "src/ReplicatedStorage/Shared/Weapons.luau:729",
   "src/ReplicatedStorage/Shared/Weapons.luau:736",
-  "src/ServerScriptService/Modules/ArtPlan.luau:474",
+  "src/ServerScriptService/Modules/ArtPlan.luau:479",
   "src/ServerScriptService/Modules/BotEscolta.luau:133",
   "src/ServerScriptService/Modules/BotEscolta.luau:251",
   "src/ServerScriptService/Modules/BotService.luau:262",
@@ -8062,6 +8062,9 @@
  "arrozal": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Movement.client.luau:1256",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:49"
+ ],
+ "arrozal ao sul da vila; nome de design": [
+  "src/ReplicatedStorage/Shared/MapConfig.luau:32"
  ],
  "asking": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/JogarAgora.luau:51",
@@ -10745,21 +10748,21 @@
   "src/ReplicatedStorage/Shared/Progression.luau:606"
  ],
  "parts": [
-  "src/ServerScriptService/Modules/ArtPlan.luau:736",
+  "src/ServerScriptService/Modules/ArtPlan.luau:744",
   "src/ServerScriptService/Modules/AssetLoader.luau:514",
   "src/ServerScriptService/Modules/AssetLoader.luau:657"
  ],
  "parts:": [
-  "src/ServerScriptService/Modules/ArtPlan.luau:736",
+  "src/ServerScriptService/Modules/ArtPlan.luau:744",
   "src/ServerScriptService/Modules/AssetLoader.luau:514",
   "src/ServerScriptService/Modules/AssetLoader.luau:657"
  ],
  "parts:horta": [
-  "src/ServerScriptService/Modules/ArtPlan.luau:279",
-  "src/ServerScriptService/Modules/ArtPlan.luau:696"
+  "src/ServerScriptService/Modules/ArtPlan.luau:283",
+  "src/ServerScriptService/Modules/ArtPlan.luau:704"
  ],
  "parts:varanda": [
-  "src/ServerScriptService/Modules/ArtPlan.luau:668"
+  "src/ServerScriptService/Modules/ArtPlan.luau:676"
  ],
  "pass": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Progresso.client.luau:455",
@@ -11069,7 +11072,7 @@
  "quick": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/JogarAgora.luau:199"
  ],
- "quintal junto da boca E1 do túnel; nome de design": [
+ "quintal a oeste da vila; nome de design": [
   "src/ReplicatedStorage/Shared/MapConfig.luau:27"
  ],
  "radio": [
@@ -11354,9 +11357,6 @@
  "sargento, líder de squad": [
   "src/ReplicatedStorage/Shared/Progression.luau:80",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Progresso.client.luau:1289"
- ],
- "saída de emboscada da boca E3 do túnel; nome de design": [
-  "src/ReplicatedStorage/Shared/MapConfig.luau:32"
  ],
  "scale": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/EditorHud.client.luau:360",

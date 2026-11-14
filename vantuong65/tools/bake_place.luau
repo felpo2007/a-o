@@ -99,7 +99,9 @@ local CHAO = {
 	{ material = "LeafyGrass", id = "forrest_ground_01", ladoM = 2.0 },
 	{ material = "Grass", id = "leafy_grass", ladoM = 2.0 },
 	{ material = "Mud", id = "brown_mud_leaves_01", ladoM = 1.3 },
-	{ material = "Ground", id = "forest_ground_06", ladoM = 2.11 },
+	-- D-115: terra batida (dirt_floor) nas ruas, becos, praça, quintais e diques; era forest_ground_06,
+	-- terra escura de mata
+	{ material = "Ground", id = "dirt_floor", ladoM = 2.07 },
 }
 local ms = game:GetService("MaterialService")
 local nVar, nOverride = 0, 0

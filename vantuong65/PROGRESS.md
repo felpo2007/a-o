@@ -24,7 +24,8 @@
   lados, vigia das tripulações de bot e saída melhor de quem trava.
 - **Lote 4a (v46, D-114): feito.** Mapa de 500 x 500 m (Xóm Gò até An Cường (2)), objetivos perto
   do centro e 40 x 40. Falta o dono pôr o servidor em 80 (TODO_USUARIO).
-- Lote 4b (v47): cabanas e vilas maiores; terra batida nas ruas.
+- **Lote 4b (v47, D-115): feito.** Cabanas 30% maiores, Xóm Gò maior, An Cường (2) com casario
+  novo (18 casas) e terra batida nas ruas, becos, quintais e praça.
 - Lote 5 (menu): menu animado com o mapa e o soldado (JOGAR, CONFIGURAÇÕES, LOJA, PASSE, TUTORIAL) e o
   tutorial fora do jogo; tela de carregamento até o mapa inteiro.
 - Lote 6: análise do jogo inteiro com ideias em imagens.

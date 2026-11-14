@@ -208,10 +208,10 @@ test("lugares que fazem o jogo estão no recorte: An Cường (2), túneis, trin
 		local sp = strongpoint(name)
 		assert(Geometry.inBounds(b, sp.x, sp.z), name)
 	end
-	-- bocas dos túneis e a trincheira (metros a partir do centro de An Cường (2)) a pelo menos 15 m da
-	-- borda: ninguém sai de um túnel para fora da área
+	-- bocas dos túneis e a trincheira (metros a partir do LOCAL da carta de An Cường (2), como o jogo:
+	-- Tunnels.toWorld) a pelo menos 15 m da borda: ninguém sai de um túnel para fora da área
 	local Tunnels = require("../../src/ReplicatedStorage/Shared/Tunnels") :: any
-	local ac = strongpoint("An Cường (2)")
+	local ac = location("An Cường (2)")
 	local pts = {}
 	for _, n in Tunnels.nodes or {} do
 		table.insert(pts, { n.x, n.z })

@@ -18,7 +18,8 @@ Tunnels.nodes = {
 	E2 = { x = 45, z = 25, entrance = true }, -- junto ao riacho a leste
 	E3 = { x = -15, z = 150, entrance = true }, -- arrozal ao sul (saída de emboscada)
 	E4 = { x = -35, z = -95, entrance = true }, -- sebe ao norte
-	E5 = { x = 10, z = 205, entrance = true }, -- dentro da trincheira sul
+	-- dentro da trincheira sul. D-115: 185 m (era 205): no mapa de 500 m a 205 m ficava na borda sul
+	E5 = { x = 10, z = 185, entrance = true },
 } :: { [string]: { x: number, z: number, entrance: boolean } }
 
 Tunnels.edges = {
@@ -32,8 +33,10 @@ Tunnels.edges = {
 }
 
 -- Trincheira sul ("wide, deep trench south of the village", First Fight PDF p.23): traçado de
--- design, 1,0 m de largura x 1,5 m de profundidade, em metros relativos ao centro da vila.
-Tunnels.trench = { { -60, 205 }, { -20, 210 }, { 20, 204 }, { 60, 212 }, { 95, 206 } }
+-- design, 1,0 m de largura x 1,5 m de profundidade, em metros relativos ao centro da vila (o local da
+-- carta, MapConfig.Locations). D-115: 20 m mais perto da vila (a 204–212 m, metade dela caía fora do
+-- mapa de 500 m, cuja borda sul fica a 210 m do centro); agora fica a 18–26 m da borda.
+Tunnels.trench = { { -60, 185 }, { -20, 190 }, { 20, 184 }, { 60, 192 }, { 95, 186 } }
 Tunnels.TRENCH_W_M = 1.0
 Tunnels.TRENCH_D_M = 1.5
 

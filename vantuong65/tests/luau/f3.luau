@@ -77,7 +77,7 @@ test("bots: erro de mira cresce com distância e movimento; rajadas só em metra
 	near(BotBrain.shotDelay("mg", 600, true, 0.5), 0.1, 1e-9)
 end)
 
-test("túneis: 1,0 x 1,2 m, ~474 m, 5 entradas, caixas de escavação e forro coerentes", function()
+test("túneis: 1,0 x 1,2 m, ~454 m, 5 entradas, caixas de escavação e forro coerentes", function()
 	local n = 0
 	for _, node in Tunnels.nodes do
 		if node.entrance then
@@ -85,7 +85,7 @@ test("túneis: 1,0 x 1,2 m, ~474 m, 5 entradas, caixas de escavação e forro co
 		end
 	end
 	assert(n == 5)
-	near(Tunnels.length(), 474, 5)
+	near(Tunnels.length(), 454, 5) -- D-115: a boca E5 20 m mais perto (era ~474 m)
 	local env = { Vector3 = roblox.Vector3, CFrame = roblox.CFrame }
 	local boxes = TunnelGeometry.build(env, Tunnels, 0, 0, function()
 		return 50

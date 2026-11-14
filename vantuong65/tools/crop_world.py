@@ -143,7 +143,7 @@ PONTOS_FORTES = [
         269905,
         1692880,
         False,
-        "quintal junto da boca E1 do túnel; nome de design",
+        "quintal a oeste da vila; nome de design",
     ),
     (3, "Encosta leste", 269900, 1692975, False, "flanco leste do morro de Xóm Gò; nome de design"),
     (3, "Sopé sul do morro", 269895, 1692800, False, "pé do morro ao sul da vila; nome de design"),
@@ -163,7 +163,7 @@ PONTOS_FORTES = [
         269990,
         1692780,
         False,
-        "saída de emboscada da boca E3 do túnel; nome de design",
+        "arrozal ao sul da vila; nome de design",
     ),
     # S5: em volta da base dos EUA (ao norte e ao sul dela)
     (
@@ -251,6 +251,7 @@ def read_grid() -> dict:
     carved = re.search(r"\bstreamCarvedCm = (\d+)", s)
     moved = re.search(r"\bmoundMoved = (\d+)", s)
     cut = re.search(r"\bpaddyCut = (\d+)", s)
+    ham = re.search(r"\bhamletAdded = (\d+)", s)
     return {
         "w": w,
         "h": h,
@@ -265,6 +266,7 @@ def read_grid() -> dict:
         "carved": int(carved.group(1)) if carved else 0,
         "moved": int(moved.group(1)) if moved else 0,
         "paddyCut": int(cut.group(1)) if cut else 0,
+        "hamletAdded": int(ham.group(1)) if ham else 0,
     }
 
 
@@ -499,6 +501,11 @@ def write_grid(g: dict) -> None:
             else ""
         )
         + ("\tpaddyCut = 1, -- arrozal reduzido a 25% (crop_world)\n" if g.get("paddyCut") else "")
+        + (
+            "\thamletAdded = 1, -- casario de An Cường (2) acrescentado (crop_world, D-115)\n"
+            if g.get("hamletAdded")
+            else ""
+        )
         + f"\theightChunks = {{{chunk_list}}}, rowsPerChunk = {ROWS_PER},\n"
         f"\tclassNames = {{{names}}},\n"
         f'\tclassesRle = "{base64.b64encode(bytes(rle)).decode()}",\n'
@@ -909,13 +916,128 @@ def _dentro(poly: list[tuple[float, float]], x: float, z: float) -> bool:
     return dentro
 
 
+# ---------- casario de An Cường (2) (D-115) ----------
+# Pedido do dono: "aumente as cabanas de todo jogo e o tamanho das vilas". No recorte de 500 m An
+# Cường (2) tinha só as 5 casas da carta. Ganha um casario de design em volta da vila, como os
+# xóm do litoral de Quảng Ngãi: casas soltas a ~20 m umas das outras, viradas para o sul ou para o
+# norte (com folga de giro), fora das bocas de túnel e da trincheira (Shared/Tunnels, a partir do
+# local da carta), da base dos EUA, do mastro dos pontos fortes, do riacho e de chão inclinado.
+# Determinístico; feito uma vez (o Grid guarda hamletAdded). PLACEHOLDER de design.
+CASARIO_CENTRO = (269995.0, 1692860.0)  # entre o ponto forte e o local da carta (E 270,030)
+CASARIO_RAIO_M = 85.0
+CASARIO_PASSO_M = 21.0
+CASARIO_DIST_M = 20.0  # entre duas casas (centro a centro)
+CASARIO_MAX = 18
+CASARIO_DESNIVEL_M = 1.6  # sob a pegada de 10 x 10 m
+CASARIO_FOLGA_M = {"tunel": 12.0, "trincheira": 12.0, "base": 15.0, "ponto": 12.0, "borda": 30.0}
+
+
+def _tuneis_ing() -> tuple[list, list]:
+    """bocas e trincheira de Shared/Tunnels.luau em studs do mundo (centro = local da carta)"""
+    s = (SHARED / "Tunnels.luau").read_text("utf-8")
+    with open(ROOT / "research/locais.csv", encoding="utf-8") as fh:
+        loc = next(r for r in csv.DictReader(fh) if r["nome"] == "An Cường (2)")
+    cx, cz = float(loc["x_studs"]), float(loc["z_studs"])
+    bocas = [
+        (cx + float(x) / STUD_M, cz + float(z) / STUD_M)
+        for x, z in re.findall(r"E\d = \{ x = (-?[\d.]+), z = (-?[\d.]+), entrance = true", s)
+    ]
+    corpo = re.search(r"Tunnels\.trench = \{(.*)\}\n", s).group(1)
+    vala = [
+        (cx + float(x) / STUD_M, cz + float(z) / STUD_M)
+        for x, z in re.findall(r"\{ (-?[\d.]+), (-?[\d.]+) \}", corpo)
+    ]
+    return bocas, vala
+
+
+def casario_an_cuong(g: dict, f: dict[str, np.ndarray]) -> dict:
+    if g.get("hamletAdded"):
+        return {"acrescentadas": 0, "ja_feito": True}
+    import vila_estradas
+
+    t = vila_estradas.Terreno(g)
+    bocas, vala = _tuneis_ing()
+    base = json.loads((Path(__file__).resolve().parent / "bases_mapa.json").read_text("utf-8"))
+    hx, hz = ing_local(*QGS["US"][:2])
+    bx0, bx1, bz0, bz1 = base["US"]["area_studs"]
+    fb = CASARIO_FOLGA_M["base"] / STUD_M
+    caixa_base = (hx + bx0 - fb, hx + bx1 + fb, hz + bz0 - fb, hz + bz1 + fb)
+    pontos = [ing_local(e, n) for _s, _nm, e, n, _r, _o in PONTOS_FORTES if e is not None]
+    xa, xb, za, zb = crop_box(-CASARIO_FOLGA_M["borda"])
+    cx, cz = ing_local(*CASARIO_CENTRO)
+    casas = [tuple(p) for p in f["houses"][:, :2]]
+    rng = np.random.default_rng(1965)
+    passo = CASARIO_PASSO_M / STUD_M
+    n = int(CASARIO_RAIO_M // CASARIO_PASSO_M)
+    cands = []
+    for i in range(-n, n + 1):
+        for j in range(-n, n + 1):
+            # grade em ziguezague (linhas alternadas meio passo), com jitter de 4 m
+            x = cx + (i + (0.5 if j % 2 else 0.0)) * passo + rng.uniform(-4, 4) / STUD_M
+            z = cz + j * passo * 0.87 + rng.uniform(-4, 4) / STUD_M
+            d = math.hypot(x - cx, z - cz) * STUD_M
+            if d <= CASARIO_RAIO_M:
+                cands.append((d, x, z))
+    cands.sort()
+
+    def longe(x, z, pts, m):
+        return all(math.hypot(x - px, z - pz) * STUD_M >= m for px, pz in pts)
+
+    def longe_vala(x, z, m):
+        for (ax, az), (bx, bz) in zip(vala, vala[1:], strict=False):
+            dx, dz = bx - ax, bz - az
+            tt = max(0.0, min(1.0, ((x - ax) * dx + (z - az) * dz) / (dx * dx + dz * dz)))
+            if math.hypot(ax + tt * dx - x, az + tt * dz - z) * STUD_M < m:
+                return False
+        return True
+
+    novas = []
+    motivos = {}
+    for _d, x, z in cands:
+        if len(novas) >= CASARIO_MAX:
+            break
+        motivo = None
+        if not (xa <= x <= xb and za <= z <= zb):
+            motivo = "borda"
+        elif caixa_base[0] <= x <= caixa_base[1] and caixa_base[2] <= z <= caixa_base[3]:
+            motivo = "base"
+        elif not longe(x, z, bocas, CASARIO_FOLGA_M["tunel"]):
+            motivo = "tunel"
+        elif not longe_vala(x, z, CASARIO_FOLGA_M["trincheira"]):
+            motivo = "trincheira"
+        elif not longe(x, z, pontos, CASARIO_FOLGA_M["ponto"]):
+            motivo = "ponto"
+        elif not longe(x, z, casas, CASARIO_DIST_M):
+            motivo = "casa"
+        else:
+            p = vila_estradas.pegada(x, z, 0.0, 10.0, 10.0)
+            h = t.altura(p[:, 0], p[:, 1])
+            if (t.classe(p[:, 0], p[:, 1]) == 5).any():
+                motivo = "riacho"
+            elif float(h.max() - h.min()) > CASARIO_DESNIVEL_M:
+                motivo = "ladeira"
+        if motivo:
+            motivos[motivo] = motivos.get(motivo, 0) + 1
+            continue
+        # de frente para o sul ou para o norte, com até 15° de folga
+        giro = (0.0 if rng.random() < 0.6 else math.pi) + math.radians(rng.uniform(-15, 15))
+        y = float(t.altura(np.array([x]), np.array([z]))[0]) / STUD_M
+        novas.append((x, z, y, giro))
+        casas.append((x, z))
+    if novas:
+        f["houses"] = np.vstack([f["houses"], np.array(novas, float)])
+    g["hamletAdded"] = 1
+    return {"acrescentadas": len(novas), "recusadas": motivos}
+
+
 def vila_e_estradas(g: dict, f: dict) -> dict:
     """vila grande no setor SETOR_VILA e estradas entre os QGs e os pontos fortes
     (tools/vila_estradas.py)"""
     import vila_estradas
 
     s3 = _poligono_setor(SETOR_VILA - 1)
-    margem = 12.0 / STUD_M
+    # D-115: meio lote mais 1 m (lotes 30% maiores; eram 12 m fixos para o lote de 14 m)
+    margem = (vila_estradas.LOTE_D / 2 + 1.0) / STUD_M
 
     def setor3(x: float, z: float) -> bool:
         # o lote inteiro no setor: o centro e quatro pontos a 12 m
@@ -983,6 +1105,7 @@ def main() -> None:
     riacho = abre_riacho(gc, fc)
     base = limpa_base(fc)
     morro = move_morro(gc, fc)
+    casario = casario_an_cuong(gc, fc)
     vila_info = vila_e_estradas(gc, fc)
     write_grid(gc)
     write_features(fc)
@@ -997,6 +1120,7 @@ def main() -> None:
                 "riacho": riacho,
                 "base_eua_sem": base,
                 "morro": morro,
+                "casario_an_cuong": casario,
                 "vila_e_estradas": vila_info,
                 "pontos_do_fixture": n_fx,
             },

@@ -22,7 +22,9 @@ TEXTURAS = {
     "LeafyGrass": "forrest_ground_01",  # chão de mata: folhas, gravetos e capim (Rob Tuytel)
     "Grass": "leafy_grass",  # capim e arrozal (Charlotte Baglioni)
     "Mud": "brown_mud_leaves_01",  # barranco de riacho (Rob Tuytel)
-    "Ground": "forest_ground_06",  # terra de quintal e de vala (Charlotte Baglioni)
+    # terra batida de rua, beco, praça, quintal e dique (D-115, pedido do dono: "dê um aspecto de
+    # terra batida para o chão do jogo nas ruas"); era forest_ground_06, terra escura de mata
+    "Ground": "dirt_floor",
 }
 MAPAS = {"cor": "Diffuse", "normal": "nor_gl", "rugosidade": "Rough"}
 

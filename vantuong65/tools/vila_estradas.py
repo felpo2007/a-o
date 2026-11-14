@@ -44,15 +44,20 @@ VILA_NOME = "Xóm Gò"
 # mapa (crop_world.MORRO_PARA, cume em E 269,815 / N 1692,99)
 VILA_E = (269780.0, 269870.0)
 VILA_N = (1692930.0, 1693050.0)
-LOTE_W, LOTE_D = 12.0, 14.0  # m
-CASA_MAX = 8.5  # m: a casa cabe neste quadrado (os modelos únicos do Blender também)
+# D-115 (pedido do dono: "aumente as cabanas de todo jogo e o tamanho das vilas"; "cabanas muito
+# pequenas no mapa"): casas 30% maiores (o soldado tem 2,0 m, D-98; o beiral ficava na altura da
+# cabeça dele) e a vila cresce junto: lotes, passo, travessas, praça, pagode e casa comunal. O jogo
+# lê a escala em Village.houseScale.
+ESCALA_CASA = 1.3
+LOTE_W, LOTE_D = 12.0 * ESCALA_CASA, 14.0 * ESCALA_CASA  # m
+CASA_MAX = 8.5 * ESCALA_CASA  # m: a casa cabe neste quadrado (os modelos únicos do Blender também)
 RUA_W = 7.0  # rua principal da vila (é a estrada principal)
-PASSO_U = 14.0  # m entre lotes ao longo da rua
+PASSO_U = 14.0 * ESCALA_CASA  # m entre lotes ao longo da rua
 SLOTS = 17  # lotes por fileira
-TRAVESSAS = (-56.0, 56.0)  # u (m) das travessas: os lotes ali saem
-PRACA_U = 21.0  # meia largura da praça ao longo da rua
-CORTE_MAX = 2.6  # m: desnível máximo dentro da pegada da casa (o patamar corta até isso)
-VIZINHO_M = 30.0  # duas casas a menos disto nunca saem iguais
+TRAVESSAS = (-56.0 * ESCALA_CASA, 56.0 * ESCALA_CASA)  # u (m) das travessas: os lotes ali saem
+PRACA_U = 21.0 * ESCALA_CASA  # meia largura da praça ao longo da rua
+CORTE_MAX = 2.6 * ESCALA_CASA  # m: desnível máximo dentro da pegada da casa (o patamar corta)
+VIZINHO_M = 30.0 * ESCALA_CASA  # duas casas a menos disto nunca saem iguais
 N_VARIANTES = 12
 N_TONS = 4
 ANEXOS = ("varanda", "cozinha", "celeiro", "horta", "cerca", "pote", "meda", "varal")
@@ -178,17 +183,18 @@ def _lotes(cx, cz, ang):
                 )
     # pagode ao norte da praça e casa comunal ao sul (lado -1 = v negativo)
     vfundo = RUA_W / 2 + 1 + LOTE_D + 3 + LOTE_D / 2
-    for kind, lado, w, d in (("chua", -1, 16.0, 12.0), ("dinh", 1, 18.0, 10.0)):
+    k = ESCALA_CASA
+    for kind, lado, w, d in (("chua", -1, 16.0 * k, 12.0 * k), ("dinh", 1, 18.0 * k, 10.0 * k)):
         dx, dz = gira(0.0, lado * vfundo, ang)
         especiais.append({"kind": kind, "x": cx + dx, "z": cz + dz, "w": w, "d": d})
-    dx, dz = gira(12.0, -12.0, ang)
+    dx, dz = gira(12.0 * k, -12.0 * k, ang)
     especiais.append({"kind": "poco", "x": cx + dx, "z": cz + dz, "w": 2.0, "d": 2.0})
     # bancas do mercado nas bordas da praça
     for u in (-14.0, -4.0, 6.0, 16.0):
         for lado in (-1, 1):
             if u == 16.0 and lado == -1:
                 continue  # o poço
-            dx, dz = gira(u, lado * 13.0, ang)
+            dx, dz = gira(u * k, lado * 13.0 * k, ang)
             especiais.append({"kind": "banca", "x": cx + dx, "z": cz + dz, "w": 3.0, "d": 2.5})
     return lotes, especiais
 
@@ -212,8 +218,9 @@ def _avalia(t: Terreno, cx, cz, ang, dentro):
 def planeja_vila(t: Terreno, ing_local, dentro) -> dict:
     """procura centro e rumo da rua que deixam mais casas com menos corte"""
     melhor = None
-    for e in np.arange(VILA_E[0], VILA_E[1] + 1, 15.0):
-        for n in np.arange(VILA_N[0], VILA_N[1] + 1, 15.0):
+    # D-115: passo de 7,5 m (era 15): com os lotes maiores a vila fica justa no setor
+    for e in np.arange(VILA_E[0], VILA_E[1] + 1, 7.5):
+        for n in np.arange(VILA_N[0], VILA_N[1] + 1, 7.5):
             cx, cz = ing_local(e, n)
             for deg in range(0, 180, 10):
                 ang = math.radians(deg)
@@ -583,7 +590,7 @@ def escreve(vila: dict, estradas: list, head: str) -> None:
     )
     linhas.append(
         f"\thouseMax = {_num(CASA_MAX / STUD_M)}, lotW = {_num(LOTE_W / STUD_M)}, "
-        f"lotD = {_num(LOTE_D / STUD_M)},\n"
+        f"lotD = {_num(LOTE_D / STUD_M)}, houseScale = {_num(ESCALA_CASA)},\n"
     )
     linhas.append(
         f"\tattachNames = {{{', '.join(repr(a).replace(chr(39), chr(34)) for a in ANEXOS)}}},\n"
