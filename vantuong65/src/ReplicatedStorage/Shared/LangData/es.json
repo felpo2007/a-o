@@ -2666,5 +2666,9 @@
  "A-4 em mergulho sobre %s (%s) em %d s! As bombas pegam todo mundo: saia da fumaça violeta.": "¡A-4 en picado sobre %s (%s) en %d s! Las bombas alcanzan a todos: sal del humo violeta.",
  "Avião em mergulho: ataque aéreo chegando": "Avión en picado: llega el ataque aéreo",
  "Não saia da base!": "¡No salgas de la base!",
- "Pegue um veículo e espere na base": "Toma un vehículo y espera en la base"
+ "Pegue um veículo e espere na base": "Toma un vehículo y espera en la base",
+ "+ presente surpresa": "+ regalo sorpresa",
+ "Entre todo dia: o prêmio cresce! Pulou um dia, volta ao dia 1.": "¡Entra todos los días: el premio crece! Si faltas un día, vuelves al día 1.",
+ "HOJE!": "¡HOY!",
+ "PEGAR O PRÊMIO DO DIA %d!": "¡RECOGE EL PREMIO DEL DÍA %d!"
 }

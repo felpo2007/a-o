@@ -2673,5 +2673,9 @@
  "A-4 em mergulho sobre %s (%s) em %d s! As bombas pegam todo mundo: saia da fumaça violeta.": "A-4 diving on %s (%s) in %d s! The bombs hit everyone: get out of the violet smoke.",
  "Avião em mergulho: ataque aéreo chegando": "Jet diving in: air strike coming",
  "Não saia da base!": "Don't leave the base!",
- "Pegue um veículo e espere na base": "Grab a vehicle and wait at the base"
+ "Pegue um veículo e espere na base": "Grab a vehicle and wait at the base",
+ "+ presente surpresa": "+ surprise gift",
+ "Entre todo dia: o prêmio cresce! Pulou um dia, volta ao dia 1.": "Play every day: the prize grows! Skip a day and you go back to day 1.",
+ "HOJE!": "TODAY!",
+ "PEGAR O PRÊMIO DO DIA %d!": "GET THE DAY %d PRIZE!"
 }

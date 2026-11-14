@@ -789,6 +789,22 @@ test("D-133: bandeiras de pano esticadas na mesa, com a imagem detalhada; ALISTA
 	assert(string.find(mesa, "cta.AutomaticSize = Enum.AutomaticSize.X", 1, true), "botão do tamanho do texto")
 end)
 
+test("lote 23: diária e passe para crianças (desenhos, letras grandes, botão verde)", function()
+	local kit = fs.readFile(C .. "UiKit.luau")
+	assert(string.find(kit, "premio = { base = ", 1, true), "botão verde de pegar prêmio")
+	local d = fs.readFile(C .. "DiariaEntrada.client.luau")
+	assert(string.find(d, '"premio"', 1, true), "o botão da diária é o verde")
+	assert(string.find(d, '"💰"', 1, true) and string.find(d, '"🎁"', 1, true), "moedas e presente")
+	assert(string.find(d, "local function burst(", 1, true), "moedas voam ao receber")
+	assert(string.find(d, 'UiKit.title(f, "", px(30, 40), OURO)', 1, true), "valor do dia grande")
+	local p = fs.readFile(C .. "TelaPasse.client.luau")
+	for _, e in { "💰", "👕", "🎵", "💀" } do
+		assert(string.find(p, '"' .. e .. '"', 1, true), "ícone de desenho no passe: " .. e)
+	end
+	assert(string.find(p, 'UiKit.text2(b, "", px(18, 24), V.TEXT, F.BODY_B)', 1, true), "nome do prêmio maior")
+	assert(not string.find(p, "c.name.TextColor3 = if dimmed then V.DIM", 1, true), "prêmio futuro legível")
+end)
+
 test("lote 22: as duas bandeiras do mesmo tamanho (5:3)", function()
 	local band = fs.readFile(C .. "Bandeiras.luau")
 	local us, vc = string.match(band, "Bandeiras%.RATIO = { US = ([%d%./ ]+), VC = ([%d%./ ]+) }")

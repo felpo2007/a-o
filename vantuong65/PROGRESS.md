@@ -98,8 +98,11 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
 - Pedidos novos do dono (14/11, 15h57 a 16h41), em lotes:
   - **Lote 22 (v67, D-136): feito.** Bandeiras do mesmo tamanho na escolha de lado; grama 1/3 mais
     baixa; contagem de 10 s em que dá para pegar veículo, mas não sair da base.
-  - **Lote 23:** recompensa diária e passe mais atraentes para crianças, com letras maiores
-    (principalmente as das recompensas).
+  - **Lote 23 (v68, D-137): feito.** Recompensa diária e passe para crianças:
+    - desenhos dos prêmios (💰 🎁 👕 🎵);
+    - letras ~1,4x maiores e valores grandes em dourado;
+    - botão verde que pulsa;
+    - moedas voando ao receber.
   - **Lote 24:** símbolo de granada perto: vermelho = vai matar, branco = vai ferir.
   - **Lote 25:** nome do jogo (STARLITE: Vietnã 1965, D-101) e imagens da página (capas em
     `marketing/capas`). O dono vai dar o acesso.
@@ -118,6 +121,26 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
   - base do VC sob a mata; nomes do equipamento da Intendência sem tradução; Type 54 em 3ª pessoa;
   - a pá do autoteste na 1ª rodada de cada sessão;
   - as teclas agem por baixo da tela de carregamento (a pá cavou durante o carregamento, D-129).
+
+## v68: lote 23, recompensa diária e passe para crianças (2026-11-14, D-137)
+- **A publicar.**
+- **Diária:**
+  - janela maior;
+  - cada dia com 💰 ou 🎁 num círculo colorido e o valor em 30 px dourado;
+  - o 7º dia em ouro;
+  - hoje pulando e piscando;
+  - "🔥 dias seguidos";
+  - botão verde "PEGAR O PRÊMIO DO DIA N!" pulsando;
+  - ao receber, moedas voam e o valor sobe grande.
+- **Passe:**
+  - cartões e letras maiores (nome do prêmio 13 → 18 px);
+  - ícones em desenho (emoji) no lugar das letras;
+  - prêmios futuros legíveis;
+  - o que já pode ser pego pisca em verde;
+  - RECEBER em verde vivo.
+- **Conferido no Studio:** as duas telas e o resgate; fotos em `testes/lote23/`.
+- **Testes:** Lune todos ok (interface com o teste do lote 23; idiomas 12 ok); pytest; ruff; luau-lsp.
+- **Não testado:** o brilho dos prêmios prontos (conta no nível 0); celular e TV.
 
 ## v67: lote 22, bandeiras iguais, grama mais baixa e contagem de 10 s (2026-11-14, D-136)
 - **Publicada** (versão 67 do place, commit f0b7a5a).

@@ -4996,3 +4996,56 @@ o plugin ou o arquivo do place escreve essa propriedade.
 
 **Não testado:** um jogador de verdade dirigindo para fora (o teste moveu o jipe pelo servidor);
 celular.
+
+## D-137 — Lote 23: recompensa diária e passe para crianças (v68, 2026-11-14)
+
+Pedido do dono: "melhore ainda mais as recompensas diárias e o passe, deixe elas mais atrativas para
+crianças e deixe as escritas e principalmente as recompensas escritas maiores".
+
+**Recompensa diária** (`Controllers/DiariaEntrada`):
+- **Janela:** passou de 820 x 486 para 920 x 596 px de projeto. O `UiKit.fit` reduz em tela menor.
+- **Letras maiores:**
+  - título 34 → 44 px, em dourado;
+  - regra 15 → 19 px, em branco: "Entre todo dia: o prêmio cresce! Pulou um dia, volta ao dia 1.";
+  - valor de cada dia 19 → 30 px, em dourado;
+  - nome do item 12 → 15 px;
+  - etiquetas 12 → 16 px;
+  - texto do resultado 16 → 20 px.
+- **Desenho do prêmio em cada dia:** um círculo de cor viva com 💰 (créditos, dourado) ou 🎁 (dia com
+  presente, roxo). O dia já recebido troca pelo ✔ verde. O 7º dia fica em dourado (o maior prêmio).
+  Sem lado escolhido, o item aparece como "+ presente surpresa".
+- **Dia de hoje:** o desenho pula (1 → 1,14) e o contorno dourado pisca enquanto o prêmio está para
+  pegar; a etiqueta é "HOJE!" em dourado.
+- **Dias seguidos:** "🔥 N" em dourado.
+- **Botão:** verde vivo (`UiKit.PAGAR.premio`, novo: pegar prêmio não é compra), "PEGAR O PRÊMIO DO
+  DIA N!" em 28 px com o valor em dourado. Pulsa enquanto há prêmio.
+- **Ao receber:** 14 moedas e brilhos voam do cartão num leque para cima e o valor recebido sobe em
+  letra grande (54 px) e some em 1,5 s.
+
+**Passe** (`Controllers/TelaPasse`):
+- **Painel:** a altura passou de 640 para 684 px de projeto.
+- **Cartões:** 128 x 116 → 152 x 152 px; nome do prêmio 13 → 18 px; tipo 11 → 13 px; ícone 46 → 60 px.
+- **Cabeçalho e marcos:** título 30 → 36 px; nível 40 → 48 px; nomes das trilhas 17 → 22 px; número
+  dos marcos 14 → 17 px.
+- **Ficha de baixo:** nome 26 → 32 px; texto 14 → 17 px, em branco.
+- **Ícones:** emoji no lugar das letras (K, U, T, C, G):
+  - 💰 créditos, 🎖️ emblema, 🌿 camuflagem, 🏷️ título, 👕 uniforme;
+  - 💀 cartão de abate, 👋 gesto, 🎵 música, ⚡ reforço, ⭐ estrelas.
+  O Roblox já desenha emoji nos eventos e na carta.
+- **Prêmios futuros:** ficam legíveis (branco com 12% de transparência), não cinza; só o que já foi
+  pego fica apagado.
+- **Prêmio pronto para pegar:** contorno verde de 3 px que pisca devagar (um laço só, com a tela
+  aberta).
+- **Botões:** RECEBER e RECEBER TUDO em verde vivo (`premio`).
+
+**Traduções:** quatro textos novos em en, es e vi; `premio` (o tipo do botão) no `ignorar.json`.
+
+**Conferido no Studio:**
+- a diária aberta;
+- o resgate: moedas, "+$ 33" subindo, ✔ e RECEBIDO no dia 1, AMANHÃ no dia 2, 🔥 1;
+- o passe com os ícones novos;
+- fotos de antes e depois em `testes/lote23/`.
+
+**Não testado:**
+- o brilho dos prêmios prontos do passe (a conta de teste estava no nível 0);
+- celular e TV (só a janela do Studio, de 671 x 564 px).

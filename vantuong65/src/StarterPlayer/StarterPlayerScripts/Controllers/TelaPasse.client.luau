@@ -37,18 +37,24 @@ local V, F = UiKit.V, UiKit.F
 local px = UiKit.px
 local MAX = 50
 
-local W, H = px(1000, 1320), px(640, 860)
+-- Lote 23 (dono: "melhore ainda mais as recompensas diárias e o passe, deixe elas mais atrativas para
+-- crianças e deixe as escritas e principalmente as recompensas escritas maiores"):
+--   - cartões, ícones e letras maiores (o nome do prêmio 13 → 18 px; o ícone 46 → 60 px);
+--   - o ícone de cada tipo de prêmio é um desenho que a criança reconhece (💰 👕 🎵 ...), não letra;
+--   - o prêmio que ainda vai chegar fica legível (branco), não cinza; o que já pode ser pego brilha;
+--   - receber e receber tudo em verde vivo.
+local W, H = px(1000, 1320), px(684, 900)
 local PAD = px(20, 28)
 local HEAD_H = px(104, 138)
 local FOOT_H = px(46, 64)
-local DETAIL_H = px(140, 186)
+local DETAIL_H = px(150, 196)
 -- linha do tempo
-local GUTTER = px(96, 128) -- rótulos fixos das trilhas, à esquerda
-local COL_W = px(128, 170)
+local GUTTER = px(118, 156) -- rótulos fixos das trilhas, à esquerda
+local COL_W = px(152, 200)
 local COL_GAP = px(12, 16)
-local CARD_H = px(116, 154)
+local CARD_H = px(152, 196)
 local NODE_ROW = px(52, 70)
-local NODE_D = px(30, 40)
+local NODE_D = px(34, 44)
 local LINE_H = px(4, 6)
 -- D-130 (lote 16, dono: "coloque mais cores vivas no passe"): cores cheias. Cada tipo de prêmio tem a
 -- sua (KIND_MARK), a trilha grátis é verde e a do Veterano é dourada, a rota andada vai em degradê de
@@ -118,16 +124,16 @@ do -- D-130: o cabeçalho num degradê quente (ouro, laranja, vermelho) e a faix
 end
 
 -- cabeçalho: rótulo, nome da temporada, nível grande, barra de estrelas e o fim real
-local kick = UiKit.kicker(panel, "PASSE DE CAMPANHA", px(14, 20), VIVO.GOLD_HI)
-kick.Position = UDim2.fromOffset(PAD, px(14, 18))
-kick.Size = UDim2.fromOffset(px(300, 400), px(20, 28))
-local title = UiKit.title(panel, "", px(30, 42))
+local kick = UiKit.kicker(panel, "PASSE DE CAMPANHA", px(16, 22), VIVO.GOLD_HI)
+kick.Position = UDim2.fromOffset(PAD, px(12, 16))
+kick.Size = UDim2.fromOffset(px(320, 420), px(22, 30))
+local title = UiKit.title(panel, "", px(36, 48))
 title.Position = UDim2.fromOffset(PAD, px(34, 46))
-title.Size = UDim2.new(1, -(PAD + px(330, 440)), 0, px(40, 54))
-local ends = UiKit.kicker(panel, "", px(13, 19), V.TEXT)
-ends.Position = UDim2.fromOffset(PAD, px(76, 102))
-ends.Size = UDim2.fromOffset(px(420, 560), px(18, 26))
-local levelStat = UiKit.stat(panel, "NÍVEL", "0", px(40, 56))
+title.Size = UDim2.new(1, -(PAD + px(330, 440)), 0, px(46, 60))
+local ends = UiKit.kicker(panel, "", px(16, 21), V.TEXT)
+ends.Position = UDim2.fromOffset(PAD, px(80, 106))
+ends.Size = UDim2.fromOffset(px(440, 580), px(20, 28))
+local levelStat = UiKit.stat(panel, "NÍVEL", "0", px(48, 64))
 levelStat.frame.AnchorPoint = Vector2.new(1, 0)
 levelStat.frame.Position = UDim2.new(1, -(PAD + px(176, 232)), 0, px(24, 32))
 local starsBox = Instance.new("Frame")
@@ -136,7 +142,7 @@ starsBox.AnchorPoint = Vector2.new(1, 0)
 starsBox.Position = UDim2.new(1, -PAD, 0, px(46, 62))
 starsBox.Size = UDim2.fromOffset(px(160, 214), px(56, 76))
 starsBox.Parent = panel
-local starsLabel = UiKit.kicker(starsBox, "", px(13, 19), VIVO.GOLD_HI)
+local starsLabel = UiKit.kicker(starsBox, "", px(15, 20), VIVO.GOLD_HI)
 starsLabel.Size = UDim2.new(1, 0, 0, px(20, 28))
 local starsBack, starsFill = UiKit.bar(starsBox, px(8, 12), VIVO.GOLD)
 do
@@ -186,13 +192,13 @@ gutter.Size = UDim2.new(0, GUTTER, 1, 0)
 gutter.ZIndex = 3
 gutter.Parent = strip
 local function trackLabel(y: number, name: string, color: Color3): TextLabel
-	local t = UiKit.title(gutter, name, px(17, 24), color)
-	t.Position = UDim2.fromOffset(px(10, 14), y + CARD_H // 2 - px(22, 30))
-	t.Size = UDim2.new(1, -px(14, 18), 0, px(24, 32))
+	local t = UiKit.title(gutter, name, px(22, 28), color)
+	t.Position = UDim2.fromOffset(px(10, 14), y + CARD_H // 2 - px(28, 36))
+	t.Size = UDim2.new(1, -px(14, 18), 0, px(30, 38))
 	t.ZIndex = 3
-	local sub = UiKit.kicker(gutter, "", px(11, 15))
+	local sub = UiKit.kicker(gutter, "", px(13, 17))
 	sub.Position = UDim2.fromOffset(px(10, 14), y + CARD_H // 2 + px(4, 6))
-	sub.Size = UDim2.new(1, -px(14, 18), 0, px(30, 40))
+	sub.Size = UDim2.new(1, -px(14, 18), 0, px(36, 46))
 	sub.TextWrapped = true
 	sub.TextYAlignment = Enum.TextYAlignment.Top
 	sub.ZIndex = 3
@@ -202,9 +208,9 @@ local vetSub = trackLabel(TOP_Y, "VETERANO", VIVO.GOLD)
 local freeSub = trackLabel(FREE_Y, "GRÁTIS", VIVO.GREEN)
 freeSub.Text = "PARA TODOS"
 do -- o marco do rótulo na altura da linha
-	local t = UiKit.kicker(gutter, "NÍVEL", px(12, 17), V.DIM)
-	t.Position = UDim2.fromOffset(px(10, 14), NODE_Y - px(9, 12))
-	t.Size = UDim2.new(1, -px(14, 18), 0, px(18, 24))
+	local t = UiKit.kicker(gutter, "NÍVEL", px(14, 18), V.TEXT)
+	t.Position = UDim2.fromOffset(px(10, 14), NODE_Y - px(10, 13))
+	t.Size = UDim2.new(1, -px(14, 18), 0, px(20, 26))
 	t.ZIndex = 3
 	local r = Instance.new("Frame")
 	r.BackgroundColor3 = V.LINE
@@ -315,29 +321,29 @@ UiKit.corner(prevThumb, 4)
 local prevGlow = Instance.new("UIGradient")
 prevGlow.Rotation = 90
 prevGlow.Parent = prevThumb
-local prevMark = UiKit.text2(prevThumb, "★", px(48, 64), V.BRASS, F.TITLE)
+local prevMark = UiKit.text2(prevThumb, "★", px(64, 84), V.BRASS, F.TITLE)
 prevMark.Size = UDim2.fromScale(1, 1)
 prevMark.TextXAlignment = Enum.TextXAlignment.Center
 local BTN_W = px(214, 286)
-local BTN_H = px(40, 54)
+local BTN_H = px(46, 60)
 local textX = P + ICON + px(14, 18)
 local textW = -(textX + 2 * BTN_W + px(24, 32))
-local prevKind = UiKit.kicker(detail, "", px(13, 19))
+local prevKind = UiKit.kicker(detail, "", px(16, 21))
 prevKind.Position = UDim2.fromOffset(textX, P)
-prevKind.Size = UDim2.new(1, textW, 0, px(18, 26))
-local prevName = UiKit.title(detail, "", px(26, 36))
-prevName.Position = UDim2.fromOffset(textX, P + px(18, 26))
-prevName.Size = UDim2.new(1, textW, 0, px(36, 48))
+prevKind.Size = UDim2.new(1, textW, 0, px(22, 28))
+local prevName = UiKit.title(detail, "", px(32, 42))
+prevName.Position = UDim2.fromOffset(textX, P + px(24, 30))
+prevName.Size = UDim2.new(1, textW, 0, px(42, 54))
 prevName.TextScaled = true
 do
 	local lim = Instance.new("UITextSizeConstraint")
-	lim.MaxTextSize = UiKit.text(px(26, 36))
-	lim.MinTextSize = UiKit.text(px(15, 20))
+	lim.MaxTextSize = UiKit.text(px(32, 42))
+	lim.MinTextSize = UiKit.text(px(18, 24))
 	lim.Parent = prevName
 end
-local prevInfo = UiKit.body(detail, "", px(14, 20), V.DIM)
-prevInfo.Position = UDim2.fromOffset(textX, P + px(58, 78))
-prevInfo.Size = UDim2.new(1, textW, 0, px(40, 54))
+local prevInfo = UiKit.body(detail, "", px(17, 22), V.TEXT)
+prevInfo.Position = UDim2.fromOffset(textX, P + px(68, 86))
+prevInfo.Size = UDim2.new(1, textW, 0, px(52, 64))
 prevInfo.TextWrapped = true
 prevInfo.TextYAlignment = Enum.TextYAlignment.Top
 -- botões em duas colunas à direita: receber | Veterano, receber tudo | pular nível. Cores de compra
@@ -348,16 +354,18 @@ local function place(b: TextButton, col: number, row: number)
 	b.Position = UDim2.new(1, -(P + (2 - col) * (BTN_W + px(10, 14))), 0, P + (row - 1) * (BTN_H + px(10, 14)))
 	b.Size = UDim2.fromOffset(BTN_W, BTN_H)
 end
-local claimOne = UiKit.action(detail, "RECEBER", "primary", function()
+local claimOne = UiKit.action(detail, "RECEBER", "premio", function()
 	Bus.fire("passe_claim_selected")
 end, { h = BTN_H })
 place(claimOne.button, 1, 1)
 claimOne.label.TextXAlignment = Enum.TextXAlignment.Center
-local claimAll = UiKit.action(detail, "RECEBER TUDO", "free", function()
+claimOne.label.TextSize = UiKit.text(px(19, 25))
+local claimAll = UiKit.action(detail, "RECEBER TUDO", "premio", function()
 	CampanhaCliente.action("claim_all")
 end, { h = BTN_H })
 place(claimAll.button, 1, 2)
 claimAll.label.TextXAlignment = Enum.TextXAlignment.Center
+claimAll.label.TextSize = UiKit.text(px(19, 25))
 local buyVet = UiKit.action(detail, "", "robux", function()
 	Bus.fire("passe_buy", "season")
 end, { h = BTN_H })
@@ -411,18 +419,20 @@ local KIND_NAME: { [string]: string } = {
 	boost = "Reforço",
 	stars = "Estrelas",
 }
--- D-130: uma cor viva por tipo de prêmio (o ícone vai cheio dela; a letra fica branca por cima)
+-- D-130: uma cor viva por tipo de prêmio (o ícone vai cheio dela).
+-- Lote 23: no lugar da letra (K, U, T...), o desenho do prêmio em emoji, que a criança reconhece
+-- (o Roblox já desenha emoji nos eventos e na carta).
 local KIND_MARK: { [string]: { text: string, color: Color3 } } = {
-	credits = { text = "$", color = Color3.fromRGB(70, 196, 90) },
-	emblem = { text = "★", color = Color3.fromRGB(255, 186, 30) },
-	camo = { text = "C", color = Color3.fromRGB(150, 210, 60) },
-	title = { text = "T", color = Color3.fromRGB(70, 160, 255) },
-	uniform = { text = "U", color = Color3.fromRGB(255, 130, 40) },
-	killcard = { text = "K", color = Color3.fromRGB(240, 64, 56) },
-	gesture = { text = "G", color = Color3.fromRGB(200, 100, 255) },
-	music = { text = "♪", color = Color3.fromRGB(40, 200, 215) },
-	boost = { text = "×2", color = Color3.fromRGB(255, 160, 20) },
-	stars = { text = "★", color = Color3.fromRGB(255, 214, 60) },
+	credits = { text = "💰", color = Color3.fromRGB(70, 196, 90) },
+	emblem = { text = "🎖️", color = Color3.fromRGB(255, 186, 30) },
+	camo = { text = "🌿", color = Color3.fromRGB(150, 210, 60) },
+	title = { text = "🏷️", color = Color3.fromRGB(70, 160, 255) },
+	uniform = { text = "👕", color = Color3.fromRGB(255, 130, 40) },
+	killcard = { text = "💀", color = Color3.fromRGB(240, 64, 56) },
+	gesture = { text = "👋", color = Color3.fromRGB(200, 100, 255) },
+	music = { text = "🎵", color = Color3.fromRGB(40, 200, 215) },
+	boost = { text = "⚡", color = Color3.fromRGB(255, 160, 20) },
+	stars = { text = "⭐", color = Color3.fromRGB(255, 214, 60) },
 }
 local function rewardName(r: Reward?): string
 	if not r then
@@ -606,11 +616,11 @@ local function makeCell(parent: Instance, y: number, lvl: number, track: string)
 		lg.Parent = b
 	end
 	-- o ícone: quadrado com a cor do tipo de recompensa e a luz caindo de cima
-	local IC = px(46, 62)
+	local IC = px(60, 80)
 	local icon = Instance.new("Frame")
 	icon.Name = "Icone"
 	icon.AnchorPoint = Vector2.new(0.5, 0)
-	icon.Position = UDim2.new(0.5, 0, 0, px(10, 14))
+	icon.Position = UDim2.new(0.5, 0, 0, px(10, 12))
 	icon.Size = UDim2.fromOffset(IC, IC)
 	icon.BackgroundColor3 = V.PANEL_3
 	icon.BorderSizePixel = 0
@@ -621,25 +631,25 @@ local function makeCell(parent: Instance, y: number, lvl: number, track: string)
 	g.Rotation = 90
 	g.Color = ColorSequence.new(Color3.new(1, 1, 1), Color3.new(0.62, 0.62, 0.62))
 	g.Parent = icon
-	local mark = UiKit.text2(icon, "", px(22, 30), V.KHAKI, F.TITLE)
+	local mark = UiKit.text2(icon, "", px(32, 42), V.KHAKI, F.TITLE)
 	mark.Size = UDim2.fromScale(1, 1)
 	mark.TextXAlignment = Enum.TextXAlignment.Center
 	mark.ZIndex = 2
-	local ny = px(10, 14) + IC + px(6, 8)
-	local name = UiKit.text2(b, "", px(13, 18), V.TEXT, F.BODY_B)
+	local ny = px(10, 12) + IC + px(6, 8)
+	local name = UiKit.text2(b, "", px(18, 24), V.TEXT, F.BODY_B)
 	name.Position = UDim2.fromOffset(px(6, 8), ny)
-	name.Size = UDim2.new(1, -px(12, 16), 0, px(32, 44))
+	name.Size = UDim2.new(1, -px(12, 16), 0, px(44, 58))
 	name.TextWrapped = true
 	name.TextXAlignment = Enum.TextXAlignment.Center
 	name.TextYAlignment = Enum.TextYAlignment.Top
 	name.TextTruncate = Enum.TextTruncate.AtEnd
 	name.ZIndex = 2
-	local sub = UiKit.kicker(b, "", px(11, 15))
-	sub.Position = UDim2.fromOffset(px(6, 8), CARD_H - px(20, 26))
-	sub.Size = UDim2.new(1, -px(12, 16), 0, px(16, 22))
+	local sub = UiKit.kicker(b, "", px(13, 17))
+	sub.Position = UDim2.fromOffset(px(6, 8), CARD_H - px(24, 30))
+	sub.Size = UDim2.new(1, -px(12, 16), 0, px(18, 24))
 	sub.TextXAlignment = Enum.TextXAlignment.Center
 	sub.ZIndex = 2
-	local tag = UiKit.tag(b, "", V.OLIVE, px(11, 15))
+	local tag = UiKit.tag(b, "", V.OLIVE, px(13, 17))
 	tag.AnchorPoint = Vector2.new(1, 0)
 	tag.Position = UDim2.new(1, -px(5, 7), 0, px(5, 7))
 	tag.ZIndex = 3
@@ -721,7 +731,7 @@ local function build()
 		node.Parent = f
 		UiKit.corner(node, d // 2)
 		local nodeEdge = UiKit.edge(node, V.LINE, if big then 3 else 2, 0)
-		local nt = UiKit.text2(node, tostring(lvl), if big then px(16, 22) else px(14, 19), V.DIM, F.TITLE)
+		local nt = UiKit.text2(node, tostring(lvl), if big then px(20, 26) else px(17, 22), V.DIM, F.TITLE)
 		nt.Size = UDim2.fromScale(1, 1)
 		nt.TextXAlignment = Enum.TextXAlignment.Center
 		nt.ZIndex = 3
@@ -741,12 +751,14 @@ local STATE_TAG: { [string]: { text: string, color: Color3 } } = {
 	claimed = { text = "✔", color = V.PANEL_3 },
 	locked = { text = "VETERANO", color = Color3.fromRGB(176, 120, 20) },
 }
+-- lote 23: os cartões que já podem ser pegos (o contorno deles brilha enquanto a tela está aberta)
+local readyEdges: { UIStroke } = {}
 local function paintCell(c: Cell, se: { [string]: any }, track: string, lvl: number)
 	local r: Reward? = at(if track == "vet" then se.vet else se.free, lvl)
 	local st = cellState(se, track, lvl)
 	local km = KIND_MARK[(r and r.kind) or ""]
-	c.mark.Text = if r then (if km then km.text else "★") else ""
-	-- D-130: o ícone cheio da cor do prêmio, a letra branca
+	c.mark.Text = if r then (if km then km.text else "⭐") else ""
+	-- D-130: o ícone cheio da cor do prêmio
 	c.mark.TextColor3 = V.TEXT
 	c.icon.BackgroundColor3 = if km then km.color else VIVO.GOLD
 	c.name.Text = if r then rewardName(r) else "—"
@@ -757,10 +769,12 @@ local function paintCell(c: Cell, se: { [string]: any }, track: string, lvl: num
 		c.tag.Text = tg.text
 		c.tag.BackgroundColor3 = tg.color
 	end
-	local dimmed = st == "future" or st == "locked" or st == "claimed"
-	c.name.TextColor3 = if dimmed then V.DIM else V.TEXT
-	c.mark.TextTransparency = if st == "future" or st == "locked" then 0.3 else 0
-	c.icon.BackgroundTransparency = if st == "claimed" then 0.55 elseif st == "future" or st == "locked" then 0.3 else 0
+	-- lote 23: o prêmio que ainda vai chegar fica legível (branco, um pouco transparente); só o que já
+	-- foi pego fica apagado
+	c.name.TextColor3 = if st == "claimed" then V.DIM else V.TEXT
+	c.name.TextTransparency = if st == "future" or st == "locked" then 0.12 else 0
+	c.mark.TextTransparency = if st == "claimed" then 0.35 else 0
+	c.icon.BackgroundTransparency = if st == "claimed" then 0.55 elseif st == "future" or st == "locked" then 0.12 else 0
 	local on = sel.level == lvl and sel.track == track
 	-- o Veterano com o filete dourado, o grátis com o verde: a trilha se distingue de longe
 	c.edge.Color = if on
@@ -768,8 +782,11 @@ local function paintCell(c: Cell, se: { [string]: any }, track: string, lvl: num
 		elseif st == "ready" then VIVO.GREEN
 		elseif track == "vet" then VIVO.GOLD
 		else VIVO.GREEN_DEEP
-	c.edge.Thickness = if on then 2 else 1
+	c.edge.Thickness = if on then 3 elseif st == "ready" then 3 else 1
 	c.edge.Transparency = if on or st == "ready" then 0 else 0.35
+	if st == "ready" and r then
+		table.insert(readyEdges, c.edge)
+	end
 end
 
 local pulse: Tween? = nil
@@ -798,6 +815,7 @@ paint = function()
 	local upTo = if level <= 0 then 0 else colX(math.min(level, MAX)) - colX(1) + frac * (COL_W + COL_GAP)
 	walked.Size = UDim2.fromOffset(math.max(0, math.floor(math.min(upTo, colX(MAX) - colX(1)))), LINE_H)
 	if built then
+		table.clear(readyEdges)
 		for lvl, c in cols do
 			paintCell(c.free, se, "free", lvl)
 			paintCell(c.vet, se, "vet", lvl)
@@ -854,7 +872,7 @@ paint = function()
 	)
 	claimOne.button.Visible = st == "ready" or (st == "locked" and not se.veteran)
 	claimOne.label.Text = if st == "locked" then "LIBERAR O VETERANO" else "RECEBER"
-	claimOne.setKind(if st == "locked" then "robux" else "free") -- liberar é a compra do Veterano
+	claimOne.setKind(if st == "locked" then "robux" else "premio") -- liberar é a compra do Veterano
 	-- receber tudo: só se há algo para receber
 	local any = false
 	for lvl = 1, math.min(level, MAX) do
@@ -921,6 +939,19 @@ list:GetPropertyChangedSignal("AbsoluteWindowSize"):Connect(arrows)
 -- ===== abrir e fechar =====
 local open = false
 local token = 0
+
+-- lote 23: o contorno dos prêmios que já podem ser pegos pisca devagar (um laço só, com a tela aberta)
+RunService.Heartbeat:Connect(function()
+	if not open or #readyEdges == 0 then
+		return
+	end
+	local a = 0.5 + 0.5 * math.sin(os.clock() * 5)
+	for _, e in readyEdges do
+		if e.Color ~= VIVO.GOLD_HI then -- o escolhido fica aceso
+			e.Transparency = a * 0.65
+		end
+	end
+end)
 local function setOpen(on: boolean)
 	if on == open then
 		return

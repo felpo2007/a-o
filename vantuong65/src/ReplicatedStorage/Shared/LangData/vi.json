@@ -2673,5 +2673,9 @@
  "A-4 em mergulho sobre %s (%s) em %d s! As bombas pegam todo mundo: saia da fumaça violeta.": "A-4 bổ nhào xuống %s (%s) trong %d giây! Bom trúng tất cả: ra khỏi khói tím.",
  "Avião em mergulho: ataque aéreo chegando": "Máy bay bổ nhào: không kích sắp tới",
  "Não saia da base!": "Đừng rời khỏi căn cứ!",
- "Pegue um veículo e espere na base": "Lấy một chiếc xe và chờ ở căn cứ"
+ "Pegue um veículo e espere na base": "Lấy một chiếc xe và chờ ở căn cứ",
+ "+ presente surpresa": "+ quà bất ngờ",
+ "Entre todo dia: o prêmio cresce! Pulou um dia, volta ao dia 1.": "Vào mỗi ngày: phần thưởng tăng dần! Bỏ một ngày là quay lại ngày 1.",
+ "HOJE!": "HÔM NAY!",
+ "PEGAR O PRÊMIO DO DIA %d!": "NHẬN THƯỞNG NGÀY %d!"
 }

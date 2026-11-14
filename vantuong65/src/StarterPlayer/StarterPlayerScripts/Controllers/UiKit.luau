@@ -227,6 +227,8 @@ UiKit.PAGAR = {
 	robux = { base = Color3.fromRGB(20, 120, 92), hot = Color3.fromRGB(32, 148, 114) },
 	ci = { base = Color3.fromRGB(150, 104, 24), hot = Color3.fromRGB(178, 126, 38) },
 	free = { base = Estilo.V.OLIVE, hot = Estilo.V.OLIVE_HI },
+	-- lote 23 (diária e passe para crianças): pegar um prêmio, verde vivo (não é compra)
+	premio = { base = Color3.fromRGB(38, 150, 64), hot = Color3.fromRGB(56, 182, 84) },
 } :: { [string]: { base: Color3, hot: Color3 } }
 
 -- forma de pagar de uma moeda do jogo ("robux", "ci", "credit" do renascer guardado, "free")

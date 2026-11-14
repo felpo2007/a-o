@@ -26,13 +26,26 @@ local V = UiKit.V
 local px = UiKit.px
 
 -- ===== medidas (projeto 1280 x 720; na TV, as da TV) =====
-local W, H = px(820, 1100), px(486, 650)
-local PAD = px(22, 30)
+-- Lote 23 (dono: "melhore ainda mais as recompensas diárias e o passe, deixe elas mais atrativas para
+-- crianças e deixe as escritas e principalmente as recompensas escritas maiores"):
+--   - janela maior e letras ~1,4x maiores; o valor de cada dia em letra grande e dourada;
+--   - cada dia com o desenho do prêmio: 💰 (créditos) ou 🎁 (presente); o 7º dia em dourado;
+--   - o dia de hoje pisca e o desenho dele pula; o dia recebido ganha o ✔ verde;
+--   - o botão é verde vivo e pulsa enquanto há prêmio; ao receber, moedas voam do cartão e o valor
+--     sobe em letra grande.
+local W, H = px(920, 1220), px(596, 790)
+local PAD = px(24, 32)
 local GAP = px(10, 14)
-local CARD_Y = px(118, 158)
-local CARD_H = px(172, 230)
+local CARD_Y = px(132, 176)
+local CARD_H = px(264, 350)
 local CARD_W = math.floor((W - 2 * PAD - 6 * GAP) / Commerce.TRACK_DAYS)
-local BTN_H = px(62, 84)
+local BTN_H = px(76, 100)
+local ICON_D = px(68, 90)
+local OURO = Color3.fromRGB(255, 206, 60)
+local OURO_ESCURO = Color3.fromRGB(92, 62, 12)
+local VERDE = Color3.fromRGB(70, 190, 86)
+local ROXO = Color3.fromRGB(170, 70, 210) -- presente
+local HOJE_BG = Color3.fromRGB(70, 60, 30)
 
 -- ===== montagem =====
 local gui = UiKit.screen("VT65Diaria", 36) -- acima do menu principal (28) e da loja (30), abaixo do passe (38)
@@ -60,22 +73,23 @@ do -- faixa de latão no alto (é recompensa)
 	a.Parent = panel
 end
 
-local kick = UiKit.kicker(panel, "CADERNETA DE SERVIÇO", px(14, 20), V.BRASS)
+local kick = UiKit.kicker(panel, "CADERNETA DE SERVIÇO", px(16, 22), V.BRASS)
 kick.Position = UDim2.fromOffset(PAD, px(16, 22))
-kick.Size = UDim2.fromOffset(px(320, 430), px(20, 28))
-local title = UiKit.title(panel, "RECOMPENSA DIÁRIA", px(34, 46))
+kick.Size = UDim2.fromOffset(px(360, 480), px(22, 30))
+local title = UiKit.title(panel, "RECOMPENSA DIÁRIA", px(44, 58), OURO)
 title.Position = UDim2.fromOffset(PAD, px(36, 48))
-title.Size = UDim2.new(1, -2 * PAD, 0, px(42, 56))
-local rule = UiKit.body(panel, "Volte todo dia: o prêmio cresce. Pulou um dia, volta ao dia 1.", px(15, 21), V.DIM)
-rule.Position = UDim2.fromOffset(PAD, px(82, 110))
-rule.Size = UDim2.new(1, -2 * PAD, 0, px(22, 30))
+title.Size = UDim2.new(1, -2 * PAD, 0, px(54, 70))
+local rule = UiKit.body(panel, "Entre todo dia: o prêmio cresce! Pulou um dia, volta ao dia 1.", px(19, 25), V.TEXT)
+rule.Position = UDim2.fromOffset(PAD, px(92, 122))
+rule.Size = UDim2.new(1, -2 * PAD, 0, px(28, 36))
 
 -- dias seguidos, à direita do título
-local runStat = UiKit.stat(panel, "DIAS SEGUIDOS", "0", px(34, 46))
+local runStat = UiKit.stat(panel, "DIAS SEGUIDOS", "0", px(40, 54))
 runStat.frame.AnchorPoint = Vector2.new(1, 0)
 runStat.frame.Position = UDim2.new(1, -PAD, 0, px(18, 24))
 runStat.label.TextXAlignment = Enum.TextXAlignment.Right
 runStat.value.TextXAlignment = Enum.TextXAlignment.Right
+runStat.value.TextColor3 = OURO
 
 -- os sete dias
 type Cell = {
@@ -83,11 +97,17 @@ type Cell = {
 	scale: UIScale,
 	stroke: UIStroke,
 	day: TextLabel,
+	icon: Frame,
+	iconScale: UIScale,
+	mark: TextLabel,
 	cash: TextLabel,
 	item: TextLabel,
 	tag: TextLabel,
 }
 local cells: { Cell } = {}
+local function centered(t: TextLabel)
+	t.TextXAlignment = Enum.TextXAlignment.Center
+end
 for i = 1, Commerce.TRACK_DAYS do
 	local f = UiKit.panel(panel, V.PANEL_2, 0, true)
 	f.Name = "Dia" .. i
@@ -97,37 +117,77 @@ for i = 1, Commerce.TRACK_DAYS do
 	local sc = Instance.new("UIScale")
 	sc.Parent = f
 	local st = f:FindFirstChildOfClass("UIStroke") :: UIStroke
-	local k = UiKit.kicker(f, "DIA", px(12, 17))
+	do -- luz caindo de cima no cartão
+		local lg = Instance.new("UIGradient")
+		lg.Rotation = 90
+		lg.Color = ColorSequence.new(Color3.new(1, 1, 1), Color3.new(0.72, 0.72, 0.72))
+		lg.Parent = f
+	end
+	local k = UiKit.kicker(f, "DIA", px(15, 20))
 	k.Position = UDim2.fromOffset(0, px(8, 10))
-	k.Size = UDim2.new(1, 0, 0, px(16, 22))
-	k.TextXAlignment = Enum.TextXAlignment.Center
-	local d = UiKit.title(f, tostring(i), px(34, 46))
-	d.Position = UDim2.fromOffset(0, px(22, 30))
-	d.Size = UDim2.new(1, 0, 0, px(40, 54))
-	d.TextXAlignment = Enum.TextXAlignment.Center
-	local cash = UiKit.title(f, "", px(19, 26), V.KHAKI)
-	cash.Position = UDim2.fromOffset(0, px(66, 88))
-	cash.Size = UDim2.new(1, 0, 0, px(24, 32))
-	cash.TextXAlignment = Enum.TextXAlignment.Center
-	local item = UiKit.body(f, "", px(12, 17), V.TEXT)
-	item.Position = UDim2.fromOffset(px(4, 6), px(92, 122))
-	item.Size = UDim2.new(1, -2 * px(4, 6), 0, px(42, 56))
-	item.TextXAlignment = Enum.TextXAlignment.Center
+	k.Size = UDim2.new(1, 0, 0, px(18, 24))
+	centered(k)
+	local d = UiKit.title(f, tostring(i), px(40, 52))
+	d.Position = UDim2.fromOffset(0, px(24, 32))
+	d.Size = UDim2.new(1, 0, 0, px(46, 60))
+	centered(d)
+	-- o desenho do prêmio: moedas ou presente, num círculo de cor viva
+	local icon = Instance.new("Frame")
+	icon.Name = "Premio"
+	icon.AnchorPoint = Vector2.new(0.5, 0)
+	icon.Position = UDim2.new(0.5, 0, 0, px(74, 98))
+	icon.Size = UDim2.fromOffset(ICON_D, ICON_D)
+	icon.BackgroundColor3 = OURO
+	icon.BorderSizePixel = 0
+	icon.Parent = f
+	UiKit.corner(icon, ICON_D // 2)
+	local ig = Instance.new("UIGradient")
+	ig.Rotation = 90
+	ig.Color = ColorSequence.new(Color3.new(1, 1, 1), Color3.new(0.66, 0.66, 0.66))
+	ig.Parent = icon
+	local isc = Instance.new("UIScale")
+	isc.Parent = icon
+	local mark = UiKit.title(icon, "💰", px(38, 50), V.TEXT)
+	mark.Size = UDim2.fromScale(1, 1)
+	mark.TextYAlignment = Enum.TextYAlignment.Center
+	centered(mark)
+	local cash = UiKit.title(f, "", px(30, 40), OURO)
+	cash.Position = UDim2.fromOffset(0, px(148, 196))
+	cash.Size = UDim2.new(1, 0, 0, px(36, 48))
+	centered(cash)
+	local item = UiKit.body(f, "", px(15, 20), V.TEXT)
+	item.Position = UDim2.fromOffset(px(4, 6), px(186, 246))
+	item.Size = UDim2.new(1, -2 * px(4, 6), 0, px(40, 54))
+	item.TextWrapped = true
+	item.TextYAlignment = Enum.TextYAlignment.Top
+	centered(item)
 	item.TextTruncate = Enum.TextTruncate.AtEnd
-	local tag = UiKit.tag(f, "", V.OLIVE, px(12, 17))
+	local tag = UiKit.tag(f, "", V.OLIVE, px(16, 21))
 	tag.AnchorPoint = Vector2.new(0.5, 1)
 	tag.Position = UDim2.new(0.5, 0, 1, -px(8, 10))
 	tag.Visible = false
-	cells[i] = { frame = f, scale = sc, stroke = st, day = d, cash = cash, item = item, tag = tag }
+	cells[i] = {
+		frame = f,
+		scale = sc,
+		stroke = st,
+		day = d,
+		icon = icon,
+		iconScale = isc,
+		mark = mark,
+		cash = cash,
+		item = item,
+		tag = tag,
+	}
 end
 
 -- o que aconteceu (resgate, motivo da recusa, sequência zerada) e o aviso de sessão sem gravação
-local result = UiKit.body(panel, "", px(16, 22), V.TEXT)
-result.Position = UDim2.fromOffset(PAD, CARD_Y + CARD_H + px(12, 16))
-result.Size = UDim2.new(1, -2 * PAD, 0, px(44, 60))
-local note = UiKit.body(panel, "", px(13, 18), V.RED_HI)
-note.Position = UDim2.fromOffset(PAD, CARD_Y + CARD_H + px(56, 76))
-note.Size = UDim2.new(1, -2 * PAD, 0, px(20, 28))
+local result = UiKit.body(panel, "", px(20, 27), V.TEXT)
+result.Position = UDim2.fromOffset(PAD, CARD_Y + CARD_H + px(10, 14))
+result.Size = UDim2.new(1, -2 * PAD, 0, px(50, 66))
+result.TextWrapped = true
+local note = UiKit.body(panel, "", px(15, 20), V.RED_HI)
+note.Position = UDim2.fromOffset(PAD, CARD_Y + CARD_H + px(60, 80))
+note.Size = UDim2.new(1, -2 * PAD, 0, px(22, 30))
 
 local open = false
 local token = 0
@@ -151,7 +211,7 @@ local function claim()
 	end)
 end
 
-local mainBtn = UiKit.action(panel, "RESGATAR", "primary", function()
+local mainBtn = UiKit.action(panel, "RESGATAR", "premio", function()
 	if daily and daily.ready and daily.canClaim and not claimedNow then
 		claim()
 	elseif not busy then
@@ -160,6 +220,116 @@ local mainBtn = UiKit.action(panel, "RESGATAR", "primary", function()
 end, { action = nil, ctx = nil, h = BTN_H })
 mainBtn.button.Position = UDim2.fromOffset(PAD, H - PAD - BTN_H)
 mainBtn.button.Size = UDim2.new(1, -2 * PAD, 0, BTN_H)
+mainBtn.label.TextSize = UiKit.text(px(28, 36))
+mainBtn.sub.TextSize = UiKit.text(px(26, 34))
+mainBtn.sub.TextColor3 = OURO
+local btnScale = Instance.new("UIScale")
+btnScale.Parent = mainBtn.button
+
+-- ===== animações (lote 23) =====
+-- o botão pulsa enquanto há prêmio para pegar; o desenho do dia de hoje pula
+local btnPulse: Tween? = nil
+local function pulseButton(on: boolean)
+	if on and not btnPulse then
+		btnScale.Scale = 1
+		local t = TweenService:Create(
+			btnScale,
+			TweenInfo.new(0.55, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true),
+			{ Scale = 1.03 }
+		)
+		t:Play()
+		btnPulse = t
+	elseif not on and btnPulse then
+		btnPulse:Cancel()
+		btnPulse = nil
+		btnScale.Scale = 1
+	end
+end
+local bounceDay = 0
+local bounce: Tween? = nil
+local glow: Tween? = nil
+local function bounceToday(day: number)
+	if day == bounceDay then
+		return
+	end
+	if bounce then
+		bounce:Cancel()
+		bounce = nil
+	end
+	if glow then
+		glow:Cancel()
+		glow = nil
+	end
+	local old = cells[bounceDay]
+	if old then
+		old.iconScale.Scale = 1
+	end
+	bounceDay = day
+	local c = cells[day]
+	if not c then
+		return
+	end
+	local b = TweenService:Create(
+		c.iconScale,
+		TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut, -1, true),
+		{ Scale = 1.14 }
+	)
+	b:Play()
+	bounce = b
+	c.stroke.Transparency = 0
+	local g = TweenService:Create(
+		c.stroke,
+		TweenInfo.new(0.7, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true),
+		{ Transparency = 0.6 }
+	)
+	g:Play()
+	glow = g
+end
+
+-- ao receber: moedas e brilhos voam do cartão do dia e o valor sobe em letra grande
+local function burst(day: number, credits: number)
+	local c = cells[day]
+	if not c then
+		return
+	end
+	local origin = c.frame.Position
+	local rng = Random.new()
+	for i = 1, 14 do
+		local t = UiKit.title(panel, if i % 3 == 0 then "✨" else "💰", px(30, 40), V.TEXT)
+		t.AnchorPoint = Vector2.new(0.5, 0.5)
+		t.Size = UDim2.fromOffset(px(44, 58), px(44, 58))
+		t.Position = origin
+		centered(t)
+		t.ZIndex = 20
+		local a = rng:NextNumber(-math.pi * 0.95, -math.pi * 0.05) -- para cima, num leque
+		local r = rng:NextNumber(px(90, 120), px(190, 250))
+		local info = TweenInfo.new(rng:NextNumber(0.7, 1.1), Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+		TweenService:Create(t, info, {
+			Position = origin + UDim2.fromOffset(math.cos(a) * r, math.sin(a) * r),
+			TextTransparency = 1,
+			Rotation = rng:NextNumber(-60, 60),
+		}):Play()
+		task.delay(1.2, function()
+			t:Destroy()
+		end)
+	end
+	local big = UiKit.title(panel, string.format("+$ %d", credits), px(54, 70), OURO)
+	big.AnchorPoint = Vector2.new(0.5, 0.5)
+	big.Size = UDim2.fromOffset(px(260, 340), px(64, 84))
+	big.Position = origin
+	big.TextStrokeTransparency = 0.2
+	big.TextStrokeColor3 = Color3.new(0, 0, 0)
+	centered(big)
+	big.ZIndex = 21
+	TweenService:Create(big, TweenInfo.new(1.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+		Position = origin - UDim2.fromOffset(0, px(130, 170)),
+		TextTransparency = 1,
+		TextStrokeTransparency = 1,
+	}):Play()
+	task.delay(1.6, function()
+		big:Destroy()
+	end)
+end
 
 -- ===== estado =====
 local function itemName(id: string): string
@@ -203,40 +373,56 @@ local function render()
 	local ready = d ~= nil and d.ready == true
 	local day: number = if ready and type(d.day) == "number" then d.day else 1
 	local side = sideNow()
-	runStat.value.Text = if ready then tostring(d.run or 0) else "—"
+	runStat.value.Text = if ready then "🔥 " .. tostring(d.run or 0) else "—"
+	local claimedAll = ready and d.claimedToday == true
 	for i, c in cells do
 		local entry = Commerce.DailyTrack[i]
 		c.cash.Text = string.format("+$ %d", entry.credits)
 		local items = entry.items
 		if items then
 			local mine = if side then items[side] else nil
-			c.item.Text = if mine then "+ " .. itemName(mine) else "+ item único"
+			c.item.Text = if mine then "+ " .. itemName(mine) else "+ presente surpresa"
 		else
 			c.item.Text = ""
 		end
-		local claimed = ready and d.claimedToday == true
+		local claimed = claimedAll
 		local done = ready and (if claimed then i < day else (d.canClaim and i < day))
 		local today = ready and i == day
+		local last = i == Commerce.TRACK_DAYS
 		local text, color = "", V.OLIVE
 		if today and claimed then
-			text, color = "RECEBIDO", V.OLIVE
+			text, color = "RECEBIDO", VERDE
 		elseif today then
-			text, color = "HOJE", V.BRASS
+			text, color = "HOJE!", OURO
 		elseif done then
-			text, color = "✓", V.OLIVE
+			text, color = "✔", VERDE
 		elseif claimed and i == day % Commerce.TRACK_DAYS + 1 then
 			text, color = "AMANHÃ", V.PANEL_3
 		end
 		c.tag.Visible = text ~= ""
 		c.tag.Text = text
 		c.tag.BackgroundColor3 = color
-		c.tag.TextColor3 = if color == V.BRASS then V.BG else V.TEXT
-		c.frame.BackgroundColor3 = if today then V.PANEL_3 elseif done then Color3.fromRGB(40, 50, 30) else V.PANEL_2
-		c.stroke.Color = if today then V.BRASS else V.LINE
-		c.stroke.Thickness = if today then 2 else 1
-		c.stroke.Transparency = if today then 0 else 0.55
-		c.day.TextColor3 = if today then V.BRASS elseif done then V.TEXT else V.DIM
+		c.tag.TextColor3 = if color == OURO then V.BG else V.TEXT
+		-- o desenho: ✔ verde no que já foi recebido; senão moedas ou presente
+		local got = done or (today and claimed)
+		c.mark.Text = if got then "✔" elseif items then "🎁" else "💰"
+		c.mark.TextColor3 = V.TEXT
+		c.icon.BackgroundColor3 = if got then VERDE elseif items then ROXO else OURO
+		c.frame.BackgroundColor3 = if today
+			then HOJE_BG
+			elseif last then OURO_ESCURO
+			elseif done then Color3.fromRGB(34, 58, 34)
+			else V.PANEL_2
+		c.stroke.Color = if today then OURO elseif last then OURO else V.LINE
+		c.stroke.Thickness = if today then 3 elseif last then 2 else 1
+		if not today then
+			c.stroke.Transparency = if last then 0.2 else 0.55
+		end
+		c.day.TextColor3 = if today then OURO else V.TEXT
+		c.cash.TextColor3 = if got then V.TEXT else OURO
 	end
+	-- o dia de hoje pula e brilha enquanto o prêmio dele está para pegar
+	bounceToday(if ready and d.canClaim and not claimedNow then day else 0)
 	-- botão e texto
 	local label, sub, on = "CONTINUAR", "", true
 	if not ready then
@@ -245,13 +431,14 @@ local function render()
 		label, on = "REGISTRANDO…", false
 	elseif d.canClaim and not claimedNow then
 		local entry = Commerce.DailyTrack[day]
-		label = string.format("RESGATAR O DIA %d", day)
+		label = string.format("PEGAR O PRÊMIO DO DIA %d!", day)
 		sub = string.format("+$ %d", entry.credits)
 	end
 	mainBtn.label.Text = label
 	mainBtn.label.FontFace = UiKit.headFont(label)
 	mainBtn.sub.Text = sub
 	mainBtn.enabled(on)
+	pulseButton(on and sub ~= "")
 	local r = claimedNow
 	if r and r.ok then
 		local entry = Commerce.DailyTrack[r.day or day]
@@ -353,7 +540,13 @@ Net.event("Daily_State").OnClientEvent:Connect(function(s: any)
 		if open then
 			claimedNow = s.result
 			if s.result.ok then
-				pop(tonumber(s.result.day) or 1)
+				local day = tonumber(s.result.day) or 1
+				pop(day)
+				local entry = Commerce.DailyTrack[day]
+				local got = if type(s.result.credits) == "number" and s.result.credits > 0
+					then s.result.credits
+					else (entry and entry.credits or 0)
+				burst(day, got)
 			end
 		end
 	end
@@ -396,6 +589,8 @@ setOpen = function(on: boolean)
 		end
 		UiKit.focus(panel)
 	else
+		pulseButton(false)
+		bounceToday(0)
 		Input.closeMenu()
 		UiKit.closed("diaria")
 		UiKit.release(gui)

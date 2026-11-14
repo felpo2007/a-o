@@ -152,7 +152,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:1860"
  ],
  "%d h %02d min": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:183",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:353",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:1066"
  ],
  "%d km": [
@@ -197,11 +197,11 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:2280",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/FrontHud.client.luau:952",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaMissoes.client.luau:261",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:788",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:805",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/TutorialController.client.luau:362"
  ],
  "%d/%d ★ PARA O PRÓXIMO": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:789"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:806"
  ],
  "%d:%02d": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CasualtyScreen.luau:741",
@@ -264,7 +264,7 @@
   "src/ServerScriptService/Modules/EventosService.luau:98",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/FrontHud.client.luau:256",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:1595",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:849"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:867"
  ],
  "%s %s (%s)": [
   "src/ServerScriptService/Modules/BotVehicles.luau:978"
@@ -403,7 +403,7 @@
   "src/ServerScriptService/Modules/CompraVeiculoService.luau:312"
  ],
  "%s/%s": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:748"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:750"
  ],
  "%s: %s": [
   "src/ServerScriptService/Modules/CombatService.luau:721",
@@ -428,7 +428,7 @@
   "src/ServerScriptService/Modules/ProgressionService.luau:530"
  ],
  "%s:%d": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:670"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:680"
  ],
  "%s:%d:%d": [
   "src/ReplicatedStorage/Shared/Missoes.luau:171"
@@ -505,8 +505,8 @@
  "+ NOVO": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:1605"
  ],
- "+ item único": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:213"
+ "+ presente surpresa": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:384"
  ],
  "+%d XP": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaMissoes.client.luau:224"
@@ -592,7 +592,7 @@
   "src/ReplicatedStorage/Shared/Commerce.luau:269"
  ],
  "10 níveis": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:895"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:913"
  ],
  "100 abates.": [
   "src/ReplicatedStorage/Shared/Medalhas.luau:35"
@@ -808,7 +808,7 @@
   "src/ReplicatedFirst/LoadingScreen.client.luau:248"
  ],
  "A PARTIDA COMEÇA EM": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/Contagem.client.luau:65"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/Contagem.client.luau:79"
  ],
  "A PÉ": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:113",
@@ -862,7 +862,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ComoJogar.luau:589"
  ],
  "A temporada termina em %d dias.": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:793"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:810"
  ],
  "A-4 em mergulho sobre %s (%s) em %d s! As bombas pegam todo mundo: saia da fumaça violeta.": [
   "src/ServerScriptService/Modules/EventosService.luau:357"
@@ -915,7 +915,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/HudCampo.client.luau:667"
  ],
  "AMANHÃ": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:228"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:400"
  ],
  "AN/PRC-10 · 38–54,9 MC": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/LobbyScene.luau:896"
@@ -1077,7 +1077,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CasualtyScreen.luau:1107"
  ],
  "Aguarde a virada do dia (UTC).": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:195"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:365"
  ],
  "Ajuda a manter o jogo (pesquisa histórica, servidores). Sem recompensa em jogo.": [
   "src/ReplicatedStorage/Shared/Commerce.luau:108"
@@ -1247,7 +1247,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:1033"
  ],
  "Arraste": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:900"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:918"
  ],
  "Arraste o polegar no analógico, embaixo à esquerda, para andar; leve até a borda para correr. Toque em PULAR para passar por cima de muretas.": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ComoJogar.luau:59"
@@ -1439,7 +1439,7 @@
   "src/ReplicatedStorage/Shared/InputMap.luau:157",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:1582",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/TutorialController.client.luau:408",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:613"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:615"
  ],
  "Bainha": [
   "src/ReplicatedStorage/Shared/KnifeModel.luau:198",
@@ -1631,7 +1631,7 @@
   "src/ReplicatedStorage/Shared/MapConfig.luau:24"
  ],
  "CADERNETA DE SERVIÇO": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:63"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:76"
  ],
  "CADÊNCIA": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:1200"
@@ -1728,7 +1728,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CasualtyScreen.luau:1051"
  ],
  "COM O VETERANO": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:795"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:812"
  ],
  "COMBAT": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:77"
@@ -1788,7 +1788,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CommanderController.client.luau:155"
  ],
  "CONTINUAR": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:241"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:427"
  ],
  "CORRENDO": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ToqueHud.client.luau:807"
@@ -1872,7 +1872,7 @@
  ],
  "Camuflagem": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:1073",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:405"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:413"
  ],
  "Camuflagem de arrozal": [
   "src/ReplicatedStorage/Shared/Skins.luau:545"
@@ -2019,7 +2019,7 @@
  ],
  "Cartão de abate": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:1079",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:408"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:416"
  ],
  "Cartão de abate: Colina 43": [
   "src/ReplicatedStorage/Shared/Temporada.luau:97"
@@ -2081,7 +2081,7 @@
   "src/ReplicatedStorage/Shared/Vehicles.luau:427"
  ],
  "Chegue ao nível %d para receber.": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:847"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:865"
  ],
  "Chegue perto de um jipe, caminhão, tanque ou helicóptero para entrar. Lá dentro, troque de lugar ou saia.": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ComoJogar.luau:111"
@@ -2110,7 +2110,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:1198",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Progresso.client.luau:1049",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:862",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:905"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:923"
  ],
  "Clique ou Enter escolhe · 1–8 · Backspace cancela": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Wheel.luau:259"
@@ -2349,7 +2349,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:1082",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:1529",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:1532",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:403"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:411"
  ],
  "Créditos dobrados ativos: mais %s.": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:1503"
@@ -2359,7 +2359,7 @@
  ],
  "Ctrl": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ComoJogar.luau:610",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:610"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:612"
  ],
  "Culatra": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Ferrolho.luau:138",
@@ -2466,10 +2466,10 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehiclePrompt.client.luau:351"
  ],
  "DIA": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:100"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:126"
  ],
  "DIAS SEGUIDOS": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:74"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:87"
  ],
  "DO DIA": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaMissoes.client.luau:192"
@@ -2605,7 +2605,7 @@
  ],
  "Direita": [
   "src/ReplicatedStorage/Shared/CartaModel.luau:102",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:267"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:273"
  ],
  "Direita 50": [
   "src/ReplicatedStorage/Shared/Comms.luau:49"
@@ -2798,7 +2798,7 @@
  ],
  "Emblema": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:1075",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:404"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:412"
  ],
  "Emblema da Temporada 1": [
   "src/ReplicatedStorage/Shared/Temporada.luau:43"
@@ -2845,7 +2845,7 @@
  "Enter": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/FrontHud.client.luau:716",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Input.luau:672",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:611"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:613"
  ],
  "Entra num squad e vai direto para o campo.": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:397"
@@ -2859,6 +2859,9 @@
  ],
  "Entre num squad com vaga ou forme um novo.": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:1525"
+ ],
+ "Entre todo dia: o prêmio cresce! Pulou um dia, volta ao dia 1.": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:82"
  ],
  "Equipamento": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/InfantryController.client.luau:348",
@@ -2923,7 +2926,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ComoJogar.luau:612",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ComoJogar.luau:620",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Input.luau:683",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:612"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:614"
  ],
  "Español": [
   "src/ReplicatedFirst/Idioma.luau:33",
@@ -2944,7 +2947,7 @@
  ],
  "Esquerda": [
   "src/ReplicatedStorage/Shared/CartaModel.luau:102",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:267"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:273"
  ],
  "Esquerda 50": [
   "src/ReplicatedStorage/Shared/Comms.luau:51"
@@ -2972,7 +2975,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:760"
  ],
  "Este dia já foi resgatado.": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:194"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:364"
  ],
  "Este item não está no mercado hoje": [
   "src/ServerScriptService/Modules/CampanhaService.luau:712"
@@ -3017,7 +3020,7 @@
  ],
  "Estrelas": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:1084",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:412"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:420"
  ],
  "Evacuado pelo UH-34D: +%d de suprimento para o time": [
   "src/ServerScriptService/Modules/FieldWorkService.luau:195"
@@ -3026,8 +3029,8 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/EventosHud.client.luau:50"
  ],
  "Exemplo %d": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:1047",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:1053"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:1078",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:1084"
  ],
  "Exhausted": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Movement.client.luau:1391"
@@ -3077,7 +3080,7 @@
  "FECHAR ×": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:127",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:197",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:150"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:156"
  ],
  "FERIDO": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CasualtyScreen.luau:256",
@@ -3212,8 +3215,8 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Progresso.client.luau:1046",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:857",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:863",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:898",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:906",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:916",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:924",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehiclePrompt.client.luau:363"
  ],
  "Fechar / voltar": [
@@ -3330,8 +3333,8 @@
  ],
  "Font": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaView.luau:167",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:547",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:571"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:549",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:573"
  ],
  "Fonte: The First Fight (USMC, 2015), %s": [
   "src/ReplicatedFirst/LoadingScreen.client.luau:689"
@@ -3431,7 +3434,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ComoJogar.luau:84"
  ],
  "GRÁTIS": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:202"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:208"
  ],
  "Galveston e Orleck vão bater em %s (%s) em %d s. Fique fora da fumaça vermelha e assalte depois.": [
   "src/ServerScriptService/Modules/EventosService.luau:335"
@@ -3457,7 +3460,7 @@
  ],
  "Gesto": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:1080",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:409"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:417"
  ],
  "Gesto: conferir o mapa": [
   "src/ReplicatedStorage/Shared/Temporada.luau:81"
@@ -3564,8 +3567,8 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaView.luau:409",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/PainelComandos.client.luau:53"
  ],
- "HOJE": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:224"
+ "HOJE!": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:396"
  ],
  "HORA": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/SpawnTransition.luau:130"
@@ -3769,9 +3772,9 @@
  "Item": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaView.luau:377",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:1433",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:437",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:753",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:838"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:447",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:765",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:856"
  ],
  "Itens novos em %s (virada do dia UTC).": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:1417"
@@ -3822,7 +3825,7 @@
   "src/ServerScriptService/Modules/CampanhaService.luau:714"
  ],
  "Já é seu.": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:844"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:862"
  ],
  "KM/H": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleHudView.luau:330"
@@ -3862,7 +3865,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaMissoes.client.luau:299"
  ],
  "LENDO A CADERNETA…": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:243"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:429"
  ],
  "LEVANDO (%s) — trocar": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Progresso.client.luau:754"
@@ -3877,14 +3880,14 @@
  ],
  "LEVEL": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:85",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:451"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:461"
  ],
  "LIBERADO": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CasualtyScreen.luau:1364",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:795"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:812"
  ],
  "LIBERAR O VETERANO": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:856"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:874"
  ],
  "LIGAÇÃO PERDIDA · CONTROLE DESCONECTADO": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Reconexao.client.luau:62"
@@ -3898,7 +3901,7 @@
  ],
  "LMB": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Input.luau:668",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:606"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:608"
  ],
  "LOJA": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:400"
@@ -3998,7 +4001,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:858"
  ],
  "Lendo a caderneta…": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:289"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:476"
  ],
  "Lenço xadrez": [
   "src/ReplicatedStorage/Shared/Commerce.luau:444"
@@ -4164,7 +4167,7 @@
  ],
  "MMB": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Input.luau:670",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:608"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:610"
  ],
  "MOSTRAR": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/EditorHud.client.luau:458"
@@ -4476,7 +4479,7 @@
  ],
  "Música": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:1081",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:410"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:418"
  ],
  "Música (menus)": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:825"
@@ -4497,7 +4500,7 @@
  ],
  "NIVEL": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:85",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:452"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:462"
  ],
  "NO": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/HudCampo.client.luau:220",
@@ -4611,7 +4614,7 @@
   "src/ReplicatedStorage/Shared/Logistics.luau:41"
  ],
  "Nivel%02d": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:695"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:705"
  ],
  "Norma escrita do USMC: PLACEHOLDER (não achada)": [
   "src/ReplicatedStorage/Shared/Weapons.luau:140"
@@ -4626,11 +4629,11 @@
   "src/ServerScriptService/Modules/MedicalService.luau:384"
  ],
  "NÍVEL": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:130",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:205"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:136",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:211"
  ],
  "NÍVEL MÁXIMO": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:789"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:806"
  ],
  "NÓS": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleHudView.luau:355"
@@ -4639,16 +4642,16 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Reconexao.client.luau:234"
  ],
  "Não saia da base!": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/Contagem.client.luau:70"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/Contagem.client.luau:84"
  ],
  "Nível %d de %d · %d de %d estrelas no nível": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:1393"
  ],
  "Nível %d · trilha Veterano.": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:851"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:869"
  ],
  "Nível %d · trilha grátis.": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:852"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:870"
  ],
  "Nível recebido": [
   "src/ServerScriptService/Modules/CampanhaService.luau:687"
@@ -4703,7 +4706,7 @@
   "src/ReplicatedStorage/Shared/Skins.luau:466"
  ],
  "O registro falhou: tente de novo.": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:198"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:368"
  ],
  "O relógio zerou: a defesa do VC segurou a linha.": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/FrontHud.client.luau:739"
@@ -4840,7 +4843,7 @@
  ],
  "Operação Starlite: Temporada 1": [
   "src/ReplicatedStorage/Shared/Temporada.luau:15",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:1059"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:1090"
  ],
  "Ordem Cumprida": [
   "src/ReplicatedStorage/Shared/Medalhas.luau:76"
@@ -4923,17 +4926,20 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:2294"
  ],
  "PARA TODOS": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:203"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:209"
  ],
  "PASSE": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:401"
  ],
  "PASSE DE CAMPANHA": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:121",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:779"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:127",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:796"
  ],
  "PAUSADO": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Reconexao.client.luau:110"
+ ],
+ "PEGAR O PRÊMIO DO DIA %d!": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:434"
  ],
  "PENDENTE": [
   "src/ReplicatedStorage/Shared/Weapons.luau:354"
@@ -5114,10 +5120,10 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ToqueTelas.luau:300"
  ],
  "PULAR NÍVEL · %s": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:884"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:902"
  ],
  "PULAR NÍVEL · EM BREVE": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:888"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:906"
  ],
  "PULAR O TUTORIAL": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:1212"
@@ -5211,7 +5217,7 @@
  "Passe de campanha": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:1384",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:1389",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:786"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:803"
  ],
  "Passe seu: nível liberado.": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Progresso.client.luau:729"
@@ -5253,7 +5259,7 @@
   "src/ServerScriptService/Modules/RadioService.luau:60"
  ],
  "Pegue um veículo e espere na base": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/Contagem.client.luau:73"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/Contagem.client.luau:87"
  ],
  "Peitoral de lona (padrão chinês Tipo 56)": [
   "src/ReplicatedStorage/Shared/Progression.luau:352"
@@ -5392,7 +5398,7 @@
   "src/ServerScriptService/Modules/MapLife.luau:570"
  ],
  "Precisa do Veterano.": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:846"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:864"
  ],
  "Preciso de munição": [
   "src/ReplicatedStorage/Shared/Comms.luau:12"
@@ -5430,7 +5436,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/HudCampo.client.luau:824"
  ],
  "Pronto para receber.": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:845"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:863"
  ],
  "Pronto.": [
   "src/ReplicatedFirst/LoadingScreen.client.luau:859"
@@ -5519,7 +5525,7 @@
  "R$ %d": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:302",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:1445",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:485"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:495"
  ],
  "R$ %s": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Progresso.client.luau:448"
@@ -5543,21 +5549,21 @@
  ],
  "RECEBER": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaMissoes.client.luau:163",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:351",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:740",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:856"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:357",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:750",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:874"
  ],
  "RECEBER TUDO": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:356"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:363"
  ],
  "RECEBIDA": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaMissoes.client.luau:176"
  ],
  "RECEBIDO": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:222"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:394"
  ],
  "RECOMPENSA DIÁRIA": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:66",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:79",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/LobbyScene.luau:965",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/LobbyScene.luau:1167"
  ],
@@ -5583,7 +5589,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/FrontHud.client.luau:383"
  ],
  "REGISTRANDO…": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:245"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:431"
  ],
  "RELATÓRIO PÓS-AÇÃO": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/AfterActionController.client.luau:70"
@@ -5603,10 +5609,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:912"
  ],
  "RESGATAR": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:154"
- ],
- "RESGATAR O DIA %d": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:248"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:214"
  ],
  "RESUMO": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaView.luau:2216"
@@ -5625,7 +5628,7 @@
  ],
  "RMB": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Input.luau:669",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:607"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:609"
  ],
  "ROBUX": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:355"
@@ -5730,19 +5733,19 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:1378"
  ],
  "Recebendo o passe do servidor…": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:780"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:797"
  ],
  "Recebendo os squads do servidor…": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:1521"
  ],
  "Receber": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:897"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:915"
  ],
  "Recebido: +$ %d de crédito e um item novo no armário: %s.": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:270"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:457"
  ],
  "Recebido: +$ %d de crédito. Volte amanhã para o dia seguinte.": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:274"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:461"
  ],
  "Receiver": [
   "src/ReplicatedStorage/Shared/GunModel.luau:131"
@@ -5768,7 +5771,7 @@
  "Reforço": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:1078",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:1511",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:411"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:419"
  ],
  "Reforço %s": [
   "src/ServerScriptService/Modules/CommanderService.luau:198"
@@ -5893,7 +5896,7 @@
  "Roda": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/AfterActionController.client.luau:333",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:215",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:904"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:922"
  ],
  "Roda de comunicação": [
   "src/ReplicatedStorage/Shared/InputMap.luau:73"
@@ -6003,7 +6006,7 @@
  ],
  "SEASON": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:83",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:446"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:456"
  ],
  "SECRET": [
   "src/ReplicatedFirst/LoadingScreen.client.luau:346"
@@ -6043,7 +6046,7 @@
  ],
  "SKIP": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:79",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:450"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:460"
  ],
  "SKS": [
   "src/ReplicatedStorage/Shared/Weapons.luau:260",
@@ -6286,7 +6289,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:1053"
  ],
  "Sessão sem DataStore (perfil não carregou ou Studio): o prêmio de hoje não fica gravado.": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:295"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:482"
  ],
  "Setor do VC": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaView.luau:2195"
@@ -6332,10 +6335,10 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CommanderController.client.luau:152"
  ],
  "Seu perfil ainda está carregando: tente de novo em instantes.": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:196"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:366"
  ],
  "Seu perfil não carregou neste servidor: o prêmio não pode ser gravado agora (nada foi perdido).": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:197"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:367"
  ],
  "Seu soldado fica parado até lá. Teclado e mouse continuam valendo.": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Reconexao.client.luau:106"
@@ -6357,7 +6360,7 @@
  "Shift": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ComoJogar.luau:609",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Input.luau:671",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:609"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:611"
  ],
  "Shoulder": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/PostureController.client.luau:299",
@@ -6544,7 +6547,7 @@
  ],
  "TEMPORADA": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:83",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:447"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:457"
  ],
  "TESTAR": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/EditorHud.client.luau:323",
@@ -6781,7 +6784,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/HudCampo.client.luau:950"
  ],
  "Tome os pontos": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/Contagem.client.luau:88"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/Contagem.client.luau:102"
  ],
  "Toque": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/AfterActionController.client.luau:331",
@@ -6791,7 +6794,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:713",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:1192",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:859",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:901"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:919"
  ],
  "Toque de novo no cartão para escolher este papel.": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:1803"
@@ -6870,7 +6873,7 @@
   "src/ReplicatedStorage/Shared/Tutorial.luau:93"
  ],
  "Trilha": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:896"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:914"
  ],
  "Trilha grátis": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:1390"
@@ -6979,7 +6982,7 @@
  ],
  "Título": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:1076",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:406"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:414"
  ],
  "Túnel": [
   "src/ServerScriptService/Modules/TunnelService.luau:267",
@@ -7234,8 +7237,8 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:1130",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:2618",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:2699",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:173",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:178",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:343",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:348",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/EventosVisual.luau:189",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/FrontHud.client.luau:240",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/FrontHud.client.luau:240",
@@ -7296,7 +7299,7 @@
   "src/ReplicatedStorage/Shared/Commerce.luau:313"
  ],
  "Um dia passou sem prêmio: a sequência recomeçou no dia 1.": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:286"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:473"
  ],
  "Um item histórico por temporada e a fita da Reserva.": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:929"
@@ -7318,7 +7321,7 @@
  ],
  "Uniforme": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:1074",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:407"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:415"
  ],
  "Uniforme OG-107 · capacete M1 · colete M1955": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:142"
@@ -7373,7 +7376,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:1905"
  ],
  "VALENDO!": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/Contagem.client.luau:86"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/Contagem.client.luau:100"
  ],
  "VANT": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:81"
@@ -7583,8 +7586,8 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:1577",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:1607",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:2620",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:173",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:178",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:343",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:348",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/EventosVisual.luau:190",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/FrontHud.client.luau:240",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/FrontHud.client.luau:248",
@@ -7642,14 +7645,14 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/EditorHud.client.luau:317"
  ],
  "VETERANO": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:201",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:742"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:207",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:752"
  ],
  "VETERANO · %s": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:873"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:891"
  ],
  "VETERANO · EM BREVE": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:877"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:895"
  ],
  "VEÍCULO": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/PainelComandos.client.luau:52"
@@ -7859,7 +7862,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:2529"
  ],
  "Você já resgatou hoje. O próximo prêmio sai em %s.": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:280"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:467"
  ],
  "Você já tem um em campo": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CasualtyScreen.luau:944"
@@ -7896,9 +7899,6 @@
  "Voltar à mesa": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:2186",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:2193"
- ],
- "Volte todo dia: o prêmio cresce. Pulou um dia, volta ao dia 1.": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:69"
  ],
  "Volume": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:822"
@@ -8067,7 +8067,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/AfterActionController.client.luau:177"
  ],
  "^(%u%u)|": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:177"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:347"
  ],
  "^(%w+):?(%w*)$": [
   "src/ServerScriptService/Modules/MeleeService.luau:518"
@@ -8350,7 +8350,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleFx.client.luau:1265"
  ],
  "anda na linha": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:904"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:922"
  ],
  "andar": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/SoldierAnimations.client.luau:134",
@@ -8657,8 +8657,8 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Progresso.client.luau:791",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Progresso.client.luau:971",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Progresso.client.luau:972",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:1040",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:1041"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:1071",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:1072"
  ],
  "campo de tiro": [
   "src/ServerScriptService/Modules/Flutua.luau:308",
@@ -8794,14 +8794,15 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Progresso.client.luau:774",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Progresso.client.luau:873",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:1440",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:236",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:237"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:238",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:239"
  ],
  "claimed": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:524",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:760",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:763",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:843"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:534",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:774",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:776",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:777",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:861"
  ],
  "clique marca · roda zoom · arraste · R reunião do squad · M fecha": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameUI.client.luau:550"
@@ -8955,12 +8956,12 @@
  "credits": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:90",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:1527",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:431",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:1040",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:1041",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:1047",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:1053",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:236"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:441",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:1071",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:1072",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:1078",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:1084",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:238"
  ],
  "crouch": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ComoJogar.luau:81",
@@ -9019,8 +9020,8 @@
   "src/ReplicatedFirst/Estilo.luau:316",
   "src/ReplicatedFirst/Estilo.luau:324",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ToqueUi.luau:362",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:340",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:376",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:342",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:378",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehiclePrompt.client.luau:351"
  ],
  "dao": [
@@ -9153,11 +9154,11 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ToqueHud.client.luau:663"
  ],
  "diaria": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:378",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:400",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:418",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:424",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:453"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:571",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:595",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:613",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:619",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:648"
  ],
  "die": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Input.luau:1116"
@@ -9301,7 +9302,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaoJogador.luau:111",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaoJogador.luau:120",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaoJogador.luau:687",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:1040"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:1071"
  ],
  "empate": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameUI.client.luau:563"
@@ -9642,17 +9643,15 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CasualtyScreen.luau:1084",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:138",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/JogarAgora.luau:376",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:356",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:518",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:734",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:802",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:857",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:861",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:941",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:952",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:996",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:996",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:239"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:528",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:744",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:820",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:879",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:972",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:983",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:1027",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:1027",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:241"
  ],
  "frente %s": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameUI.client.luau:565"
@@ -9684,10 +9683,9 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ToqueHud.client.luau:954"
  ],
  "future": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:530",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:760",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:762",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:763"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:540",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:775",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:777"
  ],
  "fuzil": [
   "src/ReplicatedStorage/Shared/Casualty.luau:26"
@@ -9727,9 +9725,9 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/PainelComandos.client.luau:289",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Progresso.client.luau:1035",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:854",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:894",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:912",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/TutorialController.client.luau:402",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:505",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:507",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VirtualCursor.luau:343",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VirtualCursor.luau:604",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VirtualCursor.luau:607"
@@ -9766,7 +9764,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CanaisChat.client.luau:51"
  ],
  "gesture": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:1041"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:1072"
  ],
  "get": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CasualtyScreen.luau:1248",
@@ -10188,7 +10186,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:1202"
  ],
  "killcard": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:1041"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:1072"
  ],
  "kit": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:922"
@@ -10332,7 +10330,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaView.luau:1443"
  ],
  "level": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:453"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:463"
  ],
  "leves (sem brilho)": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:698"
@@ -10407,15 +10405,14 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/RiceField.client.luau:174"
  ],
  "locked": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:526",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:579",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:760",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:762",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:763",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:846",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:855",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:856",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:857"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:536",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:589",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:775",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:777",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:864",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:873",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:874",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:875"
  ],
  "loco": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/SoldierAnimations.client.luau:341",
@@ -10607,10 +10604,10 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:861",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:863",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaMissoes.client.luau:66",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:895",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:896",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:898",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:906",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:913",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:914",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:916",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:924",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ToqueHud.client.luau:324",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/TutorialController.client.luau:531",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehiclePrompt.client.luau:363"
@@ -10711,7 +10708,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:1198"
  ],
  "music": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:1041"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:1072"
  ],
  "médio": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:689"
@@ -10788,10 +10785,10 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Movement.client.luau:1261"
  ],
  "no nível": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:905"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:923"
  ],
  "no nível para ver": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:901"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:919"
  ],
  "no ponto de inserção": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:2188",
@@ -10891,14 +10888,15 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:412",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:413",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:414",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/Contagem.client.luau:105",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/Contagem.client.luau:119",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:639",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:642",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:1510",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:2291",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:187",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:204",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:259",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:357",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:374",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:446",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:546",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Egrets.client.luau:239",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Egrets.client.luau:244",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Egrets.client.luau:249",
@@ -10992,8 +10990,8 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Som.luau:61",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/SpawnTransition.luau:490",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/SpawnTransition.luau:490",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:431",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:791",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:441",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:808",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ToqueAuto.luau:85",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ToqueAuto.luau:86",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ToqueAuto.luau:87",
@@ -11171,10 +11169,10 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ObraToque.client.luau:135"
  ],
  "para os lados": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:900"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:918"
  ],
  "para receber": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:902"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:920"
  ],
  "parado": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/SoldierAnimations.client.luau:134"
@@ -11207,12 +11205,12 @@
  ],
  "passe": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:1388",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:934",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:961",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:981",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:988",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:995",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:1032"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:965",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:992",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:1012",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:1019",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:1026",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:1063"
  ],
  "passenger": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ToqueVeiculo.client.luau:500"
@@ -11319,6 +11317,12 @@
  "precisa de caixote de suprimento perto": [
   "src/ReplicatedStorage/Shared/Logistics.luau:147"
  ],
+ "premio": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:214",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:357",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:363",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:875"
+ ],
  "premium": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:946"
  ],
@@ -11333,7 +11337,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ComoJogar.luau:793",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:387",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:392",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:417",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:612",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/EditorHud.client.luau:682",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/FrontHud.client.luau:873",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:1445",
@@ -11376,9 +11380,9 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:1786",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:1793",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaMissoes.client.luau:369",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:980",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:987",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:994",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:1011",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:1018",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:1025",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ThirdPerson.client.luau:45",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ThirdPerson.client.luau:52",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ToqueAuto.luau:457",
@@ -11422,7 +11426,6 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ComoJogar.luau:326",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ComoJogar.luau:333",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ComoJogar.luau:350",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:154",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/EditorHud.client.luau:416",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/FrontHud.client.luau:681",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameUI.client.luau:603",
@@ -11432,11 +11435,10 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Progresso.client.luau:858",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:1242",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaMissoes.client.luau:163",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:351",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ToqueUi.luau:362",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:338",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:348",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:376"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:340",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:350",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:378"
  ],
  "procurando água (até ~200 m)...": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Movement.client.luau:1240"
@@ -11457,7 +11459,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:957",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:1161",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:1457",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:495",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:505",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ToqueTelas.luau:172"
  ],
  "prone": [
@@ -11549,14 +11551,16 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Progresso.client.luau:896"
  ],
  "ready": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:528",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:577",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:768",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:772",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:845",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:855",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:861",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:861"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:538",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:587",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:782",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:785",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:786",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:787",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:863",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:873",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:879",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:879"
  ],
  "recarga: %d s": [
   "src/ReplicatedStorage/Shared/FireSupport.luau:240"
@@ -11727,11 +11731,11 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:1314",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:1422",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:1440",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:361",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:367",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:857",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:234",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:235"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:369",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:375",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:875",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:236",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:237"
  ],
  "roda": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Wheel.luau:582"
@@ -11822,13 +11826,13 @@
  ],
  "season": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:84",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:362",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:445",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:448",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:460",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:467",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:580",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:868"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:370",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:455",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:458",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:470",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:477",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:590",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:886"
  ],
  "seat": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ToqueVeiculo.client.luau:240",
@@ -11874,13 +11878,13 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:1242",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaMissoes.client.luau:64",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaMissoes.client.luau:170",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:150",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:156",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ToqueUi.luau:357",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ToqueUi.luau:363",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ToqueUi.luau:373",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ToqueUi.luau:373",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:351",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:364",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:353",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:366",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehiclePrompt.client.luau:303",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehiclePrompt.client.luau:357"
  ],
@@ -12040,8 +12044,8 @@
  "skip": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:80",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:86",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:368",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:879"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:376",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:897"
  ],
  "slot": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/EditorHud.client.luau:182",
@@ -12219,7 +12223,7 @@
   "src/ReplicatedStorage/Shared/Movement.luau:746"
  ],
  "stars": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:1040"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:1071"
  ],
  "step": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Movement.client.luau:648",
@@ -12313,7 +12317,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:2274",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:2275",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:2725",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:177",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:347",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Eventos.client.luau:11",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Eventos.client.luau:14",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Eventos.client.luau:15",
@@ -12388,8 +12392,8 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/SpawnTransition.luau:483",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaMissoes.client.luau:384",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaMissoes.client.luau:389",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:434",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:1014",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:444",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:1045",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Toast.luau:682",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Toast.luau:819",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ToqueAuto.luau:138",
@@ -12405,7 +12409,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/TutorialController.client.luau:733",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/TutorialController.client.luau:753",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/TutorialController.client.luau:772",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:628",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:630",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:663",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:672",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleLive.luau:92",
@@ -12625,14 +12629,14 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Caveira.client.luau:285",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:219",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:404",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/Contagem.client.luau:102",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/Contagem.client.luau:116",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:1511",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:1571",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:1827",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:1895",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:2405",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:329",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:346",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:516",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:533",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/EditorHud.client.luau:282",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Egrets.client.luau:239",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Egrets.client.luau:244",
@@ -12719,10 +12723,10 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaMissoes.client.luau:306",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaMissoes.client.luau:307",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaMissoes.client.luau:384",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:385",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:392",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:1011",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:1039",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:393",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:400",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:1042",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:1070",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ToqueAuto.luau:82",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ToqueHud.client.luau:377",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ToqueTelas.luau:114",
@@ -12732,7 +12736,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Traducao.client.luau:70",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/TutorialController.client.luau:671",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/TutorialController.client.luau:751",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:960",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:962",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VirtualCursor.luau:244",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VirtualCursor.luau:544",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Voz.client.luau:221",
@@ -12850,7 +12854,7 @@
  ],
  "title": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaoJogador.luau:699",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:1040"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:1071"
  ],
  "toast": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:1639"
@@ -12946,7 +12950,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Input.luau:1029",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Input.luau:1037",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:858",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:899",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:917",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ToqueAuto.luau:294",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ToqueUi.luau:49",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ToqueVeiculo.client.luau:52",
@@ -13064,7 +13068,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Progresso.client.luau:962",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Progresso.client.luau:964",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Progresso.client.luau:965",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:1041"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:1072"
  ],
  "unknown": [
   "src/ReplicatedStorage/Shared/Casualty.luau:86",
@@ -13141,19 +13145,19 @@
  ],
  "vet": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaoJogador.luau:154",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:525",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:567",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:587",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:646",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:733",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:745",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:769",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:803",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:831",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:839",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:850",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:861",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:996"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:535",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:577",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:597",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:656",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:743",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:757",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:783",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:821",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:849",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:857",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:868",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:879",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:1027"
  ],
  "veículo": [
   "src/ServerScriptService/Modules/Flutua.luau:340"
