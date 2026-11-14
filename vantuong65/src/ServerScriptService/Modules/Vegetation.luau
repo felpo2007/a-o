@@ -42,11 +42,13 @@ type Entry = { key: string, p: number, s0: number, s1: number, patch: string? }
 -- modelo tem o tamanho real da árvore de origem (2,6 a 5 m); a escala leva ao porte da mata:
 -- emergente de 17 a 21 m, dossel de 8 a 17 m e árvore torta baixa nas manchas de cipó. A folha
 -- cresce junto (25 a 65 cm), como a das árvores de folha larga da região.
+-- D-116 (pedido do dono: "coloque um pouco mais de árvores"): as quatro árvores 40% mais frequentes
+-- (eram 0,010 / 0,035 / 0,035 / 0,012); o sub-bosque fica igual.
 Vegetation.FOREST = {
-	{ key = "ph_tree_small_02", p = 0.010, s0 = 3.6, s1 = 4.6 },
-	{ key = "ph_island_tree_01", p = 0.035, s0 = 2.2, s1 = 3.4 },
-	{ key = "ph_island_tree_02", p = 0.035, s0 = 2.4, s1 = 3.6 },
-	{ key = "ph_island_tree_03", p = 0.012, s0 = 1.6, s1 = 2.6, patch = "tangle" },
+	{ key = "ph_tree_small_02", p = 0.014, s0 = 3.6, s1 = 4.6 },
+	{ key = "ph_island_tree_01", p = 0.049, s0 = 2.2, s1 = 3.4 },
+	{ key = "ph_island_tree_02", p = 0.049, s0 = 2.4, s1 = 3.6 },
+	{ key = "ph_island_tree_03", p = 0.017, s0 = 1.6, s1 = 2.6, patch = "tangle" },
 	{ key = "shrub", p = 0.03, s0 = 1.8, s1 = 3.0, patch = "tangle" }, -- monte de cipó
 	{ key = "melaleuca_grove", p = 0.012, s0 = 0.9, s1 = 1.2, patch = "wet" },
 	{ key = "bamboo_clump", p = 0.02, s0 = 0.9, s1 = 1.3, patch = "wet" },
@@ -94,10 +96,13 @@ Vegetation.OPEN = {
 } :: { Entry }
 -- 6 = roça seca (2026-11-12: o arrozal tirado, 75%): capim baixo do terreno, moita e capim-elefante
 -- ralos em touceiras soltas, uma bananeira de vez em quando. Densidade de design (PLACEHOLDER).
+-- D-116: uma árvore de folha larga ou um coqueiro solto de vez em quando, como na beira das roças
 Vegetation.ROCA = {
 	{ key = "elephant_grass", p = 0.035, s0 = 0.7, s1 = 1.1 },
 	{ key = "shrub", p = 0.025, s0 = 0.6, s1 = 1.0 },
 	{ key = "banana", p = 0.004, s0 = 0.8, s1 = 1.1 },
+	{ key = "ph_island_tree_02", p = 0.006, s0 = 2.0, s1 = 3.0 },
+	{ key = "coconut_palm", p = 0.005, s0 = 0.9, s1 = 1.2 },
 } :: { Entry }
 -- 5 = riacho: barranco com bambu e bananeira
 Vegetation.STREAM = {

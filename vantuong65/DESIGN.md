@@ -3988,3 +3988,34 @@ publicados, e os IDs das imagens estão em `AssetIds.GroundImages`.
 
 **Não testado:** o soldado entrando pela porta de cada modelo de casa (a foto em terceira pessoa não
 saiu: a câmera de primeira pessoa volta por cima) e o celular.
+
+## D-116 — A grama de volta e mais árvores (v48, 2026-11-13)
+
+Pedido do dono: "onde está a grama que tinha e coloque um pouco mais de árvores".
+
+**Por que a grama sumiu (v47):** três coisas se somaram no mapa de 500 m:
+- a roça seca ia até 110 m de cada casa (`Landscape.FARM_M`). Com as 18 casas novas de An Cường (2)
+  (D-115), ela cobria quase toda a metade leste;
+- a roça tem manchas de terra nua (`ArtPlan.ROCA_EARTH`, material Ground). Com a terra batida clara
+  da D-115 elas apareciam laranja, no lugar do capim;
+- a clareira em volta do QG dos EUA no `Landscape` tinha ficado em 150 m (a da mata já era 80 m desde
+  a D-114).
+
+**O que mudou (PLACEHOLDER de design):**
+- roça seca até 45 m das casas (era 110);
+- clareira da base dos EUA de 80 m (era 150);
+- manchas de terra nua só onde o ruído passa de 0,8 (era 0,62);
+- árvores da mata 40% mais frequentes, com o sub-bosque igual;
+- na roça, de vez em quando, uma árvore de folha larga ou um coqueiro solto.
+
+**Medido (Lune, plano da mata com os dados do mapa; v47 → v48):**
+- mata de 30% para 47% da área; roça de 24% para 15%; clareira de 36% para 29%;
+- terra nua de 8,7% para 2,3% do mapa;
+- plantas na área de 1.744 para 2.475; árvores de 435 para 847.
+
+**Studio:**
+- mata com 2.401 plantas (eram 1.751), 100% do plano nos 5 setores;
+- 54 fps no chão, servidor a 60 Hz;
+- primeiro tiroteio aos 18 s, 0 erros de script.
+
+**Não testado:** o fps num celular ou num PC fraco com a mata maior.

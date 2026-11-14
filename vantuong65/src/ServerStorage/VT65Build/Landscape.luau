@@ -20,7 +20,10 @@ Landscape.ROCA = 6
 Landscape.SHEET_M = 4 -- a lavoura (FARM) vai até isto além da beira de cada lâmina
 
 local M = 0.28
-Landscape.FARM_M = 110 -- roça de arroz em volta das casas (design)
+-- roça de arroz em volta das casas (design). D-116 (pedido do dono: "onde está a grama que tinha e
+-- coloque um pouco mais de árvores"): 45 m (era 110). Com o casario de An Cường (2) (D-115), 110 m em
+-- volta de cada casa viravam roça quase toda a metade leste do mapa de 500 m, e a mata sumia.
+Landscape.FARM_M = 45
 -- clareiras (m): todo ponto forte (pode ser o sorteado), e áreas abertas pelo nome
 Landscape.CLEAR_STRONGPOINT_M = 30
 Landscape.CLEAR_NAMED_M = {
@@ -31,7 +34,9 @@ Landscape.CLEAR_NAMED_M = {
 Landscape.FARM_STRONGPOINT_M = 130
 -- 2026-11-13: o acampamento do VC (Data/Bases) fica sob a mata: sem clareira em volta do QG (o plano
 -- da arte tira só as plantas de dentro das pegadas e em volta dos pontos de nascer)
-Landscape.HQ_CLEAR_M = { US = 150, VC = 0 }
+-- D-116: a base dos EUA cabe em 80 m (Vegetation.US_BASE_CLEAR_M); eram 150 m, que no mapa de 500 m
+-- abriam clareira em An Cường (2) e em quase toda a borda leste
+Landscape.HQ_CLEAR_M = { US = 80, VC = 0 }
 
 export type Landscape = {
 	kindAt: (self: Landscape, x: number, z: number) -> number,

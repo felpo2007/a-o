@@ -153,8 +153,9 @@ function ArtPlan.dikeKept(paddies: any, x1: number, z1: number, x2: number, z2: 
 end
 
 -- Coluna do terreno para o TerrainBuilder.build: o chão do Site e, na roça seca (Landscape.ROCA),
--- manchas de terra nua (ruído de ~40 m) no meio do capim baixo.
-ArtPlan.ROCA_EARTH = 0.62
+-- manchas de terra nua (ruído de ~40 m) no meio do capim baixo. D-116: 0,8 (era 0,62): com a terra
+-- batida clara (D-115) as manchas tomavam o lugar do capim; agora são poucas e pequenas.
+ArtPlan.ROCA_EARTH = 0.8
 function ArtPlan.column(ctx: Ctx, x: number, z: number): (number, number, number, string?)
 	local h, wl, c, mat = Site.column(ctx.site, x, z)
 	if
