@@ -40,6 +40,11 @@ fx.Parent = workspace
 -- quadril: arma junto ao corpo (D-69: "aproxime as armas para mais perto do jogador"); era
 -- (0,17; −0,19; −0,34) m e a arma parecia flutuar longe
 local HIP = CFrame.new(0.12 / M, -0.15 / M, -0.23 / M) * CFrame.Angles(0, math.rad(3), 0)
+-- Lote 28 (D-143): pistola no quadril com os braços estendidos, as duas mãos no punho (como mirando,
+-- mais baixa e à direita). Com o HIP do fuzil o punho ficava a 23 cm do olho, cortado pela borda de
+-- baixo da tela, e o braço esquerdo atravessava a tela: a mão de apoio parecia solta (análise do
+-- lote 12, "mão escorregando"). Mirando, o punho fica a 53 cm.
+local HIP_PISTOL = CFrame.new(0.07 / M, -0.14 / M, -0.40 / M) * CFrame.Angles(0, math.rad(3), 0)
 local EYE_TO_SIGHT_M = 0.09 -- olho até a alça, mirando
 local view: Model? = nil
 local viewId: string? = nil
@@ -370,7 +375,7 @@ local function setView(id: string?)
 	-- 2026-11-12: a ficha pode corrigir o olho (pistola e SKS mais perto; luneta no alívio de olho)
 	local eyeM = Weapons.adsEye(id) or (if type(eye) == "number" then eye else EYE_TO_SIGHT_M)
 	viewAlign = Pegada3P.mira1P(viewSight, if front then front.WorldPosition else nil, eyeM / M, k)
-	viewHip = Pegada3P.quadril1P(HIP, viewSight, k)
+	viewHip = Pegada3P.quadril1P(if wp.kind == "pistol" then HIP_PISTOL else HIP, viewSight, k)
 	-- mãos, carregador e ferrolho (espaço da arma; a arma está na origem); desvios em m vezes k
 	local g = primary:FindFirstChild("Grip") :: Attachment?
 	local s = primary:FindFirstChild("Support") :: Attachment?

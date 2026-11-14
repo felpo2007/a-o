@@ -5381,3 +5381,25 @@ autoteste ("deslizando 1,12 m/s") veio do lugar em que ele estava, perto do bura
 - a Type 54 escura em 1ª pessoa;
 - a cadência abaixo de 12 fps medida num aparelho lento de verdade;
 - o quique da granada (a variação de até 5,5 m).
+
+## D-143 — Lote 28: pistola no quadril e a Type 54 (v73, 2026-11-14)
+
+Os dois itens que sobraram do lote 27 (análise do lote 12).
+
+**Pistola no quadril** (`WeaponVisuals`, `HIP_PISTOL`).
+- A pose do quadril era a do fuzil para todas as armas. Na pistola, o punho ficava a 23 cm do olho,
+  18 cm abaixo e 12 cm à direita (medido no Studio).
+- Com isso, as mãos saíam cortadas pela borda de baixo da tela e o braço esquerdo atravessava a
+  tela: a mão de apoio parecia solta ("mão escorregando").
+- As mãos estavam no lugar: a esquerda fica a 2 cm do punho mirando e no quadril.
+- Agora a pistola tem quadril próprio, com os braços estendidos: o punho a 40 cm do olho, 17 cm
+  abaixo e 7 cm à direita (mirando, 53 cm). As duas mãos aparecem fechadas no punho.
+- O fuzil e as outras armas não mudam.
+
+**Type 54:** conferida e sem bug.
+- Vista de lado, à luz do dia: aço oxidado preto, punho marrom com a estrela; a textura
+  (`SurfaceAppearance`) carrega.
+- Em 1ª pessoa parece toda escura porque, de trás, só se vê a corrediça preta (a M1911 também).
+- A arma em 3ª pessoa, no corpo do soldado, usa a mesma malha com a mesma textura.
+
+**Não conferido:** a pistola caída no chão; o celular.

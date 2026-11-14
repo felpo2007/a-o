@@ -123,14 +123,23 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     - caveira do abate;
     - anexos enterrados na vila;
     - manada nos Arrozais.
+  - **Lote 28 (v73, D-143): feito.** Pistola no quadril com as duas mãos no punho; Type 54
+    conferida (sem bug).
 
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;
   - respondido pelo dono: a M14 fica como está; o capim clareou (v58);
-  - mão de apoio das pistolas no quadril; Type 54 escura em 1ª pessoa e em 3ª pessoa;
   - base do VC sob a mata; nomes do equipamento da Intendência sem tradução;
   - o quique da granada (o bot erra de 0,2 a 5,5 m num alvo de 25 m);
   - a cadência abaixo de 12 fps medida num aparelho lento.
+
+## v73: lote 28, pistola no quadril e a Type 54 (2026-11-14, D-143)
+- **Pistola no quadril:** pose própria, com os braços estendidos. O punho fica a 40 cm do olho (era
+  23 cm, colado no rosto, com as mãos cortadas pela borda). As duas mãos ficam no punho.
+- **Type 54:** conferida e sem bug. É preta (aço oxidado) com o punho marrom; a textura carrega na 1ª
+  e na 3ª pessoa.
+- **Testes:** Lune todos ok; ruff; luau-lsp sem erro; conferido no Studio (fotos da M1911 no quadril
+  e mirando, e da Type 54 de lado).
 
 ## v72: lote 27, bugs de textura, gráficos, movimento, tiros e granadas (2026-11-14, D-142)
 - **Publicada** (versão 72 do place, commit 19b3f1b).
