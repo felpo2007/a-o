@@ -96,7 +96,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
   - as teclas agem por baixo da tela de carregamento (a pá cavou durante o carregamento, D-129).
 
 ## v60: lote 15, todos os itens da roda funcionando (2026-11-14, D-129)
-- **A publicar.**
+- **Publicada** como versão 60 do place (build do commit 9478a16).
 - **Causa da bandagem "quebrada"** (três falhas caladas): andar durante o curativo cancelava sem
   aviso; sem sangramento não fazia nada; e não devolvia vida.
 - **Feito:**
