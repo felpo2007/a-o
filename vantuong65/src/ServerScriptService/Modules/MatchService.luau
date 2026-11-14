@@ -46,6 +46,33 @@ MatchService.score = nil :: Capture.Score? -- reforços (atrito), só no Warfare
 MatchService.winner = nil :: string?
 MatchService.endedAt = 0
 MatchService.NEXT_MATCH_S = 30 -- relatório e placar na tela antes da próxima partida
+-- D-122 (pedido do dono: "a partida deve começar com cada um na sua base com uma contagem regressiva;
+-- depois a partida começa e os jogadores vão dominar os pontos"): cada partida nova abre com PREP_S
+-- de preparo. Nele não há captura nem sangria de reforços, o relógio da partida não anda, todo mundo
+-- nasce no QG e fica perto dele (PreparoService) e os bots esperam na base.
+MatchService.PREP_S = 30
+MatchService.prepUntil = 0
+
+function MatchService.inPrep(): boolean
+	return not MatchService.ended and os.clock() < MatchService.prepUntil
+end
+
+function MatchService.prepLeft(): number
+	return math.max(0, MatchService.prepUntil - os.clock())
+end
+
+-- algum jogador (gente) vivo em campo? A contagem só corre com alguém para vê-la: num servidor novo
+-- a partida abre com todos ainda carregando (~70 s no Studio) e os 30 s passariam no menu
+local function humanInField(): boolean
+	for _, p in Players:GetPlayers() do
+		local hum = p.Character and p.Character:FindFirstChildOfClass("Humanoid")
+		if hum and hum.Health > 0 then
+			return true
+		end
+	end
+	return false
+end
+local holding = false -- contagem segurada até o primeiro jogador nascer
 local pendingMode: string? = nil
 local fixedMode = false -- servidor privado: o dono escolheu o modo
 
@@ -230,7 +257,9 @@ function MatchService.newMatch(mode: string?)
 		MatchService.initialOwner = initial
 	end
 	MatchService.capturedAt = {}
-	MatchService.startedAt = os.clock()
+	-- o relógio da partida começa quando a contagem acaba (D-122)
+	MatchService.prepUntil = os.clock() + MatchService.PREP_S
+	MatchService.startedAt = MatchService.prepUntil
 	MatchService.waveEpoch = MatchService.startedAt
 	MatchService.ended = false
 	showMarkers()
@@ -329,8 +358,10 @@ local function publish()
 		progress = st.progress,
 		active = st.active,
 		points = pts,
-		timeLeft = math.max(0, limitSeconds() - (now - MatchService.startedAt)),
-		elapsed = now - MatchService.startedAt,
+		timeLeft = math.max(0, limitSeconds() - math.max(0, now - MatchService.startedAt)),
+		elapsed = math.max(0, now - MatchService.startedAt),
+		-- D-122: segundos que faltam para a partida começar (0 = valendo)
+		prep = math.ceil(MatchService.prepLeft()),
 		ended = MatchService.ended,
 		front = if MatchService.offensive then MatchService.offensive.front else nil,
 		capturing = capturing,
@@ -418,13 +449,28 @@ function MatchService.start()
 	-- require aqui dentro: os dois dependem do SpawnService, que depende deste módulo.
 	local FrontService = require(script.Parent:WaitForChild("FrontService")) :: any
 	FrontService.start()
+	-- contagem do começo (D-122): nascer só no QG e ficar perto dele
+	local PreparoService = require(script.Parent:WaitForChild("PreparoService")) :: any
+	PreparoService.start()
 	local CartaService = require(script.Parent:WaitForChild("CartaService")) :: any
 	task.spawn(CartaService.start)
 	task.spawn(function()
 		while true do
 			task.wait(1)
 			local st = MatchService.state
-			if st and not MatchService.ended then
+			if st and not MatchService.ended and MatchService.inPrep() then
+				lastCounts = counts() -- na contagem (D-122): nada se captura, nada sangra, o relógio espera
+				if not humanInField() then
+					-- ninguém em campo ainda: a contagem espera cheia (bots parados na base)
+					MatchService.prepUntil = os.clock() + MatchService.PREP_S
+					holding = true
+				elseif holding then
+					-- o primeiro jogador nasceu: a contagem corre e o relógio da partida começa depois dela
+					holding = false
+					MatchService.startedAt = MatchService.prepUntil
+					MatchService.waveEpoch = MatchService.startedAt
+				end
+			elseif st and not MatchService.ended then
 				-- autoteste no Studio pode simular quem está em cada ponto forte
 				local override = MatchService.countsOverride
 				lastCounts = if override and RunService:IsStudio() then override() else counts()

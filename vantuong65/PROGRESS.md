@@ -46,7 +46,8 @@
     RENASCER grátis grande (resposta do dono): voltar de graça é pelo ESCOLHER OUTRO PONTO;
   - menu do jogo (lado e squad): arrumar a escolha do lado; loja e passe saem dele (resposta do
     dono). No menu principal, LOJA e PASSE continuam.
-- **Lote 9, partida:** 30 contra 30. Cada um começa na sua base, com contagem regressiva; depois a
+- **Lote 9 (v54, D-122): feito.** 30 contra 30 e começo na base com contagem de 30 s.
+- **Lote 9, partida (pedido original):** 30 contra 30. Cada um começa na sua base, com contagem regressiva; depois a
   partida começa e os pontos são disputados.
 - **Lote 10, mapa de 700 x 700 m:**
   - bases no meio da borda de cada lado;
@@ -56,6 +57,17 @@
 - **Lote 11, passe e loja:** o passe em linha do tempo horizontal, da esquerda para a direita; a loja
   atraente, com imagens, cores e design bonito.
 - **Lote 12, análise:** bots, gráficos, armas, tiros e veículos (junto do lote 6).
+
+## v54: lote 9, 30 contra 30 e começo na base com contagem (2026-11-14, D-122)
+- **Feito:**
+  - 30 por lado (`Roles.TEAM_MAX`, `BotBrain.CROWD.perSide`); o servidor de 60 vagas fica com o dono;
+  - cada partida abre com 30 s de contagem: nascer só no QG, quem sai da base volta, bots e
+    viaturas parados, sem captura e com o relógio parado. A contagem espera o primeiro jogador
+    nascer;
+  - na tela, "A PARTIDA COMEÇA EM" com o número grande e, no fim, "VALENDO!".
+- **Conferido no Studio:** a contagem segura em 30 com todos no menu e corre no JOGAR (o jogador a
+  7 m do QG); o relógio começa no VALENDO; os bots e as viaturas saem depois; 30 por lado; 0 erros.
+- **Não testado:** a contagem entre partidas; vários jogadores; celular.
 
 ## v53: mesa 3D consertada e sem soldados (2026-11-14, D-121)
 - **Publicada** como versão 53 do place (build do commit 3505354).

@@ -38,10 +38,11 @@ do resto.
 
 ## 2. Configurações que o Roblox só deixa o dono fazer (15 min)
 Textos prontos e imagens: **`LANCAMENTO.md`** (página do jogo, guia do questionário e beta).
-- **Tamanho do servidor: 80 jogadores (40 x 40, D-114).** A chave não pode mudar isso ("Scope not
-  authorized", 2026-11-13). Creator Dashboard → a experiência → **Places** → o place → **Configure
-  Place** → **Server Size** = **80** → Save. (Ou dê à chave a permissão **universe.place:write**
-  e me avise: eu rodo `roblox_cloud.py server-size 80`.) O jogo já limita 40 por lado.
+- **Tamanho do servidor: 60 jogadores (30 x 30, D-122; era 80 na D-114).** A chave não pode mudar
+  isso ("Scope not authorized", 2026-11-13). Creator Dashboard → a experiência → **Places** → o place
+  → **Configure Place** → **Server Size** = **60** → Save. (Ou dê à chave a permissão
+  **universe.place:write** e me avise: eu rodo `roblox_cloud.py server-size 60`.) O jogo já limita 30
+  por lado.
 - **Questionário de maturidade:** alvo **Moderate** (Parte 9.10), com violência realista não
   gráfica e sangue leve. Sem isso o jogo não é aprovado para todos os públicos.
 - **Servidores privados:** ligar e definir o preço (sugestão em `MONETIZATION.md`).

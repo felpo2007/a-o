@@ -406,6 +406,25 @@ test("baixa: renascer aqui (créditos e Robux) e voltar, com o motivo do bloquei
 	assert(string.find(src, "CenaBaixa.show", 1, true), "o próprio soldado, caído")
 end)
 
+-- D-122 (dono: "a partida deve começar com cada um na sua base com uma contagem regressiva"): o
+-- servidor abre cada partida com PREP_S de preparo (sem captura, relógio parado, nascer só no QG, quem
+-- sai da base volta, bots e viaturas parados) e a tela mostra a contagem
+test("contagem do começo: preparo no servidor, base, bots parados e a contagem na tela", function()
+	local S = "src/ServerScriptService/Modules/"
+	local ms = fs.readFile(S .. "MatchService.luau")
+	assert(string.find(ms, "MatchService.PREP_S = 30", 1, true), "30 s de contagem")
+	assert(string.find(ms, "MatchService.startedAt = MatchService.prepUntil", 1, true), "relógio depois da contagem")
+	assert(string.find(ms, "elseif st and not MatchService.ended then", 1, true), "sem captura na contagem")
+	assert(string.find(ms, "prep = math.ceil(MatchService.prepLeft())", 1, true), "contagem no Match_State")
+	local pr = fs.readFile(S .. "PreparoService.luau")
+	assert(string.find(pr, "SpawnService.addBlocker", 1, true), "nascer só no QG")
+	assert(string.find(pr, "PreparoService.leash()", 1, true), "volta para a base")
+	assert(string.find(fs.readFile(S .. "BotService.luau"), "if MatchService.inPrep() then", 1, true), "bots parados")
+	assert(string.find(fs.readFile(S .. "BotVehicles.luau"), "MatchService.inPrep()", 1, true), "viaturas paradas")
+	local ct = fs.readFile(C .. "Contagem.client.luau")
+	assert(string.find(ct, "st.prep", 1, true) and string.find(ct, '"VALENDO!"', 1, true), "contagem na tela")
+end)
+
 -- D-121 (dono: "3D, porém tire os soldados dali"): a mesa sem soldados; a câmera roda depois dos
 -- outros scripts de câmera e, em tela estreita, abre o campo de visão em vez de recuar (recuando, saía
 -- do abrigo do VC pelo teto)

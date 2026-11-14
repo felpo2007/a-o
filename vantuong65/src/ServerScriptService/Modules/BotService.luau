@@ -2185,6 +2185,11 @@ local function think(bot: Bot, now: number)
 	if not (hum and root and head) or hum.Health <= 0 or model:GetAttribute("Downed") then
 		return
 	end
+	-- D-122: na contagem do começo da partida, o bot espera parado na base
+	if MatchService.inPrep() then
+		BotLocomotion.stop(bot, nil)
+		return
+	end
 	-- D-107: nível de detalhe pela distância do humano vivo mais perto
 	local lod = BotBrain.lodLevel(nearestHumanM(root.Position))
 	if lod ~= bot.lod then

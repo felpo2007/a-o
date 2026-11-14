@@ -529,7 +529,8 @@ local function driveTo(
 		return false
 	end
 	local pos = ch.Position
-	if not dest then
+	-- D-122: na contagem do começo da partida, a viatura espera na base
+	if not dest or MatchService.inPrep() then
 		brake(c, ch, vs, faceAt)
 		return true
 	end
@@ -637,6 +638,13 @@ end
 -- v45: vigia (ver WATCH_*). true = a tripulação foi desfeita.
 local function watchdog(c: Crew, ch: BasePart?, driverIn: boolean, now: number): boolean
 	if not ch or c.vehicle:GetAttribute("Destroyed") then
+		return false
+	end
+	-- D-122: na contagem os bots esperam parados (o motorista não embarca, a viatura não anda); os
+	-- prazos só começam quando a partida vale (no Studio, as quatro tripulações desciam na contagem)
+	if MatchService.inPrep() then
+		c.noDriverSince = nil
+		c.progAt = now
 		return false
 	end
 	if not driverIn then

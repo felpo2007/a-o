@@ -680,10 +680,10 @@ test("squad de jogador: não segue mais o líder; a marca vale 2 min e 45 s depo
 end)
 
 -- ===== D-107: 50 por lado (D-114: 40), desempenho, papel na frente e lance de assalto =====
-test("lotação: completa até 40 por lado menos os humanos, 2 por vez; sai na hora", function()
+test("lotação: completa até 30 por lado menos os humanos, 2 por vez; sai na hora", function()
 	local K = BotBrain.CROWD
 	local Roles = require("../../src/ReplicatedStorage/Shared/Roles") :: any
-	assert(K.perSide == 40 and Roles.TEAM_MAX == 40, "40 por lado (Roles.TEAM_MAX, D-114)")
+	assert(K.perSide == 30 and Roles.TEAM_MAX == 30, "30 por lado (Roles.TEAM_MAX, D-122)")
 	assert(BotBrain.fillWant(50, 0, 50, 50) == 50, "sem humano: 50 bots")
 	assert(BotBrain.fillWant(50, 3, 50, 50) == 47, "3 humanos: 47 bots")
 	assert(BotBrain.fillWant(50, 60, 50, 50) == 0, "time cheio de humanos: nenhum")

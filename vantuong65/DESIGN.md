@@ -4261,3 +4261,42 @@ Resposta do dono à pergunta da D-120: "3D, porém tire os soldados dali".
   lamparina e o abrigo, e nenhum soldado.
 
 **Não testado:** a barraca dos EUA e a sala de escolha do lado depois da mudança; celular em pé.
+
+## D-122 — Lote 9: 30 contra 30 e começo na base com contagem (v54, 2026-11-14)
+
+Pedidos do dono: "quero o jogo 30v30"; "a partida deve começar com cada um na sua base com uma
+contagem regressiva; após isso a partida começa e os jogadores vão dominar os pontos".
+
+**30 contra 30:**
+- `Roles.TEAM_MAX` = 30 e `BotBrain.CROWD.perSide` = 30 (eram 40);
+- o servidor deve ter 60 vagas. A chave não muda isso, então ficou com o dono (TODO_USUARIO).
+
+**Contagem do começo** (`MatchService.PREP_S` = 30; `Modules/PreparoService`;
+`Controllers/Contagem`):
+- cada partida nova abre com 30 s de preparo. Nesse tempo:
+  - não há captura nem sangria de reforços;
+  - o relógio da partida não anda e só começa no fim da contagem;
+  - todo ponto de nascer fora do QG fica bloqueado ("Na contagem, todos nascem na base"), inclusive a
+    reunião, o squad e o "renascer aqui";
+  - quem passa de 60 m do QG do seu lado volta para a borda da base, menos quem está sentado num
+    veículo;
+  - os bots ficam parados; as viaturas freiam e os prazos do vigia de tripulação não contam;
+- enquanto nenhum jogador está vivo em campo, a contagem fica cheia (30). Num servidor novo, a
+  partida abre com todos ainda carregando (~60 a 70 s no Studio); a contagem corre quando o primeiro
+  jogador nasce;
+- na tela: "A PARTIDA COMEÇA EM", o número grande (os 5 últimos em latão, pulsando) e "Espere na sua
+  base". No zero, "VALENDO!" e "Tome os pontos" por 2,5 s. Some com o menu principal aberto.
+
+**Conferido no Studio:**
+- a contagem ficou em 30 enquanto o jogador estava no menu;
+- no JOGAR, ele nasceu a 7 m do QG dos EUA, a contagem correu com o relógio parado em 75:00 e os
+  bots ficaram na base;
+- no fim, "VALENDO!", o relógio começou (74:59) e os bots saíram (30 bots do VC e 18 dos EUA a mais
+  de 60 m da base 30 s depois);
+- 30 por lado: 29 bots mais o jogador nos EUA, 30 bots no VC;
+- as tripulações embarcaram e saíram depois da contagem. Na 1ª tentativa, o vigia desfazia as quatro
+  tripulações durante a contagem (corrigido);
+- 0 erros de script.
+
+**Não testado:** a contagem entre uma partida e a seguinte (depois do relatório pós-ação), vários
+jogadores ao mesmo tempo e o celular.

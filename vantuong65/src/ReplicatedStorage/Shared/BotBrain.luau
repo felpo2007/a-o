@@ -488,7 +488,7 @@ end
 -- Studio e no servidor publicado (BotHz e BotCap ficam no ReplicatedStorage).
 ---------------------------------------------------------------------------------------------
 BotBrain.CROWD = {
-	perSide = 40, -- completa até 40 por lado (Roles.TEAM_MAX, D-114) menos os humanos; era 50 (D-91)
+	perSide = 30, -- completa até 30 por lado (Roles.TEAM_MAX, D-122) menos os humanos; era 40 (D-114)
 	stepS = 1, -- a lotação é conferida a cada 1 s
 	addPerStep = 2, -- e entram no máximo 2 por lado por conferida: 50 em ~25 s
 	spawnConcurrent = 4, -- modelos sendo montados ao mesmo tempo no servidor (avatar e arte)
