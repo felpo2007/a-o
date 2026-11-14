@@ -105,7 +105,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
   - as teclas agem por baixo da tela de carregamento (a pá cavou durante o carregamento, D-129).
 
 ## v66: lote 21, vegetação com até 6 mil triângulos (2026-11-14, D-135)
-- **A publicar.**
+- **Publicada** (versão 66 do place, commit e9a3d6e).
 - **Feito:**
   - 14 modelos de planta reduzidos a 5.948–6.000 triângulos (eram 7.978–13.736) e reenviados;
   - as mesmas 4.835 plantas, nas mesmas posições;
