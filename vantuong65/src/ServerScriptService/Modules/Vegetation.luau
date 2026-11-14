@@ -354,7 +354,7 @@ function Vegetation.plan(input: Input): { Item }
 								continue
 							end
 							table.insert(out, {
-								key = e.key,
+								key = e.key :: string, -- o "if" acima estreitou o tipo para "shrub" | string
 								x = px,
 								z = pz,
 								yaw = yaw,

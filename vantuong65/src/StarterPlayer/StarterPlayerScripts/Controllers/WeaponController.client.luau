@@ -672,6 +672,13 @@ Bus.on("draw_item", function(kind: string)
 		drawGrenade(kind)
 	end
 end)
+-- D-129: ferramenta do antitanque (roda, vaga 0): o lançador vem para a mão (antes só um aviso)
+Bus.on("lancador_mao", function()
+	local i = table.find(slots, "launcher")
+	if i then
+		switchTo(i, false)
+	end
+end)
 -- faixa das vagas (BarraItens): tocar numa vaga
 Bus.on("vaga_usar", function(n: number)
 	if InputMap.allowed(Input.state, "swap_weapon") then

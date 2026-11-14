@@ -118,6 +118,19 @@ Equipar.ROLE_TOOL = { commander = true, anti_tank = true, medic = true, support 
 	[string]: boolean,
 }
 
+-- D-129: o nome da vaga 0 e da roda pelo papel ("Ferramenta do papel" não dizia o que faz). O
+-- antitanque põe o lançador na mão; o médico trata ou reanima o companheiro mais perto.
+Equipar.ROLE_TOOL_LABEL = {
+	commander = "Ordens",
+	anti_tank = "Lançador",
+	medic = "Socorrer",
+	support = "Caixa de munição",
+} :: { [string]: string }
+
+function Equipar.roleToolLabel(role: string?): string
+	return (role and Equipar.ROLE_TOOL_LABEL[role]) or "Ferramenta do papel"
+end
+
 function Equipar.itemOk(id: string, role: string?, counts: Counts, canBuild: boolean): boolean
 	if id == "frag" then
 		return counts.frags > 0

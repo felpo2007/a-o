@@ -162,6 +162,8 @@ local function handleBuild(player: Player, req: any)
 	local model = place(kind, faction, pos, yaw)
 	local id = kind .. ":" .. tostring(#built + 1)
 	table.insert(built, { id = id, kind = kind, faction = faction, pos = pos, model = model })
+	-- D-129: avisa que ficou pronta (antes a obra aparecia calada)
+	Net.event("Logistics_State"):FireClient(player, { ok = "Construção pronta" })
 	if kind == "mortar_pit" then
 		player:SetAttribute("MortarX", pos.X)
 		player:SetAttribute("MortarZ", pos.Z)

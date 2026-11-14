@@ -146,7 +146,9 @@ local function render()
 			on = Equipar.itemOk(def.id, role(), counts, canBuild)
 			lit = hand == def.id
 			label = def.label
-			if def.id == "frag" then
+			if def.id == "role_tool" then
+				label = Equipar.roleToolLabel(role()) -- D-129: o nome do que faz no papel
+			elseif def.id == "frag" then
 				label = string.format("%s ×%d", def.label, counts.frags)
 			elseif def.id == "smoke" then
 				label = string.format("%s ×%d", def.label, counts.smokes)

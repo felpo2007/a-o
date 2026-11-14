@@ -4585,3 +4585,63 @@ o `botsmov.luau` e o `eventos.luau` usam os pontos novos.
 
 **Não testado:** a partida inteira até o fim; o Offensive com cinco setores no Studio (o teste do
 Lune passa).
+
+## D-129 — Lote 15: todos os itens da roda funcionando (v60, 2026-11-14)
+
+Pedido do dono: "faça todos os itens da roda funcionarem, por exemplo a bandagem não está
+funcionando". Cada item da roda de equipamento (e das vagas 5 a 0) foi testado no Studio.
+
+**Por que a bandagem "não funcionava"** (três causas, todas caladas):
+- quem andava durante os 6 s do curativo perdia tudo no fim (o servidor exigia ficar parado);
+- sem sangramento, apertar não fazia nada (o curativo só fechava ferida);
+- o curativo não devolvia vida: a tela seguia cinza e parecia que não tinha feito nada.
+
+**Regras novas** (`Shared/Medical`, `Modules/MedicalService`):
+- **Andar não cancela mais** curativo, torniquete, tratar nem reanimar. Cancelam: correr, cair,
+  entrar num veículo, levar dano ou o companheiro sair dos 3 m.
+- **O curativo devolve 30 de vida** (`Medical.C.bandageHeal`, PLACEHOLDER), além de estancar. Serve
+  também para quem está ferido sem sangrar (`Medical.needsCare`).
+- **O torniquete serve em qualquer braço ou perna sangrando**, não só na artéria. No tronco, não.
+- Apertar de novo no meio de uma ação não recomeça o curativo.
+
+**Aviso para o jogador** (evento novo `Medical_Aviso`, no Toast):
+- **por que não faz nada:** "Você não está ferido", "Sem curativos: peça a um médico", "Torniquete
+  é para braço ou perna sangrando: use a bandagem", "Ele não está ferido", "Só o médico reanima e
+  trata";
+- **por que parou:** "Interrompido: você correu" (ou caiu, foi atingido, entrou num veículo, o
+  companheiro ficou longe);
+- **quando dá certo:** "Curativo feito: sangramento parado e vida de volta", "Torniquete posto",
+  "Companheiro tratado", "Companheiro de pé".
+
+Os textos vão inteiros, sem `string.format`: a tradução troca o texto exato. O Toast divide
+"Título: texto" e põe maiúscula no corpo; as partes também estão nos dicionários.
+
+**Ferramenta do papel** (vaga 0 e roda) com o nome do que faz (`Equipar.roleToolLabel`):
+- **Lançador** (antitanque): põe o lançador na mão. Antes, só um aviso "troque de arma".
+- **Socorrer** (médico): trata ou reanima o companheiro a até 3 m. Sem ninguém perto, avisa.
+- **Caixa de munição** (suporte) e **Ordens** (comandante): como antes, com o nome novo.
+
+**Pá e construção:** agora avisam quando ficam prontas ("Buraco pronto: entre nele para se
+abrigar", "Construção pronta"). Antes o buraco e a obra apareciam calados. O aviso vai pelo campo
+novo `ok` do `Logistics_State`.
+
+**Gancho do Studio:** `VT65DevFerido` ganhou "eu_perna", "eu_arteria", "eu_dano" e "eu_estado".
+
+**Conferido no Studio:**
+- **Bandagem andando:** a vida foi de 80,7 para 107,9 e o sangramento parou. O soldado andou ~11 m
+  durante o curativo e gastou um curativo.
+- **Bandagem pela roda:** de 75,2 para 105,2. Sem ferimento, aparece o aviso; correndo, interrompe.
+- **Torniquete:** na artéria, estanca. Sem ferida de membro, explica por quê.
+- **Granada e fumaça:** vêm para a mão e saem no gatilho (3 → 2 granadas, 2 → 1 fumaça).
+- **Binóculo e caixa de munição:** o binóculo liga; a caixa mostra a prévia.
+- **Pá:** cava (sacos de areia a 2,6 m) e avisa "Buraco pronto".
+- **Construir:** o ninho de metralhadora saiu duas vezes. Perto de inimigo, aparece "Inimigos perto
+  demais".
+- **Lançador:** a vaga 0 e a roda põem o lançador na mão.
+- **Socorrer:** sem ninguém perto, avisa; com o bot caído ao lado, ele levanta ("Companheiro de pé").
+
+**Não testado:** "Ordens" do comandante (o soldado novo não tem posto para o papel); o celular e o
+controle (a roda e o botão de bandagem usam o mesmo caminho).
+
+**Achado de passagem:** as teclas funcionam por baixo da tela de carregamento. A pá cavou durante o
+"Recebendo o mapa inteiro". Fica para a lista.

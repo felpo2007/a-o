@@ -149,39 +149,92 @@ function MedicalService.hit(victim: Model, zone: string, energyJ: number, roll: 
 	apply(victim)
 end
 
-local function still(model: Model): boolean
-	local r = root(model)
-	return r ~= nil and Vector3.new(r.AssemblyLinearVelocity.X, 0, r.AssemblyLinearVelocity.Z).Magnitude < 1
+-- D-129: aviso curto para quem age (Controllers/MedicalController põe no Toast). ok = deu certo.
+local function notify(model: Model, msg: string, ok: boolean?)
+	local who = Players:GetPlayerFromCharacter(model)
+	if who then
+		Net.event("Medical_Aviso"):FireClient(who, { msg = msg, ok = ok == true })
+	end
+end
+MedicalService.notify = notify
+
+-- Por que a ação parou no meio (nil = segue). D-129: andar não cancela mais (antes, quem não ficava
+-- parado até o fim perdia o curativo sem aviso: "a bandagem não está funcionando"); correr, cair,
+-- entrar num veículo ou o alvo sair do alcance cancelam.
+local function interrupted(actor: Model, target: Model): string?
+	local ra, rt = root(actor), root(target)
+	local s = states[actor]
+	local hum = humanoid(actor)
+	-- textos inteiros (sem montar com string.format): a tradução troca o texto da tela pelo exato
+	if not (ra and rt and s) or s.dead or s.downedAt then
+		return "Interrompido: você caiu"
+	elseif hum and hum.SeatPart then
+		return "Interrompido: você entrou num veículo"
+	elseif actor:GetAttribute("Sprinting") == true then
+		return "Interrompido: você correu"
+	elseif (ra.Position - rt.Position).Magnitude > REACH then
+		return "Interrompido: o companheiro ficou longe"
+	end
+	return nil
 end
 
--- ação com tempo; cancela se mexer, levar dano ou o alvo sair do alcance. D-99: o atributo
+local function endAction(actor: Model)
+	actor:SetAttribute("ActionUntil", nil)
+	actor:SetAttribute("VT65Acao", nil)
+	busy[actor] = nil
+end
+
+-- ação com tempo; cancela se correr, levar dano ou o alvo sair do alcance (D-129). D-99: o atributo
 -- "VT65Acao" (curativo, torniquete, tratar, reanimar) replica para todos; o SoldierAnimations e o
 -- ItemView animam o soldado e as mãos de 1ª pessoa pela duração de "ActionUntil".
-local function timed(actor: Model, target: Model, seconds: number, fn: () -> boolean, op: string?, anim: string)
+-- done: o aviso quando dá certo.
+local function timed(
+	actor: Model,
+	target: Model,
+	seconds: number,
+	fn: () -> boolean,
+	op: string?,
+	anim: string,
+	done: string
+)
 	local token = os.clock()
 	busy[actor] = token
 	actor:SetAttribute("ActionUntil", os.clock() + seconds)
 	actor:SetAttribute("VT65AcaoT", workspace:GetServerTimeNow()) -- relógio comum a todos
 	actor:SetAttribute("VT65AcaoS", seconds)
 	actor:SetAttribute("VT65Acao", anim)
-	task.delay(seconds, function()
+	task.spawn(function()
+		local t0 = os.clock()
+		while os.clock() - t0 < seconds do
+			task.wait(0.2)
+			if busy[actor] ~= token then
+				-- levar dano zera o busy (MedicalService.hit); outra ação no lugar não avisa
+				if busy[actor] == nil then
+					notify(actor, "Interrompido: você foi atingido")
+				end
+				return
+			end
+			local why = interrupted(actor, target)
+			if why then
+				endAction(actor)
+				notify(actor, why)
+				return
+			end
+		end
 		if busy[actor] ~= token then
 			return
 		end
-		actor:SetAttribute("ActionUntil", nil)
-		actor:SetAttribute("VT65Acao", nil)
-		busy[actor] = nil
-		local ra, rt = root(actor), root(target)
-		if not (ra and rt) or (ra.Position - rt.Position).Magnitude > REACH or not still(actor) then
-			return
-		end
+		endAction(actor)
 		if fn() then
 			apply(target)
 			apply(actor)
+			notify(actor, done, true)
 			local who = Players:GetPlayerFromCharacter(actor)
 			if op and who and target ~= actor and MedicalService.onCare then
 				MedicalService.onCare(who, target, op)
 			end
+		else
+			notify(actor, "Nada a fazer agora")
 		end
 	end)
 end
@@ -192,6 +245,8 @@ end
 --   "caido"      o último boneco vivo (sem boneco: o bot mais perto) cai ferido; "morto" morre;
 --                "reanimar" levanta
 --   "eu_caido"   o primeiro jogador cai ferido; "eu_morto" morre; "eu_reanimar" levanta
+--   "eu_perna"   ferida leve na perna; "eu_arteria" artéria da perna; "eu_dano" −40 de vida sem
+--                sangrar; "eu_estado" só mostra vida, feridas, curativos e torniquetes (D-129)
 --   "lote"       8 bonecos em fila a 6 m: metade cai ferida e, 1,5 s depois, todos morrem
 --   "info"       no Output: corpos caindo / no chão / sumindo e, de cada caído, a inclinação do
 --                tronco e a altura das costas sobre o terreno
@@ -386,6 +441,31 @@ local function devHook()
 			devRevive(me)
 		end
 		print("[VT65 TESTE] VT65DevFerido:", v, pl.Name)
+	elseif me and states[me] and (v == "eu_perna" or v == "eu_arteria" or v == "eu_dano" or v == "eu_estado") then
+		-- D-129: ferimento no primeiro jogador para testar curativo e torniquete; "eu_estado" mostra
+		local s = states[me]
+		if v == "eu_perna" then
+			Medical.applyShot(s, "leg", 30, 0.9, os.clock()) -- ferida leve na perna (sangra devagar)
+		elseif v == "eu_arteria" then
+			Medical.applyShot(s, "leg", 30, 0.1, os.clock()) -- artéria da perna
+		elseif v == "eu_dano" then
+			s.health = math.max(s.health - 40, 1) -- ferido sem sangrar
+		end
+		apply(me)
+		local feridas = {}
+		for _, w in s.wounds do
+			table.insert(feridas, w.zone .. ":" .. w.level)
+		end
+		print(
+			string.format(
+				"[VT65 TESTE] VT65DevFerido: %s vida %.1f, feridas {%s}, curativos %d, torniquetes %d",
+				v,
+				s.health,
+				table.concat(feridas, ","),
+				s.bandages,
+				s.tourniquets
+			)
+		)
 	elseif v == "lote" then
 		task.spawn(function()
 			local made: { Model } = {}
@@ -487,16 +567,28 @@ function MedicalService.start()
 		local quick = Vantagens.mult(player, "bandage")
 		if mine.downedAt then
 			return -- caído não faz nada além de desistir
+		elseif busy[actor] then
+			return -- D-129: já está no meio de uma ação (apertar de novo não recomeça o curativo)
 		elseif req.op == "bandage" and target == actor then
-			-- D-99: a bandagem rápida estanca: torniquete na artéria (se houver um) e curativo no resto
-			if #mine.wounds == 0 or (mine.bandages <= 0 and not (Medical.arterial(mine) and mine.tourniquets > 0)) then
+			-- D-99: a bandagem rápida estanca: torniquete na artéria (se houver um) e curativo no resto.
+			-- D-129: diz por que não faz nada (antes ficava calado) e devolve vida.
+			local why = Medical.dressRefusal(mine)
+			if why then
+				notify(actor, why)
 				return
 			end
 			local anim = if Medical.arterial(mine) and mine.tourniquets > 0 then "tourniquet" else "bandage"
 			timed(actor, actor, C.bandageSelf * quick, function()
 				return (Medical.quickDress(mine))
-			end, nil, anim)
+			end, nil, anim, "Curativo feito: sangramento parado e vida de volta")
 		elseif req.op == "bandage" then
+			if mine.bandages <= 0 then
+				notify(actor, "Sem curativos")
+				return
+			elseif not Medical.needsCare(ts) then
+				notify(actor, "Ele não está ferido")
+				return
+			end
 			timed(actor, target, C.bandageOther * quick, function()
 				if mine.bandages <= 0 then
 					return false
@@ -509,22 +601,30 @@ function MedicalService.start()
 					mine.bandages -= 1
 				end
 				return ok
-			end, "bandage", "bandage_other")
+			end, "bandage", "bandage_other", "Curativo feito no companheiro")
 		elseif req.op == "tourniquet" and target == actor then
-			if not (Medical.arterial(mine) and mine.tourniquets > 0) then
+			local why = Medical.tourniquetRefusal(mine)
+			if why then
+				notify(actor, why)
 				return
 			end
 			timed(actor, actor, C.tourniquet * quick, function()
 				return Medical.tourniquet(mine)
-			end, nil, "tourniquet")
+			end, nil, "tourniquet", "Torniquete posto: sangramento parado")
 		elseif req.op == "treat" and isMedic and target ~= actor then
+			if not Medical.needsCare(ts) then
+				notify(actor, "Ele não está ferido")
+				return
+			end
 			timed(actor, target, C.medicTreat, function()
 				return Medical.treat(ts)
-			end, "treat", "treat")
+			end, "treat", "treat", "Companheiro tratado")
 		elseif req.op == "revive" and isMedic and target ~= actor then
 			timed(actor, target, C.reviveTime, function()
 				return Medical.revive(ts, os.clock())
-			end, "revive", "revive")
+			end, "revive", "revive", "Companheiro de pé")
+		elseif req.op == "revive" or req.op == "treat" then
+			notify(actor, "Só o médico reanima e trata")
 		end
 	end)
 

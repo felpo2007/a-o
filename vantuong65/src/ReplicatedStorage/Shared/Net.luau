@@ -21,13 +21,14 @@ Net.Events = {
 	"Combat_Ammo", -- s->c: munição autoritativa (o acerto vai no Combat_Confirm, D-107)
 	"Medical_Action", -- c->s: { op = "bandage"|"tourniquet"|"treat"|"revive"|"giveup", target? }
 	"Medical_State", -- s->c: estado do próprio corpo
+	"Medical_Aviso", -- s->c { msg, ok }: D-129, por que o curativo não fez nada, parou ou deu certo
 	"Match_State", -- s->c: setores, pontos fortes, tempo
 	"Squad_State", -- s->c: squads do próprio time
 	"Posture_Set", -- c->s: agachar (true/false)
 	"Commander_Request", -- c->s: { ability, grid?, correction?, confirm? } (comandante e morteiro)
 	"Commander_State", -- s->c: suprimento, recargas, avisos e erros
 	"Build_Request", -- c->s: { kind } (logística)
-	"Logistics_State", -- s->c: erro de construção
+	"Logistics_State", -- s->c: { error } recusa, { ok } obra ou buraco prontos (D-129), { key } da pá
 	"Vehicle_Fire", -- c->s: { dir } (arma do assento ou foguete antitanque)
 	"Vehicle_Reload", -- c->s: recarga do Ontos (parado) / troca de munição do 90 mm
 	"Vehicle_SwitchSeat", -- c->s: próximo assento livre permitido ao papel

@@ -154,6 +154,12 @@ test("itens das vagas: granada/fumaça só com estoque, construir e ferramenta p
 	for _, id in { "bandage", "tourniquet", "frag", "smoke", "build", "binoculars", "shovel", "role_tool" } do
 		assert(ids[id], id)
 	end
+	-- D-129: todo papel com ferramenta tem um nome que diz o que ela faz; sem papel, o nome genérico
+	for r in Equipar.ROLE_TOOL do
+		local l = Equipar.roleToolLabel(r)
+		assert(l ~= "Ferramenta do papel" and Equipar.ROLE_TOOL_LABEL[r] == l, r)
+	end
+	assert(Equipar.roleToolLabel("rifleman") == "Ferramenta do papel" and Equipar.roleToolLabel(nil) ~= "")
 end)
 
 -- ===== granada na mão (gesto do Front 44) =====

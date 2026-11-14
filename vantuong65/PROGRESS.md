@@ -76,7 +76,9 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
 - **Lote 14 (v59, D-128): feito.** 5 objetivos (resposta do dono), um por faixa do mapa, nos cantos
   alternados: A baixada sudoeste e B mata fechada (VC), C Xóm Gò (neutro), D arrozal ao sul de An
   Cường (2) e E vau do riacho (EUA).
-- **Lote 15:** todos os itens da roda funcionando ("a bandagem não está funcionando").
+- **Lote 15 (v60, D-129): feito.** Todos os itens da roda testados. A bandagem não cancela mais
+  andando, devolve 30 de vida e serve sem sangrar. Cada item avisa por que não fez nada, por que
+  parou ou que deu certo. Lançador e Socorrer agem pela vaga 0.
 - **Lote 16:** recompensa diária aparece toda vez que entra no jogo (sem lugar próprio para ela);
   bandeiras na escolha do lado (EUA e a da Frente para o VC, resposta do dono); passe com cores
   mais vivas.
@@ -90,7 +92,31 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
   - respondido pelo dono: a M14 fica como está; o capim clareou (v58);
   - gatilho que recupera a cadência abaixo de 12 fps; mão de apoio das pistolas no quadril;
   - base do VC sob a mata; nomes do equipamento da Intendência sem tradução; Type 54 em 3ª pessoa;
-  - a pá do autoteste na 1ª rodada de cada sessão.
+  - a pá do autoteste na 1ª rodada de cada sessão;
+  - as teclas agem por baixo da tela de carregamento (a pá cavou durante o carregamento, D-129).
+
+## v60: lote 15, todos os itens da roda funcionando (2026-11-14, D-129)
+- **A publicar.**
+- **Causa da bandagem "quebrada"** (três falhas caladas): andar durante o curativo cancelava sem
+  aviso; sem sangramento não fazia nada; e não devolvia vida.
+- **Feito:**
+  - andar não cancela as ações médicas; correr, cair, levar dano ou entrar num veículo cancelam;
+  - o curativo devolve 30 de vida e serve para quem está ferido sem sangrar;
+  - o torniquete serve em qualquer braço ou perna sangrando;
+  - avisos para tudo: por que não fez, por que parou, que deu certo (traduzidos);
+  - a vaga 0 tem o nome do papel: Lançador (põe na mão), Socorrer (trata ou reanima a até 3 m),
+    Caixa de munição, Ordens;
+  - a pá e a construção avisam quando ficam prontas;
+  - conserto de um aviso de tipo da v58 na `Vegetation.luau`.
+- **Conferido no Studio:**
+  - bandagem andando: 80,7 → 107,9 de vida, sangramento 0;
+  - pela roda: 75,2 → 105,2;
+  - torniquete na artéria; granada (3 → 2) e fumaça (2 → 1) lançadas; binóculo;
+  - pá com buraco e aviso; ninho de metralhadora construído;
+  - lançador na mão; reanimação pelo Socorrer;
+  - prévia da caixa de munição.
+- **Testes:** Lune todos ok (f2 e itens com as regras novas); pytest 54; ruff ok; luau-lsp 0 erros.
+- **Não testado:** "Ordens" do comandante (pede posto); celular e controle.
 
 ## v59: lote 14, cinco objetivos nos cantos do mapa (2026-11-14, D-128)
 - **Publicada** como versão 59 do place (build do commit 0edbe35).

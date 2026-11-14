@@ -309,12 +309,9 @@ local function useItem(id: string)
 		elseif r == "support" then
 			Bus.fire("caixa_municao") -- D-108: prévia da caixa no chão (Controllers/CaixaMunicao.client)
 		elseif r == "anti_tank" then
-			Bus.fire("toast", if touch then "Lançador: troque de arma" else "Lançador: troque de arma (Y)")
+			Bus.fire("lancador_mao") -- D-129: o lançador vem para a mão (WeaponController)
 		elseif r == "medic" then
-			Bus.fire(
-				"toast",
-				if touch then "Use o botão de interagir perto do alvo" else "Segure X perto do alvo para agir"
-			)
+			Bus.fire("socorro_perto") -- D-129: trata ou reanima o companheiro a até 3 m (MedicalController)
 		end
 	else
 		Bus.fire("equip_item", id) -- bandagem, torniquete, binóculo (Medical/Weapon)
@@ -336,9 +333,19 @@ if game:GetService("RunService"):IsStudio() then
 end
 
 local wheelOpen: string? = nil
+-- D-129: a roda com o nome da ferramenta do papel (Caixa de munição, Lançador, Socorrer, Ordens)
+local function equipList(): { Comms.Item }
+	local out = table.clone(Comms.EQUIP)
+	for i, it in out do
+		if it.id == "role_tool" then
+			out[i] = { id = it.id, label = Equipar.roleToolLabel(role()) }
+		end
+	end
+	return out
+end
 local function openEquip()
 	wheelOpen = "equip"
-	Wheel.open("equip", "Equipamento", Comms.EQUIP, equipEnabled, "equip_wheel")
+	Wheel.open("equip", "Equipamento", equipList(), equipEnabled, "equip_wheel")
 end
 local function commandAllowed(): boolean
 	return Radio.canTalkToCommand(role(), player:GetAttribute("Radio") == true)

@@ -104,9 +104,29 @@ test("sangramento, curativo e torniquete (D-99: o curativo estanca)", function()
 	Medical.applyHit(t, "arm", 2000, 0.9, 0)
 	Medical.applyHit(t, "torso", 480, 0.5, 0)
 	assert(#t.wounds == 2 and Medical.bleedRate(t) > 0)
+	local h0 = t.health
 	assert(Medical.bandage(t) and #t.wounds == 0 and Medical.bleedRate(t) == 0, "curativo estanca")
 	assert(t.bandages == 1, "gastou um")
-	assert(not Medical.bandage(t), "nada para tratar")
+	-- D-129: o curativo devolve vida, e serve para quem está ferido sem sangrar
+	near(t.health, math.min(h0 + Medical.C.bandageHeal, t.maxHealth), 1e-9)
+	assert(Medical.needsCare(t) == (t.health < t.maxHealth - 0.5))
+	local cheio = Medical.new()
+	assert(not Medical.needsCare(cheio) and not Medical.bandage(cheio), "nada para tratar")
+	assert(Medical.dressRefusal(cheio) == "Você não está ferido")
+	assert(Medical.tourniquetRefusal(cheio) ~= nil, "sem membro sangrando, o torniquete explica")
+	local ferido = Medical.new()
+	ferido.health = 50
+	assert(Medical.dressRefusal(ferido) == nil and Medical.bandage(ferido), "ferido sem sangrar")
+	near(ferido.health, 50 + Medical.C.bandageHeal, 1e-9)
+	ferido.bandages = 0
+	assert(Medical.dressRefusal(ferido) == "Sem curativos: peça a um médico")
+	-- D-129: o torniquete também para o sangramento de um membro sem artéria
+	local leve = Medical.new()
+	Medical.applyHit(leve, "arm", 2000, 0.9, 0)
+	assert(Medical.tourniquetRefusal(leve) == nil and Medical.tourniquet(leve) and Medical.bleedRate(leve) == 0)
+	local tronco = Medical.new()
+	Medical.applyHit(tronco, "torso", 480, 0.5, 0)
+	assert(Medical.tourniquetRefusal(tronco) ~= nil and not Medical.tourniquet(tronco), "tronco não leva torniquete")
 	-- artéria sem torniquete: compressão (vira leve, sangra devagar)
 	local u = Medical.new()
 	u.tourniquets = 0

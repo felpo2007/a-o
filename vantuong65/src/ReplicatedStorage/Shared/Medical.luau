@@ -13,6 +13,9 @@ Medical.C = {
 	bleed = { light = 0.1, grave = 0.25, arterial = 0.8 }, -- vida por segundo
 	bandageSelf = 6,
 	bandageOther = 4,
+	-- D-129 (pedido do dono: "a bandagem não está funcionando"): o curativo também devolve vida, e
+	-- serve para quem está ferido sem sangrar. PLACEHOLDER de jogo.
+	bandageHeal = 30,
 	tourniquet = 4,
 	medicTreat = 10,
 	medicHealTo = 75,
@@ -279,12 +282,18 @@ function Medical.arterial(s: State): boolean
 	return worst(s, { "arterial" }) ~= nil
 end
 
+-- D-129: há o que tratar? Sangrando ou com a vida abaixo do máximo (meio ponto de folga).
+function Medical.needsCare(s: State): boolean
+	return #s.wounds > 0 or s.health < (s.maxHealth or Medical.C.health) - 0.5
+end
+
 -- D-99: o curativo ESTANCA (antes o grave só virava leve e continuava sangrando). Um curativo de
 -- campanha fecha todos os ferimentos que não são arteriais. Artéria de membro pede torniquete; sem
 -- torniquete, o curativo é de compressão: a artéria vira um ferimento leve (sangra devagar até o
--- médico tratar). Devolve false quando não havia o que fazer ou não há curativo.
+-- médico tratar). D-129: também devolve bandageHeal de vida, e serve sem sangramento (só ferido).
+-- Devolve false quando não havia o que fazer ou não há curativo.
 function Medical.bandage(s: State): boolean
-	if s.bandages <= 0 or s.downedAt or s.dead or #s.wounds == 0 then
+	if s.bandages <= 0 or s.downedAt or s.dead or not Medical.needsCare(s) then
 		return false
 	end
 	local kept: { Wound } = {}
@@ -296,20 +305,36 @@ function Medical.bandage(s: State): boolean
 			closed += 1
 		end
 	end
-	if closed == 0 then
+	if closed == 0 and #kept > 0 then
 		-- só artéria: compressão na pior
 		kept[1].level = "light"
 	end
 	s.bandages -= 1
 	s.wounds = kept
+	s.health = math.min(s.health + Medical.C.bandageHeal, s.maxHealth or Medical.C.health)
 	return true
+end
+
+-- primeiro ferimento num braço ou numa perna (D-129: o torniquete serve em qualquer membro sangrando)
+local function limbWound(s: State): number?
+	for i, w in s.wounds do
+		if w.zone == "arm" or w.zone == "leg" then
+			return i
+		end
+	end
+	return nil
+end
+
+-- Há onde pôr o torniquete? Artéria ou outro ferimento de membro.
+function Medical.tourniquetOk(s: State): boolean
+	return worst(s, { "arterial" }) ~= nil or limbWound(s) ~= nil
 end
 
 function Medical.tourniquet(s: State): boolean
 	if s.tourniquets <= 0 or s.downedAt or s.dead then
 		return false
 	end
-	local i = worst(s, { "arterial" })
+	local i = worst(s, { "arterial" }) or limbWound(s)
 	if not i then
 		return false
 	end
@@ -328,8 +353,32 @@ end
 -- e o curativo no resto. Devolve se fez alguma coisa e quanto usou de cada (curativos, torniquetes).
 function Medical.quickDress(s: State): (boolean, number, number)
 	local t = if Medical.arterial(s) and Medical.tourniquet(s) then 1 else 0
-	local b = if #s.wounds > 0 and Medical.bandage(s) then 1 else 0
+	local b = if Medical.bandage(s) then 1 else 0
 	return t + b > 0, b, t
+end
+
+-- D-129: por que a bandagem rápida não faria nada agora (nil = faz). Mensagem para o jogador.
+function Medical.dressRefusal(s: State): string?
+	if s.dead or s.downedAt then
+		return "Caído: só um companheiro pode ajudar"
+	elseif not Medical.needsCare(s) then
+		return "Você não está ferido"
+	elseif s.bandages <= 0 and not (Medical.arterial(s) and s.tourniquets > 0) then
+		return "Sem curativos: peça a um médico"
+	end
+	return nil
+end
+
+-- D-129: por que o torniquete não faria nada agora (nil = faz).
+function Medical.tourniquetRefusal(s: State): string?
+	if s.dead or s.downedAt then
+		return "Caído: só um companheiro pode ajudar"
+	elseif s.tourniquets <= 0 then
+		return "Sem torniquete: use a bandagem"
+	elseif not Medical.tourniquetOk(s) then
+		return "Torniquete é para braço ou perna sangrando: use a bandagem"
+	end
+	return nil
 end
 
 -- tratamento completo do médico (10 s): para todo sangramento, imobiliza, vida até 75

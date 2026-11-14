@@ -134,6 +134,8 @@ local function onDig(p: Player)
 		if folder then
 			AssetLoader.place("sandbags", front.Position.X, front.Position.Z, yaw, folder)
 		end
+		-- D-129: avisa que acabou (antes o buraco aparecia calado)
+		Net.event("Logistics_State"):FireClient(p, { ok = "Buraco pronto: entre nele para se abrigar" })
 	end)
 end
 

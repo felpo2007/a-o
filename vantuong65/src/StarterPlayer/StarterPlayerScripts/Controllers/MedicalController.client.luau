@@ -30,6 +30,12 @@ Net.event("Medical_State").OnClientEvent:Connect(function(s)
 	state.recvAt = os.clock()
 	CasualtyScreen.setMedical(s)
 end)
+-- D-129: o servidor diz por que o curativo não fez nada, parou no meio ou deu certo (antes, calado)
+Net.event("Medical_Aviso").OnClientEvent:Connect(function(m)
+	if type(m) == "table" and type(m.msg) == "string" then
+		Bus.fire("toast", m.msg, if m.ok then "sucesso" else "alerta")
+	end
+end)
 
 -- aliado mais próximo (jogador ou bot) a até 3 m
 local function nearestAlly(): Model?
@@ -121,6 +127,17 @@ end)
 Input.on("interact", "holdStart", interactAlly)
 -- toque (Parte 13): o botão contextual (Interagir) chama o mesmo, quando o Input.virtual não existe
 Bus.on("interact_ally", interactAlly)
+-- D-129: ferramenta do médico (roda, vaga 0): o companheiro mais perto; sem ninguém, diz (antes só
+-- um aviso de como fazer)
+Bus.on("socorro_perto", function()
+	local ally = nearestAlly()
+	if not ally then
+		Bus.fire("toast", "Nenhum companheiro a até 3 m", "alerta")
+		return
+	end
+	local op = if ally:GetAttribute("Downed") then "revive" else "treat"
+	Net.event("Medical_Action"):FireServer({ op = op, target = ally })
+end)
 Bus.on("equip_item", function(id: string)
 	if id == "bandage" then
 		quickBandage()
