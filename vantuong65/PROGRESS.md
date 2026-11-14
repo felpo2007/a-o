@@ -55,6 +55,7 @@
 - **Lote 12, análise:** bots, gráficos, armas, tiros e veículos (junto do lote 6).
 
 ## v50: menu em planos de cinema e tutorial por aparelho (2026-11-13, D-118)
+- **Publicada** como versão 50 do place (build do commit 77c9d80).
 - **Feito:**
   - menu principal: saíram o retrato do soldado e a volta da câmera. O fundo são três planos de 11 s
     no fim da tarde (sol de 18/08/1965 às 18:06): fuzileiros nos becos de Xóm Gò, o VC no quintal de
