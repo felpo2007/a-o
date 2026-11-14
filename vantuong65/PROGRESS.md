@@ -31,6 +31,18 @@
 - Lote 6: análise do jogo inteiro com ideias em imagens.
 - Perguntas ao dono: a M4 (é de 1994); a mão escorregando (em que vista e momento).
 
+## v47: lote 4b, cabanas e vilas maiores e terra batida (2026-11-13, D-115)
+- **Publicada** como versão 47 do place (build do commit b8cd422).
+- **Feito:**
+  - casas 30% maiores em todo o mapa (a da vila: 10,8 x 10,8 x 6,2 m), com anexos e quintais;
+  - Xóm Gò com lotes, praça, pagode e casa comunal maiores (48 casas numa rua de ~327 m);
+  - An Cường (2) com 18 casas novas em volta da vila (eram 5 da carta);
+  - chão de terra batida (dirt_floor) nas ruas, becos, praça, quintais e diques;
+  - boca E5 e trincheira sul 20 m mais perto da vila, dentro do mapa; carta nova publicada.
+- **Conferido no Studio:** rua e quintais em terra batida, casas na escala 1,30, casario de An
+  Cường (2) com estradas de terra, primeiro tiroteio aos 17 s, servidor a 60 Hz, 0 erros de script.
+- **Não testado:** o soldado passando pela porta de cada modelo de casa; celular.
+
 ## v46: lote 4a, mapa de 500 x 500 m e 40 x 40 (2026-11-13, D-114)
 - **Publicada** como versão 46 do place (build do commit 25b61b7).
 - **Feito:**
