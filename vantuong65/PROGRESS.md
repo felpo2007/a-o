@@ -72,7 +72,7 @@
   - a pá do autoteste na 1ª rodada de cada sessão.
 
 ## v57: lote 12, análise de bots, gráficos, armas, tiros e veículos (2026-11-14, D-125)
-- **Publicação:** pendente (ver o commit "v57 publicada").
+- **Publicada** como versão 57 do place (build do commit dab8acd).
 - **Feito:**
   - relatório com números e 8 capturas (`testes/ANALISE_LOTE12_2026-11-14.md`);
   - bots: o passageiro do LVTP-5 espera sentado enquanto a tripulação embarca (antes ele entrava e
