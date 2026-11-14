@@ -5248,6 +5248,8 @@ sul ligando os Arrozais à Ponte e Cais. O mapa continua de 700 x 700 m.
   - O tabuleiro fica ~1,5 m acima da água. Dá para um jipe pela largura (não testado com veículo).
 - **Cais:** 7 x 3 m na margem do lado do mastro, a 14 m da ponte.
   - 5,5 m sobre a água, no nível do chão a 1 m da beira; postes de amarração na ponta.
+  - Travessas sob as pranchas e um degrau de embarque na ponta, 0,8 m abaixo do tabuleiro. No
+    Studio, só com o tabuleiro alto, o cais parecia uma mesa dentro do rio.
   - As sampanas ficam no espelho d'água, uma de cada lado.
   - O armazém e os sacos de arroz ficam em terra.
 - A ponte, o cais e as sampanas não têm patamar (o patamar tira a água) e não descem ao chão mais
@@ -5270,3 +5272,16 @@ sul ligando os Arrozais à Ponte e Cais. O mapa continua de 700 x 700 m.
 - A margem do riacho perto da foz (N 1692,56) ficava abaixo do espelho dele (11,69 m contra
   10,67 m). Corrigido no `abre_rio` (margem longe do riacho).
 - O `ArtEstimate` conta os modelos dos objetivos (a ponte de toras que ele somava não existe).
+
+**Conferido no Studio** (Play, sem bots):
+- as 28 peças montadas aparecem (log "28 em peças"): serraria, toras, tábuas, moenda, caldeira,
+  ponte, cais e as 2 sampanas, com o rio cheio d'água;
+- os modelos dos objetivos (cozinha, casa de telha, cabana, celeiro e medas) ficam rentes ao chão:
+  0,00 m entre o fundo e o terreno;
+- o soldado atravessou a ponte a pé em 6,5 s, só correndo (sem nadar), com a raiz a 43,9–44,0
+  studs sobre a água;
+- 47 lâminas no arrozal do terreno real.
+
+**Não testado:** veículo na ponte; o rio visto do chão em toda a extensão; a partida inteira; o
+celular. O aviso "1 construção com o chão real a mais de 0,6 m do patamar" é de um celeiro perto
+de Xóm Gò (0,79 m abaixo do chão), fora dos objetivos: fica para o lote 27.

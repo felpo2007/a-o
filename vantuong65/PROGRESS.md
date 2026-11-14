@@ -136,8 +136,11 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
   v70 e 47 agora.
 - **Carta:** rio em mancha d'água, ponte e construções; blocos antigos em `Carta.*_v70`.
 - **Testes:** Lune todos ok; pytest 54; ruff; luau-lsp sem erro.
-- **Studio:** ainda não conferido (o dono abriu o Roblox às 18h23; a GPU de 2 GB não aguenta os
-  dois).
+- **Conferido no Studio:**
+  - as 28 peças e os modelos dos objetivos, rentes ao chão;
+  - a travessia da ponte a pé (6,5 s, sem nadar);
+  - o cais ganhou travessas e um degrau de embarque (parecia uma mesa no rio).
+- **Para o lote 27:** um celeiro perto de Xóm Gò fica 0,79 m enterrado (aviso do AssetLoader).
 
 ## v70: lote 26a, objetivos novos, bases mais longe e mais relevo (2026-11-14, D-140)
 - **Publicada** (versão 70 do place, commit 6c0b188).

@@ -1153,9 +1153,28 @@ function MapLife.objectivePart(kind: string, m: Model, cf: CFrame, w: number, d:
 					"Wood"
 				)
 			end
+			-- travessa entre o par de estacas, logo abaixo das pranchas
+			plank(m, Vector3.new(0.16 / M, 0.2 / M, d), cf * CFrame.new(x, deckY - 0.18 / M, 0), BARK)
 		end
 		for _, sz in { -1, 1 } do
 			post(m, cf * CFrame.new(w / 2 - 0.3 / M, deckY, sz * (d / 2 - 0.3 / M)), 0.7 / M, 0.22 / M, BARK)
+		end
+		-- degrau de embarque na ponta, 0,8 m abaixo do tabuleiro (perto da água), com duas estacas
+		-- (Studio, v71: só com o tabuleiro alto o cais parecia uma mesa dentro do rio)
+		local stepY = deckY - 0.8 / M
+		plank(m, Vector3.new(1.2 / M, 0.12 / M, d * 0.8), cf * CFrame.new(w / 2 + 0.6 / M, stepY, 0))
+		for _, sz in { -1, 1 } do
+			solid(
+				part(
+					"Estaca",
+					Vector3.new(0.2 / M, 1.8 / M, 0.2 / M),
+					cf * CFrame.new(w / 2 + 1.05 / M, stepY - 0.84 / M, sz * (d * 0.4 - 0.12 / M)),
+					BARK,
+					Enum.Material.Wood,
+					m
+				),
+				"Wood"
+			)
 		end
 	elseif kind == "barco" then
 		-- sampana (thuyền) de madeira, base no espelho d'água: casco raso com proa e popa em cunha e
