@@ -1,11 +1,10 @@
-Operação Starlite, agosto de 1965. Tiro tático realista no Vietnã: fuzileiros navais dos EUA contra o 1º Regimento Viet Cong, até 50 contra 50, nos arrozais, vilas, túneis e colinas da península de Vạn Tường.
+Operação Starlite, agosto de 1965. Tiro tático em equipe no Vietnã: fuzileiros navais dos EUA contra o 1º Regimento Viet Cong, 30 contra 30, entre arrozais, vilas, mata fechada e túneis de Vạn Tường.
 
-• Squads com papéis: fuzileiro, fuzileiro automático, médico, sniper, metralhador, operador de rádio, tripulação
-• Nasça junto do seu squad; voz por proximidade e rádio do squad
-• Eventos na partida: apoio naval, ataque aéreo, helicópteros e morteiros
-• Pilote o M48, o anfíbio LVTP-5, jipes, caminhões e o helicóptero UH-34D
-• Túneis do VC, carta de época, setores e reforços
-• Missões diárias, Passe de Campanha e medalhas históricas
-• Jogável no controle e no teclado; português, English, Español, Tiếng Việt
+• 5 objetivos espalhados pelo mapa: tome e segure com o seu squad
+• Papéis: líder de squad, fuzileiro, médico, metralhador, sniper, antitanque, suporte, piloto, tripulação de tanque e comandante
+• Tanque M48, anfíbio LVTP-5, jipes, caminhões e o helicóptero UH-34D
+• Eventos na partida: apoio naval, ataque aéreo, inserção de helicóptero e morteiros
+• Recompensa diária, Passe de Campanha, uniformes de camuflagem e medalhas
+• Teclado, controle e celular; português, English, Español, Tiếng Việt
 
-Operation Starlite, August 1965. A realistic tactical shooter: US Marines vs. the Viet Cong 1st Regiment, up to 50 vs 50. Squads, voice, tunnels, tanks, helicopters, daily missions. Controller and keyboard.
+Operation Starlite, August 1965. Team tactical shooter: US Marines vs. the Viet Cong 1st Regiment, 30 vs 30. Squads, 5 objectives, tanks, helicopters, daily rewards and a campaign pass.

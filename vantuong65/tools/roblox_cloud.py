@@ -10,6 +10,7 @@ Uso (a partir de vantuong65/):
   uv run python tools/roblox_cloud.py create-store PASS_KIT_VETERAN ...   # só estas chaves
   uv run python tools/roblox_cloud.py publish-place      # publica place/VanTuong65.rbxl
   uv run python tools/roblox_cloud.py server-size 100    # máximo de jogadores por servidor
+  uv run python tools/roblox_cloud.py pagina [nome|icone|miniaturas]  # marketing/pagina.json
   uv run python tools/roblox_cloud.py all
 
 Endpoints: Assets API v1 e Place Publishing (documentados); Game Passes/Developer Products
@@ -89,12 +90,18 @@ def save_ids(ids: dict) -> None:
     IDS_FILE.write_text(json.dumps(ids, ensure_ascii=False, indent=1), "utf-8")
 
 
-def upload_asset(path: Path, asset_type: str, name: str, creator: dict, desc: str = "") -> str:
+def upload_asset(
+    path: Path, asset_type: str, name: str, creator: dict, desc: str = "", open_use: bool = False
+) -> str:
+    ctx: dict = {"creator": creator}
+    if open_use:
+        # ícone e miniaturas da página precisam de imagem de uso aberto (guia do Open Cloud)
+        ctx["assetPrivacy"] = "OpenUse"
     req = {
         "assetType": asset_type,
         "displayName": name[:50],
         "description": desc or "VAN TUONG 65 (ForgeGUI)",
-        "creationContext": {"creator": creator},
+        "creationContext": ctx,
     }
     body, ctype = multipart({"request": json.dumps(req)}, {"fileContent": path})
     op = request("POST", f"{API}/assets/v1/assets", body, {"Content-Type": ctype})
@@ -463,6 +470,61 @@ def cmd_server_size(size: int) -> None:
     print("serverSize:", r.get("serverSize"))
 
 
+def cmd_pagina(partes: set[str]) -> None:
+    """Página do jogo (lote 25): nome, ícone e miniaturas, de marketing/pagina.json.
+
+    Guia "Manage experience icons and thumbnails" do Open Cloud: a imagem sobe como Image de uso
+    aberto (Create Asset) e o place aponta para ela (Update Asset, updateMask=icon / previews). O
+    nome do jogo é o displayName do place inicial (cloud/v2, como o server-size). `partes`: nome,
+    icone, miniaturas (vazio = tudo). As imagens já enviadas ficam no roblox_ids.json (Pagina.*).
+    """
+    c = cfg()
+    u, pid = c["universeId"], c["placeId"]
+    spec = json.loads((ROOT / "marketing/pagina.json").read_text("utf-8"))
+    ids = load_ids()
+
+    def imagem(item: dict) -> str:
+        key = item["chave"]
+        if key not in ids:
+            f = ROOT / item["arquivo"]
+            ids[key] = upload_asset(f, "Image", item.get("nome", key), c["creator"], "", True)
+            save_ids(ids)
+            print("imagem enviada", key, ids[key])
+        return ids[key]
+
+    # nome e descrição: precisam do escopo universe.place:write na chave (sem ele, HTTP 403)
+    if not partes or "nome" in partes:
+        url = f"{API}/cloud/v2/universes/{u}/places/{pid}?updateMask=displayName"
+        body = json.dumps({"displayName": spec["nome"]}).encode("utf-8")
+        r = request("PATCH", url, body, {"Content-Type": "application/json"})
+        print("nome:", r.get("displayName"))
+    if "descricao" in partes:  # só quando pedida: é o texto público da página
+        texto = (ROOT / spec["descricao_arquivo"]).read_text("utf-8").strip()
+        if len(texto) > 1000:
+            raise SystemExit(f"descrição com {len(texto)} caracteres (o Roblox aceita 1000)")
+        url = f"{API}/cloud/v2/universes/{u}/places/{pid}?updateMask=description"
+        body = json.dumps({"description": texto}).encode("utf-8")
+        r = request("PATCH", url, body, {"Content-Type": "application/json"})
+        print("descrição:", len(r.get("description") or ""), "caracteres")
+    if not partes or "icone" in partes:
+        aid = imagem(spec["icone"])
+        req = {"assetId": str(pid), "icon": f"assets/{aid}"}
+        body, ctype = multipart({"request": json.dumps(req)}, {})
+        url = f"{API}/assets/v1/assets/{pid}?updateMask=icon"
+        r = request("PATCH", url, body, {"Content-Type": ctype})
+        print("ícone:", json.dumps(r, ensure_ascii=False)[:300])
+    if not partes or "miniaturas" in partes:
+        lista = [
+            {"asset": f"assets/{imagem(m)}", "altText": m.get("alt", "")[:200]}
+            for m in spec["miniaturas"]
+        ]
+        req = {"assetId": str(pid), "previews": lista}
+        body, ctype = multipart({"request": json.dumps(req)}, {})
+        url = f"{API}/assets/v1/assets/{pid}?updateMask=previews"
+        r = request("PATCH", url, body, {"Content-Type": ctype})
+        print("miniaturas:", json.dumps(r, ensure_ascii=False)[:400])
+
+
 if __name__ == "__main__":
     cmd = sys.argv[1] if len(sys.argv) > 1 else "help"
     if cmd == "upload-assets":
@@ -477,6 +539,9 @@ if __name__ == "__main__":
         cmd_publish_place()
     elif cmd == "server-size":
         cmd_server_size(int(sys.argv[2]))
+    elif cmd == "pagina":
+        # pagina [nome] [icone] [miniaturas]: sem argumento faz tudo
+        cmd_pagina(set(sys.argv[2:]))
     elif cmd == "all":
         cmd_upload_assets()
         cmd_create_store()

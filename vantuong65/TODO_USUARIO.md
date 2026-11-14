@@ -4,6 +4,18 @@ Fiz sozinho tudo o que não depende da sua conta Roblox, de dinheiro, de decisã
 Studio. A lista abaixo segue a ordem de prioridade. O que está em **negrito** destrava a maior parte
 do resto.
 
+## 0. Nome do jogo na página: STARLITE: Vietnã 1965 (lote 25, 2026-11-14)
+O ícone e as 8 miniaturas novas já foram enviados (as suas capas). O nome não foi, porque a chave
+não tem a permissão de editar o place (o Roblox respondeu "Scope not authorized"). Escolha um dos
+caminhos:
+1. **Dar a permissão à chave** (5 min): Creator Dashboard → Open Cloud → API Keys → a chave do
+   VT65 → em Access Permissions, adicione **universe.place** com **escrita**
+   (`universe.place:write`) na experiência → Save. Depois me avise: eu rodo
+   `tools/roblox_cloud.py pagina nome` (e `pagina descricao`, se você aprovar o texto novo de
+   `marketing/descricao.txt`).
+2. **Trocar à mão** (1 min): Creator Dashboard → a experiência → Configurar → Informações básicas →
+   Nome: `STARLITE: Vietnã 1965` → Salvar.
+
 ## 1. ~~Criar a experiência e me dar acesso de publicação~~ (feito em 2026-11-10)
 - A experiência foi criada, e os números estão em `cloud.json`.
 - A chave Open Cloud está no `.env` e funciona. **A chave nunca vai no chat nem no Git.**

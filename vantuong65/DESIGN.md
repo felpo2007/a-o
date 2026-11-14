@@ -5086,3 +5086,36 @@ dano".
   sumiu depois.
 
 **Não testado:** celular e TV; várias granadas na mesma direção (os símbolos do anel se sobrepõem).
+
+## D-139 — Lote 25: ícone, miniaturas e nome da página (2026-11-14)
+
+Pedido do dono: "faça as alterações das imagens e nome do jogo, eu dou acesso para você". O nome
+escolhido é **STARLITE: Vietnã 1965** (D-101); as imagens são as capas do dono em `marketing/capas`
+(fora do Git, o repositório é público).
+
+**Caminho:** o guia do Open Cloud "Manage experience icons and thumbnails":
+- a imagem sobe como Image de uso aberto (Create Asset, `assetPrivacy` OpenUse);
+- o place aponta para ela: Update Asset com `updateMask=icon` ou `previews`;
+- tudo pelo comando novo `tools/roblox_cloud.py pagina [nome|icone|miniaturas|descricao]`, que lê
+  `marketing/pagina.json`. Os IDs ficam no `roblox_ids.json` (`Pagina.*`).
+
+**Feito:**
+- **Ícone:** recorte quadrado da capa 01 (o soldado de capacete, 941 x 941 px a partir da direita),
+  reduzido a 512 px, com o título STARLITE / VIETNÃ 1965 no estêncil das capas, embaixo (o rosto
+  fica no alto). `tools/capa_titulo.py --icone --embaixo`. Legível a 150 px. O ícone anterior (um
+  capacete numa estaca, em `assets/capa`) parece túmulo e atrai pouco criança.
+- **Miniaturas:** as 8 capas na ordem do dono (a 01, com o título, primeiro), com texto alternativo
+  em português. A página não tinha nenhuma.
+- A leitura pela API confirma `icon` e as 8 `previews`. Os jogadores veem depois da moderação do
+  Roblox.
+
+**Pendente:**
+- **Nome:** o PATCH do place (cloud/v2) voltou HTTP 403 "Scope not authorized": a chave não tem
+  `universe.place:write`. Os passos estão no `TODO_USUARIO.md` (dar a permissão ou trocar à mão).
+- **Descrição:** a de hoje fala do mapa antigo (2 x 2 km), de até 50 contra 50 e do operador de
+  rádio. O texto novo, com o jogo de hoje (30 contra 30, 5 objetivos, os papéis do `Roles`, a
+  recompensa diária e o passe), está em `marketing/descricao.txt` (883 caracteres). Só sobe com o
+  aceite do dono (`pagina descricao`), porque é o texto público da página.
+
+**Não feito:** as miniaturas da página inicial (Thumbnail Personalization); pedem outra permissão
+(`universe.thumbnail:write`).

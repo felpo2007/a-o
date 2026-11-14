@@ -182,6 +182,7 @@ def compor(
     blocos: list[tuple[np.ndarray, int, int]],
     escurecer_esq: float,
     escurecer_topo: float = 0.0,
+    escurecer_base: float = 0.0,
 ) -> Image.Image:
     img = base.convert("RGB").copy()
     W, H = img.size
@@ -193,6 +194,9 @@ def compor(
     if escurecer_topo > 0:
         y = np.linspace(0, 1, H)[:, None, None]
         arr = arr * (1 - np.clip(1 - y / 0.42, 0, 1) ** 1.3 * escurecer_topo)
+    if escurecer_base > 0:
+        y = np.linspace(0, 1, H)[:, None, None]
+        arr = arr * (1 - np.clip((y - 0.58) / 0.42, 0, 1) ** 1.3 * escurecer_base)
     sombra = np.zeros((H, W), np.float32)
     tinta = np.zeros((H, W), np.float32)
     for alfa, x0, y0 in blocos:
@@ -273,6 +277,9 @@ def main() -> None:
         "--base", default=None, help="imagem de fundo (padrão: a capa/ícone com espaço)"
     )
     ap.add_argument("--saida", default=None)
+    # lote 25: ícone feito do recorte da capa do dono (o rosto do soldado fica no alto): o título
+    # vai para baixo, com o pé da imagem escurecido
+    ap.add_argument("--embaixo", action="store_true", help="ícone: título embaixo")
     a = ap.parse_args()
     if a.graduar:
         CAPA.mkdir(parents=True, exist_ok=True)
@@ -315,13 +322,18 @@ def main() -> None:
     m1, m2, tam = bloco_titulo(fonte, int(W * 0.88), 66, sub_frac=0.5)
     x0 = (W - m1.shape[1]) // 2
     gap = int(m1.shape[0] * 0.12)
-    y0 = int(H * 0.035)
-    img = compor(base, [(m1, x0, y0), (m2, x0, y0 + m1.shape[0] + gap)], 0.0, escurecer_topo=0.62)
+    if a.embaixo:
+        y0 = H - int(H * 0.04) - m2.shape[0] - gap - m1.shape[0]
+        blocos = [(m1, x0, y0), (m2, x0, y0 + m1.shape[0] + gap)]
+        img = compor(base, blocos, 0.0, escurecer_base=0.7)
+    else:
+        y0 = int(H * 0.035)
+        blocos = [(m1, x0, y0), (m2, x0, y0 + m1.shape[0] + gap)]
+        img = compor(base, blocos, 0.0, escurecer_topo=0.62)
     saida = Path(a.saida) if a.saida else CAPA / "icone_titulo_512.png"
     img.save(saida)
-    img.resize((150, 150), Image.LANCZOS).save(
-        CAPA.parent / "blender" / "_trabalho" / "icone_titulo_150_conferencia.png"
-    )
+    conf = saida.with_name(saida.stem + "_150_conferencia.png")
+    img.resize((150, 150), Image.LANCZOS).save(conf)
     print(
         "[titulo] ok",
         saida,

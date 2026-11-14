@@ -105,8 +105,9 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     - moedas voando ao receber.
   - **Lote 24 (v69, D-138): feito.** Símbolo de granada perto: vermelho = vai matar, branco = vai
     ferir; em cima da granada ou no anel, com a direção e a distância.
-  - **Lote 25:** nome do jogo (STARLITE: Vietnã 1965, D-101) e imagens da página (capas em
-    `marketing/capas`). O dono vai dar o acesso.
+  - **Lote 25 (D-139): ícone e 8 miniaturas enviados.** O nome (STARLITE: Vietnã 1965) espera a
+    permissão `universe.place:write` na chave (ou a troca à mão; `TODO_USUARIO.md`). A descrição nova
+    (`marketing/descricao.txt`) espera o aceite do dono.
   - **Lote 26:** mapa novo pela imagem do dono:
     - 5 objetivos: arrozais (SO), serraria (NO), vila (centro), ponte e cais (SE), engenho (NE);
       rio; base dos EUA a oeste e do VC a leste;
@@ -122,6 +123,16 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
   - base do VC sob a mata; nomes do equipamento da Intendência sem tradução; Type 54 em 3ª pessoa;
   - a pá do autoteste na 1ª rodada de cada sessão;
   - as teclas agem por baixo da tela de carregamento (a pá cavou durante o carregamento, D-129).
+
+## Lote 25: página do jogo (2026-11-14, D-139)
+- Sem mudança no place (sem versão nova).
+- **Ícone novo:** recorte da capa do dono com o título no estêncil, embaixo.
+- **8 miniaturas:** as capas do dono, com texto alternativo.
+- Enviados pelo comando novo `tools/roblox_cloud.py pagina`; a API confirma o ícone e as 8
+  miniaturas, que aparecem depois da moderação.
+- **Pendente:**
+  - o nome (a chave não tem `universe.place:write`: HTTP 403);
+  - a descrição nova, que espera o aceite do dono.
 
 ## v69: lote 24, aviso de granada perto (2026-11-14, D-138)
 - **Publicada** (versão 69 do place, commit 986929b).
