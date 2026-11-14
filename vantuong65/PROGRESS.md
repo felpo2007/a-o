@@ -59,6 +59,7 @@
 - **Lote 12, análise:** bots, gráficos, armas, tiros e veículos (junto do lote 6).
 
 ## v54: lote 9, 30 contra 30 e começo na base com contagem (2026-11-14, D-122)
+- **Publicada** como versão 54 do place (build do commit 23b1b63).
 - **Feito:**
   - 30 por lado (`Roles.TEAM_MAX`, `BotBrain.CROWD.perSide`); o servidor de 60 vagas fica com o dono;
   - cada partida abre com 30 s de contagem: nascer só no QG, quem sai da base volta, bots e
