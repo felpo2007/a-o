@@ -123,7 +123,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
   - as teclas agem por baixo da tela de carregamento (a pá cavou durante o carregamento, D-129).
 
 ## v68: lote 23, recompensa diária e passe para crianças (2026-11-14, D-137)
-- **A publicar.**
+- **Publicada** (versão 68 do place, commit 828c92e).
 - **Diária:**
   - janela maior;
   - cada dia com 💰 ou 🎁 num círculo colorido e o valor em 30 px dourado;
