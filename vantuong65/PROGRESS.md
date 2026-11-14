@@ -104,7 +104,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
   - as teclas agem por baixo da tela de carregamento (a pá cavou durante o carregamento, D-129).
 
 ## v65: lote 20, vila espalhada e todas as casas abertas (2026-11-14, D-134)
-- **A publicar.**
+- **Publicada** (versão 65 do place, commit dad4e6b).
 - **Causa das casas fechadas:** 10 das 48 casas eram das variantes 11 e 12, sem modelo do Blender, e
   caíam na cabana fechada do ForgeGUI. Agora só as 10 casas únicas com porta e interior.
 - **Feito:**
