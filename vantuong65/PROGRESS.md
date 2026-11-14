@@ -124,7 +124,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
   - as teclas agem por baixo da tela de carregamento (a pá cavou durante o carregamento, D-129).
 
 ## v70: lote 26a, objetivos novos, bases mais longe e mais relevo (2026-11-14, D-140)
-- **A publicar.**
+- **Publicada** (versão 70 do place, commit 6c0b188).
 - **Objetivos novos**, no mesmo mapa de 700 m: A Arrozais, B Serraria (na mata fechada), C Xóm Gò,
   D Ponte e Cais, E Engenho. Cada um fica a 291–318 m do QG mais perto (eram 252–270).
 - **Mais relevo:** morros e grotas de até ±10 m na mata, longe de casas, lavoura, riacho, vila,
