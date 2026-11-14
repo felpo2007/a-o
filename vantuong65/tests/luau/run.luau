@@ -295,20 +295,22 @@ test("riacho a leste de An Cường (2): leito contínuo de células de riacho, 
 	for n = 1692550, 1693000, 10 do
 		local z = (MapConfig.GridOrigin1965.n - n) / 0.28
 		local row = math.floor((z - Grid.originZ) / cell)
-		local col = math.floor((l.x - 120 / 0.28 - Grid.originX) / cell)
-		local last = math.floor((l.x + 40 / 0.28 - Grid.originX) / cell)
+		-- de leste para oeste: lote 26b (D-141), o rio do sul (crop_world.abre_rio) corre de oeste a
+		-- leste no sul da área e encosta no riacho; do leste, o primeiro leito da linha é o do riacho
+		local first = math.floor((l.x - 120 / 0.28 - Grid.originX) / cell)
+		local c1 = math.floor((l.x + 40 / 0.28 - Grid.originX) / cell)
 		local function cls(c: number): number
 			return world:classAt(Grid.originX + (c + 0.5) * cell, Grid.originZ + (row + 0.5) * cell)
 		end
-		while col <= last and cls(col) ~= 5 do
-			col += 1
+		while c1 >= first and cls(c1) ~= 5 do
+			c1 -= 1
 		end
-		assert(col <= last, "sem riacho em N " .. n)
+		assert(c1 >= first, "sem riacho em N " .. n)
 		-- trecho de riacho da linha e a primeira célula de chão de cada lado: o espelho d'água (fundo
 		-- + 0,6 m) fica abaixo das duas margens
-		local c1 = col
-		while cls(c1 + 1) == 5 do
-			c1 += 1
+		local col = c1
+		while cls(col - 1) == 5 do
+			col -= 1
 		end
 		local bed = math.huge
 		for c = col, c1 do

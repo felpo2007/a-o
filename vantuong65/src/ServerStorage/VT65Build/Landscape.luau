@@ -31,8 +31,9 @@ Landscape.CLEAR_NAMED_M = {
 	["Athletic field"] = 70,
 	-- D-123 (dono: "o outro em uma floresta densa e pouco acessível"): o objetivo da mata fechada; com
 	-- os 30 m de praxe o ponto virava uma clareira no meio da mata. Fica só a roda da bandeira.
-	-- Lote 26: é a Serraria (B, noroeste; era a "Mata fechada")
-	["Serraria"] = 10,
+	-- Lote 26: é a Serraria (B, noroeste; era a "Mata fechada"). Lote 26b (D-141): 22 m, o pátio do
+	-- galpão, das toras e das tábuas; a mata cerrada continua em volta até 70 m (Vegetation.DENSE_M)
+	["Serraria"] = 22,
 }
 -- pontos fortes de arrozal: em volta deles a lavoura continua (o nome é a paisagem; lote 26: "arroz"
 -- pega "Arrozais" e "Arrozal")

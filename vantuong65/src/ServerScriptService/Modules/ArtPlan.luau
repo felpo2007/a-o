@@ -116,6 +116,10 @@ export type Item = {
 	id: string?,
 	node: string?,
 	inside: string?,
+	-- construção de objetivo (lote 26b): o nome do ponto forte; afloat: em cima do rio (ponte, cais,
+	-- barco), a base não desce ao chão mais baixo da pegada
+	objective: string?,
+	afloat: boolean?,
 }
 
 export type Ctx = {
@@ -136,6 +140,7 @@ export type Ctx = {
 	spawnLanes: { any },
 	pending: { any },
 	small: { Item }, -- objetos pequenos sem patamar (planta não cai em cima)
+	objectiveCount: { [string]: number }?, -- peças postas em cada objetivo (lote 26b)
 }
 
 local BUCKET = 64
@@ -282,7 +287,42 @@ ArtPlan.rot = rot
 -- peças montadas pelo MapLife (studs X, Y, Z na escala 1)
 ArtPlan.PARTS_DIMS = {
 	["parts:horta"] = { 3 / M, 0.5 / M, 2 / M },
+	-- construções dos objetivos (lote 26b, D-141; medidas de projeto, PLACEHOLDER)
+	["parts:serraria"] = { 10 / M, 5 / M, 6 / M },
+	["parts:toras"] = { 6 / M, 2 / M, 3 / M },
+	["parts:tabuas"] = { 4 / M, 1 / M, 2 / M },
+	["parts:moenda"] = { 8 / M, 4 / M, 8 / M },
+	["parts:caldeira"] = { 9 / M, 5.2 / M, 5 / M },
+	["parts:cais"] = { 7 / M, 1 / M, 3 / M },
+	["parts:barco"] = { 7 / M, 1.2 / M, 1.7 / M },
 } :: { [string]: { number } }
+
+-- Construções dos objetivos (lote 26b, D-141; ideia de mapa do dono). Cada peça fica a r metros do
+-- mastro no rumo a (rad, somado ao giro do conjunto), de frente para ele (turn: giro a mais). kind:
+-- peças do MapLife; key: modelo publicado. A ponte e o cais vão no rio (ArtPlan.BRIDGE_OBJECTIVE).
+ArtPlan.OBJECTIVE_LAYOUT = {
+	Serraria = {
+		{ kind = "serraria", r = 11, a = 0 },
+		{ kind = "toras", r = 11, a = 2.1, turn = 0.25 },
+		{ kind = "tabuas", r = 10, a = -2.1, turn = -0.2 },
+		{ key = "hut_kitchen", r = 13, a = 3.3 },
+	},
+	Engenho = {
+		{ kind = "moenda", r = 12, a = 0 },
+		{ kind = "caldeira", r = 12, a = 2.1 },
+		{ key = "house_tile", r = 15, a = -2.1, scale = 1.3 },
+		{ key = "straw_stack", r = 11, a = 3.4 },
+	},
+	Arrozais = {
+		{ key = "hut_thatch", r = 12, a = 0, scale = 1.3 },
+		{ key = "straw_stack", r = 10, a = 2.1 },
+		{ key = "granary", r = 11, a = -2.1, scale = 1.3 },
+	},
+} :: { [string]: { any } }
+ArtPlan.BRIDGE_OBJECTIVE = "Ponte e Cais"
+ArtPlan.BRIDGE_WIDTH_M = 3.6 -- dá para um jipe
+ArtPlan.BRIDGE_BANK_M = 3 -- quanto a ponte entra em cada margem
+ArtPlan.DOCK_ALONG_M = 14 -- o cais, rio acima ou abaixo da ponte
 
 local function half(key: string, scale: number): (number, number)
 	local d = ArtBudget.DIMS[key] or ArtPlan.PARTS_DIMS[key]
@@ -553,6 +593,189 @@ function ArtPlan.structures(ctx: Ctx, has: (string) -> boolean): { Item }
 		padded("granary", vc.x - 12 / M, vc.z - 7 / M, 2.1, 1, "prop")
 		padded("vc_bunker", vc.x + 11 / M, vc.z - 4 / M, -math.pi / 2, 1, "prop")
 	end
+	-- ===== construções dos objetivos (lote 26b, D-141) =====
+	-- chão livre para a pegada: sem lâmina, dique, estrada, beco, riacho, patamar nem objeto (a clareira
+	-- do nascer só tira planta; o ponto de nascer em si fica de fora)
+	local function objFree(x: number, z: number, yaw: number, hx: number, hz: number): boolean
+		for i = -1, 1 do
+			for j = -1, 1 do
+				local px, pz = rot(x, z, yaw, i * hx, j * hz)
+				local p = ArtPlan.groundProblem(ctx, px, pz, 1 / M)
+				if p and p ~= "clareira" then
+					return false
+				end
+			end
+		end
+		local rr = math.sqrt(hx * hx + hz * hz)
+		for _, c in ctx.spawnCircles do
+			if (x - c.x) ^ 2 + (z - c.z) ^ 2 < (c.r + rr) ^ 2 then
+				return false
+			end
+		end
+		return true
+	end
+	local function objKey(e: any): string
+		return if e.kind then "parts:" .. e.kind else e.key
+	end
+	-- onde a peça cabe no giro a0 do conjunto: a r, r + 3, ... r + 24 m do mastro, no rumo dela ou até
+	-- 0,6 rad para cada lado (o mastro pode estar na estrada, com riacho e pontos de nascer perto)
+	local OBJ_TURNS = { 0, 0.3, -0.3, 0.6, -0.6 }
+	local function objSpot(sp: any, e: any, a0: number): (number?, number?, number?)
+		local hx, hz = half(objKey(e), e.scale or 1)
+		for k = 0, 8 do
+			for _, dt in OBJ_TURNS do
+				local th = a0 + e.a + dt
+				local r = (e.r + 3 * k) / M
+				local x, z = sp.x + math.cos(th) * r, sp.z + math.sin(th) * r
+				-- de frente para o mastro: o -Z local aponta para ele
+				local yaw = math.pi / 2 - th + (e.turn or 0)
+				if objFree(x, z, yaw, hx, hz) then
+					return x, z, yaw
+				end
+			end
+		end
+		return nil, nil, nil
+	end
+	local objCount: { [string]: number } = {}
+	for _, sp in MC.Strongpoints do
+		local layout = ArtPlan.OBJECTIVE_LAYOUT[sp.name]
+		if layout then
+			-- o giro do conjunto que acomoda mais peças (o primeiro, no empate)
+			local bestA, bestN = 0, -1
+			for k = 0, 11 do
+				local a0 = k * math.pi / 6
+				local n = 0
+				for _, e in layout do
+					if objSpot(sp, e, a0) then
+						n += 1
+					end
+				end
+				if n > bestN then
+					bestA, bestN = a0, n
+				end
+			end
+			local n = 0
+			for _, e in layout do
+				local x, z, yaw = objSpot(sp, e, bestA)
+				if x and z and yaw then
+					padded(objKey(e), x, z, yaw, e.scale or 1, "special", { objective = sp.name })
+					n += 1
+				end
+			end
+			objCount[sp.name] = n
+		end
+	end
+	-- Ponte e cais no rio do sul (crop_world.abre_rio): a ponte atravessa o leito na célula de rio
+	-- mais perto do mastro, apoiada nas duas margens; o cais sai da margem do lado do mastro, rio
+	-- acima ou abaixo, com duas sampanas amarradas, o armazém e sacos de arroz em terra.
+	for _, sp in MC.Strongpoints do
+		if sp.name == ArtPlan.BRIDGE_OBJECTIVE then
+			local bx, bz, yaw = ArtPlan.bridgeSpot(ctx.world, sp.x, sp.z, 60 / M)
+			if not (bx and bz and yaw) then
+				objCount[sp.name] = 0
+				continue
+			end
+			-- extensão do leito (m, X local da travessia) na linha a `along` metros da célula achada
+			local function channel(along: number): (number, number)
+				local lo, hi = math.huge, -math.huge
+				for s = -20, 20 do
+					local px, pz = rot(bx, bz, yaw, s / M, along / M)
+					if ctx.world:classAt(px, pz) == 5 then
+						lo, hi = math.min(lo, s), math.max(hi, s)
+					end
+				end
+				return lo, hi
+			end
+			local lo, hi = channel(0)
+			local mid = (lo + hi) / 2
+			local halfW = (hi - lo) / 2 + 0.5
+			local px0, pz0 = rot(bx, bz, yaw, mid / M, 0) -- meio da ponte
+			local ca, sa = math.cos(yaw), math.sin(yaw)
+			-- lado do mastro: o sinal do X local que aponta para ele
+			local side = if (sp.x - px0) * ca - (sp.z - pz0) * sa >= 0 then 1 else -1
+			local ax, az = rot(px0, pz0, yaw, (halfW + 1) / M, 0)
+			local ex, ez = rot(px0, pz0, yaw, -(halfW + 1) / M, 0)
+			local bridgeBase = math.min((Site.column(ctx.site, ax, az)), (Site.column(ctx.site, ex, ez)))
+			local n = 0
+			local function afloat(key: string, x: number, z: number, y: number, base: number, hx: number, hz: number)
+				local it: Item = {
+					key = key,
+					x = x,
+					z = z,
+					yaw = y,
+					scale = 1,
+					hx = hx,
+					hz = hz,
+					base = base,
+					group = "special",
+					foliage = false,
+					shadow = true,
+					padded = false,
+					objective = sp.name,
+					afloat = true,
+				}
+				table.insert(out, it)
+				table.insert(ctx.small, it)
+				n += 1
+			end
+			afloat(
+				"parts:ponte",
+				px0,
+				pz0,
+				yaw,
+				bridgeBase,
+				(halfW + ArtPlan.BRIDGE_BANK_M) / M,
+				ArtPlan.BRIDGE_WIDTH_M / 2 / M
+			)
+			-- cais: rio acima ou abaixo, no primeiro lado em que o armazém cabe em terra
+			for _, dir in { 1, -1 } do
+				local along = dir * ArtPlan.DOCK_ALONG_M
+				local l2, h2 = channel(along)
+				if l2 > h2 then
+					continue
+				end
+				local edge = if side > 0 then h2 + 0.5 else l2 - 0.5 -- beira do leito (m)
+				local chx, chz = half("parts:cais", 1)
+				local kx, kz = half("hut_kitchen", 1)
+				local hxw, hzw = rot(bx, bz, yaw, (edge + side * (3 + kz * M)) / M, along / M)
+				-- armazém de frente para o cais (o -Z local para o rio)
+				local wyaw = yaw + side * math.pi / 2
+				if not objFree(hxw, hzw, wyaw, kx, kz) then
+					continue
+				end
+				-- o cais: 5,5 m sobre a água e 1,5 m em terra, no nível do chão a 1 m da beira (a margem
+				-- sobe rápido); a ponta com os postes de amarração (+X local, MapLife) para o meio do rio
+				local dx, dz = rot(bx, bz, yaw, (edge - side * 2.0) / M, along / M)
+				local lipX, lipZ = rot(bx, bz, yaw, (edge + side * 1.0) / M, along / M)
+				local dyaw = if side > 0 then yaw + math.pi else yaw
+				afloat("parts:cais", dx, dz, dyaw, (Site.column(ctx.site, lipX, lipZ)), chx, chz)
+				-- sampanas dos dois lados do cais, no espelho d'água
+				local bhx, bhz = half("parts:barco", 1)
+				for _, s2 in { 1, -1 } do
+					local px, pz = rot(bx, bz, yaw, (edge - side * 4.0) / M, along / M + s2 * (chz + bhz + 0.3 / M))
+					local _, wl = Site.column(ctx.site, px, pz)
+					if wl > -math.huge then
+						afloat("parts:barco", px, pz, yaw + (if s2 > 0 then 0 else math.pi), wl, bhx, bhz)
+					end
+				end
+				padded("hut_kitchen", hxw, hzw, wyaw, 1, "special", { objective = sp.name })
+				n += 1
+				-- sacos de arroz entre o armazém e o cais
+				for i = 0, 3 do
+					local sx, sz = rot(bx, bz, yaw, (edge + side * 1.6) / M, along / M + (1.8 + i * 0.55) / M)
+					-- perto do cais e do armazém pode: fora só lâmina, dique, estrada, beco e riacho
+					local p = ArtPlan.groundProblem(ctx, sx, sz, 0.6 / M)
+					if p == nil or p == "objeto" or p == "patamar" or p == "clareira" then
+						seated("rice_sack", sx, sz, yaw + i * 0.4, 1, "special", { objective = sp.name })
+						n += 1
+					end
+				end
+				break
+			end
+			objCount[sp.name] = n
+		end
+	end
+	ctx.objectiveCount = objCount
 	-- tocas de atirador em volta dos pontos fortes do VC e neutros (fora de casa, estrada e lâmina)
 	for _, sp in MC.Strongpoints do
 		if sp.sector <= 3 then
@@ -765,7 +988,7 @@ function ArtPlan.structures(ctx: Ctx, has: (string) -> boolean): { Item }
 	-- com todos os patamares no chão: base nunca acima do chão mais baixo sob a pegada (onde dois
 	-- patamares se encostam o chão é a média dos dois)
 	for _, it in out do
-		if not it.sink and it.key ~= "log_bridge" then
+		if not it.sink and not it.afloat and it.key ~= "log_bridge" then
 			local lo = ArtPlan.footprint(ctx, it.x, it.z, it.yaw, it.hx * 0.95, it.hz * 0.95)
 			it.base = math.min(it.base, lo)
 		end

@@ -404,9 +404,22 @@ def diques(q: Quadro, dr: ImageDraw.ImageDraw, d: Dados) -> None:
 
 
 def riachos(q: Quadro, cam: Image.Image, d: Dados) -> None:
-    """riacho: as células de classe riacho ligadas pelos vizinhos, em linha azul"""
+    """riacho: as células de classe riacho ligadas pelos vizinhos, em linha azul. Lote 26b (D-141):
+    o rio do sul (leito de ~12 m, crop_world.abre_rio) em mancha d'água com as margens em traço"""
     L = d.info["landscape"]
     m = d.paisagem == L["stream"]
+    # leito largo: o que sobra da abertura por um bloco de 2 x 2 células (o riacho tem uma só)
+    largo = ndimage.binary_opening(m, structure=np.ones((2, 2), bool))
+    if largo.any():
+        # suavizada (~1 célula) antes do corte: sem a escada da grade de 4,5 m
+        suave = ndimage.gaussian_filter(largo.astype(np.float32), 1.0)
+        dentro = q.amostra(suave, N, ordem=3) > 0.45
+        borda = dentro & ~ndimage.binary_erosion(dentro, iterations=int(1.6 * SS))
+        rgba = np.zeros((N, N, 4), np.uint8)
+        rgba[dentro] = (*AGUA, 255)
+        rgba[borda] = (*AGUA_TRACO, 255)
+        cam.alpha_composite(Image.fromarray(rgba, "RGBA"))
+        m = m & ~ndimage.binary_dilation(largo)
     dr = ImageDraw.Draw(cam)
     ys, xs = np.nonzero(m)
     pts = set(zip(ys.tolist(), xs.tolist(), strict=True))
@@ -552,6 +565,11 @@ def cemiterio(q: Quadro, cam: Image.Image, d: Dados) -> None:
         )
 
 
+STUD_M = 0.28  # metros por stud
+# construções dos objetivos (lote 26b, D-141) desenhadas em preto, como as casas
+CONSTRUCAO_OBJETIVO = {"serraria", "caldeira", "hut_kitchen", "hut_thatch", "house_tile", "granary"}
+
+
 def _ret(
     q: Quadro, x: float, z: float, yaw: float, w: float, dd: float
 ) -> list[tuple[float, float]]:
@@ -648,6 +666,28 @@ def vila_grande(q: Quadro, cam: Image.Image, d: Dados) -> None:
                 outline=(*PRETO, 255),
                 width=SS,
             )
+        elif s["kind"] in CONSTRUCAO_OBJETIVO:
+            # lote 26b (D-141): galpões e casas dos objetivos, como as casas da carta
+            dr.polygon(_ret(q, s["x"], s["z"], s["yaw"], s["w"], s["d"]), fill=(*PRETO, 255))
+        elif s["kind"] == "ponte":
+            # ponte: as duas guardas e as asas nas pontas (símbolo da carta); medidas em studs
+            ca, sa = math.cos(s["yaw"]), math.sin(s["yaw"])
+            asa = 1.5 / STUD_M
+            meia, larg = s["w"] / 2, s["d"] / 2 + 1.2 / STUD_M
+            for lado in (-1, 1):
+                pts = []
+                perfil = (
+                    (-meia - asa, lado * asa),
+                    (-meia, 0),
+                    (meia, 0),
+                    (meia + asa, lado * asa),
+                )
+                for ax, az in perfil:
+                    lz = lado * larg + az
+                    pts.append(q.px(s["x"] + ax * ca + lz * sa, s["z"] - ax * sa + lz * ca))
+                dr.line(pts, fill=(*PRETO, 255), width=int(1.4 * SS))
+        elif s["kind"] == "cais":
+            dr.polygon(_ret(q, s["x"], s["z"], s["yaw"], s["w"], s["d"]), fill=(*PRETO, 255))
     # o nome ao lado da vila (a rua corre de norte a sul: o nome fica a oeste das casas)
     xs = [h[0] for h in v["houses"]]
     cx, cy = q.px(min(xs) if xs else v["x"], v["z"])

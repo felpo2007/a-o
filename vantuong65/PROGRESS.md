@@ -111,8 +111,9 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
   - **Lote 26a (v70, D-140): feito.** Objetivos da ideia do dono no mapa de 700 m (A Arrozais, B
     Serraria na mata fechada, C Xóm Gò, D Ponte e Cais, E Engenho), a 291–318 m das bases (eram
     252–270), e morros e grotas na mata. O dono confirmou: o mapa fica de 700 x 700 m.
-  - **Lote 26b:** as construções da serraria, do engenho, da ponte e do cais, e o rio no sul ligando
-    os Arrozais à Ponte e Cais.
+  - **Lote 26b (v71, D-141): feito.** Rio no sul (12 m de largura) dos Arrozais à Ponte e Cais;
+    ponte, cais, sampanas e armazém na D; galpão da serra, toras e tábuas na B; moenda, caldeira e
+    casa de telha na E; cabana e celeiro na A. Corrigida a regressão da v70 nos tabuleiros.
   - **Lote 27:** correção de bugs de textura, gráficos, movimentação, tiros e granadas.
 
 - **Próximos (ideias da análise, esperando o dono):**
@@ -122,6 +123,21 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
   - base do VC sob a mata; nomes do equipamento da Intendência sem tradução; Type 54 em 3ª pessoa;
   - a pá do autoteste na 1ª rodada de cada sessão;
   - as teclas agem por baixo da tela de carregamento (a pá cavou durante o carregamento, D-129).
+
+## v71: lote 26b, construções dos objetivos e o rio do sul (2026-11-14, D-141)
+- **Rio do sul** (`crop_world.abre_rio`): 12 m de largura, espelho a 9,6 m, margens em rampa; 233
+  células de leito na área; passa 25 m ao sul da Ponte e Cais e recebe o riacho fora da área.
+- **Construções**, em peças (`MapLife.objectivePart`) e com modelos que já existiam:
+  - A Arrozais: 3 peças;
+  - B Serraria: 4 peças (clareira de 22 m);
+  - D Ponte e Cais: 9 peças (ponte de 20 m, cais de 7 m, 2 sampanas, armazém e 4 sacos);
+  - E Engenho: 4 peças.
+- **Regressão da v70 corrigida:** o relevo inclinava tabuleiros. Lâminas no bake: 44 na v69, 24 na
+  v70 e 47 agora.
+- **Carta:** rio em mancha d'água, ponte e construções; blocos antigos em `Carta.*_v70`.
+- **Testes:** Lune todos ok; pytest 54; ruff; luau-lsp sem erro.
+- **Studio:** ainda não conferido (o dono abriu o Roblox às 18h23; a GPU de 2 GB não aguenta os
+  dois).
 
 ## v70: lote 26a, objetivos novos, bases mais longe e mais relevo (2026-11-14, D-140)
 - **Publicada** (versão 70 do place, commit 6c0b188).

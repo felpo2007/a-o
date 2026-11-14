@@ -202,6 +202,7 @@ def read_grid() -> dict:
         heights[r0 : r0 + rows] = np.frombuffer(raw, dtype="<u2").reshape(rows, w)
     carved = re.search(r"\bstreamCarvedCm = (\d+)", s)
     relief = re.search(r"\breliefAdded = (\d+)", s)
+    river = re.search(r"\briverCut = (\d+)", s)
     moved = re.search(r"\bmoundMoved = (\d+)", s)
     cut = re.search(r"\bpaddyCut = (\d+)", s)
     ham = re.search(r"\bhamletAdded = (\d+)", s)
@@ -221,6 +222,7 @@ def read_grid() -> dict:
         "paddyCut": int(cut.group(1)) if cut else 0,
         "hamletAdded": int(ham.group(1)) if ham else 0,
         "reliefAdded": int(relief.group(1)) if relief else 0,
+        "riverCut": int(river.group(1)) if river else 0,
     }
 
 
@@ -399,6 +401,122 @@ def abre_riacho(g: dict, f: dict[str, np.ndarray]) -> dict:
     return info
 
 
+# ---------- rio do sul (lote 26b) ----------
+# Ideia de mapa do dono: um rio no sul ligando os Arrozais (A) à Ponte e Cais (D). De design, como
+# os nomes: passa logo ao sul dos tabuleiros dos Arrozais (rente à borda sul), entra no mapa na
+# altura da Ponte e Cais (25 m ao sul do objetivo) e sai pelo sudeste, para o lado do riacho.
+# Fundo plano (rio lento): o TerrainBuilder põe o fundo do leito na divisa de voxel (4 studs) e o
+# espelho 0,6 m acima; um fundo inclinado viraria degraus de 1,12 m na água. As margens descem em
+# rampa até a água (vale), nunca sobem o chão. Determinístico; feito uma vez (Grid: riverCut).
+# No oeste o rio corre por fora da borda sul (N 1692,555–1692,566, a ~20 m da área): os tabuleiros
+# dos Arrozais vão até a borda e a margem do rio os inclinava (o filtro de chão plano tirava 28 dos
+# 50). Entra no mapa a leste deles, onde não há lavoura.
+RIO_PONTOS = [
+    (269420, 1692555),
+    (269560, 1692557),
+    (269680, 1692565),
+    (269780, 1692585),
+    (269880, 1692605),
+    (270000, 1692615),
+    (270070, 1692605),
+    (270140, 1692585),
+    (270210, 1692552),
+]
+RIO_TABULEIRO_M = 10.0  # a margem não rebaixa o chão a até isto de um tabuleiro
+RIO_MEIA_M = 6.0  # meia largura do leito (água): ~12 m
+RIO_FUNDO_M = 9.0  # altura do fundo (m); o espelho fica a 9,6 m
+RIO_BORDA_M = 0.9  # a margem junto da água fica isto acima do espelho
+RIO_ENCOSTA = 0.22  # subida da margem (m por m)
+RIO_MARGEM_M = 30.0  # largura da encosta de cada lado
+RIO_RIACHO_CELULAS = 2  # a margem não rebaixa o chão a até isto (células) do riacho
+
+
+def _dist_polilinha(xs: np.ndarray, zs: np.ndarray, pts: list) -> np.ndarray:
+    d = np.full(xs.shape, np.inf)
+    for (ax, az), (bx, bz) in zip(pts, pts[1:], strict=False):
+        dx, dz = bx - ax, bz - az
+        t = np.clip(((xs - ax) * dx + (zs - az) * dz) / (dx * dx + dz * dz), 0, 1)
+        d = np.minimum(d, np.hypot(ax + t * dx - xs, az + t * dz - zs))
+    return d
+
+
+def abre_rio(g: dict, f: dict[str, np.ndarray]) -> dict:
+    if g.get("riverCut"):
+        return {"ja_feito": True}
+    cell = g["cell"]
+    rows, cols = np.indices(g["heights"].shape)
+    xs = g["ox"] + (cols + 0.5) * cell
+    zs = g["oz"] + (rows + 0.5) * cell
+    pts = [ing_local(e, n) for e, n in RIO_PONTOS]
+    d = _dist_polilinha(xs, zs, pts) * STUD_M
+    h = (g["heights"].astype(float) - g["hoff"]) / 100.0
+    leito = d <= RIO_MEIA_M
+    margem = (d > RIO_MEIA_M) & (d <= RIO_MEIA_M + RIO_MARGEM_M)
+    # chão dos tabuleiros (lâmina com altura fixa) fica como está
+    folga = RIO_TABULEIRO_M / STUD_M
+    for x, z, _y, su, sv, ang in f["waters"]:
+        ca, sa = math.cos(ang), math.sin(ang)
+        dx, dz = xs - x, zs - z
+        lu = dx * ca - dz * sa
+        lv = dx * sa + dz * ca
+        sob = (np.abs(lu) <= su / 2 + folga) & (np.abs(lv) <= sv / 2 + folga)
+        margem &= ~sob
+    # perto do riacho (que desce para o rio a sudeste, fora da área) a margem também fica:
+    # rebaixada, a margem do riacho ficava abaixo do espelho dele (tests/luau/run: N 1692,56,
+    # espelho 11,69 m e margem 10,67 m)
+    perto = g["cls"] == 5
+    for _ in range(RIO_RIACHO_CELULAS):
+        viz = perto.copy()
+        viz[1:, :] |= perto[:-1, :]
+        viz[:-1, :] |= perto[1:, :]
+        viz[:, 1:] |= perto[:, :-1]
+        viz[:, :-1] |= perto[:, 1:]
+        perto = viz
+    margem &= ~perto
+    espelho = RIO_FUNDO_M + 0.6
+    alvo = espelho + RIO_BORDA_M + (d - RIO_MEIA_M) * RIO_ENCOSTA
+    antes = h.copy()
+    h[margem] = np.minimum(h[margem], alvo[margem])
+    h[leito] = RIO_FUNDO_M
+    g["cls"][leito] = 5
+    g["heights"] = np.clip(np.round(h * 100 + g["hoff"]), 0, 65535).astype("<u2")
+    g["riverCut"] = 1
+    # lâminas e diques que cruzam o leito saem (como no abre_riacho)
+    centros = np.column_stack([xs[leito], zs[leito]])
+    w = f["waters"]
+    keep_w = []
+    for x, z, _y, su, sv, ang in w:
+        ca, sa = math.cos(ang), math.sin(ang)
+        dx, dz = centros[:, 0] - x, centros[:, 1] - z
+        lu = dx * ca - dz * sa
+        lv = dx * sa + dz * ca
+        keep_w.append(
+            not np.any((np.abs(lu) <= su / 2 + cell / 2) & (np.abs(lv) <= sv / 2 + cell / 2))
+        )
+    keep_w = np.array(keep_w, bool)
+    f["waters"] = w[keep_w]
+    dk = f["dikes"]
+    keep_d = []
+    for x1, z1, x2, z2, _t, _b in dk:
+        mx, mz = (x1 + x2) / 2, (z1 + z2) / 2
+        keep_d.append(bool(np.hypot(centros[:, 0] - mx, centros[:, 1] - mz).min() > cell))
+    keep_d = np.array(keep_d, bool)
+    f["dikes"] = dk[keep_d]
+    # margem mais baixa que o espelho (a água transbordaria): só conferência
+    xa, xb, za, zb = crop_box(0.0)
+    dentro = (xs >= xa) & (xs <= xb) & (zs >= za) & (zs <= zb)
+    vizinho = margem & (d <= RIO_MEIA_M + 4.5)
+    return {
+        "celulas_leito": int(leito.sum()),
+        "celulas_leito_na_area": int((leito & dentro).sum()),
+        "espelho_m": round(espelho, 2),
+        "margem_min_m": round(float(h[vizinho].min()), 2),
+        "rebaixo_max_m": round(float((antes - h)[margem].max()), 1),
+        "laminas_fora": int((~keep_w).sum()),
+        "diques_fora": int((~keep_d).sum()),
+    }
+
+
 # ---------- escrita ----------
 def luau_num(v: float) -> str:
     return f"{v:.2f}".rstrip("0").rstrip(".")
@@ -465,6 +583,7 @@ def write_grid(g: dict) -> None:
             if g.get("reliefAdded")
             else ""
         )
+        + ("\triverCut = 1, -- rio do sul (crop_world, lote 26b)\n" if g.get("riverCut") else "")
         + f"\theightChunks = {{{chunk_list}}}, rowsPerChunk = {ROWS_PER},\n"
         f"\tclassNames = {{{names}}},\n"
         f'\tclassesRle = "{base64.b64encode(bytes(rle)).decode()}",\n'
@@ -966,17 +1085,30 @@ def mais_relevo(g: dict, f: dict[str, np.ndarray]) -> dict:
             math.hypot(ax - x, az - z) * STUD_M <= RELEVO_LAVOURA_ARROZ_M[1] for ax, az in arroz
         )
 
+    # v70 (correção no lote 26b): a vila de Xóm Gò só é posta depois (vila_e_estradas), e a
+    # lavoura das casas soltas dela ficava fora deste teste: o relevo inclinou 20 tabuleiros que se
+    # viam e o filtro de chão plano tirou (o bake montava 44 lâminas na v69 e 24 na v70). Agora
+    # todo tabuleiro é protegido, e os diques e sebes a até 50 m de um tabuleiro também.
+    laminas = f["waters"][:, :2]
+
+    def perto_de_lamina(x: float, z: float) -> bool:
+        return bool(
+            len(laminas) and np.hypot(laminas[:, 0] - x, laminas[:, 1] - z).min() * STUD_M <= 50.0
+        )
+
     def da_lavoura(a: np.ndarray) -> np.ndarray:
         if len(a) == 0:
             return a
-        m = [na_lavoura((r_[0] + r_[2]) / 2, (r_[1] + r_[3]) / 2) for r_ in a]
+        m = []
+        for r_ in a:
+            mx, mz = (r_[0] + r_[2]) / 2, (r_[1] + r_[3]) / 2
+            m.append(na_lavoura(mx, mz) or perto_de_lamina(mx, mz))
         return a[np.array(m, bool)]
 
     feicoes = marca_segmentos(da_lavoura(f["dikes"])) | marca_segmentos(da_lavoura(f["hedges"]))
-    for x, z, _y, su, sv, _a in f["waters"]:  # lâmina: o centro e o raio da caixa
-        if na_lavoura(x, z):
-            r = math.hypot(su, sv) / 2
-            feicoes |= np.hypot(xs - x, zs - z) <= r
+    for x, z, _y, su, sv, _a in f["waters"]:  # lâmina: o centro e o raio da caixa (todas)
+        r = math.hypot(su, sv) / 2
+        feicoes |= np.hypot(xs - x, zs - z) <= r
     peso = np.minimum(peso, peso_de(feicoes, *RELEVO_FOLGA["feicao"]))
     peso = np.minimum(peso, peso_de(marca_pontos(f["houses"][:, :2]), *RELEVO_FOLGA["casa"]))
     peso = np.minimum(peso, peso_de(g["cls"] == 5, *RELEVO_FOLGA["riacho"]))
@@ -1211,6 +1343,7 @@ def main() -> None:
     gc = crop_grid(g, box)
     fc = crop_features(f, crop_box(FEICOES_M), crop_box(0.0))
     riacho = abre_riacho(gc, fc)
+    rio = abre_rio(gc, fc)  # lote 26b: depois do riacho (o canal dele não afunda o rio)
     base = limpa_base(fc)
     morro = move_morro(gc, fc)
     casario = casario_an_cuong(gc, fc)
@@ -1227,6 +1360,7 @@ def main() -> None:
                 "grade_depois": [gc["w"], gc["h"]],
                 **{k: [len(f[k]), len(fc[k])] for k in f},
                 "riacho": riacho,
+                "rio": rio,
                 "base_eua_sem": base,
                 "morro": morro,
                 "casario_an_cuong": casario,

@@ -3,6 +3,7 @@
 -- as mesmas regras (ordem, densidade, teto e desbaste das sebes), a partir dos dados do mapa e do
 -- ArtBudget. É valor esperado: o sorteio real depende da ordem das peças no Roblox. Não é medição.
 local ArtBudget = require("../src/ServerScriptService/Modules/ArtBudget")
+local ArtPlan = require("../src/ServerScriptService/Modules/ArtPlan") :: any
 local Animals = require("../src/ReplicatedStorage/Shared/Animals")
 local Front = require("../src/ReplicatedStorage/Shared/Front") :: any
 local SpawnRules = require("../src/ReplicatedStorage/Shared/SpawnRules") :: any
@@ -85,8 +86,16 @@ return function(): Result
 	for _, sp in MapConfig.Strongpoints do
 		if sp.name == "Cemitério" then
 			add("grave_mound", at(sp.x, sp.z), 6)
-		elseif sp.name == "Ponte e Cais" then -- lote 26 (era o Vau do riacho)
-			add("log_bridge", at(sp.x, sp.z), 1)
+		elseif sp.name == ArtPlan.BRIDGE_OBJECTIVE then
+			-- lote 26b (D-141): ponte, cais e sampanas em peças (sem malha); armazém e sacos de arroz
+			add("hut_kitchen", at(sp.x, sp.z), 1)
+			add("rice_sack", at(sp.x, sp.z), 4)
+		end
+		-- lote 26b: os modelos das construções dos objetivos (as peças do MapLife não têm malha)
+		for _, e in ArtPlan.OBJECTIVE_LAYOUT[sp.name] or {} do
+			if e.key then
+				add(e.key, at(sp.x, sp.z), 1)
+			end
 		end
 	end
 	-- 3) bosques das colinas

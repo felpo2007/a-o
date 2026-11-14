@@ -747,8 +747,9 @@ local function post(m: Model, cf: CFrame, h: number, d: number, color: Color3)
 	solid(part("Esteio", Vector3.new(d, h, d), cf * CFrame.new(0, h / 2, 0), color, Enum.Material.Wood, m), "Wood")
 end
 
--- kind: "varanda" | "horta" | "chua" | "dinh" | "banca"; cf: centro da base (no chão), giro da peça;
--- w, d: pegada (studs). Devolve o modelo (já no parent).
+-- kind: "varanda" | "horta" | "chua" | "dinh" | "banca" ou uma construção de objetivo
+-- (MapLife.objectivePart); cf: centro da base (no chão), giro da peça; w, d: pegada (studs). Devolve o
+-- modelo (já no parent).
 function MapLife.villagePart(kind: string, parent: Instance, cf: CFrame, w: number, d: number): Model
 	local m = Instance.new("Model")
 	m.Name = "Vila_" .. kind
@@ -894,9 +895,314 @@ function MapLife.villagePart(kind: string, parent: Instance, cf: CFrame, w: numb
 		end
 		wall(m, top * CFrame.new(0, 0, d / 2 - 0.5 / M), w - 1 / M, ph, 0.2 / M, 0, 0)
 		roof(m, top * CFrame.new(0, ph, 0), w + 1.5 / M, d + 2 / M, 3.0 / M, TILE, "Tile")
+	else
+		MapLife.objectivePart(kind, m, cf, w, d)
 	end
 	m.Parent = parent
 	return m
+end
+
+---------------------------------------------------------------------------------------------
+-- Construções dos objetivos (lote 26b; ideia de mapa do dono: serraria, engenho, ponte e cais)
+---------------------------------------------------------------------------------------------
+-- Em peças, como o pagode e a casa comunal: troncos, tábuas, palha, tijolo e ferro, sem modelo
+-- novo para subir. Medidas de projeto (PLACEHOLDER de design); a pegada vem do ArtPlan.PARTS_DIMS.
+local BARK = Color3.fromRGB(92, 70, 48)
+local SAWN = Color3.fromRGB(176, 136, 90) -- madeira serrada, clara
+local SAWDUST = Color3.fromRGB(206, 178, 124)
+local BRICK = Color3.fromRGB(138, 74, 52)
+local IRON = Color3.fromRGB(46, 44, 42)
+local CANE = Color3.fromRGB(150, 160, 74)
+local HULL = Color3.fromRGB(84, 64, 44)
+
+-- tora deitada ao longo do X local (o eixo do cilindro do Roblox é o X)
+local function log(m: Model, cf: CFrame, len: number, dia: number, color: Color3?)
+	solid(
+		part("Tora", Vector3.new(len, dia, dia), cf, color or BARK, Enum.Material.Wood, m, Enum.PartType.Cylinder),
+		"Wood"
+	)
+end
+
+local function plank(m: Model, size: Vector3, cf: CFrame, color: Color3?)
+	solid(part("Tabua", size, cf, color or SAWN, Enum.Material.WoodPlanks, m), "Wood")
+end
+
+function MapLife.objectivePart(kind: string, m: Model, cf: CFrame, w: number, d: number)
+	if kind == "serraria" then
+		-- galpão aberto de toras com cobertura de palha; no meio, a mesa comprida da serra de mão com
+		-- uma tora em cima, o cavalete da serra e o monte de serragem
+		local h = 3.2 / M
+		for i = 0, 2 do
+			for _, sz in { -1, 1 } do
+				post(m, cf * CFrame.new((i - 1) * (w / 2 - 0.3 / M), 0, sz * (d / 2 - 0.3 / M)), h, 0.28 / M, BARK)
+			end
+		end
+		roof(m, cf * CFrame.new(0, h, 0), w + 1.2 / M, d + 1.6 / M, 1.8 / M, THATCH, "Thatch")
+		local mesaH = 0.8 / M
+		for k = -1, 1 do
+			post(m, cf * CFrame.new(k * 2.6 / M, 0, 0), mesaH, 0.2 / M, WOOD)
+		end
+		plank(m, Vector3.new(w * 0.72, 0.12 / M, 0.9 / M), cf * CFrame.new(0, mesaH, 0))
+		log(m, cf * CFrame.new(0.4 / M, mesaH + 0.4 / M, 0), w * 0.62, 0.68 / M)
+		-- cavalete da serra: dois paus e a travessa por cima da tora
+		for _, sz in { -1, 1 } do
+			post(m, cf * CFrame.new(-1.6 / M, 0, sz * 0.75 / M), 2.2 / M, 0.14 / M, WOOD)
+		end
+		plank(m, Vector3.new(0.14 / M, 0.14 / M, 1.7 / M), cf * CFrame.new(-1.6 / M, 2.2 / M, 0), WOOD)
+		solid(
+			part(
+				"Serra",
+				Vector3.new(0.06 / M, 1.5 / M, 0.25 / M),
+				cf * CFrame.new(-1.6 / M, 1.5 / M, 0),
+				Color3.fromRGB(120, 124, 128),
+				Enum.Material.Metal,
+				m
+			),
+			"Metal"
+		)
+		part(
+			"Serragem",
+			Vector3.new(0.35 / M, 2.4 / M, 2.4 / M),
+			cf * CFrame.new(1.2 / M, 0.12 / M, d / 2 - 1.4 / M) * UPRIGHT,
+			SAWDUST,
+			Enum.Material.Sand,
+			m,
+			Enum.PartType.Cylinder
+		)
+	elseif kind == "toras" then
+		-- pilha de toras em três camadas (4, 3 e 2), escorada por estacas nas pontas
+		local dia = 0.62 / M
+		local len = w * 0.92
+		for camada, n in { 4, 3, 2 } do
+			for i = 1, n do
+				local z = (i - (n + 1) / 2) * dia
+				log(m, cf * CFrame.new(0, dia / 2 + (camada - 1) * dia * 0.86, z), len, dia)
+			end
+		end
+		for _, sx in { -1, 1 } do
+			for _, sz in { -1, 1 } do
+				post(m, cf * CFrame.new(sx * len * 0.42, 0, sz * (2.2 * dia)), 1.9 / M, 0.12 / M, WOOD)
+			end
+		end
+	elseif kind == "tabuas" then
+		-- tábuas serradas empilhadas, com sarrafos entre as camadas para secar
+		local t = 0.08 / M
+		for _, sx in { -1, 0, 1 } do
+			plank(m, Vector3.new(0.2 / M, 0.19 / M, d * 0.95), cf * CFrame.new(sx * w * 0.4, 0.095 / M, 0), BARK)
+		end
+		for camada = 0, 5 do
+			local y = 0.25 / M + camada * (t + 0.06 / M)
+			for i = -2, 2 do
+				plank(m, Vector3.new(w * 0.95, t, 0.3 / M), cf * CFrame.new(0, y + t / 2, i * 0.36 / M))
+			end
+			for _, sx in { -1, 0, 1 } do
+				plank(
+					m,
+					Vector3.new(0.06 / M, 0.06 / M, d * 0.95),
+					cf * CFrame.new(sx * w * 0.4, y - 0.03 / M, 0),
+					WOOD
+				)
+			end
+		end
+	elseif kind == "moenda" then
+		-- moenda de cana de tração animal: a pista de terra batida em roda, os três rolos de pau em pé
+		-- num cepo, a almanjarra (o braço comprido que o búfalo puxa) e uma cobertura de palha
+		part(
+			"Pista",
+			Vector3.new(0.06 / M, w * 0.95, w * 0.95),
+			cf * CFrame.new(0, 0.03 / M, 0) * UPRIGHT,
+			EARTH,
+			Enum.Material.Ground,
+			m,
+			Enum.PartType.Cylinder
+		)
+		solid(
+			part(
+				"Cepo",
+				Vector3.new(1.8 / M, 0.45 / M, 1.2 / M),
+				cf * CFrame.new(0, 0.22 / M, 0),
+				WOOD,
+				Enum.Material.Wood,
+				m
+			),
+			"Wood"
+		)
+		for i = -1, 1 do
+			solid(
+				part(
+					"Rolo",
+					Vector3.new(1.3 / M, 0.5 / M, 0.5 / M),
+					cf * CFrame.new(i * 0.52 / M, 0.45 / M + 0.65 / M, 0) * UPRIGHT,
+					BARK,
+					Enum.Material.Wood,
+					m,
+					Enum.PartType.Cylinder
+				),
+				"Wood"
+			)
+		end
+		plank(m, Vector3.new(1.9 / M, 0.25 / M, 1.3 / M), cf * CFrame.new(0, 1.85 / M, 0), WOOD)
+		log(m, cf * CFrame.new(w * 0.26, 1.6 / M, 0), w * 0.5, 0.2 / M, WOOD)
+		local ch = 2.8 / M
+		for _, sx in { -1, 1 } do
+			for _, sz in { -1, 1 } do
+				post(m, cf * CFrame.new(sx * 1.4 / M, 0, sz * 1.4 / M), ch, 0.16 / M, BAMBOO)
+			end
+		end
+		roof(m, cf * CFrame.new(0, ch, 0), 3.6 / M, 3.6 / M, 1.2 / M, THATCH, "Thatch")
+		-- feixes de cana esperando a moenda
+		for k = 0, 2 do
+			log(m, cf * CFrame.new(-w * 0.32, 0.25 / M + k * 0.42 / M, w * 0.3), 2.6 / M, 0.42 / M, CANE)
+		end
+	elseif kind == "caldeira" then
+		-- casa das tachas: galpão aberto de telha; em baixo, a fornalha comprida de tijolo com três tachos
+		-- de ferro para apurar o caldo, e a chaminé num canto
+		local h = 3.0 / M
+		for i = 0, 2 do
+			for _, sz in { -1, 1 } do
+				post(m, cf * CFrame.new((i - 1) * (w / 2 - 0.3 / M), 0, sz * (d / 2 - 0.3 / M)), h, 0.24 / M, WOOD)
+			end
+		end
+		roof(m, cf * CFrame.new(0, h, 0), w + 1.2 / M, d + 1.6 / M, 1.6 / M, TILE, "Tile")
+		local fl = w * 0.7
+		solid(
+			part(
+				"Fornalha",
+				Vector3.new(fl, 0.85 / M, 1.3 / M),
+				cf * CFrame.new(0, 0.42 / M, 0),
+				BRICK,
+				Enum.Material.Brick,
+				m
+			),
+			"Stone"
+		)
+		for i = -1, 1 do
+			solid(
+				part(
+					"Tacho",
+					Vector3.new(0.32 / M, 1.05 / M, 1.05 / M),
+					cf * CFrame.new(i * fl / 3.2, 0.85 / M + 0.12 / M, 0) * UPRIGHT,
+					IRON,
+					Enum.Material.Metal,
+					m,
+					Enum.PartType.Cylinder
+				),
+				"Metal"
+			)
+		end
+		solid(
+			part(
+				"Chamine",
+				Vector3.new(0.9 / M, 5.2 / M, 0.9 / M),
+				cf * CFrame.new(fl / 2 + 0.6 / M, 2.6 / M, 0),
+				BRICK,
+				Enum.Material.Brick,
+				m
+			),
+			"Stone"
+		)
+	elseif kind == "ponte" then
+		-- ponte de madeira atravessada no rio (X local = travessia): tabuleiro de pranchas, estacas
+		-- fincadas no leito a cada ~4 m e guarda-corpo dos dois lados
+		local deckY = 0.35 / M
+		plank(m, Vector3.new(w, 0.18 / M, d), cf * CFrame.new(0, deckY, 0))
+		local n = math.max(2, math.floor(w / (4 / M)))
+		for i = 0, n do
+			local x = -w / 2 + i * w / n
+			for _, sz in { -1, 1 } do
+				local z = sz * (d / 2 - 0.15 / M)
+				-- estaca: do leito (3,5 m abaixo da margem) até o corrimão
+				solid(
+					part(
+						"Estaca",
+						Vector3.new(0.22 / M, 3.5 / M + deckY + 1.0 / M, 0.22 / M),
+						cf * CFrame.new(x, (deckY + 1.0 / M - 3.5 / M) / 2, z),
+						BARK,
+						Enum.Material.Wood,
+						m
+					),
+					"Wood"
+				)
+			end
+		end
+		for _, sz in { -1, 1 } do
+			plank(
+				m,
+				Vector3.new(w, 0.12 / M, 0.12 / M),
+				cf * CFrame.new(0, deckY + 1.0 / M, sz * (d / 2 - 0.15 / M)),
+				WOOD
+			)
+		end
+	elseif kind == "cais" then
+		-- trapiche: plataforma de pranchas sobre estacas, metade na margem e metade sobre a água, com
+		-- dois postes de amarração na ponta
+		local deckY = 0.25 / M
+		plank(m, Vector3.new(w, 0.16 / M, d), cf * CFrame.new(0, deckY, 0))
+		for i = 0, 3 do
+			local x = -w / 2 + 0.3 / M + i * (w - 0.6 / M) / 3
+			for _, sz in { -1, 1 } do
+				solid(
+					part(
+						"Estaca",
+						Vector3.new(0.24 / M, 3.0 / M, 0.24 / M),
+						cf * CFrame.new(x, deckY - 1.5 / M, sz * (d / 2 - 0.15 / M)),
+						BARK,
+						Enum.Material.Wood,
+						m
+					),
+					"Wood"
+				)
+			end
+		end
+		for _, sz in { -1, 1 } do
+			post(m, cf * CFrame.new(w / 2 - 0.3 / M, deckY, sz * (d / 2 - 0.3 / M)), 0.7 / M, 0.22 / M, BARK)
+		end
+	elseif kind == "barco" then
+		-- sampana (thuyền) de madeira, base no espelho d'água: casco raso com proa e popa em cunha e
+		-- a cobertura de palha em arco no meio
+		local hullH = 0.55 / M
+		local mid = w * 0.6
+		solid(
+			part(
+				"Casco",
+				Vector3.new(mid, hullH, d),
+				cf * CFrame.new(0, hullH / 2 - 0.2 / M, 0),
+				HULL,
+				Enum.Material.Wood,
+				m
+			),
+			"Wood"
+		)
+		for _, sgn in { -1, 1 } do
+			local wp = Instance.new("WedgePart")
+			wp.Name = "Ponta"
+			wp.Anchored = true
+			wp.CanCollide = true
+			wp.CanQuery = true
+			wp.CanTouch = false
+			-- a ponta fina da cunha (-Z local) aponta para fora; de cabeça para baixo, o fundo sobe
+			-- até a proa e o convés fica reto
+			wp.Size = Vector3.new(d, hullH, (w - mid) / 2)
+			wp.CFrame = cf
+				* CFrame.new(sgn * (mid / 2 + (w - mid) / 4), hullH / 2 - 0.2 / M, 0)
+				* CFrame.Angles(0, -sgn * math.pi / 2, 0)
+				* CFrame.Angles(0, 0, math.pi)
+			wp.Color = HULL
+			wp.Material = Enum.Material.Wood
+			wp:SetAttribute("Material", "Wood")
+			wp.Parent = m
+		end
+		local cob = part(
+			"Cobertura",
+			Vector3.new(mid * 0.6, d * 0.9, d * 0.9),
+			cf * CFrame.new(0, hullH - 0.2 / M, 0),
+			THATCH,
+			Enum.Material.Grass,
+			m,
+			Enum.PartType.Cylinder
+		)
+		solid(cob, "Thatch")
+	end
 end
 
 ---------------------------------------------------------------------------------------------

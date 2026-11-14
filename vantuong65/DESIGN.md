@@ -5191,3 +5191,82 @@ ponto por setor as duas são iguais e o teste só passava por arredondamento. Ag
 
 **Não testado:** a partida inteira; o relevo de perto, no chão (as fotos de cima mostram pouco); o
 celular.
+
+## D-141 — Lote 26b: construções dos objetivos e o rio do sul (v71, 2026-11-14)
+
+Pedido do dono (a mesma ideia de mapa da D-140): a serraria, o engenho, a ponte e o cais, e o rio no
+sul ligando os Arrozais à Ponte e Cais. O mapa continua de 700 x 700 m.
+
+**Rio do sul** (`crop_world.abre_rio`, logo depois do riacho; gravado no Grid como `riverCut`):
+- Leito de 12 m de largura, fundo plano a 9,0 m e espelho a 9,6 m (fundo inclinado viraria
+  degraus de 1,12 m na água, por causa do voxel de 4 studs).
+- **Traçado** (`RIO_PONTOS`, de design):
+  - no oeste corre por fora da borda sul, a ~20 m da área, para não inclinar os tabuleiros dos
+    Arrozais;
+  - entra no mapa a leste deles e passa 25 m ao sul da Ponte e Cais;
+  - sai pelo sudeste e recebe o riacho fora da área.
+- **Margens:** descem em rampa até a água (22%, 30 m de cada lado) e nunca sobem o chão. Não
+  rebaixam a até 10 m de um tabuleiro nem a até 2 células do riacho. A margem mais baixa junto da
+  água fica a 10,5 m, rebaixo máximo de 8,1 m.
+- **Números:** 489 células de leito, 233 dentro da área. Saíram 12 diques que cruzavam o leito e
+  nenhuma lâmina.
+- **Carta:** o leito largo é uma mancha d'água com as duas margens em traço (o riacho continua em
+  linha).
+
+**Construções** (`ArtPlan.OBJECTIVE_LAYOUT` e o bloco da ponte em `ArtPlan.structures`):
+- **Em peças** (`MapLife.objectivePart`), sem modelo novo para subir. São medidas de projeto
+  (PLACEHOLDER):
+  - **serraria:** galpão aberto de toras com palha, a mesa comprida com a tora, o cavalete da serra
+    e a serragem;
+  - **toras:** pilha de 9 em três camadas, escorada;
+  - **tábuas:** pilha com sarrafos para secar;
+  - **moenda:** de tração animal, com a pista, os três rolos de pau, a almanjarra, uma cobertura
+    de palha e feixes de cana;
+  - **caldeira:** casa das tachas aberta, de telha, com a fornalha de tijolo, três tachos de
+    ferro e a chaminé;
+  - **ponte, cais e sampana.**
+- **Modelos que já existiam:** cozinha (galpão e armazém), casa de telha, cabana, celeiro, meda
+  de palha e saco de arroz.
+- **Onde cada peça fica:**
+  - a 10–15 m do mastro, de frente para ele;
+  - num giro do conjunto (12 tentados) em que nenhuma peça cai em lâmina, dique, estrada, beco,
+    riacho, patamar, outro objeto ou ponto de nascer;
+  - sem lugar, a peça se afasta até +24 m e até 0,6 rad para o lado. O Engenho precisou disso: o
+    mastro fica na estrada, com o riacho a 10 m e dois pontos de nascer;
+  - cada construção ganha patamar no terreno, como as casas.
+
+| Objetivo | Peças (medido no plano, `tools/objetivos_plano.luau`) |
+|---|---|
+| A Arrozais | cabana (21 m), meda de palha (10 m), celeiro (11 m) |
+| B Serraria | galpão da serra (11 m), toras (11 m), tábuas (10 m), cozinha (13 m) |
+| D Ponte e Cais | ponte, cais, 2 sampanas, armazém e 4 sacos de arroz |
+| E Engenho | caldeira (12 m), meda (11 m), casa de telha (21 m), moenda (30 m) |
+
+- **Ponte:** 20 m x 3,6 m, na célula de rio mais perto do mastro, atravessada no leito e
+  recentrada no meio dele.
+  - Apoiada nas duas margens, no nível da mais baixa; estacas a cada ~4 m e guarda-corpo de 1 m.
+  - O tabuleiro fica ~1,5 m acima da água. Dá para um jipe pela largura (não testado com veículo).
+- **Cais:** 7 x 3 m na margem do lado do mastro, a 14 m da ponte.
+  - 5,5 m sobre a água, no nível do chão a 1 m da beira; postes de amarração na ponta.
+  - As sampanas ficam no espelho d'água, uma de cada lado.
+  - O armazém e os sacos de arroz ficam em terra.
+- A ponte, o cais e as sampanas não têm patamar (o patamar tira a água) e não descem ao chão mais
+  baixo da pegada (`Item.afloat`).
+- **Serraria:** a clareira passou de 10 para 22 m (`Landscape.CLEAR_NAMED_M`), o pátio do galpão.
+  A mata cerrada continua em volta até 70 m.
+- **Carta:** galpões e casas dos objetivos em preto; a ponte com o símbolo das guardas e das asas.
+
+**Correção da v70 (regressão):**
+- O `mais_relevo` protegia a lavoura das casas da carta, mas a lavoura das casas soltas de Xóm Gò
+  só é posta depois (`vila_e_estradas`).
+- Com isso, o relevo inclinou tabuleiros que se viam, e o filtro de chão plano os tirou: o bake
+  montava 44 lâminas na v69 e 24 na v70.
+- Agora toda lâmina é protegida, e os diques e sebes a até 50 m de uma também: 53 tabuleiros ficam,
+  0 em ladeira. O bake monta 47 lâminas.
+
+**Testes:**
+- O `run.luau` procurava o riacho varrendo cada linha de oeste para leste e achava antes o rio
+  novo. Agora varre do leste.
+- A margem do riacho perto da foz (N 1692,56) ficava abaixo do espelho dele (11,69 m contra
+  10,67 m). Corrigido no `abre_rio` (margem longe do riacho).
+- O `ArtEstimate` conta os modelos dos objetivos (a ponte de toras que ele somava não existe).
