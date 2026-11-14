@@ -334,6 +334,17 @@ local function dig(): (string, string?)
 		if top and (top.Instance:GetAttribute("Material") == "PaddyWater" or top.Instance.Name == "Dike") then
 			return nil
 		end
+		-- lote 27: piso de construção (a pá recusa; antes cavava sob a esteira do heliponto)
+		local floor =
+			workspace:Raycast(hit.Position + Vector3.new(0, 0.6 / M, 0), Vector3.new(0, -0.7 / M, 0), anyParams)
+		if
+			floor
+			and floor.Instance ~= workspace.Terrain
+			and floor.Instance:IsA("BasePart")
+			and (floor.Instance :: BasePart).CanCollide
+		then
+			return nil
+		end
 		return hit
 	end
 	local x, z, g
@@ -363,20 +374,62 @@ local function dig(): (string, string?)
 	-- O PivotTo não zera a velocidade: depois de 1 s caindo de 400 studs o soldado chegava ao chão
 	-- a ~200 studs/s, quicava, e a pá cancelava ("você se moveu"). Falhou 1 vez em 4 no Studio
 	-- (2026-11-11). Agora zera a velocidade e espera ficar parado antes de cavar.
-	c:PivotTo(CFrame.new(g.Position + Vector3.new(0, 4, 0)))
-	root.AssemblyLinearVelocity = Vector3.zero
-	root.AssemblyAngularVelocity = Vector3.zero
-	task.wait(1.5)
-	waitFor(function()
-		return root.AssemblyLinearVelocity.Magnitude * M < 0.2
-	end, 5)
+	-- Lote 27 (D-142): confere que o soldado ficou no ponto e repete o teletransporte (até 3 vezes; o
+	-- número vai no resultado). A falha da 1ª rodada não era isso (1 teletransporte bastou): os sacos
+	-- de areia da pá aterravam o buraco (FieldWorkService).
+	local tries = 0
+	repeat
+		tries += 1
+		c:PivotTo(CFrame.new(g.Position + Vector3.new(0, 4, 0)))
+		root.AssemblyLinearVelocity = Vector3.zero
+		root.AssemblyAngularVelocity = Vector3.zero
+		task.wait(1.5)
+		waitFor(function()
+			return root.AssemblyLinearVelocity.Magnitude * M < 0.2
+		end, 5)
+		local off = ((root.Position - g.Position) * Vector3.new(1, 0, 1)).Magnitude * M
+	until off < 1 or tries >= 3
 	local ahead = root.Position + root.CFrame.LookVector * Vector3.new(1, 0, 1) * (1.5 / M)
+	-- Lote 27 (D-142): o chão de uma roda de 2,5 m em volta do ponto à frente, antes e depois. A sonda
+	-- num ponto só (comparado com o chão do pé) falhava: o buraco cai na grade de voxel de 1,12 m e o
+	-- ponto ficava na beira (0,01 m), ou a ladeira entrava na conta (−0,81 m). No jogo a pá cavou
+	-- 1,31 m (Studio, 2026-11-14).
+	local probes: { Vector3 } = {}
+	for i = -5, 5 do
+		for j = -5, 5 do
+			local off = Vector3.new(i, 0, j) * (0.5 / M)
+			if off.Magnitude <= 2.5 / M then
+				table.insert(probes, ahead + off)
+			end
+		end
+	end
+	local function floorAt(q: Vector3): number?
+		local hit = workspace:Raycast(q + Vector3.new(0, 10, 0), Vector3.new(0, -40, 0), params)
+		return if hit then hit.Position.Y else nil
+	end
+	local before: { number? } = {}
+	for k, q in probes do
+		before[k] = floorAt(q)
+	end
+	-- lote 27: parado à força enquanto cava (com os bots na base, um esbarrão de 1 m cancelava a pá:
+	-- "você se moveu", Studio 2026-11-14)
+	root.Anchored = true
 	FieldWorkService.dig(p)
 	task.wait(9.5)
-	local probe = workspace:Raycast(ahead + Vector3.new(0, 10, 0), Vector3.new(0, -40, 0), params)
-	local drop = if probe then (g.Position.Y - probe.Position.Y) * M else 0
+	root.Anchored = false
+	local drop = 0
+	for k, q in probes do
+		local b, a = before[k], floorAt(q)
+		if b and a then
+			drop = math.max(drop, (b - a) * M)
+		end
+	end
 	return if drop > 0.5 then "ok" else "FALHA",
-		string.format("chão à frente desceu %.2f m (esperado ~1,2 m; a recusa aparece no aviso do jogador)", drop)
+		string.format(
+			"o chão perto da frente desceu até %.2f m (esperado ~1,2 m; a recusa aparece no aviso do jogador); %d teletransporte(s)",
+			drop,
+			tries
+		)
 end
 
 -- Medevac: bot EUA caído junto de um UH-34D pousado vira suprimento. Usa um UH-34D que já está

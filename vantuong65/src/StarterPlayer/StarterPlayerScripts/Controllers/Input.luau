@@ -275,9 +275,17 @@ local function pressUp(id: string)
 	end
 end
 
+-- Lote 27 (D-142): a tela de carregamento (ReplicatedFirst/LoadingScreen, "VT65Loading") na frente.
+-- As teclas do jogo agiam por baixo dela: a pá cavou durante o "Recebendo o mapa inteiro" (D-129).
+local function loadingUp(): boolean
+	local pg = player:FindFirstChildOfClass("PlayerGui")
+	local g = pg and pg:FindFirstChild("VT65Loading")
+	return g ~= nil and g:IsA("ScreenGui") and g.Enabled and g:GetAttribute("Saindo") ~= true
+end
+
 local function blockedNow(): boolean
 	local s = Input.state
-	return s.disconnected or s.robloxMenu or s.awaitRelease or s.unfocused
+	return s.disconnected or s.robloxMenu or s.awaitRelease or s.unfocused or loadingUp()
 end
 
 local function onButton(code: string, down: boolean, isPad: boolean)

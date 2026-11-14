@@ -231,6 +231,9 @@ Net.event("Logistics_State").OnClientEvent:Connect(function(msg)
 	elseif type(msg.ok) == "string" then
 		-- D-129: obra ou buraco prontos
 		Bus.fire("toast", msg.ok, "sucesso")
+	elseif type(msg.info) == "string" then
+		-- lote 27: andamento ("Cavando… fique parado"), sem o ✗ do erro
+		Bus.fire("toast", msg.info)
 	end
 end)
 

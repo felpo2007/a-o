@@ -114,15 +114,45 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
   - **Lote 26b (v71, D-141): feito.** Rio no sul (12 m de largura) dos Arrozais à Ponte e Cais;
     ponte, cais, sampanas e armazém na D; galpão da serra, toras e tábuas na B; moenda, caldeira e
     casa de telha na E; cabana e celeiro na A. Corrigida a regressão da v70 nos tabuleiros.
-  - **Lote 27:** correção de bugs de textura, gráficos, movimentação, tiros e granadas.
+  - **Lote 27 (v72, D-142): feito.**
+    - Sons das armas que nunca tocavam;
+    - cadência abaixo de 12 fps;
+    - granada do bot;
+    - teclas sob a tela de carregamento;
+    - pá (sacos tapando o buraco, cavar sob piso, capim no fundo);
+    - caveira do abate;
+    - anexos enterrados na vila;
+    - manada nos Arrozais.
 
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;
   - respondido pelo dono: a M14 fica como está; o capim clareou (v58);
-  - gatilho que recupera a cadência abaixo de 12 fps; mão de apoio das pistolas no quadril;
-  - base do VC sob a mata; nomes do equipamento da Intendência sem tradução; Type 54 em 3ª pessoa;
-  - a pá do autoteste na 1ª rodada de cada sessão;
-  - as teclas agem por baixo da tela de carregamento (a pá cavou durante o carregamento, D-129).
+  - mão de apoio das pistolas no quadril; Type 54 escura em 1ª pessoa e em 3ª pessoa;
+  - base do VC sob a mata; nomes do equipamento da Intendência sem tradução;
+  - o quique da granada (o bot erra de 0,2 a 5,5 m num alvo de 25 m);
+  - a cadência abaixo de 12 fps medida num aparelho lento.
+
+## v72: lote 27, bugs de textura, gráficos, movimento, tiros e granadas (2026-11-14, D-142)
+- **Tiros:**
+  - os sons das armas de fora (17 ids) nunca tocavam: eram conferidos como imagem e davam falha.
+    Agora tocam o disparo, o ferrolho, o estojo e o baque na carne;
+  - abaixo de 12 fps o automático solta até 2 tiros por quadro (RPD a 10 fps: 11 tiros em 1 s).
+- **Granadas:** o bot refaz a conta quando solta e mira antes do alvo. Erro no autoteste: 0,2 a
+  5,5 m; antes era até 6,3 m.
+- **Movimento:** as teclas não agem mais por baixo da tela de carregamento.
+- **Pá:**
+  - os sacos de areia tapavam o buraco; agora o parapeito vai atravessado e sem aterro;
+  - não cava sob piso sólido;
+  - o fundo do buraco é de terra;
+  - "Cavando…" não sai mais como erro.
+- **Gráficos:**
+  - a caveira do abate publicada aparece;
+  - 6 anexos de quintal que ficavam enterrados na divisa dos terraços saíram;
+  - manada com bezerro nos Arrozais.
+- **Testes:**
+  - Lune todos ok (teste novo do quadro longo); pytest 54; ruff; luau-lsp sem erro;
+  - autoteste do Studio na 1ª rodada de uma sessão nova: 18 ok, 0 falhas.
+- **Não feito:** mão de apoio das pistolas e Type 54 escura (ficam na lista).
 
 ## v71: lote 26b, construções dos objetivos e o rio do sul (2026-11-14, D-141)
 - **Publicada** (versão 71 do place, commit e4dcbe6).

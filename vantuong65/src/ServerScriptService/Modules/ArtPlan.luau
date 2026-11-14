@@ -141,6 +141,7 @@ export type Ctx = {
 	pending: { any },
 	small: { Item }, -- objetos pequenos sem patamar (planta não cai em cima)
 	objectiveCount: { [string]: number }?, -- peças postas em cada objetivo (lote 26b)
+	annexSkipped: number?, -- anexos de quintal fora por cair no terraço vizinho (lote 27)
 }
 
 local BUCKET = 64
@@ -838,6 +839,29 @@ function ArtPlan.structures(ctx: Ctx, has: (string) -> boolean): { Item }
 		local K = V.houseScale or 1
 		-- praça do mercado: patamar de terra batida
 		Site.addPad(ctx.site, V.x, V.z, vyaw, V.plazaHalf, V.plazaHalf * 0.6, true)
+		-- Lote 27 (D-142): os anexos do quintal (cozinha, celeiro, horta, cerca, meda, varal) vão depois
+		-- de todas as casas e ficam de fora se a pegada cai no patamar de OUTRA casa com outro nível (a
+		-- divisa de dois terraços da encosta). Ali o chão é a média dos dois e o anexo descia para dentro
+		-- da terra: um celeiro perto de Xóm Gò 0,8 m e duas cozinhas 0,4 m (v71).
+		local ANNEX_STEP = 0.25 / M
+		local deferred: { () -> () } = {}
+		local annexSkipped = 0
+		local function annex(key: string, ax: number, az: number, ayaw: number, scale: number, extra: any)
+			table.insert(deferred, function()
+				local ahx, ahz = half(key, scale)
+				for ii = -1, 1 do
+					for jj = -1, 1 do
+						local px, pz = rot(ax, az, ayaw, ii * ahx, jj * ahz)
+						local pad, t = Site.pad(ctx.site, px, pz)
+						if pad and t < 0.01 and math.abs(pad.level - extra.padLevel) > ANNEX_STEP then
+							annexSkipped += 1
+							return
+						end
+					end
+				end
+				padded(key, ax, az, ayaw, scale, "village", extra)
+			end)
+		end
 		for i, h in V.houses do
 			local x, z, yaw, variant, tint, scale, attach = h[1], h[2], h[3], h[4], h[5], h[6], h[7]
 			local unique = ArtBudget.VILLAGE_HOUSES[variant]
@@ -918,31 +942,23 @@ function ArtPlan.structures(ctx: Ctx, has: (string) -> boolean): { Item }
 			end
 			if on(2) then -- cozinha no fundo, à esquerda
 				local kx, kz = rot(x, z, yaw, -side, back)
-				padded("hut_kitchen", kx, kz, yaw, 0.85 * K, "village", { village = i, padLevel = it.base })
+				annex("hut_kitchen", kx, kz, yaw, 0.85 * K, { village = i, padLevel = it.base })
 			end
 			if on(4) then -- celeiro no fundo, à direita
 				local gx, gz = rot(x, z, yaw, side, back)
-				padded("granary", gx, gz, yaw, 0.85 * K, "village", { village = i, padLevel = it.base })
+				annex("granary", gx, gz, yaw, 0.85 * K, { village = i, padLevel = it.base })
 			end
 			-- o que fica no quintal ganha um patamarzinho no nível da casa (o lote é um terraço só: a vila
 			-- fica na encosta do morrote; assentado pelo ponto mais baixo, o varal e a cerca entravam até
 			-- 0,9 m no chão do lado de cima, e com o nível próprio o patamar dele e o da casa se cruzavam)
 			if on(8) and not on(2) then -- horta no fundo, à esquerda (onde não há cozinha)
 				local gx, gz = rot(x, z, yaw, -side, back)
-				padded("parts:horta", gx, gz, yaw, K, "village", { village = i, padLevel = it.base })
+				annex("parts:horta", gx, gz, yaw, K, { village = i, padLevel = it.base })
 			end
 			if on(16) then -- cerca na frente do lote, com a entrada no meio
 				for _, k in { -1, 1 } do
 					local fx, fz = rot(x, z, yaw, k * 3.7 * K / M, front)
-					padded(
-						"bamboo_fence",
-						fx,
-						fz,
-						yaw + math.pi / 2,
-						0.75,
-						"village",
-						{ village = i, padLevel = it.base }
-					)
+					annex("bamboo_fence", fx, fz, yaw + math.pi / 2, 0.75, { village = i, padLevel = it.base })
 				end
 			end
 			if on(32) then -- pote d'água ao lado da porta
@@ -951,13 +967,17 @@ function ArtPlan.structures(ctx: Ctx, has: (string) -> boolean): { Item }
 			end
 			if on(64) and not on(4) then -- meda de palha no fundo, à direita (onde não há celeiro)
 				local mx, mz = rot(x, z, yaw, side, back)
-				padded("straw_stack", mx, mz, yaw, 0.85 * K, "village", { village = i, padLevel = it.base })
+				annex("straw_stack", mx, mz, yaw, 0.85 * K, { village = i, padLevel = it.base })
 			end
 			if on(128) then -- varal no meio do fundo
 				local vx, vz = rot(x, z, yaw, 0, back)
-				padded("bamboo_clothesline", vx, vz, yaw, 0.9, "village", { village = i, padLevel = it.base })
+				annex("bamboo_clothesline", vx, vz, yaw, 0.9, { village = i, padLevel = it.base })
 			end
 		end
+		for _, put in deferred do
+			put()
+		end
+		ctx.annexSkipped = annexSkipped
 		-- pagode, casa comunal, poço e bancas do mercado
 		for _, sp in V.specials do
 			if sp.kind == "poco" then

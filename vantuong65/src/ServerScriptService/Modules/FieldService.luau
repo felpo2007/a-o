@@ -290,6 +290,28 @@ end
 -- Bot (ou qualquer modelo) arremessa no alvo: arco de 40° que cai em target, com a mesma animação
 -- e a mesma espera de saída da mão do jogador. Devolve false se não dá (sem cabeça, já
 -- arremessando, alvo alto demais para o arco).
+-- Lote 27 (D-142): a granada quica e rola ~2,5 m depois de cair (autoteste: 2,7 a 2,9 m do alvo,
+-- uma vez 6,3 m). O bot mira esse tanto antes do alvo.
+local BOT_ROLL_M = 2.5
+local THROW_ARC = math.rad(40)
+
+-- velocidade do arco de THROW_ARC que sai de `from` e cai em `target` (nil se o alvo é alto demais)
+local function arcVelocity(from: Vector3, target: Vector3): Vector3?
+	local flat = (target - from) * Vector3.new(1, 0, 1)
+	local d = flat.Magnitude
+	if d < 1 then
+		return nil
+	end
+	local h = target.Y - from.Y
+	local th = THROW_ARC
+	local denom = 2 * math.cos(th) ^ 2 * (d * math.tan(th) - h)
+	if denom <= 0 then
+		return nil
+	end
+	local v = math.min(math.sqrt(G_REAL * d * d / denom), 22 / M)
+	return (flat.Unit * math.cos(th) + Vector3.new(0, math.sin(th), 0)) * v
+end
+
 function FieldService.throwFrom(model: Model, faction: string, kind: string, target: Vector3, by: Player?): boolean
 	local head = model:FindFirstChild("Head") :: BasePart?
 	if not head or model:GetAttribute("Throwing") or model:GetAttribute("Downed") then
@@ -301,19 +323,23 @@ function FieldService.throwFrom(model: Model, faction: string, kind: string, tar
 	if d < 1 then
 		return false
 	end
-	local h = target.Y - from.Y
-	local th = math.rad(40)
-	local denom = 2 * math.cos(th) ^ 2 * (d * math.tan(th) - h)
-	if denom <= 0 then
+	-- o ponto de queda fica BOT_ROLL_M antes do alvo (no mínimo 3 m do bot): ela rola até ele
+	local short = math.min(BOT_ROLL_M / M, math.max(d - 3 / M, 0))
+	local aim = target - flat.Unit * short
+	if not arcVelocity(from, aim) then
 		return false
 	end
-	local v = math.min(math.sqrt(G_REAL * d * d / denom), 22 / M)
-	local vel = (flat.Unit * math.cos(th) + Vector3.new(0, math.sin(th), 0)) * v
 	throwPose(model)
 	task.delay(RELEASE_S, function()
 		if model.Parent and not model:GetAttribute("Downed") then
+			-- lote 27: a conta sai de onde a mão solta (o bot pode ter andado no meio segundo do braço);
+			-- antes a velocidade era a do pedido e a granada caía longe do alvo
 			local hd = model:FindFirstChild("Head") :: BasePart?
-			launch(kind, faction, if hd then hd.Position + flat.Unit * (0.4 / M) else from, vel, by)
+			local at = if hd then hd.Position + flat.Unit * (0.4 / M) else from
+			local vel = arcVelocity(at, aim) or arcVelocity(from, aim)
+			if vel then
+				launch(kind, faction, at, vel, by)
+			end
 		end
 	end)
 	return true

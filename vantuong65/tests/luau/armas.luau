@@ -383,6 +383,57 @@ test("rede: tremor de ±40 ms não derruba tiro da rajada (antes: chegada a meno
 	end
 end)
 
+test("quadro longo (lote 27): a 10 fps o automático cumpre a ficha; a 5 fps passa de 1 tiro por quadro", function()
+	local out = {}
+	for _, id in { "rpd", "type56", "m60" } do
+		local wp = Weapons.get(id)
+		local iv = Weapons.interval(wp, "auto")
+		for _, fps in { 10, 5 } do
+			local trig = Gatilho.new(wp.id, "auto", wp.magazine)
+			local rec = newRec(wp, 3)
+			Gatilho.press(trig, 0)
+			local shots, accepted, frames = 0, 0, 0
+			local now = 0
+			while now < 1 - 1e-9 do
+				frames += 1
+				-- o laço do WeaponController: até stepsPerFrame passos no mesmo quadro
+				for _ = 1, Gatilho.stepsPerFrame(trig) do
+					if Gatilho.step(trig, now) ~= "fire" then
+						break
+					end
+					shots += 1
+					local ok = Gatilho.validate(rec, {
+						weapon = wp.id,
+						mode = "auto",
+						role = "machine_gunner",
+						t = now,
+						now = now + 0.07,
+						clock = now + 0.07,
+						originStuds = 0.2,
+					})
+					if ok then
+						accepted += 1
+						rec.mag -= 1
+					end
+				end
+				now += 1 / fps
+			end
+			table.insert(out, string.format("%s %d fps: %d tiros em %d quadros", id, fps, shots, frames))
+			assert(accepted == shots, string.format("%s a %d fps: %d de %d aceitos", id, fps, accepted, shots))
+			local ficha = math.floor(1 / iv + 1e-9)
+			if fps == 10 then
+				assert(
+					shots >= math.min(ficha, 2 * frames) - 1,
+					string.format("%s a 10 fps: %d tiros (ficha %d)", id, shots, ficha)
+				)
+			else
+				assert(shots > frames, string.format("%s a 5 fps: %d tiros em %d quadros", id, shots, frames))
+			end
+		end
+	end
+	print("       (" .. table.concat(out, "; ") .. ")")
+end)
+
 test("trapaça: cliente que manda o dobro da cadência tem a metade recusada", function()
 	local wp = Weapons.get("m60")
 	local rec = newRec(wp, 1)

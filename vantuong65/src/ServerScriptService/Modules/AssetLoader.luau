@@ -711,19 +711,31 @@ function AssetLoader.start()
 		end
 		-- manadas no arrozal alagado perto das vilas (D-74): 2 búfalos e 1 bezerro
 		local herds = 0
+		-- lote 27 (D-142): e no objetivo dos Arrozais (A), o arrozal grande do mapa desde a D-140. An
+		-- Cường (2) ficou sem tabuleiro a até 200 m (o mais perto a 171 m, fora da área) e sobrava uma
+		-- manada só (autoteste "vida no mapa": 1 bezerro)
+		local herdSites: { string } = {}
 		for _, l in MapConfig.Locations do
 			if VILLAGES[l.name] then
-				local vx, vz = villageCenter(l.name)
-				local herd = Animals.herd(vx * M, vz * M, function()
-					return rng:next()
-				end, function(xm: number, zm: number): boolean
-					return inBounds(xm / M, zm / M) and inWater(xm / M, zm / M)
-				end)
-				for _, b in herd do
-					AssetLoader.place(b.species, b.x / M, b.z / M, rng:range(0, 6.28), pen, true, b.scale)
-				end
-				herds += if #herd > 0 then 1 else 0
+				table.insert(herdSites, l.name)
 			end
+		end
+		for _, sp in MapConfig.Strongpoints do
+			if string.find(string.lower(sp.name), "arroz", 1, true) then
+				table.insert(herdSites, sp.name)
+			end
+		end
+		for _, name in herdSites do
+			local vx, vz = villageCenter(name)
+			local herd = Animals.herd(vx * M, vz * M, function()
+				return rng:next()
+			end, function(xm: number, zm: number): boolean
+				return inBounds(xm / M, zm / M) and inWater(xm / M, zm / M)
+			end)
+			for _, b in herd do
+				AssetLoader.place(b.species, b.x / M, b.z / M, rng:range(0, 6.28), pen, true, b.scale)
+			end
+			herds += if #herd > 0 then 1 else 0
 		end
 		print(string.format("[VT65] animais postos: %d (%d manadas no arrozal)", #pen:GetChildren(), herds))
 		pen.Parent = out

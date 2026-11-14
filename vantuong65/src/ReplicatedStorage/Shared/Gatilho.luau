@@ -16,7 +16,10 @@ local Weapons = require(script and (script :: any).Parent.Weapons or "./Weapons"
 local Gatilho = {}
 
 Gatilho.BUFFER_S = 0.25 -- toque guardado enquanto a arma não pode atirar (semi/ferrolho)
-Gatilho.CATCHUP_S = 1 / 30 -- automático: atraso de até um quadro a 30 fps não perde cadência
+-- Lote 27 (D-142): no automático, até PER_FRAME tiros no mesmo quadro quando o quadro é mais longo que
+-- o intervalo. Com um só, abaixo de ~12 fps a cadência ficava presa ao fps (RPD 9 tiros em 1 s a
+-- ~10 fps; a ficha dá 11,7). O servidor já guarda BURST créditos: os dois tiros do quadro passam.
+Gatilho.PER_FRAME = 2
 Gatilho.MAX_LAG = 0.25 -- D-25: defasagem aceita do relógio do tiro (o tiro velho não é recusado:
 -- o relógio é preso nesta janela, a cadência continua garantida)
 Gatilho.TOLERANCE = 0.15 -- folga da cadência (D-25: 85% do intervalo)
@@ -34,6 +37,7 @@ export type Trigger = {
 	last: number, -- hora do último tiro (relógio do cliente)
 	reloadUntil: number,
 	dryDone: boolean, -- já clicou neste aperto
+	fresh: boolean, -- lote 27: o próximo tiro é o primeiro do aperto (não herda atraso)
 }
 
 function Gatilho.new(weaponId: string, mode: string, mag: number): Trigger
@@ -46,12 +50,14 @@ function Gatilho.new(weaponId: string, mode: string, mag: number): Trigger
 		last = -math.huge,
 		reloadUntil = 0,
 		dryDone = false,
+		fresh = true,
 	}
 end
 
 function Gatilho.press(t: Trigger, now: number)
 	t.held = true
 	t.dryDone = false
+	t.fresh = true
 	if t.mode ~= "auto" then
 		t.queued = now + Gatilho.BUFFER_S
 	end
@@ -65,6 +71,7 @@ end
 function Gatilho.cancel(t: Trigger)
 	t.held = false
 	t.queued = 0
+	t.fresh = true
 end
 
 -- O jogador quer atirar agora? (gatilho apertado no automático ou toque guardado)
@@ -106,10 +113,23 @@ function Gatilho.step(t: Trigger, now: number): string?
 		return nil
 	end
 	t.queued = 0
-	-- automático: a próxima conta a partir da hora em que este tiro deveria ter saído
-	t.last = if t.mode == "auto" and since < iv + Gatilho.CATCHUP_S then t.last + iv else now
+	-- automático segurado: a próxima conta a partir da hora em que este tiro deveria ter saído, com
+	-- no máximo PER_FRAME - 1 intervalos de atraso (o quadro longo solta o tiro devido no mesmo quadro
+	-- e o servidor, com BURST créditos, aceita). Era: atraso acima de CATCHUP_S zerava, e abaixo de
+	-- ~12 fps a cadência ficava presa ao fps. O primeiro tiro do aperto conta de agora.
+	if t.mode == "auto" and not t.fresh then
+		t.last = math.max(t.last + iv, now - iv * (Gatilho.PER_FRAME - 1))
+	else
+		t.last = now
+	end
+	t.fresh = false
 	t.mag -= 1
 	return "fire"
+end
+
+-- Quantos passos do gatilho o quadro pode dar: PER_FRAME no automático, 1 nos outros modos
+function Gatilho.stepsPerFrame(t: Trigger): number
+	return if t.mode == "auto" then Gatilho.PER_FRAME else 1
 end
 
 -- ===== servidor =====

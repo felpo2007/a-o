@@ -5285,3 +5285,99 @@ sul ligando os Arrozais à Ponte e Cais. O mapa continua de 700 x 700 m.
 **Não testado:** veículo na ponte; o rio visto do chão em toda a extensão; a partida inteira; o
 celular. O aviso "1 construção com o chão real a mais de 0,6 m do patamar" é de um celeiro perto
 de Xóm Gò (0,79 m abaixo do chão), fora dos objetivos: fica para o lote 27.
+
+## D-142 — Lote 27: bugs de textura, gráficos, movimento, tiros e granadas (v72, 2026-11-14)
+
+Pedido do dono: "conserte bugs de textura, gráficos, movimentação, tiros, granadas etc.". Sem uma
+lista dele, os bugs saíram de três lugares:
+- o Output do Studio;
+- o autoteste dos 12 sistemas, rodado com e sem bots e numa sessão nova;
+- as pendências da análise do lote 12 (`testes/ANALISE_LOTE12_2026-11-14.md`).
+
+**Tiros: os sons das armas nunca tocavam** (`Controllers/Som`).
+- **Causa:** o pré-carregamento conferia os 17 ids de fora (Pro Sound Effects, D-107) passando o id
+  em texto, e o Roblox o pedia como imagem: "Asset type does not match requested type". Todos davam
+  falha. O jogo tocava o som reserva (`alt`) ou nada: o ferrolho, o estojo caindo e o baque da bala
+  no corpo não têm reserva.
+- **Medido no Studio:** os 8 ids testados falham em texto e carregam como `Sound` (de 0,13 a 3,4 s).
+- **Correção:** a conferência usa instâncias `Sound`.
+- **Conferido:** numa rajada de 1 s da M60 tocaram o disparo da metralhadora (18 vezes, com a
+  camada de corpo) e o estojo (5). A sessão inteira teve 0 avisos "does not match".
+
+**Tiros: cadência abaixo de ~12 fps** (`Shared/Gatilho`, `WeaponController`).
+- O gatilho soltava um tiro por quadro: a 10 fps a RPD dava 9 tiros por segundo (a ficha dá 11,7).
+- Agora, no automático, o quadro longo solta até 2 tiros (`PER_FRAME`). O atraso acumulado fica em
+  no máximo 1 intervalo, e o 1º tiro de cada aperto conta de agora (um toque rápido continua dando
+  1 tiro).
+- O servidor já guarda 2 créditos de cadência: aceita todos.
+- **Teste novo (`armas.luau`):**
+
+  | Arma | 10 fps | 5 fps |
+  |---|---|---|
+  | RPD | 11 tiros | 9 tiros |
+  | Type 56 | 10 | 9 |
+  | M60 | 9 | 7 |
+
+  Todos aceitos pelo servidor; a 5 fps eram no máximo 5.
+- Não medido no Studio (o Studio roda acima de 12 fps com ele na frente).
+
+**Granadas: a dos bots caía longe** (`FieldService.throwFrom`).
+- A conta do arco era feita no pedido, mas a granada sai 0,4 s depois, de onde a mão estiver (o bot
+  anda).
+- Depois de cair, ela quica e rola uns 2,5 m.
+- **Correção:** a velocidade é refeita no instante em que a mão solta, e o bot mira 2,5 m antes do
+  alvo.
+- **Autoteste (alvo a 25 m):**
+  - antes: 2,7, 2,9, 5,4 e 6,3 m do alvo;
+  - agora: 2,2, 3,9, 1,2, 5,5 e 0,2 m (1 falha em 5 rodadas, pelo limite de 5 m).
+  - O quique continua sorteado (giro e chão).
+
+**Movimento: as teclas agiam por baixo da tela de carregamento** (`Controllers/Input`).
+- A pá cavou durante o "Recebendo o mapa inteiro" (D-129).
+- Agora, com a tela `VT65Loading` na frente, nenhuma ação do jogo sai.
+- **Conferido:** com a tela reaberta, o C não agachou; sem ela, agachou.
+
+**Pá de trincheira** (`FieldWorkService`). O autoteste da pá falhava na 1ª rodada de cada sessão
+desde o lote 12. A causa eram os sacos de areia:
+- `AssetLoader.place` põe um patamar de terra sob construção, e os sacos estavam girados 90°: o
+  comprido apontava para o buraco. O aterro tapava o buraco recém-cavado.
+  - **Agora:** o parapeito vai atravessado, 1 m à frente do centro, sem aterro (`placeAt`, assentado
+    no chão mais baixo de 3 pontos).
+- **Piso:** a pá cavava sob piso sólido (o autoteste cavou sob a esteira do heliponto dos EUA, com
+  o buraco invisível).
+  - **Agora** ela recusa: "Pá: aqui tem piso, procure chão de terra". O raio é curto, na faixa de
+    0,6 m acima do chão, porque o raio de cima batia no helicóptero parado.
+- **Fundo do buraco:** o fundo herdava o capim, e a grama animada crescia dentro e o escondia.
+  Agora é terra (conferido: `Ground`).
+- **Aviso:** "Cavando… fique parado 8 s" saía com o ✗ de erro. Agora é aviso de andamento.
+- **Autoteste da pá:**
+  - mede a roda de 2,5 m à frente, antes e depois;
+  - confere o teletransporte (repete até 3 vezes; na rodada final precisou de 2);
+  - segura o soldado parado enquanto cava (com os bots na base, um esbarrão cancelava).
+
+**Gráficos:**
+- **Caveira do abate** (`Controllers/Caveira`): a imagem publicada nunca aparecia. O
+  pré-carregamento dava "Success", mas o código conferia o `IsLoaded` da imagem escondida, que fica
+  falso. Agora vale o estado do pré-carregamento (0 avisos na sessão).
+- **Anexos enterrados na vila** (`ArtPlan`): na divisa de dois terraços da encosta, o patamar da casa
+  vizinha cobria parte do anexo.
+  - O chão ali é a média dos dois e o anexo descia: um celeiro 0,8 m e duas cozinhas 0,4 m.
+  - Agora os anexos do quintal vão depois de todas as casas e ficam de fora quando caem dentro do
+    patamar de outra casa com outro nível. Saíram 6.
+  - Nenhuma construção da vila fica mais de 0,3 m fora do chão do plano.
+- **Bezerros** (autoteste "vida no mapa"): An Cường (2) ficou sem arrozal a até 200 m (o mais perto
+  a 171 m, fora da área) e sobrava uma manada só. Agora há manada também nos Arrozais (2 bezerros).
+
+**Conferido e sem bug:** deitado numa encosta de 14,8°, o soldado andou 0,01 m em 5 s. A falha do
+autoteste ("deslizando 1,12 m/s") veio do lugar em que ele estava, perto do buraco da pá.
+
+**Tradução:** o aviso novo da pá em en, es e vi. Os 18 nomes de peças do lote 26b (Cepo, Serra,
+`parts:ponte`…) foram para `ignorar.json`: são identificadores e tinham escapado na v71.
+
+**Autoteste final** (1ª rodada de uma sessão nova, com bots): 18 ok, 0 falhas, 0 pulados.
+
+**Não feito (fica na lista):**
+- a mão de apoio das pistolas no quadril;
+- a Type 54 escura em 1ª pessoa;
+- a cadência abaixo de 12 fps medida num aparelho lento de verdade;
+- o quique da granada (a variação de até 5,5 m).

@@ -1170,7 +1170,25 @@
   "arrozais a sudoeste; nome de design",
   "serraria na mata fechada a noroeste; nome de design",
   "ponte e cais a sudeste; nome de design",
-  "engenho a nordeste; nome de design"
+  "engenho a nordeste; nome de design",
+  "Cepo",
+  "Chamine",
+  "Estaca",
+  "Fornalha",
+  "Pista",
+  "Rolo",
+  "Serra",
+  "Serragem",
+  "Tabua",
+  "Tacho",
+  "parts:barco",
+  "parts:cais",
+  "parts:caldeira",
+  "parts:moenda",
+  "parts:ponte",
+  "parts:serraria",
+  "parts:tabuas",
+  "parts:toras"
  ],
  "regex": []
 }

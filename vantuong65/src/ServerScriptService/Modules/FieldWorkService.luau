@@ -26,6 +26,11 @@ local function toast(p: Player, text: string)
 	Net.event("Logistics_State"):FireClient(p, { error = text })
 end
 
+-- Lote 27 (D-142): andamento (não é erro). O "Cavando… fique parado" saía com o ✗ do erro.
+local function info(p: Player, text: string)
+	Net.event("Logistics_State"):FireClient(p, { info = text })
+end
+
 -- Buraco com o fundo na altura pedida. O voxel do terreno tem 4 studs (1,12 m) e a superfície é
 -- suavizada: um FillBlock de 0,6 m de largura afundava só 0,2 a 0,5 m (reteste no Studio,
 -- 2026-11-10). Aqui as colunas de voxels sob a pegada ficam vazias acima do fundo, e o voxel do
@@ -56,6 +61,11 @@ local function excavate(cf: CFrame, lengthS: number, widthS: number, floorY: num
 					ground = mats[x][y][z]
 					break
 				end
+			end
+			-- lote 27 (D-142): terra revolvida no fundo. Com o capim de cima, a grama animada do terreno
+			-- crescia dentro do buraco e o escondia (Studio, 2026-11-14)
+			if ground == Enum.Material.Grass or ground == Enum.Material.LeafyGrass then
+				ground = Enum.Material.Ground
 			end
 			for y = 1, size.Y do
 				local yb = y0 + (y - 1) * VOXEL
@@ -99,6 +109,20 @@ local function onDig(p: Player)
 	local top = workspace:Raycast(at + Vector3.new(0, 20, 0), Vector3.new(0, -60, 0), anyParams)
 	local onWater = hit.Material == Enum.Material.Water
 		or (top ~= nil and top.Instance:GetAttribute("Material") == "PaddyWater")
+	-- Lote 27 (D-142): piso sólido rente ao chão (heliponto, piso de barraca, patamar de construção):
+	-- a pá cavava embaixo dele e o buraco ficava escondido (Studio: o autoteste cavou sob a esteira do
+	-- heliponto dos EUA). Raio curto, só na faixa de 0,6 m acima do chão: o de cima batia no helicóptero
+	-- parado no heliponto. Planta não conta (folhagem não colide).
+	local floor = workspace:Raycast(hit.Position + Vector3.new(0, 0.6 / M, 0), Vector3.new(0, -0.7 / M, 0), anyParams)
+	if
+		floor
+		and floor.Instance ~= workspace.Terrain
+		and floor.Instance:IsA("BasePart")
+		and (floor.Instance :: BasePart).CanCollide
+	then
+		toast(p, "Pá: aqui tem piso, procure chão de terra")
+		return
+	end
 	local ok, why =
 		FieldWork.canDig(owner, p:GetAttribute("Faction") :: string?, onWater, lastDig[p], os.clock(), holes)
 	if not ok then
@@ -107,7 +131,7 @@ local function onDig(p: Player)
 	end
 	digging[p] = true
 	local start = root.Position
-	toast(p, string.format("Cavando… fique parado %d s", C.seconds))
+	info(p, string.format("Cavando… fique parado %d s", C.seconds))
 	-- D-99: a animação da pá (ItemView) segue esta chave, nunca o texto do aviso, que pode vir traduzido
 	Net.event("Logistics_State"):FireClient(p, { key = "dig_start" })
 	task.delay(C.seconds, function()
@@ -129,10 +153,25 @@ local function onDig(p: Player)
 		local cf = CFrame.new(hit.Position) * CFrame.Angles(0, yaw, 0)
 		-- buraco: tira o terreno; a terra vira o parapeito de sacos de areia à frente
 		excavate(cf, C.lengthM / M, C.widthM / M, hit.Position.Y - (C.depthM + SMOOTH_EXTRA_M) / M)
-		local front = cf * CFrame.new(0, 0, -(C.widthM / 2 + 0.4) / M)
+		-- Lote 27 (D-142): o parapeito vai ATRAVESSADO na frente do buraco (o comprido dos sacos, o Z do
+		-- modelo, ao longo do buraco) e sem aterro. Antes (AssetLoader.place) o comprido apontava para o
+		-- buraco e o patamar de terra que o place põe sob construção (PLATFORM) tapava o buraco recém-
+		-- -cavado: o autoteste via 0,01 m na 1ª rodada. Assenta no chão mais baixo de 3 pontos.
+		local front = cf * CFrame.new(0, 0, -(C.widthM / 2 + 0.7) / M)
 		local folder = workspace:FindFirstChild("Map") and (workspace :: any).Map:FindFirstChild("Art")
 		if folder then
-			AssetLoader.place("sandbags", front.Position.X, front.Position.Z, yaw, folder)
+			local across = front * CFrame.Angles(0, math.pi / 2, 0)
+			local lo = math.huge
+			for _, s in { -0.9, 0, 0.9 } do
+				local q = (across * CFrame.new(0, 0, s / M)).Position
+				local h = workspace:Raycast(q + Vector3.new(0, 20, 0), Vector3.new(0, -60, 0), terrainOnly)
+				if h then
+					lo = math.min(lo, h.Position.Y)
+				end
+			end
+			if lo < math.huge then
+				AssetLoader.placeAt("sandbags", CFrame.new(front.X, lo - 0.05 / M, front.Z) * across.Rotation, folder)
+			end
 		end
 		-- D-129: avisa que acabou (antes o buraco aparecia calado)
 		Net.event("Logistics_State"):FireClient(p, { ok = "Buraco pronto: entre nele para se abrigar" })

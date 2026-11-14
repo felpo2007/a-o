@@ -164,10 +164,18 @@ local function useImage()
 	img.Image = uri
 	shadow.Image = uri
 	task.spawn(function()
+		-- Lote 27 (D-142): vale o estado do PreloadAsync. O IsLoaded da ImageLabel escondida fica falso
+		-- mesmo com a imagem baixada (Studio, 2026-11-14: "Success" e IsLoaded false), e a caveira
+		-- publicada nunca aparecia: ficava sempre o desenho com frames.
+		local fetched = false
 		pcall(function()
-			ContentProvider:PreloadAsync({ img })
+			ContentProvider:PreloadAsync({ img }, function(_, status: Enum.AssetFetchStatus)
+				if status == Enum.AssetFetchStatus.Success then
+					fetched = true
+				end
+			end)
 		end)
-		imageReady = img.IsLoaded
+		imageReady = fetched or img.IsLoaded
 		if not imageReady then
 			warn("[VT65] caveira do abate: a imagem não carregou; fica o desenho com frames")
 		end

@@ -1110,11 +1110,20 @@ RunService.RenderStepped:Connect(function(dt: number)
 	-- gatilho: o mesmo passo para mouse, controle e assento (Shared/Gatilho)
 	if wp and t and Gatilho.wants(t, now) then
 		if canShoot() then
-			local act = Gatilho.step(t, now)
-			if act == "fire" then
-				shoot(wp, t)
-			elseif act == "dry" then
-				playId(S.dry_click, 0.8) -- Type 56 sem trava do ferrolho: só o clique (Parte 10.6)
+			-- lote 27: o quadro longo (abaixo de ~12 fps) solta até Gatilho.PER_FRAME tiros no automático
+			for _ = 1, Gatilho.stepsPerFrame(t) do
+				local act = Gatilho.step(t, now)
+				if act == "fire" then
+					shoot(wp, t)
+				elseif act == "dry" then
+					playId(S.dry_click, 0.8) -- Type 56 sem trava do ferrolho: só o clique (Parte 10.6)
+					break
+				else
+					break
+				end
+				if not (Gatilho.wants(t, now) and canShoot()) then
+					break
+				end
 			end
 		elseif not t.held then
 			t.queued = 0

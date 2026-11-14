@@ -13,10 +13,21 @@ local SomArmas = require(ReplicatedStorage.Shared.SomArmas)
 local Som = {}
 
 local failed: { [number]: boolean } = {}
+-- Lote 27 (D-142): confere com instâncias Sound. Com o id em texto, o PreloadAsync pede o asset como
+-- imagem e todo áudio falha ("Asset type does not match requested type", Studio 2026-11-14): os 17
+-- ids de fora caíam no `alt` ou ficavam mudos (ferrolho, estojo, baque na carne). Como Sound, os
+-- mesmos ids carregam (8 de 8 conferidos, 0,13 a 3,4 s).
 task.spawn(function()
-	local ids: { string } = {}
+	local sounds: { Sound } = {}
+	local seen: { [number]: boolean } = {}
 	local function add(def: SomArmas.Def)
-		table.insert(ids, "rbxassetid://" .. def.id)
+		if seen[def.id] then
+			return
+		end
+		seen[def.id] = true
+		local s = Instance.new("Sound")
+		s.SoundId = "rbxassetid://" .. def.id
+		table.insert(sounds, s)
 	end
 	for _, def in SomArmas.LIB do
 		add(def)
@@ -25,7 +36,7 @@ task.spawn(function()
 		add(def)
 	end
 	pcall(function()
-		ContentProvider:PreloadAsync(ids, function(content: string, status: Enum.AssetFetchStatus)
+		ContentProvider:PreloadAsync(sounds, function(content: string, status: Enum.AssetFetchStatus)
 			if status ~= Enum.AssetFetchStatus.Success then
 				local n = tonumber(string.match(content, "(%d+)$"))
 				if n then
@@ -34,6 +45,9 @@ task.spawn(function()
 			end
 		end)
 	end)
+	for _, s in sounds do
+		s:Destroy()
+	end
 end)
 
 local function group(): SoundGroup?
