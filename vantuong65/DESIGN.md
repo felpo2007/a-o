@@ -4510,3 +4510,28 @@ dono:
 - sombra do sol desligada por padrão (~4 fps medidos).
 
 Falta medir num celular e no servidor do Roblox.
+
+## D-127 — Metade dos arbustos e capim mais claro (v58, 2026-11-14)
+
+Escolhas do dono depois da D-126: "Menos arbustos (−50%)", "M14: deixar como está", "Capim: clarear".
+
+**Arbustos** (`Vegetation.SHRUB_KEEP` = 0,5):
+- metade dos arbustos sorteados sai por um cara ou coroa da posição, feito depois de todos os
+  sorteios. Assim o resto da mata fica igual, planta por planta;
+- o teste da F5 confere que só os arbustos mudam (no plano do teste: 1.061 de 2.107, 50%);
+- no jogo, a mata caiu de 6.465 para 5.502 plantas; no cliente, de 5.418 para 4.608, com 775
+  arbustos (eram 1.585). O setor A planejado foi de ~33,8 para ~29,0 milhões de triângulos.
+
+**Medido** (Studio na frente, sem bots, as mesmas vistas da D-126):
+
+| Vista | Antes | Depois |
+|---|---|---|
+| Base dos EUA olhando a oeste | 38–43 fps | 42–47 fps |
+| Xóm Gò olhando a mata A | 46–49 fps | 49–52 fps |
+| Borda da mata A | 50–51 fps | 51–52 fps |
+
+**Capim** (`TerrainLook.COLORS.Grass`): de (72, 92, 42) para (100, 134, 74). Com a textura, o capim
+sai perto de (59, 70, 26) em vez de (43, 47, 15), e o relevo e os diques aparecem (captura
+`testes/lote12/09_capim_v58.jpg`).
+
+**M14:** fica como está (o olho a 6,3 cm da alça de anel, D-67).

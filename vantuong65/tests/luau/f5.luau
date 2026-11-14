@@ -366,6 +366,34 @@ test("mata (D-64/65): determinística, zonas livres, lavoura e clareira abertas,
 	-- leva mais plantas da borda para dentro delas (3,2%; eram < 3% no de 1 km)
 	assert(paddy / inside < 0.04, string.format("%.1f%% das plantas na lavoura/clareira", 100 * paddy / inside))
 	print(string.format("       %d plantas: %d na área, %d na cortina de fora", #a, inside, border))
+	-- D-127: com metade dos arbustos, o resto da mata fica igual planta por planta (o descarte vem
+	-- depois dos sorteios) e sobra perto da metade dos arbustos
+	local keep = Vegetation.SHRUB_KEEP
+	Vegetation.SHRUB_KEEP = 1
+	local full = plan()
+	Vegetation.SHRUB_KEEP = keep
+	local others, shrubsA, shrubsFull = {}, 0, 0
+	for _, it in full do
+		if it.key == "shrub" then
+			shrubsFull += 1
+		else
+			table.insert(others, it)
+		end
+	end
+	local j = 0
+	for _, it in a do
+		if it.key == "shrub" then
+			shrubsA += 1
+		else
+			j += 1
+			local o = others[j]
+			assert(o and o.key == it.key and o.x == it.x and o.z == it.z, "a mata mudou além dos arbustos")
+		end
+	end
+	assert(j == #others, "a mata mudou além dos arbustos")
+	local frac = shrubsA / math.max(shrubsFull, 1)
+	assert(frac > 0.4 and frac < 0.6, string.format("ficaram %.0f%% dos arbustos", 100 * frac))
+	print(string.format("       arbustos: %d de %d (%.0f%%)", shrubsA, shrubsFull, 100 * frac))
 end)
 
 test("clareira de nascimento: nenhuma planta da mata a até 15 m de QG ou reunião, visada aberta", function()

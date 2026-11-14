@@ -60,3 +60,12 @@ Cada uma muda o visual ou um pedido anterior:
 
 **O que falta medir:** um celular de verdade e o jogo publicado num servidor do Roblox. O contador no
 canto da tela ("FPS · ms") já mostra o fps no aparelho.
+
+## Escolha do dono e resultado (v58, D-127)
+O dono escolheu menos arbustos (−50%). As mesmas vistas, com o Studio na frente e sem bots:
+- base dos EUA: 41,7 / 46,6 / 44,4 fps (antes 38–43);
+- Xóm Gò olhando a mata A: 49,2 / 51,9 / 50,5 fps (antes 46–49);
+- borda da mata A: 51,8 / 51,8 / 51,3 fps (antes 50–51).
+
+Ganho de ~2–3 fps, como estimado. No cliente ficaram 775 arbustos (eram 1.585), e a mata do objetivo
+A continua fechada (`testes/lote12/10_mata_a_v58.jpg`).

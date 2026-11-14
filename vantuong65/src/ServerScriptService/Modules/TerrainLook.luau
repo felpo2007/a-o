@@ -6,7 +6,11 @@ local TerrainLook = {}
 
 -- cor multiplica a textura do material; tons medidos a olho nas capturas, não em foto calibrada
 TerrainLook.COLORS = {
-	Grass = Color3.fromRGB(72, 92, 42), -- arroz e capim de agosto; mais claro parecia gramado
+	-- D-127 (escolha do dono, lote 13): mais claro. Com (72, 92, 42) a textura leafy_grass (média
+	-- 151, 131, 89) saía perto de (43, 47, 15), verde quase preto e chapado, e o relevo sumia; este dá
+	-- ~(59, 70, 26) e os diques aparecem (testes/lote12, capturas 05 e 06). Antes: "mais claro parecia
+	-- gramado".
+	Grass = Color3.fromRGB(100, 134, 74), -- arroz e capim de agosto
 	LeafyGrass = Color3.fromRGB(92, 90, 54), -- chão de mata: folhas secas sobre capim
 	-- D-123 (dono: "conserte o solo"): o terreno multiplica a textura pela cor. A terra batida (dirt_floor,
 	-- D-115) tem média (182, 140, 100), alaranjada; com (108, 86, 60) as ruas saíam vermelho-escuro

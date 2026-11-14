@@ -122,6 +122,10 @@ Vegetation.BORDER = {
 	{ key = "coconut_palm", p = 0.02, s0 = 1.1, s1 = 1.4 },
 } :: { Entry }
 Vegetation.BORDER_M = { 40, 80 }
+-- D-127 (lote 13, escolha do dono: "Menos arbustos (−50%)"): fração dos arbustos sorteados que fica.
+-- O arbusto (10,5 mil triângulos, D-66) era o maior custo de uma espécie só: ~4–5 fps no Studio com
+-- 1.585 no cliente (testes/DESEMPENHO_2026-11-14.md).
+Vegetation.SHRUB_KEEP = 0.5
 -- Sombra só das copas grandes: emergentes e árvores de folha larga a partir de uma escala.
 -- Com sombra em todas as árvores (~18 mil na mata da D-65), a GPU de 2 GB do PC de teste travou no
 -- Studio (DXGI_ERROR_DEVICE_HUNG, 2026-11-10, com um jogo aberto ao lado). Arbusto, capim, bambu,
@@ -340,6 +344,14 @@ function Vegetation.plan(input: Input): { Item }
 						if out_d > 0 or not Vegetation.blocked(input, px, pz) then
 							local yaw = rng:range(0, 2 * math.pi)
 							local scale = rng:range(e.s0, e.s1)
+							-- D-127: metade dos arbustos sai por um cara ou coroa da posição, depois de
+							-- todos os sorteios (o resto da mata fica igual, planta por planta)
+							if
+								e.key == "shrub"
+								and hash(math.floor(px), math.floor(pz), input.seed + 31) >= Vegetation.SHRUB_KEEP
+							then
+								continue
+							end
 							table.insert(out, {
 								key = e.key,
 								x = px,

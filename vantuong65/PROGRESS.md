@@ -69,13 +69,23 @@
     eram o limite do Studio em segundo plano.
   - A mata custa ~10 fps e a sombra do sol ~4. O corte das plantas baixas longe não ganhou nada e
     saiu.
-  - Esperando o dono: menos árvores ou arbustos? Sombra do sol desligada por padrão?
+  - O dono escolheu metade dos arbustos (v58, D-127): +2–3 fps nas mesmas vistas.
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;
-  - perguntas: afastar o olho da alça da M14? clarear o capim?
+  - respondido pelo dono: a M14 fica como está; o capim clareou (v58);
   - gatilho que recupera a cadência abaixo de 12 fps; mão de apoio das pistolas no quadril;
   - base do VC sob a mata; nomes do equipamento da Intendência sem tradução; Type 54 em 3ª pessoa;
   - a pá do autoteste na 1ª rodada de cada sessão.
+
+## v58: metade dos arbustos e capim mais claro (2026-11-14, D-127)
+- **Publicação:** pendente (ver o commit "v58 publicada").
+- **Feito** (escolhas do dono depois do lote 13):
+  - metade dos arbustos da mata sai; o resto da mata fica igual, planta por planta (teste na F5);
+  - capim mais claro: (100, 134, 74), com o relevo e os diques à vista;
+  - M14: fica como está.
+- **Conferido no Studio:** 5.502 plantas na mata (eram 6.465), 775 arbustos no cliente (eram 1.585);
+  +2–3 fps nas três vistas; capim e mata A nas capturas `testes/lote12/09` e `10`.
+- **Não testado:** celular; servidor do Roblox.
 
 ## v57: lote 12, análise de bots, gráficos, armas, tiros e veículos (2026-11-14, D-125)
 - **Publicada** como versão 57 do place (build do commit dab8acd).
