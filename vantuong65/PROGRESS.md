@@ -26,8 +26,9 @@
   do centro e 40 x 40. Falta o dono pôr o servidor em 80 (TODO_USUARIO).
 - **Lote 4b (v47, D-115): feito.** Cabanas 30% maiores, Xóm Gò maior, An Cường (2) com casario
   novo (18 casas) e terra batida nas ruas, becos, quintais e praça.
-- Lote 5 (menu): menu animado com o mapa e o soldado (JOGAR, CONFIGURAÇÕES, LOJA, PASSE, TUTORIAL) e o
-  tutorial fora do jogo; tela de carregamento até o mapa inteiro.
+- **Lote 5 (v49, D-117): feito.** Menu principal animado (mapa girando em Xóm Gò, o soldado, JOGAR,
+  CONFIGURAÇÕES, LOJA, PASSE e TUTORIAL), tutorial fora da partida (COMO JOGAR) e carregamento até
+  o mapa inteiro.
 - Lote 6: análise do jogo inteiro com ideias em imagens.
 - Perguntas ao dono: a M4 (é de 1994); a mão escorregando (em que vista e momento).
 

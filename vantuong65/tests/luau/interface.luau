@@ -486,17 +486,68 @@ test("cores de compra: baixa, loja, carta de inserção, passe e intendência us
 	has("Progresso.client.luau", "robux = { bg = UiKit.PAGAR.robux.base")
 end)
 
-test("carregamento: o visual antigo (b85331e) com o carregamento completo e o JOGAR AGORA", function()
+-- D-117: a tela fica até o mapa inteiro chegar (Map.PartCount) e entrega para o menu principal, que
+-- tem o JOGAR (Bus "jogar_agora")
+test("carregamento: o visual antigo (b85331e), o mapa inteiro e a entrega para o menu principal", function()
 	local src = fs.readFile("src/ReplicatedFirst/LoadingScreen.client.luau")
 	for _, t in { "Acabamento.filme", '"SECRET"', "BRIEFING · O QUE O COMANDO SABE", "pontilha" } do
 		assert(string.find(src, t, 1, true), "visual antigo: " .. t)
 	end
-	for _, t in { "scanArt(workspace", "soundList()", "animList()", "TerrainReady", "CAP_S = 90" } do
+	for _, t in
+		{
+			"scanArt(workspace",
+			"soundList()",
+			"animList()",
+			"TerrainReady",
+			"CAP_S = 240",
+			'GetAttribute("PartCount")',
+			"MAP_PARTS_FRAC = 0.95",
+		}
+	do
 		assert(string.find(src, t, 1, true), "carregamento completo: " .. t)
 	end
-	assert(string.find(src, 'gui:SetAttribute("JogarAgora", true)', 1, true), "JOGAR AGORA")
+	assert(string.find(src, 'gui:SetAttribute("Pronto", true)', 1, true), "entrega para o menu")
+	local loader = fs.readFile("src/ServerScriptService/Modules/AssetLoader.luau")
+	assert(string.find(loader, 'map:SetAttribute("PartCount"', 1, true), "o servidor conta as peças do mapa")
+	local menu = fs.readFile(C .. "MenuPrincipal.client.luau")
+	for _, t in
+		{
+			'GetAttribute("Pronto")',
+			'Bus.fire("jogar_agora")',
+			'Bus.fire("menu_open", 1)',
+			'Bus.fire("shop_open")',
+			'Bus.fire("passe_open")',
+			"ComoJogar.open()",
+		}
+	do
+		assert(string.find(menu, t, 1, true), "menu principal: " .. t)
+	end
 	local ja = fs.readFile(C .. "JogarAgora.luau")
-	assert(string.find(ja, '"VT65Loading"', 1, true) and string.find(ja, 'GetAttribute("JogarAgora")', 1, true))
+	assert(string.find(ja, 'Bus.on("jogar_agora"', 1, true), "o JOGAR do menu chega ao Jogar agora")
+	local gm = fs.readFile(C .. "GameMenu.client.luau")
+	assert(string.find(gm, 'Bus.on("menu_open"', 1, true), "configurações abrem pelo menu principal")
+	local ui = fs.readFile(C .. "GameUI.client.luau")
+	assert(string.find(ui, 'GetAttribute("MenuPrincipal")', 1, true), "o lobby some com o menu principal aberto")
+end)
+
+-- D-117: o tutorial saiu da partida; o COMO JOGAR tem um cartão por assunto, com botões que existem
+test("tutorial fora da partida: não começa ao nascer; COMO JOGAR com ações do InputMap", function()
+	local Tutorial = require("../../src/ReplicatedStorage/Shared/Tutorial") :: any
+	assert(Tutorial.IN_MATCH == false, "o tutorial não pode começar sozinho na partida")
+	local tc = fs.readFile(C .. "TutorialController.client.luau")
+	assert(string.find(tc, "if not Tutorial.IN_MATCH then", 1, true), "onSpawn respeita o IN_MATCH")
+	assert(string.find(tc, 'Bus.fire("como_jogar_open")', 1, true), "refazer o tutorial abre o COMO JOGAR")
+	local cj = fs.readFile(C .. "ComoJogar.luau")
+	local ids = {}
+	for _, a in InputMap.ACTIONS do
+		ids[a.id] = true
+	end
+	local n = 0
+	for id in string.gmatch(cj, '{ id = "([%w_]+)", label = ') do
+		n += 1
+		assert(id == "move" or ids[id], "ação que não existe no InputMap: " .. id)
+	end
+	assert(n >= 12, "poucos botões nos cartões: " .. n)
 end)
 
 test("comandos: só com teclado e mouse ou controle; no toque nunca; fora da faixa de cima", function()

@@ -1441,6 +1441,14 @@ end
 Input.on("game_menu", "holdStart", function()
 	setOpen(true)
 end)
+-- D-117: o menu principal abre direto numa aba (1 = Configurações)
+Bus.on("menu_open", function(tab: any)
+	if type(tab) == "number" and tab ~= S.tab then
+		S.tab = tab
+		S.dirty = true
+	end
+	setOpen(true)
+end)
 Input.on("game_menu", "press", function() -- P no teclado
 	if Idioma.aberto() then
 		return

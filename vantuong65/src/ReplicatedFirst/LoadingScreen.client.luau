@@ -18,16 +18,16 @@
 --   5. as animações do soldado (Shared/SoldierAnims);
 --   6. os manequins do lobby e a arte das armas (o PreviewService marca Ready) e
 --   7. o mapa (v41): espera o terreno (TerrainReady) e a arte do servidor (Map/Art "Placed"), pede o
---      streaming em volta dos dois QGs e dos cinco objetivos e depois baixa a arte que chegou:
---      malhas, texturas, decalques, SurfaceAppearance, imagens, partículas, roupas, céu e
+--      streaming do mapa INTEIRO (D-117: o centro e os quatro quadrantes, mais os QGs e os objetivos),
+--      espera chegar 95% das peças do Map (o servidor conta em Map.PartCount) e depois baixa a arte
+--      que chegou: malhas, texturas, decalques, SurfaceAppearance, imagens, partículas, roupas, céu e
 --      MaterialVariant do ReplicatedStorage, do Workspace, do Lighting e do MaterialService (cada id
 --      uma vez só). Ao nascer, o servidor ainda pede o streaming em volta do ponto (SpawnService);
 --   8. o terreno (já pronto no 7; fica para o teto de segurança).
--- Só com tudo pronto aparecem os dois botões: JOGAR AGORA (carimbo vermelho; A, Enter, Espaço ou
--- toque: entra direto no squad e no último ponto, Controllers/JogarAgora pelo atributo "JogarAgora"
--- desta tela) e MESA DE CAMPANHA (B, Backspace: o lobby, como antes; a contagem de 10 s entra nela
--- sozinha). Y abre o idioma. Teto de segurança: com 90 s os botões aparecem de qualquer jeito e o
--- resto termina no lobby. A saída esmaece por cima do lobby (sem tela preta).
+-- D-117 (pedido do dono: "a tela de carregamento inicial deve ficar ali até carregar o jogo e o mapa
+-- inteiro"; "faça uma tela de menu animada"): com tudo pronto a tela marca "Pronto" e esmaece por cima
+-- do menu principal (Controllers/MenuPrincipal), que tem o JOGAR. Os botões JOGAR AGORA e MESA DE
+-- CAMPANHA desta tela não aparecem mais. Y abre o idioma. Teto de segurança: 4 min (era 90 s).
 -- Fora o Acabamento e o Idioma (mesmo ReplicatedFirst), não depende de nada: aparece desde o 1º quadro.
 -- Gancho de teste (só no Studio): workspace:SetAttribute("VT65DevTela", "carregamento") reabre a
 -- tela e refaz o carregamento de verdade (o que já está na memória chega rápido) para a foto;
@@ -51,8 +51,9 @@ local Idioma = require(script.Parent:WaitForChild("Idioma"))
 
 local player = Players.LocalPlayer
 
-local CAP_S = 90 -- teto de segurança
-local AUTO_S = 10 -- com tudo pronto, vai sozinha para a mesa depois disso
+local CAP_S = 240 -- teto de segurança (D-117: era 90 s; a tela fica até o mapa inteiro chegar)
+local MAP_PARTS_FRAC = 0.95 -- D-117: fração das peças do Map (Map.PartCount) que precisa ter chegado
+local MAP_PARTS_MAX_S = 90 -- e no máximo isto esperando por elas
 local BATCH = 16 -- assets por chamada do PreloadAsync (a barra anda por lote e por asset)
 
 local CANVAS = Color3.fromRGB(36, 38, 28) -- lona da barraca no escuro
@@ -846,49 +847,24 @@ local function close(quick: boolean?)
 	end
 end
 
+-- D-117: com tudo pronto, a tela entrega para o menu principal (Controllers/MenuPrincipal): marca
+-- "Pronto", espera o menu aparecer por baixo (atributo do jogador "MenuPrincipal", até 4 s) e esmaece.
+-- Os botões JOGAR AGORA e MESA DE CAMPANHA ficaram só para o gancho de teste do Studio.
 local function showButtons()
-	if play.b.Visible then
+	if allReady then
 		return
 	end
-	refreshKeys()
 	allReady = true
 	setWaiting(false)
-	setStep(
-		if capped then "Quase pronto: o resto termina no lobby." else "Pronto. A mesa de campanha espera por você."
-	)
-	for i, bt in { play, desk } do
-		bt.b.Visible = true
-		bt.b.Position = UDim2.fromOffset(bt.b.Position.X.Offset, 646)
-		tween(bt.b, 0.6, { Position = UDim2.fromOffset(bt.b.Position.X.Offset, 622), BackgroundTransparency = 0 })
-		tween(bt.edge, 0.6, { Transparency = if i == 1 then 0.25 else 0.6 })
-		tween(bt.text, 0.5, { TextTransparency = 0 }, QUINT_OUT, OUT, 0.1)
-		tween(bt.arrow, 0.5, { TextTransparency = 0 }, QUINT_OUT, OUT, 0.15)
-		tween(bt.keycap, 0.5, { BackgroundTransparency = 0 }, QUINT_OUT, OUT, 0.1)
-		tween(bt.keyText, 0.5, { TextTransparency = 0 }, QUINT_OUT, OUT, 0.1)
-		tween(bt.keyImg, 0.5, { ImageTransparency = 0 }, QUINT_OUT, OUT, 0.1)
-	end
-	if not pulse then
-		local tw = TweenService:Create(
-			play.edge,
-			TweenInfo.new(1.1, Enum.EasingStyle.Sine, INOUT, -1, true, 0.7),
-			{ Transparency = 0.75 }
-		)
-		tw:Play()
-		pulse = tw
-	end
-	Acabamento.datilografar(enterHint, "Jogar agora: o seu squad e o último ponto de inserção.", 70, 0.3)
-	-- contagem: vai sozinha para a mesa (para enquanto o cartão de idioma está aberto)
+	setStep(if capped then "Quase pronto: o resto termina no menu." else "Pronto.")
+	gui:SetAttribute("Pronto", true)
 	local my = alive
 	task.spawn(function()
-		local left = AUTO_S
-		desk.text.Text = string.format("MESA DE CAMPANHA · %d s", left)
-		while alive == my and not closing and left > 0 do
-			task.wait(1)
-			if not Idioma.aberto() then
-				left -= 1
-				desk.text.Text = string.format("MESA DE CAMPANHA · %d s", left)
-			end
+		local w0 = os.clock()
+		while player:GetAttribute("MenuPrincipal") ~= true and os.clock() - w0 < 4 and alive == my do
+			task.wait(0.1)
 		end
+		task.wait(0.3)
 		if alive == my and not closing then
 			close(false)
 		end
@@ -1221,6 +1197,17 @@ local function run()
 	local mc = sharedModule("MapConfig")
 	local spots: { Vector3 } = {}
 	if type(mc) == "table" then
+		-- D-117: o mapa inteiro: o centro e o meio de cada quadrante (com o raio do streaming, ~360 m,
+		-- os cinco cobrem a área e a cortina de fora), depois os QGs e os objetivos
+		local b = mc.Bounds
+		if type(b) == "table" then
+			local cx, cz = (b.minX + b.maxX) / 2, (b.minZ + b.maxZ) / 2
+			local qx, qz = (b.maxX - b.minX) / 4, (b.maxZ - b.minZ) / 4
+			table.insert(spots, Vector3.new(cx, 20, cz))
+			for _, s in { { -1, -1 }, { 1, -1 }, { -1, 1 }, { 1, 1 } } do
+				table.insert(spots, Vector3.new(cx + s[1] * qx, 20, cz + s[2] * qz))
+			end
+		end
 		for _, hq in (if type(mc.HQ) == "table" then mc.HQ else {}) :: any do
 			table.insert(spots, Vector3.new(hq.x, 20, hq.z))
 		end
@@ -1235,8 +1222,30 @@ local function run()
 		pcall(function()
 			player:RequestStreamAroundAsync(p, 8)
 		end)
-		setFrac(7, 0.4 * k / #spots)
+		setFrac(7, 0.3 * k / #spots)
 	end
+	-- D-117: espera as peças do mapa chegarem (o servidor contou em Map.PartCount)
+	local mapF = workspace:FindFirstChild("Map")
+	local want = if mapF then mapF:GetAttribute("PartCount") else nil
+	if mapF and type(want) == "number" and want > 0 then
+		setStep("Recebendo o mapa inteiro…")
+		local w0 = os.clock()
+		while alive == my and os.clock() - w0 < MAP_PARTS_MAX_S do
+			local n = 0
+			for _, d in mapF:GetDescendants() do
+				if d:IsA("BasePart") then
+					n += 1
+				end
+			end
+			local frac = math.clamp(n / (want * MAP_PARTS_FRAC), 0, 1)
+			setFrac(7, 0.3 + 0.3 * frac)
+			if frac >= 1 then
+				break
+			end
+			task.wait(1)
+		end
+	end
+	setFrac(7, 0.6)
 	setStep("Revelando a arte do mapa…")
 	local art: { any } = {}
 	scanArt(ReplicatedStorage, art)
@@ -1246,7 +1255,7 @@ local function run()
 		scanArt(game:GetService("MaterialService"), art)
 	end)
 	preload(art, function(done: number, total: number)
-		setFrac(7, 0.4 + 0.6 * (if total > 0 then done / total else 1))
+		setFrac(7, 0.6 + 0.4 * (if total > 0 then done / total else 1))
 	end)
 	setFrac(7, 1)
 	-- 8. terreno (sem número: o servidor só avisa quando acaba)

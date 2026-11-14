@@ -4019,3 +4019,53 @@ Pedido do dono: "onde está a grama que tinha e coloque um pouco mais de árvore
 - primeiro tiroteio aos 18 s, 0 erros de script.
 
 **Não testado:** o fps num celular ou num PC fraco com a mata maior.
+
+## D-117 — Lote 5: menu principal animado, tutorial fora da partida e carregamento do mapa inteiro (v49, 2026-11-13)
+
+Pedidos do dono:
+- "faça uma tela de menu animada bonita, que vai ter atrás o fundo do mapa bonito e o soldado, e vai
+  ter as opções jogar, configurações, loja, passe e tutorial";
+- "não quero mais o tutorial dentro do jogo";
+- "a tela de carregamento inicial deve ficar ali até carregar o jogo e o mapa inteiro".
+
+**Menu principal** (`Controllers/MenuPrincipal`): abre quando a tela de carregamento termina e fica
+até o JOGAR.
+- Fundo: o mapa de verdade. A câmera dá a volta em Xóm Gò a 120 m de raio e 40 m de altura, uma volta
+  em 4 min, com cor quente, desfoque leve ao longe e vinheta escura à esquerda para o texto.
+- À direita, o soldado (o manequim vestido pelo servidor), respirando devagar: o do lado do jogador
+  ou, antes de escolher, os dois lados se revezando a cada 9 s.
+- À esquerda, o título STARLITE · VIETNÃ 1965 e cinco botões que entram em cascata:
+  - JOGAR: o Jogar agora (lado, squad, papel e ponto automáticos);
+  - CONFIGURAÇÕES: o menu do jogo, aberto na aba Configurações (Bus `menu_open`);
+  - LOJA e PASSE: as telas de sempre;
+  - TUTORIAL: o COMO JOGAR.
+- Enquanto aberto, o atributo `MenuPrincipal` esconde o lobby (a mesa) no `GameUI`. A mesa continua
+  no menu do jogo e na tela de baixa.
+- Controle: ↑ ↓ e A; teclado: setas e Enter; toque e mouse: tocar ou clicar.
+
+**Tutorial fora da partida:**
+- `Tutorial.IN_MATCH = false`: o painel de passos não começa mais ao nascer;
+- "refazer o tutorial" abre o COMO JOGAR (`Controllers/ComoJogar`), em nove cartões: objetivo; andar
+  e correr; mirar e atirar; se proteger; granada e faca; carta; ferido; squad; veículos;
+- cada cartão tem uma frase curta e os botões do aparelho de agora em chips grandes, com o nome da
+  ação embaixo. Os botões do mouse aparecem por extenso ("CLIQUE DIREITO");
+- texto e botão ficam separados, para a tradução casar a frase inteira;
+- o campo de tiro continua nas bases.
+
+**Carregamento até o mapa inteiro:**
+- o servidor conta as peças do mapa (`Map.PartCount`, ao marcar a arte pronta);
+- a tela pede o streaming no centro e nos quatro quadrantes (além dos QGs e dos objetivos) e espera
+  chegar 95% das peças, no máximo 90 s;
+- teto de segurança de 4 min (era 90 s);
+- no fim, marca `Pronto` e esmaece por cima do menu principal. Os botões JOGAR AGORA e MESA DE
+  CAMPANHA da tela de entrada e a contagem de 10 s saíram.
+
+**Conferido no Studio:**
+- 69 a 72 s do início até o menu, com 8.156 das 8.164 peças do mapa no cliente (99,9%);
+- o menu com o mapa girando, o soldado e os cinco botões;
+- TUTORIAL, CONFIGURAÇÕES, PASSE e LOJA abrem e fecham (Backspace) de volta ao menu;
+- JOGAR põe em campo (EUA, fuzileiro, squad Alfa), sem o painel de tutorial;
+- 0 erros de script no servidor e no cliente.
+
+**Não testado:** controle de verdade e celular no menu; o menu num servidor com o carregamento lento
+(o teto de 4 min).

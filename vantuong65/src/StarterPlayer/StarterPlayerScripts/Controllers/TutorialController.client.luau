@@ -694,8 +694,10 @@ Bus.on("reload_start", function()
 	advance("action", "reload")
 end)
 
+-- D-117 (pedido do dono: "não quero mais o tutorial dentro do jogo"): refazer o tutorial abre o COMO
+-- JOGAR (Controllers/ComoJogar), fora da partida
 Bus.on("tutorial_restart", function()
-	begin(player:GetAttribute("Role") :: string?, true)
+	Bus.fire("como_jogar_open")
 end)
 Bus.on("tutorial_skip", skip)
 Input.StateChanged:Connect(function()
@@ -718,8 +720,13 @@ task.spawn(function()
 	pg.ChildAdded:Connect(watchGui)
 end)
 
--- o tutorial do papel começa ao nascer com um papel que ainda não foi concluído
+-- o tutorial do papel começa ao nascer com um papel que ainda não foi concluído. D-117: desligado (o
+-- dono não quer o tutorial dentro do jogo; ele está no TUTORIAL do menu principal). O código fica
+-- para a raia de tiro e para voltar, se o dono pedir: Tutorial.IN_MATCH = true.
 local function onSpawn()
+	if not Tutorial.IN_MATCH then
+		return
+	end
 	local r = player:GetAttribute("Role")
 	if type(r) == "string" and r ~= role then
 		begin(r)

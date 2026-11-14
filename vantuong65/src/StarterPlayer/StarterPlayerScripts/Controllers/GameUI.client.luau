@@ -364,7 +364,9 @@ end
 local function refresh()
 	local dead = not alive()
 	local hasRole = player:GetAttribute("Role") ~= nil
-	side.Visible = dead or not hasRole
+	-- D-117: com o menu principal aberto (Controllers/MenuPrincipal) o lobby fica escondido
+	local menuPrincipal = player:GetAttribute("MenuPrincipal") == true
+	side.Visible = (dead or not hasRole) and not menuPrincipal
 	DeployScreen.render(squadState) -- decide o painel (a inserção abre a carta de spawn)
 	local insertion = side.Visible and dead and hasRole and DeployScreen.panel() == "insert"
 	local targeting = mode == "target"
@@ -759,7 +761,7 @@ task.spawn(function()
 		Toast.show(msg.msg, kind, { title = "Reunião do squad", key = "reuniao_squad" })
 	end)
 end)
-for _, a in { "Faction", "SquadId", "Role" } do
+for _, a in { "Faction", "SquadId", "Role", "MenuPrincipal" } do
 	player:GetAttributeChangedSignal(a):Connect(refresh)
 end
 player.CharacterAdded:Connect(function(char)

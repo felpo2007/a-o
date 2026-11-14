@@ -930,6 +930,15 @@ function AssetLoader.start()
 			)
 		)
 	end
+	-- D-117 (pedido do dono: "a tela de carregamento inicial deve ficar ali até carregar o jogo e o mapa
+	-- inteiro"): quantas peças o mapa tem; a tela de entrada espera chegar quase todas pelo streaming
+	local nMapParts = 0
+	for _, d in map:GetDescendants() do
+		if d:IsA("BasePart") then
+			nMapParts += 1
+		end
+	end
+	map:SetAttribute("PartCount", nMapParts)
 	out:SetAttribute("Placed", true) -- o autoteste confere a arte no chão depois disto
 	-- Studio: workspace:SetAttribute("VT65DevFlutua", true) mede o que flutua no mapa (Flutua.luau)
 	require(script.Parent.Flutua).hook()

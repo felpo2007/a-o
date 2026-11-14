@@ -1120,7 +1120,10 @@
   "vida da vila",
   "C Xóm Gò",
   "^%u%f[%s]",
-  "Fuzileiro 23"
+  "Fuzileiro 23",
+  "move",
+  "W A S D",
+  "STARLITE"
  ],
  "regex": []
 }

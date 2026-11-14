@@ -16,6 +16,10 @@ local function target(m: number, text: string): Step
 	return { id = "range_" .. m, range = m, text = text }
 end
 
+-- D-117 (pedido do dono: "não quero mais o tutorial dentro do jogo"): o painel de passos não começa
+-- mais sozinho ao nascer; o tutorial fica no TUTORIAL do menu principal (Controllers/ComoJogar)
+Tutorial.IN_MATCH = false
+
 -- distâncias dos alvos do campo de tiro (m), ao lado de cada QG. D-114 (mapa de 500 m): 50, 100 e 150
 -- m (eram 100, 200 e 300: o alvo de 300 m caía fora do mapa ou no meio da área de combate)
 Tutorial.RANGE_M = { 50, 100, 150 }
