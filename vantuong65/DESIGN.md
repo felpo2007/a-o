@@ -4381,3 +4381,65 @@ Todos foram traduzidos para inglês, espanhol e vietnamita, além dos nomes novo
 **Não testado:** a partida inteira até o fim no mapa novo; celular; o desempenho (fps) no setor A com
 a mata 1,8 vez mais cheia. O Studio avisa 1 construção com o chão a mais de 0,6 m do patamar do
 plano; entre as construções carregadas, nenhuma passou disso na medida pelo raio no meio da peça.
+
+## D-124 — Lote 11: passe em linha do tempo e loja com imagens (v56, 2026-11-14)
+
+Pedidos do dono: "coloque o passe em ordem cronológica horizontal" (com design próprio, sem copiar o
+de outro jogo) e "deixe a loja atrativa com imagens, cores, design bonito".
+
+**Passe** (`Controllers/TelaPasse.client.luau`):
+- os 50 níveis numa linha do tempo da esquerda para a direita, desenhada como a rota de uma operação
+  na carta:
+  - cada nível é um marco na rota, com o número no círculo; de 10 em 10, um marco maior;
+  - o trecho andado fica em latão, até o nível atual mais a fração das estrelas; o marco atual pulsa;
+  - a trilha VETERANO fica em cima (cartão puxado para o latão, filete de latão) e a GRÁTIS embaixo,
+    cada cartão preso ao marco por um traço;
+  - os rótulos das trilhas ficam fixos à esquerda ("LIBERADO" ou "COM O VETERANO"; "PARA TODOS");
+- embaixo, a ficha do escolhido: ícone grande, tipo, nome, nível e trilha, e o motivo ("Pronto para
+  receber", "Já é seu", "Precisa do Veterano", "Chegue ao nível N"); os botões em duas colunas
+  (receber, receber tudo, Veterano e pular nível);
+- para andar:
+  - mouse: a roda (o Roblox já rola de lado uma ScrollingFrame só em X; um código nosso junto andava
+    em dobro) e as setas ◄ ►, 4 níveis por clique; as setas somem nas pontas;
+  - controle: direcional de nível em nível, LB/RB 10 níveis, LT/RT trocam a trilha;
+  - toque: arrastar; o 1º toque mostra e o 2º recebe, como antes;
+- o `CanvasPosition` anda em pixels de tela, com a escala do painel (medido no Studio: parou em 3.985
+  = 4.545 − 559). A posição das colunas passa pela mesma escala; sem ela, a seta andava 6 níveis em
+  vez de 4.
+
+**Loja** (`Controllers/ShopController.client.luau`):
+- abre na vitrine (LOJA E ARMÁRIO); antes abria na Intendência;
+- imagens feitas com os modelos do próprio jogo (`tools/blender/loja.py`, Cycles, fundo transparente,
+  luz de estúdio). A imagem mostra só o que o item dá:
+  - Uniformes USMC 1965: o capacete M1 com a capa (o fuzil saiu da imagem: ele é de todos);
+  - Uniformes da Força Principal 1965: o capacete de fibra e o chapéu de selva;
+  - Kit de Elite: o colete M1955 e a granada de fumaça M18;
+  - M151, M35 e Peugeot 403, para o cartão "VEÍCULO AO NASCER" da carta de inserção (é lá que eles são
+    comprados; o Robux só abre com o lugar ao lado já reservado);
+- `tools/loja_sombra.py` limpa a sombra: o apanhador de sombra deixava um véu fraco de alfa na
+  imagem inteira, que desenhava um retângulo escuro sobre o cartão colorido (Studio);
+- o destaque tem ao fundo uma faixa da capa do jogo (`tools/loja_banner.py`, recorte de
+  `assets/capa`), com um véu escuro à esquerda para o texto; a imagem do item vai grande à direita;
+- cartões mais altos (236 px, eram 176), com a imagem num fundo na cor do item (EUA azul, VC vermelho,
+  kits oliva, apoio latão), de cima para baixo;
+- os cartões do Mercado e das Vantagens usam o ícone publicado no passe, quando há;
+- todos os produtos têm o mesmo ícone padrão do Roblox (o cubo cinza, ID 88963008124478, medido no
+  Studio); ele não conta como imagem e fica o desenho na cor do item;
+- Intendência: o escolhido ("LEVANDO", a aba ativa) em oliva escuro com texto claro (era cáqui com
+  texto escuro).
+
+**Imagens no Roblox:** 7 decals (`assets/upload_plan.json`, grupo `Loja`); o ID da imagem de cada
+uma foi resolvido no Studio (InsertService) e está em `AssetIds.LojaImages`. As versões antigas
+ficaram no `roblox_ids.json` como `Loja.*_v1` (com fuzil) e `Loja.*_v2` (com o véu de sombra).
+
+**Teste novo** (`interface.luau`): a linha do tempo é de lado, a rolagem usa a escala, a loja abre
+na vitrine, o cubo cinza não conta e as 7 imagens têm ID.
+
+**Conferido no Studio:**
+- o passe abre no começo com a seta esquerda escondida; uma seta anda 362 px (4 níveis × 140 ×
+  0,647 de escala); no fim, o nível 50 fica inteiro na janela e a seta direita some;
+- a vitrine com as imagens, as cores e a faixa da capa; as Vantagens com os ícones publicados; a
+  Intendência sem as faixas bege.
+
+**Não testado:** o cartão do veículo com a imagem numa inserção de verdade (o Studio só conferiu que
+a imagem existe e fica escondida sem veículo escolhido); celular; compra de verdade.

@@ -108,6 +108,13 @@ O `sourcemap.json` não vai para o Git.
 - Céu (D-69): `uv run python tools/fetch_sky.py` corta o HDRI em 6 faces (`assets/ceu/`). Os IDs de
   imagem vão no `Sky` do `default.project.json` (resolvidos no Studio, como os do chão). Para conferir
   orientação sem subir, copie as faces para `content\textures` do Studio e use `rbxasset://`.
+- Imagens da loja (D-124): a imagem mostra só o que o item dá.
+  1. `blender -b --factory-startup -P tools/blender/loja.py -- todas` (Blender 5.3 em
+     `C:\Program Files\Blender Foundation`);
+  2. `uv run --group arte python tools/loja_sombra.py` (tira o véu de alfa da sombra) e
+     `tools/loja_banner.py` (faixa da capa para o destaque);
+  3. suba com `upload-assets Loja.`, resolva o ID da imagem de cada decal no Studio (InsertService)
+     e grave em `AssetIds.LojaImages`.
 - Não dá para testar render pesado no Studio com outro jogo aberto: a GPU de 2 GB do PC do dono
   travou (`DXGI_ERROR_DEVICE_HUNG`) e isso derruba o jogo dele também.
 - `Terrain.Decoration` (grama animada) só vai no arquivo do place (`tools/bake_place`): script do
@@ -135,7 +142,7 @@ O `sourcemap.json` não vai para o Git.
 - Segredos só no `.env` (no `.gitignore`), nunca no código nem no chat.
 - ForgeGUI: nunca regenerar um job em `outcome_unknown`. "failed" com `retryable` pode ser
   retomado com `generation_retry`.
-- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-124) e atualize `PROGRESS.md`.
+- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-125) e atualize `PROGRESS.md`.
 - Metas da Parte 2: vegetação ≤ 3 mil triângulos, props ≤ 5 mil, herói ≤ 20 mil (`ArtBudget`,
   conferido pelo teste da F5).
 - Commits no branch acima, com mensagem em português.

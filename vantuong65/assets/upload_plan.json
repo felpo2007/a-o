@@ -1602,5 +1602,54 @@
   "assetType": "Audio",
   "name": "VT65 motor_caminhao",
   "description": "VAN TUONG 65 - motor de 6 cilindros (M35) (tools/sons_veiculos.py)"
+ },
+ {
+  "key": "Loja.destaque",
+  "file": "assets/ui/loja/destaque.png",
+  "assetType": "Decal",
+  "name": "VT65 loja destaque",
+  "description": "VAN TUONG 65 - faixa do destaque da loja (recorte da capa, tools/loja_banner.py)"
+ },
+ {
+  "key": "Loja.usmc",
+  "file": "assets/ui/loja/usmc.png",
+  "assetType": "Decal",
+  "name": "VT65 loja usmc",
+  "description": "VAN TUONG 65 - capacete M1 e M14, Uniformes USMC 1965 (tools/blender/loja.py)"
+ },
+ {
+  "key": "Loja.vc",
+  "file": "assets/ui/loja/vc.png",
+  "assetType": "Decal",
+  "name": "VT65 loja vc",
+  "description": "VAN TUONG 65 - capacete de fibra e Type 56, Uniformes da Forca Principal 1965 (tools/blender/loja.py)"
+ },
+ {
+  "key": "Loja.elite",
+  "file": "assets/ui/loja/elite.png",
+  "assetType": "Decal",
+  "name": "VT65 loja elite",
+  "description": "VAN TUONG 65 - colete M1955 e granada de fumaca M18, Kit de Elite (tools/blender/loja.py)"
+ },
+ {
+  "key": "Loja.m151",
+  "file": "assets/ui/loja/m151.png",
+  "assetType": "Decal",
+  "name": "VT65 loja m151",
+  "description": "VAN TUONG 65 - M151 MUTT, veiculo ao nascer (tools/blender/loja.py)"
+ },
+ {
+  "key": "Loja.m35",
+  "file": "assets/ui/loja/m35.png",
+  "assetType": "Decal",
+  "name": "VT65 loja m35",
+  "description": "VAN TUONG 65 - caminhao M35, veiculo ao nascer (tools/blender/loja.py)"
+ },
+ {
+  "key": "Loja.peugeot403",
+  "file": "assets/ui/loja/peugeot403.png",
+  "assetType": "Decal",
+  "name": "VT65 loja peugeot403",
+  "description": "VAN TUONG 65 - Peugeot 403, veiculo ao nascer (tools/blender/loja.py)"
  }
 ]

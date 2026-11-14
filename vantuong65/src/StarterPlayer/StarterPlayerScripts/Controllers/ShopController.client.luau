@@ -20,6 +20,7 @@ local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 
+local AssetIds = require(ReplicatedStorage.Shared.AssetIds) :: any
 local Commerce = require(ReplicatedStorage.Shared.Commerce)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Progression = require(ReplicatedStorage.Shared.Progression)
@@ -46,7 +47,9 @@ local TABS = {
 	{ id = "vantagens", name = "VANTAGENS" },
 	{ id = "intendencia", name = "INTENDÊNCIA" },
 }
-local tab = "intendencia"
+-- D-124 (lote 11, "deixe a loja atrativa"): a loja abre na vitrine (era a intendência, uma lista de
+-- equipamento com botões bege, a primeira coisa que se via)
+local tab = "loja"
 local function tabIndex(id: string): number?
 	for i, d in TABS do
 		if d.id == id then
@@ -279,6 +282,7 @@ local order = 0
 -- Preço e ícone ao vivo sem travar a vitrine: o 1º desenho mostra "R$ …" e a miniatura desenhada; o
 -- botão e a imagem se completam quando o Roblox responde. GetProductInfoAsync devolve o preço
 -- (Managed Pricing) e o IconImageAssetId: o ícone que já está publicado no passe ou no produto.
+local DEFAULT_ICON = 88963008124478
 local pricePending: { [string]: boolean } = {}
 local priceWaiting: { [string]: { (string) -> () } } = {}
 local iconWaiting: { [string]: { (number) -> () } } = {}
@@ -298,6 +302,11 @@ local function fetch(id: number, infoType: Enum.InfoType)
 		local p = if ok and info and info.PriceInRobux then string.format("R$ %d", info.PriceInRobux) else "—"
 		priceCache[key] = p
 		local icon = if ok and info then tonumber((info :: any).IconImageAssetId) else nil
+		-- D-124: o ícone padrão dos produtos (o cubo cinza, o mesmo em todos, medido no Studio) não
+		-- conta como imagem: fica o desenho na cor do item
+		if icon == DEFAULT_ICON then
+			icon = nil
+		end
 		if icon and icon > 0 then
 			iconCache[key] = icon
 		end
@@ -428,7 +437,22 @@ local MARK: { [string]: { text: string, color: Color3 } } = {
 	PREMIUM = { text = "P", color = V.TEXT },
 }
 
--- miniatura: imagem publicada (se houver) sobre a sigla desenhada
+-- D-124: imagens da loja feitas com os modelos do próprio jogo (tools/blender/loja.py, fundo
+-- transparente). A imagem mostra só o que o item dá. Sem o ID da imagem (LojaImages = 0), fica o
+-- desenho: a sigla na cor do item.
+local LOJA_IMG: { [string]: string } = {
+	PASS_USMC_1965 = "usmc",
+	PASS_VC_1965 = "vc",
+	PASS_KIT_ELITE = "elite",
+}
+local function lojaImage(name: string?): string?
+	local ids = AssetIds.LojaImages or {}
+	local id = if name then ids[name] else nil
+	return if type(id) == "number" and id ~= 0 then string.format("rbxassetid://%d", id) else nil
+end
+
+-- miniatura: o fundo na cor do item (de cima para baixo), a imagem (render da loja ou a publicada
+-- no passe) e, sem imagem, a sigla desenhada
 type Thumb = { frame: Frame, image: ImageLabel, mark: TextLabel, strip: Frame }
 local function thumb(parent: Instance, markSize: number): Thumb
 	local f = Instance.new("Frame")
@@ -440,7 +464,7 @@ local function thumb(parent: Instance, markSize: number): Thumb
 	UiKit.corner(f, 3)
 	local g = Instance.new("UIGradient")
 	g.Rotation = 90
-	g.Color = ColorSequence.new(Color3.new(1, 1, 1), Color3.new(0.55, 0.55, 0.55))
+	g.Color = ColorSequence.new(Color3.new(1, 1, 1), Color3.new(0.45, 0.45, 0.45))
 	g.Parent = f
 	local mark = UiKit.text2(f, "", markSize, V.KHAKI, F.TITLE)
 	mark.Size = UDim2.fromScale(1, 1)
@@ -455,17 +479,31 @@ local function thumb(parent: Instance, markSize: number): Thumb
 	local image = Instance.new("ImageLabel")
 	image.Name = "Icone"
 	image.BackgroundTransparency = 1
-	image.Size = UDim2.fromScale(1, 1)
+	image.AnchorPoint = Vector2.new(0.5, 0.5)
+	image.Position = UDim2.fromScale(0.5, 0.5)
+	image.Size = UDim2.fromScale(0.96, 0.96)
 	image.ScaleType = Enum.ScaleType.Fit
 	image.Visible = false
 	image.Parent = f
 	return { frame = f, image = image, mark = mark, strip = strip }
 end
+-- o fundo da miniatura: a cor do item escurecida (a imagem se destaca, a cor diz o tipo)
+local function tintThumb(t: Thumb, accent: Color3)
+	t.frame.BackgroundColor3 = accent:Lerp(V.PANEL, 0.62)
+	t.strip.BackgroundColor3 = accent
+end
 local function paintThumb(t: Thumb, o: Offer)
 	t.mark.Text = o.mark
 	t.mark.TextColor3 = o.accent
-	t.strip.BackgroundColor3 = o.accent
+	tintThumb(t, o.accent)
 	t.image.Visible = false
+	local render = lojaImage(LOJA_IMG[o.key])
+	if render then
+		t.image.Image = render
+		t.image.Visible = true
+		t.mark.Visible = false
+		return
+	end
 	local infoType = o.infoType
 	if infoType then
 		onIcon(o.id, infoType, function(icon: number)
@@ -519,6 +557,46 @@ do
 		})
 		g.Parent = f
 	end
+	-- D-124: a faixa da capa do jogo no fundo (o arrozal, a vila e o dique no fim da tarde), com um
+	-- véu escuro da esquerda para o texto ler bem; sem a imagem, fica o painel de antes
+	local banner = lojaImage("destaque")
+	if banner then
+		local bg = Instance.new("ImageLabel")
+		bg.Name = "Fundo"
+		bg.BackgroundTransparency = 1
+		bg.Image = banner
+		bg.ScaleType = Enum.ScaleType.Crop
+		bg.Size = UDim2.fromScale(1, 1)
+		bg.ZIndex = 0
+		bg.Parent = f
+		UiKit.corner(bg, 4)
+		local veil = Instance.new("Frame")
+		veil.Name = "Veu"
+		veil.BackgroundColor3 = V.BG
+		veil.BorderSizePixel = 0
+		veil.Size = UDim2.fromScale(1, 1)
+		veil.ZIndex = 0
+		veil.Parent = bg
+		UiKit.corner(veil, 4)
+		local vg = Instance.new("UIGradient")
+		vg.Transparency = NumberSequence.new({
+			NumberSequenceKeypoint.new(0, 0.08),
+			NumberSequenceKeypoint.new(0.5, 0.3),
+			NumberSequenceKeypoint.new(1, 0.72),
+		})
+		vg.Parent = veil
+	end
+	-- a imagem grande do item à direita (quando há render da loja); senão, o soldado do lado
+	local render = Instance.new("ImageLabel")
+	render.Name = "Imagem"
+	render.BackgroundTransparency = 1
+	render.ScaleType = Enum.ScaleType.Fit
+	render.AnchorPoint = Vector2.new(1, 0.5)
+	render.Position = UDim2.new(1, -px(4, 6), 0.5, 0)
+	render.Size = UDim2.new(0, PREV_W + px(40, 54), 1, -px(8, 12))
+	render.Visible = false
+	render.Parent = f
+	hero.render = render
 	-- o soldado do lado do jogador, iluminado de lado, à direita
 	local pv = SoldierPreview.newStill(-0.55)
 	local pf = pv.frame :: Frame
@@ -531,6 +609,7 @@ do
 		pvNote.TextSize = UiKit.text(13)
 	end
 	hero.preview = pv
+	hero.soldier = pf
 	local P = px(18, 24)
 	local TH = px(72, 96)
 	local th = thumb(f, px(34, 46))
@@ -596,6 +675,15 @@ local function setHero(o: Offer)
 	hero.badge.Text = b or ""
 	hero.badge.BackgroundColor3 = if b == "NOVO" then V.OLIVE else V.RED
 	paintThumb(hero.thumb, o)
+	-- a imagem do item vai grande à direita; a miniatura da esquerda fica com a sigla
+	local big = lojaImage(LOJA_IMG[o.key])
+	hero.render.Visible = big ~= nil
+	hero.render.Image = big or ""
+	hero.soldier.Visible = big == nil
+	if big then
+		hero.thumb.image.Visible = false
+		hero.thumb.mark.Visible = true
+	end
 	hero.buy.button.Visible = not o.owned
 	hero.own.Visible = o.owned
 	priceText(o, function(t: string)
@@ -609,7 +697,7 @@ local function setHero(o: Offer)
 end
 
 -- ----- cartão da grade -----
-local CARD_H = px(176, 236)
+local CARD_H = px(236, 314) -- D-124: a imagem do item ganhou espaço (era 176)
 local lastHot: ((on: boolean) -> ())? = nil -- toque: o cartão aceso por último (apaga ao tocar outro)
 local function card(parent: Instance, o: Offer, n: number): GuiObject
 	local f = Instance.new("Frame")
@@ -623,7 +711,7 @@ local function card(parent: Instance, o: Offer, n: number): GuiObject
 	local P = px(10, 14)
 	local th = thumb(f, px(30, 42))
 	th.frame.Position = UDim2.fromOffset(P, P)
-	th.frame.Size = UDim2.new(1, -2 * P, 0, px(70, 96))
+	th.frame.Size = UDim2.new(1, -2 * P, 0, px(128, 172))
 	paintThumb(th, o)
 	local b = BADGE[o.key]
 	if b then
@@ -631,7 +719,7 @@ local function card(parent: Instance, o: Offer, n: number): GuiObject
 		t.AnchorPoint = Vector2.new(1, 0)
 		t.Position = UDim2.new(1, -6, 0, 6)
 	end
-	local y = P + px(70, 96) + px(6, 8)
+	local y = P + px(128, 172) + px(6, 8)
 	local nm = UiKit.title(f, UiKit.upper(o.name), px(17, 24))
 	nm.Position = UDim2.fromOffset(P, y)
 	nm.Size = UDim2.new(1, -2 * P, 0, px(22, 30))
@@ -1092,6 +1180,7 @@ type PageItem = {
 	enabled: boolean,
 	onClick: () -> (),
 	pay: string?, -- forma de pagar (UiKit.PAGAR: "robux", "ci"); nil = ação sem compra (oliva)
+	icon: { id: number, infoType: Enum.InfoType }?, -- D-124: o ícone publicado no passe, se houver
 }
 local ITEM_H = px(150, 206)
 local function itemCard(parent: Instance, it: PageItem, n: number): Frame
@@ -1110,7 +1199,22 @@ local function itemCard(parent: Instance, it: PageItem, n: number): Frame
 	th.frame.Size = UDim2.fromOffset(TH, TH)
 	th.mark.Text = it.mark
 	th.mark.TextColor3 = it.accent
-	th.strip.BackgroundColor3 = it.accent
+	tintThumb(th, it.accent) -- D-124: o fundo na cor do item
+	local render = lojaImage(LOJA_IMG[it.key])
+	local ic = it.icon
+	if render then
+		th.image.Image = render
+		th.image.Visible = true
+		th.mark.Visible = false
+	elseif ic then
+		onIcon(ic.id, ic.infoType, function(icon: number)
+			if th.frame.Parent then
+				th.image.Image = string.format("rbxassetid://%d", icon)
+				th.image.Visible = true
+				th.mark.Visible = false
+			end
+		end)
+	end
 	local x = P + TH + px(10, 14)
 	local nm = UiKit.title(f, UiKit.upper(it.name), px(16, 23))
 	nm.Position = UDim2.fromOffset(x, P - 2)
@@ -1208,6 +1312,7 @@ local function robuxItem(e: Entry, kind: string, mark: string, accent: Color3, o
 		owned = owned,
 		enabled = e.id ~= 0,
 		pay = "robux",
+		icon = if e.id ~= 0 then { id = e.id, infoType = e.infoType } else nil,
 		price = function(set: (string) -> ())
 			if e.id == 0 then
 				set("EM BREVE")
@@ -1671,7 +1776,7 @@ local function setOpen(open: boolean, which: string?)
 end
 
 -- o FECHAR já está ligado (UiKit.action → shop_close → setOpen(false))
--- shop_open(aba?): "loja" ou "intendencia" (sem aba: a última usada; a primeira é a intendência)
+-- shop_open(aba?): "loja" ou "intendencia" (sem aba: a última usada; a primeira é a vitrine, D-124)
 Bus.on("shop_open", function(which: string?)
 	setOpen(true, which)
 end)

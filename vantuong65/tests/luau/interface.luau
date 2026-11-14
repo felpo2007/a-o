@@ -543,7 +543,7 @@ test("cores de compra: baixa, loja, carta de inserção, passe e intendência us
 	has("ShopController.client.luau", 'pay = if isRobux then "robux" else "ci"')
 	has("CompraVeiculo.client.luau", 'addRow(name, "robux"')
 	has("CompraVeiculo.client.luau", 'addRow(name, "ci"')
-	has("TelaPasse.client.luau", 'UiKit.action(prev, "", "robux"')
+	has("TelaPasse.client.luau", 'UiKit.action(detail, "", "robux"') -- D-124: a ficha embaixo da linha do tempo
 	has("Progresso.client.luau", "robux = { bg = UiKit.PAGAR.robux.base")
 end)
 
@@ -728,6 +728,24 @@ test("marcadores: só modelos do mesmo lado (Faction igual), nada de inimigo", f
 	local _, nFaction = string.gsub(src, 'GetAttribute%("Faction"%) == faction', "")
 	assert(nFaction >= 2, "jogadores e bots filtrados pelo lado")
 	assert(not string.find(src, "~= faction", 1, true), "nenhum ramo para o outro lado")
+end)
+
+test("D-124: passe em linha do tempo de lado e loja com as imagens dos modelos", function()
+	local passe = fs.readFile(C .. "TelaPasse.client.luau")
+	assert(string.find(passe, "ScrollingDirection = Enum.ScrollingDirection.X", 1, true), "linha do tempo de lado")
+	-- o CanvasPosition anda em pixels de tela: a posição da coluna passa pela escala do painel (sem
+	-- ela, os níveis do fim ficavam fora de alcance ou a seta andava de mais)
+	assert(string.find(passe, "list.AbsoluteCanvasSize.X / o", 1, true), "escala da rolagem")
+	local loja = fs.readFile(C .. "ShopController.client.luau")
+	assert(string.find(loja, 'local tab = "loja"', 1, true), "a loja abre na vitrine")
+	assert(string.find(loja, "local DEFAULT_ICON = 88963008124478", 1, true), "o cubo cinza não conta como imagem")
+	local ids = fs.readFile("src/ReplicatedStorage/Shared/AssetIds.luau")
+	local bloco = string.match(ids, "\tLojaImages = (%b{})")
+	assert(bloco, "LojaImages")
+	for _, k in { "destaque", "usmc", "vc", "elite", "m151", "m35", "peugeot403" } do
+		local v = string.match(bloco :: string, k .. " = (%d+)")
+		assert(v and tonumber(v) ~= 0, "imagem da loja sem ID: " .. k)
+	end
 end)
 
 print(string.format("%d ok, %d falhas", passed, failed))

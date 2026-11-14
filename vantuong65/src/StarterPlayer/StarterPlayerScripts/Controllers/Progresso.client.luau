@@ -296,7 +296,9 @@ local STYLE: { [string]: { bg: Color3, fg: Color3 } } = {
 	primary = { bg = V.OLIVE, fg = V.TEXT },
 	normal = { bg = V.PANEL_3, fg = V.TEXT },
 	off = { bg = OFF_BG, fg = OFF_TEXT },
-	on = { bg = V.KHAKI, fg = V.BG },
+	-- D-124: o escolhido em oliva escuro com texto claro (era cáqui com texto escuro: as faixas bege
+	-- de "LEVANDO" eram a primeira coisa que se via na loja)
+	on = { bg = Color3.fromRGB(64, 80, 42), fg = V.TEXT },
 	robux = { bg = UiKit.PAGAR.robux.base, fg = V.TEXT },
 	ci = { bg = UiKit.PAGAR.ci.base, fg = V.TEXT },
 }

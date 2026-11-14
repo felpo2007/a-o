@@ -57,9 +57,30 @@
   - três objetivos (resposta do dono), espalhados: um no centro, numa vila maior; outro numa mata
     fechada e de difícil acesso; o terceiro à escolha;
   - arrumar o solo e o terreno.
-- **Lote 11, passe e loja:** o passe em linha do tempo horizontal, da esquerda para a direita; a loja
-  atraente, com imagens, cores e design bonito.
+- **Lote 11 (v56, D-124): feito.** O passe numa linha do tempo da esquerda para a direita (a rota de
+  uma operação na carta, Veterano em cima e Grátis embaixo); a loja com imagens dos modelos do jogo,
+  cores por item e a capa no destaque.
+- **Lote 11, passe e loja (pedido original):** o passe em linha do tempo horizontal, da esquerda para
+  a direita; a loja atraente, com imagens, cores e design bonito.
 - **Lote 12, análise:** bots, gráficos, armas, tiros e veículos (junto do lote 6).
+
+## v56: lote 11, passe em linha do tempo e loja com imagens (2026-11-14, D-124)
+- **Publicação:** pendente (ver o commit "v56 publicada").
+- **Feito:**
+  - passe: os 50 níveis numa rota da esquerda para a direita, com um marco por nível (maior de 10 em
+    10), o trecho andado em latão e o marco atual pulsando; Veterano em cima, Grátis embaixo; a ficha
+    do item escolhido embaixo; setas ◄ ►, roda do mouse, direcional, LB/RB e arrastar;
+  - loja: abre na vitrine; 6 imagens renderizadas dos modelos do jogo (capacete M1; capacete de fibra
+    e chapéu de selva; colete M1955 e M18; M151, M35 e Peugeot 403) e a faixa da capa no destaque;
+    cartões maiores com o fundo na cor do item; ícones publicados nas Vantagens; o cubo cinza padrão
+    dos produtos some;
+  - o cartão "VEÍCULO AO NASCER" mostra a imagem da viatura escolhida;
+  - Intendência sem as faixas bege;
+  - traduções das frases novas (en, es, vi).
+- **Conferido no Studio:** a rolagem do passe até o nível 50 (setas somem nas pontas; 4 níveis por
+  clique); a vitrine com as imagens e as cores; as Vantagens com ícones; a Intendência.
+- **Não testado:** o cartão do veículo com a imagem numa inserção de verdade; celular; compra de
+  verdade.
 
 ## v55: lote 10, mapa de 700 x 700 m, três objetivos e o solo (2026-11-14, D-123)
 - **Publicada** como versão 55 do place (build do commit 69ce5df).

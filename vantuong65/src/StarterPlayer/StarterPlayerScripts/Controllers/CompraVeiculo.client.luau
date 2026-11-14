@@ -13,6 +13,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
+local AssetIds = require(ReplicatedStorage.Shared.AssetIds) :: any
 local CompraVeiculo = require(ReplicatedStorage.Shared.CompraVeiculo)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Vehicles = require(ReplicatedStorage.Shared.Vehicles)
@@ -95,21 +96,35 @@ UiKit.list(cardBody, false, 4)
 local cardKicker = UiKit.kicker(cardBody, "VEÍCULO AO NASCER", 12)
 cardKicker.Size = UDim2.new(1, 0, 0, 16)
 cardKicker.LayoutOrder = 1
+-- D-124: a imagem da viatura escolhida (tools/blender/loja.py, o modelo do jogo); com o ID da
+-- imagem em 0 (AssetIds.LojaImages), fica só o nome
+local cardImage = Instance.new("ImageLabel")
+cardImage.Name = "Imagem"
+cardImage.BackgroundTransparency = 1
+cardImage.ScaleType = Enum.ScaleType.Fit
+cardImage.Size = UDim2.new(1, 0, 0, 114)
+cardImage.Visible = false
+cardImage.LayoutOrder = 2
+cardImage.Parent = cardBody
+local function vehicleImage(spec: string?): string?
+	local id = if spec then (AssetIds.LojaImages or {})[spec] else nil
+	return if type(id) == "number" and id ~= 0 then string.format("rbxassetid://%d", id) else nil
+end
 local cardTitle = UiKit.title(cardBody, "A PÉ", 22)
 cardTitle.Size = UDim2.new(1, 0, 0, 28)
-cardTitle.LayoutOrder = 2
+cardTitle.LayoutOrder = 3
 local cardNote = UiKit.text2(cardBody, "", 13, V.DIM)
 cardNote.Size = UDim2.new(1, 0, 0, 0)
 cardNote.AutomaticSize = Enum.AutomaticSize.Y
 cardNote.TextWrapped = true
 cardNote.TextXAlignment = Enum.TextXAlignment.Left
-cardNote.LayoutOrder = 3
+cardNote.LayoutOrder = 4
 
 local openPanel: () -> ()
 local cardBtn = UiKit.action(cardBody, "LEVAR VEÍCULO", "secondary", function()
 	openPanel()
 end, { action = "map_mark", ctx = "map", h = 38 })
-cardBtn.button.LayoutOrder = 4
+cardBtn.button.LayoutOrder = 5
 cardBtn.button.Selectable = false -- no controle quem abre é o X (a carta não navega pela interface)
 
 local function cardLabel()
@@ -214,6 +229,9 @@ end
 local function paintCard()
 	local f = faction()
 	cardStripe.BackgroundColor3 = sideColor(f)
+	local img = vehicleImage(st.spec)
+	cardImage.Visible = img ~= nil
+	cardImage.Image = img or ""
 	local cd = cooldownLeft()
 	if st.spec then
 		cardTitle.Text = UiKit.upper(specName(st.spec))

@@ -304,6 +304,27 @@ return {
 		sw = 0,
 		se = 0,
 	},
+	-- Imagens da loja (D-124; tools/blender/loja.py e tools/loja_banner.py): IDs de DECAL do Open
+	-- Cloud. A ImageLabel precisa do ID da IMAGEM (LojaImages, resolvido no Studio). Com a imagem em 0,
+	-- o cartão fica com o desenho (a sigla na cor do item).
+	Loja = {
+		destaque = 84026466035639,
+		usmc = 137709754309395,
+		vc = 138899408503559,
+		elite = 122678152866516,
+		m151 = 82373926872910,
+		m35 = 139647008641071,
+		peugeot403 = 78882368690368,
+	},
+	LojaImages = {
+		destaque = 77920733563788,
+		usmc = 105644007879435,
+		vc = 115821099409272,
+		elite = 76060008749851,
+		m151 = 133117232488366,
+		m35 = 112826258722569,
+		peugeot403 = 130718059148794,
+	},
 	GroundImages = {
 		forrest_ground_01_cor = 83248274685054,
 		forrest_ground_01_normal = 139783933313957,
