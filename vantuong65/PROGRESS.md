@@ -222,6 +222,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
   - a cadência abaixo de 12 fps medida num aparelho lento.
 
 ## v89: lote 47, equilíbrio dos bots no Warfare (2026-11-15, D-162)
+- **Publicada** (versão 89 do place, commit 01736cf). Autoteste no build final: 18 ok, 0 falhas.
 - **Base dos EUA:** gerador, galões e contêineres saíram da passagem dos blindados (canto
   noroeste); a barraca de comando e o refeitório ficaram onde estavam.
 - **Bots:**
