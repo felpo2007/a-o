@@ -21,29 +21,13 @@ próximas mudanças pela API, os caminhos eram:
 - A experiência foi criada, e os números estão em `cloud.json`.
 - A chave Open Cloud está no `.env` e funciona. **A chave nunca vai no chat nem no Git.**
 - 82 assets estão publicados: sons, modelos, roupas e os animais. O place foi publicado.
-- Falta criar os 4 passes e os 2 produtos de apoio (`tools/roblox_cloud.py create-store`). Isso
-  só quando você decidir os preços (`MONETIZATION.md`).
-- **Itens em Robux da D-72 (kits e renascer onde caiu): a chave não tem permissão.** Tentei criar
-  em 2026-11-11 e o Roblox respondeu "Scope not authorized". Escolha um dos caminhos:
-  1. **Dar a permissão à chave** (5 min): Creator Dashboard → Open Cloud → API Keys → a chave do
-     VT65 → em Access Permissions, adicione **game-pass** e **developer-product** com
-     leitura e escrita, na experiência VẠN TƯỜNG '65 → Save. Depois me avise: eu rodo
-     `create-store PASS_KIT_VETERAN PASS_KIT_ELITE PRODUCT_RESPAWN_INPLACE`.
-  Também tentei pelo Studio (assistente com MCP, 2026-11-11): "Scope 'developer-product:write'
-  has not been granted". Outro caminho é liberar no Studio: Assistant → MCP Permissions →
-  **game-pass:write** e **developer-product:write**, e aprovar a pasta
-  `assets/forgegui/marketing` para o ícone subir.
-  2. **Criar à mão** no Creator Dashboard → a experiência → Monetization:
-     - Game Pass "Kit Veterano", R$ 149, ícone `assets/forgegui/marketing/gamepass_kit_veterano.jpg`;
-     - Game Pass "Kit de Elite", R$ 299, ícone `assets/forgegui/marketing/gamepass_kit_elite.jpg`;
-     - Developer Product "Renascer onde caiu", R$ 25.
-     Depois me mande os 3 IDs: eu colo em `Shared/Commerce.luau` e publico.
-  Enquanto os IDs forem 0, tudo funciona com os créditos do jogo e pelo posto; só o botão de
-  Robux fica escondido.
-- **Uniformes novos da D-131 em Robux** (opcional): tigrado tadpole, lagarto, áo bà ba marrom e
-  tigrado capturado já saem com $ do jogo. Para vender em Robux, decida o preço (a sugestão é a dos
-  outros uniformes, R$ 79) e me diga: eu rodo `create-store PASS_SKIN_US_TADPOLE PASS_SKIN_US_LIZARD
-  PASS_SKIN_VC_BROWN PASS_SKIN_VC_TIGER`, ou você cria à mão e me manda os 4 IDs.
+- ~~**Loja em Robux**~~ (feita; conferida em 2026-11-15, D-164): todos os itens têm ID no jogo.
+  - Já existiam: os passes de uniforme, unidade, apoiador, kits, campanha, recruta e as 8
+    vantagens; os produtos de apoio, renascer onde caiu, pular nível, XP e créditos dobrados,
+    pacotes de créditos, os 3 veículos ao nascer e as 17 skins de arma.
+  - Os 4 uniformes da D-131 (tadpole, lagarto, áo bà ba marrom e tigrado capturado) foram criados
+    no lote 49 a R$ 79, como os outros uniformes. Você deu permissão total para pôr.
+  - Preços: os de `MONETIZATION.md` e do catálogo (`Commerce`, `Skins`).
 - **Perfil salvando nos testes do Studio** (opcional, 1 min). É configuração de segurança, por isso
   fica com você. Sem ela, o Output avisa "Studio access to APIs is not allowed" e o perfil não salva
   no Studio; no jogo publicado não muda nada.

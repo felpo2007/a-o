@@ -75,11 +75,11 @@ Skins.IDS = {
 	PASS_SKIN_US_TIGER = 2079944452,
 	PASS_SKIN_US_DUCK = 2078516472,
 	PASS_SKIN_VC_BLACK = 2078786461,
-	-- D-131 (lote 17): ainda sem Game Pass (0 = só com $; o dono cria e cola o número aqui)
-	PASS_SKIN_US_TADPOLE = 0,
-	PASS_SKIN_US_LIZARD = 0,
-	PASS_SKIN_VC_BROWN = 0,
-	PASS_SKIN_VC_TIGER = 0,
+	-- D-131 (lote 17): Game Passes criados no lote 49 (D-164), R$ 79 como os outros uniformes
+	PASS_SKIN_US_TADPOLE = 2088220472,
+	PASS_SKIN_US_LIZARD = 2088598458,
+	PASS_SKIN_VC_BROWN = 2089978461,
+	PASS_SKIN_VC_TIGER = 2089438416,
 	-- camuflagem de mato
 	PASS_CAMO_RICE = 2078852467,
 	PASS_CAMO_JUNGLE = 2078126473,
