@@ -177,7 +177,7 @@ function EventosVisual.dev(seg: number)
 		{ id = "naval", name = "Apoio naval", fase = "aviso", raioM = 60, extra = 5 },
 		{ id = "mortar", name = "Morteiro do VC", fase = "ativo", raioM = 40, extra = -2 },
 		{ id = "depot", name = "Depósito de munição do VC", fase = "armado", raioM = 15, extra = -8 },
-		{ id = "heli", name = "Inserção de helicóptero", fase = "janela", raioM = 50, extra = 10 },
+		{ id = "heli", name = "Helicóptero de reforço", fase = "janela", raioM = 50, extra = 10 },
 	}
 	table.clear(devList)
 	for i, s in samples do

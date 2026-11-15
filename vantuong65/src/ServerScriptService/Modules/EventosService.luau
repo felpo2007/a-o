@@ -562,23 +562,20 @@ local function startLz(side: string): Ev?
 	local ev = newEv("heli", side, x, z, s, C.lzHotM, def.durationS)
 	ev.data.hot = {} :: { [Player]: boolean }
 	landHeli(ev, x, z)
-	local g = grid(x, z)
+	-- D-149 (pedido do dono: "simplifique o texto de inserção do helicóptero"): sem a grade de 1965 nem
+	-- "LZ"; era "UH-34D pousando reforços na LZ BS 699 929, a 140 m de C Xóm Gò. Nasça na LZ." e
+	-- "Helicópteros pousando na LZ BS 699 929! Ataque a LZ antes que o reforço avance."
 	notify(
 		side,
 		ev,
-		string.format(
-			"UH-34D pousando reforços na LZ %s, a %d m de %s. Nasça na LZ.",
-			g,
-			C.lzFromTargetM,
-			sectorLabel(s)
-		),
+		string.format("Helicóptero pousando perto de %s: você pode nascer nele!", sectorLabel(s)),
 		"info",
 		8
 	)
 	notify(
 		ev.target,
 		ev,
-		string.format("Helicópteros pousando na LZ %s! Ataque a LZ antes que o reforço avance.", g),
+		string.format("Helicóptero inimigo pousando perto de %s: ataque antes que os reforços saiam!", sectorLabel(s)),
 		"alerta",
 		8
 	)
@@ -1096,7 +1093,10 @@ function EventosService.start()
 			if e.id == "heli" and e.side == faction and e.phase == "ativo" then
 				table.insert(out, {
 					id = "lz:" .. e.uid,
-					name = string.format("LZ — inserção (%s)", grid(e.x, e.z)),
+					-- D-149: era "LZ — inserção (BS 699 929)"
+					name = if e.sector
+						then string.format("Helicóptero perto de %s", Front.letra(e.sector))
+						else "Helicóptero",
 					x = e.x,
 					z = e.z,
 					kind = "rally",

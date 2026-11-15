@@ -261,9 +261,16 @@ function Vehicles.seatLabel(specId: string, seatId: string): string
 	end
 	local n = tonumber(string.match(seatId, "^p(%d+)$"))
 	if n then
-		return string.format("Tropa %d", n)
+		return string.format("Passageiro %d", n) -- D-149: era "Tropa %d"
 	end
 	return LABEL[seatId] or seatId
+end
+
+-- D-149 (pedido do dono: "para entrar no veículo dê as opções importantes e as outras junte em
+-- passageiro"): lugar de passageiro é o carona e a tropa (p<n); os outros (motorista ou piloto,
+-- atirador, comandante, municiador, copiloto) são os importantes, um por linha no painel.
+function Vehicles.isPassengerSeat(seatId: string): boolean
+	return seatId == "passenger" or string.match(seatId, "^p%d+$") ~= nil
 end
 
 -- Ângulo de tiro da própria arma no passageiro "p<n>" (nil = fechado). Ímpar à direita, par à
@@ -328,6 +335,31 @@ function Vehicles.seatList(specId: string): { SeatInfo }
 		})
 	end
 	return out
+end
+
+-- D-149: os lugares do painel em dois grupos: os importantes (um por linha) e os de passageiro
+-- (uma linha só, "Passageiro")
+function Vehicles.seatGroups(specId: string): ({ SeatInfo }, { SeatInfo })
+	local main, pass = {}, {}
+	for _, s in Vehicles.seatList(specId) do
+		table.insert(if Vehicles.isPassengerSeat(s.id) then pass else main, s)
+	end
+	return main, pass
+end
+
+-- D-149: o lugar de passageiro que a linha "Passageiro" dá: o primeiro livre de onde se atira com a
+-- própria arma; sem ele, o primeiro livre. free(id) diz se o lugar está livre. nil = lotado.
+function Vehicles.pickPassenger(list: { SeatInfo }, free: (string) -> boolean): string?
+	local any: string? = nil
+	for _, s in list do
+		if free(s.id) then
+			if s.open then
+				return s.id
+			end
+			any = any or s.id
+		end
+	end
+	return any
 end
 
 function Vehicles.seatInfo(specId: string, seatId: string): SeatInfo?

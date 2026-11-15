@@ -2693,5 +2693,16 @@
  "Mãos ocupadas: a arma volta ao terminar": "Tay đang bận: súng sẽ trở lại khi xong",
  "Ping alto: %d ms": "Ping cao: %d ms",
  "Quase nada chegando do servidor": "Gần như không nhận được dữ liệu từ máy chủ",
- "Servidor lento (%d Hz)": "Máy chủ chậm (%d Hz)"
+ "Servidor lento (%d Hz)": "Máy chủ chậm (%d Hz)",
+ "Atacou o helicóptero": "Đã tấn công trực thăng",
+ "Chegou de helicóptero": "Đến bằng trực thăng",
+ "Helicóptero de reforço": "Trực thăng tiếp viện",
+ "Helicóptero inimigo pousando perto de %s: ataque antes que os reforços saiam!": "Trực thăng địch đang hạ cánh gần %s: tấn công trước khi quân tiếp viện xuống!",
+ "Helicóptero perto de %s": "Trực thăng gần %s",
+ "Helicóptero pousando perto de %s: você pode nascer nele!": "Trực thăng đang hạ cánh gần %s: bạn có thể xuất hiện ở đó!",
+ "PASSAGEIRO": "HÀNH KHÁCH",
+ "Passageiro %d": "Hành khách %d",
+ "Sem lugar de passageiro livre": "Không còn chỗ hành khách trống",
+ "perto de %s": "gần %s",
+ "%d DE %d LIVRES": "%d/%d CHỖ TRỐNG"
 }

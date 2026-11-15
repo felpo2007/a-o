@@ -73,6 +73,11 @@ O `sourcemap.json` não vai para o Git.
 - O `execute_luau` do MCP roda em outra VM: `require` de módulo do jogo devolve uma CÓPIA. Use
   os ganchos acima ou observe por atributos e remotes.
 - Relatórios de teste ficam em `testes/`.
+- No Studio pelo MCP (D-149), o cliente às vezes acha que há um controle (glifos de controle na
+  tela) e troca de arma e abre a carta sozinho. Nessas sessões nenhum ProximityPrompt aparece (o
+  cartão de entrar no veículo não sai): confira o painel no jogo publicado ou pelos testes.
+- O teleporte do jogador tem que ser feito do lado do cliente (`Character:PivotTo` no Client): o
+  cliente é dono da física do personagem e desfaz o do servidor.
 - Captura longe do soldado (D-125): a arte chega ao cliente por distância; antes, peça
   `LocalPlayer:RequestStreamAroundAsync(pos)` no cliente, senão a foto sai vazia.
 - Depois do autoteste, a câmera pode ficar em Scriptable longe do soldado (o MCP desfaz a troca de
@@ -163,7 +168,7 @@ O `sourcemap.json` não vai para o Git.
 - Segredos só no `.env` (no `.gitignore`), nunca no código nem no chat.
 - ForgeGUI: nunca regenerar um job em `outcome_unknown`. "failed" com `retryable` pode ser
   retomado com `generation_retry`.
-- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-149) e atualize `PROGRESS.md`.
+- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-150) e atualize `PROGRESS.md`.
 - Tetos de triângulos por modelo: vegetação ≤ 6 mil (D-135), props e herói ≤ 20 mil (`ArtBudget`,
   conferido pelo teste da F5).
 - Commits no branch acima, com mensagem em português.

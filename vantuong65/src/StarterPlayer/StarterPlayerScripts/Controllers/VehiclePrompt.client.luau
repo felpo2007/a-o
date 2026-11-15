@@ -5,7 +5,9 @@
 -- - Perto de um veículo do próprio lado aparece o cartão do ProximityPrompt "VT65Embarcar"
 --   (VehicleService, estilo Custom): nome, lugares livres e "segure X / F para entrar"; no mouse e no
 --   toque, um clique no cartão.
--- - O painel lista os lugares (Motorista ou Piloto, Atirador, Comandante, Municiador, Carona, Tropa),
+-- - O painel lista os lugares importantes (Motorista ou Piloto, Atirador, Comandante, Municiador,
+--   Copiloto) e, D-149, junta o carona e a tropa numa linha "Passageiro" (quantos livres; entra no
+--   primeiro livre de onde se atira),
 --   livre ou ocupado; o que pede papel mostra "Trocar para Tripulante/Piloto e entrar" (a regra é de
 --   Roles; o servidor confere tudo no remote Vehicle_Board). Dentro: trocar de lugar, sair e, se o
 --   veículo tombou ou está preso, desvirar. No controle: direcional + A, B fecha.
@@ -299,7 +301,10 @@ local function openPanel(model: Model)
 	title.FontFace = UiKit.headFont(title.Text)
 	local hum = h :: Humanoid
 	local inside = hum.SeatPart ~= nil and vehicleOf(hum.SeatPart) == model
-	for i, info in Vehicles.seatList(specId) do
+	-- D-149 (dono: "dê as opções importantes e as outras junte em passageiro"): os lugares importantes
+	-- um por linha; carona e tropa numa linha só, que dá o primeiro livre (de onde se atira, se houver)
+	local mainSeats, passSeats = Vehicles.seatGroups(specId)
+	for i, info in mainSeats do
 		addRow(UiKit.upper(info.label), "secondary", i, function()
 			local seat = seatOf(model, info.id)
 			if not seat or (seat.Occupant and seat.Occupant ~= hum) then
@@ -343,6 +348,45 @@ local function openPanel(model: Model)
 				a.enabled(true)
 			else
 				a.sub.Text = "LIVRE" .. extra
+				a.enabled(true)
+			end
+		end)
+	end
+	if #passSeats > 0 then
+		local function isFree(id: string): boolean
+			local seat = seatOf(model, id)
+			return seat ~= nil and not seat.Disabled and seat.Occupant == nil
+		end
+		addRow("PASSAGEIRO", "secondary", #mainSeats + 1, function()
+			local id = Vehicles.pickPassenger(passSeats, isFree)
+			if not id then
+				Bus.fire("toast", "Sem lugar de passageiro livre")
+				return
+			end
+			request({ v = model, seat = id, crew = false })
+		end, function(a: UiKit.Action)
+			local free, total, mine, shoots = 0, 0, false, false
+			for _, info in passSeats do
+				local seat = seatOf(model, info.id)
+				if seat and not seat.Disabled then
+					total += 1
+					if seat.Occupant == hum then
+						mine = true
+					elseif not seat.Occupant then
+						free += 1
+						shoots = shoots or info.open ~= nil
+					end
+				end
+			end
+			if mine then
+				a.sub.Text = "VOCÊ"
+				a.enabled(false)
+			elseif free == 0 then
+				a.sub.Text = "LOTADO"
+				a.enabled(false)
+			else
+				-- o modelo já em caixa alta: o dicionário não traduz "%d de %d livres" depois do upper
+				a.sub.Text = string.format("%d DE %d LIVRES", free, total) .. (if shoots then " · ATIRA" else "")
 				a.enabled(true)
 			end
 		end)

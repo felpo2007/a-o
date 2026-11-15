@@ -2693,5 +2693,16 @@
  "Mãos ocupadas: a arma volta ao terminar": "Hands busy: your weapon comes back when you finish",
  "Ping alto: %d ms": "High ping: %d ms",
  "Quase nada chegando do servidor": "Almost nothing arriving from the server",
- "Servidor lento (%d Hz)": "Slow server (%d Hz)"
+ "Servidor lento (%d Hz)": "Slow server (%d Hz)",
+ "Atacou o helicóptero": "Attacked the helicopter",
+ "Chegou de helicóptero": "Arrived by helicopter",
+ "Helicóptero de reforço": "Reinforcement helicopter",
+ "Helicóptero inimigo pousando perto de %s: ataque antes que os reforços saiam!": "Enemy helicopter landing near %s: attack before the reinforcements get out!",
+ "Helicóptero perto de %s": "Helicopter near %s",
+ "Helicóptero pousando perto de %s: você pode nascer nele!": "Helicopter landing near %s: you can spawn on it!",
+ "PASSAGEIRO": "PASSENGER",
+ "Passageiro %d": "Passenger %d",
+ "Sem lugar de passageiro livre": "No free passenger seat",
+ "perto de %s": "near %s",
+ "%d DE %d LIVRES": "%d OF %d FREE"
 }

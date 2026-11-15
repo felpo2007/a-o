@@ -99,13 +99,15 @@ Eventos.DEFS = {
 	},
 	heli = {
 		id = "heli",
-		name = "Inserção de helicóptero",
+		-- D-149 (pedido do dono: "simplifique o texto de inserção do helicóptero"): era "Inserção de
+		-- helicóptero"
+		name = "Helicóptero de reforço",
 		side = "US",
 		kind = "lz",
 		rotation = true,
 		durationS = 100, -- 6 s descendo, 90 s pousado (ponto de nascimento), 4 s subindo
-		reward = { xp = 60, cr = 6, label = "Inserção pela LZ" },
-		rewardOther = { xp = 80, cr = 8, label = "Ataque à LZ" },
+		reward = { xp = 60, cr = 6, label = "Chegou de helicóptero" }, -- D-149: era "Inserção pela LZ"
+		rewardOther = { xp = 80, cr = 8, label = "Atacou o helicóptero" }, -- D-149: era "Ataque à LZ"
 		source = "W: UH-34 dos HMM-261 e HMM-361 levaram o 2/4 às LZs Red, White e Blue; a Cia I do 3/7 "
 			.. "chegou depois pelo HMM-163. A LZ Blue pousou em cima do 60º Batalhão do VC",
 	},

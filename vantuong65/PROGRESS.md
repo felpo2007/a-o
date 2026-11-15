@@ -145,14 +145,28 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     - estradas cor de terra;
     - ponte de 7 m para o tanque;
     - objetivos D e E e a linha do setor mais longe da base dos EUA (a base já encosta na borda).
-  - **Lote 34 (interface):** entrar no veículo com as vagas principais e o resto em "passageiro";
-    texto da inserção de helicóptero mais simples.
+  - **Lote 34 (v79, D-149): feito.** Entrar no veículo com os lugares importantes e uma linha
+    "Passageiro"; textos do helicóptero simples (sem grade nem "LZ").
   - Usar o Blender no que precisar de modelo novo.
 
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;
   - respondido pelo dono: a M14 fica como está; o capim clareou (v58);
   - a cadência abaixo de 12 fps medida num aparelho lento.
+
+## v79: lote 34, entrar no veículo e o texto do helicóptero (2026-11-15, D-149)
+- **Entrar no veículo:** os lugares importantes um por linha (motorista ou piloto, atirador,
+  comandante, municiador, copiloto) e o resto numa linha "PASSAGEIRO".
+  - A linha diz quantos estão livres e põe no primeiro livre de onde se atira.
+  - O M35 tinha 14 linhas; agora tem 2.
+- **Helicóptero:** "Helicóptero de reforço". Os avisos ficaram curtos:
+  - "Helicóptero pousando perto de C: você pode nascer nele!";
+  - "Helicóptero inimigo pousando perto de C: ataque antes que os reforços saiam!";
+  - na tela, "perto de C" (saíram a grade BS e o "LZ").
+- **Studio:** o aviso e a linha novos do helicóptero apareceram na partida.
+- **Não visto no Studio:** o painel de entrar (o cliente de teste não mostrou nenhum ProximityPrompt).
+  Vale o teste.
+- **Testes:** Lune ok (641); pytest 54; ruff; luau-lsp sem erro novo; traduções 100%.
 
 ## v78: lote 33, vila em meio círculo, estradas de terra, ponte para o tanque e base mais longe (2026-11-15, D-148)
 - **Publicada** (versão 78 do place, commit 160886d).

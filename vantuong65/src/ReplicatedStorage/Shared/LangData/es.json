@@ -2686,5 +2686,16 @@
  "Mãos ocupadas: a arma volta ao terminar": "Manos ocupadas: el arma vuelve al terminar",
  "Ping alto: %d ms": "Ping alto: %d ms",
  "Quase nada chegando do servidor": "Casi nada llega del servidor",
- "Servidor lento (%d Hz)": "Servidor lento (%d Hz)"
+ "Servidor lento (%d Hz)": "Servidor lento (%d Hz)",
+ "Atacou o helicóptero": "Atacó el helicóptero",
+ "Chegou de helicóptero": "Llegó en helicóptero",
+ "Helicóptero de reforço": "Helicóptero de refuerzo",
+ "Helicóptero inimigo pousando perto de %s: ataque antes que os reforços saiam!": "Helicóptero enemigo aterrizando cerca de %s: ¡ataca antes de que bajen los refuerzos!",
+ "Helicóptero perto de %s": "Helicóptero cerca de %s",
+ "Helicóptero pousando perto de %s: você pode nascer nele!": "Helicóptero aterrizando cerca de %s: ¡puedes aparecer en él!",
+ "PASSAGEIRO": "PASAJERO",
+ "Passageiro %d": "Pasajero %d",
+ "Sem lugar de passageiro livre": "No hay asiento de pasajero libre",
+ "perto de %s": "cerca de %s",
+ "%d DE %d LIVRES": "%d DE %d LIBRES"
 }

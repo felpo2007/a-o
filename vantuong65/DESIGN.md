@@ -5694,3 +5694,55 @@ tabuleiro (sobra do rio da D-141). Pela regra do `reduz_arrozal`, eles saem.
 
 **Não testado:** um M48 atravessando a ponte no Studio. Vale o teste das estradas e a medida do
 tabuleiro.
+
+## D-149 — Lote 34: entrar no veículo com os lugares importantes e "Passageiro", e o texto do helicóptero (v79, 2026-11-15)
+
+**Pedidos do dono (14/11):** "para entrar no veículo dê as opções importantes e as outras junte em
+passageiro" e "simplifique o texto de inserção do helicóptero".
+
+**Painel de entrar no veículo** (`VehiclePrompt`, `Vehicles.seatGroups`, `Vehicles.pickPassenger`):
+- **Antes:** uma linha por lugar. O M35 e o LVTP-5 mostravam 14 e 15 linhas (motorista, carona e 12
+  "Tropa").
+- **Agora:**
+  - os lugares importantes ficam um por linha: motorista ou piloto, atirador (ou a porta do
+    UH-34D), comandante, municiador e copiloto;
+  - o carona e a tropa viram uma linha só, "PASSAGEIRO", com "N DE M LIVRES" (e "· ATIRA" se algum
+    livre deixa atirar com a própria arma), "LOTADO" ou "VOCÊ";
+  - um toque nela põe o jogador no primeiro lugar livre de onde se atira e, sem ele, no primeiro
+    livre.
+- **Linhas por veículo:**
+
+  | Veículo | Linhas importantes | Passageiro (lugares) |
+  |---|---|---|
+  | M48 | 4 | — |
+  | Ontos | 3 | — |
+  | LVTP-5 | 3 | 12 |
+  | UH-34D | 3 | 8 |
+  | M35 | 1 | 13 |
+  | M151 | 1 | 3 |
+  | Peugeot | 1 | 7 |
+
+- O lugar "Tropa N" passou a se chamar "Passageiro N" (aparece assim no HUD de dentro do veículo).
+- O modelo do subtítulo já vai em caixa alta ("%d DE %d LIVRES"): o dicionário não traduz "%d de %d
+  livres" depois do `upper` (conferido no Lune: "3 DE 12 LIVRES" ficava sem tradução).
+
+**Helicóptero** (`Eventos.DEFS.heli`, `EventosService`, `EventosHud`):
+- **Nome:** "Helicóptero de reforço" (era "Inserção de helicóptero").
+- **Aviso do lado que chega:** "Helicóptero pousando perto de C Xóm Gò: você pode nascer nele!". Era
+  "UH-34D pousando reforços na LZ BS 699 929, a 140 m de C Xóm Gò. Nasça na LZ."
+- **Aviso do outro lado:** "Helicóptero inimigo pousando perto de C Xóm Gò: ataque antes que os
+  reforços saiam!". Era "Helicópteros pousando na LZ BS 699 929! Ataque a LZ antes que o reforço
+  avance."
+- **Linha do evento na tela:** "perto de C" (era "C · BS 699 929").
+- **Ponto de nascimento:** "Helicóptero perto de C" (era "LZ — inserção (BS 699 929)").
+- **Recompensas:** "Chegou de helicóptero" e "Atacou o helicóptero" (eram "Inserção pela LZ" e
+  "Ataque à LZ").
+- Traduções em inglês, espanhol e vietnamita (11 frases).
+
+**Studio (v79):**
+- O helicóptero veio sozinho no começo da partida, com os textos novos: o título "HELICÓPTERO DE
+  REFORÇO", o aviso e a linha "perto de C".
+- **Não visto no Studio:** o painel de entrar. No cliente de teste nenhum ProximityPrompt foi
+  mostrado (PromptShown não disparou nem a 7 m do M35). O Studio estava com um controle fantasma,
+  que trocava de arma e abria a carta sozinho. Valem o teste dos veículos (os grupos e a escolha do
+  lugar) e o caminho do servidor, que não mudou (Vehicle_Board com o id do lugar).

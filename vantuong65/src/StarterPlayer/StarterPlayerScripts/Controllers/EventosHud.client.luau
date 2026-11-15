@@ -138,8 +138,12 @@ local function paint()
 		r.name.FontFace = UiKit.headFont(ev.name)
 		r.phase.Text = EventosVisual.PHASE_TEXT[ev.fase] or ""
 		r.phase.TextColor3 = c
-		-- onde: o setor (S3) e a grade de 1965; sem setor, só a grade
-		r.where.Text = if ev.sector then string.format("%s · %s", Front.letra(ev.sector), ev.grade) else ev.grade
+		-- onde: o setor (S3) e a grade de 1965; sem setor, só a grade. D-149: o helicóptero só diz "perto
+		-- de C" (dono: "simplifique o texto de inserção do helicóptero")
+		r.where.Text = if ev.id == "heli" and ev.sector
+			then string.format("perto de %s", Front.letra(ev.sector))
+			elseif ev.sector then string.format("%s · %s", Front.letra(ev.sector), ev.grade)
+			else ev.grade
 		r.clock.Text = clockText(EventosVisual.left(ev))
 		r.clock.TextColor3 = if ev.fase == "fim" then V.MUTED else V.TEXT
 		if fresh then

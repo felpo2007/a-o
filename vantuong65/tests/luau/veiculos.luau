@@ -668,6 +668,42 @@ test("D-100: painel — motivo de cada recusa e a troca de papel com vaga", func
 	assert(check({ kind = "heli", seatId = "gunner" }) == "ok", "porta do UH-34D: qualquer um")
 end)
 
+test("D-149: painel de entrar — os lugares importantes um por linha e o resto em Passageiro", function()
+	local lines = {}
+	for id, _ in Vehicles.SPECS do
+		local main, pass = Vehicles.seatGroups(id)
+		assert(#main + #pass == #Vehicles.seatList(id), id .. ": algum lugar ficou de fora")
+		assert(main[1].id == "driver", id .. ": motorista/piloto primeiro")
+		for _, s in main do
+			assert(not Vehicles.isPassengerSeat(s.id), id .. " " .. s.id)
+		end
+		for _, s in pass do
+			assert(s.id == "passenger" or string.match(s.id, "^p%d+$"), id .. " " .. s.id)
+			assert(s.role == nil, id .. " " .. s.id .. ": passageiro não pede papel")
+		end
+		table.insert(lines, string.format("%s %d + passageiro (%d)", id, #main, #pass))
+	end
+	table.sort(lines)
+	print("       " .. table.concat(lines, "; "))
+	-- o M35 tinha 14 linhas (motorista, carona e 12 da tropa): agora 2
+	local m35main, m35pass = Vehicles.seatGroups("m35")
+	assert(#m35main == 1 and #m35pass == 13, "M35: motorista + passageiro (carona e 12)")
+	-- o primeiro livre de onde se atira; sem ele, o primeiro livre; lotado = nil
+	local _, uh = Vehicles.seatGroups("uh34d")
+	assert(Vehicles.pickPassenger(uh, function(id)
+		return id ~= "p1"
+	end) == "p2")
+	assert(Vehicles.pickPassenger(m35pass, function(id)
+		return id == "passenger" or id == "p4"
+	end) == "p4", "atirando da caçamba antes da cabine")
+	assert(Vehicles.pickPassenger(m35pass, function(id)
+		return id == "passenger"
+	end) == "passenger")
+	assert(Vehicles.pickPassenger(m35pass, function()
+		return false
+	end) == nil)
+end)
+
 test("D-100: lugares — ordem, nomes, quem atira de dentro e em que ângulo", function()
 	for id, _ in Vehicles.SPECS do
 		local list = Vehicles.seatList(id)
@@ -681,7 +717,9 @@ test("D-100: lugares — ordem, nomes, quem atira de dentro e em que ângulo", f
 		end
 	end
 	assert(Vehicles.seatLabel("uh34d", "driver") == "Piloto" and Vehicles.seatLabel("m48a3", "driver") == "Motorista")
-	assert(Vehicles.seatLabel("m48a3", "loader") == "Municiador" and Vehicles.seatLabel("lvtp5", "p3") == "Tropa 3")
+	assert(
+		Vehicles.seatLabel("m48a3", "loader") == "Municiador" and Vehicles.seatLabel("lvtp5", "p3") == "Passageiro 3"
+	)
 	-- fechados: motorista, municiador, cabine do caminhão e da picape; abertos: jipe, caçamba, teto, porta
 	assert(Vehicles.seatInfo("m48a3", "loader").open == nil and Vehicles.seatInfo("m35", "passenger").open == nil)
 	assert(Vehicles.seatInfo("m151", "passenger").open ~= nil and Vehicles.seatInfo("m35", "p1").open ~= nil)
