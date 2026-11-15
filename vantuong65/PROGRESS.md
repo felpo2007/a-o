@@ -169,6 +169,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
   - a cadência abaixo de 12 fps medida num aparelho lento.
 
 ## v83: lote 38, plantas afinadas longe dos caminhos (2026-11-15, D-153)
+- **Publicada** (versão 83 do place, commit c7eeeb6).
 - **Regra:** na mata, a mais de 30 m das estradas e a mais de 60 m de objetivo, QG ou vila, fica
   metade do bambu, do capim-elefante e da bananeira. O resto da mata fica igual planta por planta;
   a mata cerrada da Serraria não muda.
