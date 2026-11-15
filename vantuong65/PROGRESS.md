@@ -196,11 +196,37 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     no lugar de um atlas Casa por casa.
     - Imagens distintas nas casas: 91 → 75.
     - Na mesma vista: textura 131,8 → 122,5 MB e chamadas de desenho 268 → 229.
+- Pedido do dono (15/11): "Siga para outra":
+  - **Lote 45 (v87, D-160): feito.** Conferido no Studio o que só tinha rodado no Lune:
+    - água: vadeando sem nadar nem boiar, e deitado volta a agachado acima de 0,3 m;
+    - arrozal: o chão não alterna;
+    - veículo comprado: arrozal, casa, mata, ladeira, recusa no rio e recolhido em 90 s;
+    - desvirar e peças móveis dos 7 veículos.
+    - Corrigido o gancho "agua", que mandava o soldado para fora do mapa.
 
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;
   - respondido pelo dono: a M14 fica como está; o capim clareou (v58);
   - a cadência abaixo de 12 fps medida num aparelho lento.
+
+## v87: lote 45, água, arrozal, veículo comprado e desvirar no Studio (2026-11-15, D-160)
+- **Água** (só o rio do sul, até 0,60 m; nada fundo dentro da área):
+  - em 0,38 m e 0,60 m: vadeando, Running em todas as leituras, sem oscilação;
+  - agachar fica; deitado volta a agachado em 0,5 s.
+- **Arrozal:** 9 pontos de um tabuleiro de 32 × 36 m leram sempre "paddy" 0,62.
+- **Veículo comprado** (`VT65DevCompra`):
+  - arrozal 8,5 m (capim seco);
+  - casa 7 m (fora dela);
+  - mata 4 m (sem tronco);
+  - ladeira 4 m (0,40 m de desnível, parado a 0,1°);
+  - rio: recusou;
+  - abandonado: some em ~90 s.
+- **Peças móveis** dos 7 veículos: todas as juntas, nenhuma faltando.
+- **Desvirar:** de deitado (UpVector −0,17) para de pé (1,00), com aviso; de pé, recusa com aviso.
+- **Corrigido:** o gancho `VT65DevMov = "agua"` só procura água dentro da área de jogo.
+- **Testes:** Lune 234 ok; pytest 58; ruff, StyLua e luau-lsp limpos.
+- **Não testado** (pede teclado): velocidade vadeando, passada no dique, inclinação da câmera, tanque
+  no dique.
 
 ## v86: lote 44, trim sheet nas 10 casas da vila (2026-11-15, D-159)
 - **Publicada** (versão 86 do place, commit 7581d5f).
@@ -1555,20 +1581,17 @@ do usuário (opção A).
   itens.
 - A mira das 9 armas foi conferida contra um alvo parado. Atirando em movimento e com recuo, só no
   teste com jogadores.
-- D-93 (água, passo, VC mais rápido, dique do tanque): só Lune. No Studio, ver com
-  `workspace:SetAttribute("VT65DevMov", "info")` e os ganchos `agua`, `fundo`, `arrozal`, `dique`
-  e `veiculo`: estado Running vadeando até o peito, sem boiar; passada assistida no dique agachado;
-  inclinação da câmera; tanque subindo o dique.
-- D-100 (pilotar todos os veículos, painel de lugares, tiro de dentro, carros M151/M35/Peugeot,
-  desvirar): só Lune e luau-lsp. No Studio: `VT65DevVeh = "todos"` e `"tombar"`, `VT65DevDrive`
-  com cada ficha; ver o painel no controle, o lugar no olho, o voo do UH-34D e o tiro pela porta.
-- D-103 (veículo ao nascer): só Lune e luau-lsp. No Studio: morto na carta, X / clique no cartão,
-  escolher em CI; nascer no QG e ver o veículo a 4-10 m virado para o objetivo e o CI descontado;
-  nascer num túnel (o pedido espera); VT65DevCompra = "m151" em campo em vários lugares (casa,
-  arrozal, mata, ladeira) para ver onde acha e onde recusa; "abandono". Robux: só com os produtos.
-- D-104 (modelos _v2 em peças): só Lune e luau-lsp. No Studio: VT65DevVeh = "todos" e depois
-  "pecas" (as juntas que o importador deixou), "mira" (torre e cano), VT65DevDrive com cada
-  ficha (rodas girando, rotores, volante, olho e cabeça no teto do Peugeot e do UH-34D).
+- D-93 (água, passo, VC mais rápido, dique do tanque): os estados na água e o arrozal foram
+  conferidos no Studio (D-160). Falta, com teclado: velocidade vadeando, passada assistida no dique
+  agachado, inclinação da câmera, tanque subindo o dique.
+- D-100 (pilotar todos os veículos, painel de lugares, tiro de dentro, carros M151/M35/Peugeot):
+  o desvirar foi conferido no Studio (D-160). Falta, com teclado: ver o painel no controle, o lugar
+  no olho, o voo do UH-34D e o tiro pela porta.
+- D-103 (veículo ao nascer): o lugar (arrozal, casa, mata, ladeira, rio) e o recolhimento foram
+  conferidos no Studio (D-160). Falta: a carta (escolher em CI e o desconto), nascer num túnel e
+  Robux (só com os produtos).
+- D-104 (modelos _v2 em peças): as juntas dos 7 veículos foram conferidas no Studio (D-160). Falta,
+  com teclado: rodas girando, rotores, volante, olho e cabeça no teto do Peugeot e do UH-34D.
 
 ## Como testar no Studio
 1. Abra `vantuong65/place/VanTuong65.rbxl`.

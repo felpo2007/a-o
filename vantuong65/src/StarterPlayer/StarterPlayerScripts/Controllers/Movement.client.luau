@@ -26,6 +26,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
 local Kit = require(ReplicatedStorage.Shared.Kit)
+local MapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any
 local Movement = require(ReplicatedStorage.Shared.Movement)
 local Net = require(ReplicatedStorage.Shared.Net)
 local SoldierAnims = require(ReplicatedStorage.Shared.SoldierAnims)
@@ -1139,7 +1140,14 @@ local function devPlace(pos: Vector3, face: Vector3)
 	vel = Vector3.zero
 end
 
--- água do terreno numa espiral de raios ao redor (até ~200 m): leito entre minM e maxM
+-- água do terreno numa espiral de raios ao redor (até ~200 m): leito entre minM e maxM. D-160: só
+-- dentro da área de jogo (com 10 m de folga); o riacho da margem de fora levava o soldado para onde o
+-- jogo mata quem sai do mapa (Studio, 2026-11-15)
+local function devInside(x: number, z: number): boolean
+	local B = MapConfig.Bounds
+	local e = 10 / M
+	return x > B.minX + e and x < B.maxX - e and z > B.minZ + e and z < B.maxZ - e
+end
 local function devFindWater(minM: number, maxM: number, sea: boolean): (Vector3?, number)
 	local _, _, root = body()
 	if not root then
@@ -1160,7 +1168,7 @@ local function devFindWater(minM: number, maxM: number, sea: boolean): (Vector3?
 		for i = 1, n do
 			local a = 2 * math.pi * i / n
 			local p = Vector3.new(o.X + math.cos(a) * rad, o.Y + 300, o.Z + math.sin(a) * rad)
-			local w = workspace:Raycast(p, Vector3.new(0, -800, 0), wp)
+			local w = if devInside(p.X, p.Z) then workspace:Raycast(p, Vector3.new(0, -800, 0), wp) else nil
 			if w and w.Material == Enum.Material.Water and (not sea or math.abs(w.Position.Y) < 2) then
 				local b = workspace:Raycast(w.Position + Vector3.new(0, 0.1, 0), Vector3.new(0, -60, 0), bp)
 				local depth = if b then (w.Position.Y - b.Position.Y) * M else 99

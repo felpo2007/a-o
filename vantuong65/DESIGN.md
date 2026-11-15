@@ -6236,3 +6236,72 @@ somava 10.
 
 **Limite:** o `assets/estatico/vila_casa_03_xomgo.txt` (D-155) foi copiado da casa antiga. Antes de
 ligar o SLIM, copie de novo.
+
+## D-160 — Lote 45: água, arrozal, veículo comprado e desvirar conferidos no Studio (2026-11-15, v87)
+
+**Pedido do dono:** "Siga para outra". Foram conferidos no Studio itens da lista "O que NÃO foi
+verificado" que só tinham rodado no Lune: D-93 (água), D-100 (desvirar), D-103 (veículo ao nascer)
+e D-104 (peças móveis).
+- Sem teclado no Studio em segundo plano, nada aqui mede a velocidade andando. O soldado foi posto
+  no lugar e os estados foram lidos pelo gancho `VT65DevMov = "info"`.
+
+**Água no mapa de 700 m:** na grade de 24 studs (6,7 m), 124 pontos d'água, todos no rio do sul,
+com leito de até 0,60 m.
+- Não há água funda dentro da área: nadar só acontece fora dela.
+- O gancho achou ainda uma poça de 0,60 m perto do QG dos EUA.
+
+**D-93, água:**
+
+| Leito | Modo | Estado do Humanoid | Altura do corpo | Postura |
+|---|---|---|---|---|
+| 0,38 m | vadear | Running em 20 de 20 leituras | parada em 5 s | deitado volta a agachado em 0,5 s |
+| 0,51 m (riacho de fora) | vadear | Running | parada | — |
+| 0,60 m | vadear | Running em 20 de 20 leituras | 0 m de oscilação em 5 s | agachar fica; deitado volta a agachado em 0,5 s |
+
+- Nenhuma troca entre andar e nadar, nem o corpo boiando.
+- O limite de postura é o da D-93: deitado até 0,3 m, agachado até 0,8 m.
+
+**D-93, arrozal:** 9 pontos espalhados num tabuleiro de 32 × 36 m leram sempre "paddy", fator 0,62,
+sem alternar entre lâmina e capim.
+
+**D-103, veículo comprado em campo** (`VT65DevCompra`, sem cobrar):
+
+| Onde | Pedido | Resultado |
+|---|---|---|
+| arrozal | M151 | a 8,5 m, no capim seco fora do tabuleiro, nivelado |
+| dentro de uma casa de Xóm Gò | M35 | a 7 m, fora da casa, nivelado |
+| mata da Serraria (10 plantas a 12 m) | M151 | a 4 m, nenhum tronco na caixa |
+| ladeira de 28° perto de Xóm Gò | M35 | a 4 m, num trecho com 0,40 m de desnível entre os cantos; parado e a 0,1° |
+| dentro do rio | M151 | recusou ("sem lugar") |
+
+- O M35 da casa encosta 0,18 m na beirada do piso da casa, que tem 0,2 m de altura. A conferência
+  da caixa começa 0,35 m acima do chão de propósito, para aceitar meio-fio e soleira.
+- Na casa, o pedido não cai no "teto": os telhados não têm colisão. O veículo sai fora da casa
+  mesmo assim.
+- O abandonado (sem ninguém a 30 m) sumiu ~90 s depois que o soldado saiu de perto: o M35 e o
+  M151.
+
+**D-104, peças móveis:** `VT65DevVeh = "todos"` e `"pecas"`.
+- Os 7 veículos têm todas as juntas: rodas, portas, escotilhas, torre, cano e rotores.
+- Nenhuma peça falta e nenhum usa o substituto.
+
+**D-100, desvirar:** `VT65DevVeh = "tombar"` deitou o M35.
+- O UpVector foi a −0,17.
+- O pedido de desvirar pelo painel (remote `Vehicle_Board`, a 4 m) o pôs de pé (1,00) com o aviso
+  "Veículo desvirado".
+- Pedido de novo, com ele de pé: "O veículo não está tombado nem preso".
+
+**Corrigido (só o gancho de teste):** o `VT65DevMov = "agua"` procurava água num raio de 200 m sem
+olhar o mapa.
+- Do QG dos EUA, ele achou um riacho na margem de fora e pôs o soldado lá, onde o jogo mata quem sai
+  do mapa.
+- Agora só procura dentro da área, com 10 m de folga. Conferido: do QG achou a poça de 0,60 m de
+  dentro; no rio, um ponto de 0,60 m.
+
+**Não testado:**
+- a velocidade vadeando;
+- a passada assistida no dique;
+- a inclinação da câmera;
+- o tanque subindo o dique.
+
+Tudo isso pede o teclado no jogo.
