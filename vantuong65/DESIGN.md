@@ -6632,8 +6632,20 @@ pesado, o lote ficou no código e na análise.
   linhas passam como linhas), o cilindro, o material, a cor, as superfícies lisas e o atributo.
 - `MapLife.villagePart` põe o pivô no centro da base, com o giro do plano.
 - `AssetLoader.placeItem` procura a cópia fixa (`Vila_<tipo>`) antes de montar a construção.
-- **Falta (Studio):** copiar um conjunto (o pagode e a casa comunal de Xóm Gò), ligá-lo, conferir e
-  publicar.
+- **Feito depois, com o Studio (v92):**
+  - o copiador ganhou o modo `PREFIXO`: com `"Vila_"`, copia as 19 construções de peças do mapa
+    (serraria, toras, tábuas, moenda, caldeira, ponte, cais, 2 barcos, 4 hortas, o pagode, a casa
+    comunal e 4 bancas): 239 peças, 12 inclinadas, sem marca de problema depois de uma correção;
+  - a correção: a `WedgePart` nasce com `BottomSurface = Inlet` (o padrão do Roblox), e só as
+    pontas dos barcos ficavam assim; agora o `MapLife` põe lisa, igual à cópia;
+  - o texto (`assets/estatico/vila_construcoes.txt`, 258 linhas, 45.462 bytes) foi conferido pela
+    soma FNV-1a `f651c81d`, no Studio e no arquivo;
+  - ligado em `ativos.json`: 25 modelos fixos e 299 peças no arquivo, todos com SLIM;
+  - Studio: 25 cópias do plano puladas, as 19 `Vila_` do mapa são as fixas, vila igual (855
+    modelos, 390 construções, 27 animais, 240 abrigos dos bots), arte no chão igual (846 de 852,
+    pior a ponte a −2,7 m, como antes) e autoteste 18 ok, 0 falhas.
+  - Peça comum colide pela forma de verdade (sem o problema de colisão da malha da D-155), então
+    estas construções não ficam com o interior mais claro.
 
 **Próximo alvo da trim sheet** (`tools/textura_custo.py`): custo teórico das texturas dos modelos do
 jogo, com o teto de 1024 do Roblox, 4 bytes por pixel e os mipmaps, sem a compressão:

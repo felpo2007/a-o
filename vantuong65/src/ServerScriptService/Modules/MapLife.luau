@@ -1217,6 +1217,7 @@ function MapLife.objectivePart(kind: string, m: Model, cf: CFrame, w: number, d:
 		for _, sgn in { -1, 1 } do
 			local wp = Instance.new("WedgePart")
 			wp.Name = "Ponta"
+			wp.BottomSurface = Enum.SurfaceType.Smooth -- D-168: a WedgePart nasce com Inlet embaixo
 			wp.Anchored = true
 			wp.CanCollide = true
 			wp.CanQuery = true

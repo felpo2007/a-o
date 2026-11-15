@@ -123,9 +123,13 @@ def test_chave_que_depende_do_jogo_e_recusada(tmp_path):
 
 
 def test_ligados_e_gerado_bate():
-    # D-155: o SLIM só é gerado com o Team Create; D-167: ligado, a casa de Xóm Gò vai no place
+    # D-155: o SLIM só é gerado com o Team Create; D-167: ligado, a casa de Xóm Gò vai no place;
+    # D-168: e as 19 construções de peças do MapLife
     ativos = json.loads((ROOT / "assets" / "estatico" / "ativos.json").read_text("utf-8"))
-    assert ativos == ["vila_casa_03_xomgo"]
+    assert ativos == ["vila_casa_03_xomgo", "vila_construcoes"]
+    construcoes = estatico.ler(ROOT / "assets" / "estatico" / "vila_construcoes.txt")
+    assert len(construcoes) == 19 and all(m["chave"].startswith("Vila_") for m in construcoes)
+    assert sum(estatico.pecas(m) for m in construcoes) == 239
     gerados = sorted((ROOT / "src" / "Workspace" / "Estatico").glob("*.model.json"))
     modulo_arq = ROOT / "src" / "ServerScriptService" / "Modules" / "StaticArt.luau"
     modulo = modulo_arq.read_text("utf-8")

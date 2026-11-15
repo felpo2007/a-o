@@ -1,0 +1,401 @@
+{
+ "ClassName": "Model",
+ "Properties": {
+  "LevelOfDetail": {
+   "Enum": 4
+  },
+  "ModelStreamingMode": "Atomic",
+  "WorldPivotData": {
+   "OptionalCFrame": {
+    "position": [
+     -1395.62,
+     119.132,
+     -1890.63
+    ],
+    "orientation": [
+     [
+      0.704981,
+      0,
+      -0.709226
+     ],
+     [
+      0,
+      1,
+      0
+     ],
+     [
+      0.709226,
+      0,
+      0.704981
+     ]
+    ]
+   }
+  },
+  "Attributes": {
+   "Attributes": {
+    "VT65Estatico": {
+     "Bool": true
+    },
+    "VT65Chave": {
+     "String": "Vila_banca"
+    }
+   }
+  }
+ },
+ "Children": [
+  {
+   "Name": "Esteio",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     0.429,
+     8.571,
+     0.429
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1396.23,
+       123.418,
+       -1897.071
+      ],
+      "orientation": [
+       [
+        0.704976,
+        0.0,
+        -0.709231
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.709231,
+        0.0,
+        0.704976
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "Wood",
+    "Color": [
+     0.6431,
+     0.5725,
+     0.3765
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Esteio",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     0.429,
+     8.571,
+     0.429
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1402.057,
+       123.418,
+       -1891.279
+      ],
+      "orientation": [
+       [
+        0.704976,
+        0.0,
+        -0.709231
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.709231,
+        0.0,
+        0.704976
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "Wood",
+    "Color": [
+     0.6431,
+     0.5725,
+     0.3765
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Esteio",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     0.429,
+     8.571,
+     0.429
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1389.183,
+       123.418,
+       -1889.981
+      ],
+      "orientation": [
+       [
+        0.704976,
+        0.0,
+        -0.709231
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.709231,
+        0.0,
+        0.704976
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "Wood",
+    "Color": [
+     0.6431,
+     0.5725,
+     0.3765
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Esteio",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     0.429,
+     8.571,
+     0.429
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1395.01,
+       123.418,
+       -1884.189
+      ],
+      "orientation": [
+       [
+        0.704976,
+        0.0,
+        -0.709231
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.709231,
+        0.0,
+        0.704976
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "Wood",
+    "Color": [
+     0.6431,
+     0.5725,
+     0.3765
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Cobertura",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     12.139,
+     0.429,
+     10.359
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1395.62,
+       127.918,
+       -1890.63
+      ],
+      "orientation": [
+       [
+        0.704976,
+        0.0,
+        -0.709231
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.709231,
+        0.0,
+        0.704976
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "Grass",
+    "Color": [
+     0.6118,
+     0.5412,
+     0.3529
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Thatch"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Balcao",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     8.568,
+     2.857,
+     2.5
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1393.973,
+       120.561,
+       -1892.267
+      ],
+      "orientation": [
+       [
+        0.704976,
+        0.0,
+        -0.709231
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.709231,
+        0.0,
+        0.704976
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "Wood",
+    "Color": [
+     0.3451,
+     0.2431,
+     0.1569
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  }
+ ]
+}

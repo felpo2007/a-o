@@ -20,6 +20,9 @@
 local CHAVE = "vila_casa_03"
 local CENTRO = Vector3.new(-1280.5, 0, -1804.7)
 local RAIO_M = 10
+-- D-168: com PREFIXO, copia todos os modelos de Map.Art cujo nome começa com ele (ex.: "Vila_", as
+-- 19 construções de peças do MapLife), cada um como um M; CHAVE, CENTRO e RAIO_M ficam de fora
+local PREFIXO: string? = nil
 local M = 0.28
 local COR_PADRAO = Color3.fromRGB(163, 162, 165)
 
@@ -208,6 +211,19 @@ local function no(m: Instance, caminho: string)
 end
 
 local art = workspace.Map.Art
+if PREFIXO then
+	for _, m in art:GetChildren() do
+		if m:IsA("Model") and string.sub(m.Name, 1, #PREFIXO) == PREFIXO then
+			local pv = m:GetPivot()
+			table.insert(
+				linhas,
+				table.concat({ "M", m.Name, f(pv.X), f(pv.Y), f(pv.Z), f(giro(pv)), f(m:GetScale()) }, " ")
+			)
+			no(m, "")
+		end
+	end
+	return table.concat(linhas, "\n")
+end
 local casa, melhor = nil, math.huge
 for _, m in art:GetChildren() do
 	if m:IsA("Model") and m.Name == CHAVE then

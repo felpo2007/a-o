@@ -1,0 +1,1286 @@
+{
+ "ClassName": "Model",
+ "Properties": {
+  "LevelOfDetail": {
+   "Enum": 4
+  },
+  "ModelStreamingMode": "Atomic",
+  "WorldPivotData": {
+   "OptionalCFrame": {
+    "position": [
+     -964.341,
+     36.859,
+     -751.925
+    ],
+    "orientation": [
+     [
+      0.263115,
+      0,
+      -0.964764
+     ],
+     [
+      0,
+      1,
+      0
+     ],
+     [
+      0.964764,
+      0,
+      0.263115
+     ]
+    ]
+   }
+  },
+  "Attributes": {
+   "Attributes": {
+    "VT65Estatico": {
+     "Bool": true
+    },
+    "VT65Chave": {
+     "String": "Vila_ponte"
+    }
+   }
+  }
+ },
+ "Children": [
+  {
+   "Name": "Tabua",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     71.429,
+     0.643,
+     25.0
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -964.341,
+       38.109,
+       -751.925
+      ],
+      "orientation": [
+       [
+        0.263117,
+        0.0,
+        -0.964764
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.964764,
+        0.0,
+        0.263117
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "WoodPlanks",
+    "Color": [
+     0.6902,
+     0.5333,
+     0.3529
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Estaca",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     0.786,
+     17.321,
+     0.786
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -962.196,
+       33.02,
+       -789.529
+      ],
+      "orientation": [
+       [
+        0.263117,
+        0.0,
+        -0.964764
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.964764,
+        0.0,
+        0.263117
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "Wood",
+    "Color": [
+     0.3608,
+     0.2745,
+     0.1882
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Estaca",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     0.786,
+     17.321,
+     0.786
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -985.281,
+       33.02,
+       -783.233
+      ],
+      "orientation": [
+       [
+        0.263117,
+        0.0,
+        -0.964764
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.964764,
+        0.0,
+        0.263117
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "Wood",
+    "Color": [
+     0.3608,
+     0.2745,
+     0.1882
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Estaca",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     1.071,
+     13.75,
+     1.071
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -973.738,
+       31.234,
+       -786.381
+      ],
+      "orientation": [
+       [
+        0.263117,
+        0.0,
+        -0.964764
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.964764,
+        0.0,
+        0.263117
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "Wood",
+    "Color": [
+     0.3608,
+     0.2745,
+     0.1882
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Estaca",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     0.786,
+     17.321,
+     0.786
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -957.497,
+       33.02,
+       -772.301
+      ],
+      "orientation": [
+       [
+        0.263117,
+        0.0,
+        -0.964764
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.964764,
+        0.0,
+        0.263117
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "Wood",
+    "Color": [
+     0.3608,
+     0.2745,
+     0.1882
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Estaca",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     0.786,
+     17.321,
+     0.786
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -980.583,
+       33.02,
+       -766.005
+      ],
+      "orientation": [
+       [
+        0.263117,
+        0.0,
+        -0.964764
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.964764,
+        0.0,
+        0.263117
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "Wood",
+    "Color": [
+     0.3608,
+     0.2745,
+     0.1882
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Estaca",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     1.071,
+     13.75,
+     1.071
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -969.04,
+       31.234,
+       -769.153
+      ],
+      "orientation": [
+       [
+        0.263117,
+        0.0,
+        -0.964764
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.964764,
+        0.0,
+        0.263117
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "Wood",
+    "Color": [
+     0.3608,
+     0.2745,
+     0.1882
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Estaca",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     0.786,
+     17.321,
+     0.786
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -952.799,
+       33.02,
+       -755.073
+      ],
+      "orientation": [
+       [
+        0.263117,
+        0.0,
+        -0.964764
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.964764,
+        0.0,
+        0.263117
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "Wood",
+    "Color": [
+     0.3608,
+     0.2745,
+     0.1882
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Estaca",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     0.786,
+     17.321,
+     0.786
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -975.884,
+       33.02,
+       -748.777
+      ],
+      "orientation": [
+       [
+        0.263117,
+        0.0,
+        -0.964764
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.964764,
+        0.0,
+        0.263117
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "Wood",
+    "Color": [
+     0.3608,
+     0.2745,
+     0.1882
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Estaca",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     1.071,
+     13.75,
+     1.071
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -964.341,
+       31.234,
+       -751.925
+      ],
+      "orientation": [
+       [
+        0.263117,
+        0.0,
+        -0.964764
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.964764,
+        0.0,
+        0.263117
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "Wood",
+    "Color": [
+     0.3608,
+     0.2745,
+     0.1882
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Estaca",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     0.786,
+     17.321,
+     0.786
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -948.1,
+       33.02,
+       -737.845
+      ],
+      "orientation": [
+       [
+        0.263117,
+        0.0,
+        -0.964764
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.964764,
+        0.0,
+        0.263117
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "Wood",
+    "Color": [
+     0.3608,
+     0.2745,
+     0.1882
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Estaca",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     0.786,
+     17.321,
+     0.786
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -971.185,
+       33.02,
+       -731.549
+      ],
+      "orientation": [
+       [
+        0.263117,
+        0.0,
+        -0.964764
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.964764,
+        0.0,
+        0.263117
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "Wood",
+    "Color": [
+     0.3608,
+     0.2745,
+     0.1882
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Estaca",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     1.071,
+     13.75,
+     1.071
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -959.643,
+       31.234,
+       -734.697
+      ],
+      "orientation": [
+       [
+        0.263117,
+        0.0,
+        -0.964764
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.964764,
+        0.0,
+        0.263117
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "Wood",
+    "Color": [
+     0.3608,
+     0.2745,
+     0.1882
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Estaca",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     0.786,
+     17.321,
+     0.786
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -943.402,
+       33.02,
+       -720.617
+      ],
+      "orientation": [
+       [
+        0.263117,
+        0.0,
+        -0.964764
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.964764,
+        0.0,
+        0.263117
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "Wood",
+    "Color": [
+     0.3608,
+     0.2745,
+     0.1882
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Estaca",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     0.786,
+     17.321,
+     0.786
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -966.487,
+       33.02,
+       -714.321
+      ],
+      "orientation": [
+       [
+        0.263117,
+        0.0,
+        -0.964764
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.964764,
+        0.0,
+        0.263117
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "Wood",
+    "Color": [
+     0.3608,
+     0.2745,
+     0.1882
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Estaca",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     1.071,
+     13.75,
+     1.071
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -954.944,
+       31.234,
+       -717.469
+      ],
+      "orientation": [
+       [
+        0.263117,
+        0.0,
+        -0.964764
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.964764,
+        0.0,
+        0.263117
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "Wood",
+    "Color": [
+     0.3608,
+     0.2745,
+     0.1882
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Tabua",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     71.429,
+     1.071,
+     1.071
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -956.382,
+       37.252,
+       -754.096
+      ],
+      "orientation": [
+       [
+        0.263117,
+        0.0,
+        -0.964764
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.964764,
+        0.0,
+        0.263117
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "WoodPlanks",
+    "Color": [
+     0.3608,
+     0.2745,
+     0.1882
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Tabua",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     71.429,
+     1.071,
+     1.071
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -964.341,
+       37.252,
+       -751.925
+      ],
+      "orientation": [
+       [
+        0.263117,
+        0.0,
+        -0.964764
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.964764,
+        0.0,
+        0.263117
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "WoodPlanks",
+    "Color": [
+     0.3608,
+     0.2745,
+     0.1882
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Tabua",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     71.429,
+     1.071,
+     1.071
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -972.301,
+       37.252,
+       -749.754
+      ],
+      "orientation": [
+       [
+        0.263117,
+        0.0,
+        -0.964764
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.964764,
+        0.0,
+        0.263117
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "WoodPlanks",
+    "Color": [
+     0.3608,
+     0.2745,
+     0.1882
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Tabua",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     71.429,
+     0.429,
+     0.429
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -952.799,
+       41.681,
+       -755.073
+      ],
+      "orientation": [
+       [
+        0.263117,
+        0.0,
+        -0.964764
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.964764,
+        0.0,
+        0.263117
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "WoodPlanks",
+    "Color": [
+     0.3451,
+     0.2431,
+     0.1569
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Tabua",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     71.429,
+     0.429,
+     0.429
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -975.884,
+       41.681,
+       -748.777
+      ],
+      "orientation": [
+       [
+        0.263117,
+        0.0,
+        -0.964764
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.964764,
+        0.0,
+        0.263117
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "WoodPlanks",
+    "Color": [
+     0.3451,
+     0.2431,
+     0.1569
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  }
+ ]
+}
