@@ -155,6 +155,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
   - a cadência abaixo de 12 fps medida num aparelho lento.
 
 ## v78: lote 33, vila em meio círculo, estradas de terra, ponte para o tanque e base mais longe (2026-11-15, D-148)
+- **Publicada** (versão 78 do place, commit 160886d).
 - **Vila de Xóm Gò:**
   - as fileiras saíram;
   - casas em arcos em volta da praça, num meio círculo torto de um lado da rua, com vagas vazias e
