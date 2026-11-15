@@ -182,8 +182,8 @@
  "Carta.ne_2km": "105148744178501",
  "Carta.sw_2km": "97095607126684",
  "Carta.se_2km": "128203928291104",
- "Models.mosin": "70519343236093",
- "Models.m70": "94218979828986",
+ "Models.mosin_v79": "70519343236093",
+ "Models.m70_v79": "94218979828986",
  "store.PASS_SEASON_S1": "2081672426",
  "store.PASS_RECRUIT": "2081942423",
  "store.PASS_PERK_SPEED": "2082356430",
@@ -295,7 +295,7 @@
  "Sounds.lagarta": "110839071218227",
  "Sounds.motor_jipe": "76157418267165",
  "Sounds.motor_caminhao": "83596451612531",
- "Models.win12": "90884195431925",
+ "Models.win12_v79": "90884195431925",
  "Models.caixa_municao_us": "128489958854272",
  "Models.caixa_municao_vc": "70550239273438",
  "Models.m151_vidro": "121716450551981",
@@ -416,5 +416,8 @@
  "Carta.nw": "128645165001401",
  "Carta.ne": "137464378268810",
  "Carta.sw": "77829467548125",
- "Carta.se": "119816475637128"
+ "Carta.se": "119816475637128",
+ "Models.m70": "76814352866440",
+ "Models.mosin": "87591536414880",
+ "Models.win12": "88021040446518"
 }

@@ -103,11 +103,11 @@ return {
 		m79 = 115974893628870,
 		rpg2 = 115951819927247,
 		-- fuzis de precisão feitos no Blender (tools/blender/armas.py, 2026-11-12); 0 = arma provisória
-		m70 = 94218979828986,
-		mosin = 70519343236093,
+		m70 = 76814352866440,
+		mosin = 87591536414880,
 		-- espingarda Winchester Model 12 Trench Gun (tools/blender/espingarda.py, 2026-11-13): nós
 		-- Arma, Telha, Culatra, Gatilho e Cartucho; 0 = arma provisória
-		win12 = 90884195431925,
+		win12 = 88021040446518,
 		-- M16 de 1965 (tools/blender/m16.py, D-146): nó Arma; 0 = arma provisória
 		m16 = 115800197069430,
 		-- caixas de munição do suporte (tools/blender/caixa_municao.py, 2026-11-13): nó Caixa e

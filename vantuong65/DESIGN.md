@@ -5746,3 +5746,21 @@ passageiro" e "simplifique o texto de inserção do helicóptero".
   mostrado (PromptShown não disparou nem a 7 m do M35). O Studio estava com um controle fantasma,
   que trocava de arma e abria a carta sozinho. Valem o teste dos veículos (os grupos e a escolha do
   lugar) e o caminho do servidor, que não mudou (Vehicle_Board com o id do lugar).
+
+## D-150 — Lote 35: M70, Mosin e Escopeta 12 refeitas com o tubo certo (v80, 2026-11-15)
+
+**Pedido do dono:** "faça isso", em resposta à oferta de refazer as três armas que tinham guarda-mato,
+gatilho e zarelhos torcidos (o `tubo` do `tools/blender/armas.py` virava o anel 180° a cada ponto;
+corrigido na D-146).
+
+- **Refeitas no Blender:** `armas.py -- m70 mosin` e `espingarda.py -- win12`, sem mudar a forma.
+  - M70: 5.576 + 352 triângulos.
+  - Mosin: 6.632 + 400.
+- **Antes e depois** (prévia do GLB):
+  - na Escopeta 12, o guarda-mato era um zigue-zague e virou um laço limpo;
+  - na M70, o guarda-mato e os zarelhos saíram retos.
+- **IDs novos:** M70 76814352866440, Mosin 87591536414880, Escopeta 12 88021040446518. Os antigos
+  ficam no `roblox_ids.json` como `Models.*_v79`.
+- O `WeaponArt` não mudou: os pontos são os mesmos, e a mira da Escopeta 12, medida de novo no GLB,
+  deu o mesmo.
+- **Studio:** a Escopeta 12 carrega o modelo novo na mão.

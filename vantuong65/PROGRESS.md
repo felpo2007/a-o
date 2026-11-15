@@ -147,12 +147,33 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     - objetivos D e E e a linha do setor mais longe da base dos EUA (a base já encosta na borda).
   - **Lote 34 (v79, D-149): feito.** Entrar no veículo com os lugares importantes e uma linha
     "Passageiro"; textos do helicóptero simples (sem grade nem "LZ").
+- Pedidos novos do dono (15/11): "faça isso [refazer as 3 armas] e depois isso [um texto sobre
+  beleza e desempenho do mapa, mais duas perguntas]":
+  - **Lote 35 (v80, D-150): feito.** M70, Mosin e Escopeta 12 refeitas sem as peças torcidas.
+  - **Lote 36:**
+    - "onde está o botão para 3ª pessoa?";
+    - "as árvores devem tancar os tiros".
+  - **Lote 37 (desempenho e beleza do mapa, pelo texto):**
+    - medir antes (fps, tempo de quadro, Scene Analysis/MicroProfiler);
+    - sombra só no que importa e simplificar o que está longe;
+    - colisões simples em props;
+    - transparência sobreposta da folhagem (overdraw);
+    - reuso de modelos;
+    - detalhe concentrado nos caminhos, interiores e objetivos;
+    - medir depois.
   - Usar o Blender no que precisar de modelo novo.
 
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;
   - respondido pelo dono: a M14 fica como está; o capim clareou (v58);
   - a cadência abaixo de 12 fps medida num aparelho lento.
+
+## v80: lote 35, M70, Mosin e Escopeta 12 refeitas (2026-11-15, D-150)
+- As três armas do Blender refeitas com o `tubo` certo.
+  - O guarda-mato e os zarelhos não estão mais torcidos (na Escopeta 12 era um zigue-zague).
+  - IDs novos; os pontos de mira não mudaram.
+- **Studio:** a Escopeta 12 nova na mão.
+- **Testes:** os do jogo não mudam (só o modelo).
 
 ## v79: lote 34, entrar no veículo e o texto do helicóptero (2026-11-15, D-149)
 - **Publicada** (versão 79 do place, commit 6b0933c).
