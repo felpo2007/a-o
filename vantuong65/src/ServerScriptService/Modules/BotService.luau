@@ -88,7 +88,7 @@ local debugOn = false
 local lastFire: { [Model]: number } = setmetatable({}, { __mode = "k" }) :: any -- quem atirou e quando
 -- D-147: medida no Studio (workspace "VT65DevBots" = "distancias"): distância de cada rajada em alvo,
 -- rajadas de cobertura e pontos de flanco, desde a última medida
-local stats = { dists = {} :: { number }, cover = 0, flank = 0 }
+local stats = { dists = {} :: { number }, cover = 0, flank = 0, rush = 0 }
 
 -- Tamanho de cada time que os bots completam: o atributo BotFill do ReplicatedStorage, se houver;
 -- senão 50 (D-107; era 10, 15 no Studio). O teto pelo desempenho vem depois (crowd).
@@ -1788,11 +1788,17 @@ end
 -- parado e agachado (longe), atirando. Sem alvo: vai ao último contato e joga granada em quem sumiu.
 ---------------------------------------------------------------------------------------------
 local function duel(bot: Bot, model: Model, hum: Humanoid, root: BasePart, now: number, target: Model, targetD: number)
-	if bot.rushTo then
-		endRush(bot, now)
-	end
 	local tpos = target:GetPivot().Position
 	local distM = targetD * M
+	-- D-166 ("quero os bots bem ofensivos"): o lance de assalto da D-107 também no duelo. Antes o lance
+	-- acabava aqui e quem atacava agachava e trocava tiro de longe até o fim (D-163). Em lance, corre
+	-- até o fim dele sem atirar; com o alvo a menos de PUSH.holdM, para e luta.
+	if bot.rushTo and distM < BotBrain.PUSH.holdM then
+		endRush(bot, now)
+	end
+	if rushStep(bot, model, root, now) then
+		return
+	end
 	-- sem bala no carregador (ou já recarregando): abrigo perto e recarrega agachado
 	if bot.mag <= 0 and now >= bot.reloadUntil and not bot.firing then
 		startReload(bot, now)
@@ -1820,8 +1826,34 @@ local function duel(bot: Bot, model: Model, hum: Humanoid, root: BasePart, now: 
 		bot.strafeTo = nil
 		return
 	end
+	-- D-166: quem ataca e não está recarregando nem ferido entra no lance pelas regras da D-107
+	-- (BotBrain.shouldRush): a equipe da vez corre com o alvo além de PUSH.engageM ou depois de
+	-- PUSH.coverMaxS parada; qualquer um, depois de PUSH.coverHardMaxS no mesmo lugar
+	local hurt = hum.Health / math.max(hum.MaxHealth, 1) < F44.retreatHealth
+	if not reloading and not hurt and bot.mag > 0 and now >= bot.retreatUntil then
+		local point = squadObjective(bot)
+		if
+			BotBrain.shouldRush({
+				attacking = BotSquads.attacking(bot),
+				myBound = BotSquads.advancing(bot),
+				ready = now >= bot.nextRush,
+				wounded = false,
+				targetM = distM,
+				toPointM = if point then flat(root.Position, point) * M else math.huge,
+				zoneM = MapConfig.CaptureRadiusStuds * M,
+				pinnedS = if bot.pinnedSince then now - bot.pinnedSince else 0,
+				stillS = now - bot.fightSince,
+			})
+			and startRush(bot, root, tpos, now)
+			and rushStep(bot, model, root, now)
+		then
+			stats.rush += 1
+			bot.strafeTo = nil
+			return
+		end
+	end
 	-- vida abaixo de 35%: recua 3,5 s de costas para o inimigo, atirando
-	if hum.Health / math.max(hum.MaxHealth, 1) < F44.retreatHealth and now > bot.retreatUntil then
+	if hurt and now > bot.retreatUntil then
 		bot.retreatUntil = now + F44.retreatS
 	end
 	if now < bot.retreatUntil then
@@ -2390,6 +2422,10 @@ local function think(bot: Bot, now: number)
 			return
 		end
 		bot.strafeTo, bot.duelCover = nil, nil
+		-- D-166: o lance começado no duelo vai até o fim mesmo com o alvo sumido (atrás de algo)
+		if bot.rushTo and threat and rushStep(bot, model, root, now) then
+			return
+		end
 		-- D-147: quem tomou tiro sem ver de onde avisa o squad ("contato!") pela origem do tiro
 		local tp = bot.threatPos
 		if tp and now - bot.threatAt < 1 then
@@ -2535,9 +2571,10 @@ end
 local function rebalance()
 	local fill = BotService.fill()
 	local maxAdd = BotBrain.CROWD.addPerStep
+	local mode = ReplicatedStorage:GetAttribute("MatchMode") :: string?
 	for _, faction in { "US", "VC" } do
 		local h = humans(faction)
-		local want = BotBrain.fillWant(fill, h, Roles.TEAM_MAX, crowd.cap)
+		local want = BotBrain.fillWant(BotBrain.modeFill(fill, mode, faction), h, Roles.TEAM_MAX, crowd.cap)
 		local mine = {}
 		for _, b in bots do
 			if b.faction == faction and not b.removed then
@@ -2803,17 +2840,18 @@ local function devBots()
 		end
 		print(
 			string.format(
-				"[VT65 TESTE] bots: %d rajadas em alvo (mediana %.0f m, 90%% até %.0f m, máx. %.0f m; %d além de 45 m); %d rajadas de cobertura; %d flancos",
+				"[VT65 TESTE] bots: %d rajadas em alvo (mediana %.0f m, 90%% até %.0f m, máx. %.0f m; %d além de 45 m); %d rajadas de cobertura; %d flancos; %d lances no duelo",
 				#ds,
 				at(0.5),
 				at(0.9),
 				at(1),
 				over45,
 				stats.cover,
-				stats.flank
+				stats.flank,
+				stats.rush
 			)
 		)
-		stats.dists, stats.cover, stats.flank = {}, 0, 0
+		stats.dists, stats.cover, stats.flank, stats.rush = {}, 0, 0, 0
 	elseif v == "escala1" or v == "escala" then
 		-- D-147: "escala1" volta às distâncias e à mira do Front 44 sem escala (como na v76), para
 		-- comparar; "escala" devolve as de agora

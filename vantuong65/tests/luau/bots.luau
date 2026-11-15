@@ -1021,6 +1021,49 @@ test("D-162: bot sem o bônus de velocidade do lado; defesa com mais squads", fu
 	assert(BotBrain.SQUAD.lagMovingMps > 0, "atrasado parado não segura o squad")
 end)
 
+-- D-163/D-166 ("quero os bots bem ofensivos"): no duelo do Front 44 o atacante agachava e trocava tiro
+-- de longe até o fim; agora o lance da D-107 vale no duelo e, no Offensive, o VC defende com 2/3
+test("D-166: lance de assalto no duelo e o VC com 2/3 no Offensive", function()
+	local fs = require("@lune/fs")
+	local src = string.gsub(fs.readFile("src/ServerScriptService/Modules/BotService.luau"), "\r", "")
+	local duel = string.match(src, "local function duel%(.-\nend\n")
+	assert(duel, "duel não achado")
+	assert(string.find(duel, "BotBrain.shouldRush(", 1, true), "o duelo tem que decidir o lance (D-166)")
+	assert(string.find(duel, "rushStep(", 1, true), "o lance em curso segue no duelo")
+	assert(not string.find(duel, "if bot.rushTo then\n\t\tendRush", 1, true), "o duelo não pode cortar todo lance")
+	-- no Offensive o VC (defensor) completa só 2/3 do time; o resto não muda
+	assert(BotBrain.modeFill(30, "Offensive", "VC") == 20, "VC com 20 de 30 no Offensive")
+	assert(BotBrain.modeFill(30, "Offensive", "US") == 30, "EUA completos no Offensive")
+	assert(BotBrain.modeFill(30, "Warfare", "VC") == 30 and BotBrain.modeFill(30, nil, "VC") == 30, "Warfare igual")
+	assert(BotBrain.fillWant(BotBrain.modeFill(30, "Offensive", "VC"), 5, 30, 30) == 15, "humanos contam igual")
+	local src2 = string.gsub(fs.readFile("src/ServerScriptService/Modules/BotService.luau"), "\r", "")
+	assert(string.find(src2, "BotBrain.modeFill(fill, mode, faction)", 1, true), "o rebalance usa o fill do modo")
+	-- o lance da D-107: a equipe da vez corre com o alvo longe; ninguém corre na cara do alvo
+	local base = {
+		attacking = true,
+		myBound = true,
+		ready = true,
+		wounded = false,
+		targetM = 150,
+		toPointM = 300,
+		zoneM = 35,
+		pinnedS = 0,
+		stillS = 0,
+	}
+	assert(BotBrain.shouldRush(base), "alvo a 150 m: a equipe da vez corre")
+	local perto = table.clone(base)
+	perto.targetM = BotBrain.PUSH.holdM - 1
+	assert(not BotBrain.shouldRush(perto), "alvo perto: luta onde está")
+	local cobre = table.clone(base)
+	cobre.myBound = false
+	assert(not BotBrain.shouldRush(cobre), "quem cobre fica")
+	cobre.stillS = BotBrain.PUSH.coverHardMaxS
+	assert(BotBrain.shouldRush(cobre), "parado demais no mesmo lugar: corre mesmo cobrindo")
+	local defesa = table.clone(base)
+	defesa.attacking = false
+	assert(not BotBrain.shouldRush(defesa), "quem defende não corre")
+end)
+
 print(string.format("%d ok, %d falhas", passed, failed))
 if failed > 0 then
 	process.exit(1)

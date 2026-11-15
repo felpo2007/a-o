@@ -610,6 +610,23 @@ function BotBrain.fillWant(fill: number, humans: number, teamMax: number, cap: n
 	return math.clamp(math.min(fill, teamMax) - humans, 0, math.max(cap, 0))
 end
 
+-- D-166 (pedido do dono, 2026-11-15: "quero os bots bem ofensivos"): no Offensive só de bots, o VC
+-- segurava Xóm Gò até o fim (D-163) e os atacantes que andavam mais para dentro do fogo (D-163, D-166:
+-- marcha forçada e fumaça) perdiam mais. Na Operação Starlite os fuzileiros eram muito mais numerosos
+-- que o batalhão do VC; no Offensive, o lado que defende completa o time só até defenderShare do
+-- fill (20 de 30). Os humanos contam igual; o Warfare não muda. PLACEHOLDER de design.
+BotBrain.OFFENSIVE = {
+	defenderShare = 2 / 3,
+}
+
+-- fill do lado neste modo: no Offensive o VC (defensor) completa até defenderShare
+function BotBrain.modeFill(fill: number, mode: string?, faction: string): number
+	if mode == "Offensive" and faction == "VC" then
+		return math.floor(fill * BotBrain.OFFENSIVE.defenderShare + 0.5)
+	end
+	return fill
+end
+
 -- Quantos entram (+) ou saem (-) agora: entra no máximo `maxAdd` por vez; sair é na hora.
 function BotBrain.fillStep(have: number, want: number, maxAdd: number): number
 	if have > want then

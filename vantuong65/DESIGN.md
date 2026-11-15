@@ -6468,3 +6468,102 @@ empurra é o jogador. Se o dono quiser o ataque de bots mais forte, as alavancas
 - o tempo do Offensive (20 + 15 min por setor, `Offensive.C`);
 - os bots de ataque com granada de fumaça;
 - mais bots dos EUA no Offensive.
+
+## D-164 — Lote 49a: os 4 uniformes da D-131 em Robux (2026-11-15, v90)
+
+**Pedido do dono:** "Robux ... quero isso vc tem permissao total para colocar".
+
+- A loja em Robux já estava quase toda criada: passes de uniforme, unidade, apoiador, kits,
+  campanha, recruta e as 8 vantagens; produtos de apoio, renascer onde caiu, pular nível, XP e
+  créditos dobrados, pacotes de créditos, os 3 veículos ao nascer e as 17 skins de arma. Eu tinha
+  dito ao dono que os botões de Robux estavam escondidos; estava errado, e o `TODO_USUARIO` foi
+  corrigido.
+- Faltavam os 4 uniformes da D-131 (tadpole, lagarto, áo bà ba marrom e tigrado capturado). Foram
+  criados como Game Pass a R$ 79, o preço dos outros uniformes (`tools/roblox_cloud.py
+  create-skins`), e os IDs estão em `Skins.IDS`.
+- Continuam com o dono: servidores privados (preço), a assinatura e o Managed Pricing.
+
+## D-165 — Lote 49b: telhados na trim sheet, medidos e desfeitos (2026-11-15, sem mudança no jogo)
+
+**Pedido do dono:** "Telhados na trim sheet (menos memória de textura): faço ou não? faça".
+
+**O que foi feito:**
+- Uma 5ª folha, R (cor e normal de 1024 e rugosidade de 512), com 3 faixas: palha, folha de
+  palmeira e telha. Cada faixa foi assada de uma água de telhado de verdade (`vila_comum.placa`,
+  com o relevo fino).
+- O telhado das casas foi refeito baixo (grade de 0,6 m; só a franja do beiral ficou na malha), com
+  as UVs da placa (u ao longo do beiral, v subindo a água) e a cumeeira no topo da faixa.
+- As 10 casas foram convertidas e subidas. Nas prévias do Blender, telha, palha e folha ficaram
+  fiéis. Triângulos por casa: −4% a −24% (a 05 foi de 6.853 para 5.229).
+
+**Medida no Studio:**
+- **Como:** sem bots (`BotFill` 0 no Edit, antes do Play), Studio novo a cada medida, qualidade 10,
+  FOV 70, a vista da vila da D-159, memória `GraphicsTexture` depois de 60 s.
+- Com bots o número muda de uma sessão para outra (cada bot traz as texturas do avatar): 167,5 MB
+  na v89 e 192,3 MB com os telhados. Por isso a medida que vale é a sem bots:
+
+| Versão | Textura | Imagens distintas | Chamadas de desenho |
+|---|---|---|---|
+| v89 (telhado no atlas de cada casa) | 129,6 MB | 365 | 261 |
+| telhado na folha R | 167,7 e 170,2 MB | 335 | 262 |
+| telhado na folha R, sem aplicar a R | 134,9 MB | 335 | — |
+
+- **A faixa R sozinha custa ~35 MB nessa vista.** Os 10 atlas de telhado que saíram quase não
+  pesavam: sem eles e sem a R, a memória ficou como a da v89. Com 30 imagens a menos, a memória
+  subiu.
+- **Por que (suposição, não medida):** o Roblox parece carregar cada textura na resolução que a tela
+  pede. Cada telhado ocupava um pedaço do atlas da casa e pedia pouca resolução. A faixa R se
+  repete muito na água do telhado e pede a folha inteira, ainda mais com a casa de perto.
+
+**Resultado:** desfeito. As casas voltaram aos assets da v89, e os assets subidos ficaram anotados
+como `*_telhado` em `assets/roblox_ids.json`. Antes de passar outro grupo para a trim sheet, medir
+como acima: só vale trocar a textura que o Roblox carrega grande.
+
+## D-166 — Lote 50: bots ofensivos no Offensive (2026-11-15, v90)
+
+**Pedido do dono** (sobre a pergunta da D-163, "deixo o VC segurar Xóm Gò ou dou mais tempo aos
+EUA?"): "quero os bots bem ofensivos".
+
+**O que ficou no jogo:**
+- **Lance de assalto também no duelo.** O lance da D-107 (`BotBrain.PUSH`, `shouldRush`) só existia
+  no combate antigo; no duelo do Front 44, o atacante que via o alvo agachava e trocava tiro de longe
+  até o fim. Agora, no duelo:
+  - a equipe da vez corre até o próximo abrigo a caminho do ponto com o alvo a mais de 80 m, ou
+    depois de 6 s parada;
+  - qualquer um do ataque corre depois de 14 s no mesmo lugar;
+  - ninguém corre com o alvo a menos de 35 m, recarregando, com a vida abaixo de 35% ou dentro do
+    ponto;
+  - o lance começado vai até o fim mesmo se o alvo some.
+  - `VT65DevBots = "distancias"` conta os lances.
+- **No Offensive, o VC defende com 2/3.** O lado que defende completa o time só até 20 de 30
+  (`BotBrain.OFFENSIVE.defenderShare`, `modeFill`). Os humanos contam igual, e o Warfare não muda.
+  Na Operação Starlite os fuzileiros eram muito mais numerosos que o batalhão do VC.
+
+**Medidas** (Studio; Offensive só de bots, com um soldado dos EUA em campo e o squad dele sem bots;
+amostra a cada 30 s; o objetivo é Ponte e Cais, D):
+
+| Variante | Bots EUA × VC | Dentro de D (EUA × VC) | D tomada? |
+|---|---|---|---|
+| v89 (D-163, 1ª partida) | 30 × 30 | — | aos ~5,6 min |
+| v89, 2ª partida | 29 × 30 | 0 × 8–22 até 10,5 min | não até 10,5 min |
+| lance no duelo + fumaça | 29 × 30 | 0–5 × 4–19 | não até 10,7 min |
+| lance no duelo + VC com 2/3 (fica) | 29 × 20 | 3–6 × 6–11 dos 9,5 aos 11,5 min | não até 11,5 min |
+
+- A tomada aos 5,6 min da D-163 foi a exceção: em 4 das 5 partidas medidas (contando as 2 da
+  marcha forçada, D-163), D não caiu até 8–11 min.
+- **Por que o ataque perde:** em 90 s da variante que ficou, morreram 29 dos EUA e 11 do VC.
+  - Os EUA caíam a 87–160 m de D, com um VC a 5–27 m.
+  - O VC sai do ponto atrás do tiro ouvido e do último contato e luta de perto. Ali a rajada de 3 a 7
+    tiros das armas automáticas dele vence o M14 semiautomático.
+  - O túnel avançado do VC fica perto da frente; o bot dos EUA renasce no QG, a ~250 m, porque o
+    companheiro de squad está sempre em combate.
+- **Fumaça, tentada e desfeita:** o squad que ataca jogava uma lata (1 por vida, 1 por squad a cada
+  40 s) a 22 m na direção do contato. Foram 33 latas e 5 lances em 8,7 min, e nenhum americano entrou
+  em D: com o alvo tapado, metade do squad anda até o contato e sai da nuvem perto do VC.
+- Com a variante que ficou, os EUA entraram em D, o que a v89 não fez na mesma janela. Mas uma
+  partida por variante tem muita variação, e nenhuma tomou D.
+
+**Próximas alavancas** (não feitas, mudam o jogo do jogador):
+- o tempo do Offensive (`Offensive.C`);
+- o fogo de perto do bot dos EUA (rajada da M14 ou mais M60 no squad);
+- o defensor do Offensive mais preso ao ponto (menos caça ao contato).

@@ -223,11 +223,50 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
       primeiro setor não caiu em 8–10 min. Foi desfeita.
     - Esperando o dono: se quer o ataque de bots mais forte no Offensive (tempo do modo, fumaça
       ou mais bots dos EUA).
+- Pedido do dono (15/11): Team Create, telhados na trim, "quero os bots bem ofensivos" e Robux:
+  - **Lote 49a (D-164): feito.** Os 4 uniformes da D-131 viraram Game Pass a R$ 79; o resto da loja
+    em Robux já existia.
+  - **Lote 49b (D-165): medido e desfeito.** Telhados na trim sheet custaram +38 MB de textura na
+    vista da vila (129,6 → 167,7 MB, sem bots); as casas voltaram aos assets da v89.
+  - **Lote 50 (v90, D-166): feito.** Lance de assalto também no duelo e, no Offensive, o VC com 20
+    de 30. Os EUA chegaram a entrar em Ponte e Cais; o primeiro setor ainda não caiu em 11,5 min.
+  - Team Create: o passo a passo está no `TODO_USUARIO` (é do dono).
 
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;
   - respondido pelo dono: a M14 fica como está; o capim clareou (v58);
   - a cadência abaixo de 12 fps medida num aparelho lento.
+
+## v90: lotes 49 e 50, Robux, telhados medidos e bots ofensivos (2026-11-15, D-164 a D-166)
+- **Robux (D-164):** os 4 uniformes da D-131 a R$ 79 (`Skins.IDS`). Servidores privados, assinatura
+  e Managed Pricing continuam com o dono.
+- **Telhados na trim sheet (D-165), desfeito:**
+
+  | Versão (sem bots, vista da vila) | Textura |
+  |---|---|
+  | v89 | 129,6 MB |
+  | telhado na folha R | 167,7 e 170,2 MB |
+  | folha R sem aplicar | 134,9 MB |
+
+  - A faixa R custa ~35 MB; os atlas de telhado de cada casa quase não pesavam.
+  - Com bots, a medida varia de sessão para sessão (texturas dos avatares).
+- **Bots ofensivos (D-166):**
+  - lance de assalto também no duelo (equipe da vez com o alvo além de 80 m ou parada 6 s;
+    qualquer um parado 14 s);
+  - no Offensive, o VC defende com 20 de 30.
+  - **Offensive só de bots** (Ponte e Cais):
+
+    | Variante | EUA × VC dentro de D | D tomada |
+    |---|---|---|
+    | v89, 2ª partida | 0 × 8–22 até 10,5 min | não |
+    | lance + fumaça (desfeito) | 0–5 × 4–19 | não até 10,7 min |
+    | lance + VC com 20 (fica) | 3–6 × 6–11 dos 9,5 aos 11,5 min | não até 11,5 min |
+
+  - Por que o ataque perde: o VC caça de perto (morreram 29 × 11 em 90 s, com o VC a 5–27 m); a
+    rajada automática dele vence o M14.
+- **Testes:** Lune 238 ok (bots: D-166); pytest 58; autoteste no Studio 18 ok, 0 falhas; ruff,
+  StyLua e luau-lsp limpos.
+- **Não testado:** Offensive com jogadores; Warfare só de bots com o lance no duelo.
 
 ## v89: lote 47, equilíbrio dos bots no Warfare (2026-11-15, D-162)
 - **Publicada** (versão 89 do place, commit 01736cf). Autoteste no build final: 18 ok, 0 falhas.

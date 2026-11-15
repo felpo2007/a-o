@@ -57,6 +57,12 @@ Textos prontos e imagens: **`LANCAMENTO.md`** (página do jogo, guia do question
   - Limite conhecido: a casa fixa fica com o interior mais claro (detalhes no D-155).
   - Com o Team Create ligado, o Studio salva na nuvem o que se mexe no place aberto de lá. Eu
     continuo publicando só pelo pipeline.
+  - **Como ligar (1 min):**
+    1. Abra o place da nuvem no Studio (Create → STARLITE: Vietnã 1965 → Editar no Studio).
+    2. Aba **Arquivo (File)** → **Colaborar (Collaborate)**. Em Studio mais antigo: aba **Ver
+       (View)** → **Team Create** → **Ativar (Turn On)**.
+    3. Confirme. O Studio recarrega o place em modo de equipe.
+    4. Feche o Studio **sem salvar e sem publicar** e me avise.
 
 ## 3. Testar no Studio o que eu não consigo medir aqui
 Nada rodou dentro do Roblox. Os critérios abaixo exigem o Studio ou o jogo publicado. Abra

@@ -39,6 +39,8 @@ repositório é de OUTRO projeto (estratégias de trade). Aqui vale este arquivo
     `Trim_M/W/O/P`, sem textura, e o `metricas.json` aponta para ele;
   - rodou o `vila.py` de uma casa? Rode o `vila_trim.py` dela depois;
   - material novo no grupo Casa pede uma faixa em `FAIXAS` ou uma troca em `TROCA`;
+  - o telhado fica no atlas de cada casa: na trim sheet ele custou ~35 MB a mais de textura
+    (D-165). Antes de passar outro grupo para a trim, meça sem bots, como na D-165;
   - o `AssetLoader` clona a SurfaceAppearance do portador (`AssetIds.Models.vila_trim`) nas peças
     `Trim_*`.
 - Arte fixa no place, para o SLIM (D-155):
@@ -94,7 +96,8 @@ O `sourcemap.json` não vai para o Git.
     perto dessa ficha ("sair" tira). Com o Studio atrás de outra janela, o W do MCP não chega:
     para andar, mexa no `DriveVelocity` e no `DriveAttitude` do chassi pelo servidor (D-157);
   - `workspace:SetAttribute("VT65DevBots", "distancias")`: de que distância os bots atiraram, quantas
-    rajadas de cobertura e quantos flancos desde a última vez (D-147). A partida (e a marcha dos bots)
+    rajadas de cobertura, quantos flancos, lances no duelo e fumaças desde a última vez (D-147,
+    D-166). A partida (e a marcha dos bots)
     só começa com um jogador em campo.
   - Equilíbrio dos bots (D-162):
     - ponha o soldado em campo;
@@ -209,7 +212,7 @@ O `sourcemap.json` não vai para o Git.
 - Segredos só no `.env` (no `.gitignore`), nunca no código nem no chat.
 - ForgeGUI: nunca regenerar um job em `outcome_unknown`. "failed" com `retryable` pode ser
   retomado com `generation_retry`.
-- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-164) e atualize `PROGRESS.md`.
+- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-167) e atualize `PROGRESS.md`.
 - Tetos de triângulos por modelo: vegetação ≤ 6 mil (D-135), props e herói ≤ 20 mil (`ArtBudget`,
   conferido pelo teste da F5).
 - Commits no branch acima, com mensagem em português.
