@@ -86,6 +86,7 @@ local LENGTH_M: { [string]: number } = {
 	m70 = 1.13, -- Winchester M70 de cano de 24 pol. (tools/blender/armas.py; total PLACEHOLDER)
 	mosin = 1.232, -- Mosin-Nagant 91/30 (wiki)
 	win12 = 1.003, -- Winchester Model 12 Trench Gun, cano de 20 pol. (tools/blender/espingarda.py)
+	m16 = 0.993, -- M16 de 1965 com o quebra-chamas de três dentes (wiki: 39 pol.; tools/blender/m16.py)
 }
 local WOOD = Color3.fromRGB(96, 66, 42)
 local STEEL = Color3.fromRGB(44, 45, 47)

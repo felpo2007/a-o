@@ -217,16 +217,21 @@ class Malha:
         """Tubo ao longo de uma poligonal (x, d, z), com tampas."""
         P = [np.array([p[0], -p[1], p[2]], float) for p in pts]
         rings = []
-        ref = np.array([1.0, 0.0, 0.0])
+        u = None
         for i, p in enumerate(P):
             t = P[min(i + 1, len(P) - 1)] - P[max(i - 1, 0)]
             t /= np.linalg.norm(t)
-            if abs(np.dot(ref, t)) > 0.95:
-                ref = np.array([0.0, 0.0, 1.0])
-            u = np.cross(t, ref)
+            if u is None:
+                ref = np.array([1.0, 0.0, 0.0])
+                if abs(np.dot(ref, t)) > 0.95:
+                    ref = np.array([0.0, 0.0, 1.0])
+                u = np.cross(t, ref)
+            else:
+                # transporte paralelo: o anel não gira em volta do eixo (antes, `ref = w` virava
+                # o anel 180° a cada passo e o tubo saía torcido, em ampulheta; D-146)
+                u = u - np.dot(u, t) * t
             u /= np.linalg.norm(u)
             w = np.cross(t, u)
-            ref = w
             ring = []
             for j in range(k):
                 a = 2 * math.pi * j / k

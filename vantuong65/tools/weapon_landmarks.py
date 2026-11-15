@@ -300,6 +300,12 @@ BLENDER = {
     # gira; traz a telha que corre (pump, pumpM), a janela de ejeção (eject), a portinhola de carga
     # (load) e o pino do gatilho (trigger). A mira (conta) é medida na malha pelo sight_align.py.
     "win12": ROOT / "assets/blender/arma_win12/pontos.json",
+    # M16 de 1965 (tools/blender/m16.py, D-146): só a peça "Arma"; a mira é a da construção (o
+    # centro do anel grande da alça e a ponta do poste da massa)
+    "m16": ROOT / "assets/blender/arma_m16/pontos.json",
+    # SKS refeita no Blender (tools/blender/sks.py, D-146: a do gerador tapava a mira); com o
+    # pontos.json presente, a entrada do gerador (FORWARD) fica de fora
+    "sks": ROOT / "assets/blender/arma_sks/pontos.json",
 }
 # pontos opcionais das armas do Blender (Vector3 no espaço da malha publicada)
 BLENDER_PONTOS = ("bolt", "pump", "eject", "load", "trigger")
@@ -357,6 +363,8 @@ def main() -> None:
         "local WeaponArt: { [string]: Art } = {",
     ]
     for key in FORWARD:
+        if key in BLENDER and BLENDER[key].is_file():
+            continue  # refeita no Blender (D-146: a SKS); os pontos vêm do pontos.json abaixo
         d = landmarks(key)
         print(key, d)
         lines += [
@@ -380,7 +388,8 @@ def main() -> None:
             print("sem pontos (rode tools/blender/armas.py):", key)
             continue
         d = json.loads(caminho.read_text("utf-8"))
-        if key in MEDIDAS:
+        # só a medida feita no próprio GLB do Blender (a da SKS do CFG é a da malha do gerador)
+        if key in MEDIDAS and "glb" in CFG.get(key, {}):
             # mira medida na malha (sight_align.py); a da construção fica no pontos.json. O
             # sightKind fica vazio: o WeaponVisuals só desenha anel e entalhe (a conta é da malha)
             med = MEDIDAS[key]

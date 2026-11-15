@@ -134,8 +134,10 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     - Rodinha do mouse troca de arma;
     - a arma não atira com o item nas mãos e avisa "mãos ocupadas";
     - o aviso de conexão instável fica menos sensível e diz o motivo.
-  - **Lote 31 (armas):** mira e dano da SKS; olho mais longe na mira da M14; o fuzil da foto do dono
-    (pediu "M4"; a foto é um M16 de 1965–67), feito no Blender.
+  - **Lote 31 (v76, D-146): feito.**
+    - M16 da foto (o dono pediu "M4"), feito no Blender;
+    - SKS refeita no Blender, com mira limpa e mais dano;
+    - olho mais longe na mira da M14.
   - **Lote 32 (bots):** atirar de mais longe, trabalhar em equipe, nível médio.
   - **Lote 33 (mapa):**
     - base dos EUA mais longe dos objetivos;
@@ -150,6 +152,23 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;
   - respondido pelo dono: a M14 fica como está; o capim clareou (v58);
   - a cadência abaixo de 12 fps medida num aparelho lento.
+
+## v76: lote 31, M16 da foto, SKS refeita e a mira da M14 (2026-11-15, D-146)
+- **M16** (o dono pediu "M4"; a foto é o M16 do Vietnã): feito no Blender.
+  - 6.516 triângulos; alça de transporte com a mira de anel; quebra-chamas de três dentes.
+  - Escolha do fuzileiro, suporte, líder e enfermeiro dos EUA; nos bots, um fuzileiro por squad.
+  - 3 tiros no tronco de perto, 5 a 400 m. Seletor semi e automático.
+- **SKS:** refeita no Blender (a do gerador tapava a mira).
+  - Entalhe e poste limpos no meio; aço escuro.
+  - Dano 50: 2 tiros no tronco até 100 m, 3 até 400 m (era igual ao Tipo 56).
+- **M14:** olho a 10 cm da alça (era 4,5 cm, o anel enchia a tela).
+- **Blender:** corrigido o `tubo` que saía torcido. M70, Mosin e Escopeta 12 publicados ainda têm
+  guarda-mato e zarelhos torcidos até serem refeitos.
+- **Studio:** as três miras capturadas; o M16 atira (1 tiro no semi, 20 → 19).
+- **Testes:** Lune 639 ok; pytest 54; ruff; luau-lsp sem erro novo.
+- **Não testado:** o automático do M16 no Studio (o seletor é pelo teclado); o som do M16 de ouvido.
+- **Visto e não explicado:** uma vez o soldado do VC caiu por "estilhaços de granada" ao nascer no QG,
+  sem bots; não se repetiu.
 
 ## v75: lote 30, roda do mouse, gatilho com item na mão e o aviso de conexão (2026-11-14, D-145)
 - **Publicada** (versão 75 do place, commit 980ab7e).

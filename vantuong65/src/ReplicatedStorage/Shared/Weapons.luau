@@ -130,7 +130,11 @@ Weapons.list = {
 		dispersionMoa = 3,
 		boltHoldOpen = true,
 		enabled = true,
+		-- D-146 (pedido do dono: "aumente a distância da mira da M14"): olho a 10 cm da alça de anel (era
+		-- 4,5 cm, WeaponArt: o anel enchia a tela)
+		adsEyeM = 0.10,
 		src = {
+			adsEyeM = "PLACEHOLDER (pedido do dono: mira mais longe do olho)",
 			muzzleVelocity = "wiki:M14_rifle",
 			rpm = "FM 23-8 (7/5/1965) par. 4: 700-750; wiki:M14_rifle",
 			massLoadedKg = "wiki:M14_rifle",
@@ -142,6 +146,39 @@ Weapons.list = {
 			bulletMassG = "PLACEHOLDER (M80 ball)",
 			bcG1 = "PLACEHOLDER",
 			dispersionMoa = "PLACEHOLDER",
+		},
+	}),
+	-- D-146 (pedido do dono: "cadê a arma M4", com a foto de um M16 do Vietnã): o M4 é de 1994; o que
+	-- chegou ao Vietnã em 1965 foi o XM16E1/M16 (Exército; o USMC recebeu em 1967). Fica como escolha
+	-- do fuzileiro, do suporte, do líder e do enfermeiro dos EUA (Roles.PRIMARY), com seletor. Modelo
+	-- feito no Blender (tools/blender/m16.py).
+	w({
+		id = "m16",
+		name = "M16",
+		faction = "US",
+		kind = "rifle",
+		cartridge = "5.56x45mm (M193)",
+		muzzleVelocity = 991, -- 3.250 ft/s
+		rpm = 750, -- 700-950
+		magazine = 20,
+		massLoadedKg = 3.6,
+		bulletMassG = 3.56, -- 55 gr
+		bcG1 = 0.243,
+		modes = { "semi", "auto" }, -- seletor: trava, semi, automático
+		dispersionMoa = 3,
+		boltHoldOpen = true,
+		enabled = true,
+		adsEyeM = 0.09, -- olho no anel grande da alça de transporte (tools/blender/m16.py)
+		src = {
+			muzzleVelocity = "wiki:M16_rifle (991 m/s, M193)",
+			rpm = "wiki:M16_rifle (700-950 cíclica); 750 PLACEHOLDER no meio",
+			magazine = "wiki:M16_rifle (carregador reto de 20; o de 30 é de 1970)",
+			massLoadedKg = "wiki:M16_rifle (M16A1: 3,26 kg vazio; 3,6 carregado PLACEHOLDER)",
+			bulletMassG = "PLACEHOLDER (M193, 55 gr)",
+			bcG1 = "PLACEHOLDER (M193 publicado pelos fabricantes: 0,243)",
+			dispersionMoa = "PLACEHOLDER",
+			adsEyeM = "PLACEHOLDER (desenho, sem medida)",
+			modes = "wiki:M16_rifle (seletor safe/semi/auto no M16 e M16A1)",
 		},
 	}),
 	w({
@@ -273,6 +310,9 @@ Weapons.list = {
 		enabled = true,
 		-- olho 6 cm mais à frente na coronha (era 0,319 m da alça tangente: a arma parecia longe)
 		adsEyeM = 0.26,
+		-- D-146 (pedido do dono: "a sks dá pouco dano"): só semi e 10 tiros, então cada tiro vale mais
+		-- que o do Type 56: 2 no tronco até 100 m, 3 até 400 m (tests/luau/combate)
+		damage = 50,
 		src = {
 			muzzleVelocity = "wiki:SKS",
 			rpm = "wiki:SKS (prática 35-40; ru-wiki: 40 de combate)",
@@ -280,6 +320,7 @@ Weapons.list = {
 			massLoadedKg = "wiki:SKS",
 			bcG1 = "PLACEHOLDER",
 			adsEyeM = "PLACEHOLDER (pedido do dono: arma mais perto ao mirar)",
+			damage = "PLACEHOLDER de jogo (D-146: fuzil só semi; o Type 56 tem o mesmo cartucho e 36)",
 		},
 	}),
 	w({
@@ -524,6 +565,7 @@ end
 -- de 3,5 pol., VehicleService "rocket_35"; o do VC, o RPG-2). O nome completo segue na ficha.
 Weapons.SHORT = {
 	m14 = "M14",
+	m16 = "M16",
 	m60 = "M60",
 	m1911 = "M1911A1",
 	m79 = "M79",

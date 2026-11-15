@@ -5507,3 +5507,60 @@ porque vai dar +18". O jogo continua para 16+.
 - O console do cliente (F9) registra `[VT65 REDE]` com o ping, os dados e os Hz.
 - **Não medido no jogo publicado:** no Studio a regra não roda (a rede local não diz nada); vale o
   teste do Lune.
+
+## D-146 — Lote 31: M16 da foto, SKS refeita e a mira da M14 (v76, 2026-11-15)
+
+**Pedidos do dono (14/11):** "cadê a arma M4" (com a foto de um M16), "a mira da arma SKS está ruim
+e dá pouco dano", "aumente a distância da mira da M14" e "utilize o Blender para criar as coisas
+necessárias".
+
+**M16** (`tools/blender/m16.py`, `Shared/Weapons`):
+- O M4 é de 1994. A foto é o M16 da Guerra do Vietnã: guarda-mão triangular, alça de transporte,
+  quebra-chamas de três dentes, carregador reto de 20. É o que foi feito.
+- **Modelo no Blender:** 6.516 triângulos, atlas de 1024 px, 1,5 MB.
+  - Materiais: plástico preto, alumínio anodizado e aço fosco.
+  - A alça de transporte é um canal: a linha de visada passa por dentro dela até o poste.
+  - Mira: anel de 5 mm e poste entre as orelhas da base em "A"; raio de visada de 0,502 m.
+- **Ficha:** 5,56 x 45 mm (M193), 991 m/s, 750 tiros/min, 20 tiros, seletor semi e automático. Dano
+  do fuzil (36).
+- **Tiros para cair** (`tests/luau/combate`): 3 no tronco até 100 m, 4 a 200–300 m, 5 a 400 m (a bala
+  leve perde energia rápido).
+- **Quem leva:** escolha do fuzileiro, do suporte, do líder e do enfermeiro dos EUA
+  (`Roles.PRIMARY`). Nos bots, o primeiro fuzileiro de cada squad dos EUA.
+- **Som:** o disparo automático, mais agudo que o do Tipo 56 (PLACEHOLDER de ouvido).
+- **Sem skin:** skin pede Developer Product, que é do dono.
+
+**SKS** (`tools/blender/sks.py`):
+- **Causa da mira ruim:** a SKS do gerador era uma malha só. Mirando, a linha de visada batia na tampa
+  e na alavanca do ferrolho; o entalhe e a massa não apareciam limpos.
+- **Agora:** refeita no Blender como a carabina Tipo 56 chinesa (a SKS do VC): coronha avermelhada,
+  baioneta de espigão dobrada, carregador fixo de 10. 5.090 triângulos, 1,3 MB.
+  - A linha de visada fica a 34 mm do cano. Telha de cima, tubo de gases e braçadeira ficam abaixo
+    dela, e a tampa da culatra 15 mm abaixo.
+  - Entalhe de 4,4 mm (o real é mais estreito; o de 2,6 mm saía com ~6 px no Studio) e poste de 2,4
+    mm dentro do capuz redondo.
+  - Aço com metal 0,3: com 0,6 o Roblox refletia o céu e a culatra saía cinza-clara na mira.
+- **Dano:** 50 (era o do fuzil, 36, igual ao Tipo 56, que tem o mesmo cartucho e é automático).
+  - Agora: 2 tiros no tronco até 100 m e 3 até 400 m; braço 4.
+  - Com a vantagem de vida (1,12), 3 de perto.
+  - O teste de combate trava esses números.
+- **Asset:** a de antes fica no `roblox_ids.json` como `Models.sks_gerador`. O
+  `tools/weapon_landmarks.py` usa os pontos do Blender quando o `pontos.json` existe.
+
+**M14:** o olho fica a 10 cm da alça de anel (`adsEyeM`; era 4,5 cm, e o anel enchia a tela).
+
+**Defeito do `tubo`** (`tools/blender/armas.py`):
+- O tubo virava o anel 180° a cada ponto e saía torcido, em ampulheta. No M16 o punho e o guarda-mato
+  saíram quebrados.
+- Agora o anel segue o tubo sem girar.
+- O M70, o Mosin e a Escopeta 12 publicados foram feitos antes da correção: guarda-mato, gatilho e
+  zarelhos estão torcidos até serem refeitos.
+
+**Studio (v76):**
+- M16: na mão, com mira no anel. 1 s de gatilho no semi deu 1 tiro (carregador 20 → 19), sem recusa
+  do servidor.
+- M14: o anel pequeno no meio, com a caixa da culatra em volta.
+- SKS nova: entalhe em U no meio, com a ponta do poste dentro; aço escuro.
+- **Visto e não explicado:** numa sessão, o soldado do VC caiu "por estilhaços de granada, a poucos
+  metros" logo depois de nascer no QG, sem bots no mapa. Não se repetiu em outra sessão (14 s depois
+  do começo da partida, vida 112 o tempo todo).

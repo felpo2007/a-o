@@ -98,10 +98,13 @@ Roles.loadout = {
 -- 1ª é a padrão (a do Roles.loadout). EUA: o fuzileiro leva a M14, a espingarda Winchester 12 ou a
 -- M79 (o antigo granadeiro); o suporte, a M14 ou a espingarda; o metralhador, a M60 ou a M14 de
 -- seletor e bipé (o antigo fuzileiro automático: Weapons.roleModes). VC: SKS ou Tipo 56.
+-- D-146: o M16 entra como escolha do fuzileiro, do suporte, do líder e do enfermeiro dos EUA.
 Roles.PRIMARY = {
 	US = {
-		rifleman = { "m14", "win12", "m79" },
-		support = { "m14", "win12" },
+		squad_leader = { "m14", "m16" },
+		rifleman = { "m14", "m16", "win12", "m79" },
+		medic = { "m14", "m16" },
+		support = { "m14", "m16", "win12" },
 		machine_gunner = { "m60", "m14" },
 	},
 	VC = {

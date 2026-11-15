@@ -1190,7 +1190,13 @@
   "parts:tabuas",
   "parts:toras",
   "dados",
-  "ping"
+  "ping",
+  "5.56x45mm (M193)",
+  "PLACEHOLDER (M193 publicado pelos fabricantes: 0,243)",
+  "PLACEHOLDER (M193, 55 gr)",
+  "PLACEHOLDER (desenho, sem medida)",
+  "PLACEHOLDER (pedido do dono: mira mais longe do olho)",
+  "PLACEHOLDER de jogo (D-146: fuzil só semi; o Type 56 tem o mesmo cartucho e 36)"
  ],
  "regex": []
 }

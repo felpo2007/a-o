@@ -395,13 +395,17 @@ local function newBot(faction: string): Bot
 	end
 	-- squad de 6 (D-108, classes mais simples): líder, fuzileiro, suporte (caixa de munição), fuzileiro
 	-- (nos EUA, em squad ímpar, com a espingarda), atirador de elite (squad par; fuzileiro no ímpar) e
-	-- metralhador
+	-- metralhador. D-146: nos EUA o primeiro fuzileiro do squad leva o M16.
 	local slot, squadN = idx % 6, idx // 6
 	local role = BotService.ROLE_BY_SLOT[slot + 1]
 	if role == "sniper" and squadN % 2 == 1 then
 		role = "rifleman"
 	end
-	local primary = if faction == "US" and slot == 3 and squadN % 2 == 1 then "win12" else nil
+	local primary = if faction ~= "US"
+		then nil
+		elseif slot == 3 and squadN % 2 == 1 then "win12"
+		elseif slot == 1 then "m16"
+		else nil
 	local lo = Roles.loadoutFor(faction, role, primary) or Roles.loadout[faction].rifleman
 	local wp = Weapons.get(lo[1]) :: Weapons.Weapon
 	local diff = BotBrain.DIFFICULTY.medium

@@ -244,7 +244,7 @@
   "name": "VT65 rpd aco"
  },
  {
-  "key": "Models.sks",
+  "key": "Models.sks_gerador",
   "file": "assets/forgegui/models/sks_studs_parker.glb",
   "assetType": "Model",
   "name": "VT65 sks aco"
@@ -354,6 +354,20 @@
   "assetType": "Model",
   "name": "VT65 win12 Trench",
   "description": "VAN TUONG 65 - Winchester Model 12 Trench Gun (calibre 12, USMC 1965), modelada no Blender (tools/blender/espingarda.py)"
+ },
+ {
+  "key": "Models.m16",
+  "file": "assets/blender/arma_m16/arma_m16.glb",
+  "assetType": "Model",
+  "name": "VT65 m16",
+  "description": "VAN TUONG 65 - fuzil M16 de 1965 (guarda-mao triangular, alca de transporte, quebra-chamas de tres dentes), modelado no Blender (tools/blender/m16.py)"
+ },
+ {
+  "key": "Models.sks",
+  "file": "assets/blender/arma_sks/arma_sks.glb",
+  "assetType": "Model",
+  "name": "VT65 sks Tipo 56",
+  "description": "VAN TUONG 65 - SKS (carabina Tipo 56 chinesa, baioneta de espigao dobrada), modelada no Blender (tools/blender/sks.py)"
  },
  {
   "key": "Models.caixa_municao_us",

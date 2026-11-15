@@ -108,7 +108,12 @@ test("armas: as do papel e as de escolha existem e atiram; espingarda e M79 no f
 	assert(Roles.loadoutFor("US", "rifleman", "mosin")[1] == "m14", "arma de fora da lista: a padrão")
 	assert(Roles.loadoutFor("US", "support", "win12")[1] == "win12")
 	assert(Roles.loadoutFor("US", "anti_tank", "m14")[1] == "m1911", "antitanque: só a pistola (+ lançador)")
-	assert(#Roles.primaries("US", "medic") == 1 and Roles.primaryFor("US", "medic", "win12") == "m14")
+	assert(Roles.primaryFor("US", "medic", "win12") == "m14", "enfermeiro: sem espingarda")
+	-- D-146: M16 à escolha do fuzileiro, suporte, líder e enfermeiro dos EUA; não no VC
+	for _, role in { "rifleman", "support", "squad_leader", "medic" } do
+		assert(Roles.loadoutFor("US", role, "m16")[1] == "m16", "M16 no " .. role)
+	end
+	assert(Roles.loadoutFor("VC", "rifleman", "m16")[1] == "sks", "M16 só dos EUA")
 	-- ferramenta do papel do suporte (vaga 0) e as obras dele
 	assert(Equipar.ROLE_TOOL.support and not Equipar.ROLE_TOOL.rifleman)
 	assert(Logistics.BUILDS.ammo == nil, "a caixa construída saiu (é a do suporte)")

@@ -78,6 +78,7 @@ SomArmas.ARMA = {
 	m1911 = { tiro = "pistola", pitch = 0.88 }, -- .45 ACP grave (o F44 usa 0,9)
 	m79 = { tiro = "lancador", pitch = 1.35, vol = 0.8 }, -- "tump" do 40 mm, mais curto que o foguete
 	type56 = { tiro = "auto", pitch = 1.04, estojo = true },
+	m16 = { tiro = "auto", pitch = 1.16, estojo = true }, -- D-146: 5,56 mais seco e agudo (PLACEHOLDER de ouvido)
 	sks = { tiro = "fuzil_semi", pitch = 1.08, estojo = true },
 	rpd = { tiro = "metralhadora", pitch = 1.08, estojo = true },
 	type54 = { tiro = "pistola", pitch = 1.18 }, -- 7,62x25: estalo seco (o F44 usa 1,18 na TT-33)

@@ -99,6 +99,7 @@ Equipar.DRAW_S = {
 	launcher = 0.9,
 	rpg2 = 0.9,
 	win12 = 0.55, -- D-108: como a M1897 do Front 44
+	m16 = 0.55, -- D-146: leve, como o Tipo 56
 } :: { [string]: number }
 Equipar.DRAW_KIND = { rifle = 0.6, mg = 1.0, pistol = 0.3, launcher = 0.9, shotgun = 0.55 } :: { [string]: number }
 

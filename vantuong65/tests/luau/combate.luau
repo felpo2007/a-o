@@ -313,13 +313,24 @@ test("tabela: tiros até cair por arma, zona e distância (D-107)", function()
 end)
 
 test("fuzil no tronco: 3 a 4 tiros de 10 a 400 m; 3 de perto (pedido do dono)", function()
-	for _, id in { "m14", "type56", "sks" } do
+	for _, id in { "m14", "type56", "m16" } do
 		for _, d in DIST do
 			local n = shots(id, "torso", d)
-			assert(n >= 3 and n <= 4, string.format("%s a %d m: %d tiros", id, d, n))
+			-- D-146: a bala leve do M16 (5,56, 3,6 g) perde energia rápido: 5 tiros a 400 m
+			local max = if id == "m16" and d >= 400 then 5 else 4
+			assert(n >= 3 and n <= max, string.format("%s a %d m: %d tiros", id, d, n))
 		end
 		assert(shots(id, "torso", 50) == 3, id .. ": 3 tiros de perto")
 	end
+end)
+
+test("D-146: SKS (só semi, 10 tiros) 2 no tronco até 100 m e 3 até 400 m; braço 4+", function()
+	for _, d in DIST do
+		local n = shots("sks", "torso", d)
+		assert(n == (if d <= 100 then 2 else 3), string.format("sks a %d m: %d tiros", d, n))
+		assert(shots("sks", "arm", d) >= 4, string.format("sks braço a %d m", d))
+	end
+	assert(shots("sks", "torso", 50, 112) == 3, "vantagem de vida: 3 de perto")
 end)
 
 test("metralhadora 4 no tronco (até 300 m), pistola 3 a 4 (até 50 m, v43), precisão 2 (até 200 m)", function()
@@ -359,7 +370,7 @@ test(
 			local h = shots(id, "head", 10)
 			assert(h >= 1 and h <= 2, string.format("%s: pistola na cabeça = %d", id, h))
 		end
-		for _, id in { "m14", "type56", "sks", "m60", "rpd" } do
+		for _, id in { "m14", "type56", "m16", "m60", "rpd" } do
 			for _, d in DIST do
 				assert(shots(id, "arm", d) >= 5, string.format("%s braço a %d m: %d", id, d, shots(id, "arm", d)))
 				assert(shots(id, "leg", d) >= 5, string.format("%s perna a %d m", id, d))

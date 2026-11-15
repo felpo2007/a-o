@@ -93,7 +93,9 @@ return {
 		ph_tree_small_02 = 113866418888385,
 		m14 = 89317219190262,
 		type56 = 130417403055419,
-		sks = 97318124582467,
+		-- D-146: SKS refeita no Blender (tools/blender/sks.py); a do gerador (Models.sks_gerador no
+		-- roblox_ids.json, 97318124582467) tapava a mira
+		sks = 84746043493068,
 		m60 = 78397702456512,
 		rpd = 97742986087778,
 		m1911 = 72933851519050,
@@ -106,6 +108,8 @@ return {
 		-- espingarda Winchester Model 12 Trench Gun (tools/blender/espingarda.py, 2026-11-13): nós
 		-- Arma, Telha, Culatra, Gatilho e Cartucho; 0 = arma provisória
 		win12 = 90884195431925,
+		-- M16 de 1965 (tools/blender/m16.py, D-146): nó Arma; 0 = arma provisória
+		m16 = 115800197069430,
 		-- caixas de munição do suporte (tools/blender/caixa_municao.py, 2026-11-13): nó Caixa e
 		-- Colisao_Caixa; 0 = o CaixaMunicaoService usa o ammo_crate ou a caixa em peças
 		caixa_municao_us = 128489958854272,

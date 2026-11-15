@@ -349,7 +349,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehiclePrompt.client.luau:126"
  ],
  "%s · %s · %s\n%s · %.1f m/s · %s": [
-  "src/ServerScriptService/Modules/BotService.luau:2150"
+  "src/ServerScriptService/Modules/BotService.luau:2154"
  ],
  "%s · %s · escolha o lugar": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehiclePrompt.client.luau:296"
@@ -486,7 +486,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Toast.luau:181"
  ],
  "(870 pedida em 1966)": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:497"
+  "src/ReplicatedStorage/Shared/Weapons.luau:538"
  ],
  "([%w_]+)=([%w_]+)": [
   "src/ReplicatedStorage/Shared/Skins.luau:700"
@@ -566,10 +566,10 @@
   "src/ServerScriptService/Modules/Flutua.luau:472"
  ],
  ".30-06 Springfield (M72 Match)": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:362"
+  "src/ReplicatedStorage/Shared/Weapons.luau:403"
  ],
  ".45 ACP": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:177"
+  "src/ReplicatedStorage/Shared/Weapons.luau:214"
  ],
  "/min": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:1200"
@@ -605,7 +605,7 @@
   "src/ReplicatedStorage/Shared/Eventos.luau:152"
  ],
  "12 ga 2¾ pol. 00 Buck (9 bagos)": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:470"
+  "src/ReplicatedStorage/Shared/Weapons.luau:511"
  ],
  "18 AGO": [
   "src/ReplicatedStorage/Shared/Commerce.luau:616"
@@ -697,10 +697,10 @@
   "src/ReplicatedStorage/Shared/Commerce.luau:277"
  ],
  "37 In U.S. Military Service' (22.000 para o Vietnã do Sul em 1962-63; 3.000 para a Marinha": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:495"
+  "src/ReplicatedStorage/Shared/Weapons.luau:536"
  ],
  "37 In U.S. Military Service' (22.000 para o Vietnã do Sul em 1962-63; 3.000 para a Marinha ": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:495"
+  "src/ReplicatedStorage/Shared/Weapons.luau:536"
  ],
  "3ª pessoa (ombro)": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:749",
@@ -723,10 +723,13 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:767"
  ],
  "40x46mm (M406 HE)": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:204"
+  "src/ReplicatedStorage/Shared/Weapons.luau:241"
  ],
  "5 pol. HE": [
   "src/ReplicatedStorage/Shared/Explosive.luau:51"
+ ],
+ "5.56x45mm (M193)": [
+  "src/ReplicatedStorage/Shared/Weapons.luau:160"
  ],
  "500 créditos": [
   "src/ReplicatedStorage/Shared/Commerce.luau:260"
@@ -735,19 +738,19 @@
   "src/ReplicatedStorage/Shared/Commerce.luau:261"
  ],
  "7.62x25mm": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:315"
+  "src/ReplicatedStorage/Shared/Weapons.luau:356"
  ],
  "7.62x39mm": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:234",
-  "src/ReplicatedStorage/Shared/Weapons.luau:263",
-  "src/ReplicatedStorage/Shared/Weapons.luau:290"
+  "src/ReplicatedStorage/Shared/Weapons.luau:271",
+  "src/ReplicatedStorage/Shared/Weapons.luau:300",
+  "src/ReplicatedStorage/Shared/Weapons.luau:331"
  ],
  "7.62x51mm NATO": [
   "src/ReplicatedStorage/Shared/Weapons.luau:118",
-  "src/ReplicatedStorage/Shared/Weapons.luau:152"
+  "src/ReplicatedStorage/Shared/Weapons.luau:189"
  ],
  "7.62x54mmR (leve, tipo L)": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:412"
+  "src/ReplicatedStorage/Shared/Weapons.luau:453"
  ],
  "81 mm HE": [
   "src/ReplicatedStorage/Shared/Explosive.luau:33"
@@ -1137,16 +1140,16 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:824"
  ],
  "American Rifleman 'Combat Shotguns Of The Vietnam War' (M19 de latão e XM162 de": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:499"
+  "src/ReplicatedStorage/Shared/Weapons.luau:540"
  ],
  "American Rifleman 'Combat Shotguns Of The Vietnam War' (M19 de latão e XM162 de ": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:499"
+  "src/ReplicatedStorage/Shared/Weapons.luau:540"
  ],
  "American Rifleman (M1903A1 Unertl): aumento real 7,8x, marcada 'J. UNERTL / USMC-SNIPER'": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:386"
+  "src/ReplicatedStorage/Shared/Weapons.luau:427"
  ],
  "American Rifleman: a luneta corria para a frente nas montagens e era puxada de volta": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:390"
+  "src/ReplicatedStorage/Shared/Weapons.luau:431"
  ],
  "Amigo convidado jogou": [
   "src/ServerScriptService/Modules/CampanhaService.luau:446"
@@ -1452,13 +1455,13 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/HudCampo.client.luau:669"
  ],
  "Baioneta M6": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:720"
+  "src/ReplicatedStorage/Shared/Weapons.luau:762"
  ],
  "Baioneta armada": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponController.client.luau:983"
  ],
  "Baioneta de espigão Tipo 56": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:729"
+  "src/ReplicatedStorage/Shared/Weapons.luau:771"
  ],
  "Baioneta recolhida": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponController.client.luau:983"
@@ -1529,7 +1532,7 @@
   "src/ServerScriptService/Modules/EventosService.luau:433"
  ],
  "Barrel": [
-  "src/ReplicatedStorage/Shared/GunModel.luau:133"
+  "src/ReplicatedStorage/Shared/GunModel.luau:134"
  ],
  "Base": [
   "src/ReplicatedStorage/Shared/GrenadeArt.luau:130",
@@ -1538,7 +1541,7 @@
   "src/ServerScriptService/Modules/MapLife.luau:821"
  ],
  "Bazuca M20": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:539"
+  "src/ReplicatedStorage/Shared/Weapons.luau:581"
  ],
  "Binóculo": [
   "src/ReplicatedStorage/Shared/Comms.luau:28",
@@ -1834,7 +1837,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/LobbyScene.luau:1150"
  ],
  "Caixa de munição": [
-  "src/ReplicatedStorage/Shared/Equipar.luau:127",
+  "src/ReplicatedStorage/Shared/Equipar.luau:128",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaView.luau:2205"
  ],
  "Caixa de munição no chão": [
@@ -2608,7 +2611,7 @@
   "src/ReplicatedStorage/Shared/BotBrain.luau:1124",
   "src/ReplicatedStorage/Shared/Movement.luau:198",
   "src/ReplicatedStorage/Shared/VehicleDrive.luau:97",
-  "src/ServerScriptService/Modules/BotService.luau:583",
+  "src/ServerScriptService/Modules/BotService.luau:587",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/AudioController.client.luau:338"
  ],
  "Dikes": [
@@ -2925,7 +2928,7 @@
   "src/ReplicatedStorage/Shared/Eventos.luau:137"
  ],
  "Escopeta 12": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:537"
+  "src/ReplicatedStorage/Shared/Weapons.luau:579"
  ],
  "Escora": [
   "src/ServerScriptService/Modules/MapLife.luau:467",
@@ -3058,7 +3061,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/AudioController.client.luau:652"
  ],
  "Exército dos EUA do AK-47 (203d MI Bn); zh-wiki 56式自动步枪 (连/单)": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:251"
+  "src/ReplicatedStorage/Shared/Weapons.luau:288"
  ],
  "FALTAM %d CI": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:340"
@@ -3076,10 +3079,10 @@
   "src/ReplicatedStorage/Shared/Vehicles.luau:77"
  ],
  "FAS M406: baixas num raio de 5 m (o raio de 130 m do TM é área de perigo);": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:223"
+  "src/ReplicatedStorage/Shared/Weapons.luau:260"
  ],
  "FAS M406: baixas num raio de 5 m (o raio de 130 m do TM é área de perigo); ": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:223"
+  "src/ReplicatedStorage/Shared/Weapons.luau:260"
  ],
  "FD": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/AnimalVisuals.client.luau:354"
@@ -3112,16 +3115,16 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/LobbyScene.luau:855"
  ],
  "FM 23-67 (26/10/1964): cerca de 550 cíclica (wiki: 550-650; era 600)": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:166"
+  "src/ReplicatedStorage/Shared/Weapons.luau:203"
  ],
  "FM 23-8 (1965) par. 3a (Exército; o seletor e o bipé M2 só no fuzil automático);": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:137"
+  "src/ReplicatedStorage/Shared/Weapons.luau:141"
  ],
  "FM 23-8 (1965) par. 3a (Exército; o seletor e o bipé M2 só no fuzil automático); ": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:137"
+  "src/ReplicatedStorage/Shared/Weapons.luau:141"
  ],
  "FM 23-8 (7/5/1965) par. 4: 700-750; wiki:M14_rifle": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:135"
+  "src/ReplicatedStorage/Shared/Weapons.luau:139"
  ],
  "FOGO": [
   "src/ReplicatedStorage/Shared/Toque.luau:91",
@@ -3194,7 +3197,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameUI.client.luau:765"
  ],
  "Facão (dao)": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:736"
+  "src/ReplicatedStorage/Shared/Weapons.luau:778"
  ],
  "Faixa": [
   "src/ServerScriptService/Modules/CaixaMunicaoService.luau:99",
@@ -3280,7 +3283,7 @@
  "Ferramenta do papel": [
   "src/ReplicatedStorage/Shared/Comms.luau:30",
   "src/ReplicatedStorage/Shared/Equipar.luau:27",
-  "src/ReplicatedStorage/Shared/Equipar.luau:131",
+  "src/ReplicatedStorage/Shared/Equipar.luau:132",
   "src/ReplicatedStorage/Shared/InputMap.luau:93"
  ],
  "Ferrolho e armação com a oxidação gasta pelo coldre.": [
@@ -3300,10 +3303,10 @@
   "src/ReplicatedStorage/Shared/KnifeModel.luau:95"
  ],
  "Firearms News ('heavy post reticle'); vendedor de peças: poste embaixo com": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:439"
+  "src/ReplicatedStorage/Shared/Weapons.luau:480"
  ],
  "Firearms News ('heavy post reticle'); vendedor de peças: poste embaixo com ": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:439"
+  "src/ReplicatedStorage/Shared/Weapons.luau:480"
  ],
  "Firmando o terreno sob os pés…": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/SpawnTransition.luau:677",
@@ -3400,16 +3403,16 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaView.luau:2263"
  ],
  "Front 44 (0,05): esfera de chumbo de 0,33 pol., PLACEHOLDER": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:503"
+  "src/ReplicatedStorage/Shared/Weapons.luau:544"
  ],
  "Front 44 (400 m/s); 00 buck comercial ~1.325 ft/s: a conferir no TM 43-0001-27": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:502"
+  "src/ReplicatedStorage/Shared/Weapons.luau:543"
  ],
  "Front 44 Data/Weapons.json 12ga_00Buck (3,49 g, 8,38 mm, 9 bagos)": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:501"
+  "src/ReplicatedStorage/Shared/Weapons.luau:542"
  ],
  "Front 44 M1897 (ReloadSingleStart 0,4; por cartucho 0,55; fim 0,5)": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:506"
+  "src/ReplicatedStorage/Shared/Weapons.luau:547"
  ],
  "Fumaca": [
   "src/ServerScriptService/Modules/MapLife.luau:528",
@@ -3533,7 +3536,7 @@
  "Granadas": [
   "src/ReplicatedStorage/Shared/Kit.luau:14",
   "src/ReplicatedStorage/Shared/Vantagens.luau:34",
-  "src/ServerScriptService/Modules/BotService.luau:526",
+  "src/ServerScriptService/Modules/BotService.luau:530",
   "src/ServerScriptService/Modules/Flutua.luau:211",
   "src/ServerScriptService/Modules/SmokeService.luau:31",
   "src/ServerScriptService/Modules/VehicleService.luau:457",
@@ -3548,8 +3551,8 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/AudioController.client.luau:223"
  ],
  "Grip": [
-  "src/ReplicatedStorage/Shared/GunModel.luau:126",
-  "src/ReplicatedStorage/Shared/GunModel.luau:134",
+  "src/ReplicatedStorage/Shared/GunModel.luau:127",
+  "src/ReplicatedStorage/Shared/GunModel.luau:135",
   "src/ReplicatedStorage/Shared/KnifeModel.luau:155",
   "src/ReplicatedStorage/Shared/KnifeModel.luau:226",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/PostureController.client.luau:266"
@@ -3580,10 +3583,10 @@
   "src/ReplicatedStorage/Shared/Progression.luau:82"
  ],
  "Guns & Ammo ('Early Vietnam sniper rifles'): o ENV tinha muitos 91/30 PU; Firearms": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:445"
+  "src/ReplicatedStorage/Shared/Weapons.luau:486"
  ],
  "Guns & Ammo ('Early Vietnam sniper rifles'): o ENV tinha muitos 91/30 PU; Firearms ": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:445"
+  "src/ReplicatedStorage/Shared/Weapons.luau:486"
  ],
  "HELICÓPTERO": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaView.luau:409",
@@ -3601,7 +3604,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/SoldierPreview.luau:248"
  ],
  "Handguard": [
-  "src/ReplicatedStorage/Shared/GunModel.luau:132"
+  "src/ReplicatedStorage/Shared/GunModel.luau:133"
  ],
  "Head": [
   "src/ReplicatedStorage/Shared/Corpos.luau:29",
@@ -3853,7 +3856,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleHudView.luau:330"
  ],
  "Ka-Bar USMC": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:711"
+  "src/ReplicatedStorage/Shared/Weapons.luau:753"
  ],
  "Kit Veterano": [
   "src/ReplicatedStorage/Shared/Commerce.luau:88",
@@ -3985,8 +3988,8 @@
   "src/ReplicatedStorage/Shared/Progression.luau:78"
  ],
  "Lançador": [
-  "src/ReplicatedStorage/Shared/Equipar.luau:125",
-  "src/ReplicatedStorage/Shared/Weapons.luau:543"
+  "src/ReplicatedStorage/Shared/Equipar.luau:126",
+  "src/ReplicatedStorage/Shared/Weapons.luau:585"
  ],
  "Lançador e coronha pintados de verde-oliva em campo.": [
   "src/ReplicatedStorage/Shared/Skins.luau:282"
@@ -4123,10 +4126,10 @@
   "src/ReplicatedStorage/Shared/Skins.luau:251"
  ],
  "M70 (luneta)": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:535"
+  "src/ReplicatedStorage/Shared/Weapons.luau:577"
  ],
  "M70 de cano pesado; depois 53 M70 e 59 Unertl 8x para as duas divisões (e M1D)": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:395"
+  "src/ReplicatedStorage/Shared/Weapons.luau:436"
  ],
  "M79 · nogueira escura": [
   "src/ReplicatedStorage/Shared/Skins.luau:271"
@@ -4198,7 +4201,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ToqueTelas.luau:331"
  ],
  "Magazine": [
-  "src/ReplicatedStorage/Shared/GunModel.luau:136"
+  "src/ReplicatedStorage/Shared/GunModel.luau:137"
  ],
  "Mais": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:476"
@@ -4423,10 +4426,10 @@
   "src/ReplicatedStorage/Shared/Casualty.luau:87"
  ],
  "Mosin PU": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:536"
+  "src/ReplicatedStorage/Shared/Weapons.luau:578"
  ],
  "Mosin-Nagant 91/30 PU": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:409"
+  "src/ReplicatedStorage/Shared/Weapons.luau:450"
  ],
  "Motivo": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Toast.luau:508"
@@ -4483,7 +4486,7 @@
   "src/ReplicatedStorage/Shared/Comms.luau:40"
  ],
  "Museu da Grande Guerra Patriótica (Google Arts & Culture, TT-33): 25-30 utilizável": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:329"
+  "src/ReplicatedStorage/Shared/Weapons.luau:370"
  ],
  "Mãos Rápidas": [
   "src/ReplicatedStorage/Shared/Commerce.luau:181",
@@ -4622,7 +4625,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaView.luau:2248"
  ],
  "News: serviu no Vietnã": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:446"
+  "src/ReplicatedStorage/Shared/Weapons.luau:487"
  ],
  "Nicho": [
   "src/ServerScriptService/Modules/MapLife.luau:233"
@@ -4638,7 +4641,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:705"
  ],
  "Norma escrita do USMC: PLACEHOLDER (não achada)": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:140"
+  "src/ReplicatedStorage/Shared/Weapons.luau:144"
  ],
  "Nossos reforços estão em 25%": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/FrontHud.client.luau:330"
@@ -4884,7 +4887,7 @@
   "src/ServerScriptService/Modules/CampanhaService.luau:610"
  ],
  "Ordens": [
-  "src/ReplicatedStorage/Shared/Equipar.luau:124"
+  "src/ReplicatedStorage/Shared/Equipar.luau:125"
  ],
  "Ordens do servidor": [
   "src/ReplicatedFirst/LoadingScreen.client.luau:550"
@@ -4963,7 +4966,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:434"
  ],
  "PENDENTE": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:354"
+  "src/ReplicatedStorage/Shared/Weapons.luau:395"
  ],
  "PERIGO PRÓXIMO": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CommanderController.client.luau:171"
@@ -4984,7 +4987,7 @@
   "src/ReplicatedStorage/Shared/Explosive.luau:87"
  ],
  "PG-2 HEAT": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:342"
+  "src/ReplicatedStorage/Shared/Weapons.luau:383"
  ],
  "PLACA DE IDENTIFICAÇÃO": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaoJogador.luau:474"
@@ -5000,98 +5003,114 @@
   "src/ReplicatedStorage/Shared/Explosive.luau:101",
   "src/ReplicatedStorage/Shared/Explosive.luau:110",
   "src/ReplicatedStorage/Shared/Explosive.luau:119",
-  "src/ReplicatedStorage/Shared/Weapons.luau:143",
-  "src/ReplicatedStorage/Shared/Weapons.luau:144",
-  "src/ReplicatedStorage/Shared/Weapons.luau:169",
-  "src/ReplicatedStorage/Shared/Weapons.luau:195",
-  "src/ReplicatedStorage/Shared/Weapons.luau:255",
-  "src/ReplicatedStorage/Shared/Weapons.luau:281",
-  "src/ReplicatedStorage/Shared/Weapons.luau:307",
-  "src/ReplicatedStorage/Shared/Weapons.luau:332",
-  "src/ReplicatedStorage/Shared/Weapons.luau:333",
-  "src/ReplicatedStorage/Shared/Weapons.luau:388",
-  "src/ReplicatedStorage/Shared/Weapons.luau:403",
-  "src/ReplicatedStorage/Shared/Weapons.luau:453",
-  "src/ReplicatedStorage/Shared/Weapons.luau:454"
+  "src/ReplicatedStorage/Shared/Weapons.luau:147",
+  "src/ReplicatedStorage/Shared/Weapons.luau:148",
+  "src/ReplicatedStorage/Shared/Weapons.luau:179",
+  "src/ReplicatedStorage/Shared/Weapons.luau:206",
+  "src/ReplicatedStorage/Shared/Weapons.luau:232",
+  "src/ReplicatedStorage/Shared/Weapons.luau:292",
+  "src/ReplicatedStorage/Shared/Weapons.luau:321",
+  "src/ReplicatedStorage/Shared/Weapons.luau:348",
+  "src/ReplicatedStorage/Shared/Weapons.luau:373",
+  "src/ReplicatedStorage/Shared/Weapons.luau:374",
+  "src/ReplicatedStorage/Shared/Weapons.luau:429",
+  "src/ReplicatedStorage/Shared/Weapons.luau:444",
+  "src/ReplicatedStorage/Shared/Weapons.luau:494",
+  "src/ReplicatedStorage/Shared/Weapons.luau:495"
  ],
  "PLACEHOLDER (1219C2: 11 7/8 pol., lâmina 7 pol., de memória)": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:717"
+  "src/ReplicatedStorage/Shared/Weapons.luau:759"
  ],
  "PLACEHOLDER (230 gr)": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:194"
+  "src/ReplicatedStorage/Shared/Weapons.luau:231"
  ],
  "PLACEHOLDER (FM 23-10, 1940, no M1903: 10 a 15 tiros mirados por minuto)": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:401"
+  "src/ReplicatedStorage/Shared/Weapons.luau:442"
  ],
  "PLACEHOLDER (FM 23-35, 1940: limitada pela destreza do atirador; era 120 = 0,5 s entre tiros)": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:191"
+  "src/ReplicatedStorage/Shared/Weapons.luau:228"
  ],
  "PLACEHOLDER (Front 44 M1897: 0,8 s)": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:505"
+  "src/ReplicatedStorage/Shared/Weapons.luau:546"
+ ],
+ "PLACEHOLDER (M193 publicado pelos fabricantes: 0,243)": [
+  "src/ReplicatedStorage/Shared/Weapons.luau:178"
+ ],
+ "PLACEHOLDER (M193, 55 gr)": [
+  "src/ReplicatedStorage/Shared/Weapons.luau:177"
  ],
  "PLACEHOLDER (M43)": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:254"
+  "src/ReplicatedStorage/Shared/Weapons.luau:291"
  ],
  "PLACEHOLDER (M80 ball)": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:142"
+  "src/ReplicatedStorage/Shared/Weapons.luau:146"
  ],
  "PLACEHOLDER (cartucho a cartucho com a PU montada: a confirmar)": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:455"
+  "src/ReplicatedStorage/Shared/Weapons.luau:496"
  ],
  "PLACEHOLDER (cartucho a cartucho: a Unertl fica sobre a caixa da culatra)": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:404"
+  "src/ReplicatedStorage/Shared/Weapons.luau:445"
  ],
  "PLACEHOLDER (confirmar no FM 23-8)": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:141"
+  "src/ReplicatedStorage/Shared/Weapons.luau:145"
+ ],
+ "PLACEHOLDER (desenho, sem medida)": [
+  "src/ReplicatedStorage/Shared/Weapons.luau:180"
  ],
  "PLACEHOLDER (espigão rebatível, 22–24 cm)": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:733"
+  "src/ReplicatedStorage/Shared/Weapons.luau:775"
  ],
  "PLACEHOLDER (facão de mato, lâmina 30–35 cm)": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:742"
+  "src/ReplicatedStorage/Shared/Weapons.luau:784"
  ],
  "PLACEHOLDER (fita de 100)": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:168"
+  "src/ReplicatedStorage/Shared/Weapons.luau:205"
  ],
  "PLACEHOLDER (fontes de 8,7 a 11,3 lb com luneta)": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:451"
+  "src/ReplicatedStorage/Shared/Weapons.luau:492"
  ],
  "PLACEHOLDER (fuzil de competição com M72)": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:402"
+  "src/ReplicatedStorage/Shared/Weapons.luau:443"
  ],
  "PLACEHOLDER (lâmina 6 3/4 pol., de memória)": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:726"
+  "src/ReplicatedStorage/Shared/Weapons.luau:768"
  ],
  "PLACEHOLDER (mancha, duração e exposição: números de jogo, sem ficha)": [
   "src/ReplicatedStorage/Shared/Explosive.luau:129"
  ],
  "PLACEHOLDER (pedido do dono: arma mais perto ao mirar)": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:282"
+  "src/ReplicatedStorage/Shared/Weapons.luau:322"
+ ],
+ "PLACEHOLDER (pedido do dono: mira mais longe do olho)": [
+  "src/ReplicatedStorage/Shared/Weapons.luau:137"
  ],
  "PLACEHOLDER (pedido do dono: pistola mais perto, braços estendidos)": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:196",
-  "src/ReplicatedStorage/Shared/Weapons.luau:334"
+  "src/ReplicatedStorage/Shared/Weapons.luau:233",
+  "src/ReplicatedStorage/Shared/Weapons.luau:375"
  ],
  "PLACEHOLDER (regra de campo: ~1 pol. de padrão por jarda no cano cilíndrico)": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:504"
+  "src/ReplicatedStorage/Shared/Weapons.luau:545"
  ],
  "PLACEHOLDER (réplica Hi-Lux: 11 pés a 100 jardas)": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:389"
+  "src/ReplicatedStorage/Shared/Weapons.luau:430"
  ],
  "PLACEHOLDER (sem fonte)": [
   "src/ReplicatedStorage/Shared/Vehicles.luau:44"
  ],
  "PLACEHOLDER (wiki:.30-06_Springfield: M1 Ball 173 gr ~0,494; o M72 é a versão de competição)": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:398"
+  "src/ReplicatedStorage/Shared/Weapons.luau:439"
  ],
  "PLACEHOLDER (~13 lb com luneta e montagens; sem fonte firme)": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:400"
+  "src/ReplicatedStorage/Shared/Weapons.luau:441"
+ ],
+ "PLACEHOLDER de jogo (D-146: fuzil só semi; o Type 56 tem o mesmo cartucho e 36)": [
+  "src/ReplicatedStorage/Shared/Weapons.luau:323"
  ],
  "PLACEHOLDER de jogo (Front 44: BaseDamage 15 por bago; aqui 12 com a vida 100 da D-107)": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:507"
+  "src/ReplicatedStorage/Shared/Weapons.luau:548"
  ],
  "PLACEHOLDER derivado: alcance máximo de 400 m (wiki)": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:226"
+  "src/ReplicatedStorage/Shared/Weapons.luau:263"
  ],
  "POSTO %d": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:644"
@@ -5134,7 +5153,7 @@
   "src/ReplicatedFirst/Idioma.luau:31"
  ],
  "PU 3,5x": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:429"
+  "src/ReplicatedStorage/Shared/Weapons.luau:470"
  ],
  "PULAR": [
   "src/ReplicatedStorage/Shared/Toque.luau:112",
@@ -5316,7 +5335,7 @@
  ],
  "Piloto": [
   "src/ReplicatedStorage/Shared/Roles.luau:34",
-  "src/ReplicatedStorage/Shared/Roles.luau:229",
+  "src/ReplicatedStorage/Shared/Roles.luau:232",
   "src/ReplicatedStorage/Shared/Vehicles.luau:258"
  ],
  "Pinceladas verticais verdes e marrons do padrão francês dos paraquedistas sul-vietnamitas.": [
@@ -5675,8 +5694,8 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ComoJogar.luau:143"
  ],
  "RPD": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:287",
-  "src/ReplicatedStorage/Shared/Weapons.luau:532"
+  "src/ReplicatedStorage/Shared/Weapons.luau:328",
+  "src/ReplicatedStorage/Shared/Weapons.luau:574"
  ],
  "RPD · aço gasto": [
   "src/ReplicatedStorage/Shared/Skins.luau:362"
@@ -5685,9 +5704,9 @@
   "src/ReplicatedStorage/Shared/Skins.luau:352"
  ],
  "RPG-2": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:339",
-  "src/ReplicatedStorage/Shared/Weapons.luau:534",
-  "src/ReplicatedStorage/Shared/Weapons.luau:539"
+  "src/ReplicatedStorage/Shared/Weapons.luau:380",
+  "src/ReplicatedStorage/Shared/Weapons.luau:576",
+  "src/ReplicatedStorage/Shared/Weapons.luau:581"
  ],
  "RPG-2 · verde-oliva pintado": [
   "src/ReplicatedStorage/Shared/Skins.luau:382"
@@ -5786,7 +5805,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:461"
  ],
  "Receiver": [
-  "src/ReplicatedStorage/Shared/GunModel.luau:131"
+  "src/ReplicatedStorage/Shared/GunModel.luau:132"
  ],
  "Recompensa": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Toast.luau:88"
@@ -6090,8 +6109,8 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:460"
  ],
  "SKS": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:260",
-  "src/ReplicatedStorage/Shared/Weapons.luau:531"
+  "src/ReplicatedStorage/Shared/Weapons.luau:297",
+  "src/ReplicatedStorage/Shared/Weapons.luau:573"
  ],
  "SKS · aço gasto": [
   "src/ReplicatedStorage/Shared/Skins.luau:342"
@@ -6449,10 +6468,10 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:205"
  ],
  "Slide": [
-  "src/ReplicatedStorage/Shared/GunModel.luau:125"
+  "src/ReplicatedStorage/Shared/GunModel.luau:126"
  ],
  "Smoke": [
-  "src/ServerScriptService/Modules/BotService.luau:526",
+  "src/ServerScriptService/Modules/BotService.luau:530",
   "src/ServerScriptService/Modules/Flutua.luau:211",
   "src/ServerScriptService/Modules/SmokeService.luau:31"
  ],
@@ -6470,7 +6489,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaMissoes.client.luau:426"
  ],
  "Socorrer": [
-  "src/ReplicatedStorage/Shared/Equipar.luau:126"
+  "src/ReplicatedStorage/Shared/Equipar.luau:127"
  ],
  "Socorrista Treinado": [
   "src/ReplicatedStorage/Shared/Commerce.luau:188",
@@ -6542,7 +6561,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Movement.client.luau:1390"
  ],
  "Stock": [
-  "src/ReplicatedStorage/Shared/GunModel.luau:130"
+  "src/ReplicatedStorage/Shared/GunModel.luau:131"
  ],
  "Stone": [
   "src/ServerScriptService/Modules/MapLife.luau:822",
@@ -6625,13 +6644,13 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/HudCampo.client.luau:455"
  ],
  "TM 43-0001-27 via inetres.com (M72 Match: 2.640 ft/s a 78 pés)": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:396"
+  "src/ReplicatedStorage/Shared/Weapons.luau:437"
  ],
  "TM 43-0001-27 via inetres.com (M72: 173 gr)": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:397"
+  "src/ReplicatedStorage/Shared/Weapons.luau:438"
  ],
  "TM 43-0001-28 via inetres.com (250 ft/s); wiki:M79_grenade_launcher": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:220"
+  "src/ReplicatedStorage/Shared/Weapons.luau:257"
  ],
  "TN": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/HudCampo.client.luau:223"
@@ -6948,7 +6967,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:1390"
  ],
  "Tripulante": [
-  "src/ReplicatedStorage/Shared/Roles.luau:229"
+  "src/ReplicatedStorage/Shared/Roles.luau:232"
  ],
  "Tripulante de blindado": [
   "src/ReplicatedStorage/Shared/Roles.luau:33"
@@ -7033,12 +7052,12 @@
   "src/ReplicatedStorage/Shared/InputMap.luau:85"
  ],
  "Type 54": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:312",
-  "src/ReplicatedStorage/Shared/Weapons.luau:533"
+  "src/ReplicatedStorage/Shared/Weapons.luau:353",
+  "src/ReplicatedStorage/Shared/Weapons.luau:575"
  ],
  "Type 56": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:231",
-  "src/ReplicatedStorage/Shared/Weapons.luau:530"
+  "src/ReplicatedStorage/Shared/Weapons.luau:268",
+  "src/ReplicatedStorage/Shared/Weapons.luau:572"
  ],
  "TÍTULO": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaoJogador.luau:543"
@@ -7177,24 +7196,25 @@
   "src/ReplicatedStorage/Shared/Vehicles.luau:160",
   "src/ReplicatedStorage/Shared/Vehicles.luau:182",
   "src/ReplicatedStorage/Shared/Weapons.luau:116",
-  "src/ReplicatedStorage/Shared/Weapons.luau:150",
-  "src/ReplicatedStorage/Shared/Weapons.luau:175",
-  "src/ReplicatedStorage/Shared/Weapons.luau:202",
-  "src/ReplicatedStorage/Shared/Weapons.luau:360",
-  "src/ReplicatedStorage/Shared/Weapons.luau:468",
-  "src/ReplicatedStorage/Shared/Weapons.luau:711",
-  "src/ReplicatedStorage/Shared/Weapons.luau:720",
+  "src/ReplicatedStorage/Shared/Weapons.luau:158",
+  "src/ReplicatedStorage/Shared/Weapons.luau:187",
+  "src/ReplicatedStorage/Shared/Weapons.luau:212",
+  "src/ReplicatedStorage/Shared/Weapons.luau:239",
+  "src/ReplicatedStorage/Shared/Weapons.luau:401",
+  "src/ReplicatedStorage/Shared/Weapons.luau:509",
+  "src/ReplicatedStorage/Shared/Weapons.luau:753",
+  "src/ReplicatedStorage/Shared/Weapons.luau:762",
   "src/ServerScriptService/Modules/ArtPlan.luau:525",
   "src/ServerScriptService/Modules/BotEscolta.luau:133",
   "src/ServerScriptService/Modules/BotEscolta.luau:251",
   "src/ServerScriptService/Modules/BotService.luau:262",
   "src/ServerScriptService/Modules/BotService.luau:262",
   "src/ServerScriptService/Modules/BotService.luau:404",
-  "src/ServerScriptService/Modules/BotService.luau:1356",
-  "src/ServerScriptService/Modules/BotService.luau:1356",
-  "src/ServerScriptService/Modules/BotService.luau:2133",
-  "src/ServerScriptService/Modules/BotService.luau:2454",
-  "src/ServerScriptService/Modules/BotService.luau:2582",
+  "src/ServerScriptService/Modules/BotService.luau:1360",
+  "src/ServerScriptService/Modules/BotService.luau:1360",
+  "src/ServerScriptService/Modules/BotService.luau:2137",
+  "src/ServerScriptService/Modules/BotService.luau:2458",
+  "src/ServerScriptService/Modules/BotService.luau:2586",
   "src/ServerScriptService/Modules/BotSquads.luau:181",
   "src/ServerScriptService/Modules/BotSquads.luau:181",
   "src/ServerScriptService/Modules/BotSquads.luau:252",
@@ -7383,7 +7403,7 @@
   "src/ReplicatedStorage/Shared/Commerce.luau:320"
  ],
  "Unertl 8x": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:379"
+  "src/ReplicatedStorage/Shared/Weapons.luau:420"
  ],
  "Unidade pesada: abre com %d no time.": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:1613"
@@ -7538,26 +7558,26 @@
   "src/ReplicatedStorage/Shared/Skins.luau:594",
   "src/ReplicatedStorage/Shared/Skins.luau:651",
   "src/ReplicatedStorage/Shared/Vehicles.luau:203",
-  "src/ReplicatedStorage/Shared/Weapons.luau:232",
-  "src/ReplicatedStorage/Shared/Weapons.luau:261",
-  "src/ReplicatedStorage/Shared/Weapons.luau:288",
-  "src/ReplicatedStorage/Shared/Weapons.luau:313",
-  "src/ReplicatedStorage/Shared/Weapons.luau:340",
-  "src/ReplicatedStorage/Shared/Weapons.luau:410",
-  "src/ReplicatedStorage/Shared/Weapons.luau:729",
-  "src/ReplicatedStorage/Shared/Weapons.luau:736",
+  "src/ReplicatedStorage/Shared/Weapons.luau:269",
+  "src/ReplicatedStorage/Shared/Weapons.luau:298",
+  "src/ReplicatedStorage/Shared/Weapons.luau:329",
+  "src/ReplicatedStorage/Shared/Weapons.luau:354",
+  "src/ReplicatedStorage/Shared/Weapons.luau:381",
+  "src/ReplicatedStorage/Shared/Weapons.luau:451",
+  "src/ReplicatedStorage/Shared/Weapons.luau:771",
+  "src/ReplicatedStorage/Shared/Weapons.luau:778",
   "src/ServerScriptService/Modules/ArtPlan.luau:525",
   "src/ServerScriptService/Modules/BotEscolta.luau:133",
   "src/ServerScriptService/Modules/BotEscolta.luau:251",
   "src/ServerScriptService/Modules/BotService.luau:262",
-  "src/ServerScriptService/Modules/BotService.luau:415",
-  "src/ServerScriptService/Modules/BotService.luau:1356",
-  "src/ServerScriptService/Modules/BotService.luau:1698",
-  "src/ServerScriptService/Modules/BotService.luau:2012",
-  "src/ServerScriptService/Modules/BotService.luau:2314",
-  "src/ServerScriptService/Modules/BotService.luau:2454",
-  "src/ServerScriptService/Modules/BotService.luau:2544",
-  "src/ServerScriptService/Modules/BotService.luau:2582",
+  "src/ServerScriptService/Modules/BotService.luau:419",
+  "src/ServerScriptService/Modules/BotService.luau:1360",
+  "src/ServerScriptService/Modules/BotService.luau:1702",
+  "src/ServerScriptService/Modules/BotService.luau:2016",
+  "src/ServerScriptService/Modules/BotService.luau:2318",
+  "src/ServerScriptService/Modules/BotService.luau:2458",
+  "src/ServerScriptService/Modules/BotService.luau:2548",
+  "src/ServerScriptService/Modules/BotService.luau:2586",
   "src/ServerScriptService/Modules/BotSquads.luau:181",
   "src/ServerScriptService/Modules/BotSquads.luau:252",
   "src/ServerScriptService/Modules/BotTunnels.luau:128",
@@ -8040,16 +8060,16 @@
   "src/ReplicatedStorage/Shared/VehicleDrive.luau:101"
  ],
  "Wikipedia 'Winchester Model 1912' (Marines: Coreia e começo do Vietnã; 6 + 1; sem": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:493"
+  "src/ReplicatedStorage/Shared/Weapons.luau:534"
  ],
  "Wikipedia 'Winchester Model 1912' (Marines: Coreia e começo do Vietnã; 6 + 1; sem ": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:493"
+  "src/ReplicatedStorage/Shared/Weapons.luau:534"
  ],
  "Winchester 12 (espingarda)": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:467"
+  "src/ReplicatedStorage/Shared/Weapons.luau:508"
  ],
  "Winchester M70 (Unertl 8x)": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:359"
+  "src/ReplicatedStorage/Shared/Weapons.luau:400"
  ],
  "Wood": [
   "src/ReplicatedStorage/Shared/BotBrain.luau:1141",
@@ -8439,7 +8459,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponVisuals.client.luau:101"
  ],
  "anúncios de leilão (Rock Island, CT Firearms): cruz média com ponto pequeno no centro": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:387"
+  "src/ReplicatedStorage/Shared/Weapons.luau:428"
  ],
  "aperte um botão…": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:886"
@@ -8549,7 +8569,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:842"
  ],
  "avançando": [
-  "src/ServerScriptService/Modules/BotService.luau:2108"
+  "src/ServerScriptService/Modules/BotService.luau:2112"
  ],
  "aviso": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/EventosVisual.luau:112",
@@ -8984,7 +9004,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ToqueAuto.luau:473"
  ],
  "contra-ataque": [
-  "src/ServerScriptService/Modules/BotService.luau:2662"
+  "src/ServerScriptService/Modules/BotService.luau:2666"
  ],
  "controle": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ComoJogar.luau:179",
@@ -9117,7 +9137,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Movement.client.luau:1272"
  ],
  "de olho": [
-  "src/ServerScriptService/Modules/BotService.luau:2112"
+  "src/ServerScriptService/Modules/BotService.luau:2116"
  ],
  "debris": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleFx.client.luau:189",
@@ -9143,10 +9163,10 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/EventosVisual.luau:179"
  ],
  "desconector: atira ao fechar com o gatilho apertado); American Rifleman 'The Ithaca Model": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:494"
+  "src/ReplicatedStorage/Shared/Weapons.luau:535"
  ],
  "desconector: atira ao fechar com o gatilho apertado); American Rifleman 'The Ithaca Model ": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:494"
+  "src/ReplicatedStorage/Shared/Weapons.luau:535"
  ],
  "desk": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CasualtyScreen.luau:1236",
@@ -9327,10 +9347,10 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/AfterActionController.client.luau:331"
  ],
  "e o USMC em maio de 1966); MCB Camp Pendleton 'Evolution of shotguns in the Marine Corps'": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:496"
+  "src/ReplicatedStorage/Shared/Weapons.luau:537"
  ],
  "e o USMC em maio de 1966); MCB Camp Pendleton 'Evolution of shotguns in the Marine Corps' ": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:496"
+  "src/ReplicatedStorage/Shared/Weapons.luau:537"
  ],
  "earth": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:145",
@@ -9355,10 +9375,10 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:446"
  ],
  "em Chu Lai, 1965 (Small Arms Review): 3 em semi e 1 em automático por esquadra.": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:139"
+  "src/ReplicatedStorage/Shared/Weapons.luau:143"
  ],
  "em Chu Lai, 1965 (Small Arms Review): 3 em semi e 1 em automático por esquadra. ": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:139"
+  "src/ReplicatedStorage/Shared/Weapons.luau:143"
  ],
  "em campo": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:2255"
@@ -9367,7 +9387,7 @@
   "src/ReplicatedStorage/Shared/SpawnRules.luau:206"
  ],
  "em contato": [
-  "src/ServerScriptService/Modules/BotService.luau:2679"
+  "src/ServerScriptService/Modules/BotService.luau:2683"
  ],
  "em veículo": [
   "src/ReplicatedStorage/Shared/SpawnRules.luau:198"
@@ -10023,7 +10043,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/TutorialController.client.luau:74"
  ],
  "homem %d": [
-  "src/ServerScriptService/Modules/BotService.luau:2144"
+  "src/ServerScriptService/Modules/BotService.luau:2148"
  ],
  "hud": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/HudCampo.client.luau:1114"
@@ -10063,7 +10083,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/AudioController.client.luau:659"
  ],
  "indo ao abrigo": [
-  "src/ServerScriptService/Modules/BotService.luau:2109"
+  "src/ServerScriptService/Modules/BotService.luau:2113"
  ],
  "infantry": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:117",
@@ -10542,7 +10562,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaView.luau:1211"
  ],
  "líder": [
-  "src/ServerScriptService/Modules/BotService.luau:2144"
+  "src/ServerScriptService/Modules/BotService.luau:2148"
  ],
  "líder: %s": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:1867"
@@ -10564,7 +10584,7 @@
   "src/ReplicatedStorage/Shared/Comms.luau:59"
  ],
  "man.fas.org/dod-101/sys/land/m406.htm ('arms between 14 and 27 meters')": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:222"
+  "src/ReplicatedStorage/Shared/Weapons.luau:259"
  ],
  "map": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CameraLook.client.luau:204",
@@ -10744,7 +10764,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ToqueTelas.luau:351"
  ],
  "modernfirearms.net (3,9 kg vazia, 1.003 mm, cano de 20 pol.); cartuchos PLACEHOLDER": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:498"
+  "src/ReplicatedStorage/Shared/Weapons.luau:539"
  ],
  "mortar": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/AudioController.client.luau:674",
@@ -11124,7 +11144,7 @@
   "src/ServerScriptService/Modules/AssetLoader.luau:606"
  ],
  "o efeito é o da granada de mão grenade_us (5 m letal), PLACEHOLDER": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:224"
+  "src/ReplicatedStorage/Shared/Weapons.luau:261"
  ],
  "objetivos": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaView.luau:322",
@@ -11407,7 +11427,7 @@
   "src/ServerScriptService/Modules/Flutua.luau:246"
  ],
  "plástico, 00 buck)": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:500"
+  "src/ReplicatedStorage/Shared/Weapons.luau:541"
  ],
  "point": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/InfantryController.client.luau:162",
@@ -12039,7 +12059,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CaixaMunicao.client.luau:276"
  ],
  "sem contato": [
-  "src/ServerScriptService/Modules/BotService.luau:2679"
+  "src/ServerScriptService/Modules/BotService.luau:2683"
  ],
  "sem espaço": [
   "src/ReplicatedStorage/Shared/CaixaMunicao.luau:130",
@@ -12193,7 +12213,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:129"
  ],
  "snipercentral.com e wiki (5)": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:450"
+  "src/ReplicatedStorage/Shared/Weapons.luau:491"
  ],
  "soldado de 1ª classe": [
   "src/ReplicatedStorage/Shared/Progression.luau:77"
@@ -13119,7 +13139,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DebugHud.client.luau:102"
  ],
  "traços laterais (confiança média)": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:440"
+  "src/ReplicatedStorage/Shared/Weapons.luau:481"
  ],
  "treat": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/MedicalController.client.luau:113",
@@ -13172,7 +13192,7 @@
   "src/ServerScriptService/Modules/CompraVeiculoService.luau:321"
  ],
  "túnel %s": [
-  "src/ServerScriptService/Modules/BotService.luau:2146"
+  "src/ServerScriptService/Modules/BotService.luau:2150"
  ],
  "u_%d": [
   "src/ServerScriptService/Modules/CampanhaService.luau:455",
@@ -13211,10 +13231,10 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:444"
  ],
  "usmcweaponry.com: 3ª Divisão de Fuzileiros chegou em meados de 1965 com 12 Winchester": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:394"
+  "src/ReplicatedStorage/Shared/Weapons.luau:435"
  ],
  "usmcweaponry.com: 3ª Divisão de Fuzileiros chegou em meados de 1965 com 12 Winchester ": [
-  "src/ReplicatedStorage/Shared/Weapons.luau:394"
+  "src/ReplicatedStorage/Shared/Weapons.luau:435"
  ],
  "v:reset": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:826"
