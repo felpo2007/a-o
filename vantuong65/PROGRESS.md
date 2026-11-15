@@ -155,6 +155,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
   - a cadência abaixo de 12 fps medida num aparelho lento.
 
 ## v79: lote 34, entrar no veículo e o texto do helicóptero (2026-11-15, D-149)
+- **Publicada** (versão 79 do place, commit 6b0933c).
 - **Entrar no veículo:** os lugares importantes um por linha (motorista ou piloto, atirador,
   comandante, municiador, copiloto) e o resto numa linha "PASSAGEIRO".
   - A linha diz quantos estão livres e põe no primeiro livre de onde se atira.
