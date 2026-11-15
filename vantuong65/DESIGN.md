@@ -5843,3 +5843,70 @@ corrigido na D-146).
   os galhos grossos. Não testado andando no Studio.
 - **Teste novo** (F5): toda árvore que a mata põe tem tronco medido, e a peça cai no cilindro sem
   descer do pé.
+
+## D-152 — Lote 37: medir o mapa e mexer no que pesa (v82, 2026-11-15)
+
+**Pedido do dono:** aplicar um texto sobre beleza e desempenho do mapa: medir antes e depois, sombra
+só no que importa, simplificar o que está longe, colisões simples, cuidado com a transparência da
+folhagem, reuso de modelos e detalhe nos caminhos, interiores e objetivos.
+
+**Medida completa:** `testes/DESEMPENHO_2026-11-15.md`.
+- **Método:** seis vistas fixas, sem bots, com a qualidade gráfica fixa nos níveis 10 e 3. Contam as
+  chamadas de desenho e os triângulos por quadro; cada mudança foi testada em A/B na mesma vista.
+- **Limite:** o Studio ficou atrás de outra janela (o dono usava o computador). O fps travou em 15 e
+  o tempo de CPU por quadro oscilou entre ~12 e ~30 ms sem relação com o teste. Por isso não há
+  número de fps antes e depois.
+
+**O que pesava** (base dos EUA, nível 10):
+- casas e objetos: 1,56 milhão de triângulos, quase tudo a cerca de bambu;
+- outras plantas (bambu, palmeira, capim-elefante, bananeira, taioba, tràm): 1,34 milhão;
+- folhas: 0,43 milhão;
+- madeira: 0,44 milhão;
+- arbustos: 0,35 milhão;
+- sombra: 187 chamadas (461 na base do VC).
+
+**Mudou:**
+1. **Sombra das copas respeitando a opção "Sombra das árvores"** (defeito; `AssetLoader`,
+   `Graficos`):
+   - a planta sai do servidor sem sombra, e o cliente liga ou desliga subindo até o modelo com
+     `PlantShadow`;
+   - antes, a folha num submodelo (`Folhas0_0_Node`) escapava da busca, e as copas que chegavam pelo
+     streaming ficavam com sombra com a opção desligada (586 numa sessão);
+   - **Studio:** desligada, 0 peças de copa com sombra; ligada, 1.758; desligada de novo, 0;
+   - **A/B:** de 8 a 52 chamadas de sombra e até 260 mil triângulos a menos por quadro.
+2. **Cerca de bambu: 16.418 → 6.000 triângulos** (`tools/vegetacao_6k.py`, motivo próprio no
+   manifest):
+   - ela entra no teto da vegetação (D-135), uma exceção à regra de não reduzir objetos abaixo de 20
+     mil (D-66);
+   - **por quê:** 62 das 65 cercas ficam em An Cường (2), na frente da base dos EUA, e eram 1,12
+     milhão de triângulos nessa vista (um quarto dela);
+   - desvio máximo de 1,4 cm; de perto, no Studio, continua igual;
+   - ID novo 134018898436044 (o antigo fica como `Models.bamboo_fence_v81`).
+3. **Cortina de fora da área sem os troncos invisíveis da D-151:** 1.754 peças a menos.
+
+**Testado e não entrou** (números no relatório):
+- **Sombra desligada nos 148 objetos pequenos** (potes, sacos, caixas, arame farpado, varal):
+  - as chamadas de sombra não mudaram (242 → 247; 476 → 467);
+  - no máximo 90 mil triângulos a menos;
+  - o Roblox já desenha os iguais juntos.
+- **Folhas com transparência:** escondê-las mudou a GPU em menos de 1 ms. Não é o gargalo no PC.
+- **Colisões:** a física custa 0,045 ms por passo com 25 mil peças paradas. Script também não muda o
+  `CollisionFidelity`.
+- **Distância e reuso:** todas as malhas já usam `RenderFidelity` automática. São 12.044 malhas de
+  759 modelos, com 100 a 290 chamadas de cena por vista.
+
+**Antes e depois:**
+- **Triângulos no nível 3:**
+  - base dos EUA 3,00 → 2,49 milhões (−17%);
+  - Xóm Gò 1,24 → 1,12;
+  - base do VC 2,34 → 2,20;
+  - mata B, ponte e arrozal iguais (sem cerca).
+- **Peças no mapa:** 24.868 → 23.114.
+- **Peças com sombra no servidor:** 2.677 → 919.
+- **Arte no mapa:** 34,66 → 33,98 milhões de triângulos.
+
+**Decisão do dono** (o relatório lista):
+- afinar bambu, capim-elefante e bananeira longe dos caminhos e dos objetivos (1,3 milhão de
+  triângulos nas vistas das bases);
+- sombra do sol desligada por padrão no celular;
+- medir o fps num celular e num servidor cheio.

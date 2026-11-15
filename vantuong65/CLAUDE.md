@@ -87,7 +87,12 @@ O `sourcemap.json` não vai para o Git.
     `(New-Object -ComObject WScript.Shell).AppActivate(<pid do RobloxStudioBeta>)`;
   - os bots do servidor dividem a CPU com o cliente. `ReplicatedStorage:SetAttribute("BotFill", 0)`
     tira os bots (`nil` devolve);
-  - leia também `Stats.RenderCPUFrameTime` e `RenderGPUFrameTime`.
+  - leia também `Stats.RenderCPUFrameTime` e `RenderGPUFrameTime`;
+  - com o dono usando o computador, não roube o foco: compare por chamadas de desenho e triângulos
+    (`Stats.SceneDrawcallCount`, `ShadowsDrawcallCount`, `SceneTriangleCount`), com a qualidade
+    fixa no cliente (`settings().Rendering.QualityLevel = Enum.QualityLevel.Level10`; com o Studio
+    atrás, o automático baixa sozinho) e A/B na mesma vista (D-152,
+    `testes/DESEMPENHO_2026-11-15.md`).
 
 ## Assets no Roblox (publicados em 2026-11-10)
 - 82 assets publicados; os IDs estão em `Shared/AssetIds.luau` e `assets/roblox_ids.json`. Faltam
@@ -172,7 +177,7 @@ O `sourcemap.json` não vai para o Git.
 - Segredos só no `.env` (no `.gitignore`), nunca no código nem no chat.
 - ForgeGUI: nunca regenerar um job em `outcome_unknown`. "failed" com `retryable` pode ser
   retomado com `generation_retry`.
-- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-152) e atualize `PROGRESS.md`.
+- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-153) e atualize `PROGRESS.md`.
 - Tetos de triângulos por modelo: vegetação ≤ 6 mil (D-135), props e herói ≤ 20 mil (`ArtBudget`,
   conferido pelo teste da F5).
 - Commits no branch acima, com mensagem em português.

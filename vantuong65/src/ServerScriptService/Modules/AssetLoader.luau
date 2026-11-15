@@ -80,7 +80,10 @@ end
 -- Peça de planta posta no mapa. Copa, galho e touceira: sem colisão, a bala atravessa (Material
 -- "Bamboo", Ballistics.PASS). O tronco invisível (D-151, TrunkProxy) fica como o template deixou.
 -- Árvore sem tronco medido (proxied = false): a Madeira0 sólida, como no D-67.
-local function foliagePart(d: BasePart, shadow: boolean, proxied: boolean)
+-- D-152: a planta sai SEM sombra; quem liga é o cliente (Graficos, opção "Sombra das árvores", pelo
+-- atributo PlantShadow do modelo). Antes o servidor ligava e a copa que chegava pelo streaming ficava
+-- com sombra mesmo com a opção desligada (a folha fica num submodelo e o cliente não achava a marca).
+local function foliagePart(d: BasePart, proxied: boolean)
 	if TrunkProxy.isProxy(d.Name) then
 		return
 	end
@@ -92,7 +95,7 @@ local function foliagePart(d: BasePart, shadow: boolean, proxied: boolean)
 	end
 	d.CanCollide = solid
 	d.CanTouch = false
-	d.CastShadow = shadow
+	d.CastShadow = false
 	d:SetAttribute("Material", if wood then "Wood" else "Bamboo")
 end
 
@@ -381,8 +384,11 @@ function AssetLoader.place(
 	if foliage then
 		for _, d in m:GetDescendants() do
 			if d:IsA("BasePart") then
-				foliagePart(d, shadow == true, TreeTrunks[key] ~= nil)
+				foliagePart(d, TreeTrunks[key] ~= nil)
 			end
+		end
+		if shadow then
+			m:SetAttribute("PlantShadow", true) -- o cliente liga pela opção (Graficos)
 		end
 	end
 	m.Parent = parent
@@ -526,7 +532,7 @@ local function foliageParts(m: Model, shadow: boolean)
 	local proxied = TreeTrunks[m.Name] ~= nil
 	for _, d in m:GetDescendants() do
 		if d:IsA("BasePart") then
-			foliagePart(d, shadow, proxied)
+			foliagePart(d, proxied)
 		end
 	end
 	if shadow then
@@ -866,6 +872,7 @@ function AssetLoader.start()
 	jungle.Parent = out
 	local jrng = Rng.new(64)
 	local nJungle, nBorder, skippedLane, nPlanned = 0, 0, 0, 0
+	local nBorderProxies = 0
 	-- raio do tronco (peça Madeira0, com os galhos grossos) de cada árvore pronta, na escala 1
 	local trunkR: { [string]: number } = {}
 	local function laneClear(key: string, scale: number, x: number, z: number): boolean
@@ -916,9 +923,14 @@ function AssetLoader.start()
 							nBorder += 1
 							for _, d in pm:GetDescendants() do
 								if d:IsA("BasePart") then
-									d.CanCollide = false
-									d.CanQuery = false
-									d.CastShadow = false
+									if TrunkProxy.isProxy(d.Name) then
+										d:Destroy() -- D-152: o tronco invisível não serve aqui
+										nBorderProxies += 1
+									else
+										d.CanCollide = false
+										d.CanQuery = false
+										d.CastShadow = false
+									end
 								end
 							end
 						end
@@ -929,11 +941,12 @@ function AssetLoader.start()
 	end
 	print(
 		string.format(
-			"[VT65] plantas: %d de quintal, sebe e vila; mata %d de %d no plano (%d na cortina de fora, %d tiradas da raia)",
+			"[VT65] plantas: %d de quintal, sebe e vila; mata %d de %d no plano (%d na cortina de fora, sem %d troncos invisíveis; %d tiradas da raia)",
 			nPlants,
 			nJungle,
 			nPlanned,
 			nBorder,
+			nBorderProxies,
 			skippedLane
 		)
 	)

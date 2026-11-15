@@ -193,7 +193,7 @@ ArtBudget.TRIS = {
 	log_bridge = 4399,
 	-- ficaram os do gerador (o Blender perdeu na comparação, RELATORIO.md)
 	trench_section = 12072,
-	bamboo_fence = 16418,
+	bamboo_fence = 6000, -- D-152: reduzida de 16.418 (vegetacao_6k.py); era 1/4 da vista da base dos EUA
 	-- objetos novos do Blender (metricas.json)
 	water_jar = 2000,
 	straw_stack = 5000,
@@ -308,7 +308,7 @@ ArtBudget.DIMS = {
 	grave_mound = { 8.75, 3.91, 6.62 },
 	vc_bunker = { 14.48, 4.35, 12.8 },
 	sandbags = { 1.66, 2.4, 7.11 },
-	bamboo_fence = { 1.19, 6.51, 10.72 },
+	bamboo_fence = { 1.19, 6.52, 10.72 },
 	spider_hole = { 3.18, 2.31, 3.18 },
 	tunnel_entrance = { 3.58, 3.56, 3.56 },
 	trench_section = { 14.2, 3.99, 7.02 },

@@ -57,7 +57,7 @@
  "Ground.forest_ground_06_normal": "103100751913983",
  "Ground.forest_ground_06_rugosidade": "80664182036978",
  "Models.trench_section": "76350589057613",
- "Models.bamboo_fence": "118272877596797",
+ "Models.bamboo_fence_v81": "118272877596797",
  "Models.m14": "89317219190262",
  "Models.type56": "130417403055419",
  "Models.m60": "78397702456512",
@@ -419,5 +419,6 @@
  "Carta.se": "119816475637128",
  "Models.m70": "76814352866440",
  "Models.mosin": "87591536414880",
- "Models.win12": "88021040446518"
+ "Models.win12": "88021040446518",
+ "Models.bamboo_fence": "134018898436044"
 }

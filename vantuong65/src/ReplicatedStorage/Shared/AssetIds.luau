@@ -65,7 +65,7 @@ return {
 		well = 91389243957728,
 		granary = 109767359675365,
 		grave_mound = 125612119974664,
-		bamboo_fence = 118272877596797,
+		bamboo_fence = 134018898436044,
 		log_bridge = 113813163572493,
 		tunnel_entrance = 98656470342711,
 		trench_section = 76350589057613,

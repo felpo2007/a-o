@@ -152,20 +152,36 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
   - **Lote 35 (v80, D-150): feito.** M70, Mosin e Escopeta 12 refeitas sem as peças torcidas.
   - **Lote 36 (v81, D-151): feito.** O botão CÂMERA da 3ª pessoa de volta no toque (e a linha na
     coluna de comandos); árvores com tronco invisível medido na malha que para a bala.
-  - **Lote 37 (desempenho e beleza do mapa, pelo texto):**
-    - medir antes (fps, tempo de quadro, Scene Analysis/MicroProfiler);
-    - sombra só no que importa e simplificar o que está longe;
-    - colisões simples em props;
-    - transparência sobreposta da folhagem (overdraw);
-    - reuso de modelos;
-    - detalhe concentrado nos caminhos, interiores e objetivos;
-    - medir depois.
-  - Usar o Blender no que precisar de modelo novo.
+  - **Lote 37 (v82, D-152): feito.** Medido em `testes/DESEMPENHO_2026-11-15.md`.
+    - Corrigido: a sombra das copas não respeitava a opção "Sombra das árvores".
+    - Cerca de bambu com 6 mil triângulos (era 1/4 da vista da base dos EUA).
+    - Cortina sem os troncos invisíveis.
+    - Esperando o dono: afinar bambu, capim-elefante e bananeira longe dos caminhos; sombra do sol
+      desligada no celular; fps num celular.
 
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;
   - respondido pelo dono: a M14 fica como está; o capim clareou (v58);
   - a cadência abaixo de 12 fps medida num aparelho lento.
+
+## v82: lote 37, medir o mapa e mexer no que pesa (2026-11-15, D-152)
+- **Medida:** `testes/DESEMPENHO_2026-11-15.md` (seis vistas, qualidade fixa nos níveis 10 e 3,
+  chamadas de desenho e triângulos, A/B por mudança).
+  - Sem fps: o Studio ficou atrás de outra janela (trava em 15 fps).
+- **Sombra das copas:** a opção "Sombra das árvores" desligada não valia para as copas que chegavam
+  pelo streaming (586 com sombra numa sessão).
+  - Agora são 0 com a opção desligada e as 1.758 com ela ligada.
+  - Ganho: de 8 a 52 chamadas de sombra a menos por quadro.
+- **Cerca de bambu:** 16.418 → 6.000 triângulos. Era 1,12 milhão de triângulos na vista da base dos
+  EUA; de perto, continua igual.
+- **Cortina de fora da área:** sem os troncos invisíveis (1.754 peças a menos).
+- **Resultado no nível 3:** base dos EUA 3,00 → 2,49 milhões de triângulos (−17%); Xóm Gò e base do
+  VC também caíram.
+- **Testado e não entrou:**
+  - sombra desligada nos objetos pequenos (não mudou nada);
+  - folhas sem transparência (menos de 1 ms de GPU);
+  - colisões simples (a física custa 0,045 ms por passo).
+- **Testes:** 1 novo na F5 (a cerca no teto da vegetação).
 
 ## v81: lote 36, o botão da 3ª pessoa e o tronco que para a bala (2026-11-15, D-151)
 - **Publicada** (versão 81 do place, commit 450e102).

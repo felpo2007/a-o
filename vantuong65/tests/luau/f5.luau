@@ -509,6 +509,18 @@ test("tronco que para a bala (D-151): toda árvore da mata tem tronco medido e a
 	print(string.format("       %d cilindros nas árvores da mata", n))
 end)
 
+test("cerca de bambu no teto da vegetação (D-152): era 1/4 dos triângulos da vista da base dos EUA", function()
+	assert(ArtBudget.TRIS.bamboo_fence <= 6000, "cerca com " .. ArtBudget.TRIS.bamboo_fence .. " triângulos")
+	local man = serde.decode("json", fs.readFile("assets/forgegui/manifest.json")) :: any
+	for _, m in man.models do
+		if m.chave == "bamboo_fence" then
+			assert(m.reducao_local and m.triangulos == ArtBudget.TRIS.bamboo_fence, "manifest sem a redução da cerca")
+			return
+		end
+	end
+	error("cerca fora do manifest")
+end)
+
 print(string.format("%d ok, %d falhas", passed, failed))
 if failed > 0 then
 	process.exit(1)

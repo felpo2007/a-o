@@ -376,12 +376,23 @@
       "escala": "comprimento 3,0 m (projeto) (D-66: malha cheia)",
       "dim_studs_xyz": [
         1.19,
-        6.51,
+        6.52,
         10.72
       ],
-      "triangulos": 16418,
-      "sha256": "f7037da76dd635e5b75034c7a1d07d6a167feac4fdc607c3a4433bc272e7cfc3",
-      "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/76182c4a-70d5-4ce4-96df-181196348b3c/1ac275df-5458-4088-a3b6-b2d2db3c52bc/Model-f7037da76dd635e5b75034c7a1d07d6a167feac4fdc607c3a4433bc272e7cfc3.glb"
+      "triangulos": 6000,
+      "sha256": "67f5cf862da21d7a45f449899e8b72270fe6f8a3550c45d19e167d6d01a65a8e",
+      "url": "https://azyjlkhpdgafuobyxoax.supabase.co/storage/v1/object/public/asset-models/6db63d72-91bc-40b4-b1e5-003f154f965f/_forgegui-immutable/prepared/76182c4a-70d5-4ce4-96df-181196348b3c/1ac275df-5458-4088-a3b6-b2d2db3c52bc/Model-f7037da76dd635e5b75034c7a1d07d6a167feac4fdc607c3a4433bc272e7cfc3.glb",
+      "reducao_local": {
+        "ferramenta": "tools/decimate_glb.py (tools/vegetacao_6k.py)",
+        "pymeshlab": "2025.7.post1",
+        "faces": 6000,
+        "soltar_bordas": false,
+        "sha256_origem": "f7037da76dd635e5b75034c7a1d07d6a167feac4fdc607c3a4433bc272e7cfc3",
+        "triangulos_origem": 16418,
+        "desvio_max_m": 0.014,
+        "desvio_medio_m": 0.00171,
+        "motivo": "D-152: cerca de bambu no teto da vegetação (desempenho do mapa, 2026-11-15)"
+      }
     },
     {
       "arquivo": "models/tumulo_studs.glb",

@@ -38,6 +38,11 @@ RAIZ = Path(__file__).resolve().parent.parent
 FORGE = RAIZ / "assets" / "forgegui"
 ALVO = 6000
 MOTIVO = "D-135: vegetação com até 6 mil triângulos (pedido do dono, 2026-11-14)"
+# D-152: a cerca de bambu (16.418 triângulos) era 1 milhão de triângulos na vista da base dos EUA
+# (62 cercas em An Cường), ~1/4 da vista medida no Studio; entra no teto da vegetação
+MOTIVOS = {
+    "bamboo_fence": "D-152: cerca de bambu no teto da vegetação (desempenho do mapa, 2026-11-15)",
+}
 # plantas do ForgeGUI (o bambu sem disco é reduzido no tools/blender/bambu_sem_disco.py)
 CHAVES = [
     "shrub",
@@ -49,6 +54,7 @@ CHAVES = [
     "canopy_tree",
     "melaleuca_grove",
     "taro_fern",
+    "bamboo_fence",
 ]
 
 
@@ -135,7 +141,7 @@ def main() -> None:
             "triangulos_origem": r["tris_antes"],
             "desvio_max_m": r["desvio_max_m"],
             "desvio_medio_m": r["desvio_medio_m"],
-            "motivo": MOTIVO,
+            "motivo": MOTIVOS.get(chave, MOTIVO),
         }
         m["sha256"] = sha(src)
         m["triangulos"] = r["tris"]

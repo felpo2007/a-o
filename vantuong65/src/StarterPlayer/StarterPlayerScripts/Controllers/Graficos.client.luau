@@ -63,10 +63,25 @@ end
 
 local function setPlantShadow(m: Instance)
 	for _, d in m:GetDescendants() do
-		if d:IsA("BasePart") then
+		-- o tronco invisível (D-151) nunca faz sombra
+		if d:IsA("BasePart") and d.Transparency < 1 then
 			d.CastShadow = state.plantShadows
 		end
 	end
+end
+
+-- D-152: a árvore pronta tem a folha num submodelo (Folhas0_0_Node); a marca PlantShadow está no
+-- modelo de fora. Antes só o modelo mais perto era olhado, e a copa que chegava pelo streaming ficava
+-- com sombra mesmo com a opção desligada (586 copas no Studio, v81).
+local function plantModel(d: Instance): Instance?
+	local m = d:FindFirstAncestorWhichIsA("Model")
+	while m do
+		if m:GetAttribute("PlantShadow") == true then
+			return m
+		end
+		m = m:FindFirstAncestorWhichIsA("Model")
+	end
+	return nil
 end
 
 local art: Instance? = nil
@@ -136,11 +151,8 @@ task.spawn(function()
 	art = a
 	applyPlants()
 	a.DescendantAdded:Connect(function(d: Instance)
-		if d:IsA("BasePart") then
-			local m = d:FindFirstAncestorWhichIsA("Model")
-			if m and m:GetAttribute("PlantShadow") == true then
-				d.CastShadow = state.plantShadows
-			end
+		if d:IsA("BasePart") and d.Transparency < 1 and plantModel(d) then
+			d.CastShadow = state.plantShadows
 		end
 	end)
 end)
