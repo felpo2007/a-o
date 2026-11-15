@@ -49,20 +49,17 @@ Textos prontos e imagens: **`LANCAMENTO.md`** (página do jogo, guia do question
   `SUBSCRIPTION_UNIT_RESERVE`.
 - **Preços:** revisar as sugestões em `MONETIZATION.md`. Ativar o Managed Pricing depois das
   primeiras vendas.
-- **Team Create (para testar o SLIM, D-154):** o Roblox só gera o SLIM (cenário mais leve à
-  distância) em experiência com Team Create ligado. Você não precisa chamar ninguém.
-  - O resto já está pronto (D-155): uma casa de Xóm Gò e 5 objetos em volta viram modelo fixo com
-    SLIM sem trocar o Lune. Depois de ligar, me avise: eu ligo o conjunto e publico, e você compara a
-    casa perto e longe no jogo publicado.
-  - Limite conhecido: a casa fixa fica com o interior mais claro (detalhes no D-155).
+- ~~**Team Create (para testar o SLIM, D-154)**~~ (ligado; conferido em 2026-11-15, D-167).
   - Com o Team Create ligado, o Studio salva na nuvem o que se mexe no place aberto de lá. Eu
-    continuo publicando só pelo pipeline.
-  - **Como ligar (1 min):**
-    1. Abra o place da nuvem no Studio (Create → STARLITE: Vietnã 1965 → Editar no Studio).
-    2. Aba **Arquivo (File)** → **Colaborar (Collaborate)**. Em Studio mais antigo: aba **Ver
-       (View)** → **Team Create** → **Ativar (Turn On)**.
-    3. Confirme. O Studio recarrega o place em modo de equipe.
-    4. Feche o Studio **sem salvar e sem publicar** e me avise.
+    continuo publicando só pelo pipeline: não mexa no place da nuvem pelo Studio.
+- **Conferir o SLIM no jogo publicado** (5 min, D-167): a casa de telha da entrada de Xóm Gò (com o
+  pote, a cozinha, o celeiro e duas cercas em volta) agora é modelo fixo com SLIM.
+  1. Entre no jogo publicado e vá até a entrada de Xóm Gò.
+  2. Olhe a casa de perto e depois se afaste até uns 150–200 m, comparando com as outras casas de
+     telha iguais a ela.
+  3. Me diga se, de longe, ela some, muda de forma ou de cor, ou fica igual às outras.
+  - O Roblox gera o SLIM na nuvem depois da publicação; pode levar um tempo.
+  - Limite conhecido: o interior dela fica mais claro que o das outras (D-155).
 
 ## 3. Testar no Studio o que eu não consigo medir aqui
 Nada rodou dentro do Roblox. Os critérios abaixo exigem o Studio ou o jogo publicado. Abra

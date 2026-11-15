@@ -1,0 +1,120 @@
+{
+ "ClassName": "Model",
+ "Properties": {
+  "LevelOfDetail": {
+   "Enum": 4
+  },
+  "ModelStreamingMode": "Atomic",
+  "WorldPivotData": {
+   "OptionalCFrame": {
+    "position": [
+     -1279.768,
+     118.958,
+     -1835.498
+    ],
+    "orientation": [
+     [
+      -0.539638,
+      0,
+      0.841897
+     ],
+     [
+      0,
+      1,
+      0
+     ],
+     [
+      -0.841897,
+      0,
+      -0.539638
+     ]
+    ]
+   }
+  },
+  "Attributes": {
+   "Attributes": {
+    "VT65Estatico": {
+     "Bool": true
+    },
+    "VT65Chave": {
+     "String": "bamboo_fence"
+    }
+   }
+  }
+ },
+ "Children": [
+  {
+   "Name": "ForgeGUIExplicitTransform",
+   "ClassName": "Model",
+   "Children": [
+    {
+     "Name": "tripo_node_4356f06d-9bc5-4618-a401-0342d90ec11c",
+     "ClassName": "Model",
+     "Children": [
+      {
+       "Name": "tripo_mesh_4356f06d-9bc5-4618-a401-0342d90ec11c",
+       "ClassName": "MeshPart",
+       "Properties": {
+        "MeshId": "rbxassetid://79759198495920",
+        "InitialSize": [
+         1.1893,
+         6.516,
+         10.7227
+        ],
+        "Size": [
+         0.892,
+         4.887,
+         8.042
+        ],
+        "CFrame": {
+         "CFrame": {
+          "position": [
+           -1279.767,
+           121.401,
+           -1835.499
+          ],
+          "orientation": [
+           [
+            -0.539638,
+            0,
+            0.841897
+           ],
+           [
+            0,
+            1,
+            0
+           ],
+           [
+            -0.841897,
+            0,
+            -0.539638
+           ]
+          ]
+         }
+        },
+        "Anchored": true,
+        "CanCollide": true,
+        "CanQuery": true,
+        "CanTouch": true,
+        "CastShadow": true,
+        "Transparency": 0,
+        "CollisionFidelity": "Box"
+       },
+       "Children": [
+        {
+         "Name": "SurfaceAppearance",
+         "ClassName": "SurfaceAppearance",
+         "Properties": {
+          "AlphaMode": "Overlay",
+          "ColorMap": "rbxassetid://124314182127828",
+          "NormalMap": "rbxassetid://103141389035285"
+         }
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

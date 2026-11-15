@@ -6567,3 +6567,34 @@ amostra a cada 30 s; o objetivo é Ponte e Cais, D):
 - o tempo do Offensive (`Offensive.C`);
 - o fogo de perto do bot dos EUA (rajada da M14 ou mais M60 no squad);
 - o defensor do Offensive mais preso ao ponto (menos caça ao contato).
+
+## D-167 — Lote 51: o SLIM ligado na casa de Xóm Gò (2026-11-15, v91)
+
+**Pedido do dono:** "quero fazer o slim".
+
+- **Team Create ligado:** conferido pela API de desenvolvimento do Roblox
+  (`develop.roblox.com/v1/universes/10775697296/teamcreate` → `isEnabled: true`), lida no navegador
+  do app com a conta do dono. A versão 90 do place, que apareceu por fora do pipeline (D-166), veio
+  daí.
+- **Cópia nova do conjunto:** a de D-155 era da v83, antes da trim sheet (D-159). O conjunto foi
+  copiado de novo da v90 (`tools/estatico_copiar.luau` no servidor do Studio).
+  - 6 modelos e 60 peças, sem nenhuma linha `X`.
+  - A casa tem 55 peças: Mobilia, Telhado, `Trim_M/W/P` (com a SurfaceAppearance do portador já
+    aplicada) e 50 caixas de colisão.
+  - Conferido pela soma FNV-1a (`a34b3f7d`, 8.653 bytes) calculada no Studio e no arquivo. A soma do
+    Studio precisa da multiplicação dividida (`h*403 + ((h*256) % 65536) * 65536`): `h * 16777619`
+    passa de 2^53 e perde precisão no Luau.
+- **Ligado:** `assets/estatico/ativos.json` = `["vila_casa_03_xomgo"]`; `tools/estatico.py` gerou
+  `src/Workspace/Estatico` (6 modelos) e `Modules/StaticArt`.
+- **Studio:**
+  - o arquivo tem os 6 modelos com `LevelOfDetail = SLIM` e `Atomic`;
+  - o servidor pulou as 6 cópias do plano;
+  - a vila saiu igual: 855 modelos, 390 construções, 27 animais, 240 peças de abrigo dos bots;
+  - 6 de 8 raios param nas paredes da casa fixa (os outros passam pelas portas e pela varanda);
+  - de fora, a casa sai com o telhado, as paredes da trim sheet, o pote e as cercas;
+  - autoteste: 18 ok, 0 falhas; nenhum erro no Output.
+- **Limite conhecido (D-155):** o interior da casa fixa fica mais claro que o das outras, porque a
+  peça feita fora do Studio colide em caixa.
+- **Falta (só no jogo publicado):** o Roblox gera o SLIM na nuvem depois da publicação. Comparar a
+  casa da entrada de Xóm Gò de perto e de longe com as outras `vila_casa_03`. Se o SLIM funcionar,
+  passar mais conjuntos para arte fixa (mais casas da vila).

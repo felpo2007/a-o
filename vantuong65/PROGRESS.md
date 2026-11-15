@@ -231,11 +231,31 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
   - **Lote 50 (v90, D-166): feito.** Lance de assalto também no duelo e, no Offensive, o VC com 20
     de 30. Os EUA chegaram a entrar em Ponte e Cais; o primeiro setor ainda não caiu em 11,5 min.
   - Team Create: o passo a passo está no `TODO_USUARIO` (é do dono).
+- Pedido do dono (15/11): "quero fazer o slim":
+  - **Lote 51 (v91, D-167): feito.** O Team Create já estava ligado. A casa de telha da entrada de
+    Xóm Gò e 5 objetos em volta viraram arte fixa com SLIM (cópia nova, com a trim sheet).
+  - Falta o dono conferir no jogo publicado a casa de perto e de longe (TODO_USUARIO).
 
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;
   - respondido pelo dono: a M14 fica como está; o capim clareou (v58);
   - a cadência abaixo de 12 fps medida num aparelho lento.
+
+## v91: lote 51, o SLIM ligado na casa de Xóm Gò (2026-11-15, D-167)
+- **Team Create:** ligado (`isEnabled: true` na API de desenvolvimento do Roblox).
+- **Arte fixa com SLIM:** a `vila_casa_03` da entrada de Xóm Gò, o pote, a cozinha, o celeiro e duas
+  cercas (6 modelos, 60 peças), copiados de novo da v90, porque a cópia da D-155 era de antes da
+  trim sheet.
+  - Conferida pela soma FNV-1a (`a34b3f7d`, 8.653 bytes) no Studio e no arquivo.
+- **Studio:**
+  - 6 modelos com SLIM e Atomic, e 6 cópias do plano puladas;
+  - a vila igual: 855 modelos, 390 construções, 27 animais, 240 abrigos dos bots;
+  - 6 de 8 raios param na casa fixa;
+  - autoteste 18 ok, 0 falhas; 0 erros no Output.
+- **Testes:** Lune 238 ok; pytest 58 (`test_estatico` com a cópia nova); ruff, StyLua e luau-lsp
+  limpos.
+- **Não testado:** o SLIM em si. Ele só existe no jogo publicado, gerado pelo Roblox na nuvem;
+  a conferência é do dono (TODO_USUARIO).
 
 ## v90: lotes 49 e 50, Robux, telhados medidos e bots ofensivos (2026-11-15, D-164 a D-166)
 - **Publicada** (versão 91 do place, commit a476331). A versão 90 do place não saiu do pipeline:

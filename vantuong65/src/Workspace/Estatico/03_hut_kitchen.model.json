@@ -1,0 +1,116 @@
+{
+ "ClassName": "Model",
+ "Properties": {
+  "LevelOfDetail": {
+   "Enum": 4
+  },
+  "ModelStreamingMode": "Atomic",
+  "WorldPivotData": {
+   "OptionalCFrame": {
+    "position": [
+     -1278.471,
+     118.959,
+     -1771.532
+    ],
+    "orientation": [
+     [
+      0.841897,
+      0,
+      0.539638
+     ],
+     [
+      0,
+      1,
+      0
+     ],
+     [
+      -0.539638,
+      0,
+      0.841897
+     ]
+    ]
+   }
+  },
+  "Attributes": {
+   "Attributes": {
+    "VT65Estatico": {
+     "Bool": true
+    },
+    "VT65Chave": {
+     "String": "hut_kitchen"
+    }
+   }
+  }
+ },
+ "Children": [
+  {
+   "Name": "hut_kitchen_Node",
+   "ClassName": "Model",
+   "Children": [
+    {
+     "Name": "hut_kitchen",
+     "ClassName": "MeshPart",
+     "Properties": {
+      "MeshId": "rbxassetid://80646389952768",
+      "InitialSize": [
+       14.2742,
+       11.9204,
+       12.5891
+      ],
+      "Size": [
+       15.773,
+       13.172,
+       13.911
+      ],
+      "CFrame": {
+       "CFrame": {
+        "position": [
+         -1278.472,
+         125.543,
+         -1771.531
+        ],
+        "orientation": [
+         [
+          0.841897,
+          0,
+          0.539638
+         ],
+         [
+          0,
+          1,
+          0
+         ],
+         [
+          -0.539638,
+          0,
+          0.841897
+         ]
+        ]
+       }
+      },
+      "Anchored": true,
+      "CanCollide": true,
+      "CanQuery": true,
+      "CanTouch": true,
+      "CastShadow": true,
+      "Transparency": 0,
+      "CollisionFidelity": "Box"
+     },
+     "Children": [
+      {
+       "Name": "SurfaceAppearance",
+       "ClassName": "SurfaceAppearance",
+       "Properties": {
+        "AlphaMode": "Overlay",
+        "ColorMap": "rbxassetid://71074045203818",
+        "NormalMap": "rbxassetid://115986446822592",
+        "RoughnessMap": "rbxassetid://105803143622423",
+        "MetalnessMap": "rbxassetid://131900122965599"
+       }
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

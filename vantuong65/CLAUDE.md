@@ -43,9 +43,11 @@ repositório é de OUTRO projeto (estratégias de trade). Aqui vale este arquivo
     (D-165). Antes de passar outro grupo para a trim, meça sem bots, como na D-165;
   - o `AssetLoader` clona a SurfaceAppearance do portador (`AssetIds.Models.vila_trim`) nas peças
     `Trim_*`.
-- Arte fixa no place, para o SLIM (D-155):
+- Arte fixa no place, para o SLIM (D-155; ligada desde a v91, com o Team Create, D-167):
   - copie o conjunto do jogo rodando com `tools/estatico_copiar.luau` (Server, pelo MCP) para
-    `assets/estatico/<conjunto>.txt`;
+    `assets/estatico/<conjunto>.txt`. Recopie quando o modelo mudar (a cópia guarda malhas e
+    texturas). Para conferir o texto, use FNV-1a com a multiplicação dividida
+    (`h*403 + ((h*256) % 65536) * 65536`): no Luau, `h * 16777619` perde precisão;
   - ligue-o em `assets/estatico/ativos.json` e rode `uv run python tools/estatico.py` (gera
     `src/Workspace/Estatico` e `Modules/StaticArt`).
   - No `.model.json`, o Rojo 7.4 quer:
@@ -212,7 +214,7 @@ O `sourcemap.json` não vai para o Git.
 - Segredos só no `.env` (no `.gitignore`), nunca no código nem no chat.
 - ForgeGUI: nunca regenerar um job em `outcome_unknown`. "failed" com `retryable` pode ser
   retomado com `generation_retry`.
-- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-167) e atualize `PROGRESS.md`.
+- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-168) e atualize `PROGRESS.md`.
 - Tetos de triângulos por modelo: vegetação ≤ 6 mil (D-135), props e herói ≤ 20 mil (`ArtBudget`,
   conferido pelo teste da F5).
 - Commits no branch acima, com mensagem em português.

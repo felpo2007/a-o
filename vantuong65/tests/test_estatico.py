@@ -36,13 +36,19 @@ def test_copia_da_casa_de_xom_go():
     ]
     casa = modelos[0]
     pecas = todas(casa)
-    assert len(pecas) == 56
-    # 6 malhas visíveis (com textura) e 50 caixas de colisão invisíveis com o Material da bala
+    assert len(pecas) == 55
+    # D-167 (cópia da v90): 5 malhas visíveis com textura (Mobilia, Telhado e o grupo Casa nas
+    # folhas comuns da trim sheet, D-159) e 50 caixas de colisão invisíveis com o Material da bala
     visiveis = [p for p in pecas if "sa" in p]
     colisao = [p for p in pecas if p["nome"].startswith("Colisao_")]
-    assert len(visiveis) == 6 and len(colisao) == 50
+    assert len(visiveis) == 5 and len(colisao) == 50
+    assert sorted(p["nome"] for p in visiveis if p["nome"].startswith("Trim_")) == [
+        "Trim_M",
+        "Trim_P",
+        "Trim_W",
+    ]
     assert all("t" in p["marcas"] and p["material"] for p in colisao)
-    assert sum(len(todas(m)) for m in modelos) == 61
+    assert sum(len(todas(m)) for m in modelos) == 60
 
 
 def test_modelo_do_rojo_slim_e_tamanho_da_malha():
@@ -74,9 +80,10 @@ def test_chave_que_depende_do_jogo_e_recusada(tmp_path):
         estatico.ler(f)
 
 
-def test_desligado_por_padrao_e_gerado_bate():
-    # D-155: sem o Team Create o SLIM não é gerado; o conjunto fica fora do place até ligar
+def test_ligados_e_gerado_bate():
+    # D-155: o SLIM só é gerado com o Team Create; D-167: ligado, a casa de Xóm Gò vai no place
     ativos = json.loads((ROOT / "assets" / "estatico" / "ativos.json").read_text("utf-8"))
+    assert ativos == ["vila_casa_03_xomgo"]
     gerados = sorted((ROOT / "src" / "Workspace" / "Estatico").glob("*.model.json"))
     modulo_arq = ROOT / "src" / "ServerScriptService" / "Modules" / "StaticArt.luau"
     modulo = modulo_arq.read_text("utf-8")
