@@ -2,8 +2,9 @@
 
 Esta pasta é o jogo **VẠN TƯỜNG '65**: FPS tático 30 contra 30 no Roblox (D-122), na Operação
 Starlite (agosto de 1965), mapa 1:1 de 700 × 700 m com cinco objetivos, um em cada canto e a vila de
-Xóm Gò no morro do centro (D-128): baixada sudoeste, mata fechada, Xóm Gò, arrozal ao sul de An Cường
-(2) e vau do riacho. O mapa é coberto de mata fechada com lavoura em volta das vilas (D-65). O `CLAUDE.md` da raiz do
+Xóm Gò no morro do centro (D-128, D-140): A Arrozais, B Serraria (mata fechada), C Xóm Gò (vila em
+meio círculo, D-148), D Ponte e Cais (rio do sul) e E Engenho. O mapa é coberto de mata fechada com
+lavoura em volta das vilas (D-65). O `CLAUDE.md` da raiz do
 repositório é de OUTRO projeto (estratégias de trade). Aqui vale este arquivo. Responda sempre em português.
 
 ## Antes de qualquer coisa
@@ -162,7 +163,7 @@ O `sourcemap.json` não vai para o Git.
 - Segredos só no `.env` (no `.gitignore`), nunca no código nem no chat.
 - ForgeGUI: nunca regenerar um job em `outcome_unknown`. "failed" com `retryable` pode ser
   retomado com `generation_retry`.
-- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-148) e atualize `PROGRESS.md`.
+- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-149) e atualize `PROGRESS.md`.
 - Tetos de triângulos por modelo: vegetação ≤ 6 mil (D-135), props e herói ≤ 20 mil (`ArtBudget`,
   conferido pelo teste da F5).
 - Commits no branch acima, com mensagem em português.

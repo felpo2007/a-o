@@ -14,8 +14,11 @@ TerrainLook.COLORS = {
 	LeafyGrass = Color3.fromRGB(92, 90, 54), -- chão de mata: folhas secas sobre capim
 	-- D-123 (dono: "conserte o solo"): o terreno multiplica a textura pela cor. A terra batida (dirt_floor,
 	-- D-115) tem média (182, 140, 100), alaranjada; com (108, 86, 60) as ruas saíam vermelho-escuro
-	-- (~77, 47, 23). Este tom puxa para azul e dá ~(107, 92, 78), terra seca acinzentada (Studio, v55).
-	Ground = Color3.fromRGB(150, 168, 200), -- terra batida das ruas, becos, praça e quintais
+	-- (~77, 47, 23). Com (150, 168, 200) saíam ~(107, 92, 78), cinza; sem a foto (aparelho fraco, foto
+	-- ainda carregando) a cor azulada sobre o Ground padrão do Roblox dava estrada cinza-azulada. D-148
+	-- (dono: "as estradas não estão feitas de terra"): tom levemente quente, marrom nos dois casos:
+	-- com a foto ~(136, 94, 58), terra de laterita (no Studio, v78: rua e praça marrom-alaranjadas).
+	Ground = Color3.fromRGB(190, 172, 148), -- terra batida das ruas, becos, praça e quintais
 	Mud = Color3.fromRGB(90, 80, 64), -- barranco de riacho (D-123: menos vermelho)
 	Sand = Color3.fromRGB(188, 168, 126),
 	Rock = Color3.fromRGB(112, 104, 92),

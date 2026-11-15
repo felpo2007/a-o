@@ -140,11 +140,11 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     - olho mais longe na mira da M14.
   - **Lote 32 (v77, D-147): feito.** Bots atiram até 112 m (era 45 m), cobrem, avançam e
     flanqueiam em squad, no nível médio do Front 44 levado à escala do mapa.
-  - **Lote 33 (mapa):**
-    - base dos EUA mais longe dos objetivos;
-    - vila em meio círculo, espalhada;
-    - estradas de terra;
-    - pontes que aguentem tanque.
+  - **Lote 33 (v78, D-148): feito.**
+    - Vila em meio círculo torto e espalhado;
+    - estradas cor de terra;
+    - ponte de 7 m para o tanque;
+    - objetivos D e E e a linha do setor mais longe da base dos EUA (a base já encosta na borda).
   - **Lote 34 (interface):** entrar no veículo com as vagas principais e o resto em "passageiro";
     texto da inserção de helicóptero mais simples.
   - Usar o Blender no que precisar de modelo novo.
@@ -153,6 +153,27 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;
   - respondido pelo dono: a M14 fica como está; o capim clareou (v58);
   - a cadência abaixo de 12 fps medida num aparelho lento.
+
+## v78: lote 33, vila em meio círculo, estradas de terra, ponte para o tanque e base mais longe (2026-11-15, D-148)
+- **Vila de Xóm Gò:**
+  - as fileiras saíram;
+  - casas em arcos em volta da praça, num meio círculo torto de um lado da rua, com vagas vazias e
+    casas soltas;
+  - todas olham para a praça;
+  - 32 casas (eram 53).
+- **Estradas:** tom do chão de terra mais quente (era azulado e a terra saía cinza). No Studio a rua e
+  a praça ficaram marrom-alaranjadas.
+- **Ponte:** 7 m de largura (era 3,6 m; o tanque tem 3,63 m), com estacas e vigas no meio.
+  - Tabuleiro de 20 x 7 m no Studio.
+  - No teste, o tanque fica preso em 0,08% do mapa (na chuva eram 2,4%).
+- **Base dos EUA mais longe:** a base já encosta na borda leste. Foram para longe:
+  - o objetivo D (318 → 348 m do QG);
+  - o objetivo E (291 → 315 m);
+  - a linha do setor que o VC pode tomar (46 → 86 m do portão).
+- **Estradas:** corrigida a junção que entrava 1,4 m abaixo (rampa de 68%).
+- **Carta** refeita e reenviada.
+- **Testes:** Lune 640 ok; pytest 54; ruff; luau-lsp sem erro novo.
+- **Não testado:** um tanque passando na ponte no Studio.
 
 ## v77: lote 32, bots atiram de mais longe e trabalham em equipe (2026-11-15, D-147)
 - **Publicada** (versão 77 do place, commit 20c9fda).

@@ -14,8 +14,8 @@ MapConfig.Sectors = {
 	{ id = 1, name = "A Arrozais", polygon = { -2571.4, -642.9, -2571.4, -3142.9, -2142.9, -3142.9, -2142.9, -642.9 } },
 	{ id = 2, name = "B Serraria", polygon = { -2142.9, -642.9, -2142.9, -3142.9, -1607.2, -3142.9, -1607.2, -642.9 } },
 	{ id = 3, name = "C Xóm Gò", polygon = { -1607.2, -642.9, -1607.2, -3142.9, -1000.0, -3142.9, -1000.0, -642.9 } },
-	{ id = 4, name = "D Ponte e Cais", polygon = { -1000.0, -642.9, -1000.0, -3142.9, -571.4, -3142.9, -571.4, -642.9 } },
-	{ id = 5, name = "E Engenho", polygon = { -571.4, -642.9, -571.4, -3142.9, -71.4, -3142.9, -71.4, -642.9 } },
+	{ id = 4, name = "D Ponte e Cais", polygon = { -1000.0, -642.9, -1000.0, -3142.9, -714.3, -3142.9, -714.3, -642.9 } },
+	{ id = 5, name = "E Engenho", polygon = { -714.3, -642.9, -714.3, -3142.9, -71.4, -3142.9, -71.4, -642.9 } },
 }
 MapConfig.Strongpoints = {
 	{
@@ -37,24 +37,24 @@ MapConfig.Strongpoints = {
 	{
 		sector = 3,
 		name = "Xóm Gò",
-		x = -1339.3,
-		z = -1919.7,
+		x = -1366.1,
+		z = -1946.4,
 		real = false,
 		note = "vila grande de design no morrote do centro (40 a 60 casas); nome de design",
 	},
 	{
 		sector = 4,
 		name = "Ponte e Cais",
-		x = -714.3,
-		z = -857.1,
+		x = -964.3,
+		z = -875.0,
 		real = false,
 		note = "ponte e cais a sudeste; nome de design",
 	},
 	{
 		sector = 5,
 		name = "Engenho",
-		x = -464.3,
-		z = -2910.7,
+		x = -553.6,
+		z = -2975.0,
 		real = false,
 		note = "engenho a nordeste; nome de design",
 	},

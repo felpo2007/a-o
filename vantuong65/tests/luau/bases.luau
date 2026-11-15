@@ -227,38 +227,54 @@ test("vila Xóm Gò: casas únicas publicadas, porta para a rua, vizinhas nunca 
 	assert(math.abs(nx) < 1e-9 and math.abs(nz + 1) < 1e-9, "giro da porta não leva para -Z")
 end)
 
-test("D-134: a vila fora da grade (recuos e giros variados, casas soltas) e sem casa na rua", function()
-	-- quadro da vila: u ao longo da rua, v de lado (m)
+test("D-148: a vila em meio círculo torto e esporádico em volta da praça, sem casa na rua", function()
+	-- quadro da vila: u ao longo da rua (o diâmetro), v de lado (m); o meio círculo fica do lado +v
 	local ang = -Village.yaw
 	local ca, sa = math.cos(ang), math.sin(ang)
-	local recuos: { [number]: boolean } = {}
-	local nRecuos, girados, soltas = 0, 0, 0
+	local n = #Village.houses
+	local doLado, deFrente = 0, 0
+	local angs, raios = {}, {}
 	for _, h in Village.houses do
 		local dx, dz = h[1] - Village.x, h[2] - Village.z
+		local u = (dx * ca + dz * sa) * M
 		local v = (-dx * sa + dz * ca) * M
-		local k = math.floor(math.abs(v) + 0.5)
-		if not recuos[k] then
-			recuos[k] = true
-			nRecuos += 1
-		end
-		-- giro em relação à rua (a casa do outro lado tem meia volta)
-		local rel = (h[3] - Village.yaw) % math.pi
-		local d = math.min(rel, math.pi - rel)
-		if d > math.rad(12) then
-			girados += 1
-		end
-		if math.abs(v) > 48 then
-			soltas += 1
-		end
 		assert(math.abs(v) > Village.streetW * M / 2 + 4, "casa em cima da rua")
 		assert(h[4] >= 1 and h[4] <= 10, "variante sem modelo único")
+		if v > 0 then
+			doLado += 1
+			table.insert(angs, math.deg(math.atan2(v, u)))
+			table.insert(raios, math.sqrt(u * u + v * v))
+			-- a frente da casa (-Z local girado por yaw) aponta para a praça (até 60°)
+			local fx, fz = -math.sin(h[3]), -math.cos(h[3])
+			local px, pz = -dx, -dz
+			local cosA = (fx * px + fz * pz) / math.max(math.sqrt(px * px + pz * pz), 1e-6)
+			if cosA > math.cos(math.rad(60)) then
+				deFrente += 1
+			end
+		end
 	end
-	print(string.format("       %d recuos diferentes, %d casas giradas, %d soltas", nRecuos, girados, soltas))
-	assert(nRecuos >= 12, "recuos iguais: a vila continua em fileiras")
-	assert(girados >= #Village.houses // 4, "casas alinhadas demais com a rua")
-	assert(soltas >= 5, "faltam casas soltas fora das fileiras")
-	-- cada casa com uma trilha (a maioria): lanes = trilhas + 2 travessas
-	assert(#Village.lanes >= #Village.houses * 0.6, "poucas trilhas")
+	table.sort(angs)
+	table.sort(raios)
+	print(
+		string.format(
+			"       %d casas, %d do lado do meio círculo (de %.0f° a %.0f°, raio de %.0f a %.0f m), %d de frente para a praça",
+			n,
+			doLado,
+			angs[1],
+			angs[#angs],
+			raios[1],
+			raios[#raios],
+			deFrente
+		)
+	)
+	assert(n >= 30, "vila pequena demais: " .. n)
+	assert(doLado >= n * 0.75, "o meio círculo fica de um lado da rua")
+	assert(angs[#angs] - angs[1] > 140, "o meio círculo abre de ponta a ponta")
+	-- o 1º arco (30 m) fica quase todo com a praça e o pagode: a primeira casa sai a uns 43 m
+	assert(raios[1] < 50 and raios[#raios] > 85, "casas perto e longe da praça")
+	assert(deFrente >= doLado * 0.6, "as casas olham para a praça")
+	-- cada casa com uma trilha (a maioria): lanes = trilhas + 2 trilhas largas
+	assert(#Village.lanes >= n * 0.6, "poucas trilhas")
 end)
 
 print(string.format("%d ok, %d falhas", passed, failed))

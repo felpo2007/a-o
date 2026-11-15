@@ -5617,3 +5617,80 @@ trabalhando em equipe; faça eles no nível mediano igual do Front 44".
 - Primeiro tiroteio da partida aos 83 s, a 89 m.
 
 **Não medido:** se o jogador sente o nível médio numa partida de verdade (vale a impressão do dono).
+
+## D-148 — Lote 33: vila em meio círculo, estradas de terra, ponte para o tanque e a base dos EUA mais longe (v78, 2026-11-15)
+
+**Pedidos do dono (14/11):**
+- "faça a vila num formato meio circular mas não perfeito" e "quero que seja esporádica";
+- "as estradas não estão feitas de terra";
+- "faça as pontes grandes o suficiente para passar um veículo como o tanque";
+- "a base americana está muito perto dos objetivos, coloque ela mais longe".
+
+**Vila de Xóm Gò em meio círculo** (`tools/vila_estradas.py`):
+- **Antes:** duas fileiras de lotes de cada lado de uma rua reta. A D-134 só empurrava e girava as
+  casas dentro dessa grade, e na carta a vila continuava um retângulo de fileiras.
+- **Agora:** a rua é o diâmetro e as casas ficam em cinco arcos em volta da praça, de um lado só
+  (raios de 30 a 102 m, 18 m entre arcos).
+  - **Torto:** o raio ondula pelo ângulo, cada ponta do meio círculo sorteia ±10°, e cada casa
+    sorteia raio (±4 m), ângulo e giro.
+  - **Esporádico:** 18% das vagas ficam vazias; há 8 casas soltas além do último arco e 4 do outro
+    lado da rua.
+  - Todas as casas olham para a praça (com giro livre de ±28°; 15% de lado).
+  - Pagode no fundo da praça, casa comunal e bancas do mercado do outro lado da rua.
+  - Cada porta tem uma trilha até a praça, e duas trilhas largas vão da praça ao fundo da vila.
+- **Ajustes medidos:**
+  - Com 15 m entre arcos (menos que os 17 m entre casas) e o sorteio de ±6 m, a vila ficou com 28 e
+    depois 29 casas das 44 vagas que cabem no chão.
+  - Com as pontas a −12°/192° e 8 casas do outro lado, parecia um círculo inteiro cortado pela rua.
+  - A praça fica no centro do mapa (D-123), na janela E 269817–269842.
+- **Resultado:** 32 casas (eram 53). 24 do lado do meio círculo, de 16° a 171°, de 43 a 130 m da
+  praça, 23 de frente para ela.
+- A estrada principal contorna a vila pelo sul; antes cortava a vila no meio.
+
+**Estradas de terra** (`TerrainLook.COLORS.Ground`):
+- A estrada já era do material `Ground` com a foto de terra batida (D-115). O tom da D-123 (150,
+  168, 200) puxava para o azul e a terra saía cinza, ~(107, 92, 78).
+- Sem a foto (aparelho fraco, foto carregando), sobre o `Ground` padrão do Roblox, a estrada saía
+  cinza-azulada.
+- **Agora:** (190, 172, 148), levemente quente: com a foto, ~(136, 94, 58), marrom de laterita.
+- **Studio:** a troca de material pela foto está ativa (`GetBaseMaterialOverride(Ground)` =
+  `VT65_Ground`); a praça e a rua saíram marrom-alaranjadas.
+
+**Ponte para o tanque** (`ArtPlan.BRIDGE_WIDTH_M`, `MapLife` "ponte"):
+- A ponte da Ponte e Cais tinha 3,6 m, só um jipe (o M48 tem 3,63 m). Agora tem 7 m, a largura da
+  estrada principal.
+- Ganhou uma fileira de estacas no meio e três vigas sob o tabuleiro.
+- **Studio:** tabuleiro de 20 x 7 m.
+- **Teste das estradas:** o tabuleiro conta como chão (antes, a ponte era um obstáculo). O M48 fica
+  preso em 97 células (0,08%), no seco e na chuva. Na v77 eram 90 no seco e 2.783 na chuva, no
+  mesmo trecho do rio: a ponte larga virou a saída.
+- É a única ponte do mapa: o riacho é atravessado por aterro de estrada (5 a 7 m), e não há
+  "Riacho" nos locais para a ponte de toras.
+
+**Base dos EUA mais longe dos objetivos** (`tools/crop_world.py`):
+- A base já encosta na borda leste: vai de 48 m a oeste a 42,5 m a leste do QG, e o QG fica a 50 m
+  da borda. O mapa fica de 700 x 700 m (o dono confirmou na D-140), e a leste da borda, a 100 m do
+  QG, passa o riacho.
+- Por isso o que foi para longe foram os objetivos e a linha do setor:
+  - **Fronteira S4/S5** de E 270040 para 270000. O portão da base fica a 86 m do setor que o VC pode
+    tomar (eram 46 m). S4 tem agora 80 m (era 120) e S5, 180 m (era 140).
+  - **D Ponte e Cais** de E 270000 / N 1692640 para 269930 / 1692645, na margem norte do rio (em N
+    1692620 caía no leito e a estrada descia para dentro dele). Do QG dos EUA: 348 m (eram 318).
+  - **E Engenho** de E 270070 / N 1693215 para 270045 / 1693233, a 47 m da borda (o teste pede 45).
+    Do QG: 315 m (eram 291).
+  - A volta norte das estradas passa a N 1693195 perto do Engenho (era 1693230).
+
+**Junção das estradas** (`vila_estradas.suaviza`):
+- A altura do leito era guardada só nos vértices de cada estrada (um a cada 2 células).
+- Uma estrada que começava no meio de outra não ficava presa e entrava 1,4 m abaixo (rampa de 68% na
+  ponta sul da rua nova da vila).
+- Agora a altura vale em todas as células, interpolada. Rampa máxima medida no chão: 25,6%; o M48
+  sobe 53% em terra na chuva.
+
+**Paddy:** rodar o `crop_world.py` de novo tirou 26 diques e 4 sebes que não encostavam em nenhum
+tabuleiro (sobra do rio da D-141). Pela regra do `reduz_arrozal`, eles saem.
+
+**Carta:** refeita e reenviada (Carta.nw/ne/sw/se; os IDs da v71 a v77 ficaram como `*_v77`).
+
+**Não testado:** um M48 atravessando a ponte no Studio. Vale o teste das estradas e a medida do
+tabuleiro.

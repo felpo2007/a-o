@@ -74,13 +74,16 @@ CANAL_M = 1.1
 #  - S1 (120 m): a base do VC e a baixada a sudoeste;
 #  - S2 (150 m): a mata fechada a noroeste;
 #  - S3 (170 m): a vila de Xóm Gò inteira, no centro;
-#  - S4 (120 m): An Cường (2) e o arrozal ao sul dela (sudeste);
-#  - S5 (140 m): a base dos EUA e o vau do riacho a nordeste.
+#  - S4 (80 m; era 120 m): o rio do sul e a ponte (sudeste);
+#  - S5 (180 m; era 140 m): a base dos EUA, An Cường (2) e o engenho a nordeste.
+# D-148 (pedido do dono: "a base americana está muito perto dos objetivos, coloque ela mais longe"):
+# a base já encosta na borda leste (o mapa fica de 700 m). A fronteira S4/S5 foi 40 m para oeste: o
+# portão da base (44 m a oeste do QG) fica a 86 m do setor que o VC pode tomar (eram 46 m).
 FRONTEIRAS_ING = [
     [(269600, 1692580), (269600, 1693280)],
     [(269750, 1692580), (269750, 1693280)],
     [(269920, 1692580), (269920, 1693280)],
-    [(270040, 1692580), (270040, 1693280)],
+    [(270000, 1692580), (270000, 1693280)],
 ]
 # letra do setor no jogo (v41, pedido do dono: "troque os objetivos por A B C D E"; Front.letra)
 # Lote 26 (ideia de mapa do dono: A Arrozais a sudoeste, B Serraria a noroeste, C a vila no centro,
@@ -140,10 +143,14 @@ PONTOS_FORTES = [
     (2, "Serraria", 269700, 1693170, False, "serraria na mata fechada a noroeste; nome de design"),
     # S3: a praça da vila de Xóm Gò
     VILA_PF,
-    # S4: a ponte e o cais, a sudeste (era o Arrozal ao sul de An Cường (2))
-    (4, "Ponte e Cais", 270000, 1692640, False, "ponte e cais a sudeste; nome de design"),
-    # S5: o engenho a nordeste, ao norte da base dos EUA (era o Vau do riacho)
-    (5, "Engenho", 270070, 1693215, False, "engenho a nordeste; nome de design"),
+    # S4: a ponte e o cais, a sudeste (era o Arrozal ao sul de An Cường (2)). D-148: 70 m para
+    # oeste, na margem norte do rio (era E 270000 / N 1692640; em N 1692620 caía no leito e a
+    # estrada descia para dentro do rio): do QG dos EUA, 348 m (eram 318)
+    (4, "Ponte e Cais", 269930, 1692645, False, "ponte e cais a sudeste; nome de design"),
+    # S5: o engenho a nordeste, ao norte da base dos EUA (era o Vau do riacho). D-148: 25 m para
+    # oeste e 18 m para o norte, a 47 m da borda (era E 270070 / N 1693215): do QG dos EUA, 315 m
+    # (eram 291)
+    (5, "Engenho", 270045, 1693233, False, "engenho a nordeste; nome de design"),
 ]
 # Base dos EUA (pedido do dono: "o QG dos EUA vai virar uma base grande depois; deixe espaço
 # plano"): sem diques, lâminas d'água e sebes a até BASE_M do QG. D-114: a base (90 x 122 m) cabe
@@ -1318,18 +1325,14 @@ def vila_e_estradas(g: dict, f: dict) -> dict:
             )
     info, vila = vila_estradas.aplica(g, f, ing_local, nos, setor3, PLAY_ING, HEAD, arrozal, bases)
     VILA_XZ[VILA_PF[1]] = (vila["x"], vila["z"])
-    # segundo ponto da vila: o cruzamento da rua com a travessa mais perto do centro do mapa (luta
-    # nos becos, longe o bastante da praça para ser outro objetivo)
+    # D-148: os outros dois pontos da vila (fora do sorteio desde a D-128) vão nas pontas das duas
+    # trilhas largas do meio círculo, a mais perto e a mais longe do centro do mapa
     cx, cz = ing_local((PLAY_ING[0] + PLAY_ING[2]) / 2, (PLAY_ING[1] + PLAY_ING[3]) / 2)
-    pts = []
-    for u in vila_estradas.TRAVESSAS:
-        dx, dz = vila_estradas.gira(u, 0.0, vila["ang"])
-        pts.append((vila["x"] + dx, vila["z"] + dz))
-    pts.sort(key=lambda p: math.hypot(p[0] - cx, p[1] - cz))
+    pts = sorted(
+        (b for _a, b in vila["travessas"]), key=lambda p: math.hypot(p[0] - cx, p[1] - cz)
+    )
     VILA_XZ[VILA_BECOS[1]] = pts[0]
-    # D-114: a outra travessa vira o terceiro ponto da vila (o "norte" do nome vem conferido aqui)
     VILA_XZ[VILA_PONTA[1]] = pts[-1]
-    assert pts[-1][1] < pts[0][1], "a ponta da vila longe do centro devia ficar ao norte (z menor)"
     return info
 
 

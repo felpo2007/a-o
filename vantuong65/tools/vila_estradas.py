@@ -42,8 +42,11 @@ DATA = ROOT / "src/ServerStorage/VT65Build/Data"
 VILA_NOME = "Xóm Gò"
 # centro (praça) procurado nesta janela da grade de 1965: o morrote levado para perto do centro do
 # mapa (crop_world.MORRO_PARA, cume em E 269,815 / N 1692,99)
-VILA_E = (269780.0, 269870.0)
-VILA_N = (1692930.0, 1693050.0)
+# D-148: a praça perto do centro do mapa (E 269830 / N 1692930; D-123: o mapa é centrado na
+# vila); com a janela antiga (E 269780–269870, N 1692930–1693050) o meio círculo levava a praça
+# 50 m a oeste
+VILA_E = (269817.5, 269842.5)
+VILA_N = (1692900.0, 1692960.0)
 # D-115 (pedido do dono: "aumente as cabanas de todo jogo e o tamanho das vilas"; "cabanas muito
 # pequenas no mapa"): casas 30% maiores (o soldado tem 2,0 m, D-98; o beiral ficava na altura da
 # cabeça dele) e a vila cresce junto: lotes, passo, travessas, praça, pagode e casa comunal. O jogo
@@ -77,6 +80,34 @@ DIST_CASAS = 17.0  # m entre centros (a diagonal da casa de 8,5 m x 1,3 é 15,6 
 DIST_SOLTAS = 24.0  # m das casas soltas para as outras
 N_TONS = 4
 ANEXOS = ("varanda", "cozinha", "celeiro", "horta", "cerca", "pote", "meda", "varal")
+# D-148 (pedido do dono, 2026-11-14: "faça a vila num formato meio circular mas não perfeito",
+# "quero que seja esporádica"): as fileiras dos dois lados da rua saíram. As casas ficam em arcos em
+# volta da praça, num meio círculo de um lado da rua (a rua é o diâmetro), torto: o raio ondula pelo
+# ângulo, as pontas do meio círculo variam, cada casa sorteia raio, ângulo e giro, e um quarto das
+# vagas fica vazio. Do outro lado da rua, só umas casas soltas; além do último arco, outras soltas.
+# Todas as casas olham para a praça (com giro livre).
+# m: raios dos arcos, a partir do meio da praça. 18 m entre arcos: com 15 m (menos que DIST_CASAS)
+# a casa de um arco tirava a do vizinho no mesmo rumo e a vila ficava com 28 casas
+ARCO_R = (30.0, 48.0, 66.0, 84.0, 102.0)
+ARCO_PASSO = 20.0  # m entre casas vizinhas no mesmo arco (antes do sorteio); ímpares: meio passo
+ARCO_ONDA = (0.12, 0.07)  # amplitude das ondas de 2 e de 3 voltas no raio (meio círculo torto)
+# graus do começo e do fim do meio círculo (0 = rua, no rumo dela) e o sorteio de cada ponta. Com
+# −12°/192° e ±14° as pontas davam a volta para o outro lado da rua (vila de 2/3 de círculo)
+ARCO_ABRE = (-5.0, 185.0)
+ARCO_PONTA = 10.0
+# sorteio no raio (m) e no ângulo (fração do passo) de cada casa. Com 6 m e 0,32 as vizinhas se
+# chocavam (DIST_CASAS) e a vila ficava com 29 casas das 44 vagas que cabem no chão
+ARCO_R_SORTE = 4.0
+ARCO_A_SORTE = 0.22
+ARCO_VAZIOS = 0.18  # vagas que ficam vazias (vila esporádica)
+ARCO_GIRO = 28.0  # graus de giro livre em volta de "de frente para a praça"
+ARCO_DE_LADO = 0.15  # casas viradas de lado (±90°)
+ARCO_SOLTAS = 8  # casas soltas além do último arco
+ARCO_SOLTAS_R = (114.0, 132.0)
+# casas soltas do outro lado da rua (com 8 a vila parecia um círculo inteiro cortado pela rua)
+ARCO_OUTRO_LADO = 4
+ARCO_OUTRO_LADO_V = (16.0, 40.0)  # m da rua
+ARCO_RAIOS_TRILHA = (45.0, 135.0)  # graus das duas trilhas largas da praça até o último arco
 
 # ---------- estradas ----------
 LARGURA = {"principal": 7.0, "secundaria": 5.0, "rua": 6.0, "beco": 2.5, "trilha": 3.0}
@@ -89,8 +120,9 @@ ANEL_M = 45.0  # as voltas por fora correm a esta distância da borda (D-114; 70
 # norte e pelo sul (D-114, mapa de 500 m: ao norte da ponta da vila e ao norte da trincheira sul)
 ANEL_PONTOS = (
     # D-134: os do norte foram para a faixa da beira (N 1693230, a ~50 m da borda): logo acima da
-    # ponta da vila, com as casas espalhadas, a volta encurtava pela rua da vila e sumia do norte
-    [(269760, 1693230), (270030, 1693230)],
+    # ponta da vila, com as casas espalhadas, a volta encurtava pela rua da vila e sumia do norte.
+    # D-148: o do leste desceu para N 1693195 (o Engenho foi para E 270045 / N 1693240)
+    [(269760, 1693230), (270010, 1693195)],
     [(269750, 1692690), (269890, 1692700), (270060, 1692700)],
 )
 # a estrada do mapa passa a pelo menos isto da área de cada base (D-123: com 1 m, a suavização do
@@ -381,25 +413,254 @@ def _avalia(t: Terreno, cx, cz, ang, dentro):
     return bons, corte
 
 
+# ---------- vila em meio círculo (D-148) ----------
+def _yaw_frente(fx: float, fz: float) -> float:
+    """giro Y do Roblox que leva a frente da casa (-Z local) para o rumo (fx, fz) do mundo"""
+    return math.atan2(-fx, -fz)
+
+
+def _especiais_arco(cx, cz, ang):
+    """pagode no fundo da praça (do lado do meio círculo), casa comunal do outro lado da rua, poço
+    e bancas do mercado na praça"""
+    k = ESCALA_CASA
+    meia_v = PRACA_U * 0.6
+    especiais = []
+    for kind, v, w, d in (
+        ("chua", meia_v + 6.0 * k + 2.0, 16.0 * k, 12.0 * k),
+        ("dinh", -(meia_v + 5.0 * k + 2.0), 18.0 * k, 10.0 * k),
+    ):
+        dx, dz = gira(0.0, v, ang)
+        especiais.append({"kind": kind, "x": cx + dx, "z": cz + dz, "w": w, "d": d})
+    dx, dz = gira(12.0 * k, 8.0 * k, ang)
+    especiais.append({"kind": "poco", "x": cx + dx, "z": cz + dz, "w": 2.0, "d": 2.0})
+    # bancas do mercado só do outro lado da rua (junto da casa comunal): o lado do meio círculo fica
+    # livre para a estrada e as trilhas que saem da praça (uma banca ficava no meio da estrada)
+    for u in (-14.0, -4.0, 6.0, 16.0):
+        dx, dz = gira(u * k, -13.0 * k, ang)
+        especiais.append({"kind": "banca", "x": cx + dx, "z": cz + dz, "w": 3.0, "d": 2.5})
+    return especiais
+
+
+def _travessas_arco(cx, cz, ang) -> list:
+    """as duas trilhas largas que saem da praça para o fundo do meio círculo"""
+    out = []
+    r0, r1 = PRACA_U * 0.6, ARCO_R[-1] + 12.0
+    for deg in ARCO_RAIOS_TRILHA:
+        a = math.radians(deg)
+        p = gira(r0 * math.cos(a), r0 * math.sin(a), ang)
+        q = gira(r1 * math.cos(a), r1 * math.sin(a), ang)
+        out.append([(cx + p[0], cz + p[1]), (cx + q[0], cz + q[1])])
+    return out
+
+
+def _vagas_arco(rnd=None) -> list:
+    """vagas (u, v) em m no quadro da vila: arcos do meio círculo. Sem rnd: as vagas nominais (busca
+    do centro); com rnd: raio torto, pontas, sorteio de raio e ângulo e vagas vazias"""
+    if rnd is None:
+        f2 = f3 = 0.0
+        a0, a1 = ARCO_ABRE
+        onda = (0.0, 0.0)
+    else:
+        f2, f3 = rnd.uniform(0, 2 * math.pi), rnd.uniform(0, 2 * math.pi)
+        a0 = ARCO_ABRE[0] + rnd.uniform(-ARCO_PONTA, ARCO_PONTA)
+        a1 = ARCO_ABRE[1] + rnd.uniform(-ARCO_PONTA, ARCO_PONTA)
+        onda = ARCO_ONDA
+    vagas = []
+    for anel, r_nom in enumerate(ARCO_R):
+        n = max(2, round(math.pi * r_nom / ARCO_PASSO))
+        passo = math.radians(a1 - a0) / n
+        meio = 0.5 if anel % 2 == 0 else 0.0  # arcos alternados: as casas não ficam no mesmo rumo
+        for i in range(n + (1 if meio == 0.0 else 0)):
+            th = math.radians(a0) + (i + meio) * passo
+            r = r_nom * (1 + onda[0] * math.sin(2 * th + f2) + onda[1] * math.sin(3 * th + f3))
+            if rnd is not None:
+                if rnd.random() < ARCO_VAZIOS:
+                    continue
+                th += rnd.uniform(-ARCO_A_SORTE, ARCO_A_SORTE) * passo
+                r += rnd.uniform(-ARCO_R_SORTE, ARCO_R_SORTE)
+            vagas.append({"u": r * math.cos(th), "v": r * math.sin(th), "anel": anel})
+    return vagas
+
+
+def _avalia_arco(t: Terreno, cx, cz, ang, dentro):
+    """nota da busca: vagas nominais do meio círculo que cabem (chão, riacho, setor) e o corte"""
+    bons, corte = 0, 0.0
+    for vg in _vagas_arco():
+        gx, gz = gira(vg["u"], vg["v"], ang)
+        x, z = cx + gx, cz + gz
+        if abs(vg["v"]) < RUA_W / 2 + CASA_MAX / 2 + 1.0 or not dentro(x, z):
+            continue
+        p = pegada(x, z, 0.0, CASA_MAX, CASA_MAX, n=2)
+        h = t.altura(p[:, 0], p[:, 1])
+        rng = float(h.max() - h.min())
+        if rng > CORTE_MAX or (t.classe(p[:, 0], p[:, 1]) == 5).any():
+            continue
+        bons += 1
+        corte += rng
+    return bons, corte
+
+
+def _arcos(t: Terreno, cx, cz, ang, especiais, travessas, dentro, rnd) -> tuple[list, list]:
+    """D-148: casas nos arcos do meio círculo, soltas além dele e do outro lado da rua, todas de
+    frente para a praça; trilha de cada porta até a praça (ou a rua, do outro lado). Devolve
+    (casas, trilhas) no mesmo formato do _espalha."""
+    meia_v = PRACA_U * 0.6
+
+    def cabe(x, z, yaw, outras, dmin) -> bool:
+        p = pegada(x, z, yaw, CASA_MAX, CASA_MAX)
+        h = t.altura(p[:, 0], p[:, 1])
+        if float(h.max() - h.min()) > CORTE_MAX or (t.classe(p[:, 0], p[:, 1]) == 5).any():
+            return False
+        for px, pz in p:
+            if not dentro(px, pz):
+                return False
+            u, v = _quadro(cx, cz, ang, px, pz)
+            if abs(v) < RUA_W / 2 + 1.0:
+                return False  # na rua
+            if abs(u) <= PRACA_U + 1.0 and abs(v) <= meia_v + 1.0:
+                return False  # na praça
+            for a, b in travessas:
+                if _dist_ponto_seg(px, pz, a, b) * STUD_M < LARGURA["rua"] / 2 + 1.0:
+                    return False  # na trilha larga
+        for s in especiais:
+            folga = max(s["w"], s["d"]) / 2 + CASA_MAX * 0.75
+            if math.hypot(x - s["x"], z - s["z"]) * STUD_M < folga:
+                return False
+        return all(math.hypot(x - c["x"], z - c["z"]) * STUD_M >= dmin for c in outras)
+
+    casas: list = []
+    recuo_lote = (RUA_W / 2 + 1 + LOTE_D / 2) - (RUA_W / 2 + 1 + 1.5 + CASA_MAX / 2)
+
+    def poe(x, z, giro, solta, alvo=None):
+        # de frente para a praça (ou para `alvo`, um ponto do mundo em studs)
+        ax, az = alvo if alvo is not None else (cx, cz)
+        fx, fz = ax - x, az - z
+        n = math.hypot(fx, fz) or 1.0
+        fx, fz = _gira_roblox(fx / n, fz / n, -giro)
+        yaw = _yaw_frente(fx, fz)
+        casas.append(
+            {
+                "x": x,
+                "z": z,
+                "yaw": yaw,
+                "lx": x - fx * recuo_lote / STUD_M,
+                "lz": z - fz * recuo_lote / STUD_M,
+                "lado": 1,
+                "frente": (fx, fz),
+                "solta": solta,
+            }
+        )
+
+    def giro_sorteado() -> float:
+        if rnd.random() < ARCO_DE_LADO:
+            return math.radians(float(rnd.choice([-90.0, 90.0])) + rnd.uniform(-15, 15))
+        return math.radians(rnd.uniform(-ARCO_GIRO, ARCO_GIRO))
+
+    for vg in _vagas_arco(rnd):
+        for _ in range(8):
+            gx, gz = gira(vg["u"], vg["v"], ang)
+            x, z = cx + gx, cz + gz
+            giro = giro_sorteado()
+            fx, fz = cx - x, cz - z
+            yaw = _yaw_frente(*_gira_roblox(fx, fz, -giro))
+            if cabe(x, z, yaw, casas, DIST_CASAS):
+                poe(x, z, giro, False)
+                break
+            vg = {**vg, "u": vg["u"] + rnd.uniform(-3, 3), "v": vg["v"] + rnd.uniform(-3, 3)}
+    # soltas além do último arco (no lado do meio círculo) e do outro lado da rua
+    for qtd, gera in (
+        (ARCO_SOLTAS, lambda: _polar(rnd.uniform(*ARCO_SOLTAS_R), rnd.uniform(5, 175))),
+        (
+            ARCO_OUTRO_LADO,
+            lambda: (rnd.uniform(-ARCO_R[-1], ARCO_R[-1]), -rnd.uniform(*ARCO_OUTRO_LADO_V)),
+        ),
+    ):
+        feitas = 0
+        for _ in range(600):
+            if feitas >= qtd:
+                break
+            u, v = gera()
+            gx, gz = gira(u, v, ang)
+            x, z = cx + gx, cz + gz
+            # do outro lado da rua, de frente para a rua (o ponto da rua em frente)
+            alvo = None
+            if v < 0:
+                rx, rz = gira(u, 0.0, ang)
+                alvo = (cx + rx, cz + rz)
+            giro = math.radians(rnd.uniform(-35, 35))
+            ax, az = alvo if alvo is not None else (cx, cz)
+            yaw = _yaw_frente(*_gira_roblox(ax - x, az - z, -giro))
+            if cabe(x, z, yaw, casas, DIST_SOLTAS):
+                poe(x, z, giro, True, alvo)
+                feitas += 1
+    # trilha de cada porta: até a beira da praça (ou da rua, do outro lado); se passar por cima de
+    # outra casa, até a porta da vizinha mais perto
+    meia = CASA_MAX / 2
+    portas = [
+        (
+            c["x"] + c["frente"][0] * (meia + 0.6) / STUD_M,
+            c["z"] + c["frente"][1] * (meia + 0.6) / STUD_M,
+        )
+        for c in casas
+    ]
+
+    def livre(a, b, i, j=None) -> bool:
+        for k, c in enumerate(casas):
+            lim = meia + 0.3 if k in (i, j) else CASA_MAX * 0.72
+            if _dist_ponto_seg(c["x"], c["z"], a, b) * STUD_M < lim:
+                return False
+        return True
+
+    trilhas = []
+    for i in range(len(casas)):
+        a = portas[i]
+        u, v = _quadro(cx, cz, ang, a[0], a[1])
+        if v < 0:
+            ex, ez = gira(u, -(RUA_W / 2), ang)
+        else:
+            r = math.hypot(u, v) or 1.0
+            k = (meia_v + 1.0) / r
+            ex, ez = gira(u * k, v * k, ang)
+        b = (cx + ex, cz + ez)
+        if livre(a, b, i):
+            trilhas.append([a, b])
+            continue
+        viz = sorted(
+            (math.hypot(portas[j][0] - a[0], portas[j][1] - a[1]), j)
+            for j in range(len(casas))
+            if j != i
+        )
+        for _d, j in viz[:3]:
+            if livre(a, portas[j], i, j):
+                trilhas.append([a, portas[j]])
+                break
+    return casas, trilhas
+
+
+def _polar(r: float, graus: float) -> tuple[float, float]:
+    a = math.radians(graus)
+    return r * math.cos(a), r * math.sin(a)
+
+
 def planeja_vila(t: Terreno, ing_local, dentro) -> dict:
-    """procura centro e rumo da rua que deixam mais casas com menos corte"""
+    """procura centro e rumo da rua (o lado do meio círculo é +v) que deixam mais casas com menos
+    corte; D-148: as casas em arcos em volta da praça"""
     melhor = None
-    # D-115: passo de 7,5 m (era 15): com os lotes maiores a vila fica justa no setor
     for e in np.arange(VILA_E[0], VILA_E[1] + 1, 7.5):
         for n in np.arange(VILA_N[0], VILA_N[1] + 1, 7.5):
             cx, cz = ing_local(e, n)
-            for deg in range(0, 180, 10):
+            for deg in range(0, 360, 15):
                 ang = math.radians(deg)
-                bons, corte = _avalia(t, cx, cz, ang, dentro)
-                nota = (len(bons), -corte)
+                bons, corte = _avalia_arco(t, cx, cz, ang, dentro)
+                nota = (bons, -corte)
                 if melhor is None or nota > melhor[0]:
-                    melhor = (nota, cx, cz, ang, bons)
-    _, cx, cz, ang, bons = melhor
-    _, especiais = _lotes(cx, cz, ang)
+                    melhor = (nota, cx, cz, ang)
+    _, cx, cz, ang = melhor
+    especiais = _especiais_arco(cx, cz, ang)
+    travessas = _travessas_arco(cx, cz, ang)
     yaw = yaw_de(ang)
-    # D-134: as casas saem da grade (o centro e o rumo da rua continuam os da busca acima)
-    espalhadas, trilhas = _espalha(
-        t, cx, cz, ang, bons, especiais, dentro, np.random.default_rng(19650818)
+    espalhadas, trilhas = _arcos(
+        t, cx, cz, ang, especiais, travessas, dentro, np.random.default_rng(19650818)
     )
     # variante, tom, escala e anexos: nenhuma casa igual a outra a menos de VIZINHO_M
     rnd = np.random.default_rng(1965)
@@ -434,17 +695,12 @@ def planeja_vila(t: Terreno, ing_local, dentro) -> dict:
                 "anexos": anexos,
             }
         )
-    # D-134: os becos retos atrás das fileiras saíram; no lugar, a trilha de cada porta até a rua
-    vb = RUA_W / 2 + 1 + LOTE_D + 1.5
-    u0 = (SLOTS - 1) / 2 * PASSO_U + LOTE_W / 2
+    # a trilha de cada porta até a praça (D-134 e D-148) e as duas trilhas largas do meio círculo
     becos = trilhas
-    travessas = []
-    for u in TRAVESSAS:
-        a = gira(u, -(vb + LOTE_D + 1.5), ang)
-        b = gira(u, vb + LOTE_D + 1.5, ang)
-        travessas.append([(cx + a[0], cz + a[1]), (cx + b[0], cz + b[1])])
-    ua = gira(-(u0 + 10), 0, ang)
-    ub = gira(u0 + 10, 0, ang)
+    # a rua é o diâmetro do meio círculo, um pouco além dos dois lados
+    u0 = ARCO_R[-1] + 20.0
+    ua = gira(-u0, 0, ang)
+    ub = gira(u0, 0, ang)
     rua = [(cx + ua[0], cz + ua[1]), (cx + ub[0], cz + ub[1])]
     return {
         "x": cx,
@@ -650,8 +906,12 @@ def suaviza(t: Terreno, trechos: list) -> list:
             for i in range(len(y) - 2, -1, -1):
                 if i not in fixos:
                     y[i] = np.clip(y[i], y[i + 1] - lim[i], y[i + 1] + lim[i])
-        for i, rc in enumerate(cels_):
-            altura_estrada.setdefault(rc, float(y[i]))
+        # D-148: a altura do leito em TODAS as células da estrada (interpolada entre os vértices que
+        # ficaram), não só nos vértices: uma estrada que começava no meio de outra, numa célula sem
+        # vértice, não era presa e entrava 1,4 m abaixo (rampa de 68% na ponta sul da rua da vila)
+        ys = np.interp(np.arange(len(cels)), np.array(idx, float), y)
+        for j, rc in enumerate(cels):
+            altura_estrada.setdefault(rc, float(ys[j]))
         estradas.append({"kind": kind, "pts": np.column_stack([pts, y])})
     return estradas
 

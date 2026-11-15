@@ -86,11 +86,43 @@ for r = 0, H - 1 do
 end
 print(string.format("       grade de %d x %d (2 m) com o chão do plano em %.1f s", W, H, os.clock() - t0))
 
+-- D-148 (pedido do dono: "pontes grandes o suficiente para passar um veículo como o tanque"): a ponte
+-- de 7 m (ArtPlan.BRIDGE_WIDTH_M) leva o tanque. O tabuleiro vira chão de madeira na altura do deck
+-- (MapLife: 0,35 m acima da base da ponte, mais meia tábua), sem água, e sai da lista de bloqueios.
+local DECK_M = 0.35 + 0.09
+local nDeck = 0
+for _, s in structures do
+	if s.key == "parts:ponte" then
+		local ca, sa = math.cos(s.yaw), math.sin(s.yaw)
+		local rr = math.sqrt(s.hx * s.hx + s.hz * s.hz)
+		local c0, c1 = math.floor((s.x - rr - B.minX) / STEP), math.floor((s.x + rr - B.minX) / STEP)
+		local r0, r1 = math.floor((s.z - rr - B.minZ) / STEP), math.floor((s.z + rr - B.minZ) / STEP)
+		for r = math.max(r0, 0), math.min(r1, H - 1) do
+			for c = math.max(c0, 0), math.min(c1, W - 1) do
+				local x, z = B.minX + (c + 0.5) * STEP, B.minZ + (r + 0.5) * STEP
+				local dx, dz = x - s.x, z - s.z
+				-- o meio da largura (a mureta de cada lado fica de fora)
+				if math.abs(dx * ca - dz * sa) <= s.hx and math.abs(dx * sa + dz * ca) <= s.hz - 1 / M then
+					local i = r * W + c + 1
+					hgt[i] = math.max(hgt[i], s.base + DECK_M / M)
+					depth[i] = 0
+					ground[i] = "dirt"
+					nDeck += 1
+				end
+			end
+		end
+	end
+end
+print(string.format("       ponte: %d células de tabuleiro", nDeck))
+
 -- construções: pegada + folga (meia largura do veículo), rasterizada na grade
 local function blockedGrid(halfM: number): { boolean }
 	local blk = table.create(N, false) :: { boolean }
 	local pad = halfM / M
 	for _, s in structures do
+		if s.key == "parts:ponte" then
+			continue -- D-148: o tabuleiro é chão (acima)
+		end
 		if s.padded or s.group == "house" or s.group == "village" or s.group == "special" or s.group == "base" then
 			local ca, sa = math.cos(s.yaw), math.sin(s.yaw)
 			local ex, ez = s.hx + pad, s.hz + pad
@@ -220,6 +252,7 @@ local function run(v: Veh): any
 	local back = reach(v, blk, s, true)
 	local fit, both, stuck, island = 0, 0, 0, 0
 	local stuckBy: { [string]: number } = {}
+	local sx, sz = 0, 0 -- D-148: onde fica o "entra e não sai" (média, studs)
 	for i = 1, N do
 		if not blk[i] and depth[i] < VehicleDrive.DRIVE[v.id].fordM then
 			fit += 1
@@ -228,6 +261,9 @@ local function run(v: Veh): any
 			elseif fwd[i] then
 				stuck += 1 -- entra e não sai
 				stuckBy[ground[i]] = (stuckBy[ground[i]] or 0) + 1
+				local r = (i - 1) // W
+				sx += B.minX + ((i - 1) - r * W + 0.5) * STEP
+				sz += B.minZ + (r + 0.5) * STEP
 			elseif not back[i] then
 				island += 1
 			end
@@ -263,6 +299,9 @@ local function run(v: Veh): any
 			if #missing == 0 then "nenhum" else table.concat(missing, ", ")
 		)
 	)
+	if stuck > 0 then
+		print(string.format("       (o 'entra e não sai' fica em média em x %.0f, z %.0f)", sx / stuck, sz / stuck))
+	end
 	results[key] = res
 	return res
 end
@@ -322,6 +361,7 @@ test("estradas no chão gerado: leito sem água, sem construção e sem planta, 
 	local tanDirt = climbTan(spec, "dirt", 1) -- na chuva
 	local blk = blockedGrid(0)
 	local worst, wet, inHouse, n = 0, 0, 0, 0
+	local worstAt = ""
 	for _, r in Roads.roads do
 		local p = r.pts
 		local prev: number? = nil
@@ -360,7 +400,11 @@ test("estradas no chão gerado: leito sem água, sem construção e sem planta, 
 					end
 				end
 				if prev then
-					worst = math.max(worst, math.abs(h - prev) * M / (len / k * M))
+					local ramp = math.abs(h - prev) * M / (len / k * M)
+					if ramp > worst then
+						worst = ramp
+						worstAt = string.format("%s em (%.0f, %.0f)", r.kind, x, z)
+					end
 				end
 				prev = h
 			end
@@ -368,9 +412,10 @@ test("estradas no chão gerado: leito sem água, sem construção e sem planta, 
 	end
 	print(
 		string.format(
-			"       %d pontos do eixo: rampa máx. %.1f%% (o M48 sobe %.0f%% em terra na chuva), %d com água, %d em construção",
+			"       %d pontos do eixo: rampa máx. %.1f%% (%s; o M48 sobe %.0f%% em terra na chuva), %d com água, %d em construção",
 			n,
 			100 * worst,
+			worstAt,
 			100 * tanDirt,
 			wet,
 			inHouse

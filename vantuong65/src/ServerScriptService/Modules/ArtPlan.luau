@@ -321,7 +321,9 @@ ArtPlan.OBJECTIVE_LAYOUT = {
 	},
 } :: { [string]: { any } }
 ArtPlan.BRIDGE_OBJECTIVE = "Ponte e Cais"
-ArtPlan.BRIDGE_WIDTH_M = 3.6 -- dá para um jipe
+-- D-148 (pedido do dono: "faça as pontes grandes o suficiente para passar um veículo como o tanque"):
+-- 7 m, a largura da estrada principal (era 3,6 m, só um jipe; o M48 tem 3,63 m)
+ArtPlan.BRIDGE_WIDTH_M = 7.0
 ArtPlan.BRIDGE_BANK_M = 3 -- quanto a ponte entra em cada margem
 ArtPlan.DOCK_ALONG_M = 14 -- o cais, rio acima ou abaixo da ponte
 

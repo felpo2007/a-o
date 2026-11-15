@@ -1124,6 +1124,26 @@ function MapLife.objectivePart(kind: string, m: Model, cf: CFrame, w: number, d:
 					"Wood"
 				)
 			end
+			-- D-148: ponte larga (7 m, passa o tanque): uma fileira de estacas no meio, só até o tabuleiro,
+			-- e uma viga embaixo dele de margem a margem
+			if d > 4.5 / M then
+				solid(
+					part(
+						"Estaca",
+						Vector3.new(0.3 / M, 3.5 / M + deckY, 0.3 / M),
+						cf * CFrame.new(x, (deckY - 3.5 / M) / 2, 0),
+						BARK,
+						Enum.Material.Wood,
+						m
+					),
+					"Wood"
+				)
+			end
+		end
+		if d > 4.5 / M then
+			for _, sz in { -1, 0, 1 } do
+				plank(m, Vector3.new(w, 0.3 / M, 0.3 / M), cf * CFrame.new(0, deckY - 0.24 / M, sz * d * 0.33), BARK)
+			end
 		end
 		for _, sz in { -1, 1 } do
 			plank(
