@@ -203,6 +203,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
   - a cadência abaixo de 12 fps medida num aparelho lento.
 
 ## v86: lote 44, trim sheet nas 10 casas da vila (2026-11-15, D-159)
+- **Publicada** (versão 86 do place, commit 7581d5f).
 - **Folhas** (`tools/blender/vila_trim.py -- folhas`, 50 s):
   - M: madeira, bambu, esteira e pote;
   - W: paredes de barro, cal, tijolo e taipa;
