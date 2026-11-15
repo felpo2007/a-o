@@ -152,6 +152,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
   - a cadência abaixo de 12 fps medida num aparelho lento.
 
 ## v75: lote 30, roda do mouse, gatilho com item na mão e o aviso de conexão (2026-11-14, D-145)
+- **Publicada** (versão 75 do place, commit 980ab7e).
 - **Roda do mouse:** troca de arma (antes o giro era descartado); uma troca por giro. Conferido no
   Studio: M14 → M1911 → M14, à vista.
 - **Itens:** com curativo, torniquete, pá ou cantil nas mãos, o gatilho não sai (0 tiros no Studio;
