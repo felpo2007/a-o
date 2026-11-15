@@ -252,7 +252,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DebugHud.client.luau:88"
  ],
  "%s %02d": [
-  "src/ServerScriptService/Modules/BotService.luau:316"
+  "src/ServerScriptService/Modules/BotService.luau:320"
  ],
  "%s %02d:%02d": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameUI.client.luau:560"
@@ -349,7 +349,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehiclePrompt.client.luau:126"
  ],
  "%s · %s · %s\n%s · %.1f m/s · %s": [
-  "src/ServerScriptService/Modules/BotService.luau:2154"
+  "src/ServerScriptService/Modules/BotService.luau:2219"
  ],
  "%s · %s · escolha o lugar": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehiclePrompt.client.luau:296"
@@ -1485,7 +1485,7 @@
   "src/ServerScriptService/Modules/MapLife.luau:807"
  ],
  "Bamboo": [
-  "src/ReplicatedStorage/Shared/BotBrain.luau:1145",
+  "src/ReplicatedStorage/Shared/BotBrain.luau:1176",
   "src/ServerScriptService/Modules/AssetLoader.luau:348",
   "src/ServerScriptService/Modules/AssetLoader.luau:501",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/AudioController.client.luau:628",
@@ -1592,7 +1592,7 @@
   "src/ReplicatedStorage/Shared/Vantagens.luau:73"
  ],
  "Bot_%s_%02d": [
-  "src/ServerScriptService/Modules/BotService.luau:309"
+  "src/ServerScriptService/Modules/BotService.luau:313"
  ],
  "Botões": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:202",
@@ -2608,10 +2608,10 @@
   "src/ServerScriptService/Modules/DailyRewardService.luau:101"
  ],
  "Dike": [
-  "src/ReplicatedStorage/Shared/BotBrain.luau:1124",
+  "src/ReplicatedStorage/Shared/BotBrain.luau:1155",
   "src/ReplicatedStorage/Shared/Movement.luau:198",
   "src/ReplicatedStorage/Shared/VehicleDrive.luau:97",
-  "src/ServerScriptService/Modules/BotService.luau:587",
+  "src/ServerScriptService/Modules/BotService.luau:593",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/AudioController.client.luau:338"
  ],
  "Dikes": [
@@ -3536,7 +3536,7 @@
  "Granadas": [
   "src/ReplicatedStorage/Shared/Kit.luau:14",
   "src/ReplicatedStorage/Shared/Vantagens.luau:34",
-  "src/ServerScriptService/Modules/BotService.luau:530",
+  "src/ServerScriptService/Modules/BotService.luau:536",
   "src/ServerScriptService/Modules/Flutua.luau:211",
   "src/ServerScriptService/Modules/SmokeService.luau:31",
   "src/ServerScriptService/Modules/VehicleService.luau:457",
@@ -6471,7 +6471,7 @@
   "src/ReplicatedStorage/Shared/GunModel.luau:126"
  ],
  "Smoke": [
-  "src/ServerScriptService/Modules/BotService.luau:530",
+  "src/ServerScriptService/Modules/BotService.luau:536",
   "src/ServerScriptService/Modules/Flutua.luau:211",
   "src/ServerScriptService/Modules/SmokeService.luau:31"
  ],
@@ -6775,7 +6775,7 @@
   "src/ReplicatedFirst/LoadingScreen.client.luau:976"
  ],
  "Thatch": [
-  "src/ReplicatedStorage/Shared/BotBrain.luau:1143",
+  "src/ReplicatedStorage/Shared/BotBrain.luau:1174",
   "src/ServerScriptService/Modules/MapLife.luau:613",
   "src/ServerScriptService/Modules/MapLife.luau:628",
   "src/ServerScriptService/Modules/MapLife.luau:697",
@@ -7099,9 +7099,9 @@
   "src/ReplicatedStorage/Shared/AfterAction.luau:128",
   "src/ReplicatedStorage/Shared/AfterAction.luau:144",
   "src/ReplicatedStorage/Shared/AfterAction.luau:157",
-  "src/ReplicatedStorage/Shared/BotBrain.luau:622",
-  "src/ReplicatedStorage/Shared/BotBrain.luau:622",
-  "src/ReplicatedStorage/Shared/BotBrain.luau:731",
+  "src/ReplicatedStorage/Shared/BotBrain.luau:653",
+  "src/ReplicatedStorage/Shared/BotBrain.luau:653",
+  "src/ReplicatedStorage/Shared/BotBrain.luau:762",
   "src/ReplicatedStorage/Shared/CaixaMunicao.luau:57",
   "src/ReplicatedStorage/Shared/Capture.luau:32",
   "src/ReplicatedStorage/Shared/Capture.luau:74",
@@ -7207,14 +7207,14 @@
   "src/ServerScriptService/Modules/ArtPlan.luau:525",
   "src/ServerScriptService/Modules/BotEscolta.luau:133",
   "src/ServerScriptService/Modules/BotEscolta.luau:251",
-  "src/ServerScriptService/Modules/BotService.luau:262",
-  "src/ServerScriptService/Modules/BotService.luau:262",
-  "src/ServerScriptService/Modules/BotService.luau:404",
-  "src/ServerScriptService/Modules/BotService.luau:1360",
-  "src/ServerScriptService/Modules/BotService.luau:1360",
-  "src/ServerScriptService/Modules/BotService.luau:2137",
-  "src/ServerScriptService/Modules/BotService.luau:2458",
-  "src/ServerScriptService/Modules/BotService.luau:2586",
+  "src/ServerScriptService/Modules/BotService.luau:266",
+  "src/ServerScriptService/Modules/BotService.luau:266",
+  "src/ServerScriptService/Modules/BotService.luau:408",
+  "src/ServerScriptService/Modules/BotService.luau:1371",
+  "src/ServerScriptService/Modules/BotService.luau:1371",
+  "src/ServerScriptService/Modules/BotService.luau:2202",
+  "src/ServerScriptService/Modules/BotService.luau:2535",
+  "src/ServerScriptService/Modules/BotService.luau:2663",
   "src/ServerScriptService/Modules/BotSquads.luau:181",
   "src/ServerScriptService/Modules/BotSquads.luau:181",
   "src/ServerScriptService/Modules/BotSquads.luau:252",
@@ -7483,7 +7483,7 @@
   "src/ReplicatedStorage/Shared/AfterAction.luau:146",
   "src/ReplicatedStorage/Shared/AfterAction.luau:157",
   "src/ReplicatedStorage/Shared/AfterAction.luau:157",
-  "src/ReplicatedStorage/Shared/BotBrain.luau:622",
+  "src/ReplicatedStorage/Shared/BotBrain.luau:653",
   "src/ReplicatedStorage/Shared/Capture.luau:32",
   "src/ReplicatedStorage/Shared/Capture.luau:74",
   "src/ReplicatedStorage/Shared/Capture.luau:94",
@@ -7569,15 +7569,15 @@
   "src/ServerScriptService/Modules/ArtPlan.luau:525",
   "src/ServerScriptService/Modules/BotEscolta.luau:133",
   "src/ServerScriptService/Modules/BotEscolta.luau:251",
-  "src/ServerScriptService/Modules/BotService.luau:262",
-  "src/ServerScriptService/Modules/BotService.luau:419",
-  "src/ServerScriptService/Modules/BotService.luau:1360",
-  "src/ServerScriptService/Modules/BotService.luau:1702",
-  "src/ServerScriptService/Modules/BotService.luau:2016",
-  "src/ServerScriptService/Modules/BotService.luau:2318",
-  "src/ServerScriptService/Modules/BotService.luau:2458",
-  "src/ServerScriptService/Modules/BotService.luau:2548",
-  "src/ServerScriptService/Modules/BotService.luau:2586",
+  "src/ServerScriptService/Modules/BotService.luau:266",
+  "src/ServerScriptService/Modules/BotService.luau:423",
+  "src/ServerScriptService/Modules/BotService.luau:1371",
+  "src/ServerScriptService/Modules/BotService.luau:1718",
+  "src/ServerScriptService/Modules/BotService.luau:2081",
+  "src/ServerScriptService/Modules/BotService.luau:2383",
+  "src/ServerScriptService/Modules/BotService.luau:2535",
+  "src/ServerScriptService/Modules/BotService.luau:2625",
+  "src/ServerScriptService/Modules/BotService.luau:2663",
   "src/ServerScriptService/Modules/BotSquads.luau:181",
   "src/ServerScriptService/Modules/BotSquads.luau:252",
   "src/ServerScriptService/Modules/BotTunnels.luau:128",
@@ -8040,7 +8040,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/SoldierAnimations.client.luau:776"
  ],
  "Walls": [
-  "src/ReplicatedStorage/Shared/BotBrain.luau:1147"
+  "src/ReplicatedStorage/Shared/BotBrain.luau:1178"
  ],
  "Warfare": [
   "src/ServerScriptService/Modules/MatchService.luau:32",
@@ -8072,7 +8072,7 @@
   "src/ReplicatedStorage/Shared/Weapons.luau:400"
  ],
  "Wood": [
-  "src/ReplicatedStorage/Shared/BotBrain.luau:1141",
+  "src/ReplicatedStorage/Shared/BotBrain.luau:1172",
   "src/ServerScriptService/Modules/AssetLoader.luau:348",
   "src/ServerScriptService/Modules/AssetLoader.luau:501",
   "src/ServerScriptService/Modules/CaixaMunicaoService.luau:174",
@@ -8569,7 +8569,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:842"
  ],
  "avançando": [
-  "src/ServerScriptService/Modules/BotService.luau:2112"
+  "src/ServerScriptService/Modules/BotService.luau:2177"
  ],
  "aviso": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/EventosVisual.luau:112",
@@ -9004,7 +9004,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ToqueAuto.luau:473"
  ],
  "contra-ataque": [
-  "src/ServerScriptService/Modules/BotService.luau:2666"
+  "src/ServerScriptService/Modules/BotService.luau:2743"
  ],
  "controle": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ComoJogar.luau:179",
@@ -9137,7 +9137,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Movement.client.luau:1272"
  ],
  "de olho": [
-  "src/ServerScriptService/Modules/BotService.luau:2116"
+  "src/ServerScriptService/Modules/BotService.luau:2181"
  ],
  "debris": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleFx.client.luau:189",
@@ -9387,7 +9387,7 @@
   "src/ReplicatedStorage/Shared/SpawnRules.luau:206"
  ],
  "em contato": [
-  "src/ServerScriptService/Modules/BotService.luau:2683"
+  "src/ServerScriptService/Modules/BotService.luau:2760"
  ],
  "em veículo": [
   "src/ReplicatedStorage/Shared/SpawnRules.luau:198"
@@ -10043,7 +10043,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/TutorialController.client.luau:74"
  ],
  "homem %d": [
-  "src/ServerScriptService/Modules/BotService.luau:2148"
+  "src/ServerScriptService/Modules/BotService.luau:2213"
  ],
  "hud": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/HudCampo.client.luau:1114"
@@ -10083,7 +10083,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/AudioController.client.luau:659"
  ],
  "indo ao abrigo": [
-  "src/ServerScriptService/Modules/BotService.luau:2113"
+  "src/ServerScriptService/Modules/BotService.luau:2178"
  ],
  "infantry": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:117",
@@ -10562,7 +10562,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaView.luau:1211"
  ],
  "líder": [
-  "src/ServerScriptService/Modules/BotService.luau:2148"
+  "src/ServerScriptService/Modules/BotService.luau:2213"
  ],
  "líder: %s": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:1867"
@@ -12059,7 +12059,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CaixaMunicao.client.luau:276"
  ],
  "sem contato": [
-  "src/ServerScriptService/Modules/BotService.luau:2683"
+  "src/ServerScriptService/Modules/BotService.luau:2760"
  ],
  "sem espaço": [
   "src/ReplicatedStorage/Shared/CaixaMunicao.luau:130",
@@ -13192,7 +13192,7 @@
   "src/ServerScriptService/Modules/CompraVeiculoService.luau:321"
  ],
  "túnel %s": [
-  "src/ServerScriptService/Modules/BotService.luau:2150"
+  "src/ServerScriptService/Modules/BotService.luau:2215"
  ],
  "u_%d": [
   "src/ServerScriptService/Modules/CampanhaService.luau:455",

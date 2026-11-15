@@ -249,6 +249,37 @@ BotBrain.SQUAD = {
 	offRouteM = 45,
 }
 
+-- D-147 (pedido do dono, 2026-11-14: "os bots não estão trabalhando em equipe"): no combate do Front
+-- 44 (F44.on) o aviso de contato (BotSquads.callout) não servia para nada. O Front 44 manda 3 de cada
+-- 4 bots ao último contato da equipe e o 4º flanqueia; aqui, com squads:
+--   - o contato que um vê (ou de onde veio o tiro que ele tomou) chega aos outros em calloutS;
+--   - no lance de ataque, quem cobre segura o lugar agachado e atira no contato (supressão) e quem
+--     avança vai até ele; a metralhadora sempre cobre;
+--   - um por squad (flankSlot) vai primeiro a um ponto ao lado do contato e entra pelo flanco.
+-- PLACEHOLDER de design (a calibrar em partida).
+BotBrain.TEAM = {
+	flankSlot = 3, -- lugar no squad de quem flanqueia (0 = líder)
+	flankOffsetM = 25, -- ponto ao lado do contato, a isto da linha bot–contato
+	flankBackM = 5, -- ...e um pouco antes dele (não cruza a frente do inimigo)
+	flankMinM = 35, -- mais perto que isto do contato: vai direto
+	flankArriveM = 6,
+	flankAgainS = 20, -- um ponto de flanco por combate (contato novo depois disto)
+}
+
+-- Ponto do flanco (m, no plano): ao lado do contato (cx, cz), visto de quem flanqueia (bx, bz); side
+-- = 1 ou −1. nil = perto demais, vai direto.
+function BotBrain.flankPoint(bx: number, bz: number, cx: number, cz: number, side: number): (number?, number?)
+	local T = BotBrain.TEAM
+	local dx, dz = cx - bx, cz - bz
+	local len = math.sqrt(dx * dx + dz * dz)
+	if len < T.flankMinM then
+		return nil, nil
+	end
+	local ux, uz = dx / len, dz / len
+	local px, pz = -uz * side, ux * side
+	return cx + px * T.flankOffsetM - ux * T.flankBackM, cz + pz * T.flankOffsetM - uz * T.flankBackM
+end
+
 -- Rota estratégica (BotNav), custo por célula de 16 studs (4,48 m, a grade do terreno). O custo
 -- multiplica a distância; 1 = trote em chão firme. Pedido do dono: arrozal alagado caro; dique,
 -- trilha e sebe baratos. As trilhas da carta não existem no chão (D-87): o dique é a trilha.
@@ -1498,10 +1529,20 @@ end
 --   sem alvo: vai ao último contato (visto há até 8 s; tiro ouvido a até 110 studs; quem o acertou) e,
 --             se o inimigo sumiu a 14–70 studs há mais de 1,2 s, 25% de granada (uma a cada 12 s);
 --             recarrega abaixo da metade; longe do destino (mais de 30 studs) corre; depois, o objetivo
+-- D-147 (pedido do dono, 2026-11-14: "os bots estão tendo que chegar muito perto para atirar", "faça
+-- eles no nível mediano igual do Front 44"): o Front 44 luta em mapas de até 1.000 studs (Bastogne,
+-- 280 m); este tem 700 m. As distâncias do combate de lá (visão, o "longe" em que agacha para atirar,
+-- o alcance de escopeta e pistola e o tiro ouvido) vão vezes `escala` (2,5). A mira a uma distância d
+-- é a de lá a d ÷ `escalaMira` (2; o mesmo tamanho do erro em volta do alvo): a 50 m aqui o bot
+-- acerta como o do Front 44 a 25 m. Com a mira também × 2,5, um jogador parado no aberto levava tiro
+-- em 96% das vezes em 3 s a 50 m, o que a v36 já tinha (o dono achou forte demais). Reação, rajadas,
+-- giro e movimento ficam iguais aos de lá.
 ---------------------------------------------------------------------------------------------
 BotBrain.F44 = {
 	on = true,
 	STUD_M = 0.28, -- Front 44: Config.StudsPerMeter = 1 / 0,28
+	escala = 2.5, -- D-147: 700 m ÷ 280 m (PLACEHOLDER de design, a calibrar em partida)
+	escalaMira = 2.0, -- D-147: a mira daqui a d é a de lá a d ÷ 2 (nível médio; PLACEHOLDER)
 	sightStuds = 160,
 	coneDeg = 130,
 	nearStuds = 22,
@@ -1545,9 +1586,16 @@ local function f44M(studs: number): number
 end
 BotBrain.f44M = f44M
 
--- Alcance de visão (m): o menor entre o do Front 44 (160 studs = 44,8 m) e o da vegetação daqui.
+-- D-147: distância do combate do Front 44 levada à escala deste mapa (m)
+local function f44Far(studs: number): number
+	return f44M(studs) * BotBrain.F44.escala
+end
+BotBrain.f44Far = f44Far
+
+-- Alcance de visão (m): o menor entre o do Front 44 na escala daqui (160 studs × 2,5 = 112 m, D-147;
+-- era 44,8 m) e o da vegetação daqui.
 function BotBrain.f44SightM(vegM: number): number
-	return math.min(f44M(BotBrain.F44.sightStuds), vegM)
+	return math.min(f44Far(BotBrain.F44.sightStuds), vegM)
 end
 
 -- Vê quem está no cone da frente (130°) ou a menos de 22 studs (6,2 m) em qualquer direção.
@@ -1561,8 +1609,9 @@ function BotBrain.f44Reaction(roll: number): number
 	return F.reactionS * (F.reactionK[1] + (F.reactionK[2] - F.reactionK[1]) * math.clamp(roll, 0, 1))
 end
 
--- Erro máximo da mira (graus): o tiro cai uniforme num disco desse raio angular.
-function BotBrain.f44AimDeg(trackS: number, moving: boolean, distM: number): number
+-- Erro máximo da mira (graus) do Front 44, na distância de lá (m): o tiro cai uniforme num disco desse
+-- raio angular.
+function BotBrain.f44AimDegF44(trackS: number, moving: boolean, distM: number): number
 	local F = BotBrain.F44
 	local settle = math.clamp(trackS / F.aimSettleS, 0, 1)
 	local e = F.aimStartDeg + (F.aimEndDeg - F.aimStartDeg) * settle
@@ -1570,6 +1619,13 @@ function BotBrain.f44AimDeg(trackS: number, moving: boolean, distM: number): num
 		e *= F.aimMovingK
 	end
 	return e + (distM / F.STUD_M) * F.aimPerStudDeg
+end
+
+-- D-147: o erro daqui a distM é o de lá a distM ÷ escalaMira, dividido por ela (o disco do erro em
+-- volta do alvo fica do mesmo tamanho em metros): o bot daqui a 50 m mira como o de lá a 25 m.
+function BotBrain.f44AimDeg(trackS: number, moving: boolean, distM: number): number
+	local k = BotBrain.F44.escalaMira
+	return BotBrain.f44AimDegF44(trackS, moving, distM / k) / k
 end
 
 -- Ângulo (rad) e giro de um tiro com erro máximo errDeg (disco uniforme: raio × √sorteio).
@@ -1596,10 +1652,10 @@ function BotBrain.f44Pause(auto: boolean, intervalS: number, roll: number): numb
 	return math.max(intervalS, F.semiGapS[1] + (F.semiGapS[2] - F.semiGapS[1]) * r)
 end
 
--- Longe demais para a arma (escopeta 40 studs, pistola 70, submetralhadora 110)?
+-- Longe demais para a arma (escopeta 40 studs, pistola 70, submetralhadora 110; × escala, D-147)?
 function BotBrain.f44TooFar(kind: string, distM: number): boolean
 	local s = BotBrain.F44.tooFarStuds[kind]
-	return s ~= nil and distM > f44M(s)
+	return s ~= nil and distM > f44Far(s)
 end
 
 -- Chance de um tiro com erro máximo errDeg cair no quadrado do tronco (meio lado halfM) a distM:
@@ -1628,7 +1684,7 @@ function BotBrain.f44DuelHitChance(
 	trials: number,
 	roll: () -> number
 ): number
-	if distM > f44M(BotBrain.F44.sightStuds) then
+	if distM > f44Far(BotBrain.F44.sightStuds) then
 		return 0
 	end
 	local interval = 60 / math.max(rpm, 1)

@@ -112,6 +112,9 @@ export type Bot = {
 	duelCoverUntil: number,
 	aimHead: boolean, -- esta rajada vai na cabeça
 	invClearedAt: number, -- chegou ao último contato: nada antes disto é investigado
+	-- D-147: trabalho em equipe (quem flanqueia o contato do squad)
+	flankGoal: Vector3?, -- ponto ao lado do contato, antes de ir a ele
+	flankFor: number, -- hora do contato do squad para o qual o ponto foi feito
 }
 
 -- Ganchos que o BotService preenche no start (os módulos chamam por aqui)

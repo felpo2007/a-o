@@ -344,6 +344,17 @@ function BotSquads.callout(bot: Bot, pos: Vector3, now: number)
 	s.pendingAt = now + c[1] + (c[2] - c[1]) * bot.rng:next()
 end
 
+-- D-147: o contato avisado pelo squad e quando chegou (perto o bastante; sem idade máxima)
+function BotSquads.contactOf(bot: Bot): (Vector3?, number)
+	local s = bot.squad :: Squad?
+	local r = rootOf(bot)
+	local c = if s then s.contact else nil
+	if not (s and c and r) or flat(r.Position, c) * M > S.contactShareM then
+		return nil, -math.huge
+	end
+	return c, s.contactAt
+end
+
 -- Contato avisado pelo squad (perto o bastante e recente)
 function BotSquads.sharedThreat(bot: Bot, now: number): Vector3?
 	local s = bot.squad :: Squad?

@@ -916,14 +916,16 @@ test("v41: combate do Front 44 (visão, reação, mira, rajadas, movimento) com 
 	assert(F.burst[1] == 3 and F.burst[2] == 7 and F.burstPauseS[1] == 0.25 and F.burstPauseS[2] == 0.7)
 	assert(F.strafeStuds == 9 and F.farStuds == 70 and F.retreatHealth == 0.35 and F.retreatS == 3.5)
 	assert(F.investigateS == 8 and F.hearStuds == 110 and F.grenadeChance == 0.25 and F.grenadeEveryS == 12)
-	-- visão: 160 studs (44,8 m) ou menos, se a vegetação tapa antes
-	assert(math.abs(BotBrain.f44SightM(120) - 44.8) < 1e-9 and BotBrain.f44SightM(15) == 15)
+	-- visão: 160 studs × 2,5 (D-147: 112 m; era 44,8 m) ou menos, se a vegetação tapa antes
+	assert(math.abs(BotBrain.f44SightM(120) - 112) < 1e-9 and BotBrain.f44SightM(15) == 15)
 	assert(BotBrain.f44Sees(64, 40) and not BotBrain.f44Sees(70, 40) and BotBrain.f44Sees(170, 6))
-	-- reação 0,36–0,585 s; mira 4,5° → 1,1° em 1,2 s, +0,008° por stud
+	-- reação 0,36–0,585 s; mira de lá 4,5° → 1,1° em 1,2 s, +0,008° por stud
 	assert(math.abs(BotBrain.f44Reaction(0) - 0.36) < 1e-9 and math.abs(BotBrain.f44Reaction(1) - 0.585) < 1e-9)
-	assert(math.abs(BotBrain.f44AimDeg(0, false, 0) - 4.5) < 1e-9)
-	assert(math.abs(BotBrain.f44AimDeg(5, false, 28) - (1.1 + 0.8)) < 1e-9, "100 studs: +0,8°")
-	assert(math.abs(BotBrain.f44AimDeg(5, true, 0) - 1.65) < 1e-9, "andando ×1,5")
+	assert(math.abs(BotBrain.f44AimDegF44(0, false, 0) - 4.5) < 1e-9)
+	assert(math.abs(BotBrain.f44AimDegF44(5, false, 28) - (1.1 + 0.8)) < 1e-9, "100 studs: +0,8°")
+	assert(math.abs(BotBrain.f44AimDegF44(5, true, 0) - 1.65) < 1e-9, "andando ×1,5")
+	-- D-147: aqui a d é a de lá a d ÷ 2, dividida por 2
+	assert(math.abs(BotBrain.f44AimDeg(5, false, 56) - (1.1 + 0.8) / 2) < 1e-9, "56 m daqui = 28 m de lá")
 	-- rajadas 3–7 na automática; tiro a tiro no resto; pausa
 	for _, r in { 0, 0.3, 0.6, 0.99 } do
 		local b = BotBrain.f44Burst(true, r)
@@ -932,10 +934,13 @@ test("v41: combate do Front 44 (visão, reação, mira, rajadas, movimento) com 
 	end
 	assert(BotBrain.f44Pause(false, 1.5, 0) == 1.5, "ferrolho: a cadência manda")
 	assert(math.abs(BotBrain.f44Pause(true, 0.1, 1) - 0.7) < 1e-9)
+	-- D-147: escopeta 40 studs × 2,5 = 28 m, pistola 70 × 2,5 = 49 m
 	assert(
-		BotBrain.f44TooFar("shotgun", 12)
-			and not BotBrain.f44TooFar("shotgun", 10)
-			and not BotBrain.f44TooFar("rifle", 44)
+		BotBrain.f44TooFar("shotgun", 29)
+			and not BotBrain.f44TooFar("shotgun", 27)
+			and BotBrain.f44TooFar("pistol", 50)
+			and not BotBrain.f44TooFar("pistol", 48)
+			and not BotBrain.f44TooFar("rifle", 110)
 	)
 	-- disco dentro do quadrado: perto, tudo; longe, área ÷ área
 	assert(BotBrain.f44ShotChance(1.1, 5, 0.25) == 1)
@@ -947,16 +952,38 @@ test("v41: combate do Front 44 (visão, reação, mira, rajadas, movimento) com 
 		seed = (seed * 1103515245 + 12345) % 2147483648
 		return seed / 2147483648
 	end
+	-- D-147 (pedido do dono: "os bots têm que chegar muito perto para atirar", "nível mediano igual do
+	-- Front 44"): atiram até 112 m no aberto; a 50 m acertam como os de lá a 25 m
 	local line = {}
-	for _, dm in { 10, 25, 40, 50 } do
+	for _, dm in { 10, 25, 50, 75, 100, 112, 120 } do
 		local auto = BotBrain.f44DuelHitChance(dm, 3, true, 600, 2000, roll)
 		local semi = BotBrain.f44DuelHitChance(dm, 3, false, 600, 2000, roll)
 		table.insert(line, string.format("%d m: auto %.0f%%, semi %.0f%%", dm, auto * 100, semi * 100))
 		if dm == 50 then
-			assert(auto == 0 and semi == 0, "além de 44,8 m não vê")
+			assert(auto >= 0.6 and auto <= 0.92, "50 m fora do nível médio: " .. auto)
+			assert(semi >= 0.3 and semi <= 0.7, "50 m semi: " .. semi)
+		elseif dm == 100 then
+			assert(auto > 0.05 and auto <= 0.35, "100 m: " .. auto)
+		elseif dm == 120 then
+			assert(auto == 0 and semi == 0, "além de 112 m não vê")
 		end
 	end
-	print("       Front 44 em 3 s: " .. table.concat(line, "; "))
+	print("       Front 44 na escala daqui, em 3 s: " .. table.concat(line, "; "))
+end)
+
+test("D-147: trabalho em equipe (ponto do flanco)", function()
+	local T = BotBrain.TEAM
+	assert(T.flankSlot >= 1 and T.flankSlot <= 5, "flanco: um homem do squad, não o líder")
+	-- contato 100 m à frente: o ponto fica 25 m ao lado e 5 m antes
+	local x, z = BotBrain.flankPoint(0, 0, 0, 100, 1)
+	assert(x and z, "longe: flanqueia")
+	assert(math.abs((x :: number) + 25) < 1e-9 and math.abs((z :: number) - 95) < 1e-9, "ponto do flanco")
+	local x2 = BotBrain.flankPoint(0, 0, 0, 100, -1)
+	assert(x2 and math.abs((x2 :: number) - 25) < 1e-9, "o outro lado")
+	assert(BotBrain.flankPoint(0, 0, 0, 30, 1) == nil, "perto: vai direto")
+	-- o ponto fica mais perto do contato que quem flanqueia e longe da linha reta
+	local fx, fz = x :: number, z :: number
+	assert(math.sqrt(fx * fx + (fz - 100) ^ 2) < 30 and math.abs(fx) >= 20)
 end)
 
 print(string.format("%d ok, %d falhas", passed, failed))

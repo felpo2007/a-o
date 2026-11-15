@@ -138,7 +138,8 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     - M16 da foto (o dono pediu "M4"), feito no Blender;
     - SKS refeita no Blender, com mira limpa e mais dano;
     - olho mais longe na mira da M14.
-  - **Lote 32 (bots):** atirar de mais longe, trabalhar em equipe, nível médio.
+  - **Lote 32 (v77, D-147): feito.** Bots atiram até 112 m (era 45 m), cobrem, avançam e
+    flanqueiam em squad, no nível médio do Front 44 levado à escala do mapa.
   - **Lote 33 (mapa):**
     - base dos EUA mais longe dos objetivos;
     - vila em meio círculo, espalhada;
@@ -152,6 +153,26 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;
   - respondido pelo dono: a M14 fica como está; o capim clareou (v58);
   - a cadência abaixo de 12 fps medida num aparelho lento.
+
+## v77: lote 32, bots atiram de mais longe e trabalham em equipe (2026-11-15, D-147)
+- **Mais longe:**
+  - o combate do Front 44 tinha a visão de lá, 45 m. Agora as distâncias vão vezes 2,5 (este mapa
+    é 2,5 vezes o maior de lá): visão até 112 m no aberto;
+  - a mira a 50 m é a de lá a 25 m.
+- **Nível médio:** jogador parado no aberto leva tiro em 3 s com 81% de chance a 50 m (automática),
+  19% a 100 m. Antes: 0% além de 45 m.
+- **Em equipe:**
+  - o contato que um vê (ou o tiro que ele toma) chega ao squad;
+  - metade cobre atirando, metade avança; a metralhadora cobre;
+  - um por squad flanqueia.
+- **Studio** (mesma partida, 4 min cada):
+  - antes: 464 rajadas em alvo, mediana 38 m, máximo 45 m;
+  - agora: 718 rajadas, mediana 55 m, 90% até 75 m, máximo 112 m;
+  - 169 rajadas de cobertura e 25 flancos.
+- **Ganchos novos do Studio:** `VT65DevBots` = `"distancias"` (mede), `"escala1"` (escala antiga) e
+  `"escala"` (volta).
+- **Testes:** Lune 640 ok; pytest 54; ruff; luau-lsp sem erro novo.
+- **Não medido:** a impressão de quem joga (nível médio de verdade).
 
 ## v76: lote 31, M16 da foto, SKS refeita e a mira da M14 (2026-11-15, D-146)
 - **Publicada** (versão 76 do place, commit 87484dd).

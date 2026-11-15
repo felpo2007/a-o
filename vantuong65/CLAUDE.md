@@ -65,7 +65,10 @@ O `sourcemap.json` não vai para o Git.
   - `workspace:SetAttribute("VT65DevMode", "Offensive")`: troca o modo (Warfare, Offensive ou
     Skirmish);
   - `workspace:SetAttribute("VT65DevEnd", true)`: encerra a partida e mostra o relatório pós-ação;
-  - `workspace:SetAttribute("VT65DevRain", 1)`: força a chuva (0 a 1).
+  - `workspace:SetAttribute("VT65DevRain", 1)`: força a chuva (0 a 1);
+  - `workspace:SetAttribute("VT65DevBots", "distancias")`: de que distância os bots atiraram, quantas
+    rajadas de cobertura e quantos flancos desde a última vez (D-147). A partida (e a marcha dos bots)
+    só começa com um jogador em campo.
 - O `execute_luau` do MCP roda em outra VM: `require` de módulo do jogo devolve uma CÓPIA. Use
   os ganchos acima ou observe por atributos e remotes.
 - Relatórios de teste ficam em `testes/`.
@@ -159,7 +162,7 @@ O `sourcemap.json` não vai para o Git.
 - Segredos só no `.env` (no `.gitignore`), nunca no código nem no chat.
 - ForgeGUI: nunca regenerar um job em `outcome_unknown`. "failed" com `retryable` pode ser
   retomado com `generation_retry`.
-- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-147) e atualize `PROGRESS.md`.
+- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-148) e atualize `PROGRESS.md`.
 - Tetos de triângulos por modelo: vegetação ≤ 6 mil (D-135), props e herói ≤ 20 mil (`ArtBudget`,
   conferido pelo teste da F5).
 - Commits no branch acima, com mensagem em português.

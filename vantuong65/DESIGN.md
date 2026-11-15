@@ -5564,3 +5564,56 @@ necessárias".
 - **Visto e não explicado:** numa sessão, o soldado do VC caiu "por estilhaços de granada, a poucos
   metros" logo depois de nascer no QG, sem bots no mapa. Não se repetiu em outra sessão (14 s depois
   do começo da partida, vida 112 o tempo todo).
+
+## D-147 — Lote 32: bots atiram de mais longe e trabalham em equipe, no nível médio do Front 44 (v77, 2026-11-15)
+
+**Pedido do dono (14/11):** "os bots estão tendo que chegar muito perto para atirar e não estão
+trabalhando em equipe; faça eles no nível mediano igual do Front 44".
+
+**Causa de "chegar muito perto"** (`BotBrain.F44`, v41):
+- O combate do Front 44 foi copiado com os números de lá, inclusive a visão de 160 studs (44,8 m).
+- Os mapas do Front 44 vão até 1.000 studs (Bastogne, 280 m); este tem 700 m. Além de 45 m o bot não
+  via ninguém.
+- A mira de lá soma 0,008° por stud: a 100 m o erro passava de 4°, e o bot quase não acertava.
+
+**Agora: o Front 44 na escala daqui:**
+- **Distâncias × 2,5** (`F44.escala`, 700 m ÷ 280 m): visão até 112 m no aberto (a mata continua
+  tapando a 40 m e o capim a 15 m), parado e agachado para atirar além de 49 m, escopeta até 28 m,
+  pistola até 49 m, tiro ouvido até 77 m.
+- **Mira × 2** (`F44.escalaMira`): o bot daqui a 50 m mira como o de lá a 25 m. Com a mira também ×
+  2,5, um jogador parado no aberto levava tiro em 96% das vezes em 3 s a 50 m, o mesmo da v36, que o
+  dono achou forte demais.
+- Reação (0,45 s), rajadas, giro e movimento ficam os do Front 44.
+- **Chance de acertar ao menos uma vez em 3 s um jogador parado, em pé, no aberto** (automática /
+  semi, `tests/luau/bots`):
+
+  | Distância | 10 m | 25 m | 50 m | 75 m | 100 m | 112 m | 120 m |
+  |---|---|---|---|---|---|---|---|
+  | Antes (v76) | 100 / 100 | 81 / 50 | 0 | 0 | 0 | 0 | 0 |
+  | Agora | 100 / 100 | 100 / 100 | 81 / 50 | 40 / 19 | 19 / 8 | 14 / 6 | 0 |
+
+**Trabalho em equipe** (`BotBrain.TEAM`, `BotService`, `BotSquads.contactOf`):
+- **Causa:** no combate do Front 44, o aviso de contato do squad (`BotSquads.callout`) era enviado,
+  mas ninguém o usava. Cada bot só ia atrás do que ele mesmo viu ou ouviu.
+- **Contato do squad:** o que um vê, ou de onde veio o tiro que ele tomou, chega aos outros em 1 a
+  2,2 s (`calloutS`), e eles vão até lá.
+- **Fogo e movimento:** no ataque com contato, o squad se divide em duas metades que se revezam a
+  cada 5–8 s.
+  - Quem cobre segura o lugar agachado e atira no contato (supressão, só dentro do alcance da arma).
+  - Quem avança vai até ele.
+  - A metralhadora sempre cobre.
+- **Flanco:** um homem por squad (lugar 3) vai primeiro a um ponto 25 m ao lado do contato (e 5 m
+  antes dele) e entra pelo lado. Só a mais de 35 m do contato, e um ponto por combate.
+
+**Studio (v77), mesma partida, 30 x 30 bots, servidor a 41–58 Hz,** gancho novo
+`workspace:SetAttribute("VT65DevBots", "distancias")`:
+
+| Janela | Rajadas em alvo | Mediana | 90% até | Máximo | Além de 45 m | Cobertura | Flancos |
+|---|---|---|---|---|---|---|---|
+| Escala nova, 4,5 min | 718 | 55 m | 75 m | 112 m | 588 (82%) | 169 | 25 |
+| Escala antiga, 4 min | 464 | 38 m | 43 m | 45 m | 0 | 110 | 13 |
+
+- O gancho `VT65DevBots = "escala1"` volta à escala antiga, para comparar; `"escala"` devolve a nova.
+- Primeiro tiroteio da partida aos 83 s, a 89 m.
+
+**Não medido:** se o jogador sente o nível médio numa partida de verdade (vale a impressão do dono).

@@ -86,6 +86,9 @@ folder.Parent = workspace
 local nextId = 0
 local debugOn = false
 local lastFire: { [Model]: number } = setmetatable({}, { __mode = "k" }) :: any -- quem atirou e quando
+-- D-147: medida no Studio (workspace "VT65DevBots" = "distancias"): distância de cada rajada em alvo,
+-- rajadas de cobertura e pontos de flanco, desde a última medida
+local stats = { dists = {} :: { number }, cover = 0, flank = 0 }
 
 -- Tamanho de cada time que os bots completam: o atributo BotFill do ReplicatedStorage, se houver;
 -- senão 50 (D-107; era 10, 15 no Studio). O teto pelo desempenho vem depois (crowd).
@@ -186,6 +189,7 @@ local function resetLife(bot: Bot)
 	bot.strafeAt, bot.strafeTo, bot.retreatUntil = 0, nil, 0
 	bot.duelCover, bot.duelCoverAt, bot.duelCoverUntil = nil, 0, 0
 	bot.aimHead, bot.invClearedAt = false, -math.huge
+	bot.flankGoal, bot.flankFor = nil, -math.huge
 	BotTunnels.reset(bot)
 end
 
@@ -495,6 +499,8 @@ local function newBot(faction: string): Bot
 		duelCoverUntil = 0,
 		aimHead = false,
 		invClearedAt = -math.huge,
+		flankGoal = nil,
+		flankFor = -math.huge,
 	}
 	table.insert(bots, bot)
 	BotSquads.assign(bot)
@@ -1119,6 +1125,11 @@ local function fireVolley(bot: Bot, target: Model?, at: Vector3?)
 	end
 	if target then
 		noteFirstFire(bot, target)
+		local tr = target:FindFirstChild("HumanoidRootPart") :: BasePart?
+		local r0 = model:FindFirstChild("HumanoidRootPart") :: BasePart?
+		if tr and r0 and #stats.dists < 5000 then
+			table.insert(stats.dists, (tr.Position - r0.Position).Magnitude * M)
+		end
 	end
 	local d = bot.diff
 	local kind = bot.weapon.kind
@@ -1442,11 +1453,13 @@ local function chooseCover(bot: Bot, root: BasePart, c: Cover, now: number, retr
 end
 
 -- Supressão (D-90): sem alvo à vista, quem cobre o lance (ou a metralhadora) dá uma rajada na
--- última posição vista, se o raio até lá não para logo no próprio abrigo.
-local function suppress(bot: Bot, model: Model, now: number): boolean
-	local lk = bot.lastKnown
+-- última posição vista, se o raio até lá não para logo no próprio abrigo. D-147: também no contato
+-- avisado pelo squad (pos/at), e só dentro do alcance da arma.
+local function suppress(bot: Bot, model: Model, now: number, pos: Vector3?, at: number?): boolean
+	local lk = pos or bot.lastKnown
+	local lkAt = at or bot.lastKnownAt
 	local d = bot.diff
-	if not lk or now - bot.lastKnownAt > d.suppressMaxAgeS or now < bot.nextSuppress then
+	if not lk or now - lkAt > d.suppressMaxAgeS or now < bot.nextSuppress then
 		return false
 	end
 	if not (BotSquads.covering(bot) or bot.weapon.kind == "mg") then
@@ -1457,6 +1470,9 @@ local function suppress(bot: Bot, model: Model, now: number): boolean
 	end
 	local head = model:FindFirstChild("Head") :: BasePart?
 	if not head then
+		return false
+	end
+	if not BotBrain.inRange(d, bot.weapon.kind, (lk - head.Position).Magnitude * M) then
 		return false
 	end
 	local aim = lk + Vector3.new(bot.rng:range(-6, 6), 2, bot.rng:range(-6, 6))
@@ -1819,7 +1835,7 @@ local function duel(bot: Bot, model: Model, hum: Humanoid, root: BasePart, now: 
 		-- de lado numa faixa fixa, vai e volta; longe, parado e agachado para acertar
 		bot.strafeAt = now + between(F44.strafeS, bot.rng:next())
 		bot.strafeSign = -bot.strafeSign
-		if distM > BotBrain.f44M(F44.farStuds) then
+		if distM > BotBrain.f44Far(F44.farStuds) then -- D-147: 70 studs × 2,5 = 49 m
 			setStance(model, "crouch")
 			bot.strafeTo = nil
 		else
@@ -1838,23 +1854,72 @@ local function duel(bot: Bot, model: Model, hum: Humanoid, root: BasePart, now: 
 	tryFire(bot, target, now, targetD)
 end
 
--- Último contato a investigar: o inimigo visto (até 8 s), quem atirou em mim (7 s) ou o tiro ouvido a
--- até 110 studs (6 s); o mais recente. Ao chegar perto dele, larga.
-local function investigatePos(bot: Bot, root: BasePart, now: number): (Vector3?, number)
+-- Último contato a investigar: o inimigo visto (até 8 s), quem atirou em mim (7 s), o tiro ouvido a
+-- até 110 studs × 2,5 (6 s; D-147) ou, D-147, o contato que o squad avisou (8 s); o mais recente. Ao
+-- chegar perto dele, larga. O 2º valor diz se é o contato do squad (ninguém daqui o viu).
+local function investigatePos(bot: Bot, root: BasePart, now: number): (Vector3?, number, boolean)
 	local best: Vector3? = nil
 	local bestAt = -math.huge
-	local function consider(p: Vector3?, at: number, keepS: number)
+	local fromSquad = false
+	local function consider(p: Vector3?, at: number, keepS: number, squad: boolean)
 		if p and at > bot.invClearedAt and now - at < keepS and at > bestAt then
-			best, bestAt = p, at
+			best, bestAt, fromSquad = p, at, squad
 		end
 	end
-	consider(bot.lastKnown, bot.lastKnownAt, F44.investigateS)
-	consider(bot.threatPos, bot.threatAt, F44.hitInvestigateS)
+	consider(bot.lastKnown, bot.lastKnownAt, F44.investigateS, false)
+	consider(bot.threatPos, bot.threatAt, F44.hitInvestigateS, false)
 	local hp = bot.heardPos
-	if hp and flat(root.Position, hp) <= F44.hearStuds then
-		consider(hp, bot.heardAt, F44.heardInvestigateS)
+	if hp and flat(root.Position, hp) <= F44.hearStuds * F44.escala then
+		consider(hp, bot.heardAt, F44.heardInvestigateS, false)
 	end
-	return best, bestAt
+	local sc, scAt = BotSquads.contactOf(bot)
+	consider(sc, scAt, F44.investigateS, true)
+	return best, bestAt, fromSquad
+end
+
+-- D-147 (pedido do dono: "os bots não estão trabalhando em equipe"): quem flanqueia (um por squad,
+-- BotBrain.TEAM.flankSlot) vai primeiro a um ponto ao lado do contato do squad (BotBrain.flankPoint)
+-- e só depois ao contato. O ponto é feito uma vez por combate (não gira em volta do contato).
+local function flankGoal(bot: Bot, root: BasePart, contact: Vector3, contactAt: number): Vector3
+	local T = BotBrain.TEAM
+	if bot.slot ~= T.flankSlot then
+		return contact
+	end
+	if bot.flankGoal == nil and contactAt - bot.flankFor > T.flankAgainS then
+		bot.flankFor = contactAt
+		local side = if bot.id % 2 == 0 then 1 else -1
+		local x, z = BotBrain.flankPoint(root.Position.X * M, root.Position.Z * M, contact.X * M, contact.Z * M, side)
+		bot.flankGoal = if x and z then Vector3.new(x / M, contact.Y, z / M) else nil
+		if bot.flankGoal then
+			stats.flank += 1
+		end
+	end
+	local fg = bot.flankGoal
+	if fg and flat(root.Position, fg) * M < T.flankArriveM then
+		bot.flankGoal, fg = nil, nil
+	end
+	return fg or contact
+end
+
+-- D-147: fogo de cobertura. Sem alvo à vista e com contato recente (o próprio ou o avisado pelo
+-- squad), quem cobre o lance e a metralhadora seguram o lugar, agachados e virados para o contato,
+-- e dão rajadas nele (suppress); a outra metade do squad avança (investigate).
+local function coverFire(bot: Bot, model: Model, root: BasePart, now: number, pos: Vector3, at: number): boolean
+	if now - at > bot.diff.suppressMaxAgeS then
+		return false
+	end
+	if not (BotSquads.covering(bot) or bot.weapon.kind == "mg") then
+		return false
+	end
+	if not BotBrain.inRange(bot.diff, bot.weapon.kind, flat(root.Position, pos) * M) then
+		return false
+	end
+	setStance(model, "crouch")
+	BotLocomotion.stop(bot, pos)
+	if suppress(bot, model, now, pos, at) then
+		stats.cover += 1
+	end
+	return true
 end
 
 local function investigate(bot: Bot, model: Model, root: BasePart, head: BasePart, now: number, pos: Vector3): boolean
@@ -2322,12 +2387,24 @@ local function think(bot: Bot, now: number)
 			return
 		end
 		bot.strafeTo, bot.duelCover = nil, nil
-		local inv = investigatePos(bot, root, now)
-		if inv and investigate(bot, model, root, head, now, inv) then
+		-- D-147: quem tomou tiro sem ver de onde avisa o squad ("contato!") pela origem do tiro
+		local tp = bot.threatPos
+		if tp and now - bot.threatAt < 1 then
+			BotSquads.callout(bot, tp, now)
+		end
+		local inv, invAt, fromSquad = investigatePos(bot, root, now)
+		if inv then
 			if not bot.inCombat then
 				enterCombat(bot, now)
 			end
-			return
+			-- D-147: metade cobre (fogo no contato), metade avança; um por squad flanqueia
+			if coverFire(bot, model, root, now, inv, invAt) then
+				return
+			end
+			local goal = if fromSquad then flankGoal(bot, root, inv, invAt) else inv
+			if investigate(bot, model, root, head, now, goal) then
+				return
+			end
 		end
 		if bot.inCombat then
 			leaveCombat(bot, now)
@@ -2708,6 +2785,37 @@ local function devBots()
 		sceneTunnel()
 	elseif v == "cobertura" then
 		sceneCover()
+	elseif v == "distancias" then
+		-- D-147: de que distância os bots atiram, quanto cobrem e quantos flanqueiam
+		local ds = table.clone(stats.dists)
+		table.sort(ds)
+		local function at(q: number): number
+			return if #ds > 0 then ds[math.clamp(math.ceil(#ds * q), 1, #ds)] else 0
+		end
+		local over45 = 0
+		for _, x in ds do
+			if x > 45 then
+				over45 += 1
+			end
+		end
+		print(
+			string.format(
+				"[VT65 TESTE] bots: %d rajadas em alvo (mediana %.0f m, 90%% até %.0f m, máx. %.0f m; %d além de 45 m); %d rajadas de cobertura; %d flancos",
+				#ds,
+				at(0.5),
+				at(0.9),
+				at(1),
+				over45,
+				stats.cover,
+				stats.flank
+			)
+		)
+		stats.dists, stats.cover, stats.flank = {}, 0, 0
+	elseif v == "escala1" or v == "escala" then
+		-- D-147: "escala1" volta às distâncias e à mira do Front 44 sem escala (como na v76), para
+		-- comparar; "escala" devolve as de agora
+		F44.escala, F44.escalaMira = if v == "escala1" then 1 else 2.5, if v == "escala1" then 1 else 2.0
+		print(string.format("[VT65 TESTE] VT65DevBots: escala %.1f, mira %.1f", F44.escala, F44.escalaMira))
 	elseif v == "depurar" then
 		debugOn = not debugOn
 		print(
