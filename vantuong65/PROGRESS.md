@@ -191,11 +191,39 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     - A promoção do fim da partida cobria o cartão de fim: agora espera o cartão sair.
     - O autoteste pedia 10 fumaças, e o mapa de 700 m tem 7: o mínimo agora é 5. Ele dá 18 ok, 0
       falhas.
+- Pedido do dono (15/11): "faça o trim":
+  - **Lote 44 (v86, D-159): feito.** As 10 casas da vila dividem 3 folhas de 1024 e um piso de 512
+    no lugar de um atlas Casa por casa.
+    - Imagens distintas nas casas: 91 → 75.
+    - Na mesma vista: textura 131,8 → 122,5 MB e chamadas de desenho 268 → 229.
 
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;
   - respondido pelo dono: a M14 fica como está; o capim clareou (v58);
   - a cadência abaixo de 12 fps medida num aparelho lento.
+
+## v86: lote 44, trim sheet nas 10 casas da vila (2026-11-15, D-159)
+- **Folhas** (`tools/blender/vila_trim.py -- folhas`, 50 s):
+  - M: madeira, bambu, esteira e pote;
+  - W: paredes de barro, cal, tijolo e taipa;
+  - O: esteira e tábua de parede, terra, rede, ferro, pedra, resina e o tijolo do terreiro;
+  - P: o piso de terra, que repete a cada 4 m.
+- **Casas:** o atlas Casa virou os nós `Trim_M/W/O/P`, sem textura; Telhado, Mobília e colisão
+  ficaram iguais. Cada GLB tem 6 imagens em vez de 9.
+  - Triângulos iguais, menos três: vila_casa_02 9.274 e vila_casa_07 8.473 (o atlas tinha
+    reduzido o grupo Casa) e vila_casa_10 7.806 (as fileiras do terreiro).
+- **Jogo:** o `AssetLoader` clona nas peças `Trim_*` a SurfaceAppearance do portador `vila_trim`.
+  As 10 casas e o portador subiram de novo; os IDs antigos ficam como `_atlas` no `roblox_ids.json`.
+- **Studio:**
+  - 32 casas e 111 peças `Trim_*`, todas com textura, com 4 imagens de cor ao todo;
+  - imagens distintas nas casas: 91 → 75; as do grupo Casa, 30 → 12;
+  - na mesma vista: textura 131,8 → 122,5 MB e chamadas de desenho 268 → 229;
+  - fotos certas da vila_casa_10 e da vila_casa_02;
+  - autoteste: 18 ok, 0 falhas.
+- **Prévias:** `testes/trim/previa_vila_casa_NN.jpg` (antes × depois) e
+  `testes/trim/folhas_vila.jpg`.
+- **Testes:** Lune 234 ok (novo: a trim sheet no f5); pytest 58; ruff, StyLua e luau-lsp limpos.
+- **Não testado:** fps num celular; a memória no jogo publicado.
 
 ## v85: lote 43, autoteste, Offensive e o aviso sobre o fim da partida (2026-11-15, D-158)
 - **Publicada** (versão 85 do place, commit bc63b39).

@@ -1507,73 +1507,80 @@
  },
  {
   "key": "Models.vila_casa_01",
-  "file": "assets/blender/vila_casa_01/vila_casa_01.glb",
+  "file": "assets/blender/vila_casa_01/vila_casa_01_trim.glb",
   "assetType": "Model",
   "name": "VT65 vila_casa_01",
-  "description": "VAN TUONG 65 - casa unica da vila Xom Go (Blender)"
+  "description": "VAN TUONG 65 - casa unica da vila Xom Go (Blender, trim sheet)"
  },
  {
   "key": "Models.vila_casa_02",
-  "file": "assets/blender/vila_casa_02/vila_casa_02.glb",
+  "file": "assets/blender/vila_casa_02/vila_casa_02_trim.glb",
   "assetType": "Model",
   "name": "VT65 vila_casa_02",
-  "description": "VAN TUONG 65 - casa unica da vila Xom Go (Blender)"
+  "description": "VAN TUONG 65 - casa unica da vila Xom Go (Blender, trim sheet)"
  },
  {
   "key": "Models.vila_casa_03",
-  "file": "assets/blender/vila_casa_03/vila_casa_03.glb",
+  "file": "assets/blender/vila_casa_03/vila_casa_03_trim.glb",
   "assetType": "Model",
   "name": "VT65 vila_casa_03",
-  "description": "VAN TUONG 65 - casa unica da vila Xom Go (Blender)"
+  "description": "VAN TUONG 65 - casa unica da vila Xom Go (Blender, trim sheet)"
  },
  {
   "key": "Models.vila_casa_04",
-  "file": "assets/blender/vila_casa_04/vila_casa_04.glb",
+  "file": "assets/blender/vila_casa_04/vila_casa_04_trim.glb",
   "assetType": "Model",
   "name": "VT65 vila_casa_04",
-  "description": "VAN TUONG 65 - casa unica da vila Xom Go (Blender)"
+  "description": "VAN TUONG 65 - casa unica da vila Xom Go (Blender, trim sheet)"
  },
  {
   "key": "Models.vila_casa_05",
-  "file": "assets/blender/vila_casa_05/vila_casa_05.glb",
+  "file": "assets/blender/vila_casa_05/vila_casa_05_trim.glb",
   "assetType": "Model",
   "name": "VT65 vila_casa_05",
-  "description": "VAN TUONG 65 - casa unica da vila Xom Go (Blender)"
+  "description": "VAN TUONG 65 - casa unica da vila Xom Go (Blender, trim sheet)"
  },
  {
   "key": "Models.vila_casa_06",
-  "file": "assets/blender/vila_casa_06/vila_casa_06.glb",
+  "file": "assets/blender/vila_casa_06/vila_casa_06_trim.glb",
   "assetType": "Model",
   "name": "VT65 vila_casa_06",
-  "description": "VAN TUONG 65 - casa unica da vila Xom Go (Blender)"
+  "description": "VAN TUONG 65 - casa unica da vila Xom Go (Blender, trim sheet)"
  },
  {
   "key": "Models.vila_casa_07",
-  "file": "assets/blender/vila_casa_07/vila_casa_07.glb",
+  "file": "assets/blender/vila_casa_07/vila_casa_07_trim.glb",
   "assetType": "Model",
   "name": "VT65 vila_casa_07",
-  "description": "VAN TUONG 65 - casa unica da vila Xom Go (Blender)"
+  "description": "VAN TUONG 65 - casa unica da vila Xom Go (Blender, trim sheet)"
  },
  {
   "key": "Models.vila_casa_08",
-  "file": "assets/blender/vila_casa_08/vila_casa_08.glb",
+  "file": "assets/blender/vila_casa_08/vila_casa_08_trim.glb",
   "assetType": "Model",
   "name": "VT65 vila_casa_08",
-  "description": "VAN TUONG 65 - casa unica da vila Xom Go (Blender)"
+  "description": "VAN TUONG 65 - casa unica da vila Xom Go (Blender, trim sheet)"
  },
  {
   "key": "Models.vila_casa_09",
-  "file": "assets/blender/vila_casa_09/vila_casa_09.glb",
+  "file": "assets/blender/vila_casa_09/vila_casa_09_trim.glb",
   "assetType": "Model",
   "name": "VT65 vila_casa_09",
-  "description": "VAN TUONG 65 - casa unica da vila Xom Go (Blender)"
+  "description": "VAN TUONG 65 - casa unica da vila Xom Go (Blender, trim sheet)"
  },
  {
   "key": "Models.vila_casa_10",
-  "file": "assets/blender/vila_casa_10/vila_casa_10.glb",
+  "file": "assets/blender/vila_casa_10/vila_casa_10_trim.glb",
   "assetType": "Model",
   "name": "VT65 vila_casa_10",
-  "description": "VAN TUONG 65 - casa unica da vila Xom Go (Blender)"
+  "description": "VAN TUONG 65 - casa unica da vila Xom Go (Blender, trim sheet)"
+ },
+ {
+  "key": "Models.vila_trim",
+  "file": "assets/blender/trim_vila/vila_trim.glb",
+  "assetType": "Model",
+  "name": "VT65 vila_trim",
+  "description": "VAN TUONG 65 - folhas comuns das casas da vila (trim sheet)"
  },
  {
   "key": "Sounds.uh34d_rotor",

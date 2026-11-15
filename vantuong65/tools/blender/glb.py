@@ -33,7 +33,9 @@ def de_blender(pos_m: np.ndarray, nrm: np.ndarray, uv: np.ndarray):
 
 
 class Glb:
-    def __init__(self, gerador: str = "VT65 tools/blender"):
+    def __init__(self, gerador: str = "VT65 tools/blender", repetir: bool = False):
+        # repetir: textura que repete (trim sheet, D-159); o padrão prende na borda (atlas)
+        borda = 10497 if repetir else 33071
         self.js: dict = {
             "asset": {"version": "2.0", "generator": gerador},
             "scene": 0,
@@ -43,7 +45,7 @@ class Glb:
             "materials": [],
             "textures": [],
             "images": [],
-            "samplers": [{"magFilter": 9729, "minFilter": 9987, "wrapS": 33071, "wrapT": 33071}],
+            "samplers": [{"magFilter": 9729, "minFilter": 9987, "wrapS": borda, "wrapT": borda}],
             "accessors": [],
             "bufferViews": [],
             "buffers": [],
@@ -109,6 +111,18 @@ class Glb:
         self.js["materials"].append(m)
         return len(self.js["materials"]) - 1
 
+    def material_copia(self, m: dict, texturas: dict[int, int]) -> int:
+        """Material de outro GLB, com os índices de textura trocados (`texturas`: velho -> novo)."""
+        m = json.loads(json.dumps(m))
+        pbr = m.get("pbrMetallicRoughness", {})
+        for alvo in (pbr.get("baseColorTexture"), pbr.get("metallicRoughnessTexture")):
+            if alvo is not None:
+                alvo["index"] = texturas[alvo["index"]]
+        if "normalTexture" in m:
+            m["normalTexture"]["index"] = texturas[m["normalTexture"]["index"]]
+        self.js["materials"].append(m)
+        return len(self.js["materials"]) - 1
+
     def mesh(self, nome: str, pos, nrm, uv, idx, mat: int) -> None:
         idx = np.asarray(idx).reshape(-1)
         use16 = len(pos) < 65536
@@ -158,6 +172,44 @@ def ler_json(caminho) -> dict:
     if tipo != b"JSON":
         raise ValueError(f"{caminho}: primeiro chunk não é JSON")
     return json.loads(data[20 : 20 + n])
+
+
+def ler(caminho) -> tuple[dict, bytes]:
+    """JSON e o bloco binário de um GLB."""
+    data = open(caminho, "rb").read()
+    n, tipo = struct.unpack_from("<I4s", data, 12)
+    if tipo != b"JSON":
+        raise ValueError(f"{caminho}: primeiro chunk não é JSON")
+    js = json.loads(data[20 : 20 + n])
+    o = 20 + n
+    nb, tipo = struct.unpack_from("<I4s", data, o)
+    if tipo != b"BIN\x00":
+        raise ValueError(f"{caminho}: segundo chunk não é BIN")
+    return js, data[o + 8 : o + 8 + nb]
+
+
+_TIPOS = {5126: np.float32, 5125: np.uint32, 5123: np.uint16, 5121: np.uint8}
+_COMPS = {"SCALAR": 1, "VEC2": 2, "VEC3": 3, "VEC4": 4}
+
+
+def acessor(js: dict, binario: bytes, i: int) -> np.ndarray:
+    """Dados de um accessor (sem byteStride nem esparso, como os GLB deste pipeline)."""
+    a = js["accessors"][i]
+    v = js["bufferViews"][a["bufferView"]]
+    if v.get("byteStride"):
+        raise ValueError("accessor com byteStride: não suportado")
+    n, k = a["count"], _COMPS[a["type"]]
+    tipo = np.dtype(_TIPOS[a["componentType"]])
+    ini = v.get("byteOffset", 0) + a.get("byteOffset", 0)
+    arr = np.frombuffer(binario, tipo, n * k, ini)
+    return arr.reshape(n, k) if k > 1 else arr.copy()
+
+
+def imagem(js: dict, binario: bytes, i: int) -> tuple[bytes, str]:
+    img = js["images"][i]
+    v = js["bufferViews"][img["bufferView"]]
+    ini = v.get("byteOffset", 0)
+    return binario[ini : ini + v["byteLength"]], img["mimeType"]
 
 
 def triangulos(caminho) -> int:

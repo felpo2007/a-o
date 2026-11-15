@@ -622,6 +622,46 @@ test("cerca de bambu no teto da vegetação (D-152): era 1/4 dos triângulos da 
 	error("cerca fora do manifest")
 end)
 
+test("trim sheet da vila (D-159): as 10 casas sobem com as folhas comuns e o portador tem ID", function()
+	local AssetIds = require("../../src/ReplicatedStorage/Shared/AssetIds") :: any
+	local plan = serde.decode("json", fs.readFile("assets/upload_plan.json")) :: any
+	local casas, portador = 0, false
+	for _, item in plan do
+		local key = string.match(item.key, "^Models%.(vila_casa_%d+)$")
+		if key then
+			casas += 1
+			assert(string.find(item.file, key .. "_trim%.glb$"), key .. ": o plano não sobe o GLB da trim sheet")
+		elseif item.key == "Models.vila_trim" then
+			portador = true
+		end
+	end
+	assert(casas == 10, "esperava 10 casas no plano, veio " .. casas)
+	assert(portador, "portador vila_trim fora do plano")
+	assert(AssetIds.Models.vila_trim ~= 0, "portador vila_trim sem ID: as casas ficariam sem textura")
+	-- o AssetLoader troca a SurfaceAppearance só dos nós Trim_<letra> e nunca no próprio portador
+	local src = fs.readFile("src/ServerScriptService/Modules/AssetLoader.luau")
+	assert(string.find(src, 'TRIM_KEY = "vila_trim"', 1, true), "AssetLoader sem a chave do portador")
+	assert(string.find(src, "if key ~= AssetLoader.TRIM_KEY then", 1, true), "o portador não pode receber a folha")
+	if not haveBlender then
+		return
+	end
+	for k = 1, 10 do
+		local key = string.format("vila_casa_%02d", k)
+		local m = serde.decode("json", fs.readFile("assets/blender/" .. key .. "/metricas.json")) :: any
+		assert(m.trim and #m.trim.folhas >= 2, key .. ": sem a conversão (tools/blender/vila_trim.py)")
+		assert(string.find(m.novo.arquivo, "_trim%.glb$"), key .. ": metricas.json não aponta para o GLB da trim")
+		local trims = 0
+		for _, n in m.novo.nos do
+			assert(n.atlas ~= "Casa", key .. ": nó " .. n.no .. " ainda no atlas Casa")
+			if n.atlas == "trim" then
+				trims += 1
+				assert(string.match(n.no, "^Trim_[MWOP]$"), key .. ": nó de trim com nome fora do padrão: " .. n.no)
+			end
+		end
+		assert(trims == #m.trim.folhas, key .. ": nós Trim_ e folhas não batem")
+	end
+end)
+
 print(string.format("%d ok, %d falhas", passed, failed))
 if failed > 0 then
 	process.exit(1)

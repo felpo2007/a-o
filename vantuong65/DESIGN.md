@@ -6159,3 +6159,80 @@ cartão de fim, por alguns segundos.
   - arte no chão: 847 de 853 a até 2 m (a pior é a `Vila_ponte`, a −2,7 m, como antes);
   - medevac, morteiro, granada de bot e Offensive com relatório: ok.
 - **Sem bots** (`BotFill` 0), o autoteste dá 1 falha e 4 pulados: os testes de bot precisam deles.
+
+## D-159 — Lote 44: trim sheet nas 10 casas da vila (2026-11-15, v86)
+
+**Pedido do dono:** "faça o trim" (a trim sheet provada na D-156, agora no jogo).
+
+**Antes:** cada casa única trazia 3 atlas próprios de 1024: Telhado, Casa e Mobília. O atlas Casa
+cobre paredes, piso, estrutura e anexos. Nas 10 casas eram 30 atlas, e o grupo Casa sozinho
+somava 10.
+
+**As folhas** (`tools/blender/vila_trim.py -- folhas`, 50 s no Blender):
+- Cada material procedural do grupo Casa é assado uma vez numa faixa que repete na horizontal,
+  com 6 px de borda repetida.
+- **M** (madeira): madeira, madeira escura, bambu, esteira e o pote. São faixas de 0,8 m
+  (240 px/m), com o veio da madeira e os nós do bambu ao longo da faixa.
+  - Na prova (D-156) o veio saía atravessado: o bake usava o `local` da parede.
+- **W** (paredes): barro, barro com a trama exposta (vila_casa_05), cal, tijolo rebocado e taipa.
+  São faixas de 3,2 m (60 px/m), com V = altura (o pé molhado fica embaixo).
+- **O** (outros): esteira e tábua de parede (faixas inteiras), mais meias faixas de 0,8 m
+  (112 px/m) para terra, rede, ferro, pedra, resina e o tijolo do terreiro.
+- **P**: o piso de terra batida, 512 px que repetem a cada 4 m.
+- **Paleta:** as 10 casas usavam 26 variações. A cor de cada casa variava pouco (±6% no
+  catálogo) e ficou uma por material. Trocas:
+  - o muro e o tijolo das casas 08 e 10 vão para o tijolo rebocado (exposto 0,35);
+  - a cinza vai para o ferro;
+  - a esteira fina vai para a esteira.
+- **Terreiro de tijolo da vila_casa_10:**
+  - foi cortado em fileiras de 0,78 m (6 pares de fiadas), cada uma do pé da faixa, e a amarração
+    continua na emenda;
+  - mapeado como pedra, o terreiro tinha ficado cinza na primeira prévia.
+
+**As casas** (`vila_trim.py -- vila_casa_NN`):
+- O GLB novo copia Telhado, Mobília e as colisões do de hoje e troca o atlas Casa pelos nós
+  `Trim_M`, `Trim_W`, `Trim_O` e `Trim_P`, sem textura (só a cor média, caso o portador falte).
+- Cada GLB ficou com 6 imagens em vez de 9 e ~1,4 MB a menos (5,2 → 3,7 MB na vila_casa_01).
+- **Triângulos** iguais, com três exceções:
+  - vila_casa_02, 7.818 → 9.274: o grupo Casa tinha sido reduzido no atlas;
+  - vila_casa_07, 7.819 → 8.473: o mesmo;
+  - vila_casa_10, 7.788 → 7.806: as fileiras do terreiro.
+- As prévias de antes × depois estão em `testes/trim/previa_vila_casa_NN.jpg` e as folhas em
+  `testes/trim/folhas_vila.jpg`.
+  - A casa fica praticamente igual. Na vila_casa_02, o serrilhado em blocos que o atlas tinha na
+    parede do fundo sumiu.
+
+**No jogo:**
+- O portador `vila_trim` é um cubo por folha, com as imagens.
+- O `AssetLoader.template` clona a SurfaceAppearance dele em toda peça `Trim_<letra>`. Script do
+  jogo não troca o `ColorMap`, mas clona a SurfaceAppearance pronta.
+- As 10 casas e o portador subiram de novo. Os IDs antigos ficam como `Models.vila_casa_NN_atlas` no
+  `roblox_ids.json`.
+
+**Studio, v86:**
+- O log mostra "36 peças com a folha comum", nos 10 modelos, sem aviso; continuam 855 modelos de
+  arte.
+- No mapa: 32 casas e 111 peças `Trim_*`, todas com textura. São só 4 imagens de cor para todas.
+- **Imagens distintas nas casas:** 91 → 75. As de cor, normal e rugosidade foram de 90 para 72; as
+  do grupo Casa, de 30 para 12.
+  - Em pixels, pelo tamanho das imagens enviadas, o grupo Casa foi de 23,6 para 7,7 milhões.
+- **A/B na mesma vista, em sessão nova de cada versão:** a câmera a 24 m do centro da vila e 11 m
+  acima, qualidade 10, campo de 70°, 30 s.
+
+  | Medida | v85 | v86 |
+  |---|---|---|
+  | Memória de textura | 131,8 MB (ainda subindo) | 122,5 MB (parada) |
+  | Chamadas de desenho | 268 | 229 |
+
+- **Fotos:** a vila_casa_10 de frente e a vila_casa_02 de perto saem certas (cal com manchas,
+  tijolo do terreiro, mureta com limo, esteira, bambu com nós, rede).
+  - O tanque da vila_casa_10 tinha o tijolo à mostra por acaso do ruído; agora sai rebocado.
+- **Autoteste:** 18 ok, 0 falhas, 0 pulados (arte no chão 846 de 852).
+
+**Não testado:**
+- fps num celular;
+- a memória no jogo publicado (no Studio a textura acumula o que já foi visto, então a medida vale
+  para a mesma sequência de vistas).
+
+**Limite:** o `assets/estatico/vila_casa_03_xomgo.txt` (D-155) foi copiado da casa antiga. Antes de
+ligar o SLIM, copie de novo.

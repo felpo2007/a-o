@@ -185,18 +185,21 @@ return {
 		vc_weapon_rack = 114071799935669,
 		-- casas únicas da vila central, com interior (Blender, D-98); 0 = o mapa usa as casas atuais
 		-- com variação de rotação, escala e anexos
-		vila_casa_01 = 72684660796291,
-		vila_casa_02 = 136089034449244,
-		vila_casa_03 = 113751446463487,
-		vila_casa_04 = 119710549816229,
-		vila_casa_05 = 104160358918966,
-		vila_casa_06 = 132424774897092,
-		vila_casa_07 = 131443479826708,
-		vila_casa_08 = 137464951033207,
-		vila_casa_09 = 129525265817076,
-		vila_casa_10 = 111410077996768,
+		vila_casa_01 = 94442318744812,
+		vila_casa_02 = 84300373626060,
+		vila_casa_03 = 106692529296707,
+		vila_casa_04 = 114458771488366,
+		vila_casa_05 = 93440651127350,
+		vila_casa_06 = 90699402869224,
+		vila_casa_07 = 112735590036194,
+		vila_casa_08 = 122829040611742,
+		vila_casa_09 = 78910465741378,
+		vila_casa_10 = 128089234999095,
 		vila_casa_11 = 0,
 		vila_casa_12 = 0,
+		-- D-159: portador da trim sheet da vila (um cubo por folha); o AssetLoader clona a
+		-- SurfaceAppearance dele para as peças Trim_* das casas. Não vai para o mapa
+		vila_trim = 75477122255106,
 		-- mãos de 1ª pessoa (tools/maos, D-99); 0 = mãos montadas com peças
 		-- veículos na medida real feitos no Blender (assets/blender/RELATORIO.md); o código troca para
 		-- estas chaves junto com a tabela VehicleDrive.ART nova. Carros: 0 = substituto em peças

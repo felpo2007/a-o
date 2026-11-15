@@ -113,6 +113,51 @@ local function baseData(): any
 	return if bases then bases else nil
 end
 
+-- D-159: trim sheet da vila. As casas únicas trazem o grupo da casa (paredes, piso, estrutura e
+-- anexos) nos nós Trim_M, Trim_W, Trim_O e Trim_P, sem textura (tools/blender/vila_trim.py). A
+-- SurfaceAppearance vem clonada do portador (vila_trim: um cubo por folha, com as imagens), então as
+-- 10 casas usam as mesmas 3 folhas de 1024 e o piso de 512, em vez de um atlas por casa. Script do
+-- jogo não pode trocar o ColorMap, mas pode clonar a SurfaceAppearance pronta.
+AssetLoader.TRIM_KEY = "vila_trim"
+AssetLoader.trimParts = 0 -- peças que receberam a folha comum (no template)
+AssetLoader.trimMissing = 0 -- peças Trim_ sem folha (portador sem ID ou sem a imagem)
+local trimCache: { [string]: SurfaceAppearance }? = nil
+local function trimSheets(): { [string]: SurfaceAppearance }
+	if trimCache then
+		return trimCache
+	end
+	local out: { [string]: SurfaceAppearance } = {}
+	trimCache = out
+	local tpl = AssetLoader.template(AssetLoader.TRIM_KEY)
+	if tpl then
+		for _, d in tpl:GetDescendants() do
+			local sa = if d:IsA("MeshPart") then d:FindFirstChildOfClass("SurfaceAppearance") else nil
+			if sa and string.match(d.Name, "^Trim_%u$") then
+				out[d.Name] = sa
+			end
+		end
+	end
+	return out
+end
+local function applyTrim(tpl: Model)
+	for _, d in tpl:GetDescendants() do
+		if d:IsA("MeshPart") and string.match(d.Name, "^Trim_%u$") then
+			local sa = trimSheets()[d.Name]
+			if sa then
+				for _, c in d:GetChildren() do
+					if c:IsA("SurfaceAppearance") then
+						c:Destroy()
+					end
+				end
+				sa:Clone().Parent = d
+				AssetLoader.trimParts += 1
+			else
+				AssetLoader.trimMissing += 1
+			end
+		end
+	end
+end
+
 -- Carrega o modelo publicado (uma vez) e devolve um template ancorado, sem colisão de folhagem.
 function AssetLoader.template(key: string): Model?
 	if cache[key] then
@@ -202,6 +247,9 @@ function AssetLoader.template(key: string): Model?
 			rangeM = data.VC.range.targetM
 		end
 		MapLife.baseTemplate(tpl, rules, rangeM)
+	end
+	if key ~= AssetLoader.TRIM_KEY then
+		applyTrim(tpl)
 	end
 	cache[key] = tpl
 	return tpl
@@ -1014,6 +1062,18 @@ function AssetLoader.start()
 		end
 	end
 	print("[VT65] arte carregada:", #out:GetChildren(), "modelos")
+	if AssetLoader.trimParts > 0 or AssetLoader.trimMissing > 0 then
+		print(string.format("[VT65] trim sheet da vila (D-159): %d peças com a folha comum", AssetLoader.trimParts))
+		if AssetLoader.trimMissing > 0 then
+			warn(
+				string.format(
+					"[VT65] trim sheet: %d peças sem folha (o portador %s não carregou)",
+					AssetLoader.trimMissing,
+					AssetLoader.TRIM_KEY
+				)
+			)
+		end
+	end
 	if #StaticArt.items > 0 then
 		print(
 			string.format(
