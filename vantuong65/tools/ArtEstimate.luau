@@ -217,6 +217,9 @@ return function(): Result
 		exclude = exclude,
 		corridors = corridors,
 		density = ArtBudget.JUNGLE_DENSITY,
+		-- D-153: o mesmo afinamento longe das estradas e dos objetivos do jogo
+		paths = Vegetation.roadSegments((require :: any)("../src/ServerStorage/VT65Build/Data/Roads")),
+		focus = Vegetation.focusCircles(MapConfig),
 		seed = 1965,
 		rng = Rng.new(19650818 + 64),
 	})

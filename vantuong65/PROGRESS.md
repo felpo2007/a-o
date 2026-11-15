@@ -156,13 +156,27 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     - Corrigido: a sombra das copas não respeitava a opção "Sombra das árvores".
     - Cerca de bambu com 6 mil triângulos (era 1/4 da vista da base dos EUA).
     - Cortina sem os troncos invisíveis.
-    - Esperando o dono: afinar bambu, capim-elefante e bananeira longe dos caminhos; sombra do sol
-      desligada no celular; fps num celular.
+    - Esperando o dono: sombra do sol desligada no celular; fps num celular.
+- Pedido do dono (15/11): "faça isso [afinar plantas longe] depois isso [texto sobre SLIM, baking e
+  trim sheets]":
+  - **Lote 38 (v83, D-153): feito.** Bambu, capim-elefante e bananeira pela metade longe das estradas
+    e dos objetivos (261 plantas e 1,57 milhão de triângulos a menos).
+  - **Lote 39:** SLIM, baking e trim sheets pelo texto.
 
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;
   - respondido pelo dono: a M14 fica como está; o capim clareou (v58);
   - a cadência abaixo de 12 fps medida num aparelho lento.
+
+## v83: lote 38, plantas afinadas longe dos caminhos (2026-11-15, D-153)
+- **Regra:** na mata, a mais de 30 m das estradas e a mais de 60 m de objetivo, QG ou vila, fica
+  metade do bambu, do capim-elefante e da bananeira. O resto da mata fica igual planta por planta;
+  a mata cerrada da Serraria não muda.
+- **Studio:**
+  - 261 plantas a menos (bambu 603 → 524, capim-elefante 633 → 503, bananeira 254 → 202);
+  - arte 33,98 → 32,42 milhões de triângulos;
+  - nas vistas, de 0 a 7% a menos no nível 3 (o maior no arrozal A).
+- **Testes:** 1 novo na F5 (só as três espécies somem, só longe, e perto da metade).
 
 ## v82: lote 37, medir o mapa e mexer no que pesa (2026-11-15, D-152)
 - **Publicada** (versão 82 do place, commit 2019d07).

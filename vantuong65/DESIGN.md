@@ -5910,3 +5910,41 @@ folhagem, reuso de modelos e detalhe nos caminhos, interiores e objetivos.
   triângulos nas vistas das bases);
 - sombra do sol desligada por padrão no celular;
 - medir o fps num celular e num servidor cheio.
+
+## D-153 — Lote 38: bambu, capim-elefante e bananeira afinados longe dos caminhos (v83, 2026-11-15)
+
+**Escolha do dono** (depois do lote 37): "afinar plantas longe" (concentrar o detalhe nos caminhos e
+objetivos).
+
+**Regra** (`Vegetation.FAR`, `Vegetation.farKeep`, `roadSegments`, `focusCircles`):
+- **Onde:** na mata, a mais de 30 m das estradas e trilhas (`Data/Roads`) E a mais de 60 m de
+  objetivo, QG ou vila da carta.
+- **Quanto:** fica metade do bambu, do capim-elefante e da bananeira. A passagem é suave em 15 m.
+- **Como:** cara ou coroa fixo pela posição, depois de todos os sorteios (como a D-127). O resto da
+  mata fica igual planta por planta.
+- **Fora da regra:** a mata cerrada da Serraria (D-123), a cortina de fora e as plantas de quintal,
+  sebe e vila.
+- O `tools/ArtEstimate` usa a mesma regra.
+
+**Medido:**
+- **No Studio:**
+  - bambu 603 → 524, capim-elefante 633 → 503, bananeira 254 → 202;
+  - mata 4.877 → 4.616 plantas;
+  - arte 33,98 → 32,42 milhões de triângulos (−4,6%).
+- **Vistas, nível 3 (milhões de triângulos):**
+  - arrozal A 2,58 → 2,41;
+  - ponte D 1,60 → 1,55;
+  - base VC 2,20 → 2,16;
+  - as outras, iguais dentro da oscilação.
+- **Por que o ganho por vista é pequeno:** o que saiu fica no fundo da mata. As vistas das bases olham
+  para as vilas, cujo bosque fica inteiro.
+- **Captura** a 70 m da estrada: as árvores, os arbustos e o capim do chão continuam. Fica menos
+  bambu, capim-elefante e bananeira por baixo.
+
+**Jogo:** menos esconderijo longe dos caminhos (onde se flanqueia). Perto das estradas e dos objetivos,
+nada muda.
+
+**Teste novo** (F5):
+- o plano afinado é o completo sem algumas plantas das três espécies, na mesma ordem;
+- nenhuma some perto de estrada ou objetivo;
+- longe de tudo fica perto da metade (260 de 539 com a semente do teste).

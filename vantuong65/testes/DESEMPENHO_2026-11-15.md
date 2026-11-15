@@ -102,3 +102,23 @@ tela).
 2. **Sombra do sol no celular desligada por padrão.** Ela soma de 110 a 490 chamadas por quadro. Hoje
    o celular segue a escolha do jogador (`Graficos`, perfil de celular da Parte 13).
 3. **Medir no aparelho:** o fps do jogo publicado num celular e num servidor cheio.
+
+## Lote 38 (v83, D-153): bambu, capim-elefante e bananeira afinados longe dos caminhos
+Escolha do dono: "afinar plantas longe".
+- **Regra:** na mata, a mais de 30 m das estradas e trilhas E a mais de 60 m de objetivo, QG ou vila,
+  fica metade dessas três espécies. A passagem é suave em 15 m. O sorteio é fixo pela posição,
+  depois de todos os sorteios, então o resto da mata não muda. A mata cerrada da Serraria não afina.
+- **No Studio:**
+  - bambu 603 → 524, capim-elefante 633 → 503, bananeira 254 → 202 (261 plantas a menos);
+  - arte do mapa 33,98 → 32,42 milhões de triângulos (−4,6%).
+- **Vistas, nível 3 (milhões de triângulos, v82 → v83):**
+  - base EUA 2,49 → 2,47;
+  - Xóm Gò 1,12 → 1,19 (dentro da oscilação);
+  - mata B 2,00 → 1,98;
+  - ponte D 1,60 → 1,55;
+  - arrozal A 2,58 → 2,41;
+  - base VC 2,20 → 2,16.
+
+  O ganho por vista é pequeno porque as plantas que saíram ficam no fundo da mata. As vistas das
+  bases olham para as vilas, onde o bosque fica inteiro.
+- **No nível 10:** dentro da oscilação da v82.

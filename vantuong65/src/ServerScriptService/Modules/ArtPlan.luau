@@ -1295,6 +1295,9 @@ function ArtPlan.plants(
 		corridors = lanes,
 		density = ArtBudget.JUNGLE_DENSITY,
 		dense = Vegetation.denseCircles(ctx.mapConfig), -- D-123: mata cerrada do objetivo da mata
+		-- D-153: longe das estradas e dos objetivos, bambu, capim-elefante e bananeira afinam
+		paths = Vegetation.roadSegments(ctx.roads),
+		focus = Vegetation.focusCircles(ctx.mapConfig),
 		seed = 1965,
 		rng = Rng.new(19650818 + 64),
 		yield = yield,

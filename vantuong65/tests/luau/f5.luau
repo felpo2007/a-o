@@ -396,6 +396,107 @@ test("mata (D-64/65): determinística, zonas livres, lavoura e clareira abertas,
 	print(string.format("       arbustos: %d de %d (%.0f%%)", shrubsA, shrubsFull, 100 * frac))
 end)
 
+test("D-153: longe das estradas e dos objetivos, bambu, capim-elefante e bananeira afinam; o resto igual", function()
+	local M = 0.28
+	local Vegetation = require("../../src/ServerScriptService/Modules/Vegetation")
+	local Rng = require("../../src/ReplicatedStorage/Shared/Rng") :: any
+	local WorldData = require("../../src/ServerStorage/VT65Build/WorldData")
+	local Grid = require("../../src/ServerStorage/VT65Build/Data/Grid") :: any
+	local MapConfig = require("../../src/ReplicatedStorage/Shared/MapConfig") :: any
+	local Features = require("../../src/ServerStorage/VT65Build/Data/Features") :: any
+	local Roads = require("../../src/ServerStorage/VT65Build/Data/Roads") :: any
+	local Landscape = require("../../src/ServerStorage/VT65Build/Landscape")
+	local chunks = {}
+	for _, name in Grid.heightChunks do
+		table.insert(chunks, (require :: any)("../../src/ServerStorage/VT65Build/Data/" .. name))
+	end
+	local world = WorldData.load(Grid, chunks)
+	local houses = {}
+	for i = 1, #Features.houses, 4 do
+		table.insert(houses, Features.houses[i])
+		table.insert(houses, Features.houses[i + 1])
+	end
+	local land = Landscape.new(world, MapConfig, houses)
+	local paths = Vegetation.roadSegments(Roads)
+	local focus = Vegetation.focusCircles(MapConfig)
+	local dense = Vegetation.denseCircles(MapConfig)
+	assert(#paths > 100 and #focus >= 7, string.format("%d trechos de estrada, %d pontos", #paths, #focus))
+	local function plan(withPaths: boolean)
+		return Vegetation.plan({
+			classAt = function(x: number, z: number): number
+				return world:classAt(x, z)
+			end,
+			kindAt = function(x: number, z: number): number
+				return land:kindAt(x, z)
+			end,
+			bounds = MapConfig.Bounds,
+			cell = Grid.cellStuds,
+			exclude = Vegetation.exclusions(MapConfig, houses, {}),
+			dense = dense,
+			paths = if withPaths then paths else nil,
+			focus = if withPaths then focus else nil,
+			seed = 1965,
+			rng = Rng.new(7),
+		})
+	end
+	local full, thin = plan(false), plan(true)
+	local F = Vegetation.FAR
+	local function dist(x: number, z: number): (number, number)
+		local best = math.huge
+		for _, s in paths do
+			local dx, dz = s.x2 - s.x1, s.z2 - s.z1
+			local L2 = dx * dx + dz * dz
+			local t = if L2 > 0 then math.clamp(((x - s.x1) * dx + (z - s.z1) * dz) / L2, 0, 1) else 0
+			best = math.min(best, (s.x1 + t * dx - x) ^ 2 + (s.z1 + t * dz - z) ^ 2)
+		end
+		local near = math.huge
+		for _, c in focus do
+			near = math.min(near, math.sqrt((x - c.x) ^ 2 + (z - c.z) ^ 2))
+		end
+		return math.sqrt(best) * M, near * M
+	end
+	-- o plano afinado é o completo sem algumas plantas das três espécies, na mesma ordem
+	local j, cut, farAll, farKept = 1, 0, 0, 0
+	for _, it in full do
+		local t = thin[j]
+		local same = t and t.key == it.key and t.x == it.x and t.z == it.z
+		local dPath, dFocus = math.huge, math.huge
+		if F.keys[it.key] then
+			dPath, dFocus = dist(it.x, it.z)
+		end
+		if same then
+			j += 1
+		else
+			cut += 1
+			assert(F.keys[it.key], it.key .. " sumiu (só bambu, capim-elefante e bananeira afinam)")
+			assert(
+				dPath > F.pathM and dFocus > F.focusM,
+				string.format("%s cortado a %.0f m da estrada e %.0f m de um objetivo", it.key, dPath, dFocus)
+			)
+		end
+		local B = MapConfig.Bounds
+		local inside = it.x >= B.minX and it.x <= B.maxX and it.z >= B.minZ and it.z <= B.maxZ
+		if F.keys[it.key] and inside and dPath > F.pathM + F.rampM and dFocus > F.focusM + F.rampM then
+			local isDense = false
+			for _, c in dense do
+				if math.sqrt((it.x - c.x) ^ 2 + (it.z - c.z) ^ 2) < c.r * 1.5 then
+					isDense = true
+				end
+			end
+			if not isDense then
+				farAll += 1
+				if same then
+					farKept += 1
+				end
+			end
+		end
+	end
+	assert(j == #thin + 1, "o plano afinado tem planta que o completo não tem")
+	local frac = farKept / math.max(farAll, 1)
+	assert(farAll > 100 and frac > 0.35 and frac < 0.65, string.format("longe: ficaram %d de %d", farKept, farAll))
+	print(string.format("       %d plantas a menos; longe de tudo ficaram %d de %d", cut, farKept, farAll))
+end)
+
 test("clareira de nascimento: nenhuma planta da mata a até 15 m de QG ou reunião, visada aberta", function()
 	local M = 0.28
 	local Vegetation = require("../../src/ServerScriptService/Modules/Vegetation")

@@ -22,6 +22,10 @@ export type Input = {
 	corridors: { Segment }?, -- raias do campo de tiro
 	density: number?, -- multiplica todas as probabilidades (1 = projeto)
 	dense: { Circle }?, -- D-123: mata cerrada em volta do objetivo da mata (Vegetation.denseCircles)
+	-- D-153: estradas e trilhas (w ignorado) e pontos de interesse (objetivos, QGs, vilas). Longe deles,
+	-- o bambu, o capim-elefante e a bananeira afinam (Vegetation.FAR). Sem eles, nada afina.
+	paths: { Segment }?,
+	focus: { Circle }?,
 	seed: number, -- semente do ruído das manchas de moita
 	rng: any, -- Shared/Rng (next, range)
 	-- chamado a cada poucas colunas: no Roblox, task.wait. Sem isso o plano (~200 mil células) passou
@@ -128,6 +132,19 @@ Vegetation.BORDER_M = { 40, 80 }
 -- O arbusto (10,5 mil triângulos, D-66) era o maior custo de uma espécie só: ~4–5 fps no Studio com
 -- 1.585 no cliente (testes/DESEMPENHO_2026-11-14.md).
 Vegetation.SHRUB_KEEP = 0.5
+-- D-153 (lote 38, escolha do dono depois do lote 37: "afinar plantas longe"): o detalhe fica nos
+-- caminhos e objetivos. Bambu, capim-elefante e bananeira da mata a mais de pathM das estradas E a
+-- mais de focusM de objetivo, QG ou vila ficam em `keep` (cara ou coroa da posição, depois de todos os
+-- sorteios, como a D-127); a passagem é suave em `rampM`. A mata cerrada da Serraria (D-123) não
+-- afina. Medido no Studio (v82): eram 385 de 603 bambus, 387 de 633 capins e 158 de 254 bananeiras
+-- nessa faixa; somam 1,3 milhão de triângulos nas vistas das bases (testes/DESEMPENHO_2026-11-15.md).
+Vegetation.FAR = {
+	keys = { bamboo_clump = true, elephant_grass = true, banana = true } :: { [string]: boolean },
+	pathM = 30,
+	focusM = 60,
+	rampM = 15,
+	keep = 0.5,
+}
 -- Sombra só das copas grandes: emergentes e árvores de folha larga a partir de uma escala.
 -- Com sombra em todas as árvores (~18 mil na mata da D-65), a GPU de 2 GB do PC de teste travou no
 -- Studio (DXGI_ERROR_DEVICE_HUNG, 2026-11-10, com um jogo aberto ao lado). Arbusto, capim, bambu,
@@ -287,6 +304,57 @@ local function denseAt(circles: { Circle }?, x: number, z: number): number
 	return best
 end
 
+-- D-153: trechos das estradas e trilhas (Data/Roads: pts = x, z, y por vértice)
+function Vegetation.roadSegments(roads: any): { Segment }
+	local out: { Segment } = {}
+	for _, r in (roads and roads.roads) or {} do
+		local p = r.pts
+		for i = 1, #p - 5, 3 do
+			table.insert(out, { x1 = p[i], z1 = p[i + 1], x2 = p[i + 3], z2 = p[i + 4], w = 0 })
+		end
+	end
+	return out
+end
+
+-- D-153: objetivos, QGs e vilas da carta (o raio não conta: vale FAR.focusM)
+function Vegetation.focusCircles(mapConfig: any): { Circle }
+	local out: { Circle } = {}
+	for _, sp in mapConfig.Strongpoints or {} do
+		table.insert(out, { x = sp.x, z = sp.z, r = 0 })
+	end
+	for _, hq in mapConfig.HQ or {} do
+		table.insert(out, { x = hq.x, z = hq.z, r = 0 })
+	end
+	for _, loc in mapConfig.Locations or {} do
+		table.insert(out, { x = loc.x, z = loc.z, r = 0 })
+	end
+	return out
+end
+
+-- D-153: chance de ficar (1 perto de caminho ou objetivo, FAR.keep longe). Sem `paths`, 1.
+function Vegetation.farKeep(input: Input, x: number, z: number): number
+	local paths = input.paths
+	if not paths then
+		return 1
+	end
+	local F = Vegetation.FAR
+	local best = math.huge
+	for _, s in paths do
+		best = math.min(best, segDist2(x, z, s))
+	end
+	local tPath = smoothstep(F.pathM / M, (F.pathM + F.rampM) / M, math.sqrt(best))
+	if tPath <= 0 then
+		return 1
+	end
+	local near = math.huge
+	local focus: { Circle } = input.focus or {}
+	for _, c in focus do
+		near = math.min(near, math.sqrt((x - c.x) ^ 2 + (z - c.z) ^ 2))
+	end
+	local tFocus = smoothstep(F.focusM / M, (F.focusM + F.rampM) / M, near)
+	return 1 - (1 - F.keep) * tPath * tFocus
+end
+
 function Vegetation.blocked(input: Input, x: number, z: number): boolean
 	for _, c in input.exclude do
 		local dx, dz = x - c.x, z - c.z
@@ -371,6 +439,17 @@ function Vegetation.plan(input: Input): { Item }
 							if
 								e.key == "shrub"
 								and hash(math.floor(px), math.floor(pz), input.seed + 31) >= Vegetation.SHRUB_KEEP
+							then
+								continue
+							end
+							-- D-153: longe de caminho e objetivo, bambu, capim-elefante e bananeira afinam
+							-- (fora da mata cerrada); outro cara ou coroa da posição
+							if
+								out_d == 0
+								and Vegetation.FAR.keys[e.key]
+								and denseAt(input.dense, px, pz) <= 1
+								and hash(math.floor(px), math.floor(pz), input.seed + 53)
+									>= Vegetation.farKeep(input, px, pz)
 							then
 								continue
 							end
