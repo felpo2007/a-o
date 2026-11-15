@@ -180,6 +180,12 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     igual à de hoje (`testes/trim/previa_vila_casa_03.jpg`).
     - Usar no jogo pede uma paleta de paredes comum (26 variantes nas 10 casas), 2 ou 3 folhas e a
       troca da textura pelo `AssetLoader`.
+- Pedido do dono (15/11): "siga para outra" (a trim sheet nas 10 casas fica para depois):
+  - **Lote 42 (D-157): conferência no Studio, sem versão nova.**
+    - As 57 portas externas das 32 casas estão livres para o soldado. Uma porta de cada modelo foi
+      atravessada andando, em até 1,9 s; na `vila_casa_10` é preciso contornar o biombo.
+    - O M48 atravessou a ponte do objetivo D (barranco a −16°, tabuleiro de 20 m, barranco a +12°)
+      sem bater nem afundar.
 
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;
@@ -295,7 +301,8 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
 - **Estradas:** corrigida a junção que entrava 1,4 m abaixo (rampa de 68%).
 - **Carta** refeita e reenviada.
 - **Testes:** Lune 640 ok; pytest 54; ruff; luau-lsp sem erro novo.
-- **Não testado:** um tanque passando na ponte no Studio.
+- **Não testado:** um tanque passando na ponte no Studio. Conferido no lote 42 (D-157): o M48
+  atravessa.
 
 ## v77: lote 32, bots atiram de mais longe e trabalham em equipe (2026-11-15, D-147)
 - **Publicada** (versão 77 do place, commit 20c9fda).
@@ -803,7 +810,8 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
   - boca E5 e trincheira sul 20 m mais perto da vila, dentro do mapa; carta nova publicada.
 - **Conferido no Studio:** rua e quintais em terra batida, casas na escala 1,30, casario de An
   Cường (2) com estradas de terra, primeiro tiroteio aos 17 s, servidor a 60 Hz, 0 erros de script.
-- **Não testado:** o soldado passando pela porta de cada modelo de casa; celular.
+- **Não testado:** o soldado passando pela porta de cada modelo de casa (conferido no lote 42,
+  D-157: as 57 portas passam); celular.
 
 ## v46: lote 4a, mapa de 500 x 500 m e 40 x 40 (2026-11-13, D-114)
 - **Publicada** como versão 46 do place (build do commit 25b61b7).

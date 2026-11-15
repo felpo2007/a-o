@@ -6088,3 +6088,37 @@ materiais dividida por muitos objetos.
   por um clone da de um modelo "portador" (clonar é permitido; mudar o `ColorMap` por script, não).
 - **Ganho esperado** (estimativa): as 30 texturas do atlas Casa das 10 casas viram as 6 a 9 das
   folhas e do piso.
+
+## D-157 — Lote 42: conferência no Studio das portas das casas e do tanque na ponte (2026-11-15, sem versão nova)
+
+**Pedido do dono:** "siga para outra" (deixar a trim sheet nas 10 casas para depois). Foram
+conferidos dois "não testado" do PROGRESS que dependiam só do Studio.
+
+**Portas das casas da vila** (v47, D-115: casas na escala 1,3):
+- Caixa do tamanho do soldado passada em cada porta externa:
+  - 0,5 m de largura, de 0,25 m a 2,05 m acima do piso;
+  - de 2,5 m fora até 1,5 m dentro;
+  - colisão como a do jogo (`RespectCanCollide`), com paredes, terreno, cercas e plantas.
+  - Portas pelo `metricas.json` de cada casa.
+  - Resultado: **57 de 57 portas livres**, nas 32 casas e nos 10 modelos.
+- Andando de verdade (o soldado em campo, `MoveTo` do cliente de 3 m fora até 2 m dentro), uma
+  porta de cada modelo:
+  - 9 modelos entraram em 1,2 a 1,3 s;
+  - na `vila_casa_10`, o biombo de alvenaria (`binh_phong`) fica a 3 m da porta e barra a linha
+    reta, como numa casa vietnamita. Contornando por um lado ou pelo outro, entrou em 1,9 s.
+
+**Tanque na ponte do objetivo D** (D-148: tabuleiro de 20 x 7 m):
+- O W enviado pelo MCP não chega ao jogo com o Studio atrás de outra janela. Então o M48 andou
+  pelo servidor do mesmo jeito que os bots motoristas:
+  - `DriveVelocity` no plano a 3 m/s;
+  - `DriveAttitude` com a inclinação lida do chão pelas 4 pontas.
+- **Resultado:** partindo 6 m antes da cabeceira oeste, ele
+  - desceu o barranco (−12° a −16°);
+  - cruzou os 20 m do tabuleiro em altura constante (o chassi 3 studs acima das tábuas, desvio
+    lateral de 0,02 m);
+  - subiu o barranco leste a +12° até 8 m depois da ponte, em 11,7 s;
+  - não bateu nos corrimões nem afundou.
+- **Não testado:** um jogador dirigindo com o teclado (a mesma física vale para o motorista
+  jogador, do lado do cliente).
+
+**Nada mudou no jogo.**
