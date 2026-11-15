@@ -218,6 +218,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
   - a cadência abaixo de 12 fps medida num aparelho lento.
 
 ## v88: lote 46, carta do veículo, partida longa com bots e tripulações presas (2026-11-15, D-161)
+- **Publicada** (versão 88 do place, commit 68b8077).
 - **Carta do veículo (D-103):**
   - pedido em CI morto, entrega ao nascer no QG a 4 m virado para os objetivos;
   - 1.300 → 1.150 CI;
