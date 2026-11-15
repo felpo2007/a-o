@@ -168,6 +168,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
   - a cadência abaixo de 12 fps medida num aparelho lento.
 
 ## v81: lote 36, o botão da 3ª pessoa e o tronco que para a bala (2026-11-15, D-151)
+- **Publicada** (versão 81 do place, commit 450e102).
 - **3ª pessoa:**
   - onde fica: tecla O no computador, ↑ no direcional do controle, botão CÂMERA no celular;
   - o botão CÂMERA voltou ao toque, no canto de baixo à esquerda (tocar troca, segurar troca o
