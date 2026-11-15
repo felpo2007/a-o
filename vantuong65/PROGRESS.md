@@ -126,13 +126,26 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     - manada nos Arrozais.
   - **Lote 28 (v73, D-143): feito.** Pistola no quadril com as duas mãos no punho; Type 54
     conferida (sem bug).
+  - **Lote 29 (v74, D-144): feito.** Intendência traduzida, acampamento do VC na mata, quique da
+    granada medido (sem mudança).
 
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;
   - respondido pelo dono: a M14 fica como está; o capim clareou (v58);
-  - base do VC sob a mata; nomes do equipamento da Intendência sem tradução;
-  - o quique da granada (o bot erra de 0,2 a 5,5 m num alvo de 25 m);
   - a cadência abaixo de 12 fps medida num aparelho lento.
+
+## v74: lote 29, Intendência traduzida, acampamento do VC na mata e o quique da granada (2026-11-14, D-144)
+- **Intendência:** as linhas de equipamento ("• nome  (peso kg)") saem traduzidas em en, es e vi.
+  Antes, os 10 itens ficavam em português; há teste novo para isso.
+- **Acampamento do VC:**
+  - a roça seca até 45 m do QG virou mata cerrada: 73 plantas, eram 30;
+  - as árvores cobrem as barracas;
+  - a clareira de nascer, a raia e a saída da picape continuam livres;
+  - carta refeita.
+- **Granada:** quique medido em 3 variantes (12 a 16 arremessos cada); nenhuma melhor que a de hoje,
+  então a física fica.
+- **Testes:** Lune todos ok; pytest 54; ruff; luau-lsp sem erro; conferido no Studio (foto de cima
+  do acampamento e contagem de plantas).
 
 ## v73: lote 28, pistola no quadril e a Type 54 (2026-11-14, D-143)
 - **Publicada** (versão 73 do place, commit 7b6fc5f).

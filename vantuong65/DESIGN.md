@@ -5414,3 +5414,49 @@ Os dois itens que sobraram do lote 27 (análise do lote 12).
 - A arma em 3ª pessoa, no corpo do soldado, usa a mesma malha com a mesma textura.
 
 **Não conferido:** a pistola caída no chão; o celular.
+
+## D-144 — Lote 29: tradução da Intendência, acampamento do VC na mata e o quique da granada (v74, 2026-11-14)
+
+Itens da lista de ideias (análise do lote 12), depois do "siga" do dono.
+
+**Intendência em outros idiomas:**
+- O equipamento aparece como `"• nome  (peso kg)"` (`Controllers/Progresso`). O nome sozinho
+  estava no dicionário, mas a linha montada não: com o jogo em inglês, os 10 itens ficavam em
+  português ("Bandoleira M2 de algodão").
+- Entrou o modelo `"• %s  (%.1f kg)"` em en, es e vi.
+- Dois nomes do VC não estavam em dicionário nenhum: "Bi đông extra (cantil)" e "Túi cứu thương
+  (bolsa de socorro)".
+- **Teste novo (`idiomas.luau`):** toda linha de equipamento traduz nos três idiomas.
+- Fora isso, nos módulos de itens só ficam sem tradução os postos do VC em vietnamita e os modelos
+  de arma, de propósito.
+
+**Acampamento do VC na mata** (`Landscape.HQ_FOREST_M`, `Vegetation.DENSE_HQ_M`).
+- **Antes:** no mapa de 700 m, o QG do VC caiu em roça seca (a carta de 1965 tem lavoura ali, perto
+  de casas). As barracas, as redes e a cozinha ficavam no capim baixo.
+- **Agora:** até 45 m do QG a roça vira mata, com a mesma mata cerrada da Serraria (1,8x).
+- **Continuam sem planta:**
+  - as pegadas e os patamares;
+  - os pontos de nascer, com a clareira de 15 m e a visada;
+  - a raia de tiro;
+  - a saída da picape (`Vegetation.VC_DEPOT_EXIT_M`: três círculos de 5 m do abrigo até a
+    trilha).
+- **Medido no Studio:**
+  - plantas a até 45 m do QG: 30 só com a mata, 73 com a mata cerrada;
+  - setor A: ~4,8 milhões de triângulos (o setor B tem ~8,5);
+  - as árvores cobrem as barracas; o meio continua aberto, que é a clareira de quem nasce.
+- **Carta:** refeita (o acampamento aparece na mata); os blocos antigos ficaram em `Carta.*_v71`.
+
+**Quique da granada: medido, sem mudança.** Cópia fiel da física (`FieldService.launch`) num chão
+plano de capim, com 12 a 16 arremessos de 25 m por variante:
+
+| Variante | Onde para, em relação ao ponto de queda mirado |
+|---|---|
+| Física de hoje | +3,5 m em média, desvio de 3,3 m (de −5,9 a +6,9 m) |
+| Freio também nos quiques baixos | −1,1 m em média, desvio de 3,5 m (de −11,7 a +2,1 m) |
+| Giro zerado e metade da velocidade no 1º toque, mais o freio | −3,0 m em média, desvio de 4,7 m (até −17 m) |
+
+- Nenhuma variante foi claramente melhor, e a física ficou como estava.
+- O erro é quase todo na direção do arremesso: de lado, ~0,1 m.
+- A mira dos bots 2,5 m antes do alvo (D-142) compensa a média: erro mediano de 1,1 m.
+
+**Não feito:** o desempenho num celular e num servidor do Roblox (precisa de aparelho do dono).

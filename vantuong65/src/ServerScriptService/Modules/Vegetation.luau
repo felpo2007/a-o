@@ -191,12 +191,21 @@ end
 -- D-114 (mapa de 500 m): 80 m, o canto mais longe da base (90 x 122 m) fica a 77 m do QG. Eram 150 m,
 -- que no mapa novo pelariam An Cường (2).
 Vegetation.US_BASE_CLEAR_M = 80
+-- corredor da picape do VC: { dx, dz, raio } em m a partir do QG (lote 29)
+Vegetation.VC_DEPOT_EXIT_M = { { 23.5, -12, 5 }, { 29, -12, 5 }, { 34.5, -12, 5 } } :: { { number } }
 function Vegetation.exclusions(mapConfig: any, housesXZ: { number }, tunnelXZ: { number }): { Circle }
 	local out: { Circle } = {}
 	-- 2026-11-13: o acampamento do VC fica sob a mata (só as pegadas e os pontos de nascer abrem)
 	for f, hq in mapConfig.HQ do
 		if f == "US" then
 			table.insert(out, { x = hq.x, z = hq.z, r = Vegetation.US_BASE_CLEAR_M / M })
+		elseif f == "VC" then
+			-- lote 29 (D-144): com a mata no acampamento (Landscape.HQ_FOREST_M), a picape do VC
+			-- (VehicleService.DEPOTS, peugeot403 a 23,5 m a leste e 12 m ao norte do QG, de frente para
+			-- o leste) sai por um corredor sem planta até a trilha
+			for _, ex in Vegetation.VC_DEPOT_EXIT_M do
+				table.insert(out, { x = hq.x + ex[1] / M, z = hq.z + ex[2] / M, r = ex[3] / M })
+			end
 		end
 	end
 	for _, sp in mapConfig.Strongpoints do
@@ -247,11 +256,20 @@ end
 Vegetation.DENSE_NAMES = { ["Serraria"] = true } :: { [string]: boolean }
 Vegetation.DENSE_M = 70
 Vegetation.DENSE_K = 1.8
+-- lote 29 (D-144): o acampamento do VC também, até o raio da mata do QG (Landscape.HQ_FOREST_M): com a
+-- densidade normal sobravam ~30 árvores em 45 m e o acampamento parecia num gramado
+Vegetation.DENSE_HQ_M = { VC = 45 } :: { [string]: number }
 function Vegetation.denseCircles(mapConfig: any): { Circle }
 	local out: { Circle } = {}
 	for _, sp in mapConfig.Strongpoints do
 		if Vegetation.DENSE_NAMES[sp.name] then
 			table.insert(out, { x = sp.x, z = sp.z, r = Vegetation.DENSE_M / M })
+		end
+	end
+	for f, rM in Vegetation.DENSE_HQ_M do
+		local hq = mapConfig.HQ and mapConfig.HQ[f]
+		if hq then
+			table.insert(out, { x = hq.x, z = hq.z, r = rM / M })
 		end
 	end
 	return out

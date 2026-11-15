@@ -2686,5 +2686,8 @@
  "Engenho": "Sugar Mill",
  "Ponte e Cais": "Bridge and Docks",
  "Serraria": "Sawmill",
- "Pá: aqui tem piso, procure chão de terra": "Shovel: there's a floor here, find bare ground"
+ "Pá: aqui tem piso, procure chão de terra": "Shovel: there's a floor here, find bare ground",
+ "• %s  (%.1f kg)": "• %s  (%.1f kg)",
+ "Bi đông extra (cantil)": "Extra bi đông (canteen)",
+ "Túi cứu thương (bolsa de socorro)": "Túi cứu thương (first-aid pouch)"
 }

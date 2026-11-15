@@ -43,6 +43,11 @@ Landscape.FARM_STRONGPOINT_M = 130
 -- D-116: a base dos EUA cabe em 80 m (Vegetation.US_BASE_CLEAR_M); eram 150 m, que no mapa de 500 m
 -- abriam clareira em An Cường (2) e em quase toda a borda leste
 Landscape.HQ_CLEAR_M = { US = 80, VC = 0 }
+-- Lote 29 (D-144): o acampamento do VC sob a mata. No mapa de 700 m o QG do VC caiu em roça seca (a
+-- carta de 1965 tem lavoura ali, perto de casas): as barracas, as redes e a cozinha ficavam no capim
+-- baixo, em fila (análise do lote 12). Até isto do QG a roça vira mata; as pegadas, os pontos de
+-- nascer (com a visada), a raia de tiro e a saída da picape continuam sem planta (Vegetation).
+Landscape.HQ_FOREST_M = { VC = 45 } :: { [string]: number }
 
 export type Landscape = {
 	kindAt: (self: Landscape, x: number, z: number) -> number,
@@ -142,8 +147,13 @@ function Landscape.new(world: any, mapConfig: any, housesXZ: { number }, village
 			add(clear, l.x, l.z, r)
 		end
 	end
+	local hqForest: { Disc } = {}
 	for f, hq in mapConfig.HQ do
 		add(clear, hq.x, hq.z, Landscape.HQ_CLEAR_M[f] or 100)
+		local fr = Landscape.HQ_FOREST_M[f]
+		if fr then
+			add(hqForest, hq.x, hq.z, fr)
+		end
 	end
 	local function inside(list: { Disc }, x: number, z: number): boolean
 		for _, d in list do
@@ -168,6 +178,9 @@ function Landscape.new(world: any, mapConfig: any, housesXZ: { number }, village
 		end
 		if inside(clear, x, z) then
 			return Landscape.CLEAR
+		end
+		if inside(hqForest, x, z) then
+			return Landscape.FOREST
 		end
 		if c == 2 and inside(farm, x, z) then
 			return if waters then Landscape.ROCA else Landscape.FARM

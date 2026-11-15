@@ -760,7 +760,7 @@
  ],
  ":arte": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/KnifeView.luau:296",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponVisuals.client.luau:339"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponVisuals.client.luau:344"
  ],
  "<b>H</b> para desistir": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CasualtyScreen.luau:774"
@@ -1486,7 +1486,7 @@
   "src/ServerScriptService/Modules/AssetLoader.luau:348",
   "src/ServerScriptService/Modules/AssetLoader.luau:501",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/AudioController.client.luau:628",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponVisuals.client.luau:714"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponVisuals.client.luau:719"
  ],
  "Banco": [
   "src/ReplicatedStorage/Shared/Vehicles.luau:405"
@@ -1618,7 +1618,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ObraToque.client.luau:151"
  ],
  "Buraco pronto: entre nele para se abrigar": [
-  "src/ServerScriptService/Modules/FieldWorkService.luau:171"
+  "src/ServerScriptService/Modules/FieldWorkService.luau:177"
  ],
  "Button": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:624",
@@ -1983,7 +1983,7 @@
  "Carregador": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ToqueAuto.luau:398",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponController.client.luau:1045",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponVisuals.client.luau:654"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponVisuals.client.luau:659"
  ],
  "Carregadores": [
   "src/ReplicatedStorage/Shared/Kit.luau:13",
@@ -2048,7 +2048,7 @@
   "src/ReplicatedStorage/Shared/Casualty.luau:115"
  ],
  "Cavando… fique parado %d s": [
-  "src/ServerScriptService/Modules/FieldWorkService.luau:128"
+  "src/ServerScriptService/Modules/FieldWorkService.luau:134"
  ],
  "Caído: só um companheiro pode ajudar": [
   "src/ReplicatedStorage/Shared/Medical.luau:363",
@@ -3042,7 +3042,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:420"
  ],
  "Evacuado pelo UH-34D: +%d de suprimento para o time": [
-  "src/ServerScriptService/Modules/FieldWorkService.luau:228"
+  "src/ServerScriptService/Modules/FieldWorkService.luau:234"
  ],
  "Evento%d": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/EventosHud.client.luau:50"
@@ -3748,8 +3748,8 @@
   "src/ServerScriptService/Modules/VehicleService.luau:1554",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CasualtyScreen.luau:196",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/KnifeView.luau:581",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponVisuals.client.luau:851",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponVisuals.client.luau:894"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponVisuals.client.luau:856",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponVisuals.client.luau:899"
  ],
  "Instrumentos": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaView.luau:327"
@@ -5520,13 +5520,13 @@
   "src/ReplicatedStorage/Shared/InputMap.luau:91"
  ],
  "Pá: %s": [
-  "src/ServerScriptService/Modules/FieldWorkService.luau:123"
+  "src/ServerScriptService/Modules/FieldWorkService.luau:129"
  ],
  "Pá: aqui tem piso, procure chão de terra": [
-  "src/ServerScriptService/Modules/FieldWorkService.luau:117"
+  "src/ServerScriptService/Modules/FieldWorkService.luau:123"
  ],
  "Pá: cancelado (você se moveu)": [
-  "src/ServerScriptService/Modules/FieldWorkService.luau:140"
+  "src/ServerScriptService/Modules/FieldWorkService.luau:146"
  ],
  "QG": [
   "src/ServerScriptService/Modules/Flutua.luau:307",
@@ -6754,7 +6754,7 @@
   "src/ServerScriptService/Modules/MapLife.luau:1052",
   "src/ServerScriptService/Modules/MapLife.luau:1223",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/AudioController.client.luau:630",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponVisuals.client.luau:716"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponVisuals.client.luau:721"
  ],
  "Three": [
   "src/ReplicatedStorage/Shared/Equipar.luau:20",
@@ -7218,7 +7218,7 @@
   "src/ServerScriptService/Modules/EventosService.luau:1154",
   "src/ServerScriptService/Modules/FieldService.luau:158",
   "src/ServerScriptService/Modules/FieldService.luau:272",
-  "src/ServerScriptService/Modules/FieldWorkService.luau:210",
+  "src/ServerScriptService/Modules/FieldWorkService.luau:216",
   "src/ServerScriptService/Modules/FrontService.luau:131",
   "src/ServerScriptService/Modules/FrontService.luau:142",
   "src/ServerScriptService/Modules/FrontService.luau:204",
@@ -7683,7 +7683,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleHudView.luau:275",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehiclePrompt.client.luau:35",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehiclePrompt.client.luau:38",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponVisuals.client.luau:239"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponVisuals.client.luau:244"
  ],
  "VER NA LOJA": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaoJogador.luau:387"
@@ -8423,7 +8423,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ToqueHud.client.luau:959"
  ],
  "anel": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponVisuals.client.luau:96"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponVisuals.client.luau:101"
  ],
  "anúncios de leilão (Rock Island, CT Firearms): cruz média com ponto pequeno no centro": [
   "src/ReplicatedStorage/Shared/Weapons.luau:387"
@@ -9053,7 +9053,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CasualtyScreen.luau:1124"
  ],
  "cup": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponVisuals.client.luau:635"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponVisuals.client.luau:640"
  ],
  "curativo": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ItemView.luau:191",
@@ -9382,7 +9382,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Haptics.luau:268"
  ],
  "entalhe": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponVisuals.client.luau:109"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponVisuals.client.luau:114"
  ],
  "entre num squad antes": [
   "src/ReplicatedStorage/Shared/Squads.luau:107"
@@ -9608,8 +9608,8 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ItemView.luau:333",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ItemView.luau:336",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ItemView.luau:338",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponVisuals.client.luau:475",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponVisuals.client.luau:476"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponVisuals.client.luau:480",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponVisuals.client.luau:481"
  ],
  "float": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleFx.client.luau:1027"
@@ -9701,7 +9701,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponController.client.luau:757",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponController.client.luau:768",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponController.client.luau:925",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponVisuals.client.luau:220"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponVisuals.client.luau:225"
  ],
  "free": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaoJogador.luau:154",
@@ -9905,8 +9905,8 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ItemView.luau:331",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ItemView.luau:377",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Maos1P.luau:228",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponVisuals.client.luau:635",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponVisuals.client.luau:641"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponVisuals.client.luau:640",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponVisuals.client.luau:646"
  ],
  "ground": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:904",
@@ -10339,8 +10339,8 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponController.client.luau:557",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponController.client.luau:598",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponController.client.luau:677",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponVisuals.client.luau:589",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponVisuals.client.luau:789"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponVisuals.client.luau:594",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponVisuals.client.luau:794"
  ],
  "layout": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ToqueHud.client.luau:974"
@@ -11086,9 +11086,9 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponController.client.luau:943",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponController.client.luau:1085",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponController.client.luau:1189",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponVisuals.client.luau:338",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponVisuals.client.luau:361",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponVisuals.client.luau:371",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponVisuals.client.luau:343",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponVisuals.client.luau:366",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponVisuals.client.luau:376",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/WeatherController.client.luau:38"
  ],
  "não": [
@@ -11369,8 +11369,9 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/PostureController.client.luau:858",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/PostureController.client.luau:872",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/SoldierPreview.luau:327",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponVisuals.client.luau:381",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponVisuals.client.luau:635"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponVisuals.client.luau:378",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponVisuals.client.luau:386",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponVisuals.client.luau:640"
  ],
  "pistola": [
   "src/ReplicatedStorage/Shared/Casualty.luau:28"
@@ -11788,7 +11789,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/SoldierPreview.luau:274",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/SoldierPreview.luau:278",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponController.client.luau:927",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponVisuals.client.luau:72"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponVisuals.client.luau:77"
  ],
  "rifleman": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:124",
@@ -12097,7 +12098,7 @@
  "shotgun": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Ferrolho.luau:49",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Ferrolho.luau:61",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponVisuals.client.luau:207"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponVisuals.client.luau:212"
  ],
  "shovel": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/InfantryController.client.luau:255",
@@ -12161,9 +12162,9 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponController.client.luau:588",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponController.client.luau:671",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponController.client.luau:925",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponVisuals.client.luau:234",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponVisuals.client.luau:271",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponVisuals.client.luau:318"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponVisuals.client.luau:239",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponVisuals.client.luau:276",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponVisuals.client.luau:323"
  ],
  "sniper": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:129"
@@ -12531,8 +12532,8 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponController.client.luau:254",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponController.client.luau:528",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponController.client.luau:906",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponVisuals.client.luau:361",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponVisuals.client.luau:417"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponVisuals.client.luau:366",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponVisuals.client.luau:422"
  ],
  "sua posição": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CommanderController.client.luau:188"
@@ -12592,7 +12593,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/InfantryController.client.luau:309",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ItemView.luau:69",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Maos1P.luau:228",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponVisuals.client.luau:635"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponVisuals.client.luau:640"
  ],
  "suprimento chega em %d s": [
   "src/ServerScriptService/Modules/CommanderService.luau:183"

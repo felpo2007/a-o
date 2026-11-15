@@ -207,6 +207,33 @@ test("texto montado inteiro: causa da baixa nos três idiomas", function()
 	assert(Lang.translate(DICT.en, row) == "CAUSE      Killed by rifle, ~120 m to the northeast")
 end)
 
+-- lote 29 (D-144): a Intendência (Controllers/Progresso) lista o equipamento como
+-- "• nome  (peso kg)"; o modelo faltava e a linha ficava em português ("Bandoleira M2 de algodão")
+test("texto montado inteiro: equipamento da Intendência nos três idiomas", function()
+	local Progression = require(S .. "Progression") :: any
+	local n = 0
+	local function walk(x: any, depth: number)
+		if depth > 4 or type(x) ~= "table" then
+			return
+		end
+		if type(x.name) == "string" and type(x.kg) == "number" then
+			n += 1
+			local line = string.format("• %s  (%.1f kg)", x.name, x.kg)
+			for code, d in DICT do
+				local tr = Lang.translate(d, line)
+				assert(tr and tr ~= line, string.format("%s: sem tradução: %s", code, line))
+			end
+		end
+		for _, v in x do
+			walk(v, depth + 1)
+		end
+	end
+	walk(Progression, 0)
+	assert(n >= 10, "itens de equipamento achados: " .. n)
+	local en = Lang.translate(DICT.en, string.format("• %s  (%.1f kg)", "Bandoleira M2 de algodão", 0.3))
+	assert(en == "• Cotton M2 bandoleer  (0.3 kg)", tostring(en))
+end)
+
 test("texto montado inteiro: relatório pós-ação sai traduzido", function()
 	local r = AfterAction.new("Offensive", 6.5)
 	AfterAction.event(r, 95, "neutralized", 1, "VC", "Colina 43")
