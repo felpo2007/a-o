@@ -210,6 +210,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
   - a cadência abaixo de 12 fps medida num aparelho lento.
 
 ## v87: lote 45, água, arrozal, veículo comprado e desvirar no Studio (2026-11-15, D-160)
+- **Publicada** (versão 87 do place, commit 22bc87c).
 - **Água** (só o rio do sul, até 0,60 m; nada fundo dentro da área):
   - em 0,38 m e 0,60 m: vadeando, Running em todas as leituras, sem oscilação;
   - agachar fica; deitado volta a agachado em 0,5 s.
