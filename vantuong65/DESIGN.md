@@ -5948,3 +5948,38 @@ nada muda.
 - o plano afinado é o completo sem algumas plantas das três espécies, na mesma ordem;
 - nenhuma some perto de estrada ou objetivo;
 - longe de tudo fica perto da metade (260 de 539 com a semente do teste).
+
+## D-154 — Lote 39: SLIM, baking e trim sheets no nosso pipeline (2026-11-15, sem versão nova)
+
+**Pedido do dono:** aplicar um texto sobre SLIM, baking e trim sheets. O primeiro passo que ele
+sugere é testar o SLIM numa casa e num pequeno conjunto. Relatório:
+`testes/SLIM_BAKING_TRIM_2026-11-15.md`.
+
+**SLIM não dá para testar hoje.** A documentação pede três coisas:
+- o Team Create ligado (a nuvem só gera o SLIM nesse caso);
+- o place salvo no Roblox;
+- o modelo salvo no arquivo do place com `LevelOfDetail = SLIM`, parado durante a partida.
+
+O que trava:
+1. **Toda a arte é posta pelo `AssetLoader` quando o jogo abre** (D-57), e as casas são tingidas
+   nessa hora.
+2. **O Team Create** é configuração da experiência, decisão do dono.
+3. **O Lune 0.8 (pipeline) não grava SLIM.** No teste, o Studio aceitou `LevelOfDetail = SLIM` em
+   `vila_casa_03`, `granary`, `water_jar` e `straw_stack`, num place XML de rascunho. O Lune falhou ao
+   ler e gravar:
+   - não conhece o valor 4 do `ModelLevelOfDetail`;
+   - não lê o `Content` novo (`<uri>`), e as malhas chegaram sem `MeshId`;
+   - erro de tipo no `AssetService.Tags` ao gravar.
+
+**Baking:** já é o caminho do projeto (`comum.assar`):
+- as casas da vila têm 3 atlas de 1024 assados do modelo detalhado;
+- as bases, os veículos e a faca também.
+
+**Trim sheets:** hoje cada modelo do Blender tem os próprios atlas.
+- São 104 texturas diferentes nas casas da vila e 138 nas bases.
+- Uma folha comum da vila (madeira, bambu, palha, metal, amarrações) diminuiria isso, à custa de
+  refazer o UV e de parte do detalhe único.
+
+**Nada mudou no jogo.** Decisões do dono:
+- ligar o Team Create e autorizar a troca do Lune, para o teste do SLIM;
+- testar uma trim sheet da vila numa casa.

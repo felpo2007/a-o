@@ -161,7 +161,15 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
   trim sheets]":
   - **Lote 38 (v83, D-153): feito.** Bambu, capim-elefante e bananeira pela metade longe das estradas
     e dos objetivos (261 plantas e 1,57 milhão de triângulos a menos).
-  - **Lote 39:** SLIM, baking e trim sheets pelo texto.
+  - **Lote 39 (D-154): investigado, sem versão nova.** `testes/SLIM_BAKING_TRIM_2026-11-15.md`.
+    - **SLIM:** não dá hoje. Pede o Team Create ligado e o modelo salvo no arquivo do place. Nossa
+      arte entra quando o jogo abre, e o Lune 0.8 do pipeline não grava o SLIM nem lê o `Content`
+      novo (testado).
+    - **Baking:** já usado nas casas, nas bases, nos veículos e na faca.
+    - **Trim sheets:** 104 texturas nas casas da vila e 138 nas bases. Uma folha comum diminuiria
+      isso.
+    - **Esperando o dono:** ligar o Team Create e trocar o Lune (para testar o SLIM numa casa);
+      testar uma trim sheet da vila numa casa.
 
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;
