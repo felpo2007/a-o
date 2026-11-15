@@ -242,6 +242,8 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
       serraria...).
   - **v92 (D-168): as 19 construções de peças com SLIM.** Copiadas do jogo (239 peças, soma
     conferida), ligadas e testadas no Studio: 25 modelos fixos, vila igual, autoteste 18 ok.
+    Publicada (versão 94 do place, commit fe79d91). A 93 foi um salvamento automático do Team
+    Create, da sessão aberta só para conferir o SLIM, sem edição.
     - Conferir o SLIM no Studio por distância não funcionou (nada saiu do streaming em 6 min); o
       jeito é a cor de depuração (F9), no TODO_USUARIO.
     - Trim sheet e baking: `tools/textura_custo.py` aponta a base dos EUA (93 texturas) e as árvores
