@@ -986,6 +986,22 @@ test("D-147: trabalho em equipe (ponto do flanco)", function()
 	assert(math.sqrt(fx * fx + (fz - 100) ^ 2) < 30 and math.abs(fx) >= 20)
 end)
 
+-- D-161 (Studio, 2026-11-15): o Ontos passou para a partida nova em "hold", com o destino antigo, e
+-- ficou 4 min na mata ao lado do depósito desencalhando em laço; o vigia não contava "hold"
+test("D-161: tripulação recomeça a marcha na partida nova e o vigia pega 'hold' longe do destino", function()
+	local f = BotBrain.crewStateOnNewMatch
+	assert(f("hold", false) == "go" and f("drop", false) == "go" and f("back", false) == "go")
+	assert(f("hold", true) == "load" and f("back", true) == "load", "transporte com tropa volta a carregar")
+	assert(f("board", false) == "board" and f("load", true) == "load" and f("go", false) == "go")
+	local m = BotBrain.crewShouldMove
+	local far = BotBrain.VEHICLE.holdFarM
+	assert(far >= 20 and far <= 60, "longe do destino: " .. far)
+	assert(m("go", nil) and m("back", nil) and m("go", 5))
+	assert(not m("hold", 5) and not m("hold", far) and not m("hold", nil), "segurando a posição no destino")
+	assert(m("hold", 206), "o caso do Studio: hold a 206 m")
+	assert(not m("load", 300) and not m("drop", 300) and not m("board", 300))
+end)
+
 print(string.format("%d ok, %d falhas", passed, failed))
 if failed > 0 then
 	process.exit(1)

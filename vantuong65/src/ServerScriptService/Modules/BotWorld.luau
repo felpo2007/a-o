@@ -529,6 +529,7 @@ local NAV_BLOCK: { [string]: boolean } = {
 	us_flagpole = true,
 	us_generator = true,
 	us_fuel_drums = true,
+	us_jerrycans = true, -- D-161: os galões do depósito seguravam o M48 e o Ontos de bot (Studio)
 	us_water_trailer = true,
 	vc_lean_to = true,
 	vc_hoang_cam_kitchen = true,

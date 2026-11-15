@@ -397,7 +397,30 @@ BotBrain.VEHICLE = {
 	mainEveryS = 9,
 	aimToleranceDeg = 2.5,
 	turretDegS = 24, -- se a ficha não tiver (Vehicles.turretDegS)
+	-- D-161: "hold" mais longe que isto do destino não é posição segurada (o vigia conta como andando)
+	holdFarM = 40,
 }
+
+-- D-161: partida nova. A contagem (PreparoService) puxa o veículo com a tripulação para a borda da
+-- base, mas a tripulação guardava o estado da partida anterior. Segurando a posição, largando ou
+-- voltando: recomeça a marcha ("load" no transporte com tropa, para levar o squad de novo).
+-- Embarcando, carregando ou em marcha: continua.
+function BotBrain.crewStateOnNewMatch(state: string, transport: boolean): string
+	if state == "hold" or state == "drop" or state == "back" then
+		return if transport then "load" else "go"
+	end
+	return state
+end
+
+-- D-161: o vigia da tripulação só desfaz quem devia estar andando e não sai do lugar. Marcha e volta
+-- contam sempre; "hold" só longe do destino (antes nunca contava: o Ontos que ficou em "hold" a 206 m,
+-- desencalhando na mata ao lado do depósito, prendia 2 bots a partida inteira).
+function BotBrain.crewShouldMove(state: string, destM: number?): boolean
+	if state == "go" or state == "back" then
+		return true
+	end
+	return state == "hold" and destM ~= nil and destM > BotBrain.VEHICLE.holdFarM
+end
 
 -- Diferença leve de lado: o VC prefere sebe e emboscada (espera escondido mais tempo); os EUA
 -- preferem abrigo sólido e avançam mais. PLACEHOLDER de design.

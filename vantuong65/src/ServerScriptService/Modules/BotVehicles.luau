@@ -68,6 +68,8 @@ export type Crew = {
 	noDriverSince: number?, -- desde quando o motorista não está sentado
 	progAt: number, -- último instante em que o veículo andou WATCH_MOVE_M
 	progPos: Vector3?,
+	progBest: number?, -- D-161: menor distância (m) ao destino desde o último progresso
+	progDest: Vector3?, -- o destino daquela conta
 }
 
 -- v45: sem motorista sentado por WATCH_NO_DRIVER_S (morreu, não chegou) ou o veículo parado por
@@ -77,6 +79,7 @@ export type Crew = {
 local WATCH_NO_DRIVER_S = 15
 local WATCH_BOARD_S = 90 -- embarque que não acontece (motorista preso, sem caminho até o veículo)
 local WATCH_STALL_S = 60
+local WATCH_GO_S = 120 -- D-161: na marcha, sem chegar WATCH_MOVE_M mais perto do destino
 local WATCH_MOVE_M = 4
 
 local crews: { Crew } = {}
@@ -197,6 +200,8 @@ local function newCrew(vehicle: Model, faction: string): Crew
 		noDriverSince = nil,
 		progAt = os.clock(),
 		progPos = if ch then ch.Position else nil,
+		progBest = nil,
+		progDest = nil,
 	}
 end
 
@@ -664,21 +669,36 @@ local function watchdog(c: Crew, ch: BasePart?, driverIn: boolean, now: number):
 	end
 	c.noDriverSince = nil
 	local p = (ch :: BasePart).Position
-	local last = c.progPos
-	if not last or flat(p, last) * M >= WATCH_MOVE_M then
-		c.progPos, c.progAt = p, now
+	local d = c.dest
+	local destM = if d then flat(p, d) * M else nil
+	-- parado de propósito (carregando a tropa, segurando a posição, largando a tropa): não conta. D-161:
+	-- "hold" longe do destino conta (preso tentando chegar)
+	if not BotBrain.crewShouldMove(c.state, destM) then
+		c.progAt, c.progPos, c.progBest = now, p, nil
 		return false
 	end
-	-- parado de propósito (carregando a tropa, segurando a posição, largando a tropa): não conta
-	local moving = c.state == "go" or c.state == "back"
-	if not moving then
-		c.progAt = now
-		return false
+	local limit = WATCH_STALL_S
+	if (c.state == "go" or c.state == "hold") and d and destM then
+		-- D-161: indo para o destino, progresso é chegar WATCH_MOVE_M mais perto. O desencalhar recua 6 m
+		-- e contava como andar: o Ontos preso na mata nunca era desfeito. Destino novo zera a conta; na
+		-- marcha o prazo é maior (a rota pode contornar o rio ou a mata sem chegar mais perto)
+		local best = c.progBest
+		if c.progDest ~= d or not best or destM < best - WATCH_MOVE_M then
+			c.progDest, c.progBest, c.progAt = d, destM, now
+			return false
+		end
+		if c.state == "go" then
+			limit = WATCH_GO_S
+		end
+	else
+		local last = c.progPos
+		if not last or flat(p, last) * M >= WATCH_MOVE_M then
+			c.progPos, c.progAt = p, now
+			return false
+		end
 	end
-	if now - c.progAt > WATCH_STALL_S then
-		print(
-			string.format("[VT65] bots: %s (tripulação %d) parado há %d s: desembarcam", c.spec, c.id, WATCH_STALL_S)
-		)
+	if now - c.progAt > limit then
+		print(string.format("[VT65] bots: %s (tripulação %d) parado há %d s: desembarcam", c.spec, c.id, limit))
 		c.vehicle:SetAttribute("BotAbandonedAt", now)
 		dissolve(c)
 		return true
@@ -686,7 +706,31 @@ local function watchdog(c: Crew, ch: BasePart?, driverIn: boolean, now: number):
 	return false
 end
 
+-- D-161: partida nova (MatchService.startedAt mudou). A tripulação esquece setor, destino e rota da
+-- partida anterior; quem segurava, largava ou voltava recomeça (BotBrain.crewStateOnNewMatch). Antes,
+-- com o objetivo novo no mesmo setor, o destino antigo ficava e o Ontos puxado para a borda da base
+-- tentava chegar ao ponto velho pela mata (Studio, 2026-11-15).
+local crewMatch = -1
+local function newMatchCrews(now: number)
+	if MatchService.startedAt == crewMatch then
+		return
+	end
+	crewMatch = MatchService.startedAt
+	for _, c in crews do
+		c.sector = nil
+		c.dest = nil
+		c.route = nil
+		c.routeGoal = nil
+		c.stuckT, c.stuckN, c.stuckAt = 0, 0, nil
+		c.reverseUntil = 0
+		c.progAt, c.progPos, c.progBest, c.progDest = now, nil, nil, nil
+		local transport = (Vehicles.PASSENGERS[c.spec] or 0) > 0 and c.mech ~= nil
+		setState(c, BotBrain.crewStateOnNewMatch(c.state, transport), now)
+	end
+end
+
 function BotVehicles.drive(now: number, dt: number)
+	newMatchCrews(now)
 	for i = #crews, 1, -1 do
 		local c = crews[i]
 		local ch = chassisOf(c.vehicle)
@@ -696,6 +740,13 @@ function BotVehicles.drive(now: number, dt: number)
 			continue
 		end
 		local chassis = ch :: BasePart
+		-- D-161: na contagem a viatura espera parada e o estado não anda. O driveTo responde "chegou"
+		-- na contagem: a marcha virava "hold" na base (e ficava assim depois, tentando chegar ao destino
+		-- pela mata) e o transporte com tropa largava os passageiros ali (Studio, 2026-11-15)
+		if MatchService.inPrep() then
+			driveTo(c, chassis, nil, now, dt)
+			continue
+		end
 		local sector = c.forceSector
 		local point: Vector3? = nil
 		if sector then

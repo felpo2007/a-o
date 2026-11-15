@@ -6305,3 +6305,61 @@ olhar o mapa.
 - o tanque subindo o dique.
 
 Tudo isso pede o teclado no jogo.
+
+## D-161 — Lote 46: carta do veículo, partida longa com bots e as tripulações presas (2026-11-15, v88)
+
+**Pedido do dono:** "continue".
+
+**D-103, a carta** (pelos remotes, como o botão da tela):
+- O soldado morto pediu um M151 em CI (`Vehicle_Order`), e o pedido ficou "armado".
+- Ao nascer no QG, veio "M151 MUTT ao seu lado":
+  - a 4 m, virado para oeste (o lado dos objetivos);
+  - os créditos foram de 1.300 para 1.150 (o preço é 150);
+  - a espera entre dois pedidos foi a 120 s.
+- Pedir um M35 com o M151 ainda em campo foi recusado: "Você já tem um veículo comprado em campo".
+
+**Partida longa com bots** (Warfare, 59 bots, o soldado parado no QG; o `VT65DevBots = "squad0"`
+tirou os bots do squad do jogador):
+- Servidor: 0 erros em ~25 min de partidas, física a 60 por segundo, heartbeat de 1 a 1,6 ms.
+- Um aviso de imagem que não carregou (o rosto nº 5 do VC) foi passageiro: no cliente, os 24 rostos
+  estão carregados, e 3 bots usam aquele.
+- **O VC vence o Warfare só de bots em 6min26s–6min27s**, nas duas partidas medidas até o fim. Linha
+  do tempo:
+  - toma C (Xóm Gò) no 1º minuto;
+  - toma D (Ponte e Cais) entre o 3º e o 4º;
+  - toma E (Engenho) no 6º.
+  - Baixas parecidas (48 × 47 e 70 × 60).
+- **Por quê, contado no Studio:**
+  - em 1,1–1,3 min, 27–28 dos 29 bots do VC estão em Xóm Gò;
+  - dos EUA, 11–19 ainda estão no QG e 13–14 sentados nos veículos;
+  - depois, 8 dos EUA atacam Xóm Gò de 70–90 m enquanto o VC toma Ponte e Cais quase sem defensor.
+  - O VC está 25 m mais perto do centro e é 12% mais rápido (D-93). Só os EUA têm blindados (D-90): a
+    regra monta até 5 tripulações com 30 bots, mais os passageiros dos LVTP-5.
+  - Mexer no equilíbrio é decisão de jogo, e fica para o dono.
+
+**Defeito achado e corrigido: tripulação de bot presa** (`BotVehicles`):
+1. **Na contagem do começo** (D-122), o `driveTo` responde "chegou", porque a viatura fica parada de
+   propósito. Com isso:
+   - a marcha virava "hold" (segurando a posição) na própria base e ficava assim;
+   - o transporte com tropa podia largar os passageiros ali.
+   - Agora, na contagem, o estado da tripulação não anda.
+2. **Partida nova:** a tripulação guardava setor, destino e rota da anterior. Agora esquece, e quem
+   segurava, largava ou voltava recomeça (`BotBrain.crewStateOnNewMatch`).
+3. **Vigia** (D-113):
+   - antes, "hold" nunca contava, e "andar" era qualquer deslocamento de 4 m. O desencalhar recua 6 m,
+     então um blindado preso indo e voltando nunca era desfeito;
+   - agora "hold" a mais de 40 m do destino conta (`BotBrain.crewShouldMove`);
+   - indo para o destino, progresso é chegar 4 m mais perto: 60 s em "hold" e 120 s em "go" (a rota
+     pode contornar o rio).
+- **No Studio:**
+  - antes da correção, o Ontos ficou 4 min em "hold" a 206 m, desencalhando em laço;
+  - depois, a tripulação sai em "go" na contagem e não vira "hold";
+  - o M48 (preso a 195–197 m) e o Ontos (207–208 m) foram desfeitos em 120 s, e os bots seguiram a pé;
+  - na troca de partida, nenhuma tripulação ficou em "hold" longe do destino.
+- **Onde eles encalham:** no pátio do depósito dos EUA, a ~35 m do QG, encostados no contêiner
+  (`us_conex`), nos galões (`us_jerrycans`), no gerador e um no outro.
+  - Os galões não estavam na grade de rota e entraram (`BotWorld.NAV_BLOCK`). O contêiner e o
+    gerador já estavam.
+  - A saída do pátio pede um lote próprio.
+
+**Testes:** bots.luau ganhou o teste da D-161; Lune 235 ok.

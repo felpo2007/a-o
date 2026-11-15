@@ -203,11 +203,40 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     - veículo comprado: arrozal, casa, mata, ladeira, recusa no rio e recolhido em 90 s;
     - desvirar e peças móveis dos 7 veículos.
     - Corrigido o gancho "agua", que mandava o soldado para fora do mapa.
+- Pedido do dono (15/11): "continue":
+  - **Lote 46 (v88, D-161): feito.**
+    - A carta do veículo funciona: pedido em CI, entrega ao nascer, desconto de 150 CI e um veículo
+      por vez.
+    - Partida longa com bots: 0 erros no servidor.
+    - Corrigida a tripulação de bot presa em "hold" (na contagem e na troca de partida). O vigia
+      agora pega o blindado que se desencalha em laço.
+    - **Esperando o dono:** o VC vence o Warfare só de bots em ~6,5 min, sempre (detalhes na v88).
 
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;
   - respondido pelo dono: a M14 fica como está; o capim clareou (v58);
   - a cadência abaixo de 12 fps medida num aparelho lento.
+
+## v88: lote 46, carta do veículo, partida longa com bots e tripulações presas (2026-11-15, D-161)
+- **Carta do veículo (D-103):**
+  - pedido em CI morto, entrega ao nascer no QG a 4 m virado para os objetivos;
+  - 1.300 → 1.150 CI;
+  - espera de 120 s;
+  - um veículo por jogador.
+- **Partida longa** (59 bots, ~25 min): 0 erros no servidor, física a 60 por segundo.
+- **Achado, esperando o dono: o VC vence o Warfare só de bots em 6min26s–6min27s** (2 partidas
+  medidas até o fim).
+  - Toma C no 1º minuto, D no 3º–4º e E no 6º.
+  - Em 1,2 min, 28 do VC estão em Xóm Gò; dos EUA, 11–19 ainda no QG e 13–14 nos veículos.
+  - O VC está mais perto e é 12% mais rápido (D-93), e só os EUA têm blindados (D-90).
+- **Corrigido:** tripulação de bot presa em "hold".
+  - Na contagem a marcha virava "hold" na base; na troca de partida o destino velho ficava.
+  - O vigia não pegava o blindado que se desencalha em laço; agora pega em 60–120 s, e os bots
+    seguem a pé.
+- **Achado para um lote próprio:** o M48 e o Ontos de bot encalham no pátio do depósito dos EUA
+  (contêiner, galões, gerador e um no outro), a ~35 m do QG, toda partida. Os galões entraram na
+  grade de rota.
+- **Testes:** Lune 235 ok (D-161 no bots.luau); StyLua e luau-lsp limpos.
 
 ## v87: lote 45, água, arrozal, veículo comprado e desvirar no Studio (2026-11-15, D-160)
 - **Publicada** (versão 87 do place, commit 22bc87c).
@@ -1588,9 +1617,9 @@ do usuário (opção A).
 - D-100 (pilotar todos os veículos, painel de lugares, tiro de dentro, carros M151/M35/Peugeot):
   o desvirar foi conferido no Studio (D-160). Falta, com teclado: ver o painel no controle, o lugar
   no olho, o voo do UH-34D e o tiro pela porta.
-- D-103 (veículo ao nascer): o lugar (arrozal, casa, mata, ladeira, rio) e o recolhimento foram
-  conferidos no Studio (D-160). Falta: a carta (escolher em CI e o desconto), nascer num túnel e
-  Robux (só com os produtos).
+- D-103 (veículo ao nascer): o lugar (arrozal, casa, mata, ladeira, rio), o recolhimento (D-160) e
+  a carta em CI com o desconto (D-161) foram conferidos no Studio. Falta: nascer num túnel e Robux
+  (só com os produtos).
 - D-104 (modelos _v2 em peças): as juntas dos 7 veículos foram conferidas no Studio (D-160). Falta,
   com teclado: rodas girando, rotores, volante, olho e cabeça no teto do Peugeot e do UH-34D.
 
