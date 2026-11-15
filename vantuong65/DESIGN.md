@@ -6426,3 +6426,45 @@ pós-ação, os reforços e quem está a 100 m de Xóm Gò.
     minuto por setor de diferença).
 
 **Não testado:** com jogadores dos dois lados; servidor cheio no Roblox.
+
+## D-163 — Lote 48: Offensive só de bots e a tentativa de marcha forçada (2026-11-15, sem versão nova)
+
+**Pedido do dono:** "Siga para outra".
+
+**Bots presos na cerca da base dos EUA** (o achado da D-162):
+- Em ~2 min de partida, com amostras a cada 12–15 s, apareceu no máximo 1 bot parado por vez,
+  encostado na concertina do canto noroeste.
+- Pouco impacto; ficou como está.
+
+**Offensive só de bots (v89):**
+- Os EUA tomaram Ponte e Cais (D) aos ~5,6 min.
+- Diante de Xóm Gò (C), ficaram 7 min sem avançar, até a medida acabar aos 12,4 min:
+  - aos 10,7 min, 20 do VC estavam a menos de 100 m do ponto (12 dentro do raio de 35 m) e 1 dos
+    EUA;
+  - os EUA estavam a 100–250 m, 18 deles "em combate".
+- **Por quê:**
+  - no combate do Front 44 (v41), o bot que vê um alvo entra em duelo: longe, agacha e atira
+    parado, a qualquer distância;
+  - o lance de assalto da D-107 só existe no combate antigo;
+  - de 100 a 250 m quase ninguém acerta, então o ataque para ali.
+
+**Tentativa, desfeita:** o atacante com o alvo longe e o ponto ainda longe seguiria a marcha do
+squad, atirando andando (`pressPastTarget`).
+
+| Passa por alvo além de | Ponte e Cais (D) |
+|---|---|
+| sem a mudança (v89) | tomada aos ~5,6 min |
+| 80 m | não tomada aos 10 min; 20 dos EUA mortos ou voltando do QG |
+| 150 m | não tomada aos 8 min |
+
+- Andando para dentro do fogo, contra defensores agachados, os atacantes morrem mais do que
+  avançam. A mudança foi desfeita, e o jogo segue igual à v89.
+- Uma partida por variante tem muita variação. Mas as duas variantes pioraram no mesmo ponto
+  (o primeiro setor), que sem a mudança cai.
+
+**Fica para o dono decidir:** no Offensive só de bots, o VC deve vencer pelo relógio, defendendo
+Xóm Gò. É o desenho do modo (o defensor do morro e da vila tem vantagem), e com jogadores quem
+empurra é o jogador. Se o dono quiser o ataque de bots mais forte, as alavancas são:
+- o tempo do Offensive (20 + 15 min por setor, `Offensive.C`);
+- os bots de ataque com granada de fumaça;
+- mais bots dos EUA no Offensive.

@@ -215,6 +215,14 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
   - **Lote 47 (v89, D-162): feito.** O Warfare só de bots passou de 6,4 min para 19min56s.
     - Xóm Gò trocou de mãos três vezes, e os EUA seguraram dois setores a partida toda.
     - O VC ainda venceu, pelos reforços.
+- Pedido do dono (15/11): "Siga para outra":
+  - **Lote 48 (D-163): medido, sem versão nova.**
+    - Offensive só de bots: os EUA tomam Ponte e Cais aos ~5,6 min e param diante de Xóm Gò, em
+      duelo a 100–250 m.
+    - Tentei a marcha forçada do atacante (passar por alvo além de 80 m e de 150 m). Piorou: o
+      primeiro setor não caiu em 8–10 min. Foi desfeita.
+    - Esperando o dono: se quer o ataque de bots mais forte no Offensive (tempo do modo, fumaça
+      ou mais bots dos EUA).
 
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;
