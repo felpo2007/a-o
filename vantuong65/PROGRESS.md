@@ -154,6 +154,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
   - a cadência abaixo de 12 fps medida num aparelho lento.
 
 ## v76: lote 31, M16 da foto, SKS refeita e a mira da M14 (2026-11-15, D-146)
+- **Publicada** (versão 76 do place, commit 87484dd).
 - **M16** (o dono pediu "M4"; a foto é o M16 do Vietnã): feito no Blender.
   - 6.516 triângulos; alça de transporte com a mira de anel; quebra-chamas de três dentes.
   - Escolha do fuzileiro, suporte, líder e enfermeiro dos EUA; nos bots, um fuzileiro por squad.
