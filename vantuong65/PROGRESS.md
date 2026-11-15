@@ -165,6 +165,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
   - a cadência abaixo de 12 fps medida num aparelho lento.
 
 ## v82: lote 37, medir o mapa e mexer no que pesa (2026-11-15, D-152)
+- **Publicada** (versão 82 do place, commit 2019d07).
 - **Medida:** `testes/DESEMPENHO_2026-11-15.md` (seis vistas, qualidade fixa nos níveis 10 e 3,
   chamadas de desenho e triângulos, A/B por mudança).
   - Sem fps: o Studio ficou atrás de outra janela (trava em 15 fps).
