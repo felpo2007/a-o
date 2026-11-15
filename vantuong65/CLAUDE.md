@@ -50,6 +50,10 @@ repositório é de OUTRO projeto (estratégias de trade). Aqui vale este arquivo
     (`h*403 + ((h*256) % 65536) * 65536`): no Luau, `h * 16777619` perde precisão;
   - ligue-o em `assets/estatico/ativos.json` e rode `uv run python tools/estatico.py` (gera
     `src/Workspace/Estatico` e `Modules/StaticArt`).
+  - Construção de peças do `MapLife` (D-168): ponha `CHAVE = "Vila_<tipo>"` no copiador; as peças
+    comuns saem em linhas `B` com o CFrame inteiro, e o pivô é o centro da base.
+- Custo teórico de textura por modelo (D-168): `uv run python tools/textura_custo.py`. Serve para
+  escolher o alvo da trim sheet; o custo de verdade se mede no Studio, sem bots (D-165).
   - No `.model.json`, o Rojo 7.4 quer:
     - o `CFrame` tipado; sem ele, o erro enganoso "no project file was found";
     - os atributos tipados dentro de `Properties`; no topo, ele ignora em silêncio.
@@ -220,7 +224,7 @@ O `sourcemap.json` não vai para o Git.
 - Segredos só no `.env` (no `.gitignore`), nunca no código nem no chat.
 - ForgeGUI: nunca regenerar um job em `outcome_unknown`. "failed" com `retryable` pode ser
   retomado com `generation_retry`.
-- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-168) e atualize `PROGRESS.md`.
+- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-169) e atualize `PROGRESS.md`.
 - Tetos de triângulos por modelo: vegetação ≤ 6 mil (D-135), props e herói ≤ 20 mil (`ArtBudget`,
   conferido pelo teste da F5).
 - Commits no branch acima, com mensagem em português.

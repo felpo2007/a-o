@@ -235,6 +235,15 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
   - **Lote 51 (v91, D-167): feito.** O Team Create já estava ligado. A casa de telha da entrada de
     Xóm Gò e 5 objetos em volta viraram arte fixa com SLIM (cópia nova, com a trim sheet).
   - Falta o dono conferir no jogo publicado a casa de perto e de longe (TODO_USUARIO).
+- Pedido do dono (15/11): "continue fazendo o slim o baking e o trim sheet":
+  - **Lote 52 (D-168): código e análise, sem versão nova.** O dono estava jogando outro jogo,
+    então nada de Studio nem de Blender pesado.
+    - SLIM: o copiador e o `estatico.py` aceitam as construções de peças (pagode, casa comunal,
+      serraria...). Falta copiar e ligar um conjunto no Studio.
+    - Conferir o SLIM no Studio por distância não funcionou (nada saiu do streaming em 6 min); o
+      jeito é a cor de depuração (F9), no TODO_USUARIO.
+    - Trim sheet e baking: `tools/textura_custo.py` aponta a base dos EUA (93 texturas) e as árvores
+      da mata (6 por espécie) como próximos alvos, a medir no Studio antes.
 
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;

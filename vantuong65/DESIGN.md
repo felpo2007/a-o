@@ -6611,3 +6611,50 @@ amostra a cada 30 s; o objetivo é Ponte e Cais, D):
     mostrou o SLIM no Studio.
   - A cor de depuração ficou para depois: o dono estava com outro jogo aberto, e o Studio foi
     fechado para não travar a placa de vídeo.
+
+## D-168 — Lote 52: SLIM para as construções de peças e a escolha dos próximos alvos (2026-11-15, sem versão nova)
+
+**Pedido do dono:** "continue fazendo o slim o baking e o trim sheet".
+
+**Contexto:** o dono estava jogando outro jogo (placa de vídeo de 2 GB). Sem Studio e sem Blender
+pesado, o lote ficou no código e na análise.
+
+**SLIM para as construções de peças** (o relatório da D-154 diz que é onde o SLIM ajuda mais: as
+19 construções do `MapLife`, com até 51 peças com sombra cada):
+- `tools/estatico_copiar.luau`:
+  - `Part`, `WedgePart` e `CornerWedgePart` viram linhas `B`;
+  - cada linha leva o CFrame inteiro (o alpendre é inclinado a −8°), o material do Roblox, a cor e
+    o atributo `Material` da bala;
+  - recusa (linha `X`) superfície que não seja lisa, transparência parcial, filho, atributo além de
+    `Material` e nome com espaço.
+- `tools/estatico.py` lê a linha `B` e gera a peça do Rojo. Conferido: um modelo com a cunha a −8° e
+  uma tora em cilindro, construído no Rojo 7.4 e lido de volta no Lune, sai com a mesma matriz (as
+  linhas passam como linhas), o cilindro, o material, a cor, as superfícies lisas e o atributo.
+- `MapLife.villagePart` põe o pivô no centro da base, com o giro do plano.
+- `AssetLoader.placeItem` procura a cópia fixa (`Vila_<tipo>`) antes de montar a construção.
+- **Falta (Studio):** copiar um conjunto (o pagode e a casa comunal de Xóm Gò), ligá-lo, conferir e
+  publicar.
+
+**Próximo alvo da trim sheet** (`tools/textura_custo.py`): custo teórico das texturas dos modelos do
+jogo, com o teto de 1024 do Roblox, 4 bytes por pixel e os mipmaps, sem a compressão:
+
+| Grupo | Modelos | Texturas | MB teóricos |
+|---|---|---|---|
+| outros (bichos, plantas, morteiro, objetos) | 50 | 142 | 647 |
+| base dos EUA | 21 | 93 | 282 |
+| casas da vila | 10 | 60 | 240 |
+| veículos | 11 | 51 | 220 |
+| árvores da mata (Poly Haven) | 4 | 24 | 128 |
+| base do VC | 9 | 30 | 75 |
+
+- **Base dos EUA:** é onde o jogador nasce e fica perto de tudo, então as texturas carregam
+  grandes. O posto de comando tem 9 texturas; cada barraca, o refeitório e o pátio de veículos, 6.
+  Lona, sacos de areia, madeira e chapa se repetem: bom alvo para uma folha comum.
+- **Árvores da mata:** 6 texturas por espécie (casca e folha em atlas separados), perto da câmera
+  em todo o mapa. Assar casca e folha num atlas só (baking) baixaria para 3.
+- **A medida que decide** (regra da D-165): no Studio, sem bots, na vista da base, a memória de
+  textura com e sem as SurfaceAppearance da base. Só vale converter se a diferença for grande.
+
+**Baking:** já é o caminho do projeto para o que sai do Blender (casas, bases, veículos, faca). O
+próximo uso concreto é o atlas único das árvores da mata, depois da medida.
+
