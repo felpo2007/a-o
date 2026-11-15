@@ -135,6 +135,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
   - a cadência abaixo de 12 fps medida num aparelho lento.
 
 ## v74: lote 29, Intendência traduzida, acampamento do VC na mata e o quique da granada (2026-11-14, D-144)
+- **Publicada** (versão 74 do place, commit 992b33b).
 - **Intendência:** as linhas de equipamento ("• nome  (peso kg)") saem traduzidas em en, es e vi.
   Antes, os 10 itens ficavam em português; há teste novo para isso.
 - **Acampamento do VC:**
