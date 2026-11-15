@@ -61,6 +61,7 @@ export type Squad = {
 	mech: any, -- BotVehicles: LVTP-5 que leva este squad
 	-- 2026-11-12: espera do líder com teto e lances perto do objetivo atacado
 	waitSince: number?,
+	lagM: number?, -- atraso do último (m) que o líder viu no último passo (depuração)
 	boundMoving: boolean,
 	boundPhaseEnd: number,
 	-- D-107
@@ -436,10 +437,13 @@ function BotSquads.deployGoal(bot: Bot, point: Vector3): Vector3
 end
 
 -- Quanto o mais atrasado está do seu lugar (m)
+-- D-162: membro parado (preso na cerca, lutando) não conta. Na saída da base dos EUA, bots presos na
+-- concertina deixavam o líder caminhando a 1,4 m/s (ele caminha com alguém a mais de leaderSlowM):
+-- o squad inteiro ia andando até Xóm Gò e chegava minutos depois do VC (Studio, 2026-11-15)
 local function tailLag(s: Squad, lr: BasePart): number
 	local worst = 0
 	for _, b in s.members do
-		if b ~= s.leader and alive(b) then
+		if b ~= s.leader and alive(b) and BotLocomotion.speed(b) >= BotBrain.SQUAD.lagMovingMps then
 			local r = rootOf(b)
 			if r then
 				local back, side = BotMove.slot(s.formation, b.slot)
@@ -499,6 +503,7 @@ function BotSquads.lead(bot: Bot, root: BasePart, now: number, threatNear: boole
 	-- passo: cauteloso só perto do objetivo; corre no aberto com ameaça perto; anda se o squad ficou
 	-- para trás e espera (pouco) se ficou muito. D-107: inimigo conhecido perto não faz mais andar
 	local lag = tailLag(s, root)
+	s.lagM = lag -- rótulo de depuração (VT65DevBots "depurar")
 	local gait = "jog"
 	if threatNear and BotWorld.isOpen(pos) then
 		gait = "sprint"

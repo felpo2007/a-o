@@ -77,7 +77,7 @@ export type State = {
 	pathObj: Path?,
 	sprinting: boolean,
 	slowT: number,
-	faction: string?, -- o VC anda 12% mais rápido (Movement.factionSpeed, D-93)
+	faction: string?, -- D-162: o bot não ganha o bônus de lado (D-93: só o jogador do VC é 12% mais rápido)
 	waterMode: string, -- Movement.waterMode: "dry" | "wade" | "swim"
 	swimOn: boolean, -- estado Swimming do Humanoid ligado
 	-- D-107: nível de detalhe
@@ -639,10 +639,11 @@ local function stepOne(st: State, dt: number, now: number)
 	if stance ~= "stand" then
 		gait = stance
 	end
-	-- lado (D-93): o VC anda, trota, corre e anda agachado 12% mais rápido; mira e rastejo, iguais
-	local cap = Movement.serverSpeed(stance, gait == "sprint", leg, false, st.faction)
-	local sideK = if gait == "ads" or gait == "prone" then 1 else Movement.factionSpeed(st.faction)
-	local want = math.min((GAIT_SPEED[gait] or Movement.JOG) * sideK, cap) * st.factor
+	-- D-162: bot sem o bônus de lado, como a D-93 definiu ("os bots ficam na velocidade-base"; o VC
+	-- 12% mais rápido é do jogador). Com o bônus, o VC de bots chegava ao centro ~20 s antes e vencia o
+	-- Warfare de bots em 6–13 min; sem ele, a frente para em Xóm Gò/Ponte e Cais (Studio, 2026-11-15)
+	local cap = Movement.serverSpeed(stance, gait == "sprint", leg, false, nil)
+	local want = math.min(GAIT_SPEED[gait] or Movement.JOG, cap) * st.factor
 	local dirX, dirZ, speed = 0, 0, 0
 	local curSpeed = math.sqrt(st.body.vx ^ 2 + st.body.vz ^ 2)
 	local path = st.path

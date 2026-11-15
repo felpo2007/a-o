@@ -70,6 +70,7 @@ export type Crew = {
 	progPos: Vector3?,
 	progBest: number?, -- D-161: menor distância (m) ao destino desde o último progresso
 	progDest: Vector3?, -- o destino daquela conta
+	departed: boolean, -- D-162: já teve a vez de sair da baia
 }
 
 -- v45: sem motorista sentado por WATCH_NO_DRIVER_S (morreu, não chegou) ou o veículo parado por
@@ -84,6 +85,7 @@ local WATCH_MOVE_M = 4
 
 local crews: { Crew } = {}
 local nextId = 0
+local lastDepart: { [string]: number } = {} -- D-162: última saída de baia por lado
 
 local function flat(a: Vector3, b: Vector3): number
 	return Vector3.new(a.X - b.X, 0, a.Z - b.Z).Magnitude
@@ -202,6 +204,7 @@ local function newCrew(vehicle: Model, faction: string): Crew
 		progPos = if ch then ch.Position else nil,
 		progBest = nil,
 		progDest = nil,
+		departed = false,
 	}
 end
 
@@ -769,6 +772,16 @@ function BotVehicles.drive(now: number, dt: number)
 			end
 			driveTo(c, chassis, nil, now, dt)
 		elseif (c.state == "go" or c.state == "hold") and not c.leftDepot and c.exit then
+			-- D-162: um blindado do lado sai por vez (BotBrain.departReady); os outros esperam na baia
+			if not c.departed then
+				local last = lastDepart[c.faction]
+				if not BotBrain.departReady(if last then now - last else nil) then
+					driveTo(c, chassis, nil, now, dt)
+					continue
+				end
+				c.departed = true
+				lastDepart[c.faction] = now
+			end
 			-- sai da baia em linha reta até a frente da boca; a rota (que não entra nos taludes)
 			-- começa dali
 			local ex = c.exit :: Vector3

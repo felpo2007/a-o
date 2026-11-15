@@ -1002,6 +1002,25 @@ test("D-161: tripulação recomeça a marcha na partida nova e o vigia pega 'hol
 	assert(not m("load", 300) and not m("drop", 300) and not m("board", 300))
 end)
 
+-- D-162 (Studio): o M48 e o LVTP-5 saíam juntos e travavam um no outro no portão dos EUA
+test("D-162: um blindado sai da baia por vez", function()
+	local gap = BotBrain.VEHICLE.departGapS
+	assert(gap >= 5 and gap <= 20, "intervalo de saída: " .. gap)
+	assert(BotBrain.departReady(nil), "o primeiro sai na hora")
+	assert(not BotBrain.departReady(0) and not BotBrain.departReady(gap - 0.1))
+	assert(BotBrain.departReady(gap) and BotBrain.departReady(gap * 3))
+end)
+
+-- D-162 (Studio): com o bônus de 12% do VC nos bots, o VC de bots chegava ao centro ~20 s antes e
+-- vencia o Warfare de bots em 6–13 min. A D-93 já dizia: o bônus é do jogador; o bot fica na base
+test("D-162: bot sem o bônus de velocidade do lado; defesa com mais squads", function()
+	local fs = require("@lune/fs")
+	local src = fs.readFile("src/ServerScriptService/Modules/BotLocomotion.luau")
+	assert(not string.find(src, "factionSpeed", 1, true), "BotLocomotion não pode usar Movement.factionSpeed")
+	assert(BotBrain.TASK.defendShare >= 0.35 and BotBrain.TASK.counterShare >= 0.6, "divisão de defesa da D-162")
+	assert(BotBrain.SQUAD.lagMovingMps > 0, "atrasado parado não segura o squad")
+end)
+
 print(string.format("%d ok, %d falhas", passed, failed))
 if failed > 0 then
 	process.exit(1)

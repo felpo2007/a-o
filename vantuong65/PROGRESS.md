@@ -211,11 +211,35 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     - Corrigida a tripulação de bot presa em "hold" (na contagem e na troca de partida). O vigia
       agora pega o blindado que se desencalha em laço.
     - **Esperando o dono:** o VC vence o Warfare só de bots em ~6,5 min, sempre (detalhes na v88).
+- Pedido do dono (15/11): "Equilibre os bots":
+  - **Lote 47 (v89, D-162): feito.** O Warfare só de bots passou de 6,4 min para 19min56s.
+    - Xóm Gò trocou de mãos três vezes, e os EUA seguraram dois setores a partida toda.
+    - O VC ainda venceu, pelos reforços.
 
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;
   - respondido pelo dono: a M14 fica como está; o capim clareou (v58);
   - a cadência abaixo de 12 fps medida num aparelho lento.
+
+## v89: lote 47, equilíbrio dos bots no Warfare (2026-11-15, D-162)
+- **Base dos EUA:** gerador, galões e contêineres saíram da passagem dos blindados (canto
+  noroeste); a barraca de comando e o refeitório ficaram onde estavam.
+- **Bots:**
+  - um blindado sai da baia por vez (10 s);
+  - membro parado não faz mais o squad caminhar;
+  - defesa com 40%/70% dos squads (eram 25%/50%);
+  - o bot do VC sem o bônus de 12%, como a D-93 definiu (o jogador do VC continua mais rápido).
+- **Warfare só de bots** (relatório pós-ação):
+
+  | Versão | Duração | Resultado |
+  |---|---|---|
+  | v88 | 6:26 e 6:27 | VC tomou os 5 setores |
+  | v89 | 19:56 | os reforços dos EUA acabaram, 2 × 3 setores, baixas 257 × 277 |
+
+  - Na v89, Xóm Gò trocou de mãos três vezes.
+  - Passos intermediários na D-162.
+- **Testes:** Lune 237 ok (bots: D-162); ruff, StyLua e luau-lsp limpos.
+- **Não testado:** com jogadores dos dois lados.
 
 ## v88: lote 46, carta do veículo, partida longa com bots e tripulações presas (2026-11-15, D-161)
 - **Publicada** (versão 88 do place, commit 68b8077).

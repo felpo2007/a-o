@@ -233,6 +233,7 @@ BotBrain.SQUAD = {
 	-- um segue sozinho para o objetivo do squad
 	leaderWaitM = 60, -- ...mais que isto: o líder espera
 	leaderWaitMaxS = 3, -- e espera no máximo isto (depois segue; o atrasado alcança)
+	lagMovingMps = 0.5, -- D-162: só conta o atrasado que está andando (o parado está preso ou lutando)
 	leaderStallS = 2,
 	boundZoneM = 150, -- 2026-11-12: a até isto do objetivo atacado, com contato recente, o squad vai em lances
 	boundPauseS = { 1, 2 }, -- ...parando isto entre um lance e outro (o lance dura boundS). Era 2–4 s
@@ -399,7 +400,15 @@ BotBrain.VEHICLE = {
 	turretDegS = 24, -- se a ficha não tiver (Vehicles.turretDegS)
 	-- D-161: "hold" mais longe que isto do destino não é posição segurada (o vigia conta como andando)
 	holdFarM = 40,
+	-- D-162: um blindado do lado sai da baia por vez, com este intervalo. Saindo juntos, o M48 e o
+	-- LVTP-5 travavam um no outro no vão de 6 m do portão dos EUA (Studio). PLACEHOLDER
+	departGapS = 10,
 }
+
+-- D-162: a baia pode soltar o próximo blindado do lado? (s desde a última saída; nil = nenhuma)
+function BotBrain.departReady(sinceLastS: number?): boolean
+	return sinceLastS == nil or sinceLastS >= BotBrain.VEHICLE.departGapS
+end
 
 -- D-161: partida nova. A contagem (PreparoService) puxa o veículo com a tripulação para a borda da
 -- base, mas a tripulação guardava o estado da partida anterior. Segurando a posição, largando ou
@@ -666,9 +675,12 @@ end
 -- (BotBrain.objective); uma parte guarda o setor próprio que o inimigo ataca e, com o inimigo dentro
 -- dele, mais squads voltam (contra-ataque). PLACEHOLDER de design.
 ---------------------------------------------------------------------------------------------
+-- D-162 (dono: "equilibre os bots"): com 25% e 50%, o lado que tomava o centro primeiro (sempre o
+-- VC: mais perto e 12% mais rápido) passava por cima da defesa e vencia o Warfare de bots em 6,5 min
+-- (Studio). Mais squads guardam e mais voltam com o inimigo dentro: a frente para no setor do meio.
 BotBrain.TASK = {
-	defendShare = 0.25, -- squads que guardam o setor ameaçado, sem inimigo dentro do ponto
-	counterShare = 0.5, -- ...e com inimigo dentro do ponto
+	defendShare = 0.4, -- squads que guardam o setor ameaçado, sem inimigo dentro do ponto
+	counterShare = 0.7, -- ...e com inimigo dentro do ponto
 }
 
 -- Setor próprio que o inimigo ataca agora (o objetivo dele, se for nosso), ou nil.

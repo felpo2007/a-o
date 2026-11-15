@@ -6363,3 +6363,66 @@ tirou os bots do squad do jogador):
   - A saída do pátio pede um lote próprio.
 
 **Testes:** bots.luau ganhou o teste da D-161; Lune 235 ok.
+
+## D-162 — Lote 47: equilíbrio dos bots no Warfare (2026-11-15, v89)
+
+**Pedido do dono:** "Equilibre os bots" (achado da D-161: o VC vencia o Warfare só de bots em ~6,5
+min, sempre).
+
+**Como foi medido:** partida de Warfare com 59 bots no Studio. O soldado fica parado no QG, e o
+`VT65DevBots = "squad0"` tira os bots do squad dele. Anota-se a linha do tempo do relatório
+pós-ação, os reforços e quem está a 100 m de Xóm Gò.
+
+**O que segurava os EUA, achado e corrigido nesta ordem:**
+1. **Pátio do depósito:**
+   - na escala 1,5× das barracas (v41), o `bases_dados.py` afastou a barraca de comando para leste;
+   - o gerador, os galões e os dois contêineres "do QG" ficaram sozinhos no descampado por onde os
+     blindados vão das baias ao portão;
+   - o M48 e o Ontos encalhavam ali toda partida.
+   - Eles foram para o canto noroeste, entre a baia 1 e a cerca (`tools/blender/bases_layout.py`).
+     A barraca de comando e o refeitório ficaram fixos onde já estavam no jogo; sem isso, o
+     `afastar` os puxava de volta para a passagem. Só os 4 objetos mudaram no `Data/Bases`.
+2. **Portão:** com a passagem livre, o M48 e o LVTP-5 chegavam juntos ao vão de 6 m da cancela,
+   com bots a pé no meio, e travavam. Agora um blindado do lado sai da baia por vez, com 10 s entre
+   um e outro (`BotBrain.VEHICLE.departGapS`, `departReady`).
+3. **Squad caminhando:**
+   - o líder caminha (1,4 m/s) se o último está mais de 25 m atrás do lugar dele;
+   - um bot preso na concertina contava como atrasado para sempre, e o squad inteiro ia andando
+     até Xóm Gò (medianas de 1,2–1,5 m/s nos EUA contra 4,1 no VC);
+   - agora só conta o atrasado que está andando (`BotBrain.SQUAD.lagMovingMps`).
+   - Os líderes passaram a trotar a 3,3–3,9 m/s. O rótulo de depuração mostra o atraso que o
+     líder vê.
+4. **Defesa:**
+   - eram 25% dos squads guardando o setor ameaçado e 50% com o inimigo dentro, e o lado que
+     tomava o centro passava por cima;
+   - agora são 40% e 70% (`BotBrain.TASK`).
+5. **Velocidade dos bots do VC:**
+   - a D-93 diz que o bônus de 12% do VC é do jogador e que os bots ficam na velocidade-base, mas
+     o `BotLocomotion` aplicava o bônus também aos bots;
+   - com ele, o VC de bots chegava ao centro ~20 s antes (288 m a 4,1 m/s contra uns 330 m, pelo
+     portão, a 3,65 m/s) e tomava Xóm Gò sempre;
+   - agora o bot não usa o bônus. O jogador do VC continua 12% mais rápido.
+
+**Partidas medidas (Warfare só de bots; o VC venceu todas as que terminaram):**
+
+| Configuração | Duração | Xóm Gò | Ponte e Cais | Baixas EUA × VC |
+|---|---|---|---|---|
+| v88 (antes) | 6:26 e 6:27 | 1º min | 3º–4º min | 48×47 e 70×60 |
+| + blindados livres (1 e 2) | 7:00 | 1º min | 3º–4º min | 50×49 |
+| + defesa 40/70% | 13:03 | 1º min | 9º–10º min | 146×130 |
+| + squad (3) e 1 blindado a cada 10 bots | ~7 | 2º min | 4º min | 78×58 |
+| + squad (3), blindados como antes | 9:08 | 2º min | 4º–5º min | 108×90 |
+| + bots sem o bônus (5): a v89 | 19:56, reforços dos EUA acabaram | VC no 2º min, EUA no ~7º, VC no ~8º | dos EUA a partida toda | 257×277 |
+
+- A tripulação "a cada 10 bots" foi desfeita: com os blindados saindo do pátio, eles são o poder
+  de fogo dos EUA.
+- Uma partida por configuração tem muita variação (as linhas de ~7 e 9 min diferem só nisso). A
+  última mudança foi a única que mudou o jeito da partida:
+  - Xóm Gò trocou de mãos três vezes;
+  - os EUA seguraram Ponte e Cais e Engenho a partida inteira;
+  - os reforços andaram juntos (241×245 aos 6 min, 164×172 aos 10,6 min);
+  - o VC perdeu mais gente (277 × 257).
+  - Terminou 2 × 3 em setores, e o VC venceu pelo sangramento de quem tem menos setores (3 por
+    minuto por setor de diferença).
+
+**Não testado:** com jogadores dos dois lados; servidor cheio no Roblox.

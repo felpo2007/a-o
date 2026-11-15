@@ -2210,7 +2210,10 @@ local function debugLabel(bot: Bot, model: Model)
 	if not t then
 		return
 	end
-	local who = if BotSquads.isLeader(bot) then "líder" else string.format("homem %d", bot.slot)
+	local sq = bot.squad
+	local who = if BotSquads.isLeader(bot)
+		then string.format("líder (atraso %.0f m)", if sq and sq.lagM then sq.lagM else 0)
+		else string.format("homem %d", bot.slot)
 	local veh = BotVehicles.debugText(bot)
 	local tun = if bot.tunnel then string.format("túnel %s", tostring(bot.tunnel.phase)) else nil
 	local st = BotLocomotion.status(bot)

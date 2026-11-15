@@ -221,12 +221,18 @@ def layout_us() -> dict:
         it.append(item("us_bunker", x, z, rumo, "bunker do perímetro"))
     # QG: bandeiras, barraca de comando, gerador e contêineres
     it.append(item("us_flagpole", -37.0, -8.0, 270, "mastros diante do portão", ident="mastros"))
-    it.append(item("us_command_tent", -27.0, -14.0, 180, "QG / posto de comando", ident="coc"))
-    it.append(item("us_generator", -27.0, -25.5, 180, "gerador do QG"))
-    it.append(item("us_conex", -18.5, -25.5, 180, "carga do QG"))
-    it.append(item("us_conex", -15.8, -25.5, 180, "carga do QG"))
-    it.append(item("us_jerrycans", -21.5, -25.0, 180, "combustível do gerador"))
-    for k, (x, z) in enumerate(((-25.3, -10.0), (-25.3, -10.7), (-25.3, -11.4))):
+    # D-162: a barraca de comando fica onde o bases_dados a pôs na escala 1,5x (era -27, -14). Com o
+    # canto livre, ela voltaria para oeste e fecharia a passagem dos blindados
+    it.append(item("us_command_tent", -4.88, -15.12, 180, "QG / posto de comando", ident="coc"))
+    # D-162: gerador, galões e contêineres no canto noroeste, entre a baia 1 e a cerca. Em z = -25,5
+    # eles ficavam no meio do descampado por onde os blindados vão das baias ao portão (a barraca de
+    # comando 1,5x foi afastada para leste no bases_dados), e o M48 e o Ontos de bot encalhavam ali
+    # toda partida (Studio, 2026-11-15)
+    it.append(item("us_generator", -42.0, -40.5, 180, "gerador do QG"))
+    it.append(item("us_conex", -42.0, -45.0, 180, "carga do QG"))
+    it.append(item("us_conex", -39.3, -45.0, 180, "carga do QG"))
+    it.append(item("us_jerrycans", -40.0, -40.5, 180, "combustível do gerador"))
+    for k, (x, z) in enumerate(((-3.18, -11.12), (-3.18, -11.82), (-3.18, -12.52))):
         it.append(
             item("ammo_crate", x, z, 90, "munição do QG", dentro_de="coc", ident=f"caixote_qg_{k}")
         )
@@ -286,7 +292,8 @@ def layout_us() -> dict:
                 ident=f"gp_large_{k + 1}",
             )
         )
-    it.append(item("us_mess_tent", -10.5, 39.0, 0, "refeitório", ident="refeitorio"))
+    # D-162: o refeitório fica onde o bases_dados o pôs na escala 1,5x (era -10,5, 39)
+    it.append(item("us_mess_tent", 11.62, -17.84, 0, "refeitório", ident="refeitorio"))
     it.append(item("us_water_trailer", -3.0, 31.5, 0, "água do refeitório"))
     it.append(item("us_jerrycans", -3.0, 46.0, 0, "galões de água"))
     for k, (x, z) in enumerate(((-41.4, 23.5), (-41.4, 24.5))):
