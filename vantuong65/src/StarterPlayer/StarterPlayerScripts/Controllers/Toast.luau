@@ -647,7 +647,10 @@ end
 -- cobri-la (no Studio a faixa de ganho saía em cima da ficha de baixa, D-93). A pilha some e o que
 -- chegar espera; hold(false) devolve a pilha e mostra o que esperou, um a um (ganhos com o mesmo
 -- motivo somam no mesmo aviso).
+-- D-158: mais de uma tela segura a pilha (a de baixa e o cartão de fim de partida, que a promoção
+-- do pagamento cobria). Cada uma segura pelo nome; a pilha volta quando nenhuma segura mais.
 local held = false
+local holders: { [string]: true? } = {}
 local waiting: { () -> () } = {}
 local function park(fn: () -> ()): boolean
 	if not held then
@@ -659,7 +662,9 @@ local function park(fn: () -> ()): boolean
 	end
 	return true
 end
-function Toast.hold(on: boolean)
+function Toast.hold(on: boolean, who: string?)
+	holders[who or "baixa"] = if on then true else nil
+	on = next(holders) ~= nil
 	if held == on then
 		return
 	end

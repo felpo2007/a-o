@@ -186,11 +186,31 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
       atravessada andando, em até 1,9 s; na `vila_casa_10` é preciso contornar o biombo.
     - O M48 atravessou a ponte do objetivo D (barranco a −16°, tabuleiro de 20 m, barranco a +12°)
       sem bater nem afundar.
+- Pedido do dono (15/11): "continue":
+  - **Lote 43 (v85, D-158): feito.** O autoteste inteiro e o Offensive rodados no Studio.
+    - A promoção do fim da partida cobria o cartão de fim: agora espera o cartão sair.
+    - O autoteste pedia 10 fumaças, e o mapa de 700 m tem 7: o mínimo agora é 5. Ele dá 18 ok, 0
+      falhas.
 
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;
   - respondido pelo dono: a M14 fica como está; o capim clareou (v58);
   - a cadência abaixo de 12 fps medida num aparelho lento.
+
+## v85: lote 43, autoteste, Offensive e o aviso sobre o fim da partida (2026-11-15, D-158)
+- **Autoteste na v84:** 15 ok e 1 falha. A "vida no mapa" pedia 10 fumaças, e o mapa de 700 m dá 7
+  em toda partida (sorteio fixo). O mínimo agora é 5.
+- **Offensive:** a frente no setor 4, a captura de −0,76 ao neutro e o VC retomando. Com os dois
+  lados na área, congela (de propósito). O `VT65DevEnd` mostrou "EMPATE" e o relatório.
+- **Corrigido:** a promoção do pagamento do fim saía por cima do título do cartão de fim. O
+  `Toast.hold` agora aceita mais de uma tela ("baixa" e "fim"), e o cartão segura os avisos até
+  sair.
+- **Studio, v85:**
+  - por 9 s a pilha ficou escondida; aos 9,2 s o cartão saiu e a promoção apareceu;
+  - autoteste com o soldado e os bots: 18 ok, 0 falhas, 0 pulados (28 × 29 bots, 7 fumaças, arte
+    no chão 847 de 853).
+- **Testes:** Lune 233 ok, 0 falha (soma dos resumos dos 12 arquivos); pytest 58; ruff, StyLua e
+  luau-lsp limpos.
 
 ## v84: lote 40, o SLIM preparado (2026-11-15, D-155)
 - **Publicada** (versão 84 do place, commit f84f043).

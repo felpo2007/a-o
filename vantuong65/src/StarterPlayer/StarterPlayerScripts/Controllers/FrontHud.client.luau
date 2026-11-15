@@ -769,6 +769,7 @@ closeEnd = function()
 	Input.closeMenu()
 	UiKit.closed("fim")
 	UiKit.release(endGui)
+	Toast.hold(false, "fim")
 	local p = endParts
 	local info = TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
 	p.fit.play(info, 0.97)
@@ -848,6 +849,9 @@ local function showEnd(st: any)
 		Input.openMenu()
 	end
 	UiKit.opened("fim", endGui.DisplayOrder)
+	-- D-158: a promoção do pagamento do fim da partida cobria o título (Studio, Offensive): os avisos
+	-- esperam o cartão sair
+	Toast.hold(true, "fim")
 	endGui.Enabled = true
 	-- entra: o fundo cobre a tela, o conteúdo esmaece e assenta, as peças sobem uma a uma
 	p.bg.BackgroundTransparency = 1

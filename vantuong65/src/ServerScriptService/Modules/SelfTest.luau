@@ -760,7 +760,9 @@ local function mapLife(): (string, string?)
 		and life ~= nil
 		and lamps >= 20
 		and fx ~= nil
-		and #fx:GetChildren() >= 10
+		-- D-158: no mapa de 700 m (D-148, 32 casas da vila) o sorteio fixo dá 7 fumaças em toda
+		-- partida; o mínimo de 10 era do mapa maior e o teste falhava sem defeito
+		and #fx:GetChildren() >= 5
 		and stacks > 0
 		and jars > 0
 		and calves >= 2

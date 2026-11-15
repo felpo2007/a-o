@@ -77,7 +77,8 @@ O `sourcemap.json` não vai para o Git.
     `[VT65 TESTE]` aparecem no Output. "Deitado" e "pá" pedem o jogador em campo pelos EUA: do
     lado do cliente, dispare `VT65Remotes.Team_Choose("US")`,
     `Squad_Action({op="create", unit="infantry"})`, `Role_Choose("rifleman")` e
-    `Spawn_Request("hq")`;
+    `Spawn_Request("hq")`. Deixe os bots ligados (sem `BotFill` 0): 5 testes dependem deles
+    (D-158). Leva ~2 min; um pedido feito enquanto ele roda não é atendido;
   - `workspace:SetAttribute("VT65DevMode", "Offensive")`: troca o modo (Warfare, Offensive ou
     Skirmish);
   - `workspace:SetAttribute("VT65DevEnd", true)`: encerra a partida e mostra o relatório pós-ação;
@@ -195,7 +196,7 @@ O `sourcemap.json` não vai para o Git.
 - Segredos só no `.env` (no `.gitignore`), nunca no código nem no chat.
 - ForgeGUI: nunca regenerar um job em `outcome_unknown`. "failed" com `retryable` pode ser
   retomado com `generation_retry`.
-- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-158) e atualize `PROGRESS.md`.
+- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-159) e atualize `PROGRESS.md`.
 - Tetos de triângulos por modelo: vegetação ≤ 6 mil (D-135), props e herói ≤ 20 mil (`ArtBudget`,
   conferido pelo teste da F5).
 - Commits no branch acima, com mensagem em português.

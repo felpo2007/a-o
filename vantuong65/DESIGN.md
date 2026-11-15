@@ -6122,3 +6122,40 @@ conferidos dois "não testado" do PROGRESS que dependiam só do Studio.
   jogador, do lado do cliente).
 
 **Nada mudou no jogo.**
+
+## D-158 — Lote 43: autoteste no mapa de 700 m, o Offensive e o aviso que cobria o fim (2026-11-15, v85)
+
+**Pedido do dono:** "continue". Foram rodados no Studio o autoteste inteiro e o modo Offensive da
+v84.
+
+**Autoteste (`VT65SelfTest`), antes:** 15 ok e 1 falha, a "vida no mapa".
+- Ela pedia pelo menos 10 fumaças de cozinha nas vilas. O mapa de 700 m (D-148) dá 7 em toda
+  partida: o sorteio das vilas é fixo. O mínimo de 10 era do mapa maior, e o teste falhava sem
+  defeito no jogo.
+- Agora o mínimo é 5 (`SelfTest.luau`).
+- Três IDs de asset que o Output do Studio cita (80134531404034, 129663110534648 e
+  122703273903429) não estão no repositório nem em nenhuma instância do jogo: são do próprio
+  Roblox ou do Studio.
+
+**Offensive** (`VT65DevMode`):
+- a frente começou no setor 4; a captura foi de −0,76 ao neutro e o VC passou a retomar;
+- com os dois lados na área, o progresso parou, como deve (`Capture.luau` congela a disputa);
+- o `VT65DevEnd` mostrou o cartão "EMPATE" e o relatório ("Combate mais pesado: D (53 mortos)").
+
+**Defeito achado:** a promoção que o pagamento do fim da partida dá saía por cima do título do
+cartão de fim, por alguns segundos.
+- **Correção:** `Toast.hold(on, quem)`. Cada tela segura a pilha de avisos pelo nome: "baixa" é a
+  tela de baixa (D-93), e "fim" é o cartão de fim. A pilha volta quando nenhuma segura mais.
+- O `FrontHud` segura no `showEnd` e solta no `closeEnd`. Todos os jeitos de fechar o cartão
+  passam por ele: o clique, os 9 s, o voltar, a tecla e a partida nova. Assim, os avisos nunca ficam
+  presos.
+
+**Studio, v85:**
+- **Cartão de fim:** com o `VT65DevTela` "fim" e o `VT65DevToast` "promocao", a pilha ficou
+  escondida e sem aviso durante os 9 s do cartão. Aos 9,2 s o cartão saiu e a promoção apareceu.
+- **Autoteste, com o soldado em campo pelos EUA e os bots:** 18 ok, 0 falhas, 0 pulados.
+  - bots: 28 EUA × 29 VC;
+  - vida no mapa: 7 fumaças;
+  - arte no chão: 847 de 853 a até 2 m (a pior é a `Vila_ponte`, a −2,7 m, como antes);
+  - medevac, morteiro, granada de bot e Offensive com relatório: ok.
+- **Sem bots** (`BotFill` 0), o autoteste dá 1 falha e 4 pulados: os testes de bot precisam deles.
