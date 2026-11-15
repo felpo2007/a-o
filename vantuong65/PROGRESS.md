@@ -155,6 +155,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
   - a cadência abaixo de 12 fps medida num aparelho lento.
 
 ## v77: lote 32, bots atiram de mais longe e trabalham em equipe (2026-11-15, D-147)
+- **Publicada** (versão 77 do place, commit 20c9fda).
 - **Mais longe:**
   - o combate do Front 44 tinha a visão de lá, 45 m. Agora as distâncias vão vezes 2,5 (este mapa
     é 2,5 vezes o maior de lá): visão até 112 m no aberto;
