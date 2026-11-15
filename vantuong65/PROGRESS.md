@@ -198,6 +198,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
   - a cadência abaixo de 12 fps medida num aparelho lento.
 
 ## v85: lote 43, autoteste, Offensive e o aviso sobre o fim da partida (2026-11-15, D-158)
+- **Publicada** (versão 85 do place, commit bc63b39).
 - **Autoteste na v84:** 15 ok e 1 falha. A "vida no mapa" pedia 10 fumaças, e o mapa de 700 m dá 7
   em toda partida (sorteio fixo). O mínimo agora é 5.
 - **Offensive:** a frente no setor 4, a captura de −0,76 ao neutro e o VC retomando. Com os dois
