@@ -2682,5 +2682,9 @@
  "Pá: aqui tem piso, procure chão de terra": "Pala: aquí hay piso, busca suelo de tierra",
  "• %s  (%.1f kg)": "• %s  (%.1f kg)",
  "Bi đông extra (cantil)": "Bi đông extra (cantimplora)",
- "Túi cứu thương (bolsa de socorro)": "Túi cứu thương (bolsa de primeros auxilios)"
+ "Túi cứu thương (bolsa de socorro)": "Túi cứu thương (bolsa de primeros auxilios)",
+ "Mãos ocupadas: a arma volta ao terminar": "Manos ocupadas: el arma vuelve al terminar",
+ "Ping alto: %d ms": "Ping alto: %d ms",
+ "Quase nada chegando do servidor": "Casi nada llega del servidor",
+ "Servidor lento (%d Hz)": "Servidor lento (%d Hz)"
 }

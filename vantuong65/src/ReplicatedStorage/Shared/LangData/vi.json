@@ -2689,5 +2689,9 @@
  "Pá: aqui tem piso, procure chão de terra": "Xẻng: chỗ này có nền, hãy tìm đất trống",
  "• %s  (%.1f kg)": "• %s  (%.1f kg)",
  "Bi đông extra (cantil)": "Bi đông dự phòng",
- "Túi cứu thương (bolsa de socorro)": "Túi cứu thương"
+ "Túi cứu thương (bolsa de socorro)": "Túi cứu thương",
+ "Mãos ocupadas: a arma volta ao terminar": "Tay đang bận: súng sẽ trở lại khi xong",
+ "Ping alto: %d ms": "Ping cao: %d ms",
+ "Quase nada chegando do servidor": "Gần như không nhận được dữ liệu từ máy chủ",
+ "Servidor lento (%d Hz)": "Máy chủ chậm (%d Hz)"
 }

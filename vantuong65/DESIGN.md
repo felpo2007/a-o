@@ -5460,3 +5460,50 @@ plano de capim, com 12 a 16 arremessos de 25 m por variante:
 - A mira dos bots 2,5 m antes do alvo (D-142) compensa a média: erro mediano de 1,1 m.
 
 **Não feito:** o desempenho num celular e num servidor do Roblox (precisa de aparelho do dono).
+
+## D-145 — Lote 30: roda do mouse, gatilho com item na mão e o aviso de conexão (v75, 2026-11-14)
+
+**Pedidos do dono (14/11, 18h26 a 19h22)**, divididos em lotes:
+- lote 30: bugs graves;
+- lote 31: armas (SKS, M14, M16);
+- lote 32: bots;
+- lote 33: mapa (base dos EUA, vila, estradas, pontes);
+- lote 34: interface (entrar no veículo, inserção de helicóptero).
+
+O questionário de classificação ficou como rascunho, **sem envio**: o dono disse "não faça isso
+porque vai dar +18". O jogo continua para 16+.
+
+**"As roletas de arma não estão funcionando"** (`Controllers/Input`):
+- **Causa:** "roleta" é a rodinha do mouse. Ela já estava ligada à troca de arma, mas o giro era
+  descartado quando chegava "processado", e a câmera do Roblox também usa a roda.
+- **Agora:** só uma lista da interface (`ScrollingFrame` sob o ponteiro) segura a roda.
+- Um giro manda vários eventos seguidos, que viravam várias trocas encavaladas; agora é uma troca a
+  cada 0,18 s.
+- **Studio:** um giro para baixo trocou da M14 para a M1911; um para cima voltou à M14, à vista.
+
+**"Os itens não funcionam; a arma atira mesmo invisível"** (`ItemView.handsBusy`,
+`WeaponController.canShoot`):
+- **Causa:** com o curativo, o torniquete, tratar, reanimar, a pá ou o cantil nas duas mãos, a arma
+  sai da vista, mas o gatilho só olhava a granada, a troca e a faca.
+- **Agora** o gatilho não sai com as mãos ocupadas.
+- **Studio:** com a bandagem nas mãos, 1 s de gatilho deu 0 tiros; sem ela, 2 tiros.
+- **"Quando eu tento voltar para a arma ela some":** no meio do curativo ou da pá, a tecla da arma
+  não fazia nada (a arma volta sozinha no fim), e parecia que ela tinha sumido. Agora aparece "Mãos
+  ocupadas: a arma volta ao terminar".
+- **Teclas que funcionam** (conferido com o teclado no Studio):
+  - granada (3) e volta (1);
+  - binóculo (7) e volta (1);
+  - pá (8);
+  - a bandagem sem ferimento recusa com o aviso do servidor.
+
+**"Fica aparecendo conexão instável"** (`Aparelho.netStep`, `Reconexao`):
+- **Regra antiga:** acusava com o ping acima de 0,45 s por 3 s, ou com 2 s quase sem dados, mesmo
+  com o ping bom.
+- **Regra nova:** ping acima de 0,7 s por 4 s, ou 3 s quase sem dados com o ping também acima de
+  0,3 s.
+- A faixa diz o motivo: "Ping alto: N ms", "Servidor lento (N Hz)" (pelo `BotHz` que o servidor
+  publica; abaixo de 40 Hz a culpa é dos bots, não da conexão) ou "Quase nada chegando do
+  servidor".
+- O console do cliente (F9) registra `[VT65 REDE]` com o ping, os dados e os Hz.
+- **Não medido no jogo publicado:** no Studio a regra não roda (a rede local não diz nada); vale o
+  teste do Lune.

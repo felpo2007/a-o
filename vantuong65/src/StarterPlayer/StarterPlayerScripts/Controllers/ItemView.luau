@@ -357,6 +357,20 @@ local function replicate(name: string?)
 	end
 end
 
+-- Lote 30 (D-145): as duas mãos num item agora (granada na mão, curativo, torniquete, tratar,
+-- reanimar, pá, cantil). A arma está pendurada e o gatilho não pode sair: o dono viu "a arma atira
+-- mesmo invisível" (o WeaponController só olhava a granada, a troca e a faca). O binóculo já tem a
+-- regra dele e o rádio usa só a esquerda.
+function ItemView.handsBusy(): boolean
+	local h = G.hand
+	if h and h.phase ~= "fim" then
+		return true
+	end
+	local name = current()
+	local a = if name then ItemAnim.ANIMS[name] else nil
+	return a ~= nil and a.slung == true and name ~= "binoculars"
+end
+
 -- Um quadro. firstPerson: a vista de 1ª pessoa com arma (fora dela só a réplica anda).
 function ItemView.step(_dt: number, firstPerson: boolean): Out
 	local h = G.hand

@@ -2689,5 +2689,9 @@
  "Pá: aqui tem piso, procure chão de terra": "Shovel: there's a floor here, find bare ground",
  "• %s  (%.1f kg)": "• %s  (%.1f kg)",
  "Bi đông extra (cantil)": "Extra bi đông (canteen)",
- "Túi cứu thương (bolsa de socorro)": "Túi cứu thương (first-aid pouch)"
+ "Túi cứu thương (bolsa de socorro)": "Túi cứu thương (first-aid pouch)",
+ "Mãos ocupadas: a arma volta ao terminar": "Hands busy: your weapon comes back when you finish",
+ "Ping alto: %d ms": "High ping: %d ms",
+ "Quase nada chegando do servidor": "Almost nothing arriving from the server",
+ "Servidor lento (%d Hz)": "Slow server (%d Hz)"
 }

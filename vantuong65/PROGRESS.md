@@ -128,11 +128,40 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     conferida (sem bug).
   - **Lote 29 (v74, D-144): feito.** Intendência traduzida, acampamento do VC na mata, quique da
     granada medido (sem mudança).
+  - Questionário de classificação: **não enviar** (dono: "vai dar +18"). O jogo segue para 16+.
+- Pedidos novos do dono (14/11, 18h26 a 19h22), em lotes:
+  - **Lote 30 (v75, D-145): feito.**
+    - Rodinha do mouse troca de arma;
+    - a arma não atira com o item nas mãos e avisa "mãos ocupadas";
+    - o aviso de conexão instável fica menos sensível e diz o motivo.
+  - **Lote 31 (armas):** mira e dano da SKS; olho mais longe na mira da M14; o fuzil da foto do dono
+    (pediu "M4"; a foto é um M16 de 1965–67), feito no Blender.
+  - **Lote 32 (bots):** atirar de mais longe, trabalhar em equipe, nível médio.
+  - **Lote 33 (mapa):**
+    - base dos EUA mais longe dos objetivos;
+    - vila em meio círculo, espalhada;
+    - estradas de terra;
+    - pontes que aguentem tanque.
+  - **Lote 34 (interface):** entrar no veículo com as vagas principais e o resto em "passageiro";
+    texto da inserção de helicóptero mais simples.
+  - Usar o Blender no que precisar de modelo novo.
 
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;
   - respondido pelo dono: a M14 fica como está; o capim clareou (v58);
   - a cadência abaixo de 12 fps medida num aparelho lento.
+
+## v75: lote 30, roda do mouse, gatilho com item na mão e o aviso de conexão (2026-11-14, D-145)
+- **Roda do mouse:** troca de arma (antes o giro era descartado); uma troca por giro. Conferido no
+  Studio: M14 → M1911 → M14, à vista.
+- **Itens:** com curativo, torniquete, pá ou cantil nas mãos, o gatilho não sai (0 tiros no Studio;
+  antes atirava com a arma escondida). A tecla da arma no meio do item avisa "Mãos ocupadas".
+- **Conexão instável:**
+  - menos sensível: ping acima de 0,7 s por 4 s (era 0,45 s por 3 s);
+  - dados baixos só contam com o ping também alto;
+  - a faixa diz o motivo (ping, servidor lento ou dados).
+- **Testes:** Lune todos ok (rede com casos novos); pytest 54; ruff; luau-lsp sem erro.
+- **Não medido:** o aviso de conexão no jogo publicado.
 
 ## v74: lote 29, Intendência traduzida, acampamento do VC na mata e o quique da granada (2026-11-14, D-144)
 - **Publicada** (versão 74 do place, commit 992b33b).

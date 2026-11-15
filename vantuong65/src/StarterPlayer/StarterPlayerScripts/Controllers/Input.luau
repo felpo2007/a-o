@@ -497,12 +497,44 @@ end)
 -- Roda do mouse (2026-11-13): não é tecla (não tem InputBinding nem tocar/segurar); vira as fases
 -- "press" de "weapon_next" (para baixo) e "weapon_prev" (para cima) no jogo a pé, como a troca de
 -- arma (WeaponController). Sobre uma lista da interface (processed) ela rola a lista.
+-- Lote 30 (D-145, dono: "as roletas de arma ainda não estão funcionando"): a câmera do Roblox também
+-- usa a roda e o giro chegava "processado", então a troca nunca saía. Agora só a lista da interface
+-- (ScrollingFrame sob o ponteiro) segura a roda; e um giro manda vários eventos seguidos, que viravam
+-- várias trocas encavaladas: uma troca a cada WHEEL_GAP_S.
+local WHEEL_GAP_S = 0.18
+local wheelAt = -1
+local function overList(x: number, y: number): boolean
+	local pg = player:FindFirstChildOfClass("PlayerGui")
+	if not pg then
+		return false
+	end
+	local ok, list = pcall(function()
+		return pg:GetGuiObjectsAtPosition(x, y)
+	end)
+	if not ok then
+		return true -- sem como saber: deixa a roda com a interface, como antes
+	end
+	for _, g in list do
+		if g:IsA("ScrollingFrame") or g:FindFirstAncestorWhichIsA("ScrollingFrame") then
+			return true
+		end
+	end
+	return false
+end
 UserInputService.InputChanged:Connect(function(input: InputObject, processed: boolean)
-	if input.UserInputType ~= Enum.UserInputType.MouseWheel or processed or input.Position.Z == 0 then
+	if input.UserInputType ~= Enum.UserInputType.MouseWheel or input.Position.Z == 0 then
+		return
+	end
+	if processed and overList(input.Position.X, input.Position.Y) then
 		return
 	end
 	local ctx = InputMap.activeContext(Input.state)
-	if (ctx == "infantry" or ctx == "aim") and InputMap.allowed(Input.state, "swap_weapon") then
+	if (ctx == "infantry" or ctx == "aim") and InputMap.allowed(Input.state, "swap_weapon") and not blockedNow() then
+		local now = os.clock()
+		if now - wheelAt < WHEEL_GAP_S then
+			return
+		end
+		wheelAt = now
 		runPhase(if input.Position.Z < 0 then "weapon_next" else "weapon_prev", "press")
 	end
 end)

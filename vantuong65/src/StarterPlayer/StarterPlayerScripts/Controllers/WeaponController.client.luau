@@ -339,6 +339,10 @@ local function canShoot(): boolean
 	if inv.hand or os.clock() < inv.busyUntil then
 		return false
 	end
+	-- lote 30 (D-145): curativo, torniquete, pá, cantil... nas duas mãos (a arma pendurada não atira)
+	if ItemView.handsBusy() then
+		return false
+	end
 	return not KnifeView.busy()
 end
 
@@ -533,6 +537,12 @@ end
 -- fromHand: vinha da granada (que já saiu da vista); a arma só sobe. A última troca pedida vale.
 local function switchTo(i: number, fromHand: boolean)
 	if i < 1 or i > #slots or seated() then
+		return
+	end
+	-- lote 30 (D-145): no meio do curativo ou da pá a arma está pendurada e volta sozinha no fim. Antes
+	-- a tecla não fazia nada e parecia que a arma tinha sumido; agora diz por quê
+	if not inv.hand and ItemView.handsBusy() then
+		say("Mãos ocupadas: a arma volta ao terminar")
 		return
 	end
 	if not fromHand and i == slot and not inv.hand and not binoculars then

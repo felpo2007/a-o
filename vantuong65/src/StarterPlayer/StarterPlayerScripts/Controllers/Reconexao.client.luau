@@ -319,13 +319,18 @@ end)
 
 -- sinal fraco: 2 amostras por segundo (no Studio só pelo gancho: a rede local não diz nada)
 local net = Aparelho.newNet()
+-- lote 30 (D-145): a faixa diz o motivo. O servidor publica a própria velocidade (BotService:
+-- ReplicatedStorage "BotHz"); abaixo de SLOW_HZ a culpa é dele (muitos bots), não da conexão
+local SLOW_HZ = 40
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local wasWeak = false
 task.spawn(function()
 	while true do
 		task.wait(0.5)
 		local isWeak = false
+		local recv: number? = nil
+		local ping: number? = nil
 		if not RunService:IsStudio() then
-			local recv: number? = nil
-			local ping: number? = nil
 			pcall(function()
 				local v = (Stats :: any).DataReceiveKbps
 				recv = if type(v) == "number" then v else nil
@@ -335,6 +340,27 @@ task.spawn(function()
 			end)
 			isWeak = Aparelho.netStep(net, 0.5, recv, ping)
 		end
+		local hz = ReplicatedStorage:GetAttribute("BotHz")
+		if isWeak then
+			if type(hz) == "number" and hz < SLOW_HZ then
+				weakSub.Text = string.format("Servidor lento (%d Hz)", hz)
+			elseif net.reason == "ping" and ping then
+				weakSub.Text = string.format("Ping alto: %d ms", math.floor((ping :: number) * 1000 + 0.5))
+			else
+				weakSub.Text = "Quase nada chegando do servidor"
+			end
+			if not wasWeak then
+				print(
+					string.format(
+						"[VT65 REDE] instável: ping %s ms, recebendo %s kB/s, servidor %s Hz",
+						if ping then tostring(math.floor((ping :: number) * 1000 + 0.5)) else "?",
+						if recv then string.format("%.2f", recv :: number) else "?",
+						tostring(hz)
+					)
+				)
+			end
+		end
+		wasWeak = isWeak
 		setWeak((isWeak or os.clock() < devNet.weakUntil) and not rejoin.active and not shown)
 	end
 end)

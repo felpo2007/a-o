@@ -148,29 +148,38 @@ function Aparelho.continuousHaptics(device: string): boolean
 end
 
 -- ===== rede móvel =====
--- Sinal fraco: quase nada chegando do servidor por 2 s, ou latência alta por 3 s. Volta ao normal
--- com 1 s bom. É só aviso: quem segura a ligação é o Roblox.
+-- Sinal fraco: quase nada chegando do servidor por 3 s (com o ping também alto), ou latência alta
+-- por 4 s. Volta ao normal com 1 s bom. É só aviso: quem segura a ligação é o Roblox.
+-- Lote 30 (D-145, dono: "fica aparecendo conexão instável"): era 0,45 s de ping por 3 s, ou 2 s
+-- quase sem dados mesmo com o ping bom. Do Brasil para um servidor do Roblox nos EUA, com a partida
+-- cheia de bots, o ping passa de 0,45 s sem a partida travar; e a leitura de dados baixa com o ping
+-- bom não é queda. A faixa agora diz o motivo (ping, dados ou servidor lento).
 Aparelho.NET_RECV_MIN = 0.05 -- kB/s (Stats.DataReceiveKbps): partida de 50 x 50 nunca fica abaixo
-Aparelho.NET_PING_MAX = 0.45 -- s (Player:GetNetworkPing)
-Aparelho.NET_WEAK_RECV_S = 2
-Aparelho.NET_WEAK_PING_S = 3
+Aparelho.NET_PING_MAX = 0.7 -- s (Player:GetNetworkPing)
+Aparelho.NET_QUIET_PING = 0.3 -- s: "quase nada chegando" só conta com o ping também acima disto
+Aparelho.NET_WEAK_RECV_S = 3
+Aparelho.NET_WEAK_PING_S = 4
 Aparelho.NET_OK_S = 1
 
-export type Net = { quietT: number, slowT: number, goodT: number, weak: boolean }
+export type Net = { quietT: number, slowT: number, goodT: number, weak: boolean, reason: string? }
 
 function Aparelho.newNet(): Net
-	return { quietT = 0, slowT = 0, goodT = 0, weak = false }
+	return { quietT = 0, slowT = 0, goodT = 0, weak = false, reason = nil }
 end
 
--- recv/ping nil = não deu para ler (conta como bom: nunca acusa sem medida)
+-- recv/ping nil = não deu para ler (conta como bom: nunca acusa sem medida). st.reason: "ping" ou
+-- "dados" (o motivo da última vez que acusou)
 function Aparelho.netStep(st: Net, dt: number, recvKbps: number?, pingS: number?): boolean
-	local quiet = recvKbps ~= nil and recvKbps < Aparelho.NET_RECV_MIN
+	local quiet = recvKbps ~= nil
+		and recvKbps < Aparelho.NET_RECV_MIN
+		and (pingS == nil or pingS > Aparelho.NET_QUIET_PING)
 	local slow = pingS ~= nil and pingS > Aparelho.NET_PING_MAX
 	st.quietT = if quiet then st.quietT + dt else 0
 	st.slowT = if slow then st.slowT + dt else 0
 	if st.quietT >= Aparelho.NET_WEAK_RECV_S or st.slowT >= Aparelho.NET_WEAK_PING_S then
 		st.weak = true
 		st.goodT = 0
+		st.reason = if st.slowT >= Aparelho.NET_WEAK_PING_S then "ping" else "dados"
 	elseif st.weak then
 		st.goodT = if quiet or slow then 0 else st.goodT + dt
 		if st.goodT >= Aparelho.NET_OK_S then

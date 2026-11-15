@@ -1188,7 +1188,9 @@
   "parts:ponte",
   "parts:serraria",
   "parts:tabuas",
-  "parts:toras"
+  "parts:toras",
+  "dados",
+  "ping"
  ],
  "regex": []
 }

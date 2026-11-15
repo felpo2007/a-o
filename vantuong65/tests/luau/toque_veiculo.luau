@@ -517,19 +517,31 @@ test("vibração: intervalo mínimo por tipo (fogo automático não vira zumbido
 end)
 
 -- ===== rede móvel =====
-test("rede: sinal fraco só com medida (2 s sem dados ou 3 s de latência alta); volta com 1 s bom", function()
+test("rede: sinal fraco só com medida (3 s sem dados ou 4 s de latência alta); volta com 1 s bom", function()
 	local st = Aparelho.newNet()
-	for _ = 1, 3 do
+	for _ = 1, 5 do
 		assert(not Aparelho.netStep(st, 0.5, 0, nil))
 	end
-	assert(Aparelho.netStep(st, 0.5, 0, nil), "2 s sem dados")
+	assert(Aparelho.netStep(st, 0.5, 0, nil), "3 s sem dados")
+	assert(st.reason == "dados", tostring(st.reason))
 	assert(Aparelho.netStep(st, 0.5, 30, 0.08), "um bom ainda não limpa")
 	assert(not Aparelho.netStep(st, 0.5, 30, 0.08), "1 s bom limpa")
 	local p = Aparelho.newNet()
-	for _ = 1, 5 do
-		assert(not Aparelho.netStep(p, 0.5, 30, 0.6))
+	for _ = 1, 7 do
+		assert(not Aparelho.netStep(p, 0.5, 30, 0.9))
 	end
-	assert(Aparelho.netStep(p, 0.5, 30, 0.6), "3 s de latência alta")
+	assert(Aparelho.netStep(p, 0.5, 30, 0.9), "4 s de latência alta")
+	assert(p.reason == "ping", tostring(p.reason))
+	-- lote 30 (D-145): 0,6 s de ping (Brasil -> servidor nos EUA, partida cheia) não acusa mais
+	local q = Aparelho.newNet()
+	for _ = 1, 20 do
+		assert(not Aparelho.netStep(q, 0.5, 30, 0.6), "0,6 s de ping não é queda")
+	end
+	-- leitura de dados baixa com o ping bom não acusa (não é queda)
+	local r = Aparelho.newNet()
+	for _ = 1, 20 do
+		assert(not Aparelho.netStep(r, 0.5, 0, 0.12), "dados baixos com ping bom")
+	end
 	local n = Aparelho.newNet()
 	for _ = 1, 20 do
 		assert(not Aparelho.netStep(n, 0.5, nil, nil), "sem medida nunca acusa")
