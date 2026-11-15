@@ -242,6 +242,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
   - a cadência abaixo de 12 fps medida num aparelho lento.
 
 ## v91: lote 51, o SLIM ligado na casa de Xóm Gò (2026-11-15, D-167)
+- **Publicada** (versão 92 do place, commit 40a2bba).
 - **Team Create:** ligado (`isEnabled: true` na API de desenvolvimento do Roblox).
 - **Arte fixa com SLIM:** a `vila_casa_03` da entrada de Xóm Gò, o pote, a cozinha, o celeiro e duas
   cercas (6 modelos, 60 peças), copiados de novo da v90, porque a cópia da D-155 era de antes da
