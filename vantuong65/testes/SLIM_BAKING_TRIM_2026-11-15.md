@@ -83,3 +83,13 @@ com textura. Para os próximos objetos do Blender, o caminho continua o mesmo.
    para dentro do arquivo do place, começando por uma casa de teste).
 2. **Trim sheet:** fazer a folha da vila e testar numa casa (comparar a aparência e o número de
    texturas antes de mexer nas outras).
+
+## Lote 40 (D-155): o SLIM preparado, sem trocar o Lune
+- **Caminho:** o Rojo grava o `LevelOfDetail` = 4 (SLIM) e o Lune passa adiante sem ler. A casa de
+  teste e 5 objetos em volta são copiados do jogo rodando (`tools/estatico_copiar.luau`) e viram
+  modelos fixos (`tools/estatico.py`). O `AssetLoader` devolve a cópia fixa no lugar da nova.
+- **Studio:** o log bate com a v83, os raios param nas paredes e a foto de fora é idêntica.
+- **Limite:** o interior sai claro. Peça de malha criada fora do Studio não tem a colisão calculada
+  (`PhysicsData`), e a luz usa essa forma para a sombra de dentro (com `Hull` calculado no Studio,
+  escurece; com `Box`, não).
+- **Desligado** até o Team Create (`assets/estatico/ativos.json`).

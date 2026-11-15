@@ -16,6 +16,7 @@ local GunModel = require(ReplicatedStorage.Shared.GunModel)
 local MapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any
 local MapLife = require(script.Parent.MapLife)
 local Rng = require(ReplicatedStorage.Shared.Rng)
+local StaticArt = require(script.Parent.StaticArt)
 local TreeTrunks = require(script.Parent.TreeTrunks)
 local TrunkProxy = require(script.Parent.TrunkProxy)
 local Tunnels = require(ReplicatedStorage.Shared.Tunnels) :: any
@@ -543,6 +544,38 @@ local function foliageParts(m: Model, shadow: boolean)
 	m:SetAttribute("Foliage", true)
 end
 
+-- D-155: arte fixa no arquivo do place (tools/estatico.py, SLIM). A cópia que o plano poria no mesmo
+-- lugar (mesma chave, pivô a menos de StaticArt.TOL studs) não entra.
+AssetLoader.staticSkipped = 0
+function AssetLoader.isStatic(key: string, p: Vector3): boolean
+	for _, e in StaticArt.items do
+		if
+			e.key == key
+			and math.abs(e.x - p.X) < StaticArt.TOL
+			and math.abs(e.y - p.Y) < StaticArt.TOL
+			and math.abs(e.z - p.Z) < StaticArt.TOL
+		then
+			return true
+		end
+	end
+	return false
+end
+
+-- o modelo fixo de `parent` que cobre o pivô p (nil: não há, e a cópia do plano entra)
+function AssetLoader.staticModel(parent: Instance, key: string, p: Vector3): Model?
+	if not AssetLoader.isStatic(key, p) then
+		return nil
+	end
+	for _, c in parent:GetChildren() do
+		if c:IsA("Model") and c.Name == key and c:GetAttribute("VT65Estatico") then
+			if (c:GetPivot().Position - p).Magnitude < 2 * StaticArt.TOL then
+				return c
+			end
+		end
+	end
+	return nil
+end
+
 -- Põe um item do plano (ArtPlan.Item). planned: o terreno é o do plano (atributo SitePlan).
 function AssetLoader.placeItem(it: any, parent: Instance, planned: boolean): Model?
 	if string.sub(it.key, 1, 6) == "parts:" then
@@ -599,6 +632,14 @@ function AssetLoader.placeItem(it: any, parent: Instance, planned: boolean): Mod
 		end
 	end
 	m:PivotTo(CFrame.new(it.x - ox, base - bottom, it.z - oz) * CFrame.Angles(0, it.yaw, 0))
+	-- D-155: a cópia fixa do place (SLIM, Map.Art desde o arquivo) já está aqui. Ela volta no lugar da
+	-- nova: quem chama conta a casa (vida da vila, animais) e o sorteio segue igual
+	local fixed = AssetLoader.staticModel(parent, it.key, m:GetPivot().Position)
+	if fixed then
+		m:Destroy()
+		AssetLoader.staticSkipped += 1
+		return fixed
+	end
 	if it.foliage then
 		foliageParts(m, it.shadow == true)
 	end
@@ -660,7 +701,8 @@ function AssetLoader.start()
 		end
 		return false
 	end
-	local out = Instance.new("Folder")
+	-- D-155: a pasta já vem do arquivo quando há arte fixa (SLIM)
+	local out = map:FindFirstChild("Art") or Instance.new("Folder")
 	out.Name = "Art"
 	out.Parent = map
 	local rng = Rng.new(19650818)
@@ -953,7 +995,8 @@ function AssetLoader.start()
 	-- streaming (D-15): cada modelo chega inteiro
 	for _, folder in { out, jungle } do
 		for _, m in folder:GetChildren() do
-			if m:IsA("Model") then
+			-- a arte fixa (SLIM) já vem Atomic do arquivo e não pode ser mexida em jogo
+			if m:IsA("Model") and not m:GetAttribute("VT65Estatico") then
 				m.ModelStreamingMode = Enum.ModelStreamingMode.Atomic
 			end
 		end
@@ -971,6 +1014,18 @@ function AssetLoader.start()
 		end
 	end
 	print("[VT65] arte carregada:", #out:GetChildren(), "modelos")
+	if #StaticArt.items > 0 then
+		print(
+			string.format(
+				"[VT65] arte fixa (SLIM, D-155): %d modelos no arquivo; %d cópias do plano puladas",
+				#StaticArt.items,
+				AssetLoader.staticSkipped
+			)
+		)
+		if AssetLoader.staticSkipped ~= #StaticArt.items then
+			warn("[VT65] arte fixa: o plano não bateu com todos os modelos fixos (rode tools/estatico.py de novo)")
+		end
+	end
 	if AssetLoader.noGround > 0 then
 		warn(string.format("[VT65] %d modelos de arte sem terreno embaixo (postos em y = 0)", AssetLoader.noGround))
 	end

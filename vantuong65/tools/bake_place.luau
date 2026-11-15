@@ -56,6 +56,33 @@ local boxes = TunnelGeometry.build(env, Tunnels, cx, cz, function(x, z)
 end)
 local nt = FeatureBuilder.tunnels(env, boxes, workspace:FindFirstChild("Map"))
 print(string.format("túneis: %d peças, %.0f m de galeria", nt, Tunnels.length()))
+-- D-155: arte fixa (SLIM) do Rojo (Workspace.Estatico, tools/estatico.py) vai para Map.Art com o nome da
+-- chave. O LevelOfDetail (SLIM = 4) não é lido aqui: o Lune 0.8 não conhece o valor, mas grava de volta
+local estatico = workspace:FindFirstChild("Estatico")
+if estatico then
+	local modelos = {}
+	for _, m in estatico:GetChildren() do
+		if m.ClassName == "Model" then
+			table.insert(modelos, m)
+		end
+	end
+	if #modelos > 0 then
+		local map = workspace:FindFirstChild("Map")
+		assert(map, "sem Map para a arte fixa")
+		local art = map:FindFirstChild("Art")
+		if not art then
+			art = roblox.Instance.new("Folder")
+			art.Name = "Art"
+			art.Parent = map
+		end
+		for _, m in modelos do
+			m.Name = m:GetAttribute("VT65Chave") or m.Name
+			m.Parent = art
+		end
+	end
+	estatico:Destroy()
+	print(string.format("arte fixa (SLIM): %d modelos em Map.Art", #modelos))
+end
 print(
 	string.format(
 		"peças: %d diques, %d lâminas, %d sebes, %d casas, %d marcadores (%.1f s)",

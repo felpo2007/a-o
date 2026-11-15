@@ -67,8 +67,10 @@ Textos prontos e imagens: **`LANCAMENTO.md`** (página do jogo, guia do question
   primeiras vendas.
 - **Team Create (para testar o SLIM, D-154):** o Roblox só gera o SLIM (cenário mais leve à
   distância) em experiência com Team Create ligado. Você não precisa chamar ninguém.
-  - Antes de ligar, veja `testes/SLIM_BAKING_TRIM_2026-11-15.md`: o teste também pede trocar o Lune
-    do pipeline e pôr uma casa de teste dentro do arquivo do place.
+  - O resto já está pronto (D-155): uma casa de Xóm Gò e 5 objetos em volta viram modelo fixo com
+    SLIM sem trocar o Lune. Depois de ligar, me avise: eu ligo o conjunto e publico, e você compara a
+    casa perto e longe no jogo publicado.
+  - Limite conhecido: a casa fixa fica com o interior mais claro (detalhes no D-155).
   - Com o Team Create ligado, o Studio salva na nuvem o que se mexe no place aberto de lá. Eu
     continuo publicando só pelo pipeline.
 

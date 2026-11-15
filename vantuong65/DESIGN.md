@@ -5983,3 +5983,69 @@ O que trava:
 **Nada mudou no jogo.** Decisões do dono:
 - ligar o Team Create e autorizar a troca do Lune, para o teste do SLIM;
 - testar uma trim sheet da vila numa casa.
+
+## D-155 — Lote 40: o SLIM preparado (arte fixa no place, desligada até o Team Create) (v84, 2026-11-15)
+
+**Escolha do dono:** "Preparar o SLIM" (depois da D-154).
+
+**O caminho** (sem trocar o Lune):
+1. `tools/estatico_copiar.luau`: rodado no servidor do Studio pelo MCP, copia do jogo rodando um
+   conjunto já posto pelo `AssetLoader` (assentado, escalado, tingido e com o `MapLife` aplicado).
+   - O texto é compacto: malha, posição, giro, tamanho, colisão, sombra e texturas.
+   - Ele passa pela conversa porque o assistente do Studio não deixa mandar por HTTP; foi conferido
+     por uma soma FNV calculada no Studio.
+   - O primeiro conjunto é `assets/estatico/vila_casa_03_xomgo.txt`: a `vila_casa_03` da entrada de
+     Xóm Gò, o pote, a cozinha, o celeiro e duas cercas (6 modelos, 61 peças).
+2. `tools/estatico.py` gera um `.model.json` do Rojo por modelo (`src/Workspace/Estatico`) e o
+   `Modules/StaticArt` (chave e pivô de cada um).
+   - Cada modelo leva `LevelOfDetail` = 4 (SLIM), `ModelStreamingMode = Atomic` e os atributos
+     `VT65Estatico` e `VT65Chave`.
+   - O Rojo grava o valor 4, e o Lune 0.8 passa adiante sem ler.
+3. `tools/bake_place.luau` põe os modelos em `Map.Art` com o nome da chave.
+4. `AssetLoader`:
+   - reaproveita a pasta `Art` do arquivo;
+   - quando a cópia do plano cairia no mesmo lugar (mesma chave, pivô a menos de 1 stud), devolve a
+     fixa no lugar (`staticModel`). Assim a casa conta na vida da vila e nos animais, e o sorteio
+     segue igual;
+   - não mexe no `ModelStreamingMode` da fixa.
+   - Chaves que dependem do jogo rodando (estacas punji, escadas, fumaça do VC, cancela) são
+     recusadas.
+
+**O que o Rojo 7.4 aceita** (testado):
+- `CFrame` só no formato tipado `{"CFrame": {"position", "orientation"}}`. Sem o tipo, ele dá o erro
+  enganoso "no project file was found";
+- os atributos tipados dentro de `Properties` (`{"Attributes": {"Attributes": {...}}}`). No topo do
+  `.model.json` ele aceita e ignora em silêncio;
+- `WorldPivotData` como `{"OptionalCFrame": ...}`, `InitialSize` e `LevelOfDetail` `{"Enum": 4}`.
+
+**Studio:**
+- Com o conjunto ligado:
+  - o arquivo tem os 6 modelos com SLIM, Atomic e os atributos (50 caixas de colisão da casa com
+    `Material`);
+  - o servidor pulou as 6 cópias;
+  - o log bate com a v83 em tudo (390 construções, 27 animais, a mesma vida nas vilas, 855 modelos,
+    240 abrigos dos bots);
+  - os raios param nas paredes da casa fixa;
+  - a foto de fora é idêntica à da v83.
+- **Diferença achada:** o interior da casa fixa sai claro, e o da v83, escuro.
+  - Peça de malha criada fora do Studio não traz a colisão calculada (`PhysicsData`), e a luz do
+    Roblox usa essa forma para a sombra de dentro.
+  - Testado no Studio: com `Hull` calculado na hora, o interior escurece; com `Box`, continua claro.
+  - As peças que colidem vão em caixa (a colisão das casas do Blender já é de caixas; uma cabana
+    aberta do gerador vira bloco).
+
+**Por isso o conjunto está desligado** (`assets/estatico/ativos.json` = `[]`). Sem o Team Create o SLIM
+não é gerado, e ligar agora só traria o interior mais claro (casa clara esconde menos). Desligado, o
+place sai igual à v83 (conferido no Studio).
+
+**Para testar o SLIM:**
+1. o dono liga o Team Create;
+2. pôr `"vila_casa_03_xomgo"` em `ativos.json`, rodar `tools/estatico.py` e publicar;
+3. no jogo publicado, comparar a casa perto e longe com as outras `vila_casa_03`.
+
+O interior claro fica como limite conhecido até o pipeline ler a colisão do Studio (Lune novo).
+
+**Testes:**
+- `tests/test_estatico.py`: leitura da cópia, modelo do Rojo, recusa de chave e ligado igual ao
+  gerado;
+- os 644 testes Lune passam.

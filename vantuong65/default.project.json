@@ -57,6 +57,9 @@
         "StreamingMinRadius": 384,
         "StreamingTargetRadius": 1280,
         "StreamOutBehavior": "Opportunistic"
+      },
+      "Estatico": {
+        "$path": "src/Workspace/Estatico"
       }
     },
     "Lighting": {

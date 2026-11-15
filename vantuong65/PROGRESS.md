@@ -170,11 +170,31 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
       isso.
     - **Esperando o dono:** ligar o Team Create e trocar o Lune (para testar o SLIM numa casa);
       testar uma trim sheet da vila numa casa.
+  - **Lote 40 (v84, D-155): o SLIM preparado, desligado.** A casa de Xóm Gò e 5 objetos em volta
+    copiados do jogo para modelos fixos com SLIM; o pipeline os põe no place sem trocar o Lune.
+    - Fica desligado até o Team Create: a cópia fixa sai com o interior mais claro (sem a colisão
+      calculada do Studio, a luz não faz a sombra de dentro).
+    - Ligar: `assets/estatico/ativos.json`.
 
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;
   - respondido pelo dono: a M14 fica como está; o capim clareou (v58);
   - a cadência abaixo de 12 fps medida num aparelho lento.
+
+## v84: lote 40, o SLIM preparado (2026-11-15, D-155)
+- **Pipeline:**
+  - `tools/estatico_copiar.luau` copia do jogo rodando a `vila_casa_03` da entrada de Xóm Gò e o
+    pote, a cozinha, o celeiro e duas cercas (6 modelos, 61 peças);
+  - `tools/estatico.py` gera os modelos do Rojo com `LevelOfDetail` = SLIM;
+  - o bake os põe em `Map.Art`, e o `AssetLoader` devolve a cópia fixa no lugar da nova.
+- **Studio, ligado:**
+  - o servidor pulou as 6 cópias, e o log bate com a v83 em tudo;
+  - os raios param nas paredes, e a foto de fora é idêntica.
+  - O interior saiu claro: a peça feita fora do Studio não tem a colisão calculada, que a luz usa
+    para a sombra de dentro (com `Hull` calculado no Studio, escurece).
+- **Desligado** (`assets/estatico/ativos.json` vazio) até o Team Create. Desligado, o place é igual
+  à v83 (conferido).
+- **Testes:** `tests/test_estatico.py` (4); 644 no Lune.
 
 ## v83: lote 38, plantas afinadas longe dos caminhos (2026-11-15, D-153)
 - **Publicada** (versão 83 do place, commit c7eeeb6).
