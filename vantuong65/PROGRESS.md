@@ -175,6 +175,11 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     - Fica desligado até o Team Create: a cópia fixa sai com o interior mais claro (sem a colisão
       calculada do Studio, a luz não faz a sombra de dentro).
     - Ligar: `assets/estatico/ativos.json`.
+  - **Lote 41 (D-156): trim sheet provada no Blender, sem versão nova.** A `vila_casa_03` com as
+    paredes, a estrutura e os anexos numa folha de 5 faixas e o piso repetido fica praticamente
+    igual à de hoje (`testes/trim/previa_vila_casa_03.jpg`).
+    - Usar no jogo pede uma paleta de paredes comum (26 variantes nas 10 casas), 2 ou 3 folhas e a
+      troca da textura pelo `AssetLoader`.
 
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;

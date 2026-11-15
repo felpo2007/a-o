@@ -31,6 +31,9 @@ repositório é de OUTRO projeto (estratégias de trade). Aqui vale este arquivo
   ("Decompression failed"). Teste mudanças no Studio pelo MCP, mas gere o `.rbxl` pelo pipeline.
   O XML (`.rbxlx`) do Studio também não serve: o Lune 0.8 não lê o `Content` novo (`<uri>`) nem
   conhece o `LevelOfDetail = SLIM` (D-154).
+- Trim sheet da vila (D-156): `blender -b --factory-startup -P tools/blender/vila_trim.py --
+  <casa>` assa os materiais do grupo Casa em faixas que repetem e renderiza a casa de hoje × a
+  convertida (`assets/blender/trim_vila/`). Ainda não vai para o jogo.
 - Arte fixa no place, para o SLIM (D-155):
   - copie o conjunto do jogo rodando com `tools/estatico_copiar.luau` (Server, pelo MCP) para
     `assets/estatico/<conjunto>.txt`;
@@ -189,7 +192,7 @@ O `sourcemap.json` não vai para o Git.
 - Segredos só no `.env` (no `.gitignore`), nunca no código nem no chat.
 - ForgeGUI: nunca regenerar um job em `outcome_unknown`. "failed" com `retryable` pode ser
   retomado com `generation_retry`.
-- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-156) e atualize `PROGRESS.md`.
+- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-157) e atualize `PROGRESS.md`.
 - Tetos de triângulos por modelo: vegetação ≤ 6 mil (D-135), props e herói ≤ 20 mil (`ArtBudget`,
   conferido pelo teste da F5).
 - Commits no branch acima, com mensagem em português.

@@ -6049,3 +6049,42 @@ O interior claro fica como limite conhecido até o pipeline ler a colisão do St
 - `tests/test_estatico.py`: leitura da cópia, modelo do Rojo, recusa de chave e ligado igual ao
   gerado;
 - os 644 testes Lune passam.
+
+## D-156 — Lote 41: trim sheet da vila, a prova no Blender (2026-11-15, sem versão nova)
+
+**Contexto:** o SLIM ficou preparado e desligado (D-155) porque depende do Team Create. O dono pediu
+para seguir sem precisar fazer nada, e a outra técnica do texto é a trim sheet: uma folha de
+materiais dividida por muitos objetos.
+
+**Prova** (`tools/blender/vila_trim.py`, só no Blender, nada mudou no jogo):
+- **O grupo Casa da `vila_casa_03`** (paredes, piso, estrutura e anexos; hoje um atlas de 1024 só
+  dela) tem 2.194 triângulos e usa 6 materiais procedurais.
+  - Cada peça tem o atributo `local` em metros (ao longo, altura, através), que o material usa e
+    que serve de mapa para a folha.
+- **A folha** (1024 px) tem 5 faixas de 192 px, com 6 px de borda repetida.
+  - Cada material é assado uma vez numa faixa que repete na horizontal (25% a mais e a costura
+    misturada).
+  - Reboco: faixa de 3,2 m (60 px/m) com V = altura, para o pé molhado e o escorrido ficarem no
+    lugar.
+  - Madeira, madeira escura, bambu e barro: faixas de 0,8 m (240 px/m), com U ao longo do veio.
+  - O piso é uma textura de 512 que repete a cada 4 m nos dois sentidos.
+- **Conversão:** 130 peças. As faces vão para a faixa do seu material pelo `local`. Telhado e
+  mobília ficam com os atlas de hoje.
+- **Resultado:** `testes/trim/previa_vila_casa_03.jpg` (em cima, o GLB de hoje; embaixo, a casa com
+  a folha).
+  - Por fora e por dentro, a casa fica praticamente igual: as manchas, o pé molhado e os veios saem
+    do mesmo material, nas mesmas coordenadas.
+  - O bake leva 76 s, contra 18 min do build inteiro da casa.
+
+**Para usar no jogo** (lotes seguintes, ainda não feitos):
+- **Paleta:** o grupo Casa das 10 casas usa 26 variantes de material.
+  - Madeira, madeira escura, bambu, barro e piso são iguais em todas.
+  - As paredes variam por casa (3 de reboco, 3 de taipa, 2 de caiada, esteira, tábua, muro etc.).
+  - Uma folha comum pede uma paleta de paredes unificada (a variedade de cor já vem da tinta por
+    casa, `ArtPlan.TINTS`) e 2 ou 3 folhas, com cada nó do GLB numa folha só (uma
+    `SurfaceAppearance` por peça).
+- **Dividir de fato:** cada modelo enviado ganha cópias próprias das imagens. Para as casas
+  dividirem a mesma textura, o `AssetLoader` troca a `SurfaceAppearance` das peças de construção
+  por um clone da de um modelo "portador" (clonar é permitido; mudar o `ColorMap` por script, não).
+- **Ganho esperado** (estimativa): as 30 texturas do atlas Casa das 10 casas viram as 6 a 9 das
+  folhas e do piso.
