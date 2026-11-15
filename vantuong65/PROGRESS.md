@@ -238,6 +238,9 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
   - a cadência abaixo de 12 fps medida num aparelho lento.
 
 ## v90: lotes 49 e 50, Robux, telhados medidos e bots ofensivos (2026-11-15, D-164 a D-166)
+- **Publicada** (versão 91 do place, commit a476331). A versão 90 do place não saiu do pipeline:
+  apareceu enquanto o Studio da nuvem esteve aberto (15:32 a ~16:00), talvez um salvamento ou o
+  Team Create. A 91 a substituiu com o build deste commit.
 - **Robux (D-164):** os 4 uniformes da D-131 a R$ 79 (`Skins.IDS`). Servidores privados, assinatura
   e Managed Pricing continuam com o dono.
 - **Telhados na trim sheet (D-165), desfeito:**
