@@ -150,9 +150,8 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
 - Pedidos novos do dono (15/11): "faça isso [refazer as 3 armas] e depois isso [um texto sobre
   beleza e desempenho do mapa, mais duas perguntas]":
   - **Lote 35 (v80, D-150): feito.** M70, Mosin e Escopeta 12 refeitas sem as peças torcidas.
-  - **Lote 36:**
-    - "onde está o botão para 3ª pessoa?";
-    - "as árvores devem tancar os tiros".
+  - **Lote 36 (v81, D-151): feito.** O botão CÂMERA da 3ª pessoa de volta no toque (e a linha na
+    coluna de comandos); árvores com tronco invisível medido na malha que para a bala.
   - **Lote 37 (desempenho e beleza do mapa, pelo texto):**
     - medir antes (fps, tempo de quadro, Scene Analysis/MicroProfiler);
     - sombra só no que importa e simplificar o que está longe;
@@ -167,6 +166,24 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;
   - respondido pelo dono: a M14 fica como está; o capim clareou (v58);
   - a cadência abaixo de 12 fps medida num aparelho lento.
+
+## v81: lote 36, o botão da 3ª pessoa e o tronco que para a bala (2026-11-15, D-151)
+- **3ª pessoa:**
+  - onde fica: tecla O no computador, ↑ no direcional do controle, botão CÂMERA no celular;
+  - o botão CÂMERA voltou ao toque, no canto de baixo à esquerda (tocar troca, segurar troca o
+    ombro);
+  - a coluna de comandos ganhou a linha "1ª / 3ª pessoa";
+  - a dica do controle dizia "Segure →", e o comando é ↑.
+- **Árvores param a bala:** cilindros invisíveis medidos na malha (`tools/troncos.py`).
+  - Antes (v80, Studio): a `ph_tree_small_02` (171 na área) e o coqueiro (159) deixavam passar
+    todo tiro na altura de um soldado.
+  - Agora, no Studio: 0 tiros passaram. Com a M16 a 25 m, de 110 a 120 de 120 tiros por tipo de
+    árvore pararam no tronco; o resto bateu no terreno antes.
+  - Os cilindros ficam dentro do tronco desenhado (fotos com eles em vermelho).
+  - A `ph_island_tree_03` (caules finos) só para a bala no pé, até 0,8 m.
+- **Studio:** a dica "Tecla O" e a linha "O · 1ª / 3ª pessoa" na coluna de comandos.
+- **Não testado:** o botão CÂMERA num celular (valem os testes do toque), e andar entre os troncos.
+- **Testes:** 642 no Lune (1 novo na F5), pytest 54, ruff, StyLua e luau-lsp limpos.
 
 ## v80: lote 35, M70, Mosin e Escopeta 12 refeitas (2026-11-15, D-150)
 - **Publicada** (versão 80 do place, commit d63bff1).

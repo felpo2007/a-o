@@ -74,7 +74,8 @@ end
 -- glyph: texto curto no botão (frase inteira: o Traducao traduz).
 -- Saíram da tela na v39 (layout salvo com eles: o botão é ignorado): ARMA e SELETOR (o cartão da
 -- arma: tocar troca, segurar abre seletor, alça e baioneta), MARCAR (tocar no COMUNICAR), CÂMERA
--- (menu: Configurações > Toque > Câmera) e CANAL (tocar no RÁDIO).
+-- (menu: Configurações > Toque > Câmera) e CANAL (tocar no RÁDIO). D-151: a CÂMERA voltou (id
+-- "view3p"; o dono não achava a 3ª pessoa no celular).
 export type Def = {
 	id: string,
 	spec: string?,
@@ -130,6 +131,16 @@ Toque.BUTTONS = {
 	},
 	{ id = "map", spec = "map", kind = "press", glyph = "MAPA", label = "Mapa", mm = 9, show = "game" },
 	{ id = "menu", spec = "game_menu", kind = "press", glyph = "MENU", label = "Menu", mm = 9, show = "game" },
+	-- D-151 (dono: "onde está o botão para 3ª pessoa?"): a câmera volta à tela, embaixo à esquerda
+	{
+		id = "view3p",
+		spec = "view_toggle:tap|shoulder_swap:hold",
+		kind = "press",
+		glyph = "CÂMERA",
+		label = "1ª / 3ª pessoa (tocar) e trocar o ombro (segurar)",
+		mm = 9,
+		show = "foot",
+	},
 	-- contextuais (só quando servem)
 	{
 		id = "reload",
@@ -241,6 +252,10 @@ local TWO: { [string]: Pos } = {
 	comm = { x = 0.80, y = 0.09 },
 	map = { x = 0.035, y = 0.09 },
 	menu = { x = 0.135, y = 0.09 },
+	-- D-151: no canto de baixo à esquerda, ao lado do analógico. Procura em todas as telas e layouts
+	-- do teste (tests/luau/toque): embaixo do MAPA encostava nele, entre o RÁDIO e a MIRA e na fileira
+	-- do alto não cabia um botão de 9 mm no celular 16:9; aqui sobram 13 px
+	view3p = { x = 0.03, y = 0.94 },
 	reload = { x = 0.735, y = 0.42 },
 	melee = { x = 0.835, y = 0.34 },
 	hold_breath = { x = 0.835, y = 0.34 },

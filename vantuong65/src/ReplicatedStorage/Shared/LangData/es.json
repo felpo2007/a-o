@@ -2697,5 +2697,9 @@
  "Passageiro %d": "Pasajero %d",
  "Sem lugar de passageiro livre": "No hay asiento de pasajero libre",
  "perto de %s": "cerca de %s",
- "%d DE %d LIVRES": "%d DE %d LIBRES"
+ "%d DE %d LIVRES": "%d DE %d LIBRES",
+ "1ª / 3ª pessoa (tocar) e trocar o ombro (segurar)": "1.ª / 3.ª persona (tocar) y cambiar de hombro (mantener)",
+ "Botão CÂMERA: 1ª / 3ª pessoa": "Botón CÁMARA: 1.ª / 3.ª persona",
+ "CÂMERA (segurar)": "CÁMARA (mantener)",
+ "↑ no direcional: 1ª / 3ª pessoa": "↑ en la cruceta: 1.ª / 3.ª persona"
 }

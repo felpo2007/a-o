@@ -16,6 +16,8 @@ local GunModel = require(ReplicatedStorage.Shared.GunModel)
 local MapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any
 local MapLife = require(script.Parent.MapLife)
 local Rng = require(ReplicatedStorage.Shared.Rng)
+local TreeTrunks = require(script.Parent.TreeTrunks)
+local TrunkProxy = require(script.Parent.TrunkProxy)
 local Tunnels = require(ReplicatedStorage.Shared.Tunnels) :: any
 local Vegetation = require(script.Parent.Vegetation)
 local Weapons = require(ReplicatedStorage.Shared.Weapons)
@@ -75,6 +77,25 @@ function AssetLoader.ensureGroups()
 	groupsReady = true
 end
 
+-- Peça de planta posta no mapa. Copa, galho e touceira: sem colisão, a bala atravessa (Material
+-- "Bamboo", Ballistics.PASS). O tronco invisível (D-151, TrunkProxy) fica como o template deixou.
+-- Árvore sem tronco medido (proxied = false): a Madeira0 sólida, como no D-67.
+local function foliagePart(d: BasePart, shadow: boolean, proxied: boolean)
+	if TrunkProxy.isProxy(d.Name) then
+		return
+	end
+	local wood = string.sub(d.Name, 1, 8) == "Madeira0"
+	local solid = wood and not proxied
+	if solid then
+		AssetLoader.ensureGroups()
+		d.CollisionGroup = AssetLoader.TRUNK_GROUP
+	end
+	d.CanCollide = solid
+	d.CanTouch = false
+	d.CastShadow = shadow
+	d:SetAttribute("Material", if wood then "Wood" else "Bamboo")
+end
+
 -- Data/Bases (as bases dos dois lados e as casas únicas da vila), carregado na primeira vez
 local bases: any = nil
 local function baseData(): any
@@ -127,6 +148,30 @@ function AssetLoader.template(key: string): Model?
 			if sa then
 				sa.AlphaMode = Enum.AlphaMode.Transparency
 			end
+		end
+	end
+	-- D-151: tronco invisível (cilindros medidos na malha) que para a bala e o soldado, não o veículo.
+	-- Fica no template: o clone leva junto e o ScaleTo da planta escala com o resto.
+	local cyls = TreeTrunks[key]
+	if cyls then
+		AssetLoader.ensureGroups()
+		local pivot = tpl:GetPivot()
+		for i, c in cyls do
+			local cf, size = TrunkProxy.frame(c, tpl:GetScale())
+			local p = Instance.new("Part")
+			p.Name = TrunkProxy.PREFIX .. i
+			p.Shape = Enum.PartType.Cylinder
+			p.Size = size
+			p.CFrame = pivot * cf
+			p.Transparency = 1
+			p.Anchored = true
+			p.CanCollide = true
+			p.CanQuery = true
+			p.CanTouch = false
+			p.CastShadow = false
+			p.CollisionGroup = AssetLoader.TRUNK_GROUP
+			p:SetAttribute("Material", "Wood")
+			p.Parent = tpl
 		end
 	end
 	if Weapons.get(key) and GunModel.fit(tpl, key) then
@@ -336,16 +381,7 @@ function AssetLoader.place(
 	if foliage then
 		for _, d in m:GetDescendants() do
 			if d:IsA("BasePart") then
-				-- árvore pronta (D-67): o tronco (Madeira0) é sólido e para a bala; copa e galhos não
-				local trunk = string.sub(d.Name, 1, 8) == "Madeira0"
-				if trunk then
-					AssetLoader.ensureGroups()
-					d.CollisionGroup = AssetLoader.TRUNK_GROUP
-				end
-				d.CanCollide = trunk
-				d.CanTouch = false
-				d.CastShadow = shadow == true
-				d:SetAttribute("Material", if trunk then "Wood" else "Bamboo")
+				foliagePart(d, shadow == true, TreeTrunks[key] ~= nil)
 			end
 		end
 	end
@@ -487,18 +523,10 @@ local function tintModel(m: Model, k: number)
 end
 
 local function foliageParts(m: Model, shadow: boolean)
+	local proxied = TreeTrunks[m.Name] ~= nil
 	for _, d in m:GetDescendants() do
 		if d:IsA("BasePart") then
-			-- árvore pronta (D-67): o tronco (Madeira0) é sólido e para a bala; copa e galhos não
-			local trunk = string.sub(d.Name, 1, 8) == "Madeira0"
-			if trunk then
-				AssetLoader.ensureGroups()
-				d.CollisionGroup = AssetLoader.TRUNK_GROUP
-			end
-			d.CanCollide = trunk
-			d.CanTouch = false
-			d.CastShadow = shadow
-			d:SetAttribute("Material", if trunk then "Wood" else "Bamboo")
+			foliagePart(d, shadow, proxied)
 		end
 	end
 	if shadow then

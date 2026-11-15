@@ -43,6 +43,8 @@ local SHOW: { [string]: { string } } = {
 		"interact",
 		"swap_weapon",
 		"comm_wheel",
+		-- D-151 (dono: "onde está o botão para 3ª pessoa?"): a câmera também fica na coluna
+		"view_toggle",
 		"map",
 		"game_menu",
 	},

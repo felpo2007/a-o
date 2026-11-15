@@ -463,6 +463,52 @@ test("clareira de nascimento: nenhuma planta da mata a até 15 m de QG ou reuni�
 	print(string.format("       %d pontos de nascimento com clareira de %d m", #spots, Vegetation.SPAWN_CLEAR_M))
 end)
 
+test("tronco que para a bala (D-151): toda árvore da mata tem tronco medido e a peça cai no cilindro", function()
+	local M = 0.28
+	local TreeTrunks = require("../../src/ServerScriptService/Modules/TreeTrunks") :: any
+	local luau = require("@lune/luau")
+	local roblox = require("@lune/roblox") :: any
+	local TrunkProxy = luau.load(
+		fs.readFile("src/ServerScriptService/Modules/TrunkProxy.luau"),
+		{ debugName = "TrunkProxy", environment = { Vector3 = roblox.Vector3, CFrame = roblox.CFrame } }
+	)() :: any
+	-- as árvores que a mata põe (Vegetation): as prontas do Poly Haven e o coqueiro
+	local src = fs.readFile("src/ServerScriptService/Modules/Vegetation.luau")
+	local keys: { [string]: boolean } = { coconut_palm = true }
+	for k in string.gmatch(src, 'key = "(ph_[%w_]+)"') do
+		keys[k] = true
+	end
+	local n = 0
+	for k in keys do
+		local cyls = TreeTrunks[k]
+		assert(cyls and #cyls >= 1, k .. ": árvore sem tronco medido (rode tools/troncos.py)")
+		local low = math.huge
+		for i, c in cyls do
+			assert(c.r > 0.02 / M and c.r < 1.2 / M, string.format("%s[%d]: raio %.2f studs", k, i, c.r))
+			low = math.min(low, c.a[2], c.b[2])
+			for _, scale in { 1, 2.5 } do
+				local cf, size = TrunkProxy.frame(c, scale)
+				local a = roblox.Vector3.new(c.a[1], c.a[2], c.a[3]) * scale
+				local b = roblox.Vector3.new(c.b[1], c.b[2], c.b[3]) * scale
+				-- as pontas do eixo X da peça são as pontas do cilindro; a espessura é o diâmetro
+				local pa = cf * roblox.Vector3.new(-size.X / 2, 0, 0)
+				local pb = cf * roblox.Vector3.new(size.X / 2, 0, 0)
+				assert((pa - a).Magnitude < 1e-3 and (pb - b).Magnitude < 1e-3, k .. ": eixo fora do cilindro")
+				assert(math.abs(size.Y - 2 * c.r * scale) < 1e-4 and size.Y == size.Z, k .. ": espessura errada")
+				-- nada abaixo do pé: a caixa da peça não desce do pivô (o assentamento usa a caixa)
+				local ux = (b - a).Unit
+				local drop = math.min(a.Y, b.Y) - c.r * scale * math.sqrt(math.max(0, 1 - ux.Y * ux.Y))
+				assert(drop > -0.02, string.format("%s[%d]: a peça desce %.2f studs abaixo do pé", k, i, -drop))
+			end
+			n += 1
+		end
+		-- o tronco nasce no chão (até 0,3 m acima do pé, na escala 1)
+		assert(low <= 0.3 / M, string.format("%s: tronco começa a %.2f m do pé", k, low * M))
+	end
+	assert(TrunkProxy.isProxy("Tronco_2") and not TrunkProxy.isProxy("Madeira0_0"), "nome da peça do tronco")
+	print(string.format("       %d cilindros nas árvores da mata", n))
+end)
+
 print(string.format("%d ok, %d falhas", passed, failed))
 if failed > 0 then
 	process.exit(1)

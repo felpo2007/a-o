@@ -275,7 +275,8 @@ test("nada de teclado no toque: os nomes são os escritos nos botões; o Input.g
 	-- o que saiu da tela aponta para onde foi
 	assert(string.find(ToqueTelas.TOUCH_NAME.swap_weapon, "CARTÃO", 1, true))
 	assert(string.find(ToqueTelas.TOUCH_NAME.fire_mode, "CARTÃO", 1, true))
-	assert(ToqueTelas.TOUCH_NAME.view_toggle == "MENU" and ToqueTelas.TOUCH_NAME.mark == "COMUNICAR")
+	-- D-151: a câmera voltou a ter botão (CÂMERA), em vez de ficar no MENU
+	assert(ToqueTelas.TOUCH_NAME.view_toggle == "CÂMERA" and ToqueTelas.TOUCH_NAME.mark == "COMUNICAR")
 	-- nenhum nome tem cara de tecla (uma letra, número ou nome de tecla)
 	for id, name in ToqueTelas.TOUCH_NAME do
 		assert(#name > 2, id .. ": nome curto demais (parece tecla)")

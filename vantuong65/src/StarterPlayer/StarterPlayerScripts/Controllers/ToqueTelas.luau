@@ -314,8 +314,9 @@ ToqueTelas.TOUCH_NAME = {
 	give_up = "DESISTIR",
 	radio_talk = "RÁDIO (segurar)",
 	radio_channel = "RÁDIO",
-	view_toggle = "MENU",
-	shoulder_swap = "MENU",
+	-- D-151: o botão CÂMERA voltou à tela (tocar troca 1ª/3ª pessoa; segurar troca o ombro)
+	view_toggle = "CÂMERA",
+	shoulder_swap = "CÂMERA (segurar)",
 	lean_left = "INCLINAR",
 	lean_right = "INCLINAR",
 	hold_breath = "FÔLEGO",

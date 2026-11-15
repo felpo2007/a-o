@@ -2704,5 +2704,9 @@
  "Passageiro %d": "Passenger %d",
  "Sem lugar de passageiro livre": "No free passenger seat",
  "perto de %s": "near %s",
- "%d DE %d LIVRES": "%d OF %d FREE"
+ "%d DE %d LIVRES": "%d OF %d FREE",
+ "1ª / 3ª pessoa (tocar) e trocar o ombro (segurar)": "1st / 3rd person (tap) and swap shoulder (hold)",
+ "Botão CÂMERA: 1ª / 3ª pessoa": "CAMERA button: 1st / 3rd person",
+ "CÂMERA (segurar)": "CAMERA (hold)",
+ "↑ no direcional: 1ª / 3ª pessoa": "D-pad ↑: 1st / 3rd person"
 }

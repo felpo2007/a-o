@@ -120,6 +120,10 @@ O `sourcemap.json` não vai para o Git.
   - o importador do Open Cloud traz a folha com `AlphaMode = Overlay` e face única; o
     `AssetLoader.template` liga `Transparency` e `DoubleSided` nas peças `Folhas*`;
   - asset grátis de terceiro (Creator Store) não carrega no jogo publicado: só os do dono.
+- Tronco que para a bala (D-151): `uv run python tools/troncos.py` mede os caules na malha e grava
+  `Modules/TreeTrunks.luau` (cilindros que o `AssetLoader.template` vira peças invisíveis
+  `Tronco_N`). Árvore nova da mata: ponha em `ARVORES` no script e rode de novo (o teste da F5
+  cobra). `--previa <pasta>` desenha os cilindros sobre a madeira.
 - Armas: `tools/armas_parker.py` gera `<arma>_studs_parker.glb` (aço fosco, texturas de 1024) a
   partir do GLB do gerador; é ele que sobe. Rode depois do `fetch_forgegui_assets.py`.
 - Armas do Blender (D-146): M70 e Mosin (`tools/blender/armas.py`), Escopeta 12 (`espingarda.py`),
@@ -168,7 +172,7 @@ O `sourcemap.json` não vai para o Git.
 - Segredos só no `.env` (no `.gitignore`), nunca no código nem no chat.
 - ForgeGUI: nunca regenerar um job em `outcome_unknown`. "failed" com `retryable` pode ser
   retomado com `generation_retry`.
-- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-151) e atualize `PROGRESS.md`.
+- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-152) e atualize `PROGRESS.md`.
 - Tetos de triângulos por modelo: vegetação ≤ 6 mil (D-135), props e herói ≤ 20 mil (`ArtBudget`,
   conferido pelo teste da F5).
 - Commits no branch acima, com mensagem em português.

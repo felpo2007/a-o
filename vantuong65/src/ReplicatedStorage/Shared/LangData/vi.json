@@ -2704,5 +2704,9 @@
  "Passageiro %d": "Hành khách %d",
  "Sem lugar de passageiro livre": "Không còn chỗ hành khách trống",
  "perto de %s": "gần %s",
- "%d DE %d LIVRES": "%d/%d CHỖ TRỐNG"
+ "%d DE %d LIVRES": "%d/%d CHỖ TRỐNG",
+ "1ª / 3ª pessoa (tocar) e trocar o ombro (segurar)": "Ngôi thứ nhất / thứ ba (chạm) và đổi vai (giữ)",
+ "Botão CÂMERA: 1ª / 3ª pessoa": "Nút CAMERA: ngôi thứ nhất / thứ ba",
+ "CÂMERA (segurar)": "CAMERA (giữ)",
+ "↑ no direcional: 1ª / 3ª pessoa": "↑ trên phím hướng: ngôi thứ nhất / thứ ba"
 }

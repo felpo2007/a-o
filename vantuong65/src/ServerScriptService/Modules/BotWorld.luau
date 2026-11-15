@@ -547,7 +547,11 @@ local function markTrunks(g: BotNav.Grid, folder: Instance): number
 		end
 		if m:IsA("Model") and BotBrain.plantKind(m.Name) then
 			local trunk = m:FindFirstChild("Madeira0_0", true)
-			if trunk and trunk:IsA("BasePart") and trunk.CanCollide then
+			-- D-151: com o tronco invisível (Tronco_1...), a Madeira0 ficou sem colisão; a pegada dela
+			-- continua marcando a célula como antes (a cortina de fora da área não tem colisão: fica fora)
+			local proxy = m:FindFirstChild("Tronco_1")
+			local solid = proxy ~= nil and proxy:IsA("BasePart") and proxy.CanCollide
+			if trunk and trunk:IsA("BasePart") and (trunk.CanCollide or solid) then
 				-- a peça do tronco leva os galhos grossos: a pegada dela (até 24 studs), não só o centro
 				-- (no teste o LVTP-5 encalhou num tronco inclinado com o centro na célula do lado)
 				local _, yaw, _ = trunk.CFrame:ToOrientation()

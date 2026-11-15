@@ -5764,3 +5764,82 @@ corrigido na D-146).
 - O `WeaponArt` não mudou: os pontos são os mesmos, e a mira da Escopeta 12, medida de novo no GLB,
   deu o mesmo.
 - **Studio:** a Escopeta 12 carrega o modelo novo na mão.
+## D-151 — Lote 36: o botão da 3ª pessoa e o tronco que para a bala (v81, 2026-11-15)
+
+**Pedidos do dono:** "onde está o botão para 3ª pessoa?" e "as árvores devem tancar os tiros".
+
+**3ª pessoa** (`Toque`, `ToqueTelas`, `PainelComandos`, `ThirdPerson`):
+- **Onde fica:**
+  - computador: tecla O;
+  - controle: ↑ no direcional;
+  - celular e tablet: o botão CÂMERA, que tinha saído da tela na v39 e voltou.
+- **Botão CÂMERA no toque** (id `view3p`): no canto de baixo à esquerda, ao lado do analógico.
+  - Tocar troca 1ª / 3ª pessoa; segurar troca o ombro. Tem 9 mm, o mínimo do teste.
+  - O lugar saiu de uma busca em todas as telas e layouts do teste do toque: embaixo do MAPA
+    encostava nele, e entre o RÁDIO e a MIRA ou na fileira do alto não cabia no celular 16:9. No
+    canto sobram 13 px.
+- **Coluna de comandos** (computador e controle): ganhou a linha "1ª / 3ª pessoa", antes do Mapa.
+- **Dica do primeiro nascimento:**
+  - no controle dizia "Segure → no direcional", mas o comando é ↑ tocado; agora diz "↑ no
+    direcional";
+  - no toque, "Botão CÂMERA: 1ª / 3ª pessoa".
+- **Nome do comando no toque:** era "MENU" (a câmera tinha ido para Configurações > Toque); agora
+  é "CÂMERA" e "CÂMERA (segurar)".
+- Traduções das 4 frases novas em inglês, espanhol e vietnamita.
+
+**Tronco que para a bala** (`tools/troncos.py`, `Modules/TreeTrunks`, `Modules/TrunkProxy`,
+`AssetLoader`):
+- **Antes (medido no Studio, v80):** a bala só para em peça com colisão. Nas árvores prontas isso
+  era a peça `Madeira0`, com a colisão automática do Roblox (um casco aproximado do tronco com os
+  galhos grossos).
+  - Na `ph_tree_small_02` (171 na área), a `Madeira0` é a galhada a mais de 7 m do chão. O tronco
+    de verdade (`Madeira1`) não tinha colisão: todo tiro na altura de um soldado passava.
+  - O coqueiro (159 na área) não tinha nenhuma peça sólida.
+- **Agora:** cada árvore leva cilindros invisíveis (`Tronco_1`, `Tronco_2`...) que param a bala e o
+  soldado, mas não o veículo (grupo `VT65Tronco`, D-67).
+  - Os cilindros saem da malha: `tools/troncos.py` corta a madeira em fatias de 0,25 m e liga os
+    contornos de uma fatia para a outra, do pé até 5 m (no coqueiro, 9 m) ou até o caule se abrir
+    em galhos.
+  - Caule com raio abaixo de 6 cm não conta; galho grosso que sai do tronco conta (menos no
+    coqueiro, onde lá em cima é a copa). Até 6 cilindros por árvore.
+  - Ficam no template: o clone leva junto e escala com a planta.
+  - Copa, galhos e a madeira desenhada ficam sem colisão: a bala passa por eles como antes, perdendo
+    um pouco (Ballistics.PASS).
+- **Cilindros por árvore** (na escala típica da mata):
+
+  | Árvore | Cilindros | Até | Raio (m) |
+  |---|---|---|---|
+  | ph_island_tree_01 | 6 | 4,1 m | 0,37 a 0,85 |
+  | ph_island_tree_02 | 6 | 4,8 m | 0,16 a 0,61 |
+  | ph_island_tree_03 | 3 | 0,8 m | 0,10 a 0,12 |
+  | ph_tree_small_02 | 2 | 4,8 m | 0,28 a 0,31 |
+  | coconut_palm | 3 | 6,5 m | 0,17 a 0,33 |
+
+  A `ph_island_tree_03` tem caules finos e tortos: acima de 1 m todos têm 6 cm de raio ou menos, então
+  só o pé para a bala.
+- **Mapeamento:** o pivô do modelo é a origem do GLB. O ponto do GLB vai ao modelo com x e z
+  trocados de sinal (o giro de 180° do importador, D-58), conferido nas peças da
+  `ph_island_tree_02` no Studio.
+- **Studio (v81):**
+  - Bala com a regra do `Hitbox.trace`, em 16 direções a 0,5, 1,2 e 1,6 m, em 12 árvores de cada
+    tipo: 192 de 192 tiros pararam no tronco invisível em cada altura e tipo (na
+    `ph_island_tree_03`, só a 0,5 m).
+  - `Hitbox.trace` da M16 a 25 m, mirando o tronco a 1 m de altura, 4 tiros em cada uma de 30
+    árvores por tipo:
+
+    | Árvore | No tronco | No terreno antes |
+    |---|---|---|
+    | coqueiro | 110 de 120 | 10 |
+    | ph_tree_small_02 | 115 de 120 | 5 |
+    | ph_island_tree_02 | 120 de 120 | 0 |
+    | ph_island_tree_01 | 116 de 120 | 4 |
+
+    Nenhum tiro passou.
+  - Fotos com os cilindros pintados de vermelho (coqueiro, `ph_tree_small_02`, `ph_island_tree_01`
+    e `_02`): o cilindro fica dentro do tronco desenhado.
+  - Os bots continuam vendo 1.793 troncos que barram os veículos, o mesmo número da v80
+    (`BotWorld.markTrunks` aceita a `Madeira0` sem colisão quando há o tronco invisível).
+- **Muda para quem anda:** o soldado esbarra no cilindro do tronco, não mais no casco do tronco com
+  os galhos grossos. Não testado andando no Studio.
+- **Teste novo** (F5): toda árvore que a mata põe tem tronco medido, e a peça cai no cilindro sem
+  descer do pé.

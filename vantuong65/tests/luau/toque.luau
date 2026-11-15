@@ -764,8 +764,9 @@ test("tela enxuta: fixos só os do uso o tempo todo; o resto some, vira contextu
 	local function vis(id: string, c: Toque.Ctx): boolean
 		return Toque.visible(Toque.BY_ID[id], c)
 	end
-	-- a pé, sem nada acontecendo: só analógico, tiro, mira, pular, agachar, ITEM, COMUNICAR, mapa e
-	-- menu (o cartão da arma é do HudCampo; o interagir, do Interagir.client)
+	-- a pé, sem nada acontecendo: só analógico, tiro, mira, pular, agachar, ITEM, COMUNICAR, mapa,
+	-- menu e (D-151, "onde está o botão para 3ª pessoa?") a CÂMERA (o cartão da arma é do HudCampo; o
+	-- interagir, do Interagir.client)
 	local calm: Toque.Ctx = { foot = true, vehicle = false, downed = false, aiming = false, voice = false }
 	local slots = Toque.layout({ touchLayout = "two", touchMirror = false, touchCustom = {} })
 	local shown = {}
@@ -776,7 +777,7 @@ test("tela enxuta: fixos só os do uso o tempo todo; o resto some, vira contextu
 	end
 	table.sort(shown)
 	assert(
-		table.concat(shown, ",") == "aim,comm,equip,fire,jump,map,menu,posture,stick",
+		table.concat(shown, ",") == "aim,comm,equip,fire,jump,map,menu,posture,stick,view3p",
 		"fixos: " .. table.concat(shown, ",")
 	)
 	-- os que saíram da tela: troca de arma e seletor no cartão, marcar no COMUNICAR, câmera no menu,

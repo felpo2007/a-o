@@ -72,9 +72,10 @@ local function hint()
 		if not hum or hum.Health <= 0 or Input.settings.thirdPerson then
 			return
 		end
+		-- D-151: o controle é ↑ tocado no direcional (InputMap "view_toggle"); o texto dizia "Segure →"
 		local text = if Input.touchActive()
-			then "CÂMERA: 1ª / 3ª pessoa"
-			elseif Input.isGamepad() then "Segure → no direcional: 1ª / 3ª pessoa"
+			then "Botão CÂMERA: 1ª / 3ª pessoa"
+			elseif Input.isGamepad() then "↑ no direcional: 1ª / 3ª pessoa"
 			else "Tecla O: 1ª / 3ª pessoa"
 		Bus.fire("toast", text)
 	end)
