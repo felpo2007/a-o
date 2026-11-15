@@ -6670,3 +6670,26 @@ jogo, com o teto de 1024 do Roblox, 4 bytes por pixel e os mipmaps, sem a compre
 **Baking:** já é o caminho do projeto para o que sai do Blender (casas, bases, veículos, faca). O
 próximo uso concreto é o atlas único das árvores da mata, depois da medida.
 
+**A medida, com o Studio (depois da v92):**
+- **Como:** uma cópia da v92 com um corte injetado no `AssetLoader` (só na cópia, pelo Edit). As
+  peças das chaves escolhidas trocam a SurfaceAppearance pela folha `Trim_P` (512), como se o grupo
+  estivesse todo numa folha só. Studio novo por medida, sem bots, qualidade 10, FOV 70, câmera fixa
+  olhando o QG dos EUA (onde o jogador nasce), memória `GraphicsTexture` depois de 60 s.
+- **Apagar a SurfaceAppearance não serve de medida:** sem ela, a peça usa a textura do material do
+  Roblox, e a memória foi de 132,7 para 273,6 MB.
+
+| Vista do QG dos EUA | Textura | Chamadas de desenho |
+|---|---|---|
+| v92 normal | 132,7 MB | 358 |
+| a base dos EUA (78 modelos, 41 SA) numa folha só | 126,6 MB | 358 |
+| todos os modelos do mapa (282 SA) numa folha só | 109,9 MB | 358 |
+| sem os 4 `MaterialVariant` do chão | 132,8 MB | 358 |
+
+- **Toda a textura de modelo custa ~23 MB nessa vista, e a base dos EUA ~6 MB.** O resto (~110 MB)
+  é o chão do Roblox, o céu, a interface e os personagens. Tirar as 4 variantes fotográficas não
+  muda nada: o chão padrão ocupa o mesmo.
+- **Conclusão:** trim sheet e baking de modelos não têm mais o que ganhar em memória de textura.
+  A trim sheet da base economizaria no máximo ~6 MB, pouco para refazer as UVs e perder detalhe
+  (o mesmo que a D-165 mostrou no telhado). Não feita. O que ainda pesa no desenho (chamadas e
+  triângulos de longe) é o que o SLIM ataca.
+

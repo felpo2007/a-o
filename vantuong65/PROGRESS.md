@@ -244,6 +244,9 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     conferida), ligadas e testadas no Studio: 25 modelos fixos, vila igual, autoteste 18 ok.
     Publicada (versão 94 do place, commit fe79d91). A 93 foi um salvamento automático do Team
     Create, da sessão aberta só para conferir o SLIM, sem edição.
+  - **Trim sheet e baking: medidos, não vale continuar.** Na vista do QG dos EUA (sem bots):
+    normal 132,7 MB; a base numa folha só 126,6 MB; todos os modelos numa folha só 109,9 MB.
+    Toda a textura de modelo custa ~23 MB, e a base ~6 MB; o resto é chão, céu e interface.
     - Conferir o SLIM no Studio por distância não funcionou (nada saiu do streaming em 6 min); o
       jeito é a cor de depuração (F9), no TODO_USUARIO.
     - Trim sheet e baking: `tools/textura_custo.py` aponta a base dos EUA (93 texturas) e as árvores

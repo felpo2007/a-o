@@ -54,6 +54,10 @@ repositório é de OUTRO projeto (estratégias de trade). Aqui vale este arquivo
     comuns saem em linhas `B` com o CFrame inteiro, e o pivô é o centro da base.
 - Custo teórico de textura por modelo (D-168): `uv run python tools/textura_custo.py`. Serve para
   escolher o alvo da trim sheet; o custo de verdade se mede no Studio, sem bots (D-165).
+  - Medido (D-168): na vista do QG dos EUA, toda a textura de modelo custa ~23 MB de ~133 MB, e a
+    base dos EUA ~6 MB. Trim sheet nova só com medida que mostre ganho grande.
+  - Para medir, troque a SurfaceAppearance pela `Trim_P` numa cópia; não a apague (sem ela, a
+    peça usa a textura do material do Roblox e a memória dobra).
   - No `.model.json`, o Rojo 7.4 quer:
     - o `CFrame` tipado; sem ele, o erro enganoso "no project file was found";
     - os atributos tipados dentro de `Properties`; no topo, ele ignora em silêncio.
