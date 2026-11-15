@@ -169,6 +169,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
   - a cadência abaixo de 12 fps medida num aparelho lento.
 
 ## v80: lote 35, M70, Mosin e Escopeta 12 refeitas (2026-11-15, D-150)
+- **Publicada** (versão 80 do place, commit d63bff1).
 - As três armas do Blender refeitas com o `tubo` certo.
   - O guarda-mato e os zarelhos não estão mais torcidos (na Escopeta 12 era um zigue-zague).
   - IDs novos; os pontos de mira não mudaram.
