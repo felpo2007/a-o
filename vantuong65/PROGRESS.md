@@ -182,6 +182,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
   - a cadência abaixo de 12 fps medida num aparelho lento.
 
 ## v84: lote 40, o SLIM preparado (2026-11-15, D-155)
+- **Publicada** (versão 84 do place, commit f84f043).
 - **Pipeline:**
   - `tools/estatico_copiar.luau` copia do jogo rodando a `vila_casa_03` da entrada de Xóm Gò e o
     pote, a cozinha, o celeiro e duas cercas (6 modelos, 61 peças);
