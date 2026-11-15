@@ -23,6 +23,10 @@ Peça de malha criada fora do Studio não traz a colisão calculada (PhysicsData
 Por isso o conjunto só entra no place quando estiver em `assets/estatico/ativos.json` (lista de
 nomes sem o .txt). Ligue depois do Team Create, para o teste do SLIM.
 
+D-168: as construções de peças do MapLife (pagode, casa comunal, bancas, serraria, cais...) vêm em
+linhas `B` (Part, WedgePart ou CornerWedgePart com o CFrame inteiro, o material e a cor). O modelo
+se chama `Vila_<tipo>` e o pivô é o centro da base (MapLife.villagePart), que o AssetLoader procura.
+
 Uso: uv run python tools/estatico.py
 """
 
@@ -37,6 +41,7 @@ ENTRADA = RAIZ / "assets" / "estatico"
 SAIDA = RAIZ / "src" / "Workspace" / "Estatico"
 MODULO = RAIZ / "src" / "ServerScriptService" / "Modules" / "StaticArt.luau"
 SLIM = 4  # Enum.ModelLevelOfDetail.SLIM
+BLOCOS = {"Part", "WedgePart", "CornerWedgePart"}  # D-168: peças comuns aceitas nas linhas B
 # chaves que dependem do jogo rodando (MapLife.baseInstance): toque das estacas, escada TrussPart,
 # fumaça da cozinha do VC e a cancela que gira. Elas ficam com o AssetLoader.
 SO_EM_JOGO = {"vc_punji", "us_watchtower", "vila_casa_09", "vc_hoang_cam_kitchen", "us_gate"}
@@ -102,6 +107,29 @@ def ler(caminho: Path) -> list[dict]:
                 "escala": atual["escala"],
             }
             alvo["filhos"].append(peca)
+        elif tipo == "B":
+            assert atual is not None and alvo is not None, f"linha {n}: B fora de modelo"
+            if len(campos) != 22:
+                raise SystemExit(f"{caminho.name}:{n}: linha B com {len(campos)} campos (eram 22)")
+            classe, forma, nome = campos[:3]
+            num = [float(v) for v in campos[3:18]]
+            marcas, material, mat_enum, rgb = campos[18:]
+            if classe not in BLOCOS:
+                raise SystemExit(f"{caminho.name}:{n}: peça {classe} fora de {sorted(BLOCOS)}")
+            peca = {
+                "nome": nome,
+                "classe": classe,
+                "forma": None if forma == "-" else forma,
+                "pos": num[0:3],
+                "rot": [num[3:6], num[6:9], num[9:12]],
+                "tamanho": num[12:15],
+                "marcas": "" if marcas == "-" else marcas,
+                "material": None if material == "-" else material,
+                "mat_roblox": mat_enum,
+                "cor": [float(v) for v in rgb.split(",")],
+            }
+            alvo["filhos"].append(peca)
+            peca = None  # S e C são só de peça de malha
         elif tipo == "S":
             assert peca is not None, f"linha {n}: S sem peça"
             cor, normal, rug, metal, alfa, rgb = campos
@@ -170,13 +198,48 @@ def rojo_peca(p: dict) -> dict:
     return no
 
 
+def rojo_bloco(p: dict) -> dict:
+    """D-168: peça comum. O CFrame vai inteiro (linhas da matriz, como no `orientacao`)."""
+    m = p["marcas"]
+    props: dict = {
+        "Size": p["tamanho"],
+        "CFrame": {"CFrame": {"position": p["pos"], "orientation": p["rot"]}},
+        "Anchored": True,
+        "CanCollide": "c" in m,
+        "CanQuery": "q" in m,
+        "CanTouch": "h" in m,
+        "CastShadow": "s" in m,
+        "Transparency": 1 if "t" in m else 0,
+        "Material": p["mat_roblox"],
+        "Color": p["cor"],
+        "TopSurface": "Smooth",
+        "BottomSurface": "Smooth",
+    }
+    if p["classe"] == "Part" and p["forma"]:
+        props["Shape"] = p["forma"]
+    if p["material"]:
+        props["Attributes"] = atributos({"Material": p["material"]})
+    return {"Name": p["nome"], "ClassName": p["classe"], "Properties": props}
+
+
+def folha(f: dict) -> bool:
+    """Peça (de malha ou comum), não submodelo."""
+    return "malha" in f or "classe" in f
+
+
+def rojo_filho(f: dict) -> dict:
+    if "classe" in f:
+        return rojo_bloco(f)
+    return rojo_peca(f) if "malha" in f else rojo_no(f)
+
+
 def rojo_no(n: dict) -> dict:
-    filhos = [rojo_no(f) if "malha" not in f else rojo_peca(f) for f in n["filhos"]]
+    filhos = [rojo_filho(f) for f in n["filhos"]]
     return {"Name": n["nome"], "ClassName": "Model", "Children": filhos}
 
 
 def rojo_modelo(m: dict) -> dict:
-    filhos = [rojo_no(f) if "malha" not in f else rojo_peca(f) for f in m["filhos"]]
+    filhos = [rojo_filho(f) for f in m["filhos"]]
     return {
         "ClassName": "Model",
         "Properties": {
@@ -190,7 +253,7 @@ def rojo_modelo(m: dict) -> dict:
 
 
 def pecas(n: dict) -> int:
-    return sum(pecas(f) if "malha" not in f else 1 for f in n["filhos"])
+    return sum(1 if folha(f) else pecas(f) for f in n["filhos"])
 
 
 def main() -> None:

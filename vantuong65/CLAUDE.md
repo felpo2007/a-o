@@ -55,6 +55,12 @@ repositório é de OUTRO projeto (estratégias de trade). Aqui vale este arquivo
     - os atributos tipados dentro de `Properties`; no topo, ele ignora em silêncio.
   - Peça feita assim não tem a colisão calculada: colide em caixa, e a luz não faz a sombra de
     dentro.
+  - Conferir o SLIM (D-167): ele só é gerado no place da nuvem (Play no Studio dele ou no jogo
+    publicado), nunca numa cópia local. Não há API do estado: só a cor de depuração (F9 →
+    DebugVisualizations → SlimTintMode, ou o menu de visualização do Studio). No cliente,
+    `Stats.PerformanceStats.Memory.PlaceMemory.GraphicsSlimModels` mede a memória dos SLIM
+    carregados. No Play do Studio, a 1.434 studs da casa, nada saiu do streaming em 6 min (o
+    `Opportunistic` quase não libera com memória sobrando), e essa memória ficou em 0.
 - **No PC do dono (Windows):**
   - Rojo 7.4.4, Lune 0.8.9, StyLua 2.0.2 e luau-lsp 1.70.1 portáteis ficam em
     `%LOCALAPPDATA%\Programs\vt65-tools`. As definições do Roblox ficam em

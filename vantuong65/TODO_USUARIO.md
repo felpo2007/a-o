@@ -58,6 +58,10 @@ Textos prontos e imagens: **`LANCAMENTO.md`** (página do jogo, guia do question
   2. Olhe a casa de perto e depois se afaste até uns 150–200 m, comparando com as outras casas de
      telha iguais a ela.
   3. Me diga se, de longe, ela some, muda de forma ou de cor, ou fica igual às outras.
+  - Jeito mais rápido (só quem edita o jogo vê): no jogo publicado, aperte **F9** (Console do
+    Desenvolvedor) → **DebugVisualizations** → **SlimTintMode** → **TranscoderStatus**. A casa e os
+    5 objetos em volta ganham uma cor pelo estado do SLIM (gerando, pronto ou falhou). Me mande uma
+    foto.
   - O Roblox gera o SLIM na nuvem depois da publicação; pode levar um tempo.
   - Limite conhecido: o interior dela fica mais claro que o das outras (D-155).
 

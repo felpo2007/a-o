@@ -19,7 +19,7 @@ CASA = ROOT / "assets" / "estatico" / "vila_casa_03_xomgo.txt"
 def todas(no: dict) -> list[dict]:
     out = []
     for f in no["filhos"]:
-        out += [f] if "malha" in f else todas(f)
+        out += [f] if estatico.folha(f) else todas(f)
     return out
 
 
@@ -71,6 +71,48 @@ def test_modelo_do_rojo_slim_e_tamanho_da_malha():
     # giro de 32,659° em Y
     o = p["Properties"]["CFrame"]["CFrame"]["orientation"]
     assert o[1] == [0, 1, 0] and o[0][1] == 0 and abs(o[0][0] ** 2 + o[0][2] ** 2 - 1) < 1e-5
+
+
+def test_construcao_de_pecas_linha_b(tmp_path):
+    # D-168: o alpendre inclinado (-8° em X) e uma tora (cilindro), como o MapLife monta
+    f = tmp_path / "vila.txt"
+    f.write_text(
+        "M Vila_teste 10.000 5.000 20.000 30.000 1.000\n"
+        "B WedgePart - Alpendre 10.000 6.000 20.000 1.000000 0.000000 0.000000 0.000000 0.990268"
+        " 0.139173 0.000000 -0.139173 0.990268 4.000 1.000 3.000 cqs Thatch Grass"
+        " 0.6118,0.5412,0.3529\n"
+        "B Part Cylinder Tora 0.000 2.000 0.000 1.000000 0.000000 0.000000 0.000000 1.000000"
+        " 0.000000 0.000000 0.000000 1.000000 8.000 1.500 1.500 cqs Wood Wood"
+        " 0.3608,0.2745,0.1882\n",
+        "utf-8",
+    )
+    (m,) = estatico.ler(f)
+    assert m["chave"] == "Vila_teste" and estatico.pecas(m) == 2
+    cunha, tora = m["filhos"]
+    j = estatico.rojo_bloco(cunha)
+    assert j["ClassName"] == "WedgePart" and "Shape" not in j["Properties"]
+    # as linhas da matriz vão como linhas (conferido no Rojo 7.4 e lido de volta no Lune)
+    assert j["Properties"]["CFrame"]["CFrame"]["orientation"][1] == [0.0, 0.990268, 0.139173]
+    assert j["Properties"]["Material"] == "Grass"
+    assert j["Properties"]["Attributes"]["Attributes"]["Material"] == {"String": "Thatch"}
+    t = estatico.rojo_bloco(tora)
+    assert t["ClassName"] == "Part" and t["Properties"]["Shape"] == "Cylinder"
+    assert t["Properties"]["Color"] == [0.3608, 0.2745, 0.1882]
+    assert t["Properties"]["CanCollide"] and t["Properties"]["CastShadow"]
+    # o modelo inteiro sai com as duas peças
+    assert [c["Name"] for c in estatico.rojo_modelo(m)["Children"]] == ["Alpendre", "Tora"]
+
+
+def test_linha_b_incompleta_e_classe_estranha_recusadas(tmp_path):
+    f = tmp_path / "x.txt"
+    f.write_text("M Vila_teste 0 0 0 0 1\nB Part Block Parede 0 0 0 1 0 0\n", "utf-8")
+    with pytest.raises(SystemExit):
+        estatico.ler(f)
+    g = tmp_path / "y.txt"
+    linha = "B TrussPart - Escada" + " 0" * 15 + " cqs - Plastic 1,1,1\n"
+    g.write_text("M Vila_teste 0 0 0 0 1\n" + linha, "utf-8")
+    with pytest.raises(SystemExit):
+        estatico.ler(g)
 
 
 def test_chave_que_depende_do_jogo_e_recusada(tmp_path):

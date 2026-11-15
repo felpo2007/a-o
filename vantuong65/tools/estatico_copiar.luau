@@ -13,6 +13,9 @@
 --      marcas: c CanCollide, q CanQuery, s CastShadow, t Transparency 1, h CanTouch
 --   S <cor> <normal> <rugosidade> <metal> <AlphaMode> <r,g,b>   SurfaceAppearance da última peça
 --   C <r,g,b>                                       cor da última peça (só se fugir do padrão)
+--   B <classe> <forma|-> <nome> <x> <y> <z> <R00..R22> <sx> <sy> <sz> <marcas> <Material|-> <material> <r,g,b>
+--      D-168: peça comum (Part, WedgePart, CornerWedgePart) das construções de peças do MapLife,
+--      com o CFrame inteiro (há peças inclinadas), o material do Roblox e a cor
 --   X <texto>                                       algo fora do previsto (o estatico.py recusa)
 local CHAVE = "vila_casa_03"
 local CENTRO = Vector3.new(-1280.5, 0, -1804.7)
@@ -35,7 +38,79 @@ local function id(s: string): string
 	return (string.gsub(s, "^rbxassetid://", ""))
 end
 
+local function marcasDe(p: BasePart): string
+	local marcas = (if p.CanCollide then "c" else "")
+		.. (if p.CanQuery then "q" else "")
+		.. (if p.CastShadow then "s" else "")
+		.. (if p.Transparency >= 1 then "t" else "")
+		.. (if p.CanTouch then "h" else "")
+	return if marcas == "" then "-" else marcas
+end
+
+-- D-168: peça comum, com o CFrame inteiro
+local function bloco(p: BasePart)
+	if string.find(p.Name, "%s") then
+		table.insert(linhas, "X nome com espaço " .. p:GetFullName())
+	end
+	if p.Transparency > 0 and p.Transparency < 1 then
+		table.insert(linhas, "X transparência " .. p.Transparency .. " " .. p:GetFullName())
+	end
+	for k, v in
+		{
+			Reflectance = p.Reflectance ~= 0,
+			Anchored = not p.Anchored,
+			Massless = p.Massless,
+			CollisionGroup = p.CollisionGroup ~= "Default",
+			MaterialVariant = p.MaterialVariant ~= "",
+			TopSurface = p.TopSurface ~= Enum.SurfaceType.Smooth,
+			BottomSurface = p.BottomSurface ~= Enum.SurfaceType.Smooth,
+		}
+	do
+		if v then
+			table.insert(linhas, "X " .. k .. " fora do padrão em " .. p:GetFullName())
+		end
+	end
+	for k in p:GetAttributes() do
+		if k ~= "Material" then
+			table.insert(linhas, "X atributo " .. k .. " em " .. p:GetFullName())
+		end
+	end
+	for _, c in p:GetChildren() do
+		table.insert(linhas, "X filho " .. c.ClassName .. " em " .. p:GetFullName())
+	end
+	local x, y, z, r00, r01, r02, r10, r11, r12, r20, r21, r22 = p.CFrame:GetComponents()
+	local rot = {}
+	for _, r in { r00, r01, r02, r10, r11, r12, r20, r21, r22 } do
+		table.insert(rot, string.format("%.6f", r))
+	end
+	local s = p.Size
+	table.insert(
+		linhas,
+		table.concat({
+			"B",
+			p.ClassName,
+			if p:IsA("Part") then (p :: Part).Shape.Name else "-",
+			p.Name,
+			f(x),
+			f(y),
+			f(z),
+			table.concat(rot, " "),
+			f(s.X),
+			f(s.Y),
+			f(s.Z),
+			marcasDe(p),
+			tostring(p:GetAttribute("Material") or "-"),
+			p.Material.Name,
+			rgb(p.Color),
+		}, " ")
+	)
+end
+
 local function peca(p: BasePart)
+	if p:IsA("Part") or p:IsA("WedgePart") or p:IsA("CornerWedgePart") then
+		bloco(p)
+		return
+	end
 	if not p:IsA("MeshPart") then
 		table.insert(linhas, "X peça " .. p.ClassName .. " " .. p:GetFullName())
 		return

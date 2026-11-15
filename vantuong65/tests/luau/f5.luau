@@ -662,6 +662,26 @@ test("trim sheet da vila (D-159): as 10 casas sobem com as folhas comuns e o por
 	end
 end)
 
+-- D-168: a construção de peças (pagode, casa comunal, serraria...) também pode ser arte fixa do SLIM
+test("arte fixa (D-155, D-168): o plano acha a construção de peças fixa pelo pivô da base", function()
+	local function semCR(s: string): string
+		return (string.gsub(s, "\r", ""))
+	end
+	local ml = semCR(fs.readFile("src/ServerScriptService/Modules/MapLife.luau"))
+	local vp = string.match(ml, "function MapLife%.villagePart%(.-\nend\n")
+	assert(vp, "MapLife.villagePart não achado")
+	assert(string.find(vp, "m.WorldPivot = cf", 1, true), "o pivô da construção tem que ser o centro da base")
+	local al = semCR(fs.readFile("src/ServerScriptService/Modules/AssetLoader.luau"))
+	local pi = string.match(al, "function AssetLoader%.placeItem%(.-\nend\n")
+	assert(pi, "AssetLoader.placeItem não achado")
+	local a = string.find(pi, 'AssetLoader.staticModel(parent, "Vila_" .. kind, cf.Position)', 1, true)
+	local b = string.find(pi, "MapLife.villagePart(kind", 1, true)
+	assert(a and b and a < b, "a cópia fixa tem que ser procurada antes de montar a construção")
+	-- o copiador escreve as peças comuns (linha B) com o CFrame inteiro
+	local cp = fs.readFile("tools/estatico_copiar.luau")
+	assert(string.find(cp, "p.CFrame:GetComponents()", 1, true), "o copiador grava o CFrame inteiro do bloco")
+end)
+
 print(string.format("%d ok, %d falhas", passed, failed))
 if failed > 0 then
 	process.exit(1)

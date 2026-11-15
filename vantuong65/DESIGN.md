@@ -6598,3 +6598,16 @@ amostra a cada 30 s; o objetivo é Ponte e Cais, D):
 - **Falta (só no jogo publicado):** o Roblox gera o SLIM na nuvem depois da publicação. Comparar a
   casa da entrada de Xóm Gò de perto e de longe com as outras `vila_casa_03`. Se o SLIM funcionar,
   passar mais conjuntos para arte fixa (mais casas da vila).
+- **Tentativa de conferir (2026-11-15, depois da v91):**
+  - Pela documentação, não há API do estado do SLIM: só a cor de depuração (F9 →
+    DebugVisualizations → SlimTintMode, ou o menu de visualização do Studio). A geração só acontece
+    no place da nuvem.
+  - Com o place da nuvem aberto no Studio (sem editar), Play, e o soldado levado a 1.434 studs da
+    casa (o raio do streaming é 1.280):
+    - em 6 min o cliente passou de 733 para 687 modelos de arte e parou;
+    - a casa fixa não saiu do streaming (115 peças no cliente);
+    - `GraphicsSlimModels` ficou em 0 MB.
+  - Com memória sobrando, o `Opportunistic` quase não libera, então o teste por distância não
+    mostrou o SLIM no Studio.
+  - A cor de depuração ficou para depois: o dono estava com outro jogo aberto, e o Studio foi
+    fechado para não travar a placa de vídeo.

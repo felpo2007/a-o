@@ -628,7 +628,15 @@ end
 function AssetLoader.placeItem(it: any, parent: Instance, planned: boolean): Model?
 	if string.sub(it.key, 1, 6) == "parts:" then
 		local cf = CFrame.new(it.x, it.base, it.z) * CFrame.Angles(0, it.yaw, 0)
-		return MapLife.villagePart(string.sub(it.key, 7), parent, cf, it.hx * 2, it.hz * 2)
+		local kind = string.sub(it.key, 7)
+		-- D-168: construção de peças fixa no arquivo (SLIM): a chave é o nome do modelo (Vila_<tipo>)
+		-- e o pivô, o centro da base (MapLife.villagePart)
+		local fixed = AssetLoader.staticModel(parent, "Vila_" .. kind, cf.Position)
+		if fixed then
+			AssetLoader.staticSkipped += 1
+			return fixed
+		end
+		return MapLife.villagePart(kind, parent, cf, it.hx * 2, it.hz * 2)
 	end
 	local tpl = AssetLoader.template(it.key)
 	if not tpl or not budget(it.key, it.x, it.z) then

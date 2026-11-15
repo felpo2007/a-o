@@ -898,6 +898,8 @@ function MapLife.villagePart(kind: string, parent: Instance, cf: CFrame, w: numb
 	else
 		MapLife.objectivePart(kind, m, cf, w, d)
 	end
+	-- D-168: pivô no centro da base, com o giro do plano (a arte fixa do SLIM acha a cópia por ele)
+	m.WorldPivot = cf
 	m.Parent = parent
 	return m
 end
