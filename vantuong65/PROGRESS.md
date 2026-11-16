@@ -347,6 +347,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     - Os uniformes aparecem vestidos no soldado, com o molde de verdade.
     - Conferido: Lune 5 ok na roleta. No Studio, 4 aberturas pararam no item do servidor, com
       desvio de 0,5 px, com e sem PULAR.
+    - **v101 publicada** (versão 106 do place, commit 74bd8a0).
     - O pedido original, guardado para referência:
   - **Lote 61: roleta horizontal na abertura das caixas.** Só a apresentação muda;
     sorteio, chances, preços, prêmios, regras, inventário, compras e gravação ficam iguais.
