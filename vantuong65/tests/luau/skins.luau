@@ -322,6 +322,10 @@ test("D-179: acabamento universal vale em qualquer arma com arte, do lado do jog
 	assert(not Skins.cabe(Skins.get("skin_m14_birch"), "m16"))
 	local ok, why = Skins.canBuy("uni_cristal_rubro", {}, {}, 1e9)
 	assert(not ok and why == "só nas caixas")
+	-- D-181: chave da textura pronta: o universal tem uma por arma
+	assert(Skins.chavePronta("uni_cristal_rubro", "m16") == "uni_cristal_rubro@m16")
+	assert(Skins.chavePronta("skin_m14_birch", "m14") == "skin_m14_birch")
+	assert(type(Skins.TAG_ACABAMENTO) == "string" and #Skins.TAG_ACABAMENTO > 0)
 end)
 
 test("lista por tipo e lado: o de ambos entra nos dois", function()

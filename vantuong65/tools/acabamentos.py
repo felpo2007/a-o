@@ -1811,9 +1811,17 @@ def mapas_classe(
     return metal, rugo
 
 
-def _png(arr: np.ndarray, destino: Path) -> None:
+# D-181: os mapas de metal e aspereza quase não têm detalhe: em 512 custam 1/4 da memória de
+# textura (medido no Studio: 60 acabamentos diferentes na tela, +104 MB com tudo em 1024)
+TAM_CLASSE = 512
+
+
+def _png(arr: np.ndarray, destino: Path, lado: int | None = None) -> None:
     destino.parent.mkdir(parents=True, exist_ok=True)
-    Image.fromarray((np.clip(arr, 0, 1) * 255 + 0.5).astype(np.uint8)).save(destino, optimize=True)
+    im = Image.fromarray((np.clip(arr, 0, 1) * 255 + 0.5).astype(np.uint8))
+    if lado and im.size != (lado, lado):
+        im = im.resize((lado, lado), Image.BOX)
+    im.save(destino, optimize=True)
 
 
 def le_meta() -> dict:
@@ -1995,6 +2003,23 @@ def cmd_luau(specs: list[dict]) -> None:
                     "NormalMap": f"rbxassetid://{normal or orig['normal']}",
                     "MetalnessMap": f"rbxassetid://{metal or orig['metal']}",
                     "RoughnessMap": f"rbxassetid://{rugo or orig['rugo']}",
+                    # D-181: script do jogo não lê os mapas da SurfaceAppearance; o cliente lê daqui
+                    # para pré-carregar (Controllers/AcabamentoCarga)
+                    "Attributes": {
+                        "Attributes": {
+                            "Mapas": {
+                                "String": ",".join(
+                                    str(x)
+                                    for x in (
+                                        cor,
+                                        normal or orig["normal"],
+                                        metal or orig["metal"],
+                                        rugo or orig["rugo"],
+                                    )
+                                )
+                            }
+                        }
+                    },
                 },
             }
         )
@@ -2142,8 +2167,8 @@ def main() -> None:
                 if ck not in classes_feitas and (a.todas or not mp.exists()) and not a.previas:
                     pbr = pbr or pbr_original(arma)
                     metal, rugo = mapas_classe(CLASSE[rec], sel, pbr[1], pbr[2])
-                    _png(metal, mp)
-                    _png(rugo, SAIDA / "classes" / f"{ck}_r.png")
+                    _png(metal, mp, TAM_CLASSE)
+                    _png(rugo, SAIDA / "classes" / f"{ck}_r.png", TAM_CLASSE)
                 classes_feitas.add(ck)
             meta[s["id"]] = info
             imgs.append(previa(mapa, tex, f"{s['id']} ({rec})"))

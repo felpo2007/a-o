@@ -561,7 +561,7 @@
   "src/ReplicatedStorage/Shared/Weapons.luau:540"
  ],
  "([%w_]+)=([%w_]+)": [
-  "src/ReplicatedStorage/Shared/Skins.luau:1780"
+  "src/ReplicatedStorage/Shared/Skins.luau:1794"
  ],
  "(agora %d)": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:1553"
@@ -9308,8 +9308,8 @@
   "src/ReplicatedStorage/Shared/Skins.luau:1052",
   "src/ReplicatedStorage/Shared/Skins.luau:1062",
   "src/ReplicatedStorage/Shared/Skins.luau:1072",
-  "src/ReplicatedStorage/Shared/Skins.luau:1670",
-  "src/ReplicatedStorage/Shared/Skins.luau:1731",
+  "src/ReplicatedStorage/Shared/Skins.luau:1684",
+  "src/ReplicatedStorage/Shared/Skins.luau:1745",
   "src/ReplicatedStorage/Shared/SpawnRules.luau:98",
   "src/ReplicatedStorage/Shared/SpawnRules.luau:140",
   "src/ReplicatedStorage/Shared/Vehicles.luau:51",
@@ -9739,8 +9739,8 @@
   "src/ReplicatedStorage/Shared/Skins.luau:1337",
   "src/ReplicatedStorage/Shared/Skins.luau:1347",
   "src/ReplicatedStorage/Shared/Skins.luau:1357",
-  "src/ReplicatedStorage/Shared/Skins.luau:1670",
-  "src/ReplicatedStorage/Shared/Skins.luau:1731",
+  "src/ReplicatedStorage/Shared/Skins.luau:1684",
+  "src/ReplicatedStorage/Shared/Skins.luau:1745",
   "src/ReplicatedStorage/Shared/Vehicles.luau:203",
   "src/ReplicatedStorage/Shared/Weapons.luau:269",
   "src/ReplicatedStorage/Shared/Weapons.luau:298",
@@ -11854,7 +11854,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameUI.client.luau:298"
  ],
  "escolha um lado primeiro": [
-  "src/ReplicatedStorage/Shared/Skins.luau:1732",
+  "src/ReplicatedStorage/Shared/Skins.luau:1746",
   "src/ServerScriptService/Modules/ProgressionService.luau:362"
  ],
  "escolha um ponto pronto": [
@@ -11980,7 +11980,7 @@
  "faltam %s": [
   "src/ReplicatedStorage/Shared/Progression.luau:498",
   "src/ReplicatedStorage/Shared/Progression.luau:653",
-  "src/ReplicatedStorage/Shared/Skins.luau:1717"
+  "src/ReplicatedStorage/Shared/Skins.luau:1731"
  ],
  "far": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/SoldierAnimations.client.luau:560",
@@ -12120,7 +12120,7 @@
  "foto + consultor": [
   "src/ReplicatedStorage/Shared/Commerce.luau:460",
   "src/ReplicatedStorage/Shared/Skins.luau:708",
-  "src/ReplicatedStorage/Shared/Skins.luau:1642"
+  "src/ReplicatedStorage/Shared/Skins.luau:1656"
  ],
  "four": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:766"
@@ -12689,7 +12689,7 @@
   "src/ReplicatedStorage/Shared/Progression.luau:494"
  ],
  "já é sua": [
-  "src/ReplicatedStorage/Shared/Skins.luau:1711"
+  "src/ReplicatedStorage/Shared/Skins.luau:1725"
  ],
  "k:reset": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:678"
@@ -14723,14 +14723,14 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Progresso.client.luau:891"
  ],
  "skin desconhecida": [
-  "src/ReplicatedStorage/Shared/Skins.luau:1709",
-  "src/ReplicatedStorage/Shared/Skins.luau:1730"
+  "src/ReplicatedStorage/Shared/Skins.luau:1723",
+  "src/ReplicatedStorage/Shared/Skins.luau:1744"
  ],
  "skin do outro lado": [
-  "src/ReplicatedStorage/Shared/Skins.luau:1734"
+  "src/ReplicatedStorage/Shared/Skins.luau:1748"
  ],
  "skin não é sua": [
-  "src/ReplicatedStorage/Shared/Skins.luau:1736"
+  "src/ReplicatedStorage/Shared/Skins.luau:1750"
  ],
  "skin:": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Progresso.client.luau:862",
@@ -14960,6 +14960,7 @@
   "src/ReplicatedFirst/LoadingScreen.client.luau:924",
   "src/ReplicatedFirst/LoadingScreen.client.luau:949",
   "src/ReplicatedFirst/LoadingScreen.client.luau:965",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/AcabamentoCarga.client.luau:30",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Acerto.client.luau:53",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ArquivoTela.client.luau:771",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/AudioController.client.luau:454",
@@ -15228,10 +15229,10 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:753"
  ],
  "só nas caixas": [
-  "src/ReplicatedStorage/Shared/Skins.luau:1715"
+  "src/ReplicatedStorage/Shared/Skins.luau:1729"
  ],
  "só no conjunto em Game Pass": [
-  "src/ReplicatedStorage/Shared/Skins.luau:1713"
+  "src/ReplicatedStorage/Shared/Skins.luau:1727"
  ],
  "só o Suporte põe a caixa": [
   "src/ReplicatedStorage/Shared/CaixaMunicao.luau:109"

@@ -7229,3 +7229,37 @@ próprios.
 - **Gerador mais rápido:** a cor e o relevo da mesma gema dividem as facetas (`Ctx.memo`): 12
   universais numa arma em 90 s.
 - **Conferido:** Lune 700 ok, pytest 70. No Studio, as 344 SurfaceAppearance no place, os 12 novos nas armas de vitrine e o Ouro Derretido trocado, equipado na M14 e visto em campo; 0 erros. Detalhes em `testes/UNIVERSAIS_D180_2026-11-16.md`.
+
+## D-181 — Lote 65: desempenho e carga dos acabamentos (2026-11-16)
+
+**Pedido do dono:** "faça isso então", depois do relatório da D-180, que deixava sem teste o jogo
+publicado e o desempenho com muitas armas de acabamento na tela.
+
+- **Medido no Studio** (60 armas na frente da câmera, qualidade 10):
+  - 60 armas de fábrica: 65 chamadas de desenho, 743 mil triângulos, GPU 1,5 ms;
+  - as mesmas 60 com 60 acabamentos diferentes (o pior caso de uma partida 30 contra 30):
+    - 140 a 148 chamadas de desenho (cada acabamento é um material);
+    - triângulos e GPU iguais (1,5 a 1,6 ms);
+    - +104 a +137 MB de textura (169 mapas de 1024 novos: 60 de cor, 49 de relevo, 30 de metal
+      e 30 de aspereza);
+  - o contador de memória de textura do Studio oscila mais que a diferença a medir: trocar os
+    mapas de metal e aspereza de 512 de volta para 1024 deu −35 MB. Vale a conta de pixels, não
+    esse número.
+- **Mapas de metal e aspereza em 512** (`TAM_CLASSE`): quase não têm detalhe e, em 512, têm 1/4
+  dos pixels. As 180 imagens foram refeitas e enviadas de novo.
+- **Carga das texturas** (`Controllers/AcabamentoCarga`, etiqueta `Skins.TAG_ACABAMENTO`):
+  - no Studio, 10 de 240 imagens pedidas de uma vez falharam, e a imagem recém-enviada também
+    falha por alguns minutos. Antes, a arma ficava clara a partida inteira;
+  - agora a SA do acabamento é pré-carregada. Se falhar, há 3 novas tentativas (4, 8 e 12 s), e
+    a SA é recolocada na peça quando a textura chega;
+  - se não chegar, a arte de fábrica volta só naquele cliente (atributo `AcabamentoFalhou` na
+    peça), e o próximo acabamento entra normalmente;
+  - os acabamentos equipados (`WeaponSkins`) são pré-carregados ao mudar, antes de nascer;
+  - script do jogo não lê o `ColorMap` da SurfaceAppearance (só plugin). Os 4 IDs vão no
+    atributo `Mapas` da SA pronta (`--luau`), e `Skins.chavePronta` dá a chave.
+- **Conferido no Studio:**
+  - simulando uma imagem que não existe, a arma voltou à arte de fábrica em 26 s;
+  - trocar de acabamento depois e tirar a skin funcionaram;
+  - na 2ª medição, as 240 imagens carregaram em 6 s, sem falha;
+  - 0 erros.
+- **Jogo publicado:** JOGO

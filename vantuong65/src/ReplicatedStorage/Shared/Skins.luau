@@ -1629,6 +1629,20 @@ Skins.UNIVERSAIS = UNIVERSAIS
 Skins.UNIVERSAIS_D179 = table.move(UNIVERSAIS, 1, 12, 1, {})
 Skins.UNIVERSAIS_D180 = table.move(UNIVERSAIS, 13, #UNIVERSAIS, 1, {})
 
+-- D-181: etiqueta da SurfaceAppearance de acabamento posta na arma (o cliente pré-carrega, tenta de
+-- novo e, se a textura não chegar, volta a arte de fábrica: Controllers/AcabamentoCarga)
+Skins.TAG_ACABAMENTO = "VT65Acabamento"
+
+-- Chave da textura e da SurfaceAppearance pronta de um acabamento numa arma: o id; o universal tem
+-- uma por arma ("id@arma")
+function Skins.chavePronta(skinId: string, arma: string?): string
+	local s = Skins.get(skinId)
+	if s and s.universal then
+		return skinId .. "@" .. tostring(arma)
+	end
+	return skinId
+end
+
 -- arma que aceita acabamento universal
 function Skins.armaUniversal(arma: any): boolean
 	return type(arma) == "string" and ARMA_UNIVERSAL[arma] == true
@@ -1875,11 +1889,9 @@ end
 function Skins.applyWeapon(model: Instance, skinId: string?, weaponId: string?)
 	local found = if skinId then Skins.get(skinId) else nil
 	local skin: Skin? = if found and found.kind == "weapon" then found else nil
-	local arma = weaponId or model:GetAttribute("WeaponId") or model.Name
-	local chave: string? = nil
-	if skin then
-		chave = if skin.universal then skin.id .. "@" .. tostring(arma) else skin.id
-	end
+	local attr = model:GetAttribute("WeaponId")
+	local arma: string = weaponId or (if type(attr) == "string" then attr else model.Name)
+	local chave: string? = if skin then Skins.chavePronta(skin.id, arma) else nil
 	-- D-178/D-179: a arte das armas é uma malha só com a textura inteira (SurfaceAppearance), sem
 	-- as peças Madeira/Metal. O acabamento põe a SurfaceAppearance pronta dele (a cor nova com o
 	-- relevo e o material) ou, sem ela, troca o TextureID; a original fica guardada numa pasta da
@@ -1919,6 +1931,7 @@ function Skins.applyWeapon(model: Instance, skinId: string?, weaponId: string?)
 				if pronta then
 					local c = pronta:Clone()
 					c.Name = "VT65SkinSAAtiva"
+					c:AddTag(Skins.TAG_ACABAMENTO)
 					c.Parent = d
 					d.TextureID = base
 				else
