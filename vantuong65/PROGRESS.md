@@ -271,7 +271,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
       fronteiras escuras;
     - objetivos em etiquetas bege com seta.
     Conferida no Studio numa tela de teste com uma partida de exemplo; abrir pelo M não foi
-    conferido (teclado do MCP).
+    conferido (teclado do MCP). **v95 publicada** (versão 99 do place, commit 49ae18a).
   - Servidores: o Roblox escolhe a região de cada servidor pelo jogador (os EUA já têm) e abre
     servidores novos sozinho quando os cheios lotam. O jogo é 30 contra 30; 1.000 jogadores ao
     mesmo tempo são ~17 servidores, abertos pelo próprio Roblox.
