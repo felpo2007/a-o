@@ -264,7 +264,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
   - **Lote 54 (D-170): feito.** Mirando no celular, a arma atira sozinha quando passa num inimigo
     (vem ligado; dá para desligar no painel). SKS com o olho a 14 cm. M60 refeita no Blender, com
     um anel na alça e a massa em lâmina: no Studio, do olho, o anel fica centrado e a lâmina no
-    meio dele. 6.024 triângulos.
+    meio dele. 6.024 triângulos. **v94 publicada** (versão 98 do place, commit 71d5b8a).
   - Servidores: o Roblox escolhe a região de cada servidor pelo jogador (os EUA já têm) e abre
     servidores novos sozinho quando os cheios lotam. O jogo é 30 contra 30; 1.000 jogadores ao
     mesmo tempo são ~17 servidores, abertos pelo próprio Roblox.
