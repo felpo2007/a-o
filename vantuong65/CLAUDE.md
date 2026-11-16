@@ -53,6 +53,9 @@ repositório é de OUTRO projeto (estratégias de trade). Aqui vale este arquivo
   - Construção de peças do `MapLife` (D-168): use `PREFIXO = "Vila_"` no copiador; as peças comuns
     saem em linhas `B` com o CFrame inteiro, e o pivô é o centro da base.
   - Casa que se repete (D-169): `MOLDES = "vila_casa_"` dá um molde por chave e `I` para as outras.
+  - Construção nova no `ArtPlan` (D-172): ponha numa passada depois de tudo o que é fixo, com
+    folga, e confira no Lune se as construções de antes têm chave, posição, giro e base iguais.
+    Peça fixa que muda de lugar fica duplicada, com o aviso "o plano não bateu".
   - Texto grande do Studio (D-169): devolva em pedaços que começam com `VT65COPIA <nome> i/n` e
     grave com `uv run python tools/copia_da_conversa.py <registro.jsonl> <nome> <saida>` (o registro
     da conversa fica em `~/.claude/projects/<projeto>/<sessão>.jsonl`). Nada de transcrever à mão.
@@ -240,7 +243,7 @@ O `sourcemap.json` não vai para o Git.
 - Segredos só no `.env` (no `.gitignore`), nunca no código nem no chat.
 - ForgeGUI: nunca regenerar um job em `outcome_unknown`. "failed" com `retryable` pode ser
   retomado com `generation_retry`.
-- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-172) e atualize `PROGRESS.md`.
+- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-173) e atualize `PROGRESS.md`.
 - Tetos de triângulos por modelo: vegetação ≤ 6 mil (D-135), props e herói ≤ 20 mil (`ArtBudget`,
   conferido pelo teste da F5).
 - Commits no branch acima, com mensagem em português.

@@ -320,6 +320,48 @@ ArtPlan.OBJECTIVE_LAYOUT = {
 		{ key = "granary", r = 11, a = -2.1, scale = 1.3 },
 	},
 } :: { [string]: { any } }
+-- D-172 (dono: "traga mais coisas para os outros objetivos, mais árvores, construções grandes"): um
+-- segundo anel de construções em volta de A, B, D e E, de 16 a ~45 m do mastro (a: rumo em rad, fixo;
+-- r: a primeira distância tentada). Entram depois de tudo o que é fixo no arquivo (SLIM, D-155) e com
+-- 3 m de folga de patamar, objeto e estrada: uma peça nova nunca empurra uma fixa.
+ArtPlan.OBJECTIVE_EXTRA = {
+	-- a fazenda do arrozal: casa grande, casa de varanda, celeiro e medas. Em volta é lâmina e dique,
+	-- e nenhuma peça dali é fixa no arquivo: 1 m de folga (clear)
+	Arrozais = {
+		{ key = "vila_casa_04", r = 24, a = 0.8, clear = 1 },
+		{ key = "hut_veranda", r = 22, a = 2.6, clear = 1 },
+		{ key = "granary", r = 18, a = 4.2, scale = 1.4, clear = 1 },
+		{ key = "straw_stack", r = 16, a = 5.2, scale = 1.2, clear = 1 },
+		{ key = "straw_stack", r = 20, a = 5.7, clear = 1 },
+	},
+	Serraria = { -- o segundo galpão, mais toras, a palhoça dos lenhadores e o abrigo de folhas
+		{ kind = "serraria", r = 24, a = 1.2 },
+		{ kind = "toras", r = 20, a = 2.8 },
+		{ kind = "toras", r = 22, a = 4.4, turn = 0.4 },
+		{ key = "hut_thatch", r = 24, a = 5.4, scale = 1.2 },
+		{ key = "vc_lean_to", r = 20, a = 0.2 },
+	},
+	["Ponte e Cais"] = { -- o armazém grande do porto, a casa de telha, o celeiro e a cozinha
+		{ key = "vila_casa_06", r = 24, a = 1.6 },
+		{ key = "house_tile", r = 22, a = 3.2, scale = 1.3 },
+		{ key = "granary", r = 18, a = 4.6, scale = 1.3 },
+		{ key = "hut_kitchen", r = 18, a = 0.4 },
+	},
+	Engenho = { -- a casa do dono do engenho, a segunda caldeira, a casa de varanda e o celeiro
+		{ key = "vila_casa_08", r = 26, a = 1.0 },
+		{ kind = "caldeira", r = 22, a = 2.8 },
+		{ key = "hut_veranda", r = 22, a = 4.4 },
+		{ key = "granary", r = 18, a = 5.6, scale = 1.3 },
+	},
+} :: { [string]: { any } }
+ArtPlan.EXTRA_CLEAR_M = 3 -- folga em volta da pegada das peças do D-172 (`clear` na peça muda)
+-- D-172: árvores em volta de cada objetivo (chave, quantas, escala mínima e máxima), de 22 a 48 m
+ArtPlan.OBJECTIVE_TREES = {
+	Arrozais = { { "coconut_palm", 6, 0.9, 1.15 }, { "banana", 4, 0.9, 1.1 }, { "ph_island_tree_01", 2, 2.6, 3.2 } },
+	Serraria = { { "canopy_tree", 4, 0.9, 1.1 }, { "ph_island_tree_02", 4, 2.8, 3.4 } },
+	["Ponte e Cais"] = { { "coconut_palm", 6, 0.9, 1.15 }, { "ph_island_tree_02", 4, 2.6, 3.2 } },
+	Engenho = { { "coconut_palm", 4, 0.9, 1.15 }, { "banana", 4, 0.9, 1.1 }, { "ph_island_tree_01", 3, 2.6, 3.2 } },
+} :: { [string]: { any } }
 ArtPlan.BRIDGE_OBJECTIVE = "Ponte e Cais"
 -- D-148 (pedido do dono: "faça as pontes grandes o suficiente para passar um veículo como o tanque"):
 -- 7 m, a largura da estrada principal (era 3,6 m, só um jipe; o M48 tem 3,63 m)
@@ -1007,6 +1049,47 @@ function ArtPlan.structures(ctx: Ctx, has: (string) -> boolean): { Item }
 			end
 		end
 	end
+	-- D-172: o segundo anel dos objetivos, depois de tudo o que é fixo no arquivo. Rumo fixo e, se não
+	-- couber, 0,35 rad para cada lado (a volta inteira) e 3 m mais longe (até +36 m). A pegada inteira
+	-- fica a 10 m da borda da área jogável (a casa grande do Arrozais caía rente à borda sul)
+	local BB = MC.Bounds
+	local function wellInside(x: number, z: number, rr: number): boolean
+		return x - rr >= BB.minX and x + rr <= BB.maxX and z - rr >= BB.minZ and z + rr <= BB.maxZ
+	end
+	for _, sp in MC.Strongpoints do
+		local extra = ArtPlan.OBJECTIVE_EXTRA[sp.name]
+		if extra then
+			local n = 0
+			for _, e in extra do
+				local key = objKey(e)
+				if string.sub(key, 1, 6) ~= "parts:" and not has(key) then
+					continue
+				end
+				local hx, hz = half(key, e.scale or 1)
+				local clear = (e.clear or ArtPlan.EXTRA_CLEAR_M) / M
+				local done = false
+				for k = 0, 12 do
+					for t = 0, 17 do
+						local th = e.a + (if t % 2 == 0 then 1 else -1) * math.ceil(t / 2) * 0.35
+						local r = (e.r + 3 * k) / M
+						local x, z = sp.x + math.cos(th) * r, sp.z + math.sin(th) * r
+						local yaw = math.pi / 2 - th + (e.turn or 0)
+						local rr = math.sqrt(hx * hx + hz * hz) + 10 / M
+						if wellInside(x, z, rr) and objFree(x, z, yaw, hx + clear, hz + clear) then
+							padded(key, x, z, yaw, e.scale or 1, "special", { objective = sp.name, extra = true })
+							n += 1
+							done = true
+							break
+						end
+					end
+					if done then
+						break
+					end
+				end
+			end
+			objCount[sp.name] = (objCount[sp.name] or 0) + n
+		end
+	end
 	-- com todos os patamares no chão: base nunca acima do chão mais baixo sob a pegada (onde dois
 	-- patamares se encostam o chão é a média dos dois)
 	for _, it in out do
@@ -1218,6 +1301,82 @@ function ArtPlan.plants(
 				local key = if i % 2 == 0 then "coconut_palm" else "banana"
 				local tx, tz = rot(h[1], h[2], h[3], rng:range(-4, 4) / M, V.lotD / 2 + 1 / M)
 				add(key, tx, tz, rng:range(0, 6.28), rng:range(0.9, 1.1))
+			end
+		end
+		-- D-172 (dono: "mais árvores na vila"): sorteio próprio, para as plantas de antes não mudarem
+		local rv2 = Rng.new(19650818 + 172)
+		-- árvores nos vãos entre os lotes, dentro do bambuzal: grade de 7 m com sorteio de 2 m, do meio
+		-- para fora (a grade de canto a canto punha todas na borda), até 30, a 6 m uma da outra. No fundo
+		-- dos lotes quase tudo é patamar, beco ou rua: lá a planta não entra
+		local TREES = { "coconut_palm", "banana", "coconut_palm", "ph_island_tree_01" }
+		local cand: { { number } } = {}
+		local gu = -ru + step / 2
+		while gu <= ru do
+			local gv = -rv + step / 2
+			while gv <= rv do
+				local u2, v2 = gu + rv2:range(-2, 2) / M, gv + rv2:range(-2, 2) / M
+				-- dentro da elipse do bambuzal, 4 m para dentro
+				local eu, ev = u2 / (ru - 4 / M), v2 / (rv - 4 / M)
+				if eu * eu + ev * ev < 1 then
+					table.insert(cand, { u2, v2, eu * eu + ev * ev })
+				end
+				gv += step
+			end
+			gu += step
+		end
+		table.sort(cand, function(a: { number }, b: { number }): boolean
+			return a[3] < b[3]
+		end)
+		local placed: { { number } } = {}
+		for _, c in cand do
+			if #placed >= 30 then
+				break
+			end
+			local x, z = world(c[1], c[2])
+			local near = false
+			for _, q in placed do
+				if (q[1] - x) ^ 2 + (q[2] - z) ^ 2 < (6 / M) ^ 2 then
+					near = true
+					break
+				end
+			end
+			if not near then
+				local key = TREES[1 + (#placed % #TREES)]
+				local scale = if key == "ph_island_tree_01" then rv2:range(2.2, 2.8) else rv2:range(0.9, 1.15)
+				if has(key) and add(key, x, z, rv2:range(0, 6.28), scale, scale >= 2) then
+					table.insert(placed, { x, z })
+				end
+			end
+		end
+		-- árvores de sombra em volta da praça do mercado (as figueiras das praças de vila)
+		for k = 0, 7 do
+			local a = k * math.pi / 4 + rv2:range(-0.2, 0.2)
+			local r = V.plazaHalf + rv2:range(4, 8) / M
+			local key = if k % 2 == 0 then "ph_island_tree_01" else "ph_island_tree_03"
+			if not has(key) then
+				key = "hill_tree"
+			end
+			local scale = if key == "hill_tree" then 1 else rv2:range(2.6, 3.2)
+			local tx, tz = V.x + math.cos(a) * r, V.z + math.sin(a) * r
+			add(key, tx, tz, rv2:range(0, 6.28), scale, true)
+		end
+	end
+	-- D-172: árvores em volta dos objetivos A, B, D e E (ArtPlan.OBJECTIVE_TREES), sorteio próprio
+	local ro = Rng.new(19650818 + 1720)
+	for _, sp in MC.Strongpoints do
+		for _, spec in ArtPlan.OBJECTIVE_TREES[sp.name] or {} do
+			local key, count, s0, s1 = spec[1], spec[2], spec[3], spec[4]
+			if has(key) then
+				local put, tries = 0, 0
+				while put < count and tries < count * 8 do
+					tries += 1
+					local a, r = ro:range(0, 2 * math.pi), ro:range(22, 48) / M
+					local tx, tz = sp.x + math.cos(a) * r, sp.z + math.sin(a) * r
+					local scale = ro:range(s0, s1)
+					if inBounds(tx, tz) and add(key, tx, tz, a, scale, scale >= 2) then
+						put += 1
+					end
+				end
 			end
 		end
 	end

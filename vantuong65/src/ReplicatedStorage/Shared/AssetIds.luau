@@ -320,10 +320,10 @@ return {
 	-- imagem em 0 e o decal publicado, o servidor resolve a imagem no início (CartaService); com os
 	-- dois em 0, o mapa tático usa o desenho simples de antes.
 	Carta = {
-		nw = 113094885749942,
-		ne = 92641264376488,
-		sw = 72705992852209,
-		se = 106452292950916,
+		nw = 79349546991710,
+		ne = 77775671768371,
+		sw = 72623303265319,
+		se = 74027804366788,
 	},
 	CartaImages = {
 		nw = 0,

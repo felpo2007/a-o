@@ -97,6 +97,15 @@ return function(): Result
 				add(e.key, at(sp.x, sp.z), 1)
 			end
 		end
+		-- D-172: o segundo anel de construções e as árvores em volta do objetivo
+		for _, e in ArtPlan.OBJECTIVE_EXTRA[sp.name] or {} do
+			if e.key then
+				add(e.key, at(sp.x, sp.z), 1)
+			end
+		end
+		for _, t in ArtPlan.OBJECTIVE_TREES[sp.name] or {} do
+			add(t[1], at(sp.x, sp.z), t[2])
+		end
 	end
 	-- 3) bosques das colinas
 	for _, l in MapConfig.Locations do

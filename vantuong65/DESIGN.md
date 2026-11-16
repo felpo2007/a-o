@@ -6799,3 +6799,35 @@ seta). Da imagem vale o estilo; o mapa é o nosso, de 700 x 700 m (regra da mem�
 - Subiram duas séries de blocos. A primeira (115672300899918, 116059414410035, 110806933850980 e
   117558276761799) ainda tinha a rosa dos ventos e não é usada.
 
+## D-172 — Lote 56: mais construções e árvores nos objetivos e na vila (2026-11-15)
+
+**Pedido do dono:** "traga mais coisas para os outros objetivos, mais árvores, construções grandes,
+mais árvores na vila."
+
+- **Segundo anel de construções** (`ArtPlan.OBJECTIVE_EXTRA`), de 16 a ~55 m do mastro:
+  - A Arrozais: a fazenda. Casa grande (`vila_casa_04`), casa de varanda, celeiro maior e duas
+    medas;
+  - B Serraria: o segundo galpão, mais duas pilhas de toras, a palhoça dos lenhadores e um abrigo
+    de folhas;
+  - D Ponte e Cais: o armazém grande (`vila_casa_06`), a casa de telha, o celeiro e a cozinha;
+  - E Engenho: a casa do dono (`vila_casa_08`), a segunda caldeira, a casa de varanda e o celeiro.
+  - No plano entraram as 18. Os objetivos passaram de 3/4/9/4 peças para 8/9/13/8 (A/B/D/E).
+- **Sem mexer no que é fixo (SLIM, D-155):**
+  - as peças novas entram numa passada própria, depois da vila, com 3 m de folga de patamar,
+    objeto e estrada. No Arrozais, que é todo lâmina e dique e não tem peça fixa, a folga é 1 m;
+  - a pegada fica a 10 m da borda da área: a casa grande do Arrozais caía rente à borda sul;
+  - conferido no Lune: as 409 construções de antes têm chave, posição, giro e base idênticos;
+  - no Studio, 53 de 53 modelos fixos casaram, sem aviso.
+- **Árvores** (sorteios próprios, para as plantas de antes não mudarem):
+  - em volta de cada objetivo, de 22 a 48 m (`ArtPlan.OBJECTIVE_TREES`): coqueiros e bananeiras
+    nas fazendas, árvores grandes no Engenho, na Ponte e na Serraria (com emergentes na mata);
+  - na vila: árvores de sombra em volta da praça e uma grade do meio para fora nos vãos entre os
+    lotes (até 30, a 6 m uma da outra). No fundo dos lotes não cabem: é tudo patamar, beco e rua.
+    A grade de canto a canto punha as 30 na borda.
+  - A 90 m do meio da vila são 34 árvores fora a mata (eram 2). No jogo, as plantas de quintal,
+    sebe e vila foram de 394 para 467 e a arte carregada de 855 para 946 modelos.
+- **Carta:** as construções novas entram na carta de atlas (`CONSTRUCAO_OBJETIVO` do
+  `make_carta.py`). Os blocos foram regerados e subidos de novo.
+- **Limite:** os bots usam as construções novas como abrigo, como as outras; não foi medido se o
+  Offensive ficou mais lento.
+

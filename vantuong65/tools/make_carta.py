@@ -594,7 +594,19 @@ def cemiterio(q: Quadro, cam: Image.Image, d: Dados) -> None:
 
 STUD_M = 0.28  # metros por stud
 # construções dos objetivos (lote 26b, D-141) desenhadas em preto, como as casas
-CONSTRUCAO_OBJETIVO = {"serraria", "caldeira", "hut_kitchen", "hut_thatch", "house_tile", "granary"}
+CONSTRUCAO_OBJETIVO = {
+    "serraria",
+    "caldeira",
+    "hut_kitchen",
+    "hut_thatch",
+    "house_tile",
+    "granary",
+    # D-172: o segundo anel dos objetivos (ArtPlan.OBJECTIVE_EXTRA)
+    "hut_veranda",
+    "vila_casa_04",
+    "vila_casa_06",
+    "vila_casa_08",
+}
 
 
 def _ret(

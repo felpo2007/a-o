@@ -272,6 +272,13 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     - objetivos em etiquetas bege com seta.
     Conferida no Studio numa tela de teste com uma partida de exemplo; abrir pelo M não foi
     conferido (teclado do MCP). **v95 publicada** (versão 99 do place, commit 49ae18a).
+  - **Lote 56 (D-172): feito.** Mais construções nos objetivos:
+    - A: a fazenda;
+    - B: o segundo galpão, toras e a palhoça;
+    - D: o armazém grande;
+    - E: a casa do dono e a segunda caldeira.
+    São 18 peças novas e árvores em volta de cada objetivo. Na vila são 34 árvores (eram 2). As
+    peças fixas do SLIM não mudaram (Lune: 409 iguais; Studio: 53 de 53).
   - Servidores: o Roblox escolhe a região de cada servidor pelo jogador (os EUA já têm) e abre
     servidores novos sozinho quando os cheios lotam. O jogo é 30 contra 30; 1.000 jogadores ao
     mesmo tempo são ~17 servidores, abertos pelo próprio Roblox.
