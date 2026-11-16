@@ -278,7 +278,8 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     - D: o armazém grande;
     - E: a casa do dono e a segunda caldeira.
     São 18 peças novas e árvores em volta de cada objetivo. Na vila são 34 árvores (eram 2). As
-    peças fixas do SLIM não mudaram (Lune: 409 iguais; Studio: 53 de 53).
+    peças fixas do SLIM não mudaram (Lune: 409 iguais; Studio: 53 de 53). **v96 publicada**
+    (versão 100 do place, commit e8776c4).
   - Servidores: o Roblox escolhe a região de cada servidor pelo jogador (os EUA já têm) e abre
     servidores novos sozinho quando os cheios lotam. O jogo é 30 contra 30; 1.000 jogadores ao
     mesmo tempo são ~17 servidores, abertos pelo próprio Roblox.
