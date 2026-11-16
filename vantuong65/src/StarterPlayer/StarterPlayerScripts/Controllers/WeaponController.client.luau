@@ -332,6 +332,11 @@ local function canShoot(): boolean
 	if Input.state.map then -- carta aberta na mão (D-98): o fuzil está a tiracolo
 		return false
 	end
+	-- lote 66 (dono: "estou conseguindo atirar enquanto corro"): correndo, a arma vai para o lado. O
+	-- gatilho tira da corrida (InfantryController) e o tiro sai quando o corpo para de correr
+	if not seated() and (Input.state.sprinting or char:GetAttribute("Sprinting") == true) then
+		return false
+	end
 	if seated() then
 		return player:GetAttribute("SeatFire") == true
 	end

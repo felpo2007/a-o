@@ -419,6 +419,48 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
       - o console tem 134 erros "PBR textures may not be visible", em todas as SurfaceAppearance do
         jogo (também nas de antes). Fica para investigar.
     - **v105 publicada** (versão 110 do place, commit 072148e).
+- Pedido do dono (16/11, com a imagem da tela de carregamento e de uma loja): uma lista de 24
+  itens e a especificação da adaptação para celulares e tablets (`especificacao/PROMPT_MOBILE.md`,
+  só local). Vai em lotes pequenos, primeiro os defeitos que atrapalham a partida.
+  - **Lote 66 (D-182): feito.**
+    - O contador do pente cai a cada tiro (o HUD segue o carregador do cliente).
+    - Correndo não se atira: o gatilho tira da corrida e o tiro sai quando o corpo para.
+    - O JOGAR do menu principal leva à mesa (lado, squad, papel e ponto). O JOGAR AGORA fica
+      na mesa.
+    - Conferido: Lune 700 ok e pytest 70. No Studio, com o toque:
+      - o HUD foi de 20 para 17 com o carregador;
+      - correndo, nenhum tiro saiu;
+      - o JOGAR abriu a escolha do lado.
+    - Não testado: mouse e Shift, controle, celular de verdade e o jogo publicado.
+  - **Fila, na ordem prevista** (cada um num lote, com teste no Studio):
+    1. a pá: "ela n esta funcionando" e "crie a pá no blender";
+    2. "helicopoteros quando pousam ainda flutuam";
+    3. "os eventos n estao acontecendo", e melhorá-los;
+    4. "a tela de carregamento inicial esta demorando demais";
+    5. a carta tática: "n consigo ver certos lugares e selecionar certos lugares";
+    6. a adaptação completa ao celular e ao tablet (`PROMPT_MOBILE.md`), em vários lotes:
+       - matriz de auditoria P0 a P3;
+       - perfis pelo `PreferredInput` e áreas seguras;
+       - tamanhos num lugar só;
+       - dois polegares com tiro arrastando;
+       - editor do HUD com predefinições;
+       - modo de diagnóstico e menus;
+       - medir em vários tamanhos de tela;
+       - a loja e a roleta sem mudar preço, chance nem compra;
+    7. 3ª pessoa: vista melhor e o soldado à esquerda;
+    8. corrida sem saltitar e a animação de deslizar;
+    9. o mapa:
+       - mais cara de guerra;
+       - mais árvores na vila e em volta;
+       - construções grandes e diferentes nos outros objetivos;
+    10. manhã ou noite: "esta muito sol";
+    11. os bots:
+        - atacam outros objetivos;
+        - usam as casas;
+        - jogam como jogadores;
+    12. todas as telas interativas melhores. Inspiração em CS, Fortnite, Battlefield, CoD e R6
+        só como ideia: nada de nome, interface, som ou layout de outro jogo (regra do CLAUDE.md).
+  - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;
   - respondido pelo dono: a M14 fica como está; o capim clareou (v58);

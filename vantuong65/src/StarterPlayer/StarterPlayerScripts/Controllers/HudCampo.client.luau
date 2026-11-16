@@ -568,6 +568,28 @@ Net.event("Combat_Ammo").OnClientEvent:Connect(function(a: any)
 	end
 end)
 
+-- lote 66 (dono: "eu atiro e contagem de balas n cai no pente"): o servidor só manda a munição ao
+-- equipar e ao recarregar; a cada tiro vale o carregador do cliente (atributos locais "Carregador" e
+-- "Reserva" do WeaponController, que o servidor corrige no Combat_Ammo)
+local function ammoLocal()
+	local m, s = player:GetAttribute("Carregador"), player:GetAttribute("Reserva")
+	local changed = false
+	if type(m) == "number" and m ~= W.mag then
+		W.mag = m
+		changed = true
+	end
+	if type(s) == "number" and s ~= W.spare then
+		W.spare = s
+		changed = true
+	end
+	if changed then
+		renderWeapon()
+		wake()
+	end
+end
+player:GetAttributeChangedSignal("Carregador"):Connect(ammoLocal)
+player:GetAttributeChangedSignal("Reserva"):Connect(ammoLocal)
+
 local reloadTween: Tween? = nil
 Bus.on("reload_start", function(dur: number)
 	local t = reloadTween

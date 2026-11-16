@@ -13,8 +13,9 @@
 --   - cada plano procura chão livre para os soldados (sem casa, muro ou tronco) e tira a câmera de
 --     trás do que tapar a vista; sem terreno ainda, a câmera dá a volta em Xóm Gò como antes;
 --   - faixas pretas em cima e embaixo, a vinheta escura à esquerda (texto) e o nome do lugar no canto.
--- À esquerda, o título e os cinco botões: JOGAR (Jogar agora: lado, squad, papel e ponto
--- automáticos, Controllers/JogarAgora), CONFIGURAÇÕES (menu do jogo, aba Configurações), LOJA,
+-- À esquerda, o título e os cinco botões: JOGAR (lote 66: fecha e mostra a mesa do lobby, onde se
+-- escolhe lado, squad, papel e ponto; o JOGAR AGORA automático fica na mesa), CONFIGURAÇÕES (menu do
+-- jogo, aba Configurações), LOJA,
 -- PASSE e TUTORIAL (Controllers/ComoJogar, aqui mesmo, sem entrar na partida).
 -- Enquanto aberto, o atributo do jogador "MenuPrincipal" fica true: o GameUI esconde o lobby (a mesa)
 -- e a câmera é daqui. Fecha só no JOGAR (a mesa continua no menu do jogo e na tela de baixa).
@@ -395,7 +396,7 @@ local playB = makeButton("JOGAR", true, BY, 92)
 local subPlay = text(group, F.BODY, 18, V.TEXT)
 subPlay.Position = UDim2.fromOffset(BX + 6, BY + 98)
 subPlay.Size = UDim2.fromOffset(440, 22)
-subPlay.Text = "Entra num squad e vai direto para o campo."
+subPlay.Text = "Escolha o lado, o squad, o papel e onde nascer."
 local Y2 = BY + 132
 local settingsB = makeButton("CONFIGURAÇÕES", false, Y2, 60)
 local shopB = makeButton("LOJA", false, Y2 + 70, 60)
@@ -845,7 +846,9 @@ local function setOpen(on: boolean)
 	end
 end
 
--- JOGAR: o menu esmaece e o Jogar agora pede lado, squad, papel e ponto ao servidor
+-- JOGAR: o menu esmaece e a mesa do lobby aparece para escolher lado, squad, papel e ponto. Lote 66
+-- (dono: "o botao do lobby jogar n deve me levar direito pro jogo"): antes chamava o Jogar agora,
+-- que escolhia tudo e punha em campo; ele continua na mesa (botão JOGAR AGORA)
 local function play()
 	if busy or not open then
 		return
@@ -855,7 +858,6 @@ local function play()
 	local fade = UiKit.tween(shade, TweenInfo.new(0.45, Enum.EasingStyle.Sine), { BackgroundTransparency = 1 })
 	fade.Completed:Wait()
 	setOpen(false)
-	Bus.fire("jogar_agora")
 end
 
 UiKit.bind(playB.b, function()

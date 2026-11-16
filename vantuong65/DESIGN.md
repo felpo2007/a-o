@@ -7270,3 +7270,42 @@ publicado e o desempenho com muitas armas de acabamento na tela.
     da vila, as árvores, os animais e o chão: não é dos acabamentos;
   - fora do Studio, não deu para confirmar se o relevo e o brilho aparecem;
   - detalhes em `testes/CARGA_D181_2026-11-16.md`.
+
+## D-182 — Lote 66: o contador do pente, sem tiro correndo e o JOGAR leva à mesa (2026-11-16)
+
+**Pedido do dono** (16/11): uma lista de 24 itens e a especificação da adaptação para celulares e
+tablets (`especificacao/PROMPT_MOBILE.md`, só local; "Use esta versão para substituir a
+anterior"). Vai em lotes pequenos, primeiro os defeitos que atrapalham a partida. Este lote traz os
+três mais simples:
+- "eu atiro e contagem de balas n cai no pente";
+- "estou conseguindo atirar enquanto corro";
+- "o botao do lobby jogar n deve me levar direito pro jogo".
+
+- **Contador do pente** (`HudCampo`):
+  - a causa: o HUD só recebia a munição do servidor (`Combat_Ammo`), que é mandada ao equipar
+    e ao recarregar;
+  - agora ele segue a cada tiro os atributos locais `Carregador` e `Reserva` do
+    `WeaponController`;
+  - o servidor continua corrigindo pelo `Combat_Ammo`.
+- **Correndo não se atira:**
+  - `WeaponController.canShoot` recusa o tiro a pé com `Input.state.sprinting` ou com o atributo
+    `Sprinting` do corpo;
+  - o gatilho tira da corrida (`InfantryController`), como o mirar já fazia, e o tiro sai assim
+    que o corpo para de correr;
+  - no toque, o analógico na borda não volta a correr com o dedo no gatilho (`ToqueHud`);
+  - sentado em veículo, nada muda.
+- **JOGAR do menu principal** (`MenuPrincipal`):
+  - o menu esmaece e mostra a mesa do lobby (lado, squad, papel e ponto), em vez de chamar o
+    Jogar agora;
+  - o JOGAR AGORA continua na mesa e no menu do jogo, e o RENASCER continua na tela de baixa;
+  - novo subtítulo, traduzido em en, es e vi: "Escolha o lado, o squad, o papel e onde nascer.".
+- **Teste no Lune:** o `interface.luau` agora cobra que o `play()` do menu principal não chame o
+  `jogar_agora` e revele a mesa.
+- **Conferido no Studio** (cópia local, toque forçado com `VT65DevToque`):
+  - JOGAR → a mesa "ESCOLHA O SEU LADO", sem lado e fora de campo;
+  - 3 toques no gatilho da M14: o carregador e o HUD foram de 20 para 17;
+  - correndo pelo analógico, nenhum tiro saiu. Com o gatilho apertado no meio da corrida, a
+    corrida parou e o tiro saiu 0,12 s depois (17 → 16).
+- **Não testado:** mouse e Shift no computador (o mouse do MCP não dispara a arma de forma
+  confiável), controle, celular de verdade e o jogo publicado.
+- Detalhes em `testes/LOTE66_D182_2026-11-16.md`.

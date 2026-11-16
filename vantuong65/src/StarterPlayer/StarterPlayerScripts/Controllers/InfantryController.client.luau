@@ -63,8 +63,11 @@ Bus.on("sprint_stop", function(reason: string?)
 		end
 	end
 end)
--- mirar tira da corrida
+-- mirar tira da corrida; lote 66: o gatilho também (correndo não se atira, WeaponController)
 Input.on("aim", "press", function()
+	setSprint(false)
+end)
+Input.on("fire", "press", function()
 	setSprint(false)
 end)
 Input.on("sprint", "press", function()

@@ -851,7 +851,8 @@ RunService.RenderStepped:Connect(function(dt: number)
 	if Input.touchActive() then
 		Input.setVirtualStick("left", Vector2.new(x, y))
 	end
-	S.sprintWant = sprint and S.ctx.foot and not Input.state.aiming
+	-- lote 66: com o dedo no gatilho o analógico não volta a correr (correndo não se atira)
+	S.sprintWant = sprint and S.ctx.foot and not Input.state.aiming and not Input.virtualDown("fire")
 	if Input.touchActive() then
 		syncSprint()
 		autoVault(dt, y)

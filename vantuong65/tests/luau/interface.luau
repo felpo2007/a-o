@@ -551,8 +551,9 @@ test("cores de compra: baixa, loja, carta de inserção, passe e intendência us
 	has("Progresso.client.luau", "robux = { bg = UiKit.PAGAR.robux.base")
 end)
 
--- D-117: a tela fica até o mapa inteiro chegar (Map.PartCount) e entrega para o menu principal, que
--- tem o JOGAR (Bus "jogar_agora")
+-- D-117: a tela fica até o mapa inteiro chegar (Map.PartCount) e entrega para o menu principal. D-182:
+-- o JOGAR do menu principal leva à mesa do lobby (lado, squad, papel e ponto), não direto ao campo;
+-- o Jogar agora (Bus "jogar_agora") fica no menu do jogo e na mesa
 test("carregamento: o visual antigo (b85331e), o mapa inteiro e a entrega para o menu principal", function()
 	local src = fs.readFile("src/ReplicatedFirst/LoadingScreen.client.luau")
 	for _, t in { "Acabamento.filme", '"SECRET"', "BRIEFING · O QUE O COMANDO SABE", "pontilha" } do
@@ -578,7 +579,6 @@ test("carregamento: o visual antigo (b85331e), o mapa inteiro e a entrega para o
 	for _, t in
 		{
 			'GetAttribute("Pronto")',
-			'Bus.fire("jogar_agora")',
 			'Bus.fire("menu_open", 1)',
 			'Bus.fire("shop_open")',
 			'Bus.fire("passe_open")',
@@ -587,8 +587,12 @@ test("carregamento: o visual antigo (b85331e), o mapa inteiro e a entrega para o
 	do
 		assert(string.find(menu, t, 1, true), "menu principal: " .. t)
 	end
+	local play = string.match(menu, "local function play%(%)(.-)\nend")
+	assert(play, "menu principal: função play")
+	assert(not string.find(play, "jogar_agora", 1, true), "D-182: o JOGAR não põe direto em campo")
+	assert(string.find(play, "setOpen(false)", 1, true), "D-182: o JOGAR revela a mesa do lobby")
 	local ja = fs.readFile(C .. "JogarAgora.luau")
-	assert(string.find(ja, 'Bus.on("jogar_agora"', 1, true), "o JOGAR do menu chega ao Jogar agora")
+	assert(string.find(ja, 'Bus.on("jogar_agora"', 1, true), "o Jogar agora escuta o Bus (menu do jogo e mesa)")
 	local gm = fs.readFile(C .. "GameMenu.client.luau")
 	assert(string.find(gm, 'Bus.on("menu_open"', 1, true), "configurações abrem pelo menu principal")
 	local ui = fs.readFile(C .. "GameUI.client.luau")
