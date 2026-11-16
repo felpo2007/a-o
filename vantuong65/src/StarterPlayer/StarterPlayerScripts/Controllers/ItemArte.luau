@@ -13,6 +13,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Caixas = require(ReplicatedStorage.Shared.Caixas) :: any
+local Conjuntos = require(ReplicatedStorage.Shared.Conjuntos) :: any
 local Cosmeticos = require(ReplicatedStorage.Shared.Cosmeticos) :: any
 local GunModel = require(ReplicatedStorage.Shared.GunModel) :: any
 local Skins = require(ReplicatedStorage.Shared.Skins) :: any
@@ -49,6 +50,13 @@ function ItemArte.info(item: any): any
 		end
 	end
 	out.id = id
+	-- D-176: título de conjunto (tit_*): o texto do título é o próprio item
+	if id and string.sub(id, 1, 4) == "tit_" and Conjuntos.TITULOS[id] then
+		out.kind = "titulo"
+		out.nome = out.nome or Conjuntos.TITULOS[id]
+		out.raridade = out.raridade or "lendario"
+		out.desc = out.desc or "Título do cartão do jogador."
+	end
 	local s = id and Skins.get(id)
 	if s then
 		out.skin = s
@@ -238,6 +246,23 @@ function ItemArte.desenha(parent: Instance, item: any, s: number): Frame
 		u.Position = UDim2.fromScale(0, 0.62)
 		u.Size = UDim2.fromScale(1, 0.24)
 		u.TextXAlignment = Enum.TextXAlignment.Center
+	elseif it.kind == "titulo" then
+		-- faixa de papel com o título datilografado (o título é texto por natureza)
+		local fx = frame(box, UDim2.fromScale(0.86, 0.34), Color3.fromRGB(214, 202, 168), 0)
+		fx.AnchorPoint = Vector2.new(0.5, 0.5)
+		fx.Position = UDim2.fromScale(0.5, 0.5)
+		fx.Rotation = -4
+		UiKit.corner(fx, 2)
+		local t = label(
+			fx,
+			UiKit.upper(it.nome or ""),
+			math.floor(s * 0.1),
+			Color3.fromRGB(46, 40, 30),
+			Font.fromEnum(UiKit.TYPE_OLD)
+		)
+		t.Size = UDim2.fromScale(0.92, 1)
+		t.Position = UDim2.fromScale(0.04, 0)
+		t.TextXAlignment = Enum.TextXAlignment.Center
 	elseif it.skin and it.skin.kind == "weapon" then
 		arma(box, it.skin)
 	elseif it.skin and it.skin.kind == "uniform" then

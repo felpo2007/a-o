@@ -197,9 +197,26 @@ CAMPAIGN_DESC = {
     "PASS_PERK_ALL": (
         "As 7 vantagens juntas, com desconto. Nenhum número de combate passa de +12%."
     ),
+    # D-176: as mesmas descrições de Shared/Conjuntos
+    "PASS_SET_IDENTIDADE": (
+        "2 plaquetas, 2 emblemas e 2 molduras para o cartão. Só visual, permanente."
+    ),
+    "PASS_SET_UNIFORMES": (
+        "4 uniformes novos: HBT verde-sálvia e tigrado dourado (EUA), áo bà ba verde-oliva e anil "
+        "(Frente). Só visual, permanente."
+    ),
+    "PASS_SET_ARMAS": (
+        "6 acabamentos novos: M14, M60, M1911A1, Tipo 56, SKS e RPD. Só visual, permanente."
+    ),
+    "PASS_SET_FUNDADOR": (
+        "Uniforme de fundador nos dois lados, insígnia e emblema, plaqueta comemorativa, cartão "
+        "exclusivo e o título Fundador no perfil. Só visual, permanente."
+    ),
 }
 # passe sem imagem própria: usa a arte da capa do jogo (imagem que já existe no repositório)
 FALLBACK_PASS_IMAGE = "marketing/capa_keyart.jpg"
+# D-176: imagens dos conjuntos (relativas a assets/forgegui, como as outras)
+CONJ = "../ui/conjuntos/"
 
 
 def cmd_create_store(only: set[str] | None = None) -> None:
@@ -226,6 +243,12 @@ def cmd_create_store(only: set[str] | None = None) -> None:
         ("PASS_PERK_POCKETS", "Bolsos Extras", None, 149),
         ("PASS_PERK_EAGLE", "Olho de Águia", None, 99),
         ("PASS_PERK_ALL", "Pacote Combatente", None, 799),
+        # D-176: conjuntos em Game Pass (Shared/Conjuntos); imagens montadas no jogo
+        # (assets/ui/conjuntos/<chave>.png, ver testes/CONJUNTOS_*.md)
+        ("PASS_SET_IDENTIDADE", "Identidade Militar", f"{CONJ}PASS_SET_IDENTIDADE.png", 49),
+        ("PASS_SET_UNIFORMES", "Uniformes Históricos", f"{CONJ}PASS_SET_UNIFORMES.png", 99),
+        ("PASS_SET_ARMAS", "Personalização de Armas", f"{CONJ}PASS_SET_ARMAS.png", 149),
+        ("PASS_SET_FUNDADOR", "Fundador STARLITE", f"{CONJ}PASS_SET_FUNDADOR.png", 499),
     ]
     for key, name, img, price in passes:
         if f"store.{key}" in ids or (only is not None and key not in only):

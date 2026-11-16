@@ -23,6 +23,11 @@ local Cosmeticos = require(
 		then (game :: any):GetService("ReplicatedStorage").Shared.Cosmeticos
 		else "../../ReplicatedStorage/Shared/Cosmeticos"
 ) :: any
+local Conjuntos = require(
+	if script
+		then (game :: any):GetService("ReplicatedStorage").Shared.Conjuntos
+		else "../../ReplicatedStorage/Shared/Conjuntos"
+) :: any
 local Arquivo = require(
 	if script
 		then (game :: any):GetService("ReplicatedStorage").Shared.Arquivo
@@ -523,6 +528,26 @@ function CaixaRegras.resgatarColecao(
 	}
 	registra(d, r)
 	return r, nil
+end
+
+-- D-176: grava no perfil os itens de cartão e os títulos dos conjuntos em Game Pass que o jogador
+-- tem (`passes`: chave -> true). Idempotente. Devolve os ids gravados agora.
+function CaixaRegras.gravarConjuntos(p: any, passes: { [string]: boolean }?): { string }
+	local novos = {}
+	if not passes then
+		return novos
+	end
+	for _, c in Conjuntos.LISTA do
+		if passes[c.key] then
+			for _, id in Conjuntos.paraGravar(c.key) do
+				if not p.campaign.owned[id] then
+					p.campaign.owned[id] = true
+					table.insert(novos, id)
+				end
+			end
+		end
+	end
+	return novos
 end
 
 -- Bilhetes ganhos jogando (missão cumprida, boas-vindas). Teto por dia UTC. Devolve quantos entraram.

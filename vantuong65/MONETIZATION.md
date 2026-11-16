@@ -125,6 +125,19 @@ dá um cosmético **exclusivo** (fora das caixas, da troca e da compra direta), 
 créditos, uma vez por conta. Nenhuma coleção exige caixa paga: o teste cobra um caminho grátis para
 cada item. Tabela de coleções e prêmios: `DESIGN.md` (D-175).
 
+### Conjuntos em Game Pass (D-176)
+Compra única, permanente e só visual, com itens novos que não saem de caixa, troca nem compra
+com $. A venda fica no ARQUIVO, página CONJUNTOS. Todos foram criados e estão à venda:
+
+| Conjunto | Preço (referência) | ID |
+|---|---|---|
+| Identidade Militar | R$ 49 | 2088634972 |
+| Uniformes Históricos | R$ 99 | 2088232933 |
+| Personalização de Armas | R$ 149 | 2089588819 |
+| Fundador STARLITE | R$ 499 | 2087975040 |
+
+O preço real é o do Creator Hub; a tela lê com `GetProductInfoAsync`.
+
 ### Para ligar a venda paga (Creator Dashboard)
 1. **Questionário de classificação:** responda que há itens aleatórios pagos e reenvie. A política
    manda reenviar quando uma atualização muda uma resposta.
@@ -146,7 +159,7 @@ Regional Pricing e Content Ratings (create.roblox.com/docs).
 |---|---|---|
 | Developer Products / ProcessReceipt | Conforme | grava antes de devolver `PurchaseGranted` (UpdateAsync); falha = `NotProcessedYet` |
 | Concessão idempotente | Conforme | o mesmo PurchaseId devolve o resultado gravado, sem novo sorteio (teste e Studio) |
-| Game Passes | Conforme | posse por `UserOwnsGamePassAsync` |
+| Game Passes | Conforme | posse por `UserOwnsGamePassAsync`; os 4 conjuntos (D-176) são só visuais, permanentes e com o conteúdo listado antes da compra |
 | Assinatura | Pendente de configuração | ID vazio; criar no Creator Hub (Robux, mínimo R$ 49) |
 | Preço regional | Pendente de configuração | a leitura já é dinâmica; o opt-in dos produtos é do dono |
 | Pacotes pagos | Conforme | o Pacote de Recruta tem conteúdo fixo, sem aleatório |
@@ -170,8 +183,8 @@ Regional Pricing e Content Ratings (create.roblox.com/docs).
 | Mouse, toque e controle | Conforme no código | falta conferir num celular e num Xbox reais |
 
 ### Próximos lotes (plano de expansão)
-- Game Passes novos do pedido (Identidade Militar, Uniformes Históricos, Personalização de Armamentos,
-  Fundador): pedem os itens visuais (cartões, gravações, animação de inspeção).
+- Game Passes novos do pedido: feitos (D-176), sem capacetes, gravações e animações de inspeção
+  (não existem no jogo).
 - Clube de Veteranos (assinatura): o dono cria no Creator Hub; o código já lê a assinatura.
 - Passe de temporada de 8 semanas: hoje são 6 semanas e 50 níveis (Temporada).
 - Pacotes de compra direta (Patrulha, Infantaria, Reconhecimento, Veterano) com conteúdo fixo. A

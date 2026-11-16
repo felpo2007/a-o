@@ -6,11 +6,15 @@
 -- Visual de documento militar (papel, máquina de escrever, carimbo). Nenhum texto diminui quem
 -- ainda não tem o item: o que falta aparece apagado, com o caminho para conseguir.
 -- Controle: tudo é botão selecionável (A escolhe, B volta). Studio: VT65DevTela = "arquivo".
+local MarketplaceService = game:GetService("MarketplaceService")
+local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
 local Arquivo = require(ReplicatedStorage.Shared.Arquivo) :: any
 local Caixas = require(ReplicatedStorage.Shared.Caixas) :: any
+local Commerce = require(ReplicatedStorage.Shared.Commerce) :: any
+local Conjuntos = require(ReplicatedStorage.Shared.Conjuntos) :: any
 local Net = require(ReplicatedStorage.Shared.Net)
 local Progression = require(ReplicatedStorage.Shared.Progression) :: any
 local Bus = require(script.Parent.Bus)
@@ -20,6 +24,7 @@ local Toast = require(script.Parent.Toast)
 local UiKit = require(script.Parent.UiKit)
 
 local V, F, px = UiKit.V, UiKit.F, UiKit.px
+local player = Players.LocalPlayer
 local TYPE = Font.fromEnum(UiKit.TYPE_OLD)
 local PAPEL = Color3.fromRGB(214, 202, 168)
 local TINTA = Color3.fromRGB(46, 40, 30)
@@ -99,6 +104,9 @@ local function origemTexto(o: any): string?
 		return string.format("Intendência: %s em créditos", Progression.money(o.preco))
 	elseif o.tipo == "robux" then
 		return "Compra em Robux na loja"
+	elseif o.tipo == "passe" then
+		local c = Conjuntos.get(o.passe)
+		return string.format("Conjunto %s (Game Pass, compra única)", if c then c.nome else tostring(o.passe))
 	elseif o.tipo == "colecao" then
 		local c = Arquivo.colecao(o.colecao)
 		return string.format("Prêmio da coleção %s", if c then c.nome else tostring(o.colecao))
@@ -494,6 +502,113 @@ local function pagColecoes(area: Frame)
 	end
 end
 
+-- ===== conjuntos em Game Pass (D-176): itens novos e exclusivos, só visuais, compra única =====
+local precos: { [number]: number } = {}
+local function precoPasse(id: number): number?
+	if id == 0 then
+		return nil
+	end
+	if precos[id] then
+		return precos[id]
+	end
+	local ok, info = pcall(function()
+		return MarketplaceService:GetProductInfoAsync(id, Enum.InfoType.GamePass)
+	end)
+	if ok and type(info) == "table" and type(info.PriceInRobux) == "number" then
+		precos[id] = info.PriceInRobux
+		return info.PriceInRobux
+	end
+	return nil
+end
+
+local function pagConjuntos(area: Frame)
+	local list = scroll(area)
+	UiKit.list(list, false, px(8, 10))
+	local nota = text(
+		list,
+		"Compra única em Robux, permanente. Só visual: nada muda o combate. Os itens não saem de caixa.",
+		px(13, 17),
+		V.DIM,
+		F.BODY
+	)
+	nota.LayoutOrder = 0
+	nota.Size = UDim2.new(1, -px(10, 14), 0, px(34, 44))
+	local larg = area.AbsoluteSize.X
+	if larg < 100 then
+		larg = px(560, 740)
+	end
+	local cardW = larg - px(10, 14) - px(8, 10)
+	local direita = px(156, 206)
+	local margem = px(12, 16)
+	local esq = cardW - direita - margem * 2 - px(8, 10)
+	local s = px(52, 68)
+	local gap = px(6, 8)
+	local porLinha = math.max(1, math.floor((esq + gap) / (s + gap)))
+	for i, c in Conjuntos.LISTA do
+		local tem = state.conjuntos ~= nil and state.conjuntos[c.key] == true
+		local linhas = math.ceil(#c.itens / porLinha)
+		local topoMinis = px(102, 132)
+		local alt = math.max(topoMinis + linhas * (s + gap) + px(6, 8), px(150, 198))
+		local card = frame(list, UDim2.new(1, -px(10, 14), 0, alt), V.PANEL_2, 0)
+		card.LayoutOrder = i
+		card.Name = "Conjunto_" .. c.key
+		UiKit.corner(card, 4)
+		UiKit.edge(card, if tem then V.BRASS else V.LINE, 1, if tem then 0 else 0.4)
+		local nm = text(card, UiKit.upper(c.nome), px(16, 22), V.KHAKI, TYPE)
+		nm.Position = UDim2.fromOffset(margem, px(8, 10))
+		nm.Size = UDim2.fromOffset(esq, px(26, 34))
+		nm.TextWrapped = false
+		nm.TextScaled = true
+		local lim = Instance.new("UITextSizeConstraint")
+		lim.MaxTextSize = px(16, 22)
+		lim.MinTextSize = 9
+		lim.Parent = nm
+		local ds = text(card, c.desc, px(13, 17), V.DIM, F.BODY)
+		ds.Position = UDim2.fromOffset(margem, px(34, 44))
+		ds.Size = UDim2.fromOffset(esq, px(64, 84)) -- até quatro linhas
+		ds.TextYAlignment = Enum.TextYAlignment.Top
+		local grade = frame(card, UDim2.fromOffset(esq, linhas * (s + gap)))
+		grade.Position = UDim2.fromOffset(margem, topoMinis)
+		local gl = Instance.new("UIGridLayout")
+		gl.CellSize = UDim2.fromOffset(s, s)
+		gl.CellPadding = UDim2.fromOffset(gap, gap)
+		gl.SortOrder = Enum.SortOrder.LayoutOrder
+		gl.Parent = grade
+		for j, id in c.itens do
+			miniatura(grade, id, s, j, tem)
+		end
+		local col = frame(card, UDim2.new(0, direita, 1, -px(16, 20)))
+		col.AnchorPoint = Vector2.new(1, 0)
+		col.Position = UDim2.new(1, -px(8, 10), 0, px(8, 10))
+		local id = tonumber((Commerce.IDS :: any)[c.key]) or 0
+		local label = if tem then "NO SEU ARQUIVO" elseif id == 0 then "EM BREVE" else "COMPRAR"
+		local a = UiKit.action(col, label, if tem or id == 0 then "secondary" else "robux", function()
+			if tem or id == 0 then
+				return
+			end
+			Net.event("Commerce_Track"):FireServer("prompt", c.key)
+			MarketplaceService:PromptGamePassPurchase(player, id)
+		end, { h = px(44, 58) })
+		a.button.Name = "Comprar_" .. c.key
+		a.button.AnchorPoint = Vector2.new(0, 1)
+		a.button.Position = UDim2.new(0, 0, 1, 0)
+		a.button.Size = UDim2.new(1, 0, 0, px(44, 58))
+		a.enabled(not tem and id ~= 0)
+		local pr = text(col, if tem then "✓ Já é seu" else "", px(14, 18), V.KHAKI, F.TITLE_MED)
+		pr.Size = UDim2.new(1, 0, 0, px(22, 28))
+		pr.TextXAlignment = Enum.TextXAlignment.Center
+		if not tem and id ~= 0 then
+			task.spawn(function()
+				local v = precoPasse(id)
+				if v and a.button.Parent then
+					a.label.Text = string.format("COMPRAR · R$ %d", v)
+					pr.Text = "Preço lido do Roblox (pode variar por região)"
+				end
+			end)
+		end
+	end
+end
+
 local function pagCategoria(area: Frame, cat: string)
 	local list = scroll(area)
 	local grid = Instance.new("UIGridLayout")
@@ -611,6 +726,13 @@ build = function()
 		a.button.Size = UDim2.new(1, 0, 0, px(42, 56))
 	end
 	botao("colecoes", "COLEÇÕES", string.format("%d/%d", completas, #Arquivo.COLECOES), 1)
+	local temC = 0
+	for _, c in Conjuntos.LISTA do
+		if state.conjuntos and state.conjuntos[c.key] then
+			temC += 1
+		end
+	end
+	botao("conjuntos", "CONJUNTOS", string.format("%d/%d", temC, #Conjuntos.LISTA), 50)
 	for i, c in Arquivo.CATEGORIAS do
 		local tot, tem = 0, 0
 		for _, id in itens do
@@ -627,6 +749,8 @@ build = function()
 	area.Position = UDim2.fromOffset(navW + px(10, 14), topo)
 	if aba == "colecoes" then
 		pagColecoes(area)
+	elseif aba == "conjuntos" then
+		pagConjuntos(area)
 	else
 		pagCategoria(area, aba)
 	end
@@ -641,6 +765,19 @@ local function refresh()
 		end
 	end)
 end
+
+-- D-176: outra tela pede uma página (a Intendência abre os conjuntos)
+Bus.on("arquivo_aba", function(id: string)
+	if type(id) == "string" then
+		aba = id
+	end
+end)
+-- compra de um conjunto: o servidor grava os itens; relê o álbum
+MarketplaceService.PromptGamePassPurchaseFinished:Connect(function(who: Player, _id: number, ok: boolean)
+	if who == player and ok then
+		task.delay(1.5, refresh)
+	end
+end)
 
 Bus.on("arquivo_show", function(h: Frame)
 	host = h

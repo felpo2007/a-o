@@ -15,10 +15,13 @@ local CompraVeiculo = require(ReplicatedStorage.Shared.CompraVeiculo)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Reforcos = require(ReplicatedStorage.Shared.Reforcos)
 local Skins = require(ReplicatedStorage.Shared.Skins)
+local Conjuntos = require(ReplicatedStorage.Shared.Conjuntos) :: any
 local Temporada = require(ReplicatedStorage.Shared.Temporada)
 local PlayerData = require(script.Parent.PlayerData)
 
 local CommerceService = {}
+-- D-176: chamado depois de cada refresh da posse (o CaixaService grava os itens dos conjuntos)
+CommerceService.onConjuntos = nil :: ((player: Player) -> ())?
 local ownership: { [Player]: Commerce.Ownership } = {}
 -- passes comprados nesta sessão: o UserOwnsGamePassAsync guarda a resposta antiga por um tempo e
 -- diria "não" logo depois da compra
@@ -105,6 +108,10 @@ function CommerceService.refresh(player: Player)
 	for _, key in Skins.passKeys() do
 		passes[key] = passOwned(player, Skins.IDS[key] or 0)
 	end
+	-- D-176: conjuntos em Game Pass (Shared/Conjuntos)
+	for _, c in Conjuntos.LISTA do
+		passes[c.key] = passOwned(player, (Commerce.IDS :: any)[c.key] or 0)
+	end
 	-- campanha: passe da temporada, Pacote de Recruta e vantagens
 	for _, pass in Commerce.CampaignPasses do
 		passes[pass.key] = passOwned(player, (Commerce.IDS :: any)[pass.key] or 0)
@@ -138,6 +145,10 @@ function CommerceService.refresh(player: Player)
 	end
 	if CommerceService.onPasses then
 		task.spawn(CommerceService.onPasses, player)
+	end
+	local cb = CommerceService.onConjuntos
+	if cb then
+		task.spawn(cb, player)
 	end
 end
 

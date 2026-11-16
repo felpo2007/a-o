@@ -250,6 +250,19 @@ return {
 		vc_brown_pants_v3 = 131357842269638,
 		vc_tiger_shirt_v3 = 113808314201475,
 		vc_tiger_pants_v3 = 107937294744885,
+		-- D-176: conjuntos em Game Pass (Uniformes Históricos e Fundador)
+		us_hbt_shirt_v3 = 87018466659842,
+		us_hbt_pants_v3 = 109133128760328,
+		us_goldtiger_shirt_v3 = 96472750104295,
+		us_goldtiger_pants_v3 = 70948222044169,
+		vc_oliva_shirt_v3 = 115123821090322,
+		vc_oliva_pants_v3 = 133420782975238,
+		vc_anil_shirt_v3 = 126727168925811,
+		vc_anil_pants_v3 = 134160953776516,
+		us_fundador_shirt_v3 = 121679886479095,
+		us_fundador_pants_v3 = 91632366145974,
+		vc_fundador_shirt_v3 = 112187313890760,
+		vc_fundador_pants_v3 = 119385410939751,
 	},
 	-- Equipamento: MODELOS (GLB) soldados à cabeça/tronco em runtime (Characters.dress)
 	Accessories = {

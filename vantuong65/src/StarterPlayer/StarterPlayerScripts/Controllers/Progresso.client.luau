@@ -835,6 +835,8 @@ local function skinCard(s: Skins.Skin, sk: { [string]: any })
 		status = "Sua (passe)"
 	elseif how then
 		status = "Sua"
+	elseif s.soPasse then
+		status = "Só no conjunto em Game Pass (aba ARQUIVO)" -- D-176
 	else
 		status = if Skins.robuxId(s) ~= 0
 			then string.format("%s · %s", money(s.price), robuxText(s))
@@ -862,6 +864,13 @@ local function skinCard(s: Skins.Skin, sk: { [string]: any })
 				Net.event("Gear_Equip"):FireServer(s.id, true)
 			end, look)
 		end
+	elseif s.soPasse then
+		-- D-176: item de conjunto em Game Pass: não se compra com $; o conjunto está no ARQUIVO
+		button(actions, "VER O CONJUNTO", "normal", "set:" .. s.id, function()
+			select(s.id)
+			Bus.fire("arquivo_aba", "conjuntos")
+			Bus.fire("shop_open", "arquivo")
+		end, look)
 	else
 		local have = tonumber(state and state.credits) or 0
 		local can = have >= s.price

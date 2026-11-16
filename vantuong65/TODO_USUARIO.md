@@ -24,7 +24,8 @@ do resto.
      tinha pedido para eu não enviar o questionário, então essa parte é sua;
    - depois me avise, e eu crio os 4 produtos pelo script e ligo a venda. O passo a passo está em
      `MONETIZATION.md`.
-3. **Clube de Veteranos (assinatura):** só se cria no Creator Hub (Monetization → Subscriptions).
+3. **Clube de Veteranos (assinatura):** os 4 conjuntos em Game Pass já estão à venda (D-176); falta
+   só a assinatura. Ela só se cria no Creator Hub (Monetization → Subscriptions).
    Em Robux, o mínimo é R$ 49. O preço que você pediu, R$ 149, serve. Crie e me passe o ID
    (`EXP-...`).
 

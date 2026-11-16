@@ -451,5 +451,21 @@
  "Carta.nw": "79349546991710",
  "Carta.ne": "77775671768371",
  "Carta.sw": "72623303265319",
- "Carta.se": "74027804366788"
+ "Carta.se": "74027804366788",
+ "Clothing.us_hbt_shirt_v3": "87018466659842",
+ "Clothing.us_hbt_pants_v3": "109133128760328",
+ "Clothing.us_goldtiger_shirt_v3": "96472750104295",
+ "Clothing.us_goldtiger_pants_v3": "70948222044169",
+ "Clothing.vc_oliva_shirt_v3": "115123821090322",
+ "Clothing.vc_oliva_pants_v3": "133420782975238",
+ "Clothing.vc_anil_shirt_v3": "126727168925811",
+ "Clothing.vc_anil_pants_v3": "134160953776516",
+ "Clothing.us_fundador_shirt_v3": "121679886479095",
+ "Clothing.us_fundador_pants_v3": "91632366145974",
+ "Clothing.vc_fundador_shirt_v3": "112187313890760",
+ "Clothing.vc_fundador_pants_v3": "119385410939751",
+ "store.PASS_SET_IDENTIDADE": "2088634972",
+ "store.PASS_SET_UNIFORMES": "2088232933",
+ "store.PASS_SET_ARMAS": "2089588819",
+ "store.PASS_SET_FUNDADOR": "2087975040"
 }

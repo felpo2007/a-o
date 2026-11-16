@@ -9,6 +9,7 @@ local S = "../../src/ReplicatedStorage/Shared/"
 local M = "../../src/ServerScriptService/Modules/"
 local Arquivo = require(S .. "Arquivo") :: any
 local Caixas = require(S .. "Caixas") :: any
+local Conjuntos = require(S .. "Conjuntos") :: any
 local Cosmeticos = require(S .. "Cosmeticos") :: any
 local Skins = require(S .. "Skins") :: any
 local CaixaRegras = require(M .. "CaixaRegras") :: any
@@ -55,8 +56,10 @@ test("álbum: todos os cosméticos e skins, sem camuflagem nem prêmio de saldo"
 		local c = Arquivo.categoria(id)
 		n[c] += 1
 	end
-	assert(n.uniformes == 8 and n.acabamentos == 17, "skins: 8 uniformes e 17 acabamentos")
-	assert(n.insignias == 9 and n.plaquetas == 9 and n.molduras == 10, "cartão com os 9 exclusivos")
+	-- D-176: mais 6 uniformes, 6 acabamentos, 4 emblemas, 3 plaquetas e 3 molduras dos conjuntos
+	assert(n.uniformes == 14 and n.acabamentos == 23, "skins: 14 uniformes e 23 acabamentos")
+	assert(n.insignias == 13 and n.plaquetas == 12 and n.molduras == 13, "cartão com os exclusivos")
+	assert(#itens == 75)
 	for _, id in { "camo_rice", "camo_jungle", "camo_bamboo", "cr_500", "frag_250", "nada" } do
 		assert(Arquivo.categoria(id) == nil and not vistos[id], id)
 	end
@@ -72,7 +75,12 @@ end)
 
 test("todo item do álbum tem caminho grátis; nenhuma coleção exige caixa paga", function()
 	for _, id in Arquivo.itens() do
-		assert(Arquivo.gratis(id), "sem caminho grátis: " .. id)
+		if Conjuntos.doItem(id) then
+			-- D-176: o item de conjunto em Game Pass sai só do passe (compra direta em Robux)
+			assert(not Arquivo.gratis(id) and Arquivo.compraDireta(id), "conjunto: " .. id)
+		else
+			assert(Arquivo.gratis(id), "sem caminho grátis: " .. id)
+		end
 	end
 	-- um item que só existisse em caixa paga seria recusado
 	local soPaga = false

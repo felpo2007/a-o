@@ -30,7 +30,7 @@ export type Item = {
 local function pool(kinds: { [string]: boolean }): { string }
 	local out = {}
 	for _, s in Skins.CATALOG do
-		if kinds[s.kind] then
+		if kinds[s.kind] and not s.soPasse then -- D-176: o do conjunto em Game Pass não entra
 			table.insert(out, s.id)
 		end
 	end

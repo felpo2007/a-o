@@ -17,6 +17,8 @@
 -- EXCEÇÃO do dono (2026-11-11): as skins de Shared/Skins (arma, uniforme e camuflagem de mato) ficam
 -- fora desta regra, com catálogo e IDs próprios; a camuflagem de mato dá vantagem contra os bots
 -- ("vantagem comprada" autorizada). Commerce.GAMEPLAY continua com os 3 itens da D-72.
+local Conjuntos = require(script and (script :: any).Parent.Conjuntos or "./Conjuntos") :: any
+
 local Commerce = {}
 
 Commerce.IDS = {
@@ -62,6 +64,11 @@ Commerce.IDS = {
 	PRODUCT_CRATE_SPECIAL = 0, -- "Caixa de Equipamentos Especiais"
 	PRODUCT_CRATE_ELITE = 0, -- "Caixa de Arsenal de Elite"
 	PRODUCT_CRATE_HISTORIC = 0, -- "Caixa de Operações Históricas"
+	-- D-176: conjuntos em Game Pass (Shared/Conjuntos), só visuais. 0 = não criado (o botão some)
+	PASS_SET_IDENTIDADE = 2088634972, -- "Identidade Militar"
+	PASS_SET_UNIFORMES = 2088232933, -- "Uniformes Históricos"
+	PASS_SET_ARMAS = 2089588819, -- "Personalização de Armas"
+	PASS_SET_FUNDADOR = 2087975040, -- "Fundador STARLITE"
 	-- Experience Subscription (mensal; o criador precisa estar habilitado)
 	SUBSCRIPTION_UNIT_RESERVE = "", -- "Reserva da Unidade"; ex.: "EXP-1234567890"
 }
@@ -573,7 +580,7 @@ function Commerce.productKeyById(productId: number): string?
 end
 
 function Commerce.passKeyById(passId: number): string?
-	for _, list in { Commerce.Passes :: { any }, Commerce.CampaignPasses :: { any } } do
+	for _, list in { Commerce.Passes :: { any }, Commerce.CampaignPasses :: { any }, Conjuntos.LISTA :: { any } } do
 		for _, pass in list do
 			local id = (Commerce.IDS :: any)[pass.key]
 			if type(id) == "number" and id ~= 0 and id == passId then

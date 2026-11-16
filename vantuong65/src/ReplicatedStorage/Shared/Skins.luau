@@ -159,6 +159,7 @@ export type Skin = {
 	pattern: string?, -- uniforme: desenho da prévia ("tiger" | "tadpole" | "lizard" | "duck" | "plain")
 	camo: string?, -- camuflagem: "rice" | "jungle" | "bamboo" (atributo "Camo", BotBrain)
 	texture: string?, -- camuflagem: chave da textura em AssetIds.Images
+	soPasse: boolean?, -- D-176: só pelo conjunto em Game Pass (robuxKey); não se compra com $
 }
 
 local function base(id: string, kind: string, side: string, tier: string, key: string, name: string, desc: string): Skin
@@ -177,6 +178,12 @@ local function base(id: string, kind: string, side: string, tier: string, key: s
 		check = "foto",
 		swatch = {},
 	}
+end
+
+-- D-176: item de conjunto em Game Pass (só pelo passe: fora do $ da Intendência e do Mercado)
+local function soPasse(s: Skin): Skin
+	s.soPasse = true
+	return s
 end
 
 local function weapon(
@@ -383,6 +390,79 @@ Skins.CATALOG = {
 		"Tubo e protetor de madeira pintados de verde.",
 		{ wood = OD, handguard = OD, metal = OD }
 	),
+	-- ===== D-176: conjunto "Personalização de Armas" (Game Pass PASS_SET_ARMAS; só pelo passe) =====
+	soPasse(
+		weapon(
+			"skin_m14_oleada",
+			"m14",
+			"US",
+			"weapon_plus",
+			"PASS_SET_ARMAS",
+			"M14 · nogueira oleada",
+			"Coronha e guarda-mão de nogueira escurecida por anos de óleo de linhaça.",
+			{ wood = { 58, 36, 22 }, handguard = { 58, 36, 22 } }
+		)
+	),
+	soPasse(
+		weapon(
+			"skin_m60_fosfato",
+			"m60",
+			"US",
+			"weapon_plus",
+			"PASS_SET_ARMAS",
+			"M60 · fosfato novo",
+			"Caixa e cano com o fosfato cinza-esverdeado de arma recém-saída do depósito.",
+			{ metal = { 58, 62, 56 } }
+		)
+	),
+	soPasse(
+		weapon(
+			"skin_m1911_marrom",
+			"m1911",
+			"US",
+			"weapon_plus",
+			"PASS_SET_ARMAS",
+			"M1911A1 · talas de plástico marrom",
+			"As talas de plástico marrom do modelo de serviço, com o aço fosfatizado.",
+			{ wood = { 92, 56, 36 }, metal = { 52, 54, 50 } }
+		)
+	),
+	soPasse(
+		weapon(
+			"skin_type56_vermelha",
+			"type56",
+			"VC",
+			"weapon_plus",
+			"PASS_SET_ARMAS",
+			"Tipo 56 · madeira avermelhada",
+			"Coronha e guarda-mão de madeira de fábrica tingida de vermelho-escuro.",
+			{ wood = { 118, 60, 38 }, handguard = { 118, 60, 38 } }
+		)
+	),
+	soPasse(
+		weapon(
+			"skin_sks_clara",
+			"sks",
+			"VC",
+			"weapon_plus",
+			"PASS_SET_ARMAS",
+			"SKS · madeira clara",
+			"Coronha inteiriça de madeira clara, envernizada de fábrica.",
+			{ wood = BIRCH }
+		)
+	),
+	soPasse(
+		weapon(
+			"skin_rpd_azulado",
+			"rpd",
+			"VC",
+			"weapon_plus",
+			"PASS_SET_ARMAS",
+			"RPD · aço azulado e madeira escura",
+			"Oxidação azul inteira e coronha de madeira escura, oleada.",
+			{ metal = BLUED, wood = WALNUT }
+		)
+	),
 } :: { Skin }
 
 -- ===== uniformes =====
@@ -518,6 +598,93 @@ for _, s in
 			nil,
 			"tiger"
 		),
+		-- ===== D-176: conjuntos em Game Pass (só pelo passe; cores de olho, `check = "foto"`) =====
+		-- "Uniformes Históricos" (PASS_SET_UNIFORMES)
+		soPasse(
+			uniform(
+				"skin_us_hbt",
+				"US",
+				"PASS_SET_UNIFORMES",
+				"HBT verde-sálvia",
+				"A sarja espinha de peixe dos utilitários antigos, mais verde e mais clara que o algodão novo.",
+				{ { 112, 124, 92 }, { 140, 148, 116 } },
+				"us_hbt_shirt_v3",
+				"us_hbt_pants_v3",
+				nil,
+				"plain"
+			)
+		),
+		soPasse(
+			uniform(
+				"skin_us_goldtiger",
+				"US",
+				"PASS_SET_UNIFORMES",
+				"Tigrado dourado",
+				"A variante de fundo amarelado do tiger stripe dos assessores.",
+				{ { 176, 152, 96 }, { 96, 104, 60 }, { 112, 82, 46 }, { 34, 32, 28 } },
+				"us_goldtiger_shirt_v3",
+				"us_goldtiger_pants_v3",
+				nil,
+				"tiger"
+			)
+		),
+		soPasse(
+			uniform(
+				"skin_vc_oliva",
+				"VC",
+				"PASS_SET_UNIFORMES",
+				"Áo bà ba verde-oliva",
+				"O pano tingido de verde das forças locais, mangas arregaçadas.",
+				{ { 84, 92, 62 }, { 118, 124, 92 } },
+				"vc_oliva_shirt_v3",
+				"vc_oliva_pants_v3",
+				nil,
+				"plain"
+			)
+		),
+		soPasse(
+			uniform(
+				"skin_vc_anil",
+				"VC",
+				"PASS_SET_UNIFORMES",
+				"Áo bà ba anil",
+				"Tingido de anil, azul muito escuro que desbota para o cinza-azulado.",
+				{ { 36, 40, 56 }, { 70, 76, 94 } },
+				"vc_anil_shirt_v3",
+				"vc_anil_pants_v3",
+				nil,
+				"plain"
+			)
+		),
+		-- "Fundador STARLITE" (PASS_SET_FUNDADOR)
+		soPasse(
+			uniform(
+				"skin_us_fundador",
+				"US",
+				"PASS_SET_FUNDADOR",
+				"Fundador · EUA",
+				"O utilitário de sempre num pano exclusivo, mais escuro: de quem apoiou o jogo no começo.",
+				{ { 70, 78, 52 }, { 104, 110, 82 } },
+				"us_fundador_shirt_v3",
+				"us_fundador_pants_v3",
+				nil,
+				"plain"
+			)
+		),
+		soPasse(
+			uniform(
+				"skin_vc_fundador",
+				"VC",
+				"PASS_SET_FUNDADOR",
+				"Fundador · Frente",
+				"O uniforme da Força Principal num pano exclusivo, mais escuro: de quem apoiou o jogo no começo.",
+				{ { 62, 66, 54 }, { 96, 98, 84 } },
+				"vc_fundador_shirt_v3",
+				"vc_fundador_pants_v3",
+				nil,
+				"plain"
+			)
+		),
 	}
 do
 	table.insert(Skins.CATALOG, s)
@@ -633,6 +800,8 @@ function Skins.canBuy(
 		return false, "skin desconhecida"
 	elseif Skins.owns(s, owned, passes) then
 		return false, "já é sua"
+	elseif s.soPasse then
+		return false, "só no conjunto em Game Pass"
 	elseif money < s.price then
 		return false, string.format("faltam %s", Progression.money(s.price - money))
 	end

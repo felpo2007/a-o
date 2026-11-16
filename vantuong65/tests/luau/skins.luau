@@ -8,6 +8,7 @@ local S = "../../src/ReplicatedStorage/Shared/"
 local Skins = require(S .. "Skins") :: any
 local Progression = require(S .. "Progression") :: any
 local Commerce = require(S .. "Commerce") :: any
+local Conjuntos = require(S .. "Conjuntos") :: any
 local Weapons = require(S .. "Weapons") :: any
 local BotBrain = require(S .. "BotBrain") :: any
 local AssetIds = require(S .. "AssetIds") :: any
@@ -56,15 +57,25 @@ test("catálogo: ids únicos, tipos, lados, armas de verdade e chaves de Robux",
 		assert(s.side == "US" or s.side == "VC" or s.side == "both", s.id)
 		assert(#s.name > 0 and #s.desc > 0, s.id .. ": nome e descrição")
 		assert(Skins.get(s.id) == s)
-		assert(Skins.IDS[s.robuxKey] ~= nil, s.id .. ": chave fora de Skins.IDS")
-		assert(type(Skins.IDS[s.robuxKey]) == "number")
+		if s.soPasse then
+			-- D-176: item de conjunto em Game Pass: a chave é a do conjunto (Commerce.IDS)
+			assert(Conjuntos.get(s.robuxKey), s.id .. ": conjunto " .. s.robuxKey)
+			assert(Conjuntos.doItem(s.id) == s.robuxKey, s.id .. ": fora da lista do conjunto")
+			assert(type((Commerce.IDS :: any)[s.robuxKey]) == "number", s.id)
+		else
+			assert(Skins.IDS[s.robuxKey] ~= nil, s.id .. ": chave fora de Skins.IDS")
+			assert(type(Skins.IDS[s.robuxKey]) == "number")
+		end
 		assert(#s.swatch > 0, s.id .. ": sem cores de prévia")
 		if s.kind == "weapon" then
 			local wp = Weapons.get(s.weapon)
 			assert(wp, s.id .. ": arma " .. tostring(s.weapon))
 			assert(wp.faction == s.side, s.id .. ": skin do lado errado da arma")
 			assert(s.finish and (s.finish.wood or s.finish.metal or s.finish.handguard), s.id .. ": sem acabamento")
-			assert(s.robuxKind == "product", s.id .. ": arma em Robux é Developer Product")
+			assert(
+				s.robuxKind == (if s.soPasse then "pass" else "product"),
+				s.id .. ": arma em Robux é Developer Product (a do conjunto, o Game Pass dele)"
+			)
 		else
 			assert(s.robuxKind == "pass", s.id .. ": uniforme e camuflagem são Game Pass")
 		end
@@ -86,7 +97,8 @@ test("catálogo: ids únicos, tipos, lados, armas de verdade e chaves de Robux",
 	-- toda chave de Robux tem uma skin (nada sobra para o dono criar à toa)
 	local used = {}
 	for _, s in Skins.CATALOG do
-		assert(not used[s.robuxKey], "chave repetida " .. s.robuxKey)
+		-- D-176: as skins de um conjunto em Game Pass dividem a chave do conjunto
+		assert(s.soPasse or not used[s.robuxKey], "chave repetida " .. s.robuxKey)
 		used[s.robuxKey] = true
 	end
 	for key in Skins.IDS do
@@ -272,13 +284,19 @@ test("lista por tipo e lado: o de ambos entra nos dois", function()
 		assert(s.side == "US" and s.kind == "weapon")
 	end
 	assert(#Skins.list("camo", "US") == 3 and #Skins.list("camo", "VC") == 3)
-	-- D-131: o VC tem o preto, o marrom e o tigrado capturado; os EUA, cinco
-	local vc = {}
+	-- D-131: o VC tem o preto, o marrom e o tigrado capturado; os EUA, cinco. D-176: mais 3 de cada
+	-- lado nos conjuntos em Game Pass (só pelo passe)
+	local vc, n = {}, { US = 0, VC = 0 }
 	for _, s in Skins.list("uniform", "VC") do
 		vc[s.id] = true
 	end
-	assert(vc.skin_vc_black and vc.skin_vc_brown and vc.skin_vc_tiger and #Skins.list("uniform", "VC") == 3)
-	assert(#Skins.list("uniform", "US") == 5)
+	for _, s in Skins.list("uniform", nil) do
+		if s.soPasse then
+			n[s.side] += 1
+		end
+	end
+	assert(vc.skin_vc_black and vc.skin_vc_brown and vc.skin_vc_tiger and #Skins.list("uniform", "VC") == 6)
+	assert(#Skins.list("uniform", "US") == 8 and n.US == 3 and n.VC == 3)
 end)
 
 -- Perfil --------------------------------------------------------------------------------------

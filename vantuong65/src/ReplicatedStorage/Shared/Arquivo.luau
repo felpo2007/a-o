@@ -15,6 +15,7 @@
 -- nada de vitrine vazia nem item inventado. "Itens históricos de temporada" é a marca de origem da
 -- caixa de temporada, não uma categoria.
 local Caixas = require(script and (script :: any).Parent.Caixas or "./Caixas") :: any
+local Conjuntos = require(script and (script :: any).Parent.Conjuntos or "./Conjuntos") :: any
 local Cosmeticos = require(script and (script :: any).Parent.Cosmeticos or "./Cosmeticos") :: any
 local Skins = require(script and (script :: any).Parent.Skins or "./Skins") :: any
 
@@ -224,7 +225,8 @@ end
 -- ===== origens (de onde o item sai) =====
 -- tipo: "caixa" (caixa = id, paga = bool, temporada = bool), "troca" (custo em Fragmentos),
 -- "compra_direta" (preco em $, aba CAIXAS), "intendencia" (preco em $), "robux" (Developer Product
--- ou Game Pass, compra direta em Robux) e "colecao" (colecao = id: prêmio exclusivo).
+-- ou Game Pass, compra direta em Robux), "colecao" (colecao = id: prêmio exclusivo) e "passe"
+-- (passe = chave do conjunto em Game Pass, D-176: só por ele).
 export type Origem = {
 	tipo: string,
 	caixa: string?,
@@ -233,6 +235,7 @@ export type Origem = {
 	custo: number?,
 	preco: number?,
 	colecao: string?,
+	passe: string?,
 }
 
 -- preço da compra direta com créditos (o mesmo do CaixaRegras.precoCreditos; o teste confere)
@@ -253,6 +256,11 @@ function Arquivo.origens(id: string): { Origem }
 	local out: { Origem } = {}
 	local info = Cosmeticos.info(id)
 	if not info then
+		-- título de conjunto (tit_*): só o passe
+		local passe = Conjuntos.doItem(id)
+		if passe then
+			table.insert(out, { tipo = "passe", passe = passe })
+		end
 		return out
 	end
 	local emCaixa = false
@@ -277,7 +285,7 @@ function Arquivo.origens(id: string): { Origem }
 		table.insert(out, { tipo = "compra_direta", preco = pd })
 	end
 	local s = Skins.get(id)
-	if s then
+	if s and not s.soPasse then
 		local preco = Skins.tierPrice(s.tier)
 		if preco > 0 then
 			table.insert(out, { tipo = "intendencia", preco = preco })
@@ -291,13 +299,18 @@ function Arquivo.origens(id: string): { Origem }
 			table.insert(out, { tipo = "colecao", colecao = c.id })
 		end
 	end
+	local passe = Conjuntos.doItem(id)
+	if passe then
+		table.insert(out, { tipo = "passe", passe = passe })
+	end
 	return out
 end
 
 -- dá para conseguir sem Robux? (caixa grátis, troca, compra direta, Intendência ou coleção)
+local GRATIS = { troca = true, compra_direta = true, intendencia = true, colecao = true }
 function Arquivo.gratis(id: string): boolean
 	for _, o in Arquivo.origens(id) do
-		if (o.tipo == "caixa" and not o.paga) or o.tipo ~= "caixa" and o.tipo ~= "robux" then
+		if (o.tipo == "caixa" and not o.paga) or GRATIS[o.tipo] then
 			return true
 		end
 	end
@@ -306,7 +319,7 @@ end
 
 function Arquivo.compraDireta(id: string): boolean
 	for _, o in Arquivo.origens(id) do
-		if o.tipo == "compra_direta" or o.tipo == "intendencia" or o.tipo == "robux" then
+		if o.tipo == "compra_direta" or o.tipo == "intendencia" or o.tipo == "robux" or o.tipo == "passe" then
 			return true
 		end
 	end

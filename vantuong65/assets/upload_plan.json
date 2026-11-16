@@ -1784,5 +1784,89 @@
   "assetType": "Decal",
   "name": "VT65 bandeira_frente",
   "description": "VAN TUONG 65 - bandeira (Frente de Libertação) da escolha de lado (tools/bandeiras_textura.py)"
+ },
+ {
+  "key": "Clothing.us_hbt_shirt_v3",
+  "file": "assets/clothing/skins/us_hbt_shirt_v3.png",
+  "assetType": "Decal",
+  "name": "VT65 us_hbt_shirt_v3",
+  "description": "VAN TUONG 65 - skin HBT verde-sálvia, camisa (tools/make_clothing_skins.py, D-176)"
+ },
+ {
+  "key": "Clothing.us_hbt_pants_v3",
+  "file": "assets/clothing/skins/us_hbt_pants_v3.png",
+  "assetType": "Decal",
+  "name": "VT65 us_hbt_pants_v3",
+  "description": "VAN TUONG 65 - skin HBT verde-sálvia, calça (tools/make_clothing_skins.py, D-176)"
+ },
+ {
+  "key": "Clothing.us_goldtiger_shirt_v3",
+  "file": "assets/clothing/skins/us_goldtiger_shirt_v3.png",
+  "assetType": "Decal",
+  "name": "VT65 us_goldtiger_shirt_v3",
+  "description": "VAN TUONG 65 - skin tigrado dourado, camisa (tools/make_clothing_skins.py, D-176)"
+ },
+ {
+  "key": "Clothing.us_goldtiger_pants_v3",
+  "file": "assets/clothing/skins/us_goldtiger_pants_v3.png",
+  "assetType": "Decal",
+  "name": "VT65 us_goldtiger_pants_v3",
+  "description": "VAN TUONG 65 - skin tigrado dourado, calça (tools/make_clothing_skins.py, D-176)"
+ },
+ {
+  "key": "Clothing.vc_oliva_shirt_v3",
+  "file": "assets/clothing/skins/vc_oliva_shirt_v3.png",
+  "assetType": "Decal",
+  "name": "VT65 vc_oliva_shirt_v3",
+  "description": "VAN TUONG 65 - skin áo bà ba verde-oliva, camisa (tools/make_clothing_skins.py, D-176)"
+ },
+ {
+  "key": "Clothing.vc_oliva_pants_v3",
+  "file": "assets/clothing/skins/vc_oliva_pants_v3.png",
+  "assetType": "Decal",
+  "name": "VT65 vc_oliva_pants_v3",
+  "description": "VAN TUONG 65 - skin áo bà ba verde-oliva, calça (tools/make_clothing_skins.py, D-176)"
+ },
+ {
+  "key": "Clothing.vc_anil_shirt_v3",
+  "file": "assets/clothing/skins/vc_anil_shirt_v3.png",
+  "assetType": "Decal",
+  "name": "VT65 vc_anil_shirt_v3",
+  "description": "VAN TUONG 65 - skin áo bà ba anil, camisa (tools/make_clothing_skins.py, D-176)"
+ },
+ {
+  "key": "Clothing.vc_anil_pants_v3",
+  "file": "assets/clothing/skins/vc_anil_pants_v3.png",
+  "assetType": "Decal",
+  "name": "VT65 vc_anil_pants_v3",
+  "description": "VAN TUONG 65 - skin áo bà ba anil, calça (tools/make_clothing_skins.py, D-176)"
+ },
+ {
+  "key": "Clothing.us_fundador_shirt_v3",
+  "file": "assets/clothing/skins/us_fundador_shirt_v3.png",
+  "assetType": "Decal",
+  "name": "VT65 us_fundador_shirt_v3",
+  "description": "VAN TUONG 65 - skin fundador (EUA), camisa (tools/make_clothing_skins.py, D-176)"
+ },
+ {
+  "key": "Clothing.us_fundador_pants_v3",
+  "file": "assets/clothing/skins/us_fundador_pants_v3.png",
+  "assetType": "Decal",
+  "name": "VT65 us_fundador_pants_v3",
+  "description": "VAN TUONG 65 - skin fundador (EUA), calça (tools/make_clothing_skins.py, D-176)"
+ },
+ {
+  "key": "Clothing.vc_fundador_shirt_v3",
+  "file": "assets/clothing/skins/vc_fundador_shirt_v3.png",
+  "assetType": "Decal",
+  "name": "VT65 vc_fundador_shirt_v3",
+  "description": "VAN TUONG 65 - skin fundador (Frente), camisa (tools/make_clothing_skins.py, D-176)"
+ },
+ {
+  "key": "Clothing.vc_fundador_pants_v3",
+  "file": "assets/clothing/skins/vc_fundador_pants_v3.png",
+  "assetType": "Decal",
+  "name": "VT65 vc_fundador_pants_v3",
+  "description": "VAN TUONG 65 - skin fundador (Frente), calça (tools/make_clothing_skins.py, D-176)"
  }
 ]

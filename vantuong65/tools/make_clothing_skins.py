@@ -72,6 +72,25 @@ BROWN_SUN = (128, 96, 72)
 # VC: tiger stripe capturado do ARVN, gasto e encardido (mais escuro que o dos assessores)
 TIGER_WORN = ((128, 120, 82), (72, 86, 50), (82, 64, 40), (28, 28, 26))
 TIGER_WORN_SUN = (150, 140, 104)
+# D-176 (lote 60, conjuntos em Game Pass; cores de olho, PLACEHOLDER até a foto, `check = "foto"`):
+# - HBT verde-sálvia: a sarja espinha de peixe dos utilitários P-1953, mais verde e mais clara que o
+#   sateen OG-107; ainda aparecia em 1965 em quem recebeu fardamento antigo;
+# - tigrado dourado: a variante de fundo amarelado do tiger stripe dos assessores (meados dos 60);
+# - áo bà ba verde-oliva: o pano tingido de verde das forças locais;
+# - áo bà ba anil: o tingido de anil, azul muito escuro, que desbota para o cinza-azulado;
+# - fundador (EUA e Frente): o corte de sempre num pano exclusivo, mais escuro.
+HBT = (112, 124, 92)
+HBT_SUN = (140, 148, 116)
+GOLD_TIGER = ((176, 152, 96), (96, 104, 60), (112, 82, 46), (34, 32, 28))
+GOLD_TIGER_SUN = (196, 176, 124)
+OLIVA = (84, 92, 62)
+OLIVA_SUN = (118, 124, 92)
+ANIL = (36, 40, 56)
+ANIL_SUN = (70, 76, 94)
+FUND_US = (70, 78, 52)
+FUND_US_SUN = (104, 110, 82)
+FUND_VC = (62, 66, 54)
+FUND_VC_SUN = (96, 98, 84)
 
 
 @dataclass(frozen=True)
@@ -154,6 +173,57 @@ OUTFITS: dict[str, Skin] = {
         None,
         0.9,
     ),
+    # D-176: conjuntos em Game Pass
+    "us_hbt_shirt_v3": Skin(
+        _spec("shirt", HBT, HBT_SUN, "plain", 5801), "plain", (), FADED_STENCIL, 1.2
+    ),
+    "us_hbt_pants_v3": Skin(_spec("pants", HBT, HBT_SUN, "plain", 5802), "plain", (), None, 1.0),
+    "us_goldtiger_shirt_v3": Skin(
+        _spec("shirt", GOLD_TIGER[0], GOLD_TIGER_SUN, "plain", 5901),
+        "tiger",
+        GOLD_TIGER[1:],
+        None,
+        0.7,
+    ),
+    "us_goldtiger_pants_v3": Skin(
+        _spec("pants", GOLD_TIGER[0], GOLD_TIGER_SUN, "plain", 5902),
+        "tiger",
+        GOLD_TIGER[1:],
+        None,
+        0.7,
+    ),
+    "vc_oliva_shirt_v3": Skin(
+        _spec("shirt", OLIVA, OLIVA_SUN, "plain", 6001, "ao_ba_ba", "forearm"),
+        "plain",
+        (),
+        None,
+        1.1,
+    ),
+    "vc_oliva_pants_v3": Skin(
+        _spec("pants", OLIVA, OLIVA_SUN, "plain", 6002, "ao_ba_ba"), "plain", (), None, 1.0
+    ),
+    "vc_anil_shirt_v3": Skin(
+        _spec("shirt", ANIL, ANIL_SUN, "plain", 6101, "ao_ba_ba", "forearm"),
+        "plain",
+        (),
+        None,
+        1.1,
+    ),
+    "vc_anil_pants_v3": Skin(
+        _spec("pants", ANIL, ANIL_SUN, "plain", 6102, "ao_ba_ba"), "plain", (), None, 1.0
+    ),
+    "us_fundador_shirt_v3": Skin(
+        _spec("shirt", FUND_US, FUND_US_SUN, "sateen", 6201), "plain", (), (40, 42, 32), 0.8
+    ),
+    "us_fundador_pants_v3": Skin(
+        _spec("pants", FUND_US, FUND_US_SUN, "sateen", 6202), "plain", (), None, 0.7
+    ),
+    "vc_fundador_shirt_v3": Skin(
+        _spec("shirt", FUND_VC, FUND_VC_SUN, "plain", 6301, "vc_uniform"), "plain", (), None, 0.8
+    ),
+    "vc_fundador_pants_v3": Skin(
+        _spec("pants", FUND_VC, FUND_VC_SUN, "plain", 6302, "vc_uniform"), "plain", (), None, 0.7
+    ),
 }
 SETS = [
     ("OG-107 desbotado (skin_us_faded)", "us_faded_shirt_v3", "us_faded_pants_v3", "usmc"),
@@ -168,6 +238,18 @@ SETS = [
     ("Lagarto, paraquedistas (skin_us_lizard)", "us_lizard_shirt_v3", "us_lizard_pants_v3", "usmc"),
     ("Áo bà ba marrom (skin_vc_brown)", "vc_brown_shirt_v3", "vc_brown_pants_v3", "vc"),
     ("Tiger stripe capturado (skin_vc_tiger)", "vc_tiger_shirt_v3", "vc_tiger_pants_v3", "vc"),
+    # D-176
+    ("HBT verde-sálvia (skin_us_hbt)", "us_hbt_shirt_v3", "us_hbt_pants_v3", "usmc"),
+    (
+        "Tigrado dourado (skin_us_goldtiger)",
+        "us_goldtiger_shirt_v3",
+        "us_goldtiger_pants_v3",
+        "usmc",
+    ),
+    ("Áo bà ba verde-oliva (skin_vc_oliva)", "vc_oliva_shirt_v3", "vc_oliva_pants_v3", "vc"),
+    ("Áo bà ba anil (skin_vc_anil)", "vc_anil_shirt_v3", "vc_anil_pants_v3", "vc"),
+    ("Fundador, EUA (skin_us_fundador)", "us_fundador_shirt_v3", "us_fundador_pants_v3", "usmc"),
+    ("Fundador, Frente (skin_vc_fundador)", "vc_fundador_shirt_v3", "vc_fundador_pants_v3", "vc"),
 ]
 
 

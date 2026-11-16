@@ -6988,3 +6988,50 @@ mensagem, a roleta das caixas entrou na fila como lote 61 (texto em `especificac
 - **Conferido:** Lune 9 ok no álbum e a suíte inteira (684 ok); Studio com o resgate pelo clique, a
   recusa do segundo pedido e das coleções incompletas, e 0 erros. Detalhes em
   `testes/ARQUIVO_D175_2026-11-16.md`.
+
+## D-176 — Lote 60: conjuntos em Game Pass (2026-11-16)
+
+**Pedido do dono:** "continua" (lote 60 do prompt master definitivo, item 19, com a criação dos 4
+Game Passes na conta).
+
+- **4 conjuntos de compra única** (`Shared/Conjuntos.luau`), com os preços de referência do pedido:
+
+  | Conjunto | Robux | Itens (todos novos, exclusivos e só visuais) |
+  |---|---|---|
+  | Identidade Militar | 49 | plaquetas de cobre e de aço enegrecido; emblemas Bússola e Sinalizador; molduras de cordão de paraquedas e de carimbo de serviço |
+  | Uniformes Históricos | 99 | HBT verde-sálvia e tigrado dourado (EUA); áo bà ba verde-oliva e anil (Frente) |
+  | Personalização de Armas | 149 | M14 nogueira oleada, M60 fosfato novo, M1911A1 talas de plástico marrom, Tipo 56 madeira avermelhada, SKS madeira clara, RPD aço azulado e madeira escura |
+  | Fundador STARLITE | 499 | uniforme de fundador nos dois lados, Insígnia de Fundador, Emblema Fundador 1965, plaqueta comemorativa, moldura (o cartão exclusivo) e o título "Fundador STARLITE" |
+
+- **Do pedido, o que ficou de fora** (não existe no jogo, e nada é vendido sem existir): capacetes,
+  acessórios e variações de equipamento (Uniformes Históricos), gravações e animações de inspeção
+  (Armas). Fica para quando houver o sistema.
+- **Posse:**
+  - a skin vale pelo passe (`Skins.owns`, com `robuxKey` igual à chave do conjunto);
+  - `soPasse` tira a skin do $ da Intendência e do Mercado. Lá aparece "Só no conjunto em Game
+    Pass", com o botão VER O CONJUNTO;
+  - os itens de cartão e o título são gravados no perfil (`campaign.owned`) quando o servidor vê
+    o passe (ao entrar e depois da compra, `CommerceService.onConjuntos`). Assim o cartão, o
+    álbum e o USAR veem igual.
+- **Fora de tudo o que é sorteio ou troca:**
+  - `exclusivo = "passe"`: não entra em caixa, a validação recusa;
+  - não entra na troca de Fragmentos nem na compra direta;
+  - no ARQUIVO, a origem é o conjunto, sem caminho grátis;
+  - nenhuma coleção pede item de conjunto.
+- **Venda:** página CONJUNTOS no ARQUIVO.
+  - O botão COMPRAR mostra o preço lido do Roblox e abre o prompt oficial.
+  - Quem já tem vê "NO SEU ARQUIVO".
+  - A loja não fica aberta em combate, então não há prompt acidental.
+- **Uniformes:** 6 moldes novos no gerador (`tools/make_clothing_skins.py`, as mesmas costuras da
+  v3), subidos ao Roblox. As cores são de olho: PLACEHOLDER até a foto (`check = "foto"`).
+- **Imagens dos passes:** montadas no próprio jogo (`ItemArte` e o manequim do lobby com os moldes
+  novos) e recortadas. O nome do jogador nas plaquetas virou "STARLITE", porque a imagem é pública.
+- **Criados no Roblox:**
+  - 4 Game Passes à venda: Identidade 2088634972, Uniformes 2088232933, Armas 2089588819 e
+    Fundador 2087975040;
+  - 12 decals de roupa.
+- **Clube de Veteranos (assinatura):** ainda não. A assinatura só se cria no Creator Hub (é do
+  dono). Os benefícios entram quando houver o ID.
+- **Conferido:** Lune 6 ok nos conjuntos e 690 na suíte. No Studio, a posse dos 4 passes, os itens
+  gravados, a página CONJUNTOS e o soldado em campo com o molde novo, com 0 erros. Detalhes em
+  `testes/CONJUNTOS_D176_2026-11-16.md`.

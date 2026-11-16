@@ -31,6 +31,7 @@ local Arquivo = require(ReplicatedStorage.Shared.Arquivo) :: any
 local Caixas = require(ReplicatedStorage.Shared.Caixas) :: any
 local Calendario = require(ReplicatedStorage.Shared.Calendario) :: any
 local Commerce = require(ReplicatedStorage.Shared.Commerce)
+local Conjuntos = require(ReplicatedStorage.Shared.Conjuntos) :: any
 local Cosmeticos = require(ReplicatedStorage.Shared.Cosmeticos) :: any
 local Net = require(ReplicatedStorage.Shared.Net)
 local Temporada = require(ReplicatedStorage.Shared.Temporada)
@@ -469,9 +470,14 @@ function CaixaService.arquivoEstado(player: Player): any
 			resgatada = p.caixas.arquivo[c.id] ~= nil,
 		}
 	end
+	local conjuntos = {}
+	for _, c in Conjuntos.LISTA do
+		conjuntos[c.key] = ps[c.key] == true
+	end
 	return {
 		possui = possui,
 		colecoes = colecoes,
+		conjuntos = conjuntos,
 		fragmentos = p.caixas.fragmentos,
 		creditos = p.credits,
 		desligado = arquivoInvalido,
@@ -520,6 +526,40 @@ function CaixaService.resgatarColecao(player: Player, colId: any): any
 		)
 	end)
 	return { ok = true, resultado = r, item = itemView(r.item) }
+end
+
+-- D-176: conjuntos em Game Pass: grava no perfil os itens de cartão e o título de quem tem o
+-- passe (ao entrar e depois da compra). As skins valem pelo próprio passe (Skins.owns).
+function CaixaService.conjuntos(player: Player)
+	local p = PlayerData.get(player)
+	if not p then
+		return
+	end
+	local ps = passes(player)
+	local falta = false
+	for _, c in Conjuntos.LISTA do
+		if ps[c.key] then
+			for _, id in Conjuntos.paraGravar(c.key) do
+				if not p.campaign.owned[id] then
+					falta = true
+				end
+			end
+		end
+	end
+	if not falta then
+		return
+	end
+	local novos: { string } = {}
+	local status = PlayerData.transact(player, function(prof)
+		novos = CaixaRegras.gravarConjuntos(prof, ps)
+		return if #novos > 0 then true else nil
+	end)
+	if status == "ok" and #novos > 0 then
+		local g = CaixaService.onGrant
+		if g then
+			task.spawn(g, player)
+		end
+	end
 end
 
 -- D-174: caixa grátis guardada por um marco do jogo (cada marco só uma vez). O jogador recebe um
@@ -728,6 +768,10 @@ local function devHook()
 end
 
 function CaixaService.start()
+	-- D-176: a posse dos Game Passes mudou (entrada, compra): grava os itens dos conjuntos
+	CommerceService.onConjuntos = function(player: Player)
+		CaixaService.conjuntos(player)
+	end
 	CommerceService.crateReceipt = function(player: Player, info: { [string]: any }, c: any)
 		return CaixaService.recibo(player, info, c)
 	end
@@ -767,6 +811,7 @@ function CaixaService.start()
 	end)
 	PlayerData.Loaded:Connect(function(player: Player)
 		aplicarCartao(player)
+		task.spawn(CaixaService.conjuntos, player) -- D-176
 		-- boas-vindas: 2 bilhetes uma vez por conta, para conhecer a caixa gratuita
 		CaixaService.ganhar(player, 2, "boas_vindas")
 	end)

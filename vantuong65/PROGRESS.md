@@ -323,6 +323,20 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
       0 erros.
     - **v99 publicada** (versão 104 do place, commit 44c0440).
     - Próximo: lote 60 (Game Passes novos e Clube de Veteranos) e lote 61 (roleta).
+- Pedido do dono (16/11): "continua":
+  - **Lote 60 (D-176): conjuntos em Game Pass.** Foram criados no Roblox 4 passes, só visuais e
+    com itens novos e exclusivos:
+    - Identidade Militar (R$ 49);
+    - Uniformes Históricos (R$ 99);
+    - Personalização de Armas (R$ 149);
+    - Fundador STARLITE (R$ 499).
+    Também há 6 uniformes novos (12 moldes subidos), 6 acabamentos e 10 itens de cartão, além do
+    título.
+    - A venda fica no ARQUIVO, página CONJUNTOS.
+    - Conferido: Lune 6 ok nos conjuntos, 690 na suíte. No Studio, a posse, os itens gravados e o
+      soldado em campo com o molde novo, com 0 erros.
+    - Fora do pedido por não existirem no jogo: capacetes, gravações e animações de inspeção.
+    - O Clube de Veteranos espera o dono criar a assinatura no Creator Hub.
 - Pedido do dono (16/11): "siga e adicione isso para a lista": a roleta das caixas. O texto inteiro
   está em `especificacao/PROMPT_ROLETA_CAIXAS.md` (só local).
   - **Lote 61 (na fila): roleta horizontal na abertura das caixas.** Só a apresentação muda;

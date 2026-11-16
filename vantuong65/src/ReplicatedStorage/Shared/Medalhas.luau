@@ -132,6 +132,7 @@ Medalhas.NAMES = {
 	emb_padrao = "Emblema: Operação Starlite",
 	tit_soldado = "Soldado",
 	emb_top10 = "Emblema: Placar da Semana",
+	tit_fundador = "Fundador STARLITE", -- D-176: conjunto Fundador (Game Pass)
 } :: { [string]: string }
 
 export type Card = { emblem: string, title: string, medals: { string } }
