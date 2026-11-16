@@ -6704,8 +6704,32 @@ próximo uso concreto é o atlas único das árvores da mata, depois da medida.
     `VT65_Ground`). No Studio esses erros não aparecem. **Não investigado:** pode ser a qualidade
     gráfica automática baixa na placa de 2 GB (o Roblox desliga o PBR em qualidade baixa) ou falha
     de carga de verdade.
-- **Conclusão:** trim sheet e baking de modelos não têm mais o que ganhar em memória de textura.
-  A trim sheet da base economizaria no máximo ~6 MB, pouco para refazer as UVs e perder detalhe
-  (o mesmo que a D-165 mostrou no telhado). Não feita. O que ainda pesa no desenho (chamadas e
-  triângulos de longe) é o que o SLIM ataca.
+- **Conclusão (trim e baking):** trim sheet e baking de modelos não têm mais o que ganhar em memória
+  de textura. A trim sheet da base economizaria no máximo ~6 MB, pouco para refazer as UVs e perder
+  detalhe (o mesmo que a D-165 mostrou no telhado). Não feita. O que ainda pesa no desenho (chamadas
+  e triângulos de longe) é o que o SLIM ataca.
+
+## D-169 — Lote 53: as casas da vila no SLIM, por molde (2026-11-15, v93)
+
+**Pedido do dono:** "Passe mesmo assim" (mais casas no SLIM, sem esperar a conferência do D-168).
+
+- **Por molde:** as casas únicas da vila são clones do mesmo modelo, sem tinta (só o pivô, o giro em
+  Y e a escala mudam; `ArtPlan` não põe `tint` nelas). O copiador ganhou o modo `MOLDES`: a primeira
+  casa de cada chave sai inteira (o molde) e as outras só como `I <chave> <x> <y> <z> <giro>
+  <escala>`. O `tools/estatico.py` leva o molde ao pivô de cada instância.
+- **Sem transcrição:** o texto (938 linhas, 58.648 bytes) voltou do Studio em 4 pedaços marcados
+  `VT65COPIA casas i/4`, e o `tools/copia_da_conversa.py` o tirou do registro da conversa e gravou
+  `assets/estatico/vila_casas.txt`. A soma FNV-1a bateu (`db1c2595`).
+- **Casas:** 28 (9 moldes e 19 instâncias). A `vila_casa_09` fica com o jogo: o `MapLife` mexe nela
+  (escada). Com a casa de Xóm Gò da D-167, são 29 das 32 casas únicas.
+- **Conferido:**
+  - o telhado e o piso de cada uma das 28 casas geradas contra a casa do jogo: maior diferença
+    0,0014 stud;
+  - Studio: 53 modelos fixos (1.722 peças), 53 cópias do plano puladas, nenhuma peça da trim sheet
+    sem textura, vila igual (855 modelos, 390 construções, 27 animais, 42 lamparinas, 240 abrigos
+    dos bots, arte no chão 846 de 852), autoteste 18 ok, 0 falhas.
+- **Limites:**
+  - o interior das casas fixas fica mais claro que o de antes (a peça de malha feita fora do Studio
+    colide em caixa, D-155). Casa clara esconde menos quem está dentro;
+  - o SLIM em si segue sem confirmação (D-168).
 

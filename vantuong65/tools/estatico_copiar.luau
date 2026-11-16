@@ -23,6 +23,10 @@ local RAIO_M = 10
 -- D-168: com PREFIXO, copia todos os modelos de Map.Art cujo nome começa com ele (ex.: "Vila_", as
 -- 19 construções de peças do MapLife), cada um como um M; CHAVE, CENTRO e RAIO_M ficam de fora
 local PREFIXO: string? = nil
+-- D-169: com MOLDES (ex.: "vila_casa_"), a primeira casa de cada chave sai inteira (M, o molde) e as
+-- outras só como "I <chave> <x> <y> <z> <giro> <escala>"; as que já são fixas (VT65Estatico) ficam de
+-- fora. Serve para modelo clonado sem tinta (as casas únicas da vila).
+local MOLDES: string? = nil
 local M = 0.28
 local COR_PADRAO = Color3.fromRGB(163, 162, 165)
 
@@ -211,6 +215,32 @@ local function no(m: Instance, caminho: string)
 end
 
 local art = workspace.Map.Art
+if MOLDES then
+	local vistos: { [string]: boolean } = {}
+	local insts = {}
+	for _, m in art:GetChildren() do
+		if m:IsA("Model") and string.sub(m.Name, 1, #MOLDES) == MOLDES and not m:GetAttribute("VT65Estatico") then
+			local pv = m:GetPivot()
+			if vistos[m.Name] then
+				table.insert(
+					insts,
+					table.concat({ "I", m.Name, f(pv.X), f(pv.Y), f(pv.Z), f(giro(pv)), f(m:GetScale()) }, " ")
+				)
+			else
+				vistos[m.Name] = true
+				table.insert(
+					linhas,
+					table.concat({ "M", m.Name, f(pv.X), f(pv.Y), f(pv.Z), f(giro(pv)), f(m:GetScale()) }, " ")
+				)
+				no(m, "")
+			end
+		end
+	end
+	for _, l in insts do
+		table.insert(linhas, l)
+	end
+	return table.concat(linhas, "\n")
+end
 if PREFIXO then
 	for _, m in art:GetChildren() do
 		if m:IsA("Model") and string.sub(m.Name, 1, #PREFIXO) == PREFIXO then

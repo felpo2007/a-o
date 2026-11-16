@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import math
 import sys
 from pathlib import Path
 
@@ -103,6 +104,45 @@ def test_construcao_de_pecas_linha_b(tmp_path):
     assert [c["Name"] for c in estatico.rojo_modelo(m)["Children"]] == ["Alpendre", "Tora"]
 
 
+def test_instancia_de_molde(tmp_path):
+    # D-169: a casa repetida vem do molde (mesma chave), levada ao pivô, ao giro e à escala dela
+    f = tmp_path / "casas.txt"
+    f.write_text(
+        "M vila_casa_01 100.000 10.000 200.000 30.000 1.300\n"
+        "N Trim_M_Node\n"
+        "P Trim_M 111 110.000 15.000 200.000 30.000 13.000 6.500 2.600 s -\n"
+        "S 1 2 3 4 Overlay 1.0000,1.0000,1.0000\n"
+        "I vila_casa_01 100.000 10.000 200.000 30.000 1.300\n"
+        "I vila_casa_01 0.000 20.000 0.000 120.000 2.600\n",
+        "utf-8",
+    )
+    lidos = estatico.ler(f)
+    assert [m.get("instancia", False) for m in lidos] == [False, True, True]
+    molde, igual, girada = estatico.instanciar(lidos, estatico.moldes_de([f]))
+    p0, p1, p2 = (todas(m)[0] for m in (molde, igual, girada))
+    # no mesmo pivô, a mesma peça
+    assert p1["pos"] == pytest.approx(p0["pos"]) and p1["giro"] == pytest.approx(p0["giro"])
+    assert p1["tamanho"] == pytest.approx(p0["tamanho"]) and p1["sa"] == p0["sa"]
+    # giro +90° e escala 2x: a peça a 10 studs do pivô do molde vai a 20 studs do pivô da
+    # instância, girada 90° em volta dele, e 5 × 2 = 10 acima
+    assert estatico._girar(10, 0, 0) == pytest.approx((10, 0))
+    assert estatico._girar(10, 0, 90) == pytest.approx((0, -10), abs=1e-9)  # CFrame.Angles(0, 90°)
+    l0x, l0z = estatico._girar(10.0, 0.0, -30)
+    wx, wz = estatico._girar(l0x * 2, l0z * 2, 120)
+    assert p2["pos"] == pytest.approx([wx, 20 + 5 * 2, wz], abs=1e-3)
+    assert math.hypot(p2["pos"][0], p2["pos"][2]) == pytest.approx(20, abs=1e-3)
+    assert p2["giro"] == pytest.approx(120) and p2["tamanho"] == pytest.approx([26, 13, 5.2])
+    # o InitialSize da malha não muda com a escala da instância
+    a = estatico.rojo_peca(p0)["Properties"]["InitialSize"]
+    b = estatico.rojo_peca(p2)["Properties"]["InitialSize"]
+    assert a == pytest.approx(b)
+    # instância sem molde é recusada
+    g = tmp_path / "sozinha.txt"
+    g.write_text("I vila_casa_02 0 0 0 0 1\n", "utf-8")
+    with pytest.raises(SystemExit):
+        estatico.instanciar(estatico.ler(g), estatico.moldes_de([g]))
+
+
 def test_linha_b_incompleta_e_classe_estranha_recusadas(tmp_path):
     f = tmp_path / "x.txt"
     f.write_text("M Vila_teste 0 0 0 0 1\nB Part Block Parede 0 0 0 1 0 0\n", "utf-8")
@@ -126,10 +166,15 @@ def test_ligados_e_gerado_bate():
     # D-155: o SLIM só é gerado com o Team Create; D-167: ligado, a casa de Xóm Gò vai no place;
     # D-168: e as 19 construções de peças do MapLife
     ativos = json.loads((ROOT / "assets" / "estatico" / "ativos.json").read_text("utf-8"))
-    assert ativos == ["vila_casa_03_xomgo", "vila_construcoes"]
+    assert ativos == ["vila_casa_03_xomgo", "vila_construcoes", "vila_casas"]
     construcoes = estatico.ler(ROOT / "assets" / "estatico" / "vila_construcoes.txt")
     assert len(construcoes) == 19 and all(m["chave"].startswith("Vila_") for m in construcoes)
     assert sum(estatico.pecas(m) for m in construcoes) == 239
+    # D-169: as casas únicas da vila, 9 moldes e 19 instâncias (a vila_casa_09 fica com o jogo)
+    casas = estatico.ler(ROOT / "assets" / "estatico" / "vila_casas.txt")
+    assert sum(1 for m in casas if not m.get("instancia")) == 9
+    assert sum(1 for m in casas if m.get("instancia")) == 19
+    assert not any(m["chave"] == "vila_casa_09" for m in casas)
     gerados = sorted((ROOT / "src" / "Workspace" / "Estatico").glob("*.model.json"))
     modulo_arq = ROOT / "src" / "ServerScriptService" / "Modules" / "StaticArt.luau"
     modulo = modulo_arq.read_text("utf-8")

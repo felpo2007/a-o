@@ -50,8 +50,12 @@ repositório é de OUTRO projeto (estratégias de trade). Aqui vale este arquivo
     (`h*403 + ((h*256) % 65536) * 65536`): no Luau, `h * 16777619` perde precisão;
   - ligue-o em `assets/estatico/ativos.json` e rode `uv run python tools/estatico.py` (gera
     `src/Workspace/Estatico` e `Modules/StaticArt`).
-  - Construção de peças do `MapLife` (D-168): ponha `CHAVE = "Vila_<tipo>"` no copiador; as peças
-    comuns saem em linhas `B` com o CFrame inteiro, e o pivô é o centro da base.
+  - Construção de peças do `MapLife` (D-168): use `PREFIXO = "Vila_"` no copiador; as peças comuns
+    saem em linhas `B` com o CFrame inteiro, e o pivô é o centro da base.
+  - Casa que se repete (D-169): `MOLDES = "vila_casa_"` dá um molde por chave e `I` para as outras.
+  - Texto grande do Studio (D-169): devolva em pedaços que começam com `VT65COPIA <nome> i/n` e
+    grave com `uv run python tools/copia_da_conversa.py <registro.jsonl> <nome> <saida>` (o registro
+    da conversa fica em `~/.claude/projects/<projeto>/<sessão>.jsonl`). Nada de transcrever à mão.
 - Custo teórico de textura por modelo (D-168): `uv run python tools/textura_custo.py`. Serve para
   escolher o alvo da trim sheet; o custo de verdade se mede no Studio, sem bots (D-165).
   - Medido (D-168): na vista do QG dos EUA, toda a textura de modelo custa ~23 MB de ~133 MB, e a
@@ -228,7 +232,7 @@ O `sourcemap.json` não vai para o Git.
 - Segredos só no `.env` (no `.gitignore`), nunca no código nem no chat.
 - ForgeGUI: nunca regenerar um job em `outcome_unknown`. "failed" com `retryable` pode ser
   retomado com `generation_retry`.
-- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-169) e atualize `PROGRESS.md`.
+- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-170) e atualize `PROGRESS.md`.
 - Tetos de triângulos por modelo: vegetação ≤ 6 mil (D-135), props e herói ≤ 20 mil (`ArtBudget`,
   conferido pelo teste da F5).
 - Commits no branch acima, com mensagem em português.

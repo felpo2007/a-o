@@ -240,6 +240,10 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     então nada de Studio nem de Blender pesado.
     - SLIM: o copiador e o `estatico.py` aceitam as construções de peças (pagode, casa comunal,
       serraria...).
+    - Conferir o SLIM no Studio por distância não funcionou (nada saiu do streaming em 6 min); o
+      jeito é a cor de depuração (F9), no TODO_USUARIO.
+    - Trim sheet e baking: `tools/textura_custo.py` aponta a base dos EUA (93 texturas) e as árvores
+      da mata (6 por espécie) como próximos alvos, a medir no Studio antes.
   - **v92 (D-168): as 19 construções de peças com SLIM.** Copiadas do jogo (239 peças, soma
     conferida), ligadas e testadas no Studio: 25 modelos fixos, vila igual, autoteste 18 ok.
     Publicada (versão 94 do place, commit fe79d91). A 93 foi um salvamento automático do Team
@@ -247,10 +251,12 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
   - **Trim sheet e baking: medidos, não vale continuar.** Na vista do QG dos EUA (sem bots):
     normal 132,7 MB; a base numa folha só 126,6 MB; todos os modelos numa folha só 109,9 MB.
     Toda a textura de modelo custa ~23 MB, e a base ~6 MB; o resto é chão, céu e interface.
-    - Conferir o SLIM no Studio por distância não funcionou (nada saiu do streaming em 6 min); o
-      jeito é a cor de depuração (F9), no TODO_USUARIO.
-    - Trim sheet e baking: `tools/textura_custo.py` aponta a base dos EUA (93 texturas) e as árvores
-      da mata (6 por espécie) como próximos alvos, a medir no Studio antes.
+  - **SLIM sem confirmação:** no Studio nada foi desenhado por ele; no jogo publicado não deu para
+    olhar a vila de longe. Mais de 100 erros "PBR textures may not be visible" no jogo publicado.
+- Pedido do dono (15/11): "Passe mesmo assim" (mais casas no SLIM):
+  - **v93 (D-169): 29 das 32 casas únicas da vila no SLIM.** Copiadas por molde (9 moldes e 19
+    instâncias), sem transcrever à mão; conferidas contra o jogo (0,0014 stud) e no Studio (53
+    modelos fixos, vila igual, autoteste 18 ok). Interior das casas fixas mais claro (D-155).
 
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;

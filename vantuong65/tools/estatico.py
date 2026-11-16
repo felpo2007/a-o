@@ -27,6 +27,10 @@ D-168: as construções de peças do MapLife (pagode, casa comunal, bancas, serr
 linhas `B` (Part, WedgePart ou CornerWedgePart com o CFrame inteiro, o material e a cor). O modelo
 se chama `Vila_<tipo>` e o pivô é o centro da base (MapLife.villagePart), que o AssetLoader procura.
 
+D-169: casa que se repete vem em linha `I <chave> <x> <y> <z> <giro> <escala>`, uma instância do
+molde de mesma chave (o primeiro `M` dela nos arquivos de `assets/estatico`). As casas únicas da
+vila são clones do mesmo modelo, sem tinta: só mudam o pivô, o giro em Y e a escala.
+
 Uso: uv run python tools/estatico.py
 """
 
@@ -107,6 +111,22 @@ def ler(caminho: Path) -> list[dict]:
                 "escala": atual["escala"],
             }
             alvo["filhos"].append(peca)
+        elif tipo == "I":
+            # D-169: instância de um molde (resolvida em `instanciar`, depois de ler os arquivos)
+            chave, x, y, z, giro, escala = campos
+            if chave in SO_EM_JOGO:
+                raise SystemExit(f"{caminho.name}:{n}: {chave} depende do jogo rodando (MapLife)")
+            modelos.append(
+                {
+                    "chave": chave,
+                    "pivo": [float(x), float(y), float(z)],
+                    "giro": float(giro),
+                    "escala": float(escala),
+                    "instancia": True,
+                    "filhos": [],
+                }
+            )
+            atual, alvo, peca = None, None, None
         elif tipo == "B":
             assert atual is not None and alvo is not None, f"linha {n}: B fora de modelo"
             if len(campos) != 22:
@@ -141,6 +161,61 @@ def ler(caminho: Path) -> list[dict]:
         else:
             raise SystemExit(f"{caminho.name}:{n}: linha desconhecida {tipo!r}")
     return modelos
+
+
+def _girar(x: float, z: float, graus: float) -> tuple[float, float]:
+    """O vetor (x, z) girado como CFrame.Angles(0, graus, 0) (linhas [[c,0,s],[0,1,0],[-s,0,c]])."""
+    r = math.radians(graus)
+    c, s = math.cos(r), math.sin(r)
+    return c * x + s * z, -s * x + c * z
+
+
+def _copiar_no(n: dict, molde: dict, inst: dict) -> dict:
+    """D-169: o filho do molde levado para a instância (pivô, giro em Y e escala)."""
+    if "classe" in n:
+        raise SystemExit(f"molde {molde['chave']}: peça comum (linha B) em molde não é aceita")
+    if "malha" not in n:
+        return {"nome": n["nome"], "filhos": [_copiar_no(f, molde, inst) for f in n["filhos"]]}
+    k = inst["escala"] / molde["escala"]
+    px, py, pz = (n["pos"][i] - molde["pivo"][i] for i in range(3))
+    lx, lz = _girar(px, pz, -molde["giro"])
+    wx, wz = _girar(lx * k, lz * k, inst["giro"])
+    p = dict(n)
+    p["pos"] = [
+        round(inst["pivo"][0] + wx, 4),
+        round(inst["pivo"][1] + py * k, 4),
+        round(inst["pivo"][2] + wz, 4),
+    ]
+    p["giro"] = round(n["giro"] - molde["giro"] + inst["giro"], 4)
+    p["tamanho"] = [round(v * k, 4) for v in n["tamanho"]]
+    p["escala"] = inst["escala"]
+    return p
+
+
+def instanciar(modelos: list[dict], moldes: dict[str, dict]) -> list[dict]:
+    """D-169: troca cada linha I pelo molde da mesma chave, levado ao pivô dela."""
+    out = []
+    for m in modelos:
+        if not m.get("instancia"):
+            out.append(m)
+            continue
+        molde = moldes.get(m["chave"])
+        if molde is None:
+            raise SystemExit(f"instância de {m['chave']} sem molde em assets/estatico")
+        novo = {k: m[k] for k in ("chave", "pivo", "giro", "escala")}
+        novo["filhos"] = [_copiar_no(f, molde, m) for f in molde["filhos"]]
+        out.append(novo)
+    return out
+
+
+def moldes_de(arquivos: list[Path]) -> dict[str, dict]:
+    """O primeiro M de cada chave, na ordem dos arquivos."""
+    moldes: dict[str, dict] = {}
+    for arq in arquivos:
+        for m in ler(arq):
+            if not m.get("instancia"):
+                moldes.setdefault(m["chave"], m)
+    return moldes
 
 
 def atributos(valores: dict) -> dict:
@@ -265,6 +340,9 @@ def main() -> None:
         modelos += ler(ENTRADA / f"{nome}.txt")
     for arq in sorted(ENTRADA.glob("*.txt")):
         ler(arq)  # confere também os desligados
+    # D-169: os moldes vêm primeiro dos ligados (na ordem de ativos.json), depois dos outros
+    arquivos = [ENTRADA / f"{nome}.txt" for nome in ativos] + sorted(ENTRADA.glob("*.txt"))
+    modelos = instanciar(modelos, moldes_de(arquivos))
     SAIDA.mkdir(parents=True, exist_ok=True)
     (SAIDA / ".gitkeep").write_text("", "utf-8")
     for velho in SAIDA.glob("*.model.json"):
