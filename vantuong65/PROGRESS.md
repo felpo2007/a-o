@@ -296,6 +296,10 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     - Conferido: Lune 20 ok (100 mil sorteios por caixa) e Studio, com recibos simulados. Dois erros
       achados no Studio foram corrigidos.
     - Esperando o dono: o que fazer com a loja que vende vantagem; o questionário; a assinatura.
+    - **v97 publicada** (versão 102 do place, commit 6b9f6d6). A 101 saiu com o build anterior,
+      sem a trava "recibo com a venda desligada não sorteia", porque a cópia do place falhou com o
+      arquivo ainda preso. Não havia risco: os produtos das caixas não existem. Foi republicada
+      logo em seguida.
 
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;
