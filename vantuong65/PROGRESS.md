@@ -378,7 +378,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
       textura.
     - Conferido: Lune 697 ok, pytest 67. No Studio: troca → equipar → campo com a textura na
       arma de 1ª e 3ª pessoa; a roleta parou no item do servidor; o degradê no cartão; 0 erros.
-    - **v102 publicada** (versão 107 do place, commit PENDENTE).
+    - **v102 publicada** (versão 107 do place, commit 5b42e49).
 
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;
