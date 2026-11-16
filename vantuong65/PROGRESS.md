@@ -403,7 +403,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     - Todo acabamento tem o material dele (verniz, metal, semibrilho, pintura acetinada ou tinta
       fosca), e mais 16 ganharam relevo (carbono, colmeia, damasco, laca, bambu, carta).
     - Conferido: Lune 700 ok, pytest 70. No Studio, as 344 SurfaceAppearance no place, os 12 novos nas armas de vitrine e o Ouro Derretido trocado, equipado na M14 e visto em campo; 0 erros.
-    - **v104 publicada** (versão 109 do place, commit PENDENTE).
+    - **v104 publicada** (versão 109 do place, commit 8d73fbc).
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;
   - respondido pelo dono: a M14 fica como está; o capim clareou (v58);
