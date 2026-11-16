@@ -394,7 +394,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     - Nas caixas sem mudar a fatia de nenhuma raridade; cada um sai de uma caixa grátis.
     - Conferido: Lune 699 ok, pytest 70. No Studio, troca → equipar → campo com a SurfaceAppearance
       na arma de 1ª e 3ª pessoa, e o EQUIPAR/TIRAR do perfil em outra arma; 0 erros.
-    - **v103 publicada** (versão 108 do place, commit PENDENTE).
+    - **v103 publicada** (versão 108 do place, commit 6e9d8ac).
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;
   - respondido pelo dono: a M14 fica como está; o capim clareou (v58);
