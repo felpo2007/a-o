@@ -313,6 +313,32 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     - Não testado: os marcos numa partida de verdade (só pelo código e pelos ganchos).
     - **v98 publicada** (versão 103 do place, commit d1a5823).
     - Próximos: lote 59 (Arquivo Militar), lote 60 (Game Passes novos e Clube de Veteranos).
+  - **Lote 59 (D-175): ARQUIVO MILITAR STARLITE.** Aba ARQUIVO na loja com os 53 cosméticos por
+    categoria e 9 coleções com prêmio exclusivo garantido.
+    - Cada item mostra a imagem (arma em 3D, soldado vestido no detalhe), a raridade, a posse e
+      como conseguir.
+    - Nenhuma coleção exige caixa paga (teste).
+    - Resgate atômico, uma vez por conta.
+    - Conferido: Lune 9 ok no álbum, 684 na suíte; Studio com o resgate pelo clique e as recusas,
+      0 erros.
+    - Próximo: lote 60 (Game Passes novos e Clube de Veteranos) e lote 61 (roleta).
+- Pedido do dono (16/11): "siga e adicione isso para a lista": a roleta das caixas. O texto inteiro
+  está em `especificacao/PROMPT_ROLETA_CAIXAS.md` (só local).
+  - **Lote 61 (na fila): roleta horizontal na abertura das caixas.** Só a apresentação muda;
+    sorteio, chances, preços, prêmios, regras, inventário, compras e gravação ficam iguais.
+    - Antes de abrir: galeria com a imagem grande de cada item, a chance real embaixo, fundo e
+      borda da raridade e a marca de "já tem". Sem o nome no cartão; o nome fica acessível de
+      outro jeito (descrição).
+    - Na abertura: faixa de cartões da direita para a esquerda, marcador fixo no centro,
+      desaceleração suave, parada exata no item que o servidor já gravou, 5 a 7 s e PULAR. De 5 a
+      7 cartões no PC, menos no celular. Sem roleta circular e sem "quase ganhou" fabricado.
+    - Visual: fundo militar escuro, borda acesa da raridade, gradiente nas pontas, som leve na
+      rolagem, destaque para épico e lendário. PC, celular e controle.
+    - Imagens dos itens com os modelos do jogo, no mesmo enquadramento e luz: arma de lado,
+      uniforme vestido no soldado, emblema e plaqueta centralizados. Sem texto no lugar de imagem
+      que falta.
+    - Resultado: o cartão ampliado, a raridade, luz e som, e os botões EQUIPAR e VOLTAR.
+    - Testar em várias resoluções que ela para sempre no item do servidor.
 
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;

@@ -119,6 +119,12 @@ abrir, em "VER ITENS E PROBABILIDADES".
 - **Caixas de marco (D-174):** grátis, guardadas até o jogador abrir; cada marco dá uma vez.
   Podem dar $ 500 ou $ 1.500 em créditos e 100 ou 250 Fragmentos (nunca em caixa paga).
 
+### ARQUIVO MILITAR STARLITE (D-175)
+Álbum de todos os cosméticos (aba ARQUIVO da loja) e 9 coleções temáticas. Cada coleção completa
+dá um cosmético **exclusivo** (fora das caixas, da troca e da compra direta), mais Fragmentos e
+créditos, uma vez por conta. Nenhuma coleção exige caixa paga: o teste cobra um caminho grátis para
+cada item. Tabela de coleções e prêmios: `DESIGN.md` (D-175).
+
 ### Para ligar a venda paga (Creator Dashboard)
 1. **Questionário de classificação:** responda que há itens aleatórios pagos e reenvie. A política
    manda reenviar quando uma atualização muda uma resposta.
@@ -158,7 +164,7 @@ Regional Pricing e Content Ratings (create.roblox.com/docs).
 | Classificação de conteúdo | Pendente de validação externa | o questionário é do dono |
 | Itens novos (emblemas, plaquetas, molduras) | Conforme | desenhos originais, sem insígnia real nem marca |
 | Interface honesta, sem pressão | Conforme | sem contador, urgência ou desconto; preço vem do Roblox |
-| Alternativa gratuita | Conforme | caixa de Bilhete, 5 caixas de marco, troca de Fragmentos e compra direta com créditos ganhos jogando |
+| Alternativa gratuita | Conforme | caixa de Bilhete, 5 caixas de marco, troca de Fragmentos, compra direta com créditos ganhos jogando e as coleções do Arquivo (nenhuma exige caixa paga; teste) |
 | **Igualdade competitiva** | **Não conforme** | a loja antiga vende vantagem: vantagens até +12% (D-101), kits (D-72), renascer onde caiu, veículo ao nascer (D-103), camuflagem contra os bots (D-85), reforços de XP. O dono decidiu manter (2026-11-16, D-174) |
 | Gasto de créditos ($) atômico | Parcial | a compra direta (D-174) é atômica e junta os créditos da sessão antes; as compras antigas com $ ainda descontam na memória |
 | Mouse, toque e controle | Conforme no código | falta conferir num celular e num Xbox reais |
@@ -170,7 +176,8 @@ Regional Pricing e Content Ratings (create.roblox.com/docs).
 - Passe de temporada de 8 semanas: hoje são 6 semanas e 50 níveis (Temporada).
 - Pacotes de compra direta (Patrulha, Infantaria, Reconhecimento, Veterano) com conteúdo fixo. A
   compra direta item a item, com créditos, já existe (D-174).
-- "ARQUIVO MILITAR STARLITE": álbum de coleções temáticas com recompensa garantida (lote 59).
+- "ARQUIVO MILITAR STARLITE": feito (D-175).
+- Roleta horizontal na abertura das caixas (lote 61): só a apresentação muda.
 - Painel de configuração dos produtos, chances e temporadas; relatório de analytics por categoria.
 - Caixas 3D próprias (hoje são as caixas de munição do jogo) e som de abertura.
 

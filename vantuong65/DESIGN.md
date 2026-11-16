@@ -6943,3 +6943,48 @@ kits, renascer onde caiu, veículo ao nascer, camuflagem contra os bots, reforç
   - 60: os 4 Game Passes novos e o Clube de Veteranos.
   - Depois: sequência diária que não zera, medalhas com progresso e data, convite de amigos,
     funil do onboarding, cerimônia de posto, batalhões com nome filtrado, temporada de 8 semanas.
+
+## D-175 — Lote 59: ARQUIVO MILITAR STARLITE (2026-11-16)
+
+**Pedido do dono:** "siga" (lote 59 do prompt master definitivo, item 10: álbum de coleção). Na mesma
+mensagem, a roleta das caixas entrou na fila como lote 61 (texto em `especificacao/`, só local).
+
+- **O álbum** (aba ARQUIVO da loja, `Shared/Arquivo.luau` + `Controllers/ArquivoTela.client.luau`):
+  - 53 itens em 5 categorias: uniformes, acabamentos de arma, insígnias, plaquetas e molduras;
+  - cada item mostra o nome, a imagem (arma em 3D; soldado vestido no detalhe; pano da farda na
+    grade; desenho do emblema, plaqueta e moldura), a raridade, se o jogador tem, como conseguir
+    (caixas, troca, compra direta, Intendência, Robux, coleção) e "Compra direta" / "Grátis jogando";
+  - categorias do pedido sem item no jogo (capacetes, mochilas, animações de inspeção) não
+    aparecem. "Itens históricos de temporada" virou a marca da origem na caixa de temporada.
+- **9 coleções temáticas** com prêmio garantido (valores de design, PLACEHOLDER):
+
+  | Coleção | Itens | Prêmio |
+  |---|---|---|
+  | Objetivos da Operação | 5 emblemas dos objetivos | Plaqueta: carta dos objetivos + 100 Fragmentos |
+  | Operação Starlite | Starlite, Chu Lai, carta de operações, moldura Starlite | Emblema: Operação + 150 |
+  | Plaquetas de Identificação | as 6 plaquetas | Moldura: identidade + 150 |
+  | Molduras do Cartão | as 6 molduras | Emblema: Arquivo + 150 |
+  | Arsenal dos Fuzileiros | 8 acabamentos dos EUA | Moldura: arsenal dos fuzileiros + 300 + $ 3.000 |
+  | Arsenal da Frente | 9 acabamentos da Frente | Moldura: arsenal da Frente + 300 + $ 3.000 |
+  | Fardas dos Fuzileiros | 5 uniformes dos EUA | Plaqueta: fardas dos fuzileiros + 500 + $ 5.000 |
+  | Fardas da Frente | 3 uniformes da Frente | Plaqueta: fardas da Frente + 300 + $ 3.000 |
+  | Arquivo Completo | as 8 coleções completas | Moldura: Arquivo Militar + 1.000 + $ 10.000 |
+
+- **Regras do pedido, cobradas no teste:**
+  - nenhuma coleção exige caixa paga: todo item tem caminho grátis (caixa grátis, troca, compra
+    direta ou Intendência com os créditos ganhos jogando);
+  - o prêmio é um cosmético exclusivo (`exclusivo = "arquivo"`), fora das caixas, da troca e da
+    compra direta. Assim quem joga de graça ganha algo que não se compra.
+- **Resgate atômico, uma vez por conta:** `CaixaRegras.resgatarColecao` dentro do
+  `PlayerData.transact`. Grava em `caixas.arquivo[coleção]`, separado dos marcos das caixas, e entra
+  no histórico com a origem "colecao". O servidor confere a posse (Game Pass de uniforme conta). Uma
+  coleção com erro na partida desliga o resgate, e o álbum continua visível.
+- **`caixas.marcos`:** o teto subiu de 512 para 2048. As missões da semana dão até 3 marcos por
+  semana; no teto, um marco perdido daria a caixa de novo.
+- **Desenho comum (`Controllers/ItemArte.luau`):** a tela das caixas passou a usar o mesmo desenho,
+  com a arma em 3D também na troca e na abertura. A roleta do lote 61 vai usar o mesmo módulo.
+- **Ganchos de Studio:** `VT65DevCaixa = "colecao:<id>"` dá os itens de uma coleção, e
+  `VT65DevTela = "arquivo"` abre a aba.
+- **Conferido:** Lune 9 ok no álbum e a suíte inteira (684 ok); Studio com o resgate pelo clique, a
+  recusa do segundo pedido e das coleções incompletas, e 0 erros. Detalhes em
+  `testes/ARQUIVO_D175_2026-11-16.md`.

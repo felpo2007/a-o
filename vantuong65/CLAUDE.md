@@ -134,6 +134,8 @@ O `sourcemap.json` não vai para o Git.
     `"creditos"` (+5.000), `"marco:<caixa>"` (guarda uma caixa de marco) e `"partidas:<n>"`
     (marcos de partidas). A aba abre com `VT65DevTela = "caixas"`; feche antes a recompensa
     diária, que abre por cima.
+  - ARQUIVO MILITAR (D-175): `VT65DevCaixa = "colecao:<id>"` dá os itens de uma coleção;
+    `VT65DevTela = "arquivo"` abre a aba. No Studio o dono tem os Game Passes de uniforme.
   - Clicar na tela pelo MCP: o `user_mouse_input` com `instance_path` funciona mesmo com o Studio
     atrás. Antes, dê nome único ao botão e aos pais (há muitos `Frame` e `Botao` iguais).
 - O `execute_luau` do MCP roda em outra VM: `require` de módulo do jogo devolve uma CÓPIA. Use
@@ -251,7 +253,7 @@ O `sourcemap.json` não vai para o Git.
 - Segredos só no `.env` (no `.gitignore`), nunca no código nem no chat.
 - ForgeGUI: nunca regenerar um job em `outcome_unknown`. "failed" com `retryable` pode ser
   retomado com `generation_retry`.
-- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-175) e atualize `PROGRESS.md`.
+- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-176) e atualize `PROGRESS.md`.
 - Tetos de triângulos por modelo: vegetação ≤ 6 mil (D-135), props e herói ≤ 20 mil (`ArtBudget`,
   conferido pelo teste da F5).
 - Commits no branch acima, com mensagem em português.

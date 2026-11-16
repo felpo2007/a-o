@@ -14,7 +14,6 @@
 -- de intendência ($, ganhos jogando) pelo cosmético escolhido, sem sorteio.
 -- Controle: tudo é botão selecionável (A escolhe, B volta). Studio: VT65DevTela = "caixas".
 local MarketplaceService = game:GetService("MarketplaceService")
-local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
@@ -24,10 +23,10 @@ local Net = require(ReplicatedStorage.Shared.Net)
 local Progression = require(ReplicatedStorage.Shared.Progression) :: any
 local Bus = require(script.Parent.Bus)
 local Input = require(script.Parent.Input)
+local ItemArte = require(script.Parent.ItemArte)
 local Toast = require(script.Parent.Toast)
 local UiKit = require(script.Parent.UiKit)
 
-local player = Players.LocalPlayer
 local V, F, px = UiKit.V, UiKit.F, UiKit.px
 
 local state: any = nil
@@ -93,79 +92,10 @@ local function ehSaldo(item: any): boolean
 	return item ~= nil and (item.kind == "creditos" or item.kind == "fragmentos")
 end
 
--- desenho do item (emblema, plaqueta, moldura ou skin), quadrado de lado `s`
+-- desenho do item (emblema, plaqueta, moldura, arma em 3D, pano do uniforme ou prêmio de saldo),
+-- quadrado de lado `s`: Controllers/ItemArte (D-175, o mesmo do ARQUIVO MILITAR)
 local function desenhaItem(parent: Instance, item: any, s: number): Frame
-	local box = frame(parent, UDim2.fromOffset(s, s), V.PANEL_2, 0)
-	UiKit.corner(box, 6)
-	local r = rar(item.raridade)
-	local rc = rgb(r.cor, V.DIM)
-	UiKit.edge(box, rc, 2, 0)
-	local c1, c2 = rgb(item.cor, rc), rgb(item.cor2, V.TEXT)
-	if item.kind == "emblema" then
-		local e = frame(box, UDim2.fromScale(0.7, 0.7), c1, 0)
-		e.AnchorPoint = Vector2.new(0.5, 0.5)
-		e.Position = UDim2.fromScale(0.5, 0.5)
-		UiKit.corner(e, math.floor(s * 0.12))
-		UiKit.edge(e, c2, 2, 0.2)
-		local t = text(e, item.sigla or "★", math.floor(s * 0.3), c2, F.TITLE)
-		t.Size = UDim2.fromScale(1, 1)
-		t.TextXAlignment = Enum.TextXAlignment.Center
-	elseif item.kind == "plaqueta" then
-		local tag = frame(box, UDim2.fromScale(0.82, 0.48), c1, 0)
-		tag.AnchorPoint = Vector2.new(0.5, 0.5)
-		tag.Position = UDim2.fromScale(0.5, 0.5)
-		UiKit.corner(tag, math.floor(s * 0.1))
-		UiKit.edge(tag, c2, 3, 0)
-		local hole = frame(tag, UDim2.fromOffset(math.floor(s * 0.08), math.floor(s * 0.08)), V.BG, 0)
-		hole.AnchorPoint = Vector2.new(0, 0.5)
-		hole.Position = UDim2.new(0, math.floor(s * 0.05), 0.5, 0)
-		UiKit.corner(hole, 99)
-		local t = text(tag, UiKit.upper(player.DisplayName), math.floor(s * 0.1), V.BG, F.TITLE_MED)
-		t.Position = UDim2.fromScale(0.2, 0)
-		t.Size = UDim2.fromScale(0.78, 1)
-		t.TextTruncate = Enum.TextTruncate.AtEnd
-	elseif item.kind == "moldura" then
-		local m = frame(box, UDim2.fromScale(0.78, 0.56), V.PANEL, 0)
-		m.AnchorPoint = Vector2.new(0.5, 0.5)
-		m.Position = UDim2.fromScale(0.5, 0.5)
-		UiKit.corner(m, 4)
-		UiKit.edge(m, c1, 4, 0)
-		local bar = frame(m, UDim2.new(0, math.floor(s * 0.06), 1, 0), c2, 0)
-		bar.Name = "Faixa"
-	elseif ehSaldo(item) then
-		-- prêmio de saldo (D-174): uma ficha redonda com a quantidade e a sigla da moeda
-		local cor = if item.kind == "creditos" then V.KHAKI else V.BRASS
-		local m = frame(box, UDim2.fromScale(0.72, 0.72), cor:Lerp(V.PANEL, 0.6), 0)
-		m.AnchorPoint = Vector2.new(0.5, 0.5)
-		m.Position = UDim2.fromScale(0.5, 0.5)
-		UiKit.corner(m, 999)
-		UiKit.edge(m, cor, 3, 0)
-		local q = text(m, tostring(item.quantidade or ""), math.floor(s * 0.2), V.TEXT, F.TITLE)
-		q.Size = UDim2.fromScale(1, 0.62)
-		q.TextXAlignment = Enum.TextXAlignment.Center
-		q.TextYAlignment = Enum.TextYAlignment.Bottom
-		local u = text(
-			m,
-			if item.kind == "creditos" then "CRÉDITOS" else "FRAGMENTOS",
-			math.floor(s * 0.07),
-			cor,
-			F.TITLE_MED
-		)
-		u.Position = UDim2.fromScale(0, 0.62)
-		u.Size = UDim2.fromScale(1, 0.24)
-		u.TextXAlignment = Enum.TextXAlignment.Center
-	else
-		-- skin: o nome por extenso sobre listras na cor da raridade
-		local g = Instance.new("UIGradient")
-		g.Color = ColorSequence.new(rc:Lerp(V.PANEL, 0.55), V.PANEL_2)
-		g.Rotation = 45
-		g.Parent = box
-		local t = text(box, item.nome or item.id, math.floor(s * 0.12), V.TEXT, F.TITLE_MED)
-		t.Size = UDim2.fromScale(0.9, 0.9)
-		t.Position = UDim2.fromScale(0.05, 0.05)
-		t.TextXAlignment = Enum.TextXAlignment.Center
-	end
-	return box
+	return ItemArte.desenha(parent, item, s)
 end
 
 -- caixa 3D (cópia do servidor em ReplicatedStorage.VT65CaixasArte) num ViewportFrame
@@ -731,6 +661,7 @@ local function abrirHist()
 			then "bilhete"
 			elseif h.origem == "marco" then "caixa ganha"
 			elseif h.origem == "compra" then "créditos"
+			elseif h.origem == "colecao" then "coleção do Arquivo"
 			elseif h.origem == "recibo" then "Robux"
 			elseif h.origem == "restrito" then "Robux (sem sorteio)"
 			else "troca"

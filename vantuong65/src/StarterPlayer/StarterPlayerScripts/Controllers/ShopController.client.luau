@@ -45,6 +45,8 @@ local TABS = {
 	{ id = "loja", name = "LOJA E ARMÁRIO" },
 	-- D-173: caixas de suprimentos (Controllers/CaixasTela.client desenha dentro do host dela)
 	{ id = "caixas", name = "CAIXAS" },
+	-- D-175: ARQUIVO MILITAR STARLITE (Controllers/ArquivoTela.client desenha dentro do host dela)
+	{ id = "arquivo", name = "ARQUIVO" },
 	{ id = "mercado", name = "MERCADO" },
 	{ id = "vantagens", name = "VANTAGENS" },
 	{ id = "intendencia", name = "INTENDÊNCIA" },
@@ -247,6 +249,10 @@ host.Parent = sheet
 local hostCaixas = host:Clone()
 hostCaixas.Name = "Caixas"
 hostCaixas.Parent = sheet
+-- D-175: a página do ARQUIVO MILITAR (ArquivoTela.client)
+local hostArquivo = host:Clone()
+hostArquivo.Name = "Arquivo"
+hostArquivo.Parent = sheet
 
 -- páginas MERCADO e VANTAGENS: listas que rolam, como a da loja (montadas quando o conteúdo muda)
 local function newPage(name: string): ScrollingFrame
@@ -1696,14 +1702,20 @@ setTab = function(id: string)
 	end
 	host.Visible = id == "intendencia"
 	hostCaixas.Visible = id == "caixas"
+	hostArquivo.Visible = id == "arquivo"
 	if id == "caixas" then
 		Bus.fire("caixas_show", hostCaixas)
 	else
 		Bus.fire("caixas_hide")
 	end
+	if id == "arquivo" then
+		Bus.fire("arquivo_show", hostArquivo)
+	else
+		Bus.fire("arquivo_hide")
+	end
 	if id == "intendencia" then
 		Bus.fire("intendencia_show", host)
-	elseif id ~= "caixas" then
+	elseif id ~= "caixas" and id ~= "arquivo" then
 		Bus.fire("intendencia_hide")
 		renderPage() -- mercado e vantagens: só redesenha se o estado mudou
 		UiKit.focus(pages[id])
@@ -1712,7 +1724,11 @@ setTab = function(id: string)
 	end
 	-- a folha nova desliza um pouco (o conteúdo já existe: nada é criado aqui)
 	-- posição de repouso guardada: trocar de aba rápido não deixa a folha deslocada no meio do tween
-	local page: GuiObject = if id == "intendencia" then host elseif id == "caixas" then hostCaixas else pages[id]
+	local page: GuiObject = if id == "intendencia"
+		then host
+		elseif id == "caixas" then hostCaixas
+		elseif id == "arquivo" then hostArquivo
+		else pages[id]
 	local p0: UDim2 = pageBase[page] or page.Position
 	pageBase[page] = p0
 	page.Position = p0 + UDim2.fromOffset(px(14, 20), 0)
@@ -1779,6 +1795,7 @@ local function setOpen(open: boolean, which: string?)
 		UiKit.release(gui)
 		Bus.fire("intendencia_hide")
 		Bus.fire("caixas_hide")
+		Bus.fire("arquivo_hide")
 		Bus.fire("shop_closed")
 		local info = TweenInfo.new(0.16, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
 		fit.play(info, 0.95)
@@ -1831,7 +1848,14 @@ if RunService:IsStudio() then
 	-- "vantagens" nas vantagens
 	workspace:GetAttributeChangedSignal("VT65DevTela"):Connect(function()
 		local v = workspace:GetAttribute("VT65DevTela")
-		if v == "loja" or v == "intendencia" or v == "mercado" or v == "vantagens" or v == "caixas" then
+		if
+			v == "loja"
+			or v == "intendencia"
+			or v == "mercado"
+			or v == "vantagens"
+			or v == "caixas"
+			or v == "arquivo"
+		then
 			Bus.fire("shop_open", v)
 			task.defer(function()
 				workspace:SetAttribute("VT65DevTela", nil)

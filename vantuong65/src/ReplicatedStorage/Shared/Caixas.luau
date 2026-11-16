@@ -531,6 +531,8 @@ function Caixas.validar(c: Caixa, itemInfo: (string) -> any): { string }
 			table.insert(erros, c.id .. ": raridade inválida em " .. e.item)
 		elseif info.vantagem then
 			table.insert(erros, c.id .. ": item com vantagem de jogo " .. e.item)
+		elseif info.exclusivo then
+			table.insert(erros, c.id .. ": item exclusivo do Arquivo Militar " .. e.item)
 		end
 	end
 	if soma ~= Caixas.ESCALA then

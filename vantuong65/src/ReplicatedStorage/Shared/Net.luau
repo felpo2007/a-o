@@ -97,6 +97,8 @@ Net.Functions = {
 	"Suprimento_Trocar", -- itemId: troca Fragmentos por item garantido
 	"Suprimento_Equipar", -- { slot = "tag" | "mol", item }: plaqueta ou moldura do cartão
 	"Suprimento_Loja", -- itemId: compra direta com créditos (D-174)
+	"Arquivo_Get", -- D-175: álbum ARQUIVO MILITAR (posse dos itens e coleções)
+	"Arquivo_Resgatar", -- colId: prêmio da coleção completa (uma vez por conta)
 }
 
 local folderName = "VT65Remotes"

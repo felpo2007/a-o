@@ -18,6 +18,7 @@
 --   workspace:SetAttribute("VT65DevCaixa", "recibo:<caixa>") -> recibo simulado (sem Robux)
 --   D-174: "creditos" (+5000 créditos), "marco:<caixa>" (guarda uma caixa de marco, com o aviso) e
 --   "partidas:<n>" (como se a partida n tivesse terminado: Recruta e os marcos de Veterano)
+--   D-175: "colecao:<id>" (dá os itens de uma coleção do Arquivo Militar, para o resgate)
 local AnalyticsService = game:GetService("AnalyticsService")
 local MarketplaceService = game:GetService("MarketplaceService")
 local Players = game:GetService("Players")
@@ -26,6 +27,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
 
+local Arquivo = require(ReplicatedStorage.Shared.Arquivo) :: any
 local Caixas = require(ReplicatedStorage.Shared.Caixas) :: any
 local Calendario = require(ReplicatedStorage.Shared.Calendario) :: any
 local Commerce = require(ReplicatedStorage.Shared.Commerce)
@@ -438,6 +440,88 @@ function CaixaService.comprarCreditos(player: Player, item: any): any
 	return { ok = true, resultado = r, item = itemView(item) }
 end
 
+-- ===== D-175: ARQUIVO MILITAR (Shared/Arquivo) =====
+local arquivoInvalido = false
+
+-- a posse de cada item do álbum e o estado de cada coleção (o catálogo o cliente lê do Shared)
+function CaixaService.arquivoEstado(player: Player): any
+	local p = PlayerData.get(player)
+	if not p then
+		return { carregando = true }
+	end
+	local ps = passes(player)
+	local possui: { [string]: boolean } = {}
+	for _, id in Arquivo.itens() do
+		if CaixaRegras.possui(p, id, ps) then
+			possui[id] = true
+		end
+	end
+	local function tem(id: string): boolean
+		return possui[id] == true
+	end
+	local colecoes = {}
+	for _, c in Arquivo.COLECOES do
+		local t, n = Arquivo.progresso(c, tem)
+		colecoes[c.id] = {
+			tem = t,
+			total = n,
+			completa = n > 0 and t >= n,
+			resgatada = p.caixas.arquivo[c.id] ~= nil,
+		}
+	end
+	return {
+		possui = possui,
+		colecoes = colecoes,
+		fragmentos = p.caixas.fragmentos,
+		creditos = p.credits,
+		desligado = arquivoInvalido,
+	}
+end
+
+function CaixaService.resgatarColecao(player: Player, colId: any): any
+	if type(colId) ~= "string" or #colId > 32 then
+		return { ok = false, motivo = "pedido" }
+	end
+	if arquivoInvalido then
+		return { ok = false, motivo = "desligado" }
+	end
+	if not guard(player) then
+		return { ok = false, motivo = "espera" }
+	end
+	local ps = passes(player)
+	local motivoFinal: string? = nil
+	local status, r = PlayerData.transact(player, function(p)
+		local res, motivo = CaixaRegras.resgatarColecao(p, colId, os.time(), ps)
+		motivoFinal = motivo
+		return res
+	end)
+	release(player)
+	if status ~= "ok" then
+		return { ok = false, motivo = motivoFinal or status }
+	end
+	avisar(player, r)
+	local c = Arquivo.colecao(colId)
+	if c and c.premio.creditos > 0 and CaixaService.onCredits then
+		task.spawn(CaixaService.onCredits, player)
+	end
+	pcall(function()
+		AnalyticsService:LogCustomEvent(player, "colecao_completa", 1, {
+			[Enum.AnalyticsCustomFieldKeys.CustomField01.Name] = colId,
+		})
+		local saldo = (PlayerData.get(player) :: any).caixas.fragmentos
+		AnalyticsService:LogEconomyEvent(
+			player,
+			Enum.AnalyticsEconomyFlowType.Source,
+			"Fragmentos",
+			r.fragmentos,
+			saldo,
+			Enum.AnalyticsEconomyTransactionType.Gameplay.Name,
+			"colecao_" .. colId
+		)
+	end)
+	return { ok = true, resultado = r, item = itemView(r.item) }
+end
+
 -- D-174: caixa grátis guardada por um marco do jogo (cada marco só uma vez). O jogador recebe um
 -- aviso; a loja não abre sozinha
 function CaixaService.darCaixa(player: Player, caixaId: string, marco: string)
@@ -607,6 +691,24 @@ local function devHook()
 		elseif string.sub(v, 1, 6) == "marco:" then
 			-- D-174: a caixa de marco pelo caminho de verdade (com o aviso), um marco novo por pedido
 			CaixaService.darCaixa(player, string.sub(v, 7), "dev:" .. tostring(os.clock()))
+		elseif string.sub(v, 1, 8) == "colecao:" then
+			-- D-175: dá todos os itens de uma coleção do Arquivo (para testar o resgate)
+			local c = Arquivo.colecao(string.sub(v, 9))
+			if c then
+				local ps = passes(player)
+				PlayerData.transact(player, function(p)
+					for _, id in c.itens do
+						if not CaixaRegras.possui(p, id, ps) then
+							Cosmeticos.conceder(p, id)
+						end
+					end
+					return true
+				end)
+				local g = CaixaService.onGrant
+				if g then
+					task.spawn(g, player)
+				end
+			end
 		elseif string.sub(v, 1, 9) == "partidas:" then
 			CaixaService.partidaCompleta(player, tonumber(string.sub(v, 10)) or 0)
 		elseif string.sub(v, 1, 7) == "recibo:" then
@@ -650,6 +752,14 @@ function CaixaService.start()
 	Net.func("Suprimento_Equipar").OnServerInvoke = function(player: Player, req: any)
 		local r = CaixaService.equipar(player, req)
 		r.estado = CaixaService.estado(player)
+		return r
+	end
+	Net.func("Arquivo_Get").OnServerInvoke = function(player: Player)
+		return CaixaService.arquivoEstado(player)
+	end
+	Net.func("Arquivo_Resgatar").OnServerInvoke = function(player: Player, colId: any)
+		local r = CaixaService.resgatarColecao(player, colId)
+		r.estado = CaixaService.arquivoEstado(player)
 		return r
 	end
 	Net.event("Suprimento_Comprar").OnServerEvent:Connect(function(player: Player, caixaId: any)
@@ -696,6 +806,12 @@ function CaixaService.start()
 			warn("[Caixas] tabela inválida:", table.concat(erros, "; "))
 			invalidas[c.id] = true
 		end
+	end
+	-- D-175: coleções do Arquivo Militar com erro desligam o resgate (o álbum continua visível)
+	local erros = Arquivo.validar()
+	if #erros > 0 then
+		warn("[Arquivo] coleções inválidas:", table.concat(erros, "; "))
+		arquivoInvalido = true
 	end
 end
 

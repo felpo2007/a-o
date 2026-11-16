@@ -11,7 +11,8 @@
 --   dia, hoje: dia UTC e bilhetes ganhos nele (teto TETO_DIA, contra farm em servidor privado);
 --   on: plaqueta e moldura escolhidas;
 --   guardadas[caixa]: caixas grátis ganhas por marco e ainda fechadas (D-174);
---   marcos[chave]: os marcos que já deram caixa (cada um só uma vez: "recruta", "posto:5"...).
+--   marcos[chave]: os marcos que já deram caixa (cada um só uma vez: "recruta", "posto:5"...);
+--   arquivo[coleção]: quando o prêmio da coleção do Arquivo Militar foi resgatado (D-175).
 local Caixas = require(
 	if script
 		then (game :: any):GetService("ReplicatedStorage").Shared.Caixas
@@ -21,6 +22,11 @@ local Cosmeticos = require(
 	if script
 		then (game :: any):GetService("ReplicatedStorage").Shared.Cosmeticos
 		else "../../ReplicatedStorage/Shared/Cosmeticos"
+) :: any
+local Arquivo = require(
+	if script
+		then (game :: any):GetService("ReplicatedStorage").Shared.Arquivo
+		else "../../ReplicatedStorage/Shared/Arquivo"
 ) :: any
 
 local CaixaRegras = {}
@@ -40,7 +46,7 @@ export type Resultado = {
 	raridade: string?,
 	repetido: boolean,
 	fragmentos: number,
-	origem: string, -- "bilhete" | "recibo" | "restrito" | "troca"
+	origem: string, -- "bilhete" | "marco" | "recibo" | "restrito" | "troca" | "compra" | "colecao"
 	t: number,
 	id: string?, -- PurchaseId (caixa paga)
 }
@@ -58,6 +64,7 @@ export type Dados = {
 	on: { tag: string?, mol: string? },
 	guardadas: { [string]: number },
 	marcos: { [string]: boolean },
+	arquivo: { [string]: number },
 }
 
 function CaixaRegras.padrao(): Dados
@@ -74,9 +81,12 @@ function CaixaRegras.padrao(): Dados
 		on = {},
 		guardadas = {},
 		marcos = {},
+		arquivo = {},
 	}
 end
-CaixaRegras.MAX_MARCOS = 512
+-- D-175: era 512. As missões da semana dão até 3 marcos por semana: 2048 duram ~13 anos. No
+-- teto, o perfil guarda os primeiros que achar, e um marco perdido daria a caixa de novo.
+CaixaRegras.MAX_MARCOS = 2048
 
 local function num(v: any, lo: number, hi: number, def: number): number
 	if type(v) ~= "number" or v ~= v then
@@ -153,6 +163,13 @@ function CaixaRegras.sanear(raw: any): Dados
 			if type(k) == "string" and #k < 64 and v == true and n < CaixaRegras.MAX_MARCOS then
 				n += 1
 				d.marcos[k] = true
+			end
+		end
+	end
+	if type(raw.arquivo) == "table" then
+		for k, v in raw.arquivo do
+			if Arquivo.colecao(k) then
+				d.arquivo[k] = num(v, 0, 1e11, 0)
 			end
 		end
 	end
@@ -420,8 +437,12 @@ end
 -- ganhou antes de chamar). Só os cosméticos do cartão (as skins têm a compra própria na Intendência).
 function CaixaRegras.precoCreditos(item: string): number?
 	local info = Cosmeticos.info(item)
-	if not info or (info.kind ~= "emblema" and info.kind ~= "plaqueta" and info.kind ~= "moldura") then
-		return nil
+	if
+		not info
+		or info.exclusivo
+		or (info.kind ~= "emblema" and info.kind ~= "plaqueta" and info.kind ~= "moldura")
+	then
+		return nil -- D-175: o exclusivo do Arquivo só sai da coleção completa
 	end
 	local rar = Caixas.raridade(info.raridade)
 	return rar and rar.creditos
@@ -452,6 +473,55 @@ function CaixaRegras.comprarCreditos(p: any, item: string, now: number): (Result
 		id = nil,
 	}
 	registra(p.caixas, r)
+	return r, nil
+end
+
+-- D-175: prêmio de uma coleção do ARQUIVO MILITAR (Shared/Arquivo). Só com a coleção completa e uma
+-- vez por conta. Entrega o cosmético exclusivo (se ainda não tem), os Fragmentos e os créditos.
+-- `p.credits` é o saldo de verdade (o PlayerData.transact junta os créditos da sessão antes).
+-- Devolve (resultado, nil) ou (nil, motivo).
+function CaixaRegras.resgatarColecao(
+	p: any,
+	colId: string,
+	now: number,
+	passes: { [string]: boolean }?
+): (Resultado?, string?)
+	local c = Arquivo.colecao(colId)
+	if not c then
+		return nil, "colecao"
+	end
+	local d: Dados = p.caixas
+	if d.arquivo[colId] then
+		return nil, "resgatada"
+	end
+	local function possui(id: string): boolean
+		return CaixaRegras.possui(p, id, passes)
+	end
+	if not Arquivo.completa(c, possui) then
+		return nil, "incompleta"
+	end
+	local pr = c.premio
+	local info = Cosmeticos.info(pr.item)
+	assert(info, "prêmio sem cadastro")
+	local dup = CaixaRegras.possui(p, pr.item, passes)
+	if not dup then
+		Cosmeticos.conceder(p, pr.item)
+	end
+	d.fragmentos = math.min(CaixaRegras.MAX_SALDO, d.fragmentos + pr.fragmentos)
+	p.credits = math.min(p.credits + pr.creditos, 1000000000)
+	d.arquivo[colId] = now
+	local r: Resultado = {
+		caixa = "arquivo:" .. colId,
+		versao = 0,
+		item = pr.item,
+		raridade = info.raridade,
+		repetido = dup,
+		fragmentos = pr.fragmentos,
+		origem = "colecao",
+		t = now,
+		id = nil,
+	}
+	registra(d, r)
 	return r, nil
 end
 
