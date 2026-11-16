@@ -321,6 +321,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     - Resgate atômico, uma vez por conta.
     - Conferido: Lune 9 ok no álbum, 684 na suíte; Studio com o resgate pelo clique e as recusas,
       0 erros.
+    - **v99 publicada** (versão 104 do place, commit 44c0440).
     - Próximo: lote 60 (Game Passes novos e Clube de Veteranos) e lote 61 (roleta).
 - Pedido do dono (16/11): "siga e adicione isso para a lista": a roleta das caixas. O texto inteiro
   está em `especificacao/PROMPT_ROLETA_CAIXAS.md` (só local).
