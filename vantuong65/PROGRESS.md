@@ -432,6 +432,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
       - correndo, nenhum tiro saiu;
       - o JOGAR abriu a escolha do lado.
     - Não testado: mouse e Shift, controle, celular de verdade e o jogo publicado.
+    - **v106 publicada** (versão 111 do place, commit bb82d03).
   - **Fila, na ordem prevista** (cada um num lote, com teste no Studio):
     1. a pá: "ela n esta funcionando" e "crie a pá no blender";
     2. "helicopoteros quando pousam ainda flutuam";
