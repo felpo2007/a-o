@@ -7262,4 +7262,11 @@ publicado e o desempenho com muitas armas de acabamento na tela.
   - trocar de acabamento depois e tirar a skin funcionaram;
   - na 2ª medição, as 240 imagens carregaram em 6 s, sem falha;
   - 0 erros.
-- **Jogo publicado:** JOGO
+- **Jogo publicado** (Roblox Player, versão 110 do place):
+  - nas galerias das caixas, os acabamentos da D-178 e os universais aparecem com a cor
+    certa;
+  - o console do cliente tem 134 erros "Failed to load … SurfaceAppearance. PBR textures
+    may not be visible in game". Atingem os acabamentos e também a arma de fábrica, as casas
+    da vila, as árvores, os animais e o chão: não é dos acabamentos;
+  - fora do Studio, não deu para confirmar se o relevo e o brilho aparecem;
+  - detalhes em `testes/CARGA_D181_2026-11-16.md`.

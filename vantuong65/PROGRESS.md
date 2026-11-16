@@ -404,6 +404,21 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
       fosca), e mais 16 ganharam relevo (carbono, colmeia, damasco, laca, bambu, carta).
     - Conferido: Lune 700 ok, pytest 70. No Studio, as 344 SurfaceAppearance no place, os 12 novos nas armas de vitrine e o Ouro Derretido trocado, equipado na M14 e visto em campo; 0 erros.
     - **v104 publicada** (versão 109 do place, commit 8d73fbc).
+- Pedido do dono (16/11): "faça isso então" (testar o jogo publicado e o desempenho com muitas
+  armas de acabamento).
+  - **Lote 65 (D-181): desempenho e carga dos acabamentos.**
+    - Medido no Studio, 60 acabamentos diferentes na tela:
+      - dobram as chamadas de desenho das armas (65 → 148);
+      - a GPU fica igual (1,5 ms);
+      - +104 a +137 MB de textura (o contador oscila).
+    - Mapas de metal e aspereza em 512.
+    - Carga com nova tentativa: a imagem que falha é pedida de novo; se não chegar, volta a arte de
+      fábrica em vez da arma clara.
+    - Jogo publicado:
+      - os acabamentos aparecem com a cor nas galerias das caixas;
+      - o console tem 134 erros "PBR textures may not be visible", em todas as SurfaceAppearance do
+        jogo (também nas de antes). Fica para investigar.
+    - **v105 publicada** (versão 110 do place, commit 072148e).
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;
   - respondido pelo dono: a M14 fica como está; o capim clareou (v58);
