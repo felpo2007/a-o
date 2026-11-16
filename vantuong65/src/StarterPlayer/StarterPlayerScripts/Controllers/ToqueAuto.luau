@@ -9,7 +9,7 @@
 --   - inclinar na quina mirando (touchAutoLean), pelos mesmos lean_left/lean_right do Q/E;
 --   - respiração na luneta (touchAutoBreath): prende ao entrar, solta antes de cansar;
 --   - pegar munição e abrir caixote ao encostar (touchAutoPickup), pelo mesmo segurar do prompt;
---   - tiro sozinho com a mira num inimigo à vista (touchAutoFire, DESLIGADO no padrão);
+--   - tiro sozinho com a mira num inimigo à vista (touchAutoFire; ligado no padrão desde a D-170);
 --   - os avisos de interação do Roblox (ProximityPrompt) não aparecem no toque: o botão INTERAGIR
 --     (Interagir.client) já mostra o que fazer, sem tecla nenhuma.
 -- O ímã leve da mira fica no CameraLook (gira a câmera); a recarga automática, no WeaponController.
@@ -237,7 +237,7 @@ local function stepBreath(scoped: boolean, enabled: boolean)
 	end
 end
 
--- ===== tiro sozinho (opção, desligado no padrão) =====
+-- ===== tiro sozinho (opção, ligado no padrão: D-170) =====
 local function setFire(on: boolean)
 	if on == S.fireHeld then
 		return

@@ -308,8 +308,10 @@ Weapons.list = {
 		dispersionMoa = 3.5,
 		boltHoldOpen = true,
 		enabled = true,
-		-- olho 6 cm mais à frente na coronha (era 0,319 m da alça tangente: a arma parecia longe)
-		adsEyeM = 0.26,
+		-- D-170 (dono: "a mira da sks precisa melhorar ainda mais"): olho a 14 cm da alça tangente (era
+		-- 0,26 m e, antes, 0,319 m). Visto do olho no Studio: a 26 cm o entalhe e a massa ficavam
+		-- minúsculos no fim da tampa da caixa; a 14 cm o entalhe em U enquadra a massa no centro
+		adsEyeM = 0.14,
 		-- D-146 (pedido do dono: "a sks dá pouco dano"): só semi e 10 tiros, então cada tiro vale mais
 		-- que o do Type 56: 2 no tronco até 100 m, 3 até 400 m (tests/luau/combate)
 		damage = 50,

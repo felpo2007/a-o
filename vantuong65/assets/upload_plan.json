@@ -232,7 +232,7 @@
   "description": "VAN TUONG 65 - refeito no Blender, mesma forma com 1/3 dos triangulos"
  },
  {
-  "key": "Models.m60",
+  "key": "Models.m60_gerador",
   "file": "assets/forgegui/models/m60_studs_parker.glb",
   "assetType": "Model",
   "name": "VT65 m60 aco"
@@ -368,6 +368,13 @@
   "assetType": "Model",
   "name": "VT65 sks Tipo 56",
   "description": "VAN TUONG 65 - SKS (carabina Tipo 56 chinesa, baioneta de espigao dobrada), modelada no Blender (tools/blender/sks.py)"
+ },
+ {
+  "key": "Models.m60",
+  "file": "assets/blender/arma_m60/arma_m60.glb",
+  "assetType": "Model",
+  "name": "VT65 m60 blender",
+  "description": "VAN TUONG 65 - metralhadora M60 de 1965 (alca de folha com furo, massa em lamina, bipe dobrado), modelada no Blender (tools/blender/m60.py)"
  },
  {
   "key": "Models.caixa_municao_us",

@@ -662,12 +662,13 @@ test("chaves novas do contrato: padrões, faixas e escolhas", function()
 		touchMirror = false,
 		touchAutoVault = true,
 		batterySaver = false,
-		-- v39: automáticos do toque (o tiro sozinho vem desligado) e a recarga automática (frente de itens)
+		-- v39: automáticos do toque e a recarga automática (frente de itens); D-170: o tiro sozinho vem
+		-- ligado (pedido do dono)
 		touchAutoLean = true,
 		touchAutoPickup = true,
 		touchAutoBreath = true,
 		touchAssist = true,
-		touchAutoFire = false,
+		touchAutoFire = true,
 		autoReload = true,
 	}
 	for k, v in want do
@@ -678,13 +679,22 @@ test("chaves novas do contrato: padrões, faixas e escolhas", function()
 		touchAutoPickup = false,
 		touchAutoBreath = false,
 		touchAssist = false,
-		touchAutoFire = true,
+		touchAutoFire = false,
+		touchRev = 2,
 	}) :: any
 	assert(
 		not off.touchAutoLean and not off.touchAutoPickup and not off.touchAutoBreath and not off.touchAssist,
 		"dá para desligar cada automático"
 	)
-	assert(off.touchAutoFire == true and InputMap.validate({ touchAutoFire = "sim" }).touchAutoFire == false)
+	assert(off.touchAutoFire == false, "desligado depois da revisão 2 fica desligado")
+	assert(InputMap.validate({ touchAutoFire = "sim" }).touchAutoFire == true, "valor ruim: o padrão")
+	-- D-170: quem salvou antes (sem touchRev) com o tiro sozinho desligado recebe o padrão novo, uma vez
+	local velho = InputMap.validate({ touchAutoFire = false, touchAutoLean = false }) :: any
+	assert(velho.touchAutoFire == true and velho.touchRev == 2 and velho.touchAutoLean == false)
+	assert(InputMap.validate(velho).touchAutoFire == true)
+	local depois = table.clone(velho)
+	depois.touchAutoFire = false
+	assert(InputMap.validate(depois).touchAutoFire == false, "desligar de novo vale")
 	local s = InputMap.validate({
 		gyroMode = "girar",
 		gyroSens = 10,
@@ -1011,7 +1021,7 @@ test("tiro sozinho (opção desligada): espera a reação, semi em toques espaç
 			assert(Toque.autoFire(s2, dt, k * dt, x) == nil, key)
 		end
 	end
-	assert(D.touchAutoFire == false, "vem desligado")
+	assert(D.touchAutoFire == true, "D-170: vem ligado")
 end)
 
 test("pegar munição e abrir caixote ao encostar; respiração sozinha solta antes de cansar", function()

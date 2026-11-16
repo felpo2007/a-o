@@ -6733,3 +6733,35 @@ próximo uso concreto é o atlas único das árvores da mata, depois da medida.
     colide em caixa, D-155). Casa clara esconde menos quem está dentro;
   - o SLIM em si segue sem confirmação (D-168).
 
+## D-170 — Lote 54: tiro sozinho no celular, mira da SKS e M60 nova (2026-11-15)
+
+**Pedidos do dono:** "coloque q quem mira no celular atira sozinho para ele quando acha uma
+jogador"; "a mira da m60 está horrível e precisa melhorar ainda mais da sks".
+
+- **Tiro sozinho no celular:** o `touchAutoFire` (toque v39, `ToqueAuto`: mirando, atira quando a
+  linha do olho passa num inimigo à vista; nada através de parede, mata ou fumaça) agora vem ligado. Quem já tinha salvo a configuração com ele desligado (o
+  padrão antigo) também passa a ter ligado uma vez (`touchRev` 2); depois disso, quem desligar no
+  painel continua desligado.
+- **SKS:** olho a 14 cm da alça tangente (era 26 cm). Visto do olho no Studio: a 26 cm o entalhe
+  e a massa ficavam minúsculos no fim da tampa da caixa; a 14 cm o entalhe em U enquadra a massa no
+  centro.
+- **M60 refeita no Blender** (`tools/blender/m60.py`, como a SKS e o M16 da D-146):
+  - a do gerador tinha a alça em três dentes grossos, e o do meio ficava fora da linha da massa e
+    tapava o alvo;
+  - a nova tem a alça de folha atrás da tampa de alimentação, com um anel de 11 mm numa haste fina
+    no alto, e a massa em lâmina de 5 mm numa base alta perto do quebra-chamas. Linha de visada a
+    7 cm do cano, raio de visada 0,70 m (PLACEHOLDER, de fotos);
+  - a folha real envolve o furo numa placa. Testei assim (furo de 7 mm, depois 11 mm) e, a 12 cm
+    do olho, a placa preta tapava o meio da tela. Ficou o anel numa haste, que deixa ver em volta;
+  - tem bipé dobrado, alça de transporte à esquerda e um pedaço da fita de munição saindo da
+    bandeja. São 6.024 triângulos e 1,2 MB;
+  - mão direita a 10 cm abaixo do cano e olho a 12 cm do anel: são os mínimos do teste das armas
+    para metralhadora (lote 7);
+  - a do gerador fica no `roblox_ids.json` como `Models.m60_gerador` (78397702456512);
+  - antes do anel subiram duas versões de teste (73121910270823 e 111948356962277), que não são
+    usadas.
+- **Conferido:**
+  - no Studio, do ponto do olho (FOV de mira 50,4°): o anel fica centrado e a lâmina no meio dele.
+    Nada entre a alça e a massa sobe até a linha;
+  - Lune 37 arquivos, 0 falhas (pegada, F5, armas e toque); pytest 61.
+

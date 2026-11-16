@@ -96,7 +96,9 @@ return {
 		-- D-146: SKS refeita no Blender (tools/blender/sks.py); a do gerador (Models.sks_gerador no
 		-- roblox_ids.json, 97318124582467) tapava a mira
 		sks = 84746043493068,
-		m60 = 78397702456512,
+		-- D-170: M60 refeita no Blender (tools/blender/m60.py); a do gerador (Models.m60_gerador no
+		-- roblox_ids.json, 78397702456512) tinha a alça em três dentes que tapavam a mira
+		m60 = 115778411346125,
 		rpd = 97742986087778,
 		m1911 = 72933851519050,
 		type54 = 89276790728567,

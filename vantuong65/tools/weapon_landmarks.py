@@ -306,6 +306,9 @@ BLENDER = {
     # SKS refeita no Blender (tools/blender/sks.py, D-146: a do gerador tapava a mira); com o
     # pontos.json presente, a entrada do gerador (FORWARD) fica de fora
     "sks": ROOT / "assets/blender/arma_sks/pontos.json",
+    # M60 refeita no Blender (tools/blender/m60.py, D-170: a alça da malha do gerador, em três
+    # dentes, tapava a mira); a mira é a da construção (o centro do furo da folha e a lâmina)
+    "m60": ROOT / "assets/blender/arma_m60/pontos.json",
 }
 # pontos opcionais das armas do Blender (Vector3 no espaço da malha publicada)
 BLENDER_PONTOS = ("bolt", "pump", "eject", "load", "trigger")

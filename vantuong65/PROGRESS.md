@@ -259,6 +259,15 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     modelos fixos, vila igual, autoteste 18 ok). Interior das casas fixas mais claro (D-155).
     Publicada (versão 97 do place, commit 7be94b8). As 95 e 96 foram salvamentos automáticos do
     Team Create, das sessões abertas para procurar o SLIM, sem edição.
+- Pedido do dono (15/11, à tarde): mais coisas nos outros objetivos, mira da M60 e da SKS, tiro
+  sozinho no celular, servidores nos EUA, carta no estilo de atlas:
+  - **Lote 54 (D-170): feito.** Mirando no celular, a arma atira sozinha quando passa num inimigo
+    (vem ligado; dá para desligar no painel). SKS com o olho a 14 cm. M60 refeita no Blender, com
+    um anel na alça e a massa em lâmina: no Studio, do olho, o anel fica centrado e a lâmina no
+    meio dele. 6.024 triângulos.
+  - Servidores: o Roblox escolhe a região de cada servidor pelo jogador (os EUA já têm) e abre
+    servidores novos sozinho quando os cheios lotam. O jogo é 30 contra 30; 1.000 jogadores ao
+    mesmo tempo são ~17 servidores, abertos pelo próprio Roblox.
 
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;

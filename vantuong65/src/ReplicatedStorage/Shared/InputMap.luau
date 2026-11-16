@@ -239,7 +239,8 @@ export type Settings = {
 	touchAutoPickup: boolean, -- parado junto da caixa de munição ou do caixote, pega/abre sozinho
 	touchAutoBreath: boolean, -- na luneta, prende a respiração sozinho (solta antes de cansar)
 	touchAssist: boolean, -- fricção e ímã leve na mira de ferro/luneta (só toque)
-	touchAutoFire: boolean, -- mirando com a mira no inimigo à vista, atira sozinho (padrão: desligado)
+	touchAutoFire: boolean, -- mirando com a mira no inimigo à vista, atira sozinho (D-170: ligado)
+	touchRev: number, -- D-170: revisão dos padrões do toque já aplicada a quem salvou antes
 	batterySaver: boolean, -- economia de bateria (lido pelo agente de desempenho)
 	showFps: boolean, -- v43 (pedido do dono): quadros por segundo e ping no canto (Controllers/Fps)
 }
@@ -311,7 +312,9 @@ InputMap.DEFAULTS = {
 	touchAutoPickup = true,
 	touchAutoBreath = true,
 	touchAssist = true,
-	touchAutoFire = false,
+	-- D-170 (dono: "quem mira no celular atira sozinho quando acha um jogador"): ligado no padrão
+	touchAutoFire = true,
+	touchRev = 2,
 	batterySaver = false,
 	showFps = true,
 } :: Settings
@@ -478,6 +481,12 @@ function InputMap.validate(raw: any): Settings
 			end
 		end
 	end
+	-- D-170: quem salvou antes da revisão 2 tinha o tiro sozinho desligado por ser o padrão de então;
+	-- recebe o padrão novo uma vez (quem desligar depois fica desligado: a revisão vai junto)
+	if (tonumber(raw.touchRev) or 0) < 2 then
+		out.touchAutoFire = InputMap.DEFAULTS.touchAutoFire
+	end
+	out.touchRev = InputMap.DEFAULTS.touchRev
 	if out.moveOuter <= out.moveInner + 0.1 then
 		out.moveOuter = math.min(1, out.moveInner + 0.3)
 	end

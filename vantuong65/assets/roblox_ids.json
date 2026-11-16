@@ -60,7 +60,7 @@
  "Models.bamboo_fence_v81": "118272877596797",
  "Models.m14": "89317219190262",
  "Models.type56": "130417403055419",
- "Models.m60": "78397702456512",
+ "Models.m60_gerador": "78397702456512",
  "Models.rpd": "97742986087778",
  "Models.m1911": "72933851519050",
  "Models.type54": "89276790728567",
@@ -446,5 +446,6 @@
  "store.PASS_SKIN_US_TADPOLE": "2088220472",
  "store.PASS_SKIN_US_LIZARD": "2088598458",
  "store.PASS_SKIN_VC_BROWN": "2089978461",
- "store.PASS_SKIN_VC_TIGER": "2089438416"
+ "store.PASS_SKIN_VC_TIGER": "2089438416",
+ "Models.m60": "115778411346125"
 }
