@@ -420,16 +420,17 @@ test("carta: 4 blocos no plano de upload e grupos novos em AssetIds (valor 0 at�
 	for _, t in Carta.TILES do
 		local it = keys["Carta." .. t.key]
 		assert(it, "falta Carta." .. t.key)
-		assert(it.file == string.format("assets/carta/carta_%d_%d.png", t.row, t.col), it.file)
+		-- D-171: a carta do jogo é a página de atlas (tools/make_carta.py --estilo atlas)
+		assert(it.file == string.format("assets/carta/atlas_%d_%d.png", t.row, t.col), it.file)
 	end
 	local AssetIds = require("../../src/ReplicatedStorage/Shared/AssetIds") :: any
 	for _, t in Carta.TILES do
 		assert(type(AssetIds.Carta[t.key]) == "number" and type(AssetIds.CartaImages[t.key]) == "number")
 	end
-	if fs.isFile("assets/carta/carta_0_0.png") then
-		print("       (blocos gerados em assets/carta: rode tools/make_carta.py de novo se o mapa mudar)")
+	if fs.isFile("assets/carta/atlas_0_0.png") then
+		print("       (blocos gerados em assets/carta: rode tools/make_carta.py --estilo atlas se o mapa mudar)")
 	else
-		print("       (blocos ainda não gerados: uv run python tools/make_carta.py)")
+		print("       (blocos ainda não gerados: uv run python tools/make_carta.py --estilo atlas)")
 	end
 end)
 

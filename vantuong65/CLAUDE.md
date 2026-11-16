@@ -214,6 +214,14 @@ O `sourcemap.json` não vai para o Git.
   grave em `AssetIds.GroundImages`.
 - Relevo: `tools/relevo_dem.py` (DEM Copernicus, cumes calibrados na carta). Rode depois do
   `crop_world.py`.
+- Carta tática (D-171): a do jogo é a página de atlas,
+  `uv run --group arte python tools/make_carta.py --dados --estilo atlas` (blocos
+  `assets/carta/atlas_*.png`). Mudou o mapa? Gere de novo, tire `Carta.nw/ne/sw/se` do
+  `roblox_ids.json` e suba com `upload-assets Carta.nw Carta.ne Carta.sw Carta.se`. O
+  `CartaService` resolve a imagem do decal ao abrir o servidor.
+- Testar uma tela sem o fluxo do menu: monte o módulo (cópia do `require` no Client) numa
+  `ScreenGui` de teste com `ZIndexBehavior = Sibling`. No padrão Global, o fundo da folha
+  cobre os blocos.
 - Arma nova: acrescente em `tools/weapon_landmarks.py` (frente e frações das mãos, vistas numa
   captura) e, se tiver alça de anel ou entalhe, as janelas em `tools/sight_align.py`. Rode o
   `weapon_landmarks.py` para regenerar `Shared/WeaponArt.luau`. Depois confira a mira no Studio
@@ -232,7 +240,7 @@ O `sourcemap.json` não vai para o Git.
 - Segredos só no `.env` (no `.gitignore`), nunca no código nem no chat.
 - ForgeGUI: nunca regenerar um job em `outcome_unknown`. "failed" com `retryable` pode ser
   retomado com `generation_retry`.
-- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-171) e atualize `PROGRESS.md`.
+- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-172) e atualize `PROGRESS.md`.
 - Tetos de triângulos por modelo: vegetação ≤ 6 mil (D-135), props e herói ≤ 20 mil (`ArtBudget`,
   conferido pelo teste da F5).
 - Commits no branch acima, com mensagem em português.

@@ -2,8 +2,10 @@
 -- Carta tática de verdade (pedido do dono, 2026-11-11: "o mapa que você abre no jogo está
 -- simplório, faça um mapa de verdade"). O GameUI continua dono das telas e das entradas do mapa;
 -- este módulo desenha dentro da janela do mapa:
---   - a folha: a carta topográfica (tools/make_carta.py) em 4 blocos de 1024 px; sem imagem
---     publicada, um fundo escuro com a quadrícula de 1 km;
+--   - a folha: a carta em 4 blocos de 1024 px, no estilo de página de atlas desde a D-171
+--     (tools/make_carta.py --estilo atlas: cores chapadas, rio com linhas de costa); sem imagem
+--     publicada, um fundo escuro com a quadrícula de 1 km. Por cima, os setores pintados pelo dono
+--     como os países do atlas, fronteiras escuras e etiquetas bege com seta nos objetivos;
 --   - por cima, no estilo novo (Estilo/UiKit, 2026-11-11: sem papel datilografado, lápis nem vincos):
 --     setores com dono (azul = nosso, vermelho = do inimigo, cinza = neutro), a frente, os objetivos
 --     com o progresso e a disputa, os pontos de inserção do lado do jogador (símbolo forte, estado
@@ -76,7 +78,18 @@ local COR = {
 	me = V.TEXT, -- você
 	tunel = Color3.fromRGB(214, 130, 64), -- túneis do VC
 	lz = Color3.fromRGB(150, 196, 236), -- LZ da inserção de helicóptero (ponto "lz:<n>")
+	-- página de atlas (D-171): fronteira escura entre os setores, etiqueta bege dos objetivos com
+	-- tinta escura, e o halo creme do papel nas letras dos setores
+	fronteira = Color3.fromRGB(62, 52, 42),
+	etiqueta = Color3.fromRGB(232, 216, 176),
+	tintaAtlas = Color3.fromRGB(42, 36, 30),
+	disputa = Color3.fromRGB(150, 62, 26),
+	papelAtlas = Color3.fromRGB(247, 241, 224),
 }
+-- cor do setor como "país" do atlas (D-171): o dono pinta a faixa inteira, sem esconder a carta
+local SETOR_TR = { ativo = 0.6, fora = 0.76, neutro = 0.88 }
+-- etiqueta do objetivo: afastada do ponto para o meio da carta, presa por uma linha com seta
+local ETIQUETA_PX = 40
 local TYPE = F.TITLE_MED -- rótulos (Oswald)
 local HAND = F.TITLE_MED -- anotações do squad (antes a lápis; agora o mesmo Oswald)
 
@@ -978,7 +991,10 @@ local function drawSectors(st: any)
 			local f = Instance.new("Frame")
 			f.BorderSizePixel = 0
 			f.BackgroundColor3 = color
-			f.BackgroundTransparency = if owner == "Neutral" then 0.94 elseif active then 0.84 else 0.9
+			f.BackgroundTransparency = if owner == "Neutral"
+				then SETOR_TR.neutro
+				elseif active then SETOR_TR.ativo
+				else SETOR_TR.fora
 			f.Position = UDim2.fromScale(u0, v0)
 			f.Size = UDim2.fromScale(u1 - u0, v1 - v0)
 			f.Name = "S" .. s.id
@@ -992,19 +1008,20 @@ local function drawSectors(st: any)
 		end
 		local cu = select(1, uv((math.min(table.unpack(xs)) + math.max(table.unpack(xs))) / 2, B.minZ))
 		-- só o número do setor, grande; o dono é a cor (a legenda diz qual é qual); fora de jogo, apagado
-		local t = label(sect, Front.letra(s.id), 24, color, F.TITLE)
+		-- letra do setor como o nome de país do atlas: a cor do lado, escurecida, com o halo do papel
+		local t = label(sect, Front.letra(s.id), 26, color:Lerp(COR.tintaAtlas, 0.45), F.TITLE)
 		t.AnchorPoint = Vector2.new(0.5, 0)
 		t.Position = UDim2.new(cu, 0, 0, 30)
 		t.TextTransparency = if active then 0 else 0.4
-		t.TextStrokeColor3 = V.BG
-		t.TextStrokeTransparency = 0.35
+		t.TextStrokeColor3 = COR.papelAtlas
+		t.TextStrokeTransparency = 0.15
 		-- o que é nosso vai por texto (a cor é a do lado, a mesma para os dois jogadores)
 		if owner == myFaction() then
-			local mine = label(sect, "NOSSO", 12, V.TEXT, F.TITLE_MED)
+			local mine = label(sect, "NOSSO", 12, COR.tintaAtlas, F.TITLE_MED)
 			mine.AnchorPoint = Vector2.new(0.5, 0)
-			mine.Position = UDim2.new(cu, 0, 0, 58)
-			mine.TextStrokeColor3 = V.BG
-			mine.TextStrokeTransparency = 0.3
+			mine.Position = UDim2.new(cu, 0, 0, 60)
+			mine.TextStrokeColor3 = COR.papelAtlas
+			mine.TextStrokeTransparency = 0.15
 			mine.TextTransparency = if active then 0 else 0.4
 		end
 	end
@@ -1023,10 +1040,12 @@ local function drawSectors(st: any)
 				-- traço duplo: a cor de cada lado do lado dele
 				local du = if math.abs(u1 - u2) < 1e-6 then 0.0016 else 0
 				local dv = if du == 0 then 0.0016 else 0
-				pencil(lines, u1 - du, v1 - dv, u2 - du, v2 - dv, ownerColor(oa), 2)
-				pencil(lines, u1 + du, v1 + dv, u2 + du, v2 + dv, ownerColor(ob), 2)
+				pencil(lines, u1 - du, v1 - dv, u2 - du, v2 - dv, ownerColor(oa), 3)
+				pencil(lines, u1 + du, v1 + dv, u2 + du, v2 + dv, ownerColor(ob), 3)
+				pencil(lines, u1, v1, u2, v2, COR.fronteira, 1, nil, 0)
 			else
-				dashed(lines, u1, v1, u2, v2, COR.neutro, 1, 28)
+				-- fronteira de atlas: tracejado escuro
+				dashed(lines, u1, v1, u2, v2, COR.fronteira, 2, 36)
 			end
 		end
 		if frontLine then
@@ -1088,17 +1107,39 @@ local function drawObjectives(st: any)
 		local dot = label(layer, "◆", 14, color, Enum.Font.GothamBold)
 		dot.AnchorPoint = Vector2.new(0.5, 0.5)
 		dot.Position = UDim2.fromScale(u, v)
-		-- ficha do objetivo: nome, barra e estado
+		-- etiqueta do objetivo (página de atlas, D-171): caixa bege com tinta escura, afastada do ponto
+		-- para o meio da carta (os objetivos dos cantos não saem da folha), presa por uma linha com
+		-- seta que aponta o ponto
+		local sx = if u > 0.5 then -1 else 1
+		local sy = if v > 0.5 then -1 else 1
+		local ox, oy = sx * ETIQUETA_PX, sy * ETIQUETA_PX
+		local leader = Instance.new("Frame")
+		leader.Name = "Seta"
+		leader.AnchorPoint = Vector2.new(0.5, 0.5)
+		leader.BackgroundColor3 = COR.fronteira
+		leader.BackgroundTransparency = if active then 0 else 0.4
+		leader.BorderSizePixel = 0
+		leader.Position = UDim2.new(u, ox / 2, v, oy / 2)
+		leader.Size = UDim2.fromOffset(math.sqrt(ox * ox + oy * oy), 2)
+		leader.Rotation = math.deg(math.atan2(oy, ox))
+		leader.Parent = layer
+		local head = label(layer, "►", 13, COR.fronteira, Enum.Font.GothamBold)
+		head.Name = "Ponta"
+		head.AnchorPoint = Vector2.new(0.5, 0.5)
+		head.Position = UDim2.new(u, ox * 0.3, v, oy * 0.3)
+		head.Rotation = math.deg(math.atan2(-oy, -ox))
+		head.TextTransparency = if active then 0 else 0.4
 		local card = Instance.new("Frame")
-		card.AnchorPoint = Vector2.new(0.5, 0)
-		card.Position = UDim2.new(u, 0, v, 14)
+		card.Name = "Etiqueta"
+		card.AnchorPoint = Vector2.new(if sx > 0 then 0 else 1, if sy > 0 then 0 else 1)
+		card.Position = UDim2.new(u, ox, v, oy)
 		card.AutomaticSize = Enum.AutomaticSize.XY
 		card.Size = UDim2.new()
-		card.BackgroundColor3 = V.PANEL
-		card.BackgroundTransparency = if active then 0.1 else 0.4
+		card.BackgroundColor3 = COR.etiqueta
+		card.BackgroundTransparency = if active then 0.02 else 0.3
 		card.BorderSizePixel = 0
 		corner(card, 3)
-		stroke(card, color, 1.5, 0.15)
+		stroke(card, COR.fronteira, 1.5, if active then 0 else 0.4)
 		local pad = Instance.new("UIPadding")
 		pad.PaddingLeft, pad.PaddingRight = UDim.new(0, 6), UDim.new(0, 6)
 		pad.PaddingTop, pad.PaddingBottom = UDim.new(0, 3), UDim.new(0, 4)
@@ -1109,7 +1150,8 @@ local function drawObjectives(st: any)
 		list.Padding = UDim.new(0, 2)
 		list.Parent = card
 		card.Parent = layer
-		local name = label(card, string.format("%s · %s", Front.letra(s), UiKit.upper(p.name)), 13, V.TEXT, TYPE)
+		local name =
+			label(card, string.format("%s · %s", Front.letra(s), UiKit.upper(p.name)), 14, COR.tintaAtlas, TYPE)
 		name.LayoutOrder = 1
 		local bar = Instance.new("Frame")
 		bar.Size = UDim2.fromOffset(84, 5)
@@ -1128,16 +1170,16 @@ local function drawObjectives(st: any)
 		mid.Parent = bar
 		bar.Parent = card
 		-- estado só quando conta (disputa, captura, fora de jogo); o dono já é a cor
-		local status = label(card, "", 12, V.DIM, HAND)
+		local status = label(card, "", 12, COR.tintaAtlas, HAND)
 		status.LayoutOrder = 3
 		status.Visible = false
-		-- papel do time: ATACAR / DEFENDER, numa etiqueta cáqui ao lado
+		-- papel do time: ATACAR / DEFENDER, em tarja escura no alto da etiqueta (fora dela, cobria a
+		-- etiqueta quando as duas iam para o mesmo lado)
 		if s == target and role then
-			local tag = label(layer, if role == "attack" then "ATACAR" else "DEFENDER", 15, V.BG, F.TITLE)
-			tag.AnchorPoint = Vector2.new(0, 1)
-			tag.Position = UDim2.new(u, 12, v, -10)
+			local tag = label(card, if role == "attack" then "ATACAR" else "DEFENDER", 14, V.KHAKI, F.TITLE)
+			tag.LayoutOrder = 0
 			tag.BackgroundTransparency = 0
-			tag.BackgroundColor3 = V.KHAKI
+			tag.BackgroundColor3 = COR.fronteira
 			corner(tag, 3)
 			local tp = Instance.new("UIPadding")
 			tp.PaddingLeft, tp.PaddingRight = UDim.new(0, 6), UDim.new(0, 6)
@@ -1164,15 +1206,16 @@ local function updateObjectives(st: any)
 		local cap = st.capturing and st.capturing[s]
 		local contested = st.contested and st.contested[s]
 		local owner = st.owner[s]
-		local text, color = "", V.DIM
+		-- tinta escura: o texto fica na etiqueta bege (D-171)
+		local text, color = "", COR.tintaAtlas
 		if not w.active then
 			text = if st.mode == "Offensive" and owner == "US" then "tomado" else "fora de jogo"
 		elseif contested then
-			text, color = "⚔ EM DISPUTA", V.KHAKI
+			text, color = "⚔ EM DISPUTA", COR.disputa
 		elseif cap and cap == f then
-			text, color = if owner == f then "▲ reforçando" else "▲ tomando", V.TEXT
+			text = if owner == f then "▲ reforçando" else "▲ tomando"
 		elseif cap then
-			text, color = if owner == f then "▼ sob ataque" else "▼ inimigo reforça", V.TEXT
+			text = if owner == f then "▼ sob ataque" else "▼ inimigo reforça"
 		end
 		w.status.Text = text
 		w.status.TextColor3 = color

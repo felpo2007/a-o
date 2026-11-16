@@ -841,32 +841,60 @@
   "description": "VAN TUONG 65 - animal com esqueleto e pele feito no Blender (D-79)"
  },
  {
-  "key": "Carta.nw",
+  "key": "Carta.nw_topo",
   "file": "assets/carta/carta_0_0.png",
   "assetType": "Decal",
   "name": "VT65 carta tatica NO",
   "description": "VAN TUONG 65 - carta topografica do mapa tatico, bloco noroeste (tools/make_carta.py)"
  },
  {
-  "key": "Carta.ne",
+  "key": "Carta.ne_topo",
   "file": "assets/carta/carta_0_1.png",
   "assetType": "Decal",
   "name": "VT65 carta tatica NE",
   "description": "VAN TUONG 65 - carta topografica do mapa tatico, bloco nordeste (tools/make_carta.py)"
  },
  {
-  "key": "Carta.sw",
+  "key": "Carta.sw_topo",
   "file": "assets/carta/carta_1_0.png",
   "assetType": "Decal",
   "name": "VT65 carta tatica SO",
   "description": "VAN TUONG 65 - carta topografica do mapa tatico, bloco sudoeste (tools/make_carta.py)"
  },
  {
-  "key": "Carta.se",
+  "key": "Carta.se_topo",
   "file": "assets/carta/carta_1_1.png",
   "assetType": "Decal",
   "name": "VT65 carta tatica SE",
   "description": "VAN TUONG 65 - carta topografica do mapa tatico, bloco sudeste (tools/make_carta.py)"
+ },
+ {
+  "key": "Carta.nw",
+  "file": "assets/carta/atlas_0_0.png",
+  "assetType": "Decal",
+  "name": "VT65 carta atlas NO",
+  "description": "VAN TUONG 65 - carta do mapa tatico no estilo de atlas, bloco noroeste (tools/make_carta.py --estilo atlas)"
+ },
+ {
+  "key": "Carta.ne",
+  "file": "assets/carta/atlas_0_1.png",
+  "assetType": "Decal",
+  "name": "VT65 carta atlas NE",
+  "description": "VAN TUONG 65 - carta do mapa tatico no estilo de atlas, bloco nordeste (tools/make_carta.py --estilo atlas)"
+ },
+ {
+  "key": "Carta.sw",
+  "file": "assets/carta/atlas_1_0.png",
+  "assetType": "Decal",
+  "name": "VT65 carta atlas SO",
+  "description": "VAN TUONG 65 - carta do mapa tatico no estilo de atlas, bloco sudoeste (tools/make_carta.py --estilo atlas)"
+ },
+ {
+  "key": "Carta.se",
+  "file": "assets/carta/atlas_1_1.png",
+  "assetType": "Decal",
+  "name": "VT65 carta atlas SE",
+  "description": "VAN TUONG 65 - carta do mapa tatico no estilo de atlas, bloco sudeste (tools/make_carta.py --estilo atlas)"
  },
  {
   "key": "Clothing.us_faded_shirt_v3",

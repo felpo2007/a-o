@@ -314,15 +314,16 @@ return {
 		up = 0,
 		dn = 0,
 	},
-	-- Carta topográfica do mapa tático (tools/make_carta.py; 2048 px em 4 blocos de 1024: nw, ne, sw,
-	-- se). IDs de DECAL do Open Cloud; a ImageLabel precisa do ID da IMAGEM (CartaImages). Com a
+	-- Carta do mapa tático, no estilo de página de atlas desde a D-171 (tools/make_carta.py --estilo
+	-- atlas; a topográfica de antes fica no roblox_ids.json como Carta.*_topo). 2048 px em 4 blocos
+	-- de 1024: nw, ne, sw, se. IDs de DECAL do Open Cloud; a ImageLabel precisa do ID da IMAGEM (CartaImages). Com a
 	-- imagem em 0 e o decal publicado, o servidor resolve a imagem no início (CartaService); com os
 	-- dois em 0, o mapa tático usa o desenho simples de antes.
 	Carta = {
-		nw = 128645165001401,
-		ne = 137464378268810,
-		sw = 77829467548125,
-		se = 119816475637128,
+		nw = 113094885749942,
+		ne = 92641264376488,
+		sw = 72705992852209,
+		se = 106452292950916,
 	},
 	CartaImages = {
 		nw = 0,

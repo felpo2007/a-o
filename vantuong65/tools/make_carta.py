@@ -19,6 +19,7 @@ Roblox): carta_0_0.png (NO), carta_0_1.png (NE), carta_1_0.png (SO), carta_1_1.p
 Uso (a partir de vantuong65/):
   uv run python tools/make_carta.py            # roda o Lune se faltar assets/carta/dados
   uv run python tools/make_carta.py --dados    # força a exportação pelo Lune antes
+  uv run python tools/make_carta.py --estilo atlas   # a página de atlas do jogo (D-171)
 """
 
 from __future__ import annotations
@@ -66,6 +67,21 @@ CURVA_MESTRA = (150, 86, 38)
 PRETO = (34, 31, 27)
 GRADE = (30, 30, 34)
 GRADE_FINA = (92, 104, 118)
+# ---------- estilo atlas (D-171, dono: "deixe o mapa nesse estilo", uma página de atlas) ----------
+# cores chapadas e claras, água azul de atlas com as linhas de costa, sem curvas nem símbolos de
+# vegetação: a cor dos setores (dono) entra por cima, no jogo (CartaView), como os países do atlas
+PAPEL_ATLAS = (247, 241, 224)
+TINTAS_ATLAS = {
+    "mata": (206, 226, 180),
+    "densa": (190, 214, 164),
+    "bosque": (182, 208, 156),
+    "lavoura": (248, 238, 192),
+    "clareira": (244, 235, 206),
+    "roca": (242, 230, 188),
+}
+AGUA_ATLAS = (150, 196, 232)
+AGUA_ATLAS_TRACO = (38, 92, 150)
+GRADE_ATLAS = (58, 86, 128)
 # setas da nota de margem (sul, sudoeste, sudeste)
 SETA_S, SETA_SO, SETA_SE = "↓", "↙", "↘"
 
@@ -250,9 +266,9 @@ def caixa_rot(cx: float, cy: float, w: float, h: float, ang: float) -> list[tupl
 
 
 # ---------- camadas ----------
-def papel(rng: np.random.Generator) -> np.ndarray:
+def papel(rng: np.random.Generator, cor=PAPEL) -> np.ndarray:
     base = np.empty((N, N, 3), np.float32)
-    base[:] = PAPEL
+    base[:] = cor
     manchas = ndimage.gaussian_filter(rng.standard_normal((N // 16, N // 16)), 3)
     manchas = ndimage.zoom(manchas / (manchas.std() + 1e-6), 16, order=1)[:N, :N]
     fibra = ndimage.gaussian_filter(rng.standard_normal((N, N)).astype(np.float32), 0.8)
@@ -261,8 +277,19 @@ def papel(rng: np.random.Generator) -> np.ndarray:
     return base
 
 
-def tintas(q: Quadro, d: Dados) -> tuple[np.ndarray, dict[int, np.ndarray]]:
-    """cor de fundo por paisagem (bordas orgânicas: máscaras suavizadas antes de reamostrar)"""
+def tintas(
+    q: Quadro, d: Dados, paleta: dict | None = None
+) -> tuple[np.ndarray, dict[int, np.ndarray]]:
+    """cor de fundo por paisagem (bordas orgânicas: máscaras suavizadas antes de reamostrar).
+    `paleta`: as cores de outro estilo (o atlas, D-171); sem ela, as da carta topográfica"""
+    t = paleta or {
+        "mata": MATA,
+        "densa": MATA_DENSA,
+        "bosque": BOSQUE,
+        "lavoura": LAVOURA,
+        "clareira": CLAREIRA,
+        "roca": ROCA,
+    }
     L = d.info["landscape"]
     mascaras = {}
     roca = L.get("roca", -1)
@@ -274,14 +301,14 @@ def tintas(q: Quadro, d: Dados) -> tuple[np.ndarray, dict[int, np.ndarray]]:
         mascaras[k] = mascaras[k] / soma
     cipo = q.amostra(ndimage.gaussian_filter(d.cipo, 1.0), N)
     densa = np.clip((cipo - 0.52) / 0.12, 0, 1)[..., None]
-    mata = np.array(MATA, np.float32) * (1 - densa) + np.array(MATA_DENSA, np.float32) * densa
+    mata = np.array(t["mata"], np.float32) * (1 - densa) + np.array(t["densa"], np.float32) * densa
     cor = (
         mascaras[L["forest"]][..., None] * mata
-        + mascaras[L["grove"]][..., None] * np.array(BOSQUE, np.float32)
-        + mascaras[L["farm"]][..., None] * np.array(LAVOURA, np.float32)
-        + mascaras[L["clear"]][..., None] * np.array(CLAREIRA, np.float32)
-        + mascaras[L["stream"]][..., None] * np.array(MATA, np.float32)
-        + mascaras[roca][..., None] * np.array(ROCA, np.float32)
+        + mascaras[L["grove"]][..., None] * np.array(t["bosque"], np.float32)
+        + mascaras[L["farm"]][..., None] * np.array(t["lavoura"], np.float32)
+        + mascaras[L["clear"]][..., None] * np.array(t["clareira"], np.float32)
+        + mascaras[L["stream"]][..., None] * np.array(t["mata"], np.float32)
+        + mascaras[roca][..., None] * np.array(t["roca"], np.float32)
     )
     return cor, mascaras
 
@@ -403,7 +430,7 @@ def diques(q: Quadro, dr: ImageDraw.ImageDraw, d: Dados) -> None:
         dr.line([q.px(x1, z1), q.px(x2, z2)], fill=(*DIQUE, 190), width=max(1, int(0.9 * SS)))
 
 
-def riachos(q: Quadro, cam: Image.Image, d: Dados) -> None:
+def riachos(q: Quadro, cam: Image.Image, d: Dados, agua=AGUA, traco=AGUA_TRACO) -> None:
     """riacho: as células de classe riacho ligadas pelos vizinhos, em linha azul. Lote 26b (D-141):
     o rio do sul (leito de ~12 m, crop_world.abre_rio) em mancha d'água com as margens em traço"""
     L = d.info["landscape"]
@@ -416,8 +443,8 @@ def riachos(q: Quadro, cam: Image.Image, d: Dados) -> None:
         dentro = q.amostra(suave, N, ordem=3) > 0.45
         borda = dentro & ~ndimage.binary_erosion(dentro, iterations=int(1.6 * SS))
         rgba = np.zeros((N, N, 4), np.uint8)
-        rgba[dentro] = (*AGUA, 255)
-        rgba[borda] = (*AGUA_TRACO, 255)
+        rgba[dentro] = (*agua, 255)
+        rgba[borda] = (*traco, 255)
         cam.alpha_composite(Image.fromarray(rgba, "RGBA"))
         m = m & ~ndimage.binary_dilation(largo)
     dr = ImageDraw.Draw(cam)
@@ -431,10 +458,10 @@ def riachos(q: Quadro, cam: Image.Image, d: Dados) -> None:
                 # diagonal só se não houver o caminho reto (evita triângulos)
                 if dr_ and dc and ((r + dr_, c) in pts or (r, c + dc) in pts):
                     continue
-                dr.line([p, q.de_celula(r + dr_, c + dc)], fill=(*AGUA_TRACO, 255), width=largura)
+                dr.line([p, q.de_celula(r + dr_, c + dc)], fill=(*traco, 255), width=largura)
         dr.ellipse(
             [p[0] - largura / 2, p[1] - largura / 2, p[0] + largura / 2, p[1] + largura / 2],
-            fill=(*AGUA_TRACO, 255),
+            fill=(*traco, 255),
         )
 
 
@@ -757,7 +784,7 @@ def tracejado_linha(dr, pts, cor, larg: int, traco: float, vao: float) -> None:
 
 
 # ---------- grade militar ----------
-def grade(q: Quadro, cam: Image.Image) -> None:
+def grade(q: Quadro, cam: Image.Image, cor=GRADE, fina=GRADE_FINA) -> None:
     dr = ImageDraw.Draw(cam)
     e0, e1 = q.E(q.x0), q.E(q.x1)
     n0, n1 = q.Nn(q.z1), q.Nn(q.z0)  # sul, norte
@@ -766,32 +793,32 @@ def grade(q: Quadro, cam: Image.Image) -> None:
         if e % 1000 == 0:
             continue
         x, _ = q.px(q.x_de_E(e), 0)
-        dr.line([(x, 0), (x, N)], fill=(*GRADE_FINA, 46), width=SS)
+        dr.line([(x, 0), (x, N)], fill=(*fina, 46), width=SS)
     for n in range(int(math.ceil(n0 / 100)) * 100, int(n1) + 1, 100):
         if n % 1000 == 0:
             continue
         _, y = q.px(0, q.z_de_N(n))
-        dr.line([(0, y), (N, y)], fill=(*GRADE_FINA, 46), width=SS)
+        dr.line([(0, y), (N, y)], fill=(*fina, 46), width=SS)
     # 1 km: linhas da quadrícula da carta
     es = [e for e in range(int(math.ceil(e0 / 1000)) * 1000, int(e1) + 1, 1000)]
     ns = [n for n in range(int(math.ceil(n0 / 1000)) * 1000, int(n1) + 1, 1000)]
     for e in es:
         x, _ = q.px(q.x_de_E(e), 0)
-        dr.line([(x, 0), (x, N)], fill=(*GRADE, 230), width=int(1.5 * SS))
+        dr.line([(x, 0), (x, N)], fill=(*cor, 230), width=int(1.5 * SS))
     for n in ns:
         _, y = q.px(0, q.z_de_N(n))
-        dr.line([(0, y), (N, y)], fill=(*GRADE, 230), width=int(1.5 * SS))
+        dr.line([(0, y), (N, y)], fill=(*cor, 230), width=int(1.5 * SS))
     # números: algarismos principais grandes ("69"), o resto pequeno (²69⁰⁰⁰ᵐE.)
     grande, pequeno = F_SANS_B(int(26 * SS)), F_SANS_B(int(13 * SS))
     halo = (*PAPEL, 235)
 
     def rotulo(principal: str, antes: str, depois: str, cx: float, cy: float) -> None:
-        g = texto_img(principal, grande, (*GRADE, 255), halo, 3 * SS)
+        g = texto_img(principal, grande, (*cor, 255), halo, 3 * SS)
         partes = [g]
         if antes:
-            partes.insert(0, texto_img(antes, pequeno, (*GRADE, 255), halo, 2 * SS))
+            partes.insert(0, texto_img(antes, pequeno, (*cor, 255), halo, 2 * SS))
         if depois:
-            partes.append(texto_img(depois, pequeno, (*GRADE, 255), halo, 2 * SS))
+            partes.append(texto_img(depois, pequeno, (*cor, 255), halo, 2 * SS))
         w = sum(p.width for p in partes) - 4 * (len(partes) - 1)
         h = max(p.height for p in partes)
         im = Image.new("RGBA", (w, h), (0, 0, 0, 0))
@@ -822,15 +849,15 @@ def grade(q: Quadro, cam: Image.Image) -> None:
             continue
         x, _ = q.px(q.x_de_E(e), 0)
         for y0, y1, ty in ((0, 9 * SS, 16 * SS), (N, N - 9 * SS, N - 16 * SS)):
-            dr.line([(x, y0), (x, y1)], fill=(*GRADE, 255), width=SS)
-            cola(cam, texto_img(str((e // 100) % 10), f, (*GRADE, 255), halo, SS), x, ty)
+            dr.line([(x, y0), (x, y1)], fill=(*cor, 255), width=SS)
+            cola(cam, texto_img(str((e // 100) % 10), f, (*cor, 255), halo, SS), x, ty)
     for n in range(int(math.ceil(n0 / 100)) * 100, int(n1) + 1, 100):
         if n % 1000 == 0:
             continue
         _, y = q.px(0, q.z_de_N(n))
         for x0, x1, tx in ((0, 9 * SS, 16 * SS), (N, N - 9 * SS, N - 16 * SS)):
-            dr.line([(x0, y), (x1, y)], fill=(*GRADE, 255), width=SS)
-            cola(cam, texto_img(str((n // 100) % 10), f, (*GRADE, 255), halo, SS), tx, y)
+            dr.line([(x0, y), (x1, y)], fill=(*cor, 255), width=SS)
+            cola(cam, texto_img(str((n // 100) % 10), f, (*cor, 255), halo, SS), tx, y)
 
 
 # ---------- nomes e cotas ----------
@@ -935,7 +962,7 @@ def nomes(q: Quadro, cam: Image.Image, d: Dados, caixas: list) -> None:
 
 
 # ---------- rosa dos ventos, escala e notas ----------
-def rosa_e_escala(q: Quadro, cam: Image.Image) -> None:
+def rosa_e_escala(q: Quadro, cam: Image.Image, nota: str = "CURVAS A CADA 5 METROS") -> None:
     dr = ImageDraw.Draw(cam)
     x0, y0, w, h = 58 * SS, 74 * SS, 252 * SS, 292 * SS
     sombra = Image.new("RGBA", (int(w), int(h)), (0, 0, 0, 0))
@@ -1030,7 +1057,7 @@ def rosa_e_escala(q: Quadro, cam: Image.Image) -> None:
         cola(cam, texto_img(unid, f_esc, (*PRETO, 255)), bx + comp / 2, y + 13 * SS)
     cola(
         cam,
-        texto_img("CURVAS A CADA 5 METROS", F_ESTREITA(int(10 * SS)), (*PRETO, 255)),
+        texto_img(nota, F_ESTREITA(int(10 * SS)), (*PRETO, 255)),
         cx,
         y0 + h - 14 * SS,
     )
@@ -1078,15 +1105,86 @@ def compoe(rgb: np.ndarray, cam: Image.Image) -> np.ndarray:
     return rgb * (1 - a[..., 3:4]) + a[..., :3] * 255 * a[..., 3:4]
 
 
+def costa(q: Quadro, cam: Image.Image, d: Dados) -> None:
+    """linhas de costa do atlas: três traços paralelos à margem do rio, dentro d'água, cada vez
+    mais claros"""
+    L = d.info["landscape"]
+    largo = ndimage.binary_opening(d.paisagem == L["stream"], structure=np.ones((2, 2), bool))
+    if not largo.any():
+        return
+    suave = ndimage.gaussian_filter(largo.astype(np.float32), 1.0)
+    dentro = q.amostra(suave, N, ordem=3) > 0.45
+    ys, xs = np.nonzero(dentro)
+    m = 4 * SS
+    y0, y1 = max(0, ys.min() - m), min(N, ys.max() + m + 1)
+    x0, x1 = max(0, xs.min() - m), min(N, xs.max() + m + 1)
+    dist = ndimage.distance_transform_edt(dentro[y0:y1, x0:x1])
+    dr = ImageDraw.Draw(cam)
+    for passo, alfa in ((5, 160), (10, 115), (16, 70)):
+        for c in find_contours(dist, passo * SS):
+            pts = [(float(x) + x0, float(y) + y0) for y, x in c]
+            if len(pts) > 2:
+                dr.line(pts, fill=(*AGUA_ATLAS_TRACO, alfa), width=SS, joint="curve")
+
+
+def atlas(q: Quadro, d: Dados, rng: np.random.Generator) -> Image.Image:
+    """a mesma área no estilo de atlas (D-171): papel claro, cores chapadas da paisagem, relevo só
+    no sombreado leve, rio de atlas com as linhas de costa, estradas, casas, vilas e a grade de 1 km
+    em azul; moldura dupla com as marcas de 100 m entre as linhas"""
+    rgb = papel(rng, PAPEL_ATLAS)
+    cor, _ = tintas(q, d, TINTAS_ATLAS)
+    rgb = cor + (rgb - np.array(PAPEL_ATLAS, np.float32)) * 0.5
+    agua = Image.new("RGBA", (N, N), (0, 0, 0, 0))
+    poligonos_agua(q, ImageDraw.Draw(agua), d)
+    rgb = compoe(rgb, agua)
+    rgb *= (1.0 + (sombreado(q, d) - 1.0) * 0.55)[..., None]
+
+    topo = Image.new("RGBA", (N, N), (0, 0, 0, 0))
+    riachos(q, topo, d, AGUA_ATLAS, AGUA_ATLAS_TRACO)
+    costa(q, topo, d)
+    dt = ImageDraw.Draw(topo)
+    sebes(q, dt, d)
+    estradas(q, dt, d)
+    casas(q, dt, d)
+    vila_grande(q, topo, d)
+    bases(q, dt, d)
+    trincheira(q, dt, d)
+    cemiterio(q, topo, d)
+    campo(q, topo, d)
+    rgb = compoe(rgb, topo)
+
+    marg = Image.new("RGBA", (N, N), (0, 0, 0, 0))
+    grade(q, marg, GRADE_ATLAS, GRADE_ATLAS)
+    nomes(q, marg, d, [])
+    notas(q, marg, d)
+    # sem a caixa da rosa dos ventos: a janela do mapa já tem o norte e a escala, e a letra do
+    # setor A caía em cima dela (Studio)
+    dm = ImageDraw.Draw(marg)
+    dm.rectangle([0, 0, N - 1, N - 1], outline=(*PRETO, 255), width=int(3 * SS))
+    dm.rectangle([9 * SS, 9 * SS, N - 1 - 9 * SS, N - 1 - 9 * SS], outline=(*PRETO, 255), width=SS)
+    rgb = compoe(rgb, marg)
+    img = Image.fromarray(np.clip(rgb, 0, 255).astype(np.uint8), "RGB")
+    return img.resize((LADO, LADO), Image.Resampling.LANCZOS)
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--dados", action="store_true", help="exporta os dados pelo Lune antes")
+    ap.add_argument(
+        "--estilo",
+        choices=("topo", "atlas"),
+        default="topo",
+        help="topo: carta do AMS (carta_*.png); atlas: página de atlas, a do jogo (atlas_*.png)",
+    )
     args = ap.parse_args()
     if args.dados or not (DADOS / "dados.json").exists():
         exporta_dados()
     d = carrega()
     q = Quadro(d)
     rng = np.random.default_rng(1965)
+    if args.estilo == "atlas":
+        salva(atlas(q, d, rng), "atlas")
+        return
 
     rgb = papel(rng)
     cor, mascaras = tintas(q, d)
@@ -1151,14 +1249,19 @@ def main() -> None:
     arr = envelhece(np.asarray(img, dtype=np.float32), rng)
     img = Image.fromarray(np.clip(arr, 0, 255).astype(np.uint8), "RGB")
 
+    salva(img, "carta")
+
+
+def salva(img: Image.Image, nome: str) -> None:
+    """a carta inteira (<nome>_2048.png) e os 4 blocos de 1024 px (<nome>_<lin>_<col>.png)"""
     SAIDA.mkdir(parents=True, exist_ok=True)
-    img.save(SAIDA / "carta_2048.png", optimize=True)
+    img.save(SAIDA / f"{nome}_2048.png", optimize=True)
     meio = LADO // 2
     for lin in range(2):
         for col in range(2):
             bloco = img.crop((col * meio, lin * meio, (col + 1) * meio, (lin + 1) * meio))
-            bloco.save(SAIDA / f"carta_{lin}_{col}.png", optimize=True)
-    print(f"carta: {SAIDA / 'carta_2048.png'} e 4 blocos de {meio} px")
+            bloco.save(SAIDA / f"{nome}_{lin}_{col}.png", optimize=True)
+    print(f"{nome}: {SAIDA / (nome + '_2048.png')} e 4 blocos de {meio} px")
 
 
 if __name__ == "__main__":

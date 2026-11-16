@@ -6765,3 +6765,37 @@ jogador"; "a mira da m60 está horrível e precisa melhorar ainda mais da sks".
     Nada entre a alça e a massa sobe até a linha;
   - Lune 37 arquivos, 0 falhas (pegada, F5, armas e toque); pytest 61.
 
+## D-171 — Lote 55: a carta tática no estilo de página de atlas (2026-11-15)
+
+**Pedido do dono:** "deixe o mapa nesse estilo" (imagem de um atlas político aberto: países em
+cores chapadas, fronteiras escuras, mar azul com as linhas de costa, nomes em etiquetas bege com
+seta). Da imagem vale o estilo; o mapa é o nosso, de 700 x 700 m (regra da memória).
+
+- **Folha** (`tools/make_carta.py --estilo atlas`, blocos `assets/carta/atlas_*.png`):
+  - papel claro e cores chapadas da paisagem: mata verde-claro, lavoura amarelo-palha;
+  - relevo só num sombreado leve, sem curvas de nível nem símbolos de vegetação;
+  - o rio do sul em azul de atlas com três linhas de costa dentro d'água;
+  - estradas, casas, vilas, bases e grade de 1 km (em azul), com moldura dupla;
+  - sem a caixa da rosa dos ventos: a janela já tem o norte e a escala, e a letra do setor A caía
+    em cima dela.
+  - A topográfica (`--estilo topo`, o padrão do script) continua no `roblox_ids.json` como
+    `Carta.*_topo`.
+- **Por cima, no jogo** (`CartaView`):
+  - cada setor pintado pelo dono como um país do atlas: azul dos EUA, vermelho do VC, creme
+    neutro. A cor continua fixa por lado. Transparência 0,6 no setor em jogo, 0,76 fora de jogo e
+    0,88 no neutro (era 0,84/0,9/0,94, quase invisível);
+  - fronteiras: tracejado escuro entre setores do mesmo dono e, no contato, as duas cores com um
+    fio escuro no meio. A letra do setor sai na cor do lado escurecida, com o halo do papel;
+  - objetivos: etiqueta bege com tinta escura, afastada 40 px do ponto rumo ao meio da carta (os
+    dos cantos não saem da folha), presa por uma linha com seta. "ATACAR/DEFENDER" virou uma tarja
+    no alto da etiqueta: fora dela, as duas se cobriam.
+- **Conferido no Studio:**
+  - os 4 blocos novos resolvidos pelo `CartaService`;
+  - a `CartaView` montada numa tela de teste com uma partida de exemplo (VC em A e B, neutro em C,
+    EUA em D e E, B em disputa, C sendo tomado): setores, fronteiras e as 5 etiquetas com seta
+    legíveis.
+  - O fluxo de abrir o mapa pelo M não foi conferido: o teclado do MCP não chega ao jogo com o
+    Studio atrás de outra janela.
+- Subiram duas séries de blocos. A primeira (115672300899918, 116059414410035, 110806933850980 e
+  117558276761799) ainda tinha a rosa dos ventos e não é usada.
+
