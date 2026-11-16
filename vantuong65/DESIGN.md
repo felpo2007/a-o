@@ -6688,6 +6688,22 @@ próximo uso concreto é o atlas único das árvores da mata, depois da medida.
 - **Toda a textura de modelo custa ~23 MB nessa vista, e a base dos EUA ~6 MB.** O resto (~110 MB)
   é o chão do Roblox, o céu, a interface e os personagens. Tirar as 4 variantes fotográficas não
   muda nada: o chão padrão ocupa o mesmo.
+- **Conferência do SLIM (2026-11-15, depois da v92):**
+  - No Studio desta versão, o menu de visualização (engrenagem do viewport, 32 modos) não tem modo
+    do SLIM. O que existe é o `SlimTintMode` do Console do Desenvolvedor (F9 → DebugVisualizations),
+    com `None`, `LevelOfDetail` e `DataModelState`; o `TranscoderStatus` da documentação não aparece.
+  - Place da nuvem, Play no Studio, `DataModelState` ligado (a legenda aparece): nenhum modelo
+    ficou verde ou amarelo, nem de perto nem a ~300 m da vila, nem depois de sair e entrar de novo
+    (1 min depois). `GraphicsSlimModels` ficou em 0 MB. **No Studio, nada foi desenhado pelo SLIM.**
+  - Jogo publicado (conta do dono, servidor vazio): o modo liga, mas o menu mostra cenas de perto
+    (o Roblox desenha peça por peça), e na partida o mouse fica preso e a mata tapa a vila. Não deu
+    para ver a vila de longe. **Não confirmado.**
+  - **Achado à parte, no jogo publicado:** o console mostrou 109 a 113 erros "Failed to load …
+    SurfaceAppearance. PBR textures may not be visible in game" (granary, casas, Trim_O, cozinha,
+    poço, toca, trincheira) e o mesmo para os `MaterialVariant` do chão (`VT65_Grass`,
+    `VT65_Ground`). No Studio esses erros não aparecem. **Não investigado:** pode ser a qualidade
+    gráfica automática baixa na placa de 2 GB (o Roblox desliga o PBR em qualidade baixa) ou falha
+    de carga de verdade.
 - **Conclusão:** trim sheet e baking de modelos não têm mais o que ganhar em memória de textura.
   A trim sheet da base economizaria no máximo ~6 MB, pouco para refazer as UVs e perder detalhe
   (o mesmo que a D-165 mostrou no telhado). Não feita. O que ainda pesa no desenho (chamadas e

@@ -59,9 +59,15 @@ Textos prontos e imagens: **`LANCAMENTO.md`** (página do jogo, guia do question
      telha iguais a ela.
   3. Me diga se, de longe, ela some, muda de forma ou de cor, ou fica igual às outras.
   - Jeito mais rápido (só quem edita o jogo vê): no jogo publicado, aperte **F9** (Console do
-    Desenvolvedor) → **DebugVisualizations** → **SlimTintMode** → **TranscoderStatus**. A casa e os
-    5 objetos em volta ganham uma cor pelo estado do SLIM (gerando, pronto ou falhou). Me mande uma
-    foto.
+    Desenvolvedor) → lista de abas → **DebugVisualizations** → linha **SlimTintMode** →
+    **DataModelState**. Feche o F9, entre na partida e olhe a vila **de longe** (de um morro, a uns
+    200 m): o que o Roblox desenha pelo SLIM fica verde ou amarelo. De perto nada muda de cor. Me
+    mande uma foto. (Eu liguei esse modo no jogo publicado, mas com o mouse preso na partida não
+    consegui olhar a vila de longe.)
+  - No mesmo F9, na aba **Log**, apareceram mais de 100 erros "Failed to load … SurfaceAppearance.
+    PBR textures may not be visible in game". Me diga se as casas, o chão e as armas estão com
+    textura no seu jogo e qual qualidade gráfica está no menu do Roblox (Configurações →
+    Qualidade gráfica).
   - O Roblox gera o SLIM na nuvem depois da publicação; pode levar um tempo.
   - Limite conhecido: o interior dela fica mais claro que o das outras (D-155).
 
