@@ -134,6 +134,9 @@ O `sourcemap.json` não vai para o Git.
     `"creditos"` (+5.000), `"marco:<caixa>"` (guarda uma caixa de marco) e `"partidas:<n>"`
     (marcos de partidas). A aba abre com `VT65DevTela = "caixas"`; feche antes a recompensa
     diária, que abre por cima.
+  - Roleta das caixas (D-177): no fim da rolagem, a tela grava `RoletaIndice`, `RoletaItem`,
+    `RoletaServidor` e `RoletaDesvioPx` no ScreenGui `VT65CaixaAbertura`; confira contra o
+    `hist[1]` do `Suprimento_Get`. O PULAR fica em `VT65CaixaAbertura.PainelRoleta.Pular`.
   - Conjuntos em Game Pass (D-176): no Studio o dono tem os 4 passes. Imagem de passe nova:
     monte no cliente com o `ItemArte` (cópia do `require`), troque o nome do jogador e recorte
     a captura. Molde de roupa no cliente só pelo id de imagem resolvido no servidor.
@@ -256,7 +259,7 @@ O `sourcemap.json` não vai para o Git.
 - Segredos só no `.env` (no `.gitignore`), nunca no código nem no chat.
 - ForgeGUI: nunca regenerar um job em `outcome_unknown`. "failed" com `retryable` pode ser
   retomado com `generation_retry`.
-- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-177) e atualize `PROGRESS.md`.
+- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-178) e atualize `PROGRESS.md`.
 - Tetos de triângulos por modelo: vegetação ≤ 6 mil (D-135), props e herói ≤ 20 mil (`ArtBudget`,
   conferido pelo teste da F5).
 - Commits no branch acima, com mensagem em português.

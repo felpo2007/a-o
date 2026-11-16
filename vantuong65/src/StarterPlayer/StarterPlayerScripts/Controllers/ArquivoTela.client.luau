@@ -484,7 +484,7 @@ local function pagColecoes(area: Frame)
 		local label = if st.resgatada
 			then "RESGATADO"
 			elseif st.completa then "RESGATAR PRÊMIO"
-			else string.format("FALTAM %d", math.max(0, st.total - st.tem))
+			else string.format("AINDA FALTAM %d", math.max(0, st.total - st.tem))
 		local a = UiKit.action(
 			col,
 			label,

@@ -9,6 +9,7 @@ local InsertService = game:GetService("InsertService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local AssetIds = require(ReplicatedStorage.Shared.AssetIds) :: any
+local Skins = require(ReplicatedStorage.Shared.Skins) :: any
 
 local ImagensUi = {}
 
@@ -28,7 +29,32 @@ local function imageOf(decalId: number): number?
 	return tonumber(string.match(tex, "%d+$") or "")
 end
 
+-- D-177: os moldes de roupa das skins de uniforme (decal -> imagem), para o cliente vestir o
+-- soldado nos cartões das caixas, da roleta e do álbum ("Molde_<chave>" no ReplicatedStorage).
+-- Um de cada vez: o InsertService limita pedidos em rajada.
+function ImagensUi.moldes()
+	task.spawn(function()
+		local C = AssetIds.Clothing or {}
+		local feitos: { [string]: boolean } = {}
+		for _, s in Skins.CATALOG do
+			if s.kind == "uniform" then
+				for _, key in { s.shirt, s.pants } do
+					local d = key and C[key]
+					if key and not feitos[key] and type(d) == "number" and d ~= 0 then
+						feitos[key] = true
+						local id = imageOf(d)
+						if id and id ~= 0 then
+							ReplicatedStorage:SetAttribute("Molde_" .. key, id)
+						end
+					end
+				end
+			end
+		end
+	end)
+end
+
 function ImagensUi.start()
+	ImagensUi.moldes()
 	local images = AssetIds.Images or {}
 	for _, k in ImagensUi.KEYS do
 		local d = images[k]

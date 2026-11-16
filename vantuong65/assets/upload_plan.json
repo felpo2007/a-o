@@ -1868,5 +1868,40 @@
   "assetType": "Decal",
   "name": "VT65 vc_fundador_pants_v3",
   "description": "VAN TUONG 65 - skin fundador (Frente), calça (tools/make_clothing_skins.py, D-176)"
+ },
+ {
+  "key": "Sounds.roleta_tique",
+  "file": "assets/roleta_sons/roleta_tique.ogg",
+  "assetType": "Audio",
+  "name": "VT65 roleta_tique",
+  "description": "VAN TUONG 65 - roleta das caixas: estalo da lingueta, um por cartão (tools/sons_roleta.py, D-177)"
+ },
+ {
+  "key": "Sounds.roleta_parada",
+  "file": "assets/roleta_sons/roleta_parada.ogg",
+  "assetType": "Audio",
+  "name": "VT65 roleta_parada",
+  "description": "VAN TUONG 65 - roleta das caixas: trava da caixa fechando (tools/sons_roleta.py, D-177)"
+ },
+ {
+  "key": "Sounds.roleta_revela",
+  "file": "assets/roleta_sons/roleta_revela.ogg",
+  "assetType": "Audio",
+  "name": "VT65 roleta_revela",
+  "description": "VAN TUONG 65 - roleta das caixas: sino pequeno (comum, incomum) (tools/sons_roleta.py, D-177)"
+ },
+ {
+  "key": "Sounds.roleta_raro",
+  "file": "assets/roleta_sons/roleta_raro.ogg",
+  "assetType": "Audio",
+  "name": "VT65 roleta_raro",
+  "description": "VAN TUONG 65 - roleta das caixas: sino de latão (raro) (tools/sons_roleta.py, D-177)"
+ },
+ {
+  "key": "Sounds.roleta_lendario",
+  "file": "assets/roleta_sons/roleta_lendario.ogg",
+  "assetType": "Audio",
+  "name": "VT65 roleta_lendario",
+  "description": "VAN TUONG 65 - roleta das caixas: dois sinos em quinta (épico, lendário) (tools/sons_roleta.py, D-177)"
  }
 ]

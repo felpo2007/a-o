@@ -9,18 +9,27 @@
 --   - caixa paga só aparece para quem o servidor libera (venda ligada, PolicyService ok); sem pressa
 --     artificial, sem contador falso, sem preço inventado (o preço vem do GetProductInfoAsync);
 --   - animação: completa, curta ou sem (botão no alto), e PULAR a qualquer momento.
+-- D-177 (pedido do dono: roleta estilo Counter-Strike, com identidade própria): a galeria de
+-- imagens com a chance real de cada item (sem nome no cartão; o nome fica na descrição), a
+-- ROLETA horizontal que para no item que o servidor já gravou (Shared/Roleta) e a RECOMPENSA com
+-- EQUIPAR e VOLTAR. Nada de sorteio aqui: a faixa só enfeita, com os pesos da própria lista.
 -- D-174: as caixas grátis dos marcos (Recruta, Serviço, Batalhão, Campanha, Veterano) ficam
 -- guardadas até o jogador abrir, cada uma com o "como ganhar"; a COMPRA DIRETA troca créditos
 -- de intendência ($, ganhos jogando) pelo cosmético escolhido, sem sorteio.
 -- Controle: tudo é botão selecionável (A escolhe, B volta). Studio: VT65DevTela = "caixas".
+local ContentProvider = game:GetService("ContentProvider")
 local MarketplaceService = game:GetService("MarketplaceService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+local SoundService = game:GetService("SoundService")
 local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
 
+local AssetIds = require(ReplicatedStorage.Shared.AssetIds) :: any
 local Caixas = require(ReplicatedStorage.Shared.Caixas) :: any
 local Net = require(ReplicatedStorage.Shared.Net)
 local Progression = require(ReplicatedStorage.Shared.Progression) :: any
+local Roleta = require(ReplicatedStorage.Shared.Roleta) :: any
 local Bus = require(script.Parent.Bus)
 local Input = require(script.Parent.Input)
 local ItemArte = require(script.Parent.ItemArte)
@@ -261,9 +270,103 @@ local function botaoAcao(parent: Instance, c: any): any
 	return a
 end
 
--- ITENS E PROBABILIDADES (antes de comprar ou abrir)
+-- ===== sons (D-177, tools/sons_roleta.py) =====
+local sonsCarregados = false
+local function carregaSons()
+	if sonsCarregados then
+		return
+	end
+	sonsCarregados = true
+	task.spawn(function()
+		local lista = {}
+		for _, k in { "roleta_tique", "roleta_parada", "roleta_revela", "roleta_raro", "roleta_lendario" } do
+			local id = AssetIds.Sounds and AssetIds.Sounds[k]
+			if type(id) == "number" and id ~= 0 then
+				local s = Instance.new("Sound")
+				s.SoundId = "rbxassetid://" .. id
+				table.insert(lista, s)
+			end
+		end
+		pcall(function()
+			ContentProvider:PreloadAsync(lista)
+		end)
+		for _, s in lista do
+			s:Destroy()
+		end
+	end)
+end
+
+local function tocar(chave: string, vol: number, tom: number?)
+	local id = AssetIds.Sounds and AssetIds.Sounds[chave]
+	if type(id) ~= "number" or id == 0 then
+		return
+	end
+	local s = Instance.new("Sound")
+	s.SoundId = "rbxassetid://" .. id
+	s.Volume = vol
+	s.PlaybackSpeed = tom or 1
+	local g = SoundService:FindFirstChild("VT65Efeitos")
+	if g and g:IsA("SoundGroup") then
+		s.SoundGroup = g
+	end
+	s.Parent = SoundService
+	s.Ended:Once(function()
+		s:Destroy()
+	end)
+	s:Play()
+	task.delay(4, function()
+		if s.Parent then
+			s:Destroy()
+		end
+	end)
+end
+
+local SOM_RARIDADE = {
+	comum = "roleta_revela",
+	incomum = "roleta_revela",
+	raro = "roleta_raro",
+	epico = "roleta_lendario",
+	lendario = "roleta_lendario",
+}
+
+local function equipar(it: any)
+	local ok = pcall(function()
+		if it.kind == "plaqueta" or it.kind == "moldura" then
+			Net.func("Suprimento_Equipar")
+				:InvokeServer({ slot = if it.kind == "plaqueta" then "tag" else "mol", item = it.id })
+		elseif it.kind == "emblema" then
+			Net.event("Campanha_Action"):FireServer({ op = "card_set", emblem = it.id })
+		elseif it.kind == "skin" then
+			Net.event("Gear_Equip"):FireServer(it.id, true)
+		end
+	end)
+	Toast.show(if ok then "Equipado." else "Não deu para equipar agora.")
+end
+
+local function equipavel(it: any): boolean
+	return it ~= nil and (it.kind == "plaqueta" or it.kind == "moldura" or it.kind == "emblema" or it.kind == "skin")
+end
+
+-- texto acessível de um item (o cartão não tem nome; a descrição mostra)
+local function descricao(e: any): string
+	local it = ItemArte.info(e.item)
+	local r = rar(it.raridade)
+	local base =
+		string.format("%s · %s · %s · %s", it.nome or it.id, UiKit.upper(r.nome), kindName(it.kind or ""), e.pct)
+	if e.repetido then
+		base ..= string.format(" · Você já tem: vira +%d Fragmentos", e.fragmentos)
+	end
+	return base
+end
+
+-- ITENS E PROBABILIDADES (antes de comprar ou abrir): galeria de imagens com a chance real de
+-- cada uma. Sem nome no cartão (o pedido); o nome e os detalhes aparecem na descrição embaixo ao
+-- passar o cursor, focar com o controle ou tocar.
 local function abrirOdds(c: any)
-	local W, H = px(640, 860), px(580, 780)
+	carregaSons()
+	local cam = workspace.CurrentCamera
+	local W = math.min(px(780, 1040), math.floor(cam.ViewportSize.X - 24))
+	local H = px(600, 800)
 	local _, panel = overlay("CaixaOdds", 42, W, H)
 	closeButton(panel, "CaixaOdds")
 	local t = text(panel, UiKit.upper(c.nome), px(24, 32), V.TEXT, F.TITLE)
@@ -301,10 +404,13 @@ local function abrirOdds(c: any)
 			chip.AutomaticSize = Enum.AutomaticSize.X
 		end
 	end
-	-- lista completa
+	-- a galeria (todas as imagens do mesmo tamanho)
+	local topo = px(122, 162)
+	local baixo = px(160, 214) -- descrição + regras + botão
 	local list = Instance.new("ScrollingFrame")
-	list.Position = UDim2.fromOffset(px(18, 24), px(122, 162))
-	list.Size = UDim2.new(1, -px(36, 48), 1, -px(122, 162) - px(150, 200))
+	list.Name = "Galeria"
+	list.Position = UDim2.fromOffset(px(18, 24), topo)
+	list.Size = UDim2.new(1, -px(36, 48), 1, -topo - baixo)
 	list.BackgroundTransparency = 1
 	list.BorderSizePixel = 0
 	list.AutomaticCanvasSize = Enum.AutomaticSize.Y
@@ -312,44 +418,71 @@ local function abrirOdds(c: any)
 	list.ScrollBarThickness = px(5, 7)
 	list.ScrollBarImageColor3 = V.LINE
 	list.Parent = panel
-	UiKit.list(list, false, px(4, 6))
-	for i, e in c.lista do
-		local row = frame(list, UDim2.new(1, -px(10, 14), 0, px(34, 46)), if i % 2 == 0 then V.PANEL_2 else V.PANEL, 0)
-		row.LayoutOrder = i
-		local r = rar(e.item.raridade)
-		local sw = frame(row, UDim2.fromOffset(px(10, 14), px(24, 32)), rgb(r.cor, V.DIM), 0)
-		sw.Position = UDim2.fromOffset(px(6, 8), px(5, 7))
-		UiKit.corner(sw, 2)
-		local nm = text(
-			row,
-			string.format("%s · %s · %s", e.item.nome, UiKit.upper(r.nome), kindName(e.item.kind)),
-			px(14, 19),
-			V.TEXT,
-			F.BODY
-		)
-		nm.Position = UDim2.fromOffset(px(24, 32), 0)
-		nm.Size = UDim2.new(1, -px(250, 330), 1, 0)
-		nm.TextTruncate = Enum.TextTruncate.AtEnd
-		local pc = text(row, e.pct, px(16, 22), V.KHAKI, F.TITLE)
-		pc.AnchorPoint = Vector2.new(1, 0)
-		pc.Position = UDim2.new(1, -px(8, 10), 0, 0)
-		pc.Size = UDim2.new(0, px(80, 106), 1, 0)
-		pc.TextXAlignment = Enum.TextXAlignment.Right
-		if e.repetido then
-			local d =
-				text(row, string.format("JÁ TEM → +%d FRAGMENTOS", e.fragmentos), px(12, 16), V.BRASS, F.TITLE_MED)
-			d.AnchorPoint = Vector2.new(1, 0)
-			d.Position = UDim2.new(1, -px(94, 124), 0, 0)
-			d.Size = UDim2.new(0, px(150, 200), 1, 0)
-			d.TextXAlignment = Enum.TextXAlignment.Right
-		end
-	end
-	-- regras e o botão de agir
-	local regras = text(panel, "• " .. table.concat(state.regras, "\n• "), px(13, 17), V.DIM, F.BODY)
+	local s = px(104, 138)
+	local grid = Instance.new("UIGridLayout")
+	grid.CellSize = UDim2.fromOffset(s + px(8, 10), s + px(34, 44))
+	grid.CellPadding = UDim2.fromOffset(px(8, 10), px(8, 10))
+	grid.SortOrder = Enum.SortOrder.LayoutOrder
+	grid.Parent = list
+	-- descrição (acessível) e as regras embaixo
+	local desc = text(panel, "Toque ou passe o cursor num item para ver o nome.", px(14, 19), V.TEXT, F.BODY_B)
+	desc.Name = "Descricao"
+	desc.AnchorPoint = Vector2.new(0, 1)
+	desc.Position = UDim2.new(0, px(18, 24), 1, -baixo + px(40, 54))
+	desc.Size = UDim2.new(1, -px(36, 48), 0, px(36, 48))
+	desc.TextYAlignment = Enum.TextYAlignment.Top
+	local regras = text(panel, "• " .. table.concat(state.regras, "\n• "), px(11, 14), V.DIM, F.BODY)
 	regras.AnchorPoint = Vector2.new(0, 1)
 	regras.Position = UDim2.new(0, px(18, 24), 1, -px(64, 86))
-	regras.Size = UDim2.new(1, -px(36, 48), 0, px(84, 112))
+	regras.Size = UDim2.new(1, -px(36, 48), 0, px(66, 88))
 	regras.TextYAlignment = Enum.TextYAlignment.Top
+	for i, e in c.lista do
+		local it = ItemArte.info(e.item)
+		local rc = ItemArte.corRaridade(it.raridade)
+		local cel = Instance.new("TextButton")
+		cel.Name = "Cel_" .. tostring(it.id)
+		cel.Text = ""
+		cel.AutoButtonColor = false
+		cel.LayoutOrder = i
+		cel.BackgroundColor3 = rc:Lerp(V.BG, 0.72)
+		cel.BorderSizePixel = 0
+		cel.Selectable = true
+		cel.Parent = list
+		UiKit.corner(cel, 6)
+		local borda = UiKit.edge(cel, rc, 2, 0.15)
+		local box = ItemArte.desenha(cel, e.item, s, { soldado = true })
+		box.Position = UDim2.fromOffset(px(4, 5), px(4, 5))
+		local pc = text(cel, e.pct, px(16, 22), V.TEXT, F.TITLE)
+		pc.AnchorPoint = Vector2.new(0, 1)
+		pc.Position = UDim2.new(0, 0, 1, -px(4, 5))
+		pc.Size = UDim2.new(1, 0, 0, px(24, 32))
+		pc.TextXAlignment = Enum.TextXAlignment.Center
+		if e.repetido then
+			-- já tem: selo no canto (vira Fragmentos; a descrição diz quantos)
+			local selo = frame(cel, UDim2.fromOffset(px(22, 28), px(22, 28)), V.KHAKI, 0)
+			selo.Name = "JaTem"
+			selo.AnchorPoint = Vector2.new(1, 0)
+			selo.Position = UDim2.new(1, -px(3, 4), 0, px(3, 4))
+			selo.ZIndex = 6
+			UiKit.corner(selo, 99)
+			local v = text(selo, "✓", px(14, 18), V.BG, F.TITLE)
+			v.Size = UDim2.fromScale(1, 1)
+			v.TextXAlignment = Enum.TextXAlignment.Center
+			v.ZIndex = 7
+		end
+		local function mostra()
+			desc.Text = descricao(e)
+			borda.Thickness = 3
+		end
+		local function some()
+			borda.Thickness = 2
+		end
+		cel.MouseEnter:Connect(mostra)
+		cel.MouseLeave:Connect(some)
+		cel.SelectionGained:Connect(mostra)
+		cel.SelectionLost:Connect(some)
+		UiKit.bind(cel, mostra)
+	end
 	local row = frame(panel, UDim2.new(1, -px(36, 48), 0, px(46, 62)))
 	row.AnchorPoint = Vector2.new(0, 1)
 	row.Position = UDim2.new(0, px(18, 24), 1, -px(12, 16))
@@ -360,90 +493,98 @@ local function abrirOdds(c: any)
 	UiKit.focus(panel)
 end
 
--- ABERTURA: o resultado já está gravado no servidor; aqui só a apresentação
-local function abertura(c: any, res: any, item: any)
-	local W, H = px(560, 740), px(560, 740)
-	local g, panel = overlay("CaixaAbertura", 46, W, H)
-	panel.BackgroundColor3 = V.BG
+-- RECOMPENSA: o cartão ampliado, a raridade com a luz dela, EQUIPAR e VOLTAR. O item já está no
+-- inventário (gravado pelo servidor antes de qualquer animação).
+local function recompensa(panel: Frame, g: ScreenGui, res: any, item: any)
 	local r = rar(res.raridade)
 	local rc = rgb(r.cor, V.KHAKI)
-	local skip = false
-	local pular = UiKit.action(panel, "PULAR", "secondary", function()
-		skip = true
-	end, { h = px(38, 52) })
-	pular.button.AnchorPoint = Vector2.new(1, 0)
-	pular.button.Position = UDim2.new(1, -px(14, 20), 0, px(12, 16))
-	pular.button.Size = UDim2.fromOffset(px(110, 146), px(38, 52))
-	local stage = frame(panel, UDim2.fromScale(1, 1))
-	local vp, cam, m = viewport(stage, c.modelo or "caixa_municao_us", px(360, 480))
-	vp.AnchorPoint = Vector2.new(0.5, 0.5)
-	vp.Position = UDim2.fromScale(0.5, 0.45)
-	local flash = frame(g, UDim2.fromScale(1, 1), rc, 1)
-	flash.ZIndex = 5
-	local function espera(t: number)
-		local t0 = os.clock()
-		while os.clock() - t0 < t and not skip do
-			task.wait()
-		end
-	end
-	if anim ~= "sem" and m then
-		local cf, size = m:GetBoundingBox()
-		local d = size.Magnitude * 1.7
-		local longe = CFrame.lookAt(cf.Position + Vector3.new(d * 0.9, d * 0.7, d * 1.2), cf.Position)
-		local perto = CFrame.lookAt(cf.Position + Vector3.new(d * 0.4, d * 0.32, d * 0.55), cf.Position)
-		cam.CFrame = longe
-		local curta = anim == "curta"
-		TweenService:Create(cam, TweenInfo.new(if curta then 0.45 else 1.0, Enum.EasingStyle.Quint), { CFrame = perto })
-			:Play()
-		espera(if curta then 0.45 else 1.0)
-		if not curta and not skip then
-			-- as travas: duas batidas secas (sem tremer a tela, só a caixa)
-			local p0 = m:GetPivot()
-			for _, ang in { 3, -3, 2, 0 } do
-				m:PivotTo(p0 * CFrame.Angles(0, 0, math.rad(ang)))
-				espera(0.07)
-			end
-			m:PivotTo(p0)
-		end
-		if not skip then
-			flash.BackgroundTransparency = if curta then 0.6 else 0.25
-			TweenService:Create(flash, TweenInfo.new(if curta then 0.25 else 0.5), { BackgroundTransparency = 1 })
-				:Play()
-			if res.raridade == "lendario" and not curta then
-				espera(0.25)
-				flash.BackgroundTransparency = 0.35
-				TweenService:Create(flash, TweenInfo.new(0.6), { BackgroundTransparency = 1 }):Play()
-			end
-		end
-	end
-	if overlays.CaixaAbertura ~= g then
-		return -- outra abertura tomou o lugar desta (ou a tela fechou)
-	end
-	flash.BackgroundTransparency = 1
-	stage:Destroy()
-	pular.button.Visible = false
-	-- revelação
+	local alto = res.raridade == "epico" or res.raridade == "lendario"
 	local card = frame(panel, UDim2.fromScale(1, 1))
-	UiKit.list(card, false, px(10, 14), Enum.HorizontalAlignment.Center)
-	UiKit.pad(card, px(18, 24), px(18, 24), px(40, 54), px(14, 18))
-	if item then
-		local box = desenhaItem(card, item, px(200, 270))
-		box.LayoutOrder = 1
-		if res.raridade == "lendario" or res.raridade == "epico" then
-			local glow = box:FindFirstChildOfClass("UIStroke")
-			if glow then
-				glow.Thickness = 4
-			end
+	card.Name = "Recompensa"
+	card.ClipsDescendants = true -- a luz não vaza do painel
+	-- luz da raridade: halo atrás do cartão; raios girando no épico e no lendário
+	local S = px(230, 300)
+	local luz = frame(card, UDim2.fromOffset(S * 2.2, S * 2.2), rc, 0.35)
+	luz.AnchorPoint = Vector2.new(0.5, 0.5)
+	luz.Position = UDim2.new(0.5, 0, 0, px(40, 54) + S / 2)
+	UiKit.corner(luz, 999)
+	local halo = Instance.new("UIGradient")
+	halo.Transparency = NumberSequence.new({
+		NumberSequenceKeypoint.new(0, 1),
+		NumberSequenceKeypoint.new(0.5, 0.35),
+		NumberSequenceKeypoint.new(1, 1),
+	})
+	halo.Parent = luz
+	local raios: { Frame } = {}
+	if alto then
+		for k = 0, 5 do
+			local raio = frame(card, UDim2.fromOffset(S * 2.6, math.floor(S * 0.12)), rc, 0.45)
+			raio.AnchorPoint = Vector2.new(0.5, 0.5)
+			raio.Position = luz.Position
+			raio.Rotation = k * 30
+			local gr = Instance.new("UIGradient")
+			gr.Transparency = NumberSequence.new({
+				NumberSequenceKeypoint.new(0, 1),
+				NumberSequenceKeypoint.new(0.5, 0.2),
+				NumberSequenceKeypoint.new(1, 1),
+			})
+			gr.Parent = raio
+			table.insert(raios, raio)
 		end
+		local giro: RBXScriptConnection? = nil
+		giro = RunService.RenderStepped:Connect(function(dt: number)
+			if not card.Parent then
+				if giro then
+					giro:Disconnect()
+				end
+				return
+			end
+			for _, raio in raios do
+				raio.Rotation = (raio.Rotation + dt * 12) % 360
+			end
+		end)
 	end
-	if res.raridade then -- sem item (Fragmentos fixos): sem etiqueta de raridade
-		local tag = UiKit.tag(card, UiKit.upper(r.nome), rc, px(16, 22))
-		tag.LayoutOrder = 2
+	local ampliado = Instance.new("Frame")
+	ampliado.Name = "Ampliado"
+	ampliado.BackgroundTransparency = 1
+	ampliado.AnchorPoint = Vector2.new(0.5, 0)
+	ampliado.Position = UDim2.new(0.5, 0, 0, px(40, 54))
+	ampliado.Size = UDim2.fromOffset(S, S)
+	ampliado.ZIndex = 3
+	ampliado.Parent = card
+	local escala = Instance.new("UIScale")
+	escala.Scale = 0.6
+	escala.Parent = ampliado
+	if item then
+		local box = ItemArte.desenha(ampliado, item, S, { soldado = true })
+		box.Position = UDim2.fromScale(0, 0)
+		local st = box:FindFirstChildOfClass("UIStroke")
+		if st then
+			st.Thickness = if alto then 5 else 3
+		end
+	else
+		-- só Fragmentos (conta restrita): a ficha de saldo
+		local box = ItemArte.desenha(
+			ampliado,
+			{ id = "frag", kind = "fragmentos", quantidade = res.fragmentos, raridade = "comum" },
+			S
+		)
+		box.Position = UDim2.fromScale(0, 0)
+	end
+	TweenService:Create(escala, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = 1 })
+		:Play()
+	local col = frame(card, UDim2.new(1, 0, 0, px(150, 200)))
+	col.AnchorPoint = Vector2.new(0, 1)
+	col.Position = UDim2.new(0, 0, 1, -px(10, 14))
+	UiKit.list(col, false, px(6, 8), Enum.HorizontalAlignment.Center)
+	if res.raridade then
+		local tag = UiKit.tag(col, UiKit.upper(r.nome), rc, px(16, 22))
+		tag.LayoutOrder = 1
 		tag.AutomaticSize = Enum.AutomaticSize.X
 	end
-	local nome = text(card, if item then item.nome else "Fragmentos de Arsenal", px(26, 34), V.TEXT, F.TITLE)
-	nome.LayoutOrder = 3
-	nome.Size = UDim2.new(1, 0, 0, px(36, 48))
+	local nome = text(col, if item then item.nome else "Fragmentos de Arsenal", px(24, 32), V.TEXT, F.TITLE)
+	nome.LayoutOrder = 2
+	nome.Size = UDim2.new(1, -px(24, 32), 0, px(32, 42))
 	nome.TextXAlignment = Enum.TextXAlignment.Center
 	local linha = if res.origem == "restrito"
 		then string.format(
@@ -457,32 +598,261 @@ local function abertura(c: any, res: any, item: any)
 		elseif ehSaldo(item) then "Entrou no seu saldo."
 		elseif res.origem == "compra" then "Comprado com créditos: já é seu."
 		else "Novo no seu arsenal."
-	local l = text(card, linha, px(15, 20), if res.repetido then V.BRASS else V.KHAKI, F.BODY)
-	l.LayoutOrder = 4
-	l.Size = UDim2.new(1, 0, 0, px(40, 54))
+	local l = text(col, linha, px(15, 20), if res.repetido then V.BRASS else V.KHAKI, F.BODY)
+	l.LayoutOrder = 3
+	l.Size = UDim2.new(1, -px(24, 32), 0, px(22, 30))
 	l.TextXAlignment = Enum.TextXAlignment.Center
-	local row = frame(card, UDim2.new(1, 0, 0, px(46, 62)))
-	row.LayoutOrder = 5
+	local row = frame(col, UDim2.new(1, 0, 0, px(46, 62)))
+	row.LayoutOrder = 4
 	UiKit.list(row, true, px(12, 16), Enum.HorizontalAlignment.Center)
-	if item and not res.repetido and (item.kind == "plaqueta" or item.kind == "moldura") then
-		local usar = UiKit.action(row, "USAR NO CARTÃO", "primary", function()
-			local slot = if item.kind == "plaqueta" then "tag" else "mol"
-			pcall(function()
-				local rr = Net.func("Suprimento_Equipar"):InvokeServer({ slot = slot, item = item.id })
-				if type(rr) == "table" and rr.estado then
-					state = rr.estado
-				end
-			end)
+	if item and not ehSaldo(item) and equipavel(item) then
+		local eq = UiKit.action(row, "EQUIPAR", "primary", function()
+			equipar(item)
 			closeOverlay("CaixaAbertura")
 			refresh()
 		end, { h = px(46, 62) })
-		usar.button.Size = UDim2.fromOffset(px(200, 270), px(46, 62))
+		eq.button.Name = "Equipar"
+		eq.button.Size = UDim2.fromOffset(px(180, 240), px(46, 62))
 	end
-	local ok = UiKit.action(row, "OK", "secondary", function()
+	local volta = UiKit.action(row, "VOLTAR", "secondary", function()
 		closeOverlay("CaixaAbertura")
 	end, { h = px(46, 62) })
-	ok.button.Size = UDim2.fromOffset(px(120, 160), px(46, 62))
-	UiKit.focus(row)
+	volta.button.Name = "Voltar"
+	volta.button.Size = UDim2.fromOffset(px(150, 200), px(46, 62))
+	if overlays.CaixaAbertura == g then
+		UiKit.focus(row)
+	end
+end
+
+-- ABERTURA (D-177): roleta horizontal que para no item que o servidor JÁ gravou. Troca, compra
+-- direta, conta restrita (só Fragmentos) e efeitos desligados vão direto à recompensa (não houve
+-- sorteio para mostrar, ou o jogador não quer a animação).
+local function abertura(c: any, res: any, item: any)
+	carregaSons()
+	local cam = workspace.CurrentCamera
+	local vpW = cam.ViewportSize.X
+	local W = math.floor(math.min(vpW - 24, px(1120, 1480)))
+	local H = px(470, 620)
+	local g, panel = overlay("CaixaAbertura", 46, W, H)
+	panel.Name = "PainelRoleta"
+	panel.BackgroundColor3 = V.BG
+	local fundo = Instance.new("UIGradient")
+	fundo.Rotation = 90
+	fundo.Color = ColorSequence.new(V.BG_OLIVE, V.BG)
+	fundo.Parent = panel
+	local titulo = text(panel, UiKit.upper(c.nome or "Caixa"), px(16, 22), V.KHAKI, Font.fromEnum(UiKit.TYPE_OLD))
+	titulo.Position = UDim2.fromOffset(px(18, 24), px(14, 18))
+	titulo.Size = UDim2.new(1, -px(170, 230), 0, px(26, 34))
+	local lista: { any } = {}
+	for _, e in (c.lista or {}) :: { any } do
+		if type(e.item) == "table" and type(e.peso) == "number" then
+			table.insert(lista, { item = e.item.id, peso = e.peso })
+		end
+	end
+	local soma = 0
+	for _, e in lista do
+		soma += e.peso
+	end
+	local podeRoleta = anim ~= "sem" and type(res.item) == "string" and soma == Caixas.ESCALA
+	if not podeRoleta then
+		recompensa(panel, g, res, item)
+		tocar("roleta_parada", 0.6)
+		tocar(SOM_RARIDADE[res.raridade or "comum"] or "roleta_revela", 0.7)
+		return
+	end
+	-- PULAR desde o começo: apertado durante a montagem, vai direto ao vencedor
+	local skip = false
+	local pular = UiKit.action(panel, "PULAR", "secondary", function()
+		skip = true
+	end, { h = px(38, 52) })
+	pular.button.Name = "Pular"
+	pular.button.AnchorPoint = Vector2.new(1, 0)
+	pular.button.Position = UDim2.new(1, -px(14, 20), 0, px(12, 16))
+	pular.button.Size = UDim2.fromOffset(px(110, 146), px(38, 52))
+	UiKit.focus(panel)
+	-- a janela da faixa ocupa quase toda a largura; 5 a 7 cartões no PC, 3 no celular
+	local janelaW = W - px(32, 44)
+	local gap = px(8, 12)
+	-- celular (só toque): até 5 cartões; PC e controle: até 7
+	local soToque = UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
+	local n = Roleta.visiveis(janelaW, px(104, 140), if soToque then 5 else 7)
+	local cartao = Roleta.larguraCartao(janelaW, n, gap)
+	local cartaoH = cartao + px(10, 14)
+	local janelaH = cartaoH + px(28, 36)
+	local janela = frame(panel, UDim2.fromOffset(janelaW, janelaH), Color3.fromRGB(12, 13, 10), 0)
+	janela.Name = "Janela"
+	janela.AnchorPoint = Vector2.new(0.5, 0.5)
+	janela.Position = UDim2.fromScale(0.5, 0.48)
+	janela.ClipsDescendants = true
+	UiKit.corner(janela, 4)
+	UiKit.edge(janela, V.LINE, 1, 0.3)
+	local y = math.floor((janelaH - cartaoH) / 2)
+	local faixa = frame(janela, UDim2.fromOffset(Roleta.TOTAL * (cartao + gap), cartaoH))
+	faixa.Name = "Faixa"
+	local function px0(i: number): number
+		return math.floor(Roleta.posicao(i, cartao, gap, janelaW) + 0.5)
+	end
+	faixa.Position = UDim2.fromOffset(px0(Roleta.INICIO), y)
+	local rng = Random.new()
+	local ids = Roleta.faixa(lista, res.item, function(): number
+		return rng:NextInteger(0, Caixas.ESCALA - 1)
+	end)
+	local cartoes: { Frame } = {}
+	local moldes: { Instance } = {}
+	for i, id in ids do
+		local it = ItemArte.info(id)
+		local rc = ItemArte.corRaridade(it.raridade)
+		local cf = frame(faixa, UDim2.fromOffset(cartao, cartaoH), rc:Lerp(V.BG, 0.7), 0)
+		cf.Name = "Cartao_" .. i
+		cf.Position = UDim2.fromOffset((i - 1) * (cartao + gap), 0)
+		UiKit.corner(cf, 6)
+		UiKit.edge(cf, rc, 2, 0.1)
+		local esc = Instance.new("UIScale")
+		esc.Parent = cf
+		local box = ItemArte.desenha(cf, id, cartao - px(8, 10), { soldado = true })
+		box.Position = UDim2.fromOffset(px(4, 5), px(4, 5))
+		-- faixa da raridade embaixo da imagem
+		local barra = frame(cf, UDim2.new(1, -px(8, 10), 0, px(4, 5)), rc, 0)
+		barra.AnchorPoint = Vector2.new(0.5, 1)
+		barra.Position = UDim2.new(0.5, 0, 1, -px(3, 4))
+		UiKit.corner(barra, 2)
+		cartoes[i] = cf
+		for _, d in box:GetDescendants() do
+			-- o molde como imagem (pré-carregar o Shirt/Pants gera aviso de representação no Output)
+			local tpl = if d:IsA("Shirt") then d.ShirtTemplate elseif d:IsA("Pants") then d.PantsTemplate else nil
+			if tpl and tpl ~= "" then
+				local im = Instance.new("ImageLabel")
+				im.Image = tpl
+				table.insert(moldes, im)
+			end
+		end
+		if i % 12 == 0 then
+			task.wait() -- monta em lotes: sem travar o quadro
+		end
+		if overlays.CaixaAbertura ~= g then
+			return -- a tela fechou enquanto montava
+		end
+	end
+	-- marcador fixo no centro e o escurecido das pontas
+	local marcador = frame(janela, UDim2.new(0, px(3, 4), 1, 0), V.BRASS, 0)
+	marcador.Name = "Marcador"
+	marcador.AnchorPoint = Vector2.new(0.5, 0)
+	marcador.Position = UDim2.fromScale(0.5, 0)
+	marcador.ZIndex = 8
+	for _, cima in { true, false } do
+		local seta = frame(janela, UDim2.fromOffset(px(14, 18), px(14, 18)), V.BRASS, 0)
+		seta.AnchorPoint = Vector2.new(0.5, 0.5)
+		seta.Position = UDim2.new(0.5, 0, if cima then 0 else 1, 0)
+		seta.Rotation = 45
+		seta.ZIndex = 8
+	end
+	for _, lado in { 0, 1 } do
+		local sombra = frame(janela, UDim2.new(0.22, 0, 1, 0), Color3.fromRGB(12, 13, 10), 0)
+		sombra.AnchorPoint = Vector2.new(lado, 0)
+		sombra.Position = UDim2.fromScale(lado, 0)
+		sombra.ZIndex = 7
+		local gr = Instance.new("UIGradient")
+		gr.Transparency = NumberSequence.new(if lado == 0 then 0 else 1, if lado == 0 then 1 else 0)
+		gr.Parent = sombra
+	end
+	-- moldes de roupa: carrega antes de girar (até 1,5 s), para nenhum cartão mudar no meio
+	if #moldes > 0 then
+		local pronto = false
+		task.spawn(function()
+			pcall(function()
+				ContentProvider:PreloadAsync(moldes)
+			end)
+			for _, im in moldes do
+				im:Destroy()
+			end
+			pronto = true
+		end)
+		local t0 = os.clock()
+		while not pronto and not skip and os.clock() - t0 < 1.5 do
+			task.wait()
+		end
+	end
+	if overlays.CaixaAbertura ~= g then
+		return
+	end
+	-- a rolagem: da direita para a esquerda, desacelerando até o vencedor no marcador
+	local final = UDim2.fromOffset(px0(Roleta.POS_VENCEDOR), y)
+	local dur = Roleta.DURACAO[anim] or Roleta.DURACAO.completa
+	if skip then
+		dur = 0.01 -- pulou antes de girar
+	end
+	local tw = TweenService:Create(faixa, TweenInfo.new(dur, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+		Position = final,
+	})
+	local ultimo = Roleta.INICIO
+	local ultimoTique = 0
+	local passo = RunService.RenderStepped:Connect(function()
+		local i = Roleta.noMarcador(faixa.Position.X.Offset, cartao, gap, janelaW)
+		if i ~= ultimo then
+			ultimo = i
+			local agora = os.clock()
+			if agora - ultimoTique > 0.045 then
+				ultimoTique = agora
+				tocar("roleta_tique", 0.28, 0.95 + rng:NextNumber() * 0.1)
+			end
+		end
+	end)
+	tw:Play()
+	local t0 = os.clock()
+	while os.clock() - t0 < dur + 0.05 and not skip do
+		task.wait()
+		if overlays.CaixaAbertura ~= g then
+			passo:Disconnect()
+			tw:Cancel()
+			return
+		end
+	end
+	passo:Disconnect()
+	tw:Cancel()
+	faixa.Position = final
+	pular.button.Visible = false
+	-- conferência (Studio e teste): o cartão no marcador, o item dele e o desvio do centro em px
+	local noCentro = Roleta.noMarcador(final.X.Offset, cartao, gap, janelaW)
+	local centro = final.X.Offset + (noCentro - 1) * (cartao + gap) + cartao / 2
+	g:SetAttribute("RoletaIndice", noCentro)
+	g:SetAttribute("RoletaItem", ids[noCentro])
+	g:SetAttribute("RoletaServidor", res.item)
+	g:SetAttribute("RoletaDesvioPx", centro - janelaW / 2)
+	g:SetAttribute("RoletaVisiveis", n)
+	g:SetAttribute("RoletaPulou", skip)
+	-- destaque do vencedor
+	local venc = cartoes[Roleta.POS_VENCEDOR]
+	local esc = venc:FindFirstChildOfClass("UIScale")
+	local st = venc:FindFirstChildOfClass("UIStroke")
+	if st then
+		st.Thickness = 4
+		st.Transparency = 0
+	end
+	tocar("roleta_parada", 0.6)
+	if esc then
+		TweenService:Create(esc, TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = 1.1 })
+			:Play()
+	end
+	local rc = rgb(rar(res.raridade).cor, V.KHAKI)
+	local flash = frame(g, UDim2.fromScale(1, 1), rc, 1)
+	flash.ZIndex = 20
+	local forte = res.raridade == "epico" or res.raridade == "lendario"
+	if anim == "completa" or forte then
+		flash.BackgroundTransparency = if forte then 0.35 else 0.7
+		TweenService:Create(flash, TweenInfo.new(if forte then 0.6 else 0.35), { BackgroundTransparency = 1 }):Play()
+	end
+	local espera = if skip then 0.25 elseif forte then 0.9 else 0.6
+	local t1 = os.clock()
+	while os.clock() - t1 < espera do
+		task.wait()
+		if overlays.CaixaAbertura ~= g then
+			return
+		end
+	end
+	tocar(SOM_RARIDADE[res.raridade or "comum"] or "roleta_revela", 0.7)
+	janela:Destroy()
+	titulo.Text = UiKit.upper(c.nome or "Caixa")
+	recompensa(panel, g, res, item)
 end
 
 -- TROCA de Fragmentos por item garantido
@@ -543,7 +913,7 @@ local function abrirTroca()
 				if rr.ok then
 					closeOverlay("CaixaTroca")
 					refresh()
-					abertura({ modelo = "caixa_municao_us" }, rr.resultado, rr.item)
+					abertura({ nome = "Troca de Fragmentos" }, rr.resultado, rr.item)
 				else
 					Toast.show(
 						if rr.motivo == "fragmentos" then "Fragmentos insuficientes." else "Não deu para trocar agora."
@@ -614,7 +984,7 @@ local function abrirLoja()
 				if rr.ok then
 					closeOverlay("CaixaLoja")
 					refresh()
-					abertura({ modelo = "caixa_municao_us" }, rr.resultado, rr.item)
+					abertura({ nome = "Compra direta" }, rr.resultado, rr.item)
 				else
 					Toast.show(
 						if rr.motivo == "creditos"

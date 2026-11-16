@@ -176,7 +176,7 @@ Regional Pricing e Content Ratings (create.roblox.com/docs).
 | Venda das caixas pagas | Pendente de configuração | `PAGAS_LIGADAS = false`, produtos não criados |
 | Classificação de conteúdo | Pendente de validação externa | o questionário é do dono |
 | Itens novos (emblemas, plaquetas, molduras) | Conforme | desenhos originais, sem insígnia real nem marca |
-| Interface honesta, sem pressão | Conforme | sem contador, urgência ou desconto; preço vem do Roblox |
+| Interface honesta, sem pressão | Conforme | sem contador, urgência ou desconto; preço vem do Roblox; a roleta (D-177) não fabrica quase vitória (enchimento com as chances reais, parada exata, teste) |
 | Alternativa gratuita | Conforme | caixa de Bilhete, 5 caixas de marco, troca de Fragmentos, compra direta com créditos ganhos jogando e as coleções do Arquivo (nenhuma exige caixa paga; teste) |
 | **Igualdade competitiva** | **Não conforme** | a loja antiga vende vantagem: vantagens até +12% (D-101), kits (D-72), renascer onde caiu, veículo ao nascer (D-103), camuflagem contra os bots (D-85), reforços de XP. O dono decidiu manter (2026-11-16, D-174) |
 | Gasto de créditos ($) atômico | Parcial | a compra direta (D-174) é atômica e junta os créditos da sessão antes; as compras antigas com $ ainda descontam na memória |
@@ -190,7 +190,8 @@ Regional Pricing e Content Ratings (create.roblox.com/docs).
 - Pacotes de compra direta (Patrulha, Infantaria, Reconhecimento, Veterano) com conteúdo fixo. A
   compra direta item a item, com créditos, já existe (D-174).
 - "ARQUIVO MILITAR STARLITE": feito (D-175).
-- Roleta horizontal na abertura das caixas (lote 61): só a apresentação muda.
+- Roleta horizontal na abertura das caixas: feita (D-177). Só a apresentação mudou: o enchimento
+  usa as chances reais da lista e a parada é exata no item gravado, sem "quase vitória".
 - Painel de configuração dos produtos, chances e temporadas; relatório de analytics por categoria.
 - Caixas 3D próprias (hoje são as caixas de munição do jogo) e som de abertura.
 

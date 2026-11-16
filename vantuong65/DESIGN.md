@@ -7035,3 +7035,48 @@ Game Passes na conta).
 - **Conferido:** Lune 6 ok nos conjuntos e 690 na suíte. No Studio, a posse dos 4 passes, os itens
   gravados, a página CONJUNTOS e o soldado em campo com o molde novo, com 0 erros. Detalhes em
   `testes/CONJUNTOS_D176_2026-11-16.md`.
+
+## D-177 — Lote 61: roleta horizontal nas caixas (2026-11-16)
+
+**Pedido do dono:** "siga para a roleta". O texto do pedido está em
+`especificacao/PROMPT_ROLETA_CAIXAS.md` (só local): roleta horizontal inspirada no Counter-Strike,
+com identidade própria. Só a apresentação muda.
+
+- **Não mudou:** sorteio, chances, preços, prêmios, regras de quem pode comprar, inventário,
+  compras e gravação. O resultado continua gravado pelo servidor antes de qualquer animação.
+- **Galeria antes de abrir** (ITENS E PROBABILIDADES):
+  - imagens do mesmo tamanho, com a chance real de cada item embaixo, o fundo e a borda da
+    raridade e o selo ✓ no que já tem;
+  - sem nome no cartão. O nome, a raridade, o tipo, a chance e o "vira +N Fragmentos" aparecem na
+    descrição ao passar o cursor, focar com o controle ou tocar;
+  - as regras ficam na mesma tela, antes do botão de abrir ou comprar.
+- **Roleta** (`Shared/Roleta.luau`, puro, com teste):
+  - 48 cartões, com o vencedor do servidor no 42º;
+  - o enchimento é sorteado no cliente com os mesmos pesos da lista, cada cartão independente e
+    sem olhar o vencedor. Nada de item raro posto ao lado para fingir "quase saiu";
+  - a parada é exata no centro do cartão (sem deslocamento de "por pouco");
+  - duração: 6 s no modo completo e 2,6 s no curto, com desaceleração Quint (velocidade zero no
+    fim). O PULAR existe desde o começo;
+  - de 3 a 7 cartões conforme a largura; no celular (só toque), no máximo 5.
+- **Visual:** fundo escuro de campanha, a janela da faixa, o marcador de latão fixo no centro com
+  as setas, as pontas escurecidas, a borda acesa da raridade no cartão e um destaque ao parar.
+  Épico e lendário têm clarão, halo e raios girando.
+- **Imagens dos itens** (`ItemArte`, os modelos do próprio jogo):
+  - arma em 3D com o acabamento, de lado;
+  - uniforme vestido no soldado do lobby com o molde de verdade. O servidor resolve o id da imagem
+    (`ImagensUi.moldes`, atributos `Molde_*`), porque o cliente não abre decal;
+  - emblema, plaqueta e moldura centralizados; ficha para créditos e Fragmentos.
+- **Recompensa:** o cartão ampliado, a raridade com a luz dela, o som da raridade, EQUIPAR e
+  VOLTAR. EQUIPAR põe a plaqueta ou a moldura no cartão, o emblema pelo `card_set` e a skin pelo
+  `Gear_Equip`. Troca, compra direta, conta restrita e efeitos desligados vão direto à recompensa.
+- **Sons** (`tools/sons_roleta.py`, síntese própria, 5 áudios enviados ao Roblox): a lingueta a
+  cada cartão (no máximo 1 a cada 45 ms), a trava ao parar, e um sino conforme a raridade.
+- **Carregamento:** os cartões são montados em lotes de 12 por quadro. Os moldes de roupa são
+  pré-carregados como imagem, até 1,5 s, antes de girar, para nenhum cartão mudar no meio.
+  Pré-carregar o Shirt/Pants gerava aviso no Output.
+- **Conserto da D-175:** o botão "FALTAM %d" do álbum empatava com o "FALTAM %s" que já existia, e
+  a tradução dependia da ordem do dicionário. Virou "AINDA FALTAM %d".
+- **Conferido:** Lune 5 ok na roleta e a suíte inteira. No Studio, 4 aberturas pararam no item do
+  servidor (índice 42, desvio de 0,5 px), com e sem PULAR. Também a galeria, a recompensa e o
+  EQUIPAR, e o Output sem os avisos dos moldes depois do conserto. Detalhes em
+  `testes/ROLETA_D177_2026-11-16.md`.

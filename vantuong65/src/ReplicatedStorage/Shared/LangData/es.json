@@ -2908,7 +2908,6 @@
  "Emblema: Arquivo": "Emblema: Archivo",
  "Emblema: Operação": "Emblema: Operación",
  "Este prêmio já foi resgatado.": "Este premio ya fue reclamado.",
- "FALTAM %d": "FALTAN %d",
  "Fardas da Frente": "Uniformes del Frente",
  "Fardas dos Fuzileiros": "Uniformes de los Marines",
  "Insígnias": "Insignias",
@@ -3010,5 +3009,16 @@
  "VER O CONJUNTO": "VER EL CONJUNTO",
  "Áo bà ba anil": "Áo bà ba añil",
  "Áo bà ba verde-oliva": "Áo bà ba verde oliva",
- "✓ Já é seu": "✓ Ya es tuyo"
+ "✓ Já é seu": "✓ Ya es tuyo",
+ " · Você já tem: vira +%d Fragmentos": " · Ya lo tienes: se vuelve +%d Fragmentos",
+ "Caixa": "Caja",
+ "Compra direta": "Compra directa",
+ "Equipado.": "Equipado.",
+ "Não deu para equipar agora.": "No se pudo equipar ahora.",
+ "Toque ou passe o cursor num item para ver o nome.": "Toca o pasa el cursor sobre un objeto para ver su nombre.",
+ "Troca de Fragmentos": "Canje de Fragmentos",
+ "VOLTAR": "VOLVER",
+ "· Você já tem: vira +%d Fragmentos": "· Ya lo tienes: se vuelve +%d Fragmentos",
+ "%s · %s · %s · %s": "%s · %s · %s · %s",
+ "AINDA FALTAM %d": "FALTAN %d"
 }

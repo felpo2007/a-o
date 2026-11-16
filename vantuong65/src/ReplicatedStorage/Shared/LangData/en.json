@@ -2915,7 +2915,6 @@
  "Emblema: Arquivo": "Emblem: Archive",
  "Emblema: Operação": "Emblem: Operation",
  "Este prêmio já foi resgatado.": "This reward was already claimed.",
- "FALTAM %d": "%d TO GO",
  "Fardas da Frente": "Front's Uniforms",
  "Fardas dos Fuzileiros": "Marines' Uniforms",
  "Insígnias": "Insignia",
@@ -3017,5 +3016,16 @@
  "VER O CONJUNTO": "SEE THE SET",
  "Áo bà ba anil": "Indigo áo bà ba",
  "Áo bà ba verde-oliva": "Olive áo bà ba",
- "✓ Já é seu": "✓ Already yours"
+ "✓ Já é seu": "✓ Already yours",
+ " · Você já tem: vira +%d Fragmentos": " · You already own it: becomes +%d Fragments",
+ "Caixa": "Crate",
+ "Compra direta": "Direct purchase",
+ "Equipado.": "Equipped.",
+ "Não deu para equipar agora.": "Couldn't equip it right now.",
+ "Toque ou passe o cursor num item para ver o nome.": "Tap or hover over an item to see its name.",
+ "Troca de Fragmentos": "Fragment exchange",
+ "VOLTAR": "BACK",
+ "· Você já tem: vira +%d Fragmentos": "· You already own it: becomes +%d Fragments",
+ "%s · %s · %s · %s": "%s · %s · %s · %s",
+ "AINDA FALTAM %d": "%d TO GO"
 }

@@ -180,8 +180,113 @@ local function pano(box: Frame, s: any)
 	end
 end
 
+-- ===== soldado vestido =====
+-- O manequim do lobby (VT65Preview, vestido pelo servidor) com o molde da skin: o id de IMAGEM que o
+-- servidor resolveu ("Molde_<chave>", ImagensUi.moldes; o cliente não abre decal). Sem ele, a farda
+-- sai pintada nas cores da skin, como a prévia da Intendência.
+local SHIRT = { "UpperTorso", "LeftUpperArm", "LeftLowerArm", "RightUpperArm", "RightLowerArm" }
+local PANTS = { "LowerTorso", "LeftUpperLeg", "LeftLowerLeg", "RightUpperLeg", "RightLowerLeg" }
+local retrato: any = nil
+
+local function manequim(lado: string): Model?
+	local folder = ReplicatedStorage:FindFirstChild("VT65Preview")
+	local m = if folder then folder:FindFirstChild(lado) else nil
+	if not (m and m:IsA("Model")) then
+		return nil
+	end
+	local want = m:GetAttribute("Parts")
+	if type(want) == "number" then
+		local n = 0
+		for _, d in m:GetDescendants() do
+			if d:IsA("BasePart") then
+				n += 1
+			end
+		end
+		if n < want then
+			return nil -- ainda chegando do servidor
+		end
+	end
+	return m
+end
+
+-- clone do manequim do lado da skin, já com a farda (ou nil se o manequim não chegou)
+local function vestido(s: any): Model?
+	local src = manequim(if s.side == "VC" then "VC" else "US")
+	if not src then
+		return nil
+	end
+	local m = src:Clone()
+	local camisa = s.shirt and ReplicatedStorage:GetAttribute("Molde_" .. s.shirt)
+	local calca = s.pants and ReplicatedStorage:GetAttribute("Molde_" .. s.pants)
+	if type(camisa) == "number" and type(calca) == "number" then
+		local sh = m:FindFirstChildOfClass("Shirt") or Instance.new("Shirt")
+		sh.ShirtTemplate = "rbxassetid://" .. camisa
+		sh.Parent = m
+		local pa = m:FindFirstChildOfClass("Pants") or Instance.new("Pants")
+		pa.PantsTemplate = "rbxassetid://" .. calca
+		pa.Parent = m
+		return m
+	end
+	local shirt, pants
+	if s.rgb then
+		shirt, pants = rgb(s.rgb.shirt, V.PANEL), rgb(s.rgb.pants, V.PANEL)
+	else
+		shirt = rgb(s.swatch[1], V.PANEL)
+		pants = rgb(s.swatch[2] or s.swatch[1], V.PANEL)
+	end
+	for _, d in m:GetChildren() do
+		if d:IsA("Shirt") or d:IsA("Pants") then
+			d:Destroy()
+		end
+	end
+	for _, name in SHIRT do
+		local part = m:FindFirstChild(name)
+		if part and part:IsA("BasePart") then
+			part.Color = shirt
+		end
+	end
+	for _, name in PANTS do
+		local part = m:FindFirstChild(name)
+		if part and part:IsA("BasePart") then
+			part.Color = pants
+		end
+	end
+	return m
+end
+
+-- o soldado num cartão (ViewportFrame parado, de três quartos, corpo inteiro). false = sem manequim
+local function soldadoCartao(box: Frame, s: any): boolean
+	local m = vestido(s)
+	if not m then
+		return false
+	end
+	local vp = Instance.new("ViewportFrame")
+	vp.Name = "Soldado"
+	vp.Size = UDim2.fromScale(1, 1)
+	vp.BackgroundTransparency = 1
+	vp.Ambient = Color3.fromRGB(128, 124, 114)
+	vp.LightColor = Color3.fromRGB(255, 240, 220)
+	vp.LightDirection = Vector3.new(-0.5, -0.8, -1)
+	vp.Parent = box
+	local cam = Instance.new("Camera")
+	cam.FieldOfView = 30
+	cam.Parent = vp
+	vp.CurrentCamera = cam
+	m:PivotTo(CFrame.identity)
+	m.Parent = vp
+	local cf, size = m:GetBoundingBox()
+	local root = m:FindFirstChild("HumanoidRootPart") or m.PrimaryPart
+	local frente = if root and root:IsA("BasePart") then root.CFrame.LookVector else Vector3.new(0, 0, -1)
+	local dir = (CFrame.fromAxisAngle(Vector3.yAxis, math.rad(25)) * frente).Unit
+	local d = size.Y / 2 / math.tan(math.rad(cam.FieldOfView / 2)) * 1.1
+	cam.CFrame = CFrame.lookAt(cf.Position + dir * d + Vector3.new(0, size.Y * 0.04, 0), cf.Position)
+	return true
+end
+
 -- Desenho do item num quadrado de lado `s`, com fundo e borda da raridade. Devolve o quadro.
-function ItemArte.desenha(parent: Instance, item: any, s: number): Frame
+-- opts.soldado: o uniforme vestido no soldado (ViewportFrame; mais pesado que o pano).
+export type Opcoes = { soldado: boolean? }
+function ItemArte.desenha(parent: Instance, item: any, s: number, opts: Opcoes?): Frame
 	local it = ItemArte.info(item)
 	local box = frame(parent, UDim2.fromOffset(s, s), V.PANEL_2, 0)
 	box.Name = "Item"
@@ -266,7 +371,9 @@ function ItemArte.desenha(parent: Instance, item: any, s: number): Frame
 	elseif it.skin and it.skin.kind == "weapon" then
 		arma(box, it.skin)
 	elseif it.skin and it.skin.kind == "uniform" then
-		pano(box, it.skin)
+		if not (opts and opts.soldado and soldadoCartao(box, it.skin)) then
+			pano(box, it.skin)
+		end
 	else
 		-- sem cadastro: o quadro fica só com a cor da raridade (nada de texto no lugar da imagem)
 		box.Name = "ItemSemArte"
@@ -274,72 +381,21 @@ function ItemArte.desenha(parent: Instance, item: any, s: number): Frame
 	return box
 end
 
--- ===== soldado vestido (o retrato grande do detalhe; um só, reaproveitado) =====
-local SHIRT = { "UpperTorso", "LeftUpperArm", "LeftLowerArm", "RightUpperArm", "RightLowerArm" }
-local PANTS = { "LowerTorso", "LeftUpperLeg", "LeftLowerLeg", "RightUpperLeg", "RightLowerLeg" }
-local retrato: any = nil
-
-local function manequim(lado: string): Model?
-	local folder = ReplicatedStorage:FindFirstChild("VT65Preview")
-	local m = if folder then folder:FindFirstChild(lado) else nil
-	if not (m and m:IsA("Model")) then
-		return nil
-	end
-	local want = m:GetAttribute("Parts")
-	if type(want) == "number" then
-		local n = 0
-		for _, d in m:GetDescendants() do
-			if d:IsA("BasePart") then
-				n += 1
-			end
-		end
-		if n < want then
-			return nil -- ainda chegando do servidor
-		end
-	end
-	return m
-end
-
--- Põe o soldado com a farda do uniforme `item` em `parent` (tamanho cheio). Devolve false se o
--- manequim do lobby ainda não chegou (quem chama desenha o pano no lugar).
+-- Põe o soldado com a farda do uniforme `item` em `parent` (tamanho cheio), no retrato grande que
+-- gira de leve (SoldierPreview: um só, reaproveitado; ele não descarta retratos). false = sem
+-- manequim (quem chama desenha o pano no lugar).
 function ItemArte.soldado(parent: Instance, item: any): boolean
 	local it = ItemArte.info(item)
 	local s = it.skin
 	if not (s and s.kind == "uniform") then
 		return false
 	end
-	local lado = if s.side == "VC" then "VC" else "US"
-	local src = manequim(lado)
-	if not src then
+	local m = vestido(s)
+	if not m then
 		return false
 	end
 	if not retrato then
 		retrato = SoldierPreview.newStill(-0.45)
-	end
-	local m = src:Clone()
-	local shirt, pants
-	if s.rgb then
-		shirt, pants = rgb(s.rgb.shirt, V.PANEL), rgb(s.rgb.pants, V.PANEL)
-	else
-		shirt = rgb(s.swatch[1], V.PANEL)
-		pants = rgb(s.swatch[2] or s.swatch[1], V.PANEL)
-	end
-	for _, d in m:GetChildren() do
-		if d:IsA("Shirt") or d:IsA("Pants") then
-			d:Destroy()
-		end
-	end
-	for _, name in SHIRT do
-		local part = m:FindFirstChild(name)
-		if part and part:IsA("BasePart") then
-			part.Color = shirt
-		end
-	end
-	for _, name in PANTS do
-		local part = m:FindFirstChild(name)
-		if part and part:IsA("BasePart") then
-			part.Color = pants
-		end
 	end
 	SoldierPreview.setModel(retrato, m)
 	local f = retrato.frame :: Frame

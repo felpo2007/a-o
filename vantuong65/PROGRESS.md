@@ -340,7 +340,15 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     - **v100 publicada** (versão 105 do place, commit ea2a7f1).
 - Pedido do dono (16/11): "siga e adicione isso para a lista": a roleta das caixas. O texto inteiro
   está em `especificacao/PROMPT_ROLETA_CAIXAS.md` (só local).
-  - **Lote 61 (na fila): roleta horizontal na abertura das caixas.** Só a apresentação muda;
+  - **Lote 61 (D-177): feito.** Pedido: "siga para a roleta".
+    - A galeria mostra imagens com a chance real, sem nome no cartão, e o nome na descrição.
+    - A roleta horizontal para no item gravado pelo servidor, com marcador, sons próprios e PULAR.
+    - A recompensa tem a luz da raridade, EQUIPAR e VOLTAR.
+    - Os uniformes aparecem vestidos no soldado, com o molde de verdade.
+    - Conferido: Lune 5 ok na roleta. No Studio, 4 aberturas pararam no item do servidor, com
+      desvio de 0,5 px, com e sem PULAR.
+    - O pedido original, guardado para referência:
+  - **Lote 61: roleta horizontal na abertura das caixas.** Só a apresentação muda;
     sorteio, chances, preços, prêmios, regras, inventário, compras e gravação ficam iguais.
     - Antes de abrir: galeria com a imagem grande de cada item, a chance real embaixo, fundo e
       borda da raridade e a marca de "já tem". Sem o nome no cartão; o nome fica acessível de

@@ -467,5 +467,10 @@
  "store.PASS_SET_IDENTIDADE": "2088634972",
  "store.PASS_SET_UNIFORMES": "2088232933",
  "store.PASS_SET_ARMAS": "2089588819",
- "store.PASS_SET_FUNDADOR": "2087975040"
+ "store.PASS_SET_FUNDADOR": "2087975040",
+ "Sounds.roleta_tique": "136573554888618",
+ "Sounds.roleta_parada": "112994739464058",
+ "Sounds.roleta_revela": "129467433848849",
+ "Sounds.roleta_raro": "132667265672941",
+ "Sounds.roleta_lendario": "94782492992853"
 }

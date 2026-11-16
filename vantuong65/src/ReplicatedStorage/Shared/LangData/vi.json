@@ -2915,7 +2915,6 @@
  "Emblema: Arquivo": "Huy hiệu: Hồ sơ",
  "Emblema: Operação": "Huy hiệu: Chiến dịch",
  "Este prêmio já foi resgatado.": "Phần thưởng này đã được nhận.",
- "FALTAM %d": "CÒN THIẾU %d",
  "Fardas da Frente": "Quân phục Mặt trận",
  "Fardas dos Fuzileiros": "Quân phục Thủy quân lục chiến",
  "Insígnias": "Phù hiệu",
@@ -3017,5 +3016,16 @@
  "VER O CONJUNTO": "XEM BỘ",
  "Áo bà ba anil": "Áo bà ba chàm",
  "Áo bà ba verde-oliva": "Áo bà ba xanh ô-liu",
- "✓ Já é seu": "✓ Đã là của bạn"
+ "✓ Já é seu": "✓ Đã là của bạn",
+ " · Você já tem: vira +%d Fragmentos": " · Bạn đã có: thành +%d Mảnh",
+ "Caixa": "Hòm",
+ "Compra direta": "Mua trực tiếp",
+ "Equipado.": "Đã trang bị.",
+ "Não deu para equipar agora.": "Chưa trang bị được lúc này.",
+ "Toque ou passe o cursor num item para ver o nome.": "Chạm hoặc rê chuột lên món để xem tên.",
+ "Troca de Fragmentos": "Đổi Mảnh",
+ "VOLTAR": "QUAY LẠI",
+ "· Você já tem: vira +%d Fragmentos": "· Bạn đã có: thành +%d Mảnh",
+ "%s · %s · %s · %s": "%s · %s · %s · %s",
+ "AINDA FALTAM %d": "CÒN THIẾU %d"
 }

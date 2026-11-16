@@ -49,6 +49,12 @@ return {
 		naval_distant = 84327200976853,
 		a4_mergulho = 92915361935434, -- D-132: A-4 do ataque aéreo (tools/som_ataque_aereo.py)
 		radio_squelch = 117911075807959,
+		-- D-177: roleta das caixas (tools/sons_roleta.py; 0 = sem som)
+		roleta_tique = 136573554888618,
+		roleta_parada = 112994739464058,
+		roleta_revela = 129467433848849,
+		roleta_raro = 132667265672941,
+		roleta_lendario = 94782492992853,
 		-- corpo a corpo (D-94; tools/faca/sons.py). 0 = usa um substituto (curativo, impacto na terra)
 		faca_saque = 111901564575957,
 		faca_corte = 101889458600810,
