@@ -337,6 +337,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
       soldado em campo com o molde novo, com 0 erros.
     - Fora do pedido por não existirem no jogo: capacetes, gravações e animações de inspeção.
     - O Clube de Veteranos espera o dono criar a assinatura no Creator Hub.
+    - **v100 publicada** (versão 105 do place, commit ea2a7f1).
 - Pedido do dono (16/11): "siga e adicione isso para a lista": a roleta das caixas. O texto inteiro
   está em `especificacao/PROMPT_ROLETA_CAIXAS.md` (só local).
   - **Lote 61 (na fila): roleta horizontal na abertura das caixas.** Só a apresentação muda;
