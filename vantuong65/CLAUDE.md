@@ -130,8 +130,10 @@ O `sourcemap.json` não vai para o Git.
     - `"depurar"` mostra o rótulo de cada bot (o líder com o atraso do squad).
   - Caixas (D-173): `VT65DevCaixa` = `"bilhetes"` (+5), `"fragmentos"` (+1000), `"pagas"` (liga
     a venda nesta sessão), `"restrito"` / `"falha"` (simulam o PolicyService), `"normal"`,
-    `"recibo:<caixa>"` (recibo simulado, sem Robux, e o mesmo recibo de novo). A aba abre com
-    `VT65DevTela = "caixas"`.
+    `"recibo:<caixa>"` (recibo simulado, sem Robux, e o mesmo recibo de novo). D-174:
+    `"creditos"` (+5.000), `"marco:<caixa>"` (guarda uma caixa de marco) e `"partidas:<n>"`
+    (marcos de partidas). A aba abre com `VT65DevTela = "caixas"`; feche antes a recompensa
+    diária, que abre por cima.
   - Clicar na tela pelo MCP: o `user_mouse_input` com `instance_path` funciona mesmo com o Studio
     atrás. Antes, dê nome único ao botão e aos pais (há muitos `Frame` e `Botao` iguais).
 - O `execute_luau` do MCP roda em outra VM: `require` de módulo do jogo devolve uma CÓPIA. Use
@@ -249,7 +251,7 @@ O `sourcemap.json` não vai para o Git.
 - Segredos só no `.env` (no `.gitignore`), nunca no código nem no chat.
 - ForgeGUI: nunca regenerar um job em `outcome_unknown`. "failed" com `retryable` pode ser
   retomado com `generation_retry`.
-- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-174) e atualize `PROGRESS.md`.
+- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-175) e atualize `PROGRESS.md`.
 - Tetos de triângulos por modelo: vegetação ≤ 6 mil (D-135), props e herói ≤ 20 mil (`ArtBudget`,
   conferido pelo teste da F5).
 - Commits no branch acima, com mensagem em português.

@@ -4,9 +4,9 @@ Fiz sozinho tudo o que não depende da sua conta Roblox, de dinheiro, de decisã
 Studio. A lista abaixo segue a ordem de prioridade. O que está em **negrito** destrava a maior parte
 do resto.
 
-## Monetização (D-173, 2026-11-15): três decisões suas
-1. **A loja antiga vende vantagem de jogo.** O seu pedido novo diz que nenhum item pago pode dar
-   vantagem. Hoje vendem vantagem:
+## Monetização (D-173, 2026-11-15): duas pendências suas
+1. ~~**A loja antiga vende vantagem de jogo.**~~ Decidido em 2026-11-16: fica como está, a opção
+   (c) (D-174). O pedido diz que nenhum item pago pode dar vantagem. Hoje vendem vantagem:
    - as 8 vantagens até +12%: velocidade, vida, fôlego, recarga, socorro, bolsos e olho de águia;
    - os 2 kits de equipamento;
    - o renascer onde caiu;

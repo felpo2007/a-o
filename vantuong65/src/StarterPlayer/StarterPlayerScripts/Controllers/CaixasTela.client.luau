@@ -9,6 +9,9 @@
 --   - caixa paga só aparece para quem o servidor libera (venda ligada, PolicyService ok); sem pressa
 --     artificial, sem contador falso, sem preço inventado (o preço vem do GetProductInfoAsync);
 --   - animação: completa, curta ou sem (botão no alto), e PULAR a qualquer momento.
+-- D-174: as caixas grátis dos marcos (Recruta, Serviço, Batalhão, Campanha, Veterano) ficam
+-- guardadas até o jogador abrir, cada uma com o "como ganhar"; a COMPRA DIRETA troca créditos
+-- de intendência ($, ganhos jogando) pelo cosmético escolhido, sem sorteio.
 -- Controle: tudo é botão selecionável (A escolhe, B volta). Studio: VT65DevTela = "caixas".
 local MarketplaceService = game:GetService("MarketplaceService")
 local Players = game:GetService("Players")
@@ -18,6 +21,7 @@ local TweenService = game:GetService("TweenService")
 
 local Caixas = require(ReplicatedStorage.Shared.Caixas) :: any
 local Net = require(ReplicatedStorage.Shared.Net)
+local Progression = require(ReplicatedStorage.Shared.Progression) :: any
 local Bus = require(script.Parent.Bus)
 local Input = require(script.Parent.Input)
 local Toast = require(script.Parent.Toast)
@@ -80,7 +84,13 @@ local function kindName(kind: string): string
 		then "Emblema do cartão"
 		elseif kind == "plaqueta" then "Plaqueta do cartão"
 		elseif kind == "moldura" then "Moldura do cartão"
+		elseif kind == "creditos" then "Créditos ($)"
+		elseif kind == "fragmentos" then "Fragmentos de Arsenal"
 		else "Acabamento ou uniforme"
+end
+
+local function ehSaldo(item: any): boolean
+	return item ~= nil and (item.kind == "creditos" or item.kind == "fragmentos")
 end
 
 -- desenho do item (emblema, plaqueta, moldura ou skin), quadrado de lado `s`
@@ -122,6 +132,28 @@ local function desenhaItem(parent: Instance, item: any, s: number): Frame
 		UiKit.edge(m, c1, 4, 0)
 		local bar = frame(m, UDim2.new(0, math.floor(s * 0.06), 1, 0), c2, 0)
 		bar.Name = "Faixa"
+	elseif ehSaldo(item) then
+		-- prêmio de saldo (D-174): uma ficha redonda com a quantidade e a sigla da moeda
+		local cor = if item.kind == "creditos" then V.KHAKI else V.BRASS
+		local m = frame(box, UDim2.fromScale(0.72, 0.72), cor:Lerp(V.PANEL, 0.6), 0)
+		m.AnchorPoint = Vector2.new(0.5, 0.5)
+		m.Position = UDim2.fromScale(0.5, 0.5)
+		UiKit.corner(m, 999)
+		UiKit.edge(m, cor, 3, 0)
+		local q = text(m, tostring(item.quantidade or ""), math.floor(s * 0.2), V.TEXT, F.TITLE)
+		q.Size = UDim2.fromScale(1, 0.62)
+		q.TextXAlignment = Enum.TextXAlignment.Center
+		q.TextYAlignment = Enum.TextYAlignment.Bottom
+		local u = text(
+			m,
+			if item.kind == "creditos" then "CRÉDITOS" else "FRAGMENTOS",
+			math.floor(s * 0.07),
+			cor,
+			F.TITLE_MED
+		)
+		u.Position = UDim2.fromScale(0, 0.62)
+		u.Size = UDim2.fromScale(1, 0.24)
+		u.TextXAlignment = Enum.TextXAlignment.Center
 	else
 		-- skin: o nome por extenso sobre listras na cor da raridade
 		local g = Instance.new("UIGradient")
@@ -242,7 +274,7 @@ local function closeButton(parent: Instance, name: string)
 end
 
 Input.on("ui_back", "press", function()
-	for _, name in { "CaixaAbertura", "CaixaOdds", "CaixaTroca", "CaixaHist", "CaixaCartao" } do
+	for _, name in { "CaixaAbertura", "CaixaOdds", "CaixaTroca", "CaixaLoja", "CaixaHist", "CaixaCartao" } do
 		if overlays[name] and UiKit.backFor(name) then
 			closeOverlay(name)
 			return
@@ -254,8 +286,26 @@ local refresh: () -> () = function() end
 local abrirGratis: (c: any) -> () = function(_c: any) end
 local comprar: (c: any) -> () = function(_c: any) end
 
--- botão de ação da caixa (abrir com bilhete ou comprar), ou nil se não há o que fazer
+-- botão de ação da caixa (abrir com bilhete, abrir uma guardada ou comprar), ou nil se não há o que
+-- fazer
 local function botaoAcao(parent: Instance, c: any): any
+	if c.tipo == "gratuita" and c.fonte == "marco" then
+		local g = c.guardadas or 0
+		local a = UiKit.action(
+			parent,
+			if g == 1
+				then "ABRIR · 1 GUARDADA"
+				elseif g > 1 then string.format("ABRIR · %d GUARDADAS", g)
+				else "NENHUMA GUARDADA",
+			"premio",
+			function()
+				abrirGratis(c)
+			end,
+			{ h = px(46, 62) }
+		)
+		a.enabled(g >= 1 and c.bloqueio == nil)
+		return a
+	end
 	if c.tipo == "gratuita" then
 		local n = c.bilhetes or 1
 		local a = UiKit.action(
@@ -289,8 +339,12 @@ local function abrirOdds(c: any)
 	local t = text(panel, UiKit.upper(c.nome), px(24, 32), V.TEXT, F.TITLE)
 	t.Position = UDim2.fromOffset(px(18, 24), px(14, 18))
 	t.Size = UDim2.new(1, -px(170, 230), 0, px(32, 42))
-	local custo = if c.tipo == "gratuita"
-		then string.format("Custo: %d Bilhete de Recompensa (ganho jogando; não se compra).", c.bilhetes or 1)
+	local custo = if c.fonte == "marco"
+		then string.format("Grátis, não se compra. Como ganhar: %s", c.ganha or "jogando.")
+		elseif c.tipo == "gratuita" then string.format(
+			"Custo: %d Bilhete de Recompensa (ganho jogando; não se compra).",
+			c.bilhetes or 1
+		)
 		else (function(): string
 			local p = priceOf(c.produtoId)
 			return if p
@@ -470,6 +524,8 @@ local function abertura(c: any, res: any, item: any)
 			"Você já tinha este item: virou +%d Fragmentos de Arsenal.",
 			res.fragmentos
 		)
+		elseif ehSaldo(item) then "Entrou no seu saldo."
+		elseif res.origem == "compra" then "Comprado com créditos: já é seu."
 		else "Novo no seu arsenal."
 	local l = text(card, linha, px(15, 20), if res.repetido then V.BRASS else V.KHAKI, F.BODY)
 	l.LayoutOrder = 4
@@ -573,6 +629,80 @@ local function abrirTroca()
 	UiKit.focus(panel)
 end
 
+-- COMPRA DIRETA (D-174, caminho C): o cosmético escolhido por créditos ($), sem sorteio
+local function abrirLoja()
+	local W, H = px(640, 860), px(580, 780)
+	local _, panel = overlay("CaixaLoja", 42, W, H)
+	closeButton(panel, "CaixaLoja")
+	local t = text(panel, "COMPRA DIRETA", px(24, 32), V.TEXT, F.TITLE)
+	t.Position = UDim2.fromOffset(px(18, 24), px(14, 18))
+	t.Size = UDim2.new(1, -px(170, 230), 0, px(32, 42))
+	local sub = text(
+		panel,
+		string.format(
+			"Você tem %s em créditos (ganhos em partidas e missões). Você escolhe o item e leva ele, sem sorteio.",
+			Progression.money(state.creditos or 0)
+		),
+		px(14, 19),
+		V.DIM,
+		F.BODY
+	)
+	sub.Position = UDim2.fromOffset(px(18, 24), px(48, 62))
+	sub.Size = UDim2.new(1, -px(36, 48), 0, px(40, 54))
+	local list = Instance.new("ScrollingFrame")
+	list.Position = UDim2.fromOffset(px(18, 24), px(94, 124))
+	list.Size = UDim2.new(1, -px(36, 48), 1, -px(106, 140))
+	list.BackgroundTransparency = 1
+	list.BorderSizePixel = 0
+	list.AutomaticCanvasSize = Enum.AutomaticSize.Y
+	list.CanvasSize = UDim2.new()
+	list.ScrollBarThickness = px(5, 7)
+	list.ScrollBarImageColor3 = V.LINE
+	list.Parent = panel
+	UiKit.list(list, false, px(6, 8))
+	for i, e in state.loja or {} do
+		local row = frame(list, UDim2.new(1, -px(10, 14), 0, px(58, 78)), V.PANEL_2, 0)
+		row.LayoutOrder = i
+		local box = desenhaItem(row, e.item, px(50, 68))
+		box.Position = UDim2.fromOffset(px(4, 5), px(4, 5))
+		local r = rar(e.item.raridade)
+		local nm = text(
+			row,
+			string.format("%s\n%s · %s", e.item.nome, UiKit.upper(r.nome), kindName(e.item.kind)),
+			px(14, 18),
+			V.TEXT,
+			F.BODY
+		)
+		nm.Position = UDim2.fromOffset(px(64, 86), 0)
+		nm.Size = UDim2.new(1, -px(270, 360), 1, 0)
+		local label = if e.possui then "JÁ TEM" else string.format("LEVAR · %s", Progression.money(e.preco))
+		local a = UiKit.action(row, label, "ci", function()
+			local ok, rr = pcall(function()
+				return Net.func("Suprimento_Loja"):InvokeServer(e.item.id)
+			end)
+			if ok and type(rr) == "table" then
+				if rr.ok then
+					closeOverlay("CaixaLoja")
+					refresh()
+					abertura({ modelo = "caixa_municao_us" }, rr.resultado, rr.item)
+				else
+					Toast.show(
+						if rr.motivo == "creditos"
+							then "Créditos insuficientes: jogue partidas e cumpra missões."
+							elseif rr.motivo == "possui" then "Você já tem este item."
+							else "Não deu para levar agora."
+					)
+				end
+			end
+		end, { h = px(40, 54) })
+		a.button.AnchorPoint = Vector2.new(1, 0.5)
+		a.button.Position = UDim2.new(1, -px(8, 10), 0.5, 0)
+		a.button.Size = UDim2.fromOffset(px(190, 252), px(40, 54))
+		a.enabled(not e.possui and (state.creditos or 0) >= e.preco)
+	end
+	UiKit.focus(panel)
+end
+
 -- HISTÓRICO dos últimos resultados (o servidor guarda 100; aqui os 20 mais novos)
 local function abrirHist()
 	local W, H = px(560, 740), px(520, 700)
@@ -599,6 +729,8 @@ local function abrirHist()
 		local quando = os.date("%d/%m %H:%M", h.t)
 		local o = if h.origem == "bilhete"
 			then "bilhete"
+			elseif h.origem == "marco" then "caixa ganha"
+			elseif h.origem == "compra" then "créditos"
 			elseif h.origem == "recibo" then "Robux"
 			elseif h.origem == "restrito" then "Robux (sem sorteio)"
 			else "troca"
@@ -702,17 +834,19 @@ local function build()
 		a.button.Size = UDim2.fromOffset(w or px(110, 146), px(38, 52))
 		a.button.LayoutOrder = order
 	end
-	atalho("TROCA", 2, abrirTroca)
-	atalho("HISTÓRICO", 3, abrirHist)
-	atalho("CARTÃO", 4, abrirCartao)
+	atalho("COMPRA DIRETA", 1, abrirLoja, px(150, 200))
+	atalho("TROCA", 2, abrirTroca, px(96, 128))
+	atalho("HISTÓRICO", 3, abrirHist, px(110, 146))
+	atalho("CARTÃO", 4, abrirCartao, px(96, 128))
 	atalho(ANIM_LABEL[anim], 5, function()
 		anim = ANIM_NEXT[anim]
 		build()
-	end, px(190, 252))
+	end, px(184, 244))
 	local saldo = text(
 		r,
 		string.format(
-			"BILHETES %d (hoje %d de %d) · FRAGMENTOS DE ARSENAL %d",
+			"CRÉDITOS %s · BILHETES %d (hoje %d de %d) · FRAGMENTOS %d",
+			Progression.money(state.creditos or 0),
 			state.bilhetes,
 			state.hoje or 0,
 			state.tetoDia or 4,
@@ -726,8 +860,8 @@ local function build()
 	saldo.Size = UDim2.new(1, 0, 0, px(22, 30))
 	-- aviso da conta restrita (sem caixas pagas) e de onde vêm os bilhetes
 	local nota = if state.restrito or not state.politicaOk
-		then "Caixas pagas indisponíveis na sua conta. A caixa gratuita e a troca de Fragmentos continuam."
-		else "Bilhetes de Recompensa vêm das missões do dia (1) e da semana (2), até 4 por dia. Não se compram."
+		then "Caixas pagas indisponíveis na sua conta. As caixas grátis, a troca e a compra direta continuam."
+		else "Caixas grátis vêm de jogar: missões (Bilhetes), treinamento, patentes, passe e partidas. Não se compram."
 	local n = text(r, nota, px(13, 17), V.DIM, F.BODY)
 	n.Position = UDim2.fromOffset(0, px(70, 94))
 	n.Size = UDim2.new(1, 0, 0, px(22, 30))
@@ -780,7 +914,12 @@ local function build()
 		local lg = text(card, table.concat(legenda, " · "), px(12, 16), V.DIM, F.BODY)
 		lg.Position = UDim2.fromOffset(x, px(94, 124))
 		lg.Size = UDim2.new(1, -x - px(230, 300), 0, px(32, 42)) -- duas linhas: as 5 raridades cabem
-		if c.temporada and c.fim then
+		if c.fonte == "marco" then
+			local como = text(card, "Como ganhar: " .. (c.ganha or "jogando."), px(12, 16), V.KHAKI, F.BODY)
+			como.Position = UDim2.fromOffset(x, px(126, 166))
+			como.Size = UDim2.new(1, -x - px(230, 300), 0, px(22, 30))
+			como.TextTruncate = Enum.TextTruncate.AtEnd
+		elseif c.temporada and c.fim then
 			local fim = text(
 				card,
 				string.format("Só nesta temporada, até %s.", os.date("%d/%m/%Y", c.fim)),
@@ -836,6 +975,7 @@ abrirGratis = function(c: any)
 		Toast.show(
 			if rr.motivo == "bilhetes"
 				then "Sem Bilhetes de Recompensa: cumpra uma missão do dia."
+				elseif rr.motivo == "guardada" then "Nenhuma caixa desta guardada. Veja como ganhar no cartão dela."
 				else "Não deu para abrir agora."
 		)
 		return
@@ -866,6 +1006,19 @@ Net.event("Suprimento_Resultado").OnClientEvent:Connect(function(msg: any)
 	closeOverlay("CaixaOdds")
 	abertura(c, msg.resultado, msg.item)
 	refresh()
+end)
+
+-- D-174: caixa grátis ganha num marco (fica guardada; a loja não abre sozinha)
+Net.event("Suprimento_Ganhou").OnClientEvent:Connect(function(msg: any)
+	if type(msg) ~= "table" or type(msg.nome) ~= "string" then
+		return
+	end
+	Toast.show(string.format("%s guardada: abra na loja, aba CAIXAS.", msg.nome))
+	if host and host.Visible then
+		refresh()
+	else
+		task.spawn(fetch)
+	end
 end)
 
 Bus.on("caixas_show", function(h: Frame)

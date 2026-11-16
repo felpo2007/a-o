@@ -77,6 +77,20 @@ local function key(userId: number): string
 	return "u_" .. userId
 end
 
+-- D-174: salvar e a transação das caixas mexem na base dos créditos (o delta da sessão). Um de cada
+-- vez por jogador (espera até 15 s; depois segue, para nunca travar a saída do jogador)
+local io: { [Player]: boolean } = {}
+local function lock(player: Player)
+	local t0 = os.clock()
+	while io[player] and os.clock() - t0 < 15 do
+		task.wait(0.05)
+	end
+	io[player] = true
+end
+local function unlock(player: Player)
+	io[player] = nil
+end
+
 -- progresso que só cresce: a recompensa mais nova, a união dos cosméticos ganhos e a das skins
 -- compradas (dst <- src)
 local function mergeProgress(dst: Profile, src: Profile)
@@ -133,6 +147,7 @@ function PlayerData.save(player: Player): boolean
 	if not (ds and p) or player:GetAttribute("DataReadOnly") then
 		return false
 	end
+	lock(player)
 	local base = bases[player] or ProfileSchema.synced(p)
 	-- o que a sessão tinha no instante da gravação (o que entrar depois fica para a próxima)
 	local snap = ProfileSchema.synced(p)
@@ -161,6 +176,7 @@ function PlayerData.save(player: Player): boolean
 	if ok and w then
 		bases[player] = ProfileSchema.afterWrite(p, snap, w)
 	end
+	unlock(player)
 	return ok
 end
 
@@ -218,6 +234,12 @@ function PlayerData.transact(player: Player, fn: (Profile) -> any): (string, any
 	end
 	local result: any = nil
 	local stored: Profile? = nil
+	-- D-174: créditos. O gravado recebe o que a sessão ganhou e ainda não salvou (o "delta" da
+	-- sessão, ProfileSchema.applySession): a compra direta vê o saldo de verdade e o prêmio em
+	-- créditos entra no gravado. Depois, a base e a memória andam juntas (nada conta duas vezes)
+	lock(player)
+	local base = bases[player]
+	local deltaUsado = 0
 	local ok = retry(function()
 		return (ds :: DataStore):UpdateAsync(key(player.UserId), function(old)
 			local p = PlayerData.migrate(old)
@@ -225,6 +247,8 @@ function PlayerData.transact(player: Player, fn: (Profile) -> any): (string, any
 			for id in mem.campaign.owned do
 				p.campaign.owned[id] = true
 			end
+			deltaUsado = if base then mem.credits - base.credits else 0
+			p.credits = math.clamp(p.credits + deltaUsado, 0, 1000000000)
 			result = nil
 			stored = nil
 			local r = fn(p)
@@ -238,13 +262,21 @@ function PlayerData.transact(player: Player, fn: (Profile) -> any): (string, any
 		end)
 	end, 3)
 	if not ok then
+		unlock(player)
 		return "error", nil
 	end
 	local s = stored
 	if result == nil or not s then
+		unlock(player)
 		return "nada", nil
 	end
 	mem.caixas = s.caixas
+	if base then
+		-- o que a memória ganhou enquanto gravava fica como delta novo da sessão
+		local novos = mem.credits - base.credits - deltaUsado
+		base.credits = s.credits
+		mem.credits = s.credits + novos
+	end
 	ProfileSchema.mergeSkins(mem.skins, s.skins)
 	for id in s.campaign.owned do
 		mem.campaign.owned[id] = true
@@ -254,6 +286,7 @@ function PlayerData.transact(player: Player, fn: (Profile) -> any): (string, any
 			mem.purchases[id] = t
 		end
 	end
+	unlock(player)
 	return "ok", result
 end
 
@@ -327,6 +360,7 @@ function PlayerData.start()
 		PlayerData.save(player)
 		profiles[player] = nil
 		bases[player] = nil
+		io[player] = nil
 	end)
 	game:BindToClose(function()
 		if RunService:IsStudio() then

@@ -104,7 +104,7 @@ return function(): Result
 			end
 		end
 		for _, t in ArtPlan.OBJECTIVE_TREES[sp.name] or {} do
-			add(t[1], at(sp.x, sp.z), t[2])
+			add(t.key, at(sp.x, sp.z), t.n)
 		end
 	end
 	-- 3) bosques das colinas

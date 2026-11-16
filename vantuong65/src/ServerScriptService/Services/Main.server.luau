@@ -42,7 +42,10 @@ CommerceService.start()
 -- D-173: caixas de suprimentos (o recibo da caixa paga entra pelo CommerceService). Protegido: um
 -- erro nas caixas não pode parar a subida do resto do servidor
 do
-	local ok, err = pcall(CaixaService.start)
+	local ok, err = pcall(function(): any
+		CaixaService.start()
+		return nil
+	end)
 	if not ok then
 		warn("[VT65] caixas fora do ar:", err)
 	end

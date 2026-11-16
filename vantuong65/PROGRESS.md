@@ -300,6 +300,18 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
       sem a trava "recibo com a venda desligada não sorteia", porque a cópia do place falhou com o
       arquivo ainda preso. Não havia risco: os produtos das caixas não existem. Foi republicada
       logo em seguida.
+- Pedido do dono (16/11): "deixe como esta e faça isso" + o prompt master definitivo. Os itens
+  com vantagem da loja antiga ficam como estão (decisão do dono).
+  - **Lote 58 (D-174): caixas grátis por marco, prêmios de saldo e compra direta.**
+    - Cinco caixas grátis guardadas por marco: Recruta (treino ou primeira partida), Serviço
+      (posto), Batalhão (missão da semana), Campanha (passe) e Veterano (10 a 200 partidas).
+    - Prêmios de saldo nas grátis ($ 500, $ 1.500, 100 e 250 Fragmentos); Fragmentos
+      5/15/40/100/250.
+    - Compra direta de emblema, plaqueta e moldura com créditos ($ 1.500 a $ 30.000), atômica.
+    - Conferido: Lune 25 ok nas caixas e a suíte inteira; Studio com os ganchos (caixas dadas,
+      abertura, compra $ 6.300 → $ 4.800, aviso, prêmio de 100 Fragmentos), 0 erros.
+    - Não testado: os marcos numa partida de verdade (só pelo código e pelos ganchos).
+    - Próximos: lote 59 (Arquivo Militar), lote 60 (Game Passes novos e Clube de Veteranos).
 
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;

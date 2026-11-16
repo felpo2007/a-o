@@ -6886,3 +6886,60 @@ para não enviar o questionário.
   Personalização de Armamentos, Fundador), Clube de Veteranos (assinatura), passe de 8 semanas,
   pacotes de compra direta, painel de configuração, caixas 3D próprias com som.
 
+## D-174 — Lote 58: caixas grátis por marco, prêmios de saldo e compra direta (2026-11-16)
+
+**Pedido do dono:** "deixe como esta e faça isso" + o "PROMPT MASTER DEFINITIVO" (jogo envolvente
+para público jovem, monetização ética, caixas de recompensa, regras do Roblox).
+
+**Decisão do dono:** os itens que dão vantagem na loja antiga ficam como estão (vantagens até +12%,
+kits, renascer onde caiu, veículo ao nascer, camuflagem contra os bots, reforços de XP). A linha
+"Igualdade competitiva" do `MONETIZATION.md` segue "Não conforme", agora como escolha registrada.
+
+- **Caixas grátis por marco (5 novas, `fonte = "marco"`):** ficam guardadas no perfil
+  (`caixas.guardadas`) até o jogador abrir. Cada marco só dá uma vez (`caixas.marcos`, teto de 512).
+  O jogador recebe um aviso; a loja não abre sozinha.
+
+  | Caixa | Marco |
+  |---|---|
+  | Recruta | treinamento de um papel ou a primeira partida completa (uma vez por conta) |
+  | Serviço | cada posto novo |
+  | Batalhão | cada missão da semana cumprida |
+  | Campanha | níveis 10, 20, 30, 40 e 50 da trilha grátis do passe |
+  | Veterano | 10, 25, 50, 100 e 200 partidas completas |
+
+  A caixa de Bilhete (D-173) continua igual.
+- **Prêmios de saldo**, só nas caixas grátis: $ 500 e $ 1.500 em créditos, 100 e 250 Fragmentos.
+  Não viram repetida nem posse e não entram na troca nem na compra direta. A validação recusa prêmio
+  de saldo em caixa paga.
+- **Fragmentos 5/15/40/100/250** por raridade (eram 10/25/60/150/400, D-173), como no pedido. A
+  troca segue em 10× (50/150/400/1.000/2.500).
+- **Compra direta (caminho C):** o emblema, a plaqueta ou a moldura escolhidos, por créditos, sem
+  sorteio. Preço por raridade: $ 1.500 / 3.000 / 7.500 / 15.000 / 30.000 (~300 por partida,
+  `Skins.MONEY_PER_MATCH`). As skins seguem na Intendência.
+  - A compra é atômica: o `PlayerData.transact` junta antes os créditos ganhos na sessão (o delta
+    da memória) e trava o salvamento automático enquanto grava.
+- **Nome da moeda:** o pedido chama de "Créditos de Serviço" a moeda ganha jogando. O jogo já tem os
+  créditos de intendência, mostrados com o cifrão ($). Ficou o nome do jogo, para não haver duas
+  moedas com nomes diferentes. As três moedas do pedido são: créditos ($), Fragmentos de Arsenal e
+  Bilhetes de Recompensa.
+- **Tela (aba CAIXAS):**
+  - caixas de marco com "Como ganhar" e "ABRIR · N GUARDADA(S)";
+  - saldo de créditos na linha de saldos;
+  - botão COMPRA DIRETA, com a lista e "LEVAR · $ N";
+  - aviso de caixa ganha;
+  - prêmio de saldo desenhado como ficha com a quantidade;
+  - textos em en, es e vi.
+- **Ganchos de Studio novos** (`VT65DevCaixa`): `"creditos"` (+5.000), `"marco:<caixa>"` e
+  `"partidas:<n>"`.
+- **luau-lsp:** corrigidos erros de tipo que vinham da D-172 (`ArtPlan.OBJECTIVE_TREES` virou
+  registro, com os mesmos valores) e da D-173 (perfil talvez nil no `CaixaService`; `pcall` no
+  `Main`).
+- **Conferido:** Lune 25 ok nas caixas (100 mil sorteios em cada uma das 10) e a suíte inteira.
+  No Studio: caixas dadas pelos marcos, abertura de caixa guardada, compra direta ($ 6.300 →
+  $ 4.800), aviso e prêmio de Fragmentos. A arte fixa bateu com o plano (53 de 53). Detalhes em
+  `testes/CAIXAS_D174_2026-11-16.md`.
+- **Próximos lotes do pedido:**
+  - 59: "ARQUIVO MILITAR STARLITE" (álbum com coleções temáticas e recompensa garantida);
+  - 60: os 4 Game Passes novos e o Clube de Veteranos.
+  - Depois: sequência diária que não zera, medalhas com progresso e data, convite de amigos,
+    funil do onboarding, cerimônia de posto, batalhões com nome filtrado, temporada de 8 semanas.

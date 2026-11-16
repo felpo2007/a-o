@@ -16,6 +16,8 @@
 --   workspace:SetAttribute("VT65DevCaixa", "restrito")  -> simula ArePaidRandomItemsRestricted
 --   workspace:SetAttribute("VT65DevCaixa", "falha")     -> simula falha da consulta ao PolicyService
 --   workspace:SetAttribute("VT65DevCaixa", "recibo:<caixa>") -> recibo simulado (sem Robux)
+--   D-174: "creditos" (+5000 créditos), "marco:<caixa>" (guarda uma caixa de marco, com o aviso) e
+--   "partidas:<n>" (como se a partida n tivesse terminado: Recruta e os marcos de Veterano)
 local AnalyticsService = game:GetService("AnalyticsService")
 local MarketplaceService = game:GetService("MarketplaceService")
 local Players = game:GetService("Players")
@@ -47,6 +49,8 @@ local invalidas: { [string]: boolean } = {}
 CaixaService.MIN_GAP = 0.4
 -- item ou cosmético novo no perfil: o CampanhaService reenvia o estado da campanha (emblemas do cartão)
 CaixaService.onGrant = nil :: ((player: Player) -> ())?
+-- créditos mudaram (compra direta, prêmio): o ProgressionService reenvia o saldo
+CaixaService.onCredits = nil :: ((player: Player) -> ())?
 CaixaService.POLICY_TTL = 600
 
 local function sorteio(): number
@@ -137,6 +141,7 @@ local function itemView(id: string): any
 		cor = info.cor,
 		cor2 = info.cor2,
 		sigla = info.sigla,
+		quantidade = info.quantidade, -- prêmio de Créditos ou Fragmentos (D-174)
 	}
 end
 
@@ -174,6 +179,9 @@ function CaixaService.estado(player: Player): any
 			versao = c.versao,
 			sorteios = c.sorteios,
 			bilhetes = c.bilhetes,
+			fonte = c.fonte,
+			ganha = c.ganha,
+			guardadas = d.guardadas[c.id] or 0,
 			produtoId = produtoId(c),
 			robuxRef = c.robux,
 			temporada = c.temporada,
@@ -194,6 +202,24 @@ function CaixaService.estado(player: Player): any
 			possui = CaixaRegras.possui(p, t.item, ps),
 		})
 	end
+	-- D-174: compra direta (caminho C) com créditos ($): os cosméticos do cartão
+	local loja = {}
+	for _, it in Cosmeticos.ITENS do
+		local preco = CaixaRegras.precoCreditos(it.id)
+		if preco then
+			table.insert(loja, {
+				item = itemView(it.id),
+				preco = preco,
+				possui = CaixaRegras.possui(p, it.id, ps),
+			})
+		end
+	end
+	table.sort(loja, function(a, b)
+		if a.preco ~= b.preco then
+			return a.preco < b.preco
+		end
+		return a.item.id < b.item.id
+	end)
 	local hist = {}
 	for i = #d.hist, math.max(1, #d.hist - 19), -1 do
 		local r = d.hist[i]
@@ -222,6 +248,8 @@ function CaixaService.estado(player: Player): any
 		fragmentos = d.fragmentos,
 		caixas = caixas,
 		troca = troca,
+		loja = loja,
+		creditos = p.credits,
 		hist = hist,
 		meus = meus,
 		on = { tag = d.on.tag, mol = d.on.mol },
@@ -267,6 +295,10 @@ end
 
 -- avisa quem mostra a posse: a campanha (emblemas, plaquetas, molduras) e a intendência (skins)
 local function avisar(player: Player, r: any)
+	local info = r and r.item and Cosmeticos.info(r.item)
+	if info and info.kind == "creditos" and CaixaService.onCredits then
+		task.spawn(CaixaService.onCredits, player)
+	end
 	if r and r.item and not r.repetido then
 		if string.sub(r.item, 1, 5) == "skin_" and CommerceService.onSkin then
 			task.spawn(CommerceService.onSkin, player, r.item, false) -- só a posse (não equipa sozinho)
@@ -310,22 +342,29 @@ function CaixaService.abrir(player: Player, caixaId: any): any
 	release(player)
 	if status ~= "ok" then
 		local p = PlayerData.get(player)
-		local semBilhete = p and p.caixas.bilhetes < (c.bilhetes or 1)
-		return { ok = false, motivo = if semBilhete then "bilhetes" else status }
+		local motivo = status
+		if p and c.fonte == "marco" and (p.caixas.guardadas[caixaId] or 0) < 1 then
+			motivo = "guardada"
+		elseif p and c.fonte ~= "marco" and p.caixas.bilhetes < (c.bilhetes or 1) then
+			motivo = "bilhetes"
+		end
+		return { ok = false, motivo = motivo }
 	end
 	logAbertura(player, r)
 	avisar(player, r)
-	pcall(function()
-		AnalyticsService:LogEconomyEvent(
-			player,
-			Enum.AnalyticsEconomyFlowType.Sink,
-			"Bilhetes",
-			c.bilhetes or 1,
-			PlayerData.get(player).caixas.bilhetes,
-			Enum.AnalyticsEconomyTransactionType.Shop.Name,
-			"caixa_" .. caixaId
-		)
-	end)
+	if c.fonte ~= "marco" then
+		pcall(function()
+			AnalyticsService:LogEconomyEvent(
+				player,
+				Enum.AnalyticsEconomyFlowType.Sink,
+				"Bilhetes",
+				c.bilhetes or 1,
+				(PlayerData.get(player) :: any).caixas.bilhetes,
+				Enum.AnalyticsEconomyTransactionType.Shop.Name,
+				"caixa_" .. caixaId
+			)
+		end)
+	end
 	return { ok = true, resultado = r, item = if r.item then itemView(r.item) else nil }
 end
 
@@ -354,12 +393,86 @@ function CaixaService.trocar(player: Player, item: any): any
 			Enum.AnalyticsEconomyFlowType.Sink,
 			"Fragmentos",
 			-(r.fragmentos :: number),
-			PlayerData.get(player).caixas.fragmentos,
+			(PlayerData.get(player) :: any).caixas.fragmentos,
 			Enum.AnalyticsEconomyTransactionType.Shop.Name,
 			item
 		)
 	end)
 	return { ok = true, resultado = r, item = itemView(item) }
+end
+
+-- D-174: compra direta com créditos ($) (o item escolhido, sem sorteio). Atômica: o saldo e
+-- o item mudam na mesma gravação (PlayerData.transact junta os créditos da sessão antes)
+function CaixaService.comprarCreditos(player: Player, item: any): any
+	if type(item) ~= "string" or #item > 48 then
+		return { ok = false, motivo = "pedido" }
+	end
+	if not guard(player) then
+		return { ok = false, motivo = "espera" }
+	end
+	local motivoFinal: string? = nil
+	local status, r = PlayerData.transact(player, function(p)
+		local res, motivo = CaixaRegras.comprarCreditos(p, item, os.time())
+		motivoFinal = motivo
+		return res
+	end)
+	release(player)
+	if status ~= "ok" then
+		return { ok = false, motivo = motivoFinal or status }
+	end
+	avisar(player, r)
+	pcall(function()
+		AnalyticsService:LogEconomyEvent(
+			player,
+			Enum.AnalyticsEconomyFlowType.Sink,
+			"Creditos",
+			CaixaRegras.precoCreditos(item) or 0,
+			(PlayerData.get(player) :: any).credits,
+			Enum.AnalyticsEconomyTransactionType.Shop.Name,
+			item
+		)
+	end)
+	if CaixaService.onCredits then
+		task.spawn(CaixaService.onCredits, player)
+	end
+	return { ok = true, resultado = r, item = itemView(item) }
+end
+
+-- D-174: caixa grátis guardada por um marco do jogo (cada marco só uma vez). O jogador recebe um
+-- aviso; a loja não abre sozinha
+function CaixaService.darCaixa(player: Player, caixaId: string, marco: string)
+	task.spawn(function()
+		local c = Caixas.get(caixaId)
+		if not c then
+			return
+		end
+		local status = PlayerData.transact(player, function(p)
+			return if CaixaRegras.darCaixa(p, caixaId, marco) then true else nil
+		end)
+		if status == "ok" then
+			Net.event("Suprimento_Ganhou"):FireClient(player, { caixa = caixaId, nome = c.nome })
+			pcall(function()
+				AnalyticsService:LogCustomEvent(player, "caixa_ganha", 1, {
+					[Enum.AnalyticsCustomFieldKeys.CustomField01.Name] = caixaId,
+					[Enum.AnalyticsCustomFieldKeys.CustomField02.Name] = string.split(marco, ":")[1],
+				})
+			end)
+		end
+	end)
+end
+
+-- D-174: marcos de carreira (partidas completas) -> Caixa de Veterano; a primeira partida completa
+-- também dá a Caixa de Recruta (o treinamento dentro da partida está desligado)
+CaixaService.MARCOS_PARTIDAS = { 10, 25, 50, 100, 200 }
+function CaixaService.partidaCompleta(player: Player, n: number)
+	if n >= 1 then
+		CaixaService.darCaixa(player, "recruta", "recruta")
+	end
+	for _, m in CaixaService.MARCOS_PARTIDAS do
+		if n >= m then
+			CaixaService.darCaixa(player, "veterano", "partidas:" .. m)
+		end
+	end
 end
 
 function CaixaService.equipar(player: Player, req: any): any
@@ -414,7 +527,7 @@ function CaixaService.ganhar(player: Player, n: number, motivo: string)
 					Enum.AnalyticsEconomyFlowType.Source,
 					"Bilhetes",
 					dado,
-					PlayerData.get(player).caixas.bilhetes,
+					(PlayerData.get(player) :: any).caixas.bilhetes,
 					Enum.AnalyticsEconomyTransactionType.Gameplay.Name,
 					motivo
 				)
@@ -483,6 +596,19 @@ local function devHook()
 			dev.falha = true
 		elseif v == "normal" then
 			dev.pagas, dev.restrito, dev.falha = false, false, false
+		elseif v == "creditos" then
+			PlayerData.transact(player, function(p)
+				p.credits += 5000
+				return true
+			end)
+			if CaixaService.onCredits then
+				task.spawn(CaixaService.onCredits, player)
+			end
+		elseif string.sub(v, 1, 6) == "marco:" then
+			-- D-174: a caixa de marco pelo caminho de verdade (com o aviso), um marco novo por pedido
+			CaixaService.darCaixa(player, string.sub(v, 7), "dev:" .. tostring(os.clock()))
+		elseif string.sub(v, 1, 9) == "partidas:" then
+			CaixaService.partidaCompleta(player, tonumber(string.sub(v, 10)) or 0)
 		elseif string.sub(v, 1, 7) == "recibo:" then
 			local c = Caixas.get(string.sub(v, 8))
 			if c and c.tipo == "paga" then
@@ -492,7 +618,7 @@ local function devHook()
 				print("[VT65 CAIXA] recibo simulado", c.id, d.Name)
 				-- o mesmo recibo de novo devolve o mesmo resultado (sem novo sorteio)
 				local again = CaixaService.recibo(player, fake, c)
-				print("[VT65 CAIXA] recibo repetido", c.id, again.Name, #PlayerData.get(player).caixas.hist)
+				print("[VT65 CAIXA] recibo repetido", c.id, again.Name, #(PlayerData.get(player) :: any).caixas.hist)
 			end
 		end
 	end
@@ -513,6 +639,11 @@ function CaixaService.start()
 	end
 	Net.func("Suprimento_Trocar").OnServerInvoke = function(player: Player, item: any)
 		local r = CaixaService.trocar(player, item)
+		r.estado = CaixaService.estado(player)
+		return r
+	end
+	Net.func("Suprimento_Loja").OnServerInvoke = function(player: Player, item: any)
+		local r = CaixaService.comprarCreditos(player, item)
 		r.estado = CaixaService.estado(player)
 		return r
 	end

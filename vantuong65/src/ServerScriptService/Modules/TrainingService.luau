@@ -12,6 +12,7 @@ local MapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any
 local Net = require(ReplicatedStorage.Shared.Net)
 local Roles = require(ReplicatedStorage.Shared.Roles) :: any
 local Tutorial = require(ReplicatedStorage.Shared.Tutorial)
+local CaixaService = require(script.Parent.CaixaService)
 local PlayerData = require(script.Parent.PlayerData)
 
 local TrainingService = {}
@@ -404,6 +405,8 @@ function TrainingService.start()
 		last[p] = now
 		prof.tutorial = Tutorial.sanitize(prof.tutorial, Roles.roles)
 		prof.tutorial[role] = true
+		-- D-174: concluir um treinamento guarda a Caixa de Recruta (uma vez por conta)
+		CaixaService.darCaixa(p, "recruta", "recruta")
 	end)
 	Players.PlayerRemoving:Connect(function(p)
 		last[p] = nil

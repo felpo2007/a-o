@@ -84,15 +84,21 @@ Dashboard → Analytics.
 6. Managed Pricing: opte por ele depois de ter vendas, porque itens abaixo do limite não entram nos
    testes.
 
-## Caixas de suprimentos (D-173, 2026-11-15)
+## Caixas de suprimentos (D-173, 2026-11-15; D-174, 2026-11-16)
 
 Código: `Shared/Caixas.luau` (tabelas e chances), `Shared/Cosmeticos.luau` (itens), `Modules/CaixaRegras.luau`
 (regras sobre o perfil), `Modules/CaixaService.luau` (servidor), `Controllers/CaixasTela.client.luau` (aba
-CAIXAS da loja). Testes: `tests/luau/caixas.luau`. Relatório: `testes/CAIXAS_2026-11-15.md`.
+CAIXAS da loja). Testes: `tests/luau/caixas.luau`. Relatórios: `testes/CAIXAS_2026-11-15.md` e
+`testes/CAIXAS_D174_2026-11-16.md`.
 
 | Caixa | Como se abre | Itens | Distribuição por raridade |
 |---|---|---|---|
 | Caixa de Recompensa | 1 Bilhete de Recompensa (ganho jogando) | 16 | 82 / 13 / 3 / 1 / 1% |
+| Caixa de Recruta | grátis: treinamento ou primeira partida (uma vez) | 13 | 84 / 11 / 3 / 1,5 / 0,5% |
+| Caixa de Serviço | grátis: cada posto novo | 16 | 39 / 43 / 16 / 1,5 / 0,5% |
+| Caixa de Batalhão | grátis: cada missão da semana | 15 | 42 / 30 / 24 / 3 / 1% |
+| Caixa de Campanha | grátis: níveis 10 a 50 da trilha grátis do passe | 13 | — / 55 / 30 / 13 / 2% |
+| Caixa de Veterano | grátis: 10, 25, 50, 100 e 200 partidas | 15 | — / — / 44 / 46 / 10% |
 | Caixa de Suprimentos | Robux, ref. R$ 49 (desligada) | 26 | 60 / 25 / 10 / 4 / 1% |
 | Caixa de Equipamentos Especiais | Robux, ref. R$ 99 (desligada) | 18 | — / 45 / 36 / 16 / 3% |
 | Caixa de Arsenal de Elite | Robux, ref. R$ 149 (desligada) | 14 | — / — / 40 / 48 / 12% |
@@ -104,9 +110,14 @@ abrir, em "VER ITENS E PROBABILIDADES".
 **Economias separadas:**
 - **Bilhetes de Recompensa:** só jogando. Valem 1 por missão do dia, 2 por missão da semana (até 4 por
   dia) e 2 de boas-vindas. Nunca à venda, nem por Robux, assinatura ou pacote.
-- **Fragmentos de Arsenal:** vêm da repetida (Comum 10, Incomum 25, Raro 60, Épico 150, Lendário 400).
-  Trocam por item garantido (custo de 10× o valor da raridade). Não viram Robux nem dinheiro.
-- **Créditos ($):** também vendidos por Robux (`PRODUCT_CREDITS_*`), por isso **não** abrem caixa.
+- **Fragmentos de Arsenal:** vêm da repetida (Comum 5, Incomum 15, Raro 40, Épico 100, Lendário 250,
+  D-174) e dos prêmios das caixas grátis. Trocam por item garantido (custo de 10× o valor da
+  raridade). Não viram Robux nem dinheiro.
+- **Créditos ($):** ganhos jogando e também vendidos por Robux (`PRODUCT_CREDITS_*`), por isso
+  **não** abrem caixa. Compram direto (D-174, sem sorteio) emblemas, plaquetas e molduras:
+  $ 1.500 / 3.000 / 7.500 / 15.000 / 30.000 por raridade.
+- **Caixas de marco (D-174):** grátis, guardadas até o jogador abrir; cada marco dá uma vez.
+  Podem dar $ 500 ou $ 1.500 em créditos e 100 ou 250 Fragmentos (nunca em caixa paga).
 
 ### Para ligar a venda paga (Creator Dashboard)
 1. **Questionário de classificação:** responda que há itens aleatórios pagos e reenvie. A política
@@ -147,9 +158,9 @@ Regional Pricing e Content Ratings (create.roblox.com/docs).
 | Classificação de conteúdo | Pendente de validação externa | o questionário é do dono |
 | Itens novos (emblemas, plaquetas, molduras) | Conforme | desenhos originais, sem insígnia real nem marca |
 | Interface honesta, sem pressão | Conforme | sem contador, urgência ou desconto; preço vem do Roblox |
-| Alternativa gratuita | Conforme | caixa gratuita e troca de Fragmentos |
-| **Igualdade competitiva** | **Não conforme** | a loja antiga vende vantagem: vantagens até +12% (D-101), kits (D-72), renascer onde caiu, veículo ao nascer (D-103), camuflagem contra os bots (D-85), reforços de XP. Decisão do dono |
-| Gasto de créditos ($) atômico | Não conforme | compras antigas com $ descontam na memória (achado; fora da D-173) |
+| Alternativa gratuita | Conforme | caixa de Bilhete, 5 caixas de marco, troca de Fragmentos e compra direta com créditos ganhos jogando |
+| **Igualdade competitiva** | **Não conforme** | a loja antiga vende vantagem: vantagens até +12% (D-101), kits (D-72), renascer onde caiu, veículo ao nascer (D-103), camuflagem contra os bots (D-85), reforços de XP. O dono decidiu manter (2026-11-16, D-174) |
+| Gasto de créditos ($) atômico | Parcial | a compra direta (D-174) é atômica e junta os créditos da sessão antes; as compras antigas com $ ainda descontam na memória |
 | Mouse, toque e controle | Conforme no código | falta conferir num celular e num Xbox reais |
 
 ### Próximos lotes (plano de expansão)
@@ -157,7 +168,9 @@ Regional Pricing e Content Ratings (create.roblox.com/docs).
   Fundador): pedem os itens visuais (cartões, gravações, animação de inspeção).
 - Clube de Veteranos (assinatura): o dono cria no Creator Hub; o código já lê a assinatura.
 - Passe de temporada de 8 semanas: hoje são 6 semanas e 50 níveis (Temporada).
-- Pacotes de compra direta (Patrulha, Infantaria, Reconhecimento, Veterano) com conteúdo fixo.
+- Pacotes de compra direta (Patrulha, Infantaria, Reconhecimento, Veterano) com conteúdo fixo. A
+  compra direta item a item, com créditos, já existe (D-174).
+- "ARQUIVO MILITAR STARLITE": álbum de coleções temáticas com recompensa garantida (lote 59).
 - Painel de configuração dos produtos, chances e temporadas; relatório de analytics por categoria.
 - Caixas 3D próprias (hoje são as caixas de munição do jogo) e som de abertura.
 

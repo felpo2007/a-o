@@ -17,6 +17,7 @@ local Net = require(ReplicatedStorage.Shared.Net)
 local Progression = require(ReplicatedStorage.Shared.Progression)
 local Skins = require(ReplicatedStorage.Shared.Skins)
 local Weapons = require(ReplicatedStorage.Shared.Weapons)
+local CaixaService = require(script.Parent.CaixaService)
 local CampanhaEventos = require(script.Parent.CampanhaEventos)
 local Combatants = require(script.Parent.Combatants)
 local CommerceService = require(script.Parent.CommerceService)
@@ -204,6 +205,10 @@ local function add(p: Player, gx: number, gc: number, label: string, raw: boolea
 			pt = Progression.rankDef(factionOf(p), after).pt,
 			bonus = bonus,
 		}
+		-- D-174: cada patente nova guarda uma Caixa de Serviço (uma por patente)
+		for r = before + 1, after do
+			CaixaService.darCaixa(p, "servico", "posto:" .. r)
+		end
 	end
 	push(p, extra)
 	return gc
@@ -379,6 +384,10 @@ end
 function ProgressionService.start()
 	-- a caveira do abate (cliente) precisa do ID da imagem, não do decal publicado
 	require(script.Parent.ImagensUi).start()
+	-- D-174: créditos mudaram nas caixas (compra direta, prêmio): reenvia o saldo
+	CaixaService.onCredits = function(p: Player)
+		push(p)
+	end
 	PlayerData.Loaded:Connect(function(p: Player)
 		if not sess[p] then
 			newSess(p)

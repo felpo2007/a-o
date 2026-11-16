@@ -360,6 +360,10 @@ local function claimLevel(p: Player, prof: any, track: string, level: number): b
 	end
 	claimed[tostring(level)] = true
 	giveReward(p, prof, rw)
+	-- D-174: os níveis 10, 20, 30, 40 e 50 da trilha grátis guardam uma Caixa de Campanha
+	if track == "free" and level % 10 == 0 then
+		CaixaService.darCaixa(p, "campanha", string.format("%s:nivel:%d", Temporada.SEASON.id, level))
+	end
 	return true
 end
 
@@ -378,6 +382,10 @@ local function claimMission(p: Player, prof: any, id: string): boolean
 				-- D-173: Bilhete de Recompensa (caixa gratuita): 1 na do dia, 2 na da semana, com teto
 				-- por dia (CaixaRegras.TETO_DIA)
 				CaixaService.ganhar(p, if k == 1 then 1 else 2, "missao")
+				-- D-174: a missão da semana (em equipe) também guarda uma Caixa de Batalhão
+				if k == 2 then
+					CaixaService.darCaixa(p, "batalhao", string.format("semana:%d:%s", c.missions.week, id))
+				end
 				return true
 			end
 		end
@@ -529,6 +537,8 @@ local function onEvent(p: Player, name: string, data: { [string]: any })
 		end
 		local result = tostring(data.result)
 		bump(c, "matches")
+		-- D-174: 1ª partida completa -> Caixa de Recruta; 10/25/50/100/200 -> Caixa de Veterano
+		CaixaService.partidaCompleta(p, c.stats.matches or 0)
 		if result == "win" then
 			bump(c, "wins")
 			bump(c, if data.faction == "VC" then "winsVC" else "winsUS")

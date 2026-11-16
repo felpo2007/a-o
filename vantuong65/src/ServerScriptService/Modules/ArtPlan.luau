@@ -356,12 +356,27 @@ ArtPlan.OBJECTIVE_EXTRA = {
 } :: { [string]: { any } }
 ArtPlan.EXTRA_CLEAR_M = 3 -- folga em volta da pegada das peças do D-172 (`clear` na peça muda)
 -- D-172: árvores em volta de cada objetivo (chave, quantas, escala mínima e máxima), de 22 a 48 m
+type ArvoreObjetivo = { key: string, n: number, s0: number, s1: number }
 ArtPlan.OBJECTIVE_TREES = {
-	Arrozais = { { "coconut_palm", 6, 0.9, 1.15 }, { "banana", 4, 0.9, 1.1 }, { "ph_island_tree_01", 2, 2.6, 3.2 } },
-	Serraria = { { "canopy_tree", 4, 0.9, 1.1 }, { "ph_island_tree_02", 4, 2.8, 3.4 } },
-	["Ponte e Cais"] = { { "coconut_palm", 6, 0.9, 1.15 }, { "ph_island_tree_02", 4, 2.6, 3.2 } },
-	Engenho = { { "coconut_palm", 4, 0.9, 1.15 }, { "banana", 4, 0.9, 1.1 }, { "ph_island_tree_01", 3, 2.6, 3.2 } },
-} :: { [string]: { any } }
+	Arrozais = {
+		{ key = "coconut_palm", n = 6, s0 = 0.9, s1 = 1.15 },
+		{ key = "banana", n = 4, s0 = 0.9, s1 = 1.1 },
+		{ key = "ph_island_tree_01", n = 2, s0 = 2.6, s1 = 3.2 },
+	},
+	Serraria = {
+		{ key = "canopy_tree", n = 4, s0 = 0.9, s1 = 1.1 },
+		{ key = "ph_island_tree_02", n = 4, s0 = 2.8, s1 = 3.4 },
+	},
+	["Ponte e Cais"] = {
+		{ key = "coconut_palm", n = 6, s0 = 0.9, s1 = 1.15 },
+		{ key = "ph_island_tree_02", n = 4, s0 = 2.6, s1 = 3.2 },
+	},
+	Engenho = {
+		{ key = "coconut_palm", n = 4, s0 = 0.9, s1 = 1.15 },
+		{ key = "banana", n = 4, s0 = 0.9, s1 = 1.1 },
+		{ key = "ph_island_tree_01", n = 3, s0 = 2.6, s1 = 3.2 },
+	},
+} :: { [string]: { ArvoreObjetivo } }
 ArtPlan.BRIDGE_OBJECTIVE = "Ponte e Cais"
 -- D-148 (pedido do dono: "faça as pontes grandes o suficiente para passar um veículo como o tanque"):
 -- 7 m, a largura da estrada principal (era 3,6 m, só um jipe; o M48 tem 3,63 m)
@@ -1364,8 +1379,9 @@ function ArtPlan.plants(
 	-- D-172: árvores em volta dos objetivos A, B, D e E (ArtPlan.OBJECTIVE_TREES), sorteio próprio
 	local ro = Rng.new(19650818 + 1720)
 	for _, sp in MC.Strongpoints do
-		for _, spec in ArtPlan.OBJECTIVE_TREES[sp.name] or {} do
-			local key, count, s0, s1 = spec[1], spec[2], spec[3], spec[4]
+		local trees: { ArvoreObjetivo } = ArtPlan.OBJECTIVE_TREES[sp.name] or {}
+		for _, spec in trees do
+			local key, count, s0, s1 = spec.key, spec.n, spec.s0, spec.s1
 			if has(key) then
 				local put, tries = 0, 0
 				while put < count and tries < count * 8 do

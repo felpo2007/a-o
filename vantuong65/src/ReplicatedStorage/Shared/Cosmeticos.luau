@@ -14,7 +14,7 @@ local Cosmeticos = {}
 
 export type Item = {
 	id: string,
-	kind: string, -- "emblema" | "plaqueta" | "moldura" | "skin"
+	kind: string, -- "emblema" | "plaqueta" | "moldura" | "skin" | "creditos" | "fragmentos"
 	raridade: string,
 	nome: string,
 	nomeEn: string,
@@ -23,6 +23,48 @@ export type Item = {
 	cor2: { number }?, -- cor de detalhe (emblema: letras; plaqueta: borda; moldura: faixa)
 	sigla: string?, -- emblema: até 2 letras desenhadas
 	vantagem: boolean?,
+	quantidade: number?, -- "creditos" / "fragmentos": quanto entra
+}
+
+-- D-174: prêmios que não são cosméticos (só nas caixas grátis): créditos ($) e Fragmentos.
+-- Nunca contam como repetidos e não entram na troca nem na compra direta.
+local PREMIOS: { Item } = {
+	{
+		id = "cr_500",
+		kind = "creditos",
+		raridade = "comum",
+		nome = "$ 500 em créditos",
+		nomeEn = "$500 in credits",
+		desc = "Créditos ganhos jogando, para compras garantidas.",
+		quantidade = 500,
+	},
+	{
+		id = "cr_1500",
+		kind = "creditos",
+		raridade = "incomum",
+		nome = "$ 1.500 em créditos",
+		nomeEn = "$1,500 in credits",
+		desc = "Créditos ganhos jogando, para compras garantidas.",
+		quantidade = 1500,
+	},
+	{
+		id = "frag_100",
+		kind = "fragmentos",
+		raridade = "raro",
+		nome = "100 Fragmentos de Arsenal",
+		nomeEn = "100 Arsenal Fragments",
+		desc = "Trocam por item garantido.",
+		quantidade = 100,
+	},
+	{
+		id = "frag_250",
+		kind = "fragmentos",
+		raridade = "raro",
+		nome = "250 Fragmentos de Arsenal",
+		nomeEn = "250 Arsenal Fragments",
+		desc = "Trocam por item garantido.",
+		quantidade = 250,
+	},
 }
 
 local ITENS: { Item } = {
@@ -261,6 +303,11 @@ local byId: { [string]: Item } = {}
 for _, it in ITENS do
 	byId[it.id] = it
 end
+local premios: { [string]: Item } = {}
+for _, it in PREMIOS do
+	premios[it.id] = it
+end
+Cosmeticos.PREMIOS = PREMIOS
 Cosmeticos.ITENS = ITENS
 
 -- Item de caixa (cosmético ou skin); nil se não existe ou não pode entrar em caixa
@@ -268,7 +315,7 @@ function Cosmeticos.info(id: any): Item?
 	if type(id) ~= "string" then
 		return nil
 	end
-	local it = byId[id]
+	local it = byId[id] or premios[id]
 	if it then
 		return it
 	end
@@ -296,6 +343,9 @@ function Cosmeticos.possui(
 	skinsOwned: { [string]: boolean }?,
 	passes: { [string]: boolean }?
 ): boolean
+	if premios[id] then
+		return false -- prêmio de quantidade: nunca é repetido
+	end
 	if byId[id] then
 		return campaignOwned ~= nil and campaignOwned[id] == true
 	end
@@ -309,7 +359,14 @@ end
 
 -- concede (no perfil já carregado): cosmético em campaign.owned, skin em skins.owned
 function Cosmeticos.conceder(p: any, id: string)
-	if byId[id] then
+	local pr = premios[id]
+	if pr then
+		if pr.kind == "creditos" then
+			p.credits = math.min(p.credits + (pr.quantidade or 0), 1000000000)
+		else
+			p.caixas.fragmentos = math.min(p.caixas.fragmentos + (pr.quantidade or 0), 1000000)
+		end
+	elseif byId[id] then
 		p.campaign.owned[id] = true
 	elseif Skins.get(id) then
 		p.skins.owned[id] = true

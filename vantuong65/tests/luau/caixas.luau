@@ -1,6 +1,8 @@
 --!strict
 -- Testes das caixas de suprimentos (D-173): tabelas, chances exatas, 100 mil sorteios por caixa
 -- (qui-quadrado), repetidas, recibo idempotente, jogador restrito, troca, bilhetes e perfil.
+-- D-174: caixas grátis por marco (guardadas), prêmios de saldo, compra direta com créditos e os
+-- ganchos dos marcos no servidor.
 -- Uso: lune run tests/luau/caixas.luau
 local fs = require("@lune/fs")
 local process = require("@lune/process")
@@ -42,7 +44,7 @@ end
 
 -- ===== tabelas =====
 test("todas as caixas passam na validação e somam exatamente 100%", function()
-	assert(#Caixas.CAIXAS == 5, "5 caixas")
+	assert(#Caixas.CAIXAS == 10, "10 caixas (D-174)")
 	for _, c in Caixas.CAIXAS do
 		local erros = Caixas.validar(c, Cosmeticos.info)
 		assert(#erros == 0, table.concat(erros, "; "))
@@ -191,9 +193,9 @@ test("item que já tem: o resultado final vira Fragmentos e a soma segue 100%", 
 	for _, r in odds do
 		soma += r.peso
 		if r.item == "tag_aco" then
-			assert(r.repetido and r.fragmentos == 10, "comum = 10")
+			assert(r.repetido and r.fragmentos == 5, "comum = 5")
 		elseif r.item == "skin_m14_birch" then
-			assert(r.repetido and r.fragmentos == 25, "incomum = 25")
+			assert(r.repetido and r.fragmentos == 15, "incomum = 15")
 		else
 			assert(not r.repetido and r.fragmentos == 0)
 		end
@@ -203,7 +205,7 @@ test("item que já tem: o resultado final vira Fragmentos e a soma segue 100%", 
 	local odds2 = CaixaRegras.odds(p, "elite", { PASS_SKIN_US_TIGER = true })
 	for _, r in odds2 do
 		if r.item == "skin_us_tiger" then
-			assert(r.repetido and r.fragmentos == 400, "lendário = 400")
+			assert(r.repetido and r.fragmentos == 250, "lendário = 250")
 		end
 	end
 end)
@@ -229,14 +231,14 @@ test("repetida nunca some: vira Fragmentos da raridade, sem conceder de novo", f
 	p.caixas.bilhetes = 2
 	CaixaRegras.abrirGratuita(p, "gratuita", 0, 1, {})
 	local r = CaixaRegras.abrirGratuita(p, "gratuita", 0, 2, {})
-	assert(r.repetido and r.fragmentos == 10 and p.caixas.fragmentos == 10)
+	assert(r.repetido and r.fragmentos == 5 and p.caixas.fragmentos == 5)
 	-- skin: vai para skins.owned; repetida vira fragmentos
 	local p2 = perfil()
 	local c = Caixas.get("especiais")
 	local r2 = CaixaRegras.aplicar(p2, "especiais", 0, 1, "recibo", {}, "x1")
 	assert(r2.item == c.itens[1].item and p2.skins.owned[r2.item] == true)
 	local r3 = CaixaRegras.aplicar(p2, "especiais", 0, 2, "recibo", {}, "x2")
-	assert(r3.repetido and r3.fragmentos == 25 and p2.caixas.fragmentos == 25)
+	assert(r3.repetido and r3.fragmentos == 15 and p2.caixas.fragmentos == 15)
 end)
 
 test("recibo da caixa paga é idempotente: o mesmo PurchaseId não sorteia de novo", function()
@@ -268,7 +270,7 @@ test("troca de Fragmentos: custo da raridade, só o que não tem", function()
 	assert(r == nil and m == "fragmentos")
 	p.caixas.fragmentos = 4000
 	local r2 = CaixaRegras.trocar(p, "tag_gravada", 1, {})
-	assert(r2 and p.caixas.fragmentos == 0 and p.campaign.owned.tag_gravada == true)
+	assert(r2 and p.caixas.fragmentos == 1500 and p.campaign.owned.tag_gravada == true, "lendário custa 2500")
 	p.caixas.fragmentos = 4000
 	local r3, m3 = CaixaRegras.trocar(p, "tag_gravada", 1, {})
 	assert(r3 == nil and m3 == "possui" and p.caixas.fragmentos == 4000)
@@ -349,6 +351,129 @@ test("garantia progressiva: desligada não muda nada; ligada (simulada) soma 100
 	assert(ok, err)
 end)
 
+-- ===== D-174: caixas grátis por marco, prêmios de saldo e compra direta =====
+test("D-174: as cinco caixas grátis de marco existem, com o como ganhar, e a de bilhete segue", function()
+	local marco = {}
+	for _, c in Caixas.CAIXAS do
+		if c.fonte == "marco" then
+			table.insert(marco, c.id)
+		end
+	end
+	table.sort(marco)
+	assert(table.concat(marco, ",") == "batalhao,campanha,recruta,servico,veterano", table.concat(marco, ","))
+	assert(Caixas.get("gratuita").fonte == "bilhete")
+	-- fragmentos por raridade: 5/15/40/100/250 (o pedido do dono)
+	local f = {}
+	for _, r in Caixas.RARIDADES do
+		table.insert(f, tostring(r.fragmentos))
+		assert(r.custo == r.fragmentos * 10, r.id .. ": troca = 10 repetidas da mesma raridade")
+		assert(r.creditos and r.creditos > 0, r.id .. ": preço em créditos")
+	end
+	assert(table.concat(f, "/") == "5/15/40/100/250", table.concat(f, "/"))
+end)
+
+test("D-174: caixa de marco fica guardada, cada marco vale uma vez, e abrir gasta a guardada", function()
+	local p = perfil()
+	local r0, m0 = CaixaRegras.abrirGratuita(p, "servico", 0, 1, {})
+	assert(r0 == nil and m0 == "guardada", "sem guardada não abre")
+	assert(CaixaRegras.darCaixa(p, "servico", "posto:2"), "dá")
+	assert(not CaixaRegras.darCaixa(p, "servico", "posto:2"), "o mesmo marco não dá duas vezes")
+	assert(CaixaRegras.darCaixa(p, "servico", "posto:3"))
+	assert(p.caixas.guardadas.servico == 2)
+	-- só caixa grátis de marco: nem a de bilhete, nem a paga, nem caixa inventada
+	assert(not CaixaRegras.darCaixa(p, "gratuita", "x") and not CaixaRegras.darCaixa(p, "suprimentos", "y"))
+	assert(not CaixaRegras.darCaixa(p, "nada", "z"))
+	local r = CaixaRegras.abrirGratuita(p, "servico", 0, 2, {})
+	assert(r and r.origem == "marco" and p.caixas.guardadas.servico == 1)
+	assert(p.caixas.bilhetes == 0, "não gasta bilhete")
+	-- as guardadas e os marcos sobrevivem à ida e volta pelo DataStore
+	local back = ProfileSchema.migrate(p)
+	assert(back.caixas.guardadas.servico == 1 and back.caixas.marcos["posto:2"] == true)
+	assert(not CaixaRegras.darCaixa(back, "servico", "posto:3"), "marco gravado não volta a dar")
+	-- teto de marcos guardados (perfil não cresce sem fim)
+	local p2 = perfil()
+	for i = 1, CaixaRegras.MAX_MARCOS do
+		p2.caixas.marcos["m" .. i] = true
+	end
+	assert(not CaixaRegras.darCaixa(p2, "veterano", "partidas:10"), "teto")
+	-- lixo no perfil é saneado
+	local d = CaixaRegras.sanear({
+		guardadas = { servico = -3, nada = 2, veterano = 1.5 },
+		marcos = { [1] = true, ok = "sim" },
+	})
+	assert((d.guardadas.servico or 0) == 0 and d.guardadas.nada == nil, "guardadas saneadas")
+	assert(next(d.marcos) == nil, "marcos saneados")
+end)
+
+test("D-174: prêmio de saldo entra no saldo, nunca é repetido e não vai para troca nem loja", function()
+	local p = perfil()
+	p.credits = 100
+	CaixaRegras.darCaixa(p, "campanha", "passe:10")
+	CaixaRegras.darCaixa(p, "campanha", "passe:20")
+	local c = Caixas.get("campanha")
+	-- acha o n que cai no prêmio de créditos
+	local acc, nCr = 0, nil
+	for _, e in c.itens do
+		if e.item == "cr_1500" then
+			nCr = acc
+		end
+		acc += e.peso
+	end
+	assert(nCr, "a caixa de campanha tem o prêmio de créditos")
+	local r1 = CaixaRegras.abrirGratuita(p, "campanha", nCr, 1, {})
+	assert(r1.item == "cr_1500" and not r1.repetido and p.credits == 1600, "entrou no saldo")
+	local r2 = CaixaRegras.abrirGratuita(p, "campanha", nCr, 2, {})
+	assert(r2.item == "cr_1500" and not r2.repetido and p.credits == 3100, "de novo: soma, não vira fragmento")
+	assert(p.caixas.fragmentos == 0)
+	assert(p.campaign.owned.cr_1500 == nil, "não vira posse")
+	for _, t in CaixaRegras.troca() do
+		local k = Cosmeticos.info(t.item).kind
+		assert(k ~= "creditos" and k ~= "fragmentos", t.item)
+	end
+	assert(CaixaRegras.precoCreditos("cr_500") == nil and CaixaRegras.precoCreditos("frag_250") == nil)
+	-- caixa paga só com cosméticos: a validação recusa prêmio de saldo
+	local paga = table.clone(Caixas.get("suprimentos"))
+	paga.itens = table.clone(paga.itens)
+	paga.itens[1] = { item = "cr_500", peso = paga.itens[1].peso }
+	assert(#Caixas.validar(paga, Cosmeticos.info) > 0, "paga com créditos")
+end)
+
+test("D-174: compra direta com créditos: preço da raridade, saldo exato, só o que não tem", function()
+	local p = perfil()
+	p.credits = 0
+	local preco = CaixaRegras.precoCreditos("tag_aco")
+	assert(preco == Caixas.raridade("comum").creditos)
+	local r0, m0 = CaixaRegras.comprarCreditos(p, "tag_aco", 1)
+	assert(r0 == nil and m0 == "creditos" and p.credits == 0)
+	p.credits = preco + 7
+	local r = CaixaRegras.comprarCreditos(p, "tag_aco", 2)
+	assert(r and r.origem == "compra" and p.credits == 7 and p.campaign.owned.tag_aco == true)
+	local r2, m2 = CaixaRegras.comprarCreditos(p, "tag_aco", 3)
+	assert(r2 == nil and m2 == "possui" and p.credits == 7, "não cobra duas vezes")
+	-- skins têm a compra própria na Intendência; camuflagem e item inventado ficam fora
+	for _, id in { "skin_m14_birch", "camo_rice", "nada" } do
+		local rx, mx = CaixaRegras.comprarCreditos(p, id, 4)
+		assert(rx == nil and mx == "item", id)
+	end
+	assert(#p.caixas.hist == 1, "só a compra entrou no histórico")
+end)
+
+test("D-174: os marcos chamam darCaixa no servidor (treino, posto, missão da semana, passe, partidas)", function()
+	local function tem(arq: string, trecho: string)
+		local src = fs.readFile(arq)
+		assert(string.find(src, trecho, 1, true), arq .. ": " .. trecho)
+	end
+	tem("src/ServerScriptService/Modules/TrainingService.luau", 'CaixaService.darCaixa(p, "recruta"')
+	tem("src/ServerScriptService/Modules/ProgressionService.luau", 'CaixaService.darCaixa(p, "servico"')
+	tem("src/ServerScriptService/Modules/CampanhaService.luau", 'CaixaService.darCaixa(p, "batalhao"')
+	tem("src/ServerScriptService/Modules/CampanhaService.luau", 'CaixaService.darCaixa(p, "campanha"')
+	tem("src/ServerScriptService/Modules/CampanhaService.luau", "CaixaService.partidaCompleta(")
+	tem("src/ServerScriptService/Modules/CaixaService.luau", 'CaixaService.darCaixa(player, "veterano"')
+	-- a compra direta passa pela gravação atômica, que junta os créditos da sessão antes
+	tem("src/ServerScriptService/Modules/CaixaService.luau", "CaixaRegras.comprarCreditos(p, item, os.time())")
+	tem("src/ServerScriptService/Modules/PlayerData.luau", "deltaUsado")
+end)
+
 -- ===== produtos, temporada e servidor =====
 test("caixas pagas: produto em Commerce.IDS, venda desligada até o questionário", function()
 	assert(Caixas.PAGAS_LIGADAS == false, "D-173: o dono liga depois de reenviar o questionário")
@@ -358,7 +483,12 @@ test("caixas pagas: produto em Commerce.IDS, venda desligada até o questionári
 			assert(Caixas.porProduto(c.produto) == c)
 			assert(c.robux and c.robux > 0)
 		else
-			assert(c.produto == nil and c.robux == nil and (c.bilhetes or 0) >= 1)
+			assert(c.produto == nil and c.robux == nil, c.id)
+			if c.fonte == "bilhete" then
+				assert((c.bilhetes or 0) >= 1, c.id)
+			else
+				assert(c.fonte == "marco" and type(c.ganha) == "string" and #c.ganha > 10, c.id .. ": como ganhar")
+			end
 		end
 	end
 	local h = Caixas.get("historica")

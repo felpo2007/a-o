@@ -17,8 +17,11 @@
 --     Só para quem o PolicyService libera (ArePaidRandomItemsRestricted falso) e só com
 --     `Caixas.PAGAS_LIGADAS` (desligado até o dono atualizar o questionário de classificação:
 --     itens aleatórios pagos mudam as respostas, e a política manda reenviar);
---   - caixa gratuita: só com Bilhetes de Recompensa, ganhos jogando (nunca vendidos, nunca por
---     Robux, assinatura ou pacote pago).
+--   - caixa gratuita: com Bilhetes de Recompensa (missões do dia) ou guardada por um marco do jogo
+--     (D-174: treinamento, patente, missão da semana, passe grátis, carreira). Nunca vendida, nunca
+--     por Robux, assinatura ou pacote pago;
+--   - três caminhos (D-174): gratuito (caixas grátis), premium (caixas pagas, só para quem pode) e
+--     compra direta (o item escolhido, por créditos ($) ou Fragmentos, sem sorteio).
 local Caixas = {}
 
 Caixas.ESCALA = 100000 -- peso inteiro: 1 = 0,001%
@@ -31,21 +34,58 @@ export type Raridade = {
 	cor: { number },
 	fragmentos: number, -- o que uma repetida desta raridade vira
 	custo: number, -- preço na troca de Fragmentos (item garantido, escolhido pelo jogador)
+	creditos: number, -- D-174: preço na compra direta com créditos ($, ganhos jogando)
 }
 
--- cinco raridades; a cor só classifica (não é valor em dinheiro)
+-- cinco raridades; a cor só classifica (não é valor em dinheiro). D-174: Fragmentos da repetida
+-- pelo pedido do dono (5/15/40/100/250, parâmetros de equilíbrio); a troca custa 10 vezes isso. A
+-- compra direta em créditos ($): ~300 por partida (Skins.MONEY_PER_MATCH), então 5 a 100
+-- partidas, como as skins (PLACEHOLDER até a telemetria)
 Caixas.RARIDADES = {
-	{ id = "comum", nome = "Comum", nomeEn = "Common", cor = { 158, 158, 150 }, fragmentos = 10, custo = 100 },
-	{ id = "incomum", nome = "Incomum", nomeEn = "Uncommon", cor = { 96, 168, 76 }, fragmentos = 25, custo = 250 },
-	{ id = "raro", nome = "Raro", nomeEn = "Rare", cor = { 72, 128, 210 }, fragmentos = 60, custo = 600 },
-	{ id = "epico", nome = "Épico", nomeEn = "Epic", cor = { 150, 86, 200 }, fragmentos = 150, custo = 1500 },
+	{
+		id = "comum",
+		nome = "Comum",
+		nomeEn = "Common",
+		cor = { 158, 158, 150 },
+		fragmentos = 5,
+		custo = 50,
+		creditos = 1500,
+	},
+	{
+		id = "incomum",
+		nome = "Incomum",
+		nomeEn = "Uncommon",
+		cor = { 96, 168, 76 },
+		fragmentos = 15,
+		custo = 150,
+		creditos = 3000,
+	},
+	{
+		id = "raro",
+		nome = "Raro",
+		nomeEn = "Rare",
+		cor = { 72, 128, 210 },
+		fragmentos = 40,
+		custo = 400,
+		creditos = 7500,
+	},
+	{
+		id = "epico",
+		nome = "Épico",
+		nomeEn = "Epic",
+		cor = { 150, 86, 200 },
+		fragmentos = 100,
+		custo = 1000,
+		creditos = 15000,
+	},
 	{
 		id = "lendario",
 		nome = "Lendário",
 		nomeEn = "Legendary",
 		cor = { 214, 172, 64 },
-		fragmentos = 400,
-		custo = 4000,
+		fragmentos = 250,
+		custo = 2500,
+		creditos = 30000,
 	},
 } :: { Raridade }
 
@@ -70,7 +110,9 @@ export type Caixa = {
 	sorteios: number, -- resultados por abertura
 	robux: number?, -- preço de REFERÊNCIA (o mostrado vem do GetProductInfoAsync)
 	produto: string?, -- chave do Developer Product em Commerce.IDS
-	bilhetes: number?, -- custo em Bilhetes de Recompensa (só a gratuita)
+	bilhetes: number?, -- custo em Bilhetes de Recompensa (gratuita com fonte "bilhete")
+	fonte: string?, -- gratuita: "bilhete" (Bilhetes) ou "marco" (guardada por um marco do jogo)
+	ganha: string?, -- de onde vem (texto da tela)
 	temporada: string?, -- só aberta na temporada (Temporada.atual)
 	modelo: string, -- caixa 3D (AssetIds.Models)
 	itens: { Entrada },
@@ -95,6 +137,8 @@ Caixas.CAIXAS = {
 		versao = 1,
 		sorteios = 1,
 		bilhetes = 1,
+		fonte = "bilhete",
+		ganha = "Bilhetes: missões do dia (1) e da semana (2), até 4 por dia.",
 		modelo = "caixa_municao_us",
 		itens = {
 			{ item = "tag_aco", peso = 9000 },
@@ -116,9 +160,173 @@ Caixas.CAIXAS = {
 		},
 	},
 	{
+		id = "recruta",
+		nome = "Caixa de Recruta",
+		nomeEn = "Recruit Crate",
+		desc = "Ganha uma vez: no treinamento de um papel ou na primeira partida.",
+		tipo = "gratuita",
+		versao = 1,
+		sorteios = 1,
+		fonte = "marco",
+		ganha = "Concluir o treinamento de um papel ou a primeira partida (uma vez por conta).",
+		modelo = "caixa_municao_us",
+		itens = {
+			-- comum: 84%
+			{ item = "tag_aco", peso = 12000 },
+			{ item = "tag_aluminio", peso = 12000 },
+			{ item = "emb_arrozais", peso = 10000 },
+			{ item = "emb_serraria", peso = 10000 },
+			{ item = "emb_ponte", peso = 10000 },
+			{ item = "emb_engenho", peso = 10000 },
+			{ item = "mol_lona", peso = 10000 },
+			{ item = "cr_500", peso = 10000 },
+			-- incomum: 11%
+			{ item = "mol_mapa", peso = 6000 },
+			{ item = "emb_xomgo", peso = 5000 },
+			-- raro: 3%
+			{ item = "mol_latao", peso = 3000 },
+			-- épico: 1,5%
+			{ item = "mol_noite", peso = 1500 },
+			-- lendário: 0,5%
+			{ item = "tag_gravada", peso = 500 },
+		},
+	},
+	{
+		id = "servico",
+		nome = "Caixa de Serviço",
+		nomeEn = "Service Crate",
+		desc = "Ganha a cada patente nova.",
+		tipo = "gratuita",
+		versao = 1,
+		sorteios = 1,
+		fonte = "marco",
+		ganha = "Subir de patente (uma por patente).",
+		modelo = "caixa_municao_us",
+		itens = {
+			-- comum: 39%
+			{ item = "tag_borracha", peso = 9000 },
+			{ item = "tag_corrente", peso = 9000 },
+			{ item = "mol_caixote", peso = 9000 },
+			{ item = "cr_500", peso = 12000 },
+			-- incomum: 43%
+			{ item = "tag_latao", peso = 9000 },
+			{ item = "mol_mapa", peso = 9000 },
+			{ item = "emb_xomgo", peso = 9000 },
+			{ item = "skin_m14_birch", peso = 4000 },
+			{ item = "skin_type56_birch", peso = 4000 },
+			{ item = "cr_1500", peso = 8000 },
+			-- raro: 16%
+			{ item = "mol_latao", peso = 5000 },
+			{ item = "skin_m1911_blued", peso = 4000 },
+			{ item = "skin_type54_worn", peso = 4000 },
+			{ item = "frag_100", peso = 3000 },
+			-- épico: 1,5%
+			{ item = "mol_noite", peso = 1500 },
+			-- lendário: 0,5%
+			{ item = "mol_starlite", peso = 500 },
+		},
+	},
+	{
+		id = "batalhao",
+		nome = "Caixa de Batalhão",
+		nomeEn = "Battalion Crate",
+		desc = "Ganha nas missões da semana, feitas em equipe.",
+		tipo = "gratuita",
+		versao = 1,
+		sorteios = 1,
+		fonte = "marco",
+		ganha = "Cumprir uma missão da semana (uma por missão).",
+		modelo = "caixa_municao_vc",
+		itens = {
+			-- comum: 42%
+			{ item = "emb_arrozais", peso = 8000 },
+			{ item = "emb_serraria", peso = 8000 },
+			{ item = "emb_ponte", peso = 8000 },
+			{ item = "emb_engenho", peso = 8000 },
+			{ item = "cr_500", peso = 10000 },
+			-- incomum: 30%
+			{ item = "emb_xomgo", peso = 10000 },
+			{ item = "skin_m60_worn", peso = 6000 },
+			{ item = "skin_rpd_worn", peso = 6000 },
+			{ item = "cr_1500", peso = 8000 },
+			-- raro: 24%
+			{ item = "emb_starlite", peso = 8000 },
+			{ item = "skin_m79_od", peso = 6000 },
+			{ item = "skin_rpg2_od", peso = 6000 },
+			{ item = "frag_100", peso = 4000 },
+			-- épico: 3%
+			{ item = "emb_chulai", peso = 3000 },
+			-- lendário: 1%
+			{ item = "tag_gravada", peso = 1000 },
+		},
+	},
+	{
+		id = "campanha",
+		nome = "Caixa de Campanha",
+		nomeEn = "Campaign Crate",
+		desc = "Ganha na trilha grátis do passe da temporada.",
+		tipo = "gratuita",
+		versao = 1,
+		sorteios = 1,
+		fonte = "marco",
+		ganha = "Receber os níveis 10, 20, 30, 40 e 50 da trilha grátis do passe.",
+		modelo = "caixa_municao_vc",
+		itens = {
+			-- incomum: 55%
+			{ item = "mol_mapa", peso = 12000 },
+			{ item = "tag_latao", peso = 12000 },
+			{ item = "skin_m79_walnut", peso = 8000 },
+			{ item = "skin_sks_worn", peso = 8000 },
+			{ item = "cr_1500", peso = 15000 },
+			-- raro: 30%
+			{ item = "mol_latao", peso = 8000 },
+			{ item = "skin_sks_walnut", peso = 8000 },
+			{ item = "skin_m14_worn", peso = 8000 },
+			{ item = "frag_100", peso = 6000 },
+			-- épico: 13%
+			{ item = "mol_noite", peso = 5000 },
+			{ item = "skin_rpd_birch", peso = 4000 },
+			{ item = "skin_m60_od", peso = 4000 },
+			-- lendário: 2%
+			{ item = "mol_starlite", peso = 2000 },
+		},
+	},
+	{
+		id = "veterano",
+		nome = "Caixa de Veterano",
+		nomeEn = "Veteran Crate",
+		desc = "Ganha nos marcos de carreira: 10, 25, 50, 100 e 200 partidas.",
+		tipo = "gratuita",
+		versao = 1,
+		sorteios = 1,
+		fonte = "marco",
+		ganha = "Completar 10, 25, 50, 100 e 200 partidas.",
+		modelo = "caixa_municao_us",
+		itens = {
+			-- raro: 44%
+			{ item = "skin_m14_tape", peso = 10000 },
+			{ item = "skin_type56_tape", peso = 10000 },
+			{ item = "skin_type56_blued", peso = 10000 },
+			{ item = "mol_latao", peso = 8000 },
+			{ item = "frag_250", peso = 6000 },
+			-- épico: 46%
+			{ item = "skin_us_faded", peso = 9000 },
+			{ item = "skin_vc_black", peso = 9000 },
+			{ item = "skin_us_duck", peso = 7000 },
+			{ item = "skin_vc_brown", peso = 7000 },
+			{ item = "mol_noite", peso = 7000 },
+			{ item = "emb_chulai", peso = 7000 },
+			-- lendário: 10%
+			{ item = "skin_us_tiger", peso = 3000 },
+			{ item = "skin_vc_tiger", peso = 3000 },
+			{ item = "tag_gravada", peso = 2000 },
+			{ item = "mol_starlite", peso = 2000 },
+		},
+	},
+	{
 		id = "suprimentos",
-		nome = "Caixa de Suprimentos",
-		nomeEn = "Supply Crate",
+		nome = "Caixa de Suprimentos Militares",
+		nomeEn = "Military Supply Crate",
 		desc = "Plaquetas, insígnias, molduras e acabamentos de arma.",
 		tipo = "paga",
 		versao = 1,
@@ -229,8 +437,8 @@ Caixas.CAIXAS = {
 	},
 	{
 		id = "historica",
-		nome = "Caixa de Operações Históricas",
-		nomeEn = "Historical Operations Crate",
+		nome = "Caixa da Coleção de Campanha",
+		nomeEn = "Campaign Collection Crate",
 		desc = "Só nesta campanha: a Operação Starlite, agosto de 1965.",
 		tipo = "paga",
 		versao = 1,
@@ -333,6 +541,20 @@ function Caixas.validar(c: Caixa, itemInfo: (string) -> any): { string }
 	end
 	if c.tipo == "gratuita" and (c.produto or c.robux) then
 		table.insert(erros, c.id .. ": caixa gratuita não pode ter preço nem produto")
+	end
+	if c.tipo == "gratuita" and c.fonte ~= "bilhete" and c.fonte ~= "marco" then
+		table.insert(erros, c.id .. ": caixa gratuita sem fonte (bilhete ou marco)")
+	end
+	if c.fonte == "bilhete" and (c.bilhetes or 0) < 1 then
+		table.insert(erros, c.id .. ": caixa de bilhete sem custo em bilhetes")
+	end
+	if c.tipo == "paga" then
+		for _, e in c.itens do
+			local info = itemInfo(e.item)
+			if info and (info.kind == "creditos" or info.kind == "fragmentos") then
+				table.insert(erros, c.id .. ": caixa paga só com cosméticos (" .. e.item .. ")")
+			end
+		end
 	end
 	return erros
 end
@@ -471,14 +693,14 @@ end
 -- texto das regras mostrado com a lista (antes da compra)
 Caixas.REGRAS = {
 	"1 resultado por abertura. As chances abaixo são exatas e somam 100%.",
-	"Item que você já tem vira Fragmentos de Arsenal: Comum 10, Incomum 25, Raro 60, Épico 150, Lendário 400.",
+	"Item que você já tem vira Fragmentos de Arsenal: Comum 5, Incomum 15, Raro 40, Épico 100, Lendário 250.",
 	"Fragmentos trocam por qualquer item da troca, garantido. Não viram Robux nem dinheiro.",
 	"As chances são as mesmas para todos e não mudam com o que você gasta.",
 	"Itens só visuais, presos à sua conta: não dão vantagem e não podem ser trocados.",
 }
 Caixas.REGRAS_EN = {
 	"1 result per opening. The odds below are exact and add up to 100%.",
-	"An item you already own becomes Arsenal Fragments: Common 10, Uncommon 25, Rare 60, Epic 150, Legendary 400.",
+	"An item you already own becomes Arsenal Fragments: Common 5, Uncommon 15, Rare 40, Epic 100, Legendary 250.",
 	"Fragments trade for any item in the exchange, guaranteed. They never become Robux or money.",
 	"The odds are the same for everyone and never change with how much you spend.",
 	"Cosmetic only, bound to your account: no gameplay advantage and no trading.",

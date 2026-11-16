@@ -9,7 +9,9 @@
 --   hist: os últimos HIST resultados (mais novo no fim);
 --   recibos[PurchaseId]: o resultado de cada caixa paga (o mesmo recibo devolve o mesmo resultado);
 --   dia, hoje: dia UTC e bilhetes ganhos nele (teto TETO_DIA, contra farm em servidor privado);
---   on: plaqueta e moldura escolhidas.
+--   on: plaqueta e moldura escolhidas;
+--   guardadas[caixa]: caixas grátis ganhas por marco e ainda fechadas (D-174);
+--   marcos[chave]: os marcos que já deram caixa (cada um só uma vez: "recruta", "posto:5"...).
 local Caixas = require(
 	if script
 		then (game :: any):GetService("ReplicatedStorage").Shared.Caixas
@@ -54,6 +56,8 @@ export type Dados = {
 	hoje: number,
 	boasVindas: boolean,
 	on: { tag: string?, mol: string? },
+	guardadas: { [string]: number },
+	marcos: { [string]: boolean },
 }
 
 function CaixaRegras.padrao(): Dados
@@ -68,8 +72,11 @@ function CaixaRegras.padrao(): Dados
 		hoje = 0,
 		boasVindas = false,
 		on = {},
+		guardadas = {},
+		marcos = {},
 	}
 end
+CaixaRegras.MAX_MARCOS = 512
 
 local function num(v: any, lo: number, hi: number, def: number): number
 	if type(v) ~= "number" or v ~= v then
@@ -129,6 +136,23 @@ function CaixaRegras.sanear(raw: any): Dados
 			local ok = resultado(r)
 			if type(id) == "string" and ok then
 				d.recibos[id] = ok
+			end
+		end
+	end
+	if type(raw.guardadas) == "table" then
+		for k, v in raw.guardadas do
+			local c = if type(k) == "string" then Caixas.get(k) else nil
+			if c and c.tipo == "gratuita" then
+				d.guardadas[k] = num(v, 0, 1000, 0)
+			end
+		end
+	end
+	if type(raw.marcos) == "table" then
+		local n = 0
+		for k, v in raw.marcos do
+			if type(k) == "string" and #k < 64 and v == true and n < CaixaRegras.MAX_MARCOS then
+				n += 1
+				d.marcos[k] = true
 			end
 		end
 	end
@@ -238,7 +262,8 @@ function CaixaRegras.aplicar(
 	return r
 end
 
--- Caixa gratuita com bilhete. Devolve (resultado, nil) ou (nil, motivo).
+-- Caixa gratuita: com bilhete (fonte "bilhete") ou uma guardada (fonte "marco"). Devolve
+-- (resultado, nil) ou (nil, motivo).
 function CaixaRegras.abrirGratuita(
 	p: any,
 	caixaId: string,
@@ -250,12 +275,42 @@ function CaixaRegras.abrirGratuita(
 	if not c or c.tipo ~= "gratuita" then
 		return nil, "caixa"
 	end
+	if c.fonte == "marco" then
+		if (p.caixas.guardadas[caixaId] or 0) < 1 then
+			return nil, "guardada"
+		end
+		p.caixas.guardadas[caixaId] -= 1
+		return CaixaRegras.aplicar(p, caixaId, n, now, "marco", passes, nil), nil
+	end
 	local custo = c.bilhetes or 1
 	if p.caixas.bilhetes < custo then
 		return nil, "bilhetes"
 	end
 	p.caixas.bilhetes -= custo
 	return CaixaRegras.aplicar(p, caixaId, n, now, "bilhete", passes, nil), nil
+end
+
+-- D-174: dá uma caixa grátis guardada por um marco do jogo. Cada `marco` só vale uma vez. Devolve
+-- true se deu agora.
+function CaixaRegras.darCaixa(p: any, caixaId: string, marco: string): boolean
+	local c = Caixas.get(caixaId)
+	if not c or c.tipo ~= "gratuita" or c.fonte ~= "marco" then
+		return false
+	end
+	local d: Dados = p.caixas
+	if d.marcos[marco] then
+		return false
+	end
+	local n = 0
+	for _ in d.marcos do
+		n += 1
+	end
+	if n >= CaixaRegras.MAX_MARCOS then
+		return false
+	end
+	d.marcos[marco] = true
+	d.guardadas[caixaId] = (d.guardadas[caixaId] or 0) + 1
+	return true
 end
 
 -- Recibo de caixa paga. Idempotente: o mesmo PurchaseId devolve o resultado já gravado (sem novo
@@ -309,7 +364,8 @@ function CaixaRegras.troca(): { { item: string, raridade: string, custo: number 
 				seen[e.item] = true
 				local info = Cosmeticos.info(e.item)
 				local rar = info and Caixas.raridade(info.raridade)
-				if info and rar then
+				-- prêmio de quantidade (créditos, Fragmentos) não entra na troca
+				if info and rar and info.kind ~= "creditos" and info.kind ~= "fragmentos" then
 					table.insert(out, { item = e.item, raridade = info.raridade, custo = rar.custo })
 				end
 			end
@@ -352,6 +408,46 @@ function CaixaRegras.trocar(p: any, item: string, now: number, passes: { [string
 		repetido = false,
 		fragmentos = -custo,
 		origem = "troca",
+		t = now,
+		id = nil,
+	}
+	registra(p.caixas, r)
+	return r, nil
+end
+
+-- D-174: compra direta (caminho C) com créditos ($): o cosmético escolhido, preço da raridade,
+-- sem sorteio. `p.credits` aqui é o saldo de verdade (o PlayerData.transact junta o que a sessão
+-- ganhou antes de chamar). Só os cosméticos do cartão (as skins têm a compra própria na Intendência).
+function CaixaRegras.precoCreditos(item: string): number?
+	local info = Cosmeticos.info(item)
+	if not info or (info.kind ~= "emblema" and info.kind ~= "plaqueta" and info.kind ~= "moldura") then
+		return nil
+	end
+	local rar = Caixas.raridade(info.raridade)
+	return rar and rar.creditos
+end
+
+function CaixaRegras.comprarCreditos(p: any, item: string, now: number): (Resultado?, string?)
+	local preco = CaixaRegras.precoCreditos(item)
+	if not preco then
+		return nil, "item"
+	end
+	if CaixaRegras.possui(p, item, nil) then
+		return nil, "possui"
+	end
+	if p.credits < preco then
+		return nil, "creditos"
+	end
+	p.credits -= preco
+	Cosmeticos.conceder(p, item)
+	local r: Resultado = {
+		caixa = "compra",
+		versao = 0,
+		item = item,
+		raridade = Cosmeticos.info(item).raridade,
+		repetido = false,
+		fragmentos = 0,
+		origem = "compra",
 		t = now,
 		id = nil,
 	}
