@@ -205,6 +205,17 @@ O `sourcemap.json` não vai para o Git.
   cobra). `--previa <pasta>` desenha os cilindros sobre a madeira.
 - Armas: `tools/armas_parker.py` gera `<arma>_studs_parker.glb` (aço fosco, texturas de 1024) a
   partir do GLB do gerador; é ele que sobe. Rode depois do `fetch_forgegui_assets.py`.
+- Acabamentos de arma (D-178): a arte da arma é uma malha só, então o acabamento é uma textura
+  inteira que troca o `TextureID` (`Skins.applyWeapon`, `Shared/AcabamentosArte.luau`).
+  - `uv run --group arte python tools/acabamentos.py` pinta as que faltam (`--todas` refaz;
+    `--mascaras` mostra madeira/metal/latão/pano) e faz prévias em
+    `assets/acabamentos/previas`. Receita nova: `RECEITAS` no script e `arte` no `Skins`;
+  - para o jogo: `--plano`, `upload-assets Acab.` (Decal), `--resolver <arquivo>` rodado no
+    Studio (Server) e gravado com o
+    `copia_da_conversa.py ... acab_imagens assets/acabamentos_imagens.json`, e `--luau`;
+  - arma refeita (GLB novo)? Rode de novo: o cache sai do GLB, e as texturas também.
+  - no Studio, cada textura nova no `TextureID` escreve 3 avisos "No asset content
+    representation" no Output (com Image ou Decal, e mesmo pré-carregada); ela carrega e aparece.
 - Armas do Blender (D-146): M70 e Mosin (`tools/blender/armas.py`), Escopeta 12 (`espingarda.py`),
   M16 (`m16.py`) e SKS (`sks.py`, no lugar da do gerador). Rode com
   `blender -b --factory-startup -P tools/blender/<arquivo>.py -- <chave>` (`--montar` para só a
@@ -259,7 +270,7 @@ O `sourcemap.json` não vai para o Git.
 - Segredos só no `.env` (no `.gitignore`), nunca no código nem no chat.
 - ForgeGUI: nunca regenerar um job em `outcome_unknown`. "failed" com `retryable` pode ser
   retomado com `generation_retry`.
-- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-178) e atualize `PROGRESS.md`.
+- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-179) e atualize `PROGRESS.md`.
 - Tetos de triângulos por modelo: vegetação ≤ 6 mil (D-135), props e herói ≤ 20 mil (`ArtBudget`,
   conferido pelo teste da F5).
 - Commits no branch acima, com mensagem em português.

@@ -38,3 +38,5 @@ assets/facas/
 # ícones das skins e catálogo exportado para criar os itens de Robux (tools/roblox_cloud.py create-skins)
 assets/skins_icones/
 assets/skins_loja.json
+# texturas dos acabamentos de arma, feitas dos GLB das armas (tools/acabamentos.py, D-178)
+assets/acabamentos/

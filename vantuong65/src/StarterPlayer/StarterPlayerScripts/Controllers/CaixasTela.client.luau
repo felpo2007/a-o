@@ -699,6 +699,7 @@ local function abertura(c: any, res: any, item: any)
 	end)
 	local cartoes: { Frame } = {}
 	local moldes: { Instance } = {}
+	local jaPre: { [string]: boolean } = {}
 	for i, id in ids do
 		local it = ItemArte.info(id)
 		local rc = ItemArte.corRaridade(it.raridade)
@@ -718,9 +719,15 @@ local function abertura(c: any, res: any, item: any)
 		UiKit.corner(barra, 2)
 		cartoes[i] = cf
 		for _, d in box:GetDescendants() do
-			-- o molde como imagem (pré-carregar o Shirt/Pants gera aviso de representação no Output)
-			local tpl = if d:IsA("Shirt") then d.ShirtTemplate elseif d:IsA("Pants") then d.PantsTemplate else nil
-			if tpl and tpl ~= "" then
+			-- o molde como imagem (pré-carregar o Shirt/Pants gera aviso de representação no Output);
+			-- D-178: a textura do acabamento de arma também (sem ela a arma aparece clara no começo)
+			local tpl = if d:IsA("Shirt")
+				then d.ShirtTemplate
+				elseif d:IsA("Pants") then d.PantsTemplate
+				elseif d:IsA("MeshPart") then d.TextureID
+				else nil
+			if tpl and tpl ~= "" and not jaPre[tpl] then
+				jaPre[tpl] = true
 				local im = Instance.new("ImageLabel")
 				im.Image = tpl
 				table.insert(moldes, im)
@@ -755,7 +762,8 @@ local function abertura(c: any, res: any, item: any)
 		gr.Transparency = NumberSequence.new(if lado == 0 then 0 else 1, if lado == 0 then 1 else 0)
 		gr.Parent = sombra
 	end
-	-- moldes de roupa: carrega antes de girar (até 1,5 s), para nenhum cartão mudar no meio
+	-- moldes de roupa e texturas de arma: carrega antes de girar (até 1,5 s), para nenhum cartão
+	-- mudar no meio
 	if #moldes > 0 then
 		local pronto = false
 		task.spawn(function()

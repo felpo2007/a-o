@@ -74,6 +74,24 @@ local function frame(parent: Instance, size: UDim2, color: Color3?, tr: number?)
 	return f
 end
 
+-- D-178: degradê cor -> cor3 (a cor de baixo fica branca e o UIGradient pinta). Só no próprio
+-- objeto: o texto e os filhos ficam com a cor deles.
+local function degrade(obj: Instance, c1: Color3, c3: Color3?)
+	if not c3 then
+		return
+	end
+	if obj:IsA("UIStroke") then
+		obj.Color = Color3.new(1, 1, 1)
+	else
+		(obj :: any).BackgroundColor3 = Color3.new(1, 1, 1)
+	end
+	local g = Instance.new("UIGradient")
+	g.Name = "Degrade"
+	g.Color = ColorSequence.new(c1, c3)
+	g.Rotation = 45
+	g.Parent = obj
+end
+
 local function label(parent: Instance, s: string, size: number, color: Color3, font: any): TextLabel
 	local t = UiKit.rotulo(parent, size, color, font)
 	t.Text = s
@@ -298,12 +316,14 @@ function ItemArte.desenha(parent: Instance, item: any, s: number, opts: Opcoes?)
 	fundo.Rotation = 90
 	fundo.Parent = box
 	local c1, c2 = rgb(it.cor, rc), rgb(it.cor2, V.TEXT)
+	local c3: Color3? = if type(it.cor3) == "table" then rgb(it.cor3, c1) else nil
 	if it.kind == "emblema" then
 		local e = frame(box, UDim2.fromScale(0.7, 0.7), c1, 0)
 		e.AnchorPoint = Vector2.new(0.5, 0.5)
 		e.Position = UDim2.fromScale(0.5, 0.5)
 		UiKit.corner(e, math.floor(s * 0.12))
 		UiKit.edge(e, c2, 2, 0.2)
+		degrade(e, c1, c3)
 		local t = label(e, it.sigla or "★", math.floor(s * 0.3), c2, F.TITLE)
 		t.Size = UDim2.fromScale(1, 1)
 		t.TextXAlignment = Enum.TextXAlignment.Center
@@ -313,6 +333,7 @@ function ItemArte.desenha(parent: Instance, item: any, s: number, opts: Opcoes?)
 		tag.Position = UDim2.fromScale(0.5, 0.5)
 		UiKit.corner(tag, math.floor(s * 0.1))
 		UiKit.edge(tag, c2, 3, 0)
+		degrade(tag, c1, c3)
 		local hole = frame(tag, UDim2.fromOffset(math.floor(s * 0.08), math.floor(s * 0.08)), V.BG, 0)
 		hole.AnchorPoint = Vector2.new(0, 0.5)
 		hole.Position = UDim2.new(0, math.floor(s * 0.05), 0.5, 0)
@@ -326,7 +347,7 @@ function ItemArte.desenha(parent: Instance, item: any, s: number, opts: Opcoes?)
 		m.AnchorPoint = Vector2.new(0.5, 0.5)
 		m.Position = UDim2.fromScale(0.5, 0.5)
 		UiKit.corner(m, 4)
-		UiKit.edge(m, c1, 4, 0)
+		degrade(UiKit.edge(m, c1, 4, 0), c1, c3)
 		local bar = frame(m, UDim2.new(0, math.floor(s * 0.06), 1, 0), c2, 0)
 		bar.Name = "Faixa"
 	elseif it.kind == "creditos" or it.kind == "fragmentos" then

@@ -285,7 +285,7 @@ function Arquivo.origens(id: string): { Origem }
 		table.insert(out, { tipo = "compra_direta", preco = pd })
 	end
 	local s = Skins.get(id)
-	if s and not s.soPasse then
+	if s and not s.soPasse and not s.soCaixa then
 		local preco = Skins.tierPrice(s.tier)
 		if preco > 0 then
 			table.insert(out, { tipo = "intendencia", preco = preco })

@@ -954,7 +954,8 @@ local function renderSkins(s: { [string]: any })
 			if wp.faction == faction then
 				local list = {}
 				for _, x in Skins.list("weapon", faction) do
-					if x.weapon == wp.id then
+					-- D-178: o acabamento das caixas só aparece aqui para quem já tem (para equipar)
+					if x.weapon == wp.id and (not x.soCaixa or (sk.owned or {})[x.id]) then
 						table.insert(list, x)
 					end
 				end

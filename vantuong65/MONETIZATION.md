@@ -84,7 +84,7 @@ Dashboard → Analytics.
 6. Managed Pricing: opte por ele depois de ter vendas, porque itens abaixo do limite não entram nos
    testes.
 
-## Caixas de suprimentos (D-173, 2026-11-15; D-174, 2026-11-16)
+## Caixas de suprimentos (D-173, 2026-11-15; D-174 e D-178, 2026-11-16)
 
 Código: `Shared/Caixas.luau` (tabelas e chances), `Shared/Cosmeticos.luau` (itens), `Modules/CaixaRegras.luau`
 (regras sobre o perfil), `Modules/CaixaService.luau` (servidor), `Controllers/CaixasTela.client.luau` (aba
@@ -93,19 +93,25 @@ CAIXAS da loja). Testes: `tests/luau/caixas.luau`. Relatórios: `testes/CAIXAS_2
 
 | Caixa | Como se abre | Itens | Distribuição por raridade |
 |---|---|---|---|
-| Caixa de Recompensa | 1 Bilhete de Recompensa (ganho jogando) | 16 | 82 / 13 / 3 / 1 / 1% |
-| Caixa de Recruta | grátis: treinamento ou primeira partida (uma vez) | 13 | 84 / 11 / 3 / 1,5 / 0,5% |
-| Caixa de Serviço | grátis: cada posto novo | 16 | 39 / 43 / 16 / 1,5 / 0,5% |
-| Caixa de Batalhão | grátis: cada missão da semana | 15 | 42 / 30 / 24 / 3 / 1% |
-| Caixa de Campanha | grátis: níveis 10 a 50 da trilha grátis do passe | 13 | — / 55 / 30 / 13 / 2% |
-| Caixa de Veterano | grátis: 10, 25, 50, 100 e 200 partidas | 15 | — / — / 44 / 46 / 10% |
-| Caixa de Suprimentos | Robux, ref. R$ 49 (desligada) | 26 | 60 / 25 / 10 / 4 / 1% |
-| Caixa de Equipamentos Especiais | Robux, ref. R$ 99 (desligada) | 18 | — / 45 / 36 / 16 / 3% |
-| Caixa de Arsenal de Elite | Robux, ref. R$ 149 (desligada) | 14 | — / — / 40 / 48 / 12% |
+| Caixa de Recompensa | 1 Bilhete de Recompensa (ganho jogando) | 43 | 82 / 13 / 3 / 1 / 1% |
+| Caixa de Recruta | grátis: treinamento ou primeira partida (uma vez) | 22 | 84 / 11 / 3 / 1,5 / 0,5% |
+| Caixa de Serviço | grátis: cada posto novo | 49 | 39 / 43 / 16 / 1,5 / 0,5% |
+| Caixa de Batalhão | grátis: cada missão da semana | 44 | 42 / 30 / 24 / 3 / 1% |
+| Caixa de Campanha | grátis: níveis 10 a 50 da trilha grátis do passe | 55 | — / 55 / 30 / 13 / 2% |
+| Caixa de Veterano | grátis: 10, 25, 50, 100 e 200 partidas | 59 | — / — / 44 / 46 / 10% |
+| Caixa de Suprimentos | Robux, ref. R$ 49 (desligada) | 126 | 60 / 25 / 10 / 4 / 1% |
+| Caixa de Equipamentos Especiais | Robux, ref. R$ 99 (desligada) | 109 | — / 45 / 36 / 16 / 3% |
+| Caixa de Arsenal de Elite | Robux, ref. R$ 149 (desligada) | 87 | — / — / 40 / 48 / 12% |
 | Caixa de Operações Históricas | Robux, ref. R$ 99, só na Temporada 1 (desligada) | 11 | — / 50 / 30 / 15 / 5% |
 
 (comum / incomum / raro / épico / lendário). A chance de cada item está na tela, antes de comprar ou
 abrir, em "VER ITENS E PROBABILIDADES".
+
+**D-178:** entraram 100 itens só visuais (60 acabamentos de arma extravagantes e 40 itens de
+cartão). A fatia de cada raridade em cada caixa é a mesma de antes (o teste cobra caixa por
+caixa); só o peso de cada item dentro da raridade foi redividido. Todo item novo sai de pelo
+menos uma caixa grátis, e os acabamentos novos não se compram com $ nem com Robux (só caixa e
+troca de Fragmentos).
 
 **Economias separadas:**
 - **Bilhetes de Recompensa:** só jogando. Valem 1 por missão do dia, 2 por missão da semana (até 4 por

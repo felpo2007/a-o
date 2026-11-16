@@ -467,6 +467,165 @@ Caixas.CAIXAS = {
 	},
 } :: { Caixa }
 
+-- ===== D-178: os 100 itens novos (60 acabamentos extravagantes e 40 itens de cartão) =====
+-- Entram SEM mudar a fatia de cada raridade na caixa (as porcentagens por raridade mostradas antes
+-- continuam as mesmas): dentro da raridade, os pesos são redivididos e cada item novo pesa como a
+-- média dos antigos dela. Cada item entra em pelo menos uma caixa grátis (e todos na de Suprimentos).
+-- A caixa que muda sobe de versão (o resultado gravado guarda a versão da tabela).
+local Cosmeticos = require(script and (script :: any).Parent.Cosmeticos or "./Cosmeticos") :: any
+local Skins = require(script and (script :: any).Parent.Skins or "./Skins") :: any
+
+local function raridadeDe(id: string): string
+	local info = Cosmeticos.info(id)
+	assert(info, "item sem cadastro: " .. id)
+	return info.raridade
+end
+
+-- os 100 novos, por raridade (ordem fixa: a do catálogo)
+local NOVOS: { [string]: { string } } = {}
+for _, e in Skins.EXTRAVAGANTES :: { any } do
+	local r = raridadeDe(e[1])
+	NOVOS[r] = NOVOS[r] or {}
+	table.insert(NOVOS[r], e[1])
+end
+for _, it in Cosmeticos.ITENS :: { any } do
+	if it.cor3 then
+		NOVOS[it.raridade] = NOVOS[it.raridade] or {}
+		table.insert(NOVOS[it.raridade], it.id)
+	end
+end
+Caixas.NOVOS_D178 = NOVOS
+
+local function metade(lista: { string }, qual: number): { string }
+	local out = {}
+	for i, id in lista do
+		if i % 2 == qual then
+			table.insert(out, id)
+		end
+	end
+	return out
+end
+
+local function juntar(...: { string }): { string }
+	local out = {}
+	for _, l in { ... } do
+		for _, id in l do
+			table.insert(out, id)
+		end
+	end
+	return out
+end
+
+local N = function(r: string): { string }
+	return NOVOS[r] or {}
+end
+Caixas.ACRESCIMOS = {
+	recruta = N("comum"),
+	gratuita = juntar(N("comum"), N("incomum")),
+	servico = juntar(N("incomum"), metade(N("raro"), 1)),
+	batalhao = N("raro"),
+	campanha = juntar(metade(N("raro"), 0), N("epico")),
+	veterano = juntar(N("epico"), N("lendario")),
+	suprimentos = juntar(N("comum"), N("incomum"), N("raro"), N("epico"), N("lendario")),
+	especiais = juntar(N("incomum"), N("raro"), N("epico"), N("lendario")),
+	elite = juntar(N("raro"), N("epico"), N("lendario")),
+} :: { [string]: { string } }
+
+-- Acrescenta `novos` aos `itens` sem mudar o total de cada raridade. Pesos inteiros, soma exata
+-- (maior resto). Item novo de raridade que a caixa não tem é recusado (mudaria a distribuição).
+function Caixas.acrescentar(itens: { Entrada }, novos: { string }, itemInfo: (string) -> any): { Entrada }
+	local grupos: { [string]: { total: number, antigos: { Entrada }, novos: { string } } } = {}
+	local tem: { [string]: boolean } = {}
+	for _, e in itens do
+		local r = itemInfo(e.item).raridade
+		local g = grupos[r] or { total = 0, antigos = {}, novos = {} }
+		g.total += e.peso
+		table.insert(g.antigos, e)
+		grupos[r] = g
+		tem[e.item] = true
+	end
+	for _, id in novos do
+		if not tem[id] then
+			local r = itemInfo(id).raridade
+			local g = grupos[r]
+			assert(g, "raridade " .. r .. " não existe nesta caixa (" .. id .. ")")
+			table.insert(g.novos, id)
+			tem[id] = true
+		end
+	end
+	local out: { Entrada } = {}
+	for _, rar in Caixas.RARIDADES do
+		local g = grupos[rar.id]
+		if g then
+			local nA, nN = #g.antigos, #g.novos
+			if nN == 0 then
+				for _, e in g.antigos do
+					table.insert(out, { item = e.item, peso = e.peso })
+				end
+			else
+				local k = nA / (nA + nN)
+				local media = g.total / nA
+				local ids, reais = {}, {}
+				for _, e in g.antigos do
+					table.insert(ids, e.item)
+					table.insert(reais, e.peso * k)
+				end
+				for _, id in g.novos do
+					table.insert(ids, id)
+					table.insert(reais, media * k)
+				end
+				-- arredonda pelo maior resto, cada um com pelo menos 1
+				local base, soma = {}, 0
+				for i, v in reais do
+					base[i] = math.max(1, math.floor(v))
+					soma += base[i]
+				end
+				local ordem = {}
+				for i in reais do
+					table.insert(ordem, i)
+				end
+				table.sort(ordem, function(a, b)
+					local ra, rb = reais[a] - math.floor(reais[a]), reais[b] - math.floor(reais[b])
+					if ra ~= rb then
+						return ra > rb
+					end
+					return a < b
+				end)
+				local falta = g.total - soma
+				local j = 1
+				while falta > 0 do
+					base[ordem[j]] += 1
+					falta -= 1
+					j = j % #ordem + 1
+				end
+				while falta < 0 do
+					-- tira de quem tem mais
+					local maior = 1
+					for i = 2, #base do
+						if base[i] > base[maior] then
+							maior = i
+						end
+					end
+					base[maior] -= 1
+					falta += 1
+				end
+				for i, id in ids do
+					table.insert(out, { item = id, peso = base[i] })
+				end
+			end
+		end
+	end
+	return out
+end
+
+for _, c in Caixas.CAIXAS do
+	local novos = Caixas.ACRESCIMOS[c.id]
+	if novos and #novos > 0 then
+		c.itens = Caixas.acrescentar(c.itens, novos, Cosmeticos.info)
+		c.versao += 1
+	end
+end
+
 local BY_ID: { [string]: Caixa } = {}
 for _, c in Caixas.CAIXAS do
 	BY_ID[c.id] = c

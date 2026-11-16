@@ -7080,3 +7080,71 @@ com identidade própria. Só a apresentação muda.
   servidor (índice 42, desvio de 0,5 px), com e sem PULAR. Também a galeria, a recompensa e o
   EQUIPAR, e o Output sem os avisos dos moldes depois do conserto. Detalhes em
   `testes/ROLETA_D177_2026-11-16.md`.
+
+## D-178 — Lote 62: 100 itens novos nas caixas, extravagantes (2026-11-16)
+
+**Pedido do dono:** "crie 100 novas skins e itens para ganhar nessas caixas, podem ser bem
+extravagantes se inspire no cs battlefield e outros jogos faça com maestria".
+
+- **O que entrou:** 60 acabamentos de arma e 40 itens de cartão (14 emblemas, 13 plaquetas e
+  13 molduras), todos só visuais.
+  - Por raridade: 9 comuns, 18 incomuns, 29 raros, 28 épicos e 16 lendários.
+  - A inspiração é o estilo de pintura dos jogos de tiro: degradê, damasco, tigre, carbono,
+    cromo, camuflagem digital, lava, galáxia. Os nomes e os desenhos são próprios. "Fibra de
+    Carbono" virou "Trama de Carbono" para não repetir nome de skin de outro jogo.
+- **Acabamentos (`Skins.EXTRAVAGANTES`, campo `soCaixa`):**
+  - saem só das caixas e da troca de Fragmentos. A Intendência ($ e Robux) e o Mercado não os
+    vendem (`canBuy` responde "só nas caixas");
+  - na lista de armas do perfil, aparecem só para quem já tem;
+  - 6 na M14, M16, Tipo 56, SKS e RPD; 5 na M60, M1911A1, Winchester M70, Winchester 12, Tipo 54
+    e Mosin-Nagant.
+- **Texturas de verdade** (`tools/acabamentos.py`, teste `tests/test_acabamentos.py`):
+  - 23 receitas de desenho mais a "tinta";
+  - a malha de cada arma é rasterizada no espaço da textura (cada texel ganha a posição 3D e a
+    normal), e o padrão é pintado em 3D, contínuo na arma inteira;
+  - a luz e os detalhes da textura original continuam por cima (razão de luminância);
+  - a cor original separa madeira, metal, latão e pano. O latão (cartuchos, cinto) e a bandoleira
+    nunca são pintados. A receita diz o alvo: tudo, só o metal ou só a madeira;
+  - camuflagem, pixel e laca medem a cobertura na própria arma, então cada cor cobre a mesma
+    fração em qualquer arma;
+  - prévias de lado em `assets/acabamentos/previas` (fora do Git, como os GLB das armas).
+- **Conserto: os acabamentos antigos não apareciam.** A arte das armas é uma malha só, sem as
+  peças Madeira/Metal que a tinta da D-131 pintava. Os 23 acabamentos de antes (17 da Intendência
+  e 6 do conjunto da D-176) agora também têm textura, pela receita "tinta": a cor de madeira,
+  guarda-mão e metal sobre a textura original, e a fita enrolada no guarda-mão.
+- **Como aplica (`Skins.applyWeapon`):**
+  - troca o `TextureID` da MeshPart pela textura do acabamento (`Shared/AcabamentosArte.luau`,
+    gerado por `--luau`);
+  - guarda a SurfaceAppearance numa pasta da peça e devolve tudo ao tirar a skin. Script não pode
+    trocar o mapa de cor de uma SurfaceAppearance, por isso a troca de textura;
+  - a textura sobe como **Decal** (como as imagens do chão e da loja) e o ID da imagem é
+    resolvido no Studio (`--resolver`, `assets/acabamentos_imagens.json`);
+  - no Studio, cada textura nova no `TextureID` escreve 3 avisos "No asset content
+    representation" no Output, com Image ou Decal e mesmo pré-carregada. A textura carrega e
+    aparece;
+  - a roleta pré-carrega as texturas das armas antes de girar, junto dos moldes de roupa. Sem isso
+    a arma aparece clara por um instante.
+- **Itens de cartão:** cor de degradê (`cor3`). O fundo do emblema, a plaqueta e a borda da
+  moldura passam de `cor` para `cor3` (UIGradient a 45°), no cartão do jogador e nas imagens das
+  caixas e do ARQUIVO. A sigla do emblema fica na cor dela.
+- **Nas caixas, sem mudar nenhuma porcentagem** (`Caixas.acrescentar`):
+  - dentro de cada raridade, os pesos são redivididos. O total da raridade fica igual e cada item
+    novo pesa como a média dos antigos dela (pesos inteiros, maior resto);
+  - todo item novo está numa caixa grátis e na de Suprimentos:
+    - Recruta e Recompensa recebem os comuns;
+    - Recompensa e Serviço, os incomuns;
+    - Serviço, Batalhão e Campanha dividem os raros;
+    - Campanha e Veterano, os épicos;
+    - Veterano, os lendários;
+  - nas pagas, Suprimentos recebe os 100, Equipamentos Especiais de incomum a lendário e Arsenal de
+    Elite de raro a lendário. A Operações Históricas não muda;
+  - a caixa que mudou subiu de versão (o resultado gravado guarda a versão da tabela).
+- **Traduções:** 200 textos em inglês, espanhol e vietnamita. As siglas e os nomes em inglês dos
+  itens de cartão foram para o `ignorar.json`.
+- **Conferido:** Lune 697 ok na suíte (caixas 27, skins 17, arquivo 9), pytest 67
+  (`test_acabamentos` 6). No Studio:
+  - troca → equipar → campo, com a M14 de 1ª e 3ª pessoa no Tigre de Fogo;
+  - a roleta parou no item do servidor (índice 42, desvio de 0,5 px) e o EQUIPAR pôs a textura
+    na M60;
+  - o degradê no cartão aparece e some ao trocar;
+  - 0 erros. Detalhes em `testes/ACABAMENTOS_D178_2026-11-16.md`.

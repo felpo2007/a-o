@@ -21,6 +21,8 @@
 -- No perfil (ProfileSchema.skins): `owned` (comprados com $ ou por Developer Product) e `on`
 -- (equipado por lado e por encaixe: id da arma, "uniform" ou "camo").
 local Progression = require(script and (script :: any).Parent.Progression or "./Progression") :: any
+-- D-178: a textura de cada acabamento (gerada por tools/acabamentos.py: skinId -> id da imagem)
+local AcabamentosArte = require(script and (script :: any).Parent.AcabamentosArte or "./AcabamentosArte") :: any
 
 local Skins = {}
 
@@ -160,6 +162,8 @@ export type Skin = {
 	camo: string?, -- camuflagem: "rice" | "jungle" | "bamboo" (atributo "Camo", BotBrain)
 	texture: string?, -- camuflagem: chave da textura em AssetIds.Images
 	soPasse: boolean?, -- D-176: só pelo conjunto em Game Pass (robuxKey); não se compra com $
+	soCaixa: boolean?, -- D-178: só nas caixas e na troca de Fragmentos (robuxKey "CAIXA")
+	arte: any?, -- D-178: { receita, cores, alvo } da textura gerada (tools/acabamentos.py)
 }
 
 local function base(id: string, kind: string, side: string, tier: string, key: string, name: string, desc: string): Skin
@@ -734,6 +738,642 @@ do
 	table.insert(Skins.CATALOG, s)
 end
 
+-- ===== D-178: ARSENAL EXTRAVAGANTE (pedido do dono: "100 novas skins e itens ... bem
+-- extravagantes"). Só nas caixas e na troca de Fragmentos (`soCaixa`: fora do $ da Intendência e
+-- do Mercado). Nomes e desenhos próprios: a inspiração é o estilo de pintura de jogos de tiro, sem
+-- copiar nome nem desenho de nenhum. O desenho sai de `arte` (tools/acabamentos.py): a receita do
+-- padrão em 3D (contínuo na arma inteira, por cima da sombra e dos detalhes da textura original),
+-- as cores e onde pinta ("tudo", "metal" ou "madeira"). `finish` é a cor de reserva da arma
+-- provisória (Shared/GunModel). Todos são só visuais.
+export type Arte = { receita: string, cores: { { number } }, alvo: string }
+local EXTRAVAGANTES: { { any } } = {
+	-- id, arma, lado, nome, descrição, receita, cores, alvo
+	-- M14
+	{
+		"skin_m14_tigre_fogo",
+		"m14",
+		"US",
+		"M14 · Tigre de Fogo",
+		"Listras de tigre laranja e preto da coronha à boca do cano.",
+		"tigre",
+		{ { 238, 110, 26 }, { 20, 16, 14 } },
+		"tudo",
+	},
+	{
+		"skin_m14_por_do_sol",
+		"m14",
+		"US",
+		"M14 · Pôr do Sol",
+		"Degradê do amarelo ao magenta, como o céu de Chu Lai no fim da tarde.",
+		"fade",
+		{ { 252, 206, 64 }, { 240, 96, 40 }, { 168, 40, 120 } },
+		"tudo",
+	},
+	{
+		"skin_m14_damasco_azul",
+		"m14",
+		"US",
+		"M14 · Damasco Azul",
+		"Aço damasco em ondas, azulado a fogo.",
+		"damasco",
+		{ { 120, 150, 196 }, { 22, 30, 52 } },
+		"metal",
+	},
+	{
+		"skin_m14_selva_eletrica",
+		"m14",
+		"US",
+		"M14 · Selva Elétrica",
+		"Manchas de mata em verde-limão, preto e petróleo.",
+		"camo",
+		{ { 150, 230, 40 }, { 16, 20, 18 }, { 20, 110, 96 }, { 70, 90, 30 } },
+		"tudo",
+	},
+	{
+		"skin_m14_carbono",
+		"m14",
+		"US",
+		"M14 · Trama de Carbono",
+		"Trama de carbono preta e cinza no metal.",
+		"carbono",
+		{ { 18, 18, 20 }, { 74, 76, 82 } },
+		"metal",
+	},
+	{
+		"skin_m14_laca_vermelha",
+		"m14",
+		"US",
+		"M14 · Laca Vermelha e Ouro",
+		"Coronha em laca vermelha de Huế com flocos de ouro.",
+		"laca",
+		{ { 150, 22, 24 }, { 236, 190, 80 } },
+		"madeira",
+	},
+	-- M16
+	{
+		"skin_m16_aurora",
+		"m16",
+		"US",
+		"M16 · Aurora",
+		"Do verde ao violeta, como a luz do norte.",
+		"fade",
+		{ { 60, 240, 150 }, { 40, 170, 220 }, { 140, 60, 210 } },
+		"tudo",
+	},
+	{
+		"skin_m16_pixel_neon",
+		"m16",
+		"US",
+		"M16 · Pixel Neon",
+		"Quadradinhos magenta, ciano e preto.",
+		"digital",
+		{ { 240, 40, 170 }, { 30, 220, 230 }, { 14, 14, 20 }, { 90, 30, 140 } },
+		"tudo",
+	},
+	{
+		"skin_m16_cromo",
+		"m16",
+		"US",
+		"M16 · Cromo Espelhado",
+		"Cromo claro com reflexos frios.",
+		"cromo",
+		{ { 236, 240, 246 }, { 70, 78, 92 }, { 180, 210, 240 } },
+		"tudo",
+	},
+	{
+		"skin_m16_colmeia_neon",
+		"m16",
+		"US",
+		"M16 · Colmeia Neon",
+		"Grade de hexágonos ciano sobre preto.",
+		"hex",
+		{ { 14, 16, 22 }, { 40, 230, 240 } },
+		"tudo",
+	},
+	{
+		"skin_m16_artico",
+		"m16",
+		"US",
+		"M16 · Ártico",
+		"Manchas de neve, gelo e cinza.",
+		"camo",
+		{ { 236, 240, 244 }, { 170, 186, 200 }, { 96, 108, 122 }, { 200, 220, 236 } },
+		"tudo",
+	},
+	{
+		"skin_m16_zebra",
+		"m16",
+		"US",
+		"M16 · Zebra",
+		"Listras pretas e brancas, sem meio-termo.",
+		"zebra",
+		{ { 240, 240, 236 }, { 16, 16, 16 } },
+		"tudo",
+	},
+	-- M60
+	{
+		"skin_m60_escamas_rubras",
+		"m60",
+		"US",
+		"M60 · Escamas Rubras",
+		"Escamas vermelhas com a borda dourada.",
+		"escamas",
+		{ { 168, 24, 30 }, { 230, 180, 70 }, { 250, 110, 80 } },
+		"tudo",
+	},
+	{
+		"skin_m60_lava_viva",
+		"m60",
+		"US",
+		"M60 · Lava Viva",
+		"Rocha negra rachada com o fogo por baixo.",
+		"lava",
+		{ { 22, 18, 18 }, { 250, 110, 20 }, { 255, 220, 90 } },
+		"tudo",
+	},
+	{
+		"skin_m60_noite_urbana",
+		"m60",
+		"US",
+		"M60 · Noite Urbana",
+		"Manchas cinza-azuladas de cidade à noite.",
+		"camo",
+		{ { 52, 60, 76 }, { 24, 28, 36 }, { 110, 118, 132 }, { 74, 84, 104 } },
+		"tudo",
+	},
+	{
+		"skin_m60_carbono_vermelho",
+		"m60",
+		"US",
+		"M60 · Carbono Vermelho",
+		"Trama de carbono com fio vermelho.",
+		"carbono",
+		{ { 26, 12, 14 }, { 170, 30, 34 } },
+		"metal",
+	},
+	{
+		"skin_m60_tempestade",
+		"m60",
+		"US",
+		"M60 · Tempestade",
+		"Relâmpagos azuis cortando o metal escuro.",
+		"raio",
+		{ { 16, 20, 34 }, { 120, 210, 255 } },
+		"tudo",
+	},
+	-- M1911A1
+	{
+		"skin_m1911_ouro_polido",
+		"m1911",
+		"US",
+		"M1911A1 · Ouro Polido",
+		"A pistola inteira em ouro, com talas de nogueira.",
+		"ouro",
+		{ { 236, 190, 70 }, { 120, 80, 20 } },
+		"metal",
+	},
+	{
+		"skin_m1911_madreperola",
+		"m1911",
+		"US",
+		"M1911A1 · Madrepérola",
+		"Laca negra com incrustação de madrepérola.",
+		"laca",
+		{ { 16, 16, 20 }, { 220, 236, 236 } },
+		"tudo",
+	},
+	{
+		"skin_m1911_carrara",
+		"m1911",
+		"US",
+		"M1911A1 · Mármore Carrara",
+		"Branco com veios cinza, como pedra polida.",
+		"marmore",
+		{ { 236, 234, 228 }, { 120, 120, 124 }, { 180, 178, 176 } },
+		"tudo",
+	},
+	{
+		"skin_m1911_ouro_rosa",
+		"m1911",
+		"US",
+		"M1911A1 · Ouro Rosa",
+		"Aço banhado em ouro rosa escovado.",
+		"ouro",
+		{ { 232, 150, 130 }, { 120, 60, 50 } },
+		"metal",
+	},
+	{
+		"skin_m1911_damasco_cinza",
+		"m1911",
+		"US",
+		"M1911A1 · Damasco Cinza",
+		"Ondas de aço damasco claro e escuro.",
+		"damasco",
+		{ { 190, 192, 196 }, { 46, 48, 52 } },
+		"metal",
+	},
+	-- Winchester M70
+	{
+		"skin_m70_carta",
+		"m70",
+		"US",
+		"Winchester M70 · Carta Topográfica",
+		"As curvas de nível da carta de Van Tuong por todo o fuzil.",
+		"topo",
+		{ { 222, 210, 172 }, { 150, 104, 60 }, { 70, 110, 150 } },
+		"tudo",
+	},
+	{
+		"skin_m70_marmore_negro",
+		"m70",
+		"US",
+		"Winchester M70 · Mármore Negro",
+		"Pedra negra com veios de ouro.",
+		"marmore",
+		{ { 18, 18, 20 }, { 220, 176, 70 }, { 90, 80, 60 } },
+		"tudo",
+	},
+	{
+		"skin_m70_bambu",
+		"m70",
+		"US",
+		"Winchester M70 · Bambu Dourado",
+		"Coronha em gomos de bambu claro.",
+		"bambu",
+		{ { 206, 176, 96 }, { 120, 92, 40 } },
+		"madeira",
+	},
+	{
+		"skin_m70_deserto_rosa",
+		"m70",
+		"US",
+		"Winchester M70 · Deserto Rosa",
+		"Manchas de areia, rosa e terra.",
+		"camo",
+		{ { 226, 176, 170 }, { 200, 170, 120 }, { 150, 100, 80 }, { 240, 210, 190 } },
+		"tudo",
+	},
+	{
+		"skin_m70_nebulosa",
+		"m70",
+		"US",
+		"Winchester M70 · Nebulosa",
+		"Nuvens roxas e azuis com estrelas.",
+		"galaxia",
+		{ { 10, 8, 24 }, { 130, 50, 190 }, { 40, 110, 210 }, { 255, 255, 255 } },
+		"tudo",
+	},
+	-- Winchester 12
+	{
+		"skin_win12_chamas",
+		"win12",
+		"US",
+		"Winchester 12 · Chamas Clássicas",
+		"Chamas laranja e amarelas saindo da culatra, sobre preto.",
+		"chamas",
+		{ { 18, 16, 16 }, { 240, 90, 20 }, { 255, 210, 60 } },
+		"tudo",
+	},
+	{
+		"skin_win12_zebra_vermelha",
+		"win12",
+		"US",
+		"Winchester 12 · Zebra Vermelha",
+		"Listras vermelhas e pretas.",
+		"zebra",
+		{ { 200, 30, 34 }, { 16, 14, 14 } },
+		"tudo",
+	},
+	{
+		"skin_win12_outono",
+		"win12",
+		"US",
+		"Winchester 12 · Outono",
+		"Manchas de folha seca: laranja, vinho e marrom.",
+		"camo",
+		{ { 210, 110, 40 }, { 120, 40, 34 }, { 90, 60, 36 }, { 230, 170, 70 } },
+		"tudo",
+	},
+	{
+		"skin_win12_titanio",
+		"win12",
+		"US",
+		"Winchester 12 · Titânio Queimado",
+		"Aço tratado a fogo: azul, roxo e dourado.",
+		"anodizado",
+		{ { 60, 80, 200 }, { 150, 60, 170 }, { 230, 180, 80 } },
+		"metal",
+	},
+	{
+		"skin_win12_pixel_floresta",
+		"win12",
+		"US",
+		"Winchester 12 · Pixel Floresta",
+		"Quadradinhos verdes e marrons.",
+		"digital",
+		{ { 84, 110, 52 }, { 50, 66, 34 }, { 110, 88, 58 }, { 150, 150, 100 } },
+		"tudo",
+	},
+	-- Tipo 56
+	{
+		"skin_type56_serpente",
+		"type56",
+		"VC",
+		"Tipo 56 · Escamas de Serpente",
+		"Escamas verde-oliva com a borda negra.",
+		"escamas",
+		{ { 96, 120, 44 }, { 20, 24, 14 }, { 170, 190, 80 } },
+		"tudo",
+	},
+	{
+		"skin_type56_furta_cor",
+		"type56",
+		"VC",
+		"Tipo 56 · Furta-cor",
+		"Película de óleo que muda de cor com a luz.",
+		"oleo",
+		{ { 255, 255, 255 } },
+		"tudo",
+	},
+	{
+		"skin_type56_jade",
+		"type56",
+		"VC",
+		"Tipo 56 · Jade Imperial",
+		"Pedra de jade verde com veios claros.",
+		"jade",
+		{ { 120, 200, 140 }, { 20, 90, 60 } },
+		"tudo",
+	},
+	{
+		"skin_type56_tigre_branco",
+		"type56",
+		"VC",
+		"Tipo 56 · Tigre Branco",
+		"Listras pretas sobre branco e cinza.",
+		"tigre",
+		{ { 230, 230, 226 }, { 20, 20, 22 } },
+		"tudo",
+	},
+	{
+		"skin_type56_sangue_ouro",
+		"type56",
+		"VC",
+		"Tipo 56 · Sangue e Ouro",
+		"Degradê do vermelho-sangue ao ouro.",
+		"fade",
+		{ { 120, 10, 16 }, { 200, 40, 30 }, { 240, 190, 70 } },
+		"tudo",
+	},
+	{
+		"skin_type56_pixel_oceano",
+		"type56",
+		"VC",
+		"Tipo 56 · Pixel Oceano",
+		"Quadradinhos azuis do raso ao fundo.",
+		"digital",
+		{ { 40, 130, 200 }, { 20, 60, 120 }, { 120, 200, 230 }, { 10, 30, 70 } },
+		"tudo",
+	},
+	-- SKS
+	{
+		"skin_sks_laca_negra",
+		"sks",
+		"VC",
+		"SKS · Laca Negra e Ouro",
+		"Laca negra com folha de ouro, como os painéis de sơn mài.",
+		"laca",
+		{ { 14, 12, 12 }, { 230, 180, 70 } },
+		"madeira",
+	},
+	{
+		"skin_sks_mar_profundo",
+		"sks",
+		"VC",
+		"SKS · Mar Profundo",
+		"Degradê do verde-água ao azul-marinho.",
+		"fade",
+		{ { 60, 200, 190 }, { 20, 110, 150 }, { 10, 30, 80 } },
+		"tudo",
+	},
+	{
+		"skin_sks_malaquita",
+		"sks",
+		"VC",
+		"SKS · Malaquita",
+		"Faixas verdes em ondas, como a pedra.",
+		"malaquita",
+		{ { 30, 140, 90 }, { 10, 60, 40 }, { 120, 220, 170 } },
+		"tudo",
+	},
+	{
+		"skin_sks_tigre_jade",
+		"sks",
+		"VC",
+		"SKS · Tigre de Jade",
+		"Listras negras sobre verde-jade.",
+		"tigre",
+		{ { 90, 180, 120 }, { 14, 30, 22 } },
+		"tudo",
+	},
+	{
+		"skin_sks_chamas_azuis",
+		"sks",
+		"VC",
+		"SKS · Chamas Azuis",
+		"Chamas azuis e brancas sobre preto.",
+		"chamas",
+		{ { 14, 16, 26 }, { 40, 110, 240 }, { 190, 230, 255 } },
+		"tudo",
+	},
+	{
+		"skin_sks_carbono",
+		"sks",
+		"VC",
+		"SKS · Trama de Carbono",
+		"Trama de carbono no metal.",
+		"carbono",
+		{ { 18, 18, 20 }, { 74, 76, 82 } },
+		"metal",
+	},
+	-- RPD
+	{
+		"skin_rpd_gelo",
+		"rpd",
+		"VC",
+		"RPD · Gelo Rachado",
+		"Gelo branco-azulado com rachaduras.",
+		"lava",
+		{ { 220, 236, 248 }, { 60, 120, 200 }, { 150, 200, 240 } },
+		"tudo",
+	},
+	{
+		"skin_rpd_escamas_abissais",
+		"rpd",
+		"VC",
+		"RPD · Escamas Abissais",
+		"Escamas roxas e verde-água do fundo do mar.",
+		"escamas",
+		{ { 70, 30, 120 }, { 30, 200, 190 }, { 180, 120, 240 } },
+		"tudo",
+	},
+	{
+		"skin_rpd_raio_vermelho",
+		"rpd",
+		"VC",
+		"RPD · Raio Vermelho",
+		"Relâmpagos vermelhos no metal escuro.",
+		"raio",
+		{ { 22, 12, 14 }, { 255, 70, 60 } },
+		"tudo",
+	},
+	{
+		"skin_rpd_colmeia_ambar",
+		"rpd",
+		"VC",
+		"RPD · Colmeia Âmbar",
+		"Grade de hexágonos âmbar sobre marrom.",
+		"hex",
+		{ { 40, 26, 14 }, { 240, 160, 40 } },
+		"tudo",
+	},
+	{
+		"skin_rpd_via_lactea",
+		"rpd",
+		"VC",
+		"RPD · Via Láctea",
+		"Faixa de estrelas sobre o céu escuro.",
+		"galaxia",
+		{ { 6, 8, 18 }, { 40, 60, 130 }, { 120, 110, 170 }, { 255, 250, 230 } },
+		"tudo",
+	},
+	{
+		"skin_rpd_selva_escura",
+		"rpd",
+		"VC",
+		"RPD · Selva Escura",
+		"Manchas de mata fechada à noite.",
+		"camo",
+		{ { 30, 46, 30 }, { 14, 20, 14 }, { 60, 74, 46 }, { 40, 34, 24 } },
+		"tudo",
+	},
+	-- Tipo 54
+	{
+		"skin_type54_ouro_negro",
+		"type54",
+		"VC",
+		"Tipo 54 · Ouro Negro",
+		"Armação negra com o ferrolho em ouro.",
+		"ouro",
+		{ { 230, 182, 64 }, { 20, 18, 16 } },
+		"tudo",
+	},
+	{
+		"skin_type54_damasco_ouro",
+		"type54",
+		"VC",
+		"Tipo 54 · Damasco Ouro",
+		"Ondas de damasco em ouro e aço.",
+		"damasco",
+		{ { 236, 190, 90 }, { 70, 56, 30 } },
+		"metal",
+	},
+	{
+		"skin_type54_cromo_azul",
+		"type54",
+		"VC",
+		"Tipo 54 · Cromo Azul",
+		"Cromo com o reflexo azul.",
+		"cromo",
+		{ { 200, 220, 250 }, { 30, 50, 100 }, { 120, 170, 240 } },
+		"tudo",
+	},
+	{
+		"skin_type54_carta_noturna",
+		"type54",
+		"VC",
+		"Tipo 54 · Carta Noturna",
+		"Curvas de nível verdes brilhando no preto.",
+		"topo",
+		{ { 10, 16, 12 }, { 50, 200, 90 }, { 140, 255, 160 } },
+		"tudo",
+	},
+	{
+		"skin_type54_artico",
+		"type54",
+		"VC",
+		"Tipo 54 · Ártico",
+		"Manchas de neve e gelo.",
+		"camo",
+		{ { 236, 240, 244 }, { 170, 186, 200 }, { 96, 108, 122 }, { 200, 220, 236 } },
+		"tudo",
+	},
+	-- Mosin-Nagant
+	{
+		"skin_mosin_laca_vermelha",
+		"mosin",
+		"VC",
+		"Mosin-Nagant · Laca Vermelha e Ouro",
+		"Coronha longa em laca vermelha com ouro.",
+		"laca",
+		{ { 150, 22, 24 }, { 236, 190, 80 } },
+		"madeira",
+	},
+	{
+		"skin_mosin_bambu_negro",
+		"mosin",
+		"VC",
+		"Mosin-Nagant · Bambu Negro",
+		"Gomos de bambu escuro na coronha.",
+		"bambu",
+		{ { 50, 44, 30 }, { 14, 12, 8 } },
+		"madeira",
+	},
+	{
+		"skin_mosin_nebulosa_rubra",
+		"mosin",
+		"VC",
+		"Mosin-Nagant · Nebulosa Rubra",
+		"Nuvens vermelhas e laranja com estrelas.",
+		"galaxia",
+		{ { 14, 6, 10 }, { 190, 40, 50 }, { 240, 130, 40 }, { 255, 240, 220 } },
+		"tudo",
+	},
+	{
+		"skin_mosin_selva_eletrica",
+		"mosin",
+		"VC",
+		"Mosin-Nagant · Selva Elétrica",
+		"Manchas verde-limão, preto e petróleo.",
+		"camo",
+		{ { 150, 230, 40 }, { 16, 20, 18 }, { 20, 110, 96 }, { 70, 90, 30 } },
+		"tudo",
+	},
+	{
+		"skin_mosin_inverno",
+		"mosin",
+		"VC",
+		"Mosin-Nagant · Inverno",
+		"Branco de inverno com a coronha clara.",
+		"camo",
+		{ { 236, 236, 232 }, { 200, 200, 196 }, { 150, 150, 146 }, { 220, 216, 206 } },
+		"tudo",
+	},
+}
+Skins.EXTRAVAGANTES = EXTRAVAGANTES
+for _, e in EXTRAVAGANTES do
+	local cores = e[7] :: { { number } }
+	local s = weapon(e[1], e[2], e[3], "weapon_plus", "CAIXA", e[4], e[5], {
+		metal = cores[1],
+		wood = cores[2] or cores[1],
+		handguard = cores[2] or cores[1],
+	})
+	s.soCaixa = true
+	s.arte = { receita = e[6], cores = cores, alvo = e[8] }
+	s.check = "estilo"
+	table.insert(Skins.CATALOG, s)
+end
+
 local byId: { [string]: Skin } = {}
 for _, s in Skins.CATALOG do
 	byId[s.id] = s
@@ -802,6 +1442,8 @@ function Skins.canBuy(
 		return false, "já é sua"
 	elseif s.soPasse then
 		return false, "só no conjunto em Game Pass"
+	elseif s.soCaixa then
+		return false, "só nas caixas"
 	elseif money < s.price then
 		return false, string.format("faltam %s", Progression.money(s.price - money))
 	end
@@ -953,6 +1595,38 @@ end
 function Skins.applyWeapon(model: Instance, skinId: string?)
 	local found = if skinId then Skins.get(skinId) else nil
 	local skin: Skin? = if found and found.kind == "weapon" then found else nil
+	-- D-178: a arte das armas é uma malha só com a textura inteira (SurfaceAppearance), sem as peças
+	-- Madeira/Metal: o acabamento troca a textura pela gerada (AcabamentosArte) e guarda a
+	-- SurfaceAppearance numa pasta da peça (fora do ar) para voltar ao tirar a skin.
+	local tex = if skin then AcabamentosArte[skin.id] else nil
+	for _, d in model:GetDescendants() do
+		if d:IsA("MeshPart") then
+			local sa = d:FindFirstChildOfClass("SurfaceAppearance")
+			local guarda = d:FindFirstChild("VT65SkinSA")
+			if d:GetAttribute("SkinBaseTex") == nil then
+				d:SetAttribute("SkinBaseTex", d.TextureID)
+			end
+			if type(tex) == "number" and tex ~= 0 and (sa or guarda) then
+				if sa then
+					if not guarda then
+						local f = Instance.new("Folder")
+						f.Name = "VT65SkinSA"
+						f.Parent = d
+						guarda = f
+					end
+					sa.Parent = guarda
+				end
+				d.TextureID = "rbxassetid://" .. tex
+			elseif guarda then
+				local g = guarda:FindFirstChildOfClass("SurfaceAppearance")
+				if g then
+					g.Parent = d
+				end
+				local bt = d:GetAttribute("SkinBaseTex")
+				d.TextureID = if type(bt) == "string" then bt else ""
+			end
+		end
+	end
 	for _, d in model:GetDescendants() do
 		if d:IsA("BasePart") then
 			local cls = Skins.partClass(d.Name)

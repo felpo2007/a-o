@@ -56,9 +56,9 @@ test("todas as caixas passam na validação e somam exatamente 100%", function()
 	end
 end)
 
-test("caixa de suprimentos: 60/25/10/4/1 e 26 itens (a tabela do pedido)", function()
+test("caixa de suprimentos: 60/25/10/4/1 e 126 itens (a tabela do pedido + os 100 da D-178)", function()
 	local c = Caixas.get("suprimentos")
-	assert(#c.itens == 26)
+	assert(#c.itens == 126, #c.itens)
 	local t = Caixas.porRaridade(c, Cosmeticos.info, nil)
 	assert(t.comum == 60000 and t.incomum == 25000 and t.raro == 10000, "60/25/10")
 	assert(t.epico == 4000 and t.lendario == 1000, "4/1")
@@ -67,7 +67,7 @@ test("caixa de suprimentos: 60/25/10/4/1 e 26 itens (a tabela do pedido)", funct
 		local r = Cosmeticos.info(e.item).raridade
 		n[r] = (n[r] or 0) + 1
 	end
-	assert(n.comum == 10 and n.incomum == 5 and n.raro == 5 and n.epico == 4 and n.lendario == 2)
+	assert(n.comum == 19 and n.incomum == 23 and n.raro == 34 and n.epico == 32 and n.lendario == 18)
 end)
 
 test("a raridade é do item: nenhuma caixa tem item com vantagem de jogo", function()
@@ -472,6 +472,76 @@ test("D-174: os marcos chamam darCaixa no servidor (treino, posto, missão da se
 	-- a compra direta passa pela gravação atômica, que junta os créditos da sessão antes
 	tem("src/ServerScriptService/Modules/CaixaService.luau", "CaixaRegras.comprarCreditos(p, item, os.time())")
 	tem("src/ServerScriptService/Modules/PlayerData.luau", "deltaUsado")
+end)
+
+-- ===== D-178: os 100 itens novos =====
+test("D-178: 100 itens novos, nas caixas sem mudar a fatia de nenhuma raridade", function()
+	local n = 0
+	for _, l in Caixas.NOVOS_D178 do
+		n += #l
+	end
+	assert(n == 100, "100 itens: " .. n)
+	-- as porcentagens por raridade de antes (MONETIZATION.md), caixa por caixa
+	local ANTES = {
+		gratuita = { 82000, 13000, 3000, 1000, 1000 },
+		recruta = { 84000, 11000, 3000, 1500, 500 },
+		servico = { 39000, 43000, 16000, 1500, 500 },
+		batalhao = { 42000, 30000, 24000, 3000, 1000 },
+		campanha = { 0, 55000, 30000, 13000, 2000 },
+		veterano = { 0, 0, 44000, 46000, 10000 },
+		suprimentos = { 60000, 25000, 10000, 4000, 1000 },
+		especiais = { 0, 45000, 36000, 16000, 3000 },
+		elite = { 0, 0, 40000, 48000, 12000 },
+		historica = { 0, 50000, 30000, 15000, 5000 },
+	}
+	for id, v in ANTES do
+		local t = Caixas.porRaridade(Caixas.get(id), Cosmeticos.info, nil)
+		for i, r in Caixas.RARIDADES do
+			assert((t[r.id] or 0) == v[i], string.format("%s %s: %d (era %d)", id, r.id, t[r.id] or 0, v[i]))
+		end
+	end
+	-- cada novo numa caixa grátis e na de Suprimentos; nenhum peso zerado
+	local gratis, sup = {}, {}
+	for _, c in Caixas.CAIXAS do
+		for _, e in c.itens do
+			assert(e.peso >= 1 and e.peso == math.floor(e.peso), c.id .. " " .. e.item)
+			if c.tipo == "gratuita" then
+				gratis[e.item] = true
+			end
+			if c.id == "suprimentos" then
+				sup[e.item] = true
+			end
+		end
+	end
+	for _, l in Caixas.NOVOS_D178 do
+		for _, id in l do
+			assert(gratis[id], id .. " sem caixa grátis")
+			assert(sup[id], id .. " fora da de Suprimentos")
+			local info = Cosmeticos.info(id)
+			assert(info and not info.vantagem and not info.exclusivo, id)
+		end
+	end
+	-- a regra de acrescentar recusa raridade que a caixa não tem
+	assert(not pcall(Caixas.acrescentar, Caixas.get("elite").itens, { "skin_m14_carbono" }, Cosmeticos.info))
+end)
+
+test("D-178: o acabamento extravagante sai só das caixas e da troca", function()
+	local Skins = require(S .. "Skins") :: any
+	local n = 0
+	for _, s in Skins.CATALOG do
+		if s.soCaixa then
+			n += 1
+			assert(s.kind == "weapon" and Skins.robuxId(s) == 0, s.id)
+			local ok, why = Skins.canBuy(s.id, {}, {}, 1e9)
+			assert(not ok and why == "só nas caixas", s.id)
+			local naTroca = false
+			for _, t in CaixaRegras.troca() do
+				naTroca = naTroca or t.item == s.id
+			end
+			assert(naTroca, s.id .. " fora da troca")
+		end
+	end
+	assert(n == 60, "60 acabamentos: " .. n)
 end)
 
 -- ===== produtos, temporada e servidor =====

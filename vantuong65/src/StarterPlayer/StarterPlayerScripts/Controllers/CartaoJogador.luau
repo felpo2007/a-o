@@ -79,6 +79,25 @@ local function rgb(t: any, def: Color3): Color3
 	return if type(t) == "table" and #t >= 3 then Color3.fromRGB(t[1], t[2], t[3]) else def
 end
 local DEFAULT_EMBLEM, DEFAULT_TITLE = "emb_padrao", "tit_soldado"
+-- D-178: degradê cor -> cor3 dos cosméticos extravagantes (nil apaga). Devolve se ligou.
+local function degrade(obj: Instance, c1: Color3, c3: Color3?): boolean
+	local g = obj:FindFirstChild("Degrade")
+	if not c3 then
+		if g then
+			g:Destroy()
+		end
+		return false
+	end
+	if not g then
+		local n = Instance.new("UIGradient")
+		n.Name = "Degrade"
+		n.Rotation = 45
+		n.Parent = obj
+		g = n
+	end
+	(g :: UIGradient).Color = ColorSequence.new(c1, c3)
+	return true
+end
 
 -- medalhas: do Shared/Medalhas (LIST: id, name, desc); sem o módulo, vazio
 export type Medal = { id: string, name: string, cond: string }
@@ -258,6 +277,16 @@ function CartaoJogador.placa(parent: Instance, w: number, h: number): Placa
 	bar.BorderSizePixel = 0
 	bar.Parent = f
 	local E = h - px(24, 32)
+	-- D-178: fundo do emblema por baixo (o degradê não pode tingir a sigla)
+	local emblemFundo = Instance.new("Frame")
+	emblemFundo.Name = "EmblemaFundo"
+	emblemFundo.BorderSizePixel = 0
+	emblemFundo.Position = UDim2.fromOffset(px(16, 22), px(12, 16))
+	emblemFundo.Size = UDim2.fromOffset(E, E)
+	emblemFundo.BackgroundColor3 = Color3.new(1, 1, 1)
+	emblemFundo.Visible = false
+	UiKit.corner(emblemFundo, 4)
+	emblemFundo.Parent = f
 	local emblem = UiKit.text2(f, "★", math.floor(E * 0.5), V.KHAKI, F.TITLE)
 	emblem.Position = UDim2.fromOffset(px(16, 22), px(12, 16))
 	emblem.Size = UDim2.fromOffset(E, E)
@@ -326,9 +355,15 @@ function CartaoJogador.placa(parent: Instance, w: number, h: number): Placa
 		end
 		emblem.BackgroundColor3 = rgb(ce and ce.cor, V.PANEL_3)
 		emblem.TextColor3 = rgb(ce and ce.cor2, V.KHAKI)
+		local c3e: Color3? = if ce and ce.cor3 then rgb(ce.cor3, V.PANEL_3) else nil
+		emblemFundo.Visible = degrade(emblemFundo, rgb(ce and ce.cor, V.PANEL_3), c3e)
+		emblem.BackgroundTransparency = if emblemFundo.Visible then 1 else 0
 		-- moldura e plaqueta escolhidas (atributos do CaixaService)
 		local mol = cosmetico(player:GetAttribute("VT65Moldura"))
 		edge.Color = rgb(mol and mol.cor, V.KHAKI)
+		if degrade(edge, rgb(mol and mol.cor, V.KHAKI), if mol and mol.cor3 then rgb(mol.cor3, V.KHAKI) else nil) then
+			edge.Color = Color3.new(1, 1, 1)
+		end
 		edge.Thickness = if mol then 2.5 else 1
 		edge.Transparency = if mol then 0 else 0.55
 		bar.BackgroundColor3 = rgb(mol and mol.cor2, V.KHAKI)
@@ -336,6 +371,9 @@ function CartaoJogador.placa(parent: Instance, w: number, h: number): Placa
 		tag.Visible = tg ~= nil
 		if tg then
 			tag.BackgroundColor3 = rgb(tg.cor, V.DIM)
+			if degrade(tag, rgb(tg.cor, V.DIM), if tg.cor3 then rgb(tg.cor3, V.DIM) else nil) then
+				tag.BackgroundColor3 = Color3.new(1, 1, 1)
+			end
 			tagEdge.Color = rgb(tg.cor2, V.LINE)
 			tagText.Text = UiKit.upper(player.DisplayName)
 		end

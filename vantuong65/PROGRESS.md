@@ -365,6 +365,21 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     - Resultado: o cartão ampliado, a raridade, luz e som, e os botões EQUIPAR e VOLTAR.
     - Testar em várias resoluções que ela para sempre no item do servidor.
 
+- Pedido do dono (16/11): "crie 100 novas skins e itens para ganhar nessas caixas, podem ser bem
+  extravagantes se inspire no cs battlefield e outros jogos faça com maestria".
+  - **Lote 62 (D-178): 100 itens novos nas caixas.**
+    - 60 acabamentos de arma extravagantes, com textura de verdade pintada na malha de cada arma
+      (tigre, degradê, damasco, carbono, cromo, laca com ouro, escamas, lava, raio, galáxia,
+      chamas, pixel, jade, mármore, carta topográfica e mais).
+    - 40 itens de cartão (14 emblemas, 13 plaquetas, 13 molduras) com cor em degradê.
+    - Nas caixas sem mudar a fatia de nenhuma raridade; todo item novo sai de uma caixa grátis.
+      Os acabamentos novos não se compram ($ ou Robux): só caixa e troca de Fragmentos.
+    - Conserto: os 23 acabamentos de antes não apareciam na arma (a malha é uma só); agora têm
+      textura.
+    - Conferido: Lune 697 ok, pytest 67. No Studio: troca → equipar → campo com a textura na
+      arma de 1ª e 3ª pessoa; a roleta parou no item do servidor; o degradê no cartão; 0 erros.
+    - **v102 publicada** (versão 107 do place, commit PENDENTE).
+
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;
   - respondido pelo dono: a M14 fica como está; o capim clareou (v58);

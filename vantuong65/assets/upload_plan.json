@@ -1903,5 +1903,586 @@
   "assetType": "Audio",
   "name": "VT65 roleta_lendario",
   "description": "VAN TUONG 65 - roleta das caixas: dois sinos em quinta (épico, lendário) (tools/sons_roleta.py, D-177)"
+ },
+ {
+  "key": "Acab.skin_m14_birch",
+  "file": "assets/acabamentos/skin_m14_birch.png",
+  "assetType": "Decal",
+  "name": "Acabamento m14_birch",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_m14_tape",
+  "file": "assets/acabamentos/skin_m14_tape.png",
+  "assetType": "Decal",
+  "name": "Acabamento m14_tape",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_m14_worn",
+  "file": "assets/acabamentos/skin_m14_worn.png",
+  "assetType": "Decal",
+  "name": "Acabamento m14_worn",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_m60_od",
+  "file": "assets/acabamentos/skin_m60_od.png",
+  "assetType": "Decal",
+  "name": "Acabamento m60_od",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_m60_worn",
+  "file": "assets/acabamentos/skin_m60_worn.png",
+  "assetType": "Decal",
+  "name": "Acabamento m60_worn",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_m79_walnut",
+  "file": "assets/acabamentos/skin_m79_walnut.png",
+  "assetType": "Decal",
+  "name": "Acabamento m79_walnut",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_m79_od",
+  "file": "assets/acabamentos/skin_m79_od.png",
+  "assetType": "Decal",
+  "name": "Acabamento m79_od",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_m1911_blued",
+  "file": "assets/acabamentos/skin_m1911_blued.png",
+  "assetType": "Decal",
+  "name": "Acabamento m1911_blued",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_type56_birch",
+  "file": "assets/acabamentos/skin_type56_birch.png",
+  "assetType": "Decal",
+  "name": "Acabamento type56_birch",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_type56_blued",
+  "file": "assets/acabamentos/skin_type56_blued.png",
+  "assetType": "Decal",
+  "name": "Acabamento type56_blued",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_type56_tape",
+  "file": "assets/acabamentos/skin_type56_tape.png",
+  "assetType": "Decal",
+  "name": "Acabamento type56_tape",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_sks_walnut",
+  "file": "assets/acabamentos/skin_sks_walnut.png",
+  "assetType": "Decal",
+  "name": "Acabamento sks_walnut",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_sks_worn",
+  "file": "assets/acabamentos/skin_sks_worn.png",
+  "assetType": "Decal",
+  "name": "Acabamento sks_worn",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_rpd_birch",
+  "file": "assets/acabamentos/skin_rpd_birch.png",
+  "assetType": "Decal",
+  "name": "Acabamento rpd_birch",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_rpd_worn",
+  "file": "assets/acabamentos/skin_rpd_worn.png",
+  "assetType": "Decal",
+  "name": "Acabamento rpd_worn",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_type54_worn",
+  "file": "assets/acabamentos/skin_type54_worn.png",
+  "assetType": "Decal",
+  "name": "Acabamento type54_worn",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_rpg2_od",
+  "file": "assets/acabamentos/skin_rpg2_od.png",
+  "assetType": "Decal",
+  "name": "Acabamento rpg2_od",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_m14_oleada",
+  "file": "assets/acabamentos/skin_m14_oleada.png",
+  "assetType": "Decal",
+  "name": "Acabamento m14_oleada",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_m60_fosfato",
+  "file": "assets/acabamentos/skin_m60_fosfato.png",
+  "assetType": "Decal",
+  "name": "Acabamento m60_fosfato",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_m1911_marrom",
+  "file": "assets/acabamentos/skin_m1911_marrom.png",
+  "assetType": "Decal",
+  "name": "Acabamento m1911_marrom",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_type56_vermelha",
+  "file": "assets/acabamentos/skin_type56_vermelha.png",
+  "assetType": "Decal",
+  "name": "Acabamento type56_vermelha",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_sks_clara",
+  "file": "assets/acabamentos/skin_sks_clara.png",
+  "assetType": "Decal",
+  "name": "Acabamento sks_clara",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_rpd_azulado",
+  "file": "assets/acabamentos/skin_rpd_azulado.png",
+  "assetType": "Decal",
+  "name": "Acabamento rpd_azulado",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_m14_tigre_fogo",
+  "file": "assets/acabamentos/skin_m14_tigre_fogo.png",
+  "assetType": "Decal",
+  "name": "Acabamento m14_tigre_fogo",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_m14_por_do_sol",
+  "file": "assets/acabamentos/skin_m14_por_do_sol.png",
+  "assetType": "Decal",
+  "name": "Acabamento m14_por_do_sol",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_m14_damasco_azul",
+  "file": "assets/acabamentos/skin_m14_damasco_azul.png",
+  "assetType": "Decal",
+  "name": "Acabamento m14_damasco_azul",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_m14_selva_eletrica",
+  "file": "assets/acabamentos/skin_m14_selva_eletrica.png",
+  "assetType": "Decal",
+  "name": "Acabamento m14_selva_eletrica",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_m14_carbono",
+  "file": "assets/acabamentos/skin_m14_carbono.png",
+  "assetType": "Decal",
+  "name": "Acabamento m14_carbono",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_m14_laca_vermelha",
+  "file": "assets/acabamentos/skin_m14_laca_vermelha.png",
+  "assetType": "Decal",
+  "name": "Acabamento m14_laca_vermelha",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_m16_aurora",
+  "file": "assets/acabamentos/skin_m16_aurora.png",
+  "assetType": "Decal",
+  "name": "Acabamento m16_aurora",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_m16_pixel_neon",
+  "file": "assets/acabamentos/skin_m16_pixel_neon.png",
+  "assetType": "Decal",
+  "name": "Acabamento m16_pixel_neon",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_m16_cromo",
+  "file": "assets/acabamentos/skin_m16_cromo.png",
+  "assetType": "Decal",
+  "name": "Acabamento m16_cromo",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_m16_colmeia_neon",
+  "file": "assets/acabamentos/skin_m16_colmeia_neon.png",
+  "assetType": "Decal",
+  "name": "Acabamento m16_colmeia_neon",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_m16_artico",
+  "file": "assets/acabamentos/skin_m16_artico.png",
+  "assetType": "Decal",
+  "name": "Acabamento m16_artico",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_m16_zebra",
+  "file": "assets/acabamentos/skin_m16_zebra.png",
+  "assetType": "Decal",
+  "name": "Acabamento m16_zebra",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_m60_escamas_rubras",
+  "file": "assets/acabamentos/skin_m60_escamas_rubras.png",
+  "assetType": "Decal",
+  "name": "Acabamento m60_escamas_rubras",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_m60_lava_viva",
+  "file": "assets/acabamentos/skin_m60_lava_viva.png",
+  "assetType": "Decal",
+  "name": "Acabamento m60_lava_viva",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_m60_noite_urbana",
+  "file": "assets/acabamentos/skin_m60_noite_urbana.png",
+  "assetType": "Decal",
+  "name": "Acabamento m60_noite_urbana",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_m60_carbono_vermelho",
+  "file": "assets/acabamentos/skin_m60_carbono_vermelho.png",
+  "assetType": "Decal",
+  "name": "Acabamento m60_carbono_vermelho",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_m60_tempestade",
+  "file": "assets/acabamentos/skin_m60_tempestade.png",
+  "assetType": "Decal",
+  "name": "Acabamento m60_tempestade",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_m1911_ouro_polido",
+  "file": "assets/acabamentos/skin_m1911_ouro_polido.png",
+  "assetType": "Decal",
+  "name": "Acabamento m1911_ouro_polido",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_m1911_madreperola",
+  "file": "assets/acabamentos/skin_m1911_madreperola.png",
+  "assetType": "Decal",
+  "name": "Acabamento m1911_madreperola",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_m1911_carrara",
+  "file": "assets/acabamentos/skin_m1911_carrara.png",
+  "assetType": "Decal",
+  "name": "Acabamento m1911_carrara",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_m1911_ouro_rosa",
+  "file": "assets/acabamentos/skin_m1911_ouro_rosa.png",
+  "assetType": "Decal",
+  "name": "Acabamento m1911_ouro_rosa",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_m1911_damasco_cinza",
+  "file": "assets/acabamentos/skin_m1911_damasco_cinza.png",
+  "assetType": "Decal",
+  "name": "Acabamento m1911_damasco_cinza",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_m70_carta",
+  "file": "assets/acabamentos/skin_m70_carta.png",
+  "assetType": "Decal",
+  "name": "Acabamento m70_carta",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_m70_marmore_negro",
+  "file": "assets/acabamentos/skin_m70_marmore_negro.png",
+  "assetType": "Decal",
+  "name": "Acabamento m70_marmore_negro",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_m70_bambu",
+  "file": "assets/acabamentos/skin_m70_bambu.png",
+  "assetType": "Decal",
+  "name": "Acabamento m70_bambu",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_m70_deserto_rosa",
+  "file": "assets/acabamentos/skin_m70_deserto_rosa.png",
+  "assetType": "Decal",
+  "name": "Acabamento m70_deserto_rosa",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_m70_nebulosa",
+  "file": "assets/acabamentos/skin_m70_nebulosa.png",
+  "assetType": "Decal",
+  "name": "Acabamento m70_nebulosa",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_win12_chamas",
+  "file": "assets/acabamentos/skin_win12_chamas.png",
+  "assetType": "Decal",
+  "name": "Acabamento win12_chamas",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_win12_zebra_vermelha",
+  "file": "assets/acabamentos/skin_win12_zebra_vermelha.png",
+  "assetType": "Decal",
+  "name": "Acabamento win12_zebra_vermelha",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_win12_outono",
+  "file": "assets/acabamentos/skin_win12_outono.png",
+  "assetType": "Decal",
+  "name": "Acabamento win12_outono",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_win12_titanio",
+  "file": "assets/acabamentos/skin_win12_titanio.png",
+  "assetType": "Decal",
+  "name": "Acabamento win12_titanio",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_win12_pixel_floresta",
+  "file": "assets/acabamentos/skin_win12_pixel_floresta.png",
+  "assetType": "Decal",
+  "name": "Acabamento win12_pixel_floresta",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_type56_serpente",
+  "file": "assets/acabamentos/skin_type56_serpente.png",
+  "assetType": "Decal",
+  "name": "Acabamento type56_serpente",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_type56_furta_cor",
+  "file": "assets/acabamentos/skin_type56_furta_cor.png",
+  "assetType": "Decal",
+  "name": "Acabamento type56_furta_cor",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_type56_jade",
+  "file": "assets/acabamentos/skin_type56_jade.png",
+  "assetType": "Decal",
+  "name": "Acabamento type56_jade",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_type56_tigre_branco",
+  "file": "assets/acabamentos/skin_type56_tigre_branco.png",
+  "assetType": "Decal",
+  "name": "Acabamento type56_tigre_branco",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_type56_sangue_ouro",
+  "file": "assets/acabamentos/skin_type56_sangue_ouro.png",
+  "assetType": "Decal",
+  "name": "Acabamento type56_sangue_ouro",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_type56_pixel_oceano",
+  "file": "assets/acabamentos/skin_type56_pixel_oceano.png",
+  "assetType": "Decal",
+  "name": "Acabamento type56_pixel_oceano",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_sks_laca_negra",
+  "file": "assets/acabamentos/skin_sks_laca_negra.png",
+  "assetType": "Decal",
+  "name": "Acabamento sks_laca_negra",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_sks_mar_profundo",
+  "file": "assets/acabamentos/skin_sks_mar_profundo.png",
+  "assetType": "Decal",
+  "name": "Acabamento sks_mar_profundo",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_sks_malaquita",
+  "file": "assets/acabamentos/skin_sks_malaquita.png",
+  "assetType": "Decal",
+  "name": "Acabamento sks_malaquita",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_sks_tigre_jade",
+  "file": "assets/acabamentos/skin_sks_tigre_jade.png",
+  "assetType": "Decal",
+  "name": "Acabamento sks_tigre_jade",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_sks_chamas_azuis",
+  "file": "assets/acabamentos/skin_sks_chamas_azuis.png",
+  "assetType": "Decal",
+  "name": "Acabamento sks_chamas_azuis",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_sks_carbono",
+  "file": "assets/acabamentos/skin_sks_carbono.png",
+  "assetType": "Decal",
+  "name": "Acabamento sks_carbono",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_rpd_gelo",
+  "file": "assets/acabamentos/skin_rpd_gelo.png",
+  "assetType": "Decal",
+  "name": "Acabamento rpd_gelo",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_rpd_escamas_abissais",
+  "file": "assets/acabamentos/skin_rpd_escamas_abissais.png",
+  "assetType": "Decal",
+  "name": "Acabamento rpd_escamas_abissais",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_rpd_raio_vermelho",
+  "file": "assets/acabamentos/skin_rpd_raio_vermelho.png",
+  "assetType": "Decal",
+  "name": "Acabamento rpd_raio_vermelho",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_rpd_colmeia_ambar",
+  "file": "assets/acabamentos/skin_rpd_colmeia_ambar.png",
+  "assetType": "Decal",
+  "name": "Acabamento rpd_colmeia_ambar",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_rpd_via_lactea",
+  "file": "assets/acabamentos/skin_rpd_via_lactea.png",
+  "assetType": "Decal",
+  "name": "Acabamento rpd_via_lactea",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_rpd_selva_escura",
+  "file": "assets/acabamentos/skin_rpd_selva_escura.png",
+  "assetType": "Decal",
+  "name": "Acabamento rpd_selva_escura",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_type54_ouro_negro",
+  "file": "assets/acabamentos/skin_type54_ouro_negro.png",
+  "assetType": "Decal",
+  "name": "Acabamento type54_ouro_negro",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_type54_damasco_ouro",
+  "file": "assets/acabamentos/skin_type54_damasco_ouro.png",
+  "assetType": "Decal",
+  "name": "Acabamento type54_damasco_ouro",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_type54_cromo_azul",
+  "file": "assets/acabamentos/skin_type54_cromo_azul.png",
+  "assetType": "Decal",
+  "name": "Acabamento type54_cromo_azul",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_type54_carta_noturna",
+  "file": "assets/acabamentos/skin_type54_carta_noturna.png",
+  "assetType": "Decal",
+  "name": "Acabamento type54_carta_noturna",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_type54_artico",
+  "file": "assets/acabamentos/skin_type54_artico.png",
+  "assetType": "Decal",
+  "name": "Acabamento type54_artico",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_mosin_laca_vermelha",
+  "file": "assets/acabamentos/skin_mosin_laca_vermelha.png",
+  "assetType": "Decal",
+  "name": "Acabamento mosin_laca_vermelha",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_mosin_bambu_negro",
+  "file": "assets/acabamentos/skin_mosin_bambu_negro.png",
+  "assetType": "Decal",
+  "name": "Acabamento mosin_bambu_negro",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_mosin_nebulosa_rubra",
+  "file": "assets/acabamentos/skin_mosin_nebulosa_rubra.png",
+  "assetType": "Decal",
+  "name": "Acabamento mosin_nebulosa_rubra",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_mosin_selva_eletrica",
+  "file": "assets/acabamentos/skin_mosin_selva_eletrica.png",
+  "assetType": "Decal",
+  "name": "Acabamento mosin_selva_eletrica",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "Acab.skin_mosin_inverno",
+  "file": "assets/acabamentos/skin_mosin_inverno.png",
+  "assetType": "Decal",
+  "name": "Acabamento mosin_inverno",
+  "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
  }
 ]
