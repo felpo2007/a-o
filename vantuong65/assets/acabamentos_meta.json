@@ -1,0 +1,931 @@
+{
+ "skin_m14_birch": {
+  "arma": "m14"
+ },
+ "skin_m14_carbono": {
+  "arma": "m14"
+ },
+ "skin_m14_damasco_azul": {
+  "arma": "m14"
+ },
+ "skin_m14_laca_vermelha": {
+  "arma": "m14"
+ },
+ "skin_m14_oleada": {
+  "arma": "m14"
+ },
+ "skin_m14_por_do_sol": {
+  "arma": "m14"
+ },
+ "skin_m14_selva_eletrica": {
+  "arma": "m14"
+ },
+ "skin_m14_tape": {
+  "arma": "m14"
+ },
+ "skin_m14_tigre_fogo": {
+  "arma": "m14"
+ },
+ "skin_m14_worn": {
+  "arma": "m14"
+ },
+ "skin_m16_artico": {
+  "arma": "m16"
+ },
+ "skin_m16_aurora": {
+  "arma": "m16"
+ },
+ "skin_m16_colmeia_neon": {
+  "arma": "m16"
+ },
+ "skin_m16_cromo": {
+  "arma": "m16",
+  "classe": "m16_espelho_tudo"
+ },
+ "skin_m16_pixel_neon": {
+  "arma": "m16"
+ },
+ "skin_m16_zebra": {
+  "arma": "m16"
+ },
+ "skin_m1911_blued": {
+  "arma": "m1911"
+ },
+ "skin_m1911_carrara": {
+  "arma": "m1911",
+  "relevo": true,
+  "classe": "m1911_pedra_tudo"
+ },
+ "skin_m1911_damasco_cinza": {
+  "arma": "m1911"
+ },
+ "skin_m1911_madreperola": {
+  "arma": "m1911"
+ },
+ "skin_m1911_marrom": {
+  "arma": "m1911"
+ },
+ "skin_m1911_ouro_polido": {
+  "arma": "m1911",
+  "classe": "m1911_espelho_metal"
+ },
+ "skin_m1911_ouro_rosa": {
+  "arma": "m1911",
+  "classe": "m1911_espelho_metal"
+ },
+ "skin_m60_carbono_vermelho": {
+  "arma": "m60"
+ },
+ "skin_m60_escamas_rubras": {
+  "arma": "m60",
+  "relevo": true
+ },
+ "skin_m60_fosfato": {
+  "arma": "m60"
+ },
+ "skin_m60_lava_viva": {
+  "arma": "m60",
+  "relevo": true,
+  "classe": "m60_pedra_tudo"
+ },
+ "skin_m60_noite_urbana": {
+  "arma": "m60"
+ },
+ "skin_m60_od": {
+  "arma": "m60"
+ },
+ "skin_m60_tempestade": {
+  "arma": "m60"
+ },
+ "skin_m60_worn": {
+  "arma": "m60"
+ },
+ "skin_m70_bambu": {
+  "arma": "m70"
+ },
+ "skin_m70_carta": {
+  "arma": "m70"
+ },
+ "skin_m70_deserto_rosa": {
+  "arma": "m70"
+ },
+ "skin_m70_marmore_negro": {
+  "arma": "m70",
+  "relevo": true,
+  "classe": "m70_pedra_tudo"
+ },
+ "skin_m70_nebulosa": {
+  "arma": "m70"
+ },
+ "skin_m79_od": {
+  "arma": "m79"
+ },
+ "skin_m79_walnut": {
+  "arma": "m79"
+ },
+ "skin_mosin_bambu_negro": {
+  "arma": "mosin"
+ },
+ "skin_mosin_inverno": {
+  "arma": "mosin"
+ },
+ "skin_mosin_laca_vermelha": {
+  "arma": "mosin"
+ },
+ "skin_mosin_nebulosa_rubra": {
+  "arma": "mosin"
+ },
+ "skin_mosin_selva_eletrica": {
+  "arma": "mosin"
+ },
+ "skin_rpd_azulado": {
+  "arma": "rpd"
+ },
+ "skin_rpd_birch": {
+  "arma": "rpd"
+ },
+ "skin_rpd_colmeia_ambar": {
+  "arma": "rpd"
+ },
+ "skin_rpd_escamas_abissais": {
+  "arma": "rpd",
+  "relevo": true
+ },
+ "skin_rpd_gelo": {
+  "arma": "rpd",
+  "relevo": true,
+  "classe": "rpd_pedra_tudo"
+ },
+ "skin_rpd_raio_vermelho": {
+  "arma": "rpd"
+ },
+ "skin_rpd_selva_escura": {
+  "arma": "rpd"
+ },
+ "skin_rpd_via_lactea": {
+  "arma": "rpd"
+ },
+ "skin_rpd_worn": {
+  "arma": "rpd"
+ },
+ "skin_rpg2_od": {
+  "arma": "rpg2"
+ },
+ "skin_sks_carbono": {
+  "arma": "sks"
+ },
+ "skin_sks_chamas_azuis": {
+  "arma": "sks"
+ },
+ "skin_sks_clara": {
+  "arma": "sks"
+ },
+ "skin_sks_laca_negra": {
+  "arma": "sks"
+ },
+ "skin_sks_malaquita": {
+  "arma": "sks",
+  "relevo": true,
+  "classe": "sks_pedra_tudo"
+ },
+ "skin_sks_mar_profundo": {
+  "arma": "sks"
+ },
+ "skin_sks_tigre_jade": {
+  "arma": "sks"
+ },
+ "skin_sks_walnut": {
+  "arma": "sks"
+ },
+ "skin_sks_worn": {
+  "arma": "sks"
+ },
+ "skin_type54_artico": {
+  "arma": "type54"
+ },
+ "skin_type54_carta_noturna": {
+  "arma": "type54"
+ },
+ "skin_type54_cromo_azul": {
+  "arma": "type54",
+  "classe": "type54_espelho_tudo"
+ },
+ "skin_type54_damasco_ouro": {
+  "arma": "type54"
+ },
+ "skin_type54_ouro_negro": {
+  "arma": "type54",
+  "classe": "type54_espelho_tudo"
+ },
+ "skin_type54_worn": {
+  "arma": "type54"
+ },
+ "skin_type56_birch": {
+  "arma": "type56"
+ },
+ "skin_type56_blued": {
+  "arma": "type56"
+ },
+ "skin_type56_furta_cor": {
+  "arma": "type56"
+ },
+ "skin_type56_jade": {
+  "arma": "type56",
+  "relevo": true,
+  "classe": "type56_pedra_tudo"
+ },
+ "skin_type56_pixel_oceano": {
+  "arma": "type56"
+ },
+ "skin_type56_sangue_ouro": {
+  "arma": "type56"
+ },
+ "skin_type56_serpente": {
+  "arma": "type56",
+  "relevo": true
+ },
+ "skin_type56_tape": {
+  "arma": "type56"
+ },
+ "skin_type56_tigre_branco": {
+  "arma": "type56"
+ },
+ "skin_type56_vermelha": {
+  "arma": "type56"
+ },
+ "skin_win12_chamas": {
+  "arma": "win12"
+ },
+ "skin_win12_outono": {
+  "arma": "win12"
+ },
+ "skin_win12_pixel_floresta": {
+  "arma": "win12"
+ },
+ "skin_win12_titanio": {
+  "arma": "win12"
+ },
+ "skin_win12_zebra_vermelha": {
+  "arma": "win12"
+ },
+ "uni_cristal_ambar@m14": {
+  "arma": "m14",
+  "relevo": true,
+  "classe": "m14_cristal_tudo"
+ },
+ "uni_cristal_ambar@m16": {
+  "arma": "m16",
+  "relevo": true,
+  "classe": "m16_cristal_tudo"
+ },
+ "uni_cristal_ambar@m1911": {
+  "arma": "m1911",
+  "relevo": true,
+  "classe": "m1911_cristal_tudo"
+ },
+ "uni_cristal_ambar@m60": {
+  "arma": "m60",
+  "relevo": true,
+  "classe": "m60_cristal_tudo"
+ },
+ "uni_cristal_ambar@m70": {
+  "arma": "m70",
+  "relevo": true,
+  "classe": "m70_cristal_tudo"
+ },
+ "uni_cristal_ambar@mosin": {
+  "arma": "mosin",
+  "relevo": true,
+  "classe": "mosin_cristal_tudo"
+ },
+ "uni_cristal_ambar@rpd": {
+  "arma": "rpd",
+  "relevo": true,
+  "classe": "rpd_cristal_tudo"
+ },
+ "uni_cristal_ambar@sks": {
+  "arma": "sks",
+  "relevo": true,
+  "classe": "sks_cristal_tudo"
+ },
+ "uni_cristal_ambar@type54": {
+  "arma": "type54",
+  "relevo": true,
+  "classe": "type54_cristal_tudo"
+ },
+ "uni_cristal_ambar@type56": {
+  "arma": "type56",
+  "relevo": true,
+  "classe": "type56_cristal_tudo"
+ },
+ "uni_cristal_ambar@win12": {
+  "arma": "win12",
+  "relevo": true,
+  "classe": "win12_cristal_tudo"
+ },
+ "uni_cristal_ciano@m14": {
+  "arma": "m14",
+  "relevo": true,
+  "classe": "m14_cristal_tudo"
+ },
+ "uni_cristal_ciano@m16": {
+  "arma": "m16",
+  "relevo": true,
+  "classe": "m16_cristal_tudo"
+ },
+ "uni_cristal_ciano@m1911": {
+  "arma": "m1911",
+  "relevo": true,
+  "classe": "m1911_cristal_tudo"
+ },
+ "uni_cristal_ciano@m60": {
+  "arma": "m60",
+  "relevo": true,
+  "classe": "m60_cristal_tudo"
+ },
+ "uni_cristal_ciano@m70": {
+  "arma": "m70",
+  "relevo": true,
+  "classe": "m70_cristal_tudo"
+ },
+ "uni_cristal_ciano@mosin": {
+  "arma": "mosin",
+  "relevo": true,
+  "classe": "mosin_cristal_tudo"
+ },
+ "uni_cristal_ciano@rpd": {
+  "arma": "rpd",
+  "relevo": true,
+  "classe": "rpd_cristal_tudo"
+ },
+ "uni_cristal_ciano@sks": {
+  "arma": "sks",
+  "relevo": true,
+  "classe": "sks_cristal_tudo"
+ },
+ "uni_cristal_ciano@type54": {
+  "arma": "type54",
+  "relevo": true,
+  "classe": "type54_cristal_tudo"
+ },
+ "uni_cristal_ciano@type56": {
+  "arma": "type56",
+  "relevo": true,
+  "classe": "type56_cristal_tudo"
+ },
+ "uni_cristal_ciano@win12": {
+  "arma": "win12",
+  "relevo": true,
+  "classe": "win12_cristal_tudo"
+ },
+ "uni_cristal_cobalto@m14": {
+  "arma": "m14",
+  "relevo": true,
+  "classe": "m14_cristal_tudo"
+ },
+ "uni_cristal_cobalto@m16": {
+  "arma": "m16",
+  "relevo": true,
+  "classe": "m16_cristal_tudo"
+ },
+ "uni_cristal_cobalto@m1911": {
+  "arma": "m1911",
+  "relevo": true,
+  "classe": "m1911_cristal_tudo"
+ },
+ "uni_cristal_cobalto@m60": {
+  "arma": "m60",
+  "relevo": true,
+  "classe": "m60_cristal_tudo"
+ },
+ "uni_cristal_cobalto@m70": {
+  "arma": "m70",
+  "relevo": true,
+  "classe": "m70_cristal_tudo"
+ },
+ "uni_cristal_cobalto@mosin": {
+  "arma": "mosin",
+  "relevo": true,
+  "classe": "mosin_cristal_tudo"
+ },
+ "uni_cristal_cobalto@rpd": {
+  "arma": "rpd",
+  "relevo": true,
+  "classe": "rpd_cristal_tudo"
+ },
+ "uni_cristal_cobalto@sks": {
+  "arma": "sks",
+  "relevo": true,
+  "classe": "sks_cristal_tudo"
+ },
+ "uni_cristal_cobalto@type54": {
+  "arma": "type54",
+  "relevo": true,
+  "classe": "type54_cristal_tudo"
+ },
+ "uni_cristal_cobalto@type56": {
+  "arma": "type56",
+  "relevo": true,
+  "classe": "type56_cristal_tudo"
+ },
+ "uni_cristal_cobalto@win12": {
+  "arma": "win12",
+  "relevo": true,
+  "classe": "win12_cristal_tudo"
+ },
+ "uni_cristal_esmeralda@m14": {
+  "arma": "m14",
+  "relevo": true,
+  "classe": "m14_cristal_tudo"
+ },
+ "uni_cristal_esmeralda@m16": {
+  "arma": "m16",
+  "relevo": true,
+  "classe": "m16_cristal_tudo"
+ },
+ "uni_cristal_esmeralda@m1911": {
+  "arma": "m1911",
+  "relevo": true,
+  "classe": "m1911_cristal_tudo"
+ },
+ "uni_cristal_esmeralda@m60": {
+  "arma": "m60",
+  "relevo": true,
+  "classe": "m60_cristal_tudo"
+ },
+ "uni_cristal_esmeralda@m70": {
+  "arma": "m70",
+  "relevo": true,
+  "classe": "m70_cristal_tudo"
+ },
+ "uni_cristal_esmeralda@mosin": {
+  "arma": "mosin",
+  "relevo": true,
+  "classe": "mosin_cristal_tudo"
+ },
+ "uni_cristal_esmeralda@rpd": {
+  "arma": "rpd",
+  "relevo": true,
+  "classe": "rpd_cristal_tudo"
+ },
+ "uni_cristal_esmeralda@sks": {
+  "arma": "sks",
+  "relevo": true,
+  "classe": "sks_cristal_tudo"
+ },
+ "uni_cristal_esmeralda@type54": {
+  "arma": "type54",
+  "relevo": true,
+  "classe": "type54_cristal_tudo"
+ },
+ "uni_cristal_esmeralda@type56": {
+  "arma": "type56",
+  "relevo": true,
+  "classe": "type56_cristal_tudo"
+ },
+ "uni_cristal_esmeralda@win12": {
+  "arma": "win12",
+  "relevo": true,
+  "classe": "win12_cristal_tudo"
+ },
+ "uni_cristal_rubro@m14": {
+  "arma": "m14",
+  "relevo": true,
+  "classe": "m14_cristal_tudo"
+ },
+ "uni_cristal_rubro@m16": {
+  "arma": "m16",
+  "relevo": true,
+  "classe": "m16_cristal_tudo"
+ },
+ "uni_cristal_rubro@m1911": {
+  "arma": "m1911",
+  "relevo": true,
+  "classe": "m1911_cristal_tudo"
+ },
+ "uni_cristal_rubro@m60": {
+  "arma": "m60",
+  "relevo": true,
+  "classe": "m60_cristal_tudo"
+ },
+ "uni_cristal_rubro@m70": {
+  "arma": "m70",
+  "relevo": true,
+  "classe": "m70_cristal_tudo"
+ },
+ "uni_cristal_rubro@mosin": {
+  "arma": "mosin",
+  "relevo": true,
+  "classe": "mosin_cristal_tudo"
+ },
+ "uni_cristal_rubro@rpd": {
+  "arma": "rpd",
+  "relevo": true,
+  "classe": "rpd_cristal_tudo"
+ },
+ "uni_cristal_rubro@sks": {
+  "arma": "sks",
+  "relevo": true,
+  "classe": "sks_cristal_tudo"
+ },
+ "uni_cristal_rubro@type54": {
+  "arma": "type54",
+  "relevo": true,
+  "classe": "type54_cristal_tudo"
+ },
+ "uni_cristal_rubro@type56": {
+  "arma": "type56",
+  "relevo": true,
+  "classe": "type56_cristal_tudo"
+ },
+ "uni_cristal_rubro@win12": {
+  "arma": "win12",
+  "relevo": true,
+  "classe": "win12_cristal_tudo"
+ },
+ "uni_cristal_violeta@m14": {
+  "arma": "m14",
+  "relevo": true,
+  "classe": "m14_cristal_tudo"
+ },
+ "uni_cristal_violeta@m16": {
+  "arma": "m16",
+  "relevo": true,
+  "classe": "m16_cristal_tudo"
+ },
+ "uni_cristal_violeta@m1911": {
+  "arma": "m1911",
+  "relevo": true,
+  "classe": "m1911_cristal_tudo"
+ },
+ "uni_cristal_violeta@m60": {
+  "arma": "m60",
+  "relevo": true,
+  "classe": "m60_cristal_tudo"
+ },
+ "uni_cristal_violeta@m70": {
+  "arma": "m70",
+  "relevo": true,
+  "classe": "m70_cristal_tudo"
+ },
+ "uni_cristal_violeta@mosin": {
+  "arma": "mosin",
+  "relevo": true,
+  "classe": "mosin_cristal_tudo"
+ },
+ "uni_cristal_violeta@rpd": {
+  "arma": "rpd",
+  "relevo": true,
+  "classe": "rpd_cristal_tudo"
+ },
+ "uni_cristal_violeta@sks": {
+  "arma": "sks",
+  "relevo": true,
+  "classe": "sks_cristal_tudo"
+ },
+ "uni_cristal_violeta@type54": {
+  "arma": "type54",
+  "relevo": true,
+  "classe": "type54_cristal_tudo"
+ },
+ "uni_cristal_violeta@type56": {
+  "arma": "type56",
+  "relevo": true,
+  "classe": "type56_cristal_tudo"
+ },
+ "uni_cristal_violeta@win12": {
+  "arma": "win12",
+  "relevo": true,
+  "classe": "win12_cristal_tudo"
+ },
+ "uni_geleira_antiga@m14": {
+  "arma": "m14",
+  "relevo": true,
+  "classe": "m14_gelo_tudo"
+ },
+ "uni_geleira_antiga@m16": {
+  "arma": "m16",
+  "relevo": true,
+  "classe": "m16_gelo_tudo"
+ },
+ "uni_geleira_antiga@m1911": {
+  "arma": "m1911",
+  "relevo": true,
+  "classe": "m1911_gelo_tudo"
+ },
+ "uni_geleira_antiga@m60": {
+  "arma": "m60",
+  "relevo": true,
+  "classe": "m60_gelo_tudo"
+ },
+ "uni_geleira_antiga@m70": {
+  "arma": "m70",
+  "relevo": true,
+  "classe": "m70_gelo_tudo"
+ },
+ "uni_geleira_antiga@mosin": {
+  "arma": "mosin",
+  "relevo": true,
+  "classe": "mosin_gelo_tudo"
+ },
+ "uni_geleira_antiga@rpd": {
+  "arma": "rpd",
+  "relevo": true,
+  "classe": "rpd_gelo_tudo"
+ },
+ "uni_geleira_antiga@sks": {
+  "arma": "sks",
+  "relevo": true,
+  "classe": "sks_gelo_tudo"
+ },
+ "uni_geleira_antiga@type54": {
+  "arma": "type54",
+  "relevo": true,
+  "classe": "type54_gelo_tudo"
+ },
+ "uni_geleira_antiga@type56": {
+  "arma": "type56",
+  "relevo": true,
+  "classe": "type56_gelo_tudo"
+ },
+ "uni_geleira_antiga@win12": {
+  "arma": "win12",
+  "relevo": true,
+  "classe": "win12_gelo_tudo"
+ },
+ "uni_inverno_sombrio@m14": {
+  "arma": "m14",
+  "relevo": true,
+  "classe": "m14_gelo_tudo"
+ },
+ "uni_inverno_sombrio@m16": {
+  "arma": "m16",
+  "relevo": true,
+  "classe": "m16_gelo_tudo"
+ },
+ "uni_inverno_sombrio@m1911": {
+  "arma": "m1911",
+  "relevo": true,
+  "classe": "m1911_gelo_tudo"
+ },
+ "uni_inverno_sombrio@m60": {
+  "arma": "m60",
+  "relevo": true,
+  "classe": "m60_gelo_tudo"
+ },
+ "uni_inverno_sombrio@m70": {
+  "arma": "m70",
+  "relevo": true,
+  "classe": "m70_gelo_tudo"
+ },
+ "uni_inverno_sombrio@mosin": {
+  "arma": "mosin",
+  "relevo": true,
+  "classe": "mosin_gelo_tudo"
+ },
+ "uni_inverno_sombrio@rpd": {
+  "arma": "rpd",
+  "relevo": true,
+  "classe": "rpd_gelo_tudo"
+ },
+ "uni_inverno_sombrio@sks": {
+  "arma": "sks",
+  "relevo": true,
+  "classe": "sks_gelo_tudo"
+ },
+ "uni_inverno_sombrio@type54": {
+  "arma": "type54",
+  "relevo": true,
+  "classe": "type54_gelo_tudo"
+ },
+ "uni_inverno_sombrio@type56": {
+  "arma": "type56",
+  "relevo": true,
+  "classe": "type56_gelo_tudo"
+ },
+ "uni_inverno_sombrio@win12": {
+  "arma": "win12",
+  "relevo": true,
+  "classe": "win12_gelo_tudo"
+ },
+ "uni_obsidiana@m14": {
+  "arma": "m14",
+  "relevo": true,
+  "classe": "m14_cristal_tudo"
+ },
+ "uni_obsidiana@m16": {
+  "arma": "m16",
+  "relevo": true,
+  "classe": "m16_cristal_tudo"
+ },
+ "uni_obsidiana@m1911": {
+  "arma": "m1911",
+  "relevo": true,
+  "classe": "m1911_cristal_tudo"
+ },
+ "uni_obsidiana@m60": {
+  "arma": "m60",
+  "relevo": true,
+  "classe": "m60_cristal_tudo"
+ },
+ "uni_obsidiana@m70": {
+  "arma": "m70",
+  "relevo": true,
+  "classe": "m70_cristal_tudo"
+ },
+ "uni_obsidiana@mosin": {
+  "arma": "mosin",
+  "relevo": true,
+  "classe": "mosin_cristal_tudo"
+ },
+ "uni_obsidiana@rpd": {
+  "arma": "rpd",
+  "relevo": true,
+  "classe": "rpd_cristal_tudo"
+ },
+ "uni_obsidiana@sks": {
+  "arma": "sks",
+  "relevo": true,
+  "classe": "sks_cristal_tudo"
+ },
+ "uni_obsidiana@type54": {
+  "arma": "type54",
+  "relevo": true,
+  "classe": "type54_cristal_tudo"
+ },
+ "uni_obsidiana@type56": {
+  "arma": "type56",
+  "relevo": true,
+  "classe": "type56_cristal_tudo"
+ },
+ "uni_obsidiana@win12": {
+  "arma": "win12",
+  "relevo": true,
+  "classe": "win12_cristal_tudo"
+ },
+ "uni_onix_polido@m14": {
+  "arma": "m14",
+  "relevo": true,
+  "classe": "m14_pedra_tudo"
+ },
+ "uni_onix_polido@m16": {
+  "arma": "m16",
+  "relevo": true,
+  "classe": "m16_pedra_tudo"
+ },
+ "uni_onix_polido@m1911": {
+  "arma": "m1911",
+  "relevo": true,
+  "classe": "m1911_pedra_tudo"
+ },
+ "uni_onix_polido@m60": {
+  "arma": "m60",
+  "relevo": true,
+  "classe": "m60_pedra_tudo"
+ },
+ "uni_onix_polido@m70": {
+  "arma": "m70",
+  "relevo": true,
+  "classe": "m70_pedra_tudo"
+ },
+ "uni_onix_polido@mosin": {
+  "arma": "mosin",
+  "relevo": true,
+  "classe": "mosin_pedra_tudo"
+ },
+ "uni_onix_polido@rpd": {
+  "arma": "rpd",
+  "relevo": true,
+  "classe": "rpd_pedra_tudo"
+ },
+ "uni_onix_polido@sks": {
+  "arma": "sks",
+  "relevo": true,
+  "classe": "sks_pedra_tudo"
+ },
+ "uni_onix_polido@type54": {
+  "arma": "type54",
+  "relevo": true,
+  "classe": "type54_pedra_tudo"
+ },
+ "uni_onix_polido@type56": {
+  "arma": "type56",
+  "relevo": true,
+  "classe": "type56_pedra_tudo"
+ },
+ "uni_onix_polido@win12": {
+  "arma": "win12",
+  "relevo": true,
+  "classe": "win12_pedra_tudo"
+ },
+ "uni_ouro_lapidado@m14": {
+  "arma": "m14",
+  "relevo": true,
+  "classe": "m14_metal_tudo"
+ },
+ "uni_ouro_lapidado@m16": {
+  "arma": "m16",
+  "relevo": true,
+  "classe": "m16_metal_tudo"
+ },
+ "uni_ouro_lapidado@m1911": {
+  "arma": "m1911",
+  "relevo": true,
+  "classe": "m1911_metal_tudo"
+ },
+ "uni_ouro_lapidado@m60": {
+  "arma": "m60",
+  "relevo": true,
+  "classe": "m60_metal_tudo"
+ },
+ "uni_ouro_lapidado@m70": {
+  "arma": "m70",
+  "relevo": true,
+  "classe": "m70_metal_tudo"
+ },
+ "uni_ouro_lapidado@mosin": {
+  "arma": "mosin",
+  "relevo": true,
+  "classe": "mosin_metal_tudo"
+ },
+ "uni_ouro_lapidado@rpd": {
+  "arma": "rpd",
+  "relevo": true,
+  "classe": "rpd_metal_tudo"
+ },
+ "uni_ouro_lapidado@sks": {
+  "arma": "sks",
+  "relevo": true,
+  "classe": "sks_metal_tudo"
+ },
+ "uni_ouro_lapidado@type54": {
+  "arma": "type54",
+  "relevo": true,
+  "classe": "type54_metal_tudo"
+ },
+ "uni_ouro_lapidado@type56": {
+  "arma": "type56",
+  "relevo": true,
+  "classe": "type56_metal_tudo"
+ },
+ "uni_ouro_lapidado@win12": {
+  "arma": "win12",
+  "relevo": true,
+  "classe": "win12_metal_tudo"
+ },
+ "uni_quartzo_rosa@m14": {
+  "arma": "m14",
+  "relevo": true,
+  "classe": "m14_cristal_tudo"
+ },
+ "uni_quartzo_rosa@m16": {
+  "arma": "m16",
+  "relevo": true,
+  "classe": "m16_cristal_tudo"
+ },
+ "uni_quartzo_rosa@m1911": {
+  "arma": "m1911",
+  "relevo": true,
+  "classe": "m1911_cristal_tudo"
+ },
+ "uni_quartzo_rosa@m60": {
+  "arma": "m60",
+  "relevo": true,
+  "classe": "m60_cristal_tudo"
+ },
+ "uni_quartzo_rosa@m70": {
+  "arma": "m70",
+  "relevo": true,
+  "classe": "m70_cristal_tudo"
+ },
+ "uni_quartzo_rosa@mosin": {
+  "arma": "mosin",
+  "relevo": true,
+  "classe": "mosin_cristal_tudo"
+ },
+ "uni_quartzo_rosa@rpd": {
+  "arma": "rpd",
+  "relevo": true,
+  "classe": "rpd_cristal_tudo"
+ },
+ "uni_quartzo_rosa@sks": {
+  "arma": "sks",
+  "relevo": true,
+  "classe": "sks_cristal_tudo"
+ },
+ "uni_quartzo_rosa@type54": {
+  "arma": "type54",
+  "relevo": true,
+  "classe": "type54_cristal_tudo"
+ },
+ "uni_quartzo_rosa@type56": {
+  "arma": "type56",
+  "relevo": true,
+  "classe": "type56_cristal_tudo"
+ },
+ "uni_quartzo_rosa@win12": {
+  "arma": "win12",
+  "relevo": true,
+  "classe": "win12_cristal_tudo"
+ }
+}

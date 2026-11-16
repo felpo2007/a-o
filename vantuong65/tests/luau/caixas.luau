@@ -56,9 +56,9 @@ test("todas as caixas passam na validação e somam exatamente 100%", function()
 	end
 end)
 
-test("caixa de suprimentos: 60/25/10/4/1 e 126 itens (a tabela do pedido + os 100 da D-178)", function()
+test("caixa de suprimentos: 60/25/10/4/1 e 138 itens (o pedido + 100 da D-178 + 12 da D-179)", function()
 	local c = Caixas.get("suprimentos")
-	assert(#c.itens == 126, #c.itens)
+	assert(#c.itens == 138, #c.itens)
 	local t = Caixas.porRaridade(c, Cosmeticos.info, nil)
 	assert(t.comum == 60000 and t.incomum == 25000 and t.raro == 10000, "60/25/10")
 	assert(t.epico == 4000 and t.lendario == 1000, "4/1")
@@ -67,7 +67,7 @@ test("caixa de suprimentos: 60/25/10/4/1 e 126 itens (a tabela do pedido + os 10
 		local r = Cosmeticos.info(e.item).raridade
 		n[r] = (n[r] or 0) + 1
 	end
-	assert(n.comum == 19 and n.incomum == 23 and n.raro == 34 and n.epico == 32 and n.lendario == 18)
+	assert(n.comum == 19 and n.incomum == 23 and n.raro == 36 and n.epico == 39 and n.lendario == 21)
 end)
 
 test("a raridade é do item: nenhuma caixa tem item com vantagem de jogo", function()
@@ -541,7 +541,39 @@ test("D-178: o acabamento extravagante sai só das caixas e da troca", function(
 			assert(naTroca, s.id .. " fora da troca")
 		end
 	end
-	assert(n == 60, "60 acabamentos: " .. n)
+	-- D-179: mais os 12 universais
+	assert(n == 72, "60 acabamentos e 12 universais: " .. n)
+end)
+
+test("D-179: os 12 universais nas caixas sem mudar a fatia de nenhuma raridade", function()
+	local n, por = 0, {}
+	for r, l in Caixas.NOVOS_D179 do
+		n += #l
+		por[r] = #l
+	end
+	assert(n == 12, "12 universais: " .. n)
+	assert(por.raro == 2 and por.epico == 7 and por.lendario == 3)
+	local gratis, sup = {}, {}
+	for _, c in Caixas.CAIXAS do
+		for _, e in c.itens do
+			if c.tipo == "gratuita" then
+				gratis[e.item] = true
+			end
+			if c.id == "suprimentos" then
+				sup[e.item] = true
+			end
+		end
+	end
+	for _, l in Caixas.NOVOS_D179 do
+		for _, id in l do
+			assert(gratis[id] and sup[id], id .. " sem caixa grátis ou fora da de Suprimentos")
+			local info = Cosmeticos.info(id)
+			assert(info and info.universal and not info.vantagem, id)
+		end
+	end
+	-- a historica não muda; as que mudaram subiram de versão
+	assert(Caixas.get("historica").versao == 1)
+	assert(Caixas.get("veterano").versao == 3 and Caixas.get("elite").versao == 3)
 end)
 
 -- ===== produtos, temporada e servidor =====

@@ -164,6 +164,8 @@ export type Skin = {
 	soPasse: boolean?, -- D-176: só pelo conjunto em Game Pass (robuxKey); não se compra com $
 	soCaixa: boolean?, -- D-178: só nas caixas e na troca de Fragmentos (robuxKey "CAIXA")
 	arte: any?, -- D-178: { receita, cores, alvo } da textura gerada (tools/acabamentos.py)
+	universal: boolean?, -- D-179: acabamento que vale em qualquer arma de Skins.ARMAS_UNIVERSAL
+	vitrine: string?, -- D-179: arma que mostra o universal nas imagens (caixas, ARQUIVO)
 }
 
 local function base(id: string, kind: string, side: string, tier: string, key: string, name: string, desc: string): Skin
@@ -1374,6 +1376,150 @@ for _, e in EXTRAVAGANTES do
 	table.insert(Skins.CATALOG, s)
 end
 
+-- ===== D-179: ACABAMENTOS UNIVERSAIS (pedido do dono: "faça skins estilo jogo r6 tbm como inverno
+-- sombrio, geleiras, entre outras" e "skins das pedras tem q ter relevo"). Um item vale em qualquer
+-- arma com arte (Skins.ARMAS_UNIVERSAL), do lado do jogador: escolhe-se a arma ao equipar. Só nas
+-- caixas e na troca. A textura de cada arma sai de tools/acabamentos.py (chave "id@arma"), com
+-- relevo de verdade (mapa normal) e brilho próprio (metal e aspereza) na SurfaceAppearance.
+-- Nomes próprios: nenhum nome de skin de outro jogo.
+Skins.ARMAS_UNIVERSAL = { "m14", "m16", "m60", "m1911", "m70", "win12", "type56", "sks", "rpd", "type54", "mosin" }
+local ARMA_UNIVERSAL: { [string]: boolean } = {}
+for _, w in Skins.ARMAS_UNIVERSAL do
+	ARMA_UNIVERSAL[w] = true
+end
+-- arma do acabamento universal quando o jogador não escolheu (a de fábrica de cada lado)
+Skins.ARMA_PADRAO = { US = "m14", VC = "type56" }
+
+local UNIVERSAIS: { { any } } = {
+	-- id, nome, descrição, receita, cores, alvo, arma da vitrine
+	{
+		"uni_cristal_rubro",
+		"Cristal Rubro",
+		"Facetas de rubi lapidado: cada face pega a luz de um jeito. Vale em qualquer arma.",
+		"cristal",
+		{ { 196, 14, 28 }, { 255, 130, 130 } },
+		"tudo",
+		"m16",
+	},
+	{
+		"uni_cristal_ciano",
+		"Cristal Ciano",
+		"Facetas de pedra ciano que brilham como água rasa. Vale em qualquer arma.",
+		"cristal",
+		{ { 0, 178, 196 }, { 170, 255, 255 } },
+		"tudo",
+		"type56",
+	},
+	{
+		"uni_cristal_cobalto",
+		"Cristal Cobalto",
+		"Facetas azul-cobalto, fundas e frias. Vale em qualquer arma.",
+		"cristal",
+		{ { 22, 70, 196 }, { 150, 196, 255 } },
+		"tudo",
+		"m14",
+	},
+	{
+		"uni_cristal_ambar",
+		"Cristal Âmbar",
+		"Facetas de topázio cor de mel, quentes na luz. Vale em qualquer arma.",
+		"cristal",
+		{ { 218, 132, 12 }, { 255, 226, 130 } },
+		"tudo",
+		"sks",
+	},
+	{
+		"uni_cristal_violeta",
+		"Cristal Violeta",
+		"Facetas de ametista, do lilás ao roxo fundo. Vale em qualquer arma.",
+		"cristal",
+		{ { 124, 56, 188 }, { 222, 176, 255 } },
+		"tudo",
+		"m1911",
+	},
+	{
+		"uni_cristal_esmeralda",
+		"Cristal Esmeralda",
+		"Facetas verde-esmeralda com o brilho claro nas arestas. Vale em qualquer arma.",
+		"cristal",
+		{ { 8, 136, 70 }, { 146, 255, 186 } },
+		"tudo",
+		"rpd",
+	},
+	{
+		"uni_quartzo_rosa",
+		"Quartzo Rosa",
+		"Facetas rosadas e leitosas de quartzo. Vale em qualquer arma.",
+		"cristal",
+		{ { 226, 138, 168 }, { 255, 222, 232 } },
+		"tudo",
+		"type54",
+	},
+	{
+		"uni_obsidiana",
+		"Obsidiana Lapidada",
+		"Vidro vulcânico negro em facetas, com o reflexo roxo. Vale em qualquer arma.",
+		"obsidiana",
+		{ { 14, 12, 18 }, { 132, 76, 210 } },
+		"tudo",
+		"m70",
+	},
+	{
+		"uni_ouro_lapidado",
+		"Ouro Lapidado",
+		"Ouro maciço cortado em facetas que espelham o céu. Vale em qualquer arma.",
+		"ouro_lapidado",
+		{ { 226, 166, 40 }, { 255, 240, 170 } },
+		"tudo",
+		"win12",
+	},
+	{
+		"uni_inverno_sombrio",
+		"Inverno Sombrio",
+		"Azul de noite gelada com geada nas manchas e neve no que fica para cima. Vale em qualquer arma.",
+		"inverno",
+		{ { 14, 20, 34 }, { 172, 210, 255 }, { 240, 248, 255 } },
+		"tudo",
+		"m60",
+	},
+	{
+		"uni_geleira_antiga",
+		"Geleira Antiga",
+		"Gelo em camadas, do branco ao azul fundo, cortado por rachaduras. Vale em qualquer arma.",
+		"geleira",
+		{ { 226, 240, 252 }, { 120, 186, 236 }, { 24, 78, 150 } },
+		"tudo",
+		"mosin",
+	},
+	{
+		"uni_onix_polido",
+		"Ônix Polido",
+		"Pedra polida em faixas pretas e brancas com o relevo das camadas. Vale em qualquer arma.",
+		"onix",
+		{ { 16, 16, 18 }, { 236, 232, 226 }, { 112, 110, 106 } },
+		"tudo",
+		"m14",
+	},
+}
+for _, e in UNIVERSAIS do
+	local cores = e[5] :: { { number } }
+	local s = base(e[1], "weapon", "both", "weapon_plus", "CAIXA", e[2], e[3])
+	s.finish = { metal = cores[1], wood = cores[1], handguard = cores[1] }
+	s.swatch = cores
+	s.soCaixa = true
+	s.universal = true
+	s.vitrine = e[7]
+	s.arte = { receita = e[4], cores = cores, alvo = e[6] }
+	s.check = "estilo"
+	table.insert(Skins.CATALOG, s)
+end
+Skins.UNIVERSAIS = UNIVERSAIS
+
+-- arma que aceita acabamento universal
+function Skins.armaUniversal(arma: any): boolean
+	return type(arma) == "string" and ARMA_UNIVERSAL[arma] == true
+end
+
 local byId: { [string]: Skin } = {}
 for _, s in Skins.CATALOG do
 	byId[s.id] = s
@@ -1386,9 +1532,18 @@ function Skins.get(id: any): Skin?
 	return if type(id) == "string" then byId[id] else nil
 end
 
--- encaixe onde a skin fica equipada: id da arma, "uniform" ou "camo"
+-- encaixe onde a skin fica equipada: id da arma, "uniform" ou "camo" (o universal, D-179, não
+-- tem encaixe fixo: vale na arma escolhida; aqui volta a vitrine)
 function Skins.slotOf(s: Skin): string
-	return if s.kind == "weapon" then s.weapon or "?" else s.kind
+	return if s.kind == "weapon" then s.weapon or s.vitrine or "?" else s.kind
+end
+
+-- A skin cabe neste encaixe? (a de arma na arma dela; o universal em qualquer arma com arte)
+function Skins.cabe(s: Skin, slot: string): boolean
+	if s.kind ~= "weapon" then
+		return s.kind == slot
+	end
+	return s.weapon == slot or (s.universal == true and Skins.armaUniversal(slot))
 end
 
 function Skins.sideOk(s: Skin, faction: string?): boolean
@@ -1483,7 +1638,7 @@ function Skins.equipped(
 	end
 	for slot, id in on do
 		local s = Skins.get(id)
-		if s and Skins.slotOf(s) == slot and Skins.canEquip(id, faction, owned, passes) then
+		if s and Skins.cabe(s, slot) and Skins.canEquip(id, faction, owned, passes) then
 			out[slot] = id
 		end
 	end
@@ -1495,7 +1650,7 @@ function Skins.encodeWeapons(on: { [string]: string }): string
 	local parts = {}
 	for slot, id in on do
 		local s = Skins.get(id)
-		if s and s.kind == "weapon" and s.weapon == slot then
+		if s and s.kind == "weapon" and Skins.cabe(s, slot) then
 			table.insert(parts, slot .. "=" .. id)
 		end
 	end
@@ -1510,7 +1665,7 @@ function Skins.decodeWeapons(text: string?): { [string]: string }
 	end
 	for slot, id in string.gmatch(text, "([%w_]+)=([%w_]+)") do
 		local s = Skins.get(id)
-		if s and s.kind == "weapon" and s.weapon == slot then
+		if s and s.kind == "weapon" and Skins.cabe(s, slot :: string) then
 			out[slot :: string] = s.id
 		end
 	end
@@ -1592,21 +1747,52 @@ end
 --   - Part (arma provisória): Color e, no guarda-mão com fita, o material Fabric.
 -- A cor e o material originais ficam em atributos da peça (SkinBase*) para voltar ao tirar a skin.
 -- O modelo ganha o atributo "Skin" (id ou nil).
-function Skins.applyWeapon(model: Instance, skinId: string?)
+-- D-179: SurfaceAppearance pronta de cada acabamento (o arquivo do place traz; script não muda o
+-- ColorMap). nil no Lune ou sem a pasta.
+local function saPronta(chave: string): Instance?
+	local ok, f = pcall(function(): any
+		return (game :: any):GetService("ReplicatedStorage"):FindFirstChild("VT65AcabamentosSA")
+	end)
+	return if ok and f then f:FindFirstChild(chave) else nil
+end
+
+-- weaponId: a arma do modelo (o acabamento universal tem uma textura por arma). Sem ele, o
+-- atributo "WeaponId" do modelo ou o nome (as cópias de VT65WeaponArt têm o nome da arma).
+function Skins.applyWeapon(model: Instance, skinId: string?, weaponId: string?)
 	local found = if skinId then Skins.get(skinId) else nil
 	local skin: Skin? = if found and found.kind == "weapon" then found else nil
-	-- D-178: a arte das armas é uma malha só com a textura inteira (SurfaceAppearance), sem as peças
-	-- Madeira/Metal: o acabamento troca a textura pela gerada (AcabamentosArte) e guarda a
-	-- SurfaceAppearance numa pasta da peça (fora do ar) para voltar ao tirar a skin.
-	local tex = if skin then AcabamentosArte[skin.id] else nil
+	local arma = weaponId or model:GetAttribute("WeaponId") or model.Name
+	local chave: string? = nil
+	if skin then
+		chave = if skin.universal then skin.id .. "@" .. tostring(arma) else skin.id
+	end
+	-- D-178/D-179: a arte das armas é uma malha só com a textura inteira (SurfaceAppearance), sem
+	-- as peças Madeira/Metal. O acabamento põe a SurfaceAppearance pronta dele (a cor nova com o
+	-- relevo e o material) ou, sem ela, troca o TextureID; a original fica guardada numa pasta da
+	-- peça para voltar ao tirar a skin.
+	local pronta = if chave then saPronta(chave) else nil
+	local tex = if chave then AcabamentosArte[chave] else nil
+	local temTex = type(tex) == "number" and tex ~= 0
 	for _, d in model:GetDescendants() do
 		if d:IsA("MeshPart") then
-			local sa = d:FindFirstChildOfClass("SurfaceAppearance")
+			local sa: Instance? = nil
+			for _, c in d:GetChildren() do
+				if c:IsA("SurfaceAppearance") and c.Name ~= "VT65SkinSAAtiva" then
+					sa = c
+					break
+				end
+			end
 			local guarda = d:FindFirstChild("VT65SkinSA")
+			local ativa = d:FindFirstChild("VT65SkinSAAtiva")
+			if ativa then
+				ativa:Destroy()
+			end
 			if d:GetAttribute("SkinBaseTex") == nil then
 				d:SetAttribute("SkinBaseTex", d.TextureID)
 			end
-			if type(tex) == "number" and tex ~= 0 and (sa or guarda) then
+			local bt = d:GetAttribute("SkinBaseTex")
+			local base = if type(bt) == "string" then bt else ""
+			if (pronta or temTex) and (sa or guarda) then
 				if sa then
 					if not guarda then
 						local f = Instance.new("Folder")
@@ -1616,14 +1802,20 @@ function Skins.applyWeapon(model: Instance, skinId: string?)
 					end
 					sa.Parent = guarda
 				end
-				d.TextureID = "rbxassetid://" .. tex
+				if pronta then
+					local c = pronta:Clone()
+					c.Name = "VT65SkinSAAtiva"
+					c.Parent = d
+					d.TextureID = base
+				else
+					d.TextureID = "rbxassetid://" .. tex
+				end
 			elseif guarda then
 				local g = guarda:FindFirstChildOfClass("SurfaceAppearance")
 				if g then
 					g.Parent = d
 				end
-				local bt = d:GetAttribute("SkinBaseTex")
-				d.TextureID = if type(bt) == "string" then bt else ""
+				d.TextureID = base
 			end
 		end
 	end

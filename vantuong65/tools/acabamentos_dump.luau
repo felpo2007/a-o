@@ -13,7 +13,20 @@ assert(saida, "uso: lune run tools/acabamentos_dump.luau <saida.json>")
 
 local out = {}
 for _, s in Skins.CATALOG do
-	if s.kind == "weapon" then
+	if s.kind == "weapon" and s.universal then
+		-- D-179: o universal vira um acabamento por arma ("id@arma")
+		for _, arma in Skins.ARMAS_UNIVERSAL do
+			table.insert(out, {
+				id = s.id .. "@" .. arma,
+				base = s.id,
+				arma = arma,
+				finish = s.finish or {},
+				arte = s.arte,
+				soCaixa = true,
+				universal = true,
+			})
+		end
+	elseif s.kind == "weapon" then
 		table.insert(out, {
 			id = s.id,
 			arma = s.weapon,

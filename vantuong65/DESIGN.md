@@ -7148,3 +7148,49 @@ extravagantes se inspire no cs battlefield e outros jogos faça com maestria".
     na M60;
   - o degradê no cartão aparece e some ao trocar;
   - 0 erros. Detalhes em `testes/ACABAMENTOS_D178_2026-11-16.md`.
+
+## D-179 — Lote 63: acabamentos universais estilo R6 e relevo de verdade (2026-11-16)
+
+**Pedido do dono:** "faca skins estilo jogo r6 tbm como inverno sombrio, geleiras, entre outras" e
+"skins das pedras tem q ter relevo", com imagens de referência (gemas lapidadas, ouro, gelo).
+
+- **12 acabamentos universais** (`Skins.UNIVERSAIS`): um item vale em qualquer uma das 11 armas
+  com arte (`Skins.ARMAS_UNIVERSAL`), do lado do jogador, como as gemas do R6.
+  - Gemas lapidadas: Cristal Rubro, Ciano, Cobalto, Âmbar, Violeta e Esmeralda, e o Quartzo
+    Rosa.
+  - Pedra e metal: Obsidiana Lapidada, Ouro Lapidado e Ônix Polido.
+  - Gelo: Inverno Sombrio (azul quase preto cortado por lascas de gelo, geada e neve em cima) e
+    Geleira Antiga (gelo em camadas com rachaduras).
+  - Os nomes são próprios: nada de "Ruby", "Glacier" ou outro nome de skin de jogo.
+  - Raridades: 2 raros, 7 épicos e 3 lendários. Só caixas e troca de Fragmentos.
+- **Equipar:** o universal aparece debaixo de cada arma do perfil (aba ARMAS) para quem tem, e
+  equipa na arma do cartão (`Gear_Equip(id, on, arma)`).
+  - Pode ficar em várias armas ao mesmo tempo.
+  - O EQUIPAR da roleta põe na arma da mão ou, sem ela, na de fábrica do lado (M14 ou Tipo 56).
+  - A regra do encaixe é `Skins.cabe`.
+- **Relevo de verdade** (`tools/acabamentos.py`):
+  - a rasterização guarda a tangente e a bitangente de cada texel. O relevo da receita vira mapa
+    normal em espaço tangente, somado ao relevo da arte original (mistura "whiteout");
+  - nas gemas cada faceta é um plano inclinado (normal sorteada por faceta), com a luz correndo
+    nele. No gelo e na pedra o relevo sai de uma altura: rachaduras fundas, geada e camadas;
+  - as pedras de antes também ganharam relevo: jade, mármore (2), malaquita, lava (2) e escamas
+    (3);
+  - mapas de material por classe (`CLASSES`): gema, ouro, gelo, pedra e espelho (cromo e ouro de
+    antes). Têm metal e aspereza próprios onde o acabamento pinta e os da arte original no resto.
+- **SurfaceAppearance pronta** (`src/ReplicatedStorage/VT65AcabamentosSA.model.json`, gerada por
+  `--luau`):
+  - cada acabamento tem a dele: a cor nova, mais o relevo e o material (novos ou os da arte
+    original, lidos no Studio em `assets/armas_pbr.json`);
+  - `Skins.applyWeapon` clona a pronta (script não muda o ColorMap) e guarda a original;
+  - todos os acabamentos das 11 armas passam a usar a pronta, então os da D-178 recuperam o
+    relevo e o brilho da arte;
+  - a M79 e o RPG-2 continuam pelo `TextureID`, porque não têm a cópia de 1ª pessoa.
+- **Nas caixas, sem mudar nenhuma porcentagem** (`Caixas.ACRESCIMOS_D179`, a mesma regra da
+  D-178):
+  - raros em Batalhão e Campanha; épicos em Campanha e Veterano; lendários no Veterano;
+  - os 12 em Suprimentos, Equipamentos Especiais e Arsenal de Elite.
+- **Conferido:** Lune 699 ok, pytest 70 (`test_acabamentos` 9). No Studio:
+  - a pasta com 212 SurfaceAppearance no place; os 12 universais nas armas de vitrine;
+  - troca, equipar na M14 e na M1911 (recusa na Tipo 56) e a M14 em campo com o Cristal Rubro;
+  - o EQUIPAR e o TIRAR do perfil na M16; os acabamentos da D-178 pela pronta;
+  - 0 erros. Detalhes em `testes/UNIVERSAIS_D179_2026-11-16.md`.

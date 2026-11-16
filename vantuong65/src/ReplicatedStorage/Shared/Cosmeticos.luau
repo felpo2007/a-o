@@ -1058,6 +1058,19 @@ Cosmeticos.RARIDADE_SKIN = {
 	skin_rpd_selva_escura = "comum",
 	skin_type54_artico = "comum",
 	skin_mosin_inverno = "comum",
+	-- D-179: acabamentos universais (valem em qualquer arma)
+	uni_cristal_rubro = "epico",
+	uni_cristal_ciano = "epico",
+	uni_cristal_cobalto = "epico",
+	uni_cristal_ambar = "epico",
+	uni_cristal_violeta = "epico",
+	uni_cristal_esmeralda = "epico",
+	uni_quartzo_rosa = "raro",
+	uni_obsidiana = "epico",
+	uni_ouro_lapidado = "lendario",
+	uni_inverno_sombrio = "lendario",
+	uni_geleira_antiga = "lendario",
+	uni_onix_polido = "raro",
 } :: { [string]: string }
 
 local byId: { [string]: Item } = {}
@@ -1091,6 +1104,7 @@ function Cosmeticos.info(id: any): Item?
 			nomeEn = s.name,
 			desc = s.desc,
 			vantagem = s.kind == "camo",
+			universal = s.universal,
 		}
 	end
 	return nil

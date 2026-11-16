@@ -1151,7 +1151,11 @@ function AssetLoader.attachWeapon(model: Model, weaponId: string)
 	end
 	local owner = game:GetService("Players"):GetPlayerFromCharacter(model)
 	w:SetAttribute("WeaponId", weaponId)
-	Skins.applyWeapon(w, if owner then Skins.weaponSkinFrom(owner:GetAttribute("WeaponSkins"), weaponId) else nil)
+	Skins.applyWeapon(
+		w,
+		if owner then Skins.weaponSkinFrom(owner:GetAttribute("WeaponSkins"), weaponId) else nil,
+		weaponId
+	)
 	local primary = w.PrimaryPart
 	if not primary then
 		return

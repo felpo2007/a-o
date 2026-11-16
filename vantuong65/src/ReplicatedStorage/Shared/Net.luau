@@ -57,7 +57,7 @@ Net.Events = {
 	"Daily_State", -- s->c: caderneta de serviço (sequência, dia, total, itens) e o resultado do pedido
 	-- progressão (2026-11-11, Shared/Progression)
 	"Gear_Buy", -- c->s gearId: compra com créditos de intendência (permanente; gravação atômica)
-	"Gear_Equip", -- c->s gearId, on: leva ou deixa o item no próximo spawn
+	"Gear_Equip", -- c->s gearId, on[, arma]: leva ou deixa o item (a arma do universal, D-179)
 	"Progress_State", -- s->c: XP, posto, créditos, níveis de kit, escolha e o resultado do último pedido
 	"Progress_Report", -- s->c: relatório de serviço ao sair de campo (linhas, XP, CI, subida de posto)
 	"InPlace_Buy", -- c->s: pede a compra em Robux do renascer onde caiu (o servidor confere as regras antes)

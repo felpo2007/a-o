@@ -380,6 +380,21 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
       arma de 1ª e 3ª pessoa; a roleta parou no item do servidor; o degradê no cartão; 0 erros.
     - **v102 publicada** (versão 107 do place, commit 5b42e49).
 
+- Pedido do dono (16/11, com imagens de referência): "faca skins estilo jogo r6 tbm como inverno
+  sombrio, geleiras, entre outras" e "skins das pedras tem q ter relevo".
+  - **Lote 63 (D-179): acabamentos universais e relevo de verdade.**
+    - 12 universais: valem em qualquer uma das 11 armas com arte, como as gemas do R6.
+      - 7 gemas lapidadas e o Ouro Lapidado, a Obsidiana Lapidada e o Ônix Polido;
+      - Inverno Sombrio e Geleira Antiga, de gelo.
+    - Equipa-se na arma escolhida, debaixo de cada arma no perfil. Pode ficar em várias armas.
+    - Relevo de verdade (mapa normal) nas gemas, no gelo e nas pedras, incluindo as de antes (jade,
+      mármore, malaquita, lava, escamas), e brilho próprio (metal e aspereza) por material.
+    - Todos os acabamentos das 11 armas agora usam uma SurfaceAppearance pronta: os da D-178
+      recuperam o relevo e o brilho da arte original.
+    - Nas caixas sem mudar a fatia de nenhuma raridade; cada um sai de uma caixa grátis.
+    - Conferido: Lune 699 ok, pytest 70. No Studio, troca → equipar → campo com a SurfaceAppearance
+      na arma de 1ª e 3ª pessoa, e o EQUIPAR/TIRAR do perfil em outra arma; 0 erros.
+    - **v103 publicada** (versão 108 do place, commit PENDENTE).
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;
   - respondido pelo dono: a M14 fica como está; o capim clareou (v58);

@@ -481,13 +481,16 @@ local function clearPreview()
 	end
 end
 
+-- D-179: arma em que o acabamento universal está sendo visto/equipado (a do cartão clicado)
+local armaUniversal: string? = nil
+
 local function weaponPreview(s: Skins.Skin)
-	local wid = s.weapon or ""
+	local wid = s.weapon or armaUniversal or s.vitrine or ""
 	local wp = Weapons.get(wid)
 	local folder = ReplicatedStorage:FindFirstChild("VT65WeaponArt")
 	local art = if folder then folder:FindFirstChild(wid) else nil
 	local m: Model = if art and art:IsA("Model") then art:Clone() else GunModel.build(wid, if wp then wp.kind else nil)
-	Skins.applyWeapon(m, s.id)
+	Skins.applyWeapon(m, s.id, wid)
 	m:PivotTo(CFrame.identity)
 	m.Parent = view
 	local cf, size = m:GetBoundingBox()
@@ -790,14 +793,16 @@ end
 local CAT_NAME = { weapon = "ARMAS", uniform = "UNIFORME", camo = "CAMUFLAGEM" }
 local CAT_ORDER: { string } = { "weapon", "uniform", "camo" }
 
-local function skinCard(s: Skins.Skin, sk: { [string]: any })
+-- arma: a do universal (D-179), que aparece debaixo de cada arma e equipa nela
+local function skinCard(s: Skins.Skin, sk: { [string]: any }, arma: string?)
 	local owned = sk.owned or {}
 	local on = sk.on or {}
 	local how = owned[s.id]
-	local equipped = on[Skins.slotOf(s)] == s.id
+	local equipped = on[arma or Skins.slotOf(s)] == s.id
+	local chave = if arma then s.id .. "@" .. arma else s.id
 	order += 1
 	local card = Instance.new("Frame")
-	card.Name = s.id
+	card.Name = chave
 	card.BackgroundColor3 = CARD_BG
 	card.BorderSizePixel = 0
 	card.AutomaticSize = Enum.AutomaticSize.Y
@@ -843,25 +848,29 @@ local function skinCard(s: Skins.Skin, sk: { [string]: any })
 			else money(s.price)
 	end
 	text(status, 13, if how then P.money else P.text, true, 2)
-	local actions = rowOf(card, 3)
+	if arma then
+		text("Acabamento universal: vale em qualquer arma.", 12, P.text, false, 3)
+	end
+	local actions = rowOf(card, 4)
 	local look = function()
+		armaUniversal = arma
 		select(s.id)
 	end
 	if how then
 		-- toque (Parte 13): sem "passar o mouse", o toque também mostra a skin na prévia
 		if equipped then
-			button(actions, "TIRAR", "normal", "skin:" .. s.id, function()
+			button(actions, "TIRAR", "normal", "skin:" .. chave, function()
 				if ToqueUi.active() then
-					select(s.id)
+					look()
 				end
-				Net.event("Gear_Equip"):FireServer(s.id, false)
+				Net.event("Gear_Equip"):FireServer(s.id, false, arma)
 			end, look)
 		else
-			button(actions, "EQUIPAR", "primary", "skin:" .. s.id, function()
+			button(actions, "EQUIPAR", "primary", "skin:" .. chave, function()
 				if ToqueUi.active() then
-					select(s.id)
+					look()
 				end
-				Net.event("Gear_Equip"):FireServer(s.id, true)
+				Net.event("Gear_Equip"):FireServer(s.id, true, arma)
 			end, look)
 		end
 	elseif s.soPasse then
@@ -921,7 +930,8 @@ local function defaultRow(slot: string, sk: { [string]: any }, text: string)
 	local cur = (sk.on or {})[slot]
 	if cur then
 		fullButton(text, "normal", "default:" .. slot, function()
-			Net.event("Gear_Equip"):FireServer(cur, false)
+			-- o universal (D-179) está nesta arma: o encaixe vai junto
+			Net.event("Gear_Equip"):FireServer(cur, false, slot)
 		end)
 	end
 end
@@ -954,8 +964,10 @@ local function renderSkins(s: { [string]: any })
 			if wp.faction == faction then
 				local list = {}
 				for _, x in Skins.list("weapon", faction) do
-					-- D-178: o acabamento das caixas só aparece aqui para quem já tem (para equipar)
-					if x.weapon == wp.id and (not x.soCaixa or (sk.owned or {})[x.id]) then
+					-- D-178: o acabamento das caixas só aparece aqui para quem já tem (para equipar);
+					-- D-179: o universal que é seu aparece em toda arma que o aceita
+					local daArma = x.weapon == wp.id or (x.universal and Skins.armaUniversal(wp.id))
+					if daArma and (not x.soCaixa or (sk.owned or {})[x.id]) then
 						table.insert(list, x)
 					end
 				end
@@ -964,7 +976,7 @@ local function renderSkins(s: { [string]: any })
 					defaultRow(wp.id, sk, "Voltar ao acabamento de fábrica")
 					for _, x in list do
 						first = first or x.id
-						skinCard(x, sk)
+						skinCard(x, sk, if x.universal then wp.id else nil)
 					end
 				end
 			end
@@ -1209,7 +1221,7 @@ local function skinModel(m: Instance)
 	if m:IsA("Model") then
 		local wid = m:GetAttribute("WeaponId")
 		if type(wid) == "string" then
-			Skins.applyWeapon(m, Skins.weaponSkinFrom(player:GetAttribute("WeaponSkins"), wid))
+			Skins.applyWeapon(m, Skins.weaponSkinFrom(player:GetAttribute("WeaponSkins"), wid), wid)
 		end
 	end
 end

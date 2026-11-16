@@ -205,8 +205,16 @@ O `sourcemap.json` não vai para o Git.
   cobra). `--previa <pasta>` desenha os cilindros sobre a madeira.
 - Armas: `tools/armas_parker.py` gera `<arma>_studs_parker.glb` (aço fosco, texturas de 1024) a
   partir do GLB do gerador; é ele que sobe. Rode depois do `fetch_forgegui_assets.py`.
-- Acabamentos de arma (D-178): a arte da arma é uma malha só, então o acabamento é uma textura
-  inteira que troca o `TextureID` (`Skins.applyWeapon`, `Shared/AcabamentosArte.luau`).
+- Acabamentos de arma (D-178, D-179): a arte da arma é uma malha só, então o acabamento é uma
+  textura inteira. `Skins.applyWeapon` clona a SurfaceAppearance pronta dele
+  (`src/ReplicatedStorage/VT65AcabamentosSA.model.json`: a cor nova e o relevo e o material,
+  novos ou os da arte em `assets/armas_pbr.json`); sem ela, troca o `TextureID`
+  (`Shared/AcabamentosArte.luau`). O universal (D-179) tem uma textura por arma (`id@arma`).
+  - Relevo: receita em `RELEVO` (mapa normal `<id>_n.png`); material em `CLASSE`/`CLASSES`
+    (`classes/<arma>_<classe>_<alvo>_m/_r.png`); `assets/acabamentos_meta.json` guarda qual
+    acabamento tem cada um;
+  - arma nova ou refeita: releia no Studio os mapas da SurfaceAppearance dela para o
+    `armas_pbr.json` (Server, `VT65WeaponArt`) e gere de novo;
   - `uv run --group arte python tools/acabamentos.py` pinta as que faltam (`--todas` refaz;
     `--mascaras` mostra madeira/metal/latão/pano) e faz prévias em
     `assets/acabamentos/previas`. Receita nova: `RECEITAS` no script e `arte` no `Skins`;
@@ -270,7 +278,7 @@ O `sourcemap.json` não vai para o Git.
 - Segredos só no `.env` (no `.gitignore`), nunca no código nem no chat.
 - ForgeGUI: nunca regenerar um job em `outcome_unknown`. "failed" com `retryable` pode ser
   retomado com `generation_retry`.
-- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-179) e atualize `PROGRESS.md`.
+- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-180) e atualize `PROGRESS.md`.
 - Tetos de triângulos por modelo: vegetação ≤ 6 mil (D-135), props e herói ≤ 20 mil (`ArtBudget`,
   conferido pelo teste da F5).
 - Commits no branch acima, com mensagem em português.

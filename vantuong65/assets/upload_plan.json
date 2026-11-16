@@ -2484,5 +2484,2574 @@
   "assetType": "Decal",
   "name": "Acabamento mosin_inverno",
   "description": "VAN TUONG 65: textura de acabamento de arma (D-178)"
+ },
+ {
+  "key": "AcabM.m16_espelho_tudo",
+  "file": "assets/acabamentos/classes/m16_espelho_tudo_m.png",
+  "assetType": "Image",
+  "name": "Metal m16_espelho_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabR.m16_espelho_tudo",
+  "file": "assets/acabamentos/classes/m16_espelho_tudo_r.png",
+  "assetType": "Image",
+  "name": "Aspereza m16_espelho_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.skin_m60_escamas_rubras",
+  "file": "assets/acabamentos/skin_m60_escamas_rubras_n.png",
+  "assetType": "Image",
+  "name": "Relevo skin_m60_escamas_rubras",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.skin_m60_lava_viva",
+  "file": "assets/acabamentos/skin_m60_lava_viva_n.png",
+  "assetType": "Image",
+  "name": "Relevo skin_m60_lava_viva",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabM.m60_pedra_tudo",
+  "file": "assets/acabamentos/classes/m60_pedra_tudo_m.png",
+  "assetType": "Image",
+  "name": "Metal m60_pedra_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabR.m60_pedra_tudo",
+  "file": "assets/acabamentos/classes/m60_pedra_tudo_r.png",
+  "assetType": "Image",
+  "name": "Aspereza m60_pedra_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabM.m1911_espelho_metal",
+  "file": "assets/acabamentos/classes/m1911_espelho_metal_m.png",
+  "assetType": "Image",
+  "name": "Metal m1911_espelho_metal",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabR.m1911_espelho_metal",
+  "file": "assets/acabamentos/classes/m1911_espelho_metal_r.png",
+  "assetType": "Image",
+  "name": "Aspereza m1911_espelho_metal",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.skin_m1911_carrara",
+  "file": "assets/acabamentos/skin_m1911_carrara_n.png",
+  "assetType": "Image",
+  "name": "Relevo skin_m1911_carrara",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabM.m1911_pedra_tudo",
+  "file": "assets/acabamentos/classes/m1911_pedra_tudo_m.png",
+  "assetType": "Image",
+  "name": "Metal m1911_pedra_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabR.m1911_pedra_tudo",
+  "file": "assets/acabamentos/classes/m1911_pedra_tudo_r.png",
+  "assetType": "Image",
+  "name": "Aspereza m1911_pedra_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.skin_m70_marmore_negro",
+  "file": "assets/acabamentos/skin_m70_marmore_negro_n.png",
+  "assetType": "Image",
+  "name": "Relevo skin_m70_marmore_negro",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabM.m70_pedra_tudo",
+  "file": "assets/acabamentos/classes/m70_pedra_tudo_m.png",
+  "assetType": "Image",
+  "name": "Metal m70_pedra_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabR.m70_pedra_tudo",
+  "file": "assets/acabamentos/classes/m70_pedra_tudo_r.png",
+  "assetType": "Image",
+  "name": "Aspereza m70_pedra_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.skin_type56_serpente",
+  "file": "assets/acabamentos/skin_type56_serpente_n.png",
+  "assetType": "Image",
+  "name": "Relevo skin_type56_serpente",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.skin_type56_jade",
+  "file": "assets/acabamentos/skin_type56_jade_n.png",
+  "assetType": "Image",
+  "name": "Relevo skin_type56_jade",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabM.type56_pedra_tudo",
+  "file": "assets/acabamentos/classes/type56_pedra_tudo_m.png",
+  "assetType": "Image",
+  "name": "Metal type56_pedra_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabR.type56_pedra_tudo",
+  "file": "assets/acabamentos/classes/type56_pedra_tudo_r.png",
+  "assetType": "Image",
+  "name": "Aspereza type56_pedra_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.skin_sks_malaquita",
+  "file": "assets/acabamentos/skin_sks_malaquita_n.png",
+  "assetType": "Image",
+  "name": "Relevo skin_sks_malaquita",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabM.sks_pedra_tudo",
+  "file": "assets/acabamentos/classes/sks_pedra_tudo_m.png",
+  "assetType": "Image",
+  "name": "Metal sks_pedra_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabR.sks_pedra_tudo",
+  "file": "assets/acabamentos/classes/sks_pedra_tudo_r.png",
+  "assetType": "Image",
+  "name": "Aspereza sks_pedra_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.skin_rpd_gelo",
+  "file": "assets/acabamentos/skin_rpd_gelo_n.png",
+  "assetType": "Image",
+  "name": "Relevo skin_rpd_gelo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabM.rpd_pedra_tudo",
+  "file": "assets/acabamentos/classes/rpd_pedra_tudo_m.png",
+  "assetType": "Image",
+  "name": "Metal rpd_pedra_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabR.rpd_pedra_tudo",
+  "file": "assets/acabamentos/classes/rpd_pedra_tudo_r.png",
+  "assetType": "Image",
+  "name": "Aspereza rpd_pedra_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.skin_rpd_escamas_abissais",
+  "file": "assets/acabamentos/skin_rpd_escamas_abissais_n.png",
+  "assetType": "Image",
+  "name": "Relevo skin_rpd_escamas_abissais",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabM.type54_espelho_tudo",
+  "file": "assets/acabamentos/classes/type54_espelho_tudo_m.png",
+  "assetType": "Image",
+  "name": "Metal type54_espelho_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabR.type54_espelho_tudo",
+  "file": "assets/acabamentos/classes/type54_espelho_tudo_r.png",
+  "assetType": "Image",
+  "name": "Aspereza type54_espelho_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_cristal_rubro@m14",
+  "file": "assets/acabamentos/uni_cristal_rubro@m14.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_cristal_rubro@m14",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_cristal_rubro@m14",
+  "file": "assets/acabamentos/uni_cristal_rubro@m14_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_cristal_rubro@m14",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabM.m14_cristal_tudo",
+  "file": "assets/acabamentos/classes/m14_cristal_tudo_m.png",
+  "assetType": "Image",
+  "name": "Metal m14_cristal_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabR.m14_cristal_tudo",
+  "file": "assets/acabamentos/classes/m14_cristal_tudo_r.png",
+  "assetType": "Image",
+  "name": "Aspereza m14_cristal_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_cristal_rubro@m16",
+  "file": "assets/acabamentos/uni_cristal_rubro@m16.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_cristal_rubro@m16",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_cristal_rubro@m16",
+  "file": "assets/acabamentos/uni_cristal_rubro@m16_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_cristal_rubro@m16",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabM.m16_cristal_tudo",
+  "file": "assets/acabamentos/classes/m16_cristal_tudo_m.png",
+  "assetType": "Image",
+  "name": "Metal m16_cristal_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabR.m16_cristal_tudo",
+  "file": "assets/acabamentos/classes/m16_cristal_tudo_r.png",
+  "assetType": "Image",
+  "name": "Aspereza m16_cristal_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_cristal_rubro@m60",
+  "file": "assets/acabamentos/uni_cristal_rubro@m60.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_cristal_rubro@m60",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_cristal_rubro@m60",
+  "file": "assets/acabamentos/uni_cristal_rubro@m60_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_cristal_rubro@m60",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabM.m60_cristal_tudo",
+  "file": "assets/acabamentos/classes/m60_cristal_tudo_m.png",
+  "assetType": "Image",
+  "name": "Metal m60_cristal_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabR.m60_cristal_tudo",
+  "file": "assets/acabamentos/classes/m60_cristal_tudo_r.png",
+  "assetType": "Image",
+  "name": "Aspereza m60_cristal_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_cristal_rubro@m1911",
+  "file": "assets/acabamentos/uni_cristal_rubro@m1911.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_cristal_rubro@m1911",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_cristal_rubro@m1911",
+  "file": "assets/acabamentos/uni_cristal_rubro@m1911_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_cristal_rubro@m1911",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabM.m1911_cristal_tudo",
+  "file": "assets/acabamentos/classes/m1911_cristal_tudo_m.png",
+  "assetType": "Image",
+  "name": "Metal m1911_cristal_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabR.m1911_cristal_tudo",
+  "file": "assets/acabamentos/classes/m1911_cristal_tudo_r.png",
+  "assetType": "Image",
+  "name": "Aspereza m1911_cristal_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_cristal_rubro@m70",
+  "file": "assets/acabamentos/uni_cristal_rubro@m70.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_cristal_rubro@m70",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_cristal_rubro@m70",
+  "file": "assets/acabamentos/uni_cristal_rubro@m70_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_cristal_rubro@m70",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabM.m70_cristal_tudo",
+  "file": "assets/acabamentos/classes/m70_cristal_tudo_m.png",
+  "assetType": "Image",
+  "name": "Metal m70_cristal_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabR.m70_cristal_tudo",
+  "file": "assets/acabamentos/classes/m70_cristal_tudo_r.png",
+  "assetType": "Image",
+  "name": "Aspereza m70_cristal_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_cristal_rubro@win12",
+  "file": "assets/acabamentos/uni_cristal_rubro@win12.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_cristal_rubro@win12",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_cristal_rubro@win12",
+  "file": "assets/acabamentos/uni_cristal_rubro@win12_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_cristal_rubro@win12",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabM.win12_cristal_tudo",
+  "file": "assets/acabamentos/classes/win12_cristal_tudo_m.png",
+  "assetType": "Image",
+  "name": "Metal win12_cristal_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabR.win12_cristal_tudo",
+  "file": "assets/acabamentos/classes/win12_cristal_tudo_r.png",
+  "assetType": "Image",
+  "name": "Aspereza win12_cristal_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_cristal_rubro@type56",
+  "file": "assets/acabamentos/uni_cristal_rubro@type56.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_cristal_rubro@type56",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_cristal_rubro@type56",
+  "file": "assets/acabamentos/uni_cristal_rubro@type56_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_cristal_rubro@type56",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabM.type56_cristal_tudo",
+  "file": "assets/acabamentos/classes/type56_cristal_tudo_m.png",
+  "assetType": "Image",
+  "name": "Metal type56_cristal_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabR.type56_cristal_tudo",
+  "file": "assets/acabamentos/classes/type56_cristal_tudo_r.png",
+  "assetType": "Image",
+  "name": "Aspereza type56_cristal_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_cristal_rubro@sks",
+  "file": "assets/acabamentos/uni_cristal_rubro@sks.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_cristal_rubro@sks",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_cristal_rubro@sks",
+  "file": "assets/acabamentos/uni_cristal_rubro@sks_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_cristal_rubro@sks",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabM.sks_cristal_tudo",
+  "file": "assets/acabamentos/classes/sks_cristal_tudo_m.png",
+  "assetType": "Image",
+  "name": "Metal sks_cristal_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabR.sks_cristal_tudo",
+  "file": "assets/acabamentos/classes/sks_cristal_tudo_r.png",
+  "assetType": "Image",
+  "name": "Aspereza sks_cristal_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_cristal_rubro@rpd",
+  "file": "assets/acabamentos/uni_cristal_rubro@rpd.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_cristal_rubro@rpd",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_cristal_rubro@rpd",
+  "file": "assets/acabamentos/uni_cristal_rubro@rpd_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_cristal_rubro@rpd",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabM.rpd_cristal_tudo",
+  "file": "assets/acabamentos/classes/rpd_cristal_tudo_m.png",
+  "assetType": "Image",
+  "name": "Metal rpd_cristal_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabR.rpd_cristal_tudo",
+  "file": "assets/acabamentos/classes/rpd_cristal_tudo_r.png",
+  "assetType": "Image",
+  "name": "Aspereza rpd_cristal_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_cristal_rubro@type54",
+  "file": "assets/acabamentos/uni_cristal_rubro@type54.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_cristal_rubro@type54",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_cristal_rubro@type54",
+  "file": "assets/acabamentos/uni_cristal_rubro@type54_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_cristal_rubro@type54",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabM.type54_cristal_tudo",
+  "file": "assets/acabamentos/classes/type54_cristal_tudo_m.png",
+  "assetType": "Image",
+  "name": "Metal type54_cristal_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabR.type54_cristal_tudo",
+  "file": "assets/acabamentos/classes/type54_cristal_tudo_r.png",
+  "assetType": "Image",
+  "name": "Aspereza type54_cristal_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_cristal_rubro@mosin",
+  "file": "assets/acabamentos/uni_cristal_rubro@mosin.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_cristal_rubro@mosin",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_cristal_rubro@mosin",
+  "file": "assets/acabamentos/uni_cristal_rubro@mosin_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_cristal_rubro@mosin",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabM.mosin_cristal_tudo",
+  "file": "assets/acabamentos/classes/mosin_cristal_tudo_m.png",
+  "assetType": "Image",
+  "name": "Metal mosin_cristal_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabR.mosin_cristal_tudo",
+  "file": "assets/acabamentos/classes/mosin_cristal_tudo_r.png",
+  "assetType": "Image",
+  "name": "Aspereza mosin_cristal_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_cristal_ciano@m14",
+  "file": "assets/acabamentos/uni_cristal_ciano@m14.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_cristal_ciano@m14",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_cristal_ciano@m14",
+  "file": "assets/acabamentos/uni_cristal_ciano@m14_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_cristal_ciano@m14",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_cristal_ciano@m16",
+  "file": "assets/acabamentos/uni_cristal_ciano@m16.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_cristal_ciano@m16",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_cristal_ciano@m16",
+  "file": "assets/acabamentos/uni_cristal_ciano@m16_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_cristal_ciano@m16",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_cristal_ciano@m60",
+  "file": "assets/acabamentos/uni_cristal_ciano@m60.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_cristal_ciano@m60",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_cristal_ciano@m60",
+  "file": "assets/acabamentos/uni_cristal_ciano@m60_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_cristal_ciano@m60",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_cristal_ciano@m1911",
+  "file": "assets/acabamentos/uni_cristal_ciano@m1911.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_cristal_ciano@m1911",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_cristal_ciano@m1911",
+  "file": "assets/acabamentos/uni_cristal_ciano@m1911_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_cristal_ciano@m1911",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_cristal_ciano@m70",
+  "file": "assets/acabamentos/uni_cristal_ciano@m70.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_cristal_ciano@m70",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_cristal_ciano@m70",
+  "file": "assets/acabamentos/uni_cristal_ciano@m70_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_cristal_ciano@m70",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_cristal_ciano@win12",
+  "file": "assets/acabamentos/uni_cristal_ciano@win12.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_cristal_ciano@win12",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_cristal_ciano@win12",
+  "file": "assets/acabamentos/uni_cristal_ciano@win12_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_cristal_ciano@win12",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_cristal_ciano@type56",
+  "file": "assets/acabamentos/uni_cristal_ciano@type56.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_cristal_ciano@type56",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_cristal_ciano@type56",
+  "file": "assets/acabamentos/uni_cristal_ciano@type56_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_cristal_ciano@type56",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_cristal_ciano@sks",
+  "file": "assets/acabamentos/uni_cristal_ciano@sks.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_cristal_ciano@sks",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_cristal_ciano@sks",
+  "file": "assets/acabamentos/uni_cristal_ciano@sks_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_cristal_ciano@sks",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_cristal_ciano@rpd",
+  "file": "assets/acabamentos/uni_cristal_ciano@rpd.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_cristal_ciano@rpd",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_cristal_ciano@rpd",
+  "file": "assets/acabamentos/uni_cristal_ciano@rpd_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_cristal_ciano@rpd",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_cristal_ciano@type54",
+  "file": "assets/acabamentos/uni_cristal_ciano@type54.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_cristal_ciano@type54",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_cristal_ciano@type54",
+  "file": "assets/acabamentos/uni_cristal_ciano@type54_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_cristal_ciano@type54",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_cristal_ciano@mosin",
+  "file": "assets/acabamentos/uni_cristal_ciano@mosin.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_cristal_ciano@mosin",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_cristal_ciano@mosin",
+  "file": "assets/acabamentos/uni_cristal_ciano@mosin_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_cristal_ciano@mosin",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_cristal_cobalto@m14",
+  "file": "assets/acabamentos/uni_cristal_cobalto@m14.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_cristal_cobalto@m14",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_cristal_cobalto@m14",
+  "file": "assets/acabamentos/uni_cristal_cobalto@m14_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_cristal_cobalto@m14",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_cristal_cobalto@m16",
+  "file": "assets/acabamentos/uni_cristal_cobalto@m16.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_cristal_cobalto@m16",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_cristal_cobalto@m16",
+  "file": "assets/acabamentos/uni_cristal_cobalto@m16_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_cristal_cobalto@m16",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_cristal_cobalto@m60",
+  "file": "assets/acabamentos/uni_cristal_cobalto@m60.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_cristal_cobalto@m60",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_cristal_cobalto@m60",
+  "file": "assets/acabamentos/uni_cristal_cobalto@m60_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_cristal_cobalto@m60",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_cristal_cobalto@m1911",
+  "file": "assets/acabamentos/uni_cristal_cobalto@m1911.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_cristal_cobalto@m1911",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_cristal_cobalto@m1911",
+  "file": "assets/acabamentos/uni_cristal_cobalto@m1911_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_cristal_cobalto@m1911",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_cristal_cobalto@m70",
+  "file": "assets/acabamentos/uni_cristal_cobalto@m70.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_cristal_cobalto@m70",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_cristal_cobalto@m70",
+  "file": "assets/acabamentos/uni_cristal_cobalto@m70_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_cristal_cobalto@m70",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_cristal_cobalto@win12",
+  "file": "assets/acabamentos/uni_cristal_cobalto@win12.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_cristal_cobalto@win12",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_cristal_cobalto@win12",
+  "file": "assets/acabamentos/uni_cristal_cobalto@win12_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_cristal_cobalto@win12",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_cristal_cobalto@type56",
+  "file": "assets/acabamentos/uni_cristal_cobalto@type56.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_cristal_cobalto@type56",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_cristal_cobalto@type56",
+  "file": "assets/acabamentos/uni_cristal_cobalto@type56_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_cristal_cobalto@type56",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_cristal_cobalto@sks",
+  "file": "assets/acabamentos/uni_cristal_cobalto@sks.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_cristal_cobalto@sks",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_cristal_cobalto@sks",
+  "file": "assets/acabamentos/uni_cristal_cobalto@sks_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_cristal_cobalto@sks",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_cristal_cobalto@rpd",
+  "file": "assets/acabamentos/uni_cristal_cobalto@rpd.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_cristal_cobalto@rpd",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_cristal_cobalto@rpd",
+  "file": "assets/acabamentos/uni_cristal_cobalto@rpd_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_cristal_cobalto@rpd",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_cristal_cobalto@type54",
+  "file": "assets/acabamentos/uni_cristal_cobalto@type54.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_cristal_cobalto@type54",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_cristal_cobalto@type54",
+  "file": "assets/acabamentos/uni_cristal_cobalto@type54_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_cristal_cobalto@type54",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_cristal_cobalto@mosin",
+  "file": "assets/acabamentos/uni_cristal_cobalto@mosin.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_cristal_cobalto@mosin",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_cristal_cobalto@mosin",
+  "file": "assets/acabamentos/uni_cristal_cobalto@mosin_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_cristal_cobalto@mosin",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_cristal_ambar@m14",
+  "file": "assets/acabamentos/uni_cristal_ambar@m14.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_cristal_ambar@m14",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_cristal_ambar@m14",
+  "file": "assets/acabamentos/uni_cristal_ambar@m14_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_cristal_ambar@m14",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_cristal_ambar@m16",
+  "file": "assets/acabamentos/uni_cristal_ambar@m16.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_cristal_ambar@m16",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_cristal_ambar@m16",
+  "file": "assets/acabamentos/uni_cristal_ambar@m16_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_cristal_ambar@m16",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_cristal_ambar@m60",
+  "file": "assets/acabamentos/uni_cristal_ambar@m60.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_cristal_ambar@m60",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_cristal_ambar@m60",
+  "file": "assets/acabamentos/uni_cristal_ambar@m60_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_cristal_ambar@m60",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_cristal_ambar@m1911",
+  "file": "assets/acabamentos/uni_cristal_ambar@m1911.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_cristal_ambar@m1911",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_cristal_ambar@m1911",
+  "file": "assets/acabamentos/uni_cristal_ambar@m1911_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_cristal_ambar@m1911",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_cristal_ambar@m70",
+  "file": "assets/acabamentos/uni_cristal_ambar@m70.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_cristal_ambar@m70",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_cristal_ambar@m70",
+  "file": "assets/acabamentos/uni_cristal_ambar@m70_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_cristal_ambar@m70",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_cristal_ambar@win12",
+  "file": "assets/acabamentos/uni_cristal_ambar@win12.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_cristal_ambar@win12",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_cristal_ambar@win12",
+  "file": "assets/acabamentos/uni_cristal_ambar@win12_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_cristal_ambar@win12",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_cristal_ambar@type56",
+  "file": "assets/acabamentos/uni_cristal_ambar@type56.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_cristal_ambar@type56",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_cristal_ambar@type56",
+  "file": "assets/acabamentos/uni_cristal_ambar@type56_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_cristal_ambar@type56",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_cristal_ambar@sks",
+  "file": "assets/acabamentos/uni_cristal_ambar@sks.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_cristal_ambar@sks",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_cristal_ambar@sks",
+  "file": "assets/acabamentos/uni_cristal_ambar@sks_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_cristal_ambar@sks",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_cristal_ambar@rpd",
+  "file": "assets/acabamentos/uni_cristal_ambar@rpd.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_cristal_ambar@rpd",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_cristal_ambar@rpd",
+  "file": "assets/acabamentos/uni_cristal_ambar@rpd_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_cristal_ambar@rpd",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_cristal_ambar@type54",
+  "file": "assets/acabamentos/uni_cristal_ambar@type54.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_cristal_ambar@type54",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_cristal_ambar@type54",
+  "file": "assets/acabamentos/uni_cristal_ambar@type54_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_cristal_ambar@type54",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_cristal_ambar@mosin",
+  "file": "assets/acabamentos/uni_cristal_ambar@mosin.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_cristal_ambar@mosin",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_cristal_ambar@mosin",
+  "file": "assets/acabamentos/uni_cristal_ambar@mosin_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_cristal_ambar@mosin",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_cristal_violeta@m14",
+  "file": "assets/acabamentos/uni_cristal_violeta@m14.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_cristal_violeta@m14",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_cristal_violeta@m14",
+  "file": "assets/acabamentos/uni_cristal_violeta@m14_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_cristal_violeta@m14",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_cristal_violeta@m16",
+  "file": "assets/acabamentos/uni_cristal_violeta@m16.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_cristal_violeta@m16",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_cristal_violeta@m16",
+  "file": "assets/acabamentos/uni_cristal_violeta@m16_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_cristal_violeta@m16",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_cristal_violeta@m60",
+  "file": "assets/acabamentos/uni_cristal_violeta@m60.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_cristal_violeta@m60",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_cristal_violeta@m60",
+  "file": "assets/acabamentos/uni_cristal_violeta@m60_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_cristal_violeta@m60",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_cristal_violeta@m1911",
+  "file": "assets/acabamentos/uni_cristal_violeta@m1911.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_cristal_violeta@m1911",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_cristal_violeta@m1911",
+  "file": "assets/acabamentos/uni_cristal_violeta@m1911_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_cristal_violeta@m1911",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_cristal_violeta@m70",
+  "file": "assets/acabamentos/uni_cristal_violeta@m70.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_cristal_violeta@m70",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_cristal_violeta@m70",
+  "file": "assets/acabamentos/uni_cristal_violeta@m70_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_cristal_violeta@m70",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_cristal_violeta@win12",
+  "file": "assets/acabamentos/uni_cristal_violeta@win12.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_cristal_violeta@win12",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_cristal_violeta@win12",
+  "file": "assets/acabamentos/uni_cristal_violeta@win12_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_cristal_violeta@win12",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_cristal_violeta@type56",
+  "file": "assets/acabamentos/uni_cristal_violeta@type56.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_cristal_violeta@type56",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_cristal_violeta@type56",
+  "file": "assets/acabamentos/uni_cristal_violeta@type56_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_cristal_violeta@type56",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_cristal_violeta@sks",
+  "file": "assets/acabamentos/uni_cristal_violeta@sks.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_cristal_violeta@sks",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_cristal_violeta@sks",
+  "file": "assets/acabamentos/uni_cristal_violeta@sks_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_cristal_violeta@sks",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_cristal_violeta@rpd",
+  "file": "assets/acabamentos/uni_cristal_violeta@rpd.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_cristal_violeta@rpd",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_cristal_violeta@rpd",
+  "file": "assets/acabamentos/uni_cristal_violeta@rpd_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_cristal_violeta@rpd",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_cristal_violeta@type54",
+  "file": "assets/acabamentos/uni_cristal_violeta@type54.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_cristal_violeta@type54",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_cristal_violeta@type54",
+  "file": "assets/acabamentos/uni_cristal_violeta@type54_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_cristal_violeta@type54",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_cristal_violeta@mosin",
+  "file": "assets/acabamentos/uni_cristal_violeta@mosin.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_cristal_violeta@mosin",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_cristal_violeta@mosin",
+  "file": "assets/acabamentos/uni_cristal_violeta@mosin_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_cristal_violeta@mosin",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_cristal_esmeralda@m14",
+  "file": "assets/acabamentos/uni_cristal_esmeralda@m14.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_cristal_esmeralda@m14",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_cristal_esmeralda@m14",
+  "file": "assets/acabamentos/uni_cristal_esmeralda@m14_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_cristal_esmeralda@m14",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_cristal_esmeralda@m16",
+  "file": "assets/acabamentos/uni_cristal_esmeralda@m16.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_cristal_esmeralda@m16",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_cristal_esmeralda@m16",
+  "file": "assets/acabamentos/uni_cristal_esmeralda@m16_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_cristal_esmeralda@m16",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_cristal_esmeralda@m60",
+  "file": "assets/acabamentos/uni_cristal_esmeralda@m60.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_cristal_esmeralda@m60",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_cristal_esmeralda@m60",
+  "file": "assets/acabamentos/uni_cristal_esmeralda@m60_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_cristal_esmeralda@m60",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_cristal_esmeralda@m1911",
+  "file": "assets/acabamentos/uni_cristal_esmeralda@m1911.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_cristal_esmeralda@m1911",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_cristal_esmeralda@m1911",
+  "file": "assets/acabamentos/uni_cristal_esmeralda@m1911_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_cristal_esmeralda@m1911",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_cristal_esmeralda@m70",
+  "file": "assets/acabamentos/uni_cristal_esmeralda@m70.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_cristal_esmeralda@m70",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_cristal_esmeralda@m70",
+  "file": "assets/acabamentos/uni_cristal_esmeralda@m70_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_cristal_esmeralda@m70",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_cristal_esmeralda@win12",
+  "file": "assets/acabamentos/uni_cristal_esmeralda@win12.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_cristal_esmeralda@win12",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_cristal_esmeralda@win12",
+  "file": "assets/acabamentos/uni_cristal_esmeralda@win12_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_cristal_esmeralda@win12",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_cristal_esmeralda@type56",
+  "file": "assets/acabamentos/uni_cristal_esmeralda@type56.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_cristal_esmeralda@type56",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_cristal_esmeralda@type56",
+  "file": "assets/acabamentos/uni_cristal_esmeralda@type56_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_cristal_esmeralda@type56",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_cristal_esmeralda@sks",
+  "file": "assets/acabamentos/uni_cristal_esmeralda@sks.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_cristal_esmeralda@sks",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_cristal_esmeralda@sks",
+  "file": "assets/acabamentos/uni_cristal_esmeralda@sks_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_cristal_esmeralda@sks",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_cristal_esmeralda@rpd",
+  "file": "assets/acabamentos/uni_cristal_esmeralda@rpd.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_cristal_esmeralda@rpd",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_cristal_esmeralda@rpd",
+  "file": "assets/acabamentos/uni_cristal_esmeralda@rpd_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_cristal_esmeralda@rpd",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_cristal_esmeralda@type54",
+  "file": "assets/acabamentos/uni_cristal_esmeralda@type54.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_cristal_esmeralda@type54",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_cristal_esmeralda@type54",
+  "file": "assets/acabamentos/uni_cristal_esmeralda@type54_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_cristal_esmeralda@type54",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_cristal_esmeralda@mosin",
+  "file": "assets/acabamentos/uni_cristal_esmeralda@mosin.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_cristal_esmeralda@mosin",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_cristal_esmeralda@mosin",
+  "file": "assets/acabamentos/uni_cristal_esmeralda@mosin_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_cristal_esmeralda@mosin",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_quartzo_rosa@m14",
+  "file": "assets/acabamentos/uni_quartzo_rosa@m14.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_quartzo_rosa@m14",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_quartzo_rosa@m14",
+  "file": "assets/acabamentos/uni_quartzo_rosa@m14_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_quartzo_rosa@m14",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_quartzo_rosa@m16",
+  "file": "assets/acabamentos/uni_quartzo_rosa@m16.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_quartzo_rosa@m16",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_quartzo_rosa@m16",
+  "file": "assets/acabamentos/uni_quartzo_rosa@m16_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_quartzo_rosa@m16",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_quartzo_rosa@m60",
+  "file": "assets/acabamentos/uni_quartzo_rosa@m60.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_quartzo_rosa@m60",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_quartzo_rosa@m60",
+  "file": "assets/acabamentos/uni_quartzo_rosa@m60_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_quartzo_rosa@m60",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_quartzo_rosa@m1911",
+  "file": "assets/acabamentos/uni_quartzo_rosa@m1911.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_quartzo_rosa@m1911",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_quartzo_rosa@m1911",
+  "file": "assets/acabamentos/uni_quartzo_rosa@m1911_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_quartzo_rosa@m1911",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_quartzo_rosa@m70",
+  "file": "assets/acabamentos/uni_quartzo_rosa@m70.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_quartzo_rosa@m70",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_quartzo_rosa@m70",
+  "file": "assets/acabamentos/uni_quartzo_rosa@m70_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_quartzo_rosa@m70",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_quartzo_rosa@win12",
+  "file": "assets/acabamentos/uni_quartzo_rosa@win12.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_quartzo_rosa@win12",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_quartzo_rosa@win12",
+  "file": "assets/acabamentos/uni_quartzo_rosa@win12_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_quartzo_rosa@win12",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_quartzo_rosa@type56",
+  "file": "assets/acabamentos/uni_quartzo_rosa@type56.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_quartzo_rosa@type56",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_quartzo_rosa@type56",
+  "file": "assets/acabamentos/uni_quartzo_rosa@type56_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_quartzo_rosa@type56",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_quartzo_rosa@sks",
+  "file": "assets/acabamentos/uni_quartzo_rosa@sks.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_quartzo_rosa@sks",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_quartzo_rosa@sks",
+  "file": "assets/acabamentos/uni_quartzo_rosa@sks_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_quartzo_rosa@sks",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_quartzo_rosa@rpd",
+  "file": "assets/acabamentos/uni_quartzo_rosa@rpd.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_quartzo_rosa@rpd",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_quartzo_rosa@rpd",
+  "file": "assets/acabamentos/uni_quartzo_rosa@rpd_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_quartzo_rosa@rpd",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_quartzo_rosa@type54",
+  "file": "assets/acabamentos/uni_quartzo_rosa@type54.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_quartzo_rosa@type54",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_quartzo_rosa@type54",
+  "file": "assets/acabamentos/uni_quartzo_rosa@type54_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_quartzo_rosa@type54",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_quartzo_rosa@mosin",
+  "file": "assets/acabamentos/uni_quartzo_rosa@mosin.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_quartzo_rosa@mosin",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_quartzo_rosa@mosin",
+  "file": "assets/acabamentos/uni_quartzo_rosa@mosin_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_quartzo_rosa@mosin",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_obsidiana@m14",
+  "file": "assets/acabamentos/uni_obsidiana@m14.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_obsidiana@m14",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_obsidiana@m14",
+  "file": "assets/acabamentos/uni_obsidiana@m14_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_obsidiana@m14",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_obsidiana@m16",
+  "file": "assets/acabamentos/uni_obsidiana@m16.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_obsidiana@m16",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_obsidiana@m16",
+  "file": "assets/acabamentos/uni_obsidiana@m16_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_obsidiana@m16",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_obsidiana@m60",
+  "file": "assets/acabamentos/uni_obsidiana@m60.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_obsidiana@m60",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_obsidiana@m60",
+  "file": "assets/acabamentos/uni_obsidiana@m60_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_obsidiana@m60",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_obsidiana@m1911",
+  "file": "assets/acabamentos/uni_obsidiana@m1911.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_obsidiana@m1911",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_obsidiana@m1911",
+  "file": "assets/acabamentos/uni_obsidiana@m1911_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_obsidiana@m1911",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_obsidiana@m70",
+  "file": "assets/acabamentos/uni_obsidiana@m70.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_obsidiana@m70",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_obsidiana@m70",
+  "file": "assets/acabamentos/uni_obsidiana@m70_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_obsidiana@m70",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_obsidiana@win12",
+  "file": "assets/acabamentos/uni_obsidiana@win12.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_obsidiana@win12",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_obsidiana@win12",
+  "file": "assets/acabamentos/uni_obsidiana@win12_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_obsidiana@win12",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_obsidiana@type56",
+  "file": "assets/acabamentos/uni_obsidiana@type56.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_obsidiana@type56",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_obsidiana@type56",
+  "file": "assets/acabamentos/uni_obsidiana@type56_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_obsidiana@type56",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_obsidiana@sks",
+  "file": "assets/acabamentos/uni_obsidiana@sks.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_obsidiana@sks",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_obsidiana@sks",
+  "file": "assets/acabamentos/uni_obsidiana@sks_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_obsidiana@sks",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_obsidiana@rpd",
+  "file": "assets/acabamentos/uni_obsidiana@rpd.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_obsidiana@rpd",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_obsidiana@rpd",
+  "file": "assets/acabamentos/uni_obsidiana@rpd_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_obsidiana@rpd",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_obsidiana@type54",
+  "file": "assets/acabamentos/uni_obsidiana@type54.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_obsidiana@type54",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_obsidiana@type54",
+  "file": "assets/acabamentos/uni_obsidiana@type54_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_obsidiana@type54",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_obsidiana@mosin",
+  "file": "assets/acabamentos/uni_obsidiana@mosin.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_obsidiana@mosin",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_obsidiana@mosin",
+  "file": "assets/acabamentos/uni_obsidiana@mosin_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_obsidiana@mosin",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_ouro_lapidado@m14",
+  "file": "assets/acabamentos/uni_ouro_lapidado@m14.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_ouro_lapidado@m14",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_ouro_lapidado@m14",
+  "file": "assets/acabamentos/uni_ouro_lapidado@m14_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_ouro_lapidado@m14",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabM.m14_metal_tudo",
+  "file": "assets/acabamentos/classes/m14_metal_tudo_m.png",
+  "assetType": "Image",
+  "name": "Metal m14_metal_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabR.m14_metal_tudo",
+  "file": "assets/acabamentos/classes/m14_metal_tudo_r.png",
+  "assetType": "Image",
+  "name": "Aspereza m14_metal_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_ouro_lapidado@m16",
+  "file": "assets/acabamentos/uni_ouro_lapidado@m16.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_ouro_lapidado@m16",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_ouro_lapidado@m16",
+  "file": "assets/acabamentos/uni_ouro_lapidado@m16_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_ouro_lapidado@m16",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabM.m16_metal_tudo",
+  "file": "assets/acabamentos/classes/m16_metal_tudo_m.png",
+  "assetType": "Image",
+  "name": "Metal m16_metal_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabR.m16_metal_tudo",
+  "file": "assets/acabamentos/classes/m16_metal_tudo_r.png",
+  "assetType": "Image",
+  "name": "Aspereza m16_metal_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_ouro_lapidado@m60",
+  "file": "assets/acabamentos/uni_ouro_lapidado@m60.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_ouro_lapidado@m60",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_ouro_lapidado@m60",
+  "file": "assets/acabamentos/uni_ouro_lapidado@m60_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_ouro_lapidado@m60",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabM.m60_metal_tudo",
+  "file": "assets/acabamentos/classes/m60_metal_tudo_m.png",
+  "assetType": "Image",
+  "name": "Metal m60_metal_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabR.m60_metal_tudo",
+  "file": "assets/acabamentos/classes/m60_metal_tudo_r.png",
+  "assetType": "Image",
+  "name": "Aspereza m60_metal_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_ouro_lapidado@m1911",
+  "file": "assets/acabamentos/uni_ouro_lapidado@m1911.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_ouro_lapidado@m1911",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_ouro_lapidado@m1911",
+  "file": "assets/acabamentos/uni_ouro_lapidado@m1911_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_ouro_lapidado@m1911",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabM.m1911_metal_tudo",
+  "file": "assets/acabamentos/classes/m1911_metal_tudo_m.png",
+  "assetType": "Image",
+  "name": "Metal m1911_metal_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabR.m1911_metal_tudo",
+  "file": "assets/acabamentos/classes/m1911_metal_tudo_r.png",
+  "assetType": "Image",
+  "name": "Aspereza m1911_metal_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_ouro_lapidado@m70",
+  "file": "assets/acabamentos/uni_ouro_lapidado@m70.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_ouro_lapidado@m70",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_ouro_lapidado@m70",
+  "file": "assets/acabamentos/uni_ouro_lapidado@m70_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_ouro_lapidado@m70",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabM.m70_metal_tudo",
+  "file": "assets/acabamentos/classes/m70_metal_tudo_m.png",
+  "assetType": "Image",
+  "name": "Metal m70_metal_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabR.m70_metal_tudo",
+  "file": "assets/acabamentos/classes/m70_metal_tudo_r.png",
+  "assetType": "Image",
+  "name": "Aspereza m70_metal_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_ouro_lapidado@win12",
+  "file": "assets/acabamentos/uni_ouro_lapidado@win12.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_ouro_lapidado@win12",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_ouro_lapidado@win12",
+  "file": "assets/acabamentos/uni_ouro_lapidado@win12_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_ouro_lapidado@win12",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabM.win12_metal_tudo",
+  "file": "assets/acabamentos/classes/win12_metal_tudo_m.png",
+  "assetType": "Image",
+  "name": "Metal win12_metal_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabR.win12_metal_tudo",
+  "file": "assets/acabamentos/classes/win12_metal_tudo_r.png",
+  "assetType": "Image",
+  "name": "Aspereza win12_metal_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_ouro_lapidado@type56",
+  "file": "assets/acabamentos/uni_ouro_lapidado@type56.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_ouro_lapidado@type56",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_ouro_lapidado@type56",
+  "file": "assets/acabamentos/uni_ouro_lapidado@type56_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_ouro_lapidado@type56",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabM.type56_metal_tudo",
+  "file": "assets/acabamentos/classes/type56_metal_tudo_m.png",
+  "assetType": "Image",
+  "name": "Metal type56_metal_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabR.type56_metal_tudo",
+  "file": "assets/acabamentos/classes/type56_metal_tudo_r.png",
+  "assetType": "Image",
+  "name": "Aspereza type56_metal_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_ouro_lapidado@sks",
+  "file": "assets/acabamentos/uni_ouro_lapidado@sks.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_ouro_lapidado@sks",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_ouro_lapidado@sks",
+  "file": "assets/acabamentos/uni_ouro_lapidado@sks_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_ouro_lapidado@sks",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabM.sks_metal_tudo",
+  "file": "assets/acabamentos/classes/sks_metal_tudo_m.png",
+  "assetType": "Image",
+  "name": "Metal sks_metal_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabR.sks_metal_tudo",
+  "file": "assets/acabamentos/classes/sks_metal_tudo_r.png",
+  "assetType": "Image",
+  "name": "Aspereza sks_metal_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_ouro_lapidado@rpd",
+  "file": "assets/acabamentos/uni_ouro_lapidado@rpd.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_ouro_lapidado@rpd",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_ouro_lapidado@rpd",
+  "file": "assets/acabamentos/uni_ouro_lapidado@rpd_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_ouro_lapidado@rpd",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabM.rpd_metal_tudo",
+  "file": "assets/acabamentos/classes/rpd_metal_tudo_m.png",
+  "assetType": "Image",
+  "name": "Metal rpd_metal_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabR.rpd_metal_tudo",
+  "file": "assets/acabamentos/classes/rpd_metal_tudo_r.png",
+  "assetType": "Image",
+  "name": "Aspereza rpd_metal_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_ouro_lapidado@type54",
+  "file": "assets/acabamentos/uni_ouro_lapidado@type54.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_ouro_lapidado@type54",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_ouro_lapidado@type54",
+  "file": "assets/acabamentos/uni_ouro_lapidado@type54_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_ouro_lapidado@type54",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabM.type54_metal_tudo",
+  "file": "assets/acabamentos/classes/type54_metal_tudo_m.png",
+  "assetType": "Image",
+  "name": "Metal type54_metal_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabR.type54_metal_tudo",
+  "file": "assets/acabamentos/classes/type54_metal_tudo_r.png",
+  "assetType": "Image",
+  "name": "Aspereza type54_metal_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_ouro_lapidado@mosin",
+  "file": "assets/acabamentos/uni_ouro_lapidado@mosin.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_ouro_lapidado@mosin",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_ouro_lapidado@mosin",
+  "file": "assets/acabamentos/uni_ouro_lapidado@mosin_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_ouro_lapidado@mosin",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabM.mosin_metal_tudo",
+  "file": "assets/acabamentos/classes/mosin_metal_tudo_m.png",
+  "assetType": "Image",
+  "name": "Metal mosin_metal_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabR.mosin_metal_tudo",
+  "file": "assets/acabamentos/classes/mosin_metal_tudo_r.png",
+  "assetType": "Image",
+  "name": "Aspereza mosin_metal_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_inverno_sombrio@m14",
+  "file": "assets/acabamentos/uni_inverno_sombrio@m14.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_inverno_sombrio@m14",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_inverno_sombrio@m14",
+  "file": "assets/acabamentos/uni_inverno_sombrio@m14_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_inverno_sombrio@m14",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabM.m14_gelo_tudo",
+  "file": "assets/acabamentos/classes/m14_gelo_tudo_m.png",
+  "assetType": "Image",
+  "name": "Metal m14_gelo_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabR.m14_gelo_tudo",
+  "file": "assets/acabamentos/classes/m14_gelo_tudo_r.png",
+  "assetType": "Image",
+  "name": "Aspereza m14_gelo_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_inverno_sombrio@m16",
+  "file": "assets/acabamentos/uni_inverno_sombrio@m16.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_inverno_sombrio@m16",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_inverno_sombrio@m16",
+  "file": "assets/acabamentos/uni_inverno_sombrio@m16_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_inverno_sombrio@m16",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabM.m16_gelo_tudo",
+  "file": "assets/acabamentos/classes/m16_gelo_tudo_m.png",
+  "assetType": "Image",
+  "name": "Metal m16_gelo_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabR.m16_gelo_tudo",
+  "file": "assets/acabamentos/classes/m16_gelo_tudo_r.png",
+  "assetType": "Image",
+  "name": "Aspereza m16_gelo_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_inverno_sombrio@m60",
+  "file": "assets/acabamentos/uni_inverno_sombrio@m60.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_inverno_sombrio@m60",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_inverno_sombrio@m60",
+  "file": "assets/acabamentos/uni_inverno_sombrio@m60_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_inverno_sombrio@m60",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabM.m60_gelo_tudo",
+  "file": "assets/acabamentos/classes/m60_gelo_tudo_m.png",
+  "assetType": "Image",
+  "name": "Metal m60_gelo_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabR.m60_gelo_tudo",
+  "file": "assets/acabamentos/classes/m60_gelo_tudo_r.png",
+  "assetType": "Image",
+  "name": "Aspereza m60_gelo_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_inverno_sombrio@m1911",
+  "file": "assets/acabamentos/uni_inverno_sombrio@m1911.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_inverno_sombrio@m1911",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_inverno_sombrio@m1911",
+  "file": "assets/acabamentos/uni_inverno_sombrio@m1911_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_inverno_sombrio@m1911",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabM.m1911_gelo_tudo",
+  "file": "assets/acabamentos/classes/m1911_gelo_tudo_m.png",
+  "assetType": "Image",
+  "name": "Metal m1911_gelo_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabR.m1911_gelo_tudo",
+  "file": "assets/acabamentos/classes/m1911_gelo_tudo_r.png",
+  "assetType": "Image",
+  "name": "Aspereza m1911_gelo_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_inverno_sombrio@m70",
+  "file": "assets/acabamentos/uni_inverno_sombrio@m70.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_inverno_sombrio@m70",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_inverno_sombrio@m70",
+  "file": "assets/acabamentos/uni_inverno_sombrio@m70_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_inverno_sombrio@m70",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabM.m70_gelo_tudo",
+  "file": "assets/acabamentos/classes/m70_gelo_tudo_m.png",
+  "assetType": "Image",
+  "name": "Metal m70_gelo_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabR.m70_gelo_tudo",
+  "file": "assets/acabamentos/classes/m70_gelo_tudo_r.png",
+  "assetType": "Image",
+  "name": "Aspereza m70_gelo_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_inverno_sombrio@win12",
+  "file": "assets/acabamentos/uni_inverno_sombrio@win12.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_inverno_sombrio@win12",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_inverno_sombrio@win12",
+  "file": "assets/acabamentos/uni_inverno_sombrio@win12_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_inverno_sombrio@win12",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabM.win12_gelo_tudo",
+  "file": "assets/acabamentos/classes/win12_gelo_tudo_m.png",
+  "assetType": "Image",
+  "name": "Metal win12_gelo_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabR.win12_gelo_tudo",
+  "file": "assets/acabamentos/classes/win12_gelo_tudo_r.png",
+  "assetType": "Image",
+  "name": "Aspereza win12_gelo_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_inverno_sombrio@type56",
+  "file": "assets/acabamentos/uni_inverno_sombrio@type56.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_inverno_sombrio@type56",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_inverno_sombrio@type56",
+  "file": "assets/acabamentos/uni_inverno_sombrio@type56_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_inverno_sombrio@type56",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabM.type56_gelo_tudo",
+  "file": "assets/acabamentos/classes/type56_gelo_tudo_m.png",
+  "assetType": "Image",
+  "name": "Metal type56_gelo_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabR.type56_gelo_tudo",
+  "file": "assets/acabamentos/classes/type56_gelo_tudo_r.png",
+  "assetType": "Image",
+  "name": "Aspereza type56_gelo_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_inverno_sombrio@sks",
+  "file": "assets/acabamentos/uni_inverno_sombrio@sks.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_inverno_sombrio@sks",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_inverno_sombrio@sks",
+  "file": "assets/acabamentos/uni_inverno_sombrio@sks_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_inverno_sombrio@sks",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabM.sks_gelo_tudo",
+  "file": "assets/acabamentos/classes/sks_gelo_tudo_m.png",
+  "assetType": "Image",
+  "name": "Metal sks_gelo_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabR.sks_gelo_tudo",
+  "file": "assets/acabamentos/classes/sks_gelo_tudo_r.png",
+  "assetType": "Image",
+  "name": "Aspereza sks_gelo_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_inverno_sombrio@rpd",
+  "file": "assets/acabamentos/uni_inverno_sombrio@rpd.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_inverno_sombrio@rpd",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_inverno_sombrio@rpd",
+  "file": "assets/acabamentos/uni_inverno_sombrio@rpd_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_inverno_sombrio@rpd",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabM.rpd_gelo_tudo",
+  "file": "assets/acabamentos/classes/rpd_gelo_tudo_m.png",
+  "assetType": "Image",
+  "name": "Metal rpd_gelo_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabR.rpd_gelo_tudo",
+  "file": "assets/acabamentos/classes/rpd_gelo_tudo_r.png",
+  "assetType": "Image",
+  "name": "Aspereza rpd_gelo_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_inverno_sombrio@type54",
+  "file": "assets/acabamentos/uni_inverno_sombrio@type54.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_inverno_sombrio@type54",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_inverno_sombrio@type54",
+  "file": "assets/acabamentos/uni_inverno_sombrio@type54_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_inverno_sombrio@type54",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabM.type54_gelo_tudo",
+  "file": "assets/acabamentos/classes/type54_gelo_tudo_m.png",
+  "assetType": "Image",
+  "name": "Metal type54_gelo_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabR.type54_gelo_tudo",
+  "file": "assets/acabamentos/classes/type54_gelo_tudo_r.png",
+  "assetType": "Image",
+  "name": "Aspereza type54_gelo_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_inverno_sombrio@mosin",
+  "file": "assets/acabamentos/uni_inverno_sombrio@mosin.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_inverno_sombrio@mosin",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_inverno_sombrio@mosin",
+  "file": "assets/acabamentos/uni_inverno_sombrio@mosin_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_inverno_sombrio@mosin",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabM.mosin_gelo_tudo",
+  "file": "assets/acabamentos/classes/mosin_gelo_tudo_m.png",
+  "assetType": "Image",
+  "name": "Metal mosin_gelo_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabR.mosin_gelo_tudo",
+  "file": "assets/acabamentos/classes/mosin_gelo_tudo_r.png",
+  "assetType": "Image",
+  "name": "Aspereza mosin_gelo_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_geleira_antiga@m14",
+  "file": "assets/acabamentos/uni_geleira_antiga@m14.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_geleira_antiga@m14",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_geleira_antiga@m14",
+  "file": "assets/acabamentos/uni_geleira_antiga@m14_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_geleira_antiga@m14",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_geleira_antiga@m16",
+  "file": "assets/acabamentos/uni_geleira_antiga@m16.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_geleira_antiga@m16",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_geleira_antiga@m16",
+  "file": "assets/acabamentos/uni_geleira_antiga@m16_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_geleira_antiga@m16",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_geleira_antiga@m60",
+  "file": "assets/acabamentos/uni_geleira_antiga@m60.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_geleira_antiga@m60",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_geleira_antiga@m60",
+  "file": "assets/acabamentos/uni_geleira_antiga@m60_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_geleira_antiga@m60",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_geleira_antiga@m1911",
+  "file": "assets/acabamentos/uni_geleira_antiga@m1911.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_geleira_antiga@m1911",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_geleira_antiga@m1911",
+  "file": "assets/acabamentos/uni_geleira_antiga@m1911_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_geleira_antiga@m1911",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_geleira_antiga@m70",
+  "file": "assets/acabamentos/uni_geleira_antiga@m70.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_geleira_antiga@m70",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_geleira_antiga@m70",
+  "file": "assets/acabamentos/uni_geleira_antiga@m70_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_geleira_antiga@m70",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_geleira_antiga@win12",
+  "file": "assets/acabamentos/uni_geleira_antiga@win12.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_geleira_antiga@win12",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_geleira_antiga@win12",
+  "file": "assets/acabamentos/uni_geleira_antiga@win12_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_geleira_antiga@win12",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_geleira_antiga@type56",
+  "file": "assets/acabamentos/uni_geleira_antiga@type56.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_geleira_antiga@type56",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_geleira_antiga@type56",
+  "file": "assets/acabamentos/uni_geleira_antiga@type56_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_geleira_antiga@type56",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_geleira_antiga@sks",
+  "file": "assets/acabamentos/uni_geleira_antiga@sks.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_geleira_antiga@sks",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_geleira_antiga@sks",
+  "file": "assets/acabamentos/uni_geleira_antiga@sks_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_geleira_antiga@sks",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_geleira_antiga@rpd",
+  "file": "assets/acabamentos/uni_geleira_antiga@rpd.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_geleira_antiga@rpd",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_geleira_antiga@rpd",
+  "file": "assets/acabamentos/uni_geleira_antiga@rpd_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_geleira_antiga@rpd",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_geleira_antiga@type54",
+  "file": "assets/acabamentos/uni_geleira_antiga@type54.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_geleira_antiga@type54",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_geleira_antiga@type54",
+  "file": "assets/acabamentos/uni_geleira_antiga@type54_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_geleira_antiga@type54",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_geleira_antiga@mosin",
+  "file": "assets/acabamentos/uni_geleira_antiga@mosin.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_geleira_antiga@mosin",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_geleira_antiga@mosin",
+  "file": "assets/acabamentos/uni_geleira_antiga@mosin_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_geleira_antiga@mosin",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_onix_polido@m14",
+  "file": "assets/acabamentos/uni_onix_polido@m14.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_onix_polido@m14",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_onix_polido@m14",
+  "file": "assets/acabamentos/uni_onix_polido@m14_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_onix_polido@m14",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabM.m14_pedra_tudo",
+  "file": "assets/acabamentos/classes/m14_pedra_tudo_m.png",
+  "assetType": "Image",
+  "name": "Metal m14_pedra_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabR.m14_pedra_tudo",
+  "file": "assets/acabamentos/classes/m14_pedra_tudo_r.png",
+  "assetType": "Image",
+  "name": "Aspereza m14_pedra_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_onix_polido@m16",
+  "file": "assets/acabamentos/uni_onix_polido@m16.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_onix_polido@m16",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_onix_polido@m16",
+  "file": "assets/acabamentos/uni_onix_polido@m16_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_onix_polido@m16",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabM.m16_pedra_tudo",
+  "file": "assets/acabamentos/classes/m16_pedra_tudo_m.png",
+  "assetType": "Image",
+  "name": "Metal m16_pedra_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabR.m16_pedra_tudo",
+  "file": "assets/acabamentos/classes/m16_pedra_tudo_r.png",
+  "assetType": "Image",
+  "name": "Aspereza m16_pedra_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_onix_polido@m60",
+  "file": "assets/acabamentos/uni_onix_polido@m60.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_onix_polido@m60",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_onix_polido@m60",
+  "file": "assets/acabamentos/uni_onix_polido@m60_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_onix_polido@m60",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_onix_polido@m1911",
+  "file": "assets/acabamentos/uni_onix_polido@m1911.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_onix_polido@m1911",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_onix_polido@m1911",
+  "file": "assets/acabamentos/uni_onix_polido@m1911_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_onix_polido@m1911",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_onix_polido@m70",
+  "file": "assets/acabamentos/uni_onix_polido@m70.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_onix_polido@m70",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_onix_polido@m70",
+  "file": "assets/acabamentos/uni_onix_polido@m70_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_onix_polido@m70",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_onix_polido@win12",
+  "file": "assets/acabamentos/uni_onix_polido@win12.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_onix_polido@win12",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_onix_polido@win12",
+  "file": "assets/acabamentos/uni_onix_polido@win12_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_onix_polido@win12",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabM.win12_pedra_tudo",
+  "file": "assets/acabamentos/classes/win12_pedra_tudo_m.png",
+  "assetType": "Image",
+  "name": "Metal win12_pedra_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabR.win12_pedra_tudo",
+  "file": "assets/acabamentos/classes/win12_pedra_tudo_r.png",
+  "assetType": "Image",
+  "name": "Aspereza win12_pedra_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_onix_polido@type56",
+  "file": "assets/acabamentos/uni_onix_polido@type56.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_onix_polido@type56",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_onix_polido@type56",
+  "file": "assets/acabamentos/uni_onix_polido@type56_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_onix_polido@type56",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_onix_polido@sks",
+  "file": "assets/acabamentos/uni_onix_polido@sks.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_onix_polido@sks",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_onix_polido@sks",
+  "file": "assets/acabamentos/uni_onix_polido@sks_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_onix_polido@sks",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_onix_polido@rpd",
+  "file": "assets/acabamentos/uni_onix_polido@rpd.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_onix_polido@rpd",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_onix_polido@rpd",
+  "file": "assets/acabamentos/uni_onix_polido@rpd_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_onix_polido@rpd",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_onix_polido@type54",
+  "file": "assets/acabamentos/uni_onix_polido@type54.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_onix_polido@type54",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_onix_polido@type54",
+  "file": "assets/acabamentos/uni_onix_polido@type54_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_onix_polido@type54",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabM.type54_pedra_tudo",
+  "file": "assets/acabamentos/classes/type54_pedra_tudo_m.png",
+  "assetType": "Image",
+  "name": "Metal type54_pedra_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabR.type54_pedra_tudo",
+  "file": "assets/acabamentos/classes/type54_pedra_tudo_r.png",
+  "assetType": "Image",
+  "name": "Aspereza type54_pedra_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Acab.uni_onix_polido@mosin",
+  "file": "assets/acabamentos/uni_onix_polido@mosin.png",
+  "assetType": "Image",
+  "name": "Acabamento uni_onix_polido@mosin",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabN.uni_onix_polido@mosin",
+  "file": "assets/acabamentos/uni_onix_polido@mosin_n.png",
+  "assetType": "Image",
+  "name": "Relevo uni_onix_polido@mosin",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabM.mosin_pedra_tudo",
+  "file": "assets/acabamentos/classes/mosin_pedra_tudo_m.png",
+  "assetType": "Image",
+  "name": "Metal mosin_pedra_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "AcabR.mosin_pedra_tudo",
+  "file": "assets/acabamentos/classes/mosin_pedra_tudo_r.png",
+  "assetType": "Image",
+  "name": "Aspereza mosin_pedra_tudo",
+  "description": "VAN TUONG 65: textura de acabamento de arma"
  }
 ]

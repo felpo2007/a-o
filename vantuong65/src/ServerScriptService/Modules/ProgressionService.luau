@@ -327,12 +327,28 @@ end
 local function skinWeaponNow(p: Player, weaponId: string)
 	local w = p.Character and p.Character:FindFirstChild("Weapon")
 	if w and w:GetAttribute("WeaponId") == weaponId then
-		Skins.applyWeapon(w, Skins.weaponSkinFrom(p:GetAttribute("WeaponSkins"), weaponId))
+		Skins.applyWeapon(w, Skins.weaponSkinFrom(p:GetAttribute("WeaponSkins"), weaponId), weaponId)
 	end
 end
 
+-- D-179: arma em que o acabamento universal vai: a pedida (do lado), a da mão ou a de fábrica
+local function armaDoUniversal(p: Player, faction: string, pedida: any): string?
+	local function vale(w: any): boolean
+		local wp = Skins.armaUniversal(w) and Weapons.get(w) or nil
+		return wp ~= nil and wp.faction == faction
+	end
+	if pedida ~= nil then
+		return if vale(pedida) then pedida else nil
+	end
+	local naMao = p:GetAttribute("EquippedWeapon")
+	if type(naMao) == "string" and vale(naMao) then
+		return naMao
+	end
+	return Skins.ARMA_PADRAO[faction]
+end
+
 -- Equipa (on) ou tira uma skin. Devolve o resultado para o painel (nil = sem aviso).
-local function equipSkin(p: Player, id: string, on: boolean): string?
+local function equipSkin(p: Player, id: string, on: boolean, arma: any): string?
 	local prof = PlayerData.get(p)
 	local s = Skins.get(id)
 	if not (prof and s) then
@@ -340,6 +356,13 @@ local function equipSkin(p: Player, id: string, on: boolean): string?
 	end
 	local faction = Skins.factionFor(s, factionOf(p))
 	local slot = Skins.slotOf(s)
+	if s.universal then
+		local w = if faction then armaDoUniversal(p, faction, arma) else nil
+		if not w then
+			return if faction then "essa arma não aceita o acabamento" else "escolha um lado primeiro"
+		end
+		slot = w
+	end
 	if on then
 		local ok, why = Skins.canEquip(id, faction, prof.skins.owned, passes(p))
 		if not ok or not faction then
@@ -351,8 +374,8 @@ local function equipSkin(p: Player, id: string, on: boolean): string?
 		prof.skins.on[faction][slot] = nil
 	end
 	ProgressionService.applySkins(p)
-	if s.weapon then
-		skinWeaponNow(p, s.weapon)
+	if s.weapon or s.universal then
+		skinWeaponNow(p, s.weapon or slot)
 	end
 	if s.kind ~= "weapon" and p.Character and faction == factionOf(p) then
 		return if on then string.format("%s: vale no próximo spawn", s.name) else "Tirada: vale no próximo spawn"
@@ -600,13 +623,17 @@ function ProgressionService.start()
 
 	-- levar ou deixar um item liberado no próximo spawn (só guarda os desmarcados). Com id de skin:
 	-- equipar (on = true) ou tirar (false); o servidor confere a posse e o lado.
-	Net.event("Gear_Equip").OnServerEvent:Connect(function(p: Player, id: any, on: any)
+	-- arma: só do acabamento universal (D-179), a arma em que ele vai
+	Net.event("Gear_Equip").OnServerEvent:Connect(function(p: Player, id: any, on: any, arma: any)
 		local prof = PlayerData.get(p)
 		if not prof or type(id) ~= "string" or type(on) ~= "boolean" then
 			return
 		end
+		if arma ~= nil and type(arma) ~= "string" then
+			return
+		end
 		if Skins.get(id) then
-			local msg = equipSkin(p, id, on)
+			local msg = equipSkin(p, id, on, arma)
 			push(p, { result = msg })
 			return
 		end

@@ -111,3 +111,35 @@ def test_laca_ouro_fica_ouro_e_perola_fica_clara():
         assert len(lasca) > 50, "sem lascas"
         azul_menor = float((lasca[:, 0] - lasca[:, 2]).mean())
         assert (azul_menor > 0.3) if quente else (azul_menor < 0.15), inc
+
+
+def test_universais_tem_receita_e_relevo():
+    s = SKINS.read_text("utf-8").replace("\r\n", "\n")
+    bloco = s[s.index("local UNIVERSAIS") : s.index("Skins.UNIVERSAIS = UNIVERSAIS")]
+    rec = re.findall(r'\n\t\t"(uni_[a-z_]+)",(?:\n\t\t"[^"\n]*",){2}\n\t\t"([a-z_]+)",', bloco)
+    assert len(rec) == 12, rec
+    for uid, r in rec:
+        assert r in A.RECEITAS and r in A.RELEVO and r in A.CLASSE, (uid, r)
+
+
+def test_relevo_unitario_e_para_fora():
+    base = nuvem()
+    paleta = np.array([[0.8, 0.1, 0.1], [1, 0.6, 0.6], [0.2, 0.3, 0.9]], np.float32)
+    ctx = A.Ctx(base.q, base.n, base.t, base.lum, paleta, 7)
+    for nome, f in A.RELEVO.items():
+        d = f(ctx)
+        assert d.shape == (len(base.q), 3), nome
+        assert np.allclose(np.linalg.norm(d, axis=1), 1, atol=1e-3), nome
+        assert (d[:, 2] > 0).all(), nome  # o relevo nunca vira a face do avesso
+        assert np.abs(d[:, :2]).max() > 0.02, f"{nome} sem relevo"
+
+
+def test_mapas_de_material_so_onde_pinta():
+    rugo0 = np.full((8, 8), 0.7, np.float32)
+    metal0 = np.zeros((8, 8), np.float32)
+    sel = np.zeros((8, 8), bool)
+    sel[2:5, 2:5] = True
+    metal, rugo = A.mapas_classe("cristal", sel, rugo0, metal0)
+    m, r = A.CLASSES["cristal"]
+    assert np.allclose(metal[sel], m) and np.allclose(rugo[sel], r, atol=0.01)
+    assert np.allclose(metal[~sel], 0) and np.allclose(rugo[~sel], 0.7)

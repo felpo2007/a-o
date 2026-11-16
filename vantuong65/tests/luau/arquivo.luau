@@ -58,9 +58,10 @@ test("álbum: todos os cosméticos e skins, sem camuflagem nem prêmio de saldo"
 	end
 	-- D-176: mais 6 uniformes, 6 acabamentos, 4 emblemas, 3 plaquetas e 3 molduras dos conjuntos
 	-- D-178: mais 60 acabamentos extravagantes e 40 itens de cartão (14, 13 e 13)
-	assert(n.uniformes == 14 and n.acabamentos == 83, "skins: 14 uniformes e 83 acabamentos")
+	-- D-179: mais 12 acabamentos universais
+	assert(n.uniformes == 14 and n.acabamentos == 95, "skins: 14 uniformes e 95 acabamentos")
 	assert(n.insignias == 27 and n.plaquetas == 25 and n.molduras == 26, "cartão com os exclusivos")
-	assert(#itens == 175, #itens)
+	assert(#itens == 187, #itens)
 	for _, id in { "camo_rice", "camo_jungle", "camo_bamboo", "cr_500", "frag_250", "nada" } do
 		assert(Arquivo.categoria(id) == nil and not vistos[id], id)
 	end

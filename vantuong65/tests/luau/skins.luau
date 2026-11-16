@@ -71,7 +71,10 @@ test("catálogo: ids únicos, tipos, lados, armas de verdade e chaves de Robux",
 			assert(type(Skins.IDS[s.robuxKey]) == "number")
 		end
 		assert(#s.swatch > 0, s.id .. ": sem cores de prévia")
-		if s.kind == "weapon" then
+		if s.kind == "weapon" and s.universal then
+			-- D-179: o universal não tem arma nem lado fixo (vale em qualquer arma com arte)
+			assert(s.side == "both" and s.weapon == nil, s.id)
+		elseif s.kind == "weapon" then
 			local wp = Weapons.get(s.weapon)
 			assert(wp, s.id .. ": arma " .. tostring(s.weapon))
 			assert(wp.faction == s.side, s.id .. ": skin do lado errado da arma")
@@ -284,9 +287,46 @@ test("pintura: peças com nome (arte nova e provisória) e o guarda-mão segue a
 	assert(Skins.paintFor(nil, "wood") == nil)
 end)
 
+test("D-179: acabamento universal vale em qualquer arma com arte, do lado do jogador", function()
+	local n = 0
+	for _, s in Skins.CATALOG do
+		if s.universal then
+			n += 1
+			assert(s.kind == "weapon" and s.side == "both" and s.weapon == nil, s.id)
+			assert(s.soCaixa and s.robuxKey == "CAIXA", s.id .. ": só caixa e troca")
+			assert(Skins.armaUniversal(s.vitrine), s.id .. ": vitrine " .. tostring(s.vitrine))
+			assert(s.arte and s.arte.alvo == "tudo", s.id)
+			for _, w in Skins.ARMAS_UNIVERSAL do
+				assert(Skins.cabe(s, w), s.id .. " em " .. w)
+			end
+			assert(not Skins.cabe(s, "m79") and not Skins.cabe(s, "uniform"), s.id)
+		end
+	end
+	assert(n == 12, "12 universais: " .. n)
+	-- toda arma universal existe e tem lado; a padrão de cada lado aceita
+	for _, w in Skins.ARMAS_UNIVERSAL do
+		assert(Weapons.get(w), w)
+	end
+	assert(Skins.armaUniversal(Skins.ARMA_PADRAO.US) and Skins.armaUniversal(Skins.ARMA_PADRAO.VC))
+	-- equipado em duas armas ao mesmo tempo (uma de cada vez por encaixe), lido de volta igual
+	local owned = { uni_cristal_rubro = true, skin_m14_birch = true }
+	local on = { m14 = "uni_cristal_rubro", m16 = "uni_cristal_rubro", m79 = "uni_cristal_rubro" }
+	local eq = Skins.equipped(on, "US", owned, {})
+	assert(eq.m14 == "uni_cristal_rubro" and eq.m16 == "uni_cristal_rubro", "nas duas armas")
+	assert(eq.m79 == nil, "a M79 não tem arte: não aceita")
+	local txt = Skins.encodeWeapons(eq)
+	assert(txt == "m14=uni_cristal_rubro;m16=uni_cristal_rubro", txt)
+	assert(Skins.weaponSkinFrom(txt, "m16") == "uni_cristal_rubro")
+	-- sem posse não vale; a de arma comum continua presa à arma dela
+	assert(next(Skins.equipped({ m14 = "uni_geleira_antiga" }, "US", owned, {})) == nil)
+	assert(not Skins.cabe(Skins.get("skin_m14_birch"), "m16"))
+	local ok, why = Skins.canBuy("uni_cristal_rubro", {}, {}, 1e9)
+	assert(not ok and why == "só nas caixas")
+end)
+
 test("lista por tipo e lado: o de ambos entra nos dois", function()
 	for _, s in Skins.list("weapon", "US") do
-		assert(s.side == "US" and s.kind == "weapon")
+		assert((s.side == "US" or (s.universal and s.side == "both")) and s.kind == "weapon")
 	end
 	assert(#Skins.list("camo", "US") == 3 and #Skins.list("camo", "VC") == 3)
 	-- D-131: o VC tem o preto, o marrom e o tigrado capturado; os EUA, cinco. D-176: mais 3 de cada

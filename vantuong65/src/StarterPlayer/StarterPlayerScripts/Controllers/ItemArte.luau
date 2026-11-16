@@ -113,7 +113,8 @@ local function arma(box: Frame, s: any)
 	cam.FieldOfView = 24
 	cam.Parent = vp
 	vp.CurrentCamera = cam
-	local wid = s.weapon or ""
+	-- D-179: o acabamento universal aparece na arma de vitrine dele
+	local wid = s.weapon or s.vitrine or ""
 	local folder = ReplicatedStorage:FindFirstChild("VT65WeaponArt")
 	local art = if folder then folder:FindFirstChild(wid) else nil
 	local m: Model
@@ -123,7 +124,7 @@ local function arma(box: Frame, s: any)
 		local wp = Weapons.get(wid)
 		m = GunModel.build(wid, if wp then wp.kind else nil)
 	end
-	Skins.applyWeapon(m, s.id)
+	Skins.applyWeapon(m, s.id, wid)
 	m:PivotTo(CFrame.identity)
 	m.Parent = vp
 	-- de lado (a Intendência enquadra igual), com folga para o cano não sair do quadro

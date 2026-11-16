@@ -1,0 +1,2337 @@
+{
+ "ClassName": "Folder",
+ "Children": [
+  {
+   "Name": "skin_m14_birch",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://79419281365617",
+    "NormalMap": "rbxassetid://116934510797674",
+    "MetalnessMap": "rbxassetid://105547662188920",
+    "RoughnessMap": "rbxassetid://74025398507034"
+   }
+  },
+  {
+   "Name": "skin_m14_carbono",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://72929199952940",
+    "NormalMap": "rbxassetid://116934510797674",
+    "MetalnessMap": "rbxassetid://105547662188920",
+    "RoughnessMap": "rbxassetid://74025398507034"
+   }
+  },
+  {
+   "Name": "skin_m14_damasco_azul",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://96316291939076",
+    "NormalMap": "rbxassetid://116934510797674",
+    "MetalnessMap": "rbxassetid://105547662188920",
+    "RoughnessMap": "rbxassetid://74025398507034"
+   }
+  },
+  {
+   "Name": "skin_m14_laca_vermelha",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://130144294496739",
+    "NormalMap": "rbxassetid://116934510797674",
+    "MetalnessMap": "rbxassetid://105547662188920",
+    "RoughnessMap": "rbxassetid://74025398507034"
+   }
+  },
+  {
+   "Name": "skin_m14_oleada",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://125101849714904",
+    "NormalMap": "rbxassetid://116934510797674",
+    "MetalnessMap": "rbxassetid://105547662188920",
+    "RoughnessMap": "rbxassetid://74025398507034"
+   }
+  },
+  {
+   "Name": "skin_m14_por_do_sol",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://125006743637083",
+    "NormalMap": "rbxassetid://116934510797674",
+    "MetalnessMap": "rbxassetid://105547662188920",
+    "RoughnessMap": "rbxassetid://74025398507034"
+   }
+  },
+  {
+   "Name": "skin_m14_selva_eletrica",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://72692366126771",
+    "NormalMap": "rbxassetid://116934510797674",
+    "MetalnessMap": "rbxassetid://105547662188920",
+    "RoughnessMap": "rbxassetid://74025398507034"
+   }
+  },
+  {
+   "Name": "skin_m14_tape",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://126832123563619",
+    "NormalMap": "rbxassetid://116934510797674",
+    "MetalnessMap": "rbxassetid://105547662188920",
+    "RoughnessMap": "rbxassetid://74025398507034"
+   }
+  },
+  {
+   "Name": "skin_m14_tigre_fogo",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://79484181280882",
+    "NormalMap": "rbxassetid://116934510797674",
+    "MetalnessMap": "rbxassetid://105547662188920",
+    "RoughnessMap": "rbxassetid://74025398507034"
+   }
+  },
+  {
+   "Name": "skin_m14_worn",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://100061911673689",
+    "NormalMap": "rbxassetid://116934510797674",
+    "MetalnessMap": "rbxassetid://105547662188920",
+    "RoughnessMap": "rbxassetid://74025398507034"
+   }
+  },
+  {
+   "Name": "skin_m16_artico",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://116479051970153",
+    "NormalMap": "rbxassetid://120889293624258",
+    "MetalnessMap": "rbxassetid://72228499638683",
+    "RoughnessMap": "rbxassetid://114727620871909"
+   }
+  },
+  {
+   "Name": "skin_m16_aurora",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://101962460845794",
+    "NormalMap": "rbxassetid://120889293624258",
+    "MetalnessMap": "rbxassetid://72228499638683",
+    "RoughnessMap": "rbxassetid://114727620871909"
+   }
+  },
+  {
+   "Name": "skin_m16_colmeia_neon",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://140520555776801",
+    "NormalMap": "rbxassetid://120889293624258",
+    "MetalnessMap": "rbxassetid://72228499638683",
+    "RoughnessMap": "rbxassetid://114727620871909"
+   }
+  },
+  {
+   "Name": "skin_m16_cromo",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://133314766870770",
+    "NormalMap": "rbxassetid://120889293624258",
+    "MetalnessMap": "rbxassetid://138225035909882",
+    "RoughnessMap": "rbxassetid://78786188573040"
+   }
+  },
+  {
+   "Name": "skin_m16_pixel_neon",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://113096093807212",
+    "NormalMap": "rbxassetid://120889293624258",
+    "MetalnessMap": "rbxassetid://72228499638683",
+    "RoughnessMap": "rbxassetid://114727620871909"
+   }
+  },
+  {
+   "Name": "skin_m16_zebra",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://77843984207558",
+    "NormalMap": "rbxassetid://120889293624258",
+    "MetalnessMap": "rbxassetid://72228499638683",
+    "RoughnessMap": "rbxassetid://114727620871909"
+   }
+  },
+  {
+   "Name": "skin_m1911_blued",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://118414571908105",
+    "NormalMap": "rbxassetid://124386647834980",
+    "MetalnessMap": "rbxassetid://133826639001461",
+    "RoughnessMap": "rbxassetid://82588368297255"
+   }
+  },
+  {
+   "Name": "skin_m1911_carrara",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://75663638886521",
+    "NormalMap": "rbxassetid://124554897289679",
+    "MetalnessMap": "rbxassetid://74581343239297",
+    "RoughnessMap": "rbxassetid://113387913594996"
+   }
+  },
+  {
+   "Name": "skin_m1911_damasco_cinza",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://100223847724560",
+    "NormalMap": "rbxassetid://124386647834980",
+    "MetalnessMap": "rbxassetid://133826639001461",
+    "RoughnessMap": "rbxassetid://82588368297255"
+   }
+  },
+  {
+   "Name": "skin_m1911_madreperola",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://118834064780922",
+    "NormalMap": "rbxassetid://124386647834980",
+    "MetalnessMap": "rbxassetid://133826639001461",
+    "RoughnessMap": "rbxassetid://82588368297255"
+   }
+  },
+  {
+   "Name": "skin_m1911_marrom",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://100259773217329",
+    "NormalMap": "rbxassetid://124386647834980",
+    "MetalnessMap": "rbxassetid://133826639001461",
+    "RoughnessMap": "rbxassetid://82588368297255"
+   }
+  },
+  {
+   "Name": "skin_m1911_ouro_polido",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://76385041850045",
+    "NormalMap": "rbxassetid://124386647834980",
+    "MetalnessMap": "rbxassetid://85858320922921",
+    "RoughnessMap": "rbxassetid://119008784599293"
+   }
+  },
+  {
+   "Name": "skin_m1911_ouro_rosa",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://90914355310296",
+    "NormalMap": "rbxassetid://124386647834980",
+    "MetalnessMap": "rbxassetid://85858320922921",
+    "RoughnessMap": "rbxassetid://119008784599293"
+   }
+  },
+  {
+   "Name": "skin_m60_carbono_vermelho",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://116252475747501",
+    "NormalMap": "rbxassetid://108317889733503",
+    "MetalnessMap": "rbxassetid://121622228313455",
+    "RoughnessMap": "rbxassetid://101407560910084"
+   }
+  },
+  {
+   "Name": "skin_m60_escamas_rubras",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://74530870916583",
+    "NormalMap": "rbxassetid://108560323749087",
+    "MetalnessMap": "rbxassetid://121622228313455",
+    "RoughnessMap": "rbxassetid://101407560910084"
+   }
+  },
+  {
+   "Name": "skin_m60_fosfato",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://87826817776257",
+    "NormalMap": "rbxassetid://108317889733503",
+    "MetalnessMap": "rbxassetid://121622228313455",
+    "RoughnessMap": "rbxassetid://101407560910084"
+   }
+  },
+  {
+   "Name": "skin_m60_lava_viva",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://114664082484106",
+    "NormalMap": "rbxassetid://95065066508320",
+    "MetalnessMap": "rbxassetid://77210933729664",
+    "RoughnessMap": "rbxassetid://97428517433228"
+   }
+  },
+  {
+   "Name": "skin_m60_noite_urbana",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://74259079491056",
+    "NormalMap": "rbxassetid://108317889733503",
+    "MetalnessMap": "rbxassetid://121622228313455",
+    "RoughnessMap": "rbxassetid://101407560910084"
+   }
+  },
+  {
+   "Name": "skin_m60_od",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://134636925258450",
+    "NormalMap": "rbxassetid://108317889733503",
+    "MetalnessMap": "rbxassetid://121622228313455",
+    "RoughnessMap": "rbxassetid://101407560910084"
+   }
+  },
+  {
+   "Name": "skin_m60_tempestade",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://102921704195667",
+    "NormalMap": "rbxassetid://108317889733503",
+    "MetalnessMap": "rbxassetid://121622228313455",
+    "RoughnessMap": "rbxassetid://101407560910084"
+   }
+  },
+  {
+   "Name": "skin_m60_worn",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://137931570906084",
+    "NormalMap": "rbxassetid://108317889733503",
+    "MetalnessMap": "rbxassetid://121622228313455",
+    "RoughnessMap": "rbxassetid://101407560910084"
+   }
+  },
+  {
+   "Name": "skin_m70_bambu",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://120947736916610",
+    "NormalMap": "rbxassetid://71389923975915",
+    "MetalnessMap": "rbxassetid://74109058338633",
+    "RoughnessMap": "rbxassetid://88098401034655"
+   }
+  },
+  {
+   "Name": "skin_m70_carta",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://89451361437042",
+    "NormalMap": "rbxassetid://71389923975915",
+    "MetalnessMap": "rbxassetid://74109058338633",
+    "RoughnessMap": "rbxassetid://88098401034655"
+   }
+  },
+  {
+   "Name": "skin_m70_deserto_rosa",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://80346990121359",
+    "NormalMap": "rbxassetid://71389923975915",
+    "MetalnessMap": "rbxassetid://74109058338633",
+    "RoughnessMap": "rbxassetid://88098401034655"
+   }
+  },
+  {
+   "Name": "skin_m70_marmore_negro",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://96782656102830",
+    "NormalMap": "rbxassetid://77674552280317",
+    "MetalnessMap": "rbxassetid://130183342626613",
+    "RoughnessMap": "rbxassetid://120777086627341"
+   }
+  },
+  {
+   "Name": "skin_m70_nebulosa",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://115791673752371",
+    "NormalMap": "rbxassetid://71389923975915",
+    "MetalnessMap": "rbxassetid://74109058338633",
+    "RoughnessMap": "rbxassetid://88098401034655"
+   }
+  },
+  {
+   "Name": "skin_mosin_bambu_negro",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://89045760482154",
+    "NormalMap": "rbxassetid://101123329944131",
+    "MetalnessMap": "rbxassetid://110289494926013",
+    "RoughnessMap": "rbxassetid://110544721208631"
+   }
+  },
+  {
+   "Name": "skin_mosin_inverno",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://91752928698184",
+    "NormalMap": "rbxassetid://101123329944131",
+    "MetalnessMap": "rbxassetid://110289494926013",
+    "RoughnessMap": "rbxassetid://110544721208631"
+   }
+  },
+  {
+   "Name": "skin_mosin_laca_vermelha",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://92711959213585",
+    "NormalMap": "rbxassetid://101123329944131",
+    "MetalnessMap": "rbxassetid://110289494926013",
+    "RoughnessMap": "rbxassetid://110544721208631"
+   }
+  },
+  {
+   "Name": "skin_mosin_nebulosa_rubra",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://93881336690094",
+    "NormalMap": "rbxassetid://101123329944131",
+    "MetalnessMap": "rbxassetid://110289494926013",
+    "RoughnessMap": "rbxassetid://110544721208631"
+   }
+  },
+  {
+   "Name": "skin_mosin_selva_eletrica",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://81547607530133",
+    "NormalMap": "rbxassetid://101123329944131",
+    "MetalnessMap": "rbxassetid://110289494926013",
+    "RoughnessMap": "rbxassetid://110544721208631"
+   }
+  },
+  {
+   "Name": "skin_rpd_azulado",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://97688164539944",
+    "NormalMap": "rbxassetid://84412771743668",
+    "MetalnessMap": "rbxassetid://88117920164822",
+    "RoughnessMap": "rbxassetid://78726090782756"
+   }
+  },
+  {
+   "Name": "skin_rpd_birch",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://127993609812772",
+    "NormalMap": "rbxassetid://84412771743668",
+    "MetalnessMap": "rbxassetid://88117920164822",
+    "RoughnessMap": "rbxassetid://78726090782756"
+   }
+  },
+  {
+   "Name": "skin_rpd_colmeia_ambar",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://113961912247250",
+    "NormalMap": "rbxassetid://84412771743668",
+    "MetalnessMap": "rbxassetid://88117920164822",
+    "RoughnessMap": "rbxassetid://78726090782756"
+   }
+  },
+  {
+   "Name": "skin_rpd_escamas_abissais",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://118661483861469",
+    "NormalMap": "rbxassetid://120517361989577",
+    "MetalnessMap": "rbxassetid://88117920164822",
+    "RoughnessMap": "rbxassetid://78726090782756"
+   }
+  },
+  {
+   "Name": "skin_rpd_gelo",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://137567233032783",
+    "NormalMap": "rbxassetid://96178291073684",
+    "MetalnessMap": "rbxassetid://109834209358221",
+    "RoughnessMap": "rbxassetid://95631207337513"
+   }
+  },
+  {
+   "Name": "skin_rpd_raio_vermelho",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://107594077309658",
+    "NormalMap": "rbxassetid://84412771743668",
+    "MetalnessMap": "rbxassetid://88117920164822",
+    "RoughnessMap": "rbxassetid://78726090782756"
+   }
+  },
+  {
+   "Name": "skin_rpd_selva_escura",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://113887070441076",
+    "NormalMap": "rbxassetid://84412771743668",
+    "MetalnessMap": "rbxassetid://88117920164822",
+    "RoughnessMap": "rbxassetid://78726090782756"
+   }
+  },
+  {
+   "Name": "skin_rpd_via_lactea",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://132467228583692",
+    "NormalMap": "rbxassetid://84412771743668",
+    "MetalnessMap": "rbxassetid://88117920164822",
+    "RoughnessMap": "rbxassetid://78726090782756"
+   }
+  },
+  {
+   "Name": "skin_rpd_worn",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://118740303345874",
+    "NormalMap": "rbxassetid://84412771743668",
+    "MetalnessMap": "rbxassetid://88117920164822",
+    "RoughnessMap": "rbxassetid://78726090782756"
+   }
+  },
+  {
+   "Name": "skin_sks_carbono",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://75054098915804",
+    "NormalMap": "rbxassetid://90252108198849",
+    "MetalnessMap": "rbxassetid://128307439355953",
+    "RoughnessMap": "rbxassetid://140642916285016"
+   }
+  },
+  {
+   "Name": "skin_sks_chamas_azuis",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://82354557135204",
+    "NormalMap": "rbxassetid://90252108198849",
+    "MetalnessMap": "rbxassetid://128307439355953",
+    "RoughnessMap": "rbxassetid://140642916285016"
+   }
+  },
+  {
+   "Name": "skin_sks_clara",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://140539002921089",
+    "NormalMap": "rbxassetid://90252108198849",
+    "MetalnessMap": "rbxassetid://128307439355953",
+    "RoughnessMap": "rbxassetid://140642916285016"
+   }
+  },
+  {
+   "Name": "skin_sks_laca_negra",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://125567813422983",
+    "NormalMap": "rbxassetid://90252108198849",
+    "MetalnessMap": "rbxassetid://128307439355953",
+    "RoughnessMap": "rbxassetid://140642916285016"
+   }
+  },
+  {
+   "Name": "skin_sks_malaquita",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://79521599719638",
+    "NormalMap": "rbxassetid://129030175475876",
+    "MetalnessMap": "rbxassetid://100100740701537",
+    "RoughnessMap": "rbxassetid://110808471270735"
+   }
+  },
+  {
+   "Name": "skin_sks_mar_profundo",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://131829336298975",
+    "NormalMap": "rbxassetid://90252108198849",
+    "MetalnessMap": "rbxassetid://128307439355953",
+    "RoughnessMap": "rbxassetid://140642916285016"
+   }
+  },
+  {
+   "Name": "skin_sks_tigre_jade",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://84925890392889",
+    "NormalMap": "rbxassetid://90252108198849",
+    "MetalnessMap": "rbxassetid://128307439355953",
+    "RoughnessMap": "rbxassetid://140642916285016"
+   }
+  },
+  {
+   "Name": "skin_sks_walnut",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://132879635655253",
+    "NormalMap": "rbxassetid://90252108198849",
+    "MetalnessMap": "rbxassetid://128307439355953",
+    "RoughnessMap": "rbxassetid://140642916285016"
+   }
+  },
+  {
+   "Name": "skin_sks_worn",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://126784756400525",
+    "NormalMap": "rbxassetid://90252108198849",
+    "MetalnessMap": "rbxassetid://128307439355953",
+    "RoughnessMap": "rbxassetid://140642916285016"
+   }
+  },
+  {
+   "Name": "skin_type54_artico",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://86390594542865",
+    "NormalMap": "rbxassetid://74742967699023",
+    "MetalnessMap": "rbxassetid://72949483981823",
+    "RoughnessMap": "rbxassetid://82238858979847"
+   }
+  },
+  {
+   "Name": "skin_type54_carta_noturna",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://96653743485423",
+    "NormalMap": "rbxassetid://74742967699023",
+    "MetalnessMap": "rbxassetid://72949483981823",
+    "RoughnessMap": "rbxassetid://82238858979847"
+   }
+  },
+  {
+   "Name": "skin_type54_cromo_azul",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://82177393172975",
+    "NormalMap": "rbxassetid://74742967699023",
+    "MetalnessMap": "rbxassetid://76275509231282",
+    "RoughnessMap": "rbxassetid://136218942506681"
+   }
+  },
+  {
+   "Name": "skin_type54_damasco_ouro",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://87622256725872",
+    "NormalMap": "rbxassetid://74742967699023",
+    "MetalnessMap": "rbxassetid://72949483981823",
+    "RoughnessMap": "rbxassetid://82238858979847"
+   }
+  },
+  {
+   "Name": "skin_type54_ouro_negro",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://107123015333516",
+    "NormalMap": "rbxassetid://74742967699023",
+    "MetalnessMap": "rbxassetid://76275509231282",
+    "RoughnessMap": "rbxassetid://136218942506681"
+   }
+  },
+  {
+   "Name": "skin_type54_worn",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://72733542851569",
+    "NormalMap": "rbxassetid://74742967699023",
+    "MetalnessMap": "rbxassetid://72949483981823",
+    "RoughnessMap": "rbxassetid://82238858979847"
+   }
+  },
+  {
+   "Name": "skin_type56_birch",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://118889701741286",
+    "NormalMap": "rbxassetid://131088011732386",
+    "MetalnessMap": "rbxassetid://121921562517499",
+    "RoughnessMap": "rbxassetid://100516912001955"
+   }
+  },
+  {
+   "Name": "skin_type56_blued",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://129800493748663",
+    "NormalMap": "rbxassetid://131088011732386",
+    "MetalnessMap": "rbxassetid://121921562517499",
+    "RoughnessMap": "rbxassetid://100516912001955"
+   }
+  },
+  {
+   "Name": "skin_type56_furta_cor",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://121003595685351",
+    "NormalMap": "rbxassetid://131088011732386",
+    "MetalnessMap": "rbxassetid://121921562517499",
+    "RoughnessMap": "rbxassetid://100516912001955"
+   }
+  },
+  {
+   "Name": "skin_type56_jade",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://107505035925485",
+    "NormalMap": "rbxassetid://133701758832831",
+    "MetalnessMap": "rbxassetid://137186125139973",
+    "RoughnessMap": "rbxassetid://93645056633484"
+   }
+  },
+  {
+   "Name": "skin_type56_pixel_oceano",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://138397423225274",
+    "NormalMap": "rbxassetid://131088011732386",
+    "MetalnessMap": "rbxassetid://121921562517499",
+    "RoughnessMap": "rbxassetid://100516912001955"
+   }
+  },
+  {
+   "Name": "skin_type56_sangue_ouro",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://134359609401634",
+    "NormalMap": "rbxassetid://131088011732386",
+    "MetalnessMap": "rbxassetid://121921562517499",
+    "RoughnessMap": "rbxassetid://100516912001955"
+   }
+  },
+  {
+   "Name": "skin_type56_serpente",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://74631339581026",
+    "NormalMap": "rbxassetid://81380178316913",
+    "MetalnessMap": "rbxassetid://121921562517499",
+    "RoughnessMap": "rbxassetid://100516912001955"
+   }
+  },
+  {
+   "Name": "skin_type56_tape",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://90532801603490",
+    "NormalMap": "rbxassetid://131088011732386",
+    "MetalnessMap": "rbxassetid://121921562517499",
+    "RoughnessMap": "rbxassetid://100516912001955"
+   }
+  },
+  {
+   "Name": "skin_type56_tigre_branco",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://96012716083888",
+    "NormalMap": "rbxassetid://131088011732386",
+    "MetalnessMap": "rbxassetid://121921562517499",
+    "RoughnessMap": "rbxassetid://100516912001955"
+   }
+  },
+  {
+   "Name": "skin_type56_vermelha",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://74733173441885",
+    "NormalMap": "rbxassetid://131088011732386",
+    "MetalnessMap": "rbxassetid://121921562517499",
+    "RoughnessMap": "rbxassetid://100516912001955"
+   }
+  },
+  {
+   "Name": "skin_win12_chamas",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://82369882541615",
+    "NormalMap": "rbxassetid://111458662792748",
+    "MetalnessMap": "rbxassetid://101762069471154",
+    "RoughnessMap": "rbxassetid://138648127955918"
+   }
+  },
+  {
+   "Name": "skin_win12_outono",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://81500021886655",
+    "NormalMap": "rbxassetid://111458662792748",
+    "MetalnessMap": "rbxassetid://101762069471154",
+    "RoughnessMap": "rbxassetid://138648127955918"
+   }
+  },
+  {
+   "Name": "skin_win12_pixel_floresta",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://95498936415838",
+    "NormalMap": "rbxassetid://111458662792748",
+    "MetalnessMap": "rbxassetid://101762069471154",
+    "RoughnessMap": "rbxassetid://138648127955918"
+   }
+  },
+  {
+   "Name": "skin_win12_titanio",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://103132625477113",
+    "NormalMap": "rbxassetid://111458662792748",
+    "MetalnessMap": "rbxassetid://101762069471154",
+    "RoughnessMap": "rbxassetid://138648127955918"
+   }
+  },
+  {
+   "Name": "skin_win12_zebra_vermelha",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://97525910738945",
+    "NormalMap": "rbxassetid://111458662792748",
+    "MetalnessMap": "rbxassetid://101762069471154",
+    "RoughnessMap": "rbxassetid://138648127955918"
+   }
+  },
+  {
+   "Name": "uni_cristal_ambar@m14",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://132954447022920",
+    "NormalMap": "rbxassetid://125672868961592",
+    "MetalnessMap": "rbxassetid://124928641577074",
+    "RoughnessMap": "rbxassetid://76069487391875"
+   }
+  },
+  {
+   "Name": "uni_cristal_ambar@m16",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://120109867831742",
+    "NormalMap": "rbxassetid://92317176729103",
+    "MetalnessMap": "rbxassetid://125381057264124",
+    "RoughnessMap": "rbxassetid://114782519330304"
+   }
+  },
+  {
+   "Name": "uni_cristal_ambar@m1911",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://140281012310233",
+    "NormalMap": "rbxassetid://107260180147221",
+    "MetalnessMap": "rbxassetid://140384393217108",
+    "RoughnessMap": "rbxassetid://85313618458152"
+   }
+  },
+  {
+   "Name": "uni_cristal_ambar@m60",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://105046571575998",
+    "NormalMap": "rbxassetid://102700707392992",
+    "MetalnessMap": "rbxassetid://98447161703511",
+    "RoughnessMap": "rbxassetid://125036551910170"
+   }
+  },
+  {
+   "Name": "uni_cristal_ambar@m70",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://93973403576323",
+    "NormalMap": "rbxassetid://130562145510734",
+    "MetalnessMap": "rbxassetid://122139722972634",
+    "RoughnessMap": "rbxassetid://83466701654875"
+   }
+  },
+  {
+   "Name": "uni_cristal_ambar@mosin",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://94518284121781",
+    "NormalMap": "rbxassetid://115670912267671",
+    "MetalnessMap": "rbxassetid://93260488737135",
+    "RoughnessMap": "rbxassetid://84428222483290"
+   }
+  },
+  {
+   "Name": "uni_cristal_ambar@rpd",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://118782125037210",
+    "NormalMap": "rbxassetid://96668958154521",
+    "MetalnessMap": "rbxassetid://112221400224800",
+    "RoughnessMap": "rbxassetid://87825548627160"
+   }
+  },
+  {
+   "Name": "uni_cristal_ambar@sks",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://134756904453745",
+    "NormalMap": "rbxassetid://131416045875392",
+    "MetalnessMap": "rbxassetid://72164252377596",
+    "RoughnessMap": "rbxassetid://109325136207674"
+   }
+  },
+  {
+   "Name": "uni_cristal_ambar@type54",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://120226416084520",
+    "NormalMap": "rbxassetid://118620152343332",
+    "MetalnessMap": "rbxassetid://123145651024892",
+    "RoughnessMap": "rbxassetid://83493207057419"
+   }
+  },
+  {
+   "Name": "uni_cristal_ambar@type56",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://84293787838729",
+    "NormalMap": "rbxassetid://135737388938416",
+    "MetalnessMap": "rbxassetid://118851185276863",
+    "RoughnessMap": "rbxassetid://117980717074515"
+   }
+  },
+  {
+   "Name": "uni_cristal_ambar@win12",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://115260165074340",
+    "NormalMap": "rbxassetid://129876740555620",
+    "MetalnessMap": "rbxassetid://128174970254757",
+    "RoughnessMap": "rbxassetid://131045479070826"
+   }
+  },
+  {
+   "Name": "uni_cristal_ciano@m14",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://106692596063939",
+    "NormalMap": "rbxassetid://78253518405664",
+    "MetalnessMap": "rbxassetid://124928641577074",
+    "RoughnessMap": "rbxassetid://76069487391875"
+   }
+  },
+  {
+   "Name": "uni_cristal_ciano@m16",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://102351918105435",
+    "NormalMap": "rbxassetid://107661806439150",
+    "MetalnessMap": "rbxassetid://125381057264124",
+    "RoughnessMap": "rbxassetid://114782519330304"
+   }
+  },
+  {
+   "Name": "uni_cristal_ciano@m1911",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://128049144524799",
+    "NormalMap": "rbxassetid://98623269169512",
+    "MetalnessMap": "rbxassetid://140384393217108",
+    "RoughnessMap": "rbxassetid://85313618458152"
+   }
+  },
+  {
+   "Name": "uni_cristal_ciano@m60",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://72356986073268",
+    "NormalMap": "rbxassetid://90384969311144",
+    "MetalnessMap": "rbxassetid://98447161703511",
+    "RoughnessMap": "rbxassetid://125036551910170"
+   }
+  },
+  {
+   "Name": "uni_cristal_ciano@m70",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://106741110789659",
+    "NormalMap": "rbxassetid://80132852263335",
+    "MetalnessMap": "rbxassetid://122139722972634",
+    "RoughnessMap": "rbxassetid://83466701654875"
+   }
+  },
+  {
+   "Name": "uni_cristal_ciano@mosin",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://78137502047798",
+    "NormalMap": "rbxassetid://121562493762113",
+    "MetalnessMap": "rbxassetid://93260488737135",
+    "RoughnessMap": "rbxassetid://84428222483290"
+   }
+  },
+  {
+   "Name": "uni_cristal_ciano@rpd",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://118901681101021",
+    "NormalMap": "rbxassetid://127147505254730",
+    "MetalnessMap": "rbxassetid://112221400224800",
+    "RoughnessMap": "rbxassetid://87825548627160"
+   }
+  },
+  {
+   "Name": "uni_cristal_ciano@sks",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://139787340214915",
+    "NormalMap": "rbxassetid://84947229249394",
+    "MetalnessMap": "rbxassetid://72164252377596",
+    "RoughnessMap": "rbxassetid://109325136207674"
+   }
+  },
+  {
+   "Name": "uni_cristal_ciano@type54",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://73319438735737",
+    "NormalMap": "rbxassetid://75451072037057",
+    "MetalnessMap": "rbxassetid://123145651024892",
+    "RoughnessMap": "rbxassetid://83493207057419"
+   }
+  },
+  {
+   "Name": "uni_cristal_ciano@type56",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://127870987870303",
+    "NormalMap": "rbxassetid://122021969134441",
+    "MetalnessMap": "rbxassetid://118851185276863",
+    "RoughnessMap": "rbxassetid://117980717074515"
+   }
+  },
+  {
+   "Name": "uni_cristal_ciano@win12",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://101296556504018",
+    "NormalMap": "rbxassetid://90443265178851",
+    "MetalnessMap": "rbxassetid://128174970254757",
+    "RoughnessMap": "rbxassetid://131045479070826"
+   }
+  },
+  {
+   "Name": "uni_cristal_cobalto@m14",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://119335495921357",
+    "NormalMap": "rbxassetid://84177023403372",
+    "MetalnessMap": "rbxassetid://124928641577074",
+    "RoughnessMap": "rbxassetid://76069487391875"
+   }
+  },
+  {
+   "Name": "uni_cristal_cobalto@m16",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://79813099103498",
+    "NormalMap": "rbxassetid://97891531164512",
+    "MetalnessMap": "rbxassetid://125381057264124",
+    "RoughnessMap": "rbxassetid://114782519330304"
+   }
+  },
+  {
+   "Name": "uni_cristal_cobalto@m1911",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://86812631195982",
+    "NormalMap": "rbxassetid://113616246062175",
+    "MetalnessMap": "rbxassetid://140384393217108",
+    "RoughnessMap": "rbxassetid://85313618458152"
+   }
+  },
+  {
+   "Name": "uni_cristal_cobalto@m60",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://104111615911698",
+    "NormalMap": "rbxassetid://91852659783646",
+    "MetalnessMap": "rbxassetid://98447161703511",
+    "RoughnessMap": "rbxassetid://125036551910170"
+   }
+  },
+  {
+   "Name": "uni_cristal_cobalto@m70",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://120873598195776",
+    "NormalMap": "rbxassetid://73193207031561",
+    "MetalnessMap": "rbxassetid://122139722972634",
+    "RoughnessMap": "rbxassetid://83466701654875"
+   }
+  },
+  {
+   "Name": "uni_cristal_cobalto@mosin",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://84447352305997",
+    "NormalMap": "rbxassetid://85529568888056",
+    "MetalnessMap": "rbxassetid://93260488737135",
+    "RoughnessMap": "rbxassetid://84428222483290"
+   }
+  },
+  {
+   "Name": "uni_cristal_cobalto@rpd",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://110362003167696",
+    "NormalMap": "rbxassetid://121071586054674",
+    "MetalnessMap": "rbxassetid://112221400224800",
+    "RoughnessMap": "rbxassetid://87825548627160"
+   }
+  },
+  {
+   "Name": "uni_cristal_cobalto@sks",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://110510030727293",
+    "NormalMap": "rbxassetid://111803916901463",
+    "MetalnessMap": "rbxassetid://72164252377596",
+    "RoughnessMap": "rbxassetid://109325136207674"
+   }
+  },
+  {
+   "Name": "uni_cristal_cobalto@type54",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://97762266874814",
+    "NormalMap": "rbxassetid://88854888502109",
+    "MetalnessMap": "rbxassetid://123145651024892",
+    "RoughnessMap": "rbxassetid://83493207057419"
+   }
+  },
+  {
+   "Name": "uni_cristal_cobalto@type56",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://138661776863452",
+    "NormalMap": "rbxassetid://94787044466492",
+    "MetalnessMap": "rbxassetid://118851185276863",
+    "RoughnessMap": "rbxassetid://117980717074515"
+   }
+  },
+  {
+   "Name": "uni_cristal_cobalto@win12",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://91482361313508",
+    "NormalMap": "rbxassetid://70835177181160",
+    "MetalnessMap": "rbxassetid://128174970254757",
+    "RoughnessMap": "rbxassetid://131045479070826"
+   }
+  },
+  {
+   "Name": "uni_cristal_esmeralda@m14",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://85798891744878",
+    "NormalMap": "rbxassetid://114784218123036",
+    "MetalnessMap": "rbxassetid://124928641577074",
+    "RoughnessMap": "rbxassetid://76069487391875"
+   }
+  },
+  {
+   "Name": "uni_cristal_esmeralda@m16",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://75064346866853",
+    "NormalMap": "rbxassetid://82808061560584",
+    "MetalnessMap": "rbxassetid://125381057264124",
+    "RoughnessMap": "rbxassetid://114782519330304"
+   }
+  },
+  {
+   "Name": "uni_cristal_esmeralda@m1911",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://124131327315407",
+    "NormalMap": "rbxassetid://97954637986945",
+    "MetalnessMap": "rbxassetid://140384393217108",
+    "RoughnessMap": "rbxassetid://85313618458152"
+   }
+  },
+  {
+   "Name": "uni_cristal_esmeralda@m60",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://74749429966140",
+    "NormalMap": "rbxassetid://108450278623021",
+    "MetalnessMap": "rbxassetid://98447161703511",
+    "RoughnessMap": "rbxassetid://125036551910170"
+   }
+  },
+  {
+   "Name": "uni_cristal_esmeralda@m70",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://81356480543033",
+    "NormalMap": "rbxassetid://113363858059054",
+    "MetalnessMap": "rbxassetid://122139722972634",
+    "RoughnessMap": "rbxassetid://83466701654875"
+   }
+  },
+  {
+   "Name": "uni_cristal_esmeralda@mosin",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://117096073306555",
+    "NormalMap": "rbxassetid://88399008269989",
+    "MetalnessMap": "rbxassetid://93260488737135",
+    "RoughnessMap": "rbxassetid://84428222483290"
+   }
+  },
+  {
+   "Name": "uni_cristal_esmeralda@rpd",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://137274060953748",
+    "NormalMap": "rbxassetid://131672850217145",
+    "MetalnessMap": "rbxassetid://112221400224800",
+    "RoughnessMap": "rbxassetid://87825548627160"
+   }
+  },
+  {
+   "Name": "uni_cristal_esmeralda@sks",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://81952648784721",
+    "NormalMap": "rbxassetid://116831120270012",
+    "MetalnessMap": "rbxassetid://72164252377596",
+    "RoughnessMap": "rbxassetid://109325136207674"
+   }
+  },
+  {
+   "Name": "uni_cristal_esmeralda@type54",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://76196967125537",
+    "NormalMap": "rbxassetid://114076030913820",
+    "MetalnessMap": "rbxassetid://123145651024892",
+    "RoughnessMap": "rbxassetid://83493207057419"
+   }
+  },
+  {
+   "Name": "uni_cristal_esmeralda@type56",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://70737979258982",
+    "NormalMap": "rbxassetid://100731939955825",
+    "MetalnessMap": "rbxassetid://118851185276863",
+    "RoughnessMap": "rbxassetid://117980717074515"
+   }
+  },
+  {
+   "Name": "uni_cristal_esmeralda@win12",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://119799457486170",
+    "NormalMap": "rbxassetid://83966129624906",
+    "MetalnessMap": "rbxassetid://128174970254757",
+    "RoughnessMap": "rbxassetid://131045479070826"
+   }
+  },
+  {
+   "Name": "uni_cristal_rubro@m14",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://136163253019874",
+    "NormalMap": "rbxassetid://108565833884505",
+    "MetalnessMap": "rbxassetid://124928641577074",
+    "RoughnessMap": "rbxassetid://76069487391875"
+   }
+  },
+  {
+   "Name": "uni_cristal_rubro@m16",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://128085131341341",
+    "NormalMap": "rbxassetid://96466714947281",
+    "MetalnessMap": "rbxassetid://125381057264124",
+    "RoughnessMap": "rbxassetid://114782519330304"
+   }
+  },
+  {
+   "Name": "uni_cristal_rubro@m1911",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://99354674035347",
+    "NormalMap": "rbxassetid://113061475228569",
+    "MetalnessMap": "rbxassetid://140384393217108",
+    "RoughnessMap": "rbxassetid://85313618458152"
+   }
+  },
+  {
+   "Name": "uni_cristal_rubro@m60",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://105007637574250",
+    "NormalMap": "rbxassetid://108757527481440",
+    "MetalnessMap": "rbxassetid://98447161703511",
+    "RoughnessMap": "rbxassetid://125036551910170"
+   }
+  },
+  {
+   "Name": "uni_cristal_rubro@m70",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://100069061921129",
+    "NormalMap": "rbxassetid://125677848619954",
+    "MetalnessMap": "rbxassetid://122139722972634",
+    "RoughnessMap": "rbxassetid://83466701654875"
+   }
+  },
+  {
+   "Name": "uni_cristal_rubro@mosin",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://128118772706049",
+    "NormalMap": "rbxassetid://138681766801956",
+    "MetalnessMap": "rbxassetid://93260488737135",
+    "RoughnessMap": "rbxassetid://84428222483290"
+   }
+  },
+  {
+   "Name": "uni_cristal_rubro@rpd",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://97830862898963",
+    "NormalMap": "rbxassetid://117118939286636",
+    "MetalnessMap": "rbxassetid://112221400224800",
+    "RoughnessMap": "rbxassetid://87825548627160"
+   }
+  },
+  {
+   "Name": "uni_cristal_rubro@sks",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://74145252700840",
+    "NormalMap": "rbxassetid://135363692694859",
+    "MetalnessMap": "rbxassetid://72164252377596",
+    "RoughnessMap": "rbxassetid://109325136207674"
+   }
+  },
+  {
+   "Name": "uni_cristal_rubro@type54",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://80899814097319",
+    "NormalMap": "rbxassetid://79928673453854",
+    "MetalnessMap": "rbxassetid://123145651024892",
+    "RoughnessMap": "rbxassetid://83493207057419"
+   }
+  },
+  {
+   "Name": "uni_cristal_rubro@type56",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://111567181156179",
+    "NormalMap": "rbxassetid://121451397611472",
+    "MetalnessMap": "rbxassetid://118851185276863",
+    "RoughnessMap": "rbxassetid://117980717074515"
+   }
+  },
+  {
+   "Name": "uni_cristal_rubro@win12",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://114116310525524",
+    "NormalMap": "rbxassetid://103195377232672",
+    "MetalnessMap": "rbxassetid://128174970254757",
+    "RoughnessMap": "rbxassetid://131045479070826"
+   }
+  },
+  {
+   "Name": "uni_cristal_violeta@m14",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://104321684262075",
+    "NormalMap": "rbxassetid://117618804547906",
+    "MetalnessMap": "rbxassetid://124928641577074",
+    "RoughnessMap": "rbxassetid://76069487391875"
+   }
+  },
+  {
+   "Name": "uni_cristal_violeta@m16",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://100308366271257",
+    "NormalMap": "rbxassetid://99565494443808",
+    "MetalnessMap": "rbxassetid://125381057264124",
+    "RoughnessMap": "rbxassetid://114782519330304"
+   }
+  },
+  {
+   "Name": "uni_cristal_violeta@m1911",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://131943465949765",
+    "NormalMap": "rbxassetid://105648268905588",
+    "MetalnessMap": "rbxassetid://140384393217108",
+    "RoughnessMap": "rbxassetid://85313618458152"
+   }
+  },
+  {
+   "Name": "uni_cristal_violeta@m60",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://76221622525714",
+    "NormalMap": "rbxassetid://83699308469979",
+    "MetalnessMap": "rbxassetid://98447161703511",
+    "RoughnessMap": "rbxassetid://125036551910170"
+   }
+  },
+  {
+   "Name": "uni_cristal_violeta@m70",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://129433839860696",
+    "NormalMap": "rbxassetid://103260680942452",
+    "MetalnessMap": "rbxassetid://122139722972634",
+    "RoughnessMap": "rbxassetid://83466701654875"
+   }
+  },
+  {
+   "Name": "uni_cristal_violeta@mosin",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://129934210047752",
+    "NormalMap": "rbxassetid://120926563544303",
+    "MetalnessMap": "rbxassetid://93260488737135",
+    "RoughnessMap": "rbxassetid://84428222483290"
+   }
+  },
+  {
+   "Name": "uni_cristal_violeta@rpd",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://139621283886304",
+    "NormalMap": "rbxassetid://136767901570574",
+    "MetalnessMap": "rbxassetid://112221400224800",
+    "RoughnessMap": "rbxassetid://87825548627160"
+   }
+  },
+  {
+   "Name": "uni_cristal_violeta@sks",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://131737354808877",
+    "NormalMap": "rbxassetid://89369772055706",
+    "MetalnessMap": "rbxassetid://72164252377596",
+    "RoughnessMap": "rbxassetid://109325136207674"
+   }
+  },
+  {
+   "Name": "uni_cristal_violeta@type54",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://124556370651137",
+    "NormalMap": "rbxassetid://79265942925956",
+    "MetalnessMap": "rbxassetid://123145651024892",
+    "RoughnessMap": "rbxassetid://83493207057419"
+   }
+  },
+  {
+   "Name": "uni_cristal_violeta@type56",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://133756881347675",
+    "NormalMap": "rbxassetid://73261425817556",
+    "MetalnessMap": "rbxassetid://118851185276863",
+    "RoughnessMap": "rbxassetid://117980717074515"
+   }
+  },
+  {
+   "Name": "uni_cristal_violeta@win12",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://116494268399597",
+    "NormalMap": "rbxassetid://90296345478927",
+    "MetalnessMap": "rbxassetid://128174970254757",
+    "RoughnessMap": "rbxassetid://131045479070826"
+   }
+  },
+  {
+   "Name": "uni_geleira_antiga@m14",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://72786227121391",
+    "NormalMap": "rbxassetid://98889709628277",
+    "MetalnessMap": "rbxassetid://72383217476377",
+    "RoughnessMap": "rbxassetid://138704969906160"
+   }
+  },
+  {
+   "Name": "uni_geleira_antiga@m16",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://125487458536216",
+    "NormalMap": "rbxassetid://92758420797129",
+    "MetalnessMap": "rbxassetid://121581754616853",
+    "RoughnessMap": "rbxassetid://84822077682294"
+   }
+  },
+  {
+   "Name": "uni_geleira_antiga@m1911",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://125024432834459",
+    "NormalMap": "rbxassetid://127699451236654",
+    "MetalnessMap": "rbxassetid://112372136731337",
+    "RoughnessMap": "rbxassetid://79028450571571"
+   }
+  },
+  {
+   "Name": "uni_geleira_antiga@m60",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://85771640564548",
+    "NormalMap": "rbxassetid://134717295654517",
+    "MetalnessMap": "rbxassetid://130477071526132",
+    "RoughnessMap": "rbxassetid://130399634838345"
+   }
+  },
+  {
+   "Name": "uni_geleira_antiga@m70",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://70784120566997",
+    "NormalMap": "rbxassetid://101381750062501",
+    "MetalnessMap": "rbxassetid://128751056749159",
+    "RoughnessMap": "rbxassetid://107383570614706"
+   }
+  },
+  {
+   "Name": "uni_geleira_antiga@mosin",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://77805609964509",
+    "NormalMap": "rbxassetid://82623879815746",
+    "MetalnessMap": "rbxassetid://131661601662640",
+    "RoughnessMap": "rbxassetid://74789564916193"
+   }
+  },
+  {
+   "Name": "uni_geleira_antiga@rpd",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://91643111896126",
+    "NormalMap": "rbxassetid://124786839349937",
+    "MetalnessMap": "rbxassetid://115981455145442",
+    "RoughnessMap": "rbxassetid://92041316883620"
+   }
+  },
+  {
+   "Name": "uni_geleira_antiga@sks",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://99172382939997",
+    "NormalMap": "rbxassetid://119713303208851",
+    "MetalnessMap": "rbxassetid://137134863585390",
+    "RoughnessMap": "rbxassetid://116351553893800"
+   }
+  },
+  {
+   "Name": "uni_geleira_antiga@type54",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://95548348997162",
+    "NormalMap": "rbxassetid://131953620374205",
+    "MetalnessMap": "rbxassetid://116789778553839",
+    "RoughnessMap": "rbxassetid://124228964049542"
+   }
+  },
+  {
+   "Name": "uni_geleira_antiga@type56",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://111962065784066",
+    "NormalMap": "rbxassetid://111244667958825",
+    "MetalnessMap": "rbxassetid://130242804804265",
+    "RoughnessMap": "rbxassetid://87154050856348"
+   }
+  },
+  {
+   "Name": "uni_geleira_antiga@win12",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://134511040001855",
+    "NormalMap": "rbxassetid://104688664152706",
+    "MetalnessMap": "rbxassetid://74353515611199",
+    "RoughnessMap": "rbxassetid://92112993464536"
+   }
+  },
+  {
+   "Name": "uni_inverno_sombrio@m14",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://135167086264008",
+    "NormalMap": "rbxassetid://70883634503519",
+    "MetalnessMap": "rbxassetid://72383217476377",
+    "RoughnessMap": "rbxassetid://138704969906160"
+   }
+  },
+  {
+   "Name": "uni_inverno_sombrio@m16",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://85036983499304",
+    "NormalMap": "rbxassetid://119678530365041",
+    "MetalnessMap": "rbxassetid://121581754616853",
+    "RoughnessMap": "rbxassetid://84822077682294"
+   }
+  },
+  {
+   "Name": "uni_inverno_sombrio@m1911",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://116652921043780",
+    "NormalMap": "rbxassetid://78802956913231",
+    "MetalnessMap": "rbxassetid://112372136731337",
+    "RoughnessMap": "rbxassetid://79028450571571"
+   }
+  },
+  {
+   "Name": "uni_inverno_sombrio@m60",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://76202341370024",
+    "NormalMap": "rbxassetid://74086057952923",
+    "MetalnessMap": "rbxassetid://130477071526132",
+    "RoughnessMap": "rbxassetid://130399634838345"
+   }
+  },
+  {
+   "Name": "uni_inverno_sombrio@m70",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://76610980774653",
+    "NormalMap": "rbxassetid://113858440938292",
+    "MetalnessMap": "rbxassetid://128751056749159",
+    "RoughnessMap": "rbxassetid://107383570614706"
+   }
+  },
+  {
+   "Name": "uni_inverno_sombrio@mosin",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://99036136485537",
+    "NormalMap": "rbxassetid://89254216890694",
+    "MetalnessMap": "rbxassetid://131661601662640",
+    "RoughnessMap": "rbxassetid://74789564916193"
+   }
+  },
+  {
+   "Name": "uni_inverno_sombrio@rpd",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://123957913539480",
+    "NormalMap": "rbxassetid://121874335573868",
+    "MetalnessMap": "rbxassetid://115981455145442",
+    "RoughnessMap": "rbxassetid://92041316883620"
+   }
+  },
+  {
+   "Name": "uni_inverno_sombrio@sks",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://89873308023358",
+    "NormalMap": "rbxassetid://114087762617493",
+    "MetalnessMap": "rbxassetid://137134863585390",
+    "RoughnessMap": "rbxassetid://116351553893800"
+   }
+  },
+  {
+   "Name": "uni_inverno_sombrio@type54",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://117987474570932",
+    "NormalMap": "rbxassetid://129132023019066",
+    "MetalnessMap": "rbxassetid://116789778553839",
+    "RoughnessMap": "rbxassetid://124228964049542"
+   }
+  },
+  {
+   "Name": "uni_inverno_sombrio@type56",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://102650881711902",
+    "NormalMap": "rbxassetid://70583098539600",
+    "MetalnessMap": "rbxassetid://130242804804265",
+    "RoughnessMap": "rbxassetid://87154050856348"
+   }
+  },
+  {
+   "Name": "uni_inverno_sombrio@win12",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://95818326598070",
+    "NormalMap": "rbxassetid://76439670216655",
+    "MetalnessMap": "rbxassetid://74353515611199",
+    "RoughnessMap": "rbxassetid://92112993464536"
+   }
+  },
+  {
+   "Name": "uni_obsidiana@m14",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://87649914467702",
+    "NormalMap": "rbxassetid://137005670812927",
+    "MetalnessMap": "rbxassetid://124928641577074",
+    "RoughnessMap": "rbxassetid://76069487391875"
+   }
+  },
+  {
+   "Name": "uni_obsidiana@m16",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://137767314751792",
+    "NormalMap": "rbxassetid://85658456374648",
+    "MetalnessMap": "rbxassetid://125381057264124",
+    "RoughnessMap": "rbxassetid://114782519330304"
+   }
+  },
+  {
+   "Name": "uni_obsidiana@m1911",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://97575279757868",
+    "NormalMap": "rbxassetid://85408438369751",
+    "MetalnessMap": "rbxassetid://140384393217108",
+    "RoughnessMap": "rbxassetid://85313618458152"
+   }
+  },
+  {
+   "Name": "uni_obsidiana@m60",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://129786399378579",
+    "NormalMap": "rbxassetid://76756960275716",
+    "MetalnessMap": "rbxassetid://98447161703511",
+    "RoughnessMap": "rbxassetid://125036551910170"
+   }
+  },
+  {
+   "Name": "uni_obsidiana@m70",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://124174915189713",
+    "NormalMap": "rbxassetid://80676748096095",
+    "MetalnessMap": "rbxassetid://122139722972634",
+    "RoughnessMap": "rbxassetid://83466701654875"
+   }
+  },
+  {
+   "Name": "uni_obsidiana@mosin",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://118714138948468",
+    "NormalMap": "rbxassetid://117044557606027",
+    "MetalnessMap": "rbxassetid://93260488737135",
+    "RoughnessMap": "rbxassetid://84428222483290"
+   }
+  },
+  {
+   "Name": "uni_obsidiana@rpd",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://74473275962208",
+    "NormalMap": "rbxassetid://134357894034910",
+    "MetalnessMap": "rbxassetid://112221400224800",
+    "RoughnessMap": "rbxassetid://87825548627160"
+   }
+  },
+  {
+   "Name": "uni_obsidiana@sks",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://129518920795607",
+    "NormalMap": "rbxassetid://107295429726736",
+    "MetalnessMap": "rbxassetid://72164252377596",
+    "RoughnessMap": "rbxassetid://109325136207674"
+   }
+  },
+  {
+   "Name": "uni_obsidiana@type54",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://84221472783454",
+    "NormalMap": "rbxassetid://135029507411177",
+    "MetalnessMap": "rbxassetid://123145651024892",
+    "RoughnessMap": "rbxassetid://83493207057419"
+   }
+  },
+  {
+   "Name": "uni_obsidiana@type56",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://86600300365086",
+    "NormalMap": "rbxassetid://75712203593759",
+    "MetalnessMap": "rbxassetid://118851185276863",
+    "RoughnessMap": "rbxassetid://117980717074515"
+   }
+  },
+  {
+   "Name": "uni_obsidiana@win12",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://114357196534067",
+    "NormalMap": "rbxassetid://73063377543500",
+    "MetalnessMap": "rbxassetid://128174970254757",
+    "RoughnessMap": "rbxassetid://131045479070826"
+   }
+  },
+  {
+   "Name": "uni_onix_polido@m14",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://111187499116759",
+    "NormalMap": "rbxassetid://93105984667698",
+    "MetalnessMap": "rbxassetid://115637664928680",
+    "RoughnessMap": "rbxassetid://129339512648176"
+   }
+  },
+  {
+   "Name": "uni_onix_polido@m16",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://109152088513290",
+    "NormalMap": "rbxassetid://90730767809540",
+    "MetalnessMap": "rbxassetid://134035551386504",
+    "RoughnessMap": "rbxassetid://108964511373500"
+   }
+  },
+  {
+   "Name": "uni_onix_polido@m1911",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://107658568031316",
+    "NormalMap": "rbxassetid://74365346542906",
+    "MetalnessMap": "rbxassetid://74581343239297",
+    "RoughnessMap": "rbxassetid://113387913594996"
+   }
+  },
+  {
+   "Name": "uni_onix_polido@m60",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://112843653077025",
+    "NormalMap": "rbxassetid://71387103847274",
+    "MetalnessMap": "rbxassetid://77210933729664",
+    "RoughnessMap": "rbxassetid://97428517433228"
+   }
+  },
+  {
+   "Name": "uni_onix_polido@m70",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://125971806664528",
+    "NormalMap": "rbxassetid://94363611234628",
+    "MetalnessMap": "rbxassetid://130183342626613",
+    "RoughnessMap": "rbxassetid://120777086627341"
+   }
+  },
+  {
+   "Name": "uni_onix_polido@mosin",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://80720551320409",
+    "NormalMap": "rbxassetid://93773474921858",
+    "MetalnessMap": "rbxassetid://90369000784232",
+    "RoughnessMap": "rbxassetid://128807681630140"
+   }
+  },
+  {
+   "Name": "uni_onix_polido@rpd",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://81970458794464",
+    "NormalMap": "rbxassetid://108501204389056",
+    "MetalnessMap": "rbxassetid://109834209358221",
+    "RoughnessMap": "rbxassetid://95631207337513"
+   }
+  },
+  {
+   "Name": "uni_onix_polido@sks",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://78214673938966",
+    "NormalMap": "rbxassetid://119531839498241",
+    "MetalnessMap": "rbxassetid://100100740701537",
+    "RoughnessMap": "rbxassetid://110808471270735"
+   }
+  },
+  {
+   "Name": "uni_onix_polido@type54",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://77169615481485",
+    "NormalMap": "rbxassetid://77881671685758",
+    "MetalnessMap": "rbxassetid://133506170351568",
+    "RoughnessMap": "rbxassetid://101317918585120"
+   }
+  },
+  {
+   "Name": "uni_onix_polido@type56",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://82919442759497",
+    "NormalMap": "rbxassetid://122974667440275",
+    "MetalnessMap": "rbxassetid://137186125139973",
+    "RoughnessMap": "rbxassetid://93645056633484"
+   }
+  },
+  {
+   "Name": "uni_onix_polido@win12",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://109710246669666",
+    "NormalMap": "rbxassetid://118402990359829",
+    "MetalnessMap": "rbxassetid://77211112922590",
+    "RoughnessMap": "rbxassetid://120940299628622"
+   }
+  },
+  {
+   "Name": "uni_ouro_lapidado@m14",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://137870014463531",
+    "NormalMap": "rbxassetid://88725605057899",
+    "MetalnessMap": "rbxassetid://83715808820622",
+    "RoughnessMap": "rbxassetid://136030364276418"
+   }
+  },
+  {
+   "Name": "uni_ouro_lapidado@m16",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://75269842020338",
+    "NormalMap": "rbxassetid://126840283074761",
+    "MetalnessMap": "rbxassetid://90186993243555",
+    "RoughnessMap": "rbxassetid://139240492260062"
+   }
+  },
+  {
+   "Name": "uni_ouro_lapidado@m1911",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://110107860848188",
+    "NormalMap": "rbxassetid://82769403740284",
+    "MetalnessMap": "rbxassetid://103471415201372",
+    "RoughnessMap": "rbxassetid://72121736704401"
+   }
+  },
+  {
+   "Name": "uni_ouro_lapidado@m60",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://119644820218312",
+    "NormalMap": "rbxassetid://113143871714109",
+    "MetalnessMap": "rbxassetid://119848895238566",
+    "RoughnessMap": "rbxassetid://124397682930168"
+   }
+  },
+  {
+   "Name": "uni_ouro_lapidado@m70",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://76125666664894",
+    "NormalMap": "rbxassetid://136658064764571",
+    "MetalnessMap": "rbxassetid://101254603891029",
+    "RoughnessMap": "rbxassetid://94943528735732"
+   }
+  },
+  {
+   "Name": "uni_ouro_lapidado@mosin",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://91973014125947",
+    "NormalMap": "rbxassetid://86945986453006",
+    "MetalnessMap": "rbxassetid://128629782384727",
+    "RoughnessMap": "rbxassetid://75445571361127"
+   }
+  },
+  {
+   "Name": "uni_ouro_lapidado@rpd",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://102398071355429",
+    "NormalMap": "rbxassetid://130104598939030",
+    "MetalnessMap": "rbxassetid://100963765274493",
+    "RoughnessMap": "rbxassetid://91140912666311"
+   }
+  },
+  {
+   "Name": "uni_ouro_lapidado@sks",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://118929374928073",
+    "NormalMap": "rbxassetid://114219393133252",
+    "MetalnessMap": "rbxassetid://92136035168424",
+    "RoughnessMap": "rbxassetid://78457823223495"
+   }
+  },
+  {
+   "Name": "uni_ouro_lapidado@type54",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://72577387525294",
+    "NormalMap": "rbxassetid://78352666491584",
+    "MetalnessMap": "rbxassetid://126793750254735",
+    "RoughnessMap": "rbxassetid://74009487665762"
+   }
+  },
+  {
+   "Name": "uni_ouro_lapidado@type56",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://113357851957367",
+    "NormalMap": "rbxassetid://117619468573231",
+    "MetalnessMap": "rbxassetid://81430975174405",
+    "RoughnessMap": "rbxassetid://131374125021081"
+   }
+  },
+  {
+   "Name": "uni_ouro_lapidado@win12",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://133235576875266",
+    "NormalMap": "rbxassetid://115128619678006",
+    "MetalnessMap": "rbxassetid://104147689580465",
+    "RoughnessMap": "rbxassetid://100987656289109"
+   }
+  },
+  {
+   "Name": "uni_quartzo_rosa@m14",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://123728209062764",
+    "NormalMap": "rbxassetid://83531818429024",
+    "MetalnessMap": "rbxassetid://124928641577074",
+    "RoughnessMap": "rbxassetid://76069487391875"
+   }
+  },
+  {
+   "Name": "uni_quartzo_rosa@m16",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://83868050241517",
+    "NormalMap": "rbxassetid://121989050845382",
+    "MetalnessMap": "rbxassetid://125381057264124",
+    "RoughnessMap": "rbxassetid://114782519330304"
+   }
+  },
+  {
+   "Name": "uni_quartzo_rosa@m1911",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://99662522364658",
+    "NormalMap": "rbxassetid://91912045103406",
+    "MetalnessMap": "rbxassetid://140384393217108",
+    "RoughnessMap": "rbxassetid://85313618458152"
+   }
+  },
+  {
+   "Name": "uni_quartzo_rosa@m60",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://108110460600547",
+    "NormalMap": "rbxassetid://122582810122761",
+    "MetalnessMap": "rbxassetid://98447161703511",
+    "RoughnessMap": "rbxassetid://125036551910170"
+   }
+  },
+  {
+   "Name": "uni_quartzo_rosa@m70",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://111784110285351",
+    "NormalMap": "rbxassetid://97531689630830",
+    "MetalnessMap": "rbxassetid://122139722972634",
+    "RoughnessMap": "rbxassetid://83466701654875"
+   }
+  },
+  {
+   "Name": "uni_quartzo_rosa@mosin",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://86459103811378",
+    "NormalMap": "rbxassetid://77274061800831",
+    "MetalnessMap": "rbxassetid://93260488737135",
+    "RoughnessMap": "rbxassetid://84428222483290"
+   }
+  },
+  {
+   "Name": "uni_quartzo_rosa@rpd",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://125318811246651",
+    "NormalMap": "rbxassetid://109894216608021",
+    "MetalnessMap": "rbxassetid://112221400224800",
+    "RoughnessMap": "rbxassetid://87825548627160"
+   }
+  },
+  {
+   "Name": "uni_quartzo_rosa@sks",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://99710033343460",
+    "NormalMap": "rbxassetid://131118416977318",
+    "MetalnessMap": "rbxassetid://72164252377596",
+    "RoughnessMap": "rbxassetid://109325136207674"
+   }
+  },
+  {
+   "Name": "uni_quartzo_rosa@type54",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://96164637505318",
+    "NormalMap": "rbxassetid://74789723129767",
+    "MetalnessMap": "rbxassetid://123145651024892",
+    "RoughnessMap": "rbxassetid://83493207057419"
+   }
+  },
+  {
+   "Name": "uni_quartzo_rosa@type56",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://107269697510268",
+    "NormalMap": "rbxassetid://115501133101632",
+    "MetalnessMap": "rbxassetid://118851185276863",
+    "RoughnessMap": "rbxassetid://117980717074515"
+   }
+  },
+  {
+   "Name": "uni_quartzo_rosa@win12",
+   "ClassName": "SurfaceAppearance",
+   "Properties": {
+    "AlphaMode": "Overlay",
+    "ColorMap": "rbxassetid://117755161006631",
+    "NormalMap": "rbxassetid://106100387647139",
+    "MetalnessMap": "rbxassetid://128174970254757",
+    "RoughnessMap": "rbxassetid://131045479070826"
+   }
+  }
+ ]
+}

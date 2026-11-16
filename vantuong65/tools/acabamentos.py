@@ -57,8 +57,14 @@ LUAU = ROOT / "src/ReplicatedStorage/Shared/AcabamentosArte.luau"
 # ID da imagem de cada decal Acab.* (o TextureID não abre decal), resolvido no Studio pelo
 # InsertService (--resolver)
 IMAGENS = ROOT / "assets/acabamentos_imagens.json"
+# D-179: relevo e classe de material de cada acabamento (sai da geração; --luau lê)
+META = ROOT / "assets/acabamentos_meta.json"
+# mapas da arte original de cada arma no Roblox (normal, metal e aspereza), lidos no Studio
+ARMAS_PBR = ROOT / "assets/armas_pbr.json"
+# SurfaceAppearance pronta de cada acabamento (o jogo clona; script não muda o ColorMap)
+SA_MODELO = ROOT / "src/ReplicatedStorage/VT65AcabamentosSA.model.json"
 TAM = 1024
-VERSAO = 3  # sobe quando a rasterização muda (invalida o cache)
+VERSAO = 4  # sobe quando a rasterização muda (invalida o cache)
 
 # arma (Shared/Weapons) -> GLB que subiu como AssetIds.Models.<arma>
 ARMAS = {
@@ -88,6 +94,8 @@ class Mapa:
     n: np.ndarray  # (H, W, 3) normal na mesma ordem
     t: np.ndarray  # (H, W) 0 = fim da coronha, 1 = boca do cano
     lado: dict  # G-buffer das prévias de lado
+    tg: np.ndarray | None = None  # (H, W, 3) tangente (u crescendo), na ordem de q
+    bt: np.ndarray | None = None  # (H, W, 3) bitangente (para cima na imagem, como o glTF)
 
 
 def _eixos(pos: np.ndarray) -> tuple[int, int, int, float, float, float]:
@@ -219,13 +227,15 @@ def mapa_da_arma(arma: str) -> Mapa:
         z = np.load(arq, allow_pickle=True)
         if str(z["chave"]) == chave:
             lado = z["lado"].item()
-            return Mapa(z["cob"], z["q"], z["n"], z["t"], lado)
+            return Mapa(z["cob"], z["q"], z["n"], z["t"], lado, z["tg"], z["bt"])
     prims = Glb(glb).primitivas()
     todas = np.concatenate([p.pos for p in prims])
     comp, alto, trav, sinal, cmin, L = _eixos(todas)
     centro = (todas.min(axis=0) + todas.max(axis=0)) / 2
     P = np.zeros((TAM, TAM, 3), np.float32)
     N = np.zeros((TAM, TAM, 3), np.float32)
+    Tg = np.zeros((TAM, TAM, 3), np.float32)
+    Bt = np.zeros((TAM, TAM, 3), np.float32)
     cob = np.zeros((TAM, TAM), bool)
     for p in prims:
         uvpx = p.uv * TAM
@@ -242,20 +252,69 @@ def mapa_da_arma(arma: str) -> Mapa:
             P[ys, xs] = w0[:, None] * A + w1[:, None] * B + w2[:, None] * C
             N[ys, xs] = nn / ln
             cob[ys, xs] = True
-    cob = _dilatar(cob, P, N)
+            # tangente (u) e bitangente (v para cima na imagem): o relevo vira mapa normal
+            du1, dv1 = p.uv[i1] - p.uv[i0]
+            du2, dv2 = p.uv[i2] - p.uv[i0]
+            det = du1 * dv2 - du2 * dv1
+            if abs(det) > 1e-12:
+                e1, e2 = B - A, C - A
+                tu = (e1 * dv2 - e2 * dv1) / det
+                bv = (e2 * du1 - e1 * du2) / det
+                Tg[ys, xs] = tu / max(np.linalg.norm(tu), 1e-9)
+                Bt[ys, xs] = -bv / max(np.linalg.norm(bv), 1e-9)
+    cob = _dilatar(cob, P, N, Tg, Bt)
     # ordem [través, alto, comprimento]; o comprimento cresce para a boca do cano
     rel = (P - centro) / L * 4.0
     q = np.stack([rel[..., trav], rel[..., alto], rel[..., comp] * sinal], axis=-1)
     n = np.stack([N[..., trav], N[..., alto], N[..., comp] * sinal], axis=-1)
     t = np.clip(q[..., 2] / 4.0 + 0.5, 0, 1)
+    tg = np.stack([Tg[..., trav], Tg[..., alto], Tg[..., comp] * sinal], axis=-1)
+    bt = np.stack([Bt[..., trav], Bt[..., alto], Bt[..., comp] * sinal], axis=-1)
     lado = _lado(prims, comp, alto, trav, sinal)
-    np.savez_compressed(arq, chave=chave, cob=cob, q=q, n=n, t=t, lado=np.array(lado, dtype=object))
+    np.savez_compressed(
+        arq,
+        chave=chave,
+        cob=cob,
+        q=q,
+        n=n,
+        t=t,
+        tg=tg,
+        bt=bt,
+        lado=np.array(lado, dtype=object),
+    )
     print(f"  {arma}: malha rasterizada ({int(cob.sum())} texels)")
-    return Mapa(cob, q, n, t, lado)
+    return Mapa(cob, q, n, t, lado, tg, bt)
 
 
 def textura_original(arma: str) -> np.ndarray:
     return np.asarray(Glb(ROOT / ARMAS[arma]).imagem(0).convert("RGB"), np.float32) / 255.0
+
+
+def pbr_original(arma: str) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Mapa normal (espaço tangente, -1..1, verde para cima como o glTF), aspereza e metal da arte
+    original. Sem o mapa no GLB: normal reta, aspereza 0,8 e metal 0."""
+    g = Glb(ROOT / ARMAS[arma])
+    mat = g.primitivas()[0].material
+
+    def carrega(mapa: str) -> np.ndarray | None:
+        i = g.imagem_pbr(mat, mapa)
+        if i is None:
+            return None
+        im = g.imagem(i).convert("RGB")
+        if im.size != (TAM, TAM):
+            im = im.resize((TAM, TAM), Image.BILINEAR)
+        return np.asarray(im, np.float32) / 255.0
+
+    nm, orm = carrega("normal"), carrega("orm")
+    if nm is None:
+        normal = np.zeros((TAM, TAM, 3), np.float32)
+        normal[..., 2] = 1
+    else:
+        normal = nm * 2 - 1
+        normal /= np.maximum(np.linalg.norm(normal, axis=-1, keepdims=True), 1e-6)
+    rugo = orm[..., 1] if orm is not None else np.full((TAM, TAM), 0.8, np.float32)
+    metal = orm[..., 2] if orm is not None else np.zeros((TAM, TAM), np.float32)
+    return normal.astype(np.float32), rugo.astype(np.float32), metal.astype(np.float32)
 
 
 # ===================================================================== regiões pela cor
@@ -417,6 +476,8 @@ class Ctx:
     lum: np.ndarray
     c: np.ndarray  # (k, 3) cores 0..1
     seed: int
+    tg: np.ndarray | None = None  # tangente e bitangente da malha (relevo)
+    bt: np.ndarray | None = None
 
     def cor(self, i: int) -> np.ndarray:
         return self.c[min(i, len(self.c) - 1)]
@@ -795,6 +856,336 @@ def r_jade(x: Ctx):
     return mix(cor, x.cor(2) if len(x.c) > 2 else x.cor(1) * 1.2, veia), None
 
 
+# ===================================================================== D-179: relevo e gemas
+def worley_celula(p: np.ndarray, seed: int) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Como o worley, e mais a célula (inteiros) do ponto mais perto: sorteio por faceta."""
+    pf = np.floor(p)
+    i = pf.astype(np.int64)
+    f1 = np.full(len(p), 9.0, np.float32)
+    f2 = np.full(len(p), 9.0, np.float32)
+    cel = np.zeros((len(p), 3), np.int64)
+    for dx in (-1, 0, 1):
+        for dy in (-1, 0, 1):
+            for dz in (-1, 0, 1):
+                cx, cy, cz = i[:, 0] + dx, i[:, 1] + dy, i[:, 2] + dz
+                fx = cx + _hash(cx, cy, cz, seed)
+                fy = cy + _hash(cx, cy, cz, seed + 1)
+                fz = cz + _hash(cx, cy, cz, seed + 2)
+                d = np.sqrt((p[:, 0] - fx) ** 2 + (p[:, 1] - fy) ** 2 + (p[:, 2] - fz) ** 2)
+                d = d.astype(np.float32)
+                perto = d < f1
+                f2 = np.where(perto, f1, np.minimum(f2, d))
+                f1 = np.where(perto, d, f1)
+                cel[perto] = np.stack([cx, cy, cz], axis=1)[perto]
+    return f1, f2, cel
+
+
+def _unit(v: np.ndarray) -> np.ndarray:
+    return v / np.maximum(np.linalg.norm(v, axis=1, keepdims=True), 1e-9)
+
+
+def _quadro(x: Ctx) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Tangente, bitangente e normal ortonormais em cada ponto (na ordem de q)."""
+    n = _unit(x.n.astype(np.float64))
+    if x.tg is not None and x.bt is not None:
+        t0 = x.tg.astype(np.float64)
+    else:  # nuvem de teste: qualquer tangente perpendicular
+        cima = np.where(np.abs(n[:, 1:2]) < 0.9, [[0.0, 1.0, 0.0]], [[1.0, 0.0, 0.0]])
+        t0 = np.cross(cima, n)
+    t = _unit(t0 - (t0 * n).sum(1, keepdims=True) * n)
+    b = np.cross(n, t)
+    if x.bt is not None:  # mantém o sentido da bitangente da malha (pode ser espelhada)
+        sinal = np.sign((b * x.bt).sum(1, keepdims=True))
+        b = b * np.where(sinal == 0, 1.0, sinal)
+    return t, b, n
+
+
+def _tangente(x: Ctx, nobj: np.ndarray) -> np.ndarray:
+    """Normal do objeto -> espaço tangente (x na tangente, y na bitangente, z na normal)."""
+    t, b, n = _quadro(x)
+    nobj = _unit(nobj.astype(np.float64))
+    v = np.stack([(nobj * t).sum(1), (nobj * b).sum(1), (nobj * n).sum(1)], axis=1)
+    v[:, 2] = np.maximum(v[:, 2], 0.05)
+    return _unit(v).astype(np.float32)
+
+
+def _por_altura(x: Ctx, altura, eps: float = 0.003) -> np.ndarray:
+    """Relevo de uma altura em unidades de q (a arma tem 4 de comprimento): derivada numérica
+    nas direções da tangente e da bitangente."""
+    t, b, _n = _quadro(x)
+    h0 = altura(x.q)
+    ht = altura(x.q + eps * t)
+    hb = altura(x.q + eps * b)
+    dt, db = (ht - h0) / eps, (hb - h0) / eps
+    v = np.stack([-dt, -db, np.ones_like(dt)], axis=1)
+    return _unit(v).astype(np.float32)
+
+
+def _facetas(x: Ctx, escala: float = 5.0):
+    """Facetas de pedra lapidada: células 3D; devolve 3 sorteios por faceta, a aresta e a rampa
+    de luz dentro da faceta (cada face é um plano inclinado: clareia de um lado para o outro)."""
+    p = x.q * escala + (fbm(x.q * 1.1, x.seed + 31, 2)[:, None] - 0.5) * 0.3
+    f1, f2, cel = worley_celula(p, x.seed + 7)
+    a = _hash(cel[:, 0], cel[:, 1], cel[:, 2], x.seed + 11)
+    b = _hash(cel[:, 0], cel[:, 1], cel[:, 2], x.seed + 12)
+    c = _hash(cel[:, 0], cel[:, 1], cel[:, 2], x.seed + 13)
+    s0 = x.seed + 7
+    centro = np.stack(
+        [
+            cel[:, 0] + _hash(cel[:, 0], cel[:, 1], cel[:, 2], s0),
+            cel[:, 1] + _hash(cel[:, 0], cel[:, 1], cel[:, 2], s0 + 1),
+            cel[:, 2] + _hash(cel[:, 0], cel[:, 1], cel[:, 2], s0 + 2),
+        ],
+        axis=1,
+    )
+    direcao = _unit(np.stack([b - 0.5, c - 0.5, a - 0.5], axis=1).astype(np.float64))
+    rampa = ((p - centro) * direcao).sum(1).astype(np.float32)
+    aresta = 1 - smooth(0.0, 0.045, f2 - f1)
+    return a, b, c, aresta, rampa
+
+
+def _gema(x: Ctx, minimo: float, maximo: float, escala: float = 5.0):
+    """Brilho de cada faceta (uma escura de vez em quando, poucas acesas) com a rampa de luz."""
+    a, _b, _c, aresta, rampa = _facetas(x, escala)
+    br = minimo + (maximo - minimo) * a**1.25 + rampa * 0.55 * (maximo - minimo)
+    br = np.where(a < 0.08, minimo * 0.5, br)
+    return np.clip(br, 0.02, 1.6), aresta, a
+
+
+def r_cristal(x: Ctx):
+    """Gema lapidada: facetas pequenas, cada uma um plano com a luz correndo; as mais claras puxam
+    para a cor 2 (o brilho) e a aresta tem o fio claro."""
+    br, aresta, _a = _gema(x, 0.14, 1.25)
+    cor = x.cor(0)[None] * np.minimum(br, 1.0)[:, None]
+    acesa = smooth(0.95, 1.4, br)
+    cor = mix(cor, x.cor(1)[None], acesa * 0.9)
+    cor = mix(cor, (x.cor(1) * 0.9)[None], aresta * 0.45)
+    return np.clip(cor, 0, 1), acesa * 0.2
+
+
+def r_ouro_lapidado(x: Ctx):
+    """Ouro cortado em facetas: nunca escurece até o preto (é metal claro)."""
+    br, aresta, _a = _gema(x, 0.5, 1.3)
+    cor = x.cor(0)[None] * np.minimum(br, 1.0)[:, None]
+    acesa = smooth(1.0, 1.35, br)
+    cor = mix(cor, x.cor(1)[None], acesa * 0.85)
+    cor = mix(cor, x.cor(1)[None], aresta * 0.35)
+    return np.clip(cor, 0, 1), None
+
+
+def r_obsidiana(x: Ctx):
+    """Vidro vulcânico lapidado: facetas pretas e o reflexo colorido (cor 2) nas acesas."""
+    br, aresta, a = _gema(x, 0.05, 0.6, 4.2)
+    cor = np.repeat(x.cor(0)[None], len(br), axis=0) + br[:, None] * 0.12
+    reflexo = smooth(0.42, 0.75, br) * (0.5 + 0.5 * a)
+    cor = mix(cor, x.cor(1)[None], reflexo * 0.75)
+    cor = mix(cor, (x.cor(1) * 0.6)[None], aresta * 0.3)
+    return np.clip(cor, 0, 1), reflexo * 0.15
+
+
+def _inverno_campos(q: np.ndarray, n: np.ndarray, seed: int):
+    """Inverno sombrio: rede de lascas de gelo (arestas finas), placas foscas de geada em algumas
+    lascas, samambaias de geada e a neve no que fica para cima."""
+    p = q * 3.6 + (fbm(q * 1.2, seed + 9, 3)[:, None] - 0.5) * 0.5
+    f1, f2, cel = worley_celula(p, seed + 8)
+    lasca = 1 - smooth(0.0, 0.03, f2 - f1)
+    fosca = smooth(0.62, 0.7, _hash(cel[:, 0], cel[:, 1], cel[:, 2], seed + 10)) * smooth(
+        0.0, 0.5, f1
+    )
+    crista = 1 - np.abs(2 * fbm(q * 3.0, seed + 3, 5) - 1)
+    mancha = smooth(0.45, 0.6, fbm(q * 0.9, seed + 4, 3))
+    geada = smooth(0.72, 0.9, crista) * mancha
+    neve = smooth(0.5, 0.8, n[:, 1]) * smooth(0.4, 0.55, fbm(q * 2.5, seed + 5, 3))
+    return lasca, fosca, geada, neve
+
+
+def r_inverno(x: Ctx):
+    """Inverno sombrio: azul quase preto cortado por lascas de gelo claras (cor 2), placas foscas,
+    geada em samambaia e neve (cor 3) pousada em cima."""
+    q = x.q
+    lasca, fosca, geada, neve = _inverno_campos(q, x.n, x.seed)
+    base = x.cor(0)[None] * (0.8 + 0.45 * fbm(q * 2.0, x.seed + 1, 3))[:, None]
+    gelo = x.cor(1)
+    branco = x.cor(2) if len(x.c) > 2 else np.array([0.95, 0.97, 1.0], np.float32)
+    cor = mix(base, (gelo * 0.55)[None], fosca * 0.55)
+    cor = mix(cor, gelo[None], geada * 0.8)
+    cor = mix(cor, gelo[None], lasca * 0.9)
+    cor = mix(cor, branco[None], neve * 0.9)
+    return np.clip(cor, 0, 1), lasca * 0.35
+
+
+def _geleira_campos(q: np.ndarray, seed: int):
+    prof = fbm(q * 0.9, seed, 5)
+    p = q * 2.6 + (fbm(q * 1.2, seed + 8, 3)[:, None] - 0.5) * 0.8
+    f1, f2 = worley(p, seed + 9)
+    racha = 1 - smooth(0.0, 0.035, f2 - f1)
+    borda = smooth(0.035, 0.06, f2 - f1) * (1 - smooth(0.06, 0.1, f2 - f1))
+    return prof, racha, borda
+
+
+def r_geleira(x: Ctx):
+    """Geleira: gelo do branco (cor 1) ao azul fundo (cor 3) em camadas, rachaduras profundas com
+    a borda clara."""
+    q = x.q
+    prof, racha, borda = _geleira_campos(q, x.seed)
+    cor = gradiente(x.c[:3] if len(x.c) >= 3 else x.c, smooth(0.32, 0.75, prof))
+    camadas = 0.93 + 0.07 * np.sin(2 * np.pi * (q[:, 1] * 3.0 + fbm(q * 1.5, x.seed + 2, 3) * 2.0))
+    cor = cor * camadas[:, None]
+    fundo = x.cor(2) * 0.45
+    cor = mix(cor, fundo[None], racha * 0.9)
+    cor = mix(cor, np.minimum(x.cor(0) * 1.1, 1)[None], borda * 0.6)
+    return np.clip(cor, 0, 1), None
+
+
+def _onix_campos(q: np.ndarray, seed: int):
+    """Ônix: muitas camadas finas e onduladas, de larguras diferentes."""
+    w = fbm(q * 0.8, seed, 5)
+    v = (q[:, 2] * 0.45 + q[:, 1] * 1.3 + q[:, 0] * 0.3) * 4.2 + w * 4.5
+    fr = v - np.floor(v)
+    clara = smooth(0.5, 0.56, fr) * (1 - smooth(0.86, 0.92, fr))
+    troca = np.exp(-(((fr - 0.53) / 0.03) ** 2)) + np.exp(-(((fr - 0.89) / 0.03) ** 2))
+    fina = smooth(0.2, 0.23, fr) * (1 - smooth(0.25, 0.28, fr))  # o veio fino no escuro
+    return np.clip(clara + fina * 0.8, 0, 1), np.clip(troca, 0, 1)
+
+
+def r_onix(x: Ctx):
+    """Ônix: faixas pretas (cor 1) e brancas (cor 2) finas e onduladas, cinza (cor 3) na troca."""
+    clara, troca = _onix_campos(x.q, x.seed)
+    cor = mix(x.cor(0)[None], x.cor(1)[None], clara)
+    if len(x.c) > 2:
+        cor = mix(cor, x.cor(2)[None], troca * 0.55)
+    grao = 0.95 + 0.08 * fbm(x.q * 6.0, x.seed + 3, 3)
+    return np.clip(cor * grao[:, None], 0, 1), None
+
+
+# relevo: espaço tangente (n, 3) para o mapa normal
+def rel_facetas(x: Ctx, forca: float = 0.5, escala: float = 5.0) -> np.ndarray:
+    a, b, c, _aresta, _rampa = _facetas(x, escala)
+    r = np.stack([b * 2 - 1, c * 2 - 1, a * 2 - 1], axis=1).astype(np.float64)
+    n = _unit(x.n.astype(np.float64))
+    rt = r - (r * n).sum(1, keepdims=True) * n
+    return _tangente(x, n + forca * rt)
+
+
+def rel_inverno(x: Ctx) -> np.ndarray:
+    def h(q):
+        lasca, fosca, geada, neve = _inverno_campos(q, x.n, x.seed)
+        return (lasca * 0.004 + fosca * 0.002 + geada * 0.005 + neve * 0.008) + fbm(
+            q * 5.0, x.seed + 7, 3
+        ) * 0.003
+
+    return _por_altura(x, h)
+
+
+def rel_geleira(x: Ctx) -> np.ndarray:
+    def h(q):
+        prof, racha, _b = _geleira_campos(q, x.seed)
+        return prof * 0.012 - racha * 0.006
+
+    return _por_altura(x, h)
+
+
+def rel_onix(x: Ctx) -> np.ndarray:
+    def h(q):
+        clara, _t = _onix_campos(q, x.seed)
+        return clara * 0.002 + fbm(q * 6.0, x.seed + 3, 3) * 0.003
+
+    return _por_altura(x, h)
+
+
+def rel_lava(x: Ctx) -> np.ndarray:
+    def h(q):
+        p = q * 4.2 + (fbm(q * 1.5, x.seed + 5, 3)[:, None] - 0.5) * 1.4
+        f1, f2 = worley(p, x.seed)
+        racha = 1 - smooth(0.02, 0.09, f2 - f1)
+        return fbm(q * 4, x.seed + 2, 4) * 0.012 - racha * 0.006
+
+    return _por_altura(x, h)
+
+
+def rel_escamas(x: Ctx) -> np.ndarray:
+    def h(q):
+        u, v = plano(q, x.n)
+        w = (fbm(q * 1.4, x.seed + 2, 3) - 0.5) * 0.9
+        pp = np.stack([u * 15.0 + w, v * 17.0 - w, np.zeros_like(u)], axis=1)
+        f1, f2 = worley(pp, x.seed)
+        borda = 1 - smooth(0.05, 0.14, f2 - f1)
+        return (1 - smooth(0.0, 0.6, f1)) * 0.012 - borda * 0.004
+
+    return _por_altura(x, h)
+
+
+def rel_marmore(x: Ctx) -> np.ndarray:
+    def h(q):
+        w = fbm(q * 1.3, x.seed, 6)
+        v = np.abs(np.sin(2 * np.pi * (q[:, 2] * 0.45 + q[:, 1] * 0.8 + w * 2.6)))
+        veia = 1 - smooth(0.0, 0.1, v)
+        return fbm(q * 3, x.seed + 2, 4) * 0.005 - veia * 0.0025
+
+    return _por_altura(x, h)
+
+
+def rel_jade(x: Ctx) -> np.ndarray:
+    def h(q):
+        nuvem = fbm(q * 1.7, x.seed, 5)
+        w = fbm(q * 2.2, x.seed + 3, 5)
+        v = np.abs(np.sin(2 * np.pi * (q[:, 2] * 0.6 + q[:, 1] * 0.7 + w * 2.2)))
+        veia = 1 - smooth(0.0, 0.07, v)
+        return nuvem * 0.008 - veia * 0.003
+
+    return _por_altura(x, h)
+
+
+def rel_malaquita(x: Ctx) -> np.ndarray:
+    def h(q):
+        w = fbm(q * 0.75, x.seed, 5)
+        v = w * 16.0 + fbm(q * 3.0, x.seed + 2, 3) * 0.6
+        fr = v - np.floor(v)
+        return smooth(0.15, 0.85, fr) * 0.003
+
+    return _por_altura(x, h)
+
+
+RELEVO = {
+    "cristal": rel_facetas,
+    "obsidiana": lambda x: rel_facetas(x, 0.55, 4.2),
+    "ouro_lapidado": rel_facetas,
+    "inverno": rel_inverno,
+    "geleira": rel_geleira,
+    "onix": rel_onix,
+    "lava": rel_lava,
+    "escamas": rel_escamas,
+    "marmore": rel_marmore,
+    "jade": rel_jade,
+    "malaquita": rel_malaquita,
+}
+# material de cada receita na SurfaceAppearance: metal e aspereza onde o acabamento pinta (fora
+# dele, os da arte original). Receita sem classe usa os mapas originais inteiros.
+CLASSE = {
+    "cristal": "cristal",
+    "obsidiana": "cristal",
+    "ouro_lapidado": "metal",
+    "inverno": "gelo",
+    "geleira": "gelo",
+    "onix": "pedra",
+    "lava": "pedra",
+    "marmore": "pedra",
+    "jade": "pedra",
+    "malaquita": "pedra",
+    "cromo": "espelho",
+    "ouro": "espelho",
+}
+CLASSES = {  # metal, aspereza
+    "cristal": (0.25, 0.08),
+    "metal": (1.0, 0.16),
+    "gelo": (0.05, 0.12),
+    "pedra": (0.0, 0.3),
+    "espelho": (1.0, 0.1),
+}
+# quanto do relevo fino da arte original some debaixo do acabamento (a gema é lisa)
+ATENUA = {"cristal": 0.6, "metal": 0.5, "gelo": 0.3}
+
+
 RECEITAS = {
     "tigre": r_tigre,
     "fade": r_fade,
@@ -819,9 +1210,26 @@ RECEITAS = {
     "oleo": r_oleo,
     "jade": r_jade,
     "malaquita": r_malaquita,
+    "cristal": r_cristal,
+    "obsidiana": r_obsidiana,
+    "ouro_lapidado": r_ouro_lapidado,
+    "inverno": r_inverno,
+    "geleira": r_geleira,
+    "onix": r_onix,
 }
 # quanto da luz e do detalhe da textura original passa (1 = tudo; metais brilhantes, mais)
-CONTRASTE = {"cromo": 1.15, "ouro": 1.1, "anodizado": 1.0, "laca": 0.95}
+CONTRASTE = {
+    "cromo": 1.15,
+    "ouro": 1.1,
+    "anodizado": 1.0,
+    "laca": 0.95,
+    "cristal": 0.5,
+    "obsidiana": 0.5,
+    "ouro_lapidado": 0.6,
+    "inverno": 0.7,
+    "geleira": 0.55,
+    "onix": 0.7,
+}
 
 
 def aplicar(receita: str, ctx: Ctx) -> tuple[np.ndarray, np.ndarray | None]:
@@ -842,8 +1250,39 @@ def _seed(texto: str) -> int:
     return zlib.crc32(texto.encode()) % 100000
 
 
-def pintar(spec: dict, mapa: Mapa, orig: np.ndarray, reg: dict) -> tuple[np.ndarray, list[str]]:
+def selecao(spec: dict, mapa: Mapa, reg: dict) -> tuple[np.ndarray | None, str, list[str]]:
+    """Onde a receita pinta (madeira, metal ou tudo, sem latão nem pano) e o alvo de fato."""
+    arte = spec.get("arte")
+    if not arte:
+        return None, "", []
     avisos: list[str] = []
+    alvo = arte["alvo"]
+    if alvo == "madeira" and reg["madeira"].sum() < 0.03 * mapa.cob.sum():
+        avisos.append("arma quase sem madeira: pinta tudo")
+        alvo = "tudo"
+    sel = {
+        "tudo": reg["madeira"] | reg["metal"],
+        "metal": reg["metal"],
+        "madeira": reg["madeira"],
+    }[alvo]
+    return sel, alvo, avisos
+
+
+def _ctx(spec: dict, mapa: Mapa, sel: np.ndarray, lum_sel: np.ndarray) -> Ctx:
+    arte = spec["arte"]
+    return Ctx(
+        mapa.q[sel],
+        mapa.n[sel],
+        mapa.t[sel],
+        lum_sel,
+        np.array(arte["cores"], np.float32) / 255.0,
+        _seed(spec["id"]),
+        mapa.tg[sel] if mapa.tg is not None else None,
+        mapa.bt[sel] if mapa.bt is not None else None,
+    )
+
+
+def pintar(spec: dict, mapa: Mapa, orig: np.ndarray, reg: dict) -> tuple[np.ndarray, list[str]]:
     L = lum(orig)
     out = orig.copy()
     ref = np.ones_like(L)
@@ -853,30 +1292,16 @@ def pintar(spec: dict, mapa: Mapa, orig: np.ndarray, reg: dict) -> tuple[np.ndar
             ref[m] = max(float(np.median(L[m])), 0.04)
     arte = spec.get("arte")
     if arte:
-        alvo = arte["alvo"]
-        if alvo == "madeira" and reg["madeira"].sum() < 0.03 * mapa.cob.sum():
-            avisos.append("arma quase sem madeira: pinta tudo")
-            alvo = "tudo"
-        sel = {
-            "tudo": reg["madeira"] | reg["metal"],
-            "metal": reg["metal"],
-            "madeira": reg["madeira"],
-        }[alvo]
-        ctx = Ctx(
-            mapa.q[sel],
-            mapa.n[sel],
-            mapa.t[sel],
-            L[sel],
-            np.array(arte["cores"], np.float32) / 255.0,
-            _seed(spec["id"]),
-        )
-        cor, emis = aplicar(arte["receita"], ctx)
+        sel, _alvo, avisos = selecao(spec, mapa, reg)
+        assert sel is not None
+        cor, emis = aplicar(arte["receita"], _ctx(spec, mapa, sel, L[sel]))
         s = np.clip(L[sel] / ref[sel], 0.18, 2.2) ** CONTRASTE.get(arte["receita"], 0.85)
         final = np.clip(cor * s[:, None], 0, 1)
         if emis is not None:
             final = mix(final, np.clip(cor, 0, 1), np.clip(emis, 0, 1))
         out[sel] = final
         return out, avisos
+    avisos = []
     # receita "tinta": a cor de madeira, guarda-mão e metal do acabamento de cor (D-176 e antes)
     f = spec.get("finish") or {}
     gm = guarda_mao(reg, mapa)
@@ -901,6 +1326,52 @@ def pintar(spec: dict, mapa: Mapa, orig: np.ndarray, reg: dict) -> tuple[np.ndar
     if not any(rgb is not None for _, _, rgb in partes):
         avisos.append("acabamento sem cor")
     return out, avisos
+
+
+# ===================================================================== relevo e material (D-179)
+def mapa_normal(spec: dict, mapa: Mapa, reg: dict, base: np.ndarray) -> np.ndarray | None:
+    """Mapa normal do acabamento: o relevo da receita somado ao da arte original (mistura
+    "whiteout"), só onde a receita pinta. None: receita sem relevo."""
+    arte = spec.get("arte")
+    if not arte or arte["receita"] not in RELEVO:
+        return None
+    sel, _alvo, _av = selecao(spec, mapa, reg)
+    assert sel is not None
+    d = RELEVO[arte["receita"]](_ctx(spec, mapa, sel, np.zeros(int(sel.sum()), np.float32)))
+    o = base[sel].astype(np.float64)
+    at = ATENUA.get(CLASSE.get(arte["receita"], ""), 0.0)
+    if at:
+        o = _unit(o * (1 - at) + np.array([[0.0, 0.0, 1.0]]) * at)
+    nb = np.stack([o[:, 0] + d[:, 0], o[:, 1] + d[:, 1], o[:, 2] * d[:, 2]], axis=1)
+    out = base.copy()
+    out[sel] = _unit(nb).astype(np.float32)
+    return out
+
+
+def mapas_classe(
+    classe: str, sel: np.ndarray, rugo0: np.ndarray, metal0: np.ndarray
+) -> tuple[np.ndarray, np.ndarray]:
+    """Metal e aspereza: os da classe onde o acabamento pinta (com um pouco da variação da
+    original, o gasto), os originais no resto."""
+    m, r = CLASSES[classe]
+    metal, rugo = metal0.copy(), rugo0.copy()
+    metal[sel] = m
+    med = float(np.median(rugo0[sel])) if sel.any() else 0.5
+    rugo[sel] = np.clip(r + (rugo0[sel] - med) * 0.25, 0.03, 1.0)
+    return metal, rugo
+
+
+def _png(arr: np.ndarray, destino: Path) -> None:
+    destino.parent.mkdir(parents=True, exist_ok=True)
+    Image.fromarray((np.clip(arr, 0, 1) * 255 + 0.5).astype(np.uint8)).save(destino, optimize=True)
+
+
+def le_meta() -> dict:
+    return json.loads(META.read_text("utf-8")) if META.exists() else {}
+
+
+def grava_meta(meta: dict) -> None:
+    META.write_text(json.dumps(dict(sorted(meta.items())), indent=1) + "\n", "utf-8", newline="\n")
 
 
 # ===================================================================== prévias
@@ -966,47 +1437,82 @@ def _grava_json(p: Path, dados) -> None:
     p.write_bytes(txt.replace("\n", nl).encode("utf-8"))
 
 
+def _plano_entrada(key: str, arq: Path, nome: str, desc: str) -> dict:
+    return {
+        "key": key,
+        "file": arq.relative_to(ROOT).as_posix(),
+        "assetType": "Image",
+        "name": nome[:50],
+        "description": desc,
+    }
+
+
 def cmd_plano(specs: list[dict]) -> None:
+    """Põe no upload_plan o que existe e falta: a cor (Acab.), o relevo (AcabN.) e os mapas de
+    material (AcabM. metal e AcabR. aspereza). As novas sobem como Image (as de antes, Decal)."""
     plano = json.loads(PLANO.read_text("utf-8"))
     tem = {x["key"] for x in plano}
+    meta = le_meta()
+    desc = "VAN TUONG 65: textura de acabamento de arma"
     novos = 0
-    for s in specs:
-        key = f"Acab.{s['id']}"
-        arq = SAIDA / f"{s['id']}.png"
-        if key in tem or not arq.exists():
-            continue
-        plano.append(
-            {
-                "key": key,
-                "file": arq.relative_to(ROOT).as_posix(),
-                "assetType": "Decal",
-                "name": f"Acabamento {s['id'][5:]}",
-                "description": "VAN TUONG 65: textura de acabamento de arma (D-178)",
-            }
-        )
-        novos += 1
+    vistos: set[str] = set()
+    for sp in specs:
+        k = sp["id"]
+        itens = [(f"Acab.{k}", SAIDA / f"{k}.png", f"Acabamento {k}")]
+        itens.append((f"AcabN.{k}", SAIDA / f"{k}_n.png", f"Relevo {k}"))
+        ck = (meta.get(k) or {}).get("classe")
+        if ck and ck not in vistos:
+            vistos.add(ck)
+            itens.append((f"AcabM.{ck}", SAIDA / "classes" / f"{ck}_m.png", f"Metal {ck}"))
+            itens.append((f"AcabR.{ck}", SAIDA / "classes" / f"{ck}_r.png", f"Aspereza {ck}"))
+        for key, arq, nome in itens:
+            if key in tem or not arq.exists():
+                continue
+            plano.append(_plano_entrada(key, arq, nome, desc))
+            tem.add(key)
+            novos += 1
     _grava_json(PLANO, plano)
-    print(f"{novos} acabamentos novos no upload_plan.json")
+    print(f"{novos} imagens novas no upload_plan.json")
+
+
+def _imagens_por_chave() -> dict[str, int]:
+    """ID da imagem de cada chave do plano Acab*: a Image direto do roblox_ids; o Decal pela
+    imagem resolvida no Studio (acabamentos_imagens.json)."""
+    ids = json.loads(IDS.read_text("utf-8")) if IDS.exists() else {}
+    imagens = json.loads(IMAGENS.read_text("utf-8")) if IMAGENS.exists() else {}
+    tipos = {x["key"]: x["assetType"] for x in json.loads(PLANO.read_text("utf-8"))}
+    out: dict[str, int] = {}
+    for key, tipo in tipos.items():
+        if not key.startswith("Acab") or key not in ids:
+            continue
+        if tipo == "Image":
+            out[key] = int(ids[key])
+        elif tipo == "Decal" and key.startswith("Acab.") and key[5:] in imagens:
+            out[key] = int(imagens[key[5:]])
+    return out
+
+
+def _chave_luau(k: str) -> str:
+    return k if k.replace("_", "a").isalnum() and not k[0].isdigit() else f'["{k}"]'
 
 
 def cmd_luau(specs: list[dict]) -> None:
-    ids = json.loads(IDS.read_text("utf-8")) if IDS.exists() else {}
-    imagens = json.loads(IMAGENS.read_text("utf-8")) if IMAGENS.exists() else {}
-    validos = {s["id"] for s in specs}
-    decais = {k[5:] for k in ids if k.startswith("Acab.") and k[5:] in validos}
-    pares = sorted((k, int(v)) for k, v in imagens.items() if k in decais and int(v) > 0)
-    falta = sorted(decais - {k for k, _ in pares})
+    img = _imagens_por_chave()
+    meta = le_meta()
+    pbr = json.loads(ARMAS_PBR.read_text("utf-8")) if ARMAS_PBR.exists() else {}
+    validos = {sp["id"]: sp for sp in specs}
+    pares = sorted((k, img[f"Acab.{k}"]) for k in validos if f"Acab.{k}" in img)
+    falta = sorted(k for k in validos if f"Acab.{k}" not in img)
     if falta:
-        print(
-            f"{len(falta)} decais sem a imagem resolvida (rode a resolução no Studio):", falta[:5]
-        )
-    corpo = "".join(f"\t{k} = {v},\n" for k, v in pares)
+        print(f"{len(falta)} acabamentos sem a imagem da cor no Roblox:", falta[:5])
+    corpo = "".join(f"\t{_chave_luau(k)} = {v},\n" for k, v in pares)
     txt = (
         "--!strict\n"
         "-- Gerado por tools/acabamentos.py --luau (D-178); não edite à mão. Textura (ID de\n"
         "-- imagem do Roblox) de cada acabamento de arma: a textura da arma repintada pela\n"
-        "-- receita da skin.\n"
-        "-- Skins.applyWeapon troca o TextureID da MeshPart por ela.\n"
+        '-- receita da skin. Chave: o id da skin; o acabamento universal (D-179), "id@arma".\n'
+        "-- Reserva do Skins.applyWeapon quando a arma não tem SurfaceAppearance pronta\n"
+        "-- (ReplicatedStorage.VT65AcabamentosSA): troca o TextureID da MeshPart.\n"
         + (
             "return {\n" + corpo + "} :: { [string]: number }\n"
             if pares
@@ -1014,16 +1520,53 @@ def cmd_luau(specs: list[dict]) -> None:
         )
     )
     LUAU.write_text(txt, "utf-8", newline="\n")
-    print(f"{len(pares)} texturas em {LUAU.relative_to(ROOT)}")
+    # as SurfaceAppearance prontas: a cor nova e o relevo e o material (novos ou os da arte)
+    filhos = []
+    sem_relevo = 0
+    for k, cor in pares:
+        arma = validos[k]["arma"]
+        orig = (pbr.get(arma) or [None])[0]
+        if not orig:
+            continue
+        info = meta.get(k) or {}
+        normal = img.get(f"AcabN.{k}")
+        if info.get("relevo") and not normal:
+            sem_relevo += 1
+        ck = info.get("classe")
+        metal = img.get(f"AcabM.{ck}") if ck else None
+        rugo = img.get(f"AcabR.{ck}") if ck else None
+        filhos.append(
+            {
+                "Name": k,
+                "ClassName": "SurfaceAppearance",
+                "Properties": {
+                    "AlphaMode": orig.get("alpha", "Overlay"),
+                    "ColorMap": f"rbxassetid://{cor}",
+                    "NormalMap": f"rbxassetid://{normal or orig['normal']}",
+                    "MetalnessMap": f"rbxassetid://{metal or orig['metal']}",
+                    "RoughnessMap": f"rbxassetid://{rugo or orig['rugo']}",
+                },
+            }
+        )
+    modelo = {"ClassName": "Folder", "Children": filhos}
+    SA_MODELO.write_text(json.dumps(modelo, indent=1) + "\n", "utf-8", newline="\n")
+    print(
+        f"{len(pares)} texturas em {LUAU.relative_to(ROOT)}; {len(filhos)} SurfaceAppearance em "
+        f"{SA_MODELO.relative_to(ROOT)}"
+        + (f" ({sem_relevo} sem o relevo no Roblox ainda)" if sem_relevo else "")
+    )
 
 
 def cmd_resolver(specs: list[dict], saida: Path) -> None:
     """Escreve o Luau que resolve, no Studio, a imagem de cada decal Acab.* (InsertService) e
     devolve um JSON {skin: imagem} no formato do copia_da_conversa.py (nome acab_imagens)."""
     ids = json.loads(IDS.read_text("utf-8")) if IDS.exists() else {}
+    tipos = {x["key"]: x["assetType"] for x in json.loads(PLANO.read_text("utf-8"))}
     validos = {s["id"] for s in specs}
     pares = sorted(
-        (k[5:], int(v)) for k, v in ids.items() if k.startswith("Acab.") and k[5:] in validos
+        (k[5:], int(v))
+        for k, v in ids.items()
+        if k.startswith("Acab.") and k[5:] in validos and tipos.get(k) == "Decal"
     )
     lista = "".join(f'\t{{ "{k}", {v} }},\n' for k, v in pares)
     txt = (
@@ -1041,7 +1584,7 @@ def cmd_resolver(specs: list[dict], saida: Path) -> None:
         "\telse\n"
         "\t\tfalhas += 1\n"
         "\tend\n"
-        "\tif ok and typeof(m) == \"Instance\" then\n"
+        '\tif ok and typeof(m) == "Instance" then\n'
         "\t\tm:Destroy()\n"
         "\tend\n"
         "\tif i % 10 == 0 then\n"
@@ -1093,6 +1636,7 @@ def main() -> None:
             continue
         por_arma.setdefault(s["arma"], []).append(s)
 
+    meta = le_meta()
     for arma, lista in por_arma.items():
         mapa = mapa_da_arma(arma)
         orig = textura_original(arma)
@@ -1117,6 +1661,8 @@ def main() -> None:
             )
             continue
         imgs = [previa(mapa, orig, f"{arma}: original")]
+        pbr = None
+        classes_feitas: set[str] = set()
         for s in lista:
             png = SAIDA / f"{s['id']}.png"
             if png.exists() and not a.todas:
@@ -1126,12 +1672,32 @@ def main() -> None:
                 for av in avisos:
                     print(f"  aviso {s['id']}: {av}")
                 if not a.previas:
-                    Image.fromarray((np.clip(tex, 0, 1) * 255 + 0.5).astype(np.uint8)).save(
-                        png, optimize=True
-                    )
+                    _png(tex, png)
             rec = s["arte"]["receita"] if s.get("arte") else "tinta"
+            info: dict = {"arma": arma}
+            sel, alvo, _av = selecao(s, mapa, reg)
+            if rec in RELEVO:
+                info["relevo"] = True
+                npng = SAIDA / f"{s['id']}_n.png"
+                if (a.todas or not npng.exists()) and not a.previas:
+                    pbr = pbr or pbr_original(arma)
+                    nm = mapa_normal(s, mapa, reg, pbr[0])
+                    assert nm is not None
+                    _png(nm * 0.5 + 0.5, npng)
+            if rec in CLASSE and sel is not None:
+                ck = f"{arma}_{CLASSE[rec]}_{alvo}"
+                info["classe"] = ck
+                mp = SAIDA / "classes" / f"{ck}_m.png"
+                if ck not in classes_feitas and (a.todas or not mp.exists()) and not a.previas:
+                    pbr = pbr or pbr_original(arma)
+                    metal, rugo = mapas_classe(CLASSE[rec], sel, pbr[1], pbr[2])
+                    _png(metal, mp)
+                    _png(rugo, SAIDA / "classes" / f"{ck}_r.png")
+                classes_feitas.add(ck)
+            meta[s["id"]] = info
             imgs.append(previa(mapa, tex, f"{s['id']} ({rec})"))
             print(f"  {s['id']} ({rec})")
+        grava_meta(meta)
         folha_contato(imgs, PREVIAS / f"{arma}.png")
         print(
             f"{arma}: {len(lista)} acabamentos; prévia em "

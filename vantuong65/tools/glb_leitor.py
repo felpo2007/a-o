@@ -83,6 +83,18 @@ class Glb:
         ini = bv.get("byteOffset", 0)
         return Image.open(io.BytesIO(self.bin[ini : ini + bv["byteLength"]])).convert("RGBA")
 
+    def imagem_pbr(self, material: int, mapa: str) -> int | None:
+        """Índice da imagem do mapa do material: "normal" ou "orm" (metal e aspereza do glTF)."""
+        mat = self.json["materials"][material]
+        t = (
+            mat.get("normalTexture")
+            if mapa == "normal"
+            else mat.get("pbrMetallicRoughness", {}).get("metallicRoughnessTexture")
+        )
+        if t is None:
+            return None
+        return self.json["textures"][t["index"]]["source"]
+
     def imagem_cor(self, material: int) -> int | None:
         mat = self.json["materials"][material]
         t = mat.get("pbrMetallicRoughness", {}).get("baseColorTexture")

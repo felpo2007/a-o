@@ -626,6 +626,35 @@ for _, c in Caixas.CAIXAS do
 	end
 end
 
+-- ===== D-179: os 12 acabamentos universais (gemas lapidadas, gelo e pedra, com relevo) =====
+-- Mesma regra da D-178: entram sem mudar a fatia de nenhuma raridade, cada um numa caixa grátis e
+-- na de Suprimentos; a caixa que muda sobe de versão.
+local UNIV: { [string]: { string } } = {}
+for _, e in Skins.UNIVERSAIS :: { any } do
+	local r = raridadeDe(e[1])
+	UNIV[r] = UNIV[r] or {}
+	table.insert(UNIV[r], e[1])
+end
+Caixas.NOVOS_D179 = UNIV
+local U = function(r: string): { string }
+	return UNIV[r] or {}
+end
+Caixas.ACRESCIMOS_D179 = {
+	batalhao = U("raro"),
+	campanha = juntar(U("raro"), U("epico")),
+	veterano = juntar(U("epico"), U("lendario")),
+	suprimentos = juntar(U("raro"), U("epico"), U("lendario")),
+	especiais = juntar(U("raro"), U("epico"), U("lendario")),
+	elite = juntar(U("raro"), U("epico"), U("lendario")),
+} :: { [string]: { string } }
+for _, c in Caixas.CAIXAS do
+	local novos = Caixas.ACRESCIMOS_D179[c.id]
+	if novos and #novos > 0 then
+		c.itens = Caixas.acrescentar(c.itens, novos, Cosmeticos.info)
+		c.versao += 1
+	end
+end
+
 local BY_ID: { [string]: Caixa } = {}
 for _, c in Caixas.CAIXAS do
 	BY_ID[c.id] = c

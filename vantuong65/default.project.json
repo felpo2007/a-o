@@ -8,6 +8,9 @@
     "ReplicatedStorage": {
       "Shared": {
         "$path": "src/ReplicatedStorage/Shared"
+      },
+      "VT65AcabamentosSA": {
+        "$path": "src/ReplicatedStorage/VT65AcabamentosSA.model.json"
       }
     },
     "ServerStorage": {
