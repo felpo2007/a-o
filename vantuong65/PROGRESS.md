@@ -257,6 +257,8 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
   - **v93 (D-169): 29 das 32 casas únicas da vila no SLIM.** Copiadas por molde (9 moldes e 19
     instâncias), sem transcrever à mão; conferidas contra o jogo (0,0014 stud) e no Studio (53
     modelos fixos, vila igual, autoteste 18 ok). Interior das casas fixas mais claro (D-155).
+    Publicada (versão 97 do place, commit 7be94b8). As 95 e 96 foram salvamentos automáticos do
+    Team Create, das sessões abertas para procurar o SLIM, sem edição.
 
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;
