@@ -302,7 +302,7 @@ test("D-179: acabamento universal vale em qualquer arma com arte, do lado do jog
 			assert(not Skins.cabe(s, "m79") and not Skins.cabe(s, "uniform"), s.id)
 		end
 	end
-	assert(n == 12, "12 universais: " .. n)
+	assert(n == 24, "24 universais (D-179 e D-180): " .. n)
 	-- toda arma universal existe e tem lado; a padrão de cada lado aceita
 	for _, w in Skins.ARMAS_UNIVERSAL do
 		assert(Weapons.get(w), w)

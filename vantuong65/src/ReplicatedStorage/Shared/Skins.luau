@@ -1500,6 +1500,117 @@ local UNIVERSAIS: { { any } } = {
 		"tudo",
 		"m14",
 	},
+	-- D-180: mais 12 (pedido do dono: "continue fazendo"), no espírito das imagens que ele mandou:
+	-- gemas nevadas, cristal iridescente e polar, ouro derretido, ondas, cerejeira, nuvem desenhada,
+	-- rede neon, porcelana de Huế e jade com ouro
+	{
+		"uni_nevasca_rubra",
+		"Nevasca Rubra",
+		"Facetas vermelhas lapidadas no meio da geada branca. Vale em qualquer arma.",
+		"nevasca",
+		{ { 200, 20, 36 }, { 255, 235, 240 } },
+		"tudo",
+		"m14",
+	},
+	{
+		"uni_nevasca_violeta",
+		"Nevasca Violeta",
+		"Facetas roxas lapidadas no meio da geada branca. Vale em qualquer arma.",
+		"nevasca",
+		{ { 120, 40, 200 }, { 245, 235, 255 } },
+		"tudo",
+		"m16",
+	},
+	{
+		"uni_nevasca_rosa",
+		"Nevasca Rosa",
+		"Facetas cor-de-rosa lapidadas no meio da geada branca. Vale em qualquer arma.",
+		"nevasca",
+		{ { 236, 60, 150 }, { 255, 236, 246 } },
+		"tudo",
+		"sks",
+	},
+	{
+		"uni_cristal_iridescente",
+		"Cristal Iridescente",
+		"Facetas claras que trocam de cor com a luz: rosa, verde-água e lilás. Vale em qualquer arma.",
+		"iridescente",
+		{ { 240, 244, 255 }, { 255, 170, 220 }, { 150, 240, 230 }, { 190, 160, 255 } },
+		"tudo",
+		"m1911",
+	},
+	{
+		"uni_cristal_polar",
+		"Cristal Polar",
+		"Gelo azul em facetas com a geada branca nas arestas. Vale em qualquer arma.",
+		"polar",
+		{ { 190, 240, 255 }, { 20, 110, 190 }, { 255, 255, 255 } },
+		"tudo",
+		"m60",
+	},
+	{
+		"uni_ouro_derretido",
+		"Ouro Derretido",
+		"Preto lustroso com o ouro escorrendo de cima em pingos. Vale em qualquer arma.",
+		"derretido",
+		{ { 14, 14, 16 }, { 232, 176, 48 } },
+		"tudo",
+		"type54",
+	},
+	{
+		"uni_mar_revolto",
+		"Mar Revolto",
+		"Escamas de onda brancas sobre o azul que escurece até a noite, com espuma nas cristas. Vale em qualquer arma.",
+		"ondas",
+		{ { 24, 92, 170 }, { 10, 32, 80 }, { 236, 244, 252 } },
+		"tudo",
+		"rpd",
+	},
+	{
+		"uni_galho_cerejeira",
+		"Galho de Cerejeira",
+		"Vermelho com galhos escuros e flores brancas de miolo dourado. Vale em qualquer arma.",
+		"cerejeira",
+		{ { 178, 16, 28 }, { 255, 236, 240 }, { 240, 190, 60 } },
+		"tudo",
+		"type56",
+	},
+	{
+		"uni_nuvem_rubra",
+		"Nuvem Rubra",
+		"Preto com nuvens desenhadas em vermelho e fios de ouro. Vale em qualquer arma.",
+		"nuvem",
+		{ { 12, 12, 16 }, { 210, 30, 36 }, { 230, 180, 60 } },
+		"tudo",
+		"m70",
+	},
+	{
+		"uni_rede_neon",
+		"Rede Neon",
+		"Malha de triângulos acesa, do magenta ao ciano, no azul-noite. Vale em qualquer arma.",
+		"neon",
+		{ { 14, 10, 30 }, { 255, 40, 200 }, { 30, 220, 255 } },
+		"tudo",
+		"win12",
+	},
+	{
+		"uni_porcelana_hue",
+		"Porcelana de Huế",
+		"Esmalte branco com flores e ramos azul-cobalto e frisos de ouro. Vale em qualquer arma.",
+		"porcelana",
+		{ { 244, 246, 250 }, { 28, 64, 170 }, { 214, 160, 60 } },
+		"tudo",
+		"mosin",
+	},
+	{
+		"uni_jade_ouro",
+		"Jade e Ouro",
+		"Jade verde com filigrana de ouro em arabescos. Vale em qualquer arma.",
+		"jade_ouro",
+		{ { 40, 150, 100 }, { 150, 230, 190 }, { 236, 190, 80 } },
+		"tudo",
+		"m16",
+	},
 }
 for _, e in UNIVERSAIS do
 	local cores = e[5] :: { { number } }
@@ -1514,6 +1625,9 @@ for _, e in UNIVERSAIS do
 	table.insert(Skins.CATALOG, s)
 end
 Skins.UNIVERSAIS = UNIVERSAIS
+-- os lotes, na ordem da lista (as caixas acrescentam cada um na sua vez)
+Skins.UNIVERSAIS_D179 = table.move(UNIVERSAIS, 1, 12, 1, {})
+Skins.UNIVERSAIS_D180 = table.move(UNIVERSAIS, 13, #UNIVERSAIS, 1, {})
 
 -- arma que aceita acabamento universal
 function Skins.armaUniversal(arma: any): boolean

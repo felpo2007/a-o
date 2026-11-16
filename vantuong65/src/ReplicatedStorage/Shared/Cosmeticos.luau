@@ -1071,6 +1071,19 @@ Cosmeticos.RARIDADE_SKIN = {
 	uni_inverno_sombrio = "lendario",
 	uni_geleira_antiga = "lendario",
 	uni_onix_polido = "raro",
+	-- D-180
+	uni_nevasca_rubra = "epico",
+	uni_nevasca_violeta = "epico",
+	uni_nevasca_rosa = "epico",
+	uni_cristal_iridescente = "lendario",
+	uni_cristal_polar = "epico",
+	uni_ouro_derretido = "lendario",
+	uni_mar_revolto = "epico",
+	uni_galho_cerejeira = "epico",
+	uni_nuvem_rubra = "lendario",
+	uni_rede_neon = "raro",
+	uni_porcelana_hue = "epico",
+	uni_jade_ouro = "lendario",
 } :: { [string]: string }
 
 local byId: { [string]: Item } = {}

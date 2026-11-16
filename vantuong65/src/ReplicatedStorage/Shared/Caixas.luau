@@ -630,7 +630,7 @@ end
 -- Mesma regra da D-178: entram sem mudar a fatia de nenhuma raridade, cada um numa caixa grátis e
 -- na de Suprimentos; a caixa que muda sobe de versão.
 local UNIV: { [string]: { string } } = {}
-for _, e in Skins.UNIVERSAIS :: { any } do
+for _, e in Skins.UNIVERSAIS_D179 :: { any } do
 	local r = raridadeDe(e[1])
 	UNIV[r] = UNIV[r] or {}
 	table.insert(UNIV[r], e[1])
@@ -649,6 +649,33 @@ Caixas.ACRESCIMOS_D179 = {
 } :: { [string]: { string } }
 for _, c in Caixas.CAIXAS do
 	local novos = Caixas.ACRESCIMOS_D179[c.id]
+	if novos and #novos > 0 then
+		c.itens = Caixas.acrescentar(c.itens, novos, Cosmeticos.info)
+		c.versao += 1
+	end
+end
+
+-- ===== D-180: mais 12 acabamentos universais, na mesma regra (fatia de cada raridade igual) =====
+local UNIV2: { [string]: { string } } = {}
+for _, e in Skins.UNIVERSAIS_D180 :: { any } do
+	local r = raridadeDe(e[1])
+	UNIV2[r] = UNIV2[r] or {}
+	table.insert(UNIV2[r], e[1])
+end
+Caixas.NOVOS_D180 = UNIV2
+local U2 = function(r: string): { string }
+	return UNIV2[r] or {}
+end
+Caixas.ACRESCIMOS_D180 = {
+	batalhao = U2("raro"),
+	campanha = juntar(U2("raro"), U2("epico")),
+	veterano = juntar(U2("epico"), U2("lendario")),
+	suprimentos = juntar(U2("raro"), U2("epico"), U2("lendario")),
+	especiais = juntar(U2("raro"), U2("epico"), U2("lendario")),
+	elite = juntar(U2("raro"), U2("epico"), U2("lendario")),
+} :: { [string]: { string } }
+for _, c in Caixas.CAIXAS do
+	local novos = Caixas.ACRESCIMOS_D180[c.id]
 	if novos and #novos > 0 then
 		c.itens = Caixas.acrescentar(c.itens, novos, Cosmeticos.info)
 		c.versao += 1

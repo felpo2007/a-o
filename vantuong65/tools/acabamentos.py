@@ -38,7 +38,7 @@ import shutil
 import subprocess
 import sys
 import zlib
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 import numpy as np
@@ -478,6 +478,7 @@ class Ctx:
     seed: int
     tg: np.ndarray | None = None  # tangente e bitangente da malha (relevo)
     bt: np.ndarray | None = None
+    memo: dict = field(default_factory=dict)  # o que a cor e o relevo dividem (D-180)
 
     def cor(self, i: int) -> np.ndarray:
         return self.c[min(i, len(self.c) - 1)]
@@ -924,6 +925,9 @@ def _por_altura(x: Ctx, altura, eps: float = 0.003) -> np.ndarray:
 def _facetas(x: Ctx, escala: float = 5.0):
     """Facetas de pedra lapidada: células 3D; devolve 3 sorteios por faceta, a aresta e a rampa
     de luz dentro da faceta (cada face é um plano inclinado: clareia de um lado para o outro)."""
+    chave = ("facetas", escala)
+    if chave in x.memo:
+        return x.memo[chave]
     p = x.q * escala + (fbm(x.q * 1.1, x.seed + 31, 2)[:, None] - 0.5) * 0.3
     f1, f2, cel = worley_celula(p, x.seed + 7)
     a = _hash(cel[:, 0], cel[:, 1], cel[:, 2], x.seed + 11)
@@ -941,6 +945,7 @@ def _facetas(x: Ctx, escala: float = 5.0):
     direcao = _unit(np.stack([b - 0.5, c - 0.5, a - 0.5], axis=1).astype(np.float64))
     rampa = ((p - centro) * direcao).sum(1).astype(np.float32)
     aresta = 1 - smooth(0.0, 0.045, f2 - f1)
+    x.memo[chave] = (a, b, c, aresta, rampa)
     return a, b, c, aresta, rampa
 
 
@@ -1146,6 +1151,381 @@ def rel_malaquita(x: Ctx) -> np.ndarray:
     return _por_altura(x, h)
 
 
+# ===================================================================== D-180: mais universais
+def _celulas2d(u: np.ndarray, v: np.ndarray, escala: float, seed: int, jitter: float = 0.7):
+    """Grade 2D com um ponto sorteado por célula: devolve o deslocamento até o ponto, o raio
+    sorteado (0..1) e se a célula tem motivo (sorteio 0..1)."""
+    gu, gv = u * escala, v * escala
+    iu, iv = np.floor(gu), np.floor(gv)
+    iu64, iv64 = iu.astype(np.int64), iv.astype(np.int64)
+    z = np.zeros_like(iu64)
+    ju = (_hash(iu64, iv64, z, seed) - 0.5) * jitter
+    jv = (_hash(iu64, iv64, z, seed + 1) - 0.5) * jitter
+    du = gu - (iu + 0.5 + ju * 0.5)
+    dv = gv - (iv + 0.5 + jv * 0.5)
+    raio = _hash(iu64, iv64, z, seed + 2)
+    tem = _hash(iu64, iv64, z, seed + 3)
+    return du, dv, raio, tem
+
+
+def r_nevasca(x: Ctx):
+    """Gema nevada: metade das facetas brancas de geada, metade lapidadas na cor 1."""
+    br, aresta, a = _gema(x, 0.2, 1.2)
+    _a, b, _c, _ar, rampa = _facetas(x)
+    branca = smooth(0.4, 0.44, b)
+    cor = x.cor(0)[None] * np.minimum(br, 1.0)[:, None]
+    gelo = mix(x.cor(1)[None], np.array([[1.0, 1.0, 1.0]]), 0.6) * (
+        0.86 + 0.18 * (rampa[:, None] + 0.5)
+    )
+    cor = mix(cor, np.clip(gelo, 0, 1), branca)
+    cor = mix(cor, x.cor(1)[None], aresta * 0.4)
+    return np.clip(cor, 0, 1), None
+
+
+IRIS = np.array(
+    [[1.0, 0.68, 0.86], [0.6, 0.95, 0.92], [0.76, 0.66, 1.0], [1.0, 0.95, 0.8]], np.float32
+)
+
+
+def r_iridescente(x: Ctx):
+    """Cristal iridescente: facetas claras, cada uma com um reflexo de cor (rosa, verde-água,
+    lilás, champanhe) que muda com o ângulo."""
+    br, aresta, a = _gema(x, 0.62, 1.15)
+    _a, b, c, _ar, _r = _facetas(x)
+    pal = x.c[1:] if len(x.c) > 2 else IRIS
+    fase = (c + x.n[:, 1] * 0.35 + x.n[:, 0] * 0.2) % 1.0
+    k = len(pal)
+    i = np.floor(fase * k).astype(int) % k
+    j = (i + 1) % k
+    tinta = mix(pal[i], pal[j], smooth(0, 1, fase * k - np.floor(fase * k)))
+    base = x.cor(0)[None] * np.minimum(br, 1.0)[:, None]
+    cor = mix(base, tinta * np.minimum(br, 1.0)[:, None], 0.35 + 0.3 * b[:, None])
+    cor = mix(cor, np.array([[1.0, 1.0, 1.0]]), aresta * 0.5)
+    return np.clip(cor, 0, 1), None
+
+
+def r_polar(x: Ctx):
+    """Cristal polar: gelo azul em facetas, do ciano claro (cor 1) ao azul fundo (cor 2), com a
+    geada branca (cor 3) nas arestas e trincas finas dentro."""
+    br, aresta, a = _gema(x, 0.3, 1.1, 4.2)
+    cor = gradiente(x.c[:2], smooth(0.15, 0.95, a))
+    cor = cor * np.minimum(br, 1.0)[:, None] * 1.1
+    f1, f2 = worley(x.q * 11.0, x.seed + 21)
+    trinca = (1 - smooth(0.0, 0.03, f2 - f1)) * smooth(0.5, 0.7, ruido(x.q * 3.0, x.seed + 22))
+    branco = x.cor(2) if len(x.c) > 2 else np.array([1.0, 1.0, 1.0], np.float32)
+    cor = mix(cor, branco[None], np.clip(aresta * 0.75 + trinca * 0.5, 0, 1))
+    return np.clip(cor, 0, 1), None
+
+
+def _derretido_campos(q: np.ndarray, seed: int, topo: float, alto: float):
+    """Ouro derramado de cima: a camada de cima e os pingos que escorrem (colunas em pé, cada
+    uma com um tamanho e a ponta redonda)."""
+    u = q[:, 2] * 4.5 + 0.12 * np.sin(q[:, 1] * 3.0)
+    col = np.floor(u)
+    fr = u - col
+    c64 = col.astype(np.int64)
+    z = np.zeros_like(c64)
+    tam = 0.05 + 0.5 * _hash(c64, z, z, seed + 1) ** 1.6
+    largura = 0.35 + 0.4 * _hash(c64, z, z, seed + 2)
+    meio = np.abs(fr - 0.5) / (largura * 0.5)  # 0 no meio do pingo, 1 na borda dele
+    perfil = np.sqrt(np.clip(1 - meio**2, 0, 1))
+    limite = topo - alto * (0.24 + tam * perfil)
+    return smooth(-0.006, 0.006, q[:, 1] - limite)
+
+
+def r_derretido(x: Ctx):
+    """Ouro derretido: preto lustroso (cor 1) e o ouro (cor 2) escorrendo de cima em pingos."""
+    alto = float(np.percentile(x.q[:, 1], 99.5) - np.percentile(x.q[:, 1], 0.5))
+    topo = float(np.percentile(x.q[:, 1], 99.5))
+    x.memo["derretido"] = (topo, alto)
+    ouro = _derretido_campos(x.q, x.seed, topo, alto)
+    k = x.n[:, 1] * 0.5 + 0.5
+    preto = x.cor(0)[None] * (0.9 + 0.5 * smooth(0.4, 1.0, k))[:, None]
+    dourado = x.cor(1)[None] * (0.8 + 0.3 * smooth(0.2, 1.0, k))[:, None]
+    return np.clip(mix(preto, dourado, ouro), 0, 1), None
+
+
+def _ondas_campos(u: np.ndarray, v: np.ndarray):
+    """Ondas em escamas (arcos concêntricos em fileiras desencontradas)."""
+    s = 9.0
+    gv = v * s
+    linha = np.floor(gv)
+    gu = u * s + 0.5 * (linha % 2)
+    du = gu - np.floor(gu) - 0.5
+    dv = gv - linha
+    d = np.sqrt(du * du + dv * dv)  # o centro do arco fica embaixo da célula
+    aneis = d * 4.0
+    fr = aneis - np.floor(aneis)
+    traco = 1 - smooth(0.12, 0.22, np.minimum(fr, 1 - fr))
+    dentro = d < 1.0
+    return traco * dentro, linha
+
+
+def r_ondas(x: Ctx):
+    """Mar revolto: escamas de onda brancas (cor 3) sobre o azul (cor 1) que escurece para o
+    azul-noite (cor 2) ao longo da arma, com espuma nas cristas."""
+    u, v = plano(x.q, x.n)
+    traco, linha = _ondas_campos(u, v)
+    base = gradiente(x.c[:2], smooth(0.0, 1.0, x.t + (fbm(x.q * 1.2, x.seed, 3) - 0.5) * 0.3))
+    var = 0.85 + 0.3 * _hash(
+        linha.astype(np.int64),
+        np.zeros_like(linha, np.int64),
+        np.zeros_like(linha, np.int64),
+        x.seed,
+    )
+    base = base * var[:, None]
+    branco = x.cor(2) if len(x.c) > 2 else np.array([0.95, 0.97, 1.0], np.float32)
+    espuma = smooth(0.62, 0.7, fbm(x.q * 2.4, x.seed + 4, 4))
+    cor = mix(base, branco[None], np.clip(traco * 0.9 + espuma * 0.6, 0, 1))
+    return np.clip(cor, 0, 1), None
+
+
+def _flores(u: np.ndarray, v: np.ndarray, seed: int, escala: float = 6.0):
+    du, dv, raio, tem = _celulas2d(u, v, escala, seed)
+    r = np.sqrt(du * du + dv * dv)
+    ang = np.arctan2(dv, du) + raio * 6.28
+    R = 0.26 + 0.12 * raio
+    petala = r < R * (0.62 + 0.38 * np.abs(np.cos(2.5 * ang)))
+    miolo = r < R * 0.22
+    sim = tem > 0.35
+    return petala & sim, miolo & sim
+
+
+def r_cerejeira(x: Ctx):
+    """Galho de cerejeira: fundo vermelho (cor 1), galhos escuros e flores de cinco pétalas
+    brancas (cor 2) com o miolo dourado (cor 3)."""
+    u, v = plano(x.q, x.n)
+    petala, miolo = _flores(u, v, x.seed)
+    galho = 1 - smooth(0.0, 0.025, np.abs(fbm(x.q * 1.4, x.seed + 5, 4) - 0.5))
+    base = x.cor(0)[None] * (0.85 + 0.25 * fbm(x.q * 2.0, x.seed + 6, 3))[:, None]
+    escuro = x.cor(0) * 0.25
+    cor = mix(base, escuro[None], galho * 0.9)
+    rosa = mix(x.cor(1)[None], x.cor(0)[None], 0.12)
+    cor = np.where(petala[:, None], rosa, cor)
+    meio = x.cor(2) if len(x.c) > 2 else x.cor(1) * 0.8
+    cor = np.where(miolo[:, None], meio[None], cor)
+    return np.clip(cor, 0, 1), None
+
+
+def _nuvem_campos(u: np.ndarray, v: np.ndarray, seed: int):
+    """Nuvens desenhadas: bolhas de contorno duplo (o traço de fora e o de dentro)."""
+    q2 = np.stack([u * 2.6, v * 2.6, np.zeros_like(u)], axis=1)
+    f = fbm(q2, seed, 4)
+    lim = 0.58
+    dentro = f > lim
+    fora = 1 - smooth(0.0, 0.022, np.abs(f - lim))
+    meio = 1 - smooth(0.0, 0.016, np.abs(f - (lim + 0.055)))
+    return dentro, np.clip(fora + meio * 0.8, 0, 1)
+
+
+def r_nuvem(x: Ctx):
+    """Nuvem rubra: preto (cor 1) com nuvens desenhadas em vermelho (cor 2) e fios de ouro
+    (cor 3) cruzando a arma."""
+    u, v = plano(x.q, x.n)
+    dentro, traco = _nuvem_campos(u, v, x.seed)
+    base = x.cor(0)[None] * (0.9 + 0.3 * fbm(x.q * 2.0, x.seed + 1, 3))[:, None]
+    base = np.where(dentro[:, None], base * 1.6 + x.cor(1)[None] * 0.06, base)
+    cor = mix(base, x.cor(1)[None], traco)
+    if len(x.c) > 2:
+        fio = 1 - smooth(0.0, 0.02, np.abs(((x.q[:, 2] * 0.9 + x.q[:, 1] * 1.6) % 1.4) - 0.7))
+        fio = fio * smooth(0.45, 0.55, ruido(x.q * 1.5, x.seed + 9))
+        cor = mix(cor, x.cor(2)[None], fio)
+    return np.clip(cor, 0, 1), traco * 0.3
+
+
+def _neon_campos(u: np.ndarray, v: np.ndarray, q: np.ndarray, seed: int):
+    w = (fbm(q * 1.2, seed, 3) - 0.5) * 0.35
+    s3 = np.sqrt(3.0) / 2
+    linhas = 0.0
+    for a, b in ((1.0, 0.0), (0.5, s3), (0.5, -s3)):
+        k = (u * a + v * b) * 4.5 + w
+        fr = k - np.floor(k)
+        linhas = np.maximum(linhas, 1 - smooth(0.02, 0.06, np.minimum(fr, 1 - fr)))
+    return linhas
+
+
+def r_neon(x: Ctx):
+    """Rede neon: azul-noite (cor 1) com a malha de triângulos acesa, do magenta (cor 2) ao
+    ciano (cor 3) ao longo da arma."""
+    u, v = plano(x.q, x.n)
+    linhas = _neon_campos(u, v, x.q, x.seed)
+    acesa = gradiente(x.c[1:3] if len(x.c) > 2 else x.c, smooth(0.05, 0.95, x.t))
+    base = x.cor(0)[None] * (0.8 + 0.5 * fbm(x.q * 1.5, x.seed + 2, 3))[:, None]
+    base = mix(base, acesa * 0.25, 0.25)
+    cor = mix(base, acesa, linhas)
+    return np.clip(cor, 0, 1), linhas * 0.7
+
+
+def _porcelana_campos(u: np.ndarray, v: np.ndarray, t: np.ndarray, seed: int):
+    du, dv, raio, tem = _celulas2d(u, v, 5.0, seed, 0.3)
+    r = np.sqrt(du * du + dv * dv)
+    ang = np.arctan2(dv, du)
+    R = 0.3
+    flor = (r < R * (0.55 + 0.45 * np.abs(np.cos(4 * ang)))) & (r > R * 0.18) & (tem > 0.25)
+    ramo = 1 - smooth(0.0, 0.12, np.abs(np.sin(2 * np.pi * (u * 2.4 + np.sin(v * 6.0) * 0.3))))
+    folha = 1 - smooth(0.0, 0.1, np.abs(np.sin(2 * np.pi * (v * 5.0 + u * 1.5))))
+    ramo = np.clip(ramo + folha * ramo * 0.5, 0, 1) * (~flor) * (r > R * 1.05)
+    friso = (t * 6.0) % 1.0
+    friso = 1 - smooth(0.012, 0.025, np.minimum(friso, 1 - friso))
+    return flor, np.clip(ramo, 0, 1), friso
+
+
+def r_porcelana(x: Ctx):
+    """Porcelana de Huế: esmalte branco (cor 1) com flores e ramos em azul-cobalto (cor 2) e
+    frisos de ouro (cor 3) em volta da arma."""
+    u, v = plano(x.q, x.n)
+    flor, ramo, friso = _porcelana_campos(u, v, x.t, x.seed)
+    base = x.cor(0)[None] * (0.94 + 0.06 * fbm(x.q * 3.0, x.seed + 1, 2))[:, None]
+    azul = x.cor(1)[None] * (0.85 + 0.3 * ruido(x.q * 8.0, x.seed + 2))[:, None]
+    cor = np.where(flor[:, None], azul, base)
+    cor = mix(cor, x.cor(1)[None] * 1.15, ramo * 0.8)
+    ouro = x.cor(2) if len(x.c) > 2 else np.array([0.84, 0.63, 0.24], np.float32)
+    cor = mix(cor, ouro[None], friso)
+    return np.clip(cor, 0, 1), None
+
+
+def _filigrana(q: np.ndarray, seed: int):
+    """Filigrana: linhas de ouro finas e curvas (curvas de nível de um ruído), em manchas."""
+    w = fbm(q * 2.2, seed + 7, 4)
+    w = (w - 0.5) * 3.0
+    linha = 1 - smooth(0.05, 0.3, np.abs(np.sin(2 * np.pi * w * 5.0)))
+    return linha * smooth(0.3, 0.42, fbm(q * 0.9, seed + 8, 3))
+
+
+def r_jade_ouro(x: Ctx):
+    """Jade e ouro: jade verde nublado (cores 1 e 2) com filigrana de ouro (cor 3) em arabescos."""
+    q = x.q
+    nuvem = fbm(q * 1.7, x.seed, 5)
+    cor = mix(x.cor(0)[None], x.cor(1)[None], smooth(0.3, 0.8, nuvem))
+    ouro = x.cor(2) if len(x.c) > 2 else np.array([0.92, 0.75, 0.3], np.float32)
+    fil = _filigrana(q, x.seed)
+    cor = mix(cor, ouro[None] * (0.85 + 0.3 * (x.n[:, 1:2] * 0.5 + 0.5)), fil)
+    return np.clip(cor, 0, 1), None
+
+
+# relevo dos antigos (D-180) e dos novos
+def rel_carbono(x: Ctx) -> np.ndarray:
+    def h(q):
+        u, v = plano(q, x.n)
+        a, b = u * 22.0, v * 22.0
+        ia, ib = np.floor(a), np.floor(b)
+        deitado = ((ia + ib).astype(np.int64) % 4) < 2
+        largura = np.where(deitado, b - ib, a - ia)
+        return np.sin(np.pi * largura) ** 0.5 * 0.0035 + deitado * 0.0008
+
+    return _por_altura(x, h)
+
+
+def rel_hex(x: Ctx) -> np.ndarray:
+    def h(q):
+        u, v = plano(q, x.n)
+        d, _cid = _hexdist(u * 9.0, v * 9.0)
+        return smooth(0.0, 0.06, d) * 0.004
+
+    return _por_altura(x, h)
+
+
+def rel_damasco(x: Ctx) -> np.ndarray:
+    def h(q):
+        w = fbm(q * 1.1, x.seed, 5)
+        v = np.sin(2 * np.pi * (q[:, 1] * 2.2 + q[:, 2] * 0.55 + q[:, 0] * 1.2 + w * 3.2) * 7.0)
+        return smooth(-0.55, 0.55, v) * 0.0015
+
+    return _por_altura(x, h)
+
+
+def rel_laca(x: Ctx) -> np.ndarray:
+    perola = lum(x.cor(1)) > 0.75 and float(x.cor(1).max() - x.cor(1).min()) < 0.2
+
+    def h(q):
+        p = q * (6.0 if perola else 3.4) + (fbm(q * 2.0, x.seed + 4, 3)[:, None] - 0.5) * 0.8
+        mancha = fbm(p, x.seed, 4)
+        lim = x.memo.setdefault("laca_lim", float(np.percentile(mancha, 78)))
+        return smooth(lim - 0.008, lim + 0.008, mancha) * 0.0025
+
+    return _por_altura(x, h)
+
+
+def rel_bambu(x: Ctx) -> np.ndarray:
+    def h(q):
+        seg = q[:, 2] * 2.1 + (fbm(q * 0.8, x.seed, 2) - 0.5) * 0.3
+        fr = seg - np.floor(seg)
+        no = np.maximum(smooth(0.92, 0.985, fr), 1 - smooth(0.0, 0.03, fr))
+        return no * 0.006 + smooth(0.0, 0.9, fr) * 0.002
+
+    return _por_altura(x, h)
+
+
+def rel_topo(x: Ctx) -> np.ndarray:
+    def h(q):
+        f = fbm(q * 0.8, x.seed, 5)
+        lo, hi = x.memo.setdefault("topo_lim", (float(f.min()), float(f.max())))
+        hh = (f - lo) / max(hi - lo, 1e-4) * 26.0
+        fr = hh - np.floor(hh)
+        return (1 - smooth(0.05, 0.13, np.minimum(fr, 1 - fr))) * 0.0015
+
+    return _por_altura(x, h)
+
+
+def rel_derretido(x: Ctx) -> np.ndarray:
+    topo, alto = x.memo.get("derretido") or (
+        float(np.percentile(x.q[:, 1], 99.5)),
+        float(np.percentile(x.q[:, 1], 99.5) - np.percentile(x.q[:, 1], 0.5)),
+    )
+    return _por_altura(x, lambda q: _derretido_campos(q, x.seed, topo, alto) * 0.005)
+
+
+def rel_ondas(x: Ctx) -> np.ndarray:
+    def h(q):
+        u, v = plano(q, x.n)
+        traco, _l = _ondas_campos(u, v)
+        return traco * 0.0015
+
+    return _por_altura(x, h)
+
+
+def rel_cerejeira(x: Ctx) -> np.ndarray:
+    def h(q):
+        u, v = plano(q, x.n)
+        petala, _m = _flores(u, v, x.seed)
+        return petala * 0.002
+
+    return _por_altura(x, h)
+
+
+def rel_nuvem(x: Ctx) -> np.ndarray:
+    def h(q):
+        u, v = plano(q, x.n)
+        _d, traco = _nuvem_campos(u, v, x.seed)
+        return traco * 0.0015
+
+    return _por_altura(x, h)
+
+
+def rel_neon(x: Ctx) -> np.ndarray:
+    def h(q):
+        u, v = plano(q, x.n)
+        return -_neon_campos(u, v, q, x.seed) * 0.0012
+
+    return _por_altura(x, h)
+
+
+def rel_porcelana(x: Ctx) -> np.ndarray:
+    def h(q):
+        u, v = plano(q, x.n)
+        flor, _r, friso = _porcelana_campos(u, v, x.t, x.seed)
+        return flor * 0.0008 + friso * 0.002
+
+    return _por_altura(x, h)
+
+
+def rel_jade_ouro(x: Ctx) -> np.ndarray:
+    def h(q):
+        return fbm(q * 1.7, x.seed, 5) * 0.006 + _filigrana(q, x.seed) * 0.003
+
+    return _por_altura(x, h)
+
+
 RELEVO = {
     "cristal": rel_facetas,
     "obsidiana": lambda x: rel_facetas(x, 0.55, 4.2),
@@ -1158,6 +1538,24 @@ RELEVO = {
     "marmore": rel_marmore,
     "jade": rel_jade,
     "malaquita": rel_malaquita,
+    # D-180: os antigos com desenho em relevo
+    "carbono": rel_carbono,
+    "hex": rel_hex,
+    "damasco": rel_damasco,
+    "laca": rel_laca,
+    "bambu": rel_bambu,
+    "topo": rel_topo,
+    # D-180: os universais novos
+    "nevasca": rel_facetas,
+    "iridescente": rel_facetas,
+    "polar": lambda x: rel_facetas(x, 0.45, 4.2),
+    "derretido": rel_derretido,
+    "ondas": rel_ondas,
+    "cerejeira": rel_cerejeira,
+    "nuvem": rel_nuvem,
+    "neon": rel_neon,
+    "porcelana": rel_porcelana,
+    "jade_ouro": rel_jade_ouro,
 }
 # material de cada receita na SurfaceAppearance: metal e aspereza onde o acabamento pinta (fora
 # dele, os da arte original). Receita sem classe usa os mapas originais inteiros.
@@ -1174,6 +1572,34 @@ CLASSE = {
     "malaquita": "pedra",
     "cromo": "espelho",
     "ouro": "espelho",
+    # D-180: todo acabamento tem o material dele (antes, só os de pedra e espelho)
+    "laca": "laca",
+    "anodizado": "metal",
+    "damasco": "metal",
+    "carbono": "carbono",
+    "fade": "pintura",
+    "tigre": "pintura",
+    "zebra": "pintura",
+    "hex": "pintura",
+    "chamas": "pintura",
+    "raio": "pintura",
+    "galaxia": "pintura",
+    "oleo": "pintura",
+    "escamas": "pintura",
+    "camo": "fosca",
+    "digital": "fosca",
+    "bambu": "fosca",
+    "topo": "fosca",
+    "nevasca": "cristal",
+    "iridescente": "cristal",
+    "polar": "gelo",
+    "derretido": "metal",
+    "ondas": "pintura",
+    "cerejeira": "pintura",
+    "nuvem": "pintura",
+    "neon": "pintura",
+    "porcelana": "laca",
+    "jade_ouro": "pedra",
 }
 CLASSES = {  # metal, aspereza
     "cristal": (0.25, 0.08),
@@ -1181,6 +1607,10 @@ CLASSES = {  # metal, aspereza
     "gelo": (0.05, 0.12),
     "pedra": (0.0, 0.3),
     "espelho": (1.0, 0.1),
+    "laca": (0.05, 0.1),  # verniz brilhante (laca, esmalte de porcelana)
+    "carbono": (0.15, 0.3),
+    "pintura": (0.08, 0.38),  # pintura acetinada
+    "fosca": (0.02, 0.65),  # tinta de campo
 }
 # quanto do relevo fino da arte original some debaixo do acabamento (a gema é lisa)
 ATENUA = {"cristal": 0.6, "metal": 0.5, "gelo": 0.3}
@@ -1216,6 +1646,16 @@ RECEITAS = {
     "inverno": r_inverno,
     "geleira": r_geleira,
     "onix": r_onix,
+    "nevasca": r_nevasca,
+    "iridescente": r_iridescente,
+    "polar": r_polar,
+    "derretido": r_derretido,
+    "ondas": r_ondas,
+    "cerejeira": r_cerejeira,
+    "nuvem": r_nuvem,
+    "neon": r_neon,
+    "porcelana": r_porcelana,
+    "jade_ouro": r_jade_ouro,
 }
 # quanto da luz e do detalhe da textura original passa (1 = tudo; metais brilhantes, mais)
 CONTRASTE = {
@@ -1282,7 +1722,9 @@ def _ctx(spec: dict, mapa: Mapa, sel: np.ndarray, lum_sel: np.ndarray) -> Ctx:
     )
 
 
-def pintar(spec: dict, mapa: Mapa, orig: np.ndarray, reg: dict) -> tuple[np.ndarray, list[str]]:
+def pintar(
+    spec: dict, mapa: Mapa, orig: np.ndarray, reg: dict, memo: dict | None = None
+) -> tuple[np.ndarray, list[str]]:
     L = lum(orig)
     out = orig.copy()
     ref = np.ones_like(L)
@@ -1294,7 +1736,10 @@ def pintar(spec: dict, mapa: Mapa, orig: np.ndarray, reg: dict) -> tuple[np.ndar
     if arte:
         sel, _alvo, avisos = selecao(spec, mapa, reg)
         assert sel is not None
-        cor, emis = aplicar(arte["receita"], _ctx(spec, mapa, sel, L[sel]))
+        ctx = _ctx(spec, mapa, sel, L[sel])
+        if memo is not None:  # a cor e o relevo dividem o que é caro (as facetas)
+            ctx.memo = memo
+        cor, emis = aplicar(arte["receita"], ctx)
         s = np.clip(L[sel] / ref[sel], 0.18, 2.2) ** CONTRASTE.get(arte["receita"], 0.85)
         final = np.clip(cor * s[:, None], 0, 1)
         if emis is not None:
@@ -1329,7 +1774,9 @@ def pintar(spec: dict, mapa: Mapa, orig: np.ndarray, reg: dict) -> tuple[np.ndar
 
 
 # ===================================================================== relevo e material (D-179)
-def mapa_normal(spec: dict, mapa: Mapa, reg: dict, base: np.ndarray) -> np.ndarray | None:
+def mapa_normal(
+    spec: dict, mapa: Mapa, reg: dict, base: np.ndarray, memo: dict | None = None
+) -> np.ndarray | None:
     """Mapa normal do acabamento: o relevo da receita somado ao da arte original (mistura
     "whiteout"), só onde a receita pinta. None: receita sem relevo."""
     arte = spec.get("arte")
@@ -1337,7 +1784,10 @@ def mapa_normal(spec: dict, mapa: Mapa, reg: dict, base: np.ndarray) -> np.ndarr
         return None
     sel, _alvo, _av = selecao(spec, mapa, reg)
     assert sel is not None
-    d = RELEVO[arte["receita"]](_ctx(spec, mapa, sel, np.zeros(int(sel.sum()), np.float32)))
+    ctx = _ctx(spec, mapa, sel, np.zeros(int(sel.sum()), np.float32))
+    if memo is not None:
+        ctx.memo = memo
+    d = RELEVO[arte["receita"]](ctx)
     o = base[sel].astype(np.float64)
     at = ATENUA.get(CLASSE.get(arte["receita"], ""), 0.0)
     if at:
@@ -1664,11 +2114,12 @@ def main() -> None:
         pbr = None
         classes_feitas: set[str] = set()
         for s in lista:
+            memo: dict = {}
             png = SAIDA / f"{s['id']}.png"
             if png.exists() and not a.todas:
                 tex = np.asarray(Image.open(png).convert("RGB"), np.float32) / 255.0
             else:
-                tex, avisos = pintar(s, mapa, orig, reg)
+                tex, avisos = pintar(s, mapa, orig, reg, memo)
                 for av in avisos:
                     print(f"  aviso {s['id']}: {av}")
                 if not a.previas:
@@ -1681,7 +2132,7 @@ def main() -> None:
                 npng = SAIDA / f"{s['id']}_n.png"
                 if (a.todas or not npng.exists()) and not a.previas:
                     pbr = pbr or pbr_original(arma)
-                    nm = mapa_normal(s, mapa, reg, pbr[0])
+                    nm = mapa_normal(s, mapa, reg, pbr[0], memo)
                     assert nm is not None
                     _png(nm * 0.5 + 0.5, npng)
             if rec in CLASSE and sel is not None:

@@ -117,7 +117,7 @@ def test_universais_tem_receita_e_relevo():
     s = SKINS.read_text("utf-8").replace("\r\n", "\n")
     bloco = s[s.index("local UNIVERSAIS") : s.index("Skins.UNIVERSAIS = UNIVERSAIS")]
     rec = re.findall(r'\n\t\t"(uni_[a-z_]+)",(?:\n\t\t"[^"\n]*",){2}\n\t\t"([a-z_]+)",', bloco)
-    assert len(rec) == 12, rec
+    assert len(rec) == 24, rec  # D-179 e D-180
     for uid, r in rec:
         assert r in A.RECEITAS and r in A.RELEVO and r in A.CLASSE, (uid, r)
 

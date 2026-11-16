@@ -395,6 +395,15 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     - Conferido: Lune 699 ok, pytest 70. No Studio, troca → equipar → campo com a SurfaceAppearance
       na arma de 1ª e 3ª pessoa, e o EQUIPAR/TIRAR do perfil em outra arma; 0 erros.
     - **v103 publicada** (versão 108 do place, commit 6e9d8ac).
+- Pedido do dono (16/11, com mais imagens de referência): "continue fazendo e melhore os outros".
+  - **Lote 64 (D-180): mais 12 universais e os de antes melhorados.**
+    - Nevasca Rubra, Violeta e Rosa, Cristal Iridescente, Cristal Polar, Ouro Derretido, Mar
+      Revolto, Galho de Cerejeira, Nuvem Rubra, Rede Neon, Porcelana de Huế e Jade e Ouro: agora
+      são 24 universais.
+    - Todo acabamento tem o material dele (verniz, metal, semibrilho, pintura acetinada ou tinta
+      fosca), e mais 16 ganharam relevo (carbono, colmeia, damasco, laca, bambu, carta).
+    - Conferido: Lune 700 ok, pytest 70. No Studio, as 344 SurfaceAppearance no place, os 12 novos nas armas de vitrine e o Ouro Derretido trocado, equipado na M14 e visto em campo; 0 erros.
+    - **v104 publicada** (versão 109 do place, commit PENDENTE).
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;
   - respondido pelo dono: a M14 fica como está; o capim clareou (v58);

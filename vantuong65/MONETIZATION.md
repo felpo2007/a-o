@@ -84,7 +84,7 @@ Dashboard → Analytics.
 6. Managed Pricing: opte por ele depois de ter vendas, porque itens abaixo do limite não entram nos
    testes.
 
-## Caixas de suprimentos (D-173, 2026-11-15; D-174, D-178 e D-179, 2026-11-16)
+## Caixas de suprimentos (D-173, 2026-11-15; D-174, D-178 a D-180, 2026-11-16)
 
 Código: `Shared/Caixas.luau` (tabelas e chances), `Shared/Cosmeticos.luau` (itens), `Modules/CaixaRegras.luau`
 (regras sobre o perfil), `Modules/CaixaService.luau` (servidor), `Controllers/CaixasTela.client.luau` (aba
@@ -96,12 +96,12 @@ CAIXAS da loja). Testes: `tests/luau/caixas.luau`. Relatórios: `testes/CAIXAS_2
 | Caixa de Recompensa | 1 Bilhete de Recompensa (ganho jogando) | 43 | 82 / 13 / 3 / 1 / 1% |
 | Caixa de Recruta | grátis: treinamento ou primeira partida (uma vez) | 22 | 84 / 11 / 3 / 1,5 / 0,5% |
 | Caixa de Serviço | grátis: cada posto novo | 49 | 39 / 43 / 16 / 1,5 / 0,5% |
-| Caixa de Batalhão | grátis: cada missão da semana | 46 | 42 / 30 / 24 / 3 / 1% |
-| Caixa de Campanha | grátis: níveis 10 a 50 da trilha grátis do passe | 64 | — / 55 / 30 / 13 / 2% |
-| Caixa de Veterano | grátis: 10, 25, 50, 100 e 200 partidas | 69 | — / — / 44 / 46 / 10% |
-| Caixa de Suprimentos | Robux, ref. R$ 49 (desligada) | 138 | 60 / 25 / 10 / 4 / 1% |
-| Caixa de Equipamentos Especiais | Robux, ref. R$ 99 (desligada) | 121 | — / 45 / 36 / 16 / 3% |
-| Caixa de Arsenal de Elite | Robux, ref. R$ 149 (desligada) | 99 | — / — / 40 / 48 / 12% |
+| Caixa de Batalhão | grátis: cada missão da semana | 47 | 42 / 30 / 24 / 3 / 1% |
+| Caixa de Campanha | grátis: níveis 10 a 50 da trilha grátis do passe | 72 | — / 55 / 30 / 13 / 2% |
+| Caixa de Veterano | grátis: 10, 25, 50, 100 e 200 partidas | 80 | — / — / 44 / 46 / 10% |
+| Caixa de Suprimentos | Robux, ref. R$ 49 (desligada) | 150 | 60 / 25 / 10 / 4 / 1% |
+| Caixa de Equipamentos Especiais | Robux, ref. R$ 99 (desligada) | 133 | — / 45 / 36 / 16 / 3% |
+| Caixa de Arsenal de Elite | Robux, ref. R$ 149 (desligada) | 111 | — / — / 40 / 48 / 12% |
 | Caixa de Operações Históricas | Robux, ref. R$ 99, só na Temporada 1 (desligada) | 11 | — / 50 / 30 / 15 / 5% |
 
 (comum / incomum / raro / épico / lendário). A chance de cada item está na tela, antes de comprar ou
@@ -115,7 +115,8 @@ troca de Fragmentos).
 
 **D-179:** mais 12 acabamentos universais (valem em qualquer arma com arte), na mesma regra:
 a fatia de cada raridade não mudou, cada um sai de uma caixa grátis (Batalhão, Campanha ou
-Veterano) e da de Suprimentos, e não se compra com $ nem com Robux.
+Veterano) e da de Suprimentos, e não se compra com $ nem com Robux. **D-180:** mais 12
+universais na mesma regra (24 no total).
 
 **Economias separadas:**
 - **Bilhetes de Recompensa:** só jogando. Valem 1 por missão do dia, 2 por missão da semana (até 4 por

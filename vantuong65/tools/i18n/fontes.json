@@ -214,7 +214,7 @@
   "src/ServerScriptService/Modules/ContatoService.luau:63"
  ],
  "%d,%s%%": [
-  "src/ReplicatedStorage/Shared/Caixas.luau:761"
+  "src/ReplicatedStorage/Shared/Caixas.luau:788"
  ],
  "%d/%d": [
   "src/ReplicatedFirst/LoadingScreen.client.luau:688",
@@ -483,10 +483,10 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/FrontHud.client.luau:302"
  ],
  "%s: os pesos somam %d (precisa de %d)": [
-  "src/ReplicatedStorage/Shared/Caixas.luau:727"
+  "src/ReplicatedStorage/Shared/Caixas.luau:754"
  ],
  "%s: peso inválido em %s": [
-  "src/ReplicatedStorage/Shared/Caixas.luau:707"
+  "src/ReplicatedStorage/Shared/Caixas.luau:734"
  ],
  "%s: recebido": [
   "src/ServerScriptService/Modules/CampanhaService.luau:931"
@@ -561,7 +561,7 @@
   "src/ReplicatedStorage/Shared/Weapons.luau:540"
  ],
  "([%w_]+)=([%w_]+)": [
-  "src/ReplicatedStorage/Shared/Skins.luau:1666"
+  "src/ReplicatedStorage/Shared/Skins.luau:1780"
  ],
  "(agora %d)": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:1553"
@@ -661,10 +661,10 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:207"
  ],
  "1 result per opening. The odds below are exact and add up to 100%.": [
-  "src/ReplicatedStorage/Shared/Caixas.luau:892"
+  "src/ReplicatedStorage/Shared/Caixas.luau:919"
  ],
  "1 resultado por abertura. As chances abaixo são exatas e somam 100%.": [
-  "src/ReplicatedStorage/Shared/Caixas.luau:885"
+  "src/ReplicatedStorage/Shared/Caixas.luau:912"
  ],
  "1 vaga": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:1546"
@@ -878,19 +878,19 @@
   "src/ReplicatedStorage/Shared/Explosive.luau:69"
  ],
  ": caixa de bilhete sem custo em bilhetes": [
-  "src/ReplicatedStorage/Shared/Caixas.luau:739"
+  "src/ReplicatedStorage/Shared/Caixas.luau:766"
  ],
  ": caixa gratuita não pode ter preço nem produto": [
-  "src/ReplicatedStorage/Shared/Caixas.luau:733"
+  "src/ReplicatedStorage/Shared/Caixas.luau:760"
  ],
  ": caixa gratuita sem fonte (bilhete ou marco)": [
-  "src/ReplicatedStorage/Shared/Caixas.luau:736"
+  "src/ReplicatedStorage/Shared/Caixas.luau:763"
  ],
  ": caixa paga sem produto": [
-  "src/ReplicatedStorage/Shared/Caixas.luau:730"
+  "src/ReplicatedStorage/Shared/Caixas.luau:757"
  ],
  ": caixa paga só com cosméticos (": [
-  "src/ReplicatedStorage/Shared/Caixas.luau:745"
+  "src/ReplicatedStorage/Shared/Caixas.luau:772"
  ],
  ": coleção com menos de 2 itens": [
   "src/ReplicatedStorage/Shared/Arquivo.luau:371"
@@ -905,22 +905,22 @@
   "src/ReplicatedStorage/Shared/Arquivo.luau:405"
  ],
  ": item com vantagem de jogo": [
-  "src/ReplicatedStorage/Shared/Caixas.luau:721"
+  "src/ReplicatedStorage/Shared/Caixas.luau:748"
  ],
  ": item com vantagem de jogo ": [
-  "src/ReplicatedStorage/Shared/Caixas.luau:721"
+  "src/ReplicatedStorage/Shared/Caixas.luau:748"
  ],
  ": item desconhecido": [
-  "src/ReplicatedStorage/Shared/Caixas.luau:717"
+  "src/ReplicatedStorage/Shared/Caixas.luau:744"
  ],
  ": item desconhecido ": [
-  "src/ReplicatedStorage/Shared/Caixas.luau:717"
+  "src/ReplicatedStorage/Shared/Caixas.luau:744"
  ],
  ": item exclusivo do Arquivo Militar": [
-  "src/ReplicatedStorage/Shared/Caixas.luau:723"
+  "src/ReplicatedStorage/Shared/Caixas.luau:750"
  ],
  ": item exclusivo do Arquivo Militar ": [
-  "src/ReplicatedStorage/Shared/Caixas.luau:723"
+  "src/ReplicatedStorage/Shared/Caixas.luau:750"
  ],
  ": item fora do álbum": [
   "src/ReplicatedStorage/Shared/Arquivo.luau:380"
@@ -930,11 +930,11 @@
  ],
  ": item repetido": [
   "src/ReplicatedStorage/Shared/Arquivo.luau:376",
-  "src/ReplicatedStorage/Shared/Caixas.luau:712"
+  "src/ReplicatedStorage/Shared/Caixas.luau:739"
  ],
  ": item repetido ": [
   "src/ReplicatedStorage/Shared/Arquivo.luau:376",
-  "src/ReplicatedStorage/Shared/Caixas.luau:712"
+  "src/ReplicatedStorage/Shared/Caixas.luau:739"
  ],
  ": item sem caminho grátis": [
   "src/ReplicatedStorage/Shared/Arquivo.luau:382"
@@ -961,19 +961,19 @@
   "src/ReplicatedStorage/Shared/Arquivo.luau:395"
  ],
  ": raridade inválida em": [
-  "src/ReplicatedStorage/Shared/Caixas.luau:719"
+  "src/ReplicatedStorage/Shared/Caixas.luau:746"
  ],
  ": raridade inválida em ": [
-  "src/ReplicatedStorage/Shared/Caixas.luau:719"
+  "src/ReplicatedStorage/Shared/Caixas.luau:746"
  ],
  ": sem itens": [
-  "src/ReplicatedStorage/Shared/Caixas.luau:702"
+  "src/ReplicatedStorage/Shared/Caixas.luau:729"
  ],
  ": só 1 resultado por abertura nesta versão": [
-  "src/ReplicatedStorage/Shared/Caixas.luau:699"
+  "src/ReplicatedStorage/Shared/Caixas.luau:726"
  ],
  ": versão inválida": [
-  "src/ReplicatedStorage/Shared/Caixas.luau:696"
+  "src/ReplicatedStorage/Shared/Caixas.luau:723"
  ],
  ":arte": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/KnifeView.luau:296",
@@ -1483,7 +1483,7 @@
   "src/ReplicatedFirst/LoadingScreen.client.luau:246"
  ],
  "An item you already own becomes Arsenal Fragments: Common 5, Uncommon 15, Rare 40, Epic 100, Legendary 250.": [
-  "src/ReplicatedStorage/Shared/Caixas.luau:893"
+  "src/ReplicatedStorage/Shared/Caixas.luau:920"
  ],
  "Analógico": [
   "src/ReplicatedStorage/Shared/Toque.luau:91",
@@ -1614,7 +1614,7 @@
   "src/ReplicatedStorage/Shared/Commerce.luau:224"
  ],
  "As chances são as mesmas para todos e não mudam com o que você gasta.": [
-  "src/ReplicatedStorage/Shared/Caixas.luau:888"
+  "src/ReplicatedStorage/Shared/Caixas.luau:915"
  ],
  "As curvas de nível da carta de Van Tuong por todo o fuzil.": [
   "src/ReplicatedStorage/Shared/Skins.luau:983"
@@ -2064,7 +2064,7 @@
  ],
  "CAIXA": [
   "src/ReplicatedStorage/Shared/Skins.luau:1368",
-  "src/ReplicatedStorage/Shared/Skins.luau:1506"
+  "src/ReplicatedStorage/Shared/Skins.luau:1617"
  ],
  "CAIXA DE MUNIÇÃO": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CaixaMunicao.client.luau:114",
@@ -2951,7 +2951,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/EditorHud.client.luau:572"
  ],
  "Cosmetic only, bound to your account: no gameplay advantage and no trading.": [
-  "src/ReplicatedStorage/Shared/Caixas.luau:896"
+  "src/ReplicatedStorage/Shared/Caixas.luau:923"
  ],
  "Cosmeticos": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaoJogador.luau:66",
@@ -2986,6 +2986,12 @@
  ],
  "Cristal Esmeralda": [
   "src/ReplicatedStorage/Shared/Skins.luau:1442"
+ ],
+ "Cristal Iridescente": [
+  "src/ReplicatedStorage/Shared/Skins.luau:1535"
+ ],
+ "Cristal Polar": [
+  "src/ReplicatedStorage/Shared/Skins.luau:1544"
  ],
  "Cristal Rubro": [
   "src/ReplicatedStorage/Shared/Skins.luau:1397"
@@ -3866,6 +3872,9 @@
  "Equipo": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/JanelaChat.client.luau:78"
  ],
+ "Escamas de onda brancas sobre o azul que escurece até a noite, com espuma nas cristas. Vale em qualquer arma.": [
+  "src/ReplicatedStorage/Shared/Skins.luau:1563"
+ ],
  "Escamas roxas e verde-água do fundo do mar.": [
   "src/ReplicatedStorage/Shared/Skins.luau:1217"
  ],
@@ -3913,6 +3922,9 @@
  ],
  "Escuadra": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/JanelaChat.client.luau:78"
+ ],
+ "Esmalte branco com flores e ramos azul-cobalto e frisos de ouro. Vale em qualquer arma.": [
+  "src/ReplicatedStorage/Shared/Skins.luau:1599"
  ],
  "Espaço": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ComoJogar.luau:610",
@@ -4186,6 +4198,12 @@
  "Facetas azul-cobalto, fundas e frias. Vale em qualquer arma.": [
   "src/ReplicatedStorage/Shared/Skins.luau:1416"
  ],
+ "Facetas claras que trocam de cor com a luz: rosa, verde-água e lilás. Vale em qualquer arma.": [
+  "src/ReplicatedStorage/Shared/Skins.luau:1536"
+ ],
+ "Facetas cor-de-rosa lapidadas no meio da geada branca. Vale em qualquer arma.": [
+  "src/ReplicatedStorage/Shared/Skins.luau:1527"
+ ],
  "Facetas de ametista, do lilás ao roxo fundo. Vale em qualquer arma.": [
   "src/ReplicatedStorage/Shared/Skins.luau:1434"
  ],
@@ -4201,8 +4219,14 @@
  "Facetas rosadas e leitosas de quartzo. Vale em qualquer arma.": [
   "src/ReplicatedStorage/Shared/Skins.luau:1452"
  ],
+ "Facetas roxas lapidadas no meio da geada branca. Vale em qualquer arma.": [
+  "src/ReplicatedStorage/Shared/Skins.luau:1518"
+ ],
  "Facetas verde-esmeralda com o brilho claro nas arestas. Vale em qualquer arma.": [
   "src/ReplicatedStorage/Shared/Skins.luau:1443"
+ ],
+ "Facetas vermelhas lapidadas no meio da geada branca. Vale em qualquer arma.": [
+  "src/ReplicatedStorage/Shared/Skins.luau:1509"
  ],
  "Faction": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:2700",
@@ -4434,10 +4458,10 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CaixasTela.client.luau:927"
  ],
  "Fragmentos trocam por qualquer item da troca, garantido. Não viram Robux nem dinheiro.": [
-  "src/ReplicatedStorage/Shared/Caixas.luau:887"
+  "src/ReplicatedStorage/Shared/Caixas.luau:914"
  ],
  "Fragments trade for any item in the exchange, guaranteed. They never become Robux or money.": [
-  "src/ReplicatedStorage/Shared/Caixas.luau:894"
+  "src/ReplicatedStorage/Shared/Caixas.luau:921"
  ],
  "Frags": [
   "src/ServerScriptService/Modules/ArmaNaMao.luau:136",
@@ -4606,6 +4630,9 @@
  "GRÁTIS": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:208"
  ],
+ "Galho de Cerejeira": [
+  "src/ReplicatedStorage/Shared/Skins.luau:1571"
+ ],
  "Galveston e Orleck vão bater em %s (%s) em %d s. Fique fora da fumaça vermelha e assalte depois.": [
   "src/ServerScriptService/Modules/EventosService.luau:335"
  ],
@@ -4640,6 +4667,9 @@
  ],
  "Geleira Antiga": [
   "src/ReplicatedStorage/Shared/Skins.luau:1487"
+ ],
+ "Gelo azul em facetas com a geada branca nas arestas. Vale em qualquer arma.": [
+  "src/ReplicatedStorage/Shared/Skins.luau:1545"
  ],
  "Gelo branco-azulado com rachaduras.": [
   "src/ReplicatedStorage/Shared/Skins.luau:1207"
@@ -5030,7 +5060,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:856"
  ],
  "Item que você já tem vira Fragmentos de Arsenal: Comum 5, Incomum 15, Raro 40, Épico 100, Lendário 250.": [
-  "src/ReplicatedStorage/Shared/Caixas.luau:886"
+  "src/ReplicatedStorage/Shared/Caixas.luau:913"
  ],
  "Itens aleatórios pagos indisponíveis para a sua conta agora: +%d Fragmentos de Arsenal, sem sorteio.": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CaixasTela.client.luau:591"
@@ -5039,7 +5069,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:1429"
  ],
  "Itens só visuais, presos à sua conta: não dão vantagem e não podem ser trocados.": [
-  "src/ReplicatedStorage/Shared/Caixas.luau:889"
+  "src/ReplicatedStorage/Shared/Caixas.luau:916"
  ],
  "JANELA": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/EventosVisual.luau:61"
@@ -5058,6 +5088,12 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:138",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/JogarAgora.luau:376",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/JogarAgora.luau:448"
+ ],
+ "Jade e Ouro": [
+  "src/ReplicatedStorage/Shared/Skins.luau:1607"
+ ],
+ "Jade verde com filigrana de ouro em arabescos. Vale em qualquer arma.": [
+  "src/ReplicatedStorage/Shared/Skins.luau:1608"
  ],
  "Jogadores %s %d/%d · pesados abrem com %d": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:1515"
@@ -5601,6 +5637,9 @@
  "Major": [
   "src/ReplicatedStorage/Shared/Progression.luau:86"
  ],
+ "Malha de triângulos acesa, do magenta ao ciano, no azul-noite. Vale em qualquer arma.": [
+  "src/ReplicatedStorage/Shared/Skins.luau:1590"
+ ],
  "Manchas cinza-azuladas de cidade à noite.": [
   "src/ReplicatedStorage/Shared/Skins.luau:901"
  ],
@@ -5631,6 +5670,9 @@
  ],
  "Mapa tático": [
   "src/ReplicatedStorage/Shared/InputMap.luau:109"
+ ],
+ "Mar Revolto": [
+  "src/ReplicatedStorage/Shared/Skins.luau:1562"
  ],
  "Marca": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaView.luau:1753",
@@ -6166,6 +6208,15 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaView.luau:994",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaView.luau:2291"
  ],
+ "Nevasca Rosa": [
+  "src/ReplicatedStorage/Shared/Skins.luau:1526"
+ ],
+ "Nevasca Rubra": [
+  "src/ReplicatedStorage/Shared/Skins.luau:1508"
+ ],
+ "Nevasca Violeta": [
+  "src/ReplicatedStorage/Shared/Skins.luau:1517"
+ ],
  "News: serviu no Vietnã": [
   "src/ReplicatedStorage/Shared/Weapons.luau:489"
  ],
@@ -6196,6 +6247,9 @@
  ],
  "Novo no seu arsenal.": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CaixasTela.client.luau:600"
+ ],
+ "Nuvem Rubra": [
+  "src/ReplicatedStorage/Shared/Skins.luau:1580"
  ],
  "Nuvens roxas e azuis com estrelas.": [
   "src/ReplicatedStorage/Shared/Skins.luau:1023"
@@ -6567,6 +6621,9 @@
   "src/ReplicatedFirst/LoadingScreen.client.luau:1018",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:67",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:68"
+ ],
+ "Ouro Derretido": [
+  "src/ReplicatedStorage/Shared/Skins.luau:1553"
  ],
  "Ouro Lapidado": [
   "src/ReplicatedStorage/Shared/Skins.luau:1469"
@@ -7265,6 +7322,12 @@
  "Prender a respiração sozinho na luneta": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:729"
  ],
+ "Preto com nuvens desenhadas em vermelho e fios de ouro. Vale em qualquer arma.": [
+  "src/ReplicatedStorage/Shared/Skins.luau:1581"
+ ],
+ "Preto lustroso com o ouro escorrendo de cima em pingos. Vale em qualquer arma.": [
+  "src/ReplicatedStorage/Shared/Skins.luau:1554"
+ ],
  "Preço lido do Roblox (pode variar por região)": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ArquivoTela.client.luau:605"
  ],
@@ -7677,6 +7740,9 @@
  ],
  "Recruta de Campanha": [
   "src/ReplicatedStorage/Shared/Temporada.luau:44"
+ ],
+ "Rede Neon": [
+  "src/ReplicatedStorage/Shared/Skins.luau:1589"
  ],
  "Refazer o tutorial do papel": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:941"
@@ -8731,7 +8797,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponVisuals.client.luau:721"
  ],
  "The odds are the same for everyone and never change with how much you spend.": [
-  "src/ReplicatedStorage/Shared/Caixas.luau:895"
+  "src/ReplicatedStorage/Shared/Caixas.luau:922"
  ],
  "Three": [
   "src/ReplicatedStorage/Shared/Equipar.luau:20",
@@ -9242,8 +9308,8 @@
   "src/ReplicatedStorage/Shared/Skins.luau:1052",
   "src/ReplicatedStorage/Shared/Skins.luau:1062",
   "src/ReplicatedStorage/Shared/Skins.luau:1072",
-  "src/ReplicatedStorage/Shared/Skins.luau:1556",
-  "src/ReplicatedStorage/Shared/Skins.luau:1617",
+  "src/ReplicatedStorage/Shared/Skins.luau:1670",
+  "src/ReplicatedStorage/Shared/Skins.luau:1731",
   "src/ReplicatedStorage/Shared/SpawnRules.luau:98",
   "src/ReplicatedStorage/Shared/SpawnRules.luau:140",
   "src/ReplicatedStorage/Shared/Vehicles.luau:51",
@@ -9673,8 +9739,8 @@
   "src/ReplicatedStorage/Shared/Skins.luau:1337",
   "src/ReplicatedStorage/Shared/Skins.luau:1347",
   "src/ReplicatedStorage/Shared/Skins.luau:1357",
-  "src/ReplicatedStorage/Shared/Skins.luau:1556",
-  "src/ReplicatedStorage/Shared/Skins.luau:1617",
+  "src/ReplicatedStorage/Shared/Skins.luau:1670",
+  "src/ReplicatedStorage/Shared/Skins.luau:1731",
   "src/ReplicatedStorage/Shared/Vehicles.luau:203",
   "src/ReplicatedStorage/Shared/Weapons.luau:269",
   "src/ReplicatedStorage/Shared/Weapons.luau:298",
@@ -10002,6 +10068,9 @@
  ],
  "Verga": [
   "src/ServerScriptService/Modules/MapLife.luau:734"
+ ],
+ "Vermelho com galhos escuros e flores brancas de miolo dourado. Vale em qualquer arma.": [
+  "src/ReplicatedStorage/Shared/Skins.luau:1572"
  ],
  "Vermelho de pedra preciosa.": [
   "src/ReplicatedStorage/Shared/Cosmeticos.luau:618"
@@ -11785,7 +11854,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameUI.client.luau:298"
  ],
  "escolha um lado primeiro": [
-  "src/ReplicatedStorage/Shared/Skins.luau:1618",
+  "src/ReplicatedStorage/Shared/Skins.luau:1732",
   "src/ServerScriptService/Modules/ProgressionService.luau:362"
  ],
  "escolha um ponto pronto": [
@@ -11911,7 +11980,7 @@
  "faltam %s": [
   "src/ReplicatedStorage/Shared/Progression.luau:498",
   "src/ReplicatedStorage/Shared/Progression.luau:653",
-  "src/ReplicatedStorage/Shared/Skins.luau:1603"
+  "src/ReplicatedStorage/Shared/Skins.luau:1717"
  ],
  "far": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/SoldierAnimations.client.luau:560",
@@ -12051,7 +12120,7 @@
  "foto + consultor": [
   "src/ReplicatedStorage/Shared/Commerce.luau:460",
   "src/ReplicatedStorage/Shared/Skins.luau:708",
-  "src/ReplicatedStorage/Shared/Skins.luau:1528"
+  "src/ReplicatedStorage/Shared/Skins.luau:1642"
  ],
  "four": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:766"
@@ -12620,7 +12689,7 @@
   "src/ReplicatedStorage/Shared/Progression.luau:494"
  ],
  "já é sua": [
-  "src/ReplicatedStorage/Shared/Skins.luau:1597"
+  "src/ReplicatedStorage/Shared/Skins.luau:1711"
  ],
  "k:reset": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:678"
@@ -14654,14 +14723,14 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Progresso.client.luau:891"
  ],
  "skin desconhecida": [
-  "src/ReplicatedStorage/Shared/Skins.luau:1595",
-  "src/ReplicatedStorage/Shared/Skins.luau:1616"
+  "src/ReplicatedStorage/Shared/Skins.luau:1709",
+  "src/ReplicatedStorage/Shared/Skins.luau:1730"
  ],
  "skin do outro lado": [
-  "src/ReplicatedStorage/Shared/Skins.luau:1620"
+  "src/ReplicatedStorage/Shared/Skins.luau:1734"
  ],
  "skin não é sua": [
-  "src/ReplicatedStorage/Shared/Skins.luau:1622"
+  "src/ReplicatedStorage/Shared/Skins.luau:1736"
  ],
  "skin:": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Progresso.client.luau:862",
@@ -15159,10 +15228,10 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:753"
  ],
  "só nas caixas": [
-  "src/ReplicatedStorage/Shared/Skins.luau:1601"
+  "src/ReplicatedStorage/Shared/Skins.luau:1715"
  ],
  "só no conjunto em Game Pass": [
-  "src/ReplicatedStorage/Shared/Skins.luau:1599"
+  "src/ReplicatedStorage/Shared/Skins.luau:1713"
  ],
  "só o Suporte põe a caixa": [
   "src/ReplicatedStorage/Shared/CaixaMunicao.luau:109"
@@ -15871,269 +15940,665 @@
  "uni_cristal_esmeralda@win12": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:134"
  ],
- "uni_cristal_rubro@m14": [
+ "uni_cristal_iridescente@m14": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:135"
  ],
- "uni_cristal_rubro@m16": [
+ "uni_cristal_iridescente@m16": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:136"
  ],
- "uni_cristal_rubro@m1911": [
+ "uni_cristal_iridescente@m1911": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:137"
  ],
- "uni_cristal_rubro@m60": [
+ "uni_cristal_iridescente@m60": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:138"
  ],
- "uni_cristal_rubro@m70": [
+ "uni_cristal_iridescente@m70": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:139"
  ],
- "uni_cristal_rubro@mosin": [
+ "uni_cristal_iridescente@mosin": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:140"
  ],
- "uni_cristal_rubro@rpd": [
+ "uni_cristal_iridescente@rpd": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:141"
  ],
- "uni_cristal_rubro@sks": [
+ "uni_cristal_iridescente@sks": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:142"
  ],
- "uni_cristal_rubro@type54": [
+ "uni_cristal_iridescente@type54": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:143"
  ],
- "uni_cristal_rubro@type56": [
+ "uni_cristal_iridescente@type56": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:144"
  ],
- "uni_cristal_rubro@win12": [
+ "uni_cristal_iridescente@win12": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:145"
  ],
- "uni_cristal_violeta@m14": [
+ "uni_cristal_polar@m14": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:146"
  ],
- "uni_cristal_violeta@m16": [
+ "uni_cristal_polar@m16": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:147"
  ],
- "uni_cristal_violeta@m1911": [
+ "uni_cristal_polar@m1911": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:148"
  ],
- "uni_cristal_violeta@m60": [
+ "uni_cristal_polar@m60": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:149"
  ],
- "uni_cristal_violeta@m70": [
+ "uni_cristal_polar@m70": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:150"
  ],
- "uni_cristal_violeta@mosin": [
+ "uni_cristal_polar@mosin": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:151"
  ],
- "uni_cristal_violeta@rpd": [
+ "uni_cristal_polar@rpd": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:152"
  ],
- "uni_cristal_violeta@sks": [
+ "uni_cristal_polar@sks": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:153"
  ],
- "uni_cristal_violeta@type54": [
+ "uni_cristal_polar@type54": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:154"
  ],
- "uni_cristal_violeta@type56": [
+ "uni_cristal_polar@type56": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:155"
  ],
- "uni_cristal_violeta@win12": [
+ "uni_cristal_polar@win12": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:156"
  ],
- "uni_geleira_antiga@m14": [
+ "uni_cristal_rubro@m14": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:157"
  ],
- "uni_geleira_antiga@m16": [
+ "uni_cristal_rubro@m16": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:158"
  ],
- "uni_geleira_antiga@m1911": [
+ "uni_cristal_rubro@m1911": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:159"
  ],
- "uni_geleira_antiga@m60": [
+ "uni_cristal_rubro@m60": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:160"
  ],
- "uni_geleira_antiga@m70": [
+ "uni_cristal_rubro@m70": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:161"
  ],
- "uni_geleira_antiga@mosin": [
+ "uni_cristal_rubro@mosin": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:162"
  ],
- "uni_geleira_antiga@rpd": [
+ "uni_cristal_rubro@rpd": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:163"
  ],
- "uni_geleira_antiga@sks": [
+ "uni_cristal_rubro@sks": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:164"
  ],
- "uni_geleira_antiga@type54": [
+ "uni_cristal_rubro@type54": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:165"
  ],
- "uni_geleira_antiga@type56": [
+ "uni_cristal_rubro@type56": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:166"
  ],
- "uni_geleira_antiga@win12": [
+ "uni_cristal_rubro@win12": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:167"
  ],
- "uni_inverno_sombrio@m14": [
+ "uni_cristal_violeta@m14": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:168"
  ],
- "uni_inverno_sombrio@m16": [
+ "uni_cristal_violeta@m16": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:169"
  ],
- "uni_inverno_sombrio@m1911": [
+ "uni_cristal_violeta@m1911": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:170"
  ],
- "uni_inverno_sombrio@m60": [
+ "uni_cristal_violeta@m60": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:171"
  ],
- "uni_inverno_sombrio@m70": [
+ "uni_cristal_violeta@m70": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:172"
  ],
- "uni_inverno_sombrio@mosin": [
+ "uni_cristal_violeta@mosin": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:173"
  ],
- "uni_inverno_sombrio@rpd": [
+ "uni_cristal_violeta@rpd": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:174"
  ],
- "uni_inverno_sombrio@sks": [
+ "uni_cristal_violeta@sks": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:175"
  ],
- "uni_inverno_sombrio@type54": [
+ "uni_cristal_violeta@type54": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:176"
  ],
- "uni_inverno_sombrio@type56": [
+ "uni_cristal_violeta@type56": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:177"
  ],
- "uni_inverno_sombrio@win12": [
+ "uni_cristal_violeta@win12": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:178"
  ],
- "uni_obsidiana@m14": [
+ "uni_galho_cerejeira@m14": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:179"
  ],
- "uni_obsidiana@m16": [
+ "uni_galho_cerejeira@m16": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:180"
  ],
- "uni_obsidiana@m1911": [
+ "uni_galho_cerejeira@m1911": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:181"
  ],
- "uni_obsidiana@m60": [
+ "uni_galho_cerejeira@m60": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:182"
  ],
- "uni_obsidiana@m70": [
+ "uni_galho_cerejeira@m70": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:183"
  ],
- "uni_obsidiana@mosin": [
+ "uni_galho_cerejeira@mosin": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:184"
  ],
- "uni_obsidiana@rpd": [
+ "uni_galho_cerejeira@rpd": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:185"
  ],
- "uni_obsidiana@sks": [
+ "uni_galho_cerejeira@sks": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:186"
  ],
- "uni_obsidiana@type54": [
+ "uni_galho_cerejeira@type54": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:187"
  ],
- "uni_obsidiana@type56": [
+ "uni_galho_cerejeira@type56": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:188"
  ],
- "uni_obsidiana@win12": [
+ "uni_galho_cerejeira@win12": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:189"
  ],
- "uni_onix_polido@m14": [
+ "uni_geleira_antiga@m14": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:190"
  ],
- "uni_onix_polido@m16": [
+ "uni_geleira_antiga@m16": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:191"
  ],
- "uni_onix_polido@m1911": [
+ "uni_geleira_antiga@m1911": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:192"
  ],
- "uni_onix_polido@m60": [
+ "uni_geleira_antiga@m60": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:193"
  ],
- "uni_onix_polido@m70": [
+ "uni_geleira_antiga@m70": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:194"
  ],
- "uni_onix_polido@mosin": [
+ "uni_geleira_antiga@mosin": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:195"
  ],
- "uni_onix_polido@rpd": [
+ "uni_geleira_antiga@rpd": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:196"
  ],
- "uni_onix_polido@sks": [
+ "uni_geleira_antiga@sks": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:197"
  ],
- "uni_onix_polido@type54": [
+ "uni_geleira_antiga@type54": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:198"
  ],
- "uni_onix_polido@type56": [
+ "uni_geleira_antiga@type56": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:199"
  ],
- "uni_onix_polido@win12": [
+ "uni_geleira_antiga@win12": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:200"
  ],
- "uni_ouro_lapidado@m14": [
+ "uni_inverno_sombrio@m14": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:201"
  ],
- "uni_ouro_lapidado@m16": [
+ "uni_inverno_sombrio@m16": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:202"
  ],
- "uni_ouro_lapidado@m1911": [
+ "uni_inverno_sombrio@m1911": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:203"
  ],
- "uni_ouro_lapidado@m60": [
+ "uni_inverno_sombrio@m60": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:204"
  ],
- "uni_ouro_lapidado@m70": [
+ "uni_inverno_sombrio@m70": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:205"
  ],
- "uni_ouro_lapidado@mosin": [
+ "uni_inverno_sombrio@mosin": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:206"
  ],
- "uni_ouro_lapidado@rpd": [
+ "uni_inverno_sombrio@rpd": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:207"
  ],
- "uni_ouro_lapidado@sks": [
+ "uni_inverno_sombrio@sks": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:208"
  ],
- "uni_ouro_lapidado@type54": [
+ "uni_inverno_sombrio@type54": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:209"
  ],
- "uni_ouro_lapidado@type56": [
+ "uni_inverno_sombrio@type56": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:210"
  ],
- "uni_ouro_lapidado@win12": [
+ "uni_inverno_sombrio@win12": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:211"
  ],
- "uni_quartzo_rosa@m14": [
+ "uni_jade_ouro@m14": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:212"
  ],
- "uni_quartzo_rosa@m16": [
+ "uni_jade_ouro@m16": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:213"
  ],
- "uni_quartzo_rosa@m1911": [
+ "uni_jade_ouro@m1911": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:214"
  ],
- "uni_quartzo_rosa@m60": [
+ "uni_jade_ouro@m60": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:215"
  ],
- "uni_quartzo_rosa@m70": [
+ "uni_jade_ouro@m70": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:216"
  ],
- "uni_quartzo_rosa@mosin": [
+ "uni_jade_ouro@mosin": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:217"
  ],
- "uni_quartzo_rosa@rpd": [
+ "uni_jade_ouro@rpd": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:218"
  ],
- "uni_quartzo_rosa@sks": [
+ "uni_jade_ouro@sks": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:219"
  ],
- "uni_quartzo_rosa@type54": [
+ "uni_jade_ouro@type54": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:220"
  ],
- "uni_quartzo_rosa@type56": [
+ "uni_jade_ouro@type56": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:221"
  ],
- "uni_quartzo_rosa@win12": [
+ "uni_jade_ouro@win12": [
   "src/ReplicatedStorage/Shared/AcabamentosArte.luau:222"
+ ],
+ "uni_mar_revolto@m14": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:223"
+ ],
+ "uni_mar_revolto@m16": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:224"
+ ],
+ "uni_mar_revolto@m1911": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:225"
+ ],
+ "uni_mar_revolto@m60": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:226"
+ ],
+ "uni_mar_revolto@m70": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:227"
+ ],
+ "uni_mar_revolto@mosin": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:228"
+ ],
+ "uni_mar_revolto@rpd": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:229"
+ ],
+ "uni_mar_revolto@sks": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:230"
+ ],
+ "uni_mar_revolto@type54": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:231"
+ ],
+ "uni_mar_revolto@type56": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:232"
+ ],
+ "uni_mar_revolto@win12": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:233"
+ ],
+ "uni_nevasca_rosa@m14": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:234"
+ ],
+ "uni_nevasca_rosa@m16": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:235"
+ ],
+ "uni_nevasca_rosa@m1911": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:236"
+ ],
+ "uni_nevasca_rosa@m60": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:237"
+ ],
+ "uni_nevasca_rosa@m70": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:238"
+ ],
+ "uni_nevasca_rosa@mosin": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:239"
+ ],
+ "uni_nevasca_rosa@rpd": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:240"
+ ],
+ "uni_nevasca_rosa@sks": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:241"
+ ],
+ "uni_nevasca_rosa@type54": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:242"
+ ],
+ "uni_nevasca_rosa@type56": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:243"
+ ],
+ "uni_nevasca_rosa@win12": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:244"
+ ],
+ "uni_nevasca_rubra@m14": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:245"
+ ],
+ "uni_nevasca_rubra@m16": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:246"
+ ],
+ "uni_nevasca_rubra@m1911": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:247"
+ ],
+ "uni_nevasca_rubra@m60": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:248"
+ ],
+ "uni_nevasca_rubra@m70": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:249"
+ ],
+ "uni_nevasca_rubra@mosin": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:250"
+ ],
+ "uni_nevasca_rubra@rpd": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:251"
+ ],
+ "uni_nevasca_rubra@sks": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:252"
+ ],
+ "uni_nevasca_rubra@type54": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:253"
+ ],
+ "uni_nevasca_rubra@type56": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:254"
+ ],
+ "uni_nevasca_rubra@win12": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:255"
+ ],
+ "uni_nevasca_violeta@m14": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:256"
+ ],
+ "uni_nevasca_violeta@m16": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:257"
+ ],
+ "uni_nevasca_violeta@m1911": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:258"
+ ],
+ "uni_nevasca_violeta@m60": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:259"
+ ],
+ "uni_nevasca_violeta@m70": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:260"
+ ],
+ "uni_nevasca_violeta@mosin": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:261"
+ ],
+ "uni_nevasca_violeta@rpd": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:262"
+ ],
+ "uni_nevasca_violeta@sks": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:263"
+ ],
+ "uni_nevasca_violeta@type54": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:264"
+ ],
+ "uni_nevasca_violeta@type56": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:265"
+ ],
+ "uni_nevasca_violeta@win12": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:266"
+ ],
+ "uni_nuvem_rubra@m14": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:267"
+ ],
+ "uni_nuvem_rubra@m16": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:268"
+ ],
+ "uni_nuvem_rubra@m1911": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:269"
+ ],
+ "uni_nuvem_rubra@m60": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:270"
+ ],
+ "uni_nuvem_rubra@m70": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:271"
+ ],
+ "uni_nuvem_rubra@mosin": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:272"
+ ],
+ "uni_nuvem_rubra@rpd": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:273"
+ ],
+ "uni_nuvem_rubra@sks": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:274"
+ ],
+ "uni_nuvem_rubra@type54": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:275"
+ ],
+ "uni_nuvem_rubra@type56": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:276"
+ ],
+ "uni_nuvem_rubra@win12": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:277"
+ ],
+ "uni_obsidiana@m14": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:278"
+ ],
+ "uni_obsidiana@m16": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:279"
+ ],
+ "uni_obsidiana@m1911": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:280"
+ ],
+ "uni_obsidiana@m60": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:281"
+ ],
+ "uni_obsidiana@m70": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:282"
+ ],
+ "uni_obsidiana@mosin": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:283"
+ ],
+ "uni_obsidiana@rpd": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:284"
+ ],
+ "uni_obsidiana@sks": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:285"
+ ],
+ "uni_obsidiana@type54": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:286"
+ ],
+ "uni_obsidiana@type56": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:287"
+ ],
+ "uni_obsidiana@win12": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:288"
+ ],
+ "uni_onix_polido@m14": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:289"
+ ],
+ "uni_onix_polido@m16": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:290"
+ ],
+ "uni_onix_polido@m1911": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:291"
+ ],
+ "uni_onix_polido@m60": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:292"
+ ],
+ "uni_onix_polido@m70": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:293"
+ ],
+ "uni_onix_polido@mosin": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:294"
+ ],
+ "uni_onix_polido@rpd": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:295"
+ ],
+ "uni_onix_polido@sks": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:296"
+ ],
+ "uni_onix_polido@type54": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:297"
+ ],
+ "uni_onix_polido@type56": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:298"
+ ],
+ "uni_onix_polido@win12": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:299"
+ ],
+ "uni_ouro_derretido@m14": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:300"
+ ],
+ "uni_ouro_derretido@m16": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:301"
+ ],
+ "uni_ouro_derretido@m1911": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:302"
+ ],
+ "uni_ouro_derretido@m60": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:303"
+ ],
+ "uni_ouro_derretido@m70": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:304"
+ ],
+ "uni_ouro_derretido@mosin": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:305"
+ ],
+ "uni_ouro_derretido@rpd": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:306"
+ ],
+ "uni_ouro_derretido@sks": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:307"
+ ],
+ "uni_ouro_derretido@type54": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:308"
+ ],
+ "uni_ouro_derretido@type56": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:309"
+ ],
+ "uni_ouro_derretido@win12": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:310"
+ ],
+ "uni_ouro_lapidado@m14": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:311"
+ ],
+ "uni_ouro_lapidado@m16": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:312"
+ ],
+ "uni_ouro_lapidado@m1911": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:313"
+ ],
+ "uni_ouro_lapidado@m60": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:314"
+ ],
+ "uni_ouro_lapidado@m70": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:315"
+ ],
+ "uni_ouro_lapidado@mosin": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:316"
+ ],
+ "uni_ouro_lapidado@rpd": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:317"
+ ],
+ "uni_ouro_lapidado@sks": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:318"
+ ],
+ "uni_ouro_lapidado@type54": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:319"
+ ],
+ "uni_ouro_lapidado@type56": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:320"
+ ],
+ "uni_ouro_lapidado@win12": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:321"
+ ],
+ "uni_porcelana_hue@m14": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:322"
+ ],
+ "uni_porcelana_hue@m16": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:323"
+ ],
+ "uni_porcelana_hue@m1911": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:324"
+ ],
+ "uni_porcelana_hue@m60": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:325"
+ ],
+ "uni_porcelana_hue@m70": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:326"
+ ],
+ "uni_porcelana_hue@mosin": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:327"
+ ],
+ "uni_porcelana_hue@rpd": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:328"
+ ],
+ "uni_porcelana_hue@sks": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:329"
+ ],
+ "uni_porcelana_hue@type54": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:330"
+ ],
+ "uni_porcelana_hue@type56": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:331"
+ ],
+ "uni_porcelana_hue@win12": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:332"
+ ],
+ "uni_quartzo_rosa@m14": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:333"
+ ],
+ "uni_quartzo_rosa@m16": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:334"
+ ],
+ "uni_quartzo_rosa@m1911": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:335"
+ ],
+ "uni_quartzo_rosa@m60": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:336"
+ ],
+ "uni_quartzo_rosa@m70": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:337"
+ ],
+ "uni_quartzo_rosa@mosin": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:338"
+ ],
+ "uni_quartzo_rosa@rpd": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:339"
+ ],
+ "uni_quartzo_rosa@sks": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:340"
+ ],
+ "uni_quartzo_rosa@type54": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:341"
+ ],
+ "uni_quartzo_rosa@type56": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:342"
+ ],
+ "uni_quartzo_rosa@win12": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:343"
+ ],
+ "uni_rede_neon@m14": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:344"
+ ],
+ "uni_rede_neon@m16": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:345"
+ ],
+ "uni_rede_neon@m1911": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:346"
+ ],
+ "uni_rede_neon@m60": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:347"
+ ],
+ "uni_rede_neon@m70": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:348"
+ ],
+ "uni_rede_neon@mosin": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:349"
+ ],
+ "uni_rede_neon@rpd": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:350"
+ ],
+ "uni_rede_neon@sks": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:351"
+ ],
+ "uni_rede_neon@type54": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:352"
+ ],
+ "uni_rede_neon@type56": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:353"
+ ],
+ "uni_rede_neon@win12": [
+  "src/ReplicatedStorage/Shared/AcabamentosArte.luau:354"
  ],
  "unidade abre com 16 jogadores no time": [
   "src/ReplicatedStorage/Shared/Squads.luau:60"

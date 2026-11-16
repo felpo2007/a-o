@@ -7194,3 +7194,38 @@ extravagantes se inspire no cs battlefield e outros jogos faça com maestria".
   - troca, equipar na M14 e na M1911 (recusa na Tipo 56) e a M14 em campo com o Cristal Rubro;
   - o EQUIPAR e o TIRAR do perfil na M16; os acabamentos da D-178 pela pronta;
   - 0 erros. Detalhes em `testes/UNIVERSAIS_D179_2026-11-16.md`.
+
+## D-180 — Lote 64: mais 12 universais e os acabamentos de antes melhorados (2026-11-16)
+
+**Pedido do dono:** "continue fazendo e melhore os outros", com imagens de referência de skins de
+jogos de tiro (gemas nevadas, cristal iridescente, ouro escorrendo, flores, nuvens desenhadas,
+ondas, porcelana, jade com ouro, malha neon). Das imagens vale a ideia; o desenho e os nomes são
+próprios.
+
+- **12 universais novos** (o lote `Skins.UNIVERSAIS_D180`; agora são 24 universais):
+  - Nevasca Rubra, Violeta e Rosa: metade das facetas brancas de geada, metade lapidadas na cor;
+  - Cristal Iridescente (facetas claras com reflexo rosa, verde-água e lilás) e Cristal Polar
+    (gelo azul em facetas com a geada nas arestas);
+  - Ouro Derretido: preto lustroso com o ouro escorrendo de cima em pingos de ponta redonda;
+  - Mar Revolto (escamas de onda), Galho de Cerejeira, Nuvem Rubra (nuvens de contorno duplo e
+    fios de ouro), Rede Neon (malha de triângulos acesa do magenta ao ciano), Porcelana de Huế
+    (esmalte branco, flores e ramos azul-cobalto e frisos de ouro) e Jade e Ouro (filigrana);
+  - raridades: 1 raro, 7 épicos e 4 lendários. Só caixa e troca, na mesma regra das caixas
+    (`Caixas.ACRESCIMOS_D180`).
+- **Os de antes, melhorados:**
+  - todo acabamento agora tem o material dele na SurfaceAppearance:
+    - laca e porcelana: verniz brilhante;
+    - damasco, titânio e ouro derretido: metal;
+    - carbono: semibrilho;
+    - degradê, tigre, zebra, colmeia, chamas, raio, galáxia, óleo, escamas e os desenhados:
+      pintura acetinada;
+    - camuflagem, pixel, bambu e carta: tinta fosca de campo;
+  - antes só as pedras, o gelo e o espelho tinham material;
+  - ganharam relevo:
+    - a trama do carbono (3);
+    - a colmeia (2), com a célula alta e a linha funda;
+    - o damasco gravado (3) e as lascas da laca (4);
+    - os nós do bambu (2) e as curvas da carta (2).
+- **Gerador mais rápido:** a cor e o relevo da mesma gema dividem as facetas (`Ctx.memo`): 12
+  universais numa arma em 90 s.
+- **Conferido:** Lune 700 ok, pytest 70. No Studio, as 344 SurfaceAppearance no place, os 12 novos nas armas de vitrine e o Ouro Derretido trocado, equipado na M14 e visto em campo; 0 erros. Detalhes em `testes/UNIVERSAIS_D180_2026-11-16.md`.
