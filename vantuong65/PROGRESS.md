@@ -311,6 +311,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     - Conferido: Lune 25 ok nas caixas e a suíte inteira; Studio com os ganchos (caixas dadas,
       abertura, compra $ 6.300 → $ 4.800, aviso, prêmio de 100 Fragmentos), 0 erros.
     - Não testado: os marcos numa partida de verdade (só pelo código e pelos ganchos).
+    - **v98 publicada** (versão 103 do place, commit d1a5823).
     - Próximos: lote 59 (Arquivo Militar), lote 60 (Game Passes novos e Clube de Veteranos).
 
 - **Próximos (ideias da análise, esperando o dono):**
