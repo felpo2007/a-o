@@ -55,6 +55,13 @@ Commerce.IDS = {
 	PRODUCT_VEH_M151 = 3730793969, -- "Veículo ao nascer: M151 MUTT"
 	PRODUCT_VEH_M35 = 3730793971, -- "Veículo ao nascer: caminhão M35"
 	PRODUCT_VEH_PEUGEOT403 = 3730793973, -- "Veículo ao nascer: Peugeot 403"
+	-- D-173: caixas pagas (Shared/Caixas). 0 = não criadas. A venda ainda depende de
+	-- Caixas.PAGAS_LIGADAS (desligado até o dono reenviar o questionário de classificação) e do
+	-- PolicyService de cada jogador (CaixaService)
+	PRODUCT_CRATE_SUPPLY = 0, -- "Caixa de Suprimentos"
+	PRODUCT_CRATE_SPECIAL = 0, -- "Caixa de Equipamentos Especiais"
+	PRODUCT_CRATE_ELITE = 0, -- "Caixa de Arsenal de Elite"
+	PRODUCT_CRATE_HISTORIC = 0, -- "Caixa de Operações Históricas"
 	-- Experience Subscription (mensal; o criador precisa estar habilitado)
 	SUBSCRIPTION_UNIT_RESERVE = "", -- "Reserva da Unidade"; ex.: "EXP-1234567890"
 }

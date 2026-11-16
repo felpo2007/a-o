@@ -4,6 +4,30 @@ Fiz sozinho tudo o que não depende da sua conta Roblox, de dinheiro, de decisã
 Studio. A lista abaixo segue a ordem de prioridade. O que está em **negrito** destrava a maior parte
 do resto.
 
+## Monetização (D-173, 2026-11-15): três decisões suas
+1. **A loja antiga vende vantagem de jogo.** O seu pedido novo diz que nenhum item pago pode dar
+   vantagem. Hoje vendem vantagem:
+   - as 8 vantagens até +12%: velocidade, vida, fôlego, recarga, socorro, bolsos e olho de águia;
+   - os 2 kits de equipamento;
+   - o renascer onde caiu;
+   - os 3 veículos ao nascer;
+   - a camuflagem que engana os bots;
+   - os reforços de XP e de créditos.
+
+   Quem já comprou tem esses benefícios. As saídas possíveis:
+   - (a) parar de vender e manter para quem já tem;
+   - (b) trocar cada um por um cosmético equivalente, dado a quem já comprou;
+   - (c) deixar como está, e o pedido fica sem cumprir esse ponto.
+2. **Caixas pagas:** prontas, mas desligadas. Para ligar:
+   - responda no questionário de classificação (Creator Dashboard) que há itens aleatórios pagos e
+     reenvie. A política do Roblox manda reenviar quando uma atualização muda uma resposta. Você
+     tinha pedido para eu não enviar o questionário, então essa parte é sua;
+   - depois me avise, e eu crio os 4 produtos pelo script e ligo a venda. O passo a passo está em
+     `MONETIZATION.md`.
+3. **Clube de Veteranos (assinatura):** só se cria no Creator Hub (Monetization → Subscriptions).
+   Em Robux, o mínimo é R$ 49. O preço que você pediu, R$ 149, serve. Crie e me passe o ID
+   (`EXP-...`).
+
 ## 0. ~~Nome do jogo na página: STARLITE: Vietnã 1965~~ (feito em 2026-11-14)
 Você entrou na conta no navegador do app e eu troquei no Creator Dashboard (Game details): o nome
 **STARLITE: Vietnã 1965** e a descrição para crianças que você aprovou (`marketing/descricao.txt`).

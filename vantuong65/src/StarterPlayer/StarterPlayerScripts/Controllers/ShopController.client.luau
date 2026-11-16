@@ -43,6 +43,8 @@ local W, H = px(720, 960), px(620, 820) -- vitrine: destaque e duas colunas de c
 -- VANTAGENS (as vantagens compradas, com o número exato e o teto).
 local TABS = {
 	{ id = "loja", name = "LOJA E ARMÁRIO" },
+	-- D-173: caixas de suprimentos (Controllers/CaixasTela.client desenha dentro do host dela)
+	{ id = "caixas", name = "CAIXAS" },
 	{ id = "mercado", name = "MERCADO" },
 	{ id = "vantagens", name = "VANTAGENS" },
 	{ id = "intendencia", name = "INTENDÊNCIA" },
@@ -167,7 +169,7 @@ for i, d in TABS do
 	b.BackgroundTransparency = 1
 	b.BorderSizePixel = 0
 	b.FontFace = UiKit.Estilo.headFont(d.name)
-	b.TextSize = UiKit.text(px(19, 26)) -- quatro abas cabem na largura do painel
+	b.TextSize = UiKit.text(px(17, 23)) -- cinco abas cabem na largura do painel (D-173)
 	b.TextColor3 = V.DIM
 	b.Text = d.name
 	b.Selectable = false
@@ -241,6 +243,10 @@ host.Position = UDim2.fromOffset(0, 6)
 host.Size = UDim2.new(1, 0, 1, -6)
 host.Visible = false
 host.Parent = sheet
+-- D-173: a página das caixas (CaixasTela.client) entra aqui quando a aba CAIXAS está ativa
+local hostCaixas = host:Clone()
+hostCaixas.Name = "Caixas"
+hostCaixas.Parent = sheet
 
 -- páginas MERCADO e VANTAGENS: listas que rolam, como a da loja (montadas quando o conteúdo muda)
 local function newPage(name: string): ScrollingFrame
@@ -1689,16 +1695,24 @@ setTab = function(id: string)
 		pg.Visible = pid == id
 	end
 	host.Visible = id == "intendencia"
+	hostCaixas.Visible = id == "caixas"
+	if id == "caixas" then
+		Bus.fire("caixas_show", hostCaixas)
+	else
+		Bus.fire("caixas_hide")
+	end
 	if id == "intendencia" then
 		Bus.fire("intendencia_show", host)
-	else
+	elseif id ~= "caixas" then
 		Bus.fire("intendencia_hide")
 		renderPage() -- mercado e vantagens: só redesenha se o estado mudou
 		UiKit.focus(pages[id])
+	else
+		Bus.fire("intendencia_hide")
 	end
 	-- a folha nova desliza um pouco (o conteúdo já existe: nada é criado aqui)
 	-- posição de repouso guardada: trocar de aba rápido não deixa a folha deslocada no meio do tween
-	local page: GuiObject = if id == "intendencia" then host else pages[id]
+	local page: GuiObject = if id == "intendencia" then host elseif id == "caixas" then hostCaixas else pages[id]
 	local p0: UDim2 = pageBase[page] or page.Position
 	pageBase[page] = p0
 	page.Position = p0 + UDim2.fromOffset(px(14, 20), 0)
@@ -1764,6 +1778,7 @@ local function setOpen(open: boolean, which: string?)
 		UiKit.closed("loja")
 		UiKit.release(gui)
 		Bus.fire("intendencia_hide")
+		Bus.fire("caixas_hide")
 		Bus.fire("shop_closed")
 		local info = TweenInfo.new(0.16, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
 		fit.play(info, 0.95)
@@ -1816,7 +1831,7 @@ if RunService:IsStudio() then
 	-- "vantagens" nas vantagens
 	workspace:GetAttributeChangedSignal("VT65DevTela"):Connect(function()
 		local v = workspace:GetAttribute("VT65DevTela")
-		if v == "loja" or v == "intendencia" or v == "mercado" or v == "vantagens" then
+		if v == "loja" or v == "intendencia" or v == "mercado" or v == "vantagens" or v == "caixas" then
 			Bus.fire("shop_open", v)
 			task.defer(function()
 				workspace:SetAttribute("VT65DevTela", nil)

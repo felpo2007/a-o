@@ -6831,3 +6831,58 @@ mais árvores na vila."
 - **Limite:** os bots usam as construções novas como abrigo, como as outras; não foi medido se o
   Offensive ficou mais lento.
 
+## D-173 — Lote 57: caixas de suprimentos (2026-11-15)
+
+**Pedido do dono:** "faça isso agora" + um prompt de monetização completa: loja, passes,
+assinatura, passe de temporada, inventário, caixas grátis e pagas com chances, Fragmentos,
+conformidade com o Roblox.
+
+**Revê a D-20** ("caixa-surpresa paga rejeitada") só nas caixas: elas existem. A venda paga fica
+desligada (`Caixas.PAGAS_LIGADAS = false`) até o dono reenviar o questionário de classificação. A
+política de conteúdo manda reenviar quando uma atualização muda uma resposta, e o dono pediu antes
+para não enviar o questionário.
+
+- **Lido nas fontes oficiais (2026-11-15):**
+  - chance numérica de cada resultado final, somando 100%, antes da compra;
+  - lista com texto (ícone sem palavra não vale);
+  - a chance atualiza quando um resultado muda para o jogador;
+  - `ArePaidRandomItemsRestricted` por jogador; moeda comprável conta como paga;
+  - recompensa aleatória sem Robux não precisa divulgar;
+  - `ProcessReceipt` só concede com gravação; nunca pelo `PromptProductPurchaseFinished`.
+- **Feito (5 caixas, 19 cosméticos novos e 25 skins):**
+  - tabelas com pesos inteiros na base 100.000, versão por caixa e validação. Tabela ruim desliga
+    a caixa na partida;
+  - sorteio só no servidor (`Random`), dentro da transação atômica (`PlayerData.transact`,
+    `UpdateAsync`). O resultado é gravado antes de ir ao cliente, e a animação só mostra;
+  - caixa paga: `PolicyService` no servidor antes do prompt e na hora do recibo. Restrito, sem
+    resposta ou com a venda desligada, o recibo vira Fragmentos fixos, sem sorteio;
+  - recibo idempotente pelo PurchaseId (o resultado fica gravado com ele);
+  - caixa gratuita com Bilhetes de Recompensa: 1 por missão do dia, 2 por missão da semana, teto de
+    4 por dia, 2 de boas-vindas. Nunca à venda. Créditos ($), que são vendidos, não abrem caixa;
+  - repetida vira Fragmentos de Arsenal (10/25/60/150/400). A troca por item garantido custa 10× o
+    valor da raridade;
+  - garantia progressiva pronta e desligada (`Caixas.PITY`): ligada, a tela mostra a chance
+    efetiva;
+  - itens novos, todos originais (sem insígnia real): 7 emblemas (`emb_*`, os do cartão), 6
+    plaquetas (`tag_*`, o nome do jogador gravado no cartão) e 6 molduras (`mol_*`, borda e faixa
+    do cartão). As skins entram com a raridade fixa por item;
+  - tela: aba CAIXAS na loja e, por cima dela, itens e probabilidades, abertura 3D, troca,
+    histórico e cartão;
+  - animação completa, curta ou desligada, e PULAR. Caixa paga só aparece para quem pode comprar;
+  - analytics: abertura por caixa, raridade e novo/repetido; Bilhetes e Fragmentos como economia
+    (fonte e gasto);
+  - textos em pt, en, es e vi.
+- **Conferido:** Lune 20 ok (100.000 sorteios por caixa, qui² abaixo do limite em todas) e Studio.
+  Detalhes e números em `testes/CAIXAS_2026-11-15.md`; auditoria em `MONETIZATION.md`.
+- **Erros achados no Studio e corrigidos:**
+  - remote com o tipo trocado parava a subida do servidor. O início das caixas ficou protegido, e
+    há teste do tipo dos remotes;
+  - recibo repetido refazia a abertura.
+- **Não conforme com o pedido, esperando o dono:** a loja antiga vende vantagem de jogo. São as
+  vantagens até +12% (D-101), os kits (D-72), renascer onde caiu, o veículo ao nascer (D-103), a
+  camuflagem contra os bots (D-85) e os reforços de XP. O pedido novo diz "nenhum item pago pode
+  criar vantagem competitiva", mas mexer nisso muda o que gente já comprou.
+- **Fica para os próximos lotes:** Game Passes novos (Identidade Militar, Uniformes Históricos,
+  Personalização de Armamentos, Fundador), Clube de Veteranos (assinatura), passe de 8 semanas,
+  pacotes de compra direta, painel de configuração, caixas 3D próprias com som.
+

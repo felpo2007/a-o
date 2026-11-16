@@ -59,7 +59,24 @@ end
 local function nameOf(id: string): string
 	local M = shared("Medalhas")
 	local names = M and M.NAMES
-	return if type(names) == "table" and type(names[id]) == "string" then names[id] else id
+	if type(names) == "table" and type(names[id]) == "string" then
+		return names[id]
+	end
+	-- D-173: emblemas, plaquetas e molduras das caixas (Shared/Cosmeticos)
+	local C = shared("Cosmeticos")
+	local it = C and C.info and C.info(id)
+	return if it then it.nome else id
+end
+-- cosmético das caixas (cor, sigla) ou nil
+local function cosmetico(id: any): any
+	if type(id) ~= "string" then
+		return nil
+	end
+	local C = shared("Cosmeticos")
+	return C and C.info and C.info(id)
+end
+local function rgb(t: any, def: Color3): Color3
+	return if type(t) == "table" and #t >= 3 then Color3.fromRGB(t[1], t[2], t[3]) else def
 end
 local DEFAULT_EMBLEM, DEFAULT_TITLE = "emb_padrao", "tit_soldado"
 
@@ -233,7 +250,7 @@ function CartaoJogador.placa(parent: Instance, w: number, h: number): Placa
 	f.Selectable = true
 	f.SelectionImageObject = UiKit.FOCUS
 	UiKit.corner(f, 4)
-	UiKit.edge(f, V.KHAKI, 1, 0.55)
+	local edge = UiKit.edge(f, V.KHAKI, 1, 0.55)
 	f.Parent = parent
 	local bar = Instance.new("Frame")
 	bar.Size = UDim2.new(0, px(5, 7), 1, 0)
@@ -261,6 +278,21 @@ function CartaoJogador.placa(parent: Instance, w: number, h: number): Placa
 	medalLine.Position = UDim2.fromOffset(x, px(58, 80))
 	medalLine.Size = UDim2.new(1, -x - px(10, 14), 0, px(26, 36))
 	medalLine.TextTruncate = Enum.TextTruncate.AtEnd
+	-- D-173: plaqueta de identificação (caixas): no canto de cima, com o nome gravado
+	local tag = Instance.new("Frame")
+	tag.Name = "Plaqueta"
+	tag.AnchorPoint = Vector2.new(1, 0)
+	tag.Position = UDim2.new(1, -px(8, 11), 0, px(8, 11))
+	tag.Size = UDim2.fromOffset(px(64, 88), px(30, 42))
+	tag.BorderSizePixel = 0
+	tag.Visible = false
+	UiKit.corner(tag, 7)
+	local tagEdge = UiKit.edge(tag, V.LINE, 2, 0)
+	tag.Parent = f
+	local tagText = UiKit.text2(tag, "", px(10, 14), V.BG, F.TITLE_MED)
+	tagText.Size = UDim2.fromScale(1, 1)
+	tagText.TextXAlignment = Enum.TextXAlignment.Center
+	tagText.TextTruncate = Enum.TextTruncate.AtEnd
 	local r = UiKit.realce(f, V.PANEL, V.PANEL_2, 1.015)
 	f.MouseEnter:Connect(function()
 		r.set(true)
@@ -287,6 +319,26 @@ function CartaoJogador.placa(parent: Instance, w: number, h: number): Placa
 		emblem.Text = if em == DEFAULT_EMBLEM
 			then "★"
 			else UiKit.upper(if cut then string.sub(emName, 1, cut - 1) else emName)
+		-- D-173: emblema das caixas: a sigla e as cores dele
+		local ce = cosmetico(em)
+		if ce and ce.sigla then
+			emblem.Text = ce.sigla
+		end
+		emblem.BackgroundColor3 = rgb(ce and ce.cor, V.PANEL_3)
+		emblem.TextColor3 = rgb(ce and ce.cor2, V.KHAKI)
+		-- moldura e plaqueta escolhidas (atributos do CaixaService)
+		local mol = cosmetico(player:GetAttribute("VT65Moldura"))
+		edge.Color = rgb(mol and mol.cor, V.KHAKI)
+		edge.Thickness = if mol then 2.5 else 1
+		edge.Transparency = if mol then 0 else 0.55
+		bar.BackgroundColor3 = rgb(mol and mol.cor2, V.KHAKI)
+		local tg = cosmetico(player:GetAttribute("VT65Plaqueta"))
+		tag.Visible = tg ~= nil
+		if tg then
+			tag.BackgroundColor3 = rgb(tg.cor, V.DIM)
+			tagEdge.Color = rgb(tg.cor2, V.LINE)
+			tagText.Text = UiKit.upper(player.DisplayName)
+		end
 		name.Text = UiKit.upper(player.DisplayName)
 		name.FontFace = UiKit.headFont(player.DisplayName)
 		-- "TÍTULO · POSTO" (o Lang traduz item a item)
@@ -307,6 +359,11 @@ function CartaoJogador.placa(parent: Instance, w: number, h: number): Placa
 		medalLine.TextColor3 = if #names > 0 then V.KHAKI else V.MUTED
 	end
 	paint(CampanhaCliente.get())
+	for _, attr in { "VT65Moldura", "VT65Plaqueta" } do
+		player:GetAttributeChangedSignal(attr):Connect(function()
+			paint(CampanhaCliente.get())
+		end)
+	end
 	return { frame = f, paint = paint }
 end
 

@@ -38,6 +38,7 @@ local Reforcos = require(ReplicatedStorage.Shared.Reforcos)
 local Skins = require(ReplicatedStorage.Shared.Skins)
 local Temporada = require(ReplicatedStorage.Shared.Temporada)
 local Vantagens = require(ReplicatedStorage.Shared.Vantagens)
+local CaixaService = require(script.Parent.CaixaService)
 local CampanhaEventos = require(script.Parent.CampanhaEventos)
 local CommerceService = require(script.Parent.CommerceService)
 local MatchService = require(script.Parent.MatchService)
@@ -364,7 +365,7 @@ end
 
 local function claimMission(p: Player, prof: any, id: string): boolean
 	local c = prof.campaign
-	for _, list in { c.missions.daily, c.missions.weekly } do
+	for k, list in { c.missions.daily, c.missions.weekly } do
 		for _, r in list do
 			if r.id == id and Missoes.claimable(r) then
 				local d = Missoes.def(id)
@@ -374,6 +375,9 @@ local function claimMission(p: Player, prof: any, id: string): boolean
 				r.claimed = true
 				ProgressionService.bonus(p, d.reward.xp, d.reward.cr, "Missão cumprida")
 				addStars(p, c, d.reward.stars)
+				-- D-173: Bilhete de Recompensa (caixa gratuita): 1 na do dia, 2 na da semana, com teto
+				-- por dia (CaixaRegras.TETO_DIA)
+				CaixaService.ganhar(p, if k == 1 then 1 else 2, "missao")
 				return true
 			end
 		end
@@ -888,6 +892,10 @@ end
 -- ===== início =====
 function CampanhaService.start()
 	CampanhaEventos.connect(onEvent)
+	-- D-173: cosmético ganho na caixa (emblema, plaqueta, moldura): o cartão vê na hora
+	CaixaService.onGrant = function(p: Player)
+		send(p, true)
+	end
 
 	-- multiplicadores de XP e créditos para o que se ganha jogando
 	ProgressionService.mult = function(p: Player): (number, number)

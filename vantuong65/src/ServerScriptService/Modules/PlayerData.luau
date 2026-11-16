@@ -198,6 +198,65 @@ function PlayerData.applyReceipt(player: Player, purchaseId: string, mutate: (Pr
 	return true, newData ~= nil
 end
 
+-- D-173: transação atômica (UpdateAsync) para as caixas. `fn(p)` muda o perfil GRAVADO e devolve
+-- um valor; nil cancela (nada é gravado). Antes de `fn`, o gravado ganha a posse que a memória tem e
+-- ainda não salvou (skins e cosméticos: união, como no salvamento), para a repetida ser reconhecida.
+-- Depois, a memória copia as caixas, a posse e os recibos gravados. Sem DataStore: só no Studio,
+-- em memória. Devolve ("ok" | "nada" | "loading" | "readonly" | "error", valor).
+function PlayerData.transact(player: Player, fn: (Profile) -> any): (string, any)
+	local mem = profiles[player]
+	if not mem then
+		return "loading", nil
+	end
+	local ds = getStore()
+	if not ds or player:GetAttribute("DataReadOnly") then
+		if not RunService:IsStudio() then
+			return "readonly", nil
+		end
+		local r = fn(mem)
+		return if r ~= nil then "ok" else "nada", r
+	end
+	local result: any = nil
+	local stored: Profile? = nil
+	local ok = retry(function()
+		return (ds :: DataStore):UpdateAsync(key(player.UserId), function(old)
+			local p = PlayerData.migrate(old)
+			ProfileSchema.mergeSkins(p.skins, mem.skins)
+			for id in mem.campaign.owned do
+				p.campaign.owned[id] = true
+			end
+			result = nil
+			stored = nil
+			local r = fn(p)
+			if r == nil then
+				return nil
+			end
+			result = r
+			prune(p)
+			stored = p
+			return p
+		end)
+	end, 3)
+	if not ok then
+		return "error", nil
+	end
+	local s = stored
+	if result == nil or not s then
+		return "nada", nil
+	end
+	mem.caixas = s.caixas
+	ProfileSchema.mergeSkins(mem.skins, s.skins)
+	for id in s.campaign.owned do
+		mem.campaign.owned[id] = true
+	end
+	for id, t in s.purchases do
+		if mem.purchases[id] == nil then
+			mem.purchases[id] = t
+		end
+	end
+	return "ok", result
+end
+
 local function applyDaily(p: Profile, r: Commerce.DailyResult)
 	p.daily = { run = r.state.run, lastDay = r.state.lastDay, total = r.state.total }
 	for _, id in r.items do

@@ -9,6 +9,7 @@ local MarketplaceService = game:GetService("MarketplaceService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
+local Caixas = require(ReplicatedStorage.Shared.Caixas) :: any
 local Commerce = require(ReplicatedStorage.Shared.Commerce)
 local CompraVeiculo = require(ReplicatedStorage.Shared.CompraVeiculo)
 local Net = require(ReplicatedStorage.Shared.Net)
@@ -38,6 +39,10 @@ CommerceService.onCampaign = nil :: ((player: Player, key: string, now: boolean)
 -- aplicado, deliver = entregar no lugar reservado (false = virou CI no perfil).
 CommerceService.vehicleReady = nil :: ((player: Player, spec: string) -> boolean)?
 CommerceService.vehicleGrant = nil :: ((player: Player, spec: string, deliver: boolean, credits: number) -> ())?
+-- D-173: recibo de caixa paga (posto pelo CaixaService: sorteio no servidor, idempotente pelo
+-- PurchaseId, PolicyService conferido na hora)
+CommerceService.crateReceipt =
+	nil :: ((player: Player, info: { [string]: any }, c: any) -> Enum.ProductPurchaseDecision)?
 
 local function passOwned(player: Player, id: number): boolean
 	if id == 0 then
@@ -274,6 +279,11 @@ local function processReceipt(info: { [string]: any }): Enum.ProductPurchaseDeci
 		return Enum.ProductPurchaseDecision.NotProcessedYet
 	end
 	local key = Commerce.productKeyById(info.ProductId)
+	local crate = Caixas.porProduto(key)
+	if crate then
+		local cr = CommerceService.crateReceipt
+		return if cr then cr(player, info, crate) else Enum.ProductPurchaseDecision.NotProcessedYet
+	end
 	local cp = if key then Commerce.campaignProduct(key) else nil
 	if cp then
 		return campaignReceipt(player, info, cp)

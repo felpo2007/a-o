@@ -283,6 +283,19 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
   - Servidores: o Roblox escolhe a região de cada servidor pelo jogador (os EUA já têm) e abre
     servidores novos sozinho quando os cheios lotam. O jogo é 30 contra 30; 1.000 jogadores ao
     mesmo tempo são ~17 servidores, abertos pelo próprio Roblox.
+- Pedido do dono (15/11, à noite): monetização completa (loja, passes, assinatura, passe, caixas
+  com chances, Fragmentos, conformidade com o Roblox):
+  - **Lote 57 (D-173): caixas de suprimentos.**
+    - Cinco caixas: a gratuita, com Bilhetes ganhos jogando, e quatro pagas, desligadas até o dono
+      reenviar o questionário de classificação.
+    - O sorteio é só no servidor, gravado antes da animação.
+    - O recibo é idempotente, e o PolicyService é conferido antes do prompt e no recibo.
+    - A repetida vira Fragmentos, que trocam por item garantido.
+    - Itens novos: 19 cosméticos do cartão (emblemas, plaquetas e molduras), mais 25 skins.
+    - Tela: aba CAIXAS, itens e probabilidades, abertura 3D, troca, histórico e cartão.
+    - Conferido: Lune 20 ok (100 mil sorteios por caixa) e Studio, com recibos simulados. Dois erros
+      achados no Studio foram corrigidos.
+    - Esperando o dono: o que fazer com a loja que vende vantagem; o questionário; a assinatura.
 
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;

@@ -68,8 +68,9 @@ Dashboard → Analytics.
 4. **Anúncios pagos (Ads Manager):** só depois de a retenção do dia 1 estar medida.
 
 ### Rejeitado de propósito
-- **Caixas aleatórias pagas:** exigem transparência de chances, são reguladas em vários países e vão
-  contra o tom histórico.
+- **Caixas aleatórias pagas:** rejeitadas na D-20 e **revistas na D-173** a pedido do dono. As caixas
+  existem (seção abaixo), mas a venda paga fica desligada até o dono reenviar o questionário de
+  classificação.
 - **Anúncios dentro do mundo (Immersive Ads):** um outdoor no Vietnã de 1965 quebra a imersão.
 - **Acesso pago ao jogo:** um 30v30 precisa de volume de jogadores.
 
@@ -82,6 +83,83 @@ Dashboard → Analytics.
 5. Opcional: Subscriptions (se a conta for elegível).
 6. Managed Pricing: opte por ele depois de ter vendas, porque itens abaixo do limite não entram nos
    testes.
+
+## Caixas de suprimentos (D-173, 2026-11-15)
+
+Código: `Shared/Caixas.luau` (tabelas e chances), `Shared/Cosmeticos.luau` (itens), `Modules/CaixaRegras.luau`
+(regras sobre o perfil), `Modules/CaixaService.luau` (servidor), `Controllers/CaixasTela.client.luau` (aba
+CAIXAS da loja). Testes: `tests/luau/caixas.luau`. Relatório: `testes/CAIXAS_2026-11-15.md`.
+
+| Caixa | Como se abre | Itens | Distribuição por raridade |
+|---|---|---|---|
+| Caixa de Recompensa | 1 Bilhete de Recompensa (ganho jogando) | 16 | 82 / 13 / 3 / 1 / 1% |
+| Caixa de Suprimentos | Robux, ref. R$ 49 (desligada) | 26 | 60 / 25 / 10 / 4 / 1% |
+| Caixa de Equipamentos Especiais | Robux, ref. R$ 99 (desligada) | 18 | — / 45 / 36 / 16 / 3% |
+| Caixa de Arsenal de Elite | Robux, ref. R$ 149 (desligada) | 14 | — / — / 40 / 48 / 12% |
+| Caixa de Operações Históricas | Robux, ref. R$ 99, só na Temporada 1 (desligada) | 11 | — / 50 / 30 / 15 / 5% |
+
+(comum / incomum / raro / épico / lendário). A chance de cada item está na tela, antes de comprar ou
+abrir, em "VER ITENS E PROBABILIDADES".
+
+**Economias separadas:**
+- **Bilhetes de Recompensa:** só jogando. Valem 1 por missão do dia, 2 por missão da semana (até 4 por
+  dia) e 2 de boas-vindas. Nunca à venda, nem por Robux, assinatura ou pacote.
+- **Fragmentos de Arsenal:** vêm da repetida (Comum 10, Incomum 25, Raro 60, Épico 150, Lendário 400).
+  Trocam por item garantido (custo de 10× o valor da raridade). Não viram Robux nem dinheiro.
+- **Créditos ($):** também vendidos por Robux (`PRODUCT_CREDITS_*`), por isso **não** abrem caixa.
+
+### Para ligar a venda paga (Creator Dashboard)
+1. **Questionário de classificação:** responda que há itens aleatórios pagos e reenvie. A política
+   manda reenviar quando uma atualização muda uma resposta.
+2. **Produtos:** crie os 4 Developer Products, só pelo nome:
+   `uv run --env-file .env python tools/roblox_cloud.py create-store PRODUCT_CRATE_SUPPLY PRODUCT_CRATE_SPECIAL PRODUCT_CRATE_ELITE PRODUCT_CRATE_HISTORIC`.
+   O script grava os IDs em `Commerce.IDS`. Ou crie no Creator Hub (Monetization → Developer
+   Products) e cole os IDs.
+3. **Ligar a venda:** troque `Caixas.PAGAS_LIGADAS` para `true` e o teste que cobra `false`
+   (`tests/luau/caixas.luau`). Registre no `DESIGN.md` e publique.
+4. **Preço regional** (opcional): ligue o Regional Pricing dos produtos. A tela já lê o preço com
+   `GetProductInfoAsync`. Não há trocas nem presentes, então o `GetUsersPriceLevelsAsync` não é
+   necessário.
+
+### Auditoria de conformidade (2026-11-15)
+Fontes oficiais lidas nesse dia: Paid Random Items, PolicyService, Developer Products, Subscriptions,
+Regional Pricing e Content Ratings (create.roblox.com/docs).
+
+| Item | Estado | Observação |
+|---|---|---|
+| Developer Products / ProcessReceipt | Conforme | grava antes de devolver `PurchaseGranted` (UpdateAsync); falha = `NotProcessedYet` |
+| Concessão idempotente | Conforme | o mesmo PurchaseId devolve o resultado gravado, sem novo sorteio (teste e Studio) |
+| Game Passes | Conforme | posse por `UserOwnsGamePassAsync` |
+| Assinatura | Pendente de configuração | ID vazio; criar no Creator Hub (Robux, mínimo R$ 49) |
+| Preço regional | Pendente de configuração | a leitura já é dinâmica; o opt-in dos produtos é do dono |
+| Pacotes pagos | Conforme | o Pacote de Recruta tem conteúdo fixo, sem aleatório |
+| Probabilidade de cada resultado | Conforme | lista completa, antes da compra, botão com texto (sem ícone solto) |
+| Soma de 100% | Conforme | pesos inteiros na base 100.000; soma conferida no teste e na partida |
+| PolicyService (ArePaidRandomItemsRestricted) | Conforme | no servidor, antes do prompt e no recibo; falha na consulta = bloqueio |
+| Compra indireta (moeda comprável) | Conforme | só Bilhete abre caixa; créditos vendidos por Robux não abrem |
+| Repetidas | Conforme | viram Fragmentos; a tela mostra o resultado final de cada item para o jogador |
+| Modificador de sorte | Não aplicável | não existe |
+| Garantia progressiva | Não aplicável | desligada; quando ligada, a tela mostra a chance efetiva do próximo sorteio |
+| Benefício mínimo | Conforme | todo resultado dá item ou Fragmentos |
+| Apostas e conversão em dinheiro | Conforme | nada de aposta, troca, saque ou resgate |
+| Troca de itens pagos | Não aplicável | itens presos à conta (`IsPaidItemTradingAllowed` só se a troca existir) |
+| Venda das caixas pagas | Pendente de configuração | `PAGAS_LIGADAS = false`, produtos não criados |
+| Classificação de conteúdo | Pendente de validação externa | o questionário é do dono |
+| Itens novos (emblemas, plaquetas, molduras) | Conforme | desenhos originais, sem insígnia real nem marca |
+| Interface honesta, sem pressão | Conforme | sem contador, urgência ou desconto; preço vem do Roblox |
+| Alternativa gratuita | Conforme | caixa gratuita e troca de Fragmentos |
+| **Igualdade competitiva** | **Não conforme** | a loja antiga vende vantagem: vantagens até +12% (D-101), kits (D-72), renascer onde caiu, veículo ao nascer (D-103), camuflagem contra os bots (D-85), reforços de XP. Decisão do dono |
+| Gasto de créditos ($) atômico | Não conforme | compras antigas com $ descontam na memória (achado; fora da D-173) |
+| Mouse, toque e controle | Conforme no código | falta conferir num celular e num Xbox reais |
+
+### Próximos lotes (plano de expansão)
+- Game Passes novos do pedido (Identidade Militar, Uniformes Históricos, Personalização de Armamentos,
+  Fundador): pedem os itens visuais (cartões, gravações, animação de inspeção).
+- Clube de Veteranos (assinatura): o dono cria no Creator Hub; o código já lê a assinatura.
+- Passe de temporada de 8 semanas: hoje são 6 semanas e 50 níveis (Temporada).
+- Pacotes de compra direta (Patrulha, Infantaria, Reconhecimento, Veterano) com conteúdo fixo.
+- Painel de configuração dos produtos, chances e temporadas; relatório de analytics por categoria.
+- Caixas 3D próprias (hoje são as caixas de munição do jogo) e som de abertura.
 
 Fontes consultadas em 2026-11-09:
 - [Roblox Q2 2026: carta aos acionistas (SEC)](https://www.sec.gov/Archives/edgar/data/0001315098/000162828026051059/ex991-robloxq22026earnin.htm)

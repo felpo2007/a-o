@@ -304,6 +304,36 @@ def cmd_create_store(only: set[str] | None = None) -> None:
             20,
             "3.000 créditos de intendência (50% a mais que o pacote de 500).",
         ),
+        # caixas pagas (D-173): só criadas pedindo a chave pelo nome (create-store
+        # PRODUCT_CRATE_...), depois de o dono reenviar o questionário e decidir ligar a venda
+        (
+            "PRODUCT_CRATE_SUPPLY",
+            "Caixa de Suprimentos",
+            49,
+            "1 item cosmético aleatório (plaquetas, emblemas, molduras, acabamentos). Chances "
+            "de cada item na tela antes da compra. Repetido vira Fragmentos. Sem vantagem.",
+        ),
+        (
+            "PRODUCT_CRATE_SPECIAL",
+            "Caixa de Equipamentos Especiais",
+            99,
+            "1 item cosmético aleatório (acabamentos de arma e uniformes). Chances de cada item na "
+            "tela antes da compra. Repetido vira Fragmentos. Sem vantagem em jogo.",
+        ),
+        (
+            "PRODUCT_CRATE_ELITE",
+            "Caixa de Arsenal de Elite",
+            149,
+            "1 item cosmético aleatório (uniformes, plaquetas e molduras raras). Chances de "
+            "cada item na tela antes da compra. Repetido vira Fragmentos. Sem vantagem.",
+        ),
+        (
+            "PRODUCT_CRATE_HISTORIC",
+            "Caixa de Operações Históricas",
+            99,
+            "1 item cosmético aleatório da temporada. Chances de cada item na tela antes da "
+            "compra. Repetido vira Fragmentos. Sem vantagem em jogo.",
+        ),
         # veículo ao nascer (D-103); preço do coordenador, perto do valor em créditos (PLACEHOLDER)
         (
             "PRODUCT_VEH_M151",
@@ -330,6 +360,9 @@ def cmd_create_store(only: set[str] | None = None) -> None:
     for key, name, price, desc in products:
         if f"store.{key}" in ids or (only is not None and key not in only):
             continue
+        if key.startswith("PRODUCT_CRATE_") and only is None:
+            continue  # D-173: caixa paga só pelo nome
+
         url = f"{API}/developer-products/v2/universes/{u}/developer-products"
         fields = {
             "name": name,

@@ -70,6 +70,8 @@ Net.Events = {
 	-- campanha: missões, passe, mercado, reforços, medalhas, cartão, vantagens (2026-11-12)
 	"Campanha_State", -- s->c: estado inteiro (Controllers/CampanhaCliente); traz result do último pedido
 	"Campanha_Action", -- c->s { op, ... }: reroll, claim_mission, claim_level, claim_all, market_buy...
+	"Suprimento_Resultado", -- s->c resultado: caixa paga entregue (recibo gravado), para a abertura (D-173)
+	"Suprimento_Comprar", -- c->s caixaId: confere tudo no servidor e abre o prompt da caixa paga (D-173)
 	-- D-108: caixa de munição do Suporte (Modules/CaixaMunicaoService + Controllers/CaixaMunicao.client)
 	"Caixa_Por", -- c->s { x, y, z, yaw }: pôr a caixa ali (o servidor confere tudo)
 	"Caixa_Aviso", -- s->c { msg, ok?, w? }: recusa, caixa posta ou o que pegou da caixa
@@ -87,6 +89,12 @@ Net.Functions = {
 	"Daily_Get", -- caderneta de serviço (recompensa diária) do jogador
 	"Progress_Get", -- estado da progressão (o mesmo do Progress_State)
 	"Campanha_Get", -- estado da campanha (o mesmo do Campanha_State)
+	-- D-173: caixas de suprimentos (Controllers/CaixasTela + CaixaService; "Caixa_*" acima é a
+	-- caixa de munição do Suporte)
+	"Suprimento_Get", -- estado: bilhetes, fragmentos, caixas com as chances deste jogador, troca
+	"Suprimento_Abrir", -- caixaId (gratuita): abre com bilhete; devolve o resultado já gravado
+	"Suprimento_Trocar", -- itemId: troca Fragmentos por item garantido
+	"Suprimento_Equipar", -- { slot = "tag" | "mol", item }: plaqueta ou moldura do cartão
 }
 
 local folderName = "VT65Remotes"

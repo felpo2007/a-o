@@ -34,10 +34,19 @@ local TrapService = require(Modules:WaitForChild("TrapService"))
 local PreviewService = require(Modules:WaitForChild("PreviewService"))
 local DailyRewardService = require(Modules:WaitForChild("DailyRewardService"))
 local ProgressionService = require(Modules:WaitForChild("ProgressionService"))
+local CaixaService = require(Modules:WaitForChild("CaixaService"))
 
 task.spawn(TerrainRuntime.start) -- gera o terreno se o place veio sem ele
 PlayerData.start()
 CommerceService.start()
+-- D-173: caixas de suprimentos (o recibo da caixa paga entra pelo CommerceService). Protegido: um
+-- erro nas caixas não pode parar a subida do resto do servidor
+do
+	local ok, err = pcall(CaixaService.start)
+	if not ok then
+		warn("[VT65] caixas fora do ar:", err)
+	end
+end
 DailyRewardService.start() -- recompensa diária (caderneta de serviço do lobby)
 TeamService.start()
 MatchService.start()

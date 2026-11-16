@@ -41,6 +41,7 @@ local Temporada = require(
 		then (game :: any):GetService("ReplicatedStorage").Shared.Temporada
 		else "../../ReplicatedStorage/Shared/Temporada"
 ) :: any
+local CaixaRegras = require(if script then (script :: any).Parent.CaixaRegras else "./CaixaRegras") :: any
 
 local ProfileSchema = {}
 
@@ -83,6 +84,9 @@ export type Profile = {
 	respawnCredits: number, -- v3: renasceres no lugar comprados em Robux e ainda não usados
 	skins: SkinsData, -- skins de arma, uniforme e camuflagem (Shared/Skins)
 	campaign: Campaign, -- v4: campanha (missões, passe, reforços, medalhas, cartão...)
+	-- D-173: caixas (bilhetes, fragmentos, resultados e recibos). Só muda por transação atômica
+	-- (PlayerData.transact); o salvamento comum mantém o que está gravado (CaixaRegras)
+	caixas: any,
 }
 
 -- ===== v4: campanha =====
@@ -302,6 +306,7 @@ function ProfileSchema.default(): Profile
 		respawnCredits = 0,
 		skins = { owned = {}, on = { US = {}, VC = {} } },
 		campaign = ProfileSchema.defaultCampaign(),
+		caixas = CaixaRegras.padrao(),
 	}
 end
 
@@ -441,6 +446,8 @@ function ProfileSchema.applySession(rec: Profile, stored: Profile, mem: Profile,
 	rec.skins = skins
 	-- campanha (v4): máximo e união do que só cresce; a escolha é a da sessão
 	rec.campaign = ProfileSchema.mergeCampaign(stored.campaign, mem.campaign)
+	-- D-173: as caixas só mudam por transação atômica: vale sempre o que está gravado
+	rec.caixas = stored.caixas
 	return { xp = xp, credits = credits, respawnCredits = rc }
 end
 
@@ -513,6 +520,8 @@ function ProfileSchema.migrate(raw: any): Profile
 	p.skins = ProfileSchema.sanitizeSkins(raw.skins)
 	-- v3 → v4: sem `campaign`, a campanha começa zerada (nada a converter)
 	p.campaign = ProfileSchema.sanitizeCampaign(raw.campaign)
+	-- D-173: sem `caixas`, tudo zerado
+	p.caixas = CaixaRegras.sanear(raw.caixas)
 	return p
 end
 
