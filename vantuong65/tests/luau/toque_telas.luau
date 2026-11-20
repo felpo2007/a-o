@@ -290,8 +290,8 @@ test("nada de teclado no toque: os nomes são os escritos nos botões; o Input.g
 		string.find(input, 'if device == "touch" then\n\t\treturn nil, ToqueTelas.TOUCH_NAME[actionId] or ""', 1, true),
 		"Input.glyph sem o ramo do toque"
 	)
-	-- a roda não mostra os números 1–8 no toque; o painel de teclas some no toque
-	assert(string.find(src("Wheel.luau"), "not Input.touchActive() -- as teclas 1–8 são do teclado", 1, true))
+	-- a roda não mostra os números no toque; o painel de teclas some no toque
+	assert(string.find(src("Wheel.luau"), "not Input.touchActive() -- as teclas são do teclado", 1, true))
 	assert(string.find(src("PainelComandos.client.luau"), "ToqueUi.active()", 1, true))
 	-- no toque os avisos de interação do Roblox (que podem mostrar a tecla) dão lugar ao INTERAGIR
 	local auto = src("ToqueAuto.luau")

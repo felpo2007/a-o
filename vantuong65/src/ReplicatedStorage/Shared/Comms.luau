@@ -16,17 +16,21 @@ Comms.MESSAGES = {
 	no_radio = "Sem rádio: só o operador de rádio fala com o comandante",
 } :: { [string]: string }
 
-export type Item = { id: string, label: string }
+-- D-190: art, count e equipped só na roda de equipamento (Controllers/RodaArte e Wheel)
+export type Item = { id: string, label: string, art: string?, count: string?, equipped: boolean? }
 
--- Roda de equipamento (LB segurado): 8 posições fixas.
+-- Roda de equipamento (LB segurado). D-190 (dono: roda "inspirada na referência de GTA", com as armas e
+-- os itens): 9 posições fixas, as duas armas no alto (o nome e o desenho vêm da vaga), depois as
+-- granadas, os curativos, a pá, construir e a ferramenta do papel. O binóculo saiu (Equipar.REMOVED).
 Comms.EQUIP = {
-	{ id = "bandage", label = "Bandagem" },
-	{ id = "tourniquet", label = "Torniquete" },
+	{ id = "slot:1", label = "Arma principal" },
+	{ id = "slot:2", label = "Arma secundária" },
 	{ id = "frag", label = "Granada" },
 	{ id = "smoke", label = "Fumaça" },
-	{ id = "build", label = "Construir" },
-	{ id = "binoculars", label = "Binóculo" },
+	{ id = "bandage", label = "Bandagem" },
+	{ id = "tourniquet", label = "Torniquete" },
 	{ id = "shovel", label = "Pá de trincheira" },
+	{ id = "build", label = "Construir" },
 	{ id = "role_tool", label = "Ferramenta do papel" },
 } :: { Item }
 

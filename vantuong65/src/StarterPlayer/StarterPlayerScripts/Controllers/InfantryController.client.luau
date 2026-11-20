@@ -13,6 +13,7 @@ local Comms = require(ReplicatedStorage.Shared.Comms)
 local Equipar = require(ReplicatedStorage.Shared.Equipar)
 local InputMap = require(ReplicatedStorage.Shared.InputMap)
 local Radio = require(ReplicatedStorage.Shared.Radio)
+local Weapons = require(ReplicatedStorage.Shared.Weapons) :: any
 local Logistics = require(ReplicatedStorage.Shared.Logistics)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Bus = require(script.Parent.Bus)
@@ -21,6 +22,7 @@ local Toast = require(script.Parent.Toast)
 local ToqueUi = require(script.Parent.ToqueUi)
 local UiKit = require(script.Parent.UiKit)
 local ViewMode = require(script.Parent.ViewMode)
+local RodaArte = require(script.Parent.RodaArte)
 local Wheel = require(script.Parent.Wheel)
 
 local player = Players.LocalPlayer
@@ -267,8 +269,23 @@ local role = function(): string
 	return if type(r) == "string" then r else ""
 end
 
+-- D-190: as duas armas na roda ("slot:1", "slot:2"): dá quando a vaga tem arma
+local function vagas(): { string }
+	local v = player:GetAttribute("Vagas")
+	return if type(v) == "string" and v ~= "" then string.split(v, ",") else {}
+end
+local function slotOf(id: string): number?
+	return if string.sub(id, 1, 5) == "slot:" then tonumber(string.sub(id, 6)) else nil
+end
+
 local function equipEnabled(id: string): boolean
-	if id == "shovel" then
+	local n = slotOf(id)
+	if n then
+		local w = vagas()[n]
+		return w ~= nil and w ~= "" and w ~= "launcher"
+	elseif Equipar.REMOVED[id] then
+		return false -- D-190: o binóculo saiu do jogo
+	elseif id == "shovel" then
 		return true -- cava em setor próprio (o servidor recusa e explica quando não pode)
 	elseif id == "frag" then
 		return ((player:GetAttribute("Frags") :: number?) or 0) > 0
@@ -298,6 +315,15 @@ end)
 
 local function useItem(id: string)
 	lastItem = id
+	-- D-190: as armas da roda trocam pela vaga (a mesma troca das teclas 1 e 2, com o saque)
+	local n = slotOf(id)
+	if n then
+		Bus.fire("vaga_usar", n)
+		return
+	end
+	if Equipar.REMOVED[id] then
+		return
+	end
 	-- toque (Parte 13): pá e obras passam pela prévia (ObraToque: girar, confirmar, cancelar)
 	local touch = ToqueUi.active()
 	if touch and (id == "shovel" or string.sub(id, 1, 6) == "build:") then
@@ -330,7 +356,7 @@ local function useItem(id: string)
 			Bus.fire("socorro_perto") -- D-129: trata ou reanima o companheiro a até 3 m (MedicalController)
 		end
 	else
-		Bus.fire("equip_item", id) -- bandagem, torniquete, binóculo (Medical/Weapon)
+		Bus.fire("equip_item", id) -- bandagem, torniquete (Medical/Weapon)
 	end
 end
 
@@ -349,13 +375,61 @@ if game:GetService("RunService"):IsStudio() then
 end
 
 local wheelOpen: string? = nil
--- D-129: a roda com o nome da ferramenta do papel (Caixa de munição, Lançador, Socorrer, Ordens)
-local function equipList(): { Comms.Item }
-	local out = table.clone(Comms.EQUIP)
-	for i, it in out do
-		if it.id == "role_tool" then
-			out[i] = { id = it.id, label = Equipar.roleToolLabel(role()) }
+-- curativos e torniquetes que sobram (o servidor manda no Medical_State)
+local medical = { bandages = 0, tourniquets = 0 }
+Net.event("Medical_State").OnClientEvent:Connect(function(st: any)
+	if type(st) == "table" then
+		medical.bandages = if type(st.bandages) == "number" then st.bandages else medical.bandages
+		medical.tourniquets = if type(st.tourniquets) == "number" then st.tourniquets else medical.tourniquets
+	end
+end)
+local function num(name: string): number?
+	local v = player:GetAttribute(name)
+	return if type(v) == "number" then v else nil
+end
+
+-- D-129: a roda com o nome da ferramenta do papel (Caixa de munição, Lançador, Socorrer, Ordens).
+-- D-190 (dono: roda "inspirada na referência de GTA", imagens das armas e dos itens): as duas armas
+-- com o nome delas, o desenho de cada ficha (Controllers/RodaArte), a munição da arma na mão
+-- (carregador/reserva), as granadas, fumaças, curativos e torniquetes que sobram e o que está na mão.
+local function equipList(): { Wheel.Item }
+	local out: { Wheel.Item } = {}
+	local vs = vagas()
+	local cur = num("Vaga")
+	local inHand = player:GetAttribute("ItemNaMao")
+	for _, it in Comms.EQUIP do
+		local label, count, equipped, wid = it.label, nil :: string?, false, nil :: string?
+		local n = slotOf(it.id)
+		if n then
+			local w = vs[n]
+			if w and w ~= "" and w ~= "launcher" then
+				wid = w
+				local fac = player:GetAttribute("Faction")
+				local short = Weapons.shortName(w, if type(fac) == "string" then fac else nil)
+				label = if type(short) == "string" and short ~= "" then short else label
+				equipped = inHand == nil and cur == n
+				local mag, spare = num("Carregador"), num("Reserva")
+				if equipped and mag and spare then
+					count = string.format("%d/%d", mag, spare)
+				end
+			end
+		elseif it.id == "frag" or it.id == "smoke" then
+			count = tostring(num(if it.id == "frag" then "Frags" else "Smokes") or 0)
+			equipped = inHand == it.id
+		elseif it.id == "bandage" then
+			count = tostring(medical.bandages)
+		elseif it.id == "tourniquet" then
+			count = tostring(medical.tourniquets)
+		elseif it.id == "role_tool" then
+			label = Equipar.roleToolLabel(role())
 		end
+		table.insert(out, {
+			id = it.id,
+			label = label,
+			art = RodaArte.artFor(it.id, wid, role()),
+			count = count,
+			equipped = equipped,
+		})
 	end
 	return out
 end

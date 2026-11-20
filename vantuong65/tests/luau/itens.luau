@@ -98,7 +98,11 @@ test("teclado: 1 a 0 escolhem a vaga, roda do mouse e Y trocam; sem conflito no 
 				assert(a.pad == "ButtonY" and a.padPress == "tap" and a.key == nil, "Y troca (a tecla 1 é a vaga 1)")
 			end
 		end
-		assert(found, id .. " sem ação")
+		-- D-190: a vaga 7 era o binóculo, que saiu do jogo (sem tecla)
+		assert(found or Equipar.REMOVED[Equipar.SLOTS[n].id], id .. " sem ação")
+		if Equipar.REMOVED[Equipar.SLOTS[n].id] then
+			assert(not found, id .. ": a tecla do item removido continua")
+		end
 	end
 	assert(#InputMap.keyConflicts(InputMap.DEFAULTS) == 0, table.concat(InputMap.keyConflicts(InputMap.DEFAULTS), "; "))
 	assert(#InputMap.conflicts(InputMap.DEFAULTS) == 0, table.concat(InputMap.conflicts(InputMap.DEFAULTS), "; "))
@@ -372,6 +376,87 @@ test("fumaça: as nuvens vêm do relógio (o formato antigo de peça com R ainda
 	assert(#Smoke.clouds(folder, Smoke.DURATION_S + 1) == 1, "só a peça antiga")
 end)
 
+-- D-190 (dono: roda de equipamento "inspirada na referência de GTA", com as imagens das armas e dos
+-- itens; "retire o binóculo das formas de obtenção e uso durante a partida")
+test("D-190: o binóculo saiu (vaga, roda, teclas, tutorial, toque) sem mexer na ótica do veículo", function()
+	assert(Equipar.REMOVED.binoculars == true)
+	assert(not Equipar.itemOk("binoculars", "rifleman", { frags = 1, smokes = 1 }, true), "indisponível")
+	assert(Equipar.SLOTS[7].id == "binoculars" and Equipar.SLOTS[8].id == "shovel", "as outras vagas não mudam")
+	local vehicle = false
+	for _, a in InputMap.ACTIONS do
+		assert(a.id ~= "binoculars" and a.id ~= "slot_7", "atalho do binóculo: " .. a.id)
+		vehicle = vehicle or a.id == "v_binoculars"
+	end
+	assert(vehicle, "a ótica do comandante do veículo continua")
+	local Comms = require(S .. "Comms") :: any
+	for _, it in Comms.EQUIP do
+		assert(it.id ~= "binoculars", "roda")
+	end
+	assert(
+		not string.find(fs.readFile("src/ReplicatedStorage/Shared/Tutorial.luau"), '"binoculars"', 1, true),
+		"tutorial"
+	)
+	local C = "src/StarterPlayer/StarterPlayerScripts/Controllers/"
+	assert(not string.find(fs.readFile(C .. "ToqueTelas.luau"), "binoculars =", 1, true), "toque")
+	local wc = fs.readFile(C .. "WeaponController.client.luau")
+	assert(string.find(wc, "if Equipar.REMOVED.binoculars and not binoculars then", 1, true), "trava no binóculo")
+	assert(string.find(wc, "if not def or Equipar.REMOVED[def.id] then", 1, true), "vaga 7 não faz nada")
+	local bar = fs.readFile(C .. "BarraItens.client.luau")
+	assert(string.find(bar, "c.b.Visible = not Equipar.REMOVED[def.id]", 1, true), "a faixa esconde a vaga")
+	-- um ajuste salvo para a tecla do binóculo é lixo agora: o validate tira
+	local s = InputMap.validate({ keymap = { ["infantry.binoculars"] = "B" } })
+	assert(s.keymap == nil or s.keymap["infantry.binoculars"] == nil, "ajuste antigo sai")
+end)
+
+test("D-190: a roda de equipamento com as armas, os desenhos, a quantidade e o que está na mão", function()
+	local Comms = require(S .. "Comms") :: any
+	assert(#Comms.EQUIP == 9 and Comms.EQUIP[1].id == "slot:1" and Comms.EQUIP[2].id == "slot:2")
+	-- a escolha não pula entre vizinhos perto da divisa; no centro fica a que estava
+	local n = 9
+	local slice = 360 / n
+	local function at(deg: number): (number, number)
+		return math.sin(math.rad(deg)), math.cos(math.rad(deg))
+	end
+	local x, y = at(slice / 2 + 3) -- 3° depois da divisa entre 1 e 2
+	assert(InputMap.wheelIndex(x, y, n) == 2, "sem folga: já é o 2")
+	assert(InputMap.wheelIndexSticky(x, y, n, 1) == 1, "com folga: fica no 1")
+	x, y = at(slice / 2 + 10)
+	assert(InputMap.wheelIndexSticky(x, y, n, 1) == 2, "passou da folga: vai para o 2")
+	assert(InputMap.wheelIndexSticky(0.1, 0.1, n, 4) == 4, "no centro fica o que estava")
+	assert(InputMap.wheelIndexSticky(0.1, 0.1, n, nil) == nil, "no centro sem escolha")
+	x, y = at(-slice / 2 - 3) -- do 1 para o 9 (passa pelo zero)
+	assert(InputMap.wheelIndexSticky(x, y, n, 1) == 1, "do 1 para o 9, perto da divisa: fica")
+	local x9, y9 = at(-slice)
+	assert(InputMap.wheelIndexSticky(x9, y9, n, 1) == 9, "no meio do 9: vai")
+	local C = "src/StarterPlayer/StarterPlayerScripts/Controllers/"
+	local wheel = fs.readFile(C .. "Wheel.luau")
+	for _, t in
+		{
+			"local MAX = 10",
+			"RodaArte.show(s.vp, it.art)",
+			'eq.Text = "EM USO"',
+			"InputMap.wheelIndexSticky(r.X, r.Y, #items, selected)",
+			"Zero = 10,",
+		}
+	do
+		assert(string.find(wheel, t, 1, true), "Wheel: " .. t)
+	end
+	local inf = fs.readFile(C .. "InfantryController.client.luau")
+	for _, t in
+		{
+			"art = RodaArte.artFor(it.id, wid, role())",
+			'Bus.fire("vaga_usar", n)',
+			'count = string.format("%d/%d", mag, spare)',
+			"count = tostring(medical.bandages)",
+		}
+	do
+		assert(string.find(inf, t, 1, true), "InfantryController: " .. t)
+	end
+	local arte = fs.readFile(C .. "RodaArte.luau")
+	for _, t in { "VT65WeaponArt", "GrenadeArt.hand", "PaArte.build", "ItemAnim.PROPS.curativo" } do
+		assert(string.find(arte, t, 1, true), "RodaArte usa o modelo do jogo: " .. t)
+	end
+end)
 print(string.format("%d ok, %d falhas", passed, failed))
 if failed > 0 then
 	process.exit(1)

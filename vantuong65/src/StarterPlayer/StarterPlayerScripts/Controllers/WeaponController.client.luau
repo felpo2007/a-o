@@ -452,8 +452,12 @@ local function launchRocket()
 	end
 end
 
--- binóculo (tecla B, direcional ↑, roda de equipamento, vaga 7)
+-- binóculo (era: tecla B, roda de equipamento, vaga 7). D-190: saiu do jogo (Equipar.REMOVED); só
+-- guarda, se algo ainda o tiver ligado
 local function toggleBinoculars()
+	if Equipar.REMOVED.binoculars and not binoculars then
+		return
+	end
 	binoculars = not binoculars
 	binoc.Visible = binoculars
 	player:SetAttribute("Binoculars", binoculars) -- local: a marcação vira "alvo" (área aproximada)
@@ -648,8 +652,8 @@ end
 -- Usa a vaga n (teclas 1 a 0, toque na faixa das vagas)
 local function useSlot(n: number)
 	local def = Equipar.SLOTS[n]
-	if not def then
-		return
+	if not def or Equipar.REMOVED[def.id] then
+		return -- D-190: a vaga 7 (o binóculo) não faz nada
 	end
 	if def.kind == "weapon" then
 		switchTo(n, false)

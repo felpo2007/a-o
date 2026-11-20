@@ -66,7 +66,6 @@ local GRENADES = act("equip_wheel", "Roda de equipamento: {a}. Granadas e fumaç
 Tutorial.ROLE = {
 	commander = {
 		act("comm_wheel", "Roda de comunicação: {a}. A página Comando pede fogo de apoio no mapa."),
-		act("binoculars", "Binóculo: {a}."),
 	},
 	-- D-108: o líder leva o rádio do squad (era do operador de rádio)
 	squad_leader = {
@@ -97,7 +96,6 @@ Tutorial.ROLE = {
 	sniper = {
 		act("zeroing", "Alça da luneta, 100 m a mais: {a}. Tocar o seletor desce."),
 		act("hold_breath", "Prender a respiração na luneta: {a}. Segure pouco: depois o fôlego falta."),
-		act("binoculars", "Binóculo: {a}."),
 	},
 	tank_crew = {
 		ENTER,

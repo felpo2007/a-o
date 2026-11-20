@@ -87,14 +87,12 @@ act("slot_3", "infantry", nil, "press", "Three", "press", "Granada")
 act("slot_4", "infantry", nil, "press", "Four", "press", "Fumaça")
 act("slot_5", "infantry", nil, "press", "Five", "press", "Bandagem")
 act("slot_6", "infantry", nil, "press", "Six", "press", "Torniquete")
-act("slot_7", "infantry", nil, "press", "Seven", "press", "Binóculo")
 act("slot_8", "infantry", nil, "press", "Eight", "press", "Pá de trincheira")
 act("slot_9", "infantry", nil, "press", "Nine", "press", "Construir")
 act("slot_0", "infantry", nil, "press", "Zero", "press", "Ferramenta do papel")
 -- Direcional ↑ (v43, pedido do dono: "onde está o botão para 3ª pessoa? coloque em uma das setas do
--- controle"): tocar troca 1ª/3ª pessoa, segurar troca o ombro. O binóculo segue na roda de
--- equipamento (LB) e na tecla B. No teclado, O e I.
-act("binoculars", "infantry", nil, "press", "B", "press", "Binóculo")
+-- controle"): tocar troca 1ª/3ª pessoa, segurar troca o ombro. No teclado, O e I. D-190: o binóculo
+-- saiu do jogo (a tecla B e a vaga 7 também).
 act("view_toggle", "infantry", "DPadUp", "tap", "O", "press", "1ª / 3ª pessoa")
 act("shoulder_swap", "infantry", "DPadUp", "hold", "I", "press", "Trocar ombro (3ª pessoa)")
 act("quick_bandage", "infantry", "DPadDown", "tap", "G", "press", "Bandagem rápida")
@@ -442,6 +440,13 @@ function InputMap.sanitizeTouchCustom(raw: any): { [string]: { [string]: TouchSl
 	return out
 end
 
+-- D-190: as ações que existem ("ctx.id"); ajuste salvo de uma ação que saiu do jogo (o binóculo) é
+-- descartado, sem mexer nos outros
+local KNOWN: { [string]: boolean } = {}
+for _, a in A do
+	KNOWN[a.ctx .. "." .. a.id] = true
+end
+
 -- Saneia configurações vindas do cliente ou do DataStore (o servidor também chama).
 function InputMap.validate(raw: any): Settings
 	local out = table.clone(InputMap.DEFAULTS) :: any
@@ -468,7 +473,14 @@ function InputMap.validate(raw: any): Settings
 	if type(raw.remap) == "table" then
 		local n = 0
 		for k, v in raw.remap do
-			if type(k) == "string" and type(v) == "string" and #k < 48 and #v < 32 and not InputMap.RESERVED[v] then
+			if
+				type(k) == "string"
+				and KNOWN[k]
+				and type(v) == "string"
+				and #k < 48
+				and #v < 32
+				and not InputMap.RESERVED[v]
+			then
 				n += 1
 				if n > 80 then
 					break
@@ -480,7 +492,14 @@ function InputMap.validate(raw: any): Settings
 	if type(raw.keymap) == "table" then
 		local n = 0
 		for k, v in raw.keymap do
-			if type(k) == "string" and type(v) == "string" and #k < 48 and #v < 32 and not InputMap.KEY_RESERVED[v] then
+			if
+				type(k) == "string"
+				and KNOWN[k]
+				and type(v) == "string"
+				and #k < 48
+				and #v < 32
+				and not InputMap.KEY_RESERVED[v]
+			then
 				n += 1
 				if n > 80 then
 					break
@@ -691,6 +710,32 @@ function InputMap.wheelIndex(x: number, y: number, n: number, deadzone: number?)
 	end
 	local slice = 2 * math.pi / n
 	return math.floor((a + slice / 2) / slice) % n + 1
+end
+
+-- D-190 (dono: "evite oscilações entre setores"): como wheelIndex, mas o setor escolhido (cur) só
+-- muda quando a direção passa a mais de meio setor + hysDeg do centro dele; no centro (zona morta),
+-- fica o que estava (soltar o analógico não apaga a escolha).
+InputMap.WHEEL_HYSTERESIS_DEG = 7
+function InputMap.wheelIndexSticky(
+	x: number,
+	y: number,
+	n: number,
+	cur: number?,
+	deadzone: number?,
+	hysDeg: number?
+): number?
+	local idx = InputMap.wheelIndex(x, y, n, deadzone)
+	if not idx then
+		return cur
+	end
+	if not cur or cur == idx or cur > n then
+		return idx
+	end
+	local a = math.atan2(x, y)
+	local center = (cur - 1) * 2 * math.pi / n
+	local d = math.abs((a - center + math.pi) % (2 * math.pi) - math.pi)
+	local keep = math.pi / n + math.rad(hysDeg or InputMap.WHEEL_HYSTERESIS_DEG)
+	return if d <= keep then cur else idx
 end
 
 -- ===== cursor com ímã (mapa e spawn) =====

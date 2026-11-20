@@ -114,15 +114,22 @@ local function render()
 	end
 	local touch = Input.touchActive()
 	local vp = workspace.CurrentCamera.ViewportSize
-	local w = math.floor(math.clamp((vp.X - 40) / #cards - 4, 46, if TV then 96 else 68))
+	-- D-190: a vaga do item que saiu do jogo (o binóculo) some da faixa
+	local shown = 0
+	for n in cards do
+		if not Equipar.REMOVED[Equipar.SLOTS[n].id] then
+			shown += 1
+		end
+	end
+	local w = math.floor(math.clamp((vp.X - 40) / shown - 4, 46, if TV then 96 else 68))
 	-- no toque fica na zona "vagas" do HUD (Shared/Toque.ZONES: no alto, sem botão por baixo; antes
 	-- ficava a 17% da altura e cobria os botões de cima, pegando o toque deles)
 	local zone = if touch then ToqueUi.zoneIn(gui, "vagas") else nil
 	if zone then
-		w = math.floor(math.clamp(zone.w / #cards - 4, 30, 68))
+		w = math.floor(math.clamp(zone.w / shown - 4, 30, 68))
 	end
 	local h = math.floor(w * 0.7)
-	row.Size = UDim2.fromOffset((w + 4) * #cards, h)
+	row.Size = UDim2.fromOffset((w + 4) * shown, h)
 	if zone then
 		row.AnchorPoint = Vector2.new(0.5, 0)
 		row.Position = UDim2.fromOffset(zone.x + zone.w / 2, zone.y)
@@ -133,6 +140,7 @@ local function render()
 	end
 	for n, c in cards do
 		local def = Equipar.SLOTS[n]
+		c.b.Visible = not Equipar.REMOVED[def.id]
 		local label, on, lit
 		if def.kind == "weapon" then
 			local id = vagas[n]

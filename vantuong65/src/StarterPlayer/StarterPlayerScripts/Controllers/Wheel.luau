@@ -1,6 +1,9 @@
 --!strict
 -- Roda radial (Parte 12.5): seleção pelo analógico direito com zona morta de 40% (ou pelo mouse /
--- teclas 1–8); soltar o botão que abriu confirma; B cancela. Itens em posições fixas.
+-- teclas 1–9 e 0); soltar o botão que abriu confirma; B cancela. Itens em posições fixas.
+-- D-190 (dono: roda de equipamento "inspirada na referência de GTA", com imagens): a ficha de quem tem
+-- desenho (Item.art) mostra o próprio modelo do jogo (Controllers/RodaArte), a quantidade e "EM USO";
+-- a escolha muda só a mais de meio setor + 7° do centro do setor escolhido (InputMap.wheelIndexSticky).
 -- Visual (pedido do dono, 2026-11-11: "melhore ainda mais todas as interfaces"): mostrador de
 -- bússola oliva com filete cáqui, ponteiro de latão que gira até o item, fichas em volta (a
 -- escolhida acende em latão e cresce), o nome do item escolhido no miolo e as dicas em chip. Entra
@@ -14,15 +17,18 @@ local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 
+local Comms = require(game:GetService("ReplicatedStorage").Shared.Comms)
 local InputMap = require(game:GetService("ReplicatedStorage").Shared.InputMap)
 local Toque = require(game:GetService("ReplicatedStorage").Shared.Toque)
 local Bus = require(script.Parent.Bus)
 local Input = require(script.Parent.Input)
+local RodaArte = require(script.Parent.RodaArte)
 local UiKit = require(script.Parent.UiKit)
 
 local Wheel = {}
 
-export type Item = { id: string, label: string }
+-- D-190: art (o desenho do RodaArte), count (munição ou quantidade) e equipped (o que está na mão)
+export type Item = Comms.Item
 
 local TV = UiKit.tv()
 local function px(pc: number, tv: number): number
@@ -31,9 +37,13 @@ end
 -- Fichas numa elipse (D-93; no Studio as fichas 5 e 6 se sobrepunham e a 1 encostava no anel):
 -- mais largo que alto, as diagonais ficam fora do alcance das de cima/baixo e o anel de marcas
 -- (0,46) fica por dentro de todas, com folga até na ficha acesa (escala 1,1).
-local SIZE = px(520, 728)
+-- D-190 (roda de equipamento com imagens): até MAX fichas (a de equipamento tem 9: as duas armas e
+-- os itens); com desenho, a ficha é maior (imagem em cima, nome e quantidade embaixo).
+local MAX = 10
+local SIZE = px(600, 840)
 local RX, RY = SIZE * 0.42, SIZE * 0.34
 local CARD_W, CARD_H = px(136, 190), px(58, 80)
+local ART_W, ART_H = px(150, 210), px(108, 150)
 
 local gui = UiKit.screen("VT65Wheel", 40)
 gui.Enabled = false
@@ -54,7 +64,7 @@ center.Size = UDim2.fromOffset(SIZE, SIZE)
 center.BackgroundTransparency = 1
 center.Parent = gui
 -- a área medida inclui as fichas dos lados (passam do mostrador)
-local fit = UiKit.fit(gui, center, 2 * (RX + CARD_W * 0.55), SIZE, 10)
+local fit = UiKit.fit(gui, center, 2 * (RX + ART_W * 0.55), SIZE, 10)
 
 local function circle(parent: Instance, d: number, color: Color3, tr: number): Frame
 	local f = Instance.new("Frame")
@@ -136,19 +146,31 @@ hint.Size = UDim2.new(0.86, 0, 0.16, 0)
 hint.TextXAlignment = Enum.TextXAlignment.Center
 hint.TextTransparency = 0.2
 
-type Slot = { f: TextButton, t: TextLabel, n: TextLabel, sc: UIScale, e: UIStroke, on: boolean?, hot: boolean? }
+type Slot = {
+	f: TextButton,
+	t: TextLabel,
+	n: TextLabel,
+	sc: UIScale,
+	e: UIStroke,
+	vp: ViewportFrame,
+	cnt: TextLabel,
+	eq: TextLabel,
+	on: boolean?,
+	hot: boolean?,
+	key: string?, -- o que foi desenhado (nome, desenho, quantidade, em uso)
+}
 local slots: { Slot } = {}
-for i = 1, 8 do
-	local a = (i - 1) * math.pi / 4
+for i = 1, MAX do
 	local f = Instance.new("TextButton") -- o mouse também escolhe pela ficha
+	f.Name = string.format("Ficha%d", i)
 	f.AnchorPoint = Vector2.new(0.5, 0.5)
-	f.Position = UDim2.new(0.5, math.sin(a) * RX, 0.5, -math.cos(a) * RY)
 	f.Size = UDim2.fromOffset(CARD_W, CARD_H)
 	f.BackgroundColor3 = UiKit.DRAB
 	f.BackgroundTransparency = 0.08
 	f.AutoButtonColor = false
 	f.Text = ""
 	f.Selectable = false
+	f.Visible = false
 	f.ZIndex = 3
 	f.Parent = center
 	UiKit.corner(f, 4)
@@ -156,22 +178,47 @@ for i = 1, 8 do
 	local e = UiKit.edge(f, UiKit.KHAKI, 1, 0.6)
 	local sc = Instance.new("UIScale")
 	sc.Parent = f
+	local vp = RodaArte.frame(f)
+	vp.Visible = false
+	vp.ZIndex = 4
 	local t = UiKit.rotulo(f, 14, UiKit.KHAKI, UiKit.HEAD_FONT)
-	t.Position = UDim2.fromOffset(px(8, 12), 0)
-	t.Size = UDim2.new(1, -px(16, 24), 1, 0)
+	t.Name = "Nome"
 	t.TextXAlignment = Enum.TextXAlignment.Center
 	t.TextWrapped = true
-	t.ZIndex = 4
+	t.ZIndex = 5
 	local n = UiKit.rotulo(f, 11, UiKit.NIGHT, UiKit.HEAD_FONT)
+	n.Name = "Tecla"
 	n.Position = UDim2.fromOffset(3, 3)
 	n.Size = UDim2.fromOffset(px(16, 24), px(16, 24))
 	n.BackgroundColor3 = UiKit.KHAKI
 	n.BackgroundTransparency = 0.1
 	n.TextXAlignment = Enum.TextXAlignment.Center
-	n.Text = tostring(i)
-	n.ZIndex = 5
+	n.Text = tostring(i % 10)
+	n.ZIndex = 6
 	UiKit.corner(n, 3)
-	slots[i] = { f = f, t = t, n = n, sc = sc, e = e }
+	-- quantidade (munição, granadas, curativos), no alto à direita
+	local cnt = UiKit.rotulo(f, 12, UiKit.CARD, UiKit.HEAD_FONT)
+	cnt.Name = "Quantidade"
+	cnt.AnchorPoint = Vector2.new(1, 0)
+	cnt.Position = UDim2.new(1, -px(5, 7), 0, px(3, 4))
+	cnt.Size = UDim2.fromOffset(px(70, 98), px(16, 22))
+	cnt.TextXAlignment = Enum.TextXAlignment.Right
+	cnt.ZIndex = 6
+	cnt.Visible = false
+	-- o que está na mão
+	local eq = UiKit.rotulo(f, 10, UiKit.NIGHT, UiKit.HEAD_FONT)
+	eq.Name = "EmUso"
+	eq.AnchorPoint = Vector2.new(0.5, 0.5)
+	eq.Position = UDim2.new(0.5, 0, 0, 0)
+	eq.Size = UDim2.fromOffset(px(58, 80), px(15, 20))
+	eq.BackgroundColor3 = UiKit.BRASS
+	eq.BackgroundTransparency = 0
+	eq.TextXAlignment = Enum.TextXAlignment.Center
+	eq.Text = "EM USO"
+	eq.ZIndex = 7
+	eq.Visible = false
+	UiKit.corner(eq, 3)
+	slots[i] = { f = f, t = t, n = n, sc = sc, e = e, vp = vp, cnt = cnt, eq = eq }
 end
 
 local items: { Item } = {}
@@ -185,16 +232,49 @@ local needleAngle = 0
 local holdCodes: { Enum.KeyCode } = {} -- botões que abriram a roda segurando (vazio: sem segurar)
 local holdAction: string? = nil -- a ação que abriu segurando (o botão virtual do toque também conta)
 
+-- D-190: a ficha i de n, em volta da elipse (1 = topo, sentido horário); com desenho, maior
+local function place(i: number, n: number, art: boolean)
+	local s = slots[i]
+	local a = (i - 1) * 2 * math.pi / math.max(n, 1)
+	s.f.Position = UDim2.new(0.5, math.sin(a) * RX, 0.5, -math.cos(a) * RY)
+	if art then
+		s.f.Size = UDim2.fromOffset(ART_W, ART_H)
+		s.vp.Position = UDim2.fromOffset(px(6, 8), px(14, 20))
+		s.vp.Size = UDim2.new(1, -px(12, 16), 1, -px(44, 62))
+		s.t.AnchorPoint = Vector2.new(0, 1)
+		s.t.Position = UDim2.new(0, px(6, 8), 1, -px(3, 4))
+		s.t.Size = UDim2.new(1, -px(12, 16), 0, px(26, 36))
+	else
+		s.f.Size = UDim2.fromOffset(CARD_W, CARD_H)
+		s.t.AnchorPoint = Vector2.zero
+		s.t.Position = UDim2.fromOffset(px(8, 12), 0)
+		s.t.Size = UDim2.new(1, -px(16, 24), 1, 0)
+	end
+	s.vp.Visible = art
+	s.key = nil
+end
+
 local function paintSlot(i: number, s: Slot, it: Item)
 	local on = enabledFn(it.id)
 	local hot = selected == i
-	if s.on == on and s.hot == hot and s.t.Text == it.label then
+	local key = string.format("%s|%s|%s|%s", it.label, it.art or "", it.count or "", tostring(it.equipped))
+	if s.on == on and s.hot == hot and s.key == key then
 		return
 	end
-	s.on, s.hot = on, hot
+	s.on, s.hot, s.key = on, hot, key
 	s.t.Text = it.label
 	s.t.FontFace = UiKit.headFont(it.label)
-	s.n.Visible = not Input.isGamepad() and not Input.touchActive() -- as teclas 1–8 são do teclado
+	s.n.Visible = not Input.isGamepad() and not Input.touchActive() -- as teclas são do teclado
+	if it.art then
+		RodaArte.show(s.vp, it.art)
+		-- indisponível: o desenho fica apagado e cinza
+		s.vp.ImageTransparency = if on then 0 else 0.55
+		s.vp.ImageColor3 = if on then Color3.new(1, 1, 1) else Color3.fromRGB(120, 120, 120)
+	end
+	s.cnt.Visible = it.count ~= nil
+	s.cnt.Text = it.count or ""
+	s.cnt.TextColor3 = if on then UiKit.CARD else Color3.fromRGB(240, 124, 104)
+	s.eq.Visible = it.equipped == true
 	TweenService:Create(s.f, UiKit.QUICK, {
 		BackgroundColor3 = if hot and on then UiKit.OLIVE elseif hot then UiKit.STAMP else UiKit.DRAB,
 		BackgroundTransparency = if on or hot then 0.05 else 0.45,
@@ -204,9 +284,9 @@ local function paintSlot(i: number, s: Slot, it: Item)
 		TextTransparency = if on then 0 else 0.55,
 	}):Play()
 	TweenService:Create(s.e, UiKit.QUICK, {
-		Color = if hot then UiKit.BRASS else UiKit.KHAKI,
+		Color = if hot then UiKit.BRASS elseif it.equipped then UiKit.BRASS_LIGHT else UiKit.KHAKI,
 		Thickness = if hot then 2 else 1,
-		Transparency = if hot then 0 else 0.6,
+		Transparency = if hot then 0 elseif it.equipped then 0.25 else 0.6,
 	}):Play()
 	TweenService:Create(s.sc, UiKit.SOFT, { Scale = if hot then 1.1 else 1 }):Play()
 end
@@ -227,7 +307,7 @@ local function render()
 			chosen.Text = if on then it.label else string.format("%s (indisponível)", it.label)
 			chosen.TextColor3 = if on then UiKit.CARD else Color3.fromRGB(240, 124, 104)
 			-- o ponteiro gira pelo caminho mais curto
-			local target = ((selected :: number) - 1) * 45
+			local target = ((selected :: number) - 1) * 360 / math.max(#items, 1)
 			local d = (target - needleAngle + 540) % 360 - 180
 			needleAngle += d
 			needle.Visible = true
@@ -255,9 +335,9 @@ local function renderHint()
 			else "Solte para escolher · B cancela"
 	else
 		hint.Text = if toggle
-			then "Toque de novo para escolher · 1–8 · Backspace cancela"
-			elseif free then "Clique ou Enter escolhe · 1–8 · Backspace cancela"
-			else "Solte para escolher · 1–8 · Backspace cancela"
+			then "Toque de novo para escolher · 1–9 · Backspace cancela"
+			elseif free then "Clique ou Enter escolhe · 1–9 · Backspace cancela"
+			else "Solte para escolher · 1–9 · Backspace cancela"
 	end
 end
 
@@ -332,7 +412,15 @@ local function hide(animated: boolean)
 end
 
 local function reset(label: string, list: { Item })
-	items = list
+	items = table.move(list, 1, math.min(#list, MAX), 1, {})
+	-- D-190: as fichas em volta, pelo número de itens; com desenho, as maiores
+	local art = false
+	for _, it in items do
+		art = art or it.art ~= nil
+	end
+	for i = 1, #items do
+		place(i, #items, art)
+	end
 	selected, cursor = nil, Vector2.zero
 	drawnSel = -1
 	title.Text = UiKit.upper(label)
@@ -460,7 +548,10 @@ RunService.RenderStepped:Connect(function()
 		if s and cur then
 			local d = cur - s
 			local r = thumbR()
-			idx = InputMap.wheelIndex(d.X / r, -d.Y / r, #items)
+			-- no centro cancela (sem a folga: ela só vale entre setores)
+			idx = if InputMap.wheelIndex(d.X / r, -d.Y / r, #items)
+				then InputMap.wheelIndexSticky(d.X / r, -d.Y / r, #items, selected)
+				else nil
 			if idx ~= selected then
 				selected = idx
 				render()
@@ -469,14 +560,14 @@ RunService.RenderStepped:Connect(function()
 		return
 	elseif Input.isGamepad() then
 		local r = Input.stickRaw("right")
-		idx = InputMap.wheelIndex(r.X, r.Y, #items)
+		idx = InputMap.wheelIndexSticky(r.X, r.Y, #items, selected)
 	else
 		local d = UserInputService:GetMouseDelta()
 		cursor = cursor + Vector2.new(d.X, -d.Y)
 		if cursor.Magnitude > 120 then
 			cursor = cursor.Unit * 120
 		end
-		idx = InputMap.wheelIndex(cursor.X / 120, cursor.Y / 120, #items)
+		idx = InputMap.wheelIndexSticky(cursor.X / 120, cursor.Y / 120, #items, selected)
 	end
 	if idx and idx ~= selected then
 		selected = idx
@@ -484,7 +575,7 @@ RunService.RenderStepped:Connect(function()
 	end
 end)
 
--- teclas 1–8 escolhem direto no teclado
+-- teclas 1–9 e 0 escolhem direto no teclado
 UserInputService.InputBegan:Connect(function(input)
 	if not isOpen or input.UserInputType ~= Enum.UserInputType.Keyboard then
 		return
@@ -498,6 +589,8 @@ UserInputService.InputBegan:Connect(function(input)
 		Six = 6,
 		Seven = 7,
 		Eight = 8,
+		Nine = 9,
+		Zero = 10,
 	} :: { [string]: number })[input.KeyCode.Name]
 	if n and items[n] then
 		selected = n

@@ -309,7 +309,6 @@ ToqueTelas.TOUCH_NAME = {
 	equip_wheel = "ITEM (segurar)",
 	comm_wheel = "COMUNICAR (segurar)",
 	mark = "COMUNICAR",
-	binoculars = "ITEM (segurar)",
 	quick_bandage = "BANDAGEM",
 	tourniquet = "ITEM (segurar)",
 	give_up = "DESISTIR",

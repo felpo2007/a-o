@@ -394,12 +394,17 @@ test("3ª pessoa: teclas próprias no teclado, preferências salvas e saneadas",
 	assert(not InputMap.allowed(st, "jump") and not InputMap.allowed(st, "view_toggle"))
 end)
 
-test("rodas: 8 itens fixos por página; mensagens sem digitar", function()
+test("rodas: itens fixos por página (equipamento 9, D-190; comunicação 8); mensagens sem digitar", function()
 	local Comms = require(S .. "Comms")
-	for _, page in { Comms.EQUIP, Comms.COMM, Comms.COMMAND } do
+	assert(#Comms.EQUIP == 9, "equipamento com " .. #Comms.EQUIP .. " itens")
+	for _, page in { Comms.COMM, Comms.COMMAND } do
 		assert(#page == 8, "página com " .. #page .. " itens")
 	end
-	assert(Comms.EQUIP[1].id == "bandage" and Comms.COMM[1].id == "mark", "posições fixas mudaram")
+	assert(Comms.EQUIP[1].id == "slot:1" and Comms.EQUIP[2].id == "slot:2", "as armas no alto (D-190)")
+	assert(Comms.COMM[1].id == "mark", "posições fixas mudaram")
+	for _, it in Comms.EQUIP do
+		assert(it.id ~= "binoculars", "o binóculo saiu (D-190)")
+	end
 	for _, it in Comms.COMM do
 		assert(Comms.MESSAGES[it.id] or it.id == "mark" or it.id == "page_command", it.id .. " sem texto")
 	end

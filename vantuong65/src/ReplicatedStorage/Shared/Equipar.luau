@@ -8,8 +8,8 @@
 -- papel tinha UMA arma: apertar não fazia nada. As teclas 2 a 0 e a roda do mouse não existiam, e os
 -- itens só saíam pela roda de equipamento, sem nada na mão até o arremesso.
 -- Vagas fixas (memória muscular, como a roda): 1 principal, 2 pistola (o antitanque: 1 pistola, 2
--- lançador), 3 granada, 4 fumaça, 5 bandagem, 6 torniquete, 7 binóculo, 8 pá, 9 construir, 0 ferramenta
--- do papel. Item que não dá agora fica apagado, no lugar.
+-- lançador), 3 granada, 4 fumaça, 5 bandagem, 6 torniquete, 7 (era o binóculo, D-190), 8 pá, 9
+-- construir, 0 ferramenta do papel. Item que não dá agora fica apagado, no lugar.
 local Equipar = {}
 
 export type Slot = { n: number, id: string, key: string, label: string, kind: string }
@@ -26,6 +26,13 @@ Equipar.SLOTS = {
 	{ n = 9, id = "build", key = "Nine", label = "Construir", kind = "item" },
 	{ n = 10, id = "role_tool", key = "Zero", label = "Ferramenta do papel", kind = "item" },
 } :: { Slot }
+
+-- D-190 (dono: "retire o binóculo das formas de obtenção e uso durante a partida"): o item sai da vaga
+-- 7 (a faixa das vagas a esconde e a tecla 7 não faz nada), da roda de equipamento, dos atalhos (a
+-- tecla B e a vaga 7 saíram do InputMap) e do tutorial. A vaga 7 fica na lista para os números das
+-- outras não mudarem. O código do binóculo (WeaponController, ItemView) fica, travado: a ótica do
+-- comandante do veículo é outra coisa (VehicleController, "v_binoculars") e continua.
+Equipar.REMOVED = { binoculars = true } :: { [string]: boolean }
 
 -- Pistola de cada lado (Shared/Weapons): M1911A1 nos EUA, Tipo 54 (TT-33 chinesa) no VC.
 Equipar.PISTOL = { US = "m1911", VC = "type54" } :: { [string]: string }
@@ -133,7 +140,9 @@ function Equipar.roleToolLabel(role: string?): string
 end
 
 function Equipar.itemOk(id: string, role: string?, counts: Counts, canBuild: boolean): boolean
-	if id == "frag" then
+	if Equipar.REMOVED[id] then
+		return false
+	elseif id == "frag" then
 		return counts.frags > 0
 	elseif id == "smoke" then
 		return counts.smokes > 0

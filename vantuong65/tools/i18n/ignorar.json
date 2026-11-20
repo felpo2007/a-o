@@ -1469,7 +1469,23 @@
   "Continuar",
   "Configuracoes",
   "SegundoPlano",
-  "Cheio"
+  "Cheio",
+  "%s|%s|%s",
+  "%s|%s|%s|%s",
+  "Ficha%d",
+  "Saco%d",
+  "grenade:",
+  "role:",
+  "role:anti_tank",
+  "slot:",
+  "slot:1",
+  "slot:2",
+  "weapon:",
+  "Arte",
+  "Nome",
+  "Tecla",
+  "Quantidade",
+  "EmUso"
  ],
  "regex": [
   "^uni_[a-z_]+@[a-z0-9]+$"
