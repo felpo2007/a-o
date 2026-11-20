@@ -149,6 +149,12 @@ O `sourcemap.json` não vai para o Git.
       TUTORIAL|LOJA|PASSE|CONFIGURACOES>`; o JOGAR continua em `...Conteudo.JOGAR`;
     - na janela estreita do Studio (839 × 656) a coluna da direita fica grande: o enquadramento
       certo de 16:9 só se vê numa tela cheia.
+  - Loja (D-207): os códigos se testam pelo mesmo pedido do botão, do lado do cliente:
+    `VT65Remotes.Campanha_Action:FireServer({ op = "code_redeem", code = "..." })`. A resposta
+    aparece em `VT65Shop.Painel.Conteudo.Codigos.Resgatar.Resposta`. O clique do MCP dentro do
+    painel da loja (com escala) não chegou aos botões das páginas que rolam; os das abas chegam.
+    As abas têm o nome do id (`loja`, `codigos`...), dentro de um quadro sem nome único: dê um nome
+    antes de clicar.
   - D-191/D-190 (só Studio): `VT65DevGranada = "6"` lança uma granada a 6 m/s do primeiro
     jogador; `VT65DevTela = "3p"` liga a 3ª pessoa (o teclado do MCP não chega com o Studio
     atrás); `VT65DevTela = "roda_equip:<n>"` abre a roda de equipamento com a ficha n;
@@ -372,7 +378,7 @@ O `sourcemap.json` não vai para o Git.
 - Segredos só no `.env` (no `.gitignore`), nunca no código nem no chat.
 - ForgeGUI: nunca regenerar um job em `outcome_unknown`. "failed" com `retryable` pode ser
   retomado com `generation_retry`.
-- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-207) e atualize `PROGRESS.md`.
+- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-208) e atualize `PROGRESS.md`.
 - Tetos de triângulos por modelo: vegetação ≤ 6 mil (D-135), props e herói ≤ 20 mil (`ArtBudget`,
   conferido pelo teste da F5).
 - Commits no branch acima, com mensagem em português.

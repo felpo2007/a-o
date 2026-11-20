@@ -8873,3 +8873,89 @@ O Arsenal de verdade (categorias, prévia, equipar) é de um lote próprio.
 - **Cosmético equipado:** a troca do soldado foi medida pelo lado; o caminho do Commerce_Equip só
   pelo Lune.
 - **O jogo publicado.**
+
+## D-207 — Lote 92: a loja sobre o palco, a compra só pelo destaque e os códigos de resgate (2026-11-20)
+
+**Pedido do dono:** o mesmo do D-206 ("lobby, loja e passe ... com imagens bem feitas, transições de
+qualidade"), com as referências da loja: o título, as abas com o botão de troca, o saldo no alto, a
+grade de cartões com imagem e preço, e o personagem na luz à direita. O §9 do prompt pede:
+- as categorias "Destaques, Itens, Conjuntos, Caixas e Códigos";
+- detalhes e prévia antes de comprar;
+- os estados da compra (em andamento, cancelada, confirmada, erro, entrega pendente), sem pedido
+  duplicado;
+- códigos válido, inválido, vencido e já usado, confirmados pelo servidor.
+
+**A casca (ShopController):**
+- O painel saiu do meio (720 × 620) para a esquerda (1120 × 900; `UiKit.fit` encolhe numa janela
+  menor).
+- **No lobby**, o fundo é só o escuro da esquerda, e o palco mostra o soldado do jogador à direita
+  (quadro "loja", em 82% da largura). **Em campo** (tecla L), um véu na tela inteira.
+- **Cabeçalho:** "LOJA", a linha "VISUAIS, CAIXAS E APOIO · AS VANTAGENS TÊM TETO" e, à direita, o
+  saldo de créditos com um "+" que leva ao MERCADO.
+- **Abas:** as 7, com o botão do controle ou a tecla (Q/E) nas pontas e o traço âmbar na ativa:
+  DESTAQUES (a vitrine de antes), MERCADO, CAIXAS, ARQUIVO, VANTAGENS, INTENDÊNCIA e CÓDIGOS.
+- **Grades:** a vitrine e o mercado em 3 colunas.
+- **Abertura:** o painel entra da esquerda em 0,28 s.
+
+**Compra (§9):**
+- O cartão não compra mais. O botão de preço leva o item para o destaque (nome, descrição, a imagem
+  grande e o preço), sobe a lista até ele e passa o foco do controle para o COMPRAR.
+- A compra só sai do destaque:
+  - **em andamento:** o botão trava com "…" enquanto a janela do Roblox está aberta;
+  - **cancelada:** "Compra cancelada", na borda vermelha;
+  - **comprada (passe):** "ENTREGANDO…" até o servidor mandar a posse;
+  - **entrega pendente:** sem a posse em 15 s, o botão destrava com "Entrega pendente" e um aviso;
+  - **produto:** "Compra confirmada".
+- O resultado da janela do Roblox (`Prompt*PurchaseFinished`) só muda a tela; quem entrega continua
+  sendo o servidor.
+- **O armário** usa o último lado escolhido quando o jogador ainda não tem lado (no lobby). Equipar
+  ali refaz o soldado do palco (D-206): é a prévia no soldado do §9.
+
+**Códigos (`Shared/Codigos`, `CampanhaService` op "code_redeem"):**
+- O servidor limpa o texto (caixa alta, sem espaço nem traço, só letras e números, até 24) e
+  responde válido, inválido, vencido, "ainda não vale" ou já usado.
+- O uso fica em `campaign.owned["codigo:<CÓDIGO>"]`: o mapa de posse da campanha, já gravado e
+  unido entre servidores. Não precisou de versão nova do perfil.
+- O prêmio sai por `ProgressionService.bonus` (créditos) e pelas estrelas do passe, e o perfil é
+  gravado na hora.
+- Mais de 8 erros no minuto: "Muitas tentativas: espere um minuto" (contra tentar todos).
+- **Na tela:** o campo e o RESGATAR (trava com "…", destrava sem resposta em 8 s); a resposta do
+  servidor em verde ou vermelho; os códigos que a conta já usou.
+- **Código de lançamento (proposta, TODO do dono):** `STARLITE1965`, 250 créditos (pouco mais que uma
+  semana de recompensa diária, que dá 30 a 90 por dia), até 31/01/2027.
+
+**Conferido no Studio** (janela de 839 × 656):
+- A loja nova abriu pelo LOJA do lobby: cabeçalho, saldo, abas com Q/E, destaque e a grade de 3
+  colunas com as imagens; o MERCADO também (`testes/lote92`).
+- **Códigos pelo mesmo pedido do botão** (`Campanha_Action`):
+  - "naoexiste99": "Este código não existe.";
+  - "starlite-1965": "Código aceito: $ 250", e o saldo foi de 1.333 para 1.583;
+  - "STARLITE1965" de novo: "Você já usou este código.";
+  - "Já usados nesta conta: STARLITE1965" apareceu;
+  - 8 erros seguidos: o 9º pedido recebeu "Muitas tentativas".
+- **O clique do MCP** no RESGATAR e num cartão da vitrine não chegou ao botão. O botão não recebeu
+  nem o MouseButton1Down e ficou "Idle" com o mouse do MCP em cima. Já o `GetGuiObjectsAtPosition`
+  no centro do botão devolve o próprio botão por cima de tudo. Os cliques nas abas e no LOJA
+  chegaram. O desvio parece do clique do MCP dentro do painel com escala (a captura sai 1,25× maior
+  que os pixels da tela). O clique de verdade não foi testado.
+- **Erros:** 0 novos.
+
+**Testes:**
+- `loja.luau` (6):
+  - os 5 estados do código;
+  - os códigos cabem no mapa de posse e têm prêmio;
+  - o servidor valida, marca, grava e limita;
+  - as categorias e o painel à esquerda;
+  - o cartão não compra (nenhum `UiKit.bind(bt, o.action`) e a compra tem os estados;
+  - o armário pelo último lado.
+- `interface.luau`: a linha dos códigos usados não junta texto com `..`.
+
+**Não testado:**
+- **O clique de verdade** no RESGATAR e nos cartões (o do MCP desvia).
+- **Uma compra de verdade:** nenhuma janela de compra foi aberta, nem no Studio.
+- A tela 16:9 cheia, o controle e o celular.
+- **O jogo publicado.**
+- **O que fica para os próximos lotes:**
+  - a prévia de item que o jogador ainda não tem no soldado (o servidor só veste o que é dele);
+  - o mercado e as vantagens ainda compram direto do cartão (a janela do Roblox é a confirmação);
+  - os conjuntos com a lista exata do que vem.

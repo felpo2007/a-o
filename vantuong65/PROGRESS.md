@@ -859,6 +859,25 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     - **v124 publicada** (versão 129 do place, commit 543bacd).
     - **Próximo:** a loja (Destaques, Itens, Conjuntos, Caixas e Códigos) sobre o mesmo palco, e
       depois o passe.
+  - **Lote 92 (D-207): a loja sobre o palco, a compra só pelo destaque e os códigos, feito.**
+    - A loja ocupa a esquerda (1120 × 900) e o soldado do jogador fica à direita, no palco do lobby.
+    - Cabeçalho "LOJA", saldo com "+", 7 abas com Q/E: DESTAQUES, MERCADO, CAIXAS, ARQUIVO,
+      VANTAGENS, INTENDÊNCIA e CÓDIGOS. Grades em 3 colunas.
+    - O cartão leva ao destaque; a compra sai só dele, com os estados: em andamento, cancelada,
+      entregando e entrega pendente.
+    - O armário usa o último lado no lobby; equipar veste o soldado do palco.
+    - Códigos (`Shared/Codigos`, op "code_redeem"): válido, inválido, vencido, ainda não e já usado;
+      o uso fica em `campaign.owned`; 8 erros por minuto. Proposta: `STARLITE1965`, 250 créditos
+      (TODO do dono).
+    - Conferido no Studio:
+      - inexistente, aceito (1.333 → 1.583) e já usado;
+      - o limite no 9º pedido;
+      - a loja nova sobre o lobby.
+      - O clique do MCP não chegou ao RESGATAR nem a um cartão (desvio da ferramenta no painel com
+        escala); o caminho foi testado pelo mesmo pedido do botão.
+    - Lune 812 ok (55 arquivos), pytest 76, ruff, StyLua e luau-lsp limpos, i18n 100%. Relatório:
+      `testes/LOTE92_D207_2026-11-20.md`.
+    - **Próximo:** o passe (trilha grátis e Veterano, missões) sobre o mesmo palco.
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;

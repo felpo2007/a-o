@@ -11,6 +11,7 @@
 -- A Intendência (Progresso.client) abre junto, à esquerda: a pasta fica à direita dela e encolhe
 -- para não cobrir o painel (antes, numa tela de 1280 px, as duas se sobrepunham).
 -- Só no Studio: workspace:SetAttribute("VT65DevTela", "loja") abre a loja.
+local GuiService = game:GetService("GuiService")
 local HttpService = game:GetService("HttpService")
 local MarketplaceService = game:GetService("MarketplaceService")
 local Players = game:GetService("Players")
@@ -22,12 +23,14 @@ local UserInputService = game:GetService("UserInputService")
 
 local AssetIds = require(ReplicatedStorage.Shared.AssetIds) :: any
 local Commerce = require(ReplicatedStorage.Shared.Commerce)
+local JogarAgora = require(ReplicatedStorage.Shared.JogarAgora) :: any
 local Net = require(ReplicatedStorage.Shared.Net)
 local Progression = require(ReplicatedStorage.Shared.Progression)
 local Acabamento = require(ReplicatedFirst:WaitForChild("Acabamento"))
 local Bus = require(script.Parent.Bus)
 local CampanhaCliente = require(script.Parent.CampanhaCliente)
 local Input = require(script.Parent.Input)
+local LobbyPalco = require(script.Parent.LobbyPalco)
 local SoldierPreview = require(script.Parent.SoldierPreview)
 local ToqueUi = require(script.Parent.ToqueUi)
 local UiKit = require(script.Parent.UiKit)
@@ -37,19 +40,26 @@ local TV = UiKit.tv()
 local function px(pc: number, tv: number): number
 	return if TV then tv else pc
 end
-local W, H = px(720, 960), px(620, 820) -- vitrine: destaque e duas colunas de cartões
+-- D-207 (referências do dono: a loja ocupa a esquerda e o soldado fica à direita, na luz): o painel
+-- cresceu de 720 x 620 para 1120 x 900 e saiu do meio para a esquerda; no lobby o palco (LobbyPalco)
+-- põe o soldado do jogador à direita dele
+local W, H = px(1120, 1490), px(900, 1200)
+local X0 = px(48, 64) -- margem da esquerda
 -- abas na mesma ficha (D-93: antes eram duas telas, uma por cima da outra). Plano de volta diária
 -- (2026-11-12): MERCADO (mercado do dia, reforços, Pacote de Recruta, créditos e o passe) e
--- VANTAGENS (as vantagens compradas, com o número exato e o teto).
+-- VANTAGENS (as vantagens compradas, com o número exato e o teto). D-207 (§9: "Destaques, Itens,
+-- Conjuntos, Caixas e Códigos"): a vitrine virou DESTAQUES, o mercado vem logo depois, e entrou
+-- CÓDIGOS
 local TABS = {
-	{ id = "loja", name = "LOJA E ARMÁRIO" },
+	{ id = "loja", name = "DESTAQUES" },
+	{ id = "mercado", name = "MERCADO" },
 	-- D-173: caixas de suprimentos (Controllers/CaixasTela.client desenha dentro do host dela)
 	{ id = "caixas", name = "CAIXAS" },
 	-- D-175: ARQUIVO MILITAR STARLITE (Controllers/ArquivoTela.client desenha dentro do host dela)
 	{ id = "arquivo", name = "ARQUIVO" },
-	{ id = "mercado", name = "MERCADO" },
 	{ id = "vantagens", name = "VANTAGENS" },
 	{ id = "intendencia", name = "INTENDÊNCIA" },
+	{ id = "codigos", name = "CÓDIGOS" },
 }
 -- D-124 (lote 11, "deixe a loja atrativa"): a loja abre na vitrine (era a intendência, uma lista de
 -- equipamento com botões bege, a primeira coisa que se via)
@@ -109,17 +119,41 @@ pcall(function()
 end)
 gui.Parent = player:WaitForChild("PlayerGui")
 
--- painel escuro e sólido no meio (sai a pasta parda e o formulário de requisição); UiKit.fit encolhe
--- numa janela pequena (D-93: numa janela de 671 x 565 o FECHAR ficava em y = −28)
 local V = UiKit.V
 local F = UiKit.F
+-- D-207: o fundo. No lobby, só o escuro da esquerda (o palco e o soldado aparecem à direita, como nas
+-- referências); fora dele (em campo, tecla L), um véu na tela inteira.
+local fundo = Instance.new("Frame")
+fundo.Name = "Fundo"
+fundo.Position = UDim2.fromOffset(-200, -200)
+fundo.Size = UDim2.new(1, 400, 1, 400)
+fundo.BackgroundColor3 = Color3.fromRGB(5, 5, 4)
+fundo.BackgroundTransparency = 1
+fundo.BorderSizePixel = 0
+fundo.Parent = gui
+local fundoGrad = Instance.new("UIGradient")
+fundoGrad.Parent = fundo
+local function pintarFundo(noPalco: boolean)
+	fundo.BackgroundTransparency = 0
+	fundoGrad.Transparency = if noPalco
+		then NumberSequence.new({
+			NumberSequenceKeypoint.new(0, 0.05),
+			NumberSequenceKeypoint.new(0.5, 0.3),
+			NumberSequenceKeypoint.new(0.72, 0.85),
+			NumberSequenceKeypoint.new(1, 1),
+		})
+		else NumberSequence.new(0.25)
+end
+
+-- o painel, à esquerda; UiKit.fit encolhe numa janela pequena (D-93: numa janela de 671 x 565 o
+-- FECHAR ficava em y = −28)
 local folder = Instance.new("Frame")
 folder.Name = "Painel"
-folder.AnchorPoint = Vector2.new(0.5, 0.5)
-folder.Position = UDim2.fromScale(0.5, 0.5)
+folder.AnchorPoint = Vector2.new(0, 0.5)
+folder.Position = UDim2.new(0, X0, 0.5, 0)
 folder.Size = UDim2.fromOffset(W, H)
 folder.BackgroundColor3 = V.PANEL
-folder.BackgroundTransparency = 0.04
+folder.BackgroundTransparency = UiKit.Estilo.fundo(0.12)
 folder.BorderSizePixel = 0
 folder.Active = true -- tapa a mesa do lobby atrás (o clique não atravessa)
 folder.Parent = gui
@@ -127,39 +161,116 @@ UiKit.corner(folder, 4)
 UiKit.edge(folder, V.LINE, 1, 0.35)
 local fit = UiKit.fit(gui, folder, W, H, 12)
 Acabamento.sombra(folder, 24, Vector2.new(0, 9), 0.6)
-do -- filete oliva no alto: o acento de época do cabeçalho
+do -- filete âmbar no alto (D-207; era oliva): o acento do cabeçalho
 	local accent = Instance.new("Frame")
-	accent.BackgroundColor3 = V.OLIVE
+	accent.BackgroundColor3 = V.AMBAR
 	accent.BorderSizePixel = 0
-	accent.Size = UDim2.new(1, 0, 0, px(3, 4))
+	accent.Size = UDim2.new(0, px(120, 160), 0, px(3, 4))
 	accent.Parent = folder
 	UiKit.corner(accent, 2)
 end
 
--- abas grandes no alto (são o título): LOJA E ARMÁRIO | INTENDÊNCIA (LB/RB, Q/E ou clique); a ativa
--- em texto claro com o traço oliva embaixo
-local PADX = px(20, 28)
+-- D-207: cabeçalho como nas referências: o título, uma linha do que se vende e, à direita, o saldo
+local PADX = px(24, 32)
+local HEAD_H = px(80, 106)
+do
+	local t = UiKit.title(folder, "LOJA", px(46, 62))
+	t.Name = "Titulo"
+	t.Position = UDim2.fromOffset(PADX, px(14, 18))
+	t.Size = UDim2.fromOffset(px(300, 400), px(48, 64))
+	local s = UiKit.kicker(folder, "VISUAIS, CAIXAS E APOIO · AS VANTAGENS TÊM TETO", px(14, 20), V.DIM)
+	s.Name = "Subtitulo"
+	s.Position = UDim2.fromOffset(PADX + 2, px(62, 82))
+	s.Size = UDim2.fromOffset(px(620, 820), px(20, 28))
+end
+-- o saldo de créditos (o "+" leva ao mercado, onde se compram)
+local saldo = Instance.new("Frame")
+saldo.Name = "Saldo"
+saldo.AnchorPoint = Vector2.new(1, 0)
+saldo.Position = UDim2.new(1, -(PADX + px(130, 172)), 0, px(22, 30))
+saldo.Size = UDim2.fromOffset(px(200, 266), px(38, 52))
+saldo.BackgroundColor3 = V.PANEL_2
+saldo.BorderSizePixel = 0
+saldo.Parent = folder
+UiKit.corner(saldo, 4)
+UiKit.edge(saldo, V.AMBAR, 1, 0.3)
+local saldoTxt = UiKit.text2(saldo, "", px(20, 28), V.TEXT, F.TITLE)
+saldoTxt.Position = UDim2.fromOffset(px(12, 16), 0)
+saldoTxt.Size = UDim2.new(1, -px(56, 74), 1, 0)
+local saldoMais = Instance.new("TextButton")
+saldoMais.Name = "Mais"
+saldoMais.AnchorPoint = Vector2.new(1, 0.5)
+saldoMais.Position = UDim2.new(1, -px(5, 7), 0.5, 0)
+saldoMais.Size = UDim2.fromOffset(px(30, 40), px(30, 40))
+saldoMais.BackgroundColor3 = V.AMBAR
+saldoMais.AutoButtonColor = false
+saldoMais.FontFace = F.TITLE
+saldoMais.TextSize = UiKit.text(px(22, 30))
+saldoMais.TextColor3 = V.AMBAR_TEXTO
+saldoMais.Text = "+"
+saldoMais.Selectable = false
+saldoMais.Parent = saldo
+UiKit.corner(saldoMais, 3)
+local function pintarSaldo()
+	local cr = player:GetAttribute("Credits")
+	saldoTxt.Text = if type(cr) == "number" then Progression.money(cr) else "–"
+end
+player:GetAttributeChangedSignal("Credits"):Connect(pintarSaldo)
+pintarSaldo()
+
+-- abas grandes (LB/RB, Q/E ou clique), com o botão do controle ou a tecla nas pontas; a ativa em
+-- texto claro com o traço âmbar embaixo
 local TAB_H = px(48, 66)
+local TAB_Y = px(14, 18) + HEAD_H
 local tabRow = Instance.new("Frame")
 tabRow.BackgroundTransparency = 1
-tabRow.Position = UDim2.fromOffset(PADX, px(14, 18))
-tabRow.Size = UDim2.new(1, -(PADX + px(150, 200)), 0, TAB_H)
+tabRow.Position = UDim2.fromOffset(PADX, TAB_Y)
+tabRow.Size = UDim2.new(1, -2 * PADX, 0, TAB_H)
 tabRow.Parent = folder
+local dicaAba: { { img: ImageLabel, key: TextLabel, acao: string } } = {}
 do
 	local l = Instance.new("UIListLayout")
 	l.FillDirection = Enum.FillDirection.Horizontal
-	l.VerticalAlignment = Enum.VerticalAlignment.Bottom
+	l.VerticalAlignment = Enum.VerticalAlignment.Center
 	l.SortOrder = Enum.SortOrder.LayoutOrder
-	l.Padding = UDim.new(0, px(16, 24))
+	l.Padding = UDim.new(0, px(18, 26))
 	l.Parent = tabRow
 	local rule = Instance.new("Frame")
 	rule.BackgroundColor3 = V.LINE
 	rule.BackgroundTransparency = 0.4
 	rule.BorderSizePixel = 0
-	rule.Position = UDim2.fromOffset(PADX, px(14, 18) + TAB_H)
+	rule.Position = UDim2.fromOffset(PADX, TAB_Y + TAB_H)
 	rule.Size = UDim2.new(1, -2 * PADX, 0, 1)
 	rule.Parent = folder
+	for i, acao in { "ui_tab_prev", "ui_tab_next" } do
+		local img = Instance.new("ImageLabel")
+		img.BackgroundTransparency = 1
+		img.Size = UDim2.fromOffset(px(28, 38), px(28, 38))
+		img.LayoutOrder = if i == 1 then 0 else 100
+		img.Parent = tabRow
+		local key = UiKit.text2(tabRow, "", px(15, 21), V.TEXT, F.TITLE_MED)
+		key.BackgroundColor3 = V.PANEL_3
+		key.BackgroundTransparency = 0
+		key.AutomaticSize = Enum.AutomaticSize.X
+		key.Size = UDim2.fromOffset(0, px(26, 36))
+		key.TextXAlignment = Enum.TextXAlignment.Center
+		key.LayoutOrder = if i == 1 then 0 else 100
+		UiKit.corner(key, 3)
+		UiKit.pad(key, px(8, 10))
+		table.insert(dicaAba, { img = img, key = key, acao = acao })
+	end
 end
+local function pintarDicasAba()
+	for _, d in dicaAba do
+		local img, txt = Input.glyph(d.acao, "menu")
+		local toque = Input.device() == "touch" or ToqueUi.active()
+		d.img.Visible = not toque and img ~= nil
+		d.img.Image = img or ""
+		d.key.Visible = not toque and img == nil and txt ~= ""
+		d.key.Text = UiKit.keyName(txt)
+	end
+end
+pintarDicasAba()
 local tabButtons: { [string]: TextButton } = {}
 local setTab: (id: string) -> () = function(_id: string) end
 for i, d in TABS do
@@ -171,7 +282,7 @@ for i, d in TABS do
 	b.BackgroundTransparency = 1
 	b.BorderSizePixel = 0
 	b.FontFace = UiKit.Estilo.headFont(d.name)
-	b.TextSize = UiKit.text(px(17, 23)) -- cinco abas cabem na largura do painel (D-173)
+	b.TextSize = UiKit.text(px(20, 27)) -- D-207: sete abas cabem no painel de 1120
 	b.TextColor3 = V.DIM
 	b.Text = d.name
 	b.Selectable = false
@@ -187,7 +298,7 @@ for i, d in TABS do
 	mark.AnchorPoint = Vector2.new(0.5, 1)
 	mark.Position = UDim2.new(0.5, 0, 1, px(6, 8))
 	mark.Size = UDim2.new(1, px(4, 8), 0, px(3, 4))
-	mark.BackgroundColor3 = V.OLIVE_HI
+	mark.BackgroundColor3 = V.AMBAR -- D-205: a seleção em âmbar
 	mark.BackgroundTransparency = 1
 	mark.BorderSizePixel = 0
 	mark.Parent = b
@@ -196,6 +307,9 @@ for i, d in TABS do
 	end)
 	tabButtons[d.id] = b
 end
+UiKit.bind(saldoMais, function()
+	setTab("mercado") -- os créditos se compram no mercado
+end)
 
 -- fechar: botão fino, só contorno (no controle, B). Liga em shop_close → setOpen(false)
 local closeBtn = UiKit.action(folder, "FECHAR ×", "secondary", function()
@@ -208,7 +322,7 @@ close.Size = UDim2.fromOffset(px(118, 160), px(38, 52))
 close.Selectable = false
 
 -- a lista (rola no analógico direito ou na roda do mouse), direto no painel
-local TOP = px(14, 18) + TAB_H + px(8, 10)
+local TOP = TAB_Y + TAB_H + px(8, 10)
 local FOOT = px(48, 66)
 local sheet = Instance.new("Frame")
 sheet.Name = "Conteudo"
@@ -269,7 +383,125 @@ local function newPage(name: string): ScrollingFrame
 end
 local marketPage = newPage("Mercado")
 local perkPage = newPage("Vantagens")
-local pages: { [string]: ScrollingFrame } = { loja = panel, mercado = marketPage, vantagens = perkPage }
+local codesPage = newPage("Codigos")
+local pages: { [string]: ScrollingFrame } =
+	{ loja = panel, mercado = marketPage, vantagens = perkPage, codigos = codesPage }
+
+-- ----- CÓDIGOS (D-207; §9: "Trate código válido, inválido, expirado e já utilizado. O servidor
+-- confirma o benefício.") -----
+-- Montada uma vez: o campo, o RESGATAR (trava enquanto o servidor responde), a resposta do servidor e
+-- os códigos que esta conta já usou (campaign.owned "codigo:*", do estado da campanha).
+local codigo: { [string]: any } = {}
+do
+	local f = Instance.new("Frame")
+	f.Name = "Resgatar"
+	f.LayoutOrder = 1
+	f.Size = UDim2.new(1, -24, 0, px(250, 330))
+	f.BackgroundColor3 = V.PANEL_2
+	f.BorderSizePixel = 0
+	f.Parent = codesPage
+	UiKit.corner(f, 4)
+	UiKit.edge(f, V.LINE, 1, 0.4)
+	local P = px(24, 32)
+	local t = UiKit.title(f, "RESGATAR UM CÓDIGO", px(38, 52))
+	t.Position = UDim2.fromOffset(P, P)
+	t.Size = UDim2.new(1, -2 * P, 0, px(46, 62))
+	local s = UiKit.body(f, "Um uso por conta. Quem confere e entrega é o servidor.", px(15, 21), V.DIM)
+	s.Position = UDim2.fromOffset(P, P + px(50, 66))
+	s.Size = UDim2.new(1, -2 * P, 0, px(22, 30))
+	local box = Instance.new("TextBox")
+	box.Name = "Campo"
+	box.Position = UDim2.fromOffset(P, P + px(86, 114))
+	box.Size = UDim2.new(1, -(2 * P + px(220, 290)), 0, px(54, 72))
+	box.BackgroundColor3 = V.BG
+	box.BorderSizePixel = 0
+	box.ClearTextOnFocus = false
+	box.PlaceholderText = "DIGITE O CÓDIGO"
+	box.PlaceholderColor3 = V.MUTED
+	box.Text = ""
+	box.FontFace = F.TITLE_MED
+	box.TextSize = UiKit.text(px(24, 32))
+	box.TextColor3 = V.TEXT
+	box.TextXAlignment = Enum.TextXAlignment.Left
+	box.Selectable = true
+	box.SelectionImageObject = UiKit.FOCUS
+	box.Parent = f
+	UiKit.corner(box, 3)
+	UiKit.edge(box, V.TEXT, 2, 0.15)
+	UiKit.pad(box, px(16, 22))
+	local resultado = UiKit.body(f, "", px(16, 22), V.DIM)
+	resultado.Name = "Resposta"
+	resultado.Position = UDim2.fromOffset(P, P + px(150, 198))
+	resultado.Size = UDim2.new(1, -2 * P, 0, px(26, 34))
+	local enviado = false
+	local btn: UiKit.Action
+	local envio = 0
+	local function enviar()
+		if enviado then
+			return -- sem pedido duplicado enquanto o servidor responde
+		end
+		local txt = box.Text
+		if (string.gsub(txt, "%s", "")) == "" then
+			btn.erro("Digite um código")
+			return
+		end
+		enviado = true
+		envio += 1
+		local meu = envio
+		btn.carregando(true)
+		resultado.Text = "Conferindo…"
+		resultado.TextColor3 = V.DIM
+		CampanhaCliente.action("code_redeem", { code = txt })
+		-- sem resposta em 8 s: destrava e avisa (a rede pode ter caído)
+		task.delay(8, function()
+			if enviado and envio == meu then
+				enviado = false
+				btn.carregando(false)
+				resultado.Text = "Sem resposta do servidor. Tente de novo."
+				resultado.TextColor3 = V.RED_HI
+			end
+		end)
+	end
+	btn = UiKit.action(f, "RESGATAR", "primary", enviar, { h = px(54, 72) })
+	btn.button.Name = "Resgatar"
+	btn.button.AnchorPoint = Vector2.new(1, 0)
+	btn.button.Position = UDim2.new(1, -P, 0, P + px(86, 114))
+	btn.button.Size = UDim2.fromOffset(px(206, 274), px(54, 72))
+	box.FocusLost:Connect(function(enter: boolean)
+		if enter then
+			enviar()
+		end
+	end)
+	local usados = UiKit.body(f, "", px(14, 20), V.DIM)
+	usados.Name = "Usados"
+	usados.Position = UDim2.fromOffset(P, P + px(184, 242))
+	usados.Size = UDim2.new(1, -2 * P, 0, px(22, 30))
+	codigo.box, codigo.btn, codigo.resultado, codigo.usados = box, btn, resultado, usados
+	codigo.fim = function(ok: boolean, msg: string?)
+		enviado = false
+		btn.carregando(false)
+		resultado.Text = msg or (if ok then "Código aceito." else "O código não passou.")
+		resultado.TextColor3 = if ok then V.OLIVE_HI else V.RED_HI
+		if ok then
+			box.Text = ""
+		else
+			btn.erro("Não passou")
+		end
+	end
+end
+local function renderCodes()
+	local st = CampanhaCliente.get()
+	local list: { string } = {}
+	if st and type(st.owned) == "table" then
+		for k in st.owned do
+			if type(k) == "string" and string.sub(k, 1, 7) == "codigo:" then
+				table.insert(list, string.sub(k, 8))
+			end
+		end
+	end
+	table.sort(list)
+	codigo.usados.Text = if #list > 0 then string.format("Já usados nesta conta: %s", table.concat(list, ", ")) else ""
+end
 
 do -- filete sobre as dicas do pé
 	local r = Instance.new("Frame")
@@ -546,6 +778,7 @@ end
 local HERO_H = px(236, 316)
 local PREV_W = px(210, 280)
 local hero: { [string]: any } = {}
+local comprar: (o: Offer) -> () = function(_o: Offer) end -- (definida depois do destaque)
 do
 	local f = Instance.new("Frame")
 	f.Name = "Destaque"
@@ -657,7 +890,7 @@ do
 	local buy = UiKit.action(f, "", "robux", function()
 		local o = hero.offer :: Offer?
 		if o and not o.owned then
-			o.action()
+			comprar(o)
 		end
 	end, { h = px(54, 74) })
 	buy.button.Name = "Comprar"
@@ -698,6 +931,7 @@ local function setHero(o: Offer)
 	end
 	hero.buy.button.Visible = not o.owned
 	hero.own.Visible = o.owned
+	hero.buy.enabled(true) -- item novo no destaque: o botão volta ao normal (D-207)
 	priceText(o, function(t: string)
 		if hero.offer == o then
 			hero.buy.label.Text = t
@@ -707,6 +941,92 @@ local function setHero(o: Offer)
 		UiKit.enter({ hero.name, hero.desc }, 8, 0.03)
 	end
 end
+
+-- ----- compra (D-207; §9: "Preveja compra em andamento, cancelamento, confirmação, erro e entrega
+-- pendente. O botão não deve permitir solicitações duplicadas") -----
+-- Só pelo destaque: o botão trava com "…" enquanto a janela do Roblox está aberta; fechada sem
+-- comprar, "Compra cancelada"; comprada, "ENTREGANDO…" até o servidor mandar a posse (Commerce_State)
+-- ou 15 s ("entrega pendente": chega quando o servidor confirmar). O resultado do Roblox é só para a
+-- tela: quem entrega é o servidor (ProcessReceipt / posse do passe).
+local compraAtiva: Offer? = nil
+local compraGen = 0
+local function fimCompra(comprado: boolean)
+	local o = compraAtiva
+	if not o then
+		return
+	end
+	compraAtiva = nil
+	local b = hero.buy
+	b.carregando(false)
+	if not comprado then
+		b.erro("Compra cancelada")
+		return
+	end
+	local g = compraGen
+	if o.infoType == Enum.InfoType.GamePass then
+		b.enabled(false)
+		b.label.Text = "ENTREGANDO…"
+		task.delay(15, function()
+			if compraGen == g and hero.offer == o and not o.owned then
+				b.enabled(true)
+				b.erro("Entrega pendente")
+				Bus.fire("toast", "A compra passou; o item chega quando o servidor confirmar.")
+			end
+		end)
+	else
+		Bus.fire("toast", "Compra confirmada.")
+	end
+end
+comprar = function(o: Offer)
+	if compraAtiva then
+		return -- sem pedido duplicado
+	end
+	compraAtiva = o
+	compraGen += 1
+	local g = compraGen
+	hero.buy.carregando(true)
+	local ok = pcall(o.action)
+	if not ok then
+		compraAtiva = nil
+		hero.buy.carregando(false)
+		hero.buy.erro("A compra não abriu")
+		return
+	end
+	-- a janela do Roblox não respondeu (fechada de outro jeito): destrava em 90 s
+	task.delay(90, function()
+		if compraAtiva == o and compraGen == g then
+			compraAtiva = nil
+			hero.buy.carregando(false)
+		end
+	end)
+end
+MarketplaceService.PromptGamePassPurchaseFinished:Connect(function(plr: Player, _id: number, comprado: boolean)
+	if plr == player then
+		fimCompra(comprado)
+	end
+end)
+MarketplaceService.PromptProductPurchaseFinished:Connect(function(uid: number, _id: number, comprado: boolean)
+	if uid == player.UserId then
+		fimCompra(comprado)
+	end
+end)
+-- Premium e assinatura: o Roblox não diz se comprou; só destrava
+MarketplaceService.PromptPremiumPurchaseFinished:Connect(function()
+	local o = compraAtiva
+	if o then
+		compraAtiva = nil
+		hero.buy.carregando(false)
+	end
+end)
+pcall(function()
+	(MarketplaceService :: any).PromptSubscriptionPurchaseFinished:Connect(function()
+		local o = compraAtiva
+		if o then
+			compraAtiva = nil
+			hero.buy.carregando(false)
+		end
+	end)
+end)
 
 -- ----- cartão da grade -----
 local CARD_H = px(236, 314) -- D-124: a imagem do item ganhou espaço (era 176)
@@ -815,7 +1135,15 @@ local function card(parent: Instance, o: Offer, n: number): GuiObject
 		bt.SelectionLost:Connect(function()
 			both(false)
 		end)
-		UiKit.bind(bt, o.action, both)
+		-- D-207 (§9: "Ao selecionar, abrir detalhes e prévia antes da ação de comprar"): o cartão
+		-- não compra; leva o item para o destaque (detalhes e imagem grande) e o foco para o comprar
+		UiKit.bind(bt, function()
+			setHero(o)
+			UiKit.tween(panel, UiKit.SOFT, { CanvasPosition = Vector2.zero })
+			if Input.isGamepad() then
+				GuiService.SelectedObject = hero.buy.button
+			end
+		end, both)
 	end
 	return f
 end
@@ -978,7 +1306,13 @@ end
 -- destaque e o soldado são montados uma vez e só trocam os textos.
 local lastSig = ""
 local function render()
+	-- D-207: no lobby (sem lado ainda) vale o último lado escolhido; o armário equipa nele e o
+	-- soldado do palco (o do próprio jogador) veste na hora
 	local faction = player:GetAttribute("Faction") :: string?
+	if faction ~= "US" and faction ~= "VC" then
+		local c = JogarAgora.decode(player:GetAttribute("UltimaEscolha"))
+		faction = if c.f == "US" or c.f == "VC" then c.f else nil
+	end
 	SoldierPreview.set(hero.preview, faction, nil)
 	local sig = ""
 	pcall(function()
@@ -1029,7 +1363,8 @@ local function render()
 		grid.AutomaticSize = Enum.AutomaticSize.Y
 		grid.Parent = panel
 		local gl = Instance.new("UIGridLayout")
-		gl.CellSize = UDim2.new(0.5, -px(5, 7), 0, CARD_H)
+		-- D-207: três colunas no painel largo (como a grade das referências)
+		gl.CellSize = UDim2.new(1 / 3, -px(7, 10), 0, CARD_H)
 		gl.CellPadding = UDim2.fromOffset(px(10, 14), px(10, 14))
 		gl.SortOrder = Enum.SortOrder.LayoutOrder
 		gl.Parent = grid
@@ -1304,7 +1639,8 @@ local function grid(parent: Instance, wide: boolean?): Frame
 	g.AutomaticSize = Enum.AutomaticSize.Y
 	g.Parent = parent
 	local gl = Instance.new("UIGridLayout")
-	gl.CellSize = if wide then UDim2.new(1, 0, 0, ITEM_H) else UDim2.new(0.5, -px(5, 7), 0, ITEM_H)
+	-- D-207: três colunas no painel largo (a linha larga continua inteira)
+	gl.CellSize = if wide then UDim2.new(1, 0, 0, ITEM_H) else UDim2.new(1 / 3, -px(7, 10), 0, ITEM_H)
 	gl.CellPadding = UDim2.fromOffset(px(10, 14), px(10, 14))
 	gl.SortOrder = Enum.SortOrder.LayoutOrder
 	gl.Parent = g
@@ -1639,12 +1975,17 @@ local function renderPage()
 		renderMarket()
 	elseif tab == "vantagens" then
 		renderPerks()
+	elseif tab == "codigos" then
+		renderCodes()
 	end
 end
 
 CampanhaCliente.Changed:Connect(function(_s: any, result: any)
 	if gui.Enabled then
 		renderPage()
+	end
+	if type(result) == "table" and result.op == "code_redeem" then
+		codigo.fim(result.ok == true, if type(result.msg) == "string" then result.msg else nil)
 	end
 	if type(result) == "table" and result.op == "market_buy" then
 		Bus.fire(
@@ -1754,11 +2095,16 @@ local function setOpen(open: boolean, which: string?)
 	if open then
 		gui.Enabled = true
 		UiKit.opened("loja", gui.DisplayOrder)
-		folder.Position = UDim2.new(0.5, 0, 0.5, 26)
-		fit.play(TweenInfo.new(0.28, Enum.EasingStyle.Back, Enum.EasingDirection.Out), 1, 0.94)
-		TweenService:Create(folder, TweenInfo.new(0.24, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
-			Position = UDim2.fromScale(0.5, 0.5),
-		}):Play()
+		-- D-207: entra da esquerda, sobre o palco (no lobby) ou sobre o véu (em campo)
+		pintarFundo(LobbyPalco.aberto())
+		pintarDicasAba()
+		fundo.BackgroundTransparency = 1
+		UiKit.tween(fundo, TweenInfo.new(0.3, Enum.EasingStyle.Sine), { BackgroundTransparency = 0 })
+		folder.Position = UDim2.new(0, X0 - px(40, 54), 0.5, 0)
+		fit.play(TweenInfo.new(0.28, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), 1, 0.97)
+		UiKit.tween(folder, TweenInfo.new(0.28, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+			Position = UDim2.new(0, X0, 0.5, 0),
+		})
 		Input.openMenu()
 		Net.event("Commerce_Track"):FireServer("store_open")
 		render() -- com o que já se sabe: a pasta nunca abre vazia esperando o servidor
@@ -1832,6 +2178,7 @@ end
 Input.DeviceChanged:Connect(function()
 	if gui.Enabled then
 		renderFoot()
+		pintarDicasAba()
 	end
 end)
 UiKit.watch(panel, function()

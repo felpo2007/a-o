@@ -1626,7 +1626,12 @@
   "inicio",
   "perfil",
   "riacho",
-  "trincheira"
+  "trincheira",
+  "Codigos",
+  "codigo",
+  "codigo:",
+  "codigos",
+  "código"
  ],
  "regex": [
   "^uni_[a-z_]+@[a-z0-9]+$"

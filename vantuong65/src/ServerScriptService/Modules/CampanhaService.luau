@@ -27,6 +27,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
 local Calendario = require(ReplicatedStorage.Shared.Calendario)
+local Codigos = require(ReplicatedStorage.Shared.Codigos)
 local Commerce = require(ReplicatedStorage.Shared.Commerce)
 local Front = require(ReplicatedStorage.Shared.Front)
 local Medalhas = require(ReplicatedStorage.Shared.Medalhas)
@@ -67,6 +68,7 @@ type Rt = {
 	friendSquad: boolean,
 	vetDev: boolean,
 	lastAction: number,
+	codeFails: { number }, -- D-207: os.clock() dos códigos errados do último minuto
 }
 local rt: { [Player]: Rt } = {}
 
@@ -81,6 +83,7 @@ local function rtOf(p: Player): Rt
 			friendSquad = false,
 			vetDev = false,
 			lastAction = 0,
+			codeFails = {},
 		}
 		rt[p] = r
 	end
@@ -736,6 +739,39 @@ local function onAction(p: Player, msg: any)
 			})
 			setResult(p, op, true, string.format("%s comprada por %s", sk.name, Progression.money(price)))
 			task.spawn(PlayerData.save, p)
+		end
+	elseif op == "code_redeem" then
+		-- D-207: código de resgate (Shared/Codigos). Vale uma vez por conta (campaign.owned, união
+		-- entre servidores, gravado na hora); erros demais no minuto esperam.
+		local agora = os.clock()
+		local recentes: { number } = {}
+		for _, t in r.codeFails do
+			if agora - t < 60 then
+				table.insert(recentes, t)
+			end
+		end
+		r.codeFails = recentes
+		if #recentes >= Codigos.TENTATIVAS then
+			setResult(p, op, false, Codigos.MENSAGEM.espera)
+		else
+			local ok, motivo, d = Codigos.validar(msg.code, os.time(), c.owned)
+			if ok and d then
+				c.owned[Codigos.chave(d.codigo)] = true
+				local partes: { string } = {}
+				if d.cr > 0 then
+					ProgressionService.bonus(p, 0, d.cr, "código " .. d.codigo)
+					table.insert(partes, Progression.money(d.cr))
+				end
+				if d.estrelas > 0 then
+					addStars(p, c, d.estrelas)
+					table.insert(partes, string.format("%d ★", d.estrelas))
+				end
+				setResult(p, op, true, "Código aceito: " .. table.concat(partes, " e "))
+				task.spawn(PlayerData.save, p)
+			else
+				table.insert(r.codeFails, agora)
+				setResult(p, op, false, Codigos.MENSAGEM[motivo] or Codigos.MENSAGEM.invalido)
+			end
 		end
 	elseif op == "card_set" then
 		local owned = table.clone(c.owned)
