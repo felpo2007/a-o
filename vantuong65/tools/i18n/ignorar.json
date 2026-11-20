@@ -1487,7 +1487,9 @@
   "Quantidade",
   "EmUso",
   "^roda_equip:?(%d*)$",
-  "roda_equip"
+  "roda_equip",
+  "fundo_chao",
+  "3p"
  ],
  "regex": [
   "^uni_[a-z_]+@[a-z0-9]+$"

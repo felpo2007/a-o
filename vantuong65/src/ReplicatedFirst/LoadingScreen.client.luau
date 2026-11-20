@@ -17,15 +17,17 @@
 -- asset e as falhas):
 --   1. o jogo (game.Loaded);
 --   2. os remotes do servidor (sem resposta em 60 s: o aviso, e continua esperando);
---   3. a interface: fontes, as texturas do Acabamento, os botões do controle e as imagens que o
---      servidor resolveu (Img_*, a carta tática CartaImage_*), chão e céu do AssetIds;
+--   3. a interface: fontes, as texturas do Acabamento, os botões do controle e as imagens da
+--      interface que o servidor resolveu (Img_*). Imagem vai numa ImageLabel (em texto solto o
+--      PreloadAsync não baixava: no Studio, 22 de 25 voltavam "Failure");
 --   4. a ficha do jogador (o servidor põe "XP" no jogador quando o perfil chega; "DataReadOnly" quando
 --      não carregou). Sem ela em DATA_MAX_S, a tela diz que os dados ainda não chegaram: não mostra
 --      uma conta vazia como se fosse a dele;
 --   5. os manequins e os objetos do menu e da mesa (o PreviewService marca Ready);
 --   6. o terreno (TerrainReady) e o streaming em volta dos três lugares dos planos do menu.
 -- Em segundo plano (depois das seis, com a tela ainda aberta ou já no menu; o menu mostra a linha
--- "VT65Fundo" do jogador): a arte das armas, as animações do soldado, todos os sons e o mapa (o
+-- "VT65Fundo" do jogador): o chão, o céu e a carta tática, a arte das armas, as animações do
+-- soldado, todos os sons e o mapa (o
 -- streaming do centro, dos quadrantes, dos QGs e dos objetivos, 95% das peças do Map.PartCount e a
 -- arte que chegou). Ao nascer, o servidor ainda pede o streaming em volta do ponto (SpawnService).
 -- Sem porcentagem: a barra tem uma parte por etapa e cada parte enche com o que foi contado nela; a
@@ -1029,6 +1031,15 @@ local function preload(items: { any }, onStep: (done: number, total: number) -> 
 	local i = 1
 	while i <= total do
 		local batch = table.move(items, i, math.min(i + BATCH - 1, total), 1, {})
+		-- D-186: id de imagem em texto solto o PreloadAsync não sabe o que é (no Studio, 22 de 25 voltavam
+		-- "Failure" sem baixar nada; numa ImageLabel as mesmas carregam): vai numa ImageLabel
+		for k, it in batch do
+			if type(it) == "string" then
+				local l = Instance.new("ImageLabel")
+				l.Image = it
+				batch[k] = l
+			end
+		end
 		local n = 0
 		pcall(function()
 			ContentProvider:PreloadAsync(batch, function(_id: string, status: Enum.AssetFetchStatus)
@@ -1181,10 +1192,21 @@ local function interfaceList(): { any }
 			addId(list, UserInputService:GetImageForKeyCode(kc))
 		end)
 	end
-	-- imagens que o servidor resolveu (caveira do abate, carta tática) e as do AssetIds que já são
-	-- imagens (chão, céu)
+	-- imagens da interface que o servidor resolveu (caveira do abate, prêmios)
 	for name, v in ReplicatedStorage:GetAttributes() do
-		if string.sub(name, 1, 4) == "Img_" or string.sub(name, 1, 11) == "CartaImage_" then
+		if string.sub(name, 1, 4) == "Img_" then
+			addId(list, assetId(v))
+		end
+	end
+	return list
+end
+
+-- D-186: o chão (as texturas do MaterialVariant), o céu e a carta tática vão em segundo plano: no
+-- Studio, baixando de verdade, eles levavam ~8 s da etapa da interface
+local function groundList(): { any }
+	local list: { any } = {}
+	for name, v in ReplicatedStorage:GetAttributes() do
+		if string.sub(name, 1, 11) == "CartaImage_" then
 			addId(list, assetId(v))
 		end
 	end
@@ -1264,6 +1286,10 @@ local function background()
 	end
 	bgStarted = true
 	task.spawn(function()
+		preload(groundList(), function(done: number, total: number)
+			bgSet(string.format("Em segundo plano · chão e céu: %d/%d", done, total))
+		end)
+		mark("fundo_chao")
 		local weapons: { any } = {}
 		scanArt(ReplicatedStorage:FindFirstChild("VT65WeaponArt"), weapons)
 		preload(weapons, function(done: number, total: number)

@@ -433,6 +433,32 @@ function FieldService.start()
 	grenadeFolder.Name = "Granadas"
 	grenadeFolder.Parent = workspace
 
+	-- D-191, só no Studio: workspace "VT65DevGranada" = "<metros/s>" (ou qualquer texto: 17) lança uma
+	-- granada dos EUA da cabeça do primeiro jogador para a frente dele, um pouco para cima, como o
+	-- arremesso de verdade (a física, o piso, o quique e a explosão são os do jogo)
+	if RunService:IsStudio() then
+		workspace:GetAttributeChangedSignal("VT65DevGranada"):Connect(function()
+			local v = workspace:GetAttribute("VT65DevGranada")
+			if v == nil then
+				return
+			end
+			workspace:SetAttribute("VT65DevGranada", nil)
+			local p = Players:GetPlayers()[1]
+			local head = p and p.Character and p.Character:FindFirstChild("Head") :: BasePart?
+			if not (p and head) then
+				warn("[VT65 TESTE] VT65DevGranada: nenhum jogador em campo")
+				return
+			end
+			local speed = tonumber(v) or THROW_MS
+			local dir = head.CFrame.LookVector
+			local flat = Vector3.new(dir.X, 0, dir.Z)
+			dir = if flat.Magnitude > 1e-3 then flat.Unit else Vector3.zAxis
+			local from = head.Position + dir * (1 / M)
+			launch("frag", "US", from, (dir + Vector3.new(0, 0.35, 0)).Unit * speed / M, p)
+			print(string.format("[VT65 TESTE] VT65DevGranada: lançada a %.0f m/s", speed))
+		end)
+	end
+
 	Net.func("Settings_Get").OnServerInvoke = function(p: Player)
 		local prof = PlayerData.get(p)
 		return InputMap.validate(prof and prof.settings)

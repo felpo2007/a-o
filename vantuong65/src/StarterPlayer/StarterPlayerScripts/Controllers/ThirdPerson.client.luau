@@ -82,6 +82,19 @@ local function hint()
 end
 player.CharacterAdded:Connect(hint)
 
+-- só no Studio (teste pelo MCP, cujo teclado não chega com o Studio atrás): workspace "VT65DevTela" =
+-- "3p" liga ou desliga a 3ª pessoa, como a tecla O
+if game:GetService("RunService"):IsStudio() then
+	workspace:GetAttributeChangedSignal("VT65DevTela"):Connect(function()
+		if workspace:GetAttribute("VT65DevTela") == "3p" then
+			task.defer(function()
+				workspace:SetAttribute("VT65DevTela", nil)
+			end)
+			toggleView()
+		end
+	end)
+end
+
 workspace:GetAttributeChangedSignal("ThirdPersonAllowed"):Connect(function()
 	if not ViewMode.allowed() and Input.settings.thirdPerson then
 		Bus.fire("toast", "3ª pessoa desligada neste modo")

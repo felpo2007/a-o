@@ -268,8 +268,8 @@ local function paintSlot(i: number, s: Slot, it: Item)
 	if it.art then
 		RodaArte.show(s.vp, it.art)
 		-- indisponível: o desenho fica apagado e cinza
-		s.vp.ImageTransparency = if on then 0 else 0.55
-		s.vp.ImageColor3 = if on then Color3.new(1, 1, 1) else Color3.fromRGB(120, 120, 120)
+		s.vp.ImageTransparency = if on then 0 else 0.4
+		s.vp.ImageColor3 = if on then Color3.new(1, 1, 1) else Color3.fromRGB(150, 150, 150)
 	end
 	s.cnt.Visible = it.count ~= nil
 	s.cnt.Text = it.count or ""
