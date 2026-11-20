@@ -101,7 +101,7 @@ local DEPOTS: { { spec: string, dx: number, dz: number, yaw: number?, exitM: num
 	{ spec = "peugeot403", dx = 23.5, dz = -12, yaw = -math.pi / 2 },
 }
 -- olho de quem está sentado acima do assento (studs): o lugar fica embaixo do olho medido na malha
-local EYE_ABOVE_SEAT = 3.2 -- PLACEHOLDER (soldado de 2,0 m sentado, D-98)
+local EYE_ABOVE_SEAT = VehicleDrive.EYE_ABOVE_SEAT -- D-196: no Shared (a câmera de quem está na torre usa)
 local PAINT: { [string]: Color3 } = {
 	us = Color3.fromRGB(86, 90, 62), -- verde-oliva do USMC
 	civil = Color3.fromRGB(112, 124, 128), -- cinza-azulado civil desbotado (veic_peugeot403.py)
@@ -294,8 +294,84 @@ end
 -- juntas. Vêm do tiro (jogador e bot) e do Vehicle_Aim que o VehicleFx do atirador manda ~8 vezes
 -- por segundo. Só o lugar de VehicleDrive.ART[id].aim.seat aponta.
 local lastAim: { [Instance]: number } = {}
+
+-- ===== D-196: a torre no servidor (prompt de jogabilidade, item 15) =====
+-- Antes a torre só girava no desenho de cada cliente (VehicleFx): os corpos da torre não giravam com
+-- ela. Agora quem está na torre vai soldado a ela (addSeat) e o servidor gira as juntas no mesmo passo
+-- dos clientes (VehicleDrive.torreGira, na velocidade da ficha): o corpo que o servidor acerta é o
+-- mesmo que os outros veem na escotilha.
+type TorreState = { m6: Motor6D, cano: Motor6D?, yaw: number, pitch: number, spec: string, degS: number }
+local torres: { [Model]: TorreState } = {}
+local torreLoop: RBXScriptConnection? = nil
+
+local function torrePart(model: Model): BasePart?
+	for _, d in model:GetDescendants() do
+		if d.Name == "Torre" and d:IsA("BasePart") then
+			return d
+		end
+	end
+	return nil
+end
+
+local function stepTorres(dt: number)
+	for model, st in torres do
+		if model.Parent == nil then
+			torres[model] = nil
+			continue
+		end
+		if model:GetAttribute("Destroyed") then
+			continue -- destruído: a torre para onde estava
+		end
+		local ay, ap = model:GetAttribute("AimYaw"), model:GetAttribute("AimPitch")
+		local yaw = VehicleDrive.torreGira(st.yaw, if type(ay) == "number" then ay else 0, st.degS, dt)
+		local down, up = VehicleDrive.limiteCano(st.spec, yaw)
+		local want = math.clamp(if type(ap) == "number" then ap else 0, math.rad(down), math.rad(up))
+		local pitch = st.pitch + math.clamp(want - st.pitch, -math.rad(20) * dt, math.rad(20) * dt)
+		if yaw ~= st.yaw then
+			st.yaw = yaw
+			st.m6.Transform = CFrame.Angles(0, yaw, 0)
+		end
+		if pitch ~= st.pitch then
+			st.pitch = pitch
+			local c = st.cano
+			if c then
+				c.Transform = CFrame.Angles(0, 0, -pitch) -- nariz em −X: elevar gira em −Z (VehicleFx)
+			end
+		end
+	end
+end
+
+local function registrarTorre(model: Model, specId: string)
+	local m6: Motor6D?, cano: Motor6D? = nil, nil
+	for _, d in model:GetDescendants() do
+		if d:IsA("Motor6D") then
+			if d.Name == "Torre" then
+				m6 = d
+			elseif d.Name == "Cano" then
+				cano = d
+			end
+		end
+	end
+	local spec = Vehicles.SPECS[specId]
+	if not (m6 and VehicleDrive.ART[specId] and VehicleDrive.ART[specId].aim) then
+		return
+	end
+	torres[model] = {
+		m6 = m6,
+		cano = cano,
+		yaw = 0,
+		pitch = 0,
+		spec = specId,
+		degS = (spec and spec.turretDegS) or 30,
+	}
+	if not torreLoop then
+		torreLoop = RunService.Heartbeat:Connect(stepTorres)
+	end
+end
+
 local function setAim(model: Model, seat: Seat, dir: Vector3)
-	local art = VehicleDrive.ART[tostring(model:GetAttribute("Spec"))]
+	local specId = tostring(model:GetAttribute("Spec"))
+	local art = VehicleDrive.ART[specId]
 	local aim = art and art.aim
 	local chassis = model:FindFirstChild("Chassis") :: BasePart?
 	local mag = dir.Magnitude
@@ -304,7 +380,9 @@ local function setAim(model: Model, seat: Seat, dir: Vector3)
 	end
 	local l = (chassis :: BasePart).CFrame:VectorToObjectSpace(dir.Unit)
 	local yaw = math.atan2(-l.X, -l.Z)
-	local pitch = math.clamp(math.asin(math.clamp(l.Y, -1, 1)), math.rad(aim.down), math.rad(aim.up))
+	-- D-196: com o mínimo do cano naquele giro (não entra no casco)
+	local down, up = VehicleDrive.limiteCano(specId, yaw)
+	local pitch = math.clamp(math.asin(math.clamp(l.Y, -1, 1)), math.rad(down), math.rad(up))
 	model:SetAttribute("AimYaw", math.floor(yaw * 200 + 0.5) / 200)
 	model:SetAttribute("AimPitch", math.floor(pitch * 200 + 0.5) / 200)
 end
@@ -320,6 +398,22 @@ local function fireFromSeat(seat: Seat, char: Model, player: Player?, dir: Vecto
 	setAim(model, seat, dir)
 	if seat:GetAttribute("Personal") == true then
 		return false -- D-100: a própria arma do ocupante vai pelo CombatService (Combat_Fire)
+	end
+	-- D-196: a arma da torre não atira para dentro do próprio casco (o mínimo do cano naquele giro)
+	local specId = tostring(model:GetAttribute("Spec"))
+	local art = VehicleDrive.ART[specId]
+	local chassis = model:FindFirstChild("Chassis") :: BasePart?
+	if art and art.aim and art.aim.seat == seat:GetAttribute("SeatId") and chassis and dir.Magnitude > 0.5 then
+		local l = chassis.CFrame:VectorToObjectSpace(dir.Unit)
+		local yaw = math.atan2(-l.X, -l.Z)
+		local pitch = math.asin(math.clamp(l.Y, -1, 1))
+		local down = VehicleDrive.limiteCano(specId, yaw)
+		if pitch < math.rad(down) then
+			local p2 = math.rad(down)
+			dir = chassis.CFrame:VectorToWorldSpace(
+				Vector3.new(-math.sin(yaw) * math.cos(p2), math.sin(p2), -math.cos(yaw) * math.cos(p2))
+			)
+		end
 	end
 	local origin = seat.Position + Vector3.new(0, 2.5 / M, 0) + dir * (2 / M)
 	-- M60 do assento (porta, cúpula) e a coaxial do atirador do M48 (RB / tecla F)
@@ -749,9 +843,11 @@ local function addSeat(model: Model, chassis: BasePart, mount: BasePart, info: V
 		s:SetAttribute("ArcDown", arc.down)
 		s:SetAttribute("ArcUp", arc.up)
 	end
-	-- preso à arte: quem está sentado balança com a carroceria
+	-- preso à arte: quem está sentado balança com a carroceria. D-196: na torre, preso a ela (gira junto;
+	-- antes a torre passava pelo corpo do atirador, do comandante e do municiador)
+	local torre = if VehicleDrive.naTorre(tostring(model:GetAttribute("Spec")), id) then torrePart(model) else nil
 	local w = Instance.new("WeldConstraint")
-	w.Part0, w.Part1 = mount, s
+	w.Part0, w.Part1 = torre or mount, s
 	w.Parent = s
 	s.Parent = model
 	s:GetPropertyChangedSignal("Occupant"):Connect(function()
@@ -1014,7 +1110,14 @@ end
 -- (paradas até alguém animar); rodas Roda_* (também as da lagarta) na ArtRoot com os eixos do chassi.
 -- O VehicleFx de cada cliente gira pelo Transform. O resto fica soldado na ArtRoot. Sem o nó com o
 -- nome (modelo velho, importador que juntou as peças), tudo solda como antes.
-local function artJoints(art: Model, mount: BasePart, chassis: BasePart, mesh: BasePart?, info: VehicleDrive.Art?)
+local function artJoints(
+	art: Model,
+	mount: BasePart,
+	chassis: BasePart,
+	mesh: BasePart?,
+	info: VehicleDrive.Art?,
+	specId: string
+)
 	local pivots: { [string]: { number } } = if info and info.pivots then info.pivots else {}
 	local byName: { [string]: BasePart } = {}
 	local parts: { BasePart } = {}
@@ -1070,7 +1173,10 @@ local function artJoints(art: Model, mount: BasePart, chassis: BasePart, mesh: B
 		elseif hub and p ~= hub and string.match(name, "^Pa_%d+$") then
 			weld(hub, p)
 		elseif piv and mesh and casco and p ~= casco then
-			local part0 = if name == "Cano" and byName.Torre then byName.Torre else casco :: BasePart
+			-- D-196: o cano e as escotilhas da torre giram com ela (antes as escotilhas do comandante e do
+			-- municiador ficavam no casco e a torre passava por elas)
+			local onTorre = name == "Cano" or VehicleDrive.naTorre(specId, name)
+			local part0 = if onTorre and byName.Torre then byName.Torre else casco :: BasePart
 			local at = (mesh :: BasePart).CFrame * CFrame.new(piv[1] * s.X, piv[2] * s.Y, piv[3] * s.Z)
 			local m6 = Instance.new("Motor6D")
 			m6.Name = name
@@ -1233,7 +1339,7 @@ local function build(specId: string, at: Vector3, yaw: number, depot: number?): 
 			local shift = (mesh :: BasePart).CFrame:VectorToWorldSpace(Vector3.new(hullCenter, 0, 0))
 			art:PivotTo(CFrame.new(-shift) * art:GetPivot())
 		end
-		artJoints(art, mount, chassis, mesh, info)
+		artJoints(art, mount, chassis, mesh, info, specId)
 		art.Parent = model
 		chassis.Transparency = 1
 		if heli then
@@ -1279,6 +1385,7 @@ local function build(specId: string, at: Vector3, yaw: number, depot: number?): 
 	for k, s in Vehicles.seatList(specId) do
 		addSeat(model, chassis, mount, s, seatCFrame(specId, s, k, chassis, mount, mesh))
 	end
+	registrarTorre(model, specId) -- D-196
 	-- D-100: painel de entrar (Controllers/VehiclePrompt desenha; o servidor só valida o pedido)
 	local pa = Instance.new("Attachment")
 	pa.Name = "Embarque"

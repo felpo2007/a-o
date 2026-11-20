@@ -955,7 +955,10 @@ RunService:BindToRenderStep("VT65VehicleCam", Enum.RenderPriority.Camera.Value +
 	-- olho do assento (fora da malha), com a mola da carroceria
 	local eye = camera.CFrame.Position
 	local ex, ey, ez = VehicleDrive.eyeOf(tostring(model:GetAttribute("Spec")), seatId)
-	if fresh and view.meshRel and ex and ey and ez then
+	if VehicleDrive.naTorre(tostring(model:GetAttribute("Spec")), seatId) then
+		-- D-196: na torre, o olho sai do assento, que gira com ela (com a mola da carroceria junto)
+		eye = (seat.CFrame * CFrame.new(0, VehicleDrive.EYE_ABOVE_SEAT, 0)).Position
+	elseif fresh and view.meshRel and ex and ey and ez then
 		local s = view.scale
 		eye = (cf * (view.meshRel :: CFrame) * CFrame.new(ex * s.X, ey * s.Y, ez * s.Z)).Position
 	end

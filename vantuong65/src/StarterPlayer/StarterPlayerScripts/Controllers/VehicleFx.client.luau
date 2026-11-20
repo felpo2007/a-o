@@ -895,11 +895,11 @@ local function updateJoints(fx: Fx, dt: number)
 		wantYaw = if type(ay) == "number" then ay else 0
 		wantPitch = if type(ap) == "number" then ap else 0
 	end
-	wantPitch = math.clamp(wantPitch, math.rad(aim.down), math.rad(aim.up))
+	-- D-196: o mesmo passo do servidor (VehicleDrive.torreGira), e o cano com o mínimo daquele giro
 	local degS = (fx.body and fx.body.turretDegS) or 30
-	local maxYaw = math.rad(degS) * dt
-	local dy = (wantYaw - fx.aimYaw + math.pi) % (2 * math.pi) - math.pi
-	fx.aimYaw += math.clamp(dy, -maxYaw, maxYaw)
+	fx.aimYaw = VehicleDrive.torreGira(fx.aimYaw, wantYaw, degS, dt)
+	local down, up = VehicleDrive.limiteCano(tostring(fx.model:GetAttribute("Spec")), fx.aimYaw)
+	wantPitch = math.clamp(wantPitch, math.rad(down), math.rad(up))
 	fx.aimPitch += math.clamp(wantPitch - fx.aimPitch, -math.rad(20) * dt, math.rad(20) * dt)
 	if torre then
 		torre.Transform = CFrame.Angles(0, fx.aimYaw, 0)

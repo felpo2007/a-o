@@ -914,7 +914,7 @@ test("lote _v2: modelo do Blender, peças móveis, olho do soldado de 2 m e orç
 	-- ligações: o VehicleService pega o modelo novo e monta as juntas; o VehicleFx gira pelos nomes
 	local vs = fs.readFile("src/ServerScriptService/Modules/VehicleService.luau")
 	assert(string.find(vs, "AssetLoader.template(Vehicles.modelKey(specId))", 1, true))
-	assert(string.find(vs, "artJoints(art, mount, chassis, mesh, info)", 1, true))
+	assert(string.find(vs, "artJoints(art, mount, chassis, mesh, info, specId)", 1, true)) -- D-196: com a ficha
 	assert(string.find(vs, '"^Pa_%d+$"', 1, true), "pás soldadas no cubo")
 	local vfx = fs.readFile("src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleFx.client.luau")
 	for _, name in { "Torre", "Cano", "RotorPrincipal", "RotorCauda", "Volante" } do

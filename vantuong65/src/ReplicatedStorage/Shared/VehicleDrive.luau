@@ -942,7 +942,11 @@ export type Art = {
 	pivots: { [string]: { number } }?, -- peça móvel (nome do nó do GLB) -> junta (studs, malha)
 	aim: { seat: string, down: number, up: number }?, -- torre e cano: lugar que aponta e elevação (°)
 	steerTiltDeg: number?, -- coluna do volante, da vertical para trás
+	-- D-196: o que gira com a torre (lugares e peças do GLB) e a elevação mínima do cano por giro
+	-- (graus da frente, + para a esquerda), para o cano não entrar no casco
+	torre: Torre?,
 }
+export type Torre = { lugares: { string }, pecas: { string }, minPitch: { { number } }? }
 
 -- Lote dos _v2 (2026-11-12): os 7 modelos do Blender na medida real (assets/blender/RELATORIO.md,
 -- "Tabela ART nova"); os antigos estavam 10 a 35% fora. Referencial da malha nova: studs, centro da
@@ -974,6 +978,15 @@ VehicleDrive.ART = {
 			Escotilha_Municiador = { 4.93, 4.02, 2 },
 		},
 		aim = { seat = "gunner", down = -9, up = 19 },
+		-- D-196: atirador, comandante e municiador ficam na torre (as escotilhas deles também)
+		torre = {
+			lugares = { "gunner", "commander", "loader" },
+			pecas = { "Escotilha_Comandante", "Escotilha_Municiador" },
+			-- medido no Studio (D-196): raio no casco ao longo do cano (4,05 m, do munhão, a partir de 15%
+			-- dele, e outro 0,1 m abaixo), de 15 em 15° de giro. Por cima do motor o cano não desce;
+			-- no resto, os −9° da ficha
+			minPitch = { { 150, -9 }, { 165, -7 }, { 180, -4 }, { 195, -7 }, { 210, -6 }, { 225, -9 } },
+		},
 	},
 	ontos = {
 		box = { 14.43, 7.64, 9.28 },
@@ -998,6 +1011,7 @@ VehicleDrive.ART = {
 			Escotilha_TraseiraD = { 6.57, 0.39, -1.75 },
 		},
 		aim = { seat = "gunner", down = -10, up = 20 },
+		torre = { lugares = { "gunner" }, pecas = { "Escotilha_Torre" } }, -- D-196
 	},
 	lvtp5 = {
 		box = { 32.27, 11.2, 13.11 },
@@ -1026,6 +1040,7 @@ VehicleDrive.ART = {
 			Escotilha_Comandante = { -9.94, 4.6, -3.39 },
 		},
 		aim = { seat = "gunner", down = -15, up = 45 },
+		torre = { lugares = { "gunner" }, pecas = {} }, -- D-196: a cúpula da metralhadora
 	},
 	uh34d = {
 		box = { 63.24, 17.32, 44.07 },
@@ -1093,6 +1108,60 @@ VehicleDrive.ART = {
 		steerTiltDeg = 55,
 	},
 } :: { [string]: Art }
+
+-- ===== D-196: a torre (prompt de jogabilidade, item 15) =====
+-- O olho fica EYE_ABOVE_SEAT acima do assento (o VehicleService põe o assento aí embaixo; a câmera de
+-- quem está na torre parte do assento, que gira com ela). PLACEHOLDER (soldado de 2,0 m sentado, D-98).
+VehicleDrive.EYE_ABOVE_SEAT = 3.2
+
+-- O lugar ou a peça do GLB gira com a torre?
+function VehicleDrive.naTorre(id: string, nome: string): boolean
+	local art = VehicleDrive.ART[id]
+	local t = art and art.torre
+	if not t then
+		return false
+	end
+	return table.find(t.lugares, nome) ~= nil or table.find(t.pecas, nome) ~= nil
+end
+
+-- Giro da torre num passo: do atual para o pedido, pelo caminho mais curto, no máximo degS por segundo
+-- (rad). O mesmo no servidor (juntas e corpos de quem está na torre) e em cada cliente.
+function VehicleDrive.torreGira(cur: number, want: number, degS: number, dt: number): number
+	local d = (want - cur + math.pi) % (2 * math.pi) - math.pi
+	local maxStep = math.rad(degS) * dt
+	return cur + math.clamp(d, -maxStep, maxStep)
+end
+
+-- Elevação permitida do cano (graus) com a torre no giro `yaw` (rad, + para a esquerda): a da ficha,
+-- com o mínimo medido na malha onde o cano passaria pelo casco (minPitch: { giro°, mínimo° },
+-- interpolado em volta).
+function VehicleDrive.limiteCano(id: string, yaw: number): (number, number)
+	local art = VehicleDrive.ART[id]
+	local aim = art and art.aim
+	if not aim then
+		return -90, 90
+	end
+	local down, up = aim.down, aim.up
+	local tab = art.torre and art.torre.minPitch
+	if tab and #tab > 0 then
+		local g = math.deg(yaw) % 360
+		local n = #tab
+		local lo, hi = tab[n], tab[1]
+		for i = 1, n do
+			if tab[i][1] >= g then
+				hi = tab[i]
+				lo = tab[if i == 1 then n else i - 1]
+				break
+			end
+			lo, hi = tab[i], tab[if i == n then 1 else i + 1]
+		end
+		local span = (hi[1] - lo[1]) % 360
+		local u = if span > 0 then ((g - lo[1]) % 360) / span else 0
+		local m = lo[2] + (hi[2] - lo[2]) * math.clamp(u, 0, 1)
+		down = math.max(down, m)
+	end
+	return down, math.max(up, down)
+end
 
 -- D-98: a tabela foi feita para o soldado de 1,75 m. O de 2,0 m (Corpo.K = 8/7) senta com o olho
 -- mais alto: a parte do corpo acima do assento cresce K. Tripulação (cabeça ~0,4 m acima da

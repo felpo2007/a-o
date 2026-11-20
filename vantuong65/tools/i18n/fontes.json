@@ -547,7 +547,7 @@
  ],
  "%s_%d": [
   "src/ServerScriptService/Modules/EventosService.luau:183",
-  "src/ServerScriptService/Modules/VehicleService.luau:1052"
+  "src/ServerScriptService/Modules/VehicleService.luau:1155"
  ],
  "%s_%s": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/EventoCartao.luau:83"
@@ -2508,7 +2508,8 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleHudView.luau:84"
  ],
  "Cano": [
-  "src/ServerScriptService/Modules/VehicleService.luau:1073"
+  "src/ServerScriptService/Modules/VehicleService.luau:350",
+  "src/ServerScriptService/Modules/VehicleService.luau:1178"
  ],
  "Canteiro": [
   "src/ServerScriptService/Modules/MapLife.luau:775"
@@ -2802,7 +2803,7 @@
   "src/ServerScriptService/Modules/EventosService.luau:515",
   "src/ServerScriptService/Modules/Flutua.luau:211",
   "src/ServerScriptService/Modules/SmokeService.luau:31",
-  "src/ServerScriptService/Modules/VehicleService.luau:512"
+  "src/ServerScriptService/Modules/VehicleService.luau:606"
  ],
  "Combate mais pesado: %s (%d mortos).": [
   "src/ReplicatedStorage/Shared/AfterAction.luau:137"
@@ -3683,7 +3684,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:695"
  ],
  "Effects": [
-  "src/ServerScriptService/Modules/VehicleService.luau:512"
+  "src/ServerScriptService/Modules/VehicleService.luau:606"
  ],
  "Eight": [
   "src/ReplicatedStorage/Shared/Equipar.luau:25",
@@ -3945,7 +3946,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:613"
  ],
  "Entrar": [
-  "src/ServerScriptService/Modules/VehicleService.luau:1289",
+  "src/ServerScriptService/Modules/VehicleService.luau:1396",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ComoJogar.luau:113"
  ],
  "Entrar no veículo: {a}, perto dele.": [
@@ -4075,11 +4076,11 @@
   "src/ReplicatedStorage/Shared/Comms.luau:55"
  ],
  "Estabilizador desligado": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:1195"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:1198"
  ],
  "Estabilizador ligado": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:687",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:1195"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:1198"
  ],
  "Estabilizar o pairado: {a}. Calor e peso roubam potência: decole correndo.": [
   "src/ReplicatedStorage/Shared/Tutorial.luau:108"
@@ -4878,7 +4879,7 @@
   "src/ServerScriptService/Modules/Flutua.luau:211",
   "src/ServerScriptService/Modules/RodadaService.luau:132",
   "src/ServerScriptService/Modules/SmokeService.luau:31",
-  "src/ServerScriptService/Modules/VehicleService.luau:512",
+  "src/ServerScriptService/Modules/VehicleService.luau:606",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaoJogador.luau:217",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:1561"
  ],
@@ -5125,7 +5126,7 @@
   "src/ServerScriptService/Modules/CombatService.luau:582",
   "src/ServerScriptService/Modules/FieldWorkService.luau:241",
   "src/ServerScriptService/Modules/MedicalService.luau:549",
-  "src/ServerScriptService/Modules/VehicleService.luau:1684",
+  "src/ServerScriptService/Modules/VehicleService.luau:1791",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CasualtyScreen.luau:196",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/KnifeView.luau:578",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponVisuals.client.luau:862",
@@ -5531,7 +5532,7 @@
  ],
  "Longe demais": [
   "src/ReplicatedStorage/Shared/Vehicles.luau:541",
-  "src/ServerScriptService/Modules/VehicleService.luau:1568"
+  "src/ServerScriptService/Modules/VehicleService.luau:1675"
  ],
  "Loop": [
   "src/ReplicatedStorage/Shared/KnifeModel.luau:220"
@@ -9203,6 +9204,10 @@
  "Torrao": [
   "src/ServerScriptService/Modules/FieldWorkService.luau:186"
  ],
+ "Torre": [
+  "src/ServerScriptService/Modules/VehicleService.luau:309",
+  "src/ServerScriptService/Modules/VehicleService.luau:348"
+ ],
  "Torso": [
   "src/ServerScriptService/Modules/RadioService.luau:87"
  ],
@@ -10049,7 +10054,7 @@
   "src/ServerScriptService/Modules/TrainingService.luau:421",
   "src/ServerScriptService/Modules/TunnelService.luau:225",
   "src/ServerScriptService/Modules/Vegetation.luau:219",
-  "src/ServerScriptService/Modules/VehicleService.luau:372",
+  "src/ServerScriptService/Modules/VehicleService.luau:466",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/AfterActionController.client.luau:205",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/AfterActionController.client.luau:223",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/AfterActionController.client.luau:227",
@@ -10347,7 +10352,7 @@
   "src/ReplicatedStorage/Shared/Vehicles.luau:537"
  ],
  "Veículo desvirado": [
-  "src/ServerScriptService/Modules/VehicleService.luau:1623"
+  "src/ServerScriptService/Modules/VehicleService.luau:1730"
  ],
  "Veículo do outro lado": [
   "src/ReplicatedStorage/Shared/Vehicles.luau:535"
@@ -10404,7 +10409,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaView.luau:2244"
  ],
  "Você agora é %s neste combate": [
-  "src/ServerScriptService/Modules/VehicleService.luau:1726"
+  "src/ServerScriptService/Modules/VehicleService.luau:1833"
  ],
  "Você ficou entre os 10 melhores da semana": [
   "src/ServerScriptService/Modules/CampanhaService.luau:894"
@@ -10751,7 +10756,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Toast.luau:133"
  ],
  "^Pa_%d+$": [
-  "src/ServerScriptService/Modules/VehicleService.luau:1070"
+  "src/ServerScriptService/Modules/VehicleService.luau:1173"
  ],
  "^Pancada de chuva": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Toast.luau:132"
@@ -10821,7 +10826,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:707"
  ],
  "^p(%d+)$": [
-  "src/ReplicatedStorage/Shared/VehicleDrive.luau:1116",
+  "src/ReplicatedStorage/Shared/VehicleDrive.luau:1185",
   "src/ReplicatedStorage/Shared/Vehicles.luau:262",
   "src/ReplicatedStorage/Shared/Vehicles.luau:503"
  ],
@@ -10994,7 +10999,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:755"
  ],
  "ammo": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:1123"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:1126"
  ],
  "amphibious": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleFx.client.luau:566",
@@ -11101,7 +11106,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/JogarAgora.luau:449"
  ],
  "assist": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:1190"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:1193"
  ],
  "atacar": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Marcadores.luau:516"
@@ -11680,7 +11685,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Reconexao.client.luau:371"
  ],
  "copilot": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:1002"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:1005"
  ],
  "coronel, comandante de regimento": [
   "src/ReplicatedStorage/Shared/Progression.luau:93"
@@ -12004,8 +12009,8 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:608",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:609",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:670",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:973",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:1002",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:976",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:1005",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleFx.client.luau:1297"
  ],
  "dry": [
@@ -12239,8 +12244,8 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ToqueVeiculo.client.luau:239",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ToqueVeiculo.client.luau:242",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ToqueVeiculo.client.luau:336",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:1212",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:1216",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:1215",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:1219",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehiclePrompt.client.luau:402"
  ],
  "explosion": [
@@ -12688,7 +12693,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponVisuals.client.luau:652"
  ],
  "ground": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:964",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:967",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleHudView.luau:284",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleHudView.luau:295",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleHudView.luau:326"
@@ -12732,7 +12737,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:691",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:706",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:950",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:964",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:967",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleFx.client.luau:383",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleFx.client.luau:518",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleFx.client.luau:705",
@@ -14433,18 +14438,18 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ThirdPerson.client.luau:52",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ToqueAuto.luau:457",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/TutorialController.client.luau:662",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:1099",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:1114",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:1118",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:1125",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:1132",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:1138",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:1153",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:1164",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:1170",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:1198",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:1223",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:1225",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:1102",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:1117",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:1121",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:1128",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:1135",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:1141",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:1156",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:1167",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:1173",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:1201",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:1226",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:1228",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehiclePrompt.client.luau:443",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Voz.client.luau:284",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponController.client.luau:509",
@@ -14681,13 +14686,13 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Input.luau:993",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ItemView.luau:92",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ToqueAuto.luau:459",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:1110",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:1117",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:1128",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:1135",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:1159",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:1167",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:1173",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:1113",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:1120",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:1131",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:1138",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:1162",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:1170",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:1176",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Voz.client.luau:286",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponController.client.luau:931",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponController.client.luau:956",
@@ -14922,7 +14927,7 @@
  ],
  "seat": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ToqueVeiculo.client.luau:240",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:1202",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:1205",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleHudView.luau:285",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleHudView.luau:286",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleHudView.luau:287",
@@ -16036,7 +16041,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Marcadores.luau:721",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Marcadores.luau:721",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Marcadores.luau:784",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:1149"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:1152"
  ],
  "teclado": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ComoJogar.luau:181"
