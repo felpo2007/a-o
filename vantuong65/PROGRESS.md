@@ -601,6 +601,27 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     - Não testado: sentado como atirador, o tiro rente ao convés, o giro do Ontos (a fonte não
       fecha) e o cano sobre a cabeça do motorista.
     - **v114 publicada** (versão 119 do place, commit 2022ae9).
+  - **Lote 81 (D-197): a destruição dos veículos, feita.**
+    - Uma vez só, nesta ordem: a propulsão para; lugar fechado morre e lugar aberto se fere e sai;
+      os vivos ficam fora do lugar; a explosão com nome próprio; o destroço escurece e não aceita
+      mais ninguém.
+    - Bugs que já existiam e foram corrigidos:
+      - o destroço seguia andando;
+      - o caído ficava sentado no destroço;
+      - os assentos nunca desligavam (`Seat` é `BasePart`);
+      - a causa dizia "canhão de tanque".
+    - No cliente: fumaça e fogo pelo dano, a explosão do tamanho do veículo (clarão, fogo, fumaça,
+      poeira, pedaços contados e som) e o destroço queimando até sumir.
+    - Conferido: Lune 753 ok (47 arquivos), pytest 70 e ruff limpo. No Studio, jipe com o soldado
+      no carona:
+      - propulsão desligada;
+      - o soldado fora do lugar no mesmo quadro, vivo e caído;
+      - 5 pedaços, o destroço queimando e o lugar desligado;
+      - caminhão com fumaça aos 50 e fogo aos 20;
+      - a tela "explosão de veículo".
+      - Relatório: `testes/LOTE81_D197_2026-11-20.md`.
+    - Não testado: tanque e helicóptero destruídos, tripulação fechada, bots dentro e o jogo
+      publicado.
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;

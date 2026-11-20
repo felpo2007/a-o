@@ -7885,3 +7885,64 @@ corpo do atirador; motorista e atirador independentes.
 - o cano passando por cima da cabeça do motorista do M48 (fora do pedido; seguiu como antes);
 - a escotilha da torre do Ontos (0,44 m) é mais estreita que os ombros do soldado (0,53 m,
   relatório do Blender): a malha não mudou.
+## D-197 — Lote 81: a destruição dos veículos em ordem, com explosão do tamanho e destroço queimando (2026-11-20)
+
+**Pedido do dono** (prompt de jogabilidade, item 16): uma sequência coerente de dano, explosão e
+destroço, com clarão, fogo, fumaça, poeira, poucos fragmentos e som do tamanho do veículo; a
+destruição uma vez só; propulsão e armas paradas; ocupantes pelo sistema de dano, sobreviventes
+soltos, ninguém preso; o destroço não aceita ninguém e some ou volta no ciclo; efeito separado do
+dano, sem quebrar juntas em volta; integrado ao reinício da partida.
+
+**O que já havia:** a destruição uma vez só (atributo `Destroyed`), as armas paradas, o destroço que
+some aos 30 s e o veículo que volta ao depósito (180 s, e na partida nova, D-193). O dano das
+explosões é o do `ExplosionService`, sem o `Explosion` do Roblox (não quebra juntas).
+
+**Achado e corrigido:**
+- a propulsão seguia ligada: o destroço podia seguir andando com a velocidade pedida;
+- todos os ocupantes levavam 3000 J no tronco. Na regra médica isso só derruba, e o caído ficava
+  sentado no destroço até ele sumir;
+- os assentos nunca eram desligados: `Seat` também é `BasePart`, e o laço só os pintava. O destroço
+  aceitava gente;
+- a arte texturizada não escurecia: a cor da peça não pinta a SurfaceAppearance;
+- a explosão usava o tipo do canhão de 90 mm, e a tela de ferido dizia "canhão de tanque";
+- não havia efeito próprio: só a explosão de um projétil de 90 mm, igual para jipe e tanque, e
+  nenhuma fumaça ou fogo pelo dano.
+
+**Agora (`Shared/VeiculoDano`, testado no `tests/luau/destroco.luau`):**
+- porte pela massa da ficha:
+  - leve, abaixo de 3 t: jipe e Peugeot;
+  - médio, até 15 t: M35, Ontos e UH-34D;
+  - pesado: M48 e LVTP-5.
+- A explosão de cada porte (escala, fragmentos 5/7/10, som e tom, fumaça do destroço 20/25/28 s) é
+  PLACEHOLDER de efeito;
+- servidor (`destroyVehicle`), nesta ordem:
+  - marca `Destroyed`, integridade 0 e motor desligado;
+  - desliga `DriveVelocity` e `DriveAttitude` (o helicóptero cai);
+  - ocupantes: lugar fechado (casco, cabine, helicóptero) morre (cabeça, 3000 J); lugar aberto leva
+    900 J no tronco, abaixo do que derruba;
+  - quem ficou vivo, caído ou não, sai do lugar: o jogador é posto fora do chassi, o bot pelo
+    `botLeave`;
+  - a explosão do dano (`Explosive.veiculo`, o alcance do 90 mm e o nome "explosão de veículo");
+  - o destroço escurece (peça e SurfaceAppearance), desliga os assentos e o painel de embarque;
+- cliente (`Controllers/VeiculoDano.client`), só efeito:
+  - fumaça clara do motor com integridade ≤ 60, fogo e fumaça escura com ≤ 25;
+  - destruído e visto ao vivo: clarão, bola de fogo, núcleo, faíscas, fumaça preta subindo, poeira
+    rasteira, os pedaços de chapa do porte (física local, somem em 4 s) e o som da explosão no
+    volume e tom do porte;
+  - o destroço queima e fumega, o fogo some antes, até o servidor tirá-lo. Quem chega pelo
+    streaming vê só o destroço;
+- gancho do Studio: `VT65DevVeh = "destruir"` destrói o veículo mais perto pelo caminho do jogo.
+
+**Conferido no Studio** (jipe M151 criado pelo gancho, soldado no carona, lugar aberto):
+- `Destroyed`, `DriveVelocity` e `DriveAttitude` desligados, motor apagado, integridade 0;
+- o soldado saiu do lugar no mesmo quadro e ficou fora do jipe (2,1 m do centro). Ficou caído com
+  2 de vida (na repetição, 1): os 900 J do lugar mais a explosão logo em volta. Vivo e solto, para o
+  médico;
+- 5 pedaços de chapa (porte leve), 7 efeitos na pasta no máximo, e o destroço com fumaça 13,7/s e
+  fogo 18,3/s logo depois;
+- o lugar do carona ficou desligado;
+- caminhão M35: integridade 50, fumaça 6/s e sem fogo; 20, fumaça escura 10/s e fogo 18/s;
+- a tela de ferido: "Ferido por estilhaços de explosão de veículo" (antes "canhão de tanque").
+
+**Não testado:** a explosão vista e ouvida de perto (as capturas foram da tela de ferido), um tanque
+e um helicóptero destruídos, a tripulação de lugar fechado morrendo, bots dentro e o jogo publicado.
