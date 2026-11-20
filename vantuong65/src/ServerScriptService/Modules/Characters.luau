@@ -246,9 +246,20 @@ local function imageUrl(id: number): string
 	return url
 end
 
+-- D-206: o soldado do lobby (PreviewService.pessoal) não é personagem, mas é de um jogador: o
+-- atributo "Dono" (UserId) dá a ele o mesmo rosto, as mesmas skins e o mesmo equipamento do spawn.
+local function ownerOf(model: Model): Player?
+	local p = Players:GetPlayerFromCharacter(model)
+	if p then
+		return p
+	end
+	local id = model:GetAttribute("Dono")
+	return if type(id) == "number" then Players:GetPlayerByUserId(id) else nil
+end
+
 -- Semente estável do soldado: UserId do jogador; número do bot ("Bot_VC_07"); 0 no manequim.
 local function seedOf(model: Model): number
-	local player = Players:GetPlayerFromCharacter(model)
+	local player = ownerOf(model)
 	if player then
 		return player.UserId
 	end
@@ -260,7 +271,7 @@ local function roleOf(model: Model): string?
 	if type(r) == "string" then
 		return r
 	end
-	local player = Players:GetPlayerFromCharacter(model)
+	local player = ownerOf(model)
 	local pr = player and player:GetAttribute("Role")
 	return if type(pr) == "string" then pr else nil
 end
@@ -327,8 +338,14 @@ end
 
 -- Skin do jogador num encaixe ("SkinUniform" / "SkinCamo"), se for do lado. Bot e manequim: nil.
 local function skinOfPlayer(model: Model, attr: string, kind: string, faction: string): Skins.Skin?
-	local player = Players:GetPlayerFromCharacter(model)
-	local s = if player then Skins.get(player:GetAttribute(attr)) else nil
+	local player = ownerOf(model)
+	-- o soldado do lobby traz a skin do lado dele no próprio modelo (no lobby o jogador ainda não tem
+	-- lado, e o atributo do jogador fica vazio)
+	local v = model:GetAttribute(attr)
+	if v == nil and player then
+		v = player:GetAttribute(attr)
+	end
+	local s = if player then Skins.get(v) else nil
 	return if s and s.kind == kind and Skins.sideOk(s, faction) then s else nil
 end
 

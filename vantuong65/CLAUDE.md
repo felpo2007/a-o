@@ -140,6 +140,15 @@ O `sourcemap.json` não vai para o Git.
       ("Large", "Larger", "Largest"). Valem para o que for desenhado depois.
     - Não feche a confirmação destruindo a janela: a pilha de telas fica com ela por cima, e o
       menu de baixo para de responder. Feche pelo VOLTAR.
+  - Lobby (D-206, do lado do CLIENTE):
+    - `VT65DevPalco` = "US" ou "VC" troca o acampamento;
+    - `VT65DevNome` troca o nome do rodapé (capturas sem o nome da conta);
+    - o soldado próprio chega em `PlayerGui.VT65MeuSoldado.Soldado` (atributos Faction, Weapon,
+      Parts);
+    - as entradas do menu ficam em `VT65MenuPrincipal.Palco.Conteudo.<ARSENAL|MISSOES|PERFIL|
+      TUTORIAL|LOJA|PASSE|CONFIGURACOES>`; o JOGAR continua em `...Conteudo.JOGAR`;
+    - na janela estreita do Studio (839 × 656) a coluna da direita fica grande: o enquadramento
+      certo de 16:9 só se vê numa tela cheia.
   - D-191/D-190 (só Studio): `VT65DevGranada = "6"` lança uma granada a 6 m/s do primeiro
     jogador; `VT65DevTela = "3p"` liga a 3ª pessoa (o teclado do MCP não chega com o Studio
     atrás); `VT65DevTela = "roda_equip:<n>"` abre a roda de equipamento com a ficha n;
@@ -363,7 +372,7 @@ O `sourcemap.json` não vai para o Git.
 - Segredos só no `.env` (no `.gitignore`), nunca no código nem no chat.
 - ForgeGUI: nunca regenerar um job em `outcome_unknown`. "failed" com `retryable` pode ser
   retomado com `generation_retry`.
-- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-206) e atualize `PROGRESS.md`.
+- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-207) e atualize `PROGRESS.md`.
 - Tetos de triângulos por modelo: vegetação ≤ 6 mil (D-135), props e herói ≤ 20 mil (`ArtBudget`,
   conferido pelo teste da F5).
 - Commits no branch acima, com mensagem em português.

@@ -158,6 +158,9 @@
  "%d CI, cobrados só quando o lugar for achado": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:244"
  ],
+ "%d DE %d FEITAS HOJE": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:938"
+ ],
  "%d DE %d LIVRES": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehiclePrompt.client.luau:389"
  ],
@@ -258,6 +261,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:2280",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/FrontHud.client.luau:956",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/InfantryController.client.luau:417",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:939",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaMissoes.client.luau:261",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:805",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/TutorialController.client.luau:362"
@@ -281,6 +285,15 @@
   "src/ServerScriptService/Modules/CampanhaService.luau:774",
   "src/ServerScriptService/Modules/FieldWorkService.luau:78",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Marcadores.luau:206"
+ ],
+ "%dD %dH": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:818"
+ ],
+ "%dH %02dM": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:820"
+ ],
+ "%dM": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:822"
  ],
  "%s\n%s": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaView.luau:1486"
@@ -371,6 +384,9 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:944",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/TutorialController.client.luau:79"
  ],
+ "%s / %s": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:926"
+ ],
  "%s XP": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Progresso.client.luau:1137"
  ],
@@ -383,10 +399,10 @@
  "%s comprada por %s": [
   "src/ServerScriptService/Modules/CampanhaService.luau:735",
   "src/ServerScriptService/Modules/CampanhaService.luau:737",
-  "src/ServerScriptService/Modules/ProgressionService.luau:405"
+  "src/ServerScriptService/Modules/ProgressionService.luau:420"
  ],
  "%s comprado por %s": [
-  "src/ServerScriptService/Modules/ProgressionService.luau:626"
+  "src/ServerScriptService/Modules/ProgressionService.luau:641"
  ],
  "%s foi neutralizado: retome o ponto": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/FrontHud.client.luau:286"
@@ -417,6 +433,9 @@
  ],
  "%s sob ataque": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/FrontHud.client.luau:308"
+ ],
+ "%s · %d %s NO SERVIDOR": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:854"
  ],
  "%s · %d m": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Marcadores.luau:441",
@@ -534,10 +553,10 @@
   "src/ServerScriptService/Modules/CampanhaService.luau:931"
  ],
  "%s: vale no próximo spawn": [
-  "src/ServerScriptService/Modules/ProgressionService.luau:383"
+  "src/ServerScriptService/Modules/ProgressionService.luau:398"
  ],
  "%s: é sua": [
-  "src/ServerScriptService/Modules/ProgressionService.luau:568"
+  "src/ServerScriptService/Modules/ProgressionService.luau:583"
  ],
  "%s:%d": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:680"
@@ -650,6 +669,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Toast.luau:533"
  ],
  "+%s XP": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:933",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Toast.luau:530"
  ],
  "+%s em créditos": [
@@ -1081,9 +1101,6 @@
  "<font face=\"Arimo\">%1</font>": [
   "src/ReplicatedFirst/Acabamento.luau:428"
  ],
- "A  ESCOLHER     ↑ ↓  ANDAR": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:421"
- ],
  "A Arrozais": [
   "src/ReplicatedStorage/Shared/MapConfig.luau:14"
  ],
@@ -1188,6 +1205,12 @@
  ],
  "A temporada termina em %d dias.": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:810"
+ ],
+ "A trilha da temporada: recompensas por estrelas de partidas e ordens.": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:527"
+ ],
+ "A trilha grátis vale para todos; a Veterano, com o passe.": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:907"
  ],
  "A variante de fundo amarelado do tiger stripe dos assessores.": [
   "src/ReplicatedStorage/Shared/Skins.luau:629"
@@ -1306,6 +1329,13 @@
  ],
  "ARQUIVO MILITAR STARLITE": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ArquivoTela.client.luau:681"
+ ],
+ "ARRASTE": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:1306"
+ ],
+ "ARSENAL": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:441",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:442"
  ],
  "AS": [
   "src/ReplicatedStorage/Shared/Cosmeticos.luau:496"
@@ -1578,7 +1608,9 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:651"
  ],
  "Andar": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/ComoJogar.luau:61"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/ComoJogar.luau:61",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:1295",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:1305"
  ],
  "Andar: %d%%": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/EditorHud.client.luau:541"
@@ -1678,6 +1710,9 @@
  "Arraste o polegar no analógico, embaixo à esquerda, para andar; leve até a borda para correr. Toque em PULAR para passar por cima de muretas.": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ComoJogar.luau:59"
  ],
+ "Arraste o soldado para girar": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:1301"
+ ],
  "Arraste um botão para mover. Toque nele para escolher.": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/EditorHud.client.luau:303",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/EditorHud.client.luau:330",
@@ -1685,9 +1720,7 @@
  ],
  "Arrozais": [
   "src/ReplicatedFirst/LoadingScreen.client.luau:74",
-  "src/ReplicatedStorage/Shared/MapConfig.luau:21",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:91",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:92"
+  "src/ReplicatedStorage/Shared/MapConfig.luau:21"
  ],
  "Arsenal da Frente": [
   "src/ReplicatedStorage/Shared/Arquivo.luau:100"
@@ -1709,6 +1742,9 @@
  ],
  "As curvas de nível da carta de Van Tuong por todo o fuzil.": [
   "src/ReplicatedStorage/Shared/Skins.luau:983"
+ ],
+ "As duas trilhas valem para você.": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:906"
  ],
  "As medalhas chegam com a próxima atualização do servidor.": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaoJogador.luau:654"
@@ -1957,6 +1993,9 @@
  ],
  "Baixas: nossas %d · inimigo %d": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaView.luau:2306"
+ ],
+ "Baixo": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:100"
  ],
  "Bala passando perto": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/AudioController.client.luau:714"
@@ -2292,6 +2331,9 @@
  "COMO CONSEGUIR": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ArquivoTela.client.luau:237"
  ],
+ "COMO JOGAR": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:484"
+ ],
  "COMO JOGAR  ·  %d / %d": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ComoJogar.luau:681"
  ],
@@ -2336,9 +2378,12 @@
  "CONEXÃO PERDIDA": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Reconexao.client.luau:194"
  ],
+ "CONFIGURACOES": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:536"
+ ],
  "CONFIGURAÇÕES": [
   "src/ReplicatedFirst/LoadingScreen.client.luau:559",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:402"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:537"
  ],
  "CONFIRMAR": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:1194"
@@ -2772,6 +2817,9 @@
  "Ciano elétrico sobre azul-noite.": [
   "src/ReplicatedStorage/Shared/Cosmeticos.luau:432"
  ],
+ "Cima": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:108"
+ ],
  "Cinta": [
   "src/ServerScriptService/Modules/CaixaMunicaoService.luau:84"
  ],
@@ -2979,6 +3027,9 @@
  "Contato! Inimigo à vista": [
   "src/ReplicatedStorage/Shared/Comms.luau:13"
  ],
+ "Conteudo": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:179"
+ ],
  "Contra-ataque": [
   "src/ReplicatedStorage/Shared/Eventos.luau:163"
  ],
@@ -2994,6 +3045,9 @@
  ],
  "Controle · %s": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:933"
+ ],
+ "Controles, mira, som, gráficos, idioma e acessibilidade.": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:541"
  ],
  "Convite aceito": [
   "src/ServerScriptService/Modules/CampanhaService.luau:563"
@@ -3086,6 +3140,9 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaoJogador.luau:66",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaoJogador.luau:75"
  ],
+ "Cosméticos: não mudam o combate.": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:1002"
+ ],
  "Couro Duro": [
   "src/ReplicatedStorage/Shared/Commerce.luau:181",
   "src/ReplicatedStorage/Shared/Vantagens.luau:49"
@@ -3103,6 +3160,9 @@
  "Creditos": [
   "src/ServerScriptService/Modules/CaixaService.luau:431",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Toast.luau:507"
+ ],
+ "Credits": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:860"
  ],
  "Crie uma unidade com nome e tag, convide membros e apareça no relatório pós-ação. Sem vantagem em combate.": [
   "src/ReplicatedStorage/Shared/Commerce.luau:93"
@@ -3299,6 +3359,12 @@
  "DIA": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:126"
  ],
+ "DIA %d DE 7 · PRONTA PARA RECEBER": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:962"
+ ],
+ "DIA %d DE 7 · PRÓXIMA EM %s": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:965"
+ ],
  "DIAS SEGUIDOS": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:87"
  ],
@@ -3444,6 +3510,9 @@
  ],
  "Dica": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/FimDeRodada.client.luau:152"
+ ],
+ "Dicas": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:182"
  ],
  "Dike": [
   "src/ReplicatedStorage/Shared/BotBrain.luau:1207",
@@ -3647,10 +3716,8 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/EventosVisual.luau:62"
  ],
  "ENTER": [
-  "src/ReplicatedFirst/LoadingScreen.client.luau:866"
- ],
- "ENTER  ESCOLHER     ↑ ↓  ANDAR": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:425"
+  "src/ReplicatedFirst/LoadingScreen.client.luau:866",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:1304"
  ],
  "ENTRANDO": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/JogarAgora.luau:454"
@@ -4016,6 +4083,9 @@
  "Entrar no veículo: {a}, perto dele.": [
   "src/ReplicatedStorage/Shared/Tutorial.luau:63"
  ],
+ "Entre na partida: escolha o lado, o squad, o papel e onde nascer.": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:1094"
+ ],
  "Entre num squad com vaga ou forme um novo.": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:1525"
  ],
@@ -4045,6 +4115,9 @@
  "Equipamento por peso": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:984"
  ],
+ "Equipamento por posto e créditos: o que vai no peso do seu kit.": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:446"
+ ],
  "Equipamento: %.1f de %.1f kg (vale no próximo spawn)": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:985"
  ],
@@ -4073,7 +4146,7 @@
   "src/ReplicatedFirst/Idioma.luau:362"
  ],
  "Escolha o lado, o squad, o papel e onde nascer.": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:400"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:322"
  ],
  "Escolha o papel no dossiê antes da inserção.": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:2526"
@@ -4087,6 +4160,8 @@
  "Escolher": [
   "src/ReplicatedStorage/Shared/InputMap.luau:150",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:2196",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:1294",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:1304",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Progresso.client.luau:1066",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Progresso.client.luau:1071",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:868"
@@ -4134,6 +4209,7 @@
  ],
  "Esquerda": [
   "src/ReplicatedStorage/Shared/CartaModel.luau:102",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:92",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:273"
  ],
  "Esquerda 50": [
@@ -4244,6 +4320,9 @@
  "FALTAM %s": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Progresso.client.luau:890"
  ],
+ "FARDAS E ACABAMENTOS": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:1001"
+ ],
  "FAS DoD-101 M48 (lado 76 mm na frente, 51 mm atrás)": [
   "src/ReplicatedStorage/Shared/Vehicles.luau:69"
  ],
@@ -4344,9 +4423,6 @@
  "FUZIL": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:1450"
  ],
- "FUZILEIROS DOS EUA": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:107"
- ],
  "FUZILEIROS NAVAIS DOS EUA": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:139",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/LobbyScene.luau:1269"
@@ -4418,6 +4494,7 @@
   "src/ReplicatedStorage/Shared/Skins.luau:1509"
  ],
  "Faction": [
+  "src/ServerScriptService/Modules/PreviewService.luau:270",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:2700",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameUI.client.luau:765"
  ],
@@ -4547,7 +4624,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Wheel.luau:165"
  ],
  "Fim de partida: %s": [
-  "src/ServerScriptService/Modules/ProgressionService.luau:542"
+  "src/ServerScriptService/Modules/ProgressionService.luau:557"
  ],
  "Fio": [
   "src/ReplicatedStorage/Shared/KnifeModel.luau:95"
@@ -4902,6 +4979,10 @@
  "Gesto: gole do cantil": [
   "src/ReplicatedStorage/Shared/Temporada.luau:95"
  ],
+ "Girar o soldado": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:1296",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:1306"
+ ],
  "Giroscópio": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:782",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:783"
@@ -5038,9 +5119,9 @@
  "Head": [
   "src/ReplicatedStorage/Shared/Corpos.luau:55",
   "src/ReplicatedStorage/Shared/Hitbox.luau:53",
-  "src/ServerScriptService/Modules/Characters.luau:275",
-  "src/ServerScriptService/Modules/Characters.luau:375",
-  "src/ServerScriptService/Modules/Characters.luau:498",
+  "src/ServerScriptService/Modules/Characters.luau:286",
+  "src/ServerScriptService/Modules/Characters.luau:392",
+  "src/ServerScriptService/Modules/Characters.luau:515",
   "src/ServerScriptService/Modules/Gear.luau:840",
   "src/ServerScriptService/Modules/MeleeService.luau:61",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/KnifeView.luau:259"
@@ -5295,11 +5376,15 @@
  "JD": [
   "src/ReplicatedStorage/Shared/Cosmeticos.luau:544"
  ],
+ "JOGADOR": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:857"
+ ],
  "JOGADORES": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:1056"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:1056",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:857"
  ],
  "JOGAR": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:396"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:314"
  ],
  "JOGAR AGORA": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:138",
@@ -5436,10 +5521,14 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:736"
  ],
  "LOJA": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:403"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:508",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:509"
  ],
  "LOJA E ARMÁRIO": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:45"
+ ],
+ "LOJA · UNIFORMES DE 1965": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:1000"
  ],
  "LOTADO": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:784",
@@ -5821,9 +5910,13 @@
  "MIRAR E ATIRAR": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ComoJogar.luau:67"
  ],
+ "MISSOES": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:455"
+ ],
  "MISSÕES": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaoJogador.luau:428",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/FrontHud.client.luau:899",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:456",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaMissoes.client.luau:58"
  ],
  "MMB": [
@@ -6341,11 +6434,20 @@
  "NO CONTROLE": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ComoJogar.luau:119"
  ],
+ "NO SERVIDOR": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:763"
+ ],
  "NO SEU ARQUIVO": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ArquivoTela.client.luau:584"
  ],
  "NOSSO": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaView.luau:1020"
+ ],
+ "NOVAS EM": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:911"
+ ],
+ "NOVAS EM ": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:911"
  ],
  "NOVO": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:425",
@@ -6502,10 +6604,16 @@
   "src/ServerScriptService/Modules/MedicalService.luau:384"
  ],
  "NÍVEL": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:575",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:908",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:136",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:211"
  ],
+ "NÍVEL ": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:908"
+ ],
  "NÍVEL MÁXIMO": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:900",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:806"
  ],
  "NÓS": [
@@ -6622,6 +6730,9 @@
  "O preto da guerrilha local: sem gola, dois bolsos baixos, mangas arregaçadas.": [
   "src/ReplicatedStorage/Shared/Skins.luau:552"
  ],
+ "O que você já alcançou chega na compra.": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:1011"
+ ],
  "O registro falhou: tente de novo.": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:379"
  ],
@@ -6696,6 +6807,9 @@
  "OPERAÇÃO STARLITE · III MAF · 1965": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/AfterActionController.client.luau:67"
  ],
+ "OPERAÇÃO STARLITE · VẠN TƯỜNG · AGOSTO DE 1965": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:252"
+ ],
  "OPERAÇÃO STARLITE · VẠN TƯỜNG · QUẢNG NGÃI · 18 DE AGOSTO DE 1965": [
   "src/ReplicatedFirst/LoadingScreen.client.luau:266"
  ],
@@ -6708,6 +6822,9 @@
  "ORDEM DO COMANDANTE": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/HudCampo.client.luau:954",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/HudCampo.client.luau:996"
+ ],
+ "ORDENS DO DIA": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:602"
  ],
  "ORDENS DO DIA E DA SEMANA": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaMissoes.client.luau:55"
@@ -6793,9 +6910,6 @@
   "src/ReplicatedStorage/Shared/Arquivo.luau:59",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/FrontHud.client.luau:1009"
  ],
- "Operação Starlite · Vạn Tường · agosto de 1965": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:323"
- ],
  "Operação Starlite · Vạn Tường, 18–24 ago 1965": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:604"
  ],
@@ -6823,8 +6937,14 @@
  "Ordens": [
   "src/ReplicatedStorage/Shared/Equipar.luau:276"
  ],
+ "Ordens do dia e da semana: XP, créditos e estrelas do passe.": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:460"
+ ],
  "Os cinco uniformes dos EUA.": [
   "src/ReplicatedStorage/Shared/Arquivo.luau:120"
+ ],
+ "Os comandos e o básico da partida, sem entrar em campo.": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:488"
  ],
  "Os dias 3 e 7 da caderneta de serviço (recompensa diária) dão itens que só saem de lá.": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:1062"
@@ -6922,15 +7042,24 @@
  "PARA TODOS": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:209"
  ],
+ "PARTIDA": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:257"
+ ],
  "PASSAGEIRO": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehiclePrompt.client.luau:360"
  ],
  "PASSE": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:404"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:522"
  ],
  "PASSE DE CAMPANHA": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:523",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:566",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:1009",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:127",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:796"
+ ],
+ "PASSE DE CAMPANHA · %s": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:890"
  ],
  "PAUSADO": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Reconexao.client.luau:110"
@@ -6940,6 +7069,10 @@
  ],
  "PENDENTE": [
   "src/ReplicatedStorage/Shared/Weapons.luau:397"
+ ],
+ "PERFIL": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:469",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:470"
  ],
  "PERIGO": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:1460"
@@ -7111,6 +7244,15 @@
  ],
  "PLACEHOLDER derivado: alcance máximo de 400 m (wiki)": [
   "src/ReplicatedStorage/Shared/Weapons.luau:263"
+ ],
+ "POSTO": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:754",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:842",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:843"
+ ],
+ "POSTO ": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:842",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:843"
  ],
  "POSTO %d": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:644"
@@ -7351,6 +7493,9 @@
  ],
  "Película de óleo que muda de cor com a luz.": [
   "src/ReplicatedStorage/Shared/Skins.luau:1095"
+ ],
+ "Perfil": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:181"
  ],
  "Perfil ainda carregando": [
   "src/ServerScriptService/Modules/CampanhaService.luau:673"
@@ -7819,7 +7964,8 @@
  "RECOMPENSA DIÁRIA": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:79",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/LobbyScene.luau:965",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/LobbyScene.luau:1167"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/LobbyScene.luau:1167",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:666"
  ],
  "RECRUIT": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:95"
@@ -7939,6 +8085,9 @@
  ],
  "RPG-2 · verde-oliva pintado": [
   "src/ReplicatedStorage/Shared/Skins.luau:395"
+ ],
+ "RS": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:1296"
  ],
  "RT": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ComoJogar.luau:151",
@@ -8100,7 +8249,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/FrontHud.client.luau:339"
  ],
  "Renascer guardado recebido": [
-  "src/ServerScriptService/Modules/ProgressionService.luau:556"
+  "src/ServerScriptService/Modules/ProgressionService.luau:571"
  ],
  "Renascer onde caiu": [
   "src/ReplicatedStorage/Shared/Commerce.luau:133"
@@ -8153,6 +8302,9 @@
  ],
  "Restaurar tudo?": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:917"
+ ],
+ "Resumo": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:180"
  ],
  "Reticulo": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Luneta.luau:70"
@@ -8254,6 +8406,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/AfterActionController.client.luau:329"
  ],
  "Role": [
+  "src/ServerScriptService/Modules/PreviewService.luau:270",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:2714",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameUI.client.luau:765"
  ],
@@ -8470,7 +8623,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:2293"
  ],
  "STARLITE": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:309"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:241"
  ],
  "STARLITE Founder": [
   "src/ReplicatedStorage/Shared/Conjuntos.luau:59"
@@ -8686,9 +8839,7 @@
  "Serraria": [
   "src/ReplicatedFirst/LoadingScreen.client.luau:74",
   "src/ReplicatedStorage/Shared/MapConfig.luau:22",
-  "src/ServerScriptService/Modules/Vegetation.luau:273",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:80",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:81"
+  "src/ServerScriptService/Modules/Vegetation.luau:273"
  ],
  "Service Crate": [
   "src/ReplicatedStorage/Shared/Caixas.luau:197"
@@ -8748,6 +8899,9 @@
  ],
  "Seu %s foi destruído (sem reembolso)": [
   "src/ServerScriptService/Modules/CompraVeiculoService.luau:445"
+ ],
+ "Seu cartão: posto, medalhas, emblema e o placar da semana.": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:474"
  ],
  "Seu papel não pede fogo (comandante ou morteiro).": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CommanderController.client.luau:152"
@@ -8924,7 +9078,7 @@
   "src/ServerScriptService/Modules/MapLife.luau:1104"
  ],
  "Store": [
-  "src/ServerScriptService/Modules/CommerceService.luau:171"
+  "src/ServerScriptService/Modules/CommerceService.luau:173"
  ],
  "Sua": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Progresso.client.luau:842"
@@ -8993,6 +9147,15 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:87",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:457"
  ],
+ "TEMPORADA ENCERRADA": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:892"
+ ],
+ "TERMINA EM": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:894"
+ ],
+ "TERMINA EM ": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:894"
+ ],
  "TESTAR": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/EditorHud.client.luau:323",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/EditorHud.client.luau:444"
@@ -9001,7 +9164,7 @@
   "src/ReplicatedStorage/Shared/Cosmeticos.luau:400"
  ],
  "TIP": [
-  "src/ServerScriptService/Modules/CommerceService.luau:319"
+  "src/ServerScriptService/Modules/CommerceService.luau:321"
  ],
  "TIRAR": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CaixasTela.client.luau:1094",
@@ -9026,6 +9189,9 @@
  "TN": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/HudCampo.client.luau:224"
  ],
+ "TODAS AS ORDENS  ›": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:652"
+ ],
  "TOMANDO": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/FrontHud.client.luau:468",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/FrontHud.client.luau:559"
@@ -9045,6 +9211,9 @@
  "TRAVAR": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ToqueHud.client.luau:204",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ToqueHud.client.luau:832"
+ ],
+ "TRILHA VETERANO": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:1010"
  ],
  "TROCA": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CaixasTela.client.luau:1147",
@@ -9068,7 +9237,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CaixasTela.client.luau:912"
  ],
  "TUTORIAL": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:405"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:483"
  ],
  "TUTORIAL EM ANDAMENTO": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:287"
@@ -9270,7 +9439,7 @@
   "src/ReplicatedStorage/Shared/Skins.luau:315"
  ],
  "Tirada: vale no próximo spawn": [
-  "src/ServerScriptService/Modules/ProgressionService.luau:383"
+  "src/ServerScriptService/Modules/ProgressionService.luau:398"
  ],
  "Tiro de %s": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/AudioController.client.luau:652"
@@ -9759,7 +9928,7 @@
   "src/ServerScriptService/Modules/CaixaMunicaoService.luau:72",
   "src/ServerScriptService/Modules/CaixaMunicaoService.luau:507",
   "src/ServerScriptService/Modules/CampanhaService.luau:100",
-  "src/ServerScriptService/Modules/Characters.luau:639",
+  "src/ServerScriptService/Modules/Characters.luau:656",
   "src/ServerScriptService/Modules/CommanderService.luau:228",
   "src/ServerScriptService/Modules/CommanderService.luau:237",
   "src/ServerScriptService/Modules/CommanderService.luau:250",
@@ -9814,13 +9983,16 @@
   "src/ServerScriptService/Modules/MatchService.luau:526",
   "src/ServerScriptService/Modules/MedicalService.luau:269",
   "src/ServerScriptService/Modules/MeleeService.luau:480",
-  "src/ServerScriptService/Modules/PreviewService.luau:137",
+  "src/ServerScriptService/Modules/PreviewService.luau:171",
+  "src/ServerScriptService/Modules/PreviewService.luau:171",
+  "src/ServerScriptService/Modules/PreviewService.luau:171",
+  "src/ServerScriptService/Modules/PreviewService.luau:313",
   "src/ServerScriptService/Modules/ProfileSchema.luau:392",
   "src/ServerScriptService/Modules/ProgressionService.luau:51",
   "src/ServerScriptService/Modules/ProgressionService.luau:74",
-  "src/ServerScriptService/Modules/ProgressionService.luau:522",
-  "src/ServerScriptService/Modules/ProgressionService.luau:522",
-  "src/ServerScriptService/Modules/ProgressionService.luau:524",
+  "src/ServerScriptService/Modules/ProgressionService.luau:537",
+  "src/ServerScriptService/Modules/ProgressionService.luau:537",
+  "src/ServerScriptService/Modules/ProgressionService.luau:539",
   "src/ServerScriptService/Modules/SpawnService.luau:671",
   "src/ServerScriptService/Modules/SpawnService.luau:671",
   "src/ServerScriptService/Modules/TeamService.luau:17",
@@ -9892,6 +10064,10 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/FrontHud.client.luau:1074",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameUI.client.luau:563",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ItemArte.luau:233",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/LobbyPalco.luau:422",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/LobbyPalco.luau:427",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/LobbyPalco.luau:431",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/LobbyPalco.luau:435",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/LobbyScene.luau:350",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/LobbyScene.luau:714",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/LobbyScene.luau:715",
@@ -9904,8 +10080,6 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Maos1P.luau:47",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Maos1P.luau:196",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Marcadores.luau:71",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:72",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:94",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Movement.client.luau:1232",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:1045",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/SpawnTransition.luau:347",
@@ -10013,6 +10187,9 @@
  ],
  "Uniformes de época e as plaquetas e molduras mais raras.": [
   "src/ReplicatedStorage/Shared/Caixas.luau:411"
+ ],
+ "Uniformes, acabamentos de arma, conjuntos e caixas.": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:513"
  ],
  "Uniforms": [
   "src/ReplicatedStorage/Shared/Arquivo.luau:28"
@@ -10192,7 +10369,7 @@
   "src/ServerScriptService/Modules/CaixaMunicaoService.luau:508",
   "src/ServerScriptService/Modules/CampanhaService.luau:100",
   "src/ServerScriptService/Modules/CampanhaService.luau:544",
-  "src/ServerScriptService/Modules/Characters.luau:424",
+  "src/ServerScriptService/Modules/Characters.luau:441",
   "src/ServerScriptService/Modules/CommanderService.luau:228",
   "src/ServerScriptService/Modules/CommanderService.luau:238",
   "src/ServerScriptService/Modules/CommanderService.luau:251",
@@ -10234,13 +10411,15 @@
   "src/ServerScriptService/Modules/MeleeService.luau:480",
   "src/ServerScriptService/Modules/MeleeService.luau:506",
   "src/ServerScriptService/Modules/MeleeService.luau:535",
-  "src/ServerScriptService/Modules/PreviewService.luau:102",
-  "src/ServerScriptService/Modules/PreviewService.luau:137",
+  "src/ServerScriptService/Modules/PreviewService.luau:131",
+  "src/ServerScriptService/Modules/PreviewService.luau:171",
+  "src/ServerScriptService/Modules/PreviewService.luau:171",
+  "src/ServerScriptService/Modules/PreviewService.luau:313",
   "src/ServerScriptService/Modules/ProfileSchema.luau:392",
   "src/ServerScriptService/Modules/ProgressionService.luau:51",
-  "src/ServerScriptService/Modules/ProgressionService.luau:522",
-  "src/ServerScriptService/Modules/ProgressionService.luau:522",
-  "src/ServerScriptService/Modules/ProgressionService.luau:524",
+  "src/ServerScriptService/Modules/ProgressionService.luau:537",
+  "src/ServerScriptService/Modules/ProgressionService.luau:537",
+  "src/ServerScriptService/Modules/ProgressionService.luau:539",
   "src/ServerScriptService/Modules/SpawnService.luau:126",
   "src/ServerScriptService/Modules/SpawnService.luau:132",
   "src/ServerScriptService/Modules/SpawnService.luau:158",
@@ -10308,6 +10487,12 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ItemArte.luau:233",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/JogarAgora.luau:49",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/KnifeView.luau:289",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/LobbyPalco.luau:422",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/LobbyPalco.luau:427",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/LobbyPalco.luau:431",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/LobbyPalco.luau:435",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/LobbyPalco.luau:435",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/LobbyPalco.luau:523",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/LobbyScene.luau:1014",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/LobbyScene.luau:1069",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/LobbyScene.luau:1197",
@@ -10318,7 +10503,6 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Maos1P.luau:200",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Marcadores.luau:71",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Marcadores.luau:663",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:83",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Movement.client.luau:1232",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Progresso.client.luau:60",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Progresso.client.luau:1340",
@@ -10338,6 +10522,9 @@
  ],
  "VER O CONJUNTO": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Progresso.client.luau:878"
+ ],
+ "VER O PASSE  ›": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:587"
  ],
  "VER O RELATÓRIO": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/FrontHud.client.luau:681"
@@ -10376,11 +10563,8 @@
  "VI": [
   "src/ReplicatedFirst/Idioma.luau:34"
  ],
- "VIET CONG": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:107"
- ],
  "VIETNÃ 1965": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:313"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:243"
  ],
  "VIEW": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ComoJogar.luau:167"
@@ -10748,7 +10932,8 @@
   "src/ServerScriptService/Modules/MatchService.luau:500",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/AfterActionController.client.luau:435",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/FrontHud.client.luau:1071",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:204"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:204",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:855"
  ],
  "Warfare (5 setores, 75 min)": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:205"
@@ -10843,6 +11028,7 @@
  "XP": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CasualtyScreen.luau:1347",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CasualtyScreen.luau:1347",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:860",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Toast.luau:506"
  ],
  "XP DOBRADO DE FIM DE SEMANA": [
@@ -10866,12 +11052,7 @@
   "src/ReplicatedFirst/LoadingScreen.client.luau:74",
   "src/ReplicatedStorage/Shared/MapConfig.luau:23",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/AudioController.client.luau:277",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/LobbyScene.luau:449",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:69",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:70",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:82",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:93",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:128"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/LobbyScene.luau:449"
  ],
  "Zero": [
   "src/ReplicatedStorage/Shared/Equipar.luau:27",
@@ -11319,8 +11500,15 @@
   "src/ReplicatedStorage/Shared/MapConfig.luau:21"
  ],
  "arrozal": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:1116",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:1137",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:1435",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Movement.client.luau:1264",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:49"
+ ],
+ "arsenal": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:448",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:1470"
  ],
  "asking": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/JogarAgora.luau:51",
@@ -11420,6 +11608,15 @@
  "bamboo": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Progresso.client.luau:526"
  ],
+ "bambu": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:528"
+ ],
+ "banana": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/LobbyPalco.luau:289",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/LobbyPalco.luau:290",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/LobbyPalco.luau:319",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/LobbyPalco.luau:320"
+ ],
  "bandage": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaoJogador.luau:207",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/InfantryController.client.luau:423",
@@ -11470,7 +11667,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/EditorHud.client.luau:455"
  ],
  "bloqueado": [
-  "src/ReplicatedFirst/Estilo.luau:550",
+  "src/ReplicatedFirst/Estilo.luau:553",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaView.luau:1477",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameUI.client.luau:212",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:1448"
@@ -11562,7 +11759,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/SoldierPreview.luau:282",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/SoldierPreview.luau:301",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/SoldierPreview.luau:333",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/SoldierPreview.luau:703"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/SoldierPreview.luau:711"
  ],
  "caiu na água": [
   "src/ReplicatedStorage/Shared/Progression.luau:616"
@@ -11654,6 +11851,15 @@
  "carregando": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:1448"
  ],
+ "carregando as ordens…": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:883"
+ ],
+ "carregando o passe…": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:882"
+ ],
+ "carregando…": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:953"
+ ],
  "carta": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameUI.client.luau:863"
  ],
@@ -11729,6 +11935,9 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:2672",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/LobbyScene.luau:1210",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/LobbyScene.luau:1489"
+ ],
+ "chuva": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:475"
  ],
  "chão %s (fator %.2f) | água: leito %s, %s | estado %s | %.2f m/s (pedido %.2f) | lado %s ×%.2f | %.1f kg": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Movement.client.luau:1405"
@@ -11896,6 +12105,10 @@
  "conferir (wiki:M35)": [
   "src/ReplicatedStorage/Shared/Vehicles.luau:196"
  ],
+ "config": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:543",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:1495"
+ ],
  "configuracoes": [
   "src/ReplicatedFirst/LoadingScreen.client.luau:921"
  ],
@@ -11905,6 +12118,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CommanderController.client.luau:223"
  ],
  "confirma": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:1503",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:1212",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:1225",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:1237",
@@ -12461,7 +12675,7 @@
  ],
  "escolha um lado primeiro": [
   "src/ReplicatedStorage/Shared/Skins.luau:1746",
-  "src/ServerScriptService/Modules/ProgressionService.luau:364"
+  "src/ServerScriptService/Modules/ProgressionService.luau:376"
  ],
  "escolha um ponto pronto": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameUI.client.luau:301"
@@ -12492,7 +12706,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:854"
  ],
  "essa arma não aceita o acabamento": [
-  "src/ServerScriptService/Modules/ProgressionService.luau:364"
+  "src/ServerScriptService/Modules/ProgressionService.luau:376"
  ],
  "estado": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Fumaca.client.luau:235",
@@ -13028,7 +13242,7 @@
  ],
  "guarda": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/SoldierPreview.luau:526",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/SoldierPreview.luau:703"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/SoldierPreview.luau:711"
  ],
  "guardada": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CaixasTela.client.luau:1287"
@@ -13168,7 +13382,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ArquivoTela.client.luau:343"
  ],
  "indisponivel": [
-  "src/ReplicatedFirst/Estilo.luau:550",
+  "src/ReplicatedFirst/Estilo.luau:553",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:1448"
  ],
  "indo ao abrigo": [
@@ -13213,6 +13427,13 @@
  ],
  "informe a grade do alvo": [
   "src/ServerScriptService/Modules/CommanderService.luau:106"
+ ],
+ "inicio": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/LobbyPalco.luau:77",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:1138",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:1420",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:1513",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:1515"
  ],
  "inimigo a menos de %d m": [
   "src/ReplicatedStorage/Shared/Front.luau:247",
@@ -13275,6 +13496,7 @@
  ],
  "intendencia": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ArquivoTela.client.luau:103",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:450",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:52",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:1703",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:1716",
@@ -13345,7 +13567,8 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CaixasTela.client.luau:1227"
  ],
  "jogar": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/JogarAgora.luau:539"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/JogarAgora.luau:539",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:1117"
  ],
  "jogo": [
   "src/ReplicatedFirst/LoadingScreen.client.luau:610",
@@ -13657,6 +13880,10 @@
  ],
  "loja": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaoJogador.luau:483",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:514",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:515",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:1055",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:1491",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Progresso.client.luau:1116",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Progresso.client.luau:1121",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:45",
@@ -13901,6 +14128,8 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:746"
  ],
  "missoes": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:462",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:1493",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaMissoes.client.luau:326",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaMissoes.client.luau:347",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaMissoes.client.luau:370",
@@ -14263,6 +14492,8 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/LancadorFx.client.luau:269",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/LancadorFx.client.luau:295",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/LancadorFx.client.luau:299",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/LobbyPalco.luau:143",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/LobbyPalco.luau:447",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/LobbyScene.luau:541",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Marcadores.luau:338",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Marcadores.luau:701",
@@ -14270,6 +14501,9 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Marcadores.luau:718",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Marcadores.luau:725",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Marcadores.luau:757",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:53",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:837",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:840",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/MorteFx.client.luau:72",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/MorteFx.client.luau:123",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/MorteFx.client.luau:216",
@@ -14586,6 +14820,10 @@
  ],
  "passe": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ArquivoTela.client.luau:107",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:529",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:1249",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:1253",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:1492",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:1400",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:965",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaPasse.client.luau:992",
@@ -14624,6 +14862,10 @@
  ],
  "pelo posto": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Progresso.client.luau:753"
+ ],
+ "perfil": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:476",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:1494"
  ],
  "perfilmovel": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Graficos.client.luau:162"
@@ -14724,13 +14966,14 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CaixaMunicao.client.luau:196"
  ],
  "posto": [
-  "src/ServerScriptService/Modules/ProgressionService.luau:211"
+  "src/ServerScriptService/Modules/ProgressionService.luau:223",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:489"
  ],
  "posto %d para comprar": [
   "src/ReplicatedStorage/Shared/Progression.luau:496"
  ],
  "posto:": [
-  "src/ServerScriptService/Modules/ProgressionService.luau:211"
+  "src/ServerScriptService/Modules/ProgressionService.luau:223"
  ],
  "posture": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ToqueHud.client.luau:625"
@@ -15158,6 +15401,9 @@
  ],
  "revived": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Input.luau:1173"
+ ],
+ "riacho": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:461"
  ],
  "rifle": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CasualtyScreen.luau:1652",
@@ -15967,7 +16213,11 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Marcadores.luau:335",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Marcadores.luau:365",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/MedicalController.client.luau:35",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:441",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:828",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:842",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:855",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:872",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:1315",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Movement.client.luau:166",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Movement.client.luau:189",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Movement.client.luau:271",
@@ -16338,6 +16588,8 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Marcadores.luau:494",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Marcadores.luau:701",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/MedicalController.client.luau:35",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:976",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:989",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Movement.client.luau:181",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Progresso.client.luau:461",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Progresso.client.luau:1162",
@@ -16682,6 +16934,9 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/MedicalController.client.luau:138",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ToqueTelas.luau:188"
  ],
+ "trincheira": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:447"
+ ],
  "tritanopia (vermelho x verde)": [
   "src/ReplicatedStorage/Shared/Accessibility.luau:19"
  ],
@@ -16721,6 +16976,8 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaView.luau:1482"
  ],
  "tutorial": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:490",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:1513",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/TutorialController.client.luau:427",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/TutorialController.client.luau:768"
  ],
@@ -17934,6 +18191,9 @@
  "● SELECIONADO": [
   "src/ReplicatedFirst/Estilo.luau:65"
  ],
+ "★ %d / %d": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:900"
+ ],
  "⚔ EM DISPUTA": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaView.luau:1214"
  ],
@@ -17942,6 +18202,9 @@
  ],
  "✓ EQUIPADO": [
   "src/ReplicatedFirst/Estilo.luau:71"
+ ],
+ "✓ FEITA": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:926"
  ],
  "✓ Já é seu": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ArquivoTela.client.luau:597"
@@ -17955,6 +18218,9 @@
  "✓ SEU": [
   "src/ReplicatedFirst/Estilo.luau:70"
  ],
+ "✓ VETERANO ATIVO": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:902"
+ ],
  "✔ SEU": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:668",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:777",
@@ -17965,5 +18231,8 @@
  ],
  "🔒 BLOQUEADO": [
   "src/ReplicatedFirst/Estilo.luau:72"
+ ],
+ "🔒 VETERANO BLOQUEADO": [
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:902"
  ]
 }

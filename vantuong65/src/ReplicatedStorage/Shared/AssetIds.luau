@@ -409,6 +409,18 @@ return {
 		m35 = 112826258722569,
 		peugeot403 = 130718059148794,
 	},
+	-- D-206: as capas do dono (marketing/capas), já publicadas como imagens da página do jogo
+	-- (Pagina.miniatura_* no roblox_ids.json, tipo Image: o ID serve direto na ImageLabel). O lobby
+	-- troca a imagem do cartão grande pela da entrada em foco.
+	Capas = {
+		arrozal = 127113724350027, -- 02: fuzileiros olham o arrozal e a vila
+		posto = 106648597763688, -- 03: posto de comando, rádio e carta
+		vila = 75529421549577, -- 04: patrulha entre as casas
+		trincheira = 108723457521434, -- 05: trincheira em 1ª pessoa
+		bambu = 121763364440920, -- 06: patrulha noturna no bambuzal
+		chuva = 102077571679866, -- 07: combate na vila debaixo de chuva
+		riacho = 102197151301930, -- 08: travessia do riacho na mata
+	},
 	GroundImages = {
 		forrest_ground_01_cor = 83248274685054,
 		forrest_ground_01_normal = 139783933313957,

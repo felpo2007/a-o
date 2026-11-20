@@ -198,31 +198,22 @@ test("QGs: EUA no último setor, VC no setor 1, no meio da borda de cada lado", 
 	assert(Geometry.sectorAt(MapConfig.Sectors, MapConfig.HQ.VC.x, MapConfig.HQ.VC.z) == 1)
 end)
 
-test("menu principal: todo plano ancora em ponto forte ou local da carta que existe (D-123)", function()
-	-- com o mapa de 700 m dois planos apontavam para pontos que saíram e o menu ficava num plano só;
-	-- D-128: o spXZ do menu também acha os locais da carta (An Cường (2))
-	local src = fs.readFile("src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau")
-	local function exists(name: string): boolean
-		for _, sp in MapConfig.Strongpoints do
-			if sp.name == name then
-				return true
-			end
-		end
-		for _, l in MapConfig.Locations do
-			if l.name == name then
-				return true
-			end
-		end
-		return false
-	end
-	local n = 0
-	for key, name in string.gmatch(src, '\n%s*(%a+) = "([^"]+)",') do
-		if key == "anchor" or key == "toward" then
-			assert(exists(name), "plano do menu sem ponto forte nem local: " .. name)
-			n += 1
-		end
-	end
-	assert(n >= 6, "planos do menu não achados no arquivo")
+test("palco do lobby fora do mapa e longe da mesa de campanha (D-206)", function()
+	-- D-206: o menu deixou os planos pelo mapa (D-118/D-123) e virou o palco do soldado; o palco fica
+	-- no alto, fora da área jogável, e longe das cenas da mesa (LobbyScene), que ficam do outro lado
+	local C = "src/StarterPlayer/StarterPlayerScripts/Controllers/"
+	local palco = fs.readFile(C .. "LobbyPalco.luau")
+	local cena = fs.readFile(C .. "LobbyScene.luau")
+	local dz =
+		tonumber(string.match(palco, "local BASE = Vector3%.new%(%(B%.minX %+ B%.maxX%) / 2, %d+, B%.minZ %- (%d+)%)"))
+	local cz =
+		tonumber(string.match(cena, "local BASE = Vector3%.new%(%(B%.minX %+ B%.maxX%) / 2, %d+, B%.maxZ %+ (%d+)%)"))
+	assert(dz and cz, "BASE do palco ou da mesa não achada")
+	local b = MapConfig.Bounds
+	local zPalco = b.minZ - (dz :: number)
+	local zCena = b.maxZ + (cz :: number)
+	assert(b.minZ - zPalco >= 2000, "palco perto do mapa")
+	assert(zCena - zPalco >= 5000, "palco perto da mesa")
 end)
 
 test("setores cobrem a área sem buraco nem sobreposição (amostra de 50 m)", function()

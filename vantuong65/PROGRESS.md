@@ -833,8 +833,31 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
       - o corte da câmera do lobby;
       - o celular e o jogo publicado.
     - **v123 publicada** (versão 128 do place, commit e127995).
-    - **Próximo:** lote 91, o lobby (Arsenal, Missões e Perfil, o resumo à direita, o rodapé e o
-      soldado que gira).
+  - **Lote 91 (D-206): o lobby na composição das referências do dono, feito.**
+    - Pedido: lobby, loja e passe "com imagens bem feitas, transições de qualidade". Este lote é o
+      lobby; a loja e o passe vêm a seguir, sobre o mesmo palco.
+    - Esquerda: a marca, o cartão do JOGAR com as capas do dono e a navegação grande (ARSENAL,
+      MISSÕES, PERFIL, COMO JOGAR, LOJA, PASSE, CONFIGURAÇÕES). Direita: passe, ordens do dia,
+      diária e um destaque. Rodapé: saldo, posto, jogadores e o jogador.
+    - O soldado é o do próprio jogador: o servidor monta como no spawn, com cosméticos, skins e a
+      arma do último papel (`PreviewService.pessoal`, PlayerGui.VT65MeuSoldado).
+    - Ele fica num acampamento de 1965 ao fim da tarde (`LobbyPalco`; EUA ou VC pelo último lado),
+      com luz de cinema, câmera por entrada e giro por arraste ou analógico.
+    - Foco: barra âmbar, descrição, capa em fusão e enquadramento novo. Movimento reduzido: só
+      esmaece e corta.
+    - Conferido no Studio:
+      - o soldado no meio do espaço livre;
+      - de EUA para VC com a SKS em 2,0 s;
+      - a pasta continua depois de nascer;
+      - 150 px de arraste giram 94°;
+      - a LOJA por cima e o JOGAR até a mesa;
+      - 0 erros novos;
+      - palco com 177 peças e 49 chamadas de desenho.
+    - Lune 806 ok (54 arquivos), pytest 76, ruff, StyLua e luau-lsp limpos, i18n 100%. Relatório:
+      `testes/LOTE91_D206_2026-11-20.md`; capturas em `testes/lote91`.
+    - Não testado: a tela 16:9 cheia, o controle de verdade, o celular e o jogo publicado.
+    - **Próximo:** a loja (Destaques, Itens, Conjuntos, Caixas e Códigos) sobre o mesmo palco, e
+      depois o passe.
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;

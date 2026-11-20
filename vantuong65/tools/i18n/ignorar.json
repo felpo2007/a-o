@@ -1607,7 +1607,26 @@
   "estados",
   "indisponivel",
   "selecionado",
-  "voltou"
+  "voltou",
+  "Baixo",
+  "Cima",
+  "CONFIGURACOES",
+  "Conteudo",
+  "Credits",
+  "Dicas",
+  "MISSOES",
+  "Perfil",
+  "RS",
+  "Resumo",
+  "arsenal",
+  "bambu",
+  "banana",
+  "chuva",
+  "config",
+  "inicio",
+  "perfil",
+  "riacho",
+  "trincheira"
  ],
  "regex": [
   "^uni_[a-z_]+@[a-z0-9]+$"

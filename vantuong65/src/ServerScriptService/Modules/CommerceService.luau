@@ -33,6 +33,8 @@ CommerceService.onGrant = nil :: ((player: Player, grants: string, now: boolean)
 CommerceService.onRefresh = nil :: ((player: Player) -> ())?
 -- skin recebida por Robux (recibo de Developer Product ou compra de Game Pass); `now` = agora
 CommerceService.onSkin = nil :: ((player: Player, skinId: string, now: boolean) -> ())?
+-- D-206: chamado depois de o jogador equipar um cosmético (PreviewService refaz o soldado do lobby)
+CommerceService.onEquip = nil :: ((player: Player) -> ())?
 -- campanha (2026-11-12): posse dos passes relida (Veterano, Recruta, vantagens) e produto da
 -- campanha entregue (pular nível, reforço, créditos); postos pelo CampanhaService
 CommerceService.onPasses = nil :: ((player: Player) -> ())?
@@ -384,6 +386,9 @@ function CommerceService.start()
 		p.equipped[faction] = p.equipped[faction] or Commerce.defaultLoadout(faction)
 		p.equipped[faction][slot] = id
 		push(player)
+		if CommerceService.onEquip then
+			task.spawn(CommerceService.onEquip, player) -- D-206: o soldado do lobby veste de novo
+		end
 	end)
 	Net.event("Commerce_Track").OnServerEvent:Connect(function(player, step, item)
 		if type(step) == "string" and (item == nil or type(item) == "string") then

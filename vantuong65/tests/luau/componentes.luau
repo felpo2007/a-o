@@ -123,7 +123,9 @@ test("movimento reduzido: o que desliza, cresce ou pulsa para (§20)", function(
 	local fontes: { [string]: string } = {
 		["LobbyScene.luau"] = "camDur = if UiKit.Estilo.reduzMovimento() then 0.01 else MOVE_TIME",
 		["DiariaEntrada.client.luau"] = "if on and UiKit.Estilo.reduzMovimento() then",
-		["MenuPrincipal.client.luau"] = "if ring and not UiKit.Estilo.reduzMovimento() then",
+		-- D-206: a entrada só esmaece, sem o zoom lento das capas
+		["MenuPrincipal.client.luau"] = "local parado = Estilo.reduzMovimento()",
+		["LobbyPalco.luau"] = "camDur = if Estilo.reduzMovimento() then 0 else MOVE_S",
 		["CartaView.luau"] = "if not UiKit.Estilo.reduzMovimento() then",
 		["CenaBaixa.luau"] = "if Estilo.reduzMovimento() then",
 	}

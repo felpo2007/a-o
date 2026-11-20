@@ -669,10 +669,18 @@ function SoldierPreview.setModel(p: Preview, m: Model?)
 		-- clone do manequim do lobby (montado fora do mundo) ou do soldado: juntas resolvidas e a pose
 		applyPose(m, p.pose :: string)
 	end
-	m:PivotTo(CFrame.identity)
+	-- D-206: no modo mundo (o palco do lobby) o modelo próprio fica de pé no ponto, como o manequim
+	local stand = p.stand
+	if stand then
+		standModel(m, stand)
+	else
+		m:PivotTo(CFrame.identity)
+	end
 	m.Parent = p.world
 	p.model = m
-	frameModel(p)
+	if not stand then
+		frameModel(p)
+	end
 	local vp = p.vp
 	if vp then
 		vp.ImageTransparency = 1

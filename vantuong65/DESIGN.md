@@ -8710,3 +8710,166 @@ acima dela); os resets do menu; as abas no LB/RB e Q/E; o foco na ação princip
 - A transparência `VT65DevTransparencia` 0, só olhada, sem número.
 - O corte da câmera do lobby com movimento reduzido.
 - O celular e o jogo publicado.
+
+## D-206 — Lote 91: o lobby na composição das referências, com o próprio soldado num acampamento (2026-11-20)
+
+**Pedido do dono:** "quero q vc se baseie nas imagens para criar o lobbys a loja o passe quero q
+vc faça com imagens bem feitas transições de qualidade como se fosse um jogo sensacional de alta
+qualidade visual". As imagens são as que vieram com o prompt de interface:
+- 9 no chat de 20/11 e 11 nos dois .zip do WhatsApp;
+- as de lobby, loja, passe, placar e personalização são de um jogo de luta do Roblox;
+- as de HUD e mapa são de um jogo de guerra do Roblox.
+
+O texto do prompt (§6) diz o que vale delas: "Inspire-se na composição das referências, com
+soldado equipado em destaque e navegação organizada". Ficam a composição e a qualidade. Saem os
+nomes, textos, ícones, cores e a moeda delas: a identidade é a deste jogo (1965, âmbar e oliva, as
+capas do dono). Este lote é o lobby; a loja e o passe vêm nos próximos, sobre o mesmo palco.
+
+**A composição (§6), numa grade dentro da área segura:**
+- **Esquerda, no escuro:**
+  - a marca;
+  - o cartão grande do JOGAR (a ação mais evidente), com imagem, o botão âmbar, a linha de
+    descrição e o modo com os jogadores no servidor;
+  - a navegação em letras grandes: ARSENAL, MISSÕES, PERFIL, COMO JOGAR;
+  - depois LOJA, PASSE DE CAMPANHA (com o nível) e CONFIGURAÇÕES.
+- **Centro:** o soldado do próprio jogador, de pé, na luz.
+- **Direita:**
+  - o passe: temporada, fim, nível, estrelas e o estado do Veterano;
+  - as 3 ordens do dia, com progresso e prêmio;
+  - a recompensa diária: o dia e os 7 selos;
+  - um destaque em posição secundária: a loja e o passe, trocando a cada 7 s.
+- **Rodapé:** os comandos do aparelho à esquerda; à direita, saldo, posto, jogadores no servidor,
+  o jogador e a barra de XP do posto.
+- Os números são todos do jogo (CampanhaCliente, Daily_Get, atributos do jogador). Sem o estado,
+  aparece "carregando…", nunca uma conta vazia.
+
+**O soldado do próprio jogador (PreviewService.pessoal):** o prompt pede "o próprio avatar do
+jogador com seu uniforme, arma e equipamentos". Antes, o menu mostrava manequins iguais para todos.
+- Agora o servidor monta um soldado por jogador como no spawn:
+  - Characters.describe/dress com os cosméticos equipados do lado;
+  - as skins de uniforme e camuflagem desse lado, gravadas no próprio modelo (no lobby o jogador
+    ainda não tem lado);
+  - o rosto pelo UserId e a arma principal do último papel.
+- O `Characters` aceita o atributo "Dono" no modelo para o rosto, o papel e as skins.
+- Vai para a PlayerGui.VT65MeuSoldado: só o dono recebe.
+- É refeito, no máximo uma vez a cada 1,5 s, quando o jogador:
+  - equipa um cosmético (Commerce_Equip);
+  - troca uma skin;
+  - troca de lado ou de papel (atributos UltimaEscolha, Faction e Role).
+- Sem ele ainda, aparece o manequim do lado.
+- **Medido no Studio:**
+  - o soldado chegou (EUA, M14, 34 peças);
+  - ao escolher o VC na mesa, virou VC com a SKS em 2,0 s;
+  - a pasta continuou na PlayerGui depois de nascer em campo.
+
+**O palco (Controllers/LobbyPalco):** o acampamento de 1965 ao fim da tarde, montado no cliente,
+no alto e fora do mapa, e só no Workspace com o menu aberto.
+- **EUA:**
+  - a barraca de comando com lampião e a barraca de lona;
+  - caixas de munição empilhadas e um rádio de campanha;
+  - sacos de areia, galões, tambores, o M151 e o mastro;
+  - o UH-34D pousado ao longe, entre coqueiros.
+- **VC:**
+  - o abrigo de folha, a rede e o armário de armas;
+  - o caixote, os sacos de arroz e a lamparina;
+  - a cozinha Hoàng Cầm, entre bambus e bananeiras.
+- Os modelos são os do mapa, já preparados pelo `AssetLoader.template`. O PreviewService copia 20
+  para VT65Preview.Props.
+- **Luz:**
+  - o sol real das 18h06 de 18/08/1965 (como o menu já fazia);
+  - o palco gira para o sol ficar atrás e à direita do soldado (contorno e céu claro atrás);
+  - uma luz principal quente do lado da câmera, que acende na entrada;
+  - um preenchimento frio e o lampião tremendo;
+  - poeira no facho;
+  - cor quente com mais contraste e o fundo desfocado (profundidade de campo).
+- **Câmera:**
+  - cada entrada tem um enquadramento (corpo inteiro no início; torso e arma no ARSENAL; busto no
+    PERFIL; de cima nas MISSÕES; o soldado no canto na LOJA e no PASSE);
+  - a câmera vai de um a outro em 0,55 s, sem tranco, partindo de onde está;
+  - na abertura, um travelling de 1,7 s desce até o soldado;
+  - um respiro leve;
+  - o soldado fica no meio do espaço livre entre as colunas, medido na tela. No Studio, com a
+    janela estreita, a coluna da direita o cobria (`testes/lote91/antes_soldado_coberto.jpg`).
+- **Girar o soldado:** arrastar o mouse ou o dedo fora da coluna da esquerda, ou o analógico
+  direito. Volta de frente depois de 8 s parado. O gesto não aciona nada (só fora dos botões e sem
+  tela por cima).
+
+**As imagens:** as capas do dono (marketing/capas), já publicadas como imagens da página do jogo
+(`Pagina.miniatura_*`, tipo Image), entram em `AssetIds.Capas`. Cada entrada do menu tem a sua, e o
+cartão grande troca para ela no foco, em fusão de 0,3 s com um zoom lento.
+
+| Entrada | Capa |
+|---|---|
+| JOGAR | os fuzileiros olhando o arrozal |
+| ARSENAL | a trincheira em 1ª pessoa |
+| MISSÕES | a travessia do riacho |
+| PERFIL | a vila na chuva |
+| COMO JOGAR | o posto de comando |
+| PASSE | o bambuzal à noite |
+| LOJA | o banner da vitrine |
+
+**Transições (§4):**
+- **Entrada:**
+  - os blocos esmaecem e deslizam um depois do outro;
+  - os itens da esquerda chegam em escada (45 ms);
+  - as sombras e a luz do soldado sobem.
+- **Foco (mouse, controle, cursor virtual ou toque):**
+  - a barra âmbar cresce ao lado da entrada e o texto desliza e fica âmbar;
+  - a descrição troca, a capa funde e o soldado muda de enquadramento;
+  - sem foco por 0,5 s, volta ao JOGAR e ao quadro de início.
+- **Tela por cima** (loja, passe, missões, cartão, configurações, tutorial): o menu esmaece e o
+  soldado vai para o enquadramento dela; ao fechar, tudo volta.
+- **JOGAR:** a câmera entra no soldado, a tela escurece num preto quente e a mesa do lobby aparece,
+  como antes (lote 66).
+- **Movimento reduzido:** a entrada só esmaece, a câmera corta, sem travelling, sem poeira e sem o
+  zoom das capas.
+
+**Mapeamento até os lotes das telas:**
+
+| Entrada | Abre |
+|---|---|
+| ARSENAL | a Intendência (equipamento por posto e créditos) |
+| MISSÕES | as ordens |
+| PERFIL | o cartão do jogador |
+| COMO JOGAR | o tutorial |
+| LOJA | a vitrine |
+| PASSE | o passe |
+| CONFIGURAÇÕES | a aba do menu do jogo |
+
+O Arsenal de verdade (categorias, prévia, equipar) é de um lote próprio.
+
+**Conferido no Studio** (janela de 839 × 656; um jogador, mouse; nome de teste pelo
+`VT65DevNome`):
+- **Composição:** o soldado próprio no centro, grande, entre as colunas.
+- **Acampamentos:** o dos EUA com 23 modelos carregados; o do VC pelo `VT65DevPalco`.
+- **Foco:** a câmera foi para a arma no ARSENAL e para o busto no PERFIL, e a capa e a descrição
+  trocaram.
+- **Giro:** 150 px de arraste giraram o soldado 94°, sem abrir nada.
+- **Telas:** a LOJA abriu por cima com o menu esmaecido; o JOGAR levou à mesa.
+- **Erros:** 0 novos.
+- **Custo do palco:** 177 peças, 49 chamadas de desenho (149 de sombra), ~128 mil triângulos na
+  cena; ~54 fps no Studio atrás de outras janelas.
+- **Dois acertos depois da 1ª captura:**
+  - os três modelos de planta tinham o nome errado (`_v65`) e não chegavam;
+  - a câmera do ARSENAL (2,25 m) e a do PERFIL (1,55 m) estavam perto demais.
+
+**Testes:**
+- `lobby.luau` (7):
+  - todo modelo do acampamento tem ID;
+  - cada vaga do palco usa um modelo que o servidor manda;
+  - as câmeras a 2,5 m ou mais e o alvo perto do meio;
+  - o soldado próprio e os ganchos;
+  - o JOGAR e as entradas do §6;
+  - as capas são as da página;
+  - as transições e o movimento reduzido.
+- `run.luau`: o teste dos planos do menu antigo virou "palco fora do mapa e longe da mesa".
+- `componentes.luau`: âncoras do movimento reduzido.
+
+**Não testado:**
+- **Tela 16:9 cheia:** o Studio do MCP fica numa janela de 839 × 656. A conta diz que, em
+  1920 × 1080, o soldado fica em 54% da largura.
+- **Controle de verdade:** navegação, analógico direito e foco devolvido.
+- **Toque e celular:** o lote do celular reorganiza o lobby (§6: "no celular, reorganize").
+- **Cosmético equipado:** a troca do soldado foi medida pelo lado; o caminho do Commerce_Equip só
+  pelo Lune.
+- **O jogo publicado.**

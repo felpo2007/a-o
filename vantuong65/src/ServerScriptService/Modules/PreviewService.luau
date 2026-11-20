@@ -28,6 +28,35 @@ local PROPS: { [string]: string } = {
 	sandbags = "Models",
 }
 PreviewService.PROPS = PROPS
+-- D-206: o acampamento do lobby (Controllers/LobbyPalco). Os mesmos modelos do mapa, já preparados
+-- pelo AssetLoader.template (folha de duas faces, sem colisão de folhagem), copiados para
+-- VT65Preview.Props.<chave>. Sem a arte, o palco põe o que tiver.
+local ACAMPAMENTO = {
+	-- EUA
+	"us_command_tent",
+	"us_tent_gp_medium",
+	"caixa_municao_us",
+	"ammo_crate",
+	"us_jerrycans",
+	"us_fuel_drums",
+	"sandbag_wall",
+	"m151",
+	"uh34d_v3",
+	"us_flagpole",
+	-- VC
+	"vc_lean_to",
+	"vc_hammock",
+	"vc_weapon_rack",
+	"caixa_municao_vc",
+	"rice_sack",
+	"clay_lamp",
+	"vc_hoang_cam_kitchen",
+	-- mata dos dois
+	"coconut_palm",
+	"banana",
+	"bamboo_clump",
+}
+PreviewService.ACAMPAMENTO = ACAMPAMENTO
 
 -- Modelo publicado parado, sem scripts e fora das consultas (o cliente clona na cena do lobby)
 local function loadProp(key: string, group: string, folder: Folder)
@@ -125,7 +154,154 @@ local function build(faction: string, folder: Folder)
 	model.Parent = folder
 end
 
+-- ===== o soldado do próprio jogador (D-206; prompt de interface §6: "Use o próprio avatar do
+-- jogador com seu uniforme, arma e equipamentos") =====
+-- Montado como no spawn: Characters.describe/dress com os cosméticos equipados do lado, as skins de
+-- uniforme e camuflagem desse lado (atributos no próprio modelo, porque no lobby o jogador ainda não
+-- tem lado) e a arma principal do último papel. Parado e fora do mundo, na pasta VT65MeuSoldado da
+-- PlayerGui: só o dono recebe. Refeito quando ele equipa um cosmético ou uma skin, troca de lado ou de
+-- papel (no máximo um a cada PESSOAL_S).
+local PESSOAL_S = 1.5
+local pessoalGen: { [Player]: number } = {}
+
+local function escolhaDe(player: Player): (string, string, string)
+	local JogarAgora = require(ReplicatedStorage.Shared.JogarAgora) :: any
+	local c = JogarAgora.decode(player:GetAttribute("UltimaEscolha"))
+	local fa = player:GetAttribute("Faction")
+	local faction = if fa == "US" or fa == "VC" then fa else (if c.f == "US" or c.f == "VC" then c.f else "US")
+	local ra = player:GetAttribute("Role")
+	local role = if type(ra) == "string" then ra else (if c.f == faction and c.role then c.role else "rifleman")
+	local byRole = Roles.loadout[faction]
+	local list = byRole[role] or byRole.rifleman
+	local weapon = list[1]
+	if c.f == faction and c.role == role and c.w and table.find(Roles.primaries(faction, role), c.w) then
+		weapon = c.w
+	end
+	return faction, role, weapon
+end
+
+local function montaPessoal(player: Player)
+	local PlayerData = require(script.Parent.PlayerData) :: any
+	local ProgressionService = require(script.Parent.ProgressionService) :: any
+	local prof = PlayerData.get(player)
+	if not prof or not player.Parent then
+		return
+	end
+	local faction, role, weapon = escolhaDe(player)
+	local equipped = prof.equipped[faction]
+	local ok, model = pcall(function()
+		return Players:CreateHumanoidModelFromDescriptionAsync(
+			Characters.describe(faction, equipped, player.UserId),
+			Enum.HumanoidRigType.R15
+		)
+	end)
+	if not ok or not model or not player.Parent then
+		return
+	end
+	for _, d in model:GetDescendants() do
+		if d:IsA("BaseScript") then
+			d:Destroy()
+		end
+	end
+	local hum = model:FindFirstChildOfClass("Humanoid")
+	if hum then
+		hum.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
+		hum.HealthDisplayType = Enum.HumanoidHealthDisplayType.AlwaysOff
+	end
+	model.Name = "Soldado"
+	model:SetAttribute("Dono", player.UserId)
+	model:SetAttribute("Role", role)
+	local skins = ProgressionService.skinsFor(player, faction)
+	model:SetAttribute("SkinUniform", skins.uniform)
+	model:SetAttribute("SkinCamo", skins.camo)
+	Characters.dress(model, faction, equipped)
+	AssetLoader.attachWeapon(model, weapon)
+	local parts = 0
+	for _, d in model:GetDescendants() do
+		if d:IsA("BasePart") then
+			d.Anchored = true
+			d.CanCollide = false
+			d.CanQuery = false
+			d.CanTouch = false
+			parts += 1
+		end
+	end
+	model:SetAttribute("Faction", faction)
+	model:SetAttribute("Weapon", weapon)
+	model:SetAttribute("Parts", parts)
+	local pg = player:FindFirstChildOfClass("PlayerGui")
+	if not pg then
+		model:Destroy()
+		return
+	end
+	local folder = pg:FindFirstChild("VT65MeuSoldado")
+	if not folder then
+		local f = Instance.new("Folder")
+		f.Name = "VT65MeuSoldado"
+		f.Parent = pg
+		folder = f
+	end
+	-- o novo entra antes de o velho sair: o cliente troca sem ficar sem soldado
+	local old = (folder :: Instance):GetChildren()
+	model.Parent = folder
+	for _, o in old do
+		o:Destroy()
+	end
+end
+
+-- refaz o soldado do jogador daqui a pouco (vários pedidos juntos viram um)
+function PreviewService.pessoal(player: Player)
+	local g = (pessoalGen[player] or 0) + 1
+	pessoalGen[player] = g
+	task.delay(PESSOAL_S, function()
+		if pessoalGen[player] == g and player.Parent then
+			local ok, err = pcall(function(): any
+				montaPessoal(player)
+				return nil
+			end)
+			if not ok then
+				warn("[VT65] lobby: soldado do jogador", player.UserId, err)
+			end
+		end
+	end)
+end
+
+local function vigiaJogador(player: Player)
+	for _, a in { "UltimaEscolha", "Faction", "Role" } do
+		player:GetAttributeChangedSignal(a):Connect(function()
+			PreviewService.pessoal(player)
+		end)
+	end
+	-- perfil já carregado (o PlayerData.Loaded do start pega os que chegam depois)
+	local PlayerData = require(script.Parent.PlayerData) :: any
+	if PlayerData.get(player) then
+		PreviewService.pessoal(player)
+	end
+	-- se a PlayerGui for refeita (renascer), a pasta volta
+	player.CharacterAdded:Connect(function()
+		task.wait(1)
+		local pg = player:FindFirstChildOfClass("PlayerGui")
+		if pg and not pg:FindFirstChild("VT65MeuSoldado") then
+			PreviewService.pessoal(player)
+		end
+	end)
+end
+
 function PreviewService.start()
+	-- D-206: o soldado de cada jogador (os ganchos de cosmético e skin chamam o mesmo)
+	local CommerceService = require(script.Parent.CommerceService) :: any
+	local ProgressionService = require(script.Parent.ProgressionService) :: any
+	CommerceService.onEquip = PreviewService.pessoal
+	ProgressionService.onSkinChange = PreviewService.pessoal
+	local PlayerData = require(script.Parent.PlayerData) :: any
+	PlayerData.Loaded:Connect(PreviewService.pessoal)
+	Players.PlayerAdded:Connect(vigiaJogador)
+	for _, p in Players:GetPlayers() do
+		vigiaJogador(p)
+	end
+	Players.PlayerRemoving:Connect(function(p)
+		pessoalGen[p] = nil
+	end)
 	local folder = ReplicatedStorage:FindFirstChild(PreviewService.FOLDER) :: Folder?
 	if not folder then
 		local f = Instance.new("Folder")
@@ -158,6 +334,34 @@ function PreviewService.start()
 		end)
 		if not ok then
 			warn("[VT65] lobby: modelo", key, err)
+		end
+	end
+	-- D-206: o acampamento do lobby, pelos templates do mapa (já carregados para a arte)
+	for _, key in ACAMPAMENTO do
+		local ok, err = pcall(function(): any
+			local tpl = AssetLoader.template(key)
+			if tpl and not (props :: Folder):FindFirstChild(key) then
+				local m = tpl:Clone()
+				local parts = 0
+				for _, d in m:GetDescendants() do
+					if d:IsA("BaseScript") then
+						d:Destroy()
+					elseif d:IsA("BasePart") then
+						d.Anchored = true
+						d.CanCollide = false
+						d.CanQuery = false
+						d.CanTouch = false
+						parts += 1
+					end
+				end
+				m.Name = key
+				m:SetAttribute("Parts", parts)
+				m.Parent = props
+			end
+			return nil
+		end)
+		if not ok then
+			warn("[VT65] lobby: acampamento", key, err)
 		end
 	end
 	-- arte das armas-base de todos os papéis (a prévia troca a arma ao escolher o papel)

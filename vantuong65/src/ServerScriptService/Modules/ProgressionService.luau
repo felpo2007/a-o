@@ -135,6 +135,18 @@ local function stateFor(p: Player, extra: { [string]: any }?): { [string]: any }
 	}
 end
 
+-- D-206: chamado depois de o jogador trocar uma skin (PreviewService refaz o soldado do lobby)
+ProgressionService.onSkinChange = nil :: ((p: Player) -> ())?
+
+-- D-206: as skins que valeriam num lado dado (o soldado do lobby, antes de o jogador ter lado)
+function ProgressionService.skinsFor(p: Player, faction: string): { [string]: string }
+	local prof = PlayerData.get(p)
+	if not prof then
+		return {}
+	end
+	return Skins.equipped(prof.skins.on[faction], faction, prof.skins.owned, passes(p))
+end
+
 -- Skins que valem no lado atual, em atributos do jogador (lidos no spawn e pela arma). Só o que é
 -- dele de fato (Skins.equipped): passe reembolsado ou lado trocado não vestem nada.
 function ProgressionService.applySkins(p: Player)
@@ -376,6 +388,9 @@ local function equipSkin(p: Player, id: string, on: boolean, arma: any): string?
 		prof.skins.on[faction][slot] = nil
 	end
 	ProgressionService.applySkins(p)
+	if ProgressionService.onSkinChange then
+		task.spawn(ProgressionService.onSkinChange, p) -- D-206: o soldado do lobby veste de novo
+	end
 	if s.weapon or s.universal then
 		skinWeaponNow(p, s.weapon or slot)
 	end
