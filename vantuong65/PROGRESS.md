@@ -566,6 +566,26 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     - Não testado: a troca vista por outro jogador, corrida e deitar no meio, controle, toque,
       celular e jogo publicado.
     - **v112 publicada** (versão 117 do place, commit 1cb8ba8).
+  - **Lote 79 (D-195): a pá com uma pazada por aperto, feita.**
+    - A pá fica na mão; cada aperto do gatilho, clique ou toque é uma pazada de 1,4 s. Segurar não
+      repete, e apertos rápidos deixam no máximo uma na fila.
+    - O gatilho analógico ganhou histerese (aperta acima do limiar, solta 0,08 abaixo).
+    - O servidor confere pá, cadência, lugar e, no contato, movimento e alcance.
+    - O buraco desce a cada pazada (6 para 1,24 m), com borda irregular, monte de terra à frente e
+      o parapeito no fim. É escrito a partir do terreno de antes: igual para vários cavando, e a
+      partida nova devolve.
+    - Conferido: Lune 744 ok (45 arquivos), pytest 70 e ruff limpo. No Studio:
+      - fundo 0,24, 0,44, 0,64 e 0,84 m, e no fim 1,24 m (na 1ª versão as 2 primeiras pazadas não
+        apareciam);
+      - 10 apertos em 1 s deram 2 pazadas; segurar 3 s deu 1;
+      - a arma sobe ao guardar a pá;
+      - movido 4 m logo depois do aperto, a pazada se perdeu.
+      - Relatório: `testes/LOTE79_D195_2026-11-20.md`.
+    - Limites:
+      - o servidor vê o corpo com ~0,2 s de atraso da física;
+      - a pazada perdida no buraco novo conta no limite de 1 por minuto.
+    - Não testado: vários jogadores no mesmo buraco, controle e celular de verdade, o som e o
+      jogo publicado.
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;

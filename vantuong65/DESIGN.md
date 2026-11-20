@@ -7777,3 +7777,62 @@ duplicar munição, recarregar de graça nem deixar o jogador travado, e visíve
 **Não testado:** a troca vista por outro jogador (só havia um no Studio), o capim alto escondeu a
 arma baixa nas capturas, a corrida e o deitar no meio da troca, o controle e o toque, o celular e o
 jogo publicado.
+## D-195 — Lote 79: a pá com uma pazada por aperto e o buraco que cresce (2026-11-20)
+
+**Pedido do dono** (prompt de jogabilidade, item 13): apertar o gatilho a cada cavada. A pá bate no
+chão, a terra sai no contato, o buraco muda e a próxima pede soltar e apertar de novo. Segurar não
+cava; o gatilho analógico precisa de limites de acionamento e liberação; cliques e toques valem uma
+cada; sem fila sem fim. O buraco cresce aos poucos, com profundidade e colisão de verdade, bordas
+irregulares, terra exposta e retirada, partículas e som juntos, validado no servidor, consistente com
+vários cavando e restaurado na partida nova.
+
+**Antes:** uma ação de 8 s (5 pazadas animadas em laço) que fazia o buraco inteiro no fim.
+
+**Agora:**
+- a pá fica na mão (vaga 8, roda, prévia do toque) até trocar de arma, puxar a granada, sentar num
+  veículo ou cair ferido. Ao guardar, a arma sobe de baixo e quem pegou a pá se agacha (de pé, a
+  ponta não chegava ao chão) e levanta;
+- cada aperto do gatilho (RT, clique, toque no tiro) é UMA pazada de 1,4 s: a animação e o som de uma
+  pazada, com a lâmina cravando aos 0,35 s, quando a terra sai. Apertos rápidos: no máximo uma na
+  fila (nos últimos 40% da pazada); segurar não repete;
+- gatilho analógico: aperta acima do limiar do jogador e só solta abaixo dele menos 0,08
+  (`InputMap.triggerDown`). Vale para todo gatilho, inclusive o tiro;
+- servidor (`FieldWorkService`): confere a pá na mão, a cadência (1,4 s com folga de 0,3 s; o excesso
+  é jogado fora), o lugar (as regras de antes: terra, longe da base inimiga, fora da água e de piso,
+  1 buraco novo por minuto, limite no mapa) e, no contato, que quem cava não andou 1 m nem saiu de
+  3,2 m do buraco;
+- buraco: 6 pazadas. A grade 4 x 4 de voxels em volta (o buraco 2 x 2 no meio, como na D-183) é
+  escrita a cada pazada a partir do terreno de antes (`FieldWork.colunaVoxels`). O resultado é o mesmo
+  não importa quem cavou nem em que ordem (vários jogadores no mesmo buraco), e quem entrar depois vê
+  o terreno (é o terreno). O fundo desce por igual, com a folga da suavização desde a 1ª pazada. A
+  borda desce até 0,15 m nas 2 primeiras, irregular e fixa por coluna. A fileira da frente sobe com
+  a terra tirada (até 0,3 m). O capim do fundo vira terra revolvida. O parapeito de sacos fica em
+  cima do monte, no fim;
+- a obra guarda o terreno de antes na 1ª pazada: a partida nova devolve (D-193), inclusive o buraco
+  pela metade;
+- 3ª pessoa: o atributo `VT65PazadaT` (relógio do servidor) põe a pazada no clipe e no IK de todos
+  (`ItemAnim.paTime`). O clipe gravado de 8 s fica, e a pá usa a subida e a 1ª pazada dele;
+- o autoteste (`FieldWorkService.dig`) pega a pá, dá as 6 pazadas na cadência e guarda (~9 s, como
+  antes).
+
+**Conferido no Studio** (fuzileiro dos EUA, grama a ~90 m do QG; um aperto por `VT65DevRajada`):
+- fundo depois de cada pazada, 1ª versão (sem a folga desde a 1ª): 0,00, 0,07, 0,34, 0,64, 0,94 e
+  1,24 m. As 2 primeiras não apareciam;
+- versão final: 0,24, 0,44, 0,64 e 0,84 m; depois 1,04 e 1,24 m. Um aperto entre elas não virou
+  pazada no servidor (sem `VT65PazadaT` nem aviso). O provável é a folga de 0,15 s com um engasgo do
+  servidor, e ela passou a 0,3 s. Não retestei depois disso;
+- "Buraco pronto" e o parapeito no fim; apertos a mais no mesmo buraco: "Pá: este buraco já está
+  pronto";
+- borda de −0,20 a −0,55 m e monte de −0,09 a +0,22 m, em relação ao chão de fora;
+- 10 apertos em 1 s: 2 pazadas; gatilho segurado 3 s: 1 pazada;
+- trocar para a arma com a pá na mão: a pá saiu do corpo em 0,07 s e a M14 subiu de baixo em
+  0,6 s. Na 1ª versão a arma aparecia pronta, porque o atributo ainda valia como mãos ocupadas;
+- movido 4 m 0,05 s depois do aperto: "pazada perdida".
+
+**Limites e não testado:**
+- o servidor vê o corpo do cliente com o atraso da física (~0,15–0,2 s): um teleporte de 1,6 m
+  0,2 s depois do aperto ainda não aparece no contato (a pazada contou). Por isso a regra do
+  alcance também vale;
+- a pazada perdida no buraco novo já conta o buraco no limite de 1 por minuto;
+- não testado: vários jogadores no mesmo buraco, controle e celular de verdade, o som ouvido e o
+  jogo publicado.

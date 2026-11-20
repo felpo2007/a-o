@@ -124,6 +124,9 @@ O `sourcemap.json` não vai para o Git.
     - Altura da arma de 1ª pessoa: o Model da câmera com o atributo `VT65Escala`, no espaço da câmera.
     - Pose baixa de 3ª pessoa sem trocar: o atributo local `VT65Troca` do personagem com
       `"<agora no relógio do servidor>;1;0;99;zzz;n"`.
+  - Pá (D-195), do lado do cliente: `"vaga:8"` pega a pá; cada `VT65DevRajada = 0.05` é um aperto
+    (uma pazada). O servidor marca a pazada em `VT65PazadaT` e avisa "Buraco: k/6" pelo
+    `Logistics_State`. Teste a pá num chão de terra longe do QG (o teleporte do cliente).
   - tela de entrada (D-186): os segundos de cada etapa em atributos `T_<etapa>` do
     `ReplicatedFirst.LoadingScreen`; o botão é `VT65Loading.Fundo.Palco.Continuar`;
   - `workspace:SetAttribute("VT65DevDrive", "m48a3")`: senta o jogador no motorista do veículo mais
@@ -292,7 +295,7 @@ O `sourcemap.json` não vai para o Git.
 - Segredos só no `.env` (no `.gitignore`), nunca no código nem no chat.
 - ForgeGUI: nunca regenerar um job em `outcome_unknown`. "failed" com `retryable` pode ser
   retomado com `generation_retry`.
-- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-195) e atualize `PROGRESS.md`.
+- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-196) e atualize `PROGRESS.md`.
 - Tetos de triângulos por modelo: vegetação ≤ 6 mil (D-135), props e herói ≤ 20 mil (`ArtBudget`,
   conferido pelo teste da F5).
 - Commits no branch acima, com mensagem em português.
