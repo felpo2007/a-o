@@ -669,6 +669,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
       - capturas em `testes/lote83`; relatório em `testes/LOTE83_D199_2026-11-20.md`.
     - Não testado: pouso em encosta, outro jogador vendo o piloto, embarque da tropa, celular e jogo
       publicado.
+    - **v117 publicada** (versão 122 do place, commit 4353996).
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;
