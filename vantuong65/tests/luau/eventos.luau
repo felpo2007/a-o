@@ -47,9 +47,10 @@ test("os sete eventos têm fonte, recompensa, lado e tipo", function()
 end)
 
 test("ritmo: 2 a 3 min entre eventos; o primeiro no minuto 1", function()
-	near(Eventos.gap(0), 120, 1e-9)
-	near(Eventos.gap(1), 180, 1e-9)
-	near(Eventos.gap(0.5), 150, 1e-9)
+	-- D-185: de 1,5 a 2,5 min (era 2 a 3)
+	near(Eventos.gap(0), 90, 1e-9)
+	near(Eventos.gap(1), 150, 1e-9)
+	near(Eventos.gap(0.5), 120, 1e-9)
 	assert(Eventos.C.firstAtS == 60)
 end)
 
@@ -209,6 +210,39 @@ test("D-132: ataque aéreo no objetivo, nos dois lados e com o som do A-4", func
 	local ids = fs.readFile("src/ReplicatedStorage/Shared/AssetIds.luau")
 	local id = string.match(ids, "a4_mergulho = (%d+)")
 	assert(id and tonumber(id) ~= 0, "som publicado")
+end)
+
+-- D-185 (dono: "os eventos n estao acontecendo" e "melhore eles")
+test("cartão do evento: a favor, contra ou para todos; distância e rumo; dentro da área", function()
+	assert(Eventos.stance("naval", "US", "US") == "favor", "naval dos EUA para os EUA")
+	assert(Eventos.stance("naval", "US", "VC") == "contra", "naval dos EUA para o VC")
+	assert(Eventos.stance("mortar", "VC", "US") == "contra", "morteiro do VC para os EUA")
+	assert(
+		Eventos.stance("air", "US", "US") == "todos" and Eventos.stance("air", "US", "VC") == "todos",
+		"o A-4 pega todo mundo"
+	)
+	assert(Eventos.stance("heli", "US", nil) == "contra", "sem lado: contra")
+	for _, k in { "favor", "contra", "todos" } do
+		assert(type(Eventos.STANCE_TEXT[k]) == "string", "rótulo " .. k)
+	end
+	-- +X = leste, +Z = sul
+	local d, dir = Eventos.whereFrom(-350, 0)
+	assert(d == 350 and dir == "oeste", string.format("350 m a oeste: %d %s", d, dir))
+	d, dir = Eventos.whereFrom(0, -120)
+	assert(d == 120 and dir == "norte", "120 m ao norte")
+	d, dir = Eventos.whereFrom(70, 70)
+	assert(d == 100 and dir == "sudeste", string.format("~99 m a sudeste: %d %s", d, dir))
+	d = Eventos.whereFrom(10, 5)
+	assert(d == 0, "aqui perto")
+	d = Eventos.whereFrom(0, 612)
+	assert(d == 600, "longe: de 50 em 50 m")
+	assert(Eventos.inside(40, 0, 20), "a 40 m de um raio de 20 m (+30): dentro")
+	assert(not Eventos.inside(60, 0, 20), "a 60 m: fora")
+	-- o primeiro aviso de cada evento vira o cartão; o A-4 aparece no céu
+	local cli = fs.readFile("src/StarterPlayer/StarterPlayerScripts/Controllers/Eventos.client.luau")
+	assert(string.find(cli, "EventoCartao.show", 1, true), "o cartão do começo")
+	local audio = fs.readFile("src/StarterPlayer/StarterPlayerScripts/Controllers/AudioController.client.luau")
+	assert(string.find(audio, "a4Model()", 1, true), "o A-4 visível")
 end)
 
 -- D-184 (dono: "helicopoteros quando pousam ainda flutuam")

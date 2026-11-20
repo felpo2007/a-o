@@ -7431,3 +7431,57 @@ animações (correr sem saltitar e deslizar).
 - o pouso com controle e no toque (só teclado);
 - a subida do helicóptero do evento no fim (o código dela não mudou);
 - o jogo publicado.
+
+## D-185 — Lote 69: os eventos que ninguém via (2026-11-20)
+
+**Pedido do dono** (lista de 16/11): "os eventos n estao acontecendo" e "melhore eles".
+
+**O que o teste mostrou** (Studio, place da v108, partida com bots e o soldado na base dos EUA):
+- a agenda funciona: o helicóptero de reforço veio 71 s depois de nascer e o depósito do VC 129 s
+  depois disso;
+- pelo gancho do Studio, os outros 5 (naval, aéreo, morteiro, medevac e contra-ataque) começaram
+  sem erro, passaram pelas fases e mandaram os avisos;
+- tudo caiu longe do soldado:
+  - tiro naval: 6 impactos a 357–373 m;
+  - bombas do A-4: 4 a 320–346 m;
+  - morteiro: 8 a 300–389 m;
+- para quem joga, cada evento era um aviso de texto curto (3 a 4 s) e uma linha na faixa da direita.
+  O A-4 era só som. Dá para jogar sem perceber os eventos: é isso que o dono viu.
+
+**O que mudou:**
+- **Cartão do começo** (`Controllers/EventoCartao`, pelo `Toast.custom`, na faixa dos avisos e
+  na zona do celular): o primeiro aviso de cada evento vira um cartão maior, de 7 s, com:
+  - o ícone grande num selo da cor do que o evento é para quem vê (`Eventos.stance`): verde
+    "A SEU FAVOR", vermelho "CONTRA VOCÊ" ou âmbar "PERIGO PARA TODOS" (o A-4 pega os dois lados);
+  - o nome do evento e o que fazer (o texto do servidor);
+  - onde: o setor, a distância e o rumo de quem vê ("C · ~325 m a oeste", `Eventos.whereFrom`);
+  - numa barragem que pode ferir quem vê, dentro da área (raio do evento + 30 m,
+    `Eventos.inside`), a linha vermelha "VOCÊ ESTÁ NA ÁREA: SAIA AGORA";
+  - o estalo do rádio (`radio_squelch`) ao chegar.
+  Os avisos seguintes do mesmo evento (barragem terminou, depósito destruído) continuam em texto.
+- **Faixa da direita:** em vez da grade de 1965, a distância até o evento ("C · ~60 m"),
+  atualizada 4 vezes por segundo.
+- **O A-4 aparece:** uma silhueta em peças no tamanho real (12,2 m, 8,4 m de envergadura), com o
+  rastro escuro do motor, na mesma reta do som (250 m de altura, 200 m/s). PLACEHOLDER de forma
+  até um modelo do Blender.
+- **Mais eventos:** um a cada 1,5 a 2,5 min (era 2 a 3 min). O primeiro continua no minuto 1.
+
+**Conferido no Studio:**
+- cartão a favor (tiro naval): selo verde, "APOIO NAVAL", a instrução e "C · ~325 m a oeste"
+  (`testes/lote69/cartao_a_favor.jpg`);
+- cartão contra, com o soldado a 60 m do centro de um morteiro do VC (raio de 148 m): selo
+  vermelho e a linha "VOCÊ ESTÁ NA ÁREA: SAIA AGORA" (`cartao_perigo_na_area.jpg`);
+- faixa com "C · ~60 m" em cada evento (`faixa_com_distancia.jpg`);
+- A-4: 5 peças, nariz para oeste, a 250 m de altura, passou a 253 m do soldado e saiu depois de
+  ~12 s; uma cópia parada fotografada de perto (`a4_silhueta.jpg`).
+
+**Não testado:**
+- o cartão âmbar do A-4 (a regra tem teste no Lune);
+- o som do rádio (não ouvido);
+- o celular;
+- o jogo publicado.
+
+**Visto de passagem:**
+- numa janela estreita (a do Studio, ~840 px) o cartão cobre parte da faixa da direita;
+- o Output do Studio enche de "Failed to upload TexturePack … 429 … PBR textures may not be
+  visible": é o Studio subindo as texturas das SurfaceAppearance de uma cópia local.

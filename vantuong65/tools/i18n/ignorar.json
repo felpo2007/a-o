@@ -1427,7 +1427,24 @@
   "TR",
   ":pecas",
   "Torrao",
-  "pa:"
+  "pa:",
+  "%s_%s",
+  "^evento:(%d+)$",
+  "barrage",
+  "contra",
+  "favor",
+  "EvSelo",
+  "EvIcone",
+  "EvLado",
+  "EvNome",
+  "EvTexto",
+  "EvOnde",
+  "EvPerigo",
+  "A4Fuselagem",
+  "A4Nariz",
+  "A4Asa",
+  "A4Profundor",
+  "A4Deriva"
  ],
  "regex": [
   "^uni_[a-z_]+@[a-z0-9]+$"

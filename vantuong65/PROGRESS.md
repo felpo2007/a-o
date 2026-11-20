@@ -436,7 +436,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
   - **Fila, na ordem prevista** (cada um num lote, com teste no Studio):
     1. a pá: "ela n esta funcionando" e "crie a pá no blender" (feito, lote 67);
     2. "helicopoteros quando pousam ainda flutuam" (feito, lote 68);
-    3. "os eventos n estao acontecendo", e melhorá-los;
+    3. "os eventos n estao acontecendo", e melhorá-los (feito, lote 69);
     4. "a tela de carregamento inicial esta demorando demais";
     5. a carta tática: "n consigo ver certos lugares e selecionar certos lugares";
     6. a adaptação completa ao celular e ao tablet (`PROMPT_MOBILE.md`), em vários lotes:
@@ -493,6 +493,19 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
       - Lune 703 ok e pytest 70.
     - Não testado: o som (não ouvido), controle e toque no pouso e o jogo publicado.
     - **v108 publicada** (versão 113 do place, commit e0aa56f).
+  - **Lote 69 (D-185): os eventos, feito.**
+    - Eles aconteciam (no Studio: o helicóptero aos 71 s e o depósito 129 s depois; os 7 tipos
+      sem erro), mas longe (300–390 m) e só com um aviso de texto de 3 a 4 s.
+    - Agora o começo de cada evento é um cartão de 7 s:
+      - o que é ("A SEU FAVOR", "CONTRA VOCÊ" ou "PERIGO PARA TODOS");
+      - o que fazer e a distância com o rumo ("C · ~325 m a oeste");
+      - dentro da área de uma barragem, "VOCÊ ESTÁ NA ÁREA: SAIA AGORA";
+      - o estalo do rádio.
+    - A faixa da direita mostra a distância até cada evento, o A-4 aparece no céu e os eventos vêm
+      a cada 1,5 a 2,5 min (eram 2 a 3).
+    - Conferido: Lune 704 ok e pytest 70. No Studio, o cartão a favor e o de perigo, a faixa com
+      a distância e o A-4 passando.
+    - Não testado: o cartão do A-4, o som do rádio, o celular e o jogo publicado.
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;

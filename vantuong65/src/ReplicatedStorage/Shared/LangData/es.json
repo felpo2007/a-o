@@ -3273,5 +3273,14 @@
  "Vermelho com galhos escuros e flores brancas de miolo dourado. Vale em qualquer arma.": "Rojo con ramas oscuras y flores blancas de centro dorado. Sirve en cualquier arma.",
  "Escolha o lado, o squad, o papel e onde nascer.": "Elige el bando, el escuadrón, el rol y dónde aparecer.",
  "Pá: próximo buraco em %d s": "Pala: próximo pozo en %d s",
- "perto da base inimiga não dá": "no se puede cerca de la base enemiga"
+ "perto da base inimiga não dá": "no se puede cerca de la base enemiga",
+ "%s · aqui perto": "%s · aquí cerca",
+ "%s · ~%d m": "%s · ~%d m",
+ "%s · ~%d m a %s": "%s · ~%d m al %s",
+ "A SEU FAVOR": "A TU FAVOR",
+ "CONTRA VOCÊ": "CONTRA TI",
+ "PERIGO PARA TODOS": "PELIGRO PARA TODOS",
+ "VOCÊ ESTÁ NA ÁREA: SAIA AGORA": "ESTÁS EN LA ZONA: SAL AHORA",
+ "aqui perto": "aquí cerca",
+ "~%d m a %s": "~%d m al %s"
 }

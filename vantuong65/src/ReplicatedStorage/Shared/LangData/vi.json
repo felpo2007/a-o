@@ -3280,5 +3280,13 @@
  "Vermelho com galhos escuros e flores brancas de miolo dourado. Vale em qualquer arma.": "Nền đỏ với cành sẫm và hoa trắng nhụy vàng. Dùng cho mọi khẩu súng.",
  "Escolha o lado, o squad, o papel e onde nascer.": "Chọn phe, tiểu đội, vai trò và nơi xuất phát.",
  "Pá: próximo buraco em %d s": "Xẻng: hố tiếp theo sau %d giây",
- "perto da base inimiga não dá": "không được gần căn cứ địch"
+ "perto da base inimiga não dá": "không được gần căn cứ địch",
+ "%s · aqui perto": "%s · ở gần",
+ "%s · ~%d m": "%s · ~%d m",
+ "%s · ~%d m a %s": "%s · ~%d m về phía %s",
+ "A SEU FAVOR": "CÓ LỢI CHO BẠN",
+ "CONTRA VOCÊ": "CHỐNG LẠI BẠN",
+ "PERIGO PARA TODOS": "NGUY HIỂM CHO TẤT CẢ",
+ "VOCÊ ESTÁ NA ÁREA: SAIA AGORA": "BẠN ĐANG Ở TRONG VÙNG: RỜI ĐI NGAY",
+ "aqui perto": "ở gần"
 }

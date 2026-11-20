@@ -9,11 +9,14 @@
 -- por 20 s, sem o servidor, aqui, na carta e no mundo.
 -- Toque (v39): na zona livre "eventos" do HUD de toque (coluna da esquerda, acima do polegar; à direita
 -- ficam os botões), só as linhas que cabem (no celular, uma). Durante o tutorial a zona fecha.
+local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 
+local Eventos = require(ReplicatedStorage.Shared.Eventos)
 local Front = require(ReplicatedStorage.Shared.Front)
+local MapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any
 local EventosVisual = require(script.Parent.EventosVisual)
 local Input = require(script.Parent.Input)
 local ToqueUi = require(script.Parent.ToqueUi)
@@ -119,6 +122,23 @@ local function clockText(s: number): string
 	return string.format("%d:%02d", t // 60, t % 60)
 end
 
+-- D-185: onde, pela distância de quem vê ("C · ~350 m"); antes era a grade de 1965 ("C · BS 697 929")
+-- e o helicóptero "perto de C" (D-149)
+local player = Players.LocalPlayer
+local function whereText(ev: EventosVisual.Ev): string
+	local base = if ev.sector then Front.letra(ev.sector) else ev.grade
+	local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+	if not (root and root:IsA("BasePart")) then
+		return base
+	end
+	local M = MapConfig.STUD_M
+	local d = Eventos.whereFrom((ev.x - root.Position.X) * M, (ev.z - root.Position.Z) * M)
+	if d == 0 then
+		return string.format("%s · aqui perto", base)
+	end
+	return string.format("%s · ~%d m", base, d)
+end
+
 local function paint()
 	shown = EventosVisual.list()
 	for i, r in rows do
@@ -138,12 +158,7 @@ local function paint()
 		r.name.FontFace = UiKit.headFont(ev.name)
 		r.phase.Text = EventosVisual.PHASE_TEXT[ev.fase] or ""
 		r.phase.TextColor3 = c
-		-- onde: o setor (S3) e a grade de 1965; sem setor, só a grade. D-149: o helicóptero só diz "perto
-		-- de C" (dono: "simplifique o texto de inserção do helicóptero")
-		r.where.Text = if ev.id == "heli" and ev.sector
-			then string.format("perto de %s", Front.letra(ev.sector))
-			elseif ev.sector then string.format("%s · %s", Front.letra(ev.sector), ev.grade)
-			else ev.grade
+		r.where.Text = whereText(ev)
 		r.clock.Text = clockText(EventosVisual.left(ev))
 		r.clock.TextColor3 = if ev.fase == "fim" then V.MUTED else V.TEXT
 		if fresh then
@@ -198,6 +213,7 @@ task.spawn(function()
 				local ev = shown[i]
 				if ev and r.frame.Visible then
 					r.clock.Text = clockText(EventosVisual.left(ev))
+					r.where.Text = whereText(ev) -- D-185: a distância muda com quem anda
 				end
 			end
 		end

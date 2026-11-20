@@ -692,6 +692,54 @@ end)
 -- Pelo marcador (replicado sempre), e não por remote: quem entra no meio ouve do ponto certo.
 local A4 = { speedM = 200, altM = 250, passS = 9, clipS = 12 }
 local flying: { [Instance]: boolean } = {}
+
+-- D-185 (dono: "os eventos n estao acontecendo"): o A-4 que se vê, na mesma reta do som. Era só som.
+-- Silhueta em peças no tamanho real (A-4C: 12,2 m de comprimento e 8,4 m de envergadura; cinza-gaivota
+-- da Marinha) e o rastro escuro do motor J52, que ajuda a achar o avião no céu. PLACEHOLDER de forma.
+local function a4Model(): Model
+	local m = Instance.new("Model")
+	m.Name = "VT65A4"
+	local gray = Color3.fromRGB(168, 170, 166)
+	local function part(name: string, sizeM: Vector3, at: CFrame, shape: Enum.PartType?): Part
+		local p = Instance.new("Part")
+		p.Name = name
+		if shape then
+			p.Shape = shape
+		end
+		p.Size = sizeM / M
+		p.CFrame = at
+		p.Color = gray
+		p.Material = Enum.Material.SmoothPlastic
+		p.Anchored = true
+		p.CanCollide, p.CanQuery, p.CanTouch = false, false, false
+		p.Parent = m
+		return p
+	end
+	-- referencial: nariz em −Z, cima em +Y (CFrame.lookAt no rumo do voo)
+	local body =
+		part("A4Fuselagem", Vector3.new(12.2, 1.2, 1.2), CFrame.Angles(0, math.pi / 2, 0), Enum.PartType.Cylinder)
+	part("A4Nariz", Vector3.new(1.2, 1.2, 1.2), CFrame.new(0, 0, -6.1 / M), Enum.PartType.Ball)
+	part("A4Asa", Vector3.new(8.4, 0.2, 3.2), CFrame.new(0, -0.3 / M, 0.6 / M))
+	part("A4Profundor", Vector3.new(3.4, 0.15, 1.3), CFrame.new(0, 0.2 / M, 5.4 / M))
+	part("A4Deriva", Vector3.new(0.15, 2.2, 2.0), CFrame.new(0, 1.3 / M, 5.0 / M))
+	m.PrimaryPart = body
+	body.PivotOffset = body.CFrame:Inverse() -- o pivô do modelo é o referencial do desenho
+	local a0 = Instance.new("Attachment")
+	a0.Position = Vector3.new(0, 0.3 / M, 0)
+	a0.Parent = body
+	local a1 = Instance.new("Attachment")
+	a1.Position = Vector3.new(0, -0.3 / M, 0)
+	a1.Parent = body
+	local trail = Instance.new("Trail")
+	trail.Attachment0, trail.Attachment1 = a0, a1
+	trail.Color = ColorSequence.new(Color3.fromRGB(70, 68, 62))
+	trail.Transparency = NumberSequence.new(0.35, 1)
+	trail.Lifetime = 2.5
+	trail.WidthScale = NumberSequence.new(1, 3)
+	trail.LightInfluence = 1
+	trail.Parent = body
+	return m
+end
 local function airPass(marker: Instance)
 	local id = sid("a4_mergulho")
 	if not id or flying[marker] or marker:GetAttribute("Evento") ~= "air" then
@@ -724,11 +772,16 @@ local function airPass(marker: Instance)
 	s.RollOffMinDistance = 300 / M -- o clipe já traz a distância: o Roblox só abafa de muito longe
 	s.RollOffMaxDistance = 3000 / M
 	s.Parent = a
+	-- D-185: o avião que se vê, no mesmo ponto do som, com o nariz no rumo
+	local plane = a4Model()
 	local function place(t: number)
 		local along = (t - A4.passS) * A4.speedM / M
 		a.WorldPosition = Vector3.new(target.X, gy + A4.altM / M, target.Z) + dir * along
+		local p = a.WorldPosition
+		plane:PivotTo(CFrame.lookAt(p, p + dir))
 	end
 	place(math.max(elapsed, 0))
+	plane.Parent = workspace
 	s.TimePosition = math.max(elapsed, 0)
 	s:Play()
 	caption("a4", "Avião em mergulho: ataque aéreo chegando", a.WorldPosition)
@@ -738,6 +791,7 @@ local function airPass(marker: Instance)
 		if t > A4.clipS or not s.Parent then
 			con:Disconnect()
 			a:Destroy()
+			plane:Destroy()
 			flying[marker] = nil
 			return
 		end

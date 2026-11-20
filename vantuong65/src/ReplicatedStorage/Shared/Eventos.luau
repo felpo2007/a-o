@@ -15,8 +15,12 @@ local Eventos = {}
 
 Eventos.C = {
 	firstAtS = 60, -- o primeiro evento (abertura) cai no minuto 1 da partida
-	gapMinS = 120, -- depois, um evento a cada 2 a 3 min
-	gapMaxS = 180,
+	-- depois, um evento a cada 1,5 a 2,5 min. D-185 (dono: "os eventos n estao acontecendo"): era 2 a 3
+	-- min; numa partida no Studio eles aconteciam, mas longe e só com um aviso de texto
+	gapMinS = 90,
+	gapMaxS = 150,
+	nearM = 30, -- D-185: a esta distância o cartão do evento diz "aqui perto"
+	insideExtraM = 30, -- D-185: dentro do raio do evento mais isto, o cartão avisa "você está na área"
 	retryS = 15, -- sem alvo agora: tenta de novo em 15 s
 	assaultS = 60, -- janela depois da barragem: quem toma ou segura o ponto ganha
 	blockExtraM = 30, -- ponto de nascimento a até (alcance da barragem + 30 m) fica bloqueado no aviso
@@ -404,6 +408,41 @@ function Eventos.summary(
 		worst = t[n] or 0,
 		within = inside / math.max(n + late, 1),
 	}
+end
+
+-- D-185: o que o evento é para quem vê: "favor" (é do lado dele), "contra" (é do outro lado e cai nele)
+-- ou "todos" (o ataque aéreo fere os dois lados). O cartão do evento pinta e escreve por isso.
+function Eventos.stance(id: string, side: string, myFaction: string?): string
+	local d = Eventos.DEFS[id]
+	if d and d.hitsAll then
+		return "todos"
+	end
+	return if myFaction ~= nil and myFaction == side then "favor" else "contra"
+end
+
+Eventos.STANCE_TEXT = {
+	favor = "A SEU FAVOR",
+	contra = "CONTRA VOCÊ",
+	todos = "PERIGO PARA TODOS",
+} :: { [string]: string }
+
+local BEARINGS = { "norte", "nordeste", "leste", "sudeste", "sul", "sudoeste", "oeste", "noroeste" }
+-- D-185: distância e rumo de quem vê até o evento, como se diz no rádio (dx, dz em metros; +X = leste,
+-- +Z = sul). Devolve a distância arredondada (0 = aqui perto) e o rumo.
+function Eventos.whereFrom(dxM: number, dzM: number): (number, string)
+	local d = math.sqrt(dxM * dxM + dzM * dzM)
+	local a = math.deg(math.atan2(dxM, -dzM)) % 360 -- 0 = norte, sentido horário
+	local dir = BEARINGS[math.floor((a + 22.5) / 45) % 8 + 1]
+	if d < Eventos.C.nearM then
+		return 0, dir
+	end
+	local step = if d < 150 then 10 elseif d < 400 then 25 else 50
+	return math.max(step, math.floor(d / step + 0.5) * step), dir
+end
+
+-- D-185: quem vê está dentro da área do evento (raio do evento mais C.insideExtraM)?
+function Eventos.inside(dxM: number, dzM: number, raioM: number): boolean
+	return dxM * dxM + dzM * dzM <= (raioM + Eventos.C.insideExtraM) ^ 2
 end
 
 -- D-184: etiqueta do helicóptero do evento (inserção e medevac): o rotor gira no cliente
