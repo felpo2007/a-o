@@ -551,7 +551,7 @@ test("cores de compra: baixa, loja, carta de inserção, passe e intendência us
 	has("Progresso.client.luau", "robux = { bg = UiKit.PAGAR.robux.base")
 end)
 
--- D-117: a tela fica até o mapa inteiro chegar (Map.PartCount) e entrega para o menu principal. D-182:
+-- D-117: a tela carrega o mapa inteiro (Map.PartCount; D-186: em segundo plano) e entrega para o menu principal. D-182:
 -- o JOGAR do menu principal leva à mesa do lobby (lado, squad, papel e ponto), não direto ao campo;
 -- o Jogar agora (Bus "jogar_agora") fica no menu do jogo e na mesa
 test("carregamento: o visual antigo (b85331e), o mapa inteiro e a entrega para o menu principal", function()
@@ -565,7 +565,7 @@ test("carregamento: o visual antigo (b85331e), o mapa inteiro e a entrega para o
 			"soundList()",
 			"animList()",
 			"TerrainReady",
-			"CAP_S = 240",
+			"ESSENTIAL_CAP_S = 60",
 			'GetAttribute("PartCount")',
 			"MAP_PARTS_FRAC = 0.95",
 		}
@@ -599,6 +599,51 @@ test("carregamento: o visual antigo (b85331e), o mapa inteiro e a entrega para o
 	assert(string.find(ui, 'GetAttribute("MenuPrincipal")', 1, true), "o lobby some com o menu principal aberto")
 end)
 
+-- D-186 (dono: "a tela de carregamento inicial esta demorando demais"): só o essencial segura a tela,
+-- em seis etapas reais e sem porcentagem; o CONTINUAR (Enter, A ou o toque) e as CONFIGURAÇÕES; os
+-- avisos do que não chegou (a ficha do jogador, arquivos, o servidor); o resto em segundo plano, com a
+-- linha no menu principal
+test("carregamento: o essencial, o CONTINUAR, os avisos e o segundo plano (D-186)", function()
+	local src = fs.readFile("src/ReplicatedFirst/LoadingScreen.client.luau")
+	for _, t in { '"Jogo"', '"Servidor"', '"Interface"', '"Sua ficha"', '"Soldados"', '"Terreno"' } do
+		assert(string.find(src, t, 1, true), "etapa: " .. t)
+	end
+	assert(not string.find(src, "%d%%", 1, true), "sem porcentagem")
+	for _, t in
+		{
+			'"CONTINUAR"',
+			'"CONFIGURAÇÕES"',
+			"Enum.KeyCode.ButtonA",
+			"Toque em CONTINUAR",
+			'GetAttribute("XP")',
+			'"DataReadOnly"',
+			"AssetFetchStatus.Failure",
+			"Seus dados ainda não chegaram.",
+			"O servidor demora a responder.",
+			'SetAttribute("VT65Fundo"',
+			'"AbrirConfig"',
+			"MENU_PLACES",
+			'mark("fundo_mapa")',
+			'"botoes_teto"',
+		}
+	do
+		assert(string.find(src, t, 1, true), "tela de entrada: " .. t)
+	end
+	-- o essencial vem antes do segundo plano: os sons e o mapa inteiro só depois dos botões
+	local bg = string.find(src, "local function background()", 1, true)
+	local snd = string.find(src, "preload(soundList()", 1, true)
+	local whole = string.find(src, 'GetAttribute("PartCount")', 1, true)
+	assert(bg and snd and whole and snd > bg and whole > bg, "sons e mapa inteiro em segundo plano")
+	-- nada avança sozinho: o "Pronto" (o menu abre) só no close, que é do CONTINUAR
+	local close = string.find(src, "local function close(", 1, true)
+	local pronto = string.find(src, 'gui:SetAttribute("Pronto", true)', 1, true)
+	local show = string.find(src, "local function showButtons()", 1, true)
+	assert(close and pronto and show and pronto > close and pronto < show, "Pronto só ao continuar")
+	local menu = fs.readFile(C .. "MenuPrincipal.client.luau")
+	for _, t in { '"VT65Fundo"', '"AbrirConfig"', "UiKit.top() ~= nil" } do
+		assert(string.find(menu, t, 1, true), "menu principal: " .. t)
+	end
+end)
 -- D-117: o tutorial saiu da partida; o COMO JOGAR tem um cartão por assunto, com botões que existem
 test("tutorial fora da partida: não começa ao nascer; COMO JOGAR com ações do InputMap", function()
 	local Tutorial = require("../../src/ReplicatedStorage/Shared/Tutorial") :: any

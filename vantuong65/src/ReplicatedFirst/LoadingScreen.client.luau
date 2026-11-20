@@ -8,29 +8,37 @@
 --     Fight (USMC, 2015; citações em research/F0_FONTES.md), um por vez, num cartão oliva;
 --   - à direita, a carta 1:50.000 sendo traçada: grade, curvas de nível, os eixos a lápis vermelho
 --     se desenhando e correndo, a marca do objetivo piscando e o carimbo SECRET;
---   - embaixo, a pontilha de filme, a etapa datilografada, as cinco etapas e a barra.
--- O que carrega (ContentProvider:PreloadAsync, em lotes; o callback conta cada asset), em 8 partes
--- que acendem as 5 etapas da fila:
---   1. o jogo (game.Loaded) e 2. os remotes do servidor;
+--   - embaixo, a pontilha de filme, a etapa datilografada, as seis etapas e a barra em seis partes.
+-- D-186 (dono, 20/11: "a tela de carregamento inicial esta demorando demais" e "melhore as telas de
+-- carregamento"): antes a tela esperava o jogo INTEIRO (todos os sons, todas as armas, o streaming do
+-- mapa todo e a arte de tudo o que chegou, D-117). Agora só o essencial segura a tela e aparece o
+-- CONTINUAR; o resto termina em segundo plano, no menu.
+-- O essencial, em seis etapas reais (ContentProvider:PreloadAsync em lotes; o callback conta cada
+-- asset e as falhas):
+--   1. o jogo (game.Loaded);
+--   2. os remotes do servidor (sem resposta em 60 s: o aviso, e continua esperando);
 --   3. a interface: fontes, as texturas do Acabamento, os botões do controle e as imagens que o
 --      servidor resolveu (Img_*, a carta tática CartaImage_*), chão e céu do AssetIds;
---   4. todos os sons do AssetIds.Sounds;
---   5. as animações do soldado (Shared/SoldierAnims);
---   6. os manequins do lobby e a arte das armas (o PreviewService marca Ready) e
---   7. o mapa (v41): espera o terreno (TerrainReady) e a arte do servidor (Map/Art "Placed"), pede o
---      streaming do mapa INTEIRO (D-117: o centro e os quatro quadrantes, mais os QGs e os objetivos),
---      espera chegar 95% das peças do Map (o servidor conta em Map.PartCount) e depois baixa a arte
---      que chegou: malhas, texturas, decalques, SurfaceAppearance, imagens, partículas, roupas, céu e
---      MaterialVariant do ReplicatedStorage, do Workspace, do Lighting e do MaterialService (cada id
---      uma vez só). Ao nascer, o servidor ainda pede o streaming em volta do ponto (SpawnService);
---   8. o terreno (já pronto no 7; fica para o teto de segurança).
--- D-117 (pedido do dono: "a tela de carregamento inicial deve ficar ali até carregar o jogo e o mapa
--- inteiro"; "faça uma tela de menu animada"): com tudo pronto a tela marca "Pronto" e esmaece por cima
--- do menu principal (Controllers/MenuPrincipal), que tem o JOGAR. Os botões JOGAR AGORA e MESA DE
--- CAMPANHA desta tela não aparecem mais. Y abre o idioma. Teto de segurança: 4 min (era 90 s).
+--   4. a ficha do jogador (o servidor põe "XP" no jogador quando o perfil chega; "DataReadOnly" quando
+--      não carregou). Sem ela em DATA_MAX_S, a tela diz que os dados ainda não chegaram: não mostra
+--      uma conta vazia como se fosse a dele;
+--   5. os manequins e os objetos do menu e da mesa (o PreviewService marca Ready);
+--   6. o terreno (TerrainReady) e o streaming em volta dos três lugares dos planos do menu.
+-- Em segundo plano (depois das seis, com a tela ainda aberta ou já no menu; o menu mostra a linha
+-- "VT65Fundo" do jogador): a arte das armas, as animações do soldado, todos os sons e o mapa (o
+-- streaming do centro, dos quadrantes, dos QGs e dos objetivos, 95% das peças do Map.PartCount e a
+-- arte que chegou). Ao nascer, o servidor ainda pede o streaming em volta do ponto (SpawnService).
+-- Sem porcentagem: a barra tem uma parte por etapa e cada parte enche com o que foi contado nela; a
+-- etapa sem contagem (esperando o servidor) tem o brilho que corre.
+-- CONTINUAR (Enter, A ou o toque) marca "Pronto" e a tela esmaece por cima do menu principal
+-- (Controllers/MenuPrincipal). CONFIGURAÇÕES (C ou X) faz o mesmo e o menu abre a aba Configurações
+-- (atributo "AbrirConfig"). Y abre o idioma. Teto: com ESSENTIAL_CAP_S, os botões aparecem com o que
+-- já chegou e a tela diz o que falta.
+-- Medida (D-186): os segundos de cada etapa ficam em atributos deste script ("T_<etapa>", desde o
+-- primeiro quadro), e os do segundo plano também ("T_fundo_<parte>").
 -- Fora o Acabamento e o Idioma (mesmo ReplicatedFirst), não depende de nada: aparece desde o 1º quadro.
 -- Gancho de teste (só no Studio): workspace:SetAttribute("VT65DevTela", "carregamento") reabre a
--- tela e refaz o carregamento de verdade (o que já está na memória chega rápido) para a foto;
+-- tela e refaz o carregamento essencial (o que já está na memória chega rápido) para a foto;
 -- qualquer outro valor (ou nil) fecha, se já estiver pronta.
 local ContentProvider = game:GetService("ContentProvider")
 local GuiService = game:GetService("GuiService")
@@ -51,10 +59,17 @@ local Idioma = require(script.Parent:WaitForChild("Idioma"))
 
 local player = Players.LocalPlayer
 
-local CAP_S = 240 -- teto de segurança (D-117: era 90 s; a tela fica até o mapa inteiro chegar)
+local T0 = os.clock() -- D-186: as medidas contam daqui (o primeiro quadro do cliente)
+local ESSENTIAL_CAP_S = 60 -- teto do essencial (D-186; D-117 esperava o mapa inteiro, até 4 min)
+local REMOTES_WARN_S = 60 -- sem os remotes: o aviso (e continua esperando)
+local DATA_MAX_S = 25 -- a ficha do jogador: depois disto, o aviso de que não chegou
+local PREVIEW_MAX_S = 30 -- os manequins do menu
 local MAP_PARTS_FRAC = 0.95 -- D-117: fração das peças do Map (Map.PartCount) que precisa ter chegado
-local MAP_PARTS_MAX_S = 90 -- e no máximo isto esperando por elas
+local MAP_PARTS_MAX_S = 90 -- e no máximo isto esperando por elas (em segundo plano)
 local BATCH = 16 -- assets por chamada do PreloadAsync (a barra anda por lote e por asset)
+-- os lugares dos planos do menu principal (Controllers/MenuPrincipal, SHOTS): o terreno deles chega
+-- antes do CONTINUAR, para o menu abrir com o mapa e os soldados
+local MENU_PLACES = { "Xóm Gò", "Serraria", "Arrozais" }
 
 local CANVAS = Color3.fromRGB(36, 38, 28) -- lona da barraca no escuro
 local KHAKI = Color3.fromRGB(201, 186, 140)
@@ -73,6 +88,7 @@ local HEAD_REG = Font.fromName("Oswald", Enum.FontWeight.Regular)
 local TYPE = Font.fromEnum(Enum.Font.SpecialElite)
 local BODY = Font.fromEnum(Enum.Font.Arimo)
 local GLYPH = Font.fromEnum(Enum.Font.ArimoBold) -- ■ □ ► e cia. estão no Arimo
+local AMBER = Color3.fromRGB(232, 168, 64) -- etapa que passou com aviso (dados, imagens)
 
 local QUINT_OUT = Enum.EasingStyle.Quint
 local OUT, IN, INOUT = Enum.EasingDirection.Out, Enum.EasingDirection.In, Enum.EasingDirection.InOut
@@ -383,7 +399,11 @@ digit.TextYAlignment = Enum.TextYAlignment.Center
 digit.ZIndex = 2
 
 -- ----- progresso -----
-local stepText = label(stage, TYPE, 19, CARD, 206, 520, 830, 26)
+local stepText = label(stage, TYPE, 19, CARD, 206, 520, 650, 26)
+-- D-186: a contagem real da etapa ("24/31"), entre o texto e a etapa
+local countLbl = label(stage, HEAD_REG, 18, KHAKI, 866, 517, 170, 32, Enum.TextXAlignment.Right)
+countLbl.Name = "Contagem"
+countLbl.TextYAlignment = Enum.TextYAlignment.Center
 stepText.RichText = true
 stepText.TextWrapped = false
 stepText.TextTruncate = Enum.TextTruncate.AtEnd
@@ -400,24 +420,26 @@ rowLayout.SortOrder = Enum.SortOrder.LayoutOrder
 rowLayout.Padding = UDim.new(0, 16)
 rowLayout.Parent = stepsRow
 
-local barBack = box(stage, DRAB, 206, 592, 974, 10)
-corner(barBack, 2)
-edge(barBack, KHAKI, 1, 0.7)
-barBack.ClipsDescendants = true
-local barFill = box(barBack, STAMP, 0, 0, 0, 10)
-barFill.Size = UDim2.fromScale(0, 1)
-lit(barFill, 90, 0.7)
-local nib = box(barFill, BRASS_LIGHT, 0, 0, 2, 10, 0.1) -- ponta de tinta que anda com a barra
-nib.AnchorPoint = Vector2.new(1, 0)
-nib.Position = UDim2.fromScale(1, 0)
-nib.Size = UDim2.new(0, 2, 1, 0)
-for i = 1, 9 do -- régua de contador de filme
-	local m = box(barBack, KHAKI, 0, 0, 1, 10, 0.55)
-	m.Position = UDim2.new(i / 10, 0, 0, 0)
-	m.Size = UDim2.new(0, 1, 1, 0)
-	m.ZIndex = 2
+-- D-186: a barra tem uma parte por etapa (sem porcentagem: cada parte enche com o que foi contado
+-- nela); a parte da etapa que só espera o servidor ganha o brilho que corre
+local N_STEPS = 6
+local SEG_GAP = 6
+local SEG_W = (974 - (N_STEPS - 1) * SEG_GAP) / N_STEPS
+type Seg = { back: Frame, fill: Frame }
+local segs: { Seg } = {}
+for i = 1, N_STEPS do
+	local back = box(stage, DRAB, math.floor(206 + (i - 1) * (SEG_W + SEG_GAP)), 592, math.floor(SEG_W), 10)
+	back.Name = string.format("Parte%d", i)
+	corner(back, 2)
+	edge(back, KHAKI, 1, 0.7)
+	back.ClipsDescendants = true
+	local fill = box(back, STAMP, 0, 0, 0, 10)
+	fill.Name = "Cheio"
+	fill.Size = UDim2.fromScale(0, 1)
+	lit(fill, 90, 0.7)
+	segs[i] = { back = back, fill = fill }
 end
-local shine = box(barBack, CARD, 0, 0, 0, 0, 0) -- brilho que corre na etapa sem número
+local shine = box(segs[1].back, CARD, 0, 0, 0, 0, 0) -- brilho que corre na etapa sem número
 shine.Size = UDim2.fromScale(1, 1)
 shine.ZIndex = 3
 shine.Visible = false
@@ -430,13 +452,19 @@ shineGrad.Transparency = NumberSequence.new({
 	NumberSequenceKeypoint.new(1, 1),
 })
 shineGrad.Parent = shine
--- o número fica na linha da etapa (a fila de etapas usa a largura toda da barra)
-local percent = label(stage, HEAD, 24, CARD, 1050, 514, 130, 32, Enum.TextXAlignment.Right)
-percent.TextYAlignment = Enum.TextYAlignment.Center
-percent.Text = "0%"
+-- a etapa em que está, na linha do texto (era a porcentagem)
+local stepNo = label(stage, HEAD, 22, CARD, 1050, 514, 130, 32, Enum.TextXAlignment.Right)
+stepNo.TextYAlignment = Enum.TextYAlignment.Center
+stepNo.Text = string.format("ETAPA %d/%d", 1, N_STEPS)
+-- o que termina em segundo plano (embaixo da barra)
+local bgLine = label(stage, BODY, 14, KHAKI, 206, 608, 974, 18)
+bgLine.TextWrapped = false
+bgLine.TextTruncate = Enum.TextTruncate.AtEnd
+bgLine.TextTransparency = 0.2
+bgLine.Text = "Depois do CONTINUAR, as armas, os sons e o mapa terminam de carregar no menu."
 
--- ----- os dois botões do fim: JOGAR AGORA (carimbo vermelho com filete de latão e a tecla num
--- chip) e MESA DE CAMPANHA (oliva escuro, com a contagem) -----
+-- ----- os dois botões do fim (D-186): CONTINUAR (carimbo vermelho com filete de latão e a tecla num
+-- chip) e CONFIGURAÇÕES (oliva escuro) -----
 type Btn = {
 	b: TextButton,
 	edge: UIStroke,
@@ -452,7 +480,7 @@ type Btn = {
 local function stampButton(x: number, w: number, text: string, color: Color3, hot: Color3, textSize: number): Btn
 	local b = Instance.new("TextButton")
 	b.Name = "Botao"
-	b.Position = UDim2.fromOffset(x, 622)
+	b.Position = UDim2.fromOffset(x, 634)
 	b.Size = UDim2.fromOffset(w, 54)
 	b.BackgroundColor3 = color
 	b.BackgroundTransparency = 1
@@ -506,10 +534,15 @@ local function stampButton(x: number, w: number, text: string, color: Color3, ho
 		hot = hot,
 	}
 end
-local play = stampButton(868, 312, "JOGAR AGORA", STAMP, Color3.fromRGB(172, 50, 38), 24)
-local desk = stampButton(554, 300, "MESA DE CAMPANHA", DRAB, Color3.fromRGB(62, 68, 48), 20)
-local enterHint = label(stage, TYPE, 14, KHAKI, 206, 622, 330, 54)
-enterHint.TextTransparency = 0.15
+local play = stampButton(868, 312, "CONTINUAR", STAMP, Color3.fromRGB(172, 50, 38), 26)
+play.b.Name = "Continuar"
+local desk = stampButton(554, 300, "CONFIGURAÇÕES", DRAB, Color3.fromRGB(62, 68, 48), 20)
+desk.b.Name = "Configuracoes"
+play.b.NextSelectionLeft, desk.b.NextSelectionRight = desk.b, play.b
+-- D-186: o aviso do que não chegou (dados do jogador, imagens, o teto), à esquerda dos botões
+local enterHint = label(stage, BODY, 14, AMBER, 206, 634, 330, 54)
+enterHint.Name = "Aviso"
+enterHint.TextYAlignment = Enum.TextYAlignment.Center
 
 -- ----- idioma (pedido do dono, 2026-11-11): chip no alto à direita; Y no controle -----
 local function openLanguage()
@@ -542,18 +575,19 @@ end
 gui:GetPropertyChangedSignal("AbsoluteSize"):Connect(fit)
 fit()
 
--- ===== etapas (a fila de 5) e as 8 partes do carregamento =====
+-- ===== as seis etapas do essencial (D-186) =====
 type Step = { name: string, done: boolean, glyph: TextLabel, text: TextLabel, pop: UIScale }
 local steps: { Step } = {}
 local STEP_DEFS: { string } = {
-	"Jogo recebido",
-	"Ordens do servidor",
-	"Interface e sons",
-	"Soldados e arte",
-	"Terreno de Vạn Tường",
+	"Jogo",
+	"Servidor",
+	"Interface",
+	"Sua ficha",
+	"Soldados",
+	"Terreno",
 }
--- parte do carregamento -> etapa da fila (a etapa acende quando todas as suas partes acabam)
-local PART_STEP = { 1, 2, 3, 3, 4, 4, 4, 5 }
+-- nome curto de cada etapa nas medidas (atributos "T_<nome>" do script)
+local STEP_KEYS = { "jogo", "servidor", "interface", "ficha", "soldados", "terreno" }
 for i, name in STEP_DEFS do
 	local item = Instance.new("Frame")
 	item.BackgroundTransparency = 1
@@ -583,22 +617,13 @@ for i, name in STEP_DEFS do
 	table.insert(steps, { name = name, done = false, glyph = g, text = t, pop = pop })
 end
 
--- barra: valor exibido é um tween até o alvo; o alvo só sobe (peso de cada parte, soma 1)
-local WEIGHTS = { 0.04, 0.04, 0.12, 0.16, 0.08, 0.16, 0.28, 0.12 }
-local frac: { number } = { 0, 0, 0, 0, 0, 0, 0, 0 }
-local prog = Instance.new("NumberValue")
-local target = 0
-prog.Changed:Connect(function(v: number)
-	local x = math.clamp(v, 0, 1)
-	barFill.Size = UDim2.fromScale(x, 1)
-	percent.Text = string.format("%d%%", math.floor(x * 100 + 0.5))
-end)
-local function setTarget(v: number)
-	if v <= target then
-		return
-	end
-	target = v
-	tween(prog, 0.5, { Value = v })
+-- cada parte da barra: o que foi contado na etapa (só sobe)
+local frac: { number } = table.create(N_STEPS, 0)
+local warned: { boolean } = table.create(N_STEPS, false)
+
+-- D-186: os segundos desde o primeiro quadro, num atributo do script (a tela some; o script fica)
+local function mark(name: string)
+	script:SetAttribute("T_" .. name, math.floor((os.clock() - T0) * 10 + 0.5) / 10)
 end
 
 local function finish(i: number)
@@ -607,32 +632,60 @@ local function finish(i: number)
 		return
 	end
 	s.done = true
-	s.glyph.Text = "■"
-	s.glyph.TextColor3 = BRASS
+	mark(STEP_KEYS[i])
+	s.glyph.Text = if warned[i] then "!" else "■"
+	s.glyph.TextColor3 = if warned[i] then AMBER else BRASS
 	s.pop.Scale = 1.7
 	tween(s.pop, 0.35, { Scale = 1 })
-	tween(s.text, 0.3, { TextTransparency = 0, TextColor3 = CARD })
+	tween(s.text, 0.3, { TextTransparency = 0, TextColor3 = if warned[i] then AMBER else CARD })
+	stepNo.Text = string.format("ETAPA %d/%d", math.min(i + 1, N_STEPS), N_STEPS)
 end
 
 local function setFrac(i: number, f: number)
-	frac[i] = math.max(frac[i], math.clamp(f, 0, 1))
-	local sum = 0
-	for k, w in WEIGHTS do
-		sum += w * frac[k]
+	local v = math.max(frac[i], math.clamp(f, 0, 1))
+	if v > frac[i] then
+		frac[i] = v
+		tween(segs[i].fill, 0.35, { Size = UDim2.fromScale(v, 1) })
 	end
-	setTarget(sum)
-	-- etapa da fila: acende com todas as suas partes no fim
-	local st = PART_STEP[i]
-	for k, s in PART_STEP do
-		if s == st and frac[k] < 1 then
-			return
+	if v >= 1 then
+		finish(i)
+	end
+end
+
+-- a etapa passou, mas com aviso (o glifo "!" e a parte da barra em âmbar)
+local function warnStep(i: number)
+	warned[i] = true
+	segs[i].fill.BackgroundColor3 = AMBER
+end
+
+-- os avisos que ficam à esquerda dos botões, um por linha e um por assunto (nil tira o do assunto)
+local noteOrder: { string } = {}
+local noteText: { [string]: string? } = {}
+local function note(key: string, text: string?)
+	if text and noteText[key] == nil then
+		table.insert(noteOrder, key)
+	elseif not text then
+		local i = table.find(noteOrder, key)
+		if i then
+			table.remove(noteOrder, i)
 		end
 	end
-	finish(st)
+	noteText[key] = text
+	local lines: { string } = {}
+	for _, k in noteOrder do
+		local t = noteText[k]
+		if t then
+			table.insert(lines, t)
+		end
+	end
+	enterHint.Text = table.concat(lines, "\n")
 end
 
 local shineTween: Tween? = nil
-local function setWaiting(on: boolean)
+local function setWaiting(on: boolean, i: number?)
+	if i then
+		shine.Parent = segs[i].back
+	end
 	shine.Visible = on
 	if on and not shineTween then
 		shineGrad.Offset = Vector2.new(-1, 0)
@@ -751,16 +804,29 @@ local function intro()
 	leaderLoop(my)
 end
 
--- ===== JOGAR AGORA e MESA =====
+-- ===== CONTINUAR e CONFIGURAÇÕES (D-186) =====
 local allReady = false
 local capped = false
 local closing = false
 local pulse: Tween? = nil
+local hintDev = "" -- o aparelho da última dica (a dica só muda quando ele muda)
+
+-- o aparelho em uso: "pad", "touch" ou "keys" (a dica e o chip da tecla mudam com ele)
+local function device(): string
+	local last = UserInputService:GetLastInputType()
+	if UserInputService.GamepadEnabled and string.sub(last.Name, 1, 7) == "Gamepad" then
+		return "pad"
+	end
+	if last == Enum.UserInputType.Touch or (UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled) then
+		return "touch"
+	end
+	return "keys"
+end
 
 local function refreshKeys()
-	local pad = UserInputService.GamepadEnabled
-		and string.sub(UserInputService:GetLastInputType().Name, 1, 7) == "Gamepad"
-	local touch = UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
+	local dev = device()
+	local pad = dev == "pad"
+	local touch = dev == "touch"
 	local function keyOf(bt: Btn, code: Enum.KeyCode, key: string)
 		local img: string? = nil
 		if pad then
@@ -778,9 +844,24 @@ local function refreshKeys()
 		bt.text.Position = UDim2.fromOffset(if img == nil and touch then 22 else 84, 0)
 	end
 	keyOf(play, Enum.KeyCode.ButtonA, "ENTER")
-	keyOf(desk, Enum.KeyCode.ButtonB, "BACKSPACE")
+	keyOf(desk, Enum.KeyCode.ButtonX, "C")
+	if allReady and dev ~= hintDev then
+		hintDev = dev
+		setStep(
+			if pad
+				then "Pronto. Aperte A para continuar."
+				elseif touch then "Pronto. Toque em CONTINUAR."
+				else "Pronto. Aperte Enter ou clique em CONTINUAR."
+		)
+	end
 end
-UserInputService.LastInputTypeChanged:Connect(refreshKeys)
+UserInputService.LastInputTypeChanged:Connect(function()
+	local before = play.keyImg.Visible
+	refreshKeys()
+	if allReady and before ~= play.keyImg.Visible and play.keyImg.Visible then
+		GuiService.SelectedObject = play.b -- chegou o controle: o foco no CONTINUAR
+	end
+end)
 
 local function hover(bt: Btn, on: boolean)
 	tween(bt.scale, 0.18, { Scale = if on then 1.03 else 1 })
@@ -803,24 +884,35 @@ end
 
 -- Sai esmaecendo por cima do lobby: tudo vai para um CanvasGroup que some (o lobby aparece por
 -- trás, sem passar pelo preto) enquanto o palco sobe um pouco, como câmera recuando. O grupo existe
--- desde o início, vazio (em repouso o texto fica fora dele, nítido). quick: o JOGAR AGORA (o
--- Controllers/JogarAgora lê o atributo e pede o squad e o ponto assim que o lobby estiver pronto).
+-- desde o início, vazio (em repouso o texto fica fora dele, nítido).
+-- D-186: marca "Pronto" (o menu principal abre por baixo), espera o menu (atributo do jogador
+-- "MenuPrincipal", até 4 s) e esmaece. settings: o menu abre a aba Configurações ("AbrirConfig").
+-- O carregamento em segundo plano continua (ele não é da geração `alive`).
 local exitGroup = Instance.new("CanvasGroup")
 exitGroup.Name = "Saida"
 exitGroup.Size = UDim2.fromScale(1, 1)
 exitGroup.BackgroundTransparency = 1
 exitGroup.Parent = gui
-local function close(quick: boolean?)
+local function close(settings: boolean?)
 	if closing or not allReady then
 		return
 	end
 	closing = true
+	mark(if settings then "configuracoes" else "continuar")
 	Idioma.fechar()
-	if quick then
-		gui:SetAttribute("JogarAgora", true)
+	if pulse then
+		pulse:Cancel()
+		pulse = nil
+	end
+	GuiService.SelectedObject = nil
+	gui:SetAttribute("AbrirConfig", if settings then true else nil)
+	gui:SetAttribute("Pronto", true)
+	local my = alive
+	local w0 = os.clock()
+	while player:GetAttribute("MenuPrincipal") ~= true and os.clock() - w0 < 4 and alive == my do
+		task.wait(0.05)
 	end
 	gui:SetAttribute("Saindo", true) -- a mesa do lobby (LobbyScene) começa o travelling de chegada agora
-	local my = alive
 	local cg = exitGroup -- criado vazio no início: nada novo nasce na hora da saída
 	cg.GroupTransparency = 0
 	bg.Parent = cg
@@ -829,7 +921,7 @@ local function close(quick: boolean?)
 	local fade = tween(cg, 0.95, { GroupTransparency = 1 }, Enum.EasingStyle.Sine, INOUT, 0.05)
 	fade.Completed:Wait()
 	if alive == my then
-		alive += 1 -- para os laços (pontilha, briefing, contagem) e o carregamento que ainda corre
+		alive += 1 -- para os laços (pontilha, briefing, contagem)
 	end
 	Acabamento.ligar(film, false, 0)
 	Acabamento.pulsar(objective, false)
@@ -847,38 +939,62 @@ local function close(quick: boolean?)
 	end
 end
 
--- D-117: com tudo pronto, a tela entrega para o menu principal (Controllers/MenuPrincipal): marca
--- "Pronto", espera o menu aparecer por baixo (atributo do jogador "MenuPrincipal", até 4 s) e esmaece.
--- Os botões JOGAR AGORA e MESA DE CAMPANHA ficaram só para o gancho de teste do Studio.
+-- um botão entra: aparece, o fundo e o filete acendem, o texto e a tecla chegam
+local function reveal(bt: Btn, delay: number)
+	bt.b.Visible = true
+	bt.b.BackgroundTransparency = 1
+	bt.scale.Scale = 0.94
+	tween(bt.b, 0.3, { BackgroundTransparency = 0 }, QUINT_OUT, OUT, delay)
+	tween(bt.scale, 0.3, { Scale = 1 }, QUINT_OUT, OUT, delay)
+	tween(bt.edge, 0.3, { Transparency = 0.2 }, QUINT_OUT, OUT, delay)
+	for _, t in { bt.text, bt.arrow, bt.keyText } do
+		tween(t, 0.25, { TextTransparency = 0 }, QUINT_OUT, OUT, delay + 0.08)
+	end
+	tween(bt.keycap, 0.25, { BackgroundTransparency = 0 }, QUINT_OUT, OUT, delay + 0.08)
+	tween(bt.keyImg, 0.25, { ImageTransparency = 0 }, QUINT_OUT, OUT, delay + 0.08)
+end
+
+-- D-186: com o essencial pronto (ou no teto), aparecem o CONTINUAR e as CONFIGURAÇÕES. Nada avança
+-- sozinho: o jogador escolhe quando sair (passar o mouse ou o foco só realça).
 local function showButtons()
 	if allReady then
 		return
 	end
 	allReady = true
+	mark(if capped then "botoes_teto" else "botoes")
 	setWaiting(false)
-	setStep(if capped then "Quase pronto: o resto termina no menu." else "Pronto.")
-	gui:SetAttribute("Pronto", true)
-	local my = alive
-	task.spawn(function()
-		local w0 = os.clock()
-		while player:GetAttribute("MenuPrincipal") ~= true and os.clock() - w0 < 4 and alive == my do
-			task.wait(0.1)
-		end
-		task.wait(0.3)
-		if alive == my and not closing then
-			close(false)
+	stepNo.Text = if capped then "QUASE" else "PRONTO"
+	hintDev = ""
+	refreshKeys() -- escreve a dica do aparelho na linha da etapa
+	if capped then
+		note("teto", "Parte do essencial ainda está chegando.")
+	end
+	reveal(desk, 0)
+	reveal(play, 0.08)
+	task.delay(0.45, function()
+		if allReady and not closing and gui.Enabled then
+			local tw = TweenService:Create(
+				play.edge,
+				TweenInfo.new(0.9, Enum.EasingStyle.Sine, INOUT, -1, true),
+				{ Transparency = 0.75 }
+			)
+			tw:Play()
+			pulse = tw
+			if device() == "pad" then
+				GuiService.SelectedObject = play.b
+			end
 		end
 	end)
 end
 
 play.b.Activated:Connect(function()
 	if allReady and not Idioma.recente() then
-		task.spawn(close, true)
+		task.spawn(close, false)
 	end
 end)
 desk.b.Activated:Connect(function()
 	if allReady and not Idioma.recente() then
-		task.spawn(close, false)
+		task.spawn(close, true)
 	end
 end)
 UserInputService.InputBegan:Connect(function(input: InputObject)
@@ -890,26 +1006,36 @@ UserInputService.InputBegan:Connect(function(input: InputObject)
 		openLanguage()
 	elseif not allReady or UserInputService:GetFocusedTextBox() then
 		return
-	elseif kc == Enum.KeyCode.Return or kc == Enum.KeyCode.Space or kc == Enum.KeyCode.ButtonA then
-		task.spawn(close, true)
-	elseif kc == Enum.KeyCode.Backspace or kc == Enum.KeyCode.ButtonB then
+	elseif kc == Enum.KeyCode.Return or kc == Enum.KeyCode.KeypadEnter or kc == Enum.KeyCode.Space then
 		task.spawn(close, false)
+	elseif kc == Enum.KeyCode.ButtonA then
+		-- A no controle: o botão com o foco (o GuiService já aperta ele); sem foco, CONTINUAR
+		if GuiService.SelectedObject == nil then
+			task.spawn(close, false)
+		end
+	elseif kc == Enum.KeyCode.C or kc == Enum.KeyCode.ButtonX then
+		task.spawn(close, true)
 	end
 end)
 
--- ===== o que carregar (o carregamento completo da v37) =====
--- PreloadAsync em lotes: onStep(feitos, total) a cada asset e a cada lote
-local function preload(items: { any }, onStep: (done: number, total: number) -> ())
+-- ===== o que carregar =====
+-- PreloadAsync em lotes: onStep(feitos, total) a cada asset e a cada lote. Devolve quantos falharam
+-- (AssetFetchStatus.Failure; D-186: a tela diz, em vez de fingir que chegou)
+local function preload(items: { any }, onStep: (done: number, total: number) -> ()): number
 	local total = #items
 	onStep(0, total)
 	local done = 0
+	local failed = 0
 	local i = 1
 	while i <= total do
 		local batch = table.move(items, i, math.min(i + BATCH - 1, total), 1, {})
 		local n = 0
 		pcall(function()
-			ContentProvider:PreloadAsync(batch, function()
+			ContentProvider:PreloadAsync(batch, function(_id: string, status: Enum.AssetFetchStatus)
 				n += 1
+				if status == Enum.AssetFetchStatus.Failure then
+					failed += 1
+				end
 				onStep(done + math.min(n, #batch), total)
 			end)
 		end)
@@ -917,6 +1043,7 @@ local function preload(items: { any }, onStep: (done: number, total: number) -> 
 		onStep(done, total)
 		i += BATCH
 	end
+	return failed
 end
 
 local seen: { [string]: boolean } = {}
@@ -1112,170 +1239,254 @@ local function animList(): { any }
 end
 
 -- ===== carregamento de verdade =====
--- (a geração `alive` já foi aberta pela entrada: o briefing, a pontilha e o carregamento são dela)
+-- D-186: o essencial em seis etapas; depois, o segundo plano. A geração do carregamento (runGen) é
+-- separada da tela (alive): ao CONTINUAR, a tela some e o carregamento segue.
+local runGen = 0
+local bgStarted = false
+
+-- a contagem real da etapa, à direita da linha do texto ("24/31")
+local function count(done: number, total: number)
+	countLbl.Text = if total > 0 and done < total then string.format("%d/%d", done, total) else ""
+end
+
+-- a linha do segundo plano: aqui embaixo da barra e no atributo "VT65Fundo" do jogador (o menu
+-- principal mostra a mesma linha); nil quando acabou. Cada linha é um modelo inteiro (a tradução não
+-- entra num modelo dentro de outro)
+local function bgSet(text: string?)
+	player:SetAttribute("VT65Fundo", text)
+	bgLine.Text = text or "Tudo carregado."
+end
+
+-- armas, movimentos, sons e o mapa (uma vez por sessão)
+local function background()
+	if bgStarted then
+		return
+	end
+	bgStarted = true
+	task.spawn(function()
+		local weapons: { any } = {}
+		scanArt(ReplicatedStorage:FindFirstChild("VT65WeaponArt"), weapons)
+		preload(weapons, function(done: number, total: number)
+			bgSet(string.format("Em segundo plano · armas: %d/%d", done, total))
+		end)
+		mark("fundo_armas")
+		preload(animList(), function(done: number, total: number)
+			bgSet(string.format("Em segundo plano · movimentos: %d/%d", done, total))
+		end)
+		mark("fundo_movimentos")
+		preload(soundList(), function(done: number, total: number)
+			bgSet(string.format("Em segundo plano · sons: %d/%d", done, total))
+		end)
+		mark("fundo_sons")
+		-- o mapa (v41, D-117): a arte do servidor, o streaming do mapa inteiro (o centro e o meio de cada
+		-- quadrante, com o raio do streaming, ~360 m, cobrem a área e a cortina de fora; depois os QGs e os
+		-- objetivos), 95% das peças do Map e a arte de tudo o que chegou
+		local a0 = os.clock()
+		while os.clock() - a0 < 30 do
+			local mapF = workspace:FindFirstChild("Map")
+			local artF = mapF and mapF:FindFirstChild("Art")
+			if artF and artF:GetAttribute("Placed") == true then
+				break
+			end
+			task.wait(0.25)
+		end
+		local mc = sharedModule("MapConfig")
+		local spots: { Vector3 } = {}
+		if type(mc) == "table" then
+			local b = mc.Bounds
+			if type(b) == "table" then
+				local cx, cz = (b.minX + b.maxX) / 2, (b.minZ + b.maxZ) / 2
+				local qx, qz = (b.maxX - b.minX) / 4, (b.maxZ - b.minZ) / 4
+				table.insert(spots, Vector3.new(cx, 20, cz))
+				for _, s in { { -1, -1 }, { 1, -1 }, { -1, 1 }, { 1, 1 } } do
+					table.insert(spots, Vector3.new(cx + s[1] * qx, 20, cz + s[2] * qz))
+				end
+			end
+			for _, hq in (if type(mc.HQ) == "table" then mc.HQ else {}) :: any do
+				table.insert(spots, Vector3.new(hq.x, 20, hq.z))
+			end
+			for _, sp in (if type(mc.Strongpoints) == "table" then mc.Strongpoints else {}) :: any do
+				table.insert(spots, Vector3.new(sp.x, 20, sp.z))
+			end
+		end
+		for k, p in spots do
+			bgSet(string.format("Em segundo plano · mapa: %d/%d lugares", k - 1, #spots))
+			pcall(function()
+				player:RequestStreamAroundAsync(p, 8)
+			end)
+		end
+		local mapF = workspace:FindFirstChild("Map")
+		local want = if mapF then mapF:GetAttribute("PartCount") else nil
+		if mapF and type(want) == "number" and want > 0 then
+			local w0 = os.clock()
+			local goal = math.floor(want * MAP_PARTS_FRAC)
+			while os.clock() - w0 < MAP_PARTS_MAX_S do
+				local n = 0
+				for _, d in mapF:GetDescendants() do
+					if d:IsA("BasePart") then
+						n += 1
+					end
+				end
+				bgSet(string.format("Em segundo plano · peças do mapa: %d/%d", math.min(n, goal), goal))
+				if n >= goal then
+					break
+				end
+				task.wait(1)
+			end
+		end
+		mark("fundo_pecas")
+		bgSet("Em segundo plano · arte do mapa…")
+		local art: { any } = {}
+		scanArt(ReplicatedStorage, art)
+		scanArt(workspace, art)
+		scanArt(Lighting, art)
+		pcall(function()
+			scanArt(game:GetService("MaterialService"), art)
+		end)
+		preload(art, function(done: number, total: number)
+			bgSet(string.format("Em segundo plano · arte do mapa: %d/%d", done, total))
+		end)
+		mark("fundo_mapa")
+		bgSet(nil)
+	end)
+end
+
 local function run()
-	local my = alive
-	local t0 = os.clock()
-	-- teto de segurança: com CAP_S, os botões aparecem com o que já chegou
-	task.delay(CAP_S, function()
-		if alive == my and not allReady then
+	runGen += 1
+	local my = runGen
+	-- teto do essencial: com ESSENTIAL_CAP_S, os botões aparecem com o que já chegou
+	task.delay(ESSENTIAL_CAP_S, function()
+		if runGen == my and not allReady then
 			capped = true
 			showButtons()
 		end
 	end)
-	-- 1 e 2: jogo e remotes
+	local failed = 0
+	local function addFail(n: number)
+		failed += n
+		if failed > 0 then
+			note("falhas", string.format("%d arquivos não baixaram; o jogo tenta de novo.", failed))
+		end
+	end
+	-- 1. o jogo
 	setStep("Recebendo o jogo…")
+	setWaiting(true, 1)
 	if not game:IsLoaded() then
 		game.Loaded:Wait()
 	end
+	setWaiting(false)
 	setFrac(1, 1)
+	-- 2. o servidor (sem ele nada funciona: avisa e continua esperando)
 	setStep("Recebendo as ordens do servidor…")
-	ReplicatedStorage:WaitForChild("VT65Remotes", 60)
+	setWaiting(true, 2)
+	if not ReplicatedStorage:WaitForChild("VT65Remotes", REMOTES_WARN_S) then
+		warnStep(2)
+		note("servidor", "O servidor demora a responder.")
+		setStep("O servidor ainda não respondeu: esperando…")
+		ReplicatedStorage:WaitForChild("VT65Remotes")
+		note("servidor", nil)
+	end
+	setWaiting(false)
 	setFrac(2, 1)
-	if alive ~= my then
+	if runGen ~= my then
 		return
 	end
-	-- 3. interface (a carta tática chega do servidor logo no início: espera um pouco por ela)
+	-- 3. a interface (a carta tática chega do servidor logo no início: espera um pouco por ela)
 	setStep("Carregando fontes, papéis e a interface…")
 	local w0 = os.clock()
 	while ReplicatedStorage:GetAttribute("CartaPronta") == nil and os.clock() - w0 < 6 do
 		task.wait(0.2)
 	end
-	preload(interfaceList(), function(done: number, total: number)
+	addFail(preload(interfaceList(), function(done: number, total: number)
 		setFrac(3, if total > 0 then done / total else 1)
-	end)
+		count(done, total)
+	end))
 	setFrac(3, 1)
-	-- 4. sons
-	setStep("Carregando os sons do campo…")
-	preload(soundList(), function(done: number, total: number)
-		setFrac(4, if total > 0 then done / total else 1)
-	end)
+	-- 4. a ficha do jogador (o servidor põe "XP" quando o perfil chega; "DataReadOnly" antes, se não
+	-- carregou). Sem ela, a tela diz: não mostra uma conta vazia como se fosse a dele.
+	setStep("Buscando a sua ficha de serviço…")
+	setWaiting(true, 4)
+	local d0 = os.clock()
+	while player:GetAttribute("XP") == nil and os.clock() - d0 < DATA_MAX_S and runGen == my do
+		task.wait(0.2)
+	end
+	setWaiting(false)
+	if player:GetAttribute("DataReadOnly") == true then
+		warnStep(4)
+		note("ficha", "Seus dados não carregaram: esta sessão não salva.")
+	elseif player:GetAttribute("XP") == nil then
+		warnStep(4)
+		note("ficha", "Seus dados ainda não chegaram.")
+		task.spawn(function()
+			while player:GetAttribute("XP") == nil do
+				player:GetAttributeChangedSignal("XP"):Wait()
+			end
+			note(
+				"ficha",
+				if player:GetAttribute("DataReadOnly") == true
+					then "Seus dados não carregaram: esta sessão não salva."
+					else nil
+			)
+		end)
+	end
 	setFrac(4, 1)
-	-- 5. animações
-	setStep("Ensaiando os movimentos dos soldados…")
-	preload(animList(), function(done: number, total: number)
-		setFrac(5, if total > 0 then done / total else 1)
-	end)
-	setFrac(5, 1)
-	-- 6. manequins do lobby e arte das armas (o PreviewService marca Ready quando termina)
+	-- 5. os manequins e os objetos do menu e da mesa (o PreviewService marca Ready quando termina)
 	setStep("Montando os soldados e os objetos da mesa…")
-	local preview = ReplicatedStorage:WaitForChild("VT65Preview", 30)
+	setWaiting(true, 5)
+	local preview = ReplicatedStorage:WaitForChild("VT65Preview", PREVIEW_MAX_S)
 	if preview then
-		setWaiting(true)
 		local p0 = os.clock()
-		while preview:GetAttribute("Ready") ~= true and os.clock() - p0 < 45 and alive == my do
+		while preview:GetAttribute("Ready") ~= true and os.clock() - p0 < PREVIEW_MAX_S and runGen == my do
 			task.wait(0.25)
 		end
-		setWaiting(false)
+	end
+	setWaiting(false)
+	if not (preview and preview:GetAttribute("Ready") == true) then
+		warnStep(5)
+		note("soldados", "Os soldados do menu ainda estão chegando.")
 	end
 	local soldiers: { any } = {}
 	scanArt(preview, soldiers)
-	scanArt(ReplicatedStorage:FindFirstChild("VT65WeaponArt"), soldiers)
-	preload(soldiers, function(done: number, total: number)
-		setFrac(6, if total > 0 then done / total else 1)
-	end)
-	setFrac(6, 1)
-	-- 7. o mapa (v41, pedido do dono: "carregue todo o jogo perfeitamente na tela de início"): o
-	-- terreno e a arte que o servidor põe, e o streaming em volta dos QGs e dos cinco objetivos (com o
-	-- StreamingEnabled, o que fica longe da mesa de campanha só chegava depois de nascer); depois, a
-	-- arte de tudo que chegou
-	setStep("Abrindo o mapa de Vạn Tường…")
-	setWaiting(true)
-	while ReplicatedStorage:GetAttribute("TerrainReady") ~= true and alive == my do
-		task.wait(0.25)
-	end
-	local a0 = os.clock()
-	while alive == my and os.clock() - a0 < 30 do
-		local mapF = workspace:FindFirstChild("Map")
-		local artF = mapF and mapF:FindFirstChild("Art")
-		if artF and artF:GetAttribute("Placed") == true then
-			break
-		end
+	addFail(preload(soldiers, function(done: number, total: number)
+		setFrac(5, if total > 0 then done / total else 1)
+		count(done, total)
+	end))
+	setFrac(5, 1)
+	-- 6. o terreno e os lugares dos planos do menu
+	setStep("Abrindo o terreno de Vạn Tường…")
+	setWaiting(true, 6)
+	while ReplicatedStorage:GetAttribute("TerrainReady") ~= true and runGen == my do
 		task.wait(0.25)
 	end
 	setWaiting(false)
 	local mc = sharedModule("MapConfig")
-	local spots: { Vector3 } = {}
-	if type(mc) == "table" then
-		-- D-117: o mapa inteiro: o centro e o meio de cada quadrante (com o raio do streaming, ~360 m,
-		-- os cinco cobrem a área e a cortina de fora), depois os QGs e os objetivos
-		local b = mc.Bounds
-		if type(b) == "table" then
-			local cx, cz = (b.minX + b.maxX) / 2, (b.minZ + b.maxZ) / 2
-			local qx, qz = (b.maxX - b.minX) / 4, (b.maxZ - b.minZ) / 4
-			table.insert(spots, Vector3.new(cx, 20, cz))
-			for _, s in { { -1, -1 }, { 1, -1 }, { -1, 1 }, { 1, 1 } } do
-				table.insert(spots, Vector3.new(cx + s[1] * qx, 20, cz + s[2] * qz))
+	local places: { Vector3 } = {}
+	if type(mc) == "table" and type(mc.Strongpoints) == "table" then
+		for _, name in MENU_PLACES do
+			for _, sp in mc.Strongpoints :: any do
+				if sp.name == name then
+					table.insert(places, Vector3.new(sp.x, 20, sp.z))
+				end
 			end
 		end
-		for _, hq in (if type(mc.HQ) == "table" then mc.HQ else {}) :: any do
-			table.insert(spots, Vector3.new(hq.x, 20, hq.z))
-		end
-		for _, sp in (if type(mc.Strongpoints) == "table" then mc.Strongpoints else {}) :: any do
-			table.insert(spots, Vector3.new(sp.x, 20, sp.z))
-		end
 	end
-	for k, p in spots do
-		if alive ~= my then
-			return
-		end
+	for k, p in places do
+		count(k - 1, #places)
 		pcall(function()
 			player:RequestStreamAroundAsync(p, 8)
 		end)
-		setFrac(7, 0.3 * k / #spots)
+		setFrac(6, k / #places)
 	end
-	-- D-117: espera as peças do mapa chegarem (o servidor contou em Map.PartCount)
-	local mapF = workspace:FindFirstChild("Map")
-	local want = if mapF then mapF:GetAttribute("PartCount") else nil
-	if mapF and type(want) == "number" and want > 0 then
-		setStep("Recebendo o mapa inteiro…")
-		local w0 = os.clock()
-		while alive == my and os.clock() - w0 < MAP_PARTS_MAX_S do
-			local n = 0
-			for _, d in mapF:GetDescendants() do
-				if d:IsA("BasePart") then
-					n += 1
-				end
-			end
-			local frac = math.clamp(n / (want * MAP_PARTS_FRAC), 0, 1)
-			setFrac(7, 0.3 + 0.3 * frac)
-			if frac >= 1 then
-				break
-			end
-			task.wait(1)
-		end
-	end
-	setFrac(7, 0.6)
-	setStep("Revelando a arte do mapa…")
-	local art: { any } = {}
-	scanArt(ReplicatedStorage, art)
-	scanArt(workspace, art)
-	scanArt(Lighting, art)
-	pcall(function()
-		scanArt(game:GetService("MaterialService"), art)
-	end)
-	preload(art, function(done: number, total: number)
-		setFrac(7, 0.6 + 0.4 * (if total > 0 then done / total else 1))
-	end)
-	setFrac(7, 1)
-	-- 8. terreno (sem número: o servidor só avisa quando acaba)
-	if ReplicatedStorage:GetAttribute("TerrainReady") ~= true then
-		setStep("O servidor está gerando o terreno de Vạn Tường…")
-		setWaiting(true)
-		while ReplicatedStorage:GetAttribute("TerrainReady") ~= true and alive == my do
-			task.wait(0.25)
-		end
-		setWaiting(false)
-	end
-	setFrac(8, 1)
-	if alive ~= my then
+	count(0, 0)
+	setFrac(6, 1)
+	if runGen ~= my then
 		return
 	end
-	-- a barra chega ao fim antes dos botões (nada aparece no meio do tween)
-	task.wait(math.max(0.5, 0.8 - (os.clock() - t0)))
-	if alive == my and not allReady then
+	task.wait(0.35) -- a última parte termina de encher antes dos botões
+	if runGen == my and not allReady then
 		showButtons()
 	end
+	background()
 end
 
 Acabamento.ligar(film, true, 0)
@@ -1284,8 +1495,8 @@ task.spawn(run)
 
 -- ===== gancho de teste (só no Studio): a tela de volta, carregando de novo, para a foto =====
 -- workspace:SetAttribute("VT65DevTela", "carregamento"): reabre e refaz a animação e o carregamento
--- (o que já está na memória chega rápido). Fica aberta até o atributo mudar (outro valor ou nil),
--- MESA ou JOGAR AGORA.
+-- essencial (o que já está na memória chega rápido). Fica aberta até o atributo mudar (outro valor
+-- ou nil), o CONTINUAR ou as CONFIGURAÇÕES. O segundo plano não roda de novo (é uma vez por sessão).
 if RunService:IsStudio() then
 	local function demo()
 		if gui.Parent == nil or (gui.Enabled and not closing) then
@@ -1293,21 +1504,28 @@ if RunService:IsStudio() then
 		end
 		closing, allReady, capped = false, false, false
 		gui:SetAttribute("Saindo", nil)
-		gui:SetAttribute("JogarAgora", nil)
+		gui:SetAttribute("Pronto", nil)
+		gui:SetAttribute("AbrirConfig", nil)
 		gui.Enabled = true
 		stage.Position = UDim2.fromScale(0.5, 0.5)
 		for _, bt in { play, desk } do
 			bt.b.Visible = false
 			bt.b.BackgroundTransparency = 1
-			bt.text.TextTransparency, bt.arrow.TextTransparency = 1, 1
+			bt.edge.Transparency = 1
+			bt.text.TextTransparency, bt.arrow.TextTransparency, bt.keyText.TextTransparency = 1, 1, 1
+			bt.keycap.BackgroundTransparency, bt.keyImg.ImageTransparency = 1, 1
 		end
-		desk.text.Text = "MESA DE CAMPANHA"
+		table.clear(noteOrder)
+		table.clear(noteText)
 		enterHint.Text = ""
-		target = 0
-		prog.Value = 0
+		countLbl.Text = ""
+		stepNo.Text = string.format("ETAPA %d/%d", 1, N_STEPS)
 		table.clear(seen)
-		for i in frac do
+		for i = 1, N_STEPS do
 			frac[i] = 0
+			warned[i] = false
+			segs[i].fill.Size = UDim2.fromScale(0, 1)
+			segs[i].fill.BackgroundColor3 = STAMP
 		end
 		for _, s in steps do
 			s.done = false

@@ -426,6 +426,22 @@ local function refreshHint()
 end
 refreshHint()
 
+-- D-186: o que a tela de entrada ainda carrega em segundo plano (atributo "VT65Fundo" do jogador),
+-- embaixo à direita, discreto; some quando acaba
+local bgLoad = text(group, F.BODY, 15, V.DIM)
+bgLoad.Name = "SegundoPlano"
+bgLoad.AnchorPoint = Vector2.new(1, 0)
+bgLoad.Position = UDim2.fromOffset(1220, 688)
+bgLoad.Size = UDim2.fromOffset(620, 22)
+bgLoad.TextXAlignment = Enum.TextXAlignment.Right
+bgLoad.TextTruncate = Enum.TextTruncate.AtEnd
+local function refreshBgLoad()
+	local v = player:GetAttribute("VT65Fundo")
+	bgLoad.Text = if type(v) == "string" then v else "" -- o modelo inteiro da tela de entrada
+end
+player:GetAttributeChangedSignal("VT65Fundo"):Connect(refreshBgLoad)
+refreshBgLoad()
+
 -- ----- legenda do plano (canto de baixo, à direita) -----
 local capBox = Instance.new("CanvasGroup")
 capBox.Name = "Legenda"
@@ -926,9 +942,23 @@ task.spawn(function()
 	end
 	if not opened and not inField() then
 		setOpen(true)
+		-- D-186: as CONFIGURAÇÕES da tela de entrada (atributo "AbrirConfig"): a aba abre por cima do
+		-- menu, e a recompensa diária espera ela fechar
+		local lg = pg:FindFirstChild("VT65Loading")
+		local settings = lg ~= nil and lg:GetAttribute("AbrirConfig") == true
+		if settings then
+			task.delay(0.6, function()
+				if open then
+					Bus.fire("menu_open", 1) -- aba Configurações
+				end
+			end)
+		end
 		-- lote 16 (D-130, dono: "a recompensa diária deve aparecer toda vez que entro no jogo"): a
 		-- caderneta abre por cima do menu, depois que ele assenta (Controllers/DiariaEntrada.client)
 		task.delay(1.2, function()
+			while settings and open and UiKit.top() ~= nil do
+				task.wait(0.3)
+			end
 			if open then
 				Bus.fire("diaria_entrada")
 			end
