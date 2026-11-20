@@ -25,6 +25,9 @@ export type Type = {
 	fragJ: number, -- energia típica de um fragmento que fere (J)
 	src: string,
 	burn: Burn?,
+	-- D-198: até onde o sopro empurra os corpos (CorposService); sem ele, o casualtyM. O tamanho do
+	-- efeito é outro parâmetro (Shared/ExplosaoEfeito): dano, empurrão e imagem são independentes
+	impulsoM: number?,
 }
 
 Explosive.TYPES = {
@@ -54,6 +57,7 @@ Explosive.TYPES = {
 		craterM = 2.2,
 		fragJ = 900,
 		src = "PLACEHOLDER",
+		impulsoM = 20, -- D-198: PLACEHOLDER (o sopro forte; os estilhaços vão mais longe)
 	},
 	bomb_250lb = {
 		id = "bomb_250lb",
@@ -63,6 +67,7 @@ Explosive.TYPES = {
 		craterM = 3.5,
 		fragJ = 1000,
 		src = "PLACEHOLDER",
+		impulsoM = 28, -- D-198: PLACEHOLDER (antes os corpos voavam até os 70 m do raio de baixas)
 	},
 	he_90 = {
 		id = "he_90",

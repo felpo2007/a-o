@@ -220,6 +220,8 @@ export type Settings = {
 	-- movimento da câmera (balanço da passada, inércia da cabeça, inclinação nas curvas), 0 a 1;
 	-- lido pelo Movement.client (acessibilidade: enjoo de movimento)
 	cameraBob: number,
+	-- D-198: tremor da câmera nas explosões, 0 a 1 (Controllers/ExplosionFx; acessibilidade)
+	cameraShake: number,
 	-- coluna de comandos na lateral da tela (Controllers/PainelComandos); booleana, o validate saneia
 	hintsPanel: boolean,
 	-- Parte 13 (celular e tablet; Shared/Toque, Controllers/ToqueHud e EditorHud)
@@ -299,6 +301,7 @@ InputMap.DEFAULTS = {
 	volAmbient = 0.6,
 	volMusic = 0.35,
 	cameraBob = 1,
+	cameraShake = 1,
 	hintsPanel = true,
 	touchAimToggle = true,
 	touchAimFire = true,
@@ -366,6 +369,7 @@ local RANGES: { [string]: { number } } = {
 	volAmbient = { 0, 1 },
 	volMusic = { 0, 1 },
 	cameraBob = { 0, 1 },
+	cameraShake = { 0, 1 },
 	gyroSens = { 0.2, 3 },
 	touchLookSens = { 0.2, 3 },
 	touchAdsSens = { 0.1, 2 },

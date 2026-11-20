@@ -22,6 +22,8 @@ local TEX = {
 	core = "rbxasset://textures/particles/explosion01_core_main.dds",
 	fire = "rbxasset://textures/particles/fire_main.dds",
 	dust = "rbxasset://textures/particles/smoke_main.dds",
+	-- D-198: a smoke_main some com cor escura; a fumaça preta usa esta, que já é escura
+	escura = "rbxasset://textures/particles/explosion01_smoke_main.dds",
 	sparks = "rbxasset://textures/particles/fire_sparks_main.dds",
 }
 
@@ -117,8 +119,8 @@ local function explode(model: Model, chassis: BasePart)
 	}):Emit(math.floor(14 * s))
 	-- fumaça preta subindo (óleo e borracha)
 	emitter(anchor, {
-		Texture = TEX.dust,
-		Color = ColorSequence.new(Color3.fromRGB(34, 32, 30), Color3.fromRGB(70, 68, 64)),
+		Texture = TEX.escura,
+		Color = ColorSequence.new(Color3.fromRGB(225, 215, 205), Color3.fromRGB(255, 252, 246)),
 		Size = seq(0, 1.4 * s / M, 0.5, 3.4 * s / M, 1, 5 * s / M),
 		Transparency = seq(0, 0.2, 0.6, 0.55, 1, 1),
 		Lifetime = NumberRange.new(3, 5),
@@ -193,16 +195,19 @@ local function aplicar(w: Watch)
 	if est == "inteiro" then
 		w.smoke.Enabled, w.fire.Enabled = false, false
 	elseif est == "fumaca" then
+		w.smoke.Texture = TEX.dust
 		w.smoke.Color = ColorSequence.new(Color3.fromRGB(150, 148, 142), Color3.fromRGB(190, 188, 182))
 		w.smoke.Rate = 6
 		w.smoke.Enabled, w.fire.Enabled = true, false
 	elseif est == "fogo" then
-		w.smoke.Color = ColorSequence.new(Color3.fromRGB(46, 44, 40), Color3.fromRGB(96, 92, 86))
+		w.smoke.Texture = TEX.escura
+		w.smoke.Color = ColorSequence.new(Color3.fromRGB(245, 240, 232), Color3.fromRGB(255, 255, 255))
 		w.smoke.Rate = 10
 		w.fire.Rate = 18
 		w.smoke.Enabled, w.fire.Enabled = true, true
 	else
-		w.smoke.Color = ColorSequence.new(Color3.fromRGB(28, 26, 24), Color3.fromRGB(70, 66, 60))
+		w.smoke.Texture = TEX.escura
+		w.smoke.Color = ColorSequence.new(Color3.fromRGB(215, 205, 195), Color3.fromRGB(245, 240, 232))
 		w.smoke.Enabled, w.fire.Enabled = true, true
 	end
 end

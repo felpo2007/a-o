@@ -15,6 +15,7 @@ local SoundService = game:GetService("SoundService")
 local Accessibility = require(ReplicatedStorage.Shared.Accessibility)
 local AssetIds = require(ReplicatedStorage.Shared.AssetIds) :: any
 local Ballistics = require(ReplicatedStorage.Shared.Ballistics)
+local ExplosaoEfeito = require(ReplicatedStorage.Shared.ExplosaoEfeito)
 local MapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any
 local Net = require(ReplicatedStorage.Shared.Net)
 local SomArmas = require(ReplicatedStorage.Shared.SomArmas)
@@ -147,7 +148,16 @@ local function caption(key: string, what: string, pos: Vector3?, delay: number?)
 end
 
 -- som 3D num ponto do mundo (ou 2D se pos == nil)
-local function play(key: string, pos: Vector3?, volume: number, maxDist: number?, delay: number?)
+-- D-198: pitch (tom) e grave (só os graves: o agudo cortado, como o estrondo e o eco de longe)
+local function play(
+	key: string,
+	pos: Vector3?,
+	volume: number,
+	maxDist: number?,
+	delay: number?,
+	pitch: number?,
+	grave: boolean?
+)
 	local id = sid(key)
 	if not id then
 		return
@@ -156,6 +166,12 @@ local function play(key: string, pos: Vector3?, volume: number, maxDist: number?
 		local s = Instance.new("Sound")
 		s.SoundId = id
 		s.Volume = volume
+		s.PlaybackSpeed = pitch or 1
+		if grave then
+			local eq = Instance.new("EqualizerSoundEffect")
+			eq.HighGain, eq.MidGain, eq.LowGain = -24, -8, 4
+			eq.Parent = s
+		end
 		s.SoundGroup = sfxGroup
 		s.RollOffMode = Enum.RollOffMode.InverseTapered
 		s.RollOffMinDistance = 10
@@ -661,6 +677,15 @@ Net.unreliable("Fire_Impact").OnClientEvent:Connect(function(e)
 	if dM < 3000 then
 		play("explosion", pos, math.clamp(1.4 - dM / 2500, 0.3, 1.4), 3000 / M, dM / Ballistics.SOUND)
 		caption("explosion", "Explosão", pos, dM / Ballistics.SOUND)
+	end
+	-- D-198: bomba e tiro naval: o corpo grave junto com o estrondo e a cauda (o eco pelo vale e pela
+	-- mata) logo depois, mais grave e longa; ouvidos de mais longe
+	local T = ExplosaoEfeito.de(tostring(e.id))
+	if T.classe == "pesada" and dM < 6000 then
+		local d = ExplosaoEfeito.atrasoSom(dM)
+		local k = math.clamp(1.3 - dM / 4000, 0.35, 1.3)
+		play("explosion", pos, k, 6000 / M, d, 0.62, true)
+		play("explosion", pos, k * 0.55, 8000 / M, d + 0.22, 0.42, true)
 	end
 end)
 Net.unreliable("Fire_Incoming").OnClientEvent:Connect(function(e)

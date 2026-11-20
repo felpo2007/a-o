@@ -33,6 +33,10 @@ Corpos.IMPULSO_SOBE = { bala = 0, explosao = 12 } :: { [string]: number } -- stu
 
 -- (no plano, para cima) em studs/s. distM e raioM só valem para a explosão.
 function Corpos.impulso(kind: string, distM: number?, raioM: number?): (number, number)
+	-- D-198: além do raio do empurrão (Explosive.impulsoM), o estilhaço que matou empurra como uma bala
+	if kind == "explosao" and (distM or 0) > (raioM or math.huge) then
+		return Corpos.IMPULSO.bala, Corpos.IMPULSO_SOBE.bala
+	end
 	if kind == "explosao" then
 		local k = 1 - math.clamp((distM or 0) / math.max(raioM or 1, 1), 0, 1)
 		return Corpos.IMPULSO.explosao * (0.35 + 0.65 * k), Corpos.IMPULSO_SOBE.explosao * k

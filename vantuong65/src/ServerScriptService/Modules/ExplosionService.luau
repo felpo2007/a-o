@@ -192,7 +192,7 @@ function ExplosionService.detonate(id: string, pos: Vector3, by: Player?, from: 
 					e.model:SetAttribute("VT65GolpeDe", pos)
 					e.model:SetAttribute("VT65GolpeK", "explosao")
 					e.model:SetAttribute("VT65GolpeDistM", dM)
-					e.model:SetAttribute("VT65GolpeRaioM", t.casualtyM)
+					e.model:SetAttribute("VT65GolpeRaioM", t.impulsoM or t.casualtyM) -- D-198: o raio do empurrão
 					e.model:SetAttribute("VT65GolpeT", os.clock())
 				end
 				-- colete M1955 (D-72, equipamento liberado): estilhaço no tronco perde energia

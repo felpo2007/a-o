@@ -1546,7 +1546,10 @@
   "destroco",
   "fogo",
   "fumaca",
-  "inteiro"
+  "inteiro",
+  "estrutura",
+  "pesada",
+  "vegetacao"
  ],
  "regex": [
   "^uni_[a-z_]+@[a-z0-9]+$"

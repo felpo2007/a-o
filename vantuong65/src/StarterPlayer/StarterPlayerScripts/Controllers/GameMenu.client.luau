@@ -861,6 +861,8 @@ local function renderSettings()
 		numberRow("Campo de visão (graus)", "fov", 5, "%d")
 		-- balanço da passada, inércia da cabeça e inclinação nas curvas (Movement.client)
 		numberRow("Movimento da câmera", "cameraBob", 0.1, "%d%%", 100)
+		-- D-198: o tremor das explosões (bomba de avião, tiro naval, morteiro, granada)
+		numberRow("Tremor das explosões", "cameraShake", 0.1, "%d%%", 100)
 		choiceRow("Modo daltônico (traçantes)", "colorblind", Accessibility.MODES, {
 			Accessibility.MODE_NAMES.off,
 			Accessibility.MODE_NAMES.protan,
