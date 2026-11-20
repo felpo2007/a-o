@@ -1575,7 +1575,12 @@
   "Saco",
   "Tronco",
   "rel",
-  "solda"
+  "solda",
+  "bots de volta ao QG",
+  "caixas de munição",
+  "construções e caixotes da logística",
+  "crateras e capim queimado",
+  "recargas do comandante"
  ],
  "regex": [
   "^uni_[a-z_]+@[a-z0-9]+$"

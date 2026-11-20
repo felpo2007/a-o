@@ -194,6 +194,47 @@ function LogisticsService.tempGarrison(faction: string, x: number, z: number, na
 	)
 end
 
+-- caixotes iniciais ao lado de cada QG (EUA na borda leste, VC na retaguarda oeste)
+local function caixotesIniciais()
+	local MapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any
+	for f, hq in MapConfig.HQ do
+		for i = 1, 2 do
+			LogisticsService.spawnCrate(f, Vector3.new(hq.x + i * 12, 0, hq.z + 8), Logistics.CRATE)
+		end
+	end
+end
+
+-- D-203 (§22): a partida nova começa como a primeira: sem as construções da anterior (posto de
+-- reunião, ninho, posição de morteiro; as armadilhas são do TrapService.limpar), sem reforço de
+-- túnel aberto, o suprimento do começo e os caixotes iniciais nos QGs. Devolve quantas peças saíram.
+function LogisticsService.restaurar(): number
+	local n = 0
+	for _, b in built do
+		if b.model.Parent then
+			n += 1
+		end
+		b.model:Destroy()
+	end
+	table.clear(built)
+	table.clear(mortarPos)
+	table.clear(temp)
+	for _, c in folder:GetChildren() do
+		c:Destroy()
+		n += 1
+	end
+	LogisticsService.state = Logistics.new()
+	for _, p in Players:GetPlayers() do
+		p:SetAttribute("MortarX", nil)
+		p:SetAttribute("MortarZ", nil)
+		local f = p:GetAttribute("Faction")
+		if f then
+			p:SetAttribute("Supply", LogisticsService.state.supply[f])
+		end
+	end
+	caixotesIniciais()
+	return n
+end
+
 function LogisticsService.start()
 	folder = Instance.new("Folder")
 	folder.Name = "Logistics"
@@ -238,13 +279,7 @@ function LogisticsService.start()
 			end
 		end
 	end)
-	-- caixotes iniciais ao lado de cada QG (EUA na borda leste, VC na retaguarda oeste)
-	local MapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any
-	for f, hq in MapConfig.HQ do
-		for i = 1, 2 do
-			LogisticsService.spawnCrate(f, Vector3.new(hq.x + i * 12, 0, hq.z + 8), Logistics.CRATE)
-		end
-	end
+	caixotesIniciais()
 end
 
 return LogisticsService

@@ -731,6 +731,30 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
       Relatório: `testes/LOTE86_D202_2026-11-20.md`; capturas em `testes/lote86`.
     - Não testado: três jogadores de verdade, alguém saindo depois do fim, celular e jogo publicado.
     - **v120 publicada** (versão 125 do place, commit 2c83742).
+  - **Lote 87 (D-203): a partida nova sem sobra da anterior e a contagem pelo relógio do servidor,
+    feito.**
+    - Tarefa presa à partida (`Rodada.presa`): os tiros e o caixote pedidos ao comandante não caem
+      depois do fim nem na partida nova. Pedido no fim é recusado e as recargas zeram.
+    - O fogo do napalm apaga no fim. O capim queimado e o da caixa de munição voltam com as crateras.
+    - A partida nova sai limpa: sem as construções, os caixotes e as caixas da anterior, com o
+      suprimento do começo (150).
+    - Bots: parados e sem atirar nas telas do fim; na restauração saem sem baixa e nascem no QG na
+      contagem.
+    - Contagem pelo relógio do servidor (`VT65InicioEm`), com um tique nos 5 últimos segundos e um
+      apito no "VALENDO!" (`tools/sons_partida.py`; `Sounds.contagem_tique` e `partida_apito`).
+    - Conferido no Studio (Suporte dos EUA, três fins):
+      - cada número virou 33–101 ms depois do segundo exato e o apito tocou 4–49 ms depois do zero;
+      - nas telas do fim, os 59 bots andaram no máximo 1,6 mm em 16 s, com 0 traçadores (198 na
+        partida);
+      - a restauração deixou só os 4 caixotes, suprimento 150 e 19 voxels de capim de volta;
+      - todos os bots nasceram no QG.
+    - Lune 782 ok (51 arquivos), pytest 70, ruff, StyLua e luau-lsp limpos, i18n 100%. Relatório:
+      `testes/LOTE87_D203_2026-11-20.md`; captura em `testes/lote87`.
+    - Não testado:
+      - o tiro do comandante no Studio (o perfil local tem posto 1);
+      - o napalm no Studio;
+      - dois clientes ao mesmo tempo;
+      - o jogo publicado.
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;

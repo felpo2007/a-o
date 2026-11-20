@@ -420,10 +420,15 @@ test("contagem do começo: preparo no servidor, base, bots parados e a contagem 
 	local pr = fs.readFile(S .. "PreparoService.luau")
 	assert(string.find(pr, "SpawnService.addBlocker", 1, true), "nascer só no QG")
 	assert(string.find(pr, "PreparoService.leash()", 1, true), "volta para a base")
-	assert(string.find(fs.readFile(S .. "BotService.luau"), "if MatchService.inPrep() then", 1, true), "bots parados")
+	-- D-203: também depois do fim
+	assert(
+		string.find(fs.readFile(S .. "BotService.luau"), "if MatchService.inPrep() or MatchService.ended then", 1, true),
+		"bots parados"
+	)
 	assert(string.find(fs.readFile(S .. "BotVehicles.luau"), "MatchService.inPrep()", 1, true), "viaturas paradas")
 	local ct = fs.readFile(C .. "Contagem.client.luau")
-	assert(string.find(ct, "st.prep", 1, true) and string.find(ct, '"VALENDO!"', 1, true), "contagem na tela")
+	-- D-203: o número sai do relógio do servidor (VT65InicioEm), não mais do Match_State
+	assert(string.find(ct, "Rodada.contagem(", 1, true) and string.find(ct, '"VALENDO!"', 1, true), "contagem na tela")
 	-- lote 22: o veículo com gente dentro também volta para a base, e a tela avisa quem foi puxado
 	assert(string.find(pr, "leashVehicle(v, hq, r)", 1, true), "veículo preso na base")
 	assert(string.find(pr, '"PrepVolta"', 1, true) and string.find(ct, '"PrepVolta"', 1, true), "aviso de volta")

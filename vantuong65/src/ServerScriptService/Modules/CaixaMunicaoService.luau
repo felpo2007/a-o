@@ -24,6 +24,7 @@ local Net = require(ReplicatedStorage.Shared.Net)
 local AssetLoader = require(script.Parent.AssetLoader)
 local CombatService = require(script.Parent.CombatService)
 local Combatants = require(script.Parent.Combatants)
+local ExplosionService = require(script.Parent.ExplosionService)
 local ProgressionService = require(script.Parent.ProgressionService)
 
 local CaixaMunicaoService = {}
@@ -227,6 +228,21 @@ function CaixaMunicaoService.list(): { CaixaMunicao.Box }
 	return boxes
 end
 
+-- D-203 (§22): partida nova sem as caixas da anterior e com a espera de cada Suporte zerada.
+-- Devolve quantas caixas saíram.
+function CaixaMunicaoService.limpar(): number
+	local n = #boxes
+	for i = #boxes, 1, -1 do
+		removeBox(boxes[i])
+	end
+	for id, m in models do -- modelo sem caixa (não devia sobrar)
+		m:Destroy()
+		models[id] = nil
+	end
+	table.clear(lastPlaced)
+	return n
+end
+
 -- Caixa do lado mais perto de pos (studs), a até maxM metros
 function CaixaMunicaoService.nearest(faction: string, pos: Vector3, maxM: number): CaixaMunicao.Box?
 	return CaixaMunicao.nearest(boxes, faction, pos.X, pos.Z, maxM, M, os.clock())
@@ -271,6 +287,7 @@ function CaixaMunicaoService.place(
 	pcall(function()
 		local ext = Vector3.new(1.2, 1.5, 1.2) / M
 		local region = Region3.new(pos - ext, pos + ext):ExpandToGrid(4)
+		ExplosionService.guardar(region) -- D-203: o capim volta na partida nova
 		for _, mat in { Enum.Material.Grass, Enum.Material.LeafyGrass } do
 			workspace.Terrain:ReplaceMaterial(region, 4, mat, Enum.Material.Ground)
 		end

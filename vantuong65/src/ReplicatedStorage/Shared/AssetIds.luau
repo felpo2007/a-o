@@ -55,6 +55,9 @@ return {
 		roleta_revela = 129467433848849,
 		roleta_raro = 132667265672941,
 		roleta_lendario = 94782492992853,
+		-- D-203: contagem do começo e apito de início (tools/sons_partida.py; 0 = sem som)
+		contagem_tique = 116493671686163,
+		partida_apito = 75456146464614,
 		-- corpo a corpo (D-94; tools/faca/sons.py). 0 = usa um substituto (curativo, impacto na terra)
 		faca_saque = 111901564575957,
 		faca_corte = 101889458600810,

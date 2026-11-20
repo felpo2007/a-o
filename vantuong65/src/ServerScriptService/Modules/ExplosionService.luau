@@ -8,6 +8,7 @@ local Net = require(ReplicatedStorage.Shared.Net)
 local Rng = require(ReplicatedStorage.Shared.Rng)
 local AnimalService = require(script.Parent.AnimalService)
 local Combatants = require(script.Parent.Combatants)
+local MatchService = require(script.Parent.MatchService)
 local MedicalService = require(script.Parent.MedicalService)
 
 local ExplosionService = {}
@@ -19,8 +20,16 @@ local rng = Rng.new(651818)
 ExplosionService.onVehicles = nil :: ((pos: Vector3, id: string) -> ())?
 
 -- D-193: o terreno de antes de cada cratera, para a partida nova devolver (do último ao primeiro)
+-- D-203 (§22): também o capim que vira terra (napalm, caixa de munição: ExplosionService.guardar)
 type Cratera = { region: Region3, mats: any, occs: any }
 local crateras: { Cratera } = {}
+
+-- Guarda o terreno da região (já no grid de 4) antes de mudar; a partida nova devolve.
+function ExplosionService.guardar(region: Region3)
+	local mats, occs = workspace.Terrain:ReadVoxels(region, 4)
+	table.insert(crateras, { region = region, mats = mats, occs = occs })
+end
+
 function ExplosionService.restaurar(): number
 	local n = #crateras
 	for i = n, 1, -1 do
@@ -56,7 +65,8 @@ local ZONES = { "torso", "torso", "arm", "leg", "leg", "head" }
 -- queimadura na 1ª vez e queda com lethalS de exposição (Explosive.burnStep), a cada 0,25 s.
 -- Visual para todos: fogo (Fire), fumaça preta (Smoke) e luz em 7 pontos da mancha. O chão
 -- chamusca: capim do terreno vira terra (Terrain:ReplaceMaterial), sem mexer no relevo nem nas
--- peças do mapa, no máximo 6 manchas por minuto.
+-- peças do mapa, no máximo 6 manchas por minuto. D-203: o capim volta na partida nova e o fogo
+-- apaga no fim da partida.
 local burnBudget = Explosive.newBudget(6)
 function ExplosionService.ignite(pos: Vector3, heading: Vector3?, by: Player?, id: string?, from: string?)
 	local t = Explosive.TYPES[id or "napalm"]
@@ -112,18 +122,24 @@ function ExplosionService.ignite(pos: Vector3, heading: Vector3?, by: Player?, i
 				local c = pos + h * (i / 5 * b.lengthM / M)
 				local ext = Vector3.new(b.widthM / 2, 3, b.widthM / 2) / M
 				local region = Region3.new(c - ext, c + ext):ExpandToGrid(4)
+				ExplosionService.guardar(region) -- D-203: o capim volta na partida nova
 				for _, mat in { Enum.Material.Grass, Enum.Material.LeafyGrass } do
 					workspace.Terrain:ReplaceMaterial(region, 4, mat, Enum.Material.Ground)
 				end
 			end
 		end)
 	end
+	-- D-203 (§22): o fogo é desta partida; apaga no fim (e a restauração tira a pasta)
+	local rodada = MatchService.rodada
 	task.spawn(function()
 		local exposed: { [Model]: number } = {}
 		local done: { [Model]: string } = {}
 		local t0 = os.clock()
-		while os.clock() - t0 < b.durationS do
+		while os.clock() - t0 < b.durationS and folder.Parent do
 			local dt = task.wait(0.25)
+			if MatchService.rodada ~= rodada or MatchService.ended then
+				break
+			end
 			for _, e in Combatants.list() do
 				local root = Combatants.root(e)
 				local model = e.model
@@ -217,9 +233,9 @@ function ExplosionService.detonate(id: string, pos: Vector3, by: Player?, from: 
 		local r = t.craterM / M
 		pcall(function()
 			-- D-193: guarda o terreno antes de abrir a cratera
-			local region = Region3.new(center - Vector3.one * (r + 4), center + Vector3.one * (r + 4)):ExpandToGrid(4)
-			local mats, occs = terrain:ReadVoxels(region, 4)
-			table.insert(crateras, { region = region, mats = mats, occs = occs })
+			ExplosionService.guardar(
+				Region3.new(center - Vector3.one * (r + 4), center + Vector3.one * (r + 4)):ExpandToGrid(4)
+			)
 			terrain:FillBall(center, r, Enum.Material.Air)
 		end)
 	end

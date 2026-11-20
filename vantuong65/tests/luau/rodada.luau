@@ -159,7 +159,22 @@ test("restauração: cada sistema devolve o seu, na ordem, e ninguém nasce entr
 	local M = "src/ServerScriptService/Modules/"
 	local rs = fs.readFile(M .. "RodadaService.luau")
 	local ordem = {}
-	for _, nome in { "corpos", "soltos", "armadilhas", "buracos", "crateras", "veiculos", "jogadores" } do
+	-- D-203: logística, caixas, comandante e bots (os bots depois dos veículos: a tripulação desce antes)
+	for _, nome in
+		{
+			"corpos",
+			"soltos",
+			"armadilhas",
+			"buracos",
+			"crateras",
+			"logistica",
+			"caixas",
+			"comandante",
+			"veiculos",
+			"bots",
+			"jogadores",
+		}
+	do
 		local i = string.find(rs, string.format('RodadaService.aoRestaurar("%s"', nome), 1, true)
 		assert(i, "registra " .. nome)
 		table.insert(ordem, i)
@@ -193,6 +208,145 @@ test("restauração: cada sistema devolve o seu, na ordem, e ninguém nasce entr
 	assert(e and q and e < q, "entre as partidas ninguém nasce (nem o jogar agora)")
 	local ts = fs.readFile(M .. "TrapService.luau")
 	assert(string.find(ts, "function TrapService.limpar(): number", 1, true))
+end)
+
+-- D-203 (§22): tarefa atrasada presa à partida em que nasceu
+test("presa: a tarefa da partida velha não roda na nova; com paraNoFim, nem depois do fim", function()
+	local rodada, acabou = 4, false
+	local function ler(): (number, boolean)
+		return rodada, acabou
+	end
+	local rodou: { string } = {}
+	local a = Rodada.presa(ler, function(x: string)
+		table.insert(rodou, x)
+	end)
+	local b = Rodada.presa(ler, function(x: string)
+		table.insert(rodou, x)
+	end, true)
+	a("a1")
+	b("b1")
+	acabou = true -- fim da partida: só a que vale até a partida nova roda
+	a("a2")
+	b("b2")
+	rodada, acabou = 5, false -- partida nova: nenhuma das duas
+	a("a3")
+	b("b3")
+	assert(table.concat(rodou, ",") == "a1,b1,a2", table.concat(rodou, ","))
+	-- a criada na partida nova vale nela
+	local c = Rodada.presa(ler, function(x: string)
+		table.insert(rodou, x)
+	end, true)
+	c("c1")
+	assert(rodou[#rodou] == "c1")
+end)
+
+test("contagem: segundos inteiros pelo relógio do servidor, zero depois e sem atributo", function()
+	assert(Rodada.contagem(100, 90) == 10)
+	assert(Rodada.contagem(100, 90.01) == 10)
+	assert(Rodada.contagem(100, 90.999) == 10)
+	assert(Rodada.contagem(100, 91) == 9, "vira no segundo exato")
+	assert(Rodada.contagem(100, 99.5) == 1)
+	assert(Rodada.contagem(100, 100) == 0, "valendo")
+	assert(Rodada.contagem(100, 130) == 0)
+	assert(Rodada.contagem(nil, 5) == 0, "sem atributo: nada a contar")
+	assert(Rodada.contagem(0 / 0, 5) == 0, "NaN")
+	-- dois clientes com o mesmo relógio do servidor mostram o mesmo número, a cada 0,05 s
+	local t = 90
+	while t < 100 do
+		local um, outro = Rodada.contagem(100, t), Rodada.contagem(100, t + 1e-9)
+		assert(um == outro, string.format("t %.2f", t))
+		t += 0.05
+	end
+end)
+
+test("servidor: tarefas presas à partida, bots parados no fim e de volta ao QG, logística zerada", function()
+	local fs = require("@lune/fs")
+	local M = "src/ServerScriptService/Modules/"
+	local function tem(arq: string, lista: { string })
+		local src = string.gsub(fs.readFile(M .. arq), "\r\n", "\n") -- o checkout pode vir com CRLF
+		for _, t in lista do
+			assert(string.find(src, t, 1, true), arq .. ": " .. t)
+		end
+		return src
+	end
+	-- comandante: todo task.delay passa pela guarda; pedido no fim recusado; recargas zeradas
+	local cs = tem("CommanderService.luau", {
+		"if MatchService.ended then",
+		"function CommanderService.restaurar(): number",
+		"readyAt[f] = {}",
+	})
+	local delays, presos = 0, 0
+	local i = 1
+	while true do
+		local a = string.find(cs, "task.delay(", i, true)
+		if not a then
+			break
+		end
+		delays += 1
+		local trecho = string.sub(cs, a, a + 90)
+		if string.find(trecho, "MatchService.presa(", 1, true) then
+			presos += 1
+		end
+		i = a + 1
+	end
+	assert(delays >= 4 and presos == delays, string.format("%d de %d task.delay presos", presos, delays))
+	tem("MatchService.luau", {
+		'ReplicatedStorage:SetAttribute("VT65InicioEm", workspace:GetServerTimeNow() + MatchService.prepLeft())',
+		"function MatchService.presa<A...>(fn: (A...) -> (), paraNoFim: boolean?): (A...) -> ()",
+		"holding = true\n\t\t\t\t\tmarcarInicio()",
+	})
+	-- napalm: o capim volta e o fogo apaga no fim; a caixa de munição também guarda o capim
+	tem("ExplosionService.luau", {
+		"function ExplosionService.guardar(region: Region3)",
+		"ExplosionService.guardar(region) -- D-203: o capim volta na partida nova",
+		"while os.clock() - t0 < b.durationS and folder.Parent do",
+		"if MatchService.rodada ~= rodada or MatchService.ended then",
+	})
+	tem("CaixaMunicaoService.luau", {
+		"ExplosionService.guardar(region) -- D-203: o capim volta na partida nova",
+		"function CaixaMunicaoService.limpar(): number",
+		"table.clear(lastPlaced)",
+	})
+	tem("LogisticsService.luau", {
+		"function LogisticsService.restaurar(): number",
+		"LogisticsService.state = Logistics.new()",
+		"table.clear(mortarPos)",
+		"table.clear(temp)",
+	})
+	-- bots: parados e sem atirar no fim, ninguém nasce entre as partidas, voltam ao QG sem baixa
+	tem("BotService.luau", {
+		"and not MatchService.ended\n\t\t\tand now >= bot.readyAt",
+		"if MatchService.inPrep() or MatchService.ended then",
+		"or MatchService.ended -- D-203: o fim corta a rajada",
+		"function BotService.restaurar(): number",
+		'if model:GetAttribute("VT65Restaurado") then',
+		"b.readyAt = 0",
+	})
+	local bv = fs.readFile(M .. "BotVehicles.luau")
+	local _, n = string.gsub(bv, "MatchService%.inPrep%(%) or MatchService%.ended", "")
+	assert(n == 2, "a viatura dos bots para no fim (vigia e marcha): " .. n)
+end)
+
+test("tela: contagem pelo relógio do servidor, com o tique dos 5 últimos e o apito", function()
+	local fs = require("@lune/fs")
+	local src = fs.readFile("src/StarterPlayer/StarterPlayerScripts/Controllers/Contagem.client.luau")
+	for _, t in
+		{
+			'ReplicatedStorage:GetAttribute("VT65InicioEm")',
+			"Rodada.contagem(",
+			'tocar("partida_apito", 0.6)',
+			'tocar("contagem_tique", 0.35)',
+			'return type(f) == "string" and f ~= "jogo"',
+		}
+	do
+		assert(string.find(src, t, 1, true), "Contagem: " .. t)
+	end
+	assert(not string.find(src, 'Net.event("Match_State")', 1, true), "o número não vem mais do Match_State")
+	local ids = fs.readFile("src/ReplicatedStorage/Shared/AssetIds.luau")
+	for _, k in { "contagem_tique", "partida_apito" } do
+		local v = string.match(ids, k .. " = (%d+)")
+		assert(v and tonumber(v) and (tonumber(v) :: number) > 0, "som publicado: " .. k)
+	end
 end)
 
 -- D-193 (o Studio travou o início do servidor esperando "Rodada_Votar", que faltava na lista do Net):

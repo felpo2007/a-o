@@ -7670,5 +7670,19 @@
   "assetType": "Audio",
   "name": "VT65 rpg2_recarga",
   "description": "VAN TUONG 65 - RPG-2: granada da bolsa, raspa na boca e trava (tools/sons_rpg.py, D-200)"
+ },
+ {
+  "key": "Sounds.contagem_tique",
+  "file": "assets/partida_sons/contagem_tique.ogg",
+  "assetType": "Audio",
+  "name": "VT65 contagem_tique",
+  "description": "VAN TUONG 65 - contagem do começo: toque seco nos 5 últimos segundos (tools/sons_partida.py, D-203)"
+ },
+ {
+  "key": "Sounds.partida_apito",
+  "file": "assets/partida_sons/partida_apito.ogg",
+  "assetType": "Audio",
+  "name": "VT65 partida_apito",
+  "description": "VAN TUONG 65 - começo da partida: apito de campo, dois curtos e um longo (tools/sons_partida.py, D-203)"
  }
 ]

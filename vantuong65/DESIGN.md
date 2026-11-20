@@ -8382,3 +8382,93 @@ de 0,45 s), os três nunca no mesmo gesto e cada um com dois ou mais em 12 s, o 
 
 **Não testado:** com três jogadores de verdade (só um no Studio), alguém saindo depois do fim (a cópia
 congelada foi conferida, a saída não), o custo da cena num celular e o jogo publicado.
+
+## D-203 — Lote 87: a partida nova sem sobra da anterior e a contagem pelo relógio do servidor (2026-11-20)
+
+**Pedido do dono** (prompt de jogabilidade, §22): o ciclo inteiro no mesmo servidor (fim, comemoração,
+votação mesmo com um mapa, restauração, contagem, partida). A restauração devolve pontuação e
+objetivos, jogadores com equipamento e munição, veículos e aeronaves, destroços e corpos, granadas e
+projéteis, buracos e terreno cavado, câmera, mira, inclinação e corrida, telas e cronômetros, e mantém
+a progressão. A contagem é sincronizada, com visual claro e sinal de início. Quem entra no meio vê o
+estado certo. Um identificador de rodada impede que tarefa ou evento antigo afete a partida nova.
+
+**O que já existia** (D-193): o ciclo e as fases no relógio do servidor (`VT65Fase`, `VT65FaseAte`),
+a votação com o mapa real, a rodada (`MatchService.rodada`, `VT65Rodada`) e a restauração de corpos,
+granadas, fumaça, armas no chão, napalm (a pasta), armadilhas, buracos da pá, crateras, veículos (com
+a época que impede o reaparecimento velho) e jogadores (corpo novo no QG, o que zera mira, corrida,
+inclinação e roda pelo `InputMap`). A progressão nunca é tocada. A auditoria deste lote achou o que
+ainda passava de uma partida para a outra.
+
+**Agora:**
+- **Tarefa presa à partida** (`Rodada.presa`, módulo puro; `MatchService.presa`): a função só roda se
+  a rodada ainda é a de quando foi criada e, com `paraNoFim`, se a partida não acabou.
+  - Comandante: o disparo, o aviso de chegada e o impacto de cada tiro (morteiro, naval, ataque
+    aéreo) e o caixote a caminho passam por ela. Antes, uma salva pedida no fim caía nas telas do fim
+    ou na partida nova.
+  - Pedido depois do fim: recusado ("a partida acabou").
+  - As recargas e o último alvo zeram na partida nova (`CommanderService.restaurar`).
+- **Napalm:** o fogo apaga no fim da partida ou quando a restauração tira a pasta (antes queimava até
+  o fim do prazo e ainda feria). O capim que vira terra é guardado antes (`ExplosionService.guardar`,
+  o mesmo das crateras) e volta. A caixa de munição, que também troca o capim por terra, guarda igual.
+- **Logística** (`LogisticsService.restaurar`): as construções saem (posição de morteiro, ninho, posto
+  de reunião), com o reforço de túnel aberto e a posição de morteiro do lado. O suprimento volta ao do
+  começo (150) e os caixotes iniciais voltam aos QGs.
+- **Caixas de munição** (`CaixaMunicaoService.limpar`): saem todas (as dos bots também), e a espera de
+  cada Suporte zera.
+- **Bots:**
+  - depois do fim ficam parados e não atiram (a rajada em curso para) nem nascem; as viaturas deles
+    param;
+  - na restauração, depois dos veículos, o corpo sai sem morrer (sem arma no chão nem baixa) e a
+    espera zera (`BotService.restaurar`). Eles nascem na contagem da partida nova, que só deixa nascer
+    no QG (PreparoService).
+  - Antes, eles seguiam lutando nas telas do fim e começavam a partida nova onde a anterior acabou.
+- **Contagem sincronizada:**
+  - o servidor publica a hora em que a partida vale no relógio dele (`VT65InicioEm`, GetServerTimeNow),
+    e cada cliente calcula o número (`Rodada.contagem`, 20 vezes por segundo);
+  - antes o número vinha no `Match_State`, a cada 1 s, e cada cliente virava o número quando o
+    pacote chegava;
+  - quem entra no meio lê o atributo; depois do fim (`VT65Fase` fora de "jogo") não há contagem.
+- **Sinal de início:** além do "VALENDO!", um toque seco em cada um dos 5 últimos segundos e um apito
+  de campo (dois toques curtos e um longo) no zero. Os sons são de síntese própria
+  (`tools/sons_partida.py`, numpy para OGG, como a roleta), subidos como `Sounds.contagem_tique` e
+  `Sounds.partida_apito`. O apito foi conferido por código: três toques de 0–170, 250–420 e 530–1310 ms,
+  pico em 2.974 Hz.
+
+**Conferido no Studio** (um jogador, como Suporte dos EUA; três fins pelo gancho):
+- **Contagem:**
+  - na partida nova cada número virou 33–101 ms depois do segundo exato do relógio do servidor, e
+    54–57 ms na partida depois da restauração;
+  - os 5 tiques tocaram 4–50 ms antes de cada segundo inteiro: o som entra no mesmo quadro em que o
+    número vira;
+  - o apito tocou 4–49 ms depois do zero e o "VALENDO!" saiu em 55–99 ms;
+  - a tela fechou 2,6 s depois.
+- **Bots nas telas do fim:** em 16 s, o maior deslocamento entre os 59 foi de 1,6 mm, e nenhum
+  morreu. Os traçadores de tiro que chegaram ao cliente foram 198 na partida e 0 nas quatro fases do
+  fim.
+- **Restauração**, com uma posição de morteiro, um ninho e uma caixa de munição postos antes:
+  - a logística ficou só com os 4 caixotes iniciais, sem caixa de munição;
+  - o suprimento voltou a 150 e a posição de morteiro do jogador sumiu;
+  - perto da caixa, 19 voxels de terra voltaram a capim;
+  - o registro do servidor: 6 peças da logística, 2 caixas (uma de bot), 10 trechos de terreno, 9
+    veículos, 59 bots e 1 jogador.
+- **Bots na partida nova:** todos nasceram no QG (nenhum a mais de 60 m até 15 s; depois andam).
+  Na 2ª partida o modo sorteado foi Offensive, em que o VC completa só 20 bots: os 10 a menos são o
+  modo, não a restauração.
+- **Fases:** 0 / 8,0 / 20,0 / 35,2 / 38,1 s; sem erro no servidor.
+
+**Testes:** `rodada.luau`, com 4 testes novos:
+- a tarefa presa (velha não roda na nova; com `paraNoFim`, nem depois do fim);
+- a contagem em segundos inteiros, que vira no segundo exato;
+- as amarras no servidor: todo `task.delay` do comandante passa pela guarda, o fogo apaga, e a
+  logística, as caixas e os bots voltam;
+- a tela pelo relógio do servidor, com os dois sons publicados.
+
+A ordem da restauração ganhou logística, caixas, comandante e bots.
+
+**Não testado:**
+- o tiro do comandante no Studio: o perfil local tem posto 1 e o comandante pede posto 3, então a
+  guarda ficou nos testes do Lune;
+- o napalm no Studio (sai do ataque aéreo do comandante);
+- a contagem em dois clientes ao mesmo tempo: a sincronia vem do relógio do servidor, medida num
+  cliente;
+- o jogo publicado.

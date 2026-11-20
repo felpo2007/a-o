@@ -155,15 +155,22 @@ end
 
 -- O que cada sistema devolve na partida nova (D-193), na ordem: o que está solto no mapa, o terreno,
 -- os veículos (tira quem está sentado) e por último os jogadores, de volta ao QG com corpo novo.
--- require aqui dentro: estes módulos dependem do MatchService. Não volta: a grama queimada pelo
--- napalm (ReplaceMaterial), as construções da logística e os tiros já marcados (morteiro, barragem).
+-- require aqui dentro: estes módulos dependem do MatchService.
+-- D-203 (§22): também as construções e os caixotes da logística (e o suprimento do começo), as caixas
+-- de munição, as recargas do comandante e os bots (de volta ao QG, depois dos veículos). O capim
+-- queimado volta com as crateras (ExplosionService.guardar). Tiro pedido e fogo param sozinhos
+-- (MatchService.presa).
 local function registrar()
 	local S = script.Parent
 	local CorposService = require(S:WaitForChild("CorposService")) :: any
 	local TrapService = require(S:WaitForChild("TrapService")) :: any
 	local FieldWorkService = require(S:WaitForChild("FieldWorkService")) :: any
 	local ExplosionService = require(S:WaitForChild("ExplosionService")) :: any
+	local LogisticsService = require(S:WaitForChild("LogisticsService")) :: any
+	local CaixaMunicaoService = require(S:WaitForChild("CaixaMunicaoService")) :: any
+	local CommanderService = require(S:WaitForChild("CommanderService")) :: any
 	local VehicleService = require(S:WaitForChild("VehicleService")) :: any
+	local BotService = require(S:WaitForChild("BotService")) :: any
 	local SpawnService = require(S:WaitForChild("SpawnService")) :: any
 	local function relato(nome: string, n: any)
 		print(string.format("[VT65] partida nova: %s %s", nome, tostring(n)))
@@ -197,10 +204,22 @@ local function registrar()
 		relato("buracos da pá", FieldWorkService.restaurar())
 	end)
 	RodadaService.aoRestaurar("crateras", function()
-		relato("crateras", ExplosionService.restaurar())
+		relato("crateras e capim queimado", ExplosionService.restaurar())
+	end)
+	RodadaService.aoRestaurar("logistica", function()
+		relato("construções e caixotes da logística", LogisticsService.restaurar())
+	end)
+	RodadaService.aoRestaurar("caixas", function()
+		relato("caixas de munição", CaixaMunicaoService.limpar())
+	end)
+	RodadaService.aoRestaurar("comandante", function()
+		relato("recargas do comandante", CommanderService.restaurar())
 	end)
 	RodadaService.aoRestaurar("veiculos", function()
 		relato("veículos de volta", VehicleService.restaurar())
+	end)
+	RodadaService.aoRestaurar("bots", function()
+		relato("bots de volta ao QG", BotService.restaurar())
 	end)
 	RodadaService.aoRestaurar("jogadores", function()
 		relato("jogadores de volta ao QG", SpawnService.restaurar())

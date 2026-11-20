@@ -22,6 +22,7 @@ local Geometry = require(ReplicatedStorage.Shared.Geometry)
 local MapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any
 local Net = require(ReplicatedStorage.Shared.Net)
 local Offensive = require(ReplicatedStorage.Shared.Offensive)
+local Rodada = require(ReplicatedStorage.Shared.Rodada)
 local Weather = require(ReplicatedStorage.Shared.Weather)
 local Rng = require(ReplicatedStorage.Shared.Rng)
 local Combatants = require(script.Parent.Combatants)
@@ -115,6 +116,21 @@ end
 
 function MatchService.prepLeft(): number
 	return math.max(0, MatchService.prepUntil - os.clock())
+end
+
+-- D-203 (§22): a hora em que a partida vale, no relógio do servidor, para a contagem da tela
+-- (Shared/Rodada.contagem): todos os clientes contam juntos e quem entra no meio lê o atributo.
+local function marcarInicio()
+	ReplicatedStorage:SetAttribute("VT65InicioEm", workspace:GetServerTimeNow() + MatchService.prepLeft())
+end
+
+-- D-203 (§22): tarefa atrasada presa a esta partida (Rodada.presa). paraNoFim: também não roda
+-- depois do fim (tiro de artilharia e caixote a caminho, fogo).
+local function lerRodada(): (number, boolean)
+	return MatchService.rodada, MatchService.ended
+end
+function MatchService.presa<A...>(fn: (A...) -> (), paraNoFim: boolean?): (A...) -> ()
+	return Rodada.presa(lerRodada, fn, paraNoFim)
 end
 
 -- algum jogador (gente) vivo em campo? A contagem só corre com alguém para vê-la: num servidor novo
@@ -328,6 +344,7 @@ function MatchService.newMatch(mode: string?)
 	MatchService.startedAt = MatchService.prepUntil
 	MatchService.waveEpoch = MatchService.startedAt
 	MatchService.ended = false
+	marcarInicio()
 	showMarkers()
 	MatchService.report = AfterAction.new(MatchService.mode, Lighting.ClockTime)
 	-- chuva: o Skirmish (20 min) é curto demais; Warfare e Offensive podem ter uma pancada
@@ -543,6 +560,7 @@ function MatchService.start()
 					-- ninguém em campo ainda: a contagem espera cheia (bots parados na base)
 					MatchService.prepUntil = os.clock() + MatchService.PREP_S
 					holding = true
+					marcarInicio()
 				elseif holding then
 					-- o primeiro jogador nasceu: a contagem corre e o relógio da partida começa depois dela
 					holding = false

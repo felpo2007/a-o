@@ -104,6 +104,27 @@ function BotService.list(): { Bot }
 	return bots
 end
 
+-- D-203 (§22): na partida nova cada bot volta ao QG, como o jogador (antes ficava onde a partida
+-- acabou, às vezes no ponto do outro lado). O corpo sai sem morrer (sem arma no chão nem baixa) e a
+-- espera zera: o bot nasce na contagem da partida nova, que só deixa nascer no QG (PreparoService).
+-- Roda depois dos veículos (a tripulação já desceu). Devolve quantos saíram de campo.
+function BotService.restaurar(): number
+	local n = 0
+	for _, b in bots do
+		local m = b.model
+		if m then
+			m:SetAttribute("VT65Restaurado", true)
+			BotLocomotion.detach(b)
+			BotTunnels.reset(b)
+			b.model = nil
+			m:Destroy()
+			n += 1
+		end
+		b.readyAt = 0
+	end
+	return n
+end
+
 -- D-108: papel pelo lugar no squad de 6 de bots (o 1º é o líder)
 BotService.ROLE_BY_SLOT = { "squad_leader", "rifleman", "support", "rifleman", "sniper", "machine_gunner" }
 
@@ -335,6 +356,9 @@ local function spawnModel(bot: Bot)
 	end
 	if hum then
 		hum.Died:Connect(function()
+			if model:GetAttribute("VT65Restaurado") then
+				return -- D-203: saiu na restauração (BotService.restaurar), não morreu
+			end
 			local t = os.clock()
 			bot.readyAt = SpawnRules.readyAt(t, 0, MatchService.waveEpoch)
 			BotLocomotion.detach(bot)
@@ -1165,6 +1189,7 @@ local function fireVolley(bot: Bot, target: Model?, at: Vector3?)
 				or model:GetAttribute("Downed")
 				or (target ~= nil and not (te and Combatants.active(te)))
 				or bot.mag <= 0
+				or MatchService.ended -- D-203: o fim corta a rajada
 			then
 				break
 			end
@@ -2266,9 +2291,12 @@ local spawningNow = 0 -- modelos sendo montados agora (D-107: no máximo CROWD.s
 local function think(bot: Bot, now: number)
 	local model = bot.model
 	if not model then
+		-- D-203 (§22): depois do fim ninguém nasce; a restauração zera a espera e o bot nasce na
+		-- contagem da partida nova, no QG (PreparoService)
 		if
 			not bot.removed
 			and not bot.spawning
+			and not MatchService.ended
 			and now >= bot.readyAt
 			and spawningNow < BotBrain.CROWD.spawnConcurrent
 		then
@@ -2289,8 +2317,9 @@ local function think(bot: Bot, now: number)
 	if not (hum and root and head) or hum.Health <= 0 or model:GetAttribute("Downed") then
 		return
 	end
-	-- D-122: na contagem do começo da partida, o bot espera parado na base
-	if MatchService.inPrep() then
+	-- D-122: na contagem do começo da partida, o bot espera parado na base. D-203 (§22): depois do
+	-- fim também (as telas do fim, a comemoração e a votação), sem atirar
+	if MatchService.inPrep() or MatchService.ended then
 		BotLocomotion.stop(bot, nil)
 		return
 	end

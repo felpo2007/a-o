@@ -13,6 +13,7 @@ local Rng = require(ReplicatedStorage.Shared.Rng)
 local Combatants = require(script.Parent.Combatants)
 local ExplosionService = require(script.Parent.ExplosionService)
 local LogisticsService = require(script.Parent.LogisticsService)
+local MatchService = require(script.Parent.MatchService)
 local SpawnService = require(script.Parent.SpawnService)
 local TunnelService = require(script.Parent.TunnelService)
 
@@ -71,6 +72,11 @@ local function handle(player: Player, req: any)
 	end
 	local a = FireSupport.ABILITIES[req.ability]
 	local now = os.clock()
+	-- D-203 (§22): depois do fim, nada de pedido novo (a partida nova zera as recargas)
+	if MatchService.ended then
+		reply(player, { error = "a partida acabou" })
+		return
+	end
 	local ok, why =
 		FireSupport.canUse(req.ability, faction, role, LogisticsService.supply(faction), readyAt[faction], now)
 	if not ok or not a then
@@ -158,28 +164,41 @@ local function handle(player: Player, req: any)
 		local impacts = FireSupport.impacts(a, tx, tz, heading, M, function()
 			return rng:next()
 		end)
+		-- D-203 (§22): cada etapa presa a esta partida; o fim corta a salva no ar (MatchService.presa)
 		for _, imp in impacts do
 			local tLaunch = a.delayS + imp.t
 			if launch then
 				local lp = launch
-				task.delay(tLaunch, function()
-					Net.unreliable("Fire_Launch"):FireAllClients({ kind = "mortar", x = lp.X, y = lp.Y, z = lp.Z })
-				end)
+				task.delay(
+					tLaunch,
+					MatchService.presa(function()
+						Net.unreliable("Fire_Launch"):FireAllClients({ kind = "mortar", x = lp.X, y = lp.Y, z = lp.Z })
+					end, true)
+				)
 			end
 			local tImpact = tLaunch + tof
-			task.delay(math.max(tImpact - 2.5, 0), function()
-				local p = groundAt(imp.x, imp.z)
-				Net.unreliable("Fire_Incoming"):FireAllClients({ x = p.X, y = p.Y, z = p.Z })
-			end)
-			task.delay(tImpact, function()
-				ExplosionService.detonate(a.explosive :: string, groundAt(imp.x, imp.z), nil, faction) -- v41: sem fogo amigo
-			end)
+			task.delay(
+				math.max(tImpact - 2.5, 0),
+				MatchService.presa(function()
+					local p = groundAt(imp.x, imp.z)
+					Net.unreliable("Fire_Incoming"):FireAllClients({ x = p.X, y = p.Y, z = p.Z })
+				end, true)
+			)
+			task.delay(
+				tImpact,
+				MatchService.presa(function()
+					ExplosionService.detonate(a.explosive :: string, groundAt(imp.x, imp.z), nil, faction) -- v41: sem fogo amigo
+				end, true)
+			)
 		end
 	elseif a.kind == "supply" then
 		readyAt[faction][a.id] = now + a.cooldownS
-		task.delay(a.delayS, function()
-			LogisticsService.spawnCrate(faction, Vector3.new(tx, 0, tz))
-		end)
+		task.delay(
+			a.delayS,
+			MatchService.presa(function()
+				LogisticsService.spawnCrate(faction, Vector3.new(tx, 0, tz))
+			end, true)
+		)
 		reply(player, { info = string.format("suprimento chega em %d s", a.delayS) })
 	elseif a.kind == "tunnel" then
 		local best, bestD = nil, math.huge
@@ -199,6 +218,25 @@ local function handle(player: Player, req: any)
 		reply(player, { info = string.format("reforço aberto na entrada %s por 180 s", best.id) })
 	end
 	broadcastState(faction)
+end
+
+-- D-203 (§22): partida nova com as recargas do comandante zeradas e sem alvo guardado. Devolve
+-- quantas recargas ainda corriam.
+function CommanderService.restaurar(): number
+	local n = 0
+	local now = os.clock()
+	for _, f in { "US", "VC" } do
+		for _, t in readyAt[f] do
+			if t > now then
+				n += 1
+			end
+		end
+		readyAt[f] = {}
+	end
+	table.clear(lastTarget)
+	broadcastState("US")
+	broadcastState("VC")
+	return n
 end
 
 function CommanderService.start()

@@ -13,7 +13,9 @@
 --   - menos de três elegíveis: só os que houver;
 --   - votação: um voto por jogador (pode trocar até o fim); sem voto, o primeiro mapa; empate, o
 --     primeiro da lista. Só mapas que existem (MAPAS); nada de opção de mentira;
---   - rodada: um número que sobe a cada partida; tarefa da rodada velha confere e para.
+--   - rodada: um número que sobe a cada partida; tarefa da rodada velha confere e para
+--     (Rodada.presa, D-203);
+--   - contagem: a hora do início no relógio do servidor (Rodada.contagem, D-203).
 local Rodada = {}
 
 Rodada.FASES = { "jogo", "fim", "comemoracao", "votacao", "restauracao" }
@@ -118,6 +120,31 @@ end
 -- Tarefa da rodada `minha` ainda vale com a rodada atual `agora`?
 function Rodada.vale(minha: number, agora: number): boolean
 	return minha == agora
+end
+
+-- D-203 (§22): tarefa atrasada presa à partida em que nasceu. `ler` devolve (rodada atual, a partida
+-- acabou?). A função devolvida só chama fn se a rodada ainda é a mesma; com paraNoFim, também não
+-- depois do fim. Tiro pedido ao comandante, caixote a caminho, fogo que queima: nada disso cai na
+-- partida nova (nem, com paraNoFim, na tela do fim).
+function Rodada.presa<A...>(ler: () -> (number, boolean), fn: (A...) -> (), paraNoFim: boolean?): (A...) -> ()
+	local minha = ler()
+	return function(...: A...)
+		local agora, acabou = ler()
+		if Rodada.vale(minha, agora) and not (paraNoFim and acabou) then
+			fn(...)
+		end
+	end
+end
+
+-- D-203 (§22): segundos inteiros que a tela mostra na contagem do começo. inicioEm: a hora em que a
+-- partida vale, no relógio do servidor (atributo "VT65InicioEm", GetServerTimeNow); agora: o mesmo
+-- relógio no cliente. Todos os clientes contam juntos (o relógio é o do servidor, não a chegada do
+-- Match_State), e quem entra no meio lê o atributo. 0 = valendo.
+function Rodada.contagem(inicioEm: number?, agora: number): number
+	if type(inicioEm) ~= "number" or inicioEm ~= inicioEm then
+		return 0
+	end
+	return math.max(0, math.ceil(inicioEm - agora - 1e-6))
 end
 
 return Rodada

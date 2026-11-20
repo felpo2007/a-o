@@ -650,7 +650,7 @@ local function watchdog(c: Crew, ch: BasePart?, driverIn: boolean, now: number):
 	end
 	-- D-122: na contagem os bots esperam parados (o motorista não embarca, a viatura não anda); os
 	-- prazos só começam quando a partida vale (no Studio, as quatro tripulações desciam na contagem)
-	if MatchService.inPrep() then
+	if MatchService.inPrep() or MatchService.ended then -- D-203: e nas telas do fim
 		c.noDriverSince = nil
 		c.progAt = now
 		return false
@@ -746,7 +746,8 @@ function BotVehicles.drive(now: number, dt: number)
 		-- D-161: na contagem a viatura espera parada e o estado não anda. O driveTo responde "chegou"
 		-- na contagem: a marcha virava "hold" na base (e ficava assim depois, tentando chegar ao destino
 		-- pela mata) e o transporte com tropa largava os passageiros ali (Studio, 2026-11-15)
-		if MatchService.inPrep() then
+		-- D-203 (§22): depois do fim também, parada até a restauração
+		if MatchService.inPrep() or MatchService.ended then
 			driveTo(c, chassis, nil, now, dt)
 			continue
 		end
