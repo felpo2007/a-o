@@ -895,6 +895,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
       - 0 erros.
     - Lune 815 ok (56 arquivos), pytest 76, ruff, StyLua e luau-lsp limpos, i18n 100%. Relatório:
       `testes/LOTE93_D208_2026-11-20.md`.
+    - **v126 publicada** (versão 131 do place, commit fe76a58).
     - **Próximo (Prompt A):** o mapa de nascer, o HUD de infantaria e de veículo, morte e
       resultados, celular e a verificação final.
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
