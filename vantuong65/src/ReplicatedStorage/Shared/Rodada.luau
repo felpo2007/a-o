@@ -1,8 +1,9 @@
 --!strict
 -- Fim de partida e partida nova (prompt de jogabilidade, itens 21 e 22; D-193). Módulo PURO (Lune e
 -- Roblox): as regras; quem roda é o servidor (Modules/RodadaService) e a tela é do cliente.
--- Ciclo: fim da partida -> comemoração (os três melhores do time que venceu) -> votação de mapa
--- (aparece mesmo com um mapa só) -> restauração -> contagem (a do MatchService, D-122) -> partida.
+-- Ciclo: fim da partida (a tela de fim da ação, FrontHud) -> comemoração (os três melhores do time
+-- que venceu) -> votação de mapa (aparece mesmo com um mapa só) -> restauração -> contagem (a do
+-- MatchService, D-122) -> partida.
 --   - pontuação: a oficial do modo, os pontos de cada ação que a progressão já conta (abate,
 --     assistência, captura, socorro...; Progression.REWARDS), somados por partida, sem o teto por
 --     minuto da XP. Congelada ao fim;
@@ -15,14 +16,24 @@
 --   - rodada: um número que sobe a cada partida; tarefa da rodada velha confere e para.
 local Rodada = {}
 
-Rodada.FASES = { "jogo", "comemoracao", "votacao", "restauracao" }
-Rodada.DUR = { comemoracao = 12, votacao = 15, restauracao = 3 } :: { [string]: number } -- s
+Rodada.FASES = { "jogo", "fim", "comemoracao", "votacao", "restauracao" }
+Rodada.DUR = { fim = 8, comemoracao = 12, votacao = 15, restauracao = 3 } :: { [string]: number } -- s
+
+-- s do fim da partida até a partida nova (o "próxima partida em" da tela de fim)
+function Rodada.total(): number
+	local t = 0
+	for _, f in Rodada.FASES do
+		t += Rodada.DUR[f] or 0
+	end
+	return t
+end
 Rodada.PODIO_MAX = 3
 
--- Mapas que existem (um por enquanto). carta: o atributo da imagem da carta tática (CartaService).
+-- Mapas que existem (um por enquanto). carta: o prefixo dos atributos das imagens da carta tática
+-- (CartaService: prefixo + nw, ne, sw, se).
 export type Mapa = { id: string, nome: string, carta: string }
 Rodada.MAPAS = {
-	{ id = "vantuong", nome = "Vạn Tường", carta = "CartaImage_nw" },
+	{ id = "vantuong", nome = "Vạn Tường", carta = "CartaImage_" },
 } :: { Mapa }
 
 export type Linha = {

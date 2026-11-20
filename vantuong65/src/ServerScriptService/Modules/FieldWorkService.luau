@@ -20,6 +20,10 @@ local M = 0.28
 local lastDig: { [Player]: number } = {}
 local digging: { [Player]: boolean } = {}
 local holes = 0
+-- D-193: o que cada buraco mudou, para a partida nova devolver (o terreno de antes, voxel a voxel, e o
+-- parapeito de sacos que ele pôs). Volta na ordem contrária: buracos vizinhos se sobrepõem.
+type Buraco = { region: Region3, mats: any, occs: any, parapeito: Model? }
+local buracos: { Buraco } = {}
 
 local terrainOnly = RaycastParams.new()
 terrainOnly.FilterType = Enum.RaycastFilterType.Include
@@ -44,10 +48,13 @@ end
 -- 0,87 a 0,94 m no centro; 0,6 → 1,24 m nos 4 pontos medidos; 0,9 → 1,54 m.
 local VOXEL = 4
 local SMOOTH_EXTRA_M = 0.6
-local function excavate(minX: number, maxX: number, minZ: number, maxZ: number, topY: number, floorY: number)
+local function excavate(minX: number, maxX: number, minZ: number, maxZ: number, topY: number, floorY: number): Buraco
 	local region = Region3.new(Vector3.new(minX, floorY - VOXEL, minZ), Vector3.new(maxX, topY + 2 * VOXEL, maxZ))
 		:ExpandToGrid(VOXEL)
 	local mats, occs = workspace.Terrain:ReadVoxels(region, VOXEL)
+	-- D-193: o terreno de antes (para devolver na partida nova)
+	local antes: Buraco = { region = region, mats = nil, occs = nil, parapeito = nil }
+	antes.mats, antes.occs = workspace.Terrain:ReadVoxels(region, VOXEL)
 	local size = mats.Size
 	local y0 = region.CFrame.Position.Y - region.Size.Y / 2
 	for x = 1, size.X do
@@ -81,6 +88,27 @@ local function excavate(minX: number, maxX: number, minZ: number, maxZ: number, 
 		end
 	end
 	workspace.Terrain:WriteVoxels(region, VOXEL, mats, occs)
+	table.insert(buracos, antes)
+	return antes
+end
+
+-- D-193: a partida nova devolve o terreno de cada buraco (do último ao primeiro) e tira os parapeitos;
+-- a conta de buracos e a espera de cada jogador zeram
+function FieldWorkService.restaurar(): number
+	local n = #buracos
+	for i = n, 1, -1 do
+		local b = buracos[i]
+		pcall(function()
+			workspace.Terrain:WriteVoxels(b.region, VOXEL, b.mats, b.occs)
+		end)
+		if b.parapeito then
+			b.parapeito:Destroy()
+		end
+	end
+	table.clear(buracos)
+	holes = 0
+	table.clear(lastDig)
+	return n
 end
 
 -- ===== pá =====
@@ -297,7 +325,8 @@ local function onDig(p: Player)
 		holes += 1
 		-- buraco: tira o terreno; a terra vira o parapeito de sacos de areia à frente
 		local surf = hit.Position.Y
-		excavate(cx - half, cx + half, cz - half, cz + half, surf, surf - (C.depthM + SMOOTH_EXTRA_M) / M)
+		local buraco =
+			excavate(cx - half, cx + half, cz - half, cz + half, surf, surf - (C.depthM + SMOOTH_EXTRA_M) / M)
 		-- Lote 27 (D-142): o parapeito vai ATRAVESSADO na frente do buraco (o comprido dos sacos, o Z do
 		-- modelo, ao longo do buraco) e sem aterro: o patamar de terra do AssetLoader.place tapava o
 		-- buraco. Assenta no chão mais baixo de 3 pontos. D-183: no lado do buraco que dá para onde o
@@ -319,7 +348,12 @@ local function onDig(p: Player)
 				end
 			end
 			if lo < math.huge then
-				AssetLoader.placeAt("sandbags", CFrame.new(front.X, lo - 0.05 / M, front.Z) * across.Rotation, folder)
+				local saco = AssetLoader.placeAt(
+					"sandbags",
+					CFrame.new(front.X, lo - 0.05 / M, front.Z) * across.Rotation,
+					folder
+				)
+				buraco.parapeito = if typeof(saco) == "Instance" and saco:IsA("Model") then saco else nil
 			end
 		end
 		-- D-129: avisa que acabou (antes o buraco aparecia calado)

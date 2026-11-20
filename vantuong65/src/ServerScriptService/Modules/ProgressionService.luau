@@ -229,6 +229,7 @@ function ProgressionService.award(p: Player, kind: string, pairKey: string?, dat
 	if pairKey and cd and not Progression.pairReady(s.pairs, kind .. ":" .. pairKey, now, cd) then
 		return
 	end
+	MatchService.pontuar(p, rw.xp, kind) -- D-193: os pontos da partida (sem o teto por minuto da XP)
 	CampanhaEventos.fire(p, kind, data)
 	local gx, gc = Progression.grant(s.window, now, rw.xp, rw.cr)
 	add(p, gx, gc, rw.label)

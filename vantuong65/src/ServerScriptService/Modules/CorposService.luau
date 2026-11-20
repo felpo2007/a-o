@@ -606,6 +606,28 @@ local function vigiar(model: Model)
 	end)
 end
 
+-- D-193 (partida nova): todos os corpos saem de uma vez. Primeiro a fila de quem ainda cai (senão o
+-- vigiar faria uma cópia nova de quem fosse removido), depois as cópias no chão e o que sobrar na pasta.
+-- Devolve quantos corpos saíram.
+function CorposService.limpar(): number
+	local n = 0
+	for _ in caindo do
+		n += 1
+	end
+	table.clear(caindo)
+	for _, c in fila do
+		if c.model.Parent then
+			c.model:Destroy()
+		end
+	end
+	n += #fila
+	table.clear(fila)
+	for _, d in pastaCorpos():GetChildren() do
+		d:Destroy()
+	end
+	return n
+end
+
 function CorposService.info(): (number, number, number)
 	local n, some = 0, 0
 	for _ in caindo do

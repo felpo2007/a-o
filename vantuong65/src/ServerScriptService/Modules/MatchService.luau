@@ -55,6 +55,60 @@ MatchService.NEXT_MATCH_S = 30 -- relatório e placar na tela antes da próxima 
 MatchService.PREP_S = 10
 MatchService.prepUntil = 0
 
+-- D-193 (dono: a comemoração usa "a pontuação oficial do modo"): os pontos de cada jogador NESTA
+-- partida, os mesmos de cada ação que a progressão conta (Progression.REWARDS: abate, assistência,
+-- captura, socorro...), sem o teto por minuto da XP; abates e mortes para o desempate. Zera a cada
+-- partida; congela no fim (o ProgressionService chama MatchService.pontuar; as mortes vêm daqui).
+export type Placar = { nome: string, lado: string, pontos: number, abates: number, mortes: number, ordem: number }
+MatchService.placar = {} :: { [string]: Placar } -- por UserId
+local ordemPlacar = 0
+local function linhaDe(p: Player): Placar?
+	local lado = p:GetAttribute("Faction")
+	if lado ~= "US" and lado ~= "VC" then
+		return nil
+	end
+	local key = tostring(p.UserId)
+	local l = MatchService.placar[key]
+	if not l then
+		ordemPlacar += 1
+		l = { nome = p.DisplayName, lado = lado :: string, pontos = 0, abates = 0, mortes = 0, ordem = ordemPlacar }
+		MatchService.placar[key] = l
+	end
+	l.lado = lado :: string -- trocou de lado: conta pelo lado de agora
+	return l
+end
+function MatchService.pontuar(p: Player, pontos: number, kind: string)
+	if MatchService.ended then
+		return
+	end
+	local l = linhaDe(p)
+	if l then
+		l.pontos += math.max(pontos, 0)
+		if kind == "kill" then
+			l.abates += 1
+		end
+	end
+end
+-- As linhas da partida (para o pódio, Shared/Rodada), com o id de cada uma.
+function MatchService.linhas(): { any }
+	local out = {}
+	for id, l in MatchService.placar do
+		table.insert(out, {
+			id = id,
+			nome = l.nome,
+			lado = l.lado,
+			pontos = l.pontos,
+			abates = l.abates,
+			mortes = l.mortes,
+			ordem = l.ordem,
+		})
+	end
+	return out
+end
+-- D-193: depois do fim, quem cuida do ciclo (comemoração, votação, restauração) e chama newMatch.
+-- Sem ele, como antes: NEXT_MATCH_S e a partida nova.
+MatchService.afterEnd = nil :: ((winner: string) -> ())?
+
 function MatchService.inPrep(): boolean
 	return not MatchService.ended and os.clock() < MatchService.prepUntil
 end
@@ -221,7 +275,12 @@ local function showMarkers()
 	updateFlags()
 end
 
+-- D-193: número da partida (sobe a cada newMatch); tarefa de uma partida velha confere e para
+MatchService.rodada = 0
+
 function MatchService.newMatch(mode: string?)
+	MatchService.rodada += 1
+	ReplicatedStorage:SetAttribute("VT65Rodada", MatchService.rodada)
 	MatchService.mode = mode or pendingMode or Capture.nextMode(MatchService.mode, fixedMode, MatchService.rotation)
 	pendingMode = nil
 	local rng = Rng.new(os.time())
@@ -262,6 +321,8 @@ function MatchService.newMatch(mode: string?)
 		MatchService.initialOwner = initial
 	end
 	MatchService.capturedAt = {}
+	MatchService.placar = {} -- D-193: pontos da partida do zero
+	ordemPlacar = 0
 	-- o relógio da partida começa quando a contagem acaba (D-122)
 	MatchService.prepUntil = os.clock() + MatchService.PREP_S
 	MatchService.startedAt = MatchService.prepUntil
@@ -402,6 +463,10 @@ local function endMatch(winner: string)
 	end
 	ReplicatedStorage:SetAttribute("LastWinner", winner)
 	publish()
+	if MatchService.afterEnd then
+		task.spawn(MatchService.afterEnd, winner) -- D-193: comemoração, votação, restauração
+		return
+	end
 	task.delay(MatchService.NEXT_MATCH_S, function()
 		MatchService.newMatch()
 	end)
@@ -447,6 +512,12 @@ function MatchService.start()
 				if MatchService.score then
 					Capture.casualty(MatchService.score, e.faction) -- atrito: cada morte gasta um reforço
 				end
+				if e.player then
+					local l = linhaDe(e.player) -- D-193: a morte no placar da partida
+					if l then
+						l.mortes += 1
+					end
+				end
 			end
 		end)
 	end)
@@ -459,6 +530,9 @@ function MatchService.start()
 	PreparoService.start()
 	local CartaService = require(script.Parent:WaitForChild("CartaService")) :: any
 	task.spawn(CartaService.start)
+	-- D-193: o ciclo do fim de partida (comemoração, votação, restauração, partida nova)
+	local RodadaService = require(script.Parent:WaitForChild("RodadaService")) :: any
+	RodadaService.start()
 	task.spawn(function()
 		while true do
 			task.wait(1)

@@ -39,6 +39,15 @@ local function trigger(t: Live, victim: Model)
 	end
 end
 
+-- D-193 (partida nova): todas as armadilhas saem. Devolve quantas.
+function TrapService.limpar(): number
+	local n = #live
+	for i = n, 1, -1 do
+		remove(live[i])
+	end
+	return n
+end
+
 -- Arma uma armadilha (chamado pela logística depois de validar papel, custo e limite).
 function TrapService.place(kind: string, faction: string, pos: Vector3, yaw: number): Instance
 	local def = Traps.KINDS[kind]

@@ -18,6 +18,21 @@ local rng = Rng.new(651818)
 -- gancho para veículos (VehicleService registra; evita dependência circular)
 ExplosionService.onVehicles = nil :: ((pos: Vector3, id: string) -> ())?
 
+-- D-193: o terreno de antes de cada cratera, para a partida nova devolver (do último ao primeiro)
+type Cratera = { region: Region3, mats: any, occs: any }
+local crateras: { Cratera } = {}
+function ExplosionService.restaurar(): number
+	local n = #crateras
+	for i = n, 1, -1 do
+		local c = crateras[i]
+		pcall(function()
+			workspace.Terrain:WriteVoxels(c.region, 4, c.mats, c.occs)
+		end)
+	end
+	table.clear(crateras)
+	return n
+end
+
 local function covered(from: Vector3, model: Model, target: Vector3): boolean
 	local params = RaycastParams.new()
 	params.FilterType = Enum.RaycastFilterType.Exclude
@@ -198,8 +213,14 @@ function ExplosionService.detonate(id: string, pos: Vector3, by: Player?, from: 
 	end
 	if t.craterM > 0 and Explosive.allowCrater(budget, os.clock()) then
 		local terrain = workspace.Terrain
+		local center = pos - Vector3.new(0, t.craterM * 0.4 / M, 0)
+		local r = t.craterM / M
 		pcall(function()
-			terrain:FillBall(pos - Vector3.new(0, t.craterM * 0.4 / M, 0), t.craterM / M, Enum.Material.Air)
+			-- D-193: guarda o terreno antes de abrir a cratera
+			local region = Region3.new(center - Vector3.one * (r + 4), center + Vector3.one * (r + 4)):ExpandToGrid(4)
+			local mats, occs = terrain:ReadVoxels(region, 4)
+			table.insert(crateras, { region = region, mats = mats, occs = occs })
+			terrain:FillBall(center, r, Enum.Material.Air)
 		end)
 	end
 end

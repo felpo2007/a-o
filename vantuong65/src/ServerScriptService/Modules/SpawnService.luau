@@ -340,6 +340,29 @@ local function spawnAt(player: Player, faction: string, x: number, z: number, at
 	end
 end
 
+-- D-193 (partida nova): quem está vivo volta ao QG do seu lado com um corpo novo (vida, equipamento e
+-- munição da partida; trocar o corpo não conta baixa nem morte), e o "onde caiu" da partida velha
+-- some de todos. Quem está morto escolhe o ponto na tela de sempre (na contagem, só o QG).
+function SpawnService.restaurar(): number
+	local n = 0
+	for _, p in Players:GetPlayers() do
+		local inf = info[p]
+		if inf then
+			inf.deathPos = nil
+		end
+		local faction = p:GetAttribute("Faction")
+		local hq = if type(faction) == "string" then MapConfig.HQ[faction] else nil
+		if inf and hq and alive(p) then
+			n += 1
+			task.spawn(function()
+				local x, z = SpawnService.hqSpot(faction :: string, hq.x, hq.z)
+				spawnAt(p, faction :: string, x, z, nil, "hq")
+			end)
+		end
+	end
+	return n
+end
+
 -- ===== nascer no companheiro do squad =====
 -- Último tiro dado ou dano levado por modelo (jogador ou bot), para a regra "não está em combate".
 -- Os ganchos envolvem CombatService.fire (todo tiro validado: jogador, bot, assento de veículo) e
@@ -892,6 +915,9 @@ function SpawnService.start()
 	end)
 
 	Net.event("Spawn_Request").OnServerEvent:Connect(function(player, pointId, method)
+		if MatchService.ended then
+			return -- D-193: entre o fim e a partida nova (pódio, votação, restauração) ninguém nasce
+		end
 		if pointId == "quick" then
 			quickPlay(player, method) -- jogar agora: lado, squad e papel podem faltar ainda
 			return

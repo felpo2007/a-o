@@ -154,6 +154,9 @@ local function occupants(model: Model): { Model }
 	return out
 end
 
+-- D-193: época dos veículos; a partida nova a muda e o reaparecer marcado antes não cria duplicata
+local epoca = 0
+
 local function destroyVehicle(model: Model)
 	if model:GetAttribute("Destroyed") then
 		return
@@ -176,11 +179,12 @@ local function destroyVehicle(model: Model)
 		end
 	end
 	local spec, depot = model:GetAttribute("Spec"), model:GetAttribute("Depot")
+	local minha = epoca
 	task.delay(30, function()
 		model:Destroy()
 	end)
 	task.delay(RESPAWN_S, function()
-		if type(spec) == "string" and type(depot) == "number" then
+		if minha == epoca and type(spec) == "string" and type(depot) == "number" then
 			-- (any): o checador antigo ordena as funções e ainda não viu o spawn aqui (D-90)
 			(VehicleService :: any).spawn(spec, depot)
 		end
@@ -1955,6 +1959,44 @@ end
 ---------------------------------------------------------------------------------------------
 -- D-90: API dos bots (BotVehicles). Entradas do motorista e do atirador no servidor.
 ---------------------------------------------------------------------------------------------
+
+-- D-193 (partida nova): quem está sentado sai (bot pelo botLeave; jogador levanta), todos os
+-- veículos somem (inteiros, destroços e comprados), o reaparecer marcado antes para de valer e o
+-- conjunto inicial dos depósitos volta. Devolve quantos voltaram.
+function VehicleService.restaurar(): number
+	epoca += 1
+	local list: { Instance } = if folder then folder:GetChildren() else {}
+	for _, m in list do
+		if m:IsA("Model") then
+			for _, s in m:GetDescendants() do
+				if s:IsA("Seat") and s.Occupant then
+					local occ = s.Occupant.Parent :: Model
+					if occ:GetAttribute("Bot") == true then
+						pcall(function()
+							(VehicleService :: any).botLeave(occ)
+						end)
+					end
+					local hum = occ:FindFirstChildOfClass("Humanoid")
+					if hum then
+						hum.Sit = false
+					end
+					local weld = s:FindFirstChild("SeatWeld")
+					if weld then
+						weld:Destroy()
+					end
+				end
+			end
+			m:Destroy()
+		end
+	end
+	local n = 0
+	for i, d in DEPOTS do
+		if (VehicleService :: any).spawn(d.spec, i) then
+			n += 1
+		end
+	end
+	return n
+end
 
 -- Veículos inteiros (não destruídos)
 function VehicleService.vehicles(): { Model }
