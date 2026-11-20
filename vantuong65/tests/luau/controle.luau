@@ -1,5 +1,6 @@
 --!strict
 -- Testes da Parte 12 (controle). Uso: lune run tests/luau/controle.luau
+local fs = require("@lune/fs")
 local process = require("@lune/process")
 
 local S = "../../src/ReplicatedStorage/Shared/"
@@ -509,6 +510,29 @@ test("D-82: teclado remapeável, mouse e gráficos saneados", function()
 	assert(D.mouseAds < 1 and D.mouseScope < D.mouseAds, "mouse mais lento apontando e na luneta")
 end)
 
+-- D-188 (dono: "L3: um clique liga a corrida, outro desliga; não precisa segurar"): no controle o L3
+-- alterna (o soltar não desliga), e morrer, renascer, entrar no veículo e o túnel limpam a corrida
+test("D-188: L3 alterna a corrida e os estados limpam", function()
+	local found = false
+	for _, a in InputMap.ACTIONS do
+		if a.id == "sprint" and a.ctx == "infantry" then
+			found = a.pad == "ButtonL3" and a.padPress == "press"
+		end
+	end
+	assert(found, "correr no L3, por aperto")
+	local src = fs.readFile("src/StarterPlayer/StarterPlayerScripts/Controllers/InfantryController.client.luau")
+	assert(string.find(src, "setSprint(not sprinting) -- L3 alterna", 1, true), "o aperto alterna")
+	assert(
+		string.find(src, "if not Input.isGamepad() and not Input.settings.sprintToggle then", 1, true),
+		"no controle o soltar não desliga"
+	)
+	for _, ev in { "die", "respawn", "vehicle_enter", "vehicle_exit", "tunnel_enter" } do
+		local s = InputMap.newState()
+		InputMap.event(s, "sprint", true)
+		InputMap.event(s, ev, if ev == "vehicle_enter" then "ground" else nil)
+		assert(not s.sprinting, ev .. " limpa a corrida")
+	end
+end)
 print(string.format("%d ok, %d falhas", passed, failed))
 if failed > 0 then
 	process.exit(1)

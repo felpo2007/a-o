@@ -50,14 +50,22 @@ end
 -- ===== velocidades =====
 -- 2026-11-13 ("copie a movimentação igual a do Front 44"): os studs/s do Front 44 (Config.Movement:
 -- Walk 14, Sprint 21, Crouch 7, Prone 4) com 1 stud = 0,28 m, lá e aqui (antes 3,1 / 5,5 / 1,4 / 0,5)
-local J, R, C, P = 14 * 0.28, 21 * 0.28, 7 * 0.28, 4 * 0.28
-test("velocidade: as do Front 44 (m/s iguais: 1 stud = 0,28 m nos dois jogos)", function()
-	near(Movement.JOG, 3.92, 1e-9, "trote")
-	near(Movement.SPRINT, 5.88, 1e-9, "corrida")
-	near(Movement.CROUCH, 1.96, 1e-9, "agachado")
-	near(Movement.PRONE, 1.12, 1e-9, "rastejar")
-	near(Movement.ADS, 9 * 0.28, 1e-9, "mirando")
-	near(Movement.WALK, 1.4, 1e-9, "perna ferida (não existe no Front 44)")
+-- D-188 (dono: "aumente em 20% a velocidade de locomoção a pé"): todas × 1,2, uma vez, na definição
+local FK = 1.2
+local J, R, C, P = 14 * 0.28 * FK, 21 * 0.28 * FK, 7 * 0.28 * FK, 4 * 0.28 * FK
+test("velocidade: as do Front 44 × 1,2 (D-188; m/s iguais: 1 stud = 0,28 m nos dois jogos)", function()
+	near(Movement.FOOT_SPEED_K, 1.2, 1e-12, "20% a mais")
+	near(Movement.JOG, 3.92 * FK, 1e-9, "trote")
+	near(Movement.SPRINT, 5.88 * FK, 1e-9, "corrida")
+	near(Movement.CROUCH, 1.96 * FK, 1e-9, "agachado")
+	near(Movement.PRONE, 1.12 * FK, 1e-9, "rastejar")
+	near(Movement.ADS, 9 * 0.28 * FK, 1e-9, "mirando")
+	near(Movement.WALK, 1.4 * FK, 1e-9, "caminhada")
+	near(Movement.SWIM, 0.9 * FK, 1e-9, "nado")
+	near(Movement.SLIDE_MPS, 27 * 0.28 * FK, 1e-9, "deslize")
+	-- as proporções de antes ficam
+	near(Movement.SPRINT / Movement.JOG, 1.5, 1e-9, "corrida / trote")
+	near(Movement.CROUCH / Movement.JOG, 0.5, 1e-9, "agachado / trote")
 	near(Movement.jumpPower(Movement.JUMP_REST_M, 196.2), 34, 0.01, "pulo: JumpPower 34 do Front 44")
 end)
 
@@ -813,8 +821,9 @@ test("D-93/D-99: passo responsivo como no Front 44 (arranca quase na hora, para 
 		timeMove(0, J, 0, Movement.surfaceGrip("paddy") * Movement.wadeGrip(0.5)) > start * 1.5,
 		"arrozal e água pesam"
 	)
-	local x = Movement.moveStep(3, 0, -3, 0, 0.1, Movement.AIR_GRIP)
-	assert(x > 2.3, "no ar o embalo continua quase todo")
+	-- D-188: a 3 m/s × 1,2 (as acelerações subiram junto)
+	local x = Movement.moveStep(3 * FK, 0, -3 * FK, 0, 0.1, Movement.AIR_GRIP)
+	assert(x > 2.3 * FK, "no ar o embalo continua quase todo")
 end)
 
 test("D-93: curva gira a velocidade sem encolher (antes caía a 70% no meio)", function()

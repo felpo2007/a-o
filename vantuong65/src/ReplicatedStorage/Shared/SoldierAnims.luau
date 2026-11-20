@@ -121,7 +121,9 @@ SoldierAnims.FADE_IN = 0.2
 SoldierAnims.FADE_PRONE_MAX = 0.6 -- deitar/levantar: a câmera leva 0,6–1,0 s; o corpo não espera tanto
 -- 2026-11-13 (movimento do Front 44): rastejar a 1,12 m/s pede 2,8x do clipe (0,35 m/s × SCALE) e o
 -- VC agachado (1,96 × 1,12 = 2,2 m/s) 2,54x; com teto 2,5 o pé deslizava ~11%. 3,0 dá folga.
-SoldierAnims.RATE_MIN, SoldierAnims.RATE_MAX = 0.35, 3.0
+-- D-188 (velocidades a pé × 1,2): rastejar a 1,34 m/s pede ~3,4x e o VC agachado (2,63 m/s) ~3,0x;
+-- o teto sobe para 3,6.
+SoldierAnims.RATE_MIN, SoldierAnims.RATE_MAX = 0.35, 3.6
 
 function SoldierAnims.id(name: string): number
 	local c = SoldierAnims.CLIPS[name]

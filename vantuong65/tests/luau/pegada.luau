@@ -463,7 +463,7 @@ test("capacete na cabeça de bloco: a borda de cima da cabeça fica dentro do ca
 end)
 
 test("deslizar (Front 44): começa mais rápido que a corrida e termina agachado", function()
-	near(Movement.slideSpeed(0, nil), 27 * 0.28, 1e-9, "27 studs/s")
+	near(Movement.slideSpeed(0, nil), 27 * 0.28 * Movement.FOOT_SPEED_K, 1e-9, "27 studs/s × 1,2 (D-188)")
 	assert(Movement.slideSpeed(0, nil) > Movement.SPRINT, "mais que a corrida")
 	near(Movement.slideSpeed(Movement.SLIDE_S, nil), Movement.CROUCH, 1e-9, "acaba agachado")
 	local last = math.huge
@@ -472,7 +472,7 @@ test("deslizar (Front 44): começa mais rápido que a corrida e termina agachado
 		assert(s <= last + 1e-9, "só desacelera")
 		last = s
 	end
-	near(Movement.slideSpeed(0, "VC"), 27 * 0.28 * 1.12, 1e-9, "VC")
+	near(Movement.slideSpeed(0, "VC"), 27 * 0.28 * Movement.FOOT_SPEED_K * 1.12, 1e-9, "VC")
 end)
 
 print(string.format("%d ok, %d falhas", passed, failed))

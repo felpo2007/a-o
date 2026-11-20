@@ -42,14 +42,24 @@ Movement.BODY_K = BODY_K
 -- o que se sente correndo é o mundo passando. Antes (D-93/D-99): trote 3,1, corrida 5,5, agachado
 -- 1,4, rastejar 0,5, mirando 1,8 m/s. O VC × 1,12 e a perna ferida (1,4) continuam. PLACEHOLDER.
 Movement.F44 = { walk = 14, sprint = 21, crouch = 7, ads = 9, prone = 4, jump = 34, slide = 27 } -- studs/s
-Movement.WALK = Units.Speed.walk * STUD -- 1,4: caminhada (perna ferida)
-Movement.JOG = Movement.F44.walk * STUD -- 3,92: andar padrão do jogo (o "Walk" do Front 44)
-Movement.SPRINT = Movement.F44.sprint * STUD -- 5,88: corrida
-Movement.CROUCH = Movement.F44.crouch * STUD -- 1,96
-Movement.PRONE = Movement.F44.prone * STUD -- 1,12: rastejar
-Movement.ADS = Movement.F44.ads * STUD -- 2,52: andando com a arma no ombro
-Movement.TRANSITION = 0.6 -- enquanto deita ou levanta
-Movement.SWIM = 0.9
+-- D-188 (dono: "aumente em 20% a velocidade de locomoção a pé dos jogadores de ambos os times"): toda
+-- velocidade a pé vezes FOOT_SPEED_K, UMA vez, aqui na definição. Ninguém multiplica de novo: morrer,
+-- renascer, trocar de lado, sair do veículo e a partida nova leem estas constantes. As proporções
+-- ficam (andar, trote, corrida, agachado, rastejar, mirando, nado, transição, deslize e os limiares
+-- de deslizar e mergulhar). Pulo, gravidade e veículos ficam fora. A passada da animação segue a
+-- velocidade real (SoldierAnims.cycleRate) e os passos seguem a distância (AudioController.STRIDE).
+-- Valores de antes (D-93, Front 44): andar 1,4, trote 3,92, corrida 5,88, agachado 1,96, rastejar
+-- 1,12 e mirando 2,52 m/s.
+Movement.FOOT_SPEED_K = 1.2
+local FK = Movement.FOOT_SPEED_K
+Movement.WALK = Units.Speed.walk * STUD * FK -- 1,68: caminhada
+Movement.JOG = Movement.F44.walk * STUD * FK -- 4,70: andar padrão do jogo (o "Walk" do Front 44)
+Movement.SPRINT = Movement.F44.sprint * STUD * FK -- 7,06: corrida
+Movement.CROUCH = Movement.F44.crouch * STUD * FK -- 2,35
+Movement.PRONE = Movement.F44.prone * STUD * FK -- 1,34: rastejar
+Movement.ADS = Movement.F44.ads * STUD * FK -- 3,02: andando com a arma no ombro
+Movement.TRANSITION = 0.6 * FK -- enquanto deita ou levanta
+Movement.SWIM = 0.9 * FK
 -- Corrida pela direção do pedido em relação à frente (cosseno): cheia até ~45° (W+D no teclado),
 -- diminui até o trote em ~60°. Antes era um degrau em 0,6 (~53°): a velocidade caía aos trancos.
 Movement.SPRINT_FORWARD = 0.5
@@ -406,8 +416,9 @@ end
 -- ===== inércia =====
 -- accelStep: o modelo vetorial da D-68 (7 m/s² acelerando, 10 freando). Os bots usam (BotMove) e ficam
 -- com ele. O jogador usa moveStep (D-93).
-Movement.ACCEL = 7 -- m/s² acelerando: parado → trote em ~0,45 s; trote → corrida em ~0,35 s
-Movement.DECEL = 10 -- m/s² freando: corrida → parado em ~0,55 s
+-- D-188: as acelerações também × FOOT_SPEED_K: arrancar, parar e virar levam o mesmo tempo de antes
+Movement.ACCEL = 7 * FK -- m/s² acelerando: parado → trote em ~0,45 s; trote → corrida em ~0,35 s
+Movement.DECEL = 10 * FK -- m/s² freando: corrida → parado em ~0,55 s
 -- no ar: pouco controle (o embalo continua). 2026-11-13: 0,1 → 0,15 (com a arrancada nova, 6 m/s² no
 -- ar; no Front 44 o Humanoid tem o controle do ar inteiro)
 Movement.AIR_GRIP = 0.15
@@ -440,10 +451,11 @@ end
 -- 44"): agora quase isso, com um resto de suavização para a passada das animações não dar tranco:
 -- arrancada 40 → 30 m/s² (parado → trote ~0,1 s; trote → corrida ~0,06 s), parada 40 m/s² (corrida →
 -- parado ~0,15 s), curva 60 m/s² (90° correndo em ~0,15 s). Antes (D-99): 16 → 8, 16 e 22. PLACEHOLDER.
-Movement.ACCEL_LOW = 40
-Movement.ACCEL_HIGH = 30
-Movement.DECEL_MOVE = 40
-Movement.TURN_LAT = 60
+-- D-188: × FOOT_SPEED_K (os mesmos tempos com as velocidades 20% maiores)
+Movement.ACCEL_LOW = 40 * FK
+Movement.ACCEL_HIGH = 30 * FK
+Movement.DECEL_MOVE = 40 * FK
+Movement.TURN_LAT = 60 * FK
 Movement.TURN_MAX = 16 -- rad/s (devagar a direção vira quase na hora)
 Movement.TURN_MIN_MPS = 0.5 -- abaixo disto a velocidade é tratada como vetor (arrancada)
 Movement.REVERSE_COS = -0.35
@@ -758,7 +770,7 @@ Movement.STANCE_TIME = {
 	["prone>crouch"] = 0.4,
 } :: { [string]: number }
 Movement.DIVE_TIME = 0.35 -- mergulho correndo: chega ao chão mais rápido (antes 0,45)
-Movement.DIVE_MIN_MPS = 3.5 -- velocidade mínima para mergulhar em vez de deitar
+Movement.DIVE_MIN_MPS = 3.5 * FK -- velocidade mínima para mergulhar em vez de deitar (D-188: × FOOT_SPEED_K)
 Movement.DIVE_S = 0.5 -- duração do deslize do mergulho
 
 function Movement.stanceTime(from: string, to: string, dive: boolean?): number
@@ -780,12 +792,12 @@ function Movement.diveSpeed(v0: number, t: number): number
 end
 
 -- ===== deslizar (Front 44: agachar correndo) =====
--- Mantém o embalo da corrida e termina agachado: começa a SLIDE_MPS (27 studs/s = 7,56 m/s, mais que
+-- Mantém o embalo da corrida e termina agachado: começa a SLIDE_MPS (27 studs/s = 7,56 m/s × 1,2, mais que
 -- a corrida) e cai até a velocidade de agachado em SLIDE_S (0,8 s), pela curva do Front 44
 -- (SlideSpeed + (Crouch − SlideSpeed) × t²). O VC desliza 12% mais rápido, como corre.
-Movement.SLIDE_MPS = Movement.F44.slide * STUD
+Movement.SLIDE_MPS = Movement.F44.slide * STUD * FK -- D-188: 9,07 m/s
 Movement.SLIDE_S = 0.8
-Movement.SLIDE_MIN_MPS = 3.5 -- abaixo disto (andando) agachar só agacha
+Movement.SLIDE_MIN_MPS = 3.5 * FK -- abaixo disto (andando) agachar só agacha (D-188: × FOOT_SPEED_K)
 Movement.SLIDE_ROLL_DEG = 5 -- a câmera tomba de lado (Front 44 "slideRoll")
 
 function Movement.slideSpeed(t: number, faction: string?): number
