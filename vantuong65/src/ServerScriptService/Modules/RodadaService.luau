@@ -56,6 +56,48 @@ function RodadaService.fase(): string
 	return fase
 end
 
+-- D-202 (§21): a cópia do soldado de cada lugar do pódio, congelada no fim da partida, em
+-- ReplicatedStorage.VT65PodioModelos.<UserId>: a cena da comemoração (Controllers/CenaComemoracao)
+-- mostra a aparência e o equipamento da partida, mesmo que ele saia depois. Sem personagem agora, a
+-- cena usa o manequim do lado.
+local function pastaModelos(): Folder
+	local f = ReplicatedStorage:FindFirstChild("VT65PodioModelos")
+	if not (f and f:IsA("Folder")) then
+		f = Instance.new("Folder")
+		f.Name = "VT65PodioModelos"
+		f.Parent = ReplicatedStorage
+	end
+	return f :: Folder
+end
+
+local function congelarModelos(podio: { any })
+	local pasta = pastaModelos()
+	pasta:ClearAllChildren()
+	for _, l in podio do
+		local p = Players:GetPlayerByUserId(tonumber(l.id) or 0)
+		local c = p and p.Character
+		if c and c:FindFirstChild("HumanoidRootPart") then
+			local was = c.Archivable
+			c.Archivable = true
+			local ok, m = pcall(function(): Model
+				return c:Clone()
+			end)
+			c.Archivable = was
+			if ok and m then
+				for _, d in m:GetDescendants() do
+					if d:IsA("BaseScript") or d:IsA("Sound") or d:IsA("ProximityPrompt") then
+						d:Destroy()
+					elseif d:IsA("BasePart") then
+						d.Anchored = true
+					end
+				end
+				m.Name = tostring(l.id)
+				m.Parent = pasta
+			end
+		end
+	end
+end
+
 -- O ciclo depois do fim da partida (MatchService.afterEnd).
 function RodadaService.fim(winner: string)
 	local minha = MatchService.rodada
@@ -65,6 +107,7 @@ function RodadaService.fim(winner: string)
 	-- o resultado congela agora (quem sair daqui em diante continua no pódio)
 	local podio = Rodada.podio(MatchService.linhas() :: any, winner)
 	ReplicatedStorage:SetAttribute("VT65Podio", HttpService:JSONEncode({ vencedor = winner, linhas = podio }))
+	pcall(congelarModelos, podio)
 	-- 0. a tela de fim da ação (FrontHud: vitória, setores, reforços, baixas)
 	setFase("fim", Rodada.DUR.fim)
 	task.wait(Rodada.DUR.fim)
@@ -104,6 +147,7 @@ function RodadaService.fim(winner: string)
 	if not vale() then
 		return
 	end
+	pastaModelos():ClearAllChildren()
 	-- 4. a partida nova, com a contagem de sempre
 	MatchService.newMatch()
 	setFase("jogo", nil)

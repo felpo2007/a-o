@@ -717,6 +717,19 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     - Não testado: outro jogador, celular, jogo publicado, tempo de chegada andando no jogo, partida
       inteira com bots no mapa novo.
     - **v119 publicada** (versão 124 do place, commit 061edb9).
+  - **Lote 86 (D-202): a comemoração dos três melhores como cena, feita.**
+    - Cena no fim da partida (`Controllers/CenaComemoracao`): caixotes de madeira com faixa de latão,
+      aço e bronze, o pano da cor do lado que venceu (dois no empate), sacos de areia, coqueiros e
+      céu de fim de tarde; os cartões (colocação, nome, pontos, abates e mortes) embaixo de cada um.
+    - Gestos procedurais (`Shared/Comemoracao`): fuzil erguido com pulinhos, punho no ar, aceno e
+      braços em V, em sequências diferentes para cada lugar, por cinemática direta sobre o rig de
+      AnimationConstraint do soldado.
+    - Aparência congelada no fim (`VT65PodioModelos`): vale mesmo se o jogador sair; sem ela, o
+      personagem de agora; sem os dois, o manequim do lado.
+    - Conferido no Studio: a cópia congelada usada, vitória com três, empate, pódio vazio e o ciclo
+      inteiro sem erro. Lune 778 ok (51 arquivos), pytest 70, ruff, StyLua e luau-lsp limpos.
+      Relatório: `testes/LOTE86_D202_2026-11-20.md`; capturas em `testes/lote86`.
+    - Não testado: três jogadores de verdade, alguém saindo depois do fim, celular e jogo publicado.
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;

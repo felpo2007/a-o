@@ -8326,3 +8326,59 @@ carregando.
 
 **Não testado:** outro jogador; celular; o jogo publicado; o tempo de chegada andando de verdade no
 jogo (medido na grade); bots numa partida inteira no mapa novo.
+## D-202 — Lote 86: a comemoração dos três melhores como cena, com gestos (2026-11-20)
+
+**Pedido do dono** (prompt de jogabilidade, §21): ao fim da partida, uma tela ou cena com os três
+melhores do time que venceu: personagens completos (aparência e equipamento), o 1º em destaque, o 2º e
+o 3º ao lado, nome, colocação, pontos e estatísticas, o time vencedor, animações de comemoração
+variadas, cenário coerente, empate sem inventar vencedor e a cena valendo mesmo se alguém sair.
+
+**O que já existia** (D-193): o pódio congelado no fim pela pontuação da partida (os pontos de cada
+ação da progressão, desempate por pontos, abates, menos mortes, entrada e nome), o empate com os
+melhores dos dois lados, menos de três quando houver menos, e um cartão por lugar com o soldado
+girando num ViewportFrame (sem animação).
+
+**Agora:**
+- **Cena** (`Controllers/CenaComemoracao`, num ViewportFrame só): três caixotes de madeira (1,4 m,
+  0,9 m e 0,55 m; faixa de latão, aço e bronze), sacos de areia dos lados, caixas de munição, o mastro
+  de bambu com o pano da cor do lado que venceu (dois, um de cada cor, no empate), coqueiros e mata
+  ao fundo, céu de fim de tarde. Nada na frente dos soldados. A câmera balança ±6° e se aproxima
+  devagar, sempre com os três no quadro.
+- **Cartões** embaixo de cada soldado, numa faixa própria (antes da faixa, eles tapavam os caixotes):
+  colocação e nome, pontos, abates e mortes. Seguem a câmera (`Cena.telaX`).
+- **Gestos** (`Shared/Comemoracao`, módulo puro): fuzil erguido com pulinhos, punho no ar, aceno e
+  braços em V. Cada lugar tem a sua sequência em laço e começa noutro ponto, e a troca de gesto mistura
+  em 0,6 s. A mão direita segura a arma da partida, então os gestos de mão livre usam a esquerda.
+  - Procedurais, sem asset de animação: cinemática direta sobre peças ancoradas (o ViewportFrame não
+    simula).
+  - As juntas do soldado são AnimationConstraint (R15 do HumanoidDescription), medido no Studio: 15
+    juntas e 14 BallSocket. Cada uma volta aos anexos de rig dela, então o personagem copiado
+    deitado, agachado, mirando ou caído fica de pé; acessórios e armas seguem as soldas
+    (WeldConstraint da arma na mão, Weld do acessório).
+  - Os pés ficam no tampo pela sola mais baixa; no pulo, sobem.
+- **Aparência congelada** (`RodadaService`): no fim da partida o servidor copia o personagem de cada
+  lugar do pódio para `ReplicatedStorage.VT65PodioModelos.<UserId>`. A cena usa essa cópia; sem ela,
+  o personagem de agora; sem os dois (saiu sem corpo), o manequim do lado. A pasta esvazia antes da
+  partida nova. A cópia do personagem local em 1ª pessoa vinha sem rosto (a cabeça escondida); a
+  montagem zera esse esconderijo.
+
+**Conferido no Studio** (um jogador; os outros lugares postos à mão com ids sem jogador, o caminho do
+manequim):
+- fim pelo gancho com o soldado pontuando: o servidor congelou a cópia dele e a cena a usou (o 1º com
+  o fuzil erguido);
+- vitória dos EUA com três, empate (um do VC em 1º, os dois panos) e pódio vazio (o palco e a frase em
+  faixa escura);
+- os gestos trocando entre capturas e a câmera balançando;
+- o ciclo inteiro: fim 8 s → comemoração 12 s → votação 15 s → restauração 3 s → partida, sem erro no
+  Output (fora os "TexturePack" do Studio local), e a cena vazia depois.
+
+**Erros achados no Studio e corrigidos:** o laço do pano passava pela chave do topo do mastro guardada na
+mesma tabela (a câmera parava em (0, 20, 20)); os cartões tapavam os caixotes; o 1º quase não se
+destacava em altura; o pano saía cortado no alto; a cópia local sem rosto.
+
+**Testes:** `comemoracao.luau` (5): juntas no limite (cotovelo e joelho só para o lado certo), maior
+passo entre dois quadros a 60 fps de 10,6° (era 19° com o "soco" de expoente 0,6 e 11,7° com a mistura
+de 0,45 s), os três nunca no mesmo gesto e cada um com dois ou mais em 12 s, o palco e as amarras.
+
+**Não testado:** com três jogadores de verdade (só um no Studio), alguém saindo depois do fim (a cópia
+congelada foi conferida, a saída não), o custo da cena num celular e o jogo publicado.

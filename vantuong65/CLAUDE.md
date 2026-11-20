@@ -121,6 +121,10 @@ O `sourcemap.json` não vai para o Git.
   - `workspace:SetAttribute("VT65DevMode", "Offensive")`: troca o modo (Warfare, Offensive ou
     Skirmish);
   - `workspace:SetAttribute("VT65DevEnd", true)`: encerra a partida e mostra o relatório pós-ação;
+    D-202: a comemoração dura 12 s. Para olhar com calma, com a partida rodando, ponha à mão (Server)
+    o `VT65Podio` (JSON com `vencedor` e `linhas`; ids sem jogador viram o manequim do lado), o
+    `VT65FaseAte` minutos à frente e `VT65Fase = "comemoracao"`. Não guarde captura com o nome da
+    conta nos cartões (use nomes de teste);
   - `workspace:SetAttribute("VT65DevRain", 1)`: força a chuva (0 a 1);
   - D-191/D-190 (só Studio): `VT65DevGranada = "6"` lança uma granada a 6 m/s do primeiro
     jogador; `VT65DevTela = "3p"` liga a 3ª pessoa (o teclado do MCP não chega com o Studio
@@ -330,7 +334,7 @@ O `sourcemap.json` não vai para o Git.
 - Segredos só no `.env` (no `.gitignore`), nunca no código nem no chat.
 - ForgeGUI: nunca regenerar um job em `outcome_unknown`. "failed" com `retryable` pode ser
   retomado com `generation_retry`.
-- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-202) e atualize `PROGRESS.md`.
+- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-203) e atualize `PROGRESS.md`.
 - Tetos de triângulos por modelo: vegetação ≤ 6 mil (D-135), props e herói ≤ 20 mil (`ArtBudget`,
   conferido pelo teste da F5).
 - Commits no branch acima, com mensagem em português.

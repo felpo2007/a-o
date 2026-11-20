@@ -1562,7 +1562,20 @@
   "PLACEHOLDER (o de antes)",
   "Rockets",
   "cancelar",
-  "equilíbrio: 4 a 6 tiros por minuto com a mira (Small Arms Survey); 6 s só a recarga"
+  "equilíbrio: 4 a 6 tiros por minuto com a mira (Small Arms Survey); 6 s só a recarga",
+  "Ankle",
+  "Caixote%d",
+  "Capim",
+  "Chao",
+  "Faixa%d",
+  "Hip",
+  "Knee",
+  "Municao%d",
+  "Pano",
+  "Saco",
+  "Tronco",
+  "rel",
+  "solda"
  ],
  "regex": [
   "^uni_[a-z_]+@[a-z0-9]+$"

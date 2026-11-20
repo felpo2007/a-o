@@ -3,9 +3,11 @@
 -- (Modules/RodadaService; atributos "VT65Fase" e "VT65FaseAte" em ReplicatedStorage, que valem para
 -- quem entra no meio):
 --   - comemoração: o time que venceu (ou o empate, sem inventar vencedor) e o pódio congelado
---     ("VT65Podio"): o 1º no meio e mais alto, o 2º e o 3º dos lados, cada um com o soldado (o
---     personagem dele, ou o manequim do lado se ele saiu), a colocação, o nome, os pontos e abates e
---     mortes. O soldado gira devagar. PLACEHOLDER: sem animação de comemoração ainda;
+--     ("VT65Podio"): o 1º no meio e mais alto, o 2º e o 3º dos lados, a colocação, o nome, os pontos e
+--     abates e mortes. D-202: os três numa cena (Controllers/CenaComemoracao: palco de caixotes, o
+--     pano do lado que venceu, fim de tarde), cada um com o soldado da partida (a cópia congelada no
+--     fim, "VT65PodioModelos"; sem ela, o personagem de agora; quem saiu sem cópia, o manequim do
+--     lado) comemorando com gestos variados (Shared/Comemoracao);
 --   - votação: cada mapa que existe ("VT65Mapas", um só por enquanto), com a imagem da carta, o nome,
 --     os votos ("VT65Votos") e o tempo; tocar, clicar ou A vota (pode trocar até o fim);
 --   - restauração: "Preparando a próxima partida…"; depois a contagem de sempre (Controllers/Contagem).
@@ -17,6 +19,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
 local Net = require(ReplicatedStorage.Shared.Net)
+local CenaComemoracao = require(script.Parent.CenaComemoracao)
 local Input = require(script.Parent.Input)
 local UiKit = require(script.Parent.UiKit)
 
@@ -68,67 +71,66 @@ podium.Position = UDim2.fromOffset(0, px(130, 180))
 podium.Size = UDim2.new(1, 0, 1, -px(130, 180))
 podium.Parent = root
 
+-- D-202: a cena (palco e soldados) em cima; embaixo, a faixa dos cartões, um sob cada soldado
+local BAND = px(100, 138)
+local stage = Instance.new("Frame")
+stage.Name = "Palco"
+stage.BackgroundTransparency = 1
+stage.ClipsDescendants = true
+stage.Size = UDim2.new(1, 0, 1, -BAND)
+stage.Parent = podium
+UiKit.corner(stage, 6)
+local cena = CenaComemoracao.nova(stage)
+
 type Card = {
 	f: Frame,
-	vp: ViewportFrame,
 	place: TextLabel,
 	name: TextLabel,
 	pts: TextLabel,
 	kd: TextLabel,
-	model: Model?,
 }
--- colocação -> (x central em fração, altura em px, deslocamento para baixo)
-local SLOT = {
-	[1] = { x = 0.5, h = px(440, 610), down = 0 },
-	[2] = { x = 0.2, h = px(390, 540), down = px(50, 70) },
-	[3] = { x = 0.8, h = px(370, 510), down = px(70, 98) },
-}
-local CW = px(300, 410)
+-- os soldados ficam a ~20% da largura um do outro (Comemoracao.LUGARES): o cartão cabe em 18%
+local CW, CH = px(196, 270), px(92, 126)
 local cards: { Card } = {}
 for i = 1, 3 do
-	local s = SLOT[i]
-	local f = UiKit.panel(podium, V.PANEL, 0.08)
+	local f = UiKit.panel(podium, V.PANEL, 0.06)
 	f.Name = string.format("Lugar%d", i)
-	f.AnchorPoint = Vector2.new(0.5, 0)
-	f.Position = UDim2.new(s.x, 0, 0, s.down)
-	f.Size = UDim2.fromOffset(CW, s.h)
+	f.AnchorPoint = Vector2.new(0.5, 1)
+	f.Position = UDim2.new(0.5, 0, 1, -px(2, 3))
+	f.Size = UDim2.fromOffset(CW, CH)
+	f.ZIndex = 3
 	UiKit.edge(f, if i == 1 then V.BRASS else V.LINE, if i == 1 then 2 else 1, 0.1)
-	local vp = Instance.new("ViewportFrame")
-	vp.Name = "Soldado"
-	vp.BackgroundTransparency = 1
-	vp.Position = UDim2.fromOffset(px(8, 11), px(44, 60))
-	vp.Size = UDim2.new(1, -px(16, 22), 1, -px(150, 206))
-	vp.Ambient = Color3.fromRGB(140, 136, 124)
-	vp.LightColor = Color3.fromRGB(255, 240, 220)
-	vp.LightDirection = Vector3.new(-0.5, -0.8, -1)
-	vp.Parent = f
-	local cam = Instance.new("Camera")
-	cam.FieldOfView = 30
-	cam.Parent = vp
-	vp.CurrentCamera = cam
-	local place = label(f, "Colocacao", px(34, 48), if i == 1 then V.BRASS else V.KHAKI, F.TITLE)
-	place.Position = UDim2.fromOffset(0, px(6, 8))
-	place.Size = UDim2.new(1, 0, 0, px(38, 52))
+	-- colocação e nome na mesma linha; embaixo os pontos e os abates e mortes
+	local place = label(f, "Colocacao", px(24, 33), if i == 1 then V.BRASS else V.KHAKI, F.TITLE)
+	place.Position = UDim2.fromOffset(px(6, 8), px(4, 6))
+	place.Size = UDim2.fromOffset(px(40, 55), px(30, 41))
 	place.Text = string.format("%dº", i)
-	local name = label(f, "Nome", px(22, 31), V.TEXT, F.TITLE_MED)
-	name.AnchorPoint = Vector2.new(0, 1)
-	name.Position = UDim2.new(0, px(8, 11), 1, -px(70, 96))
-	name.Size = UDim2.new(1, -px(16, 22), 0, px(30, 42))
+	local name = label(f, "Nome", px(18, 25), V.TEXT, F.TITLE_MED)
+	name.Position = UDim2.fromOffset(px(48, 66), px(6, 8))
+	name.Size = UDim2.new(1, -px(54, 74), 0, px(28, 39))
+	name.TextXAlignment = Enum.TextXAlignment.Left
 	name.TextTruncate = Enum.TextTruncate.AtEnd
-	local pts = label(f, "Pontos", px(20, 28), V.KHAKI, F.TITLE)
-	pts.AnchorPoint = Vector2.new(0, 1)
-	pts.Position = UDim2.new(0, 0, 1, -px(40, 55))
-	pts.Size = UDim2.new(1, 0, 0, px(26, 36))
-	local kd = label(f, "Abates", px(15, 21), V.DIM, F.BODY)
-	kd.AnchorPoint = Vector2.new(0, 1)
-	kd.Position = UDim2.new(0, 0, 1, -px(14, 20))
-	kd.Size = UDim2.new(1, 0, 0, px(22, 30))
-	cards[i] = { f = f, vp = vp, place = place, name = name, pts = pts, kd = kd, model = nil }
+	local pts = label(f, "Pontos", px(17, 23), V.KHAKI, F.TITLE)
+	pts.Position = UDim2.fromOffset(0, px(38, 52))
+	pts.Size = UDim2.new(1, 0, 0, px(22, 30))
+	local kd = label(f, "Abates", px(13, 18), V.DIM, F.BODY)
+	kd.Position = UDim2.fromOffset(0, px(62, 85))
+	kd.Size = UDim2.new(1, 0, 0, px(20, 27))
+	for _, t in { place, name, pts, kd } do
+		t.ZIndex = 4
+	end
+	cards[i] = { f = f, place = place, name = name, pts = pts, kd = kd }
 end
-local empty = label(podium, "Vazio", px(20, 28), V.DIM, F.BODY)
-empty.Position = UDim2.fromScale(0, 0.4)
-empty.Size = UDim2.new(1, 0, 0, px(30, 42))
+local empty = label(podium, "Vazio", px(20, 28), V.TEXT, F.BODY)
+empty.AnchorPoint = Vector2.new(0.5, 0.5)
+empty.Position = UDim2.fromScale(0.5, 0.4)
+empty.Size = UDim2.fromOffset(px(620, 850), px(44, 60))
 empty.Text = "Ninguém do time que venceu fez pontos nesta partida."
+-- em cima da cena: faixa escura para ler
+empty.BackgroundColor3 = V.PANEL
+empty.BackgroundTransparency = 0.2
+empty.ZIndex = 3
+UiKit.corner(empty, 4)
 
 -- ===== votação =====
 local vote = Instance.new("Frame")
@@ -240,67 +242,46 @@ local function decode(attr: string): any
 end
 
 -- ===== o soldado de cada lugar =====
+local function copia(m: Instance): Model?
+	if not m:IsA("Model") then
+		return nil
+	end
+	local was = m.Archivable
+	m.Archivable = true
+	local ok, c = pcall(function(): Model
+		return m:Clone()
+	end)
+	m.Archivable = was
+	return if ok then c else nil
+end
+
+local function manequim(lado: string): Model?
+	-- saiu (ou sem corpo agora): o manequim do lado, vestido pelo servidor
+	local folder = ReplicatedStorage:FindFirstChild("VT65Preview")
+	local m = folder and folder:FindFirstChild(lado)
+	return if m then copia(m) else nil
+end
+
 local function modelFor(id: string, lado: string): Model?
+	-- D-202: a cópia congelada no fim da partida (RodadaService), que vale mesmo se ele saiu
+	local congelados = ReplicatedStorage:FindFirstChild("VT65PodioModelos")
+	local frozen = congelados and congelados:FindFirstChild(id)
+	if frozen then
+		local c = copia(frozen)
+		if c then
+			return c
+		end
+	end
 	local uid = tonumber(id)
 	local p = if uid then Players:GetPlayerByUserId(uid) else nil
 	local char = p and p.Character
 	if char then
-		local was = char.Archivable
-		char.Archivable = true
-		local ok, c = pcall(function(): Model
-			return char:Clone()
-		end)
-		char.Archivable = was
-		if ok and c then
+		local c = copia(char)
+		if c then
 			return c
 		end
 	end
-	-- saiu (ou sem corpo agora): o manequim do lado, vestido pelo servidor
-	local folder = ReplicatedStorage:FindFirstChild("VT65Preview")
-	local m = folder and folder:FindFirstChild(lado)
-	if m and m:IsA("Model") then
-		return m:Clone()
-	end
-	return nil
-end
-
-local function setSoldier(card: Card, m: Model?)
-	if card.model then
-		card.model:Destroy()
-		card.model = nil
-	end
-	if not m then
-		return
-	end
-	for _, d in m:GetDescendants() do
-		if d:IsA("BaseScript") or d:IsA("Sound") then
-			d:Destroy()
-		elseif d:IsA("BasePart") then
-			d.Anchored = true
-		elseif d:IsA("Humanoid") then
-			d.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
-		end
-	end
-	m:PivotTo(CFrame.identity)
-	m.Parent = card.vp
-	card.model = m
-end
-
-local spinT = 0
-local function frameCards(dt: number)
-	spinT += dt
-	for i, c in cards do
-		local m = c.model
-		local cam = c.vp.CurrentCamera
-		if m and cam and c.f.Visible then
-			local cf, size = m:GetBoundingBox()
-			-- gira devagar; o 1º um pouco mais rápido
-			local a = spinT * (if i == 1 then 0.5 else 0.35) + i
-			local d = size.Y / 2 / math.tan(math.rad(cam.FieldOfView / 2)) * 1.15
-			local dir = Vector3.new(math.sin(a), 0.12, math.cos(a)).Unit
-			cam.CFrame = CFrame.lookAt(cf.Position + dir * d, cf.Position)
-		end
-	end
+	return manequim(lado)
 end
 
 local function showPodium()
@@ -311,10 +292,14 @@ local function showPodium()
 		-- frase inteira (a tradução não entra num modelo dentro de outro)
 		title.Text = if winner == "US" then "VITÓRIA · FUZILEIROS DOS EUA" else "VITÓRIA · VIET CONG"
 		title.TextColor3 = if winner == "US" then V.US else V.VC
+		cena:bandeira({ if winner == "US" then V.US else V.VC })
 	else
 		title.Text = "EMPATE"
 		title.TextColor3 = V.TEXT
+		-- empate: os dois panos, sem inventar vencedor
+		cena:bandeira({ V.US, V.VC })
 	end
+	cena:reiniciar()
 	local linhas = if type(data) == "table" and type(data.linhas) == "table" then data.linhas else {}
 	for i, c in cards do
 		local l = linhas[i]
@@ -329,14 +314,25 @@ local function showPodium()
 				elseif a == 1 then string.format("1 abate · %d mortes", m)
 				elseif m == 1 then string.format("%d abates · 1 morte", a)
 				else string.format("%d abates · %d mortes", a, m)
-			setSoldier(c, modelFor(tostring(l.id), tostring(l.lado)))
-		else
-			setSoldier(c, nil)
+			local lado = tostring(l.lado)
+			-- copiado de um corpo que não é um R15 inteiro: o manequim no lugar
+			if not cena:por(i, modelFor(tostring(l.id), lado)) then
+				cena:por(i, manequim(lado))
+			end
 		end
 	end
 	empty.Visible = #linhas == 0
 	podium.Visible = true
 	vote.Visible = false
+end
+
+-- os cartões embaixo de cada soldado (a câmera balança, eles acompanham)
+local function frameCards()
+	for i, c in cards do
+		if c.f.Visible then
+			c.f.Position = UDim2.new(math.clamp(cena:telaX(i), 0.1, 0.9), 0, 1, -px(2, 3))
+		end
+	end
 end
 
 local function refreshVotes()
@@ -391,9 +387,7 @@ local function setShown(on: boolean)
 	else
 		Input.closeMenu()
 		UiKit.release(gui)
-		for _, c in cards do
-			setSoldier(c, nil)
-		end
+		cena:reiniciar()
 	end
 end
 
@@ -412,6 +406,7 @@ local function onPhase()
 		title.TextColor3 = V.TEXT
 		podium.Visible = false
 		vote.Visible = false
+		cena:reiniciar()
 	else
 		setShown(false)
 	end
@@ -420,7 +415,7 @@ ReplicatedStorage:GetAttributeChangedSignal("VT65Fase"):Connect(onPhase)
 ReplicatedStorage:GetAttributeChangedSignal("VT65Votos"):Connect(refreshVotes)
 onPhase()
 
--- relógio da fase e o giro dos soldados
+-- relógio da fase, a cena e os cartões
 RunService.RenderStepped:Connect(function(dt: number)
 	if not shown then
 		return
@@ -433,6 +428,7 @@ RunService.RenderStepped:Connect(function(dt: number)
 		clock.Text = ""
 	end
 	if podium.Visible then
-		frameCards(dt)
+		cena:passo(dt)
+		frameCards()
 	end
 end)
