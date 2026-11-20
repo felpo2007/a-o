@@ -527,6 +527,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     - Não testado: o inclinar no controle e no teclado, a vibração sentida, os passos ouvidos, a
       morte por bala e no veículo, o celular de verdade e o jogo publicado.
     - Faltam assets: passos em metal e em pedra.
+    - **v110 publicada** (versão 115 do place, commit 1185e87).
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;
