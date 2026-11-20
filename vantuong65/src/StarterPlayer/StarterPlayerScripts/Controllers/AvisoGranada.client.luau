@@ -3,7 +3,8 @@
 -- matar você e branco que vai dar dano"). A regra (raios, fogo amigo, a sua própria granada) fica em
 -- Shared/GrenadeWarn; aqui o desenho:
 --   - o símbolo da granada (corpo redondo, alavanca e anel do pino), vermelho e pulsando quando mataria,
---     branco quando só fere, com a distância embaixo ("4 m");
+--     branco quando só fere. D-191 (dono: "remova a metragem numérica exibida para granadas"): sem
+--     o número da distância (antes "4 m" embaixo); a cor, o pulso e a direção continuam;
 --   - granada à vista: o símbolo fica em cima dela na tela;
 --   - granada fora da vista (atrás, do lado): o símbolo vai para um anel em volta do meio da tela, na
 --     direção dela, com uma seta apontando para fora;
@@ -101,6 +102,7 @@ local function newMark(): Mark
 	dist.TextSize = UiKit.text(px(20, 26))
 	dist.TextStrokeTransparency = 0.2
 	dist.TextStrokeColor3 = Color3.new(0, 0, 0)
+	dist.Visible = false -- D-191: sem metragem
 	dist.Parent = f
 	-- seta para fora (só no anel)
 	local arrow = Instance.new("TextLabel")
@@ -247,7 +249,7 @@ RunService.RenderStepped:Connect(function()
 			m.dist.AnchorPoint = Vector2.new(0.5, 0.5)
 			m.dist.Position = UDim2.new(0.5, -ax * ICON * 1.05, 0.5, -ay * ICON * 1.05)
 		end
-		m.dist.Text = string.format("%d m", math.max(1, math.floor(n.distM + 0.5)))
+		m.dist.Text = "" -- D-191: sem o número da distância (a regra de perto continua no GrenadeWarn)
 		paint(m, n.kill, pulse)
 		m.frame.Visible = true
 	end

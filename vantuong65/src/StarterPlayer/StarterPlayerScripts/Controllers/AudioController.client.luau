@@ -18,6 +18,7 @@ local Ballistics = require(ReplicatedStorage.Shared.Ballistics)
 local MapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any
 local Net = require(ReplicatedStorage.Shared.Net)
 local SomArmas = require(ReplicatedStorage.Shared.SomArmas)
+local Superficie = require(ReplicatedStorage.Shared.Superficie)
 local Weapons = require(ReplicatedStorage.Shared.Weapons)
 local Weather = require(ReplicatedStorage.Shared.Weather)
 local Bus = require(script.Parent.Bus)
@@ -322,34 +323,39 @@ task.spawn(function()
 end)
 
 -- ===== passos =====
-local function stepKey(root: BasePart, model: Model): string
+-- D-191 (dono: passos conforme o piso "diretamente sob o personagem"): o raio para no que está logo
+-- embaixo (a ponte vale mais que o rio), o piso sai do Shared/Superficie (terra, lama, arrozal, água,
+-- areia, madeira, metal, pedra) e, na divisa, só troca depois de duas leituras seguidas. No ar (nada
+-- até AIR_STUDS abaixo dos pés) não há passo.
+local AIR_STUDS = 4.6 -- do centro do corpo ao chão em pé ~3,6 studs; mais que isto é pulo ou queda
+local stableOf: { [Model]: Superficie.Stable } = setmetatable({}, { __mode = "k" }) :: any
+local function surfaceUnder(root: BasePart, model: Model): (string?, number)
 	local params = RaycastParams.new()
 	params.FilterType = Enum.RaycastFilterType.Exclude
 	params.FilterDescendantsInstances = { model }
 	local r = workspace:Raycast(root.Position, Vector3.new(0, -12, 0), params)
 	if not r then
-		return "step_grass"
+		return nil, math.huge
 	end
 	local inst = r.Instance
-	if inst ~= workspace.Terrain then
-		local mat = inst:GetAttribute("Material")
-		if mat == "PaddyWater" then
-			return "step_paddy"
-		elseif inst.Name == "Dike" then
-			return "step_mud"
-		elseif inst:FindFirstAncestor("log_bridge") then
-			return "step_wood"
-		end
-		return "step_grass"
+	local attr = inst:GetAttribute("Material")
+	local s = Superficie.of(
+		inst == workspace.Terrain,
+		r.Material.Name,
+		inst.Name,
+		if type(attr) == "string" then attr else nil,
+		inst:FindFirstAncestor("log_bridge") ~= nil
+	)
+	return s, root.Position.Y - r.Position.Y
+end
+local function stepKey(root: BasePart, model: Model): string
+	local s = surfaceUnder(root, model)
+	local st = stableOf[model]
+	if not st then
+		st = Superficie.newStable()
+		stableOf[model] = st
 	end
-	if r.Material == Enum.Material.Water then
-		return "step_paddy"
-	elseif r.Material == Enum.Material.Sand then
-		return "step_sand"
-	elseif r.Material == Enum.Material.Mud then
-		return "step_mud"
-	end
-	return "step_grass"
+	return Superficie.STEP[Superficie.stable(st, s or "grass")] or "step_grass"
 end
 
 local walked: { [Model]: { pos: Vector3, acc: number } } = setmetatable({}, { __mode = "k" }) :: any
@@ -407,6 +413,11 @@ task.spawn(function()
 				else
 					local d = (Vector3.new(root.Position.X, 0, root.Position.Z) - Vector3.new(w.pos.X, 0, w.pos.Z)).Magnitude
 					w.pos = root.Position
+					-- D-191: no ar não conta passo (pulo, queda, transpor)
+					local _, below = surfaceUnder(root, char)
+					if below > AIR_STUDS then
+						continue
+					end
 					w.acc += d
 					if w.acc >= STRIDE * 4 then
 						w.acc = 0

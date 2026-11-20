@@ -10,8 +10,10 @@
 local AnalyticsService = game:GetService("AnalyticsService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 
 local Comms = require(ReplicatedStorage.Shared.Comms)
+local GrenadePhysics = require(ReplicatedStorage.Shared.GrenadePhysics)
 local Kit = require(ReplicatedStorage.Shared.Kit)
 local Radio = require(ReplicatedStorage.Shared.Radio)
 local Vantagens = require(ReplicatedStorage.Shared.Vantagens)
@@ -256,17 +258,49 @@ local function launch(kind: string, faction: string?, from: Vector3, vel: Vector
 		then Vector3.new(0, 0, rng:range(-16, -10))
 		else Vector3.new(rng:range(-8, 8), rng:range(-4, 4), rng:range(-8, 8))
 	-- freio no chão: a bola do Roblox rola sem atrito de rolamento e a granada seguia a 6 m/s por
-	-- mais 10 m depois de cair (Studio, 2026-11-11); granada de verdade quica e para em 1–3 m
+	-- mais 10 m depois de cair (Studio, 2026-11-11); granada de verdade quica e para em 1–3 m.
+	-- D-191 (dono: "quiques e rolamento compatíveis com a superfície", "evite atravessamento"): o freio
+	-- depende do chão (GrenadePhysics.groundDamp: lama e arrozal seguram, madeira e pedra deixam rolar)
+	-- e, a cada quadro, um raio do lugar de antes ao de agora: se a bola passou por uma parede fina,
+	-- volta para o ponto do encontro e quica (GrenadePhysics.bounce).
 	task.spawn(function()
 		local params = RaycastParams.new()
 		params.FilterType = Enum.RaycastFilterType.Exclude
 		params.FilterDescendantsInstances = { m }
 		while m.Parent do
 			task.wait(0.1)
-			if workspace:Raycast(core.Position, Vector3.new(0, -0.75, 0), params) then
-				core.AssemblyLinearVelocity *= 0.72
-				core.AssemblyAngularVelocity *= 0.72
+			local hit = workspace:Raycast(core.Position, Vector3.new(0, -0.75, 0), params)
+			if hit then
+				local k = GrenadePhysics.groundDamp(GrenadePhysics.surfaceOf(hit.Instance, hit.Material))
+				core.AssemblyLinearVelocity *= k
+				core.AssemblyAngularVelocity *= k
 			end
+		end
+	end)
+	task.spawn(function()
+		local params = RaycastParams.new()
+		params.FilterType = Enum.RaycastFilterType.Exclude
+		params.FilterDescendantsInstances = { m, grenadeFolder }
+		local last = core.Position
+		while m.Parent do
+			RunService.Heartbeat:Wait()
+			if not m.Parent then
+				break
+			end
+			local now = core.Position
+			local step = now - last
+			if step.Magnitude > GrenadePhysics.SWEEP_MIN_STUDS then
+				local hit = workspace:Raycast(last, step, params)
+				if hit then
+					-- passou pela face: volta para antes dela e quica pela normal
+					core.CFrame = CFrame.new(hit.Position + hit.Normal * (core.Size.X / 2 + 0.05))
+					local mat = GrenadePhysics.surfaceOf(hit.Instance, hit.Material)
+					core.AssemblyLinearVelocity =
+						GrenadePhysics.bounce(core.AssemblyLinearVelocity, hit.Normal, GrenadePhysics.restitution(mat))
+					now = core.Position
+				end
+			end
+			last = now
 		end
 	end)
 	local fuse = if kind == "smoke" then SMOKE_FUSE_S else (FUSE_S[faction or "US"] or 4.5)
