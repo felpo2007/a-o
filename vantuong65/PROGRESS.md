@@ -506,6 +506,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     - Conferido: Lune 704 ok e pytest 70. No Studio, o cartão a favor e o de perigo, a faixa com
       a distância e o A-4 passando.
     - Não testado: o cartão do A-4, o som do rádio, o celular e o jogo publicado.
+    - **v109 publicada** (versão 114 do place, commit 0759d9a).
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;
