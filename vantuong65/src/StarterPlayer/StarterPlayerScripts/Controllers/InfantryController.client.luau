@@ -373,6 +373,8 @@ if game:GetService("RunService"):IsStudio() then
 		end
 	end)
 end
+-- (o gancho "VT65DevTela" = "roda_equip", que abre a roda de equipamento para a foto, fica depois
+-- de equipList, mais abaixo)
 
 local wheelOpen: string? = nil
 -- curativos e torniquetes que sobram (o servidor manda no Medical_State)
@@ -508,6 +510,30 @@ Input.on("last_item", "tap", function()
 end)
 -- páginas abertas por toque (teclado com "alternar"): o mesmo botão confirma
 Bus.on("wheel_confirm", confirmWheel)
+
+-- D-190, só no Studio: workspace:SetAttribute("VT65DevTela", "roda_equip") abre a roda de
+-- equipamento de verdade por 8 s, com a ficha 3 escolhida (para a foto); "roda_equip:<n>" escolhe a n
+if game:GetService("RunService"):IsStudio() then
+	workspace:GetAttributeChangedSignal("VT65DevTela"):Connect(function()
+		local v = workspace:GetAttribute("VT65DevTela")
+		local n = if type(v) == "string" then string.match(v, "^roda_equip:?(%d*)$") else nil
+		if n == nil then
+			return
+		end
+		task.defer(function()
+			workspace:SetAttribute("VT65DevTela", nil)
+		end)
+		wheelOpen = "equip"
+		Wheel.open("equip", "Equipamento", equipList(), equipEnabled)
+		Wheel.devSelect(tonumber(n) or 3)
+		task.delay(8, function()
+			if Wheel.isOpen() and wheelOpen == "equip" then
+				wheelOpen = nil
+				Wheel.close(false)
+			end
+		end)
+	end)
+end
 
 -- cancelamentos (menu, mapa, morte, veículo) chegam pela máquina de estados
 Input.StateChanged:Connect(function(cancelled: { string })

@@ -482,6 +482,14 @@ function Wheel.page(label: string, list: { Item }, enabled: ((string) -> boolean
 	fit.play(TweenInfo.new(0.14, Enum.EasingStyle.Quint), 1, 0.94)
 end
 
+-- só para o gancho do Studio (foto): escolhe a ficha i sem o analógico
+function Wheel.devSelect(i: number)
+	if isOpen and items[i] then
+		selected = i
+		render()
+	end
+end
+
 -- Fecha; devolve o id escolhido (ou nil se cancelou / item apagado).
 function Wheel.close(confirm: boolean): string?
 	if not isOpen then
