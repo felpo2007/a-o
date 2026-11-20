@@ -73,6 +73,17 @@ Explosive.TYPES = {
 		fragJ = 700,
 		src = "PLACEHOLDER",
 	},
+	-- D-197: a explosão do próprio veículo destruído (combustível e munição): o mesmo alcance do 90 mm
+	-- HE, com nome próprio (a tela de ferido dizia "canhão de tanque")
+	veiculo = {
+		id = "veiculo",
+		name = "explosão de veículo",
+		lethalM = 6,
+		casualtyM = 22,
+		craterM = 0.9,
+		fragJ = 700,
+		src = "PLACEHOLDER (os números do 90 mm HE)",
+	},
 	heat_106 = {
 		id = "heat_106",
 		name = "106 mm HEAT (Ontos)",

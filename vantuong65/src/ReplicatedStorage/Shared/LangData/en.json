@@ -3348,5 +3348,6 @@
  "Buraco: %d/%d": "Foxhole: %d/%d",
  "Pá na mão: uma pazada por aperto do gatilho (%d para o buraco)": "Shovel in hand: one shovelful per trigger pull (%d for the foxhole)",
  "Pá: este buraco já está pronto": "Shovel: this foxhole is already done",
- "Pá: pazada perdida (você se moveu)": "Shovel: shovelful lost (you moved)"
+ "Pá: pazada perdida (você se moveu)": "Shovel: shovelful lost (you moved)",
+ "explosão de veículo": "vehicle explosion"
 }

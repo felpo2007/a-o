@@ -3348,5 +3348,6 @@
  "Buraco: %d/%d": "Hố cá nhân: %d/%d",
  "Pá na mão: uma pazada por aperto do gatilho (%d para o buraco)": "Xẻng trên tay: mỗi lần bóp cò là một nhát (%d nhát cho cái hố)",
  "Pá: este buraco já está pronto": "Xẻng: hố này đã xong",
- "Pá: pazada perdida (você se moveu)": "Xẻng: hỏng nhát xẻng (bạn đã di chuyển)"
+ "Pá: pazada perdida (você se moveu)": "Xẻng: hỏng nhát xẻng (bạn đã di chuyển)",
+ "explosão de veículo": "vụ nổ xe"
 }

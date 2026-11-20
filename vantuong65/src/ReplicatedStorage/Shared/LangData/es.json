@@ -3342,5 +3342,6 @@
  "Buraco: %d/%d": "Pozo: %d/%d",
  "Pá na mão: uma pazada por aperto do gatilho (%d para o buraco)": "Pala en mano: una palada por cada gatillo (%d para el pozo)",
  "Pá: este buraco já está pronto": "Pala: este pozo ya está listo",
- "Pá: pazada perdida (você se moveu)": "Pala: palada perdida (te moviste)"
+ "Pá: pazada perdida (você se moveu)": "Pala: palada perdida (te moviste)",
+ "explosão de veículo": "explosión de vehículo"
 }

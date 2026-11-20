@@ -1540,7 +1540,13 @@
   "guardar",
   "pazada",
   "pegar",
-  "Torre"
+  "Torre",
+  "PLACEHOLDER (os números do 90 mm HE)",
+  "a %.0f m",
+  "destroco",
+  "fogo",
+  "fumaca",
+  "inteiro"
  ],
  "regex": [
   "^uni_[a-z_]+@[a-z0-9]+$"

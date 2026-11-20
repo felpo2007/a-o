@@ -31,6 +31,7 @@ local Net = require(ReplicatedStorage.Shared.Net)
 local Rng = require(ReplicatedStorage.Shared.Rng)
 local Roles = require(ReplicatedStorage.Shared.Roles)
 local VehicleDrive = require(ReplicatedStorage.Shared.VehicleDrive)
+local VeiculoDano = require(ReplicatedStorage.Shared.VeiculoDano)
 local Vehicles = require(ReplicatedStorage.Shared.Vehicles)
 local AssetLoader = require(script.Parent.AssetLoader)
 local BotWorld = require(script.Parent.BotWorld)
@@ -157,23 +158,73 @@ end
 -- D-193: época dos veículos; a partida nova a muda e o reaparecer marcado antes não cria duplicata
 local epoca = 0
 
+-- D-197 (prompt de jogabilidade, item 16): a destruição numa ordem só, uma vez. O dano é daqui; o
+-- efeito (a explosão do tamanho do veículo, os pedaços, o fogo e a fumaça do destroço) é do cliente,
+-- pelo atributo "Destroyed" (Controllers/VeiculoDano.client). A explosão do dano é a do
+-- ExplosionService (sem o Explosion do Roblox: nada de juntas quebradas em volta).
 local function destroyVehicle(model: Model)
 	if model:GetAttribute("Destroyed") then
 		return
 	end
 	model:SetAttribute("Destroyed", true)
+	model:SetAttribute("Integrity", 0)
+	model:SetAttribute("EngineOn", false)
 	local chassis = model:FindFirstChild("Chassis") :: BasePart?
-	for _, occ in occupants(model) do
-		MedicalService.hit(occ, "torso", 3000, rng:next())
+	local ficha = Vehicles.SPECS[tostring(model:GetAttribute("Spec"))]
+	local heli = ficha ~= nil and ficha.kind == "heli"
+	-- a propulsão para (antes a velocidade pedida seguia valendo e o destroço andava); o helicóptero cai
+	if chassis then
+		for _, n in { "DriveVelocity", "DriveAttitude" } do
+			local c = chassis:FindFirstChild(n)
+			if c and (c:IsA("LinearVelocity") or c:IsA("AlignOrientation")) then
+				(c :: any).Enabled = false
+			end
+		end
+	end
+	-- quem está dentro: lugar fechado morre; lugar aberto se fere e sai (VeiculoDano.ferimento). Antes
+	-- todos levavam 3000 J no tronco, que só derruba: o ferido ficava sentado no destroço até ele sumir
+	local dentro: { { seat: Seat, hum: Humanoid } } = {}
+	for _, s in model:GetDescendants() do
+		if s:IsA("Seat") and s.Occupant then
+			local hum = s.Occupant :: Humanoid
+			local f = VeiculoDano.ferimento(s:GetAttribute("Open") == true, heli)
+			MedicalService.hit(hum.Parent :: Model, f.zona, f.energiaJ, rng:next())
+			table.insert(dentro, { seat = s, hum = hum })
+		end
+	end
+	-- quem sobreviveu (ferido ou caído) sai do lugar: o jogador vai para fora do chassi (o aviso do
+	-- assento, placeOutside); o bot, pelo botLeave
+	for _, e in dentro do
+		local hum = e.hum
+		if hum.Parent and hum.Health > 0 and hum.SeatPart == e.seat then
+			if Players:GetPlayerFromCharacter(hum.Parent) then
+				local weld = e.seat:FindFirstChild("SeatWeld")
+				if weld then
+					weld:Destroy()
+				end
+				hum.Sit = false
+			else
+				(VehicleService :: any).botLeave(hum.Parent)
+			end
+		end
 	end
 	if chassis then
-		ExplosionService.detonate("he_90", chassis.Position)
+		ExplosionService.detonate("veiculo", chassis.Position) -- D-197: o alcance do 90 mm, nome próprio
 	end
+	local dark = Color3.fromRGB(30, 28, 26)
+	-- o assento antes da peça: Seat também é BasePart (antes ele só era pintado e nunca desligado, e o
+	-- destroço aceitava gente)
 	for _, d in model:GetDescendants() do
-		if d:IsA("BasePart") then
-			d.Color = Color3.fromRGB(30, 28, 26)
-		elseif d:IsA("Seat") then
+		if d:IsA("Seat") then
 			d.Disabled = true
+			d.Color = dark
+		elseif d:IsA("BasePart") then
+			d.Color = dark
+		elseif d:IsA("SurfaceAppearance") then
+			-- a arte tem textura: escurece pela cor da SurfaceAppearance (a Color da peça não pinta)
+			pcall(function()
+				(d :: any).Color = Color3.fromRGB(46, 42, 38)
+			end)
 		elseif d:IsA("ProximityPrompt") then
 			d.Enabled = false
 		end
@@ -1935,6 +1986,29 @@ local function devVeh()
 	local look = Vector3.new(r.CFrame.LookVector.X, 0, r.CFrame.LookVector.Z).Unit
 	local right = Vector3.new(-look.Z, 0, look.X)
 	local yaw = math.atan2(-look.X, -look.Z)
+	-- D-197: "destruir" destrói o veículo mais perto (o mesmo caminho do jogo: destroyVehicle)
+	if want == "destruir" then
+		local best: Model? = nil
+		local bestD = math.huge
+		for _, m in folder:GetChildren() do
+			local ch = m:FindFirstChild("Chassis") :: BasePart?
+			if m:IsA("Model") and ch and not m:GetAttribute("Destroyed") then
+				local d = flatDist(ch.Position, r.Position)
+				if d < bestD then
+					best, bestD = m, d
+				end
+			end
+		end
+		if best then
+			print(
+				"[VT65 TESTE] VT65DevVeh: destruído",
+				best:GetAttribute("Spec"),
+				string.format("a %.0f m", bestD * M)
+			)
+			destroyVehicle(best)
+		end
+		return
+	end
 	if want == "tombar" then
 		local best: Model? = nil
 		local bestD = math.huge

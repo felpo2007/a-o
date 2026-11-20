@@ -36,6 +36,7 @@ local EXPLOSIVE = {
 	naval_5in = "tiro naval",
 	bomb_250lb = "bomba de avião",
 	he_90 = "canhão de tanque",
+	veiculo = "explosão de veículo", -- D-197
 	heat_106 = "canhão sem recuo",
 	pg2 = "foguete",
 	rocket_35 = "foguete",

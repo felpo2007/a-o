@@ -32,6 +32,7 @@ local SCALE: { [string]: number } = {
 	rocket_35 = 1.3,
 	pg2 = 1.3,
 	he_90 = 1.6,
+	veiculo = 1.6, -- D-197 (o VeiculoDano.client põe a explosão grande por cima)
 	heat_106 = 1.6,
 	mortar_81 = 1.8,
 	mortar_82 = 1.8,
