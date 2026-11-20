@@ -543,9 +543,28 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
       - o soldado vivo a 11 m do QG e a rodada 2.
       - Relatório: `testes/LOTE77_D193_2026-11-20.md`.
     - Não volta: a grama do napalm, as construções e o fogo já marcado. Os bots mantêm o estado.
-    - Não testado: vários jogadores, celular e jogo publicado. O jipe ficou a 60 studs do ponto
-      medido antes, e não conferi se aquele ponto era o depósito.
+    - Não testado: vários jogadores, celular e jogo publicado.
+    - O jipe ficou a 60 studs do ponto medido antes, que não era o depósito. Conferido no lote 78:
+      voltou a 0,04 stud do depósito.
     - **v111 publicada** (versão 116 do place, commit 6d75f51).
+  - **Lote 78 (D-194): a troca de arma, feita.**
+    - A troca virou estado (`Shared/Equipar.Troca`):
+      - a troca no meio de outra parte da altura da arma, sem pular para cima;
+      - voltar à arma que descia cancela a troca.
+    - A troca, a granada e o curativo param a recarga no cliente e no servidor. Antes, trocar e voltar
+      dava a arma cheia.
+    - A mira e a recarga pedidas no meio saem no fim. Sair do veículo faz a arma subir.
+    - Em 3ª pessoa a arma baixa, espera a nova chegar à mão e sobe (atributo "Troca").
+    - Conferido: Lune 736 ok (44 arquivos), pytest 70 e ruff limpo. No Studio:
+      - M14 para pistola pronta em 0,54 s, com salto máximo de 0,16 stud por quadro;
+      - troca no meio da subida com salto de 0,05 (antes ~0,65);
+      - a M14 voltou com 17 depois de 3 s guardada no meio da recarga (antes 20);
+      - mira ligada no fim da troca (0,565 s);
+      - saída do jipe sem quadro cheio;
+      - em 3ª pessoa a boca foi de −37° a −81° na troca.
+      - Relatório: `testes/LOTE78_D194_2026-11-20.md`.
+    - Não testado: a troca vista por outro jogador, corrida e deitar no meio, controle, toque,
+      celular e jogo publicado.
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;

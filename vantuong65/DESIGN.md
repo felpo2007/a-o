@@ -7707,8 +7707,9 @@ dobra o veículo); jogadores vivos voltam ao QG. Pedido de spawn com a partida e
 **Conferido no Studio** (`VT65DevEnd`):
 - as fases passaram de fim a jogo; o voto contou ("1 voto", "SEU VOTO");
 - o fundo do buraco subiu 1,24 m e o parapeito saiu;
-- havia 9 veículos antes e depois. O jipe, empurrado 80 studs, foi refeito, mas ficou a 60 studs do
-  ponto medido antes. Não conferi se aquele ponto era o depósito (um bot pode tê-lo tirado de lá);
+- havia 9 veículos antes e depois. O jipe, empurrado 80 studs, foi refeito. Nesse teste ficou a 60
+  studs do ponto medido antes, que não era o depósito. Conferido no teste do lote 78, medindo o
+  depósito antes de o jogo começar: depois da restauração o jipe estava a 0,04 stud dele;
 - os corpos foram de 13 para 1;
 - o soldado voltou vivo a 11 m do QG, e a rodada passou a 2;
 - o pódio de três lugares apareceu com um pódio montado à mão (só havia um jogador).
@@ -7718,3 +7719,61 @@ barragem já marcado. Os bots mantêm o estado.
 
 **Não testado:** com vários jogadores (votos diferentes e o pódio de verdade), no celular e no jogo
 publicado.
+
+## D-194 — Lote 78: a troca de arma como estado (2026-11-20)
+
+**Pedido do dono** (prompt de jogabilidade, item 10): a arma atual desce, a próxima é puxada e entra
+em posição, integrada à mira, à corrida, ao tiro, à recarga, à granada, ao veículo e à morte, sem
+duplicar munição, recarregar de graça nem deixar o jogador travado, e visível em 3ª pessoa.
+
+**O que já havia:** a descida e a subida de 1ª pessoa (KnifeView, tempos do Front 44 no
+`Equipar.DRAW_S`), o gatilho preso durante a troca e a última troca valendo.
+
+**Achado no código e corrigido:**
+- uma troca pedida no meio de outra recomeçava a curva do alto: a arma pulava para cima;
+- voltar à arma que estava descendo não cancelava: a outra entrava assim mesmo;
+- a recarga continuava no servidor com a arma guardada. Trocar e voltar dava a arma cheia sem
+  esperar com ela na mão;
+- a mira apertada no meio da troca ligava com a arma ainda subindo;
+- em 3ª pessoa a arma só trocava de lugar (sem descer), 0,1 s depois de chegar embaixo;
+- o gancho de teste `"vaga:N"` nunca casava (o padrão aceitava só letras).
+
+**Agora (`Shared/Equipar.Troca`, testado no `tests/luau/troca.luau`):**
+- a altura da arma (0 em uso, 1 embaixo) é um estado com começo, descida que falta e subida. Troca
+  nova parte da altura de agora (descida = holster × (1 − altura)). Voltar à arma que descia sobe
+  de onde está (saque × altura). O modelo troca lá embaixo, no passo do quadro;
+- recarga: a troca, a granada e o item nas mãos (curativo, pá) param a recarga. O cliente avisa
+  (`Combat_Reload { cancel }`) e o servidor também para quando a mão muda (`Posture_Set { arma }`).
+  Na espingarda ficam os cartuchos que já entraram (`Weapons.tubeLoaded`). A animação de 1ª pessoa,
+  os cartuchos que faltam, a barra do HUD e o clipe de 3ª pessoa param juntos;
+- mira apertada no meio liga no fim, se ainda estiver apertada (ou alternada); recarga pedida no
+  meio sai no fim; golpe de faca e baioneta, não;
+- veículo: entrar termina a troca (a arma certa ao sair); sair faz a arma subir do cinto, pelo
+  sinal do assento (pelo passo do quadro ela aparecia um quadro em cima);
+- granada: a arma desce da altura em que está; com uma troca pendente, depois do arremesso volta a
+  arma que vinha;
+- 3ª pessoa: o cliente avisa a curva no começo (`Posture_Set { troca }`); o servidor (ArmaNaMao,
+  até 12 por segundo, com limites) põe o atributo "Troca" no personagem com o relógio do servidor.
+  Cada cliente baixa a arma a partir da pega de agora (0,25 m abaixo, a boca 50° para o chão),
+  espera a arma nova chegar à mão (até 0,6 s) e sobe. O próprio usa o atributo local "VT65Troca".
+  A mão nova vale na hora no servidor (antes esperava 0,1 s).
+- Deitado, a arma baixa só a metade (para não entrar no chão).
+
+**Conferido no Studio** (M14 e M1911 do fuzileiro, 60 fps):
+- M14 para pistola: a M14 chega embaixo em 0,27 s (0,24 + um quadro), a pistola fica pronta em
+  0,54 s; o maior salto entre quadros é 0,16 stud;
+- volta no meio: a pistola desceu a 38% e subiu em 0,114 s, sem trocar de arma;
+- troca no meio da subida da M14: salto de 0,05 stud logo depois do pedido (recomeçar do alto
+  saltaria ~0,65);
+- recarga: 3 tiros (20 para 17), recarga, troca aos 0,7 s, 3 s com a pistola: a M14 voltou com 17
+  e 8 carregadores. Antes voltaria com 20;
+- mira apertada aos 0,11 s ligou aos 0,565 s (fim da troca, 0,54);
+- saída do jipe: o 1º quadro já baixo e a M14 subindo até a posição em 0,57 s;
+- granada puxada e guardada: na mão aos 0,25 s, no corpo (servidor) aos 0,32 s, de volta sem gastar
+  granada (3 para 3);
+- 3ª pessoa: o servidor pôs o "Troca" e a arma nova chegou à mão 0,03 s depois do fundo; na pose
+  baixa a boca foi de −37° para −81° e a mão direita desceu 0,2 m.
+
+**Não testado:** a troca vista por outro jogador (só havia um no Studio), o capim alto escondeu a
+arma baixa nas capturas, a corrida e o deitar no meio da troca, o controle e o toque, o celular e o
+jogo publicado.

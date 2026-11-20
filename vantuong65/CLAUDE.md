@@ -118,6 +118,12 @@ O `sourcemap.json` não vai para o Git.
   - D-191/D-190 (só Studio): `VT65DevGranada = "6"` lança uma granada a 6 m/s do primeiro
     jogador; `VT65DevTela = "3p"` liga a 3ª pessoa (o teclado do MCP não chega com o Studio
     atrás); `VT65DevTela = "roda_equip:<n>"` abre a roda de equipamento com a ficha n;
+  - D-194, postos do lado do CLIENTE (do servidor, o `VT65DevGranada` lança uma granada): o
+    `VT65DevGranada` aceita `"vaga:N"` (a tecla N), `"recarga"` e `"mirar:<s>"` (aperta a mira e
+    solta depois de s). Para repetir o mesmo valor, ponha nil antes.
+    - Altura da arma de 1ª pessoa: o Model da câmera com o atributo `VT65Escala`, no espaço da câmera.
+    - Pose baixa de 3ª pessoa sem trocar: o atributo local `VT65Troca` do personagem com
+      `"<agora no relógio do servidor>;1;0;99;zzz;n"`.
   - tela de entrada (D-186): os segundos de cada etapa em atributos `T_<etapa>` do
     `ReplicatedFirst.LoadingScreen`; o botão é `VT65Loading.Fundo.Palco.Continuar`;
   - `workspace:SetAttribute("VT65DevDrive", "m48a3")`: senta o jogador no motorista do veículo mais
@@ -286,7 +292,7 @@ O `sourcemap.json` não vai para o Git.
 - Segredos só no `.env` (no `.gitignore`), nunca no código nem no chat.
 - ForgeGUI: nunca regenerar um job em `outcome_unknown`. "failed" com `retryable` pode ser
   retomado com `generation_retry`.
-- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-194) e atualize `PROGRESS.md`.
+- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-195) e atualize `PROGRESS.md`.
 - Tetos de triângulos por modelo: vegetação ≤ 6 mil (D-135), props e herói ≤ 20 mil (`ArtBudget`,
   conferido pelo teste da F5).
 - Commits no branch acima, com mensagem em português.
