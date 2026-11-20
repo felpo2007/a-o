@@ -670,6 +670,31 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     - Não testado: pouso em encosta, outro jogador vendo o piloto, embarque da tropa, celular e jogo
       publicado.
     - **v117 publicada** (versão 122 do place, commit 4353996).
+  - **Lote 84 (D-200): o RPG-2 do VC integrado, feito.**
+    - Tubo carregado e reserva ("Rockets" + "RocketLoaded"): nasce com 3, 1 no tubo.
+    - Servidor (`LancadorService`): confere mão, papel, tubo, cadência e direção; põe a alça e a
+      dispersão; simula o voo; aplica penetração e dano no veículo. Espoleta arma em 5 m. Recarga de
+      6 s, cancelada ao trocar de arma.
+    - Alça 50/100/150 m (o PG-2 cai ~7 m em 100 m a 84 m/s).
+    - Cliente:
+      - gatilho atira ou, vazio, recarrega;
+      - mira na alça do RPG-2;
+      - recarga animada em 1ª pessoa (granada da bolsa para a boca) e em 3ª (tubo de pé);
+      - cartão na tela e contagem na roda.
+    - Visto por todos (`LancadorFx`): nuvem de pólvora, sopro para trás, a granada PG-2 voando com
+      rastro, explosão ou falha.
+    - Sons próprios (`tools/sons_rpg.py`): disparo, voo em laço e recarga.
+    - Conferido no Studio:
+      - 2 acertos destruíram o Ontos (100 → 16,7 → 0);
+      - tiro vazio recusado, recarga de 6 s, recarga cancelada pela troca;
+      - falha aos pés sem explosão;
+      - o gatilho do cliente atirou e recarregou;
+      - a alça no centro mirando.
+      - Lune 773 ok (50 arquivos) e pytest 70.
+      - Relatório: `testes/LOTE84_D200_2026-11-20.md`; capturas em `testes/lote84`.
+    - Limite: a arte do RPG-2 mostra a ogiva sempre (malha única).
+    - Não testado: outro jogador, celular e controle de verdade, bazuca dos EUA, sons ouvidos e jogo
+      publicado.
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;

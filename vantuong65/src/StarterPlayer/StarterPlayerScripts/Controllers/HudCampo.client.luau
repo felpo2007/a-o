@@ -32,6 +32,7 @@ local TweenService = game:GetService("TweenService")
 
 local Front = require(ReplicatedStorage.Shared.Front)
 local Net = require(ReplicatedStorage.Shared.Net)
+local Lancador = require(ReplicatedStorage.Shared.Lancador)
 local Weapons = require(ReplicatedStorage.Shared.Weapons) :: any
 local Bus = require(script.Parent.Bus)
 local Input = require(script.Parent.Input)
@@ -462,7 +463,47 @@ local function modeText(m: string): string
 	return MODE_NAME[string.lower(m)] or UiKit.upper(m)
 end
 
+-- D-200: o lançador (Shared/Lancador): o tubo (1 ou 0), a reserva em granadas e a alça. "Rockets" é o
+-- total com o do tubo; "RocketReloadUntil" é a recarga em andamento (servidor)
+local function renderLauncher(): boolean
+	-- a vaga do lançador chega como "rpg2" (a arte do VC, Equipar.handId) ou "launcher" (EUA, sem arte)
+	if not (W.id == "launcher" or W.id == Lancador.FICHA.VC.id or W.id == Lancador.FICHA.US.id) then
+		return false
+	end
+	local fac = player:GetAttribute("Faction")
+	local f = Lancador.de(if type(fac) == "string" then fac else nil)
+	local tubo, reserva =
+		Lancador.estado(player:GetAttribute("Rockets") :: number?, player:GetAttribute("RocketLoaded") :: boolean?)
+	local recarregando = player:GetAttribute("RocketReloadUntil") ~= nil
+	A.name.Text = f.nome
+	A.mode.Text = MODE_NAME.single
+	A.mode.Visible = true
+	local z = player:GetAttribute("LauncherZero")
+	A.zero.Text = string.format("Alça %d m", if type(z) == "number" then z else Lancador.ALCA_PADRAO)
+	A.zero.Visible = true
+	for _, c in A.cells :: { Frame } do
+		c.BackgroundTransparency = if tubo == 1 then 0 else 0.8
+		c.BackgroundColor3 = if tubo == 1 then UiKit.BRASS else UiKit.STAMP
+	end
+	A.magText.Text = if recarregando
+		then "recarregando"
+		elseif tubo == 1 then string.format("%s no tubo", f.municao)
+		else "tubo vazio"
+	A.count.Text = tostring(tubo)
+	A.count.TextColor3 = if tubo == 0 then UiKit.STAMP else UiKit.CARD
+	A.capLabel.Text = "/1"
+	for i, p in A.pips :: { Frame } do
+		p.Visible = i <= math.min(reserva, 4)
+	end
+	A.more.Text = string.format("× %d", reserva)
+	A.more.TextColor3 = if reserva == 0 then UiKit.STAMP else UiKit.CARD
+	return true
+end
+
 local function renderWeapon()
+	if renderLauncher() then
+		return
+	end
 	local wp = weaponDef()
 	-- v41: nome curto (Weapons.shortName: as duas Winchester distintas, a bazuca dos EUA com nome)
 	local fac = player:GetAttribute("Faction")
@@ -589,6 +630,14 @@ local function ammoLocal()
 end
 player:GetAttributeChangedSignal("Carregador"):Connect(ammoLocal)
 player:GetAttributeChangedSignal("Reserva"):Connect(ammoLocal)
+-- D-200: o lançador (tubo, reserva, recarga e alça)
+for _, nome in { "Rockets", "RocketLoaded", "RocketReloadUntil", "LauncherZero" } do
+	player:GetAttributeChangedSignal(nome):Connect(function()
+		if renderLauncher() then
+			wake()
+		end
+	end)
+end
 
 local reloadTween: Tween? = nil
 Bus.on("reload_start", function(dur: number)

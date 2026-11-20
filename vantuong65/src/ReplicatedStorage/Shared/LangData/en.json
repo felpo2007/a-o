@@ -3350,5 +3350,9 @@
  "Pá: este buraco já está pronto": "Shovel: this foxhole is already done",
  "Pá: pazada perdida (você se moveu)": "Shovel: shovelful lost (you moved)",
  "explosão de veículo": "vehicle explosion",
- "Tremor das explosões": "Explosion camera shake"
+ "Tremor das explosões": "Explosion camera shake",
+ "%s no tubo": "%s in the tube",
+ "Disparo de lançador antitanque": "Anti-tank launcher fired",
+ "recarregando": "reloading",
+ "tubo vazio": "tube empty"
 }

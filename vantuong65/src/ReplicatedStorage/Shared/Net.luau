@@ -29,7 +29,9 @@ Net.Events = {
 	"Commander_State", -- s->c: suprimento, recargas, avisos e erros
 	"Build_Request", -- c->s: { kind } (logística)
 	"Logistics_State", -- s->c: { error } recusa, { ok } obra ou buraco prontos (D-129), { key } da pá
-	"Vehicle_Fire", -- c->s: { dir } (arma do assento ou foguete antitanque)
+	"Vehicle_Fire", -- c->s: { dir } (arma do assento)
+	-- D-200: lançador do antitanque (Modules/LancadorService)
+	"Lancador_Acao", -- c->s { op = "fogo", dir, alca } | { op = "recarga" } | { op = "cancelar" }
 	"Vehicle_Reload", -- c->s: recarga do Ontos (parado) / troca de munição do 90 mm
 	"Vehicle_SwitchSeat", -- c->s: próximo assento livre permitido ao papel
 	-- D-100: painel do veículo (Controllers/VehiclePrompt)
@@ -82,7 +84,8 @@ Net.Unreliable = {
 	"Combat_Tracer", -- s->c: traçantes/efeitos de outros jogadores
 	"Fire_Impact", -- s->c: explosão { id, x, y, z }
 	"Fire_Incoming", -- s->c: assobio de granada chegando { x, y, z }
-	"Fire_Launch", -- s->c: disparo de morteiro/canhão/naval/foguete { kind, x, y, z }
+	"Fire_Launch", -- s->c: disparo de morteiro/canhão/naval/foguete { kind, x, y, z } (lançador: + vx, vy, vz, n, by)
+	"Lancador_Fim", -- s->c: D-200, o projétil n do lançador parou { n, x, y, z, falhou }
 }
 Net.Functions = {
 	"Commerce_GetState",

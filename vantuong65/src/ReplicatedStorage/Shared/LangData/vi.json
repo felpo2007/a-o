@@ -3350,5 +3350,9 @@
  "Pá: este buraco já está pronto": "Xẻng: hố này đã xong",
  "Pá: pazada perdida (você se moveu)": "Xẻng: hỏng nhát xẻng (bạn đã di chuyển)",
  "explosão de veículo": "vụ nổ xe",
- "Tremor das explosões": "Rung màn hình khi nổ"
+ "Tremor das explosões": "Rung màn hình khi nổ",
+ "%s no tubo": "%s trong ống",
+ "Disparo de lançador antitanque": "Súng chống tăng khai hỏa",
+ "recarregando": "đang nạp đạn",
+ "tubo vazio": "ống trống"
 }

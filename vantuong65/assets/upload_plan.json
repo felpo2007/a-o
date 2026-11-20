@@ -7649,5 +7649,26 @@
   "assetType": "Audio",
   "name": "VT65 pa_cavar",
   "description": "VAN TUONG 65 - pazada: crava, alavanca e joga a terra (tools/sons_pa.py, D-183)"
+ },
+ {
+  "key": "Sounds.rpg2_disparo",
+  "file": "assets/rpg_sons/rpg2_disparo.ogg",
+  "assetType": "Audio",
+  "name": "VT65 rpg2_disparo",
+  "description": "VAN TUONG 65 - RPG-2: carga de polvora, baque do tubo e sopro (tools/sons_rpg.py, D-200)"
+ },
+ {
+  "key": "Sounds.rpg2_voo",
+  "file": "assets/rpg_sons/rpg2_voo.ogg",
+  "assetType": "Audio",
+  "name": "VT65 rpg2_voo",
+  "description": "VAN TUONG 65 - PG-2 voando: vento nas aletas, em laco (tools/sons_rpg.py, D-200)"
+ },
+ {
+  "key": "Sounds.rpg2_recarga",
+  "file": "assets/rpg_sons/rpg2_recarga.ogg",
+  "assetType": "Audio",
+  "name": "VT65 rpg2_recarga",
+  "description": "VAN TUONG 65 - RPG-2: granada da bolsa, raspa na boca e trava (tools/sons_rpg.py, D-200)"
  }
 ]

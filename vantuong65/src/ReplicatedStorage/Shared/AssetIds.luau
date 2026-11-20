@@ -62,6 +62,10 @@ return {
 		baioneta_encaixe = 75358128019094,
 		-- D-183: a pazada (tools/sons_pa.py), em laço no buraco enquanto cava; 0 = impact_earth
 		pa_cavar = 81977178311325,
+		-- D-200: lançador RPG-2 (tools/sons_rpg.py); 0 = o do 106 mm no disparo, sem voo, recarga do Tipo 56
+		rpg2_disparo = 125144632297259,
+		rpg2_voo = 116978431046810,
+		rpg2_recarga = 138378206462386,
 	},
 	-- Modelos publicados como "Model" (InsertService:LoadAsset no servidor)
 	Models = {

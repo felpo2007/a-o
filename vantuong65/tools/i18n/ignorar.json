@@ -1550,7 +1550,19 @@
   "estrutura",
   "pesada",
   "vegetacao",
-  "Vidro"
+  "Vidro",
+  "%d+%d",
+  "Aleta",
+  "Falhou",
+  "Haste",
+  "Ogiva",
+  "PG-2",
+  "PLACEHOLDER (3 por vida, como antes)",
+  "PLACEHOLDER (espoleta piezoelétrica; distância de armar sem fonte)",
+  "PLACEHOLDER (o de antes)",
+  "Rockets",
+  "cancelar",
+  "equilíbrio: 4 a 6 tiros por minuto com a mira (Small Arms Survey); 6 s só a recarga"
  ],
  "regex": [
   "^uni_[a-z_]+@[a-z0-9]+$"

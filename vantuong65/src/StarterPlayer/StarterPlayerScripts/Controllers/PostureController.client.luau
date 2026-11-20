@@ -86,6 +86,9 @@ local HOLD_KNIFE = holdCF(ArmIK.HOLDS.knife)
 -- PLACEHOLDER de pose, conferido na captura do Studio.
 local TROCA_DROP = CFrame.new(Vector3.new(0.04, -0.25, 0.04) / 0.28)
 local TROCA_TILT = CFrame.Angles(math.rad(-50), 0, 0)
+-- D-200: recarga do lançador em 3ª pessoa: o tubo desce 0,15 m e a boca sobe 35° (PLACEHOLDER de pose)
+local RECARGA_TUBO_DROP = CFrame.new(Vector3.new(0.05, -0.15, 0.05) / 0.28)
+local RECARGA_TUBO_TILT = CFrame.Angles(math.rad(35), 0, 0)
 local STRIKE_KEYS = { { 0, 0 }, { 0.18, 1 }, { 0.32, 2 }, { 0.45, 2 }, { 0.9, 0 } } -- 0 base, 1 guarda, 2 estocada
 
 -- v41 ("jogo está bem pesado ainda"): a lista é montada 4 vezes por segundo (antes, duas vezes por
@@ -394,6 +397,7 @@ type Blend = {
 	blade: number,
 	knife: number,
 	nade: number,
+	rl: number, -- D-200: recarga do lançador (0..1)
 	item: number,
 	pitch: number,
 	ads: number,
@@ -421,6 +425,7 @@ local function newBlend(): Blend
 		blade = 0,
 		knife = 0,
 		nade = 0,
+		rl = 0,
 		item = 0,
 		pitch = 0,
 		ads = 0,
@@ -888,6 +893,14 @@ local function holdWeapon(char: Model, b: Blend, dt: number, far: boolean): Goal
 	local td = trocaDe(char, b, w)
 	if td > 1e-3 then
 		hold = hold:Lerp(TROCA_DROP * hold * TROCA_TILT, td * (1 - 0.5 * b.prone))
+	end
+	-- D-200: recarga do lançador vista por todos ("RocketReloadUntil" do jogador, LancadorService): o
+	-- tubo desce do ombro com a boca para cima, onde a granada entra
+	local dono = Players:GetPlayerFromCharacter(char)
+	local rl = dono ~= nil and dono:GetAttribute("RocketReloadUntil") ~= nil and not prone
+	b.rl += ((if rl then 1 else 0) - b.rl) * math.min(1, dt / 0.2)
+	if b.rl > 1e-3 then
+		hold = hold:Lerp(RECARGA_TUBO_DROP * hold * RECARGA_TUBO_TILT, smooth(b.rl))
 	end
 	if not weld.C0:FuzzyEq(hold, 1e-5) then
 		weld.C0 = hold

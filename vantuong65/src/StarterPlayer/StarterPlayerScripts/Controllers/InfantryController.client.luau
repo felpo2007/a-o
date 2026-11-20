@@ -12,6 +12,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Comms = require(ReplicatedStorage.Shared.Comms)
 local Equipar = require(ReplicatedStorage.Shared.Equipar)
 local InputMap = require(ReplicatedStorage.Shared.InputMap)
+local Lancador = require(ReplicatedStorage.Shared.Lancador)
 local Radio = require(ReplicatedStorage.Shared.Radio)
 local Weapons = require(ReplicatedStorage.Shared.Weapons) :: any
 local Logistics = require(ReplicatedStorage.Shared.Logistics)
@@ -425,6 +426,12 @@ local function equipList(): { Wheel.Item }
 			count = tostring(medical.tourniquets)
 		elseif it.id == "role_tool" then
 			label = Equipar.roleToolLabel(role())
+			if role() == "anti_tank" then
+				-- D-200: o tubo e a reserva do lançador ("1+2": carregado e duas granadas na bolsa)
+				local tubo, reserva = Lancador.estado(num("Rockets"), player:GetAttribute("RocketLoaded") == true)
+				count = string.format("%d+%d", tubo, reserva)
+				equipped = inHand == nil and cur ~= nil and vs[cur] == "launcher"
+			end
 		end
 		table.insert(out, {
 			id = it.id,

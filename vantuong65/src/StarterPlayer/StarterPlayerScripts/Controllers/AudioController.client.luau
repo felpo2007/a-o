@@ -701,6 +701,9 @@ local LAUNCH: { [string]: string } = {
 	gun_90 = "gun_90",
 	rr_106 = "rr_106",
 	rocket = "rr_106",
+	-- D-200: o lançador do antitanque (LancadorService); sem o som próprio publicado, o do 106 mm
+	rpg2 = if (tonumber((AssetIds.Sounds :: any).rpg2_disparo) or 0) ~= 0 then "rpg2_disparo" else "rr_106",
+	m20 = "rr_106",
 }
 Net.unreliable("Fire_Launch").OnClientEvent:Connect(function(e)
 	local pos = Vector3.new(e.x, e.y, e.z)
@@ -710,6 +713,7 @@ Net.unreliable("Fire_Launch").OnClientEvent:Connect(function(e)
 		local what = if e.kind == "mortar"
 			then "Disparo de morteiro"
 			elseif e.kind == "naval" then "Tiro naval ao longe"
+			elseif e.kind == "rpg2" or e.kind == "m20" then "Disparo de lançador antitanque"
 			else "Disparo de canhão/foguete"
 		caption(string.format("launch:%s", e.kind), what, pos, dM / Ballistics.SOUND) -- chave, não texto
 		if e.kind == "naval" then

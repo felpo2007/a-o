@@ -136,14 +136,18 @@ local function apply(p: Player, arma: any)
 		local left = p:GetAttribute(if arma == "frag" then "Frags" else "Smokes")
 		if type(left) == "number" and left > 0 then
 			ArmaNaMao.grenade(char, arma, fac)
+			char:SetAttribute("ArmaMao", arma)
 		end
 		return
 	end
 	ArmaNaMao.grenade(char, nil, fac)
 	local list = slotsOf(p)
 	if type(arma) ~= "string" or not table.find(list, arma) then
+		char:SetAttribute("ArmaMao", nil)
 		return
 	end
+	-- D-200: o que está na mão, conferido (o LancadorService só atira e recarrega com "launcher")
+	char:SetAttribute("ArmaMao", arma)
 	local handId = Equipar.handId(arma, fac)
 	if handId and Weapons.get(handId) then
 		local cur = char:FindFirstChild("Weapon")

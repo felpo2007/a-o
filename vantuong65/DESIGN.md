@@ -8104,3 +8104,103 @@ O disco borrado soma 2 peças com decal por rotor.
 - um segundo jogador vendo o piloto: aqui só um cliente, com o corpo forçado visível;
 - a tropa embarcando e as câmeras dos passageiros e do atirador;
 - celular e jogo publicado.
+
+## D-200 — Lote 84: o RPG-2 do VC integrado de verdade (2026-11-20)
+
+**Pedido do dono** (prompt de jogabilidade, item 19): um lançador antiveículo para o VC, com o RPG-2
+(B40) como referência de 1965, integrado como as outras armas:
+- loadout, inventário e roda; imagem e informação na tela;
+- animações de equipar, mirar, disparar e recarregar; sons e efeitos;
+- munição e reposição; dano contra veículos; controles de computador, controle e celular;
+- trajetória e colisão confiáveis, explosão no impacto;
+- o servidor valida o uso, a munição, a cadência e o resultado;
+- números de equilíbrio definidos e uma apresentação que distinga o lançador das armas comuns.
+
+**Antes:** o antitanque do VC já levava um "RPG-2" na vaga do lançador, mas de forma simples:
+- o foguete saía pelo `Vehicle_Fire` com 6 s entre tiros;
+- não havia tubo carregado, recarga, alça, projétil visível nem cartão na tela;
+- o som era o do canhão sem recuo de 106 mm.
+
+**Agora (`Shared/Lancador`, `Modules/LancadorService`, `Controllers/LancadorFx`):**
+- **Munição:** "Rockets" é o total, contando o do tubo; "RocketLoaded" diz se o tubo está carregado.
+  - Nasce com 3 (1 no tubo e 2 na bolsa).
+  - A caixa de munição do Suporte repõe o total, como antes.
+  - Só atira carregado; a recarga põe uma granada da bolsa no tubo.
+- **Servidor:** confere tudo no tiro (`Lancador_Acao`):
+  - vivo, a pé, papel antitanque e o lançador na mão (atributo novo `ArmaMao`, do `ArmaNaMao`);
+  - tubo carregado, intervalo mínimo e direção válida.
+  - A alça e a dispersão saem do servidor, não do cliente.
+  - O voo é simulado a cada Heartbeat, com gravidade.
+  - No veículo, a penetração e o dano de antes (`VehicleService.projectileHit`); em tudo, a explosão
+    do PG-2. O abate fica com quem atirou.
+  - Antes de 5 m a espoleta não arma: o projétil falha e não explode (muro colado na cara também).
+- **Recarga:** 6 s no servidor ("RocketReloadUntil"). Só completa com o lançador ainda na mão; trocar
+  de arma ou pedir "cancelar" para tudo.
+- **Alça:** 50, 100 e 150 m, como a do RPG-2. Sem ela, a 84 m/s o PG-2 cai ~7 m em 100 m. A ponta do
+  centro da tela é onde ele cai na distância da alça; muda com as teclas de alça.
+- **Cliente:**
+  - gatilho atira, ou recarrega com o tubo vazio; R recarrega;
+  - a troca de arma cancela a recarga;
+  - mirar leva a alça do RPG-2 ao olho;
+  - o tranco no disparo vai para a arma e a câmera;
+  - celular e controle usam as mesmas ações (gatilho, mira, recarga).
+- **Animação de 1ª pessoa:** na recarga, o tubo desce do ombro e a boca sobe à frente (~0,55 m do
+  olho). A mão esquerda vai à bolsa, traz a granada PG-2 e a enfia pela haste.
+- **Animação de 3ª pessoa:** todos veem o tubo ficar de pé à frente do corpo enquanto ele recarrega.
+- **Visto por todos (`LancadorFx`):**
+  - clarão na boca e a nuvem cinza-clara de pólvora em volta do atirador (o PG-2 sai por carga de
+    pólvora, sem motor);
+  - o sopro para trás, que levanta poeira do chão;
+  - a granada PG-2 voando (ogiva, haste e aletas), com um rastro fino e o som do voo;
+  - no fim, a explosão do PG-2, ou o baque e a poeira da falha. No máximo 12 projéteis ao mesmo
+    tempo.
+- **Tela:** o cartão da arma mostra "RPG-2 · TIRO ÚNICO · Alça 100 m", o tubo (1 ou 0, vermelho
+  vazio), "PG-2 no tubo", "tubo vazio" ou "recarregando", e a reserva. Na roda, a ferramenta do
+  antitanque mostra "tubo+reserva".
+- **Sons próprios** (`tools/sons_rpg.py`, síntese):
+  - o disparo: estampido, baque grave do tubo aberto, sopro da pólvora e cauda;
+  - o voo, em laço: vento nas aletas;
+  - a recarga: pano da bolsa, raspão e a trava.
+  - Também a legenda "Disparo de lançador antitanque".
+
+**Números de equilíbrio (Shared/Lancador):**
+
+| Item | RPG-2 | Fonte |
+|---|---|---|
+| velocidade | 84 m/s | wiki:RPG-2; DTIC AD0783955 |
+| alça | 50/100/150 m | wiki (eficaz 100–150 m, máximo 200 m); russianwarrior (alça até 150 m) |
+| recarga | 6 s | equilíbrio: 4 a 6 tiros por minuto com a mira (Small Arms Survey) |
+| granadas | 3 (1 + 2) | PLACEHOLDER (como antes) |
+| espoleta arma em | 5 m | PLACEHOLDER |
+| dispersão | 0,4° (desvio-padrão) | PLACEHOLDER |
+| penetração | 150 mm | `Vehicles.PEN.pg2` (wiki; weaponsystems.net) |
+| contra infantaria | letal 2 m, baixas 8 m | `Explosive.pg2` (PLACEHOLDER, como antes) |
+
+O PG-2 fura o Ontos, o LVTP-5 e o lado do M48, mas não a frente do M48 (110 mm a 60°). A bazuca M20
+dos EUA usa o mesmo caminho com a ficha dela (sem arte de 1ª pessoa).
+
+**Studio:** `VT65DevRajada` (cliente) agora aperta o gatilho com o lançador na mão e escreve
+`[VT65 LANÇADOR] granadas a -> b, tubo, alça`.
+
+**Conferido no Studio** (VC antitanque em campo, Ontos posto a 14 m):
+- 1º tiro: granadas 3 → 2, tubo vazio, Ontos de 100 para 16,7 de integridade; o 2º o destruiu;
+- tiro com o tubo vazio recusado (granadas continuaram 2);
+- recarga de 6 s e o tubo carregado depois;
+- troca para a pistola no meio: a recarga parou e o tubo ficou vazio;
+- tiro aos pés (menos de 5 m): falhou, sem explosão, vida igual (112);
+- o gatilho pelo caminho do cliente atirou e, vazio, recarregou;
+- mirando, a alça e a massa no centro da tela;
+- na recarga, a boca a −0,05/−0,09/−0,55 m do olho, como calculado;
+- o tubo de pé em 3ª pessoa; a nuvem, o rastro e o cartão na tela.
+
+**Não testado:**
+- outro jogador vendo o tiro e a recarga (só um cliente);
+- celular e controle de verdade;
+- a bazuca dos EUA;
+- os sons ouvidos;
+- a granada da recarga depois do último ajuste de tamanho;
+- o jogo publicado.
+
+**Limite conhecido:** a arte do RPG-2 (ForgeGUI) é uma malha só, com a ogiva sempre na boca: vazio ou
+recarregando, ela continua aparecendo. Para tirar, é preciso um RPG-2 do Blender com a ogiva em peça
+própria.

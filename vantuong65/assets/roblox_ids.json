@@ -1293,5 +1293,8 @@
  "Models.shovel_vc": "134364845804022",
  "Sounds.pa_cavar": "81977178311325",
  "Images.rotor_borrao": "105200442956287",
- "Models.uh34d_v3": "78025077667001"
+ "Models.uh34d_v3": "78025077667001",
+ "Sounds.rpg2_disparo": "125144632297259",
+ "Sounds.rpg2_voo": "116978431046810",
+ "Sounds.rpg2_recarga": "138378206462386"
 }

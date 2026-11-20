@@ -163,9 +163,27 @@ local MAG_SIZE: { [string]: Vector3 } = {
 }
 -- quadros-chave da mão esquerda: tempo (fração), espaço ("w" arma, "c" câmera), ponto
 type Key = { t: number, s: string, p: Vector3 }
+-- D-200: boca do lançador no espaço da arma (setView) e a granada PG-2 na mão esquerda na recarga
+local muzzleL = Vector3.zero
+local granada: BasePart? = nil
 local function reloadKeys(): { Key }
 	local down = Vector3.new(0, -viewK, 0) / M
 	local back = Vector3.new(0, 0, viewK) / M
+	if viewKind == "launcher" then
+		-- a mão vai à bolsa, traz a granada à frente da boca, empurra para dentro e volta ao tubo
+		local fwd = -back
+		return {
+			{ t = 0.0, s = "w", p = supportL },
+			{ t = 0.12, s = "w", p = supportL + down * 0.06 },
+			{ t = 0.26, s = "c", p = POUCH },
+			{ t = 0.36, s = "c", p = POUCH },
+			{ t = 0.54, s = "w", p = muzzleL + fwd * 0.3 },
+			{ t = 0.66, s = "w", p = muzzleL + fwd * 0.06 },
+			{ t = 0.74, s = "w", p = muzzleL + fwd * 0.04 },
+			{ t = 0.9, s = "w", p = supportL },
+			{ t = 1.0, s = "w", p = supportL },
+		}
+	end
 	return {
 		{ t = 0.0, s = "w", p = supportL },
 		{ t = 0.13, s = "w", p = magL + down * 0.02 },
@@ -198,6 +216,10 @@ local function magPart(kind: string): BasePart
 end
 
 local function clearMags()
+	if granada then
+		granada:Destroy()
+		granada = nil
+	end
 	if oldMag then
 		oldMag:Destroy()
 		oldMag = nil
@@ -215,6 +237,10 @@ Bus.on("reload_start", function(dur: number, _kind: string)
 	clearMags()
 	reloadT0, reloadDur = os.clock(), dur
 	magDropped = false
+end)
+-- D-200: o disparo do lançador: o tubo dá o tranco para trás
+Bus.on("lancador_disparo", function()
+	kick = math.max(kick, 1.6)
 end)
 -- D-194: troca de arma no meio da recarga: a mão volta e os carregadores somem
 Bus.on("reload_cancel", function()
@@ -387,6 +413,8 @@ local function setView(id: string?)
 	local s = primary:FindFirstChild("Support") :: Attachment?
 	gripL = if g then g.WorldPosition else Vector3.zero
 	supportL = if s then s.WorldPosition else gripL + Vector3.new(0, 0, -0.3 * k / M)
+	local mz = primary:FindFirstChild("Muzzle") :: Attachment?
+	muzzleL = if mz then mz.WorldPosition else supportL + Vector3.new(0, 0, -0.5 * k / M)
 	viewKind = wp.kind
 	local km = k / M
 	if wp.kind == "pistol" then
@@ -554,7 +582,13 @@ RunService:BindToRenderStep("VT65ViewModel", Enum.RenderPriority.Camera.Value + 
 	local recoil = CFrame.new(0, 0, kick * 0.05 / M) * CFrame.Angles(kick * math.rad(4) * (1 - aimT), 0, 0)
 	-- recarga: inclina a arma para mostrar o encaixe; tapa no carregador; puxa o ferrolho
 	local pose = CFrame.identity
-	if reloading then
+	if reloading and viewKind == "launcher" then
+		-- D-200: o tubo desce do ombro e a boca sobe à frente, ~0,55 m do olho e um pouco à esquerda,
+		-- onde a mão põe a granada (conta feita com a boca e o punho medidos no Studio, arma a 1,4x)
+		local w = smooth(rp / 0.18) * (1 - smooth((rp - 0.82) / 0.16))
+		local tilt = CFrame.new(0.08 / M, -0.33 / M, 0.07 / M) * CFrame.Angles(math.rad(40), math.rad(20), 0)
+		pose = CFrame.identity:Lerp(tilt, w)
+	elseif reloading then
 		local w = smooth(rp / 0.12) * (1 - smooth((rp - 0.86) / 0.14))
 		local tilt = CFrame.new(0.02 / M, -0.07 / M, 0.03 / M)
 			* CFrame.Angles(math.rad(-10), math.rad(10), math.rad(30))
@@ -622,6 +656,28 @@ RunService:BindToRenderStep("VT65ViewModel", Enum.RenderPriority.Camera.Value + 
 			elseif rp >= 0.64 and newMag then
 				newMag:Destroy() -- encaixado: some dentro da arma
 				newMag = nil
+			end
+		else
+			-- D-200: a granada PG-2 sai da bolsa na mão esquerda (0,36) e entra na boca (0,66)
+			if rp >= 0.36 and rp < 0.66 then
+				if not granada then
+					local g = Instance.new("Part")
+					g.Name = "GranadaPG2"
+					g.Shape = Enum.PartType.Cylinder
+					g.Anchored, g.CanCollide, g.CanQuery, g.CanTouch, g.CastShadow = true, false, false, false, false
+					g.Material = Enum.Material.Metal
+					g.Color = Color3.fromRGB(70, 78, 52)
+					g.Size = Vector3.new(0.5, 0.07, 0.07) * viewK / M -- PG-2 com a haste (~0,5 m), na escala da arte
+					g.Parent = camera
+					granada = g
+				end
+				local g = granada :: BasePart
+				-- deitada ao longo do tubo (o X da peça no -Z da arma): a mão segura a ogiva e a haste vai à frente da
+				-- mão, para dentro da boca
+				g.CFrame = (rot + handL) * CFrame.Angles(0, math.pi / 2, 0) * CFrame.new(-0.12 * km, 0, 0)
+			elseif granada then
+				granada:Destroy()
+				granada = nil
 			end
 		end
 	end

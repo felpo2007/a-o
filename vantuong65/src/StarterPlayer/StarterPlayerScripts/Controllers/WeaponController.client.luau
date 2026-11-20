@@ -41,6 +41,7 @@ local Ballistics = require(ReplicatedStorage.Shared.Ballistics)
 local Equipar = require(ReplicatedStorage.Shared.Equipar)
 local Gatilho = require(ReplicatedStorage.Shared.Gatilho)
 local InputMap = require(ReplicatedStorage.Shared.InputMap)
+local Lancador = require(ReplicatedStorage.Shared.Lancador)
 local Logistics = require(ReplicatedStorage.Shared.Logistics)
 local Melee = require(ReplicatedStorage.Shared.Melee)
 local Movement = require(ReplicatedStorage.Shared.Movement)
@@ -447,15 +448,69 @@ local function shoot(wp: Weapons.Weapon, t: Gatilho.Trigger)
 	Haptics.fire(kick, t.mode == "auto")
 end
 
--- foguete do antitanque (slot "launcher"): pelo VehicleService, como antes
+-- ===== D-200: lançador do antitanque (vaga "launcher"; Shared/Lancador, Modules/LancadorService) =====
+-- O servidor confere tudo; aqui só pede e anima. "Rockets" é o total com o do tubo; "RocketLoaded",
+-- o tubo; "RocketReloadUntil" (relógio do servidor), a recarga em andamento. A alça (50/100/150 m)
+-- fica no atributo local "LauncherZero" para a tela (HudCampo).
+local lanc = { reloadUntil = 0, alca = Lancador.ALCA_PADRAO }
+player:SetAttribute("LauncherZero", lanc.alca)
+player.CharacterAdded:Connect(function()
+	lanc.reloadUntil = 0 -- a recarga da vida anterior não segura a nova
+end)
+local function minhaFicha(): Lancador.Ficha
+	local f = player:GetAttribute("Faction")
+	return Lancador.de(if type(f) == "string" then f else nil)
+end
+local function lancEstado(): (number?, boolean?)
+	return player:GetAttribute("Rockets") :: number?, player:GetAttribute("RocketLoaded") :: boolean?
+end
+local function startLauncherReload()
+	if not launcher or seated() or os.clock() < lanc.reloadUntil then
+		return
+	end
+	local total, loaded = lancEstado()
+	if not Lancador.podeRecarregar(total, loaded) or player:GetAttribute("RocketReloadUntil") ~= nil then
+		return
+	end
+	if inv.hand or os.clock() < inv.busyUntil or ItemView.handsBusy() then
+		return
+	end
+	local f = minhaFicha()
+	lanc.reloadUntil = os.clock() + f.recargaS
+	setAim(false)
+	Net.event("Lancador_Acao"):FireServer({ op = "recarga" })
+	local id = (S :: any)[f.id .. "_recarga"]
+	playId(if type(id) == "number" and id ~= 0 then id else S.reload_type56, 0.8)
+	Bus.fire("reload_start", f.recargaS, "launcher")
+end
+local function cancelLauncherReload()
+	if os.clock() < lanc.reloadUntil then
+		lanc.reloadUntil = 0
+		Net.event("Lancador_Acao"):FireServer({ op = "cancelar" })
+		Bus.fire("reload_cancel", "launcher")
+	end
+end
 local function launchRocket()
 	local now = os.clock()
-	if now - lastLaunch > 1 and canShoot() and not seated() then
-		lastLaunch = now
-		local _, dir = ViewMode.aimDirection() -- o foguete sai da cabeça (VehicleService)
-		Net.event("Vehicle_Fire"):FireServer({ dir = dir })
-		Haptics.fire(1.6, false)
+	if now - lastLaunch < Lancador.INTERVALO_MIN_S or not canShoot() or seated() or now < lanc.reloadUntil then
+		return
 	end
+	local total, loaded = lancEstado()
+	if not Lancador.podeAtirar(total, loaded) then
+		if Lancador.podeRecarregar(total, loaded) then
+			startLauncherReload() -- tubo vazio: o gatilho recarrega, como nas armas
+		else
+			playId(S.dry_click, 0.6)
+		end
+		return
+	end
+	lastLaunch = now
+	local _, dir = ViewMode.aimDirection() -- sai da cabeça (LancadorService), levantado pela alça
+	Net.event("Lancador_Acao"):FireServer({ op = "fogo", dir = dir, alca = lanc.alca })
+	Bus.fire("lancador_disparo")
+	recoilPitch += 2.2
+	recoilReturn += 1.6
+	Haptics.fire(1.6, false)
 end
 
 -- binóculo (era: tecla B, roda de equipamento, vaga 7). D-190: saiu do jogo (Equipar.REMOVED); só
@@ -475,6 +530,10 @@ end
 -- Recarga (D-69): pede ao servidor e, se ele vai aceitar (há carregador, não está recarregando e
 -- o carregador não está cheio), o WeaponVisuals anima a troca com as mãos no tempo do servidor.
 local function startReload()
+	if launcher and not seated() then
+		startLauncherReload()
+		return
+	end
 	local wp, t = active()
 	local now = os.clock()
 	if not (wp and t) or now < t.reloadUntil or (spareBy[wp.id] or 0) <= 0 or t.mag >= wp.magazine then
@@ -527,6 +586,13 @@ Bus.on("seat_reload", startReload)
 
 -- alça: segurar sobe; arma de um modo só e alça longa (M79, lunetas): tocar desce
 local function stepZero(dir: number)
+	if launcher and not seated() then
+		-- D-200: a alça do lançador (50/100/150 m), sem dar a volta
+		lanc.alca = Lancador.proximaAlca(minhaFicha(), lanc.alca, if dir > 0 then 1 else -1)
+		player:SetAttribute("LauncherZero", lanc.alca)
+		say(string.format("Alça de mira: %d m", lanc.alca))
+		return
+	end
 	local wp = active()
 	if not wp then
 		return
@@ -620,6 +686,7 @@ end
 
 -- A recarga da arma da mão para (o servidor também para a dela quando a mão muda: CombatService)
 local function cancelReloadNow()
+	cancelLauncherReload() -- D-200: largar o lançador no meio da recarga
 	local wp = weapon
 	local t = if wp then triggers[wp.id] else nil
 	inv.reloadQueued = false
@@ -1148,6 +1215,24 @@ if RunService:IsStudio() then
 	end)
 	workspace:GetAttributeChangedSignal("VT65DevRajada"):Connect(function()
 		local secs = workspace:GetAttribute("VT65DevRajada")
+		if type(secs) == "number" and launcher and not seated() then
+			-- D-200: o lançador na mão: o mesmo gatilho (tiro, ou recarga com o tubo vazio)
+			local r0 = player:GetAttribute("Rockets")
+			triggerDown()
+			task.wait(secs)
+			triggerUp()
+			task.wait(0.4)
+			print(
+				string.format(
+					"[VT65 LANÇADOR] granadas %s -> %s, tubo %s, alça %d m",
+					tostring(r0),
+					tostring(player:GetAttribute("Rockets")),
+					tostring(player:GetAttribute("RocketLoaded")),
+					lanc.alca
+				)
+			)
+			return
+		end
 		local wp, t = active()
 		if type(secs) ~= "number" or not (wp and t) then
 			return

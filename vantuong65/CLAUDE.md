@@ -135,6 +135,9 @@ O `sourcemap.json` não vai para o Git.
   - `VT65DevVeh` (servidor): `"m151"` (ou outra ficha) cria o veículo à frente do jogador;
     `"destruir"` destrói o mais perto pelo caminho do jogo (D-197). Para sentar num lugar certo, o
     cliente manda `Vehicle_Board { v = modelo, seat = "passenger" }` de perto;
+  - `VT65DevRajada` com o lançador na mão (D-200, cliente): aperta o gatilho (tiro, ou recarga com o
+    tubo vazio) e escreve `[VT65 LANÇADOR]`. Para repor granadas no teste, ponha `Rockets` e
+    `RocketLoaded` no jogador pelo servidor;
   - `VT65DevRotor` (D-199, do lado do CLIENTE): 0 a 1 fixa a rotação vista dos helicópteros (pás
     e disco borrado); `nil` devolve;
   - `workspace:SetAttribute("VT65DevBots", "distancias")`: de que distância os bots atiraram, quantas
@@ -319,7 +322,7 @@ O `sourcemap.json` não vai para o Git.
 - Segredos só no `.env` (no `.gitignore`), nunca no código nem no chat.
 - ForgeGUI: nunca regenerar um job em `outcome_unknown`. "failed" com `retryable` pode ser
   retomado com `generation_retry`.
-- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-200) e atualize `PROGRESS.md`.
+- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-201) e atualize `PROGRESS.md`.
 - Tetos de triângulos por modelo: vegetação ≤ 6 mil (D-135), props e herói ≤ 20 mil (`ArtBudget`,
   conferido pelo teste da F5).
 - Commits no branch acima, com mensagem em português.

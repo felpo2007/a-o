@@ -328,6 +328,17 @@ local function shoot(gun: any, origin: Vector3, dir: Vector3, ignore: { Instance
 	end)
 end
 
+-- D-200: o projétil do lançador (LancadorService) bateu em `inst`: se for um veículo, a penetração e
+-- o dano dele, como o do canhão. Devolve se era um veículo.
+function VehicleService.projectileHit(inst: Instance, penKey: string, step: Vector3): boolean
+	local chassis = chassisOf(inst)
+	if chassis and chassis.Parent and not (chassis.Parent :: Model):GetAttribute("Destroyed") then
+		hitVehicle(chassis.Parent :: Model, chassis, penKey, step)
+		return true
+	end
+	return false
+end
+
 local function seatOf(player: Player): Seat?
 	local char = player.Character
 	local hum = char and char:FindFirstChildOfClass("Humanoid")
@@ -510,22 +521,7 @@ local function onFire(player: Player, req: any)
 		fireFromSeat(seat, char, player, dir, req.coax == true, now)
 		return
 	end
-	-- foguete de infantaria (papel antitanque, a pé)
-	if player:GetAttribute("Role") ~= "anti_tank" then
-		return
-	end
-	local key = if player:GetAttribute("Faction") == "VC" then "pg2" else "rocket_35"
-	local left = (player:GetAttribute("Rockets") :: number?) or 0
-	if left <= 0 or now - (lastShot[player :: any] or 0) < GUNS[key].reloadS then
-		return
-	end
-	local head = char:FindFirstChild("Head") :: BasePart?
-	if not head then
-		return
-	end
-	player:SetAttribute("Rockets", left - 1)
-	lastShot[player :: any] = now
-	shoot(GUNS[key], head.Position + dir * (1.5 / M), dir, { char }, player:GetAttribute("Faction") :: string?)
+	-- D-200: o foguete do antitanque a pé saiu daqui (Modules/LancadorService, "Lancador_Acao")
 end
 
 -- recarga do Ontos: os tubos são carregados por fora; só com o veículo parado (10 s por tubo, D-36)
@@ -2421,6 +2417,7 @@ function VehicleService.start()
 	local function arm(player: Player)
 		player.CharacterAdded:Connect(function()
 			player:SetAttribute("Rockets", if player:GetAttribute("Role") == "anti_tank" then 3 else 0)
+			player:SetAttribute("RocketLoaded", player:GetAttribute("Role") == "anti_tank") -- D-200: nasce carregado
 			player:SetAttribute("VehicleCrew", nil)
 		end)
 	end

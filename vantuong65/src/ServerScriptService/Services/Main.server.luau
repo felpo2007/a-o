@@ -24,6 +24,7 @@ local TerrainRuntime = require(Modules:WaitForChild("TerrainRuntime"))
 local LogisticsService = require(Modules:WaitForChild("LogisticsService"))
 local CommanderService = require(Modules:WaitForChild("CommanderService"))
 local VehicleService = require(Modules:WaitForChild("VehicleService"))
+local LancadorService = require(Modules:WaitForChild("LancadorService"))
 local FieldService = require(Modules:WaitForChild("FieldService"))
 local TrainingService = require(Modules:WaitForChild("TrainingService"))
 local AnimalService = require(Modules:WaitForChild("AnimalService"))
@@ -67,6 +68,7 @@ TrapService.start() -- Parte 11 (depois): armadilhas VC, antes da logística que
 LogisticsService.start() -- F4: suprimento, caixotes e construções
 CommanderService.start() -- F4: comandante e missões de fogo por grade
 VehicleService.start() -- F4: M48A3, Ontos, LVTP-5 e UH-34D
+LancadorService.start() -- D-200: RPG-2 e bazuca do antitanque a pé
 FieldService.start() -- Parte 12: configurações de controle, marcações, mensagens, granadas e corpo a corpo
 TrainingService.start() -- F6: campo de tiro e tutorial por papel
 AnimalService.start() -- Parte 11: búfalos e galinhas fogem de tiros e explosões
