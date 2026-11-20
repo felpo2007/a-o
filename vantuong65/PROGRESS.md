@@ -832,6 +832,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
       - as preferências ligadas no aparelho;
       - o corte da câmera do lobby;
       - o celular e o jogo publicado.
+    - **v123 publicada** (versão 128 do place, commit e127995).
     - **Próximo:** lote 91, o lobby (Arsenal, Missões e Perfil, o resumo à direita, o rodapé e o
       soldado que gira).
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
