@@ -3337,5 +3337,10 @@
  "VOTAÇÃO DO MAPA": "VOTACIÓN DEL MAPA",
  "%d abates · 1 morte": "%d bajas · 1 muerte",
  "1 abate · %d mortes": "1 baja · %d muertes",
- "1 abate · 1 morte": "1 baja · 1 muerte"
+ "1 abate · 1 morte": "1 baja · 1 muerte",
+ "%d pazadas: um toque no tiro para cada": "%d paladas: un toque en disparar por cada una",
+ "Buraco: %d/%d": "Pozo: %d/%d",
+ "Pá na mão: uma pazada por aperto do gatilho (%d para o buraco)": "Pala en mano: una palada por cada gatillo (%d para el pozo)",
+ "Pá: este buraco já está pronto": "Pala: este pozo ya está listo",
+ "Pá: pazada perdida (você se moveu)": "Pala: palada perdida (te moviste)"
 }

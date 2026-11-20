@@ -34,7 +34,6 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
-local FieldWork = require(ReplicatedStorage.Shared.FieldWork)
 local ItemAnim = require(ReplicatedStorage.Shared.ItemAnim)
 local Joints = require(ReplicatedStorage.Shared.Joints)
 local Melee = require(ReplicatedStorage.Shared.Melee)
@@ -274,7 +273,7 @@ local function itemStep(d: Driver)
 	local model = d.model
 	local name, t, D = ItemAnim.current(function(a: string): any
 		return model:GetAttribute(a)
-	end, workspace:GetServerTimeNow(), FieldWork.DIG.seconds)
+	end, workspace:GetServerTimeNow())
 	local want = if name and d.active and model:GetAttribute("Prone") ~= true then SoldierAnims.ITEM_CLIP[name] else nil
 	if d.item and d.item ~= want then
 		local old = d.tracks[d.item]
@@ -290,7 +289,10 @@ local function itemStep(d: Driver)
 	if not tr.IsPlaying then
 		tr:Play(0.2, 1, 0)
 	end
-	local tt = ItemAnim.localTime(ItemAnim.ANIMS[name], t, D)
+	-- D-195: a pá pela última pazada (atributo VT65PazadaT do servidor)
+	local ps = model:GetAttribute("VT65PazadaT")
+	local since = if type(ps) == "number" then workspace:GetServerTimeNow() - ps else nil
+	local tt = ItemAnim.itemTime(name, ItemAnim.ANIMS[name], t, D, since)
 	tr.TimePosition = math.clamp(tt, 0, math.max(CLIPS[want].length - 1e-3, 0))
 end
 

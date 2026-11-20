@@ -125,7 +125,8 @@ end
 -- pode pedir? (papel e suprimento: o resto, inimigo perto e caixote, só o servidor sabe)
 local function check(kind: string): (boolean, string)
 	if kind == "dig" then
-		return true, string.format("fique parado %d s", FieldWork.DIG.seconds)
+		-- D-195: uma pazada por toque no tiro (antes: parado 8 s)
+		return true, string.format("%d pazadas: um toque no tiro para cada", FieldWork.DIG.pazadas)
 	end
 	local b = Logistics.BUILDS[kind]
 	local role = player:GetAttribute("Role")
@@ -189,7 +190,7 @@ bOk.Activated:Connect(function()
 		return
 	end
 	if c.kind == "dig" then
-		Net.event("Dig_Request"):FireServer()
+		Bus.fire("pa_pegar") -- D-195: a pá vem para a mão; o tiro dá as pazadas
 	else
 		Net.event("Build_Request"):FireServer({ kind = c.kind })
 	end

@@ -19,7 +19,6 @@ local ArmIK = require(ReplicatedStorage.Shared.ArmIK)
 local CartaModel = require(ReplicatedStorage.Shared.CartaModel)
 local Corpo = require(ReplicatedStorage.Shared.Corpo)
 local Equipar = require(ReplicatedStorage.Shared.Equipar)
-local FieldWork = require(ReplicatedStorage.Shared.FieldWork)
 local ItemAnim = require(ReplicatedStorage.Shared.ItemAnim)
 local PaArte = require(ReplicatedStorage.Shared.PaArte)
 local Joints = require(ReplicatedStorage.Shared.Joints)
@@ -505,7 +504,7 @@ type ItemNow = { name: string, t: number, D: number? }
 local function itemOf(char: Model): ItemNow?
 	local name, t, D = ItemAnim.current(function(a: string): any
 		return char:GetAttribute(a)
-	end, workspace:GetServerTimeNow(), FieldWork.DIG.seconds)
+	end, workspace:GetServerTimeNow())
 	return if name then { name = name, t = t, D = D } else nil
 end
 
@@ -649,7 +648,10 @@ local function holdItem(
 	local last = itemLast[char]
 	if now then
 		local a = ItemAnim.ANIMS[now.name]
-		local tt = ItemAnim.localTime(a, now.t, now.D)
+		-- D-195: a pá pela última pazada (atributo VT65PazadaT do servidor)
+		local ps = char:GetAttribute("VT65PazadaT")
+		local since = if type(ps) == "number" then workspace:GetServerTimeNow() - ps else nil
+		local tt = ItemAnim.itemTime(now.name, a, now.t, now.D, since)
 		local r0, l0, tilt = ItemAnim.sample(a.tp, tt)
 		local r, l = ItemAnim.reach(r0, "R"), ItemAnim.reach(l0, "L")
 		last = {

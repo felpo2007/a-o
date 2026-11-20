@@ -3343,5 +3343,10 @@
  "VOTAÇÃO DO MAPA": "MAP VOTE",
  "%d abates · 1 morte": "%d kills · 1 death",
  "1 abate · %d mortes": "1 kill · %d deaths",
- "1 abate · 1 morte": "1 kill · 1 death"
+ "1 abate · 1 morte": "1 kill · 1 death",
+ "%d pazadas: um toque no tiro para cada": "%d shovelfuls: one tap on fire for each",
+ "Buraco: %d/%d": "Foxhole: %d/%d",
+ "Pá na mão: uma pazada por aperto do gatilho (%d para o buraco)": "Shovel in hand: one shovelful per trigger pull (%d for the foxhole)",
+ "Pá: este buraco já está pronto": "Shovel: this foxhole is already done",
+ "Pá: pazada perdida (você se moveu)": "Shovel: shovelful lost (you moved)"
 }

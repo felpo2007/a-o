@@ -53,7 +53,10 @@ end
 -- até os 8 s, porque depois de loop.b vem o fim inteiro (2,0 a 8 s). Agora as 5 pazadas de 1,4 s vão
 -- por extenso de 0,6 a 7,6 s, e o laço cobre todas. golpe: { tempo desde o começo da pazada, direita,
 -- esquerda }.
-ItemAnim.PA = { t0 = 0.6, periodo = 1.4, n = 5 }
+-- D-195 (dono: "pressionar RT a cada cavada"): a pá fica na mão (segurada) e cada aperto é UMA
+-- pazada de 1,4 s (crava aos 0,35 s, quando a terra sai; alavanca; joga). As chaves são a subida
+-- até o pronto (t0) e uma pazada; ItemAnim.paTime põe o tempo nelas.
+ItemAnim.PA = { t0 = 0.6, periodo = 1.4, n = 1 }
 local function pazadas(rest: { V }, pronto: { V }, golpe: { { any } }): { Key }
 	local P = ItemAnim.PA
 	local out = { k(0, rest[1], rest[2]) }
@@ -65,8 +68,21 @@ local function pazadas(rest: { V }, pronto: { V }, golpe: { { any } }): { Key }
 		end
 	end
 	table.insert(out, k(P.t0 + P.n * P.periodo, pronto[1], pronto[2]))
-	table.insert(out, k(8, rest[1], rest[2]))
+	table.insert(out, k(P.t0 + P.n * P.periodo + 0.5, rest[1], rest[2]))
 	return out
+end
+
+-- Tempo nas chaves da pá: subindo até o pronto, a pazada em andamento (sinceStroke de 0 a periodo) ou
+-- parada no pronto entre as pazadas.
+function ItemAnim.paTime(sinceHeld: number, sinceStroke: number?): number
+	local P = ItemAnim.PA
+	if sinceHeld < P.t0 then
+		return math.max(sinceHeld, 0)
+	end
+	if sinceStroke and sinceStroke >= 0 and sinceStroke < P.periodo then
+		return P.t0 + sinceStroke
+	end
+	return P.t0
 end
 
 ItemAnim.ANIMS = {
@@ -273,12 +289,13 @@ ItemAnim.ANIMS = {
 		prop = { kind = "binoculo", hand = "both", from = 0 },
 	},
 	shovel = {
-		dur = 8,
-		loop = { a = 0.6, b = 7.6 }, -- D-183: as 5 pazadas (ItemAnim.PA)
+		dur = 2.5,
+		loop = { a = 0.6, b = 2.0 }, -- D-195: uma pazada (ItemAnim.PA); o tempo vem do ItemAnim.paTime
 		slung = true,
 		left = true,
 		right = true,
-		held = false,
+		held = true, -- D-195: na mão até guardar
+
 		tp = pazadas({ { 0.45, 0, -1.2 }, { -0.45, 0, -1.2 } }, {
 			{ 0.35, 0.1, -1 },
 			{ -0.021, -0.419, -1.259 }, -- pronto, a lâmina no chão à frente
@@ -297,7 +314,7 @@ ItemAnim.ANIMS = {
 		}),
 		poseR = "grip",
 		poseL = "grip",
-		prop = { kind = "pa", hand = "both", from = 0.3, to = 7.7 },
+		prop = { kind = "pa", hand = "both", from = 0.3, to = 2.3 },
 	},
 	canteen = {
 		dur = 3.5,
@@ -448,9 +465,9 @@ end
 
 -- O que o soldado está usando agora, pelos atributos do personagem (get = GetAttribute), no relógio
 -- do servidor `now`: ação médica ("VT65Acao", "VT65AcaoT", "VT65AcaoS") ou item ("VT65Item",
--- "VT65ItemT"; a pá dura digS, o cantil o nominal, rádio e binóculo enquanto o atributo existir).
--- Devolve nome, tempo desde o começo e duração (nil = segurado).
-function ItemAnim.current(get: (string) -> any, now: number, digS: number): (string?, number, number?)
+-- "VT65ItemT"; o cantil dura o nominal; rádio, binóculo e, desde a D-195, a pá enquanto o atributo
+-- existir). Devolve nome, tempo desde o começo e duração (nil = segurado).
+function ItemAnim.current(get: (string) -> any, now: number): (string?, number, number?)
 	local acao, t0 = get("VT65Acao"), get("VT65AcaoT")
 	if type(acao) == "string" and ItemAnim.ANIMS[acao] and type(t0) == "number" then
 		local s = get("VT65AcaoS")
@@ -461,15 +478,21 @@ function ItemAnim.current(get: (string) -> any, now: number, digS: number): (str
 	end
 	local it, i0 = get("VT65Item"), get("VT65ItemT")
 	if type(it) == "string" and ItemAnim.ANIMS[it] and type(i0) == "number" then
-		local D: number? = if it == "shovel"
-			then digS
-			elseif ItemAnim.ANIMS[it].held then nil
-			else ItemAnim.ANIMS[it].dur
+		local D: number? = if ItemAnim.ANIMS[it].held then nil else ItemAnim.ANIMS[it].dur
 		if not D or now - i0 <= D then
 			return it, math.max(now - i0, 0), D
 		end
 	end
 	return nil, 0, nil
+end
+
+-- Tempo nas chaves de qualquer item: a pá pela última pazada ("VT65PazadaT", sinceStroke), o resto
+-- pelo laço (localTime)
+function ItemAnim.itemTime(name: string, a: Anim, t: number, D: number?, sinceStroke: number?): number
+	if name == "shovel" then
+		return ItemAnim.paTime(t, sinceStroke)
+	end
+	return ItemAnim.localTime(a, t, D)
 end
 
 -- Duração das ações do servidor (s), para quem não recebeu "VT65AcaoS".

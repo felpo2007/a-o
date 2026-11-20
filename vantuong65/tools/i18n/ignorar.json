@@ -1536,7 +1536,10 @@
   "^([%d%.%-]+);([%d%.]+);([%d%.]+);([%d%.]+);([%w_]*);([vn])$",
   "^mirar:([%d%.]+)$",
   "^vaga:(%d+)$",
-  "recarga"
+  "recarga",
+  "guardar",
+  "pazada",
+  "pegar"
  ],
  "regex": [
   "^uni_[a-z_]+@[a-z0-9]+$"

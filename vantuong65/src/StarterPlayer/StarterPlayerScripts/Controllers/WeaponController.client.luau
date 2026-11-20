@@ -639,6 +639,11 @@ local function switchTo(i: number, fromHand: boolean)
 	if i < 1 or i > #slots or seated() then
 		return
 	end
+	-- D-195: com a pá na mão, ela vai ao cinto e a arma pedida sobe de baixo (como da granada)
+	if not inv.hand and ItemView.paNaMao() then
+		ItemView.guardarPa()
+		fromHand = true
+	end
 	-- lote 30 (D-145): no meio do curativo ou da pá a arma está pendurada e volta sozinha no fim. Antes
 	-- a tecla não fazia nada e parecia que a arma tinha sumido; agora diz por quê
 	if not inv.hand and ItemView.handsBusy() then
@@ -697,6 +702,9 @@ local function stepTroca(now: number)
 	local i = inv.alvo
 	local tr = inv.troca
 	if seated() or ItemView.handsBusy() then
+		if seated() and ItemView.paNaMao() then
+			ItemView.guardarPa() -- D-195: no veículo a pá vai ao cinto
+		end
 		if i then
 			inv.alvo = nil
 			slot = i
@@ -761,11 +769,16 @@ local function drawGrenade(kind: string)
 	inv.aimQueued = false
 	cancelReloadNow()
 	local now = os.clock()
-	local fromHand = inv.hand ~= nil
+	-- D-195: com a pá na mão, ela vai ao cinto e a granada vem (a arma já está baixa)
+	local fromPa = not inv.hand and ItemView.paNaMao()
+	if fromPa then
+		ItemView.guardarPa()
+	end
+	local fromHand = inv.hand ~= nil or fromPa
 	local curId, curKind = curInfo()
 	local hold = if fromHand then 0 else Equipar.holsterS(curId, curKind)
 	local d0 = if fromHand then 1 else downNow(now)
-	if fromHand then
+	if inv.hand then
 		setHand(nil)
 	end
 	-- D-194: com uma troca pendente, depois do arremesso volta a arma que estava vindo
@@ -864,6 +877,11 @@ local function triggerDown()
 	-- D-108: prévia da caixa de munição do suporte (Controllers/CaixaMunicao.client): o gatilho põe
 	if player:GetAttribute("PondoCaixa") == true and not seated() then
 		Bus.fire("caixa_por")
+		return
+	end
+	-- D-195: com a pá na mão, cada aperto é uma pazada (soltar e apertar de novo para a próxima)
+	if ItemView.paNaMao() and not seated() then
+		ItemView.pazada()
 		return
 	end
 	if binoculars and not seated() then

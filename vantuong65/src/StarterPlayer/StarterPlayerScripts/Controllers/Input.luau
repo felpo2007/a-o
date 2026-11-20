@@ -1111,11 +1111,12 @@ local function anyDown(): boolean
 	return false
 end
 
--- gatilhos: aperto/soltura sintetizados pelo valor analógico com o limiar do jogador
+-- gatilhos: aperto/soltura sintetizados pelo valor analógico com o limiar do jogador; D-195: solta só
+-- abaixo do limiar menos a folga (InputMap.triggerDown), para a tremida não dar vários apertos
 local trigDown: { [string]: boolean } = { ButtonL2 = false, ButtonR2 = false }
 RunService.Heartbeat:Connect(function()
 	for name, was in trigDown do
-		local down = padValue((Enum.KeyCode :: any)[name]).Z > Input.settings.triggerThreshold
+		local down = InputMap.triggerDown(was, padValue((Enum.KeyCode :: any)[name]).Z, Input.settings.triggerThreshold)
 		if down ~= was then
 			trigDown[name] = down
 			onButton(name, down, true)

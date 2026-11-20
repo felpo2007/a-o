@@ -5,7 +5,7 @@
 -- - O quê: curativo em si, torniquete, curativo no companheiro, tratamento e reanimação do médico
 --   (atributo "VT65Acao" que o MedicalService grava com "VT65AcaoT"/"VT65AcaoS"), rádio (segurar o
 --   botão do rádio), binóculo (atributo local "Binoculars"), pá (atributo "VT65Item" = "shovel" posto pelo
---   servidor, ou a chave "dig_start"/"dig_cancel" no Logistics_State; nunca o texto da tela, que
+--   servidor, ou as chaves "pa_mao"/"pa_guardada" no Logistics_State (D-195); nunca o texto da tela, que
 --   pode chegar traduzido) e cantil (só pelo gancho do Studio: o jogo ainda não tem a ação de beber).
 -- - 1ª pessoa: o fuzil sai da frente (o rádio usa só a esquerda) e as mãos do Maos1P seguem o
 --   caminho do Shared/ItemAnim, com o objeto na mão (modelo "VT65Item1P" na câmera).
@@ -24,6 +24,7 @@ local GrenadeArt = require(ReplicatedStorage.Shared.GrenadeArt)
 local ItemAnim = require(ReplicatedStorage.Shared.ItemAnim)
 local Net = require(ReplicatedStorage.Shared.Net)
 local PaArte = require(ReplicatedStorage.Shared.PaArte)
+local Bus = require(script.Parent.Bus)
 local Input = require(script.Parent.Input)
 -- D-108: objeto e granada do tamanho das mãos de 1ª pessoa (Maos1P.scale = Corpo.ARMA_K)
 local Maos1P = require(script.Parent.Maos1P)
@@ -39,7 +40,12 @@ local ELBOW_L = Vector3.new(-0.22, -0.44, 0.05) / M
 local S = {
 	radio = false,
 	radioT0 = nil :: number?,
-	shovelT0 = -100, -- os.clock
+	-- D-195: a pá na mão (pedida aqui; o servidor confirma com VT65Item) e as pazadas (relógio local)
+	pa = false,
+	paT0 = -100,
+	guardadaT = -100,
+	pazadaT0 = -100,
+	fila = false, -- uma pazada esperando o fim da que está em andamento (nunca mais de uma)
 	devName = nil :: string?,
 	devT0 = 0,
 	sent = nil :: string?,
@@ -91,15 +97,14 @@ Input.StateChanged:Connect(function()
 	end
 end)
 
--- pá: por CHAVE (o texto do aviso pode chegar traduzido). O FieldWorkService manda hoje só o
--- texto; com { key = "dig_start" } ao começar e { key = "dig_cancel" } ao cancelar (ou o atributo
--- "VT65Item" = "shovel" no personagem, que o PostureController e este módulo já leem), a pá anima.
+-- D-195: a pá por CHAVE (o texto do aviso pode chegar traduzido): "pa_mao" e "pa_guardada" do
+-- FieldWorkService acertam o estado local; o atributo "VT65Item" = "shovel" do personagem manda.
 Net.event("Logistics_State").OnClientEvent:Connect(function(msg: any)
 	local key = type(msg) == "table" and msg.key
-	if key == "dig_start" then
-		S.shovelT0 = os.clock()
-	elseif key == "dig_cancel" then
-		S.shovelT0 = -100
+	if key == "pa_mao" and not S.pa then
+		S.pa, S.paT0 = true, os.clock()
+	elseif key == "pa_guardada" then
+		S.pa, S.fila = false, false
 	end
 end)
 
@@ -118,6 +123,81 @@ end
 
 -- itens que ESTE cliente pede ao servidor (os outros, como a pá, o servidor põe e tira)
 local CLIENT_ITEMS = { radio = true, binoculars = true, canteen = true }
+
+-- ===== D-195: a pá na mão e uma pazada por aperto (prompt de jogabilidade, item 13) =====
+-- A pá está na mão? O pedido local vale até a volta do servidor (0,8 s); guardada agora, o atributo
+-- do servidor ainda não saiu e não conta.
+function ItemView.paNaMao(): boolean
+	local now = os.clock()
+	if now - S.guardadaT < 0.8 then
+		return false
+	end
+	if S.pa and now - S.paT0 < 0.8 then
+		return true
+	end
+	local char = player.Character
+	return char ~= nil and char:GetAttribute("VT65Item") == "shovel"
+end
+
+function ItemView.pegarPa()
+	if ItemView.paNaMao() then
+		return
+	end
+	S.pa, S.paT0, S.pazadaT0, S.fila = true, os.clock(), -100, false
+	S.guardadaT = -100
+	Net.event("Dig_Request"):FireServer({ op = "pegar" })
+end
+
+function ItemView.guardarPa()
+	if not ItemView.paNaMao() then
+		return
+	end
+	S.pa, S.fila, S.guardadaT = false, false, os.clock()
+	Net.event("Dig_Request"):FireServer({ op = "guardar" })
+end
+
+-- Uma pazada por aperto (gatilho, clique, toque). Nos últimos 40% da pazada em andamento (ou
+-- enquanto a pá sobe) cabe UMA na fila; o resto é jogado fora, nunca uma fila sem fim.
+function ItemView.pazada()
+	if not ItemView.paNaMao() then
+		return
+	end
+	local now = os.clock()
+	local since = now - S.pazadaT0
+	local P = FieldWork.DIG.pazadaS
+	local subindo = now - S.paT0 < ItemAnim.PA.t0
+	if since >= P and not subindo then
+		S.pazadaT0, S.fila = now, false
+		Net.event("Dig_Request"):FireServer({ op = "pazada" })
+	elseif subindo or since >= P * 0.6 then
+		S.fila = true
+	end
+end
+
+-- tempo desde a pazada em andamento: a local ou, se não houver, a do servidor (autoteste)
+local function strokeSince(): number?
+	local now = os.clock()
+	if now - S.pazadaT0 < FieldWork.DIG.pazadaS then
+		return now - S.pazadaT0
+	end
+	local char = player.Character
+	local t = char and char:GetAttribute("VT65PazadaT")
+	if type(t) == "number" then
+		return workspace:GetServerTimeNow() - t
+	end
+	return nil
+end
+
+Bus.on("pa_pegar", function()
+	ItemView.pegarPa()
+end)
+Bus.on("pa_alternar", function()
+	if ItemView.paNaMao() then
+		ItemView.guardarPa()
+	else
+		ItemView.pegarPa()
+	end
+end)
 
 -- A ação de agora: nome, tempo desde o começo, duração (nil = segurada)
 local function current(): (string?, number, number?)
@@ -144,9 +224,9 @@ local function current(): (string?, number, number?)
 			end
 		end
 	end
-	local dig = FieldWork.DIG.seconds
-	if now - S.shovelT0 <= dig then
-		return "shovel", now - S.shovelT0, dig
+	-- D-195: a pá segurada (sem fim próprio: até guardar)
+	if ItemView.paNaMao() then
+		return "shovel", now - S.paT0, nil
 	end
 	if S.radio then
 		return "radio", now - (S.radioT0 or now), nil
@@ -157,10 +237,13 @@ local function current(): (string?, number, number?)
 	-- item que o servidor pôs no personagem (a pá)
 	if char then
 		local it = char:GetAttribute("VT65Item")
-		if type(it) == "string" and not CLIENT_ITEMS[it] then
+		-- D-195: a pá guardada agora não conta (o atributo do servidor ainda não saiu; contando, a troca
+		-- de arma via "mãos ocupadas" e a arma aparecia pronta, sem subir: Studio)
+		local guardada = it == "shovel" and now - S.guardadaT < 0.8
+		if type(it) == "string" and not CLIENT_ITEMS[it] and not guardada then
 			local name, t, D = ItemAnim.current(function(a: string): any
 				return char:GetAttribute(a)
-			end, workspace:GetServerTimeNow(), dig)
+			end, workspace:GetServerTimeNow())
 			if name then
 				return name, t, D
 			end
@@ -341,9 +424,8 @@ end
 
 -- avisa o servidor do item segurado (rádio, binóculo, pá, cantil) para os outros verem
 local function replicate(name: string?)
-	-- a pá vai ao servidor só quando este cliente a soube pela chave "dig_start"
-	local mine = os.clock() - S.shovelT0 <= FieldWork.DIG.seconds
-	local ok = name and (CLIENT_ITEMS[name] or (name == "shovel" and mine)) and S.devName == nil
+	-- D-195: a pá é do servidor (Dig_Request), não vai por aqui
+	local ok = name and CLIENT_ITEMS[name] and S.devName == nil
 	local want = if ok then name else nil
 	local char = player.Character
 	local attr = char and char:GetAttribute("VT65Item")
@@ -374,6 +456,15 @@ end
 
 -- Um quadro. firstPerson: a vista de 1ª pessoa com arma (fora dela só a réplica anda).
 function ItemView.step(_dt: number, firstPerson: boolean): Out
+	-- D-195: a pazada da fila sai quando a de agora termina
+	if S.fila then
+		local now = os.clock()
+		if not ItemView.paNaMao() then
+			S.fila = false
+		elseif now - S.pazadaT0 >= FieldWork.DIG.pazadaS and now - S.paT0 >= ItemAnim.PA.t0 then
+			ItemView.pazada()
+		end
+	end
 	local h = G.hand
 	if h and h.phase ~= "fim" then
 		replicate(nil) -- rádio/binóculo saem; a granada na mão do corpo é do servidor (ArmaNaMao)
@@ -429,7 +520,8 @@ function ItemView.step(_dt: number, firstPerson: boolean): Out
 		return out
 	end
 	local anim = a :: ItemAnim.Anim
-	local tt = ItemAnim.localTime(anim, t, D)
+	-- D-195: a pá pela última pazada (a local, ou a do servidor no autoteste)
+	local tt = ItemAnim.itemTime(name :: string, anim, t, D, if name == "shovel" then strokeSince() else nil)
 	local r, l, tilt = ItemAnim.sample(anim.fp, tt)
 	local cam = camera.CFrame
 	local pr = cam * (Vector3.new(r[1], r[2], r[3]) / M)

@@ -3343,5 +3343,10 @@
  "VOTAÇÃO DO MAPA": "BẦU CHỌN BẢN ĐỒ",
  "%d abates · 1 morte": "%d hạ gục · 1 tử trận",
  "1 abate · %d mortes": "1 hạ gục · %d tử trận",
- "1 abate · 1 morte": "1 hạ gục · 1 tử trận"
+ "1 abate · 1 morte": "1 hạ gục · 1 tử trận",
+ "%d pazadas: um toque no tiro para cada": "%d nhát xẻng: chạm nút bắn một lần cho mỗi nhát",
+ "Buraco: %d/%d": "Hố cá nhân: %d/%d",
+ "Pá na mão: uma pazada por aperto do gatilho (%d para o buraco)": "Xẻng trên tay: mỗi lần bóp cò là một nhát (%d nhát cho cái hố)",
+ "Pá: este buraco já está pronto": "Xẻng: hố này đã xong",
+ "Pá: pazada perdida (você se moveu)": "Xẻng: hỏng nhát xẻng (bạn đã di chuyển)"
 }

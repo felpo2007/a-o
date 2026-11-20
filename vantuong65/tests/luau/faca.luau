@@ -614,7 +614,13 @@ test("D-99: itens com caminho completo, laço e alcance do braço", function()
 		-- clipe de 3ª pessoa com o mesmo tempo (id 0 até subir)
 		local clip = SA.CLIPS[SA.ITEM_CLIP[name]]
 		assert(clip and clip.layer == "upper", name .. ": sem clipe")
-		assert(math.abs(clip.length - a.dur) < 0.04, name .. ": duração do clipe")
+		if name == "shovel" then
+			-- D-195: o clipe gravado tem as 5 pazadas de antes (8 s); a pá usa a subida e a 1ª (paTime),
+			-- que têm o mesmo tempo das chaves
+			assert(clip.length >= ItemAnim.PA.t0 + ItemAnim.PA.periodo, name .. ": clipe curto")
+		else
+			assert(math.abs(clip.length - a.dur) < 0.04, name .. ": duração do clipe")
+		end
 	end
 	for name in ItemAnim.ACTIONS do
 		assert(ItemAnim.ANIMS[name], name)
@@ -629,17 +635,19 @@ test("D-99: o que o soldado usa agora vem dos atributos (relógio do servidor)",
 	local function get(k: string): any
 		return attrs[k]
 	end
-	assert(ItemAnim.current(get, 100, 8) == nil, "nada")
+	assert(ItemAnim.current(get, 100) == nil, "nada")
 	attrs.VT65Acao, attrs.VT65AcaoT, attrs.VT65AcaoS = "bandage", 98, 6
-	local n, t, D = ItemAnim.current(get, 100, 8)
+	local n, t, D = ItemAnim.current(get, 100)
 	assert(n == "bandage" and t == 2 and D == 6, "curativo")
-	assert(ItemAnim.current(get, 103.5, 8) == "bandage" and ItemAnim.current(get, 104.1 + 2, 8) == nil, "acaba")
+	assert(ItemAnim.current(get, 103.5) == "bandage" and ItemAnim.current(get, 104.1 + 2) == nil, "acaba")
 	attrs.VT65Acao = nil
 	attrs.VT65Item, attrs.VT65ItemT = "radio", 90
-	local n2, _, D2 = ItemAnim.current(get, 300, 8)
+	local n2, _, D2 = ItemAnim.current(get, 300)
 	assert(n2 == "radio" and D2 == nil, "rádio segurado")
 	attrs.VT65Item = "shovel"
-	assert(ItemAnim.current(get, 97, 8) == "shovel" and ItemAnim.current(get, 99, 8) == nil, "pá dura 8 s")
+	-- D-195: a pá fica na mão até guardar (antes durava 8 s)
+	local n3, _, D3 = ItemAnim.current(get, 400)
+	assert(n3 == "shovel" and D3 == nil, "pá segurada")
 end)
 
 print(string.format("%d ok, %d falhas", passed, failed))

@@ -671,6 +671,17 @@ function InputMap.trigger(z: number, threshold: number): number
 	return math.clamp((z - threshold) / math.max(1 - threshold, 1e-3), 0, 1)
 end
 
+-- D-195 (dono: "o gatilho é analógico, use limites de acionamento e liberação"): o gatilho aperta
+-- acima do limiar do jogador e só solta abaixo dele menos TRIGGER_HYS. Antes era um limiar só: o
+-- dedo parado perto dele dava vários apertos (uma pazada ou um tiro a cada tremida).
+InputMap.TRIGGER_HYS = 0.08
+function InputMap.triggerDown(was: boolean, z: number, threshold: number): boolean
+	if was then
+		return z > math.max(threshold - InputMap.TRIGGER_HYS, 0.01)
+	end
+	return z > threshold
+end
+
 -- ===== assistência de mira (só controle) =====
 InputMap.ASSIST_MAX = 0.3 -- desaceleração máxima (30%)
 InputMap.ASSIST_RANGE_M = 150

@@ -331,7 +331,8 @@ local function useItem(id: string)
 		return
 	end
 	if id == "shovel" then
-		Net.event("Dig_Request"):FireServer()
+		-- D-195: a pá vem para a mão (ou volta ao cinto); o gatilho dá uma pazada por aperto (ItemView)
+		Bus.fire("pa_alternar")
 	elseif id == "frag" or id == "smoke" then
 		-- 2026-11-13: a granada vem para a mão (WeaponController: o gatilho arma e lança, como no
 		-- Front 44); antes saía na hora, sem nada na mão

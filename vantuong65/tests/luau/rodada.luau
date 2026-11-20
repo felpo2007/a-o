@@ -169,7 +169,8 @@ test("restauração: cada sistema devolve o seu, na ordem, e ninguém nasce entr
 	end
 	local fw = fs.readFile(M .. "FieldWorkService.luau")
 	assert(
-		string.find(fw, "antes.mats, antes.occs = workspace.Terrain:ReadVoxels(region, VOXEL)", 1, true),
+		-- D-195: a obra guarda o terreno de antes na 1ª pazada
+		string.find(fw, "b.mats, b.occs = workspace.Terrain:ReadVoxels(region, VOXEL)", 1, true),
 		"buraco guarda o terreno"
 	)
 	assert(string.find(fw, "for i = n, 1, -1 do", 1, true), "buracos voltam do último ao primeiro")
