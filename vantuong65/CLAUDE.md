@@ -203,6 +203,11 @@ O `sourcemap.json` não vai para o Git.
     `explosion01_smoke_main.dds` com cor clara.
 - Depois do autoteste, a câmera pode ficar em Scriptable longe do soldado (o MCP desfaz a troca de
   tipo). Aí o servidor recusa tiros por "origem": é do teste, não do jogo.
+  - Lote 89: para testar tiro e munição assim, prenda a câmera à cabeça no cliente com
+    `RunService:BindToRenderStep(nome, Enum.RenderPriority.Camera.Value + 20, ...)`. Senão o
+    servidor corrige a munição do cliente e parece recarga de graça.
+  - O teste com servidor e dois clientes só abre pela interface do Studio (Test › Clients and
+    Servers). Pela linha de comando (`-task StartServer`) ele não sobe.
 - Medir fps (D-126):
   - o Studio atrás de outra janela limita o jogo a 15 fps. Traga-o para a frente antes:
     `(New-Object -ComObject WScript.Shell).AppActivate(<pid do RobloxStudioBeta>)`;

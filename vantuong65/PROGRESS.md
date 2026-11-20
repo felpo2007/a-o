@@ -784,6 +784,25 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
       - o tiro de perto com bots de verdade: a câmera do MCP presa longe, então o tiro de perto foi
         disparado pelo remote.
     - **v122 publicada** (versão 127 do place, commit 355d5f8).
+  - **Lote 89: verificação final do prompt de jogabilidade (§24) e a entrega (§25), feito.**
+    - Sem mudança de código; os cenários do §24 rodaram no Studio com um jogador e os bots.
+    - **Velocidade:** andar 17,808 depois de 3 renascimentos, 3 entradas e saídas de veículo e 3
+      ciclos; não acumula.
+    - **Combate:**
+      - granada: uma explosão, sem metragem;
+      - pá: segurar dá uma pazada, cada aperto avança o buraco;
+      - veículo: 33 de 33 peças visíveis para os outros; a destruição dá uma explosão;
+      - morte por explosão e no veículo: com corpo e renascer;
+      - troca de arma: sem recarga de graça nem munição duplicada;
+      - roda: 9 fichas com o modelo 3D, sem binóculo.
+    - **Fim de partida:** votação com um mapa (o voto contou).
+    - **Três ciclos:** o mesmo número de objetos no mesmo modo (diferença ≤ 6), terreno idêntico,
+      0 erros, memória estável depois do 1º.
+    - Dois jogadores não deu: o controle da tela foi recusado, e o servidor com clientes pela linha
+      de comando não abriu.
+    - Relatórios: `testes/LOTE89_VERIFICACAO_2026-11-20.md` e a entrega
+      `testes/ENTREGA_PROMPT_B_2026-11-20.md`.
+    - **Próximo:** o Prompt A (as telas).
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;
