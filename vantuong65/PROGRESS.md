@@ -437,7 +437,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     1. a pá: "ela n esta funcionando" e "crie a pá no blender" (feito, lote 67);
     2. "helicopoteros quando pousam ainda flutuam" (feito, lote 68);
     3. "os eventos n estao acontecendo", e melhorá-los (feito, lote 69);
-    4. "a tela de carregamento inicial esta demorando demais";
+    4. "a tela de carregamento inicial esta demorando demais" (feito, lote 70);
     5. a carta tática: "n consigo ver certos lugares e selecionar certos lugares";
     6. a adaptação completa ao celular e ao tablet (`PROMPT_MOBILE.md`), em vários lotes:
        - matriz de auditoria P0 a P3;
@@ -507,6 +507,26 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
       a distância e o A-4 passando.
     - Não testado: o cartão do A-4, o som do rádio, o celular e o jogo publicado.
     - **v109 publicada** (versão 114 do place, commit 0759d9a).
+  - **Lotes 70 a 76 (D-186 a D-192), feitos; base do 77 (D-193).** O dono mandou dois pedidos
+    grandes (a interface inteira e a jogabilidade; `especificacao/PROMPT_INTERFACE_E_JOGABILIDADE.md`,
+    só local) e pediu antes a tela de carregamento. Testados juntos no Studio (o Roblox do dono
+    estava aberto até 01:45).
+    - Lote 70: a tela de entrada sai em 12,7 s (era 70,9 s no Studio), com CONTINUAR e
+      CONFIGURAÇÕES, seis etapas sem porcentagem, avisos do que não chegou e o resto em segundo
+      plano no menu. De passagem: as imagens não eram pré-carregadas (texto solto no PreloadAsync).
+    - Lote 71: o soldado não some mais no veículo em 3ª pessoa; a perna ferida não impede correr.
+    - Lote 72: a pé 20% mais rápido, uma vez só, com as acelerações junto.
+    - Lote 73: inclinar alternando (LB/RB mirando, Q/E); no celular o tiro também mira; vibração
+      na eliminação confirmada.
+    - Lote 74: a roda de equipamento com o modelo de cada arma e item; o binóculo saiu do jogo.
+    - Lote 75: a granada sem metragem e com freio pelo piso; os passos pelo chão.
+    - Lote 76: o corpo cai empurrado pelo golpe que matou; morte em lugar aberto de veículo cai fora.
+    - Base do 77: as regras do pódio e da votação (sem a integração ainda).
+    - Conferido: Lune 723 ok, pytest 70, ruff limpo. No Studio, os números de cada decisão
+      (`testes/LOTE70_76_D186_D192_2026-11-20.md`).
+    - Não testado: o inclinar no controle e no teclado, a vibração sentida, os passos ouvidos, a
+      morte por bala e no veículo, o celular de verdade e o jogo publicado.
+    - Faltam assets: passos em metal e em pedra.
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;

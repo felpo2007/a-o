@@ -7485,3 +7485,207 @@ animações (correr sem saltitar e deslizar).
 - numa janela estreita (a do Studio, ~840 px) o cartão cobre parte da faixa da direita;
 - o Output do Studio enche de "Failed to upload TexturePack … 429 … PBR textures may not be
   visible": é o Studio subindo as texturas das SurfaceAppearance de uma cópia local.
+
+## D-186 — Lote 70: a tela de entrada curta, com CONTINUAR (2026-11-20)
+
+**Pedido do dono** (20/11): "a tela de carregamento inicial esta demorando demais" e "quero q antes
+de vc realizar o prompt vc melhore as telas de carregamento". O prompt da interface (§5) pede:
+nome STARLITE, ação principal "Continuar", configurações essenciais à mão, a dica de entrada pelo
+aparelho, etapas reais (sem porcentagem fictícia), os estados de falha e continuar assim que o
+essencial estiver pronto.
+
+**Por que demorava:** desde a D-117 a tela esperava o jogo inteiro antes de sair: todos os sons,
+todas as armas, o streaming do mapa todo, 95% das peças do Map (até 90 s) e a arte de tudo o que
+chegou. Teto de 4 min.
+
+**O que mudou** (visual da tela de 13/11 mantido: película, briefing e carta):
+- **Só o essencial segura a tela**, em seis etapas reais: jogo, servidor, interface, sua ficha,
+  soldados do menu e terreno (com o streaming dos três lugares dos planos do menu: Xóm Gò, Serraria
+  e Arrozais). Teto do essencial: 60 s.
+- **Sem porcentagem:** a barra tem uma parte por etapa, que enche com o que foi contado nela; a
+  contagem aparece ("24/31") e "ETAPA 3/6" fica no lugar da porcentagem. Etapa que só espera o
+  servidor tem o brilho que corre.
+- **CONTINUAR** (Enter, A ou o toque; a dica muda com o aparelho) e **CONFIGURAÇÕES** (C ou X: o
+  menu abre a aba Configurações e a recompensa diária espera ela fechar). Nada avança sozinho.
+- **Avisos do que não chegou**, em âmbar: os dados do jogador ("Seus dados ainda não chegaram." ou
+  "Seus dados não carregaram: esta sessão não salva."), os arquivos que falharam ("N arquivos não
+  baixaram; o jogo tenta de novo."), o servidor que demora e o teto.
+- **Em segundo plano:** armas, movimentos, sons e o mapa inteiro (D-117) terminam depois; a linha
+  aparece embaixo da barra e no canto do menu principal ("Em segundo plano · sons: 40/164").
+- **Medida:** os segundos de cada etapa ficam em atributos do script (`T_<etapa>`), e os do segundo
+  plano também (`T_fundo_<parte>`).
+- **Imagens:** o PreloadAsync não baixava id de imagem em texto solto (no Studio, 22 de 25 voltavam
+  "Failure"; numa ImageLabel as mesmas carregam). O código antigo tinha o mesmo defeito e não
+  contava as falhas. Agora cada imagem vai numa ImageLabel. Baixando de verdade, o chão (texturas
+  do MaterialVariant), o céu e a carta tática custavam ~8 s da interface: foram para o segundo
+  plano, o primeiro dele ("chão e céu").
+
+**Medido no Studio** (mesmo PC, bots ligados, place local):
+- antes (v109 com as marcas de tempo): as partes essenciais em 6,6 s, o mapa inteiro em 70,4 s e a
+  tela saiu em **70,9 s**;
+- depois: jogo 0,5 s, servidor 0,5 s, interface 4,3 s, ficha 4,6 s, soldados 10,1 s, terreno
+  12,3 s e o **CONTINUAR em 12,7 s**. O segundo plano seguiu no menu (armas, movimentos e sons
+  em ~2 s; a arte do mapa terminou aos ~74 s);
+- CONFIGURAÇÕES: abriu a aba Configurações por cima do menu; a recompensa diária veio depois de
+  fechar;
+- o aviso mostrou "3 arquivos não baixaram" (da arte dos manequins; as 39 imagens da interface,
+  do chão, do céu e da carta carregaram todas numa ImageLabel).
+
+## D-187 — Lote 71: o soldado no veículo e a corrida depois do tiro (2026-11-20)
+
+**Pedido do dono** (prompt de jogabilidade, item 1): "o personagem some ao entrar no carro" e
+"receber tiro não deve impedir a corrida".
+
+**Causas:**
+- `VehicleController` escondia o próprio corpo (LocalTransparencyModifier = 1) a cada quadro em
+  QUALQUER câmera, inclusive na perseguição, e nada o devolvia ao sair;
+- um tiro na perna ligava `legImpaired`: a velocidade caía para o passo (1,4 m/s), sem corrida, sem
+  pulo e sem transpor até o curativo (D-93).
+
+**O que mudou:**
+- no veículo o próprio corpo só some na 1ª pessoa do assento e aparece na perseguição, esmaecendo
+  com a câmera; ao sair (ou com o veículo destruído) fica como a câmera a pé espera; morto, à
+  mostra. Os outros sempre veem o ocupante (só a transparência local muda);
+- `Movement.LEG_WOUND_LIMITS = false`: a perna ferida não limita mais velocidade, corrida, pulo,
+  transpor nem passada (jogadores e bots). O ferimento continua (sangra, pede curativo, aparece na
+  tela). `true` volta a regra da D-93.
+
+**Conferido no Studio:**
+- jipe M151, motorista: em 1ª pessoa as 34 peças do corpo escondidas (câmera a 1,6 studs da
+  cabeça); em 3ª pessoa as 34 à mostra, o soldado sentado ao volante na perseguição (11,8 studs);
+  ao sair em 1ª pessoa, escondido; em 3ª, à mostra (o esmaecer da câmera colada, 0,42);
+- perna ferida (`VT65DevFerido = "eu_perna"`): `LegImpaired` = true e, correndo, WalkSpeed 26,71
+  studs/s = 7,48 m/s (a corrida nova vezes a vantagem 1,06 do dono); pulo 30. Antes ficaria em
+  1,4 m/s sem pulo.
+
+## D-188 — Lote 72: 20% mais rápido a pé, uma vez só, e o L3 da corrida (2026-11-20)
+
+**Pedido do dono** (item 2): velocidade a pé dos dois times × 1,2, sem acumular; corrida por clique
+no L3.
+
+**O que mudou:**
+- `Movement.FOOT_SPEED_K = 1,2`, aplicado na definição: andar 1,68, trote 4,70, corrida 7,06,
+  agachado 2,35, rastejar 1,34, mirando 3,02, nado, transição, deslize (9,07) e os limiares de
+  deslizar e mergulhar. Ninguém multiplica de novo (morrer, renascer, trocar de lado, veículo e
+  partida nova leem as constantes). No Studio, a pé: WalkSpeed 17,81 studs/s = 4,99 m/s (o trote
+  novo vezes a vantagem 1,06 do dono) e, correndo, 7,48 m/s;
+- as acelerações sobem junto: arrancar, parar e virar levam o mesmo tempo de antes;
+- pulo, gravidade e veículos ficam fora. A passada da animação segue a velocidade real (teto de
+  reprodução 3,0 → 3,6, para rastejar e o VC agachado) e os passos seguem a distância;
+- o L3 já alternava a corrida no controle (Parte 12.2); o teste novo cobre o aperto, o soltar que
+  não desliga e a limpeza ao morrer, renascer, entrar no veículo e no túnel.
+
+## D-189 — Lote 73: inclinar alternando, o tiro que mira no celular e a vibração da eliminação (2026-11-20)
+
+**Pedido do dono** (itens 3 a 5).
+
+**O que mudou:**
+- **Inclinar:** três estados. Um aperto inclina, outro no mesmo lado volta, o outro lado vai direto
+  (`InputMap.leanNext`). No controle, LB/RB mirando (antes L3/R3); mirando, LB e RB só inclinam
+  (não abrem a roda nem lançam a granada). Prender a respiração foi para o L3 mirando; o R3 volta ao
+  corpo a corpo. Q/E no teclado. Sair da mira, morrer, o veículo e o túnel centralizam (a D-99
+  mantinha a inclinação ao soltar a mira). "Segurar" fica em Configurações › Acessib. › Inclinar. O
+  toque (trava do botão, quina sozinha) segue segurando.
+- **Celular:** o botão de tiro também mira com arma de fogo na mão (granada, pá, curativo: só a ação
+  deles). Soltar desce a arma. O arrasto no botão gira a câmera, com outro dedo andando. Opção "só
+  atira" em Configurações › Toque › Botão de tiro.
+- **Toque rápido logo depois de correr:** a arma vale a corrida local por 1 s depois de parar (o
+  "Sprinting" do servidor chega um ping depois e jogava o tiro fora).
+- **Vibração:** o servidor numera cada abate no `Combat_Kill` (só quem abateu; assistência não); o
+  cliente dá um pulso curto por número, no controle (motores) e no celular (HapticEffect), com a
+  opção Vibração › Eliminação confirmada.
+
+**Conferido no Studio** (toque forçado, `VT65DevToque`):
+- segurar o tiro 1,5 s com a M14: a mira ligou na hora, saiu um tiro (semiautomática) e a mira
+  desceu ao soltar; um toque de 0,12 s deu um tiro durante a subida da arma e a mira desceu;
+- com a granada na mão, segurar o tiro não mirou e soltar lançou (granadas 3 → 2);
+- o abate de um boneco pela granada mandou um `Combat_Kill` com `k = 1`.
+
+**Não testado:** o inclinar no controle e no teclado (o teclado do MCP não chega ao jogo com o
+Studio atrás), a vibração sentida e o celular de verdade.
+
+## D-190 — Lote 74: a roda de equipamento com imagens e o binóculo fora do jogo (2026-11-20)
+
+**Pedido do dono** (itens 11 e 12): roda "inspirada na referência de GTA", com as imagens das armas
+e dos itens; retirar o binóculo das formas de obtenção e uso.
+
+**O que mudou:**
+- **Roda de equipamento:** 9 posições fixas, as duas armas no alto (o nome curto da vaga), depois
+  granada, fumaça, bandagem, torniquete, pá, construir e a ferramenta do papel. Cada ficha mostra o
+  próprio modelo do jogo num ViewportFrame (`Controllers/RodaArte`: a arte publicada da arma, a
+  granada, a pá do Blender, as peças da mão), a munição da arma na mão, as granadas, fumaças,
+  curativos e torniquetes que sobram, "EM USO" e o item apagado quando não dá. Escolher uma arma
+  troca pela vaga, com o saque. Construir, caixa de munição, bolsa do médico e rádio são
+  PLACEHOLDER de forma (peças simples).
+- **Sem pulo entre vizinhos:** a escolha muda só a mais de meio setor + 7° do centro do setor
+  escolhido (`InputMap.wheelIndexSticky`); no toque, o centro ainda cancela.
+- A roda aceita até 10 fichas (teclas 1 a 9 e 0).
+- **Binóculo:** `Equipar.REMOVED`. Saiu da vaga 7 (a faixa esconde, a tecla não faz nada), da roda,
+  da tecla B, do tutorial e do toque. Ajuste de tecla salvo de ação que não existe mais é
+  descartado no `InputMap.validate`. A ótica do comandante do veículo (`v_binoculars`) continua: é
+  a vista do assento, não o item.
+
+**Conferido no Studio** (`VT65DevTela = "roda_equip"`, gancho novo): as 9 fichas com o modelo de
+cada coisa (M14, M1911A1, granada, fumaça, bandagem, torniquete, pá, sacos de areia), "EM USO" e
+20/8 na M14, as quantidades (3 granadas, 2 fumaças, 4 bandagens, 2 torniquetes), construir e a
+ferramenta do papel apagados para o fuzileiro. Com a roda aberta, 45 fps contra 37–38 fechada (o
+número oscila com os bots; a roda não pesa). A faixa das vagas ficou com 1 a 6 e 8 a 10.
+
+**Não testado:** a escolha pelo mouse, pelo analógico e pelo toque (só pelo gancho), o
+binóculo do comandante no veículo.
+
+## D-191 — Lote 75: a granada sem metragem e com piso, e os passos pelo chão (2026-11-20)
+
+**Pedido do dono** (itens 6 e 8).
+
+**O que mudou:**
+- **Granada:** sem o número da distância no aviso de granada perto (a cor, o pulso e a direção
+  continuam). O freio no chão depende do piso (`Shared/GrenadePhysics`: lama 0,45 e arrozal 0,40
+  seguram, madeira 0,82, metal 0,85 e pedra 0,84 deixam rolar; antes 0,72 em qualquer chão) e, a
+  cada quadro, um raio do lugar de antes ao de agora devolve a bola que pulou uma face fina e a faz
+  quicar. O servidor continua dono do lançamento, da espoleta e da única detonação.
+- **Piso** (`Shared/Superficie`): terra e grama, lama e dique, arrozal, água, areia e sacos de
+  areia, madeira de casas e pontes, metal de veículos e pedra. O raio para no que está logo embaixo
+  (a ponte vale mais que o rio).
+- **Passos:** o som pelo piso; na divisa só troca com duas leituras seguidas; no ar não conta passo.
+- **Faltam** os passos em metal e em pedra (sem asset): PLACEHOLDER com o da madeira e o da areia,
+  listados em `Superficie.MISSING_STEPS`.
+
+**Conferido no Studio** (`VT65DevGranada`, gancho novo): a 6 m/s a granada bateu no boneco e parou
+a 2,5 m em 1,3 s; o aviso de granada perto apareceu sem o número (a etiqueta escondida e vazia).
+
+**Não testado:** os passos ouvidos em cada piso e a granada passando por uma parede fina.
+
+## D-192 — Lote 76: a queda do corpo pelo golpe que matou e a morte no veículo (2026-11-20)
+
+**Pedido do dono** (prompt de jogabilidade, item 7: ragdoll). O boneco de pano da D-107 já tinha
+juntas com limite, uma queda por morte, a física do servidor que todos veem, o corpo congelado sem
+colisão (não colide com veículo nem com outro corpo), o teto de 24 corpos e o tempo de vida.
+
+**O que mudou:**
+- o golpe que matou fica marcado no soldado (CombatService: de onde veio o tiro; ExplosionService:
+  o centro, a distância e o raio). Até 0,6 s antes da morte ele empurra o corpo inteiro para longe:
+  bala leve (8 studs/s), explosão mais forte perto do centro (até 30 no plano e 12 para cima),
+  sempre abaixo do freio do assentar (`Corpos.impulso`). Sem golpe recente, o empurrão leve de
+  antes. Corpo caído também é empurrado pela explosão (antes, só quem morria em pé);
+- veículo: o assento solta (Sit e a SeatWeld). Lugar fechado: sem corpo, como antes. Lugar aberto
+  (jipe, escotilha, porta): o corpo cai do lado de fora, a 5 studs.
+
+**Conferido no Studio:** um boneco caído, morto por uma granada a 1,1 m (`VT65DevGranada`): golpe
+"explosao", o tronco saiu a 3,3 m/s e deslizou 0,78 m no chão.
+
+**Não testado:** a morte por bala, a morte num lugar aberto de veículo e o resultado visto por outro
+jogador.
+
+## D-193 — Base do lote 77: as regras do fim de partida (2026-11-20)
+
+**Pedido do dono** (itens 21 e 22): comemoração com os três melhores do time que venceu, votação de
+mapa mesmo com um mapa só, restauração e contagem.
+
+**Feito (só as regras, `Shared/Rodada`, testadas no Lune):** o pódio dos até três melhores do time
+que venceu (desempate por pontos, abates, menos mortes, entrada e nome; empate entre os lados mostra
+os melhores dos dois), a votação (um voto por jogador; sem voto, o mapa que existe; voto em mapa
+inexistente não conta), as fases e o número da rodada.
+
+**Falta:** a integração no servidor (fases, pontos por partida, restauração de veículos, buracos,
+corpos, granadas e jogadores) e as telas.
