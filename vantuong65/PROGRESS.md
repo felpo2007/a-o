@@ -783,6 +783,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
       - dois jogadores, o celular e o jogo publicado;
       - o tiro de perto com bots de verdade: a câmera do MCP presa longe, então o tiro de perto foi
         disparado pelo remote.
+    - **v122 publicada** (versão 127 do place, commit 355d5f8).
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;
