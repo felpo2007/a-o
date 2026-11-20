@@ -696,6 +696,26 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     - Não testado: outro jogador, celular e controle de verdade, bazuca dos EUA, sons ouvidos e jogo
       publicado.
     - **v118 publicada** (versão 123 do place, commit fa24b72).
+  - **Lote 85 (D-201): objetivos mais centrais, centro mais baixo e mais relevo fora, feito.**
+    - Objetivos do centro do mapa: A 403 → 263 m, B 273 → 207 m, D 302 → 183 m, E 372 → 255 m; do
+      QG mais perto: A 190, B 240, D 275, E 196 m. Setores e carta junto (S3/S4 com um degrau).
+    - Os tabuleiros dos Arrozais foram com o chão (16 lâminas, 67 diques, 9 sebes; os 44 planos), e o
+      rio do sul foi com a Ponte e Cais (passa ~30 m ao sul dela e sai pelo sul a oeste de An Cường).
+    - Centro: o morro de 35,7 m virou baixada (fundo 14,3 m, anel de 130–200 m a 19,4 m). De 8 pontos
+      a 200 m da praça, com o olho a 1,6 m, só 3% da vila fica à vista.
+    - Fora do centro: 5 morros, 2 lombadas, 2 taludes e relevo aleatório de ±6 m; nenhum alto vê mais
+      que 3 objetivos até 300 m.
+    - Tempo a pé do QG ao objetivo mais perto (trote D-188): VC → A 60 → 40 s, EUA → E 79 → 51 s;
+      cruzando o mapa, EUA → A 161 → 130 s (`tools/tempos_chegada.py`).
+    - Veículos: os 5 vão e voltam do QG dos EUA a todos os objetivos (teste `estradas`).
+    - Arte fixa recopiada do jogo (24 construções e 35 casas; 59 de 59 casaram no Studio).
+    - Raia de tiro: a direção recusa construção a menos de 8 m da linha (uma casa da vila tapava o
+      alvo de 150 m do VC).
+    - Conferido: Lune 773 ok (50 arquivos), pytest 70, ruff, StyLua e luau-lsp limpos; autoteste em 4
+      rodadas (raia ok depois da correção; granada de bot e pá com falhas de sorteio, no relatório).
+      Relatório: `testes/LOTE85_D201_2026-11-20.md`; capturas e mapas em `testes/lote85`.
+    - Não testado: outro jogador, celular, jogo publicado, tempo de chegada andando no jogo, partida
+      inteira com bots no mapa novo.
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;

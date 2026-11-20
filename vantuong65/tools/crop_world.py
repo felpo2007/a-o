@@ -79,11 +79,16 @@ CANAL_M = 1.1
 # D-148 (pedido do dono: "a base americana está muito perto dos objetivos, coloque ela mais longe"):
 # a base já encosta na borda leste (o mapa fica de 700 m). A fronteira S4/S5 foi 40 m para oeste: o
 # portão da base (44 m a oeste do QG) fica a 86 m do setor que o VC pode tomar (eram 46 m).
+# D-201 (lote 85, prompt de jogabilidade §20: "aproxime os cinco objetivos da região central"): os
+# quatro dos cantos foram para 180–265 m do centro (eram 270–400 m) e as fronteiras foram junto,
+# cada objetivo a 40 m ou mais da sua. A S3/S4 tem um degrau (a carta pinta retângulos): x = +40 m
+# ao sul de N 1692,83 (a Ponte e Cais) e +90 m ao norte (a vila de Xóm Gò inteira no setor C). A
+# S4/S5 a +150 m deixa o portão da base dos EUA a 106 m do setor que o VC pode tomar (eram 86 m).
 FRONTEIRAS_ING = [
-    [(269600, 1692580), (269600, 1693280)],
+    [(269665, 1692580), (269665, 1693280)],
     [(269750, 1692580), (269750, 1693280)],
-    [(269920, 1692580), (269920, 1693280)],
-    [(270000, 1692580), (270000, 1693280)],
+    [(269870, 1692580), (269870, 1692830), (269920, 1692830), (269920, 1693280)],
+    [(269980, 1692580), (269980, 1693280)],
 ]
 # letra do setor no jogo (v41, pedido do dono: "troque os objetivos por A B C D E"; Front.letra)
 # Lote 26 (ideia de mapa do dono: A Arrozais a sudoeste, B Serraria a noroeste, C a vila no centro,
@@ -135,22 +140,26 @@ VILA_PONTA = (
 # Lote 26 ("deixe as bases mais longe dos objetivos"): os quatro dos cantos foram para mais perto
 # das bordas norte e sul e para longe da borda da própria base. Do QG mais perto: A 296 m (era
 # 270), B 294 m (266), D 318 m (252), E 291 m (254).
+# D-201 (lote 85): os quatro dos cantos vieram para perto do centro (do centro do mapa: A 263 m, era
+# 403; B 207 m, era 273; D 183 m, era 302; E 255 m, era 372), com o conjunto inteiro (centraliza):
+# os tabuleiros dos Arrozais e o chão deles vieram junto, e o rio do sul passa a 28 m da Ponte e
+# Cais. Do QG mais perto: A 190 m, B 240 m, D 275 m, E 196 m.
 PONTOS_FORTES = [
-    # S1: arrozais a sudoeste, a 55 m da borda sul (era a Baixada sudoeste)
-    (1, "Arrozais", 269555, 1692635, False, "arrozais a sudoeste; nome de design"),
+    # S1: arrozais a sudoeste (D-140: a 55 m da borda sul; D-201: 205 m a oeste e 165 m ao sul do
+    # centro, na lavoura que veio com eles)
+    (1, "Arrozais", 269625, 1692765, False, "arrozais a sudoeste; nome de design"),
     # S2: serraria na mata fechada a noroeste, longe das casas e sem estrada (D-123; era a Mata
-    # fechada). A ~65 m da volta de estrada do norte
-    (2, "Serraria", 269700, 1693170, False, "serraria na mata fechada a noroeste; nome de design"),
+    # fechada). D-201: 125 m a oeste e 165 m ao norte do centro (era E 269700 / N 1693170)
+    (2, "Serraria", 269705, 1693095, False, "serraria na mata fechada a noroeste; nome de design"),
     # S3: a praça da vila de Xóm Gò
     VILA_PF,
-    # S4: a ponte e o cais, a sudeste (era o Arrozal ao sul de An Cường (2)). D-148: 70 m para
-    # oeste, na margem norte do rio (era E 270000 / N 1692640; em N 1692620 caía no leito e a
-    # estrada descia para dentro do rio): do QG dos EUA, 348 m (eram 318)
-    (4, "Ponte e Cais", 269930, 1692645, False, "ponte e cais a sudeste; nome de design"),
-    # S5: o engenho a nordeste, ao norte da base dos EUA (era o Vau do riacho). D-148: 25 m para
-    # oeste e 18 m para o norte, a 47 m da borda (era E 270070 / N 1693215): do QG dos EUA, 315 m
-    # (eram 291)
-    (5, "Engenho", 270045, 1693233, False, "engenho a nordeste; nome de design"),
+    # S4: a ponte e o cais, a sudeste (era o Arrozal ao sul de An Cường (2)). D-201: 80 m a leste e
+    # 165 m ao sul do centro, na margem norte do rio, a 65 m da casa mais perto de An Cường (2) (era
+    # E 269930 / N 1692645, rente à borda sul)
+    (4, "Ponte e Cais", 269910, 1692765, False, "ponte e cais a sudeste; nome de design"),
+    # S5: o engenho a nordeste, ao norte da base dos EUA (era o Vau do riacho). D-201: 195 m a
+    # leste e 165 m ao norte do centro (era E 270045 / N 1693233, a 47 m da borda norte)
+    (5, "Engenho", 270025, 1693095, False, "engenho a nordeste; nome de design"),
 ]
 # Base dos EUA (pedido do dono: "o QG dos EUA vai virar uma base grande depois; deixe espaço
 # plano"): sem diques, lâminas d'água e sebes a até BASE_M do QG. D-114: a base (90 x 122 m) cabe
@@ -180,8 +189,14 @@ def local_ing(x: float, z: float) -> tuple[float, float]:
 
 
 # ---------- leitura dos dados gerados ----------
-def read_grid() -> dict:
-    s = (DATA / "Grid.luau").read_text("utf-8")
+def read_grid(ler=None) -> dict:
+    """Grid e alturas de DATA; ler(nome) devolve o texto de outro lugar (o Git, no lote 85)."""
+    if ler is None:
+
+        def ler(nome: str) -> str:
+            return (DATA / f"{nome}.luau").read_text("utf-8")
+
+    s = ler("Grid")
 
     def num(key: str) -> float:
         m = re.search(rf"\b{key} = (-?[\d.]+)", s)
@@ -202,7 +217,7 @@ def read_grid() -> dict:
             i += 2
     heights = np.zeros((h, w), dtype="<u2")
     for name in chunks:
-        t = (DATA / f"{name}.luau").read_text("utf-8")
+        t = ler(name)
         r0 = int(re.search(r"row0 = (\d+)", t).group(1))
         rows = int(re.search(r"rows = (\d+)", t).group(1))
         raw = base64.b64decode(re.search(r'data = "([^"]*)"', t).group(1))
@@ -210,6 +225,7 @@ def read_grid() -> dict:
     carved = re.search(r"\bstreamCarvedCm = (\d+)", s)
     relief = re.search(r"\breliefAdded = (\d+)", s)
     river = re.search(r"\briverCut = (\d+)", s)
+    centro = re.search(r"\bcenterLowered = (\d+)", s)
     moved = re.search(r"\bmoundMoved = (\d+)", s)
     cut = re.search(r"\bpaddyCut = (\d+)", s)
     ham = re.search(r"\bhamletAdded = (\d+)", s)
@@ -230,6 +246,7 @@ def read_grid() -> dict:
         "hamletAdded": int(ham.group(1)) if ham else 0,
         "reliefAdded": int(relief.group(1)) if relief else 0,
         "riverCut": int(river.group(1)) if river else 0,
+        "centerLowered": int(centro.group(1)) if centro else 0,
     }
 
 
@@ -418,16 +435,30 @@ def abre_riacho(g: dict, f: dict[str, np.ndarray]) -> dict:
 # No oeste o rio corre por fora da borda sul (N 1692,555–1692,566, a ~20 m da área): os tabuleiros
 # dos Arrozais vão até a borda e a margem do rio os inclinava (o filtro de chão plano tirava 28 dos
 # 50). Entra no mapa a leste deles, onde não há lavoura.
+# D-201 (lote 85): a Ponte e Cais veio para 165 m ao sul do centro, e o rio veio com ela. Entra
+# pela borda oeste ao sul dos tabuleiros novos dos Arrozais, corre para leste e passa ~30 m ao sul
+# da Ponte e Cais; logo depois vira para o sul a oeste de An Cường (2) (a ~55 m da ponta da
+# trincheira) e sai pela borda sul; fora da área vai para leste até o riacho. A faixa ao sul do rio
+# fica para flanquear (vau de 0,6 m e a ponte).
 RIO_PONTOS = [
-    (269420, 1692555),
-    (269560, 1692557),
-    (269680, 1692565),
-    (269780, 1692585),
-    (269880, 1692605),
-    (270000, 1692615),
-    (270070, 1692605),
-    (270140, 1692585),
-    (270210, 1692552),
+    (269360, 1692610),
+    (269470, 1692638),
+    (269570, 1692666),
+    (269670, 1692678),
+    (269760, 1692692),
+    (269830, 1692708),
+    (269870, 1692725),
+    (269900, 1692733),
+    (269925, 1692730),
+    (269933, 1692712),
+    (269922, 1692685),
+    (269915, 1692660),
+    (269918, 1692620),
+    (269925, 1692570),
+    (269950, 1692525),
+    (270030, 1692510),
+    (270120, 1692518),
+    (270205, 1692538),
 ]
 RIO_TABULEIRO_M = 10.0  # a margem não rebaixa o chão a até isto de um tabuleiro
 RIO_MEIA_M = 6.0  # meia largura do leito (água): ~12 m
@@ -436,6 +467,8 @@ RIO_BORDA_M = 0.9  # a margem junto da água fica isto acima do espelho
 RIO_ENCOSTA = 0.22  # subida da margem (m por m)
 RIO_MARGEM_M = 30.0  # largura da encosta de cada lado
 RIO_RIACHO_CELULAS = 2  # a margem não rebaixa o chão a até isto (células) do riacho
+RIO_TUNEL_M = 12.0  # nem a até isto de uma boca de túnel ou da trincheira (D-201)
+RIO_CASA_M = 15.0  # nem a até isto de uma casa (D-201)
 
 
 def _dist_polilinha(xs: np.ndarray, zs: np.ndarray, pts: list) -> np.ndarray:
@@ -480,10 +513,26 @@ def abre_rio(g: dict, f: dict[str, np.ndarray]) -> dict:
         viz[:, :-1] |= perto[:, 1:]
         perto = viz
     margem &= ~perto
+    # D-201: o rio novo passa a oeste de An Cường (2); a margem não mexe no chão das bocas de túnel
+    # nem da trincheira (TunnelService cava a partir do chão)
+    bocas, vala = _tuneis_ing()
+    longe_tunel = _dist_polilinha(xs, zs, vala) * STUD_M > RIO_TUNEL_M
+    for bx, bz in bocas:
+        longe_tunel &= np.hypot(xs - bx, zs - bz) * STUD_M > RIO_TUNEL_M
+    margem &= longe_tunel
+    # e nem a até RIO_CASA_M de uma casa (a casa tem o chão gravado no Features)
+    for hx, hz in f["houses"][:, :2]:
+        margem &= np.hypot(xs - hx, zs - hz) * STUD_M > RIO_CASA_M
     espelho = RIO_FUNDO_M + 0.6
     alvo = espelho + RIO_BORDA_M + (d - RIO_MEIA_M) * RIO_ENCOSTA
     antes = h.copy()
     h[margem] = np.minimum(h[margem], alvo[margem])
+    # D-201: fora da área o rio novo corre em chão baixo (a sudeste): a margem junto da água sobe
+    # até a borda dela, senão o horizonte via água acima do chão. Dentro da área nada sobe.
+    xa0, xb0, za0, zb0 = crop_box(0.0)
+    fora_area = (xs < xa0) | (xs > xb0) | (zs < za0) | (zs > zb0)
+    junto = (d > RIO_MEIA_M) & (d <= RIO_MEIA_M + 4.5) & fora_area
+    h[junto] = np.maximum(h[junto], espelho + RIO_BORDA_M)
     h[leito] = RIO_FUNDO_M
     g["cls"][leito] = 5
     g["heights"] = np.clip(np.round(h * 100 + g["hoff"]), 0, 65535).astype("<u2")
@@ -591,6 +640,11 @@ def write_grid(g: dict) -> None:
             else ""
         )
         + ("\triverCut = 1, -- rio do sul (crop_world, lote 26b)\n" if g.get("riverCut") else "")
+        + (
+            "\tcenterLowered = 1, -- centro baixo, objetivos centrais (crop_world, D-201)\n"
+            if g.get("centerLowered")
+            else ""
+        )
         + f"\theightChunks = {{{chunk_list}}}, rowsPerChunk = {ROWS_PER},\n"
         f"\tclassNames = {{{names}}},\n"
         f'\tclassesRle = "{base64.b64encode(bytes(rle)).decode()}",\n'
@@ -708,10 +762,31 @@ def write_mapconfig(box) -> None:
     )
 
 
-def write_fixture(box) -> int:
+def altura_studs(g: dict, x: float, z: float) -> float:
+    """Altura (studs) com a mesma interpolação bilinear do WorldData.heightAt."""
+    fx = (x - g["ox"]) / g["cell"] - 0.5
+    fz = (z - g["oz"]) / g["cell"] - 0.5
+    c0, r0 = int(np.floor(fx)), int(np.floor(fz))
+    tx, tz = fx - c0, fz - r0
+
+    def cel(c: int, r: int) -> float:
+        c = min(max(c, 0), g["w"] - 1)
+        r = min(max(r, 0), g["h"] - 1)
+        return (int(g["heights"][r, c]) - g["hoff"]) / 100.0 / STUD_M
+
+    top = cel(c0, r0) * (1 - tx) + cel(c0 + 1, r0) * tx
+    bot = cel(c0, r0 + 1) * (1 - tx) + cel(c0 + 1, r0 + 1) * tx
+    return top * (1 - tz) + bot * tz
+
+
+def write_fixture(box, g: dict | None = None) -> int:
+    """Só os pontos dentro do recorte; com g, a altura de cada um sai das alturas novas (D-201)."""
     xmin, xmax, zmin, zmax = box
     fx = json.loads(FIXTURE.read_text("utf-8"))
     keep = [p for p in fx if xmin <= p["x"] <= xmax and zmin <= p["z"] <= zmax]
+    if g is not None:
+        for p in keep:
+            p["h_studs"] = round(altura_studs(g, p["x"], p["z"]), 3)
     FIXTURE.write_text(json.dumps(keep, ensure_ascii=False, indent=1), encoding="utf-8")
     return len(keep)
 
@@ -1162,6 +1237,398 @@ def mais_relevo(g: dict, f: dict[str, np.ndarray]) -> dict:
     }
 
 
+# ---------- lote 85 (D-201): objetivos mais centrais, centro mais baixo, relevo fora ----------
+# Prompt de jogabilidade do dono, §20: aproximar os cinco objetivos do centro levando o conjunto
+# inteiro (não só a bandeira); rebaixar o centro numa depressão suave e legível, com saídas,
+# cobertura e sem ficar exposto aos altos; mais relevo fora do centro (colinas, taludes, elevações),
+# sem um ponto alto que domine todos os objetivos; o mapa continua de 700 x 700 m e as bases nas
+# bordas.
+# Tudo de design (PLACEHOLDER), determinístico e feito uma vez (Grid: centerLowered). As medidas que
+# importam (desnível, rampa, visada dos altos) saem no relatório do passo.
+CENTRO_ING = ((PLAY_ING[0] + PLAY_ING[2]) / 2, (PLAY_ING[1] + PLAY_ING[3]) / 2)
+# o rio antigo (lote 26b) só rebaixou o chão: o de antes dele é o da v70, no Git (só nas células
+# que ele gravou: a v71 também corrigiu o relevo perto dos tabuleiros)
+RIO_ANTIGO_COMMIT = "6c0b188"
+RIO_ANTIGO_PONTOS = [  # o traçado do lote 26b ao D-200
+    (269420, 1692555),
+    (269560, 1692557),
+    (269680, 1692565),
+    (269780, 1692585),
+    (269880, 1692605),
+    (270000, 1692615),
+    (270070, 1692605),
+    (270140, 1692585),
+    (270210, 1692552),
+]
+# Arrozais: os tabuleiros, diques e sebes a até ARROZAIS_RAIO_M do lugar antigo vão para o novo com
+# o chão deles (cópia por células inteiras, então cada lâmina continua com o fundo plano dela). O
+# chão copiado vale inteiro até ARROZAIS_EMENDA_M[0] do mastro novo e se emenda até [1].
+ARROZAIS_DE = (269555.0, 1692635.0)  # o objetivo A da D-140 à D-200
+ARROZAIS_RAIO_M = 115.0
+ARROZAIS_EMENDA_M = (125.0, 170.0)
+# Centro: o "chão de fora" (alturas a mais de BACIA_FORA_M, alisadas com BACIA_SIGMA_M) é levado
+# por cima do centro, que fica BACIA_FUNDO_M abaixo dele até BACIA_PERFIL_M[0] e sobe até [1]. O
+# terreno antigo dá lugar à bacia até BACIA_TROCA_M[0] e volta inteiro em [1]. Do relevo miúdo
+# antigo fica BACIA_DETALHE (o fundo não vira uma mesa).
+BACIA_CENTRO_M = (0.0, 15.0)  # metros a leste e ao norte do centro do mapa (a praça de Xóm Gò)
+BACIA_FORA_M = 215.0
+BACIA_SIGMA_M = 70.0
+BACIA_FUNDO_M = 5.0
+BACIA_PERFIL_M = (50.0, 185.0)
+BACIA_TROCA_M = (155.0, 245.0)
+BACIA_DETALHE = 0.3
+# Morros de fora: (nome, leste, norte, altura, meia largura ao longo, de lado, rumo em graus a
+# partir do leste) em metros do centro do mapa. Os morros ficam atrás dos objetivos (vistos do
+# centro), a 270–415 m da praça; as duas lombadas, baixas, entre as bases e o centro (~150 m).
+MORROS = [
+    ("morro do noroeste", -255.0, 245.0, 7.0, 45.0, 35.0, 25.0),
+    ("lombada oeste", -165.0, 40.0, 4.0, 70.0, 25.0, 90.0),
+    ("morro do sudoeste", -240.0, -318.0, 6.0, 50.0, 22.0, 5.0),
+    ("morro do sul", 10.0, -312.0, 6.0, 45.0, 26.0, -10.0),
+    ("lombada leste", 115.0, 100.0, 4.0, 55.0, 28.0, 60.0),
+    ("morro do nordeste", 175.0, 268.0, 7.0, 40.0, 30.0, 0.0),
+    ("morro do norte", -40.0, 300.0, 5.0, 45.0, 28.0, 0.0),
+]
+# a bacia e o vale do rio descem em rampa larga: perto de casas e túneis a folga é esta (m), mais
+# curta que a do relevo aleatório (RELEVO_FOLGA)
+PROTECAO_LARGA_M = (12.0, 35.0)
+# Taludes: (nome, leste1, norte1, leste2, norte2, altura, frente, platô, volta) em metros. Sobe à
+# esquerda de 1 -> 2: a frente de FRENTE m, o platô e a volta suave.
+TALUDES = [
+    ("talude do norte", -90.0, 205.0, 70.0, 232.0, 2.5, 14.0, 18.0, 45.0),
+    ("talude do sudoeste", -140.0, -60.0, -60.0, -150.0, 2.5, 12.0, 15.0, 40.0),
+]
+# relevo aleatório de fora (outra semente; o do lote 26 continua): até ±RELEVO2_AMP_M (95%)
+RELEVO2_AMP_M = 6.0
+RELEVO2_SIGMA_M = 32.0
+RELEVO2_SEMENTE = 1965085
+RELEVO2_FORA_M = (200.0, 280.0)  # do centro da bacia: sem relevo aleatório no centro nem na borda
+# Vale do rio novo: o chão acima de RIO_VALE (m) a d m do eixo desce até ele (só desce).
+RIO_VALE_BORDA_M = 10.5
+RIO_VALE_RAMPA = 0.10
+RIO_VALE_FIM_M = (80.0, 140.0)
+# pátio de cada objetivo: o relevo miúdo some até PATIO_M[0] do mastro e volta em [1]
+PATIO_M = (22.0, 40.0)
+
+
+def _git_grid(commit: str) -> dict:
+    import subprocess
+
+    def ler(nome: str) -> str:
+        rel = f"./src/ServerStorage/VT65Build/Data/{nome}.luau"
+        r = subprocess.run(
+            ["git", "-C", str(ROOT), "show", f"{commit}:{rel}"],
+            capture_output=True,
+            check=True,
+        )
+        return r.stdout.decode("utf-8")
+
+    return read_grid(ler)
+
+
+def desfaz_rio_antigo(g: dict) -> dict:
+    """D-201: volta o chão e a classe das células que o rio antigo (lote 26b) mexeu, uma vez.
+
+    A v71 refez o relevo do lote 26 com a proteção dos tabuleiros corrigida (D-141), então fora do
+    rio a v70 não serve. Só voltam ao chão da v70 as células que o abre_rio antigo gravou: o
+    leito (9,0 m) e a margem que ficou exatamente na rampa dele (o resto da margem já estava
+    abaixo dela)."""
+    if not g.get("riverCut") or g.get("centerLowered"):
+        return {"feito": False}
+    g70 = _git_grid(RIO_ANTIGO_COMMIT)
+    assert g70["heights"].shape == g["heights"].shape, "grade da v70 diferente"
+    assert (g70["ox"], g70["oz"], g70["cell"]) == (g["ox"], g["oz"], g["cell"])
+    cell = g["cell"]
+    rows, cols = np.indices(g["heights"].shape)
+    xs = g["ox"] + (cols + 0.5) * cell
+    zs = g["oz"] + (rows + 0.5) * cell
+    d = _dist_polilinha(xs, zs, [ing_local(e, n) for e, n in RIO_ANTIGO_PONTOS]) * STUD_M
+    h = (g["heights"].astype(float) - g["hoff"]) / 100.0
+    rampa = RIO_FUNDO_M + 0.6 + RIO_BORDA_M + (d - RIO_MEIA_M) * RIO_ENCOSTA
+    leito = (d <= RIO_MEIA_M) & (np.abs(h - RIO_FUNDO_M) < 0.006)
+    margem = (d > RIO_MEIA_M) & (d <= RIO_MEIA_M + RIO_MARGEM_M) & (np.abs(h - rampa) < 0.006)
+    volta = leito | margem
+    # o relevo da v71 difere do da v70 perto dos tabuleiros: a diferença das células vizinhas (que o
+    # rio não mexeu), alisada, entra também nas que voltam (senão ficava degrau de até 5 m)
+    from scipy import ndimage
+
+    h70 = (g70["heights"].astype(float) - g["hoff"]) / 100.0
+    fica = (~volta).astype(float)
+    sig = 10.0 / (cell * STUD_M)
+    dif = ndimage.gaussian_filter((h - h70) * fica, sig, mode="nearest") / np.maximum(
+        ndimage.gaussian_filter(fica, sig, mode="nearest"), 1e-9
+    )
+    antes = np.where(volta, h70 + dif, h)
+    g["heights"] = np.clip(np.round(antes * 100 + g["hoff"]), 0, 65535).astype("<u2")
+    cls = (g["cls"] == 5) & (g70["cls"] != 5)
+    g["cls"] = np.where(cls, g70["cls"], g["cls"]).astype(np.uint8)
+    g["riverCut"] = 0
+    return {
+        "celulas_leito": int(leito.sum()),
+        "celulas_margem": int(margem.sum()),
+        "celulas_classe": int(cls.sum()),
+    }
+
+
+def _suave(t: np.ndarray) -> np.ndarray:
+    t = np.clip(t, 0.0, 1.0)
+    return t * t * (3 - 2 * t)
+
+
+def _rampa(d: np.ndarray, d0: float, d1: float) -> np.ndarray:
+    return _suave((d - d0) / (d1 - d0))
+
+
+def _pares(pts: list) -> np.ndarray:
+    """polilinha -> segmentos (x1, z1, x2, z2)"""
+    return np.array([(a[0], a[1], b[0], b[1]) for a, b in zip(pts, pts[1:], strict=False)], float)
+
+
+def _marca_pontos(g: dict, pts) -> np.ndarray:
+    m = np.zeros(g["heights"].shape, bool)
+    for x, z in pts:
+        r, c = int((z - g["oz"]) / g["cell"]), int((x - g["ox"]) / g["cell"])
+        if 0 <= r < m.shape[0] and 0 <= c < m.shape[1]:
+            m[r, c] = True
+    return m
+
+
+def _marca_segmentos(g: dict, a: np.ndarray) -> np.ndarray:
+    pts = []
+    for x1, z1, x2, z2, *_ in a:
+        n = max(2, int(math.hypot(x2 - x1, z2 - z1) / g["cell"]) + 2)
+        pts += [(x1 + (x2 - x1) * t, z1 + (z2 - z1) * t) for t in np.linspace(0, 1, n)]
+    return _marca_pontos(g, pts)
+
+
+def _dist_marcas(g: dict, marcas: np.ndarray) -> np.ndarray:
+    """distância (m) de cada célula até a marca mais perto (infinito sem marcas)"""
+    from scipy import ndimage
+
+    if not marcas.any():
+        return np.full(marcas.shape, np.inf)
+    return ndimage.distance_transform_edt(~marcas) * g["cell"] * STUD_M
+
+
+def _peso_de(g: dict, marcas: np.ndarray, d0: float, d1: float) -> np.ndarray:
+    """0 até d0 (m) das marcas, 1 a partir de d1"""
+    return _rampa(_dist_marcas(g, marcas), d0, d1)
+
+
+def _feicoes(g: dict, f: dict, xs: np.ndarray, zs: np.ndarray, todas: dict | None = None):
+    """Células das lâminas e dos diques e sebes que o jogo põe: perto de um tabuleiro ou de uma casa
+    (como no mais_relevo). todas: as feições que contam para esse "perto" (sem ele, as de f)."""
+    todas = todas or f
+    laminas = todas["waters"][:, :2]
+    casas = todas["houses"][:, :2]
+
+    def da_lavoura(a: np.ndarray) -> np.ndarray:
+        if len(a) == 0:
+            return a
+        mx, mz = (a[:, 0] + a[:, 2]) / 2, (a[:, 1] + a[:, 3]) / 2
+        perto = np.zeros(len(a), bool)
+        for px, pz in laminas:
+            perto |= np.hypot(mx - px, mz - pz) * STUD_M <= 50.0
+        for px, pz in casas:
+            perto |= np.hypot(mx - px, mz - pz) * STUD_M <= RELEVO_LAVOURA_CASA_M
+        return a[perto]
+
+    m = _marca_segmentos(g, da_lavoura(f["dikes"])) | _marca_segmentos(g, da_lavoura(f["hedges"]))
+    for x, z, _y, su, sv, _a in f["waters"]:
+        m |= np.hypot(xs - x, zs - z) <= math.hypot(su, sv) / 2
+    return m
+
+
+def _protecao(
+    g: dict, f: dict, xs: np.ndarray, zs: np.ndarray, perto: tuple[float, float] | None = None
+) -> np.ndarray:
+    """Peso 0..1 do relevo novo: zero no que tem altura própria (as folgas do lote 26). Com perto,
+    as casas e os túneis usam essa folga mais curta (a bacia e o vale: chão que desce em rampa
+    larga, sem os morrotes do relevo aleatório)."""
+    peso = _peso_de(g, _feicoes(g, f, xs, zs), *RELEVO_FOLGA["feicao"])
+    casa = perto or RELEVO_FOLGA["casa"]
+    tunel = perto or RELEVO_FOLGA["tunel"]
+    peso = np.minimum(peso, _peso_de(g, _marca_pontos(g, f["houses"][:, :2]), *casa))
+    peso = np.minimum(peso, _peso_de(g, g["cls"] == 5, *RELEVO_FOLGA["riacho"]))
+    bocas, vala = _tuneis_ing()
+    tuneis = _marca_segmentos(g, _pares(vala)) | _marca_pontos(g, bocas)
+    peso = np.minimum(peso, _peso_de(g, tuneis, *tunel))
+    for e, n, _ in QGS.values():
+        bx, bz = ing_local(e, n)
+        peso = np.minimum(peso, _rampa(np.hypot(xs - bx, zs - bz) * STUD_M, *RELEVO_BASE_M))
+    return peso
+
+
+def _move_arrozais(g: dict, f: dict, xs, zs, h: np.ndarray) -> dict:
+    """Leva os tabuleiros, diques e sebes dos Arrozais antigos para o objetivo novo, com o chão."""
+    cell = g["cell"]
+    ax0, az0 = ing_local(*ARROZAIS_DE)
+    novo = next((e, n) for _s, nm, e, n, *_ in PONTOS_FORTES if nm == "Arrozais")
+    ax1, az1 = ing_local(*novo)
+    dc, dr = round((ax1 - ax0) / cell), round((az1 - az0) / cell)
+    dx, dz = dc * cell, dr * cell
+    cx, cz = ax0 + dx, az0 + dz  # o centro da cópia (a meia célula do mastro novo)
+    raio = ARROZAIS_RAIO_M / STUD_M
+    d_novo = np.hypot(xs - cx, zs - cz) * STUD_M
+    # chão de origem (célula - deslocamento) e o quanto ele sobe para casar com o lugar novo
+    rows, cols = np.indices(h.shape)
+    rs, cs = rows - dr, cols - dc
+    valido = (rs >= 0) & (rs < h.shape[0]) & (cs >= 0) & (cs < h.shape[1])
+    copia = np.where(valido, h[np.clip(rs, 0, h.shape[0] - 1), np.clip(cs, 0, h.shape[1] - 1)], h)
+    d_velho = np.hypot(xs - ax0, zs - az0) * STUD_M
+    borda_velha = (d_velho > 100) & (d_velho <= ARROZAIS_EMENDA_M[0])
+    anel_novo = (d_novo > ARROZAIS_EMENDA_M[0]) & (d_novo <= ARROZAIS_EMENDA_M[1])
+    dy = float(np.median(h[anel_novo]) - np.median(h[borda_velha]))
+    w = 1.0 - _rampa(d_novo, *ARROZAIS_EMENDA_M)
+    w = np.where(valido, w, 0.0)
+    cls_antes = g["cls"].copy()
+    nucleo = (d_novo <= ARROZAIS_EMENDA_M[0]) & valido
+    origem = cls_antes[np.clip(rs, 0, h.shape[0] - 1), np.clip(cs, 0, h.shape[1] - 1)]
+    troca = nucleo & (cls_antes != 5) & (origem != 5)
+    g["cls"][troca] = origem[troca]
+    dy_studs = dy / STUD_M
+    n_mov = {}
+    foram = {"houses": f["houses"][:0]}
+    ficaram = {"houses": f["houses"]}
+    # quem vai: o meio dentro do raio do lugar antigo; quem sai: o que já estava no lugar novo
+    for key, cols_y in (("waters", (2,)), ("dikes", (4, 5)), ("hedges", (4,))):
+        a = f[key]
+        if key == "waters":
+            mx, mz = a[:, 0], a[:, 1]
+        else:
+            mx, mz = (a[:, 0] + a[:, 2]) / 2, (a[:, 1] + a[:, 3]) / 2
+        vai = np.hypot(mx - ax0, mz - az0) <= raio
+        no_lugar = (np.hypot(mx - cx, mz - cz) * STUD_M <= ARROZAIS_EMENDA_M[0] + 10) & ~vai
+        a = a.copy()
+        a[vai, 0] += dx
+        a[vai, 1] += dz
+        if key != "waters":
+            a[vai, 2] += dx
+            a[vai, 3] += dz
+        for c in cols_y:
+            a[vai, c] += dy_studs
+        f[key] = a[~no_lugar]
+        foram[key] = a[vai]
+        ficaram[key] = a[~vai & ~no_lugar]
+        n_mov[key] = {"foram": int(vai.sum()), "sairam": int(no_lugar.sum())}
+    # a emenda não mexe no chão das feições que ficaram, e debaixo das que foram o chão copiado vale
+    # inteiro (uma lâmina grande na beira do raio passa dos 125 m)
+    w = w * _peso_de(g, _feicoes(g, ficaram, xs, zs, f), *RELEVO_FOLGA["feicao"])
+    debaixo = 1 - _rampa(_dist_marcas(g, _feicoes(g, foram, xs, zs, f)), 4.0, 20.0)
+    w = np.maximum(w, np.where(valido, debaixo, 0.0))
+    novo_h = h * (1 - w) + (copia + dy) * w
+    return {
+        "h": novo_h,
+        "info": {
+            "deslocamento_m": [round(dx * STUD_M, 1), round(-dz * STUD_M, 1)],
+            "sobe_m": round(dy, 2),
+            "celulas_de_classe": int(troca.sum()),
+            **n_mov,
+        },
+        "centro": (cx, cz),
+    }
+
+
+def centraliza(g: dict, f: dict) -> dict:
+    if g.get("centerLowered"):
+        return {"ja_feito": True}
+    from scipy import ndimage
+
+    cell = g["cell"]
+    cm = cell * STUD_M
+    shape = g["heights"].shape
+    rows, cols = np.indices(shape)
+    xs = g["ox"] + (cols + 0.5) * cell
+    zs = g["oz"] + (rows + 0.5) * cell
+    mx0, mz0 = ing_local(*CENTRO_ING)
+    em, nm = (xs - mx0) * STUD_M, -(zs - mz0) * STUD_M  # metros a leste e ao norte do centro
+    h0 = (g["heights"].astype(float) - g["hoff"]) / 100.0
+    info: dict = {}
+
+    # 1. os Arrozais com o chão e os tabuleiros
+    arroz = _move_arrozais(g, f, xs, zs, h0)
+    h1 = arroz["h"]
+    info["arrozais"] = arroz["info"]
+    ax, az = arroz["centro"]
+    d_arroz = np.hypot(xs - ax, zs - az) * STUD_M
+
+    em_arroz = _rampa(d_arroz, ARROZAIS_EMENDA_M[0], ARROZAIS_EMENDA_M[1] - 5)
+    peso = np.minimum(_protecao(g, f, xs, zs), em_arroz)
+    peso_largo = np.minimum(_protecao(g, f, xs, zs, PROTECAO_LARGA_M), em_arroz)
+
+    # 2. o centro: bacia por baixo do chão de fora
+    r = np.hypot(em - BACIA_CENTRO_M[0], nm - BACIA_CENTRO_M[1])
+    fora = (r > BACIA_FORA_M).astype(float)
+    sig = BACIA_SIGMA_M / cm
+    chao = ndimage.gaussian_filter(h1 * fora, sig, mode="nearest") / np.maximum(
+        ndimage.gaussian_filter(fora, sig, mode="nearest"), 1e-9
+    )
+    miudo = h1 - ndimage.gaussian_filter(h1, 20.0 / cm, mode="nearest")
+    bacia = chao - BACIA_FUNDO_M * (1 - _rampa(r, *BACIA_PERFIL_M)) + BACIA_DETALHE * miudo
+    troca = 1 - _rampa(r, *BACIA_TROCA_M)
+    d_centro = troca * (bacia - h1) * peso_largo
+
+    # 3. morros, taludes e relevo aleatório fora do centro
+    d_morro = np.zeros(shape)
+    for _nome, e, n, alt, sx, sy, giro in MORROS:
+        a = math.radians(giro)
+        u = (em - e) * math.cos(a) + (nm - n) * math.sin(a)
+        v = -(em - e) * math.sin(a) + (nm - n) * math.cos(a)
+        d_morro += alt * np.exp(-0.5 * ((u / sx) ** 2 + (v / sy) ** 2))
+    for _nome, e1, n1, e2, n2, alt, frente, plato, volta in TALUDES:
+        le = math.hypot(e2 - e1, n2 - n1)
+        te, tn = (e2 - e1) / le, (n2 - n1) / le
+        ao_longo = (em - e1) * te + (nm - n1) * tn
+        lado = -(em - e1) * tn + (nm - n1) * te  # positivo à esquerda de 1 -> 2
+        sobe = _suave((lado + frente / 2) / frente)
+        desce = 1 - _rampa(lado, frente / 2 + plato, frente / 2 + plato + volta)
+        pontas = _rampa(ao_longo, -30.0, 10.0) * (1 - _rampa(ao_longo, le - 10.0, le + 30.0))
+        d_morro += alt * sobe * desce * pontas
+    rng = np.random.default_rng(RELEVO2_SEMENTE)
+    campo = ndimage.gaussian_filter(rng.normal(size=shape), RELEVO2_SIGMA_M / cm, mode="reflect")
+    campo /= campo.std()
+    xa, xb, za, zb = crop_box(0.0)
+    de_fora = (xs < xa) | (xs > xb) | (zs < za) | (zs > zb)
+    ganho = np.where(de_fora, RELEVO_HORIZONTE, 1.0) * _rampa(r, *RELEVO2_FORA_M)
+    d_relevo = RELEVO2_AMP_M / 2 * campo * ganho
+    h2 = h1 + d_centro + (d_morro + d_relevo) * peso
+
+    # 4. o vale do rio novo (só desce)
+    d_rio = _dist_polilinha(xs, zs, [ing_local(e, n) for e, n in RIO_PONTOS]) * STUD_M
+    vale = RIO_VALE_BORDA_M + RIO_VALE_RAMPA * np.maximum(d_rio - RIO_MEIA_M, 0.0)
+    desce = np.maximum(h2 - vale, 0.0) * (1 - _rampa(d_rio, *RIO_VALE_FIM_M)) * peso_largo
+    h3 = h2 - desce
+
+    # 5. pátio dos objetivos novos: sem o relevo miúdo perto do mastro
+    liso = ndimage.gaussian_filter(h3, 12.0 / cm, mode="nearest")
+    for _s, nome, e, n, *_ in PONTOS_FORTES:
+        if e is None or nome == "Arrozais":
+            continue
+        px, pz = ing_local(e, n)
+        wp = 1 - _rampa(np.hypot(xs - px, zs - pz) * STUD_M, *PATIO_M)
+        h3 = h3 * (1 - wp) + liso * wp
+
+    g["heights"] = np.clip(np.round(h3 * 100 + g["hoff"]), 0, 65535).astype("<u2")
+    g["centerLowered"] = 1
+    dentro = ~de_fora
+    gy, gx = np.gradient(h3, cm)
+    rampa = np.hypot(gx, gy)
+    info.update(
+        {
+            "desnivel_m": [round(float(h0[dentro].min()), 1), round(float(h0[dentro].max()), 1)],
+            "desnivel_depois_m": [
+                round(float(h3[dentro].min()), 1),
+                round(float(h3[dentro].max()), 1),
+            ],
+            "centro_baixou_m": round(float((h0 - h3)[(r < 30) & dentro].mean()), 1),
+            "rampa_p95": round(float(np.percentile(rampa[dentro], 95)), 3),
+            "rampa_max": round(float(rampa[dentro].max()), 3),
+            "rio_vale_baixou_max_m": round(float(desce[dentro].max()), 1),
+        }
+    )
+    return info
+
+
 # ---------- casario de An Cường (2) (D-115) ----------
 # Pedido do dono: "aumente as cabanas de todo jogo e o tamanho das vilas". No recorte de 500 m An
 # Cường (2) tinha só as 5 casas da carta. Ganha um casario de design em volta da vila, como os
@@ -1328,9 +1795,7 @@ def vila_e_estradas(g: dict, f: dict) -> dict:
     # D-148: os outros dois pontos da vila (fora do sorteio desde a D-128) vão nas pontas das duas
     # trilhas largas do meio círculo, a mais perto e a mais longe do centro do mapa
     cx, cz = ing_local((PLAY_ING[0] + PLAY_ING[2]) / 2, (PLAY_ING[1] + PLAY_ING[3]) / 2)
-    pts = sorted(
-        (b for _a, b in vila["travessas"]), key=lambda p: math.hypot(p[0] - cx, p[1] - cz)
-    )
+    pts = sorted((b for _a, b in vila["travessas"]), key=lambda p: math.hypot(p[0] - cx, p[1] - cz))
     VILA_XZ[VILA_BECOS[1]] = pts[0]
     VILA_XZ[VILA_PONTA[1]] = pts[-1]
     return info
@@ -1346,16 +1811,20 @@ def main() -> None:
     gc = crop_grid(g, box)
     fc = crop_features(f, crop_box(FEICOES_M), crop_box(0.0))
     riacho = abre_riacho(gc, fc)
-    rio = abre_rio(gc, fc)  # lote 26b: depois do riacho (o canal dele não afunda o rio)
+    rio_antigo = desfaz_rio_antigo(gc)  # D-201: só uma vez, sobre os dados da v118
     base = limpa_base(fc)
     morro = move_morro(gc, fc)
     casario = casario_an_cuong(gc, fc)
     relevo = mais_relevo(gc, fc)  # lote 26: antes da vila e das estradas, que se ajustam ao chão
+    centro = centraliza(gc, fc)  # D-201: objetivos mais centrais, centro mais baixo, morros fora
+    # lote 26b: depois do riacho (o canal dele não afunda o rio); D-201: depois do centraliza, que
+    # já baixou o vale do rio novo
+    rio = abre_rio(gc, fc)
     vila_info = vila_e_estradas(gc, fc)
     write_grid(gc)
     write_features(fc)
     write_mapconfig(crop_box(LOCAIS_TOL_M))
-    n_fx = write_fixture(box)
+    n_fx = write_fixture(box, gc)
     print(
         json.dumps(
             {
@@ -1363,6 +1832,8 @@ def main() -> None:
                 "grade_depois": [gc["w"], gc["h"]],
                 **{k: [len(f[k]), len(fc[k])] for k in f},
                 "riacho": riacho,
+                "rio_antigo_desfeito": rio_antigo,
+                "centraliza": centro,
                 "rio": rio,
                 "base_eua_sem": base,
                 "morro": morro,

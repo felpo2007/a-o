@@ -8204,3 +8204,125 @@ dos EUA usa o mesmo caminho com a ficha dela (sem arte de 1ª pessoa).
 **Limite conhecido:** a arte do RPG-2 (ForgeGUI) é uma malha só, com a ogiva sempre na boca: vazio ou
 recarregando, ela continua aparecendo. Para tirar, é preciso um RPG-2 do Blender com a ogiva em peça
 própria.
+## D-201 — Lote 85: objetivos mais centrais, centro mais baixo e mais relevo fora (2026-11-20)
+
+**Pedido do dono** (prompt de jogabilidade, §20): aproximar os cinco objetivos do centro levando o
+conjunto inteiro (área de captura, construções, cobertura, acessos e pontos), sem juntar tudo num
+ponto; rebaixar o centro numa depressão suave e legível, com saídas e cobertura e sem ficar exposto
+aos altos; mais relevo fora do centro, sem um ponto alto que domine todos os objetivos; revisar
+estradas, pontes, água, vegetação e construções; atualizar marcadores, zonas, carta e spawns; medir os
+tempos de chegada com a velocidade nova e conferir as rotas dos veículos. O mapa continua de 700 x
+700 m, com as bases no meio das bordas oeste e leste.
+
+**Revê a D-128/D-140** ("um objetivo em cada canto, longe das bases") e o "morro do centro" da vila
+(D-95, D-114): o pedido novo manda o contrário nos dois.
+
+**Objetivos** (`tools/crop_world.py`, `PONTOS_FORTES`; metros a leste/norte do centro do mapa):
+
+| Objetivo | Era | Agora | Do centro | Do QG mais perto |
+|---|---|---|---|---|
+| A Arrozais | (−275, −295) | (−205, −165) | 403 → 263 m | 296 → 190 m |
+| B Serraria | (−130, +240) | (−125, +165) | 273 → 207 m | 294 → 240 m |
+| C Xóm Gò | praça (−13, +15) | praça (−13, +30) | — | — |
+| D Ponte e Cais | (+100, −285) | (+80, −165) | 302 → 183 m | 348 → 275 m |
+| E Engenho | (+215, +303) | (+195, +165) | 372 → 255 m | 315 → 196 m |
+
+- Entre objetivos vizinhos na ordem dos setores: A→B 554 → 340 m, B→C 254 → 176 m, C→D 320 → 216
+  m, D→E 599 → 350 m. Os quatro continuam nos quatro quadrantes, com mata e lavoura entre eles.
+- **Setores:** S1/S2 em x = −165 m (era −230); S2/S3 em −80; S3/S4 com um degrau, +40 m ao sul de N
+  1692,83 (a Ponte e Cais) e +90 m ao norte (a vila inteira no C); S4/S5 em +150 (era +170: o portão da
+  base dos EUA fica a 106 m do setor que o VC pode tomar, eram 86). Cada objetivo a 40 m ou mais da
+  sua fronteira. A carta e o `Carta.boundary` já tratavam fronteira em degrau; o teste do `modo` passou
+  a pedir trechos retos que somam a altura do mapa.
+- **O conjunto vem junto:**
+  - as construções, as árvores, a clareira, a lavoura e os pontos de reunião saem da posição do mastro
+    (ArtPlan, Landscape, Vegetation, SpawnRules); o plano pôs as 8/9/13/8 peças de A/B/D/E, como na
+    D-172;
+  - **Arrozais:** os 16 tabuleiros, 67 diques e 9 sebes a até 115 m do lugar antigo foram com o chão
+    deles (cópia por células inteiras, +71,7 m a leste e +129,9 m ao norte, o chão 3,86 m acima).
+    No lugar novo saíram 1 lâmina, 6 diques e 15 sebes que ficavam por baixo. Os 44 tabuleiros que
+    ficaram têm o mesmo desnível de antes (0 acima de 0,8 m);
+  - **Ponte e Cais:** o rio foi junto (abaixo).
+
+**Rio do sul** (`RIO_PONTOS`): entra pela borda oeste ao sul dos tabuleiros, corre para leste, passa
+~30 m ao sul da Ponte e Cais, vira para o sul a oeste de An Cường (2) e sai pela borda sul; fora da área
+vai até o riacho. 641 células de leito, 368 dentro da área (eram 489 e 233).
+- O rio antigo foi desfeito (`desfaz_rio_antigo`): voltam ao chão da v70 (Git, 6c0b188) só as células
+  que o `abre_rio` antigo gravou (489 de leito e 1.249 de margem, e 486 de classe). A v70 não serve
+  inteira: a v71 refez o relevo perto dos tabuleiros (D-141). A diferença v71−v70 das vizinhas entra
+  também nessas células (sem ela ficavam degraus de até 5 m).
+- A margem nova não rebaixa a até 12 m das bocas de túnel e da trincheira nem a até 15 m de casa; fora
+  da área, a beira junto da água sobe até 0,9 m acima do espelho (o chão a sudeste é baixo). Margem mais
+  baixa junto da água: 10,5 m (espelho 9,6 m).
+- A faixa ao sul do rio virou caminho de flanco: a volta sul das estradas cruza o rio em dois vaus
+  aterrados (o leito de estrada com bueiro da Site) e a ponte da Ponte e Cais.
+
+**Centro mais baixo** (`centraliza`, gravado no Grid como `centerLowered`):
+- O "chão de fora" (alturas a mais de 215 m do centro, alisadas em 70 m) passa por cima do centro, e o
+  centro fica 5 m abaixo dele até 50 m, subindo até 185 m; o terreno antigo dá lugar a isso até 155 m
+  e volta inteiro em 245 m. Fica 30% do relevo miúdo antigo.
+- O morro de 35,7 m da vila sumiu: o centro baixou 20,6 m. No jogo (teste `run`): fundo 14,3 m (0–40
+  m da praça) contra 19,4 m no anel de 130–200 m. No Studio: praça 14,1 m, e 21,9 m 200 m ao norte.
+- A vila foi replanejada no chão novo (35 casas) e as estradas também (principal 1.102 m, secundária
+  1.895 m).
+- **Não fica exposto:** de 8 pontos a 200 m da praça, com o olho a 1,6 m, só 0 a 14 de 121 pontos da
+  vila ficam à vista (média de 3%; raios contra o terreno e as peças, no Studio). O capim alto, o
+  bambu, as casas e a curva do chão tapam o resto. Saídas: a principal corta a baixada de sudoeste a
+  nordeste e há estradas para a Ponte e Cais e para a base dos EUA; o sul abre para o vale do rio.
+
+**Mais relevo fora do centro** (com peso 0 no que tem altura própria, como no lote 26: tabuleiros,
+diques e sebes da lavoura, casas, riacho, túneis e bases):
+- 5 morros de 5 a 7 m atrás dos objetivos (vistos do centro), a 270–415 m da praça; 2 lombadas de 4 m
+  entre as bases e o centro (~150 m); 2 taludes de 2,5–3 m (norte e sudoeste); relevo aleatório de ±6 m
+  a mais de 200–280 m do centro (outra semente; o do lote 26 continua).
+- Vale do rio: o chão acima de 10,5 m + 10% da distância ao eixo desce até ele (até 140 m).
+- Na área: desnível de 8,9–35,7 m para 7,2–29,7 m; rampa p95 26,5% (era ~26%), máxima 58,6%. O ponto
+  mais alto (29,6 m) fica no setor A, a 209 m da praça.
+- **Nenhum alto domina:** dos 4% mais altos da área, com só o chão, ninguém vê mais que 3 objetivos até
+  300 m, nem mais que 4 até 400 m (na v118, 3 e 3: os cantos ficavam longe demais do morro).
+
+**Tempos de chegada a pé** (`tools/tempos_chegada.py`: caminho mais rápido na grade, trote de 4,70
+m/s da D-188, VC × 1,12, rampa, mata, tabuleiro e água do `Movement`; sem casas e árvores):
+
+| De → para | v118 | agora |
+|---|---|---|
+| QG VC → A | 60 s | 40 s |
+| QG VC → B | 66 s | 52 s |
+| QG VC → C | 64 s | 62 s |
+| QG VC → D | 108 s | 91 s |
+| QG VC → E | 133 s | 113 s |
+| QG EUA → A | 161 s | 130 s |
+| QG EUA → B | 124 s | 113 s |
+| QG EUA → C | 75 s | 72 s |
+| QG EUA → D | 85 s | 67 s |
+| QG EUA → E | 79 s | 51 s |
+
+**Veículos** (teste `estradas`): M48A3, M151, M35, LVTP-5 e Ontos vão e voltam do QG dos EUA a todos os
+objetivos; o M48 alcança e volta de 99,8% das células onde cabe.
+
+**Raia de tiro:** com a vila na baixada, uma casa caiu na linha do alvo de 150 m do VC (o autoteste
+parou nela). A escolha da direção (`TrainingService`) agora também recusa construção de `Map.Art` a
+menos de 8 m da linha do tiro (depois dos primeiros 10 m).
+
+**Arte fixa (SLIM, D-155):** recopiada do jogo rodando, sem nenhum conjunto ligado:
+- `vila_construcoes`: 24 construções de peças (eram 19: as 4 de peças da D-172 e uma horta a mais),
+  301 peças, 57.320 bytes, FNV-1a 717725730 no Studio e no arquivo;
+- `vila_casas`: a vila inteira, 9 moldes e 26 instâncias (35 casas; as 3 `vila_casa_09` ficam com o
+  jogo), 58.185 bytes, FNV-1a 3314851559. O conjunto `vila_casa_03_xomgo` (D-167) saiu: a casa dele
+  é o molde da `vila_casa_03` agora;
+- no Studio: 59 modelos no arquivo e 59 cópias do plano puladas, sem aviso.
+
+**Carta:** refeita e reenviada (os blocos antigos ficaram como `Carta.*_v118`).
+
+**Autoteste** (4 rodadas no Studio): a raia passou nos 6 alvos depois da correção. A granada de bot
+caiu longe em 2 das 4 (12,3 e 16,0 m de um alvo a 25 m à frente de onde o bot estiver; já falhava
+por sorteio, lote 12, e o relevo maior faz o chão do caminho barrar mais). A pá falhou 1 vez, depois
+do teste de Offensive mudar a frente (passou nas outras). "Deitado" falhou 1 vez com a arte ainda
+carregando.
+
+**Flutuando:** `VT65DevFlutua` sem nada novo no ar nos objetivos e na vila. Ficaram 3 casos em An Cường
+(cabana com um canto 1,43 m no ar, pote 0,44 m, bunker 0,25 m), onde o chão não mudou neste lote
+(diferença 0,00 m): eram de antes. Os barcos da Ponte e Cais "no ar" estão na água.
+
+**Não testado:** outro jogador; celular; o jogo publicado; o tempo de chegada andando de verdade no
+jogo (medido na grade); bots numa partida inteira no mapa novo.

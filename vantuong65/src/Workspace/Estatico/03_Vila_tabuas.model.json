@@ -1,0 +1,3056 @@
+{
+ "ClassName": "Model",
+ "Properties": {
+  "LevelOfDetail": {
+   "Enum": 4
+  },
+  "ModelStreamingMode": "Atomic",
+  "WorldPivotData": {
+   "OptionalCFrame": {
+    "position": [
+     -1785.93,
+     85.937,
+     -2513.029
+    ],
+    "orientation": [
+     [
+      -0.9463,
+      0,
+      -0.32329
+     ],
+     [
+      0,
+      1,
+      0
+     ],
+     [
+      0.32329,
+      0,
+      -0.9463
+     ]
+    ]
+   }
+  },
+  "Attributes": {
+   "Attributes": {
+    "VT65Estatico": {
+     "Bool": true
+    },
+    "VT65Chave": {
+     "String": "Vila_tabuas"
+    }
+   }
+  }
+ },
+ "Children": [
+  {
+   "Name": "Tabua",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     0.714,
+     0.679,
+     6.786
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1780.523,
+       86.276,
+       -2514.876
+      ],
+      "orientation": [
+       [
+        -0.9463,
+        0.0,
+        -0.32329
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.32329,
+        0.0,
+        -0.9463
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "WoodPlanks",
+    "Color": [
+     0.3608,
+     0.2745,
+     0.1882
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Tabua",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     0.714,
+     0.679,
+     6.786
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1785.93,
+       86.276,
+       -2513.029
+      ],
+      "orientation": [
+       [
+        -0.9463,
+        0.0,
+        -0.32329
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.32329,
+        0.0,
+        -0.9463
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "WoodPlanks",
+    "Color": [
+     0.3608,
+     0.2745,
+     0.1882
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Tabua",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     0.714,
+     0.679,
+     6.786
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1791.338,
+       86.276,
+       -2511.181
+      ],
+      "orientation": [
+       [
+        -0.9463,
+        0.0,
+        -0.32329
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.32329,
+        0.0,
+        -0.9463
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "WoodPlanks",
+    "Color": [
+     0.3608,
+     0.2745,
+     0.1882
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Tabua",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     13.571,
+     0.286,
+     1.071
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1785.099,
+       86.973,
+       -2510.595
+      ],
+      "orientation": [
+       [
+        -0.9463,
+        0.0,
+        -0.32329
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.32329,
+        0.0,
+        -0.9463
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "WoodPlanks",
+    "Color": [
+     0.6902,
+     0.5333,
+     0.3529
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Tabua",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     13.571,
+     0.286,
+     1.071
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1785.515,
+       86.973,
+       -2511.812
+      ],
+      "orientation": [
+       [
+        -0.9463,
+        0.0,
+        -0.32329
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.32329,
+        0.0,
+        -0.9463
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "WoodPlanks",
+    "Color": [
+     0.6902,
+     0.5333,
+     0.3529
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Tabua",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     13.571,
+     0.286,
+     1.071
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1785.93,
+       86.973,
+       -2513.029
+      ],
+      "orientation": [
+       [
+        -0.9463,
+        0.0,
+        -0.32329
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.32329,
+        0.0,
+        -0.9463
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "WoodPlanks",
+    "Color": [
+     0.6902,
+     0.5333,
+     0.3529
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Tabua",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     13.571,
+     0.286,
+     1.071
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1786.346,
+       86.973,
+       -2514.245
+      ],
+      "orientation": [
+       [
+        -0.9463,
+        0.0,
+        -0.32329
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.32329,
+        0.0,
+        -0.9463
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "WoodPlanks",
+    "Color": [
+     0.6902,
+     0.5333,
+     0.3529
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Tabua",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     13.571,
+     0.286,
+     1.071
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1786.761,
+       86.973,
+       -2515.462
+      ],
+      "orientation": [
+       [
+        -0.9463,
+        0.0,
+        -0.32329
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.32329,
+        0.0,
+        -0.9463
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "WoodPlanks",
+    "Color": [
+     0.6902,
+     0.5333,
+     0.3529
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Tabua",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     0.214,
+     0.214,
+     6.786
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1780.523,
+       86.723,
+       -2514.876
+      ],
+      "orientation": [
+       [
+        -0.9463,
+        0.0,
+        -0.32329
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.32329,
+        0.0,
+        -0.9463
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "WoodPlanks",
+    "Color": [
+     0.3451,
+     0.2431,
+     0.1569
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Tabua",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     0.214,
+     0.214,
+     6.786
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1785.93,
+       86.723,
+       -2513.029
+      ],
+      "orientation": [
+       [
+        -0.9463,
+        0.0,
+        -0.32329
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.32329,
+        0.0,
+        -0.9463
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "WoodPlanks",
+    "Color": [
+     0.3451,
+     0.2431,
+     0.1569
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Tabua",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     0.214,
+     0.214,
+     6.786
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1791.338,
+       86.723,
+       -2511.181
+      ],
+      "orientation": [
+       [
+        -0.9463,
+        0.0,
+        -0.32329
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.32329,
+        0.0,
+        -0.9463
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "WoodPlanks",
+    "Color": [
+     0.3451,
+     0.2431,
+     0.1569
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Tabua",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     13.571,
+     0.286,
+     1.071
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1785.099,
+       87.473,
+       -2510.595
+      ],
+      "orientation": [
+       [
+        -0.9463,
+        0.0,
+        -0.32329
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.32329,
+        0.0,
+        -0.9463
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "WoodPlanks",
+    "Color": [
+     0.6902,
+     0.5333,
+     0.3529
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Tabua",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     13.571,
+     0.286,
+     1.071
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1785.515,
+       87.473,
+       -2511.812
+      ],
+      "orientation": [
+       [
+        -0.9463,
+        0.0,
+        -0.32329
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.32329,
+        0.0,
+        -0.9463
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "WoodPlanks",
+    "Color": [
+     0.6902,
+     0.5333,
+     0.3529
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Tabua",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     13.571,
+     0.286,
+     1.071
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1785.93,
+       87.473,
+       -2513.029
+      ],
+      "orientation": [
+       [
+        -0.9463,
+        0.0,
+        -0.32329
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.32329,
+        0.0,
+        -0.9463
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "WoodPlanks",
+    "Color": [
+     0.6902,
+     0.5333,
+     0.3529
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Tabua",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     13.571,
+     0.286,
+     1.071
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1786.346,
+       87.473,
+       -2514.245
+      ],
+      "orientation": [
+       [
+        -0.9463,
+        0.0,
+        -0.32329
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.32329,
+        0.0,
+        -0.9463
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "WoodPlanks",
+    "Color": [
+     0.6902,
+     0.5333,
+     0.3529
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Tabua",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     13.571,
+     0.286,
+     1.071
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1786.761,
+       87.473,
+       -2515.462
+      ],
+      "orientation": [
+       [
+        -0.9463,
+        0.0,
+        -0.32329
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.32329,
+        0.0,
+        -0.9463
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "WoodPlanks",
+    "Color": [
+     0.6902,
+     0.5333,
+     0.3529
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Tabua",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     0.214,
+     0.214,
+     6.786
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1780.523,
+       87.223,
+       -2514.876
+      ],
+      "orientation": [
+       [
+        -0.9463,
+        0.0,
+        -0.32329
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.32329,
+        0.0,
+        -0.9463
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "WoodPlanks",
+    "Color": [
+     0.3451,
+     0.2431,
+     0.1569
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Tabua",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     0.214,
+     0.214,
+     6.786
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1785.93,
+       87.223,
+       -2513.029
+      ],
+      "orientation": [
+       [
+        -0.9463,
+        0.0,
+        -0.32329
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.32329,
+        0.0,
+        -0.9463
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "WoodPlanks",
+    "Color": [
+     0.3451,
+     0.2431,
+     0.1569
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Tabua",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     0.214,
+     0.214,
+     6.786
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1791.338,
+       87.223,
+       -2511.181
+      ],
+      "orientation": [
+       [
+        -0.9463,
+        0.0,
+        -0.32329
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.32329,
+        0.0,
+        -0.9463
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "WoodPlanks",
+    "Color": [
+     0.3451,
+     0.2431,
+     0.1569
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Tabua",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     13.571,
+     0.286,
+     1.071
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1785.099,
+       87.973,
+       -2510.595
+      ],
+      "orientation": [
+       [
+        -0.9463,
+        0.0,
+        -0.32329
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.32329,
+        0.0,
+        -0.9463
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "WoodPlanks",
+    "Color": [
+     0.6902,
+     0.5333,
+     0.3529
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Tabua",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     13.571,
+     0.286,
+     1.071
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1785.515,
+       87.973,
+       -2511.812
+      ],
+      "orientation": [
+       [
+        -0.9463,
+        0.0,
+        -0.32329
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.32329,
+        0.0,
+        -0.9463
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "WoodPlanks",
+    "Color": [
+     0.6902,
+     0.5333,
+     0.3529
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Tabua",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     13.571,
+     0.286,
+     1.071
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1785.93,
+       87.973,
+       -2513.029
+      ],
+      "orientation": [
+       [
+        -0.9463,
+        0.0,
+        -0.32329
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.32329,
+        0.0,
+        -0.9463
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "WoodPlanks",
+    "Color": [
+     0.6902,
+     0.5333,
+     0.3529
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Tabua",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     13.571,
+     0.286,
+     1.071
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1786.346,
+       87.973,
+       -2514.245
+      ],
+      "orientation": [
+       [
+        -0.9463,
+        0.0,
+        -0.32329
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.32329,
+        0.0,
+        -0.9463
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "WoodPlanks",
+    "Color": [
+     0.6902,
+     0.5333,
+     0.3529
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Tabua",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     13.571,
+     0.286,
+     1.071
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1786.761,
+       87.973,
+       -2515.462
+      ],
+      "orientation": [
+       [
+        -0.9463,
+        0.0,
+        -0.32329
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.32329,
+        0.0,
+        -0.9463
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "WoodPlanks",
+    "Color": [
+     0.6902,
+     0.5333,
+     0.3529
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Tabua",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     0.214,
+     0.214,
+     6.786
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1780.523,
+       87.723,
+       -2514.876
+      ],
+      "orientation": [
+       [
+        -0.9463,
+        0.0,
+        -0.32329
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.32329,
+        0.0,
+        -0.9463
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "WoodPlanks",
+    "Color": [
+     0.3451,
+     0.2431,
+     0.1569
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Tabua",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     0.214,
+     0.214,
+     6.786
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1785.93,
+       87.723,
+       -2513.029
+      ],
+      "orientation": [
+       [
+        -0.9463,
+        0.0,
+        -0.32329
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.32329,
+        0.0,
+        -0.9463
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "WoodPlanks",
+    "Color": [
+     0.3451,
+     0.2431,
+     0.1569
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Tabua",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     0.214,
+     0.214,
+     6.786
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1791.338,
+       87.723,
+       -2511.181
+      ],
+      "orientation": [
+       [
+        -0.9463,
+        0.0,
+        -0.32329
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.32329,
+        0.0,
+        -0.9463
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "WoodPlanks",
+    "Color": [
+     0.3451,
+     0.2431,
+     0.1569
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Tabua",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     13.571,
+     0.286,
+     1.071
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1785.099,
+       88.473,
+       -2510.595
+      ],
+      "orientation": [
+       [
+        -0.9463,
+        0.0,
+        -0.32329
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.32329,
+        0.0,
+        -0.9463
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "WoodPlanks",
+    "Color": [
+     0.6902,
+     0.5333,
+     0.3529
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Tabua",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     13.571,
+     0.286,
+     1.071
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1785.515,
+       88.473,
+       -2511.812
+      ],
+      "orientation": [
+       [
+        -0.9463,
+        0.0,
+        -0.32329
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.32329,
+        0.0,
+        -0.9463
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "WoodPlanks",
+    "Color": [
+     0.6902,
+     0.5333,
+     0.3529
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Tabua",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     13.571,
+     0.286,
+     1.071
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1785.93,
+       88.473,
+       -2513.029
+      ],
+      "orientation": [
+       [
+        -0.9463,
+        0.0,
+        -0.32329
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.32329,
+        0.0,
+        -0.9463
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "WoodPlanks",
+    "Color": [
+     0.6902,
+     0.5333,
+     0.3529
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Tabua",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     13.571,
+     0.286,
+     1.071
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1786.346,
+       88.473,
+       -2514.245
+      ],
+      "orientation": [
+       [
+        -0.9463,
+        0.0,
+        -0.32329
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.32329,
+        0.0,
+        -0.9463
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "WoodPlanks",
+    "Color": [
+     0.6902,
+     0.5333,
+     0.3529
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Tabua",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     13.571,
+     0.286,
+     1.071
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1786.761,
+       88.473,
+       -2515.462
+      ],
+      "orientation": [
+       [
+        -0.9463,
+        0.0,
+        -0.32329
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.32329,
+        0.0,
+        -0.9463
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "WoodPlanks",
+    "Color": [
+     0.6902,
+     0.5333,
+     0.3529
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Tabua",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     0.214,
+     0.214,
+     6.786
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1780.523,
+       88.223,
+       -2514.876
+      ],
+      "orientation": [
+       [
+        -0.9463,
+        0.0,
+        -0.32329
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.32329,
+        0.0,
+        -0.9463
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "WoodPlanks",
+    "Color": [
+     0.3451,
+     0.2431,
+     0.1569
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Tabua",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     0.214,
+     0.214,
+     6.786
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1785.93,
+       88.223,
+       -2513.029
+      ],
+      "orientation": [
+       [
+        -0.9463,
+        0.0,
+        -0.32329
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.32329,
+        0.0,
+        -0.9463
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "WoodPlanks",
+    "Color": [
+     0.3451,
+     0.2431,
+     0.1569
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Tabua",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     0.214,
+     0.214,
+     6.786
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1791.338,
+       88.223,
+       -2511.181
+      ],
+      "orientation": [
+       [
+        -0.9463,
+        0.0,
+        -0.32329
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.32329,
+        0.0,
+        -0.9463
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "WoodPlanks",
+    "Color": [
+     0.3451,
+     0.2431,
+     0.1569
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Tabua",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     13.571,
+     0.286,
+     1.071
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1785.099,
+       88.973,
+       -2510.595
+      ],
+      "orientation": [
+       [
+        -0.9463,
+        0.0,
+        -0.32329
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.32329,
+        0.0,
+        -0.9463
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "WoodPlanks",
+    "Color": [
+     0.6902,
+     0.5333,
+     0.3529
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Tabua",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     13.571,
+     0.286,
+     1.071
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1785.515,
+       88.973,
+       -2511.812
+      ],
+      "orientation": [
+       [
+        -0.9463,
+        0.0,
+        -0.32329
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.32329,
+        0.0,
+        -0.9463
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "WoodPlanks",
+    "Color": [
+     0.6902,
+     0.5333,
+     0.3529
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Tabua",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     13.571,
+     0.286,
+     1.071
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1785.93,
+       88.973,
+       -2513.029
+      ],
+      "orientation": [
+       [
+        -0.9463,
+        0.0,
+        -0.32329
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.32329,
+        0.0,
+        -0.9463
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "WoodPlanks",
+    "Color": [
+     0.6902,
+     0.5333,
+     0.3529
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Tabua",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     13.571,
+     0.286,
+     1.071
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1786.346,
+       88.973,
+       -2514.245
+      ],
+      "orientation": [
+       [
+        -0.9463,
+        0.0,
+        -0.32329
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.32329,
+        0.0,
+        -0.9463
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "WoodPlanks",
+    "Color": [
+     0.6902,
+     0.5333,
+     0.3529
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Tabua",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     13.571,
+     0.286,
+     1.071
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1786.761,
+       88.973,
+       -2515.462
+      ],
+      "orientation": [
+       [
+        -0.9463,
+        0.0,
+        -0.32329
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.32329,
+        0.0,
+        -0.9463
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "WoodPlanks",
+    "Color": [
+     0.6902,
+     0.5333,
+     0.3529
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Tabua",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     0.214,
+     0.214,
+     6.786
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1780.523,
+       88.723,
+       -2514.876
+      ],
+      "orientation": [
+       [
+        -0.9463,
+        0.0,
+        -0.32329
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.32329,
+        0.0,
+        -0.9463
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "WoodPlanks",
+    "Color": [
+     0.3451,
+     0.2431,
+     0.1569
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Tabua",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     0.214,
+     0.214,
+     6.786
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1785.93,
+       88.723,
+       -2513.029
+      ],
+      "orientation": [
+       [
+        -0.9463,
+        0.0,
+        -0.32329
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.32329,
+        0.0,
+        -0.9463
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "WoodPlanks",
+    "Color": [
+     0.3451,
+     0.2431,
+     0.1569
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Tabua",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     0.214,
+     0.214,
+     6.786
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1791.338,
+       88.723,
+       -2511.181
+      ],
+      "orientation": [
+       [
+        -0.9463,
+        0.0,
+        -0.32329
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.32329,
+        0.0,
+        -0.9463
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "WoodPlanks",
+    "Color": [
+     0.3451,
+     0.2431,
+     0.1569
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Tabua",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     13.571,
+     0.286,
+     1.071
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1785.099,
+       89.473,
+       -2510.595
+      ],
+      "orientation": [
+       [
+        -0.9463,
+        0.0,
+        -0.32329
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.32329,
+        0.0,
+        -0.9463
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "WoodPlanks",
+    "Color": [
+     0.6902,
+     0.5333,
+     0.3529
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Tabua",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     13.571,
+     0.286,
+     1.071
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1785.515,
+       89.473,
+       -2511.812
+      ],
+      "orientation": [
+       [
+        -0.9463,
+        0.0,
+        -0.32329
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.32329,
+        0.0,
+        -0.9463
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "WoodPlanks",
+    "Color": [
+     0.6902,
+     0.5333,
+     0.3529
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Tabua",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     13.571,
+     0.286,
+     1.071
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1785.93,
+       89.473,
+       -2513.029
+      ],
+      "orientation": [
+       [
+        -0.9463,
+        0.0,
+        -0.32329
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.32329,
+        0.0,
+        -0.9463
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "WoodPlanks",
+    "Color": [
+     0.6902,
+     0.5333,
+     0.3529
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Tabua",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     13.571,
+     0.286,
+     1.071
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1786.346,
+       89.473,
+       -2514.245
+      ],
+      "orientation": [
+       [
+        -0.9463,
+        0.0,
+        -0.32329
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.32329,
+        0.0,
+        -0.9463
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "WoodPlanks",
+    "Color": [
+     0.6902,
+     0.5333,
+     0.3529
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Tabua",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     13.571,
+     0.286,
+     1.071
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1786.761,
+       89.473,
+       -2515.462
+      ],
+      "orientation": [
+       [
+        -0.9463,
+        0.0,
+        -0.32329
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.32329,
+        0.0,
+        -0.9463
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "WoodPlanks",
+    "Color": [
+     0.6902,
+     0.5333,
+     0.3529
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Tabua",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     0.214,
+     0.214,
+     6.786
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1780.523,
+       89.223,
+       -2514.876
+      ],
+      "orientation": [
+       [
+        -0.9463,
+        0.0,
+        -0.32329
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.32329,
+        0.0,
+        -0.9463
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "WoodPlanks",
+    "Color": [
+     0.3451,
+     0.2431,
+     0.1569
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Tabua",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     0.214,
+     0.214,
+     6.786
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1785.93,
+       89.223,
+       -2513.029
+      ],
+      "orientation": [
+       [
+        -0.9463,
+        0.0,
+        -0.32329
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.32329,
+        0.0,
+        -0.9463
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "WoodPlanks",
+    "Color": [
+     0.3451,
+     0.2431,
+     0.1569
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Tabua",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     0.214,
+     0.214,
+     6.786
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1791.338,
+       89.223,
+       -2511.181
+      ],
+      "orientation": [
+       [
+        -0.9463,
+        0.0,
+        -0.32329
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.32329,
+        0.0,
+        -0.9463
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "WoodPlanks",
+    "Color": [
+     0.3451,
+     0.2431,
+     0.1569
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  }
+ ]
+}

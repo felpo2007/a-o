@@ -1,9 +1,9 @@
 # Instruções para o Claude: VẠN TƯỜNG '65 (jogo de Roblox)
 
 Esta pasta é o jogo **VẠN TƯỜNG '65**: FPS tático 30 contra 30 no Roblox (D-122), na Operação
-Starlite (agosto de 1965), mapa 1:1 de 700 × 700 m com cinco objetivos, um em cada canto e a vila de
-Xóm Gò no morro do centro (D-128, D-140): A Arrozais, B Serraria (mata fechada), C Xóm Gò (vila em
-meio círculo, D-148), D Ponte e Cais (rio do sul) e E Engenho. O mapa é coberto de mata fechada com
+Starlite (agosto de 1965), mapa 1:1 de 700 × 700 m com cinco objetivos: quatro nos quadrantes, a
+180–265 m do centro, e a vila de Xóm Gò numa baixada no centro (D-201): A Arrozais, B Serraria (mata
+fechada), C Xóm Gò (vila em meio círculo, D-148), D Ponte e Cais (rio do sul) e E Engenho. O mapa é coberto de mata fechada com
 lavoura em volta das vilas (D-65). O `CLAUDE.md` da raiz do
 repositório é de OUTRO projeto (estratégias de trade). Aqui vale este arquivo. Responda sempre em português.
 
@@ -27,6 +27,13 @@ repositório é de OUTRO projeto (estratégias de trade). Aqui vale este arquivo
   recorta o mundo gerado (`geo.WORLD_ING`, 4 × 2,4 km) para a área jogável (`geo.PLAY_ING`) com
   150 m de margem. Setores, pontos fortes e QGs ficam nele. Se regerar com `export_roblox.py`, rode
   o `crop_world.py` depois.
+  - Cada passo do relevo é feito uma vez e marcado no Grid (`reliefAdded`, `riverCut`,
+    `centerLowered`...). D-201: o `centraliza` (baixada do centro, morros, taludes, Arrozais com o
+    chão) roda antes do `abre_rio`. Mudou o relevo? Rode o `crop_world.py` duas vezes (a 2ª passada
+    das estradas ainda corta feições) e confira que a 3ª não muda nada.
+  - Tempo a pé de cada QG a cada objetivo: `uv run python tools/tempos_chegada.py` (`--git <commit>`
+    mede um mapa antigo).
+  - Mudou o mapa? Refaça a carta e a arte fixa (desligue os conjuntos, recopie do jogo, D-201).
 - **Não salve o place pelo Studio:** o Studio grava com outra compressão, que o Lune 0.8 não lê
   ("Decompression failed"). Teste mudanças no Studio pelo MCP, mas gere o `.rbxl` pelo pipeline.
   O XML (`.rbxlx`) do Studio também não serve: o Lune 0.8 não lê o `Content` novo (`<uri>`) nem
@@ -294,8 +301,9 @@ O `sourcemap.json` não vai para o Git.
 - Chão fotográfico: `MaterialVariant` no bake (texturas do Poly Haven via `tools/fetch_textures.py`).
   O `MaterialVariant` usa o ID da imagem: resolva o decal com `InsertService:LoadAsset` no Studio e
   grave em `AssetIds.GroundImages`.
-- Relevo: `tools/relevo_dem.py` (DEM Copernicus, cumes calibrados na carta). Rode depois do
-  `crop_world.py`.
+- Relevo: `tools/relevo_dem.py` (DEM Copernicus, cumes calibrados na carta) é do mapa de 2 km
+  (D-66); no de 700 m o relevo sai do `crop_world.py` (`mais_relevo` e `centraliza`). Não rode o
+  `relevo_dem.py` neste mapa: ele procura cumes que não existem mais.
 - Carta tática (D-171): a do jogo é a página de atlas,
   `uv run --group arte python tools/make_carta.py --dados --estilo atlas` (blocos
   `assets/carta/atlas_*.png`). Mudou o mapa? Gere de novo, tire `Carta.nw/ne/sw/se` do
@@ -322,7 +330,7 @@ O `sourcemap.json` não vai para o Git.
 - Segredos só no `.env` (no `.gitignore`), nunca no código nem no chat.
 - ForgeGUI: nunca regenerar um job em `outcome_unknown`. "failed" com `retryable` pode ser
   retomado com `generation_retry`.
-- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-201) e atualize `PROGRESS.md`.
+- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-202) e atualize `PROGRESS.md`.
 - Tetos de triângulos por modelo: vegetação ≤ 6 mil (D-135), props e herói ≤ 20 mil (`ArtBudget`,
   conferido pelo teste da F5).
 - Commits no branch acima, com mensagem em português.

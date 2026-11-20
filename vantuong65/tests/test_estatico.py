@@ -14,7 +14,7 @@ sys.path.insert(0, str(ROOT / "tools"))
 
 import estatico  # noqa: E402
 
-CASA = ROOT / "assets" / "estatico" / "vila_casa_03_xomgo.txt"
+CASAS = ROOT / "assets" / "estatico" / "vila_casas.txt"
 
 
 def todas(no: dict) -> list[dict]:
@@ -24,22 +24,20 @@ def todas(no: dict) -> list[dict]:
     return out
 
 
-def test_copia_da_casa_de_xom_go():
-    modelos = estatico.ler(CASA)
-    chaves = [m["chave"] for m in modelos]
-    assert chaves == [
-        "vila_casa_03",
-        "water_jar",
-        "hut_kitchen",
-        "granary",
-        "bamboo_fence",
-        "bamboo_fence",
-    ]
-    casa = modelos[0]
+def molde_03() -> dict:
+    # D-167 era a cópia de uma casa só (vila_casa_03_xomgo); D-201: a vila foi recopiada inteira e
+    # essa casa é o molde da vila_casa_03 no vila_casas
+    return next(
+        m for m in estatico.ler(CASAS) if m["chave"] == "vila_casa_03" and not m.get("instancia")
+    )
+
+
+def test_molde_da_casa_03():
+    casa = molde_03()
     pecas = todas(casa)
     assert len(pecas) == 55
-    # D-167 (cópia da v90): 5 malhas visíveis com textura (Mobilia, Telhado e o grupo Casa nas
-    # folhas comuns da trim sheet, D-159) e 50 caixas de colisão invisíveis com o Material da bala
+    # D-167: 5 malhas visíveis com textura (Mobilia, Telhado e o grupo Casa nas folhas comuns da
+    # trim sheet, D-159) e 50 caixas de colisão invisíveis com o Material da bala
     visiveis = [p for p in pecas if "sa" in p]
     colisao = [p for p in pecas if p["nome"].startswith("Colisao_")]
     assert len(visiveis) == 5 and len(colisao) == 50
@@ -49,11 +47,10 @@ def test_copia_da_casa_de_xom_go():
         "Trim_W",
     ]
     assert all("t" in p["marcas"] and p["material"] for p in colisao)
-    assert sum(len(todas(m)) for m in modelos) == 60
 
 
 def test_modelo_do_rojo_slim_e_tamanho_da_malha():
-    casa = estatico.ler(CASA)[0]
+    casa = molde_03()
     j = estatico.rojo_modelo(casa)
     props = j["Properties"]
     assert props["LevelOfDetail"] == {"Enum": estatico.SLIM} and estatico.SLIM == 4
@@ -69,7 +66,7 @@ def test_modelo_do_rojo_slim_e_tamanho_da_malha():
         assert b == pytest.approx(a / casa["escala"], abs=1e-3)
     # sem colisão calculada fora do Studio: o que colide vai em caixa
     assert p["Properties"]["CollisionFidelity"] == "Box"
-    # giro de 32,659° em Y
+    # giro só em Y
     o = p["Properties"]["CFrame"]["CFrame"]["orientation"]
     assert o[1] == [0, 1, 0] and o[0][1] == 0 and abs(o[0][0] ** 2 + o[0][2] ** 2 - 1) < 1e-5
 
@@ -164,16 +161,19 @@ def test_chave_que_depende_do_jogo_e_recusada(tmp_path):
 
 def test_ligados_e_gerado_bate():
     # D-155: o SLIM só é gerado com o Team Create; D-167: ligado, a casa de Xóm Gò vai no place;
-    # D-168: e as 19 construções de peças do MapLife
+    # D-168: e as construções de peças do MapLife. D-201 (objetivos e vila no lugar novo):
+    # recopiadas do jogo, 24 construções (eram 19: entram as 4 de peças da D-172 e uma horta a mais
+    # da vila nova) e a vila inteira no vila_casas
     ativos = json.loads((ROOT / "assets" / "estatico" / "ativos.json").read_text("utf-8"))
-    assert ativos == ["vila_casa_03_xomgo", "vila_construcoes", "vila_casas"]
+    assert ativos == ["vila_construcoes", "vila_casas"]
     construcoes = estatico.ler(ROOT / "assets" / "estatico" / "vila_construcoes.txt")
-    assert len(construcoes) == 19 and all(m["chave"].startswith("Vila_") for m in construcoes)
-    assert sum(estatico.pecas(m) for m in construcoes) == 239
-    # D-169: as casas únicas da vila, 9 moldes e 19 instâncias (a vila_casa_09 fica com o jogo)
+    assert len(construcoes) == 24 and all(m["chave"].startswith("Vila_") for m in construcoes)
+    assert sum(estatico.pecas(m) for m in construcoes) == 301
+    # D-169: as casas únicas da vila, 9 moldes e as instâncias (a vila_casa_09 fica com o jogo);
+    # D-201: 26 instâncias (35 casas fixas, as 3 casas grandes dos objetivos entre elas)
     casas = estatico.ler(ROOT / "assets" / "estatico" / "vila_casas.txt")
     assert sum(1 for m in casas if not m.get("instancia")) == 9
-    assert sum(1 for m in casas if m.get("instancia")) == 19
+    assert sum(1 for m in casas if m.get("instancia")) == 26
     assert not any(m["chave"] == "vila_casa_09" for m in casas)
     gerados = sorted((ROOT / "src" / "Workspace" / "Estatico").glob("*.model.json"))
     modulo_arq = ROOT / "src" / "ServerScriptService" / "Modules" / "StaticArt.luau"

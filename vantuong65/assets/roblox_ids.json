@@ -448,10 +448,10 @@
  "store.PASS_SKIN_VC_BROWN": "2089978461",
  "store.PASS_SKIN_VC_TIGER": "2089438416",
  "Models.m60": "115778411346125",
- "Carta.nw": "79349546991710",
- "Carta.ne": "77775671768371",
- "Carta.sw": "72623303265319",
- "Carta.se": "74027804366788",
+ "Carta.nw_v118": "79349546991710",
+ "Carta.ne_v118": "77775671768371",
+ "Carta.sw_v118": "72623303265319",
+ "Carta.se_v118": "74027804366788",
  "Clothing.us_hbt_shirt_v3": "87018466659842",
  "Clothing.us_hbt_pants_v3": "109133128760328",
  "Clothing.us_goldtiger_shirt_v3": "96472750104295",
@@ -1296,5 +1296,9 @@
  "Models.uh34d_v3": "78025077667001",
  "Sounds.rpg2_disparo": "125144632297259",
  "Sounds.rpg2_voo": "116978431046810",
- "Sounds.rpg2_recarga": "138378206462386"
+ "Sounds.rpg2_recarga": "138378206462386",
+ "Carta.nw": "119616076783717",
+ "Carta.ne": "86585663169186",
+ "Carta.sw": "100556092033219",
+ "Carta.se": "91749073547998"
 }

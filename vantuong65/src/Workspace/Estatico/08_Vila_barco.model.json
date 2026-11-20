@@ -1,0 +1,281 @@
+{
+ "ClassName": "Model",
+ "Properties": {
+  "LevelOfDetail": {
+   "Enum": 4
+  },
+  "ModelStreamingMode": "Atomic",
+  "WorldPivotData": {
+   "OptionalCFrame": {
+    "position": [
+     -1092.034,
+     34.143,
+     -1194.073
+    ],
+    "orientation": [
+     [
+      0.0,
+      0,
+      -1.0
+     ],
+     [
+      0,
+      1,
+      0
+     ],
+     [
+      1.0,
+      0,
+      0.0
+     ]
+    ]
+   }
+  },
+  "Attributes": {
+   "Attributes": {
+    "VT65Estatico": {
+     "Bool": true
+    },
+    "VT65Chave": {
+     "String": "Vila_barco"
+    }
+   }
+  }
+ },
+ "Children": [
+  {
+   "Name": "Casco",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     15.0,
+     1.964,
+     6.071
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1092.034,
+       34.411,
+       -1194.073
+      ],
+      "orientation": [
+       [
+        -0.0,
+        0.0,
+        -1.0
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        1.0,
+        0.0,
+        -0.0
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "Wood",
+    "Color": [
+     0.3294,
+     0.251,
+     0.1725
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Ponta",
+   "ClassName": "WedgePart",
+   "Properties": {
+    "Size": [
+     6.071,
+     1.964,
+     5.0
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1092.034,
+       34.411,
+       -1204.073
+      ],
+      "orientation": [
+       [
+        -1.0,
+        0.0,
+        0.0
+       ],
+       [
+        -0.0,
+        -1.0,
+        0.0
+       ],
+       [
+        0.0,
+        0.0,
+        1.0
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "Wood",
+    "Color": [
+     0.3294,
+     0.251,
+     0.1725
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Ponta",
+   "ClassName": "WedgePart",
+   "Properties": {
+    "Size": [
+     6.071,
+     1.964,
+     5.0
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1092.034,
+       34.411,
+       -1184.073
+      ],
+      "orientation": [
+       [
+        1.0,
+        -0.0,
+        0.0
+       ],
+       [
+        -0.0,
+        -1.0,
+        0.0
+       ],
+       [
+        0.0,
+        -0.0,
+        -1.0
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "Wood",
+    "Color": [
+     0.3294,
+     0.251,
+     0.1725
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Cobertura",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     9.0,
+     5.464,
+     5.464
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1092.034,
+       35.393,
+       -1194.073
+      ],
+      "orientation": [
+       [
+        -0.0,
+        0.0,
+        -1.0
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        1.0,
+        0.0,
+        -0.0
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "Grass",
+    "Color": [
+     0.6118,
+     0.5412,
+     0.3529
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Cylinder",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Thatch"
+      }
+     }
+    }
+   }
+  }
+ ]
+}

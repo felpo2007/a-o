@@ -202,6 +202,40 @@ local function baseLane(faction: string): any?
 	return { offsetM = { ox * M, oz * M }, dir = { r.dirX, r.dirZ } }
 end
 
+-- D-201 (lote 85): com a vila na baixada, uma casa dela caiu na linha do alvo de 150 m do VC (o
+-- autoteste parou nela). A raia também não passa a menos de LANE_BUILDING_M de uma construção de
+-- Map.Art (planta não conta): a arte fixa (SLIM) já está no place quando a raia é escolhida.
+local LANE_BUILDING_M = 8
+local LANE_START_M = 10
+
+local function buildingOnLine(a: Vector3, b: Vector3): boolean
+	local map = workspace:FindFirstChild("Map")
+	local art = map and map:FindFirstChild("Art")
+	if not art then
+		return false
+	end
+	local ab = Vector3.new(b.X - a.X, 0, b.Z - a.Z)
+	local len2 = ab:Dot(ab)
+	if len2 < 1e-6 then
+		return false
+	end
+	local len = math.sqrt(len2)
+	for _, m in art:GetChildren() do
+		if m:IsA("Model") and not m:GetAttribute("Foliage") then
+			local p = m:GetPivot().Position
+			local ap = Vector3.new(p.X - a.X, 0, p.Z - a.Z)
+			-- os primeiros LANE_START_M ficam de fora: a linha de tiro começa junto da cerca da base
+			if ap:Dot(ab) / len * M >= LANE_START_M then
+				local t = math.clamp(ap:Dot(ab) / len2, 0, 1)
+				if (ap - ab * t).Magnitude * M < LANE_BUILDING_M then
+					return true
+				end
+			end
+		end
+	end
+	return false
+end
+
 local function laneClear(x0: number, z0: number, dx: number, dz: number): boolean
 	local g0 = terrainAt(x0, z0)
 	if not (g0 and inside(x0, z0)) or g0.Material == Enum.Material.Water or inBase(x0, z0) then
@@ -211,6 +245,9 @@ local function laneClear(x0: number, z0: number, dx: number, dz: number): boolea
 		local x, z = targetXZ(x0, z0, dx, dz, i, m)
 		local g = terrainAt(x, z)
 		if not (g and inside(x, z)) or g.Material == Enum.Material.Water then
+			return false
+		end
+		if buildingOnLine(g0.Position, g.Position) then
 			return false
 		end
 		local target = g.Position + Vector3.new(0, TARGET_CENTER_M / M, 0)

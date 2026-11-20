@@ -379,10 +379,23 @@ test("carta: setores viram retângulos que cobrem o polígono sem sobra (amostra
 	end
 end)
 
--- D-123 (mapa de 700 m, 3 setores): as fronteiras entre vizinhos são retas; setores longe não encostam
-test("carta: as fronteiras dos setores são retas (1 trecho cada)", function()
+-- D-123 (mapa de 700 m): as fronteiras entre vizinhos cruzam o mapa de sul a norte; setores longe não
+-- encostam. D-201: a S3/S4 tem um degrau (a vila inteira no C, a Ponte e Cais no D), então cada trecho
+-- é reto (vertical ou horizontal) e os verticais somam a altura do mapa
+test("carta: as fronteiras dos setores são retilíneas e vão de sul a norte", function()
+	local b = MapConfig.Bounds
 	for s = 1, NS - 1 do
-		assert(#Carta.boundary(MapConfig.Sectors, s, s + 1) == 1, "fronteira " .. s)
+		local segs = Carta.boundary(MapConfig.Sectors, s, s + 1)
+		assert(#segs >= 1, "fronteira " .. s)
+		local alto = 0
+		for _, e in segs do
+			local vertical = math.abs(e.x1 - e.x2) < 1e-6
+			assert(vertical or math.abs(e.z1 - e.z2) < 1e-6, "trecho torto na fronteira " .. s)
+			if vertical then
+				alto += math.abs(e.z2 - e.z1)
+			end
+		end
+		near(alto, b.maxZ - b.minZ, 0.5, "fronteira " .. s)
 	end
 	assert(#Carta.boundary(MapConfig.Sectors, 1, 3) == 0)
 end)

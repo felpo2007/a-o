@@ -106,10 +106,30 @@ local function summit(): (number, number, number)
 	return bx, bz, best
 end
 
-test("morro de Xóm Gò: o ponto mais alto da área, ~36 m, no setor da vila", function()
+-- D-201 (lote 85, prompt de jogabilidade §20): o morro do centro virou uma baixada. A praça de Xóm Gò
+-- fica abaixo do anel em volta (130 a 200 m dela), e o ponto mais alto da área fica fora do setor da
+-- vila e longe da praça (era o morro de 36 m da vila)
+test("centro mais baixo: a praça numa baixada, o ponto mais alto longe dela (D-201)", function()
+	local vila = strongpoint("Xóm Gò")
+	local function media(r0: number, r1: number): number
+		local s, n = 0, 0
+		for a = 0, 355, 5 do
+			for r = r0, r1, 10 do
+				local x = vila.x + math.cos(math.rad(a)) * r / 0.28
+				local z = vila.z + math.sin(math.rad(a)) * r / 0.28
+				s += world:heightAt(x, z) * 0.28
+				n += 1
+			end
+		end
+		return s / n
+	end
+	local fundo, anel = media(0, 40), media(130, 200)
+	assert(anel - fundo >= 4, string.format("fundo %.1f m, anel %.1f m", fundo, anel))
 	local x, z, h = summit()
-	near(h * 0.28, 35.7, 1.0, "cume")
-	assert(Geometry.sectorAt(MapConfig.Sectors, x, z) == 3, "o cume fora do setor da vila") -- D-128: C
+	assert(Geometry.sectorAt(MapConfig.Sectors, x, z) ~= 3, "o cume no setor da vila")
+	local d = math.sqrt((x - vila.x) ^ 2 + (z - vila.z) ^ 2) * 0.28
+	assert(d >= 150, string.format("o cume a %.0f m da praça", d))
+	print(string.format("       (fundo %.1f m, anel %.1f m; cume %.1f m a %.0f m da praça)", fundo, anel, h * 0.28, d))
 end)
 
 test("área jogável é 0,7 x 0,7 km e o terreno a cobre com margem", function()
