@@ -7677,15 +7677,44 @@ colisão (não colide com veículo nem com outro corpo), o teto de 24 corpos e o
 **Não testado:** a morte por bala, a morte num lugar aberto de veículo e o resultado visto por outro
 jogador.
 
-## D-193 — Base do lote 77: as regras do fim de partida (2026-11-20)
+## D-193 — Lote 77: o fim de partida com pódio, votação e a volta do mapa (2026-11-20)
 
 **Pedido do dono** (itens 21 e 22): comemoração com os três melhores do time que venceu, votação de
 mapa mesmo com um mapa só, restauração e contagem.
 
-**Feito (só as regras, `Shared/Rodada`, testadas no Lune):** o pódio dos até três melhores do time
-que venceu (desempate por pontos, abates, menos mortes, entrada e nome; empate entre os lados mostra
-os melhores dos dois), a votação (um voto por jogador; sem voto, o mapa que existe; voto em mapa
+**Regras (`Shared/Rodada`, testadas no Lune):** o pódio dos até três melhores do time que venceu
+(desempate por pontos, abates, menos mortes, entrada e nome; empate entre os lados mostra os
+melhores dos dois), a votação (um voto por jogador; sem voto, o mapa que existe; voto em mapa
 inexistente não conta), as fases e o número da rodada.
 
-**Falta:** a integração no servidor (fases, pontos por partida, restauração de veículos, buracos,
-corpos, granadas e jogadores) e as telas.
+**Fases** (`RodadaService`, 38 s no total, que viram o `MatchService.NEXT_MATCH_S`):
+- fim (8 s): o relatório pós-ação de antes, com a faixa "VITÓRIA · <lado>";
+- comemoração (12 s): os três melhores, cada um com o seu soldado girando (o personagem, ou o
+  manequim do uniforme quando o jogador saiu);
+- votação (15 s): um cartão por mapa, com a carta tática (2x2 blocos); o voto troca até o fim;
+- restauração (3 s), e a partida nova começa com a contagem de antes.
+- O estado vai para o cliente em atributos do ReplicatedStorage (`VT65Fase`, `VT65FaseAte`,
+  `VT65Podio`, `VT65Mapas`, `VT65Votos`, `VT65MapaEscolhido`, `VT65Rodada`); o voto, pelo remote
+  `Rodada_Votar`.
+- Pontos por partida no `MatchService.placar`: o XP de cada recompensa, os abates e as mortes,
+  zerados na partida nova.
+
+**A restauração, em ordem:** corpos; objetos soltos (granadas, fumaça, armas caídas, napalm);
+armadilhas; buracos (o voxel de antes de cavar volta e o parapeito sai); crateras; veículos (todos
+saem, inclusive com gente dentro, e voltam aos depósitos; um temporizador de respawn antigo não
+dobra o veículo); jogadores vivos voltam ao QG. Pedido de spawn com a partida encerrada é recusado.
+
+**Conferido no Studio** (`VT65DevEnd`):
+- as fases passaram de fim a jogo; o voto contou ("1 voto", "SEU VOTO");
+- o fundo do buraco subiu 1,24 m e o parapeito saiu;
+- havia 9 veículos antes e depois. O jipe, empurrado 80 studs, foi refeito, mas ficou a 60 studs do
+  ponto medido antes. Não conferi se aquele ponto era o depósito (um bot pode tê-lo tirado de lá);
+- os corpos foram de 13 para 1;
+- o soldado voltou vivo a 11 m do QG, e a rodada passou a 2;
+- o pódio de três lugares apareceu com um pódio montado à mão (só havia um jogador).
+
+**Não volta:** a grama queimada pelo napalm, as construções da logística e um tiro de morteiro ou
+barragem já marcado. Os bots mantêm o estado.
+
+**Não testado:** com vários jogadores (votos diferentes e o pódio de verdade), no celular e no jogo
+publicado.

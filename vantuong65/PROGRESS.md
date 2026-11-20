@@ -528,6 +528,23 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
       morte por bala e no veículo, o celular de verdade e o jogo publicado.
     - Faltam assets: passos em metal e em pedra.
     - **v110 publicada** (versão 115 do place, commit 1185e87).
+  - **Lote 77 (D-193): o fim de partida, feito.**
+    - Em 38 s depois do fim:
+      - o relatório (8 s);
+      - os três melhores do time que venceu, cada um com o soldado girando (12 s);
+      - a votação do mapa, mesmo com um mapa só (15 s);
+      - a volta do mapa (3 s) e a contagem da partida nova.
+    - A volta do mapa: buracos e parapeitos, crateras, veículos nos depósitos, sem corpos, objetos
+      soltos nem armadilhas, e os vivos no QG.
+    - Conferido: Lune 727 ok, pytest 70 e ruff limpo. No Studio:
+      - as fases de ponta a ponta e o voto contado;
+      - o buraco subiu 1,24 m e o parapeito saiu;
+      - 9 veículos refeitos e os corpos de 13 para 1;
+      - o soldado vivo a 11 m do QG e a rodada 2.
+      - Relatório: `testes/LOTE77_D193_2026-11-20.md`.
+    - Não volta: a grama do napalm, as construções e o fogo já marcado. Os bots mantêm o estado.
+    - Não testado: vários jogadores, celular e jogo publicado. O jipe ficou a 60 studs do ponto
+      medido antes, e não conferi se aquele ponto era o depósito.
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;
