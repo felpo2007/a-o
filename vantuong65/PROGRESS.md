@@ -492,6 +492,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
         encostas de 6° e 12°;
       - Lune 703 ok e pytest 70.
     - Não testado: o som (não ouvido), controle e toque no pouso e o jogo publicado.
+    - **v108 publicada** (versão 113 do place, commit e0aa56f).
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;
