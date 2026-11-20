@@ -587,6 +587,19 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     - Não testado: vários jogadores no mesmo buraco, controle e celular de verdade, o som e o
       jogo publicado.
     - **v113 publicada** (versão 118 do place, commit 043ab06).
+  - **Lote 80 (D-196): a torre dos blindados, feita.**
+    - Atirador, comandante e municiador (M48), atirador (Ontos, cúpula do LVTP-5) e as escotilhas da
+      torre giram com ela. Antes a torre passava pelos corpos e pelas escotilhas paradas.
+    - A torre gira também no servidor, no passo dos clientes: os acertos batem com o que se vê.
+    - A câmera de quem está na torre gira com ela.
+    - O cano do M48 tem o mínimo por giro medido na malha (por cima do motor, até −4°).
+    - Conferido: Lune 748 ok (46 arquivos), pytest 70 e ruff limpo. No Studio:
+      - torre a 90°: o atirador andou 1,22 m, o comandante 1,08 m e o municiador 1,02 m com ela, e
+        o motorista não saiu do lugar;
+      - no cliente, o comandante no mesmo lugar do servidor (0,00 m), com a escotilha em cima.
+      - Relatório: `testes/LOTE80_D196_2026-11-20.md`.
+    - Não testado: sentado como atirador, o tiro rente ao convés, o giro do Ontos (a fonte não
+      fecha) e o cano sobre a cabeça do motorista.
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;

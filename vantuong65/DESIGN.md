@@ -7836,3 +7836,52 @@ vários cavando e restaurado na partida nova.
 - a pazada perdida no buraco novo já conta o buraco no limite de 1 por minuto;
 - não testado: vários jogadores no mesmo buraco, controle e celular de verdade, o som ouvido e o
   jogo publicado.
+## D-196 — Lote 80: a torre leva a tripulação e as escotilhas, e o cano não entra no casco (2026-11-20)
+
+**Pedido do dono** (prompt de jogabilidade, item 15): espaço real para a torre e o atirador, com a
+base e o eixo de giro, a altura e a posição do ocupante, o espaço do cano, os limites de elevação e
+giro, o acesso e a saída e o modelo casado com a colisão. A torre não pode atravessar o chassi nem o
+corpo do atirador; motorista e atirador independentes.
+
+**Achado no código:**
+- os lugares da torre (atirador, comandante e municiador do M48; atirador do Ontos; atirador da
+  cúpula do LVTP-5) eram soldados ao casco. A torre girava só no desenho de cada cliente (o Transform
+  da junta) e passava por cima dos corpos, e as cabeças saíam das escotilhas;
+- as escotilhas da torre (comandante e municiador no M48, a da torre no Ontos) estavam presas ao
+  casco e ficavam paradas no ar quando a torre girava;
+- o cano tinha só os limites da ficha e podia descer por dentro do convés do motor.
+
+**Agora:**
+- `VehicleDrive.ART[id].torre`: os lugares e as peças que giram com a torre. As escotilhas da lista
+  ganham a junta na Torre (`artJoints`) e os lugares, a solda (`addSeat`);
+- o servidor gira as juntas da torre e do cano no mesmo passo dos clientes (`VehicleDrive.torreGira`,
+  na velocidade da ficha; elevação a 20°/s): os corpos na torre ficam no mesmo lugar no servidor
+  (que confere os acertos) e em todos os clientes;
+- a câmera de quem está na torre sai do assento (`EYE_ABOVE_SEAT` acima), que gira com ela;
+- mínimo do cano por giro (`VehicleDrive.limiteCano`), medido na malha no Studio: raio no casco
+  (malha com colisão por decomposição convexa) ao longo do cano, a partir de 15% dele e outro 0,1 m
+  abaixo, de 15 em 15° de giro;
+  - M48: cano de 4,05 m; −7° a 165°, −4° a 180°, −7° a 195°, −6° a 210°; no resto, os −9° da ficha;
+  - Ontos: −10° (da ficha) em toda a volta;
+  - LVTP-5: não usado. A cúpula não tem peça de cano no modelo, e o comprimento de 1,1 m que usei na
+    medida foi chute;
+- o cliente (desenho) e o servidor (a pontaria e o tiro do canhão) usam o mesmo mínimo: o tiro não
+  sai para dentro do próprio casco;
+- motorista e atirador continuam independentes (o motorista fica no casco).
+
+**Conferido no Studio:**
+- soldas: M48 com o atirador, o comandante e o municiador na Torre; Ontos com o atirador; LVTP-5
+  com o atirador da cúpula; escotilhas do comandante e do municiador (M48) e da torre (Ontos) com a
+  junta na Torre;
+- `AimYaw` de 90° no M48: a torre girou 90,0° no servidor. O atirador andou 1,22 m, o comandante
+  1,08 m e o municiador 1,02 m com ela, e o motorista 0,00 m;
+- no cliente, o comandante a 0,00 m de onde o servidor o via, com a escotilha logo acima dele.
+
+**Não testado e limites:**
+- sentado como atirador (o papel de tripulante no Studio), a câmera girando com a torre e o tiro
+  rente ao convés;
+- o giro do Ontos: a fonte (wiki:M50_Ontos) só dá "cerca de 40 graus" de giro num protótipo, sem
+  dizer se é o total ou para cada lado; ficou livre, como antes;
+- o cano passando por cima da cabeça do motorista do M48 (fora do pedido; seguiu como antes);
+- a escotilha da torre do Ontos (0,44 m) é mais estreita que os ombros do soldado (0,53 m,
+  relatório do Blender): a malha não mudou.
