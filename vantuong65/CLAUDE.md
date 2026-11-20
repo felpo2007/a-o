@@ -171,6 +171,15 @@ O `sourcemap.json` não vai para o Git.
   cliente é dono da física do personagem e desfaz o do servidor.
 - Captura longe do soldado (D-125): a arte chega ao cliente por distância; antes, peça
   `LocalPlayer:RequestStreamAroundAsync(pos)` no cliente, senão a foto sai vazia.
+- Efeitos (D-198):
+  - para ver uma explosão sem dano, dispare do servidor
+    `VT65Remotes.Fire_Impact:FireAllClients({ id, x, y, z })`;
+  - para a foto, prenda a câmera do cliente num ponto com `RunService:BindToRenderStep(..., Camera + 20)`
+    (a troca de tipo da câmera o MCP desfaz; o `camera_position` da captura não vale no Play);
+  - desligue a grama animada só no cliente com `workspace.Terrain.Decoration = false` e evite a copa
+    da mata, que esconde as partículas;
+  - partícula: a `smoke_main.dds` some com cor escura; para fumaça escura use a
+    `explosion01_smoke_main.dds` com cor clara.
 - Depois do autoteste, a câmera pode ficar em Scriptable longe do soldado (o MCP desfaz a troca de
   tipo). Aí o servidor recusa tiros por "origem": é do teste, não do jogo.
 - Medir fps (D-126):
@@ -298,7 +307,7 @@ O `sourcemap.json` não vai para o Git.
 - Segredos só no `.env` (no `.gitignore`), nunca no código nem no chat.
 - ForgeGUI: nunca regenerar um job em `outcome_unknown`. "failed" com `retryable` pode ser
   retomado com `generation_retry`.
-- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-198) e atualize `PROGRESS.md`.
+- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-199) e atualize `PROGRESS.md`.
 - Tetos de triângulos por modelo: vegetação ≤ 6 mil (D-135), props e herói ≤ 20 mil (`ArtBudget`,
   conferido pelo teste da F5).
 - Commits no branch acima, com mensagem em português.

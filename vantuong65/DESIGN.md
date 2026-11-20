@@ -7946,3 +7946,65 @@ explosões é o do `ExplosionService`, sem o `Explosion` do Roblox (não quebra 
 
 **Não testado:** a explosão vista e ouvida de perto (as capturas foram da tela de ferido), um tanque
 e um helicóptero destruídos, a tripulação de lugar fechado morrendo, bots dentro e o jogo publicado.
+## D-198 — Lote 82: as explosões grandes do ataque aéreo, e a fumaça escura que aparece (2026-11-20)
+
+**Pedido do dono** (prompt de jogabilidade, item 17): explosões das bombas e dos impactos do ataque
+aéreo grandes, pesadas e convincentes:
+- clarão curto, bola de fogo que evolui, poeira rente ao chão e coluna de fumaça;
+- detritos controlados, som com impacto e cauda, tremor pela distância com ajuste;
+- conforme a superfície e com variação entre uma e outra;
+- tamanho, dano e impulso independentes, partículas, luzes e pedaços limitados, e detalhe menor de
+  longe.
+
+**O avião:** o A-4 do ataque aéreo só passa no céu (EventosVisual) e não pode ser destruído. Não há
+efeito de destruição de aeronave a fazer.
+
+**Agora:**
+- `Shared/ExplosaoEfeito`: o tamanho do efeito (escala e classe) separado do raio de dano
+  (`Explosive.lethalM`/`casualtyM`, sem mudança) e do empurrão dos corpos (`Explosive.impulsoM`:
+  bomba 28 m e tiro naval 20 m, PLACEHOLDER; antes o empurrão ia até o raio de baixas, 70 m na
+  bomba). Além do `impulsoM`, o estilhaço que matou empurra como bala (`Corpos.impulso`);
+- a classe "pesada" (bomba de 250 lb e tiro naval de 5 pol.) ganha a explosão grande (`ExplosionFx`):
+  - clarão: luz forte e curta (teto de 4 ao mesmo tempo) e um branco rápido na tela a menos de
+    500 m (`ColorCorrectionEffect`);
+  - bola de fogo em 3 a 5 lóbulos que crescem, sobem e escurecem (~15 m na bomba), com o núcleo e
+    as faíscas;
+  - anel de poeira (ou de água) que corre rente ao chão em 8 jatos;
+  - coluna de fumaça escura que sai por até 6 s e pende com a variação, com a poeira clara junto
+    (cinza-marrom embaixo, escura em cima);
+  - detritos com física pela superfície (torrões, galhos e folhas, tábuas; na água, a coluna branca
+    e as gotas), com teto de 40 ao mesmo tempo;
+  - superfície pelo raio no ponto: água (terreno ou lâmina do arrozal), estrutura (peça que colide),
+    vegetação (capim, folhagem) ou terra;
+  - variação por semente: lóbulos, giro, ritmo (±15%), tamanho (±12%) e inclinação da coluna;
+  - detalhe pela distância (até 150 m tudo; cai até 35% a 900 m) e pela qualidade gráfica, nunca
+    abaixo de 25%; até 3 explosões grandes completas ao mesmo tempo, as outras simples;
+- som (`AudioController`): nas pesadas, além do estrondo de sempre, o corpo grave e a cauda (eco),
+  mais grave e longa, 0,22 s depois, pela velocidade do som e ouvida de mais longe;
+- tremor da câmera em todas as explosões pela distância (`ExplosaoEfeito.tremor`), vezes o ajuste
+  novo das Configurações > Acessibilidade, "Tremor das explosões" (0 a 100%, `cameraShake`).
+
+**Achado no Studio, corrigido:** a textura `smoke_main.dds` só aparece com cor clara. Com cinza
+escuro ou preto ela some (teste lado a lado: a branca e a marrom grande apareceram, a cinza-escura
+não). Por isso estavam invisíveis:
+- a fumaça cinza das explosões menores (D-77);
+- a coluna escura da 1ª versão desta bomba;
+- a fumaça escura do destroço de veículo (D-197).
+A fumaça escura agora usa a `explosion01_smoke_main.dds`, que já é escura, com cor clara; o teste
+cobra que a `smoke_main` nunca leve cor escura.
+
+**Conferido no Studio** (efeito disparado pelo `Fire_Impact`, só imagem e som, sem dano; bots
+desligados; câmera presa num ponto de observação a ~70 m):
+- 1ª bomba, a 70 m: 5 lóbulos, 9 pedaços, 1 luz, 11 emissores e a coluna saindo até +3,5 s;
+- pior quadro: 176 ms na 1ª bomba da sessão. Na 2ª, 24 ms; sem explosão, 27 ms (média 17 ms). O pico
+  é só da primeira vez;
+- versões:
+  - na mata fechada a copa escondeu as partículas;
+  - no aberto, a 1ª versão mostrou só o fogo (a textura acima);
+  - a 2ª saiu um borrão preto;
+  - a final mostra a bola de fogo grande, o anel de poeira e a coluna cinza-marrom com o alto
+    escuro (`testes/lote82`);
+- o destroço do jipe (D-197) com a fumaça escura nova, 7/s logo depois.
+
+**Não testado:** a explosão na água e numa estrutura (só a regra no Lune), o som ouvido, várias
+bombas do ataque aéreo de verdade em sequência (só disparos soltos), celular e jogo publicado.

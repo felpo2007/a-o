@@ -623,6 +623,27 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     - Não testado: tanque e helicóptero destruídos, tripulação fechada, bots dentro e o jogo
       publicado.
     - **v115 publicada** (versão 120 do place, commit 515b70a).
+  - **Lote 82 (D-198): as explosões do ataque aéreo, feitas.**
+    - A bomba de 250 lb e o tiro naval ganharam a explosão grande:
+      - clarão na luz e na tela;
+      - bola de fogo de ~15 m em lóbulos;
+      - anel de poeira rasteira e a coluna de fumaça com poeira clara embaixo;
+      - detritos pela superfície (terra, vegetação, estrutura, água);
+      - som com corpo e cauda.
+    - Cada explosão varia um pouco. O detalhe cai com a distância e a qualidade, com teto de
+      explosões, luzes e pedaços.
+    - Tamanho, dano e empurrão são independentes: a bomba empurra os corpos até 28 m, não mais até
+      os 70 m do dano.
+    - Tremor ajustável: Configurações > Acessibilidade, "Tremor das explosões".
+    - Achado: a textura de fumaça usada desde a D-77 some com cor escura. A fumaça escura das
+      explosões e do destroço de veículo era invisível; passou para a textura escura.
+    - Conferido: Lune 760 ok (48 arquivos), pytest 70 e ruff limpo. No Studio:
+      - 1ª bomba a 70 m: 5 lóbulos, 9 pedaços, 1 luz e a coluna até +3,5 s;
+      - pior quadro: 24 ms com explosão contra 27 ms sem (176 ms só na primeira da sessão);
+      - capturas da bola de fogo e da coluna em `testes/lote82`.
+      - Relatório: `testes/LOTE82_D198_2026-11-20.md`.
+    - Não testado: água e estrutura no Studio, o som ouvido, o ataque aéreo inteiro em sequência,
+      celular e jogo publicado.
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;
