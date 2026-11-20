@@ -38,8 +38,8 @@ test("layout: toda ação de jogo tem botão de controle (exceções documentada
 	local padless = {
 		give_up = "B segurado quando caído",
 		tourniquet = "roda de equipamento",
-		lean_left = "L3 na camada de mira (D-99: Q no teclado a qualquer hora)",
-		lean_right = "R3 na camada de mira (D-99: E no teclado a qualquer hora)",
+		lean_left = "LB na camada de mira (D-189; Q no teclado a qualquer hora)",
+		lean_right = "RB na camada de mira (D-189; E no teclado a qualquer hora)",
 		binoculars = "roda de equipamento (v43: o ↑ é a câmera)",
 		radio_channel = "botão RÁDIO do toque e tecla U (v43: o → é marcar e a comunicação)",
 	}
@@ -310,9 +310,9 @@ test("layout padrão = tabela da Parte 12 (infantaria, veículos, mapa e menus)"
 		{ "infantry", "quick_grenade", "ButtonR1", "press" },
 		{ "infantry", "comm_wheel", "DPadRight", "hold" },
 		{ "infantry", "mark", "DPadRight", "tap" },
-		{ "aim", "lean_left", "ButtonL3", "press" },
-		{ "aim", "lean_right", "ButtonR3", "press" },
-		{ "aim", "hold_breath", "ButtonL1", "press" },
+		{ "aim", "lean_left", "ButtonL1", "press" }, -- D-189: LB/RB mirando inclinam
+		{ "aim", "lean_right", "ButtonR1", "press" },
+		{ "aim", "hold_breath", "ButtonL3", "press" }, -- D-189: prender a respiração foi para o L3
 		{ "infantry", "crouch", "ButtonB", "tap" },
 		{ "infantry", "prone", "ButtonB", "hold" },
 		{ "infantry", "reload", "ButtonX", "tap" },
@@ -437,7 +437,7 @@ test("troca de contexto: mira não desliga sozinha; M e P não fecham o que abri
 	assert(InputMap.survives({ act("lean_left", "infantry") }, "aim"), "Q soltava ao mirar")
 end)
 
-test("D-99: inclinar como no Front 44 (Q/E a qualquer hora, L3/R3 mirando, colisão, quartos)", function()
+test("D-99/D-189: inclinar (Q/E a qualquer hora, LB/RB mirando, colisão, quartos)", function()
 	local Movement = require(S .. "Movement")
 	local keys: { [string]: string } = {}
 	local pads: { [string]: string } = {}
@@ -452,15 +452,16 @@ test("D-99: inclinar como no Front 44 (Q/E a qualquer hora, L3/R3 mirando, colis
 		end
 	end
 	assert(keys["infantry.lean_left"] == "Q" and keys["infantry.lean_right"] == "E", "Q/E na infantaria")
-	assert(pads["aim.lean_left"] == "ButtonL3" and pads["aim.lean_right"] == "ButtonR3", "L3/R3 mirando")
+	assert(pads["aim.lean_left"] == "ButtonL1" and pads["aim.lean_right"] == "ButtonR1", "LB/RB mirando (D-189)")
 	assert(keys["aim.lean_left"] == nil, "a mira não tapa o Q da infantaria")
-	-- sem mirar o pedido vale; soltar a mira não zera
+	-- sem mirar o pedido vale (D-99); D-189: sair da mira centraliza
 	local s = InputMap.newState()
 	InputMap.event(s, "lean", -1)
 	assert(s.lean == -1, "inclinou sem mirar")
 	InputMap.event(s, "aim", true)
 	InputMap.event(s, "aim", false)
-	assert(s.lean == -1, "soltar a mira zerava o inclinar")
+	assert(s.lean == 0, "sair da mira centraliza (D-189)")
+	InputMap.event(s, "lean", -1)
 	InputMap.event(s, "vehicle_enter", "ground_vehicle")
 	assert(s.lean == 0)
 	InputMap.event(s, "lean", 1)
@@ -532,6 +533,96 @@ test("D-188: L3 alterna a corrida e os estados limpam", function()
 		InputMap.event(s, ev, if ev == "vehicle_enter" then "ground" else nil)
 		assert(not s.sprinting, ev .. " limpa a corrida")
 	end
+end)
+
+-- D-189 (dono: inclinar alternando com LB/RB mirando; o mesmo botão mira e atira no celular; o controle
+-- vibra na eliminação confirmada)
+test("D-189: inclinar alterna (três estados), LB/RB mirando não lançam granada nem abrem a roda", function()
+	-- três estados: o mesmo lado volta ao centro; o outro lado vai direto
+	assert(InputMap.leanNext(0, -1, true) == -1 and InputMap.leanNext(-1, -1, true) == 0, "esquerda e volta")
+	assert(InputMap.leanNext(0, 1, true) == 1 and InputMap.leanNext(1, 1, true) == 0, "direita e volta")
+	assert(InputMap.leanNext(-1, 1, true) == 1 and InputMap.leanNext(1, -1, true) == -1, "troca de lado direto")
+	assert(InputMap.leanNext(0.5, 1, true) == 0, "inclinado em parte (parede) volta")
+	assert(InputMap.leanNext(-1, 1, false) == 1 and InputMap.leanNext(1, 1, false) == 1, "segurar: só o lado")
+	assert(InputMap.DEFAULTS.leanToggle == true, "alternar é o padrão")
+	-- sair da mira, morrer, veículo e túnel centralizam
+	local s = InputMap.newState()
+	InputMap.event(s, "aim", true)
+	InputMap.event(s, "lean", -1)
+	local out = InputMap.event(s, "aim", false)
+	assert(s.lean == 0 and table.find(out, "lean"), "sair da mira centraliza e avisa")
+	for _, ev in { "die", "vehicle_enter", "tunnel_enter", "downed" } do
+		local st = InputMap.newState()
+		InputMap.event(st, "aim", true)
+		InputMap.event(st, "lean", 1)
+		InputMap.event(st, ev, if ev == "vehicle_enter" then "ground" else nil)
+		assert(st.lean == 0, ev .. " centraliza")
+	end
+	-- mirando, a camada de cima vence: LB e RB só inclinam
+	local aimPads: { [string]: string } = {}
+	for _, a in InputMap.ACTIONS do
+		if a.ctx == "aim" and a.pad then
+			aimPads[a.pad] = a.id
+		end
+	end
+	assert(aimPads.ButtonL1 == "lean_left" and aimPads.ButtonR1 == "lean_right", "LB/RB na mira")
+	assert(aimPads.ButtonL3 == "hold_breath", "L3 mirando prende a respiração (não corre)")
+	local layers = InputMap.layers("aim")
+	assert(layers[1] == "aim", "a mira é a primeira camada")
+	-- o toque segura (trava do botão e quina sozinha): o alternar não vale para ele
+	local inf = fs.readFile("src/StarterPlayer/StarterPlayerScripts/Controllers/InfantryController.client.luau")
+	assert(string.find(inf, "not Input.fromVirtual", 1, true), "toque segura")
+	assert(string.find(inf, "InputMap.leanNext(Input.state.lean, dir, leanToggles())", 1, true), "alterna")
+end)
+
+test("D-189: o botão de tiro do celular mira e atira (só com arma de fogo); opção de separar", function()
+	assert(InputMap.DEFAULTS.touchAimFire == true, "combinado é o padrão")
+	local hud = fs.readFile("src/StarterPlayer/StarterPlayerScripts/Controllers/ToqueHud.client.luau")
+	for _, t in
+		{
+			"Input.settings.touchAimFire ~= false",
+			'player:GetAttribute("EquippedWeapon") ~= nil',
+			'player:GetAttribute("ItemNaMao") == nil',
+			"not ItemView.handsBusy()",
+			"S.fireAim = true",
+			'Input.virtual("aim", false)',
+		}
+	do
+		assert(string.find(hud, t, 1, true), "ToqueHud: " .. t)
+	end
+	-- a mira entra antes do tiro (o tiro sai na hora, durante a subida da arma)
+	local a = string.find(hud, 'S.fireAim = true\n\t\t\t\tInput.virtual("aim", true)', 1, true)
+	local f = a and string.find(hud, 'Input.virtual("fire", true)', a, true)
+	assert(a and f, "mira e depois o tiro, no mesmo toque")
+	-- o arrasto no botão de tiro gira a câmera (outro dedo anda)
+	assert(string.find(hud, 'if id == "camera" or id == "fire" then', 1, true), "arrastar no tiro mira")
+	local menu = fs.readFile("src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau")
+	assert(string.find(menu, '"touchAimFire", { true, false }, { "mira e atira", "só atira" }', 1, true), "opção")
+	-- toque rápido não se perde logo depois de correr
+	local wc = fs.readFile("src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponController.client.luau")
+	assert(string.find(wc, "os.clock() - lastSprintT > SPRINT_LAG_S", 1, true), "corrida do servidor atrasada")
+end)
+
+test("D-189: vibração só na eliminação confirmada, uma vez por abate, com a opção", function()
+	assert(InputMap.DEFAULTS.hapticKill == "normal", "ligada no padrão")
+	local ok = InputMap.validate({ hapticKill = "off" })
+	assert(ok.hapticKill == "off", "desligar vale")
+	assert(InputMap.validate({ hapticKill = "forte" }).hapticKill == "normal", "lixo volta ao padrão")
+	local prog = fs.readFile("src/ServerScriptService/Modules/ProgressionService.luau")
+	local k = string.find(prog, "killSeq += 1", 1, true)
+	local send = k and string.find(prog, 'Net.event("Combat_Kill"):FireClient(killer, {', k, true)
+	assert(k and send, "o número do abate vai só para quem abateu")
+	local loop = send and string.find(prog, "who ~= killer", send, true)
+	local assist = loop and string.find(prog, 'award(who, "assist")', loop, true)
+	assert(
+		loop and assist and not string.find(string.sub(prog, loop, assist), "FireClient", 1, true),
+		"assistência não manda o aviso"
+	)
+	local hap = fs.readFile("src/StarterPlayer/StarterPlayerScripts/Controllers/Haptics.luau")
+	assert(string.find(hap, "if killSeen[k] then", 1, true), "uma vez por número")
+	assert(string.find(hap, 'Net.event("Combat_Kill").OnClientEvent', 1, true), "escuta o servidor")
+	local menu = fs.readFile("src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau")
+	assert(string.find(menu, '"hapticKill"', 1, true), "opção na Vibração")
 end)
 print(string.format("%d ok, %d falhas", passed, failed))
 if failed > 0 then

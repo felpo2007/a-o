@@ -320,6 +320,15 @@ local function bodyBusy(): boolean
 	return player:GetAttribute("Vaulting") == true or player:GetAttribute("StanceBusy") == true
 end
 
+-- D-189: a última vez que a corrida local estava ligada (o atributo do servidor atrasa um ping)
+local SPRINT_LAG_S = 1.0
+local lastSprintT = -math.huge
+RunService.Heartbeat:Connect(function()
+	if Input.state.sprinting then
+		lastSprintT = os.clock()
+	end
+end)
+
 -- O corpo deixa atirar agora? Sentado: só com "SeatFire" (lugar aberto, 1ª pessoa, no ângulo).
 local function canShoot(): boolean
 	local char = player.Character
@@ -333,9 +342,15 @@ local function canShoot(): boolean
 		return false
 	end
 	-- lote 66 (dono: "estou conseguindo atirar enquanto corro"): correndo, a arma vai para o lado. O
-	-- gatilho tira da corrida (InfantryController) e o tiro sai quando o corpo para de correr
-	if not seated() and (Input.state.sprinting or char:GetAttribute("Sprinting") == true) then
-		return false
+	-- gatilho tira da corrida (InfantryController) e o tiro sai quando o corpo para de correr.
+	-- D-189 ("um toque rápido válido não pode ser perdido"): o "Sprinting" do servidor chega um ping
+	-- depois; logo depois de parar aqui (SPRINT_LAG_S) vale a corrida local, senão o toque curto que
+	-- tirou da corrida era jogado fora antes de o servidor responder
+	if not seated() then
+		local serverSprint = char:GetAttribute("Sprinting") == true and os.clock() - lastSprintT > SPRINT_LAG_S
+		if Input.state.sprinting or serverSprint then
+			return false
+		end
 	end
 	if seated() then
 		return player:GetAttribute("SeatFire") == true
@@ -807,7 +822,7 @@ Input.on("aim", "release", function()
 		setAim(false)
 	end
 end)
--- prender a respiração: segurar (LB / Shift) até Weapons.BREATH_S (4 s; na luneta, vezes a vantagem
+-- prender a respiração: segurar (L3 mirando desde a D-189, antes LB / Shift) até Weapons.BREATH_S (4 s; na luneta, vezes a vantagem
 -- "breath" do passe "Fôlego de Atirador", 1,6); soltar antes acaba
 local function endBreath(at: number)
 	local held = at - breath.start

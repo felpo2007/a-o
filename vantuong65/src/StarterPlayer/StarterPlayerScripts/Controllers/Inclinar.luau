@@ -5,8 +5,9 @@
 -- a máquina de estados zerava o inclinar fora da mira, a câmera só ia 0,4 m de lado sem girar, nada
 -- impedia de espiar através da parede e soltar a mira mandava lean = 0 ao servidor.
 -- Agora, como no Front 44:
--- - segurar Q/E (teclado, a qualquer hora a pé) ou L3/R3 (controle, mirando: fora da mira L3 corre e
---   R3 é o corpo a corpo, D-69). As duas teclas contam juntas (soltar uma volta para a outra);
+-- - Q/E (teclado, a qualquer hora a pé) ou, D-189, LB/RB (controle, mirando; antes L3/R3). Um aperto
+--   inclina, outro no mesmo lado volta, o outro lado vai direto (InputMap.leanNext; "segurar" nas
+--   Configurações volta ao jeito antigo). Sair da mira, morrer, o veículo e o túnel centralizam;
 -- - o valor anda para o alvo a 8/s; correndo, deitado, nadando, transpondo ou sentado o alvo é 0;
 -- - a câmera vai para o lado (Movement.LEAN.offsetM) e gira 14°; a arma de 1ª pessoa vai junto
 --   (WeaponVisuals, VT65ViewModelSeat); em 3ª pessoa o tronco do próprio soldado usa este valor;

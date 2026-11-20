@@ -6,7 +6,7 @@
 local InputMap = {}
 
 -- Contextos: um de jogo por vez (infantaria, veículo terrestre, helicóptero); "aim" é uma camada da
--- infantaria (L3/R3 inclinam); mapa, menu e roda ficam por cima e bloqueiam o jogo (Sink).
+-- infantaria (D-189: LB/RB inclinam); mapa, menu e roda ficam por cima e bloqueiam o jogo (Sink).
 InputMap.CONTEXTS = {
 	global = { priority = 90, game = true, sink = false }, -- vale em todos os contextos de jogo
 	infantry = { priority = 100, game = true, sink = false },
@@ -110,16 +110,17 @@ act("map", "global", "ButtonSelect", "tap", "M", "press", "Mapa tático")
 act("game_menu", "global", "ButtonSelect", "hold", "P", "press", "Menu do jogo")
 act("give_up", "infantry", nil, "press", "H", "press", "Desistir (caído: segure B)")
 act("tourniquet", "infantry", nil, "press", "T", "press", "Torniquete (também na roda)")
--- D-99 (inclinar do Front 44): Q/E no teclado a qualquer hora a pé, segurando. Antes ficavam só na
--- camada de mira e sem mirar a tecla não chegava ("os botões de se inclinar não estão funcionando").
+-- D-99 (inclinar do Front 44): Q/E no teclado a qualquer hora a pé. Antes ficavam só na camada de mira
+-- e sem mirar a tecla não chegava ("os botões de se inclinar não estão funcionando").
 act("lean_left", "infantry", nil, "press", "Q", "press", "Inclinar à esquerda")
 act("lean_right", "infantry", nil, "press", "E", "press", "Inclinar à direita")
--- Camada de mira: L3/R3 (afundar os analógicos) inclinam enquanto mira, a pedido do usuário (D-69):
--- no controle não sobra botão fora da mira (L3 corre, R3 é o corpo a corpo, o direcional tem
--- tocar/segurar). LB prende a respiração; RB segue marcando. O teclado usa o Q/E da infantaria.
-act("lean_left", "aim", "ButtonL3", "press", nil, "press", "Inclinar à esquerda")
-act("lean_right", "aim", "ButtonR3", "press", nil, "press", "Inclinar à direita")
-act("hold_breath", "aim", "ButtonL1", "press", "LeftShift", "press", "Prender a respiração")
+-- D-189 (dono: "LB/RB enquanto estiver mirando, mantendo L3 reservado à corrida"): na camada de mira, LB e
+-- RB inclinam, alternando (InputMap.leanNext): a camada de cima vence, então mirando o LB não abre a
+-- roda nem pega o último item e o RB não lança a granada. Prender a respiração foi para o L3 (mirando
+-- não se corre); o R3 volta a ser o corpo a corpo. Antes (D-69): L3/R3 inclinavam e o LB prendia.
+act("lean_left", "aim", "ButtonL1", "press", nil, "press", "Inclinar à esquerda")
+act("lean_right", "aim", "ButtonR1", "press", nil, "press", "Inclinar à direita")
+act("hold_breath", "aim", "ButtonL3", "press", "LeftShift", "press", "Prender a respiração")
 
 -- Veículo terrestre (Parte 12.3). Direção: analógico esquerdo (ou A/D); acelerar/frear: gatilhos
 -- (ou W/S) lidos como eixo no VehicleController.
@@ -191,9 +192,11 @@ export type Settings = {
 	-- controle; no teclado, como no Front 44, só ao apertar o gatilho vazio, o que vale sempre)
 	autoReload: boolean,
 	sprintToggle: boolean,
+	leanToggle: boolean, -- D-189: inclinar alterna (um aperto inclina, outro volta); false: segurar
 	wheelToggle: boolean,
 	hapticFire: string,
 	hapticDamage: string,
+	hapticKill: string, -- D-189: pulso da eliminação confirmada (servidor)
 	fov: number, -- campo de visão base em graus (acessibilidade)
 	colorblind: string, -- "off" | "protan" | "deutan" | "tritan" (cor dos traçantes)
 	captions: boolean, -- legendas de som
@@ -223,6 +226,7 @@ export type Settings = {
 	hintsPanel: boolean,
 	-- Parte 13 (celular e tablet; Shared/Toque, Controllers/ToqueHud e EditorHud)
 	touchAimToggle: boolean, -- mirar no toque: um toque liga, outro desliga (false: segurar)
+	touchAimFire: boolean, -- D-189: o botão de tiro também mira (arma de fogo na mão); false: separados
 	gyroMode: string, -- "off" | "aim" (só mirando) | "always"
 	gyroSens: number,
 	touchLookSens: number, -- olhar pelo arrasto (quadril)
@@ -271,9 +275,11 @@ InputMap.DEFAULTS = {
 	aimToggle = false,
 	autoReload = true,
 	sprintToggle = true,
+	leanToggle = true,
 	wheelToggle = false,
 	hapticFire = "normal",
 	hapticDamage = "normal",
+	hapticKill = "normal",
 	fov = 70,
 	colorblind = "off",
 	captions = false,
@@ -297,6 +303,7 @@ InputMap.DEFAULTS = {
 	cameraBob = 1,
 	hintsPanel = true,
 	touchAimToggle = true,
+	touchAimFire = true,
 	gyroMode = "off",
 	gyroSens = 1,
 	touchLookSens = 1,
@@ -377,6 +384,7 @@ local CHOICES: { [string]: { [string]: boolean } } = {
 	aimAssist = { minimal = true, off = true },
 	hapticFire = { off = true, low = true, normal = true },
 	hapticDamage = { off = true, low = true, normal = true },
+	hapticKill = { off = true, low = true, normal = true },
 	colorblind = { off = true, protan = true, deutan = true, tritan = true },
 }
 
@@ -752,6 +760,19 @@ function InputMap.newState(): State
 	}
 end
 
+-- D-189: inclinar alternando, três estados (−1 esquerda, 0 centro, 1 direita). Apertar o lado em que
+-- já está volta ao centro; o outro lado vai direto para ele. Sem alternar (leanToggle false): o aperto
+-- inclina e o soltar volta (quem chama manda 0 no soltar).
+function InputMap.leanNext(cur: number, dir: number, toggle: boolean): number
+	if not toggle then
+		return dir
+	end
+	if dir ~= 0 and math.sign(cur) == math.sign(dir) then
+		return 0
+	end
+	return dir
+end
+
 -- Cancela tudo que é "segurado" no jogo; devolve o que foi cancelado.
 local function cancelHolds(s: State): { string }
 	local out = {}
@@ -849,7 +870,13 @@ function InputMap.event(s: State, ev: string, arg: any?): { string }
 	elseif ev == "buttons_released" then
 		s.awaitRelease = false
 	elseif ev == "aim" then
+		local was = s.aiming
 		s.aiming = arg == true
+		-- D-189: sair da mira centraliza a inclinação (o pedido da tecla Q/E sem mirar continua valendo)
+		if was and not s.aiming and s.lean ~= 0 then
+			s.lean = 0
+			return { "lean" }
+		end
 	elseif ev == "sprint" then
 		s.sprinting = arg == true
 	elseif ev == "lean" then

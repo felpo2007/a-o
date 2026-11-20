@@ -3315,5 +3315,10 @@
  "Seus dados não carregaram: esta sessão não salva.": "Your data did not load: this session will not save.",
  "Soldados": "Soldiers",
  "Terreno": "Terrain",
- "Tudo carregado.": "Everything loaded."
+ "Tudo carregado.": "Everything loaded.",
+ "Botão de tiro": "Fire button",
+ "Eliminação confirmada": "Confirmed kill",
+ "Inclinar": "Lean",
+ "mira e atira": "aims and fires",
+ "só atira": "fires only"
 }

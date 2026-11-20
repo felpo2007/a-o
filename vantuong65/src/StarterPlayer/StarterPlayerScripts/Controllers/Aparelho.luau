@@ -92,13 +92,14 @@ end
 Aparelho.HAPTIC_LEVEL = { off = 0, low = 0.45, normal = 1 } :: { [string]: number }
 Aparelho.HAPTIC_MIN = 0.1 -- abaixo disso alguns celulares não vibram (documentação do HapticEffect)
 Aparelho.HAPTIC_FLOOR = 0.12 -- piso de quem está ligado (o "baixo" ainda se sente)
-Aparelho.HAPTIC_GAP = { fire = 0.1, hit = 0.15, explosion = 0.3 } :: { [string]: number }
+Aparelho.HAPTIC_GAP = { fire = 0.1, hit = 0.15, explosion = 0.3, kill = 0.25 } :: { [string]: number }
 Aparelho.EXPLOSION_RANGE_M = 120
 
 export type Pulse = { amp: number, ms: number, preset: string }
 
--- kind: "fire" (x = coice em graus), "hit" (x ignorado), "explosion" (x = distância em m).
--- level: hapticFire (disparo) ou hapticDamage (atingido, explosão). nil = não vibra.
+-- kind: "fire" (x = coice em graus), "hit" (x ignorado), "explosion" (x = distância em m), "kill"
+-- (D-189, x ignorado). level: hapticFire (disparo), hapticDamage (atingido, explosão) ou hapticKill
+-- (eliminação). nil = não vibra.
 function Aparelho.pulse(kind: string, level: string, x: number, battery: boolean): Pulse?
 	local lv = Aparelho.HAPTIC_LEVEL[level] or 1
 	if lv <= 0 then
@@ -124,6 +125,11 @@ function Aparelho.pulse(kind: string, level: string, x: number, battery: boolean
 		amp = k * lv
 		ms = math.floor(150 + 250 * k)
 		preset = "GameplayExplosion"
+	elseif kind == "kill" then
+		-- D-189: eliminação confirmada pelo servidor: um pulso curto e firme (level: hapticKill)
+		amp = 0.7 * lv
+		ms = 90
+		preset = "UINotification"
 	else
 		return nil
 	end

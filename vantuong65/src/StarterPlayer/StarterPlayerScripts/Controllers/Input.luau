@@ -96,7 +96,20 @@ end
 -- vez só. Soltar sempre passa (nada fica preso).
 type FireFn = (InputMap.Action, string) -> ()
 
+-- D-189: true enquanto os handlers de um botão virtual (toque, ToqueAuto) rodam (o task.spawn roda o
+-- começo de cada um na hora). O inclinar do toque é segurar/soltar (trava do botão, quina sozinha);
+-- o alternar do LB/RB e do Q/E não vale para ele.
+Input.fromVirtual = false
+
+local fireVirtualInner: FireFn
 local function fireVirtual(a: InputMap.Action, phase: string)
+	local prev = Input.fromVirtual
+	Input.fromVirtual = true
+	fireVirtualInner(a, phase)
+	Input.fromVirtual = prev
+end
+
+function fireVirtualInner(a: InputMap.Action, phase: string)
 	local ending = phase == "release" or phase == "holdEnd"
 	if not ending and InputMap.CONTEXTS[a.ctx].game and not InputMap.allowed(Input.state, a.id) then
 		return

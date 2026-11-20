@@ -11,6 +11,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Comms = require(ReplicatedStorage.Shared.Comms)
 local Equipar = require(ReplicatedStorage.Shared.Equipar)
+local InputMap = require(ReplicatedStorage.Shared.InputMap)
 local Radio = require(ReplicatedStorage.Shared.Radio)
 local Logistics = require(ReplicatedStorage.Shared.Logistics)
 local Net = require(ReplicatedStorage.Shared.Net)
@@ -109,26 +110,38 @@ Input.on("prone", "holdStart", function()
 	Net.event("Posture_Set"):FireServer({ stance = if st == "prone" then "stand" else "prone" })
 end)
 
--- inclinar: só mirando; câmera desloca ~0,35 m para o lado
+-- inclinar: câmera desloca ~0,35 m para o lado. D-189 (dono: "a inclinação funciona como alternância,
+-- sem precisar segurar"): um aperto inclina, outro no mesmo lado volta ao centro, o outro lado vai
+-- direto para ele (InputMap.leanNext). LB/RB mirando no controle, Q/E no teclado. Com "segurar"
+-- (Configurações › Acessib.), o soltar volta como antes. Sair da mira, morrer, o veículo e o túnel
+-- centralizam (InputMap.event; o StateChanged daqui avisa o servidor).
 local function lean(dir: number)
 	Input.event("lean", dir)
 	Net.event("Posture_Set"):FireServer({ lean = Input.state.lean })
 end
+-- o toque (trava do botão, quina sozinha do ToqueAuto) segura e solta: sem alternar
+local function leanToggles(): boolean
+	return Input.settings.leanToggle ~= false and not Input.fromVirtual
+end
+local function leanPress(dir: number)
+	lean(InputMap.leanNext(Input.state.lean, dir, leanToggles()))
+end
+local function leanRelease(dir: number)
+	if not leanToggles() and math.sign(Input.state.lean) == dir then
+		lean(0)
+	end
+end
 Input.on("lean_left", "press", function()
-	lean(-1)
+	leanPress(-1)
 end)
 Input.on("lean_left", "release", function()
-	if Input.state.lean < 0 then
-		lean(0)
-	end
+	leanRelease(-1)
 end)
 Input.on("lean_right", "press", function()
-	lean(1)
+	leanPress(1)
 end)
 Input.on("lean_right", "release", function()
-	if Input.state.lean > 0 then
-		lean(0)
-	end
+	leanRelease(1)
 end)
 
 -- ===== interagir (X segurado / F): ProximityPrompt do mundo =====

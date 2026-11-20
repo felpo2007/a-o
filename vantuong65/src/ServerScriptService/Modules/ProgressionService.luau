@@ -169,6 +169,7 @@ function ProgressionService.push(p: Player, extra: { [string]: any }?)
 	end
 end
 local push = ProgressionService.push
+local killSeq = 0 -- D-189: número de cada abate no Combat_Kill (o cliente vibra uma vez por número)
 
 -- Soma XP e CI já liberados pelo teto (ou do fim de partida, que fica fora do teto). Promoção dá o
 -- soldo do posto novo. Os multiplicadores da campanha valem no que se ganha jogando; `raw` (bônus
@@ -477,11 +478,15 @@ function ProgressionService.start()
 					kind = if wp then wp.kind else "rifle",
 					victimBot = victimP == nil,
 				})
-				-- v43 (pedido do dono: "coloque o nome da kill também"): o nome de quem caiu para a caveira
+				-- v43 (pedido do dono: "coloque o nome da kill também"): o nome de quem caiu para a caveira.
+				-- D-189: k = número do abate (um por morte), para o cliente vibrar uma vez só mesmo com o
+				-- aviso repetido. Só quem abateu recebe; assistência não manda este aviso.
 				local bn = e.model:GetAttribute("BotName")
+				killSeq += 1
 				Net.event("Combat_Kill"):FireClient(killer, {
 					name = if victimP then victimP.DisplayName elseif type(bn) == "string" then bn else "inimigo",
 					w = wid,
+					k = killSeq,
 				})
 			end
 			for who, t in hits do

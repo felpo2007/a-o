@@ -40,6 +40,7 @@ local UserInputService = game:GetService("UserInputService")
 local InputMap = require(ReplicatedStorage.Shared.InputMap)
 local Toque = require(ReplicatedStorage.Shared.Toque)
 local Input = require(script.Parent.Input)
+local ItemView = require(script.Parent.ItemView)
 local ToqueAuto = require(script.Parent.ToqueAuto)
 local UiKit = require(script.Parent.UiKit)
 local VozEstado = require(script.Parent.VozEstado)
@@ -238,6 +239,7 @@ local S = {
 	sprintNext = 0,
 	vault = Toque.newVault(),
 	fireCount = 0,
+	fireAim = false, -- D-189: a mira que o botão de tiro ligou (solta junto com ele)
 	aimLatched = false,
 	aimLatchedAt = 0,
 	giveUpT0 = nil :: number?,
@@ -488,6 +490,20 @@ local function toggleLatch(b: Btn)
 	setLatch(b, true)
 end
 
+-- D-189 (dono: "o mesmo botão serve para mirar e atirar" no celular): com a arma de fogo na mão, a pé,
+-- o botão de tiro também mira (Configurações › Toque › Botão de tiro). Com granada, pá, curativo ou
+-- outro item na mão, só a ação dele (o gatilho do WeaponController decide), sem forçar a mira.
+-- Mira já ligada (botão MIRAR, trava) fica como está. O tiro sai na hora: o WeaponController atira
+-- durante a subida da arma com a precisão daquele instante.
+local function aimFireOn(): boolean
+	return Input.settings.touchAimFire ~= false
+		and S.ctx.foot
+		and not S.ctx.downed
+		and player:GetAttribute("EquippedWeapon") ~= nil
+		and player:GetAttribute("ItemNaMao") == nil
+		and not ItemView.handsBusy()
+end
+
 local function buttonDown(b: Btn, t: Touch)
 	local d = b.def
 	b.down = true
@@ -495,6 +511,10 @@ local function buttonDown(b: Btn, t: Touch)
 		S.fireCount += 1
 		if S.fireCount == 1 then
 			Toque.unlock(S.stick)
+			if not Input.state.aiming and aimFireOn() then
+				S.fireAim = true
+				Input.virtual("aim", true)
+			end
 			Input.virtual("fire", true)
 		end
 	elseif d.kind == "aim" then
@@ -518,6 +538,10 @@ local function buttonUp(b: Btn, t: Touch)
 		S.fireCount = math.max(0, S.fireCount - 1)
 		if S.fireCount == 0 then
 			Input.virtual("fire", false)
+			if S.fireAim then -- D-189: soltar o tiro desce a arma (a mira que ele ligou)
+				S.fireAim = false
+				Input.virtual("aim", false)
+			end
 		end
 	elseif d.kind == "aim" then
 		aimEvent(false)
@@ -647,6 +671,7 @@ local function resetAll(viaInput: boolean)
 	Toque.releaseAll(S.tracker)
 	S.stickKey = nil
 	S.fireCount = 0
+	S.fireAim = false
 	S.aimLatched = false
 	for _, b in btns do
 		b.latched, b.down = false, false

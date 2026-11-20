@@ -714,6 +714,8 @@ local function renderSettings()
 		-- Parte 13 (celular e tablet): Shared/Toque, ToqueHud e EditorHud
 		section("Mira no toque")
 		choiceRow("Mirar no toque", "touchAimToggle", { true, false }, { "alternar", "segurar" })
+		-- D-189: o botão de tiro também mira (com arma de fogo na mão); ou mira e tiro separados
+		choiceRow("Botão de tiro", "touchAimFire", { true, false }, { "mira e atira", "só atira" })
 		numberRow("Sensibilidade do olhar", "touchLookSens", 0.05, "%.2f")
 		numberRow("Sensibilidade na mira de ferro", "touchAdsSens", 0.05, "%.2f")
 		numberRow("Sensibilidade na luneta", "touchScopeSens", 0.05, "%.2f")
@@ -776,6 +778,7 @@ local function renderSettings()
 			for _, k in
 				{
 					"touchAimToggle",
+					"touchAimFire",
 					"gyroMode",
 					"gyroSens",
 					"touchLookSens",
@@ -832,6 +835,13 @@ local function renderSettings()
 		section("Vibração do controle")
 		choiceRow("Disparo", "hapticFire", { "normal", "low", "off" }, { "normal", "baixa", "desligada" })
 		choiceRow("Dano e explosões", "hapticDamage", { "normal", "low", "off" }, { "normal", "baixa", "desligada" })
+		-- D-189: um pulso curto quando o servidor confirma a eliminação (no controle e no celular)
+		choiceRow(
+			"Eliminação confirmada",
+			"hapticKill",
+			{ "normal", "low", "off" },
+			{ "normal", "baixa", "desligada" }
+		)
 	elseif SUB == "Acessib." then
 		section("Idioma / Language")
 		-- D-84: idioma da interface (Traducao.client); "automático" = idioma da conta Roblox
@@ -845,6 +855,8 @@ local function renderSettings()
 		numberRow("Tempo de segurar (s)", "holdTime", 0.05, "%.2f")
 		choiceRow("Mirar", "aimToggle", { false, true }, { "segurar", "alternar" })
 		choiceRow("Correr", "sprintToggle", { true, false }, { "alternar", "segurar (teclado)" })
+		-- D-189: LB/RB mirando e Q/E (o toque segura sempre)
+		choiceRow("Inclinar", "leanToggle", { true, false }, { "alternar", "segurar" })
 		choiceRow("Rodas radiais", "wheelToggle", { false, true }, { "segurar", "alternar" })
 		numberRow("Campo de visão (graus)", "fov", 5, "%d")
 		-- balanço da passada, inércia da cabeça e inclinação nas curvas (Movement.client)

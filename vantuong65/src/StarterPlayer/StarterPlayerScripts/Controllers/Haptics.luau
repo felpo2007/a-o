@@ -157,6 +157,30 @@ function Haptics.hit(fromPos: Vector3)
 	end
 end
 
+-- D-189 (dono: "faça o controle vibrar quando o jogador conseguir uma eliminação confirmada"): o
+-- servidor manda o Combat_Kill só para quem abateu (assistência e acerto não), com o número k do
+-- abate; cada número vibra uma vez (aviso repetido não vibra de novo). Um pulso curto e firme, com a
+-- intensidade de Configurações › Vibração › Eliminação confirmada (desligada não vibra). No controle,
+-- os motores grande e pequeno; no celular, o HapticEffect (Aparelho.pulse "kill").
+local killSeen: { [number]: boolean } = {}
+function Haptics.kill(k: number?): boolean
+	if type(k) == "number" then
+		if killSeen[k] then
+			return false
+		end
+		killSeen[k] = true
+	end
+	local level = (Input.settings :: any).hapticKill or "normal"
+	touchPulse("kill", level, 0)
+	local lv = LEVEL[level] or 1
+	if lv <= 0 then
+		return false
+	end
+	add(Enum.VibrationMotor.Large, 0.75 * lv, 0.14)
+	add(Enum.VibrationMotor.Small, 0.55 * lv, 0.1)
+	return true
+end
+
 -- contínuos: batimento (ferido grave), motor do veículo, rotor
 function Haptics.set(name: string, motor: Enum.VibrationMotor?, v: number?)
 	if motor and v and v > 0 then
@@ -217,6 +241,9 @@ end)
 -- ligações diretas com os eventos do jogo
 Net.event("Combat_Hit").OnClientEvent:Connect(function(o)
 	Haptics.hit(Vector3.new(o.x, o.y, o.z))
+end)
+Net.event("Combat_Kill").OnClientEvent:Connect(function(o)
+	Haptics.kill(if type(o) == "table" and type(o.k) == "number" then o.k else nil) -- D-189
 end)
 Net.unreliable("Fire_Impact").OnClientEvent:Connect(function(e)
 	local d = (Vector3.new(e.x, e.y, e.z) - camera.CFrame.Position).Magnitude * M
