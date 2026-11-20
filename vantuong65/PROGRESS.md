@@ -644,6 +644,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
       - Relatório: `testes/LOTE82_D198_2026-11-20.md`.
     - Não testado: água e estrutura no Studio, o som ouvido, o ataque aéreo inteiro em sequência,
       celular e jogo publicado.
+    - **v116 publicada** (versão 121 do place, commit 68fccbf).
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;
