@@ -1959,12 +1959,15 @@ local function drawMe()
 		tag.Position = UDim2.new(0.5, 0, 1, 0)
 		tag.TextStrokeColor3 = V.BG
 		tag.TextStrokeTransparency = 0.15
-		local p = TweenService:Create(
-			halo,
-			TweenInfo.new(0.9, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true),
-			{ Size = UDim2.fromOffset(22, 22), BackgroundTransparency = 0.35 }
-		)
-		p:Play()
+		-- D-205: com movimento reduzido o halo fica parado (o "VOCÊ" e a seta continuam)
+		if not UiKit.Estilo.reduzMovimento() then
+			local p = TweenService:Create(
+				halo,
+				TweenInfo.new(0.9, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true),
+				{ Size = UDim2.fromOffset(22, 22), BackgroundTransparency = 0.35 }
+			)
+			p:Play()
+		end
 	end
 	local char = player.Character
 	local root = char and char:FindFirstChild("HumanoidRootPart") :: BasePart?

@@ -131,6 +131,15 @@ O `sourcemap.json` não vai para o Git.
     restauração dá corpo novo e o PlayerGui some. O posto do perfil do Studio é 1, e o comandante
     pede o posto 3;
   - `workspace:SetAttribute("VT65DevRain", 1)`: força a chuva (0 a 1);
+  - Componentes da interface (D-205, do lado do CLIENTE):
+    - `VT65DevTela = "componentes"` abre a vitrine (abas, estados do cartão e do botão);
+      `"componentes:fechar"` fecha; `"aba:+1"`/`"aba:-1"` passam a aba pelo caminho do LB/RB;
+    - `"confirma"` abre uma confirmação, e a resposta vai para `VT65DevConfirma` ("confirmou" ou
+      "voltou");
+    - as preferências: `VT65DevMovimento` (true), `VT65DevTransparencia` (0 a 1) e `VT65DevTexto`
+      ("Large", "Larger", "Largest"). Valem para o que for desenhado depois.
+    - Não feche a confirmação destruindo a janela: a pilha de telas fica com ela por cima, e o
+      menu de baixo para de responder. Feche pelo VOLTAR.
   - D-191/D-190 (só Studio): `VT65DevGranada = "6"` lança uma granada a 6 m/s do primeiro
     jogador; `VT65DevTela = "3p"` liga a 3ª pessoa (o teclado do MCP não chega com o Studio
     atrás); `VT65DevTela = "roda_equip:<n>"` abre a roda de equipamento com a ficha n;
@@ -354,7 +363,7 @@ O `sourcemap.json` não vai para o Git.
 - Segredos só no `.env` (no `.gitignore`), nunca no código nem no chat.
 - ForgeGUI: nunca regenerar um job em `outcome_unknown`. "failed" com `retryable` pode ser
   retomado com `generation_retry`.
-- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-205) e atualize `PROGRESS.md`.
+- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-206) e atualize `PROGRESS.md`.
 - Tetos de triângulos por modelo: vegetação ≤ 6 mil (D-135), props e herói ≤ 20 mil (`ArtBudget`,
   conferido pelo teste da F5).
 - Commits no branch acima, com mensagem em português.

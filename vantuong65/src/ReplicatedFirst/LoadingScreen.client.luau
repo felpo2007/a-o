@@ -95,6 +95,10 @@ local AMBER = Color3.fromRGB(232, 168, 64) -- etapa que passou com aviso (dados,
 local QUINT_OUT = Enum.EasingStyle.Quint
 local OUT, IN, INOUT = Enum.EasingDirection.Out, Enum.EasingDirection.In, Enum.EasingDirection.InOut
 
+-- D-205 (§4): com movimento reduzido (Estilo.reduzMovimento), o que mexe de lugar ou de tamanho
+-- troca direto; cor e transparência continuam com a transição curta
+local Estilo = require(script.Parent:WaitForChild("Estilo"))
+local MEXE = { Position = true, Size = true, Rotation = true, Scale = true, CFrame = true, Offset = true }
 local function tween(
 	o: Instance,
 	t: number,
@@ -103,7 +107,16 @@ local function tween(
 	dir: Enum.EasingDirection?,
 	delay: number?
 ): Tween
-	local tw = TweenService:Create(o, TweenInfo.new(t, style or QUINT_OUT, dir or OUT, 0, false, delay or 0), props)
+	local dur = t
+	if Estilo.reduzMovimento() then
+		for k in props do
+			if MEXE[k] then
+				dur = 0
+				break
+			end
+		end
+	end
+	local tw = TweenService:Create(o, TweenInfo.new(dur, style or QUINT_OUT, dir or OUT, 0, false, delay or 0), props)
 	tw:Play()
 	return tw
 end
@@ -536,8 +549,13 @@ local function stampButton(x: number, w: number, text: string, color: Color3, ho
 		hot = hot,
 	}
 end
-local play = stampButton(868, 312, "CONTINUAR", STAMP, Color3.fromRGB(172, 50, 38), 26)
+-- D-205 (§3): a ação principal em âmbar com texto escuro (era o vermelho de carimbo)
+local EV = Estilo.V
+local play = stampButton(868, 312, "CONTINUAR", EV.AMBAR, EV.AMBAR_HI, 26)
 play.b.Name = "Continuar"
+play.text.TextColor3 = EV.AMBAR_TEXTO
+play.arrow.TextColor3 = EV.AMBAR_TEXTO
+play.edge.Color = EV.AMBAR_TEXTO
 local desk = stampButton(554, 300, "CONFIGURAÇÕES", DRAB, Color3.fromRGB(62, 68, 48), 20)
 desk.b.Name = "Configuracoes"
 play.b.NextSelectionLeft, desk.b.NextSelectionRight = desk.b, play.b

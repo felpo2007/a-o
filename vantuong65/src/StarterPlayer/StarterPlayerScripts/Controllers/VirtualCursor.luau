@@ -74,7 +74,7 @@ local pulse = 0 -- s de "clique" no anel
 local gui = Instance.new("ScreenGui")
 gui.Name = "VT65Cursor"
 gui.ResetOnSpawn = false
-gui.DisplayOrder = 60 -- acima de todos os menus
+gui.DisplayOrder = 99 -- acima de todos os menus e da confirmação (95, D-205)
 gui.IgnoreGuiInset = true
 gui.Enabled = false
 pcall(function()

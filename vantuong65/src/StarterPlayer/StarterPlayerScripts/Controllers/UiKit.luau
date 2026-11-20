@@ -98,19 +98,29 @@ function UiKit.tv(): boolean
 	return ok and v == true
 end
 
--- tamanho de texto: na TV nunca abaixo de 24 px (1080p)
+-- tamanho de texto: cresce com a preferência do jogador (D-205, Estilo.textoK); na TV nunca abaixo
+-- de 24 px (1080p)
 function UiKit.text(size: number): number
-	return if UiKit.tv() then math.max(size, 24) else size
+	return Estilo.ts(size)
 end
 
 -- Texto dentro de uma tela com UIScale: na TV o tamanho NA TELA (size × scale) nunca fica abaixo de
--- 24 px. Fora da TV devolve o tamanho de projeto.
+-- 24 px. Fora da TV devolve o tamanho de projeto (com a preferência de tamanho, D-205).
 function UiKit.textAt(size: number, scale: number): number
+	local s = math.floor(size * Estilo.textoK() + 0.5)
 	if not UiKit.tv() then
-		return size
+		return s
 	end
-	return math.max(size, math.ceil(24 / math.max(scale, 0.05)))
+	return math.max(s, math.ceil(24 / math.max(scale, 0.05)))
 end
+
+-- D-205: "Reduzir movimento" das Configurações (Input.settings.uiReduceMotion) vira o atributo local
+-- que o Estilo lê junto com a preferência do Roblox
+local function syncMovimento()
+	player:SetAttribute("VT65ReduzMovimento", (Input.settings :: any).uiReduceMotion == true)
+end
+Input.SettingsChanged:Connect(syncMovimento)
+syncMovimento()
 
 function UiKit.screen(name: string, order: number?): ScreenGui
 	local g = Instance.new("ScreenGui")
@@ -126,12 +136,34 @@ function UiKit.screen(name: string, order: number?): ScreenGui
 end
 
 -- ===== movimento (pedido do dono, 2026-11-11: "mais fluido") =====
--- Tempos de interface: QUICK para realce e cor, SOFT para escala e entrada de cartão.
-UiKit.QUICK = TweenInfo.new(0.14, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
-UiKit.SOFT = TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
+-- Tempos de interface: QUICK para realce e cor, SOFT para escala e entrada de cartão (D-205: 0,15 e
+-- 0,30 s, a faixa do §4). Um tween novo na mesma propriedade substitui o anterior (o TweenService
+-- cancela o que estava andando): trocar rápido de foco não acumula animação.
+UiKit.QUICK = Estilo.QUICK
+UiKit.SOFT = Estilo.SOFT
+
+-- propriedades que mexem de lugar ou de tamanho: com movimento reduzido elas trocam direto
+UiKit.MOVIMENTO = {
+	Position = true,
+	Size = true,
+	Rotation = true,
+	Scale = true,
+	CanvasPosition = true,
+	AnchorPoint = true,
+	Offset = true,
+} :: { [string]: boolean }
 
 function UiKit.tween(o: Instance, info: TweenInfo, props: { [string]: any }): Tween
-	local t = TweenService:Create(o, info, props)
+	local i = info
+	if Estilo.reduzMovimento() then
+		for k in props do
+			if UiKit.MOVIMENTO[k] then
+				i = TweenInfo.new(0)
+				break
+			end
+		end
+	end
+	local t = TweenService:Create(o, i, props)
 	t:Play()
 	return t
 end
@@ -166,7 +198,7 @@ function UiKit.realce(b: GuiObject, base: Color3?, quente: Color3?, escala: numb
 		local s = Instance.new("UIStroke")
 		s.Name = "Realce"
 		s.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-		s.Color = UiKit.BRASS
+		s.Color = Estilo.V.FOCO
 		s.Thickness = 2
 		s.Transparency = 1
 		s.Parent = b
@@ -190,7 +222,7 @@ function UiKit.realce(b: GuiObject, base: Color3?, quente: Color3?, escala: numb
 			on = v
 			UiKit.tween(scale, UiKit.SOFT, { Scale = if v then (escala or 1.035) else 1 })
 			UiKit.tween(edge, UiKit.QUICK, {
-				Color = if v then UiKit.BRASS else rest.color,
+				Color = if v then Estilo.V.FOCO else rest.color,
 				Thickness = if v then math.max(rest.thick, 2) else rest.thick,
 				Transparency = if v then 0 else rest.tr,
 			})
@@ -262,7 +294,7 @@ focusFrame.Size = UDim2.new(1, 8, 1, 8)
 focusFrame.Position = UDim2.fromOffset(-4, -4)
 local stroke = Instance.new("UIStroke")
 stroke.Thickness = 4
-stroke.Color = Color3.fromRGB(255, 214, 0)
+stroke.Color = Estilo.V.FOCO -- D-205: o âmbar do foco
 stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 stroke.Parent = focusFrame
 UiKit.FOCUS = focusFrame
@@ -276,6 +308,12 @@ GuiService:GetPropertyChangedSignal("SelectedObject"):Connect(function()
 	end
 	stroke.Transparency = 0
 	if not GuiService.SelectedObject then
+		return
+	end
+	if Estilo.reduzMovimento() then
+		-- D-205: movimento reduzido: a moldura aparece no lugar e não respira
+		focusFrame.Size = UDim2.new(1, 8, 1, 8)
+		focusFrame.Position = UDim2.fromOffset(-4, -4)
 		return
 	end
 	focusFrame.Size = UDim2.new(1, 20, 1, 20)
@@ -329,6 +367,8 @@ export type Action = Estilo.ButtonParts & {
 	enabled: (on: boolean) -> (),
 	isEnabled: () -> boolean,
 	setKind: (kind: string) -> (),
+	carregando: (on: boolean) -> (), -- D-205: trava e mostra "…" (operação em andamento)
+	erro: (msg: string) -> (), -- D-205: borda vermelha e o motivo por 2,5 s
 }
 export type ActionOpts = { action: string?, ctx: string?, h: number? }
 
@@ -338,7 +378,7 @@ local function kindColors(k: string): (Color3, Color3)
 	if pay then
 		return pay.base, pay.hot
 	elseif k == "primary" then
-		return Estilo.V.OLIVE, Estilo.V.OLIVE_HI
+		return Estilo.V.AMBAR, Estilo.V.AMBAR_HI -- D-205 (§3): ação principal em âmbar
 	elseif k == "danger" then
 		return Estilo.V.RED, Estilo.V.RED_HI
 	end
@@ -404,18 +444,85 @@ function UiKit.action(parent: Instance?, text: string, kind: string?, onClick: (
 		end
 	end
 	glyph()
-	Input.DeviceChanged:Connect(glyph)
+	-- D-205 (§21): a conexão sai junto com o botão (antes cada tela recriada deixava uma para trás)
+	local devConn = Input.DeviceChanged:Connect(glyph)
+	b.Destroying:Connect(function()
+		devConn:Disconnect()
+	end)
+	-- D-205 (§3): pressionado: o botão afunda um pouco enquanto o dedo ou o mouse seguram
+	local scl = b:FindFirstChild("Escala") :: UIScale?
+	local function afunda(v: boolean)
+		if scl and on then
+			UiKit.tween(scl, UiKit.QUICK, { Scale = if v then 0.97 else (if r.hot() then 1.015 else 1) })
+		end
+	end
+	b.MouseButton1Down:Connect(function()
+		afunda(true)
+	end)
+	b.MouseButton1Up:Connect(function()
+		afunda(false)
+	end)
+	b.MouseLeave:Connect(function()
+		afunda(false)
+	end)
 	local a = parts :: any
 	a.realce = r
+	-- D-205: texto escuro só sobre o âmbar da ação principal habilitada; apagado, texto claro
+	local function tinta()
+		local escuro = on and k == "primary"
+		local c = if escuro then Estilo.V.AMBAR_TEXTO elseif k == "ghost" then Estilo.V.DIM else Estilo.V.TEXT
+		parts.label.TextColor3 = c
+		parts.sub.TextColor3 = if escuro then Estilo.V.AMBAR_TEXTO else Estilo.V.TEXT
+	end
 	a.enabled = function(v: boolean)
 		on = v
 		b.AutoButtonColor = false
 		parts.label.TextTransparency = if v then 0 else 0.55
 		parts.sub.TextTransparency = if v then 0.15 else 0.6
+		tinta()
 		r.base(if v then base else Estilo.V.PANEL_2)
 	end
 	a.isEnabled = function(): boolean
 		return on
+	end
+	-- D-205 (§3, §9: "o botão não deve permitir solicitações duplicadas enquanto uma operação estiver
+	-- sendo processada"): carregando trava o clique e mostra "…" à direita; erro pisca a borda em
+	-- vermelho e escreve o motivo no lugar do "…" por 2,5 s
+	local subAntes: string? = nil
+	local erroGen = 0
+	a.carregando = function(v: boolean)
+		if v then
+			subAntes = subAntes or parts.sub.Text
+			parts.sub.Text = "…"
+			a.enabled(false)
+		else
+			parts.sub.Text = subAntes or ""
+			subAntes = nil
+			a.enabled(true)
+		end
+	end
+	a.erro = function(msg: string)
+		erroGen += 1
+		local g = erroGen
+		local antes = parts.sub.Text
+		parts.sub.Text = msg
+		parts.sub.TextColor3 = Estilo.V.RED_HI
+		local e = edgeLine
+		if e then
+			local c, tr = e.Color, e.Transparency
+			e.Color, e.Transparency = Estilo.V.RED_HI, 0
+			task.delay(2.5, function()
+				if erroGen == g and e.Parent then
+					e.Color, e.Transparency = c, tr
+				end
+			end)
+		end
+		task.delay(2.5, function()
+			if erroGen == g and parts.sub.Parent then
+				parts.sub.Text = antes
+				tinta()
+			end
+		end)
 	end
 	a.setKind = function(kk: string)
 		if kk == k then
@@ -424,6 +531,7 @@ function UiKit.action(parent: Instance?, text: string, kind: string?, onClick: (
 		k = kk
 		base, hot = kindColors(kk)
 		shape(kk)
+		tinta()
 		r.quente(hot)
 		r.base(if on then base else Estilo.V.PANEL_2)
 	end
@@ -458,7 +566,22 @@ local function firstSelectable(root: Instance): GuiObject?
 	return best
 end
 
--- Põe o foco no primeiro item (de cima para baixo) se o jogador estiver no controle.
+-- D-205 (§19: "definir foco inicial"): a ação principal de uma tela se marca com UiKit.principal;
+-- o foco começa nela, e não no item mais em cima à esquerda
+function UiKit.principal(o: GuiObject)
+	o:SetAttribute("VT65Principal", true)
+end
+local function principalEm(root: Instance): GuiObject?
+	for _, d in root:GetDescendants() do
+		if d:IsA("GuiObject") and d.Selectable and d.Visible and d:GetAttribute("VT65Principal") == true then
+			return d
+		end
+	end
+	return nil
+end
+
+-- Põe o foco na ação principal (UiKit.principal) ou no primeiro item (de cima para baixo) se o
+-- jogador estiver no controle.
 function UiKit.focus(root: Instance)
 	if not Input.isGamepad() or VirtualCursor.isActive() then
 		return -- com o cursor virtual, quem escolhe é o cursor (A não pode ativar dois botões)
@@ -468,7 +591,7 @@ function UiKit.focus(root: Instance)
 		if cur and cur:IsDescendantOf(root) and cur.Visible then
 			return
 		end
-		local f = firstSelectable(root)
+		local f = principalEm(root) or firstSelectable(root)
 		if f then
 			GuiService.SelectedObject = f
 		end
@@ -477,6 +600,10 @@ end
 
 -- Vigia: tela visível no controle sem foco nela vira aviso e é corrigida (Parte 12.7).
 local watched: { { root: GuiObject, active: () -> boolean, warned: boolean } } = {}
+-- (definida lá embaixo, com a pilha de telas)
+local focoPorCima: (root: GuiObject) -> boolean = function(_root: GuiObject): boolean
+	return false
+end
 function UiKit.watch(root: GuiObject, active: () -> boolean)
 	table.insert(watched, { root = root, active = active, warned = false })
 end
@@ -487,7 +614,8 @@ task.spawn(function()
 			for _, w in watched do
 				if w.active() and w.root.Visible then
 					local cur = GuiService.SelectedObject
-					if not (cur and cur:IsDescendantOf(w.root)) then
+					-- D-205: foco numa tela por cima (a confirmação, uma janela aberta do menu) fica lá
+					if not (cur and cur:IsDescendantOf(w.root)) and not focoPorCima(w.root) then
 						if not firstSelectable(w.root) then
 							if not w.warned then
 								w.warned = true
@@ -848,25 +976,67 @@ end
 -- e um aperto só fecha uma tela (os handlers de ui_back rodam todos no mesmo aperto).
 -- order = DisplayOrder da tela: uma tela que abre DEPOIS mas fica por baixo (o relatório, 40, que
 -- chega com a tela de fim, 43, já aberta) entra abaixo dela na pilha, como aparece.
-type Entry = { name: string, order: number }
+-- D-205 (§19: "restaurar o foco após fechar um modal"): cada entrada guarda o foco de antes de a tela
+-- abrir; ao fechar, o foco volta para ele se ainda estiver na tela (só no controle).
+type Entry = { name: string, order: number, foco: GuiObject? }
 local stack: { Entry } = {}
 local lastBack = 0
-function UiKit.closed(name: string)
+-- o objeto está na tela agora: no PlayerGui, numa ScreenGui ligada e com ele e os pais visíveis
+local function naTela(o: GuiObject): boolean
+	local pg = player:FindFirstChildOfClass("PlayerGui")
+	if not (pg and o:IsDescendantOf(pg)) then
+		return false
+	end
+	local p: Instance? = o
+	while p and p:IsA("GuiObject") do
+		if not p.Visible then
+			return false
+		end
+		p = p.Parent
+	end
+	local g = o:FindFirstAncestorWhichIsA("LayerCollector")
+	return g == nil or not g:IsA("ScreenGui") or g.Enabled
+end
+UiKit.naTela = naTela
+-- o foco do controle está numa tela à vista que fica por cima desta (DisplayOrder maior)?
+focoPorCima = function(root: GuiObject): boolean
+	local cur = GuiService.SelectedObject
+	if not (cur and naTela(cur)) then
+		return false
+	end
+	local a = cur:FindFirstAncestorWhichIsA("ScreenGui")
+	local b = root:FindFirstAncestorWhichIsA("ScreenGui")
+	return a ~= nil and b ~= nil and a ~= b and a.DisplayOrder > b.DisplayOrder
+end
+UiKit.focoPorCima = focoPorCima
+local function focoValido(f: GuiObject?): boolean
+	return f ~= nil and f.Parent ~= nil and f.Selectable and naTela(f)
+end
+function UiKit.closed(name: string, semVoltarFoco: boolean?)
 	for i, e in stack do
 		if e.name == name then
 			table.remove(stack, i)
+			local f = e.foco
+			if not semVoltarFoco and Input.isGamepad() and f then
+				task.defer(function()
+					if focoValido(f) then
+						GuiService.SelectedObject = f
+					end
+				end)
+			end
 			return
 		end
 	end
 end
 function UiKit.opened(name: string, order: number?)
-	UiKit.closed(name)
+	local antes = GuiService.SelectedObject
+	UiKit.closed(name, true)
 	local o = order or 0
 	local at = #stack + 1
 	while at > 1 and stack[at - 1].order > o do
 		at -= 1
 	end
-	table.insert(stack, at, { name = name, order = o })
+	table.insert(stack, at, { name = name, order = o, foco = antes })
 end
 function UiKit.top(): string?
 	local e = stack[#stack]
@@ -923,6 +1093,433 @@ function UiKit.hold(bar: Frame, seconds: number, done: () -> ()): Hold
 			return on
 		end,
 	}
+end
+
+-- ----- confirmação (D-205; prompt de interface §18, "Modais": "confirmação clara para sair da
+-- partida, descartar alterações ou outras ações relevantes. Ofereça confirmar e voltar, com foco
+-- previsível") -----
+-- Uma janela por vez, por cima das telas (DisplayOrder 95). O foco do controle começa em VOLTAR (a
+-- resposta que não muda nada) e não sai da janela; B ou Backspace voltam. Ao fechar, o foco volta
+-- para onde estava (UiKit.closed). Devolve uma função que fecha sem responder (a tela que abriu a
+-- confirmação fechou por outro motivo).
+export type ModalOpts = {
+	titulo: string,
+	texto: string?,
+	confirmar: string?, -- padrão "CONFIRMAR"
+	voltar: string?, -- padrão "VOLTAR"
+	perigo: boolean?, -- confirmar em vermelho (apagar, sair, descartar)
+	aoConfirmar: () -> (),
+	aoVoltar: (() -> ())?,
+}
+local modalGui: ScreenGui? = nil
+local modalAberto: ((ok: boolean, silencioso: boolean?) -> ())? = nil
+function UiKit.modal(o: ModalOpts): () -> ()
+	local anterior = modalAberto
+	if anterior then
+		anterior(false, true)
+	end
+	local px, V = Estilo.px, Estilo.V
+	local g = modalGui or UiKit.screen("VT65Confirma", 95)
+	modalGui = g
+	g.Enabled = true
+	-- véu escuro: cobre também a borda fora da área segura, e nada atrás recebe clique
+	local veu = Instance.new("Frame")
+	veu.Name = "Veu"
+	veu.Active = true
+	veu.BackgroundColor3 = Color3.new(0, 0, 0)
+	veu.BackgroundTransparency = 1
+	veu.BorderSizePixel = 0
+	veu.Position = UDim2.fromOffset(-200, -200)
+	veu.Size = UDim2.new(1, 400, 1, 400)
+	veu.Parent = g
+	local painel = Estilo.panel(g, V.PANEL, 0, true)
+	painel.Name = "Confirmacao"
+	painel.Active = true
+	painel.AnchorPoint = Vector2.new(0.5, 0.5)
+	painel.Position = UDim2.fromScale(0.5, 0.5)
+	painel.Size = UDim2.new(0.92, 0, 0, 0)
+	painel.AutomaticSize = Enum.AutomaticSize.Y
+	-- o foco do controle não sai da janela
+	painel.SelectionGroup = true
+	painel.SelectionBehaviorUp = Enum.SelectionBehavior.Stop
+	painel.SelectionBehaviorDown = Enum.SelectionBehavior.Stop
+	painel.SelectionBehaviorLeft = Enum.SelectionBehavior.Stop
+	painel.SelectionBehaviorRight = Enum.SelectionBehavior.Stop
+	local lim = Instance.new("UISizeConstraint")
+	lim.MaxSize = Vector2.new(px(480, 680), math.huge)
+	lim.Parent = painel
+	local esc = Instance.new("UIScale")
+	esc.Name = "Escala"
+	esc.Parent = painel
+	local gap = px(14, 20)
+	Estilo.pad(painel, px(22, 30), nil, px(20, 28), px(20, 28))
+	Estilo.list(painel, false, gap)
+	local faixa = Instance.new("Frame")
+	faixa.Name = "Faixa"
+	faixa.BackgroundColor3 = if o.perigo then V.RED else V.AMBAR
+	faixa.BorderSizePixel = 0
+	faixa.Size = UDim2.new(0, px(48, 64), 0, px(3, 4))
+	faixa.LayoutOrder = 1
+	faixa.Parent = painel
+	local titulo = Estilo.title(painel, UiKit.upper(o.titulo), px(26, 36))
+	titulo.Name = "Titulo"
+	titulo.TextWrapped = true
+	titulo.TextTruncate = Enum.TextTruncate.None
+	titulo.AutomaticSize = Enum.AutomaticSize.Y
+	titulo.Size = UDim2.new(1, 0, 0, px(30, 42))
+	titulo.LayoutOrder = 2
+	if o.texto and o.texto ~= "" then
+		local corpo = Estilo.body(painel, o.texto, px(16, 24), V.DIM)
+		corpo.Name = "Texto"
+		corpo.AutomaticSize = Enum.AutomaticSize.Y
+		corpo.Size = UDim2.new(1, 0, 0, px(20, 28))
+		corpo.LayoutOrder = 3
+	end
+	local linha = Instance.new("Frame")
+	linha.Name = "Botoes"
+	linha.BackgroundTransparency = 1
+	linha.Size = UDim2.new(1, 0, 0, px(48, 66))
+	linha.LayoutOrder = 4
+	linha.Parent = painel
+	Estilo.list(linha, true, gap)
+	local feito = false
+	local fechar: (ok: boolean, silencioso: boolean?) -> ()
+	local h = px(48, 66)
+	local voltar = UiKit.action(linha, o.voltar or "VOLTAR", "secondary", function()
+		fechar(false)
+	end, { action = "ui_back", ctx = "menu", h = h })
+	voltar.button.Name = "Voltar"
+	voltar.button.Size = UDim2.new(0.5, -math.floor(gap / 2), 0, h)
+	voltar.button.LayoutOrder = 1
+	local conf = UiKit.action(linha, o.confirmar or "CONFIRMAR", if o.perigo then "danger" else "primary", function()
+		fechar(true)
+	end, { h = h })
+	conf.button.Name = "Confirmar"
+	conf.button.Size = UDim2.new(0.5, -math.floor(gap / 2), 0, h)
+	conf.button.LayoutOrder = 2
+	UiKit.principal(voltar.button)
+	fechar = function(ok: boolean, silencioso: boolean?)
+		if feito then
+			return
+		end
+		feito = true
+		if modalAberto == fechar then
+			modalAberto = nil
+		end
+		UiKit.release(painel)
+		veu:Destroy()
+		painel:Destroy()
+		UiKit.closed("confirma", silencioso)
+		if modalAberto == nil then
+			g.Enabled = false
+		end
+		if not silencioso then
+			if ok then
+				o.aoConfirmar()
+			elseif o.aoVoltar then
+				(o.aoVoltar :: () -> ())()
+			end
+		end
+	end
+	modalAberto = fechar
+	UiKit.opened("confirma", g.DisplayOrder)
+	-- entrada curta: o véu escurece e a janela cresce de 96 % (sem crescer com movimento reduzido)
+	UiKit.tween(veu, UiKit.QUICK, { BackgroundTransparency = 0.45 })
+	esc.Scale = 0.96
+	UiKit.tween(esc, UiKit.SOFT, { Scale = 1 })
+	UiKit.focus(painel)
+	return function()
+		fechar(false, true)
+	end
+end
+Input.on("ui_back", "press", function()
+	local f = modalAberto
+	if f and UiKit.backFor("confirma") then
+		f(false)
+	end
+end)
+
+-- ----- abas (D-205; §18 componentes, §19 "navegar por abas", tabela de controles: "Alternar abas:
+-- LB/RB") -----
+-- Fileira de abas com LB/RB (ou Q/E) nas pontas; a ativa em texto claro com o traço âmbar embaixo.
+-- Clique, toque, LB/RB e Q/E trocam. tela: o nome dado ao UiKit.opened (LB/RB só valem com ela por
+-- cima e as abas à vista). aoTrocar(id) roda a cada troca, não na criação. Sai do registro sozinha
+-- quando o quadro é destruído.
+export type Aba = { id: string, nome: string }
+export type Abas = {
+	frame: Frame,
+	set: (id: string, silencioso: boolean?) -> (),
+	atual: () -> string,
+	passo: (dir: number) -> (),
+	tela: string,
+}
+local abasVivas: { [Frame]: Abas } = {}
+function UiKit.abas(parent: Instance, lista: { Aba }, tela: string, aoTrocar: (id: string) -> (), h: number?): Abas
+	local px, V = Estilo.px, Estilo.V
+	local H = h or px(44, 60)
+	local row = Instance.new("Frame")
+	row.Name = "Abas"
+	row.BackgroundTransparency = 1
+	row.Size = UDim2.new(1, 0, 0, H)
+	row.Parent = parent
+	local lay = Estilo.list(row, true, px(16, 24))
+	lay.VerticalAlignment = Enum.VerticalAlignment.Bottom
+	local function dica(ordem: number): (ImageLabel, TextLabel)
+		local img = Instance.new("ImageLabel")
+		img.BackgroundTransparency = 1
+		img.Size = UDim2.fromOffset(math.floor(H * 0.62), math.floor(H * 0.62))
+		img.LayoutOrder = ordem
+		img.Parent = row
+		local t = Estilo.text(row, "", px(14, 20), V.TEXT, Estilo.F.TITLE_MED)
+		t.BackgroundColor3 = V.PANEL_3
+		t.BackgroundTransparency = 0
+		t.AutomaticSize = Enum.AutomaticSize.X
+		t.Size = UDim2.fromOffset(0, math.floor(H * 0.6))
+		t.TextXAlignment = Enum.TextXAlignment.Center
+		t.LayoutOrder = ordem
+		Estilo.corner(t, 3)
+		Estilo.stroke(t, V.LINE, 1, 0.2)
+		Estilo.pad(t, px(7, 10))
+		t.Parent = row
+		return img, t
+	end
+	local imgA, keyA = dica(0)
+	local imgB, keyB = dica(#lista + 1)
+	local function dica1(img: ImageLabel, key: TextLabel, acao: string)
+		local i, txt = Input.glyph(acao, "menu")
+		local toque = Input.touchActive()
+		img.Visible = not toque and i ~= nil
+		img.Image = i or ""
+		key.Visible = not toque and i == nil and txt ~= ""
+		key.Text = UiKit.keyName(txt)
+	end
+	local function dicas()
+		dica1(imgA, keyA, "ui_tab_prev")
+		dica1(imgB, keyB, "ui_tab_next")
+	end
+	dicas()
+	local devConn = Input.DeviceChanged:Connect(dicas)
+	local atual = lista[1] and lista[1].id or ""
+	local botoes: { [string]: TextButton } = {}
+	local api: Abas
+	local function pinta()
+		for id, b in botoes do
+			local on = id == atual
+			b.TextColor3 = if on then V.TEXT else V.DIM
+			local m = b:FindFirstChild("Marca") :: Frame?
+			if m then
+				m.BackgroundTransparency = if on then 0 else 1
+			end
+		end
+	end
+	for i, d in lista do
+		local b = Instance.new("TextButton")
+		b.Name = "Aba_" .. d.id
+		b.AutoButtonColor = false
+		b.AutomaticSize = Enum.AutomaticSize.X
+		b.Size = UDim2.fromOffset(0, H)
+		b.BackgroundTransparency = 1
+		b.BorderSizePixel = 0
+		b.FontFace = Estilo.headFont(d.nome, Estilo.F.TITLE_MED)
+		b.TextSize = Estilo.ts(px(17, 23))
+		b.Text = d.nome
+		-- LB/RB trocam a aba; o foco fica no conteúdo (aba focável prenderia o direcional no alto)
+		b.Selectable = false
+		b.LayoutOrder = i
+		b.Parent = row
+		Estilo.pad(b, px(2, 4), nil, 0, px(8, 10))
+		local m = Instance.new("Frame")
+		m.Name = "Marca"
+		m.AnchorPoint = Vector2.new(0.5, 1)
+		m.Position = UDim2.new(0.5, 0, 1, px(8, 10))
+		m.Size = UDim2.new(1, px(4, 8), 0, px(3, 4))
+		m.BackgroundColor3 = V.AMBAR
+		m.BorderSizePixel = 0
+		m.Parent = b
+		b.MouseEnter:Connect(function()
+			if d.id ~= atual then
+				b.TextColor3 = V.TEXT
+			end
+		end)
+		b.MouseLeave:Connect(pinta)
+		UiKit.bind(b, function()
+			api.set(d.id)
+		end)
+		botoes[d.id] = b
+	end
+	api = {
+		frame = row,
+		tela = tela,
+		atual = function(): string
+			return atual
+		end,
+		set = function(id: string, silencioso: boolean?)
+			if not botoes[id] then
+				return
+			end
+			local mudou = id ~= atual
+			atual = id
+			pinta()
+			if mudou and not silencioso then
+				aoTrocar(id)
+			end
+		end,
+		passo = function(dir: number)
+			local n = #lista
+			if n == 0 then
+				return
+			end
+			local i = 1
+			for k, d in lista do
+				if d.id == atual then
+					i = k
+				end
+			end
+			api.set(lista[(i - 1 + dir) % n + 1].id)
+		end,
+	}
+	pinta()
+	abasVivas[row] = api
+	row.Destroying:Connect(function()
+		abasVivas[row] = nil
+		devConn:Disconnect()
+	end)
+	return api
+end
+for acao, dir in { ui_tab_prev = -1, ui_tab_next = 1 } :: { [string]: number } do
+	Input.on(acao, "press", function()
+		local topo = UiKit.top()
+		for row, a in abasVivas do
+			if a.tela == topo and naTela(row) then
+				a.passo(dir)
+				return
+			end
+		end
+	end)
+end
+
+-- ----- vitrine dos componentes (só no Studio, D-205) -----
+-- workspace "VT65DevTela" (do lado do cliente): "componentes" abre a vitrine (abas, estados do
+-- cartão e do botão); "confirma" abre uma confirmação e grava a resposta em "VT65DevConfirma"
+-- ("confirmou"/"voltou"); "aba:+1" e "aba:-1" passam a aba como LB/RB. Repetir o valor: nil antes.
+if game:GetService("RunService"):IsStudio() then
+	local vitrine: ScreenGui? = nil
+	local function abrirVitrine()
+		if vitrine then
+			vitrine:Destroy()
+		end
+		local px, V = Estilo.px, Estilo.V
+		local g = UiKit.screen("VT65Componentes", 60)
+		vitrine = g
+		local p = Estilo.panel(g, V.PANEL, 0, true)
+		p.Name = "Vitrine"
+		p.AnchorPoint = Vector2.new(0.5, 0.5)
+		p.Position = UDim2.fromScale(0.5, 0.5)
+		p.Size = UDim2.fromOffset(px(700, 980), px(440, 620))
+		Estilo.pad(p, px(20, 28), nil, px(14, 20))
+		local corpo = Instance.new("Frame")
+		corpo.Name = "Corpo"
+		corpo.BackgroundTransparency = 1
+		corpo.Position = UDim2.fromOffset(0, px(60, 84))
+		corpo.Size = UDim2.new(1, 0, 1, -px(60, 84))
+		corpo.Parent = p
+		local function limpar()
+			for _, c in corpo:GetChildren() do
+				c:Destroy()
+			end
+		end
+		local function grade(): Frame
+			local f = Instance.new("Frame")
+			f.BackgroundTransparency = 1
+			f.Size = UDim2.fromScale(1, 1)
+			f.Parent = corpo
+			local gl = Instance.new("UIGridLayout")
+			gl.CellSize = UDim2.fromOffset(px(210, 300), px(64, 90))
+			gl.CellPadding = UDim2.fromOffset(px(12, 16), px(12, 16))
+			gl.SortOrder = Enum.SortOrder.LayoutOrder
+			gl.Parent = f
+			return f
+		end
+		local function desenhar(id: string)
+			limpar()
+			local f = grade()
+			if id == "estados" then
+				for i, nome in
+					{ "adquirido", "equipado", "bloqueado", "indisponivel", "selecionado", "carregando", "erro" }
+				do
+					local c = Estilo.itemCard(f, "M14", "FUZIL", V.KHAKI)
+					c.frame.Name = "Cartao_" .. nome
+					c.frame.LayoutOrder = i
+					c.mark.Text = "M14"
+					Estilo.cardEstado(c, nome)
+				end
+			else
+				local a = UiKit.action(f, "PRINCIPAL", "primary", function() end, { h = px(56, 78) })
+				a.button.LayoutOrder = 1
+				UiKit.action(f, "SECUNDÁRIO", "secondary", function() end, { h = px(56, 78) }).button.LayoutOrder = 2
+				UiKit.action(f, "PERIGO", "danger", function() end, { h = px(56, 78) }).button.LayoutOrder = 3
+				local d = UiKit.action(f, "APAGADO", "primary", function() end, { h = px(56, 78) })
+				d.button.LayoutOrder = 4
+				d.enabled(false)
+				local c = UiKit.action(f, "CARREGANDO", "primary", function() end, { h = px(56, 78) })
+				c.button.LayoutOrder = 5
+				c.carregando(true)
+				local e = UiKit.action(f, "COM ERRO", "secondary", function() end, { h = px(56, 78) })
+				e.button.Name = "ComErro"
+				e.button.LayoutOrder = 6
+				e.erro("Falhou")
+				UiKit.principal(a.button)
+			end
+			UiKit.focus(corpo)
+		end
+		UiKit.abas(p, {
+			{ id = "estados", nome = "ESTADOS" },
+			{ id = "botoes", nome = "BOTÕES" },
+		}, "componentes", desenhar)
+		desenhar("estados")
+		UiKit.opened("componentes", g.DisplayOrder)
+		g.Destroying:Connect(function()
+			UiKit.closed("componentes")
+		end)
+	end
+	Input.on("ui_back", "press", function()
+		local v = vitrine
+		if v and UiKit.backFor("componentes") then
+			vitrine = nil
+			v:Destroy()
+		end
+	end)
+	workspace:GetAttributeChangedSignal("VT65DevTela"):Connect(function()
+		local v = workspace:GetAttribute("VT65DevTela")
+		if v == "componentes" then
+			abrirVitrine()
+		elseif v == "componentes:fechar" and vitrine then
+			(vitrine :: ScreenGui):Destroy()
+			vitrine = nil
+		elseif v == "confirma" then
+			workspace:SetAttribute("VT65DevConfirma", nil)
+			UiKit.modal({
+				titulo = "Restaurar padrões?",
+				texto = "Todas as opções desta aba voltam ao padrão.",
+				confirmar = "RESTAURAR",
+				perigo = true,
+				aoConfirmar = function()
+					workspace:SetAttribute("VT65DevConfirma", "confirmou")
+				end,
+				aoVoltar = function()
+					workspace:SetAttribute("VT65DevConfirma", "voltou")
+				end,
+			})
+		elseif v == "aba:+1" or v == "aba:-1" then
+			local topo = UiKit.top()
+			for row, a in abasVivas do
+				if a.tela == topo and naTela(row) then
+					a.passo(if v == "aba:+1" then 1 else -1)
+					break
+				end
+			end
+		end
+	end)
 end
 
 -- ----- pré-carga (pedido do dono, 2026-11-11: "1000x mais liso") -----

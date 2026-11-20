@@ -240,7 +240,12 @@ local S = {
 	dirty = true, -- algo mudou com o menu fechado: redesenha ao abrir (senão abre o que já existe)
 }
 local function busy(): boolean
-	return S.listening ~= nil or S.keyListening ~= nil or os.clock() < S.swallowUntil
+	-- D-205: com uma confirmação (ou outra tela) por cima, LB/RB e LT/RT não mexem nas abas de baixo
+	local topo = UiKit.top()
+	return S.listening ~= nil
+		or S.keyListening ~= nil
+		or os.clock() < S.swallowUntil
+		or (topo ~= nil and topo ~= "menu")
 end
 local function isOwner(): boolean
 	return ReplicatedStorage:GetAttribute("PrivateServer") == true and game.PrivateServerOwnerId == player.UserId
@@ -547,6 +552,21 @@ local function action(key: string, text: string, onClick: () -> (), danger: bool
 	UiKit.bind(b, onClick)
 end
 
+-- D-205 (§18, "Modais": confirmação para descartar alterações): restaurar padrões e sair do squad
+-- pedem confirmação; o foco começa em VOLTAR e volta para a linha ao fechar
+local function comConfirma(titulo: string, texto: string, fn: () -> (), confirmar: string?): () -> ()
+	return function()
+		UiKit.modal({
+			titulo = titulo,
+			texto = texto,
+			confirmar = confirmar or "RESTAURAR",
+			perigo = true,
+			aoConfirmar = fn,
+		})
+	end
+end
+local PADRAO_ABA = "As opções desta aba voltam ao padrão."
+
 -- Muda UMA configuração pelo caminho leve do Input (setSetting só refaz os botões quando a chave
 -- mexe neles); antes cada ◄ ► recriava todo o Input Action System e redesenhava o menu inteiro.
 local function set(k: string, v: any)
@@ -675,11 +695,15 @@ local function renderSettings()
 				end
 			end
 		end
-		action("k:reset", "Restaurar teclas padrão", function()
-			local s = table.clone(Input.settings) :: any
-			s.keymap = {}
-			Input.setSettings(s)
-		end)
+		action(
+			"k:reset",
+			"Restaurar teclas padrão",
+			comConfirma("Restaurar o padrão?", PADRAO_ABA, function()
+				local s = table.clone(Input.settings) :: any
+				s.keymap = {}
+				Input.setSettings(s)
+			end)
+		)
 	elseif SUB == "Gráficos" then
 		section("Imagem")
 		choiceRow(
@@ -703,13 +727,17 @@ local function renderSettings()
 		-- v43 (pedido do dono: "coloque os dados de fps no jogo"): FPS e ping no canto (Controllers/Fps)
 		choiceRow("FPS e ping na tela", "showFps", { true, false }, { "mostrar", "esconder" })
 		note("A qualidade geral fica no menu do Roblox (Esc > Configurações).")
-		action("g:reset", "Restaurar gráficos padrão", function()
-			local s = table.clone(Input.settings) :: any
-			for _, k in { "gfxDetail", "gfxShadows", "gfxPlantShadows", "gfxPost", "gfxBrightness", "batterySaver" } do
-				s[k] = (InputMap.DEFAULTS :: any)[k]
-			end
-			Input.setSettings(s)
-		end)
+		action(
+			"g:reset",
+			"Restaurar gráficos padrão",
+			comConfirma("Restaurar o padrão?", PADRAO_ABA, function()
+				local s = table.clone(Input.settings) :: any
+				for _, k in { "gfxDetail", "gfxShadows", "gfxPlantShadows", "gfxPost", "gfxBrightness", "batterySaver" } do
+					s[k] = (InputMap.DEFAULTS :: any)[k]
+				end
+				Input.setSettings(s)
+			end)
+		)
 	elseif SUB == "Toque" then
 		-- Parte 13 (celular e tablet): Shared/Toque, ToqueHud e EditorHud
 		section("Mira no toque")
@@ -773,33 +801,37 @@ local function renderSettings()
 		action("t:editor", "Editar o HUD de toque", function()
 			Bus.fire("editor_hud_open")
 		end)
-		action("t:reset", "Restaurar o toque padrão", function()
-			local s = table.clone(Input.settings) :: any
-			for _, k in
-				{
-					"touchAimToggle",
-					"touchAimFire",
-					"gyroMode",
-					"gyroSens",
-					"touchLookSens",
-					"touchAdsSens",
-					"touchScopeSens",
-					"touchAccel",
-					"touchOpacity",
-					"touchLayout",
-					"touchMirror",
-					"touchAutoVault",
-					"touchAssist",
-					"touchAutoFire",
-					"touchAutoLean",
-					"touchAutoBreath",
-					"touchAutoPickup",
-				}
-			do
-				s[k] = (InputMap.DEFAULTS :: any)[k]
-			end
-			Input.setSettings(s) -- os layouts próprios (Meu 1–3) ficam guardados
-		end)
+		action(
+			"t:reset",
+			"Restaurar o toque padrão",
+			comConfirma("Restaurar o padrão?", PADRAO_ABA, function()
+				local s = table.clone(Input.settings) :: any
+				for _, k in
+					{
+						"touchAimToggle",
+						"touchAimFire",
+						"gyroMode",
+						"gyroSens",
+						"touchLookSens",
+						"touchAdsSens",
+						"touchScopeSens",
+						"touchAccel",
+						"touchOpacity",
+						"touchLayout",
+						"touchMirror",
+						"touchAutoVault",
+						"touchAssist",
+						"touchAutoFire",
+						"touchAutoLean",
+						"touchAutoBreath",
+						"touchAutoPickup",
+					}
+				do
+					s[k] = (InputMap.DEFAULTS :: any)[k]
+				end
+				Input.setSettings(s) -- os layouts próprios (Meu 1–3) ficam guardados
+			end)
+		)
 	elseif SUB == "Mira" then
 		section("Sensibilidade no controle")
 		numberRow("Quadril horizontal", "sensHipX", 0.05, "%.2f")
@@ -826,11 +858,15 @@ local function renderSettings()
 		numberRow("Efeitos (tiros, passos, motores)", "volEffects", 0.05, "%d%%", 100)
 		numberRow("Ambiente (mata, vila, chuva)", "volAmbient", 0.05, "%d%%", 100)
 		numberRow("Música (menus)", "volMusic", 0.05, "%d%%", 100)
-		action("v:reset", "Restaurar o som padrão", function()
-			for _, k in { "volEffects", "volAmbient", "volMusic" } do
-				Input.setSetting(k, (InputMap.DEFAULTS :: any)[k])
-			end
-		end)
+		action(
+			"v:reset",
+			"Restaurar o som padrão",
+			comConfirma("Restaurar o padrão?", PADRAO_ABA, function()
+				for _, k in { "volEffects", "volAmbient", "volMusic" } do
+					Input.setSetting(k, (InputMap.DEFAULTS :: any)[k])
+				end
+			end)
+		)
 	elseif SUB == "Vibração" then
 		section("Vibração do controle")
 		choiceRow("Disparo", "hapticFire", { "normal", "low", "off" }, { "normal", "baixa", "desligada" })
@@ -863,6 +899,8 @@ local function renderSettings()
 		numberRow("Movimento da câmera", "cameraBob", 0.1, "%d%%", 100)
 		-- D-198: o tremor das explosões (bomba de avião, tiro naval, morteiro, granada)
 		numberRow("Tremor das explosões", "cameraShake", 0.1, "%d%%", 100)
+		-- D-205: as telas sem deslizar nem crescer (soma-se à opção do Roblox)
+		choiceRow("Reduzir movimento da interface", "uiReduceMotion", { false, true }, { "não", "sim" })
 		choiceRow("Modo daltônico (traçantes)", "colorblind", Accessibility.MODES, {
 			Accessibility.MODE_NAMES.off,
 			Accessibility.MODE_NAMES.protan,
@@ -873,9 +911,14 @@ local function renderSettings()
 		-- painel lateral com os comandos do momento (o fork FIM cria o painel e a chave no InputMap;
 		-- sem a chave ainda, a linha mostra "ligado", o padrão)
 		choiceRow("Painel de comandos na tela", "hintsPanel", { true, false }, { "ligado", "desligado" })
-		action("a:reset", "Restaurar padrões", function()
-			Input.setSettings(nil)
-		end, true)
+		action(
+			"a:reset",
+			"Restaurar padrões",
+			comConfirma("Restaurar tudo?", "Todas as configurações voltam ao padrão, em todas as abas.", function()
+				Input.setSettings(nil)
+			end),
+			true
+		)
 	elseif SUB == "Botões" then
 		local conflicts = InputMap.conflicts(Input.settings)
 		if #conflicts > 0 then
@@ -908,11 +951,15 @@ local function renderSettings()
 				end
 			end
 		end
-		action("b:reset", "Restaurar botões padrão", function()
-			local s = table.clone(Input.settings) :: any
-			s.remap = {}
-			Input.setSettings(s)
-		end)
+		action(
+			"b:reset",
+			"Restaurar botões padrão",
+			comConfirma("Restaurar o padrão?", PADRAO_ABA, function()
+				local s = table.clone(Input.settings) :: any
+				s.remap = {}
+				Input.setSettings(s)
+			end)
+		)
 	end
 end
 
@@ -922,10 +969,14 @@ local function renderSquad()
 		player:SetAttribute("Role", nil)
 		Bus.fire("menu_close_request")
 	end)
-	action("s:leave", "Sair do squad", function()
-		Net.event("Squad_Action"):FireServer({ op = "leave" })
-		Bus.fire("menu_close_request")
-	end)
+	action(
+		"s:leave",
+		"Sair do squad",
+		comConfirma("Sair do squad?", "Você deixa o squad e escolhe outro antes de voltar ao campo.", function()
+			Net.event("Squad_Action"):FireServer({ op = "leave" })
+			Bus.fire("menu_close_request")
+		end, "SAIR")
+	)
 	-- equipamento por peso: ◄ ► por item, dentro do limite em kg
 	local kind = kitKind()
 	local k = S.kit or Kit.validate(nil, kind)

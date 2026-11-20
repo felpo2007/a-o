@@ -42,7 +42,37 @@ Estilo.V = {
 	-- lados
 	US = Color3.fromRGB(86, 120, 186),
 	VC = Color3.fromRGB(190, 64, 48),
+	-- D-205 (prompt de interface §3: "âmbar ou amarelo para foco, seleção e ações importantes;
+	-- verde-oliva e tons de papel, lona e metal como apoio"): as cores por função
+	AMBAR = Color3.fromRGB(226, 166, 46), -- ação principal (botão cheio), seleção
+	AMBAR_HI = Color3.fromRGB(244, 190, 72), -- ação principal com o foco
+	AMBAR_TEXTO = Color3.fromRGB(24, 20, 10), -- texto sobre o âmbar (contraste 9:1)
+	FOCO = Color3.fromRGB(255, 206, 64), -- moldura do foco (mouse, controle, toque)
+	PAPEL = Color3.fromRGB(214, 203, 170), -- apoio: papel
+	LONA = Color3.fromRGB(150, 140, 104), -- apoio: lona
+	METAL = Color3.fromRGB(122, 128, 124), -- apoio: metal
 }
+
+-- D-205 (§3): estado de cada componente e de cada item, sempre com cor, símbolo E palavra (a cor
+-- sozinha não basta). Os botões e cartões leem daqui.
+-- rotulo: o que a etiqueta mostra (símbolo e palavra num texto só, para a tradução achar a frase)
+export type Estado = { cor: Color3, simbolo: string, texto: string, rotulo: string }
+Estilo.ESTADO = {
+	-- componentes
+	normal = { cor = Estilo.V.PANEL, simbolo = "", texto = "", rotulo = "" },
+	foco = { cor = Estilo.V.FOCO, simbolo = "", texto = "", rotulo = "" },
+	pressionado = { cor = Estilo.V.AMBAR, simbolo = "", texto = "", rotulo = "" },
+	selecionado = { cor = Estilo.V.AMBAR, simbolo = "●", texto = "SELECIONADO", rotulo = "● SELECIONADO" },
+	desabilitado = { cor = Estilo.V.MUTED, simbolo = "", texto = "INDISPONÍVEL", rotulo = "INDISPONÍVEL" },
+	carregando = { cor = Estilo.V.PANEL_3, simbolo = "…", texto = "CARREGANDO", rotulo = "… CARREGANDO" },
+	erro = { cor = Estilo.V.RED, simbolo = "!", texto = "ERRO", rotulo = "! ERRO" },
+	-- itens
+	adquirido = { cor = Estilo.V.OLIVE, simbolo = "✓", texto = "SEU", rotulo = "✓ SEU" },
+	equipado = { cor = Estilo.V.AMBAR, simbolo = "✓", texto = "EQUIPADO", rotulo = "✓ EQUIPADO" },
+	bloqueado = { cor = Estilo.V.PANEL_3, simbolo = "🔒", texto = "BLOQUEADO", rotulo = "🔒 BLOQUEADO" },
+	-- "×" (Latin-1): o Arimo não tem o "✕", que saía como um quadrado (Studio, lote 90)
+	indisponivel = { cor = Estilo.V.RED, simbolo = "×", texto = "OUTRA CLASSE", rotulo = "× OUTRA CLASSE" },
+} :: { [string]: Estado }
 
 -- ===== tipos =====
 Estilo.F = {
@@ -67,9 +97,67 @@ function Estilo.px(pc: number, tv: number): number
 	return if TV then tv else pc
 end
 
--- texto: na TV nunca abaixo de 24 px
+-- ===== preferências do jogador (D-205; prompt de interface §4 e §20) =====
+-- O Roblox guarda três preferências de acessibilidade do jogador, e a interface segue as três:
+--   - reduzir movimento (GuiService.ReducedMotionEnabled): o que desliza ou cresce vira troca direta
+--     (UiKit.tween, Estilo.enter, a moldura de foco). Também liga pelas Configurações › Acessib.
+--     (atributo local "VT65ReduzMovimento" do Player, posto pelo UiKit);
+--   - transparência (GuiService.PreferredTransparency, de 0 a 1): multiplica a transparência dos
+--     painéis e botões translúcidos (0 = fundos opacos);
+--   - tamanho do texto (GuiService.PreferredTextSize): Estilo.ts e UiKit.text crescem por TEXTO_K.
+-- Teste no Studio: workspace "VT65DevMovimento" (true), "VT65DevTransparencia" (0..1) e
+-- "VT65DevTexto" ("Large", "Larger", "Largest"). Valem para o que for desenhado depois.
+Estilo.TEXTO_K = { Medium = 1, Large = 1.15, Larger = 1.3, Largest = 1.45 } :: { [string]: number }
+local RunService = game:GetService("RunService")
+local function dev(nome: string): any
+	return if RunService:IsStudio() then workspace:GetAttribute(nome) else nil
+end
+local function lerGui(prop: string): any
+	local ok, v = pcall(function(): any
+		return (GuiService :: any)[prop]
+	end)
+	return if ok then v else nil
+end
+
+function Estilo.reduzMovimento(): boolean
+	if dev("VT65DevMovimento") == true then
+		return true
+	end
+	local p = game:GetService("Players").LocalPlayer
+	if p and p:GetAttribute("VT65ReduzMovimento") == true then
+		return true
+	end
+	return lerGui("ReducedMotionEnabled") == true
+end
+
+function Estilo.transparencia(): number
+	local d = dev("VT65DevTransparencia")
+	if type(d) == "number" then
+		return math.clamp(d, 0, 1)
+	end
+	local v = lerGui("PreferredTransparency")
+	return if type(v) == "number" then math.clamp(v, 0, 1) else 1
+end
+
+function Estilo.textoK(): number
+	local d = dev("VT65DevTexto")
+	local nome: string? = if type(d) == "string" then d else nil
+	if not nome then
+		local v = lerGui("PreferredTextSize")
+		nome = if typeof(v) == "EnumItem" then v.Name else "Medium"
+	end
+	return Estilo.TEXTO_K[nome :: string] or 1
+end
+
+-- transparência de um fundo translúcido, pela preferência do jogador (0 continua 0)
+function Estilo.fundo(tr: number): number
+	return tr * Estilo.transparencia()
+end
+
+-- texto: cresce com a preferência do jogador; na TV nunca abaixo de 24 px
 function Estilo.ts(size: number): number
-	return if TV then math.max(size, 24) else size
+	local s = math.floor(size * Estilo.textoK() + 0.5)
+	return if TV then math.max(s, 24) else s
 end
 
 -- título no Oswald; com letra do vietnamita, no Arimo Bold (o Oswald não tem)
@@ -165,7 +253,7 @@ end
 function Estilo.panel(parent: Instance?, color: Color3?, tr: number?, edge: boolean?): Frame
 	local f = Instance.new("Frame")
 	f.BackgroundColor3 = color or Estilo.V.PANEL
-	f.BackgroundTransparency = tr or 0
+	f.BackgroundTransparency = Estilo.fundo(tr or 0) -- D-205: a preferência de transparência
 	f.BorderSizePixel = 0
 	Estilo.corner(f, 4)
 	if edge ~= false then
@@ -321,12 +409,13 @@ function Estilo.button(parent: Instance?, text: string, kind: string?, h: number
 	b.Text = ""
 	b.Size = UDim2.new(1, 0, 0, height)
 	b.BorderSizePixel = 0
-	b.BackgroundColor3 = if k == "primary" then Estilo.V.OLIVE elseif k == "danger" then Estilo.V.RED else Estilo.V.PANEL
-	b.BackgroundTransparency = if big then 0 elseif k == "secondary" then 0.35 else 1
+	-- D-205 (§3): a ação principal em âmbar, com texto escuro; o oliva fica de apoio
+	b.BackgroundColor3 = if k == "primary" then Estilo.V.AMBAR elseif k == "danger" then Estilo.V.RED else Estilo.V.PANEL
+	b.BackgroundTransparency = if big then 0 elseif k == "secondary" then Estilo.fundo(0.35) else 1
 	Estilo.corner(b, 4)
 	Estilo.stroke(
 		b,
-		if big then Estilo.V.TEXT else Estilo.V.LINE,
+		if k == "primary" then Estilo.V.AMBAR_TEXTO elseif big then Estilo.V.TEXT else Estilo.V.LINE,
 		1,
 		if big then 0.8 elseif k == "ghost" then 1 else 0.1
 	)
@@ -352,8 +441,17 @@ function Estilo.button(parent: Instance?, text: string, kind: string?, h: number
 	label.Position = UDim2.fromOffset(padX, 0)
 	label.TextXAlignment = if big then Enum.TextXAlignment.Left else Enum.TextXAlignment.Center
 	label.TextTruncate = Enum.TextTruncate.AtEnd
-	label.TextColor3 = if k == "ghost" then Estilo.V.DIM else Estilo.V.TEXT
-	local sub = Estilo.text(b, "", math.floor(height * (if big then 0.3 else 0.34)), Estilo.V.TEXT, Estilo.F.TITLE_MED)
+	label.TextColor3 = if k == "ghost"
+		then Estilo.V.DIM
+		elseif k == "primary" then Estilo.V.AMBAR_TEXTO
+		else Estilo.V.TEXT
+	local sub = Estilo.text(
+		b,
+		"",
+		math.floor(height * (if big then 0.3 else 0.34)),
+		if k == "primary" then Estilo.V.AMBAR_TEXTO else Estilo.V.TEXT,
+		Estilo.F.TITLE_MED
+	)
 	sub.Name = "Sub"
 	sub.AnchorPoint = Vector2.new(1, 0)
 	sub.Position = UDim2.new(1, -padX, 0, 0)
@@ -431,13 +529,70 @@ function Estilo.itemCard(parent: Instance?, name: string, kind: string, accent: 
 	return { frame = f, thumb = thumb, image = image, mark = mark, name = n, kind = kd }
 end
 
+-- D-205 (§3): etiqueta de estado com cor, símbolo e palavra ("✓ EQUIPADO", "🔒 BLOQUEADO"): a cor
+-- sozinha não diz o estado. Texto escuro sobre o âmbar.
+function Estilo.estadoTag(parent: Instance?, nome: string, size: number?): TextLabel
+	local e = Estilo.ESTADO[nome] or Estilo.ESTADO.normal
+	local t = Estilo.tag(parent, e.rotulo, e.cor, size)
+	t.Name = "Estado"
+	-- todas no Arimo Bold: o Oswald desenha o "×" como um ponto e não tem o "✓" (no Studio as
+	-- etiquetas saíam em duas fontes)
+	t.FontFace = Estilo.F.BODY_B
+	t.TextColor3 = if e.cor == Estilo.V.AMBAR then Estilo.V.AMBAR_TEXTO else Estilo.V.TEXT
+	t.Visible = e.rotulo ~= ""
+	return t
+end
+
+-- estado de um cartão de item: etiqueta no canto de cima à direita (uma só, trocada no lugar) e o
+-- nome apagado quando o item não pode ser usado. nil tira a etiqueta.
+function Estilo.cardEstado(c: ItemCard, nome: string?)
+	local velha = c.frame:FindFirstChild("Estado")
+	if velha then
+		velha:Destroy()
+	end
+	local apagado = nome == "bloqueado" or nome == "indisponivel"
+	c.name.TextColor3 = if apagado then Estilo.V.DIM else Estilo.V.TEXT
+	c.image.ImageTransparency = if apagado then 0.5 else 0
+	if not nome then
+		return
+	end
+	local t = Estilo.estadoTag(c.frame, nome, Estilo.px(11, 18))
+	t.AnchorPoint = Vector2.new(1, 0)
+	t.Position = UDim2.new(1, -Estilo.px(4, 6), 0, Estilo.px(4, 6))
+	t.Size = UDim2.fromOffset(0, Estilo.px(18, 26))
+	-- o nome encolhe para a etiqueta (no Studio, "NÃO NESTA CLASSE" cobria o nome do item)
+	local nome0 = c.name.Size
+	local function abre()
+		if t.Parent then
+			c.name.Size = UDim2.new(
+				nome0.X.Scale,
+				nome0.X.Offset - t.AbsoluteSize.X - Estilo.px(6, 8),
+				nome0.Y.Scale,
+				nome0.Y.Offset
+			)
+		else
+			c.name.Size = nome0
+		end
+	end
+	t:GetPropertyChangedSignal("AbsoluteSize"):Connect(abre)
+	t.Destroying:Connect(function()
+		c.name.Size = nome0
+	end)
+	abre()
+	t.ZIndex = c.frame.ZIndex + 2
+end
+
 -- ===== movimento =====
-Estilo.QUICK = TweenInfo.new(0.14, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
+-- D-205 (§4: "transições curtas, de 0,15 a 0,30 s"): QUICK para realce e cor, SOFT para escala e
+-- entrada. Com movimento reduzido, a entrada não desliza (Estilo.enter) e o UiKit.tween troca direto
+-- o que mexe de lugar ou de tamanho.
+Estilo.QUICK = TweenInfo.new(0.15, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
 Estilo.SOFT = TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
 
 -- entrada escalonada: cada objeto desliza `dy` px até a posição de repouso (guardada na 1ª vez)
 function Estilo.enter(list: { GuiObject }, dy: number?, step: number?, delay: number?)
 	local TweenService = game:GetService("TweenService")
+	local parado = Estilo.reduzMovimento()
 	for i, o in list do
 		local base = o:GetAttribute("EstiloBase")
 		local p: UDim2
@@ -446,6 +601,10 @@ function Estilo.enter(list: { GuiObject }, dy: number?, step: number?, delay: nu
 		else
 			p = o.Position
 			o:SetAttribute("EstiloBase", p)
+		end
+		if parado then
+			o.Position = p
+			continue
 		end
 		o.Position = p + UDim2.fromOffset(0, dy or 14)
 		TweenService:Create(

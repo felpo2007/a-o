@@ -222,6 +222,8 @@ export type Settings = {
 	cameraBob: number,
 	-- D-198: tremor da câmera nas explosões, 0 a 1 (Controllers/ExplosionFx; acessibilidade)
 	cameraShake: number,
+	-- D-205: reduzir o movimento da interface (soma-se à preferência do Roblox; Estilo.reduzMovimento)
+	uiReduceMotion: boolean,
 	-- coluna de comandos na lateral da tela (Controllers/PainelComandos); booleana, o validate saneia
 	hintsPanel: boolean,
 	-- Parte 13 (celular e tablet; Shared/Toque, Controllers/ToqueHud e EditorHud)
@@ -302,6 +304,7 @@ InputMap.DEFAULTS = {
 	volMusic = 0.35,
 	cameraBob = 1,
 	cameraShake = 1,
+	uiReduceMotion = false,
 	hintsPanel = true,
 	touchAimToggle = true,
 	touchAimFire = true,

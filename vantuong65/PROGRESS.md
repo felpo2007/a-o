@@ -803,6 +803,37 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     - Relatórios: `testes/LOTE89_VERIFICACAO_2026-11-20.md` e a entrega
       `testes/ENTREGA_PROMPT_B_2026-11-20.md`.
     - **Próximo:** o Prompt A (as telas).
+  - **Lote 90 (D-205): a fundação da interface do Prompt A, feito.**
+    - Cores por função: a ação principal em âmbar com texto escuro (botão do kit, JOGAR, CONTINUAR);
+      contraste medido no Lune: 8,5:1 no botão principal, 14,7:1 no texto do painel, 6,4:1 no
+      secundário, foco acima de 3:1.
+    - Estados com cor, símbolo e palavra (`Estilo.ESTADO`, `estadoTag`, `cardEstado`); botão com
+      pressionado, carregando (trava o pedido duplicado) e erro.
+    - Preferências: movimento reduzido, transparência e tamanho de texto do Roblox, mais a opção
+      "Reduzir movimento da interface" em Acessib.; com ela param os pulsos, o travelling do lobby,
+      o halo da carta e o giro da cena de baixa.
+    - Componentes novos: `UiKit.modal` (confirmação, foco em VOLTAR, preso na janela, B volta) e
+      `UiKit.abas` (LB/RB e Q/E). A confirmação já protege os 6 "Restaurar" e o "Sair do squad" do
+      menu do jogo.
+    - Foco: a pilha de telas devolve o foco ao fechar; `UiKit.principal` marca onde ele começa; o
+      vigia não puxa o foco de uma tela que está por cima. O cursor virtual subiu para 99.
+    - Conferido no Studio:
+      - âmbar no JOGAR e no CONTINUAR;
+      - 7 estados sem cobrir o nome;
+      - abas nos dois sentidos;
+      - a confirmação responde uma vez e segura a tela de baixo;
+      - com movimento reduzido, a janela abre em 1,000 no 2º quadro (0,971 sem);
+      - texto "Largest" de 17 para 25 px;
+      - 0 erros fora do TexturePack.
+    - Lune 799 ok (53 arquivos), pytest 76, ruff, StyLua e luau-lsp limpos, i18n 100%. Relatório:
+      `testes/LOTE90_D205_2026-11-20.md`; capturas em `testes/lote90`.
+    - Não testado:
+      - controle de verdade (foco devolvido, B fechando);
+      - as preferências ligadas no aparelho;
+      - o corte da câmera do lobby;
+      - o celular e o jogo publicado.
+    - **Próximo:** lote 91, o lobby (Arsenal, Missões e Perfil, o resumo à direita, o rodapé e o
+      soldado que gira).
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;

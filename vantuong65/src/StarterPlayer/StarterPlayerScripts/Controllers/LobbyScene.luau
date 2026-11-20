@@ -1574,7 +1574,8 @@ local function startMove()
 	local cam = camera()
 	camFrom = if cam then cam.CFrame else nil
 	camT = 0
-	camDur = MOVE_TIME
+	-- D-205 (§20): com movimento reduzido a câmera corta para o objeto (um quadro), sem travelling
+	camDur = if UiKit.Estilo.reduzMovimento() then 0.01 else MOVE_TIME
 	arriving = false
 end
 
@@ -1969,7 +1970,7 @@ local function step(dt: number)
 			-- entrada por cima, a câmera espera parada no ponto de partida.
 			local dist = (s.focus - target.Position).Magnitude
 			camFrom = target * CFrame.new(0, dist * 0.06, dist * 0.22)
-			camT, camDur = 0, ARRIVE_TIME
+			camT, camDur = 0, if UiKit.Estilo.reduzMovimento() then 0.01 else ARRIVE_TIME
 			if not covered then
 				arriving = false
 			end

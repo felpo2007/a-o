@@ -1593,7 +1593,21 @@
   "longe",
   "medio",
   "seco",
-  "tiros"
+  "tiros",
+  "Medium",
+  "aba:+1",
+  "aba:-1",
+  "adquirido",
+  "carregando",
+  "componentes",
+  "componentes:fechar",
+  "confirma",
+  "confirmou",
+  "equipado",
+  "estados",
+  "indisponivel",
+  "selecionado",
+  "voltou"
  ],
  "regex": [
   "^uni_[a-z_]+@[a-z0-9]+$"

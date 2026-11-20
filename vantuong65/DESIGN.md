@@ -8602,3 +8602,111 @@ arquivo por kit, os mesmos nomes; `Shared/SomKits` diz onde cada um começa).
 - Dois jogadores, o celular e o jogo publicado.
 - **Clique seco no Studio:** a M14 trava o ferrolho e recarrega no vazio.
 - A recarga das outras armas no Studio (só a M14; as outras têm o tempo conferido no Lune).
+
+## D-205 — Lote 90: a fundação da interface (cores por função, estados, preferências, confirmação, abas e foco) (2026-11-20)
+
+**Pedido do dono** (prompt de interface, o 1º lote dele): antes de refazer cada tela, uma base comum.
+- §3: âmbar para foco, seleção e ação importante; oliva, papel, lona e metal de apoio; estados de
+  componente (normal, foco, pressionado, selecionado, desabilitado, carregando, erro) e de item
+  (adquirido, equipado, bloqueado, indisponível para a classe), nunca só pela cor.
+- §4: transições curtas, de 0,15 a 0,30 s.
+- §18: componentes compartilhados, entre eles abas e modais; confirmação clara para descartar
+  alterações, com confirmar e voltar e foco previsível.
+- §19: foco inicial definido, foco devolvido ao fechar um modal, LB/RB nas abas.
+- §20: seguir as preferências do jogador (movimento reduzido, tamanho do texto) e contraste.
+- §21: nada de conexão sobrando.
+
+**Cores por função (`Estilo.V`):**
+- `AMBAR` (226, 166, 46) é o fundo da ação principal, com `AMBAR_TEXTO` (24, 20, 10) por cima;
+  `AMBAR_HI` com o foco; `FOCO` (255, 206, 64) é a moldura do foco; `PAPEL`, `LONA` e `METAL` de
+  apoio. O oliva deixou de ser a cor da ação principal.
+- Contraste medido no Lune (WCAG 2): texto do botão principal 8,5:1, texto no painel 14,7:1, texto
+  secundário 6,4:1; a moldura do foco passa de 3:1 contra os três tons de painel.
+- Mudaram: o botão principal do kit (`Estilo.button`, `UiKit.action`), o JOGAR do menu principal e
+  o CONTINUAR da tela de entrada.
+
+**Estados (`Estilo.ESTADO`):** cada um tem cor, símbolo, palavra e o rótulo pronto para a tradução
+("✓ EQUIPADO", "🔒 BLOQUEADO", "× OUTRA CLASSE", "● SELECIONADO", "… CARREGANDO", "! ERRO",
+"✓ SEU").
+- `Estilo.estadoTag` desenha a etiqueta, sempre no Arimo Bold. No Studio o "✕" saiu como um
+  quadrado (o Arimo não tem) e o Oswald desenhava o "×" como um ponto. Ficou o "×".
+- `Estilo.cardEstado(cartão, estado)` põe a etiqueta no canto do cartão de item, apaga o nome do
+  item bloqueado ou de outra classe e encolhe o nome para a etiqueta. No Studio, "NÃO NESTA CLASSE"
+  cobria o nome; virou "OUTRA CLASSE" e o nome encolhe.
+- Botão (`UiKit.action`): afunda para 0,97 enquanto apertado; `carregando(true)` trava o clique e
+  mostra "…" (sem pedido duplicado, §9); `erro(msg)` pinta a borda de vermelho e escreve o motivo
+  por 2,5 s. A conexão de troca de dispositivo sai com o botão (antes, uma sobrava a cada tela
+  recriada).
+
+**Preferências do jogador:**
+- Do Roblox (`GuiService`), com sinal de mudança, conferidas no Studio:
+  - `ReducedMotionEnabled`: o que desliza ou cresce troca direto (`UiKit.tween`, `Estilo.enter`, a
+    moldura de foco sem respirar);
+  - `PreferredTransparency` (0 a 1): multiplica a transparência dos painéis e botões translúcidos
+    (`Estilo.fundo`);
+  - `PreferredTextSize`: o texto cresce 1, 1,15, 1,3 ou 1,45 (`Estilo.TEXTO_K`, pelo `Estilo.ts` e
+    pelo `UiKit.text`).
+- Do jogo: Configurações › Acessib. › "Reduzir movimento da interface" (`uiReduceMotion`, começa
+  desligada). Liga o mesmo caminho pelo atributo local `VT65ReduzMovimento`.
+- Com movimento reduzido também param: o pulso do JOGAR, o pulso e o salto da diária (e as moedas
+  voando), o travelling da câmera do lobby (corta), o halo do "você" na carta e o giro da cena de
+  baixa.
+- Tempos: `QUICK` 0,15 s (era 0,14, abaixo da faixa) e `SOFT` 0,30 s; o UiKit usa os do Estilo.
+
+**Confirmação (`UiKit.modal`):** título, texto, VOLTAR e CONFIRMAR (vermelho quando `perigo`).
+- Fica por cima das telas (DisplayOrder 95); o véu escuro não deixa clicar atrás.
+- O foco do controle abre em VOLTAR e não sai da janela (`SelectionGroup` com as 4 direções
+  paradas). B ou Backspace voltam. Responde uma vez só.
+- O cursor virtual subiu para 99, senão ficaria por baixo da janela.
+- Ligada no menu do jogo: os 5 "Restaurar ... padrão" de cada aba (teclas, gráficos, toque, som,
+  botões), o "Restaurar padrões" de tudo e o "Sair do squad". Com ela aberta, LB/RB, LT/RT e o direcional não mexem no menu de baixo (`busy()` olha a
+  tela de cima).
+
+**Abas (`UiKit.abas`):** a fileira com LB/RB (ou Q/E) nas pontas, que trocam conforme o
+dispositivo e somem no toque; a ativa em texto claro com o traço âmbar embaixo.
+- Clique, toque, LB/RB e Q/E trocam a aba; LB/RB só valem para as abas da tela de cima e à vista.
+- Um registro só no módulo (as ações do `Input` não se desligam); a fileira sai dele ao ser
+  destruída.
+- As telas existentes (menu do jogo, loja) ainda têm as abas delas; passam para esta nos lotes de
+  cada tela.
+
+**Foco:**
+- A pilha de telas (`UiKit.opened`/`closed`) guarda o foco de antes de cada tela e o devolve ao
+  fechar, se ele ainda estiver à vista (só no controle).
+- `UiKit.principal(botão)` marca a ação principal, e o `UiKit.focus` começa nela. A diária abre no
+  RESGATAR e a confirmação no VOLTAR.
+- O vigia de foco (`UiKit.watch`) não puxa mais o foco de uma tela que está por cima (DisplayOrder
+  maior).
+
+**Conferido no Studio** (um jogador, mouse; gancho `VT65DevTela` = `"componentes"`, `"confirma"` e
+`"aba:±1"`):
+- CONTINUAR e JOGAR em âmbar com o texto escuro.
+- Os 7 estados no cartão, sem a etiqueta cobrir o nome, todos no Arimo.
+- Os 6 tipos e estados de botão (principal, secundário, perigo, apagado, carregando, com erro).
+- **Abas:** pelo clique e pelo mesmo caminho do LB/RB, nos dois sentidos, com a volta ao início.
+- **Confirmação:**
+  - VOLTAR respondeu "voltou" e CONFIRMAR "confirmou", e a janela fechou;
+  - com ela aberta, nem o LB/RB nem o clique na aba de trás mudaram a aba;
+  - depois de fechar, as sub-abas do menu voltaram a responder.
+- **Do menu real:** Som › "Restaurar o som padrão" abriu a confirmação, e VOLTAR não mudou nada.
+- **Movimento reduzido:** a janela abriu em escala 1,000 já no 2º quadro; sem a opção, 0,971 no 2º
+  quadro e 1,000 em 0,5 s.
+- **Texto "Largest":** a aba foi de 17 para 25 px.
+- **A opção "Reduzir movimento"** do menu ligou o atributo do jogador.
+- **Preferências do Roblox no Studio:** `ReducedMotionEnabled` false, `PreferredTransparency` 1 e
+  `PreferredTextSize` Medium (as três leem sem erro).
+- **Erros:** 0, fora os "TexturePack 429" do Studio.
+
+**Testes:** `componentes.luau` (11): contraste calculado das cores do código; estados com símbolo e
+palavra; as três preferências e a escala do texto; tempos do §4; movimento reduzido nas telas;
+âmbar; estados do botão; a confirmação (foco, pilha, ordem acima de todas as telas de menu, cursor
+acima dela); os resets do menu; as abas no LB/RB e Q/E; o foco na ação principal.
+
+**Não testado:**
+- **Controle de verdade:** o MCP não manda controle. O foco devolvido, o foco em VOLTAR e o B
+  fechando ficaram só no código e no Lune.
+- A preferência real de movimento e de texto do Roblox ligada no aparelho (só os ganchos
+  `VT65DevMovimento` e `VT65DevTexto`).
+- A transparência `VT65DevTransparencia` 0, só olhada, sem número.
+- O corte da câmera do lobby com movimento reduzido.
+- O celular e o jogo publicado.

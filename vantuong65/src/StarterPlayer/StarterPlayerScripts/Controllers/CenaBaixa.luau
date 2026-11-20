@@ -16,6 +16,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 
 local Acabamento = require(ReplicatedFirst:WaitForChild("Acabamento"))
+local Estilo = require(ReplicatedFirst:WaitForChild("Estilo"))
 
 local CenaBaixa = {}
 
@@ -523,7 +524,12 @@ function CenaBaixa.show(c: Cena, m: Model?, faction: string?)
 		{ Value = DRIFT }
 	)
 	c.drift = t
-	t:Play()
+	-- D-205: com movimento reduzido a câmera da cena não gira (fica no meio do arco)
+	if Estilo.reduzMovimento() then
+		val.Value = 0
+	else
+		t:Play()
+	end
 	c.vp.ImageTransparency = 1
 	TweenService:Create(c.vp, TweenInfo.new(0.45, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
 		ImageTransparency = 0,

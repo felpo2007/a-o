@@ -333,18 +333,19 @@ local function makeButton(label: string, primary: boolean, y: number, h: number)
 	b.Text = ""
 	b.Size = UDim2.fromOffset(if primary then 440 else 400, h)
 	b.Position = UDim2.fromOffset(BX, y)
-	b.BackgroundColor3 = if primary then V.RED else V.PANEL
-	b.BackgroundTransparency = if primary then 0 else 0.12
+	-- D-205 (§3): a ação principal em âmbar com texto escuro (era vermelha)
+	b.BackgroundColor3 = if primary then V.AMBAR else V.PANEL
+	b.BackgroundTransparency = if primary then 0 else UiKit.Estilo.fundo(0.12)
 	b.BorderSizePixel = 0
 	b.Selectable = true
 	b.SelectionImageObject = UiKit.FOCUS
 	b.Parent = group
 	UiKit.corner(b, 4)
-	UiKit.edge(b, if primary then UiKit.BRASS else V.LINE, if primary then 2 else 1, if primary then 0.2 else 0.35)
+	UiKit.edge(b, if primary then V.AMBAR_TEXTO else V.LINE, if primary then 2 else 1, if primary then 0.6 else 0.35)
 	local accent = Instance.new("Frame")
 	accent.Name = "Filete"
 	accent.BorderSizePixel = 0
-	accent.BackgroundColor3 = if primary then UiKit.BRASS else V.KHAKI
+	accent.BackgroundColor3 = if primary then V.AMBAR_TEXTO else V.KHAKI
 	accent.Size = UDim2.new(0, if primary then 8 else 5, 1, 0)
 	accent.Parent = b
 	local t = Instance.new("TextLabel")
@@ -354,7 +355,7 @@ local function makeButton(label: string, primary: boolean, y: number, h: number)
 	t.Size = UDim2.new(1, -60, 1, 0)
 	t.FontFace = if primary then F.TITLE else F.TITLE_MED
 	t.TextSize = if primary then 46 else 30
-	t.TextColor3 = V.TEXT
+	t.TextColor3 = if primary then V.AMBAR_TEXTO else V.TEXT
 	t.TextXAlignment = Enum.TextXAlignment.Left
 	t.Text = label
 	t.Parent = b
@@ -366,11 +367,11 @@ local function makeButton(label: string, primary: boolean, y: number, h: number)
 	arrow.Size = UDim2.new(0, 30, 1, 0)
 	arrow.FontFace = F.TITLE
 	arrow.TextSize = if primary then 40 else 26
-	arrow.TextColor3 = if primary then UiKit.BRASS_LIGHT else V.DIM
+	arrow.TextColor3 = if primary then V.AMBAR_TEXTO else V.DIM
 	arrow.Text = "›"
 	arrow.Parent = b
 	local r =
-		UiKit.realce(b, b.BackgroundColor3, if primary then V.RED_HI else V.PANEL_3, if primary then 1.04 else 1.035)
+		UiKit.realce(b, b.BackgroundColor3, if primary then V.AMBAR_HI else V.PANEL_3, if primary then 1.04 else 1.035)
 	local function hover(on: boolean)
 		r.set(on)
 		UiKit.tween(arrow, UiKit.QUICK, { Position = UDim2.new(1, if on then -12 else -22, 0, 0) })
@@ -756,9 +757,9 @@ local function startLoops()
 		tw:Cancel()
 	end
 	table.clear(loops)
-	-- o filete do JOGAR pulsa
+	-- o filete do JOGAR pulsa (D-205: não com movimento reduzido)
 	local ring = playB.b:FindFirstChildOfClass("UIStroke")
-	if ring then
+	if ring and not UiKit.Estilo.reduzMovimento() then
 		local tw = TweenService:Create(
 			ring,
 			TweenInfo.new(1.1, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true, 0.6),

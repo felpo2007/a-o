@@ -223,6 +223,7 @@ mainBtn.button.Size = UDim2.new(1, -2 * PAD, 0, BTN_H)
 mainBtn.label.TextSize = UiKit.text(px(28, 36))
 mainBtn.sub.TextSize = UiKit.text(px(26, 34))
 mainBtn.sub.TextColor3 = OURO
+UiKit.principal(mainBtn.button) -- D-205: o foco do controle abre no RESGATAR
 local btnScale = Instance.new("UIScale")
 btnScale.Parent = mainBtn.button
 
@@ -230,6 +231,10 @@ btnScale.Parent = mainBtn.button
 -- o botão pulsa enquanto há prêmio para pegar; o desenho do dia de hoje pula
 local btnPulse: Tween? = nil
 local function pulseButton(on: boolean)
+	-- D-205 (§4, §20): com movimento reduzido nada pulsa sem parar
+	if on and UiKit.Estilo.reduzMovimento() then
+		return
+	end
 	if on and not btnPulse then
 		btnScale.Scale = 1
 		local t = TweenService:Create(
@@ -269,6 +274,10 @@ local function bounceToday(day: number)
 	if not c then
 		return
 	end
+	if UiKit.Estilo.reduzMovimento() then
+		c.stroke.Transparency = 0 -- o dia de hoje fica marcado, sem saltar nem piscar
+		return
+	end
 	local b = TweenService:Create(
 		c.iconScale,
 		TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut, -1, true),
@@ -294,7 +303,9 @@ local function burst(day: number, credits: number)
 	end
 	local origin = c.frame.Position
 	local rng = Random.new()
-	for i = 1, 14 do
+	-- movimento reduzido: sem moedas voando; o valor aparece no lugar e some devagar
+	local parado = UiKit.Estilo.reduzMovimento()
+	for i = 1, if parado then 0 else 14 do
 		local t = UiKit.title(panel, if i % 3 == 0 then "✨" else "💰", px(30, 40), V.TEXT)
 		t.AnchorPoint = Vector2.new(0.5, 0.5)
 		t.Size = UDim2.fromOffset(px(44, 58), px(44, 58))
@@ -322,7 +333,7 @@ local function burst(day: number, credits: number)
 	centered(big)
 	big.ZIndex = 21
 	TweenService:Create(big, TweenInfo.new(1.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-		Position = origin - UDim2.fromOffset(0, px(130, 170)),
+		Position = if parado then origin else origin - UDim2.fromOffset(0, px(130, 170)),
 		TextTransparency = 1,
 		TextStrokeTransparency = 1,
 	}):Play()
