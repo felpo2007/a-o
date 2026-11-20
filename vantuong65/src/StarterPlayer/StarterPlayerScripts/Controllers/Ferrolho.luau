@@ -31,7 +31,7 @@ local PUMP_M = 0.1 -- curso da telha (~10 cm, PLACEHOLDER)
 
 local cycle = { t0 = -1, dur = 1, pump = false }
 -- recarga da espingarda: começo, duração, cartuchos, tempos da arma e se bombeia no fim
-local shells = { t0 = -1, dur = 1, n = 0, startS = 0.4, shellS = 0.55 }
+local shells = { t0 = -1, dur = 1, n = 0, startS = 0.4, shellS = 0.55, gen = 0 }
 -- posição de repouso das peças animadas no espaço da peça principal, por modelo de 1ª pessoa
 local rest: { [BasePart]: CFrame } = setmetatable({}, { __mode = "k" }) :: any
 
@@ -59,16 +59,30 @@ Bus.on("reload_start", function(dur: number, kind: string?, n: number?, empty: b
 	local base = (shells.startS + shells.n * shells.shellS + (if empty then (wp and wp.reloadEndS or 0.5) else 0))
 	local k = if base > 0 then shells.dur / base else 1
 	local a = SomArmas.arma(id, "shotgun")
+	-- D-194: a recarga cancelada (troca de arma) cala os cartuchos que ainda não entraram
+	shells.gen += 1
+	local gen = shells.gen
+	local function later(at: number, what: string, opts: { [string]: any })
+		task.delay(at, function()
+			if shells.gen == gen then
+				Som.play(what, opts)
+			end
+		end)
+	end
 	for i = 1, shells.n do
-		Som.play(a.cartucho or "mec_cartucho", {
-			delay = (shells.startS + (i - 0.35) * shells.shellS) * k,
-			vol = 0.9,
-			pitch = 0.95 + math.random() * 0.1,
-		})
+		later(
+			(shells.startS + (i - 0.35) * shells.shellS) * k,
+			a.cartucho or "mec_cartucho",
+			{ vol = 0.9, pitch = 0.95 + math.random() * 0.1 }
+		)
 	end
 	if empty then
-		Som.play(a.mecanica or "mec_bomba", { delay = (shells.startS + shells.n * shells.shellS + 0.05) * k })
+		later((shells.startS + shells.n * shells.shellS + 0.05) * k, a.mecanica or "mec_bomba", {})
 	end
+end)
+Bus.on("reload_cancel", function()
+	shells.gen += 1
+	shells.t0 = -1
 end)
 
 local function smooth(x: number): number

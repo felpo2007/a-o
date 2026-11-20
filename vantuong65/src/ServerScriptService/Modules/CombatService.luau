@@ -789,19 +789,46 @@ function CombatService.start()
 	-- D-107: acerto visto pelo atirador (Controllers/Acerto)
 	Net.event("Combat_Claim").OnServerEvent:Connect(onClaim)
 
-	-- recarga: { w = arma } (sem w: a principal)
+	-- D-194: recarga cancelada (troca de arma, granada, item nas mãos): o carregador não entra. Na
+	-- espingarda ficam os cartuchos que já entraram. Antes a recarga terminava sozinha com a arma
+	-- guardada (trocar e voltar dava a arma cheia sem esperar com ela na mão).
+	local function cancelReload(player: Player, rec: Rec)
+		local now = os.clock()
+		if now >= rec.reloadUntil then
+			return
+		end
+		local wp = Weapons.get(rec.weapon)
+		local t0 = rec.reloadT0
+		if wp and wp.feed == "tube" and t0 then
+			local n = Weapons.tubeLoaded(wp, rec.mag, rec.spare, now - t0, rec.reloadK)
+			rec.spare -= n
+			rec.mag += n
+		end
+		rec.reloadUntil, rec.reloadT0, rec.reloadK = 0, nil, nil
+		sendAmmo(player, rec)
+	end
+
+	-- recarga: { w = arma } (sem w: a principal); { w, cancel = true } cancela a dela
 	Net.event("Combat_Reload").OnServerEvent:Connect(function(player, req)
 		local rec = recFor(player, if type(req) == "table" then req.w else nil)
+		if rec and type(req) == "table" and req.cancel == true then
+			cancelReload(player, rec)
+			return
+		end
 		local wp = rec and Weapons.get(rec.weapon)
 		if not (rec and wp) or rec.spare <= 0 or os.clock() < rec.reloadUntil or rec.mag >= wp.magazine then
 			return
 		end
 		-- vantagem "Mãos Rápidas" (Vant_reload, 0,88): o gatilho só volta depois desta recarga
 		-- D-108: espingarda, cartucho a cartucho (o tempo depende de quantos entram)
-		local dur = Weapons.reloadTime(wp, Vantagens.mult(player, "reload"), rec.mag, rec.spare)
-		rec.reloadUntil = os.clock() + dur
+		local k = Vantagens.mult(player, "reload")
+		local dur = Weapons.reloadTime(wp, k, rec.mag, rec.spare)
+		local untilT = os.clock() + dur
+		rec.reloadUntil, rec.reloadT0, rec.reloadK = untilT, os.clock(), k
 		task.delay(dur, function()
-			if recFor(player, rec.weapon) == rec then
+			-- D-194: cancelada no meio (ou outra depois dela) não completa
+			if recFor(player, rec.weapon) == rec and rec.reloadUntil == untilT then
+				rec.reloadT0, rec.reloadK = nil, nil
 				if wp.feed == "tube" then
 					local n = Weapons.tubeShells(wp, rec.mag, rec.spare)
 					rec.spare -= n
@@ -825,6 +852,27 @@ function CombatService.start()
 		local rec = recFor(player, if type(req) == "table" then req.w else nil)
 		if rec then
 			sendAmmo(player, rec)
+		end
+	end)
+
+	-- D-194: a mão mudou (Posture_Set { arma }, o mesmo aviso do Modules/ArmaNaMao): a recarga das
+	-- armas que saíram da mão para. Vale mesmo sem o aviso de cancelar do cliente.
+	Net.event("Posture_Set").OnServerEvent:Connect(function(player, req: any)
+		if type(req) ~= "table" or req.arma == nil then
+			return
+		end
+		local inHand = if type(req.arma) == "string" then req.arma else nil
+		local a = ammo[player]
+		if a and a.weapon ~= inHand then
+			cancelReload(player, a)
+		end
+		local others = extra[player]
+		if others then
+			for id, rec in others do
+				if id ~= inHand then
+					cancelReload(player, rec)
+				end
+			end
 		end
 	end)
 

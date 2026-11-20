@@ -673,6 +673,15 @@ function Weapons.tubeShells(wp: Weapon, mag: number, spare: number): number
 	return math.max(math.min(wp.magazine - mag, spare), 0)
 end
 
+-- D-194: recarga do depósito tubular interrompida (troca de arma) depois de `elapsed` s: os
+-- cartuchos que já entraram ficam (cada um no fim do tempo dele); mult = a vantagem de recarga.
+function Weapons.tubeLoaded(wp: Weapon, mag: number, spare: number, elapsed: number, mult: number?): number
+	local k = math.max(mult or 1, 1e-3)
+	local t = elapsed / k - (wp.reloadStartS or 0.4)
+	local n = math.floor(t / (wp.shellS or 0.55) + 1e-6)
+	return math.clamp(n, 0, Weapons.tubeShells(wp, mag, spare))
+end
+
 -- Bagos por tiro (1 nas balas)
 function Weapons.pelletsOf(wp: Weapon): number
 	return math.max(wp.pellets or 1, 1)

@@ -195,7 +195,16 @@ export type Shot = {
 	originStuds: number, -- distância da origem à cabeça
 	seat: SeatInfo?,
 }
-export type Rec = { weapon: string, mag: number, spare: number, reloadUntil: number, gate: Gate }
+-- D-194: reloadT0/reloadK = começo e vantagem da recarga em andamento (para cancelar na troca)
+export type Rec = {
+	weapon: string,
+	mag: number,
+	spare: number,
+	reloadUntil: number,
+	gate: Gate,
+	reloadT0: number?,
+	reloadK: number?,
+}
 
 -- O tiro vale? (true) ou (false, motivo). Gasta o crédito de cadência quando vale; a munição é
 -- descontada pelo chamador.

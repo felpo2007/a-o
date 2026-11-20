@@ -18,6 +18,7 @@ local RunService = game:GetService("RunService")
 local ArmIK = require(ReplicatedStorage.Shared.ArmIK)
 local CartaModel = require(ReplicatedStorage.Shared.CartaModel)
 local Corpo = require(ReplicatedStorage.Shared.Corpo)
+local Equipar = require(ReplicatedStorage.Shared.Equipar)
 local FieldWork = require(ReplicatedStorage.Shared.FieldWork)
 local ItemAnim = require(ReplicatedStorage.Shared.ItemAnim)
 local PaArte = require(ReplicatedStorage.Shared.PaArte)
@@ -80,6 +81,12 @@ local MAP_AT = holdCF(ArmIK.HOLDS.map)
 local HOLD_GUARD = holdCF(ArmIK.HOLDS.guard)
 local HOLD_LUNGE = holdCF(ArmIK.HOLDS.lunge)
 local HOLD_KNIFE = holdCF(ArmIK.HOLDS.knife)
+-- D-194: troca de arma em 3ª pessoa: a partir da pega de agora (a do Pegada3P, que muda com a mira,
+-- a corrida e o tipo de arma), a arma desce 0,25 m, vai 4 cm para a direita e a boca baixa 50° para o
+-- chão. Uma pega fixa (como a da faca) ficava MAIS ALTA que a do fuzil na guarda (Studio: +0,5 stud).
+-- PLACEHOLDER de pose, conferido na captura do Studio.
+local TROCA_DROP = CFrame.new(Vector3.new(0.04, -0.25, 0.04) / 0.28)
+local TROCA_TILT = CFrame.Angles(math.rad(-50), 0, 0)
 local STRIKE_KEYS = { { 0, 0 }, { 0.18, 1 }, { 0.32, 2 }, { 0.45, 2 }, { 0.9, 0 } } -- 0 base, 1 guarda, 2 estocada
 
 -- v41 ("jogo está bem pesado ainda"): a lista é montada 4 vezes por segundo (antes, duas vezes por
@@ -403,6 +410,8 @@ type Blend = {
 	near: boolean,
 	accH: number, -- v41: dt guardado dos quadros pulados (pose do tronco longe da câmera)
 	accP: number, -- v41: idem para a arma de quem está além do LOD_FAR
+	trocaRaw: any, -- D-194: o texto do atributo da troca já lido
+	troca: Equipar.TrocaVista?,
 }
 local blend: { [Model]: Blend } = setmetatable({}, { __mode = "k" }) :: any
 
@@ -428,7 +437,37 @@ local function newBlend(): Blend
 		near = true,
 		accH = 0,
 		accP = 0,
+		trocaRaw = nil,
+		troca = nil,
 	}
+end
+
+-- D-194: troca de arma vista em 3ª pessoa (Shared/Equipar). O atributo "Troca" vem do servidor
+-- (ArmaNaMao); o próprio soldado usa o local "VT65Troca" (sem esperar a volta). A arma desce à pega
+-- baixa, espera a nova chegar à mão (a arma da mão ou a granada) e sobe. Devolve a altura (0..1).
+local function trocaDe(char: Model, b: Blend, w: Model?): number
+	local raw = char:GetAttribute(if char == player.Character then "VT65Troca" else "Troca")
+	if raw == nil then
+		return 0
+	end
+	if raw ~= b.trocaRaw then
+		b.trocaRaw = raw
+		b.troca = Equipar.trocaLer(raw)
+	end
+	local v = b.troca
+	if not v then
+		return 0
+	end
+	local now = workspace:GetServerTimeNow()
+	if v.tr.riseAt == nil then
+		local chegou = if v.alvo == "frag" or v.alvo == "smoke"
+			then char:FindFirstChild("GranadaMao") ~= nil
+			else w ~= nil and w:GetAttribute("WeaponId") == v.alvo
+		if chegou then
+			Equipar.trocaSobe(v.tr, now)
+		end
+	end
+	return Equipar.trocaDown(v.tr, now)
 end
 
 -- carta na mão de cada soldado com o mapa aberto (só neste cliente, como a pose)
@@ -842,6 +881,11 @@ local function holdWeapon(char: Model, b: Blend, dt: number, far: boolean): Goal
 		if t >= 0 and t < 0.9 then
 			hold = strikeHold(hold, t)
 		end
+	end
+	-- D-194: troca de arma: a arma baixa (deitado, só metade, para não entrar no chão)
+	local td = trocaDe(char, b, w)
+	if td > 1e-3 then
+		hold = hold:Lerp(TROCA_DROP * hold * TROCA_TILT, td * (1 - 0.5 * b.prone))
 	end
 	if not weld.C0:FuzzyEq(hold, 1e-5) then
 		weld.C0 = hold

@@ -454,6 +454,14 @@ Bus.on("reload_start", function(dur: number)
 		playUpper(d, "recarregar", SoldierAnims.reloadSpeed(dur))
 	end
 end)
+-- D-194: troca de arma no meio da recarga: o clipe para (o Animator replica a parada para todos)
+Bus.on("reload_cancel", function()
+	local d = mine
+	local tr = d and d.tracks.recarregar
+	if tr and tr.IsPlaying then
+		tr:Stop(0.15)
+	end
+end)
 Bus.on("grenade_throw", function()
 	local d = mine
 	if d then

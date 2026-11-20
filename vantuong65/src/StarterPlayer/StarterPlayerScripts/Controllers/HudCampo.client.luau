@@ -607,6 +607,15 @@ Bus.on("reload_start", function(dur: number)
 	tw:Play()
 	wake()
 end)
+-- D-194: recarga cancelada pela troca de arma: a barra some
+Bus.on("reload_cancel", function()
+	local t = reloadTween
+	if t then
+		t:Cancel()
+		reloadTween = nil
+	end
+	A.reload.Size = UDim2.new(0, 0, 0, px(3, 4))
+end)
 
 -- aviso curto no cartão (troca de arma, baioneta...)
 local flashToken = 0

@@ -170,18 +170,71 @@ local function watch(char: Model)
 	end)
 end
 
+-- D-194: a troca que os outros veem. O cliente avisa no começo { d0, hold, draw, alvo, volta } (a
+-- curva do Shared/Equipar); aqui vira o atributo "Troca" do personagem, com o relógio do servidor.
+-- Os outros clientes (PostureController) baixam a arma, esperam a nova chegar à mão e a sobem.
+local trocaN: { [Player]: { t: number, n: number } } = {}
+local function troca(p: Player, t: any)
+	local char = alive(p)
+	if not (char and type(t) == "table") then
+		return
+	end
+	-- até 12 por segundo (o bastante para trocas seguidas; o resto é ruído)
+	local now = os.clock()
+	local r: { t: number, n: number } = trocaN[p] or { t = now, n = 0 }
+	if now - r.t >= 1 then
+		r = { t = now, n = 0 }
+	end
+	trocaN[p] = r
+	r.n += 1
+	if r.n > 12 then
+		return
+	end
+	local d0, hold, draw = tonumber(t.d0), tonumber(t.hold), tonumber(t.draw)
+	local alvo = t.alvo
+	if not (d0 and hold and draw) or type(alvo) ~= "string" or #alvo > 16 or not string.match(alvo, "^[%w_]*$") then
+		return
+	end
+	local tr: Equipar.Troca = {
+		t0 = 0,
+		d0 = math.clamp(d0, 0, 1),
+		hold = math.clamp(hold, 0, Equipar.TROCA_MAX_HOLD),
+		draw = math.clamp(draw, 0, Equipar.TROCA_MAX_DRAW),
+		top = 1,
+		riseAt = nil,
+	}
+	char:SetAttribute("Troca", Equipar.trocaTexto(workspace:GetServerTimeNow(), tr, alvo, t.volta == true))
+end
+
 function ArmaNaMao.start()
+	local lastApply: { [Player]: number } = {}
 	Net.event("Posture_Set").OnServerEvent:Connect(function(p: Player, req: any)
-		if type(req) ~= "table" or req.arma == nil then
+		if type(req) ~= "table" then
+			return
+		end
+		if req.troca ~= nil then
+			troca(p, req.troca)
+		end
+		if req.arma == nil then
+			return
+		end
+		-- D-194: o primeiro pedido vale na hora (a arma nova chega à mão sem esperar 0,1 s embaixo);
+		-- os seguintes, dentro de 0,1 s, viram um só (vale o último)
+		local now = os.clock()
+		local since = now - (lastApply[p] or -1)
+		if pending[p] == nil and since >= 0.1 then
+			lastApply[p] = now
+			apply(p, req.arma)
 			return
 		end
 		local first = pending[p] == nil
 		pending[p] = req.arma
 		if first then
-			task.delay(0.1, function()
+			task.delay(math.max(0.1 - since, 0.02), function()
 				local arma = pending[p]
 				pending[p] = nil
 				if arma ~= nil then
+					lastApply[p] = os.clock()
 					apply(p, arma)
 				end
 			end)
@@ -199,6 +252,8 @@ function ArmaNaMao.start()
 	Players.PlayerAdded:Connect(onPlayer)
 	Players.PlayerRemoving:Connect(function(p)
 		pending[p] = nil
+		trocaN[p] = nil
+		lastApply[p] = nil
 	end)
 end
 

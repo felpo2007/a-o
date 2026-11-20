@@ -1530,7 +1530,13 @@
   "se",
   "sw",
   "Blocos",
-  "CartaImage_"
+  "CartaImage_",
+  "%.3f;%.3f;%.3f;%.3f;%s;%s",
+  "Troca",
+  "^([%d%.%-]+);([%d%.]+);([%d%.]+);([%d%.]+);([%w_]*);([vn])$",
+  "^mirar:([%d%.]+)$",
+  "^vaga:(%d+)$",
+  "recarga"
  ],
  "regex": [
   "^uni_[a-z_]+@[a-z0-9]+$"

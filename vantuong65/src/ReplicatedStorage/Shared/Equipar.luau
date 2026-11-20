@@ -118,6 +118,150 @@ function Equipar.holsterS(id: string?, kind: string?): number
 	return math.clamp(Equipar.drawS(id, kind) * 0.4, 0.15, 0.3)
 end
 
+-- ===== D-194: a troca como estado (prompt de jogabilidade, item 10) =====
+-- Altura da arma pela troca: 0 = em uso, 1 = embaixo, fora da vista. A arma desce, troca lá
+-- embaixo e a nova sobe; o dedo só chega ao gatilho no fim da subida (Equipar.trocaFim).
+-- - Pedido no meio de outra troca: continua da altura em que a arma está (antes recomeçava de cima e
+--   a arma pulava), com a descida que falta (holsterS × (1 − altura)).
+-- - Voltar para a arma que está descendo (antes de chegar embaixo) cancela a troca: ela sobe de onde
+--   está, no saque dela vezes a altura (trocaVolta).
+-- - 3ª pessoa: a mesma curva, mas só sobe quando a arma nova chegou ao corpo (o servidor a põe na
+--   mão), ou depois de TROCA_ESPERA_S embaixo (trocaSobe).
+export type Troca = {
+	t0: number, -- começo
+	d0: number, -- altura no começo (0..1)
+	hold: number, -- descida que falta (s)
+	draw: number, -- subida (s); math.huge = fica embaixo (granada na mão)
+	top: number, -- de onde a subida parte (1, ou d0 na volta)
+	riseAt: number?, -- começo da subida (nil: esperando a arma nova, só na 3ª pessoa)
+}
+Equipar.TROCA_ESPERA_S = 0.6
+
+-- as curvas do KnifeView: a descida acelera sem parar no fim; a subida sai e chega suave
+local function easeIn(x: number): number
+	x = math.clamp(x, 0, 1)
+	return x * x * (2 - x) * 0.5 + x * x * 0.5
+end
+local function easeIO(x: number): number
+	x = math.clamp(x, 0, 1)
+	return x * x * (3 - 2 * x)
+end
+
+-- Troca nova a partir da altura de agora. esperar: a subida espera trocaSobe (3ª pessoa).
+function Equipar.trocaNova(now: number, down0: number, holsterS: number, drawS: number, esperar: boolean?): Troca
+	local d0 = math.clamp(down0, 0, 1)
+	local hold = math.max(holsterS, 0) * (1 - d0)
+	return {
+		t0 = now,
+		d0 = d0,
+		hold = hold,
+		draw = math.max(drawS, 0),
+		top = 1,
+		riseAt = if esperar then nil else now + hold,
+	}
+end
+
+-- Cancela a troca: a arma que descia sobe de onde está (drawS = o saque dela).
+function Equipar.trocaVolta(now: number, down0: number, drawS: number): Troca
+	local d0 = math.clamp(down0, 0, 1)
+	return { t0 = now, d0 = d0, hold = 0, draw = math.max(drawS, 0) * d0, top = d0, riseAt = now }
+end
+
+-- instante em que a arma chega embaixo (a troca do modelo)
+function Equipar.trocaEmbaixo(tr: Troca): number
+	return tr.t0 + tr.hold
+end
+
+-- 3ª pessoa: a arma nova chegou ao corpo em `at`; a subida começa (nunca antes de chegar embaixo)
+function Equipar.trocaSobe(tr: Troca, at: number)
+	if tr.riseAt == nil then
+		tr.riseAt = math.max(at, tr.t0 + tr.hold)
+	end
+end
+
+-- começo da subida, contando a espera máxima da 3ª pessoa
+local function riseOf(tr: Troca, now: number): number?
+	local r = tr.riseAt
+	if r == nil and now >= tr.t0 + tr.hold + Equipar.TROCA_ESPERA_S then
+		return tr.t0 + tr.hold + Equipar.TROCA_ESPERA_S
+	end
+	return r
+end
+
+-- Altura da arma agora (0..1)
+function Equipar.trocaDown(tr: Troca, now: number): number
+	local t = now - tr.t0
+	if t < 0 then
+		return tr.d0
+	end
+	if t < tr.hold then
+		return tr.d0 + (1 - tr.d0) * easeIn(t / tr.hold)
+	end
+	local top = if tr.hold > 0 then 1 else tr.top
+	local r = riseOf(tr, now)
+	if r == nil or now < r then
+		return top
+	end
+	if tr.draw <= 0 then
+		return 0
+	end
+	return top * (1 - easeIO((now - r) / tr.draw))
+end
+
+-- Fim da troca (a arma pronta), ou nil enquanto a 3ª pessoa espera a arma nova
+function Equipar.trocaFim(tr: Troca, now: number): number?
+	local r = riseOf(tr, now)
+	return if r then r + tr.draw else nil
+end
+
+-- A arma da troca está pronta agora?
+function Equipar.trocaPronta(tr: Troca?, now: number): boolean
+	if not tr then
+		return true
+	end
+	local f = Equipar.trocaFim(tr, now)
+	return f ~= nil and now >= f
+end
+
+-- ===== o que os outros veem (atributo "Troca" do personagem, posto pelo servidor) =====
+-- "t0;d0;hold;draw;alvo;v": t0 no relógio do servidor; alvo = o que vai à mão (id da arma da mão,
+-- "frag"/"smoke"); v = "v" na volta, "n" na troca nova. O próprio cliente põe o mesmo texto no
+-- atributo local "VT65Troca" (sem esperar a volta do servidor).
+export type TrocaVista = { tr: Troca, alvo: string, volta: boolean }
+
+function Equipar.trocaTexto(t0: number, tr: Troca, alvo: string, volta: boolean): string
+	return string.format(
+		"%.3f;%.3f;%.3f;%.3f;%s;%s",
+		t0,
+		tr.d0,
+		tr.hold,
+		math.min(tr.draw, 99),
+		alvo,
+		if volta then "v" else "n"
+	)
+end
+
+function Equipar.trocaLer(s: any): TrocaVista?
+	if type(s) ~= "string" then
+		return nil
+	end
+	local a, b, c, d, alvo, v = string.match(s, "^([%d%.%-]+);([%d%.]+);([%d%.]+);([%d%.]+);([%w_]*);([vn])$")
+	local t0, d0, hold, draw = tonumber(a), tonumber(b), tonumber(c), tonumber(d)
+	if not (t0 and d0 and hold and draw and alvo and v) then
+		return nil
+	end
+	local volta = v == "v"
+	local tr = if volta
+		then Equipar.trocaVolta(t0, d0, if d0 > 0 then draw / d0 else 0)
+		else Equipar.trocaNova(t0, d0, if d0 < 1 then hold / (1 - d0) else 0, draw, true)
+	-- d0 = 1 na troca nova: já embaixo (vinha da granada)
+	return { tr = tr, alvo = alvo, volta = volta }
+end
+
+-- Limites do que o servidor aceita do cliente (s)
+Equipar.TROCA_MAX_HOLD = 0.5
+Equipar.TROCA_MAX_DRAW = 1.5
+
 -- ===== item que dá para usar agora (mesma regra da roda de equipamento) =====
 -- frags/smokes: o que sobra (atributos Frags/Smokes); canBuild: o papel tem alguma construção.
 export type Counts = { frags: number, smokes: number }

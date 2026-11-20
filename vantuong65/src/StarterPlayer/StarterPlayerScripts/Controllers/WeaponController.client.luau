@@ -90,6 +90,8 @@ local scope = { blend = 0 }
 -- vagas e mão (2026-11-13, Shared/Equipar): granada na mão, arma para voltar depois do arremesso,
 -- troca em andamento (a última vale), até quando a troca segura o gatilho, o que o servidor sabe da
 -- mão, "mirando" com a granada (por baixo) e a recarga automática pendente
+-- D-194: a troca como estado (Shared/Equipar.Troca): a curva da arma, a vaga que entra lá embaixo e a
+-- mira e a recarga pedidas no meio dela
 local inv = {
 	hand = nil :: Equipar.Hand?,
 	prev = 1,
@@ -98,6 +100,10 @@ local inv = {
 	sent = nil :: string?,
 	under = false,
 	autoAt = 0,
+	troca = nil :: Equipar.Troca?,
+	alvo = nil :: number?,
+	aimQueued = false,
+	reloadQueued = false,
 }
 -- bipé (Weapons.BIPOD): "prone" (armado no chão), "rested" (guarda-mão sobre um apoio) ou nil
 local bipod = { state = nil :: string?, params = RaycastParams.new() }
@@ -475,7 +481,12 @@ local function startReload()
 		return
 	end
 	if not seated() and (inv.hand or now < inv.busyUntil) then
-		return -- granada na mão ou troca de arma: a recarga espera
+		-- granada na mão ou troca de arma: a recarga espera (D-194: no fim da troca ela sai)
+		inv.reloadQueued = inv.troca ~= nil and not inv.hand
+		return
+	end
+	if not seated() and ItemView.handsBusy() then
+		return -- D-194: curativo, pá... nas duas mãos
 	end
 	if not seated() and KnifeView.busy() then
 		KnifeView.sheatheNow()
@@ -557,8 +568,73 @@ local function nameOf(id: string?): string
 	return if n ~= "" then n else "—"
 end
 
+-- ===== D-194: a troca de arma (prompt de jogabilidade, item 10) =====
+-- Altura da arma pela troca agora (0 = em uso, 1 = embaixo)
+local function downNow(now: number): number
+	local tr = inv.troca
+	return if tr then Equipar.trocaDown(tr, now) else 0
+end
+
+-- arma na mão agora: id e tipo para os tempos (Equipar.drawS/holsterS)
+local function curInfo(): (string?, string?)
+	if launcher then
+		return "launcher", "launcher"
+	end
+	return if weapon then weapon.id else nil, if weapon then weapon.kind else nil
+end
+
+local function slotInfo(i: number): (string?, string?)
+	local id = slots[i]
+	if id == "launcher" then
+		return id, "launcher"
+	end
+	local wp = if id then Weapons.get(id) else nil
+	return id, if wp then wp.kind else nil
+end
+
+-- o que vai à mão do corpo (o RPG-2 no lugar do "launcher" do VC), como o ArmaNaMao
+local function handIdOf(id: string?): string
+	local f = player:GetAttribute("Faction")
+	return Equipar.handId(id, if type(f) == "string" then f else nil) or ""
+end
+
+-- Põe a troca: a curva da 1ª pessoa (KnifeView), o gatilho preso até o fim e, com `alvo`, o que os
+-- outros veem (Posture_Set { troca }, que o ArmaNaMao põe no atributo "Troca" do personagem) e a
+-- 3ª pessoa do próprio (atributo local "VT65Troca"). draw3p: a subida vista de fora, se for outra.
+local function setTroca(tr: Equipar.Troca?, alvo: string?, volta: boolean?, draw3p: number?)
+	inv.troca = tr
+	KnifeView.troca(tr)
+	local now = os.clock()
+	inv.busyUntil = if tr then Equipar.trocaFim(tr, now) or now else 0
+	local char = player.Character
+	if not (tr and alvo and char) then
+		return
+	end
+	local seen = table.clone(tr)
+	seen.draw = math.min(draw3p or tr.draw, Equipar.TROCA_MAX_DRAW)
+	char:SetAttribute("VT65Troca", Equipar.trocaTexto(workspace:GetServerTimeNow(), seen, alvo, volta == true))
+	Net.event("Posture_Set"):FireServer({
+		troca = { d0 = seen.d0, hold = seen.hold, draw = seen.draw, alvo = alvo, volta = volta == true },
+	})
+end
+
+-- A recarga da arma da mão para (o servidor também para a dela quando a mão muda: CombatService)
+local function cancelReloadNow()
+	local wp = weapon
+	local t = if wp then triggers[wp.id] else nil
+	inv.reloadQueued = false
+	if wp and t and os.clock() < t.reloadUntil then
+		t.reloadUntil = 0
+		Net.event("Combat_Reload"):FireServer({ w = wp.id, cancel = true })
+		Bus.fire("reload_cancel", wp.id)
+	end
+end
+
 -- Põe a arma da vaga i na mão: a atual desce (holsterS), troca lá embaixo e a nova sobe (drawS).
 -- fromHand: vinha da granada (que já saiu da vista); a arma só sobe. A última troca pedida vale.
+-- D-194: uma troca no meio de outra parte da altura em que a arma está; voltar para a arma que está
+-- descendo cancela a troca (ela sobe de onde está); a recarga em andamento para; a mira segurada
+-- volta no fim; o modelo troca lá embaixo no passo do quadro (stepTroca), não num task.delay.
 local function switchTo(i: number, fromHand: boolean)
 	if i < 1 or i > #slots or seated() then
 		return
@@ -569,9 +645,21 @@ local function switchTo(i: number, fromHand: boolean)
 		say("Mãos ocupadas: a arma volta ao terminar")
 		return
 	end
-	if not fromHand and i == slot and not inv.hand and not binoculars then
-		Bus.fire("vagas_mostrar") -- já está na mão: só mostra a faixa
-		return
+	local now = os.clock()
+	local pending = inv.alvo
+	if not fromHand and not inv.hand and not binoculars then
+		if i == (pending or slot) then
+			Bus.fire("vagas_mostrar") -- já está na mão (ou já vai para ela): só mostra a faixa
+			return
+		end
+		if pending and i == slot then
+			inv.alvo = nil
+			inv.token += 1
+			local id, kind = curInfo()
+			setTroca(Equipar.trocaVolta(now, downNow(now), Equipar.drawS(id, kind)), handIdOf(id), true)
+			Bus.fire("vagas_mostrar")
+			return
+		end
 	end
 	if binoculars then
 		toggleBinoculars()
@@ -579,29 +667,70 @@ local function switchTo(i: number, fromHand: boolean)
 	for _, t in triggers do
 		Gatilho.cancel(t)
 	end
+	if aiming and not Input.settings.aimToggle then
+		inv.aimQueued = true -- segurando a mira: ela volta quando a arma nova chegar
+	end
 	setAim(false)
+	cancelReloadNow()
+	local d0 = downNow(now)
 	if inv.hand then
 		setHand(nil)
 		fromHand = true
 	end
-	local curId = if launcher then "launcher" elseif weapon then weapon.id else nil
-	local hold = if fromHand then 0 else Equipar.holsterS(curId, weapon and weapon.kind)
-	local newId = slots[i]
-	local nwp = Weapons.get(newId)
-	local draw = Equipar.drawS(newId, if newId == "launcher" then "launcher" elseif nwp then nwp.kind else nil)
+	local id, kind = curInfo()
+	local hold = if fromHand then 0 else Equipar.holsterS(id, kind)
+	if fromHand then
+		d0 = 1
+	end
+	local newId, newKind = slotInfo(i)
 	inv.token += 1
-	local my = inv.token
-	inv.busyUntil = os.clock() + hold + draw
-	KnifeView.troca(hold, draw)
+	inv.alvo = i
+	-- vinda da granada: de fora, a arma já está baixa na mão esquerda (a pega da granada)
+	setTroca(Equipar.trocaNova(now, d0, hold, Equipar.drawS(newId, newKind)), if fromHand then nil else handIdOf(newId))
 	Bus.fire("vagas_mostrar")
-	task.delay(hold, function()
-		if inv.token ~= my then
-			return
+end
+
+-- Um quadro da troca: o modelo troca lá embaixo; no veículo ela termina já; curativo ou pá nas mãos
+-- terminam a troca; a mira e a recarga pedidas no meio saem. (A subida ao sair do veículo é do sinal
+-- do assento: watchSeat.)
+local function stepTroca(now: number)
+	local i = inv.alvo
+	local tr = inv.troca
+	if seated() or ItemView.handsBusy() then
+		if i then
+			inv.alvo = nil
+			slot = i
+			equip()
 		end
+		if tr and not inv.hand then
+			setTroca(nil)
+		end
+		cancelReloadNow()
+		inv.aimQueued = false
+		return
+	end
+	if i and tr and now >= Equipar.trocaEmbaixo(tr) then
+		inv.alvo = nil
 		slot = i
 		equip()
 		say(nameOf(slots[i]))
-	end)
+	end
+	if tr and not inv.alvo and Equipar.trocaPronta(tr, now) then
+		inv.troca = nil
+		KnifeView.troca(nil)
+	end
+	if inv.troca == nil and not inv.hand and now >= inv.busyUntil then
+		if inv.aimQueued then
+			inv.aimQueued = false
+			if InputMap.allowed(Input.state, "aim") then
+				setAim(true)
+			end
+		end
+		if inv.reloadQueued then
+			inv.reloadQueued = false
+			startReload()
+		end
+	end
 end
 
 local function counts(): Equipar.Counts
@@ -629,18 +758,28 @@ local function drawGrenade(kind: string)
 		Gatilho.cancel(t)
 	end
 	setAim(false)
-	local curId = if launcher then "launcher" elseif weapon then weapon.id else nil
-	local hold = if inv.hand then 0 else Equipar.holsterS(curId, weapon and weapon.kind)
-	if inv.hand then
+	inv.aimQueued = false
+	cancelReloadNow()
+	local now = os.clock()
+	local fromHand = inv.hand ~= nil
+	local curId, curKind = curInfo()
+	local hold = if fromHand then 0 else Equipar.holsterS(curId, curKind)
+	local d0 = if fromHand then 1 else downNow(now)
+	if fromHand then
 		setHand(nil)
 	end
-	inv.prev = slot
+	-- D-194: com uma troca pendente, depois do arremesso volta a arma que estava vindo
+	inv.prev = inv.alvo or slot
+	inv.alvo = nil
 	inv.token += 1
 	local my = inv.token
-	KnifeView.troca(hold, math.huge) -- a arma desce e fica embaixo até voltar (switchTo)
-	inv.busyUntil = os.clock() + hold
+	-- a arma desce (da altura em que está) e fica embaixo até voltar (switchTo); de fora, a granada
+	-- chega à mão e o fuzil sobe à pega da granada (na mão esquerda) no saque dela
+	local tr = Equipar.trocaNova(now, d0, hold, math.huge)
+	setTroca(tr, if fromHand then nil else kind, false, Equipar.GRENADE.drawS)
+	inv.busyUntil = Equipar.trocaEmbaixo(tr)
 	Bus.fire("vagas_mostrar")
-	task.delay(hold, function()
+	task.delay(tr.hold, function()
 		if inv.token ~= my or seated() then
 			return
 		end
@@ -804,9 +943,14 @@ Input.on("quick_grenade", "release", function()
 	end
 end)
 -- mirar: com a granada na mão, mirar ao soltar lança por baixo (curta)
-Input.on("aim", "press", function()
+local function aimPress()
 	if inv.hand then
 		inv.under = if Input.settings.aimToggle then not inv.under else true
+		return
+	end
+	-- D-194: no meio da troca a mira espera a arma nova chegar (stepTroca)
+	if inv.troca and os.clock() < inv.busyUntil then
+		inv.aimQueued = if Input.settings.aimToggle then not inv.aimQueued else true
 		return
 	end
 	if Input.settings.aimToggle then
@@ -814,8 +958,8 @@ Input.on("aim", "press", function()
 	else
 		setAim(true)
 	end
-end)
-Input.on("aim", "release", function()
+end
+local function aimRelease()
 	if inv.hand then
 		if not Input.settings.aimToggle then
 			inv.under = false
@@ -823,9 +967,12 @@ Input.on("aim", "release", function()
 		return
 	end
 	if not Input.settings.aimToggle then
+		inv.aimQueued = false
 		setAim(false)
 	end
-end)
+end
+Input.on("aim", "press", aimPress)
+Input.on("aim", "release", aimRelease)
 -- prender a respiração: segurar (L3 mirando desde a D-189, antes LB / Shift) até Weapons.BREATH_S (4 s; na luneta, vezes a vantagem
 -- "breath" do passe "Fôlego de Atirador", 1,6); soltar antes acaba
 local function endBreath(at: number)
@@ -870,7 +1017,8 @@ local function melee(rifle: boolean?)
 	end
 	local now = os.clock()
 	local _, t = active()
-	if now < meleeS.nextAt or (t and now < t.reloadUntil) then
+	-- D-194: no meio da troca de arma também não (as mãos estão na arma que desce ou sobe)
+	if now < meleeS.nextAt or (t and now < t.reloadUntil) or now < inv.busyUntil then
 		return
 	end
 	local id = Melee.choose(char:GetAttribute("Bayonet") == true, rifle == true, meleeS.last, now - meleeS.lastAt)
@@ -934,15 +1082,24 @@ if RunService:IsStudio() then
 	end)
 	-- 2026-11-13: workspace:SetAttribute("VT65DevGranada", "frag" | "smoke" | "frag:baixo" |
 	-- "smoke:baixo") puxa a granada, arma (0,5 s apertado) e lança (por baixo com ":baixo");
-	-- "vaga:N" usa a vaga N como a tecla; "estado" escreve vagas, mão e munição no Output
+	-- "vaga:N" usa a vaga N como a tecla; "estado" escreve vagas, mão e munição no Output.
+	-- D-194: "recarga" pede a recarga como a tecla; "mirar:<s>" aperta a mira e solta depois de s
+	-- (o "vaga:N" não casava antes: o padrão de baixo só aceita letras depois dos dois pontos)
 	workspace:GetAttributeChangedSignal("VT65DevGranada"):Connect(function()
 		local v = workspace:GetAttribute("VT65DevGranada")
 		if type(v) ~= "string" then
 			return
 		end
 		local kind, low = string.match(v, "^(%a+):?(%a*)$")
-		if kind == "vaga" then
-			useSlot(tonumber(low) or tonumber(string.match(v, "%d+") or "") or 1)
+		local vagaN = string.match(v, "^vaga:(%d+)$")
+		local mirarS = tonumber(string.match(v, "^mirar:([%d%.]+)$") or "")
+		if vagaN then
+			useSlot(tonumber(vagaN) or 1)
+		elseif mirarS then
+			aimPress()
+			task.delay(mirarS, aimRelease)
+		elseif v == "recarga" then
+			startReload()
 		elseif kind == "estado" then
 			local _, t = active()
 			print(
@@ -1024,6 +1181,9 @@ Input.StateChanged:Connect(function(cancelled: { string }, ctx: string)
 	if ctx ~= "infantry" and ctx ~= "aim" and binoculars then
 		binoculars = false
 		binoc.Visible = false
+	end
+	if ctx ~= "infantry" and ctx ~= "aim" then
+		inv.aimQueued, inv.reloadQueued = false, false -- D-194: menu ou carta no meio da troca
 	end
 	-- menu, mapa, roda, morte: a granada que ainda não saiu volta ao cinto (Front 44)
 	local h = inv.hand
@@ -1163,6 +1323,7 @@ RunService.RenderStepped:Connect(function(dt: number)
 			t.queued = 0
 		end
 	end
+	stepTroca(now)
 	stepHand(now)
 	stepAmmo(wp, t, now)
 	if breath.untilT > 0 and now >= breath.untilT then
@@ -1264,12 +1425,34 @@ end)
 player:GetAttributeChangedSignal("Loadout"):Connect(equip)
 player:GetAttributeChangedSignal("CarriedWeapon"):Connect(equip)
 player:GetAttributeChangedSignal("Role"):Connect(equip)
-player.CharacterAdded:Connect(function()
+
+-- D-194: saiu do veículo: a arma sobe do cinto (antes aparecia pronta de uma vez). Pelo sinal do
+-- assento, antes do quadro ser desenhado: pelo passo do quadro (Studio) a arma aparecia um quadro em
+-- cima antes de descer.
+local function watchSeat(char: Model)
+	local hum = char:WaitForChild("Humanoid", 10) :: Humanoid?
+	if not hum then
+		return
+	end
+	hum:GetPropertyChangedSignal("SeatPart"):Connect(function()
+		if hum.SeatPart ~= nil or hum.Health <= 0 or player.Character ~= char or inv.hand then
+			return
+		end
+		local id, kind = curInfo()
+		if id then
+			setTroca(Equipar.trocaNova(os.clock(), 1, 0, Equipar.drawS(id, kind)))
+		end
+	end)
+end
+
+player.CharacterAdded:Connect(function(char: Model)
+	task.spawn(watchSeat, char)
 	slot = 1
 	inv.token += 1 -- troca pendente da vida anterior não vale
 	inv.busyUntil, inv.sent, inv.autoAt = 0, nil, 0
+	inv.troca, inv.alvo, inv.aimQueued, inv.reloadQueued = nil, nil, false, false
 	setHand(nil)
-	KnifeView.troca(0, 0)
+	KnifeView.troca(nil)
 	aiming, binoculars = false, false
 	binoc.Visible = false
 	breath.untilT, breath.outUntil = 0, 0
@@ -1280,4 +1463,7 @@ player.CharacterAdded:Connect(function()
 	equip()
 	player.CameraMode = Enum.CameraMode.LockFirstPerson -- primeira pessoa (Parte 10.5)
 end)
+if player.Character then
+	task.spawn(watchSeat, player.Character)
+end
 equip()

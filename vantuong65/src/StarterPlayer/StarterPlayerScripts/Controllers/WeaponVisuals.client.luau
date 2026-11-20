@@ -216,6 +216,12 @@ Bus.on("reload_start", function(dur: number, _kind: string)
 	reloadT0, reloadDur = os.clock(), dur
 	magDropped = false
 end)
+-- D-194: troca de arma no meio da recarga: a mão volta e os carregadores somem
+Bus.on("reload_cancel", function()
+	clearMags()
+	reloadDur = 0
+	magDropped = false
+end)
 
 -- ===== arremesso de granada em 1ª pessoa (D-77) =====
 -- A arma desce; a mão direita pega a granada no cinto, a esquerda puxa o pino, o braço arma ao
