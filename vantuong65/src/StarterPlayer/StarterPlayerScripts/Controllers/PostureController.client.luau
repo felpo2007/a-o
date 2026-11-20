@@ -20,6 +20,7 @@ local CartaModel = require(ReplicatedStorage.Shared.CartaModel)
 local Corpo = require(ReplicatedStorage.Shared.Corpo)
 local FieldWork = require(ReplicatedStorage.Shared.FieldWork)
 local ItemAnim = require(ReplicatedStorage.Shared.ItemAnim)
+local PaArte = require(ReplicatedStorage.Shared.PaArte)
 local Joints = require(ReplicatedStorage.Shared.Joints)
 local Movement = require(ReplicatedStorage.Shared.Movement)
 local Pegada3P = require(ReplicatedStorage.Shared.Pegada3P)
@@ -487,9 +488,20 @@ end
 -- objeto da mão (peças no tamanho real), soldado na UpperTorso
 local PROP_M = 0.28 -- m por stud: o objeto fica no tamanho real (o corpo é que é ampliado)
 local props: { [Model]: { model: Model, weld: Weld, kind: string } } = setmetatable({}, { __mode = "k" }) :: any
+local function factionOf(char: Model): string?
+	local f = char:GetAttribute("Faction")
+	if f == nil then
+		local pl = Players:GetPlayerFromCharacter(char)
+		f = pl and pl:GetAttribute("Faction")
+	end
+	return if type(f) == "string" then f else nil
+end
+
 local function propOf(char: Model, ut: BasePart, kind: string?): (Model?, Weld?)
 	local cur = props[char]
-	if cur and cur.kind == kind and cur.model.Parent then
+	-- D-183: a pá guarda o lado e se é a arte do Blender (Shared/PaArte.cacheKey)
+	local want = if kind == "pa" then "pa:" .. PaArte.cacheKey(factionOf(char)) else kind
+	if cur and cur.kind == want and cur.model.Parent then
 		return cur.model, cur.weld
 	end
 	if cur then
@@ -502,6 +514,19 @@ local function propOf(char: Model, ut: BasePart, kind: string?): (Model?, Weld?)
 	local def = ItemAnim.PROPS[kind]
 	if not def then
 		return nil, nil
+	end
+	-- D-183: a pá do Blender (Shared/PaArte), do lado de quem cava; a chave muda quando a arte chega
+	if kind == "pa" then
+		local pa = PaArte.build(factionOf(char), false)
+		pa.Name = "VT65ItemProp"
+		local pega = pa.PrimaryPart :: BasePart
+		local pw = Instance.new("Weld")
+		pw.Part0, pw.Part1 = ut, pega
+		pw.C1 = CFrame.identity
+		pw.Parent = pega
+		pa.Parent = char
+		props[char] = { model = pa, weld = pw, kind = want :: string }
+		return pa, pw
 	end
 	local m = Instance.new("Model")
 	m.Name = "VT65ItemProp"
@@ -520,8 +545,12 @@ local function propOf(char: Model, ut: BasePart, kind: string?): (Model?, Weld?)
 		p.CFrame = cf
 		p.Parent = m
 		if main then
-			local w = Instance.new("WeldConstraint")
+			-- D-183: Weld com o desvio escrito. A WeldConstraint grava o desvio ao entrar no workspace, quando
+			-- a Weld do tronco já levou a peça principal para a mão: as lentes do binóculo ficavam a ~1.900
+			-- studs do soldado (Studio, 2026-11-19)
+			local w = Instance.new("Weld")
 			w.Part0, w.Part1 = main, p
+			w.C0 = (main :: BasePart).CFrame:ToObjectSpace(p.CFrame)
 			w.Parent = p
 		else
 			main = p
@@ -529,17 +558,7 @@ local function propOf(char: Model, ut: BasePart, kind: string?): (Model?, Weld?)
 		return p
 	end
 	local s, M = def.size, PROP_M
-	if kind == "pa" then
-		piece({ 0.12, 0.03, 0.03 }, CFrame.identity, Enum.PartType.Cylinder) -- cabo em T (mão direita)
-		piece(
-			{ s[3], s[1], s[2] },
-			CFrame.new(0, 0, -s[3] / 2 / M) * CFrame.Angles(0, math.pi / 2, 0),
-			Enum.PartType.Cylinder
-		)
-		local bl = def.blade or { 0.2, 0.15, 0.01 }
-		piece({ bl[2], bl[1], bl[3] }, CFrame.new(0, 0, -(s[3] + bl[1] / 2) / M) * CFrame.Angles(math.pi / 2, 0, 0)).Material =
-			Enum.Material.Metal
-	elseif kind == "binoculo" then
+	if kind == "binoculo" then
 		piece({ s[1] * 0.3, s[2], s[3] }, CFrame.identity)
 		for _, x in { -1, 1 } do
 			piece(

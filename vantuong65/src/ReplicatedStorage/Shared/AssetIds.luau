@@ -60,6 +60,8 @@ return {
 		faca_corte = 101889458600810,
 		faca_impacto = 103935391429233,
 		baioneta_encaixe = 75358128019094,
+		-- D-183: a pazada (tools/sons_pa.py), em laço no buraco enquanto cava; 0 = impact_earth
+		pa_cavar = 81977178311325,
 	},
 	-- Modelos publicados como "Model" (InsertService:LoadAsset no servidor)
 	Models = {
@@ -122,6 +124,10 @@ return {
 		-- Colisao_Caixa; 0 = o CaixaMunicaoService usa o ammo_crate ou a caixa em peças
 		caixa_municao_us = 128489958854272,
 		caixa_municao_vc = 70550239273438,
+		-- pás de trincheira na mão (tools/blender/novos.py, D-183): M1943 dos EUA e a cópia chinesa da
+		-- MPL-50 do VC; 0 = a pá em peças (Shared/PaArte)
+		shovel_us = 90382506388372,
+		shovel_vc = 134364845804022,
 		uh34d = 104404673955740,
 		m48a3 = 83880316083319,
 		ontos = 116051447339407,

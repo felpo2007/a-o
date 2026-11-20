@@ -389,7 +389,8 @@ local function dig(): (string, string?)
 		end, 5)
 		local off = ((root.Position - g.Position) * Vector3.new(1, 0, 1)).Magnitude * M
 	until off < 1 or tries >= 3
-	local ahead = root.Position + root.CFrame.LookVector * Vector3.new(1, 0, 1) * (1.5 / M)
+	-- D-183: o centro do buraco fica 1,7 m à frente, na grade do terreno (até 0,56 m de desvio)
+	local ahead = root.Position + root.CFrame.LookVector * Vector3.new(1, 0, 1) * (1.7 / M)
 	-- Lote 27 (D-142): o chão de uma roda de 2,5 m em volta do ponto à frente, antes e depois. A sonda
 	-- num ponto só (comparado com o chão do pé) falhava: o buraco cai na grade de voxel de 1,12 m e o
 	-- ponto ficava na beira (0,01 m), ou a ladeira entrava na conta (−0,81 m). No jogo a pá cavou
@@ -424,7 +425,8 @@ local function dig(): (string, string?)
 			drop = math.max(drop, (b - a) * M)
 		end
 	end
-	return if drop > 0.5 then "ok" else "FALHA",
+	-- D-183: o buraco de 2 x 2 voxels tem ~1,24 m no meio (antes passava com 0,5 m)
+	return if drop > 0.9 then "ok" else "FALHA",
 		string.format(
 			"o chão perto da frente desceu até %.2f m (esperado ~1,2 m; a recusa aparece no aviso do jogador); %d teletransporte(s)",
 			drop,

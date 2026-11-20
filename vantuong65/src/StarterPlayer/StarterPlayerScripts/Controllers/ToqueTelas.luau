@@ -251,11 +251,12 @@ end
 
 -- ===== construção (pá e obras) =====
 -- Prévia (m): largura, profundidade, altura e a distância à frente que o SERVIDOR usa
--- (LogisticsService: 2 m à frente da raiz, rumo da raiz; FieldWorkService: a pá, 1,5 m). As medidas
--- das obras com modelo (sacos de areia, morteiro, armadilhas) são aproximadas: só a pegada.
+-- (LogisticsService: 2 m à frente da raiz, rumo da raiz; FieldWorkService: a pá, 1,7 m e na grade do
+-- terreno, D-183). As medidas das obras com modelo (sacos de areia, morteiro, armadilhas) são
+-- aproximadas: só a pegada.
 export type Preview = { w: number, d: number, h: number, ahead: number }
 ToqueTelas.PREVIEW = {
-	dig = { w = 1.8, d = 0.6, h = 0.25, ahead = 1.5 },
+	dig = { w = 2.24, d = 2.24, h = 0.25, ahead = 1.7 },
 	garrison = { w = 1.2, d = 0.1, h = 2.2, ahead = 2 },
 	mg_nest = { w = 2.2, d = 0.8, h = 0.7, ahead = 2 },
 	mortar_pit = { w = 1.6, d = 1.6, h = 0.6, ahead = 2 },

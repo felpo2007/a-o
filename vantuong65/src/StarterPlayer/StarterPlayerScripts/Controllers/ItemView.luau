@@ -23,6 +23,7 @@ local FieldWork = require(ReplicatedStorage.Shared.FieldWork)
 local GrenadeArt = require(ReplicatedStorage.Shared.GrenadeArt)
 local ItemAnim = require(ReplicatedStorage.Shared.ItemAnim)
 local Net = require(ReplicatedStorage.Shared.Net)
+local PaArte = require(ReplicatedStorage.Shared.PaArte)
 local Input = require(script.Parent.Input)
 -- D-108: objeto e granada do tamanho das mãos de 1ª pessoa (Maos1P.scale = Corpo.ARMA_K)
 local Maos1P = require(script.Parent.Maos1P)
@@ -170,12 +171,23 @@ end
 
 -- objeto da mão em 1ª pessoa
 local function prop(kind: string): Model
-	local key = kind .. ":" .. Maos1P.scale()
+	local faction = player:GetAttribute("Faction")
+	local fac = if type(faction) == "string" then faction else nil
+	-- D-183: a pá do Blender (Shared/PaArte); a chave muda quando a arte chega
+	local key = kind .. ":" .. Maos1P.scale() .. (if kind == "pa" then ":" .. PaArte.cacheKey(fac) else "")
 	if S.model and S.model.Parent and S.modelKind == key then
 		return S.model
 	end
 	if S.model then
 		S.model:Destroy()
+	end
+	if kind == "pa" then
+		local pa = PaArte.build(fac, true)
+		pa.Name = "VT65Item1P"
+		pa:ScaleTo(Maos1P.scale())
+		pa.Parent = camera
+		S.model, S.modelKind = pa, key
+		return pa
 	end
 	local def = ItemAnim.PROPS[kind]
 	local m = Instance.new("Model")
@@ -208,17 +220,6 @@ local function prop(kind: string): Model
 				Enum.PartType.Cylinder
 			)
 		end
-	elseif kind == "pa" then
-		main = piece(
-			{ s[3], s[1], s[2] },
-			CFrame.new(0, 0, -s[3] / 2 / M) * CFrame.Angles(0, math.pi / 2, 0),
-			Enum.PartType.Cylinder
-		)
-		local b = def.blade or { 0.2, 0.15, 0.01 }
-		local blade =
-			piece({ b[2], b[1], b[3] }, CFrame.new(0, 0, -(s[3] + b[1] / 2) / M) * CFrame.Angles(math.pi / 2, 0, 0))
-		blade.Material = Enum.Material.Metal
-		piece({ 0.12, 0.03, 0.03 }, CFrame.identity, Enum.PartType.Cylinder) -- o cabo em T, na mão direita
 	else
 		main = piece(s, CFrame.identity)
 	end

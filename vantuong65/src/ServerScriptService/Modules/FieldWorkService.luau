@@ -3,15 +3,17 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
+local AssetIds = require(ReplicatedStorage.Shared.AssetIds) :: any
 local FieldWork = require(ReplicatedStorage.Shared.FieldWork)
-local Geometry = require(ReplicatedStorage.Shared.Geometry)
+local ItemAnim = require(ReplicatedStorage.Shared.ItemAnim)
 local Logistics = require(ReplicatedStorage.Shared.Logistics)
 local MapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any
 local Net = require(ReplicatedStorage.Shared.Net)
+local PaArte = require(ReplicatedStorage.Shared.PaArte)
 local AssetLoader = require(script.Parent.AssetLoader)
 local Combatants = require(script.Parent.Combatants)
 local LogisticsService = require(script.Parent.LogisticsService)
-local MatchService = require(script.Parent.MatchService)
+local PostureService = require(script.Parent.PostureService)
 
 local FieldWorkService = {}
 local M = 0.28
@@ -37,18 +39,14 @@ end
 -- fundo fica com ocupação proporcional. A pegada vira múltiplo do voxel (2,2 a 3,4 m de lado).
 -- A suavização ainda ergue o fundo de um buraco tão estreito: pedindo 1,2 m ele ficava a 0,58 m
 -- (média de 10 buracos no Studio); pedindo 1,8 m, a 1,19 m (mediana de 42 medidas). Daí o extra.
+-- D-183: a pegada é de 2 x 2 voxels alinhados à grade (FieldWork.holeGrid); com 1 voxel de largura o
+-- fundo ficava a 0,62 m. SMOOTH_EXTRA_M medido no Studio no buraco de 2 x 2 (2026-11-19): folga 0,3 →
+-- 0,87 a 0,94 m no centro; 0,6 → 1,24 m nos 4 pontos medidos; 0,9 → 1,54 m.
 local VOXEL = 4
 local SMOOTH_EXTRA_M = 0.6
-local function excavate(cf: CFrame, lengthS: number, widthS: number, floorY: number)
-	local minX, maxX, minZ, maxZ = math.huge, -math.huge, math.huge, -math.huge
-	for _, s in { { -1, -1 }, { -1, 1 }, { 1, -1 }, { 1, 1 } } do
-		local p = cf * Vector3.new(s[1] * lengthS / 2, 0, s[2] * widthS / 2)
-		minX, maxX = math.min(minX, p.X), math.max(maxX, p.X)
-		minZ, maxZ = math.min(minZ, p.Z), math.max(maxZ, p.Z)
-	end
-	local region =
-		Region3.new(Vector3.new(minX, floorY - VOXEL, minZ), Vector3.new(maxX, cf.Position.Y + 2 * VOXEL, maxZ))
-			:ExpandToGrid(VOXEL)
+local function excavate(minX: number, maxX: number, minZ: number, maxZ: number, topY: number, floorY: number)
+	local region = Region3.new(Vector3.new(minX, floorY - VOXEL, minZ), Vector3.new(maxX, topY + 2 * VOXEL, maxZ))
+		:ExpandToGrid(VOXEL)
 	local mats, occs = workspace.Terrain:ReadVoxels(region, VOXEL)
 	local size = mats.Size
 	local y0 = region.CFrame.Position.Y - region.Size.Y / 2
@@ -86,6 +84,105 @@ local function excavate(cf: CFrame, lengthS: number, widthS: number, floorY: num
 end
 
 -- ===== pá =====
+-- D-183: as pazadas no buraco (Shared/ItemAnim.PA, o mesmo relógio da animação): a terra sai do buraco
+-- para a direita de quem cava e o som de cada pazada (tools/sons_pa.py) toca em laço. Todos veem e
+-- ouvem (peça do servidor). Devolve a função que para tudo.
+local function emitter(
+	name: string,
+	size: { number },
+	speed: NumberRange,
+	life: NumberRange,
+	alpha: number
+): ParticleEmitter
+	local e = Instance.new("ParticleEmitter")
+	e.Name = name
+	e.Texture = "rbxasset://textures/particles/smoke_main.dds"
+	e.Color = ColorSequence.new(Color3.fromRGB(92, 70, 48), Color3.fromRGB(122, 98, 72))
+	e.LightEmission = 0
+	e.LightInfluence = 1
+	e.Size = NumberSequence.new({ NumberSequenceKeypoint.new(0, size[1]), NumberSequenceKeypoint.new(1, size[2]) })
+	e.Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, alpha), NumberSequenceKeypoint.new(1, 1) })
+	e.Lifetime = life
+	e.Speed = speed
+	e.SpreadAngle = Vector2.new(20, 20)
+	e.Acceleration = Vector3.new(0, -9.8 / M, 0)
+	e.EmissionDirection = Enum.NormalId.Front
+	e.Rate = 0
+	return e
+end
+
+local function digFx(at: Vector3, right: Vector3): () -> ()
+	local P = ItemAnim.PA
+	local part = Instance.new("Part")
+	part.Name = "VT65PaTerra"
+	part.Anchored, part.CanCollide, part.CanQuery, part.CanTouch, part.CastShadow = true, false, false, false, false
+	part.Transparency = 1
+	part.Size = Vector3.one * 0.2
+	local pos = at + Vector3.new(0, 0.25 / M, 0)
+	part.CFrame = CFrame.lookAt(pos, pos + right * 0.55 + Vector3.yAxis * 0.85)
+	local torrao = emitter("Torrao", { 0.28, 0.4 }, NumberRange.new(9, 15), NumberRange.new(0.6, 0.9), 0)
+	torrao.Parent = part
+	local poeira = emitter("Poeira", { 1.2, 3.2 }, NumberRange.new(1.5, 4), NumberRange.new(1.0, 1.6), 0.55)
+	poeira.Acceleration = Vector3.new(0, 0.3 / M, 0)
+	poeira.Parent = part
+	local s = Instance.new("Sound")
+	s.Name = "Pazada"
+	local id = AssetIds.Sounds.pa_cavar
+	s.SoundId = "rbxassetid://"
+		.. tostring(if type(id) == "number" and id ~= 0 then id else AssetIds.Sounds.impact_earth)
+	s.Looped = true
+	s.Volume = 0.9
+	s.RollOffMode = Enum.RollOffMode.InverseTapered
+	s.RollOffMinDistance = 2 / M
+	s.RollOffMaxDistance = 40 / M
+	s.Parent = part
+	part.Parent = workspace
+	local alive = true
+	local function burst(e: ParticleEmitter, rate: number, dur: number)
+		e.Rate = rate
+		task.delay(dur, function()
+			e.Rate = 0
+		end)
+	end
+	task.spawn(function()
+		local t0 = os.clock()
+		local function waitUntil(t: number): boolean
+			local d = t - (os.clock() - t0)
+			if d > 0 then
+				task.wait(d)
+			end
+			return alive
+		end
+		if not waitUntil(P.t0) then
+			return
+		end
+		s:Play()
+		for i = 0, P.n - 1 do
+			local base = P.t0 + i * P.periodo
+			if not waitUntil(base + 0.35) then
+				return
+			end
+			burst(poeira, 14, 0.15) -- crava: a poeira sobe do buraco
+			if not waitUntil(base + 1.0) then
+				return
+			end
+			burst(torrao, 60, 0.2) -- joga: os torrões voam para a direita
+			burst(poeira, 10, 0.2)
+		end
+	end)
+	return function()
+		if not alive then
+			return
+		end
+		alive = false
+		s:Stop()
+		torrao.Rate, poeira.Rate = 0, 0
+		task.delay(1.8, function()
+			part:Destroy()
+		end)
+	end
+end
+
 local function onDig(p: Player)
 	local char = p.Character
 	local hum = char and char:FindFirstChildOfClass("Humanoid")
@@ -95,13 +192,24 @@ local function onDig(p: Player)
 	end
 	local C = FieldWork.DIG
 	local look = root.CFrame.LookVector * Vector3.new(1, 0, 1)
-	local at = root.Position + look.Unit * (C.aheadM / M)
+	if look.Magnitude < 1e-3 then
+		return
+	end
+	look = look.Unit
+	-- D-183: o buraco é de 2 x 2 voxels na grade do terreno, com o centro no canto de voxels mais perto
+	-- do ponto à frente
+	local want = root.Position + look * (C.aheadM / M)
+	local cx, cz, half = FieldWork.holeGrid(want.X, want.Z, VOXEL)
+	local at = Vector3.new(cx, want.Y, cz)
 	local hit = workspace:Raycast(at + Vector3.new(0, 20, 0), Vector3.new(0, -60, 0), terrainOnly)
 	if not hit then
 		return
 	end
-	local sector = Geometry.sectorAt(MapConfig.Sectors, at.X, at.Z)
-	local owner = if sector then MatchService.ownerOf(sector) else nil
+	-- D-183: perto da base inimiga não (antes: só em setor do próprio lado)
+	local faction = p:GetAttribute("Faction")
+	local enemy = if faction == "US" then "VC" elseif faction == "VC" then "US" else nil
+	local hq = if enemy then MapConfig.HQ[enemy] else nil
+	local hqDistM = if hq then Vector2.new(cx - hq.x, cz - hq.z).Magnitude * M else nil
 	-- água: terreno de água ou a lâmina d'água do arrozal (peça com Material "PaddyWater")
 	local anyParams = RaycastParams.new()
 	anyParams.FilterType = Enum.RaycastFilterType.Exclude
@@ -112,21 +220,28 @@ local function onDig(p: Player)
 	-- Lote 27 (D-142): piso sólido rente ao chão (heliponto, piso de barraca, patamar de construção):
 	-- a pá cavava embaixo dele e o buraco ficava escondido (Studio: o autoteste cavou sob a esteira do
 	-- heliponto dos EUA). Raio curto, só na faixa de 0,6 m acima do chão: o de cima batia no helicóptero
-	-- parado no heliponto. Planta não conta (folhagem não colide).
-	local floor = workspace:Raycast(hit.Position + Vector3.new(0, 0.6 / M, 0), Vector3.new(0, -0.7 / M, 0), anyParams)
-	if
-		floor
-		and floor.Instance ~= workspace.Terrain
-		and floor.Instance:IsA("BasePart")
-		and (floor.Instance :: BasePart).CanCollide
-	then
-		toast(p, "Pá: aqui tem piso, procure chão de terra")
-		return
+	-- parado no heliponto. Planta não conta (folhagem não colide). D-183: no meio e nos 4 cantos de
+	-- dentro do buraco, que agora tem 2,24 m de lado.
+	for _, o in { { 0, 0 }, { -0.7, -0.7 }, { -0.7, 0.7 }, { 0.7, -0.7 }, { 0.7, 0.7 } } do
+		local q = Vector3.new(cx + o[1] * half, hit.Position.Y, cz + o[2] * half)
+		local floor = workspace:Raycast(q + Vector3.new(0, 0.6 / M, 0), Vector3.new(0, -0.7 / M, 0), anyParams)
+		if
+			floor
+			and floor.Instance ~= workspace.Terrain
+			and floor.Instance:IsA("BasePart")
+			and (floor.Instance :: BasePart).CanCollide
+		then
+			toast(p, "Pá: aqui tem piso, procure chão de terra")
+			return
+		end
 	end
-	local ok, why =
-		FieldWork.canDig(owner, p:GetAttribute("Faction") :: string?, onWater, lastDig[p], os.clock(), holes)
+	local ok, why, waitS = FieldWork.canDig(hqDistM, onWater, lastDig[p], os.clock(), holes)
 	if not ok then
-		toast(p, string.format("Pá: %s", tostring(why)))
+		if waitS then
+			toast(p, string.format("Pá: próximo buraco em %d s", waitS)) -- D-183: diz quanto falta
+		else
+			toast(p, string.format("Pá: %s", tostring(why)))
+		end
 		return
 	end
 	digging[p] = true
@@ -134,30 +249,64 @@ local function onDig(p: Player)
 	info(p, string.format("Cavando… fique parado %d s", C.seconds))
 	-- D-99: a animação da pá (ItemView) segue esta chave, nunca o texto do aviso, que pode vir traduzido
 	Net.event("Logistics_State"):FireClient(p, { key = "dig_start" })
-	task.delay(C.seconds, function()
+	-- D-183: a terra voando e o som de cada pazada no buraco (todos veem e ouvem). O servidor põe a pá
+	-- na mão com o relógio dele (VT65Item/VT65ItemT): a animação de todos começa com a terra e o som
+	-- (antes era o Posture_Set do cliente, uma ida e volta depois)
+	local stopFx = digFx(hit.Position, root.CFrame.RightVector)
+	char:SetAttribute("VT65ItemT", workspace:GetServerTimeNow())
+	char:SetAttribute("VT65Item", "shovel")
+	-- D-183: em pé, a ponta da pá ficava a 0,5-0,7 m do chão (Studio): quem cava se agacha. Volta a
+	-- ficar em pé no fim, se estava em pé e ninguém mudou a postura no meio
+	local crouched = false
+	if not char:GetAttribute("Prone") and not char:GetAttribute("Crouched") then
+		crouched = PostureService.setStance(char, "crouch")
+	end
+	task.spawn(function()
+		local t0 = os.clock()
+		local why: string? = nil
+		while os.clock() - t0 < C.seconds do
+			task.wait(0.2)
+			local r2 = char:FindFirstChild("HumanoidRootPart") :: BasePart?
+			if not r2 or char.Parent == nil or hum.Health <= 0 or char:GetAttribute("Downed") then
+				why = "morto"
+				break
+			end
+			-- D-183: cancela na hora em que se move (antes só no fim dos 8 s); só o deslocamento no chão,
+			-- porque agachar baixa o corpo
+			if ((r2.Position - start) * Vector3.new(1, 0, 1)).Magnitude * M > C.stillM then
+				why = "moveu"
+				break
+			end
+		end
 		digging[p] = nil
-		local r2 = char:FindFirstChild("HumanoidRootPart") :: BasePart?
-		if
-			not r2
-			or hum.Health <= 0
-			or char:GetAttribute("Downed")
-			or (r2.Position - start).Magnitude * M > C.stillM
-		then
-			toast(p, "Pá: cancelado (você se moveu)")
+		stopFx()
+		if char:GetAttribute("VT65Item") == "shovel" then
+			char:SetAttribute("VT65Item", nil)
+		end
+		if crouched and char.Parent and char:GetAttribute("Crouched") == true and not char:GetAttribute("Downed") then
+			PostureService.setStance(char, "stand")
+		end
+		if why then
+			if why == "moveu" then
+				toast(p, "Pá: cancelado (você se moveu)")
+			end
 			Net.event("Logistics_State"):FireClient(p, { key = "dig_cancel" })
 			return
 		end
 		lastDig[p] = os.clock()
 		holes += 1
-		local yaw = math.atan2(-look.X, -look.Z)
-		local cf = CFrame.new(hit.Position) * CFrame.Angles(0, yaw, 0)
 		-- buraco: tira o terreno; a terra vira o parapeito de sacos de areia à frente
-		excavate(cf, C.lengthM / M, C.widthM / M, hit.Position.Y - (C.depthM + SMOOTH_EXTRA_M) / M)
+		local surf = hit.Position.Y
+		excavate(cx - half, cx + half, cz - half, cz + half, surf, surf - (C.depthM + SMOOTH_EXTRA_M) / M)
 		-- Lote 27 (D-142): o parapeito vai ATRAVESSADO na frente do buraco (o comprido dos sacos, o Z do
-		-- modelo, ao longo do buraco) e sem aterro. Antes (AssetLoader.place) o comprido apontava para o
-		-- buraco e o patamar de terra que o place põe sob construção (PLATFORM) tapava o buraco recém-
-		-- -cavado: o autoteste via 0,01 m na 1ª rodada. Assenta no chão mais baixo de 3 pontos.
-		local front = cf * CFrame.new(0, 0, -(C.widthM / 2 + 0.7) / M)
+		-- modelo, ao longo do buraco) e sem aterro: o patamar de terra do AssetLoader.place tapava o
+		-- buraco. Assenta no chão mais baixo de 3 pontos. D-183: no lado do buraco que dá para onde o
+		-- soldado olha, fora da borda (a parede vai até o centro do voxel vizinho, 1,5 voxel do meio).
+		local axis = if math.abs(look.X) > math.abs(look.Z)
+			then Vector3.new(math.sign(look.X), 0, 0)
+			else Vector3.new(0, 0, math.sign(look.Z))
+		local face = CFrame.lookAt(Vector3.new(cx, surf, cz), Vector3.new(cx, surf, cz) + axis)
+		local front = face * CFrame.new(0, 0, -(1.5 * half + 0.3 / M))
 		local folder = workspace:FindFirstChild("Map") and (workspace :: any).Map:FindFirstChild("Art")
 		if folder then
 			local across = front * CFrame.Angles(0, math.pi / 2, 0)
@@ -245,6 +394,21 @@ end
 function FieldWorkService.start()
 	terrainOnly.FilterDescendantsInstances = { workspace.Terrain }
 	Net.event("Dig_Request").OnServerEvent:Connect(onDig)
+	-- D-183: a pá do Blender para a mão de 1ª e 3ª pessoa (Shared/PaArte): cópia dos modelos publicados
+	task.spawn(function()
+		local folder = Instance.new("Folder")
+		folder.Name = PaArte.FOLDER
+		for _, f in { "US", "VC" } do
+			local key = PaArte.key(f)
+			local tpl = AssetLoader.template(key)
+			if tpl then
+				local copy = tpl:Clone()
+				copy.Name = key
+				copy.Parent = folder
+			end
+		end
+		folder.Parent = ReplicatedStorage
+	end)
 	Players.PlayerRemoving:Connect(function(p)
 		lastDig[p] = nil
 		digging[p] = nil

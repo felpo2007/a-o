@@ -49,6 +49,26 @@ local function k(t: number, r: V, l: V, tilt: number?): Key
 	return { t = t, r = r, l = l, tilt = tilt }
 end
 
+-- D-183 (dono: "ela n esta funcionando"): a pá dava UMA pazada (o laço de 0,6 a 2,0 s) e ficava parada
+-- até os 8 s, porque depois de loop.b vem o fim inteiro (2,0 a 8 s). Agora as 5 pazadas de 1,4 s vão
+-- por extenso de 0,6 a 7,6 s, e o laço cobre todas. golpe: { tempo desde o começo da pazada, direita,
+-- esquerda }.
+ItemAnim.PA = { t0 = 0.6, periodo = 1.4, n = 5 }
+local function pazadas(rest: { V }, pronto: { V }, golpe: { { any } }): { Key }
+	local P = ItemAnim.PA
+	local out = { k(0, rest[1], rest[2]) }
+	for i = 0, P.n - 1 do
+		local t = P.t0 + i * P.periodo
+		table.insert(out, k(t, pronto[1], pronto[2]))
+		for _, g in golpe do
+			table.insert(out, k(t + (g[1] :: number), g[2] :: V, g[3] :: V))
+		end
+	end
+	table.insert(out, k(P.t0 + P.n * P.periodo, pronto[1], pronto[2]))
+	table.insert(out, k(8, rest[1], rest[2]))
+	return out
+end
+
 ItemAnim.ANIMS = {
 	bandage = {
 		dur = 6,
@@ -254,31 +274,27 @@ ItemAnim.ANIMS = {
 	},
 	shovel = {
 		dur = 8,
-		loop = { a = 0.6, b = 2.0 },
+		loop = { a = 0.6, b = 7.6 }, -- D-183: as 5 pazadas (ItemAnim.PA)
 		slung = true,
 		left = true,
 		right = true,
 		held = false,
-		tp = {
-			k(0, { 0.45, 0, -1.2 }, { -0.45, 0, -1.2 }),
-			k(0.6, { 0.35, 0.1, -1 }, { -0.021, -0.419, -1.259 }), -- pronto, a lâmina no chão à frente
-			k(0.95, { 0.3, -0.6, -1.25 }, { -0.272, -0.682, -1.164 }), -- crava
-			k(1.25, { 0.45, -0.2, -0.95 }, { -0.169, -0.565, -1.226 }), -- alavanca
-			k(1.6, { 0.83, 0.2, -0.8 }, { 0.116, -0.014, -1.429 }), -- joga a terra para a direita
-			k(2.0, { 0.35, 0.1, -1 }, { -0.021, -0.419, -1.259 }),
-			k(7.5, { 0.35, 0.1, -1 }, { -0.021, -0.419, -1.259 }),
-			k(8, { 0.45, 0, -1.2 }, { -0.45, 0, -1.2 }),
-		},
-		fp = {
-			k(0, FP_R0, FP_L0),
-			k(0.6, { 0.12, -0.2, -0.3 }, { 0.02, -0.34, -0.44 }),
-			k(0.95, { 0.1, -0.34, -0.36 }, { 0.0, -0.5, -0.52 }),
-			k(1.25, { 0.14, -0.24, -0.28 }, { 0.02, -0.42, -0.5 }),
-			k(1.6, { 0.26, -0.16, -0.26 }, { 0.2, -0.26, -0.42 }),
-			k(2.0, { 0.12, -0.2, -0.3 }, { 0.02, -0.34, -0.44 }),
-			k(7.5, { 0.12, -0.2, -0.3 }, { 0.02, -0.34, -0.44 }),
-			k(8, FP_R0, FP_L0),
-		},
+		tp = pazadas({ { 0.45, 0, -1.2 }, { -0.45, 0, -1.2 } }, {
+			{ 0.35, 0.1, -1 },
+			{ -0.021, -0.419, -1.259 }, -- pronto, a lâmina no chão à frente
+		}, {
+			{ 0.35, { 0.3, -0.6, -1.25 }, { -0.272, -0.682, -1.164 } }, -- crava
+			{ 0.65, { 0.45, -0.2, -0.95 }, { -0.169, -0.565, -1.226 } }, -- alavanca
+			{ 1.0, { 0.83, 0.2, -0.8 }, { 0.116, -0.014, -1.429 } }, -- joga a terra para a direita
+		}),
+		-- D-183: 1ª pessoa com a lâmina na tela. Antes a ponta ficava ~41° abaixo do centro (a tela vai
+		-- até ~35°) e só se viam as mãos. A pá sai da direita para a esquerda (Shared/PaArte): no pronto
+		-- a ponta fica ~26° abaixo e 15° à esquerda; ao jogar a terra ela passa para a direita.
+		fp = pazadas({ FP_R0, FP_L0 }, { { 0.16, -0.16, -0.32 }, { 0.02, -0.26, -0.52 } }, {
+			{ 0.35, { 0.14, -0.24, -0.42 }, { 0.0, -0.36, -0.62 } }, -- crava (empurra para baixo e à frente)
+			{ 0.65, { 0.18, -0.3, -0.3 }, { 0.04, -0.32, -0.52 } }, -- alavanca (o cabo desce, a lâmina sobe)
+			{ 1.0, { 0.22, -0.12, -0.3 }, { 0.36, -0.22, -0.5 } }, -- joga a terra para a direita
+		}),
 		poseR = "grip",
 		poseL = "grip",
 		prop = { kind = "pa", hand = "both", from = 0.3, to = 7.7 },

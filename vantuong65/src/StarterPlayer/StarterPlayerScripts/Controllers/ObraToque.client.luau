@@ -220,6 +220,11 @@ RunService.RenderStepped:Connect(function()
 	local rr = r :: BasePart
 	local look = rr.CFrame.LookVector
 	local x, z, yaw = ToqueTelas.buildSpot(rr.Position.X, rr.Position.Z, look.X, look.Z, c.def.ahead / M)
+	if c.kind == "dig" then
+		-- D-183: o buraco cai na grade do terreno (2 x 2 voxels alinhados), como no FieldWorkService
+		x, z = FieldWork.holeGrid(x, z, FieldWork.VOXEL_M / M)
+		yaw = 0
+	end
 	params.FilterDescendantsInstances = { player.Character :: Model, ghost, arrow }
 	local hit = workspace:Raycast(Vector3.new(x, rr.Position.Y + 8, z), Vector3.new(0, -40, 0), params)
 	local y = if hit then hit.Position.Y else rr.Position.Y - 3

@@ -1190,6 +1190,176 @@ def receita_bamboo_clothesline():
     return pecas
 
 
+# =============================================================== pás de trincheira (D-183)
+# Deitadas ao longo de Y: a lâmina em -Y (a partir do ombro em y = 0), o cabo em +Y e a concha para
+# cima (+Z). No Roblox (giro de 180° do importador, D-58) a lâmina fica em -Z e a concha em +Y; o
+# Shared/PaArte acha a ponta do cabo pela caixa da malha.
+PA_EIXO_Z = 0.012  # altura do eixo do cabo sobre o meio da lâmina
+
+
+def _lamina(nome, comprimento, meia_larg, concavo, espessura, nu=14, nv=22):
+    """Lâmina de pá: grade com o contorno `meia_larg(v)` (v = 0 no ombro, 1 na ponta) ao longo de
+    -Y, concha para cima (as bordas sobem `concavo` m, menos perto da ponta) e espessura."""
+    bm = bmesh.new()
+    linhas = []
+    for j in range(nv + 1):
+        v = j / nv
+        w = max(meia_larg(v), 0.0004)
+        linha = []
+        for i in range(nu + 1):
+            u = -1 + 2 * i / nu
+            linha.append(bm.verts.new((u * w, -v * comprimento, concavo * u * u * (1 - 0.6 * v))))
+        linhas.append(linha)
+    for a, b in zip(linhas[:-1], linhas[1:], strict=True):
+        for i in range(nu):
+            bm.faces.new((a[i], a[i + 1], b[i + 1], b[i]))
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces[:])
+    obj = M.de_bmesh(nome, bm)
+    return M.solidificar(obj, espessura, 0.0)
+
+
+def _no_eixo(obj):
+    """Peça de torno feita em Y (eixo="Y") sobe para o eixo do cabo."""
+    return M.mover(obj, Matrix.Translation((0.0, 0.0, PA_EIXO_Z)))
+
+
+def receita_shovel_us():
+    """Pá de trincheira M1943 dos EUA, aberta: lâmina de aço estampado verde-oliva com nervura,
+    língua e dobradiça, porca de travar serrilhada, luva de aço e cabo reto de freixo com a ponta
+    arredondada. A tinta gasta nas quinas e no gume mostra o aço."""
+    W, L = 0.0775, 0.22
+
+    def meia(v):
+        if v < 0.07:
+            return W * (0.86 + 0.14 * math.sin(math.pi / 2 * v / 0.07))
+        if v < 0.55:
+            return W * (1 - 0.05 * (v - 0.07) / 0.48)
+        s = (v - 0.55) / 0.45
+        return 0.95 * W * max(0.0, 1 - s**1.7) ** 0.7
+
+    tinta = mat_tinta("tinta_pa_us", "#4e5233", desgaste=0.8, escala=700.0)
+    aco = mat_aco("aco_pa_us", "#7d7b72", 0.45, 700.0)
+    lamina = M.material(M.suave(_lamina("lamina", L, meia, 0.011, 0.0022), 40), tinta)
+    nervura = M.tubo(
+        "nervura", [(0, -0.004, 0.0013), (0, -0.095, 0.0011)], 0.0048, segs=10, achatar=0.35
+    )
+    M.material(M.suave(nervura, 50), tinta)
+    lingua = M.caixa("lingua", (0.034, 0.056, 0.004), (0.0, 0.026, 0.007))
+    M.chanfrar(lingua, 0.0012, 1)
+    M.material(lingua, tinta)
+    orelhas = []
+    for x in (-0.0155, 0.0155):
+        o = M.caixa("orelha", (0.003, 0.022, 0.022), (x, 0.050, PA_EIXO_Z))
+        M.chanfrar(o, 0.0008, 1)
+        orelhas.append(M.material(o, tinta))
+    pino = M.torno(
+        "pino", [(0, -0.021), (0.0045, -0.021), (0.0045, 0.021), (0, 0.021)], segs=16, eixo="X"
+    )
+    M.mover(pino, Matrix.Translation((0.0, 0.050, PA_EIXO_Z)))
+    M.material(M.suave(pino, 45), aco)
+    luva = _no_eixo(
+        M.torno(
+            "luva",
+            [(0, 0.060), (0.0182, 0.060), (0.0185, 0.064), (0.0185, 0.092), (0.0172, 0.095)]
+            + [(0, 0.095)],
+            segs=32,
+            eixo="Y",
+        )
+    )
+    M.material(M.suave(luva, 45), tinta)
+    porca = M.torno(
+        "porca",
+        [(0, 0.095), (0.0222, 0.095), (0.0236, 0.099), (0.0236, 0.124), (0.0222, 0.128)]
+        + [(0, 0.128)],
+        segs=72,
+        eixo="Y",
+    )
+
+    def serrilha(co, normal):
+        r = math.hypot(co.x, co.z)
+        if r < 0.0230:
+            return 0.0
+        a = math.atan2(co.z, co.x)
+        return -0.0011 * max(0.0, math.cos(18 * a)) ** 2
+
+    M.deslocar(porca, serrilha)
+    M.material(M.suave(_no_eixo(porca), 40), tinta)
+    cabo = M.torno(
+        "cabo",
+        [
+            (0, 0.126),
+            (0.0166, 0.126),
+            (0.0163, 0.21),
+            (0.0166, 0.30),
+            (0.0181, 0.340),
+            (0.0187, 0.350),
+            (0.0171, 0.358),
+            (0.0100, 0.3615),
+            (0, 0.362),
+        ],
+        segs=24,
+        eixo="Y",
+        fatiar=0.02,
+    )
+    madeira = mat_madeira("freixo_pa", "#b39a74", "#7d6446", "#958a78", eixo="Y", rug=0.6)
+    M.material(M.suave(_no_eixo(cabo), 45), madeira)
+    return [lamina, nervura, lingua, *orelhas, pino, luva, porca, cabo]
+
+
+def receita_shovel_vc():
+    """Pá de infantaria do VC: cópia chinesa da MPL-50 soviética, inteiriça (não dobra). Lâmina de
+    ombros retos e ponta em quilha, tubo do encaixe enrolado, tira de reforço rebitada por cima do
+    cabo e cabo de madeira com a ponta alargada; tinta verde quase toda gasta, com ferrugem."""
+    W, L = 0.075, 0.18
+
+    def meia(v):
+        if v < 0.04:
+            return W * (0.93 + 0.07 * v / 0.04)
+        if v < 0.6:
+            return W
+        s = (v - 0.6) / 0.4
+        return W * max(0.0, 1 - s**1.25) ** 0.6
+
+    tinta = mat_tinta("tinta_pa_vc", "#3e4430", desgaste=0.9, ferrugem=True, escala=700.0)
+    lamina = M.material(M.suave(_lamina("lamina", L, meia, 0.006, 0.0018), 40), tinta)
+    tubo = M.torno(
+        "encaixe",
+        [(0, -0.014), (0.0120, -0.014), (0.0186, 0.0), (0.0186, 0.070), (0.0176, 0.074)]
+        + [(0, 0.074)],
+        segs=32,
+        eixo="Y",
+    )
+    M.material(M.suave(_no_eixo(tubo), 45), tinta)
+    topo = PA_EIXO_Z + 0.0178
+    tira = M.caixa("tira", (0.013, 0.105, 0.0026), (0.0, 0.122, topo + 0.0011))
+    M.chanfrar(tira, 0.0009, 1)
+    M.material(tira, tinta)
+    rebites = []
+    for y in (0.096, 0.165):
+        rb = M.torno("rebite", [(0, 0.0), (0.0034, 0.0), (0.0030, 0.0018), (0, 0.0024)], segs=12)
+        M.mover(rb, Matrix.Translation((0.0, y, topo + 0.0022)))
+        rebites.append(M.material(M.suave(rb, 45), mat_aco("aco_rebite", "#6d6b64", 0.5, 700.0)))
+    cabo = M.torno(
+        "cabo",
+        [
+            (0, 0.072),
+            (0.0172, 0.072),
+            (0.0170, 0.20),
+            (0.0176, 0.28),
+            (0.0205, 0.312),
+            (0.0208, 0.318),
+            (0.0180, 0.3215),
+            (0, 0.322),
+        ],
+        segs=24,
+        eixo="Y",
+        fatiar=0.02,
+    )
+    madeira = mat_madeira("cabo_pa_vc", "#9c7a4d", "#6b5034", "#7f7466", eixo="Y", rug=0.7)
+    M.material(M.suave(_no_eixo(cabo), 45), madeira)
+    return [lamina, tubo, tira, *rebites, cabo]
+
+
 # =============================================================== versão em peças (hoje)
 def _rbx(x, y, z):
     """Posição do Roblox (studs, Y em cima) -> Blender (m, Z em cima)."""
@@ -1234,6 +1404,7 @@ CORES_LUAU = {
     "WOOD": "#82603c",
     "AGUA": "#3a423a",
     "TAMPA18": "#c4c4ba",
+    "PA": "#54583c",
 }
 
 
@@ -1296,6 +1467,22 @@ def pecas_smoke_m18():
 
 def pecas_ammo_crate():
     return [("Caixote", p_bloco((2.0, 1.1, 1.2), (0, 0.55, 0)), "CRATE", 0.75)]
+
+
+def pecas_shovel_us():
+    """A pá de antes (ItemAnim.PROPS.pa no ItemView e no PostureController): cabo de 0,55 m, lâmina
+    de 0,2 x 0,15 m e o cabo em T na mão direita (o cabo redondo vira bloco aqui)."""
+    k = 1 / STUD
+    y = 0.02 * k
+    return [
+        ("Pega", p_cilindro(0.12 * k, 0.03 * k, (0, y, 0)), "PA", 0.6),
+        ("Cabo", p_bloco((0.035 * k, 0.035 * k, 0.55 * k), (0, y, -0.275 * k)), "PA", 0.6),
+        ("Lamina", p_bloco((0.15 * k, 0.01 * k, 0.2 * k), (0, y, -0.65 * k)), "IRON", 0.4),
+    ]
+
+
+def pecas_shovel_vc():
+    return pecas_shovel_us()
 
 
 def pecas_rice_sack():
@@ -1504,6 +1691,45 @@ NOVOS: dict[str, dict] = {
         "medidas": {
             "vara_m": [3.24, "PLACEHOLDER"],
             "altura_m": [2.0, "PLACEHOLDER (vara a 1,75 m)"],
+        },
+    },
+    # D-183: a pá na mão (1ª e 3ª pessoa), pedido do dono "crie a pá no blender"
+    "shovel_us": {
+        "nome": "pá de trincheira M1943 (EUA), aberta",
+        "classe": "pequeno",
+        "suave": 45,
+        "metal": True,
+        "forca_ao": 0.4,
+        "pecas": "ItemAnim.PROPS.pa (ItemView e PostureController: cabo, lâmina e cabo em T)",
+        "medidas": {
+            "comprimento_m": [
+                0.582,
+                "PLACEHOLDER: entre 21 pol (offgridweb.com, sem dizer se aberta) e 25 pol "
+                "(Wikipedia, Entrenching tool: pá genérica aberta, 630 mm)",
+            ],
+            "lamina_m": [
+                [0.155, 0.22],
+                "PLACEHOLDER: 6 pol de largura (offgridweb.com); o comprimento é das fotos",
+            ],
+            "cabo": [None, "freixo (especificação do governo dos EUA da pá combinada, apache.org)"],
+        },
+    },
+    "shovel_vc": {
+        "nome": "pá de infantaria do VC (cópia chinesa da MPL-50)",
+        "classe": "pequeno",
+        "suave": 45,
+        "metal": True,
+        "forca_ao": 0.4,
+        "pecas": "ItemAnim.PROPS.pa (a mesma pá em peças dos dois lados)",
+        "medidas": {
+            "comprimento_m": [0.502, "Wikipedia, MPL-50: 50 cm"],
+            "lamina_m": [[0.15, 0.18], "Wikipedia, MPL-50: 15 x 18 cm"],
+            "espessura_m": [0.0018, "DIF Company (fabricante da MPL-50): aço de 1,4 a 2 mm"],
+            "modelo": [
+                None,
+                "PLACEHOLDER: a do VC como a cópia chinesa da MPL-50 (sem fonte do modelo "
+                "exato de 1965)",
+            ],
         },
     },
 }

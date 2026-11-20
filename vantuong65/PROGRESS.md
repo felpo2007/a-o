@@ -434,7 +434,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     - Não testado: mouse e Shift, controle, celular de verdade e o jogo publicado.
     - **v106 publicada** (versão 111 do place, commit bb82d03).
   - **Fila, na ordem prevista** (cada um num lote, com teste no Studio):
-    1. a pá: "ela n esta funcionando" e "crie a pá no blender";
+    1. a pá: "ela n esta funcionando" e "crie a pá no blender" (feito, lote 67);
     2. "helicopoteros quando pousam ainda flutuam";
     3. "os eventos n estao acontecendo", e melhorá-los;
     4. "a tela de carregamento inicial esta demorando demais";
@@ -461,6 +461,26 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
         - jogam como jogadores;
     12. todas as telas interativas melhores. Inspiração em CS, Fortnite, Battlefield, CoD e R6
         só como ideia: nada de nome, interface, som ou layout de outro jogo (regra do CLAUDE.md).
+  - **Lote 67 (D-183): a pá, feito.**
+    - Cava em qualquer chão de terra, menos a até 75 m da base inimiga. Antes, só em setor do
+      próprio lado, e no meio do mapa recusava sempre.
+    - Buraco de 2,24 m de lado e 1,24 m de fundo (antes 0,62 m), com o parapeito alinhado.
+    - Pá nova do Blender nos dois lados: a M1943 dos EUA e a MPL-50 chinesa do VC.
+    - 5 pazadas com a lâmina na tela em 1ª pessoa, terra voando, som e o soldado agachado.
+    - Avisa quanto falta para o próximo buraco; cancela na hora em que o soldado se move.
+    - Corrigido de passagem: as lentes do binóculo de 3ª pessoa ficavam a ~1.900 studs do
+      soldado.
+    - Conferido: Lune 701 ok, pytest 70. No Studio:
+      - cavou no centro (C), onde antes recusava;
+      - autoteste "pá" com 1,20 m;
+      - recusa perto da base do VC e aviso de "próximo buraco em 53 s";
+      - cancelou 0,3 s depois de se mover.
+    - Não testado:
+      - o clique no CAVAR do toque (o mouse do MCP não aciona o botão com o toque forçado);
+      - o som (não foi ouvido);
+      - a pá do VC na mão;
+      - celular de verdade e jogo publicado.
+    - Limite: em 3ª pessoa a ponta fica a 0,33–0,52 m do chão (só ajoelhado encostaria).
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;

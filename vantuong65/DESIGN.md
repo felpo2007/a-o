@@ -7309,3 +7309,64 @@ três mais simples:
 - **Não testado:** mouse e Shift no computador (o mouse do MCP não dispara a arma de forma
   confiável), controle, celular de verdade e o jogo publicado.
 - Detalhes em `testes/LOTE66_D182_2026-11-16.md`.
+
+## D-183 — Lote 67: a pá funciona no mapa inteiro e foi feita no Blender (2026-11-19)
+
+**Pedido do dono** (lista de 16/11): "crie a pá no blender" e "ela n esta funcionando".
+
+**O que estava errado** (Studio, 2026-11-16, antes de mexer):
+- no centro (C, neutro) e no setor do inimigo (A), a pá recusava com "Pá: só em setor do seu
+  lado". No começo os EUA só têm D e E e o VC A e B, então onde se luta a pá nunca cavava;
+- na base dos EUA ela cavava, mas o buraco tinha 0,62 m de fundo (pedido: 1,2 m). A pegada de
+  0,6 m virava 1 voxel de largura (1,12 m), e a suavização do terreno enchia o fundo;
+- em 1ª pessoa só apareciam as mãos: a ponta da lâmina ficava ~41° abaixo do centro, e a tela vai
+  até ~35°;
+- a animação dava UMA pazada (o laço de 0,6 a 2,0 s) e ficava parada até os 8 s, porque depois do
+  laço vinha o fim inteiro (2,0 a 8 s).
+
+**Regras novas** (`Shared/FieldWork`):
+- cava em qualquer chão de terra, menos a até 75 m da base inimiga (`DIG.enemyHqM`, o mesmo do
+  ponto de reunião do squad, `Front.squadRallyHqM`). Continuam: água, piso, 1 por minuto e 80 por
+  partida;
+- o limite por minuto diz quanto falta: "Pá: próximo buraco em %d s";
+- buraco de 2 x 2 voxels (2,24 m de lado) alinhado à grade do terreno (`FieldWork.holeGrid`), com
+  o centro 1,7 m à frente (a grade desloca até 0,56 m). A folga do fundo (`SMOOTH_EXTRA_M`) foi
+  medida no Studio: 0,3 m deu 0,87 a 0,94 m; 0,6 m deu 1,24 m nos 4 pontos medidos; 0,9 m deu
+  1,54 m. Ficou 0,6 m;
+- o piso é procurado no meio e nos 4 cantos de dentro do buraco;
+- o parapeito de sacos vai no lado do buraco que dá para onde o soldado olha, paralelo a ele e
+  fora da parede (1,98 m do centro).
+
+**Ao cavar** (`FieldWorkService`):
+- o servidor põe a pá na mão com o relógio dele (`VT65Item`/`VT65ItemT`): a animação de todos
+  começa junto com a terra e o som (antes era o `Posture_Set` do cliente, uma ida e volta depois);
+- terra no buraco para todos: poeira ao cravar e torrões para a direita de quem cava ao jogar, nas
+  5 pazadas;
+- som da pazada (`tools/sons_pa.py`, sintetizado, 1,4 s) em laço no buraco;
+- o soldado se agacha enquanto cava e volta a ficar em pé no fim (se estava em pé);
+- cancela na hora em que ele sai do lugar (mais de 1 m no chão; antes só no fim dos 8 s).
+
+**Animação** (`Shared/ItemAnim`): as 5 pazadas de 1,4 s vão por extenso de 0,6 a 7,6 s
+(`ItemAnim.PA`). As chaves de 1ª pessoa são novas: a ponta da lâmina fica de 21° a 30° abaixo do
+centro e vai de 15° à esquerda a 35° à direita ao jogar a terra.
+
+**A pá do Blender** (`tools/blender/novos.py`, classe "pequeno"):
+- `shovel_us`: M1943 aberta, de lâmina verde-oliva com nervura, dobradiça, porca serrilhada e cabo
+  de freixo; 0,582 m;
+- `shovel_vc`: cópia chinesa da MPL-50, inteiriça, com tubo do encaixe, tira rebitada e cabo
+  alargado; 0,502 m, lâmina de 15 x 18 cm (Wikipedia, MPL-50);
+- as duas com 600 triângulos e textura de 512; publicadas (`AssetIds.Models.shovel_us`/`_vc`);
+- `Shared/PaArte` monta a pá da mão de 1ª e 3ª pessoa. O servidor copia os modelos para
+  `ReplicatedStorage.VT65ItemArte`; sem eles, fica a pá em peças de antes.
+
+**Defeito antigo achado no teste:** os objetos de mão de 3ª pessoa com mais de uma peça eram presos
+com `WeldConstraint` antes de entrar no `workspace`. Essa solda grava o desvio quando entra, e aí a
+`Weld` do tronco já tinha levado a peça principal para a mão. Resultado: as lentes do binóculo (e a
+malha da pá nova) ficavam a ~1.900 studs do soldado. Agora é `Weld` com o desvio escrito (`C0`), no
+`PaArte` e no `PostureController`.
+
+**Toque:** a prévia "Buraco de combate" tem 2,24 x 2,24 m e cai na mesma grade do servidor.
+
+**Limite que fica:** em 3ª pessoa, mesmo agachado, a ponta da pá fica de 0,33 a 0,52 m do chão
+(em pé eram 0,50 a 0,68 m): com a pá curta, só ajoelhado ela encosta. Fica para o lote das
+animações (correr sem saltitar e deslizar).

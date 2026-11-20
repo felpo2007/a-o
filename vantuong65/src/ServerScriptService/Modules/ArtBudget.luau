@@ -82,6 +82,9 @@ ArtBudget.KIND = {
 	-- caixas de munição do suporte (tools/blender/caixa_municao.py, 2026-11-13)
 	caixa_municao_us = "prop",
 	caixa_municao_vc = "prop",
+	-- pás de trincheira na mão (tools/blender/novos.py, D-183)
+	shovel_us = "prop",
+	shovel_vc = "prop",
 	-- bases dos dois lados (Blender, 2026-11-13; Data/Bases): assets/blender/<chave>/metricas.json
 	us_tent_gp_medium = "prop",
 	us_tent_gp_large = "prop",
@@ -204,6 +207,8 @@ ArtBudget.TRIS = {
 	bamboo_clothesline = 2749,
 	caixa_municao_us = 4800,
 	caixa_municao_vc = 3600,
+	shovel_us = 600,
+	shovel_vc = 600,
 	-- bases dos dois lados (metricas.json, "novo"; tools/bases_dados.py imprime a lista)
 	us_armor_revetment = 3539,
 	us_bunker = 1744,

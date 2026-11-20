@@ -7615,5 +7615,26 @@
   "assetType": "Image",
   "name": "Relevo uni_jade_ouro@mosin",
   "description": "VAN TUONG 65: textura de acabamento de arma"
+ },
+ {
+  "key": "Models.shovel_us",
+  "file": "assets/blender/shovel_us/shovel_us.glb",
+  "assetType": "Model",
+  "name": "VT65 shovel_us",
+  "description": "VAN TUONG 65 - pa de trincheira M1943 (EUA), modelada no Blender (tools/blender/novos.py, D-183)"
+ },
+ {
+  "key": "Models.shovel_vc",
+  "file": "assets/blender/shovel_vc/shovel_vc.glb",
+  "assetType": "Model",
+  "name": "VT65 shovel_vc",
+  "description": "VAN TUONG 65 - pa de infantaria do VC (copia chinesa da MPL-50), modelada no Blender (tools/blender/novos.py, D-183)"
+ },
+ {
+  "key": "Sounds.pa_cavar",
+  "file": "assets/pa_sons/pa_cavar.ogg",
+  "assetType": "Audio",
+  "name": "VT65 pa_cavar",
+  "description": "VAN TUONG 65 - pazada: crava, alavanca e joga a terra (tools/sons_pa.py, D-183)"
  }
 ]
