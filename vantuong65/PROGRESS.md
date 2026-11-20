@@ -730,6 +730,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
       inteiro sem erro. Lune 778 ok (51 arquivos), pytest 70, ruff, StyLua e luau-lsp limpos.
       Relatório: `testes/LOTE86_D202_2026-11-20.md`; capturas em `testes/lote86`.
     - Não testado: três jogadores de verdade, alguém saindo depois do fim, celular e jogo publicado.
+    - **v120 publicada** (versão 125 do place, commit 2c83742).
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;
