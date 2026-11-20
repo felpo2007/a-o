@@ -430,6 +430,57 @@ local function hold(model: Model, chassis: BasePart)
 	model:SetAttribute("NetRotor", 0)
 end
 
+-- D-184 (dono: "helicopoteros quando pousam ainda flutuam"): o helicóptero sem piloto assenta nas 3
+-- rodas (Colisao_Roda). Enquanto ele cai e para, a atitude (AlignOrientation) segue o plano do chão
+-- sob as rodas (VehicleDrive.groundPlane, até HELI_SETTLE_DEG). Presa na atitude de quando o piloto
+-- saiu, numa encosta de 6° ele ficava com duas rodas no ar (+0,26 e +0,64 m); solta, tombava numa de
+-- 12° (Studio, 2026-11-19).
+local HELI_SETTLE_DEG = 20
+local settling: { [Model]: boolean } = {}
+local function settleHeli(model: Model, chassis: BasePart)
+	local ao = chassis:FindFirstChild("DriveAttitude") :: AlignOrientation?
+	if settling[model] or not ao then
+		return
+	end
+	local aoP = ao :: AlignOrientation
+	settling[model] = true
+	task.spawn(function()
+		local params = RaycastParams.new()
+		params.FilterType = Enum.RaycastFilterType.Exclude
+		params.FilterDescendantsInstances = { model }
+		params.RespectCanCollide = true
+		local quiet, t0 = 0, os.clock()
+		while model.Parent and os.clock() - t0 < 15 do
+			local seat = model:FindFirstChild("Seat_driver") :: Seat?
+			if seat and seat.Occupant then
+				break -- o piloto voltou: a atitude é dele
+			end
+			local _, yaw, _ = chassis.CFrame:ToOrientation()
+			local base = CFrame.new(chassis.Position) * CFrame.Angles(0, yaw, 0)
+			local pts: { { number } } = {}
+			for _, w in model:GetChildren() do
+				if w.Name == "Colisao_Roda" and w:IsA("BasePart") then
+					local r = workspace:Raycast(w.Position, Vector3.new(0, -400, 0), params)
+					if r then
+						local lp = base:PointToObjectSpace(Vector3.new(w.Position.X, chassis.Position.Y, w.Position.Z))
+						table.insert(pts, { -lp.Z, lp.X, r.Position.Y - chassis.Position.Y })
+					end
+				end
+			end
+			local _, b, c = VehicleDrive.groundPlane(pts, HELI_SETTLE_DEG)
+			if b and c then
+				aoP.CFrame = CFrame.Angles(0, yaw, 0) * CFrame.Angles(math.atan(b), 0, math.atan(c))
+			end
+			quiet = if chassis.AssemblyLinearVelocity.Magnitude * M < 0.05 then quiet + 0.2 else 0
+			if quiet >= 2 then
+				break
+			end
+			task.wait(0.2)
+		end
+		settling[model] = nil
+	end)
+end
+
 ---------------------------------------------------------------------------------------------
 -- D-90: bot motorista. O servidor roda a mesma física do motorista jogador (VehicleDrive no
 -- VehicleController: chão por raio, atitude pelas 4 pontas, LinearVelocity e AlignOrientation),
@@ -782,6 +833,9 @@ local function addSeat(model: Model, chassis: BasePart, mount: BasePart, info: V
 				pcall(function()
 					chassis:SetNetworkOwner(nil)
 				end)
+				if model:GetAttribute("Kind") == "heli" then
+					settleHeli(model, chassis) -- D-184: assenta nas 3 rodas
+				end
 			end
 		end
 	end)
@@ -811,6 +865,72 @@ local function weld(a: BasePart, b: BasePart)
 	local w = Instance.new("WeldConstraint")
 	w.Part0, w.Part1 = a, b
 	w.Parent = b
+end
+
+-- D-184 (dono: "helicopoteros quando pousam ainda flutuam"): o UH-34D apoia nas 3 rodas. O chassi era
+-- uma caixa de 4 x 11,5 m com o fundo inteiro na altura das rodas: em chão abaulado ela apoiava na
+-- barriga e as rodas ficavam de 0,35 a 0,39 m no ar (Studio, 2026-11-19). Agora o chassi não colide
+-- (continua com a massa, os assentos e os raios); colidem, invisíveis e sem massa, a fuselagem
+-- (Colisao_Casco, com o fundo HELI_BELLY_M acima das rodas) e uma bola em cada roda da arte
+-- (Colisao_Roda), com o fundo no fundo do chassi. O VehicleController mede o pouso nelas.
+local HELI_BELLY_M = 0.45 -- PLACEHOLDER: vão da barriga ao chão
+local HELI_WHEEL_M = 0.6 -- PLACEHOLDER: diâmetro da roda
+-- a fuselagem de colisão: 2 m de largura (o chassi de 4 m vai de roda a roda) e do nariz até a roda
+-- da cauda (atrás dela o cone sobe). Com a caixa inteira, numa encosta de 12° o canto de trás
+-- encostava no chão e as rodas ficavam a 0,5 m (Studio). PLACEHOLDER (fuselagem do H-34 ~1,7 m)
+local HELI_BODY_W_M = 2.0
+local function heliColliders(model: Model, chassis: BasePart, art: Instance)
+	local wheels: { BasePart } = {}
+	for _, d in art:GetDescendants() do
+		if d:IsA("BasePart") and string.sub(d.Name, 1, 5) == "Roda_" then
+			table.insert(wheels, d)
+		end
+	end
+	if #wheels < 3 then
+		return -- sem as rodas da arte: fica a caixa, como antes
+	end
+	local function collider(name: string, size: Vector3, cf: CFrame, shape: Enum.PartType?): Part
+		local p = Instance.new("Part")
+		p.Name = name
+		if shape then
+			p.Shape = shape
+		end
+		p.Size = size
+		p.CFrame = cf
+		p.Transparency = 1
+		p.Massless = true
+		p.CanTouch = false
+		p.CanQuery = false
+		p.CollisionGroup = AssetLoader.VEHICLE_GROUP
+		p.CustomPhysicalProperties = PhysicalProperties.new(0.7, 0.9, 0.05)
+		weld(chassis, p)
+		p.Parent = model
+		return p
+	end
+	local belly = HELI_BELLY_M / M
+	-- a roda mais atrás (frente = −Z): o fim da fuselagem de colisão
+	local tailZ = -math.huge
+	for _, w in wheels do
+		tailZ = math.max(tailZ, chassis.CFrame:PointToObjectSpace(w.Position).Z)
+	end
+	local front = -chassis.Size.Z / 2
+	local back = math.min(chassis.Size.Z / 2, tailZ)
+	collider(
+		"Colisao_Casco",
+		Vector3.new(math.min(chassis.Size.X, HELI_BODY_W_M / M), chassis.Size.Y - belly, back - front),
+		chassis.CFrame * CFrame.new(0, belly / 2, (front + back) / 2)
+	)
+	local r = HELI_WHEEL_M / M / 2
+	for _, w in wheels do
+		local lp = chassis.CFrame:PointToObjectSpace(w.Position)
+		collider(
+			"Colisao_Roda",
+			Vector3.one * (2 * r),
+			chassis.CFrame * CFrame.new(lp.X, -chassis.Size.Y / 2 + r, lp.Z),
+			Enum.PartType.Ball
+		)
+	end
+	chassis.CanCollide = false
 end
 
 -- Roda presa à ArtRoot por Motor6D (o VehicleFx gira e esterça pelo Transform): a junta fica no
@@ -1112,6 +1232,9 @@ local function build(specId: string, at: Vector3, yaw: number, depot: number?): 
 		artJoints(art, mount, chassis, mesh, info)
 		art.Parent = model
 		chassis.Transparency = 1
+		if heli then
+			heliColliders(model, chassis, art) -- D-184: apoia nas 3 rodas
+		end
 	elseif wheeled and placeholderCar(specId, chassis, mount) then
 		chassis.Transparency = 1
 		model:SetAttribute("ArtPlaceholder", true) -- sem malha medida: o VehicleFx não põe o olho nela
@@ -1186,6 +1309,9 @@ local function build(specId: string, at: Vector3, yaw: number, depot: number?): 
 		model:SetAttribute("Ammo", "he")
 	end
 	model.Parent = folder
+	if heli then
+		settleHeli(model, chassis) -- D-184: nasce assentado nas 3 rodas
+	end
 	return model
 end
 

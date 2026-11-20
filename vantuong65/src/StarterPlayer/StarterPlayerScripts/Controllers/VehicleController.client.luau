@@ -377,6 +377,7 @@ if RunService:IsStudio() then
 end
 
 local LAND_ASSIST_M = 1.5 -- PLACEHOLDER de design: abaixo disto (rodas), soltar o coletivo pousa
+local HELI_GROUND_TILT_DEG = 20 -- D-184: inclinação máxima do pousado pelas rodas (PLACEHOLDER)
 
 local function heliStep(model: Model, chassis: BasePart, dt: number)
 	local S = HeliModel.SPEC
@@ -437,6 +438,26 @@ local function heliStep(model: Model, chassis: BasePart, dt: number)
 	-- flutuando no chão"): era rotorZ − igeZ, a altura das rodas menos os 5 ft do pairado IGE; o pouso
 	-- parava com as rodas a 1,81 m do chão (medido no Studio) e ficava ali enquanto houvesse piloto
 	local gearH = rotorZ - hubM
+	-- D-184: com as bolas das rodas (VehicleService.heliColliders), vale a roda mais perto do chão. O
+	-- raio no meio do chassi via o chão do meio: em chão abaulado as rodas ficavam de 0,35 a 0,39 m no ar
+	local wheelH: number? = nil
+	-- chão sob cada roda { ao longo (frente +), de lado (direita +), altura }, no rumo `yaw`
+	local wheelPts: { { number } } = {}
+	local yawFrame = CFrame.new(chassis.Position) * CFrame.Angles(0, yaw, 0)
+	for _, c in model:GetChildren() do
+		if c.Name == "Colisao_Roda" and c:IsA("BasePart") then
+			local r = workspace:Raycast(c.Position, Vector3.new(0, -400, 0), rays.solid)
+			if r then
+				local h = (c.Position.Y - c.Size.Y / 2 - r.Position.Y) * M
+				wheelH = if wheelH then math.min(wheelH, h) else h
+				local lp = yawFrame:PointToObjectSpace(Vector3.new(c.Position.X, chassis.Position.Y, c.Position.Z))
+				table.insert(wheelPts, { -lp.Z, lp.X, r.Position.Y - chassis.Position.Y })
+			end
+		end
+	end
+	if wheelH then
+		gearH = wheelH
+	end
 	local V = Vector3.new(heli.vel.X, 0, heli.vel.Z).Magnitude
 	-- v39: sem pedais na tela do toque: devagar, o analógico de lado vira o nariz; rápido, inclina
 	local touchPedal = 0
@@ -477,6 +498,12 @@ local function heliStep(model: Model, chassis: BasePart, dt: number)
 	live.cyclicX, live.cyclicY = tr, tp
 	if onGround then
 		local gp, gr = groundAttitude(chassis, yaw)
+		-- D-184: com as rodas de colisão, a atitude é a do plano do chão sob as 3 (todas encostam); a das
+		-- 4 pontas da caixa deixava uma roda no ar em chão torto
+		local _, b, c = VehicleDrive.groundPlane(wheelPts, HELI_GROUND_TILT_DEG)
+		if b and c then
+			gp, gr = math.atan(b), math.atan(c)
+		end
 		tp, tr = gp or 0, gr or 0
 	end
 	heli.pitch, heli.pitchV = VehicleDrive.attitude(heli.pitch, heli.pitchV, tp, dt)
@@ -521,7 +548,21 @@ local function heliStep(model: Model, chassis: BasePart, dt: number)
 	local lv = chassis:FindFirstChild("DriveVelocity") :: LinearVelocity?
 	local ao = chassis:FindFirstChild("DriveAttitude") :: AlignOrientation?
 	if lv and ao then
-		lv.VectorVelocity = heli.vel / M
+		-- D-184: no chão (com as rodas de colisão), o vertical fica com a gravidade e o helicóptero assenta
+		-- nas 3 rodas; a velocidade no plano segura o deslize. No ar, a velocidade inteira, como antes
+		if onGround and wheelH ~= nil then
+			if lv.VelocityConstraintMode ~= Enum.VelocityConstraintMode.Plane then
+				lv.VelocityConstraintMode = Enum.VelocityConstraintMode.Plane
+				lv.PrimaryTangentAxis = Vector3.xAxis
+				lv.SecondaryTangentAxis = Vector3.zAxis
+			end
+			lv.PlaneVelocity = Vector2.new(heli.vel.X, heli.vel.Z) / M
+		else
+			if lv.VelocityConstraintMode ~= Enum.VelocityConstraintMode.Vector then
+				lv.VelocityConstraintMode = Enum.VelocityConstraintMode.Vector
+			end
+			lv.VectorVelocity = heli.vel / M
+		end
 		ao.CFrame = yawCF * CFrame.Angles(heli.pitch, 0, heli.roll)
 	end
 	live.model = model

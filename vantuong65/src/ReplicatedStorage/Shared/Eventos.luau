@@ -29,6 +29,7 @@ Eventos.C = {
 	depotBehindM = 60, -- depósito: atrás do ponto forte do VC (como a reunião) ...
 	depotSideM = 40, -- ... e 40 m para o lado (fora da clareira de nascer)
 	escortM = 20, -- medevac: quem está a até 20 m quando o ferido sai leva a escolta
+	heliTiltMaxDeg = 12, -- D-184: o helicóptero pousado inclina com o chão sob as rodas até 12°
 	-- métrica (ContatoService)
 	contactM = 150, -- troca de tiros: atirou num inimigo ou levou tiro a até 150 m
 	coneDeg = 8, -- "atirou num inimigo": ele está a até 8° da linha do tiro
@@ -404,5 +405,9 @@ function Eventos.summary(
 		within = inside / math.max(n + late, 1),
 	}
 end
+
+-- D-184: etiqueta do helicóptero do evento (inserção e medevac): o rotor gira no cliente
+-- (Controllers/HeliEvento.client); o modelo é só arte ancorada, não é veículo.
+Eventos.HELI_TAG = "VT65HeliEvento"
 
 return Eventos

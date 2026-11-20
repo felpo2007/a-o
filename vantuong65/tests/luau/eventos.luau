@@ -8,6 +8,7 @@ local Eventos = require(S .. "Eventos") :: any
 local Explosive = require(S .. "Explosive") :: any
 local Rng = require(S .. "Rng") :: any
 local MapConfig = require(S .. "MapConfig") :: any
+local VehicleDrive = require(S .. "VehicleDrive") :: any
 
 local M = MapConfig.STUD_M
 
@@ -208,6 +209,41 @@ test("D-132: ataque aéreo no objetivo, nos dois lados e com o som do A-4", func
 	local ids = fs.readFile("src/ReplicatedStorage/Shared/AssetIds.luau")
 	local id = string.match(ids, "a4_mergulho = (%d+)")
 	assert(id and tonumber(id) ~= 0, "som publicado")
+end)
+
+-- D-184 (dono: "helicopoteros quando pousam ainda flutuam")
+test("helicóptero do evento: plano do chão sob as 3 rodas, inclinação limitada", function()
+	-- chão plano a 2 studs: altura 2, sem inclinação
+	local T = Eventos.C.heliTiltMaxDeg
+	local a, b, c = VehicleDrive.groundPlane({ { -10, 0, 2 }, { 5, -3, 2 }, { 5, 3, 2 } }, T)
+	near(a :: number, 2, 1e-9, "altura no centro")
+	near(b :: number, 0, 1e-9, "ao longo")
+	near(c :: number, 0, 1e-9, "de lado")
+	-- rampa de 5% para a frente e 2% para a direita: y = 1 + 0,05 x + 0,02 z
+	local function y(x: number, z: number): number
+		return 1 + 0.05 * x + 0.02 * z
+	end
+	a, b, c = VehicleDrive.groundPlane({ { -10, 0, y(-10, 0) }, { 5, -3, y(5, -3) }, { 5, 3, y(5, 3) } }, T)
+	near(a :: number, 1, 1e-9, "rampa: altura")
+	near(b :: number, 0.05, 1e-9, "rampa: ao longo")
+	near(c :: number, 0.02, 1e-9, "rampa: de lado")
+	-- ladeira forte: a inclinação para no limite
+	local lim = math.tan(math.rad(T))
+	_, b, _ = VehicleDrive.groundPlane({ { -10, 0, -10 }, { 5, -3, 5 }, { 5, 3, 5 } }, T)
+	near(b :: number, lim, 1e-9, "limite de inclinação")
+	-- poucos pontos ou alinhados: nada
+	assert(VehicleDrive.groundPlane({ { 0, 0, 0 }, { 1, 0, 0 } }, T) == nil, "2 pontos")
+	assert(VehicleDrive.groundPlane({ { 0, 0, 0 }, { 1, 0, 0 }, { 2, 0, 0 } }, T) == nil, "alinhados")
+end)
+
+test("helicóptero do evento: arte do Blender no chão pelas rodas, rotor e som", function()
+	local svc = fs.readFile("src/ServerScriptService/Modules/EventosService.luau")
+	assert(string.find(svc, 'AssetLoader.template(Vehicles.modelKey("uh34d"))', 1, true), "arte do UH-34D pilotável")
+	assert(string.find(svc, "VehicleDrive.groundPlane(", 1, true), "pouso pelas rodas")
+	assert(string.find(svc, "Eventos.HELI_TAG", 1, true), "etiqueta do rotor")
+	assert(not string.find(svc, "size.Y / 2 + h / M", 1, true), "o pivô a meia altura (o que flutuava) saiu")
+	local cli = fs.readFile("src/StarterPlayer/StarterPlayerScripts/Controllers/HeliEvento.client.luau")
+	assert(string.find(cli, "Eventos.HELI_TAG", 1, true), "o cliente gira o rotor")
 end)
 
 print(string.format("%d ok, %d falhas", passed, failed))

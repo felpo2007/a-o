@@ -435,7 +435,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     - **v106 publicada** (versão 111 do place, commit bb82d03).
   - **Fila, na ordem prevista** (cada um num lote, com teste no Studio):
     1. a pá: "ela n esta funcionando" e "crie a pá no blender" (feito, lote 67);
-    2. "helicopoteros quando pousam ainda flutuam";
+    2. "helicopoteros quando pousam ainda flutuam" (feito, lote 68);
     3. "os eventos n estao acontecendo", e melhorá-los;
     4. "a tela de carregamento inicial esta demorando demais";
     5. a carta tática: "n consigo ver certos lugares e selecionar certos lugares";
@@ -482,6 +482,16 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
       - celular de verdade e jogo publicado.
     - Limite: em 3ª pessoa a ponta fica a 0,33–0,52 m do chão (só ajoelhado encostaria).
     - **v107 publicada** (versão 112 do place, commit ebd0131).
+  - **Lote 68 (D-184): o helicóptero que flutua, feito.**
+    - O de reforço do evento ficava 3,09 m acima do chão (modelo velho com o pivô na base). Agora é o
+      UH-34D do Blender, pousado pelas 3 rodas, inclinado com o chão, com o rotor girando e som.
+    - O pilotado apoiava numa caixa: em chão abaulado as rodas ficavam a 0,35–0,39 m. Agora colide
+      nas rodas, mede o pouso nelas e assenta nas 3, com e sem piloto.
+    - Conferido no Studio:
+      - rodas a −0,01 a +0,01 m no evento, no heliponto, no pouso pilotado fora dele e vazio em
+        encostas de 6° e 12°;
+      - Lune 703 ok e pytest 70.
+    - Não testado: o som (não ouvido), controle e toque no pouso e o jogo publicado.
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;

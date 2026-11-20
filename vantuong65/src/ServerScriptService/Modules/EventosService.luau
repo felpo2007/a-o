@@ -14,10 +14,12 @@
 --   ProgressionService.award (Progression.REWARDS ganha as chaves "evento_*" no início).
 -- Studio: workspace:SetAttribute("VT65DevEvento", id) dispara agora ("naval", "air", "heli", "mortar",
 -- "medevac", "depot", "counter" ou "proximo"); o valor volta a nil sozinho.
+local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
+local AssetIds = require(ReplicatedStorage.Shared.AssetIds) :: any
 local Eventos = require(ReplicatedStorage.Shared.Eventos)
 local Explosive = require(ReplicatedStorage.Shared.Explosive)
 local FieldWork = require(ReplicatedStorage.Shared.FieldWork)
@@ -30,6 +32,7 @@ local Net = require(ReplicatedStorage.Shared.Net)
 local Progression = require(ReplicatedStorage.Shared.Progression)
 local Rng = require(ReplicatedStorage.Shared.Rng)
 local SpawnRules = require(ReplicatedStorage.Shared.SpawnRules)
+local VehicleDrive = require(ReplicatedStorage.Shared.VehicleDrive)
 local Vehicles = require(ReplicatedStorage.Shared.Vehicles) :: any
 local AssetLoader = require(script.Parent.AssetLoader)
 local Combatants = require(script.Parent.Combatants)
@@ -453,16 +456,28 @@ end
 
 -- ===== helicóptero (inserção e medevac dos EUA) =====
 local HELI_LEN_M = (Vehicles.SPECS.uh34d and Vehicles.SPECS.uh34d.lengthM) or 14.4 -- fuselagem 47 ft 2 in
+-- D-184 (dono: "helicopoteros quando pousam ainda flutuam"): a arte é a do UH-34D pilotável (Blender,
+-- uh34d_v2, já na medida real), com o mesmo giro da arte no chassi (VehicleService.ART_YAW: −90°).
+-- Antes era o modelo velho do ForgeGUI ("uh34d"), com o pivô na base: o código punha o pivô a meia
+-- altura do chão e o helicóptero ficava com o fundo a 3,09 m do chão (Studio, 2026-11-19).
+local HELI_ART_YAW = math.rad(-90)
 
 local function heliModel(): Model
-	local tpl = AssetLoader.template("uh34d")
+	local tpl = AssetLoader.template(Vehicles.modelKey("uh34d"))
+	local real = tpl ~= nil
+	if not tpl then
+		tpl = AssetLoader.template("uh34d")
+	end
 	local m: Model
 	if tpl then
 		m = tpl:Clone()
-		local _, size = m:GetBoundingBox()
-		local long = math.max(size.X, size.Z)
-		if long > 0 then
-			m:ScaleTo(m:GetScale() * (HELI_LEN_M / M) / long)
+		if not real then
+			-- o modelo velho vem fora de escala: pelo comprimento da fuselagem
+			local _, size = m:GetBoundingBox()
+			local long = math.max(size.X, size.Z)
+			if long > 0 then
+				m:ScaleTo(m:GetScale() * (HELI_LEN_M / M) / long)
+			end
 		end
 	else
 		-- sem arte publicada: caixa oliva no tamanho da fuselagem
@@ -480,20 +495,97 @@ local function heliModel(): Model
 			d.Anchored, d.CanCollide, d.CanQuery, d.CanTouch = true, false, false, false
 		end
 	end
+	CollectionService:AddTag(m, Eventos.HELI_TAG)
 	return m
+end
+
+-- D-184: onde o helicóptero fica pousado, com o nariz no rumo `yaw`. O fundo da caixa da arte vai no
+-- chão e, com as rodas (peças Roda_*), o plano do chão sob as 3 inclina o helicóptero (até
+-- C.heliTiltMaxDeg). Devolve o pivô do modelo pousado.
+local function restPose(m: Model, x: number, z: number, yaw: number): CFrame
+	local boxCF, size = m:GetBoundingBox()
+	local pivotInBox = boxCF:ToObjectSpace(m:GetPivot())
+	local base = CFrame.new(x, SpawnService.groundY(x, z), z) * CFrame.Angles(0, yaw, 0)
+	-- f: referencial do helicóptero com o fundo da caixa na origem
+	local function place(f: CFrame): CFrame
+		return f * CFrame.new(0, size.Y / 2, 0) * CFrame.Angles(0, HELI_ART_YAW, 0) * pivotInBox
+	end
+	m:PivotTo(place(base))
+	local skip: { Instance } = { m }
+	for _, n in { "Combatants", "Vehicles", "Corpos", "DroppedWeapons" } do
+		local f = workspace:FindFirstChild(n)
+		if f then
+			table.insert(skip, f)
+		end
+	end
+	local map = workspace:FindFirstChild("Map")
+	local jungle = map and map:FindFirstChild("Art") and (map :: any).Art:FindFirstChild("Jungle")
+	if jungle then
+		table.insert(skip, jungle) -- tronco invisível da mata não é chão
+	end
+	local params = RaycastParams.new()
+	params.FilterType = Enum.RaycastFilterType.Exclude
+	params.FilterDescendantsInstances = skip
+	params.RespectCanCollide = true
+	params.IgnoreWater = true
+	-- { ao longo (frente +), de lado (direita +), altura do chão } no referencial `base`
+	local pts: { { number } } = {}
+	for _, d in m:GetDescendants() do
+		if d:IsA("BasePart") and string.sub(d.Name, 1, 5) == "Roda_" then
+			local w = base:PointToObjectSpace(Vector3.new(d.Position.X, base.Position.Y, d.Position.Z))
+			local hit = workspace:Raycast(
+				Vector3.new(d.Position.X, base.Position.Y + 40, d.Position.Z),
+				Vector3.new(0, -120, 0),
+				params
+			)
+			if hit then
+				table.insert(pts, { -w.Z, w.X, hit.Position.Y - base.Position.Y })
+			end
+		end
+	end
+	local a, b, c = VehicleDrive.groundPlane(pts, C.heliTiltMaxDeg)
+	if a and b and c then
+		return place(base * CFrame.new(0, a, 0) * CFrame.Angles(math.atan(b), 0, 0) * CFrame.Angles(0, 0, math.atan(c)))
+	end
+	return place(base)
+end
+
+-- som do rotor no cubo (o helicóptero do evento não é veículo: o VehicleFx não toca nele)
+local function heliSound(m: Model)
+	local id = AssetIds.Sounds.uh34d_rotor
+	if type(id) ~= "number" or id == 0 then
+		return
+	end
+	local hub = m:FindFirstChild("RotorPrincipal", true) or m.PrimaryPart or m:FindFirstChildWhichIsA("BasePart", true)
+	if not (hub and hub:IsA("BasePart")) then
+		return
+	end
+	local s = Instance.new("Sound")
+	s.Name = "RotorEvento"
+	s.SoundId = "rbxassetid://" .. tostring(id)
+	s.Looped = true
+	s.Volume = 1
+	s.RollOffMode = Enum.RollOffMode.InverseTapered
+	s.RollOffMinDistance = 12 / M
+	s.RollOffMaxDistance = 420 / M
+	s.Parent = hub
+	s:Play()
 end
 
 -- desce em 6 s até o chão, fica, e sobe ao fim; poeira enquanto pousado
 local function landHeli(ev: Ev, x: number, z: number)
 	local m = heliModel()
 	local g = ground(x, z)
-	local _, size = m:GetBoundingBox()
-	local yaw = math.atan2(ev.x - MapConfig.HQ[ev.side].x, ev.z - MapConfig.HQ[ev.side].z)
+	-- D-184: o nariz para onde ele vai, do QG para a LZ (antes o modelo velho ficava virado para o QG)
+	local hq = MapConfig.HQ[ev.side]
+	local yaw = math.atan2(-(ev.x - hq.x), -(ev.z - hq.z))
+	local rest = restPose(m, x, z, yaw)
 	local function at(h: number): CFrame
-		return CFrame.new(g + Vector3.new(0, size.Y / 2 + h / M, 0)) * CFrame.Angles(0, yaw, 0)
+		return rest + Vector3.new(0, h / M, 0)
 	end
 	m:PivotTo(at(60))
 	m.Parent = world
+	heliSound(m)
 	table.insert(ev.props, m)
 	ev.data.heli = m
 	task.spawn(function()

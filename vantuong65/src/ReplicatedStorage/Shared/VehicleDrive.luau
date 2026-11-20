@@ -1207,6 +1207,43 @@ function VehicleDrive.heliVertical(vy: number, climb: number, gearH: number, dt:
 	return v
 end
 
+-- D-184 (dono: "helicopoteros quando pousam ainda flutuam"): o chão sob as 3 rodas do helicóptero
+-- pousado (o pilotado no VehicleController e o do evento no EventosService). Pontos { ao longo (frente
+-- +), de lado (direita +), altura do chão } no referencial do helicóptero (studs). Devolve a altura
+-- do plano no centro (0, 0) e as inclinações dy/d(ao longo) e dy/d(de lado), limitadas a `maxDeg`;
+-- nil com menos de 3 pontos ou com os 3 alinhados. Usa os 3 primeiros.
+function VehicleDrive.groundPlane(p: { { number } }, maxDeg: number): (number?, number?, number?)
+	if #p < 3 then
+		return nil, nil, nil
+	end
+	local function det3(a: { { number } }): number
+		return a[1][1] * (a[2][2] * a[3][3] - a[2][3] * a[3][2])
+			- a[1][2] * (a[2][1] * a[3][3] - a[2][3] * a[3][1])
+			+ a[1][3] * (a[2][1] * a[3][2] - a[2][2] * a[3][1])
+	end
+	local A: { { number } } = {}
+	local Y: { number } = {}
+	for i = 1, 3 do
+		A[i] = { 1, p[i][1], p[i][2] }
+		Y[i] = p[i][3]
+	end
+	local D = det3(A)
+	if math.abs(D) < 1e-6 then
+		return nil, nil, nil
+	end
+	local out: { number } = {}
+	for col = 1, 3 do
+		local Ac: { { number } } = {}
+		for i = 1, 3 do
+			Ac[i] = table.clone(A[i])
+			Ac[i][col] = Y[i]
+		end
+		out[col] = det3(Ac) / D
+	end
+	local lim = math.tan(math.rad(maxDeg))
+	return out[1], math.clamp(out[2], -lim, lim), math.clamp(out[3], -lim, lim)
+end
+
 -- Guinada da curva coordenada (rad/s): inclinado em velocidade, o nariz acompanha a curva.
 -- roll > 0 = lado direito para cima (curva para a esquerda, guinada +).
 function VehicleDrive.coordinatedYaw(roll: number, speedMs: number): number

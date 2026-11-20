@@ -7370,3 +7370,64 @@ malha da pá nova) ficavam a ~1.900 studs do soldado. Agora é `Weld` com o desv
 **Limite que fica:** em 3ª pessoa, mesmo agachado, a ponta da pá fica de 0,33 a 0,52 m do chão
 (em pé eram 0,50 a 0,68 m): com a pá curta, só ajoelhado ela encosta. Fica para o lote das
 animações (correr sem saltitar e deslizar).
+
+## D-184 — Lote 68: o helicóptero pousa nas rodas (2026-11-19)
+
+**Pedido do dono** (lista de 16/11): "helicopoteros quando pousam ainda flutuam".
+
+**Medido no Studio antes de mexer** (place da v107):
+- **helicóptero de reforço do evento** ("Helicóptero pousando perto de C"): o fundo da malha ficava
+  **3,09 m acima do chão** (`testes/lote68/evento_antes_flutuando.jpg`). Era o modelo velho do
+  ForgeGUI ("uh34d"), com o pivô na base, e o código punha o pivô a meia altura do chão;
+- **UH-34D parado no heliponto:** no chão (−0,01 m);
+- **UH-34D pilotado:**
+  - no heliponto pousou certo (−0,01 m na esteira);
+  - fora dele, em chão abaulado, as rodas ficaram de 0,35 a 0,39 m no ar. O chassi é uma caixa de
+    4 x 11,5 m com o fundo inteiro na altura das rodas: ela apoiava no meio, com os cantos de 0,48
+    a 0,57 m no ar, e o pouso media a altura só no centro.
+
+**Helicóptero do evento** (`EventosService`, inserção e medevac):
+- usa a arte do UH-34D pilotável (Blender, `uh34d_v2`, na medida real) com o mesmo giro da arte no
+  chassi (−90°). O modelo velho só entra se faltar a arte nova;
+- pousa pelas rodas: o fundo da caixa vai no chão e o plano do chão sob as 3 rodas (peças `Roda_*`)
+  inclina o helicóptero, até 12° (`Eventos.C.heliTiltMaxDeg`);
+- o nariz aponta para onde ele vai, do QG para a LZ;
+- o rotor gira no cliente (`Controllers/HeliEvento.client`, pela etiqueta `Eventos.HELI_TAG`);
+- tem o som do rotor (`uh34d_rotor`) em laço no cubo, até 420 m.
+
+**UH-34D pilotável** (`VehicleService`, `VehicleController`):
+- **colisão nas rodas:**
+  - o chassi não colide mais; continua com a massa, os assentos e os raios;
+  - colidem, invisíveis e sem massa, a fuselagem (`Colisao_Casco`) e uma bola de 0,6 m em cada roda
+    da arte (`Colisao_Roda`), com o fundo no fundo do chassi;
+  - a fuselagem tem 2 m de largura, vai do nariz até a roda da cauda e fica com o fundo 0,45 m
+    acima das rodas (PLACEHOLDER). Com a caixa inteira, numa encosta de 12° o canto de trás
+    encostava no chão e as rodas ficavam a 0,5 m;
+- **altura do pouso:** é a da roda mais perto do chão (antes, o raio no meio do chassi);
+- **no chão:**
+  - o vertical fica com a gravidade (a `LinearVelocity` passa a segurar só o plano, o deslize), e o
+    helicóptero assenta nas 3 rodas;
+  - a atitude é a do plano do chão sob as rodas (`VehicleDrive.groundPlane`, até 20°), não mais a
+    das 4 pontas da caixa;
+- **sem piloto:** enquanto ele cai e para, a atitude segue o plano do chão sob as rodas
+  (`settleHeli`, também ao nascer):
+  - presa na atitude de quando o piloto saiu, numa encosta de 6° ele ficava com duas rodas no ar;
+  - solta de vez, tombava numa de 12°.
+- A conta do plano (3 pontos, inclinação limitada) é pura e tem teste no Lune
+  (`VehicleDrive.groundPlane`, `tests/luau/eventos.luau`).
+
+**Conferido no Studio** (rodas da arte contra o chão, pelo raio que respeita a colisão):
+- evento: −0,00, −0,00 e +0,01 m, inclinado com o chão (`evento_depois_pousado.jpg`); o rotor
+  gira, o nariz aponta para a LZ e o som toca;
+- heliponto: −0,01 m nas 3 rodas;
+- pilotado:
+  - fora do heliponto: +0,00, −0,00 e +0,01 m, com o piloto e depois que ele saiu;
+  - numa encosta (≈10° de arfagem): +0,00, −0,00 e +0,01 m;
+- vazio, solto sobre encostas: 6,3° → +0,01, +0,00 e +0,00 m; 11,9° → +0,00, +0,01 e +0,00 m;
+  parado.
+
+**Não testado:**
+- o som do rotor do evento (não foi ouvido);
+- o pouso com controle e no toque (só teclado);
+- a subida do helicóptero do evento no fim (o código dela não mudou);
+- o jogo publicado.
