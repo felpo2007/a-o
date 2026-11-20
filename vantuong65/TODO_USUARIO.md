@@ -28,11 +28,10 @@ do resto.
    só a assinatura. Ela só se cria no Creator Hub (Monetization → Subscriptions).
    Em Robux, o mínimo é R$ 49. O preço que você pediu, R$ 149, serve. Crie e me passe o ID
    (`EXP-...`).
-4. **Códigos de resgate (D-207, 2026-11-20):** a aba CÓDIGOS da loja funciona. Deixei um código de
-   lançamento como proposta: `STARLITE1965`, 250 créditos, até 31/01/2027. Ele está em
-   `src/ReplicatedStorage/Shared/Codigos.luau` e vale até você dizer outra coisa. Diga:
-   - se fica, muda o valor ou sai;
-   - quais códigos quer para eventos e para a página do jogo.
+4. **Códigos de resgate (D-207, 2026-11-20):** a aba CÓDIGOS da loja funciona.
+   - ~~O código de lançamento~~ Decidido em 2026-11-20: `STARLITE1965` fica, com 250 créditos, até
+     31/01/2027 (`src/ReplicatedStorage/Shared/Codigos.luau`).
+   - Ainda seu: quais códigos quer para eventos e para a página do jogo.
 
 ## 0. ~~Nome do jogo na página: STARLITE: Vietnã 1965~~ (feito em 2026-11-14)
 Você entrou na conta no navegador do app e eu troquei no Creator Dashboard (Game details): o nome

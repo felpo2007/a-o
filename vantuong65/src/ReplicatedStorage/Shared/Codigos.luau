@@ -4,7 +4,7 @@
 -- "code_redeem") valida e entrega; o cliente (ShopController, aba CÓDIGOS) só mostra.
 -- Cada código vale uma vez por conta: fica gravado em campaign.owned["codigo:<CÓDIGO>"] (o mapa de
 -- posse da campanha, que é união entre servidores).
--- A lista é do dono: o de lançamento é uma proposta (DESIGN D-207), trocar à vontade.
+-- A lista é do dono: o de lançamento foi aprovado por ele em 2026-11-20 (DESIGN D-207).
 local Codigos = {}
 
 export type Codigo = {

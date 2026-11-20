@@ -8921,8 +8921,9 @@ grade de cartões com imagem e preço, e o personagem na luz à direita. O §9 d
 - Mais de 8 erros no minuto: "Muitas tentativas: espere um minuto" (contra tentar todos).
 - **Na tela:** o campo e o RESGATAR (trava com "…", destrava sem resposta em 8 s); a resposta do
   servidor em verde ou vermelho; os códigos que a conta já usou.
-- **Código de lançamento (proposta, TODO do dono):** `STARLITE1965`, 250 créditos (pouco mais que uma
-  semana de recompensa diária, que dá 30 a 90 por dia), até 31/01/2027.
+- **Código de lançamento:** `STARLITE1965`, 250 créditos (pouco mais que uma semana de recompensa
+  diária, que dá 30 a 90 por dia), até 31/01/2027. Proposto neste lote e aprovado pelo dono em
+  2026-11-20 ("Pode ficar").
 
 **Conferido no Studio** (janela de 839 × 656):
 - A loja nova abriu pelo LOJA do lobby: cabeçalho, saldo, abas com Q/E, destaque e a grade de 3

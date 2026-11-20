@@ -867,8 +867,8 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
       entregando e entrega pendente.
     - O armário usa o último lado no lobby; equipar veste o soldado do palco.
     - Códigos (`Shared/Codigos`, op "code_redeem"): válido, inválido, vencido, ainda não e já usado;
-      o uso fica em `campaign.owned`; 8 erros por minuto. Proposta: `STARLITE1965`, 250 créditos
-      (TODO do dono).
+      o uso fica em `campaign.owned`; 8 erros por minuto. `STARLITE1965`, 250 créditos, aprovado
+      pelo dono em 2026-11-20.
     - Conferido no Studio:
       - inexistente, aceito (1.333 → 1.583) e já usado;
       - o limite no 9º pedido;
