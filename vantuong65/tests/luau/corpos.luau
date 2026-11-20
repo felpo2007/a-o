@@ -334,6 +334,36 @@ test("morte e caído ligados no servidor", function()
 	assert(string.find(ms, "CorposService.start()", 1, true), "corpos ligados")
 end)
 
+-- D-192 (dono: impulsos "limitados, proporcionais ao evento"; "trate separadamente a morte dentro de
+-- veículos")
+test("D-192: o golpe que matou empurra o corpo (bala leve, explosão forte perto), sempre com teto", function()
+	local h, up = Corpos.impulso("bala")
+	assert(h == Corpos.IMPULSO.bala and up == 0, "bala: leve, sem subir")
+	local hNear, upNear = Corpos.impulso("explosao", 0, 15)
+	local hFar, upFar = Corpos.impulso("explosao", 15, 15)
+	assert(hNear > hFar and upNear > upFar and upFar == 0, "explosão: mais forte perto")
+	assert(hFar > Corpos.IMPULSO.bala * 0.9, "explosão longe ainda empurra como um tiro")
+	for _, d in { 0, 2, 5, 10, 15, 40 } do
+		local a, b = Corpos.impulso("explosao", d, 15)
+		assert(math.sqrt(a * a + b * b) * 1.15 < Corpos.VOO_MAX, "abaixo do freio do assentar")
+	end
+	local cs = fs.readFile("src/ServerScriptService/Modules/CorposService.luau")
+	for _, t in
+		{
+			"os.clock() - gt <= Corpos.GOLPE_VALE_S",
+			"p.AssemblyLinearVelocity += dir.Unit * h * jitter",
+			'local open = seat:GetAttribute("Open") == true',
+			'local weld = seat:FindFirstChild("SeatWeld")',
+			"out.Unit * Corpos.LADO_STUDS",
+		}
+	do
+		assert(string.find(cs, t, 1, true), "CorposService: " .. t)
+	end
+	local ex = fs.readFile("src/ServerScriptService/Modules/ExplosionService.luau")
+	assert(string.find(ex, 'e.model:SetAttribute("VT65GolpeK", "explosao")', 1, true), "explosão marca")
+	local cb = fs.readFile("src/ServerScriptService/Modules/CombatService.luau")
+	assert(string.find(cb, 'victim:SetAttribute("VT65GolpeK", "bala")', 1, true), "bala marca")
+end)
 print(string.format("%d ok, %d falhas", passed, failed))
 if failed > 0 then
 	process.exit(1)

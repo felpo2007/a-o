@@ -16,7 +16,9 @@
 --    bot o BotService destrói; o do jogador é o personagem dele até renascer: câmera e telas);
 -- 4. depois de Corpos.VIDA_S o corpo some (atributos "VT65Some"/"VT65SomeS": o MorteFx de cada
 --    cliente apaga em Corpos.SUMIR_S); acima do Corpos.TETO o mais velho some antes.
--- Evacuado pelo medevac ou morto num assento de veículo: sem corpo (sai do campo / fica no veículo).
+-- Evacuado pelo medevac: sem corpo. D-192: morto num lugar fechado de veículo, sem corpo (fica no
+-- casco); num lugar aberto, o corpo cai do lado de fora. O golpe que matou (bala ou explosão) dá o
+-- impulso da queda (Corpos.impulso).
 local Players = game:GetService("Players")
 local PhysicsService = game:GetService("PhysicsService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -426,13 +428,35 @@ local function morreu(model: Model)
 	end
 	model:SetAttribute("VT65Morto", workspace:GetServerTimeNow())
 	local hum = model:FindFirstChildOfClass("Humanoid")
-	-- evacuado (medevac) ou morto no assento: sem corpo
-	if model:GetAttribute("Evacuated") == true or (hum and hum.SeatPart ~= nil) then
-		if hum and hum.SeatPart then
-			hum.Sit = false
-		end
+	-- evacuado (medevac): sem corpo
+	if model:GetAttribute("Evacuated") == true then
 		esconder(model)
 		return
+	end
+	-- D-192 (dono: "trate separadamente a morte dentro de veículos, liberando vínculos e assentos"): o
+	-- assento solta (Sit e a SeatWeld). Lugar fechado (dentro do casco): sem corpo, como antes. Lugar
+	-- aberto (jipe, escotilha, porta): o corpo cai do lado de fora (o boneco não colide com o veículo)
+	local seat = hum and hum.SeatPart
+	if hum and seat then
+		local open = seat:GetAttribute("Open") == true
+		hum.Sit = false
+		local weld = seat:FindFirstChild("SeatWeld")
+		if weld then
+			weld:Destroy()
+		end
+		if not open then
+			esconder(model)
+			return
+		end
+		local veh = seat:FindFirstAncestorWhichIsA("Model")
+		local chassis = veh and veh:FindFirstChild("Chassis")
+		local center = if chassis and chassis:IsA("BasePart") then chassis.Position else seat.Position
+		local out = seat.Position - center
+		out = Vector3.new(out.X, 0, out.Z)
+		if out.Magnitude < 0.5 then
+			out = seat.CFrame.RightVector
+		end
+		model:PivotTo(model:GetPivot() + out.Unit * Corpos.LADO_STUDS + Vector3.new(0, 1, 0))
 	end
 	local deitado = model:GetAttribute("Prone") == true or model:GetAttribute("Downed") == true
 	soltarDeFora(model)
@@ -468,9 +492,34 @@ local function morreu(model: Model)
 			root:SetNetworkOwner(nil)
 		end)
 	end
-	-- em pé: um empurrão leve para trás e de lado (sem ele o boneco pode só desabar no lugar)
+	-- D-192: o golpe que matou (bala ou explosão, marcado pelo CombatService e pelo ExplosionService)
+	-- empurra o corpo inteiro para longe dele; sem golpe recente, em pé, o empurrão leve de antes
+	-- (para trás e de lado: sem ele o boneco pode só desabar no lugar)
 	local ut = model:FindFirstChild("UpperTorso") :: BasePart?
-	if ut and not deitado then
+	local gk, gde, gt =
+		model:GetAttribute("VT65GolpeK"), model:GetAttribute("VT65GolpeDe"), model:GetAttribute("VT65GolpeT")
+	local golpe = ut ~= nil
+		and type(gk) == "string"
+		and typeof(gde) == "Vector3"
+		and type(gt) == "number"
+		and os.clock() - gt <= Corpos.GOLPE_VALE_S
+	if golpe and ut and (gk == "explosao" or not deitado) then
+		local dm, rm = model:GetAttribute("VT65GolpeDistM"), model:GetAttribute("VT65GolpeRaioM")
+		local h, up = Corpos.impulso(
+			gk :: string,
+			if type(dm) == "number" then dm else nil,
+			if type(rm) == "number" then rm else nil
+		)
+		local away = ut.Position - (gde :: Vector3)
+		local dir = Vector3.new(away.X, 0, away.Z)
+		if dir.Magnitude > 1e-3 then
+			local r = Random.new()
+			for _, p in ps do
+				local jitter = 0.85 + 0.3 * r:NextNumber()
+				p.AssemblyLinearVelocity += dir.Unit * h * jitter + Vector3.new(0, up * jitter, 0)
+			end
+		end
+	elseif ut and not deitado then
 		local r = Random.new()
 		local back = -ut.CFrame.LookVector
 		local side = ut.CFrame.RightVector * r:NextNumber(-0.5, 0.5)

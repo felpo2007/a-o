@@ -172,6 +172,14 @@ function ExplosionService.detonate(id: string, pos: Vector3, by: Player?, from: 
 					exposure *= Explosive.COVERED
 				end
 				local result, energy = Explosive.effect(id, dM, exposure, rng:next())
+				if result == "lethal" or result == "wound" then
+					-- D-192: o golpe para a queda do corpo (CorposService), se este matar
+					e.model:SetAttribute("VT65GolpeDe", pos)
+					e.model:SetAttribute("VT65GolpeK", "explosao")
+					e.model:SetAttribute("VT65GolpeDistM", dM)
+					e.model:SetAttribute("VT65GolpeRaioM", t.casualtyM)
+					e.model:SetAttribute("VT65GolpeT", os.clock())
+				end
 				-- colete M1955 (D-72, equipamento liberado): estilhaço no tronco perde energia
 				local ff = e.player and e.player:GetAttribute("FragFactor")
 				local vest = if type(ff) == "number" then math.clamp(ff, 0.1, 1) else 1

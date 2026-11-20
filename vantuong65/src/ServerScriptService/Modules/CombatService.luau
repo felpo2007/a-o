@@ -292,6 +292,10 @@ local function bulletHit(
 	local wasDown, wasDead = s ~= nil and s.downedAt ~= nil, s ~= nil and s.dead
 	local frac = energy / math.max(Ballistics.energy(wp.bulletMassG, wp.muzzleVelocity), 1)
 	local dmg = total or Medical.shotDamage(Weapons.damageOf(wp), zone, frac)
+	-- D-192: o golpe para a queda do corpo (CorposService), se este tiro matar
+	victim:SetAttribute("VT65GolpeDe", origin)
+	victim:SetAttribute("VT65GolpeK", "bala")
+	victim:SetAttribute("VT65GolpeT", os.clock())
 	-- o MedicalService.hit é envolvido com a assinatura antiga: o dano da bala vai pelo Medical (e
 	-- sai de lá mesmo se a chamada falhar, para não valer no próximo estilhaço)
 	Medical.nextShot = dmg

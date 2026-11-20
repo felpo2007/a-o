@@ -483,7 +483,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:750"
  ],
  "%s: %s": [
-  "src/ServerScriptService/Modules/CombatService.luau:721",
+  "src/ServerScriptService/Modules/CombatService.luau:725",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:1053"
  ],
  "%s: %s (caderneta)": [
@@ -4898,7 +4898,7 @@
   "src/ReplicatedStorage/Shared/GunModel.luau:133"
  ],
  "Head": [
-  "src/ReplicatedStorage/Shared/Corpos.luau:29",
+  "src/ReplicatedStorage/Shared/Corpos.luau:51",
   "src/ReplicatedStorage/Shared/Hitbox.luau:53",
   "src/ServerScriptService/Modules/Characters.luau:275",
   "src/ServerScriptService/Modules/Characters.luau:375",
@@ -5062,9 +5062,9 @@
   "src/ReplicatedStorage/Shared/Arquivo.luau:30"
  ],
  "Instance": [
-  "src/ServerScriptService/Modules/CombatService.luau:434",
-  "src/ServerScriptService/Modules/CombatService.luau:546",
-  "src/ServerScriptService/Modules/CombatService.luau:578",
+  "src/ServerScriptService/Modules/CombatService.luau:438",
+  "src/ServerScriptService/Modules/CombatService.luau:550",
+  "src/ServerScriptService/Modules/CombatService.luau:582",
   "src/ServerScriptService/Modules/MedicalService.luau:549",
   "src/ServerScriptService/Modules/VehicleService.luau:1680",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CasualtyScreen.luau:196",
@@ -8007,7 +8007,7 @@
   "src/ServerScriptService/Modules/MapLife.luau:1035"
  ],
  "Root": [
-  "src/ServerScriptService/Modules/CorposService.luau:193",
+  "src/ServerScriptService/Modules/CorposService.luau:195",
   "src/ServerScriptService/Modules/PostureService.luau:41",
   "src/ServerScriptService/Modules/PostureService.luau:158",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/MorteFx.client.luau:197",
@@ -10581,7 +10581,7 @@
   "src/ServerScriptService/Modules/CompraVeiculoService.luau:541"
  ],
  "^([%w_]+):?([%w_]*)$": [
-  "src/ServerScriptService/Modules/CombatService.luau:733"
+  "src/ServerScriptService/Modules/CombatService.luau:737"
  ],
  "^Alvo": [
   "src/ServerScriptService/Modules/Flutua.luau:270"
@@ -10909,7 +10909,7 @@
   "src/ReplicatedStorage/Shared/Casualty.luau:70"
  ],
  "arma fora do equipamento": [
-  "src/ServerScriptService/Modules/CombatService.luau:845"
+  "src/ServerScriptService/Modules/CombatService.luau:849"
  ],
  "arma no chão": [
   "src/ServerScriptService/Modules/Flutua.luau:389"

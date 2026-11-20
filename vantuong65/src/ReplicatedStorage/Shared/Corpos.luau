@@ -22,6 +22,28 @@ Corpos.ERGUER_MAX = 4 -- studs: o quanto um corpo deitado sobe antes de ganhar c
 Corpos.EM_PE_Y = 0.75 -- componente vertical do eixo do tronco acima da qual o corpo "está de pé"
 Corpos.GRUPO = "VT65Corpo" -- grupo de colisão do boneco (não colide com ele mesmo nem com veículo)
 
+-- D-192 (dono: corpos "que caiam com peso e reajam de maneira convincente aos impactos", "impulsos
+-- limitados, proporcionais ao evento"): o golpe que matou (o servidor marca no soldado de onde veio,
+-- bala ou explosão, e a distância, até GOLPE_VALE_S antes da morte) empurra o corpo para longe dele.
+-- Bala: leve, na direção do tiro. Explosão: mais forte perto do centro e um pouco para cima. Sempre
+-- abaixo de VOO_MAX (o freio do assentar). Sem golpe recente, o empurrão leve de antes.
+Corpos.GOLPE_VALE_S = 0.6
+Corpos.IMPULSO = { bala = 8, explosao = 30 } :: { [string]: number } -- studs/s no plano
+Corpos.IMPULSO_SOBE = { bala = 0, explosao = 12 } :: { [string]: number } -- studs/s para cima
+
+-- (no plano, para cima) em studs/s. distM e raioM só valem para a explosão.
+function Corpos.impulso(kind: string, distM: number?, raioM: number?): (number, number)
+	if kind == "explosao" then
+		local k = 1 - math.clamp((distM or 0) / math.max(raioM or 1, 1), 0, 1)
+		return Corpos.IMPULSO.explosao * (0.35 + 0.65 * k), Corpos.IMPULSO_SOBE.explosao * k
+	end
+	return Corpos.IMPULSO.bala, Corpos.IMPULSO_SOBE.bala
+end
+
+-- Lugar de veículo: aberto (jipe, escotilha, porta do helicóptero) o corpo cai do lado de fora, a
+-- LADO_STUDS do assento; fechado (dentro do casco) fica sem corpo, como antes.
+Corpos.LADO_STUDS = 5
+
 -- As 15 peças do corpo R15 (sem a HumanoidRootPart)
 Corpos.PECAS = {
 	"LowerTorso",
