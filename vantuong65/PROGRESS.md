@@ -586,6 +586,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
       - a pazada perdida no buraco novo conta no limite de 1 por minuto.
     - Não testado: vários jogadores no mesmo buraco, controle e celular de verdade, o som e o
       jogo publicado.
+    - **v113 publicada** (versão 118 do place, commit 043ab06).
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;
