@@ -877,6 +877,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
         escala); o caminho foi testado pelo mesmo pedido do botão.
     - Lune 812 ok (55 arquivos), pytest 76, ruff, StyLua e luau-lsp limpos, i18n 100%. Relatório:
       `testes/LOTE92_D207_2026-11-20.md`.
+    - **v125 publicada** (versão 130 do place, commit 3b15873).
     - **Próximo:** o passe (trilha grátis e Veterano, missões) sobre o mesmo palco.
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
 - **Próximos (ideias da análise, esperando o dono):**
