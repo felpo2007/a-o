@@ -481,6 +481,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
       - a pá do VC na mão;
       - celular de verdade e jogo publicado.
     - Limite: em 3ª pessoa a ponta fica a 0,33–0,52 m do chão (só ajoelhado encostaria).
+    - **v107 publicada** (versão 112 do place, commit ebd0131).
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;
