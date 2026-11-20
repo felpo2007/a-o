@@ -716,6 +716,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
       Relatório: `testes/LOTE85_D201_2026-11-20.md`; capturas e mapas em `testes/lote85`.
     - Não testado: outro jogador, celular, jogo publicado, tempo de chegada andando no jogo, partida
       inteira com bots no mapa novo.
+    - **v119 publicada** (versão 124 do place, commit 061edb9).
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;
