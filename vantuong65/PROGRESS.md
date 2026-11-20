@@ -600,6 +600,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
       - Relatório: `testes/LOTE80_D196_2026-11-20.md`.
     - Não testado: sentado como atirador, o tiro rente ao convés, o giro do Ontos (a fonte não
       fecha) e o cano sobre a cabeça do motorista.
+    - **v114 publicada** (versão 119 do place, commit 2022ae9).
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;
