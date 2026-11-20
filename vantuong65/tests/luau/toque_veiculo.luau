@@ -601,6 +601,24 @@ test("telas do T3: nenhum texto montado aos pedaços com '..'", function()
 	end
 end)
 
+-- D-187 (dono: "o personagem some ao entrar no carro"): o próprio corpo só some na 1ª pessoa do assento
+-- (esmaece com a câmera), aparece na perseguição e, ao sair, fica como a câmera a pé espera
+test("D-187: o próprio corpo no veículo só some no olho do assento e volta ao sair", function()
+	local src = fs.readFile(C .. "VehicleController.client.luau")
+	assert(not string.find(src, "hideBody", 1, true), "o esconde-sempre saiu")
+	assert(string.find(src, "setBodyLocal(player.Character, math.floor((1 - b) * 10 + 0.5) / 10)", 1, true), "esmaece")
+	assert(string.find(src, "releaseBody() -- D-187", 1, true), "ao sair")
+	local rel = string.find(src, "local function releaseBody()", 1, true)
+	local body = rel and string.sub(src, rel, rel + 700) or ""
+	assert(
+		string.find(body, "if alive and not third then 1 else 0", 1, true),
+		"1ª pessoa a pé esconde; 3ª e morto mostram"
+	)
+	-- os outros sempre veem: nada no servidor esconde o ocupante
+	local svc = fs.readFile("src/ServerScriptService/Modules/VehicleService.luau")
+	assert(not string.find(svc, "LocalTransparencyModifier", 1, true), "servidor não esconde")
+end)
+
 print(string.format("%d ok, %d falhas", passed, failed))
 if failed > 0 then
 	process.exit(1)

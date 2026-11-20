@@ -1379,7 +1379,7 @@ RunService.Heartbeat:Connect(function(dt: number)
 	end
 	-- pulo: só de pé, descansado o bastante, fora de transições, com intervalo
 	local canJump = st == "stand"
-		and c:GetAttribute("LegImpaired") ~= true
+		and not Movement.legLimit(c:GetAttribute("LegImpaired") == true) -- D-187
 		and player:GetAttribute("Downed") ~= true
 		and now >= jumpReadyAt
 		and stamina.value >= Movement.JUMP_MIN_STAMINA

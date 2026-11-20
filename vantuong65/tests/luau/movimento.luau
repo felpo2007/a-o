@@ -1,5 +1,6 @@
 --!strict
 -- Testes do movimento e da 3ª pessoa (Shared/Movement). Uso: lune run tests/luau/movimento.luau
+local fs = require("@lune/fs")
 local process = require("@lune/process")
 
 local S = "../../src/ReplicatedStorage/Shared/"
@@ -66,7 +67,8 @@ test("velocidade: bases iguais às do servidor (trote, corrida, agachado, rastej
 	near(Movement.targetSpeed(ctx({ stance = "crouch" })), C, 1e-6, "agachado (Front 44: 7 studs/s)")
 	near(Movement.targetSpeed(ctx({ stance = "prone" })), P, 1e-6, "rastejar (Front 44: 4 studs/s)")
 	near(Movement.targetSpeed(ctx({ aiming = true })), Movement.ADS, 1e-6, "mirando")
-	near(Movement.targetSpeed(ctx({ legImpaired = true, sprinting = true })), 1.4, 1e-6, "perna ferida")
+	-- D-187: a perna ferida não prende mais (corre como sem ferimento)
+	near(Movement.targetSpeed(ctx({ legImpaired = true, sprinting = true })), R, 1e-6, "perna ferida corre")
 	assert(Movement.targetSpeed(ctx({ downed = true })) == 0, "caído")
 	near(Movement.targetSpeed(ctx({ sprinting = true, forward = -1 })), J, 1e-6, "corrida de costas = trote")
 	near(Movement.targetSpeed(ctx({ sprinting = true, forward = 0.3 })), J, 1e-6, "corrida de lado = trote")
@@ -114,7 +116,7 @@ test("D-99: vantagem de velocidade (1,06) no trote e na corrida, com e sem passe
 	near(Movement.serverSpeed("stand", true, false, false, "VC", 1.06), R * 1.12 * 1.06, 1e-9, "VC")
 	near(Movement.serverSpeed("crouch", false, false, false, nil, 1.06), Movement.CROUCH, 1e-9, "agachado igual")
 	near(Movement.serverSpeed("prone", false, false, false, nil, 1.06), Movement.PRONE, 1e-9, "rastejar igual")
-	near(Movement.serverSpeed("stand", true, true, false, nil, 1.06), Movement.WALK, 1e-9, "perna ferida igual")
+	near(Movement.serverSpeed("stand", true, true, false, nil, 1.06), R * 1.06, 1e-9, "perna ferida corre (D-187)")
 	near(Movement.serverSpeed("stand", false, false, false, nil, nil), J, 1e-9, "sem passe")
 	near(Movement.serverSpeed("stand", true, false, false, nil, 2), R * 1.12, 1e-9, "teto de 12%")
 	near(Movement.targetSpeed(ctx({ perkSpeed = 1.06 })), J * 1.06, 1e-9, "cliente: trote")
@@ -151,7 +153,7 @@ test("D-93: VC mais leve corre 12% mais; mira, rastejar e nado iguais; teto do s
 	near(Movement.targetSpeed(ctx({ faction = "VC", aiming = true })), Movement.ADS, 1e-9, "mirando igual")
 	near(Movement.targetSpeed(ctx({ faction = "VC", swimming = true })), Movement.SWIM, 1e-9, "nado igual")
 	near(Movement.serverSpeed("stand", true, false, false, "VC"), R * k, 1e-9)
-	near(Movement.serverSpeed("stand", true, true, false, "VC"), 1.4 * k, 1e-9, "perna ferida")
+	near(Movement.serverSpeed("stand", true, true, false, "VC"), R * k, 1e-9, "perna ferida corre (D-187)")
 	near(Movement.serverSpeed("prone", false, false, false, "VC"), P, 1e-9)
 	-- equipamento mais leve: menos peso, pulo e fôlego melhores com a mesma arma
 	local function kit(f: string?): number
@@ -517,7 +519,7 @@ test("transpor: dique, cerca e sacos de areia transpõe; mureta com chão em cim
 	)
 end)
 
-test("transpor: recusa alto, baixo, longe, sem espaço, queda, deitado e perna ferida", function()
+test("transpor: recusa alto, baixo, longe, sem espaço, queda e deitado", function()
 	local cases: { { any } } = {
 		{ { height = 1.4 }, "alto" },
 		{ { height = 0.25 }, "baixo" },
@@ -529,7 +531,6 @@ test("transpor: recusa alto, baixo, longe, sem espaço, queda, deitado e perna f
 		{ { depth = NIL, headroom = 1.2 }, "sem espaço em cima" },
 		{ { stance = "crouch" }, "postura" },
 		{ { stance = "prone" }, "postura" },
-		{ { legImpaired = true }, "perna ferida" },
 		{ { stamina = 0 }, "sem fôlego" },
 	}
 	for _, c in cases do
@@ -547,6 +548,34 @@ test("transpor: cansado e pesado é mais lento; correndo é mais rápido", funct
 	assert(base.cost == Movement.COST.vault)
 end)
 
+-- D-187 (dono: receber tiro não deve impedir a corrida): a perna ferida não limita a corrida, o pulo,
+-- o transpor nem a passada; a regra antiga volta com LEG_WOUND_LIMITS = true
+test("D-187: perna ferida não prende o soldado (corrida, transpor, passada, bots)", function()
+	assert(Movement.LEG_WOUND_LIMITS == false, "desligado")
+	assert(not Movement.legLimit(true) and not Movement.legLimit(false) and not Movement.legLimit(nil))
+	local plan = Movement.vaultPlan(vp({ legImpaired = true }))
+	assert(plan ~= nil, "transpõe com a perna ferida")
+	local a = Movement.stepPlan({ height = 0.4, distance = 0.3, headroom = 2, stance = "crouch", legImpaired = true })
+	local b = Movement.stepPlan({ height = 0.4, distance = 0.3, headroom = 2, stance = "crouch", legImpaired = false })
+	assert(a and b and math.abs(a.duration - b.duration) < 1e-9, "passada igual")
+	-- a regra antiga, ligada de novo
+	Movement.LEG_WOUND_LIMITS = true
+	local ok, err = pcall(function()
+		assert(Movement.legLimit(true) and not Movement.legLimit(false))
+		near(Movement.serverSpeed("stand", true, true, false), Movement.WALK, 1e-9, "antiga: passo")
+		local p2, why = Movement.vaultPlan(vp({ legImpaired = true }))
+		assert(p2 == nil and why == "perna ferida", "antiga: não transpõe")
+	end)
+	Movement.LEG_WOUND_LIMITS = false
+	assert(ok, err)
+	-- o servidor não tira o pulo nem corta a corrida
+	local med = fs.readFile("src/ServerScriptService/Modules/MedicalService.luau")
+	assert(string.find(med, "Movement.legLimit(s.legImpaired) then 0 else 30", 1, true), "pulo do servidor")
+	local cli = fs.readFile("src/StarterPlayer/StarterPlayerScripts/Controllers/Movement.client.luau")
+	assert(string.find(cli, 'Movement.legLimit(c:GetAttribute("LegImpaired") == true)', 1, true), "pulo do cliente")
+	local brain = fs.readFile("src/ReplicatedStorage/Shared/BotBrain.luau")
+	assert(string.find(brain, "Movement.legLimit(c.legImpaired)", 1, true), "bots")
+end)
 -- ===== postura =====
 test("postura: deitar e levantar demoram mais que agachar; mergulho chega antes", function()
 	assert(Movement.stanceTime("stand", "crouch") < Movement.stanceTime("stand", "prone"))

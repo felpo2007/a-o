@@ -97,6 +97,15 @@ local function perkK(perk: number?): number
 end
 Movement.perkK = perkK
 
+-- D-187 (dono: receber tiro não deve impedir a corrida): a perna ferida não limita mais a velocidade,
+-- a corrida, o pulo, o transpor nem a passada assistida. O ferimento continua (sangra, pede curativo,
+-- aparece na tela e no som); só não prende o soldado. true volta à regra antiga (D-93: no máximo o
+-- passo, sem pulo nem transpor). Vale para jogadores e bots (o mesmo Movement).
+Movement.LEG_WOUND_LIMITS = false
+function Movement.legLimit(legImpaired: boolean?): boolean
+	return Movement.LEG_WOUND_LIMITS and legImpaired == true
+end
+
 -- Velocidade máxima que o SERVIDOR aplica no WalkSpeed (MedicalService.apply chama esta função), em
 -- m/s. `faction` é opcional (os bots chamam com 4 argumentos e ficam na velocidade-base); `perk` é o
 -- multiplicador "speed" das vantagens (1 sem passe).
@@ -118,7 +127,7 @@ function Movement.serverSpeed(
 		elseif stance == "crouch" then Movement.CROUCH * k
 		elseif sprinting then Movement.SPRINT * k * p
 		else Movement.JOG * k * p
-	return if legImpaired then math.min(v, Movement.WALK * k) else v
+	return if Movement.legLimit(legImpaired) then math.min(v, Movement.WALK * k) else v
 end
 
 -- ===== peso do equipamento =====
@@ -379,7 +388,7 @@ function Movement.targetSpeed(c: SpeedCtx): number
 	if c.aiming then
 		v = math.min(v, Movement.ADS)
 	end
-	if c.legImpaired then
+	if Movement.legLimit(c.legImpaired) then
 		v = math.min(v, Movement.WALK * k)
 	end
 	if c.transition then
@@ -649,7 +658,7 @@ export type VaultPlan = { kind: string, duration: number, cost: number }
 function Movement.vaultPlan(p: VaultProbe): (VaultPlan?, string)
 	if p.stance ~= "stand" then
 		return nil, "postura"
-	elseif p.legImpaired then
+	elseif Movement.legLimit(p.legImpaired) then
 		return nil, "perna ferida"
 	elseif p.height == nil then
 		return nil, "nada à frente"
@@ -729,7 +738,7 @@ function Movement.stepPlan(p: StepProbe): (VaultPlan?, string)
 	local agile = math.clamp(p.agility or 1, 0.5, 2)
 	local dur = Movement.STEP_TIME[p.stance]
 		* (1 + 0.8 * math.max(h - 0.2, 0))
-		* (if p.legImpaired then 1.4 else 1)
+		* (if Movement.legLimit(p.legImpaired) then 1.4 else 1)
 		/ agile
 	return { kind = "step", duration = dur, cost = 0 }, "ok"
 end

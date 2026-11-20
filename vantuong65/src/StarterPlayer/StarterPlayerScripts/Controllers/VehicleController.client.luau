@@ -835,9 +835,16 @@ local function setLocalAttr(name: string, value: boolean, field: string)
 	end
 end
 
--- o próprio corpo (e o fuzil que ele carrega) some para quem está sentado: a câmera não fica mais na
--- cabeça e o boneco apareceria cortado pelo casco
-local function hideBody(char: Model)
+-- O próprio corpo de quem está sentado, só para ele (LocalTransparencyModifier; os outros sempre veem
+-- o ocupante). D-187 (dono: "o personagem some ao entrar no carro"): antes ele sumia em qualquer
+-- câmera e nada o devolvia. Agora:
+--   - 1ª pessoa (a câmera no olho do assento): some, senão o boneco apareceria cortado pela câmera;
+--   - perseguição (3ª pessoa): aparece, sentado no lugar;
+--   - ao sair (ou com o veículo destruído): fica como a câmera a pé espera (escondido na 1ª pessoa,
+--     à mostra na 3ª, que o ThirdPerson assume no quadro seguinte); morto, à mostra (a tela de baixa
+--     mostra o corpo). Peça invisível por função (HumanoidRootPart, caixas de acerto) continua
+--     invisível: o modificador só soma à Transparency dela.
+local function setBodyLocal(char: Model, v: number)
 	if cam.bodyOf ~= char or os.clock() - cam.bodyT > 2 then
 		cam.bodyOf, cam.bodyT = char, os.clock()
 		cam.body = {}
@@ -849,13 +856,27 @@ local function hideBody(char: Model)
 	end
 	for _, d in cam.body do
 		if d:IsA("BasePart") then
-			if d.LocalTransparencyModifier ~= 1 then
-				d.LocalTransparencyModifier = 1
+			if d.LocalTransparencyModifier ~= v then
+				d.LocalTransparencyModifier = v
 			end
-		elseif d:IsA("Decal") and d.LocalTransparencyModifier ~= 1 then
-			d.LocalTransparencyModifier = 1
+		elseif d:IsA("Decal") and d.LocalTransparencyModifier ~= v then
+			d.LocalTransparencyModifier = v
 		end
 	end
+end
+
+-- saiu do assento: o corpo como a câmera a pé espera
+local function releaseBody()
+	local char = player.Character
+	if not char then
+		return
+	end
+	local hum = char:FindFirstChildOfClass("Humanoid")
+	local alive = hum ~= nil and hum.Health > 0
+	local third = Input.settings.thirdPerson == true and ViewMode.allowed()
+	cam.bodyT = 0 -- relê as peças (o corpo pode ter mudado sentado)
+	setBodyLocal(char, if alive and not third then 1 else 0)
+	cam.bodyOf = nil
 end
 
 local function rayList(model: Model): { Instance }
@@ -907,11 +928,9 @@ RunService:BindToRenderStep("VT65VehicleCam", Enum.RenderPriority.Camera.Value +
 			cam.model = nil
 			cam.blend, cam.boom = 0, -1
 			offAll()
+			releaseBody() -- D-187
 		end
 		return
-	end
-	if player.Character then
-		hideBody(player.Character)
 	end
 	cam.t += dt
 	local cf = chassis.CFrame
@@ -972,6 +991,11 @@ RunService:BindToRenderStep("VT65VehicleCam", Enum.RenderPriority.Camera.Value +
 	-- molduras: ótica (canhão), binóculo (comandante), cabine (pilotos, em 1ª pessoa); retícula de quem
 	-- tem arma (na perseguição é por ela que se mira)
 	local first = b < 0.5
+	-- D-187: o próprio corpo some no olho e aparece na perseguição, esmaecendo com a câmera (em
+	-- décimos: parada a câmera, nada é reescrito)
+	if player.Character then
+		setBodyLocal(player.Character, math.floor((1 - b) * 10 + 0.5) / 10)
+	end
 	local bigGun = weapon == "gun_90" or weapon == "rr_106"
 	overlay.optic.Visible = first and state.zoom == 1 and bigGun
 	overlay.binoc.Visible = first and state.zoom == 2

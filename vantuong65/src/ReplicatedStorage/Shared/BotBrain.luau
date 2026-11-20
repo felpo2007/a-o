@@ -1501,7 +1501,7 @@ function BotBrain.gait(c: GaitCtx): (string, number)
 		elseif name == "sprint" then Movement.SPRINT
 		elseif name == "walk" then Movement.WALK
 		else Movement.JOG
-	if c.legImpaired and v > Movement.WALK then
+	if Movement.legLimit(c.legImpaired) and v > Movement.WALK then -- D-187
 		return "walk", Movement.WALK
 	end
 	return name, v

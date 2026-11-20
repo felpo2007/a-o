@@ -61,8 +61,10 @@ test("passo: as velocidades são as âncoras do Movement e da animação (andar,
 	assert(v == Movement.PRONE and n == "prone")
 	n, v = g({ behindM = 30 })
 	assert(n == "sprint", "atrasado no squad corre")
+	-- D-187: a perna ferida não prende mais (jogador e bot)
+	local n0, v0 = g({ urgent = true })
 	n, v = g({ urgent = true, legImpaired = true })
-	assert(v == Movement.WALK, "perna ferida anda")
+	assert(n == n0 and v == v0, "perna ferida corre como sem ferimento")
 	-- arrozal e rampa como o jogador
 	assert(BotBrain.groundFactor("paddy", 0, 0, 0) < BotBrain.groundFactor("forest", 0, 0, 0))
 	assert(BotBrain.groundFactor("firm", 0, 0, 0.3) < BotBrain.groundFactor("firm", 0, 0, 0))

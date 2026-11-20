@@ -88,7 +88,7 @@ local function apply(model: Model)
 			if type(faction) == "string" then faction else nil,
 			Vantagens.mult(who, "speed") -- D-99: trote e corrida (o cliente usa o mesmo)
 		) / Units.STUD_M
-		hum.JumpPower = if s.legImpaired then 0 else 30
+		hum.JumpPower = if Movement.legLimit(s.legImpaired) then 0 else 30 -- D-187
 	end
 	model:SetAttribute("ArmImpaired", s.armImpaired)
 	model:SetAttribute("LegImpaired", s.legImpaired)
