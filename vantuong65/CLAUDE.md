@@ -135,6 +135,8 @@ O `sourcemap.json` não vai para o Git.
   - `VT65DevVeh` (servidor): `"m151"` (ou outra ficha) cria o veículo à frente do jogador;
     `"destruir"` destrói o mais perto pelo caminho do jogo (D-197). Para sentar num lugar certo, o
     cliente manda `Vehicle_Board { v = modelo, seat = "passenger" }` de perto;
+  - `VT65DevRotor` (D-199, do lado do CLIENTE): 0 a 1 fixa a rotação vista dos helicópteros (pás
+    e disco borrado); `nil` devolve;
   - `workspace:SetAttribute("VT65DevBots", "distancias")`: de que distância os bots atiraram, quantas
     rajadas de cobertura, quantos flancos, lances no duelo e fumaças desde a última vez (D-147,
     D-166). A partida (e a marcha dos bots)
@@ -253,6 +255,16 @@ O `sourcemap.json` não vai para o Git.
 - Pá de trincheira (D-183): `blender -b --factory-startup -P tools/blender/novos.py -- shovel_us` (ou `shovel_vc`)
   e o som com `blender ... -P tools/sons_pa.py`. A mão de 1ª e 3ª pessoa sai do `Shared/PaArte`.
   Objeto de mão de 3ª pessoa com várias peças: solde com `Weld` e `C0`, não com `WeldConstraint`.
+- UH-34D v3 (D-199): `blender -b --factory-startup -P tools/blender/veiculos.py -- uh34d`
+  (`--previa` só renderiza). A silhueta foi medida por código no desenho de três vistas (veja
+  `MEDIDAS` no `veic_uh34d.py`). Depois do build:
+  - copie o `metricas.json` para `assets/veiculos/uh34d_metricas.json` (o `assets/blender` fica fora
+    do Git);
+  - passe o `art_novo` e as juntas dele para o `VehicleDrive.ART.uh34d` (o teste `rotor.luau`
+    cobra).
+
+  O disco borrado do rotor sai de `uv run python tools/rotor_borrao.py` (Decal em
+  `Images.rotor_borrao`; o `ImagensUi` resolve).
 - Armas do Blender (D-146): M70 e Mosin (`tools/blender/armas.py`), Escopeta 12 (`espingarda.py`),
   M16 (`m16.py`) e SKS (`sks.py`, no lugar da do gerador). Rode com
   `blender -b --factory-startup -P tools/blender/<arquivo>.py -- <chave>` (`--montar` para só a
@@ -307,7 +319,7 @@ O `sourcemap.json` não vai para o Git.
 - Segredos só no `.env` (no `.gitignore`), nunca no código nem no chat.
 - ForgeGUI: nunca regenerar um job em `outcome_unknown`. "failed" com `retryable` pode ser
   retomado com `generation_retry`.
-- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-199) e atualize `PROGRESS.md`.
+- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-200) e atualize `PROGRESS.md`.
 - Tetos de triângulos por modelo: vegetação ≤ 6 mil (D-135), props e herói ≤ 20 mil (`ArtBudget`,
   conferido pelo teste da F5).
 - Commits no branch acima, com mensagem em português.

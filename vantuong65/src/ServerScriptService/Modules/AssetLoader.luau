@@ -158,6 +158,8 @@ local function applyTrim(tpl: Model)
 	end
 end
 
+AssetLoader.VIDRO_TRANSPARENCIA = 0.55
+
 -- Carrega o modelo publicado (uma vez) e devolve um template ancorado, sem colisão de folhagem.
 function AssetLoader.template(key: string): Model?
 	if cache[key] then
@@ -197,6 +199,15 @@ function AssetLoader.template(key: string): Model?
 			if sa then
 				sa.AlphaMode = Enum.AlphaMode.Transparency
 			end
+		end
+		-- D-199: vidro dos veículos do Blender (nó "Vidro", o para-brisa do UH-34D): transparente, nos
+		-- dois lados (quem está dentro vê o vidro), sem sombra e sem barrar raio (a bala e a câmera
+		-- passam)
+		if d:IsA("MeshPart") and string.sub(d.Name, 1, 5) == "Vidro" then
+			d.Transparency = AssetLoader.VIDRO_TRANSPARENCIA
+			d.DoubleSided = true
+			d.CastShadow = false
+			d.CanQuery = false
 		end
 	end
 	-- D-151: tronco invisível (cilindros medidos na malha) que para a bala e o soldado, não o veículo.

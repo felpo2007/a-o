@@ -8008,3 +8008,99 @@ desligados; câmera presa num ponto de observação a ~70 m):
 
 **Não testado:** a explosão na água e numa estrutura (só a regra no Lune), o som ouvido, várias
 bombas do ataque aéreo de verdade em sequência (só disparos soltos), celular e jogo publicado.
+
+## D-199 — Lote 83: o UH-34D refeito na silhueta do desenho, e o rotor girando de verdade (2026-11-20)
+
+**Pedido do dono** (prompt de jogabilidade, item 18): melhorar o helicóptero sem trocar de aeronave:
+- silhueta e proporções; cabine, vidros, portas e bancos; o interior que aparece;
+- trem de pouso, rotor principal e de cauda, pintura, desgaste e detalhe de superfície;
+- o rotor convincente em cada rotação e distância;
+- colisão simples, ocupantes visíveis, câmera compatível, o voo igual e sem perda grande de
+  desempenho.
+
+**Silhueta medida, não desenhada a olho.** O contorno do UH-34D (perfil, planta e frente) foi lido
+por código, coluna a coluna, no desenho de três vistas do the-blueprints.com, na escala do
+comprimento da fuselagem (14,25 m: 0,0559 m por pixel). O v2 estava longe do H-34:
+- cabine dos pilotos baixa: o teto do v2 ficava a 3,54 m, e no desenho fica a 3,86 m, acima do teto
+  do porão;
+- mastro alto: o topo do cubo ficava a 4,85 m; no desenho, 4,53 m. A Wikipedia dá 4,36 m de altura
+  e flugzeuginfo/Sikorsky, 4,85 m;
+- cone de cauda raso: no desenho ele é fundo e estreito (1,6 m de altura atrás do porão) e sobe numa
+  deriva inclinada;
+- trem principal: a roda vai em x = 5,03 m (Ø 0,76 m), e o amortecedor sobe até o nariz;
+- bequilha: no desenho fica bem atrás, em x = −3,92 m (no v2, −1,65 m). Entre-eixos de 8,95 m;
+- rotor de cauda a 3,83 m de altura e 0,55 m à esquerda.
+
+**Agora (UH-34D v3, `tools/blender/veic_uh34d.py`; 13.648 triângulos, 3 atlas de 1024):**
+- casco em 48 lados com a parte de cima mais estreita (cabine e carenagem), cortado reto nas janelas
+  e nas portas;
+- vidro do para-brisa num nó próprio, "Vidro": o `AssetLoader` deixa transparente (0,55), nos dois
+  lados, sem sombra e sem barrar raio (bala e câmera passam). As janelas de correr dos pilotos ficam
+  abertas, com o vidro corrido para trás por fora;
+- molduras nas janelas e portas, a coluna do meio e a porta de correr aberta. A porta é a própria
+  chapa do casco, 1,3 m para trás, com a janelinha e os trilhos;
+- interior num nó próprio, "Interior":
+  - cabine: painel com 16 mostradores, capô, console do eixo entre os pilotos, comandos, pedais,
+    bancos com blindagem e o fosso dos pedais;
+  - porão: bancos de lona com tubos, cavernas, argolas no piso, extintor, caixa de primeiros socorros
+    e a M60 da porta com caixa, coronha, cano, bipé, cunhete e fita;
+- nariz com a grade de ar das portas em concha, escapamentos, venezianas, degraus, alça, antena,
+  farol anticolisão e luzes de posição;
+- cubo articulado: braços, dobradiças, punhos, amortecedores, chifres, hastes e o prato cíclico;
+- pás com o perfil NACA 0012 (fonte: Army Aviation e Sikorsky Archives), queda na ponta e a faixa
+  laranja-amarela nos 6 pol. de fora. A cor da faixa vem de um resumo de busca; a página não abriu.
+  Corda de 0,41 m: PLACEHOLDER;
+- rotor de cauda com 4 pás de perfil e a caixa na deriva; estabilizador à direita;
+- pneus com banda de rodagem e parafusos; trem com amortecedor, V e freio;
+- pintura com linhas de painel e rebites, fuligem do escapamento, poeira, lascas;
+- marcas coladas na pele: MARINES, insígnia nacional com a faixa vermelha, YN, 150570 e o 19.
+  As posições de MARINES e da insígnia são PLACEHOLDER.
+
+**A cabine 0,22 m mais alta que o desenho (teto a 4,08 m).** O soldado R15 sentado do jogo tem, do
+centro do assento (Studio): cabeça 1,33 m e capacete 1,59 m acima, quadril 0,30 m acima, pés 0,19 m
+abaixo. Assento-capacete passa de 1,6 m; na altura do desenho só havia 1,31 m do piso ao teto. No v2,
+a cabeça do piloto já atravessava o teto. Agora:
+- olho do piloto a 3,57 m (a câmera);
+- assento com `ART.seatDrop` (0,46 m a mais de descida, só o corpo; a câmera fica no olho);
+- fosso dos pedais a 2,08 m.
+Medido no Studio, do chão das rodas: quadril 2,60 m (estofado 2,58), pés 2,11 m (fosso 2,08) e
+capacete 3,89 m, sob o teto de 4,04 m acima da cabeça.
+
+**Rotor (`Shared/RotorVisual`, `Controllers/RotorDisco`):**
+- de 0 a 30% da rotação, as pás da malha giram inteiras;
+- de 30% a 70%, somem (`LocalTransparencyModifier`, só neste cliente). A 220 rpm uma pá passaria 22°
+  por quadro a 60 fps;
+- entra o disco borrado: decal em `Images.rotor_borrao`, `tools/rotor_borrao.py`:
+  - 4 rastros gaussianos, mais fortes perto do cubo;
+  - o anel fraco da ponta e um véu leve;
+  - simétrico, então serve visto de cima e de baixo;
+- o disco gira devagar (0,55 volta/s na rotação cheia) e inclina como antes. De 80 m a 700 m ele cai
+  até 45% da força;
+- sem a imagem, fica o disco cinza de antes;
+- antes, o rotor só girava a até 220 m da câmera e longe as pás ficavam paradas. Agora gira e mostra
+  o disco até 1,5 km, o alcance do som do rotor;
+- o helicóptero do evento (inserção e medevac) usa o mesmo disco. As pás invisíveis nem são movidas.
+
+**Colisão e voo:**
+- a arte continua sem colisão. Os colisores do D-184 saem das rodas da arte: as três bolas foram
+  junto, e o corpo vai até a bequilha nova;
+- no Studio, as três rodas tocaram o chão (−1 cm) nos dois helicópteros, nivelados;
+- decolagem com Espaço: subiu 28 m a 10,5 m/s, nivelado (D-61: ~10,7 m/s).
+
+**Desempenho** (Studio, mesma vista a ~27 m, qualidade 10; um v2 e um v3 parados lado a lado):
+
+| Cena | Chamadas de desenho | Triângulos | Sombras |
+|---|---|---|---|
+| sem nenhum | 115,6 | 193,9 mil | 41 |
+| só o v2 | +11,7 | +4,8 mil | +24 |
+| só o v3 | +12,3 | +13,7 mil | +6 |
+
+O disco borrado soma 2 peças com decal por rotor.
+
+**Studio:** `VT65DevRotor` (cliente) fixa a rotação vista dos helicópteros.
+
+**Não testado:**
+- pouso em encosta com o corpo de colisão até a bequilha nova;
+- um segundo jogador vendo o piloto: aqui só um cliente, com o corpo forçado visível;
+- a tropa embarcando e as câmeras dos passageiros e do atirador;
+- celular e jogo publicado.

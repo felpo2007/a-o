@@ -6,7 +6,8 @@
 --   chão pelas 4 pontas, afunda na lama e no arrozal e, boiando, sobe e desce na água;
 -- - lagarta: faixas finas que correm no laço da lagarta medido na malha (VehicleDrive.ART), cada
 --   lado na sua velocidade (na curva e no giro no lugar elas andam em sentidos opostos);
--- - UH-34D: disco de desfoque e pás do rotor principal e do de cauda, que partem e param devagar; o
+-- - UH-34D: pás do rotor principal e do de cauda que partem e param devagar; com a rotação, elas
+--   somem e entra o disco borrado (D-199: RotorVisual e RotorDisco, até 1,5 km, não só perto); o
 --   disco inclina com a aceleração; downwash de poeira, capim ou água debaixo dele;
 -- - poeira na terra seca e na areia, capim e folhas, barro na lama, respingo no arrozal, esteira e
 --   espuma na água, fumaça de escapamento que engrossa na aceleração e solta um bafo na partida;
@@ -32,7 +33,9 @@ local SoundService = game:GetService("SoundService")
 local AssetIds = require(ReplicatedStorage.Shared.AssetIds) :: any
 local VehicleDrive = require(ReplicatedStorage.Shared.VehicleDrive)
 local Vehicles = require(ReplicatedStorage.Shared.Vehicles) :: any
+local RotorVisual = require(ReplicatedStorage.Shared.RotorVisual)
 local Input = require(script.Parent.Input)
+local RotorDisco = require(script.Parent.RotorDisco)
 local VehicleLive = require(script.Parent.VehicleLive)
 
 local player = Players.LocalPlayer
@@ -302,9 +305,10 @@ type Fx = {
 	sideX: { number }, -- lado no chassi das lagartas +z e −z da malha (−1 esquerda, +1 direita)
 	fwdSign: number, -- 1 se o nariz da malha é −x (o ramo de baixo corre em +x andando para a frente)
 	barsMud: boolean,
-	rotorParts: { BasePart }?,
-	rotorAng: number,
-	tailAng: number,
+	-- D-199: discos borrados (principal e de cauda) e as peças da malha que somem com a rotação
+	discos: { principal: RotorDisco.Disco, cauda: RotorDisco.Disco }?,
+	pas: { BasePart },
+	caudaPecas: { BasePart },
 	wash: { holder: BasePart, dust: { ParticleEmitter }, bits: { ParticleEmitter }, ground: string }?,
 	wake: { holder: BasePart, bow: ParticleEmitter, spray: ParticleEmitter, foam: { ParticleEmitter } }?,
 	sounds: { [string]: Layer },
@@ -411,9 +415,9 @@ local function newFx(model: Model, chassis: BasePart): Fx
 		sideX = { -1, 1 },
 		fwdSign = 1,
 		barsMud = false,
-		rotorParts = nil,
-		rotorAng = 0,
-		tailAng = 0,
+		discos = nil,
+		pas = {},
+		caudaPecas = {},
 		wash = nil,
 		wake = nil,
 		sounds = {},
@@ -582,33 +586,8 @@ local function setupVisual(fx: Fx)
 			fx.wake = { holder = holder, bow = bowMist, spray = spray, foam = foam }
 		end
 	else
-		-- rotor principal (disco + 4 pás) e de cauda (disco + 4 pás), por cima das pás paradas da malha
+		-- D-199: o rotor (pás e disco borrado) vive com o veículo inteiro, não só perto (setupRotor)
 		local rot = art and art.rotor
-		local tail = art and art.tail
-		if rot and tail and fx.meshRel then
-			local s = fx.scale.X
-			local R, r = rot.r * s, tail.r * s
-			local parts: { BasePart } = {}
-			local disc = localPart("RotorDisco", Vector3.new(0.12, 2 * R, 2 * R), rgb(48, 48, 44))
-			disc.Shape = Enum.PartType.Cylinder
-			disc.Transparency = 1
-			table.insert(parts, disc)
-			for _ = 1, 4 do
-				table.insert(parts, localPart("RotorPa", Vector3.new(R * 0.97, 0.12, 1.15 * s), rgb(34, 34, 32)))
-			end
-			local tdisc = localPart("CaudaDisco", Vector3.new(0.08, 2 * r, 2 * r), rgb(60, 60, 56))
-			tdisc.Shape = Enum.PartType.Cylinder
-			tdisc.Transparency = 1
-			table.insert(parts, tdisc)
-			for _ = 1, 2 do
-				table.insert(parts, localPart("CaudaPa", Vector3.new(2 * r * 0.96, 0.3 * s, 0.06), rgb(40, 40, 38)))
-			end
-			for _, p in parts do
-				track(fx, p)
-			end
-			fx.rotorParts = parts
-			fx.barCF = table.create(#parts, CFrame.identity)
-		end
 		-- downwash: anel de 6 pontos no chão debaixo do cubo
 		local holder: BasePart = localPart("Downwash", Vector3.one * 0.2, COLORS.bar)
 		holder.Transparency = 1
@@ -645,7 +624,7 @@ local function teardownVisual(fx: Fx)
 		inst:Destroy()
 	end
 	table.clear(fx.created)
-	fx.emit, fx.bars, fx.belt, fx.rotorParts, fx.wash, fx.wake = nil, nil, nil, nil, nil, nil
+	fx.emit, fx.bars, fx.belt, fx.wash, fx.wake = nil, nil, nil, nil, nil
 	fx.barCF = {}
 	fx.pose = CFrame.identity
 	local motor = fx.motor
@@ -659,8 +638,50 @@ local function teardownVisual(fx: Fx)
 	end
 end
 
+-- D-199: discos borrados do helicóptero e as peças da malha que somem (pás e rotor de cauda). Vivem
+-- enquanto o veículo está no alcance do som do rotor (1,5 km): longe o rotor também gira.
+local function setupRotor(fx: Fx)
+	local art = fx.art
+	local rot, tail = art and art.rotor, art and art.tail
+	if fx.discos or not (rot and tail and fx.meshRel) then
+		return
+	end
+	local s = fx.scale.X
+	fx.discos = {
+		principal = RotorDisco.novo("RotorDisco", rot.r * s, "Y", folder),
+		cauda = RotorDisco.novo("CaudaDisco", tail.r * s, "Z", folder),
+	}
+	local arte = fx.model:FindFirstChild("Art")
+	if arte then
+		for _, d in arte:GetDescendants() do
+			if d:IsA("BasePart") then
+				if string.match(d.Name, "^Pa_%d+$") then
+					table.insert(fx.pas, d)
+				elseif d.Name == "RotorCauda" then
+					table.insert(fx.caudaPecas, d)
+				end
+			end
+		end
+	end
+end
+
+local function teardownRotor(fx: Fx)
+	local d = fx.discos
+	if d then
+		RotorDisco.destruir(d.principal)
+		RotorDisco.destruir(d.cauda)
+		fx.discos = nil
+	end
+	-- as pás voltam a aparecer (o destroço e quem chega perto de novo as veem)
+	RotorDisco.esconder(fx.pas, 0)
+	RotorDisco.esconder(fx.caudaPecas, 0)
+	table.clear(fx.pas)
+	table.clear(fx.caudaPecas)
+end
+
 local function teardown(fx: Fx)
 	teardownVisual(fx)
+	teardownRotor(fx)
 	for _, l in fx.sounds do
 		l.s:Destroy()
 	end
@@ -704,6 +725,11 @@ local function updateEngine(fx: Fx, dt: number)
 	fx.load += (l - fx.load) * (1 - math.exp(-dt / 0.25))
 	if fx.kind == "heli" then
 		fx.rotor = VehicleDrive.rotorStep(fx.rotor, on, dt)
+		-- D-199 (só Studio, do lado do cliente): workspace.VT65DevRotor = 0..1 fixa a rotação vista
+		local dev = workspace:GetAttribute("VT65DevRotor")
+		if type(dev) == "number" and RunService:IsStudio() then
+			fx.rotor = math.clamp(dev, 0, 1)
+		end
 	end
 end
 
@@ -836,24 +862,30 @@ end
 -- atirador local pela câmera (e manda ao servidor ~8 vezes por segundo, Vehicle_Aim); os outros pelos
 -- atributos AimYaw/AimPitch. Giro da torre na velocidade da ficha (turretDegS).
 local aimRemote: UnreliableRemoteEvent? = nil
+-- D-199: o cubo e as pás giram também longe (o helicóptero se vê de longe), não só perto
+local function spinRotors(fx: Fx, dt: number)
+	local j = fx.joints
+	local rot, tail = j.rotor, j.tail
+	if not (rot or tail) then
+		return
+	end
+	local H = VehicleDrive.HELI
+	fx.hubAng = (fx.hubAng + fx.rotor * H.rotorRpm / 60 * 2 * math.pi * dt) % (2 * math.pi)
+	fx.hubTail = (fx.hubTail + fx.rotor * H.tailRpm / 60 * 2 * math.pi * dt) % (2 * math.pi)
+	if rot then
+		local a = fx.chassis.CFrame:VectorToObjectSpace(fx.acc)
+		local tiltF = math.clamp(-a.Z / VehicleDrive.G * 0.35, -0.08, 0.08)
+		local tiltR = math.clamp(a.X / VehicleDrive.G * 0.35, -0.08, 0.08)
+		rot.Transform = CFrame.Angles(-tiltR, 0, tiltF) * CFrame.Angles(0, fx.hubAng, 0)
+	end
+	if tail then
+		tail.Transform = CFrame.Angles(0, 0, fx.hubTail)
+	end
+end
+
 local function updateJoints(fx: Fx, dt: number)
 	local j = fx.joints
 	local art = fx.art
-	local rot, tail = j.rotor, j.tail
-	if rot or tail then
-		local H = VehicleDrive.HELI
-		fx.hubAng = (fx.hubAng + fx.rotor * H.rotorRpm / 60 * 2 * math.pi * dt) % (2 * math.pi)
-		fx.hubTail = (fx.hubTail + fx.rotor * H.tailRpm / 60 * 2 * math.pi * dt) % (2 * math.pi)
-		if rot then
-			local a = fx.chassis.CFrame:VectorToObjectSpace(fx.acc)
-			local tiltF = math.clamp(-a.Z / VehicleDrive.G * 0.35, -0.08, 0.08)
-			local tiltR = math.clamp(a.X / VehicleDrive.G * 0.35, -0.08, 0.08)
-			rot.Transform = CFrame.Angles(-tiltR, 0, tiltF) * CFrame.Angles(0, fx.hubAng, 0)
-		end
-		if tail then
-			tail.Transform = CFrame.Angles(0, 0, fx.hubTail)
-		end
-	end
 	local vol = j.volante
 	if vol and art and art.steerTiltDeg then
 		local t = math.rad(art.steerTiltDeg)
@@ -949,20 +981,29 @@ local function drawBars(fx: Fx, dt: number, vFwd: number, yawRate: number)
 	end
 end
 
+-- D-199: pás da malha inteiras na partida e sumindo com a rotação; o disco borrado entra no lugar
+-- (RotorVisual: pela rotação e pela distância) e gira devagar
 local function drawRotor(fx: Fx, dt: number)
-	local parts = fx.rotorParts
+	local discos = fx.discos
 	local art = fx.art
 	local mcf = meshCF(fx)
-	if not (parts and art and art.rotor and art.tail and mcf) then
+	if not (discos and art and art.rotor and art.tail and mcf) then
 		return
 	end
 	local rot, tail = art.rotor :: VehicleDrive.RotorArt, art.tail :: VehicleDrive.RotorArt
-	local H = VehicleDrive.HELI
 	local s = fx.scale
 	local rotor = fx.rotor
-	local show = rotor > 0.02
-	fx.rotorAng = (fx.rotorAng + rotor * H.rotorRpm / 60 * 2 * math.pi * dt) % (2 * math.pi)
-	fx.tailAng = (fx.tailAng + rotor * H.tailRpm / 60 * 2 * math.pi * dt) % (2 * math.pi)
+	local pasT, discoT = RotorVisual.estado(rotor, fx.dist * M)
+	RotorDisco.esconder(fx.pas, pasT)
+	RotorDisco.esconder(fx.caudaPecas, pasT)
+	local giro = RotorVisual.giro(rotor) * dt
+	discos.principal.ang = (discos.principal.ang + giro) % (2 * math.pi)
+	discos.cauda.ang = (discos.cauda.ang + giro * 2.3) % (2 * math.pi)
+	RotorDisco.transparencia(discos.principal, discoT)
+	RotorDisco.transparencia(discos.cauda, discoT)
+	if discoT >= 0.999 then
+		return
+	end
 	-- disco inclina com a aceleração (e, no piloto local, com o cíclico pedido)
 	local a = fx.chassis.CFrame:VectorToObjectSpace(fx.acc)
 	local tiltF = math.clamp(-a.Z / VehicleDrive.G * 0.35, -0.08, 0.08)
@@ -976,33 +1017,16 @@ local function drawRotor(fx: Fx, dt: number)
 	local hub = mcf
 		* CFrame.new(rot.x * s.X, rot.y * s.Y, rot.z * s.Z)
 		* CFrame.Angles(-tiltR * fx.fwdSign, 0, tiltF * fx.fwdSign)
-	local R = rot.r * s.X
-	local blur = math.clamp((rotor - 0.3) / 0.5, 0, 1)
-	-- lote _v2: as pás da malha giram de verdade (junta RotorPrincipal/RotorCauda); as de peça somem
-	-- e fica só o disco de desfoque
-	local meshBlades = fx.joints.rotor ~= nil
-	parts[1].Transparency = if show then 1 - 0.22 * blur else 1
-	table.insert(bulk.parts, parts[1])
-	table.insert(bulk.cfs, hub * CFrame.Angles(0, 0, math.pi / 2))
-	for k = 1, 4 do
-		local p = parts[1 + k]
-		p.Transparency = if show and not meshBlades then 0.25 + 0.65 * math.clamp(rotor / 0.6, 0, 1) else 1
-		table.insert(bulk.parts, p)
-		table.insert(
-			bulk.cfs,
-			hub * CFrame.Angles(0, fx.rotorAng + (k - 1) * math.pi / 2, 0) * CFrame.new(R * 0.5 + 0.4, 0.05, 0)
-		)
-	end
 	local tcf = mcf * CFrame.new(tail.x * s.X, tail.y * s.Y, tail.z * s.Z)
-	parts[6].Transparency = if show then 1 - 0.3 * blur else 1
-	table.insert(bulk.parts, parts[6])
-	table.insert(bulk.cfs, tcf * CFrame.Angles(0, math.pi / 2, 0))
-	for k = 1, 2 do
-		local p = parts[6 + k]
-		p.Transparency = if show and fx.joints.tail == nil then 0.3 + 0.6 * math.clamp(rotor / 0.5, 0, 1) else 1
-		table.insert(bulk.parts, p)
-		table.insert(bulk.cfs, tcf * CFrame.Angles(0, 0, fx.tailAng + (k - 1) * math.pi / 2))
+	local function poe(d: RotorDisco.Disco, cubo: CFrame)
+		local c1, c2 = RotorDisco.cframes(d, cubo)
+		table.insert(bulk.parts, d.peca)
+		table.insert(bulk.cfs, c1)
+		table.insert(bulk.parts, d.reserva)
+		table.insert(bulk.cfs, c2)
 	end
+	poe(discos.principal, hub)
+	poe(discos.cauda, tcf)
 end
 
 local function setColor(list: { ParticleEmitter }, c: Color3)
@@ -1363,8 +1387,12 @@ local function refresh()
 				-- o helicóptero se ouve mais longe (rotor)
 				local range = if model:GetAttribute("Kind") == "heli" then CFG.heliStuds else CFG.soundStuds
 				if not fx and d < range then
-					fx = newFx(model, chassis)
-					fxs[model] = fx
+					local novo = newFx(model, chassis)
+					fxs[model] = novo
+					if novo.kind == "heli" then
+						setupRotor(novo)
+					end
+					fx = novo
 				end
 				if fx then
 					fx.dist = d
@@ -1395,6 +1423,9 @@ RunService.PreSimulation:Connect(function(dt: number)
 		end
 		fx.dist = (fx.chassis.Position - camPos).Magnitude
 		updateEngine(fx, dt)
+		if fx.kind == "heli" then
+			spinRotors(fx, dt)
+		end
 		if fx.visual then
 			updateGround(fx, dt)
 			updatePose(fx, dt)
@@ -1431,6 +1462,9 @@ RunService.PreRender:Connect(function(dt: number)
 			continue
 		end
 		updateSound(fx, dt, fx.model == seated)
+		if fx.kind == "heli" then
+			drawRotor(fx, dt) -- D-199: longe também
+		end
 		if not fx.visual then
 			continue
 		end
@@ -1439,7 +1473,6 @@ RunService.PreRender:Connect(function(dt: number)
 		local vFwd = -lv.Z * M
 		local yawRate = chassis.AssemblyAngularVelocity:Dot(chassis.CFrame.UpVector)
 		if fx.kind == "heli" then
-			drawRotor(fx, dt)
 			drawWash(fx, rain)
 		else
 			if not mine(fx) then

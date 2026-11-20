@@ -945,6 +945,9 @@ export type Art = {
 	-- D-196: o que gira com a torre (lugares e peças do GLB) e a elevação mínima do cano por giro
 	-- (graus da frente, + para a esquerda), para o cano não entrar no casco
 	torre: Torre?,
+	-- D-199: quanto o assento desce além do EYE_ABOVE_SEAT (studs), por lugar. A câmera fica no olho
+	-- medido; só o corpo desce (o R15 sentado tem a cabeça 1,33 m acima do assento, Studio)
+	seatDrop: { [string]: number }?,
 }
 export type Torre = { lugares: { string }, pecas: { string }, minPitch: { { number } }? }
 
@@ -1042,23 +1045,30 @@ VehicleDrive.ART = {
 		aim = { seat = "gunner", down = -15, up = 45 },
 		torre = { lugares = { "gunner" }, pecas = {} }, -- D-196: a cúpula da metralhadora
 	},
+	-- D-199: v3 (silhueta medida no desenho de três vistas): números do assets/blender/uh34d/
+	-- metricas.json (art_novo e as juntas); o teste rotor.luau confere
 	uh34d = {
-		box = { 63.24, 17.32, 44.07 },
-		rotor = { x = -9.59, y = 7.59, z = 0, r = 30.48 },
-		tail = { x = 26.66, y = 3.48, z = 1.21, r = 5.18 },
-		-- cabine alta sobre o motor do nariz; atirador debruçado na porta da direita
+		box = { 63.28, 18.68, 44.41 },
+		rotor = { x = -9.44, y = 6.34, z = 0, r = 30.48 },
+		tail = { x = 26.64, y = 4.34, z = 1.96, r = 5.18 },
+		-- cabine alta sobre o motor do nariz (olho a 3,57 m do chão); atirador debruçado na porta da direita
 		eyes = {
-			driver = { -14.41, 2.73, -1.36 },
-			copilot = { -14.41, 2.73, 1.36 },
-			gunner = { -10.12, -2.52, -3.57 },
+			driver = { -13.9, 3.41, -1.5 },
+			copilot = { -13.9, 3.41, 1.5 },
+			gunner = { -9.97, -3.2, -3.71 },
 		},
-		-- tropa dentro do porão com forro (antes caía fora da fuselagem de 1,68 m)
-		riders = { x0 = -11.2, dx = 1.29, y = -2.88, z = 2.79 },
+		-- tropa dentro do porão com forro (fuselagem de 1,76 m)
+		riders = { x0 = -11.04, dx = 1.29, y = -3.56, z = 2.86 },
 		pivots = {
-			RotorPrincipal = { -9.59, 7.59, 0 },
-			RotorCauda = { 26.66, 3.48, 1.21 },
-			Escotilha_Porta = { -5.02, -3.3, -3.17 },
+			RotorPrincipal = { -9.44, 6.34, 0 },
+			RotorCauda = { 26.64, 4.34, 1.96 },
+			Escotilha_Porta = { -7.03, -3.51, -3.12 },
 		},
+		-- D-199: o R15 sentado tem a cabeça 1,33 m e o capacete 1,59 m acima do centro do assento, o
+		-- quadril 0,30 m acima e os pés 0,19 m abaixo (Studio). Medido com 0,38 m de descida, do chão
+		-- das rodas: quadril 2,68, pés 2,19, capacete 3,97. Com 0,46 m: quadril no estofado (2,60;
+		-- topo 2,58), pés no fosso (2,11; fundo 2,08), capacete a 3,89 sob o teto (4,04 sobre a cabeça)
+		seatDrop = { driver = 0.46 / 0.28, copilot = 0.46 / 0.28 },
 	},
 	m151 = {
 		box = { 12.66, 6.36, 5.79 },

@@ -645,6 +645,30 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     - Não testado: água e estrutura no Studio, o som ouvido, o ataque aéreo inteiro em sequência,
       celular e jogo publicado.
     - **v116 publicada** (versão 121 do place, commit 68fccbf).
+  - **Lote 83 (D-199): o helicóptero melhorado, feito.**
+    - UH-34D v3 (`tools/blender/veic_uh34d.py`): a silhueta saiu do desenho de três vistas, medido
+      por código.
+      - Corrigido: cabine alta, mastro curto, cone fundo, deriva inclinada, trem até o nariz e
+        bequilha 2,3 m mais para trás.
+      - Novo: vidro transparente, molduras, interior com painel e comandos, cubo articulado, pás
+        NACA 0012 com a ponta laranja, pneus, marcas e insígnia.
+      - 13.648 triângulos, contra 4.742 no v2.
+    - Cabine 0,22 m mais alta que o desenho e assento mais baixo (`ART.seatDrop`), porque o
+      soldado R15 sentado não cabia. Antes, a cabeça do piloto atravessava o teto.
+    - Rotor: as pás somem com a rotação e entra o disco borrado (`RotorVisual`, `RotorDisco`,
+      textura `tools/rotor_borrao.py`).
+      - Agora gira até 1,5 km; antes as pás paravam além de 220 m.
+      - O helicóptero do evento também tem o disco.
+    - Conferido: Lune 766 ok (49 arquivos), pytest 70 e ruff limpo. No Studio:
+      - as três rodas no chão (−1 cm) e nivelado;
+      - decolou subindo 10,5 m/s;
+      - piloto sentado com o capacete a 3,89 m, sob o teto (4,04 m), quadril no estofado e pés no
+        fosso;
+      - na mesma vista a 27 m: +12,3 chamadas de desenho e +13,7 mil triângulos (v2: +11,7 e
+        +4,8 mil);
+      - capturas em `testes/lote83`; relatório em `testes/LOTE83_D199_2026-11-20.md`.
+    - Não testado: pouso em encosta, outro jogador vendo o piloto, embarque da tropa, celular e jogo
+      publicado.
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;

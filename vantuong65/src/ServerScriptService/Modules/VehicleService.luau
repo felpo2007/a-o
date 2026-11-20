@@ -1259,7 +1259,8 @@ local function seatCFrame(
 		local box = art.box
 		local s = mesh.Size / Vector3.new(box[1], box[2], box[3])
 		local eye = mesh.CFrame * Vector3.new(ex * s.X, ey * s.Y, ez * s.Z)
-		return CFrame.new(eye - Vector3.new(0, EYE_ABOVE_SEAT, 0)) * rot
+		local drop = (art.seatDrop and art.seatDrop[info.id]) or 0 -- D-199
+		return CFrame.new(eye - Vector3.new(0, EYE_ABOVE_SEAT + drop, 0)) * rot
 	end
 	local at = Vehicles.wheeledSeatAt(specId, info.id)
 	if at then

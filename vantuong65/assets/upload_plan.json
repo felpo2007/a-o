@@ -1149,6 +1149,19 @@
   "description": "VAN TUONG 65 - veiculo na medida real, feito no Blender"
  },
  {
+  "key": "Models.uh34d_v3",
+  "file": "assets/blender/uh34d/uh34d.glb",
+  "assetType": "Model",
+  "name": "VT65 uh34d_v3",
+  "description": "VAN TUONG 65 - UH-34D refeito: silhueta medida, vidro, interior, cubo e pas com perfil"
+ },
+ {
+  "key": "Images.rotor_borrao",
+  "file": "assets/rotor/rotor_borrao.png",
+  "assetType": "Decal",
+  "name": "VT65 rotor_borrao"
+ },
+ {
   "key": "Models.m151",
   "file": "assets/blender/m151/m151.glb",
   "assetType": "Model",

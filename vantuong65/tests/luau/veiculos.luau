@@ -566,9 +566,9 @@ test("vista sentado: todo assento tem olho fora do casco (escotilha, cabine, por
 			end
 		end
 	end
-	-- UH-34D (_v2, medida real): cabine alta acima do porão; atirador debruçado para fora da pele da
-	-- direita (meia largura da fuselagem 0,84 m); a tropa DENTRO do porão (antes caía fora)
-	local half = 0.84 / 0.28
+	-- UH-34D (_v3, D-199): cabine alta acima do porão; atirador debruçado para fora da pele da
+	-- direita (meia largura da fuselagem 0,88 m); a tropa DENTRO do porão (antes caía fora)
+	local half = 0.88 / 0.28
 	local _, py = VehicleDrive.eyeOf("uh34d", "driver")
 	local _, ry, rz = VehicleDrive.eyeOf("uh34d", "p1")
 	local _, _, gz = VehicleDrive.eyeOf("uh34d", "gunner")
@@ -879,7 +879,7 @@ test("lote _v2: modelo do Blender, peças móveis, olho do soldado de 2 m e orç
 			end
 		end
 	end
-	assert(Vehicles.modelKey("m48a3") == "m48a3_v2" and Vehicles.modelKey("uh34d") == "uh34d_v2")
+	assert(Vehicles.modelKey("m48a3") == "m48a3_v2" and Vehicles.modelKey("uh34d") == "uh34d_v3")
 	-- quem gira: torre e cano nos três blindados (o LVTP-5 só a cúpula), rotores no UH-34D, volante nos carros
 	for _, id in { "m48a3", "ontos" } do
 		local a = VehicleDrive.ART[id]
@@ -902,7 +902,7 @@ test("lote _v2: modelo do Blender, peças móveis, olho do soldado de 2 m e orç
 	local roofs = {
 		peugeot403 = 1.86 + (0.12 - 0.094) / 0.28, -- olho de 2 m do Blender + cabeça + folga (−9 cm)
 		m35 = 3.07 + (2.764 - 2.292) / 0.28, -- olho da tabela + (teto − olho), em m do chão
-		uh34d = 2.73 + (3.457 - 3.189) / 0.28,
+		uh34d = 3.41 + (4.007 - 3.57) / 0.28, -- v3: folga de 0,407 m para o soldado de 2 m
 	}
 	for id, roof in roofs do
 		local _, y = VehicleDrive.eyeOf(id, "driver")

@@ -1549,7 +1549,8 @@
   "inteiro",
   "estrutura",
   "pesada",
-  "vegetacao"
+  "vegetacao",
+  "Vidro"
  ],
  "regex": [
   "^uni_[a-z_]+@[a-z0-9]+$"

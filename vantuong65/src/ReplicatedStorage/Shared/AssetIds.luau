@@ -221,6 +221,8 @@ return {
 		ontos_v2 = 140388448545182,
 		lvtp5_v2 = 106956293397124,
 		uh34d_v2 = 110115617078484,
+		-- D-199: UH-34D refeito (silhueta medida, vidro, interior, cubo e pás com perfil)
+		uh34d_v3 = 78025077667001,
 		m151 = 105050207488338,
 		m35 = 105676392589052,
 		peugeot403 = 124703224666199,
@@ -301,6 +303,9 @@ return {
 		-- a imagem (atributo "Img_bandeira_eua"/"Img_bandeira_frente"). Com 0, a bandeira em peças
 		bandeira_eua = 81433016721243,
 		bandeira_frente = 113462893009049,
+		-- D-199: disco borrado do rotor girando (tools/rotor_borrao.py); Decal, o ImagensUi resolve a
+		-- imagem ("Img_rotor_borrao", RotorDisco). Com 0, o disco cinza de antes
+		rotor_borrao = 105200442956287,
 	},
 	-- Texturas do chão (D-66; Poly Haven, CC0): IDs de DECAL devolvidos pelo Open Cloud. O
 	-- MaterialVariant precisa do ID da IMAGEM de cada decal: fica em GroundImages (resolvido no Studio).
