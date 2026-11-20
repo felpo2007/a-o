@@ -403,6 +403,134 @@ function ItemArte.desenha(parent: Instance, item: any, s: number, opts: Opcoes?)
 	return box
 end
 
+-- ===== recompensas do passe (D-208; prompt de interface §11: "Imagem de cada recompensa") =====
+-- O passe (Shared/Temporada) tinha um emoji por tipo. Agora cada recompensa tem um desenho:
+--   - acabamento de arma (camo) e uniforme: o item de verdade (a arma em 3D com o acabamento, o pano da
+--     farda), pelo ItemArte.desenha;
+--   - créditos, título e emblema: a ficha, a faixa de papel e a insígnia do ItemArte.desenha;
+--   - cartão de abate: a moldura com a caveira; música: o disco; gesto: o soldado em silhueta fazendo o
+--     gesto; reforço: o selo "2×". Desenhados com quadros (nada de imagem inventada).
+local SIGLA: { [string]: { s: string, c1: { number }, c3: { number } } } = {
+	emb_s1 = { s = "S1", c1 = { 214, 172, 72 }, c3 = { 150, 96, 10 } },
+	emb_capacete = { s = "M1", c1 = { 104, 124, 64 }, c3 = { 46, 56, 30 } },
+	emb_bambu = { s = "B", c1 = { 120, 150, 60 }, c3 = { 40, 70, 30 } },
+	emb_estrela = { s = "★", c1 = { 196, 122, 56 }, c3 = { 110, 60, 24 } },
+	emb_veterano_ouro = { s = "★", c1 = { 255, 206, 64 }, c3 = { 170, 110, 10 } },
+}
+local function caixaDe(parent: Instance, s: number, rc: Color3): Frame
+	local box = frame(parent, UDim2.fromOffset(s, s), V.PANEL_2, 0)
+	box.Name = "Item"
+	UiKit.corner(box, 6)
+	UiKit.edge(box, rc, 2, 0)
+	local fundo = Instance.new("UIGradient")
+	fundo.Color = ColorSequence.new(rc:Lerp(V.PANEL_2, 0.72), V.PANEL_2)
+	fundo.Rotation = 90
+	fundo.Parent = box
+	return box
+end
+local function circulo(parent: Instance, d: number, cor: Color3, cx: number?, cy: number?): Frame
+	local f = frame(parent, UDim2.fromScale(d, d), cor, 0)
+	f.AnchorPoint = Vector2.new(0.5, 0.5)
+	f.Position = UDim2.fromScale(cx or 0.5, cy or 0.5)
+	local ar = Instance.new("UIAspectRatioConstraint")
+	ar.Parent = f
+	UiKit.corner(f, 999)
+	return f
+end
+local function barra(parent: Instance, x: number, y: number, w: number, h: number, rot: number, cor: Color3): Frame
+	local f = frame(parent, UDim2.fromScale(w, h), cor, 0)
+	f.AnchorPoint = Vector2.new(0.5, 0.5)
+	f.Position = UDim2.fromScale(x, y)
+	f.Rotation = rot
+	UiKit.corner(f, 3)
+	return f
+end
+
+function ItemArte.recompensa(parent: Instance, r: any, s: number): Frame
+	local kind = if type(r) == "table" then r.kind else nil
+	local id = if type(r) == "table" then (r.id or (type(r.ids) == "table" and r.ids[1]) or nil) else nil
+	if (kind == "camo" or kind == "uniform") and id and Skins.get(id) then
+		return ItemArte.desenha(parent, { id = id, raridade = if kind == "camo" then "raro" else "epico" }, s)
+	elseif kind == "credits" then
+		return ItemArte.desenha(
+			parent,
+			{ id = "creditos", kind = "creditos", quantidade = r.amount, raridade = "comum" },
+			s
+		)
+	elseif kind == "title" then
+		return ItemArte.desenha(parent, { id = id, kind = "titulo", nome = r.name, raridade = "epico" }, s)
+	elseif kind == "emblem" then
+		local sg = SIGLA[id or ""] or { s = "★", c1 = { 214, 172, 72 }, c3 = { 120, 80, 20 } }
+		return ItemArte.desenha(parent, {
+			id = id,
+			kind = "emblema",
+			sigla = sg.s,
+			cor = sg.c1,
+			cor2 = { 240, 234, 220 },
+			cor3 = sg.c3,
+			raridade = if id == "emb_veterano_ouro" then "lendario" else "raro",
+		}, s)
+	end
+	local rc = ItemArte.corRaridade(if kind == "boost" then "incomum" else "epico")
+	local box = caixaDe(parent, s, rc)
+	box.Name = "Recompensa"
+	if kind == "killcard" then
+		-- cartão de abate: a moldura escura com a faixa vermelha e a caveira desenhada
+		local m = frame(box, UDim2.fromScale(0.74, 0.56), V.PANEL, 0)
+		m.AnchorPoint = Vector2.new(0.5, 0.5)
+		m.Position = UDim2.fromScale(0.5, 0.5)
+		UiKit.corner(m, 4)
+		UiKit.edge(m, V.RED_HI, 3, 0)
+		frame(m, UDim2.new(0, math.max(3, math.floor(s * 0.05)), 1, 0), V.RED, 0)
+		local cran = circulo(m, 0.5, V.TEXT, 0.56, 0.42)
+		circulo(cran, 0.26, V.PANEL, 0.32, 0.5)
+		circulo(cran, 0.26, V.PANEL, 0.68, 0.5)
+		barra(m, 0.56, 0.78, 0.2, 0.14, 0, V.TEXT)
+	elseif kind == "music" then
+		-- disco de vinil: o preto com os sulcos e o selo no meio
+		local d = circulo(box, 0.74, Color3.fromRGB(18, 18, 16))
+		for _, k in { 0.86, 0.68 } do
+			local g = circulo(d, k, Color3.fromRGB(18, 18, 16))
+			UiKit.edge(g, Color3.fromRGB(60, 60, 56), 1, 0.2)
+		end
+		local selo = circulo(d, 0.36, Color3.fromRGB(80, 120, 170))
+		UiKit.edge(selo, V.TEXT, 1, 0.5)
+		circulo(selo, 0.2, V.BG)
+	elseif kind == "gesture" then
+		-- o soldado em silhueta fazendo o gesto (a mão erguida até a testa ou o mapa nas mãos)
+		local cor = Color3.fromRGB(200, 196, 176)
+		circulo(box, 0.2, cor, 0.5, 0.26)
+		barra(box, 0.5, 0.56, 0.22, 0.36, 0, cor)
+		barra(box, 0.42, 0.88, 0.08, 0.26, 0, cor)
+		barra(box, 0.58, 0.88, 0.08, 0.26, 0, cor)
+		if id == "ges_mapa" then
+			barra(box, 0.5, 0.56, 0.4, 0.2, 0, Color3.fromRGB(214, 203, 170))
+		elseif id == "ges_cantil" then
+			barra(box, 0.68, 0.36, 0.08, 0.3, -30, cor)
+			circulo(box, 0.12, V.OLIVE, 0.66, 0.2)
+		else
+			barra(box, 0.66, 0.38, 0.08, 0.32, 40, cor)
+		end
+	elseif kind == "boost" then
+		-- selo do reforço: "2×" grande em âmbar
+		local selo = circulo(box, 0.74, V.AMBAR)
+		UiKit.edge(selo, V.AMBAR_TEXTO, 3, 0.3)
+		local t = label(selo, "2×", math.floor(s * 0.28), V.AMBAR_TEXTO, F.TITLE)
+		t.Size = UDim2.fromScale(1, 0.7)
+		t.TextXAlignment = Enum.TextXAlignment.Center
+		t.TextYAlignment = Enum.TextYAlignment.Bottom
+		local x = label(selo, if id == "xp" then "XP" else "", math.floor(s * 0.11), V.AMBAR_TEXTO, F.TITLE_MED)
+		x.Position = UDim2.fromScale(0, 0.66)
+		x.Size = UDim2.fromScale(1, 0.2)
+		x.TextXAlignment = Enum.TextXAlignment.Center
+	else
+		local t = label(box, "★", math.floor(s * 0.4), V.BRASS, F.BODY_B)
+		t.Size = UDim2.fromScale(1, 1)
+		t.TextXAlignment = Enum.TextXAlignment.Center
+	end
+	return box
+end
+
 -- Põe o soldado com a farda do uniforme `item` em `parent` (tamanho cheio), no retrato grande que
 -- gira de leve (SoldierPreview: um só, reaproveitado; ele não descarta retratos). false = sem
 -- manequim (quem chama desenha o pano no lugar).

@@ -1631,7 +1631,11 @@
   "codigo",
   "codigo:",
   "codigos",
-  "código"
+  "código",
+  "%s:%s:%s",
+  "incomum",
+  "raro",
+  "xp"
  ],
  "regex": [
   "^uni_[a-z_]+@[a-z0-9]+$"

@@ -159,7 +159,8 @@ folder.Active = true -- tapa a mesa do lobby atrás (o clique não atravessa)
 folder.Parent = gui
 UiKit.corner(folder, 4)
 UiKit.edge(folder, V.LINE, 1, 0.35)
-local fit = UiKit.fit(gui, folder, W, H, 12)
+-- a margem da esquerda entra na conta (no passe, sem ela, o FECHAR saía da tela à direita)
+local fit = UiKit.fit(gui, folder, W + X0, H, 12)
 Acabamento.sombra(folder, 24, Vector2.new(0, 9), 0.6)
 do -- filete âmbar no alto (D-207; era oliva): o acento do cabeçalho
 	local accent = Instance.new("Frame")

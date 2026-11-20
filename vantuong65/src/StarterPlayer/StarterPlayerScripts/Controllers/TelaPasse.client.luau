@@ -28,6 +28,8 @@ local Progression = require(ReplicatedStorage.Shared.Progression)
 local Bus = require(script.Parent.Bus)
 local CampanhaCliente = require(script.Parent.CampanhaCliente)
 local Input = require(script.Parent.Input)
+local ItemArte = require(script.Parent.ItemArte)
+local LobbyPalco = require(script.Parent.LobbyPalco)
 local ToqueTelas = require(script.Parent.ToqueTelas)
 local ToqueUi = require(script.Parent.ToqueUi)
 local UiKit = require(script.Parent.UiKit)
@@ -43,7 +45,11 @@ local MAX = 50
 --   - o ícone de cada tipo de prêmio é um desenho que a criança reconhece (💰 👕 🎵 ...), não letra;
 --   - o prêmio que ainda vai chegar fica legível (branco), não cinza; o que já pode ser pego brilha;
 --   - receber e receber tudo em verde vivo.
-local W, H = px(1000, 1320), px(684, 900)
+-- D-208 (referências do dono: o passe ocupa a esquerda e o personagem fica à direita, na luz): o
+-- painel cresceu de 1000 para 1180 de largura (mais níveis à vista) e saiu do meio para a esquerda;
+-- no lobby o palco (LobbyPalco) põe o soldado do jogador à direita dele
+local W, H = px(1180, 1560), px(684, 900)
+local X0 = px(48, 64)
 local PAD = px(20, 28)
 local HEAD_H = px(104, 138)
 local FOOT_H = px(46, 64)
@@ -56,9 +62,9 @@ local CARD_H = px(152, 196)
 local NODE_ROW = px(52, 70)
 local NODE_D = px(34, 44)
 local LINE_H = px(4, 6)
--- D-130 (lote 16, dono: "coloque mais cores vivas no passe"): cores cheias. Cada tipo de prêmio tem a
--- sua (KIND_MARK), a trilha grátis é verde e a do Veterano é dourada, a rota andada vai em degradê de
--- ouro e a faixa do alto, de ouro a vermelho. Antes tudo era oliva e latão apagados.
+-- D-130 (lote 16, dono: "coloque mais cores vivas no passe"): cores cheias. A trilha grátis é verde e
+-- a do Veterano é dourada, a rota andada vai em degradê de ouro e a faixa do alto, de ouro a
+-- vermelho. Antes tudo era oliva e latão apagados. (D-208: cada prêmio com o próprio desenho.)
 local VIVO = {
 	GOLD = Color3.fromRGB(255, 196, 40),
 	GOLD_HI = Color3.fromRGB(255, 222, 90),
@@ -75,22 +81,37 @@ local FREE_BG_HI = Color3.fromRGB(34, 84, 48)
 -- ===== montagem =====
 local gui = UiKit.screen("VT65Passe", 38) -- acima da loja (30) e do menu (35)
 gui.Enabled = false
+-- D-208: no lobby, só o escuro da esquerda (o palco e o soldado aparecem à direita); fora dele, o véu
 local dim = Instance.new("Frame")
 dim.Name = "Veu"
-dim.Size = UDim2.fromScale(1, 1)
-dim.BackgroundColor3 = V.BG
+dim.Position = UDim2.fromOffset(-200, -200)
+dim.Size = UDim2.new(1, 400, 1, 400)
+dim.BackgroundColor3 = Color3.fromRGB(5, 5, 4)
 dim.BackgroundTransparency = 1
 dim.BorderSizePixel = 0
 dim.Active = true
 dim.Parent = gui
+local dimGrad = Instance.new("UIGradient")
+dimGrad.Parent = dim
+local function pintarVeu(noPalco: boolean)
+	dimGrad.Transparency = if noPalco
+		then NumberSequence.new({
+			NumberSequenceKeypoint.new(0, 0.05),
+			NumberSequenceKeypoint.new(0.55, 0.3),
+			NumberSequenceKeypoint.new(0.75, 0.85),
+			NumberSequenceKeypoint.new(1, 1),
+		})
+		else NumberSequence.new(0.35)
+end
 
-local panel = UiKit.panel(gui, V.PANEL, 0.03)
+local panel = UiKit.panel(gui, V.PANEL, 0.08)
 panel.Name = "Passe"
-panel.AnchorPoint = Vector2.new(0.5, 0.5)
-panel.Position = UDim2.fromScale(0.5, 0.5)
+panel.AnchorPoint = Vector2.new(0, 0.5)
+panel.Position = UDim2.new(0, X0, 0.5, 0)
 panel.Size = UDim2.fromOffset(W, H)
-local fit = UiKit.fit(gui, panel, W, H, 12)
-do -- D-130: o cabeçalho num degradê quente (ouro, laranja, vermelho) e a faixa do alto cheia
+-- a margem da esquerda entra na conta (no Studio, sem ela, o FECHAR saía da tela à direita)
+local fit = UiKit.fit(gui, panel, W + X0, H, 12)
+do -- D-130: o cabeçalho quente; D-208: escuro, com o ouro só subindo da esquerda (as referências)
 	local band = Instance.new("Frame")
 	band.Name = "Cabecalho"
 	band.BackgroundColor3 = Color3.new(1, 1, 1)
@@ -100,13 +121,13 @@ do -- D-130: o cabeçalho num degradê quente (ouro, laranja, vermelho) e a faix
 	band.Parent = panel
 	local bg = Instance.new("UIGradient")
 	bg.Color = ColorSequence.new({
-		ColorSequenceKeypoint.new(0, Color3.fromRGB(150, 96, 10)),
-		ColorSequenceKeypoint.new(0.5, Color3.fromRGB(150, 60, 16)),
-		ColorSequenceKeypoint.new(1, Color3.fromRGB(120, 24, 24)),
+		ColorSequenceKeypoint.new(0, Color3.fromRGB(120, 78, 12)),
+		ColorSequenceKeypoint.new(0.55, Color3.fromRGB(40, 32, 18)),
+		ColorSequenceKeypoint.new(1, Color3.fromRGB(22, 25, 19)),
 	})
 	bg.Transparency = NumberSequence.new({
-		NumberSequenceKeypoint.new(0, 0.1),
-		NumberSequenceKeypoint.new(1, 0.45),
+		NumberSequenceKeypoint.new(0, 0.2),
+		NumberSequenceKeypoint.new(1, 0.5),
 	})
 	bg.Parent = band
 	local a = Instance.new("Frame")
@@ -160,6 +181,24 @@ closeBtn.button.AnchorPoint = Vector2.new(1, 0)
 closeBtn.button.Position = UDim2.new(1, -PAD, 0, px(10, 14))
 closeBtn.button.Size = UDim2.fromOffset(px(110, 150), px(28, 40))
 closeBtn.button.Selectable = false
+-- D-208: as referências juntam a trilha e as missões; aqui as ordens do dia ficam a um clique (a tela
+-- delas abre no lugar do passe)
+local ordensBtn = UiKit.action(panel, "ORDENS DO DIA ›", "secondary", function()
+	Bus.fire("passe_close")
+	Bus.fire("missoes_open")
+end, { h = px(34, 48) })
+ordensBtn.button.Name = "Ordens"
+ordensBtn.button.AnchorPoint = Vector2.new(1, 0)
+ordensBtn.button.Position = UDim2.new(1, -(PAD + px(120, 162)), 0, px(10, 14))
+ordensBtn.button.Size = UDim2.fromOffset(px(170, 226), px(28, 40))
+ordensBtn.button.Selectable = false
+-- D-208 (§11: "Estado do acesso premium"): o Veterano numa etiqueta com símbolo e palavra
+local vetPill = UiKit.tag(panel, "", V.PANEL_3, px(14, 19))
+vetPill.Name = "Veterano"
+vetPill.FontFace = F.BODY_B
+vetPill.AnchorPoint = Vector2.new(0, 0)
+vetPill.Position = UDim2.fromOffset(PAD + px(330, 440), px(78, 104))
+vetPill.Size = UDim2.fromOffset(0, px(24, 32))
 
 -- ----- a faixa da linha do tempo -----
 local TL_Y = HEAD_H + px(4, 6)
@@ -310,20 +349,15 @@ detail.Size = UDim2.new(1, -2 * PAD, 0, DETAIL_H - px(6, 8))
 local P = px(12, 16)
 local DH = DETAIL_H - px(6, 8)
 local ICON = DH - 2 * P
+-- D-208: a arte da recompensa escolhida, grande (ItemArte.recompensa)
 local prevThumb = Instance.new("Frame")
 prevThumb.Name = "Icone"
-prevThumb.BackgroundColor3 = V.PANEL_3
+prevThumb.BackgroundTransparency = 1
 prevThumb.BorderSizePixel = 0
 prevThumb.Position = UDim2.fromOffset(P, P)
 prevThumb.Size = UDim2.fromOffset(ICON, ICON)
 prevThumb.Parent = detail
-UiKit.corner(prevThumb, 4)
-local prevGlow = Instance.new("UIGradient")
-prevGlow.Rotation = 90
-prevGlow.Parent = prevThumb
-local prevMark = UiKit.text2(prevThumb, "★", px(64, 84), V.BRASS, F.TITLE)
-prevMark.Size = UDim2.fromScale(1, 1)
-prevMark.TextXAlignment = Enum.TextXAlignment.Center
+local prevArtKey = ""
 local BTN_W = px(214, 286)
 local BTN_H = px(46, 60)
 local textX = P + ICON + px(14, 18)
@@ -419,21 +453,9 @@ local KIND_NAME: { [string]: string } = {
 	boost = "Reforço",
 	stars = "Estrelas",
 }
--- D-130: uma cor viva por tipo de prêmio (o ícone vai cheio dela).
--- Lote 23: no lugar da letra (K, U, T...), o desenho do prêmio em emoji, que a criança reconhece
--- (o Roblox já desenha emoji nos eventos e na carta).
-local KIND_MARK: { [string]: { text: string, color: Color3 } } = {
-	credits = { text = "💰", color = Color3.fromRGB(70, 196, 90) },
-	emblem = { text = "🎖️", color = Color3.fromRGB(255, 186, 30) },
-	camo = { text = "🌿", color = Color3.fromRGB(150, 210, 60) },
-	title = { text = "🏷️", color = Color3.fromRGB(70, 160, 255) },
-	uniform = { text = "👕", color = Color3.fromRGB(255, 130, 40) },
-	killcard = { text = "💀", color = Color3.fromRGB(240, 64, 56) },
-	gesture = { text = "👋", color = Color3.fromRGB(200, 100, 255) },
-	music = { text = "🎵", color = Color3.fromRGB(40, 200, 215) },
-	boost = { text = "⚡", color = Color3.fromRGB(255, 160, 20) },
-	stars = { text = "⭐", color = Color3.fromRGB(255, 214, 60) },
-}
+-- D-130 e lote 23 davam a cada tipo de prêmio uma cor e um emoji. D-208: o desenho do próprio
+-- prêmio (ItemArte.recompensa) entrou no lugar: a arma com o acabamento, o pano da farda, a
+-- insígnia, a faixa do título, o cartão de abate, o disco, o gesto, o selo do reforço.
 local function rewardName(r: Reward?): string
 	if not r then
 		return "—"
@@ -513,7 +535,8 @@ end)
 -- ===== as colunas (montadas uma vez) =====
 type Cell = {
 	button: TextButton,
-	icon: Frame,
+	icon: CanvasGroup, -- D-208: a arte da recompensa (CanvasGroup: apaga inteira quando já recebida)
+	artKey: string,
 	mark: TextLabel,
 	name: TextLabel,
 	sub: TextLabel,
@@ -615,27 +638,24 @@ local function makeCell(parent: Instance, y: number, lvl: number, track: string)
 		lg.Color = ColorSequence.new(Color3.new(1, 1, 1), Color3.new(0.7, 0.7, 0.7))
 		lg.Parent = b
 	end
-	-- o ícone: quadrado com a cor do tipo de recompensa e a luz caindo de cima
-	local IC = px(60, 80)
-	local icon = Instance.new("Frame")
+	-- D-208: a arte da recompensa (ItemArte.recompensa, posta no paint quando o estado chega), num
+	-- CanvasGroup que apaga inteiro quando o prêmio já foi recebido; o emoji do lote 23 saiu
+	local IC = px(68, 90)
+	local icon = Instance.new("CanvasGroup")
 	icon.Name = "Icone"
 	icon.AnchorPoint = Vector2.new(0.5, 0)
-	icon.Position = UDim2.new(0.5, 0, 0, px(10, 12))
+	icon.Position = UDim2.new(0.5, 0, 0, px(8, 10))
 	icon.Size = UDim2.fromOffset(IC, IC)
-	icon.BackgroundColor3 = V.PANEL_3
+	icon.BackgroundTransparency = 1
 	icon.BorderSizePixel = 0
 	icon.ZIndex = 2
 	icon.Parent = b
-	UiKit.corner(icon, IC // 2)
-	local g = Instance.new("UIGradient")
-	g.Rotation = 90
-	g.Color = ColorSequence.new(Color3.new(1, 1, 1), Color3.new(0.62, 0.62, 0.62))
-	g.Parent = icon
 	local mark = UiKit.text2(icon, "", px(32, 42), V.KHAKI, F.TITLE)
 	mark.Size = UDim2.fromScale(1, 1)
 	mark.TextXAlignment = Enum.TextXAlignment.Center
 	mark.ZIndex = 2
-	local ny = px(10, 12) + IC + px(6, 8)
+	mark.Visible = false
+	local ny = px(8, 10) + IC + px(4, 6)
 	local name = UiKit.text2(b, "", px(18, 24), V.TEXT, F.BODY_B)
 	name.Position = UDim2.fromOffset(px(6, 8), ny)
 	name.Size = UDim2.new(1, -px(12, 16), 0, px(44, 58))
@@ -685,6 +705,7 @@ local function makeCell(parent: Instance, y: number, lvl: number, track: string)
 	return {
 		button = b,
 		icon = icon,
+		artKey = "",
 		mark = mark,
 		name = name,
 		sub = sub,
@@ -746,35 +767,57 @@ local function build()
 	end
 end
 
+-- D-208 (§11: "Diferencie visualmente recompensa bloqueada, alcançada, disponível para resgate,
+-- resgatada e dependente de premium"): cada estado com cor, símbolo e palavra; o que ainda não chegou
+-- diz o nível (o "future" ganha o texto no paint)
 local STATE_TAG: { [string]: { text: string, color: Color3 } } = {
 	ready = { text = "RECEBER", color = VIVO.GREEN_DEEP },
-	claimed = { text = "✔", color = V.PANEL_3 },
-	locked = { text = "VETERANO", color = Color3.fromRGB(176, 120, 20) },
+	claimed = { text = "✓ RECEBIDO", color = V.PANEL_3 },
+	locked = { text = "🔒 VETERANO", color = Color3.fromRGB(176, 120, 20) },
+	future = { text = "NÍVEL", color = V.PANEL_3 },
 }
+-- chave da arte de uma recompensa (a arte só é refeita quando a recompensa muda)
+local function artKeyOf(r: Reward?): string
+	if not r then
+		return ""
+	end
+	local any = r :: any
+	local id = r.id or (type(any.ids) == "table" and any.ids[1]) or ""
+	return string.format("%s:%s:%s", r.kind or "", tostring(id), tostring(r.amount or ""))
+end
 -- lote 23: os cartões que já podem ser pegos (o contorno deles brilha enquanto a tela está aberta)
 local readyEdges: { UIStroke } = {}
 local function paintCell(c: Cell, se: { [string]: any }, track: string, lvl: number)
 	local r: Reward? = at(if track == "vet" then se.vet else se.free, lvl)
 	local st = cellState(se, track, lvl)
-	local km = KIND_MARK[(r and r.kind) or ""]
-	c.mark.Text = if r then (if km then km.text else "⭐") else ""
-	-- D-130: o ícone cheio da cor do prêmio
-	c.mark.TextColor3 = V.TEXT
-	c.icon.BackgroundColor3 = if km then km.color else VIVO.GOLD
+	-- D-208: a arte da recompensa (uma vez por recompensa; só o estado muda depois)
+	local key = artKeyOf(r)
+	if c.artKey ~= key then
+		c.artKey = key
+		for _, ch in c.icon:GetChildren() do
+			if ch ~= c.mark then
+				ch:Destroy()
+			end
+		end
+		if r then
+			local a = ItemArte.recompensa(c.icon, r, c.icon.Size.X.Offset)
+			a.Size = UDim2.fromScale(1, 1)
+		end
+	end
 	c.name.Text = if r then rewardName(r) else "—"
 	c.sub.Text = if r then UiKit.upper(KIND_NAME[r.kind or ""] or "Item") else ""
 	local tg = STATE_TAG[st]
 	c.tag.Visible = tg ~= nil and r ~= nil
 	if tg then
-		c.tag.Text = tg.text
+		c.tag.Text = if st == "future" then string.format("NÍVEL %d", lvl) else tg.text
 		c.tag.BackgroundColor3 = tg.color
+		c.tag.FontFace = F.BODY_B
 	end
 	-- lote 23: o prêmio que ainda vai chegar fica legível (branco, um pouco transparente); só o que já
-	-- foi pego fica apagado
+	-- foi pego fica apagado. D-208: a arte apaga junto (bloqueado um pouco, recebido bem mais)
 	c.name.TextColor3 = if st == "claimed" then V.DIM else V.TEXT
 	c.name.TextTransparency = if st == "future" or st == "locked" then 0.12 else 0
-	c.mark.TextTransparency = if st == "claimed" then 0.35 else 0
-	c.icon.BackgroundTransparency = if st == "claimed" then 0.55 elseif st == "future" or st == "locked" then 0.12 else 0
+	c.icon.GroupTransparency = if st == "claimed" then 0.55 elseif st == "future" or st == "locked" then 0.25 else 0
 	local on = sel.level == lvl and sel.track == track
 	-- o Veterano com o filete dourado, o grátis com o verde: a trilha se distingue de longe
 	c.edge.Color = if on
@@ -847,12 +890,26 @@ paint = function()
 	end
 	-- ficha do escolhido
 	local rw: Reward? = at(if sel.track == "vet" then se.vet else se.free, sel.level)
-	local km = KIND_MARK[(rw and rw.kind) or ""]
-	prevMark.Text = if km then km.text else "★"
-	prevMark.TextColor3 = V.TEXT
-	-- D-130: a miniatura cheia da cor do prêmio
-	prevThumb.BackgroundColor3 = if km then km.color else VIVO.GOLD
-	prevGlow.Color = ColorSequence.new(Color3.new(1, 1, 1), Color3.new(0.6, 0.6, 0.6))
+	-- D-208: a arte grande da recompensa escolhida (refeita só quando ela muda)
+	local pk = artKeyOf(rw)
+	if pk ~= prevArtKey then
+		prevArtKey = pk
+		for _, ch in prevThumb:GetChildren() do
+			ch:Destroy()
+		end
+		if rw then
+			local a = ItemArte.recompensa(prevThumb, rw, ICON)
+			a.Size = UDim2.fromScale(1, 1)
+			if not UiKit.Estilo.reduzMovimento() then
+				local sc = Instance.new("UIScale")
+				sc.Scale = 0.92
+				sc.Parent = a
+				UiKit.tween(sc, UiKit.QUICK, { Scale = 1 })
+			end
+		end
+	end
+	vetPill.Text = if se.veteran then "✓ VETERANO ATIVO" else "🔒 VETERANO BLOQUEADO"
+	vetPill.BackgroundColor3 = if se.veteran then VIVO.GREEN_DEEP else Color3.fromRGB(120, 82, 14)
 	prevKind.Text = UiKit.upper(KIND_NAME[(rw and rw.kind) or ""] or "Item")
 	prevKind.TextColor3 = if sel.track == "vet" then VIVO.GOLD else VIVO.GREEN
 	prevName.Text = UiKit.upper(rewardName(rw))
@@ -972,12 +1029,13 @@ local function setOpen(on: boolean)
 		sel.level, sel.track = level, "free"
 		paint()
 		renderFoot()
+		-- D-208: entra da esquerda, sobre o palco (no lobby) ou sobre o véu (em campo)
+		pintarVeu(LobbyPalco.aberto())
 		dim.BackgroundTransparency = 1
-		TweenService:Create(dim, TweenInfo.new(0.25), { BackgroundTransparency = 0.45 }):Play()
-		panel.Position = UDim2.new(0.5, 0, 0.5, 24)
-		TweenService:Create(panel, TweenInfo.new(0.3, Enum.EasingStyle.Quint), { Position = UDim2.fromScale(0.5, 0.5) })
-			:Play()
-		fit.play(TweenInfo.new(0.3, Enum.EasingStyle.Quint), 1, 0.95)
+		UiKit.tween(dim, TweenInfo.new(0.25), { BackgroundTransparency = 0 })
+		panel.Position = UDim2.new(0, X0 - px(40, 54), 0.5, 0)
+		UiKit.tween(panel, TweenInfo.new(0.3, Enum.EasingStyle.Quint), { Position = UDim2.new(0, X0, 0.5, 0) })
+		fit.play(TweenInfo.new(0.3, Enum.EasingStyle.Quint), 1, 0.97)
 		task.defer(function()
 			scrollTo(level, true)
 			choose(level, "free", true)

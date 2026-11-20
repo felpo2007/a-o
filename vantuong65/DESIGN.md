@@ -8959,3 +8959,76 @@ grade de cartões com imagem e preço, e o personagem na luz à direita. O §9 d
   - a prévia de item que o jogador ainda não tem no soldado (o servidor só veste o que é dele);
   - o mercado e as vantagens ainda compram direto do cartão (a janela do Roblox é a confirmação);
   - os conjuntos com a lista exata do que vem.
+
+## D-208 — Lote 93: o passe sobre o palco, com o desenho de cada recompensa (2026-11-20)
+
+**Pedido do dono:** o mesmo do D-206 ("lobby, loja e passe ... com imagens bem feitas"). As
+referências do passe mostram:
+- o painel com a trilha grátis e a premium alinhadas por nível;
+- a imagem grande do prêmio escolhido;
+- os selos de nível, XP e premium no alto;
+- as missões a um passo;
+- o personagem na luz à direita.
+
+O §11 pede a imagem de cada recompensa e os estados bloqueada, alcançada, disponível, resgatada e
+dependente do premium.
+
+**O que fica (pedidos de antes do dono):**
+- a linha do tempo horizontal dos 50 níveis (D-124: "coloque o passe em ordem cronológica
+  horizontal");
+- as cores vivas das trilhas, verde a grátis e dourada a Veterano (D-130);
+- as letras grandes (lote 23).
+
+**O que mudou:**
+- **Casca:**
+  - o painel saiu do meio para a esquerda e cresceu de 1000 para 1180 (mais níveis à vista);
+  - no lobby, o fundo é o escuro da esquerda, e o palco mostra o soldado do jogador à direita
+    (quadro "passe");
+  - em campo, o véu de antes;
+  - o painel entra da esquerda em 0,3 s.
+- **Encaixe na tela:** o `UiKit.fit` passou a contar a margem da esquerda, no passe e na loja.
+  Antes, no Studio, o FECHAR do passe saía da tela à direita (`testes/lote93/passe_antes_da_margem.jpg`).
+- **Cabeçalho:** escuro, com o ouro só subindo da esquerda e o filete do alto.
+  - Ao lado do fim da temporada, o estado do Veterano: "✓ VETERANO ATIVO" ou "🔒 VETERANO
+    BLOQUEADO".
+  - "ORDENS DO DIA ›" ao lado do FECHAR abre a tela das ordens no lugar do passe.
+- **A imagem de cada recompensa:** `ItemArte.recompensa` entrou no lugar do emoji do lote 23.
+  - **Itens de verdade:** acabamento de arma (a arma em 3D com o acabamento) e uniforme (o pano da
+    farda), pelo `ItemArte.desenha` das caixas e do arquivo.
+  - **Desenhos do ItemArte:** a ficha de créditos, a faixa de título e a insígnia do emblema, com
+    sigla e cores por emblema.
+  - **Desenhos novos, feitos com quadros:**
+    - o cartão de abate: a moldura com a faixa vermelha e a caveira;
+    - a música: o disco de vinil com os sulcos e o selo;
+    - o gesto: o soldado em silhueta, com a mão na testa, o mapa ou o cantil;
+    - o reforço: o selo "2×" em âmbar.
+  - A arte de cada cartão é montada uma vez por recompensa, num CanvasGroup que apaga inteiro.
+  - A ficha embaixo mostra a arte grande, que cresce de 92% ao trocar (sem crescer com movimento
+    reduzido).
+- **Estados (§11), com cor, símbolo e palavra:**
+  - "RECEBER" (disponível, verde, o contorno pisca);
+  - "✓ RECEBIDO" (resgatada, a arte a 55%);
+  - "🔒 VETERANO" (dependente do premium);
+  - "NÍVEL n" (ainda bloqueada, a arte a 25%).
+
+**Conferido no Studio** (janela de 839 × 656):
+- O passe abriu pelo PASSE do lobby, com o estado do Veterano.
+- **Arte:** emblema S1, cartão de abate, selo 2× XP, fichas de créditos, o pano do uniforme e a
+  faixa do título.
+- **Foco no nível 2 do Veterano:** a ficha trocou para a arte grande do cartão de abate.
+- **Nível 10:** as armas em 3D com o acabamento nas duas trilhas (2 ViewportFrames); no 12, o gesto
+  de continência.
+- **Margem:** depois do ajuste, o FECHAR coube na janela.
+- **Erros:** 0 novos.
+
+**Testes:**
+- `passe.luau` (3): todo tipo de recompensa da temporada tem desenho (e nada de emoji); os cinco
+  estados; a casca e a linha do tempo horizontal.
+- `interface.luau`: o teste do lote 23 passou a cobrar o desenho por tipo no lugar do emoji.
+
+**Não testado:**
+- Receber uma recompensa e comprar o Veterano nesta tela nova: a lógica não mudou; nada foi recebido
+  nem comprado.
+- A tela 16:9 cheia, o controle, o celular e o jogo publicado.
+- **Fica para depois:** as ordens dentro do próprio passe (como numa aba), em vez de abrir a tela
+  delas.

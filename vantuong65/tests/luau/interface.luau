@@ -852,8 +852,11 @@ test("lote 23: diária e passe para crianças (desenhos, letras grandes, botão 
 	assert(string.find(d, "local function burst(", 1, true), "moedas voam ao receber")
 	assert(string.find(d, 'UiKit.title(f, "", px(30, 40), OURO)', 1, true), "valor do dia grande")
 	local p = fs.readFile(C .. "TelaPasse.client.luau")
-	for _, e in { "💰", "👕", "🎵", "💀" } do
-		assert(string.find(p, '"' .. e .. '"', 1, true), "ícone de desenho no passe: " .. e)
+	-- D-208: o emoji do passe virou o desenho do próprio prêmio (ItemArte.recompensa), um por tipo
+	assert(string.find(p, "ItemArte.recompensa(c.icon, r,", 1, true), "desenho do prêmio no cartão")
+	local arte = fs.readFile(C .. "ItemArte.luau")
+	for _, kind in { "credits", "title", "emblem", "killcard", "music", "gesture", "boost" } do
+		assert(string.find(arte, 'kind == "' .. kind .. '"', 1, true), "prêmio sem desenho: " .. kind)
 	end
 	assert(string.find(p, 'UiKit.text2(b, "", px(18, 24), V.TEXT, F.BODY_B)', 1, true), "nome do prêmio maior")
 	assert(not string.find(p, "c.name.TextColor3 = if dimmed then V.DIM", 1, true), "prêmio futuro legível")

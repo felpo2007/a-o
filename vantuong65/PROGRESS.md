@@ -878,7 +878,25 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     - Lune 812 ok (55 arquivos), pytest 76, ruff, StyLua e luau-lsp limpos, i18n 100%. Relatório:
       `testes/LOTE92_D207_2026-11-20.md`.
     - **v125 publicada** (versão 130 do place, commit 3b15873).
-    - **Próximo:** o passe (trilha grátis e Veterano, missões) sobre o mesmo palco.
+  - **Lote 93 (D-208): o passe sobre o palco, com o desenho de cada recompensa, feito.**
+    - Painel à esquerda (1180), o soldado à direita no palco, cabeçalho escuro com o estado do
+      Veterano e "ORDENS DO DIA ›".
+    - Cada recompensa com a imagem dela (`ItemArte.recompensa`): a arma em 3D com o acabamento, o
+      pano da farda, a insígnia, a faixa do título, a ficha de créditos, o cartão de abate, o disco,
+      o gesto e o selo 2×. Sai o emoji do lote 23.
+    - Estados com símbolo e palavra: RECEBER, ✓ RECEBIDO, 🔒 VETERANO, NÍVEL n.
+    - A linha do tempo horizontal (D-124) e as cores vivas (D-130) ficam.
+    - Loja e passe: o encaixe na tela conta a margem da esquerda (o FECHAR do passe saía da tela).
+    - Conferido no Studio:
+      - a arte de todos os tipos;
+      - a ficha troca no foco;
+      - as armas 3D no nível 10;
+      - o painel cabe na janela;
+      - 0 erros.
+    - Lune 815 ok (56 arquivos), pytest 76, ruff, StyLua e luau-lsp limpos, i18n 100%. Relatório:
+      `testes/LOTE93_D208_2026-11-20.md`.
+    - **Próximo (Prompt A):** o mapa de nascer, o HUD de infantaria e de veículo, morte e
+      resultados, celular e a verificação final.
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;

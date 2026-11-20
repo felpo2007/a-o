@@ -1533,6 +1533,7 @@
  "Nuvens vermelhas e laranja com estrelas.",
  "NÍVEL",
  "NÍVEL ",
+ "NÍVEL %d",
  "NÍVEL MÁXIMO",
  "NÓS",
  "Não deu para abrir agora.",
@@ -1604,6 +1605,7 @@
  "ORDEM DO COMANDANTE",
  "ORDENS DO DIA",
  "ORDENS DO DIA E DA SEMANA",
+ "ORDENS DO DIA ›",
  "OUTRA CLASSE",
  "Objetivo (cor do dono)",
  "Objetivos da Operação",
@@ -2837,10 +2839,12 @@
  "✓ Já é seu",
  "✓ NO ARQUIVO",
  "✓ No seu arquivo.",
+ "✓ RECEBIDO",
  "✓ SEU",
  "✓ VETERANO ATIVO",
  "✔ SEU",
  "✗ construa a posição de morteiro primeiro (tecla J)",
  "🔒 BLOQUEADO",
+ "🔒 VETERANO",
  "🔒 VETERANO BLOQUEADO"
 ]
