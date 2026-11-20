@@ -545,6 +545,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     - Não volta: a grama do napalm, as construções e o fogo já marcado. Os bots mantêm o estado.
     - Não testado: vários jogadores, celular e jogo publicado. O jipe ficou a 60 studs do ponto
       medido antes, e não conferi se aquele ponto era o depósito.
+    - **v111 publicada** (versão 116 do place, commit 6d75f51).
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;
