@@ -856,6 +856,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     - Lune 806 ok (54 arquivos), pytest 76, ruff, StyLua e luau-lsp limpos, i18n 100%. Relatório:
       `testes/LOTE91_D206_2026-11-20.md`; capturas em `testes/lote91`.
     - Não testado: a tela 16:9 cheia, o controle de verdade, o celular e o jogo publicado.
+    - **v124 publicada** (versão 129 do place, commit 543bacd).
     - **Próximo:** a loja (Destaques, Itens, Conjuntos, Caixas e Códigos) sobre o mesmo palco, e
       depois o passe.
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
