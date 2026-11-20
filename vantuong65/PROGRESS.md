@@ -622,6 +622,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
       - Relatório: `testes/LOTE81_D197_2026-11-20.md`.
     - Não testado: tanque e helicóptero destruídos, tripulação fechada, bots dentro e o jogo
       publicado.
+    - **v115 publicada** (versão 120 do place, commit 515b70a).
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;
