@@ -756,6 +756,33 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
       - dois clientes ao mesmo tempo;
       - o jogo publicado.
     - **v121 publicada** (versão 126 do place, commit 1719937).
+  - **Lote 88 (D-204): um kit de som próprio para cada arma, e o campo com variações, feito.**
+    - Antes: 5 gravações de biblioteca para 12 armas, com o tom trocado. A loja da Roblox só tinha
+      sons tirados de outros jogos; agora é síntese própria (`tools/sons_armas.py`): 19 kits, 281
+      trechos, 3,4 MB (`Shared/SomKits`).
+    - Cada arma tem:
+      - 4 tiros em 1ª pessoa e 3 de outro soldado perto;
+      - o clique seco e a recarga peça a peça, no tempo da animação;
+      - o ferrolho ou a bomba, e o estojo.
+    - Caudas pelo lugar de quem ouve (aberto, mata, fechado, túnel), tocadas até o fim em vagas sem
+      corte seco; médio e longe por família; bala, passos (6 por chão), impactos, explosões e
+      pazadas com variação sem repetir; motor com tom próprio por veículo.
+    - Mixagem: grupo dos tiros com limitador; o ambiente abaixa no tiroteio; passos e bala não.
+    - Medido no arquivo: o centroide vai de 945 Hz (M79) a 3.068 Hz (Type 54) na 1ª pessoa, e a 3ª
+      pessoa é sempre mais clara; pico máximo de −0,85 dBFS.
+    - Conferido no Studio:
+      - 19 de 19 kits carregaram;
+      - 8 tiros sem repetir variação e sem tocar de novo pela rede;
+      - recarga da M14 no tempo da animação (erro ≤ ~0,05 s);
+      - vaga de caudas com no máximo 5 numa rajada de 14;
+      - pazadas em 4 trechos.
+    - Lune 788 ok (52 arquivos), pytest 76, ruff, StyLua e luau-lsp limpos, i18n 100%. Relatório:
+      `testes/LOTE88_D204_2026-11-20.md`; espectrogramas em `testes/lote88`.
+    - Não testado:
+      - os sons de ouvido;
+      - dois jogadores, o celular e o jogo publicado;
+      - o tiro de perto com bots de verdade: a câmera do MCP presa longe, então o tiro de perto foi
+        disparado pelo remote.
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;

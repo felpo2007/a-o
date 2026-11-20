@@ -1,46 +1,44 @@
 --!strict
--- Toca os sons das armas (Shared/SomArmas, D-107): só o trecho de um disparo do arquivo
--- (PlaybackRegion), tom, equalização, cauda pelo lugar (eco ou reverberação) e 3D num ponto do mundo.
--- Os ids de fora (Front 44 / Pro Sound Effects) são conferidos uma vez no começo; o que não carregar
--- toca o som do jogo da chave `alt` (AssetIds.Sounds). Usado pelo AudioController e pelo Acerto.
+-- Toca os kits de som (D-204; Shared/SomKits, gerado por tools/sons_armas.py): só o trecho pedido do
+-- arquivo do kit (PlaybackRegion), 2D ou 3D num ponto do mundo, com atraso, tom e equalização, no
+-- grupo de mixagem certo ("tiros": a arma, a cauda, a explosão; "efeitos": o resto). Usado pelo
+-- AudioController, pelo Acerto e pelo Ferrolho.
+-- Vagas (caudas): no máximo N tocando por vaga; a que entra apaga a mais velha em 80 ms (Tween no
+-- volume), sem corte seco. A última de uma rajada toca até o fim.
+-- Os arquivos são conferidos uma vez no começo (como Sound: com o id em texto o PreloadAsync pede
+-- imagem e falha, D-142); kit que não carregar fica mudo e avisa uma vez.
 local ContentProvider = game:GetService("ContentProvider")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local SoundService = game:GetService("SoundService")
+local TweenService = game:GetService("TweenService")
 
 local AssetIds = require(ReplicatedStorage.Shared.AssetIds) :: any
-local SomArmas = require(ReplicatedStorage.Shared.SomArmas)
+local SomKits = require(ReplicatedStorage.Shared.SomKits)
 
 local Som = {}
 
-local failed: { [number]: boolean } = {}
--- Lote 27 (D-142): confere com instâncias Sound. Com o id em texto, o PreloadAsync pede o asset como
--- imagem e todo áudio falha ("Asset type does not match requested type", Studio 2026-11-14): os 17
--- ids de fora caíam no `alt` ou ficavam mudos (ferrolho, estojo, baque na carne). Como Sound, os
--- mesmos ids carregam (8 de 8 conferidos, 0,13 a 3,4 s).
+local failed: { [string]: boolean } = {}
 task.spawn(function()
 	local sounds: { Sound } = {}
-	local seen: { [number]: boolean } = {}
-	local function add(def: SomArmas.Def)
-		if seen[def.id] then
-			return
+	local byId: { [string]: string } = {}
+	for kit in SomKits do
+		local id = AssetIds.Sounds[kit]
+		if type(id) == "number" and id ~= 0 then
+			local s = Instance.new("Sound")
+			s.SoundId = "rbxassetid://" .. id
+			table.insert(sounds, s)
+			byId[tostring(id)] = kit
+		else
+			failed[kit] = true
 		end
-		seen[def.id] = true
-		local s = Instance.new("Sound")
-		s.SoundId = "rbxassetid://" .. def.id
-		table.insert(sounds, s)
-	end
-	for _, def in SomArmas.LIB do
-		add(def)
-	end
-	for _, def in SomArmas.CARNE do
-		add(def)
 	end
 	pcall(function()
 		ContentProvider:PreloadAsync(sounds, function(content: string, status: Enum.AssetFetchStatus)
 			if status ~= Enum.AssetFetchStatus.Success then
-				local n = tonumber(string.match(content, "(%d+)$"))
-				if n then
-					failed[n] = true
+				local kit = byId[string.match(content, "(%d+)$") or ""]
+				if kit and not failed[kit] then
+					failed[kit] = true
+					warn("[VT65 SOM] kit sem carregar: " .. kit)
 				end
 			end
 		end)
@@ -50,70 +48,61 @@ task.spawn(function()
 	end
 end)
 
-local function group(): SoundGroup?
-	local g = SoundService:FindFirstChild("VT65Efeitos")
-	return if g and g:IsA("SoundGroup") then g else nil
+local function group(nome: string): SoundGroup?
+	local fx = SoundService:FindFirstChild("VT65Efeitos")
+	if not fx then
+		return nil
+	end
+	local g = if nome == "tiros" then fx:FindFirstChild("VT65Tiros") else fx
+	return if g and g:IsA("SoundGroup") then g else (if fx:IsA("SoundGroup") then fx else nil)
 end
 
 export type Opts = {
 	pos: Vector3?, -- 3D nesse ponto; sem: 2D
-	vol: number?, -- multiplica o volume do som
-	pitch: number?, -- multiplica o tom
+	vol: number?,
+	pitch: number?, -- multiplica o tom (só ajuste fino: a variação vem dos trechos)
 	delay: number?, -- s
 	minDist: number?, -- studs (3D)
 	maxDist: number?, -- studs (3D)
 	low: number?, -- dB (equalizador)
 	mid: number?,
 	high: number?,
-	cauda: SomArmas.Cauda?,
+	grupo: string?, -- "tiros" | "efeitos" (padrão)
+	vaga: string?, -- nome da vaga (caudas)
+	vagas: number?, -- quantas tocam juntas na vaga
 }
 
-local function go(def: SomArmas.Def, o: Opts)
-	local id, start, len, pitch = def.id, def.start, def.len, def.pitch or 1
-	if failed[id] then
-		local alt = def.alt and AssetIds.Sounds[def.alt]
-		if type(alt) ~= "number" or alt == 0 then
-			return
-		end
-		id, start, len, pitch = alt, nil, nil, 1 -- o som do jogo inteiro, no tom dele
+local vagas: { [string]: { Sound } } = {}
+
+local function apaga(s: Sound)
+	if not s.Parent then
+		return
+	end
+	TweenService:Create(s, TweenInfo.new(0.08, Enum.EasingStyle.Linear), { Volume = 0 }):Play()
+	task.delay(0.1, function()
+		s:Stop()
+	end)
+end
+
+local function go(kit: string, trecho: string, o: Opts)
+	local k = SomKits[kit]
+	local seg = k and k.seg[trecho]
+	local id = AssetIds.Sounds[kit]
+	if not seg or failed[kit] or type(id) ~= "number" or id == 0 then
+		return
 	end
 	local s = Instance.new("Sound")
+	s.Name = "VT65_" .. trecho
 	s.SoundId = "rbxassetid://" .. id
-	s.Volume = def.vol * (o.vol or 1)
-	s.PlaybackSpeed = pitch * (o.pitch or 1)
-	s.SoundGroup = group()
-	if len then
-		pcall(function()
-			s.PlaybackRegionsEnabled = true
-			s.PlaybackRegion = NumberRange.new(start or 0, (start or 0) + len)
-		end)
-	end
+	s.Volume = o.vol or 1
+	s.PlaybackSpeed = o.pitch or 1
+	s.SoundGroup = group(o.grupo or "efeitos")
+	s.PlaybackRegionsEnabled = true
+	s.PlaybackRegion = NumberRange.new(seg[1], seg[1] + seg[2])
 	if o.low or o.mid or o.high then
 		local eq = Instance.new("EqualizerSoundEffect")
 		eq.LowGain, eq.MidGain, eq.HighGain = o.low or 0, o.mid or 0, o.high or 0
-		eq.Priority = 1
 		eq.Parent = s
-	end
-	local c = o.cauda
-	if c then
-		if c.eco then
-			local e = Instance.new("EchoSoundEffect")
-			e.Delay = c.delay
-			e.Feedback = c.feedback
-			e.WetLevel = c.wet
-			e.DryLevel = 0
-			e.Priority = 2
-			e.Parent = s
-		else
-			local r = Instance.new("ReverbSoundEffect")
-			r.DecayTime = c.decay
-			r.Density = 1
-			r.Diffusion = 1
-			r.WetLevel = c.wet
-			r.DryLevel = 0
-			r.Priority = 2
-			r.Parent = s
-		end
 	end
 	local holder: Instance = SoundService
 	local att: Attachment? = nil
@@ -128,9 +117,22 @@ local function go(def: SomArmas.Def, o: Opts)
 		holder = a
 	end
 	s.Parent = holder
+	local v = o.vaga
+	if v then
+		local lista = vagas[v] or {}
+		vagas[v] = lista
+		for i = #lista, 1, -1 do
+			if not lista[i].Parent or not lista[i].IsPlaying then
+				table.remove(lista, i)
+			end
+		end
+		while #lista >= (o.vagas or 2) do
+			apaga(table.remove(lista, 1) :: Sound)
+		end
+		table.insert(lista, s)
+	end
 	s:Play()
-	-- a cauda (eco) toca depois do fim do trecho: some 2 s depois (som inteiro: até 6 s)
-	local life = (len or 6) / math.max(s.PlaybackSpeed, 0.1) + 2
+	local life = seg[2] / math.max(s.PlaybackSpeed, 0.1) + 0.3
 	task.delay(life, function()
 		s:Destroy()
 		if att then
@@ -139,24 +141,30 @@ local function go(def: SomArmas.Def, o: Opts)
 	end)
 end
 
--- Toca um som (Def ou chave de SomArmas.LIB)
-function Som.play(what: SomArmas.Def | string, opts: Opts?)
-	local def: SomArmas.Def? = if type(what) == "string" then SomArmas.LIB[what] else what
-	if not def then
-		return
-	end
+-- Toca o trecho `trecho` do kit `kit` (Shared/SomKits)
+function Som.kit(kit: string, trecho: string, opts: Opts?)
 	local o: Opts = opts or {}
 	local d = o.delay
 	if d and d > 0 then
-		task.delay(d, go, def, o)
+		task.delay(d, go, kit, trecho, o)
 	else
-		go(def, o)
+		go(kit, trecho, o)
 	end
 end
 
--- O id carregou? (false = toca o alt)
-function Som.ok(def: SomArmas.Def): boolean
-	return not failed[def.id]
+-- Duração (s) e âncora (s) do trecho (0 se não existe)
+function Som.trecho(kit: string, trecho: string): (number, number)
+	local k = SomKits[kit]
+	local seg = k and k.seg[trecho]
+	if not seg then
+		return 0, 0
+	end
+	return seg[2], seg[3]
+end
+
+-- O kit carregou?
+function Som.ok(kit: string): boolean
+	return not failed[kit]
 end
 
 return Som

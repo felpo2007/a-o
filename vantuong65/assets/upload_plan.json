@@ -7684,5 +7684,138 @@
   "assetType": "Audio",
   "name": "VT65 partida_apito",
   "description": "VAN TUONG 65 - começo da partida: apito de campo, dois curtos e um longo (tools/sons_partida.py, D-203)"
+ },
+ {
+  "key": "Sounds.kit_m14",
+  "file": "assets/armas_sons/kit_m14.ogg",
+  "assetType": "Audio",
+  "name": "VT65 kit_m14",
+  "description": "VAN TUONG 65 - kit de som: arma m14: tiros em 1ª e 3ª pessoa, seco, recarga, ciclo e estojo (tools/sons_armas.py, D-204)"
+ },
+ {
+  "key": "Sounds.kit_m16",
+  "file": "assets/armas_sons/kit_m16.ogg",
+  "assetType": "Audio",
+  "name": "VT65 kit_m16",
+  "description": "VAN TUONG 65 - kit de som: arma m16: tiros em 1ª e 3ª pessoa, seco, recarga, ciclo e estojo (tools/sons_armas.py, D-204)"
+ },
+ {
+  "key": "Sounds.kit_type56",
+  "file": "assets/armas_sons/kit_type56.ogg",
+  "assetType": "Audio",
+  "name": "VT65 kit_type56",
+  "description": "VAN TUONG 65 - kit de som: arma type56: tiros em 1ª e 3ª pessoa, seco, recarga, ciclo e estojo (tools/sons_armas.py, D-204)"
+ },
+ {
+  "key": "Sounds.kit_sks",
+  "file": "assets/armas_sons/kit_sks.ogg",
+  "assetType": "Audio",
+  "name": "VT65 kit_sks",
+  "description": "VAN TUONG 65 - kit de som: arma sks: tiros em 1ª e 3ª pessoa, seco, recarga, ciclo e estojo (tools/sons_armas.py, D-204)"
+ },
+ {
+  "key": "Sounds.kit_rpd",
+  "file": "assets/armas_sons/kit_rpd.ogg",
+  "assetType": "Audio",
+  "name": "VT65 kit_rpd",
+  "description": "VAN TUONG 65 - kit de som: arma rpd: tiros em 1ª e 3ª pessoa, seco, recarga, ciclo e estojo (tools/sons_armas.py, D-204)"
+ },
+ {
+  "key": "Sounds.kit_m60",
+  "file": "assets/armas_sons/kit_m60.ogg",
+  "assetType": "Audio",
+  "name": "VT65 kit_m60",
+  "description": "VAN TUONG 65 - kit de som: arma m60: tiros em 1ª e 3ª pessoa, seco, recarga, ciclo e estojo (tools/sons_armas.py, D-204)"
+ },
+ {
+  "key": "Sounds.kit_m1911",
+  "file": "assets/armas_sons/kit_m1911.ogg",
+  "assetType": "Audio",
+  "name": "VT65 kit_m1911",
+  "description": "VAN TUONG 65 - kit de som: arma m1911: tiros em 1ª e 3ª pessoa, seco, recarga, ciclo e estojo (tools/sons_armas.py, D-204)"
+ },
+ {
+  "key": "Sounds.kit_type54",
+  "file": "assets/armas_sons/kit_type54.ogg",
+  "assetType": "Audio",
+  "name": "VT65 kit_type54",
+  "description": "VAN TUONG 65 - kit de som: arma type54: tiros em 1ª e 3ª pessoa, seco, recarga, ciclo e estojo (tools/sons_armas.py, D-204)"
+ },
+ {
+  "key": "Sounds.kit_m70",
+  "file": "assets/armas_sons/kit_m70.ogg",
+  "assetType": "Audio",
+  "name": "VT65 kit_m70",
+  "description": "VAN TUONG 65 - kit de som: arma m70: tiros em 1ª e 3ª pessoa, seco, recarga, ciclo e estojo (tools/sons_armas.py, D-204)"
+ },
+ {
+  "key": "Sounds.kit_mosin",
+  "file": "assets/armas_sons/kit_mosin.ogg",
+  "assetType": "Audio",
+  "name": "VT65 kit_mosin",
+  "description": "VAN TUONG 65 - kit de som: arma mosin: tiros em 1ª e 3ª pessoa, seco, recarga, ciclo e estojo (tools/sons_armas.py, D-204)"
+ },
+ {
+  "key": "Sounds.kit_win12",
+  "file": "assets/armas_sons/kit_win12.ogg",
+  "assetType": "Audio",
+  "name": "VT65 kit_win12",
+  "description": "VAN TUONG 65 - kit de som: arma win12: tiros em 1ª e 3ª pessoa, seco, recarga, ciclo e estojo (tools/sons_armas.py, D-204)"
+ },
+ {
+  "key": "Sounds.kit_m79",
+  "file": "assets/armas_sons/kit_m79.ogg",
+  "assetType": "Audio",
+  "name": "VT65 kit_m79",
+  "description": "VAN TUONG 65 - kit de som: arma m79: tiros em 1ª e 3ª pessoa, seco, recarga, ciclo e estojo (tools/sons_armas.py, D-204)"
+ },
+ {
+  "key": "Sounds.kit_caudas",
+  "file": "assets/armas_sons/kit_caudas.ogg",
+  "assetType": "Audio",
+  "name": "VT65 kit_caudas",
+  "description": "VAN TUONG 65 - kit de som: cauda do tiro pelo lugar de quem ouve (aberto, mata, fechado, túnel) (tools/sons_armas.py, D-204)"
+ },
+ {
+  "key": "Sounds.kit_distancia",
+  "file": "assets/armas_sons/kit_distancia.ogg",
+  "assetType": "Audio",
+  "name": "VT65 kit_distancia",
+  "description": "VAN TUONG 65 - kit de som: tiros de médio e longe (tools/sons_armas.py, D-204)"
+ },
+ {
+  "key": "Sounds.kit_balas",
+  "file": "assets/armas_sons/kit_balas.ogg",
+  "assetType": "Audio",
+  "name": "VT65 kit_balas",
+  "description": "VAN TUONG 65 - kit de som: estalo e zunido da bala, marcador de acerto (tools/sons_armas.py, D-204)"
+ },
+ {
+  "key": "Sounds.kit_passos",
+  "file": "assets/armas_sons/kit_passos.ogg",
+  "assetType": "Audio",
+  "name": "VT65 kit_passos",
+  "description": "VAN TUONG 65 - kit de som: passos em 5 chãos, 6 variações (tools/sons_armas.py, D-204)"
+ },
+ {
+  "key": "Sounds.kit_impactos",
+  "file": "assets/armas_sons/kit_impactos.ogg",
+  "assetType": "Audio",
+  "name": "VT65 kit_impactos",
+  "description": "VAN TUONG 65 - kit de som: impactos de bala em terra, água, madeira, palha e carne (tools/sons_armas.py, D-204)"
+ },
+ {
+  "key": "Sounds.kit_explosoes",
+  "file": "assets/armas_sons/kit_explosoes.ogg",
+  "assetType": "Audio",
+  "name": "VT65 kit_explosoes",
+  "description": "VAN TUONG 65 - kit de som: granada, explosão pesada e eco (tools/sons_armas.py, D-204)"
+ },
+ {
+  "key": "Sounds.kit_campo",
+  "file": "assets/armas_sons/kit_campo.ogg",
+  "assetType": "Audio",
+  "name": "VT65 kit_campo",
+  "description": "VAN TUONG 65 - kit de som: pazadas (4 variações) (tools/sons_armas.py, D-204)"
  }
 ]

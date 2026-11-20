@@ -1580,7 +1580,20 @@
   "caixas de munição",
   "construções e caixotes da logística",
   "crateras e capim queimado",
-  "recargas do comandante"
+  "recargas do comandante",
+  "%s_%s_%d",
+  "carne",
+  "cartucho",
+  "cauda",
+  "ciclo",
+  "eco",
+  "efeitos",
+  "estojo",
+  "grama",
+  "longe",
+  "medio",
+  "seco",
+  "tiros"
  ],
  "regex": [
   "^uni_[a-z_]+@[a-z0-9]+$"

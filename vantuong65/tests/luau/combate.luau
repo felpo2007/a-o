@@ -453,18 +453,15 @@ test("toda arma tem dano > 0; precisão com dano próprio", function()
 end)
 
 -- ===== 4. som e ritmo =====
-test("som: toda arma ligada tem disparo; camadas por distância sem buraco; estalo e zunido", function()
+test("som: toda arma ligada tem kit; camadas por distância sem buraco; estalo e zunido", function()
+	-- D-204: o kit de cada arma (os trechos e o id conferidos em tests/luau/sons.luau)
 	for _, wp in Weapons.list do
-		if wp.enabled then
+		if wp.enabled and wp.kind ~= "knife" and wp.kind ~= "bayonet" and wp.id ~= "rpg2" then
 			local a = SomArmas.arma(wp.id, wp.kind)
-			local def = SomArmas.LIB[a.tiro]
-			assert(def and def.id > 0 and def.vol > 0 and a.pitch > 0, wp.id)
+			assert(a.kit and a.familia and a.recarga, wp.id)
 		end
 	end
-	assert(SomArmas.arma("arma_nova", "pistol").tiro == "pistola", "arma nova pela classe")
-	for _, def in SomArmas.LIB do
-		assert(def.id > 0 and def.vol > 0, "id")
-	end
+	assert(SomArmas.arma("arma_nova", "pistol").kit == "kit_m1911", "arma nova pela classe")
 	-- perto domina de perto, longe domina de longe, e alguma camada sempre toca até 2.400 m
 	local n0, m0, f0 = SomArmas.camadas(5)
 	assert(n0 == 1 and m0 == 0 and f0 == 0, "perto")
@@ -477,8 +474,8 @@ test("som: toda arma ligada tem disparo; camadas por distância sem buraco; esta
 	end
 	assert(SomArmas.agudos(300, "mata") < SomArmas.agudos(300, "aberto"), "mata abafa mais")
 	-- bala passando
-	assert(SomArmas.passagem(5, 700, 349) == "bala_estalo", "supersônica a 5 m")
-	assert(SomArmas.passagem(5, 250, 349) == "bala_zunido", ".45 a 5 m")
+	assert(SomArmas.passagem(5, 700, 349) == "estalo", "supersônica a 5 m")
+	assert(SomArmas.passagem(5, 250, 349) == "zunido", ".45 a 5 m")
 	assert(SomArmas.passagem(10, 700, 349) == nil, "longe")
 	-- lugar de quem ouve
 	assert(SomArmas.lugar(0, 8, false, false, false) == "aberto")
@@ -487,8 +484,9 @@ test("som: toda arma ligada tem disparo; camadas por distância sem buraco; esta
 	assert(SomArmas.lugar(4, 8, false, true, false) == "fechado", "vila")
 	assert(SomArmas.lugar(0, 8, false, false, true) == "tunel")
 	for _, l in { "aberto", "mata", "fechado", "tunel" } do
-		assert(SomArmas.CAUDA[l], "cauda de " .. l)
+		assert(SomArmas.cauda("fuzil", l, 1) == "fuzil_" .. l .. "_1", "cauda de " .. l)
 	end
+	assert(SomArmas.cauda("pistola", "?", 2) == "pistola_aberto_2", "lugar desconhecido: aberto")
 	assert(SomArmas.LUGAR == "aberto")
 end)
 

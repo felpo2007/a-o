@@ -1,118 +1,121 @@
 --!strict
--- Som das armas (D-107; pedido do dono: "melhore o áudio das armas", "mostre quando você acerta o
--- tiro com o dano, ou barulho diferente mas leve"). Dados e contas puras (Lune: tests/luau/combate);
--- quem toca é o Controllers/AudioController (tiros, ferrolho, estojo, estalo) e o Controllers/Acerto
--- (marcador), pelo Controllers/Som.
--- Camadas do tiro:
---   - perto (até ~120 m): o disparo da arma (classe + ajuste de tom por arma) e, até 40 m, o "corpo"
---     (o mesmo disparo uma oitava abaixo, só graves: o tiro fica encorpado);
---   - médio e longe: os tiros gravados a ~150 m e ~500 m (AssetIds.Sounds), com os agudos caindo com
---     a distância e o som chegando com o atraso dele (d / 349 m/s);
---   - cauda pelo lugar de quem ouve: aberto (arrozal, clareira) = eco que rola, longo; mata = cauda
---     curta e abafada; fechado (vila, construção) = reverberação curta; túnel = reverberação forte;
---   - estalo supersônico quando a bala passa a até 8 m, zunido quando passa a até 4 m (e sempre na
---     bala subsônica: .45 ACP).
--- Sons "F44": os mesmos do Front 44 (Pro Sound Effects na Creator Store, liberados para uso em
--- experiências); cada arquivo traz vários disparos e o jogo toca só o trecho de um (start, len). Se
--- um id não carregar, o Controllers/Som usa `alt` (chave de AssetIds.Sounds).
+-- Som das armas (D-107; D-204, prompt de jogabilidade §9: "não gosto dos sons atuais das armas").
+-- Dados e contas puras (Lune: tests/luau/combate e sons); quem toca é o Controllers/Som, chamado pelo
+-- AudioController (tiros, recarga, clique seco, ferrolho, estojo, bala, passos, impactos, explosões),
+-- pelo Acerto e pelo Ferrolho.
+-- D-204: cada arma tem o seu KIT de som (tools/sons_armas.py, síntese própria; os trechos em
+-- Shared/SomKits; o arquivo em AssetIds.Sounds.<kit>). Antes, 12 armas dividiam 5 disparos de
+-- biblioteca com o tom trocado. No kit:
+--   - p1..p4: o tiro em 1ª pessoa (a mecânica no ouvido, o grave forte); a próxima variação nunca é
+--     a mesma da última (SomArmas.sorteia);
+--   - e1..e3: o tiro de outro soldado perto (o sopro da boca e o estalo da bala, sem a mecânica);
+--   - seco, as peças da recarga (SomArmas.RECARGA, no tempo da animação), ciclo (ferrolho ou bomba),
+--     estojo1 e estojo2.
+-- Camadas do tiro alheio (a soma é a de antes, D-107):
+--   - perto (até ~120 m): o "e" da arma;
+--   - médio e longe: kit_distancia pela família (fuzil, pistola, pesado), com o atraso do som (d / 349
+--     m/s) e os agudos caindo;
+--   - a cauda, pelo lugar de quem ouve (kit_caudas: aberto, mata, fechado, túnel), feita junto com o
+--     tiro e tocada até o fim (a nova apaga a mais velha em 80 ms, sem estalo);
+--   - estalo da bala supersônica a até 8 m, zunido a até 4 m (e a subsônica a até 6 m): kit_balas.
 local SomArmas = {}
 
-export type Def = {
-	id: number,
-	start: number?, -- início do trecho (s)
-	len: number?, -- duração do trecho (s)
-	vol: number,
-	pitch: number?,
-	alt: string?, -- chave de AssetIds.Sounds se o id não carregar
-}
-
-SomArmas.LIB = {
-	-- disparos por classe (F44 Config.Sounds.Shots)
-	fuzil_cheio = { id = 9118173739, start = 0, len = 1.7, vol = 0.95, pitch = 1.12, alt = "shot_m14" },
-	fuzil_semi = { id = 9118174539, start = 0.17, len = 1.4, vol = 0.9, pitch = 1.16, alt = "shot_m14" },
-	auto = { id = 9116335315, start = 0.06, len = 0.55, vol = 0.85, pitch = 0.9, alt = "shot_type56" },
-	metralhadora = { id = 9116335315, start = 0.06, len = 0.3, vol = 0.85, pitch = 1.05, alt = "shot_m14" },
-	pistola = { id = 9117396996, start = 0.03, len = 0.32, vol = 0.75, pitch = 1, alt = "shot_m14" },
-	lancador = { id = 12222065, start = 0, len = 1.8, vol = 1, pitch = 1, alt = "mortar_launch" },
-	-- D-108: espingarda calibre 12 (F44 Shots.Shotgun: o disparo grave e largo, com eco)
-	espingarda = { id = 9112910245, start = 0.04, len = 0.8, vol = 1, pitch = 1, alt = "shot_m14" },
-	-- mecânica (F44 Bolt, Shell)
-	mec_ferrolho = { id = 9116357355, start = 0, len = 1.3, vol = 0.55, pitch = 1.15 },
-	mec_estojo = { id = 9113633058, start = 0.18, len = 0.22, vol = 0.3, pitch = 1 },
-	-- D-108: bomba da espingarda (F44 Pump: o mesmo arquivo do disparo, logo depois dele: telha para
-	-- trás e para a frente) e cartucho entrando no depósito (F44 Reload, só o estalo do começo,
-	-- mais agudo: PLACEHOLDER, ouvir no Studio). Estojo de plástico vermelho caindo: F44 Shell grave.
-	mec_bomba = { id = 9112910245, start = 0.84, len = 0.7, vol = 0.7, pitch = 1 },
-	mec_cartucho = { id = 9117889191, start = 1.0, len = 0.28, vol = 0.5, pitch = 1.35 },
-	mec_cartucho_cai = { id = 9113633058, start = 0.18, len = 0.22, vol = 0.32, pitch = 0.62 },
-	-- bala passando (F44 Whiz); o estalo supersônico é o do jogo (AssetIds.Sounds.crack)
-	bala_zunido = { id = 9118168273, start = 0, len = 0.4, vol = 0.7, pitch = 1, alt = "crack" },
-	-- marcador de acerto (F44 Hit, HeadHit, Kill): leve, 2D, só para quem atirou
-	acerto_corpo = { id = 15675032796, vol = 0.45, pitch = 1, alt = "dry_click" },
-	acerto_cabeca = { id = 15675059323, vol = 0.55, pitch = 1, alt = "dry_click" },
-	acerto_abate = { id = 9117969717, start = 0, len = 0.5, vol = 0.5, pitch = 1, alt = "dry_click" },
-} :: { [string]: Def }
-
--- baque da bala no corpo, no lugar do alvo (F44 FleshHit): um dos quatro
-SomArmas.CARNE = {
-	{ id = 9114482141, start = 0, len = 0.5, vol = 0.5 },
-	{ id = 9114482303, start = 0, len = 0.5, vol = 0.5 },
-	{ id = 9114482300, start = 0, len = 0.5, vol = 0.5 },
-	{ id = 9114482566, start = 0, len = 0.5, vol = 0.5 },
-} :: { Def }
-
 export type Arma = {
-	tiro: string, -- chave em LIB
-	pitch: number, -- ajuste de tom sobre o da classe (calibre)
+	kit: string, -- AssetIds.Sounds e Shared/SomKits
+	familia: string, -- "fuzil" | "pistola" | "pesado": a cauda e o tiro de longe
+	recarga: string, -- SomArmas.RECARGA
+	estojo: boolean?, -- o estojo pulando (semi e automático)
+	ciclo: boolean?, -- ferrolho manual ou bomba entre os tiros (trecho "ciclo")
 	vol: number?,
-	ferrolho: boolean?, -- manobra entre tiros (som de ferrolho)
-	estojo: boolean?, -- estojo pulando (semi e automático)
-	mecanica: string?, -- D-108: som da manobra entre tiros (chave em LIB; senão mec_ferrolho)
-	cartucho: string?, -- D-108: som de cada cartucho entrando na recarga um a um (chave em LIB)
 }
 
--- Por arma (ajuste de tom como o PerWeapon do Front 44: calibre maior, tom mais baixo)
 SomArmas.ARMA = {
-	m14 = { tiro = "fuzil_semi", pitch = 0.94, estojo = true }, -- 7,62x51: mais grave que o Garand do F44
-	m60 = { tiro = "metralhadora", pitch = 0.92, estojo = true },
-	m1911 = { tiro = "pistola", pitch = 0.88 }, -- .45 ACP grave (o F44 usa 0,9)
-	m79 = { tiro = "lancador", pitch = 1.35, vol = 0.8 }, -- "tump" do 40 mm, mais curto que o foguete
-	type56 = { tiro = "auto", pitch = 1.04, estojo = true },
-	m16 = { tiro = "auto", pitch = 1.16, estojo = true }, -- D-146: 5,56 mais seco e agudo (PLACEHOLDER de ouvido)
-	sks = { tiro = "fuzil_semi", pitch = 1.08, estojo = true },
-	rpd = { tiro = "metralhadora", pitch = 1.08, estojo = true },
-	type54 = { tiro = "pistola", pitch = 1.18 }, -- 7,62x25: estalo seco (o F44 usa 1,18 na TT-33)
-	m70 = { tiro = "fuzil_cheio", pitch = 0.96, ferrolho = true },
-	mosin = { tiro = "fuzil_cheio", pitch = 1.05, ferrolho = true }, -- o F44 usa 1,05 no Mosin
-	-- D-108: 12 de cano curto, um tom abaixo da M1897 do F44 (mais carga de pólvora no 00 militar:
-	-- PLACEHOLDER de ouvido); bomba entre os tiros e cartucho a cartucho na recarga
-	win12 = {
-		tiro = "espingarda",
-		pitch = 0.94,
-		vol = 1.05,
-		ferrolho = true,
-		mecanica = "mec_bomba",
-		cartucho = "mec_cartucho",
-	},
+	m14 = { kit = "kit_m14", familia = "fuzil", recarga = "caixa", estojo = true },
+	m16 = { kit = "kit_m16", familia = "fuzil", recarga = "caixa", estojo = true },
+	type56 = { kit = "kit_type56", familia = "fuzil", recarga = "caixa", estojo = true },
+	sks = { kit = "kit_sks", familia = "fuzil", recarga = "clipe", estojo = true },
+	rpd = { kit = "kit_rpd", familia = "fuzil", recarga = "fita", estojo = true },
+	m60 = { kit = "kit_m60", familia = "fuzil", recarga = "fita", estojo = true },
+	m1911 = { kit = "kit_m1911", familia = "pistola", recarga = "pistola", estojo = true },
+	type54 = { kit = "kit_type54", familia = "pistola", recarga = "pistola", estojo = true },
+	m70 = { kit = "kit_m70", familia = "fuzil", recarga = "manual", ciclo = true },
+	mosin = { kit = "kit_mosin", familia = "fuzil", recarga = "manual", ciclo = true },
+	win12 = { kit = "kit_win12", familia = "pesado", recarga = "tubo", ciclo = true, estojo = true },
+	m79 = { kit = "kit_m79", familia = "pesado", recarga = "lancador" },
 } :: { [string]: Arma }
 
--- Arma sem linha própria (as que vierem): pela classe
+-- Arma sem linha própria (as que vierem): a da classe
 SomArmas.CLASSE = {
-	rifle = { tiro = "fuzil_semi", pitch = 1, estojo = true },
-	mg = { tiro = "metralhadora", pitch = 1, estojo = true },
-	pistol = { tiro = "pistola", pitch = 1 },
-	launcher = { tiro = "lancador", pitch = 1.35, vol = 0.8 },
-	shotgun = { tiro = "espingarda", pitch = 1, ferrolho = true, mecanica = "mec_bomba", cartucho = "mec_cartucho" },
+	rifle = SomArmas.ARMA.m14,
+	mg = SomArmas.ARMA.m60,
+	pistol = SomArmas.ARMA.m1911,
+	launcher = SomArmas.ARMA.m79,
+	shotgun = SomArmas.ARMA.win12,
 } :: { [string]: Arma }
-
--- Som da manobra entre tiros da arma (ferrolho ou bomba)
-function SomArmas.mecanica(id: string?, kind: string?): string
-	local a = SomArmas.arma(id or "", kind)
-	return a.mecanica or "mec_ferrolho"
-end
 
 function SomArmas.arma(id: string, kind: string?): Arma
 	return SomArmas.ARMA[id] or SomArmas.CLASSE[kind or "rifle"] or SomArmas.CLASSE.rifle
+end
+
+SomArmas.PROPRIO = 4 -- p1..p4
+SomArmas.OUTRO = 3 -- e1..e3
+
+-- Variação de 1 a n sem repetir a última (r em [0, 1)). Com uma só, sempre 1.
+function SomArmas.sorteia(n: number, ultima: number?, r: number): number
+	if n <= 1 then
+		return 1
+	end
+	if not ultima or ultima < 1 or ultima > n then
+		return math.clamp(1 + math.floor(r * n), 1, n)
+	end
+	local k = math.clamp(1 + math.floor(r * (n - 1)), 1, n - 1)
+	return if k >= ultima then k + 1 else k
+end
+
+-- ===== recarga =====
+-- Por tipo: { trecho do kit, fração da recarga em que a âncora do trecho cai }. As frações são as da
+-- animação de 1ª pessoa (WeaponVisuals: o carregador sai de 0,13 a 0,25, o novo encaixa em 0,64, o
+-- tapa em 0,66 e a alavanca vai de 0,79 a 0,86).
+SomArmas.RECARGA = {
+	caixa = {
+		{ "solta", 0.12 },
+		{ "sai", 0.13 },
+		{ "cai", 0.33 },
+		{ "entra", 0.64 },
+		{ "tapa", 0.66 },
+		{ "ferrolho", 0.79 },
+	},
+	pistola = { { "solta", 0.12 }, { "sai", 0.13 }, { "cai", 0.33 }, { "entra", 0.64 }, { "slide", 0.84 } },
+	fita = { { "tampa_abre", 0.14 }, { "fita", 0.4 }, { "tampa_fecha", 0.66 }, { "ferrolho", 0.79 } },
+	clipe = { { "abre", 0.1 }, { "clipe", 0.36 }, { "desce", 0.42 }, { "clipe_sai", 0.66 }, { "fecha", 0.8 } },
+	manual = {
+		{ "abre", 0.08 },
+		{ "cartucho", 0.26 },
+		{ "cartucho", 0.34 },
+		{ "cartucho", 0.42 },
+		{ "cartucho", 0.5 },
+		{ "cartucho", 0.58 },
+		{ "fecha", 0.8 },
+	},
+	lancador = { { "abre", 0.1 }, { "estojo_sai", 0.22 }, { "granada", 0.55 }, { "fecha", 0.78 } },
+	tubo = {}, -- a espingarda: cartucho a cartucho no Controllers/Ferrolho
+} :: { [string]: { { any } } }
+
+export type Passo = { trecho: string, t: number }
+
+-- Quando tocar cada peça (s desde o começo da recarga de `dur` s). ancora(trecho) = o instante dentro
+-- do trecho que casa com a animação (Shared/SomKits). Nunca antes de 0.
+function SomArmas.agenda(tipo: string, dur: number, ancora: (string) -> number): { Passo }
+	local out: { Passo } = {}
+	local lista = SomArmas.RECARGA[tipo]
+	if not lista then
+		return out
+	end
+	for _, e in lista do
+		local trecho = e[1] :: string
+		table.insert(out, { trecho = trecho, t = math.max(0, (e[2] :: number) * dur - ancora(trecho)) })
+	end
+	return out
 end
 
 -- ===== distância =====
@@ -138,6 +141,12 @@ function SomArmas.agudos(dM: number, lugar: string?): number
 	return -math.clamp(dM * k, 0, 30)
 end
 
+-- trecho do kit_distancia: "<família>_medio_<v>" ou "<família>_longe_<v>" (3 variações)
+SomArmas.DISTANCIA = 3
+function SomArmas.distante(familia: string, faixa: string, v: number): string
+	return string.format("%s_%s_%d", familia, faixa, v)
+end
+
 -- ===== lugar de quem ouve =====
 SomArmas.LUGAR = "aberto" -- antes da primeira medida
 -- Pelo eco: de N raios na horizontal (25 m), quantos bateram; teto = raio para cima bateu (copa ou
@@ -157,34 +166,49 @@ function SomArmas.lugar(hits: number, total: number, teto: boolean, vila: boolea
 	return "aberto"
 end
 
-export type Cauda = {
-	eco: boolean, -- true: eco que rola (EchoSoundEffect); false: reverberação (ReverbSoundEffect)
-	delay: number, -- eco: atraso (s)
-	feedback: number, -- eco: realimentação (0..1)
-	wet: number, -- dB
-	decay: number, -- reverberação: decaimento (s)
-}
-
--- Cauda do tiro pelo lugar de quem ouve (PLACEHOLDER de mixagem, a ouvir no Studio)
-SomArmas.CAUDA = {
-	aberto = { eco = true, delay = 0.32, feedback = 0.38, wet = -9, decay = 0 },
-	mata = { eco = false, delay = 0, feedback = 0, wet = -12, decay = 0.7 },
-	fechado = { eco = false, delay = 0, feedback = 0, wet = -9, decay = 0.5 },
-	tunel = { eco = false, delay = 0, feedback = 0, wet = -3, decay = 1.6 },
-} :: { [string]: Cauda }
+-- D-204: a cauda é gravada no kit_caudas (por família e lugar, 2 variações): o eco que rola e
+-- escurece no aberto, a cauda curta e abafada na mata, os reflexos cedo na vila e o tubo grave do
+-- túnel. Antes era um efeito (EchoSoundEffect/ReverbSoundEffect) no próprio disparo, cortado com ele.
+SomArmas.CAUDAS = 2
+SomArmas.LUGARES = { "aberto", "mata", "fechado", "tunel" }
+function SomArmas.cauda(familia: string, lugar: string, v: number): string
+	local l = if table.find(SomArmas.LUGARES, lugar) then lugar else "aberto"
+	return string.format("%s_%s_%d", familia, l, v)
+end
+SomArmas.CAUDA_VAGAS_PROPRIO = 2 -- caudas do próprio tiro tocando juntas (a rajada)
+SomArmas.CAUDA_VAGAS_OUTROS = 4 -- dos tiros dos outros
 
 -- ===== bala passando =====
--- O que se ouve da bala que passa a `closestM` do ouvinte: "bala_estalo" (supersônica, até 8 m; o
--- AssetIds.Sounds.crack), "bala_zunido" (até 4 m, ou a subsônica até 6 m) ou nil. Volume 0..1.
+-- O que se ouve da bala que passa a `closestM` do ouvinte: "estalo" (supersônica, até 8 m), "zunido"
+-- (até 4 m, ou a subsônica até 6 m) ou nil. Volume 0..1. Trechos do kit_balas: estalo1..3, zunido1..3.
 function SomArmas.passagem(closestM: number, speed: number, sound: number): (string?, number)
 	local supersonic = speed > sound
 	if supersonic and closestM < 8 then
-		return "bala_estalo", math.clamp(1.2 - closestM / 8, 0.3, 1.1)
+		return "estalo", math.clamp(1.2 - closestM / 8, 0.3, 1.1)
 	end
 	if closestM < (if supersonic then 4 else 6) then
-		return "bala_zunido", math.clamp(1 - closestM / 6, 0.25, 0.9)
+		return "zunido", math.clamp(1 - closestM / 6, 0.25, 0.9)
 	end
 	return nil, 0
 end
+
+-- ===== chão e impacto =====
+-- passos (kit_passos, 6 variações por chão) pela chave antiga do AudioController.stepKey
+SomArmas.PASSOS = 6
+SomArmas.CHAO = {
+	step_grass = "grama",
+	step_mud = "lama",
+	step_paddy = "arrozal",
+	step_sand = "areia",
+	step_wood = "madeira",
+} :: { [string]: string }
+-- impactos (kit_impactos, 4 variações por material)
+SomArmas.IMPACTOS = 4
+SomArmas.IMPACTO = {
+	impact_earth = "terra",
+	impact_water = "agua",
+	impact_wood = "madeira",
+	impact_thatch = "palha",
+} :: { [string]: string }
 
 return SomArmas

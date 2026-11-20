@@ -177,6 +177,7 @@ type Mark = { t: number, color: Color3, size: number, life: number, sum: number,
 local mark: Mark = { t = -10, color = WHITE, size = 8, life = 0.25, sum = 0, numLife = 0.6 }
 local conn: RBXScriptConnection? = nil
 local lastSound = 0
+local ultimaCarne: number? = nil
 
 local function render()
 	local age = os.clock() - mark.t
@@ -224,17 +225,18 @@ Net.event("Combat_Confirm").OnClientEvent:Connect(function(c: any)
 	end
 	render()
 	-- som leve, 2D, um por vez na rajada; o baque da bala no corpo, no lugar do alvo
+	-- D-204: o marcador e o baque são do kit_balas e do kit_impactos (carne1..4, sem repetir o último)
 	if now - lastSound > 0.05 then
 		lastSound = now
-		Som.play(if kill then "acerto_abate" elseif head then "acerto_cabeca" else "acerto_corpo", {})
+		Som.kit("kit_balas", if kill then "acerto_abate" elseif head then "acerto_cabeca" else "acerto_corpo", {})
 	end
 	local x, y, z = c.x, c.y, c.z
 	if type(x) == "number" and type(y) == "number" and type(z) == "number" then
-		local carne = SomArmas.CARNE[math.random(1, #SomArmas.CARNE)]
-		Som.play(carne, {
+		local v = SomArmas.sorteia(SomArmas.IMPACTOS, ultimaCarne, math.random())
+		ultimaCarne = v
+		Som.kit("kit_impactos", "carne" .. v, {
 			pos = Vector3.new(x, y, z),
 			vol = 0.8,
-			pitch = 0.9 + math.random() * 0.2,
 			minDist = 6 / M,
 			maxDist = 80 / M,
 		})

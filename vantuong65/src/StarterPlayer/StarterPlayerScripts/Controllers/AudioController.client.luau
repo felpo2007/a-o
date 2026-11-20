@@ -7,6 +7,10 @@
 -- abafado na mata, reverberação na vila e no túnel), estojo e ferrolho. Os tiros dos outros ganham o
 -- disparo da própria arma de perto, agudos caindo com a distância, a cauda e o zunido da bala que
 -- passa rente. Dados em Shared/SomArmas; quem toca é o Controllers/Som.
+-- D-204 (§9): tudo isso sai dos kits de som próprios (tools/sons_armas.py; Shared/SomKits): o tiro em
+-- 1ª e 3ª pessoa de cada arma, a cauda pelo lugar, médio e longe, a bala, a recarga peça a peça, o
+-- clique seco, o ciclo, o estojo, os passos (6 por chão), os impactos e as explosões. Variação sem
+-- repetir a última; os tiros num grupo com limitador, e o ambiente abaixa durante o tiroteio.
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -52,6 +56,33 @@ end
 local sfxGroup = group("VT65Efeitos", 0.5)
 local ambGroup = group("VT65Ambiente", 0.6)
 local musicGroup = group("VT65Musica", 0.35)
+-- D-204 (§9: "tiros com presença sem esconder permanentemente informações úteis"): os tiros, as caudas
+-- e as explosões num grupo dentro dos efeitos, com um limitador (muitos juntos não saturam); o
+-- ambiente abaixa enquanto há tiro (compressor ligado ao grupo dos tiros) e volta em ~0,6 s. Os passos,
+-- a bala passando, o rádio e os avisos ficam fora do grupo dos tiros: não abaixam.
+local shotGroup = Instance.new("SoundGroup")
+shotGroup.Name = "VT65Tiros"
+shotGroup.Volume = 1
+shotGroup.Parent = sfxGroup
+do
+	local lim = Instance.new("CompressorSoundEffect")
+	lim.Name = "Limitador"
+	lim.Threshold = -6
+	lim.Ratio = 8
+	lim.Attack = 0.003
+	lim.Release = 0.15
+	lim.GainMakeup = 0
+	lim.Parent = shotGroup
+	local duck = Instance.new("CompressorSoundEffect")
+	duck.Name = "AbaixaNoTiro"
+	duck.SideChain = shotGroup
+	duck.Threshold = -30
+	duck.Ratio = 3
+	duck.Attack = 0.01
+	duck.Release = 0.6
+	duck.GainMakeup = 0
+	duck.Parent = ambGroup
+end
 -- volume escolhido no menu do jogo (Configurações → Som), salvo na conta (Input.settings)
 local function applyVolumes()
 	local s = Input.settings :: any
@@ -375,7 +406,16 @@ local function stepKey(root: BasePart, model: Model): string
 end
 
 local walked: { [Model]: { pos: Vector3, acc: number } } = setmetatable({}, { __mode = "k" }) :: any
-local STRIDE = 0.8 / M -- ~0,8 m por passo (o arquivo de passos tem 4 passos: tocamos 1 a cada 4)
+-- ~0,8 m por passo. D-204: um passo por passada, do kit_passos (6 variações por chão, sem repetir a
+-- última de cada soldado); antes o arquivo tinha 4 passos e tocava 1 vez a cada 4 passadas
+local STRIDE = 0.8 / M
+local ultimoPasso: { [any]: number } = setmetatable({}, { __mode = "k" }) :: any
+local function passo(key: string, pos: Vector3, vol: number, maxDist: number, quem: any)
+	local chao = SomArmas.CHAO[key] or "grama"
+	local v = SomArmas.sorteia(SomArmas.PASSOS, ultimoPasso[quem], math.random())
+	ultimoPasso[quem] = v
+	Som.kit("kit_passos", chao .. v, { pos = pos, vol = vol, minDist = 10, maxDist = maxDist })
+end
 
 local function characters(): { Model }
 	local list = {}
@@ -435,7 +475,7 @@ task.spawn(function()
 						continue
 					end
 					w.acc += d
-					if w.acc >= STRIDE * 4 then
+					if w.acc >= STRIDE then
 						w.acc = 0
 						local rain = ReplicatedStorage:GetAttribute("Rain")
 						-- rastejando quase não se ouve; correndo, mais alto (movimento, 2026-11-11)
@@ -449,7 +489,7 @@ task.spawn(function()
 							base *= 0.55
 						end
 						local vol = base * Weather.footstepVolume(if type(rain) == "number" then rain else 0) -- a chuva cobre os passos
-						play(key, root.Position, vol, 45 / M)
+						passo(key, root.Position, vol, 45 / M, char)
 					end
 				end
 			end
@@ -462,7 +502,7 @@ local function ownStep(volume: number)
 	local char = player.Character
 	local root = char and char:FindFirstChild("HumanoidRootPart") :: BasePart?
 	if char and root then
-		play(stepKey(root, char), root.Position, volume, 45 / M)
+		passo(stepKey(root, char), root.Position, volume, 45 / M, char)
 	end
 end
 Bus.on("landed", function(dropM: number)
@@ -472,38 +512,45 @@ Bus.on("vault_start", function()
 	ownStep(0.5)
 end)
 
--- ===== tiro próprio (D-107) =====
--- O WeaponController avisa cada tiro que sai (Bus "shot_fired"): disparo da arma (2D), o corpo (o
--- mesmo disparo uma oitava abaixo, só graves), a cauda pelo lugar e o estojo pulando. Na rajada a
--- cauda e o estojo não se empilham.
+-- ===== tiro próprio (D-107; D-204: o kit da arma) =====
+-- O WeaponController avisa cada tiro que sai (Bus "shot_fired"): o tiro em 1ª pessoa do kit da arma
+-- (p1..p4, nunca a mesma variação duas vezes seguidas), a cauda pelo lugar de quem ouve (kit_caudas,
+-- tocada até o fim: na rajada a nova apaga a mais velha, a última rola inteira) e o estojo pulando.
+-- O som do próprio tiro é só daqui: o servidor manda o traçante (Combat_Tracer) só para os OUTROS
+-- (CombatService.fire, exceptPlayer), então o tiro previsto no cliente não toca de novo.
 local lastTail, lastShell = 0, 0
+local ultimo: { [string]: number } = {} -- última variação por kit e tipo
+local function variacao(chave: string, n: number): number
+	local v = SomArmas.sorteia(n, ultimo[chave], math.random())
+	ultimo[chave] = v
+	return v
+end
 local function ownShot(weaponId: string?)
 	local wp = if type(weaponId) == "string" then Weapons.get(weaponId) else nil
 	if not wp then
 		return
 	end
 	local a = SomArmas.arma(wp.id, wp.kind)
-	local def = SomArmas.LIB[a.tiro]
-	if not def then
-		return
-	end
 	local now = os.clock()
-	local tail = now - lastTail > 0.12
-	if tail then
-		lastTail = now
-	end
-	local jitter = 1 + (math.random() - 0.5) * 0.04
-	Som.play(def, {
-		vol = 0.85 * (a.vol or 1),
-		pitch = a.pitch * jitter,
-		cauda = if tail then SomArmas.CAUDA[lugar] else nil,
+	-- ±1% de tom: só o ajuste fino; a variação de verdade são os trechos
+	Som.kit(a.kit, "p" .. variacao(a.kit .. "p", SomArmas.PROPRIO), {
+		vol = 0.9 * (a.vol or 1),
+		pitch = 1 + (math.random() - 0.5) * 0.02,
+		grupo = "tiros",
 	})
-	if wp.kind ~= "launcher" then
-		Som.play(def, { vol = 0.4 * (a.vol or 1), pitch = a.pitch * 0.55, low = 6, mid = -8, high = -30 })
+	if now - lastTail > 0.12 then
+		lastTail = now
+		Som.kit("kit_caudas", SomArmas.cauda(a.familia, lugar, variacao("cauda", SomArmas.CAUDAS)), {
+			vol = 0.9,
+			grupo = "tiros",
+			vaga = "cauda_propria",
+			vagas = SomArmas.CAUDA_VAGAS_PROPRIO,
+		})
 	end
-	if a.estojo and now - lastShell > 0.18 then
+	-- (no ferrolho manual e na bomba o estojo sai no ciclo, não no tiro)
+	if a.estojo and not a.ciclo and now - lastShell > 0.18 then
 		lastShell = now
-		Som.play("mec_estojo", { delay = 0.35 + math.random() * 0.15, vol = 0.6, pitch = 0.9 + math.random() * 0.25 })
+		Som.kit(a.kit, "estojo" .. variacao(a.kit .. "estojo", 2), { delay = 0.35 + math.random() * 0.15, vol = 0.6 })
 	end
 end
 Bus.on("shot_fired", function(shot: any)
@@ -516,28 +563,64 @@ Bus.on("vehicle_mg_shot", function()
 	ownShot("m60")
 end)
 
--- ferrolho manobrado (fuzis de precisão): o som cabe no ciclo da arma. D-108: a bomba da espingarda
--- (SomArmas.mecanica) e o estojo de plástico caindo depois dela
+-- ferrolho manobrado (fuzis de precisão) ou a bomba da espingarda: o trecho "ciclo" do kit, feito no
+-- tempo da animação (Ferrolho.curve e pumpCurve) e ajustado à duração do ciclo da arma
 Bus.on("bolt_cycle", function(dur: number, weaponId: string?)
-	local key = SomArmas.mecanica(weaponId)
-	local def = SomArmas.LIB[key] or SomArmas.LIB.mec_ferrolho
-	local d = if type(dur) == "number" and dur > 0 then dur else 1
-	local natural = (def.len or 1.3) / (def.pitch or 1)
-	Som.play(def, { delay = 0.08, pitch = math.clamp(natural / d, 0.85, 1.25) })
-	if key == "mec_bomba" then
-		Som.play(
-			"mec_cartucho_cai",
-			{ delay = 0.5 + math.random() * 0.15, vol = 0.6, pitch = 0.9 + math.random() * 0.2 }
-		)
+	local wp = if type(weaponId) == "string" then Weapons.get(weaponId) else nil
+	local a = SomArmas.arma(if wp then wp.id else "", if wp then wp.kind else nil)
+	local len = Som.trecho(a.kit, "ciclo")
+	if len <= 0 then
+		return
+	end
+	local d = if type(dur) == "number" and dur > 0 then dur else len
+	Som.kit(a.kit, "ciclo", { pitch = math.clamp(len / d, 0.85, 1.25) })
+	if a.estojo then -- o cartucho vazio da espingarda caindo depois da bomba
+		Som.kit(a.kit, "estojo" .. variacao(a.kit .. "estojo", 2), { delay = 0.5 + math.random() * 0.15, vol = 0.6 })
 	end
 end)
 
+-- D-204: o clique seco da própria arma (gatilho sem munição)
+Bus.on("dry_fire", function(weaponId: string?)
+	local wp = if type(weaponId) == "string" then Weapons.get(weaponId) else nil
+	local a = SomArmas.arma(if wp then wp.id else "", if wp then wp.kind else nil)
+	Som.kit(a.kit, "seco", { vol = 0.8 })
+end)
+
+-- D-204: a recarga peça a peça (SomArmas.RECARGA), cada uma no instante da animação; a troca de arma
+-- no meio cala o que ainda não tocou. A espingarda é do Ferrolho (cartucho a cartucho); o RPG-2 tem o
+-- som dele (WeaponController).
+local recargaGen = 0
+Bus.on("reload_start", function(dur: number, _kind: string?, _n: number?, _empty: boolean?, weaponId: string?)
+	recargaGen += 1
+	local wp = if type(weaponId) == "string" then Weapons.get(weaponId) else nil
+	if not wp then
+		return
+	end
+	local a = SomArmas.arma(wp.id, wp.kind)
+	local gen = recargaGen
+	local d = if type(dur) == "number" and dur > 0 then dur else 2.5
+	for _, p in
+		SomArmas.agenda(a.recarga, d, function(trecho: string): number
+			local _, anc = Som.trecho(a.kit, trecho)
+			return anc
+		end)
+	do
+		task.delay(p.t, function()
+			if recargaGen == gen then
+				Som.kit(a.kit, p.trecho, { vol = 0.85 })
+			end
+		end)
+	end
+end)
+Bus.on("reload_cancel", function()
+	recargaGen += 1
+end)
+
 -- ===== tiros dos outros: camadas, atraso do som, estalo e impacto =====
-local function layer(key: string): SomArmas.Def?
-	local id = SND[key]
-	return if type(id) == "number" and id ~= 0 then { id = id, vol = 1 } else nil
+-- trecho com variação (sem repetir a última) de um kit de fora das armas
+local function var(prefixo: string, n: number): string
+	return prefixo .. variacao(prefixo, n)
 end
-local MID, FAR = layer("shot_mid"), layer("shot_distant")
 
 -- v41 ("jogo está bem pesado ainda"): o disparo de quem está a mais de 100 m tem teto de 16 por
 -- segundo (balde de 8). No Studio, com 100 bots, eram 33 sons de tiro tocando juntos; o tiroteio
@@ -568,49 +651,55 @@ Net.unreliable("Combat_Tracer").OnClientEvent:Connect(function(shot)
 	if dM < 2500 then
 		caption(string.format("shot:%s", wp.id), string.format("Tiro de %s", wp.name or wp.id), origin, delay)
 	end
-	-- D-107: disparo da arma de perto (3D), tiros gravados de médio e longe na direção dele (3D sem
-	-- atenuação: o volume é o da camada), agudos caindo com a distância e a cauda do lugar
+	-- D-107/D-204: o tiro de perto do kit da arma (e1..e3, 3D), médio e longe do kit_distancia pela
+	-- família (3D sem atenuação: o volume é o da camada), agudos caindo com a distância e, perto, a
+	-- cauda pelo lugar de quem ouve (no máximo SomArmas.CAUDA_VAGAS_OUTROS juntas)
 	local a = SomArmas.arma(wp.id, wp.kind)
-	local def = SomArmas.LIB[a.tiro]
 	local near, mid, far = SomArmas.camadas(dM)
 	local high = SomArmas.agudos(dM, lugar)
-	local cauda = SomArmas.CAUDA[lugar]
-	local jitter = 1 + (math.random() - 0.5) * 0.04
+	local jitter = 1 + (math.random() - 0.5) * 0.02
 	local layers = dM <= 100 or farOk()
-	if layers and near > 0.01 and def then
-		Som.play(def, {
+	if layers and near > 0.01 then
+		Som.kit(a.kit, "e" .. variacao(a.kit .. "e", SomArmas.OUTRO), {
 			pos = origin,
 			vol = near * (a.vol or 1),
-			pitch = a.pitch * jitter,
+			pitch = jitter,
 			delay = delay,
 			minDist = 8 / M,
 			maxDist = 1500 / M,
 			high = high,
-			cauda = cauda,
+			grupo = "tiros",
 		})
-		if dM < 40 and wp.kind ~= "launcher" then
-			Som.play(def, {
-				pos = origin,
-				vol = 0.35 * near * (a.vol or 1),
-				pitch = a.pitch * 0.55,
-				delay = delay,
-				minDist = 8 / M,
-				maxDist = 400 / M,
-				low = 6,
-				mid = -8,
-				high = -30,
-			})
-		end
+		Som.kit("kit_caudas", SomArmas.cauda(a.familia, lugar, variacao("cauda_outros", SomArmas.CAUDAS)), {
+			vol = 0.75 * near,
+			delay = delay,
+			grupo = "tiros",
+			vaga = "cauda_outros",
+			vagas = SomArmas.CAUDA_VAGAS_OUTROS,
+		})
 	end
-	if layers and mid > 0.01 and MID then
-		Som.play(MID, { pos = origin, vol = mid * 0.8, delay = delay, minDist = 1e5, maxDist = 2e5, high = high * 0.5 })
+	local function distante(faixa: string, vol: number, h: number)
+		local chave = a.familia .. faixa
+		local v = variacao(chave, SomArmas.DISTANCIA)
+		Som.kit("kit_distancia", SomArmas.distante(a.familia, faixa, v), {
+			pos = origin,
+			vol = vol,
+			delay = delay,
+			minDist = 1e5,
+			maxDist = 2e5,
+			high = h,
+			grupo = "tiros",
+		})
 	end
-	if layers and far > 0.01 and FAR then
-		Som.play(FAR, { pos = origin, vol = far * 0.7, delay = delay, minDist = 1e5, maxDist = 2e5, cauda = cauda })
+	if layers and mid > 0.01 then
+		distante("medio", mid * 0.9, high * 0.5)
 	end
-	-- ferrolho de quem atira perto (fuzil de precisão)
-	if a.ferrolho and dM < 40 then
-		Som.play("mec_ferrolho", { pos = origin, delay = delay + 0.3, vol = 0.8, minDist = 3 / M, maxDist = 60 / M })
+	if layers and far > 0.01 then
+		distante("longe", far * 0.8, 0)
+	end
+	-- o ferrolho ou a bomba de quem atira perto
+	if a.ciclo and dM < 40 then
+		Som.kit(a.kit, "ciclo", { pos = origin, delay = delay + 0.1, vol = 0.8, minDist = 3 / M, maxDist = 60 / M })
 	end
 	-- estalo (supersônica) ou zunido: passagem mais próxima da trajetória (reta) até o ouvinte
 	local t = (listener - origin):Dot(dir)
@@ -620,11 +709,8 @@ Net.unreliable("Combat_Tracer").OnClientEvent:Connect(function(shot)
 		local tFlight = distM / math.max(wp.muzzleVelocity * 0.85, 1)
 		local what, vol = SomArmas.passagem(closest, wp.muzzleVelocity * 0.85, Ballistics.SOUND)
 		if what and distM > 15 then
-			if what == "bala_estalo" then
-				play("crack", nil, vol, nil, tFlight)
-			else
-				Som.play(what, { delay = tFlight, vol = vol, pitch = 0.9 + math.random() * 0.2 })
-			end
+			-- D-204: kit_balas (estalo1..3, zunido1..3), fora do grupo dos tiros: não abaixa
+			Som.kit("kit_balas", var(what, 3), { delay = tFlight, vol = vol })
 			caption("crack", "Bala passando perto", nil, tFlight)
 		end
 	end
@@ -664,7 +750,15 @@ Net.unreliable("Combat_Tracer").OnClientEvent:Connect(function(shot)
 			local pos = Vector3.new(hit.x, hit.y, hit.z) / M
 			local dl = (pos - listener).Magnitude * M
 			if dl < 80 then
-				play(hit.target :: string, pos, 0.9, 80 / M, hit.t + dl / Ballistics.SOUND)
+				-- D-204: kit_impactos, 4 variações por material
+				local matKit = SomArmas.IMPACTO[hit.target :: string] or "terra"
+				Som.kit("kit_impactos", var(matKit, SomArmas.IMPACTOS), {
+					pos = pos,
+					vol = 0.9,
+					minDist = 10,
+					maxDist = 80 / M,
+					delay = hit.t + dl / Ballistics.SOUND,
+				})
 			end
 		end
 	end
@@ -674,18 +768,41 @@ end)
 Net.unreliable("Fire_Impact").OnClientEvent:Connect(function(e)
 	local pos = Vector3.new(e.x, e.y, e.z)
 	local dM = (pos - camera.CFrame.Position).Magnitude * M
-	if dM < 3000 then
-		play("explosion", pos, math.clamp(1.4 - dM / 2500, 0.3, 1.4), 3000 / M, dM / Ballistics.SOUND)
+	-- D-204: kit_explosoes (granada1..3; pesada1..2 e o eco1..2 rolando pelo vale), sem trocar o tom
+	local T = ExplosaoEfeito.de(tostring(e.id))
+	local pesada = T.classe == "pesada"
+	if dM < 3000 and not pesada then
+		Som.kit("kit_explosoes", var("granada", 3), {
+			pos = pos,
+			vol = math.clamp(1.4 - dM / 2500, 0.3, 1.4),
+			minDist = 10,
+			maxDist = 3000 / M,
+			delay = dM / Ballistics.SOUND,
+			high = SomArmas.agudos(dM * 0.5, lugar),
+			grupo = "tiros",
+		})
 		caption("explosion", "Explosão", pos, dM / Ballistics.SOUND)
 	end
-	-- D-198: bomba e tiro naval: o corpo grave junto com o estrondo e a cauda (o eco pelo vale e pela
-	-- mata) logo depois, mais grave e longa; ouvidos de mais longe
-	local T = ExplosaoEfeito.de(tostring(e.id))
-	if T.classe == "pesada" and dM < 6000 then
+	-- D-198: bomba e tiro naval: o estrondo grave e a cauda (o eco pelo vale e pela mata) logo depois,
+	-- mais grave e longa; ouvidos de mais longe
+	if pesada and dM < 6000 then
 		local d = ExplosaoEfeito.atrasoSom(dM)
 		local k = math.clamp(1.3 - dM / 4000, 0.35, 1.3)
-		play("explosion", pos, k, 6000 / M, d, 0.62, true)
-		play("explosion", pos, k * 0.55, 8000 / M, d + 0.22, 0.42, true)
+		Som.kit("kit_explosoes", var("pesada", 2), {
+			pos = pos,
+			vol = k,
+			minDist = 10,
+			maxDist = 6000 / M,
+			delay = d,
+			high = SomArmas.agudos(dM * 0.5, lugar),
+			grupo = "tiros",
+		})
+		Som.kit(
+			"kit_explosoes",
+			var("eco", 2),
+			{ pos = pos, vol = k * 0.6, minDist = 10, maxDist = 8000 / M, delay = d + 0.22, grupo = "tiros" }
+		)
+		caption("explosion", "Explosão", pos, d)
 	end
 end)
 Net.unreliable("Fire_Incoming").OnClientEvent:Connect(function(e)

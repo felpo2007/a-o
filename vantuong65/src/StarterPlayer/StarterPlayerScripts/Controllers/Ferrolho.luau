@@ -13,7 +13,8 @@
 --     arma mexe;
 --   - recarga cartucho a cartucho ("reload_start" com o tipo "shotgun"): a arma gira de lado com a
 --     portinhola de carga para a mão esquerda e balança a cada cartucho que entra, com o som de cada
---     um (SomArmas.mec_cartucho) e, vazia, a bomba no fim. Tempos: Weapons.reloadTime.
+--     um (o trecho "cartucho" do kit da arma, D-204) e, vazia, a bomba no fim ("ciclo"). Tempos:
+--     Weapons.reloadTime.
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local SomArmas = require(ReplicatedStorage.Shared.SomArmas)
@@ -62,22 +63,24 @@ Bus.on("reload_start", function(dur: number, kind: string?, n: number?, empty: b
 	-- D-194: a recarga cancelada (troca de arma) cala os cartuchos que ainda não entraram
 	shells.gen += 1
 	local gen = shells.gen
-	local function later(at: number, what: string, opts: { [string]: any })
+	-- D-204: os trechos "cartucho" e "ciclo" (a bomba) do kit da espingarda
+	local function later(at: number, trecho: string, opts: { [string]: any })
 		task.delay(at, function()
 			if shells.gen == gen then
-				Som.play(what, opts)
+				Som.kit(a.kit, trecho, opts :: any)
 			end
 		end)
 	end
+	local _, anc = Som.trecho(a.kit, "cartucho")
 	for i = 1, shells.n do
 		later(
-			(shells.startS + (i - 0.35) * shells.shellS) * k,
-			a.cartucho or "mec_cartucho",
-			{ vol = 0.9, pitch = 0.95 + math.random() * 0.1 }
+			math.max(0, (shells.startS + (i - 0.35) * shells.shellS) * k - anc),
+			"cartucho",
+			{ vol = 0.9, pitch = 0.97 + math.random() * 0.06 }
 		)
 	end
 	if empty then
-		later((shells.startS + shells.n * shells.shellS + 0.05) * k, a.mecanica or "mec_bomba", {})
+		later((shells.startS + shells.n * shells.shellS + 0.05) * k, "ciclo", {})
 	end
 end)
 Bus.on("reload_cancel", function()

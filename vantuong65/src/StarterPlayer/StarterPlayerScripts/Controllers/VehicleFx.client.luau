@@ -289,6 +289,7 @@ type Fx = {
 	load: number,
 	rotor: number,
 	slip: number,
+	detune: number, -- D-204: o tom próprio deste motor (dois iguais não soam iguais)
 	engineOn: boolean,
 	t: number,
 	pose: CFrame,
@@ -399,6 +400,8 @@ local function newFx(model: Model, chassis: BasePart): Fx
 		load = 0,
 		rotor = 0,
 		slip = 0,
+		-- D-204: ±2,5% fixo por veículo (pelo id: o mesmo em todos os clientes)
+		detune = 0.975 + 0.05 * ((string.byte(id, -1) or 0) * 37 % 101) / 100,
 		engineOn = false,
 		t = math.random() * 100,
 		pose = CFrame.identity,
@@ -1274,7 +1277,7 @@ local function updateSound(fx: Fx, dt: number, inside: boolean)
 		local pitch, vol = VehicleDrive.engineVoice(fx.rpm, fx.load)
 		-- partida: o motor acorda devagar
 		vol *= math.clamp(fx.rpm / CFG.idleRpm, 0, 1)
-		l.s.PlaybackSpeed = pitch
+		l.s.PlaybackSpeed = pitch * fx.detune
 		l.s.Volume = 0.85 * vol * (gain[key :: string] or 1) * (if inside then 0.85 else 1)
 		if l.distort then
 			l.distort.Level = 0.04 + 0.18 * fx.load

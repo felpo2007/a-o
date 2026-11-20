@@ -559,9 +559,8 @@ local function startReload()
 	t.reloadUntil = now + dur + 1
 	Gatilho.cancel(t)
 	Net.event("Combat_Reload"):FireServer({ w = wp.id })
-	if wp.feed ~= "tube" then -- a espingarda: o som de cada cartucho (Ferrolho)
-		playId(if wp.faction == "US" then S.reload_m14 else S.reload_type56, 0.7)
-	end
+	-- D-204: o som da recarga é da arma, peça a peça no tempo da animação (AudioController, pelo
+	-- "reload_start"); a espingarda, cartucho a cartucho (Ferrolho)
 	Bus.fire("reload_start", dur, wp.kind, Weapons.tubeShells(wp, t.mag, spare), t.mag <= 0, wp.id)
 end
 Input.on("reload", "tap", startReload)
@@ -976,7 +975,7 @@ local function triggerDown()
 	-- ferrolho (Tipo 56, Parte 10.6) ainda dá o clique.
 	if t.mag <= 0 and (spareBy[wp.id] or 0) > 0 and os.clock() >= t.reloadUntil and not seated() then
 		if not wp.boltHoldOpen then
-			playId(S.dry_click, 0.8)
+			Bus.fire("dry_fire", wp.id) -- D-204: o clique seco da própria arma (AudioController)
 		end
 		startReload()
 		return
@@ -1413,7 +1412,7 @@ RunService.RenderStepped:Connect(function(dt: number)
 				if act == "fire" then
 					shoot(wp, t)
 				elseif act == "dry" then
-					playId(S.dry_click, 0.8) -- Type 56 sem trava do ferrolho: só o clique (Parte 10.6)
+					Bus.fire("dry_fire", wp.id) -- Type 56 sem trava do ferrolho: só o clique (D-204: o da arma)
 					break
 				else
 					break

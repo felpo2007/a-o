@@ -8472,3 +8472,133 @@ A ordem da restauração ganhou logística, caixas, comandante e bots.
 - a contagem em dois clientes ao mesmo tempo: a sincronia vem do relógio do servidor, medida num
   cliente;
 - o jogo publicado.
+
+## D-204 — Lote 88: um kit de som próprio para cada arma, e o campo com variações (2026-11-20)
+
+**Pedido do dono** (prompt de jogabilidade, §9): "não gosto dos sons atuais das armas". Quer:
+- uma mudança perceptível de qualidade e identidade, trocando a fonte, não só o volume ou o tom;
+- em cada arma, ataque, corpo, mecânica, cauda, recarga, manejo e clique seco, com variações
+  discretas;
+- a própria arma diferente da dos outros, o perto diferente do longe e o fechado do aberto;
+- a cauda da rajada terminando natural, sem estalo, saturação ou corte;
+- variações também em passos, cavadas, impactos, granadas, explosões e motores;
+- tiros com presença sem esconder o resto do que importa ouvir, e o tiro previsto não tocando de
+  novo quando chega a confirmação;
+- avaliar AudioPlayer e AudioEmitter.
+
+**Antes:**
+- 12 armas dividiam 5 gravações de biblioteca (as do Front 44, da Pro Sound Effects), uma por
+  classe, com o tom trocado por arma;
+- o "corpo" era o mesmo arquivo uma oitava abaixo;
+- a cauda era um efeito (eco ou reverberação) no próprio disparo, cortado com ele;
+- a recarga era uma por lado (EUA ou VC) e o clique seco, um só para todas.
+
+**A fonte:** a loja da Roblox (busca de áudio no Studio) só trouxe sons tirados de outros jogos
+(CS:GO, Day of Infamy, ARMA 3, mods), que a regra do projeto proíbe. Ficou a síntese própria, como
+nos veículos, no RPG-2 e na pá: `tools/sons_armas.py` (numpy; o Blender só grava o OGG).
+
+**Kits (19 arquivos, 281 trechos, 3,4 MB; `Shared/SomKits`, gerado pelo script):**
+- **Um por arma** (12):
+  - p1..p4: o tiro em 1ª pessoa (mecânica no ouvido, grave forte, estalo da bala fraco, reflexo do
+    chão a ~8 ms);
+  - e1..e3: o tiro de outro soldado perto (sopro da boca e estalo da bala na frente, mecânica quase
+    sumida, reflexo do chão a <1 ms);
+  - seco; as peças da recarga do tipo da arma (carregador, pistola, fita, clipe da SKS, cartucho a
+    cartucho, 40 mm); ciclo (ferrolho manual ou bomba); estojo1 e estojo2 (latão de fuzil ou de
+    pistola, plástico).
+  - Cada tiro tem camadas com nome: o pulso de pressão (Friedlander), o sopro dos gases com a voz
+    da boca, o estrondo grave que cai de tom, o estalo supersônico (onda N), a mecânica (modos de
+    aço amortecidos) e o reflexo do chão.
+  - A identidade sai do calibre, do cano, do sistema de ação e do material. Exemplos: a mola do
+    amortecedor da M16, o transportador pesado da Type 56, o "ping" do pistão da SKS, o ferrolho
+    aberto e a fita da M60 e da RPD, o ferrolho de aço da M1911, o percussor dos fuzis de ferrolho,
+    o "bum" largo da 12 e o "tum" oco do 40 mm.
+- **Caudas** pelo lugar de quem ouve (3 famílias × 4 lugares × 2):
+  - aberto: batidas que voltam das árvores e escurecem, até 2,2 s;
+  - mata: curta e abafada;
+  - fechado: reflexos cedo, clara;
+  - túnel: grave, com batidas a cada ~12 ms.
+- **Distância** (3 famílias × médio/longe × 3) e **balas**: estalo e zunido (3 de cada) e os
+  marcadores de acerto.
+- **Passos** (5 chãos × 6), **impactos** (terra, água, madeira, palha e carne × 4), **explosões**
+  (granada × 3, pesada × 2, eco × 2) e **pazadas** (4).
+
+**Medido no arquivo** (`--medir`, `assets/armas_sons/medidas.json`):
+- **Centroide do espectro, 1ª pessoa:** M79 945, Winchester 12 1.480, Mosin 1.661, M70 1.710,
+  M60 1.717, M14 1.828, Type 56 1.876, RPD 1.975, SKS 2.074, M16 2.360, M1911 2.392 e Type 54
+  3.068 Hz.
+- **3ª pessoa:** sempre mais clara (1.880 a 4.893 Hz).
+- **Variações da mesma arma:** o centroide muda até 20% (a M70; a maioria ≤ 12%). A normalização
+  passou a ser pela energia, não pelo pico do ruído: pelo pico, chegava a 40%.
+- **Sem clipar:** pico máximo de −0,85 dBFS depois do Vorbis, as bordas de cada trecho em 0 e 60 ms
+  de silêncio entre os trechos.
+
+**No jogo:**
+- **Tocar um trecho:** `Controllers/Som` toca só o trecho pedido (PlaybackRegion), 2D ou 3D. A
+  variação nunca repete a última (`SomArmas.sorteia`); o tom só ganha ±1% de ajuste fino.
+- **Caudas:** tocam até o fim, em vagas: 2 do próprio tiro e 4 dos outros. A que entra apaga a mais
+  velha em 80 ms (Tween no volume), sem corte seco, e a última da rajada rola inteira.
+- **Recarga:** peça a peça, com a âncora de cada trecho na fração da animação de 1ª pessoa (o
+  carregador sai em 0,13, encaixa em 0,64, o tapa em 0,66 e a alavanca em 0,79). A troca de arma
+  cala o resto.
+- **Clique seco e ciclo:** o clique é o da arma (Bus "dry_fire"). O ferrolho e a bomba seguem a
+  duração do ciclo; o estojo da espingarda e do ferrolho sai no ciclo, não no tiro.
+- **Tiro dos outros:** perto, o "e"; médio e longe, a família; o atraso e os agudos caindo
+  continuam como antes.
+- **Bala, impactos, explosões e passos:** a bala e os impactos vêm dos kits. A explosão pesada não
+  baixa mais o tom: toca o próprio trecho mais o eco. Os passos agora são um por passada (antes, um
+  arquivo de 4 passos a cada 4 passadas), sem repetir o último de cada soldado.
+- **Pazada:** é do servidor e sorteia 1 das 4.
+- **Motor:** cada veículo tem um tom fixo de ±2,5% pelo id, e dois iguais não soam iguais.
+- **Mixagem:**
+  - os tiros, as caudas e as explosões vão num grupo próprio (`VT65Tiros`, dentro dos efeitos),
+    com limitador (−6 dB, 8:1), para muitos juntos não saturarem;
+  - o ambiente abaixa durante o tiroteio (compressor ligado ao grupo dos tiros, 3:1, volta em
+    0,6 s);
+  - os passos, a bala passando, o rádio e os avisos ficam fora e não abaixam.
+- **Tiro previsto:** o próprio tiro toca só pelo Bus "shot_fired". O servidor não manda o
+  traçante a quem atirou (`if other ~= exceptPlayer`), então não toca de novo.
+- **AudioPlayer e AudioEmitter:** avaliados e não usados agora.
+  - O motivo para a API nova seria a reverberação (AudioReverb) continuar depois de o som parar,
+    mas a cauda agora é gravada e toca até o fim.
+  - O resto do jogo (ambiente, veículos, grupos) é Sound e SoundGroup, e misturar exigiria ligar
+    AudioListener e AudioDeviceOutput em tudo.
+  - Fica para um lote de migração, se o dono quiser.
+
+**Conferido no Studio** (um jogador, M14):
+- **Kits:** os 19 carregaram no cliente (PreloadAsync: 0 falhas) com a duração igual à do
+  `SomKits` (diferença 0).
+- **Tiro próprio:** 8 tiros tocaram p1 p4 p2 p4 p2 p3 p2 p3, sem repetir. Cada um teve cauda e
+  estojo; 16 sons no grupo dos tiros e 8 nos efeitos. Nenhum "e": o próprio tiro não voltou pela
+  rede.
+- **Recarga da M14:** solta 0,25, sai 0,28, cai 0,70, entra 1,28, tapa 1,40 e ferrolho 1,68 s. Cai
+  na fração de uma recarga de 2,13 s (2,4 s × 0,88 da vantagem de recarga do perfil), com erro de
+  até ~0,05 s.
+- **Com os bots em 30 a 35 s:**
+  - 76 a 341 tiros médios e 226 a 268 longes, nas 3 variações;
+  - passos na grama nas 6 variações;
+  - estalo da bala, impactos e granadas nas 3 variações.
+- **Tiro de perto:** a câmera do MCP ficou presa no QG (Scriptable) e o ouvinte é a câmera, então os
+  bots soavam longe. O tiro de perto foi disparado pelo próprio remote do servidor (Combat_Tracer
+  com a origem a 10–30 m). Tocaram e1/e2/e3, as caudas por família (fuzil, pistola, pesado), o
+  ciclo da 12 e do Mosin, o estalo da bala a 3 m e os impactos.
+- **Vagas:** numa rajada de 14 tiros de RPD a 10 m, o máximo de caudas juntas foi 5 (4 + 1
+  apagando), e não 14.
+- **Pazadas:** 6 em 4 trechos diferentes (0,00/1,46/2,92/4,38 s), sem repetir a anterior.
+- **Erros:** 0, fora os dos meus próprios comandos de teste.
+
+**Testes:**
+- `sons.luau` (6): todo kit publicado e com os seus trechos; trechos sem sobreposição; variação
+  sem repetir; a recarga na fração da animação; as amarras.
+- `test_sons_armas.py` (6): nada clipa, bordas em zero, a ordem dos calibres, a 3ª pessoa mais
+  clara e as variações próximas.
+- Atualizados: `combate`, `classes` e `explosao`.
+
+**Se o dono quiser gravações de verdade depois**, os pontos de troca são os trechos de cada kit (um
+arquivo por kit, os mesmos nomes; `Shared/SomKits` diz onde cada um começa).
+
+**Não testado:**
+- **De ouvido:** ninguém ouviu os sons; só foram medidos (espectro, nível, bordas, tempos).
+- Dois jogadores, o celular e o jogo publicado.
+- **Clique seco no Studio:** a M14 trava o ferrolho e recarrega no vazio.
+- A recarga das outras armas no Studio (só a M14; as outras têm o tempo conferido no Lune).

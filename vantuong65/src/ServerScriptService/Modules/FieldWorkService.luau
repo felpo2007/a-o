@@ -10,6 +10,8 @@ local Logistics = require(ReplicatedStorage.Shared.Logistics)
 local MapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any
 local Net = require(ReplicatedStorage.Shared.Net)
 local PaArte = require(ReplicatedStorage.Shared.PaArte)
+local SomArmas = require(ReplicatedStorage.Shared.SomArmas)
+local SomKits = require(ReplicatedStorage.Shared.SomKits)
 local AssetLoader = require(script.Parent.AssetLoader)
 local Combatants = require(script.Parent.Combatants)
 local LogisticsService = require(script.Parent.LogisticsService)
@@ -175,6 +177,7 @@ end
 
 -- D-195: UMA pazada (antes, 5 em laço): o som inteiro dela (pa_cavar, 1,4 s, a lâmina crava aos
 -- 0,35 s), a poeira na hora em que crava e os torrões quando joga (1,0 s)
+local ultimaPazada: number? = nil
 local function pazadaFx(at: Vector3, right: Vector3)
 	local part = Instance.new("Part")
 	part.Name = "VT65PaTerra"
@@ -190,11 +193,23 @@ local function pazadaFx(at: Vector3, right: Vector3)
 	poeira.Parent = part
 	local s = Instance.new("Sound")
 	s.Name = "Pazada"
-	local id = AssetIds.Sounds.pa_cavar
-	s.SoundId = "rbxassetid://"
-		.. tostring(if type(id) == "number" and id ~= 0 then id else AssetIds.Sounds.impact_earth)
+	-- D-204: uma das 4 pazadas do kit_campo (a terra cai diferente; o golpe aos 0,35 s é o mesmo), sem
+	-- repetir a anterior; sem o kit, a pazada única de antes
+	local kit = AssetIds.Sounds.kit_campo
+	local v = SomArmas.sorteia(4, ultimaPazada, math.random())
+	local seg = SomKits.kit_campo and SomKits.kit_campo.seg["pazada" .. v]
+	if type(kit) == "number" and kit ~= 0 and seg then
+		ultimaPazada = v
+		s.SoundId = "rbxassetid://" .. kit
+		s.PlaybackRegionsEnabled = true
+		s.PlaybackRegion = NumberRange.new(seg[1], seg[1] + seg[2])
+	else
+		local id = AssetIds.Sounds.pa_cavar
+		s.SoundId = "rbxassetid://"
+			.. tostring(if type(id) == "number" and id ~= 0 then id else AssetIds.Sounds.impact_earth)
+	end
 	s.Volume = 0.9
-	s.PlaybackSpeed = 0.96 + math.random() * 0.08 -- variação pequena, sem mudar o caráter
+	s.PlaybackSpeed = 0.98 + math.random() * 0.04 -- ajuste fino; a variação são as pazadas
 	s.RollOffMode = Enum.RollOffMode.InverseTapered
 	s.RollOffMinDistance = 2 / M
 	s.RollOffMaxDistance = 40 / M

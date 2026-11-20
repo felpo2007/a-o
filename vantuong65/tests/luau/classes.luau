@@ -332,10 +332,10 @@ test("espingarda: Winchester 12, 9 bagos de 00, 7 cartuchos, bomba e recarga um 
 	assert(Weapons.pelletSeed(77, 0) == 77)
 	-- peso e som
 	assert(Kit.DEFAULT_MAGS.shotgun == Weapons.MAGS.shotgun and Kit.MAG_KG.shotgun > 0)
+	-- D-204: o kit da espingarda tem o cartucho e a bomba ("ciclo"); o da M70, o ferrolho
 	local a = SomArmas.arma("win12", "shotgun")
-	assert(a.tiro == "espingarda" and a.mecanica == "mec_bomba" and a.cartucho == "mec_cartucho")
-	assert(SomArmas.LIB.espingarda and SomArmas.LIB.mec_bomba and SomArmas.LIB.mec_cartucho)
-	assert(SomArmas.mecanica("m70") == "mec_ferrolho" and SomArmas.mecanica("win12") == "mec_bomba")
+	assert(a.kit == "kit_win12" and a.recarga == "tubo" and a.ciclo == true and a.familia == "pesado")
+	assert(SomArmas.arma("m70").ciclo == true and SomArmas.arma("m70").recarga == "manual")
 end)
 
 test("espingarda: bagos somam num ferimento; mata de perto em 1–2 tiros, fraca de longe", function()

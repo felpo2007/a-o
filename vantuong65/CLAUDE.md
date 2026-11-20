@@ -271,6 +271,16 @@ O `sourcemap.json` não vai para o Git.
   - arma refeita (GLB novo)? Rode de novo: o cache sai do GLB, e as texturas também.
   - no Studio, cada textura nova no `TextureID` escreve 3 avisos "No asset content
     representation" no Output (com Image ou Decal, e mesmo pré-carregada); ela carrega e aparece.
+- Sons das armas e do campo (D-204): `blender -b --factory-startup -P tools/sons_armas.py` gera os 19
+  kits (`assets/armas_sons/kit_*.ogg`) e o `Shared/SomKits.luau` (os trechos);
+  `uv run --group arte python tools/sons_armas.py --medir` dá os números e os espectrogramas.
+  - Mudou um kit já publicado? Tire a chave dele do `assets/roblox_ids.json` e suba de novo com
+    `upload-assets Sounds.kit_<nome>`: o script não troca versão, sobe um asset novo.
+  - A síntese é determinística (semente por trecho): o mesmo código gera o mesmo som.
+  - No Studio pelo MCP, o ouvinte é a câmera, que pode ficar presa longe do soldado (Scriptable).
+    Para ouvir o tiro de perto, dispare do servidor
+    `VT65Remotes.Combat_Tracer:FireClient(player, { w, ox, oy, oz, dx, dy, dz, seed })` perto da
+    câmera.
 - Pá de trincheira (D-183): `blender -b --factory-startup -P tools/blender/novos.py -- shovel_us` (ou `shovel_vc`)
   e o som com `blender ... -P tools/sons_pa.py`. A mão de 1ª e 3ª pessoa sai do `Shared/PaArte`.
   Objeto de mão de 3ª pessoa com várias peças: solde com `Weld` e `C0`, não com `WeldConstraint`.
@@ -339,7 +349,7 @@ O `sourcemap.json` não vai para o Git.
 - Segredos só no `.env` (no `.gitignore`), nunca no código nem no chat.
 - ForgeGUI: nunca regenerar um job em `outcome_unknown`. "failed" com `retryable` pode ser
   retomado com `generation_retry`.
-- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-204) e atualize `PROGRESS.md`.
+- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-205) e atualize `PROGRESS.md`.
 - Tetos de triângulos por modelo: vegetação ≤ 6 mil (D-135), props e herói ≤ 20 mil (`ArtBudget`,
   conferido pelo teste da F5).
 - Commits no branch acima, com mensagem em português.
