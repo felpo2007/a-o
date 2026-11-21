@@ -9887,4 +9887,10 @@ veículos maiores, soldado dentro do veículo, cura melhor, miras limpas e telas
 - **Miras (`tools/mira_limpa.py`):** move só os vértices da linha de visada, com o mesmo UV, para não
   invalidar os acabamentos. M16: furo de 5 para 8,4 mm, trilhos fora do anel. SKS: entalhe de 4,4 para
   7,6 mm e 5,5 mm mais fundo (antes o fundo escondia o poste).
-- **Não testado no Studio nem publicado:** a lista está em `testes/LOTE108_D236_2026-11-21.md`.
+- **Rosto em placa:** a cabeça padrão do Roblox é malha com o rosto antigo na textura, e um Decal nela
+  segue o UV. O `Characters` tira a textura e põe o rosto na peça `Head.Rosto` (invisível, sem colisão).
+- **Quem aparece no veículo:** o jipe, o atirador da porta do UH-34D e quem atira com a própria arma. Quem
+  atira não pode ser invisível. A Peugeot vai toda fechada: a fila de trás não atira mais pela aba.
+- **Moldes como Image:** a chave `Clothing.*_v3` aponta para o arquivo v4. O ID antigo fica em `*_decal_v139`.
+- **Medido:** 276 de 276 trechos a pé, autoteste 18 de 18 e -0,8% de chamadas de desenho sobre a v139.
+  Detalhes e o que ficou sem teste em `testes/LOTE108_D236_2026-11-21.md`.

@@ -317,6 +317,7 @@ local function close()
 		return
 	end
 	panel.Visible = false
+	gui.DisplayOrder = ORDER
 	UiKit.release(panel)
 	UiKit.closed(NAME)
 	Input.closeMenu()
@@ -389,6 +390,18 @@ openPanel = function()
 	local cor = sideColor(f)
 	stripe.BackgroundColor3 = cor
 	kicker.Text = UiKit.upper(string.format("veículo ao nascer · %s", SIDE_PT[f :: string] or ""))
+	-- celular deitado: sem o texto longo e com cartão mais baixo, e a vitrine ocupa a altura da tela
+	local telaH = gui.AbsoluteSize.Y
+	local compacta = telaH < 480
+	info.Visible = not compacta
+	foot.frame.Visible = not compacta
+	local alturaCartao = if compacta then 256 else CARTAO_H
+	local alturaFoto = alturaCartao - 144
+	rows.Size = UDim2.new(1, 0, 0, alturaCartao)
+	local escalaFinal = 1
+	if compacta and stageScale.Scale > 0 then
+		escalaFinal = math.min((gui.AbsoluteSize.X - 8) / PANEL_W, (telaH - 6) / 440) / stageScale.Scale
+	end
 	local n = 0
 	for ordem, spec in list :: { string } do
 		local item = CompraVeiculo.ITEMS[spec]
@@ -397,35 +410,28 @@ openPanel = function()
 		local c = UiKit.panel(rows, V.PANEL_2, 0.08, true)
 		c.Name = "Cartao_" .. spec
 		c.LayoutOrder = ordem
-		c.Size = UDim2.fromOffset(CARTAO_W, CARTAO_H)
+		c.Size = UDim2.fromOffset(CARTAO_W, alturaCartao)
 		c.ClipsDescendants = true
 		table.insert(open.cartoes, c)
 		local traco = c:FindFirstChildOfClass("UIStroke")
-		local luz = Instance.new("CanvasGroup") -- corta os raios girados dentro do cartão
-		luz.Name = "Luz"
-		luz.BackgroundTransparency = 1
-		luz.BorderSizePixel = 0
-		luz.Size = UDim2.new(1, 0, 0, 196)
-		luz.ZIndex = 1
-		luz.Parent = c
-		UiEfeitos.halo(luz, UDim2.fromOffset(CARTAO_W // 2, 104), cor, 400, 0.45, 3.2, 1)
-		UiEfeitos.raios(luz, Vector2.new(CARTAO_W // 2, 104), cor, 520, 3, 5, 1)
+		-- só o brilho redondo: no Studio, os raios numa CanvasGroup cobriram a foto da viatura
+		UiEfeitos.halo(c, UDim2.fromOffset(CARTAO_W // 2, alturaFoto // 2 + 4), cor, alturaFoto * 1.85, 0.42, 3.2, 1)
 		local arte = Instance.new("ImageLabel")
 		arte.Name = "Viatura"
 		arte.BackgroundTransparency = 1
 		arte.AnchorPoint = Vector2.new(0.5, 0)
 		arte.Position = UDim2.new(0.5, 0, 0, 2)
-		arte.Size = UDim2.new(1, -40, 0, 194)
+		arte.Size = UDim2.new(1, -40, 0, alturaFoto)
 		arte.ScaleType = Enum.ScaleType.Fit
 		arte.Image = vehicleImage(spec) or ""
 		arte.ZIndex = 3
 		arte.Parent = c
 		UiEfeitos.varre(c, 4.5 + ordem * 0.7, Color3.fromRGB(255, 244, 214), 4)
 		local nome = UiKit.title(c, UiKit.upper(specName(spec)), 26)
-		nome.Position = UDim2.fromOffset(14, 198)
+		nome.Position = UDim2.fromOffset(14, alturaFoto + 4)
 		nome.Size = UDim2.new(1, -28, 0, 32)
 		nome.ZIndex = 5
-		local lugares = if ficha and ficha.seats then #ficha.seats else 0
+		local lugares = #Vehicles.seatList(spec) -- os da ficha e os passageiros
 		local kmh = if ficha then ficha.maxKmh else nil
 		local dados = UiKit.text2(
 			c,
@@ -435,7 +441,7 @@ openPanel = function()
 			15,
 			V.KHAKI
 		)
-		dados.Position = UDim2.fromOffset(14, 230)
+		dados.Position = UDim2.fromOffset(14, alturaFoto + 36)
 		dados.Size = UDim2.new(1, -28, 0, 22)
 		dados.TextXAlignment = Enum.TextXAlignment.Left
 		dados.ZIndex = 5
@@ -506,16 +512,19 @@ openPanel = function()
 	end, function(a: UiKit.Action)
 		a.button.Visible = st.spec ~= nil and st.state ~= "reserved"
 	end)
-	addRow(rodape, "FECHAR", "ghost", 2, UDim.new(0, 170), close)
+	addRow(rodape, "FECHAR", "secondary", 2, UDim.new(0, 170), close)
 	foot.clear()
 	foot.action("ui_back", "menu", "Fechar")
+	-- acima dos botões da carta no celular (VT65CartaToque, ordem 22), abaixo da tela da baixa (25)
+	gui.DisplayOrder = ORDER + 2
+	panel.Active = true
 	panel.Visible = true
 	-- a vitrine entra com um pulo curto (parada, com movimento reduzido)
 	if UiKit.Estilo.reduzMovimento() then
-		panelScale.Scale = 1
+		panelScale.Scale = escalaFinal
 	else
-		panelScale.Scale = 0.94
-		TweenService:Create(panelScale, TweenInfo.new(0.24, Enum.EasingStyle.Back), { Scale = 1 }):Play()
+		panelScale.Scale = escalaFinal * 0.94
+		TweenService:Create(panelScale, TweenInfo.new(0.24, Enum.EasingStyle.Back), { Scale = escalaFinal }):Play()
 	end
 	Input.openMenu()
 	UiKit.opened(NAME, ORDER)

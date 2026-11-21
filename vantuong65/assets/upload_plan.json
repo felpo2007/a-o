@@ -704,56 +704,56 @@
  },
  {
   "key": "Clothing.us_shirt_v3",
-  "file": "assets/clothing/v3/us_shirt_v3.png",
-  "assetType": "Decal",
+  "file": "assets/clothing/v4/us_shirt_v3.png",
+  "assetType": "Image",
   "name": "VT65 us_shirt_v3"
  },
  {
   "key": "Clothing.us_shirt_rolled_v3",
-  "file": "assets/clothing/v3/us_shirt_rolled_v3.png",
-  "assetType": "Decal",
+  "file": "assets/clothing/v4/us_shirt_rolled_v3.png",
+  "assetType": "Image",
   "name": "VT65 us_shirt_rolled_v3"
  },
  {
   "key": "Clothing.us_pants_v3",
-  "file": "assets/clothing/v3/us_pants_v3.png",
-  "assetType": "Decal",
+  "file": "assets/clothing/v4/us_pants_v3.png",
+  "assetType": "Image",
   "name": "VT65 us_pants_v3"
  },
  {
   "key": "Clothing.vc_khaki_shirt_v3",
-  "file": "assets/clothing/v3/vc_khaki_shirt_v3.png",
-  "assetType": "Decal",
+  "file": "assets/clothing/v4/vc_khaki_shirt_v3.png",
+  "assetType": "Image",
   "name": "VT65 vc_khaki_shirt_v3"
  },
  {
   "key": "Clothing.vc_khaki_pants_v3",
-  "file": "assets/clothing/v3/vc_khaki_pants_v3.png",
-  "assetType": "Decal",
+  "file": "assets/clothing/v4/vc_khaki_pants_v3.png",
+  "assetType": "Image",
   "name": "VT65 vc_khaki_pants_v3"
  },
  {
   "key": "Clothing.vc_green_shirt_v3",
-  "file": "assets/clothing/v3/vc_green_shirt_v3.png",
-  "assetType": "Decal",
+  "file": "assets/clothing/v4/vc_green_shirt_v3.png",
+  "assetType": "Image",
   "name": "VT65 vc_green_shirt_v3"
  },
  {
   "key": "Clothing.vc_green_pants_v3",
-  "file": "assets/clothing/v3/vc_green_pants_v3.png",
-  "assetType": "Decal",
+  "file": "assets/clothing/v4/vc_green_pants_v3.png",
+  "assetType": "Image",
   "name": "VT65 vc_green_pants_v3"
  },
  {
   "key": "Clothing.vc_black_shirt_v3",
-  "file": "assets/clothing/v3/vc_black_shirt_v3.png",
-  "assetType": "Decal",
+  "file": "assets/clothing/v4/vc_black_shirt_v3.png",
+  "assetType": "Image",
   "name": "VT65 vc_black_shirt_v3"
  },
  {
   "key": "Clothing.vc_black_pants_v3",
-  "file": "assets/clothing/v3/vc_black_pants_v3.png",
-  "assetType": "Decal",
+  "file": "assets/clothing/v4/vc_black_pants_v3.png",
+  "assetType": "Image",
   "name": "VT65 vc_black_pants_v3"
  },
  {
@@ -898,43 +898,43 @@
  },
  {
   "key": "Clothing.us_faded_shirt_v3",
-  "file": "assets/clothing/skins/us_faded_shirt_v3.png",
-  "assetType": "Decal",
+  "file": "assets/clothing/v4/us_faded_shirt_v3.png",
+  "assetType": "Image",
   "name": "VT65 us_faded_shirt_v3",
   "description": "VAN TUONG 65 - skin OG-107 desbotado, camisa (tools/make_clothing_skins.py)"
  },
  {
   "key": "Clothing.us_faded_pants_v3",
-  "file": "assets/clothing/skins/us_faded_pants_v3.png",
-  "assetType": "Decal",
+  "file": "assets/clothing/v4/us_faded_pants_v3.png",
+  "assetType": "Image",
   "name": "VT65 us_faded_pants_v3",
   "description": "VAN TUONG 65 - skin OG-107 desbotado, calca (tools/make_clothing_skins.py)"
  },
  {
   "key": "Clothing.us_tiger_shirt_v3",
-  "file": "assets/clothing/skins/us_tiger_shirt_v3.png",
-  "assetType": "Decal",
+  "file": "assets/clothing/v4/us_tiger_shirt_v3.png",
+  "assetType": "Image",
   "name": "VT65 us_tiger_shirt_v3",
   "description": "VAN TUONG 65 - skin tiger stripe, camisa (tools/make_clothing_skins.py)"
  },
  {
   "key": "Clothing.us_tiger_pants_v3",
-  "file": "assets/clothing/skins/us_tiger_pants_v3.png",
-  "assetType": "Decal",
+  "file": "assets/clothing/v4/us_tiger_pants_v3.png",
+  "assetType": "Image",
   "name": "VT65 us_tiger_pants_v3",
   "description": "VAN TUONG 65 - skin tiger stripe, calca (tools/make_clothing_skins.py)"
  },
  {
   "key": "Clothing.us_duck_shirt_v3",
-  "file": "assets/clothing/skins/us_duck_shirt_v3.png",
-  "assetType": "Decal",
+  "file": "assets/clothing/v4/us_duck_shirt_v3.png",
+  "assetType": "Image",
   "name": "VT65 us_duck_shirt_v3",
   "description": "VAN TUONG 65 - skin duck hunter, camisa (tools/make_clothing_skins.py)"
  },
  {
   "key": "Clothing.us_duck_pants_v3",
-  "file": "assets/clothing/skins/us_duck_pants_v3.png",
-  "assetType": "Decal",
+  "file": "assets/clothing/v4/us_duck_pants_v3.png",
+  "assetType": "Image",
   "name": "VT65 us_duck_pants_v3",
   "description": "VAN TUONG 65 - skin duck hunter, calca (tools/make_clothing_skins.py)"
  },
@@ -1723,57 +1723,57 @@
  },
  {
   "key": "Clothing.us_tadpole_shirt_v3",
-  "file": "assets/clothing/skins/us_tadpole_shirt_v3.png",
-  "assetType": "Decal",
+  "file": "assets/clothing/v4/us_tadpole_shirt_v3.png",
+  "assetType": "Image",
   "name": "VT65 us_tadpole_shirt_v3",
   "description": "VAN TUONG 65 - skin tiger stripe tadpole, camisa (tools/make_clothing_skins.py)"
  },
  {
   "key": "Clothing.us_tadpole_pants_v3",
-  "file": "assets/clothing/skins/us_tadpole_pants_v3.png",
-  "assetType": "Decal",
+  "file": "assets/clothing/v4/us_tadpole_pants_v3.png",
+  "assetType": "Image",
   "name": "VT65 us_tadpole_pants_v3",
   "description": "VAN TUONG 65 - skin tiger stripe tadpole, calça (tools/make_clothing_skins.py)"
  },
  {
   "key": "Clothing.us_lizard_shirt_v3",
-  "file": "assets/clothing/skins/us_lizard_shirt_v3.png",
-  "assetType": "Decal",
+  "file": "assets/clothing/v4/us_lizard_shirt_v3.png",
+  "assetType": "Image",
   "name": "VT65 us_lizard_shirt_v3",
   "description": "VAN TUONG 65 - skin lagarto (paraquedistas), camisa (tools/make_clothing_skins.py)"
  },
  {
   "key": "Clothing.us_lizard_pants_v3",
-  "file": "assets/clothing/skins/us_lizard_pants_v3.png",
-  "assetType": "Decal",
+  "file": "assets/clothing/v4/us_lizard_pants_v3.png",
+  "assetType": "Image",
   "name": "VT65 us_lizard_pants_v3",
   "description": "VAN TUONG 65 - skin lagarto (paraquedistas), calça (tools/make_clothing_skins.py)"
  },
  {
   "key": "Clothing.vc_brown_shirt_v3",
-  "file": "assets/clothing/skins/vc_brown_shirt_v3.png",
-  "assetType": "Decal",
+  "file": "assets/clothing/v4/vc_brown_shirt_v3.png",
+  "assetType": "Image",
   "name": "VT65 vc_brown_shirt_v3",
   "description": "VAN TUONG 65 - skin áo bà ba marrom, camisa (tools/make_clothing_skins.py)"
  },
  {
   "key": "Clothing.vc_brown_pants_v3",
-  "file": "assets/clothing/skins/vc_brown_pants_v3.png",
-  "assetType": "Decal",
+  "file": "assets/clothing/v4/vc_brown_pants_v3.png",
+  "assetType": "Image",
   "name": "VT65 vc_brown_pants_v3",
   "description": "VAN TUONG 65 - skin áo bà ba marrom, calça (tools/make_clothing_skins.py)"
  },
  {
   "key": "Clothing.vc_tiger_shirt_v3",
-  "file": "assets/clothing/skins/vc_tiger_shirt_v3.png",
-  "assetType": "Decal",
+  "file": "assets/clothing/v4/vc_tiger_shirt_v3.png",
+  "assetType": "Image",
   "name": "VT65 vc_tiger_shirt_v3",
   "description": "VAN TUONG 65 - skin tiger stripe capturado, camisa (tools/make_clothing_skins.py)"
  },
  {
   "key": "Clothing.vc_tiger_pants_v3",
-  "file": "assets/clothing/skins/vc_tiger_pants_v3.png",
-  "assetType": "Decal",
+  "file": "assets/clothing/v4/vc_tiger_pants_v3.png",
+  "assetType": "Image",
   "name": "VT65 vc_tiger_pants_v3",
   "description": "VAN TUONG 65 - skin tiger stripe capturado, calça (tools/make_clothing_skins.py)"
  },
@@ -1800,85 +1800,85 @@
  },
  {
   "key": "Clothing.us_hbt_shirt_v3",
-  "file": "assets/clothing/skins/us_hbt_shirt_v3.png",
-  "assetType": "Decal",
+  "file": "assets/clothing/v4/us_hbt_shirt_v3.png",
+  "assetType": "Image",
   "name": "VT65 us_hbt_shirt_v3",
   "description": "VAN TUONG 65 - skin HBT verde-sálvia, camisa (tools/make_clothing_skins.py, D-176)"
  },
  {
   "key": "Clothing.us_hbt_pants_v3",
-  "file": "assets/clothing/skins/us_hbt_pants_v3.png",
-  "assetType": "Decal",
+  "file": "assets/clothing/v4/us_hbt_pants_v3.png",
+  "assetType": "Image",
   "name": "VT65 us_hbt_pants_v3",
   "description": "VAN TUONG 65 - skin HBT verde-sálvia, calça (tools/make_clothing_skins.py, D-176)"
  },
  {
   "key": "Clothing.us_goldtiger_shirt_v3",
-  "file": "assets/clothing/skins/us_goldtiger_shirt_v3.png",
-  "assetType": "Decal",
+  "file": "assets/clothing/v4/us_goldtiger_shirt_v3.png",
+  "assetType": "Image",
   "name": "VT65 us_goldtiger_shirt_v3",
   "description": "VAN TUONG 65 - skin tigrado dourado, camisa (tools/make_clothing_skins.py, D-176)"
  },
  {
   "key": "Clothing.us_goldtiger_pants_v3",
-  "file": "assets/clothing/skins/us_goldtiger_pants_v3.png",
-  "assetType": "Decal",
+  "file": "assets/clothing/v4/us_goldtiger_pants_v3.png",
+  "assetType": "Image",
   "name": "VT65 us_goldtiger_pants_v3",
   "description": "VAN TUONG 65 - skin tigrado dourado, calça (tools/make_clothing_skins.py, D-176)"
  },
  {
   "key": "Clothing.vc_oliva_shirt_v3",
-  "file": "assets/clothing/skins/vc_oliva_shirt_v3.png",
-  "assetType": "Decal",
+  "file": "assets/clothing/v4/vc_oliva_shirt_v3.png",
+  "assetType": "Image",
   "name": "VT65 vc_oliva_shirt_v3",
   "description": "VAN TUONG 65 - skin áo bà ba verde-oliva, camisa (tools/make_clothing_skins.py, D-176)"
  },
  {
   "key": "Clothing.vc_oliva_pants_v3",
-  "file": "assets/clothing/skins/vc_oliva_pants_v3.png",
-  "assetType": "Decal",
+  "file": "assets/clothing/v4/vc_oliva_pants_v3.png",
+  "assetType": "Image",
   "name": "VT65 vc_oliva_pants_v3",
   "description": "VAN TUONG 65 - skin áo bà ba verde-oliva, calça (tools/make_clothing_skins.py, D-176)"
  },
  {
   "key": "Clothing.vc_anil_shirt_v3",
-  "file": "assets/clothing/skins/vc_anil_shirt_v3.png",
-  "assetType": "Decal",
+  "file": "assets/clothing/v4/vc_anil_shirt_v3.png",
+  "assetType": "Image",
   "name": "VT65 vc_anil_shirt_v3",
   "description": "VAN TUONG 65 - skin áo bà ba anil, camisa (tools/make_clothing_skins.py, D-176)"
  },
  {
   "key": "Clothing.vc_anil_pants_v3",
-  "file": "assets/clothing/skins/vc_anil_pants_v3.png",
-  "assetType": "Decal",
+  "file": "assets/clothing/v4/vc_anil_pants_v3.png",
+  "assetType": "Image",
   "name": "VT65 vc_anil_pants_v3",
   "description": "VAN TUONG 65 - skin áo bà ba anil, calça (tools/make_clothing_skins.py, D-176)"
  },
  {
   "key": "Clothing.us_fundador_shirt_v3",
-  "file": "assets/clothing/skins/us_fundador_shirt_v3.png",
-  "assetType": "Decal",
+  "file": "assets/clothing/v4/us_fundador_shirt_v3.png",
+  "assetType": "Image",
   "name": "VT65 us_fundador_shirt_v3",
   "description": "VAN TUONG 65 - skin fundador (EUA), camisa (tools/make_clothing_skins.py, D-176)"
  },
  {
   "key": "Clothing.us_fundador_pants_v3",
-  "file": "assets/clothing/skins/us_fundador_pants_v3.png",
-  "assetType": "Decal",
+  "file": "assets/clothing/v4/us_fundador_pants_v3.png",
+  "assetType": "Image",
   "name": "VT65 us_fundador_pants_v3",
   "description": "VAN TUONG 65 - skin fundador (EUA), calça (tools/make_clothing_skins.py, D-176)"
  },
  {
   "key": "Clothing.vc_fundador_shirt_v3",
-  "file": "assets/clothing/skins/vc_fundador_shirt_v3.png",
-  "assetType": "Decal",
+  "file": "assets/clothing/v4/vc_fundador_shirt_v3.png",
+  "assetType": "Image",
   "name": "VT65 vc_fundador_shirt_v3",
   "description": "VAN TUONG 65 - skin fundador (Frente), camisa (tools/make_clothing_skins.py, D-176)"
  },
  {
   "key": "Clothing.vc_fundador_pants_v3",
-  "file": "assets/clothing/skins/vc_fundador_pants_v3.png",
-  "assetType": "Decal",
+  "file": "assets/clothing/v4/vc_fundador_pants_v3.png",
+  "assetType": "Image",
   "name": "VT65 vc_fundador_pants_v3",
   "description": "VAN TUONG 65 - skin fundador (Frente), calça (tools/make_clothing_skins.py, D-176)"
  },
@@ -11905,251 +11905,6 @@
   "assetType": "Image",
   "name": "VT65 rosto2 vc 12",
   "description": "VAN TUONG 65 - rosto pintado de soldado (D-236)"
- },
- {
-  "key": "Roupa4.us_duck_pants_v3",
-  "file": "assets/clothing/v4/us_duck_pants_v3.png",
-  "assetType": "Image",
-  "name": "VT65 roupa4 us_duck_pants_v3",
-  "description": "VAN TUONG 65 - uniforme com dobras e luz (D-236)"
- },
- {
-  "key": "Roupa4.us_duck_shirt_v3",
-  "file": "assets/clothing/v4/us_duck_shirt_v3.png",
-  "assetType": "Image",
-  "name": "VT65 roupa4 us_duck_shirt_v3",
-  "description": "VAN TUONG 65 - uniforme com dobras e luz (D-236)"
- },
- {
-  "key": "Roupa4.us_faded_pants_v3",
-  "file": "assets/clothing/v4/us_faded_pants_v3.png",
-  "assetType": "Image",
-  "name": "VT65 roupa4 us_faded_pants_v3",
-  "description": "VAN TUONG 65 - uniforme com dobras e luz (D-236)"
- },
- {
-  "key": "Roupa4.us_faded_shirt_v3",
-  "file": "assets/clothing/v4/us_faded_shirt_v3.png",
-  "assetType": "Image",
-  "name": "VT65 roupa4 us_faded_shirt_v3",
-  "description": "VAN TUONG 65 - uniforme com dobras e luz (D-236)"
- },
- {
-  "key": "Roupa4.us_fundador_pants_v3",
-  "file": "assets/clothing/v4/us_fundador_pants_v3.png",
-  "assetType": "Image",
-  "name": "VT65 roupa4 us_fundador_pants_v3",
-  "description": "VAN TUONG 65 - uniforme com dobras e luz (D-236)"
- },
- {
-  "key": "Roupa4.us_fundador_shirt_v3",
-  "file": "assets/clothing/v4/us_fundador_shirt_v3.png",
-  "assetType": "Image",
-  "name": "VT65 roupa4 us_fundador_shirt_v3",
-  "description": "VAN TUONG 65 - uniforme com dobras e luz (D-236)"
- },
- {
-  "key": "Roupa4.us_goldtiger_pants_v3",
-  "file": "assets/clothing/v4/us_goldtiger_pants_v3.png",
-  "assetType": "Image",
-  "name": "VT65 roupa4 us_goldtiger_pants_v3",
-  "description": "VAN TUONG 65 - uniforme com dobras e luz (D-236)"
- },
- {
-  "key": "Roupa4.us_goldtiger_shirt_v3",
-  "file": "assets/clothing/v4/us_goldtiger_shirt_v3.png",
-  "assetType": "Image",
-  "name": "VT65 roupa4 us_goldtiger_shirt_v3",
-  "description": "VAN TUONG 65 - uniforme com dobras e luz (D-236)"
- },
- {
-  "key": "Roupa4.us_hbt_pants_v3",
-  "file": "assets/clothing/v4/us_hbt_pants_v3.png",
-  "assetType": "Image",
-  "name": "VT65 roupa4 us_hbt_pants_v3",
-  "description": "VAN TUONG 65 - uniforme com dobras e luz (D-236)"
- },
- {
-  "key": "Roupa4.us_hbt_shirt_v3",
-  "file": "assets/clothing/v4/us_hbt_shirt_v3.png",
-  "assetType": "Image",
-  "name": "VT65 roupa4 us_hbt_shirt_v3",
-  "description": "VAN TUONG 65 - uniforme com dobras e luz (D-236)"
- },
- {
-  "key": "Roupa4.us_lizard_pants_v3",
-  "file": "assets/clothing/v4/us_lizard_pants_v3.png",
-  "assetType": "Image",
-  "name": "VT65 roupa4 us_lizard_pants_v3",
-  "description": "VAN TUONG 65 - uniforme com dobras e luz (D-236)"
- },
- {
-  "key": "Roupa4.us_lizard_shirt_v3",
-  "file": "assets/clothing/v4/us_lizard_shirt_v3.png",
-  "assetType": "Image",
-  "name": "VT65 roupa4 us_lizard_shirt_v3",
-  "description": "VAN TUONG 65 - uniforme com dobras e luz (D-236)"
- },
- {
-  "key": "Roupa4.us_pants_v3",
-  "file": "assets/clothing/v4/us_pants_v3.png",
-  "assetType": "Image",
-  "name": "VT65 roupa4 us_pants_v3",
-  "description": "VAN TUONG 65 - uniforme com dobras e luz (D-236)"
- },
- {
-  "key": "Roupa4.us_shirt_rolled_v3",
-  "file": "assets/clothing/v4/us_shirt_rolled_v3.png",
-  "assetType": "Image",
-  "name": "VT65 roupa4 us_shirt_rolled_v3",
-  "description": "VAN TUONG 65 - uniforme com dobras e luz (D-236)"
- },
- {
-  "key": "Roupa4.us_shirt_v3",
-  "file": "assets/clothing/v4/us_shirt_v3.png",
-  "assetType": "Image",
-  "name": "VT65 roupa4 us_shirt_v3",
-  "description": "VAN TUONG 65 - uniforme com dobras e luz (D-236)"
- },
- {
-  "key": "Roupa4.us_tadpole_pants_v3",
-  "file": "assets/clothing/v4/us_tadpole_pants_v3.png",
-  "assetType": "Image",
-  "name": "VT65 roupa4 us_tadpole_pants_v3",
-  "description": "VAN TUONG 65 - uniforme com dobras e luz (D-236)"
- },
- {
-  "key": "Roupa4.us_tadpole_shirt_v3",
-  "file": "assets/clothing/v4/us_tadpole_shirt_v3.png",
-  "assetType": "Image",
-  "name": "VT65 roupa4 us_tadpole_shirt_v3",
-  "description": "VAN TUONG 65 - uniforme com dobras e luz (D-236)"
- },
- {
-  "key": "Roupa4.us_tiger_pants_v3",
-  "file": "assets/clothing/v4/us_tiger_pants_v3.png",
-  "assetType": "Image",
-  "name": "VT65 roupa4 us_tiger_pants_v3",
-  "description": "VAN TUONG 65 - uniforme com dobras e luz (D-236)"
- },
- {
-  "key": "Roupa4.us_tiger_shirt_v3",
-  "file": "assets/clothing/v4/us_tiger_shirt_v3.png",
-  "assetType": "Image",
-  "name": "VT65 roupa4 us_tiger_shirt_v3",
-  "description": "VAN TUONG 65 - uniforme com dobras e luz (D-236)"
- },
- {
-  "key": "Roupa4.vc_anil_pants_v3",
-  "file": "assets/clothing/v4/vc_anil_pants_v3.png",
-  "assetType": "Image",
-  "name": "VT65 roupa4 vc_anil_pants_v3",
-  "description": "VAN TUONG 65 - uniforme com dobras e luz (D-236)"
- },
- {
-  "key": "Roupa4.vc_anil_shirt_v3",
-  "file": "assets/clothing/v4/vc_anil_shirt_v3.png",
-  "assetType": "Image",
-  "name": "VT65 roupa4 vc_anil_shirt_v3",
-  "description": "VAN TUONG 65 - uniforme com dobras e luz (D-236)"
- },
- {
-  "key": "Roupa4.vc_black_pants_v3",
-  "file": "assets/clothing/v4/vc_black_pants_v3.png",
-  "assetType": "Image",
-  "name": "VT65 roupa4 vc_black_pants_v3",
-  "description": "VAN TUONG 65 - uniforme com dobras e luz (D-236)"
- },
- {
-  "key": "Roupa4.vc_black_shirt_v3",
-  "file": "assets/clothing/v4/vc_black_shirt_v3.png",
-  "assetType": "Image",
-  "name": "VT65 roupa4 vc_black_shirt_v3",
-  "description": "VAN TUONG 65 - uniforme com dobras e luz (D-236)"
- },
- {
-  "key": "Roupa4.vc_brown_pants_v3",
-  "file": "assets/clothing/v4/vc_brown_pants_v3.png",
-  "assetType": "Image",
-  "name": "VT65 roupa4 vc_brown_pants_v3",
-  "description": "VAN TUONG 65 - uniforme com dobras e luz (D-236)"
- },
- {
-  "key": "Roupa4.vc_brown_shirt_v3",
-  "file": "assets/clothing/v4/vc_brown_shirt_v3.png",
-  "assetType": "Image",
-  "name": "VT65 roupa4 vc_brown_shirt_v3",
-  "description": "VAN TUONG 65 - uniforme com dobras e luz (D-236)"
- },
- {
-  "key": "Roupa4.vc_fundador_pants_v3",
-  "file": "assets/clothing/v4/vc_fundador_pants_v3.png",
-  "assetType": "Image",
-  "name": "VT65 roupa4 vc_fundador_pants_v3",
-  "description": "VAN TUONG 65 - uniforme com dobras e luz (D-236)"
- },
- {
-  "key": "Roupa4.vc_fundador_shirt_v3",
-  "file": "assets/clothing/v4/vc_fundador_shirt_v3.png",
-  "assetType": "Image",
-  "name": "VT65 roupa4 vc_fundador_shirt_v3",
-  "description": "VAN TUONG 65 - uniforme com dobras e luz (D-236)"
- },
- {
-  "key": "Roupa4.vc_green_pants_v3",
-  "file": "assets/clothing/v4/vc_green_pants_v3.png",
-  "assetType": "Image",
-  "name": "VT65 roupa4 vc_green_pants_v3",
-  "description": "VAN TUONG 65 - uniforme com dobras e luz (D-236)"
- },
- {
-  "key": "Roupa4.vc_green_shirt_v3",
-  "file": "assets/clothing/v4/vc_green_shirt_v3.png",
-  "assetType": "Image",
-  "name": "VT65 roupa4 vc_green_shirt_v3",
-  "description": "VAN TUONG 65 - uniforme com dobras e luz (D-236)"
- },
- {
-  "key": "Roupa4.vc_khaki_pants_v3",
-  "file": "assets/clothing/v4/vc_khaki_pants_v3.png",
-  "assetType": "Image",
-  "name": "VT65 roupa4 vc_khaki_pants_v3",
-  "description": "VAN TUONG 65 - uniforme com dobras e luz (D-236)"
- },
- {
-  "key": "Roupa4.vc_khaki_shirt_v3",
-  "file": "assets/clothing/v4/vc_khaki_shirt_v3.png",
-  "assetType": "Image",
-  "name": "VT65 roupa4 vc_khaki_shirt_v3",
-  "description": "VAN TUONG 65 - uniforme com dobras e luz (D-236)"
- },
- {
-  "key": "Roupa4.vc_oliva_pants_v3",
-  "file": "assets/clothing/v4/vc_oliva_pants_v3.png",
-  "assetType": "Image",
-  "name": "VT65 roupa4 vc_oliva_pants_v3",
-  "description": "VAN TUONG 65 - uniforme com dobras e luz (D-236)"
- },
- {
-  "key": "Roupa4.vc_oliva_shirt_v3",
-  "file": "assets/clothing/v4/vc_oliva_shirt_v3.png",
-  "assetType": "Image",
-  "name": "VT65 roupa4 vc_oliva_shirt_v3",
-  "description": "VAN TUONG 65 - uniforme com dobras e luz (D-236)"
- },
- {
-  "key": "Roupa4.vc_tiger_pants_v3",
-  "file": "assets/clothing/v4/vc_tiger_pants_v3.png",
-  "assetType": "Image",
-  "name": "VT65 roupa4 vc_tiger_pants_v3",
-  "description": "VAN TUONG 65 - uniforme com dobras e luz (D-236)"
- },
- {
-  "key": "Roupa4.vc_tiger_shirt_v3",
-  "file": "assets/clothing/v4/vc_tiger_shirt_v3.png",
-  "assetType": "Image",
-  "name": "VT65 roupa4 vc_tiger_shirt_v3",
-  "description": "VAN TUONG 65 - uniforme com dobras e luz (D-236)"
  },
  {
   "key": "Recompensas.r1",

@@ -22,6 +22,7 @@ from pathlib import Path
 
 import bmesh
 import bpy
+import numpy as np
 from mathutils import Euler, Vector
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -416,7 +417,26 @@ def render(chave, amostras, teste):
     nome = ("teste_" if teste else "") + chave + ".png"
     cena.render.filepath = str(SAIDA / nome)
     bpy.ops.render.render(write_still=True)
+    borda(SAIDA / nome)
     print("ok", nome, flush=True)
+
+
+def borda(caminho: Path, faixa: float = 0.07) -> None:
+    """A sombra no chão chegava à borda do quadro e marcava uma linha reta: ela some antes."""
+    im = bpy.data.images.load(str(caminho))
+    w, h = im.size
+    px = np.empty(w * h * 4, dtype=np.float32)
+    im.pixels.foreach_get(px)
+    a = px.reshape(h, w, 4)
+    yy, xx = np.mgrid[0:h, 0:w]
+    d = np.minimum.reduce([xx, w - 1 - xx, yy, h - 1 - yy]) / w
+    t = np.clip(d / faixa, 0, 1)
+    a[..., 3] *= t * t * (3 - 2 * t)
+    im.pixels.foreach_set(a.ravel())
+    im.filepath_raw = str(caminho)
+    im.file_format = "PNG"
+    im.save()
+    bpy.data.images.remove(im)
 
 
 def principal():
@@ -425,6 +445,10 @@ def principal():
     if "--amostras" in args:
         amostras = int(args[args.index("--amostras") + 1])
     teste = "--teste" in args
+    if "--so-borda" in args:
+        for k in CENAS:
+            borda(SAIDA / f"{k}.png")
+        return
     alvos = [a for a in args if a in CENAS]
     if "todas" in args or not alvos:
         alvos = list(CENAS)

@@ -59,7 +59,12 @@ repositório é de OUTRO projeto (estratégias de trade). Aqui vale este arquivo
   `assets/estatico/ajuste_casas.json` e rode `uv run python tools/estatico.py`; rode o `estatico.py`
   outra vez depois da ferramenta.
 - Rostos e uniformes (D-236): `uv run --group arte python tools/rostos/make_rostos2.py` e
-  `tools/make_clothing_v4.py` (chaves `Rostos2.*` e `Roupa4.*`, tipo Image: o ID vai direto).
+  `tools/make_clothing_v4.py` (tipo Image: o ID vai direto). As roupas são as chaves `Clothing.*_v3`
+  do plano, com o arquivo em `assets/clothing/v4`. O rosto fica na peça `Head.Rosto`: um Decal na
+  cabeça padrão sai torto, porque ela é malha e segue o UV.
+- O `upload-assets` regrava no `AssetIds` o ID de toda chave do `roblox_ids.json`: trocar um ID só no
+  `AssetIds` é desfeito na próxima subida. Troque também no `roblox_ids.json`.
+- `VT65DevSemControle = true` (Client, logo depois do Play) ignora o controle fantasma do MCP.
 - Prêmios da recompensa (D-236): `tools/blender/recompensas.py -- todas` (CPU, `VT65_CPU=1`).
 - Mira da M16 e da SKS (D-236): `uv run --group arte python tools/mira_limpa.py` move só os vértices
   da linha de visada no GLB e mantém o UV dos acabamentos.

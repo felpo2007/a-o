@@ -1107,16 +1107,13 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     - Relatório: `testes/LOTE107_D235_2026-11-21.md`.
     - **v139 publicada** (versão 144 do place, commit add37b3).
     - **Decisão do dono:** manter a arte fixa com o interior mais claro ("Manter assim").
-  - **Lote 108 (D-236): pedidos do dono de 21/11, código pronto e AINDA NÃO PUBLICADO.** O jogo no ar
-    continua a v139.
-    - Feito: M16 automática, inclinar em L e R, cura de aliados, sons gravados, música, casas e
-      veículos maiores, ocupantes escondidos, rostos, uniformes, recompensa diária, vitrine de veículo
-      e miras da M16 e da SKS.
+  - **Lote 108 (D-236): pedidos do dono de 21/11, feito.** M16 automática, inclinar em L e R, cura de
+    aliados, sons gravados, música, casas e veículos maiores, ocupantes escondidos, rostos, uniformes,
+    recompensa diária, vitrine de veículo e miras da M16 e da SKS.
     - Casas: 86 de 88 cresceram (66 em +25%), 12 anexos saíram. Veículos: +25%.
-    - Offline: Lune, pytest, ruff, luau-lsp, i18n e `expansao_check` (0 problemas) passando.
-    - **Falta no Studio** (o jogo do dono estava aberto e ocupava a GPU): andar nas casas, portas e
-      escadas; veículos nos depósitos e bancos; sons e música; telas novas; miras; desempenho nas 9
-      vistas contra a v139; autoteste. **Só depois publicar a v140 (versão 145 do place).**
+    - Testes: 276 de 276 trechos a pé, M151 20 de 20, Lune 920, pytest 77, autoteste 18 de 18.
+    - Desenho: -0,8% sobre a v139 nas 9 vistas.
+    - **Sem teste:** os sons de ouvido, celular real, servidor cheio e cura entre dois humanos.
     - Relatório: `testes/LOTE108_D236_2026-11-21.md`.
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
 - **Próximos (ideias da análise, esperando o dono):**

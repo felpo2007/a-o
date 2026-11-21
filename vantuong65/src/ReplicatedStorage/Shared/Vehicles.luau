@@ -232,18 +232,15 @@ for _, s in Vehicles.SPECS do
 end
 
 -- D-236 (dono: "os soldados devem ficar dentro dos tanques e veiculos sem aparecerem para fora"): quem
--- continua à vista é só quem está num lugar aberto de verdade: jipe, caçamba do M35, tropa no teto do
--- LVTP-5 e o atirador da porta do UH-34D. O resto fica dentro (Controllers/OcupanteVeiculo esconde).
+-- continua à vista é quem está num lugar aberto de verdade: todo o jipe, o atirador da porta do UH-34D e
+-- quem atira com a própria arma do lugar (caçamba, teto do LVTP-5, porta do helicóptero, escotilha do
+-- comandante). Quem atira não pode ser invisível. O resto fica dentro (Controllers/OcupanteVeiculo).
 function Vehicles.ocupanteAparece(specId: string, seatId: string): boolean
-	local tropa = string.match(seatId, "^p%d+$") ~= nil
-	if specId == "m151" then
+	if specId == "m151" or (specId == "uh34d" and seatId == "gunner") then
 		return true
-	elseif specId == "m35" or specId == "lvtp5" then
-		return tropa
-	elseif specId == "uh34d" then
-		return seatId == "gunner"
 	end
-	return false
+	local info = Vehicles.seatInfo(specId, seatId)
+	return info ~= nil and info.open ~= nil
 end
 
 -- Passageiros: LVTP-5 leva 34 pela ficha e o H-34A, 12. No jogo, 12 e 8 assentos, porque o squad
@@ -314,12 +311,9 @@ local function passengerArc(specId: string, n: number): Arc?
 		-- de costas para a grade da caçamba; a última fileira também atira para trás
 		local last = (n - 1) // 2 == (Vehicles.PASSENGERS.m35 - 1) // 2
 		return { yaw = side, half = if last then 125 else 95, down = -30, up = 40 }
-	elseif specId == "peugeot403" then
-		-- sob a lona: só a fileira de trás, pela aba enrolada
-		if (n - 1) // 2 == (Vehicles.PASSENGERS.peugeot403 - 1) // 2 then
-			return { yaw = 180, half = 50, down = -25, up = 30 }
-		end
 	end
+	-- D-236: a Peugeot vai toda fechada sob a lona. A fileira de trás atirava pela aba, mas o corpo de 2 m
+	-- atravessava a lona (visto no Studio), e quem atira não pode ficar invisível
 	return nil
 end
 

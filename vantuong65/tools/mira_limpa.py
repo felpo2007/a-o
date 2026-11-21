@@ -12,7 +12,7 @@ M16 (olho a 9 cm do anel):
   descem para baixo da linha de visada;
 - as orelhas da massa abrem e o poste engrossa um pouco: o poste fica sozinho no meio do anel.
 
-SKS: o entalhe abre de 4,4 para 7,6 mm e fica 5,5 mm mais fundo. O fundo dele estava na altura da
+SKS: o entalhe abre de 4,4 para 7,6 mm e fica 3 mm mais fundo. O fundo dele estava na altura da
 ponta do poste e escondia o poste inteiro; agora o poste aparece no meio, com a ponta no nível das
 orelhas.
 
@@ -82,7 +82,8 @@ def _orelha_entalhe(x, z, d):
 
 def _fundo_entalhe(x, z, d):
     # o fundo do entalhe estava na altura da ponta do poste e escondia o poste inteiro
-    return x * (0.0038 / 0.0022), np.where(z > ZS_SKS - 0.001, ZS_SKS - 0.0055, z), d
+    # 3 mm abaixo da linha: mostra o poste e ainda tapa a madeira do guarda-mão lá atrás
+    return x * (0.0038 / 0.0022), np.where(z > ZS_SKS - 0.001, ZS_SKS - 0.0030, z), d
 
 
 # nome, faixa de |x|, faixa de altura, faixa de d (m): a peça inteira tem de caber na faixa

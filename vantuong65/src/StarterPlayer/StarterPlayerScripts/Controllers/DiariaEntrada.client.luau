@@ -187,7 +187,7 @@ for i = 1, Commerce.TRACK_DAYS do
 	local icon = Instance.new("Frame")
 	icon.Name = "Premio"
 	icon.AnchorPoint = Vector2.new(0.5, 0)
-	icon.Position = UDim2.new(0.5, 0, 0, px(33, 44))
+	icon.Position = UDim2.new(0.5, 0, 0, px(38, 50))
 	icon.Size = UDim2.fromOffset(ICON_D, ICON_D)
 	icon.BackgroundTransparency = 1
 	icon.BorderSizePixel = 0
@@ -212,12 +212,12 @@ for i = 1, Commerce.TRACK_DAYS do
 	mark.ZIndex = 2
 	centered(mark)
 	local cash = UiKit.title(f, "", px(30, 40), OURO)
-	cash.Position = UDim2.fromOffset(0, px(142, 188))
+	cash.Position = UDim2.fromOffset(0, px(150, 198))
 	cash.Size = UDim2.new(1, 0, 0, px(36, 48))
 	cash.ZIndex = 4
 	centered(cash)
 	local item = UiKit.body(f, "", px(15, 20), V.TEXT)
-	item.Position = UDim2.fromOffset(px(4, 6), px(180, 240))
+	item.Position = UDim2.fromOffset(px(4, 6), px(188, 250))
 	item.Size = UDim2.new(1, -2 * px(4, 6), 0, px(44, 58))
 	item.TextWrapped = true
 	item.TextYAlignment = Enum.TextYAlignment.Top
@@ -335,7 +335,7 @@ local function acendeLuz(c: Cell)
 	q.ZIndex = 2
 	q.Parent = c.frame
 	luzHoje = q
-	local cx, cy = CARD_W / 2, px(33, 44) + ICON_D / 2
+	local cx, cy = CARD_W / 2, px(38, 50) + ICON_D / 2
 	UiEfeitos.halo(q, UDim2.fromOffset(cx, cy), OURO, ICON_D * 1.5, 0.42, 1.8, 2)
 	UiEfeitos.raios(q, Vector2.new(cx, cy), OURO, ICON_D * 2, 4, 12, 2)
 	UiEfeitos.cintilas(q, Color3.fromRGB(255, 240, 190), 3, nil, 6)
@@ -406,26 +406,31 @@ local function burst(day: number, credits: number)
 		local info = TweenInfo.new(rng:NextNumber(0.75, 1.15), Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
 		local alvo = origin + UDim2.fromOffset(math.cos(a) * r, math.sin(a) * r)
 		local giro = rng:NextNumber(-260, 260)
+		local lado = rng:NextInteger(px(34, 44), px(56, 74))
+		local function posta(q: GuiObject)
+			-- antes do tween: ele guarda a posição de partida ao tocar
+			q.AnchorPoint = Vector2.new(0.5, 0.5)
+			q.Size = UDim2.fromOffset(lado, lado)
+			q.Position = origin
+			q.ZIndex = 20
+		end
 		local t: GuiObject
 		if moeda then
 			local im = Instance.new("ImageLabel")
 			im.BackgroundTransparency = 1
 			im.Image = moeda
 			im.ScaleType = Enum.ScaleType.Fit
+			posta(im)
 			im.Parent = panel
 			TweenService:Create(im, info, { Position = alvo, ImageTransparency = 1, Rotation = giro }):Play()
 			t = im
 		else
 			local tx = UiKit.title(panel, if i % 3 == 0 then "✨" else "💰", px(30, 40), V.TEXT)
 			centered(tx)
+			posta(tx)
 			TweenService:Create(tx, info, { Position = alvo, TextTransparency = 1, Rotation = giro }):Play()
 			t = tx
 		end
-		local lado = rng:NextInteger(px(34, 44), px(56, 74))
-		t.AnchorPoint = Vector2.new(0.5, 0.5)
-		t.Size = UDim2.fromOffset(lado, lado)
-		t.Position = origin
-		t.ZIndex = 20
 		task.delay(1.25, function()
 			t:Destroy()
 		end)

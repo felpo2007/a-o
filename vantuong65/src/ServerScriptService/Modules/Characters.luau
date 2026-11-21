@@ -555,16 +555,43 @@ local function formatoF44(model: Model, faction: string, skin: Color3, seed: num
 	end
 	local head = model:FindFirstChild("Head")
 	local id = Corpo.rosto(faction, seed)
-	if head and id ~= 0 then
-		local face = head:FindFirstChild("face")
-		if not (face and face:IsA("Decal")) then
+	if head and head:IsA("BasePart") and id ~= 0 then
+		-- D-236: a cabeça padrão do Roblox virou malha com o rosto antigo na textura, e um Decal nela segue
+		-- o UV (o rosto saía esticado para o lado). Tira a textura e põe o rosto numa placa invisível
+		-- colada na frente da cabeça. A placa fica dentro da Head: some junto na 1ª pessoa e no veículo.
+		if head:IsA("MeshPart") then
+			head.TextureID = ""
+		end
+		local velho = head:FindFirstChild("face")
+		if velho then
+			velho:Destroy()
+		end
+		local recuo = CFrame.new(0, 0, -head.Size.Z / 2 - 0.012)
+		local placa = head:FindFirstChild("Rosto") :: Part?
+		if not placa then
+			local novo = Instance.new("Part")
+			novo.Name = "Rosto"
+			novo.Transparency = 1
+			novo.CanCollide, novo.CanTouch, novo.CanQuery, novo.Massless = false, false, false, true
+			novo.CastShadow = false
+			local w = Instance.new("Weld")
+			w.Name = "Solda"
+			w.Part0, w.Part1 = head, novo
+			w.Parent = novo
 			local d = Instance.new("Decal")
 			d.Name = "face"
 			d.Face = Enum.NormalId.Front
-			d.Parent = head
-			face = d
+			d.Parent = novo
+			placa = novo
 		end
-		(face :: Decal).Texture = "rbxassetid://" .. id
+		local p = placa :: Part
+		p.Size = Vector3.new(head.Size.X * 0.96, head.Size.Y * 0.96, 0.02)
+		p.CFrame = head.CFrame * recuo
+		local solda = p:FindFirstChild("Solda") :: Weld
+		solda.C0 = recuo
+		local decal = p:FindFirstChild("face") :: Decal
+		decal.Texture = "rbxassetid://" .. id
+		p.Parent = head
 	end
 	model:SetAttribute("Formato", "front44")
 end

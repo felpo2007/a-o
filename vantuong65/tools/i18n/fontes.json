@@ -146,8 +146,8 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:1287"
  ],
  "%d CI": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:462",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:478"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:468",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:484"
  ],
  "%d CI, cobrados só quando o lugar for achado": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:300"
@@ -168,7 +168,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:1741"
  ],
  "%d ROBUX": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:497"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:503"
  ],
  "%d Robux": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CasualtyScreen.luau:1019"
@@ -192,17 +192,17 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ArquivoTela.client.luau:440"
  ],
  "%d h %02d min": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:470",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:475",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:2102"
  ],
  "%d km": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaView.luau:2202"
  ],
  "%d lugares": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:434"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:440"
  ],
  "%d lugares · até %d km/h": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:433"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:439"
  ],
  "%d m": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaView.luau:2203",
@@ -667,7 +667,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Preparacao.luau:583"
  ],
  "+ presente surpresa": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:501"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:506"
  ],
  "+%d %s": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/HudInfantaria.client.luau:430"
@@ -1341,7 +1341,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/HudCampo.client.luau:866"
  ],
  "AMANHÃ": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:517"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:522"
  ],
  "AN/PRC-10 · 38–54,9 MC": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/LobbyScene.luau:896"
@@ -1555,7 +1555,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CasualtyScreen.luau:1107"
  ],
  "Aguarde a virada do dia (UTC).": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:482"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:487"
  ],
  "Ainda não está no seu arquivo.": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ArquivoTela.client.luau:232"
@@ -1890,7 +1890,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/LobbyScene.luau:338"
  ],
  "Atirador": [
-  "src/ReplicatedStorage/Shared/Vehicles.luau:273",
+  "src/ReplicatedStorage/Shared/Vehicles.luau:270",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:56"
  ],
  "Atirador de elite": [
@@ -2088,7 +2088,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponVisuals.client.luau:789"
  ],
  "Banco": [
-  "src/ReplicatedStorage/Shared/Vehicles.luau:463"
+  "src/ReplicatedStorage/Shared/Vehicles.luau:457"
  ],
  "Bandagem": [
   "src/ReplicatedStorage/Shared/Comms.luau:30",
@@ -2482,7 +2482,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CaixasTela.client.luau:1463"
  ],
  "COMPRA ESPERANDO": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:368"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:369"
  ],
  "COMPRAR": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ArquivoTela.client.luau:584",
@@ -2558,7 +2558,7 @@
  ],
  "CONTINUAR": [
   "src/ReplicatedFirst/LoadingScreen.client.luau:556",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:550"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:555"
  ],
  "CONTINUAR ►": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Preparacao.luau:373"
@@ -2611,8 +2611,8 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/LobbyScene.luau:712"
  ],
  "Cabine": [
-  "src/ReplicatedStorage/Shared/Vehicles.luau:487",
-  "src/ReplicatedStorage/Shared/Vehicles.luau:510"
+  "src/ReplicatedStorage/Shared/Vehicles.luau:481",
+  "src/ReplicatedStorage/Shared/Vehicles.luau:504"
  ],
  "Cabo": [
   "src/ReplicatedStorage/Shared/GrenadeArt.luau:154",
@@ -2623,7 +2623,7 @@
   "src/ReplicatedStorage/Shared/Temporada.luau:58"
  ],
  "Cacamba": [
-  "src/ReplicatedStorage/Shared/Vehicles.luau:488"
+  "src/ReplicatedStorage/Shared/Vehicles.luau:482"
  ],
  "Caderneta": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/LobbyScene.luau:1150"
@@ -2806,8 +2806,8 @@
   "src/ReplicatedStorage/Shared/Commerce.luau:433"
  ],
  "Capo": [
-  "src/ReplicatedStorage/Shared/Vehicles.luau:461",
-  "src/ReplicatedStorage/Shared/Vehicles.luau:486"
+  "src/ReplicatedStorage/Shared/Vehicles.luau:455",
+  "src/ReplicatedStorage/Shared/Vehicles.luau:480"
  ],
  "Caps Lock": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ComoJogar.luau:608",
@@ -2851,7 +2851,7 @@
   "src/ServerScriptService/Modules/EventosService.luau:914"
  ],
  "Carona": [
-  "src/ReplicatedStorage/Shared/Vehicles.luau:277"
+  "src/ReplicatedStorage/Shared/Vehicles.luau:274"
  ],
  "Carregador": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/InfantryController.client.luau:436",
@@ -2913,8 +2913,8 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaoJogador.luau:989"
  ],
  "Casco": [
-  "src/ReplicatedStorage/Shared/Vehicles.luau:460",
-  "src/ReplicatedStorage/Shared/Vehicles.luau:509",
+  "src/ReplicatedStorage/Shared/Vehicles.luau:454",
+  "src/ReplicatedStorage/Shared/Vehicles.luau:503",
   "src/ServerScriptService/Modules/MapLife.luau:1256",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleHudView.luau:197"
  ],
@@ -2963,7 +2963,7 @@
   "src/ReplicatedStorage/Shared/Roles.luau:47"
  ],
  "Chassi": [
-  "src/ReplicatedStorage/Shared/Vehicles.luau:485"
+  "src/ReplicatedStorage/Shared/Vehicles.luau:479"
  ],
  "Chefe de célula": [
   "src/ReplicatedStorage/Shared/Progression.luau:98"
@@ -3068,7 +3068,7 @@
  ],
  "Comandante": [
   "src/ReplicatedStorage/Shared/Roles.luau:22",
-  "src/ReplicatedStorage/Shared/Vehicles.luau:274",
+  "src/ReplicatedStorage/Shared/Vehicles.luau:271",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:57"
  ],
  "Comandante de batalhão": [
@@ -3282,7 +3282,7 @@
   "src/ServerScriptService/Modules/CampanhaService.luau:566"
  ],
  "Copiloto": [
-  "src/ReplicatedStorage/Shared/Vehicles.luau:276",
+  "src/ReplicatedStorage/Shared/Vehicles.luau:273",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:59"
  ],
  "Cordao": [
@@ -4050,14 +4050,14 @@
  ],
  "ESCOLHIDO": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaView.luau:425",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:469",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:491"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:475",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:497"
  ],
  "ESPAÇO": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ComoJogar.luau:620"
  ],
  "ESPERA %d S": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:378"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:379"
  ],
  "ESPERA %d s": [
   "src/ReplicatedStorage/Shared/NascerPedido.luau:112"
@@ -4520,7 +4520,7 @@
   "src/ReplicatedStorage/Shared/CompraVeiculo.luau:199"
  ],
  "Espere um pouco": [
-  "src/ReplicatedStorage/Shared/Vehicles.luau:598"
+  "src/ReplicatedStorage/Shared/Vehicles.luau:592"
  ],
  "Espoleta": [
   "src/ReplicatedStorage/Shared/GrenadeArt.luau:73"
@@ -4601,7 +4601,7 @@
   "src/ReplicatedStorage/Shared/Codigos.luau:66"
  ],
  "Este dia já foi resgatado.": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:481"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:486"
  ],
  "Este item não está no mercado hoje": [
   "src/ServerScriptService/Modules/CampanhaService.luau:729"
@@ -4613,7 +4613,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:150"
  ],
  "Este lugar pede %s": [
-  "src/ReplicatedStorage/Shared/Vehicles.luau:581"
+  "src/ReplicatedStorage/Shared/Vehicles.luau:575"
  ],
  "Este ponto não está mais disponível": [
   "src/ReplicatedStorage/Shared/NascerPedido.luau:25"
@@ -4636,7 +4636,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleHudView.luau:339"
  ],
  "Estepe": [
-  "src/ReplicatedStorage/Shared/Vehicles.luau:465"
+  "src/ReplicatedStorage/Shared/Vehicles.luau:459"
  ],
  "Estilhaços de %s, a poucos metros": [
   "src/ReplicatedStorage/Shared/Casualty.luau:99"
@@ -4678,7 +4678,7 @@
   "src/ReplicatedStorage/Shared/Weapons.luau:289"
  ],
  "FALTAM %d CI": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:475"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:481"
  ],
  "FALTAM %s": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Progresso.client.luau:902"
@@ -4712,7 +4712,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaoJogador.luau:902",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CommanderController.client.luau:243",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ComoJogar.luau:352",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:509",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:515",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaMissoes.client.luau:67",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehiclePrompt.client.luau:405"
  ],
@@ -4932,7 +4932,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CaixasTela.client.luau:699"
  ],
  "Fechar": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:511",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:517",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/HudCampo.client.luau:869",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Progresso.client.luau:1080",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:1883",
@@ -5082,7 +5082,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CaixasTela.client.luau:55"
  ],
  "Fora de combate": [
-  "src/ReplicatedStorage/Shared/Vehicles.luau:559"
+  "src/ReplicatedStorage/Shared/Vehicles.luau:553"
  ],
  "Forma de pagamento inválida": [
   "src/ReplicatedStorage/Shared/CompraVeiculo.luau:210"
@@ -5501,7 +5501,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CaixasTela.client.luau:1465"
  ],
  "HOJE!": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:513"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:518"
  ],
  "HORA": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/SpawnTransition.luau:130"
@@ -5617,7 +5617,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ToqueTelas.luau:291"
  ],
  "IR A PÉ": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:503"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:509"
  ],
  "ITEM": [
   "src/ReplicatedStorage/Shared/Toque.luau:118",
@@ -5838,7 +5838,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CaixasTela.client.luau:1303"
  ],
  "JÁ TEM UM EM CAMPO": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:371"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:372"
  ],
  "Já está no seu arquivo.": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ArquivoTela.client.luau:302"
@@ -5877,7 +5877,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/SpawnTransition.luau:130"
  ],
  "LADO NO TETO (%d)": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:374"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:375"
  ],
  "LB": [
   "src/ReplicatedStorage/Shared/Cosmeticos.luau:508",
@@ -5898,7 +5898,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaMissoes.client.luau:363"
  ],
  "LENDO A CADERNETA…": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:552"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:557"
  ],
  "LEVANDO (%s) — trocar": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Progresso.client.luau:769"
@@ -6074,7 +6074,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:910"
  ],
  "Lendo a caderneta…": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:599"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:604"
  ],
  "Lendário": [
   "src/ReplicatedStorage/Shared/Caixas.luau:83"
@@ -6122,14 +6122,14 @@
   "src/ReplicatedStorage/Shared/Skins.luau:1044"
  ],
  "Lona": [
-  "src/ReplicatedStorage/Shared/Vehicles.luau:511",
+  "src/ReplicatedStorage/Shared/Vehicles.luau:505",
   "src/ServerScriptService/Modules/MapLife.luau:456"
  ],
  "Lona verde-oliva com costura.": [
   "src/ReplicatedStorage/Shared/Cosmeticos.luau:221"
  ],
  "Longe demais": [
-  "src/ReplicatedStorage/Shared/Vehicles.luau:567",
+  "src/ReplicatedStorage/Shared/Vehicles.luau:561",
   "src/ServerScriptService/Modules/VehicleService.luau:1724"
  ],
  "Loop": [
@@ -6142,10 +6142,10 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleHudView.luau:396"
  ],
  "Lugar inexistente": [
-  "src/ReplicatedStorage/Shared/Vehicles.luau:569"
+  "src/ReplicatedStorage/Shared/Vehicles.luau:563"
  ],
  "Lugar ocupado": [
-  "src/ReplicatedStorage/Shared/Vehicles.luau:571",
+  "src/ReplicatedStorage/Shared/Vehicles.luau:565",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehiclePrompt.client.luau:311"
  ],
  "Lugar reservado ao seu lado: confirme a compra do %s": [
@@ -6773,7 +6773,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleHudView.luau:197"
  ],
  "Motorista": [
-  "src/ReplicatedStorage/Shared/Vehicles.luau:272",
+  "src/ReplicatedStorage/Shared/Vehicles.luau:269",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:55",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:342",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleHudView.luau:450"
@@ -6814,7 +6814,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CenaComemoracao.luau:278"
  ],
  "Municiador": [
-  "src/ReplicatedStorage/Shared/Vehicles.luau:275",
+  "src/ReplicatedStorage/Shared/Vehicles.luau:272",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:58"
  ],
  "Munição da caixa": [
@@ -7234,7 +7234,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:1115"
  ],
  "O registro falhou: tente de novo.": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:485"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:490"
  ],
  "O relógio zerou: a defesa do VC segurou a linha.": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/FrontHud.client.luau:745"
@@ -7270,7 +7270,7 @@
   "src/ReplicatedStorage/Shared/Skins.luau:672"
  ],
  "O veículo não está tombado nem preso": [
-  "src/ReplicatedStorage/Shared/Vehicles.luau:602"
+  "src/ReplicatedStorage/Shared/Vehicles.luau:596"
  ],
  "O veículo não montou: %d CI no seu saldo.": [
   "src/ServerScriptService/Modules/CompraVeiculoService.luau:377"
@@ -7577,7 +7577,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Reconexao.client.luau:110"
  ],
  "PEGAR O PRÊMIO DO DIA %d!": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:557"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:562"
  ],
  "PENDENTE": [
   "src/ReplicatedStorage/Shared/Weapons.luau:398"
@@ -7910,7 +7910,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:2527"
  ],
  "Pare o veículo antes": [
-  "src/ReplicatedStorage/Shared/Vehicles.luau:600"
+  "src/ReplicatedStorage/Shared/Vehicles.luau:594"
  ],
  "Parede": [
   "src/ServerScriptService/Modules/MapLife.luau:760",
@@ -7930,7 +7930,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleHudView.luau:398"
  ],
  "Passageiro %d": [
-  "src/ReplicatedStorage/Shared/Vehicles.luau:290"
+  "src/ReplicatedStorage/Shared/Vehicles.luau:287"
  ],
  "Passar %d min em campo": [
   "src/ReplicatedStorage/Shared/Missoes.luau:126"
@@ -8056,7 +8056,7 @@
  "Piloto": [
   "src/ReplicatedStorage/Shared/Roles.luau:34",
   "src/ReplicatedStorage/Shared/Roles.luau:262",
-  "src/ReplicatedStorage/Shared/Vehicles.luau:284"
+  "src/ReplicatedStorage/Shared/Vehicles.luau:281"
  ],
  "Pinceladas verticais verdes e marrons do padrão francês dos paraquedistas sul-vietnamitas.": [
   "src/ReplicatedStorage/Shared/Skins.luau:576"
@@ -8235,7 +8235,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:706"
  ],
  "Porta (M60)": [
-  "src/ReplicatedStorage/Shared/Vehicles.luau:286"
+  "src/ReplicatedStorage/Shared/Vehicles.luau:283"
  ],
  "Português": [
   "src/ReplicatedFirst/Idioma.luau:31",
@@ -8506,7 +8506,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/TelaMissoes.client.luau:331"
  ],
  "RECEBIDO": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:511"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:516"
  ],
  "RECOMPENSA DIÁRIA": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:122",
@@ -8536,7 +8536,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/FrontHud.client.luau:386"
  ],
  "REGISTRANDO…": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:554"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:559"
  ],
  "RELATÓRIO PÓS-AÇÃO": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/AfterActionController.client.luau:70"
@@ -8592,8 +8592,8 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:738"
  ],
  "ROBUX": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:484",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:497"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:490",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:503"
  ],
  "RODINHA": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ComoJogar.luau:143"
@@ -8738,10 +8738,10 @@
   "src/ReplicatedStorage/Shared/Caixas.luau:272"
  ],
  "Recebido: +$ %d de crédito e um item novo no armário: %s.": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:580"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:585"
  ],
  "Recebido: +$ %d de crédito. Volte amanhã para o dia seguinte.": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:584"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:589"
  ],
  "Receiver": [
   "src/ReplicatedStorage/Shared/GunModel.luau:132"
@@ -9260,7 +9260,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CasualtyScreen.luau:1024"
  ],
  "Saia do outro veículo antes": [
-  "src/ReplicatedStorage/Shared/Vehicles.luau:565"
+  "src/ReplicatedStorage/Shared/Vehicles.luau:559"
  ],
  "Sair": [
   "src/ReplicatedStorage/Shared/InputMap.luau:140",
@@ -9423,7 +9423,7 @@
   "src/ServerScriptService/Modules/CampanhaService.luau:698"
  ],
  "Sem vaga de %s no time": [
-  "src/ReplicatedStorage/Shared/Vehicles.luau:579"
+  "src/ReplicatedStorage/Shared/Vehicles.luau:573"
  ],
  "Sensibilidade do giroscópio": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:784"
@@ -9475,7 +9475,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:1118"
  ],
  "Sessão sem DataStore (perfil não carregou ou Studio): o prêmio de hoje não fica gravado.": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:605"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:610"
  ],
  "Setor do VC": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaView.luau:2360"
@@ -9527,10 +9527,10 @@
   "src/ReplicatedStorage/Shared/Codigos.luau:70"
  ],
  "Seu perfil ainda está carregando: tente de novo em instantes.": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:483"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:488"
  ],
  "Seu perfil não carregou neste servidor: o prêmio não pode ser gravado agora (nada foi perdido).": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:484"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:489"
  ],
  "Seu soldado fica parado até lá. Teclado e mouse continuam valendo.": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Reconexao.client.luau:106"
@@ -10575,7 +10575,7 @@
   "src/ServerScriptService/Modules/CaixaMunicaoService.luau:72",
   "src/ServerScriptService/Modules/CaixaMunicaoService.luau:507",
   "src/ServerScriptService/Modules/CampanhaService.luau:103",
-  "src/ServerScriptService/Modules/Characters.luau:661",
+  "src/ServerScriptService/Modules/Characters.luau:688",
   "src/ServerScriptService/Modules/CommanderService.luau:228",
   "src/ServerScriptService/Modules/CommanderService.luau:237",
   "src/ServerScriptService/Modules/CommanderService.luau:250",
@@ -10684,8 +10684,8 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:120",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:121",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:395",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:460",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:465",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:470",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/EventosVisual.luau:189",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/FimDeRodada.client.luau:439",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/FimDeRodada.client.luau:441",
@@ -10776,7 +10776,7 @@
   "src/ServerScriptService/Modules/MedicalService.luau:212"
  ],
  "Um dia passou sem prêmio: a sequência recomeçou no dia 1.": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:596"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:601"
  ],
  "Um item histórico por temporada e a fita da Reserva.": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:1955"
@@ -11122,8 +11122,8 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:34",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:52",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:110",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:460",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:465",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:470",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/EventosVisual.luau:190",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/FimDeRodada.client.luau:439",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/FimDeRodada.client.luau:455",
@@ -11419,13 +11419,13 @@
   "src/ReplicatedStorage/Shared/Commerce.luau:326"
  ],
  "Veículo destruído": [
-  "src/ReplicatedStorage/Shared/Vehicles.luau:563"
+  "src/ReplicatedStorage/Shared/Vehicles.luau:557"
  ],
  "Veículo desvirado": [
   "src/ServerScriptService/Modules/VehicleService.luau:1779"
  ],
  "Veículo do outro lado": [
-  "src/ReplicatedStorage/Shared/Vehicles.luau:561"
+  "src/ReplicatedStorage/Shared/Vehicles.luau:555"
  ],
  "Viatura": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehiclePrompt.client.luau:35"
@@ -11508,7 +11508,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:299"
  ],
  "Você já resgatou hoje. O próximo prêmio sai em %s.": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:590"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:595"
  ],
  "Você já tem este item.": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CaixasTela.client.luau:1317"
@@ -11780,7 +11780,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/AfterActionController.client.luau:177"
  ],
  "^(%u%u)|": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:464"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:469"
  ],
  "^(%w+):?(%w*)$": [
   "src/ServerScriptService/Modules/MeleeService.luau:518"
@@ -11919,14 +11919,13 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ToqueHud.client.luau:998"
  ],
  "^p%d+$": [
-  "src/ReplicatedStorage/Shared/Vehicles.luau:238",
-  "src/ReplicatedStorage/Shared/Vehicles.luau:299",
+  "src/ReplicatedStorage/Shared/Vehicles.luau:296",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:707"
  ],
  "^p(%d+)$": [
   "src/ReplicatedStorage/Shared/VehicleDrive.luau:1195",
-  "src/ReplicatedStorage/Shared/Vehicles.luau:288",
-  "src/ReplicatedStorage/Shared/Vehicles.luau:529"
+  "src/ReplicatedStorage/Shared/Vehicles.luau:285",
+  "src/ReplicatedStorage/Shared/Vehicles.luau:523"
  ],
  "^parts": [
   "src/ServerScriptService/Modules/Flutua.luau:137"
@@ -12595,7 +12594,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ArmarioTela.luau:390"
  ],
  "cancel": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:504"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:510"
  ],
  "cancelar": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponController.client.luau:489"
@@ -12732,9 +12731,9 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CasualtyScreen.luau:1093",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CasualtyScreen.luau:1094",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CasualtyScreen.luau:1473",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:462",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:463",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:468",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:469",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:474",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Progresso.client.luau:293",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Progresso.client.luau:789",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Progresso.client.luau:903",
@@ -13235,11 +13234,11 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ToqueHud.client.luau:688"
  ],
  "diaria": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:694",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:718",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:736",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:742",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:771"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:699",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:723",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:741",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:747",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:776"
  ],
  "die": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Input.luau:1181"
@@ -13973,13 +13972,12 @@
  "get": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CasualtyScreen.luau:1248",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CasualtyScreen.luau:1433",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:592"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:601"
  ],
  "ghost": [
   "src/ReplicatedFirst/Estilo.luau:427",
   "src/ReplicatedFirst/Estilo.luau:451",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaoJogador.luau:500",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:503",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:509",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/EditorHud.client.luau:334",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/EditorHud.client.luau:427",
@@ -14902,7 +14900,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CameraLook.client.luau:205",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CameraLook.client.luau:286",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaoJogador.luau:904",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:511",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:517",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:218",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:248",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:682",
@@ -15148,8 +15146,8 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CasualtyScreen.luau:114",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CasualtyScreen.luau:908",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:248",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:551",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:568",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:560",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:577",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:2031"
  ],
  "nordeste": [
@@ -15258,18 +15256,18 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:165",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:260",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:276",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:553",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:554",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:555",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:562",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:563",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:564",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Contagem.client.luau:149",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Contagem.client.luau:199",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:33",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:37",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:85",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:474",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:491",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:569",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:669",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:479",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:496",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:574",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:674",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Egrets.client.luau:239",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Egrets.client.luau:244",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Egrets.client.luau:249",
@@ -15915,9 +15913,9 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ComoJogar.luau:783",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ComoJogar.luau:788",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ComoJogar.luau:793",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:528",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:533",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:735",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:537",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:542",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:740",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/EditorHud.client.luau:682",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/FrontHud.client.luau:928",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:1510",
@@ -16301,8 +16299,8 @@
  "reserved": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CasualtyScreen.luau:940",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:295",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:367",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:507"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:368",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:513"
  ],
  "resgatada": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ArquivoTela.client.luau:341"
@@ -16379,9 +16377,9 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CasualtyScreen.luau:1292",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CasualtyScreen.luau:1475",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:297",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:484",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:485",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:490",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:491",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:496",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Progresso.client.luau:293",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Progresso.client.luau:748",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Progresso.client.luau:926",
@@ -16554,6 +16552,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ComoJogar.luau:348",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ComoJogar.luau:352",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:127",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:515",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/EditorHud.client.luau:301",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/EditorHud.client.luau:307",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/EditorHud.client.luau:318",
@@ -17100,16 +17099,16 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CommanderController.client.luau:231",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CommanderController.client.luau:234",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:44",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:549",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:550",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:551",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:552",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:558",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:559",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:560",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:561",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Contagem.client.luau:194",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:69",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:74",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:84",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:421",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:464",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:469",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/EventoCartao.luau:90",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/EventoCartao.luau:91",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/EventoCartao.luau:97",
@@ -17497,10 +17496,10 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Caveira.client.luau:292",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Caveira.client.luau:293",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:275",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:545",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:554",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:158",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:639",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:656",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:644",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:661",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/EditorHud.client.luau:282",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Egrets.client.luau:239",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Egrets.client.luau:244",
@@ -18934,7 +18933,7 @@
   "src/ServerScriptService/Modules/Flutua.luau:340"
  ],
  "veículo ao nascer · %s": [
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:391"
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/CompraVeiculo.client.luau:392"
  ],
  "veículos de volta": [
   "src/ServerScriptService/Modules/RodadaService.luau:233"

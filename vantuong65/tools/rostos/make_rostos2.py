@@ -181,7 +181,8 @@ def olho(img: Image.Image, cx: float, k: dict, t: int) -> None:
     mas = mas.filter(ImageFilter.GaussianBlur(0.8))
     m = np.asarray(mas, dtype=float) / 255
     # branco do olho, mais escuro nos cantos e embaixo da pálpebra
-    cor = np.ones((W, W, 3)) * np.array([234.0, 228.0, 218.0])
+    # sem branco puro: na pele escura, com a luz do jogo, o olho saltava do rosto
+    cor = np.ones((W, W, 3)) * np.array([206.0, 198.0, 186.0])
     fx = (U - cx) / w
     fy = (V - cy) / h
     tom = 1 - 0.34 * np.clip(np.abs(fx), 0, 1) ** 2.2 - 0.34 * suave(0.05, -1.0, fy)

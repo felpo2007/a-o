@@ -165,8 +165,9 @@ def sks() -> tuple[list, dict]:
     g.caixa(-0.0105, 0.0105, 0.541, 0.553, 0.020, 0.028, MAT_ACO)  # cursor da folha
     for x0, x1 in lados(ENTALHE_MEIA, 0.0090):  # orelhas do entalhe
         g.caixa(x0, x1, D_ALCA, D_ALCA + 0.004, 0.021, ZS + 0.0002, MAT_ACO)
-    # D-236: o fundo 5,5 mm abaixo da linha (na altura dela, escondia o poste da massa)
-    g.caixa(-ENTALHE_MEIA, ENTALHE_MEIA, D_ALCA, D_ALCA + 0.004, 0.021, ZS - 0.0055, MAT_ACO)
+    # D-236: o fundo 3 mm abaixo da linha: na altura dela escondia o poste da massa e, mais fundo,
+    # mostrava a madeira do guarda-mão dentro do entalhe
+    g.caixa(-ENTALHE_MEIA, ENTALHE_MEIA, D_ALCA, D_ALCA + 0.004, 0.021, ZS - 0.0030, MAT_ACO)
     g.torno(
         [(0.575, 0.0070), (0.842, 0.0070)], 0, 0.018, MAT_ACO, k=16, cap0=MAT_ACO, cap1=MAT_ACO
     )

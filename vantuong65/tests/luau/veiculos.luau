@@ -725,7 +725,7 @@ test("D-100: lugares — ordem, nomes, quem atira de dentro e em que ângulo", f
 	assert(Vehicles.seatInfo("m151", "passenger").open ~= nil and Vehicles.seatInfo("m35", "p1").open ~= nil)
 	assert(Vehicles.seatInfo("lvtp5", "p12").open ~= nil and Vehicles.seatInfo("uh34d", "p1").open ~= nil)
 	assert(Vehicles.seatInfo("peugeot403", "p1").open == nil, "sob a lona")
-	assert(Vehicles.seatInfo("peugeot403", "p6").open ~= nil, "a fileira de trás atira pela aba")
+	assert(Vehicles.seatInfo("peugeot403", "p6").open == nil, "D-236: a fileira de trás também fica sob a lona")
 	assert(Vehicles.seatInfo("m48a3", "commander").weapon == "m60", "M60 montada da cúpula")
 	-- porta da direita (ímpar) atira para a direita, não para a esquerda nem por cima da cabine
 	local right = Vehicles.seatInfo("uh34d", "p1").open
@@ -735,9 +735,26 @@ test("D-100: lugares — ordem, nomes, quem atira de dentro e em que ângulo", f
 	local left = Vehicles.seatInfo("uh34d", "p2").open
 	assert(Vehicles.inArc(left, 100, 0) and not Vehicles.inArc(left, -100, 0))
 	-- volta do ângulo (179° e −179° são vizinhos)
-	local rear = Vehicles.seatInfo("peugeot403", "p6").open
+	local rear = { yaw = 180, half = 50, down = -25, up = 30 }
 	assert(Vehicles.inArc(rear, 179, 0) and Vehicles.inArc(rear, -179, 0) and not Vehicles.inArc(rear, 0, 0))
 	assert(Vehicles.inArc(Vehicles.seatInfo("lvtp5", "p1").open, 37, 10), "teto: para qualquer lado")
+end)
+
+test("D-236: quem atira do lugar aparece; quem vai fechado some", function()
+	for id in Vehicles.SPECS do
+		for _, s in Vehicles.seatList(id) do
+			if s.open then
+				assert(Vehicles.ocupanteAparece(id, s.id), id .. " " .. s.id .. ": atirador invisível")
+			end
+		end
+	end
+	for _, s in Vehicles.seatList("peugeot403") do
+		assert(not Vehicles.ocupanteAparece("peugeot403", s.id), "Peugeot " .. s.id .. ": fica dentro")
+	end
+	assert(not Vehicles.ocupanteAparece("m48a3", "driver") and not Vehicles.ocupanteAparece("m48a3", "gunner"))
+	assert(not Vehicles.ocupanteAparece("ontos", "driver") and not Vehicles.ocupanteAparece("m35", "driver"))
+	assert(Vehicles.ocupanteAparece("m151", "driver") and Vehicles.ocupanteAparece("uh34d", "gunner"))
+	assert(not Vehicles.ocupanteAparece("uh34d", "driver"))
 end)
 
 test("D-100: carros — medidas do Blender, rodas pelo nome das peças, lugares dentro da caixa", function()
