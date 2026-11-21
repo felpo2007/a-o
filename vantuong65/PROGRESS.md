@@ -919,6 +919,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     - **Não testado:** o controle de verdade, o celular, o 16:9 cheio e o jogo publicado.
     - Lune 824 ok (57 arquivos), pytest 76, ruff, StyLua e luau-lsp limpos, i18n 100%. Relatório:
       `testes/LOTE94_D209_2026-11-20.md`.
+    - **v127 publicada** (versão 132 do place, commit 19d58ef).
     - **Próximo (Prompt A):** o HUD de infantaria e de veículo, morte e resultados, celular e a
       verificação final. Do §8 ficam as abas de cima e os companheiros só aptos.
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
