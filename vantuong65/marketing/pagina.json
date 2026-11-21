@@ -1,0 +1,20 @@
+{
+ "_nota": "Página do jogo no Roblox (lote 25). As imagens são as capas do dono em marketing/capas (fora do Git). Sobe com: uv run --env-file .env python tools/roblox_cloud.py pagina",
+ "nome": "STARLITE: Vietnã 1965",
+ "descricao_arquivo": "marketing/descricao.txt",
+ "icone": {
+  "chave": "Pagina.icone",
+  "arquivo": "marketing/capas/pagina/icone_512.png",
+  "nome": "STARLITE icone"
+ },
+ "miniaturas": [
+  {"chave": "Pagina.miniatura_01", "arquivo": "marketing/capas/01_capa.png", "alt": "STARLITE: Vietnã 1965 - fuzileiro no capim alto"},
+  {"chave": "Pagina.miniatura_02", "arquivo": "marketing/capas/02_arrozal_binoculo.png", "alt": "Fuzileiros observam o arrozal e a vila ao entardecer"},
+  {"chave": "Pagina.miniatura_03", "arquivo": "marketing/capas/03_posto_de_comando.png", "alt": "Posto de comando com rádio e carta na mesa"},
+  {"chave": "Pagina.miniatura_04", "arquivo": "marketing/capas/04_vila_patrulha.png", "alt": "Patrulha entre as casas da vila"},
+  {"chave": "Pagina.miniatura_05", "arquivo": "marketing/capas/05_trincheira_1a_pessoa.png", "alt": "Trincheira em primeira pessoa"},
+  {"chave": "Pagina.miniatura_06", "arquivo": "marketing/capas/06_bambu_noite.png", "alt": "Patrulha noturna no bambuzal"},
+  {"chave": "Pagina.miniatura_07", "arquivo": "marketing/capas/07_vila_chuva.png", "alt": "Combate na vila debaixo de chuva"},
+  {"chave": "Pagina.miniatura_08", "arquivo": "marketing/capas/08_riacho_mata.png", "alt": "Travessia do riacho na mata fechada"}
+ ]
+}

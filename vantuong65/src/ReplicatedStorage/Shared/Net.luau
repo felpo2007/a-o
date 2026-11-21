@@ -1,0 +1,156 @@
+--!strict
+-- Remotes do jogo. O servidor cria (Net.server()), o cliente espera (Net.get()).
+-- Eventos confiáveis: RemoteEvent; estado frequente/efeitos: UnreliableRemoteEvent (Parte 7).
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+
+local Net = {}
+
+Net.Events = {
+	"Commerce_Equip", -- c->s: faction, slot, cosmeticId
+	"Commerce_Track", -- c->s: passo do funil da loja
+	"Commerce_State", -- s->c: estado de posse/equipados
+	"PrivateServer_SetOptions", -- c->s: dono do servidor privado
+	"Team_Choose", -- c->s: "US" | "VC"
+	"Squad_Action", -- c->s: { op = "create"|"join"|"leave", ... }
+	"Role_Choose", -- c->s: roleId
+	"Arma_Escolher", -- c->s faction, roleId, weaponId: D-211, a arma principal do papel (ARMÁRIO)
+	"Comemoracao_Equipar", -- c->s id: D-214, a comemoração do pódio (ARMÁRIO)
+	"Spawn_Request", -- c->s: spawnPointId, o pagamento ("inplace": "ci" | "credit") e a rodada (D-209)
+	"Spawn_State", -- s->c: pontos e esperas
+	"Spawn_Result", -- s->c { id, ok, cod?, msg? }: D-209, nasceu ou o motivo da recusa
+	"Combat_Fire", -- c->s: tiro (origem, direção, t, semente)
+	"Combat_Reload", -- c->s: recarregar
+	"Combat_Ammo", -- s->c: munição autoritativa (o acerto vai no Combat_Confirm, D-107)
+	"Medical_Action", -- c->s: { op = "bandage"|"tourniquet"|"treat"|"revive"|"giveup", target? }
+	"Medical_State", -- s->c: estado do próprio corpo
+	"Medical_Aviso", -- s->c { msg, ok }: D-129, por que o curativo não fez nada, parou ou deu certo
+	"Match_State", -- s->c: setores, pontos fortes, tempo
+	"Squad_State", -- s->c: squads do próprio time
+	"Posture_Set", -- c->s: agachar (true/false)
+	"Commander_Request", -- c->s: { ability, grid?, correction?, confirm? } (comandante e morteiro)
+	"Commander_State", -- s->c: suprimento, recargas, avisos e erros
+	"Build_Request", -- c->s: { kind } (logística)
+	"Logistics_State", -- s->c: { error } recusa, { ok } obra ou buraco prontos (D-129), { key } da pá
+	"Vehicle_Fire", -- c->s: { dir } (arma do assento)
+	-- D-200: lançador do antitanque (Modules/LancadorService)
+	"Lancador_Acao", -- c->s { op = "fogo", dir, alca } | { op = "recarga" } | { op = "cancelar" }
+	"Vehicle_Reload", -- c->s: recarga do Ontos (parado) / troca de munição do 90 mm
+	"Vehicle_SwitchSeat", -- c->s: próximo assento livre permitido ao papel
+	-- D-100: painel do veículo (Controllers/VehiclePrompt)
+	"Vehicle_Board", -- c->s { op = nil|"exit"|"recover", v = Model, seat = seatId, crew = bool }
+	"Vehicle_Notice", -- s->c texto: por que não entrou (lugar ocupado, papel, longe...) ou o que mudou
+	-- D-103: veículo ao nascer (Controllers/CompraVeiculo + CompraVeiculoService)
+	"Vehicle_Order", -- c->s { spec, pay = "ci"|"robux" } | { op = "cancel" } | { op = "get" }
+	"Vehicle_OrderState", -- s->c { spec?, pay?, state, msg?, cooldown?, mine?, team?, ids }
+	"Input_Type", -- c->s: "gamepad" | "kbm" | "touch" (equilíbrio controle x mouse)
+	"Settings_Save", -- c->s: configurações de controle (saneadas no servidor)
+	"Squad_Mark", -- c->s { x, y, z } / s->c { x, y, z, from, kind }: marcação para o squad
+	"Squad_Message", -- c->s { id, channel } / s->c { id, from, channel }: mensagens predefinidas
+	"Throw_Request", -- c->s { kind = "frag" | "smoke", dir }
+	"Combat_Melee", -- c->s { dir }: coronhada ou baioneta
+	"Combat_Hit", -- s->c { x, y, z }: origem do tiro que acertou (vibração do lado do impacto)
+	-- D-107: acerto visto pelo atirador e marcador de acerto (Controllers/Acerto + CombatService)
+	"Combat_Claim", -- c->s { s, v, p, x, y, z }: a bala da semente s pegou a peça p do soldado v
+	"Combat_Confirm", -- s->c { d, zn, k, f, x, y, z }: acerto confirmado, só para quem atirou
+	"Combat_Kill", -- s->c { name, w, k }: v43, o abate creditado (nome de quem caiu e a arma), para a caveira; D-189: k, o número do abate (uma vibração por abate)
+	"Combat_Feed", -- s->todos { k, ku, kf, v, vu, vf, w }: D-210, o abate creditado a um jogador (feed do alto à direita)
+	"Rodada_Votar", -- c->s mapId: D-193, o voto no mapa da próxima partida (só na votação)
+	"Tutorial_Done", -- c->s roleId: tutorial do papel concluído (F6)
+	"Range_Hit", -- s->c { dist, right, up }: acerto no campo de tiro, só para o atirador (cm)
+	"Kit_Set", -- c->s { mags, frags, smokes, bandages }: equipamento por peso (próximo spawn)
+	"Dig_Request", -- c->s: cavar buraco de combate à frente (pá de trincheira)
+	"Daily_Claim", -- c->s: pede o selo do dia (recompensa diária); o servidor valida tudo
+	"Daily_State", -- s->c: caderneta de serviço (sequência, dia, total, itens) e o resultado do pedido
+	-- progressão (2026-11-11, Shared/Progression)
+	"Gear_Buy", -- c->s gearId: compra com créditos de intendência (permanente; gravação atômica)
+	"Gear_Equip", -- c->s gearId, on[, arma]: leva ou deixa o item (a arma do universal, D-179)
+	"Progress_State", -- s->c: XP, posto, créditos, níveis de kit, escolha e o resultado do último pedido
+	"Progress_Report", -- s->c: relatório de serviço ao sair de campo (linhas, XP, CI, subida de posto)
+	"InPlace_Buy", -- c->s: pede a compra em Robux do renascer onde caiu (o servidor confere as regras antes)
+	"InPlace_Ready", -- s->c: o recibo chegou e o renascer guardado pode ser usado agora
+	-- conversa no campo (2026-11-12, Modules/Comunicacao)
+	"Voz_Radio", -- c->s: true/false (segurando o rádio do squad); o servidor valida
+	"Voz_Estado", -- s->c { squad, radio = { UserId que estão no rádio agora } }: só para o próprio squad
+	-- eventos da partida (2026-11-12, Modules/EventosService)
+	"Evento_Aviso", -- s->c { evento, texto, tipo, titulo, chave, duracao }: aviso para o Toast
+	-- campanha: missões, passe, mercado, reforços, medalhas, cartão, vantagens (2026-11-12)
+	"Campanha_State", -- s->c: estado inteiro (Controllers/CampanhaCliente); traz result do último pedido
+	"Campanha_Action", -- c->s { op, ... }: reroll, claim_mission, claim_level, claim_all, market_buy...
+	"Suprimento_Resultado", -- s->c resultado: caixa paga entregue (recibo gravado), para a abertura (D-173)
+	"Suprimento_Comprar", -- c->s caixaId: confere tudo no servidor e abre o prompt da caixa paga (D-173)
+	"Suprimento_Ganhou", -- s->c { caixa, nome }: caixa grátis guardada por um marco (D-174)
+	-- D-108: caixa de munição do Suporte (Modules/CaixaMunicaoService + Controllers/CaixaMunicao.client)
+	"Caixa_Por", -- c->s { x, y, z, yaw }: pôr a caixa ali (o servidor confere tudo)
+	"Caixa_Aviso", -- s->c { msg, ok?, w? }: recusa, caixa posta ou o que pegou da caixa
+}
+Net.Unreliable = {
+	"Combat_Tracer", -- s->c: traçantes/efeitos de outros jogadores
+	"Fire_Impact", -- s->c: explosão { id, x, y, z }
+	"Fire_Incoming", -- s->c: assobio de granada chegando { x, y, z }
+	"Fire_Launch", -- s->c: disparo de morteiro/canhão/naval/foguete { kind, x, y, z } (lançador: + vx, vy, vz, n, by)
+	"Lancador_Fim", -- s->c: D-200, o projétil n do lançador parou { n, x, y, z, falhou }
+}
+Net.Functions = {
+	"Commerce_GetState",
+	"Settings_Get",
+	"Tutorial_Get", -- papéis com o tutorial concluído
+	"Daily_Get", -- caderneta de serviço (recompensa diária) do jogador
+	"Progress_Get", -- estado da progressão (o mesmo do Progress_State)
+	"Campanha_Get", -- estado da campanha (o mesmo do Campanha_State)
+	-- D-173: caixas de suprimentos (Controllers/CaixasTela + CaixaService; "Caixa_*" acima é a
+	-- caixa de munição do Suporte)
+	"Suprimento_Get", -- estado: bilhetes, fragmentos, caixas com as chances deste jogador, troca
+	"Suprimento_Abrir", -- caixaId (gratuita): abre com bilhete; devolve o resultado já gravado
+	"Suprimento_Trocar", -- itemId: troca Fragmentos por item garantido
+	"Suprimento_Equipar", -- { slot = "tag" | "mol", item }: plaqueta ou moldura do cartão
+	"Suprimento_Loja", -- itemId: compra direta com créditos (D-174)
+	"Arquivo_Get", -- D-175: álbum ARQUIVO MILITAR (posse dos itens e coleções)
+	"Arquivo_Resgatar", -- colId: prêmio da coleção completa (uma vez por conta)
+}
+
+local folderName = "VT65Remotes"
+
+function Net.server(): Folder
+	assert(RunService:IsServer(), "Net.server só no servidor")
+	local f = ReplicatedStorage:FindFirstChild(folderName) :: Folder?
+	if f then
+		return f
+	end
+	local folder = Instance.new("Folder")
+	folder.Name = folderName
+	for _, n in Net.Events do
+		local r = Instance.new("RemoteEvent")
+		r.Name = n
+		r.Parent = folder
+	end
+	for _, n in Net.Unreliable do
+		local r = Instance.new("UnreliableRemoteEvent")
+		r.Name = n
+		r.Parent = folder
+	end
+	for _, n in Net.Functions do
+		local r = Instance.new("RemoteFunction")
+		r.Name = n
+		r.Parent = folder
+	end
+	folder.Parent = ReplicatedStorage
+	return folder
+end
+
+function Net.event(name: string): RemoteEvent
+	local folder = ReplicatedStorage:WaitForChild(folderName)
+	return folder:WaitForChild(name) :: RemoteEvent
+end
+
+function Net.unreliable(name: string): UnreliableRemoteEvent
+	local folder = ReplicatedStorage:WaitForChild(folderName)
+	return folder:WaitForChild(name) :: UnreliableRemoteEvent
+end
+
+function Net.func(name: string): RemoteFunction
+	local folder = ReplicatedStorage:WaitForChild(folderName)
+	return folder:WaitForChild(name) :: RemoteFunction
+end
+
+return Net

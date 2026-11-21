@@ -1,0 +1,51 @@
+{
+ "grade": [
+  1116,
+  759,
+  4.48
+ ],
+ "calibracao_cotas": [
+  [
+   "Colina 43",
+   32.9,
+   43.0
+  ],
+  [
+   "cota trig. 22",
+   20.2,
+   22.0
+  ],
+  [
+   "cota 22 An Cuong 1",
+   10.6,
+   22.0
+  ],
+  [
+   "cota trig. 10",
+   2.3,
+   10.0
+  ],
+  [
+   "cota trig. 45",
+   49.6,
+   45.0
+  ]
+ ],
+ "quadros_arrozal": 9589,
+ "agua_parts": 7263,
+ "diques": 18926,
+ "sebes": 3832,
+ "casas": 199,
+ "classes": {
+  "mar": 0.108,
+  "areia": 0.029,
+  "arrozal": 0.608,
+  "vila_mata": 0.02,
+  "capim": 0.234,
+  "riacho": 0.001
+ },
+ "altura_m": [
+  -0.67,
+  77.65
+ ]
+}

@@ -1,0 +1,177 @@
+{
+ "35/35.asf": {
+  "sha256": "2a8e2eda3c0d7d828566b2a9a8ab36b2b8b3864110574e8b73c8f069fded416c",
+  "bytes": 7261,
+  "uso": "esqueleto do sujeito 35"
+ },
+ "35/35_01.amc": {
+  "sha256": "0743f4ea48e7e199cd56b2810b5ce81f8ede08d32ff79aa4e363c44cc4fe33aa",
+  "bytes": 286988,
+  "uso": "andar: 'walk'"
+ },
+ "35/35_17.amc": {
+  "sha256": "8096cd53878242dbc35e987288cef6ae81d4e1c0e207086639bbed5cc06c8fee",
+  "bytes": 133172,
+  "uso": "trote: 'run/jog'"
+ },
+ "09/09.asf": {
+  "sha256": "be10dbce393fd60a2d322410032d618757afcc5bb2f7a508d887c5b0213f1897",
+  "bytes": 7260,
+  "uso": "esqueleto do sujeito 9"
+ },
+ "09/09_01.amc": {
+  "sha256": "02c94e8c2d4d2ff05f9a784f06403700c2c9d7caedd9bd92b50284d1a05f2bee",
+  "bytes": 118653,
+  "uso": "corrida: 'run'"
+ },
+ "77/77.asf": {
+  "sha256": "c72f244092c214c2c4fd496d214a20ec7bb58dbb626458dda2a2b953a465ae85",
+  "bytes": 7260,
+  "uso": "esqueleto do sujeito 77 ('careful actions')"
+ },
+ "77/77_03.amc": {
+  "sha256": "c5b7def3ff4f07c75040d26d2d35e46750e5fb255ad04e991c4eb36f05364736",
+  "bytes": 789172,
+  "uso": "parado alerta: 'ready stance'"
+ },
+ "77/77_10.amc": {
+  "sha256": "8afd929c3909f290d0880dda37b2a9e2a40ccd7e1127c1b41dbcfdc14c2a56ec",
+  "bytes": 549949,
+  "uso": "corrida cautelosa: 'careful run'"
+ },
+ "77/77_16.amc": {
+  "sha256": "bf180d1aac4e01ea519ba29b4bd65a318e7cfa4c687f346f1cd19bb78b80d33b",
+  "bytes": 521420,
+  "uso": "deitar e levantar: 'laying down, getting up, careful ready pose'"
+ },
+ "77/77_28.amc": {
+  "sha256": "b999c1e7d3bd7fe4eb3d123bccd35effb73dcb29fa5fcef4665daac1889a2393",
+  "bytes": 2375433,
+  "uso": "andar cauteloso: 'careful walk'"
+ },
+ "77/77_29.amc": {
+  "sha256": "e48097784f44c793a561aa4c555791d17c9e6d8a60d1a450dfec738e0fa704d6",
+  "bytes": 1678290,
+  "uso": "andar abaixado: 'creeping walk'"
+ },
+ "136/136.asf": {
+  "sha256": "48eb3f19477086e28495d841c604157b354fc76be054fa662ff10843ac698427",
+  "bytes": 7271,
+  "uso": "esqueleto do sujeito 136"
+ },
+ "136/136_09.amc": {
+  "sha256": "2d42440a0cd5abe84a5e4728073425ecfab53787928134536e6e8da84207e79c",
+  "bytes": 911627,
+  "uso": "andar agachado: 'Walk Crouched'"
+ },
+ "139/139.asf": {
+  "sha256": "c72f244092c214c2c4fd496d214a20ec7bb58dbb626458dda2a2b953a465ae85",
+  "bytes": 7260,
+  "uso": "esqueleto do sujeito 139"
+ },
+ "139/139_29.amc": {
+  "sha256": "e48097784f44c793a561aa4c555791d17c9e6d8a60d1a450dfec738e0fa704d6",
+  "bytes": 1678290,
+  "uso": "andar furtivo: 'Sneaking'"
+ },
+ "140/140.asf": {
+  "sha256": "13d3c7488671d3902c0ea7faa672e1c79465c034c050de88668ace164e519a37",
+  "bytes": 7259,
+  "uso": "esqueleto do sujeito 140"
+ },
+ "140/140_01.amc": {
+  "sha256": "35f699e9f25acc67fc0aac2779f2031c53107345d776dfbd514b0e7f65e55cc6",
+  "bytes": 663289,
+  "uso": "de bruços no chão: 'Get Up Face Down'"
+ },
+ "111/111.asf": {
+  "sha256": "8fe67a2163f1f70ed985e34abe0e3ff4af7f5da76f2f3c178d59759cb18bba16",
+  "bytes": 7258,
+  "uso": "esqueleto do sujeito 111"
+ },
+ "111/111_03.amc": {
+  "sha256": "ed59da10b187b0bd294316e7954769b881de2f898e5de8c27ba148e9e3f7d37b",
+  "bytes": 1211458,
+  "uso": "engatinhar: 'Crawling'"
+ },
+ "143/143.asf": {
+  "sha256": "6d7207da3bb9eceeaa32f23fb641b69f5836d11242b00c052e7d64f0cbe20a35",
+  "bytes": 7264,
+  "uso": "esqueleto do sujeito 143"
+ },
+ "143/143_22.amc": {
+  "sha256": "85a0e976e2099e82c21b84e4fb2ecdb51f8f8d00a1f1bdcd59303fc0bb997b33",
+  "bytes": 873035,
+  "uso": "arremesso por cima: 'Catch And Throw Football'"
+ },
+ "143/143_01.amc": {
+  "sha256": "021bc69edce5ca9272ec71de6e38bb9bf2984d9467798467dc47858c7e86f795",
+  "bytes": 80008,
+  "uso": "candidato: 'Run'"
+ },
+ "07/07.asf": {
+  "sha256": "c29414591d76a34885bff0b04a2666bf9659f869751a2549591c55277cf95b04",
+  "bytes": 7260,
+  "uso": "esqueleto do sujeito 7"
+ },
+ "07/07_12.amc": {
+  "sha256": "f017a78b4431e73ade6cd20d0d2323fc6e451dd4e43c247ddb19a19e6a2df6f2",
+  "bytes": 188416,
+  "uso": "candidato: 'brisk walk'"
+ },
+ "132/132.asf": {
+  "sha256": "fecc271e738613cfd245699f857b9d9fa4c15fbbd3e9ec656ce42a7a7179ca6c",
+  "bytes": 7262,
+  "uso": "esqueleto do sujeito 132"
+ },
+ "132/132_17.amc": {
+  "sha256": "bfdb8a669d17d343b69566844eb68e2d9a3354296c94569e44a635ccec1b0c29",
+  "bytes": 215173,
+  "uso": "candidato: 'Walk Fast'"
+ },
+ "127/127.asf": {
+  "sha256": "5c28c8c780fd5ae9ece226fbfce83dbce140a11394f183cca3376d238a33f395",
+  "bytes": 7256,
+  "uso": "esqueleto do sujeito 127"
+ },
+ "127/127_03.amc": {
+  "sha256": "110c379c8f383733ae982484e556ceaeb667f8e687d4258c0fce20405ed5ca0f",
+  "bytes": 267471,
+  "uso": "candidato: 'Run'"
+ },
+ "127/127_06.amc": {
+  "sha256": "e1074859e02662a89eb6ebdaa2416967815f1ac45ed6ea05321f943d065a2d66",
+  "bytes": 138868,
+  "uso": "candidato: 'Run'"
+ },
+ "141/141.asf": {
+  "sha256": "e32993b8079c0914ed4d865ad53f7b9646398808855233e6f650d4f4417df2bb",
+  "bytes": 7269,
+  "uso": "esqueleto do sujeito 141"
+ },
+ "141/141_01.amc": {
+  "sha256": "f0127a9067895d4fc6e2c82c0c3e8329ab102e392c579e6eaad2e7661ad3d180",
+  "bytes": 59274,
+  "uso": "candidato: 'Run'"
+ },
+ "16/16.asf": {
+  "sha256": "2323f876564610f84bfbec9b90b8ebffb57515673b7f4a45b0fb0849af465bdb",
+  "bytes": 7257,
+  "uso": "esqueleto do sujeito 16"
+ },
+ "16/16_35.amc": {
+  "sha256": "28e83b8ee8ff46e15cb7d41d5e77faaefe3e06cf165f05fb18dd348457bdf387",
+  "bytes": 128829,
+  "uso": "candidato: 'run/jog'"
+ },
+ "77/77_02.amc": {
+  "sha256": "110a27cb2c1d1c5b051b10b3a7db204db3699e27302e23cf444205dccc41634a",
+  "bytes": 752345,
+  "uso": "candidato: 'standing'"
+ },
+ "77/77_08.amc": {
+  "sha256": "aacb6501c46b0dbda44ed21577a406bd099f7d59d4cc39c98cd7a9f311ee6ed7",
+  "bytes": 805349,
+  "uso": "candidato: 'investigating thing on ground with two hands'"
+ }
+}

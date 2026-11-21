@@ -1,0 +1,73 @@
+--!strict
+-- GERADO por tools/estatico.py (D-155). Não edite à mão: rode o script de novo.
+-- Arte fixa no arquivo do place (SLIM): chave e pivô de cada modelo de
+-- src/Workspace/Estatico. O AssetLoader não põe a cópia de mesma chave cujo pivô cai a
+-- menos de StaticArt.TOL studs (e devolve a fixa no lugar).
+
+export type Entry = { key: string, x: number, y: number, z: number }
+
+local StaticArt = {}
+StaticArt.TOL = 1
+StaticArt.items = {
+	{ key = "Vila_serraria", x = -1735.476, y = 80.497, z = -2460.018 },
+	{ key = "Vila_toras", x = -1787.733, y = 82.141, z = -2448.288 },
+	{ key = "Vila_tabuas", x = -1785.93, y = 85.937, z = -2513.029 },
+	{ key = "Vila_moenda", x = -589.628, y = 65.939, z = -2458.001 },
+	{ key = "Vila_caldeira", x = -634.737, y = 63.6, z = -2440.464 },
+	{ key = "Vila_ponte", x = -1032.57, y = 37.279, z = -1183.359 },
+	{ key = "Vila_cais", x = -1082.57, y = 37.448, z = -1201.216 },
+	{ key = "Vila_barco", x = -1092.034, y = 34.143, z = -1194.073 },
+	{ key = "Vila_barco", x = -1073.106, y = 34.143, z = -1194.073 },
+	{ key = "Vila_horta", x = -1146.187, y = 48.585, z = -2240.453 },
+	{ key = "Vila_horta", x = -1086.804, y = 45.659, z = -2109.479 },
+	{ key = "Vila_horta", x = -1114.754, y = 53.818, z = -1767.024 },
+	{ key = "Vila_horta", x = -1040.023, y = 47.838, z = -2028.537 },
+	{ key = "Vila_horta", x = -1340.157, y = 50.603, z = -2259.633 },
+	{ key = "Vila_chua", x = -1299.96, y = 48.406, z = -1933.9 },
+	{ key = "Vila_dinh", x = -1428.91, y = 52.265, z = -2062.85 },
+	{ key = "Vila_banca", x = -1454.72, y = 51.293, z = -1996.73 },
+	{ key = "Vila_banca", x = -1421.89, y = 51.293, z = -2029.56 },
+	{ key = "Vila_banca", x = -1389.06, y = 51.293, z = -2062.39 },
+	{ key = "Vila_banca", x = -1356.23, y = 51.044, z = -2095.22 },
+	{ key = "Vila_serraria", x = -1736.841, y = 78.154, z = -2402.311 },
+	{ key = "Vila_toras", x = -1803.96, y = 81.933, z = -2420.542 },
+	{ key = "Vila_toras", x = -1792.048, y = 87.256, z = -2556.969 },
+	{ key = "Vila_caldeira", x = -584.765, y = 70.984, z = -2549.688 },
+	{ key = "vila_casa_06", x = -1264.603, y = 46.143, z = -2167.621 },
+	{ key = "vila_casa_04", x = -1232.246, y = 44.954, z = -2073.36 },
+	{ key = "vila_casa_03", x = -1208.204, y = 47.157, z = -1957.33 },
+	{ key = "vila_casa_10", x = -1181.651, y = 44.967, z = -2039.27 },
+	{ key = "vila_casa_01", x = -1204.212, y = 54.169, z = -1784.843 },
+	{ key = "vila_casa_05", x = -1483.012, y = 47.43, z = -1793.507 },
+	{ key = "vila_casa_08", x = -1121.788, y = 47.32, z = -1961.463 },
+	{ key = "vila_casa_07", x = -1228.26, y = 53.992, z = -1687.11 },
+	{ key = "vila_casa_02", x = -1521.028, y = 55.463, z = -2046.343 },
+	{ key = "vila_casa_04", x = -1239.329, y = 49.893, z = -1886.026 },
+	{ key = "vila_casa_03", x = -1297.843, y = 49.892, z = -1816.253 },
+	{ key = "vila_casa_03", x = -1507.786, y = 49.933, z = -1914.392 },
+	{ key = "vila_casa_10", x = -1303.81, y = 50.326, z = -1728.701 },
+	{ key = "vila_casa_10", x = -1156.001, y = 48.585, z = -2272.23 },
+	{ key = "vila_casa_01", x = -1120.652, y = 46.811, z = -2185.314 },
+	{ key = "vila_casa_10", x = -1103.331, y = 49.851, z = -1897.86 },
+	{ key = "vila_casa_03", x = -1122.323, y = 53.818, z = -1799.413 },
+	{ key = "vila_casa_10", x = -1160.68, y = 54.539, z = -1742.311 },
+	{ key = "vila_casa_01", x = -1409.565, y = 47.419, z = -1683.434 },
+	{ key = "vila_casa_07", x = -1497.056, y = 47.109, z = -1720.576 },
+	{ key = "vila_casa_04", x = -1539.163, y = 47.602, z = -1769.742 },
+	{ key = "vila_casa_04", x = -1063.866, y = 47.838, z = -2051.667 },
+	{ key = "vila_casa_05", x = -1071.389, y = 54.733, z = -1764.909 },
+	{ key = "vila_casa_06", x = -1168.519, y = 57.595, z = -1628.129 },
+	{ key = "vila_casa_01", x = -1258.557, y = 54.306, z = -1596.083 },
+	{ key = "vila_casa_04", x = -1435.273, y = 48.296, z = -1626.47 },
+	{ key = "vila_casa_03", x = -1348.921, y = 55.023, z = -1530.434 },
+	{ key = "vila_casa_07", x = -1514.735, y = 57.994, z = -1571.513 },
+	{ key = "vila_casa_01", x = -1081.435, y = 60.434, z = -1658.324 },
+	{ key = "vila_casa_03", x = -1353.447, y = 50.23, z = -2136.037 },
+	{ key = "vila_casa_03", x = -1225.249, y = 52.388, z = -2342.296 },
+	{ key = "vila_casa_08", x = -1336.497, y = 50.603, z = -2226.625 },
+	{ key = "vila_casa_04", x = -2018.617, y = 59.177, z = -1225.335 },
+	{ key = "vila_casa_06", x = -1004.651, y = 54.583, z = -1383.49 },
+	{ key = "vila_casa_08", x = -574.81, y = 61.386, z = -2404.028 },
+} :: { Entry }
+
+return StaticArt

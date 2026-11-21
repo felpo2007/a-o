@@ -1,0 +1,812 @@
+{
+ "ClassName": "Model",
+ "Properties": {
+  "LevelOfDetail": {
+   "Enum": 4
+  },
+  "ModelStreamingMode": "Atomic",
+  "WorldPivotData": {
+   "OptionalCFrame": {
+    "position": [
+     -584.765,
+     70.984,
+     -2549.688
+    ],
+    "orientation": [
+     [
+      -0.858933,
+      0,
+      0.512088
+     ],
+     [
+      0,
+      1,
+      0
+     ],
+     [
+      -0.512088,
+      0,
+      -0.858933
+     ]
+    ]
+   }
+  },
+  "Attributes": {
+   "Attributes": {
+    "VT65Estatico": {
+     "Bool": true
+    },
+    "VT65Chave": {
+     "String": "Vila_caldeira"
+    }
+   }
+  }
+ },
+ "Children": [
+  {
+   "Name": "Esteio",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     0.857,
+     10.714,
+     0.857
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -575.904,
+       76.341,
+       -2535.258
+      ],
+      "orientation": [
+       [
+        -0.858934,
+        0.0,
+        0.512086
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        -0.512086,
+        0.0,
+        -0.858934
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "Wood",
+    "Color": [
+     0.3451,
+     0.2431,
+     0.1569
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Esteio",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     0.857,
+     10.714,
+     0.857
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -567.857,
+       76.341,
+       -2548.755
+      ],
+      "orientation": [
+       [
+        -0.858934,
+        0.0,
+        0.512086
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        -0.512086,
+        0.0,
+        -0.858934
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "Wood",
+    "Color": [
+     0.3451,
+     0.2431,
+     0.1569
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Esteio",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     0.857,
+     10.714,
+     0.857
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -588.788,
+       76.341,
+       -2542.939
+      ],
+      "orientation": [
+       [
+        -0.858934,
+        0.0,
+        0.512086
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        -0.512086,
+        0.0,
+        -0.858934
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "Wood",
+    "Color": [
+     0.3451,
+     0.2431,
+     0.1569
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Esteio",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     0.857,
+     10.714,
+     0.857
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -580.741,
+       76.341,
+       -2556.437
+      ],
+      "orientation": [
+       [
+        -0.858934,
+        0.0,
+        0.512086
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        -0.512086,
+        0.0,
+        -0.858934
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "Wood",
+    "Color": [
+     0.3451,
+     0.2431,
+     0.1569
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Esteio",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     0.857,
+     10.714,
+     0.857
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -601.672,
+       76.341,
+       -2550.62
+      ],
+      "orientation": [
+       [
+        -0.858934,
+        0.0,
+        0.512086
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        -0.512086,
+        0.0,
+        -0.858934
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "Wood",
+    "Color": [
+     0.3451,
+     0.2431,
+     0.1569
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Esteio",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     0.857,
+     10.714,
+     0.857
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -593.625,
+       76.341,
+       -2564.118
+      ],
+      "orientation": [
+       [
+        -0.858934,
+        0.0,
+        0.512086
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        -0.512086,
+        0.0,
+        -0.858934
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "Wood",
+    "Color": [
+     0.3451,
+     0.2431,
+     0.1569
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Telhado",
+   "ClassName": "WedgePart",
+   "Properties": {
+    "Size": [
+     36.429,
+     5.714,
+     11.786
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -587.782,
+       84.555,
+       -2544.626
+      ],
+      "orientation": [
+       [
+        -0.858934,
+        0.0,
+        0.512086
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        -0.512086,
+        0.0,
+        -0.858934
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "Slate",
+    "Color": [
+     0.5725,
+     0.2824,
+     0.1961
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Tile"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Telhado",
+   "ClassName": "WedgePart",
+   "Properties": {
+    "Size": [
+     36.429,
+     5.714,
+     11.786
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -581.747,
+       84.555,
+       -2554.749
+      ],
+      "orientation": [
+       [
+        0.858935,
+        0.0,
+        -0.512085
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.512085,
+        0.0,
+        0.858935
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "Slate",
+    "Color": [
+     0.5725,
+     0.2824,
+     0.1961
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Tile"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Fornalha",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     22.5,
+     3.036,
+     4.643
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -584.765,
+       72.484,
+       -2549.688
+      ],
+      "orientation": [
+       [
+        -0.858934,
+        0.0,
+        0.512086
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        -0.512086,
+        0.0,
+        -0.858934
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "Brick",
+    "Color": [
+     0.5412,
+     0.2902,
+     0.2039
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Stone"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Tacho",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     1.143,
+     3.75,
+     3.75
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -578.725,
+       74.448,
+       -2546.087
+      ],
+      "orientation": [
+       [
+        0.0,
+        0.858934,
+        0.512086
+       ],
+       [
+        1.0,
+        -0.0,
+        0.0
+       ],
+       [
+        0.0,
+        0.512086,
+        -0.858934
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "Metal",
+    "Color": [
+     0.1804,
+     0.1725,
+     0.1647
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Cylinder",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Metal"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Tacho",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     1.143,
+     3.75,
+     3.75
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -584.765,
+       74.448,
+       -2549.688
+      ],
+      "orientation": [
+       [
+        0.0,
+        0.858934,
+        0.512086
+       ],
+       [
+        1.0,
+        -0.0,
+        0.0
+       ],
+       [
+        0.0,
+        0.512086,
+        -0.858934
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "Metal",
+    "Color": [
+     0.1804,
+     0.1725,
+     0.1647
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Cylinder",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Metal"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Tacho",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     1.143,
+     3.75,
+     3.75
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -590.804,
+       74.448,
+       -2553.288
+      ],
+      "orientation": [
+       [
+        0.0,
+        0.858934,
+        0.512086
+       ],
+       [
+        1.0,
+        -0.0,
+        0.0
+       ],
+       [
+        0.0,
+        0.512086,
+        -0.858934
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "Metal",
+    "Color": [
+     0.1804,
+     0.1725,
+     0.1647
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Cylinder",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Metal"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Chamine",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     3.214,
+     18.571,
+     3.214
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -596.268,
+       80.269,
+       -2556.546
+      ],
+      "orientation": [
+       [
+        -0.858934,
+        0.0,
+        0.512086
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        -0.512086,
+        0.0,
+        -0.858934
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "Brick",
+    "Color": [
+     0.5412,
+     0.2902,
+     0.2039
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Stone"
+      }
+     }
+    }
+   }
+  }
+ ]
+}

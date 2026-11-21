@@ -1,0 +1,1105 @@
+{
+ "ClassName": "Model",
+ "Properties": {
+  "LevelOfDetail": {
+   "Enum": 4
+  },
+  "ModelStreamingMode": "Atomic",
+  "WorldPivotData": {
+   "OptionalCFrame": {
+    "position": [
+     -1299.96,
+     48.406,
+     -1933.9
+    ],
+    "orientation": [
+     [
+      0.708672,
+      0,
+      0.705538
+     ],
+     [
+      0,
+      1,
+      0
+     ],
+     [
+      -0.705538,
+      0,
+      0.708672
+     ]
+    ]
+   }
+  },
+  "Attributes": {
+   "Attributes": {
+    "VT65Estatico": {
+     "Bool": true
+    },
+    "VT65Chave": {
+     "String": "Vila_chua"
+    }
+   }
+  }
+ },
+ "Children": [
+  {
+   "Name": "Base",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     74.29,
+     1.429,
+     55.71
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1299.96,
+       49.121,
+       -1933.9
+      ],
+      "orientation": [
+       [
+        0.70867,
+        0.0,
+        0.70554
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        -0.70554,
+        0.0,
+        0.70867
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "Cobblestone",
+    "Color": [
+     0.4863,
+     0.4549,
+     0.3922
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Stone"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Degrau",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     12.143,
+     0.476,
+     1.25
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1321.377,
+       48.645,
+       -1955.412
+      ],
+      "orientation": [
+       [
+        0.70867,
+        0.0,
+        0.70554
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        -0.70554,
+        0.0,
+        0.70867
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "Cobblestone",
+    "Color": [
+     0.4863,
+     0.4549,
+     0.3922
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Stone"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Degrau",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     12.143,
+     0.952,
+     1.25
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1320.495,
+       48.883,
+       -1954.526
+      ],
+      "orientation": [
+       [
+        0.70867,
+        0.0,
+        0.70554
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        -0.70554,
+        0.0,
+        0.70867
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "Cobblestone",
+    "Color": [
+     0.4863,
+     0.4549,
+     0.3922
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Stone"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Parede",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     25.716,
+     12.143,
+     1.071
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1326.723,
+       55.906,
+       -1936.482
+      ],
+      "orientation": [
+       [
+        0.70867,
+        0.0,
+        0.70554
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        -0.70554,
+        0.0,
+        0.70867
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "Plaster",
+    "Color": [
+     0.8078,
+     0.7529,
+     0.6275
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "MudWall"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Parede",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     25.716,
+     12.143,
+     1.071
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1302.424,
+       55.906,
+       -1960.674
+      ],
+      "orientation": [
+       [
+        0.70867,
+        0.0,
+        0.70554
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        -0.70554,
+        0.0,
+        0.70867
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "Plaster",
+    "Color": [
+     0.8078,
+     0.7529,
+     0.6275
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "MudWall"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Verga",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     8.571,
+     3.571,
+     1.071
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1314.573,
+       60.192,
+       -1948.578
+      ],
+      "orientation": [
+       [
+        0.70867,
+        0.0,
+        0.70554
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        -0.70554,
+        0.0,
+        0.70867
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "Plaster",
+    "Color": [
+     0.8078,
+     0.7529,
+     0.6275
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "MudWall"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Parede",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     60.004,
+     12.143,
+     1.071
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1285.347,
+       55.906,
+       -1919.222
+      ],
+      "orientation": [
+       [
+        0.70867,
+        0.0,
+        0.70554
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        -0.70554,
+        0.0,
+        0.70867
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "Plaster",
+    "Color": [
+     0.8078,
+     0.7529,
+     0.6275
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "MudWall"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Parede",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     18.569,
+     12.143,
+     1.071
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1313.159,
+       55.906,
+       -1904.634
+      ],
+      "orientation": [
+       [
+        -0.70554,
+        0.0,
+        0.70867
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        -0.70867,
+        0.0,
+        -0.70554
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "Plaster",
+    "Color": [
+     0.8078,
+     0.7529,
+     0.6275
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "MudWall"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Parede",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     18.569,
+     12.143,
+     1.071
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1329.284,
+       55.906,
+       -1920.831
+      ],
+      "orientation": [
+       [
+        -0.70554,
+        0.0,
+        0.70867
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        -0.70867,
+        0.0,
+        -0.70554
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "Plaster",
+    "Color": [
+     0.8078,
+     0.7529,
+     0.6275
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "MudWall"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Verga",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     4.286,
+     3.571,
+     1.071
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1321.222,
+       60.192,
+       -1912.732
+      ],
+      "orientation": [
+       [
+        -0.70554,
+        0.0,
+        0.70867
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        -0.70867,
+        0.0,
+        -0.70554
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "Plaster",
+    "Color": [
+     0.8078,
+     0.7529,
+     0.6275
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "MudWall"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Parede",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     18.569,
+     12.143,
+     1.071
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1270.636,
+       55.906,
+       -1946.969
+      ],
+      "orientation": [
+       [
+        -0.70554,
+        0.0,
+        0.70867
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        -0.70867,
+        0.0,
+        -0.70554
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "Plaster",
+    "Color": [
+     0.8078,
+     0.7529,
+     0.6275
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "MudWall"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Parede",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     18.569,
+     12.143,
+     1.071
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1286.761,
+       55.906,
+       -1963.166
+      ],
+      "orientation": [
+       [
+        -0.70554,
+        0.0,
+        0.70867
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        -0.70867,
+        0.0,
+        -0.70554
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "Plaster",
+    "Color": [
+     0.8078,
+     0.7529,
+     0.6275
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "MudWall"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Verga",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     4.286,
+     3.571,
+     1.071
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1278.698,
+       60.192,
+       -1955.068
+      ],
+      "orientation": [
+       [
+        -0.70554,
+        0.0,
+        0.70867
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        -0.70867,
+        0.0,
+        -0.70554
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "Plaster",
+    "Color": [
+     0.8078,
+     0.7529,
+     0.6275
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "MudWall"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Telhado",
+   "ClassName": "WedgePart",
+   "Properties": {
+    "Size": [
+     65.719,
+     7.143,
+     24.284
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1308.526,
+       65.549,
+       -1942.505
+      ],
+      "orientation": [
+       [
+        0.70867,
+        0.0,
+        0.70554
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        -0.70554,
+        0.0,
+        0.70867
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "Slate",
+    "Color": [
+     0.5725,
+     0.2824,
+     0.1961
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Tile"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Telhado",
+   "ClassName": "WedgePart",
+   "Properties": {
+    "Size": [
+     65.719,
+     7.143,
+     24.284
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1291.393,
+       65.549,
+       -1925.296
+      ],
+      "orientation": [
+       [
+        -0.70867,
+        0.0,
+        -0.70554
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.70554,
+        0.0,
+        -0.70867
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "Slate",
+    "Color": [
+     0.5725,
+     0.2824,
+     0.1961
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Tile"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Telhado",
+   "ClassName": "WedgePart",
+   "Properties": {
+    "Size": [
+     33.002,
+     5.714,
+     11.392
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1303.979,
+       71.978,
+       -1937.937
+      ],
+      "orientation": [
+       [
+        0.70867,
+        0.0,
+        0.70554
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        -0.70554,
+        0.0,
+        0.70867
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "Slate",
+    "Color": [
+     0.5725,
+     0.2824,
+     0.1961
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Tile"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Telhado",
+   "ClassName": "WedgePart",
+   "Properties": {
+    "Size": [
+     33.002,
+     5.714,
+     11.392
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1295.941,
+       71.978,
+       -1929.864
+      ],
+      "orientation": [
+       [
+        -0.70867,
+        0.0,
+        -0.70554
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.70554,
+        0.0,
+        -0.70867
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "Slate",
+    "Color": [
+     0.5725,
+     0.2824,
+     0.1961
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Tile"
+      }
+     }
+    }
+   }
+  },
+  {
+   "Name": "Altar",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     7.857,
+     3.571,
+     3.214
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1287.866,
+       51.621,
+       -1921.753
+      ],
+      "orientation": [
+       [
+        0.70867,
+        0.0,
+        0.70554
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        -0.70554,
+        0.0,
+        0.70867
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": true,
+    "CanQuery": true,
+    "CanTouch": false,
+    "CastShadow": true,
+    "Transparency": 0,
+    "Material": "Wood",
+    "Color": [
+     0.3451,
+     0.2431,
+     0.1569
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block",
+    "Attributes": {
+     "Attributes": {
+      "Material": {
+       "String": "Wood"
+      }
+     }
+    }
+   }
+  }
+ ]
+}

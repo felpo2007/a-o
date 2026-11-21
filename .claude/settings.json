@@ -1,0 +1,35 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(uv run:*)",
+      "Bash(uv sync:*)",
+      "Bash(lune run:*)",
+      "Bash(rojo build:*)",
+      "Bash(rojo sourcemap:*)",
+      "Bash(stylua:*)",
+      "Bash(luau-lsp analyze:*)",
+      "Bash(python3:*)",
+      "Bash(git status:*)",
+      "Bash(git log:*)",
+      "Bash(git diff:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(curl:*)",
+      "Bash(ls:*)",
+      "Bash(cp:*)",
+      "Bash(mkdir:*)",
+      "mcp__ForgeGUI__generation_list",
+      "mcp__ForgeGUI__generation_status",
+      "mcp__ForgeGUI__run_get",
+      "mcp__ForgeGUI__run_append",
+      "mcp__ForgeGUI__asset_capabilities",
+      "mcp__ForgeGUI__asset_prepare",
+      "mcp__ForgeGUI__generation_retry",
+      "mcp__ForgeGUI__generation_model_3d",
+      "mcp__ForgeGUI__generation_remesh_3d",
+      "mcp__ForgeGUI__generation_image",
+      "mcp__ForgeGUI__generation_sound_effect"
+    ]
+  }
+}
