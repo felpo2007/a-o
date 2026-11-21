@@ -51,6 +51,10 @@ repositório é de OUTRO projeto (estratégias de trade). Aqui vale este arquivo
     quintal nunca, para não virar barreira invisível. Rocha nova: `ROCHAS` no `tools/troncos.py`.
   - Sobrados (D-234): receitas em `tools/blender/exp_sobrado.py`. Material de parede em `V.bloco`
     pede regravar o `local` com a altura no 2º eixo; forro de telha fica no grupo Casa.
+  - Expansão na arte fixa (D-235): só o visual fica em `assets/estatico/expansao.txt`; a colisão fica
+    em `Map.Art.ExpansaoColisao`. Modelo `exp_` refeito ou movido: recopie com `MOLDES = "exp_"` e
+    `SO_VISUAL = true` no `estatico_copiar.luau`. O interior fica mais claro; para voltar, tire
+    `"expansao"` do `ativos.json`.
 - **Não salve o place pelo Studio:** o Studio grava com outra compressão, que o Lune 0.8 não lê
   ("Decompression failed"). Teste mudanças no Studio pelo MCP, mas gere o `.rbxl` pelo pipeline.
   O XML (`.rbxlx`) do Studio também não serve: o Lune 0.8 não lê o `Content` novo (`<uri>`) nem
@@ -466,7 +470,7 @@ O `sourcemap.json` não vai para o Git.
 - Segredos só no `.env` (no `.gitignore`), nunca no código nem no chat.
 - ForgeGUI: nunca regenerar um job em `outcome_unknown`. "failed" com `retryable` pode ser
   retomado com `generation_retry`.
-- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-235) e atualize `PROGRESS.md`.
+- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-236) e atualize `PROGRESS.md`.
 - Tetos de triângulos por modelo: vegetação ≤ 6 mil (D-135), props e herói ≤ 20 mil (`ArtBudget`,
   conferido pelo teste da F5).
 - Commits no branch acima, com mensagem em português.

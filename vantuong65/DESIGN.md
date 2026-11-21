@@ -9848,3 +9848,16 @@ mapa novo nem objetivo novo, preservando capturas, nascimentos e entradas.
 - **Forro de telha:** fica no grupo Casa, com esteira (`_placa_forro`). No grupo Telhado a redução da
   malha o engole.
 - **Medido:** +3,1% de chamadas de desenho sobre a v137 nas 9 vistas (+18,8% sobre a v135).
+
+## D-235 — Lote 107: a expansão na arte fixa e o piso que some de longe (2026-11-21)
+
+**Pedido do dono:** "Sim, fazer agora" (passar a expansão para a arte fixa e o corte à distância).
+- **Só o visual vai para o arquivo** (`assets/estatico/expansao.txt`, 31 construções, 113 peças). A
+  colisão, as luzes, a espuma e o piso que some ficam num modelo do jogo em `Map.Art.ExpansaoColisao`:
+  peça criada fora do Studio colide em caixa, e a rampa da escada e as águas viraram blocos.
+- **Modelo `exp_` refeito ou movido pede cópia nova** (`estatico_copiar.luau` com `MOLDES = "exp_"` e
+  `SO_VISUAL = true`). O teste `expansao` cobra posição e quantidade.
+- **Piso dos sobrados:** some a partir de 90 m (`Shared/ExpansaoLod`). Móvel continua sempre visível.
+- **Custo aceito (precedente da D-169):** sem a forma calculada, o interior fica mais claro: +36% no
+  térreo fechado, +39% em cima e +252% no chão do térreo aberto. À noite, +1%.
+- **Medido:** -0,5% de chamadas de desenho sobre a v138. O ganho do SLIM não foi medido.

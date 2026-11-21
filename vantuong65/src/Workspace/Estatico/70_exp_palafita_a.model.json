@@ -1,0 +1,323 @@
+{
+ "ClassName": "Model",
+ "Properties": {
+  "LevelOfDetail": {
+   "Enum": 4
+  },
+  "ModelStreamingMode": "Atomic",
+  "WorldPivotData": {
+   "OptionalCFrame": {
+    "position": [
+     -1666.1,
+     68.17,
+     -2214.299
+    ],
+    "orientation": [
+     [
+      -1.0,
+      0,
+      0.0
+     ],
+     [
+      0,
+      1,
+      0
+     ],
+     [
+      -0.0,
+      0,
+      -1.0
+     ]
+    ]
+   }
+  },
+  "Attributes": {
+   "Attributes": {
+    "VT65Estatico": {
+     "Bool": true
+    },
+    "VT65Chave": {
+     "String": "exp_palafita_a"
+    }
+   }
+  }
+ },
+ "Children": [
+  {
+   "Name": "Trim_M_Node",
+   "ClassName": "Model",
+   "Children": [
+    {
+     "Name": "Trim_M",
+     "ClassName": "MeshPart",
+     "Properties": {
+      "MeshId": "rbxassetid://127383309970348",
+      "InitialSize": [
+       27.5,
+       23.86,
+       35.183
+      ],
+      "Size": [
+       27.5,
+       23.86,
+       35.183
+      ],
+      "CFrame": {
+       "CFrame": {
+        "position": [
+         -1666.1,
+         80.169,
+         -2213.558
+        ],
+        "orientation": [
+         [
+          -1.0,
+          0,
+          0.0
+         ],
+         [
+          0,
+          1,
+          0
+         ],
+         [
+          -0.0,
+          0,
+          -1.0
+         ]
+        ]
+       }
+      },
+      "Anchored": true,
+      "CanCollide": false,
+      "CanQuery": false,
+      "CanTouch": false,
+      "CastShadow": true,
+      "Transparency": 0,
+      "CollisionFidelity": "Default"
+     },
+     "Children": [
+      {
+       "Name": "SurfaceAppearance",
+       "ClassName": "SurfaceAppearance",
+       "Properties": {
+        "AlphaMode": "Overlay",
+        "ColorMap": "rbxassetid://134979674313261",
+        "NormalMap": "rbxassetid://116858274661487",
+        "RoughnessMap": "rbxassetid://120767651982064",
+        "MetalnessMap": "rbxassetid://109994254315822"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "Name": "Trim_O_Node",
+   "ClassName": "Model",
+   "Children": [
+    {
+     "Name": "Trim_O",
+     "ClassName": "MeshPart",
+     "Properties": {
+      "MeshId": "rbxassetid://109505938464376",
+      "InitialSize": [
+       26.336,
+       23.75,
+       23.949
+      ],
+      "Size": [
+       26.336,
+       23.75,
+       23.949
+      ],
+      "CFrame": {
+       "CFrame": {
+        "position": [
+         -1666.1,
+         80.26,
+         -2219.301
+        ],
+        "orientation": [
+         [
+          -1.0,
+          0,
+          0.0
+         ],
+         [
+          0,
+          1,
+          0
+         ],
+         [
+          -0.0,
+          0,
+          -1.0
+         ]
+        ]
+       }
+      },
+      "Anchored": true,
+      "CanCollide": false,
+      "CanQuery": false,
+      "CanTouch": false,
+      "CastShadow": true,
+      "Transparency": 0,
+      "CollisionFidelity": "Default"
+     },
+     "Children": [
+      {
+       "Name": "SurfaceAppearance",
+       "ClassName": "SurfaceAppearance",
+       "Properties": {
+        "AlphaMode": "Overlay",
+        "ColorMap": "rbxassetid://98817676281040",
+        "NormalMap": "rbxassetid://97059026021565",
+        "RoughnessMap": "rbxassetid://70521593518624",
+        "MetalnessMap": "rbxassetid://109994254315822"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "Name": "Mobilia_Node",
+   "ClassName": "Model",
+   "Children": [
+    {
+     "Name": "Mobilia",
+     "ClassName": "MeshPart",
+     "Properties": {
+      "MeshId": "rbxassetid://101143747323880",
+      "InitialSize": [
+       23.615,
+       16.738,
+       16.594
+      ],
+      "Size": [
+       23.615,
+       16.738,
+       16.594
+      ],
+      "CFrame": {
+       "CFrame": {
+        "position": [
+         -1666.22,
+         76.754,
+         -2222.548
+        ],
+        "orientation": [
+         [
+          -1.0,
+          0,
+          0.0
+         ],
+         [
+          0,
+          1,
+          0
+         ],
+         [
+          -0.0,
+          0,
+          -1.0
+         ]
+        ]
+       }
+      },
+      "Anchored": true,
+      "CanCollide": false,
+      "CanQuery": false,
+      "CanTouch": false,
+      "CastShadow": true,
+      "Transparency": 0,
+      "CollisionFidelity": "Default"
+     },
+     "Children": [
+      {
+       "Name": "SurfaceAppearance",
+       "ClassName": "SurfaceAppearance",
+       "Properties": {
+        "AlphaMode": "Overlay",
+        "ColorMap": "rbxassetid://138459511046247",
+        "NormalMap": "rbxassetid://83341921454281",
+        "RoughnessMap": "rbxassetid://129215450629989",
+        "MetalnessMap": "rbxassetid://95185776785451"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "Name": "Telhado_Node",
+   "ClassName": "Model",
+   "Children": [
+    {
+     "Name": "Telhado",
+     "ClassName": "MeshPart",
+     "Properties": {
+      "MeshId": "rbxassetid://99314760622766",
+      "InitialSize": [
+       27.643,
+       7.748,
+       26.039
+      ],
+      "Size": [
+       27.643,
+       7.748,
+       26.039
+      ],
+      "CFrame": {
+       "CFrame": {
+        "position": [
+         -1666.1,
+         88.4,
+         -2219.561
+        ],
+        "orientation": [
+         [
+          -1.0,
+          0,
+          0.0
+         ],
+         [
+          0,
+          1,
+          0
+         ],
+         [
+          -0.0,
+          0,
+          -1.0
+         ]
+        ]
+       }
+      },
+      "Anchored": true,
+      "CanCollide": false,
+      "CanQuery": false,
+      "CanTouch": false,
+      "CastShadow": true,
+      "Transparency": 0,
+      "CollisionFidelity": "Default"
+     },
+     "Children": [
+      {
+       "Name": "SurfaceAppearance",
+       "ClassName": "SurfaceAppearance",
+       "Properties": {
+        "AlphaMode": "Overlay",
+        "ColorMap": "rbxassetid://109258699394442",
+        "NormalMap": "rbxassetid://76107743770798",
+        "RoughnessMap": "rbxassetid://89402187345325",
+        "MetalnessMap": "rbxassetid://95185776785451"
+       }
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

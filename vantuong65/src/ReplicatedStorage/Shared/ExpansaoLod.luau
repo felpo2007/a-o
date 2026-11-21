@@ -17,6 +17,14 @@ local TERREAS = {
 	exp_casas_ligadas = true,
 	exp_celeiro = true,
 }
+-- D-235: nos sobrados o piso aparece por baixo das colunas e no alpendre. A 90 m, com zoom, a troca não
+-- se vê: o chão embaixo é a mesma terra do patamar.
+local SOBRADOS = {
+	exp_sobrado_a = true,
+	exp_sobrado_b = true,
+	exp_sobrado_c = true,
+	exp_sobrado_d = true,
+}
 
 -- Distância (m) a partir da qual a peça some, ou nil se ela fica sempre.
 function ExpansaoLod.limiteM(chave: string, peca: string): number?
@@ -31,6 +39,9 @@ function ExpansaoLod.limiteM(chave: string, peca: string): number?
 	end
 	if peca == "Trim_P" and TERREAS[chave] then
 		return 70
+	end
+	if peca == "Trim_P" and SOBRADOS[chave] then
+		return 90
 	end
 	return nil
 end

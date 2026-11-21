@@ -1099,6 +1099,12 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     - Desenho: +3,1% sobre a v137. **Celular e 60 jogadores continuam sem medida.**
     - Relatório: `testes/LOTE106_D234_2026-11-21.md`.
     - **v138 publicada** (versão 143 do place, commit cb1d2e1).
+  - **Lote 107 (D-235): a expansão na arte fixa, feito.** 31 construções com o visual no place
+    (SLIM), colisão no jogo e piso dos sobrados sumindo a partir de 90 m.
+    - **Efeito colateral:** interior mais claro de dia (+36% a +39%; chão do térreo aberto +252%).
+    - Testes: 276 de 276 trechos a pé, M151 20 de 20, Lune 913, pytest 77, autoteste 18 de 18.
+    - Desenho: -0,5% sobre a v138. **SLIM, celular e 60 jogadores continuam sem medida.**
+    - Relatório: `testes/LOTE107_D235_2026-11-21.md`.
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;

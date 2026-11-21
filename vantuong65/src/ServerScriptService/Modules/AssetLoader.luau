@@ -639,6 +639,41 @@ function AssetLoader.staticModel(parent: Instance, key: string, p: Vector3): Mod
 	return nil
 end
 
+-- D-235: construção da expansão com o visual na arte fixa (SLIM). A colisão fica no modelo do jogo,
+-- porque a peça criada fora do Studio colide em caixa e a rampa da escada e as águas do telhado
+-- virariam blocos. As luzes e o piso que some de longe ficam com ela, para o modelo fixo não mudar.
+AssetLoader.PASTA_COLISAO = "ExpansaoColisao"
+local function soColisao(m: Model, fixo: Model)
+	local nomes: { [string]: boolean } = {}
+	for _, d in fixo:GetDescendants() do
+		if d:IsA("BasePart") then
+			nomes[d.Name] = true
+		end
+	end
+	for _, d in m:GetDescendants() do
+		if d:IsA("BasePart") and nomes[d.Name] then
+			d:Destroy()
+		end
+	end
+	local resto = m:GetDescendants()
+	for i = #resto, 1, -1 do -- de dentro para fora: o nó vazio some antes do pai
+		local d = resto[i]
+		if d:IsA("Model") and #d:GetChildren() == 0 then
+			d:Destroy()
+		end
+	end
+end
+local function pastaColisao(parent: Instance): Instance
+	local achada = parent:FindFirstChild(AssetLoader.PASTA_COLISAO)
+	if achada then
+		return achada
+	end
+	local f = Instance.new("Folder")
+	f.Name = AssetLoader.PASTA_COLISAO
+	f.Parent = parent
+	return f
+end
+
 -- Põe um item do plano (ArtPlan.Item). planned: o terreno é o do plano (atributo SitePlan).
 function AssetLoader.placeItem(it: any, parent: Instance, planned: boolean): Model?
 	if string.sub(it.key, 1, 6) == "parts:" then
@@ -707,9 +742,12 @@ function AssetLoader.placeItem(it: any, parent: Instance, planned: boolean): Mod
 	-- nova: quem chama conta a casa (vida da vila, animais) e o sorteio segue igual
 	local fixed = AssetLoader.staticModel(parent, it.key, m:GetPivot().Position)
 	if fixed then
-		m:Destroy()
 		AssetLoader.staticSkipped += 1
-		return fixed
+		if not (it :: any).expansao then
+			m:Destroy()
+			return fixed
+		end
+		soColisao(m, fixed)
 	end
 	if it.foliage then
 		foliageParts(m, it.shadow == true)
@@ -783,6 +821,12 @@ function AssetLoader.placeItem(it: any, parent: Instance, planned: boolean): Mod
 			e.Parent = a
 		end
 	end
+	if fixed then
+		-- numa pasta à parte: quem varre Map.Art (bots, autoteste, raia) continua vendo um modelo por casa
+		m.ModelStreamingMode = Enum.ModelStreamingMode.Atomic
+		m.Parent = pastaColisao(parent)
+		return fixed
+	end
 	m.Parent = parent
 	return m
 end
@@ -835,6 +879,14 @@ function AssetLoader.start()
 	local out = map:FindFirstChild("Art") or Instance.new("Folder")
 	out.Name = "Art"
 	out.Parent = map
+	-- D-235: com a expansão desligada, o visual dela que veio no arquivo sai junto
+	if not Expansao.LIGADA then
+		for _, c in out:GetChildren() do
+			if c:IsA("Model") and c:GetAttribute("VT65Estatico") and string.sub(c.Name, 1, 4) == "exp_" then
+				c:Destroy()
+			end
+		end
+	end
 	local rng = Rng.new(19650818)
 	local B = MapConfig.Bounds
 	local function inBounds(x: number, z: number): boolean
@@ -1164,7 +1216,15 @@ function AssetLoader.start()
 				AssetLoader.staticSkipped
 			)
 		)
-		if AssetLoader.staticSkipped ~= #StaticArt.items then
+		local esperados = #StaticArt.items
+		if not Expansao.LIGADA then
+			for _, e in StaticArt.items do
+				if string.sub(e.key, 1, 4) == "exp_" then
+					esperados -= 1
+				end
+			end
+		end
+		if AssetLoader.staticSkipped ~= esperados then
 			warn("[VT65] arte fixa: o plano não bateu com todos os modelos fixos (rode tools/estatico.py de novo)")
 		end
 	end

@@ -31,6 +31,10 @@ D-169: casa que se repete vem em linha `I <chave> <x> <y> <z> <giro> <escala>`, 
 molde de mesma chave (o primeiro `M` dela nos arquivos de `assets/estatico`). As casas únicas da
 vila são clones do mesmo modelo, sem tinta: só mudam o pivô, o giro em Y e a escala.
 
+D-235: a expansão (`expansao.txt`) entra só com as malhas visíveis. A colisão, as luzes e o piso que
+some de longe ficam no modelo do jogo (`Map.Art.ExpansaoColisao`), porque a rampa da escada e as
+águas do telhado virariam blocos com `CollisionFidelity = Box`.
+
 Uso: uv run python tools/estatico.py
 """
 

@@ -159,13 +159,43 @@ def test_chave_que_depende_do_jogo_e_recusada(tmp_path):
         estatico.ler(f)
 
 
+def test_expansao_so_com_o_visual():
+    # D-235: 31 construções (22 moldes e 9 repetidas). A colisão fica no modelo do jogo: fora do
+    # Studio ela viraria caixa cheia, e a escada e o andar de cima dos sobrados deixariam de existir
+    modelos = estatico.ler(ROOT / "assets" / "estatico" / "expansao.txt")
+    moldes = [m for m in modelos if not m.get("instancia")]
+    assert len(modelos) == 31 and len(moldes) == 22
+    assert all(m["chave"].startswith("exp_") for m in modelos)
+    # o piso que some de longe (Shared/ExpansaoLod) também fica no jogo: o modelo fixo não muda
+    piso_no_jogo = {
+        "exp_abrigo",
+        "exp_casa_vala",
+        "exp_casa_verde",
+        "exp_casas_ligadas",
+        "exp_celeiro",
+        "exp_sobrado_a",
+        "exp_sobrado_b",
+        "exp_sobrado_c",
+        "exp_sobrado_d",
+    }
+    for m in moldes:
+        pecas = todas(m)
+        assert pecas, m["chave"]
+        for p in pecas:
+            assert "malha" in p and "sa" in p, f"{m['chave']}/{p['nome']}"
+            assert not p["nome"].startswith(("Colisao_", "Zona_")), f"{m['chave']}/{p['nome']}"
+            assert not set(p["marcas"]) & set("cqh"), f"{m['chave']}/{p['nome']} interage"
+        if m["chave"] in piso_no_jogo:
+            assert "Trim_P" not in [p["nome"] for p in pecas], m["chave"]
+
+
 def test_ligados_e_gerado_bate():
     # D-155: o SLIM só é gerado com o Team Create; D-167: ligado, a casa de Xóm Gò vai no place;
     # D-168: e as construções de peças do MapLife. D-201 (objetivos e vila no lugar novo):
     # recopiadas do jogo, 24 construções (eram 19: entram as 4 de peças da D-172 e uma horta a mais
     # da vila nova) e a vila inteira no vila_casas
     ativos = json.loads((ROOT / "assets" / "estatico" / "ativos.json").read_text("utf-8"))
-    assert ativos == ["vila_construcoes", "vila_casas"]
+    assert ativos == ["vila_construcoes", "vila_casas", "expansao"]  # D-235: a expansão
     construcoes = estatico.ler(ROOT / "assets" / "estatico" / "vila_construcoes.txt")
     assert len(construcoes) == 24 and all(m["chave"].startswith("Vila_") for m in construcoes)
     assert sum(estatico.pecas(m) for m in construcoes) == 301

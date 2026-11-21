@@ -1,0 +1,323 @@
+{
+ "ClassName": "Model",
+ "Properties": {
+  "LevelOfDetail": {
+   "Enum": 4
+  },
+  "ModelStreamingMode": "Atomic",
+  "WorldPivotData": {
+   "OptionalCFrame": {
+    "position": [
+     -1807.184,
+     63.011,
+     -1285.747
+    ],
+    "orientation": [
+     [
+      0.178888,
+      0,
+      -0.983869
+     ],
+     [
+      0,
+      1,
+      0
+     ],
+     [
+      0.983869,
+      0,
+      0.178888
+     ]
+    ]
+   }
+  },
+  "Attributes": {
+   "Attributes": {
+    "VT65Estatico": {
+     "Bool": true
+    },
+    "VT65Chave": {
+     "String": "exp_deposito"
+    }
+   }
+  }
+ },
+ "Children": [
+  {
+   "Name": "Telhado_Node",
+   "ClassName": "Model",
+   "Children": [
+    {
+     "Name": "Telhado",
+     "ClassName": "MeshPart",
+     "Properties": {
+      "MeshId": "rbxassetid://99173945523544",
+      "InitialSize": [
+       13.442,
+       8.308,
+       13.498
+      ],
+      "Size": [
+       13.442,
+       8.308,
+       13.498
+      ],
+      "CFrame": {
+       "CFrame": {
+        "position": [
+         -1809.248,
+         78.552,
+         -1287.545
+        ],
+        "orientation": [
+         [
+          0.178888,
+          0,
+          -0.983869
+         ],
+         [
+          0,
+          1,
+          0
+         ],
+         [
+          0.983869,
+          0,
+          0.178888
+         ]
+        ]
+       }
+      },
+      "Anchored": true,
+      "CanCollide": false,
+      "CanQuery": false,
+      "CanTouch": false,
+      "CastShadow": true,
+      "Transparency": 0,
+      "CollisionFidelity": "Default"
+     },
+     "Children": [
+      {
+       "Name": "SurfaceAppearance",
+       "ClassName": "SurfaceAppearance",
+       "Properties": {
+        "AlphaMode": "Overlay",
+        "ColorMap": "rbxassetid://79936506855299",
+        "NormalMap": "rbxassetid://92005330399977",
+        "RoughnessMap": "rbxassetid://101351214447010",
+        "MetalnessMap": "rbxassetid://127195915574531"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "Name": "Trim_O_Node",
+   "ClassName": "Model",
+   "Children": [
+    {
+     "Name": "Trim_O",
+     "ClassName": "MeshPart",
+     "Properties": {
+      "MeshId": "rbxassetid://124163368598108",
+      "InitialSize": [
+       12.643,
+       18.393,
+       16.119
+      ],
+      "Size": [
+       12.643,
+       18.393,
+       16.119
+      ],
+      "CFrame": {
+       "CFrame": {
+        "position": [
+         -1807.152,
+         72.207,
+         -1287.928
+        ],
+        "orientation": [
+         [
+          0.178888,
+          0,
+          -0.983869
+         ],
+         [
+          0,
+          1,
+          0
+         ],
+         [
+          0.983869,
+          0,
+          0.178888
+         ]
+        ]
+       }
+      },
+      "Anchored": true,
+      "CanCollide": false,
+      "CanQuery": false,
+      "CanTouch": false,
+      "CastShadow": true,
+      "Transparency": 0,
+      "CollisionFidelity": "Default"
+     },
+     "Children": [
+      {
+       "Name": "SurfaceAppearance",
+       "ClassName": "SurfaceAppearance",
+       "Properties": {
+        "AlphaMode": "Overlay",
+        "ColorMap": "rbxassetid://98817676281040",
+        "NormalMap": "rbxassetid://97059026021565",
+        "RoughnessMap": "rbxassetid://70521593518624",
+        "MetalnessMap": "rbxassetid://109994254315822"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "Name": "Mobilia_Node",
+   "ClassName": "Model",
+   "Children": [
+    {
+     "Name": "Mobilia",
+     "ClassName": "MeshPart",
+     "Properties": {
+      "MeshId": "rbxassetid://95041785417836",
+      "InitialSize": [
+       10.958,
+       7.015,
+       9.689
+      ],
+      "Size": [
+       10.958,
+       7.015,
+       9.689
+      ],
+      "CFrame": {
+       "CFrame": {
+        "position": [
+         -1809.766,
+         66.519,
+         -1287.646
+        ],
+        "orientation": [
+         [
+          0.178888,
+          0,
+          -0.983869
+         ],
+         [
+          0,
+          1,
+          0
+         ],
+         [
+          0.983869,
+          0,
+          0.178888
+         ]
+        ]
+       }
+      },
+      "Anchored": true,
+      "CanCollide": false,
+      "CanQuery": false,
+      "CanTouch": false,
+      "CastShadow": true,
+      "Transparency": 0,
+      "CollisionFidelity": "Default"
+     },
+     "Children": [
+      {
+       "Name": "SurfaceAppearance",
+       "ClassName": "SurfaceAppearance",
+       "Properties": {
+        "AlphaMode": "Overlay",
+        "ColorMap": "rbxassetid://89556656834072",
+        "NormalMap": "rbxassetid://93336858618429",
+        "RoughnessMap": "rbxassetid://121547735785981",
+        "MetalnessMap": "rbxassetid://127195915574531"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "Name": "Trim_M_Node",
+   "ClassName": "Model",
+   "Children": [
+    {
+     "Name": "Trim_M",
+     "ClassName": "MeshPart",
+     "Properties": {
+      "MeshId": "rbxassetid://90410774117633",
+      "InitialSize": [
+       17.727,
+       18.524,
+       15.644
+      ],
+      "Size": [
+       17.727,
+       18.524,
+       15.644
+      ],
+      "CFrame": {
+       "CFrame": {
+        "position": [
+         -1806.767,
+         72.273,
+         -1285.814
+        ],
+        "orientation": [
+         [
+          0.178888,
+          0,
+          -0.983869
+         ],
+         [
+          0,
+          1,
+          0
+         ],
+         [
+          0.983869,
+          0,
+          0.178888
+         ]
+        ]
+       }
+      },
+      "Anchored": true,
+      "CanCollide": false,
+      "CanQuery": false,
+      "CanTouch": false,
+      "CastShadow": true,
+      "Transparency": 0,
+      "CollisionFidelity": "Default"
+     },
+     "Children": [
+      {
+       "Name": "SurfaceAppearance",
+       "ClassName": "SurfaceAppearance",
+       "Properties": {
+        "AlphaMode": "Overlay",
+        "ColorMap": "rbxassetid://134979674313261",
+        "NormalMap": "rbxassetid://116858274661487",
+        "RoughnessMap": "rbxassetid://120767651982064",
+        "MetalnessMap": "rbxassetid://109994254315822"
+       }
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

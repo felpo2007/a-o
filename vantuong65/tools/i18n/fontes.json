@@ -1594,7 +1594,7 @@
   "src/ReplicatedStorage/Shared/Cosmeticos.luau:361"
  ],
  "Alvo": [
-  "src/ServerScriptService/Modules/AssetLoader.luau:999",
+  "src/ServerScriptService/Modules/AssetLoader.luau:1051",
   "src/ServerScriptService/Modules/TrainingService.luau:360"
  ],
  "Alvo de %d m: %d cm %s, %d cm %s do centro": [
@@ -5035,7 +5035,7 @@
   "src/ReplicatedStorage/Shared/Skins.luau:727"
  ],
  "Folhas": [
-  "src/ReplicatedStorage/Shared/ExpansaoLod.luau:29",
+  "src/ReplicatedStorage/Shared/ExpansaoLod.luau:37",
   "src/ServerScriptService/Modules/AssetLoader.luau:199",
   "src/ServerScriptService/Modules/MapLife.luau:826",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Ambiente.client.luau:65",
@@ -8622,7 +8622,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/LobbyScene.luau:878"
  ],
  "Raizes": [
-  "src/ReplicatedStorage/Shared/ExpansaoLod.luau:26"
+  "src/ReplicatedStorage/Shared/ExpansaoLod.luau:34"
  ],
  "Rajada para o alto": [
   "src/ReplicatedStorage/Shared/Comemoracao.luau:415"
@@ -15418,7 +15418,7 @@
   "src/ReplicatedStorage/Shared/FieldWork.luau:58"
  ],
  "não, terreno antigo": [
-  "src/ServerScriptService/Modules/AssetLoader.luau:811"
+  "src/ServerScriptService/Modules/AssetLoader.luau:855"
  ],
  "o efeito é o da granada de mão grenade_us (5 m letal), PLACEHOLDER": [
   "src/ReplicatedStorage/Shared/Weapons.luau:261"
@@ -15593,16 +15593,16 @@
   "src/ServerScriptService/Modules/ArtPlan.luau:1054",
   "src/ServerScriptService/Modules/ArtPlan.luau:1083",
   "src/ServerScriptService/Modules/ArtPlan.luau:1179",
-  "src/ServerScriptService/Modules/AssetLoader.luau:644",
-  "src/ServerScriptService/Modules/AssetLoader.luau:863"
+  "src/ServerScriptService/Modules/AssetLoader.luau:679",
+  "src/ServerScriptService/Modules/AssetLoader.luau:915"
  ],
  "parts:": [
   "src/ServerScriptService/Modules/ArtPlan.luau:681",
   "src/ServerScriptService/Modules/ArtPlan.luau:1054",
   "src/ServerScriptService/Modules/ArtPlan.luau:1083",
   "src/ServerScriptService/Modules/ArtPlan.luau:1179",
-  "src/ServerScriptService/Modules/AssetLoader.luau:644",
-  "src/ServerScriptService/Modules/AssetLoader.luau:863"
+  "src/ServerScriptService/Modules/AssetLoader.luau:679",
+  "src/ServerScriptService/Modules/AssetLoader.luau:915"
  ],
  "parts:barco": [
   "src/ServerScriptService/Modules/ArtPlan.luau:301",

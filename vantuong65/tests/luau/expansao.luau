@@ -197,6 +197,10 @@ test("de longe só some o que não tem colisão (D-233)", function()
 	assert(ExpansaoLod.limiteM("exp_arvore_a", "Raizes0") == 45, "raiz da árvore")
 	assert(ExpansaoLod.limiteM("exp_samambaia", "Folhas0") == 55, "samambaia")
 	assert(ExpansaoLod.limiteM("exp_celeiro", "Trim_P") == 70, "piso térreo")
+	for _, k in { "exp_sobrado_a", "exp_sobrado_b", "exp_sobrado_c", "exp_sobrado_d" } do
+		assert(ExpansaoLod.limiteM(k, "Trim_P") == 90, k .. ": piso do sobrado some a 90 m (D-235)")
+		assert(ExpansaoLod.limiteM(k, "Mobilia") == nil, k .. ": móvel nunca some")
+	end
 	for _, k in { "exp_palafita_a", "exp_palafita_b", "exp_deposito", "exp_passarela", "exp_comporta" } do
 		assert(ExpansaoLod.limiteM(k, "Trim_P") == nil, k .. ": piso elevado não pode sumir")
 	end
@@ -210,6 +214,32 @@ test("de longe só some o que não tem colisão (D-233)", function()
 	assert(ExpansaoLod.esconde(lim * 1.09, 70, 1, false), "passou da folga, some")
 	assert(ExpansaoLod.esconde(lim * 1.04, 70, 1, true), "quem sumiu só volta dentro do limite")
 	assert(not ExpansaoLod.esconde(lim * 0.99, 70, 1, true), "dentro do limite, volta")
+end)
+
+test("toda construção exp_ do plano tem o visual na arte fixa, e nenhuma sobra (D-235)", function()
+	local StaticArt = R("../../src/ServerScriptService/Modules/StaticArt")
+	local fixas = {}
+	for _, e in StaticArt.items do
+		if string.sub(e.key, 1, 4) == "exp_" then
+			table.insert(fixas, e)
+		end
+	end
+	local n = 0
+	for _, it in novas(st1) do
+		if string.sub(it.key, 1, 4) == "exp_" then
+			n += 1
+			local achou = false
+			for _, e in fixas do
+				if e.key == it.key and math.abs(e.x - it.x) < 3 and math.abs(e.z - it.z) < 3 then
+					achou = true
+					break
+				end
+			end
+			assert(achou, string.format("%s em (%.1f, %.1f) sem arte fixa: recopie", it.key, it.x, it.z))
+		end
+	end
+	assert(n == #fixas, string.format("%d no plano, %d na arte fixa", n, #fixas))
+	print(string.format("       %d construções da expansão na arte fixa", n))
 end)
 
 test("o tabuleiro colhido sai só do pousio e os outros estados não mudam (D-233)", function()

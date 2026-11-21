@@ -1,0 +1,254 @@
+{
+ "ClassName": "Model",
+ "Properties": {
+  "LevelOfDetail": {
+   "Enum": 4
+  },
+  "ModelStreamingMode": "Atomic",
+  "WorldPivotData": {
+   "OptionalCFrame": {
+    "position": [
+     -1707.172,
+     65.282,
+     -1503.599
+    ],
+    "orientation": [
+     [
+      -0.799999,
+      0,
+      0.600001
+     ],
+     [
+      0,
+      1,
+      0
+     ],
+     [
+      -0.600001,
+      0,
+      -0.799999
+     ]
+    ]
+   }
+  },
+  "Attributes": {
+   "Attributes": {
+    "VT65Estatico": {
+     "Bool": true
+    },
+    "VT65Chave": {
+     "String": "exp_ruina"
+    }
+   }
+  }
+ },
+ "Children": [
+  {
+   "Name": "Trim_P_Node",
+   "ClassName": "Model",
+   "Children": [
+    {
+     "Name": "Trim_P",
+     "ClassName": "MeshPart",
+     "Properties": {
+      "MeshId": "rbxassetid://90233235074924",
+      "InitialSize": [
+       28.929,
+       0.536,
+       21.071
+      ],
+      "Size": [
+       28.929,
+       0.536,
+       21.071
+      ],
+      "CFrame": {
+       "CFrame": {
+        "position": [
+         -1706.265,
+         65.55,
+         -1503.572
+        ],
+        "orientation": [
+         [
+          -0.799999,
+          0,
+          0.600001
+         ],
+         [
+          0,
+          1,
+          0
+         ],
+         [
+          -0.600001,
+          0,
+          -0.799999
+         ]
+        ]
+       }
+      },
+      "Anchored": true,
+      "CanCollide": false,
+      "CanQuery": false,
+      "CanTouch": false,
+      "CastShadow": true,
+      "Transparency": 0,
+      "CollisionFidelity": "Default"
+     },
+     "Children": [
+      {
+       "Name": "SurfaceAppearance",
+       "ClassName": "SurfaceAppearance",
+       "Properties": {
+        "AlphaMode": "Overlay",
+        "ColorMap": "rbxassetid://100696626532955",
+        "NormalMap": "rbxassetid://71715211798756",
+        "RoughnessMap": "rbxassetid://85548114651624",
+        "MetalnessMap": "rbxassetid://138924186174796"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "Name": "Mobilia_Node",
+   "ClassName": "Model",
+   "Children": [
+    {
+     "Name": "Mobilia",
+     "ClassName": "MeshPart",
+     "Properties": {
+      "MeshId": "rbxassetid://82058413290671",
+      "InitialSize": [
+       29.878,
+       14.732,
+       22.341
+      ],
+      "Size": [
+       29.878,
+       14.732,
+       22.341
+      ],
+      "CFrame": {
+       "CFrame": {
+        "position": [
+         -1707.775,
+         72.648,
+         -1503.241
+        ],
+        "orientation": [
+         [
+          -0.799999,
+          0,
+          0.600001
+         ],
+         [
+          0,
+          1,
+          0
+         ],
+         [
+          -0.600001,
+          0,
+          -0.799999
+         ]
+        ]
+       }
+      },
+      "Anchored": true,
+      "CanCollide": false,
+      "CanQuery": false,
+      "CanTouch": false,
+      "CastShadow": true,
+      "Transparency": 0,
+      "CollisionFidelity": "Default"
+     },
+     "Children": [
+      {
+       "Name": "SurfaceAppearance",
+       "ClassName": "SurfaceAppearance",
+       "Properties": {
+        "AlphaMode": "Overlay",
+        "ColorMap": "rbxassetid://70494579014356",
+        "NormalMap": "rbxassetid://86240302124931",
+        "RoughnessMap": "rbxassetid://95734729036144",
+        "MetalnessMap": "rbxassetid://127195915574531"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "Name": "Telhado_Node",
+   "ClassName": "Model",
+   "Children": [
+    {
+     "Name": "Telhado",
+     "ClassName": "MeshPart",
+     "Properties": {
+      "MeshId": "rbxassetid://125190239805997",
+      "InitialSize": [
+       8.214,
+       4.282,
+       8.063
+      ],
+      "Size": [
+       8.214,
+       4.282,
+       8.063
+      ],
+      "CFrame": {
+       "CFrame": {
+        "position": [
+         -1693.904,
+         75.959,
+         -1503.385
+        ],
+        "orientation": [
+         [
+          -0.799999,
+          0,
+          0.600001
+         ],
+         [
+          0,
+          1,
+          0
+         ],
+         [
+          -0.600001,
+          0,
+          -0.799999
+         ]
+        ]
+       }
+      },
+      "Anchored": true,
+      "CanCollide": false,
+      "CanQuery": false,
+      "CanTouch": false,
+      "CastShadow": true,
+      "Transparency": 0,
+      "CollisionFidelity": "Default"
+     },
+     "Children": [
+      {
+       "Name": "SurfaceAppearance",
+       "ClassName": "SurfaceAppearance",
+       "Properties": {
+        "AlphaMode": "Overlay",
+        "ColorMap": "rbxassetid://86175576241042",
+        "NormalMap": "rbxassetid://138296026377457",
+        "RoughnessMap": "rbxassetid://100716986812882",
+        "MetalnessMap": "rbxassetid://127195915574531"
+       }
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

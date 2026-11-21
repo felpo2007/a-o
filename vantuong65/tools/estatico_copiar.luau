@@ -27,6 +27,10 @@ local PREFIXO: string? = nil
 -- outras só como "I <chave> <x> <y> <z> <giro> <escala>"; as que já são fixas (VT65Estatico) ficam de
 -- fora. Serve para modelo clonado sem tinta (as casas únicas da vila).
 local MOLDES: string? = nil
+-- D-235: com SO_VISUAL (use com MOLDES = "exp_"), só as malhas visíveis vão para o arquivo. A colisão
+-- (Colisao_*), as luzes e o que some de longe (atributo VT65LodM) ficam no modelo do jogo: peça criada
+-- fora do Studio colide em caixa, e a rampa da escada e as águas do telhado viraram blocos cheios.
+local SO_VISUAL = false
 local M = 0.28
 local COR_PADRAO = Color3.fromRGB(163, 162, 165)
 
@@ -190,23 +194,40 @@ local function peca(p: BasePart)
 					rgb((c :: any).Color),
 				}, " ")
 			)
-		else
+		elseif not (SO_VISUAL and c:IsA("Attachment")) then -- D-235: a luz fica no modelo do jogo
 			table.insert(linhas, "X filho " .. c.ClassName .. " em " .. p:GetFullName())
 		end
 	end
+end
+
+-- D-235: o que vai para o arquivo quando SO_VISUAL está ligado
+local function visual(p: BasePart): boolean
+	return string.sub(p.Name, 1, 8) ~= "Colisao_"
+		and string.sub(p.Name, 1, 5) ~= "Zona_"
+		and p:GetAttribute("VT65LodM") == nil
+end
+local function temVisual(m: Instance): boolean
+	for _, d in m:GetDescendants() do
+		if d:IsA("BasePart") and visual(d) then
+			return true
+		end
+	end
+	return false
 end
 
 -- submodelos em qualquer profundidade: "N a/b/c" (caminho a partir do modelo de cima)
 local function no(m: Instance, caminho: string)
 	for _, c in m:GetChildren() do
 		if c:IsA("BasePart") then
-			peca(c)
+			if not SO_VISUAL or visual(c) then
+				peca(c)
+			end
 		elseif not c:IsA("Model") then
 			table.insert(linhas, "X filho " .. c.ClassName .. " em " .. c:GetFullName())
 		end
 	end
 	for _, c in m:GetChildren() do
-		if c:IsA("Model") then
+		if c:IsA("Model") and (not SO_VISUAL or temVisual(c)) then
 			local sub = if caminho == "" then c.Name else caminho .. "/" .. c.Name
 			table.insert(linhas, "N " .. sub)
 			no(c, sub)
@@ -219,7 +240,12 @@ if MOLDES then
 	local vistos: { [string]: boolean } = {}
 	local insts = {}
 	for _, m in art:GetChildren() do
-		if m:IsA("Model") and string.sub(m.Name, 1, #MOLDES) == MOLDES and not m:GetAttribute("VT65Estatico") then
+		if
+			m:IsA("Model")
+			and string.sub(m.Name, 1, #MOLDES) == MOLDES
+			and not m:GetAttribute("VT65Estatico")
+			and not m:GetAttribute("Foliage")
+		then
 			local pv = m:GetPivot()
 			if vistos[m.Name] then
 				table.insert(
