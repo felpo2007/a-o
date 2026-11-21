@@ -7817,5 +7817,75 @@
   "assetType": "Audio",
   "name": "VT65 kit_campo",
   "description": "VAN TUONG 65 - kit de som: pazadas (4 variações) (tools/sons_armas.py, D-204)"
+ },
+ {
+  "key": "CaixaLoja.gratuita",
+  "file": "assets/ui/caixas/gratuita.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa gratuita",
+  "description": "VAN TUONG 65 - Caixa de Recompensa, imagem da loja (tools/blender/caixas_loja.py)"
+ },
+ {
+  "key": "CaixaLoja.recruta",
+  "file": "assets/ui/caixas/recruta.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa recruta",
+  "description": "VAN TUONG 65 - Caixa de Recruta, imagem da loja (tools/blender/caixas_loja.py)"
+ },
+ {
+  "key": "CaixaLoja.servico",
+  "file": "assets/ui/caixas/servico.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa servico",
+  "description": "VAN TUONG 65 - Caixa de Servico, imagem da loja (tools/blender/caixas_loja.py)"
+ },
+ {
+  "key": "CaixaLoja.batalhao",
+  "file": "assets/ui/caixas/batalhao.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa batalhao",
+  "description": "VAN TUONG 65 - Caixa de Batalhao, imagem da loja (tools/blender/caixas_loja.py)"
+ },
+ {
+  "key": "CaixaLoja.campanha",
+  "file": "assets/ui/caixas/campanha.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa campanha",
+  "description": "VAN TUONG 65 - Caixa de Campanha, imagem da loja (tools/blender/caixas_loja.py)"
+ },
+ {
+  "key": "CaixaLoja.veterano",
+  "file": "assets/ui/caixas/veterano.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa veterano",
+  "description": "VAN TUONG 65 - Caixa de Veterano, imagem da loja (tools/blender/caixas_loja.py)"
+ },
+ {
+  "key": "CaixaLoja.suprimentos",
+  "file": "assets/ui/caixas/suprimentos.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa suprimentos",
+  "description": "VAN TUONG 65 - Caixa de Suprimentos Militares, imagem da loja (tools/blender/caixas_loja.py)"
+ },
+ {
+  "key": "CaixaLoja.especiais",
+  "file": "assets/ui/caixas/especiais.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa especiais",
+  "description": "VAN TUONG 65 - Caixa de Equipamentos Especiais, imagem da loja (tools/blender/caixas_loja.py)"
+ },
+ {
+  "key": "CaixaLoja.elite",
+  "file": "assets/ui/caixas/elite.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa elite",
+  "description": "VAN TUONG 65 - Caixa de Arsenal de Elite, imagem da loja (tools/blender/caixas_loja.py)"
+ },
+ {
+  "key": "CaixaLoja.historica",
+  "file": "assets/ui/caixas/historica.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa historica",
+  "description": "VAN TUONG 65 - Caixa da Colecao de Campanha, imagem da loja (tools/blender/caixas_loja.py)"
  }
 ]

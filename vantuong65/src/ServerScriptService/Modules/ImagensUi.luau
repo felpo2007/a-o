@@ -53,8 +53,26 @@ function ImagensUi.moldes()
 	end)
 end
 
+-- D-212: as imagens das caixas da loja ("ImgCaixa_<id>"), uma de cada vez (o InsertService limita
+-- pedidos em rajada). Sem o atributo, o cliente mostra o caixote 3D de antes.
+function ImagensUi.caixas()
+	task.spawn(function()
+		for id, d in AssetIds.CaixaLoja or {} do
+			if type(d) == "number" and d ~= 0 then
+				local img = imageOf(d)
+				if img and img ~= 0 then
+					ReplicatedStorage:SetAttribute("ImgCaixa_" .. id, img)
+				else
+					warn(string.format("[VT65] imagem da caixa %s: o decal %d não abriu; fica o caixote 3D", id, d))
+				end
+			end
+		end
+	end)
+end
+
 function ImagensUi.start()
 	ImagensUi.moldes()
+	ImagensUi.caixas()
 	local images = AssetIds.Images or {}
 	for _, k in ImagensUi.KEYS do
 		local d = images[k]

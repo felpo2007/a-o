@@ -955,11 +955,31 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
       - a M16 escolhida e nascida (`Loadout = m16,m1911`);
       - "C Vila" na faixa;
       - 0 erros.
-    - Lune 845 ok (59 arquivos), pytest 76, ruff, StyLua e luau-lsp limpos, i18n 100%. Relatório:
+    - Lune 840 ok (59 arquivos), pytest 76, ruff, StyLua e luau-lsp limpos, i18n 100%. Relatório:
       `testes/LOTE96_D211_2026-11-20.md`.
     - **v129 publicada** (versão 134 do place, commit a31000a).
-    - **Próximos (pedidos de 20/11):** a loja na composição das referências com as caixas, a
-      animação da loja e da abertura, o pódio com zoom no melhor e comemoração, e as transições.
+  - **Lote 97 (D-212): a loja na composição das referências, com as caixas em imagens novas, feito.**
+    - **Caixas:** as 10 modeladas e renderizadas no Blender (`tools/blender/caixas_loja.py`):
+      madeira, metal ou laca, latão, estêncil e a luz da raridade. Publicadas e resolvidas pelo
+      servidor (`ImgCaixa_<id>`); a aba CAIXAS também usa.
+    - **DESTAQUES:** a vitrine de três colunas da referência:
+      - à esquerda, o mercado do dia com o relógio e os itens fixos;
+      - no meio, duas caixas grandes;
+      - à direita, quatro linhas com "coletados" e as prontas.
+      - O clique leva à caixa na aba CAIXAS.
+    - **CONJUNTOS:** aba nova, com os 4 conjuntos em cartões altos e a arte dos itens. A INTENDÊNCIA
+      ficou oculta (abre pelo ARSENAL e pelo ARMÁRIO).
+    - **Caixas pagas:** só aparecem com a venda ligada (o questionário de classificação é do dono).
+    - **Conferido no Studio:**
+      - as 10 imagens resolvidas;
+      - a vitrine;
+      - o clique na Caixa de Veterano (a aba CAIXAS parada nela);
+      - os conjuntos com "✔ SEU";
+      - 0 erros.
+    - Lune 845 ok (60 arquivos), pytest 76, ruff, StyLua e luau-lsp limpos, i18n 100%. Relatório:
+      `testes/LOTE97_D212_2026-11-20.md`.
+    - **Próximos (pedidos de 20/11):** a animação da loja e da abertura das caixas, o pódio com zoom
+      no melhor e comemoração, e as transições.
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;

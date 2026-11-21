@@ -23,6 +23,7 @@ local UserInputService = game:GetService("UserInputService")
 
 local AssetIds = require(ReplicatedStorage.Shared.AssetIds) :: any
 local Commerce = require(ReplicatedStorage.Shared.Commerce)
+local Conjuntos = require(ReplicatedStorage.Shared.Conjuntos) :: any
 local JogarAgora = require(ReplicatedStorage.Shared.JogarAgora) :: any
 local Net = require(ReplicatedStorage.Shared.Net)
 local Progression = require(ReplicatedStorage.Shared.Progression)
@@ -32,6 +33,8 @@ local Acabamento = require(ReplicatedFirst:WaitForChild("Acabamento"))
 local Bus = require(script.Parent.Bus)
 local CampanhaCliente = require(script.Parent.CampanhaCliente)
 local Input = require(script.Parent.Input)
+local CaixaImagem = require(script.Parent.CaixaImagem)
+local ItemArte = require(script.Parent.ItemArte)
 local LobbyPalco = require(script.Parent.LobbyPalco)
 local RodaArte = require(script.Parent.RodaArte)
 local SoldierPreview = require(script.Parent.SoldierPreview)
@@ -53,19 +56,22 @@ local X0 = px(48, 64) -- margem da esquerda
 -- VANTAGENS (as vantagens compradas, com o número exato e o teto). D-207 (§9: "Destaques, Itens,
 -- Conjuntos, Caixas e Códigos"): a vitrine virou DESTAQUES, o mercado vem logo depois, e entrou
 -- CÓDIGOS
-local TABS = {
+-- D-212 (referências da loja do dono): DESTAQUES, CONJUNTOS e CAIXAS na frente; a INTENDÊNCIA sai da
+-- fileira (oculta: abre pelo ARSENAL do lobby e pelo atalho do ARMÁRIO; o LB/RB pula)
+local TABS: { { id: string, name: string, oculta: boolean? } } = {
 	{ id = "loja", name = "DESTAQUES" },
+	{ id = "conjuntos", name = "CONJUNTOS" },
+	-- D-173: caixas de suprimentos (Controllers/CaixasTela.client desenha dentro do host dela)
+	{ id = "caixas", name = "CAIXAS" },
 	-- D-211 (dono: "coloque o botão do armário no lobby"; "cadê a M16 para os americanos"): a arma
 	-- principal de cada papel e o que você já tem para vestir
 	{ id = "armario", name = "ARMÁRIO" },
 	{ id = "mercado", name = "MERCADO" },
-	-- D-173: caixas de suprimentos (Controllers/CaixasTela.client desenha dentro do host dela)
-	{ id = "caixas", name = "CAIXAS" },
 	-- D-175: ARQUIVO MILITAR STARLITE (Controllers/ArquivoTela.client desenha dentro do host dela)
 	{ id = "arquivo", name = "ARQUIVO" },
 	{ id = "vantagens", name = "VANTAGENS" },
-	{ id = "intendencia", name = "INTENDÊNCIA" },
 	{ id = "codigos", name = "CÓDIGOS" },
+	{ id = "intendencia", name = "INTENDÊNCIA", oculta = true },
 }
 -- D-124 (lote 11, "deixe a loja atrativa"): a loja abre na vitrine (era a intendência, uma lista de
 -- equipamento com botões bege, a primeira coisa que se via)
@@ -281,6 +287,9 @@ pintarDicasAba()
 local tabButtons: { [string]: TextButton } = {}
 local setTab: (id: string) -> () = function(_id: string) end
 for i, d in TABS do
+	if d.oculta then
+		continue -- D-212: aba sem botão (abre por atalho)
+	end
 	local b = Instance.new("TextButton")
 	b.Name = d.id
 	b.AutoButtonColor = false
@@ -1156,6 +1165,628 @@ local function card(parent: Instance, o: Offer, n: number): GuiObject
 	return f
 end
 
+-- ============================================================================================
+-- D-212: a vitrine dos DESTAQUES na composição das referências do dono (fotos de 18/11): à
+-- esquerda o MERCADO DO DIA (o que troca todo dia, com o relógio) e o SEMPRE NA LOJA; no meio, duas
+-- caixas grandes; à direita, as outras caixas em linhas, com "coletados" e as prontas para abrir.
+-- As caixas têm a imagem nova (CaixaImagem: Blender) e levam à aba CAIXAS parada nelas (as
+-- probabilidades vêm antes de abrir ou comprar, como manda a regra das caixas). Caixa paga só
+-- aparece para quem pode comprar agora (sem vitrine do que não dá para levar, D-173).
+-- ============================================================================================
+local ACENTO_CAIXA: { [string]: Color3 } = {
+	gratuita = Color3.fromRGB(255, 158, 30),
+	recruta = Color3.fromRGB(115, 242, 89),
+	servico = Color3.fromRGB(140, 255, 140),
+	batalhao = Color3.fromRGB(89, 153, 255),
+	campanha = Color3.fromRGB(64, 242, 217),
+	veterano = Color3.fromRGB(255, 199, 64),
+	suprimentos = Color3.fromRGB(255, 128, 30),
+	especiais = Color3.fromRGB(38, 217, 255),
+	elite = Color3.fromRGB(255, 184, 46),
+	historica = Color3.fromRGB(255, 82, 51),
+}
+-- definidas mais abaixo (a vitrine usa as mesmas da vitrine antiga e do mercado)
+local offers: () -> { Offer }
+local hm: (sec: number) -> string
+local campaignLeft: (t: any) -> number
+local caixasEstado: any = nil
+local caixasPedido = false
+local pintarVitrine: () -> () = function() end
+local vitTimer: (() -> ())? = nil
+local function pedirCaixas()
+	if caixasPedido then
+		return
+	end
+	caixasPedido = true
+	task.spawn(function()
+		local ok, s = pcall(function()
+			return Net.func("Suprimento_Get"):InvokeServer()
+		end)
+		caixasPedido = false
+		if ok and type(s) == "table" and not s.carregando then
+			caixasEstado = s
+			if gui.Enabled and tab == "loja" then
+				pintarVitrine()
+			end
+		end
+	end)
+end
+local function coletados(c: any): (number, number)
+	local t, n = 0, 0
+	for _, e in (c.lista or {}) :: { any } do
+		n += 1
+		if e.repetido then
+			t += 1
+		end
+	end
+	return t, n
+end
+-- quantas dá para abrir agora: as guardadas (marcos) ou as que os bilhetes pagam
+local function prontas(c: any): number
+	if c.tipo == "gratuita" and c.fonte == "marco" then
+		return tonumber(c.guardadas) or 0
+	elseif c.tipo == "gratuita" then
+		return math.floor(
+			(tonumber(caixasEstado and caixasEstado.bilhetes) or 0) / math.max(1, tonumber(c.bilhetes) or 1)
+		)
+	end
+	return 0
+end
+local function caixasDaVitrine(): { any }
+	local out = {}
+	for _, c in (caixasEstado and caixasEstado.caixas or {}) :: { any } do
+		if not (c.tipo == "paga" and c.bloqueio ~= nil) and c.disponivel ~= false then
+			table.insert(out, c)
+		end
+	end
+	-- as pagas (quando à venda) primeiro, depois as que dá para abrir agora, depois a ordem do catálogo
+	table.sort(out, function(a: any, b: any): boolean
+		local pa, pb = a.tipo == "paga", b.tipo == "paga"
+		if pa ~= pb then
+			return pa
+		end
+		local ra, rb = prontas(a), prontas(b)
+		if ra ~= rb then
+			return ra > rb
+		end
+		return tostring(a.id) < tostring(b.id)
+	end)
+	return out
+end
+local function irCaixa(c: any)
+	Bus.fire("caixa_foco", c.id)
+	setTab("caixas")
+end
+-- o texto do botão da caixa: abrir as prontas, o preço (paga) ou o que falta
+local function acaoCaixa(c: any): (string, string)
+	local n = prontas(c)
+	if n > 0 then
+		return if n == 1 then "ABRIR · 1 PRONTA" else string.format("ABRIR · %d PRONTAS", n), "premio"
+	elseif c.tipo == "paga" then
+		return if c.robuxRef then string.format("R$ %d", c.robuxRef) else "COMPRAR", "robux"
+	elseif c.fonte == "marco" then
+		return "GANHE JOGANDO", "secondary"
+	end
+	return string.format("%d BILHETE%s", c.bilhetes or 1, if (c.bilhetes or 1) > 1 then "S" else ""), "secondary"
+end
+local function etiqueta(parent: Instance, texto: string, cor: Color3, escura: boolean?): TextLabel
+	local t = UiKit.tag(parent, texto, cor, px(11, 16))
+	t.TextColor3 = if escura then V.AMBAR_TEXTO else V.TEXT
+	return t
+end
+-- vida discreta: a imagem da caixa sobe e desce devagar (sem movimento reduzido)
+local function flutua(o: GuiObject, amp: number)
+	if UiKit.Estilo.reduzMovimento() then
+		return
+	end
+	local p0 = o.Position
+	TweenService:Create(
+		o,
+		TweenInfo.new(2.4 + math.random() * 0.8, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true),
+		{ Position = p0 + UDim2.fromOffset(0, -amp) }
+	):Play()
+end
+-- botão que ocupa um cartão inteiro, com o realce de foco e de mouse
+local function cartaoBotao(parent: Instance, nome: string, cor: Color3): TextButton
+	local b = Instance.new("TextButton")
+	b.Name = nome
+	b.AutoButtonColor = false
+	b.Text = ""
+	b.BackgroundColor3 = cor
+	b.BorderSizePixel = 0
+	b.ClipsDescendants = true
+	b.Selectable = true
+	b.SelectionImageObject = UiKit.FOCUS
+	b.Parent = parent
+	UiKit.corner(b, 4)
+	local r = UiKit.realce(b, cor, cor:Lerp(V.PANEL_3, 0.5), 1.02)
+	b.MouseEnter:Connect(function()
+		r.set(true)
+	end)
+	b.MouseLeave:Connect(function()
+		r.set(false)
+	end)
+	b.SelectionGained:Connect(function()
+		r.set(true)
+	end)
+	b.SelectionLost:Connect(function()
+		r.set(false)
+	end)
+	return b
+end
+-- entrada: cada peça sobe um pouco, uma depois da outra
+local function entra(o: GuiObject, i: number)
+	if UiKit.Estilo.reduzMovimento() then
+		return
+	end
+	local p0 = o.Position
+	o.Position = p0 + UDim2.fromOffset(0, px(18, 24))
+	TweenService:Create(o, TweenInfo.new(0.32, Enum.EasingStyle.Quint, Enum.EasingDirection.Out, 0, false, 0.04 * i), {
+		Position = p0,
+	}):Play()
+end
+
+pintarVitrine = function()
+	local velha = panel:FindFirstChild("Vitrine3")
+	if velha then
+		velha:Destroy()
+	end
+	vitTimer = nil
+	local VH = px(600, 800)
+	local G = px(12, 16)
+	local vit = Instance.new("Frame")
+	vit.Name = "Vitrine3"
+	vit.LayoutOrder = -200 -- acima do destaque (-100)
+	vit.BackgroundTransparency = 1
+	vit.Size = UDim2.new(1, -24, 0, VH)
+	vit:SetAttribute("Fixo", true)
+	vit.Parent = panel
+	-- largura em pixels de projeto: a do painel (a folha menos as margens) menos a margem da lista e a
+	-- barra de rolagem
+	local W0 = W - 2 * px(10, 14) - 24 - px(8, 10)
+	local wEsq = math.floor(W0 * 0.44)
+	local wMeio = math.floor(W0 * 0.28)
+	local wDir = W0 - wEsq - wMeio - 2 * G
+	local n = 0
+	-- ----- esquerda: MERCADO DO DIA e SEMPRE NA LOJA -----
+	local esq = Instance.new("Frame")
+	esq.Name = "Esquerda"
+	esq.BackgroundColor3 = V.PANEL_2
+	esq.BorderSizePixel = 0
+	esq.Size = UDim2.fromOffset(wEsq, VH)
+	esq.Parent = vit
+	UiKit.corner(esq, 4)
+	UiKit.edge(esq, V.AMBAR, 1, 0.55)
+	local P = px(14, 18)
+	local blocoH = math.floor((VH - 3 * P) / 2)
+	local function bloco(y: number, titulo: string, sub: string): (Frame, TextLabel)
+		local t = UiKit.title(esq, titulo, px(26, 34))
+		t.Position = UDim2.fromOffset(P, y)
+		t.Size = UDim2.new(0.6, 0, 0, px(30, 40))
+		local s = UiKit.rotulo(esq, 13, V.AMBAR, UiKit.F.TITLE_MED)
+		s.Position = UDim2.fromOffset(P, y + px(30, 40))
+		s.Size = UDim2.new(1, -2 * P, 0, px(18, 24))
+		s.Text = sub
+		local g = Instance.new("Frame")
+		g.BackgroundTransparency = 1
+		g.Position = UDim2.fromOffset(P, y + px(52, 70))
+		g.Size = UDim2.new(1, -2 * P, 0, blocoH - px(56, 74))
+		g.Parent = esq
+		local gl = Instance.new("UIGridLayout")
+		gl.CellSize = UDim2.new(1 / 3, -px(7, 10), 1, 0)
+		gl.CellPadding = UDim2.fromOffset(px(10, 14), 0)
+		gl.SortOrder = Enum.SortOrder.LayoutOrder
+		gl.Parent = g
+		return g, s
+	end
+	local s = CampanhaCliente.get()
+	local m = s and s.market
+	local gMerc, subMerc = bloco(P, "MERCADO DO DIA", "Escolhidos para hoje")
+	if type(m) == "table" then
+		local function relogio()
+			subMerc.Text = string.format("● NOVOS ITENS EM %s", UiKit.upper(hm(campaignLeft(m.resetsAt))))
+		end
+		relogio()
+		vitTimer = relogio
+		for i, mi in (if type(m.items) == "table" then m.items else {}) :: { any } do
+			if i > 3 or type(mi) ~= "table" then
+				continue
+			end
+			local b = cartaoBotao(gMerc, string.format("Mercado_%d", i), V.BG)
+			b.LayoutOrder = i
+			local lado = math.floor(math.min((wEsq - 2 * P) / 3 - px(16, 20), blocoH - px(130, 170)))
+			local arte = ItemArte.desenha(b, mi.id, lado)
+			arte.AnchorPoint = Vector2.new(0.5, 0)
+			arte.Position = UDim2.new(0.5, 0, 0, px(8, 10))
+			local nm = UiKit.title(b, UiKit.upper(tostring(mi.name or mi.id)), px(15, 21))
+			nm.Position = UDim2.fromOffset(px(8, 10), lado + px(12, 16))
+			nm.Size = UDim2.new(1, -px(16, 20), 0, px(20, 28))
+			local pr = etiqueta(
+				b,
+				if mi.currency == "robux"
+					then string.format("R$ %d", tonumber(mi.price) or 0)
+					else Progression.money(tonumber(mi.price) or 0),
+				if mi.owned then V.OLIVE else V.AMBAR,
+				not mi.owned
+			)
+			if mi.owned then
+				pr.Text = "✔ SEU"
+			end
+			pr.AnchorPoint = Vector2.new(0, 1)
+			pr.Position = UDim2.new(0, px(8, 10), 1, -px(8, 10))
+			UiKit.bind(b, function()
+				setTab("mercado")
+			end)
+			n += 1
+			entra(b, n)
+		end
+	else
+		subMerc.Text = "O mercado abre quando o servidor mandar a lista do dia."
+		CampanhaCliente.refresh()
+	end
+	local gFixo = bloco(P * 2 + blocoH, "SEMPRE NA LOJA", "Conjuntos, kits e apoio")
+	local fixos = 0
+	for _, o in offers() do
+		if fixos >= 3 then
+			break
+		end
+		fixos += 1
+		local b = cartaoBotao(gFixo, string.format("Fixo_%s", o.key), V.BG)
+		b.LayoutOrder = fixos
+		local th = thumb(b, px(24, 34))
+		th.frame.Position = UDim2.fromOffset(px(6, 8), px(6, 8))
+		th.frame.Size = UDim2.new(1, -px(12, 16), 1, -px(70, 92))
+		paintThumb(th, o)
+		local nm = UiKit.title(b, UiKit.upper(o.name), px(14, 20))
+		nm.AnchorPoint = Vector2.new(0, 1)
+		nm.Position = UDim2.new(0, px(8, 10), 1, -px(36, 48))
+		nm.Size = UDim2.new(1, -px(16, 20), 0, px(20, 28))
+		local pr =
+			etiqueta(b, if o.owned then "✔ SEU" else "…", if o.owned then V.OLIVE else UiKit.PAGAR.robux.base)
+		pr.AnchorPoint = Vector2.new(0, 1)
+		pr.Position = UDim2.new(0, px(8, 10), 1, -px(8, 10))
+		if not o.owned then
+			priceText(o, function(t: string)
+				if pr.Parent then
+					pr.Text = t
+				end
+			end)
+		end
+		-- leva ao destaque (detalhes e o COMPRAR), logo abaixo da vitrine
+		UiKit.bind(b, function()
+			setHero(o)
+			UiKit.tween(panel, UiKit.SOFT, { CanvasPosition = Vector2.new(0, VH + px(16, 20)) })
+			if Input.isGamepad() then
+				GuiService.SelectedObject = hero.buy.button
+			end
+		end)
+		n += 1
+		entra(b, n)
+	end
+	-- ----- caixas (meio e direita) -----
+	local lista = caixasDaVitrine()
+	if not caixasEstado then
+		pedirCaixas()
+	end
+	local meio = Instance.new("Frame")
+	meio.Name = "Meio"
+	meio.BackgroundTransparency = 1
+	meio.Position = UDim2.fromOffset(wEsq + G, 0)
+	meio.Size = UDim2.fromOffset(wMeio, VH)
+	meio.Parent = vit
+	local dir = Instance.new("Frame")
+	dir.Name = "Direita"
+	dir.BackgroundTransparency = 1
+	dir.Position = UDim2.fromOffset(wEsq + wMeio + 2 * G, 0)
+	dir.Size = UDim2.fromOffset(wDir, VH)
+	dir.Parent = vit
+	local grandeH = math.floor((VH - G) / 2)
+	for i = 1, 2 do
+		local c = lista[i]
+		if not c then
+			break
+		end
+		local acento = ACENTO_CAIXA[c.id] or V.AMBAR
+		local b = cartaoBotao(meio, string.format("CaixaGrande_%s", c.id), acento:Lerp(V.BG, 0.82))
+		b.Position = UDim2.fromOffset(0, (i - 1) * (grandeH + G))
+		b.Size = UDim2.fromOffset(wMeio, grandeH)
+		UiKit.edge(b, acento, if i == 1 then 2 else 1, if i == 1 then 0.1 else 0.5)
+		local luz = Instance.new("UIGradient")
+		luz.Rotation = 115
+		luz.Color = ColorSequence.new(Color3.new(1, 1, 1), Color3.fromRGB(120, 120, 120))
+		luz.Parent = b
+		local arte = Instance.new("Frame")
+		arte.Name = "Arte"
+		arte.BackgroundTransparency = 1
+		arte.AnchorPoint = Vector2.new(1, 0.5)
+		arte.Position = UDim2.new(1, px(18, 24), 0.52, 0)
+		arte.Size = UDim2.fromOffset(math.floor(wMeio * 0.72), math.floor(wMeio * 0.72))
+		arte.Rotation = -5
+		arte.Parent = b
+		CaixaImagem.desenha(arte, c.id, c.modelo)
+		flutua(arte, px(5, 7))
+		local tags = Instance.new("Frame")
+		tags.BackgroundTransparency = 1
+		tags.Position = UDim2.fromOffset(px(14, 18), px(12, 16))
+		tags.Size = UDim2.new(1, -px(28, 36), 0, px(22, 30))
+		tags.Parent = b
+		UiKit.list(tags, true, px(6, 8))
+		local t1 = etiqueta(
+			tags,
+			if c.tipo == "paga" then "NA LOJA" elseif c.temporada then "TEMPORADA" else "GRÁTIS JOGANDO",
+			acento,
+			true
+		)
+		t1.LayoutOrder = 1
+		local feitos, total = coletados(c)
+		local t2 = etiqueta(tags, string.format("COLETADOS %d/%d", feitos, total), V.PANEL_3)
+		t2.LayoutOrder = 2
+		local nm = UiKit.title(b, UiKit.upper(c.nome), px(28, 38))
+		nm.Position = UDim2.fromOffset(px(14, 18), px(40, 54))
+		nm.Size = UDim2.new(0.62, 0, 0, px(70, 94))
+		nm.TextWrapped = true
+		nm.TextYAlignment = Enum.TextYAlignment.Top
+		nm.TextTruncate = Enum.TextTruncate.None
+		nm.ZIndex = 3 -- por cima da imagem da caixa
+		local txt, kind = acaoCaixa(c)
+		local a = UiKit.action(b, txt, kind, function()
+			irCaixa(c)
+		end, { h = px(40, 54) })
+		a.button.AnchorPoint = Vector2.new(0, 1)
+		a.button.Position = UDim2.new(0, px(14, 18), 1, -px(14, 18))
+		a.button.Size = UDim2.fromOffset(math.floor(wMeio * 0.52), px(40, 54))
+		a.button.Selectable = false
+		UiKit.bind(b, function()
+			irCaixa(c)
+		end)
+		n += 1
+		entra(b, n)
+	end
+	local linhaH = math.floor((VH - 3 * G) / 4)
+	for i = 1, 4 do
+		local c = lista[i + 2]
+		if not c then
+			break
+		end
+		local acento = ACENTO_CAIXA[c.id] or V.AMBAR
+		local b = cartaoBotao(dir, string.format("CaixaLinha_%s", c.id), acento:Lerp(V.BG, 0.88))
+		b.Position = UDim2.fromOffset(0, (i - 1) * (linhaH + G))
+		b.Size = UDim2.fromOffset(wDir, linhaH)
+		UiKit.edge(b, acento, 1, 0.55)
+		local arte = Instance.new("Frame")
+		arte.Name = "Arte"
+		arte.BackgroundTransparency = 1
+		arte.AnchorPoint = Vector2.new(1, 0.5)
+		arte.Position = UDim2.new(1, px(6, 8), 0.5, 0)
+		arte.Size = UDim2.fromOffset(linhaH + px(16, 20), linhaH + px(16, 20))
+		arte.Parent = b
+		CaixaImagem.desenha(arte, c.id, c.modelo)
+		flutua(arte, px(3, 4))
+		local tg = etiqueta(b, if c.tipo == "paga" then "NA LOJA" else "GRÁTIS JOGANDO", acento, true)
+		tg.Position = UDim2.fromOffset(px(12, 16), px(10, 14))
+		-- só o nome próprio ("CAMPANHA"): a etiqueta e a imagem já dizem que é uma caixa
+		local curto = string.gsub(tostring(c.nome), "^[Cc]aixa d[aeo]s? ", "")
+		local nm = UiKit.title(b, UiKit.upper(curto), px(19, 26))
+		nm.Position = UDim2.fromOffset(px(12, 16), px(36, 48))
+		nm.Size = UDim2.new(1, -linhaH - px(24, 30), 0, px(26, 34))
+		nm.ZIndex = 3
+		local feitos, total = coletados(c)
+		local col = UiKit.rotulo(b, 12, V.DIM, UiKit.F.TITLE_MED)
+		col.AnchorPoint = Vector2.new(0, 1)
+		col.Position = UDim2.new(0, px(12, 16), 1, -px(10, 14))
+		col.Size = UDim2.fromOffset(px(120, 160), px(16, 22))
+		col.Text = string.format("COLETADOS %d/%d", feitos, total)
+		local txt, kind = acaoCaixa(c)
+		local pr = etiqueta(
+			b,
+			txt,
+			if kind == "premio" then V.OLIVE elseif kind == "robux" then UiKit.PAGAR.robux.base else V.PANEL_3
+		)
+		pr.AnchorPoint = Vector2.new(0, 1)
+		pr.Position = UDim2.new(0, px(12, 16), 1, -px(30, 40))
+		UiKit.bind(b, function()
+			irCaixa(c)
+		end)
+		n += 1
+		entra(b, n)
+	end
+	if #lista == 0 then
+		local w = UiKit.rotulo(meio, 15, V.DIM, UiKit.BODY_FONT)
+		w.Size = UDim2.new(1, 0, 0, px(40, 54))
+		w.Text = "Buscando as caixas…"
+	end
+end
+-- o relógio do mercado na vitrine (1 vez por segundo, só com a vitrine na tela)
+task.spawn(function()
+	while true do
+		task.wait(1)
+		local f = vitTimer
+		if f and gui.Enabled and tab == "loja" then
+			f()
+		end
+	end
+end)
+
+-- ----- CONJUNTOS (D-212; a aba de conjuntos das referências): cartões altos com a arte dos itens,
+-- o que vem, o preço e o selo de exclusivo. Comprar abre a janela do Roblox (a confirmação dela);
+-- o servidor entrega (CaixaService.conjuntos).
+-- a nota do pé dos CONJUNTOS (só visual; a compra é uma vez por conta)
+local function add2Nota(p: ScrollingFrame)
+	local t = UiKit.rotulo(p, 13, V.DIM, UiKit.BODY_FONT)
+	t.LayoutOrder = 2
+	t.Size = UDim2.new(1, -28, 0, px(36, 48))
+	t.TextWrapped = true
+	t.Text = "Conjuntos só visuais, comprados uma vez por conta. Nenhum muda o combate."
+end
+local COR_CONJUNTO = {
+	Color3.fromRGB(46, 150, 140),
+	Color3.fromRGB(120, 140, 60),
+	Color3.fromRGB(180, 60, 44),
+	Color3.fromRGB(226, 166, 46),
+}
+local conjuntosPage = newPage("Conjuntos")
+pages.conjuntos = conjuntosPage
+-- posse do passe do conjunto (o Commerce_State só traz os passes do Commerce.Passes): perguntada ao
+-- Roblox uma vez por sessão
+local passeTem: { [string]: boolean } = {}
+local renderConjuntos: () -> ()
+local function confereConjunto(key: string, id: number)
+	if passeTem[key] ~= nil then
+		return
+	end
+	passeTem[key] = false
+	task.spawn(function()
+		local ok, tem = pcall(function()
+			return MarketplaceService:UserOwnsGamePassAsync(player.UserId, id)
+		end)
+		if ok and tem then
+			passeTem[key] = true
+			if gui.Enabled and tab == "conjuntos" then
+				renderConjuntos()
+			end
+		end
+	end)
+end
+function renderConjuntos()
+	local p = conjuntosPage
+	for _, c in p:GetChildren() do
+		if not (c:IsA("UIListLayout") or c:IsA("UIPadding")) then
+			c:Destroy()
+		end
+	end
+	local CH = px(600, 800)
+	local G = px(12, 16)
+	local W0 = W - 2 * px(10, 14) - 24 - px(8, 10)
+	local cw = math.floor((W0 - 3 * G) / 4)
+	local linha = Instance.new("Frame")
+	linha.Name = "Conjuntos"
+	linha.BackgroundTransparency = 1
+	linha.Size = UDim2.new(1, -24, 0, CH)
+	linha.LayoutOrder = 1
+	linha.Parent = p
+	UiKit.list(linha, true, G)
+	local porKey: { [string]: Offer } = {}
+	for _, o in offers() do
+		porKey[o.key] = o
+	end
+	for i, cj in Conjuntos.LISTA do
+		local cor = COR_CONJUNTO[i] or V.AMBAR
+		local f = Instance.new("Frame")
+		f.Name = cj.key
+		f.LayoutOrder = i
+		f.Size = UDim2.fromOffset(cw, CH)
+		f.BackgroundColor3 = cor:Lerp(V.BG, 0.78)
+		f.BorderSizePixel = 0
+		f.ClipsDescendants = true
+		f.Parent = linha
+		UiKit.corner(f, 4)
+		UiKit.edge(f, cor, 1, 0.35)
+		local luz = Instance.new("UIGradient")
+		luz.Rotation = 90
+		luz.Color = ColorSequence.new(Color3.new(1, 1, 1), Color3.fromRGB(90, 90, 90))
+		luz.Parent = f
+		local P = px(12, 16)
+		local tags = Instance.new("Frame")
+		tags.BackgroundTransparency = 1
+		tags.Position = UDim2.fromOffset(P, P)
+		tags.Size = UDim2.new(1, -2 * P, 0, px(22, 30))
+		tags.Parent = f
+		UiKit.list(tags, true, px(6, 8))
+		etiqueta(tags, "EXCLUSIVO", cor, true).LayoutOrder = 1
+		etiqueta(tags, string.format("%d ITENS", #cj.itens), V.PANEL_3).LayoutOrder = 2
+		-- a arte: os primeiros itens do conjunto, em leque
+		local arte = Instance.new("Frame")
+		arte.Name = "Arte"
+		arte.BackgroundTransparency = 1
+		arte.Position = UDim2.fromOffset(P, px(44, 58))
+		arte.Size = UDim2.new(1, -2 * P, 0, px(200, 266))
+		arte.Parent = f
+		local lado = math.floor(math.min(cw * 0.55, px(150, 200)))
+		for k = 1, math.min(3, #cj.itens) do
+			local box = ItemArte.desenha(arte, cj.itens[k], lado)
+			box.AnchorPoint = Vector2.new(0.5, 0.5)
+			box.Position =
+				UDim2.new(0.5, (k - 2) * math.floor(lado * 0.42), 0.5, if k == 2 then -px(8, 10) else px(10, 14))
+			box.Rotation = (k - 2) * 8
+			box.ZIndex = if k == 2 then 3 else 2
+			entra(box, k)
+		end
+		local nm = UiKit.title(f, UiKit.upper(cj.nome), px(24, 32))
+		nm.Position = UDim2.fromOffset(P, px(252, 336))
+		nm.Size = UDim2.new(1, -2 * P, 0, px(58, 78))
+		nm.TextWrapped = true
+		nm.TextTruncate = Enum.TextTruncate.None
+		nm.TextYAlignment = Enum.TextYAlignment.Top
+		-- o que vem
+		local itens = Instance.new("Frame")
+		itens.BackgroundTransparency = 1
+		itens.Position = UDim2.fromOffset(P, px(314, 418))
+		itens.Size = UDim2.new(1, -2 * P, 0, px(200, 266))
+		itens.Parent = f
+		UiKit.list(itens, false, px(2, 3))
+		for k, id in cj.itens do
+			if k > 8 then
+				break
+			end
+			local inf = ItemArte.info(id)
+			local l = UiKit.rotulo(itens, 13, V.TEXT, UiKit.BODY_FONT)
+			l.LayoutOrder = k
+			l.Size = UDim2.new(1, 0, 0, px(18, 24))
+			l.TextTruncate = Enum.TextTruncate.AtEnd
+			l.Text = string.format("• %s", tostring(inf and inf.nome or id))
+		end
+		-- os conjuntos não estão no Commerce.Passes: a oferta sai do ID do passe (Commerce.IDS)
+		local o: Offer? = porKey[cj.key]
+		local idPasse = tonumber((Commerce.IDS :: any)[cj.key]) or 0
+		if idPasse ~= 0 then
+			confereConjunto(cj.key, idPasse)
+		end
+		if not o and idPasse ~= 0 then
+			o = {
+				key = cj.key,
+				name = cj.nome,
+				desc = tostring(cj.desc or ""),
+				kind = "Conjunto",
+				id = idPasse,
+				infoType = Enum.InfoType.GamePass,
+				fmt = "COMPRAR · %s",
+				owned = state.passes[cj.key] == true or passeTem[cj.key] == true,
+				mark = "★",
+				accent = cor,
+				action = function()
+					Net.event("Commerce_Track"):FireServer("prompt", cj.key)
+					MarketplaceService:PromptGamePassPurchase(player, idPasse)
+				end,
+			}
+		end
+		if o and o.owned then
+			local t = etiqueta(f, "✔ SEU", V.OLIVE)
+			t.AnchorPoint = Vector2.new(0, 1)
+			t.Position = UDim2.new(0, P, 1, -P)
+		elseif o then
+			local oferta = o :: Offer
+			local a = UiKit.action(f, "…", "robux", function()
+				oferta.action()
+			end, { h = px(44, 60) })
+			a.button.Name = "Comprar"
+			a.button.AnchorPoint = Vector2.new(0, 1)
+			a.button.Position = UDim2.new(0, P, 1, -P)
+			a.button.Size = UDim2.new(1, -2 * P, 0, px(44, 60))
+			priceText(oferta, function(t: string)
+				if a.label.Parent then
+					a.label.Text = t
+				end
+			end)
+		else
+			local t = etiqueta(f, "EM BREVE", V.PANEL_3)
+			t.AnchorPoint = Vector2.new(0, 1)
+			t.Position = UDim2.new(0, P, 1, -P)
+		end
+		entra(f, i)
+	end
+	add2Nota(p)
+end
+
 -- linha do armário: um botão por item (● equipado, ○ não)
 local function lockerRow(key: string, text: string, on: boolean, onClick: () -> ())
 	order += 1
@@ -1213,7 +1844,7 @@ local function renderFoot()
 end
 
 -- o catálogo à venda agora (passes e produtos com ID, assinatura e Premium se ainda não tem)
-local function offers(): { Offer }
+function offers(): { Offer }
 	local out: { Offer } = {}
 	local function add(o: Offer)
 		table.insert(out, o)
@@ -1337,6 +1968,9 @@ local function render()
 		end
 	end
 	order = 0
+	-- D-212: a vitrine de três colunas no alto (as caixas vêm do servidor e redesenham quando chegam)
+	pintarVitrine()
+	pedirCaixas()
 	local list = offers()
 	-- destaque: o mesmo item se ainda está à venda; senão o primeiro da ordem de entrada sem dono
 	local keep: Offer? = nil
@@ -1412,7 +2046,7 @@ end
 -- ============================================================================================
 -- Sem pressão falsa: os tempos são os de verdade (virada do dia UTC, fim do reforço comprado, fim
 -- de semana), em texto neutro, sem vermelho piscando.
-local function hm(sec: number): string
+function hm(sec: number): string
 	local s = math.max(0, math.floor(sec))
 	local h, m = s // 3600, (s % 3600) // 60
 	if h >= 24 then
@@ -1685,7 +2319,7 @@ local function robuxItem(e: Entry, kind: string, mark: string, accent: Color3, o
 	}
 end
 
-local function campaignLeft(t: any): number
+function campaignLeft(t: any): number
 	return if type(t) == "number" then CampanhaCliente.left(t) else 0
 end
 
@@ -2173,12 +2807,17 @@ local function renderPage()
 		renderCodes()
 	elseif tab == "armario" then
 		renderArmario()
+	elseif tab == "conjuntos" then
+		renderConjuntos()
 	end
 end
 
 CampanhaCliente.Changed:Connect(function(_s: any, result: any)
 	if gui.Enabled then
 		renderPage()
+		if tab == "loja" then
+			pintarVitrine() -- o mercado do dia da vitrine
+		end
 	end
 	if type(result) == "table" and result.op == "code_redeem" then
 		codigo.fim(result.ok == true, if type(result.msg) == "string" then result.msg else nil)
@@ -2233,6 +2872,9 @@ setTab = function(id: string)
 	paintTabs()
 	if not gui.Enabled then
 		return
+	end
+	if id == "loja" then
+		pedirCaixas() -- D-212: as caixas da vitrine podem ter mudado (abertas, guardadas)
 	end
 	for pid, pg in pages do
 		pg.Visible = pid == id
@@ -2367,7 +3009,14 @@ for action, dir in { ui_tab_prev = -1, ui_tab_next = 1 } :: { [string]: number }
 	Input.on(action, "press", function()
 		if gui.Enabled and UiKit.top() == "loja" then
 			local i = tabIndex(tab) or 1
-			setTab(TABS[(i - 1 + dir) % #TABS + 1].id)
+			-- a próxima aba com botão (as ocultas ficam de fora do LB/RB)
+			for _ = 1, #TABS do
+				i = (i - 1 + dir) % #TABS + 1
+				if not TABS[i].oculta then
+					break
+				end
+			end
+			setTab(TABS[i].id)
 		end
 	end)
 end

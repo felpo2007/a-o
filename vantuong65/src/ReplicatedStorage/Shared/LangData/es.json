@@ -3575,5 +3575,22 @@
  "Vencer 10 partidas pelo VC.": "Ganar 10 partidas con el VC.",
  "Vermelho e ouro, como as lanternas de papel.": "Rojo y oro, como los farolillos de papel.",
  "Vila": "Aldea",
- "✓ ESCOLHIDA": "✓ ELEGIDA"
+ "✓ ESCOLHIDA": "✓ ELEGIDA",
+ "%d BILHETE%s": "%d BOLETO%s",
+ "%d ITENS": "%d OBJETOS",
+ "ABRIR · %d PRONTAS": "ABRIR · %d LISTAS",
+ "ABRIR · 1 PRONTA": "ABRIR · 1 LISTA",
+ "Buscando as caixas…": "Cargando las cajas…",
+ "COLETADOS %d/%d": "CONSEGUIDOS %d/%d",
+ "Conjuntos só visuais, comprados uma vez por conta. Nenhum muda o combate.": "Conjuntos solo visuales, comprados una vez por cuenta. Ninguno cambia el combate.",
+ "Conjuntos, kits e apoio": "Conjuntos, kits y apoyo",
+ "EXCLUSIVO": "EXCLUSIVO",
+ "Escolhidos para hoje": "Elegidos para hoy",
+ "GANHE JOGANDO": "GANA JUGANDO",
+ "GRÁTIS JOGANDO": "GRATIS JUGANDO",
+ "MERCADO DO DIA": "MERCADO DEL DÍA",
+ "NA LOJA": "EN LA TIENDA",
+ "SEMPRE NA LOJA": "SIEMPRE EN LA TIENDA",
+ "● NOVOS ITENS EM %s": "● OBJETOS NUEVOS EN %s",
+ "Conjunto": "Conjunto"
 }

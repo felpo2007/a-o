@@ -438,4 +438,18 @@ return {
 		dirt_floor_normal = 109768166470823,
 		dirt_floor_rugosidade = 75775835318235,
 	},
+	-- D-212: as imagens das caixas na loja (tools/blender/caixas_loja.py), DECAL; o servidor resolve o
+	-- ID da imagem ao abrir (Modules/ImagensUi, atributo "ImgCaixa_<id>")
+	CaixaLoja = {
+		gratuita = 134192297234663,
+		recruta = 78748910839225,
+		servico = 131523637893357,
+		batalhao = 83478169202776,
+		campanha = 110969816908884,
+		veterano = 137720071095005,
+		suprimentos = 97450509198770,
+		especiais = 75435684217314,
+		elite = 125172343200192,
+		historica = 75483690318723,
+	},
 }

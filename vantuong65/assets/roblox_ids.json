@@ -1321,5 +1321,15 @@
  "Sounds.kit_m70": "105660584933175",
  "Sounds.kit_mosin": "106243097354707",
  "Sounds.kit_win12": "127231119267197",
- "Sounds.kit_m79": "71952098902151"
+ "Sounds.kit_m79": "71952098902151",
+ "CaixaLoja.gratuita": "134192297234663",
+ "CaixaLoja.recruta": "78748910839225",
+ "CaixaLoja.servico": "131523637893357",
+ "CaixaLoja.batalhao": "83478169202776",
+ "CaixaLoja.campanha": "110969816908884",
+ "CaixaLoja.veterano": "137720071095005",
+ "CaixaLoja.suprimentos": "97450509198770",
+ "CaixaLoja.especiais": "75435684217314",
+ "CaixaLoja.elite": "125172343200192",
+ "CaixaLoja.historica": "75483690318723"
 }

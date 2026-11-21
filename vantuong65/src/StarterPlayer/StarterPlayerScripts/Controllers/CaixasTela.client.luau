@@ -31,6 +31,7 @@ local Net = require(ReplicatedStorage.Shared.Net)
 local Progression = require(ReplicatedStorage.Shared.Progression) :: any
 local Roleta = require(ReplicatedStorage.Shared.Roleta) :: any
 local Bus = require(script.Parent.Bus)
+local CaixaImagem = require(script.Parent.CaixaImagem)
 local Input = require(script.Parent.Input)
 local ItemArte = require(script.Parent.ItemArte)
 local Toast = require(script.Parent.Toast)
@@ -107,41 +108,7 @@ local function desenhaItem(parent: Instance, item: any, s: number): Frame
 	return ItemArte.desenha(parent, item, s)
 end
 
--- caixa 3D (cópia do servidor em ReplicatedStorage.VT65CaixasArte) num ViewportFrame
-local function viewport(parent: Instance, modelo: string, s: number): (ViewportFrame, Camera, Model?)
-	local vp = Instance.new("ViewportFrame")
-	vp.Size = UDim2.fromOffset(s, s)
-	vp.BackgroundTransparency = 1
-	vp.Ambient = Color3.fromRGB(150, 146, 130)
-	vp.LightColor = Color3.fromRGB(255, 240, 214)
-	vp.LightDirection = Vector3.new(-1, -1.4, -0.6)
-	vp.Parent = parent
-	local cam = Instance.new("Camera")
-	cam.FieldOfView = 30
-	cam.Parent = vp
-	vp.CurrentCamera = cam
-	local folder = ReplicatedStorage:FindFirstChild("VT65CaixasArte")
-	local src = folder and folder:FindFirstChild(modelo)
-	local m: Model
-	if src and src:IsA("Model") then
-		m = src:Clone()
-	else
-		-- sem a arte publicada: um caixote simples, para a tela nunca ficar vazia
-		m = Instance.new("Model")
-		local p = Instance.new("Part")
-		p.Size = Vector3.new(2.6, 1.6, 1.6)
-		p.Color = Color3.fromRGB(96, 92, 58)
-		p.Material = Enum.Material.WoodPlanks
-		p.Anchored = true
-		p.Parent = m
-		m.PrimaryPart = p
-	end
-	m.Parent = vp
-	local cf, size = m:GetBoundingBox()
-	local d = size.Magnitude * 1.7
-	cam.CFrame = CFrame.lookAt(cf.Position + Vector3.new(d * 0.55, d * 0.42, d * 0.72), cf.Position)
-	return vp, cam, m
-end
+-- (D-212: o caixote 3D de reserva foi para o Controllers/CaixaImagem, que mostra a imagem nova)
 
 -- ===== estado =====
 local function fetch(): any
@@ -222,6 +189,11 @@ Input.on("ui_back", "press", function()
 end)
 
 local refresh: () -> () = function() end
+-- D-212: a caixa clicada na vitrine da loja (o próximo desenho da lista vai até ela)
+local focoPendente: string? = nil
+Bus.on("caixa_foco", function(id: string)
+	focoPendente = id
+end)
 local abrirGratis: (c: any) -> () = function(_c: any) end
 local comprar: (c: any) -> () = function(_c: any) end
 
@@ -1194,11 +1166,15 @@ local function build()
 		end
 		order += 1
 		local card = frame(list, UDim2.new(1, -px(10, 14), 0, px(150, 200)), V.PANEL_2, 0)
+		card.Name = string.format("Caixa_%s", tostring(c.id))
 		card.LayoutOrder = order
 		UiKit.corner(card, 4)
 		UiKit.edge(card, V.LINE, 1, 0.4)
-		local vp = viewport(card, c.modelo or "caixa_municao_us", px(140, 186))
-		vp.Position = UDim2.fromOffset(px(6, 8), px(5, 7))
+		-- D-212: a imagem nova da caixa (Blender); o caixote 3D fica de reserva no CaixaImagem
+		local arte = frame(card, UDim2.fromOffset(px(140, 186), px(140, 186)))
+		arte.Name = "Arte"
+		arte.Position = UDim2.fromOffset(px(6, 8), px(5, 7))
+		CaixaImagem.desenha(arte, c.id, c.modelo or "caixa_municao_us")
 		local x = px(154, 204)
 		local nm = text(card, UiKit.upper(c.nome), px(19, 26), V.TEXT, F.TITLE)
 		nm.Position = UDim2.fromOffset(x, px(8, 10))
@@ -1255,6 +1231,22 @@ local function build()
 			local why = text(col, MOTIVO[c.bloqueio] or "Indisponível.", px(12, 16), V.DIM, F.BODY)
 			why.LayoutOrder = 2
 			why.Size = UDim2.new(1, 0, 0, px(44, 60))
+		end
+	end
+	-- D-212: a caixa escolhida na vitrine da loja: a lista desce até ela e a borda acende em âmbar
+	local foco = focoPendente
+	if foco then
+		focoPendente = nil
+		local alvo = list:FindFirstChild(string.format("Caixa_%s", foco))
+		if alvo and alvo:IsA("GuiObject") then
+			task.defer(function()
+				local y = alvo.AbsolutePosition.Y - list.AbsolutePosition.Y + list.CanvasPosition.Y
+				list.CanvasPosition = Vector2.new(0, math.max(0, y - px(8, 10)))
+				local st = alvo:FindFirstChildOfClass("UIStroke")
+				if st then
+					st.Color, st.Thickness, st.Transparency = V.AMBAR, 2, 0
+				end
+			end)
 		end
 	end
 	UiKit.focus(r)

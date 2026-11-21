@@ -1673,7 +1673,16 @@
   "SCC",
   "SCE",
   "SCP",
-  "SCR"
+  "SCR",
+  "CaixaGrande_%s",
+  "CaixaLinha_%s",
+  "Caixa_%s",
+  "Conjuntos",
+  "Fixo_%s",
+  "ImgCaixa_%s",
+  "Mercado_%d",
+  "^[Cc]aixa d[aeo]s?",
+  "^[Cc]aixa d[aeo]s? "
  ],
  "regex": [
   "^uni_[a-z_]+@[a-z0-9]+$"

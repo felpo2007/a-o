@@ -354,6 +354,13 @@ O `sourcemap.json` não vai para o Git.
 - Céu (D-69): `uv run python tools/fetch_sky.py` corta o HDRI em 6 faces (`assets/ceu/`). Os IDs de
   imagem vão no `Sky` do `default.project.json` (resolvidos no Studio, como os do chão). Para conferir
   orientação sem subir, copie as faces para `content\textures` do Studio e use `rbxasset://`.
+- Imagens das caixas (D-212): `tools/blender/caixas_loja.py -- todas` (CPU, `VT65_CPU=1`) gera
+  `assets/ui/caixas/<id>.png`. Caixa nova:
+  - ponha a receita em `CAIXAS` no script;
+  - ponha a entrada no `assets/upload_plan.json` (`CaixaLoja.<id>`) e suba com
+    `upload-assets CaixaLoja.`;
+  - ponha o ID em `AssetIds.CaixaLoja`. O servidor resolve a imagem (`ImgCaixa_<id>`) e o
+    `Controllers/CaixaImagem` desenha.
 - Imagens da loja (D-124): a imagem mostra só o que o item dá.
   1. `blender -b --factory-startup -P tools/blender/loja.py -- todas` (Blender 5.3 em
      `C:\Program Files\Blender Foundation`);
@@ -397,7 +404,7 @@ O `sourcemap.json` não vai para o Git.
 - Segredos só no `.env` (no `.gitignore`), nunca no código nem no chat.
 - ForgeGUI: nunca regenerar um job em `outcome_unknown`. "failed" com `retryable` pode ser
   retomado com `generation_retry`.
-- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-212) e atualize `PROGRESS.md`.
+- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-213) e atualize `PROGRESS.md`.
 - Tetos de triângulos por modelo: vegetação ≤ 6 mil (D-135), props e herói ≤ 20 mil (`ArtBudget`,
   conferido pelo teste da F5).
 - Commits no branch acima, com mensagem em português.

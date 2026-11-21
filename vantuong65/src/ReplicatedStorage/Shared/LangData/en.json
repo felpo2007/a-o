@@ -3581,5 +3581,22 @@
  "Vencer 10 partidas pelo VC.": "Win 10 matches as the VC.",
  "Vermelho e ouro, como as lanternas de papel.": "Red and gold, like paper lanterns.",
  "Vila": "Village",
- "✓ ESCOLHIDA": "✓ CHOSEN"
+ "✓ ESCOLHIDA": "✓ CHOSEN",
+ "%d BILHETE%s": "%d TICKET%s",
+ "%d ITENS": "%d ITEMS",
+ "ABRIR · %d PRONTAS": "OPEN · %d READY",
+ "ABRIR · 1 PRONTA": "OPEN · 1 READY",
+ "Buscando as caixas…": "Loading the crates…",
+ "COLETADOS %d/%d": "COLLECTED %d/%d",
+ "Conjuntos só visuais, comprados uma vez por conta. Nenhum muda o combate.": "Cosmetic-only bundles, bought once per account. None changes combat.",
+ "Conjuntos, kits e apoio": "Bundles, kits and support",
+ "EXCLUSIVO": "EXCLUSIVE",
+ "Escolhidos para hoje": "Picked for today",
+ "GANHE JOGANDO": "EARN BY PLAYING",
+ "GRÁTIS JOGANDO": "FREE BY PLAYING",
+ "MERCADO DO DIA": "DAILY MARKET",
+ "NA LOJA": "IN STORE",
+ "SEMPRE NA LOJA": "ALWAYS IN STORE",
+ "● NOVOS ITENS EM %s": "● NEW ITEMS IN %s",
+ "Conjunto": "Bundle"
 }

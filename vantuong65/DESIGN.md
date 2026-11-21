@@ -9297,3 +9297,84 @@ Também pede:
   D-207);
 - o perfil gravado e lido de novo numa sessão nova (a migração está no teste);
 - o jogo publicado.
+
+**Correção (lote 97):** o total do Lune deste lote é 840 ok, não 845. Somei de novo os 6 do
+`armario.luau`, que já estavam na conta.
+
+## D-212 — Lote 97: a loja na composição das referências, com as caixas em imagens novas (2026-11-20)
+
+**Pedido do dono:** "faça a loja do jogo igual da imagem, com o msm layout imagens brilhantes e
+realistas, utilize o blender se necessário, coloque as caixas para vender ali modifique as imagens
+das caixas, traga vida para a loja".
+
+**As referências** (fotos do jogo de boxe de 18/11, aba de destaques):
+- à esquerda, a vitrine que troca com o tempo e a fixa;
+- no meio, dois pacotes grandes com arte;
+- à direita, a lista dos outros com "coletados";
+- uma aba de conjuntos em cartões altos;
+- o lutador na luz à direita.
+
+**O que entrou:**
+- **Composição, com a identidade do STARLITE:** nomes, cores, textos e arte são nossos (a regra de
+  não copiar nome, interface e sons de outro jogo continua). A arrumação segue a referência, como o
+  dono pediu.
+- **As imagens das caixas** (`tools/blender/caixas_loja.py`, Cycles na CPU):
+  - as 10 caixas modeladas, cada uma com o corpo dela:
+    - madeira em tábuas e ripas, madeira pintada, baú de chapa ou laca vermelha;
+    - cantoneiras de aço ou latão, alças e cintas;
+    - o nome em estêncil e a estrela nas de patente;
+    - a luz da raridade saindo pela fresta da tampa e um halo atrás na cor da caixa;
+    - relevo fino de uso nos materiais;
+  - 768 × 768 com fundo transparente (`assets/ui/caixas`);
+  - subidas como Decal (`CaixaLoja.*`, `AssetIds.CaixaLoja`); o servidor resolve a imagem ao abrir
+    (`ImagensUi.caixas`, atributo `ImgCaixa_<id>`);
+  - `CaixaImagem` desenha a imagem; sem ela, o caixote 3D de antes. A aba CAIXAS usa a imagem nova.
+- **A vitrine dos DESTAQUES** (no alto, acima do destaque, que continua sendo o único lugar de comprar
+  os passes):
+  - **esquerda:**
+    - MERCADO DO DIA: 3 itens com a arte (ItemArte), o preço e "● NOVOS ITENS EM 22 H 18 MIN";
+    - SEMPRE NA LOJA: 3 itens fixos, que levam ao destaque.
+  - **meio:** duas caixas grandes, cada uma com:
+    - a imagem flutuando devagar;
+    - as etiquetas ("GRÁTIS JOGANDO", "COLETADOS 0/43");
+    - o botão "ABRIR · 2 PRONTAS" (ou "GANHE JOGANDO", o preço, os bilhetes).
+  - **direita:** mais 4 caixas em linhas, com o nome curto ("CAMPANHA"), "COLETADOS x/y" e a ação.
+  - **Vida:** os cartões entram subindo, um depois do outro, e as imagens flutuam. Com movimento
+    reduzido, nada mexe.
+  - **Ordem das caixas:** as pagas primeiro (quando à venda), depois as que dá para abrir agora.
+  - **O clique numa caixa** abre a aba CAIXAS parada nela, com a borda em âmbar. As probabilidades vêm
+    antes de abrir ou comprar, como manda a regra das caixas.
+- **Caixas pagas:** só aparecem para quem pode comprar agora (D-173). A venda segue desligada até o
+  dono reenviar o questionário de classificação (TODO_USUARIO, item 2). Quando ligar, elas entram
+  sozinhas na frente da vitrine.
+- **CONJUNTOS** (aba nova): os 4 conjuntos em cartões altos, cada um com:
+  - a cor do conjunto, "EXCLUSIVO" e "N ITENS";
+  - os primeiros itens em leque (ItemArte) e a lista do que vem;
+  - o preço do passe, ou "✔ SEU". A posse é perguntada ao Roblox, porque o `Commerce_State` só traz
+    os passes do Commerce.
+- **Abas:** DESTAQUES, CONJUNTOS, CAIXAS, ARMÁRIO, MERCADO, ARQUIVO, VANTAGENS e CÓDIGOS. A
+  INTENDÊNCIA ficou oculta: abre pelo ARSENAL do lobby e pelo atalho do ARMÁRIO, e o LB/RB pula.
+- **Textos novos (en, es, vi):** 17.
+
+**Conferido no Studio** (janela de 839 × 656):
+- **Imagens:** as 10 resolvidas pelo servidor (`ImgCaixa_*`).
+- **Vitrine:** as três colunas (`testes/lote97/destaques_vitrine.jpg`).
+- **Ajustes vistos no Studio** (`destaques_antes_do_ajuste.jpg`):
+  - os nomes da direita cortavam ("CAIXA DE...");
+  - a descrição das caixas grandes ficava embaixo da imagem.
+- **Clique na Caixa de Veterano:** a aba CAIXAS abriu nela, com a borda âmbar
+  (`caixas_veterano_em_foco.jpg`).
+- **CONJUNTOS:** os 4 cartões com "✔ SEU" (no Studio a conta do dono tem os passes). A captura não
+  foi guardada: a plaqueta desenha o nome da conta.
+- **Renders:** `caixas_blender_1.jpg` e `caixas_blender_2.jpg`, sobre o fundo escuro da loja.
+- **Erros:** 0 (cliente e servidor).
+
+**Testes:** `loja_vitrine.luau` (5).
+
+**Não testado:**
+- uma compra de verdade (nenhuma janela de compra foi aberta);
+- as caixas pagas na vitrine (a venda está desligada);
+- o controle percorrendo a vitrine, o celular, a TV e o jogo publicado.
+
+**Fica para o lote 98:** a animação da abertura das caixas e os efeitos da loja. Também o símbolo
+que falta no conjunto Fundador.
