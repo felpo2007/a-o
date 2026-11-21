@@ -124,6 +124,7 @@ local S = {
 	hoverPoint = nil :: string?, -- ponto de inserção sob o mouse (o nome aparece só nele)
 	prefer = nil :: string?, -- ponto pronto mais perto do objetivo do time (a carta de inserção abre nele)
 	preferShown = false, -- a vista já foi levada até ele nesta abertura
+	selected = nil :: string?, -- D-209: o destino escolhido (o GameUI manda; anel âmbar e nome sempre)
 	eventWidgets = {} :: { [string]: any }, -- raio dos eventos da partida, por nome do marcador
 	tunnelSig = "", -- túneis desenhados para (lado): refeitos só quando o lado muda
 	tunnelDest = {} :: { [string]: { string } }, -- boca -> bocas a que leva (do mais perto)
@@ -385,7 +386,7 @@ function CartaView.mount(parent: Frame, ts: (n: number) -> number, toLocal: (Vec
 		key.Visible = false
 		UiKit.pad(key, 10, 12, 6)
 		UiKit.list(key, true, 12)
-		local function item(order: number, color: Color3, text: string, name: string?, glyph: string?)
+		local function item(order: number, color: Color3, text: string, name: string?, glyph: string?, ring: boolean?)
 			local f = Instance.new("Frame")
 			f.Name = name or "Item"
 			f.BackgroundTransparency = 1
@@ -398,8 +399,15 @@ function CartaView.mount(parent: Frame, ts: (n: number) -> number, toLocal: (Vec
 			sw.BackgroundColor3 = color
 			sw.BorderSizePixel = 0
 			sw.LayoutOrder = 1
-			corner(sw, 3)
-			stroke(sw, V.BG, 1.5)
+			if ring then
+				-- D-209: o anel do destino escolhido, como na carta
+				sw.BackgroundTransparency = 1
+				corner(sw)
+				stroke(sw, color, 2.5)
+			else
+				corner(sw, 3)
+				stroke(sw, V.BG, 1.5)
+			end
 			sw.Parent = f
 			if glyph then
 				-- símbolo próprio (LZ) escrito na amostra, como no ponto da carta
@@ -413,6 +421,7 @@ function CartaView.mount(parent: Frame, ts: (n: number) -> number, toLocal: (Vec
 			t.LayoutOrder = 2
 			f.Parent = key
 		end
+		item(0, V.AMBAR, "ESCOLHIDO", "Escolhido", nil, true)
 		item(1, COR.pronto, "PRONTO")
 		item(2, COR.espera, "ESPERANDO")
 		item(3, COR.bloqueado, "BLOQUEADO")
@@ -882,6 +891,20 @@ end
 
 function CartaView.setCallbacks(onSpawn: (pt: any) -> (), onClick: (u: number, v: number) -> ())
 	S.onSpawn, S.onClick = onSpawn, onClick
+end
+
+-- D-209 (§8): o destino escolhido na carta de inserção (id do ponto; nil: nenhum). A carta, o painel
+-- e a faixa de baixo mostram o mesmo.
+function CartaView.setSelected(id: string?)
+	if S.selected ~= id then
+		S.selected = id
+		CartaView.drawPoints()
+	end
+end
+
+-- o ponto sugerido agora (pronto, mais perto do objetivo do time), para a escolha inicial
+function CartaView.preferido(): string?
+	return S.prefer
 end
 
 -- ===== dados =====
@@ -1580,24 +1603,38 @@ function CartaView.drawPoints()
 			corner(pin)
 			stroke(pin, V.BG, 1.5)
 			pin.Parent = layer
+			-- D-209: anel âmbar do destino escolhido (forma, além da cor: lê sem distinguir cores)
+			local ring = Instance.new("Frame")
+			ring.Name = "Escolhido"
+			ring.AnchorPoint = Vector2.new(0.5, 0.5)
+			ring.Position = UDim2.fromScale(u, v)
+			ring.Size = UDim2.fromOffset(24, 24)
+			ring.BackgroundTransparency = 1
+			ring.Visible = false
+			corner(ring)
+			stroke(ring, V.AMBAR, 3, 0)
+			pcall(function()
+				ring.Interactable = false
+			end)
+			ring.Parent = layer
 			local id = tostring(pt.id)
 			holder.Activated:Connect(function()
 				local w = S.spawnWidgets[id]
-				if ToqueUi.active() then
-					-- toque: só escolhe (o botão de inserir do GameUI mostra a espera e confirma)
-					if w and not S.dragged and spawnMode then
-						local pu, pv = uv(w.pt.x, w.pt.z)
-						S.touchPick = { id = "spawn:" .. id, x = pu, y = pv }
-						CartaView.drawPoints()
-						local cb = S.onTouch
-						if cb then
-							task.spawn(cb)
-						end
-					end
+				-- D-209: clique e toque só ESCOLHEM (o NASCER confirma); arrastar não escolhe nada
+				if not (w and not S.dragged and spawnMode) then
 					return
 				end
-				if w and not S.dragged and spawnMode and S.onSpawn then
+				if ToqueUi.active() then
+					local pu, pv = uv(w.pt.x, w.pt.z)
+					S.touchPick = { id = "spawn:" .. id, x = pu, y = pv }
+				end
+				if S.onSpawn then
 					S.onSpawn(w.pt) -- o ponto com a espera de agora (atualizado a cada segundo)
+				end
+				CartaView.drawPoints()
+				local cb = S.onTouch
+				if cb and ToqueUi.active() then
+					task.spawn(cb)
 				end
 			end)
 			holder.MouseEnter:Connect(function()
@@ -1610,8 +1647,16 @@ function CartaView.drawPoints()
 					CartaView.drawPoints()
 				end
 			end)
-			S.spawnWidgets[id] =
-				{ holder = holder, text = text, edge = edge, glyph = glyph, pin = pin, scale = nil, pt = pt }
+			S.spawnWidgets[id] = {
+				holder = holder,
+				text = text,
+				edge = edge,
+				glyph = glyph,
+				pin = pin,
+				ring = ring,
+				scale = nil,
+				pt = pt,
+			}
 		end
 	end
 	-- o ponto sugerido (pronto, mais perto do objetivo): a carta de inserção abre nele, uma vez por
@@ -1637,21 +1682,27 @@ function CartaView.drawPoints()
 				local u, v = uv(pt.x, pt.z)
 				w.holder.Position = UDim2.new(u, 0, v, -4)
 				w.pin.Position = UDim2.fromScale(u, v)
+				w.ring.Position = UDim2.fromScale(u, v)
 				w.text.Position = UDim2.new(u, S.ts(22), v, -4)
 			end
 			w.text.Text = pointText(pt, spawnMode)
 			w.text.TextColor3 = if spawnMode and pt.blocked then Color3.fromRGB(240, 150, 130) else V.TEXT
 			local id = tostring(pt.id)
-			-- em foco (ímã), sob o mouse ou, sem nenhum dos dois, o sugerido
-			local hot = (S.focused ~= nil and S.focused.id == "spawn:" .. id)
+			-- D-209: o escolhido (anel âmbar, nome sempre aberto) vale mais que o foco e o sugerido
+			local sel = spawnMode and S.selected == id
+			-- em foco (ímã), sob o mouse ou, sem nenhum dos dois e nada escolhido, o sugerido
+			local hot = sel
+				or (S.focused ~= nil and S.focused.id == "spawn:" .. id)
 				or S.hoverPoint == id
-				or (S.focused == nil and S.hoverPoint == nil and S.prefer == id)
-			w.edge.Color = if hot then V.BRASS else V.BG
+				or (S.selected == nil and S.focused == nil and S.hoverPoint == nil and S.prefer == id)
+			w.edge.Color = if sel then V.AMBAR elseif hot then V.BRASS else V.BG
 			w.edge.Thickness = if hot then 2.5 else 1.5
+			w.ring.Visible = sel
 			w.text.Visible = hot or S.zoom >= 2 or (spawnMode and squadMate(pt) ~= nil)
 			-- o em foco passa por cima dos vizinhos e das fichas
-			w.holder.ZIndex = if hot then 3 else 1
-			w.text.ZIndex = if hot then 4 else 2
+			w.holder.ZIndex = if sel then 5 elseif hot then 3 else 1
+			w.text.ZIndex = if sel then 6 elseif hot then 4 else 2
+			w.ring.ZIndex = if sel then 5 else 1
 			local c = stateColor(pt, spawnMode)
 			w.glyph.BackgroundColor3 = c
 			w.pin.BackgroundColor3 = c

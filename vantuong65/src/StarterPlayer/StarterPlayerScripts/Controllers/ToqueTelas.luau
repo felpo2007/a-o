@@ -6,7 +6,7 @@
 --   - toque x arrasto, pinça do mapa, ponto mais perto do dedo, 2º toque que confirma;
 --   - qual interação o botão contextual faz (prompt do mundo ou companheiro ferido);
 --   - onde a construção fica (a mesma conta do servidor) e as opções do seletor de tiro;
---   - o retângulo de tela cheia do mapa e o texto do botão de inserir.
+--   - o retângulo de tela cheia do mapa.
 local ToqueTelas = {}
 
 -- Mínimo de toque enquanto o Shared/Toque (T1) não existir: 48 px na escala da interface do Roblox
@@ -108,22 +108,8 @@ function ToqueTelas.fullRect(
 	return (sx - ox) / kk, (sy - oy) / kk, sw / kk, sh / kk
 end
 
--- Botão de inserir no toque: o texto grande, a linha de baixo e se está pronto.
-export type SpawnButton = { text: string, sub: string, ready: boolean }
-function ToqueTelas.spawnButton(pt: any): SpawnButton
-	if type(pt) ~= "table" then
-		return { text = "TOQUE NUM PONTO", sub = "", ready = false }
-	end
-	local name = if type(pt.name) == "string" then pt.name else ""
-	if pt.blocked then
-		return { text = "BLOQUEADO", sub = if type(pt.why) == "string" then pt.why else name, ready = false }
-	elseif type(pt.wait) == "number" and pt.wait > 0 then
-		return { text = string.format("ESPERA %d s", math.ceil(pt.wait)), sub = name, ready = false }
-	elseif pt.ready == false then
-		return { text = "ESPERE", sub = if type(pt.why) == "string" then pt.why else name, ready = false }
-	end
-	return { text = "INSERIR", sub = name, ready = true }
-end
+-- (D-209: o texto do botão de nascer no toque saiu daqui; é o mesmo painel do mouse e do controle,
+-- Shared/NascerPedido.painel)
 
 -- ===== 2º toque confirma =====
 -- 1º toque num item: mostra (devolve false e guarda); 2º toque no MESMO item a tempo: confirma.

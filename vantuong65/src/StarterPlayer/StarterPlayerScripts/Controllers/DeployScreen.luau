@@ -2007,7 +2007,7 @@ do
 		reveal(
 			iLines,
 			table.concat({
-				"Escolha na carta um ponto PRONTO.",
+				"Escolha o destino na carta e confirme no NASCER.",
 				-- toque: não há tecla (o botão PAPEL fica na carta)
 				if ToqueUi.active()
 					then "Trocar de papel: aba PAPEL (+15 s)"
@@ -2180,16 +2180,16 @@ do
 		if panel == "insert" and scene ~= "choose" then
 			if dev == "gamepad" then
 				actionChip("map_next", "map", "Próximo ponto")
-				actionChip("map_select", "map", "Inserir")
+				actionChip("map_select", "map", "Nascer")
 				actionChip("map_mark", "map", "Levar veículo")
 				actionChip("map_role", "map", "Trocar de papel")
 				actionChip("map_back", "map", "Voltar à mesa")
 			elseif dev == "touch" then
-				chip(nil, nil, "Toque", "no ponto de inserção")
+				chip(nil, nil, "Toque", "escolhe o destino")
 			else
-				chip(nil, nil, "Clique", "no ponto de inserção")
+				chip(nil, nil, "Clique", "escolhe o destino")
 				actionChip("map_next", "map", "Próximo ponto")
-				actionChip("map_select", "map", "Inserir")
+				actionChip("map_select", "map", "Nascer")
 				actionChip("map_back", "map", "Voltar à mesa")
 			end
 		elseif dev == "gamepad" then

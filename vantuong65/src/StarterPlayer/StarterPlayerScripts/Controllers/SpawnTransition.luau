@@ -599,9 +599,26 @@ local function streamAround(pos: Vector3, timeout: number)
 	end)
 end
 
+-- D-209 (§8): a recusa do servidor (Spawn_Result) chega com o motivo; a ordem para na hora, sem
+-- esperar o tempo do corpo
+local recusa: string? = nil
+task.spawn(function()
+	Net.event("Spawn_Result").OnClientEvent:Connect(function(r: any)
+		if busy and type(r) == "table" and r.ok == false then
+			recusa = if type(r.msg) == "string" and r.msg ~= "" then r.msg else "Inserção recusada pelo comando"
+		end
+	end)
+end)
+
+-- O pedido de nascer: o id do ponto, o pagamento (só no "inplace") e a rodada. O servidor recusa o de
+-- outra partida e escolhe o lugar de verdade (nada de coordenada do cliente).
+function SpawnTransition.pedir(id: string, method: string?)
+	Net.event("Spawn_Request"):FireServer(id, method, ReplicatedStorage:GetAttribute("VT65Rodada"))
+end
+
 local function newBody(old: Model?, timeout: number): (Model?, BasePart?)
 	local deadline = os.clock() + timeout
-	while os.clock() < deadline do
+	while os.clock() < deadline and recusa == nil do
 		local c = player.Character
 		if c and c ~= old then
 			local hum = c:FindFirstChildOfClass("Humanoid")
@@ -648,11 +665,14 @@ function SpawnTransition.go(pt: Point, fire: () -> ()): boolean
 		end)
 		streamAround(Vector3.new(pt.x, 30, pt.z), STREAM_POINT_S)
 		setStage("Área recebida. Pedindo a inserção ao comando…", 0.6)
-		-- 2. pede o spawn e espera o corpo novo
+		-- 2. pede o spawn e espera o corpo novo (ou a recusa com o motivo)
+		recusa = nil
 		fire()
 		local char, root = newBody(old, BODY_S)
 		if not (char and root) then
-			setStage("Inserção recusada pelo comando (o ponto mudou?). Escolha outro.", 0.6)
+			-- o motivo do servidor numa linha só (o Lang traduz a frase inteira)
+			setStage(recusa or "Inserção recusada pelo comando (o ponto mudou?). Escolha outro.", 0.6)
+			recusa = nil
 			stampDone("RECUSADA", V.RED)
 			busy = false
 			hide(1.6)

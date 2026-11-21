@@ -896,8 +896,31 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     - Lune 815 ok (56 arquivos), pytest 76, ruff, StyLua e luau-lsp limpos, i18n 100%. Relatório:
       `testes/LOTE93_D208_2026-11-20.md`.
     - **v126 publicada** (versão 131 do place, commit fe76a58).
-    - **Próximo (Prompt A):** o mapa de nascer, o HUD de infantaria e de veículo, morte e
-      resultados, celular e a verificação final.
+  - **Lote 94 (D-209): escolher onde nascer e confirmar no NASCER, feito.**
+    - **Escolher e confirmar:** clique, toque, LB/RB e o 1º A só escolhem; o NASCER (botão, A ou
+      Enter) confirma.
+    - **O destino nos três lugares:** o anel âmbar na carta, o painel embaixo à direita (tipo, nome,
+      estado com símbolo, motivo e NASCER) e a faixa de baixo.
+    - **Destino guardado** ao voltar e depois de morrer; partida nova limpa.
+    - **Alternativa:** com o escolhido bloqueado ou fora da carta, "► Pronto perto: <ponto>".
+    - **Servidor:**
+      - o pedido leva o id do ponto e a rodada (`SpawnTransition.pedir`);
+      - toda recusa responde no `Spawn_Result` com o motivo (12 códigos, `Shared/NascerPedido`);
+      - pedido repetido não tem resposta própria;
+      - a ordem de inserção mostra a recusa na hora (antes esperava 8 s).
+    - **Conferido no Studio:**
+      - a abertura no QG pronto;
+      - o ponto bloqueado com o motivo e a alternativa;
+      - as recusas por rodada, ponto e bloqueio;
+      - dois cliques no NASCER deram um nascer só;
+      - o destino guardado depois da morte;
+      - a recusa pela tela;
+      - 0 erros.
+    - **Não testado:** o controle de verdade, o celular, o 16:9 cheio e o jogo publicado.
+    - Lune 824 ok (57 arquivos), pytest 76, ruff, StyLua e luau-lsp limpos, i18n 100%. Relatório:
+      `testes/LOTE94_D209_2026-11-20.md`.
+    - **Próximo (Prompt A):** o HUD de infantaria e de veículo, morte e resultados, celular e a
+      verificação final. Do §8 ficam as abas de cima e os companheiros só aptos.
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;

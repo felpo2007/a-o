@@ -1289,7 +1289,7 @@ K.actions.here = function(kind: string)
 		-- renasce aqui sozinho (ProgressionService.onRespawnCredit -> SpawnService)
 		local at = os.clock()
 		S.buying, S.bought = at, false
-		Net.event("Spawn_Request"):FireServer("inplace", "robux")
+		SpawnTransition.pedir("inplace", "robux")
 		task.delay(Progression.INPLACE.buyTimeoutS, function()
 			if S.buying == at then
 				S.buying = nil
@@ -1301,7 +1301,7 @@ K.actions.here = function(kind: string)
 		end
 		local method = K.ciMethod
 		SpawnTransition.go({ id = "inplace", name = tostring(e.name), x = e.x, z = e.z }, function()
-			Net.event("Spawn_Request"):FireServer("inplace", method)
+			SpawnTransition.pedir("inplace", method)
 		end)
 	end
 	paintButtons()

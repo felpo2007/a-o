@@ -9033,3 +9033,105 @@ dependente do premium.
 - A tela 16:9 cheia, o controle, o celular e o jogo publicado.
 - **Fica para depois:** as ordens dentro do próprio passe (como numa aba), em vez de abrir a tela
   delas.
+
+## D-209 — Lote 94: escolher onde nascer e confirmar no NASCER (2026-11-20)
+
+**Pedido:** o §8 do prompt de interface:
+- "Selecionar um marcador deve destacar o ponto e atualizar o painel com nome, situação e motivo de
+  eventual bloqueio. Mapa, painel e resumo inferior devem refletir o mesmo destino selecionado.";
+- "O servidor recebe o identificador do ponto e da rodada, revalida a solicitação e escolhe a
+  posição real de nascimento. Durante o processamento, bloqueie confirmações duplicadas.";
+- o NASCER em destaque embaixo à direita, habilitado só com o ponto apto;
+- preservar o ponto ao voltar do equipamento;
+- oferecer alternativas quando o ponto perde a disponibilidade.
+
+**Antes:** o clique (ou o A) num ponto pronto já pedia o nascer. O servidor recusava em silêncio, e
+a ordem de inserção esperava 8 s pelo corpo para dizer "recusada (o ponto mudou?)".
+
+**O que mudou:**
+- **Escolher e confirmar são passos separados:**
+  - clique, toque, LB/RB (Q/E) e o 1º A num ponto só escolhem;
+  - o NASCER confirma: o botão, o A ou o Enter no escolhido;
+  - arrastar a carta não escolhe nada.
+- **Destino inicial e memória:**
+  - sem destino, a carta abre com o ponto sugerido escolhido (pronto, mais perto do objetivo do
+    time);
+  - o destino fica guardado ao voltar da mesa ou do equipamento e depois de morrer, enquanto o
+    ponto existir;
+  - partida nova (`VT65Rodada`) limpa o destino.
+- **O mesmo destino nos três lugares:**
+  - na carta, o anel âmbar em volta do ponto, com o nome sempre aberto (forma, além da cor). A
+    legenda curta ganhou "ESCOLHIDO";
+  - o painel no canto de baixo à direita da carta;
+  - a faixa de baixo: "Destino: <nome> · <situação>".
+- **O painel:**
+  - o tipo do ponto (QG do lado, reunião avançada, zona de pouso, boca de túnel, companheiro do
+    squad, onde você caiu...);
+  - o nome e a etiqueta do estado, com cor, símbolo e palavra: "● PRONTO", "⏳ AGUARDANDO",
+    "× BLOQUEADO", "… PEDIDO", "× FORA DA CARTA";
+  - o motivo (o `why` do servidor, "Libera em 12 s" ou a recusa por 6 s);
+  - o NASCER em âmbar.
+- **Alternativa:** com o escolhido bloqueado ou fora da carta, "► Pronto perto: <ponto>" escolhe o
+  pronto mais perto dele.
+- **No toque,** o botão grande usa o mesmo painel (`NascerPedido.painel`), no lugar do
+  `ToqueTelas.spawnButton`.
+- **O pedido leva a rodada:**
+  - todo nascer passa pelo `SpawnTransition.pedir(id, pagamento)`, que manda
+    `Spawn_Request(id, pagamento, VT65Rodada)`: a carta, o jogar agora e o renascer onde caiu;
+  - o cliente nunca manda coordenada.
+- **O servidor confere tudo e responde no `Spawn_Result` novo:**
+  - `{ id, ok = true }` ao nascer;
+  - `{ id, ok = false, cod, msg }` na recusa. Os códigos (`Shared/NascerPedido.MOTIVO`): rodada,
+    fim, sem_lado, em_campo, terreno, papel, ponto (saiu da carta; companheiro caiu ou saiu),
+    espera, bloqueado (com o motivo do ponto), sem_lugar, pagamento e falhou;
+  - o `mateSpawn` e o `inPlace` passaram a devolver o motivo;
+  - um pedido repetido enquanto o primeiro corre (`inf.busy`) não tem resposta própria.
+- **Pedido duplicado:** o cliente trava o NASCER ("NASCENDO…") até a resposta, o corpo novo ou 12 s
+  (`NascerPedido.ESPERA_S`).
+- **Recusa na hora:** a `SpawnTransition` para ao receber a recusa. Ela escreve o motivo na ordem e
+  carimba RECUSADA, sem esperar os 8 s do corpo.
+- **Textos novos (en, es, vi):** 41.
+
+**Conferido no Studio** (janela de 839 × 656, dois places do pipeline):
+- **Abertura:** pelo JOGAR, a carta abriu com o QG escolhido: "● PRONTO", NASCER em âmbar, "Destino:
+  QG · Pronto para nascer" (`testes/lote94/carta_qg_escolhido.jpg`).
+- **Ponto bloqueado:** o clique na reunião avançada a escolheu; o servidor a bloqueava na contagem.
+  - O painel mostrou "× BLOQUEADO" com "Na contagem, todos nascem na base", o botão "BLOQUEADO" e
+    "► Pronto perto: QG" (`ponto_bloqueado_alternativa.jpg`).
+  - O clique no NASCER bloqueado não mandou pedido.
+  - A alternativa voltou o destino ao QG.
+- **Recusas pelo remote, todas com resposta e motivo:**
+  - rodada errada (8) e sem rodada → `rodada`;
+  - ponto que não existe → `ponto`;
+  - `lz:1` na contagem → `bloqueado`, "Na contagem, todos nascem na base".
+- **Nascer:** dois cliques no NASCER com 0,12 s de intervalo deram uma resposta só
+  (`{"id":"hq","ok":true}`); o soldado nasceu no QG (`transicao_em_campo.jpg`).
+- **Destino guardado:** depois de morrer, o ESCOLHER OUTRO PONTO da baixa abriu a carta com o QG
+  ainda escolhido.
+- **Recusa pela tela:** com a rodada trocada só no cliente (99), o destino foi limpo e voltou o
+  sugerido. O NASCER saiu com a rodada errada; a ordem marcou RECUSADA na hora, com "A partida mudou:
+  escolha o ponto de novo" (`recusa_rodada.jpg`).
+- **Ajustes vistos no Studio:**
+  - o "◷" saía como um quadrado no Arimo: virou "⏳" e "…";
+  - o painel de 560 × 96 tapava o rótulo do objetivo D: ficou com 470 × 88
+    (`painel_antes_de_compactar.jpg`).
+- **Erros:** 0 no Output (cliente e servidor), fora os avisos de TexturePack (429) do Studio.
+
+**Testes:**
+- `nascer.luau` (10): estados, painel, pedido em curso, tipos, alternativa, motivos, o handler do
+  servidor (a rodada antes de tudo, cada recusa responde), todo pedido com a rodada e a carta.
+- `toque_telas` e `jogaragora` seguem o caminho novo.
+
+**Não testado:**
+- **Controle de verdade:** o LB/RB, o A e o Enter (o teclado do MCP não chega com o Studio atrás).
+  A lógica está nos testes de fonte.
+- **Telas e partidas:** o celular, a tela 16:9 cheia, o jogo publicado e a troca de partida de
+  verdade (só a rodada trocada no cliente).
+- **Renascer onde caiu:** pago com créditos ou Robux, nesta versão (não comprado).
+
+**Fica para depois (§8, outros lotes):**
+- as abas Nascimento, Equipamento, Aparência e Perfil;
+- mostrar só os companheiros aptos: hoje aparecem todos, com o motivo, e os do QG tapam o símbolo
+  do QG;
+- agrupar os pontos vizinhos;
+- arrastar a carta no controle sem o cursor.

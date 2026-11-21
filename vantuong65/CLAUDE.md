@@ -116,7 +116,8 @@ O `sourcemap.json` não vai para o Git.
     `[VT65 TESTE]` aparecem no Output. "Deitado" e "pá" pedem o jogador em campo pelos EUA: do
     lado do cliente, dispare `VT65Remotes.Team_Choose("US")`,
     `Squad_Action({op="create", unit="infantry"})`, `Role_Choose("rifleman")` e
-    `Spawn_Request("hq")`. Deixe os bots ligados (sem `BotFill` 0): 5 testes dependem deles
+    `Spawn_Request("hq", nil, ReplicatedStorage:GetAttribute("VT65Rodada"))` (D-209: sem a rodada o
+    servidor recusa; a resposta chega no `Spawn_Result`). Deixe os bots ligados (sem `BotFill` 0): 5 testes dependem deles
     (D-158). Leva ~2 min; um pedido feito enquanto ele roda não é atendido;
   - `workspace:SetAttribute("VT65DevMode", "Offensive")`: troca o modo (Warfare, Offensive ou
     Skirmish);
@@ -155,6 +156,14 @@ O `sourcemap.json` não vai para o Git.
     painel da loja (com escala) não chegou aos botões das páginas que rolam; os das abas chegam.
     As abas têm o nome do id (`loja`, `codigos`...), dentro de um quadro sem nome único: dê um nome
     antes de clicar.
+  - Carta de nascer (D-209, do lado do CLIENTE):
+    - o painel fica em `VT65Menus.Stage.Carta.Nascer` (`BotaoNascer`, `Alternativa`, `Nome`,
+      `Estado`, `Motivo`);
+    - os pontos são os `Ponto` de `Carta.Folha.pontos` (o símbolo no TextLabel filho): dê nome único
+      antes de clicar;
+    - para ver as recusas, ouça o `Spawn_Result` no cliente;
+    - na 1ª vez de um perfil, a escolha de idioma (`VT65Idioma.EscolhaDeIdioma.Cartao.pt`) abre por
+      cima da carta.
   - D-191/D-190 (só Studio): `VT65DevGranada = "6"` lança uma granada a 6 m/s do primeiro
     jogador; `VT65DevTela = "3p"` liga a 3ª pessoa (o teclado do MCP não chega com o Studio
     atrás); `VT65DevTela = "roda_equip:<n>"` abre a roda de equipamento com a ficha n;
@@ -378,7 +387,7 @@ O `sourcemap.json` não vai para o Git.
 - Segredos só no `.env` (no `.gitignore`), nunca no código nem no chat.
 - ForgeGUI: nunca regenerar um job em `outcome_unknown`. "failed" com `retryable` pode ser
   retomado com `generation_retry`.
-- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-209) e atualize `PROGRESS.md`.
+- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-210) e atualize `PROGRESS.md`.
 - Tetos de triângulos por modelo: vegetação ≤ 6 mil (D-135), props e herói ≤ 20 mil (`ArtBudget`,
   conferido pelo teste da F5).
 - Commits no branch acima, com mensagem em português.

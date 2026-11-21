@@ -21,6 +21,7 @@ local Front = require(ReplicatedStorage.Shared.Front)
 local Geometry = require(ReplicatedStorage.Shared.Geometry)
 local JogarAgora = require(ReplicatedStorage.Shared.JogarAgora)
 local MapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any
+local NascerPedido = require(ReplicatedStorage.Shared.NascerPedido)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Progression = require(ReplicatedStorage.Shared.Progression)
 local Roles = require(ReplicatedStorage.Shared.Roles)
@@ -586,22 +587,28 @@ local function mateSpot(m: Mate, enemies: { number }): CFrame?
 	return nil
 end
 
-local function mateSpawn(player: Player, faction: string, pointId: string)
+-- Nascer no companheiro. Devolve nil se nasceu (ou tentou) ou o código da recusa e o motivo
+-- (NascerPedido.MOTIVO; D-209).
+local function mateSpawn(player: Player, faction: string, pointId: string): (string?, string?)
 	local inf = info[player]
 	if not inf or inf.busy then
-		return
+		return "falhou", nil
 	end
 	local now = os.clock()
 	local enemies = enemiesMeters(faction)
 	for _, m in squadMates(player) do
 		if m.id == pointId then
-			if waitFor(player, "squad", now) > 0 or mateWhy(m, enemies, now) then
-				return
+			if waitFor(player, "squad", now) > 0 then
+				return "espera", nil
+			end
+			local why = mateWhy(m, enemies, now)
+			if why then
+				return "bloqueado", why
 			end
 			local at = mateSpot(m, enemies)
 			if not at then
 				noRoom[m.model] = now
-				return
+				return "sem_lugar", nil
 			end
 			-- o cliente recebe o chão em volta antes do corpo (streaming: o lugar pode estar longe)
 			inf.busy = true
@@ -610,13 +617,18 @@ local function mateSpawn(player: Player, faction: string, pointId: string)
 			end)
 			inf.busy = false
 			-- até 2 s se passaram: ele pode ter caído ou entrado em combate
-			if info[player] ~= inf or alive(player) or mateWhy(m, enemiesMeters(faction), os.clock()) then
-				return
+			if info[player] ~= inf or alive(player) then
+				return "em_campo", nil
+			end
+			why = mateWhy(m, enemiesMeters(faction), os.clock())
+			if why then
+				return "bloqueado", why
 			end
 			spawnAt(player, faction, at.X, at.Z, at, pointId)
-			return
+			return nil, nil
 		end
 	end
+	return "ponto", nil -- o companheiro caiu, saiu do squad ou do jogo
 end
 
 -- pontos dos companheiros para a carta de inserção (mesmo formato dos outros pontos)
@@ -728,16 +740,24 @@ local function payLabel(player: Player): (string?, string)
 end
 
 -- Tenta o renascer onde caiu. method: "credit" | "ci" | "robux" | nil (automático).
-local function inPlace(player: Player, method: string?)
+-- Devolve nil se nasceu (ou tentou), "compra" com a compra em Robux aberta, ou o código da recusa e o
+-- motivo (NascerPedido.MOTIVO; D-209).
+local function inPlace(player: Player, method: string?): (string?, string?)
 	local faction = player:GetAttribute("Faction") :: string?
 	local inf = info[player]
-	if not faction or not inf or alive(player) then
-		return
+	if not faction or not inf then
+		return "sem_lado", nil
+	elseif alive(player) then
+		return "em_campo", nil
 	end
 	local now = os.clock()
 	local why, wait, pos = inPlaceStatus(player, now)
-	if why or wait > 0 or not pos then
-		return
+	if why then
+		return "bloqueado", why
+	elseif wait > 0 then
+		return "espera", nil
+	elseif not pos then
+		return "ponto", nil
 	end
 	local prof = PlayerData.get(player)
 	local credits = if prof then prof.credits else 0
@@ -747,11 +767,11 @@ local function inPlace(player: Player, method: string?)
 		m = Progression.inPlaceAuto(inf.inplaceUses, credits, rc, productOn())
 	end
 	if not m then
-		return
+		return "pagamento", nil
 	end
 	local ok, _, price = Progression.inPlacePay(m, inf.inplaceUses, credits, rc, productOn())
 	if not ok then
-		return
+		return "pagamento", nil
 	end
 	if m == "robux" then
 		-- abre a compra; o recibo vira um renascer guardado e volta aqui (onRespawnCredit)
@@ -759,16 +779,17 @@ local function inPlace(player: Player, method: string?)
 		pcall(function()
 			MarketplaceService:PromptProductPurchase(player, Commerce.IDS.PRODUCT_RESPAWN_INPLACE)
 		end)
-		return
+		return "compra", nil
 	end
 	local paid = if m == "credit"
 		then ProgressionService.useRespawnCredit(player)
 		else ProgressionService.spendCredits(player, price or math.huge)
 	if not paid then
-		return
+		return "pagamento", nil
 	end
 	inf.inplaceUses += 1
 	spawnAt(player, faction, pos.X, pos.Z)
+	return nil, nil
 end
 
 -- Pontos de quem espera, como vão no Spawn_State. Campos de cada ponto: id, name, kind, x, z
@@ -914,38 +935,70 @@ function SpawnService.start()
 		end
 	end)
 
-	Net.event("Spawn_Request").OnServerEvent:Connect(function(player, pointId, method)
+	-- D-209 (§8): o pedido traz o id do ponto e a rodada; o servidor confere tudo de novo, escolhe o
+	-- lugar de verdade e responde no Spawn_Result: { id, ok = true } ao nascer ou
+	-- { id, ok = false, cod, msg } com o motivo (NascerPedido.MOTIVO). Um pedido repetido enquanto o
+	-- primeiro corre não tem resposta própria: a do primeiro basta (o cliente também bloqueia).
+	Net.event("Spawn_Request").OnServerEvent:Connect(function(player, pointId, method, rodada)
+		local id = if type(pointId) == "string" then string.sub(pointId, 1, 64) else "?"
+		local function responde(cod: string?, why: string?)
+			if cod == "compra" then
+				return -- a compra em Robux abriu; o recibo faz o resto (onRespawnCredit)
+			elseif cod == nil and alive(player) then
+				Net.event("Spawn_Result"):FireClient(player, { id = id, ok = true })
+				return
+			end
+			local c = cod or "falhou"
+			Net.event("Spawn_Result")
+				:FireClient(player, { id = id, ok = false, cod = c, msg = NascerPedido.motivo(c, why) })
+		end
 		if MatchService.ended then
-			return -- D-193: entre o fim e a partida nova (pódio, votação, restauração) ninguém nasce
+			responde("fim") -- D-193: entre o fim e a partida nova (pódio, votação, restauração) ninguém nasce
+			return
 		end
 		if pointId == "quick" then
 			quickPlay(player, method) -- jogar agora: lado, squad e papel podem faltar ainda
 			return
 		end
-		local faction = player:GetAttribute("Faction") :: string?
-		if type(pointId) ~= "string" or not faction or not player:GetAttribute("Role") or alive(player) then
+		if rodada ~= MatchService.rodada then
+			responde("rodada") -- pedido feito na partida anterior (ou sem a rodada)
 			return
 		end
+		local faction = player:GetAttribute("Faction") :: string?
+		if type(pointId) ~= "string" or not faction or not player:GetAttribute("Role") or alive(player) then
+			responde(if alive(player) then "em_campo" else "sem_lado")
+			return
+		end
+		local inf = info[player]
+		if not inf or inf.busy then
+			return -- pedido repetido: o primeiro ainda corre
+		end
 		if ReplicatedStorage:GetAttribute("TerrainReady") == false then
-			return -- terreno ainda sendo gerado
+			responde("terreno") -- terreno ainda sendo gerado
+			return
 		end
 		local role = tostring(player:GetAttribute("Role"))
 		if ProgressionService.rank(player) < Roles.minRank(role) then
-			return -- papel acima do posto (o lobby mostra o cadeado)
+			responde("papel") -- papel acima do posto (o lobby mostra o cadeado)
+			return
 		end
 		if pointId == "inplace" then
-			inPlace(player, if type(method) == "string" then method else nil)
+			responde(inPlace(player, if type(method) == "string" then method else nil))
 			return
 		end
 		if string.sub(pointId, 1, 5) == "mate:" then
-			mateSpawn(player, faction, pointId)
+			responde(mateSpawn(player, faction, pointId))
 			return
 		end
 		local now = os.clock()
 		for _, pt in SpawnService.points(faction) do
 			if pt.id == pointId and visibleTo(pt, player) then
-				local wait, blocked = status(player, pt, now)
-				if wait > 0 or blocked then
+				local wait, blocked, why = status(player, pt, now)
+				if blocked then
+					responde("bloqueado", why)
+					return
+				elseif wait > 0 then
+					responde("espera")
 					return
 				end
 				local sx, sz = pt.x, pt.z
@@ -953,9 +1006,11 @@ function SpawnService.start()
 					sx, sz = SpawnService.hqSpot(faction, sx, sz)
 				end
 				spawnAt(player, faction, sx, sz, nil, pt.id)
+				responde(nil)
 				return
 			end
 		end
+		responde("ponto") -- o ponto saiu da carta (setor tomado, reunião desfeita, túnel fechado)
 	end)
 
 	-- estado dos pontos para quem está esperando (uma vez por segundo; campos em stateFor)

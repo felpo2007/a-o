@@ -14,8 +14,9 @@ Net.Events = {
 	"Team_Choose", -- c->s: "US" | "VC"
 	"Squad_Action", -- c->s: { op = "create"|"join"|"leave", ... }
 	"Role_Choose", -- c->s: roleId
-	"Spawn_Request", -- c->s: spawnPointId (e, para "inplace", o pagamento: "ci" | "credit")
+	"Spawn_Request", -- c->s: spawnPointId, o pagamento ("inplace": "ci" | "credit") e a rodada (D-209)
 	"Spawn_State", -- s->c: pontos e esperas
+	"Spawn_Result", -- s->c { id, ok, cod?, msg? }: D-209, nasceu ou o motivo da recusa
 	"Combat_Fire", -- c->s: tiro (origem, direção, t, semente)
 	"Combat_Reload", -- c->s: recarregar
 	"Combat_Ammo", -- s->c: munição autoritativa (o acerto vai no Combat_Confirm, D-107)

@@ -95,18 +95,7 @@ test("carta em tela cheia: o retângulo de projeto cobre a tela toda (abaixo da 
 	assert(x < 0 and w > 1280, "o celular é mais largo que 16:9: a carta passa do palco dos lados")
 end)
 
-test("botão de inserir: espera escrita até ficar pronto; bloqueado diz o motivo", function()
-	local none = ToqueTelas.spawnButton(nil)
-	assert(none.text == "TOQUE NUM PONTO" and not none.ready)
-	local w = ToqueTelas.spawnButton({ name = "LZ Norte", wait = 11.2 })
-	assert(w.text == "ESPERA 12 s" and w.sub == "LZ Norte" and not w.ready, w.text)
-	local b = ToqueTelas.spawnButton({ name = "Vila", blocked = true, why = "inimigo perto" })
-	assert(b.text == "BLOQUEADO" and b.sub == "inimigo perto" and not b.ready)
-	local e = ToqueTelas.spawnButton({ name = "Squad", ready = false, why = "companheiro em combate" })
-	assert(e.text == "ESPERE" and e.sub == "companheiro em combate" and not e.ready)
-	local r = ToqueTelas.spawnButton({ name = "QG", wait = 0 })
-	assert(r.text == "INSERIR" and r.sub == "QG" and r.ready)
-end)
+-- (D-209: o botão de nascer do toque usa o painel do Shared/NascerPedido: tests/luau/nascer.luau)
 
 -- ===== 2º toque confirma =====
 test("2º toque: o 1º mostra, o 2º no mesmo item confirma; outro item ou tempo esgotado recomeça", function()
@@ -400,11 +389,11 @@ test("mapa no toque: pinça, arrasto, toque escolhe, inserir com a espera e o al
 	assert(string.find(cv, "UserInputType.Touch then\n\t\t\ttouchMoved", 1, true), "arrasto e pinça no InputChanged")
 	assert(string.find(cv, "ToqueTelas.pinch", 1, true) and string.find(cv, "ToqueTelas.nearest", 1, true))
 	local ui = src("GameUI.client.luau")
-	for _, t in { '"CONFIRMAR ALVO"', "ToqueTelas.spawnButton", "ToqueTelas.fullRect", '"VT65SemIma"' } do
+	for _, t in { '"CONFIRMAR ALVO"', "T.confirm.Text = p.botao", "ToqueTelas.fullRect", '"VT65SemIma"' } do
 		assert(string.find(ui, t, 1, true), t)
 	end
-	-- no toque, tocar no ponto não insere direto (só escolhe)
-	assert(string.find(cv, "toque: só escolhe", 1, true))
+	-- no toque, tocar no ponto não insere direto (só escolhe; D-209: o clique também)
+	assert(string.find(cv, "clique e toque só ESCOLHEM", 1, true))
 end)
 
 test("comandante e construção: nada de digitar no toque; obra passa pela prévia", function()

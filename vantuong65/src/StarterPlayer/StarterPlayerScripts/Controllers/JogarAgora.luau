@@ -254,7 +254,7 @@ local function go(e: any)
 			end
 			task.wait(0.1)
 		end
-		Net.event("Spawn_Request"):FireServer(id)
+		SpawnTransition.pedir(id) -- D-209: com a rodada
 	end)
 	if not started then
 		S.phase = "waiting" -- outra inserção em curso: tenta no próximo passo

@@ -221,7 +221,7 @@ test("cliente: conta a espera, entra pela transição e cancela pelo voltar", fu
 	local ja = fs.readFile(C .. "JogarAgora.luau")
 	assert(string.find(ja, 'FireServer("quick", { n = S.n, v = S.vehicle })', 1, true))
 	assert(string.find(ja, "SpawnTransition.go(", 1, true), "a mesma transição")
-	assert(string.find(ja, 'Net.event("Spawn_Request"):FireServer(id)', 1, true), "o ponto pedido normal")
+	assert(string.find(ja, "SpawnTransition.pedir(id)", 1, true), "o ponto pedido normal (com a rodada, D-209)")
 	assert(string.find(ja, "Regras.waitLeft(cur, age()) <= 0", 1, true), "só pede com a espera zerada")
 	local ui = fs.readFile(C .. "GameUI.client.luau")
 	local _, n = string.gsub(ui, "JogarAgora%.cancel%(%)", "")

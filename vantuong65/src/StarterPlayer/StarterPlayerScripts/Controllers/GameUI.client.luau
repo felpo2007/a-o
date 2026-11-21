@@ -14,8 +14,8 @@
 -- Modos: "spawn" (morto), "view" (aberto em jogo) e "target" (comandante escolhendo o alvo).
 -- Tudo fica num "palco" de projeto de 1280 x 720 que escala para caber na tela (UIScale).
 -- Toque (Parte 13): a carta ocupa a tela inteira; um dedo arrasta, a pinça dá zoom (CartaView);
--- tocar escolhe o ponto (raio do dedo) e o botão grande de baixo insere, com a espera escrita
--- ("ESPERA 12 s" até ficar "INSERIR"); no alvo do comandante, tocar põe a mira e "CONFIRMAR ALVO"
+-- tocar escolhe o ponto (raio do dedo) e o botão grande de baixo nasce, com a espera escrita
+-- ("ESPERA 12 s" até ficar "NASCER", D-209); no alvo do comandante, tocar põe a mira e "CONFIRMAR ALVO"
 -- manda; ✕ / ◄ MESA fecham; + e − dão zoom; ◎ volta para você. Botões no tamanho de toque
 -- (ToqueUi.minPx), numa tela própria sem escala (VT65CartaToque).
 local GuiService = game:GetService("GuiService")
@@ -23,10 +23,12 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
+local Acabamento = require(game:GetService("ReplicatedFirst"):WaitForChild("Acabamento"))
 local Carta = require(ReplicatedStorage.Shared.Carta)
 local Front = require(ReplicatedStorage.Shared.Front)
 local InputMap = require(ReplicatedStorage.Shared.InputMap)
 local MapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any
+local NascerPedido = require(ReplicatedStorage.Shared.NascerPedido)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Bus = require(script.Parent.Bus)
 local CartaView = require(script.Parent.CartaView)
@@ -206,31 +208,227 @@ local function spawnById(id: string): any
 	return nil
 end
 
-local function spawnText(pt: any): string
-	-- lista "nome · estado": o estado é frase ou modelo inteiro (o Lang traduz item a item)
-	if pt.blocked then
-		return string.format("%s · %s", pt.name, pt.why or "bloqueado")
-	elseif (pt.wait or 0) > 0 then
-		return string.format("%s · espera %d s", pt.name, pt.wait)
-	elseif pt.ready == false then
-		return string.format("%s · %s", pt.name, pt.why or "espere")
+-- ===== D-209 (§8): escolher o destino e confirmar no NASCER =====
+-- Clique, toque, LB/RB e o 1º A só ESCOLHEM; o NASCER (botão, A ou Enter no escolhido) confirma. A
+-- carta (anel âmbar), o painel e a faixa de baixo mostram o mesmo destino. O pedido leva o id do ponto
+-- e a rodada; até a resposta (Spawn_Result), o corpo novo ou NascerPedido.ESPERA_S, outro pedido não
+-- sai. O escolhido continua escolhido ao voltar do equipamento enquanto existir; se travar ou sumir,
+-- o painel diz por quê e oferece o pronto mais perto.
+local selId: string? = nil
+local selInfo: { x: number?, z: number?, name: string }? = nil -- onde o escolhido estava (se sumir)
+local pedidoEm: number? = nil
+local pedidoId: string? = nil
+local recusa: { id: string, msg: string, t: number }? = nil
+local RECUSA_S = 6 -- s que o motivo da recusa fica no painel
+
+local COR_ESTADO: { [string]: Color3 } = {
+	pronto = Color3.fromRGB(124, 178, 84), -- as cores dos pontos da carta (CartaView.COR)
+	espera = UiKit.V.KHAKI,
+	bloqueado = UiKit.V.RED,
+	pedido = UiKit.V.AMBAR,
+	nenhum = UiKit.V.PANEL_3,
+}
+
+local statusH = if UiKit.tv() then 36 else 28
+local PAINEL_W = 470
+local painel = Instance.new("Frame")
+painel.Name = "Nascer"
+painel.AnchorPoint = Vector2.new(1, 1)
+painel.Position = UDim2.new(1, -10, 1, -(statusH + 10))
+painel.Size = UDim2.fromOffset(PAINEL_W, 88)
+painel.BackgroundColor3 = UiKit.V.PANEL
+painel.BackgroundTransparency = 0.05
+painel.BorderSizePixel = 0
+painel.Active = true -- o clique no painel não vai para a carta
+painel.Visible = false
+painel.ZIndex = 10
+painel.Parent = mapFrame
+UiKit.corner(painel, 4)
+local painelBorda = UiKit.stroke(painel, UiKit.V.LINE, 1, 0.2)
+local pFaixa = Instance.new("Frame")
+pFaixa.Name = "Faixa"
+pFaixa.Size = UDim2.new(0, 5, 1, 0)
+pFaixa.BorderSizePixel = 0
+pFaixa.ZIndex = 11
+pFaixa.Parent = painel
+UiKit.corner(pFaixa, 2)
+local INFO_W = PAINEL_W - 208
+local pTipo = UiKit.kicker(painel, "", 13, UiKit.V.DIM)
+pTipo.Position = UDim2.fromOffset(18, 10)
+pTipo.Size = UDim2.fromOffset(INFO_W, 16)
+pTipo.ZIndex = 11
+local pNome = UiKit.title(painel, "", 22, UiKit.V.TEXT)
+pNome.Name = "Nome"
+pNome.Position = UDim2.fromOffset(18, 24)
+pNome.Size = UDim2.fromOffset(INFO_W, 28)
+pNome.TextTruncate = Enum.TextTruncate.AtEnd
+pNome.ZIndex = 11
+local pTag = UiKit.text2(painel, "", 13, UiKit.V.BG, UiKit.F.BODY_B)
+pTag.Name = "Estado"
+pTag.Position = UDim2.fromOffset(18, 56)
+pTag.AutomaticSize = Enum.AutomaticSize.X
+pTag.Size = UDim2.fromOffset(0, 22)
+pTag.BackgroundTransparency = 0
+pTag.TextXAlignment = Enum.TextXAlignment.Center
+pTag.ZIndex = 11
+UiKit.corner(pTag, 3)
+UiKit.pad(pTag, 8, 8)
+local pLinha = UiKit.text2(painel, "", 15, UiKit.V.TEXT, UiKit.F.TITLE_MED)
+pLinha.Name = "Motivo"
+pLinha.Position = UDim2.fromOffset(18, 56)
+pLinha.Size = UDim2.fromOffset(INFO_W, 22)
+pLinha.TextTruncate = Enum.TextTruncate.AtEnd
+pLinha.ZIndex = 11
+-- a alternativa (o pronto mais perto) quando o escolhido trava ou some
+local pAlt = Instance.new("TextButton")
+pAlt.Name = "Alternativa"
+pAlt.AutoButtonColor = false
+pAlt.BackgroundTransparency = 1
+pAlt.Position = UDim2.fromOffset(18, 80)
+pAlt.Size = UDim2.fromOffset(INFO_W, 22)
+pAlt.FontFace = UiKit.F.TITLE_MED
+pAlt.TextSize = 15
+pAlt.TextColor3 = UiKit.V.AMBAR
+pAlt.TextXAlignment = Enum.TextXAlignment.Left
+pAlt.TextTruncate = Enum.TextTruncate.AtEnd
+pAlt.Visible = false
+pAlt.ZIndex = 11
+pAlt.Parent = painel
+local altPt: any = nil
+
+local pintarPainel: () -> ()
+local confirmar: () -> ()
+local nascerBtn = UiKit.action(painel, "NASCER", "primary", function()
+	confirmar()
+end, { action = "map_select", ctx = "map", h = 52 })
+nascerBtn.button.Name = "BotaoNascer"
+nascerBtn.button.AnchorPoint = Vector2.new(1, 0.5)
+nascerBtn.button.Position = UDim2.new(1, -14, 0.5, 0)
+nascerBtn.button.Size = UDim2.fromOffset(178, 52)
+nascerBtn.button.Selectable = false -- na carta o controle navega pela carta (LB/RB, A)
+nascerBtn.button.ZIndex = 11
+for _, d in nascerBtn.button:GetDescendants() do
+	if d:IsA("GuiObject") then
+		d.ZIndex = 12
 	end
-	return string.format("%s · PRONTO", pt.name)
 end
 
--- Inserção: só ponto PRONTO; a transição carrega a área antes de pedir o spawn (SpawnTransition)
-local function insert(pt: any)
-	if SpawnTransition.busy() then
+local function pendente(): boolean
+	return NascerPedido.emCurso(pedidoEm, os.clock())
+end
+
+local function selecionar(pt: any)
+	if pt then
+		selId = tostring(pt.id)
+		selInfo = { x = pt.x, z = pt.z, name = tostring(pt.name or "") }
+	else
+		selId, selInfo = nil, nil
+	end
+	CartaView.setSelected(selId)
+	pintarPainel()
+end
+
+-- o que o painel mostra agora (também a faixa de baixo e o botão do toque)
+local function painelAgora(): (any, NascerPedido.Painel)
+	local pt = NascerPedido.acha(spawnList, selId)
+	local p = NascerPedido.painel(pt, pendente() or SpawnTransition.busy())
+	if not pt and selInfo then
+		-- o escolhido saiu da carta (setor tomado, reunião desfeita, companheiro caiu ou saiu)
+		p = {
+			estado = "bloqueado",
+			botao = "INDISPONÍVEL",
+			ativo = false,
+			linha = NascerPedido.MOTIVO.ponto,
+			tag = "× FORA DA CARTA",
+		}
+	end
+	local r = recusa
+	if r and r.id == selId and os.clock() - r.t < RECUSA_S and p.estado ~= "pedido" then
+		p.linha = r.msg
+	end
+	return pt, p
+end
+
+function pintarPainel()
+	local on = mapWanted and mode == "spawn" and not ToqueUi.active()
+	painel.Visible = on
+	if not on then
 		return
 	end
-	-- todo ponto traz `ready` (o companheiro do squad também: id "mate:...", o mesmo Spawn_Request)
-	if pt.blocked or (type(pt.wait) == "number" and pt.wait > 0) or pt.ready == false then
-		status.Text = spawnText(pt)
+	local pt, p = painelAgora()
+	local cor = COR_ESTADO[p.estado] or UiKit.V.PANEL_3
+	pFaixa.BackgroundColor3 = cor
+	if pt then
+		pTipo.Text = UiKit.upper(NascerPedido.tipo(pt))
+		pNome.Text = Acabamento.viet(tostring(pt.name or ""))
+	elseif selInfo then
+		pTipo.Text = "DESTINO"
+		pNome.Text = Acabamento.viet(selInfo.name)
+	else
+		pTipo.Text = "DESTINO"
+		pNome.Text = "—"
+	end
+	pNome.FontFace = UiKit.headFont(pNome.Text)
+	pTag.Visible = p.tag ~= ""
+	pTag.Text = p.tag
+	pTag.BackgroundColor3 = cor
+	pTag.TextColor3 = if p.estado == "bloqueado" then UiKit.V.TEXT else UiKit.V.BG
+	-- o motivo logo depois da etiqueta
+	local tagW = if pTag.Visible then pTag.AbsoluteSize.X / math.max(stageScale.Scale, 0.01) + 10 else 0
+	pLinha.Position = UDim2.fromOffset(18 + tagW, 56)
+	pLinha.Size = UDim2.fromOffset(math.max(INFO_W - tagW, 60), 22)
+	pLinha.Text = p.linha
+	pLinha.TextColor3 = if p.estado == "bloqueado" then Color3.fromRGB(240, 150, 130) else UiKit.V.TEXT
+	-- alternativa: só com o escolhido travado ou fora da carta
+	altPt = nil
+	if p.estado == "bloqueado" then
+		local x = if pt then pt.x elseif selInfo then selInfo.x else nil
+		local z = if pt then pt.z elseif selInfo then selInfo.z else nil
+		altPt = NascerPedido.alternativa(spawnList, x, z, selId)
+	end
+	pAlt.Visible = altPt ~= nil
+	if altPt then
+		pAlt.Text = string.format("► Pronto perto: %s", Acabamento.viet(tostring(altPt.name or "")))
+	end
+	painel.Size = UDim2.fromOffset(PAINEL_W, if altPt then 108 else 88)
+	nascerBtn.label.Text = p.botao
+	nascerBtn.label.FontFace = UiKit.headFont(p.botao)
+	nascerBtn.enabled(p.ativo)
+end
+
+pAlt.Activated:Connect(function()
+	if altPt then
+		local pt = altPt
+		selecionar(pt)
+		local u, v = Carta.toUV(B, pt.x, pt.z)
+		CartaView.goTo(u, v)
+	end
+end)
+
+-- Confirma o escolhido: só ponto pronto, um pedido por vez. A transição carrega a área antes de
+-- pedir o spawn (SpawnTransition) e mostra a recusa com o motivo.
+function confirmar()
+	if mode ~= "spawn" or alive() then
 		return
 	end
-	SpawnTransition.go({ id = pt.id, name = pt.name, x = pt.x, z = pt.z }, function()
-		Net.event("Spawn_Request"):FireServer(pt.id)
+	local pt, p = painelAgora()
+	if not (pt and p.ativo) then
+		-- ainda não dá: a borda do painel pisca em vermelho (o motivo já está escrito nele)
+		painelBorda.Color, painelBorda.Transparency = UiKit.V.RED_HI, 0
+		task.delay(0.6, function()
+			painelBorda.Color, painelBorda.Transparency = UiKit.V.LINE, 0.2
+		end)
+		return
+	end
+	local id = tostring(pt.id)
+	pedidoEm, pedidoId = os.clock(), id
+	local ok = SpawnTransition.go({ id = id, name = tostring(pt.name or ""), x = pt.x, z = pt.z }, function()
+		SpawnTransition.pedir(id)
 	end)
+	if not ok then
+		pedidoEm, pedidoId = nil, nil
+	end
+	pintarPainel()
 end
 
 -- alvo da missão de fogo escolhido na carta (controle: A; mouse: clique sem arrastar)
@@ -263,7 +461,7 @@ end
 
 CartaView.setCallbacks(function(pt: any)
 	if mode == "spawn" then
-		insert(pt)
+		selecionar(pt) -- D-209: clicar ou tocar só escolhe; o NASCER confirma
 	end
 end, function(u: number, v: number)
 	if mode == "target" and not Input.isGamepad() then
@@ -383,6 +581,7 @@ local function refresh()
 	local faction = player:GetAttribute("Faction")
 	LobbyScene.update(side.Visible, if type(faction) == "string" then faction else nil)
 	syncInput()
+	pintarPainel()
 end
 DeployScreen.changed = refresh -- voltar um passo (B) e trocar de papel pelo botão mudam só o cliente
 
@@ -460,29 +659,44 @@ local function closeMap()
 end
 Input.on("map_close", "press", closeMap)
 Input.on("map_back", "press", closeMap)
-Input.on("map_next", "press", function()
+-- LB/RB (Q/E): o próximo ponto livre (pronto ou esperando), a partir do escolhido; na inserção, ele
+-- passa a ser o escolhido (D-209)
+local function percorrer(dir: number)
 	local list = readySpawns()
-	focusIdx = InputMap.cycle(#list, focusIdx, 1)
-	if focusIdx then
-		moveCursorTo(list[focusIdx])
+	local cur: number? = nil
+	for i, pt in list do
+		if tostring(pt.id) == selId then
+			cur = i
+		end
 	end
+	focusIdx = InputMap.cycle(#list, cur or focusIdx, dir)
+	if focusIdx then
+		local pt = list[focusIdx]
+		if mode == "spawn" then
+			selecionar(pt)
+		end
+		moveCursorTo(pt)
+	end
+end
+Input.on("map_next", "press", function()
+	percorrer(1)
 end)
 Input.on("map_prev", "press", function()
-	local list = readySpawns()
-	focusIdx = InputMap.cycle(#list, focusIdx, -1)
-	if focusIdx then
-		moveCursorTo(list[focusIdx])
-	end
+	percorrer(-1)
 end)
 Input.on("map_select", "press", function()
 	local focused = CartaView.focused()
 	if mode == "target" then
 		local u, v = CartaView.cursorUV()
 		chooseTarget(u, v)
-	elseif mode == "spawn" and focused then
-		local pt = spawnById(focused.id)
-		if pt then
-			insert(pt)
+	elseif mode == "spawn" then
+		-- D-209: A no ponto sob o cursor que não é o escolhido o escolhe; no escolhido (ou fora de
+		-- qualquer ponto), confirma o NASCER
+		local pt = if focused then spawnById(focused.id) else nil
+		if pt and tostring(pt.id) ~= selId then
+			selecionar(pt)
+		else
+			confirmar()
 		end
 	elseif mode == "view" and alive() then
 		local u, v = CartaView.cursorUV()
@@ -528,7 +742,7 @@ end)
 local function hintText(): string
 	if ToqueUi.active() then
 		if mode == "spawn" then
-			return "toque num ponto · pinça zoom · arraste"
+			return "toque escolhe · NASCER confirma · pinça zoom · arraste"
 		elseif mode == "target" then
 			return "toque no alvo e confirme · pinça zoom · arraste"
 		end
@@ -536,14 +750,14 @@ local function hintText(): string
 	end
 	if Input.isGamepad() then
 		if mode == "spawn" then
-			return "LB/RB pontos · A inserir · gatilhos zoom · Y papel · B volta"
+			return "LB/RB escolhe · A nascer · gatilhos zoom · Y papel · B volta"
 		elseif mode == "target" then
 			return "A confirma o alvo · gatilhos zoom · B cancela"
 		end
 		return "A marca · gatilhos zoom · R arrasta · L3 você · Y reunião do squad · B fecha"
 	end
 	if mode == "spawn" then
-		return "clique num ponto PRONTO · J jogar agora · roda zoom · arraste · R papel · M volta"
+		return "clique escolhe · Enter nasce · J jogar agora · roda zoom · arraste · R papel · M volta"
 	elseif mode == "target" then
 		return "clique no alvo · roda zoom · arraste · M cancela"
 	end
@@ -629,16 +843,12 @@ do
 		CartaView.centerOnMe()
 	end)
 	T.confirm.Activated:Connect(function()
-		local f = CartaView.touchPick()
-		if not f then
+		if mode == "spawn" then
+			confirmar() -- D-209: o escolhido (o toque na carta escolhe)
 			return
 		end
-		if mode == "spawn" then
-			local pt = spawnById(f.id)
-			if pt then
-				insert(pt)
-			end
-		elseif mode == "target" then
+		local f = CartaView.touchPick()
+		if f and mode == "target" then
 			chooseTarget(f.x, f.y)
 		end
 	end)
@@ -663,13 +873,20 @@ local function touchUpdate()
 	T.me.Visible = not spawnMode
 	local f = CartaView.touchPick()
 	if spawnMode then
-		local pt = if f then spawnById(f.id) else nil
-		local sb = ToqueTelas.spawnButton(pt)
+		-- D-209: o mesmo painel do mouse e do controle (NascerPedido), no botão grande
+		local pt, p = painelAgora()
 		T.confirm.Visible = true
-		T.confirm.Text = sb.text
-		T.sub.Text = sb.sub
-		T.confirm.BackgroundColor3 = if sb.ready then UiKit.V.OLIVE else UiKit.V.PANEL_2
-		T.confirm.TextTransparency = if sb.ready then 0 else 0.3
+		T.confirm.Text = p.botao
+		T.sub.Text = if pt or selInfo
+			then string.format(
+				"%s · %s",
+				Acabamento.viet(tostring(if pt then pt.name else (selInfo :: any).name)),
+				p.linha
+			)
+			else p.linha
+		T.confirm.BackgroundColor3 = if p.ativo then UiKit.V.AMBAR else UiKit.V.PANEL_2
+		T.confirm.TextColor3 = if p.ativo then UiKit.V.AMBAR_TEXTO else UiKit.V.TEXT
+		T.confirm.TextTransparency = if p.ativo then 0 else 0.3
 		T.side.Visible = not alive()
 		T.side.Text = "PAPEL"
 	elseif mode == "target" then
@@ -677,6 +894,7 @@ local function touchUpdate()
 		T.confirm.Text = "CONFIRMAR ALVO"
 		T.sub.Text = if f then CartaView.cursorGrid() else "toque no alvo"
 		T.confirm.BackgroundColor3 = if f then UiKit.V.RED else UiKit.V.PANEL_2
+		T.confirm.TextColor3 = UiKit.V.TEXT
 		T.confirm.TextTransparency = if f then 0 else 0.3
 		T.side.Visible = false
 	else
@@ -703,10 +921,11 @@ RunService.RenderStepped:Connect(function(dt: number)
 	local now = os.clock()
 	if now - lastStatus > 0.1 then
 		lastStatus = now
-		local focused = CartaView.focused()
-		local pt = if focused and mode == "spawn" then spawnById(focused.id) else nil
-		if pt then
-			status.Text = spawnText(pt)
+		-- D-209: na inserção a faixa de baixo diz o destino escolhido (o mesmo da carta e do painel)
+		local spt, p = painelAgora()
+		local nome = if spt then tostring(spt.name or "") elseif selInfo then selInfo.name else nil
+		if mode == "spawn" and nome then
+			status.Text = table.concat({ string.format("Destino: %s", Acabamento.viet(nome)), p.linha }, " · ")
 		elseif mode ~= "target" or targetAbility == nil then
 			status.Text = statusLine()
 		else
@@ -717,6 +936,7 @@ RunService.RenderStepped:Connect(function(dt: number)
 			CartaView.updateLegend()
 		end
 		touchUpdate()
+		pintarPainel()
 	end
 end)
 
@@ -728,6 +948,43 @@ end)
 Net.event("Spawn_State").OnClientEvent:Connect(function(st)
 	spawnList = st
 	CartaView.setSpawns(st)
+	-- D-209: sem destino escolhido, a carta abre com o sugerido escolhido (pronto, mais perto do
+	-- objetivo do time); o jogador troca com um clique, LB/RB ou um toque
+	if selId == nil and mode == "spawn" then
+		local pt = NascerPedido.acha(spawnList, CartaView.preferido())
+		if pt then
+			selecionar(pt)
+		end
+	end
+	pintarPainel()
+end)
+-- D-209: resposta do pedido de nascer (a SpawnTransition mostra a recusa na ordem; aqui o painel)
+task.spawn(function()
+	Net.event("Spawn_Result").OnClientEvent:Connect(function(r: any)
+		if type(r) ~= "table" then
+			return
+		end
+		local id = tostring(r.id)
+		if pedidoId == id then
+			pedidoEm, pedidoId = nil, nil
+		end
+		if r.ok == false then
+			recusa = {
+				id = id,
+				msg = if type(r.msg) == "string" then r.msg else NascerPedido.motivo(r.cod, nil),
+				t = os.clock(),
+			}
+			if r.cod == "rodada" then
+				selecionar(nil) -- a partida mudou: os pontos são outros
+			end
+		end
+		pintarPainel()
+	end)
+end)
+-- partida nova: o destino e o pedido da velha não valem
+ReplicatedStorage:GetAttributeChangedSignal("VT65Rodada"):Connect(function()
+	pedidoEm, pedidoId, recusa = nil, nil, nil
+	selecionar(nil)
 end)
 Net.event("Match_State").OnClientEvent:Connect(function(st)
 	-- "quem está tomando" vem como lista cheia com "" = ninguém (MatchService.publish)
@@ -767,6 +1024,7 @@ for _, a in { "Faction", "SquadId", "Role", "MenuPrincipal" } do
 end
 player.CharacterAdded:Connect(function(char)
 	pinned = false
+	pedidoEm, pedidoId = nil, nil -- nasceu: o pedido acabou (o destino fica para a próxima vez)
 	refresh()
 	local hum = char:WaitForChild("Humanoid") :: Humanoid
 	hum.Died:Connect(refresh)

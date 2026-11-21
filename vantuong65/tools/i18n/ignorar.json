@@ -1635,7 +1635,10 @@
   "%s:%s:%s",
   "incomum",
   "raro",
-  "xp"
+  "xp",
+  "Escolhido",
+  "pedido",
+  "rodada"
  ],
  "regex": [
   "^uni_[a-z_]+@[a-z0-9]+$"
