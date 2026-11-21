@@ -9482,3 +9482,79 @@ no meio do teste e apertou o PULAR e o VOLTAR; para gravar a abertura inteira, z
 - a abertura de caixa paga e a comemoração da compra (nenhuma compra foi feita);
 - o celular, a TV, o controle de verdade e o jogo publicado;
 - o fps numa máquina sem o Studio atrás (no Studio o limite é 15 fps).
+
+## D-214 — Lote 99: o pódio com os três e a câmera no melhor, e as comemorações como itens (2026-11-21)
+
+**Pedido do dono:** "faça o podio como no r6 mostrando os 3 primeiros e depois dando zoom para o
+melhor bem animado e podendo fazer comemoração que iremos vender comemoração dps".
+
+**O roteiro do pódio** (os 12 s da comemoração, `Comemoracao.PODIO`, puro e testado):
+- **chegada:** o 3º (0,15 s), o 2º (0,45 s) e o 1º (0,85 s) caem no caixote, cada um na vez dele,
+  com um quique pequeno;
+- **os três à vista** até 4,2 s, com a câmera aberta e o balanço da D-202;
+- **a câmera vai até o 1º** (4,2 a 5,6 s, na curva mais suave): de 31 para 16 studs, campo de 34° para
+  30°, das coxas até acima da cabeça, com uma órbita lenta;
+- **o 1º faz a comemoração dele** a partir de 5,0 s (saindo do gesto de antes em 0,5 s); o 2º e o 3º
+  seguem nos gestos de sempre;
+- **a tela:** os cartões do 2º e do 3º saem quando a câmera vai e entra a faixa
+  "★ MELHOR DA PARTIDA", com o nome, a comemoração dele e faíscas douradas.
+
+**As comemorações** (`Comemoracao.CATALOGO`; cada uma é um item):
+- **grátis (todo mundo tem):**
+  - Vitória (o fuzil no alto e os braços em V; a de sempre);
+  - Apresentar armas (sentido, o fuzil à frente do peito);
+- **EM BREVE (para vender depois):**
+  - Grito de guerra (o punho no peito e os braços no alto);
+  - Rajada para o alto (três tiros para o céu com o tranco);
+  - Aceno à tropa;
+  - Pulos de alegria.
+- Os gestos novos (sentido, apresentar, grito, rajada) são procedurais como os da D-202, nos mesmos
+  limites de junta e sem salto entre quadros (o maior passo nas comemorações é de 10,7° a 60 fps).
+
+**Itens e compra futura:**
+- **perfil:** `comemoracao` (a escolhida, padrão "padrao") e `comemoracoes` (as que o jogador tem, para
+  quando forem vendidas);
+- **escolha:** pelo remote `Comemoracao_Equipar`. O servidor só aceita a que o jogador tem e publica
+  `Comemoracao` e `ComemoracoesTem`;
+- **pódio:** o servidor guarda a comemoração de cada um (`l.com`) ao congelar o resultado;
+- **para vender:** basta dar `comemoracoes[id] = true` no recibo do produto (nenhum produto foi criado:
+  o preço e o produto são do dono).
+
+**ARMÁRIO:**
+- a seção nova "COMEMORAÇÃO NO PÓDIO" tem a prévia ao vivo (a mesma cena, só o soldado do lobby no
+  caixote do meio, de corpo inteiro) e os 6 cartões;
+- o cursor (ou o foco do controle) já mostra a comemoração na prévia, e o clique escolhe;
+- as EM BREVE só se veem.
+
+**Erros achados:**
+- **No Studio:** o campo `self.solo` tinha o nome do método `Cena.solo`. Vazio, o Luau achava o
+  método pelo metatable e o pódio inteiro rodava no modo prévia. O teste agora proíbe campo com nome
+  de método.
+- **Sem Studio:** `UiKit.estadoTag` não existe (o certo é `UiKit.Estilo.estadoTag`), e o luau-lsp não
+  acusou: a aba do ARMÁRIO teria quebrado. Achado por uma varredura; o teste `efeitos.luau` agora
+  confere todo `UiKit.<nome>` usado nos controladores.
+
+**Conferido no Studio** (janela de 839 × 656, nomes de teste):
+- **o remote:** pedir "pulos" (EM BREVE) deixou "padrao"; pedir "apresentar_armas" trocou;
+  `ComemoracoesTem` = "padrao,apresentar_armas";
+- **1ª rodada do pódio (ainda com o erro do nome):**
+  - os três na cena;
+  - aos ~6 s, os cartões do 2º e do 3º saíram e entrou a faixa "★ MELHOR DA PARTIDA · SOLDADO TESTE 1 ·
+    COMEMORAÇÃO: APRESENTAR ARMAS" (`testes/lote99/podio_tres_e_destaque.jpg`; a câmera ali era a da
+    prévia, por causa do erro);
+- **2ª rodada (corrigida):**
+  - a câmera lida no cliente estava perto do 1º;
+  - os três soldados estavam nos lugares;
+  - mas os ViewportFrames pararam de desenhar (nem um cubo de teste aparecia): o jogo do dono estava
+    aberto com 2,3 GB e a GPU é de 2 GB. Parei o Studio (a regra do CLAUDE.md) e a imagem ficou sem
+    ver.
+
+**Testes:** `comemoracao.luau` (10: os 5 de antes e mais 5); `efeitos.luau` (12, com a varredura do
+UiKit).
+
+**Não testado (fica para quando o jogo do dono estiver fechado):**
+- a imagem da câmera perto do 1º;
+- a pose de "apresentar armas";
+- a chegada nos caixotes;
+- a prévia do ARMÁRIO;
+- com jogadores de verdade e no jogo publicado.

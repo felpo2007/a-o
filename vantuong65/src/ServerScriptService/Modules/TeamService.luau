@@ -7,6 +7,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Teams = game:GetService("Teams")
 
+local Comemoracao = require(ReplicatedStorage.Shared.Comemoracao)
 local JogarAgora = require(ReplicatedStorage.Shared.JogarAgora)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Roles = require(ReplicatedStorage.Shared.Roles)
@@ -310,6 +311,47 @@ function TeamService.start()
 			applyLoadout(player, roleId, weapon)
 			TeamService.remember(player)
 		end
+	end)
+
+	-- D-214: a comemoração do pódio (ARMÁRIO). Só as que o jogador tem (as grátis, ou as guardadas
+	-- no perfil quando forem vendidas); vai ao cliente e ao pódio no atributo "Comemoracao".
+	local comAt: { [Player]: number } = setmetatable({}, { __mode = "k" }) :: any
+	local function publicaComemoracao(player: Player)
+		local prof = PlayerData.get(player)
+		local p = prof :: any
+		local id = if p and Comemoracao.tem(p.comemoracao, p.comemoracoes) then p.comemoracao else Comemoracao.PADRAO
+		player:SetAttribute("Comemoracao", id)
+		local donas = {}
+		for _, it in Comemoracao.CATALOGO do
+			if Comemoracao.tem(it.id, if p then p.comemoracoes else nil) then
+				table.insert(donas, it.id)
+			end
+		end
+		player:SetAttribute("ComemoracoesTem", table.concat(donas, ","))
+	end
+	PlayerData.Loaded:Connect(publicaComemoracao)
+	for _, p in Players:GetPlayers() do
+		task.spawn(publicaComemoracao, p)
+	end
+	Net.event("Comemoracao_Equipar").OnServerEvent:Connect(function(player, id)
+		if type(id) ~= "string" or #id > 32 then
+			return
+		end
+		local t = os.clock()
+		if t - (comAt[player] or 0) < 0.15 then
+			return
+		end
+		comAt[player] = t
+		local prof = PlayerData.get(player)
+		if not prof then
+			return
+		end
+		local p = prof :: any
+		if not Comemoracao.tem(id, p.comemoracoes) then
+			return -- não tem (a venda ainda não abriu)
+		end
+		p.comemoracao = id
+		publicaComemoracao(player)
 	end)
 
 	Players.PlayerRemoving:Connect(function(player)

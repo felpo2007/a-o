@@ -1006,7 +1006,26 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     - Lune 856 ok (61 arquivos), pytest 76, ruff e luau-lsp limpos, i18n 100%. Relatório:
       `testes/LOTE98_D213_2026-11-20.md`.
     - **v131 publicada** (versão 136 do place, commit 4fab88b).
-    - **Próximos (pedidos de 20/11):** o pódio com zoom no melhor e comemoração, e as transições.
+  - **Lote 99 (D-214): o pódio com os três e a câmera no melhor, e as comemorações como itens, feito
+    (falta ver a imagem no Studio).**
+    - **Pódio:** o 3º, o 2º e o 1º caem nos caixotes um depois do outro. Depois a câmera vai até o
+      1º (de 31 para 16 studs), que faz a comemoração dele, e entra a faixa "★ MELHOR DA PARTIDA".
+    - **Comemorações:** 6 no catálogo. Vitória e Apresentar armas são grátis; Grito de guerra,
+      Rajada para o alto, Aceno à tropa e Pulos de alegria estão EM BREVE, para vender.
+      - O perfil guarda a escolhida e as que o jogador tem; o servidor só aceita a que ele tem.
+    - **ARMÁRIO:** seção "COMEMORAÇÃO NO PÓDIO", com prévia ao vivo e os 6 cartões.
+    - **Erros achados:**
+      - o campo `self.solo` com o nome do método (no Studio, o pódio rodava no modo prévia);
+      - `UiKit.estadoTag`, que não existe (o luau-lsp não pegou; agora há um teste para isso).
+    - **Studio:**
+      - o remote conferido;
+      - a faixa do melhor e a saída dos cartões conferidas;
+      - a câmera perto do 1º lida no cliente;
+      - a imagem da câmera e da prévia ficou sem ver: o jogo do dono estava aberto (GPU de 2 GB) e os
+        ViewportFrames pararam de desenhar.
+    - Lune 862 ok (61 arquivos), pytest 76, ruff e luau-lsp limpos, i18n 100%. Relatório:
+      `testes/LOTE99_D214_2026-11-21.md`.
+    - **Próximos (pedidos de 20/11):** as transições (o estudo do jogo de boxe).
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;

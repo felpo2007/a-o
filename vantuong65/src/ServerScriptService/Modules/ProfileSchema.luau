@@ -74,6 +74,10 @@ export type Profile = {
 	unit: { id: string? },
 	-- D-211: a arma principal escolhida no ARMÁRIO, por "lado:papel" (ex.: "US:rifleman" -> "m16")
 	armas: { [string]: string },
+	-- D-214: a comemoração do pódio escolhida no ARMÁRIO e as que o jogador tem (as grátis não entram:
+	-- todo mundo tem; as outras, quando forem vendidas)
+	comemoracao: string,
+	comemoracoes: { [string]: boolean },
 	stats: { matches: number, playSeconds: number },
 	settings: { [string]: any }?, -- controle e acessibilidade (Parte 12.8); saneado no Settings_Get
 	tutorial: { [string]: boolean }, -- papéis com o tutorial concluído (F6)
@@ -298,6 +302,8 @@ function ProfileSchema.default(): Profile
 		tips = 0,
 		unit = {},
 		armas = {},
+		comemoracao = "padrao",
+		comemoracoes = {},
 		stats = { matches = 0, playSeconds = 0 },
 		tutorial = {},
 		daily = { run = 0, lastDay = -1, total = 0 },
@@ -503,6 +509,17 @@ function ProfileSchema.migrate(raw: any): Profile
 		for k, w in raw.armas do
 			if type(k) == "string" and type(w) == "string" and #k <= 32 and #w <= 24 then
 				p.armas[k] = w
+			end
+		end
+	end
+	-- D-214: só ids curtos em texto (o servidor confere no catálogo ao escolher e ao usar)
+	if type(raw.comemoracao) == "string" and #raw.comemoracao <= 32 then
+		p.comemoracao = raw.comemoracao
+	end
+	if type(raw.comemoracoes) == "table" then
+		for k, v in raw.comemoracoes do
+			if type(k) == "string" and #k <= 32 and v == true then
+				p.comemoracoes[k] = true
 			end
 		end
 	end

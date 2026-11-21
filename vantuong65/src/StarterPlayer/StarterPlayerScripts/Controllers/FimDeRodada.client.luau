@@ -18,9 +18,11 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
+local Comemoracao = require(ReplicatedStorage.Shared.Comemoracao)
 local Net = require(ReplicatedStorage.Shared.Net)
 local CenaComemoracao = require(script.Parent.CenaComemoracao)
 local Input = require(script.Parent.Input)
+local UiEfeitos = require(script.Parent.UiEfeitos)
 local UiKit = require(script.Parent.UiKit)
 
 local V, F = UiKit.V, UiKit.F
@@ -121,6 +123,50 @@ for i = 1, 3 do
 	end
 	cards[i] = { f = f, place = place, name = name, pts = pts, kd = kd }
 end
+-- D-214: o destaque do melhor da partida, quando a câmera chega perto dele (como nos jogos de
+-- equipe: os três, depois o 1º comemorando)
+local destaque = Instance.new("Frame")
+destaque.Name = "Destaque"
+destaque.Position = UDim2.fromOffset(px(20, 28), px(20, 28))
+destaque.Size = UDim2.fromOffset(px(440, 600), px(132, 182))
+destaque.BackgroundColor3 = V.BG
+destaque.BackgroundTransparency = 0.25
+destaque.BorderSizePixel = 0
+destaque.Visible = false
+destaque.ZIndex = 5
+destaque.Parent = podium
+UiKit.corner(destaque, 4)
+local fundoDestaque = Instance.new("UIGradient")
+fundoDestaque.Transparency = NumberSequence.new(0, 0.85)
+fundoDestaque.Parent = destaque
+local barraDestaque = Instance.new("Frame")
+barraDestaque.Name = "Barra"
+barraDestaque.BackgroundColor3 = V.BRASS
+barraDestaque.BorderSizePixel = 0
+barraDestaque.Size = UDim2.new(0, px(5, 7), 1, 0)
+barraDestaque.ZIndex = 6
+barraDestaque.Parent = destaque
+local destaqueKicker = UiKit.rotulo(destaque, px(16, 22), V.BRASS, F.TITLE_MED)
+destaqueKicker.Name = "Kicker"
+destaqueKicker.Position = UDim2.fromOffset(px(20, 28), px(10, 14))
+destaqueKicker.Size = UDim2.new(1, -px(28, 38), 0, px(22, 30))
+destaqueKicker.Text = "★ MELHOR DA PARTIDA"
+local destaqueNome = UiKit.rotulo(destaque, px(40, 56), V.TEXT, F.TITLE)
+destaqueNome.Name = "Nome"
+destaqueNome.Position = UDim2.fromOffset(px(20, 28), px(32, 44))
+destaqueNome.Size = UDim2.new(1, -px(28, 38), 0, px(52, 72))
+destaqueNome.TextTruncate = Enum.TextTruncate.AtEnd
+local destaqueCom = UiKit.rotulo(destaque, px(15, 21), V.DIM, F.TITLE_REG)
+destaqueCom.Name = "Comemoracao"
+destaqueCom.Position = UDim2.fromOffset(px(20, 28), px(88, 122))
+destaqueCom.Size = UDim2.new(1, -px(28, 38), 0, px(22, 30))
+for _, t in { destaqueKicker, destaqueNome, destaqueCom } do
+	t.ZIndex = 6
+end
+local destaquePos = destaque.Position
+local temLinha = { false, false, false }
+local destaqueFeito = false
+
 local empty = label(podium, "Vazio", px(20, 28), V.TEXT, F.BODY)
 empty.AnchorPoint = Vector2.new(0.5, 0.5)
 empty.Position = UDim2.fromScale(0.5, 0.4)
@@ -300,11 +346,21 @@ local function showPodium()
 		cena:bandeira({ V.US, V.VC })
 	end
 	cena:reiniciar()
+	destaque.Visible = false
+	destaqueFeito = false
 	local linhas = if type(data) == "table" and type(data.linhas) == "table" then data.linhas else {}
 	for i, c in cards do
 		local l = linhas[i]
 		c.f.Visible = l ~= nil
+		temLinha[i] = l ~= nil
 		if l then
+			-- D-214: a comemoração que cada um escolheu no ARMÁRIO (o servidor guardou no pódio)
+			cena:comemoracao(i, if type(l.com) == "string" then l.com else nil)
+			if i == 1 then
+				destaqueNome.Text = UiKit.upper(tostring(l.nome))
+				local it = Comemoracao.item(Comemoracao.valida(l.com))
+				destaqueCom.Text = string.format("COMEMORAÇÃO: %s", UiKit.upper(if it then it.nome else ""))
+			end
 			c.name.Text = tostring(l.nome)
 			c.pts.Text = string.format("%d pontos", tonumber(l.pontos) or 0)
 			local a, m = tonumber(l.abates) or 0, tonumber(l.mortes) or 0
@@ -326,12 +382,28 @@ local function showPodium()
 	vote.Visible = false
 end
 
--- os cartões embaixo de cada soldado (a câmera balança, eles acompanham)
+-- os cartões embaixo de cada soldado (a câmera balança, eles acompanham). D-214: quando a câmera vai
+-- até o 1º, os cartões do 2º e do 3º saem e entra o destaque do melhor, com faíscas douradas.
 local function frameCards()
+	local t = cena:tempo()
+	local P = Comemoracao.PODIO
 	for i, c in cards do
+		c.f.Visible = temLinha[i] and (i == 1 or t < P.zoom + 0.25)
 		if c.f.Visible then
 			c.f.Position = UDim2.new(math.clamp(cena:telaX(i), 0.1, 0.9), 0, 1, -px(2, 3))
 		end
+	end
+	if temLinha[1] and not destaqueFeito and t >= P.perto - 0.3 then
+		destaqueFeito = true
+		destaque.Visible = true
+		destaque.Position = destaquePos - UDim2.fromOffset(px(60, 80), 0)
+		UiKit.tween(destaque, TweenInfo.new(0.45, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+			Position = destaquePos,
+		})
+		-- (em px de projeto: o pódio fica dentro do UIScale do fit)
+		local meio = Vector2.new(destaquePos.X.Offset + px(60, 80), destaquePos.Y.Offset + px(60, 84))
+		UiEfeitos.faiscas(podium, meio, V.BRASS, 30, { vmin = 220, vmax = 700, gravidade = 500, z = 7 })
+		UiEfeitos.onda(podium, meio, V.BRASS, px(160, 220), 0.6, 7)
 	end
 end
 

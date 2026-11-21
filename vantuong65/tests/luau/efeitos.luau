@@ -216,6 +216,36 @@ test("Studio: as camadas abertas esperam baixar; o quadro travado não pula fase
 	)
 end)
 
+-- D-214: o luau-lsp não acusa membro que não existe no UiKit (o `UiKit.estadoTag` do ARMÁRIO teria
+-- quebrado a aba na loja publicada): cada UiKit.<nome> usado nos controladores tem que existir lá
+-- (função, campo, reexporte do Estilo ou tipo exportado)
+test("UiKit: todo membro usado nos controladores existe", function()
+	local uk = ler(C .. "UiKit.luau")
+	local existe: { [string]: boolean } = {}
+	for linha in string.gmatch(uk .. "\n", "([^\n]*)\n") do
+		local n = string.match(linha, "^UiKit%.([%w_]+)%s*=") or string.match(linha, "^function UiKit%.([%w_]+)")
+		local tp = string.match(linha, "^export type ([%w_]+)")
+		if n then
+			existe[n] = true
+		end
+		if tp then
+			existe[tp] = true
+		end
+	end
+	local faltam = {}
+	for _, nome in fs.readDir(C) do
+		if string.sub(nome, -5) == ".luau" and nome ~= "UiKit.luau" then
+			local src = ler(C .. nome)
+			for m in string.gmatch(src, "UiKit%.([%a_][%w_]*)") do
+				if not existe[m] then
+					table.insert(faltam, nome .. ": UiKit." .. m)
+				end
+			end
+		end
+	end
+	assert(#faltam == 0, table.concat(faltam, ", "))
+end)
+
 print(string.format("%d ok, %d falhas", passed, failed))
 if failed > 0 then
 	process.exit(1)

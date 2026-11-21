@@ -1694,7 +1694,9 @@
   "raio",
   "rodando",
   "tampa",
-  "tremor"
+  "tremor",
+  "Com_%s",
+  "Comemoracao"
  ],
  "regex": [
   "^uni_[a-z_]+@[a-z0-9]+$"

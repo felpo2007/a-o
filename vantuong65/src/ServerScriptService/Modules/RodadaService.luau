@@ -18,6 +18,7 @@ local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
+local Comemoracao = require(ReplicatedStorage.Shared.Comemoracao)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Rodada = require(ReplicatedStorage.Shared.Rodada)
 local MatchService = require(script.Parent.MatchService)
@@ -106,6 +107,11 @@ function RodadaService.fim(winner: string)
 	end
 	-- o resultado congela agora (quem sair daqui em diante continua no pódio)
 	local podio = Rodada.podio(MatchService.linhas() :: any, winner)
+	-- D-214: a comemoração que cada um escolheu no ARMÁRIO (o 1º faz a dele no pódio)
+	for _, l in podio :: { any } do
+		local pl = Players:GetPlayerByUserId(tonumber(l.id) or 0)
+		l.com = Comemoracao.valida(pl and pl:GetAttribute("Comemoracao"))
+	end
 	ReplicatedStorage:SetAttribute("VT65Podio", HttpService:JSONEncode({ vencedor = winner, linhas = podio }))
 	pcall(congelarModelos, podio)
 	-- 0. a tela de fim da ação (FrontHud: vitória, setores, reforços, baixas)

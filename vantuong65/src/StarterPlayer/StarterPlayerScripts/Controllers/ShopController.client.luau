@@ -22,6 +22,7 @@ local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 
 local AssetIds = require(ReplicatedStorage.Shared.AssetIds) :: any
+local Comemoracao = require(ReplicatedStorage.Shared.Comemoracao)
 local Commerce = require(ReplicatedStorage.Shared.Commerce)
 local Conjuntos = require(ReplicatedStorage.Shared.Conjuntos) :: any
 local JogarAgora = require(ReplicatedStorage.Shared.JogarAgora) :: any
@@ -34,6 +35,7 @@ local Bus = require(script.Parent.Bus)
 local CampanhaCliente = require(script.Parent.CampanhaCliente)
 local Input = require(script.Parent.Input)
 local CaixaImagem = require(script.Parent.CaixaImagem)
+local CenaComemoracao = require(script.Parent.CenaComemoracao)
 local ItemArte = require(script.Parent.ItemArte)
 local LobbyPalco = require(script.Parent.LobbyPalco)
 local RodaArte = require(script.Parent.RodaArte)
@@ -2677,6 +2679,168 @@ local function encherArte(vp: ViewportFrame)
 		cam.CFrame = CFrame.lookAt(alvo + (cam.CFrame.Position - alvo) * 0.55, alvo)
 	end
 end
+-- D-214: o soldado da prévia: o do lobby (vestido como você), senão o manequim do lado
+local function soldadoPrevia(lado: string): Model?
+	local function clona(m: Instance?): Model?
+		if not (m and m:IsA("Model")) then
+			return nil
+		end
+		local was = m.Archivable
+		m.Archivable = true
+		local ok, c = pcall(function(): Model
+			return m:Clone()
+		end)
+		m.Archivable = was
+		return if ok then c else nil
+	end
+	local meu = player:FindFirstChild("PlayerGui") and player.PlayerGui:FindFirstChild("VT65MeuSoldado")
+	local c = clona(meu and meu:FindFirstChild("Soldado", true))
+	if c then
+		return c
+	end
+	local pv = ReplicatedStorage:FindFirstChild("VT65Preview")
+	return clona(pv and pv:FindFirstChild(lado))
+end
+
+-- D-214: o bloco das comemorações do ARMÁRIO (prévia e cartões)
+local armarioCena: any = nil
+local function armarioComemoracoes(lado: string): Frame
+	local bloco = Instance.new("Frame")
+	bloco.Name = "Comemoracoes"
+	bloco.BackgroundTransparency = 1
+	bloco.Size = UDim2.new(1, -24, 0, px(312, 416))
+	local prev = Instance.new("Frame")
+	prev.Name = "Previa"
+	prev.BackgroundColor3 = V.PANEL_2
+	prev.BorderSizePixel = 0
+	prev.ClipsDescendants = true
+	prev.Size = UDim2.new(0, px(300, 400), 1, 0)
+	prev.Parent = bloco
+	UiKit.corner(prev, 4)
+	UiKit.edge(prev, V.AMBAR, 1, 0.5)
+	local escolhida = Comemoracao.valida(player:GetAttribute("Comemoracao"))
+	local cena = CenaComemoracao.nova(prev)
+	armarioCena = cena
+	cena:solo(escolhida)
+	local m = soldadoPrevia(lado)
+	if not (m and cena:por(1, m)) then
+		local pv = ReplicatedStorage:FindFirstChild("VT65Preview")
+		local mq = pv and pv:FindFirstChild(lado)
+		if mq and mq:IsA("Model") then
+			mq.Archivable = true
+			cena:por(1, mq:Clone())
+		end
+	end
+	local nomePrev = UiKit.rotulo(prev, px(16, 22), V.TEXT, UiKit.F.TITLE_MED)
+	nomePrev.Name = "NomePrevia"
+	nomePrev.AnchorPoint = Vector2.new(0, 1)
+	nomePrev.Position = UDim2.new(0, px(12, 16), 1, -px(8, 10))
+	nomePrev.Size = UDim2.new(1, -px(24, 32), 0, px(24, 32))
+	nomePrev.BackgroundTransparency = 1
+	nomePrev.ZIndex = 3
+	local function mostra(id: string)
+		local it = Comemoracao.item(id)
+		nomePrev.Text = string.format("PRÉVIA: %s", UiKit.upper(if it then it.nome else ""))
+		cena:solo(id)
+	end
+	mostra(escolhida)
+	local tem: { [string]: boolean } = {}
+	for _, id in string.split(tostring(player:GetAttribute("ComemoracoesTem") or ""), ",") do
+		if id ~= "" then
+			tem[id] = true
+		end
+	end
+	local lista = Instance.new("Frame")
+	lista.Name = "Lista"
+	lista.BackgroundTransparency = 1
+	lista.Position = UDim2.fromOffset(px(316, 420), 0)
+	lista.Size = UDim2.new(1, -px(316, 420), 1, 0)
+	lista.Parent = bloco
+	local gl = Instance.new("UIGridLayout")
+	gl.CellSize = UDim2.new(0.5, -px(6, 8), 0, px(96, 128))
+	gl.CellPadding = UDim2.fromOffset(px(12, 16), px(12, 16))
+	gl.SortOrder = Enum.SortOrder.LayoutOrder
+	gl.Parent = lista
+	for i, it in Comemoracao.CATALOGO do
+		local pode = it.gratis or tem[it.id] == true
+		local eq = it.id == escolhida
+		local c = Instance.new("TextButton")
+		c.Name = string.format("Com_%s", it.id)
+		c.LayoutOrder = i
+		c.AutoButtonColor = false
+		c.Text = ""
+		c.BackgroundColor3 = if eq then V.PANEL_3 else UiKit.CARD_DARK
+		c.BorderSizePixel = 0
+		c.Selectable = true
+		c.SelectionImageObject = UiKit.FOCUS
+		c.ClipsDescendants = true
+		c.Parent = lista
+		UiKit.corner(c, 4)
+		UiKit.edge(c, if eq then V.AMBAR else V.LINE, if eq then 2 else 1, if eq then 0 else 0.5)
+		local n = UiKit.title(c, UiKit.upper(it.nome), px(18, 25))
+		n.Position = UDim2.fromOffset(px(12, 16), px(8, 10))
+		n.Size = UDim2.new(1, -px(24, 32), 0, px(24, 32))
+		local d = UiKit.rotulo(c, 13, V.DIM, UiKit.BODY_FONT)
+		d.Position = UDim2.fromOffset(px(12, 16), px(34, 46))
+		d.Size = UDim2.new(1, -px(24, 32), 0, px(32, 44))
+		d.TextWrapped = true
+		d.TextYAlignment = Enum.TextYAlignment.Top
+		d.Text = it.desc
+		local tag =
+			UiKit.Estilo.estadoTag(c, if eq then "equipado" elseif pode then "normal" else "bloqueado", px(11, 16))
+		tag.AnchorPoint = Vector2.new(0, 1)
+		tag.Position = UDim2.new(0, px(12, 16), 1, -px(8, 10))
+		if not eq and pode then
+			tag.Visible = true
+			tag.Text = "ESCOLHER"
+			tag.BackgroundColor3 = V.PANEL_3
+		elseif not pode then
+			tag.Text = "🔒 EM BREVE"
+		end
+		if eq or pode then
+			UiEfeitos.varre(c, 7, nil, 5, 0.8 * i)
+		end
+		local r = UiKit.realce(c, c.BackgroundColor3, V.PANEL_3, 1.02)
+		c.MouseEnter:Connect(function()
+			r.set(true)
+			mostra(it.id) -- passar o cursor já mostra
+		end)
+		c.MouseLeave:Connect(function()
+			r.set(false)
+		end)
+		c.SelectionGained:Connect(function()
+			r.set(true)
+			mostra(it.id)
+		end)
+		c.SelectionLost:Connect(function()
+			r.set(false)
+		end)
+		UiKit.bind(c, function()
+			mostra(it.id)
+			if pode and not eq then
+				Net.event("Comemoracao_Equipar"):FireServer(it.id)
+			end
+		end)
+	end
+	-- a prévia anda só com o ARMÁRIO na tela
+	local laco: RBXScriptConnection? = nil
+	laco = RunService.RenderStepped:Connect(function(dt: number)
+		if not prev.Parent then
+			if laco then
+				laco:Disconnect()
+			end
+			if armarioCena == cena then
+				armarioCena = nil
+			end
+			return
+		end
+		if gui.Enabled and tab == "armario" then
+			cena:passo(dt)
+		end
+	end)
+	return bloco
+end
+
 local function renderArmario()
 	local p = armarioPage
 	for _, c in p:GetChildren() do
@@ -2827,6 +2991,14 @@ local function renderArmario()
 	if not any then
 		add(note("Nada liberado ainda para este lado: caixas, passe e caderneta dão visuais."))
 	end
+	-- D-214: a comemoração do pódio (quem termina em 1º faz a dele, com a câmera nele). À esquerda, a
+	-- prévia ao vivo com o seu soldado; à direita, as comemorações. As que não são grátis ficam EM
+	-- BREVE: dá para ver, mas a escolha só vale para as que você tem (o servidor confere).
+	local ct = UiKit.title(nil, "COMEMORAÇÃO NO PÓDIO", px(30, 40))
+	ct.Size = UDim2.new(1, -24, 0, px(38, 50))
+	add(ct)
+	add(note("Quem termina a partida em 1º faz a comemoração escolhida aqui, com a câmera nele."))
+	add(armarioComemoracoes(f))
 	local ir = UiKit.action(nil, "ACABAMENTOS E UNIFORMES ›", "secondary", function()
 		setTab("intendencia")
 	end, { h = px(48, 64) })
@@ -2838,6 +3010,14 @@ player:GetAttributeChangedSignal("ArmasPreferidas"):Connect(function()
 		renderArmario()
 	end
 end)
+-- D-214: a comemoração escolhida (ou uma nova que o jogador ganhou) redesenha o ARMÁRIO
+for _, a in { "Comemoracao", "ComemoracoesTem" } do
+	player:GetAttributeChangedSignal(a):Connect(function()
+		if gui.Enabled and tab == "armario" then
+			renderArmario()
+		end
+	end)
+end
 
 local function renderPage()
 	if tab == "mercado" then

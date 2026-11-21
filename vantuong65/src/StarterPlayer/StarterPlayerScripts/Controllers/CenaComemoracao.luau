@@ -31,11 +31,9 @@ type Boneco = { modelo: Model, raiz: BasePart, ordem: { Elo }, pes: { BasePart }
 
 local RAD = math.rad
 -- Enquadramento (soldado de ~8,1 studs com o capacete; braços no alto até ~15 studs acima do chão):
--- do chão a ~16 studs na vertical, com folga, e os três com os caixotes na horizontal
+-- do chão a ~16 studs na vertical, com folga, e os três com os caixotes na horizontal. D-214: o
+-- roteiro da câmera (aberta, depois perto do 1º) está no Shared/Comemoracao.camera.
 local CAM_FOV = 34
-local CAM_ALVO = Vector3.new(0, 8.6, -1)
-local CAM_DIST = 31
-local CAM_ALTO = 10.5
 
 local function peca(
 	pai: Instance,
@@ -143,6 +141,8 @@ function Cena.nova(pai: GuiObject)
 	vp.CurrentCamera = cam
 	self.ceu, self.vp, self.cam = ceu, vp, cam
 	self.t = 0
+	self.com = {} :: { [number]: string } -- D-214: a comemoração de cada lugar
+	self.soloId = nil :: string? -- D-214: a prévia do ARMÁRIO (não "solo": é o nome do método)
 	self.bonecos = {} :: { [number]: Boneco }
 	self.panos = {} :: { { Part } }
 	self.topos = {} :: { Vector3 }
@@ -525,8 +525,35 @@ end
 function Cena._posar(self: any, b: Boneco)
 	local l = Comemoracao.LUGARES[b.lugar]
 	-- de frente para a câmera (+Z), virado um pouco para o meio
-	local base = CFrame.new(l.x, l.alto + 4, 0) * CFrame.Angles(0, RAD(180 + l.giro), 0)
-	posar(b, base, Comemoracao.quadro(b.lugar, self.t))
+	local base = CFrame.new(l.x, l.alto + 4, 0) * CFrame.Angles(0, RAD(180 + (if self.soloId then 0 else l.giro)), 0)
+	if self.soloId then
+		-- D-214: a prévia do ARMÁRIO: só a comemoração escolhida, em laço
+		posar(b, base, Comemoracao.celebracao(self.soloId, self.t))
+		return
+	end
+	-- D-214: cada um chega no caixote na vez dele (3º, 2º, 1º); antes, fica fora de vista
+	local visivel, dy = Comemoracao.entrada(b.lugar, self.t)
+	if not visivel then
+		-- de lado e longe (a altura o `posar` refaz pelos pés)
+		base = CFrame.new(600, 0, 0) * base
+	end
+	local pose = Comemoracao.poseNoPodio(b.lugar, self.t, self.com[b.lugar])
+	if dy > 0 then
+		pose = { juntas = pose.juntas, sobe = math.max(0, pose.sobe) + dy }
+	end
+	posar(b, base, pose)
+end
+
+-- D-214: a comemoração do lugar (o 1º faz a dele quando a câmera chega perto)
+function Cena.comemoracao(self: any, lugar: number, id: string?)
+	self.com[lugar] = Comemoracao.valida(id)
+end
+
+-- D-214: a prévia do ARMÁRIO: um soldado só no caixote do meio, fazendo a comemoração `id` em laço,
+-- com a câmera de corpo inteiro (nil volta ao pódio)
+function Cena.solo(self: any, id: string?)
+	self.soloId = if id then Comemoracao.valida(id) else nil
+	self.t = 0
 end
 
 function Cena.passo(self: any, dt: number)
@@ -544,11 +571,19 @@ function Cena.passo(self: any, dt: number)
 			cf = cf * CFrame.new(1.6, 0, 0)
 		end
 	end
-	-- câmera: balanço lento de ±6° e uma aproximação leve
-	local a = RAD(6 * math.sin(2 * math.pi * self.t / 11))
-	local dist = CAM_DIST - 2 * math.min(1, self.t / 12)
-	local pos = CAM_ALVO + Vector3.new(math.sin(a) * dist, CAM_ALTO - CAM_ALVO.Y, math.cos(a) * dist)
-	self.cam.CFrame = CFrame.lookAt(pos, CAM_ALVO)
+	-- câmera (D-214, Shared/Comemoracao.camera): aberta nos três com o balanço lento; depois vai até o
+	-- 1º (sem pódio, fica aberta); na prévia, o soldado de corpo inteiro
+	local c = Comemoracao.camera(if self.bonecos[1] or self.soloId then self.t else 0, self.soloId ~= nil)
+	local a = RAD(c.giro)
+	local alvo = Vector3.new(c.ax, c.ay, c.az)
+	local pos = alvo + Vector3.new(math.sin(a) * c.dist, c.alto - c.ay, math.cos(a) * c.dist)
+	self.cam.FieldOfView = c.fov
+	self.cam.CFrame = CFrame.lookAt(pos, alvo)
+end
+
+-- D-214: o instante da cena (s desde o começo da comemoração), para a tela acompanhar o roteiro
+function Cena.tempo(self: any): number
+	return self.t
 end
 
 -- Onde (fração da largura da cena) fica o pé do soldado do lugar: os cartões vão embaixo dele.

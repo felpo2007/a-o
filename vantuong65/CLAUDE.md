@@ -127,6 +127,12 @@ O `sourcemap.json` não vai para o Git.
     o `VT65Podio` (JSON com `vencedor` e `linhas`; ids sem jogador viram o manequim do lado), o
     `VT65FaseAte` minutos à frente e `VT65Fase = "comemoracao"`. Não guarde captura com o nome da
     conta nos cartões (use nomes de teste);
+  - D-214: no `VT65Podio` cada linha tem `com` (a comemoração; o 1º faz a dele quando a câmera chega,
+    ~5,6 s). A comemoração do jogador sai do remote `Comemoracao_Equipar(id)` (só as que ele tem) e
+    vai para os atributos `Comemoracao` e `ComemoracoesTem`. O roteiro (chegada, câmera, troca) está
+    no `Shared/Comemoracao.PODIO`.
+    - Antes de olhar ViewportFrame no Studio, confira se o RobloxPlayerBeta do dono está ocioso
+      (~150 MB). Com o jogo dele aberto (2,3 GB), os ViewportFrames pararam de desenhar.
   - D-203: a contagem sai de `VT65InicioEm` (ReplicatedStorage, relógio do servidor). Para medir, anote
     no cliente a hora (`GetServerTimeNow`) em que o texto de `VT65Contagem.Contagem` muda e os sons
     `VT65Contagem_*` do SoundService. Guarde o medidor no ReplicatedStorage, não no PlayerGui: a
@@ -420,7 +426,7 @@ O `sourcemap.json` não vai para o Git.
 - Segredos só no `.env` (no `.gitignore`), nunca no código nem no chat.
 - ForgeGUI: nunca regenerar um job em `outcome_unknown`. "failed" com `retryable` pode ser
   retomado com `generation_retry`.
-- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-214) e atualize `PROGRESS.md`.
+- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-215) e atualize `PROGRESS.md`.
 - Tetos de triângulos por modelo: vegetação ≤ 6 mil (D-135), props e herói ≤ 20 mil (`ArtBudget`,
   conferido pelo teste da F5).
 - Commits no branch acima, com mensagem em português.
