@@ -1078,6 +1078,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
   - **Lote 103 (D-231): jogabilidade do relatório, feito.** Aviso de limite com seta, câmera sem salto,
     avisos com prioridade; a corrida continua com dano (medido). Relatório:
     `testes/LOTE103_D231_2026-11-21.md`.
+    - **v135 publicada** (versão 140 do place, commit 7fc7eb1).
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;
