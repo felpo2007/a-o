@@ -1115,6 +1115,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     - Desenho: -0,8% sobre a v139 nas 9 vistas.
     - **Sem teste:** os sons de ouvido, celular real, servidor cheio e cura entre dois humanos.
     - Relatório: `testes/LOTE108_D236_2026-11-21.md`.
+    - **v140 publicada** (versão 145 do place, commit 4de4929).
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;
