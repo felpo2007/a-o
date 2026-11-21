@@ -212,6 +212,41 @@ def instanciar(modelos: list[dict], moldes: dict[str, dict]) -> list[dict]:
     return out
 
 
+def _desloca(n: dict, d: list[float]) -> dict:
+    """Cópia da peça ou do submodelo levada por `d` (construção de peças, sem escala)."""
+    if not folha(n):
+        return {"nome": n["nome"], "filhos": [_desloca(f, d) for f in n["filhos"]]}
+    p = dict(n)
+    p["pos"] = [round(n["pos"][i] + d[i], 4) for i in range(3)]
+    return p
+
+
+def ajustar(modelos: list[dict], ajuste: dict[str, dict]) -> list[dict]:
+    """D-236: leva cada casa ao novo pivô e à escala (tools/casas_escala.luau), sem recopiar."""
+    out = []
+    for m in modelos:
+        x, y, z = m["pivo"]
+        a = ajuste.get(f"{m['chave']}|{x:.3f}|{y:.3f}|{z:.3f}")
+        if a is None:
+            out.append(m)
+            continue
+        if a.get("fora"):
+            continue  # anexo que ficou sem lugar ao lado da casa maior
+        novo = {
+            "chave": m["chave"],
+            "pivo": [a["x"], a["y"], a["z"]],
+            "giro": m["giro"],
+            "escala": round(m["escala"] * a["f"], 5),
+        }
+        if abs(a["f"] - 1) < 1e-6:
+            d = [a["x"] - x, a["y"] - y, a["z"] - z]
+            novo["filhos"] = [_desloca(f, d) for f in m["filhos"]]
+        else:
+            novo["filhos"] = [_copiar_no(f, m, novo) for f in m["filhos"]]
+        out.append(novo)
+    return out
+
+
 def moldes_de(arquivos: list[Path]) -> dict[str, dict]:
     """O primeiro M de cada chave, na ordem dos arquivos."""
     moldes: dict[str, dict] = {}
@@ -347,6 +382,9 @@ def main() -> None:
     # D-169: os moldes vêm primeiro dos ligados (na ordem de ativos.json), depois dos outros
     arquivos = [ENTRADA / f"{nome}.txt" for nome in ativos] + sorted(ENTRADA.glob("*.txt"))
     modelos = instanciar(modelos, moldes_de(arquivos))
+    arq_ajuste = ENTRADA / "ajuste_casas.json"
+    if arq_ajuste.exists():
+        modelos = ajustar(modelos, json.loads(arq_ajuste.read_text("utf-8")))
     SAIDA.mkdir(parents=True, exist_ok=True)
     (SAIDA / ".gitkeep").write_text("", "utf-8")
     for velho in SAIDA.glob("*.model.json"):

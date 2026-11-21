@@ -1205,7 +1205,7 @@ end
 -- topo do chassi, pelo tamanho. Projeto: o casco inteiro cabe na tela com FOV 70.
 function VehicleDrive.chaseOf(kind: string, lengthStuds: number): (number, number)
 	if kind == "heli" then
-		return 62, 6
+		return 78, 8 -- D-236: o helicóptero entra 25% maior (eram 62 e 6)
 	end
 	return lengthStuds * 1.2 + 8, 4
 end

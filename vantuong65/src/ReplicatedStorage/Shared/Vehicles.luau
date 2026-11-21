@@ -220,6 +220,32 @@ Vehicles.SPECS = {
 	},
 } :: { [string]: Spec }
 
+-- D-236 (dono: "faça todos os veículos maiores para q os soldados caibam dentro deles"): o soldado do
+-- jogo tem 2,03 m (Shared/Corpo) e as fichas acima são as medidas reais, para gente de 1,75 m. Todo veículo
+-- entra 25% maior na mesma proporção: chassi, arte (VehicleService.build), assentos e juntas (vêm da
+-- arte, pela razão malha/caixa). Massa, potência e blindagem continuam as da ficha.
+Vehicles.ESCALA = 1.25
+for _, s in Vehicles.SPECS do
+	s.lengthM *= Vehicles.ESCALA
+	s.widthM *= Vehicles.ESCALA
+	s.heightM *= Vehicles.ESCALA
+end
+
+-- D-236 (dono: "os soldados devem ficar dentro dos tanques e veiculos sem aparecerem para fora"): quem
+-- continua à vista é só quem está num lugar aberto de verdade: jipe, caçamba do M35, tropa no teto do
+-- LVTP-5 e o atirador da porta do UH-34D. O resto fica dentro (Controllers/OcupanteVeiculo esconde).
+function Vehicles.ocupanteAparece(specId: string, seatId: string): boolean
+	local tropa = string.match(seatId, "^p%d+$") ~= nil
+	if specId == "m151" then
+		return true
+	elseif specId == "m35" or specId == "lvtp5" then
+		return tropa
+	elseif specId == "uh34d" then
+		return seatId == "gunner"
+	end
+	return false
+end
+
 -- Passageiros: LVTP-5 leva 34 pela ficha e o H-34A, 12. No jogo, 12 e 8 assentos, porque o squad
 -- tem 6 (D-37). D-100: M151 com 2 atrás, M35 com 12 na caçamba e a Peugeot com 6 sob a lona.
 Vehicles.PASSENGERS = { lvtp5 = 12, uh34d = 8, m48a3 = 0, ontos = 0, m151 = 2, m35 = 12, peugeot403 = 6 }

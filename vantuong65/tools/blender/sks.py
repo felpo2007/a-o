@@ -66,7 +66,7 @@ D_ALCA = 0.526  # fundo do entalhe (fim de trás da folha da alça)
 D_MASSA = 0.990  # poste da massa, dentro do capuz
 # meia largura do entalhe (4,4 mm, mais largo que o real: no Studio o de 2,6 mm saía com ~6 px) e
 # do poste (2,4 mm)
-ENTALHE_MEIA = 0.0022
+ENTALHE_MEIA = 0.0038  # D-236 (dono: "deixe mais limpa"): 7,6 mm, o capuz da massa cabe inteiro
 POSTE_MEIA = 0.0012
 
 
@@ -164,8 +164,9 @@ def sks() -> tuple[list, dict]:
     g.caixa(-0.0090, 0.0090, D_ALCA, 0.572, 0.021, 0.026, MAT_ACO)  # folha
     g.caixa(-0.0105, 0.0105, 0.541, 0.553, 0.020, 0.028, MAT_ACO)  # cursor da folha
     for x0, x1 in lados(ENTALHE_MEIA, 0.0090):  # orelhas do entalhe
-        g.caixa(x0, x1, D_ALCA, D_ALCA + 0.004, 0.021, ZS + 0.0045, MAT_ACO)
-    g.caixa(-ENTALHE_MEIA, ENTALHE_MEIA, D_ALCA, D_ALCA + 0.004, 0.021, ZS, MAT_ACO)
+        g.caixa(x0, x1, D_ALCA, D_ALCA + 0.004, 0.021, ZS + 0.0002, MAT_ACO)
+    # D-236: o fundo 5,5 mm abaixo da linha (na altura dela, escondia o poste da massa)
+    g.caixa(-ENTALHE_MEIA, ENTALHE_MEIA, D_ALCA, D_ALCA + 0.004, 0.021, ZS - 0.0055, MAT_ACO)
     g.torno(
         [(0.575, 0.0070), (0.842, 0.0070)], 0, 0.018, MAT_ACO, k=16, cap0=MAT_ACO, cap1=MAT_ACO
     )

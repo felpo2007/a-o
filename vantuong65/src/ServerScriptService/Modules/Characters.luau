@@ -629,12 +629,17 @@ function Characters.dress(model: Model, faction: string, equipped: { [string]: s
 	local pantsId = if u.pants then C[u.pants] else 0
 	if type(shirtId) == "number" and shirtId ~= 0 then
 		local s = model:FindFirstChildOfClass("Shirt") or Instance.new("Shirt")
-		s.ShirtTemplate = imageUrl(shirtId)
+		-- D-236: os moldes *_v3 são a versão pintada, publicada como Image (o ID já é o da imagem)
+		s.ShirtTemplate = if string.sub(u.shirt :: string, -3) == "_v3"
+			then "rbxassetid://" .. shirtId
+			else imageUrl(shirtId)
 		s.Parent = model
 	end
 	if type(pantsId) == "number" and pantsId ~= 0 then
 		local p = model:FindFirstChildOfClass("Pants") or Instance.new("Pants")
-		p.PantsTemplate = imageUrl(pantsId)
+		p.PantsTemplate = if string.sub(u.pants :: string, -3) == "_v3"
+			then "rbxassetid://" .. pantsId
+			else imageUrl(pantsId)
 		p.Parent = model
 	end
 	model:SetAttribute("Uniforme", u.variant)

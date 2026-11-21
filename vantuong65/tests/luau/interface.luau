@@ -550,8 +550,9 @@ test("cores de compra: baixa, loja, carta de inserção, passe e intendência us
 	has("ShopController.client.luau", 'UiKit.action(f, "", "robux"')
 	has("ShopController.client.luau", 'UiKit.payPaint(bt, "robux"')
 	has("ShopController.client.luau", 'pay = if isRobux then "robux" else "ci"')
-	has("CompraVeiculo.client.luau", 'addRow(name, "robux"')
-	has("CompraVeiculo.client.luau", 'addRow(name, "ci"')
+	-- D-236: a vitrine tem um cartão por viatura, com os dois preços lado a lado
+	has("CompraVeiculo.client.luau", 'addRow(precos, "ROBUX", "robux"')
+	has("CompraVeiculo.client.luau", 'item.credits), "ci"')
 	has("TelaPasse.client.luau", 'UiKit.action(detail, "", "robux"') -- D-124: a ficha embaixo da linha do tempo
 	has("Progresso.client.luau", "robux = { bg = UiKit.PAGAR.robux.base")
 end)

@@ -312,7 +312,9 @@ test("layout padrão = tabela da Parte 12 (infantaria, veículos, mapa e menus)"
 		{ "infantry", "mark", "DPadRight", "tap" },
 		{ "aim", "lean_left", "ButtonL1", "press" }, -- D-189: LB/RB mirando inclinam
 		{ "aim", "lean_right", "ButtonR1", "press" },
-		{ "aim", "hold_breath", "ButtonL3", "press" }, -- D-189: prender a respiração foi para o L3
+		{ "aim", "lean_left_stick", "ButtonL3", "tap" }, -- D-236: L inclina à esquerda
+		{ "aim", "lean_right_stick", "ButtonR3", "press" }, -- D-236: R inclina à direita
+		{ "aim", "hold_breath", "ButtonL3", "hold" }, -- D-236: segurar o L3 prende a respiração
 		{ "infantry", "crouch", "ButtonB", "tap" },
 		{ "infantry", "prone", "ButtonB", "hold" },
 		{ "infantry", "reload", "ButtonX", "tap" },
@@ -567,11 +569,14 @@ test("D-189: inclinar alterna (três estados), LB/RB mirando não lançam granad
 	local aimPads: { [string]: string } = {}
 	for _, a in InputMap.ACTIONS do
 		if a.ctx == "aim" and a.pad then
-			aimPads[a.pad] = a.id
+			aimPads[a.pad .. ":" .. a.padPress] = a.id
 		end
 	end
-	assert(aimPads.ButtonL1 == "lean_left" and aimPads.ButtonR1 == "lean_right", "LB/RB na mira")
-	assert(aimPads.ButtonL3 == "hold_breath", "L3 mirando prende a respiração (não corre)")
+	assert(aimPads["ButtonL1:press"] == "lean_left" and aimPads["ButtonR1:press"] == "lean_right", "LB/RB na mira")
+	-- D-236: mirando, o L vai para a esquerda e o R para a direita; segurar o L prende a respiração
+	assert(aimPads["ButtonL3:tap"] == "lean_left_stick", "tocar no L3 inclina à esquerda")
+	assert(aimPads["ButtonR3:press"] == "lean_right_stick", "R3 inclina à direita")
+	assert(aimPads["ButtonL3:hold"] == "hold_breath", "segurar o L3 prende a respiração (não corre)")
 	local layers = InputMap.layers("aim")
 	assert(layers[1] == "aim", "a mira é a primeira camada")
 	-- o toque segura (trava do botão e quina sozinha): o alternar não vale para ele

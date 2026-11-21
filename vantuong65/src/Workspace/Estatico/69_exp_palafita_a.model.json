@@ -1,0 +1,323 @@
+{
+ "ClassName": "Model",
+ "Properties": {
+  "LevelOfDetail": {
+   "Enum": 4
+  },
+  "ModelStreamingMode": "Atomic",
+  "WorldPivotData": {
+   "OptionalCFrame": {
+    "position": [
+     -1666.1,
+     68.6,
+     -2214.302
+    ],
+    "orientation": [
+     [
+      -1.0,
+      0,
+      0.0
+     ],
+     [
+      0,
+      1,
+      0
+     ],
+     [
+      -0.0,
+      0,
+      -1.0
+     ]
+    ]
+   }
+  },
+  "Attributes": {
+   "Attributes": {
+    "VT65Estatico": {
+     "Bool": true
+    },
+    "VT65Chave": {
+     "String": "exp_palafita_a"
+    }
+   }
+  }
+ },
+ "Children": [
+  {
+   "Name": "Trim_M_Node",
+   "ClassName": "Model",
+   "Children": [
+    {
+     "Name": "Trim_M",
+     "ClassName": "MeshPart",
+     "Properties": {
+      "MeshId": "rbxassetid://127383309970348",
+      "InitialSize": [
+       27.5,
+       23.86,
+       35.183
+      ],
+      "Size": [
+       34.375,
+       29.825,
+       43.9787
+      ],
+      "CFrame": {
+       "CFrame": {
+        "position": [
+         -1666.1,
+         83.5987,
+         -2213.3758
+        ],
+        "orientation": [
+         [
+          -1.0,
+          0,
+          0.0
+         ],
+         [
+          0,
+          1,
+          0
+         ],
+         [
+          -0.0,
+          0,
+          -1.0
+         ]
+        ]
+       }
+      },
+      "Anchored": true,
+      "CanCollide": false,
+      "CanQuery": false,
+      "CanTouch": false,
+      "CastShadow": true,
+      "Transparency": 0,
+      "CollisionFidelity": "Default"
+     },
+     "Children": [
+      {
+       "Name": "SurfaceAppearance",
+       "ClassName": "SurfaceAppearance",
+       "Properties": {
+        "AlphaMode": "Overlay",
+        "ColorMap": "rbxassetid://134979674313261",
+        "NormalMap": "rbxassetid://116858274661487",
+        "RoughnessMap": "rbxassetid://120767651982064",
+        "MetalnessMap": "rbxassetid://109994254315822"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "Name": "Trim_O_Node",
+   "ClassName": "Model",
+   "Children": [
+    {
+     "Name": "Trim_O",
+     "ClassName": "MeshPart",
+     "Properties": {
+      "MeshId": "rbxassetid://109505938464376",
+      "InitialSize": [
+       26.336,
+       23.75,
+       23.949
+      ],
+      "Size": [
+       32.92,
+       29.6875,
+       29.9363
+      ],
+      "CFrame": {
+       "CFrame": {
+        "position": [
+         -1666.1,
+         83.7125,
+         -2220.5545
+        ],
+        "orientation": [
+         [
+          -1.0,
+          0,
+          0.0
+         ],
+         [
+          0,
+          1,
+          0
+         ],
+         [
+          -0.0,
+          0,
+          -1.0
+         ]
+        ]
+       }
+      },
+      "Anchored": true,
+      "CanCollide": false,
+      "CanQuery": false,
+      "CanTouch": false,
+      "CastShadow": true,
+      "Transparency": 0,
+      "CollisionFidelity": "Default"
+     },
+     "Children": [
+      {
+       "Name": "SurfaceAppearance",
+       "ClassName": "SurfaceAppearance",
+       "Properties": {
+        "AlphaMode": "Overlay",
+        "ColorMap": "rbxassetid://98817676281040",
+        "NormalMap": "rbxassetid://97059026021565",
+        "RoughnessMap": "rbxassetid://70521593518624",
+        "MetalnessMap": "rbxassetid://109994254315822"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "Name": "Mobilia_Node",
+   "ClassName": "Model",
+   "Children": [
+    {
+     "Name": "Mobilia",
+     "ClassName": "MeshPart",
+     "Properties": {
+      "MeshId": "rbxassetid://101143747323880",
+      "InitialSize": [
+       23.615,
+       16.738,
+       16.594
+      ],
+      "Size": [
+       29.5187,
+       20.9225,
+       20.7425
+      ],
+      "CFrame": {
+       "CFrame": {
+        "position": [
+         -1666.25,
+         79.33,
+         -2224.6132
+        ],
+        "orientation": [
+         [
+          -1.0,
+          0,
+          0.0
+         ],
+         [
+          0,
+          1,
+          0
+         ],
+         [
+          -0.0,
+          0,
+          -1.0
+         ]
+        ]
+       }
+      },
+      "Anchored": true,
+      "CanCollide": false,
+      "CanQuery": false,
+      "CanTouch": false,
+      "CastShadow": true,
+      "Transparency": 0,
+      "CollisionFidelity": "Default"
+     },
+     "Children": [
+      {
+       "Name": "SurfaceAppearance",
+       "ClassName": "SurfaceAppearance",
+       "Properties": {
+        "AlphaMode": "Overlay",
+        "ColorMap": "rbxassetid://138459511046247",
+        "NormalMap": "rbxassetid://83341921454281",
+        "RoughnessMap": "rbxassetid://129215450629989",
+        "MetalnessMap": "rbxassetid://95185776785451"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "Name": "Telhado_Node",
+   "ClassName": "Model",
+   "Children": [
+    {
+     "Name": "Telhado",
+     "ClassName": "MeshPart",
+     "Properties": {
+      "MeshId": "rbxassetid://99314760622766",
+      "InitialSize": [
+       27.643,
+       7.748,
+       26.039
+      ],
+      "Size": [
+       34.5538,
+       9.685,
+       32.5487
+      ],
+      "CFrame": {
+       "CFrame": {
+        "position": [
+         -1666.1,
+         93.8875,
+         -2220.8795
+        ],
+        "orientation": [
+         [
+          -1.0,
+          0,
+          0.0
+         ],
+         [
+          0,
+          1,
+          0
+         ],
+         [
+          -0.0,
+          0,
+          -1.0
+         ]
+        ]
+       }
+      },
+      "Anchored": true,
+      "CanCollide": false,
+      "CanQuery": false,
+      "CanTouch": false,
+      "CastShadow": true,
+      "Transparency": 0,
+      "CollisionFidelity": "Default"
+     },
+     "Children": [
+      {
+       "Name": "SurfaceAppearance",
+       "ClassName": "SurfaceAppearance",
+       "Properties": {
+        "AlphaMode": "Overlay",
+        "ColorMap": "rbxassetid://109258699394442",
+        "NormalMap": "rbxassetid://76107743770798",
+        "RoughnessMap": "rbxassetid://89402187345325",
+        "MetalnessMap": "rbxassetid://95185776785451"
+       }
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

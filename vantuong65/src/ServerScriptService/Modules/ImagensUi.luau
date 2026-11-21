@@ -50,7 +50,8 @@ function ImagensUi.moldes()
 					local d = key and C[key]
 					if key and not feitos[key] and type(d) == "number" and d ~= 0 then
 						feitos[key] = true
-						local id = imageOf(d)
+						-- D-236: os moldes *_v3 agora são a versão pintada, publicada como Image (ID direto)
+						local id = if string.sub(key, -3) == "_v3" then d else imageOf(d)
 						if id and id ~= 0 then
 							ReplicatedStorage:SetAttribute("Molde_" .. key, id)
 						end

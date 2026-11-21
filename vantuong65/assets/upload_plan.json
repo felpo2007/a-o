@@ -11737,5 +11737,474 @@
   "assetType": "Model",
   "name": "VT65 exp_sobrado_d",
   "description": "VAN TUONG 65 - expansao da Vila e do Arrozal (Blender)"
+ },
+ {
+  "key": "Rostos2.us_01",
+  "file": "assets/rostos/v2/rosto_us_01.png",
+  "assetType": "Image",
+  "name": "VT65 rosto2 us 01",
+  "description": "VAN TUONG 65 - rosto pintado de soldado (D-236)"
+ },
+ {
+  "key": "Rostos2.us_02",
+  "file": "assets/rostos/v2/rosto_us_02.png",
+  "assetType": "Image",
+  "name": "VT65 rosto2 us 02",
+  "description": "VAN TUONG 65 - rosto pintado de soldado (D-236)"
+ },
+ {
+  "key": "Rostos2.us_03",
+  "file": "assets/rostos/v2/rosto_us_03.png",
+  "assetType": "Image",
+  "name": "VT65 rosto2 us 03",
+  "description": "VAN TUONG 65 - rosto pintado de soldado (D-236)"
+ },
+ {
+  "key": "Rostos2.us_04",
+  "file": "assets/rostos/v2/rosto_us_04.png",
+  "assetType": "Image",
+  "name": "VT65 rosto2 us 04",
+  "description": "VAN TUONG 65 - rosto pintado de soldado (D-236)"
+ },
+ {
+  "key": "Rostos2.us_05",
+  "file": "assets/rostos/v2/rosto_us_05.png",
+  "assetType": "Image",
+  "name": "VT65 rosto2 us 05",
+  "description": "VAN TUONG 65 - rosto pintado de soldado (D-236)"
+ },
+ {
+  "key": "Rostos2.us_06",
+  "file": "assets/rostos/v2/rosto_us_06.png",
+  "assetType": "Image",
+  "name": "VT65 rosto2 us 06",
+  "description": "VAN TUONG 65 - rosto pintado de soldado (D-236)"
+ },
+ {
+  "key": "Rostos2.us_07",
+  "file": "assets/rostos/v2/rosto_us_07.png",
+  "assetType": "Image",
+  "name": "VT65 rosto2 us 07",
+  "description": "VAN TUONG 65 - rosto pintado de soldado (D-236)"
+ },
+ {
+  "key": "Rostos2.us_08",
+  "file": "assets/rostos/v2/rosto_us_08.png",
+  "assetType": "Image",
+  "name": "VT65 rosto2 us 08",
+  "description": "VAN TUONG 65 - rosto pintado de soldado (D-236)"
+ },
+ {
+  "key": "Rostos2.us_09",
+  "file": "assets/rostos/v2/rosto_us_09.png",
+  "assetType": "Image",
+  "name": "VT65 rosto2 us 09",
+  "description": "VAN TUONG 65 - rosto pintado de soldado (D-236)"
+ },
+ {
+  "key": "Rostos2.us_10",
+  "file": "assets/rostos/v2/rosto_us_10.png",
+  "assetType": "Image",
+  "name": "VT65 rosto2 us 10",
+  "description": "VAN TUONG 65 - rosto pintado de soldado (D-236)"
+ },
+ {
+  "key": "Rostos2.us_11",
+  "file": "assets/rostos/v2/rosto_us_11.png",
+  "assetType": "Image",
+  "name": "VT65 rosto2 us 11",
+  "description": "VAN TUONG 65 - rosto pintado de soldado (D-236)"
+ },
+ {
+  "key": "Rostos2.us_12",
+  "file": "assets/rostos/v2/rosto_us_12.png",
+  "assetType": "Image",
+  "name": "VT65 rosto2 us 12",
+  "description": "VAN TUONG 65 - rosto pintado de soldado (D-236)"
+ },
+ {
+  "key": "Rostos2.vc_01",
+  "file": "assets/rostos/v2/rosto_vc_01.png",
+  "assetType": "Image",
+  "name": "VT65 rosto2 vc 01",
+  "description": "VAN TUONG 65 - rosto pintado de soldado (D-236)"
+ },
+ {
+  "key": "Rostos2.vc_02",
+  "file": "assets/rostos/v2/rosto_vc_02.png",
+  "assetType": "Image",
+  "name": "VT65 rosto2 vc 02",
+  "description": "VAN TUONG 65 - rosto pintado de soldado (D-236)"
+ },
+ {
+  "key": "Rostos2.vc_03",
+  "file": "assets/rostos/v2/rosto_vc_03.png",
+  "assetType": "Image",
+  "name": "VT65 rosto2 vc 03",
+  "description": "VAN TUONG 65 - rosto pintado de soldado (D-236)"
+ },
+ {
+  "key": "Rostos2.vc_04",
+  "file": "assets/rostos/v2/rosto_vc_04.png",
+  "assetType": "Image",
+  "name": "VT65 rosto2 vc 04",
+  "description": "VAN TUONG 65 - rosto pintado de soldado (D-236)"
+ },
+ {
+  "key": "Rostos2.vc_05",
+  "file": "assets/rostos/v2/rosto_vc_05.png",
+  "assetType": "Image",
+  "name": "VT65 rosto2 vc 05",
+  "description": "VAN TUONG 65 - rosto pintado de soldado (D-236)"
+ },
+ {
+  "key": "Rostos2.vc_06",
+  "file": "assets/rostos/v2/rosto_vc_06.png",
+  "assetType": "Image",
+  "name": "VT65 rosto2 vc 06",
+  "description": "VAN TUONG 65 - rosto pintado de soldado (D-236)"
+ },
+ {
+  "key": "Rostos2.vc_07",
+  "file": "assets/rostos/v2/rosto_vc_07.png",
+  "assetType": "Image",
+  "name": "VT65 rosto2 vc 07",
+  "description": "VAN TUONG 65 - rosto pintado de soldado (D-236)"
+ },
+ {
+  "key": "Rostos2.vc_08",
+  "file": "assets/rostos/v2/rosto_vc_08.png",
+  "assetType": "Image",
+  "name": "VT65 rosto2 vc 08",
+  "description": "VAN TUONG 65 - rosto pintado de soldado (D-236)"
+ },
+ {
+  "key": "Rostos2.vc_09",
+  "file": "assets/rostos/v2/rosto_vc_09.png",
+  "assetType": "Image",
+  "name": "VT65 rosto2 vc 09",
+  "description": "VAN TUONG 65 - rosto pintado de soldado (D-236)"
+ },
+ {
+  "key": "Rostos2.vc_10",
+  "file": "assets/rostos/v2/rosto_vc_10.png",
+  "assetType": "Image",
+  "name": "VT65 rosto2 vc 10",
+  "description": "VAN TUONG 65 - rosto pintado de soldado (D-236)"
+ },
+ {
+  "key": "Rostos2.vc_11",
+  "file": "assets/rostos/v2/rosto_vc_11.png",
+  "assetType": "Image",
+  "name": "VT65 rosto2 vc 11",
+  "description": "VAN TUONG 65 - rosto pintado de soldado (D-236)"
+ },
+ {
+  "key": "Rostos2.vc_12",
+  "file": "assets/rostos/v2/rosto_vc_12.png",
+  "assetType": "Image",
+  "name": "VT65 rosto2 vc 12",
+  "description": "VAN TUONG 65 - rosto pintado de soldado (D-236)"
+ },
+ {
+  "key": "Roupa4.us_duck_pants_v3",
+  "file": "assets/clothing/v4/us_duck_pants_v3.png",
+  "assetType": "Image",
+  "name": "VT65 roupa4 us_duck_pants_v3",
+  "description": "VAN TUONG 65 - uniforme com dobras e luz (D-236)"
+ },
+ {
+  "key": "Roupa4.us_duck_shirt_v3",
+  "file": "assets/clothing/v4/us_duck_shirt_v3.png",
+  "assetType": "Image",
+  "name": "VT65 roupa4 us_duck_shirt_v3",
+  "description": "VAN TUONG 65 - uniforme com dobras e luz (D-236)"
+ },
+ {
+  "key": "Roupa4.us_faded_pants_v3",
+  "file": "assets/clothing/v4/us_faded_pants_v3.png",
+  "assetType": "Image",
+  "name": "VT65 roupa4 us_faded_pants_v3",
+  "description": "VAN TUONG 65 - uniforme com dobras e luz (D-236)"
+ },
+ {
+  "key": "Roupa4.us_faded_shirt_v3",
+  "file": "assets/clothing/v4/us_faded_shirt_v3.png",
+  "assetType": "Image",
+  "name": "VT65 roupa4 us_faded_shirt_v3",
+  "description": "VAN TUONG 65 - uniforme com dobras e luz (D-236)"
+ },
+ {
+  "key": "Roupa4.us_fundador_pants_v3",
+  "file": "assets/clothing/v4/us_fundador_pants_v3.png",
+  "assetType": "Image",
+  "name": "VT65 roupa4 us_fundador_pants_v3",
+  "description": "VAN TUONG 65 - uniforme com dobras e luz (D-236)"
+ },
+ {
+  "key": "Roupa4.us_fundador_shirt_v3",
+  "file": "assets/clothing/v4/us_fundador_shirt_v3.png",
+  "assetType": "Image",
+  "name": "VT65 roupa4 us_fundador_shirt_v3",
+  "description": "VAN TUONG 65 - uniforme com dobras e luz (D-236)"
+ },
+ {
+  "key": "Roupa4.us_goldtiger_pants_v3",
+  "file": "assets/clothing/v4/us_goldtiger_pants_v3.png",
+  "assetType": "Image",
+  "name": "VT65 roupa4 us_goldtiger_pants_v3",
+  "description": "VAN TUONG 65 - uniforme com dobras e luz (D-236)"
+ },
+ {
+  "key": "Roupa4.us_goldtiger_shirt_v3",
+  "file": "assets/clothing/v4/us_goldtiger_shirt_v3.png",
+  "assetType": "Image",
+  "name": "VT65 roupa4 us_goldtiger_shirt_v3",
+  "description": "VAN TUONG 65 - uniforme com dobras e luz (D-236)"
+ },
+ {
+  "key": "Roupa4.us_hbt_pants_v3",
+  "file": "assets/clothing/v4/us_hbt_pants_v3.png",
+  "assetType": "Image",
+  "name": "VT65 roupa4 us_hbt_pants_v3",
+  "description": "VAN TUONG 65 - uniforme com dobras e luz (D-236)"
+ },
+ {
+  "key": "Roupa4.us_hbt_shirt_v3",
+  "file": "assets/clothing/v4/us_hbt_shirt_v3.png",
+  "assetType": "Image",
+  "name": "VT65 roupa4 us_hbt_shirt_v3",
+  "description": "VAN TUONG 65 - uniforme com dobras e luz (D-236)"
+ },
+ {
+  "key": "Roupa4.us_lizard_pants_v3",
+  "file": "assets/clothing/v4/us_lizard_pants_v3.png",
+  "assetType": "Image",
+  "name": "VT65 roupa4 us_lizard_pants_v3",
+  "description": "VAN TUONG 65 - uniforme com dobras e luz (D-236)"
+ },
+ {
+  "key": "Roupa4.us_lizard_shirt_v3",
+  "file": "assets/clothing/v4/us_lizard_shirt_v3.png",
+  "assetType": "Image",
+  "name": "VT65 roupa4 us_lizard_shirt_v3",
+  "description": "VAN TUONG 65 - uniforme com dobras e luz (D-236)"
+ },
+ {
+  "key": "Roupa4.us_pants_v3",
+  "file": "assets/clothing/v4/us_pants_v3.png",
+  "assetType": "Image",
+  "name": "VT65 roupa4 us_pants_v3",
+  "description": "VAN TUONG 65 - uniforme com dobras e luz (D-236)"
+ },
+ {
+  "key": "Roupa4.us_shirt_rolled_v3",
+  "file": "assets/clothing/v4/us_shirt_rolled_v3.png",
+  "assetType": "Image",
+  "name": "VT65 roupa4 us_shirt_rolled_v3",
+  "description": "VAN TUONG 65 - uniforme com dobras e luz (D-236)"
+ },
+ {
+  "key": "Roupa4.us_shirt_v3",
+  "file": "assets/clothing/v4/us_shirt_v3.png",
+  "assetType": "Image",
+  "name": "VT65 roupa4 us_shirt_v3",
+  "description": "VAN TUONG 65 - uniforme com dobras e luz (D-236)"
+ },
+ {
+  "key": "Roupa4.us_tadpole_pants_v3",
+  "file": "assets/clothing/v4/us_tadpole_pants_v3.png",
+  "assetType": "Image",
+  "name": "VT65 roupa4 us_tadpole_pants_v3",
+  "description": "VAN TUONG 65 - uniforme com dobras e luz (D-236)"
+ },
+ {
+  "key": "Roupa4.us_tadpole_shirt_v3",
+  "file": "assets/clothing/v4/us_tadpole_shirt_v3.png",
+  "assetType": "Image",
+  "name": "VT65 roupa4 us_tadpole_shirt_v3",
+  "description": "VAN TUONG 65 - uniforme com dobras e luz (D-236)"
+ },
+ {
+  "key": "Roupa4.us_tiger_pants_v3",
+  "file": "assets/clothing/v4/us_tiger_pants_v3.png",
+  "assetType": "Image",
+  "name": "VT65 roupa4 us_tiger_pants_v3",
+  "description": "VAN TUONG 65 - uniforme com dobras e luz (D-236)"
+ },
+ {
+  "key": "Roupa4.us_tiger_shirt_v3",
+  "file": "assets/clothing/v4/us_tiger_shirt_v3.png",
+  "assetType": "Image",
+  "name": "VT65 roupa4 us_tiger_shirt_v3",
+  "description": "VAN TUONG 65 - uniforme com dobras e luz (D-236)"
+ },
+ {
+  "key": "Roupa4.vc_anil_pants_v3",
+  "file": "assets/clothing/v4/vc_anil_pants_v3.png",
+  "assetType": "Image",
+  "name": "VT65 roupa4 vc_anil_pants_v3",
+  "description": "VAN TUONG 65 - uniforme com dobras e luz (D-236)"
+ },
+ {
+  "key": "Roupa4.vc_anil_shirt_v3",
+  "file": "assets/clothing/v4/vc_anil_shirt_v3.png",
+  "assetType": "Image",
+  "name": "VT65 roupa4 vc_anil_shirt_v3",
+  "description": "VAN TUONG 65 - uniforme com dobras e luz (D-236)"
+ },
+ {
+  "key": "Roupa4.vc_black_pants_v3",
+  "file": "assets/clothing/v4/vc_black_pants_v3.png",
+  "assetType": "Image",
+  "name": "VT65 roupa4 vc_black_pants_v3",
+  "description": "VAN TUONG 65 - uniforme com dobras e luz (D-236)"
+ },
+ {
+  "key": "Roupa4.vc_black_shirt_v3",
+  "file": "assets/clothing/v4/vc_black_shirt_v3.png",
+  "assetType": "Image",
+  "name": "VT65 roupa4 vc_black_shirt_v3",
+  "description": "VAN TUONG 65 - uniforme com dobras e luz (D-236)"
+ },
+ {
+  "key": "Roupa4.vc_brown_pants_v3",
+  "file": "assets/clothing/v4/vc_brown_pants_v3.png",
+  "assetType": "Image",
+  "name": "VT65 roupa4 vc_brown_pants_v3",
+  "description": "VAN TUONG 65 - uniforme com dobras e luz (D-236)"
+ },
+ {
+  "key": "Roupa4.vc_brown_shirt_v3",
+  "file": "assets/clothing/v4/vc_brown_shirt_v3.png",
+  "assetType": "Image",
+  "name": "VT65 roupa4 vc_brown_shirt_v3",
+  "description": "VAN TUONG 65 - uniforme com dobras e luz (D-236)"
+ },
+ {
+  "key": "Roupa4.vc_fundador_pants_v3",
+  "file": "assets/clothing/v4/vc_fundador_pants_v3.png",
+  "assetType": "Image",
+  "name": "VT65 roupa4 vc_fundador_pants_v3",
+  "description": "VAN TUONG 65 - uniforme com dobras e luz (D-236)"
+ },
+ {
+  "key": "Roupa4.vc_fundador_shirt_v3",
+  "file": "assets/clothing/v4/vc_fundador_shirt_v3.png",
+  "assetType": "Image",
+  "name": "VT65 roupa4 vc_fundador_shirt_v3",
+  "description": "VAN TUONG 65 - uniforme com dobras e luz (D-236)"
+ },
+ {
+  "key": "Roupa4.vc_green_pants_v3",
+  "file": "assets/clothing/v4/vc_green_pants_v3.png",
+  "assetType": "Image",
+  "name": "VT65 roupa4 vc_green_pants_v3",
+  "description": "VAN TUONG 65 - uniforme com dobras e luz (D-236)"
+ },
+ {
+  "key": "Roupa4.vc_green_shirt_v3",
+  "file": "assets/clothing/v4/vc_green_shirt_v3.png",
+  "assetType": "Image",
+  "name": "VT65 roupa4 vc_green_shirt_v3",
+  "description": "VAN TUONG 65 - uniforme com dobras e luz (D-236)"
+ },
+ {
+  "key": "Roupa4.vc_khaki_pants_v3",
+  "file": "assets/clothing/v4/vc_khaki_pants_v3.png",
+  "assetType": "Image",
+  "name": "VT65 roupa4 vc_khaki_pants_v3",
+  "description": "VAN TUONG 65 - uniforme com dobras e luz (D-236)"
+ },
+ {
+  "key": "Roupa4.vc_khaki_shirt_v3",
+  "file": "assets/clothing/v4/vc_khaki_shirt_v3.png",
+  "assetType": "Image",
+  "name": "VT65 roupa4 vc_khaki_shirt_v3",
+  "description": "VAN TUONG 65 - uniforme com dobras e luz (D-236)"
+ },
+ {
+  "key": "Roupa4.vc_oliva_pants_v3",
+  "file": "assets/clothing/v4/vc_oliva_pants_v3.png",
+  "assetType": "Image",
+  "name": "VT65 roupa4 vc_oliva_pants_v3",
+  "description": "VAN TUONG 65 - uniforme com dobras e luz (D-236)"
+ },
+ {
+  "key": "Roupa4.vc_oliva_shirt_v3",
+  "file": "assets/clothing/v4/vc_oliva_shirt_v3.png",
+  "assetType": "Image",
+  "name": "VT65 roupa4 vc_oliva_shirt_v3",
+  "description": "VAN TUONG 65 - uniforme com dobras e luz (D-236)"
+ },
+ {
+  "key": "Roupa4.vc_tiger_pants_v3",
+  "file": "assets/clothing/v4/vc_tiger_pants_v3.png",
+  "assetType": "Image",
+  "name": "VT65 roupa4 vc_tiger_pants_v3",
+  "description": "VAN TUONG 65 - uniforme com dobras e luz (D-236)"
+ },
+ {
+  "key": "Roupa4.vc_tiger_shirt_v3",
+  "file": "assets/clothing/v4/vc_tiger_shirt_v3.png",
+  "assetType": "Image",
+  "name": "VT65 roupa4 vc_tiger_shirt_v3",
+  "description": "VAN TUONG 65 - uniforme com dobras e luz (D-236)"
+ },
+ {
+  "key": "Recompensas.r1",
+  "file": "assets/ui/recompensas/r1.png",
+  "assetType": "Image",
+  "name": "VT65 recompensa r1",
+  "description": "VAN TUONG 65 - premio da recompensa diaria (D-236)"
+ },
+ {
+  "key": "Recompensas.r2",
+  "file": "assets/ui/recompensas/r2.png",
+  "assetType": "Image",
+  "name": "VT65 recompensa r2",
+  "description": "VAN TUONG 65 - premio da recompensa diaria (D-236)"
+ },
+ {
+  "key": "Recompensas.r3",
+  "file": "assets/ui/recompensas/r3.png",
+  "assetType": "Image",
+  "name": "VT65 recompensa r3",
+  "description": "VAN TUONG 65 - premio da recompensa diaria (D-236)"
+ },
+ {
+  "key": "Recompensas.r4",
+  "file": "assets/ui/recompensas/r4.png",
+  "assetType": "Image",
+  "name": "VT65 recompensa r4",
+  "description": "VAN TUONG 65 - premio da recompensa diaria (D-236)"
+ },
+ {
+  "key": "Recompensas.r5",
+  "file": "assets/ui/recompensas/r5.png",
+  "assetType": "Image",
+  "name": "VT65 recompensa r5",
+  "description": "VAN TUONG 65 - premio da recompensa diaria (D-236)"
+ },
+ {
+  "key": "Recompensas.r6",
+  "file": "assets/ui/recompensas/r6.png",
+  "assetType": "Image",
+  "name": "VT65 recompensa r6",
+  "description": "VAN TUONG 65 - premio da recompensa diaria (D-236)"
+ },
+ {
+  "key": "Recompensas.r7",
+  "file": "assets/ui/recompensas/r7.png",
+  "assetType": "Image",
+  "name": "VT65 recompensa r7",
+  "description": "VAN TUONG 65 - premio da recompensa diaria (D-236)"
+ },
+ {
+  "key": "Recompensas.moeda",
+  "file": "assets/ui/recompensas/moeda.png",
+  "assetType": "Image",
+  "name": "VT65 recompensa moeda",
+  "description": "VAN TUONG 65 - premio da recompensa diaria (D-236)"
  }
 ]

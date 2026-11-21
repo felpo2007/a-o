@@ -3712,5 +3712,14 @@
  "CAPACETE": "MŨ SẮT",
  "Nada por aqui ainda.": "Chưa có gì ở đây.",
  "FORA DA ÁREA": "RA NGOÀI KHU VỰC",
- "Volte: siga a seta · %d m": "Quay lại theo mũi tên · %d m"
+ "Volte: siga a seta · %d m": "Quay lại theo mũi tên · %d m",
+ "%d lugares": "%d chỗ ngồi",
+ "%d lugares · até %d km/h": "%d chỗ ngồi · tối đa %d km/h",
+ "CAÍDO": "BỊ HẠ",
+ "CUIDANDO": "ĐANG CỨU CHỮA",
+ "Companheiro": "Đồng đội",
+ "Nenhum companheiro ferido por perto": "Không có đồng đội bị thương gần đây",
+ "SEGURAR · %s · %d s": "GIỮ · %s · %d giây",
+ "Só o médico reanima": "Chỉ quân y mới cứu sống được",
+ "Um companheiro está cuidando de você": "Một đồng đội đang cứu chữa cho bạn"
 }

@@ -11,6 +11,7 @@ local Corpos = require(ReplicatedStorage.Shared.Corpos)
 local Medical = require(ReplicatedStorage.Shared.Medical)
 local Movement = require(ReplicatedStorage.Shared.Movement)
 local Net = require(ReplicatedStorage.Shared.Net)
+local Socorro = require(ReplicatedStorage.Shared.Socorro)
 local Units = require(ReplicatedStorage.Shared.Units)
 local Vantagens = require(ReplicatedStorage.Shared.Vantagens)
 local Combatants = require(script.Parent.Combatants)
@@ -19,7 +20,7 @@ local CorposService = require(script.Parent.CorposService)
 local MedicalService = {}
 local states: { [Model]: Medical.State } = {}
 local busy: { [Model]: number } = {}
-local REACH = 3 / 0.28 -- 3 m
+local REACH = (Socorro.ALCANCE_M + 0.5) / 0.28 -- D-236: o alcance do cartão, com folga para o passo do alvo
 -- D-107: "Downed" mudou (caiu ou foi reanimado): o PostureService deita ou levanta o corpo
 MedicalService.onDowned = nil :: ((model: Model, on: boolean) -> ())?
 
@@ -63,6 +64,7 @@ local function apply(model: Model)
 	end
 	local was = model:GetAttribute("Downed") == true
 	model:SetAttribute("Downed", s.downedAt ~= nil)
+	model:SetAttribute("VT65Sangra", Medical.bleedRate(s) > 0) -- D-236: a cruz e o cartão de socorro
 	if was ~= (s.downedAt ~= nil) and MedicalService.onDowned then
 		MedicalService.onDowned(model, s.downedAt ~= nil) -- deita de costas / levanta (D-107)
 	end
@@ -203,11 +205,23 @@ local function timed(
 	actor:SetAttribute("VT65AcaoT", workspace:GetServerTimeNow()) -- relógio comum a todos
 	actor:SetAttribute("VT65AcaoS", seconds)
 	actor:SetAttribute("VT65Acao", anim)
+	-- D-236: quem está sendo cuidado sabe, e os outros veem na cruz (ninguém gasta curativo à toa)
+	local noOutro = target ~= actor
+	if noOutro then
+		target:SetAttribute("VT65Cuidando", true)
+		notify(target, "Um companheiro está cuidando de você", true)
+	end
+	local function fimDoCuidado()
+		if noOutro then
+			target:SetAttribute("VT65Cuidando", nil)
+		end
+	end
 	task.spawn(function()
 		local t0 = os.clock()
 		while os.clock() - t0 < seconds do
 			task.wait(0.2)
 			if busy[actor] ~= token then
+				fimDoCuidado()
 				-- levar dano zera o busy (MedicalService.hit); outra ação no lugar não avisa
 				if busy[actor] == nil then
 					notify(actor, "Interrompido: você foi atingido")
@@ -216,11 +230,13 @@ local function timed(
 			end
 			local why = interrupted(actor, target)
 			if why then
+				fimDoCuidado()
 				endAction(actor)
 				notify(actor, why)
 				return
 			end
 		end
+		fimDoCuidado()
 		if busy[actor] ~= token then
 			return
 		end

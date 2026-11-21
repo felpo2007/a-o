@@ -12,15 +12,17 @@ Medical.C = {
 	health = 100,
 	bleed = { light = 0.1, grave = 0.25, arterial = 0.8 }, -- vida por segundo
 	bandageSelf = 6,
-	bandageOther = 4,
+	-- D-236 (dono: "melhore o jeito de curar os aliados"): cuidar do companheiro ficou mais rápido
+	-- (curativo 4 -> 3 s, tratar 10 -> 5 s, reanimar 8 -> 5 s) e o médico devolve a vida inteira (era 75).
+	bandageOther = 3,
 	-- D-129 (pedido do dono: "a bandagem não está funcionando"): o curativo também devolve vida, e
 	-- serve para quem está ferido sem sangrar. PLACEHOLDER de jogo.
 	bandageHeal = 30,
 	tourniquet = 4,
-	medicTreat = 10,
-	medicHealTo = 75,
-	reviveTime = 8,
-	reviveHealth = 30,
+	medicTreat = 5,
+	medicHealTo = 100,
+	reviveTime = 5,
+	reviveHealth = 45,
 	reviveBlur = 20,
 	downWindow = 60,
 	giveUpAfter = 0, -- D-107: desiste a qualquer hora caído (era 15 s); a tela de queda lê daqui
@@ -389,7 +391,7 @@ function Medical.treat(s: State): boolean
 	s.wounds = {}
 	s.armImpaired = false
 	s.legImpaired = false
-	s.health = math.max(s.health, Medical.C.medicHealTo)
+	s.health = math.max(s.health, math.min(Medical.C.medicHealTo, s.maxHealth or Medical.C.health))
 	return true
 end
 

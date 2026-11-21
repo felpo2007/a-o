@@ -228,7 +228,12 @@ Net.event("Combat_Confirm").OnClientEvent:Connect(function(c: any)
 	-- D-204: o marcador e o baque são do kit_balas e do kit_impactos (carne1..4, sem repetir o último)
 	if now - lastSound > 0.05 then
 		lastSound = now
-		Som.kit("kit_balas", if kill then "acerto_abate" elseif head then "acerto_cabeca" else "acerto_corpo", {})
+		-- D-236: agora é o baque gravado, mais baixo que o tiro (o marcador sintético soava estranho)
+		Som.kit(
+			"kit_balas",
+			if kill then "acerto_abate" elseif head then "acerto_cabeca" else "acerto_corpo",
+			{ vol = if kill then 0.6 elseif head then 0.5 else 0.38 }
+		)
 	end
 	local x, y, z = c.x, c.y, c.z
 	if type(x) == "number" and type(y) == "number" and type(z) == "number" then

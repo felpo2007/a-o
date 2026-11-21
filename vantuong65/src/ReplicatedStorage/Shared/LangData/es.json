@@ -3706,5 +3706,14 @@
  "CAPACETE": "CASCO",
  "Nada por aqui ainda.": "Nada por aquí todavía.",
  "FORA DA ÁREA": "FUERA DE ZONA",
- "Volte: siga a seta · %d m": "Vuelve: sigue la flecha · %d m"
+ "Volte: siga a seta · %d m": "Vuelve: sigue la flecha · %d m",
+ "%d lugares": "%d plazas",
+ "%d lugares · até %d km/h": "%d plazas · hasta %d km/h",
+ "CAÍDO": "CAÍDO",
+ "CUIDANDO": "ATENDIENDO",
+ "Companheiro": "Compañero",
+ "Nenhum companheiro ferido por perto": "Ningún compañero herido cerca",
+ "SEGURAR · %s · %d s": "MANTENER · %s · %d s",
+ "Só o médico reanima": "Solo el médico reanima",
+ "Um companheiro está cuidando de você": "Un compañero te está atendiendo"
 }

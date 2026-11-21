@@ -12,6 +12,7 @@ local MarketplaceService = game:GetService("MarketplaceService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
 
 local AssetIds = require(ReplicatedStorage.Shared.AssetIds) :: any
 local CompraVeiculo = require(ReplicatedStorage.Shared.CompraVeiculo)
@@ -20,6 +21,7 @@ local Vehicles = require(ReplicatedStorage.Shared.Vehicles)
 local Bus = require(script.Parent.Bus)
 local Input = require(script.Parent.Input)
 local SpawnTransition = require(script.Parent.SpawnTransition)
+local UiEfeitos = require(script.Parent.UiEfeitos)
 local UiKit = require(script.Parent.UiKit)
 
 local player = Players.LocalPlayer
@@ -103,7 +105,7 @@ local cardImage = Instance.new("ImageLabel")
 cardImage.Name = "Imagem"
 cardImage.BackgroundTransparency = 1
 cardImage.ScaleType = Enum.ScaleType.Fit
-cardImage.Size = UDim2.new(1, 0, 0, 48)
+cardImage.Size = UDim2.new(1, 0, 0, 72)
 cardImage.Visible = false
 cardImage.LayoutOrder = 2
 cardImage.Parent = cardBody
@@ -141,14 +143,51 @@ cardLabel()
 Input.DeviceChanged:Connect(cardLabel)
 
 -- ===== painel de escolha =====
-local PANEL_W = 360
-local panel = UiKit.panel(stage, V.PANEL, 0.04, true)
+-- D-236 (dono: "melhore oq eu apontei nas imagens com imagens melhores feitas com qualidade, efeitos
+-- visuais"): no lugar da lista de botões, uma vitrine no meio da tela, com um cartão por viatura (a
+-- imagem do modelo sobre a luz do lado, a ficha e os dois preços), sobre uma cena do jogo.
+local PANEL_W = 880
+local CARTAO_W = 412
+local CARTAO_H = 338
+local panel = UiKit.panel(stage, V.PANEL, 0, true)
 panel.Name = "LevarVeiculo"
-panel.Position = UDim2.fromOffset(1240 - 8 - PANEL_W, 154)
+panel.AnchorPoint = Vector2.new(0.5, 0.5)
+panel.Position = UDim2.fromOffset(DESIGN_W // 2, DESIGN_H // 2)
 panel.Size = UDim2.fromOffset(PANEL_W, 0)
 panel.AutomaticSize = Enum.AutomaticSize.Y
+panel.ClipsDescendants = true
 panel.Visible = false
 panel.ZIndex = 3
+local panelScale = Instance.new("UIScale")
+panelScale.Parent = panel
+do
+	local capa = (AssetIds.Capas or {}).posto
+	if type(capa) == "number" and capa ~= 0 then
+		local f = Instance.new("ImageLabel")
+		f.Name = "Cena"
+		f.BackgroundTransparency = 1
+		f.Size = UDim2.fromScale(1, 1)
+		f.ScaleType = Enum.ScaleType.Crop
+		f.Image = "rbxassetid://" .. capa
+		f.ZIndex = -3
+		f.Parent = panel
+		local veu = Instance.new("Frame")
+		veu.Name = "VeuCena"
+		veu.BackgroundColor3 = Color3.fromRGB(13, 15, 11)
+		veu.BorderSizePixel = 0
+		veu.Size = UDim2.fromScale(1, 1)
+		veu.ZIndex = -2
+		veu.Parent = panel
+		local g = Instance.new("UIGradient")
+		g.Rotation = 90
+		g.Transparency = NumberSequence.new({
+			NumberSequenceKeypoint.new(0, 0.3),
+			NumberSequenceKeypoint.new(0.3, 0.12),
+			NumberSequenceKeypoint.new(1, 0.04),
+		})
+		g.Parent = veu
+	end
+end
 local stripe = Instance.new("Frame")
 stripe.Size = UDim2.new(1, 0, 0, 5)
 stripe.BorderSizePixel = 0
@@ -158,19 +197,19 @@ body.BackgroundTransparency = 1
 body.Size = UDim2.new(1, 0, 0, 0)
 body.AutomaticSize = Enum.AutomaticSize.Y
 body.Parent = panel
-UiKit.pad(body, 14, 14, 14, 14)
-UiKit.list(body, false, 6)
-local kicker = UiKit.kicker(body, "", 13)
+UiKit.pad(body, 18, 18, 22, 22)
+UiKit.list(body, false, 8)
+local kicker = UiKit.kicker(body, "", 14)
 kicker.Size = UDim2.new(1, 0, 0, 18)
 kicker.LayoutOrder = 1
-local title = UiKit.title(body, "LEVAR VEÍCULO", 26)
-title.Size = UDim2.new(1, 0, 0, 32)
+local title = UiKit.title(body, "LEVAR VEÍCULO", 36)
+title.Size = UDim2.new(1, 0, 0, 42)
 title.LayoutOrder = 2
 local info = UiKit.text2(
 	body,
 	"Sai a 4-10 m de você, virado para o objetivo, quando você entra pelo QG ou por um ponto de reunião. Só é cobrado quando o lugar é achado. Um por vez; abandonado, some; destruído, não volta.",
-	13,
-	V.DIM
+	14,
+	V.TEXT
 )
 info.Size = UDim2.new(1, 0, 0, 0)
 info.AutomaticSize = Enum.AutomaticSize.Y
@@ -180,13 +219,29 @@ info.LayoutOrder = 3
 local rows = Instance.new("Frame")
 rows.Name = "Lista"
 rows.BackgroundTransparency = 1
-rows.Size = UDim2.new(1, 0, 0, 0)
-rows.AutomaticSize = Enum.AutomaticSize.Y
+rows.Size = UDim2.new(1, 0, 0, CARTAO_H)
 rows.LayoutOrder = 4
 rows.Parent = body
-UiKit.list(rows, false, 4)
+do
+	local l = UiKit.list(rows, true, 12) :: any
+	if l then
+		l.HorizontalAlignment = Enum.HorizontalAlignment.Center
+	end
+end
+local rodape = Instance.new("Frame")
+rodape.Name = "Rodape"
+rodape.BackgroundTransparency = 1
+rodape.Size = UDim2.new(1, 0, 0, 44)
+rodape.LayoutOrder = 5
+rodape.Parent = body
+do
+	local l = UiKit.list(rodape, true, 10) :: any
+	if l then
+		l.HorizontalAlignment = Enum.HorizontalAlignment.Right
+	end
+end
 local foot = UiKit.chips(body, 30, false, 13)
-foot.frame.LayoutOrder = 5
+foot.frame.LayoutOrder = 6
 
 -- ===== estado =====
 type State = { spec: string?, pay: string?, state: string, msg: string?, cooldown: number, mine: number, team: number }
@@ -255,7 +310,7 @@ end
 
 -- ===== linhas do painel =====
 type Row = { action: UiKit.Action, refresh: () -> () }
-local open: { rows: { Row } } = { rows = {} }
+local open: { rows: { Row }, cartoes: { Instance } } = { rows = {}, cartoes = {} }
 
 local function close()
 	if not panel.Visible then
@@ -272,11 +327,24 @@ local function close()
 		r.action.button:Destroy()
 	end
 	table.clear(open.rows)
+	for _, c in open.cartoes do
+		c:Destroy() -- os efeitos do cartão param junto
+	end
+	table.clear(open.cartoes)
 end
 
-local function addRow(text: string, kind: string, order: number, onClick: () -> (), refresh: ((UiKit.Action) -> ())?)
-	local a = UiKit.action(rows, text, kind, onClick, { action = nil, ctx = nil, h = 44 })
+local function addRow(
+	pai: Instance,
+	text: string,
+	kind: string,
+	order: number,
+	larg: UDim,
+	onClick: () -> (),
+	refresh: ((UiKit.Action) -> ())?
+)
+	local a = UiKit.action(pai, text, kind, onClick, { action = nil, ctx = nil, h = 44 })
 	a.button.LayoutOrder = order
+	a.button.Size = UDim2.new(larg, UDim.new(0, 44))
 	local row: Row = {
 		action = a,
 		refresh = function()
@@ -318,65 +386,137 @@ openPanel = function()
 	if panel.Visible or not (list and card.Visible) then
 		return
 	end
-	stripe.BackgroundColor3 = sideColor(f)
+	local cor = sideColor(f)
+	stripe.BackgroundColor3 = cor
 	kicker.Text = UiKit.upper(string.format("veículo ao nascer · %s", SIDE_PT[f :: string] or ""))
 	local n = 0
-	for _, spec in list :: { string } do
+	for ordem, spec in list :: { string } do
 		local item = CompraVeiculo.ITEMS[spec]
-		local name = UiKit.upper(specName(spec))
+		local ficha = Vehicles.SPECS[spec]
+		-- o cartão: a viatura sobre a luz do lado, o nome, a ficha e os dois preços
+		local c = UiKit.panel(rows, V.PANEL_2, 0.08, true)
+		c.Name = "Cartao_" .. spec
+		c.LayoutOrder = ordem
+		c.Size = UDim2.fromOffset(CARTAO_W, CARTAO_H)
+		c.ClipsDescendants = true
+		table.insert(open.cartoes, c)
+		local traco = c:FindFirstChildOfClass("UIStroke")
+		local luz = Instance.new("CanvasGroup") -- corta os raios girados dentro do cartão
+		luz.Name = "Luz"
+		luz.BackgroundTransparency = 1
+		luz.BorderSizePixel = 0
+		luz.Size = UDim2.new(1, 0, 0, 196)
+		luz.ZIndex = 1
+		luz.Parent = c
+		UiEfeitos.halo(luz, UDim2.fromOffset(CARTAO_W // 2, 104), cor, 400, 0.45, 3.2, 1)
+		UiEfeitos.raios(luz, Vector2.new(CARTAO_W // 2, 104), cor, 520, 3, 5, 1)
+		local arte = Instance.new("ImageLabel")
+		arte.Name = "Viatura"
+		arte.BackgroundTransparency = 1
+		arte.AnchorPoint = Vector2.new(0.5, 0)
+		arte.Position = UDim2.new(0.5, 0, 0, 2)
+		arte.Size = UDim2.new(1, -40, 0, 194)
+		arte.ScaleType = Enum.ScaleType.Fit
+		arte.Image = vehicleImage(spec) or ""
+		arte.ZIndex = 3
+		arte.Parent = c
+		UiEfeitos.varre(c, 4.5 + ordem * 0.7, Color3.fromRGB(255, 244, 214), 4)
+		local nome = UiKit.title(c, UiKit.upper(specName(spec)), 26)
+		nome.Position = UDim2.fromOffset(14, 198)
+		nome.Size = UDim2.new(1, -28, 0, 32)
+		nome.ZIndex = 5
+		local lugares = if ficha and ficha.seats then #ficha.seats else 0
+		local kmh = if ficha then ficha.maxKmh else nil
+		local dados = UiKit.text2(
+			c,
+			if kmh
+				then string.format("%d lugares · até %d km/h", lugares, kmh)
+				else string.format("%d lugares", lugares),
+			15,
+			V.KHAKI
+		)
+		dados.Position = UDim2.fromOffset(14, 230)
+		dados.Size = UDim2.new(1, -28, 0, 22)
+		dados.TextXAlignment = Enum.TextXAlignment.Left
+		dados.ZIndex = 5
+		local precos = Instance.new("Frame")
+		precos.Name = "Precos"
+		precos.BackgroundTransparency = 1
+		precos.AnchorPoint = Vector2.new(0.5, 1)
+		precos.Position = UDim2.new(0.5, 0, 1, -14)
+		precos.Size = UDim2.new(1, -28, 0, 44)
+		precos.ZIndex = 5
+		precos.Parent = c
+		UiKit.list(precos, true, 8)
+		local id = CompraVeiculo.productId(spec)
+		local meia = if id ~= 0 then UDim.new(0.5, -4) else UDim.new(1, 0)
+		local function marcaEscolha()
+			if traco then
+				traco.Color = if st.spec == spec then V.BRASS else V.LINE
+				traco.Thickness = if st.spec == spec then 3 else 1
+				traco.Transparency = if st.spec == spec then 0 else 0.45
+			end
+		end
 		n += 1
 		-- cores de compra (UiKit.PAGAR, 2026-11-13): créditos âmbar, Robux verde, apagado sem saldo
-		addRow(name, "ci", n, function()
+		addRow(precos, string.format("%d CI", item.credits), "ci", 1, meia, function()
 			order(spec, "ci")
 		end, function(a: UiKit.Action)
+			marcaEscolha()
 			local why = blockedWhy()
-			local chosen = st.spec == spec and st.pay == "ci"
-			if chosen then
-				a.sub.Text = "ESCOLHIDO · " .. string.format("%d CI", item.credits)
+			a.sub.Text = ""
+			if st.spec == spec and st.pay == "ci" then
+				a.label.Text = "ESCOLHIDO"
 				a.enabled(false)
 			elseif why then
-				a.sub.Text = why
+				a.label.Text = why
 				a.enabled(false)
 			elseif myCredits() < item.credits then
-				a.sub.Text = string.format("FALTAM %d CI", item.credits - myCredits())
+				a.label.Text = string.format("FALTAM %d CI", item.credits - myCredits())
 				a.enabled(false)
 			else
-				a.sub.Text = string.format("%d CI", item.credits)
+				a.label.Text = string.format("%d CI", item.credits)
 				a.enabled(true)
 			end
 		end)
-		local id = CompraVeiculo.productId(spec)
 		if id ~= 0 then
 			n += 1
-			addRow(name, "robux", n, function()
+			addRow(precos, "ROBUX", "robux", 2, meia, function()
 				order(spec, "robux")
 			end, function(a: UiKit.Action)
 				local why = blockedWhy()
 				local p = priceRobux(id)
-				local price = if p then string.format("%d ROBUX", p) else "ROBUX"
+				a.sub.Text = ""
 				if st.spec == spec and st.pay == "robux" then
-					a.sub.Text = "ESCOLHIDO · " .. price
+					a.label.Text = "ESCOLHIDO"
 					a.enabled(false)
 				elseif why then
-					a.sub.Text = why
+					a.label.Text = why
 					a.enabled(false)
 				else
-					a.sub.Text = price
+					a.label.Text = if p then string.format("%d ROBUX", p) else "ROBUX"
 					a.enabled(true)
 				end
 			end)
 		end
 	end
-	addRow("IR A PÉ", "ghost", n + 1, function()
+	addRow(rodape, "IR A PÉ", "ghost", 1, UDim.new(0, 170), function()
 		Net.event("Vehicle_Order"):FireServer({ op = "cancel" })
 		close()
 	end, function(a: UiKit.Action)
 		a.button.Visible = st.spec ~= nil and st.state ~= "reserved"
 	end)
-	addRow("FECHAR", "ghost", n + 2, close)
+	addRow(rodape, "FECHAR", "ghost", 2, UDim.new(0, 170), close)
 	foot.clear()
 	foot.action("ui_back", "menu", "Fechar")
 	panel.Visible = true
+	-- a vitrine entra com um pulo curto (parada, com movimento reduzido)
+	if UiKit.Estilo.reduzMovimento() then
+		panelScale.Scale = 1
+	else
+		panelScale.Scale = 0.94
+		TweenService:Create(panelScale, TweenInfo.new(0.24, Enum.EasingStyle.Back), { Scale = 1 }):Play()
+	end
 	Input.openMenu()
 	UiKit.opened(NAME, ORDER)
 	GuiService.GuiNavigationEnabled = true

@@ -119,9 +119,13 @@ act("lean_right", "infantry", nil, "press", "E", "press", "Inclinar à direita")
 act("lean_left", "aim", "ButtonL1", "press", nil, "press", "Inclinar à esquerda")
 act("lean_right", "aim", "ButtonR1", "press", nil, "press", "Inclinar à direita")
 -- D-216 (dono: "não consigo inclinar a mira e quando tento o personagem dá uma facada"): mirando, o R3
--- não chega mais na faca da camada de baixo; ele passa o lado (direita, esquerda, centro)
-act("lean_cycle", "aim", "ButtonR3", "press", nil, "press", "Inclinar (passa o lado)")
-act("hold_breath", "aim", "ButtonL3", "press", "LeftShift", "press", "Prender a respiração")
+-- não chega mais na faca da camada de baixo.
+-- D-236 (dono: "quero q para inclinar o L vire para a esquerda e R para a direita"): os botões L e R dos
+-- analógicos inclinam cada um para o seu lado (antes o R3 passava direita, esquerda, centro). Tocar no L3
+-- inclina; segurar o L3 prende a respiração.
+act("lean_left_stick", "aim", "ButtonL3", "tap", nil, "press", "Inclinar à esquerda")
+act("lean_right_stick", "aim", "ButtonR3", "press", nil, "press", "Inclinar à direita")
+act("hold_breath", "aim", "ButtonL3", "hold", "LeftShift", "press", "Prender a respiração")
 
 -- Veículo terrestre (Parte 12.3). Direção: analógico esquerdo (ou A/D); acelerar/frear: gatilhos
 -- (ou W/S) lidos como eixo no VehicleController.

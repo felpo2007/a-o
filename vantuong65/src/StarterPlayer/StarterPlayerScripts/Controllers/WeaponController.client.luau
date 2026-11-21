@@ -1067,19 +1067,24 @@ local function endBreath(at: number)
 		breath.outUntil = at + 2.5 -- PLACEHOLDER: fôlego curto depois de segurar muito
 	end
 end
-Input.on("hold_breath", "press", function()
+local function breathStart()
 	local now = os.clock()
 	if aimingNow() and now >= breath.ready and breath.untilT == 0 then
 		breath.len = Weapons.breathTime(player:GetAttribute("Scoped") == true, Vantagens.mult(player, "breath"))
 		breath.start, breath.untilT = now, now + breath.len
 	end
-end)
-Input.on("hold_breath", "release", function()
+end
+local function breathStop()
 	local now = os.clock()
 	if breath.untilT > 0 and now < breath.untilT then
 		endBreath(now)
 	end
-end)
+end
+-- Shift no teclado; D-236: no controle é segurar o L3 (tocar nele inclina à esquerda)
+Input.on("hold_breath", "press", breathStart)
+Input.on("hold_breath", "release", breathStop)
+Input.on("hold_breath", "holdStart", breathStart)
+Input.on("hold_breath", "holdEnd", breathStop)
 Input.on("binoculars", "press", toggleBinoculars) -- tecla B
 -- (v43: no controle o binóculo fica na roda de equipamento; o ↑ é a câmera)
 -- transpor/mergulhar (Movement.client): a arma sai do ombro e o dedo sai do gatilho

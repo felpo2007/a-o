@@ -24,13 +24,12 @@ local UserInputService = game:GetService("UserInputService")
 local Net = require(ReplicatedStorage.Shared.Net)
 local Bus = require(script.Parent.Bus)
 local Input = require(script.Parent.Input)
+local SocorroAlvo = require(script.Parent.SocorroAlvo)
 local ToqueTelas = require(script.Parent.ToqueTelas)
 local ToqueUi = require(script.Parent.ToqueUi)
 local UiKit = require(script.Parent.UiKit)
 
 local player = Players.LocalPlayer
-local M = 0.28
-local ALLY_REACH = 3 / M -- MedicalController.nearestAlly
 
 local gui = UiKit.screen("VT65Interagir", 15) -- acima do HUD de campo (13), abaixo dos menus
 gui.Enabled = false
@@ -92,42 +91,13 @@ local function promptList(root: BasePart): { ToqueTelas.PromptInfo }
 	return out
 end
 
--- companheiro mais perto (jogador ou bot) a até 3 m
-local function nearestAlly(root: BasePart): ToqueTelas.AllyInfo?
-	local mine = player:GetAttribute("Faction")
-	local best: Model? = nil
-	local bestD = ALLY_REACH
-	local function consider(m: Model)
-		local r = rootOf(m)
-		if r and m:GetAttribute("Faction") == mine then
-			local d = (r.Position - root.Position).Magnitude
-			if d < bestD then
-				best, bestD = m, d
-			end
-		end
-	end
-	for _, p in Players:GetPlayers() do
-		if p ~= player and p.Character then
-			consider(p.Character)
-		end
-	end
-	local folder = workspace:FindFirstChild("Combatants")
-	if folder then
-		for _, m in folder:GetChildren() do
-			if m:IsA("Model") then
-				consider(m)
-			end
-		end
-	end
-	local m = best
-	if not m then
+-- D-236: o mesmo companheiro da tecla no PC (Controllers/SocorroAlvo, o mais urgente ao alcance)
+local function nearestAlly(): ToqueTelas.AllyInfo?
+	local it = SocorroAlvo.alvo()
+	if not it then
 		return nil
 	end
-	local owner = Players:GetPlayerFromCharacter(m)
-	local downed = m:GetAttribute("Downed") == true or (owner ~= nil and owner:GetAttribute("Downed") == true)
-	local hum = m:FindFirstChildOfClass("Humanoid")
-	local hurt = hum ~= nil and hum.Health > 0 and hum.Health < hum.MaxHealth - 1
-	return { downed = downed, hurt = hurt }
+	return { downed = it.info.downed, hurt = it.info.hurt or it.info.bleeding }
 end
 
 -- ===== estado =====
@@ -156,7 +126,7 @@ local function refreshChoice()
 	end
 	choice = ToqueTelas.chooseInteraction(
 		promptList(root :: BasePart),
-		nearestAlly(root :: BasePart),
+		nearestAlly(),
 		player:GetAttribute("Role") == "medic",
 		bandages
 	)

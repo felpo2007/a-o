@@ -618,6 +618,21 @@ Bus.on("reload_cancel", function()
 	recargaGen += 1
 end)
 
+-- D-236 (dono: "altere o barulho do dano"): levar um tiro não tinha som nenhum no próprio corpo. Agora o
+-- baque gravado a cada acerto e, no máximo a cada 1,4 s, o fôlego que falta.
+local baqueEm, dorEm = -10, -10
+Net.event("Combat_Hit").OnClientEvent:Connect(function()
+	local agora = os.clock()
+	if agora - baqueEm >= 0.1 then
+		baqueEm = agora
+		Som.kit("kit_corpo", "baque" .. variacao("corpo_baque", 3), { vol = 0.62, low = 3 })
+	end
+	if agora - dorEm >= 1.4 then
+		dorEm = agora
+		Som.kit("kit_corpo", "dor" .. variacao("corpo_dor", 3), { vol = 0.42, delay = 0.07 })
+	end
+end)
+
 -- ===== tiros dos outros: camadas, atraso do som, estalo e impacto =====
 -- trecho com variação (sem repetir a última) de um kit de fora das armas
 local function var(prefixo: string, n: number): string

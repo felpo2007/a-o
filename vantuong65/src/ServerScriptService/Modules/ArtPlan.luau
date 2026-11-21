@@ -58,6 +58,9 @@ end, "../../ServerStorage/VT65Build/FeatureBuilder")
 local Expansao = mod(function()
 	return (script :: any).Parent.Expansao
 end, "./Expansao")
+local CasasEscala = mod(function()
+	return (script :: any).Parent.CasasEscala
+end, "./CasasEscala")
 
 local M = 0.28
 ArtPlan.VERSION = 3 -- o terreno gerado guarda isto (atributo SitePlan): base pelo plano só se bater
@@ -393,6 +396,163 @@ local function half(key: string, scale: number): (number, number)
 		return d[1] * scale / 2, d[3] * scale / 2
 	end
 	return 1, 1
+end
+
+-- D-236 (dono: "as casas estao mt pequenas para os soldados aumente o tamanho de todas elas"): cada casa
+-- cresce até 25% no próprio lugar, o quanto couber sem encostar em estrada, beco, água, captura, nascer ou
+-- outra casa (tools/casas_escala.luau grava em Modules/CasasEscala).
+function ArtPlan.chaveCasa(key: string, x: number, z: number): string
+	return string.format("%s|%.1f|%.1f", key, x, z)
+end
+function ArtPlan.fatorCasa(key: string, x: number, z: number): number
+	return CasasEscala.f[ArtPlan.chaveCasa(key, x, z)] or 1
+end
+
+-- a pegada `a` encosta na pegada `b`? (caixas giradas em Y, pelos eixos das duas)
+function ArtPlan.pegadasBatem(a: any, b: any, folga: number?): boolean
+	local g = folga or 0
+	local function cantos(i: any): { { number } }
+		local ca, sa = math.cos(i.yaw), math.sin(i.yaw)
+		local out = {}
+		for _, s in { { -1, -1 }, { 1, -1 }, { 1, 1 }, { -1, 1 } } do
+			local lx, lz = s[1] * i.hx, s[2] * i.hz
+			table.insert(out, { i.x + lx * ca + lz * sa, i.z - lx * sa + lz * ca })
+		end
+		return out
+	end
+	local ca, cb = cantos(a), cantos(b)
+	for _, it in { a, b } do
+		local c, s = math.cos(it.yaw), math.sin(it.yaw)
+		for _, e in { { c, -s }, { s, c } } do
+			local a0, a1, b0, b1 = math.huge, -math.huge, math.huge, -math.huge
+			for _, p in ca do
+				local d = p[1] * e[1] + p[2] * e[2]
+				a0, a1 = math.min(a0, d), math.max(a1, d)
+			end
+			for _, p in cb do
+				local d = p[1] * e[1] + p[2] * e[2]
+				b0, b1 = math.min(b0, d), math.max(b1, d)
+			end
+			if a1 + g <= b0 or b1 + g <= a0 then
+				return false
+			end
+		end
+	end
+	return true
+end
+
+-- Depois de tudo posto (assim nenhuma peça muda de lugar por causa do patamar maior): a casa cresce em
+-- volta do próprio centro, com um patamar no mesmo nível, e o anexo do quintal que ficou embaixo dela sai.
+-- Com `soltos`, roda depois da expansão (que já põe as casas dela no tamanho): só afasta os objetos soltos.
+local function cresceCasas(ctx: any, out: { any }, soltos: boolean?)
+	local grandes: { any } = {}
+	for _, it in out do
+		local f = ArtPlan.fatorCasa(it.key, it.x, it.z)
+		if f > 1 and soltos then
+			if it.expansao then
+				table.insert(grandes, it)
+			end
+		elseif f > 1 then
+			it.scale *= f
+			it.hx *= f
+			it.hz *= f
+			Site.addPad(ctx.site, it.x, it.z, it.yaw, it.hx, it.hz, nil, it.base)
+			table.insert(grandes, it)
+		end
+	end
+	if #grandes == 0 then
+		return
+	end
+	-- chão e vizinhos do lugar novo de um anexo empurrado
+	local RUIM = { estrada = true, beco = true, lamina = true, dique = true, riacho = true, clareira = true }
+	local function livre(c: any, it: any, g: any): boolean
+		local ca, sa = math.cos(c.yaw), math.sin(c.yaw)
+		for i = -1, 1 do
+			for j = -1, 1 do
+				local px = c.x + i * c.hx * ca + j * c.hz * sa
+				local pz = c.z - i * c.hx * sa + j * c.hz * ca
+				local p = ArtPlan.groundProblem(ctx, px, pz, 0.3 / M)
+				if p and RUIM[p] then
+					return false
+				end
+			end
+		end
+		local rc = math.sqrt(c.hx ^ 2 + c.hz ^ 2)
+		for _, o in out do
+			if o ~= it and o ~= g and not o.foliage then
+				local alcance = rc + math.sqrt(o.hx ^ 2 + o.hz ^ 2)
+				if (o.x - c.x) ^ 2 + (o.z - c.z) ^ 2 < alcance ^ 2 and ArtPlan.pegadasBatem(c, o) then
+					return false
+				end
+			end
+		end
+		return true
+	end
+	-- o anexo vai para fora da casa, no eixo em que já estava (até 4 m); sem lugar, sai do quintal
+	local function empurra(it: any, g: any): boolean
+		local ca, sa = math.cos(g.yaw), math.sin(g.yaw)
+		local dx, dz = it.x - g.x, it.z - g.z
+		local lx, lz = dx * ca - dz * sa, dx * sa + dz * ca
+		local ux, uz: number, number
+		if math.abs(lz) >= math.abs(lx) then
+			local s = if lz >= 0 then 1 else -1
+			ux, uz = s * sa, s * ca
+		else
+			local s = if lx >= 0 then 1 else -1
+			ux, uz = s * ca, -s * sa
+		end
+		for passo = 1, 8 do
+			local d = passo * 0.5 / M
+			local c = { x = it.x + ux * d, z = it.z + uz * d, yaw = it.yaw, hx = it.hx, hz = it.hz }
+			if not ArtPlan.pegadasBatem(c, g, 0.1 / M) and livre(c, it, g) then
+				it.origemX, it.origemZ = it.x, it.z
+				it.x, it.z = c.x, c.z
+				if it.padded then
+					Site.addPad(ctx.site, it.x, it.z, it.yaw, it.hx, it.hz, nil, it.base)
+				elseif soltos then
+					it.base = ArtPlan.footprint(ctx, it.x, it.z, it.yaw, it.hx * 0.95, it.hz * 0.95)
+				end
+				return true
+			end
+		end
+		return false
+	end
+	local fora: { [any]: boolean } = {}
+	for _, it in out do
+		-- anexo do quintal; na 2ª passada, objeto solto da expansão (pote, banco: menos de 4 m)
+		local alvo = if soltos
+			then it.expansao and not it.padded and not it.sink and math.max(it.hx, it.hz) < 2 / M
+			else it.village and not it.home
+		if alvo and not it.foliage and ArtPlan.fatorCasa(it.key, it.x, it.z) == 1 then
+			for _, g in grandes do
+				local alcance = math.sqrt(g.hx ^ 2 + g.hz ^ 2) + math.sqrt(it.hx ^ 2 + it.hz ^ 2)
+				if (g.x - it.x) ^ 2 + (g.z - it.z) ^ 2 < alcance ^ 2 and ArtPlan.pegadasBatem(it, g) then
+					if not empurra(it, g) then
+						fora[it] = true
+					end
+					break
+				end
+			end
+		end
+	end
+	for i = #out, 1, -1 do
+		if fora[out[i]] then
+			table.remove(out, i)
+		end
+	end
+	for i = #ctx.small, 1, -1 do
+		if fora[ctx.small[i]] then
+			table.remove(ctx.small, i)
+		end
+	end
+	ctx.annexSkipped = (ctx.annexSkipped or 0)
+		+ (function()
+			local n = 0
+			for _ in fora do
+				n += 1
+			end
+			return n
+		end)()
 end
 
 -- chão mais baixo e mais alto sob uma pegada (studs)
@@ -1108,6 +1268,7 @@ function ArtPlan.structures(ctx: Ctx, has: (string) -> boolean): { Item }
 			objCount[sp.name] = (objCount[sp.name] or 0) + n
 		end
 	end
+	cresceCasas(ctx, out) -- D-236
 	-- com todos os patamares no chão: base nunca acima do chão mais baixo sob a pegada (onde dois
 	-- patamares se encostam o chão é a média dos dois)
 	for _, it in out do
@@ -1117,6 +1278,7 @@ function ArtPlan.structures(ctx: Ctx, has: (string) -> boolean): { Item }
 		end
 	end
 	ArtPlan.expansao(ctx, has, out)
+	cresceCasas(ctx, out, true) -- D-236: pote ou banco da expansão que ficou dentro da casa maior
 	return out
 end
 
@@ -1185,7 +1347,7 @@ function ArtPlan.expansao(ctx: Ctx, has: (string) -> boolean, out: { Item })
 				local tx, tz = mundo(p.olha[1], p.olha[2])
 				yaw = math.atan2(-(tx - x), -(tz - z))
 			end
-			local scale = p.escala or 1
+			local scale = (p.escala or 1) * ArtPlan.fatorCasa(p.key, x, z) -- D-236
 			local hx, hz = half(p.key, scale)
 			local base: number
 			if p.travessia then

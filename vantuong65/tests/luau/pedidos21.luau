@@ -141,11 +141,31 @@ test("toda arma com gravação, menos o M79", function()
 		end
 	end
 end)
-test("peças que não são tiro continuam no kit", function()
-	for _, t in { "seco", "ciclo", "estojo1" } do
-		assert(SomGravacoes.de("kit_m16", t) == nil, t)
+test("D-236: toda peça de recarga das armas é gravação real (o M79 fica no kit)", function()
+	for id, a in SomArmas.ARMA do
+		if id ~= "m79" then
+			for _, passo in SomArmas.RECARGA[a.recarga] do
+				assert(SomGravacoes.de(a.kit, passo[1]), id .. " " .. passo[1])
+			end
+			assert(SomGravacoes.de(a.kit, "seco"), id .. " seco")
+			if a.ciclo then
+				assert(SomGravacoes.de(a.kit, "ciclo"), id .. " ciclo")
+			end
+			if a.estojo then
+				assert(SomGravacoes.de(a.kit, "estojo1") and SomGravacoes.de(a.kit, "estojo2"), id .. " estojo")
+			end
+		end
 	end
-	assert(SomGravacoes.de("kit_explosoes", "eco1") == nil)
+	for v = 1, 4 do
+		assert(SomGravacoes.de("kit_impactos", "carne" .. v), "carne")
+	end
+	for _, t in { "acerto_corpo", "acerto_cabeca", "acerto_abate" } do
+		assert(SomGravacoes.de("kit_balas", t), t)
+	end
+	for v = 1, 3 do
+		assert(SomGravacoes.de("kit_corpo", "baque" .. v) and SomGravacoes.de("kit_corpo", "dor" .. v), "corpo")
+	end
+	assert(SomGravacoes.de("kit_explosoes", "eco1") == nil, "o eco continua no kit")
 end)
 test("nenhum recorte é usado por duas armas", function()
 	local visto: { [string]: string } = {}
@@ -186,8 +206,8 @@ test("sem arquivo repetido no pré-carregamento", function()
 		vistos[id] = true
 	end
 end)
-test("a música do menu é a nova, mais calma", function()
-	assert(AssetIds.Sounds.music_menu == 1842762516)
+test("a música do menu é a do meio-termo (D-236)", function()
+	assert(AssetIds.Sounds.music_menu == 137044114503670)
 end)
 
 print("== comemoração (D-221)")

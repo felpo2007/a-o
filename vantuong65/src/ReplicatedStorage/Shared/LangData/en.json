@@ -3712,5 +3712,14 @@
  "CAPACETE": "HELMET",
  "Nada por aqui ainda.": "Nothing here yet.",
  "FORA DA ÁREA": "OUT OF BOUNDS",
- "Volte: siga a seta · %d m": "Go back: follow the arrow · %d m"
+ "Volte: siga a seta · %d m": "Go back: follow the arrow · %d m",
+ "%d lugares": "%d seats",
+ "%d lugares · até %d km/h": "%d seats · up to %d km/h",
+ "CAÍDO": "DOWN",
+ "CUIDANDO": "TREATING",
+ "Companheiro": "Teammate",
+ "Nenhum companheiro ferido por perto": "No wounded teammate nearby",
+ "SEGURAR · %s · %d s": "HOLD · %s · %d s",
+ "Só o médico reanima": "Only the medic can revive",
+ "Um companheiro está cuidando de você": "A teammate is treating you"
 }

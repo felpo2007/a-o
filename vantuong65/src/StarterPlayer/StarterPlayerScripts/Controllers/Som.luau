@@ -147,9 +147,10 @@ local function go(kit: string, trecho: string, o: Opts)
 	local v = o.vaga
 	local quantas = o.vagas or 2
 	if g and not v then
-		local proprio = string.sub(trecho, 1, 1) == "p"
-		v = string.format("gravacao_%s_%s", kit, if proprio then "p" else "e")
-		quantas = if proprio then 3 else 5
+		-- D-236: recarga, estojo e corpo têm a própria vaga (o tiroteio não corta o carregador entrando)
+		local grupoVoz = string.match(trecho, "^([pe])%d+$") or "m"
+		v = string.format("gravacao_%s_%s", kit, grupoVoz)
+		quantas = if grupoVoz == "p" then 3 elseif grupoVoz == "e" then 5 else 4
 	end
 	if v then
 		local lista = vagas[v] or {}
@@ -196,6 +197,11 @@ end
 
 -- Duração (s) e âncora (s) do trecho (0 se não existe)
 function Som.trecho(kit: string, trecho: string): (number, number)
+	-- D-236: a gravação começa no golpe: a âncora é o começo dela
+	local g = SomGravacoes.de(kit, trecho)
+	if g and not gravacaoFalhou[g.id] then
+		return g.dur / (g.tom or 1), 0.005
+	end
 	local k = SomKits[kit]
 	local seg = k and k.seg[trecho]
 	if not seg then

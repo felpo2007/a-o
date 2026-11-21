@@ -133,6 +133,154 @@ SomGravacoes.KIT = {
 	},
 } :: { [string]: Kit }
 
+-- D-236 (dono: "altere o barulho do dano, do recarregamento, etc esta mt estranho, faça barulhos reais"):
+-- o manuseio das armas e o corpo também viram gravações da mesma biblioteca. Início, duração e pico
+-- medidos no áudio decodificado. Fontes, pela descrição do arquivo:
+--   carregador de fuzil e alavanca: "AK-47, Clip Handling Action"; ferrolho: "Machine Gun Bolt, M85";
+--   fita: "Loading Ammunition Belt"; pistola: "Pistol Clip, Loading" e "Pistol Handling";
+--   bomba: "12 Gauge Shotgun, Pump Action"; estojo: "Ammo Shell Drop"; corpo: "Body Hit"; dor: "Pained Gasp".
+local ESTOJOS = { T(9113109832, 0, 0.44, -3.1, 0.94), T(9113108632, 0, 0.49, -3.5, 0.9) }
+local SOLTA = T(9113104335, 0, 0.16, -6)
+local CAI = T(9113107271, 0, 0.6, -4.8, 0.62) -- o carregador vazio batendo no chão
+local SECO = T(9117396530, 0.01, 0.11, -12.1)
+
+local MANUSEIO: { [string]: { [string]: Trecho } } = {
+	kit_type56 = {
+		seco = SECO,
+		solta = SOLTA,
+		sai = T(9116347612, 0.16, 0.2, 3.2, 0.9),
+		cai = CAI,
+		entra = T(9116347612, 0.16, 0.24, 3.2),
+		tapa = T(9116348009, 1.005, 0.17, 3.3),
+		ferrolho = T(9116348209, 0.985, 0.62, 3.3),
+		estojo1 = ESTOJOS[1],
+		estojo2 = ESTOJOS[2],
+	},
+	kit_m16 = {
+		seco = T(9117396530, 0.01, 0.11, -12.1, 1.08),
+		solta = T(9113104335, 0, 0.16, -6, 1.1),
+		sai = T(9113104176, 0.035, 0.11, -3.6, 1.04),
+		cai = CAI,
+		entra = T(9116347624, 0.137, 0.23, 3.3, 1.08),
+		tapa = T(9113104176, 0.325, 0.14, -1.7, 1.06),
+		ferrolho = T(9116348009, 0.74, 0.44, 3.3, 1.08),
+		estojo1 = ESTOJOS[1],
+		estojo2 = ESTOJOS[2],
+	},
+	kit_m14 = {
+		seco = T(9117396530, 0.01, 0.11, -12.1, 0.94),
+		solta = T(9113104335, 0, 0.16, -6, 0.92),
+		sai = T(9113104358, 0.78, 0.13, -1.7, 0.92),
+		cai = CAI,
+		entra = T(9116348211, 0.398, 0.31, 3.2, 0.92),
+		tapa = T(9116348009, 1.005, 0.17, 3.3, 0.9),
+		ferrolho = T(9116357621, 0, 0.66, -2.6),
+		estojo1 = ESTOJOS[1],
+		estojo2 = ESTOJOS[2],
+	},
+	kit_sks = {
+		seco = SECO,
+		abre = T(9116344648, 0, 0.2, -19),
+		clipe = T(9117396156, 0, 0.14, -6.4, 0.94),
+		desce = T(9116339838, 0.235, 0.42, -14.2),
+		clipe_sai = T(9117396716, 0.718, 0.09, -14.4),
+		fecha = T(9116344663, 0, 0.13, -16.7),
+		estojo1 = ESTOJOS[1],
+		estojo2 = ESTOJOS[2],
+	},
+	kit_m60 = {
+		seco = T(9117396530, 0.01, 0.11, -12.1, 0.88),
+		tampa_abre = T(9116342002, 0, 0.26, -19.9),
+		fita = T(9116339857, 0, 1, -17.1),
+		tampa_fecha = T(9116340490, 0.125, 0.34, -14.3),
+		ferrolho = T(9116357355, 0, 0.33, -3.9),
+		estojo1 = ESTOJOS[1],
+		estojo2 = ESTOJOS[2],
+	},
+	kit_rpd = {
+		seco = T(9117396530, 0.01, 0.11, -12.1, 0.9),
+		tampa_abre = T(9116342102, 0, 0.25, -16.8),
+		fita = T(9116339838, 0.235, 0.42, -14.2, 0.96),
+		tampa_fecha = T(9116342102, 0.71, 0.15, -16.8),
+		ferrolho = T(9116357383, 0, 0.42, -8.7),
+		estojo1 = ESTOJOS[1],
+		estojo2 = ESTOJOS[2],
+	},
+	kit_m1911 = {
+		seco = T(9117396530, 0.01, 0.11, -12.1, 0.96),
+		solta = SOLTA,
+		sai = T(9117396464, 0.26, 0.09, -15.6),
+		cai = T(9113107271, 0, 0.6, -4.8, 0.74),
+		entra = T(9117396464, 0.492, 0.2, -6.5),
+		slide = T(9116344648, 0.272, 0.1, -16.3),
+		estojo1 = ESTOJOS[1],
+		estojo2 = ESTOJOS[2],
+	},
+	kit_type54 = {
+		seco = T(9117396530, 0.01, 0.11, -12.1, 1.04),
+		solta = T(9113104335, 0, 0.16, -6, 1.06),
+		sai = T(9117396464, 0.26, 0.09, -15.6, 1.05),
+		cai = T(9113107271, 0, 0.6, -4.8, 0.78),
+		entra = T(9117396156, 0, 0.14, -6.4),
+		slide = T(9116344869, 0.417, 0.09, -15.6),
+		estojo1 = ESTOJOS[1],
+		estojo2 = ESTOJOS[2],
+	},
+	kit_m70 = {
+		seco = SECO,
+		abre = T(9116357355, 0, 0.32, -3.9, 0.94),
+		cartucho = T(9117396156, 0, 0.13, -6.4, 1.08),
+		fecha = T(9116357621, 0.535, 0.12, -16.4, 0.94),
+		ciclo = T(9116357621, 0, 0.66, -2.6, 0.92),
+	},
+	kit_mosin = {
+		seco = SECO,
+		abre = T(9116357383, 0, 0.38, -8.7, 0.88),
+		cartucho = T(9117396156, 0, 0.13, -6.4, 1),
+		fecha = T(9116357383, 0.456, 0.11, -15.9, 0.88),
+		ciclo = T(9116357383, 0, 0.56, -8.7, 0.86),
+	},
+	kit_win12 = {
+		seco = SECO,
+		cartucho = T(9112912000, 0, 0.17, -7.9, 0.86),
+		ciclo = T(9112911836, 0, 0.62, -8.1),
+		estojo1 = T(9113107271, 0, 0.6, -4.8, 0.8),
+		estojo2 = T(9113106947, 0.15, 0.6, -2.8, 0.8),
+	},
+	kit_balas = {
+		acerto_corpo = T(9113485306, 0, 0.2, -7.1, 1.2),
+		acerto_cabeca = T(9113490484, 0, 0.3, -3.2, 1.12),
+		acerto_abate = T(9113489882, 0, 0.46, -5.6),
+	},
+	kit_impactos = {
+		carne1 = T(9113497758, 0, 0.24, -5.5),
+		carne2 = T(9113490003, 0, 0.31, -3.3),
+		carne3 = T(9113488143, 0, 0.32, -1.7),
+		carne4 = T(9113497945, 0, 0.18, -7.7),
+	},
+	-- o soldado levando o tiro (Controllers/AudioController): o baque e o fôlego que falta
+	kit_corpo = {
+		baque1 = T(9113490003, 0, 0.31, -3.3, 0.92),
+		baque2 = T(9113497758, 0, 0.24, -5.5, 0.9),
+		baque3 = T(9113488143, 0, 0.32, -1.7, 0.88),
+		dor1 = T(9114029889, 0, 0.46, -4.2),
+		dor2 = T(9114030316, 0.06, 0.4, -6.5),
+		dor3 = T(9125572953, 0, 0.21, -11.6),
+	},
+}
+for kit, pecas in MANUSEIO do
+	local k = SomGravacoes.KIT[kit]
+	if not k then
+		k = {}
+		SomGravacoes.KIT[kit] = k
+	end
+	local nomeados: { [string]: Trecho } = k.nomeados or {}
+	k.nomeados = nomeados
+	for nome, t in pecas do
+		nomeados[nome] = t
+	end
+end
+
 -- A gravação que toca no lugar do trecho `trecho` do kit, ou nil (fica o trecho do kit)
 function SomGravacoes.de(kit: string, trecho: string): Trecho?
 	local k = SomGravacoes.KIT[kit]

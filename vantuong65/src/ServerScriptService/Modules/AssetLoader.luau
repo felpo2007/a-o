@@ -782,7 +782,7 @@ function AssetLoader.placeItem(it: any, parent: Instance, planned: boolean): Mod
 			local a = Instance.new("Attachment")
 			a.Name = "Lampiao_" .. i
 			a.Parent = dono
-			a.WorldPosition = cf * (Vector3.new(l[1], l[2], l[3]) / M)
+			a.WorldPosition = cf * (Vector3.new(l[1], l[2], l[3]) / M * it.scale) -- D-236: a casa pode ser maior
 			local luz = Instance.new("PointLight")
 			luz.Color = Color3.fromRGB(L.cor[1], L.cor[2], L.cor[3])
 			luz.Brightness = L.brilho

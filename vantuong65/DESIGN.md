@@ -9862,3 +9862,29 @@ mapa novo nem objetivo novo, preservando capturas, nascimentos e entradas.
   térreo fechado, +39% em cima e +252% no chão do térreo aberto. À noite, +1%.
 - **Decisão do dono:** "Manter assim", depois de ver `testes/lote107/luz_antes_e_agora.jpg`.
 - **Medido:** -0,5% de chamadas de desenho sobre a v138. O ganho do SLIM não foi medido.
+
+## D-236 — Lote 108: personagens, sons, casas, veículos, telas e miras (2026-11-21)
+
+**Pedido do dono:** personagens mais bonitos, M16 automática, inclinar em L e R, sons reais, casas e
+veículos maiores, soldado dentro do veículo, cura melhor, miras limpas e telas refeitas.
+- **Causa de "casas e veículos pequenos":** o soldado tem 2,03 m num mundo em tamanho real.
+- **Casas:** `tools/casas_escala.luau` escolhe até +25% por casa, sem encostar em estrada, beco, água,
+  centro de captura ou outra construção, e grava `Modules/CasasEscala` e `assets/estatico/ajuste_casas.json`.
+  Anexo que ficou embaixo vai para o lado; sem lugar, sai. Para rodar de novo: apague o ajuste, rode o
+  `estatico.py`, a ferramenta e o `estatico.py` outra vez (senão o ajuste soma sobre ele mesmo).
+- **Veículos:** `Vehicles.ESCALA = 1,25`. Quem está em lugar fechado não aparece
+  (`Vehicles.ocupanteAparece`, `Controllers/OcupanteVeiculo`).
+- **Armas e controle:** M16 com automático e semi; L3 inclina à esquerda e R3 à direita (o toque).
+- **Cura (`Shared/Socorro`, `SocorroHud`):** cartão perto da mira e cruz sobre o ferido. Curativo 3 s,
+  tratamento 5 s (vida inteira) e reanimar 5 s (volta com 45).
+- **Sons:** recarga, acerto e dano com gravações da biblioteca do Roblox (`Shared/SomGravacoes`).
+  Música do menu entre as duas últimas, escolhida por ritmo e brilho medidos.
+- **Rostos (`tools/rostos/make_rostos2.py`):** volume pintado com sombra e luz em alfa, que serve para
+  todo tom de pele. **Uniformes (`tools/make_clothing_v4.py`):** dobras, vincos e brilho do pano sobre
+  os 35 moldes v3, com o reflexo da bota. Sobem como Image: o ID vai direto no molde.
+- **Telas:** recompensa com arte de Blender por dia (`tools/blender/recompensas.py`), raios e moedas
+  voando; "Levar veículo" virou uma vitrine com um cartão por viatura.
+- **Miras (`tools/mira_limpa.py`):** move só os vértices da linha de visada, com o mesmo UV, para não
+  invalidar os acabamentos. M16: furo de 5 para 8,4 mm, trilhos fora do anel. SKS: entalhe de 4,4 para
+  7,6 mm e 5,5 mm mais fundo (antes o fundo escondia o poste).
+- **Não testado no Studio nem publicado:** a lista está em `testes/LOTE108_D236_2026-11-21.md`.

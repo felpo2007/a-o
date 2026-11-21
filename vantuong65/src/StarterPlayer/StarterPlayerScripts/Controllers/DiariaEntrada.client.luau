@@ -15,13 +15,27 @@ local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 
+local AssetIds = require(ReplicatedStorage.Shared.AssetIds) :: any
 local Commerce = require(ReplicatedStorage.Shared.Commerce)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Bus = require(script.Parent.Bus)
 local Input = require(script.Parent.Input)
+local UiEfeitos = require(script.Parent.UiEfeitos)
 local UiKit = require(script.Parent.UiKit)
 
 local player = Players.LocalPlayer
+
+-- D-236 (dono: "melhore oq eu apontei nas imagens com imagens melhores feitas com qualidade, efeitos
+-- visuais"): cada dia mostra a arte do prêmio (tools/blender/recompensas.py), sobre uma cena do jogo; o
+-- dia de hoje tem raios e brilho, e ao receber as moedas voam. Sem o ID, volta o desenho de emoji.
+local function arteDia(i: number): string?
+	local id = (AssetIds.Recompensas or {})["r" .. i]
+	return if type(id) == "number" and id ~= 0 then "rbxassetid://" .. id else nil
+end
+local function arteMoeda(): string?
+	local id = (AssetIds.Recompensas or {}).moeda
+	return if type(id) == "number" and id ~= 0 then "rbxassetid://" .. id else nil
+end
 local V = UiKit.V
 local px = UiKit.px
 
@@ -40,7 +54,7 @@ local CARD_Y = px(132, 176)
 local CARD_H = px(264, 350)
 local CARD_W = math.floor((W - 2 * PAD - 6 * GAP) / Commerce.TRACK_DAYS)
 local BTN_H = px(76, 100)
-local ICON_D = px(68, 90)
+local ICON_D = px(108, 142)
 local OURO = Color3.fromRGB(255, 206, 60)
 local OURO_ESCURO = Color3.fromRGB(92, 62, 12)
 local VERDE = Color3.fromRGB(70, 190, 86)
@@ -65,6 +79,35 @@ panel.AnchorPoint = Vector2.new(0.5, 0.5)
 panel.Position = UDim2.fromScale(0.5, 0.5)
 panel.Size = UDim2.fromOffset(W, H)
 local fit = UiKit.fit(gui, panel, W, H, 12)
+panel.ClipsDescendants = true
+do -- D-236: a cena do arrozal ao fundo, escurecida para o texto ler bem
+	local capa = (AssetIds.Capas or {}).arrozal
+	if type(capa) == "number" and capa ~= 0 then
+		local f = Instance.new("ImageLabel")
+		f.Name = "Cena"
+		f.BackgroundTransparency = 1
+		f.Size = UDim2.fromScale(1, 1)
+		f.ScaleType = Enum.ScaleType.Crop
+		f.Image = "rbxassetid://" .. capa
+		f.ZIndex = -3
+		f.Parent = panel
+		local veu = Instance.new("Frame")
+		veu.Name = "VeuCena"
+		veu.BackgroundColor3 = Color3.fromRGB(14, 15, 11)
+		veu.BorderSizePixel = 0
+		veu.Size = UDim2.fromScale(1, 1)
+		veu.ZIndex = -2
+		veu.Parent = panel
+		local g = Instance.new("UIGradient")
+		g.Rotation = 90
+		g.Transparency = NumberSequence.new({
+			NumberSequenceKeypoint.new(0, 0.34),
+			NumberSequenceKeypoint.new(0.24, 0.18),
+			NumberSequenceKeypoint.new(1, 0.04),
+		})
+		g.Parent = veu
+	end
+end
 do -- faixa de latão no alto (é recompensa)
 	local a = Instance.new("Frame")
 	a.BackgroundColor3 = V.BRASS
@@ -76,9 +119,19 @@ end
 local kick = UiKit.kicker(panel, "CADERNETA DE SERVIÇO", px(16, 22), V.BRASS)
 kick.Position = UDim2.fromOffset(PAD, px(16, 22))
 kick.Size = UDim2.fromOffset(px(360, 480), px(22, 30))
-local title = UiKit.title(panel, "RECOMPENSA DIÁRIA", px(44, 58), OURO)
+local title = UiKit.title(panel, "RECOMPENSA DIÁRIA", px(44, 58), Color3.new(1, 1, 1))
 title.Position = UDim2.fromOffset(PAD, px(36, 48))
 title.Size = UDim2.new(1, -2 * PAD, 0, px(54, 70))
+do -- o título em ouro, com a luz de cima
+	local g = Instance.new("UIGradient")
+	g.Rotation = 90
+	g.Color = ColorSequence.new({
+		ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 240, 170)),
+		ColorSequenceKeypoint.new(0.55, OURO),
+		ColorSequenceKeypoint.new(1, Color3.fromRGB(196, 130, 28)),
+	})
+	g.Parent = title
+end
 local rule = UiKit.body(panel, "Entre todo dia: o prêmio cresce! Pulou um dia, volta ao dia 1.", px(19, 25), V.TEXT)
 rule.Position = UDim2.fromOffset(PAD, px(92, 122))
 rule.Size = UDim2.new(1, -2 * PAD, 0, px(28, 36))
@@ -99,6 +152,7 @@ type Cell = {
 	day: TextLabel,
 	icon: Frame,
 	iconScale: UIScale,
+	art: ImageLabel,
 	mark: TextLabel,
 	cash: TextLabel,
 	item: TextLabel,
@@ -123,49 +177,58 @@ for i = 1, Commerce.TRACK_DAYS do
 		lg.Color = ColorSequence.new(Color3.new(1, 1, 1), Color3.new(0.72, 0.72, 0.72))
 		lg.Parent = f
 	end
-	local k = UiKit.kicker(f, "DIA", px(15, 20))
-	k.Position = UDim2.fromOffset(0, px(8, 10))
-	k.Size = UDim2.new(1, 0, 0, px(18, 24))
-	centered(k)
-	local d = UiKit.title(f, tostring(i), px(40, 52))
-	d.Position = UDim2.fromOffset(0, px(24, 32))
-	d.Size = UDim2.new(1, 0, 0, px(46, 60))
+	f.ClipsDescendants = true -- os raios do dia de hoje ficam dentro do cartão
+	local d = UiKit.title(f, "DIA " .. i, px(22, 29))
+	d.Position = UDim2.fromOffset(0, px(7, 9))
+	d.Size = UDim2.new(1, 0, 0, px(26, 34))
+	d.ZIndex = 4
 	centered(d)
-	-- o desenho do prêmio: moedas ou presente, num círculo de cor viva
+	-- a arte do prêmio (moedas, presente ou baú); o emoji só aparece sem a imagem
 	local icon = Instance.new("Frame")
 	icon.Name = "Premio"
 	icon.AnchorPoint = Vector2.new(0.5, 0)
-	icon.Position = UDim2.new(0.5, 0, 0, px(74, 98))
+	icon.Position = UDim2.new(0.5, 0, 0, px(33, 44))
 	icon.Size = UDim2.fromOffset(ICON_D, ICON_D)
-	icon.BackgroundColor3 = OURO
+	icon.BackgroundTransparency = 1
 	icon.BorderSizePixel = 0
+	icon.ZIndex = 3
 	icon.Parent = f
-	UiKit.corner(icon, ICON_D // 2)
-	local ig = Instance.new("UIGradient")
-	ig.Rotation = 90
-	ig.Color = ColorSequence.new(Color3.new(1, 1, 1), Color3.new(0.66, 0.66, 0.66))
-	ig.Parent = icon
 	local isc = Instance.new("UIScale")
 	isc.Parent = icon
+	local art = Instance.new("ImageLabel")
+	art.Name = "Arte"
+	art.BackgroundTransparency = 1
+	art.Size = UDim2.fromScale(1, 1)
+	art.ScaleType = Enum.ScaleType.Fit
+	art.Image = arteDia(i) or ""
+	art.Visible = art.Image ~= ""
+	art.Parent = icon
+	-- o ✔ de recebido fica no canto da arte; sem a imagem, este é o desenho do prêmio
 	local mark = UiKit.title(icon, "💰", px(38, 50), V.TEXT)
+	mark.AnchorPoint = Vector2.new(0.5, 0.5)
+	mark.Position = UDim2.fromScale(0.5, 0.5)
 	mark.Size = UDim2.fromScale(1, 1)
 	mark.TextYAlignment = Enum.TextYAlignment.Center
+	mark.ZIndex = 2
 	centered(mark)
 	local cash = UiKit.title(f, "", px(30, 40), OURO)
-	cash.Position = UDim2.fromOffset(0, px(148, 196))
+	cash.Position = UDim2.fromOffset(0, px(142, 188))
 	cash.Size = UDim2.new(1, 0, 0, px(36, 48))
+	cash.ZIndex = 4
 	centered(cash)
 	local item = UiKit.body(f, "", px(15, 20), V.TEXT)
-	item.Position = UDim2.fromOffset(px(4, 6), px(186, 246))
-	item.Size = UDim2.new(1, -2 * px(4, 6), 0, px(40, 54))
+	item.Position = UDim2.fromOffset(px(4, 6), px(180, 240))
+	item.Size = UDim2.new(1, -2 * px(4, 6), 0, px(44, 58))
 	item.TextWrapped = true
 	item.TextYAlignment = Enum.TextYAlignment.Top
+	item.ZIndex = 4
 	centered(item)
 	item.TextTruncate = Enum.TextTruncate.AtEnd
 	local tag = UiKit.tag(f, "", V.OLIVE, px(16, 21))
 	tag.AnchorPoint = Vector2.new(0.5, 1)
 	tag.Position = UDim2.new(0.5, 0, 1, -px(8, 10))
 	tag.Visible = false
+	tag.ZIndex = 5
 	cells[i] = {
 		frame = f,
 		scale = sc,
@@ -173,6 +236,7 @@ for i = 1, Commerce.TRACK_DAYS do
 		day = d,
 		icon = icon,
 		iconScale = isc,
+		art = art,
 		mark = mark,
 		cash = cash,
 		item = item,
@@ -253,6 +317,30 @@ end
 local bounceDay = 0
 local bounce: Tween? = nil
 local glow: Tween? = nil
+local luzHoje: CanvasGroup? = nil -- D-236: raios, halo e cintilas do cartão de hoje (apagar para parar)
+local function apagaLuz()
+	if luzHoje then
+		luzHoje:Destroy()
+		luzHoje = nil
+	end
+end
+local function acendeLuz(c: Cell)
+	apagaLuz()
+	-- CanvasGroup: o ClipsDescendants não corta peça girada, e os raios sairiam do cartão
+	local q = Instance.new("CanvasGroup")
+	q.Name = "LuzHoje"
+	q.BackgroundTransparency = 1
+	q.BorderSizePixel = 0
+	q.Size = UDim2.fromScale(1, 1)
+	q.ZIndex = 2
+	q.Parent = c.frame
+	luzHoje = q
+	local cx, cy = CARD_W / 2, px(33, 44) + ICON_D / 2
+	UiEfeitos.halo(q, UDim2.fromOffset(cx, cy), OURO, ICON_D * 1.5, 0.42, 1.8, 2)
+	UiEfeitos.raios(q, Vector2.new(cx, cy), OURO, ICON_D * 2, 4, 12, 2)
+	UiEfeitos.cintilas(q, Color3.fromRGB(255, 240, 190), 3, nil, 6)
+	UiEfeitos.varre(q, 3.2, Color3.fromRGB(255, 236, 170), 6)
+end
 local function bounceToday(day: number)
 	if day == bounceDay then
 		return
@@ -265,6 +353,7 @@ local function bounceToday(day: number)
 		glow:Cancel()
 		glow = nil
 	end
+	apagaLuz()
 	local old = cells[bounceDay]
 	if old then
 		old.iconScale.Scale = 1
@@ -274,6 +363,7 @@ local function bounceToday(day: number)
 	if not c then
 		return
 	end
+	acendeLuz(c) -- com movimento reduzido, os efeitos ficam parados
 	if UiKit.Estilo.reduzMovimento() then
 		c.stroke.Transparency = 0 -- o dia de hoje fica marcado, sem saltar nem piscar
 		return
@@ -281,7 +371,7 @@ local function bounceToday(day: number)
 	local b = TweenService:Create(
 		c.iconScale,
 		TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut, -1, true),
-		{ Scale = 1.14 }
+		{ Scale = 1.07 }
 	)
 	b:Play()
 	bounce = b
@@ -305,22 +395,38 @@ local function burst(day: number, credits: number)
 	local rng = Random.new()
 	-- movimento reduzido: sem moedas voando; o valor aparece no lugar e some devagar
 	local parado = UiKit.Estilo.reduzMovimento()
-	for i = 1, if parado then 0 else 14 do
-		local t = UiKit.title(panel, if i % 3 == 0 then "✨" else "💰", px(30, 40), V.TEXT)
-		t.AnchorPoint = Vector2.new(0.5, 0.5)
-		t.Size = UDim2.fromOffset(px(44, 58), px(44, 58))
-		t.Position = origin
-		centered(t)
-		t.ZIndex = 20
+	-- D-236: a onda de luz, as faíscas e as moedas de verdade (a arte), girando no ar
+	local centro = Vector2.new(origin.X.Offset, origin.Y.Offset)
+	UiEfeitos.onda(panel, centro, OURO, px(220, 290), 0.6, 19)
+	UiEfeitos.faiscas(panel, centro, OURO, 34, { z = 19, tam = px(24, 32), vmin = 240, vmax = 720 })
+	local moeda = arteMoeda()
+	for i = 1, if parado then 0 else 16 do
 		local a = rng:NextNumber(-math.pi * 0.95, -math.pi * 0.05) -- para cima, num leque
-		local r = rng:NextNumber(px(90, 120), px(190, 250))
-		local info = TweenInfo.new(rng:NextNumber(0.7, 1.1), Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-		TweenService:Create(t, info, {
-			Position = origin + UDim2.fromOffset(math.cos(a) * r, math.sin(a) * r),
-			TextTransparency = 1,
-			Rotation = rng:NextNumber(-60, 60),
-		}):Play()
-		task.delay(1.2, function()
+		local r = rng:NextNumber(px(110, 146), px(240, 316))
+		local info = TweenInfo.new(rng:NextNumber(0.75, 1.15), Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+		local alvo = origin + UDim2.fromOffset(math.cos(a) * r, math.sin(a) * r)
+		local giro = rng:NextNumber(-260, 260)
+		local t: GuiObject
+		if moeda then
+			local im = Instance.new("ImageLabel")
+			im.BackgroundTransparency = 1
+			im.Image = moeda
+			im.ScaleType = Enum.ScaleType.Fit
+			im.Parent = panel
+			TweenService:Create(im, info, { Position = alvo, ImageTransparency = 1, Rotation = giro }):Play()
+			t = im
+		else
+			local tx = UiKit.title(panel, if i % 3 == 0 then "✨" else "💰", px(30, 40), V.TEXT)
+			centered(tx)
+			TweenService:Create(tx, info, { Position = alvo, TextTransparency = 1, Rotation = giro }):Play()
+			t = tx
+		end
+		local lado = rng:NextInteger(px(34, 44), px(56, 74))
+		t.AnchorPoint = Vector2.new(0.5, 0.5)
+		t.Size = UDim2.fromOffset(lado, lado)
+		t.Position = origin
+		t.ZIndex = 20
+		task.delay(1.25, function()
 			t:Destroy()
 		end)
 	end
@@ -384,7 +490,7 @@ local function render()
 	local ready = d ~= nil and d.ready == true
 	local day: number = if ready and type(d.day) == "number" then d.day else 1
 	local side = sideNow()
-	runStat.value.Text = if ready then "🔥 " .. tostring(d.run or 0) else "—"
+	runStat.value.Text = if ready then tostring(d.run or 0) else "—"
 	local claimedAll = ready and d.claimedToday == true
 	for i, c in cells do
 		local entry = Commerce.DailyTrack[i]
@@ -416,8 +522,14 @@ local function render()
 		c.tag.TextColor3 = if color == OURO then V.BG else V.TEXT
 		-- o desenho: ✔ verde no que já foi recebido; senão moedas ou presente
 		local got = done or (today and claimed)
+		-- D-236: com a arte, o recebido fica apagado com um ✔ grande por cima
+		local temArte = c.art.Image ~= ""
+		c.art.ImageTransparency = if got then 0.62 else 0
 		c.mark.Text = if got then "✔" elseif items then "🎁" else "💰"
-		c.mark.TextColor3 = V.TEXT
+		c.mark.Visible = got or not temArte
+		c.mark.TextColor3 = if got and temArte then VERDE else V.TEXT
+		c.mark.TextStrokeTransparency = if got and temArte then 0.25 else 1
+		c.icon.BackgroundTransparency = if temArte then 1 else 0
 		c.icon.BackgroundColor3 = if got then VERDE elseif items then ROXO else OURO
 		c.frame.BackgroundColor3 = if today
 			then HOJE_BG

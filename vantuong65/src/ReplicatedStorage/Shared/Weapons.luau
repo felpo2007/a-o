@@ -164,7 +164,8 @@ Weapons.list = {
 		massLoadedKg = 3.6,
 		bulletMassG = 3.56, -- 55 gr
 		bcG1 = 0.243,
-		modes = { "semi", "auto" }, -- seletor: trava, semi, automático
+		-- D-236 (dono: "faça a m16 automática"): nasce no automático; o seletor (V) ainda passa para semi
+		modes = { "auto", "semi" },
 		dispersionMoa = 3,
 		boltHoldOpen = true,
 		enabled = true,

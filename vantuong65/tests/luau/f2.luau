@@ -214,25 +214,25 @@ test("D-99: sangrar demora minutos, não segundos", function()
 	assert(graveArm > pistolTorso, "braço mais lento que o tronco")
 end)
 
-test("janela de 60 s, desistir na hora (D-107), reanimar com 30 de vida", function()
+test("janela de 60 s, desistir na hora (D-107), reanimar com 45 de vida (D-236)", function()
 	local s = Medical.new()
 	assert(not Medical.canGiveUp(s, 100), "de pé não desiste")
 	Medical.applyHit(s, "torso", 3400, 0.5, 100)
 	assert(Medical.canGiveUp(s, 100) and Medical.canGiveUp(s, 110))
-	assert(Medical.revive(s, 120) and s.health == 30 and s.blurUntil == 140)
+	assert(Medical.revive(s, 120) and s.health == 45 and s.blurUntil == 140)
 	local d = Medical.new()
 	Medical.applyHit(d, "torso", 3400, 0.5, 0)
 	assert(Medical.tick(d, 1, 61) == "died" and not Medical.revive(d, 62))
 end)
 
-test("tratamento do médico devolve até 75 e para o sangramento", function()
+test("tratamento do médico devolve a vida inteira e para o sangramento (D-236)", function()
 	local s = Medical.new()
 	Medical.applyHit(s, "torso", 480, 0.5, 0)
 	for i = 1, 10 do
 		Medical.tick(s, 1, i)
 	end
 	assert(s.health < 50)
-	assert(Medical.treat(s) and s.health == 75 and #s.wounds == 0)
+	assert(Medical.treat(s) and s.health == 100 and #s.wounds == 0)
 end)
 
 -- Spawn ------------------------------------------------------------------------------------

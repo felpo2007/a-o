@@ -4,10 +4,10 @@
 -- e reescreve os zeros abaixo. Origem: assets/forgegui/manifest.json, assets/clothing e ASSETS.csv.
 return {
 	Sounds = {
-		-- música de fundo do menu (D-220, dono: "troque a musica do jogo, por uma mais calma"): "A Place Of
-		-- Tranquility - Underscore", Bruce Maginnis, 2:28, APM Music, biblioteca licenciada pela Roblox
-		-- (APMOfficial, grátis para experiências). Antes (D-91): "Ancient Grounds underscore", 9045929119
-		music_menu = 1842762516,
+		-- música de fundo do menu. D-236 (dono: "coloque uma musica no meio termo das ultimas duas"): "The Great
+		-- Journey (Underscore Version)", Zak Alan McNeil, 2:00, APM Music, biblioteca licenciada pela Roblox.
+		-- Medida entre "Ancient Grounds" (a agitada) e "A Place Of Tranquility" (a calma) em ritmo e brilho.
+		music_menu = 137044114503670,
 		shot_m14 = 115514991960057,
 		shot_type56 = 88541025090577,
 		shot_mid = 128124799917228, -- tiro a ~150 m (camada média)
@@ -135,7 +135,7 @@ return {
 		type56 = 130417403055419,
 		-- D-146: SKS refeita no Blender (tools/blender/sks.py); a do gerador (Models.sks_gerador no
 		-- roblox_ids.json, 97318124582467) tapava a mira
-		sks = 84746043493068,
+		sks = 122473422164759,
 		-- D-170: M60 refeita no Blender (tools/blender/m60.py); a do gerador (Models.m60_gerador no
 		-- roblox_ids.json, 78397702456512) tinha a alça em três dentes que tapavam a mira
 		m60 = 115778411346125,
@@ -151,7 +151,7 @@ return {
 		-- Arma, Telha, Culatra, Gatilho e Cartucho; 0 = arma provisória
 		win12 = 88021040446518,
 		-- M16 de 1965 (tools/blender/m16.py, D-146): nó Arma; 0 = arma provisória
-		m16 = 115800197069430,
+		m16 = 120210677771954,
 		-- caixas de munição do suporte (tools/blender/caixa_municao.py, 2026-11-13): nó Caixa e
 		-- Colisao_Caixa; 0 = o CaixaMunicaoService usa o ammo_crate ou a caixa em peças
 		caixa_municao_us = 128489958854272,
@@ -421,16 +421,16 @@ return {
 	-- imagem em 0 e o decal publicado, o servidor resolve a imagem no início (CartaService); com os
 	-- dois em 0, o mapa tático usa o desenho simples de antes.
 	Carta = {
-		nw = 130047795806128,
-		ne = 106984218796156,
-		sw = 140131851324679,
-		se = 127143387496451,
+		nw = 110091617651438,
+		ne = 72918302187504,
+		sw = 116277451682771,
+		se = 104502894076560,
 	},
 	CartaImages = { -- D-228: a vista aérea (tools/mapa_aereo.py), tipo Image
-		nw = 96588065168189,
-		ne = 134779182687001,
-		sw = 81958760849713,
-		se = 82944532156820,
+		nw = 131688770113300,
+		ne = 110144589007418,
+		sw = 103191122150000,
+		se = 139092681089087,
 	},
 	-- Imagens da loja (D-124; tools/blender/loja.py e tools/loja_banner.py): IDs de DECAL do Open
 	-- Cloud. A ImageLabel precisa do ID da IMAGEM (LojaImages, resolvido no Studio). Com a imagem em 0,
@@ -443,6 +443,17 @@ return {
 		m151 = 82373926872910,
 		m35 = 139647008641071,
 		peugeot403 = 78882368690368,
+	},
+	-- D-236: a arte dos 7 dias da recompensa diária (tools/blender/recompensas.py), tipo Image
+	Recompensas = {
+		r1 = 75416562028880,
+		r2 = 95787357789531,
+		r3 = 131178680511915,
+		r4 = 140538499771877,
+		r5 = 104556714468134,
+		r6 = 85668229726212,
+		r7 = 106775231280456,
+		moeda = 102615804161656,
 	},
 	LojaImages = {
 		destaque = 77920733563788,
@@ -955,10 +966,10 @@ return {
 		acab_uni_rede_neon__type54 = 131231041071206,
 		acab_uni_rede_neon__type56 = 114366042863829,
 		acab_uni_rede_neon__win12 = 90303253261897,
-		aereo_ne = 134779182687001,
-		aereo_nw = 96588065168189,
-		aereo_se = 82944532156820,
-		aereo_sw = 81958760849713,
+		aereo_ne = 110144589007418,
+		aereo_nw = 131688770113300,
+		aereo_se = 139092681089087,
+		aereo_sw = 103191122150000,
 		arma_dao = 89869506750467,
 		arma_kabar = 111912027767852,
 		arma_m14 = 126640105585728,

@@ -210,4 +210,7 @@ def test_ligados_e_gerado_bate():
     modulo = modulo_arq.read_text("utf-8")
     n_itens = modulo.count("{ key = ")
     esperados = sum(len(estatico.ler(ROOT / "assets" / "estatico" / f"{a}.txt")) for a in ativos)
+    # D-236: anexo que ficou sem lugar ao lado de uma casa maior sai da arte fixa
+    ajuste = json.loads((ROOT / "assets" / "estatico" / "ajuste_casas.json").read_text("utf-8"))
+    esperados -= sum(1 for a in ajuste.values() if a.get("fora"))
     assert len(gerados) == n_itens == esperados, "rode tools/estatico.py"

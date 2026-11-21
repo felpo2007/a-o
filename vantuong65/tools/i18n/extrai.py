@@ -132,8 +132,10 @@ def extract() -> dict[str, list[str]]:
     found: dict[str, list[str]] = {}
     for path in sorted(SRC.rglob("*.luau")):
         rel = path.relative_to(ROOT).as_posix()
-        if "/VT65Build/" in rel or rel.endswith(("SelfTest.luau", "Profiler.luau", "/Lang.luau")):
-            continue  # construção do mapa, autoteste (servidor, sem tela) e padrões do próprio Lang
+        if "/VT65Build/" in rel or rel.endswith(
+            ("SelfTest.luau", "Profiler.luau", "/Lang.luau", "/CasasEscala.luau")
+        ):
+            continue  # mapa, autoteste (sem tela), padrões do Lang e a tabela gerada das casas
         for n, raw in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
             line = strip_comment(raw)
             if not line.strip() or SKIP_LINE.search(line):

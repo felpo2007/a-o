@@ -16,6 +16,7 @@ local Net = require(ReplicatedStorage.Shared.Net)
 local Bus = require(script.Parent.Bus)
 local CasualtyScreen = require(script.Parent.CasualtyScreen)
 local Input = require(script.Parent.Input)
+local SocorroAlvo = require(script.Parent.SocorroAlvo)
 
 local player = Players.LocalPlayer
 local cc = Instance.new("ColorCorrectionEffect")
@@ -38,41 +39,6 @@ Net.event("Medical_Aviso").OnClientEvent:Connect(function(m)
 		Bus.fire("toast", m.msg, if m.ok then "sucesso" else "alerta")
 	end
 end)
-
--- aliado mais próximo (jogador ou bot) a até 3 m
-local function nearestAlly(): Model?
-	local char = player.Character
-	local root = char and char:FindFirstChild("HumanoidRootPart") :: BasePart?
-	if not (char and root) then
-		return nil
-	end
-	local myFaction = player:GetAttribute("Faction")
-	local candidates: { Model } = {}
-	for _, p in Players:GetPlayers() do
-		if p ~= player and p.Character then
-			table.insert(candidates, p.Character)
-		end
-	end
-	local folder = workspace:FindFirstChild("Combatants")
-	if folder then
-		for _, m in folder:GetChildren() do
-			if m:IsA("Model") then
-				table.insert(candidates, m)
-			end
-		end
-	end
-	local best, bestD = nil, 3 / 0.28
-	for _, m in candidates do
-		local r = m:FindFirstChild("HumanoidRootPart") :: BasePart?
-		if r and m:GetAttribute("Faction") == myFaction then
-			local d = (r.Position - root.Position).Magnitude
-			if d < bestD then
-				best, bestD = m, d
-			end
-		end
-	end
-	return best
-end
 
 -- Entradas pela camada única (Parte 12): direcional ↓ / G = bandagem rápida (trata o sangramento
 -- mais urgente: arterial pede torniquete); T ou roda = torniquete; X segurado / F = interagir com
@@ -108,13 +74,15 @@ local function interactAlly()
 	if player:GetAttribute("PromptShown") then
 		return -- há uma interação do mundo (caixote, túnel, construção) sob a mira
 	end
-	local ally = nearestAlly()
-	if ally then
-		local op = if ally:GetAttribute("Downed")
-			then "revive"
-			elseif player:GetAttribute("Role") == "medic" then "treat"
-			else "bandage"
-		Net.event("Medical_Action"):FireServer({ op = op, target = ally })
+	-- D-236: o mais urgente ao alcance (Shared/Socorro); o que não dá para fazer diz o motivo
+	local ally = SocorroAlvo.alvo()
+	local a = ally and SocorroAlvo.acao(ally)
+	if ally and a then
+		if a.op then
+			Net.event("Medical_Action"):FireServer({ op = a.op, target = ally.model })
+		elseif a.motivo then
+			Bus.fire("toast", a.motivo, "alerta")
+		end
 	end
 end
 
@@ -132,13 +100,13 @@ Bus.on("interact_ally", interactAlly)
 -- D-129: ferramenta do médico (roda, vaga 0): o companheiro mais perto; sem ninguém, diz (antes só
 -- um aviso de como fazer)
 Bus.on("socorro_perto", function()
-	local ally = nearestAlly()
-	if not ally then
-		Bus.fire("toast", "Nenhum companheiro a até 3 m", "alerta")
+	local ally = SocorroAlvo.alvo()
+	local a = ally and SocorroAlvo.acao(ally)
+	if not (ally and a and a.op) then
+		Bus.fire("toast", "Nenhum companheiro ferido por perto", "alerta")
 		return
 	end
-	local op = if ally:GetAttribute("Downed") then "revive" else "treat"
-	Net.event("Medical_Action"):FireServer({ op = op, target = ally })
+	Net.event("Medical_Action"):FireServer({ op = a.op, target = ally.model })
 end)
 Bus.on("equip_item", function(id: string)
 	if id == "bandage" then

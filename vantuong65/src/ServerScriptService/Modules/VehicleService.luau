@@ -1020,12 +1020,12 @@ end
 -- (continua com a massa, os assentos e os raios); colidem, invisíveis e sem massa, a fuselagem
 -- (Colisao_Casco, com o fundo HELI_BELLY_M acima das rodas) e uma bola em cada roda da arte
 -- (Colisao_Roda), com o fundo no fundo do chassi. O VehicleController mede o pouso nelas.
-local HELI_BELLY_M = 0.45 -- PLACEHOLDER: vão da barriga ao chão
-local HELI_WHEEL_M = 0.6 -- PLACEHOLDER: diâmetro da roda
+local HELI_BELLY_M = 0.45 * Vehicles.ESCALA -- PLACEHOLDER: vão da barriga ao chão
+local HELI_WHEEL_M = 0.6 * Vehicles.ESCALA -- PLACEHOLDER: diâmetro da roda
 -- a fuselagem de colisão: 2 m de largura (o chassi de 4 m vai de roda a roda) e do nariz até a roda
 -- da cauda (atrás dela o cone sobe). Com a caixa inteira, numa encosta de 12° o canto de trás
 -- encostava no chão e as rodas ficavam a 0,5 m (Studio). PLACEHOLDER (fuselagem do H-34 ~1,7 m)
-local HELI_BODY_W_M = 2.0
+local HELI_BODY_W_M = 2.0 * Vehicles.ESCALA
 local function heliColliders(model: Model, chassis: BasePart, art: Instance)
 	local wheels: { BasePart } = {}
 	for _, d in art:GetDescendants() do
@@ -1297,7 +1297,7 @@ local function build(specId: string, at: Vector3, yaw: number, depot: number?): 
 	local hullCenter = 0 -- x da malha que vai para o centro do chassi
 	local tplMesh = if tpl then mainPart(tpl) else nil
 	if not heli and tplMesh and info and info.track then
-		local sx = tplMesh.Size.X / info.box[1]
+		local sx = tplMesh.Size.X / info.box[1] * Vehicles.ESCALA -- D-236: a arte entra maior
 		local lo, hi = math.huge, -math.huge
 		for _, c in info.track.circles do
 			lo = math.min(lo, c[1] - c[3])
@@ -1370,6 +1370,7 @@ local function build(specId: string, at: Vector3, yaw: number, depot: number?): 
 	if tpl then
 		local art = tpl:Clone()
 		art.Name = "Art"
+		art:ScaleTo(art:GetScale() * Vehicles.ESCALA) -- D-236: assentos e juntas seguem pela razão malha/caixa
 		local artYaw = if Vehicles.WHEELED[specId]
 			then math.rad(Vehicles.WHEELED[specId].artYawDeg)
 			else ART_YAW[specId] or 0

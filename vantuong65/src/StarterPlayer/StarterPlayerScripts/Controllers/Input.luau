@@ -465,8 +465,19 @@ end
 -- definidos mais abaixo (dispositivo)
 local setDevice: (string) -> () = function(_: string) end
 
+-- D-236 (só no Studio): workspace "VT65DevSemControle" = true ignora o controle. Nas sessões com o controle
+-- fantasma da D-149, RB e Y chegavam sozinhos a cada segundo, lançavam granada e abriam o menu.
+local function padIgnorado(t: Enum.UserInputType): boolean
+	return isGamepad(t)
+		and game:GetService("RunService"):IsStudio()
+		and workspace:GetAttribute("VT65DevSemControle") == true
+end
+
 UserInputService.InputBegan:Connect(function(input: InputObject, processed: boolean)
 	local t = input.UserInputType
+	if padIgnorado(t) then
+		return
+	end
 	if isGamepad(t) then
 		if Input.state.disconnected then
 			primaryPad = t
