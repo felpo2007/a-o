@@ -920,8 +920,30 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     - Lune 824 ok (57 arquivos), pytest 76, ruff, StyLua e luau-lsp limpos, i18n 100%. Relatório:
       `testes/LOTE94_D209_2026-11-20.md`.
     - **v127 publicada** (versão 132 do place, commit 19d58ef).
-    - **Próximo (Prompt A):** o HUD de infantaria e de veículo, morte e resultados, celular e a
-      verificação final. Do §8 ficam as abas de cima e os companheiros só aptos.
+  - **Lote 95 (D-210): o HUD de infantaria em zonas, feito.**
+    - **Vida e estados:** a vida real com o número e o rastro do dano, embaixo ao centro, com os
+      estados do corpo (hemorragia, sangrando, perna, braço). Cai a decisão antiga "sem barra de vida".
+    - **Direção do dano:** arcos vermelhos em volta da mira apontando para o tiro (o objetivo segue
+      em latão na bússola).
+    - **Abates e XP:** os abates (`Combat_Feed` novo, para todos, só nomes, lados e arma; 4 linhas de
+      6 s) e a linha discreta de XP no alto à direita.
+    - **Esquadrão:** na lateral esquerda, com o líder, o papel e em campo, caído ou fora. A coluna de
+      comandos vem embaixo dele e recolhe se não couber.
+    - **Cartão da arma:** com a imagem do modelo do jogo e a linha do equipamento (granada, fumaça,
+      bandagem).
+    - **Objetivo:** CAPTURAR, DEFENDER ou CONTESTAR; nomes somem perto da mira.
+    - **Conferido no Studio:**
+      - a vida de 112 a 72 com o rastro;
+      - o arco do lado do tiro;
+      - o feed pelo servidor;
+      - os exemplos (abates, XP, estados, esquadrão);
+      - 0 erros.
+    - **Não testado:** um abate e um XP de verdade, companheiros de verdade, o toque, a TV e o jogo
+      publicado.
+    - Lune 834 ok (58 arquivos), pytest 76, ruff, StyLua e luau-lsp limpos, i18n 100%. Relatório:
+      `testes/LOTE95_D210_2026-11-20.md`.
+    - **Próximo (Prompt A):** o HUD de veículo (§14), morte e resultados, celular e a verificação
+      final. Do §8 ficam as abas de cima e os companheiros só aptos.
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;

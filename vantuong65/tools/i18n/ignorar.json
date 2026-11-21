@@ -1638,7 +1638,21 @@
   "xp",
   "Escolhido",
   "pedido",
-  "rodada"
+  "rodada",
+  "+%d %s",
+  "<font color=\"#%s\">%s</font>   <font color=\"#%s\">[%s]</font>   <font color=\"#%s\">%s</font>",
+  "Bot VC 03",
+  "Bot VC 12",
+  "Fuzileiro 07",
+  "SOLDADO TESTE",
+  "CI",
+  "bem",
+  "campo",
+  "fora",
+  "APOIO TESTE",
+  "LIDER TESTE",
+  "MEDICO TESTE",
+  "Squad Alfa"
  ],
  "regex": [
   "^uni_[a-z_]+@[a-z0-9]+$"

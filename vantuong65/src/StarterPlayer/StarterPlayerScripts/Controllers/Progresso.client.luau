@@ -1164,7 +1164,18 @@ Net.event("Progress_State").OnClientEvent:Connect(function(s: any)
 	end
 	state = s
 	local g = s.gain
-	if type(g) == "table" and ((g.xp or 0) > 0 or (g.cr or 0) > 0) then
+	local hum = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+	if type(g) == "table" and ((g.xp or 0) > 0 or (g.cr or 0) > 0) and hum and hum.Health > 0 then
+		-- D-210 (§13: "XP discreto" no alto à direita; "avisos de XP, assistência e eliminação curtos"):
+		-- em campo o ganho vai para a linha do HudInfantaria, não para a pilha de avisos do meio
+		Bus.fire(
+			"hud_ganho",
+			if g.label ~= nil then tostring(g.label) else "",
+			tonumber(g.xp) or 0,
+			tonumber(g.cr) or 0,
+			tostring(s.cur)
+		)
+	elseif type(g) == "table" and ((g.xp or 0) > 0 or (g.cr or 0) > 0) then
 		Toast.reward(
 			if g.label ~= nil then tostring(g.label) else "",
 			tonumber(g.xp) or 0,

@@ -164,6 +164,12 @@ O `sourcemap.json` não vai para o Git.
     - para ver as recusas, ouça o `Spawn_Result` no cliente;
     - na 1ª vez de um perfil, a escolha de idioma (`VT65Idioma.EscolhaDeIdioma.Cartao.pt`) abre por
       cima da carta.
+  - HUD de infantaria (D-210, do lado do CLIENTE):
+    - `VT65DevTela = "hud_infantaria"` mostra por 8 s os arcos de dano, os estados, os abates, o XP e
+      um esquadrão de exemplo (sozinho no servidor não há companheiro);
+    - `"hud"` acende o cartão da arma;
+    - para o caminho real, do servidor: o `Combat_Hit:FireClient` e o `Combat_Feed:FireAllClients`;
+      e a vida pelo `Humanoid.Health`.
   - D-191/D-190 (só Studio): `VT65DevGranada = "6"` lança uma granada a 6 m/s do primeiro
     jogador; `VT65DevTela = "3p"` liga a 3ª pessoa (o teclado do MCP não chega com o Studio
     atrás); `VT65DevTela = "roda_equip:<n>"` abre a roda de equipamento com a ficha n;
@@ -387,7 +393,7 @@ O `sourcemap.json` não vai para o Git.
 - Segredos só no `.env` (no `.gitignore`), nunca no código nem no chat.
 - ForgeGUI: nunca regenerar um job em `outcome_unknown`. "failed" com `retryable` pode ser
   retomado com `generation_retry`.
-- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-210) e atualize `PROGRESS.md`.
+- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-211) e atualize `PROGRESS.md`.
 - Tetos de triângulos por modelo: vegetação ≤ 6 mil (D-135), props e herói ≤ 20 mil (`ArtBudget`,
   conferido pelo teste da F5).
 - Commits no branch acima, com mensagem em português.

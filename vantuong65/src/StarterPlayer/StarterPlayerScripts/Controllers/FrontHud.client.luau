@@ -5,7 +5,8 @@
 --     (cor fixa por lado, 2026-11-12: azul = EUA, vermelho = VC, cáqui = neutro; "nosso" é o ponto
 --     branco no canto), quem está tomando (▲ nós, ▼ eles), a
 --     disputa (⚔) e o progresso; reforços (Warfare) ou a frente (Offensive); e o objetivo do time
---     com rumo e distância ("ATACAR · S3 Cemitério · ~420 m a noroeste"). Some com a carta e os menus;
+--     com rumo e distância ("CAPTURAR · S3 Cemitério · ~420 m a noroeste"; D-210: CAPTURAR, DEFENDER
+--     ou CONTESTAR quando o objetivo está em disputa). Some com a carta e os menus;
 --   - captura: no setor em que estou tomando ou disputando, um painel abaixo do meio da tela com o
 --     estado, a barra do progresso e quantos aliados e inimigos há na área (Match_State.inArea);
 --   - avisos pelo Toast: setor sob ataque, em disputa, tomado, perdido, neutralizado, frente que
@@ -24,6 +25,7 @@ local UserInputService = game:GetService("UserInputService")
 
 local Casualty = require(ReplicatedStorage.Shared.Casualty)
 local Front = require(ReplicatedStorage.Shared.Front)
+local HudInfantaria = require(ReplicatedStorage.Shared.HudInfantaria)
 local MapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any
 local Net = require(ReplicatedStorage.Shared.Net)
 local Input = require(script.Parent.Input)
@@ -402,8 +404,11 @@ local function render(st: any)
 				then " · você está nele"
 				else string.format(" · ~%d m a %s", Casualty.roundDistance(m), Casualty.bearing(dx, dz))
 		end
-		local verb = if role == "attack"
-			then '<font color="#ECCA74">ATACAR</font>'
+		-- D-210 (§13): capturar, defender ou contestar (o objetivo em disputa)
+		local v = HudInfantaria.verbo(role, type(st.contested) == "table" and st.contested[target] == true)
+		local verb = if v == "contestar"
+			then '<font color="#ECCA74">CONTESTAR</font>'
+			elseif v == "capturar" then '<font color="#ECCA74">CAPTURAR</font>'
 			else '<font color="#ECCA74">DEFENDER</font>'
 		objective.Text = string.format("%s · %s%s", verb, sectorName(st, target), where)
 	else

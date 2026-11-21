@@ -9135,3 +9135,92 @@ a ordem de inserção esperava 8 s pelo corpo para dizer "recusada (o ponto mudo
   do QG;
 - agrupar os pontos vizinhos;
 - arrastar a carta no controle sem o cursor.
+
+## D-210 — Lote 95: o HUD de infantaria em zonas (2026-11-20)
+
+**Pedido:** o §13 do prompt de interface. As zonas:
+- alto ao centro: placar, tempo e A–E;
+- alto à direita: XP discreto e feed limitado de abates;
+- lateral esquerda: esquadrão;
+- pé ao centro: vida e estados;
+- pé à direita: arma ativa com imagem, munição e equipamento;
+- centro: mira e retorno de combate.
+
+Também pede:
+- capturar, defender e contestar nos marcadores;
+- menos nomes perto da mira;
+- a vida com o valor real e o dano recebido diferente da direção do objetivo.
+
+**O que já havia e fica:**
+- a faixa da frente (placar, tempo, A–E);
+- a bússola;
+- o cartão da arma com as balas e os pentes (v43);
+- a faixa das vagas que aparece ao trocar (BarraItens: a "lista breve" do §13);
+- o marcador de acerto e a caveira;
+- a roda de equipamento.
+
+**Decisão que muda:** a "sem barra de vida" do MedicalController (Parte 1, HUD mínimo) cai. O §13 pede
+"atualize a vida com o valor real". A visão que perde cor com a vida continua.
+
+**O que mudou:**
+- **Vida e estados** (`Controllers/HudInfantaria`, pé ao centro, logo acima da bússola):
+  - a barra com o número inteiro do Humanoid, cor por nível (verde > 60%, âmbar > 30%, vermelho) e
+    marcas de 25%;
+  - o dano deixa um rastro claro que encolhe em 0,4 s;
+  - em cima, os estados do `Medical_State`: HEMORRAGIA (vermelho), SANGRANDO, PERNA FERIDA e BRAÇO
+    FERIDO;
+  - no veículo a barra sai (o painel do veículo é o próximo lote).
+- **Direção do dano:**
+  - três pedaços de arco vermelho em volta da mira (raio de 120 px), apontando para a origem do tiro
+    (`Combat_Hit`);
+  - os arcos acompanham a câmera enquanto duram (1,6 s); o mesmo lado renova em vez de empilhar
+    (até 4);
+  - o objetivo segue em latão na bússola: cor, forma e lugar diferentes.
+- **Abates e XP** (alto à direita, abaixo da faixa quando ela chega até ali):
+  - `Combat_Feed` novo: o servidor manda a todos o abate creditado a um jogador (nomes, lados e
+    arma; nunca posição);
+  - no máximo 4 linhas de 6 s, nas cores fixas dos lados, com a arma entre colchetes; o seu abate ou
+    a sua queda com o filete âmbar;
+  - o XP em campo sai do meio da tela e vai para uma linha só ("+100 XP · +10 CI · Abate"), que soma
+    o mesmo rótulo por 3 s;
+  - no toque os abates não aparecem e o XP volta ao aviso de sempre (a tela limpa da v39).
+- **Esquadrão** (lateral esquerda, abaixo da reserva das listas do Roblox e da ordem):
+  - o líder primeiro com ★, o nome, o papel e o estado com símbolo e cor: em campo ●, caído ✚,
+    fora ○;
+  - vem do `Squad_State`, sem o próprio jogador;
+  - a coluna de comandos (PainelComandos) começa embaixo dele. Numa tela baixa, se não cabe nem na
+    escala mínima, ela recolhe (o §14 pede a ajuda recolhível).
+- **Cartão da arma** (HudCampo), de 290 × 108 para 340 × 140:
+  - a imagem do modelo do jogo (`RodaArte`, o mesmo desenho da roda), enchendo a largura;
+  - seletor, alça e munição na coluna da direita;
+  - embaixo, granada, fumaça e bandagem com a imagem pequena e a quantidade (zero em vermelho).
+- **Capturar, defender, contestar** (`HudInfantaria.verbo`, o mesmo na faixa, nos marcadores e na
+  carta): o objetivo em disputa (`Match_State.contested`) vira CONTESTAR; ATACAR virou CAPTURAR.
+- **Perto da mira** (9% da altura): os nomes dos aliados somem e o ícone apaga; no objetivo fica só a
+  letra.
+- **Textos novos (en, es, vi):** 9.
+
+**Conferido no Studio** (janela de 839 × 656):
+- **Antes:** sem vida, sem dano, sem abates (`testes/lote95/hud_antes.jpg`).
+- **Faixa e vida:** "CAPTURAR" na faixa; a vida com 112.
+- **Dano de verdade:** 40 de dano pelo servidor levou a barra de 112 a 72, com o rastro; o
+  `Combat_Hit` da esquerda acendeu o arco do lado esquerdo (`vida_e_dano_real.jpg`).
+- **Feed:** o `Combat_Feed` pelo servidor chegou: "SOLDADO TESTE [M1911A1] Bot VC 21".
+- **Gancho `hud_infantaria`:** arcos, estados, abates (o próprio com o filete), a linha de XP e o
+  esquadrão de exemplo com líder, caído e fora (`hud_exemplos_esquadrao.jpg`).
+- **Ajustes vistos no Studio:**
+  - o feed ficou embaixo da faixa: as telas contam a faixa do Roblox de jeitos diferentes, e agora a
+    conta desconta a origem de cada tela (`feed_sob_a_faixa_antes_do_ajuste.jpg`);
+  - a arma saía pequena no cartão: a câmera chega a 55% da distância;
+  - o esquadrão cobria a coluna de comandos: ela recolhe e volta quando ele sai
+    (`esquadrao_sobre_a_coluna_antes_do_ajuste.jpg`).
+- **Erros:** 0 no cliente e no servidor.
+
+**Testes:** `hud_infantaria.luau` (10).
+
+**Não testado:**
+- **Abate de verdade:** um jogador abatendo outro de verdade (o crédito do servidor não mudou; o
+  `Combat_Feed` sai junto do `Combat_Kill`).
+- **XP de verdade:** um ganho real pelo `Progress_State` (a ligação está nos testes de fonte).
+- **Companheiros de verdade:** só o exemplo.
+- **Telas:** o toque, a TV, o 16:9 cheio e o jogo publicado.

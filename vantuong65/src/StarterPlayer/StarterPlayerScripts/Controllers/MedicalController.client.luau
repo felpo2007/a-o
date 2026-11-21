@@ -1,5 +1,7 @@
 --!strict
--- Corpo e cura no cliente: sem barra de vida. A visão perde cor e escurece com a vida, borra
+-- Corpo e cura no cliente. Aqui não há barra de vida: desde a D-210 (§13 do prompt de interface,
+-- "atualize a vida com o valor real") ela fica no Controllers/HudInfantaria, com o número. A visão
+-- perde cor e escurece com a vida, borra
 -- depois da reanimação e quando caído. Entradas no fim do arquivo (camada Input, Parte 12).
 -- Caído e morto: a tela de queda e a ficha de baixa ficam no CasualtyScreen (2026-11-11); caído, a
 -- visão turva pulsa com o coração dele.

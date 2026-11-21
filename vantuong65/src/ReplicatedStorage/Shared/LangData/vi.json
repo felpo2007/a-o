@@ -3514,5 +3514,14 @@
  "◷ AGUARDANDO": "◷ ĐANG CHỜ",
  "◷ PEDIDO": "◷ ĐÃ YÊU CẦU",
  "… PEDIDO": "… ĐÃ YÊU CẦU",
- "⏳ AGUARDANDO": "⏳ ĐANG CHỜ"
+ "⏳ AGUARDANDO": "⏳ ĐANG CHỜ",
+ "<font color=\"#ECCA74\">CAPTURAR</font>": "<font color=\"#ECCA74\">CHIẾM</font>",
+ "<font color=\"#ECCA74\">CONTESTAR</font>": "<font color=\"#ECCA74\">TRANH CHẤP</font>",
+ "BRAÇO FERIDO": "TAY BỊ THƯƠNG",
+ "CAPTURAR": "CHIẾM",
+ "HEMORRAGIA": "XUẤT HUYẾT",
+ "PERNA FERIDA": "CHÂN BỊ THƯƠNG",
+ "SANGRANDO": "ĐANG CHẢY MÁU",
+ "capturar": "chiếm",
+ "contestar": "tranh chấp"
 }

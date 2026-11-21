@@ -3508,5 +3508,14 @@
  "◷ AGUARDANDO": "◷ ESPERANDO",
  "◷ PEDIDO": "◷ PEDIDO",
  "… PEDIDO": "… PEDIDO",
- "⏳ AGUARDANDO": "⏳ ESPERANDO"
+ "⏳ AGUARDANDO": "⏳ ESPERANDO",
+ "<font color=\"#ECCA74\">CAPTURAR</font>": "<font color=\"#ECCA74\">CAPTURAR</font>",
+ "<font color=\"#ECCA74\">CONTESTAR</font>": "<font color=\"#ECCA74\">DISPUTAR</font>",
+ "BRAÇO FERIDO": "BRAZO HERIDO",
+ "CAPTURAR": "CAPTURAR",
+ "HEMORRAGIA": "HEMORRAGIA",
+ "PERNA FERIDA": "PIERNA HERIDA",
+ "SANGRANDO": "SANGRANDO",
+ "capturar": "capturar",
+ "contestar": "disputar"
 }

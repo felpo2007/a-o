@@ -3514,5 +3514,14 @@
  "◷ AGUARDANDO": "◷ WAITING",
  "◷ PEDIDO": "◷ REQUESTED",
  "… PEDIDO": "… REQUESTED",
- "⏳ AGUARDANDO": "⏳ WAITING"
+ "⏳ AGUARDANDO": "⏳ WAITING",
+ "<font color=\"#ECCA74\">CAPTURAR</font>": "<font color=\"#ECCA74\">CAPTURE</font>",
+ "<font color=\"#ECCA74\">CONTESTAR</font>": "<font color=\"#ECCA74\">CONTEST</font>",
+ "BRAÇO FERIDO": "WOUNDED ARM",
+ "CAPTURAR": "CAPTURE",
+ "HEMORRAGIA": "HEAVY BLEEDING",
+ "PERNA FERIDA": "WOUNDED LEG",
+ "SANGRANDO": "BLEEDING",
+ "capturar": "capture",
+ "contestar": "contest"
 }

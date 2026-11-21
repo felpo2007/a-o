@@ -11,6 +11,9 @@
 --     postura (de pé, agachado, deitado) em três barras. Fica nítido quando algo muda e esmaece em
 --     5 s (HUD mínimo). Os avisos da arma (Toast com a chave "arma": seletor, alça, troca de arma,
 --     baioneta) passam a sair aqui, não na pilha do alto.
+--     v43: as balas em número ("17 /20") e os carregadores em pentes; D-210: a imagem da arma (o modelo
+--     do jogo, RodaArte) e a linha do equipamento (granada, fumaça e bandagem com a quantidade).
+--     A vida, a direção do dano, os abates, o XP e o esquadrão ficam no Controllers/HudInfantaria.
 -- Fontes de dados (nada do WeaponController muda): atributo local "EquippedWeapon", remote
 -- Combat_Ammo, Bus "reload_start", atributos Prone/Crouched do personagem e Match_State.
 -- Desempenho: tudo é criado uma vez. Por quadro, só a posição da fita (uma propriedade) e o texto
@@ -37,6 +40,7 @@ local Weapons = require(ReplicatedStorage.Shared.Weapons) :: any
 local Bus = require(script.Parent.Bus)
 local Input = require(script.Parent.Input)
 local Marcadores = require(script.Parent.Marcadores) -- liga os marcadores de aliados e objetivos
+local RodaArte = require(script.Parent.RodaArte)
 local Toast = require(script.Parent.Toast)
 local ToqueTelas = require(script.Parent.ToqueTelas)
 local ToqueUi = require(script.Parent.ToqueUi)
@@ -239,8 +243,11 @@ paintCardinals()
 -- ============================================================================================
 -- arma e postura
 -- ============================================================================================
--- D-93 (Studio: contraste baixo e letra miúda): cartão maior, fundo mais fechado, letras maiores
-local AW, AH = px(290, 410), px(108, 152)
+-- D-93 (Studio: contraste baixo e letra miúda): cartão maior, fundo mais fechado, letras maiores.
+-- D-210 (§13: "o cartão da arma ativa deve ser mais evidente que os itens secundários. Use imagens do
+-- inventário real"): a imagem da arma (o modelo do jogo, RodaArte) à esquerda, a munição à direita e o
+-- equipamento (granada, fumaça, bandagem) embaixo
+local AW, AH = px(340, 480), px(140, 196)
 local A: { [string]: any } = {}
 do
 	local card = Instance.new("CanvasGroup")
@@ -404,6 +411,60 @@ do
 	flash.Size = UDim2.fromOffset(px(124, 176), px(18, 26))
 	flash.TextXAlignment = Enum.TextXAlignment.Right
 	flash.TextTransparency = 1
+	-- D-210: a imagem da arma à esquerda; seletor, alça e munição na coluna da direita; o equipamento
+	-- embaixo. O aviso curto (flash) fica no pé da imagem.
+	local RX = P + px(142, 200) -- coluna da direita
+	local art = RodaArte.frame(card)
+	art.Position = UDim2.fromOffset(P, px(34, 48))
+	art.Size = UDim2.fromOffset(px(132, 186), px(60, 84))
+	mode.Position = UDim2.fromOffset(RX, px(36, 50))
+	zero.Position = UDim2.fromOffset(RX + px(68, 94), px(36, 50))
+	count.Position = UDim2.fromOffset(RX, px(62, 86))
+	capLabel.Position = UDim2.fromOffset(RX + px(50, 70), px(78, 108))
+	spareRow.Position = UDim2.fromOffset(RX + px(96, 134), px(72, 100))
+	spareRow.Size = UDim2.new(1, -RX - px(96, 134) - P, 0, px(20, 28))
+	flash.AnchorPoint = Vector2.new(0, 0)
+	flash.Position = UDim2.fromOffset(P, px(78, 108))
+	flash.Size = UDim2.fromOffset(px(132, 186), px(18, 26))
+	flash.TextXAlignment = Enum.TextXAlignment.Left
+	flash.TextStrokeColor3 = UiKit.NIGHT
+	flash.TextStrokeTransparency = 0.3
+	-- equipamento: a imagem pequena (o mesmo desenho da roda) e a quantidade
+	local equipRow = Instance.new("Frame")
+	equipRow.Name = "Equipamento"
+	equipRow.Position = UDim2.fromOffset(P, px(104, 146))
+	equipRow.Size = UDim2.new(1, -2 * P, 0, px(28, 40))
+	equipRow.BackgroundTransparency = 1
+	equipRow.Parent = card
+	local erl = Instance.new("UIListLayout")
+	erl.FillDirection = Enum.FillDirection.Horizontal
+	erl.VerticalAlignment = Enum.VerticalAlignment.Center
+	erl.Padding = UDim.new(0, px(14, 20))
+	erl.SortOrder = Enum.SortOrder.LayoutOrder
+	erl.Parent = equipRow
+	local equip: { [string]: { f: Frame, n: TextLabel } } = {}
+	for i, key in { "frag", "smoke", "bandage" } do
+		local f = Instance.new("Frame")
+		f.Name = key
+		f.LayoutOrder = i
+		f.BackgroundTransparency = 1
+		f.AutomaticSize = Enum.AutomaticSize.X
+		f.Size = UDim2.fromOffset(0, px(28, 40))
+		f.Parent = equipRow
+		local l = Instance.new("UIListLayout")
+		l.FillDirection = Enum.FillDirection.Horizontal
+		l.VerticalAlignment = Enum.VerticalAlignment.Center
+		l.Padding = UDim.new(0, px(4, 6))
+		l.Parent = f
+		local vp = RodaArte.frame(f)
+		vp.Size = UDim2.fromOffset(px(28, 40), px(28, 40))
+		RodaArte.show(vp, RodaArte.artFor(key, nil, nil))
+		local n = UiKit.rotulo(f, 15, UiKit.CARD, UiKit.HEAD_FONT)
+		n.AutomaticSize = Enum.AutomaticSize.X
+		n.Size = UDim2.fromOffset(0, px(28, 40))
+		n.LayoutOrder = 2
+		equip[key] = { f = f, n = n }
+	end
 	A = {
 		card = card,
 		scale = sc,
@@ -420,8 +481,36 @@ do
 		more = more,
 		reload = reload,
 		flash = flash,
+		art = art,
+		equip = equip,
 	}
 end
+
+-- D-210: a quantidade de cada item do equipamento (granadas e fumaças: atributos do jogador, que o
+-- servidor mantém; bandagens: o Medical_State). Zero fica apagado.
+local bandagens = -1
+local function paintEquip()
+	local vals: { [string]: number } = {
+		frag = tonumber(player:GetAttribute("Frags")) or 0,
+		smoke = tonumber(player:GetAttribute("Smokes")) or 0,
+		bandage = math.max(bandagens, 0),
+	}
+	for key, e in A.equip :: { [string]: { f: Frame, n: TextLabel } } do
+		local v = vals[key] or 0
+		e.n.Text = string.format("× %d", v)
+		e.n.TextColor3 = if v > 0 then UiKit.CARD else UiKit.STAMP
+	end
+end
+for _, nome in { "Frags", "Smokes" } do
+	player:GetAttributeChangedSignal(nome):Connect(paintEquip)
+end
+Net.event("Medical_State").OnClientEvent:Connect(function(s: any)
+	if type(s) == "table" and type(s.bandages) == "number" and s.bandages ~= bandagens then
+		bandagens = s.bandages
+		paintEquip()
+	end
+end)
+paintEquip()
 
 -- ===== estado da arma =====
 local W = {
@@ -566,9 +655,39 @@ local function renderStance()
 	A.stanceText.TextColor3 = if armed then UiKit.BRASS_LIGHT else UiKit.V.TEXT
 end
 
+-- D-210: o desenho da arma na mão (a mesma chave da roda de equipamento, RodaArte)
+local function artOf(id: string?): string?
+	if not id then
+		return nil
+	elseif id == "shovel" then
+		return "shovel"
+	elseif id == "launcher" or id == Lancador.FICHA.VC.id or id == Lancador.FICHA.US.id then
+		return "role:anti_tank"
+	elseif Weapons.get(id) then
+		return "weapon:" .. id
+	end
+	return nil
+end
+
+-- D-210: na janela larga do cartão a arma enche a largura (o RodaArte enquadra pela diagonal, para a
+-- ficha quase quadrada da roda; aqui a arma saía pequena, Studio)
+local function encher(vp: ViewportFrame, k: number)
+	local cam = vp.CurrentCamera
+	local m = vp:FindFirstChildOfClass("Model")
+	if cam and m then
+		local alvo = m:GetBoundingBox().Position
+		cam.CFrame = CFrame.lookAt(alvo + (cam.CFrame.Position - alvo) * k, alvo)
+	end
+end
+
 local function equip()
 	local id = player:GetAttribute("EquippedWeapon")
 	W.id = if type(id) == "string" then id else nil
+	local antes = A.art:GetAttribute("Arte")
+	RodaArte.show(A.art, artOf(W.id))
+	if A.art:GetAttribute("Arte") ~= antes then
+		encher(A.art, 0.55) -- só na troca (o RodaArte não reposiciona o mesmo desenho)
+	end
 	local wp = weaponDef()
 	-- o modo de verdade é o do seletor (atributo local FireMode do WeaponController); a ficha só
 	-- serve de reserva enquanto o atributo não chega

@@ -16,6 +16,9 @@
 -- coluna): a coluna fica embaixo à esquerda, acima do registro de rádio, abaixo de uma faixa
 -- reservada no alto (as listas do Roblox e a ordem do comandante); numa tela baixa ela desce até o
 -- pé e encolhe (UIScale) para caber nessa faixa, em qualquer tamanho de tela.
+-- D-210: o esquadrão (HudInfantaria) fica entre a reserva do alto e a coluna; numa tela baixa em que a
+-- coluna não cabe nem na escala mínima embaixo dele, ela recolhe (o §14 pede a ajuda recolhível, sem a
+-- coluna longa ao lado da mira).
 -- Studio: workspace:SetAttribute("VT65DevTela", "comandos") mostra a coluna por 8 s (mesmo com o
 -- tutorial aberto).
 local Players = game:GetService("Players")
@@ -25,6 +28,7 @@ local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 
 local InputMap = require(ReplicatedStorage.Shared.InputMap)
+local Bus = require(script.Parent.Bus)
 local Input = require(script.Parent.Input)
 local ToqueUi = require(script.Parent.ToqueUi)
 local UiKit = require(script.Parent.UiKit)
@@ -220,6 +224,20 @@ end
 -- Embaixo à esquerda: o pé da coluna fica acima do registro de rádio se a faixa entre ele e a reserva
 -- do alto couber a coluna; senão desce até acima do tutorial; e, se ainda não couber, encolhe.
 local bottomOff = FEED_TOP
+-- D-210: sem lugar nem na escala mínima (tela baixa com o esquadrão), a coluna recolhe
+local semEspaco = false
+local refresh: () -> ()
+-- D-210: o esquadrão (Controllers/HudInfantaria) fica logo abaixo da reserva do alto; a coluna começa
+-- embaixo dele
+local function reservaDoAlto(): number
+	local pg = player:FindFirstChild("PlayerGui")
+	local g = pg and pg:FindFirstChild("VT65Esquadrao")
+	local f = g and g:FindFirstChild("Esquadrao")
+	if g and g:IsA("ScreenGui") and g.Enabled and f and f:IsA("GuiObject") and f.Visible then
+		return math.max(TOP_RESERVE, f.AbsolutePosition.Y - gui.AbsolutePosition.Y + f.AbsoluteSize.Y + 8)
+	end
+	return TOP_RESERVE
+end
 local function layout()
 	local h = gui.AbsoluteSize.Y
 	local k0 = math.max(colScale.Scale, 0.01)
@@ -227,11 +245,18 @@ local function layout()
 	if h < 10 or natural < 10 then
 		return
 	end
+	local top = reservaDoAlto()
 	local bottom = FEED_TOP
-	if h - FEED_TOP - TOP_RESERVE < natural then
+	if h - FEED_TOP - top < natural then
 		bottom = LOW_BOTTOM
 	end
-	local room = h - bottom - TOP_RESERVE
+	local room = h - bottom - top
+	-- só o esquadrão recolhe a coluna (sem ele, a tela baixa fica como antes: a coluna na escala mínima)
+	local cabe = top <= TOP_RESERVE or room >= natural * MIN_K - 4
+	if cabe == semEspaco then
+		semEspaco = not cabe
+		task.defer(refresh)
+	end
 	local k = math.clamp(room / natural, MIN_K, 1)
 	if math.abs(k - colScale.Scale) > 0.01 then
 		colScale.Scale = k
@@ -241,6 +266,7 @@ local function layout()
 end
 gui:GetPropertyChangedSignal("AbsoluteSize"):Connect(layout)
 col:GetPropertyChangedSignal("AbsoluteSize"):Connect(layout)
+Bus.on("esquadrao_mudou", layout) -- D-210: o esquadrão cresceu, encolheu, apareceu ou sumiu
 
 -- ===== mostrar e esconder =====
 local devUntil = 0
@@ -297,7 +323,7 @@ local function keysMakeSense(): boolean
 	return not (UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled)
 end
 
-local function refresh()
+function refresh()
 	local st = Input.state
 	local dev = os.clock() < devUntil
 	local ctx = gameCtx() or (if dev then "infantry" else nil)
@@ -307,6 +333,7 @@ local function refresh()
 			dev
 			or (
 				Input.settings.hintsPanel ~= false
+				and not semEspaco
 				and player:GetAttribute("TutorialPasso") == nil
 				and st.alive
 				and not st.downed

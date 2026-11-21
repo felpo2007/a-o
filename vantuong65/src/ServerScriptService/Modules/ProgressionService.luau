@@ -498,11 +498,23 @@ function ProgressionService.start()
 				-- D-189: k = número do abate (um por morte), para o cliente vibrar uma vez só mesmo com o
 				-- aviso repetido. Só quem abateu recebe; assistência não manda este aviso.
 				local bn = e.model:GetAttribute("BotName")
+				local victimName = if victimP then victimP.DisplayName elseif type(bn) == "string" then bn else "inimigo"
 				killSeq += 1
 				Net.event("Combat_Kill"):FireClient(killer, {
-					name = if victimP then victimP.DisplayName elseif type(bn) == "string" then bn else "inimigo",
+					name = victimName,
 					w = wid,
 					k = killSeq,
+				})
+				-- D-210 (§13: "feed limitado de eliminações"): o abate creditado a um jogador, para todos
+				-- (nomes, lados e arma; nunca posição)
+				Net.event("Combat_Feed"):FireAllClients({
+					k = killer.DisplayName,
+					ku = killer.UserId,
+					kf = factionOf(killer),
+					v = victimName,
+					vu = if victimP then victimP.UserId else 0,
+					vf = e.faction,
+					w = wid,
 				})
 			end
 			for who, t in hits do

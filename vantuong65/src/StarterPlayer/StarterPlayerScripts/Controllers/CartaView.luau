@@ -1196,10 +1196,10 @@ local function drawObjectives(st: any)
 		local status = label(card, "", 12, COR.tintaAtlas, HAND)
 		status.LayoutOrder = 3
 		status.Visible = false
-		-- papel do time: ATACAR / DEFENDER, em tarja escura no alto da etiqueta (fora dela, cobria a
-		-- etiqueta quando as duas iam para o mesmo lado)
+		-- papel do time: CAPTURAR / DEFENDER (D-210, as palavras do §13), em tarja escura no alto da
+		-- etiqueta (fora dela, cobria a etiqueta quando as duas iam para o mesmo lado)
 		if s == target and role then
-			local tag = label(card, if role == "attack" then "ATACAR" else "DEFENDER", 14, V.KHAKI, F.TITLE)
+			local tag = label(card, if role == "attack" then "CAPTURAR" else "DEFENDER", 14, V.KHAKI, F.TITLE)
 			tag.LayoutOrder = 0
 			tag.BackgroundTransparency = 0
 			tag.BackgroundColor3 = COR.fronteira

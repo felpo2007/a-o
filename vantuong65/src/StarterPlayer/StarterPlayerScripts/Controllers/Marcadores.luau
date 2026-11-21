@@ -36,6 +36,7 @@ local TweenService = game:GetService("TweenService")
 
 local Comms = require(ReplicatedStorage.Shared.Comms)
 local Front = require(ReplicatedStorage.Shared.Front)
+local HudInfantaria = require(ReplicatedStorage.Shared.HudInfantaria)
 local MapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any
 local Net = require(ReplicatedStorage.Shared.Net)
 local Roles = require(ReplicatedStorage.Shared.Roles) :: any
@@ -75,6 +76,7 @@ local LEAD_TTL_S = 300 -- a marca do líder vale 5 min
 local MAX_ALLIES = 24
 local ALLY_RANGE_M = 150
 local NAME_RANGE_M = 40
+local NA_MIRA = 0.09 -- D-210: raio da mira (fração da altura da tela) onde nomes e linhas somem
 
 -- ===== peças =====
 local pg = player:WaitForChild("PlayerGui")
@@ -431,7 +433,16 @@ local function paintPerson(mk: Mark, w: Who)
 	mk.name.TextColor3 = color
 	mk.icon.Text = if w.downed then "✚" elseif w.leader then "★" elseif w.squad then "◆" else "▼"
 	mk.icon.TextSize = UiKit.text(if w.squad then 16 else 13)
-	local showName = w.squad or w.dist <= NAME_RANGE_M
+	-- D-210 (§13: "reduza sobreposição de ícones e nomes próximos ao retículo"): perto da mira o nome
+	-- some e o ícone apaga
+	local cam = workspace.CurrentCamera
+	local naMira = false
+	if cam then
+		local sp, on = cam:WorldToViewportPoint(w.pos)
+		local vp = cam.ViewportSize
+		naMira = on and HudInfantaria.pertoDoCentro(sp.X, sp.Y, vp.X, vp.Y, NA_MIRA)
+	end
+	local showName = (w.squad or w.dist <= NAME_RANGE_M) and not naMira
 	mk.name.Visible = showName and w.name ~= ""
 	if showName then
 		local n = short(w.name)
@@ -448,6 +459,9 @@ local function paintPerson(mk: Mark, w: Who)
 	paintVoice(mk, w.userId)
 	-- longe some devagar (os aliados fora do squad)
 	local fade = if w.squad then 0 else math.clamp((w.dist - 90) / 60, 0, 0.7)
+	if naMira then
+		fade = math.max(fade, 0.55)
+	end
 	mk.icon.TextTransparency = fade
 	mk.name.TextTransparency = fade
 	mk.icon.TextStrokeTransparency = 0.35 + fade * 0.5
@@ -513,10 +527,18 @@ local function paintGoals(myPos: Vector3, faction: string)
 			pin.TextColor3 = color
 		end
 		local d = (Vector3.new(tpos.X, myPos.Y, tpos.Z) - myPos).Magnitude * M
-		local verb = if role == "attack" then "atacar" else "defender"
+		-- D-210 (§13): capturar, defender ou contestar (o objetivo em disputa)
+		local verb = HudInfantaria.verbo(role, type(st.contested) == "table" and st.contested[target] == true)
 		goal.info.Text = if d < 50
 			then string.format("%s · você está nele", verb)
 			else string.format("%s · %d m", verb, math.floor(d / 10 + 0.5) * 10)
+		-- D-210: perto da mira só a letra (a linha do verbo e da distância some)
+		local cam = workspace.CurrentCamera
+		if cam then
+			local sp, on = cam:WorldToViewportPoint(tpos)
+			local vp = cam.ViewportSize
+			goal.info.Visible = not (on and HudInfantaria.pertoDoCentro(sp.X, sp.Y, vp.X, vp.Y, NA_MIRA))
+		end
 		goal.bb.Enabled = true
 	else
 		goal.bb.Enabled = false
