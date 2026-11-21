@@ -1005,6 +1005,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
       - Gancho novo: `VT65DevAbrir`.
     - Lune 856 ok (61 arquivos), pytest 76, ruff e luau-lsp limpos, i18n 100%. Relatório:
       `testes/LOTE98_D213_2026-11-20.md`.
+    - **v131 publicada** (versão 136 do place, commit 4fab88b).
     - **Próximos (pedidos de 20/11):** o pódio com zoom no melhor e comemoração, e as transições.
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
 - **Próximos (ideias da análise, esperando o dono):**
