@@ -6,6 +6,7 @@
 local Lighting = game:GetService("Lighting")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
+local Horarios = require(ReplicatedStorage.Shared.Horarios)
 local SolarPosition = require(ReplicatedStorage.Shared.SolarPosition)
 
 local LightingService = {}
@@ -46,7 +47,11 @@ function LightingService.update()
 	local y, m, d = table.unpack(LightingService.DATE)
 	local az, el = SolarPosition.compute(y, m, d, hour, LightingService.TZ, LightingService.LAT, LightingService.LON)
 	local tx, ty, tz = SolarPosition.direction(az, el)
-	local c, l, errDeg = SolarPosition.fit(tx, ty, tz, getDir, lastC, lastL)
+	local c, l, errDeg = hour, LightingService.LAT, 0
+	-- D-224: de noite não há sol para acertar: vale o relógio (a lua e as estrelas são do Roblox)
+	if el > -3 then
+		c, l, errDeg = SolarPosition.fit(tx, ty, tz, getDir, lastC, lastL)
+	end
 	Lighting.ClockTime = c
 	Lighting.GeographicLatitude = l
 	lastC, lastL = c, l
@@ -75,9 +80,54 @@ applyAtmosphere = function()
 	end
 end
 
+-- D-224: o horário votado para a próxima partida. A luz de cada um parte sempre dos valores do place.
+local baseLuz: { amb: Color3, ext: Color3, brilho: number, expo: number }? = nil
+function LightingService.aplicarHorario(id: string)
+	local h = Horarios.por(id) or Horarios.por(Horarios.PADRAO)
+	if not h then
+		return
+	end
+	local b = baseLuz
+	if not b then
+		b = {
+			amb = Lighting.Ambient,
+			ext = Lighting.OutdoorAmbient,
+			brilho = Lighting.Brightness,
+			expo = Lighting.ExposureCompensation,
+		}
+		baseLuz = b
+	end
+	local base = b :: { amb: Color3, ext: Color3, brilho: number, expo: number }
+	local cor = Color3.fromRGB(h.luz.cor[1], h.luz.cor[2], h.luz.cor[3])
+	Lighting.Ambient = base.amb:Lerp(cor, h.luz.mistura)
+	Lighting.OutdoorAmbient = base.ext:Lerp(cor, h.luz.mistura)
+	Lighting.Brightness = base.brilho * h.luz.brilho
+	Lighting.ExposureCompensation = base.expo + h.luz.exposicao
+	-- a cor do horário num efeito próprio (soma com o ColorCorrection do jogo, sem mexer nele)
+	local achado = Lighting:FindFirstChild("VT65Hora")
+	local cc: ColorCorrectionEffect = if achado and achado:IsA("ColorCorrectionEffect")
+		then achado
+		else Instance.new("ColorCorrectionEffect")
+	cc.Name = "VT65Hora"
+	cc.TintColor = Color3.fromRGB(h.luz.tinta[1], h.luz.tinta[2], h.luz.tinta[3])
+	cc.Saturation = h.luz.saturacao
+	cc.Parent = Lighting
+	ReplicatedStorage:SetAttribute("VT65Hora", h.id)
+	LightingService.setStart(h.hora)
+end
+
 function LightingService.start()
 	ReplicatedStorage:GetAttributeChangedSignal("Rain"):Connect(applyAtmosphere)
-	LightingService.setStart(LightingService.START_HOUR)
+	LightingService.aplicarHorario(Horarios.PADRAO)
+	-- D-224 (só no Studio): workspace "VT65DevHora" = "manha" | "meiodia" | "tarde" | "noite"
+	if game:GetService("RunService"):IsStudio() then
+		workspace:GetAttributeChangedSignal("VT65DevHora"):Connect(function()
+			local v = workspace:GetAttribute("VT65DevHora")
+			if type(v) == "string" then
+				LightingService.aplicarHorario(v)
+			end
+		end)
+	end
 	task.spawn(function()
 		while true do
 			task.wait(15)

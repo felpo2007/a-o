@@ -1502,7 +1502,14 @@ local function build()
 	list.ScrollBarThickness = px(5, 7)
 	list.ScrollBarImageColor3 = V.LINE
 	list.Parent = r
-	UiKit.list(list, false, px(8, 10))
+	-- D-230 (dono: "isso está horrível"; a referência é a loja em cartões de imagem): três colunas, com a
+	-- caixa grande em cima; as chances e o que falta continuam à vista antes de abrir
+	local gradeCaixas = Instance.new("UIGridLayout")
+	gradeCaixas.CellSize = UDim2.new(1 / 3, -px(10, 14), 0, px(362, 480))
+	gradeCaixas.CellPadding = UDim2.fromOffset(px(10, 14), px(10, 14))
+	gradeCaixas.SortOrder = Enum.SortOrder.LayoutOrder
+	gradeCaixas.Parent = list
+	UiKit.pad(list, px(2, 3), px(8, 10), px(2, 3), px(4, 6))
 	local order = 0
 	for _, c in state.caixas do
 		-- caixa paga só para quem pode comprar agora (sem vitrine do que não dá para levar)
@@ -1510,38 +1517,68 @@ local function build()
 			continue
 		end
 		order += 1
-		local card = frame(list, UDim2.new(1, -px(10, 14), 0, px(150, 200)), V.PANEL_2, 0)
+		local card = frame(list, UDim2.new(1, 0, 1, 0), Color3.new(1, 1, 1), 0)
 		card.Name = string.format("Caixa_%s", tostring(c.id))
 		card.LayoutOrder = order
+		card.ClipsDescendants = true
 		UiKit.corner(card, 4)
 		UiKit.edge(card, V.LINE, 1, 0.4)
+		-- a cor da caixa desce do alto do cartão
+		local corCaixa = CaixaImagem.ACENTO[tostring(c.id)] or V.AMBAR
+		local luz = Instance.new("UIGradient")
+		luz.Rotation = 90
+		luz.Color = ColorSequence.new({
+			ColorSequenceKeypoint.new(0, corCaixa:Lerp(V.PANEL_2, 0.62)),
+			ColorSequenceKeypoint.new(0.55, V.PANEL_2),
+			ColorSequenceKeypoint.new(1, V.PANEL_2),
+		})
+		luz.Parent = card
 		-- D-212: a imagem nova da caixa (Blender); o caixote 3D fica de reserva no CaixaImagem
-		local arte = frame(card, UDim2.fromOffset(px(140, 186), px(140, 186)))
+		local LADO = px(190, 252)
+		local arte = frame(card, UDim2.fromOffset(LADO, LADO))
 		arte.Name = "Arte"
-		arte.Position = UDim2.fromOffset(px(6, 8), px(5, 7))
+		arte.AnchorPoint = Vector2.new(0.5, 0)
+		arte.Position = UDim2.new(0.5, 0, 0, px(4, 6))
 		arte.ZIndex = 2
-		CaixaImagem.desenha(arte, c.id, c.modelo or "caixa_municao_us")
+		local desenho = CaixaImagem.desenha(arte, c.id, c.modelo or "caixa_municao_us")
+		-- D-230: a sombra da imagem some nos lados (no cartão colorido, a borda dela aparecia)
+		local imagemCaixa = desenho:FindFirstChild("Imagem")
+		if imagemCaixa then
+			local lados = Instance.new("UIGradient")
+			lados.Transparency = NumberSequence.new({
+				NumberSequenceKeypoint.new(0, 1),
+				NumberSequenceKeypoint.new(0.16, 0),
+				NumberSequenceKeypoint.new(0.84, 0),
+				NumberSequenceKeypoint.new(1, 1),
+			})
+			lados.Parent = imagemCaixa
+		end
 		-- D-213: a luz da caixa atrás da imagem
-		UiEfeitos.halo(
+		UiEfeitos.halo(card, UDim2.new(0.5, 0, 0, px(4, 6) + LADO // 2), corCaixa, px(270, 356), 0.6, nil, 1)
+		local mx = px(12, 16)
+		local y = px(4, 6) + LADO + px(4, 6)
+		local nm = text(card, UiKit.upper(c.nome), px(20, 27), V.TEXT, F.TITLE)
+		nm.Position = UDim2.fromOffset(mx, y)
+		nm.Size = UDim2.new(1, -2 * mx, 0, px(26, 34))
+		y += px(27, 36)
+		-- caixa de marco sem nenhuma guardada: em vez da descrição, como ganhar
+		local semNenhuma = c.fonte == "marco" and (c.guardadas or 0) == 0
+		local ds = text(
 			card,
-			UDim2.fromOffset(px(6, 8) + px(70, 93), px(5, 7) + px(70, 93)),
-			CaixaImagem.ACENTO[tostring(c.id)] or V.AMBAR,
-			px(170, 226),
-			0.7,
-			nil,
-			1
+			if semNenhuma then "Como ganhar: " .. (c.ganha or "jogando.") else c.desc,
+			px(13, 17),
+			if semNenhuma then V.KHAKI else V.DIM,
+			F.BODY
 		)
-		local x = px(154, 204)
-		local nm = text(card, UiKit.upper(c.nome), px(19, 26), V.TEXT, F.TITLE)
-		nm.Position = UDim2.fromOffset(x, px(8, 10))
-		nm.Size = UDim2.new(1, -x - px(230, 300), 0, px(26, 34))
-		local ds = text(card, c.desc, px(13, 17), V.DIM, F.BODY)
-		ds.Position = UDim2.fromOffset(x, px(36, 46))
-		ds.Size = UDim2.new(1, -x - px(230, 300), 0, px(36, 48))
+		ds.Position = UDim2.fromOffset(mx, y)
+		ds.Size = UDim2.new(1, -2 * mx, 0, px(34, 46))
+		ds.TextWrapped = true
+		ds.TextTruncate = Enum.TextTruncate.AtEnd
 		ds.TextYAlignment = Enum.TextYAlignment.Top
+		y += px(36, 48)
 		-- barra por raridade
-		local bar = frame(card, UDim2.new(1, -x - px(230, 300), 0, px(10, 14)), V.PANEL, 0)
-		bar.Position = UDim2.fromOffset(x, px(80, 106))
+		local bar = frame(card, UDim2.new(1, -2 * mx, 0, px(8, 11)), V.PANEL, 0)
+		bar.Position = UDim2.fromOffset(mx, y)
 		UiKit.list(bar, true, 0)
 		local legenda = {}
 		for i, rr in state.raridades do
@@ -1552,41 +1589,40 @@ local function build()
 				table.insert(legenda, string.format("%s %s", rr.nome, Caixas.pct(w)))
 			end
 		end
-		local lg = text(card, table.concat(legenda, " · "), px(12, 16), V.DIM, F.BODY)
-		lg.Position = UDim2.fromOffset(x, px(94, 124))
-		lg.Size = UDim2.new(1, -x - px(230, 300), 0, px(32, 42)) -- duas linhas: as 5 raridades cabem
-		if c.fonte == "marco" then
-			local como = text(card, "Como ganhar: " .. (c.ganha or "jogando."), px(12, 16), V.KHAKI, F.BODY)
-			como.Position = UDim2.fromOffset(x, px(126, 166))
-			como.Size = UDim2.new(1, -x - px(230, 300), 0, px(22, 30))
-			como.TextTruncate = Enum.TextTruncate.AtEnd
-		elseif c.temporada and c.fim then
-			local fim = text(
-				card,
-				string.format("Só nesta temporada, até %s.", os.date("%d/%m/%Y", c.fim)),
-				px(12, 16),
-				V.KHAKI,
-				F.BODY
-			)
-			fim.Position = UDim2.fromOffset(x, px(126, 166))
-			fim.Size = UDim2.new(1, -x - px(230, 300), 0, px(22, 30))
+		y += px(10, 13)
+		local fimTemporada = if c.temporada and c.fim
+			then string.format("Só nesta temporada, até %s.", os.date("%d/%m/%Y", c.fim))
+			else nil
+		local lg = text(card, fimTemporada or table.concat(legenda, " · "), px(12, 16), V.DIM, F.BODY)
+		lg.Position = UDim2.fromOffset(mx, y)
+		lg.Size = UDim2.new(1, -2 * mx, 0, px(30, 40)) -- duas linhas: as 5 raridades cabem
+		lg.TextWrapped = true
+		if fimTemporada then
+			lg.TextColor3 = V.KHAKI
 		end
-		-- botões: itens e probabilidades sempre antes do de agir
-		local col = frame(card, UDim2.new(0, px(220, 290), 1, -px(16, 20)))
-		col.AnchorPoint = Vector2.new(1, 0)
-		col.Position = UDim2.new(1, -px(8, 10), 0, px(8, 10))
-		UiKit.list(col, false, px(8, 10))
-		local ver = UiKit.action(col, "VER ITENS E PROBABILIDADES", "secondary", function()
+		-- botões: itens e probabilidades sempre ao lado do de agir
+		local col = frame(card, UDim2.new(1, -px(16, 20), 0, px(42, 56)))
+		col.AnchorPoint = Vector2.new(0, 1)
+		col.Position = UDim2.new(0, px(8, 10), 1, -px(8, 10))
+		UiKit.list(col, true, px(6, 8))
+		local ver = UiKit.action(col, "ITENS E CHANCES", "secondary", function()
 			abrirOdds(c)
-		end, { h = px(44, 60) })
+		end, { h = px(42, 56) })
+		ver.button.Size = UDim2.new(0.42, -px(3, 4), 1, 0)
 		ver.button.LayoutOrder = 1
+		ver.label.TextXAlignment = Enum.TextXAlignment.Center
+		ver.label.TextSize = UiKit.text(px(15, 20))
 		local a = botaoAcao(col, c)
 		if a then
+			a.button.Size = UDim2.new(0.58, -px(3, 4), 1, 0)
 			a.button.LayoutOrder = 2
+			a.label.TextXAlignment = Enum.TextXAlignment.Center
+			a.label.TextSize = UiKit.text(px(16, 21))
 		elseif c.bloqueio then
 			local why = text(col, MOTIVO[c.bloqueio] or "Indisponível.", px(12, 16), V.DIM, F.BODY)
 			why.LayoutOrder = 2
-			why.Size = UDim2.new(1, 0, 0, px(44, 60))
+			why.Size = UDim2.new(0.58, -px(3, 4), 1, 0)
+			why.TextWrapped = true
 		end
 	end
 	-- D-212: a caixa escolhida na vitrine da loja: a lista desce até ela e a borda acende em âmbar

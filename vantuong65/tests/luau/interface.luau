@@ -322,7 +322,7 @@ end)
 local REDONE = {
 	"src/ReplicatedFirst/Idioma.luau",
 	C .. "CasualtyScreen.luau",
-	C .. "DeployScreen.luau",
+	C .. "Preparacao.luau",
 	C .. "LobbyScene.luau",
 	C .. "CartaView.luau",
 	C .. "GameUI.client.luau",
@@ -817,7 +817,9 @@ test("D-130: a diária abre ao entrar, sem lugar na mesa; bandeiras na escolha d
 	assert(not string.find(mesa, "Daily_Claim", 1, true), "a mesa não resgata mais")
 	local cena = fs.readFile(C .. "LobbyScene.luau")
 	assert(string.find(cena, 'id == "shop" or id == "daily"', 1, true), "calendário e caderneta só de enfeite")
-	assert(string.find(mesa, "Bandeiras.of(f, b, FLAG_H", 1, true), "bandeira em cada ficha de alistamento")
+	-- D-223: a escolha do lado é a do Controllers/Preparacao
+	local prep = fs.readFile(C .. "Preparacao.luau")
+	assert(string.find(prep, "Bandeiras.of(f, b, FLAG_H", 1, true), "bandeira em cada ficha de alistamento")
 	local band = fs.readFile(C .. "Bandeiras.luau")
 	assert(string.find(band, "for row = 1, 9 do", 1, true), "EUA de 1965: 9 fileiras (50 estrelas)")
 	assert(string.find(band, "for i = 0, 12 do", 1, true), "13 listras")
@@ -839,8 +841,9 @@ test("D-133: bandeiras de pano esticadas na mesa, com a imagem detalhada; ALISTA
 		local v = string.match(ids, k .. " = (%d+)")
 		assert(v and tonumber(v) ~= 0, k .. " publicada")
 	end
-	local mesa = fs.readFile(C .. "DeployScreen.luau")
-	assert(string.find(mesa, "cta.AutomaticSize = Enum.AutomaticSize.X", 1, true), "botão do tamanho do texto")
+	-- D-223: o ALISTAR-SE é uma caixa própria no cartão do time
+	local prep = fs.readFile(C .. "Preparacao.luau")
+	assert(string.find(prep, 'c.ctaT.Text = "ALISTAR-SE ►"', 1, true), "botão de alistar")
 end)
 
 test("lote 23: diária e passe para crianças (desenhos, letras grandes, botão verde)", function()

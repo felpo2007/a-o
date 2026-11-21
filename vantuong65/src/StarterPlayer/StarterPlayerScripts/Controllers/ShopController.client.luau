@@ -37,7 +37,7 @@ local Input = require(script.Parent.Input)
 local CaixaImagem = require(script.Parent.CaixaImagem)
 local CenaComemoracao = require(script.Parent.CenaComemoracao)
 local ItemArte = require(script.Parent.ItemArte)
-local LobbyPalco = require(script.Parent.LobbyPalco)
+local ArmarioTela = require(script.Parent.ArmarioTela)
 local RodaArte = require(script.Parent.RodaArte)
 local SoldierPreview = require(script.Parent.SoldierPreview)
 local ToqueUi = require(script.Parent.ToqueUi)
@@ -49,11 +49,8 @@ local TV = UiKit.tv()
 local function px(pc: number, tv: number): number
 	return if TV then tv else pc
 end
--- D-207 (referências do dono: a loja ocupa a esquerda e o soldado fica à direita, na luz): o painel
--- cresceu de 720 x 620 para 1120 x 900 e saiu do meio para a esquerda; no lobby o palco (LobbyPalco)
--- põe o soldado do jogador à direita dele
+-- D-207: o painel cresceu de 720 x 620 para 1120 x 900. D-230: sem o soldado no lobby, volta ao centro
 local W, H = px(1120, 1490), px(900, 1200)
-local X0 = px(48, 64) -- margem da esquerda
 -- abas na mesma ficha (D-93: antes eram duas telas, uma por cima da outra). Plano de volta diária
 -- (2026-11-12): MERCADO (mercado do dia, reforços, Pacote de Recruta, créditos e o passe) e
 -- VANTAGENS (as vantagens compradas, com o número exato e o teto). D-207 (§9: "Destaques, Itens,
@@ -148,24 +145,17 @@ fundo.BorderSizePixel = 0
 fundo.Parent = gui
 local fundoGrad = Instance.new("UIGradient")
 fundoGrad.Parent = fundo
-local function pintarFundo(noPalco: boolean)
+local function pintarFundo()
 	fundo.BackgroundTransparency = 0
-	fundoGrad.Transparency = if noPalco
-		then NumberSequence.new({
-			NumberSequenceKeypoint.new(0, 0.05),
-			NumberSequenceKeypoint.new(0.5, 0.3),
-			NumberSequenceKeypoint.new(0.72, 0.85),
-			NumberSequenceKeypoint.new(1, 1),
-		})
-		else NumberSequence.new(0.25)
+	fundoGrad.Transparency = NumberSequence.new(0.3)
 end
 
 -- o painel, à esquerda; UiKit.fit encolhe numa janela pequena (D-93: numa janela de 671 x 565 o
 -- FECHAR ficava em y = −28)
 local folder = Instance.new("Frame")
 folder.Name = "Painel"
-folder.AnchorPoint = Vector2.new(0, 0.5)
-folder.Position = UDim2.new(0, X0, 0.5, 0)
+folder.AnchorPoint = Vector2.new(0.5, 0.5)
+folder.Position = UDim2.fromScale(0.5, 0.5)
 folder.Size = UDim2.fromOffset(W, H)
 folder.BackgroundColor3 = V.PANEL
 folder.BackgroundTransparency = UiKit.Estilo.fundo(0.12)
@@ -174,8 +164,22 @@ folder.Active = true -- tapa a mesa do lobby atrás (o clique não atravessa)
 folder.Parent = gui
 UiKit.corner(folder, 4)
 UiKit.edge(folder, V.LINE, 1, 0.35)
--- a margem da esquerda entra na conta (no passe, sem ela, o FECHAR saía da tela à direita)
-local fit = UiKit.fit(gui, folder, W + X0, H, 12)
+local fit = UiKit.fit(gui, folder, W, H, 12)
+-- D-230: com a escala mínima (0,45) os 900 de altura davam 405 px numa tela de 338: o cabeçalho e o
+-- FECHAR saíam da tela. O painel encurta e as páginas rolam
+local function ajustaAltura()
+	local cam = workspace.CurrentCamera
+	if not cam then
+		return
+	end
+	local v = cam.ViewportSize
+	local k = math.clamp(math.min((v.X - 24) / W, (v.Y - 24) / H), 0.45, 1)
+	folder.Size = UDim2.fromOffset(W, math.floor(math.min(H, (v.Y - 24) / k)))
+end
+ajustaAltura()
+if workspace.CurrentCamera then
+	workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(ajustaAltura)
+end
 Acabamento.sombra(folder, 24, Vector2.new(0, 9), 0.6)
 do -- filete âmbar no alto (D-207; era oliva): o acento do cabeçalho
 	local accent = Instance.new("Frame")
@@ -2841,169 +2845,55 @@ local function armarioComemoracoes(lado: string): Frame
 	return bloco
 end
 
+-- D-225 (dono: "melhore o armário"): categorias, grade de imagens e ficha (Controllers/ArmarioTela)
+local armarioTela: any = nil
 local function renderArmario()
-	local p = armarioPage
-	for _, c in p:GetChildren() do
-		if not (c:IsA("UIListLayout") or c:IsA("UIPadding")) then
-			c:Destroy()
-		end
-	end
-	local ordem = 0
-	local function add(o: GuiObject)
-		ordem += 1
-		o.LayoutOrder = ordem
-		o.Parent = p
-	end
-	local f = armarioLado or ladoAtual()
-	-- o lado mostrado: EUA | VC
-	local lados = Instance.new("Frame")
-	lados.Name = "Lados"
-	lados.BackgroundTransparency = 1
-	lados.Size = UDim2.new(1, -24, 0, px(40, 54))
-	local ll = Instance.new("UIListLayout")
-	ll.FillDirection = Enum.FillDirection.Horizontal
-	ll.Padding = UDim.new(0, px(10, 14))
-	ll.Parent = lados
-	for _, lado in { "US", "VC" } do
-		local on = lado == f
-		local b = UiKit.action(
-			lados,
-			if lado == "US" then "EUA" else "VC",
-			if on then "primary" else "secondary",
-			function()
-				armarioLado = lado
-				renderArmario()
+	if not armarioTela then
+		armarioTela = ArmarioTela.novo(armarioPage, {
+			lado = function(): string
+				return armarioLado or ladoAtual()
 			end,
-			{ h = px(40, 54) }
-		)
-		b.button.Name = lado
-		b.button.Size = UDim2.fromOffset(px(140, 190), px(40, 54))
-	end
-	add(lados)
-	local t = UiKit.title(nil, "ARMA PRINCIPAL", px(30, 40))
-	t.Size = UDim2.new(1, -24, 0, px(38, 50))
-	add(t)
-	add(note("Escolha a arma de cada papel: vale no próximo nascimento e fica guardada."))
-	local prefs = Roles.unpackPrefs(player:GetAttribute("ArmasPreferidas"))
-	for _, rid in ARMARIO_PAPEIS do
-		local list = Roles.primaries(f, rid)
-		local def = Roles.roles[rid]
-		if #list > 1 and def then
-			local row = Instance.new("Frame")
-			row.Name = rid
-			row.Size = UDim2.new(1, -24, 0, px(214, 286))
-			row.BackgroundColor3 = V.PANEL_2
-			row.BorderSizePixel = 0
-			UiKit.corner(row, 4)
-			UiKit.edge(row, V.LINE, 1, 0.5)
-			local nome = UiKit.title(row, UiKit.upper(def.name), px(22, 30))
-			nome.Position = UDim2.fromOffset(px(16, 22), px(10, 14))
-			nome.Size = UDim2.new(1, -px(32, 44), 0, px(30, 40))
-			local cards = Instance.new("Frame")
-			cards.BackgroundTransparency = 1
-			cards.Position = UDim2.fromOffset(px(16, 22), px(46, 62))
-			cards.Size = UDim2.new(1, -px(32, 44), 0, px(156, 208))
-			cards.Parent = row
-			local cl = Instance.new("UIListLayout")
-			cl.FillDirection = Enum.FillDirection.Horizontal
-			cl.Padding = UDim.new(0, px(12, 16))
-			cl.SortOrder = Enum.SortOrder.LayoutOrder
-			cl.Parent = cards
-			local escolhida = Roles.primaryFor(f, rid, prefs[Roles.chavePref(f, rid)])
-			for i, w in list do
-				local on = w == escolhida
-				local c = Instance.new("TextButton")
-				c.Name = w
-				c.LayoutOrder = i
-				c.AutoButtonColor = false
-				c.Text = ""
-				c.Size = UDim2.fromOffset(px(230, 306), px(156, 208))
-				c.BackgroundColor3 = if on then V.PANEL_3 else UiKit.CARD_DARK
-				c.BorderSizePixel = 0
-				c.Selectable = true
-				c.SelectionImageObject = UiKit.FOCUS
-				c.Parent = cards
-				UiKit.corner(c, 4)
-				UiKit.edge(c, if on then V.AMBAR else V.LINE, if on then 2 else 1, if on then 0 else 0.5)
-				local vp = RodaArte.frame(c)
-				vp.Position = UDim2.fromOffset(px(8, 10), px(8, 10))
-				vp.Size = UDim2.new(1, -px(16, 20), 0, px(96, 128))
-				RodaArte.show(vp, string.format("weapon:%s", w))
-				encherArte(vp)
-				local n = UiKit.title(c, Weapons.shortName(w, f), px(20, 27))
-				n.Position = UDim2.fromOffset(px(12, 16), px(106, 142))
-				n.Size = UDim2.new(1, -px(24, 32), 0, px(24, 32))
-				local tag = UiKit.rotulo(c, 13, if on then V.AMBAR else V.DIM, UiKit.F.BODY_B)
-				tag.Position = UDim2.fromOffset(px(12, 16), px(130, 174))
-				tag.Size = UDim2.new(1, -px(24, 32), 0, px(18, 24))
-				tag.Text = if on then "✓ ESCOLHIDA" else "ESCOLHER"
-				local r = UiKit.realce(c, c.BackgroundColor3, V.PANEL_3, 1.02)
-				c.MouseEnter:Connect(function()
-					r.set(true)
-				end)
-				c.MouseLeave:Connect(function()
-					r.set(false)
-				end)
-				c.SelectionGained:Connect(function()
-					r.set(true)
-				end)
-				c.SelectionLost:Connect(function()
-					r.set(false)
-				end)
-				UiKit.bind(c, function()
-					if not on then
-						Net.event("Arma_Escolher"):FireServer(f, rid, w)
+			trocarLado = function(f: string)
+				armarioLado = f
+				armarioTela.render()
+			end,
+			comemoracoes = function(f: string): GuiObject
+				local h = Instance.new("Frame")
+				h.Name = "BlocoComemoracao"
+				h.BackgroundTransparency = 1
+				local ct = UiKit.title(h, "COMEMORAÇÃO NO PÓDIO", px(30, 40))
+				ct.Size = UDim2.new(1, 0, 0, px(38, 50))
+				local b = armarioComemoracoes(f)
+				b.Position = UDim2.fromOffset(0, px(46, 60))
+				b.Size = UDim2.new(1, 0, 1, -px(46, 60))
+				b.Parent = h
+				return h
+			end,
+			-- os visuais liberados (capa de capacete, uniforme, acessório): Commerce_Equip, como antes
+			cosmeticos = function(f: string)
+				local out = {}
+				local liberados = (state and state.unlocked) or {}
+				local equipados = (state and state.equipped and state.equipped[f]) or {}
+				for _, c in Commerce.Cosmetics do
+					if c.faction == f and table.find(liberados, c.id) then
+						table.insert(out, { id = c.id, nome = c.name, slot = c.slot, eq = equipados[c.slot] == c.id })
 					end
-				end)
-			end
-			add(row)
-		end
+				end
+				return out
+			end,
+			equiparCosmetico = function(f: string, slot: string, id: string)
+				Net.event("Commerce_Equip"):FireServer(f, slot, id)
+			end,
+			irIntendencia = function()
+				setTab("intendencia")
+			end,
+			irConjuntos = function()
+				Bus.fire("arquivo_aba", "conjuntos")
+				setTab("arquivo")
+			end,
+		})
 	end
-	-- visuais: o que você já tem para vestir neste lado (o servidor valida ao equipar)
-	local v = UiKit.title(nil, "VISUAIS", px(30, 40))
-	v.Size = UDim2.new(1, -24, 0, px(38, 50))
-	add(v)
-	local any = false
-	for _, c in Commerce.Cosmetics do
-		if c.faction == f and table.find(state.unlocked, c.id) then
-			any = true
-			local eq = state.equipped[f] and state.equipped[f][c.slot] == c.id
-			local b = Instance.new("TextButton")
-			b.Name = string.format("eq_%s", c.id)
-			b.AutoButtonColor = false
-			b.Text = ""
-			b.Size = UDim2.new(1, -24, 0, px(40, 56))
-			b.BackgroundColor3 = if eq then V.PANEL_3 else V.PANEL_2
-			b.Selectable = true
-			b.SelectionImageObject = UiKit.FOCUS
-			UiKit.corner(b, 3)
-			UiKit.edge(b, if eq then V.OLIVE_HI else V.LINE, 1, if eq then 0.2 else 0.6)
-			local tx = UiKit.rotulo(b, 16, if eq then V.TEXT else V.DIM, UiKit.BODY_FONT)
-			tx.Position = UDim2.fromOffset(px(14, 18), 0)
-			tx.Size = UDim2.new(1, -px(28, 36), 1, 0)
-			tx.Text = string.format("%s  %s: %s", if eq then "●" else "○", c.slot, c.name)
-			UiKit.bind(b, function()
-				Net.event("Commerce_Equip"):FireServer(f, c.slot, c.id)
-			end)
-			add(b)
-		end
-	end
-	if not any then
-		add(note("Nada liberado ainda para este lado: caixas, passe e caderneta dão visuais."))
-	end
-	-- D-214: a comemoração do pódio (quem termina em 1º faz a dele, com a câmera nele). À esquerda, a
-	-- prévia ao vivo com o seu soldado; à direita, as comemorações. As que não são grátis ficam EM
-	-- BREVE: dá para ver, mas a escolha só vale para as que você tem (o servidor confere).
-	local ct = UiKit.title(nil, "COMEMORAÇÃO NO PÓDIO", px(30, 40))
-	ct.Size = UDim2.new(1, -24, 0, px(38, 50))
-	add(ct)
-	add(note("Quem termina a partida em 1º faz a comemoração escolhida aqui, com a câmera nele."))
-	add(armarioComemoracoes(f))
-	local ir = UiKit.action(nil, "ACABAMENTOS E UNIFORMES ›", "secondary", function()
-		setTab("intendencia")
-	end, { h = px(48, 64) })
-	ir.button.Size = UDim2.new(1, -24, 0, px(48, 64))
-	add(ir.button)
+	armarioTela.render()
 end
 player:GetAttributeChangedSignal("ArmasPreferidas"):Connect(function()
 	if gui.Enabled and tab == "armario" then
@@ -3157,15 +3047,14 @@ local function setOpen(open: boolean, which: string?)
 	if open then
 		gui.Enabled = true
 		UiKit.opened("loja", gui.DisplayOrder)
-		-- D-207: entra da esquerda, sobre o palco (no lobby) ou sobre o véu (em campo)
-		pintarFundo(LobbyPalco.aberto())
+		pintarFundo()
 		pintarDicasAba()
 		fundo.BackgroundTransparency = 1
 		UiKit.tween(fundo, TweenInfo.new(0.3, Enum.EasingStyle.Sine), { BackgroundTransparency = 0 })
-		folder.Position = UDim2.new(0, X0 - px(40, 54), 0.5, 0)
+		folder.Position = UDim2.new(0.5, 0, 0.5, px(18, 24))
 		fit.play(TweenInfo.new(0.28, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), 1, 0.97)
 		UiKit.tween(folder, TweenInfo.new(0.28, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
-			Position = UDim2.new(0, X0, 0.5, 0),
+			Position = UDim2.fromScale(0.5, 0.5),
 		})
 		Input.openMenu()
 		Net.event("Commerce_Track"):FireServer("store_open")
@@ -3271,6 +3160,7 @@ if RunService:IsStudio() then
 			or v == "vantagens"
 			or v == "caixas"
 			or v == "arquivo"
+			or v == "armario"
 		then
 			Bus.fire("shop_open", v)
 			task.defer(function()

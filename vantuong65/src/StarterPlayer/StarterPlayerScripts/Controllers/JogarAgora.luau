@@ -33,7 +33,6 @@ local Bus = require(script.Parent.Bus)
 local CartaView = require(script.Parent.CartaView)
 local DeployScreen = require(script.Parent.DeployScreen)
 local Input = require(script.Parent.Input)
-local LobbyScene = require(script.Parent.LobbyScene)
 local SpawnTransition = require(script.Parent.SpawnTransition)
 local Toast = require(script.Parent.Toast)
 local ToqueUi = require(script.Parent.ToqueUi)
@@ -413,26 +412,28 @@ local function place(): boolean
 		return false -- outra tela por cima (loja, menu, baixa, painel do veículo)
 	end
 	local panel = DeployScreen.panel()
-	-- na sala de arquivo (escolha de lado, ou trocando de lado) as fichas ocupam a faixa de baixo
-	local choosing = faction() == nil or LobbyScene.screenPoint("pick_US") ~= nil
-	if ToqueUi.active() and panel == "insert" then
+	-- D-228: na carta de nascer a ação é o NASCER; o cartão só aparece com um pedido em curso
+	if panel == "insert" and S.phase == "idle" then
+		return false
+	end
+	-- D-223: na barra de baixo da preparação; no toque, na carta de nascer
+	local toque = ToqueUi.active() and panel == "insert"
+	line.Visible = toque
+	btn.button.Size = UDim2.new(1, 0, 0, if toque then 60 else 46)
+	if toque then
 		card.AnchorPoint = Vector2.new(0, 0)
 		card.Position = UDim2.fromOffset(16, 64) -- abaixo da faixa do Roblox
 		card.Size = UDim2.fromOffset(280, 0)
 	elseif panel == "insert" then
-		card.AnchorPoint = Vector2.new(0, 1)
-		card.Position = UDim2.fromOffset(56, 652)
-		card.Size = UDim2.fromOffset(268, 0)
-	elseif choosing then
 		card.AnchorPoint = Vector2.new(1, 0)
-		card.Position = UDim2.fromOffset(1240, 140)
-		card.Size = UDim2.fromOffset(300, 0)
-	elseif panel == "desk" then
-		card.AnchorPoint = Vector2.new(1, 1)
-		card.Position = UDim2.fromOffset(1240, if UiKit.tv() then 600 else 664)
-		card.Size = UDim2.fromOffset(300, 0)
+		card.Position = UDim2.fromOffset(986, 668)
+		card.Size = UDim2.fromOffset(230, 0)
+	elseif panel == "desk" then -- o passo do lado: o lugar do botão principal está livre
+		card.AnchorPoint = Vector2.new(1, 0)
+		card.Position = UDim2.fromOffset(1256, 668)
+		card.Size = UDim2.fromOffset(260, 0)
 	else
-		return false -- squad, papel, diária e loja: o jogador está escolhendo à mão
+		return false -- grupo e classe: o jogador está escolhendo à mão
 	end
 	return true
 end

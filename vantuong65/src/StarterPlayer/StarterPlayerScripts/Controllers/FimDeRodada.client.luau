@@ -18,7 +18,9 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
+local AssetIds = require(ReplicatedStorage.Shared.AssetIds) :: any
 local Comemoracao = require(ReplicatedStorage.Shared.Comemoracao)
+local Horarios = require(ReplicatedStorage.Shared.Horarios)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Cortina = require(game:GetService("ReplicatedFirst"):WaitForChild("Cortina"))
 local CenaComemoracao = require(script.Parent.CenaComemoracao)
@@ -213,6 +215,7 @@ voteList.Parent = vote
 local layout = Instance.new("UIListLayout")
 layout.FillDirection = Enum.FillDirection.Horizontal
 layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+layout.SortOrder = Enum.SortOrder.LayoutOrder -- D-224: o mapa e, depois, os horários
 layout.Padding = UDim.new(0, px(24, 34))
 layout.Parent = voteList
 local voteHint = label(vote, "Dica", px(17, 24), V.DIM, F.BODY)
@@ -223,6 +226,85 @@ voteHint.Size = UDim2.new(1, 0, 0, px(28, 38))
 type MapCard = { b: TextButton, votes: TextLabel, mine: TextLabel, edge: UIStroke, id: string }
 local mapCards: { MapCard } = {}
 local myVote: string? = nil
+
+local pintarHoras: () -> ()
+-- D-224 (dono: "opções de horários do dia no mapa"): os quatro horários ao lado do mapa, com a pintura
+-- de cada hora (tools/podio_fundo.py --horarios)
+type HoraCard = { b: TextButton, votes: TextLabel, edge: UIStroke, id: string }
+local horaCards: { HoraCard } = {}
+local myHora: string? = nil
+do
+	local grade = Instance.new("Frame")
+	grade.Name = "Horarios"
+	grade.BackgroundTransparency = 1
+	grade.Size = UDim2.fromOffset(px(620, 850), px(380, 520))
+	grade.LayoutOrder = 99
+	grade.Parent = voteList
+	local g = Instance.new("UIGridLayout")
+	g.CellSize = UDim2.fromOffset(px(304, 418), px(184, 254))
+	g.CellPadding = UDim2.fromOffset(px(12, 14), px(12, 12))
+	g.SortOrder = Enum.SortOrder.LayoutOrder
+	g.Parent = grade
+	for i, h in Horarios.LISTA do
+		local b = Instance.new("TextButton")
+		b.Name = "Hora_" .. h.id
+		b.AutoButtonColor = false
+		b.Text = ""
+		b.BackgroundColor3 = V.PANEL
+		b.BorderSizePixel = 0
+		b.ClipsDescendants = true
+		b.LayoutOrder = i
+		b.Selectable = true
+		b.SelectionImageObject = UiKit.FOCUS
+		b.Parent = grade
+		UiKit.corner(b, 6)
+		local e = UiKit.edge(b, V.LINE, 2, 0.1)
+		local im = Instance.new("ImageLabel")
+		im.Name = "Imagem"
+		im.BackgroundTransparency = 1
+		im.ScaleType = Enum.ScaleType.Crop
+		im.Size = UDim2.fromScale(1, 1)
+		local idImg = (AssetIds.Catalogo or {})["hora_" .. h.id]
+		im.Image = if type(idImg) == "number" and idImg ~= 0 then string.format("rbxassetid://%d", idImg) else ""
+		im.Parent = b
+		local veu = Instance.new("Frame")
+		veu.BackgroundColor3 = Color3.new(0, 0, 0)
+		veu.BorderSizePixel = 0
+		veu.Size = UDim2.fromScale(1, 1)
+		veu.Parent = b
+		local vg = Instance.new("UIGradient")
+		vg.Rotation = 90
+		vg.Transparency = NumberSequence.new({
+			NumberSequenceKeypoint.new(0, 1),
+			NumberSequenceKeypoint.new(0.45, 0.85),
+			NumberSequenceKeypoint.new(1, 0.08),
+		})
+		vg.Parent = veu
+		local nome = label(b, "Nome", px(27, 38), V.TEXT, F.TITLE)
+		nome.TextXAlignment = Enum.TextXAlignment.Left
+		nome.Position = UDim2.new(0, px(14, 20), 1, -px(76, 104))
+		nome.Size = UDim2.new(1, -px(28, 40), 0, px(34, 46))
+		nome.Text = h.nome
+		local desc = label(b, "Desc", px(16, 22), V.DIM, F.BODY)
+		desc.TextXAlignment = Enum.TextXAlignment.Left
+		desc.Position = UDim2.new(0, px(14, 20), 1, -px(42, 58))
+		desc.Size = UDim2.new(0.68, 0, 0, px(24, 34))
+		desc.Text = h.desc
+		local votes = label(b, "Votos", px(17, 24), V.KHAKI, F.TITLE_MED)
+		votes.TextXAlignment = Enum.TextXAlignment.Right
+		votes.Position = UDim2.new(0.6, 0, 1, -px(42, 58))
+		votes.Size = UDim2.new(0.4, -px(14, 20), 0, px(24, 34))
+		local c: HoraCard = { b = b, votes = votes, edge = e, id = h.id }
+		horaCards[i] = c
+		UiKit.bind(b, function()
+			if ReplicatedStorage:GetAttribute("VT65Fase") == "votacao" then
+				myHora = c.id
+				Net.event("Rodada_Votar"):FireServer(nil, c.id)
+				pintarHoras()
+			end
+		end)
+	end
+end
 
 local function mapCard(m: any): MapCard
 	local b = Instance.new("TextButton")
@@ -469,7 +551,18 @@ local function frameCards()
 	end
 end
 
+pintarHoras = function()
+	local conta = decode("VT65VotosHora")
+	for _, c in horaCards do
+		local n = if type(conta) == "table" then tonumber(conta[c.id]) or 0 else 0
+		c.votes.Text = if n == 1 then "1 voto" else string.format("%d votos", n)
+		c.edge.Color = if myHora == c.id then V.BRASS else V.LINE
+		c.edge.Thickness = if myHora == c.id then 3 else 2
+	end
+end
+
 local function refreshVotes()
+	pintarHoras()
 	local conta = decode("VT65Votos")
 	for _, c in mapCards do
 		local n = if type(conta) == "table" then tonumber(conta[c.id]) or 0 else 0
@@ -490,6 +583,7 @@ local function showVote()
 	end
 	table.clear(mapCards)
 	myVote = nil
+	myHora = nil
 	local mapas = decode("VT65Mapas")
 	if type(mapas) == "table" then
 		for _, m in mapas do
@@ -571,6 +665,7 @@ ReplicatedStorage:GetAttributeChangedSignal("VT65Fase"):Connect(function()
 	onPhase()
 end)
 ReplicatedStorage:GetAttributeChangedSignal("VT65Votos"):Connect(refreshVotes)
+ReplicatedStorage:GetAttributeChangedSignal("VT65VotosHora"):Connect(pintarHoras)
 onPhase(true)
 
 -- relógio da fase, a cena e os cartões

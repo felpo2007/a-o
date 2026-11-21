@@ -19,8 +19,10 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Comemoracao = require(ReplicatedStorage.Shared.Comemoracao)
+local Horarios = require(ReplicatedStorage.Shared.Horarios)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Rodada = require(ReplicatedStorage.Shared.Rodada)
+local LightingService = require(script.Parent.LightingService)
 local MatchService = require(script.Parent.MatchService)
 
 local RodadaService = {}
@@ -33,6 +35,7 @@ end
 
 local fase = "jogo"
 local votos: { [Player]: string } = {}
+local votosHora: { [Player]: string } = {} -- D-224: o horário da próxima partida
 
 local function setFase(f: string, dur: number?)
 	fase = f
@@ -51,6 +54,8 @@ end
 local function publicarVotos()
 	local _, conta = Rodada.apurar(votosPorId())
 	ReplicatedStorage:SetAttribute("VT65Votos", HttpService:JSONEncode(conta))
+	local _, contaHora = Horarios.apurar(votosHora)
+	ReplicatedStorage:SetAttribute("VT65VotosHora", HttpService:JSONEncode(contaHora))
 end
 
 function RodadaService.fase(): string
@@ -128,6 +133,7 @@ function RodadaService.fim(winner: string)
 	end
 	-- 2. votação (aparece com um mapa só)
 	table.clear(votos)
+	table.clear(votosHora)
 	local mapas = {}
 	for _, m in Rodada.MAPAS do
 		table.insert(mapas, { id = m.id, nome = m.nome, carta = m.carta })
@@ -141,6 +147,8 @@ function RodadaService.fim(winner: string)
 	end
 	local escolhido = Rodada.apurar(votosPorId())
 	ReplicatedStorage:SetAttribute("VT65MapaEscolhido", escolhido)
+	-- D-224: a hora vencedora entra com a tela coberta, antes da restauração
+	LightingService.aplicarHorario((Horarios.apurar(votosHora)))
 	-- 3. restauração (o mapa é o mesmo: só há um; com mais mapas, a troca entra aqui)
 	setFase("restauracao", Rodada.DUR.restauracao)
 	for _, r in RodadaService.restaurar do
@@ -237,16 +245,26 @@ function RodadaService.start()
 	MatchService.afterEnd = RodadaService.fim
 	MatchService.NEXT_MATCH_S = Rodada.total() -- o "próxima partida em" da tela de fim
 	task.spawn(registrar)
-	Net.event("Rodada_Votar").OnServerEvent:Connect(function(p: Player, id: any)
-		if fase ~= "votacao" or type(id) ~= "string" or not Rodada.mapa(id) then
+	Net.event("Rodada_Votar").OnServerEvent:Connect(function(p: Player, id: any, hora: any)
+		if fase ~= "votacao" then
 			return
 		end
-		votos[p] = id
-		publicarVotos()
+		local mudou = false
+		if type(id) == "string" and Rodada.mapa(id) then
+			votos[p] = id
+			mudou = true
+		end
+		if type(hora) == "string" and Horarios.por(hora) then
+			votosHora[p] = hora
+			mudou = true
+		end
+		if mudou then
+			publicarVotos()
+		end
 	end)
 	Players.PlayerRemoving:Connect(function(p: Player)
-		if votos[p] then
-			votos[p] = nil
+		if votos[p] or votosHora[p] then
+			votos[p], votosHora[p] = nil, nil
 			if fase == "votacao" then
 				publicarVotos()
 			end

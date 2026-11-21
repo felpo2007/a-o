@@ -118,7 +118,8 @@ test("servidor: pontos da partida, ciclo depois do fim e o voto validado", funct
 			'setFase("votacao", Rodada.DUR.votacao)',
 			'setFase("restauracao", Rodada.DUR.restauracao)',
 			"MatchService.newMatch()",
-			'if fase ~= "votacao" or type(id) ~= "string" or not Rodada.mapa(id) then',
+			'if type(id) == "string" and Rodada.mapa(id) then', -- D-224: o voto traz mapa e horário
+			'if type(hora) == "string" and Horarios.por(hora) then',
 			'ReplicatedStorage:SetAttribute("VT65Podio"',
 			"Rodada.vale(minha, MatchService.rodada)",
 		}

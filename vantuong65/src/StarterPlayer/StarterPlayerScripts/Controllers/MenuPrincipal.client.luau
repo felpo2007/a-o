@@ -38,6 +38,8 @@ local CampanhaCliente = require(script.Parent.CampanhaCliente)
 local ComoJogar = require(script.Parent.ComoJogar)
 local Input = require(script.Parent.Input)
 local LobbyPalco = require(script.Parent.LobbyPalco)
+local ArteCatalogo = require(script.Parent.ArteCatalogo)
+local FundoLobby = require(script.Parent.FundoLobby)
 local UiEfeitos = require(script.Parent.UiEfeitos)
 local UiKit = require(script.Parent.UiKit)
 
@@ -68,6 +70,9 @@ pcall(function()
 	fundo.ScreenInsets = Enum.ScreenInsets.None
 end)
 fundo.Parent = player:WaitForChild("PlayerGui")
+-- D-222 (dono: "troque o fundo do lobby, coloque algo com mais qualidade e não deixe ele tremendo"; o
+-- lobby fica sem personagem): uma imagem parada na frente do palco 3D
+FundoLobby.novo(fundo, 0, -5)
 
 local function sombra(name: string, rot: number, size: UDim2, pos: UDim2, anchor: Vector2, keys: { { number } }): Frame
 	local f = Instance.new("Frame")
@@ -626,7 +631,7 @@ oNovas.Position = UDim2.new(1, -18, 0, 12)
 oNovas.Size = UDim2.fromOffset(220, 22)
 oNovas.TextXAlignment = Enum.TextXAlignment.Right
 regua(ordens, 18, 40, RW - 36)
-type Linha = { f: Frame, t: TextLabel, n: TextLabel, r: TextLabel, fill: Frame }
+type Linha = { f: Frame, img: ImageLabel, t: TextLabel, n: TextLabel, r: TextLabel, fill: Frame }
 local linhas: { Linha } = {}
 for i = 1, 3 do
 	local f = Instance.new("Frame")
@@ -638,22 +643,33 @@ for i = 1, 3 do
 	f.Size = UDim2.fromOffset(RW - 28, 58)
 	f.Parent = ordens
 	UiKit.corner(f, 3)
+	-- D-227: a imagem da ordem (a arma, a bandeira, a maleta...)
+	local img = Instance.new("ImageLabel")
+	img.Name = "Imagem"
+	img.BackgroundColor3 = V.BG
+	img.BackgroundTransparency = 0.25
+	img.BorderSizePixel = 0
+	img.ScaleType = Enum.ScaleType.Fit
+	img.Position = UDim2.fromOffset(4, 4)
+	img.Size = UDim2.fromOffset(50, 50)
+	img.Parent = f
+	UiKit.corner(img, 3)
 	local t = rotulo(f, "", F.TITLE_MED, 17, V.TEXT)
-	t.Position = UDim2.fromOffset(12, 4)
-	t.Size = UDim2.fromOffset(RW - 140, 28)
+	t.Position = UDim2.fromOffset(62, 4)
+	t.Size = UDim2.fromOffset(RW - 190, 28)
 	t.TextTruncate = Enum.TextTruncate.AtEnd
 	local r = rotulo(f, "", F.TITLE, 18, V.AMBAR)
 	r.AnchorPoint = Vector2.new(1, 0)
 	r.Position = UDim2.new(1, -12, 0, 4)
 	r.Size = UDim2.fromOffset(100, 28)
 	r.TextXAlignment = Enum.TextXAlignment.Right
-	local fill = barra(f, 12, 38, RW - 150, 5, V.KHAKI)
+	local fill = barra(f, 62, 38, RW - 200, 5, V.KHAKI)
 	local n = rotulo(f, "", F.TITLE_MED, 14, V.DIM)
 	n.AnchorPoint = Vector2.new(1, 0)
 	n.Position = UDim2.new(1, -12, 0, 30)
 	n.Size = UDim2.fromOffset(100, 22)
 	n.TextXAlignment = Enum.TextXAlignment.Right
-	table.insert(linhas, { f = f, t = t, n = n, r = r, fill = fill })
+	table.insert(linhas, { f = f, img = img, t = t, n = n, r = r, fill = fill })
 end
 local oTodas = Instance.new("TextButton")
 oTodas.Name = "TodasOrdens"
@@ -1003,10 +1019,17 @@ local function atualizarCampanha()
 			local okTexto, textoOrdem = pcall(string.format, modelo, goal)
 			l.t.Text = if okTexto then textoOrdem else modelo
 			l.t.TextColor3 = if done then V.DIM else V.TEXT
+			l.img.Image = ArteCatalogo.ordem(m.id)
+			l.img.ImageTransparency = if m.claimed == true then 0.5 else 0
 			local prog = math.min(tonumber(m.progress) or 0, goal)
-			l.n.Text = if done then "✓ FEITA" else string.format("%s / %s", fmt(prog), fmt(goal))
+			-- D-227: concluída, mas ainda sem receber, chama; recebida apaga
+			local receber = done and m.claimed ~= true
+			l.n.Text = if m.claimed == true
+				then "✓ RECEBIDA"
+				elseif receber then "RECEBER ›"
+				else string.format("%s / %s", fmt(prog), fmt(goal))
 			l.n.FontFace = if done then F.BODY_B else F.TITLE_MED
-			l.n.TextColor3 = if done then V.OLIVE_HI else V.DIM
+			l.n.TextColor3 = if receber then V.AMBAR elseif done then V.OLIVE_HI else V.DIM
 			l.fill.Size = UDim2.fromScale(prog / goal, 1)
 			l.fill.BackgroundColor3 = if done then V.OLIVE_HI else V.KHAKI
 			local rw = m.reward or {}
@@ -1151,7 +1174,8 @@ local DESTAQUE = {
 	LOJA = { cor = V.AMBAR, texto = V.AMBAR_TEXTO, atraso = 0.6 },
 	PASSE = { cor = V.RED_HI, texto = V.TEXT, atraso = 3.4 },
 } :: { [string]: { cor: Color3, texto: Color3, atraso: number } }
-local IMG_REPOUSO, IMG_FOCO = 0.3, 0
+-- D-222 (dono: "quero que as imagens apareçam no lobby somente quando passar por cima dos botões")
+local IMG_REPOUSO, IMG_FOCO = 1, 0
 type Fundo = { imagem: ImageLabel, cor: Frame? }
 local fundos: { [Item]: Fundo } = {}
 for _, it in itens do
@@ -1233,6 +1257,19 @@ local function trocarCapa(id: string)
 	capaFrente = tras
 end
 capaSombra.ZIndex = 3
+-- D-222 (dono: "quero que as imagens apareçam no lobby somente quando passar por cima dos botões"): um
+-- véu cobre a capa do JOGAR em repouso e sai com o foco (mouse, toque ou controle)
+local capaVeu = Instance.new("Frame")
+capaVeu.Name = "CapaVeu"
+capaVeu.BackgroundColor3 = V.PANEL
+capaVeu.BackgroundTransparency = 0.04
+capaVeu.BorderSizePixel = 0
+capaVeu.Size = UDim2.fromScale(1, 1)
+capaVeu.ZIndex = 3
+capaVeu.Parent = card
+local function mostraCapa(on: boolean)
+	UiKit.tween(capaVeu, UiKit.SOFT, { BackgroundTransparency = if on then 1 else 0.04 })
+end
 for _, o in { jogarBox, jogarSub, jogarModo } :: { GuiObject } do
 	o.ZIndex = 4
 end
@@ -1275,6 +1312,7 @@ local function focar(it: Item?)
 		pintarItem(antes, false)
 	end
 	focoAtual = it
+	mostraCapa(it == nil) -- a capa do JOGAR só com o foco nele; cada entrada acende a própria imagem
 	if it then
 		pintarCard(false)
 		pintarItem(it, true)
@@ -1304,6 +1342,7 @@ local function soltar()
 			end
 			focoAtual = nil
 			pintarCard(false)
+			mostraCapa(false)
 			descr.Text = DESC_JOGAR
 			trocarCapa("arrozal")
 			LobbyPalco.enquadrar("inicio")
@@ -1468,17 +1507,14 @@ local function refreshHint()
 	if Input.isGamepad() then
 		chips.add(UiKit.padImage(Enum.KeyCode.ButtonA), nil, "A", "Escolher")
 		chips.add(UiKit.padImage(Enum.KeyCode.DPadUp), UiKit.padImage(Enum.KeyCode.DPadDown), "↑↓", "Andar")
-		chips.add(UiKit.padImage(Enum.KeyCode.Thumbstick2), nil, "RS", "Girar o soldado")
 		local img0 = UiKit.padImage(Enum.KeyCode.ButtonA)
 		jogarTecla.Image = img0 or ""
 		jogarTecla.Visible = img0 ~= nil
 	elseif Input.touchActive() then
-		chips.add(nil, nil, "", "Arraste o soldado para girar")
 		jogarTecla.Visible = false
 	else
 		chips.add(nil, nil, "ENTER", "Escolher")
 		chips.add(nil, nil, "↑ ↓", "Andar")
-		chips.add(nil, nil, "ARRASTE", "Girar o soldado")
 		jogarTecla.Visible = false
 	end
 end
@@ -1608,6 +1644,7 @@ local function setOpen(on: boolean)
 		descr.Text = DESC_JOGAR
 		capaAtual = ""
 		trocarCapa("arrozal")
+		capaVeu.BackgroundTransparency = 0.04
 		cortina.BackgroundTransparency = 1
 		fundo.Enabled = true
 		gui.Enabled = true
@@ -1631,8 +1668,9 @@ local function setOpen(on: boolean)
 	end
 end
 
+-- D-222: o lobby não tem mais soldado para girar
 LobbyPalco.podeGirar = function(): boolean
-	return open and not busy and UiKit.top() == nil and not ComoJogar.isOpen()
+	return false
 end
 
 -- JOGAR: a câmera entra no soldado, o menu esmaece num escuro quente e a mesa do lobby aparece para

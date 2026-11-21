@@ -49,9 +49,9 @@ if TV then
 	chip.button.AnchorPoint = Vector2.new(1, 1)
 	chip.button.Position = UDim2.fromOffset(1240, 664)
 else
-	chip.button.Position = UDim2.fromOffset(612, 14)
+	chip.button.Position = UDim2.fromOffset(620, 670) -- D-228: na barra de baixo (em cima, cobria os passos)
 end
-chip.button.ZIndex = 4
+chip.button.ZIndex = 8
 Idioma.soAteEscolher(chip.button) -- v43: escolhido o idioma, só nas Configurações do menu do jogo
 
 -- Y no controle, com a mesa por cima de tudo (nenhum menu aberto sobre o lobby)

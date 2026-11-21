@@ -222,6 +222,10 @@ O `sourcemap.json` não vai para o Git.
     - `VT65DevMode = "Warfare"` fixa o modo;
     - leia o relatório pós-ação (`VT65AfterAction`) e a faixa da frente (reforços) no cliente.
     - `"depurar"` mostra o rótulo de cada bot (o líder com o atraso do squad).
+  - Lote 102: `VT65DevHora` (Server) = "manha", "meiodia", "tarde" ou "noite". `VT65DevTela = "armario"`
+    abre o armário e `VT65DevArmario = "<categoria>"` troca a categoria (Client; o clique do MCP não
+    acerta dentro da loja com escala). A preparação fica em `VT65Menus.Stage.Deploy` (`PaginaTime`,
+    `PaginaGrupo.Grupos`, `PaginaClasse`, `BarraBaixo.Principal`, `BarraBaixo.BotaoNascer`).
   - Caixas (D-173): `VT65DevCaixa` = `"bilhetes"` (+5), `"fragmentos"` (+1000), `"pagas"` (liga
     a venda nesta sessão), `"restrito"` / `"falha"` (simulam o PolicyService), `"normal"`,
     `"recibo:<caixa>"` (recibo simulado, sem Robux, e o mesmo recibo de novo). D-174:
@@ -412,6 +416,13 @@ O `sourcemap.json` não vai para o Git.
 - Relevo: `tools/relevo_dem.py` (DEM Copernicus, cumes calibrados na carta) é do mapa de 2 km
   (D-66); no de 700 m o relevo sai do `crop_world.py` (`mais_relevo` e `centraliza`). Não rode o
   `relevo_dem.py` neste mapa: ele procura cumes que não existem mais.
+- Imagens de catálogo (D-222 a D-229), CPU com `VT65_CPU=1`:
+  - `tools/blender/armas_catalogo.py -- todas` (armas, equipamento, classes, times, prêmios);
+  - `tools/blender/skins_catalogo.py` (347 acabamentos; `--reusar` refaz só a combinação);
+  - `tools/blender/lobby_fundo.py` e `uv run --group arte python tools/lobby_recorta.py <png>`;
+  - `uv run python tools/mapa_aereo.py` (a carta aérea, `AssetIds.CartaImages`). Mudou o mapa? Refaça;
+  - para o jogo: `uv run python tools/catalogo_imagens.py plano`, `upload-assets Catalogo.` e
+    `uv run python tools/catalogo_imagens.py ids`. Sobem como Image: o ID vai direto na ImageLabel.
 - Carta tática (D-171): a do jogo é a página de atlas,
   `uv run --group arte python tools/make_carta.py --dados --estilo atlas` (blocos
   `assets/carta/atlas_*.png`). Mudou o mapa? Gere de novo, tire `Carta.nw/ne/sw/se` do
@@ -438,7 +449,7 @@ O `sourcemap.json` não vai para o Git.
 - Segredos só no `.env` (no `.gitignore`), nunca no código nem no chat.
 - ForgeGUI: nunca regenerar um job em `outcome_unknown`. "failed" com `retryable` pode ser
   retomado com `generation_retry`.
-- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-222) e atualize `PROGRESS.md`.
+- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-231) e atualize `PROGRESS.md`.
 - Tetos de triângulos por modelo: vegetação ≤ 6 mil (D-135), props e herói ≤ 20 mil (`ArtBudget`,
   conferido pelo teste da F5).
 - Commits no branch acima, com mensagem em português.

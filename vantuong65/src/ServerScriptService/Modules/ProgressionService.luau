@@ -112,6 +112,11 @@ local function stateFor(p: Player, extra: { [string]: any }?): { [string]: any }
 		owned = owned,
 		on = Skins.equipped(if faction then prof.skins.on[faction] else nil, faction, prof.skins.owned, ps),
 		faction = faction,
+		-- D-225: o armário mostra os dois lados, qualquer que seja o atual
+		porLado = {
+			US = Skins.equipped(prof.skins.on.US, "US", prof.skins.owned, ps),
+			VC = Skins.equipped(prof.skins.on.VC, "VC", prof.skins.owned, ps),
+		},
 	}
 	return {
 		xp = prof.xp,
@@ -362,13 +367,14 @@ local function armaDoUniversal(p: Player, faction: string, pedida: any): string?
 end
 
 -- Equipa (on) ou tira uma skin. Devolve o resultado para o painel (nil = sem aviso).
-local function equipSkin(p: Player, id: string, on: boolean, arma: any): string?
+local function equipSkin(p: Player, id: string, on: boolean, arma: any, lado: any): string?
 	local prof = PlayerData.get(p)
 	local s = Skins.get(id)
 	if not (prof and s) then
 		return nil
 	end
-	local faction = Skins.factionFor(s, factionOf(p))
+	-- D-225: skin dos dois lados vale no lado que o armário está mostrando; sem ele, no atual
+	local faction = Skins.factionFor(s, if lado == "US" or lado == "VC" then lado else factionOf(p))
 	local slot = Skins.slotOf(s)
 	if s.universal then
 		local w = if faction then armaDoUniversal(p, faction, arma) else nil
@@ -657,7 +663,7 @@ function ProgressionService.start()
 	-- levar ou deixar um item liberado no próximo spawn (só guarda os desmarcados). Com id de skin:
 	-- equipar (on = true) ou tirar (false); o servidor confere a posse e o lado.
 	-- arma: só do acabamento universal (D-179), a arma em que ele vai
-	Net.event("Gear_Equip").OnServerEvent:Connect(function(p: Player, id: any, on: any, arma: any)
+	Net.event("Gear_Equip").OnServerEvent:Connect(function(p: Player, id: any, on: any, arma: any, lado: any)
 		local prof = PlayerData.get(p)
 		if not prof or type(id) ~= "string" or type(on) ~= "boolean" then
 			return
@@ -666,7 +672,7 @@ function ProgressionService.start()
 			return
 		end
 		if Skins.get(id) then
-			local msg = equipSkin(p, id, on, arma)
+			local msg = equipSkin(p, id, on, arma, lado)
 			push(p, { result = msg })
 			return
 		end

@@ -45,3 +45,12 @@ assets/acabamentos/
 assets/ui/caixas/*_en.png
 assets/ui/caixas/*_es.png
 assets/ui/caixas/*_vi.png
+# D-222: imagens de catálogo (os scripts refazem; os IDs ficam no roblox_ids.json)
+assets/ui/armas/
+assets/ui/equip/
+assets/ui/classes/
+assets/ui/times/
+assets/ui/premios/
+assets/ui/lobby/
+assets/ui/skins/
+assets/ui/horarios/

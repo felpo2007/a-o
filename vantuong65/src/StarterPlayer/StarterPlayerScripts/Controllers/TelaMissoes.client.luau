@@ -16,13 +16,16 @@ local Progression = require(ReplicatedStorage.Shared.Progression)
 local Bus = require(script.Parent.Bus)
 local CampanhaCliente = require(script.Parent.CampanhaCliente)
 local Input = require(script.Parent.Input)
+local ArteCatalogo = require(script.Parent.ArteCatalogo)
 local Toast = require(script.Parent.Toast)
 local UiKit = require(script.Parent.UiKit)
 
 local V, F = UiKit.V, UiKit.F
 local px = UiKit.px
-local W, H = px(780, 1040), px(600, 820)
-local ROW_H = px(76, 104)
+-- D-227 (dono: "melhore o visual das ordens do dia"): duas colunas, DO DIA e DA SEMANA, de cartões com
+-- a imagem da ordem, o estado escrito (em andamento, concluída, recebida), a barra e a recompensa.
+local W, H = px(1160, 1540), px(620, 820)
+local ROW_H = px(128, 170)
 
 local gui = UiKit.screen("VT65Missoes", 38) -- acima do menu do jogo (35) e da loja (30)
 gui.Enabled = false
@@ -52,10 +55,10 @@ end
 local P = px(24, 32)
 
 -- ===== cabeçalho =====
-local kick = UiKit.kicker(panel, "ORDENS DO DIA E DA SEMANA", 14)
+local kick = UiKit.kicker(panel, "DO DIA E DA SEMANA", 14)
 kick.Position = UDim2.fromOffset(P, px(16, 22))
 kick.Size = UDim2.new(1, -2 * P, 0, px(18, 26))
-local title = UiKit.title(panel, "MISSÕES", px(40, 56))
+local title = UiKit.title(panel, "ORDENS", px(40, 56))
 title.Position = UDim2.fromOffset(P, px(34, 48))
 title.Size = UDim2.new(0.6, 0, 0, px(48, 66))
 local rerollStat = UiKit.stat(panel, "TROCA GRÁTIS", "1", px(34, 46))
@@ -71,6 +74,9 @@ closeBtn.button.Size = UDim2.fromOffset(px(150, 210), px(38, 54))
 -- ===== seções e linhas =====
 type Row = {
 	frame: Frame,
+	img: ImageLabel,
+	estado: TextLabel,
+	edge: UIStroke,
 	text: TextLabel,
 	count: TextLabel,
 	fill: Frame,
@@ -98,7 +104,25 @@ body.ScrollBarThickness = px(4, 6)
 body.ScrollBarImageColor3 = V.LINE
 body.Selectable = false
 body.Parent = panel
-UiKit.list(body, false, px(6, 8))
+do
+	local l = Instance.new("UIListLayout")
+	l.FillDirection = Enum.FillDirection.Horizontal
+	l.Padding = UDim.new(0, px(16, 20))
+	l.SortOrder = Enum.SortOrder.LayoutOrder
+	l.Parent = body
+end
+local coluna: Frame = nil :: any -- a coluna que recebe as próximas linhas
+local function novaColuna(i: number)
+	local c = Instance.new("Frame")
+	c.Name = if i == 1 then "DoDia" else "DaSemana"
+	c.BackgroundTransparency = 1
+	c.LayoutOrder = i
+	c.AutomaticSize = Enum.AutomaticSize.Y
+	c.Size = UDim2.new(0.5, -px(12, 15), 0, 0)
+	c.Parent = body
+	UiKit.list(c, false, px(6, 8))
+	coluna = c
+end
 
 local order = 0
 local function nextOrder(): number
@@ -111,7 +135,7 @@ local function section(textLabel: string): (TextLabel, TextLabel)
 	f.BackgroundTransparency = 1
 	f.Size = UDim2.new(1, 0, 0, px(30, 42))
 	f.LayoutOrder = nextOrder()
-	f.Parent = body
+	f.Parent = coluna
 	local l = UiKit.title(f, textLabel, px(20, 28), V.KHAKI)
 	l.Size = UDim2.new(0.5, 0, 1, 0)
 	local r = UiKit.kicker(f, "", px(14, 20))
@@ -138,46 +162,76 @@ local function onReroll(i: number)
 end
 
 local function newRow(i: number): Row
-	local f = UiKit.panel(body, V.PANEL_2, 0, true)
+	local f = UiKit.panel(coluna, V.PANEL_2, 0, true)
 	f.Name = "Missao"
 	f.Size = UDim2.new(1, 0, 0, ROW_H)
 	f.LayoutOrder = nextOrder()
-	local BTN_W = px(150, 210)
-	local text = UiKit.text2(f, "", px(17, 24), V.TEXT, F.BODY_B)
-	text.Position = UDim2.fromOffset(px(14, 18), px(8, 10))
-	text.Size = UDim2.new(1, -px(14, 18) - BTN_W - px(150, 210), 0, px(24, 32))
+	local edge = UiKit.edge(f, V.LINE, 1, 0.5)
+	local M = px(8, 10)
+	local IMG = ROW_H - 2 * M
+	local img = Instance.new("ImageLabel")
+	img.Name = "Imagem"
+	img.BackgroundColor3 = V.BG
+	img.BackgroundTransparency = 0.2
+	img.BorderSizePixel = 0
+	img.ScaleType = Enum.ScaleType.Fit
+	img.Position = UDim2.fromOffset(M, M)
+	img.Size = UDim2.fromOffset(IMG, IMG)
+	img.Parent = f
+	UiKit.corner(img, 4)
+	local X = M + IMG + px(12, 16)
+	local BTN_W = px(128, 170)
+	local dentro = -(X + BTN_W + px(20, 26))
+	local text = UiKit.text2(f, "", px(17, 23), V.TEXT, F.BODY_B)
+	text.Position = UDim2.fromOffset(X, px(10, 13))
+	text.Size = UDim2.new(1, dentro, 0, px(46, 62))
+	text.TextWrapped = true
+	text.TextYAlignment = Enum.TextYAlignment.Top
 	text.TextTruncate = Enum.TextTruncate.AtEnd
-	local back, fill = UiKit.bar(f, px(8, 10), V.OLIVE)
-	back.Position = UDim2.fromOffset(px(14, 18), px(42, 58))
-	back.Size = UDim2.new(1, -px(14, 18) - BTN_W - px(150, 210) - px(70, 96), 0, px(8, 10))
-	local count = UiKit.text2(f, "", px(20, 28), V.TEXT, F.TITLE)
-	count.AnchorPoint = Vector2.new(0, 0.5)
-	count.Position = UDim2.new(1, -BTN_W - px(150, 210) - px(62, 86), 0, px(46, 63))
-	count.Size = UDim2.fromOffset(px(60, 84), px(26, 36))
-	local reward = UiKit.text2(f, "", px(15, 22), V.KHAKI, F.TITLE_MED)
-	reward.AnchorPoint = Vector2.new(1, 0.5)
-	reward.Position = UDim2.new(1, -BTN_W - px(24, 32), 0.5, 0)
-	reward.Size = UDim2.fromOffset(px(140, 196), ROW_H - px(12, 16))
+	local estado = UiKit.kicker(f, "", px(14, 19), V.DIM)
+	estado.Name = "Estado"
+	estado.Position = UDim2.fromOffset(X, px(60, 80))
+	estado.Size = UDim2.new(1, dentro, 0, px(20, 26))
+	local back, fill = UiKit.bar(f, px(10, 12), V.OLIVE)
+	back.BackgroundColor3 = V.BG
+	back.BackgroundTransparency = 0
+	back.Position = UDim2.new(0, X, 1, -px(26, 34))
+	back.Size = UDim2.new(1, dentro - px(66, 88), 0, px(10, 12))
+	local count = UiKit.text2(f, "", px(19, 25), V.TEXT, F.TITLE)
+	count.AnchorPoint = Vector2.new(1, 0.5)
+	count.Position = UDim2.new(1, -(BTN_W + px(20, 26)), 1, -px(21, 28))
+	count.Size = UDim2.fromOffset(px(62, 84), px(26, 34))
+	count.TextXAlignment = Enum.TextXAlignment.Right
+	-- à direita: a recompensa em cima e a ação embaixo
+	local reward = UiKit.text2(f, "", px(16, 22), V.KHAKI, F.TITLE_MED)
+	reward.AnchorPoint = Vector2.new(1, 0)
+	reward.Position = UDim2.new(1, -px(10, 13), 0, px(8, 10))
+	reward.Size = UDim2.fromOffset(BTN_W, px(64, 86))
 	reward.TextXAlignment = Enum.TextXAlignment.Right
+	reward.TextYAlignment = Enum.TextYAlignment.Top
 	reward.TextWrapped = true
-	local claim = UiKit.action(f, "RECEBER", "primary", function()
+	local claim = UiKit.action(f, "RECEBER", "premio", function()
 		onClaim(i)
-	end, { h = px(44, 60) })
-	claim.button.AnchorPoint = Vector2.new(1, 0.5)
-	claim.button.Position = UDim2.new(1, -px(12, 16), 0.5, 0)
-	claim.button.Size = UDim2.fromOffset(BTN_W, px(44, 60))
+	end, { h = px(42, 56) })
+	claim.button.AnchorPoint = Vector2.new(1, 1)
+	claim.button.Position = UDim2.new(1, -px(10, 13), 1, -px(8, 10))
+	claim.button.Size = UDim2.fromOffset(BTN_W, px(42, 56))
 	claim.label.TextXAlignment = Enum.TextXAlignment.Center
 	local reroll = UiKit.action(f, "TROCAR", "secondary", function()
 		onReroll(i)
-	end, { h = px(40, 56) })
-	reroll.button.AnchorPoint = Vector2.new(1, 0.5)
-	reroll.button.Position = UDim2.new(1, -px(12, 16), 0.5, 0)
-	reroll.button.Size = UDim2.fromOffset(BTN_W, px(40, 56))
-	local doneTag = UiKit.tag(f, "RECEBIDA", V.PANEL_3, px(14, 20))
-	doneTag.AnchorPoint = Vector2.new(1, 0.5)
-	doneTag.Position = UDim2.new(1, -px(12, 16), 0.5, 0)
+	end, { h = px(38, 52) })
+	reroll.button.AnchorPoint = Vector2.new(1, 1)
+	reroll.button.Position = UDim2.new(1, -px(10, 13), 1, -px(8, 10))
+	reroll.button.Size = UDim2.fromOffset(BTN_W, px(38, 52))
+	reroll.label.TextXAlignment = Enum.TextXAlignment.Center
+	local doneTag = UiKit.tag(f, "✓ RECEBIDA", V.PANEL_3, px(14, 20))
+	doneTag.AnchorPoint = Vector2.new(1, 1)
+	doneTag.Position = UDim2.new(1, -px(10, 13), 1, -px(12, 16))
 	return {
 		frame = f,
+		img = img,
+		estado = estado,
+		edge = edge,
 		text = text,
 		count = count,
 		fill = fill,
@@ -189,10 +243,12 @@ local function newRow(i: number): Row
 	}
 end
 
+novaColuna(1)
 section("DO DIA")
 for i = 1, 3 do
 	rows[i] = newRow(i)
 end
+novaColuna(2)
 section("DA SEMANA")
 for i = 4, 6 do
 	rows[i] = newRow(i)
@@ -269,6 +325,14 @@ local function paintRow(r: Row, m: any?, rerollLeft: number, daily: boolean)
 	r.reroll.button.Visible = canReroll and not canClaim
 	r.doneTag.Visible = claimed
 	r.frame.BackgroundColor3 = if canClaim then V.PANEL_3 else V.PANEL_2
+	-- D-227: a imagem da ordem e o estado escrito (nunca só pela cor)
+	r.img.Image = ArteCatalogo.ordem(r.id)
+	r.img.ImageTransparency = if claimed then 0.55 else 0
+	r.estado.Text = if claimed then "RECEBIDA" elseif canClaim then "CONCLUÍDA · RECEBA O PRÊMIO" else "EM ANDAMENTO"
+	r.estado.TextColor3 = if claimed then V.MUTED elseif canClaim then V.AMBAR else V.DIM
+	r.edge.Color = if canClaim then V.AMBAR else V.LINE
+	r.edge.Thickness = if canClaim then 2 else 1
+	r.edge.Transparency = if canClaim then 0 else 0.5
 end
 
 local sample: any = nil -- estado de exemplo do gancho de teste

@@ -410,7 +410,8 @@ test("comandante e construção: nada de digitar no toque; obra passa pela prév
 end)
 
 test("telas: o 1º toque mostra (papel, passe), o cartão da loja mostra o item, nada de hover", function()
-	assert(string.find(src("DeployScreen.luau"), "ToqueTelas.secondTap(roleTap", 1, true), "papel")
+	-- D-223: tocar na classe só mostra; quem escolhe é o CONFIRMAR CLASSE
+	assert(string.find(src("Preparacao.luau"), "CONFIRMAR CLASSE", 1, true), "classe")
 	assert(string.find(src("TelaPasse.client.luau"), "ToqueTelas.secondTap(cellTap", 1, true), "passe")
 	assert(string.find(src("ShopController.client.luau"), 'ver.Name = "Ver"', 1, true), "loja")
 	assert(string.find(src("TelaMissoes.client.luau"), 'Instance.new("ScrollingFrame")', 1, true), "missões rolam")

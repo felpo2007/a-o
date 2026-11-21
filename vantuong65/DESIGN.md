@@ -9719,3 +9719,79 @@ especiais, qualidade visual".
 - **Efeitos** (`Controllers/PodioEfeitos`): fachos de holofote, sol, canhões de confete, poeira, faíscas
   e onda no pouso, sinalizadores no céu, brasas, fumaça, vinheta e faixas de cinema. "Reduzir movimento"
   deixa só a luz parada.
+
+## D-222 — Lote 102: o lobby parado, sem personagem (2026-11-21)
+
+**Pedidos do dono:** "troque o fundo do lobby, coloque algo com mais qualidade e não deixe ele tremendo" e
+"quero que as imagens apareçam no lobby somente quando passar por cima dos botões".
+- O fundo é uma imagem parada (`tools/blender/lobby_fundo.py`, 2048 x 1152, sem pessoas), em 4 blocos de
+  1024 x 576 (`tools/lobby_recorta.py`, `Controllers/FundoLobby`), cobrindo a tela sem distorcer.
+- O primeiro render saiu magenta. `--troca-ceu` troca só o céu do EXR pronto (render + (1 − alfa) x (céu
+  novo − céu velho)), sem refazer a luz.
+- Em repouso nenhuma entrada tem imagem. Com o foco, a entrada acende a dela; a capa do JOGAR só com o
+  foco nele.
+
+## D-223 — Lote 102: a preparação em quatro passos (2026-11-21)
+
+**Pedidos do dono:** "isso está horrível, genérico, sem imagens", com a imagem-alvo "ESCOLHA ONDE NASCER",
+e "permita alterar o equipamento dentro do jogo na escolha da classe".
+- `Controllers/Preparacao` desenha 01 TIME, 02 GRUPO, 03 CLASSE e 04 ONDE NASCER; a `DeployScreen` ficou
+  só com a lógica. A mesa 3D e o soldado saíram.
+- CLASSE: lista com insígnias, abas ARMA PRINCIPAL, SECUNDÁRIA e EQUIPAMENTO, e ficha da arma.
+- EQUIPAMENTO: + e − por item (`Kit_Set`), barra de peso e o motivo quando bate no limite.
+- O antitanque mostra o lançador do lado (Bazuca M20 ou RPG-2).
+
+## D-224 — Lote 102: o horário do dia na votação (2026-11-21)
+
+**Pedido do dono:** "coloque opções de horários do dia no mapa, que será escolhido na escolha de mapa".
+- `Shared/Horarios`: manhã (8h30), meio-dia (12h12), fim de tarde (18h30) e noite (20h36).
+- O voto vai no `Rodada_Votar`; o servidor valida, apura (empate: o primeiro da lista) e aplica antes da
+  restauração. A cor fica num `ColorCorrection` próprio (`VT65Hora`).
+- Medido no Studio: às 17h20 o sol ainda estava alto e a noite saía laranja; daí a hora e a tinta.
+
+## D-225 — Lote 102: o armário em categorias (2026-11-21)
+
+**Pedido do dono:** "melhore o armário, faça igual o do box".
+- `Controllers/ArmarioTela`: categorias à esquerda (ARMAS, ACABAMENTOS, UNIFORMES, CAMUFLAGEM, VISUAIS e
+  COMEMORAÇÃO), grade de imagens no meio e ficha à direita.
+- Estados separados: em foco, selecionado, seu, equipado e bloqueado, com o caminho para conseguir.
+- O servidor manda o equipado de cada lado (`porLado`), e o `Gear_Equip` aceita o lado mostrado.
+
+## D-226 — Lote 102: o passe com imagens (2026-11-21)
+
+**Pedido do dono:** "melhore as imagens do passe do jogo, faça igual ao do box".
+- Painel no centro, imagem do prêmio de 68 para 132 px, selo só quando há estado a mostrar.
+- O cabeçalho diz o próximo prêmio e quantas estrelas faltam.
+- Créditos, reforço, música, gesto, cartão de abate e estrelas têm imagem em Blender.
+
+## D-227 — Lote 102: as ordens do dia (2026-11-21)
+
+**Pedido do dono:** "melhore o visual das ordens do dia".
+- Duas colunas (DO DIA, DA SEMANA) de cartões com imagem, estado escrito, barra e recompensa.
+- No lobby, cada ordem tem imagem e diz RECEBER ou RECEBIDA.
+
+## D-228 — Lote 102: o mapa de onde nascer (2026-11-21)
+
+**Pedido do dono:** "isso está horroroso, sem ordem, bagunçado, não gosto do mapa, não faz sentido".
+- A carta virou uma vista aérea ilustrada (`tools/mapa_aereo.py`), alinhada aos dados do mapa.
+- Na escolha de onde nascer saem as faixas, as fronteiras e o raio dos eventos. Objetivos são pinos com
+  etiqueta; ponto bloqueado mostra cadeado.
+- A ficha do destino fica à direita (foto, estado, time, grupo, classe, veículo).
+- No celular, o NASCER fica no pé, à esquerda do cartão do veículo.
+
+## D-229 — Lote 102: as imagens de catálogo e das skins (2026-11-21)
+
+**Pedido do dono:** "melhore as imagens da skin e delas no jogo também".
+- `tools/blender/armas_catalogo.py`: 17 armas, 14 equipamentos, 8 classes, 2 times e 10 prêmios.
+- `tools/blender/skins_catalogo.py`: 347 acabamentos. Por arma, só as passadas de luz e a UV; a cor, o
+  metal e a aspereza de cada acabamento entram depois (~1 s por imagem, em vez de um render).
+- `tools/catalogo_imagens.py` leva os PNG ao `AssetIds.Catalogo` (tipo Image). Os PNG ficam fora do Git.
+- A textura da arma dentro da partida não mudou.
+
+## D-230 — Lote 102: a loja no centro e as caixas em grade (2026-11-21)
+
+**Pedido do dono:** "isso está horrível", sobre a aba CAIXAS.
+- Sem soldado à direita, a loja volta ao centro.
+- CAIXAS em três colunas de cartões, com a caixa grande; as chances continuam à vista antes de abrir.
+- No celular, a escala mínima fazia a loja passar da tela: agora o painel encurta e as páginas rolam.
+

@@ -18,6 +18,7 @@ local Cosmeticos = require(ReplicatedStorage.Shared.Cosmeticos) :: any
 local GunModel = require(ReplicatedStorage.Shared.GunModel) :: any
 local Skins = require(ReplicatedStorage.Shared.Skins) :: any
 local Weapons = require(ReplicatedStorage.Shared.Weapons) :: any
+local ArteCatalogo = require(script.Parent.ArteCatalogo)
 local EmblemaImagem = require(script.Parent.EmblemaImagem)
 local SoldierPreview = require(script.Parent.SoldierPreview) :: any
 local UiKit = require(script.Parent.UiKit)
@@ -101,21 +102,35 @@ local function label(parent: Instance, s: string, size: number, color: Color3, f
 end
 
 -- ===== arma com o acabamento (ViewportFrame) =====
-local function arma(box: Frame, s: any)
+local function arma(box: Frame, s: any, aspecto: number?, qual: string?)
+	-- D-229: a imagem de estúdio do acabamento; o modelo 3D fica de reserva
+	local foto = ArteCatalogo.acabamento(s, qual)
+	if foto ~= "" then
+		local im = Instance.new("ImageLabel")
+		im.Name = "Arma"
+		im.BackgroundTransparency = 1
+		im.Image = foto
+		im.ScaleType = Enum.ScaleType.Fit
+		im.AnchorPoint = Vector2.new(0.5, 0.5)
+		im.Position = UDim2.fromScale(0.5, 0.5)
+		im.Size = UDim2.fromScale(0.98, 0.98)
+		im.Parent = box
+		return
+	end
 	local vp = Instance.new("ViewportFrame")
 	vp.Name = "Arma"
 	vp.Size = UDim2.fromScale(1, 1)
 	vp.BackgroundTransparency = 1
-	vp.Ambient = Color3.fromRGB(150, 146, 136)
-	vp.LightColor = Color3.fromRGB(255, 244, 226)
-	vp.LightDirection = Vector3.new(-0.6, -1, -0.8)
+	vp.Ambient = Color3.fromRGB(172, 168, 158) -- D-229: mais luz, para o acabamento aparecer
+	vp.LightColor = Color3.fromRGB(255, 246, 232)
+	vp.LightDirection = Vector3.new(-0.5, -1, -0.65)
 	vp.Parent = box
 	local cam = Instance.new("Camera")
 	cam.FieldOfView = 24
 	cam.Parent = vp
 	vp.CurrentCamera = cam
 	-- D-179: o acabamento universal aparece na arma de vitrine dele
-	local wid = s.weapon or s.vitrine or ""
+	local wid = s.weapon or qual or s.vitrine or ""
 	local folder = ReplicatedStorage:FindFirstChild("VT65WeaponArt")
 	local art = if folder then folder:FindFirstChild(wid) else nil
 	local m: Model
@@ -130,7 +145,8 @@ local function arma(box: Frame, s: any)
 	m.Parent = vp
 	-- de lado (a Intendência enquadra igual), com folga para o cano não sair do quadro
 	local cf, size = m:GetBoundingBox()
-	local dist = size.Magnitude / 2 / math.tan(math.rad(cam.FieldOfView / 2)) * 1.05
+	-- D-229: num cartão largo a arma ocupa a largura (o FOV da câmera é o vertical)
+	local dist = size.Magnitude / 2 / (math.tan(math.rad(cam.FieldOfView / 2)) * math.max(1, aspecto or 1)) * 1.05
 	cam.CFrame = CFrame.lookAt(cf.Position + Vector3.new(dist, dist * 0.18, dist * 0.12), cf.Position)
 end
 
@@ -305,16 +321,16 @@ end
 
 -- Desenho do item num quadrado de lado `s`, com fundo e borda da raridade. Devolve o quadro.
 -- opts.soldado: o uniforme vestido no soldado (ViewportFrame; mais pesado que o pano).
-export type Opcoes = { soldado: boolean? }
+export type Opcoes = { soldado: boolean?, aspecto: number?, arma: string? }
 function ItemArte.desenha(parent: Instance, item: any, s: number, opts: Opcoes?): Frame
 	local it = ItemArte.info(item)
-	local box = frame(parent, UDim2.fromOffset(s, s), V.PANEL_2, 0)
+	local box = frame(parent, UDim2.fromOffset(s, s), Color3.new(1, 1, 1), 0)
 	box.Name = "Item"
 	UiKit.corner(box, 6)
 	local rc = ItemArte.corRaridade(it.raridade)
 	UiKit.edge(box, rc, 2, 0)
 	local fundo = Instance.new("UIGradient")
-	fundo.Color = ColorSequence.new(rc:Lerp(V.PANEL_2, 0.72), V.PANEL_2)
+	fundo.Color = ColorSequence.new(rc:Lerp(V.PANEL_2, 0.62), V.PANEL_2)
 	fundo.Rotation = 90
 	fundo.Parent = box
 	local c1, c2 = rgb(it.cor, rc), rgb(it.cor2, V.TEXT)
@@ -400,7 +416,7 @@ function ItemArte.desenha(parent: Instance, item: any, s: number, opts: Opcoes?)
 		t.Position = UDim2.fromScale(0.04, 0)
 		t.TextXAlignment = Enum.TextXAlignment.Center
 	elseif it.skin and it.skin.kind == "weapon" then
-		arma(box, it.skin)
+		arma(box, it.skin, opts and opts.aspecto, opts and opts.arma)
 	elseif it.skin and it.skin.kind == "uniform" then
 		if not (opts and opts.soldado and soldadoCartao(box, it.skin)) then
 			pano(box, it.skin)
@@ -427,12 +443,12 @@ local SIGLA: { [string]: { s: string, c1: { number }, c3: { number } } } = {
 	emb_veterano_ouro = { s = "★", c1 = { 255, 206, 64 }, c3 = { 170, 110, 10 } },
 }
 local function caixaDe(parent: Instance, s: number, rc: Color3): Frame
-	local box = frame(parent, UDim2.fromOffset(s, s), V.PANEL_2, 0)
+	local box = frame(parent, UDim2.fromOffset(s, s), Color3.new(1, 1, 1), 0)
 	box.Name = "Item"
 	UiKit.corner(box, 6)
 	UiKit.edge(box, rc, 2, 0)
 	local fundo = Instance.new("UIGradient")
-	fundo.Color = ColorSequence.new(rc:Lerp(V.PANEL_2, 0.72), V.PANEL_2)
+	fundo.Color = ColorSequence.new(rc:Lerp(V.PANEL_2, 0.62), V.PANEL_2)
 	fundo.Rotation = 90
 	fundo.Parent = box
 	return box
@@ -458,6 +474,22 @@ end
 function ItemArte.recompensa(parent: Instance, r: any, s: number): Frame
 	local kind = if type(r) == "table" then r.kind else nil
 	local id = if type(r) == "table" then (r.id or (type(r.ids) == "table" and r.ids[1]) or nil) else nil
+	-- D-226: o prêmio que não é um item de verdade usa a imagem renderizada; sem ela, o desenho abaixo
+	local imagem = ArteCatalogo.premio(kind)
+	if imagem ~= "" then
+		local caixa = caixaDe(parent, s, ItemArte.corRaridade(if kind == "credits" then "comum" else "epico"))
+		caixa.Name = "Recompensa"
+		local im = Instance.new("ImageLabel")
+		im.Name = "Imagem"
+		im.BackgroundTransparency = 1
+		im.Image = imagem
+		im.ScaleType = Enum.ScaleType.Fit
+		im.AnchorPoint = Vector2.new(0.5, 0.5)
+		im.Position = UDim2.fromScale(0.5, 0.5)
+		im.Size = UDim2.fromScale(0.92, 0.92)
+		im.Parent = caixa
+		return caixa
+	end
 	if (kind == "camo" or kind == "uniform") and id and Skins.get(id) then
 		return ItemArte.desenha(parent, { id = id, raridade = if kind == "camo" then "raro" else "epico" }, s)
 	elseif kind == "credits" then

@@ -35,6 +35,7 @@ local Input = require(script.Parent.Input)
 local SoldierPreview = require(script.Parent.SoldierPreview)
 local Toast = require(script.Parent.Toast)
 local ToqueUi = require(script.Parent.ToqueUi)
+local ArteCatalogo = require(script.Parent.ArteCatalogo)
 local UiKit = require(script.Parent.UiKit)
 
 local player = Players.LocalPlayer
@@ -484,6 +485,19 @@ local armaUniversal: string? = nil
 
 local function weaponPreview(s: Skins.Skin)
 	local wid = s.weapon or armaUniversal or s.vitrine or ""
+	-- D-229: a imagem de estúdio do acabamento; sem ela, o modelo 3D
+	local foto = ArteCatalogo.acabamento(s, wid)
+	if foto ~= "" then
+		local im = Instance.new("ImageLabel")
+		im.Name = "Foto"
+		im.BackgroundTransparency = 1
+		im.Image = foto
+		im.ScaleType = Enum.ScaleType.Fit
+		im.Size = UDim2.fromScale(1, 1)
+		im.Parent = view
+		swatch.Visible = false
+		return
+	end
 	local wp = Weapons.get(wid)
 	local folder = ReplicatedStorage:FindFirstChild("VT65WeaponArt")
 	local art = if folder then folder:FindFirstChild(wid) else nil

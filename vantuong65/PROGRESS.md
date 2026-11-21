@@ -1066,6 +1066,14 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     - **Comemoração:** tela cheia, cenário pintado, coreografia, câmera e efeitos novos.
     - Relatório: `testes/LOTE101_D216-221_2026-11-21.md`.
     - **v133 publicada** (versão 138 do place, commit 9ed8bbf).
+  - **Lote 102 (D-222 a D-230): lobby, preparação, mapa, armário, passe, ordens e skins, feito.**
+    - **Lobby:** fundo novo parado, sem personagem; imagem só com o foco no botão.
+    - **Preparação:** Time, Grupo, Classe e Onde nascer, com imagens; equipamento na escolha da classe.
+    - **Mapa:** vista aérea com pinos. **Horário:** manhã, meio-dia, fim de tarde e noite na votação.
+    - **Armário, passe, ordens e caixas** refeitos em cartões de imagem.
+    - **Arte:** 398 imagens novas em Blender (347 skins), e 410 de 410 carregaram no Studio.
+    - Testes: Lune 893, pytest 76, autoteste 18 de 18; PC e simulador de celular.
+    - Relatório: `testes/LOTE102_D222-230_2026-11-21.md`.
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;

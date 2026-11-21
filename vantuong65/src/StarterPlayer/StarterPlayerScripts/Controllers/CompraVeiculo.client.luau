@@ -75,10 +75,11 @@ gui:GetPropertyChangedSignal("AbsoluteSize"):Connect(fit)
 fit()
 
 -- ===== cartão (margem direita da carta, abaixo do norte e do zoom) =====
-local CARD_W = 172
+local CARD_W = 344 -- D-223: na ficha do destino, à direita da carta
 local card = UiKit.panel(stage, V.PANEL, 0.08, true)
 card.Name = "Veiculo"
-card.Position = UDim2.fromOffset(1240 - 8 - CARD_W, 146 + 84)
+card.AnchorPoint = Vector2.new(0, 1) -- D-228: preso ao pé da ficha do destino, para não cobrir o resumo
+card.Position = UDim2.fromOffset(910, 650)
 card.Size = UDim2.fromOffset(CARD_W, 0)
 card.AutomaticSize = Enum.AutomaticSize.Y
 card.Visible = false
@@ -102,7 +103,7 @@ local cardImage = Instance.new("ImageLabel")
 cardImage.Name = "Imagem"
 cardImage.BackgroundTransparency = 1
 cardImage.ScaleType = Enum.ScaleType.Fit
-cardImage.Size = UDim2.new(1, 0, 0, 114)
+cardImage.Size = UDim2.new(1, 0, 0, 48)
 cardImage.Visible = false
 cardImage.LayoutOrder = 2
 cardImage.Parent = cardBody

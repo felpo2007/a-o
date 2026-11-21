@@ -160,7 +160,9 @@ test("transições: foco troca capa, descrição e enquadramento; movimento redu
 	assert(has(palco, "e.Enabled = not parado"), "sem poeira")
 	-- girar o soldado não aciona outro elemento: só fora da coluna e sem tela por cima
 	assert(has(palco, "if not aberto or processed or not LobbyPalco.podeGirar() then"), "gesto separado")
-	assert(has(menu, "return open and not busy and UiKit.top() == nil and not ComoJogar.isOpen()"), "podeGirar")
+	-- D-222: o lobby ficou sem soldado: não há o que girar, e o fundo é a imagem parada
+	assert(has(menu, "LobbyPalco.podeGirar = function(): boolean\n\treturn false"), "podeGirar")
+	assert(has(menu, "FundoLobby.novo(fundo, 0, -5)"), "fundo parado")
 end)
 
 print(string.format("%d ok, %d falhas", passed, failed))

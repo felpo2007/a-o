@@ -76,12 +76,12 @@ test("servidor: o código vale uma vez, grava na hora e limita tentativas", func
 	assert(has(string.sub(camp, i, j), "task.spawn(PlayerData.save, p)"), "grava na hora")
 end)
 
-test("loja: as categorias do §9 e o painel à esquerda do soldado", function()
+test("loja: as categorias do §9 e o painel no centro, sem soldado", function()
 	for _, n in { '"DESTAQUES"', '"MERCADO"', '"CAIXAS"', '"CÓDIGOS"' } do
 		assert(has(shop, n), "aba faltando: " .. n)
 	end
-	assert(has(shop, "folder.AnchorPoint = Vector2.new(0, 0.5)"), "painel à esquerda")
-	assert(has(shop, "pintarFundo(LobbyPalco.aberto())"), "sobre o palco no lobby")
+	assert(has(shop, "folder.AnchorPoint = Vector2.new(0.5, 0.5)"), "painel no centro (D-230)")
+	assert(not has(shop, "LobbyPalco"), "a loja não depende mais do palco")
 	assert(has(shop, "Progression.money(cr)"), "saldo de créditos")
 end)
 

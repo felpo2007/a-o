@@ -29,7 +29,6 @@ local Bus = require(script.Parent.Bus)
 local CampanhaCliente = require(script.Parent.CampanhaCliente)
 local Input = require(script.Parent.Input)
 local ItemArte = require(script.Parent.ItemArte)
-local LobbyPalco = require(script.Parent.LobbyPalco)
 local ToqueTelas = require(script.Parent.ToqueTelas)
 local ToqueUi = require(script.Parent.ToqueUi)
 local UiKit = require(script.Parent.UiKit)
@@ -45,22 +44,21 @@ local MAX = 50
 --   - o ícone de cada tipo de prêmio é um desenho que a criança reconhece (💰 👕 🎵 ...), não letra;
 --   - o prêmio que ainda vai chegar fica legível (branco), não cinza; o que já pode ser pego brilha;
 --   - receber e receber tudo em verde vivo.
--- D-208 (referências do dono: o passe ocupa a esquerda e o personagem fica à direita, na luz): o
--- painel cresceu de 1000 para 1180 de largura (mais níveis à vista) e saiu do meio para a esquerda;
--- no lobby o palco (LobbyPalco) põe o soldado do jogador à direita dele
-local W, H = px(1180, 1560), px(684, 900)
-local X0 = px(48, 64)
-local PAD = px(20, 28)
-local HEAD_H = px(104, 138)
-local FOOT_H = px(46, 64)
-local DETAIL_H = px(150, 196)
+-- D-226 (dono: "melhore as imagens do passe, faça igual ao do box"): sem o soldado no lobby, o painel
+-- volta ao centro e ocupa a tela; a altura que sobra do cabeçalho e da ficha vai para os cartões, com a
+-- imagem do prêmio bem maior (de 68 para 132 px) e só um selo de estado.
+local W, H = px(1232, 1640), px(684, 900)
+local PAD = px(16, 22)
+local HEAD_H = px(92, 122)
+local FOOT_H = px(36, 48)
+local DETAIL_H = px(122, 160)
 -- linha do tempo
-local GUTTER = px(118, 156) -- rótulos fixos das trilhas, à esquerda
-local COL_W = px(152, 200)
-local COL_GAP = px(12, 16)
-local CARD_H = px(152, 196)
-local NODE_ROW = px(52, 70)
-local NODE_D = px(34, 44)
+local GUTTER = px(104, 138) -- rótulos fixos das trilhas, à esquerda
+local COL_W = px(160, 212)
+local COL_GAP = px(8, 10)
+local CARD_H = px(186, 244)
+local NODE_ROW = px(40, 52)
+local NODE_D = px(30, 38)
 local LINE_H = px(4, 6)
 -- D-130 (lote 16, dono: "coloque mais cores vivas no passe"): cores cheias. A trilha grátis é verde e
 -- a do Veterano é dourada, a rota andada vai em degradê de ouro e a faixa do alto, de ouro a
@@ -81,7 +79,6 @@ local FREE_BG_HI = Color3.fromRGB(34, 84, 48)
 -- ===== montagem =====
 local gui = UiKit.screen("VT65Passe", 38) -- acima da loja (30) e do menu (35)
 gui.Enabled = false
--- D-208: no lobby, só o escuro da esquerda (o palco e o soldado aparecem à direita); fora dele, o véu
 local dim = Instance.new("Frame")
 dim.Name = "Veu"
 dim.Position = UDim2.fromOffset(-200, -200)
@@ -93,24 +90,14 @@ dim.Active = true
 dim.Parent = gui
 local dimGrad = Instance.new("UIGradient")
 dimGrad.Parent = dim
-local function pintarVeu(noPalco: boolean)
-	dimGrad.Transparency = if noPalco
-		then NumberSequence.new({
-			NumberSequenceKeypoint.new(0, 0.05),
-			NumberSequenceKeypoint.new(0.55, 0.3),
-			NumberSequenceKeypoint.new(0.75, 0.85),
-			NumberSequenceKeypoint.new(1, 1),
-		})
-		else NumberSequence.new(0.35)
-end
+dimGrad.Transparency = NumberSequence.new(0.3)
 
 local panel = UiKit.panel(gui, V.PANEL, 0.08)
 panel.Name = "Passe"
-panel.AnchorPoint = Vector2.new(0, 0.5)
-panel.Position = UDim2.new(0, X0, 0.5, 0)
+panel.AnchorPoint = Vector2.new(0.5, 0.5)
+panel.Position = UDim2.fromScale(0.5, 0.5)
 panel.Size = UDim2.fromOffset(W, H)
--- a margem da esquerda entra na conta (no Studio, sem ela, o FECHAR saía da tela à direita)
-local fit = UiKit.fit(gui, panel, W + X0, H, 12)
+local fit = UiKit.fit(gui, panel, W, H, 12)
 do -- D-130: o cabeçalho quente; D-208: escuro, com o ouro só subindo da esquerda (as referências)
 	local band = Instance.new("Frame")
 	band.Name = "Cabecalho"
@@ -146,14 +133,19 @@ end
 
 -- cabeçalho: rótulo, nome da temporada, nível grande, barra de estrelas e o fim real
 local kick = UiKit.kicker(panel, "PASSE DE CAMPANHA", px(16, 22), VIVO.GOLD_HI)
-kick.Position = UDim2.fromOffset(PAD, px(12, 16))
-kick.Size = UDim2.fromOffset(px(320, 420), px(22, 30))
-local title = UiKit.title(panel, "", px(36, 48))
-title.Position = UDim2.fromOffset(PAD, px(34, 46))
-title.Size = UDim2.new(1, -(PAD + px(330, 440)), 0, px(46, 60))
-local ends = UiKit.kicker(panel, "", px(16, 21), V.TEXT)
-ends.Position = UDim2.fromOffset(PAD, px(80, 106))
-ends.Size = UDim2.fromOffset(px(440, 580), px(20, 28))
+kick.Position = UDim2.fromOffset(PAD, px(8, 10))
+kick.Size = UDim2.fromOffset(px(320, 420), px(20, 28))
+local title = UiKit.title(panel, "", px(32, 42))
+title.Position = UDim2.fromOffset(PAD, px(26, 34))
+title.Size = UDim2.new(1, -(PAD + px(520, 690)), 0, px(40, 52))
+local ends = UiKit.kicker(panel, "", px(15, 20), V.TEXT)
+ends.Position = UDim2.fromOffset(PAD, px(66, 88))
+ends.Size = UDim2.fromOffset(px(320, 420), px(20, 28))
+-- D-226: quanto falta e para quê (o prêmio do próximo nível)
+local falta = UiKit.kicker(panel, "", px(15, 20), VIVO.GOLD_HI)
+falta.Name = "Falta"
+falta.Position = UDim2.fromOffset(PAD + px(540, 716), px(66, 88))
+falta.Size = UDim2.fromOffset(px(370, 490), px(20, 28))
 local levelStat = UiKit.stat(panel, "NÍVEL", "0", px(48, 64))
 levelStat.frame.AnchorPoint = Vector2.new(1, 0)
 levelStat.frame.Position = UDim2.new(1, -(PAD + px(176, 232)), 0, px(24, 32))
@@ -197,7 +189,7 @@ local vetPill = UiKit.tag(panel, "", V.PANEL_3, px(14, 19))
 vetPill.Name = "Veterano"
 vetPill.FontFace = F.BODY_B
 vetPill.AnchorPoint = Vector2.new(0, 0)
-vetPill.Position = UDim2.fromOffset(PAD + px(330, 440), px(78, 104))
+vetPill.Position = UDim2.fromOffset(PAD + px(330, 440), px(64, 86))
 vetPill.Size = UDim2.fromOffset(0, px(24, 32))
 
 -- ----- a faixa da linha do tempo -----
@@ -359,25 +351,25 @@ prevThumb.Size = UDim2.fromOffset(ICON, ICON)
 prevThumb.Parent = detail
 local prevArtKey = ""
 local BTN_W = px(214, 286)
-local BTN_H = px(46, 60)
+local BTN_H = px(42, 56)
 local textX = P + ICON + px(14, 18)
 local textW = -(textX + 2 * BTN_W + px(24, 32))
 local prevKind = UiKit.kicker(detail, "", px(16, 21))
 prevKind.Position = UDim2.fromOffset(textX, P)
 prevKind.Size = UDim2.new(1, textW, 0, px(22, 28))
-local prevName = UiKit.title(detail, "", px(32, 42))
-prevName.Position = UDim2.fromOffset(textX, P + px(24, 30))
-prevName.Size = UDim2.new(1, textW, 0, px(42, 54))
+local prevName = UiKit.title(detail, "", px(30, 40))
+prevName.Position = UDim2.fromOffset(textX, P + px(20, 26))
+prevName.Size = UDim2.new(1, textW, 0, px(38, 50))
 prevName.TextScaled = true
 do
 	local lim = Instance.new("UITextSizeConstraint")
-	lim.MaxTextSize = UiKit.text(px(32, 42))
+	lim.MaxTextSize = UiKit.text(px(30, 40))
 	lim.MinTextSize = UiKit.text(px(18, 24))
 	lim.Parent = prevName
 end
 local prevInfo = UiKit.body(detail, "", px(17, 22), V.TEXT)
-prevInfo.Position = UDim2.fromOffset(textX, P + px(68, 86))
-prevInfo.Size = UDim2.new(1, textW, 0, px(52, 64))
+prevInfo.Position = UDim2.fromOffset(textX, P + px(60, 78))
+prevInfo.Size = UDim2.new(1, textW, 0, px(30, 40))
 prevInfo.TextWrapped = true
 prevInfo.TextYAlignment = Enum.TextYAlignment.Top
 -- botões em duas colunas à direita: receber | Veterano, receber tudo | pular nível. Cores de compra
@@ -385,7 +377,7 @@ prevInfo.TextYAlignment = Enum.TextYAlignment.Top
 -- (verde); sem ID, apagados
 local function place(b: TextButton, col: number, row: number)
 	b.AnchorPoint = Vector2.new(1, 0)
-	b.Position = UDim2.new(1, -(P + (2 - col) * (BTN_W + px(10, 14))), 0, P + (row - 1) * (BTN_H + px(10, 14)))
+	b.Position = UDim2.new(1, -(P + (2 - col) * (BTN_W + px(10, 14))), 0, P + (row - 1) * (BTN_H + px(8, 10)))
 	b.Size = UDim2.fromOffset(BTN_W, BTN_H)
 end
 local claimOne = UiKit.action(detail, "RECEBER", "premio", function()
@@ -640,11 +632,11 @@ local function makeCell(parent: Instance, y: number, lvl: number, track: string)
 	end
 	-- D-208: a arte da recompensa (ItemArte.recompensa, posta no paint quando o estado chega), num
 	-- CanvasGroup que apaga inteiro quando o prêmio já foi recebido; o emoji do lote 23 saiu
-	local IC = px(68, 90)
+	local IC = px(132, 174) -- D-226: a imagem é o cartão
 	local icon = Instance.new("CanvasGroup")
 	icon.Name = "Icone"
 	icon.AnchorPoint = Vector2.new(0.5, 0)
-	icon.Position = UDim2.new(0.5, 0, 0, px(8, 10))
+	icon.Position = UDim2.new(0.5, 0, 0, px(4, 6))
 	icon.Size = UDim2.fromOffset(IC, IC)
 	icon.BackgroundTransparency = 1
 	icon.BorderSizePixel = 0
@@ -655,10 +647,10 @@ local function makeCell(parent: Instance, y: number, lvl: number, track: string)
 	mark.TextXAlignment = Enum.TextXAlignment.Center
 	mark.ZIndex = 2
 	mark.Visible = false
-	local ny = px(8, 10) + IC + px(4, 6)
+	local ny = px(4, 6) + IC + px(2, 3)
 	local name = UiKit.text2(b, "", px(18, 24), V.TEXT, F.BODY_B)
 	name.Position = UDim2.fromOffset(px(6, 8), ny)
-	name.Size = UDim2.new(1, -px(12, 16), 0, px(44, 58))
+	name.Size = UDim2.new(1, -px(12, 16), 0, CARD_H - ny - px(2, 3))
 	name.TextWrapped = true
 	name.TextXAlignment = Enum.TextXAlignment.Center
 	name.TextYAlignment = Enum.TextYAlignment.Top
@@ -669,9 +661,10 @@ local function makeCell(parent: Instance, y: number, lvl: number, track: string)
 	sub.Size = UDim2.new(1, -px(12, 16), 0, px(18, 24))
 	sub.TextXAlignment = Enum.TextXAlignment.Center
 	sub.ZIndex = 2
+	sub.Visible = false -- D-226: o tipo do prêmio fica na ficha; no cartão, a imagem diz
 	local tag = UiKit.tag(b, "", V.OLIVE, px(13, 17))
-	tag.AnchorPoint = Vector2.new(1, 0)
-	tag.Position = UDim2.new(1, -px(5, 7), 0, px(5, 7))
+	tag.AnchorPoint = Vector2.new(1, 1)
+	tag.Position = UDim2.new(1, -px(10, 13), 0, px(4, 6) + IC - px(4, 6))
 	tag.ZIndex = 3
 	local r = UiKit.realce(b, base, if track == "vet" then VET_BG_HI else FREE_BG_HI, 1.03)
 	local function hover(on: boolean)
@@ -774,7 +767,7 @@ local STATE_TAG: { [string]: { text: string, color: Color3 } } = {
 	ready = { text = "RECEBER", color = VIVO.GREEN_DEEP },
 	claimed = { text = "✓ RECEBIDO", color = V.PANEL_3 },
 	locked = { text = "🔒 VETERANO", color = Color3.fromRGB(176, 120, 20) },
-	future = { text = "NÍVEL", color = V.PANEL_3 },
+	future = { text = "", color = V.PANEL_3 },
 }
 -- chave da arte de uma recompensa (a arte só é refeita quando a recompensa muda)
 local function artKeyOf(r: Reward?): string
@@ -807,9 +800,10 @@ local function paintCell(c: Cell, se: { [string]: any }, track: string, lvl: num
 	c.name.Text = if r then rewardName(r) else "—"
 	c.sub.Text = if r then UiKit.upper(KIND_NAME[r.kind or ""] or "Item") else ""
 	local tg = STATE_TAG[st]
-	c.tag.Visible = tg ~= nil and r ~= nil
+	-- D-226: o que ainda não chegou não leva selo (o número do nível fica no marco)
+	c.tag.Visible = tg ~= nil and r ~= nil and st ~= "future"
 	if tg then
-		c.tag.Text = if st == "future" then string.format("NÍVEL %d", lvl) else tg.text
+		c.tag.Text = tg.text
 		c.tag.BackgroundColor3 = tg.color
 		c.tag.FontFace = F.BODY_B
 	end
@@ -852,6 +846,9 @@ paint = function()
 	ends.Text = if left > 0
 		then string.format("A temporada termina em %d dias.", math.max(1, math.floor(left / 86400)))
 		else ""
+	falta.Text = if level >= MAX
+		then "TODOS OS NÍVEIS ALCANÇADOS"
+		else string.format("PRÓXIMO PRÊMIO: NÍVEL %d · FALTAM %d ★", level + 1, math.max(1, per - inLvl))
 	vetSub.Text = if se.veteran then "LIBERADO" else "COM O VETERANO"
 	-- o trecho andado: até o marco do nível atual, mais a fração das estrelas até o próximo
 	local frac = if level >= MAX then 0 else math.clamp(inLvl / per, 0, 1)
@@ -1029,12 +1026,10 @@ local function setOpen(on: boolean)
 		sel.level, sel.track = level, "free"
 		paint()
 		renderFoot()
-		-- D-208: entra da esquerda, sobre o palco (no lobby) ou sobre o véu (em campo)
-		pintarVeu(LobbyPalco.aberto())
 		dim.BackgroundTransparency = 1
 		UiKit.tween(dim, TweenInfo.new(0.25), { BackgroundTransparency = 0 })
-		panel.Position = UDim2.new(0, X0 - px(40, 54), 0.5, 0)
-		UiKit.tween(panel, TweenInfo.new(0.3, Enum.EasingStyle.Quint), { Position = UDim2.new(0, X0, 0.5, 0) })
+		panel.Position = UDim2.new(0.5, 0, 0.5, px(18, 24))
+		UiKit.tween(panel, TweenInfo.new(0.3, Enum.EasingStyle.Quint), { Position = UDim2.fromScale(0.5, 0.5) })
 		fit.play(TweenInfo.new(0.3, Enum.EasingStyle.Quint), 1, 0.97)
 		task.defer(function()
 			scrollTo(level, true)

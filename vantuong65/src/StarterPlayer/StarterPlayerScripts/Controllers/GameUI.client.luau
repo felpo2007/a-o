@@ -34,6 +34,8 @@ local Bus = require(script.Parent.Bus)
 local CartaView = require(script.Parent.CartaView)
 local DeployScreen = require(script.Parent.DeployScreen)
 local Input = require(script.Parent.Input)
+local ArteCatalogo = require(script.Parent.ArteCatalogo)
+local FundoLobby = require(script.Parent.FundoLobby)
 local JogarAgora = require(script.Parent.JogarAgora)
 local LobbyScene = require(script.Parent.LobbyScene)
 local Marcadores = require(script.Parent.Marcadores)
@@ -44,11 +46,17 @@ local ToqueUi = require(script.Parent.ToqueUi)
 local UiKit = require(script.Parent.UiKit)
 local VirtualCursor = require(script.Parent.VirtualCursor)
 
+local Roles = require(game:GetService("ReplicatedStorage").Shared.Roles)
+
 local player = Players.LocalPlayer
 local gui = UiKit.screen("VT65Menus", 20)
 gui.IgnoreGuiInset = true
 
--- palco de projeto (1280 x 720), centrado e escalado para caber; o fundo em tela cheia é do LobbyScene
+-- D-222: atrás da preparação, o fundo parado do lobby (em tela cheia, fora do palco)
+local fundoPrep = FundoLobby.novo(gui, 0.62, 0)
+fundoPrep.Visible = false
+
+-- palco de projeto (1280 x 720), centrado e escalado para caber
 local DESIGN_W, DESIGN_H = 1280, 720
 local stage = Instance.new("Frame")
 stage.Name = "Stage"
@@ -73,7 +81,7 @@ side.Parent = stage
 -- inserção (morto) ocupa o palco à direita do painel estreito de inserção da DeployScreen (x 40 a
 -- 340, contrato com a tela do lobby); aberta em campo (ou no alvo do comandante) ocupa o palco, com a
 -- legenda curta à direita. A folha é quadrada (1 x 1 km): a altura manda no tamanho.
-local SPAWN_RECT = { x = 356, y = 146, w = 884, h = 520 }
+local SPAWN_RECT = { x = 16, y = 72, w = 876, h = 584 } -- D-223: à esquerda; a ficha do destino vai à direita
 local VIEW_RECT = { x = 24, y = 64, w = 1000, h = 620 }
 local LEGEND_RECT = { x = 1036, y = 64, w = 220, h = 620 }
 local mapFrame = Instance.new("Frame")
@@ -230,53 +238,65 @@ local COR_ESTADO: { [string]: Color3 } = {
 }
 
 local statusH = if UiKit.tv() then 36 else 28
-local PAINEL_W = 470
+-- D-223 (referência do dono): a ficha do destino à direita da carta: a foto do lugar, o nome, o estado,
+-- o resumo (time, grupo, classe) e, na barra de baixo, o NASCER
+local PAINEL_W = 364
 local painel = Instance.new("Frame")
 painel.Name = "Nascer"
-painel.AnchorPoint = Vector2.new(1, 1)
-painel.Position = UDim2.new(1, -10, 1, -(statusH + 10))
-painel.Size = UDim2.fromOffset(PAINEL_W, 88)
+painel.Position = UDim2.fromOffset(900, 72)
+painel.Size = UDim2.fromOffset(PAINEL_W, 584)
 painel.BackgroundColor3 = UiKit.V.PANEL
-painel.BackgroundTransparency = 0.05
+painel.BackgroundTransparency = 0.04
 painel.BorderSizePixel = 0
 painel.Active = true -- o clique no painel não vai para a carta
 painel.Visible = false
 painel.ZIndex = 10
-painel.Parent = mapFrame
+painel.ClipsDescendants = true
+painel.Parent = stage
 UiKit.corner(painel, 4)
 local painelBorda = UiKit.stroke(painel, UiKit.V.LINE, 1, 0.2)
+local pFoto = Instance.new("ImageLabel")
+pFoto.Name = "Foto"
+pFoto.BackgroundColor3 = UiKit.V.BG
+pFoto.BorderSizePixel = 0
+pFoto.ScaleType = Enum.ScaleType.Crop
+pFoto.Position = UDim2.fromOffset(10, 10)
+pFoto.Size = UDim2.fromOffset(PAINEL_W - 20, 158)
+pFoto.ZIndex = 11
+pFoto.Parent = painel
+UiKit.corner(pFoto, 3)
 local pFaixa = Instance.new("Frame")
 pFaixa.Name = "Faixa"
-pFaixa.Size = UDim2.new(0, 5, 1, 0)
+pFaixa.Position = UDim2.fromOffset(10, 168)
+pFaixa.Size = UDim2.fromOffset(PAINEL_W - 20, 4)
 pFaixa.BorderSizePixel = 0
 pFaixa.ZIndex = 11
 pFaixa.Parent = painel
-UiKit.corner(pFaixa, 2)
-local INFO_W = PAINEL_W - 208
-local pTipo = UiKit.kicker(painel, "", 13, UiKit.V.DIM)
-pTipo.Position = UDim2.fromOffset(18, 10)
-pTipo.Size = UDim2.fromOffset(INFO_W, 16)
+local INFO_W = PAINEL_W - 32
+local pTipo = UiKit.kicker(painel, "", 15, UiKit.V.DIM)
+pTipo.Position = UDim2.fromOffset(16, 176)
+pTipo.Size = UDim2.fromOffset(INFO_W, 20)
 pTipo.ZIndex = 11
-local pNome = UiKit.title(painel, "", 22, UiKit.V.TEXT)
+local pNome = UiKit.title(painel, "", 30, UiKit.V.TEXT)
 pNome.Name = "Nome"
-pNome.Position = UDim2.fromOffset(18, 24)
-pNome.Size = UDim2.fromOffset(INFO_W, 28)
+pNome.Position = UDim2.fromOffset(16, 192)
+pNome.Size = UDim2.fromOffset(INFO_W, 38)
 pNome.TextTruncate = Enum.TextTruncate.AtEnd
 pNome.ZIndex = 11
-local pTag = UiKit.text2(painel, "", 13, UiKit.V.BG, UiKit.F.BODY_B)
+local pTag = UiKit.text2(painel, "", 16, UiKit.V.BG, UiKit.F.BODY_B)
 pTag.Name = "Estado"
-pTag.Position = UDim2.fromOffset(18, 56)
+pTag.Position = UDim2.fromOffset(16, 232)
 pTag.AutomaticSize = Enum.AutomaticSize.X
-pTag.Size = UDim2.fromOffset(0, 22)
+pTag.Size = UDim2.fromOffset(0, 26)
 pTag.BackgroundTransparency = 0
 pTag.TextXAlignment = Enum.TextXAlignment.Center
 pTag.ZIndex = 11
 UiKit.corner(pTag, 3)
-UiKit.pad(pTag, 8, 8)
-local pLinha = UiKit.text2(painel, "", 15, UiKit.V.TEXT, UiKit.F.TITLE_MED)
+UiKit.pad(pTag, 10, 10)
+local pLinha = UiKit.text2(painel, "", 16, UiKit.V.TEXT, UiKit.F.TITLE_MED)
 pLinha.Name = "Motivo"
-pLinha.Position = UDim2.fromOffset(18, 56)
-pLinha.Size = UDim2.fromOffset(INFO_W, 22)
+pLinha.Position = UDim2.fromOffset(16, 262)
+pLinha.Size = UDim2.fromOffset(INFO_W, 24)
 pLinha.TextTruncate = Enum.TextTruncate.AtEnd
 pLinha.ZIndex = 11
 -- a alternativa (o pronto mais perto) quando o escolhido trava ou some
@@ -284,10 +304,10 @@ local pAlt = Instance.new("TextButton")
 pAlt.Name = "Alternativa"
 pAlt.AutoButtonColor = false
 pAlt.BackgroundTransparency = 1
-pAlt.Position = UDim2.fromOffset(18, 80)
-pAlt.Size = UDim2.fromOffset(INFO_W, 22)
+pAlt.Position = UDim2.fromOffset(16, 284)
+pAlt.Size = UDim2.fromOffset(INFO_W, 24)
 pAlt.FontFace = UiKit.F.TITLE_MED
-pAlt.TextSize = 15
+pAlt.TextSize = 16
 pAlt.TextColor3 = UiKit.V.AMBAR
 pAlt.TextXAlignment = Enum.TextXAlignment.Left
 pAlt.TextTruncate = Enum.TextTruncate.AtEnd
@@ -295,18 +315,36 @@ pAlt.Visible = false
 pAlt.ZIndex = 11
 pAlt.Parent = painel
 local altPt: any = nil
+-- o resumo do que foi escolhido nos passos de antes
+local pResumo: { TextLabel } = {}
+for i, rotulo in { "TIME", "GRUPO", "CLASSE" } do
+	local y = 308 + (i - 1) * 24
+	local k = UiKit.kicker(painel, rotulo, 15, UiKit.V.DIM)
+	k.Position = UDim2.fromOffset(16, y)
+	k.Size = UDim2.fromOffset(90, 26)
+	k.ZIndex = 11
+	local v = UiKit.text2(painel, "", 18, UiKit.V.TEXT, UiKit.F.TITLE_MED)
+	v.Position = UDim2.fromOffset(112, y)
+	v.Size = UDim2.fromOffset(INFO_W - 96, 26)
+	v.TextXAlignment = Enum.TextXAlignment.Right
+	v.TextTruncate = Enum.TextTruncate.AtEnd
+	v.ZIndex = 11
+	pResumo[i] = v
+end
 
 local pintarPainel: () -> ()
 local confirmar: () -> ()
-local nascerBtn = UiKit.action(painel, "NASCER", "primary", function()
+local nascerBtn = UiKit.action(DeployScreen.pe, "NASCER", "primary", function()
 	confirmar()
-end, { action = "map_select", ctx = "map", h = 52 })
+end, { action = "map_select", ctx = "map", h = 46 })
 nascerBtn.button.Name = "BotaoNascer"
 nascerBtn.button.AnchorPoint = Vector2.new(1, 0.5)
-nascerBtn.button.Position = UDim2.new(1, -14, 0.5, 0)
-nascerBtn.button.Size = UDim2.fromOffset(178, 52)
+nascerBtn.button.Position = UDim2.fromOffset(1256, 29)
+nascerBtn.button.Size = UDim2.fromOffset(260, 46)
 nascerBtn.button.Selectable = false -- na carta o controle navega pela carta (LB/RB, A)
+nascerBtn.button.Visible = false
 nascerBtn.button.ZIndex = 11
+nascerBtn.label.TextXAlignment = Enum.TextXAlignment.Center
 for _, d in nascerBtn.button:GetDescendants() do
 	if d:IsA("GuiObject") then
 		d.ZIndex = 12
@@ -350,8 +388,9 @@ local function painelAgora(): (any, NascerPedido.Painel)
 end
 
 function pintarPainel()
-	local on = mapWanted and mode == "spawn" and not ToqueUi.active()
+	local on = mapWanted and mode == "spawn" and side.Visible and not ToqueUi.active()
 	painel.Visible = on
+	nascerBtn.button.Visible = on
 	if not on then
 		return
 	end
@@ -369,14 +408,21 @@ function pintarPainel()
 		pNome.Text = "—"
 	end
 	pNome.FontFace = UiKit.headFont(pNome.Text)
+	pFoto.Image = ArteCatalogo.lugar(if pt then tostring(pt.name or "") elseif selInfo then selInfo.name else nil)
+	DeployScreen.resumo.Text = string.format("DESTINO: %s", pNome.Text)
+	do
+		local fac = player:GetAttribute("Faction")
+		local sid = player:GetAttribute("SquadId")
+		local rid = player:GetAttribute("Role")
+		pResumo[1].Text = if fac == "US" then "EUA" elseif fac == "VC" then "VC" else "—"
+		pResumo[2].Text = if type(sid) == "string" then (string.match(sid, ":(.+)$") or sid) else "—"
+		local def = if type(rid) == "string" then Roles.roles[rid] else nil
+		pResumo[3].Text = if def then def.name else "—"
+	end
 	pTag.Visible = p.tag ~= ""
 	pTag.Text = p.tag
 	pTag.BackgroundColor3 = cor
 	pTag.TextColor3 = if p.estado == "bloqueado" then UiKit.V.TEXT else UiKit.V.BG
-	-- o motivo logo depois da etiqueta
-	local tagW = if pTag.Visible then pTag.AbsoluteSize.X / math.max(stageScale.Scale, 0.01) + 10 else 0
-	pLinha.Position = UDim2.fromOffset(18 + tagW, 56)
-	pLinha.Size = UDim2.fromOffset(math.max(INFO_W - tagW, 60), 22)
 	pLinha.Text = p.linha
 	pLinha.TextColor3 = if p.estado == "bloqueado" then Color3.fromRGB(240, 150, 130) else UiKit.V.TEXT
 	-- alternativa: só com o escolhido travado ou fora da carta
@@ -390,7 +436,6 @@ function pintarPainel()
 	if altPt then
 		pAlt.Text = string.format("► Pronto perto: %s", Acabamento.viet(tostring(altPt.name or "")))
 	end
-	painel.Size = UDim2.fromOffset(PAINEL_W, if altPt then 108 else 88)
 	nascerBtn.label.Text = p.botao
 	nascerBtn.label.FontFace = UiKit.headFont(p.botao)
 	nascerBtn.enabled(p.ativo)
@@ -579,7 +624,9 @@ local function refresh()
 	showMap((insertion or pinned or targeting) and not menuPrincipal)
 	placeMap()
 	local faction = player:GetAttribute("Faction")
-	LobbyScene.update(side.Visible, if type(faction) == "string" then faction else nil)
+	-- D-223: a mesa 3D saiu da preparação; o fundo é a imagem parada
+	fundoPrep.Visible = side.Visible
+	LobbyScene.update(false, if type(faction) == "string" then faction else nil)
 	syncInput()
 	pintarPainel()
 end
@@ -814,6 +861,7 @@ do
 	-- confirmar: grande, embaixo ao centro (acima da faixa de estado da carta); a linha de baixo diz
 	-- o ponto escolhido ou o motivo da espera
 	local cw = math.floor(size * 6)
+	T.cw, T.m, T.size = cw, m, size
 	T.confirm = ToqueUi.bigButton(tg, "INSERIR", "primary", cw)
 	T.confirm.AnchorPoint = Vector2.new(0.5, 1)
 	T.confirm.Position = UDim2.new(0.5, 0, 1, -(m + 24))
@@ -869,7 +917,15 @@ local function touchUpdate()
 		return
 	end
 	local spawnMode = mode == "spawn"
-	T.close.Text = if spawnMode and side.Visible then "◄ MESA" else "✕"
+	T.close.Text = if spawnMode and side.Visible then "◄  VOLTAR" else "✕"
+	-- D-228: na escolha de onde nascer o botão é menor e fica à esquerda do cartão do veículo; grande e
+	-- no meio ele cobria a carta e o cartão
+	local nascendo = spawnMode and side.Visible
+	local largura = if nascendo then math.floor(T.size * 3.8) else T.cw
+	local cx = if nascendo then 0.42 else 0.5
+	T.confirm.Size = UDim2.fromOffset(largura, T.confirm.Size.Y.Offset)
+	T.confirm.Position = UDim2.new(cx, 0, 1, -(T.m + 24))
+	T.side.Position = UDim2.new(cx, -(largura / 2 + 12), 1, -(T.m + 24))
 	T.me.Visible = not spawnMode
 	local f = CartaView.touchPick()
 	if spawnMode then
@@ -932,6 +988,12 @@ RunService.RenderStepped:Connect(function(dt: number)
 			status.Text = string.format("ALVO %s — confirme", CartaView.cursorGrid())
 		end
 		hints.Text = hintText()
+		-- D-228: na escolha de onde nascer, a faixa sai (o destino está na barra de baixo); as dicas ficam
+		-- só para controle e toque, em que os comandos não são óbvios
+		local dicas = mode ~= "spawn" or pad or ToqueUi.active()
+		status.BackgroundTransparency = if dicas then 0.1 else 1
+		status.TextTransparency = if mode == "spawn" then 1 else 0
+		hints.TextTransparency = if dicas then 0 else 1
 		if legend.Visible then
 			CartaView.updateLegend()
 		end
