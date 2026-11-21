@@ -35,6 +35,52 @@ import loja as L  # noqa: E402
 SAIDA = C.RAIZ / "assets" / "ui" / "caixas"
 FONTE = Path("C:/Windows/Fonts/STENCIL.TTF")
 FONTE_RESERVA = Path("C:/Windows/Fonts/arialbd.ttf")
+# D-219: a Stencil não tem os acentos do vietnamita; o vietnamita sai na Arial Bold
+FONTE_VI = FONTE_RESERVA
+# D-219: o nome não passa dos montantes da frente
+LARGURA_NOME = 0.74
+
+# D-219 (dono: "as escritas nas caixas devem mudar conforme a lingua"): o nome de cada caixa, das
+# mesmas palavras do dicionário do jogo (Shared/LangData). A palavra igual à do português não gera
+# imagem: o jogo usa a original.
+NOMES = {
+    "en": {
+        "gratuita": "REWARD",
+        "recruta": "RECRUIT",
+        "servico": "SERVICE",
+        "batalhao": "BATTALION",
+        "campanha": "CAMPAIGN",
+        "veterano": "VETERAN",
+        "suprimentos": "SUPPLY",
+        "especiais": "SPECIAL",
+        "elite": "ELITE",
+        "historica": "COLLECTION",
+    },
+    "es": {
+        "gratuita": "RECOMPENSA",
+        "recruta": "RECLUTA",
+        "servico": "SERVICIO",
+        "batalhao": "BATALLÓN",
+        "campanha": "CAMPAÑA",
+        "veterano": "VETERANO",
+        "suprimentos": "SUMINISTROS",
+        "especiais": "ESPECIAL",
+        "elite": "ÉLITE",
+        "historica": "COLECCIÓN",
+    },
+    "vi": {
+        "gratuita": "PHẦN THƯỞNG",
+        "recruta": "TÂN BINH",
+        "servico": "QUÂN VỤ",
+        "batalhao": "TIỂU ĐOÀN",
+        "campanha": "CHIẾN DỊCH",
+        "veterano": "CỰU BINH",
+        "suprimentos": "QUÂN NHU",
+        "especiais": "ĐẶC BIỆT",
+        "elite": "TINH NHUỆ",
+        "historica": "BỘ SƯU TẬP",
+    },
+}
 
 # corpo: "madeira" (tábuas e ripas), "pintada" (madeira pintada), "metal" (baú de chapa)
 # cores em RGB linear aproximado (0 a 1); "acento" é a luz da raridade e o halo
@@ -641,7 +687,82 @@ def topo_suave(caminho: Path, margem: float = 0.16):
     bpy.data.images.remove(im)
 
 
-def render(chave: str, amostras: int, teste: bool, camada: str | None = None):
+def caixa_na_tela(o, cena, cam) -> tuple[float, float, float, float]:
+    """O retângulo do objeto no quadro (0 a 1, y de baixo para cima)."""
+    from bpy_extras.object_utils import world_to_camera_view
+
+    bpy.context.view_layer.update()
+    pts = [world_to_camera_view(cena, cam, o.matrix_world @ Vector(c)) for c in o.bound_box]
+    return (
+        min(p.x for p in pts),
+        min(p.y for p in pts),
+        max(p.x for p in pts),
+        max(p.y for p in pts),
+    )
+
+
+def trocar_nome(objs, novo: str, idioma: str, cena, cam) -> tuple[float, float, float, float]:
+    """D-219: troca o estêncil (a câmera já foi feita com o nome em português, para o quadro ser o
+    mesmo) e devolve a região que cobre o nome velho e o novo."""
+    est = next(o for o in objs if o.type == "FONT")
+    a = caixa_na_tela(est, cena, cam)
+    est.data.body = novo
+    if idioma == "vi":
+        est.data.font = bpy.data.fonts.load(str(FONTE_VI), check_existing=True)
+        est.data.size *= 0.9  # a Arial é mais larga e o acento sobe
+    bpy.context.view_layer.update()
+    if est.dimensions.x > LARGURA_NOME:
+        est.data.size *= LARGURA_NOME / est.dimensions.x
+    b = caixa_na_tela(est, cena, cam)
+    folga = 0.022
+    return (
+        max(0.0, min(a[0], b[0]) - folga),
+        max(0.0, min(a[1], b[1]) - folga),
+        min(1.0, max(a[2], b[2]) + folga),
+        min(1.0, max(a[3], b[3]) + folga),
+    )
+
+
+def ler_png(caminho: Path):
+    import numpy as np
+
+    im = bpy.data.images.load(str(caminho))
+    w, h = im.size
+    px = np.empty(w * h * 4, np.float32)
+    im.pixels.foreach_get(px)
+    bpy.data.images.remove(im)
+    return px.reshape(h, w, 4), w, h
+
+
+def colar_regiao(base: Path, regiao: Path, saida: Path, r, borda: int = 10):
+    """D-219: põe a região nova sobre a imagem em português, com a emenda suave nas bordas."""
+    import numpy as np
+
+    a, w, h = ler_png(base)
+    b, w2, h2 = ler_png(regiao)
+    if (w, h) != (w2, h2):
+        raise SystemExit(f"tamanhos diferentes: {base.name} {w}x{h}, região {w2}x{h2}")
+    x0, y0, x1, y1 = r[0] * w, r[1] * h, r[2] * w, r[3] * h
+    xs = np.minimum(np.arange(w) + 0.5 - x0, x1 - np.arange(w) - 0.5) / borda
+    ys = np.minimum(np.arange(h) + 0.5 - y0, y1 - np.arange(h) - 0.5) / borda
+    mx, my = np.clip(xs, 0, 1), np.clip(ys, 0, 1)
+    m = (mx * mx * (3 - 2 * mx))[None, :] * (my * my * (3 - 2 * my))[:, None]
+    saida_px = a * (1 - m[..., None]) + b * m[..., None]
+    im = bpy.data.images.new(saida.stem, w, h, alpha=True)
+    im.pixels.foreach_set(saida_px.astype(np.float32).ravel())
+    im.filepath_raw = str(saida)
+    im.file_format = "PNG"
+    im.save()
+    bpy.data.images.remove(im)
+
+
+def render(
+    chave: str,
+    amostras: int,
+    teste: bool,
+    camada: str | None = None,
+    idioma: str | None = None,
+):
     spec = CAIXAS[chave]
     C.cena_vazia()
     cena = bpy.context.scene
@@ -658,6 +779,7 @@ def render(chave: str, amostras: int, teste: bool, camada: str | None = None):
     cam, centro, raio = L.camera_para(
         objs, lado, lado, direcao=(-0.62, -1.0, 0.55), lente=55.0, folga=1.18
     )
+    regiao = trocar_nome(objs, NOMES[idioma][chave], idioma, cena, cam) if idioma else None
     L.estudio(centro, raio)
     # contraluz na cor da caixa (o brilho de cima da tampa) e o halo atrás
     r = raio
@@ -675,6 +797,20 @@ def render(chave: str, amostras: int, teste: bool, camada: str | None = None):
         abrir(spec, objs, camada, centro, raio)
     SAIDA.mkdir(parents=True, exist_ok=True)
     nome = ("teste_" if teste else "") + chave + (f"_{camada}" if camada else "") + ".png"
+    if regiao:
+        # D-219: renderiza só a faixa do nome e cola sobre a imagem em português
+        cena.render.use_border = True
+        cena.render.use_crop_to_border = False
+        cena.render.border_min_x, cena.render.border_min_y = regiao[0], regiao[1]
+        cena.render.border_max_x, cena.render.border_max_y = regiao[2], regiao[3]
+        tmp = SAIDA / f"_regiao_{chave}_{idioma}.png"
+        cena.render.filepath = str(tmp)
+        bpy.ops.render.render(write_still=True)
+        final = SAIDA / f"{Path(nome).stem}_{idioma}.png"
+        colar_regiao(SAIDA / nome, tmp, final, regiao)
+        tmp.unlink()
+        log("ok", final.name)
+        return
     cena.render.filepath = str(SAIDA / nome)
     bpy.ops.render.render(write_still=True)
     if camada == "corpo":
@@ -697,6 +833,18 @@ def principal():
         for k in chaves:
             topo_suave(SAIDA / f"{k}_corpo.png")
             log("topo", k)
+        return
+    # --idiomas [en|es|vi]: o nome em outra língua, na fechada e no corpo aberto (a tampa não tem)
+    if "--idiomas" in args:
+        i = args.index("--idiomas")
+        so = args[i + 1] if i + 1 < len(args) and args[i + 1] in NOMES else None
+        for idioma in [so] if so else list(NOMES):
+            for k in chaves:
+                if NOMES[idioma][k] == CAIXAS[k]["nome"]:
+                    log("igual ao português", k, idioma)
+                    continue
+                for camada in (None, "corpo"):
+                    render(k, amostras, False, camada, idioma)
         return
     for k in chaves:
         for camada in camadas:

@@ -60,6 +60,27 @@ local top = label(0, 32, F.TITLE_MED, 26, V.KHAKI)
 local num = label(30, 120, F.TITLE, 110, V.TEXT)
 local sub = label(156, 30, F.BODY, 22, V.TEXT)
 
+-- D-216 (dono: "os textos no celular estão horriveis tudo em cima do outro"): na tela baixa do celular
+-- a contagem sobe e encolhe, para a frase de baixo não cair em cima do cartão da arma
+local function encaixa()
+	local cam = workspace.CurrentCamera
+	local baixa = cam ~= nil and cam.ViewportSize.Y < 620
+	box.Position = UDim2.new(0.5, 0, 0, if baixa then 104 else 120)
+	box.Size = UDim2.fromOffset(520, if baixa then 124 else 210)
+	top.Size = UDim2.new(1, 0, 0, if baixa then 22 else 32)
+	top.TextSize = UiKit.text(if baixa then 18 else 26)
+	num.Position = UDim2.fromOffset(0, if baixa then 20 else 30)
+	num.Size = UDim2.new(1, 0, 0, if baixa then 74 else 120)
+	num.TextSize = UiKit.text(if baixa then 66 else 110)
+	sub.Position = UDim2.fromOffset(0, if baixa then 96 else 156)
+	sub.Size = UDim2.new(1, 0, 0, if baixa then 24 else 30)
+	sub.TextSize = UiKit.text(if baixa then 15 else 22)
+end
+encaixa()
+if workspace.CurrentCamera then
+	workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(encaixa)
+end
+
 local shown = -1
 local goUntil = 0
 local lastPrep = 0

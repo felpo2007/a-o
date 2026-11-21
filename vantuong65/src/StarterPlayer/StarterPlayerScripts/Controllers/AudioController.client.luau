@@ -23,6 +23,7 @@ local ExplosaoEfeito = require(ReplicatedStorage.Shared.ExplosaoEfeito)
 local MapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any
 local Net = require(ReplicatedStorage.Shared.Net)
 local SomArmas = require(ReplicatedStorage.Shared.SomArmas)
+local SomGravacoes = require(ReplicatedStorage.Shared.SomGravacoes)
 local Superficie = require(ReplicatedStorage.Shared.Superficie)
 local Weapons = require(ReplicatedStorage.Shared.Weapons)
 local Weather = require(ReplicatedStorage.Shared.Weather)
@@ -540,8 +541,9 @@ local function ownShot(weaponId: string?)
 	})
 	if now - lastTail > 0.12 then
 		lastTail = now
+		-- D-220: a gravação já traz a cauda dela; a sintética só dá o lugar (mata, vila, túnel)
 		Som.kit("kit_caudas", SomArmas.cauda(a.familia, lugar, variacao("cauda", SomArmas.CAUDAS)), {
-			vol = 0.9,
+			vol = if SomGravacoes.temCauda(a.kit) then 0.3 else 0.9,
 			grupo = "tiros",
 			vaga = "cauda_propria",
 			vagas = SomArmas.CAUDA_VAGAS_PROPRIO,
@@ -671,7 +673,7 @@ Net.unreliable("Combat_Tracer").OnClientEvent:Connect(function(shot)
 			grupo = "tiros",
 		})
 		Som.kit("kit_caudas", SomArmas.cauda(a.familia, lugar, variacao("cauda_outros", SomArmas.CAUDAS)), {
-			vol = 0.75 * near,
+			vol = (if SomGravacoes.temCauda(a.kit) then 0.3 else 0.75) * near,
 			delay = delay,
 			grupo = "tiros",
 			vaga = "cauda_outros",

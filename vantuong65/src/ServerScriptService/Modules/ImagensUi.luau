@@ -19,6 +19,10 @@ ImagensUi.KEYS = { "caveira_abate", "bandeira_eua", "bandeira_frente", "rotor_bo
 for _, nome in { "brilho", "faisca", "raio", "anel", "cintila" } do
 	table.insert(ImagensUi.KEYS, "efeito_" .. nome)
 end
+-- D-217: a imagem da entrada ARMÁRIO do lobby (Controllers/MenuPrincipal: "Img_menu_armario")
+table.insert(ImagensUi.KEYS, "menu_armario")
+-- D-221: o cenário do pódio (Controllers/CenaComemoracao: "Img_podio_fundo")
+table.insert(ImagensUi.KEYS, "podio_fundo")
 
 local function imageOf(decalId: number): number?
 	local ok, model = pcall(function()
@@ -60,12 +64,23 @@ end
 -- D-212: as imagens das caixas da loja ("ImgCaixa_<id>"), uma de cada vez (o InsertService limita
 -- pedidos em rajada). Sem o atributo, o cliente mostra o caixote 3D de antes. D-213: também as duas
 -- camadas da caixa aberta ("ImgCaixa_<id>_corpo" e "_tampa"), as chaves com "_" do mesmo grupo.
+-- D-219: e o nome em outra língua ("<id>_en", "<id>_corpo_en"...; a tampa não tem nome).
+function ImagensUi.passoDaCaixa(id: string): number
+	if not string.find(id, "_", 1, true) then
+		return 1 -- a fechada em português
+	end
+	if string.find(id, "_corpo", 1, true) or string.find(id, "_tampa", 1, true) then
+		return 3 -- as camadas da abertura
+	end
+	return 2 -- a fechada em outra língua
+end
+
 function ImagensUi.caixas()
 	task.spawn(function()
-		-- primeiro as fechadas (a vitrine), depois as camadas da abertura
-		for _, camadas in { false, true } do
+		-- primeiro as fechadas (a vitrine), depois as outras línguas e as camadas da abertura
+		for _, passo in { 1, 2, 3 } do
 			for id, d in AssetIds.CaixaLoja or {} do
-				if (string.find(id, "_", 1, true) ~= nil) ~= camadas then
+				if ImagensUi.passoDaCaixa(id) ~= passo then
 					continue
 				end
 				if type(d) == "number" and d ~= 0 then
@@ -83,9 +98,27 @@ function ImagensUi.caixas()
 	end)
 end
 
+-- D-218: as insígnias dos emblemas ("ImgEmblema_<id>"), uma de cada vez. Sem o atributo, o cliente
+-- mostra a sigla de antes (Controllers/EmblemaImagem).
+function ImagensUi.emblemas()
+	task.spawn(function()
+		for id, d in AssetIds.Emblemas or {} do
+			if type(d) == "number" and d ~= 0 then
+				local img = imageOf(d)
+				if img and img ~= 0 then
+					ReplicatedStorage:SetAttribute("ImgEmblema_" .. id, img)
+				else
+					warn(string.format("[VT65] imagem do emblema %s: o decal %d não abriu; fica a sigla", id, d))
+				end
+			end
+		end
+	end)
+end
+
 function ImagensUi.start()
 	ImagensUi.moldes()
 	ImagensUi.caixas()
+	ImagensUi.emblemas()
 	local images = AssetIds.Images or {}
 	for _, k in ImagensUi.KEYS do
 		local d = images[k]

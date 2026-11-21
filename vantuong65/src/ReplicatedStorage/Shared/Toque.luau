@@ -118,7 +118,7 @@ Toque.BUTTONS = {
 		glyph = "ITEM",
 		label = "Último item / roda de equipamento",
 		mm = 10,
-		show = "foot",
+		show = "foot_livre", -- D-216: mirando, o lugar é do inclinar (como o LB no controle)
 	},
 	{
 		id = "comm",
@@ -195,7 +195,8 @@ Toque.BUTTONS = {
 		mm = 13.5,
 		show = "slot",
 	},
-	-- opcionais (desligados no padrão; o editor liga): o inclinar é sozinho na quina (ToqueAuto)
+	-- D-216 (dono: "não consigo inclinar a mira"): ligados no padrão, à vista só mirando (show "aim"); o
+	-- editor pode desligar. Na quina o ToqueAuto continua inclinando sozinho.
 	{
 		id = "lean_l",
 		spec = "lean_left",
@@ -203,7 +204,7 @@ Toque.BUTTONS = {
 		glyph = "◄",
 		label = "Inclinar à esquerda",
 		mm = 9,
-		show = "foot",
+		show = "aim",
 		optional = true,
 	},
 	{
@@ -213,7 +214,7 @@ Toque.BUTTONS = {
 		glyph = "►",
 		label = "Inclinar à direita",
 		mm = 9,
-		show = "foot",
+		show = "aim",
 		optional = true,
 	},
 	{
@@ -262,8 +263,10 @@ local TWO: { [string]: Pos } = {
 	bandage = { x = 0.05, y = 0.68 },
 	radio = { x = 0.90, y = 0.09 },
 	interact = { x = 0.61, y = 0.52 },
-	lean_l = { x = 0.30, y = 0.64, on = false },
-	lean_r = { x = 0.40, y = 0.64, on = false },
+	-- D-216: mirando, o ITEM some e o inclinar fica ao alcance do polegar direito (procura em todas as
+	-- telas e layouts do teste: à esquerda do polegar, só estes lugares não cobrem botão nem zona)
+	lean_l = { x = 0.53, y = 0.70, on = true },
+	lean_r = { x = 0.72, y = 0.65, on = true },
 	give_up = { x = 0.855, y = 0.68 }, -- só caído (o tiro some)
 }
 -- 3 dedos: o indicador esquerdo atira no alto à esquerda
@@ -408,6 +411,10 @@ function Toque.visible(d: Def, c: Ctx): boolean
 		return (foot or c.vehicle) and not c.downed
 	elseif s == "foot" then
 		return foot
+	elseif s == "aim" then
+		return foot and c.aiming -- D-216: inclinar, só mirando
+	elseif s == "foot_livre" then
+		return foot and not c.aiming -- D-216: o ITEM, fora da mira
 	elseif s == "game" then
 		return foot or c.vehicle or c.downed
 	elseif s == "talk" then

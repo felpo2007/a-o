@@ -13,11 +13,14 @@ local SoundService = game:GetService("SoundService")
 local TweenService = game:GetService("TweenService")
 
 local AssetIds = require(ReplicatedStorage.Shared.AssetIds) :: any
+local SomGravacoes = require(ReplicatedStorage.Shared.SomGravacoes)
 local SomKits = require(ReplicatedStorage.Shared.SomKits)
 
 local Som = {}
 
 local failed: { [string]: boolean } = {}
+-- D-220: gravação que não carregou: o trecho do kit toca no lugar dela
+local gravacaoFalhou: { [number]: boolean } = {}
 task.spawn(function()
 	local sounds: { Sound } = {}
 	local byId: { [string]: string } = {}
@@ -32,10 +35,23 @@ task.spawn(function()
 			failed[kit] = true
 		end
 	end
+	local gravacoes: { [string]: number } = {}
+	for _, id in SomGravacoes.ids() do
+		local s = Instance.new("Sound")
+		s.SoundId = "rbxassetid://" .. id
+		table.insert(sounds, s)
+		gravacoes[tostring(id)] = id
+	end
 	pcall(function()
 		ContentProvider:PreloadAsync(sounds, function(content: string, status: Enum.AssetFetchStatus)
 			if status ~= Enum.AssetFetchStatus.Success then
-				local kit = byId[string.match(content, "(%d+)$") or ""]
+				local chave = string.match(content, "(%d+)$") or ""
+				local g = gravacoes[chave]
+				if g and not gravacaoFalhou[g] then
+					gravacaoFalhou[g] = true
+					warn(string.format("[VT65 SOM] gravação sem carregar: %d; fica o som do kit", g))
+				end
+				local kit = byId[chave]
 				if kit and not failed[kit] then
 					failed[kit] = true
 					warn("[VT65 SOM] kit sem carregar: " .. kit)
@@ -87,18 +103,28 @@ end
 local function go(kit: string, trecho: string, o: Opts)
 	local k = SomKits[kit]
 	local seg = k and k.seg[trecho]
-	local id = AssetIds.Sounds[kit]
-	if not seg or failed[kit] or type(id) ~= "number" or id == 0 then
+	local idKit = AssetIds.Sounds[kit]
+	-- D-220: a gravação real, quando há; se ela não carregou, o trecho do kit
+	local g = SomGravacoes.de(kit, trecho)
+	if g and gravacaoFalhou[g.id] then
+		g = nil
+	end
+	local inicio: number, dur: number, id: number
+	if g then
+		inicio, dur, id = g.ini, g.dur, g.id
+	elseif seg and not failed[kit] and type(idKit) == "number" and idKit ~= 0 then
+		inicio, dur, id = seg[1], seg[2], idKit
+	else
 		return
 	end
 	local s = Instance.new("Sound")
 	s.Name = "VT65_" .. trecho
 	s.SoundId = "rbxassetid://" .. id
-	s.Volume = o.vol or 1
-	s.PlaybackSpeed = o.pitch or 1
+	s.Volume = (o.vol or 1) * (if g then SomGravacoes.volume(g) else 1)
+	s.PlaybackSpeed = (o.pitch or 1) * (if g then g.tom or 1 else 1)
 	s.SoundGroup = group(o.grupo or "efeitos")
 	s.PlaybackRegionsEnabled = true
-	s.PlaybackRegion = NumberRange.new(seg[1], seg[1] + seg[2])
+	s.PlaybackRegion = NumberRange.new(inicio, inicio + dur)
 	if o.low or o.mid or o.high then
 		local eq = Instance.new("EqualizerSoundEffect")
 		eq.LowGain, eq.MidGain, eq.HighGain = o.low or 0, o.mid or 0, o.high or 0
@@ -117,7 +143,14 @@ local function go(kit: string, trecho: string, o: Opts)
 		holder = a
 	end
 	s.Parent = holder
+	-- D-220: o tiro gravado tem cauda: na rajada, poucas vozes por arma (a mais velha apaga em 80 ms)
 	local v = o.vaga
+	local quantas = o.vagas or 2
+	if g and not v then
+		local proprio = string.sub(trecho, 1, 1) == "p"
+		v = string.format("gravacao_%s_%s", kit, if proprio then "p" else "e")
+		quantas = if proprio then 3 else 5
+	end
 	if v then
 		local lista = vagas[v] or {}
 		vagas[v] = lista
@@ -126,13 +159,22 @@ local function go(kit: string, trecho: string, o: Opts)
 				table.remove(lista, i)
 			end
 		end
-		while #lista >= (o.vagas or 2) do
+		while #lista >= quantas do
 			apaga(table.remove(lista, 1) :: Sound)
 		end
 		table.insert(lista, s)
 	end
 	s:Play()
-	local life = seg[2] / math.max(s.PlaybackSpeed, 0.1) + 0.3
+	local tocando = dur / math.max(s.PlaybackSpeed, 0.1)
+	if g then
+		-- o recorte pode acabar no meio do som (antes do tiro seguinte da rajada): sai sem estalo
+		task.delay(math.max(0, tocando - 0.035), function()
+			if s.Parent then
+				TweenService:Create(s, TweenInfo.new(0.03, Enum.EasingStyle.Linear), { Volume = 0 }):Play()
+			end
+		end)
+	end
+	local life = tocando + 0.3
 	task.delay(life, function()
 		s:Destroy()
 		if att then

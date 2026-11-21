@@ -799,8 +799,13 @@ test("tela enxuta: fixos só os do uso o tempo todo; o resto some, vira contextu
 	assert(Toque.specHas(Toque.BY_ID.comm.spec :: string, "comm_wheel"), "segurar abre a roda")
 	local rp = Toque.parseSpec(Toque.BY_ID.radio.spec :: string)
 	assert(rp[1].id == "radio_channel" and rp[1].kind == "tap" and rp[2].id == "radio_talk" and rp[2].kind == "hold")
-	-- inclinar: opcional (desligado; o automático inclina na quina), o editor liga
-	assert(Toque.BY_ID.lean_l.optional and not slots.lean_l.on and not slots.lean_r.on)
+	-- D-216 (dono: "não consigo inclinar a mira"): inclinar ligado, à vista só mirando; o ITEM cede o lugar
+	assert(Toque.BY_ID.lean_l.optional and slots.lean_l.on and slots.lean_r.on)
+	local semMira = { foot = true, vehicle = false, downed = false, aiming = false, voice = false }
+	local mirando = { foot = true, vehicle = false, downed = false, aiming = true, voice = false }
+	assert(Toque.visible(Toque.BY_ID.lean_l, mirando) and Toque.visible(Toque.BY_ID.lean_r, mirando))
+	assert(not Toque.visible(Toque.BY_ID.lean_l, semMira) and not Toque.visible(Toque.BY_ID.lean_r, semMira))
+	assert(Toque.visible(Toque.BY_ID.equip, semMira) and not Toque.visible(Toque.BY_ID.equip, mirando))
 	-- contextuais: cada um só com o seu motivo
 	local function with(k: string, v: boolean, aiming: boolean?): Toque.Ctx
 		local c = table.clone(calm) :: any

@@ -146,6 +146,23 @@ end)
 Input.on("lean_right", "release", function()
 	leanRelease(1)
 end)
+-- D-216: mirando, o R3 passa o lado (antes caía na faca da camada de baixo)
+Input.on("lean_cycle", "press", function()
+	lean(InputMap.leanCycle(Input.state.lean))
+end)
+-- D-216 (só no Studio): workspace "VT65DevInclinar" = "ciclo" (o R3), "esquerda" ou "direita" (Q e E)
+if game:GetService("RunService"):IsStudio() then
+	workspace:GetAttributeChangedSignal("VT65DevInclinar"):Connect(function()
+		local v = workspace:GetAttribute("VT65DevInclinar")
+		if v == "ciclo" then
+			lean(InputMap.leanCycle(Input.state.lean))
+		elseif v == "esquerda" then
+			leanPress(-1)
+		elseif v == "direita" then
+			leanPress(1)
+		end
+	end)
+end
 
 -- ===== interagir (X segurado / F): ProximityPrompt do mundo =====
 -- Os prompts do jogo têm segurar de 2 a 8 s e usam X no controle (padrão do Roblox): o toque curto

@@ -12,7 +12,8 @@
 -- A mão direita segura a arma da partida (soldada nela), então os gestos de mão livre usam a esquerda.
 local Comemoracao = {}
 
-export type Pose = { juntas: { [string]: { number } }, sobe: number }
+-- gira: D-221, o corpo inteiro girando no lugar (graus, 0 a 360)
+export type Pose = { juntas: { [string]: { number } }, sobe: number, gira: number? }
 
 Comemoracao.JUNTAS = {
 	"Waist",
@@ -61,8 +62,96 @@ local function pernas(j: { [string]: { number } }, dobra: number)
 	end
 end
 
+-- ===== D-221 (dono: "essa comemoração esta horrosa sem trabalho nenhum sem animações fodas"): gestos
+-- por poses-chave, com preparação, explosão, pouso e pausa, em vez de um seno só =====
+type Chave = { t: number, j: { [string]: { number } }, dobra: number, sobe: number? }
+
+local function suave(u: number): number
+	local x = math.clamp(u, 0, 1)
+	return x * x * (3 - 2 * x)
+end
+
+-- A pose no instante t de uma trilha em laço (a última chave é igual à primeira)
+local function trilha(chaves: { Chave }, t: number): Pose
+	local tt = t % chaves[#chaves].t
+	local a, b = chaves[1], chaves[2]
+	for i = 1, #chaves - 1 do
+		if tt >= chaves[i].t and tt < chaves[i + 1].t then
+			a, b = chaves[i], chaves[i + 1]
+			break
+		end
+	end
+	local k = suave((tt - a.t) / (b.t - a.t))
+	local j: { [string]: { number } } = { RightWrist = { 0, 0, 0 }, LeftWrist = { 0, 0, 0 } }
+	for nome, pa in a.j do
+		local pb = b.j[nome] or pa
+		j[nome] = { pa[1] + (pb[1] - pa[1]) * k, pa[2] + (pb[2] - pa[2]) * k, pa[3] + (pb[3] - pa[3]) * k }
+	end
+	pernas(j, a.dobra + (b.dobra - a.dobra) * k)
+	local sa, sb = a.sobe or 0, b.sobe or 0
+	return { juntas = j, sobe = sa + (sb - sa) * k }
+end
+
+local function corpo(rs, re, ls, le, w, n): { [string]: { number } }
+	return {
+		RightShoulder = rs,
+		RightElbow = { re, 0, 0 },
+		LeftShoulder = ls,
+		LeftElbow = { le, 0, 0 },
+		Waist = { w, 0, 0 },
+		Neck = { n, 0, 0 },
+	}
+end
+
+-- agacha, explode para o alto com o fuzil, pousa dobrando as pernas e sacode o punho
+local SALTO: { Chave } = {
+	{ t = 0, j = corpo({ 40, 0, 10 }, 60, { 30, 0, -10 }, 50, 6, 0), dobra = 8 },
+	{ t = 0.42, j = corpo({ 5, 0, 14 }, 40, { -8, 0, -16 }, 35, 16, -6), dobra = 34, sobe = -0.2 },
+	{ t = 0.84, j = corpo({ 172, 0, 10 }, 8, { 160, 0, -16 }, 14, -14, 22), dobra = 6, sobe = 1.7 },
+	{ t = 1.26, j = corpo({ 150, 0, 12 }, 22, { 140, 0, -14 }, 30, 10, 8), dobra = 30, sobe = -0.15 },
+	{ t = 1.72, j = corpo({ 175, 0, 8 }, 6, { 112, 0, -12 }, 84, -6, 16), dobra = 4 },
+	{ t = 2.2, j = corpo({ 168, 0, 8 }, 12, { 160, 0, -12 }, 22, -10, 20), dobra = 2 },
+	{ t = 2.6, j = corpo({ 40, 0, 10 }, 60, { 30, 0, -10 }, 50, 6, 0), dobra = 8 },
+}
+
+-- abre os braços, dá uma volta inteira no ar e crava a pose com o fuzil no alto
+local GIRO: { Chave } = {
+	{ t = 0, j = corpo({ 60, 0, 10 }, 50, { 50, 0, -10 }, 50, 4, 0), dobra = 14 },
+	{ t = 0.3, j = corpo({ 30, 0, 60 }, 20, { 30, 0, -60 }, 20, 8, -4), dobra = 26, sobe = -0.1 },
+	{ t = 0.8, j = corpo({ 20, 0, 95 }, 8, { 20, 0, -95 }, 8, -4, 8), dobra = 6, sobe = 0.9 },
+	{ t = 1.4, j = corpo({ 170, 0, 10 }, 6, { 140, 0, -30 }, 20, -12, 20), dobra = 22, sobe = -0.1 },
+	{ t = 2.1, j = corpo({ 174, 0, 8 }, 6, { 146, 0, -26 }, 18, -14, 22), dobra = 6 },
+	{ t = 3.0, j = corpo({ 60, 0, 10 }, 50, { 50, 0, -10 }, 50, 4, 0), dobra = 14 },
+}
+
+-- encolhe com os punhos fechados e abre o peito num rugido para o céu
+local RUGIDO: { Chave } = {
+	{ t = 0, j = corpo({ 70, 0, 70 }, 125, { 70, 0, -70 }, 125, 8, -4), dobra = 16 },
+	{ t = 0.6, j = corpo({ 40, 0, 40 }, 140, { 40, 0, -40 }, 140, 18, -12), dobra = 26 },
+	{ t = 1.1, j = corpo({ 100, 0, 100 }, 110, { 100, 0, -100 }, 110, -16, 26), dobra = 10, sobe = 0.25 },
+	{ t = 1.9, j = corpo({ 104, 0, 104 }, 104, { 104, 0, -104 }, 104, -18, 28), dobra = 8, sobe = 0.05 },
+	{ t = 2.8, j = corpo({ 70, 0, 70 }, 125, { 70, 0, -70 }, 125, 8, -4), dobra = 16 },
+}
+
 -- Cada gesto: t em segundos desde o começo dele.
 Comemoracao.GESTOS = {
+	salto_heroi = function(t: number): Pose
+		return trilha(SALTO, t)
+	end,
+	giro_triunfo = function(t: number): Pose
+		local p = trilha(GIRO, t)
+		-- a volta acontece no ar, entre a preparação e a pose (em 360 volta a ser 0)
+		p.gira = (360 * suave(((t % 3.0) - 0.3) / 1.05)) % 360
+		return p
+	end,
+	rugido = function(t: number): Pose
+		local p = trilha(RUGIDO, t)
+		-- o tremor do corpo no auge do grito
+		local forca = suave(((t % 2.8) - 1.0) / 0.2) * (1 - suave(((t % 2.8) - 1.9) / 0.3))
+		p.juntas.Waist[2] = 3 * forca * sen(3.2, t)
+		p.juntas.Neck[2] = 4 * forca * sen(3.2, t, 1)
+		return p
+	end,
 	-- a arma levantada no alto com a direita, a esquerda em punho junto, pulinhos
 	fuzil_alto = function(t: number): Pose
 		local s = (sen(1.6, t) + 1) / 2
@@ -217,9 +306,9 @@ Comemoracao.GESTOS = {
 -- Sequência de cada lugar (gesto, segundos), em laço. Cada lugar começa num gesto diferente e com o
 -- relógio adiantado, para os três não mexerem juntos.
 Comemoracao.SEQ = {
-	[1] = { { "fuzil_alto", 4.0 }, { "vitoria", 3.0 }, { "fuzil_alto", 3.5 }, { "aceno", 2.5 } },
-	[2] = { { "punho", 3.2 }, { "aceno", 3.0 }, { "vitoria", 2.4 } },
-	[3] = { { "aceno", 2.8 }, { "punho", 3.0 }, { "fuzil_alto", 3.0 } },
+	[1] = { { "salto_heroi", 2.6 }, { "fuzil_alto", 2.6 }, { "giro_triunfo", 3.0 }, { "vitoria", 2.4 } },
+	[2] = { { "punho", 3.2 }, { "rugido", 2.8 }, { "vitoria", 2.4 } },
+	[3] = { { "aceno", 2.8 }, { "salto_heroi", 2.6 }, { "punho", 3.0 } },
 } :: { [number]: { { any } } }
 Comemoracao.ATRASO = { [1] = 0, [2] = 0.8, [3] = 1.6 } :: { [number]: number }
 Comemoracao.MISTURA_S = 0.6 -- passagem de um gesto ao outro (em 0,45 s o braço dava 11,7° num quadro)
@@ -264,7 +353,10 @@ local function mistura(a: Pose, b: Pose, k: number): Pose
 			pa[3] + (pb[3] - pa[3]) * k,
 		}
 	end
-	return { juntas = j, sobe = a.sobe + (b.sobe - a.sobe) * k }
+	-- D-221: o giro vai pelo caminho mais curto (359° e 1° estão a 2° um do outro)
+	local ga, gb = a.gira or 0, b.gira or 0
+	local dg = ((gb - ga + 180) % 360) - 180
+	return { juntas = j, sobe = a.sobe + (b.sobe - a.sobe) * k, gira = (ga + dg * k) % 360 }
 end
 
 -- A pose de uma sequência em laço no instante t: o gesto da vez, saindo do anterior nos primeiros
@@ -300,8 +392,8 @@ Comemoracao.CATALOGO = {
 	{
 		id = "padrao",
 		nome = "Vitória",
-		desc = "O fuzil no alto e os braços em V.",
-		seq = { { "fuzil_alto", 3.5 }, { "vitoria", 3.0 } },
+		desc = "O salto com o fuzil no alto e a volta no ar.",
+		seq = { { "salto_heroi", 2.6 }, { "giro_triunfo", 3.0 }, { "vitoria", 2.4 } },
 		gratis = true,
 	},
 	{
@@ -314,8 +406,8 @@ Comemoracao.CATALOGO = {
 	{
 		id = "grito_guerra",
 		nome = "Grito de guerra",
-		desc = "O punho batendo no peito e os braços no alto.",
-		seq = { { "grito", 4.8 } },
+		desc = "O punho batendo no peito e o rugido para o céu.",
+		seq = { { "grito", 4.8 }, { "rugido", 2.8 } },
 		gratis = false,
 	},
 	{
@@ -374,8 +466,9 @@ end
 -- caixotes um depois do outro; a câmera mostra os três e depois vai até o 1º, que faz a comemoração
 -- dele (a dos outros dois continua nos gestos de sempre).
 Comemoracao.PODIO = {
-	entrada = { [1] = 0.85, [2] = 0.45, [3] = 0.15 } :: { [number]: number },
-	queda = 0.4, -- s do alto até o tampo
+	-- D-221: um de cada vez, com tempo para o impacto de cada pouso aparecer
+	entrada = { [1] = 1.7, [2] = 1.05, [3] = 0.4 } :: { [number]: number },
+	queda = 0.38, -- s do alto até o tampo
 	zoom = 4.2, -- a câmera começa a ir até o 1º
 	perto = 5.6, -- e chega
 	mvp = 5.0, -- o 1º começa a comemoração dele (no meio da ida)
@@ -398,11 +491,37 @@ function Comemoracao.entrada(lugar: number, t: number): (boolean, number)
 	return true, 0.35 * math.max(0, math.sin(b * 12)) * math.exp(-b * 6)
 end
 
+-- D-221: quanto o soldado está amortecendo o pouso (0 a 1): as pernas já vêm dobrando na queda, chegam
+-- ao máximo ao tocar o tampo e voltam em cerca de 0,6 s.
+function Comemoracao.pouso(lugar: number, t: number): number
+	local P = Comemoracao.PODIO
+	local t0 = P.entrada[lugar] or 0
+	if t < t0 then
+		return 0
+	end
+	local u = (t - t0) / P.queda
+	if u < 1 then
+		return suave(u)
+	end
+	return math.exp(-(t - t0 - P.queda) * 7)
+end
+
 -- A pose do lugar no pódio: os gestos de sempre; o 1º, a partir de PODIO.mvp, a comemoração `comId`
 -- (saindo do gesto de antes na curva suave).
 function Comemoracao.poseNoPodio(lugar: number, t: number, comId: any): Pose
 	local base = Comemoracao.quadro(lugar, t)
 	local P = Comemoracao.PODIO
+	-- D-221: o pouso soma nas pernas e na cintura, por cima do gesto da vez
+	local amortece = Comemoracao.pouso(lugar, t)
+	if amortece > 0.002 then
+		for _, lado in { "Left", "Right" } do
+			local h, k, a = base.juntas[lado .. "Hip"], base.juntas[lado .. "Knee"], base.juntas[lado .. "Ankle"]
+			h[1] = math.clamp(h[1] + 26 * amortece, -60, 60)
+			k[1] = math.clamp(k[1] - 52 * amortece, -120, 0)
+			a[1] = math.clamp(a[1] + 26 * amortece, -60, 60)
+		end
+		base.juntas.Waist[1] = math.clamp(base.juntas.Waist[1] + 9 * amortece, -25, 25)
+	end
 	if lugar ~= 1 or t < P.mvp then
 		return base
 	end
@@ -432,26 +551,28 @@ function Comemoracao.camera(t: number, solo: boolean?): Camera
 	local P = Comemoracao.PODIO
 	local aberta: Camera = {
 		ax = 0,
-		ay = 8.6,
+		-- D-221: a cena ocupa a tela inteira, com o título em cima e os cartões embaixo
+		ay = 7.6,
 		az = -1,
-		dist = 31 - 2 * math.min(1, t / 12),
-		alto = 10.5,
+		dist = 38 - 2.5 * math.min(1, t / 12),
+		-- D-221: começa baixa e de lado (os soldados caem contra o céu) e sobe até mostrar os três
+		alto = 5.6 + 5.4 * suave(t / 2.4),
 		fov = 34,
-		giro = 6 * math.sin(TAU * t / 11),
+		giro = -16 * (1 - suave(t / 2.8)) + 6 * math.sin(TAU * t / 11),
 	}
 	if t <= P.zoom then
 		return aberta
 	end
-	-- a 16 studs com 30°: ~8,6 studs na vertical, das coxas até acima da cabeça (a 13, na faixa larga
-	-- do palco, os braços erguidos cortavam)
+	-- a 20 studs com 30°: ~10,7 studs na vertical, dos joelhos até os braços erguidos
 	local perto: Camera = {
 		ax = 0,
-		ay = L1.alto + 5.0,
+		ay = L1.alto + 5.4,
 		az = 0,
-		dist = 16,
-		alto = L1.alto + 5.8,
+		dist = 20,
+		-- D-221: de baixo para cima, o ângulo de herói, dando a volta devagar
+		alto = L1.alto + 4.4,
 		fov = 30,
-		giro = 10 * math.sin(TAU * (t - P.zoom) / 9),
+		giro = 18 * math.sin(TAU * (t - P.zoom) / 9),
 	}
 	local u = math.clamp((t - P.zoom) / (P.perto - P.zoom), 0, 1)
 	local k = u * u * u * (u * (u * 6 - 15) + 10)

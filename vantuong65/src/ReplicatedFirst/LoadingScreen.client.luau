@@ -59,6 +59,7 @@ end)
 local Acabamento = require(script.Parent:WaitForChild("Acabamento"))
 local Cortina = require(script.Parent:WaitForChild("Cortina"))
 local Idioma = require(script.Parent:WaitForChild("Idioma"))
+require(script.Parent:WaitForChild("TextoCabe")).iniciar() -- D-216: nenhum texto passa da caixa
 
 local player = Players.LocalPlayer
 

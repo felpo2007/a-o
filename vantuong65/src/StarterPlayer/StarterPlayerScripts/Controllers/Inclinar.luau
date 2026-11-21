@@ -39,19 +39,10 @@ export type State = {
 local S: State = { lean = 0, roll = 0, room = 1, left = false, right = false, sent = 0, sentAt = -10 }
 Inclinar.state = S
 
--- teclas seguradas (as duas camadas, teclado e controle, chamam o mesmo id)
-Input.on("lean_left", "press", function()
-	S.left = true
-end)
-Input.on("lean_left", "release", function()
-	S.left = false
-end)
-Input.on("lean_right", "press", function()
-	S.right = true
-end)
-Input.on("lean_right", "release", function()
-	S.right = false
-end)
+-- D-216 (dono: "não consigo inclinar a mira"): o lado vem do Input.state.lean, que o InfantryController
+-- mantém (alterna, ou segura com "segurar" nas Configurações e no toque). Antes este módulo lia só a
+-- tecla apertada: desde a D-189 o aperto alternava o estado, mas a câmera voltava ao soltar o botão.
+-- S.left e S.right ficam só para o gancho do Studio (VT65DevLean).
 -- menu, mapa, morte, veículo: a máquina de estados cancela o inclinar; aqui também
 Input.StateChanged:Connect(function(cancelled: { string })
 	if table.find(cancelled, "lean") then
@@ -87,6 +78,10 @@ local function intent(): number
 	local st = Input.state
 	if not InputMap.acceptsGame(st) or st.downed or st.vehicle ~= nil then
 		return 0
+	end
+	local lado = st.lean
+	if lado ~= 0 then
+		return math.sign(lado)
 	end
 	return (if S.right then 1 else 0) - (if S.left then 1 else 0)
 end

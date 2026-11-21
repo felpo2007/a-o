@@ -237,7 +237,7 @@ local function botaoAcao(parent: Instance, c: any): any
 		return nil
 	end
 	local p = priceOf(c.produtoId)
-	local label = if p then string.format("COMPRAR · R$ %d", p) else "COMPRAR"
+	local label = if p then string.format("COMPRAR · %s", UiKit.robux(p)) else "COMPRAR"
 	local a = UiKit.action(parent, label, "robux", function()
 		comprar(c)
 	end, { h = px(46, 62) })
@@ -397,7 +397,7 @@ local function abrirOdds(c: any)
 		else (function(): string
 			local p = priceOf(c.produtoId)
 			return if p
-				then string.format("Preço: R$ %d (Robux), cobrado pelo Roblox na confirmação.", p)
+				then string.format("Preço: %s, cobrado pelo Roblox na confirmação.", UiKit.robux(p))
 				else "Preço: confirmado pelo Roblox na compra."
 		end)()
 	local sub =

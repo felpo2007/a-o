@@ -218,7 +218,9 @@ test("amarras: o tiro próprio só pelo Bus, o servidor não devolve o traçante
 		assert(not string.find(ac, t, 1, true), "AudioController ainda usa " .. t)
 	end
 	local som = fs.readFile("src/StarterPlayer/StarterPlayerScripts/Controllers/Som.luau")
-	assert(string.find(som, "s.PlaybackRegion = NumberRange.new(seg[1], seg[1] + seg[2])", 1, true))
+	-- D-220: o trecho do kit ou o recorte da gravação
+	assert(string.find(som, "s.PlaybackRegion = NumberRange.new(inicio, inicio + dur)", 1, true))
+	assert(string.find(som, "inicio, dur, id = seg[1], seg[2], idKit", 1, true))
 	assert(string.find(som, "TweenInfo.new(0.08", 1, true), "a cauda velha some em 80 ms, sem corte seco")
 	assert(not string.find(som, "EchoSoundEffect", 1, true) and not string.find(som, "ReverbSoundEffect", 1, true))
 	local wc = fs.readFile("src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponController.client.luau")

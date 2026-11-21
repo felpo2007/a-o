@@ -18,6 +18,7 @@ local TweenService = game:GetService("TweenService")
 local Net = require(ReplicatedStorage.Shared.Net)
 local Bus = require(script.Parent.Bus)
 local CampanhaCliente = require(script.Parent.CampanhaCliente)
+local EmblemaImagem = require(script.Parent.EmblemaImagem)
 local Input = require(script.Parent.Input)
 local Toast = require(script.Parent.Toast)
 local UiKit = require(script.Parent.UiKit)
@@ -295,6 +296,12 @@ function CartaoJogador.placa(parent: Instance, w: number, h: number): Placa
 	emblem.BackgroundTransparency = 0
 	UiKit.corner(emblem, 4)
 	UiKit.edge(emblem, V.LINE, 1, 0.3)
+	-- D-218: a insígnia, um pouco maior que o quadro da sigla; a sigla fica só enquanto ela não chega
+	local emblemArte = EmblemaImagem.nova(f)
+	emblemArte.AnchorPoint = Vector2.new(0.5, 0.5)
+	emblemArte.Position = UDim2.fromOffset(px(16, 22) + math.floor(E / 2), px(12, 16) + math.floor(E / 2))
+	emblemArte.Size = UDim2.fromOffset(math.floor(E * 1.16), math.floor(E * 1.16))
+	emblemArte.ZIndex = emblem.ZIndex + 1
 	local x = px(16, 22) + E + px(12, 16)
 	local name = UiKit.title(f, "", px(20, 28), V.TEXT)
 	name.Position = UDim2.fromOffset(x, px(10, 14))
@@ -358,6 +365,11 @@ function CartaoJogador.placa(parent: Instance, w: number, h: number): Placa
 		local c3e: Color3? = if ce and ce.cor3 then rgb(ce.cor3, V.PANEL_3) else nil
 		emblemFundo.Visible = degrade(emblemFundo, rgb(ce and ce.cor, V.PANEL_3), c3e)
 		emblem.BackgroundTransparency = if emblemFundo.Visible then 1 else 0
+		local fundoDaSigla = emblemFundo.Visible
+		EmblemaImagem.mostra(emblemArte, em, function(tem: boolean)
+			emblem.Visible = not tem
+			emblemFundo.Visible = fundoDaSigla and not tem
+		end)
 		-- moldura e plaqueta escolhidas (atributos do CaixaService)
 		local mol = cosmetico(player:GetAttribute("VT65Moldura"))
 		edge.Color = rgb(mol and mol.cor, V.KHAKI)
@@ -635,6 +647,14 @@ end
 
 sectionHead("EMBLEMA", 1)
 local emblemRow = chipRow(2)
+-- D-218: a célula do emblema é mais alta, para a insígnia caber ao lado do nome
+local ALTURA_CHIP_EMBLEMA = px(58, 78)
+do
+	local g = emblemRow:FindFirstChildOfClass("UIGridLayout")
+	if g then
+		g.CellSize = UDim2.fromOffset(px(150, 200), ALTURA_CHIP_EMBLEMA)
+	end
+end
 sectionHead("TÍTULO", 3)
 local titleRow = chipRow(4)
 sectionHead("MEDALHAS (ESCOLHA 3)", 5)
@@ -783,7 +803,30 @@ renderEdit = function()
 		emblemIds[i] = e.id
 		local b = poolButton(emblemBtns, emblemRow, i, chooseEmblem)
 		b.button.Visible = true
-		b.label.Text = if e.id == DEFAULT_EMBLEM then "★" else UiKit.upper((string.gsub(e.name, "^[^:]*:%s*", "")))
+		local nomeEmblema = UiKit.upper((string.gsub(e.name, "^[^:]*:%s*", "")))
+		b.label.Text = if e.id == DEFAULT_EMBLEM then "★" else nomeEmblema
+		-- D-218: a insígnia à esquerda e o nome ao lado; sem a imagem, o rótulo ocupa o botão
+		local arte = b.button:FindFirstChild("EmblemaArte") :: ImageLabel?
+		if not arte then
+			local nova = EmblemaImagem.nova(b.button)
+			nova.AnchorPoint = Vector2.new(0, 0.5)
+			nova.Position = UDim2.new(0, 3, 0.5, 0)
+			nova.Size = UDim2.fromOffset(ALTURA_CHIP_EMBLEMA - 6, ALTURA_CHIP_EMBLEMA - 6)
+			arte = nova
+		end
+		local rotulo = b.label
+		local textoComImagem = nomeEmblema
+		local textoSemImagem = rotulo.Text
+		EmblemaImagem.mostra(arte :: ImageLabel, e.id, function(tem: boolean)
+			rotulo.Text = if tem then textoComImagem else textoSemImagem
+			rotulo.TextWrapped = tem
+			rotulo.TextTruncate = if tem then Enum.TextTruncate.None else Enum.TextTruncate.AtEnd
+			rotulo.TextXAlignment = if tem then Enum.TextXAlignment.Left else Enum.TextXAlignment.Center
+			rotulo.Position = UDim2.fromOffset(if tem then ALTURA_CHIP_EMBLEMA else px(18, 26), 0)
+			rotulo.Size = if tem
+				then UDim2.new(1, -ALTURA_CHIP_EMBLEMA - 4, 1, 0)
+				else UDim2.new(1, -2 * px(18, 26), 1, 0)
+		end)
 		b.realce.base(if e.id == pick.emblem then V.OLIVE else V.PANEL)
 	end
 	for i = #emblemIds + 1, #emblemBtns do

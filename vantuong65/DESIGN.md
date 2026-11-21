@@ -9636,3 +9636,86 @@ do lote 98 não havia nada.
 **Não testado:**
 - a derrota (o tranco);
 - o celular, a TV e o jogo publicado.
+
+## D-216 — Lote 101: a mira inclinada e os textos no celular (2026-11-21)
+
+**Pedidos do dono:** "não consigo inclinar a mira e quando tento o personagem da uma facada" e "os
+textos no celular estão horriveis tudo em cima do outro".
+
+**Mira inclinada:**
+- A facada vinha do R3: mirando, ele caía na ação `melee` da camada de baixo. Agora, mirando, o R3 é
+  `lean_cycle` (reto, direita, esquerda, reto).
+- O `Inclinar` lia a tecla segura e a câmera voltava ao soltar; agora lê `Input.state.lean`.
+- No toque, os botões ◄ e ► aparecem ao mirar, e o ITEM sai da frente deles.
+- Medido no Studio pelo caminho real (gancho `VT65DevInclinar`), mirando: rolagem da câmera 0°, −14°,
+  +13,9°, 0°; fica de lado sem segurar; a arma continua na mão e nenhuma animação de faca toca.
+
+**Textos no celular** (simulador do Studio, Galaxy A06, 800 × 360, área de 705 × 338):
+- `ReplicatedFirst/TextoCabe`: texto maior que a própria caixa encolhe até caber, nunca abaixo de 8 px
+  nem acima do tamanho de projeto.
+- **Lobby:** a escala parava em 0,42 e a coluna media 453 px numa tela de 338: LOJA, ARMÁRIO, PASSE e
+  CONFIGURAÇÕES ficavam cortados. Abaixo de 620 de altura entra um arranjo compacto (escala 0,56): a
+  coluna começa abaixo dos botões do Roblox e termina em 275 de 280 px; à direita ficam o passe e as
+  ordens; o rodapé encolhe. Saem a marca, as dicas de teclado, a diária e o destaque.
+- **Contagem:** sobe e encolhe, para a frase não cair no cartão da arma.
+- **FPS:** no lobby do celular sai de cima da coluna.
+- **Auditoria** (retângulo real das letras, par a par): lobby 0 pares em 85 textos.
+
+## D-217 — Lote 101: o símbolo do Robux, os botões e uma imagem por entrada (2026-11-21)
+
+**Pedidos do dono:** "troque o R$ pelo simbolo do robux", "deixe os botoes do passe e da loja
+chamativos" e "a cada negocio q vc passa em cima tem uma imagem diferente como no jogar".
+- Preço com o caractere do Robux (U+E002, `Estilo.robux`), conferido na tela.
+- Cada entrada do lobby tem a própria imagem no fundo, que acende no foco.
+- LOJA em âmbar e PASSE em vermelho, com o brilho correndo.
+- ARMÁRIO com imagem própria (`Images.menu_armario`).
+
+## D-218 — Lote 101: as insígnias dos emblemas (2026-11-21)
+
+**Pedido do dono:** "faça imagens sencacionais para os emblemas".
+- `tools/blender/emblemas.py`: 29 insígnias de metal e esmalte em Cycles (512 px, 48 amostras, 335 s
+  na CPU). A chapa muda com a raridade (bronze, aço, prata, ouro em estrela, ouro em sol), o esmalte usa
+  as cores do item e o símbolo é modelado por pontos.
+- O servidor resolve `ImgEmblema_<id>`; `Controllers/EmblemaImagem` desenha no item, na plaqueta e na
+  lista do cartão. Enquanto não chega, fica a sigla.
+
+## D-219 — Lote 101: o nome das caixas na língua do jogador (2026-11-21)
+
+**Pedido do dono:** "as escritas nas caixas devem mudar conforme a lingua".
+- `caixas_loja.py -- todas --idiomas`: renderiza só a faixa do nome, com a mesma câmera, e cola sobre a
+  imagem em português com a emenda suave. 54 imagens (fechada e corpo aberto) em 216 s.
+- As palavras saem do dicionário do jogo. Igual ao português (ELITE em inglês; RECOMPENSA e VETERANO em
+  espanhol) usa a imagem original. O vietnamita vai em Arial Bold: a Stencil não tem os acentos.
+- Os PNG por língua (34 MB) ficam fora do Git: o script os refaz e os IDs estão no `roblox_ids.json`.
+
+## D-220 — Lote 101: tiros e explosões gravados, e a música calma (2026-11-21)
+
+**Pedidos do dono:** "os sons estão horriveis" e "troque a musica do jogo, por uma mais calma".
+- A D-204 trocou a biblioteca pela síntese porque a busca do Studio só trazia sons tirados de outros
+  jogos. A API da loja, filtrada pelo criador verificado **ProSoundEffects**, traz gravações com a arma
+  na descrição.
+- `Shared/SomGravacoes`: 39 arquivos e 42 recortes, cada arma com os seus. Medidos no áudio decodificado
+  (começo do tiro, fim antes do tiro seguinte, pico).
+  - Type 56: AK-47. SKS: outras tomadas de AK-47. M16: CAR-16. M14: BAR .30-06. M60: SG-43.
+  - RPD: rajadas de AK-47. Mosin e M70: SG-43. M1911: Grizzly .45. Type 54: Beretta 9 mm.
+  - Espingarda: Remington 870. Granada: morteiro. Bomba: explosão grande.
+- Continuam sintetizados: recarga, ferrolho, estojo, passos, bala, impactos e o M79.
+- Se uma gravação não carregar, toca o trecho do kit.
+- Música do menu: "A Place Of Tranquility - Underscore" (Bruce Maginnis, APM, 2:28).
+- No Studio: 39 de 39 carregaram, os 42 recortes cabem nos arquivos e a música toca.
+- **Não ouvi nada:** a escolha foi pela descrição e pela medida. Quem julga o som é o dono.
+
+## D-221 — Lote 101: a comemoração refeita (2026-11-21)
+
+**Pedido do dono:** "essa comemoração esta horrosa sem trabalho nenhum sem animações fodas efeitos
+especiais, qualidade visual".
+- **Tela cheia:** a cena era uma faixa fina; agora ocupa a tela, com o título no alto e os cartões no pé.
+- **Cenário:** pôr do sol pintado por código (`tools/podio_fundo.py`), com o sol atrás do 1º.
+- **Palco:** noite que acende a cada pouso, caixotes com filete de luz e número, bandeira de verdade
+  ondulando em dez tiras.
+- **Coreografia** por poses-chave: salto com preparação e pouso, volta no ar e rugido. A queda no
+  caixote dobra as pernas. Maior passo de junta: 10,7° por quadro a 60 fps (limite 12°).
+- **Câmera:** começa baixa e de lado, sobe nos três, vai ao 1º de baixo para cima e treme no impacto.
+- **Efeitos** (`Controllers/PodioEfeitos`): fachos de holofote, sol, canhões de confete, poeira, faíscas
+  e onda no pouso, sinalizadores no céu, brasas, fumaça, vinheta e faixas de cinema. "Reduzir movimento"
+  deixa só a luz parada.

@@ -5,7 +5,10 @@
 -- "ImgCaixa_<id>" no ReplicatedStorage). Enquanto não chega (ou se o decal não abriu), fica o caixote
 -- 3D de antes (ReplicatedStorage.VT65CaixasArte) num ViewportFrame; quando chega, troca sozinho.
 -- Usado pela vitrine da loja (ShopController), pela aba CAIXAS e pela abertura (CaixasTela).
+local ReplicatedFirst = game:GetService("ReplicatedFirst")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local Idioma = require(ReplicatedFirst:WaitForChild("Idioma")) :: any
 
 local CaixaImagem = {}
 
@@ -24,12 +27,32 @@ CaixaImagem.ACENTO = {
 	historica = Color3.fromRGB(255, 82, 51),
 } :: { [string]: Color3 }
 
--- o ID da imagem da caixa, ou nil enquanto o servidor não resolveu. D-213: `camada` "corpo" (aberta,
--- com a luz) ou "tampa" (solta), no mesmo enquadramento da fechada
-function CaixaImagem.id(caixaId: string, camada: string?): number?
-	local chave = if camada then string.format("%s_%s", caixaId, camada) else caixaId
+local function atributo(chave: string): number?
 	local v = ReplicatedStorage:GetAttribute(string.format("ImgCaixa_%s", chave))
 	return if type(v) == "number" and v ~= 0 then v else nil
+end
+
+-- D-219: a língua da tela (a escolhida ou, no automático, a da conta)
+local function lingua(): string
+	local a = Idioma.atual()
+	return if a == "auto" then Idioma.daConta() else a
+end
+
+-- A chave da imagem na língua (pura, para o teste): o nome em português é a imagem sem sufixo, e a
+-- tampa não tem nome.
+function CaixaImagem.chave(caixaId: string, camada: string?, idioma: string?): string
+	local base = if camada then string.format("%s_%s", caixaId, camada) else caixaId
+	if idioma and idioma ~= "pt" and camada ~= "tampa" then
+		return string.format("%s_%s", base, idioma)
+	end
+	return base
+end
+
+-- o ID da imagem da caixa, ou nil enquanto o servidor não resolveu. D-213: `camada` "corpo" (aberta,
+-- com a luz) ou "tampa" (solta), no mesmo enquadramento da fechada. D-219: na língua do jogador; se a
+-- palavra é igual à do português (ELITE em inglês), não há imagem própria e vale a original.
+function CaixaImagem.id(caixaId: string, camada: string?): number?
+	return atributo(CaixaImagem.chave(caixaId, camada, lingua())) or atributo(CaixaImagem.chave(caixaId, camada))
 end
 
 -- o caixote 3D de antes (a reserva), enquadrado de três quartos
@@ -96,9 +119,19 @@ function CaixaImagem.desenha(parent: Instance, caixaId: string, modelo: string?)
 			reserva = caixote3d(holder, modelo)
 		end
 	end
-	local conn = ReplicatedStorage:GetAttributeChangedSignal(string.format("ImgCaixa_%s", caixaId)):Connect(pinta)
+	-- D-219: repinta quando chega a imagem desta caixa (em qualquer língua) ou quando a língua muda
+	local prefixo = string.format("ImgCaixa_%s", caixaId)
+	local conn = ReplicatedStorage.AttributeChanged:Connect(function(nome: string)
+		if string.sub(nome, 1, #prefixo) == prefixo then
+			pinta()
+		end
+	end)
+	local connLingua = Idioma.Mudou:Connect(function()
+		pinta()
+	end)
 	holder.Destroying:Connect(function()
 		conn:Disconnect()
+		connLingua:Disconnect()
 	end)
 	pinta()
 	holder.Parent = parent

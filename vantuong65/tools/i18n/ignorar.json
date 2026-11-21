@@ -1696,7 +1696,21 @@
   "tampa",
   "tremor",
   "Com_%s",
-  "Comemoracao"
+  "Comemoracao",
+  "Facho%d",
+  "Filete",
+  "ImgEmblema_%s",
+  "Numero",
+  "Sinal",
+  "Sol",
+  "^[pe](%d+)$",
+  "gravacao_%s_%s",
+  "vila",
+  "Mato",
+  "Neblina",
+  "Estouro",
+  "direita",
+  "esquerda"
  ],
  "regex": [
   "^uni_[a-z_]+@[a-z0-9]+$"

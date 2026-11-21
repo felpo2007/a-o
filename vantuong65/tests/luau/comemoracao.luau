@@ -52,7 +52,7 @@ test("juntas dentro do limite, cotovelo só dobra para a frente e joelho para tr
 					assert(a[1] <= 1e-6, string.format("%s dobra para a frente (%.1f)", j, a[1]))
 				end
 			end
-			assert(p.sobe >= -0.5 and p.sobe <= 1.0, string.format("pulo de %.2f", p.sobe))
+			assert(p.sobe >= -0.5 and p.sobe <= 1.8, string.format("pulo de %.2f", p.sobe))
 			t += DT
 		end
 	end
@@ -155,7 +155,7 @@ test("amarras: cópia congelada, rig de AnimationConstraint, empate sem vencedor
 	for _, t in
 		{
 			'ReplicatedStorage:FindFirstChild("VT65PodioModelos")',
-			"cena:bandeira({ V.US, V.VC })",
+			"cena:bandeira({ V.US, V.VC }, ",
 			"if not cena:por(i, modelFor(tostring(l.id), lado)) then",
 			"cena:passo(dt)",
 		}
@@ -180,7 +180,7 @@ local function confere(p: any, onde: string)
 			assert(a[1] <= 1e-6, string.format("%s: %s dobra para a frente", onde, j))
 		end
 	end
-	assert(p.sobe >= -0.5 and p.sobe <= 1.0, string.format("%s: pulo de %.2f", onde, p.sobe))
+	assert(p.sobe >= -0.5 and p.sobe <= 1.8, string.format("%s: pulo de %.2f", onde, p.sobe))
 end
 
 local function maiorPasso(f: (t: number) -> any, t0: number, t1: number): (number, string)
@@ -274,9 +274,9 @@ test("roteiro: 3º, 2º e 1º chegam nessa ordem; a câmera vai até o 1º depoi
 	assert(P.mvp > P.zoom and P.mvp < P.perto and P.perto < 12 - 4, "o 1º comemora com tempo de sobra")
 	-- câmera: começa como era (aberta), termina perto, sem pulo entre quadros
 	local c0 = Comemoracao.camera(0)
-	assert(c0.dist == 31 and c0.fov == 34 and c0.ay == 8.6)
+	assert(c0.dist == 38 and c0.fov == 34 and c0.ay == 7.6)
 	local c1 = Comemoracao.camera(P.perto + 0.5)
-	assert(c1.dist == 16 and c1.fov == 30 and c1.dist < c0.dist / 1.8, "perto do 1º (quase o dobro de perto)")
+	assert(c1.dist == 20 and c1.fov == 30 and c1.dist < c0.dist / 1.8, "perto do 1º (quase o dobro de perto)")
 	local antes = Comemoracao.camera(0)
 	local t = DT
 	while t <= 12 do
@@ -288,7 +288,8 @@ test("roteiro: 3º, 2º e 1º chegam nessa ordem; a câmera vai até o 1º depoi
 		t += DT
 	end
 	local s = Comemoracao.camera(3, true)
-	assert(s.dist > c1.dist, "a prévia mostra o corpo inteiro")
+	-- D-221: o close do pódio recuou para 20 (tela cheia); a prévia segue enquadrando do pé à cabeça
+	assert(s.dist >= 17 and s.ay < c1.ay, "a prévia mostra o corpo inteiro")
 end)
 
 test("amarras D-214: perfil, remote, servidor, pódio, tela e ARMÁRIO", function()
@@ -313,6 +314,28 @@ test("amarras D-214: perfil, remote, servidor, pódio, tela e ARMÁRIO", functio
 	local sc = fs.readFile("src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau")
 	assert(string.find(sc, '"COMEMORAÇÃO NO PÓDIO"', 1, true) and string.find(sc, '"🔒 EM BREVE"', 1, true))
 	assert(string.find(sc, 'Net.event("Comemoracao_Equipar"):FireServer(it.id)', 1, true))
+end)
+
+test("D-221: o giro do corpo fecha a volta e o pouso dobra as pernas sem tranco", function()
+	for _, it in Comemoracao.CATALOGO do
+		local antes = Comemoracao.celebracao(it.id, 0).gira or 0
+		local t = DT
+		while t <= 20 do
+			local g = Comemoracao.celebracao(it.id, t).gira or 0
+			local d = math.abs(g - antes)
+			d = math.min(d, 360 - d)
+			assert(d <= 14, string.format("%s: o giro pula %.1f° em t %.2f", it.id, d, t))
+			antes = g
+			t += DT
+		end
+	end
+	local P = Comemoracao.PODIO
+	for lugar = 1, 3 do
+		local pouso = P.entrada[lugar] + P.queda
+		assert(Comemoracao.pouso(lugar, pouso) > 0.95, "dobra no pouso")
+		assert(Comemoracao.pouso(lugar, pouso + 1.5) < 0.01, "volta a ficar de pé")
+		assert(Comemoracao.pouso(lugar, P.entrada[lugar] - 0.01) == 0, "antes de chegar, nada")
+	end
 end)
 
 print(string.format("%d ok, %d falhas", passed, failed))

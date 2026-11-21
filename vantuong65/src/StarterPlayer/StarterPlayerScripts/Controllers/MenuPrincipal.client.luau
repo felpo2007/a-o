@@ -38,6 +38,7 @@ local CampanhaCliente = require(script.Parent.CampanhaCliente)
 local ComoJogar = require(script.Parent.ComoJogar)
 local Input = require(script.Parent.Input)
 local LobbyPalco = require(script.Parent.LobbyPalco)
+local UiEfeitos = require(script.Parent.UiEfeitos)
 local UiKit = require(script.Parent.UiKit)
 
 local player = Players.LocalPlayer
@@ -121,9 +122,21 @@ palco.Parent = gui
 -- Escala: o projeto é de 1080 de altura; a tela mede a altura (e a largura, para caber nas telas
 -- estreitas). Cada bloco fica preso à sua borda (esquerda, direita, rodapé) e escala sozinho.
 local escalas: { UIScale } = {}
+-- D-216 (dono: "os textos no celular estão horriveis tudo em cima do outro"): com menos de 620 de
+-- altura o projeto de 1080 não cabe (a escala parava em 0,42 e a coluna passava da tela, cortando
+-- LOJA, ARMÁRIO e PASSE). Ali entra o arranjo compacto (`aplicarCompacto`, no fim das peças).
+local COMPACTO_ALTURA, COMPACTO_H, COMPACTO_W = 620, 600, 1180
+local aplicarCompacto: (boolean) -> () = function() end
+local function ehCompacto(): boolean
+	local cam = workspace.CurrentCamera
+	return cam ~= nil and cam.ViewportSize.Y < COMPACTO_ALTURA
+end
 local function escalaAgora(): number
 	local cam = workspace.CurrentCamera
 	local v = if cam then cam.ViewportSize else Vector2.new(1920, 1080)
+	if ehCompacto() then
+		return math.clamp(math.min(v.Y / COMPACTO_H, v.X / COMPACTO_W), 0.42, 1)
+	end
 	return math.clamp(math.min(v.Y / 1080, v.X / 1640), 0.42, 1.3)
 end
 -- o soldado fica no meio do espaço livre entre o que está escrito à esquerda (72 + 600 do projeto)
@@ -135,7 +148,7 @@ local function ajustarAlvo()
 		w = if cam then cam.ViewportSize.X else 1920
 	end
 	local k = escalaAgora()
-	local l = (72 + 600) * k
+	local l = (if ehCompacto() then 16 + 440 else 72 + 600) * k
 	local r = w - (560 - 34) * k
 	LobbyPalco.telaX = math.clamp((l + r) / 2 / math.max(w, 1), 0.4, 0.8)
 end
@@ -144,6 +157,7 @@ local function reescalar()
 	for _, s in escalas do
 		s.Scale = k
 	end
+	aplicarCompacto(ehCompacto())
 	ajustarAlvo()
 end
 
@@ -245,7 +259,7 @@ m4.Size = UDim2.fromOffset(620, 24)
 local k1 = rotulo(esq, "PARTIDA", F.TITLE_REG, 16, V.DIM)
 k1.Position = UDim2.fromOffset(X0, 236)
 k1.Size = UDim2.fromOffset(300, 22)
-regua(esq, X0, 262, 600)
+local reguaPartida = regua(esq, X0, 262, 600)
 
 local CARD_W, CARD_H = 600, 214
 local card = Instance.new("TextButton")
@@ -489,7 +503,7 @@ local descrSeta = rotulo(esq, "▸", F.BODY_B, 16, V.AMBAR)
 descrSeta.Position = UDim2.fromOffset(X0, NAV_Y + 4 * NAV_H + 6)
 descrSeta.Size = UDim2.fromOffset(18, 26)
 local SEP_Y = NAV_Y + 4 * NAV_H + 46
-regua(esq, X0, SEP_Y, 600)
+local reguaSecoes = regua(esq, X0, SEP_Y, 600)
 local SEC_Y, SEC_H = SEP_Y + 14, 48
 item(
 	esq,
@@ -515,7 +529,7 @@ item(
 	SEC_H,
 	34,
 	"Sua arma principal por papel (M14, M16, espingarda...) e o que você já tem para vestir.",
-	"posto",
+	"armario",
 	"arsenal",
 	function()
 		Bus.fire("shop_open", "armario")
@@ -543,7 +557,7 @@ item(
 	40,
 	24,
 	"Controles, mira, som, gráficos, idioma e acessibilidade.",
-	"",
+	"vila",
 	"config",
 	function()
 		Bus.fire("menu_open", 1) -- aba Configurações
@@ -729,6 +743,7 @@ local dPontos: { Frame } = {}
 -- ===== rodapé =====
 local perfil = caixa(rodape, 0, 18, 820, 70)
 perfil.Name = "Barra"
+local seps: { Frame } = {}
 local function sep(x: number)
 	local s = Instance.new("Frame")
 	s.BackgroundColor3 = V.LINE
@@ -737,6 +752,7 @@ local function sep(x: number)
 	s.Position = UDim2.fromOffset(x, 16)
 	s.Size = UDim2.fromOffset(1, 38)
 	s.Parent = perfil
+	table.insert(seps, s)
 end
 local moeda = Instance.new("TextLabel")
 moeda.Name = "Moeda"
@@ -800,6 +816,63 @@ bgLoad.Name = "SegundoPlano"
 bgLoad.Position = UDim2.fromOffset(X0, 2)
 bgLoad.Size = UDim2.fromOffset(700, 22)
 bgLoad.TextTruncate = Enum.TextTruncate.AtEnd
+
+-- ===== D-216: o arranjo compacto (celular) =====
+-- A coluna começa abaixo dos botões do Roblox (no canto de cima), com todas as entradas à vista; à
+-- direita ficam o passe e as ordens; o rodapé encolhe para não cobrir nada. Sai o que é repetido
+-- (marca, descrição da entrada, dicas de teclado, diária e destaque, que têm tela própria).
+type Ajuste = { o: any, normal: { [string]: any }, compacto: { [string]: any } }
+local ajustes: { Ajuste } = {}
+local function ajuste(o: any, compacto: { [string]: any })
+	local normal: { [string]: any } = {}
+	for k in compacto do
+		normal[k] = o[k]
+	end
+	table.insert(ajustes, { o = o, normal = normal, compacto = compacto })
+end
+local function oculta(lista: { any })
+	for _, o in lista do
+		ajuste(o, { Visible = false })
+	end
+end
+do
+	local XC, WC, TOPO = 16, 440, 112
+	oculta({ marca, k1, reguaPartida, reguaSecoes, descr, descrSeta, jogarModo, diaria, destaque, dicasB })
+	oculta({ rPostoK, rPosto, rGenteK, rGente, seps[2], seps[3] })
+	ajuste(card, { Position = UDim2.fromOffset(XC, TOPO), Size = UDim2.fromOffset(WC, 124) })
+	ajuste(jogarBox, { Position = UDim2.fromOffset(16, 12), Size = UDim2.fromOffset(250, 62) })
+	ajuste(jogarTxt, { TextSize = Estilo.ts(46) })
+	ajuste(jogarSeta, { Size = UDim2.fromOffset(26, 62) })
+	ajuste(jogarSub, { Position = UDim2.fromOffset(18, 84), Size = UDim2.fromOffset(WC - 36, 28) })
+	local LINHA = 44
+	local ordem = { "ARSENAL", "MISSOES", "PERFIL", "TUTORIAL", "LOJA", "ARMARIO", "PASSE", "CONFIGURACOES" }
+	for i, id in ordem do
+		for _, it in itens do
+			if it.id == id then
+				local y = TOPO + 130 + (i - 1) * LINHA + (if i > 4 then 6 else 0)
+				local h = if id == "CONFIGURACOES" then 36 else LINHA - 2
+				ajuste(it.b, { Position = UDim2.fromOffset(XC, y), Size = UDim2.fromOffset(WC, h) })
+				ajuste(it.linha, { Size = UDim2.fromOffset(0, h) })
+				ajuste(it.label, { Size = UDim2.fromOffset(0, h) })
+			end
+		end
+	end
+	ajuste(passeCard, { Position = UDim2.fromOffset(RX, 8) })
+	ajuste(ordens, { Position = UDim2.fromOffset(RX, 212) })
+	ajuste(perfil, { Position = UDim2.fromOffset(820 - RW - 56, 30), Size = UDim2.fromOffset(RW, 70) })
+	ajuste(avatar, { Position = UDim2.fromOffset(198, 13) })
+	ajuste(rNome, { Position = UDim2.fromOffset(252, 10), Size = UDim2.fromOffset(136, 28) })
+	ajuste(rXp.Parent, { Position = UDim2.fromOffset(252, 46), Size = UDim2.fromOffset(200, 5) })
+end
+aplicarCompacto = function(on: boolean)
+	for _, a in ajustes do
+		local valores: { [string]: any } = if on then a.compacto else a.normal
+		for k, v in valores do
+			a.o[k] = v
+		end
+	end
+end
+reescalar()
 
 -- ===== dados =====
 -- 12345 -> "12.345"
@@ -923,9 +996,13 @@ local function atualizarCampanha()
 			if done then
 				feitas += 1
 			end
-			l.t.Text = UiKit.upper(tostring(m.text or ""))
-			l.t.TextColor3 = if done then V.DIM else V.TEXT
 			local goal = math.max(tonumber(m.goal) or 1, 1)
+			-- D-216: o texto da ordem é um modelo ("Fazer %d abates"); em caixa alta o %d virava %D e
+			-- aparecia na tela. Sem caixa alta, a tradução acha o modelo
+			local modelo = tostring(m.text or "")
+			local okTexto, textoOrdem = pcall(string.format, modelo, goal)
+			l.t.Text = if okTexto then textoOrdem else modelo
+			l.t.TextColor3 = if done then V.DIM else V.TEXT
 			local prog = math.min(tonumber(m.progress) or 0, goal)
 			l.n.Text = if done then "✓ FEITA" else string.format("%s / %s", fmt(prog), fmt(goal))
 			l.n.FontFace = if done then F.BODY_B else F.TITLE_MED
@@ -1055,8 +1132,86 @@ mostrarSlide(1, false)
 -- ===== foco e transições =====
 local capaAtual = ""
 local capaFrente = capaA
+-- D-217: a imagem de cada entrada (a do ARMÁRIO é a capa do jogo sem o título, resolvida pelo servidor)
+local function urlCapa(id: string): string
+	if id == "loja" then
+		return img(LOJA_IMG.destaque)
+	elseif id == "armario" then
+		local v = ReplicatedStorage:GetAttribute("Img_menu_armario")
+		return if type(v) == "number" and v ~= 0 then string.format("rbxassetid://%d", v) else img(CAPA.posto)
+	end
+	return if id ~= "" then img(CAPA[id]) else ""
+end
+
+-- D-217 (dono: "a cada negocio q vc passa em cima tem uma imagem diferente como no jogar" e "deixe os
+-- botoes do passe e da loja chamativos"): cada entrada tem a sua imagem, sempre à vista (no celular não
+-- existe passar o dedo em cima), apagada à esquerda para o texto ler e acesa à direita; no foco ela
+-- acende e cresce. LOJA e PASSE têm a faixa de cor cheia, o texto contrastado e o brilho passando.
+local DESTAQUE = {
+	LOJA = { cor = V.AMBAR, texto = V.AMBAR_TEXTO, atraso = 0.6 },
+	PASSE = { cor = V.RED_HI, texto = V.TEXT, atraso = 3.4 },
+} :: { [string]: { cor: Color3, texto: Color3, atraso: number } }
+local IMG_REPOUSO, IMG_FOCO = 0.3, 0
+type Fundo = { imagem: ImageLabel, cor: Frame? }
+local fundos: { [Item]: Fundo } = {}
+for _, it in itens do
+	it.b.ClipsDescendants = true
+	UiKit.corner(it.b, 3)
+	local im = Instance.new("ImageLabel")
+	im.Name = "Fundo"
+	im.BackgroundTransparency = 1
+	im.AnchorPoint = Vector2.new(0.5, 0.5)
+	im.Position = UDim2.fromScale(0.5, 0.5)
+	im.Size = UDim2.fromScale(1, 1)
+	im.ScaleType = Enum.ScaleType.Crop
+	im.Image = urlCapa(it.capa)
+	im.ImageTransparency = IMG_REPOUSO
+	im.ZIndex = -2
+	im.Parent = it.b
+	local d = DESTAQUE[it.id]
+	local g = Instance.new("UIGradient")
+	g.Transparency = if d
+		then NumberSequence.new(0)
+		else NumberSequence.new({
+			NumberSequenceKeypoint.new(0, 1),
+			NumberSequenceKeypoint.new(0.4, 0.82),
+			NumberSequenceKeypoint.new(1, 0.05),
+		})
+	g.Parent = im
+	local cor: Frame? = nil
+	if d then
+		local c = Instance.new("Frame")
+		c.Name = "Cor"
+		c.BackgroundColor3 = d.cor
+		c.BorderSizePixel = 0
+		c.Size = UDim2.fromScale(1, 1)
+		c.ZIndex = -1
+		c.Parent = it.b
+		local cg = Instance.new("UIGradient")
+		cg.Transparency = NumberSequence.new({
+			NumberSequenceKeypoint.new(0, 0),
+			NumberSequenceKeypoint.new(0.55, 0.08),
+			NumberSequenceKeypoint.new(1, 0.85),
+		})
+		cg.Parent = c
+		cor = c
+		it.label.TextColor3 = d.texto
+		UiKit.edge(it.b, d.cor, 2, 0)
+		UiEfeitos.varre(it.b, 4.5, nil, 5, d.atraso)
+	end
+	fundos[it] = { imagem = im, cor = cor }
+end
+-- a imagem do ARMÁRIO chega do servidor depois de abrir
+ReplicatedStorage:GetAttributeChangedSignal("Img_menu_armario"):Connect(function()
+	for it, f in fundos do
+		if it.capa == "armario" then
+			f.imagem.Image = urlCapa("armario")
+		end
+	end
+end)
+
 local function trocarCapa(id: string)
-	local url = if id == "loja" then img(LOJA_IMG.destaque) elseif id ~= "" then img(CAPA[id]) else ""
+	local url = urlCapa(id)
 	if url == "" or url == capaAtual then
 		return
 	end
@@ -1093,7 +1248,18 @@ end
 local function pintarItem(it: Item, on: boolean)
 	UiKit.tween(it.bar, UiKit.QUICK, { Size = UDim2.new(0, if on then 5 else 0, 0.72, 0) })
 	UiKit.tween(it.linha, UiKit.QUICK, { Position = UDim2.fromOffset(if on then 18 else 0, 0) })
-	UiKit.tween(it.label, UiKit.QUICK, { TextColor3 = if on then V.AMBAR_HI else V.TEXT })
+	local d = DESTAQUE[it.id]
+	if not d then
+		UiKit.tween(it.label, UiKit.QUICK, { TextColor3 = if on then V.AMBAR_HI else V.TEXT })
+	end
+	-- D-217: a imagem da entrada acende e cresce um pouco no foco
+	local f = fundos[it]
+	if f then
+		UiKit.tween(f.imagem, UiKit.SOFT, {
+			ImageTransparency = if on then IMG_FOCO else IMG_REPOUSO,
+			Size = UDim2.fromScale(if on then 1.08 else 1, if on then 1.08 else 1),
+		})
+	end
 end
 
 local DESC_JOGAR = "Entre na partida: escolha o lado, o squad, o papel e onde nascer."

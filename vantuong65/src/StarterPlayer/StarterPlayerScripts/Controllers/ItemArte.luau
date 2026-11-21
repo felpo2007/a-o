@@ -18,6 +18,7 @@ local Cosmeticos = require(ReplicatedStorage.Shared.Cosmeticos) :: any
 local GunModel = require(ReplicatedStorage.Shared.GunModel) :: any
 local Skins = require(ReplicatedStorage.Shared.Skins) :: any
 local Weapons = require(ReplicatedStorage.Shared.Weapons) :: any
+local EmblemaImagem = require(script.Parent.EmblemaImagem)
 local SoldierPreview = require(script.Parent.SoldierPreview) :: any
 local UiKit = require(script.Parent.UiKit)
 
@@ -328,6 +329,14 @@ function ItemArte.desenha(parent: Instance, item: any, s: number, opts: Opcoes?)
 		local t = label(e, it.sigla or "★", math.floor(s * 0.3), c2, F.TITLE)
 		t.Size = UDim2.fromScale(1, 1)
 		t.TextXAlignment = Enum.TextXAlignment.Center
+		-- D-218: a insígnia por cima; a sigla colorida fica só enquanto a imagem não chega
+		local arte = EmblemaImagem.nova(box)
+		arte.AnchorPoint = Vector2.new(0.5, 0.5)
+		arte.Position = UDim2.fromScale(0.5, 0.5)
+		arte.Size = UDim2.fromScale(0.94, 0.94)
+		EmblemaImagem.mostra(arte, it.id, function(tem: boolean)
+			e.Visible = not tem
+		end)
 	elseif it.kind == "plaqueta" then
 		local tag = frame(box, UDim2.fromScale(0.82, 0.48), c1, 0)
 		tag.AnchorPoint = Vector2.new(0.5, 0.5)

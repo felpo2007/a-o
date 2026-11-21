@@ -443,7 +443,7 @@ local priceCache: { [number]: number } = {}
 local priceAsked: { [number]: boolean } = {}
 local function robuxText(s: Skins.Skin): string
 	local id = Skins.robuxId(s)
-	return string.format("R$ %s", tostring(priceCache[id] or s.robux))
+	return UiKit.robux(priceCache[id] or s.robux)
 end
 local function askPrice(s: Skins.Skin)
 	local id = Skins.robuxId(s)

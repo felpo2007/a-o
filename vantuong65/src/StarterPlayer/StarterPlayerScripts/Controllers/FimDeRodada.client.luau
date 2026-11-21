@@ -22,6 +22,7 @@ local Comemoracao = require(ReplicatedStorage.Shared.Comemoracao)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Cortina = require(game:GetService("ReplicatedFirst"):WaitForChild("Cortina"))
 local CenaComemoracao = require(script.Parent.CenaComemoracao)
+local PodioEfeitos = require(script.Parent.PodioEfeitos)
 local Input = require(script.Parent.Input)
 local UiEfeitos = require(script.Parent.UiEfeitos)
 local UiKit = require(script.Parent.UiKit)
@@ -74,16 +75,34 @@ podium.Position = UDim2.fromOffset(0, px(130, 180))
 podium.Size = UDim2.new(1, 0, 1, -px(130, 180))
 podium.Parent = root
 
--- D-202: a cena (palco e soldados) em cima; embaixo, a faixa dos cartões, um sob cada soldado
-local BAND = px(100, 138)
+-- D-202: a cena (palco e soldados); embaixo, os cartões, um sob cada soldado
 local stage = Instance.new("Frame")
 stage.Name = "Palco"
 stage.BackgroundTransparency = 1
 stage.ClipsDescendants = true
-stage.Size = UDim2.new(1, 0, 1, -BAND)
-stage.Parent = podium
-UiKit.corner(stage, 6)
+-- D-221: a cena ocupa a tela inteira (fora da área segura também), atrás do título e dos cartões
+stage.Size = UDim2.fromScale(1, 1)
+stage.BackgroundColor3 = Color3.fromRGB(9, 11, 24)
+stage.BackgroundTransparency = 0
+local telaPalco = UiKit.screen("VT65PodioPalco", 45)
+telaPalco.Enabled = false
+pcall(function()
+	telaPalco.ScreenInsets = Enum.ScreenInsets.None
+end)
+stage.Parent = telaPalco
+local function syncPalco()
+	local on = gui.Enabled and podium.Visible
+	telaPalco.Enabled = on
+	veil.BackgroundTransparency = if on then 1 else 0.04
+end
+gui:GetPropertyChangedSignal("Enabled"):Connect(syncPalco)
+podium:GetPropertyChangedSignal("Visible"):Connect(syncPalco)
 local cena = CenaComemoracao.nova(stage)
+-- D-221: os efeitos em volta da cena: cada pouso acende o facho e dispara poeira e faíscas
+local efeitos = PodioEfeitos.novo(stage, cena)
+cena.aoPousar = function(lugar: number)
+	efeitos:impacto(lugar)
+end
 
 type Card = {
 	f: Frame,
@@ -338,15 +357,20 @@ local function showPodium()
 	if winner == "US" or winner == "VC" then
 		-- frase inteira (a tradução não entra num modelo dentro de outro)
 		title.Text = if winner == "US" then "VITÓRIA · FUZILEIROS DOS EUA" else "VITÓRIA · VIET CONG"
-		title.TextColor3 = if winner == "US" then V.US else V.VC
-		cena:bandeira({ if winner == "US" then V.US else V.VC })
+		-- D-221: mais claro: agora o título fica sobre o céu da cena
+		title.TextColor3 = (if winner == "US" then V.US else V.VC):Lerp(Color3.new(1, 1, 1), 0.5)
+		cena:bandeira(
+			{ if winner == "US" then V.US else V.VC },
+			{ if winner == "US" then "bandeira_eua" else "bandeira_frente" }
+		)
 	else
 		title.Text = "EMPATE"
 		title.TextColor3 = V.TEXT
 		-- empate: os dois panos, sem inventar vencedor
-		cena:bandeira({ V.US, V.VC })
+		cena:bandeira({ V.US, V.VC }, { "bandeira_eua", "bandeira_frente" })
 	end
 	cena:reiniciar()
+	efeitos:reiniciar(if winner == "US" then V.US elseif winner == "VC" then V.VC else V.BRASS)
 	destaque.Visible = false
 	destaqueFeito = false
 	local linhas = if type(data) == "table" and type(data.linhas) == "table" then data.linhas else {}
@@ -385,13 +409,50 @@ end
 
 -- os cartões embaixo de cada soldado (a câmera balança, eles acompanham). D-214: quando a câmera vai
 -- até o 1º, os cartões do 2º e do 3º saem e entra o destaque do melhor, com faíscas douradas.
+local function cartaoX(i: number): number
+	-- a cena é a tela inteira e os cartões ficam no painel centrado: passa de uma medida à outra
+	local fx = cena:telaX(i)
+	local sa, sp = stage.AbsoluteSize, stage.AbsolutePosition
+	local pa, pp = podium.AbsoluteSize, podium.AbsolutePosition
+	return if pa.X > 0 then (sp.X + fx * sa.X - pp.X) / pa.X else fx
+end
+
+-- D-221: o título volta ao lugar e à cor de leitura (votação e restauração usam o mesmo cabeçalho)
+local function cabecalhoNormal()
+	kicker.Position = UDim2.fromOffset(0, 0)
+	title.Position = UDim2.fromOffset(0, px(26, 36))
+	clock.Position = UDim2.fromOffset(0, px(92, 128))
+	for _, o in { kicker, title, clock } do
+		o.TextTransparency = 0
+		o.TextStrokeTransparency = 1
+	end
+end
+
 local function frameCards()
 	local t = cena:tempo()
 	local P = Comemoracao.PODIO
+	-- D-221: a cena é a tela inteira: o título vai para o alto dela e os cartões para o pé, longe dos
+	-- caixotes, mesmo em tela mais alta que o painel. No close, o título sai da frente do rosto.
+	local sa, sp = stage.AbsoluteSize, stage.AbsolutePosition
+	local ra, rp = root.AbsoluteSize, root.AbsolutePosition
+	local pa, pp = podium.AbsoluteSize, podium.AbsolutePosition
+	local k = if ra.X > 0 then ra.X / W else 1
+	-- (o título e os cartões ficam na tela de área segura, que corta o que passa dela no celular)
+	local ga, gp = gui.AbsoluteSize, gui.AbsolutePosition
+	local topo = (math.max(sp.Y + sa.Y * 0.085, gp.Y + 4) - rp.Y) / k
+	kicker.Position = UDim2.fromOffset(0, topo)
+	title.Position = UDim2.fromOffset(0, topo + px(26, 36))
+	clock.Position = UDim2.fromOffset(0, topo + px(92, 128))
+	local some = math.clamp((t - P.zoom) / 0.6, 0, 1)
+	for _, o in { kicker, title, clock } do
+		o.TextTransparency = some
+		o.TextStrokeTransparency = 0.4 + 0.6 * some
+	end
+	local pe = (math.min(sp.Y + sa.Y * 0.985, gp.Y + ga.Y - 4) - (pp.Y + pa.Y)) / k
 	for i, c in cards do
 		c.f.Visible = temLinha[i] and (i == 1 or t < P.zoom + 0.25)
 		if c.f.Visible then
-			c.f.Position = UDim2.new(math.clamp(cena:telaX(i), 0.1, 0.9), 0, 1, -px(2, 3))
+			c.f.Position = UDim2.new(math.clamp(cartaoX(i), 0.1, 0.9), 0, 1, pe)
 		end
 	end
 	if temLinha[1] and not destaqueFeito and t >= P.perto - 0.3 then
@@ -423,6 +484,7 @@ local function showVote()
 	kicker.Text = "PRÓXIMA PARTIDA"
 	title.Text = "VOTAÇÃO DO MAPA"
 	title.TextColor3 = V.TEXT
+	cabecalhoNormal()
 	for _, c in mapCards do
 		c.b:Destroy()
 	end
@@ -476,6 +538,7 @@ local function aplicaFase(f: any)
 		kicker.Text = "PRÓXIMA PARTIDA"
 		title.Text = "PREPARANDO O CAMPO…"
 		title.TextColor3 = V.TEXT
+		cabecalhoNormal()
 		podium.Visible = false
 		vote.Visible = false
 		cena:reiniciar()
@@ -524,6 +587,7 @@ RunService.RenderStepped:Connect(function(dt: number)
 	end
 	if podium.Visible then
 		cena:passo(dt)
+		efeitos:passo(dt)
 		frameCards()
 	end
 end)

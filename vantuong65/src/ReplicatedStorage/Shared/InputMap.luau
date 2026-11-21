@@ -118,6 +118,9 @@ act("lean_right", "infantry", nil, "press", "E", "press", "Inclinar à direita")
 -- não se corre); o R3 volta a ser o corpo a corpo. Antes (D-69): L3/R3 inclinavam e o LB prendia.
 act("lean_left", "aim", "ButtonL1", "press", nil, "press", "Inclinar à esquerda")
 act("lean_right", "aim", "ButtonR1", "press", nil, "press", "Inclinar à direita")
+-- D-216 (dono: "não consigo inclinar a mira e quando tento o personagem dá uma facada"): mirando, o R3
+-- não chega mais na faca da camada de baixo; ele passa o lado (direita, esquerda, centro)
+act("lean_cycle", "aim", "ButtonR3", "press", nil, "press", "Inclinar (passa o lado)")
 act("hold_breath", "aim", "ButtonL3", "press", "LeftShift", "press", "Prender a respiração")
 
 -- Veículo terrestre (Parte 12.3). Direção: analógico esquerdo (ou A/D); acelerar/frear: gatilhos
@@ -834,6 +837,14 @@ function InputMap.leanNext(cur: number, dir: number, toggle: boolean): number
 		return 0
 	end
 	return dir
+end
+
+-- D-216: o R3 mirando passa o lado: centro -> direita -> esquerda -> centro
+function InputMap.leanCycle(cur: number): number
+	if cur == 0 then
+		return 1
+	end
+	return if cur > 0 then -1 else 0
 end
 
 -- Cancela tudo que é "segurado" no jogo; devolve o que foi cancelado.

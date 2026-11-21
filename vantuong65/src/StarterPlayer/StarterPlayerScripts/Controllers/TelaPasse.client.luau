@@ -514,7 +514,7 @@ local function livePrice(id: number, infoType: Enum.InfoType, onDone: (string) -
 		local ok, info = pcall(function()
 			return MarketplaceService:GetProductInfoAsync(id, infoType)
 		end)
-		local p = if ok and info and info.PriceInRobux then string.format("R$ %d", info.PriceInRobux) else "—"
+		local p = if ok and info and info.PriceInRobux then UiKit.robux(info.PriceInRobux) else "—"
 		priceCache[key] = p
 		onDone(p)
 	end)

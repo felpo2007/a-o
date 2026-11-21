@@ -40,3 +40,8 @@ assets/skins_icones/
 assets/skins_loja.json
 # texturas dos acabamentos de arma, feitas dos GLB das armas (tools/acabamentos.py, D-178)
 assets/acabamentos/
+
+# D-219: caixas por língua (34 MB): saem de tools/blender/caixas_loja.py -- todas --idiomas
+assets/ui/caixas/*_en.png
+assets/ui/caixas/*_es.png
+assets/ui/caixas/*_vi.png

@@ -143,7 +143,11 @@ test("capas: as imagens do lobby são as da página do jogo (Pagina.miniatura_*)
 	assert(n >= 6, "capas: " .. n)
 	-- cada entrada do menu com capa usa uma que existe
 	for capa in string.gmatch(menu, '\n\t"([%l]+)",\n\t"[%l]+",\n\tfunction') do
-		assert(capa == "loja" or AssetIds.Capas[capa], "entrada com capa que não existe: " .. capa)
+		-- D-217: "armario" é a imagem própria da entrada (Images.menu_armario)
+		assert(
+			capa == "loja" or AssetIds.Capas[capa] or AssetIds.Images["menu_" .. capa],
+			"entrada com capa que não existe: " .. capa
+		)
 	end
 end)
 

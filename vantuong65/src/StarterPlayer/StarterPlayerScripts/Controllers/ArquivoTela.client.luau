@@ -601,7 +601,7 @@ local function pagConjuntos(area: Frame)
 			task.spawn(function()
 				local v = precoPasse(id)
 				if v and a.button.Parent then
-					a.label.Text = string.format("COMPRAR · R$ %d", v)
+					a.label.Text = string.format("COMPRAR · %s", UiKit.robux(v))
 					pr.Text = "Preço lido do Roblox (pode variar por região)"
 				end
 			end)

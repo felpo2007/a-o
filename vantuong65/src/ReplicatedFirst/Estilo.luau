@@ -74,6 +74,13 @@ Estilo.ESTADO = {
 	indisponivel = { cor = Estilo.V.RED, simbolo = "×", texto = "OUTRA CLASSE", rotulo = "× OUTRA CLASSE" },
 } :: { [string]: Estado }
 
+-- D-217 (dono: "troque o R$ pelo simbolo do robux"): o símbolo do Robux é um caractere das fontes do
+-- Roblox (U+E002). Todo preço em Robux passa por aqui.
+Estilo.ROBUX = utf8.char(0xE002)
+function Estilo.robux(valor: any): string
+	return string.format("%s %s", Estilo.ROBUX, tostring(valor))
+end
+
 -- ===== tipos =====
 Estilo.F = {
 	TITLE = Font.fromName("Oswald", Enum.FontWeight.Bold), -- títulos e números

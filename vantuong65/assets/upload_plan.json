@@ -8083,5 +8083,600 @@
   "assetType": "Audio",
   "name": "VT65 caixa_estouro",
   "description": "VAN TUONG 65 - abertura da caixa: a tampa saltando e a luz (tools/sons_roleta.py, D-213)"
+ },
+ {
+  "key": "Images.menu_armario",
+  "file": "assets/ui/menu/armario.png",
+  "assetType": "Decal",
+  "name": "VT65 menu armario",
+  "description": "VAN TUONG 65 - imagem da entrada ARMARIO do lobby (recorte da capa, D-217)"
+ },
+ {
+  "key": "Emblemas.emb_aguia_dourada",
+  "file": "assets/ui/emblemas/emb_aguia_dourada.png",
+  "assetType": "Decal",
+  "name": "VT65 emb aguia dourada",
+  "description": "VAN TUONG 65 - insignia de emblema (tools/blender/emblemas.py)"
+ },
+ {
+  "key": "Emblemas.emb_arquivo",
+  "file": "assets/ui/emblemas/emb_arquivo.png",
+  "assetType": "Decal",
+  "name": "VT65 emb arquivo",
+  "description": "VAN TUONG 65 - insignia de emblema (tools/blender/emblemas.py)"
+ },
+ {
+  "key": "Emblemas.emb_arrozais",
+  "file": "assets/ui/emblemas/emb_arrozais.png",
+  "assetType": "Decal",
+  "name": "VT65 emb arrozais",
+  "description": "VAN TUONG 65 - insignia de emblema (tools/blender/emblemas.py)"
+ },
+ {
+  "key": "Emblemas.emb_as",
+  "file": "assets/ui/emblemas/emb_as.png",
+  "assetType": "Decal",
+  "name": "VT65 emb as",
+  "description": "VAN TUONG 65 - insignia de emblema (tools/blender/emblemas.py)"
+ },
+ {
+  "key": "Emblemas.emb_aurora",
+  "file": "assets/ui/emblemas/emb_aurora.png",
+  "assetType": "Decal",
+  "name": "VT65 emb aurora",
+  "description": "VAN TUONG 65 - insignia de emblema (tools/blender/emblemas.py)"
+ },
+ {
+  "key": "Emblemas.emb_bussola",
+  "file": "assets/ui/emblemas/emb_bussola.png",
+  "assetType": "Decal",
+  "name": "VT65 emb bussola",
+  "description": "VAN TUONG 65 - insignia de emblema (tools/blender/emblemas.py)"
+ },
+ {
+  "key": "Emblemas.emb_chulai",
+  "file": "assets/ui/emblemas/emb_chulai.png",
+  "assetType": "Decal",
+  "name": "VT65 emb chulai",
+  "description": "VAN TUONG 65 - insignia de emblema (tools/blender/emblemas.py)"
+ },
+ {
+  "key": "Emblemas.emb_cobra",
+  "file": "assets/ui/emblemas/emb_cobra.png",
+  "assetType": "Decal",
+  "name": "VT65 emb cobra",
+  "description": "VAN TUONG 65 - insignia de emblema (tools/blender/emblemas.py)"
+ },
+ {
+  "key": "Emblemas.emb_dragao",
+  "file": "assets/ui/emblemas/emb_dragao.png",
+  "assetType": "Decal",
+  "name": "VT65 emb dragao",
+  "description": "VAN TUONG 65 - insignia de emblema (tools/blender/emblemas.py)"
+ },
+ {
+  "key": "Emblemas.emb_engenho",
+  "file": "assets/ui/emblemas/emb_engenho.png",
+  "assetType": "Decal",
+  "name": "VT65 emb engenho",
+  "description": "VAN TUONG 65 - insignia de emblema (tools/blender/emblemas.py)"
+ },
+ {
+  "key": "Emblemas.emb_estrela_cadente",
+  "file": "assets/ui/emblemas/emb_estrela_cadente.png",
+  "assetType": "Decal",
+  "name": "VT65 emb estrela cadente",
+  "description": "VAN TUONG 65 - insignia de emblema (tools/blender/emblemas.py)"
+ },
+ {
+  "key": "Emblemas.emb_fenix",
+  "file": "assets/ui/emblemas/emb_fenix.png",
+  "assetType": "Decal",
+  "name": "VT65 emb fenix",
+  "description": "VAN TUONG 65 - insignia de emblema (tools/blender/emblemas.py)"
+ },
+ {
+  "key": "Emblemas.emb_fundador",
+  "file": "assets/ui/emblemas/emb_fundador.png",
+  "assetType": "Decal",
+  "name": "VT65 emb fundador",
+  "description": "VAN TUONG 65 - insignia de emblema (tools/blender/emblemas.py)"
+ },
+ {
+  "key": "Emblemas.emb_fundador_65",
+  "file": "assets/ui/emblemas/emb_fundador_65.png",
+  "assetType": "Decal",
+  "name": "VT65 emb fundador 65",
+  "description": "VAN TUONG 65 - insignia de emblema (tools/blender/emblemas.py)"
+ },
+ {
+  "key": "Emblemas.emb_jade",
+  "file": "assets/ui/emblemas/emb_jade.png",
+  "assetType": "Decal",
+  "name": "VT65 emb jade",
+  "description": "VAN TUONG 65 - insignia de emblema (tools/blender/emblemas.py)"
+ },
+ {
+  "key": "Emblemas.emb_lobo",
+  "file": "assets/ui/emblemas/emb_lobo.png",
+  "assetType": "Decal",
+  "name": "VT65 emb lobo",
+  "description": "VAN TUONG 65 - insignia de emblema (tools/blender/emblemas.py)"
+ },
+ {
+  "key": "Emblemas.emb_lotus",
+  "file": "assets/ui/emblemas/emb_lotus.png",
+  "assetType": "Decal",
+  "name": "VT65 emb lotus",
+  "description": "VAN TUONG 65 - insignia de emblema (tools/blender/emblemas.py)"
+ },
+ {
+  "key": "Emblemas.emb_lua_cheia",
+  "file": "assets/ui/emblemas/emb_lua_cheia.png",
+  "assetType": "Decal",
+  "name": "VT65 emb lua cheia",
+  "description": "VAN TUONG 65 - insignia de emblema (tools/blender/emblemas.py)"
+ },
+ {
+  "key": "Emblemas.emb_operacao",
+  "file": "assets/ui/emblemas/emb_operacao.png",
+  "assetType": "Decal",
+  "name": "VT65 emb operacao",
+  "description": "VAN TUONG 65 - insignia de emblema (tools/blender/emblemas.py)"
+ },
+ {
+  "key": "Emblemas.emb_padrao",
+  "file": "assets/ui/emblemas/emb_padrao.png",
+  "assetType": "Decal",
+  "name": "VT65 emb padrao",
+  "description": "VAN TUONG 65 - insignia de emblema (tools/blender/emblemas.py)"
+ },
+ {
+  "key": "Emblemas.emb_ponte",
+  "file": "assets/ui/emblemas/emb_ponte.png",
+  "assetType": "Decal",
+  "name": "VT65 emb ponte",
+  "description": "VAN TUONG 65 - insignia de emblema (tools/blender/emblemas.py)"
+ },
+ {
+  "key": "Emblemas.emb_raio",
+  "file": "assets/ui/emblemas/emb_raio.png",
+  "assetType": "Decal",
+  "name": "VT65 emb raio",
+  "description": "VAN TUONG 65 - insignia de emblema (tools/blender/emblemas.py)"
+ },
+ {
+  "key": "Emblemas.emb_serraria",
+  "file": "assets/ui/emblemas/emb_serraria.png",
+  "assetType": "Decal",
+  "name": "VT65 emb serraria",
+  "description": "VAN TUONG 65 - insignia de emblema (tools/blender/emblemas.py)"
+ },
+ {
+  "key": "Emblemas.emb_sinalizador",
+  "file": "assets/ui/emblemas/emb_sinalizador.png",
+  "assetType": "Decal",
+  "name": "VT65 emb sinalizador",
+  "description": "VAN TUONG 65 - insignia de emblema (tools/blender/emblemas.py)"
+ },
+ {
+  "key": "Emblemas.emb_starlite",
+  "file": "assets/ui/emblemas/emb_starlite.png",
+  "assetType": "Decal",
+  "name": "VT65 emb starlite",
+  "description": "VAN TUONG 65 - insignia de emblema (tools/blender/emblemas.py)"
+ },
+ {
+  "key": "Emblemas.emb_tigre",
+  "file": "assets/ui/emblemas/emb_tigre.png",
+  "assetType": "Decal",
+  "name": "VT65 emb tigre",
+  "description": "VAN TUONG 65 - insignia de emblema (tools/blender/emblemas.py)"
+ },
+ {
+  "key": "Emblemas.emb_top10",
+  "file": "assets/ui/emblemas/emb_top10.png",
+  "assetType": "Decal",
+  "name": "VT65 emb top10",
+  "description": "VAN TUONG 65 - insignia de emblema (tools/blender/emblemas.py)"
+ },
+ {
+  "key": "Emblemas.emb_trovao",
+  "file": "assets/ui/emblemas/emb_trovao.png",
+  "assetType": "Decal",
+  "name": "VT65 emb trovao",
+  "description": "VAN TUONG 65 - insignia de emblema (tools/blender/emblemas.py)"
+ },
+ {
+  "key": "Emblemas.emb_xomgo",
+  "file": "assets/ui/emblemas/emb_xomgo.png",
+  "assetType": "Decal",
+  "name": "VT65 emb xomgo",
+  "description": "VAN TUONG 65 - insignia de emblema (tools/blender/emblemas.py)"
+ },
+ {
+  "key": "CaixaLoja.batalhao_corpo_en",
+  "file": "assets/ui/caixas/batalhao_corpo_en.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa batalhao corpo en",
+  "description": "VAN TUONG 65 - Caixa de suprimentos com o nome na lingua (tools/blender/caixas_loja.py)"
+ },
+ {
+  "key": "CaixaLoja.batalhao_en",
+  "file": "assets/ui/caixas/batalhao_en.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa batalhao en",
+  "description": "VAN TUONG 65 - Caixa de suprimentos com o nome na lingua (tools/blender/caixas_loja.py)"
+ },
+ {
+  "key": "CaixaLoja.campanha_corpo_en",
+  "file": "assets/ui/caixas/campanha_corpo_en.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa campanha corpo en",
+  "description": "VAN TUONG 65 - Caixa de suprimentos com o nome na lingua (tools/blender/caixas_loja.py)"
+ },
+ {
+  "key": "CaixaLoja.campanha_en",
+  "file": "assets/ui/caixas/campanha_en.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa campanha en",
+  "description": "VAN TUONG 65 - Caixa de suprimentos com o nome na lingua (tools/blender/caixas_loja.py)"
+ },
+ {
+  "key": "CaixaLoja.especiais_corpo_en",
+  "file": "assets/ui/caixas/especiais_corpo_en.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa especiais corpo en",
+  "description": "VAN TUONG 65 - Caixa de suprimentos com o nome na lingua (tools/blender/caixas_loja.py)"
+ },
+ {
+  "key": "CaixaLoja.especiais_en",
+  "file": "assets/ui/caixas/especiais_en.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa especiais en",
+  "description": "VAN TUONG 65 - Caixa de suprimentos com o nome na lingua (tools/blender/caixas_loja.py)"
+ },
+ {
+  "key": "CaixaLoja.gratuita_corpo_en",
+  "file": "assets/ui/caixas/gratuita_corpo_en.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa gratuita corpo en",
+  "description": "VAN TUONG 65 - Caixa de suprimentos com o nome na lingua (tools/blender/caixas_loja.py)"
+ },
+ {
+  "key": "CaixaLoja.gratuita_en",
+  "file": "assets/ui/caixas/gratuita_en.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa gratuita en",
+  "description": "VAN TUONG 65 - Caixa de suprimentos com o nome na lingua (tools/blender/caixas_loja.py)"
+ },
+ {
+  "key": "CaixaLoja.historica_corpo_en",
+  "file": "assets/ui/caixas/historica_corpo_en.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa historica corpo en",
+  "description": "VAN TUONG 65 - Caixa de suprimentos com o nome na lingua (tools/blender/caixas_loja.py)"
+ },
+ {
+  "key": "CaixaLoja.historica_en",
+  "file": "assets/ui/caixas/historica_en.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa historica en",
+  "description": "VAN TUONG 65 - Caixa de suprimentos com o nome na lingua (tools/blender/caixas_loja.py)"
+ },
+ {
+  "key": "CaixaLoja.recruta_corpo_en",
+  "file": "assets/ui/caixas/recruta_corpo_en.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa recruta corpo en",
+  "description": "VAN TUONG 65 - Caixa de suprimentos com o nome na lingua (tools/blender/caixas_loja.py)"
+ },
+ {
+  "key": "CaixaLoja.recruta_en",
+  "file": "assets/ui/caixas/recruta_en.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa recruta en",
+  "description": "VAN TUONG 65 - Caixa de suprimentos com o nome na lingua (tools/blender/caixas_loja.py)"
+ },
+ {
+  "key": "CaixaLoja.servico_corpo_en",
+  "file": "assets/ui/caixas/servico_corpo_en.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa servico corpo en",
+  "description": "VAN TUONG 65 - Caixa de suprimentos com o nome na lingua (tools/blender/caixas_loja.py)"
+ },
+ {
+  "key": "CaixaLoja.servico_en",
+  "file": "assets/ui/caixas/servico_en.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa servico en",
+  "description": "VAN TUONG 65 - Caixa de suprimentos com o nome na lingua (tools/blender/caixas_loja.py)"
+ },
+ {
+  "key": "CaixaLoja.suprimentos_corpo_en",
+  "file": "assets/ui/caixas/suprimentos_corpo_en.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa suprimentos corpo en",
+  "description": "VAN TUONG 65 - Caixa de suprimentos com o nome na lingua (tools/blender/caixas_loja.py)"
+ },
+ {
+  "key": "CaixaLoja.suprimentos_en",
+  "file": "assets/ui/caixas/suprimentos_en.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa suprimentos en",
+  "description": "VAN TUONG 65 - Caixa de suprimentos com o nome na lingua (tools/blender/caixas_loja.py)"
+ },
+ {
+  "key": "CaixaLoja.veterano_corpo_en",
+  "file": "assets/ui/caixas/veterano_corpo_en.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa veterano corpo en",
+  "description": "VAN TUONG 65 - Caixa de suprimentos com o nome na lingua (tools/blender/caixas_loja.py)"
+ },
+ {
+  "key": "CaixaLoja.veterano_en",
+  "file": "assets/ui/caixas/veterano_en.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa veterano en",
+  "description": "VAN TUONG 65 - Caixa de suprimentos com o nome na lingua (tools/blender/caixas_loja.py)"
+ },
+ {
+  "key": "CaixaLoja.batalhao_corpo_es",
+  "file": "assets/ui/caixas/batalhao_corpo_es.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa batalhao corpo es",
+  "description": "VAN TUONG 65 - Caixa de suprimentos com o nome na lingua (tools/blender/caixas_loja.py)"
+ },
+ {
+  "key": "CaixaLoja.batalhao_es",
+  "file": "assets/ui/caixas/batalhao_es.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa batalhao es",
+  "description": "VAN TUONG 65 - Caixa de suprimentos com o nome na lingua (tools/blender/caixas_loja.py)"
+ },
+ {
+  "key": "CaixaLoja.campanha_corpo_es",
+  "file": "assets/ui/caixas/campanha_corpo_es.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa campanha corpo es",
+  "description": "VAN TUONG 65 - Caixa de suprimentos com o nome na lingua (tools/blender/caixas_loja.py)"
+ },
+ {
+  "key": "CaixaLoja.campanha_es",
+  "file": "assets/ui/caixas/campanha_es.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa campanha es",
+  "description": "VAN TUONG 65 - Caixa de suprimentos com o nome na lingua (tools/blender/caixas_loja.py)"
+ },
+ {
+  "key": "CaixaLoja.elite_corpo_es",
+  "file": "assets/ui/caixas/elite_corpo_es.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa elite corpo es",
+  "description": "VAN TUONG 65 - Caixa de suprimentos com o nome na lingua (tools/blender/caixas_loja.py)"
+ },
+ {
+  "key": "CaixaLoja.elite_es",
+  "file": "assets/ui/caixas/elite_es.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa elite es",
+  "description": "VAN TUONG 65 - Caixa de suprimentos com o nome na lingua (tools/blender/caixas_loja.py)"
+ },
+ {
+  "key": "CaixaLoja.especiais_corpo_es",
+  "file": "assets/ui/caixas/especiais_corpo_es.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa especiais corpo es",
+  "description": "VAN TUONG 65 - Caixa de suprimentos com o nome na lingua (tools/blender/caixas_loja.py)"
+ },
+ {
+  "key": "CaixaLoja.especiais_es",
+  "file": "assets/ui/caixas/especiais_es.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa especiais es",
+  "description": "VAN TUONG 65 - Caixa de suprimentos com o nome na lingua (tools/blender/caixas_loja.py)"
+ },
+ {
+  "key": "CaixaLoja.historica_corpo_es",
+  "file": "assets/ui/caixas/historica_corpo_es.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa historica corpo es",
+  "description": "VAN TUONG 65 - Caixa de suprimentos com o nome na lingua (tools/blender/caixas_loja.py)"
+ },
+ {
+  "key": "CaixaLoja.historica_es",
+  "file": "assets/ui/caixas/historica_es.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa historica es",
+  "description": "VAN TUONG 65 - Caixa de suprimentos com o nome na lingua (tools/blender/caixas_loja.py)"
+ },
+ {
+  "key": "CaixaLoja.recruta_corpo_es",
+  "file": "assets/ui/caixas/recruta_corpo_es.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa recruta corpo es",
+  "description": "VAN TUONG 65 - Caixa de suprimentos com o nome na lingua (tools/blender/caixas_loja.py)"
+ },
+ {
+  "key": "CaixaLoja.recruta_es",
+  "file": "assets/ui/caixas/recruta_es.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa recruta es",
+  "description": "VAN TUONG 65 - Caixa de suprimentos com o nome na lingua (tools/blender/caixas_loja.py)"
+ },
+ {
+  "key": "CaixaLoja.servico_corpo_es",
+  "file": "assets/ui/caixas/servico_corpo_es.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa servico corpo es",
+  "description": "VAN TUONG 65 - Caixa de suprimentos com o nome na lingua (tools/blender/caixas_loja.py)"
+ },
+ {
+  "key": "CaixaLoja.servico_es",
+  "file": "assets/ui/caixas/servico_es.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa servico es",
+  "description": "VAN TUONG 65 - Caixa de suprimentos com o nome na lingua (tools/blender/caixas_loja.py)"
+ },
+ {
+  "key": "CaixaLoja.suprimentos_corpo_es",
+  "file": "assets/ui/caixas/suprimentos_corpo_es.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa suprimentos corpo es",
+  "description": "VAN TUONG 65 - Caixa de suprimentos com o nome na lingua (tools/blender/caixas_loja.py)"
+ },
+ {
+  "key": "CaixaLoja.suprimentos_es",
+  "file": "assets/ui/caixas/suprimentos_es.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa suprimentos es",
+  "description": "VAN TUONG 65 - Caixa de suprimentos com o nome na lingua (tools/blender/caixas_loja.py)"
+ },
+ {
+  "key": "CaixaLoja.batalhao_corpo_vi",
+  "file": "assets/ui/caixas/batalhao_corpo_vi.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa batalhao corpo vi",
+  "description": "VAN TUONG 65 - Caixa de suprimentos com o nome na lingua (tools/blender/caixas_loja.py)"
+ },
+ {
+  "key": "CaixaLoja.batalhao_vi",
+  "file": "assets/ui/caixas/batalhao_vi.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa batalhao vi",
+  "description": "VAN TUONG 65 - Caixa de suprimentos com o nome na lingua (tools/blender/caixas_loja.py)"
+ },
+ {
+  "key": "CaixaLoja.campanha_corpo_vi",
+  "file": "assets/ui/caixas/campanha_corpo_vi.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa campanha corpo vi",
+  "description": "VAN TUONG 65 - Caixa de suprimentos com o nome na lingua (tools/blender/caixas_loja.py)"
+ },
+ {
+  "key": "CaixaLoja.campanha_vi",
+  "file": "assets/ui/caixas/campanha_vi.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa campanha vi",
+  "description": "VAN TUONG 65 - Caixa de suprimentos com o nome na lingua (tools/blender/caixas_loja.py)"
+ },
+ {
+  "key": "CaixaLoja.elite_corpo_vi",
+  "file": "assets/ui/caixas/elite_corpo_vi.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa elite corpo vi",
+  "description": "VAN TUONG 65 - Caixa de suprimentos com o nome na lingua (tools/blender/caixas_loja.py)"
+ },
+ {
+  "key": "CaixaLoja.elite_vi",
+  "file": "assets/ui/caixas/elite_vi.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa elite vi",
+  "description": "VAN TUONG 65 - Caixa de suprimentos com o nome na lingua (tools/blender/caixas_loja.py)"
+ },
+ {
+  "key": "CaixaLoja.especiais_corpo_vi",
+  "file": "assets/ui/caixas/especiais_corpo_vi.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa especiais corpo vi",
+  "description": "VAN TUONG 65 - Caixa de suprimentos com o nome na lingua (tools/blender/caixas_loja.py)"
+ },
+ {
+  "key": "CaixaLoja.especiais_vi",
+  "file": "assets/ui/caixas/especiais_vi.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa especiais vi",
+  "description": "VAN TUONG 65 - Caixa de suprimentos com o nome na lingua (tools/blender/caixas_loja.py)"
+ },
+ {
+  "key": "CaixaLoja.gratuita_corpo_vi",
+  "file": "assets/ui/caixas/gratuita_corpo_vi.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa gratuita corpo vi",
+  "description": "VAN TUONG 65 - Caixa de suprimentos com o nome na lingua (tools/blender/caixas_loja.py)"
+ },
+ {
+  "key": "CaixaLoja.gratuita_vi",
+  "file": "assets/ui/caixas/gratuita_vi.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa gratuita vi",
+  "description": "VAN TUONG 65 - Caixa de suprimentos com o nome na lingua (tools/blender/caixas_loja.py)"
+ },
+ {
+  "key": "CaixaLoja.historica_corpo_vi",
+  "file": "assets/ui/caixas/historica_corpo_vi.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa historica corpo vi",
+  "description": "VAN TUONG 65 - Caixa de suprimentos com o nome na lingua (tools/blender/caixas_loja.py)"
+ },
+ {
+  "key": "CaixaLoja.historica_vi",
+  "file": "assets/ui/caixas/historica_vi.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa historica vi",
+  "description": "VAN TUONG 65 - Caixa de suprimentos com o nome na lingua (tools/blender/caixas_loja.py)"
+ },
+ {
+  "key": "CaixaLoja.recruta_corpo_vi",
+  "file": "assets/ui/caixas/recruta_corpo_vi.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa recruta corpo vi",
+  "description": "VAN TUONG 65 - Caixa de suprimentos com o nome na lingua (tools/blender/caixas_loja.py)"
+ },
+ {
+  "key": "CaixaLoja.recruta_vi",
+  "file": "assets/ui/caixas/recruta_vi.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa recruta vi",
+  "description": "VAN TUONG 65 - Caixa de suprimentos com o nome na lingua (tools/blender/caixas_loja.py)"
+ },
+ {
+  "key": "CaixaLoja.servico_corpo_vi",
+  "file": "assets/ui/caixas/servico_corpo_vi.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa servico corpo vi",
+  "description": "VAN TUONG 65 - Caixa de suprimentos com o nome na lingua (tools/blender/caixas_loja.py)"
+ },
+ {
+  "key": "CaixaLoja.servico_vi",
+  "file": "assets/ui/caixas/servico_vi.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa servico vi",
+  "description": "VAN TUONG 65 - Caixa de suprimentos com o nome na lingua (tools/blender/caixas_loja.py)"
+ },
+ {
+  "key": "CaixaLoja.suprimentos_corpo_vi",
+  "file": "assets/ui/caixas/suprimentos_corpo_vi.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa suprimentos corpo vi",
+  "description": "VAN TUONG 65 - Caixa de suprimentos com o nome na lingua (tools/blender/caixas_loja.py)"
+ },
+ {
+  "key": "CaixaLoja.suprimentos_vi",
+  "file": "assets/ui/caixas/suprimentos_vi.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa suprimentos vi",
+  "description": "VAN TUONG 65 - Caixa de suprimentos com o nome na lingua (tools/blender/caixas_loja.py)"
+ },
+ {
+  "key": "CaixaLoja.veterano_corpo_vi",
+  "file": "assets/ui/caixas/veterano_corpo_vi.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa veterano corpo vi",
+  "description": "VAN TUONG 65 - Caixa de suprimentos com o nome na lingua (tools/blender/caixas_loja.py)"
+ },
+ {
+  "key": "CaixaLoja.veterano_vi",
+  "file": "assets/ui/caixas/veterano_vi.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa veterano vi",
+  "description": "VAN TUONG 65 - Caixa de suprimentos com o nome na lingua (tools/blender/caixas_loja.py)"
+ },
+ {
+  "key": "Images.podio_fundo",
+  "file": "assets/ui/podio/fundo.png",
+  "assetType": "Decal",
+  "name": "VT65 podio fundo",
+  "description": "VAN TUONG 65 - cenario pintado do podio (tools/podio_fundo.py)"
  }
 ]

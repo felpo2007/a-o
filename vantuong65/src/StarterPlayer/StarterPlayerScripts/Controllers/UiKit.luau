@@ -26,6 +26,7 @@ UiKit.Estilo = Estilo
 UiKit.V = Estilo.V
 UiKit.F = Estilo.F
 UiKit.px = Estilo.px
+UiKit.robux = Estilo.robux -- D-217: preço com o símbolo do Robux
 UiKit.ts = Estilo.ts
 UiKit.pad = Estilo.pad
 UiKit.list = Estilo.list

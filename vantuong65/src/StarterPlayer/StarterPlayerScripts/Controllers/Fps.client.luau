@@ -47,7 +47,10 @@ local BAD = Color3.fromRGB(230, 96, 80)
 local function place()
 	local vp = workspace.CurrentCamera.ViewportSize
 	local _, br = GuiService:GetGuiInset()
-	label.Position = UDim2.fromOffset(8, vp.Y - math.max(br.Y, 0) - 6)
+	-- D-216: no lobby do celular o canto é da coluna de botões: o rótulo vai para depois dela
+	local menu = player.PlayerGui:FindFirstChild("VT65MenuPrincipal")
+	local noLobby = menu ~= nil and menu:IsA("ScreenGui") and menu.Enabled and vp.Y < 620
+	label.Position = UDim2.fromOffset(if noLobby then math.floor(vp.X * 0.4) else 8, vp.Y - math.max(br.Y, 0) - 6)
 end
 workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(place)
 place()
@@ -66,6 +69,7 @@ RunService.RenderStepped:Connect(function()
 	if not on then
 		return
 	end
+	place() -- o lobby abre e fecha sem mudar o tamanho da tela
 	local ok, ping = pcall(function(): number
 		return player:GetNetworkPing()
 	end)

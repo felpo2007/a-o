@@ -543,7 +543,7 @@ local priceCache: { [string]: string } = {}
 local iconCache: { [string]: number } = {}
 local order = 0
 
--- Preço e ícone ao vivo sem travar a vitrine: o 1º desenho mostra "R$ …" e a miniatura desenhada; o
+-- Preço e ícone ao vivo sem travar a vitrine: o 1º desenho mostra o símbolo do Robux e "…" e a miniatura desenhada; o
 -- botão e a imagem se completam quando o Roblox responde. GetProductInfoAsync devolve o preço
 -- (Managed Pricing) e o IconImageAssetId: o ícone que já está publicado no passe ou no produto.
 local DEFAULT_ICON = 88963008124478
@@ -563,7 +563,7 @@ local function fetch(id: number, infoType: Enum.InfoType)
 		local ok, info = pcall(function()
 			return MarketplaceService:GetProductInfoAsync(id, infoType)
 		end)
-		local p = if ok and info and info.PriceInRobux then string.format("R$ %d", info.PriceInRobux) else "—"
+		local p = if ok and info and info.PriceInRobux then UiKit.robux(info.PriceInRobux) else "—"
 		priceCache[key] = p
 		local icon = if ok and info then tonumber((info :: any).IconImageAssetId) else nil
 		-- D-124: o ícone padrão dos produtos (o cubo cinza, o mesmo em todos, medido no Studio) não
@@ -592,7 +592,7 @@ local function fetch(id: number, infoType: Enum.InfoType)
 end
 local function price(id: number, infoType: Enum.InfoType): string
 	fetch(id, infoType)
-	return priceCache[priceKey(id, infoType)] or "R$ …"
+	return priceCache[priceKey(id, infoType)] or UiKit.robux("…")
 end
 -- quem espera o preço: roda agora se já chegou, senão quando chegar
 local function onPrice(id: number, infoType: Enum.InfoType, fn: (string) -> ())
@@ -1276,7 +1276,7 @@ local function acaoCaixa(c: any): (string, string)
 	if n > 0 then
 		return if n == 1 then "ABRIR · 1 PRONTA" else string.format("ABRIR · %d PRONTAS", n), "premio"
 	elseif c.tipo == "paga" then
-		return if c.robuxRef then string.format("R$ %d", c.robuxRef) else "COMPRAR", "robux"
+		return if c.robuxRef then UiKit.robux(c.robuxRef) else "COMPRAR", "robux"
 	elseif c.fonte == "marco" then
 		return "GANHE JOGANDO", "secondary"
 	end
@@ -1417,7 +1417,7 @@ pintarVitrine = function()
 			local pr = etiqueta(
 				b,
 				if mi.currency == "robux"
-					then string.format("R$ %d", tonumber(mi.price) or 0)
+					then UiKit.robux(tonumber(mi.price) or 0)
 					else Progression.money(tonumber(mi.price) or 0),
 				if mi.owned then V.OLIVE else V.AMBAR,
 				not mi.owned
@@ -2475,7 +2475,7 @@ local function renderMarket(force: boolean?)
 					if not isRobux then
 						set(string.format("COMPRAR · %s", Progression.money(tonumber(mi.price) or 0)))
 					elseif id == 0 then
-						set(string.format("R$ %d", tonumber(mi.price) or 0))
+						set(UiKit.robux(tonumber(mi.price) or 0))
 					else
 						set(string.format("COMPRAR · %s", price(id, infoType)))
 						onPrice(id, infoType, function(pr: string)

@@ -1055,6 +1055,16 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
       - o desfoque da confirmação;
       - 0 erros de script.
     - **v132 publicada** (versão 137 do place, commit f6eec69, com os lotes 99 e 100).
+  - **Lote 101 (D-216 a D-221): os 11 pedidos de 21/11, feito.**
+    - **Mira inclinada:** sem facada, fica de lado sem segurar (medido: 0°, −14°, +13,9°, 0°).
+    - **Celular:** lobby compacto com todas as entradas à vista, texto que cabe, contagem e FPS fora de
+      cima do resto (simulador Galaxy A06).
+    - **Loja e lobby:** símbolo do Robux, LOJA e PASSE chamativos, imagem por entrada.
+    - **Emblemas:** 29 insígnias em Blender. **Caixas:** nome em en, es e vi (54 imagens).
+    - **Som:** tiros e explosões gravados (39 arquivos, Pro Sound Effects) e música calma (APM).
+      **Não ouvi:** escolha pela descrição e pela medida.
+    - **Comemoração:** tela cheia, cenário pintado, coreografia, câmera e efeitos novos.
+    - Relatório: `testes/LOTE101_D216-221_2026-11-21.md`.
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;

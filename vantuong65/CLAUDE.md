@@ -183,6 +183,10 @@ O `sourcemap.json` não vai para o Git.
     - `"hud"` acende o cartão da arma;
     - para o caminho real, do servidor: o `Combat_Hit:FireClient` e o `Combat_Feed:FireAllClients`;
       e a vida pelo `Humanoid.Health`.
+  - Celular (D-216): antes do Play, no Edit, `StudioDeviceSimulatorService:SetDeviceAsync` com o
+    Galaxy A06 (800 × 360, o pior caso); no fim, `StopSimulationAsync`. O clique do MCP não aciona os
+    botões de toque: para inclinar use `VT65DevInclinar` = "ciclo", "esquerda" ou "direita" (Client,
+    mirando com `VT65DevGranada = "mirar:9"`) e leia a rolagem da câmera.
   - D-191/D-190 (só Studio): `VT65DevGranada = "6"` lança uma granada a 6 m/s do primeiro
     jogador; `VT65DevTela = "3p"` liga a 3ª pessoa (o teclado do MCP não chega com o Studio
     atrás); `VT65DevTela = "roda_equip:<n>"` abre a roda de equipamento com a ficha n;
@@ -346,6 +350,8 @@ O `sourcemap.json` não vai para o Git.
     Para ouvir o tiro de perto, dispare do servidor
     `VT65Remotes.Combat_Tracer:FireClient(player, { w, ox, oy, oz, dx, dy, dz, seed })` perto da
     câmera.
+- Tiros e explosões gravados (D-220): `Shared/SomGravacoes` (Pro Sound Effects, biblioteca da Roblox).
+  Recorte novo: meça no áudio (início, duração, pico) e confira no Studio com `IsLoaded` e `TimeLength`.
 - Pá de trincheira (D-183): `blender -b --factory-startup -P tools/blender/novos.py -- shovel_us` (ou `shovel_vc`)
   e o som com `blender ... -P tools/sons_pa.py`. A mão de 1ª e 3ª pessoa sai do `Shared/PaArte`.
   Objeto de mão de 3ª pessoa com várias peças: solde com `Weld` e `C0`, não com `WeldConstraint`.
@@ -383,6 +389,9 @@ O `sourcemap.json` não vai para o Git.
     `CaixaLoja.<id>_corpo`/`_tampa`.
   - O `upload-assets` só troca o número de chave que já existe no `AssetIds.luau`: chave nova, ponha
     a linha (com o ID do `roblox_ids.json`) à mão.
+- Emblemas (D-218): `tools/blender/emblemas.py -- todos --amostras 48`; caixa por língua (D-219):
+  `tools/blender/caixas_loja.py -- todas --idiomas` (os PNG ficam fora do Git). Cenário do pódio
+  (D-221): `uv run --group arte python tools/podio_fundo.py`.
 - Efeitos de interface (D-213, `Controllers/UiEfeitos`): as texturas saem de
   `uv run --group arte python tools/efeitos_ui.py` (`Images.efeito_*`, atributo `Img_efeito_*`).
   Os sons da abertura saem de `blender -b --factory-startup -P tools/sons_roleta.py -- caixa_`.
@@ -429,7 +438,7 @@ O `sourcemap.json` não vai para o Git.
 - Segredos só no `.env` (no `.gitignore`), nunca no código nem no chat.
 - ForgeGUI: nunca regenerar um job em `outcome_unknown`. "failed" com `retryable` pode ser
   retomado com `generation_retry`.
-- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-216) e atualize `PROGRESS.md`.
+- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-222) e atualize `PROGRESS.md`.
 - Tetos de triângulos por modelo: vegetação ≤ 6 mil (D-135), props e herói ≤ 20 mil (`ArtBudget`,
   conferido pelo teste da F5).
 - Commits no branch acima, com mensagem em português.
