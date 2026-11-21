@@ -1085,6 +1085,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     - Testes: Lune 908, pytest 76, autoteste 18 de 18, 21 portas e rotas a pé e agachado no Studio.
     - Medido: chamadas de desenho +17,9% nas 9 vistas. **Celular e 60 jogadores não foram medidos.**
     - Relatório: `testes/LOTE104_D232_2026-11-21.md`.
+    - **v136 publicada** (versão 141 do place, commit 31771b3).
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;
