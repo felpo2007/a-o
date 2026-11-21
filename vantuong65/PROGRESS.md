@@ -1065,6 +1065,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
       **Não ouvi:** escolha pela descrição e pela medida.
     - **Comemoração:** tela cheia, cenário pintado, coreografia, câmera e efeitos novos.
     - Relatório: `testes/LOTE101_D216-221_2026-11-21.md`.
+    - **v133 publicada** (versão 138 do place, commit 9ed8bbf).
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;
