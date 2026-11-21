@@ -978,6 +978,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
       - 0 erros.
     - Lune 845 ok (60 arquivos), pytest 76, ruff, StyLua e luau-lsp limpos, i18n 100%. Relatório:
       `testes/LOTE97_D212_2026-11-20.md`.
+    - **v130 publicada** (versão 135 do place, commit d272b10).
     - **Próximos (pedidos de 20/11):** a animação da loja e da abertura das caixas, o pódio com zoom
       no melhor e comemoração, e as transições.
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
