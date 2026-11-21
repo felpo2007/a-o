@@ -1098,6 +1098,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
       autoteste 18 de 18 em partida nova.
     - Desenho: +3,1% sobre a v137. **Celular e 60 jogadores continuam sem medida.**
     - Relatório: `testes/LOTE106_D234_2026-11-21.md`.
+    - **v138 publicada** (versão 143 do place, commit cb1d2e1).
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;
