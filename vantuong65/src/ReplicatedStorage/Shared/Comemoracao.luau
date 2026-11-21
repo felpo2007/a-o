@@ -165,7 +165,7 @@ Comemoracao.GESTOS = {
 	grito = function(t: number): Pose
 		local k = 0.5 - 0.5 * math.cos(TAU * t / 2.4) -- 0 no peito, 1 no alto
 		local b = math.max(0, sen(2.2, t)) -- as batidas no peito
-		local peito = {
+		local peito: { [string]: { number } } = {
 			RightShoulder = { 20, 0, 8 },
 			RightElbow = { 40, 0, 0 },
 			LeftShoulder = { 75 + 12 * b, 0, 18 },
@@ -173,7 +173,7 @@ Comemoracao.GESTOS = {
 			Waist = { 6 * b, 0, 0 },
 			Neck = { -6, 0, 0 },
 		}
-		local alto = {
+		local alto: { [string]: { number } } = {
 			RightShoulder = { 20, 0, 150 },
 			RightElbow = { 12, 0, 0 },
 			LeftShoulder = { 20, 0, -150 },

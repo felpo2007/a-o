@@ -1113,6 +1113,33 @@ export type ModalOpts = {
 }
 local modalGui: ScreenGui? = nil
 local modalAberto: ((ok: boolean, silencioso: boolean?) -> ())? = nil
+-- D-215 (as referências do dono: o "BACK TO THE MAIN MENU?" sobre o fundo escurecido e desfocado): com
+-- uma confirmação aberta, o mundo atrás desfoca (BlurEffect na câmera do cliente; a interface não)
+local function desfoque(on: boolean)
+	local cam = workspace.CurrentCamera
+	if not cam then
+		return
+	end
+	local b = cam:FindFirstChild("VT65DesfoqueModal")
+	if on and not b then
+		local nb = Instance.new("BlurEffect")
+		nb.Name = "VT65DesfoqueModal"
+		nb.Size = 0
+		nb.Parent = cam
+		b = nb
+	end
+	if b and b:IsA("BlurEffect") then
+		local tw = TweenService:Create(b, TweenInfo.new(0.25, Enum.EasingStyle.Quad), { Size = if on then 14 else 0 })
+		tw:Play()
+		if not on then
+			tw.Completed:Once(function()
+				if b.Parent and modalAberto == nil then
+					b:Destroy()
+				end
+			end)
+		end
+	end
+end
 function UiKit.modal(o: ModalOpts): () -> ()
 	local anterior = modalAberto
 	if anterior then
@@ -1212,6 +1239,7 @@ function UiKit.modal(o: ModalOpts): () -> ()
 		UiKit.closed("confirma", silencioso)
 		if modalAberto == nil then
 			g.Enabled = false
+			desfoque(false)
 		end
 		if not silencioso then
 			if ok then
@@ -1224,6 +1252,7 @@ function UiKit.modal(o: ModalOpts): () -> ()
 	modalAberto = fechar
 	UiKit.opened("confirma", g.DisplayOrder)
 	-- entrada curta: o véu escurece e a janela cresce de 96 % (sem crescer com movimento reduzido)
+	desfoque(true)
 	UiKit.tween(veu, UiKit.QUICK, { BackgroundTransparency = 0.45 })
 	esc.Scale = 0.96
 	UiKit.tween(esc, UiKit.SOFT, { Scale = 1 })

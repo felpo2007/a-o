@@ -20,6 +20,7 @@ local RunService = game:GetService("RunService")
 
 local Comemoracao = require(ReplicatedStorage.Shared.Comemoracao)
 local Net = require(ReplicatedStorage.Shared.Net)
+local Cortina = require(game:GetService("ReplicatedFirst"):WaitForChild("Cortina"))
 local CenaComemoracao = require(script.Parent.CenaComemoracao)
 local Input = require(script.Parent.Input)
 local UiEfeitos = require(script.Parent.UiEfeitos)
@@ -463,8 +464,7 @@ local function setShown(on: boolean)
 	end
 end
 
-local function onPhase()
-	local f = ReplicatedStorage:GetAttribute("VT65Fase")
+local function aplicaFase(f: any)
 	if f == "comemoracao" then
 		setShown(true)
 		showPodium()
@@ -483,9 +483,32 @@ local function onPhase()
 		setShown(false)
 	end
 end
-ReplicatedStorage:GetAttributeChangedSignal("VT65Fase"):Connect(onPhase)
+
+-- D-215: cada troca de fase passa pela cortina (Cortina), com o nome da próxima tela no meio; a troca
+-- acontece com a tela coberta. Sem nada na tela antes nem depois (a partida segue), troca direto.
+local SUB_FASE = {
+	comemoracao = "FIM DA PARTIDA",
+	votacao = "VOTAÇÃO DO MAPA",
+	restauracao = "PREPARANDO O CAMPO",
+} :: { [string]: string }
+local function onPhase(primeira: boolean?)
+	local f = ReplicatedStorage:GetAttribute("VT65Fase")
+	local mostra = type(f) == "string" and SUB_FASE[f] ~= nil
+	if primeira or not (shown or mostra) then
+		aplicaFase(f)
+		return
+	end
+	task.spawn(function()
+		Cortina.passar(function()
+			aplicaFase(ReplicatedStorage:GetAttribute("VT65Fase")) -- a fase de agora (a última vence)
+		end, "STARLITE", if mostra then SUB_FASE[f :: string] else "A PARTIDA VAI COMEÇAR")
+	end)
+end
+ReplicatedStorage:GetAttributeChangedSignal("VT65Fase"):Connect(function()
+	onPhase()
+end)
 ReplicatedStorage:GetAttributeChangedSignal("VT65Votos"):Connect(refreshVotes)
-onPhase()
+onPhase(true)
 
 -- relógio da fase, a cena e os cartões
 RunService.RenderStepped:Connect(function(dt: number)

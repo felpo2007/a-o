@@ -32,6 +32,7 @@ local Input = require(script.Parent.Input)
 local Toast = require(script.Parent.Toast)
 local ToqueTelas = require(script.Parent.ToqueTelas)
 local ToqueUi = require(script.Parent.ToqueUi)
+local UiEfeitos = require(script.Parent.UiEfeitos)
 local UiKit = require(script.Parent.UiKit)
 
 local player = Players.LocalPlayer
@@ -867,6 +868,45 @@ local function showEnd(st: any)
 	TweenService:Create(p.hold, TweenInfo.new(0.32, Enum.EasingStyle.Quad), { GroupTransparency = 0 }):Play()
 	p.fit.play(TweenInfo.new(0.35, Enum.EasingStyle.Quint), 1, 1.04)
 	UiKit.enter(p.parts, px(18, 26), 0.05, 0.05)
+	-- D-215: a palavra bate na tela (cresce de 150 % e assenta com mola); na vitória, faíscas e a onda
+	-- na cor do lado e um brilho passando pela palavra; na derrota, o tranco. Sem isso com movimento
+	-- reduzido (o UiKit.tween troca direto; os efeitos não saem).
+	local golpe = p.box:FindFirstChild("Golpe") :: UIScale?
+	if not golpe then
+		local u = Instance.new("UIScale")
+		u.Name = "Golpe"
+		u.Parent = p.box
+		golpe = u
+	end
+	local g = golpe :: UIScale
+	g.Scale = if UiEfeitos.calmo() then 1 else 1.5
+	UiKit.tween(g, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out, 0, false, 0.12), { Scale = 1 })
+	local vitoria = word == "VITÓRIA" or (not f and (w == "US" or w == "VC"))
+	task.delay(0.5, function()
+		if endToken ~= my or not endOpen then
+			return
+		end
+		-- px de projeto: o quadro está dentro do UIScale do fit
+		local escala = if p.hold.AbsoluteSize.X > 0 then p.hold.Size.X.Offset / p.hold.AbsoluteSize.X else 1
+		local meio = (p.box.AbsolutePosition - p.hold.AbsolutePosition + p.box.AbsoluteSize / 2) * escala
+		if vitoria then
+			UiEfeitos.faiscas(p.hold, meio, tone, 44, { vmin = 300, vmax = 900, gravidade = 620, z = 9 })
+			UiEfeitos.onda(p.hold, meio, tone, px(320, 440), 0.7, 8)
+			local vidro = p.box:FindFirstChild("Vidro")
+			if not vidro then
+				local fv = Instance.new("Frame")
+				fv.Name = "Vidro"
+				fv.BackgroundTransparency = 1
+				fv.Size = UDim2.fromScale(1, 1)
+				fv.ClipsDescendants = true
+				fv.ZIndex = 5
+				fv.Parent = p.box
+				UiEfeitos.varre(fv, 4, nil, 6)
+			end
+		elseif word == "DERROTA" then
+			UiEfeitos.tremer(p.hold, 0.35, px(10, 14))
+		end
+	end)
 	task.delay(0.35, function()
 		if endToken == my and endOpen then
 			UiKit.focus(p.hold) -- o A do controle cai no botão do relatório

@@ -9558,3 +9558,61 @@ UiKit).
 - a chegada nos caixotes;
 - a prévia do ARMÁRIO;
 - com jogadores de verdade e no jogo publicado.
+
+## D-215 — Lote 100: as transições das telas (a cortina, a palavra da vitória e o desfoque) (2026-11-21)
+
+**Pedidos do dono:** "quero transição nas telas de vitoria carregamento etc" e "analise como o jogo de
+box no roblox faz suas transições tela de carregamento etc".
+
+**A análise do jogo de boxe:**
+- **O jogo:** a busca na web não achou o título (nem "Stand and Bang" nem o "OCTAFOLD" do ringue);
+  vídeo não dá para ver daqui. A análise sai das 11 capturas do dono (18/11).
+- **Moldura fixa:** a barra de cima, as dicas de botão embaixo e o lutador iluminado à direita ficam;
+  só o conteúdo do meio troca (LOJA, PACOTES, CÓDIGOS, CARREIRA). A troca é de conteúdo, não de tela
+  inteira. Nós já fazíamos assim nas abas (a folha desliza 14 px, D-207).
+- **Modal sobre o fundo escurecido e desfocado:** "BACK TO THE MAIN MENU?" por cima da CARREIRA
+  apagada. Nós escurecíamos, mas não desfocávamos.
+- **Cartão de título nas passagens grandes:** antes da luta, a arena vista do alto com
+  "FELPO vs SAMUEL" e "GET READY 9". A passagem grande tem nome e contagem; nós já temos a contagem
+  (D-203).
+- **Cor quente e contínua:** o vermelho e o laranja do fundo se repetem em todas as telas; a troca
+  não muda a luz.
+
+**O que entrou:**
+- **A cortina** (`ReplicatedFirst/Cortina`, a conta em `CortinaCurva`): um quadrado escuro inclinado
+  (14°) atravessa a tela da esquerda para a direita, com as faixas âmbar e cáqui na frente.
+  - Cobre em 0,34 s (freando), mostra "STARLITE" e o nome da próxima tela, e sai pela direita em
+    0,4 s (acelerando), com as faixas de trás. A troca de conteúdo acontece coberta: nada pisca.
+  - Cobre qualquer proporção (16:9, 4:3, 21:9, celular em pé e deitado: o teste confere os cantos) e
+    some inteira nas pontas.
+  - Uma de cada vez. Com movimento reduzido, esmaece no lugar (0,16 + 0,12 + 0,2 s).
+  - Reservas: se a cortina falhar, a troca acontece mesmo assim e ela some. Na tela de entrada, volta
+    o esmaecer de antes; o jogador nunca fica preso.
+- **Onde ela passa:**
+  - **da tela de entrada para o lobby** ("STARLITE · OPERAÇÃO STARLITE · AGOSTO DE 1965"): coberta, a
+    tela de entrada sai e a mesa do lobby começa o travelling de chegada, que aparece já se mexendo;
+  - **nas fases do fim de partida:** VITÓRIA → comemoração ("FIM DA PARTIDA"), → votação ("VOTAÇÃO DO
+    MAPA"), → preparando ("PREPARANDO O CAMPO") e → a partida nova ("A PARTIDA VAI COMEÇAR"). Antes,
+    as três trocavam seco. Quem entra no meio de uma fase não vê a cortina.
+- **A palavra da VITÓRIA/DERROTA bate na tela:** cresce de 150 % e assenta com mola.
+  - Na vitória: faíscas e a onda na cor do lado e um brilho passando pela palavra (os efeitos da
+    D-213).
+  - Na derrota: o tranco.
+  - Com movimento reduzido: sem nada disso.
+- **O desfoque da confirmação:** com uma confirmação aberta (UiKit.modal), o mundo atrás desfoca
+  (BlurEffect 14 na câmera do cliente; a interface não desfoca).
+
+**Achado no caminho:** o luau-lsp escreve os diagnósticos na saída de erro, e eu a descartava desde o
+lote 98. O "limpo" dos lotes 98 e 99 não valia. A rodada certa (o código de saída e o arquivo com as
+duas saídas) achou tipos na `Comemoracao` (lote 99) e na `Cortina`; os dois corrigidos. Nos arquivos
+do lote 98 não havia nada.
+
+**Testes:** `transicoes.luau` (4):
+- a cobertura em 6 proporções de tela, com as pontas fora;
+- as curvas;
+- o tempo, abaixo de 1 s;
+- as ligações e as reservas.
+
+**Não testado:** nada desta D foi visto no Studio, porque o jogo do dono estava aberto (GPU de 2 GB,
+CLAUDE.md). Fica para conferir antes de publicar: a cortina na saída da tela de entrada e nas fases
+do fim, a palavra da vitória e o desfoque.

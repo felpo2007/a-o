@@ -1023,9 +1023,32 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
       - a câmera perto do 1º lida no cliente;
       - a imagem da câmera e da prévia ficou sem ver: o jogo do dono estava aberto (GPU de 2 GB) e os
         ViewportFrames pararam de desenhar.
-    - Lune 862 ok (61 arquivos), pytest 76, ruff e luau-lsp limpos, i18n 100%. Relatório:
+    - Lune 862 ok (61 arquivos), pytest 76, ruff limpo, i18n 100%. Relatório:
       `testes/LOTE99_D214_2026-11-21.md`.
-    - **Próximos (pedidos de 20/11):** as transições (o estudo do jogo de boxe).
+    - Correção (lote 100): o "luau-lsp limpo" deste lote não valia (a saída de erro estava
+      descartada). Ele acusava tipos no gesto do grito (`Comemoracao`), corrigidos no lote 100.
+  - **Lote 100 (D-215): as transições das telas, feito (falta ver no Studio e publicar 99 e 100).**
+    - **Análise das capturas do jogo de boxe** (o título não apareceu na web):
+      - moldura fixa e só o conteúdo trocando;
+      - modal sobre o fundo escurecido e desfocado;
+      - cartão de título nas passagens grandes;
+      - a cor quente contínua.
+    - **Cortina:** um quadrado escuro inclinado com as faixas âmbar atravessa a tela, mostra
+      "STARLITE" e o nome da próxima tela, e a troca acontece coberta. Passa:
+      - da tela de entrada para o lobby;
+      - entre as fases do fim de partida (comemoração, votação, preparando, partida nova).
+      - Cobre qualquer proporção de tela (testado em 6).
+      - Se falhar, a troca acontece mesmo assim (na entrada, volta o esmaecer).
+    - **VITÓRIA/DERROTA:** a palavra bate na tela. Na vitória, faíscas, onda e brilho; na derrota, o
+      tranco.
+    - **Confirmação:** o mundo atrás desfoca.
+    - **luau-lsp:** ele escreve no stderr, e eu descartava. Com a saída certa, achou tipos na
+      `Comemoracao` (lote 99) e na `Cortina`, corrigidos. Código 0, sem diagnóstico.
+    - Lune 866 ok (62 arquivos), pytest 76, ruff limpo, i18n 100%. Relatório:
+      `testes/LOTE100_D215_2026-11-21.md`.
+    - **Pendente:**
+      - ver no Studio as imagens dos lotes 99 e 100 e publicar os dois;
+      - o jogo do dono estava aberto, com a GPU de 2 GB ocupada.
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;

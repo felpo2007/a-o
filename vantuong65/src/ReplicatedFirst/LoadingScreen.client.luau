@@ -57,6 +57,7 @@ pcall(function()
 end)
 
 local Acabamento = require(script.Parent:WaitForChild("Acabamento"))
+local Cortina = require(script.Parent:WaitForChild("Cortina"))
 local Idioma = require(script.Parent:WaitForChild("Idioma"))
 
 local player = Players.LocalPlayer
@@ -932,14 +933,29 @@ local function close(settings: boolean?)
 	while player:GetAttribute("MenuPrincipal") ~= true and os.clock() - w0 < 4 and alive == my do
 		task.wait(0.05)
 	end
+	-- D-215: a cortina cobre a tela de entrada; coberta, a tela sai e a mesa do lobby começa o
+	-- travelling de chegada; a cortina segue pela direita e mostra o lobby já se mexendo
+	tween(stage, 0.35, { Position = UDim2.new(0.5, 0, 0.5, -14) }, Enum.EasingStyle.Sine, INOUT)
+	local coberta = pcall(Cortina.cobrir, "STARLITE", "OPERAÇÃO STARLITE · AGOSTO DE 1965")
+	if not coberta then
+		Cortina.soltar() -- falhou: a saída de antes (esmaecer), nunca a tela presa
+	end
 	gui:SetAttribute("Saindo", true) -- a mesa do lobby (LobbyScene) começa o travelling de chegada agora
 	local cg = exitGroup -- criado vazio no início: nada novo nasce na hora da saída
-	cg.GroupTransparency = 0
 	bg.Parent = cg
 	film.raiz.Parent = cg
-	tween(stage, 1.0, { Position = UDim2.new(0.5, 0, 0.5, -14) }, Enum.EasingStyle.Sine, INOUT)
-	local fade = tween(cg, 0.95, { GroupTransparency = 1 }, Enum.EasingStyle.Sine, INOUT, 0.05)
-	fade.Completed:Wait()
+	if coberta then
+		cg.GroupTransparency = 1 -- some de uma vez: está debaixo da cortina
+		task.spawn(function()
+			if not pcall(Cortina.descobrir) then
+				Cortina.soltar()
+			end
+		end)
+	else
+		cg.GroupTransparency = 0
+		local fade = tween(cg, 0.95, { GroupTransparency = 1 }, Enum.EasingStyle.Sine, INOUT, 0.05)
+		fade.Completed:Wait()
+	end
 	if alive == my then
 		alive += 1 -- para os laços (pontilha, briefing, contagem)
 	end
