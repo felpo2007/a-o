@@ -1054,6 +1054,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
       - a VITÓRIA batendo (a moldura que esticava foi corrigida);
       - o desfoque da confirmação;
       - 0 erros de script.
+    - **v132 publicada** (versão 137 do place, commit f6eec69, com os lotes 99 e 100).
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;
