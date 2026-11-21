@@ -55,6 +55,9 @@ end, "../../ServerStorage/VT65Build/Landscape")
 local FeatureBuilder = mod(function()
 	return (game :: any):GetService("ServerStorage").VT65Build.FeatureBuilder
 end, "../../ServerStorage/VT65Build/FeatureBuilder")
+local Expansao = mod(function()
+	return (script :: any).Parent.Expansao
+end, "./Expansao")
 
 local M = 0.28
 ArtPlan.VERSION = 3 -- o terreno gerado guarda isto (atributo SitePlan): base pelo plano só se bater
@@ -1113,7 +1116,120 @@ function ArtPlan.structures(ctx: Ctx, has: (string) -> boolean): { Item }
 			it.base = math.min(it.base, lo)
 		end
 	end
+	ArtPlan.expansao(ctx, has, out)
 	return out
+end
+
+-- D-232: a expansão da Vila e do Arrozal (dados em Expansao.luau), depois de tudo o que é fixo. Os becos,
+-- valas e patamares novos ficam marcados (`exp`): com `site.semExp` o chão volta a ser o de antes, e é
+-- assim que o sorteio das plantas antigas continua igual (ArtPlan.plants).
+function ArtPlan.expansao(ctx: Ctx, has: (string) -> boolean, out: { Item })
+	if not Expansao.LIGADA then
+		return
+	end
+	local site = ctx.site
+	for _, sp in ctx.mapConfig.Strongpoints do
+		local setor = Expansao.SETORES[sp.name]
+		if not setor then
+			continue
+		end
+		local function mundo(x: number, z: number): (number, number)
+			return sp.x + x / M, sp.z + z / M
+		end
+		for _, b in setor.becos do
+			for i = 1, #b - 3, 2 do
+				local x1, z1 = mundo(b[i], b[i + 1])
+				local x2, z2 = mundo(b[i + 2], b[i + 3])
+				Site.addLane(site, x1, z1, x2, z2, Expansao.BECO_MEIA_M / M)
+			end
+		end
+		for _, c in setor.cortes do
+			-- o leito acompanha o chão, `fundo` abaixo, e nunca sobe na direção da água (do 1º ao último ponto)
+			local ys: { number } = {}
+			-- água que termina num riacho: o leito não desce abaixo do leito dele
+			local fim = c.pts[#c.pts]
+			local fimH, fimAgua = Site.column(site, mundo(fim[1], fim[2]))
+			local piso = if fimAgua > -math.huge then fimH else -math.huge
+			for i, a in c.pts do
+				local x, z = mundo(a[1], a[2])
+				local y = math.max(Site.column(site, x, z) - c.fundo / M, piso)
+				-- 3º valor do ponto: trecho plano (a água passa nivelada pela comporta)
+				ys[i] = if i == 1 then y elseif a[3] then ys[i - 1] else math.min(ys[i - 1], y)
+			end
+			for i = 1, #c.pts - 1 do
+				local a, b = c.pts[i], c.pts[i + 1]
+				local x1, z1 = mundo(a[1], a[2])
+				local x2, z2 = mundo(b[1], b[2])
+				Site.addCut(site, {
+					x1 = x1,
+					z1 = z1,
+					y1 = ys[i],
+					x2 = x2,
+					z2 = z2,
+					y2 = ys[i + 1],
+					half = c.largura / 2 / M,
+					bank = c.margem / M,
+					depth = c.agua / M,
+					kind = c.id,
+				})
+			end
+		end
+		for _, p in setor.pecas do
+			-- "parts:<tipo>" não tem asset: o MapLife monta com peças
+			if string.sub(p.key, 1, 6) ~= "parts:" and not has(p.key) then
+				continue
+			end
+			local x, z = mundo(p.x, p.z)
+			local yaw = math.rad(p.giro or 0)
+			if p.olha then
+				local tx, tz = mundo(p.olha[1], p.olha[2])
+				yaw = math.atan2(-(tx - x), -(tz - z))
+			end
+			local scale = p.escala or 1
+			local hx, hz = half(p.key, scale)
+			local base: number
+			if p.travessia then
+				-- prancha e passarela: a média do chão nas duas pontas do eixo comprido, não o fundo da vala
+				local ca, sa = math.cos(yaw), math.sin(yaw)
+				local ox, oz = sa * hz, ca * hz
+				if hx > hz then
+					ox, oz = ca * hx, -sa * hx
+				end
+				base = ((Site.column(site, x + ox, z + oz)) + (Site.column(site, x - ox, z - oz))) / 2
+			elseif p.semPatamar then
+				base = (ArtPlan.footprint(ctx, x, z, yaw, hx, hz))
+			else
+				-- comporta: o piso do modelo fica no leito do canal e o patamar, `afunda` acima dele
+				local leito = if p.sobreLeito and p.afunda then Site.cutBed(site, x, z) else nil
+				local pad = Site.addPad(site, x, z, yaw, hx, hz, true, if leito then leito + p.afunda / M else nil)
+				pad.exp = true
+				pad.canal = p.sobreLeito
+				base = pad.level
+			end
+			local sink = if p.afunda then p.afunda / M else nil
+			table.insert(
+				out,
+				{
+					key = p.key,
+					x = x,
+					z = z,
+					yaw = yaw,
+					scale = scale,
+					hx = hx,
+					hz = hz,
+					base = base - (sink or 0),
+					group = "special",
+					foliage = false,
+					shadow = true,
+					padded = not p.semPatamar and not sink and not p.travessia,
+					sink = sink,
+					objective = sp.name,
+					id = p.id,
+					expansao = true,
+				} :: any
+			)
+		end
+	end
 end
 
 -- ===== plantas =====
@@ -1165,6 +1281,9 @@ function ArtPlan.groundProblem(ctx: Ctx, x: number, z: number, r: number): strin
 	if Vegetation.blocked({ exclude = ctx.spawnCircles, corridors = ctx.spawnLanes } :: any, x, z) then
 		return "clareira"
 	end
+	if not site.semExp and Site.expAt(site, x, z, r) then
+		return "expansao" -- D-232: beco, patamar ou vala novos
+	end
 	for _, s in ctx.small do
 		local dx, dz = x - s.x, z - s.z
 		local lim = math.max(s.hx, s.hz) + rr
@@ -1203,7 +1322,7 @@ end
 -- (x, z) cai dentro da pegada de uma construção com patamar ou casa, com folga `pad` (studs)
 function ArtPlan.inside(structures: { Item }, x: number, z: number, pad: number): boolean
 	for _, s in structures do
-		if s.padded or s.group == "house" or s.group == "base" then
+		if s.padded or s.group == "house" or s.group == "base" or (s :: any).expansao then
 			local dx, dz = x - s.x, z - s.z
 			local lim = math.sqrt(s.hx * s.hx + s.hz * s.hz) + pad
 			if dx * dx + dz * dz < lim * lim then
@@ -1221,7 +1340,7 @@ end
 -- Tudo que é planta: quintais, Colina 30, bambuzal da vila, sebes, canteiros de muda e a mata.
 -- structures: ArtPlan.structures (as zonas livres saem delas); corridors: raias do campo de tiro.
 -- has(key): modelo publicado. yield: chamado de vez em quando (task.wait no Roblox).
-function ArtPlan.plants(
+local function plantasBase(
 	ctx: Ctx,
 	structures: { Item },
 	corridors: { any },
@@ -1519,6 +1638,142 @@ function ArtPlan.plants(
 		end
 	end
 	return out
+end
+
+-- D-232: caixas de terreno a escavar (abrigo, trincheira, fundo da comporta). env: { Vector3, CFrame }.
+-- Só o volume de cada peça, depois de o terreno pronto (Build.terrain): nada de limpeza global.
+function ArtPlan.expansaoEscavar(ctx: Ctx, env: any): { any }
+	local out = {}
+	if not Expansao.LIGADA then
+		return out
+	end
+	for _, sp in ctx.mapConfig.Strongpoints do
+		local setor = Expansao.SETORES[sp.name]
+		for _, e in (setor and setor.escavar) or {} do
+			local x, z = sp.x + e.x / M, sp.z + e.z / M
+			local top = Site.column(ctx.site, x, z)
+			local fundo = e.fundo / M
+			local folga = 0.6 / M -- acima do chão, para a caixa não deixar casca de terra na boca
+			local h = fundo + folga
+			table.insert(out, {
+				cf = env.CFrame.new(x, top - fundo + h / 2, z) * env.CFrame.Angles(0, math.rad(e.giro), 0),
+				size = env.Vector3.new(e.tam[1] / M, h, e.tam[2] / M),
+				kind = "carve",
+				name = "Exp_" .. e.id,
+			})
+		end
+	end
+	return out
+end
+
+-- D-232: as plantas de antes saem do mesmo sorteio, com o chão de antes (`semExp`). Depois, só sai a que
+-- caiu em beco, patamar ou vala novos, e entram as plantas da expansão, com sorteio próprio.
+function ArtPlan.plants(
+	ctx: Ctx,
+	structures: { Item },
+	corridors: { any },
+	has: (string) -> boolean,
+	yield: (() -> ())?
+): { Item }
+	if not Expansao.LIGADA then
+		return plantasBase(ctx, structures, corridors, has, yield)
+	end
+	local site = ctx.site
+	local antigas: { Item } = {}
+	local novas: { Item } = {}
+	for _, s in structures do
+		table.insert(if (s :: any).expansao then novas else antigas, s)
+	end
+	site.semExp = true
+	local base = plantasBase(ctx, antigas, corridors, has, yield)
+	site.semExp = false
+	local out: { Item } = table.create(#base)
+	for _, p in base do
+		if not Site.expAt(site, p.x, p.z, p.hx) and not ArtPlan.inside(novas, p.x, p.z, p.hx * 0.5) then
+			p.base = ArtPlan.plantBase(ctx, p.x, p.z, p.hx, p.key, p.scale)
+			table.insert(out, p)
+		end
+	end
+	ArtPlan.plantasExpansao(ctx, novas, has, out)
+	return out
+end
+
+-- D-232: árvores-marco e plantas postas à mão em cada setor, e o sorteio pelo resto da mata
+function ArtPlan.plantasExpansao(ctx: Ctx, novas: { Item }, has: (string) -> boolean, out: { Item })
+	local function livre(key: string, x: number, z: number, scale: number): number?
+		local r = ArtPlan.plantRadius(key, scale)
+		if ArtPlan.groundProblem(ctx, x, z, r) or ArtPlan.inside(novas, x, z, r * 0.5) then
+			return nil
+		end
+		return r
+	end
+	local function poe(key: string, x: number, z: number, yaw: number, scale: number, r: number)
+		table.insert(out, {
+			key = key,
+			x = x,
+			z = z,
+			yaw = yaw,
+			scale = scale,
+			hx = r,
+			hz = r,
+			base = ArtPlan.plantBase(ctx, x, z, r, key, scale),
+			group = "plant",
+			foliage = true,
+			shadow = scale >= 1,
+			padded = false,
+		})
+	end
+	local MC = ctx.mapConfig
+	local rng = Rng.new(19650818 + 2320)
+	for _, sp in MC.Strongpoints do
+		local setor = Expansao.SETORES[sp.name]
+		if setor and setor.plantas then
+			for _, p in setor.plantas do
+				if has(p.key) then
+					local x, z = sp.x + p.x / M, sp.z + p.z / M
+					local scale = p.escala or 1
+					local yaw = rng:range(0, 2 * math.pi)
+					local r = livre(p.key, x, z, scale)
+					if r then
+						poe(p.key, x, z, yaw, scale, r)
+					end
+				end
+			end
+		end
+	end
+	local B = MC.Bounds
+	for _, e in Expansao.MATA or {} do
+		if not has(e.key) then
+			continue
+		end
+		local postas: { { number } } = {}
+		local tentativas = 0
+		while #postas < e.n and tentativas < e.n * 40 do
+			tentativas += 1
+			local x, z = rng:range(B.minX, B.maxX), rng:range(B.minZ, B.maxZ)
+			local scale = rng:range(e.s0, e.s1)
+			local yaw = rng:range(0, 2 * math.pi)
+			local kind = ctx.landscape:kindAt(x, z)
+			if not e.tipos[kind] then
+				continue
+			end
+			local perto = false
+			for _, q in postas do
+				if (q[1] - x) ^ 2 + (q[2] - z) ^ 2 < (e.dist / M) ^ 2 then
+					perto = true
+					break
+				end
+			end
+			if perto then
+				continue
+			end
+			local r = livre(e.key, x, z, scale)
+			if r then
+				poe(e.key, x, z, yaw, scale, r)
+				table.insert(postas, { x, z })
+			end
+		end
+	end
 end
 
 -- Lugar da ponte de toras: a célula de riacho mais perto e o giro que a atravessa no leito (MapLife).

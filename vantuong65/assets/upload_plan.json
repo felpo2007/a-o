@@ -11548,5 +11548,166 @@
   "assetType": "Image",
   "name": "VT65 premio relogio",
   "description": "VAN TUONG 65 - imagem de catalogo"
+ },
+ {
+  "key": "Models.exp_arvore_a",
+  "file": "assets/blender/exp_arvore_a/exp_arvore_a.glb",
+  "assetType": "Model",
+  "name": "VT65 exp_arvore_a",
+  "description": "VAN TUONG 65 - expansao da Vila e do Arrozal (Blender)"
+ },
+ {
+  "key": "Models.exp_arvore_b",
+  "file": "assets/blender/exp_arvore_b/exp_arvore_b.glb",
+  "assetType": "Model",
+  "name": "VT65 exp_arvore_b",
+  "description": "VAN TUONG 65 - expansao da Vila e do Arrozal (Blender)"
+ },
+ {
+  "key": "Models.exp_figueira",
+  "file": "assets/blender/exp_figueira/exp_figueira.glb",
+  "assetType": "Model",
+  "name": "VT65 exp_figueira",
+  "description": "VAN TUONG 65 - expansao da Vila e do Arrozal (Blender)"
+ },
+ {
+  "key": "Models.exp_rocha",
+  "file": "assets/blender/exp_rocha/exp_rocha.glb",
+  "assetType": "Model",
+  "name": "VT65 exp_rocha",
+  "description": "VAN TUONG 65 - expansao da Vila e do Arrozal (Blender)"
+ },
+ {
+  "key": "Models.exp_samambaia",
+  "file": "assets/blender/exp_samambaia/exp_samambaia.glb",
+  "assetType": "Model",
+  "name": "VT65 exp_samambaia",
+  "description": "VAN TUONG 65 - expansao da Vila e do Arrozal (Blender)"
+ },
+ {
+  "key": "Models.exp_abrigo",
+  "file": "assets/blender/exp_abrigo/exp_abrigo_trim.glb",
+  "assetType": "Model",
+  "name": "VT65 exp_abrigo",
+  "description": "VAN TUONG 65 - expansao da Vila e do Arrozal (Blender)"
+ },
+ {
+  "key": "Models.exp_carroca",
+  "file": "assets/blender/exp_carroca/exp_carroca_trim.glb",
+  "assetType": "Model",
+  "name": "VT65 exp_carroca",
+  "description": "VAN TUONG 65 - expansao da Vila e do Arrozal (Blender)"
+ },
+ {
+  "key": "Models.exp_casa_vala",
+  "file": "assets/blender/exp_casa_vala/exp_casa_vala_trim.glb",
+  "assetType": "Model",
+  "name": "VT65 exp_casa_vala",
+  "description": "VAN TUONG 65 - expansao da Vila e do Arrozal (Blender)"
+ },
+ {
+  "key": "Models.exp_casas_ligadas",
+  "file": "assets/blender/exp_casas_ligadas/exp_casas_ligadas_trim.glb",
+  "assetType": "Model",
+  "name": "VT65 exp_casas_ligadas",
+  "description": "VAN TUONG 65 - expansao da Vila e do Arrozal (Blender)"
+ },
+ {
+  "key": "Models.exp_palafita_a",
+  "file": "assets/blender/exp_palafita_a/exp_palafita_a_trim.glb",
+  "assetType": "Model",
+  "name": "VT65 exp_palafita_a",
+  "description": "VAN TUONG 65 - expansao da Vila e do Arrozal (Blender)"
+ },
+ {
+  "key": "Models.exp_palafita_b",
+  "file": "assets/blender/exp_palafita_b/exp_palafita_b_trim.glb",
+  "assetType": "Model",
+  "name": "VT65 exp_palafita_b",
+  "description": "VAN TUONG 65 - expansao da Vila e do Arrozal (Blender)"
+ },
+ {
+  "key": "Models.exp_prancha",
+  "file": "assets/blender/exp_prancha/exp_prancha_trim.glb",
+  "assetType": "Model",
+  "name": "VT65 exp_prancha",
+  "description": "VAN TUONG 65 - expansao da Vila e do Arrozal (Blender)"
+ },
+ {
+  "key": "Models.exp_trincheira",
+  "file": "assets/blender/exp_trincheira/exp_trincheira_trim.glb",
+  "assetType": "Model",
+  "name": "VT65 exp_trincheira",
+  "description": "VAN TUONG 65 - expansao da Vila e do Arrozal (Blender)"
+ },
+ {
+  "key": "Models.exp_casa_verde",
+  "file": "assets/blender/exp_casa_verde/exp_casa_verde_trim.glb",
+  "assetType": "Model",
+  "name": "VT65 exp_casa_verde",
+  "description": "VAN TUONG 65 - expansao da Vila e do Arrozal (Blender)"
+ },
+ {
+  "key": "Models.exp_celeiro",
+  "file": "assets/blender/exp_celeiro/exp_celeiro_trim.glb",
+  "assetType": "Model",
+  "name": "VT65 exp_celeiro",
+  "description": "VAN TUONG 65 - expansao da Vila e do Arrozal (Blender)"
+ },
+ {
+  "key": "Models.exp_comporta",
+  "file": "assets/blender/exp_comporta/exp_comporta_trim.glb",
+  "assetType": "Model",
+  "name": "VT65 exp_comporta",
+  "description": "VAN TUONG 65 - expansao da Vila e do Arrozal (Blender)"
+ },
+ {
+  "key": "Models.exp_deposito",
+  "file": "assets/blender/exp_deposito/exp_deposito_trim.glb",
+  "assetType": "Model",
+  "name": "VT65 exp_deposito",
+  "description": "VAN TUONG 65 - expansao da Vila e do Arrozal (Blender)"
+ },
+ {
+  "key": "Models.exp_galpao",
+  "file": "assets/blender/exp_galpao/exp_galpao_trim.glb",
+  "assetType": "Model",
+  "name": "VT65 exp_galpao",
+  "description": "VAN TUONG 65 - expansao da Vila e do Arrozal (Blender)"
+ },
+ {
+  "key": "Models.exp_muro",
+  "file": "assets/blender/exp_muro/exp_muro_trim.glb",
+  "assetType": "Model",
+  "name": "VT65 exp_muro",
+  "description": "VAN TUONG 65 - expansao da Vila e do Arrozal (Blender)"
+ },
+ {
+  "key": "Models.exp_passarela",
+  "file": "assets/blender/exp_passarela/exp_passarela_trim.glb",
+  "assetType": "Model",
+  "name": "VT65 exp_passarela",
+  "description": "VAN TUONG 65 - expansao da Vila e do Arrozal (Blender)"
+ },
+ {
+  "key": "Models.exp_patio",
+  "file": "assets/blender/exp_patio/exp_patio_trim.glb",
+  "assetType": "Model",
+  "name": "VT65 exp_patio",
+  "description": "VAN TUONG 65 - expansao da Vila e do Arrozal (Blender)"
+ },
+ {
+  "key": "Models.exp_ruina",
+  "file": "assets/blender/exp_ruina/exp_ruina_trim.glb",
+  "assetType": "Model",
+  "name": "VT65 exp_ruina",
+  "description": "VAN TUONG 65 - expansao da Vila e do Arrozal (Blender)"
+ },
+ {
+  "key": "Models.exp_telheiro",
+  "file": "assets/blender/exp_telheiro/exp_telheiro_trim.glb",
+  "assetType": "Model",
+  "name": "VT65 exp_telheiro",
+  "description": "VAN TUONG 65 - expansao da Vila e do Arrozal (Blender)"
  }
 ]

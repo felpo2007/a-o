@@ -41,6 +41,22 @@ export type Pad = {
 	hz: number,
 	level: number,
 	ground: boolean?, -- chão de terra batida no patamar (praça)
+	exp: boolean?, -- D-232: da expansão da Vila e do Arrozal (fora do cálculo com semExp)
+	canal: boolean?, -- D-232: comporta: o canal passa pelo patamar sem margem em rampa (o muro segura)
+}
+-- D-232: vala ou canal aberto no chão: leito de (x1, z1, y1) a (x2, z2, y2), meia largura `half`,
+-- margem `bank` em rampa e `depth` de água sobre o leito (0 = seco). Studs.
+type Cut = {
+	x1: number,
+	z1: number,
+	y1: number,
+	x2: number,
+	z2: number,
+	y2: number,
+	half: number,
+	bank: number,
+	depth: number,
+	kind: string,
 }
 type Seg = {
 	x1: number,
@@ -52,7 +68,7 @@ type Seg = {
 	half: number,
 	kind: string,
 }
-type Lane = { x1: number, z1: number, x2: number, z2: number, half: number }
+type Lane = { x1: number, z1: number, x2: number, z2: number, half: number, exp: boolean? }
 
 export type Site = {
 	world: any,
@@ -65,6 +81,9 @@ export type Site = {
 	shoulder: number,
 	padList: { Pad },
 	roadList: { Seg },
+	cuts: { [number]: { Cut } },
+	cutList: { Cut },
+	semExp: boolean, -- D-232: true = o chão como era antes da expansão (o sorteio das plantas antigas)
 }
 
 local function key(bx: number, bz: number): number
@@ -99,6 +118,9 @@ function Site.new(world: any, paddies: any?, TB: any?, roads: any?, lanes: { { n
 		shoulder = if roads then roads.shoulder else 3 / STUD_M,
 		padList = {},
 		roadList = {},
+		cuts = {},
+		cutList = {},
+		semExp = false,
 	}
 	if roads then
 		local reach = self.shoulder
@@ -235,6 +257,33 @@ function Site.addPad(
 	return pad
 end
 
+-- D-232: beco novo da expansão (chão de terra, sem planta). Meia largura em studs.
+function Site.addLane(self: Site, x1: number, z1: number, x2: number, z2: number, half: number)
+	local ln: Lane = { x1 = x1, z1 = z1, x2 = x2, z2 = z2, half = half, exp = true }
+	addBox(
+		self.lanes,
+		ln,
+		math.min(x1, x2) - half,
+		math.min(z1, z2) - half,
+		math.max(x1, x2) + half,
+		math.max(z1, z2) + half
+	)
+end
+
+-- D-232: vala ou canal (ver o tipo Cut). Só baixa o chão: nunca sobe nada.
+function Site.addCut(self: Site, c: Cut)
+	table.insert(self.cutList, c)
+	local m = c.half + c.bank
+	addBox(
+		self.cuts,
+		c,
+		math.min(c.x1, c.x2) - m,
+		math.min(c.z1, c.z2) - m,
+		math.max(c.x1, c.x2) + m,
+		math.max(c.z1, c.z2) + m
+	)
+end
+
 -- distância (studs) de (x, z) ao retângulo do patamar (0 dentro)
 local function padDist(p: Pad, x: number, z: number): number
 	local dx, dz = x - p.x, z - p.z
@@ -252,6 +301,19 @@ local function segInfo(s: Seg, x: number, z: number): (number, number)
 	local t = if l2 > 0 then math.clamp(((x - s.x1) * dx + (z - s.z1) * dz) / l2, 0, 1) else 0
 	local qx, qz = s.x1 + t * dx - x, s.z1 + t * dz - z
 	return math.sqrt(qx * qx + qz * qz), s.y1 + (s.y2 - s.y1) * t
+end
+
+-- D-232: altura do leito (na divisa de voxel) da vala ou canal mais perto de (x, z), ou nil.
+function Site.cutBed(self: Site, x: number, z: number): number?
+	local best, by = math.huge, nil :: number?
+	local lista: { Cut } = self.cuts[key(math.floor(x / BUCKET), math.floor(z / BUCKET))] or {}
+	for _, c in lista do
+		local d, y = segInfo(c :: any, x, z)
+		if d < best then
+			best, by = d, y
+		end
+	end
+	return if by then math.floor(by / VOXEL) * VOXEL else nil
 end
 
 -- Estrada mais perto de (x, z) dentro da largura mais o talude: (tipo, distância do eixo, altura do
@@ -279,6 +341,9 @@ function Site.lane(self: Site, x: number, z: number): boolean
 	local b = self.lanes[key(math.floor(x / BUCKET), math.floor(z / BUCKET))]
 	if b then
 		for _, l in b do
+			if l.exp and self.semExp then
+				continue
+			end
 			local d = segInfo({ x1 = l.x1, z1 = l.z1, y1 = 0, x2 = l.x2, z2 = l.z2, y2 = 0, half = 0, kind = "" }, x, z)
 			if d <= l.half then
 				return true
@@ -294,6 +359,9 @@ function Site.pad(self: Site, x: number, z: number): (Pad?, number)
 	local best, bp = math.huge, nil :: Pad?
 	if b then
 		for _, p in b do
+			if p.exp and self.semExp then
+				continue
+			end
 			local d = padDist(p, x, z)
 			if d < best then
 				best, bp = d, p
@@ -304,6 +372,35 @@ function Site.pad(self: Site, x: number, z: number): (Pad?, number)
 		return bp, math.clamp((best - Site.PAD_MARGIN) / Site.PAD_BLEND, 0, 1)
 	end
 	return nil, 1
+end
+
+-- D-232: (x, z), com raio r, cai em beco, patamar ou vala da expansão?
+function Site.expAt(self: Site, x: number, z: number, r: number): boolean
+	local k = key(math.floor(x / BUCKET), math.floor(z / BUCKET))
+	local rr = r * 0.5
+	local becos: { Lane } = self.lanes[k] or {}
+	local patamares: { Pad } = self.pads[k] or {}
+	local cortes: { Cut } = self.cuts[k] or {}
+	for _, l in becos do
+		if l.exp then
+			local d = segInfo({ x1 = l.x1, z1 = l.z1, y1 = 0, x2 = l.x2, z2 = l.z2, y2 = 0, half = 0, kind = "" }, x, z)
+			if d <= l.half + rr then
+				return true
+			end
+		end
+	end
+	for _, p in patamares do
+		if p.exp and padDist(p, x, z) <= Site.PAD_MARGIN + Site.PAD_BLEND * 0.25 + rr then
+			return true
+		end
+	end
+	for _, c in cortes do
+		local d = segInfo(c :: any, x, z)
+		if d <= c.half + c.bank + rr then
+			return true
+		end
+	end
+	return false
 end
 
 -- Coluna do terreno em (x, z): altura do chão (studs), espelho d'água (-inf sem água), classe do uso
@@ -344,11 +441,15 @@ function Site.column(self: Site, x: number, z: number): (number, number, number,
 	-- valia só o patamar mais perto, e entre dois patamares de níveis diferentes o chão dava um degrau)
 	-- e plana dentro de cada patamar (t = 0).
 	local onPad = false
+	local naComporta = false
 	local b = self.pads[key(math.floor(x / BUCKET), math.floor(z / BUCKET))]
 	if b then
 		local sw, sl = 1, h
 		local reach = Site.PAD_MARGIN + Site.PAD_BLEND
 		for _, p in b do
+			if p.exp and self.semExp then
+				continue
+			end
 			local d = padDist(p, x, z)
 			if d < reach then
 				local t = math.max((d - Site.PAD_MARGIN) / Site.PAD_BLEND, 1e-3)
@@ -358,6 +459,7 @@ function Site.column(self: Site, x: number, z: number): (number, number, number,
 				sl += w * p.level
 				if t <= 1e-3 then
 					onPad = true
+					naComporta = naComporta or p.canal == true
 					if p.ground then
 						mat = "Ground"
 					end
@@ -367,6 +469,32 @@ function Site.column(self: Site, x: number, z: number): (number, number, number,
 		h = sl / sw
 		if onPad then
 			wl = -math.huge
+		end
+	end
+	-- D-232: valas e canais da expansão. O leito fica em divisa de voxel, como o do riacho (um voxel
+	-- tem um material só: a água só aparece no voxel sem chão), e a margem desce em rampa.
+	if not self.semExp then
+		local cb = self.cuts[key(math.floor(x / BUCKET), math.floor(z / BUCKET))]
+		if cb then
+			for _, corte in cb do
+				local dc, yc = segInfo(corte :: any, x, z)
+				if dc < corte.half + corte.bank then
+					local bed = math.floor(yc / VOXEL) * VOXEL
+					if dc <= corte.half then
+						h = math.min(h, bed)
+						mat = "Mud"
+						if corte.depth > 0 then
+							wl = math.max(wl, bed + corte.depth)
+						end
+					elseif h > bed and not naComporta then
+						local t = (dc - corte.half) / corte.bank
+						h = bed + (h - bed) * (t * t * (3 - 2 * t))
+						if mat == nil then
+							mat = "Ground"
+						end
+					end
+				end
+			end
 		end
 	end
 	-- estrada: leito na largura, talude dos lados (o talude não entra no patamar)

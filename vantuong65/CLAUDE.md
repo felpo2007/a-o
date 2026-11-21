@@ -35,6 +35,18 @@ repositório é de OUTRO projeto (estratégias de trade). Aqui vale este arquivo
   - Tempo a pé de cada QG a cada objetivo: `uv run python tools/tempos_chegada.py` (`--git <commit>`
     mede um mapa antigo).
   - Mudou o mapa? Refaça a carta e a arte fixa (desligue os conjuntos, recopie do jogo, D-201).
+- Expansão da Vila e do Arrozal (D-232): dados em `Modules/Expansao.luau` (`LIGADA = false` tira só ela).
+  - Construção: `blender -b --factory-startup -P tools/blender/exp.py -- <chave>` e depois `--trim`
+    (`VT65_CPU=1`; receitas em `exp_vila.py` e `exp_arrozal.py`).
+  - Planta: `blender -b --factory-startup -P tools/blender/exp_plantas.py -- <chave>` e depois
+    `uv run --group arte python tools/expansao_registrar.py plantas` (pé em Y = 0 e cor da folha).
+  - Registro: `expansao_registrar.py plano [chaves]`, `upload-assets Models.exp_`,
+    `expansao_registrar.py jogo` e `uv run python tools/bases_dados.py`. Modelo refeito: tire a chave
+    do `roblox_ids.json` antes de subir.
+  - Conferir: `lune run tools/expansao_check.luau` (o antigo igual e nada em cima de captura, nascer,
+    estrada ou água). Planta anotada: `tools/expansao_planta.luau` e `.py`.
+  - A carta aérea é do tipo Image: depois do `catalogo_imagens.py ids`, copie os IDs novos de
+    `Catalogo.aereo_*` para `AssetIds.CartaImages` (o script não atualiza essa tabela).
 - **Não salve o place pelo Studio:** o Studio grava com outra compressão, que o Lune 0.8 não lê
   ("Decompression failed"). Teste mudanças no Studio pelo MCP, mas gere o `.rbxl` pelo pipeline.
   O XML (`.rbxlx`) do Studio também não serve: o Lune 0.8 não lê o `Content` novo (`<uri>`) nem
@@ -450,7 +462,7 @@ O `sourcemap.json` não vai para o Git.
 - Segredos só no `.env` (no `.gitignore`), nunca no código nem no chat.
 - ForgeGUI: nunca regenerar um job em `outcome_unknown`. "failed" com `retryable` pode ser
   retomado com `generation_retry`.
-- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-232) e atualize `PROGRESS.md`.
+- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-233) e atualize `PROGRESS.md`.
 - Tetos de triângulos por modelo: vegetação ≤ 6 mil (D-135), props e herói ≤ 20 mil (`ArtBudget`,
   conferido pelo teste da F5).
 - Commits no branch acima, com mensagem em português.

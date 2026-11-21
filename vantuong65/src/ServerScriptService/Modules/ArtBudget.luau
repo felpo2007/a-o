@@ -126,6 +126,31 @@ ArtBudget.KIND = {
 	vila_casa_08 = "prop",
 	vila_casa_09 = "prop",
 	vila_casa_10 = "prop",
+	-- D-232 (expansão): gerado por tools/expansao_registrar.py
+	exp_abrigo = "prop",
+	exp_arvore_a = "veg",
+	exp_arvore_b = "veg",
+	exp_carroca = "prop",
+	exp_casa_vala = "prop",
+	exp_casa_verde = "prop",
+	exp_casas_ligadas = "prop",
+	exp_celeiro = "prop",
+	exp_comporta = "prop",
+	exp_deposito = "prop",
+	exp_figueira = "veg",
+	exp_galpao = "prop",
+	exp_muro = "prop",
+	exp_palafita_a = "prop",
+	exp_palafita_b = "prop",
+	exp_passarela = "prop",
+	exp_patio = "prop",
+	exp_prancha = "prop",
+	exp_rocha = "veg",
+	exp_ruina = "prop",
+	exp_samambaia = "veg",
+	exp_telheiro = "prop",
+	exp_trincheira = "prop",
+	-- D-232 (fim)
 	m60 = "hero",
 	rpd = "hero",
 	sks = "hero",
@@ -251,6 +276,31 @@ ArtBudget.TRIS = {
 	vila_casa_08 = 7856,
 	vila_casa_09 = 7561,
 	vila_casa_10 = 7806,
+	-- D-232 (expansão): gerado por tools/expansao_registrar.py
+	exp_abrigo = 6260,
+	exp_arvore_a = 4726,
+	exp_arvore_b = 5204,
+	exp_carroca = 3938,
+	exp_casa_vala = 7690,
+	exp_casa_verde = 7868,
+	exp_casas_ligadas = 8762,
+	exp_celeiro = 8270,
+	exp_comporta = 5588,
+	exp_deposito = 5624,
+	exp_figueira = 5960,
+	exp_galpao = 3220,
+	exp_muro = 226,
+	exp_palafita_a = 9596,
+	exp_palafita_b = 9956,
+	exp_passarela = 1608,
+	exp_patio = 2330,
+	exp_prancha = 252,
+	exp_rocha = 1280,
+	exp_ruina = 3012,
+	exp_samambaia = 880,
+	exp_telheiro = 3246,
+	exp_trincheira = 796,
+	-- D-232 (fim)
 	us_m1_helmet = 3000,
 	us_m1955_vest = 3999,
 	vc_pith_helmet = 2999,
@@ -371,6 +421,31 @@ ArtBudget.DIMS = {
 	vila_casa_08 = { 29.58, 16.97, 29.7 },
 	vila_casa_09 = { 26.16, 18.7, 29.91 },
 	vila_casa_10 = { 29.71, 15.61, 29.81 },
+	-- D-232 (expansão): gerado por tools/expansao_registrar.py
+	exp_abrigo = { 28.29, 11.06, 21.07 },
+	exp_arvore_a = { 43.47, 52.31, 48.55 },
+	exp_arvore_b = { 36.44, 34.69, 33.5 },
+	exp_carroca = { 23.57, 13.87, 17.75 },
+	exp_casa_vala = { 28.21, 16.65, 24.13 },
+	exp_casa_verde = { 29.14, 19.41, 27.99 },
+	exp_casas_ligadas = { 42.64, 16.68, 21.71 },
+	exp_celeiro = { 56.43, 21.57, 35.32 },
+	exp_comporta = { 32.62, 19.18, 24.97 },
+	exp_deposito = { 17.73, 19.7, 16.94 },
+	exp_figueira = { 64.34, 59.7, 68.0 },
+	exp_galpao = { 34.86, 14.25, 20.83 },
+	exp_muro = { 14.29, 3.13, 1.61 },
+	exp_palafita_a = { 27.64, 24.04, 36.61 },
+	exp_palafita_b = { 24.19, 25.25, 22.41 },
+	exp_passarela = { 32.1, 10.03, 5.23 },
+	exp_patio = { 27.13, 3.71, 21.21 },
+	exp_prancha = { 4.29, 0.67, 12.14 },
+	exp_rocha = { 7.86, 5.01, 6.44 },
+	exp_ruina = { 30.41, 14.73, 23.64 },
+	exp_samambaia = { 5.31, 1.66, 5.32 },
+	exp_telheiro = { 24.71, 11.27, 15.34 },
+	exp_trincheira = { 8.57, 5.86, 21.43 },
+	-- D-232 (fim)
 } :: { [string]: { number } }
 
 -- Raio do pé de cada planta no chão (studs, escala 1): o tronco das árvores, a touceira do bambu e o
@@ -393,12 +468,27 @@ ArtBudget.BASE_R = {
 	elephant_grass = 2,
 	taro_fern = 2.2,
 	rice_patch = 1.5,
+	-- D-232 (expansão): gerado por tools/expansao_registrar.py
+	exp_arvore_a = 1.36,
+	exp_arvore_b = 1.31,
+	exp_figueira = 8.56,
+	exp_rocha = 3.8,
+	exp_samambaia = 2.84,
+	-- D-232 (fim)
 } :: { [string]: number }
 
 -- Pé enterrado além do PLANT_SINK_M do plano (fração da altura do modelo, studs na escala 1), para
--- modelo com base de terra à mostra. Vazio desde 2026-11-13: o bamboo_clump (o único, 8% da altura)
--- foi republicado sem o disco marrom.
-ArtBudget.BASE_SINK = {} :: { [string]: { frac: number, height: number } }
+-- modelo com base de terra à mostra. O bamboo_clump saiu em 2026-11-13, republicado sem o disco
+-- marrom. D-232: as plantas novas têm raízes abaixo do nível do chão do modelo.
+ArtBudget.BASE_SINK = {
+	-- D-232 (expansão): gerado por tools/expansao_registrar.py
+	exp_arvore_a = { frac = 0.01994, height = 52.31 },
+	exp_arvore_b = { frac = 0.02874, height = 34.69 },
+	exp_figueira = { frac = 0.02099, height = 59.7 },
+	exp_rocha = { frac = 0.18543, height = 5.01 },
+	exp_samambaia = { frac = 0.13554, height = 1.66 },
+	-- D-232 (fim)
+} :: { [string]: { frac: number, height: number } }
 
 -- Casas da vila grande (2026-11-12, Data/Village): modelos únicos do Blender, com interior e porta de
 -- pelo menos 2,1 m (7,5 studs) para o soldado de 2,0 m. Com o ID em 0, a vila usa as casas de hoje

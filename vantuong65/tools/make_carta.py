@@ -463,6 +463,10 @@ def riachos(q: Quadro, cam: Image.Image, d: Dados, agua=AGUA, traco=AGUA_TRACO) 
             [p[0] - largura / 2, p[1] - largura / 2, p[0] + largura / 2, p[1] + largura / 2],
             fill=(*traco, 255),
         )
+    # D-232: a vala e o canal da expansão
+    for a in d.info.get("aguasExp", []):
+        pts_exp = [q.px(x, z) for x, z in a["pts"]]
+        dr.line(pts_exp, fill=(*traco, 255), width=largura, joint="curve")
 
 
 Rotulo = tuple[float, float, float, float, float]  # cx, cy, largura, altura, ângulo
@@ -606,6 +610,20 @@ CONSTRUCAO_OBJETIVO = {
     "vila_casa_04",
     "vila_casa_06",
     "vila_casa_08",
+    # D-232: as construções da expansão da Vila e do Arrozal
+    "exp_palafita_a",
+    "exp_palafita_b",
+    "exp_casas_ligadas",
+    "exp_casa_vala",
+    "exp_carroca",
+    "exp_abrigo",
+    "exp_celeiro",
+    "exp_galpao",
+    "exp_deposito",
+    "exp_casa_verde",
+    "exp_ruina",
+    "exp_comporta",
+    "exp_telheiro",
 }
 
 

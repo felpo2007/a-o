@@ -1079,6 +1079,12 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     avisos com prioridade; a corrida continua com dano (medido). Relatório:
     `testes/LOTE103_D231_2026-11-21.md`.
     - **v135 publicada** (versão 140 do place, commit 7fc7eb1).
+  - **Lote 104 (D-232): expansão da Vila e do Arrozal, feito.** 40 peças novas (19 na Vila, 21 no
+    Arrozal), com interiores, abrigo, trincheira, vala, canal, comporta e passarela, e 349 plantas
+    novas. As 437 construções antigas não mudaram. `Expansao.LIGADA = false` tira só a expansão.
+    - Testes: Lune 908, pytest 76, autoteste 18 de 18, 21 portas e rotas a pé e agachado no Studio.
+    - Medido: chamadas de desenho +17,9% nas 9 vistas. **Celular e 60 jogadores não foram medidos.**
+    - Relatório: `testes/LOTE104_D232_2026-11-21.md`.
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;

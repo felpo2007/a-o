@@ -140,6 +140,25 @@ TIPOS: dict[str, tuple[str, str, float]] = {
     "us_helipad": ("terra", "pad", 0.0),
     "us_armor_revetment": ("terra", "berma", 1.4),
     "us_range_berm": ("terra", "quatro", 1.6),
+    # D-232: expansão da Vila e do Arrozal
+    "exp_palafita_a": ("zinco2", "duas", 5.0),
+    "exp_palafita_b": ("palha", "duas", 5.0),
+    "exp_casas_ligadas": ("telha", "duas", 3.6),
+    "exp_casa_vala": ("palha2", "duas", 3.4),
+    "exp_carroca": ("telha", "duas", 2.6),
+    "exp_abrigo": ("terra", "quatro", 1.2),
+    "exp_trincheira": ("terra", "plano", 0.2),
+    "exp_prancha": ("tabua", "plano", 0.2),
+    "exp_celeiro": ("zinco", "duas", 5.0),
+    "exp_galpao": ("zinco2", "duas", 3.2),
+    "exp_deposito": ("palha2", "quatro", 4.0),
+    "exp_casa_verde": ("telha2", "duas", 4.0),
+    "exp_ruina": ("madeira", "plano", 1.5),
+    "exp_comporta": ("pedra", "duas", 3.4),
+    "exp_telheiro": ("zinco2", "duas", 2.6),
+    "exp_patio": ("terra", "plano", 0.1),
+    "exp_passarela": ("tabua", "plano", 0.4),
+    "exp_muro": ("pedra", "plano", 0.5),
 }
 SEM_DESENHO = {"us_flagpole", "us_range_bench", "vc_punji", "vc_range_rest", "vc_hammock"}
 
@@ -453,6 +472,9 @@ def mascaras_agua(q: Quadro, d: Dados) -> tuple[np.ndarray, np.ndarray]:
                 if dr_ and dc and ((r + dr_, c) in pts or (r, c + dc) in pts):
                     continue
                 dr.line([p, q.de_celula(r + dr_, c + dc)], fill=255, width=22)
+    # D-232: a vala e o canal da expansão
+    for a in d.info.get("aguasExp", []):
+        dr.line([q.px(x, z) for x, z in a["pts"]], fill=255, width=22, joint="curve")
     riacho = np.asarray(im.filter(ImageFilter.GaussianBlur(12)), F4) / 255 > 0.42
     return rio, riacho & ~rio
 

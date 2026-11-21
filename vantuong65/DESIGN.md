@@ -9806,3 +9806,20 @@ e "permita alterar o equipamento dentro do jogo na escolha da classe".
 - **Corrida:** dano não desliga (medido e travado em teste). **Troca de arma** (D-194) e **zonas de
   captura** (v41) já atendiam ao relatório.
 
+## D-232 — Lote 104: expansão da Vila e do Arrozal e vegetação do mapa (2026-11-21)
+
+**Pedido do dono:** acrescentar construções, interiores, passagens e vegetação à Vila e ao Arrozal, sem
+mapa novo nem objetivo novo, preservando capturas, nascimentos e entradas.
+- **Dados à parte:** `Modules/Expansao.luau`. `Expansao.LIGADA = false` tira só a expansão.
+- **O antigo não muda:** `ArtPlan.expansao` roda depois de todo o plano. Becos, patamares e valas novos
+  ficam marcados (`exp`), e as plantas antigas são sorteadas no chão de antes (`site.semExp`). Só saem
+  as que caem no chão novo (13 de 5.080). As 437 construções ficam iguais (`tools/expansao_check.luau`).
+- **Vila:** 19 peças a oeste, na clareira vazia (palafitas, casas ligadas, casa da vala, abrigo de
+  carroça, abrigo semienterrado, 18 m de trincheira, vala com 2 pranchas e objetos de quintal).
+- **Arrozal:** 21 peças a leste, em terra seca (celeiro, pátio, galpão, depósito, telheiro, casa verde,
+  ruína, canal, comporta, passarela, muros e objetos). Os campos ficam abertos.
+- **Água:** o leito só desce, fica em divisa de voxel e termina no leito do rio. Sem nível dinâmico.
+- **Vegetação:** 5 modelos novos e 349 plantas. A folha é puxada para a cor média da mata antiga.
+- **Luz:** um lampião local por cômodo, sem sombra (11 no mapa).
+- **Medido:** chamadas de desenho +17,9% na soma de 9 vistas (de +8% a +32%). Celular não medido.
+- **Fora do lote:** estado "colhido" dos tabuleiros, porque mudaria os tabuleiros antigos.

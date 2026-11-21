@@ -316,9 +316,13 @@ def main() -> None:
         objs = por_atlas.get(atlas, [])
         if not objs:
             continue
+        # D-232: o que é `so_bake` (a chapa ondulada) entra só no bake, fora da malha do jogo
+        so_bake = [o for o in objs if o.get("so_bake")]
+        objs = [o for o in objs if not o.get("so_bake")]
         j = M.juntar(objs, f"alto_{atlas}_junto") if len(objs) > 1 else objs[0]
         j["grupo"] = atlas
         juntos.append(j)
+        juntos.extend(so_bake)
     r.objs = juntos
 
     capturas: list[dict] = []

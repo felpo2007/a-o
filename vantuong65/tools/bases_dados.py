@@ -169,7 +169,9 @@ def main() -> None:
     met = {k: metricas(k) for k in chaves}
     # casas únicas da vila (Blender, 2026-11-13): colisão por nó e a porta principal
     casas = [f"vila_casa_{i:02d}" for i in range(1, 13)]
-    met_casa = {k: m for k in casas if (m := metricas(k))}
+    # D-232: as construções da expansão da Vila e do Arrozal (as plantas não têm colisão por nó)
+    casas += sorted(p.name for p in BLENDER.glob("exp_*") if (p / "metricas.json").is_file())
+    met_casa = {k: m for k in casas if (m := metricas(k)) and m.get("colisao")}
 
     out = [
         "--!strict\n",

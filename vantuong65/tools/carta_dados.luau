@@ -27,6 +27,7 @@ local Tunnels = require("../src/ReplicatedStorage/Shared/Tunnels") :: any
 local AssetIds = require("../src/ReplicatedStorage/Shared/AssetIds") :: any
 local Vegetation = require("../src/ServerScriptService/Modules/Vegetation")
 local ArtPlan = require("../src/ServerScriptService/Modules/ArtPlan") :: any
+local Expansao = require("../src/ServerScriptService/Modules/Expansao") :: any
 
 local M = 0.28
 local OUT = "assets/carta/dados"
@@ -108,6 +109,30 @@ local lanes = {}
 for _, l in Village.lanes do
 	table.insert(lanes, { { l[1], l[2] }, { l[3], l[4] } })
 end
+-- D-232: os caminhos, a vala e o canal da expansão da Vila e do Arrozal
+local aguasExp = {}
+if Expansao.LIGADA then
+	for _, sp in MapConfig.Strongpoints do
+		local setor = Expansao.SETORES[sp.name]
+		if setor then
+			for _, b in setor.becos do
+				for i = 1, #b - 3, 2 do
+					table.insert(lanes, {
+						{ sp.x + b[i] / M, sp.z + b[i + 1] / M },
+						{ sp.x + b[i + 2] / M, sp.z + b[i + 3] / M },
+					})
+				end
+			end
+			for _, c in setor.cortes do
+				local pts = {}
+				for _, p in c.pts do
+					table.insert(pts, { sp.x + p[1] / M, sp.z + p[2] / M })
+				end
+				table.insert(aguasExp, { pts = pts, w = c.largura })
+			end
+		end
+	end
+end
 local gx, gz = ArtPlan.cemetery(MapConfig)
 -- trincheira sul de An Cường (2) (Tunnels.trench, traçado de design já posto no mundo)
 local cx, cz = 0, 0
@@ -155,6 +180,7 @@ local info = {
 	village = { name = Village.name, x = Village.x, z = Village.z, houses = villageHouses, specials = specials },
 	roads = roads,
 	lanes = lanes,
+	aguasExp = aguasExp,
 	bases = baseItems,
 	cemetery = { x = gx, z = gz },
 }

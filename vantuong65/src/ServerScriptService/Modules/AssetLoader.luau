@@ -18,6 +18,7 @@ local MapLife = require(script.Parent.MapLife)
 local Rng = require(ReplicatedStorage.Shared.Rng)
 local StaticArt = require(script.Parent.StaticArt)
 local TreeTrunks = require(script.Parent.TreeTrunks)
+local Expansao = require(script.Parent.Expansao)
 local TrunkProxy = require(script.Parent.TrunkProxy)
 local Tunnels = require(ReplicatedStorage.Shared.Tunnels) :: any
 local Vegetation = require(script.Parent.Vegetation)
@@ -676,7 +677,7 @@ function AssetLoader.placeItem(it: any, parent: Instance, planned: boolean): Mod
 		elseif not planned then
 			base = groundY(it.x, it.z)
 		end
-	elseif planned and not it.padded and not OVER_HOLE[it.key] then
+	elseif planned and not it.padded and not OVER_HOLE[it.key] and not it.expansao then
 		-- objeto sem patamar (caixote, saco, toca, cerca de arame, ponte): o menor entre o plano e o
 		-- chão real sob a pegada
 		local pts = if it.key == "log_bridge" then BRIDGE_ENDS else FOOT5
@@ -719,6 +720,53 @@ function AssetLoader.placeItem(it: any, parent: Instance, planned: boolean): Mod
 	if data and data.nodes and data.nodes[it.key] then
 		local cf = CFrame.new(it.x, base, it.z) * CFrame.Angles(0, it.yaw, 0)
 		MapLife.baseInstance(m, it.key, cf, it.node, data.extras and data.extras[it.key])
+	end
+	-- D-232: lampião nos interiores da expansão (uma luz por cômodo, sem sombra)
+	local luzes = if (it :: any).expansao then Expansao.LUZES[it.key] else nil
+	local dono = if luzes then m:FindFirstChildWhichIsA("BasePart", true) else nil
+	if luzes and dono then
+		local cf = CFrame.new(it.x, base, it.z) * CFrame.Angles(0, it.yaw, 0)
+		local L = Expansao.LUZ
+		for i, l in luzes do
+			local a = Instance.new("Attachment")
+			a.Name = "Lampiao_" .. i
+			a.Parent = dono
+			a.WorldPosition = cf * (Vector3.new(l[1], l[2], l[3]) / M)
+			local luz = Instance.new("PointLight")
+			luz.Color = Color3.fromRGB(L.cor[1], L.cor[2], L.cor[3])
+			luz.Brightness = L.brilho
+			luz.Range = L.alcanceM / M
+			luz.Shadows = false
+			luz.Parent = a
+		end
+	end
+	local espuma = if (it :: any).expansao then Expansao.ESPUMA[it.key] else nil
+	local donoE = if espuma then m:FindFirstChildWhichIsA("BasePart", true) else nil
+	if espuma and donoE then
+		local cf = CFrame.new(it.x, base, it.z) * CFrame.Angles(0, it.yaw, 0)
+		for i, l in espuma do
+			local a = Instance.new("Attachment")
+			a.Name = "Espuma_" .. i
+			a.Parent = donoE
+			a.WorldPosition = cf * (Vector3.new(l[1], l[2], l[3]) / M)
+			local e = Instance.new("ParticleEmitter")
+			e.Texture = "rbxasset://textures/particles/smoke_main.dds"
+			e.Color = ColorSequence.new(Color3.fromRGB(226, 232, 222))
+			e.Transparency = NumberSequence.new({
+				NumberSequenceKeypoint.new(0, 0.55),
+				NumberSequenceKeypoint.new(1, 1),
+			})
+			e.Size = NumberSequence.new({
+				NumberSequenceKeypoint.new(0, 0.5 / M * 0.5),
+				NumberSequenceKeypoint.new(1, 1.3 / M * 0.5),
+			})
+			e.Lifetime = NumberRange.new(0.5, 0.9)
+			e.Rate = 12
+			e.Speed = NumberRange.new(1.5, 3)
+			e.SpreadAngle = Vector2.new(35, 35)
+			e.EmissionDirection = Enum.NormalId.Top
+			e.Parent = a
+		end
 	end
 	m.Parent = parent
 	return m

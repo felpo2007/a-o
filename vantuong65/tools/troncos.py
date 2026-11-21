@@ -49,6 +49,25 @@ ARVORES: dict[str, dict] = {
         "altura": 9.0,
         "galhos": False,
     },
+    # D-232: árvores do Blender (as raízes ficam na malha Raizes0, fora da medida)
+    "exp_figueira": {
+        "glb": "assets/blender/exp_figueira/exp_figueira.glb",
+        "escala": 1.0,
+        "pe": 1.65,
+        "altura": 4.4,
+    },
+    "exp_arvore_a": {
+        "glb": "assets/blender/exp_arvore_a/exp_arvore_a.glb",
+        "escala": 1.0,
+        "pe": 0.8,
+        "altura": 2.3,
+    },
+    "exp_arvore_b": {
+        "glb": "assets/blender/exp_arvore_b/exp_arvore_b.glb",
+        "escala": 1.0,
+        "pe": 0.8,
+        "altura": 2.3,
+    },
 }
 PADRAO = {"malha": "Madeira", "altura": 5.0, "pe": 0.3, "galhos": True}
 

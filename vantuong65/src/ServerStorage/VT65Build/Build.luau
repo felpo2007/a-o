@@ -91,7 +91,12 @@ function Build.terrain()
 	})
 	workspace.Terrain:SetAttribute("PaddiesFlat", true)
 	workspace.Terrain:SetAttribute("SitePlan", ArtPlan.VERSION)
-	local n = TerrainBuilder.carve(tunnelBoxes(world))
+	local boxes = tunnelBoxes(world)
+	-- D-232: abrigo, trincheira e comporta da expansão (só o volume de cada um)
+	for _, b in ArtPlan.expansaoEscavar(ctx, { Vector3 = Vector3, CFrame = CFrame }) do
+		table.insert(boxes, b)
+	end
+	local n = TerrainBuilder.carve(boxes)
 	print("[VT65] túneis e trincheira escavados:", n, "blocos")
 end
 
