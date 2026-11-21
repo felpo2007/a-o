@@ -942,6 +942,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
       publicado.
     - Lune 834 ok (58 arquivos), pytest 76, ruff, StyLua e luau-lsp limpos, i18n 100%. Relatório:
       `testes/LOTE95_D210_2026-11-20.md`.
+    - **v128 publicada** (versão 133 do place, commit 90801dc).
     - **Próximo (Prompt A):** o HUD de veículo (§14), morte e resultados, celular e a verificação
       final. Do §8 ficam as abas de cima e os companheiros só aptos.
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
