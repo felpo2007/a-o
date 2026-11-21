@@ -237,7 +237,7 @@ m3.BorderSizePixel = 0
 m3.Position = UDim2.fromOffset(4, 124)
 m3.Size = UDim2.fromOffset(96, 4)
 m3.Parent = marca
-local m4 = rotulo(marca, "OPERAÇÃO STARLITE · VẠN TƯỜNG · AGOSTO DE 1965", F.BODY, 16, V.DIM)
+local m4 = rotulo(marca, "OPERAÇÃO STARLITE · AGOSTO DE 1965", F.BODY, 16, V.DIM)
 m4.Position = UDim2.fromOffset(4, 134)
 m4.Size = UDim2.fromOffset(620, 24)
 
@@ -505,11 +505,27 @@ item(
 		Bus.fire("shop_open")
 	end
 )
+-- D-211 (dono: "coloque o botão do armário no lobby"): a arma de cada papel (a M16 dos EUA está lá) e o
+-- que você já tem para vestir
+item(
+	esq,
+	"ARMARIO",
+	"ARMÁRIO",
+	SEC_Y + SEC_H,
+	SEC_H,
+	34,
+	"Sua arma principal por papel (M14, M16, espingarda...) e o que você já tem para vestir.",
+	"posto",
+	"arsenal",
+	function()
+		Bus.fire("shop_open", "armario")
+	end
+)
 local itPasse = item(
 	esq,
 	"PASSE",
 	"PASSE DE CAMPANHA",
-	SEC_Y + SEC_H,
+	SEC_Y + 2 * SEC_H,
 	SEC_H,
 	34,
 	"A trilha da temporada: recompensas por estrelas de partidas e ordens.",
@@ -523,7 +539,7 @@ item(
 	esq,
 	"CONFIGURACOES",
 	"CONFIGURAÇÕES",
-	SEC_Y + 2 * SEC_H,
+	SEC_Y + 3 * SEC_H,
 	40,
 	24,
 	"Controles, mira, som, gráficos, idioma e acessibilidade.",

@@ -71,7 +71,7 @@ local MAP_PARTS_MAX_S = 90 -- e no máximo isto esperando por elas (em segundo p
 local BATCH = 16 -- assets por chamada do PreloadAsync (a barra anda por lote e por asset)
 -- os lugares dos planos do menu principal (Controllers/MenuPrincipal, SHOTS): o terreno deles chega
 -- antes do CONTINUAR, para o menu abrir com o mapa e os soldados
-local MENU_PLACES = { "Xóm Gò", "Serraria", "Arrozais" }
+local MENU_PLACES = { "Vila", "Serraria", "Arrozais" }
 
 local CANVAS = Color3.fromRGB(36, 38, 28) -- lona da barraca no escuro
 local KHAKI = Color3.fromRGB(201, 186, 140)
@@ -263,7 +263,7 @@ titleScale.Parent = title
 local rule = box(stage, STAMP, 92, 238, 0, 3)
 local hair = box(stage, BRASS, 92, 245, 0, 1, 0.35)
 local sub = label(stage, BODY, 20, KHAKI, 92, 256, 700, 26)
-sub.Text = "OPERAÇÃO STARLITE · VẠN TƯỜNG · QUẢNG NGÃI · 18 DE AGOSTO DE 1965"
+sub.Text = "OPERAÇÃO STARLITE · 18 DE AGOSTO DE 1965"
 
 -- ----- briefing: cartão oliva com filete cáqui e barra de latão (a linguagem dos avisos) -----
 local BRIEFING: { { texto: string, pagina: string } } = {
@@ -271,12 +271,12 @@ local BRIEFING: { { texto: string, pagina: string } } = {
 		texto = "18 AGO 1965 · 0630H. As companhias K e I desembarcam como planejado na Green Beach.",
 		pagina = "p. 21",
 	},
-	{ texto = "A praia não foi bombardeada: a vila de An Cường (1) fica perto demais.", pagina = "p. 21" },
+	{ texto = "A praia não foi bombardeada: a vila fica perto demais.", pagina = "p. 21" },
 	{ texto = "A companhia K toma o terreno alto logo depois da vila, com a Colina 22.", pagina = "p. 21" },
 	{ texto = "Sebes de bambu e árvores de 1,8 a 2,4 m dividem cada arrozal.", pagina = "p. 10" },
-	{ texto = "An Cường (2): vila de mata fechada, trincheiras cobertas de galhos e toras.", pagina = "p. 25" },
+	{ texto = "A vila dos túneis: mata fechada, trincheiras cobertas de galhos e toras.", pagina = "p. 25" },
 	{ texto = "LZ Blue, logo ao sul de Nam Yên (3). A Colina 43 fica uns 400 m a sudoeste.", pagina = "p. 29" },
-	{ texto = "A Colina 30, ao norte de An Cường (2), domina a zona de pouso.", pagina = "p. 29" },
+	{ texto = "A Colina 30, ao norte da vila dos túneis, domina a zona de pouso.", pagina = "p. 29" },
 }
 local brief = box(stage, OLIVE_CARD, 92, 302, 640, 166, 0.1)
 brief.Name = "Briefing"
@@ -371,7 +371,7 @@ local objective = Acabamento.marca(area, STAMP, 22, 6)
 objective.raiz.Position = UDim2.fromScale(0.36, 0.44)
 objective.raiz.Visible = false
 local mapLabel = label(map, BODY, 13, INK, 26, 342, 316, 20)
-mapLabel.Text = "CARTA 1:50.000 · VẠN TƯỜNG · QUẢNG NGÃI"
+mapLabel.Text = "CARTA 1:50.000 · OPERAÇÃO STARLITE"
 local secret = label(map, HEAD, 26, STAMP, 214, 280, 140, 40, Enum.TextXAlignment.Center)
 secret.TextYAlignment = Enum.TextYAlignment.Center
 secret.Text = "SECRET"
@@ -1497,7 +1497,7 @@ local function run()
 	end))
 	setFrac(5, 1)
 	-- 6. o terreno e os lugares dos planos do menu
-	setStep("Abrindo o terreno de Vạn Tường…")
+	setStep("Abrindo o terreno…")
 	setWaiting(true, 6)
 	while ReplicatedStorage:GetAttribute("TerrainReady") ~= true and runGen == my do
 		task.wait(0.25)

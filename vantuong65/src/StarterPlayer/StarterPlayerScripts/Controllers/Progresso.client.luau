@@ -57,9 +57,7 @@ local V = UiKit.V
 local F = UiKit.F
 local function ceremony(r: { [string]: any })
 	local nameText = if r.name then tostring(r.name) else string.format("Posto %s", tostring(r.to))
-	local headText = if state and state.faction == "VC"
-		then "THĂNG CHỨC  ·  PROMOÇÃO"
-		else "PROMOTION  ·  PROMOÇÃO"
+	local headText = if state and state.faction == "VC" then "PROMOÇÃO" else "PROMOTION  ·  PROMOÇÃO"
 	local soldo = string.format("SOLDO: +%s", money(tonumber(r.bonus) or 0))
 	Toast.custom(function(card: Frame, lay: Toast.Layout): number
 		local tv = lay.tv
@@ -1351,7 +1349,7 @@ if RunService:IsStudio() then
 		local vc = state ~= nil and state.faction == "VC"
 		ceremony(
 			if vc
-				then { name = "Tiểu đội trưởng", pt = "chefe de esquadra (squad)", bonus = 500, to = 5 }
+				then { name = "Chefe de esquadra", pt = "chefe de esquadra (squad)", bonus = 500, to = 5 }
 				else { name = "Sergeant", pt = "sargento, líder de squad", bonus = 500, to = 5 }
 		)
 		task.defer(function()

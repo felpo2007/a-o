@@ -72,6 +72,8 @@ export type Profile = {
 	purchases: { [string]: number }, -- PurchaseId -> os.time()
 	tips: number,
 	unit: { id: string? },
+	-- D-211: a arma principal escolhida no ARMÁRIO, por "lado:papel" (ex.: "US:rifleman" -> "m16")
+	armas: { [string]: string },
 	stats: { matches: number, playSeconds: number },
 	settings: { [string]: any }?, -- controle e acessibilidade (Parte 12.8); saneado no Settings_Get
 	tutorial: { [string]: boolean }, -- papéis com o tutorial concluído (F6)
@@ -295,6 +297,7 @@ function ProfileSchema.default(): Profile
 		purchases = {},
 		tips = 0,
 		unit = {},
+		armas = {},
 		stats = { matches = 0, playSeconds = 0 },
 		tutorial = {},
 		daily = { run = 0, lastDay = -1, total = 0 },
@@ -494,6 +497,14 @@ function ProfileSchema.migrate(raw: any): Profile
 	p.tips = tonumber(raw.tips) or 0
 	if type(raw.unit) == "table" then
 		p.unit = raw.unit
+	end
+	-- D-211: só chaves e armas em texto curto (o servidor confere a lista do papel ao usar)
+	if type(raw.armas) == "table" then
+		for k, w in raw.armas do
+			if type(k) == "string" and type(w) == "string" and #k <= 32 and #w <= 24 then
+				p.armas[k] = w
+			end
+		end
 	end
 	if type(raw.stats) == "table" then
 		p.stats.matches = tonumber(raw.stats.matches) or 0

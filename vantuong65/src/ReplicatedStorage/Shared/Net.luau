@@ -14,6 +14,7 @@ Net.Events = {
 	"Team_Choose", -- c->s: "US" | "VC"
 	"Squad_Action", -- c->s: { op = "create"|"join"|"leave", ... }
 	"Role_Choose", -- c->s: roleId
+	"Arma_Escolher", -- c->s faction, roleId, weaponId: D-211, a arma principal do papel (ARMÁRIO)
 	"Spawn_Request", -- c->s: spawnPointId, o pagamento ("inplace": "ci" | "credit") e a rodada (D-209)
 	"Spawn_State", -- s->c: pontos e esperas
 	"Spawn_Result", -- s->c { id, ok, cod?, msg? }: D-209, nasceu ou o motivo da recusa

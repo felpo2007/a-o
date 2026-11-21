@@ -13,14 +13,14 @@ MapConfig.CaptureRadiusStuds = 35 / 0.28 -- 35 m (D-114: setores de ~100 m; o pr
 MapConfig.Sectors = {
 		{ id = 1, name = "A Arrozais", polygon = {-2571.4, -642.9, -2571.4, -3142.9, -1910.7, -3142.9, -1910.7, -642.9} },
 		{ id = 2, name = "B Serraria", polygon = {-1910.7, -642.9, -1910.7, -3142.9, -1607.2, -3142.9, -1607.2, -642.9} },
-		{ id = 3, name = "C Xóm Gò", polygon = {-1607.2, -642.9, -1607.2, -3142.9, -1000.0, -3142.9, -1000.0, -1535.7, -1178.6, -1535.7, -1178.6, -642.9} },
+		{ id = 3, name = "C Vila", polygon = {-1607.2, -642.9, -1607.2, -3142.9, -1000.0, -3142.9, -1000.0, -1535.7, -1178.6, -1535.7, -1178.6, -642.9} },
 		{ id = 4, name = "D Ponte e Cais", polygon = {-1178.6, -642.9, -1178.6, -1535.7, -1000.0, -1535.7, -1000.0, -3142.9, -785.7, -3142.9, -785.7, -642.9} },
 		{ id = 5, name = "E Engenho", polygon = {-785.7, -642.9, -785.7, -3142.9, -71.4, -3142.9, -71.4, -642.9} },
 }
 MapConfig.Strongpoints = {
 		{ sector = 1, name = "Arrozais", x = -2053.6, z = -1303.6, real = false, note = "arrozais a sudoeste; nome de design" },
 		{ sector = 2, name = "Serraria", x = -1767.9, z = -2482.2, real = false, note = "serraria na mata fechada a noroeste; nome de design" },
-		{ sector = 3, name = "Xóm Gò", x = -1366.1, z = -2000.0, real = false, note = "vila grande de design no morrote do centro (40 a 60 casas); nome de design" },
+		{ sector = 3, name = "Vila", x = -1366.1, z = -2000.0, real = false, note = "vila grande de design no morrote do centro (40 a 60 casas); nome de design" },
 		{ sector = 4, name = "Ponte e Cais", x = -1035.7, z = -1303.6, real = false, note = "ponte e cais a sudeste; nome de design" },
 		{ sector = 5, name = "Engenho", x = -625.0, z = -2482.2, real = false, note = "engenho a nordeste; nome de design" },
 }

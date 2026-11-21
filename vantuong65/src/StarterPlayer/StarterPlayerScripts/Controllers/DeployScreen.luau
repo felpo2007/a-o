@@ -601,7 +601,7 @@ do
 	-- o subtítulo tem letras do vietnamita (Vạn Tường): no Arimo, que tem
 	local subtitle = txt(root, TYPE, 16, V.DIM, 40, 52, 600, 22)
 	subtitle.TextWrapped = false
-	subtitle.Text = "Operação Starlite · Vạn Tường, 18–24 ago 1965"
+	subtitle.Text = "Operação Starlite · 18–24 ago 1965"
 end
 local function sideColor(f: string?): Color3
 	return if f == "US" then V.US elseif f == "VC" then V.VC else V.OLIVE
@@ -727,6 +727,10 @@ local function primaryOf(f: string, rid: string): string?
 	if not pref and rid == currentRole() then
 		local a = player:GetAttribute("Primaria")
 		pref = if type(a) == "string" then a else nil
+	end
+	-- D-211: a escolha guardada no perfil (ARMÁRIO ou o botão deste cartão)
+	if not pref then
+		pref = Roles.unpackPrefs(player:GetAttribute("ArmasPreferidas"))[Roles.chavePref(f, rid)]
 	end
 	return Roles.primaryFor(f, rid, pref)
 end
@@ -1721,8 +1725,10 @@ do
 		end
 		capShown = ""
 		showRole(id)
+		-- D-211: a escolha fica no perfil (vale no ARMÁRIO, no jogar agora e na próxima sessão); o
+		-- servidor troca o equipamento se for o papel de agora
+		Net.event("Arma_Escolher"):FireServer(f, id, nextId)
 		if id == currentRole() then
-			Net.event("Role_Choose"):FireServer(id, nextId)
 			notify(string.format("%s no próximo nascimento.", weaponLine(nextId)))
 		end
 	end

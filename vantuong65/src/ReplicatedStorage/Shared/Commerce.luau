@@ -481,7 +481,7 @@ Commerce.Cosmetics = {
 		id = "vc_tire_sandals",
 		faction = "VC",
 		slot = "extra",
-		name = "Dép lốp (sandálias de pneu)",
+		name = "Sandálias de pneu",
 		unlock = "daily",
 		check = "foto",
 	},

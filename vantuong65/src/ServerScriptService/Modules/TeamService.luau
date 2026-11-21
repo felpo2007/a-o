@@ -48,8 +48,23 @@ end
 
 -- D-108: a arma principal escolhida no cartão do papel (Roles.PRIMARY), guardada no atributo
 -- "Primaria" (vale no próximo nascimento: o CombatService lê o "Loadout" ao nascer)
+-- D-211: a arma do ARMÁRIO (perfil "armas") quando o pedido não diz qual; só se vale para o papel
+local function preferida(player: Player, faction: string?, roleId: string?): string?
+	if not (faction and roleId) then
+		return nil
+	end
+	local prof = PlayerData.get(player)
+	local armas = prof and (prof :: any).armas
+	local w = if type(armas) == "table" then armas[Roles.chavePref(faction, roleId)] else nil
+	if type(w) == "string" and table.find(Roles.primaries(faction, roleId), w) then
+		return w
+	end
+	return nil
+end
+
 local function applyLoadout(player: Player, roleId: string?, primary: string?)
 	local faction = player:GetAttribute("Faction") :: string?
+	primary = primary or preferida(player, faction, roleId)
 	local loadout = if roleId and faction then Roles.loadoutFor(faction, roleId, primary) else nil
 	player:SetAttribute("Loadout", if loadout then table.concat(loadout, ",") else nil)
 	local p = if roleId and faction then Roles.primaryFor(faction, roleId, primary) else nil
@@ -255,6 +270,44 @@ function TeamService.start()
 		if Squads.chooseRole(TeamService.squads[faction], player.UserId, roleId) then
 			setRole(player, roleId, w)
 			pushSquads(faction)
+			TeamService.remember(player)
+		end
+	end)
+
+	-- D-211: a arma escolhida no ARMÁRIO (lado, papel, arma). Grava no perfil, publica no atributo e,
+	-- se for o papel de agora, troca o equipamento do próximo nascimento (sem os +15 s)
+	local armaAt: { [Player]: number } = setmetatable({}, { __mode = "k" }) :: any
+	local function publicaArmas(player: Player)
+		local prof = PlayerData.get(player)
+		local armas = prof and (prof :: any).armas
+		player:SetAttribute("ArmasPreferidas", Roles.packPrefs(if type(armas) == "table" then armas else {}))
+	end
+	PlayerData.Loaded:Connect(publicaArmas)
+	for _, p in Players:GetPlayers() do
+		task.spawn(publicaArmas, p)
+	end
+	Net.event("Arma_Escolher").OnServerEvent:Connect(function(player, faction, roleId, weapon)
+		if faction ~= "US" and faction ~= "VC" or type(roleId) ~= "string" or type(weapon) ~= "string" then
+			return
+		end
+		local t = os.clock()
+		if t - (armaAt[player] or 0) < 0.15 then
+			return
+		end
+		armaAt[player] = t
+		if not table.find(Roles.primaries(faction, roleId), weapon) then
+			return -- arma fora da lista do papel
+		end
+		local prof = PlayerData.get(player)
+		if not prof then
+			return
+		end
+		local p = prof :: any
+		p.armas = if type(p.armas) == "table" then p.armas else {}
+		p.armas[Roles.chavePref(faction, roleId)] = weapon
+		publicaArmas(player)
+		if player:GetAttribute("Faction") == faction and player:GetAttribute("Role") == roleId then
+			applyLoadout(player, roleId, weapon)
 			TeamService.remember(player)
 		end
 	end)

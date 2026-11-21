@@ -333,8 +333,8 @@ local function arrow(parent: Instance, u1: number, v1: number, u2: number, v2: n
 	end
 end
 
-local VC_NAMES: { [string]: string } =
-	{ ["Colina 43"] = "Đồi 43", ["Colina 30"] = "Đồi 30", ["Cemitério"] = "Nghĩa địa" }
+-- D-211 (dono: "retire os nomes vietnamitas do jogo"): a mesa do VC usa os mesmos nomes em português
+local VC_NAMES: { [string]: string } = {}
 local US_ONLY: { [string]: boolean } = { ["LZ Blue"] = true, ["Athletic field"] = true }
 
 local function strongpoint(name: string): (number?, number?)
@@ -446,7 +446,7 @@ local function drawMap(p: BasePart, style: string)
 	local vx, vz = mapUV(hqVC.x, hqVC.z)
 	local acx, acz = strongpoint("An Cường (2)")
 	-- D-114: no mapa de 500 m a vila do lado do VC é Xóm Gò (Nam Yên (4) ficou fora)
-	local nyx, nyz = strongpoint("Xóm Gò")
+	local nyx, nyz = strongpoint("Vila")
 	if us then
 		local box = sgBox(area, rgb(40, 70, 140), ux, uz, 0.05, 0.035, 0.15)
 		box.AnchorPoint = Vector2.new(1, 0.5)
@@ -481,13 +481,13 @@ local function drawMap(p: BasePart, style: string)
 	-- margens: título e legenda
 	if us then
 		sgText(sg, "CARTA\n1:50.000", HEAD, ink, 0.015, 0.05, 0.19, 0.16)
-		sgText(sg, "VẠN TƯỜNG\nQUẢNG NGÃI", VIET, ink, 0.015, 0.23, 0.19, 0.12)
+		sgText(sg, "OPERAÇÃO\nSTARLITE", VIET, ink, 0.015, 0.23, 0.19, 0.12)
 		sgText(sg, "Grade UTM\n500 m · BS", TYPE, rgb(70, 96, 140), 0.015, 0.8, 0.19, 0.12)
 		sgText(sg, "■ QG\n● ponto forte\n→ eixo", TYPE, ink, 0.80, 0.05, 0.19, 0.2)
 		sgStamp(sg, "SECRETO", red, 0.80, 0.78, 0.18, 0.1, -8) -- em português: o dicionário traduz
 	else
-		sgText(sg, "SƠ ĐỒ\nVẠN TƯỜNG", VIET, ink, 0.015, 0.05, 0.19, 0.16)
-		sgText(sg, "Trung đoàn 1\n8 · 1965", VIET, ink, 0.015, 0.8, 0.19, 0.12)
+		sgText(sg, "CROQUI\nDA VILA", VIET, ink, 0.015, 0.05, 0.19, 0.16)
+		sgText(sg, "1º Regimento\n8 · 1965", VIET, ink, 0.015, 0.8, 0.19, 0.12)
 		sgStamp(sg, "MẬT", red, 0.82, 0.78, 0.14, 0.1, 6)
 	end
 end
@@ -789,7 +789,7 @@ local function buildUS(): Scene
 	local ph2 = sgBox(bsg, rgb(236, 234, 226), 0.56, 0.54, 0.34, 0.4)
 	ph2.Rotation = -5
 	sgBox(ph2, rgb(110, 112, 104), 0.07, 0.07, 0.86, 0.66)
-	sgText(ph2, "VẠN TƯỜNG", VIET, INK, 0.07, 0.76, 0.86, 0.2, Enum.TextXAlignment.Center)
+	sgText(ph2, "A VILA", VIET, INK, 0.07, 0.76, 0.86, 0.2, Enum.TextXAlignment.Center)
 	-- sacos de areia no pé da lona do fundo (modelo publicado ou caixas)
 	local bags = group(f, "Sacos")
 	local fbBags = group(bags, "Fallback")
@@ -1074,7 +1074,7 @@ local function buildVC(): Scene
 		map,
 		Vector3.new(0.85, 0.04, 0.6),
 		at(-0.1, 0.02, -0.1, -3),
-		"CROQUI DE VẠN TƯỜNG",
+		"CROQUI DA OPERAÇÃO",
 		"INSERÇÃO · pontos de entrada",
 		shot(-0.1, 0, -0.1, 0, 1, 0.1, 0.92),
 		VIET
@@ -1086,7 +1086,7 @@ local function buildVC(): Scene
 	local topSheet = group(docs, "Folha")
 	local top = sheet(topSheet, 0.28, 0.36, 0.12, 0.016, 0.22, 1, rgb(230, 220, 186))
 	local tsg = surface(top, 300)
-	sgText(tsg, "TRUNG ĐOÀN 1", VIET, INK, 0.08, 0.05, 0.84, 0.1)
+	sgText(tsg, "1º REGIMENTO", VIET, INK, 0.08, 0.05, 0.84, 0.1)
 	sgText(tsg, "QUÂN GIẢI PHÓNG", VIET, INK, 0.08, 0.15, 0.84, 0.08)
 	sgBox(tsg, UiKit.RULE_RED, 0.08, 0.25, 0.84, 0.006)
 	liveText("dossier", dossierText(sgText(tsg, "", VIET, INK, 0.1, 0.29, 0.76, 0.5)))

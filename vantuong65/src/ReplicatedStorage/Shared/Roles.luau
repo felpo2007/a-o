@@ -48,21 +48,21 @@ Roles.units = {
 		},
 	},
 	VC = {
-		command = { count = 1, size = 1, heavy = false, names = { "Chỉ huy" } },
+		command = { count = 1, size = 1, heavy = false, names = { "Comando" } },
 		infantry = {
 			count = 9,
 			size = 6,
 			heavy = false,
 			names = {
-				"Tiểu đội 1",
-				"Tiểu đội 2",
-				"Tiểu đội 3",
-				"Tiểu đội 4",
-				"Tiểu đội 5",
-				"Tiểu đội 6",
-				"Tiểu đội 7",
-				"Tiểu đội 8",
-				"Tiểu đội 9",
+				"Esquadra 1",
+				"Esquadra 2",
+				"Esquadra 3",
+				"Esquadra 4",
+				"Esquadra 5",
+				"Esquadra 6",
+				"Esquadra 7",
+				"Esquadra 8",
+				"Esquadra 9",
 			},
 		},
 	},
@@ -112,6 +112,36 @@ Roles.PRIMARY = {
 		support = { "sks", "type56" },
 	},
 } :: { [string]: { [string]: { string } } }
+
+-- D-211 (dono: "cadê a M16 para os americanos"): a arma escolhida no ARMÁRIO fica no perfil
+-- ("armas", por "lado:papel") e vai ao cliente no atributo "ArmasPreferidas" como
+-- "US:rifleman=m16;US:support=win12" (ordem fixa)
+function Roles.chavePref(faction: string, roleId: string): string
+	return faction .. ":" .. roleId
+end
+function Roles.packPrefs(m: { [string]: string }): string
+	local keys = {}
+	for k in m do
+		table.insert(keys, k)
+	end
+	table.sort(keys)
+	local parts = {}
+	for _, k in keys do
+		table.insert(parts, string.format("%s=%s", k, m[k] :: string))
+	end
+	return table.concat(parts, ";")
+end
+function Roles.unpackPrefs(s: any): { [string]: string }
+	local out: { [string]: string } = {}
+	if type(s) == "string" then
+		for k, w in string.gmatch(s, "([%w_]+:[%w_]+)=([%w_]+)") do
+			if k and w then
+				out[k] = w
+			end
+		end
+	end
+	return out
+end
 
 -- Armas principais que o papel pode escolher (sempre ao menos a padrão)
 function Roles.primaries(faction: string, roleId: string): { string }

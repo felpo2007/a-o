@@ -3,7 +3,8 @@
 Esta pasta é o jogo **VẠN TƯỜNG '65**: FPS tático 30 contra 30 no Roblox (D-122), na Operação
 Starlite (agosto de 1965), mapa 1:1 de 700 × 700 m com cinco objetivos: quatro nos quadrantes, a
 180–265 m do centro, e a vila de Xóm Gò numa baixada no centro (D-201): A Arrozais, B Serraria (mata
-fechada), C Xóm Gò (vila em meio círculo, D-148), D Ponte e Cais (rio do sul) e E Engenho. O mapa é coberto de mata fechada com
+fechada), C Vila (vila em meio círculo, D-148; na tela era "Xóm Gò" até a D-211, que tirou os nomes
+vietnamitas da tela), D Ponte e Cais (rio do sul) e E Engenho. O mapa é coberto de mata fechada com
 lavoura em volta das vilas (D-65). O `CLAUDE.md` da raiz do
 repositório é de OUTRO projeto (estratégias de trade). Aqui vale este arquivo. Responda sempre em português.
 
@@ -147,7 +148,10 @@ O `sourcemap.json` não vai para o Git.
     - o soldado próprio chega em `PlayerGui.VT65MeuSoldado.Soldado` (atributos Faction, Weapon,
       Parts);
     - as entradas do menu ficam em `VT65MenuPrincipal.Palco.Conteudo.<ARSENAL|MISSOES|PERFIL|
-      TUTORIAL|LOJA|PASSE|CONFIGURACOES>`; o JOGAR continua em `...Conteudo.JOGAR`;
+      TUTORIAL|LOJA|ARMARIO|PASSE|CONFIGURACOES>`; o JOGAR continua em `...Conteudo.JOGAR`;
+    - D-211: a arma do papel se escolhe pelo pedido do cartão do ARMÁRIO,
+      `Arma_Escolher:FireServer("US", "rifleman", "m16")` (fica no perfil, atributo
+      `ArmasPreferidas`);
     - na janela estreita do Studio (839 × 656) a coluna da direita fica grande: o enquadramento
       certo de 16:9 só se vê numa tela cheia.
   - Loja (D-207): os códigos se testam pelo mesmo pedido do botão, do lado do cliente:
@@ -393,7 +397,7 @@ O `sourcemap.json` não vai para o Git.
 - Segredos só no `.env` (no `.gitignore`), nunca no código nem no chat.
 - ForgeGUI: nunca regenerar um job em `outcome_unknown`. "failed" com `retryable` pode ser
   retomado com `generation_retry`.
-- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-211) e atualize `PROGRESS.md`.
+- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-212) e atualize `PROGRESS.md`.
 - Tetos de triângulos por modelo: vegetação ≤ 6 mil (D-135), props e herói ≤ 20 mil (`ArtBudget`,
   conferido pelo teste da F5).
 - Commits no branch acima, com mensagem em português.

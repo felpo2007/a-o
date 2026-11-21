@@ -35,7 +35,7 @@ Rodada.PODIO_MAX = 3
 -- (CartaService: prefixo + nw, ne, sw, se).
 export type Mapa = { id: string, nome: string, carta: string }
 Rodada.MAPAS = {
-	{ id = "vantuong", nome = "Vạn Tường", carta = "CartaImage_" },
+	{ id = "vantuong", nome = "Operação Starlite", carta = "CartaImage_" },
 } :: { Mapa }
 
 export type Linha = {

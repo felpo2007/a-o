@@ -97,7 +97,7 @@ FRONTEIRAS_ING = [
 SETORES = [
     "A Arrozais",
     "B Serraria",
-    "C Xóm Gò",
+    "C Vila",
     "D Ponte e Cais",
     "E Engenho",
 ]
@@ -111,7 +111,7 @@ SEM_ESTRADA = {"Serraria"}  # o objetivo da mata fechada: sem estrada até ele (
 # planejamento da vila escolhe no flanco leste do morrote (E e N saem de lá, por isso None aqui)
 VILA_PF = (
     SETOR_VILA,
-    "Xóm Gò",
+    "Vila",
     None,
     None,
     False,
@@ -119,7 +119,7 @@ VILA_PF = (
 )
 VILA_BECOS = (
     SETOR_VILA,
-    "Becos de Xóm Gò",
+    "Becos da vila",
     None,
     None,
     False,
@@ -128,7 +128,7 @@ VILA_BECOS = (
 # D-114: a outra travessa, do lado oposto ao centro do mapa
 VILA_PONTA = (
     SETOR_VILA,
-    "Ponta norte de Xóm Gò",
+    "Ponta norte da vila",
     None,
     None,
     False,

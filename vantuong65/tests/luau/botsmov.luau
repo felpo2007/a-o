@@ -497,15 +497,15 @@ end
 -- (Engenho, Ponte e Cais, Xóm Gò, Serraria e Arrozais)
 test("rota no mapa real: infantaria entre os objetivos vizinhos foge do arrozal alagado e usa o dique", function()
 	realRoute("Engenho", "Ponte e Cais", 0, 0)
-	realRoute("Ponte e Cais", "Xóm Gò", 0, 0)
-	realRoute("Xóm Gò", "Serraria", 0, 0)
+	realRoute("Ponte e Cais", "Vila", 0, 0)
+	realRoute("Vila", "Serraria", 0, 0)
 	realRoute("Arrozais", "Serraria", 0, 0)
 end)
 
 test("rota no mapa real: M48A3 da saída da base até o pé do morro sem atravessar casa nem sebe", function()
 	local g = buildReal()
 	local hq = MapConfig.HQ.US
-	local b = strongpoint("Xóm Gò")
+	local b = strongpoint("Vila")
 	local p = BotNav.profile("tracked", "m48a3")
 	-- D-114 (mapa de 500 m): da entrada da base dos EUA (a oeste do QG, tools/bases_mapa.json: -48 m)
 	-- até o pé leste do morro, 90 m a leste da praça de Xóm Gò (no de 1 km o alvo ficava 150 m a leste

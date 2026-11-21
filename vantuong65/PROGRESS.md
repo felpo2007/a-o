@@ -943,8 +943,22 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     - Lune 834 ok (58 arquivos), pytest 76, ruff, StyLua e luau-lsp limpos, i18n 100%. Relatório:
       `testes/LOTE95_D210_2026-11-20.md`.
     - **v128 publicada** (versão 133 do place, commit 90801dc).
-    - **Próximo (Prompt A):** o HUD de veículo (§14), morte e resultados, celular e a verificação
-      final. Do §8 ficam as abas de cima e os companheiros só aptos.
+  - **Lote 96 (D-211): o ARMÁRIO no lobby, a M16 à vista e os nomes sem vietnamita, feito.**
+    - **ARMÁRIO no lobby e na loja:** a arma principal de cada papel em 3D (a M16 dos EUA ali), o que
+      você já tem para vestir e o atalho aos acabamentos.
+    - **A escolha da arma fica no perfil** (`armas`, pedido `Arma_Escolher`): vale no próximo
+      nascimento, no jogar agora e nas próximas sessões.
+    - **Nomes:** "C Vila" no lugar de "C Xóm Gò"; esquadras, postos e itens do VC em português; as
+      telas sem Vạn Tường / Quảng Ngãi.
+    - **Conferido no Studio:**
+      - o ARMÁRIO;
+      - a M16 escolhida e nascida (`Loadout = m16,m1911`);
+      - "C Vila" na faixa;
+      - 0 erros.
+    - Lune 845 ok (59 arquivos), pytest 76, ruff, StyLua e luau-lsp limpos, i18n 100%. Relatório:
+      `testes/LOTE96_D211_2026-11-20.md`.
+    - **Próximos (pedidos de 20/11):** a loja na composição das referências com as caixas, a
+      animação da loja e da abertura, o pódio com zoom no melhor e comemoração, e as transições.
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;

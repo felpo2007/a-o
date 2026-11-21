@@ -110,7 +110,7 @@ end
 -- fica abaixo do anel em volta (130 a 200 m dela), e o ponto mais alto da área fica fora do setor da
 -- vila e longe da praça (era o morro de 36 m da vila)
 test("centro mais baixo: a praça numa baixada, o ponto mais alto longe dela (D-201)", function()
-	local vila = strongpoint("Xóm Gò")
+	local vila = strongpoint("Vila")
 	local function media(r0: number, r1: number): number
 		local s, n = 0, 0
 		for a = 0, 355, 5 do
@@ -251,7 +251,7 @@ test("lugares que fazem o jogo estão no recorte: An Cường (2), túneis, trin
 	location("An Cường (2)")
 	local b = MapConfig.Bounds
 	-- D-128: a praça de Xóm Gò é o objetivo C; An Cường (2) segue como local da carta
-	for _, name in { "Xóm Gò", "Ponte e Cais" } do -- lote 26: a Ponte e Cais (era o Arrozal ao sul)
+	for _, name in { "Vila", "Ponte e Cais" } do -- lote 26: a Ponte e Cais (era o Arrozal ao sul)
 		local sp = strongpoint(name)
 		assert(Geometry.inBounds(b, sp.x, sp.z), name)
 	end
@@ -284,7 +284,7 @@ test("lugares que fazem o jogo estão no recorte: An Cường (2), túneis, trin
 			assert(vc.x < sp.x, "QG do VC na frente de " .. sp.name)
 		end
 	end
-	local praca = strongpoint("Xóm Gò")
+	local praca = strongpoint("Vila")
 	-- a praça de Xóm Gò é o centro do mapa (D-123: o mapa de 700 m é centrado na vila)
 	near((praca.x - (b.minX + b.maxX) / 2) * 0.28, 0, 15, "Xóm Gò fora do centro")
 end)

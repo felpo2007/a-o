@@ -107,7 +107,7 @@ end
 -- baixas e resultado.
 function AfterAction.lines(r: Report): { string }
 	local out = {
-		"RELATÓRIO PÓS-AÇÃO — OPERAÇÃO STARLITE (VẠN TƯỜNG)",
+		"RELATÓRIO PÓS-AÇÃO — OPERAÇÃO STARLITE",
 		string.format("Modo: %s. Início %s.", r.mode, AfterAction.dtg(r, 0)),
 		"",
 		"1. LINHA DO TEMPO",

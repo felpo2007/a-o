@@ -9224,3 +9224,76 @@ Também pede:
 - **XP de verdade:** um ganho real pelo `Progress_State` (a ligação está nos testes de fonte).
 - **Companheiros de verdade:** só o exemplo.
 - **Telas:** o toque, a TV, o 16:9 cheio e o jogo publicado.
+
+## D-211 — Lote 96: o ARMÁRIO no lobby, a M16 à vista e os nomes sem vietnamita (2026-11-20)
+
+**Pedidos do dono (20/11):**
+- "cadê a m16 para os americanos";
+- "coloque o botão do armários no lobby";
+- "simplifique as escritas retire os nomes vietnamitas do jogo deixe apenas vila, arrozal, engenho
+  por exemplo".
+
+**A M16:**
+- **Já existia (D-146):** é escolha do líder, do fuzileiro, do médico e do suporte dos EUA.
+- **Por que não se achava:** só se trocava num botão pequeno do cartão do papel, e a escolha durava
+  a sessão.
+- **Agora a escolha fica no perfil** (campo novo `armas`, por "lado:papel"):
+  - o pedido `Arma_Escolher` confere a lista do papel, grava, publica no atributo `ArmasPreferidas`
+    e, se for o papel de agora, troca o equipamento do próximo nascimento;
+  - o papel escolhido sem arma usa a do perfil;
+  - o botão do cartão do papel grava do mesmo jeito.
+
+**O ARMÁRIO:**
+- **No lobby:** a entrada ARMÁRIO, entre a LOJA e o PASSE.
+- **Na loja:** a aba ARMÁRIO, a segunda, com:
+  - **EUA | VC:** começa no lado de agora ou no último escolhido;
+  - **ARMA PRINCIPAL:** cada papel com mais de uma arma, em cartões com o modelo 3D do jogo (RodaArte)
+    e "✓ ESCOLHIDA";
+  - **VISUAIS:** o que você já tem para vestir naquele lado, com ● equipado;
+  - **o atalho "ACABAMENTOS E UNIFORMES ›":** leva à INTENDÊNCIA.
+- As abas passaram a 8 (a letra encolheu de 20 para 18).
+
+**Nomes sem vietnamita na tela:**
+- **O setor C:** "C Xóm Gò" virou "C Vila", e o ponto forte "Xóm Gò" virou "Vila" (MapConfig e o
+  gerador `crop_world.py`, que agora escreve os nomes novos).
+- **VC:**
+  - "Chỉ huy" virou "Comando";
+  - "Tiểu đội 1–9" virou "Esquadra 1–9";
+  - os 13 postos viraram as funções em português ("Recruta", "Combatente", "Chefe de célula"...
+    "Comandante de regimento"), com siglas novas.
+- **Itens:** Cantil extra, Bolsa de socorro, Sandálias de pneu, Morteiro 82 mm, Porcelana imperial e
+  Emblema: Vila.
+- **Telas:**
+  - os subtítulos e a carta da tela de entrada ("OPERAÇÃO STARLITE · AGOSTO DE 1965");
+  - as dicas ("a vila dos túneis");
+  - o relatório pós-ação;
+  - a medalha;
+  - descrições de acabamentos;
+  - os textos da mesa 3D do lobby ("CROQUI DA VILA", "1º REGIMENTO"; a mesa do VC não traduz mais os
+    rótulos).
+- **Ficam:**
+  - os nomes de lugar que servem de chave no código e não aparecem (An Cường, An Thới: a vila dos
+    túneis e as aldeias);
+  - a fonte vietnamita pré-carregada;
+  - o idioma vietnamita, em que os postos do VC voltam aos nomes originais;
+  - as anotações históricas dos eventos, que não aparecem na tela.
+- **Textos novos (en, es, vi):** 58.
+
+**Conferido no Studio:**
+- **Lobby:** a entrada ARMÁRIO e o subtítulo novo (`testes/lote96/lobby_com_armario.jpg`).
+- **ARMÁRIO:** a aba com M14, M16, Escopeta 12 e M79 em 3D (`armario_arma_principal.jpg`).
+- **A M16 escolhida:**
+  - pelo mesmo pedido do cartão, o atributo virou "US:rifleman=m16" e o cartão passou a "✓ ESCOLHIDA"
+    (`armario_m16_escolhida.jpg`);
+  - depois, como fuzileiro sem dizer a arma: `Loadout = m16,m1911` e a M16 na mão
+    (`m16_no_cartao_da_arma.jpg`).
+- **Faixa:** "CAPTURAR · C Vila · ~325 m a oeste".
+- **Erros:** 0 (cliente e servidor).
+
+**Testes:** `armario.luau` (6).
+
+**Não testado:**
+- o clique de verdade nos cartões do ARMÁRIO (o clique do MCP não chega dentro do painel com escala,
+  D-207);
+- o perfil gravado e lido de novo numa sessão nova (a migração está no teste);
+- o jogo publicado.

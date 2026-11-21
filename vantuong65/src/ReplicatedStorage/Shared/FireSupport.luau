@@ -177,7 +177,7 @@ FireSupport.ABILITIES = {
 	},
 	vc_mortar_82 = {
 		id = "vc_mortar_82",
-		name = "Cối 82 mm",
+		name = "Morteiro 82 mm",
 		faction = "VC",
 		who = "commander", -- D-108: o comandante pede o morteiro (a equipe de morteiro saiu)
 		kind = "salvo",

@@ -53,7 +53,7 @@ Medalhas.LIST = {
 	{
 		id = "heroi_libertacao",
 		name = "Medalha de Herói (VC)",
-		desc = "Vencer 10 partidas pelo VC (Huân chương Chiến sĩ Giải phóng).",
+		desc = "Vencer 10 partidas pelo VC.",
 		stat = "winsVC",
 		goal = 10,
 	},

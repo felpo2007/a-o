@@ -26,11 +26,14 @@ local Commerce = require(ReplicatedStorage.Shared.Commerce)
 local JogarAgora = require(ReplicatedStorage.Shared.JogarAgora) :: any
 local Net = require(ReplicatedStorage.Shared.Net)
 local Progression = require(ReplicatedStorage.Shared.Progression)
+local Roles = require(ReplicatedStorage.Shared.Roles) :: any
+local Weapons = require(ReplicatedStorage.Shared.Weapons) :: any
 local Acabamento = require(ReplicatedFirst:WaitForChild("Acabamento"))
 local Bus = require(script.Parent.Bus)
 local CampanhaCliente = require(script.Parent.CampanhaCliente)
 local Input = require(script.Parent.Input)
 local LobbyPalco = require(script.Parent.LobbyPalco)
+local RodaArte = require(script.Parent.RodaArte)
 local SoldierPreview = require(script.Parent.SoldierPreview)
 local ToqueUi = require(script.Parent.ToqueUi)
 local UiKit = require(script.Parent.UiKit)
@@ -52,6 +55,9 @@ local X0 = px(48, 64) -- margem da esquerda
 -- CÓDIGOS
 local TABS = {
 	{ id = "loja", name = "DESTAQUES" },
+	-- D-211 (dono: "coloque o botão do armário no lobby"; "cadê a M16 para os americanos"): a arma
+	-- principal de cada papel e o que você já tem para vestir
+	{ id = "armario", name = "ARMÁRIO" },
 	{ id = "mercado", name = "MERCADO" },
 	-- D-173: caixas de suprimentos (Controllers/CaixasTela.client desenha dentro do host dela)
 	{ id = "caixas", name = "CAIXAS" },
@@ -283,7 +289,7 @@ for i, d in TABS do
 	b.BackgroundTransparency = 1
 	b.BorderSizePixel = 0
 	b.FontFace = UiKit.Estilo.headFont(d.name)
-	b.TextSize = UiKit.text(px(20, 27)) -- D-207: sete abas cabem no painel de 1120
+	b.TextSize = UiKit.text(px(18, 25)) -- D-207/D-211: oito abas cabem no painel de 1120
 	b.TextColor3 = V.DIM
 	b.Text = d.name
 	b.Selectable = false
@@ -385,8 +391,9 @@ end
 local marketPage = newPage("Mercado")
 local perkPage = newPage("Vantagens")
 local codesPage = newPage("Codigos")
+local armarioPage = newPage("Armario")
 local pages: { [string]: ScrollingFrame } =
-	{ loja = panel, mercado = marketPage, vantagens = perkPage, codigos = codesPage }
+	{ loja = panel, armario = armarioPage, mercado = marketPage, vantagens = perkPage, codigos = codesPage }
 
 -- ----- CÓDIGOS (D-207; §9: "Trate código válido, inválido, expirado e já utilizado. O servidor
 -- confirma o benefício.") -----
@@ -1971,6 +1978,192 @@ local function renderPerks(force: boolean?)
 	UiKit.focus(p)
 end
 
+-- ----- ARMÁRIO (D-211) -----
+-- A arma principal de cada papel do lado (Roles.PRIMARY) com a imagem do modelo do jogo (RodaArte):
+-- escolher grava no perfil (Arma_Escolher) e vale no próximo nascimento, no jogar agora e nas próximas
+-- sessões. Embaixo, o que você já tem para vestir e o caminho para os acabamentos (INTENDÊNCIA).
+local ARMARIO_PAPEIS =
+	{ "squad_leader", "rifleman", "medic", "support", "machine_gunner", "commander", "anti_tank", "sniper" }
+local armarioLado: string? = nil -- o lado mostrado (nil: o de agora ou o último escolhido)
+local function ladoAtual(): string
+	local f = player:GetAttribute("Faction")
+	if f == "US" or f == "VC" then
+		return f
+	end
+	local c = JogarAgora.decode(player:GetAttribute("UltimaEscolha"))
+	return if c and (c.f == "US" or c.f == "VC") then c.f else "US"
+end
+-- a arma enche o quadro largo do cartão (o RodaArte enquadra pela diagonal)
+local function encherArte(vp: ViewportFrame)
+	local cam = vp.CurrentCamera
+	local m = vp:FindFirstChildOfClass("Model")
+	if cam and m then
+		local alvo = m:GetBoundingBox().Position
+		cam.CFrame = CFrame.lookAt(alvo + (cam.CFrame.Position - alvo) * 0.55, alvo)
+	end
+end
+local function renderArmario()
+	local p = armarioPage
+	for _, c in p:GetChildren() do
+		if not (c:IsA("UIListLayout") or c:IsA("UIPadding")) then
+			c:Destroy()
+		end
+	end
+	local ordem = 0
+	local function add(o: GuiObject)
+		ordem += 1
+		o.LayoutOrder = ordem
+		o.Parent = p
+	end
+	local f = armarioLado or ladoAtual()
+	-- o lado mostrado: EUA | VC
+	local lados = Instance.new("Frame")
+	lados.Name = "Lados"
+	lados.BackgroundTransparency = 1
+	lados.Size = UDim2.new(1, -24, 0, px(40, 54))
+	local ll = Instance.new("UIListLayout")
+	ll.FillDirection = Enum.FillDirection.Horizontal
+	ll.Padding = UDim.new(0, px(10, 14))
+	ll.Parent = lados
+	for _, lado in { "US", "VC" } do
+		local on = lado == f
+		local b = UiKit.action(
+			lados,
+			if lado == "US" then "EUA" else "VC",
+			if on then "primary" else "secondary",
+			function()
+				armarioLado = lado
+				renderArmario()
+			end,
+			{ h = px(40, 54) }
+		)
+		b.button.Name = lado
+		b.button.Size = UDim2.fromOffset(px(140, 190), px(40, 54))
+	end
+	add(lados)
+	local t = UiKit.title(nil, "ARMA PRINCIPAL", px(30, 40))
+	t.Size = UDim2.new(1, -24, 0, px(38, 50))
+	add(t)
+	add(note("Escolha a arma de cada papel: vale no próximo nascimento e fica guardada."))
+	local prefs = Roles.unpackPrefs(player:GetAttribute("ArmasPreferidas"))
+	for _, rid in ARMARIO_PAPEIS do
+		local list = Roles.primaries(f, rid)
+		local def = Roles.roles[rid]
+		if #list > 1 and def then
+			local row = Instance.new("Frame")
+			row.Name = rid
+			row.Size = UDim2.new(1, -24, 0, px(214, 286))
+			row.BackgroundColor3 = V.PANEL_2
+			row.BorderSizePixel = 0
+			UiKit.corner(row, 4)
+			UiKit.edge(row, V.LINE, 1, 0.5)
+			local nome = UiKit.title(row, UiKit.upper(def.name), px(22, 30))
+			nome.Position = UDim2.fromOffset(px(16, 22), px(10, 14))
+			nome.Size = UDim2.new(1, -px(32, 44), 0, px(30, 40))
+			local cards = Instance.new("Frame")
+			cards.BackgroundTransparency = 1
+			cards.Position = UDim2.fromOffset(px(16, 22), px(46, 62))
+			cards.Size = UDim2.new(1, -px(32, 44), 0, px(156, 208))
+			cards.Parent = row
+			local cl = Instance.new("UIListLayout")
+			cl.FillDirection = Enum.FillDirection.Horizontal
+			cl.Padding = UDim.new(0, px(12, 16))
+			cl.SortOrder = Enum.SortOrder.LayoutOrder
+			cl.Parent = cards
+			local escolhida = Roles.primaryFor(f, rid, prefs[Roles.chavePref(f, rid)])
+			for i, w in list do
+				local on = w == escolhida
+				local c = Instance.new("TextButton")
+				c.Name = w
+				c.LayoutOrder = i
+				c.AutoButtonColor = false
+				c.Text = ""
+				c.Size = UDim2.fromOffset(px(230, 306), px(156, 208))
+				c.BackgroundColor3 = if on then V.PANEL_3 else UiKit.CARD_DARK
+				c.BorderSizePixel = 0
+				c.Selectable = true
+				c.SelectionImageObject = UiKit.FOCUS
+				c.Parent = cards
+				UiKit.corner(c, 4)
+				UiKit.edge(c, if on then V.AMBAR else V.LINE, if on then 2 else 1, if on then 0 else 0.5)
+				local vp = RodaArte.frame(c)
+				vp.Position = UDim2.fromOffset(px(8, 10), px(8, 10))
+				vp.Size = UDim2.new(1, -px(16, 20), 0, px(96, 128))
+				RodaArte.show(vp, string.format("weapon:%s", w))
+				encherArte(vp)
+				local n = UiKit.title(c, Weapons.shortName(w, f), px(20, 27))
+				n.Position = UDim2.fromOffset(px(12, 16), px(106, 142))
+				n.Size = UDim2.new(1, -px(24, 32), 0, px(24, 32))
+				local tag = UiKit.rotulo(c, 13, if on then V.AMBAR else V.DIM, UiKit.F.BODY_B)
+				tag.Position = UDim2.fromOffset(px(12, 16), px(130, 174))
+				tag.Size = UDim2.new(1, -px(24, 32), 0, px(18, 24))
+				tag.Text = if on then "✓ ESCOLHIDA" else "ESCOLHER"
+				local r = UiKit.realce(c, c.BackgroundColor3, V.PANEL_3, 1.02)
+				c.MouseEnter:Connect(function()
+					r.set(true)
+				end)
+				c.MouseLeave:Connect(function()
+					r.set(false)
+				end)
+				c.SelectionGained:Connect(function()
+					r.set(true)
+				end)
+				c.SelectionLost:Connect(function()
+					r.set(false)
+				end)
+				UiKit.bind(c, function()
+					if not on then
+						Net.event("Arma_Escolher"):FireServer(f, rid, w)
+					end
+				end)
+			end
+			add(row)
+		end
+	end
+	-- visuais: o que você já tem para vestir neste lado (o servidor valida ao equipar)
+	local v = UiKit.title(nil, "VISUAIS", px(30, 40))
+	v.Size = UDim2.new(1, -24, 0, px(38, 50))
+	add(v)
+	local any = false
+	for _, c in Commerce.Cosmetics do
+		if c.faction == f and table.find(state.unlocked, c.id) then
+			any = true
+			local eq = state.equipped[f] and state.equipped[f][c.slot] == c.id
+			local b = Instance.new("TextButton")
+			b.Name = string.format("eq_%s", c.id)
+			b.AutoButtonColor = false
+			b.Text = ""
+			b.Size = UDim2.new(1, -24, 0, px(40, 56))
+			b.BackgroundColor3 = if eq then V.PANEL_3 else V.PANEL_2
+			b.Selectable = true
+			b.SelectionImageObject = UiKit.FOCUS
+			UiKit.corner(b, 3)
+			UiKit.edge(b, if eq then V.OLIVE_HI else V.LINE, 1, if eq then 0.2 else 0.6)
+			local tx = UiKit.rotulo(b, 16, if eq then V.TEXT else V.DIM, UiKit.BODY_FONT)
+			tx.Position = UDim2.fromOffset(px(14, 18), 0)
+			tx.Size = UDim2.new(1, -px(28, 36), 1, 0)
+			tx.Text = string.format("%s  %s: %s", if eq then "●" else "○", c.slot, c.name)
+			UiKit.bind(b, function()
+				Net.event("Commerce_Equip"):FireServer(f, c.slot, c.id)
+			end)
+			add(b)
+		end
+	end
+	if not any then
+		add(note("Nada liberado ainda para este lado: caixas, passe e caderneta dão visuais."))
+	end
+	local ir = UiKit.action(nil, "ACABAMENTOS E UNIFORMES ›", "secondary", function()
+		setTab("intendencia")
+	end, { h = px(48, 64) })
+	ir.button.Size = UDim2.new(1, -24, 0, px(48, 64))
+	add(ir.button)
+end
+player:GetAttributeChangedSignal("ArmasPreferidas"):Connect(function()
+	if gui.Enabled and tab == "armario" then
+		renderArmario()
+	end
+end)
+
 local function renderPage()
 	if tab == "mercado" then
 		renderMarket()
@@ -1978,6 +2171,8 @@ local function renderPage()
 		renderPerks()
 	elseif tab == "codigos" then
 		renderCodes()
+	elseif tab == "armario" then
+		renderArmario()
 	end
 end
 
