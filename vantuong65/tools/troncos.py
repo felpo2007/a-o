@@ -70,6 +70,8 @@ ARVORES: dict[str, dict] = {
     },
 }
 PADRAO = {"malha": "Madeira", "altura": 5.0, "pe": 0.3, "galhos": True}
+# D-233: pedra da mata: um cilindro baixo no miolo, para ela parar a bala e o soldado
+ROCHAS = {"exp_rocha": "assets/blender/exp_rocha/exp_rocha.glb"}
 
 PASSO_M = 0.25  # distância entre as fatias, na escala típica
 RAIO_MIN_M = 0.06  # caule mais fino que isto (raio) não para a bala
@@ -321,6 +323,24 @@ def medir(chave: str) -> dict:
     return {"v": v, "f": f, "hastes": hs, "cil": cil, "y_pe": y_pe, "escala": escala}
 
 
+def medir_rocha(chave: str) -> dict:
+    """Cilindro em pé no miolo da pedra (85% da menor meia largura a 40% da altura), até 85%."""
+    v, f = madeira(RAIZ / ROCHAS[chave], None)
+    y0, y1 = float(v[:, 1].min()), float(v[:, 1].max())
+    faixa = v[np.abs(v[:, 1] - (y0 + 0.4 * (y1 - y0))) < 0.08 * (y1 - y0)]
+    cx, cz = (faixa[:, [0, 2]].max(axis=0) + faixa[:, [0, 2]].min(axis=0)) / 2
+    meia = (faixa[:, [0, 2]].max(axis=0) - faixa[:, [0, 2]].min(axis=0)) / 2
+    r = 0.85 * float(meia.min())
+    cil = [
+        {
+            "a": np.array([cx, y0 + 0.02, cz]),
+            "b": np.array([cx, y0 + 0.85 * (y1 - y0), cz]),
+            "r": r,
+        }
+    ]
+    return {"v": v, "f": f, "hastes": [[]], "cil": cil, "y_pe": y0, "escala": 1.0}
+
+
 def luau(medidas: dict[str, dict]) -> str:
     ls = [
         "--!strict",
@@ -384,8 +404,8 @@ def main() -> None:
     ap.add_argument("--previa", type=Path, help="pasta para os desenhos de conferência")
     args = ap.parse_args()
     medidas = {}
-    for chave in ARVORES:
-        med = medir(chave)
+    for chave in [*ARVORES, *ROCHAS]:
+        med = medir_rocha(chave) if chave in ROCHAS else medir(chave)
         medidas[chave] = med
         s = med["escala"]
         alto = max(max(c["a"][1], c["b"][1]) for c in med["cil"]) - med["y_pe"]

@@ -3,6 +3,7 @@
 -- Com ID 0 nada muda. F3 = setor central com arte final; o resto do mapa entra na F5 (D-14).
 -- Posicionamento determinístico (semente fixa). 2026-11-12: o lugar e a altura de cada coisa vêm do
 -- plano da arte (ArtPlan), o mesmo que gerou o terreno.
+local CollectionService = game:GetService("CollectionService")
 local InsertService = game:GetService("InsertService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerStorage = game:GetService("ServerStorage")
@@ -19,6 +20,7 @@ local Rng = require(ReplicatedStorage.Shared.Rng)
 local StaticArt = require(script.Parent.StaticArt)
 local TreeTrunks = require(script.Parent.TreeTrunks)
 local Expansao = require(script.Parent.Expansao)
+local ExpansaoLod = require(ReplicatedStorage.Shared.ExpansaoLod)
 local TrunkProxy = require(script.Parent.TrunkProxy)
 local Tunnels = require(ReplicatedStorage.Shared.Tunnels) :: any
 local Vegetation = require(script.Parent.Vegetation)
@@ -231,7 +233,8 @@ function AssetLoader.template(key: string): Model?
 			p.CanTouch = false
 			p.CastShadow = false
 			p.CollisionGroup = AssetLoader.TRUNK_GROUP
-			p:SetAttribute("Material", "Wood")
+			-- D-233: a rocha da expansão usa o mesmo cilindro invisível, com impacto de pedra
+			p:SetAttribute("Material", if key == "exp_rocha" then "Concrete" else "Wood")
 			p.Parent = tpl
 		end
 	end
@@ -721,6 +724,16 @@ function AssetLoader.placeItem(it: any, parent: Instance, planned: boolean): Mod
 		local cf = CFrame.new(it.x, base, it.z) * CFrame.Angles(0, it.yaw, 0)
 		MapLife.baseInstance(m, it.key, cf, it.node, data.extras and data.extras[it.key])
 	end
+	-- D-233: de longe, o cliente esconde as peças da expansão sem colisão (Shared/ExpansaoLod)
+	if string.sub(it.key, 1, 4) == "exp_" then
+		for _, d in m:GetDescendants() do
+			local limite = if d:IsA("MeshPart") then ExpansaoLod.limiteM(it.key, d.Name) else nil
+			if limite then
+				d:SetAttribute(ExpansaoLod.ATRIBUTO, limite)
+				CollectionService:AddTag(d, ExpansaoLod.TAG)
+			end
+		end
+	end
 	-- D-232: lampião nos interiores da expansão (uma luz por cômodo, sem sombra)
 	local luzes = if (it :: any).expansao then Expansao.LUZES[it.key] else nil
 	local dono = if luzes then m:FindFirstChildWhichIsA("BasePart", true) else nil
@@ -753,17 +766,19 @@ function AssetLoader.placeItem(it: any, parent: Instance, planned: boolean): Mod
 			e.Texture = "rbxasset://textures/particles/smoke_main.dds"
 			e.Color = ColorSequence.new(Color3.fromRGB(226, 232, 222))
 			e.Transparency = NumberSequence.new({
-				NumberSequenceKeypoint.new(0, 0.55),
+				NumberSequenceKeypoint.new(0, 0.2),
+				NumberSequenceKeypoint.new(0.5, 0.55),
 				NumberSequenceKeypoint.new(1, 1),
 			})
 			e.Size = NumberSequence.new({
-				NumberSequenceKeypoint.new(0, 0.5 / M * 0.5),
-				NumberSequenceKeypoint.new(1, 1.3 / M * 0.5),
+				NumberSequenceKeypoint.new(0, 0.9 / M * 0.5),
+				NumberSequenceKeypoint.new(1, 2.6 / M * 0.5),
 			})
-			e.Lifetime = NumberRange.new(0.5, 0.9)
-			e.Rate = 12
-			e.Speed = NumberRange.new(1.5, 3)
-			e.SpreadAngle = Vector2.new(35, 35)
+			e.Lifetime = NumberRange.new(0.7, 1.2)
+			e.Rate = 26
+			e.Speed = NumberRange.new(2, 5)
+			e.LightEmission = 0.15
+			e.SpreadAngle = Vector2.new(40, 40)
 			e.EmissionDirection = Enum.NormalId.Top
 			e.Parent = a
 		end

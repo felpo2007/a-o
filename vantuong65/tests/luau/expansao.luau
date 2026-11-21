@@ -17,6 +17,8 @@ local ArtPlan = R("../../src/ServerScriptService/Modules/ArtPlan")
 local ArtBudget = R("../../src/ServerScriptService/Modules/ArtBudget")
 local Expansao = R("../../src/ServerScriptService/Modules/Expansao")
 local TreeTrunks = R("../../src/ServerScriptService/Modules/TreeTrunks")
+local ExpansaoLod = R("../../src/ReplicatedStorage/Shared/ExpansaoLod")
+local RiceField = R("../../src/ReplicatedStorage/Shared/RiceField")
 
 local M = 0.28
 local passed, failed = 0, 0
@@ -160,6 +162,47 @@ test("árvore nova tem tronco que para a bala e o pé enterrado no nível do mod
 		local s = ArtBudget.BASE_SINK[k]
 		assert(s and s.frac > 0 and s.frac < 0.1, k .. ": sem BASE_SINK")
 	end
+end)
+
+test("a rocha é sólida: tem cilindro dentro da pedra, do pé para cima (D-233)", function()
+	local c = TreeTrunks.exp_rocha and TreeTrunks.exp_rocha[1]
+	assert(c, "exp_rocha sem cilindro (rode tools/troncos.py)")
+	local d = ArtBudget.DIMS.exp_rocha
+	assert(c.r > 0.3 / M and c.r < math.min(d[1], d[3]) / 2, string.format("raio %.2f studs", c.r))
+	assert(math.min(c.a[2], c.b[2]) < 0.3 / M and math.max(c.a[2], c.b[2]) <= d[2], "altura do cilindro")
+end)
+
+test("de longe só some o que não tem colisão (D-233)", function()
+	assert(ExpansaoLod.limiteM("exp_figueira", "Raizes0") == 70, "raiz da figueira")
+	assert(ExpansaoLod.limiteM("exp_arvore_a", "Raizes0") == 45, "raiz da árvore")
+	assert(ExpansaoLod.limiteM("exp_samambaia", "Folhas0") == 55, "samambaia")
+	assert(ExpansaoLod.limiteM("exp_celeiro", "Trim_P") == 70, "piso térreo")
+	for _, k in { "exp_palafita_a", "exp_palafita_b", "exp_deposito", "exp_passarela", "exp_comporta" } do
+		assert(ExpansaoLod.limiteM(k, "Trim_P") == nil, k .. ": piso elevado não pode sumir")
+	end
+	for _, peca in { "Mobilia", "Telhado", "Trim_M", "Trim_O", "Trim_W", "Colisao_x", "Tronco_1", "Rocha0" } do
+		assert(ExpansaoLod.limiteM("exp_celeiro", peca) == nil, peca .. " não pode sumir")
+		assert(ExpansaoLod.limiteM("exp_rocha", peca) == nil, peca .. " não pode sumir")
+	end
+	assert(ExpansaoLod.limiteM("vila_casa_01", "Trim_P") == nil, "casa antiga fica como era")
+	local lim = 70 / M
+	assert(not ExpansaoLod.esconde(lim * 1.04, 70, 1, false), "a folga segura quem está visível")
+	assert(ExpansaoLod.esconde(lim * 1.09, 70, 1, false), "passou da folga, some")
+	assert(ExpansaoLod.esconde(lim * 1.04, 70, 1, true), "quem sumiu só volta dentro do limite")
+	assert(not ExpansaoLod.esconde(lim * 0.99, 70, 1, true), "dentro do limite, volta")
+end)
+
+test("o tabuleiro colhido sai só do pousio e os outros estados não mudam (D-233)", function()
+	local n, colhidos = 0, 0
+	for _, p in ctx1.paddies.list do
+		n += 1
+		if RiceField.colhido(p.x, p.z) then
+			colhidos += 1
+			assert(RiceField.kind(p.x, p.z) == "fallow", "colhido fora do pousio")
+		end
+	end
+	assert(n > 0, "sem tabuleiros")
+	print(string.format("       %d tabuleiros, %d colhidos", n, colhidos))
 end)
 
 test("água nova só desce e o abrigo fica fora de lâmina, dique e riacho", function()

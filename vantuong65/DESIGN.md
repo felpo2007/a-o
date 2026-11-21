@@ -9823,3 +9823,15 @@ mapa novo nem objetivo novo, preservando capturas, nascimentos e entradas.
 - **Luz:** um lampião local por cômodo, sem sombra (11 no mapa).
 - **Medido:** chamadas de desenho +17,9% na soma de 9 vistas (de +8% a +32%). Celular não medido.
 - **Fora do lote:** estado "colhido" dos tabuleiros, porque mudaria os tabuleiros antigos.
+
+## D-233 — Lote 105: acabamento da expansão (2026-11-21)
+
+**Pedido do dono:** "continue", depois das pendências da v136.
+- **Rocha sólida:** a `exp_rocha` era planta sem colisão. Agora tem um cilindro invisível no miolo
+  (`tools/troncos.py`, `ROCHAS`), que para a bala e o soldado, com impacto de pedra.
+- **Forro:** o telhado de chapa ganhou uma face de baixo de zinco escuro (`exp_comum.forro`).
+- **Colhido:** `RiceField.colhido` marca parte dos tabuleiros em pousio, que recebem medas sem colisão.
+  O estado continua "fallow" para o resto do jogo. Sai com `Expansao.LIGADA = false`.
+- **Desenho:** `Shared/ExpansaoLod` esconde de longe só o que não tem colisão (raízes, samambaia e piso
+  das casas térreas). **Móvel e objeto de quintal ficam:** sumir com eles criaria barreira invisível.
+- **Medido:** +15,2% de chamadas de desenho sobre a v135 nas 9 vistas (era +17,9% na v136).

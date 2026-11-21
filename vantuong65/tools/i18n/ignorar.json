@@ -1734,7 +1734,8 @@
   "smokes",
   "uniformes",
   "acab_%s__%s",
-  "visuais"
+  "visuais",
+  "Raizes"
  ],
  "regex": [
   "^uni_[a-z_]+@[a-z0-9]+$"

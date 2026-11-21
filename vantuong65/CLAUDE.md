@@ -47,6 +47,8 @@ repositório é de OUTRO projeto (estratégias de trade). Aqui vale este arquivo
     estrada ou água). Planta anotada: `tools/expansao_planta.luau` e `.py`.
   - A carta aérea é do tipo Image: depois do `catalogo_imagens.py ids`, copie os IDs novos de
     `Catalogo.aereo_*` para `AssetIds.CartaImages` (o script não atualiza essa tabela).
+  - Longe da câmera (D-233): `Shared/ExpansaoLod` diz o que some. Só peça sem colisão: móvel e objeto de
+    quintal nunca, para não virar barreira invisível. Rocha nova: `ROCHAS` no `tools/troncos.py`.
 - **Não salve o place pelo Studio:** o Studio grava com outra compressão, que o Lune 0.8 não lê
   ("Decompression failed"). Teste mudanças no Studio pelo MCP, mas gere o `.rbxl` pelo pipeline.
   O XML (`.rbxlx`) do Studio também não serve: o Lune 0.8 não lê o `Content` novo (`<uri>`) nem
@@ -462,7 +464,7 @@ O `sourcemap.json` não vai para o Git.
 - Segredos só no `.env` (no `.gitignore`), nunca no código nem no chat.
 - ForgeGUI: nunca regenerar um job em `outcome_unknown`. "failed" com `retryable` pode ser
   retomado com `generation_retry`.
-- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-233) e atualize `PROGRESS.md`.
+- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-234) e atualize `PROGRESS.md`.
 - Tetos de triângulos por modelo: vegetação ≤ 6 mil (D-135), props e herói ≤ 20 mil (`ArtBudget`,
   conferido pelo teste da F5).
 - Commits no branch acima, com mensagem em português.

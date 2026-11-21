@@ -1536,7 +1536,7 @@
   "src/ReplicatedStorage/Shared/Toque.luau:109"
  ],
  "Agua": [
-  "src/ServerScriptService/Modules/MapLife.luau:592"
+  "src/ServerScriptService/Modules/MapLife.luau:640"
  ],
  "Aguardando a compra…": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CasualtyScreen.luau:1107"
@@ -1576,13 +1576,13 @@
   "src/ReplicatedStorage/Shared/Roles.luau:47"
  ],
  "Alpendre": [
-  "src/ServerScriptService/Modules/MapLife.luau:764"
+  "src/ServerScriptService/Modules/MapLife.luau:812"
  ],
  "Alt": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ComoJogar.luau:610"
  ],
  "Altar": [
-  "src/ServerScriptService/Modules/MapLife.luau:849"
+  "src/ServerScriptService/Modules/MapLife.luau:897"
  ],
  "Alterações não salvas: toque em SAIR de novo para sair.": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/EditorHud.client.luau:420"
@@ -1594,7 +1594,7 @@
   "src/ReplicatedStorage/Shared/Cosmeticos.luau:361"
  ],
  "Alvo": [
-  "src/ServerScriptService/Modules/AssetLoader.luau:984",
+  "src/ServerScriptService/Modules/AssetLoader.luau:999",
   "src/ServerScriptService/Modules/TrainingService.luau:360"
  ],
  "Alvo de %d m: %d cm %s, %d cm %s do centro": [
@@ -1846,7 +1846,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:753"
  ],
  "Assoalho": [
-  "src/ServerScriptService/Modules/MapLife.luau:864"
+  "src/ServerScriptService/Modules/MapLife.luau:912"
  ],
  "Assobio de granada chegando": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/AudioController.client.luau:814"
@@ -1861,7 +1861,7 @@
   "src/ReplicatedStorage/Shared/Eventos.luau:115"
  ],
  "Ataduras": [
-  "src/ServerScriptService/Modules/MapLife.luau:416"
+  "src/ServerScriptService/Modules/MapLife.luau:464"
  ],
  "Ataque aéreo (A-4)": [
   "src/ReplicatedStorage/Shared/Eventos.luau:84",
@@ -2066,11 +2066,11 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaoJogador.luau:213"
  ],
  "Balcao": [
-  "src/ServerScriptService/Modules/MapLife.luau:807"
+  "src/ServerScriptService/Modules/MapLife.luau:855"
  ],
  "Bamboo": [
   "src/ReplicatedStorage/Shared/BotBrain.luau:1228",
-  "src/ServerScriptService/Modules/AssetLoader.luau:101",
+  "src/ServerScriptService/Modules/AssetLoader.luau:103",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/AudioController.client.luau:743",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponVisuals.client.luau:789"
  ],
@@ -2121,7 +2121,7 @@
   "src/ReplicatedStorage/Shared/GrenadeArt.luau:130",
   "src/ReplicatedStorage/Shared/KnifeModel.luau:162",
   "src/ReplicatedStorage/Shared/KnifeModel.luau:233",
-  "src/ServerScriptService/Modules/MapLife.luau:821"
+  "src/ServerScriptService/Modules/MapLife.luau:869"
  ],
  "Battalion Crate": [
   "src/ReplicatedStorage/Shared/Caixas.luau:232"
@@ -2175,7 +2175,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/FimDeRodada.client.luau:350"
  ],
  "Boca": [
-  "src/ServerScriptService/Modules/MapLife.luau:581"
+  "src/ServerScriptService/Modules/MapLife.luau:629"
  ],
  "Boca de túnel": [
   "src/ReplicatedStorage/Shared/NascerPedido.luau:73"
@@ -2220,7 +2220,7 @@
   "src/ReplicatedStorage/Shared/Skins.luau:1359"
  ],
  "Brasa": [
-  "src/ServerScriptService/Modules/MapLife.luau:380"
+  "src/ServerScriptService/Modules/MapLife.luau:428"
  ],
  "Bravo": [
   "src/ReplicatedStorage/Shared/Roles.luau:47"
@@ -2681,9 +2681,9 @@
  ],
  "Caixote": [
   "src/ServerScriptService/Modules/LogisticsService.luau:89",
-  "src/ServerScriptService/Modules/MapLife.luau:331",
-  "src/ServerScriptService/Modules/MapLife.luau:333",
-  "src/ServerScriptService/Modules/MapLife.luau:340",
+  "src/ServerScriptService/Modules/MapLife.luau:379",
+  "src/ServerScriptService/Modules/MapLife.luau:381",
+  "src/ServerScriptService/Modules/MapLife.luau:388",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/LobbyScene.luau:1131"
  ],
  "Caixote%d": [
@@ -2725,7 +2725,7 @@
   "src/ReplicatedStorage/Shared/InputMap.luau:106"
  ],
  "Cancela": [
-  "src/ServerScriptService/Modules/MapLife.luau:1344"
+  "src/ServerScriptService/Modules/MapLife.luau:1392"
  ],
  "Cancelar": [
   "src/ReplicatedStorage/Shared/InputMap.luau:149",
@@ -2754,7 +2754,7 @@
   "src/ServerScriptService/Modules/VehicleService.luau:1225"
  ],
  "Canteiro": [
-  "src/ServerScriptService/Modules/MapLife.luau:775"
+  "src/ServerScriptService/Modules/MapLife.luau:823"
  ],
  "Cantil extra": [
   "src/ReplicatedStorage/Shared/Progression.luau:363"
@@ -2854,7 +2854,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CaixasTela.client.luau:1451"
  ],
  "Carta": [
-  "src/ServerScriptService/Modules/MapLife.luau:431",
+  "src/ServerScriptService/Modules/MapLife.luau:479",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ComoJogar.luau:96",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/LobbyScene.luau:826"
  ],
@@ -2894,7 +2894,7 @@
  "Casco": [
   "src/ReplicatedStorage/Shared/Vehicles.luau:434",
   "src/ReplicatedStorage/Shared/Vehicles.luau:483",
-  "src/ServerScriptService/Modules/MapLife.luau:1208",
+  "src/ServerScriptService/Modules/MapLife.luau:1256",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleHudView.luau:197"
  ],
  "Causa desconhecida": [
@@ -2915,13 +2915,13 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/SpawnTransition.luau:725"
  ],
  "Cepo": [
-  "src/ServerScriptService/Modules/MapLife.luau:1023"
+  "src/ServerScriptService/Modules/MapLife.luau:1071"
  ],
  "Cerca": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/JanelaChat.client.luau:78"
  ],
  "Chama": [
-  "src/ServerScriptService/Modules/MapLife.luau:236"
+  "src/ServerScriptService/Modules/MapLife.luau:284"
  ],
  "Chamas azuis e brancas sobre preto.": [
   "src/ReplicatedStorage/Shared/Skins.luau:1186"
@@ -2930,7 +2930,7 @@
   "src/ReplicatedStorage/Shared/Skins.luau:1034"
  ],
  "Chamine": [
-  "src/ServerScriptService/Modules/MapLife.luau:1097"
+  "src/ServerScriptService/Modules/MapLife.luau:1145"
  ],
  "Chao": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CenaComemoracao.luau:181"
@@ -3009,8 +3009,8 @@
   "src/ReplicatedStorage/Shared/VehicleDrive.luau:115"
  ],
  "Cobertura": [
-  "src/ServerScriptService/Modules/MapLife.luau:796",
-  "src/ServerScriptService/Modules/MapLife.luau:1238"
+  "src/ServerScriptService/Modules/MapLife.luau:844",
+  "src/ServerScriptService/Modules/MapLife.luau:1286"
  ],
  "Cobre batido, escurecido nas bordas.": [
   "src/ReplicatedStorage/Shared/Cosmeticos.luau:839"
@@ -3172,7 +3172,8 @@
   "src/ReplicatedStorage/Shared/Caixas.luau:171"
  ],
  "Concrete": [
-  "src/ReplicatedStorage/Shared/VehicleDrive.luau:114"
+  "src/ReplicatedStorage/Shared/VehicleDrive.luau:114",
+  "src/ServerScriptService/Modules/AssetLoader.luau:237"
  ],
  "Conferindo…": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:476"
@@ -3261,7 +3262,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleController.client.luau:59"
  ],
  "Cordao": [
-  "src/ServerScriptService/Modules/MapLife.luau:499"
+  "src/ServerScriptService/Modules/MapLife.luau:547"
  ],
  "Cordão trançado verde-oliva nas bordas.": [
   "src/ReplicatedStorage/Shared/Cosmeticos.luau:889"
@@ -3657,8 +3658,8 @@
   "src/ReplicatedStorage/Shared/Skins.luau:1125"
  ],
  "Degrau": [
-  "src/ServerScriptService/Modules/MapLife.luau:828",
-  "src/ServerScriptService/Modules/MapLife.luau:877"
+  "src/ServerScriptService/Modules/MapLife.luau:876",
+  "src/ServerScriptService/Modules/MapLife.luau:925"
  ],
  "Deitar": [
   "src/ReplicatedStorage/Shared/InputMap.luau:75",
@@ -3891,7 +3892,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ComoJogar.luau:51"
  ],
  "Dossel": [
-  "src/ServerScriptService/Modules/MapLife.luau:123"
+  "src/ServerScriptService/Modules/MapLife.luau:164"
  ],
  "Dossie": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/LobbyScene.luau:843"
@@ -4469,9 +4470,9 @@
   "src/ReplicatedStorage/Shared/Weapons.luau:581"
  ],
  "Escora": [
-  "src/ServerScriptService/Modules/MapLife.luau:467",
-  "src/ServerScriptService/Modules/MapLife.luau:475",
-  "src/ServerScriptService/Modules/MapLife.luau:482"
+  "src/ServerScriptService/Modules/MapLife.luau:515",
+  "src/ServerScriptService/Modules/MapLife.luau:523",
+  "src/ServerScriptService/Modules/MapLife.luau:530"
  ],
  "Escuadra": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/JanelaChat.client.luau:78"
@@ -4555,10 +4556,10 @@
   "src/ReplicatedStorage/Shared/InputMap.luau:141"
  ],
  "Estaca": [
-  "src/ServerScriptService/Modules/MapLife.luau:1119",
-  "src/ServerScriptService/Modules/MapLife.luau:1134",
-  "src/ServerScriptService/Modules/MapLife.luau:1168",
-  "src/ServerScriptService/Modules/MapLife.luau:1191"
+  "src/ServerScriptService/Modules/MapLife.luau:1167",
+  "src/ServerScriptService/Modules/MapLife.luau:1182",
+  "src/ServerScriptService/Modules/MapLife.luau:1216",
+  "src/ServerScriptService/Modules/MapLife.luau:1239"
  ],
  "Estacas punji": [
   "src/ReplicatedStorage/Shared/Traps.luau:16"
@@ -4603,10 +4604,10 @@
   "src/ReplicatedStorage/Shared/CompraVeiculo.luau:186"
  ],
  "Esteio": [
-  "src/ServerScriptService/Modules/MapLife.luau:747"
+  "src/ServerScriptService/Modules/MapLife.luau:795"
  ],
  "Esteira": [
-  "src/ServerScriptService/Modules/MapLife.luau:293",
+  "src/ServerScriptService/Modules/MapLife.luau:341",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleFx.client.luau:574"
  ],
  "Esteiras": [
@@ -5014,7 +5015,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:1452"
  ],
  "Fogao": [
-  "src/ServerScriptService/Modules/MapLife.luau:369"
+  "src/ServerScriptService/Modules/MapLife.luau:417"
  ],
  "Fogo do amarelo ao vermelho.": [
   "src/ReplicatedStorage/Shared/Cosmeticos.luau:444"
@@ -5034,8 +5035,9 @@
   "src/ReplicatedStorage/Shared/Skins.luau:727"
  ],
  "Folhas": [
-  "src/ServerScriptService/Modules/AssetLoader.luau:197",
-  "src/ServerScriptService/Modules/MapLife.luau:778",
+  "src/ReplicatedStorage/Shared/ExpansaoLod.luau:29",
+  "src/ServerScriptService/Modules/AssetLoader.luau:199",
+  "src/ServerScriptService/Modules/MapLife.luau:826",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Ambiente.client.luau:65",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Progresso.client.luau:1307"
  ],
@@ -5064,7 +5066,7 @@
   "src/ReplicatedStorage/Shared/CompraVeiculo.luau:210"
  ],
  "Fornalha": [
-  "src/ServerScriptService/Modules/MapLife.luau:1072"
+  "src/ServerScriptService/Modules/MapLife.luau:1120"
  ],
  "Força principal · alistar-se": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/LobbyScene.luau:1282"
@@ -5211,7 +5213,7 @@
   "src/ReplicatedStorage/Shared/Arquivo.luau:127"
  ],
  "Fumaca": [
-  "src/ServerScriptService/Modules/MapLife.luau:528",
+  "src/ServerScriptService/Modules/MapLife.luau:576",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Ambiente.client.luau:181",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/PodioEfeitos.luau:105"
  ],
@@ -5977,7 +5979,7 @@
   "src/ReplicatedStorage/Shared/KnifeModel.luau:86"
  ],
  "Lamparina": [
-  "src/ServerScriptService/Modules/MapLife.luau:234",
+  "src/ServerScriptService/Modules/MapLife.luau:282",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/LobbyScene.luau:1060"
  ],
  "Lampiao": [
@@ -6100,7 +6102,7 @@
  ],
  "Lona": [
   "src/ReplicatedStorage/Shared/Vehicles.luau:485",
-  "src/ServerScriptService/Modules/MapLife.luau:408"
+  "src/ServerScriptService/Modules/MapLife.luau:456"
  ],
  "Lona verde-oliva com costura.": [
   "src/ReplicatedStorage/Shared/Cosmeticos.luau:221"
@@ -6449,7 +6451,7 @@
   "src/ReplicatedStorage/Shared/Commerce.luau:492"
  ],
  "Mastro": [
-  "src/ServerScriptService/Modules/MapLife.luau:632",
+  "src/ServerScriptService/Modules/MapLife.luau:680",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CenaComemoracao.luau:313"
  ],
  "Mato": [
@@ -6508,7 +6510,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:1412"
  ],
  "Mesa": [
-  "src/ServerScriptService/Modules/MapLife.luau:426",
+  "src/ServerScriptService/Modules/MapLife.luau:474",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/LobbyScene.luau:676"
  ],
  "Metal": [
@@ -6517,8 +6519,8 @@
   "src/ServerScriptService/Modules/Gear.luau:640",
   "src/ServerScriptService/Modules/Gear.luau:730",
   "src/ServerScriptService/Modules/Gear.luau:942",
-  "src/ServerScriptService/Modules/MapLife.luau:963",
-  "src/ServerScriptService/Modules/MapLife.luau:1092"
+  "src/ServerScriptService/Modules/MapLife.luau:1011",
+  "src/ServerScriptService/Modules/MapLife.luau:1140"
  ],
  "Metal anodizado do dourado ao violeta.": [
   "src/ReplicatedStorage/Shared/Cosmeticos.luau:684"
@@ -6929,7 +6931,7 @@
  ],
  "Nam Yên (4)": [
   "src/ServerScriptService/Modules/ArtPlan.luau:1544",
-  "src/ServerScriptService/Modules/AssetLoader.luau:42"
+  "src/ServerScriptService/Modules/AssetLoader.luau:44"
  ],
  "Napalm": [
   "src/ServerScriptService/Modules/RodadaService.luau:207"
@@ -7010,7 +7012,7 @@
   "src/ReplicatedStorage/Shared/Weapons.luau:489"
  ],
  "Nicho": [
-  "src/ServerScriptService/Modules/MapLife.luau:233"
+  "src/ServerScriptService/Modules/MapLife.luau:281"
  ],
  "Nine": [
   "src/ReplicatedStorage/Shared/Equipar.luau:26",
@@ -7858,14 +7860,14 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:913"
  ],
  "Palha": [
-  "src/ServerScriptService/Modules/MapLife.luau:625"
+  "src/ServerScriptService/Modules/MapLife.luau:673"
  ],
  "Pancada de chuva: visão curta e passos abafados": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Toast.luau:840",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/WeatherController.client.luau:42"
  ],
  "Panela": [
-  "src/ServerScriptService/Modules/MapLife.luau:371"
+  "src/ServerScriptService/Modules/MapLife.luau:419"
  ],
  "Pano": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CenaComemoracao.luau:327"
@@ -7890,8 +7892,8 @@
   "src/ReplicatedStorage/Shared/Vehicles.luau:574"
  ],
  "Parede": [
-  "src/ServerScriptService/Modules/MapLife.luau:712",
-  "src/ServerScriptService/Modules/MapLife.luau:721"
+  "src/ServerScriptService/Modules/MapLife.luau:760",
+  "src/ServerScriptService/Modules/MapLife.luau:769"
  ],
  "Parte do essencial ainda está chegando.": [
   "src/ReplicatedFirst/LoadingScreen.client.luau:1007"
@@ -7939,7 +7941,7 @@
   "src/ReplicatedStorage/Shared/VehicleDrive.luau:113"
  ],
  "Pe": [
-  "src/ServerScriptService/Modules/MapLife.luau:428"
+  "src/ServerScriptService/Modules/MapLife.luau:476"
  ],
  "Pedal direito": [
   "src/ReplicatedStorage/Shared/InputMap.luau:140"
@@ -8046,7 +8048,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ItemView.luau:352"
  ],
  "Pista": [
-  "src/ServerScriptService/Modules/MapLife.luau:1013"
+  "src/ServerScriptService/Modules/MapLife.luau:1061"
  ],
  "Pistola comercial de oxidação azul com talas de nogueira, trazida por conta própria.": [
   "src/ReplicatedStorage/Shared/Skins.luau:305"
@@ -8252,7 +8254,7 @@
   "src/ReplicatedStorage/Shared/NascerPedido.luau:77"
  ],
  "Pote": [
-  "src/ServerScriptService/Modules/MapLife.luau:570"
+  "src/ServerScriptService/Modules/MapLife.luau:618"
  ],
  "Prata sobre azul-marinho.": [
   "src/ReplicatedStorage/Shared/Cosmeticos.luau:456"
@@ -8619,6 +8621,9 @@
  "Radio": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/LobbyScene.luau:878"
  ],
+ "Raizes": [
+  "src/ReplicatedStorage/Shared/ExpansaoLod.luau:26"
+ ],
  "Rajada para o alto": [
   "src/ReplicatedStorage/Shared/Comemoracao.luau:415"
  ],
@@ -8945,7 +8950,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameUI.client.luau:1084"
  ],
  "Rolo": [
-  "src/ServerScriptService/Modules/MapLife.luau:1035"
+  "src/ServerScriptService/Modules/MapLife.luau:1083"
  ],
  "Root": [
   "src/ServerScriptService/Modules/CorposService.luau:195",
@@ -9414,10 +9419,10 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Progresso.client.luau:1367"
  ],
  "Serra": [
-  "src/ServerScriptService/Modules/MapLife.luau:956"
+  "src/ServerScriptService/Modules/MapLife.luau:1004"
  ],
  "Serragem": [
-  "src/ServerScriptService/Modules/MapLife.luau:966"
+  "src/ServerScriptService/Modules/MapLife.luau:1014"
  ],
  "Serraria": [
   "src/ReplicatedFirst/LoadingScreen.client.luau:76",
@@ -9534,7 +9539,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameUI.client.luau:503"
  ],
  "Silhueta": [
-  "src/ServerScriptService/Modules/MapLife.luau:1297"
+  "src/ServerScriptService/Modules/MapLife.luau:1345"
  ],
  "Sinal": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/PodioEfeitos.luau:273"
@@ -9669,10 +9674,10 @@
   "src/ReplicatedStorage/Shared/GunModel.luau:131"
  ],
  "Stone": [
-  "src/ServerScriptService/Modules/MapLife.luau:822",
-  "src/ServerScriptService/Modules/MapLife.luau:835",
-  "src/ServerScriptService/Modules/MapLife.luau:1079",
-  "src/ServerScriptService/Modules/MapLife.luau:1104"
+  "src/ServerScriptService/Modules/MapLife.luau:870",
+  "src/ServerScriptService/Modules/MapLife.luau:883",
+  "src/ServerScriptService/Modules/MapLife.luau:1127",
+  "src/ServerScriptService/Modules/MapLife.luau:1152"
  ],
  "Store": [
   "src/ServerScriptService/Modules/CommerceService.luau:173"
@@ -9870,10 +9875,10 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ComoJogar.luau:607"
  ],
  "Tabua": [
-  "src/ServerScriptService/Modules/MapLife.luau:929"
+  "src/ServerScriptService/Modules/MapLife.luau:977"
  ],
  "Tacho": [
-  "src/ServerScriptService/Modules/MapLife.luau:1084"
+  "src/ServerScriptService/Modules/MapLife.luau:1132"
  ],
  "Tamanho: %d%%": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/EditorHud.client.luau:459"
@@ -9958,14 +9963,14 @@
  ],
  "Thatch": [
   "src/ReplicatedStorage/Shared/BotBrain.luau:1226",
-  "src/ServerScriptService/Modules/MapLife.luau:613",
-  "src/ServerScriptService/Modules/MapLife.luau:628",
-  "src/ServerScriptService/Modules/MapLife.luau:697",
-  "src/ServerScriptService/Modules/MapLife.luau:772",
-  "src/ServerScriptService/Modules/MapLife.luau:803",
-  "src/ServerScriptService/Modules/MapLife.luau:942",
-  "src/ServerScriptService/Modules/MapLife.luau:1054",
-  "src/ServerScriptService/Modules/MapLife.luau:1246",
+  "src/ServerScriptService/Modules/MapLife.luau:661",
+  "src/ServerScriptService/Modules/MapLife.luau:676",
+  "src/ServerScriptService/Modules/MapLife.luau:745",
+  "src/ServerScriptService/Modules/MapLife.luau:820",
+  "src/ServerScriptService/Modules/MapLife.luau:851",
+  "src/ServerScriptService/Modules/MapLife.luau:990",
+  "src/ServerScriptService/Modules/MapLife.luau:1102",
+  "src/ServerScriptService/Modules/MapLife.luau:1294",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/AudioController.client.luau:745",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponVisuals.client.luau:791"
  ],
@@ -9998,10 +10003,10 @@
   "src/ReplicatedStorage/Shared/Skins.luau:600"
  ],
  "Tile": [
-  "src/ServerScriptService/Modules/MapLife.luau:845",
-  "src/ServerScriptService/Modules/MapLife.luau:846",
-  "src/ServerScriptService/Modules/MapLife.luau:897",
-  "src/ServerScriptService/Modules/MapLife.luau:1068"
+  "src/ServerScriptService/Modules/MapLife.luau:893",
+  "src/ServerScriptService/Modules/MapLife.luau:894",
+  "src/ServerScriptService/Modules/MapLife.luau:945",
+  "src/ServerScriptService/Modules/MapLife.luau:1116"
  ],
  "Time": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/JanelaChat.client.luau:76"
@@ -10161,8 +10166,8 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehiclePrompt.client.luau:135"
  ],
  "Tora": [
-  "src/ServerScriptService/Modules/MapLife.luau:649",
-  "src/ServerScriptService/Modules/MapLife.luau:923"
+  "src/ServerScriptService/Modules/MapLife.luau:697",
+  "src/ServerScriptService/Modules/MapLife.luau:971"
  ],
  "Torniquete": [
   "src/ReplicatedStorage/Shared/Comms.luau:31",
@@ -10283,7 +10288,7 @@
   "src/ReplicatedStorage/Shared/InputMap.luau:97"
  ],
  "Trouxa": [
-  "src/ServerScriptService/Modules/MapLife.luau:301"
+  "src/ServerScriptService/Modules/MapLife.luau:349"
  ],
  "Três tiros para o céu, com o tranco do fuzil.": [
   "src/ReplicatedStorage/Shared/Comemoracao.luau:416"
@@ -11013,7 +11018,7 @@
   "src/ServerScriptService/Modules/FieldWorkService.luau:597",
   "src/ServerScriptService/Modules/FrontService.luau:204",
   "src/ServerScriptService/Modules/Gear.luau:372",
-  "src/ServerScriptService/Modules/MapLife.luau:1309",
+  "src/ServerScriptService/Modules/MapLife.luau:1357",
   "src/ServerScriptService/Modules/MatchService.luau:68",
   "src/ServerScriptService/Modules/MatchService.luau:192",
   "src/ServerScriptService/Modules/MatchService.luau:388",
@@ -11284,7 +11289,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:2610"
  ],
  "Vara": [
-  "src/ServerScriptService/Modules/MapLife.luau:399"
+  "src/ServerScriptService/Modules/MapLife.luau:447"
  ],
  "Vaulting": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Movement.client.luau:695",
@@ -11341,7 +11346,7 @@
   "src/ReplicatedStorage/Shared/Cosmeticos.luau:607"
  ],
  "Verga": [
-  "src/ServerScriptService/Modules/MapLife.luau:734"
+  "src/ServerScriptService/Modules/MapLife.luau:782"
  ],
  "Vermelho com galhos escuros e flores brancas de miolo dourado. Vale em qualquer arma.": [
   "src/ReplicatedStorage/Shared/Skins.luau:1572"
@@ -11404,7 +11409,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaoJogador.luau:211"
  ],
  "Vidro": [
-  "src/ServerScriptService/Modules/AssetLoader.luau:207"
+  "src/ServerScriptService/Modules/AssetLoader.luau:209"
  ],
  "Vidro vulcânico negro com reflexo roxo.": [
   "src/ReplicatedStorage/Shared/Cosmeticos.luau:651"
@@ -11648,30 +11653,30 @@
  ],
  "Wood": [
   "src/ReplicatedStorage/Shared/BotBrain.luau:1224",
-  "src/ServerScriptService/Modules/AssetLoader.luau:101",
-  "src/ServerScriptService/Modules/AssetLoader.luau:234",
+  "src/ServerScriptService/Modules/AssetLoader.luau:103",
+  "src/ServerScriptService/Modules/AssetLoader.luau:237",
   "src/ServerScriptService/Modules/CaixaMunicaoService.luau:175",
   "src/ServerScriptService/Modules/Gear.luau:537",
   "src/ServerScriptService/Modules/Gear.luau:722",
   "src/ServerScriptService/Modules/Gear.luau:875",
   "src/ServerScriptService/Modules/Gear.luau:887",
   "src/ServerScriptService/Modules/Gear.luau:944",
-  "src/ServerScriptService/Modules/MapLife.luau:747",
-  "src/ServerScriptService/Modules/MapLife.luau:814",
-  "src/ServerScriptService/Modules/MapLife.luau:856",
-  "src/ServerScriptService/Modules/MapLife.luau:871",
-  "src/ServerScriptService/Modules/MapLife.luau:884",
-  "src/ServerScriptService/Modules/MapLife.luau:924",
-  "src/ServerScriptService/Modules/MapLife.luau:929",
-  "src/ServerScriptService/Modules/MapLife.luau:1030",
-  "src/ServerScriptService/Modules/MapLife.luau:1043",
-  "src/ServerScriptService/Modules/MapLife.luau:1126",
-  "src/ServerScriptService/Modules/MapLife.luau:1141",
-  "src/ServerScriptService/Modules/MapLife.luau:1175",
-  "src/ServerScriptService/Modules/MapLife.luau:1198",
-  "src/ServerScriptService/Modules/MapLife.luau:1215",
-  "src/ServerScriptService/Modules/MapLife.luau:1234",
-  "src/ServerScriptService/Modules/MapLife.luau:1279"
+  "src/ServerScriptService/Modules/MapLife.luau:795",
+  "src/ServerScriptService/Modules/MapLife.luau:862",
+  "src/ServerScriptService/Modules/MapLife.luau:904",
+  "src/ServerScriptService/Modules/MapLife.luau:919",
+  "src/ServerScriptService/Modules/MapLife.luau:932",
+  "src/ServerScriptService/Modules/MapLife.luau:972",
+  "src/ServerScriptService/Modules/MapLife.luau:977",
+  "src/ServerScriptService/Modules/MapLife.luau:1078",
+  "src/ServerScriptService/Modules/MapLife.luau:1091",
+  "src/ServerScriptService/Modules/MapLife.luau:1174",
+  "src/ServerScriptService/Modules/MapLife.luau:1189",
+  "src/ServerScriptService/Modules/MapLife.luau:1223",
+  "src/ServerScriptService/Modules/MapLife.luau:1246",
+  "src/ServerScriptService/Modules/MapLife.luau:1263",
+  "src/ServerScriptService/Modules/MapLife.luau:1282",
+  "src/ServerScriptService/Modules/MapLife.luau:1327"
  ],
  "Wrist": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/PostureController.client.luau:311",
@@ -11809,7 +11814,7 @@
   "src/ServerScriptService/Modules/Flutua.luau:270"
  ],
  "^Placa%d+$": [
-  "src/ServerScriptService/Modules/MapLife.luau:1328"
+  "src/ServerScriptService/Modules/MapLife.luau:1376"
  ],
  "^Pá: cancelado": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Toast.luau:136"
@@ -11827,11 +11832,11 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/AfterActionController.client.luau:195"
  ],
  "^Trim_%u$": [
-  "src/ServerScriptService/Modules/AssetLoader.luau:136",
-  "src/ServerScriptService/Modules/AssetLoader.luau:145"
+  "src/ServerScriptService/Modules/AssetLoader.luau:138",
+  "src/ServerScriptService/Modules/AssetLoader.luau:147"
  ],
  "^Tunnel_%d+_floor$": [
-  "src/ServerScriptService/Modules/MapLife.luau:458"
+  "src/ServerScriptService/Modules/MapLife.luau:506"
  ],
  "^Vitória do USMC": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/AfterActionController.client.luau:199",
@@ -15226,6 +15231,8 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Eventos.client.luau:30",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/EventosVisual.luau:96",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/EventosVisual.luau:107",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/ExpansaoLod.client.luau:18",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/ExpansaoLod.client.luau:41",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ExplosionFx.client.luau:90",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ExplosionFx.client.luau:256",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ExplosionFx.client.luau:504",
@@ -15411,7 +15418,7 @@
   "src/ReplicatedStorage/Shared/FieldWork.luau:58"
  ],
  "não, terreno antigo": [
-  "src/ServerScriptService/Modules/AssetLoader.luau:796"
+  "src/ServerScriptService/Modules/AssetLoader.luau:811"
  ],
  "o efeito é o da granada de mão grenade_us (5 m letal), PLACEHOLDER": [
   "src/ReplicatedStorage/Shared/Weapons.luau:261"
@@ -15586,16 +15593,16 @@
   "src/ServerScriptService/Modules/ArtPlan.luau:1054",
   "src/ServerScriptService/Modules/ArtPlan.luau:1083",
   "src/ServerScriptService/Modules/ArtPlan.luau:1179",
-  "src/ServerScriptService/Modules/AssetLoader.luau:641",
-  "src/ServerScriptService/Modules/AssetLoader.luau:848"
+  "src/ServerScriptService/Modules/AssetLoader.luau:644",
+  "src/ServerScriptService/Modules/AssetLoader.luau:863"
  ],
  "parts:": [
   "src/ServerScriptService/Modules/ArtPlan.luau:681",
   "src/ServerScriptService/Modules/ArtPlan.luau:1054",
   "src/ServerScriptService/Modules/ArtPlan.luau:1083",
   "src/ServerScriptService/Modules/ArtPlan.luau:1179",
-  "src/ServerScriptService/Modules/AssetLoader.luau:641",
-  "src/ServerScriptService/Modules/AssetLoader.luau:848"
+  "src/ServerScriptService/Modules/AssetLoader.luau:644",
+  "src/ServerScriptService/Modules/AssetLoader.luau:863"
  ],
  "parts:barco": [
   "src/ServerScriptService/Modules/ArtPlan.luau:301",

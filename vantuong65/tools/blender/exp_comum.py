@@ -201,6 +201,32 @@ def placa_lisa(nome, a, b, c, d, mat, baixar=0.022, esp=0.02):
     return ob
 
 
+def mat_forro(nome):
+    """A chapa vista de dentro: zinco velho e escuro, sem a ferrugem viva da face de cima."""
+    m = Mat(nome, rug=0.86)
+    p = m.coord("objeto")
+    m.cor(m.misturar(m.faixa(m.ruido(p, 1.3, 4), 0.35, 0.7), rgb("#3a3833"), rgb("#55514a")))
+    m.relevo(m.ruido(p, 34.0, 3), 0.1, 0.0005)
+    return m.m
+
+
+def forro(nome, a, b, c, d, mat, baixar=0.05):
+    """Face de baixo do telhado de chapa: placa virada para dentro, logo abaixo da placa lisa."""
+    pa, pb, pc, pd = Vector(a), Vector(b), Vector(c), Vector(d)
+    n = (pb - pa).cross(pd - pa).normalized()
+    if n.z < 0:
+        n = -n
+    desce = n * -baixar
+
+    def f(u, v):
+        p = pa.lerp(pb, u).lerp(pd.lerp(pc, u), v)
+        return tuple(p + desce)
+
+    ob = V.grade(nome, f, 1, 1, fora=-n)
+    M.material(ob, mat)
+    return ob
+
+
 def telhado_chapa(
     rec,
     nome,
@@ -221,6 +247,7 @@ def telhado_chapa(
     marca = rec.marca()
     m1 = mat_chapa(f"chapa_{nome}_a", ferrugem)
     m2 = mat_chapa(f"chapa_{nome}_b", max(0.0, ferrugem - 0.6))  # o remendo mais novo
+    m_forro = mat_forro(f"forro_{nome}")
     X = L / 2 + beiral_oitao
     Y = W / 2 + beiral
     s = (hr - (h + 0.05)) / (W / 2)
@@ -260,6 +287,18 @@ def telhado_chapa(
                 (X, 0.0, hr),
                 (-X, 0.0, hr),
                 m1,
+            ),
+            "Telhado",
+            "Telhado",
+        )
+        rec.add(
+            forro(
+                f"{nome}_forro{lado}",
+                (-X, lado * Y, ze),
+                (X, lado * Y, ze),
+                (X, 0.0, hr),
+                (-X, 0.0, hr),
+                m_forro,
             ),
             "Telhado",
             "Telhado",
@@ -358,6 +397,18 @@ def telhado_varanda(rec, nome, x0, x1, y_alto, z_alto, y_baixo, z_baixo, mats: M
             (x1, y_alto, z_alto),
             (x0, y_alto, z_alto),
             m1,
+        ),
+        "Telhado",
+        "Telhado",
+    )
+    rec.add(
+        forro(
+            f"{nome}_forro",
+            (x0, y_baixo, z_baixo),
+            (x1, y_baixo, z_baixo),
+            (x1, y_alto, z_alto),
+            (x0, y_alto, z_alto),
+            mat_forro(f"forro_{nome}"),
         ),
         "Telhado",
         "Telhado",

@@ -15,6 +15,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RiceField = require(ReplicatedStorage.Shared.RiceField)
 local Rng = require(ReplicatedStorage.Shared.Rng)
 local Tunnels = require(ReplicatedStorage.Shared.Tunnels) :: any
+local Expansao = require(script.Parent.Expansao)
 
 local MapLife = {}
 local M = 0.28
@@ -77,6 +78,43 @@ local UPRIGHT = CFrame.Angles(0, 0, math.pi / 2)
 -- Arrozal
 ---------------------------------------------------------------------------------------------
 
+-- D-233: tabuleiro colhido: medas pequenas de palha sobre a mesma lâmina. Só visual, sem colisão, sem
+-- toque e fora do raio da bala (a água e o chão continuam os de antes).
+local MEDA_ESCALA = 0.45
+local function colheita(p: BasePart, top: number, sx: number, sz: number, pai: Instance, template: (string) -> Model?)
+	local base = p.CFrame * CFrame.new(0, top - p.Position.Y, 0)
+	local tpl = template("straw_stack")
+	if not tpl then
+		return
+	end
+	-- o lugar sai da posição do tabuleiro: igual em todo servidor
+	local nf = math.clamp(math.floor(sx * sz * (M * M) / 60), 2, 6)
+	for k = 1, nf do
+		local h1 = RiceField.hash(math.floor(p.Position.X), math.floor(p.Position.Z), 20 + k) / 1000
+		local h2 = RiceField.hash(math.floor(p.Position.Z), math.floor(p.Position.X), 40 + k) / 1000
+		local h3 = RiceField.hash(math.floor(p.Position.X), math.floor(p.Position.Z), 60 + k) / 1000
+		local meda = tpl:Clone()
+		meda.Name = "Meda"
+		meda:ScaleTo(meda:GetScale() * MEDA_ESCALA)
+		for _, d in meda:GetDescendants() do
+			if d:IsA("BasePart") then
+				d.Anchored = true
+				d.CanCollide = false
+				d.CanTouch = false
+				d.CanQuery = false
+				d.CastShadow = false
+			end
+		end
+		local giro = CFrame.Angles(0, h3 * 2 * math.pi, 0)
+		meda:PivotTo(giro)
+		local caixa, tam = meda:GetBoundingBox()
+		local fundo = caixa.Y - tam.Y / 2
+		local c = base * CFrame.new((h1 - 0.5) * sx * 0.8, 0.02 / M - fundo, (h2 - 0.5) * sz * 0.8)
+		meda:PivotTo(CFrame.new(c.Position) * giro)
+		meda.Parent = pai
+	end
+end
+
 -- Dossel em cada tabuleiro plantado (85% deles) e ladrilhos em ReplicatedStorage.VT65RiceArt.
 -- template: AssetLoader.template. Devolve quantos tabuleiros têm arroz.
 function MapLife.rice(map: Instance, template: (string) -> Model?): number
@@ -111,6 +149,9 @@ function MapLife.rice(map: Instance, template: (string) -> Model?): number
 	art.Parent = ReplicatedStorage
 	local folder = Instance.new("Folder")
 	folder.Name = "Arrozal"
+	local colhidos = Instance.new("Folder")
+	colhidos.Name = "Colheita"
+	local ncolhidos = 0
 	local n = 0
 	for _, p in water:GetChildren() do
 		if p:IsA("BasePart") then
@@ -130,10 +171,17 @@ function MapLife.rice(map: Instance, template: (string) -> Model?): number
 				c:SetAttribute("WaterY", top)
 				c:SetAttribute("H", h)
 				n += 1
+			elseif Expansao.LIGADA and RiceField.colhido(p.Position.X, p.Position.Z) and sx > 4 and sz > 4 then
+				colheita(p, p.Position.Y + p.Size.Y / 2, sx, sz, colhidos, template)
+				ncolhidos += 1
 			end
 		end
 	end
 	folder.Parent = map
+	if ncolhidos > 0 then
+		colhidos.Parent = map
+		print(string.format("[VT65] arrozal: %d tabuleiros colhidos", ncolhidos))
+	end
 	return n
 end
 

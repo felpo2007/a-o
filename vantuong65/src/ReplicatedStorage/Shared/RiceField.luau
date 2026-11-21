@@ -38,6 +38,12 @@ function RiceField.kind(x: number, z: number): string
 	return "fallow"
 end
 
+-- D-233: parte dos tabuleiros em pousio já foi colhida (medas de palha em cima). O estado
+-- continua "fallow" para o resto do jogo: é só o que se vê em cima da mesma lâmina d'água.
+function RiceField.colhido(x: number, z: number): boolean
+	return RiceField.kind(x, z) == "fallow" and hash(math.floor(x), math.floor(z), 7) < 700
+end
+
 -- Grade de ladrilhos de um tabuleiro sx x sz (studs, já sem a margem): número de colunas e
 -- linhas e o lado de cada ladrilho (entre 2/3 e 4/3 do nominal, cobrindo tudo sem sobra).
 function RiceField.grid(sx: number, sz: number): (number, number, number, number)
