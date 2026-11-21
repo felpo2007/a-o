@@ -148,6 +148,10 @@ ArtBudget.KIND = {
 	exp_rocha = "veg",
 	exp_ruina = "prop",
 	exp_samambaia = "veg",
+	exp_sobrado_a = "prop",
+	exp_sobrado_b = "prop",
+	exp_sobrado_c = "prop",
+	exp_sobrado_d = "prop",
 	exp_telheiro = "prop",
 	exp_trincheira = "prop",
 	-- D-232 (fim)
@@ -298,6 +302,10 @@ ArtBudget.TRIS = {
 	exp_rocha = 1280,
 	exp_ruina = 3012,
 	exp_samambaia = 880,
+	exp_sobrado_a = 17302,
+	exp_sobrado_b = 18492,
+	exp_sobrado_c = 18338,
+	exp_sobrado_d = 18942,
 	exp_telheiro = 2526,
 	exp_trincheira = 796,
 	-- D-232 (fim)
@@ -443,6 +451,10 @@ ArtBudget.DIMS = {
 	exp_rocha = { 7.86, 5.01, 6.44 },
 	exp_ruina = { 30.41, 14.73, 23.64 },
 	exp_samambaia = { 5.31, 1.66, 5.32 },
+	exp_sobrado_a = { 51.68, 29.23, 35.96 },
+	exp_sobrado_b = { 55.09, 30.4, 37.54 },
+	exp_sobrado_c = { 49.29, 29.95, 38.81 },
+	exp_sobrado_d = { 54.53, 30.71, 38.2 },
 	exp_telheiro = { 24.71, 11.27, 15.34 },
 	exp_trincheira = { 8.57, 5.86, 21.43 },
 	-- D-232 (fim)

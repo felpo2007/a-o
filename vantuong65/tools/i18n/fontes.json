@@ -15620,9 +15620,9 @@
  "parts:horta": [
   "src/ServerScriptService/Modules/ArtPlan.luau:293",
   "src/ServerScriptService/Modules/ArtPlan.luau:1018",
-  "src/ServerScriptService/Modules/Expansao.luau:103",
-  "src/ServerScriptService/Modules/Expansao.luau:193",
-  "src/ServerScriptService/Modules/Expansao.luau:194"
+  "src/ServerScriptService/Modules/Expansao.luau:111",
+  "src/ServerScriptService/Modules/Expansao.luau:211",
+  "src/ServerScriptService/Modules/Expansao.luau:212"
  ],
  "parts:moenda": [
   "src/ServerScriptService/Modules/ArtPlan.luau:298"

@@ -11709,5 +11709,33 @@
   "assetType": "Model",
   "name": "VT65 exp_telheiro",
   "description": "VAN TUONG 65 - expansao da Vila e do Arrozal (Blender)"
+ },
+ {
+  "key": "Models.exp_sobrado_a",
+  "file": "assets/blender/exp_sobrado_a/exp_sobrado_a_trim.glb",
+  "assetType": "Model",
+  "name": "VT65 exp_sobrado_a",
+  "description": "VAN TUONG 65 - expansao da Vila e do Arrozal (Blender)"
+ },
+ {
+  "key": "Models.exp_sobrado_b",
+  "file": "assets/blender/exp_sobrado_b/exp_sobrado_b_trim.glb",
+  "assetType": "Model",
+  "name": "VT65 exp_sobrado_b",
+  "description": "VAN TUONG 65 - expansao da Vila e do Arrozal (Blender)"
+ },
+ {
+  "key": "Models.exp_sobrado_c",
+  "file": "assets/blender/exp_sobrado_c/exp_sobrado_c_trim.glb",
+  "assetType": "Model",
+  "name": "VT65 exp_sobrado_c",
+  "description": "VAN TUONG 65 - expansao da Vila e do Arrozal (Blender)"
+ },
+ {
+  "key": "Models.exp_sobrado_d",
+  "file": "assets/blender/exp_sobrado_d/exp_sobrado_d_trim.glb",
+  "assetType": "Model",
+  "name": "VT65 exp_sobrado_d",
+  "description": "VAN TUONG 65 - expansao da Vila e do Arrozal (Blender)"
  }
 ]

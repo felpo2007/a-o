@@ -1092,6 +1092,12 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     - **Celular e 60 jogadores continuam sem medida.**
     - Relatório: `testes/LOTE105_D233_2026-11-21.md`.
     - **v137 publicada** (versão 142 do place, commit 3c6ee91).
+  - **Lote 106 (D-234): sobrados grandes na Vila, feito.** 4 modelos novos e 8 casas de dois andares
+    (5 com térreo aberto, 3 fechadas), com varanda, escada, móveis e 7 caminhos novos.
+    - Testes: 276 de 276 trechos a pé (em pé e agachado), M151 20 de 20, Lune 912, pytest 76,
+      autoteste 18 de 18 em partida nova.
+    - Desenho: +3,1% sobre a v137. **Celular e 60 jogadores continuam sem medida.**
+    - Relatório: `testes/LOTE106_D234_2026-11-21.md`.
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;

@@ -38,6 +38,10 @@ NOMES = {
     "exp_comporta": "Comporta e casa de manutenção",
     "exp_passarela": "Passarela sobre o canal",
     "exp_muro": "Muro baixo",
+    "exp_sobrado_a": "Sobrado de tábua, térreo aberto",
+    "exp_sobrado_b": "Sobrado caiado, térreo aberto",
+    "exp_sobrado_c": "Sobrado de tijolo, térreo fechado",
+    "exp_sobrado_d": "Sobrado ocre, térreo fechado",
 }
 TITULOS = {"Vila": "VILA", "Arrozais": "ARROZAL"}
 

@@ -164,6 +164,26 @@ test("árvore nova tem tronco que para a bala e o pé enterrado no nível do mod
 	end
 end)
 
+test("os sobrados ficam longe do mastro, com térreo aberto e fechado (D-234)", function()
+	local abertos, fechados = 0, 0
+	for _, p in Expansao.SETORES.Vila.pecas do
+		if string.sub(p.key, 1, 11) == "exp_sobrado" then
+			assert(math.sqrt(p.x ^ 2 + p.z ^ 2) > 55, p.id .. ": andar de cima perto demais do mastro")
+			assert(ArtBudget.DIMS[p.key][2] * M > 7, p.key .. ": não tem altura de dois andares")
+			assert(
+				math.max(ArtBudget.DIMS[p.key][1], ArtBudget.DIMS[p.key][3]) * M > 13,
+				p.key .. ": não é casa grande"
+			)
+			if p.key == "exp_sobrado_a" or p.key == "exp_sobrado_b" then
+				abertos += 1
+			else
+				fechados += 1
+			end
+		end
+	end
+	assert(abertos == 5 and fechados == 3, string.format("%d abertos, %d fechados", abertos, fechados))
+end)
+
 test("a rocha é sólida: tem cilindro dentro da pedra, do pé para cima (D-233)", function()
 	local c = TreeTrunks.exp_rocha and TreeTrunks.exp_rocha[1]
 	assert(c, "exp_rocha sem cilindro (rode tools/troncos.py)")

@@ -624,6 +624,10 @@ CONSTRUCAO_OBJETIVO = {
     "exp_ruina",
     "exp_comporta",
     "exp_telheiro",
+    "exp_sobrado_a",  # D-234
+    "exp_sobrado_b",
+    "exp_sobrado_c",
+    "exp_sobrado_d",
 }
 
 

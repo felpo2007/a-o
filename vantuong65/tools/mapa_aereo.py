@@ -159,6 +159,11 @@ TIPOS: dict[str, tuple[str, str, float]] = {
     "exp_patio": ("terra", "plano", 0.1),
     "exp_passarela": ("tabua", "plano", 0.4),
     "exp_muro": ("pedra", "plano", 0.5),
+    # D-234: sobrados grandes
+    "exp_sobrado_a": ("telha", "duas", 8.6),
+    "exp_sobrado_b": ("telha2", "quatro", 8.9),
+    "exp_sobrado_c": ("telha", "duas", 8.8),
+    "exp_sobrado_d": ("telha2", "quatro", 9.0),
 }
 SEM_DESENHO = {"us_flagpole", "us_range_bench", "vc_punji", "vc_range_rest", "vc_hammock"}
 

@@ -41,6 +41,10 @@ local PLANO = {
 	exp_patio = { 8, 1, 6 },
 	exp_passarela = { 9, 1.5, 1.5 },
 	exp_muro = { 4, 1, 0.45 },
+	exp_sobrado_a = { 14.5, 8.6, 10.1 },
+	exp_sobrado_b = { 15.3, 8.9, 10.5 },
+	exp_sobrado_c = { 13.9, 8.8, 10.9 },
+	exp_sobrado_d = { 15.2, 9, 10.7 },
 }
 for k, d in PLANO do
 	if not ArtBudget.DIMS[k] then

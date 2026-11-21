@@ -9835,3 +9835,16 @@ mapa novo nem objetivo novo, preservando capturas, nascimentos e entradas.
 - **Desenho:** `Shared/ExpansaoLod` esconde de longe só o que não tem colisão (raízes, samambaia e piso
   das casas térreas). **Móvel e objeto de quintal ficam:** sumir com eles criaria barreira invisível.
 - **Medido:** +15,2% de chamadas de desenho sobre a v135 nas 9 vistas (era +17,9% na v136).
+
+## D-234 — Lote 106: sobrados grandes na Vila (2026-11-21)
+
+**Pedido do dono:** casas novas grandes, de dois andares, "embaixo aberto e algumas fechadas".
+- **Modelos:** `tools/blender/exp_sobrado.py` faz 4 sobrados de 13,8 a 15,4 m de frente e 8,2 a 8,6 m
+  de altura. `a` e `b` têm térreo aberto e escada de fora; `c` e `d`, térreo fechado e escada por dentro.
+- **Na Vila:** 8 casas (5 abertas, 3 fechadas) e 7 caminhos novos em `Modules/Expansao.luau`. Todas a
+  mais de 55 m da bandeira, para o andar de cima não dominar a captura (o teste `expansao` cobra).
+- **Coluna de alvenaria:** o `V.bloco` grava o `local` para o veio da madeira. Em material de parede,
+  regrave com a altura no 2º eixo (`_pilar`), senão a textura deita e vira listras.
+- **Forro de telha:** fica no grupo Casa, com esteira (`_placa_forro`). No grupo Telhado a redução da
+  malha o engole.
+- **Medido:** +3,1% de chamadas de desenho sobre a v137 nas 9 vistas (+18,8% sobre a v135).

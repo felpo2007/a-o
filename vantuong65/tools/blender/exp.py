@@ -29,7 +29,7 @@ import vila  # noqa: E402
 import vila_casas as VC  # noqa: E402
 import vila_trim as VT  # noqa: E402
 
-MODULOS = ("exp_vila", "exp_arrozal")
+MODULOS = ("exp_vila", "exp_arrozal", "exp_sobrado")
 VAGAS = 2
 
 

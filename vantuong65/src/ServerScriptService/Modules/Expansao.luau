@@ -54,6 +54,14 @@ Expansao.SETORES = {
 			{ -52, -22, -66, -44, -100, -50, -114, -12, -110, 38, -88, 83 },
 			{ -127, 47, -105.6, 47 }, -- da saída da trincheira até a rua
 			{ -100, -13.2, -112, -17.5 }, -- da porta da casa da vala até a rua
+			-- D-234: os caminhos dos sobrados, cada um ligado a uma rua
+			{ -52, -22, -44, -36, -30, -54 },
+			{ -44, -36, -43, -72, -50, -90, -10, -90 },
+			{ -76, -28, -78, -46 },
+			{ -85.5, 45, -107, 44.5 },
+			{ 120, -78, 116, -97 },
+			{ 118, 23, 114, 1 },
+			{ -117, 72, -96, 68 },
 		},
 		cortes = {
 			{
@@ -104,6 +112,16 @@ Expansao.SETORES = {
 			{ id = "pote_2", key = "water_jar", x = -56.5, z = -56, giro = 75, semPatamar = true },
 			{ id = "palha_1", key = "straw_stack", x = -121, z = -60, giro = 40, semPatamar = true },
 			{ id = "pote_3", key = "water_jar", x = -94.5, z = -8, giro = 120, semPatamar = true },
+			-- D-234: sobrados grandes de dois andares (a e b: térreo aberto; c e d: térreo fechado). Todos a
+			-- mais de 55 m do mastro: o andar de cima não domina a área de captura
+			{ id = "sobrado_1", key = "exp_sobrado_a", x = -30, z = -62, olha = { -30, -40 } },
+			{ id = "sobrado_2", key = "exp_sobrado_c", x = -76, z = -20, olha = { -77, -46 } },
+			{ id = "sobrado_3", key = "exp_sobrado_b", x = -78, z = 44, olha = { -107, 44.5 } },
+			{ id = "sobrado_4", key = "exp_sobrado_d", x = -50, z = -98, olha = { -50, -80 } },
+			{ id = "sobrado_5", key = "exp_sobrado_a", x = -10, z = -98, olha = { -10, -80 } },
+			{ id = "sobrado_6", key = "exp_sobrado_c", x = 122, z = -68, olha = { 117, -97 } },
+			{ id = "sobrado_7", key = "exp_sobrado_b", x = 119, z = 31, olha = { 114, 1 } },
+			{ id = "sobrado_8", key = "exp_sobrado_a", x = -126, z = 72, olha = { -96, 68 } },
 		},
 		plantas = {
 			{ key = "exp_figueira", x = -127, z = -38 },
@@ -254,6 +272,11 @@ Expansao.LUZES = {
 	exp_palafita_b = { { 0, 4.5, 0.8 } },
 	exp_comporta = { { 0, 3.3, 2 } },
 	exp_deposito = { { 0, 3.6, 0 } },
+	-- D-234: os dois cômodos de cima; nos de térreo fechado, também os dois de baixo
+	exp_sobrado_a = { { 3.64, 5.05, 0.83 }, { -2.57, 5.05, 0.83 } },
+	exp_sobrado_b = { { 3.84, 5.05, 0.83 }, { -2.77, 5.05, 0.83 } },
+	exp_sobrado_c = { { 3.2, 5.05, 0.83 }, { -3.2, 5.05, 0.83 }, { 3.2, 2.2, 0.33 }, { -3.8, 2.2, 0.83 } },
+	exp_sobrado_d = { { 3.5, 5.05, 0.83 }, { -3.5, 5.05, 0.83 }, { 3.5, 2.2, 0.33 }, { -4.1, 2.2, 0.83 } },
 } :: { [string]: { { number } } }
 
 -- Agitação só na queda da saída da comporta (visual; o nível da água não muda)
