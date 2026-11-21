@@ -9378,3 +9378,107 @@ das caixas, traga vida para a loja".
 
 **Fica para o lote 98:** a animação da abertura das caixas e os efeitos da loja. Também o símbolo
 que falta no conjunto Fundador.
+
+## D-213 — Lote 98: a abertura das caixas com efeitos e a loja com vida (2026-11-20)
+
+**Pedido do dono:** "faça uma nova animação perfeita e realista com efeitos visuais para a loja e
+para a abertura das caixas itens etc".
+
+**A abertura da caixa** (antes da roleta; roteiro no `Shared/Efeitos`, puro e testado):
+1. **queda:** a caixa cai do alto do painel, acelerando, com a sombra crescendo no chão;
+2. **pouso** (0,42 s): baque (`caixa_pouso`), poeira dos dois lados, tranco no painel e a caixa
+   amassando e voltando;
+3. **tremor** (0,62 a 1,62 s): sacode cada vez mais forte e mais rápido (`caixa_tremor`), a luz da
+   caixa cresce e faíscas escapam pela fresta;
+4. **estouro** (1,62 s): clarão curto, a tampa salta e tomba para o lado, a caixa fica aberta com a
+   luz saindo de dentro, faíscas, a onda de choque, raios girando e o tranco (`caixa_estouro`);
+5. **saída** (2,15 a 2,45 s): a caixa cresce um pouco e some na luz; a roleta sai da luz (cresce de
+   90 %) com os raios atrás dela.
+
+**Regras da abertura:**
+- **A cor é a da CAIXA, nunca a do item sorteado.** O resultado só aparece na roleta; a abertura não
+  recebe o resultado (nada de adiantar nem de fingir um "quase", D-177).
+- **Efeitos curtos:** a mesma coisa em 0,75 s, sem a queda.
+- **Sem efeitos ou com movimento reduzido:** a roleta vem direto.
+- **PULAR** corta a abertura e a roleta.
+- Nenhum sorteio nesta tela (o teste da roleta proíbe `math.random`): a posição das faíscas da
+  fresta anda pelo tempo.
+- **Robustez** (vista no Studio):
+  - um quadro travado conta no máximo 0,1 s: a abertura fica mais lenta, mas não pula fase;
+  - as camadas abertas baixam no ABRIR (`preCaixa`, antes da resposta do servidor), só as da caixa
+    que vai abrir;
+  - o estouro espera as duas carregarem (até 1,2 s, a caixa sacode mais um pouco).
+
+**A caixa aberta em duas camadas** (`tools/blender/caixas_loja.py -- todas --aberta`):
+- o mesmo enquadramento da fechada, então as camadas se encaixam na tela:
+  - **corpo:** oco (fundo e quatro paredes), com o miolo aceso e a luz de dentro pintando as paredes
+    na cor da caixa, mais o facho (três cartões de luz de pé, um largo e dois finos em leque);
+  - **tampa:** sozinha, com as cantoneiras e a cinta, iluminada por baixo;
+- o alto do corpo tem o alfa caindo a zero (`topo_suave`; no jogo, a borda reta do facho aparecia);
+  `--so-topo` refaz só isso;
+- 20 imagens de 768 × 768 (média de 503 KB), subidas como `CaixaLoja.<id>_corpo` / `_tampa`; o
+  servidor resolve primeiro as fechadas, depois as camadas (`ImgCaixa_<id>_corpo`).
+
+**Efeitos de interface** (`Controllers/UiEfeitos`, um laço só que se desliga sozinho):
+- faíscas (rastro alinhado com o voo e bolinhas de luz, com arrasto e gravidade, em fórmula
+  fechada), onda de choque, raios girando, halo respirando, cintilas de quatro pontas, o brilho
+  que varre um cartão, brasas subindo, tranco e clarão;
+- texturas feitas por fórmula (`tools/efeitos_ui.py`: brilho, faísca, raio, anel e cintila;
+  33 KB no total), brancas e pintadas na cor (`Images.efeito_*`, atributo `Img_efeito_*`). Sem a
+  imagem, um quadro redondo de reserva;
+- movimento reduzido: nada voa nem treme; o halo fica parado;
+- os laços da loja param com a loja fechada.
+
+**A roleta e a recompensa:**
+- o marcador acende a cada cartão que passa;
+- o cartão vencedor solta a onda e as faíscas na cor da raridade (mais no épico e no lendário, com
+  tranco);
+- na recompensa, o halo macio respira atrás do item, com os raios do raro para cima, faíscas e onda
+  ao aparecer, cintilas, o brilho passando pelo cartão e brasas no épico e no lendário. A
+  quantidade sobe com a raridade (16 no comum a 64 no lendário).
+
+**A loja com vida:**
+- nas caixas grandes da vitrine:
+  - o halo da caixa respira atrás dela (mais forte com caixa pronta para abrir);
+  - brasas sobem e o brilho passa pelo cartão;
+- nas linhas, o mercado do dia e a aba CAIXAS, a luz de cada caixa e o brilho, fora de fase;
+- a compra que passou (passe, produto ou mercado) acende a loja com a onda e faíscas douradas (só o
+  enfeite; quem entrega é o servidor).
+
+**Sons novos** (`tools/sons_roleta.py`, síntese com semente própria; os cinco da roleta não mudaram):
+- `caixa_pouso` (450 ms);
+- `caixa_tremor` (1,1 s);
+- `caixa_estouro` (1,6 s).
+
+**Conjunto Fundador:** o "símbolo que faltava" eram os uniformes de pano liso, que sozinhos viravam um
+quadrado de cor. O leque dos CONJUNTOS agora veste o soldado (`fundador_uniformes_vestidos.jpg`).
+
+**Gancho do Studio:** `VT65DevAbrir = "<caixa grátis>"` (cliente) abre pelo mesmo caminho do botão
+ABRIR: o servidor confere, sorteia e grava. No MCP, o controle fantasma (D-149) trocou a aba da loja
+no meio do teste e apertou o PULAR e o VOLTAR; para gravar a abertura inteira, zere o
+`GuiService.SelectedObject` a cada quadro no cliente.
+
+**Conferido no Studio** (janela de 839 × 656, Studio atrás de outra janela, ~15 fps):
+- **vitrine** com os halos, as brasas e o brilho (`testes/lote98/destaques_com_vida.jpg`);
+- **6 aberturas gravadas em vídeo** (Recompensa, Veterano e Campanha):
+  - fases na Campanha: pouso 0,508 s, tremor 0,708 s, estouro e troca das camadas 1,66 s, fim 2,48 s;
+    espera pelas camadas 0 ms; pior quadro 202 ms;
+  - a roleta parou no item que o servidor gravou (`RoletaItem` = `RoletaServidor`, desvio de 0 a
+    0,5 px);
+  - sequência em `abertura_campanha_sequencia.jpg` e `abertura_tampa_voando.jpg`;
+- **recompensa** comum (cinza) e épica (raios roxos, brilho, cintilas): sem captura no repositório,
+  porque a plaqueta e a roleta desenham o nome da conta;
+- **o que o Studio mostrou e foi corrigido:**
+  - a caixa sumia no estouro (camadas ainda baixando);
+  - o clarão branco apagava tudo;
+  - a borda reta no alto do facho;
+  - um quadro de 0,8 s pulava do estouro para a saída;
+- **Output:** 0 erros de script. Os avisos "Asset content representation is being generated" são das
+  texturas de acabamento da roleta (D-178), não das imagens novas (conferido).
+
+**Testes:** `efeitos.luau` (11).
+
+**Não testado:**
+- a abertura de caixa paga e a comemoração da compra (nenhuma compra foi feita);
+- o celular, a TV, o controle de verdade e o jogo publicado;
+- o fps numa máquina sem o Studio atrás (no Studio o limite é 15 fps).

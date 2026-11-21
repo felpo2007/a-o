@@ -15,6 +15,10 @@ local ImagensUi = {}
 
 -- D-133: as bandeiras da escolha de lado (Controllers/Bandeiras: a imagem por cima do desenho)
 ImagensUi.KEYS = { "caveira_abate", "bandeira_eua", "bandeira_frente", "rotor_borrao" }
+-- D-213: as texturas dos efeitos de interface (Controllers/UiEfeitos: "Img_efeito_<nome>")
+for _, nome in { "brilho", "faisca", "raio", "anel", "cintila" } do
+	table.insert(ImagensUi.KEYS, "efeito_" .. nome)
+end
 
 local function imageOf(decalId: number): number?
 	local ok, model = pcall(function()
@@ -54,16 +58,25 @@ function ImagensUi.moldes()
 end
 
 -- D-212: as imagens das caixas da loja ("ImgCaixa_<id>"), uma de cada vez (o InsertService limita
--- pedidos em rajada). Sem o atributo, o cliente mostra o caixote 3D de antes.
+-- pedidos em rajada). Sem o atributo, o cliente mostra o caixote 3D de antes. D-213: também as duas
+-- camadas da caixa aberta ("ImgCaixa_<id>_corpo" e "_tampa"), as chaves com "_" do mesmo grupo.
 function ImagensUi.caixas()
 	task.spawn(function()
-		for id, d in AssetIds.CaixaLoja or {} do
-			if type(d) == "number" and d ~= 0 then
-				local img = imageOf(d)
-				if img and img ~= 0 then
-					ReplicatedStorage:SetAttribute("ImgCaixa_" .. id, img)
-				else
-					warn(string.format("[VT65] imagem da caixa %s: o decal %d não abriu; fica o caixote 3D", id, d))
+		-- primeiro as fechadas (a vitrine), depois as camadas da abertura
+		for _, camadas in { false, true } do
+			for id, d in AssetIds.CaixaLoja or {} do
+				if (string.find(id, "_", 1, true) ~= nil) ~= camadas then
+					continue
+				end
+				if type(d) == "number" and d ~= 0 then
+					local img = imageOf(d)
+					if img and img ~= 0 then
+						ReplicatedStorage:SetAttribute("ImgCaixa_" .. id, img)
+					else
+						warn(
+							string.format("[VT65] imagem da caixa %s: o decal %d não abriu; fica o caixote 3D", id, d)
+						)
+					end
 				end
 			end
 		end

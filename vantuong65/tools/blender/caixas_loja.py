@@ -26,7 +26,7 @@ import sys
 from pathlib import Path
 
 import bpy
-from mathutils import Vector
+from mathutils import Euler, Vector
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import comum as C  # noqa: E402
@@ -498,7 +498,150 @@ def halo(spec, centro: Vector, raio: float):
     return o
 
 
-def render(chave: str, amostras: int, teste: bool):
+def mat_feixe(nome, cor, forca):
+    """Cartão de luz (D-213): emissão com o alfa caindo para cima e para os lados (coordenadas
+    geradas do plano), o truque de efeito para o facho que sai da caixa aberta."""
+    m = bpy.data.materials.new(nome)
+    m.use_nodes = True
+    nt = m.node_tree
+    for n in list(nt.nodes):
+        nt.nodes.remove(n)
+    coord = nt.nodes.new("ShaderNodeTexCoord")
+    sep = nt.nodes.new("ShaderNodeSeparateXYZ")
+    nt.links.new(coord.outputs["Generated"], sep.inputs[0])
+
+    def op(tipo, a, b=None):
+        n = nt.nodes.new("ShaderNodeMath")
+        n.operation = tipo
+        for i, v in enumerate((a, b)):
+            if v is None:
+                continue
+            if isinstance(v, (int, float)):
+                n.inputs[i].default_value = v
+            else:
+                nt.links.new(v, n.inputs[i])
+        return n.outputs[0]
+
+    # vertical: 1 embaixo, 0 em cima, caindo depressa; lateral: sino em u
+    v = op("POWER", op("SUBTRACT", 1.0, sep.outputs["Y"]), 1.5)
+    u = op("SUBTRACT", op("MULTIPLY", sep.outputs["X"], 2.0), 1.0)
+    sino = op("POWER", op("SUBTRACT", 1.0, op("MULTIPLY", u, u)), 2.0)
+    fac = op("MULTIPLY", v, sino)
+    e = nt.nodes.new("ShaderNodeEmission")
+    e.inputs["Color"].default_value = (*cor, 1.0)
+    e.inputs["Strength"].default_value = forca
+    t = nt.nodes.new("ShaderNodeBsdfTransparent")
+    mix = nt.nodes.new("ShaderNodeMixShader")
+    nt.links.new(fac, mix.inputs["Fac"])
+    nt.links.new(t.outputs[0], mix.inputs[1])
+    nt.links.new(e.outputs[0], mix.inputs[2])
+    o = nt.nodes.new("ShaderNodeOutputMaterial")
+    nt.links.new(mix.outputs[0], o.inputs["Surface"])
+    return m
+
+
+def da_tampa(o) -> bool:
+    n = o.name
+    if n.startswith("Tampa") or n.startswith("CintaT"):
+        return True
+    return n.startswith("Canto") and meio_z(o) > CZ
+
+
+def meio_z(o) -> float:
+    """Altura do meio da peça no mundo (o `bloco` aplica a posição na malha: a origem fica em 0)."""
+    zs = [(o.matrix_world @ Vector(c)).z for c in o.bound_box]
+    return (min(zs) + max(zs)) / 2
+
+
+def abrir(spec, objs, camada: str, centro: Vector, raio: float):
+    """D-213: a caixa aberta em duas camadas com o mesmo enquadramento da fechada: "corpo" (oco,
+    sem a tampa, com a luz lá dentro e o facho saindo) e "tampa" (só ela, iluminada por baixo). A
+    tela da abertura põe uma sobre a outra e faz a tampa voar."""
+    corpo = next(o for o in objs if o.name == "Corpo")
+    m_corpo = corpo.data.materials[0]
+    for o in objs:
+        tampa = da_tampa(o)
+        if o.name.startswith("Luz"):
+            o.hide_render = True
+        elif camada == "corpo":
+            o.hide_render = tampa
+            if o.name.startswith("CintaF") or o.name.startswith("CintaA"):
+                # a cinta vai de 0 à tampa; encolhe em volta do chão (origem em 0) até a borda
+                o.scale.z = CZ / (CZ + TZ + FRESTA)
+        else:
+            o.hide_render = not tampa
+    a = spec["acento"]
+    # o miolo brilhante (bem mais fraco que a força cheia: no Standard a cor estoura para o branco)
+    m_dentro = mat_emissao("Dentro", a, min(3.0, 1.0 + spec["brilho"] * 0.25))
+    if camada == "tampa":
+        dentro = bloco("Dentro", (CX - 0.07, CY - 0.07, 0.004), (0, 0, CZ - 0.02), m_dentro, 0.0)
+        dentro.visible_camera = False  # só ilumina a tampa por baixo
+        return
+    # corpo oco: o bloco cheio sai e entram o fundo e as quatro paredes
+    corpo.hide_render = True
+    e = 0.035
+    bloco("Fundo", (CX, CY, e), (0, 0, e / 2), m_corpo, 0.004)
+    for y in (-1, 1):
+        bloco("Parede", (CX, e, CZ), (0, y * (CY / 2 - e / 2), CZ / 2), m_corpo, 0.006)
+    for x in (-1, 1):
+        bloco("Parede", (e, CY - 2 * e, CZ), (x * (CX / 2 - e / 2), 0, CZ / 2), m_corpo, 0.006)
+    bloco("Dentro", (CX - 2 * e, CY - 2 * e, 0.004), (0, 0, CZ * 0.42), m_dentro, 0.0)
+    # luz de dentro: pinta as paredes de dentro na cor da raridade
+    lz = bpy.data.lights.new("DeDentro", "POINT")
+    lz.energy = 25.0 + spec["brilho"] * 6.0
+    lz.color = a
+    lz.shadow_soft_size = 0.12
+    lo = bpy.data.objects.new("DeDentro", lz)
+    bpy.context.scene.collection.objects.link(lo)
+    lo.location = (0, 0, CZ * 0.6)
+    # o facho: três cartões de luz de pé, de frente para a câmera (um largo e dois finos tortos)
+    cam = bpy.context.scene.camera
+    d = (cam.location - centro).normalized()
+    d.z = 0.0
+    d.normalize()
+    giro_z = math.atan2(d.y, d.x) + math.radians(90)  # o giro em X põe a normal em -Y
+    forca = 1.6 + spec["brilho"] * 0.3
+    for nome, larg, alt, tombo, f in (
+        ("Feixe", CX * 1.0, 1.15, 0.0, forca),
+        ("Raio", CX * 0.32, 1.3, 9.0, forca * 1.3),
+        ("Raio", CX * 0.26, 1.2, -11.0, forca * 1.3),
+    ):
+        bpy.ops.mesh.primitive_plane_add(size=1.0)
+        p = bpy.context.active_object
+        p.name = nome
+        p.scale = (larg, alt, 1.0)
+        # a base no miolo; o tombo inclina o cartão no próprio plano (o raio abre em leque)
+        t = math.radians(tombo)
+        p.rotation_euler = (math.radians(90), t, giro_z)
+        base = Vector((0, 0, CZ * 0.45))
+        sobe = Vector((math.sin(t) * alt / 2, 0, math.cos(t) * alt / 2))  # Ry(t) de (0, 0, 1)
+        sobe.rotate(Euler((0, 0, giro_z)))
+        p.location = base + sobe
+        p.data.materials.append(mat_feixe(nome, a, f))
+        p.visible_shadow = False
+
+
+def topo_suave(caminho: Path, margem: float = 0.16):
+    """D-213: o facho da caixa aberta passa do alto do quadro; no jogo, a borda reta aparecia. O
+    alfa cai a zero na faixa de cima (`margem` da altura), com a curva suave."""
+    import numpy as np
+
+    im = bpy.data.images.load(str(caminho))
+    w, h = im.size
+    px = np.empty(w * h * 4, np.float32)
+    im.pixels.foreach_get(px)
+    px = px.reshape(h, w, 4)
+    # as linhas do Blender vão de baixo para cima: a última é o topo da imagem
+    d = np.clip((h - 0.5 - np.arange(h)) / (h * margem), 0, 1)
+    px[..., 3] *= (d * d * (3 - 2 * d))[:, None]
+    im.pixels.foreach_set(px.ravel())
+    im.filepath_raw = str(caminho)
+    im.file_format = "PNG"
+    im.save()
+    bpy.data.images.remove(im)
+
+
+def render(chave: str, amostras: int, teste: bool, camada: str | None = None):
     spec = CAIXAS[chave]
     C.cena_vazia()
     cena = bpy.context.scene
@@ -526,11 +669,16 @@ def render(chave: str, amostras: int, teste: bool):
         spec["acento"],
         1.4 * r,
     )
-    halo(spec, centro, raio)
+    if camada != "tampa":
+        halo(spec, centro, raio)
+    if camada:
+        abrir(spec, objs, camada, centro, raio)
     SAIDA.mkdir(parents=True, exist_ok=True)
-    nome = ("teste_" if teste else "") + f"{chave}.png"
+    nome = ("teste_" if teste else "") + chave + (f"_{camada}" if camada else "") + ".png"
     cena.render.filepath = str(SAIDA / nome)
     bpy.ops.render.render(write_still=True)
+    if camada == "corpo":
+        topo_suave(SAIDA / nome)
     log("ok", nome)
 
 
@@ -543,8 +691,16 @@ def principal():
         amostras = int(args[args.index("--amostras") + 1])
     teste = "--teste" in args
     chaves = list(CAIXAS) if args[0] == "todas" else [args[0]]
+    # --aberta: só as duas camadas da caixa aberta (D-213); sem ela, só a fechada
+    camadas = ["corpo", "tampa"] if "--aberta" in args else [None]
+    if "--so-topo" in args:  # só o degradê do alto nos corpos já renderizados (sem render)
+        for k in chaves:
+            topo_suave(SAIDA / f"{k}_corpo.png")
+            log("topo", k)
+        return
     for k in chaves:
-        render(k, amostras, teste)
+        for camada in camadas:
+            render(k, amostras, teste, camada)
 
 
 if __name__ == "__main__":

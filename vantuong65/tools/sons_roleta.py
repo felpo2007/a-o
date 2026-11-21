@@ -12,6 +12,11 @@ Sons curtos e leves (44,1 kHz, mono), de material de campanha, não de cassino:
 - roleta_revela.ogg: um sino pequeno e seco (comum, incomum) (700 ms).
 - roleta_raro.ogg: sino de latão com mais corpo (raro) (1,4 s).
 - roleta_lendario.ogg: dois sinos em quinta, com brilho (épico, lendário) (2,2 s).
+D-213 (a abertura da caixa), cada um com a sua semente:
+- caixa_pouso.ogg: a caixa caindo no chão, com o tilintar das cantoneiras (450 ms);
+- caixa_tremor.ogg: a caixa sacudindo, batidas cada vez mais juntas (1,1 s);
+- caixa_estouro.ogg: a trava, o rangido, o sopro e um acorde de luz (1,6 s).
+Só alguns: ... -P tools/sons_roleta.py -- caixa_
 Saídas em assets/roleta_sons/. As durações são inteiras em ms (o mixdown do Blender sai exato).
 """
 
@@ -114,17 +119,107 @@ def lendario() -> np.ndarray:
     return borda(normaliza(a + 0.8 * b, 0.75), 0.5, 120)
 
 
+def atrasa(x: np.ndarray, s: float, n: int) -> np.ndarray:
+    """`x` começando `s` segundos depois, num buffer de `n` amostras."""
+    y = np.zeros(n)
+    i = int(s * SR)
+    k = min(len(x), n - i)
+    if k > 0:
+        y[i : i + k] = x[:k]
+    return y
+
+
+# D-213: a abertura da caixa (pedido do dono: "animação perfeita e realista"). Cada som tem o seu
+# gerador (semente própria): os cinco de cima não mudam.
+def pouso() -> np.ndarray:
+    """A caixa de madeira cheia caindo no chão: baque grave, o corpo da tábua e o tilintar das
+    cantoneiras (450 ms)."""
+    g = np.random.default_rng(21301)
+    t = t_de(450)
+    n = len(t)
+    baque = np.sin(2 * math.pi * 78 * t) * np.exp(-t * 16) + 0.6 * np.sin(
+        2 * math.pi * 52 * t
+    ) * np.exp(-t * 11)
+    tabua = 0.45 * np.sin(2 * math.pi * 190 * t) * np.exp(-t * 30) + 0.3 * np.sin(
+        2 * math.pi * 455 * t
+    ) * np.exp(-t * 45)
+    golpe = passa_faixa(g.normal(0, 1, n), 80, 2500) * np.exp(-t * 55) * 0.9
+    metal = np.zeros(n)
+    for s, f in ((0.018, 2900), (0.041, 3600), (0.07, 3150)):
+        r = t_de(120)
+        metal += atrasa(np.sin(2 * math.pi * f * r) * np.exp(-r * 70) * 0.18, s, n)
+    return borda(normaliza(baque + tabua + golpe + metal, 0.85), 0.4, 30)
+
+
+def tremor() -> np.ndarray:
+    """A caixa sacudindo antes de abrir: batidas de madeira cada vez mais juntas e o metal das
+    cantoneiras chacoalhando (1,1 s)."""
+    g = np.random.default_rng(21302)
+    t = t_de(1100)
+    n = len(t)
+    x = np.zeros(n)
+    s, passo, k = 0.0, 0.16, 0
+    while s < 1.0:
+        r = t_de(160)
+        f0 = 150 + g.uniform(-25, 25)
+        bate = (np.sin(2 * math.pi * f0 * r) + 0.4 * np.sin(2 * math.pi * f0 * 2.7 * r)) * np.exp(
+            -r * 38
+        )
+        bate += passa_faixa(g.normal(0, 1, len(r)), 200, 3000) * np.exp(-r * 70) * 0.5
+        chacoalha = passa_faixa(g.normal(0, 1, len(r)), 2500, 8000) * np.exp(-r * 30) * 0.25
+        forca = 0.35 + 0.65 * (s / 1.0)
+        x += atrasa((bate + chacoalha) * forca, s, n)
+        k += 1
+        s += passo
+        passo = max(0.055, passo * 0.82)
+    return borda(normaliza(x, 0.7), 0.5, 40)
+
+
+def estouro() -> np.ndarray:
+    """A tampa saltando: o estalo da trava, o rangido da madeira, o sopro subindo e um acorde de
+    luz brilhando por cima (1,6 s)."""
+    g = np.random.default_rng(21303)
+    t = t_de(1600)
+    n = len(t)
+    estalo = passa_faixa(g.normal(0, 1, n), 900, 9000) * np.exp(-t * 120) * 1.2
+    estalo += np.sin(2 * math.pi * 2400 * t) * np.exp(-t * 90) * 0.4
+    rangido = (
+        np.sin(2 * math.pi * (210 + 90 * t) * t)
+        * np.exp(-t * 9)
+        * (0.5 + 0.5 * np.sin(2 * math.pi * 31 * t))
+    )
+    rangido *= 0.25 * (t < 0.35)
+    # o sopro: ruído com o filtro abrindo (soma de faixas que entram uma depois da outra)
+    sopro = np.zeros(n)
+    for i, (lo, hi) in enumerate(((200, 900), (600, 2400), (1500, 5000), (3000, 9000))):
+        env = np.exp(-(((t - 0.12 - 0.07 * i) / 0.16) ** 2))
+        sopro += passa_faixa(g.normal(0, 1, n), lo, hi) * env * 0.35
+    # o acorde de luz: três sinos suaves com vibrato, entrando devagar
+    luz = np.zeros(n)
+    for f, a in ((523.25, 1.0), (659.25, 0.7), (1046.5, 0.45)):
+        vib = 1 + 0.004 * np.sin(2 * math.pi * 5.5 * t)
+        luz += a * np.sin(2 * math.pi * f * vib * t) * (1 - np.exp(-t * 14)) * np.exp(-t * 1.6)
+    return borda(normaliza(estalo + rangido + sopro + 0.32 * luz, 0.85), 0.3, 150)
+
+
 SONS = {
     "roleta_tique": tique,
     "roleta_parada": parada,
     "roleta_revela": revela,
     "roleta_raro": raro,
     "roleta_lendario": lendario,
+    "caixa_pouso": pouso,
+    "caixa_tremor": tremor,
+    "caixa_estouro": estouro,
 }
 
 
 def main() -> None:
+    # depois do "--": nomes (ou começos de nome) para gerar só esses; sem nada, todos
+    pedidos = sys.argv[sys.argv.index("--") + 1 :] if "--" in sys.argv else []
     for nome, f in SONS.items():
+        if pedidos and not any(nome.startswith(p) for p in pedidos):
+            continue
         x = f()
         wav = TRAB / f"{nome}.wav"
         ogg = SAIDA / f"{nome}.ogg"

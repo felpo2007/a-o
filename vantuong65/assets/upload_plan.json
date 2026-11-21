@@ -7887,5 +7887,201 @@
   "assetType": "Decal",
   "name": "VT65 caixa historica",
   "description": "VAN TUONG 65 - Caixa da Colecao de Campanha, imagem da loja (tools/blender/caixas_loja.py)"
+ },
+ {
+  "key": "CaixaLoja.gratuita_corpo",
+  "file": "assets/ui/caixas/gratuita_corpo.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa gratuita corpo",
+  "description": "VAN TUONG 65 - caixa gratuita aberta: corpo aberto com a luz (tools/blender/caixas_loja.py, D-213)"
+ },
+ {
+  "key": "CaixaLoja.gratuita_tampa",
+  "file": "assets/ui/caixas/gratuita_tampa.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa gratuita tampa",
+  "description": "VAN TUONG 65 - caixa gratuita aberta: tampa solta (tools/blender/caixas_loja.py, D-213)"
+ },
+ {
+  "key": "CaixaLoja.recruta_corpo",
+  "file": "assets/ui/caixas/recruta_corpo.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa recruta corpo",
+  "description": "VAN TUONG 65 - caixa recruta aberta: corpo aberto com a luz (tools/blender/caixas_loja.py, D-213)"
+ },
+ {
+  "key": "CaixaLoja.recruta_tampa",
+  "file": "assets/ui/caixas/recruta_tampa.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa recruta tampa",
+  "description": "VAN TUONG 65 - caixa recruta aberta: tampa solta (tools/blender/caixas_loja.py, D-213)"
+ },
+ {
+  "key": "CaixaLoja.servico_corpo",
+  "file": "assets/ui/caixas/servico_corpo.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa servico corpo",
+  "description": "VAN TUONG 65 - caixa servico aberta: corpo aberto com a luz (tools/blender/caixas_loja.py, D-213)"
+ },
+ {
+  "key": "CaixaLoja.servico_tampa",
+  "file": "assets/ui/caixas/servico_tampa.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa servico tampa",
+  "description": "VAN TUONG 65 - caixa servico aberta: tampa solta (tools/blender/caixas_loja.py, D-213)"
+ },
+ {
+  "key": "CaixaLoja.batalhao_corpo",
+  "file": "assets/ui/caixas/batalhao_corpo.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa batalhao corpo",
+  "description": "VAN TUONG 65 - caixa batalhao aberta: corpo aberto com a luz (tools/blender/caixas_loja.py, D-213)"
+ },
+ {
+  "key": "CaixaLoja.batalhao_tampa",
+  "file": "assets/ui/caixas/batalhao_tampa.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa batalhao tampa",
+  "description": "VAN TUONG 65 - caixa batalhao aberta: tampa solta (tools/blender/caixas_loja.py, D-213)"
+ },
+ {
+  "key": "CaixaLoja.campanha_corpo",
+  "file": "assets/ui/caixas/campanha_corpo.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa campanha corpo",
+  "description": "VAN TUONG 65 - caixa campanha aberta: corpo aberto com a luz (tools/blender/caixas_loja.py, D-213)"
+ },
+ {
+  "key": "CaixaLoja.campanha_tampa",
+  "file": "assets/ui/caixas/campanha_tampa.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa campanha tampa",
+  "description": "VAN TUONG 65 - caixa campanha aberta: tampa solta (tools/blender/caixas_loja.py, D-213)"
+ },
+ {
+  "key": "CaixaLoja.veterano_corpo",
+  "file": "assets/ui/caixas/veterano_corpo.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa veterano corpo",
+  "description": "VAN TUONG 65 - caixa veterano aberta: corpo aberto com a luz (tools/blender/caixas_loja.py, D-213)"
+ },
+ {
+  "key": "CaixaLoja.veterano_tampa",
+  "file": "assets/ui/caixas/veterano_tampa.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa veterano tampa",
+  "description": "VAN TUONG 65 - caixa veterano aberta: tampa solta (tools/blender/caixas_loja.py, D-213)"
+ },
+ {
+  "key": "CaixaLoja.suprimentos_corpo",
+  "file": "assets/ui/caixas/suprimentos_corpo.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa suprimentos corpo",
+  "description": "VAN TUONG 65 - caixa suprimentos aberta: corpo aberto com a luz (tools/blender/caixas_loja.py, D-213)"
+ },
+ {
+  "key": "CaixaLoja.suprimentos_tampa",
+  "file": "assets/ui/caixas/suprimentos_tampa.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa suprimentos tampa",
+  "description": "VAN TUONG 65 - caixa suprimentos aberta: tampa solta (tools/blender/caixas_loja.py, D-213)"
+ },
+ {
+  "key": "CaixaLoja.especiais_corpo",
+  "file": "assets/ui/caixas/especiais_corpo.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa especiais corpo",
+  "description": "VAN TUONG 65 - caixa especiais aberta: corpo aberto com a luz (tools/blender/caixas_loja.py, D-213)"
+ },
+ {
+  "key": "CaixaLoja.especiais_tampa",
+  "file": "assets/ui/caixas/especiais_tampa.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa especiais tampa",
+  "description": "VAN TUONG 65 - caixa especiais aberta: tampa solta (tools/blender/caixas_loja.py, D-213)"
+ },
+ {
+  "key": "CaixaLoja.elite_corpo",
+  "file": "assets/ui/caixas/elite_corpo.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa elite corpo",
+  "description": "VAN TUONG 65 - caixa elite aberta: corpo aberto com a luz (tools/blender/caixas_loja.py, D-213)"
+ },
+ {
+  "key": "CaixaLoja.elite_tampa",
+  "file": "assets/ui/caixas/elite_tampa.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa elite tampa",
+  "description": "VAN TUONG 65 - caixa elite aberta: tampa solta (tools/blender/caixas_loja.py, D-213)"
+ },
+ {
+  "key": "CaixaLoja.historica_corpo",
+  "file": "assets/ui/caixas/historica_corpo.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa historica corpo",
+  "description": "VAN TUONG 65 - caixa historica aberta: corpo aberto com a luz (tools/blender/caixas_loja.py, D-213)"
+ },
+ {
+  "key": "CaixaLoja.historica_tampa",
+  "file": "assets/ui/caixas/historica_tampa.png",
+  "assetType": "Decal",
+  "name": "VT65 caixa historica tampa",
+  "description": "VAN TUONG 65 - caixa historica aberta: tampa solta (tools/blender/caixas_loja.py, D-213)"
+ },
+ {
+  "key": "Images.efeito_brilho",
+  "file": "assets/ui/efeitos/brilho.png",
+  "assetType": "Decal",
+  "name": "VT65 efeito brilho",
+  "description": "VAN TUONG 65 - efeito de interface: luz redonda (tools/efeitos_ui.py, D-213)"
+ },
+ {
+  "key": "Images.efeito_faisca",
+  "file": "assets/ui/efeitos/faisca.png",
+  "assetType": "Decal",
+  "name": "VT65 efeito faisca",
+  "description": "VAN TUONG 65 - efeito de interface: rastro de faisca (tools/efeitos_ui.py, D-213)"
+ },
+ {
+  "key": "Images.efeito_raio",
+  "file": "assets/ui/efeitos/raio.png",
+  "assetType": "Decal",
+  "name": "VT65 efeito raio",
+  "description": "VAN TUONG 65 - efeito de interface: raio de luz (tools/efeitos_ui.py, D-213)"
+ },
+ {
+  "key": "Images.efeito_anel",
+  "file": "assets/ui/efeitos/anel.png",
+  "assetType": "Decal",
+  "name": "VT65 efeito anel",
+  "description": "VAN TUONG 65 - efeito de interface: onda de choque (tools/efeitos_ui.py, D-213)"
+ },
+ {
+  "key": "Images.efeito_cintila",
+  "file": "assets/ui/efeitos/cintila.png",
+  "assetType": "Decal",
+  "name": "VT65 efeito cintila",
+  "description": "VAN TUONG 65 - efeito de interface: cintilacao (tools/efeitos_ui.py, D-213)"
+ },
+ {
+  "key": "Sounds.caixa_pouso",
+  "file": "assets/roleta_sons/caixa_pouso.ogg",
+  "assetType": "Audio",
+  "name": "VT65 caixa_pouso",
+  "description": "VAN TUONG 65 - abertura da caixa: a caixa caindo (tools/sons_roleta.py, D-213)"
+ },
+ {
+  "key": "Sounds.caixa_tremor",
+  "file": "assets/roleta_sons/caixa_tremor.ogg",
+  "assetType": "Audio",
+  "name": "VT65 caixa_tremor",
+  "description": "VAN TUONG 65 - abertura da caixa: a caixa sacudindo (tools/sons_roleta.py, D-213)"
+ },
+ {
+  "key": "Sounds.caixa_estouro",
+  "file": "assets/roleta_sons/caixa_estouro.ogg",
+  "assetType": "Audio",
+  "name": "VT65 caixa_estouro",
+  "description": "VAN TUONG 65 - abertura da caixa: a tampa saltando e a luz (tools/sons_roleta.py, D-213)"
  }
 ]

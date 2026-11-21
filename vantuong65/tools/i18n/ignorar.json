@@ -1682,7 +1682,19 @@
   "ImgCaixa_%s",
   "Mercado_%d",
   "^[Cc]aixa d[aeo]s?",
-  "^[Cc]aixa d[aeo]s? "
+  "^[Cc]aixa d[aeo]s? ",
+  "Fechada",
+  "brilho",
+  "cintila",
+  "corpo",
+  "estouro",
+  "faisca",
+  "feita",
+  "pouso",
+  "raio",
+  "rodando",
+  "tampa",
+  "tremor"
  ],
  "regex": [
   "^uni_[a-z_]+@[a-z0-9]+$"

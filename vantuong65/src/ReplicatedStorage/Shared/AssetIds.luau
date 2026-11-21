@@ -55,6 +55,10 @@ return {
 		roleta_revela = 129467433848849,
 		roleta_raro = 132667265672941,
 		roleta_lendario = 94782492992853,
+		-- D-213: abertura da caixa (tools/sons_roleta.py; 0 = sem som)
+		caixa_pouso = 72978580024321,
+		caixa_tremor = 94910867397830,
+		caixa_estouro = 106809902475916,
 		-- D-203: contagem do começo e apito de início (tools/sons_partida.py; 0 = sem som)
 		contagem_tique = 116493671686163,
 		partida_apito = 75456146464614,
@@ -333,6 +337,12 @@ return {
 		-- D-199: disco borrado do rotor girando (tools/rotor_borrao.py); Decal, o ImagensUi resolve a
 		-- imagem ("Img_rotor_borrao", RotorDisco). Com 0, o disco cinza de antes
 		rotor_borrao = 105200442956287,
+		-- D-213: texturas dos efeitos de interface (tools/efeitos_ui.py; Controllers/UiEfeitos)
+		efeito_brilho = 130766449498323,
+		efeito_faisca = 77072359090059,
+		efeito_raio = 77082235951303,
+		efeito_anel = 122842943714143,
+		efeito_cintila = 77692950831580,
 	},
 	-- Texturas do chão (D-66; Poly Haven, CC0): IDs de DECAL devolvidos pelo Open Cloud. O
 	-- MaterialVariant precisa do ID da IMAGEM de cada decal: fica em GroundImages (resolvido no Studio).
@@ -451,5 +461,26 @@ return {
 		especiais = 75435684217314,
 		elite = 125172343200192,
 		historica = 75483690318723,
+		-- D-213: a caixa aberta em duas camadas (corpo com a luz e tampa solta), no enquadramento da fechada
+		gratuita_corpo = 114330578851539,
+		gratuita_tampa = 130956727704168,
+		recruta_corpo = 95005042706973,
+		recruta_tampa = 125469345030333,
+		servico_corpo = 109328337311768,
+		servico_tampa = 111352770500537,
+		batalhao_corpo = 108946762687260,
+		batalhao_tampa = 131902354827409,
+		campanha_corpo = 121024244669663,
+		campanha_tampa = 106554503651730,
+		veterano_corpo = 90395001253692,
+		veterano_tampa = 134182451213993,
+		suprimentos_corpo = 126618113407431,
+		suprimentos_tampa = 71042466763333,
+		especiais_corpo = 124949905238546,
+		especiais_tampa = 119209030126003,
+		elite_corpo = 79084022802796,
+		elite_tampa = 71293643084001,
+		historica_corpo = 135647005913526,
+		historica_tampa = 134575592601698,
 	},
 }

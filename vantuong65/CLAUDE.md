@@ -215,6 +215,14 @@ O `sourcemap.json` não vai para o Git.
     `"creditos"` (+5.000), `"marco:<caixa>"` (guarda uma caixa de marco) e `"partidas:<n>"`
     (marcos de partidas). A aba abre com `VT65DevTela = "caixas"`; feche antes a recompensa
     diária, que abre por cima.
+  - Abertura da caixa (D-213, do lado do CLIENTE): `VT65DevAbrir = "<caixa grátis>"` abre pelo
+    mesmo caminho do botão ABRIR (guarde antes com `VT65DevCaixa = "marco:<caixa>"`).
+    - O painel `PainelRoleta` grava `Abertura_<fase>` (s), `Abertura_PiorQuadroMs`,
+      `Abertura_EsperaMs` e `Abertura_Camadas`.
+    - Grave com o `video_capture` do MCP e tire os quadros do MP4 com PyAV
+      (`uv run --no-project --with av`).
+    - O controle fantasma (D-149) aperta o PULAR e o VOLTAR: zere o `GuiService.SelectedObject` a
+      cada quadro (RenderStepped) durante a gravação.
   - Roleta das caixas (D-177): no fim da rolagem, a tela grava `RoletaIndice`, `RoletaItem`,
     `RoletaServidor` e `RoletaDesvioPx` no ScreenGui `VT65CaixaAbertura`; confira contra o
     `hist[1]` do `Suprimento_Get`. O PULAR fica em `VT65CaixaAbertura.PainelRoleta.Pular`.
@@ -361,6 +369,14 @@ O `sourcemap.json` não vai para o Git.
     `upload-assets CaixaLoja.`;
   - ponha o ID em `AssetIds.CaixaLoja`. O servidor resolve a imagem (`ImgCaixa_<id>`) e o
     `Controllers/CaixaImagem` desenha.
+  - D-213: `-- todas --aberta` gera as duas camadas da caixa aberta (`<id>_corpo`, `<id>_tampa`),
+    no enquadramento da fechada; `--so-topo` refaz só o degradê do alto do corpo. Suba como
+    `CaixaLoja.<id>_corpo`/`_tampa`.
+  - O `upload-assets` só troca o número de chave que já existe no `AssetIds.luau`: chave nova, ponha
+    a linha (com o ID do `roblox_ids.json`) à mão.
+- Efeitos de interface (D-213, `Controllers/UiEfeitos`): as texturas saem de
+  `uv run --group arte python tools/efeitos_ui.py` (`Images.efeito_*`, atributo `Img_efeito_*`).
+  Os sons da abertura saem de `blender -b --factory-startup -P tools/sons_roleta.py -- caixa_`.
 - Imagens da loja (D-124): a imagem mostra só o que o item dá.
   1. `blender -b --factory-startup -P tools/blender/loja.py -- todas` (Blender 5.3 em
      `C:\Program Files\Blender Foundation`);
@@ -404,7 +420,7 @@ O `sourcemap.json` não vai para o Git.
 - Segredos só no `.env` (no `.gitignore`), nunca no código nem no chat.
 - ForgeGUI: nunca regenerar um job em `outcome_unknown`. "failed" com `retryable` pode ser
   retomado com `generation_retry`.
-- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-213) e atualize `PROGRESS.md`.
+- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-214) e atualize `PROGRESS.md`.
 - Tetos de triângulos por modelo: vegetação ≤ 6 mil (D-135), props e herói ≤ 20 mil (`ArtBudget`,
   conferido pelo teste da F5).
 - Commits no branch acima, com mensagem em português.

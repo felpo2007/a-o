@@ -39,6 +39,7 @@ local LobbyPalco = require(script.Parent.LobbyPalco)
 local RodaArte = require(script.Parent.RodaArte)
 local SoldierPreview = require(script.Parent.SoldierPreview)
 local ToqueUi = require(script.Parent.ToqueUi)
+local UiEfeitos = require(script.Parent.UiEfeitos)
 local UiKit = require(script.Parent.UiKit)
 
 local player = Players.LocalPlayer
@@ -967,6 +968,26 @@ end
 -- tela: quem entrega é o servidor (ProcessReceipt / posse do passe).
 local compraAtiva: Offer? = nil
 local compraGen = 0
+-- D-213: a compra que passou acende a loja: a onda e as faíscas douradas no meio da tela (só o
+-- enfeite; quem entrega é o servidor). Sem efeito com movimento reduzido.
+local function festejaCompra()
+	if UiEfeitos.calmo() or not gui.Enabled then
+		return
+	end
+	local f = Instance.new("Frame")
+	f.Name = "Festa"
+	f.BackgroundTransparency = 1
+	f.Size = UDim2.fromScale(1, 1)
+	f.ZIndex = 50
+	f.Parent = gui
+	local s = f.AbsoluteSize
+	local c = Vector2.new(s.X / 2, s.Y / 2)
+	UiEfeitos.onda(f, c, V.AMBAR, math.min(s.X, s.Y) * 0.3, 0.6, 51)
+	UiEfeitos.faiscas(f, c, V.AMBAR, 36, { vmin = 300, vmax = 900, gravidade = 700, z = 52 })
+	task.delay(2.5, function()
+		f:Destroy()
+	end)
+end
 local function fimCompra(comprado: boolean)
 	local o = compraAtiva
 	if not o then
@@ -979,6 +1000,7 @@ local function fimCompra(comprado: boolean)
 		b.erro("Compra cancelada")
 		return
 	end
+	festejaCompra()
 	local g = compraGen
 	if o.infoType == Enum.InfoType.GamePass then
 		b.enabled(false)
@@ -1173,18 +1195,7 @@ end
 -- probabilidades vêm antes de abrir ou comprar, como manda a regra das caixas). Caixa paga só
 -- aparece para quem pode comprar agora (sem vitrine do que não dá para levar, D-173).
 -- ============================================================================================
-local ACENTO_CAIXA: { [string]: Color3 } = {
-	gratuita = Color3.fromRGB(255, 158, 30),
-	recruta = Color3.fromRGB(115, 242, 89),
-	servico = Color3.fromRGB(140, 255, 140),
-	batalhao = Color3.fromRGB(89, 153, 255),
-	campanha = Color3.fromRGB(64, 242, 217),
-	veterano = Color3.fromRGB(255, 199, 64),
-	suprimentos = Color3.fromRGB(255, 128, 30),
-	especiais = Color3.fromRGB(38, 217, 255),
-	elite = Color3.fromRGB(255, 184, 46),
-	historica = Color3.fromRGB(255, 82, 51),
-}
+local ACENTO_CAIXA: { [string]: Color3 } = CaixaImagem.ACENTO
 -- definidas mais abaixo (a vitrine usa as mesmas da vitrine antiga e do mercado)
 local offers: () -> { Offer }
 local hm: (sec: number) -> string
@@ -1419,6 +1430,7 @@ pintarVitrine = function()
 			end)
 			n += 1
 			entra(b, n)
+			UiEfeitos.varre(b, 8, nil, 5, 0.7 * i) -- D-213: o brilho passando pelo item do dia
 		end
 	else
 		subMerc.Text = "O mercado abre quando o servidor mandar a lista do dia."
@@ -1502,9 +1514,24 @@ pintarVitrine = function()
 		arte.Position = UDim2.new(1, px(18, 24), 0.52, 0)
 		arte.Size = UDim2.fromOffset(math.floor(wMeio * 0.72), math.floor(wMeio * 0.72))
 		arte.Rotation = -5
+		arte.ZIndex = 2 -- na frente do halo
 		arte.Parent = b
 		CaixaImagem.desenha(arte, c.id, c.modelo)
 		flutua(arte, px(5, 7))
+		-- D-213: a luz da caixa respira atrás dela (mais forte com caixa pronta para abrir), brasas sobem
+		-- no cartão e um brilho passa por ele de tempos em tempos
+		local pronta = prontas(c) > 0
+		UiEfeitos.halo(
+			b,
+			UDim2.new(1, px(18, 24) - math.floor(wMeio * 0.36), 0.52, 0),
+			acento,
+			math.floor(wMeio * (if pronta then 1.05 else 0.85)),
+			if pronta then 0.45 else 0.7,
+			if pronta then 1.8 else 3.2,
+			1
+		)
+		UiEfeitos.brasas(b, acento, if pronta then 9 else 5, 131 * i, 2)
+		UiEfeitos.varre(b, 6, nil, 5, 1.2 * i)
 		local tags = Instance.new("Frame")
 		tags.BackgroundTransparency = 1
 		tags.Position = UDim2.fromOffset(px(14, 18), px(12, 16))
@@ -1559,9 +1586,21 @@ pintarVitrine = function()
 		arte.AnchorPoint = Vector2.new(1, 0.5)
 		arte.Position = UDim2.new(1, px(6, 8), 0.5, 0)
 		arte.Size = UDim2.fromOffset(linhaH + px(16, 20), linhaH + px(16, 20))
+		arte.ZIndex = 2
 		arte.Parent = b
 		CaixaImagem.desenha(arte, c.id, c.modelo)
 		flutua(arte, px(3, 4))
+		-- D-213: a luz da caixa atrás dela e o brilho passando pela linha (fora de fase com as outras)
+		UiEfeitos.halo(
+			b,
+			UDim2.new(1, px(6, 8) - math.floor((linhaH + px(16, 20)) / 2), 0.5, 0),
+			acento,
+			math.floor(linhaH * 1.3),
+			if prontas(c) > 0 then 0.5 else 0.75,
+			if prontas(c) > 0 then 1.8 else nil,
+			1
+		)
+		UiEfeitos.varre(b, 7.5, nil, 5, 2.5 + 0.9 * i)
 		local tg = etiqueta(b, if c.tipo == "paga" then "NA LOJA" else "GRÁTIS JOGANDO", acento, true)
 		tg.Position = UDim2.fromOffset(px(12, 16), px(10, 14))
 		-- só o nome próprio ("CAMPANHA"): a etiqueta e a imagem já dizem que é uma caixa
@@ -1703,7 +1742,9 @@ function renderConjuntos()
 		arte.Parent = f
 		local lado = math.floor(math.min(cw * 0.55, px(150, 200)))
 		for k = 1, math.min(3, #cj.itens) do
-			local box = ItemArte.desenha(arte, cj.itens[k], lado)
+			-- D-213: o uniforme vestido no soldado (os do Fundador são de pano liso: sozinhos, viravam um
+			-- quadrado de cor e pareciam sem arte)
+			local box = ItemArte.desenha(arte, cj.itens[k], lado, { soldado = true })
 			box.AnchorPoint = Vector2.new(0.5, 0.5)
 			box.Position =
 				UDim2.new(0.5, (k - 2) * math.floor(lado * 0.42), 0.5, if k == 2 then -px(8, 10) else px(10, 14))
@@ -2823,6 +2864,9 @@ CampanhaCliente.Changed:Connect(function(_s: any, result: any)
 		codigo.fim(result.ok == true, if type(result.msg) == "string" then result.msg else nil)
 	end
 	if type(result) == "table" and result.op == "market_buy" then
+		if result.ok then
+			festejaCompra()
+		end
 		Bus.fire(
 			"toast",
 			if type(result.msg) == "string" and result.msg ~= ""

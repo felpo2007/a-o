@@ -979,8 +979,33 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     - Lune 845 ok (60 arquivos), pytest 76, ruff, StyLua e luau-lsp limpos, i18n 100%. Relatório:
       `testes/LOTE97_D212_2026-11-20.md`.
     - **v130 publicada** (versão 135 do place, commit d272b10).
-    - **Próximos (pedidos de 20/11):** a animação da loja e da abertura das caixas, o pódio com zoom
-      no melhor e comemoração, e as transições.
+  - **Lote 98 (D-213): a abertura das caixas com efeitos e a loja com vida, feito.**
+    - **Abertura:** antes da roleta, a caixa cai, pousa (poeira, baque), sacode cada vez mais e
+      estoura. No estouro, a tampa voa, a caixa fica aberta com a luz de dentro, e vêm faíscas, a
+      onda e os raios. Por fim a caixa some na luz e a roleta entra.
+      - A cor é a da caixa, nunca a do item.
+      - Efeitos curtos: 0,75 s. Sem efeitos ou com movimento reduzido: direto à roleta.
+    - **Caixa aberta:** 20 camadas no Blender (corpo oco aceso e tampa), no enquadramento da fechada.
+    - **Efeitos:** `UiEfeitos` (faíscas, onda, raios, halo, cintilas, brilho, brasas, tranco), com
+      5 texturas feitas por fórmula, e 3 sons novos (pouso, tremor, estouro).
+    - **Roleta e recompensa:** o marcador acende a cada cartão e o vencedor solta faíscas. Na
+      recompensa, a luz cresce com a raridade (raios do raro para cima, brasas no épico e no
+      lendário).
+    - **Loja:** os halos das caixas respiram (mais com caixa pronta), as brasas sobem, o brilho
+      passa pelos cartões e a compra que passou acende a loja.
+    - **Fundador:** o leque dos CONJUNTOS veste o soldado; os uniformes de pano liso pareciam sem
+      arte.
+    - **Studio:** 6 aberturas gravadas em vídeo. Na Campanha: pouso 0,508 s, estouro e troca das
+      camadas 1,66 s, fim 2,48 s; a roleta parou no item do servidor; 0 erros de script.
+      - Corrigido pelo que o Studio mostrou:
+        - a caixa sumia no estouro;
+        - o clarão forte;
+        - a borda do facho;
+        - o quadro travado que pulava fase.
+      - Gancho novo: `VT65DevAbrir`.
+    - Lune 856 ok (61 arquivos), pytest 76, ruff e luau-lsp limpos, i18n 100%. Relatório:
+      `testes/LOTE98_D213_2026-11-20.md`.
+    - **Próximos (pedidos de 20/11):** o pódio com zoom no melhor e comemoração, e as transições.
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;

@@ -27,6 +27,7 @@ local UserInputService = game:GetService("UserInputService")
 
 local AssetIds = require(ReplicatedStorage.Shared.AssetIds) :: any
 local Caixas = require(ReplicatedStorage.Shared.Caixas) :: any
+local Efeitos = require(ReplicatedStorage.Shared.Efeitos)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Progression = require(ReplicatedStorage.Shared.Progression) :: any
 local Roleta = require(ReplicatedStorage.Shared.Roleta) :: any
@@ -35,6 +36,7 @@ local CaixaImagem = require(script.Parent.CaixaImagem)
 local Input = require(script.Parent.Input)
 local ItemArte = require(script.Parent.ItemArte)
 local Toast = require(script.Parent.Toast)
+local UiEfeitos = require(script.Parent.UiEfeitos)
 local UiKit = require(script.Parent.UiKit)
 
 local V, F, px = UiKit.V, UiKit.F, UiKit.px
@@ -251,7 +253,18 @@ local function carregaSons()
 	sonsCarregados = true
 	task.spawn(function()
 		local lista = {}
-		for _, k in { "roleta_tique", "roleta_parada", "roleta_revela", "roleta_raro", "roleta_lendario" } do
+		for _, k in
+			{
+				"roleta_tique",
+				"roleta_parada",
+				"roleta_revela",
+				"roleta_raro",
+				"roleta_lendario",
+				"caixa_pouso",
+				"caixa_tremor",
+				"caixa_estouro",
+			}
+		do
 			local id = AssetIds.Sounds and AssetIds.Sounds[k]
 			if type(id) == "number" and id ~= 0 then
 				local s = Instance.new("Sound")
@@ -291,6 +304,37 @@ local function tocar(chave: string, vol: number, tom: number?)
 			s:Destroy()
 		end
 	end)
+end
+
+-- D-213: as camadas da caixa aberta e as texturas dos efeitos baixam no ABRIR (antes da resposta do
+-- servidor), para estarem prontas no estouro. Só a caixa que vai abrir: cada camada pesa ~2 MB de
+-- textura.
+local preCarregadas: { [string]: boolean } = {}
+local function preCaixa(id: string)
+	if preCarregadas[id] then
+		return
+	end
+	preCarregadas[id] = true
+	local lista: { string } = {}
+	for _, camada in { "corpo", "tampa" } do
+		local img = CaixaImagem.id(id, camada)
+		if img then
+			table.insert(lista, string.format("rbxassetid://%d", img))
+		end
+	end
+	for _, nome in { "faisca", "brilho", "raio", "anel", "cintila" } do
+		local img = UiEfeitos.imagem(nome)
+		if img then
+			table.insert(lista, img)
+		end
+	end
+	if #lista > 0 then
+		task.spawn(function()
+			pcall(function()
+				ContentProvider:PreloadAsync(lista)
+			end)
+		end)
+	end
 end
 
 local SOM_RARIDADE = {
@@ -474,47 +518,34 @@ local function recompensa(panel: Frame, g: ScreenGui, res: any, item: any)
 	local card = frame(panel, UDim2.fromScale(1, 1))
 	card.Name = "Recompensa"
 	card.ClipsDescendants = true -- a luz não vaza do painel
-	-- luz da raridade: halo atrás do cartão; raios girando no épico e no lendário
+	-- D-213: a luz da raridade com os efeitos (Controllers/UiEfeitos): o halo macio respirando atrás do
+	-- cartão e os raios girando (do raro para cima). Com os efeitos desligados (ou movimento
+	-- reduzido), só o halo parado.
 	local S = px(230, 300)
-	local luz = frame(card, UDim2.fromOffset(S * 2.2, S * 2.2), rc, 0.35)
-	luz.AnchorPoint = Vector2.new(0.5, 0.5)
-	luz.Position = UDim2.new(0.5, 0, 0, px(40, 54) + S / 2)
-	UiKit.corner(luz, 999)
-	local halo = Instance.new("UIGradient")
-	halo.Transparency = NumberSequence.new({
-		NumberSequenceKeypoint.new(0, 1),
-		NumberSequenceKeypoint.new(0.5, 0.35),
-		NumberSequenceKeypoint.new(1, 1),
-	})
-	halo.Parent = luz
-	local raios: { Frame } = {}
-	if alto then
-		for k = 0, 5 do
-			local raio = frame(card, UDim2.fromOffset(S * 2.6, math.floor(S * 0.12)), rc, 0.45)
-			raio.AnchorPoint = Vector2.new(0.5, 0.5)
-			raio.Position = luz.Position
-			raio.Rotation = k * 30
-			local gr = Instance.new("UIGradient")
-			gr.Transparency = NumberSequence.new({
-				NumberSequenceKeypoint.new(0, 1),
-				NumberSequenceKeypoint.new(0.5, 0.2),
-				NumberSequenceKeypoint.new(1, 1),
-			})
-			gr.Parent = raio
-			table.insert(raios, raio)
-		end
-		local giro: RBXScriptConnection? = nil
-		giro = RunService.RenderStepped:Connect(function(dt: number)
-			if not card.Parent then
-				if giro then
-					giro:Disconnect()
-				end
-				return
-			end
-			for _, raio in raios do
-				raio.Rotation = (raio.Rotation + dt * 12) % 360
-			end
-		end)
+	local Wp = panel.Size.X.Offset
+	local cy = px(40, 54) + S / 2
+	local forca = Efeitos.FORCA[res.raridade or "comum"] or Efeitos.FORCA.comum
+	local vivo = anim ~= "sem"
+	local raro = alto or res.raridade == "raro"
+	UiEfeitos.halo(
+		card,
+		UDim2.fromOffset(Wp / 2, cy),
+		rc,
+		math.floor(S * (1.5 + forca)),
+		math.clamp(0.62 - forca * 0.3, 0.1, 0.8),
+		if vivo then 2.4 else nil,
+		1
+	)
+	if vivo and raro then
+		UiEfeitos.raios(
+			card,
+			Vector2.new(Wp / 2, cy),
+			rc,
+			math.floor(S * (2.2 + forca)),
+			if alto then 6 else 4,
+			if alto then 11 else 7,
+			1
+		)
 	end
 	local ampliado = Instance.new("Frame")
 	ampliado.Name = "Ampliado"
@@ -545,6 +576,30 @@ local function recompensa(panel: Frame, g: ScreenGui, res: any, item: any)
 	end
 	TweenService:Create(escala, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = 1 })
 		:Play()
+	-- D-213: o item aparece com faíscas e a onda na cor da raridade, cintilas no cartão, o brilho
+	-- passando por ele e, no épico e no lendário, brasas subindo
+	if vivo then
+		local centro = Vector2.new(Wp / 2, cy)
+		UiEfeitos.faiscas(card, centro, rc, Efeitos.quantas(res.raridade, anim), {
+			vmin = 240,
+			vmax = 620 + 200 * forca,
+			gravidade = 420,
+			z = 30,
+		})
+		UiEfeitos.onda(card, centro, rc, S * 0.95, 0.6, 29)
+		UiEfeitos.cintilas(ampliado, rc, if alto then 4 elseif raro then 3 else 1, nil, 32)
+		local vidro = Instance.new("Frame")
+		vidro.Name = "Vidro"
+		vidro.BackgroundTransparency = 1
+		vidro.Size = UDim2.fromScale(1, 1)
+		vidro.ClipsDescendants = true
+		vidro.ZIndex = 10
+		vidro.Parent = ampliado
+		UiEfeitos.varre(vidro, 3.2, nil, 11, 0.4)
+		if alto then
+			UiEfeitos.brasas(card, rc, 12, 77, 2)
+		end
+	end
 	local col = frame(card, UDim2.new(1, 0, 0, px(150, 200)))
 	col.AnchorPoint = Vector2.new(0, 1)
 	col.Position = UDim2.new(0, 0, 1, -px(10, 14))
@@ -596,6 +651,237 @@ local function recompensa(panel: Frame, g: ScreenGui, res: any, item: any)
 	end
 end
 
+-- D-213 (dono: "animação perfeita e realista com efeitos visuais ... para a abertura das caixas"): a
+-- caixa antes da roleta, no roteiro do Shared/Efeitos: cai do alto (baque, poeira, tranco), sacode
+-- cada vez mais (faíscas escapando pela fresta), estoura (clarão, a tampa voa, faíscas, onda e raios)
+-- e some na luz enquanto a roleta entra. A luz é a da CAIXA: o item só aparece na roleta. As duas
+-- camadas da caixa aberta (corpo e tampa) são renders do Blender no enquadramento da fechada; sem
+-- elas, a fechada some no clarão. `pulou()` corta para o fim. Devolve o palco (os raios ficam
+-- atrás da roleta até ela parar) e marca o atributo "Intro" ("feita") quando acaba.
+local function introCaixa(panel: Frame, W: number, H: number, c: any, modo: string, pulou: () -> boolean): Frame
+	local R = Efeitos.ROTEIRO[modo] or Efeitos.ROTEIRO.completa
+	local acento = CaixaImagem.ACENTO[tostring(c.id)] or V.AMBAR
+	local palco = frame(panel, UDim2.fromScale(1, 1))
+	palco.Name = "Palco"
+	palco.ClipsDescendants = true -- a caixa cai de dentro do painel
+	palco:SetAttribute("Intro", "rodando")
+	local S = math.floor(math.min(H * 0.66, W * 0.42))
+	local cx, cy = W / 2, H * 0.54
+	-- sombra no chão (cresce com a queda) e o halo da caixa
+	local sombra = UiEfeitos.halo(palco, UDim2.fromOffset(cx, cy + S * 0.34), Color3.new(0, 0, 0), S, 0.4, nil, 1)
+	sombra.Name = "Sombra"
+	sombra.Size = UDim2.fromOffset(math.floor(S * 0.95), math.floor(S * 0.24))
+	local halo = UiEfeitos.halo(palco, UDim2.fromOffset(cx, cy), acento, math.floor(S * 1.9), 0.8, 1.4, 1)
+	halo:SetAttribute("Tr", 0.8)
+	local caixa = frame(palco, UDim2.fromOffset(S, S))
+	caixa.Name = "Caixa"
+	caixa.AnchorPoint = Vector2.new(0.5, 0.5)
+	caixa.Position = UDim2.fromOffset(cx, cy)
+	caixa.ZIndex = 3
+	local esc = Instance.new("UIScale")
+	esc.Parent = caixa
+	local function camada(nome: string, id: number?, z: number): ImageLabel?
+		if not id then
+			return nil
+		end
+		local im = Instance.new("ImageLabel")
+		im.Name = nome
+		im.BackgroundTransparency = 1
+		im.AnchorPoint = Vector2.new(0.5, 0.5)
+		im.Position = UDim2.fromScale(0.5, 0.5)
+		im.Size = UDim2.fromScale(1, 1)
+		im.ScaleType = Enum.ScaleType.Fit
+		im.Image = string.format("rbxassetid://%d", id)
+		im.ZIndex = z
+		im.Parent = caixa
+		return im
+	end
+	local fechada: GuiObject = camada("Fechada", CaixaImagem.id(c.id), 2)
+		or CaixaImagem.desenha(caixa, c.id, c.modelo or "caixa_municao_us")
+	local corpo = camada("Corpo", CaixaImagem.id(c.id, "corpo"), 2)
+	local tampa = camada("Tampa", CaixaImagem.id(c.id, "tampa"), 4)
+	local aberta = corpo ~= nil and tampa ~= nil
+	-- as camadas ficam à vista e quase transparentes: escondida (ou com 1), a imagem não é desenhada e
+	-- não baixa (no Studio, a caixa sumia no estouro, e depois o IsLoaded nunca virava); o
+	-- pré-carregamento começou no ABRIR (preCaixa)
+	for _, im in { corpo, tampa } do
+		if im then
+			im.ImageTransparency = 0.98
+		end
+	end
+	local function pinta(tr: number)
+		if fechada:IsA("ImageLabel") then
+			fechada.ImageTransparency = tr
+		else
+			fechada.Visible = tr < 0.5
+		end
+		if not aberta or fechada.Visible then
+			return -- antes do estouro as camadas abertas seguem transparentes
+		end
+		if corpo then
+			corpo.ImageTransparency = tr
+		end
+		if tampa then
+			tampa.ImageTransparency = math.max(tr, tampa.ImageTransparency)
+		end
+	end
+	local t = 0
+	local feito: { [string]: boolean } = {}
+	local proxFaisca = 0
+	local piorQuadro = 0
+	local tTroca: number? = nil -- quando a fechada deu lugar às camadas abertas
+	local espera = 0 -- quanto o estouro esperou as camadas baixarem
+	-- cada fase acontece uma vez; o instante fica no painel ("Abertura_<fase>", s) para o teste no Studio
+	local function uma(nome: string): boolean
+		if feito[nome] then
+			return false
+		end
+		feito[nome] = true
+		panel:SetAttribute("Abertura_" .. nome, math.floor(t * 1000 + 0.5) / 1000)
+		return true
+	end
+	UiEfeitos.roda(function(dt: number): boolean
+		if not palco.Parent then
+			return false
+		end
+		-- um quadro travado conta no máximo 0,1 s: a abertura fica mais lenta, mas não pula fase (no
+		-- Studio, um quadro de 0,8 s passava direto do estouro para a saída)
+		t += math.min(dt, 0.1)
+		piorQuadro = math.max(piorQuadro, dt)
+		-- as camadas abertas ainda baixando: a caixa sacode mais um pouco (até 1,2 s) antes de estourar
+		if
+			aberta
+			and not feito.estouro
+			and t >= R.estouro
+			and espera < 1.2
+			and not (corpo and tampa and corpo.IsLoaded and tampa.IsLoaded)
+		then
+			espera += math.min(dt, 0.1)
+			t = R.estouro - 0.001
+		end
+		if pulou() then
+			t = math.max(t, R.fim)
+		end
+		-- queda e pouso
+		local dy = Efeitos.queda(t, R.pouso) * S
+		local sx, sy = 1, 1
+		if t >= R.pouso then
+			if uma("pouso") and R.pouso > 0 and not pulou() then
+				tocar("caixa_pouso", 0.8)
+				UiEfeitos.tremer(panel, 0.25, px(6, 8))
+				local chao = Vector2.new(cx, cy + S * 0.3)
+				local po = Color3.fromRGB(176, 160, 124)
+				for _, lado in { 0, math.pi } do
+					UiEfeitos.faiscas(palco, chao, po, 7, {
+						cone = lado - (if lado == 0 then 0.25 else -0.25),
+						abertura = 0.7,
+						vmin = 60,
+						vmax = 220,
+						gravidade = -60, -- a poeira sobe devagar
+						arrasto = 3.2,
+						tam = px(30, 40),
+						z = 5,
+					})
+				end
+			end
+			sx, sy = Efeitos.amasso(t - R.pouso)
+		end
+		-- tremor (a luz da caixa cresce; faíscas escapam pela fresta)
+		local tx, ty, giro = 0, 0, 0
+		if t >= R.tremor and t < R.estouro then
+			if uma("tremor") and not pulou() then
+				tocar("caixa_tremor", 0.7)
+			end
+			local dur = R.estouro - R.tremor
+			tx, ty, giro = Efeitos.tremor(t - R.tremor, dur, 1)
+			local u = (t - R.tremor) / dur
+			halo:SetAttribute("Tr", 0.8 - 0.45 * u)
+			if t >= proxFaisca then
+				proxFaisca = t + 0.16 - 0.1 * u
+				UiEfeitos.faiscas(
+					palco,
+					-- o ponto da fresta anda pelo tempo (nada de sorteio nesta tela)
+					Vector2.new(cx + math.sin(t * 37.1) * S * 0.3, cy - S * 0.1),
+					acento,
+					1 + math.floor(u * 3),
+					{ abertura = 0.9, vmin = 120, vmax = 320, gravidade = 380, tam = px(16, 22), z = 6 }
+				)
+			end
+		end
+		-- estouro
+		if t >= R.estouro then
+			if uma("estouro") then
+				if not pulou() then
+					tocar("caixa_estouro", 0.85)
+					-- clarão curto (no Studio, 0,7 de branco apagava a caixa abrindo)
+					UiEfeitos.clarao(panel, Color3.new(1, 1, 1), 0.35, 0.22, 40)
+					UiEfeitos.clarao(panel, acento, 0.25, 0.6, 39)
+					local boca = Vector2.new(cx, cy - S * 0.12)
+					UiEfeitos.faiscas(palco, boca, acento, Efeitos.quantas("caixa", modo), {
+						cone = -math.pi / 2,
+						abertura = math.pi * 1.3,
+						vmin = 300,
+						vmax = 880,
+						gravidade = 520,
+						z = 8,
+					})
+					UiEfeitos.onda(palco, boca, acento, S * 1.05, 0.55, 7)
+					UiEfeitos.tremer(panel, 0.35, px(10, 14))
+				end
+				UiEfeitos.raios(palco, Vector2.new(cx, cy - S * 0.15), acento, math.floor(S * 2.6), 5, 14, 2)
+				halo:SetAttribute("Tr", 0.2)
+			end
+			-- a fechada só sai quando as duas camadas abertas já baixaram (no Studio, a 1ª abertura
+			-- de uma caixa deixava o palco vazio por ~0,3 s); até a saída, senão fica a fechada
+			if aberta and fechada.Visible and corpo and tampa and corpo.IsLoaded and tampa.IsLoaded and t < R.saida then
+				fechada.Visible = false
+				corpo.ImageTransparency = 0
+				tampa.ImageTransparency = 0
+				uma("trocaCamadas")
+				tTroca = t
+			end
+			local te = t - R.estouro
+			sx, sy = Efeitos.amasso(te * 1.3)
+			local tt = tTroca
+			if tampa and tt then
+				-- o voo conta da troca (a tampa sai do lugar dela, sem salto)
+				local lx, ly, lg, ltr = Efeitos.tampa(t - tt)
+				tampa.Position = UDim2.fromScale(0.5 + lx, 0.5 + ly)
+				tampa.Rotation = lg * 0.25
+				tampa.ImageTransparency = ltr
+			end
+		end
+		-- saída: a caixa cresce um pouco e some na luz
+		local fade = 0
+		if t >= R.saida then
+			fade = math.clamp((t - R.saida) / math.max(0.01, R.fim - R.saida), 0, 1)
+			esc.Scale = 1 + 0.12 * fade
+			halo:SetAttribute("Tr", 0.2 + 0.4 * fade)
+		end
+		pinta(fade)
+		sombra.Visible = fade < 1
+		if sombra:IsA("ImageLabel") then
+			local alt = math.clamp(1 + dy / (S * 1.4), 0, 1) -- 0 no alto, 1 no chão
+			sombra.ImageTransparency = math.max(1 - (0.6 * alt) * (1 - fade), 0.4)
+		end
+		caixa.Position = UDim2.fromOffset(cx + tx * S, cy + dy + ty * S)
+		caixa.Size = UDim2.fromOffset(math.floor(S * sx), math.floor(S * sy))
+		caixa.Rotation = giro
+		if t >= R.fim then
+			caixa:Destroy()
+			sombra:Destroy()
+			uma("fim")
+			panel:SetAttribute("Abertura_PiorQuadroMs", math.floor(piorQuadro * 1000 + 0.5))
+			panel:SetAttribute("Abertura_EsperaMs", math.floor(espera * 1000 + 0.5))
+			panel:SetAttribute("Abertura_Camadas", aberta)
+			palco:SetAttribute("Intro", "feita")
+			return false
+		end
+		return true
+	end)
+	return palco
+end
+
 -- ABERTURA (D-177): roleta horizontal que para no item que o servidor JÁ gravou. Troca, compra
 -- direta, conta restrita (só Fragmentos) e efeitos desligados vão direto à recompensa (não houve
 -- sorteio para mostrar, ou o jogador não quer a animação).
@@ -641,7 +927,16 @@ local function abertura(c: any, res: any, item: any)
 	pular.button.AnchorPoint = Vector2.new(1, 0)
 	pular.button.Position = UDim2.new(1, -px(14, 20), 0, px(12, 16))
 	pular.button.Size = UDim2.fromOffset(px(110, 146), px(38, 52))
+	pular.button.ZIndex = 6 -- por cima do palco da caixa
 	UiKit.focus(panel)
+	-- D-213: a caixa estoura antes da roleta (enquanto isso a roleta é montada, escondida). Sem efeitos
+	-- ou com movimento reduzido, a roleta vem direto.
+	local palco: Frame? = nil
+	if anim ~= "sem" and not UiEfeitos.calmo() then
+		palco = introCaixa(panel, W, H, c, anim, function(): boolean
+			return skip
+		end)
+	end
 	-- a janela da faixa ocupa quase toda a largura; 5 a 7 cartões no PC, 3 no celular
 	local janelaW = W - px(32, 44)
 	local gap = px(8, 12)
@@ -656,6 +951,8 @@ local function abertura(c: any, res: any, item: any)
 	janela.AnchorPoint = Vector2.new(0.5, 0.5)
 	janela.Position = UDim2.fromScale(0.5, 0.48)
 	janela.ClipsDescendants = true
+	janela.ZIndex = 3 -- na frente dos raios da caixa
+	janela.Visible = palco == nil
 	UiKit.corner(janela, 4)
 	UiKit.edge(janela, V.LINE, 1, 0.3)
 	local y = math.floor((janelaH - cartaoH) / 2)
@@ -755,6 +1052,28 @@ local function abertura(c: any, res: any, item: any)
 	if overlays.CaixaAbertura ~= g then
 		return
 	end
+	-- D-213: espera a caixa estourar e a roleta sai da luz (cresce de 90 %)
+	local p0 = palco
+	if p0 then
+		while p0.Parent and p0:GetAttribute("Intro") ~= "feita" and not skip do
+			task.wait()
+			if overlays.CaixaAbertura ~= g then
+				return
+			end
+		end
+		janela.Visible = true
+		if not skip then
+			local ej = Instance.new("UIScale")
+			ej.Scale = 0.9
+			ej.Parent = janela
+			TweenService:Create(ej, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = 1 })
+				:Play()
+		end
+	end
+	-- o marcador acende a cada cartão que passa (o brilho apaga sozinho)
+	local acesa = UiEfeitos.halo(janela, UDim2.fromScale(0.5, 0.5), V.BRASS, math.floor(janelaH * 1.1), 1, nil, 7)
+	acesa.Name = "MarcadorLuz"
+	acesa.Size = UDim2.fromOffset(px(40, 54), math.floor(janelaH * 1.2))
 	-- a rolagem: da direita para a esquerda, desacelerando até o vencedor no marcador
 	local final = UDim2.fromOffset(px0(Roleta.POS_VENCEDOR), y)
 	local dur = Roleta.DURACAO[anim] or Roleta.DURACAO.completa
@@ -766,15 +1085,23 @@ local function abertura(c: any, res: any, item: any)
 	})
 	local ultimo = Roleta.INICIO
 	local ultimoTique = 0
-	local passo = RunService.RenderStepped:Connect(function()
+	local luzTique = 1
+	local passo = RunService.RenderStepped:Connect(function(dt: number)
 		local i = Roleta.noMarcador(faixa.Position.X.Offset, cartao, gap, janelaW)
 		if i ~= ultimo then
 			ultimo = i
+			luzTique = 0.35
 			local agora = os.clock()
 			if agora - ultimoTique > 0.045 then
 				ultimoTique = agora
 				tocar("roleta_tique", 0.28, 0.95 + rng:NextNumber() * 0.1)
 			end
+		end
+		luzTique = math.min(1, luzTique + dt * 4)
+		if acesa:IsA("ImageLabel") then
+			acesa.ImageTransparency = luzTique
+		else
+			acesa.BackgroundTransparency = math.max(0.6, luzTique)
 		end
 	end)
 	tw:Play()
@@ -821,6 +1148,21 @@ local function abertura(c: any, res: any, item: any)
 		flash.BackgroundTransparency = if forte then 0.35 else 0.7
 		TweenService:Create(flash, TweenInfo.new(if forte then 0.6 else 0.35), { BackgroundTransparency = 1 }):Play()
 	end
+	-- D-213: o cartão vencedor solta a onda e as faíscas na cor da raridade (o item já está gravado)
+	if anim ~= "sem" and not skip then
+		local meio = Vector2.new(W / 2, H * janela.Position.Y.Scale)
+		UiEfeitos.onda(panel, meio, rc, cartao * 0.95, 0.5, 30)
+		UiEfeitos.faiscas(panel, meio, rc, math.floor(Efeitos.quantas(res.raridade, anim) * 0.6), {
+			vmin = 200,
+			vmax = 640,
+			gravidade = 600,
+			z = 31,
+		})
+		UiEfeitos.cintilas(venc, rc, if forte then 3 else 1, 0.9, 12)
+		if forte then
+			UiEfeitos.tremer(panel, 0.3, px(8, 11))
+		end
+	end
 	local espera = if skip then 0.25 elseif forte then 0.9 else 0.6
 	local t1 = os.clock()
 	while os.clock() - t1 < espera do
@@ -831,6 +1173,9 @@ local function abertura(c: any, res: any, item: any)
 	end
 	tocar(SOM_RARIDADE[res.raridade or "comum"] or "roleta_revela", 0.7)
 	janela:Destroy()
+	if palco then
+		palco:Destroy() -- os raios da caixa saem; a recompensa traz a luz da raridade
+	end
 	titulo.Text = UiKit.upper(c.nome or "Caixa")
 	recompensa(panel, g, res, item)
 end
@@ -1174,7 +1519,18 @@ local function build()
 		local arte = frame(card, UDim2.fromOffset(px(140, 186), px(140, 186)))
 		arte.Name = "Arte"
 		arte.Position = UDim2.fromOffset(px(6, 8), px(5, 7))
+		arte.ZIndex = 2
 		CaixaImagem.desenha(arte, c.id, c.modelo or "caixa_municao_us")
+		-- D-213: a luz da caixa atrás da imagem
+		UiEfeitos.halo(
+			card,
+			UDim2.fromOffset(px(6, 8) + px(70, 93), px(5, 7) + px(70, 93)),
+			CaixaImagem.ACENTO[tostring(c.id)] or V.AMBAR,
+			px(170, 226),
+			0.7,
+			nil,
+			1
+		)
 		local x = px(154, 204)
 		local nm = text(card, UiKit.upper(c.nome), px(19, 26), V.TEXT, F.TITLE)
 		nm.Position = UDim2.fromOffset(x, px(8, 10))
@@ -1262,6 +1618,7 @@ refresh = function()
 end
 
 abrirGratis = function(c: any)
+	preCaixa(tostring(c.id))
 	local ok, rr = pcall(function()
 		return Net.func("Suprimento_Abrir"):InvokeServer(c.id)
 	end)
@@ -1287,6 +1644,7 @@ abrirGratis = function(c: any)
 end
 
 comprar = function(c: any)
+	preCaixa(tostring(c.id)) -- enquanto a janela de compra está aberta
 	-- o servidor confere venda ligada, temporada e PolicyService antes de abrir o prompt
 	Net.event("Suprimento_Comprar"):FireServer(c.id)
 end
@@ -1337,6 +1695,22 @@ if RunService:IsStudio() then
 	workspace:GetAttributeChangedSignal("VT65DevTela"):Connect(function()
 		if workspace:GetAttribute("VT65DevTela") == "caixas" then
 			Bus.fire("shop_open", "caixas")
+		end
+	end)
+	-- D-213: abre uma caixa grátis pelo mesmo caminho do botão ABRIR (o servidor confere bilhete ou
+	-- guardada, sorteia e grava, como no clique), sem depender do foco da loja: o controle fantasma
+	-- do MCP (D-149) trocava a aba no meio do teste. workspace "VT65DevAbrir" = "<id da caixa>".
+	workspace:GetAttributeChangedSignal("VT65DevAbrir"):Connect(function()
+		local id = workspace:GetAttribute("VT65DevAbrir")
+		if type(id) ~= "string" then
+			return
+		end
+		local s = fetch()
+		for _, c in (if s then s.caixas else {}) :: { any } do
+			if c.id == id and c.tipo == "gratuita" then
+				abrirGratis(c)
+				return
+			end
 		end
 	end)
 end

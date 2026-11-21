@@ -9,9 +9,26 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local CaixaImagem = {}
 
--- o ID da imagem da caixa, ou nil enquanto o servidor não resolveu
-function CaixaImagem.id(caixaId: string): number?
-	local v = ReplicatedStorage:GetAttribute(string.format("ImgCaixa_%s", caixaId))
+-- a luz de cada caixa (a do `acento` do caixas_loja.py): o filete e o brilho da vitrine e a luz da
+-- abertura (D-213: a abertura usa a cor da CAIXA, nunca a do item sorteado)
+CaixaImagem.ACENTO = {
+	gratuita = Color3.fromRGB(255, 158, 30),
+	recruta = Color3.fromRGB(115, 242, 89),
+	servico = Color3.fromRGB(140, 255, 140),
+	batalhao = Color3.fromRGB(89, 153, 255),
+	campanha = Color3.fromRGB(64, 242, 217),
+	veterano = Color3.fromRGB(255, 199, 64),
+	suprimentos = Color3.fromRGB(255, 128, 30),
+	especiais = Color3.fromRGB(38, 217, 255),
+	elite = Color3.fromRGB(255, 184, 46),
+	historica = Color3.fromRGB(255, 82, 51),
+} :: { [string]: Color3 }
+
+-- o ID da imagem da caixa, ou nil enquanto o servidor não resolveu. D-213: `camada` "corpo" (aberta,
+-- com a luz) ou "tampa" (solta), no mesmo enquadramento da fechada
+function CaixaImagem.id(caixaId: string, camada: string?): number?
+	local chave = if camada then string.format("%s_%s", caixaId, camada) else caixaId
+	local v = ReplicatedStorage:GetAttribute(string.format("ImgCaixa_%s", chave))
 	return if type(v) == "number" and v ~= 0 then v else nil
 end
 
