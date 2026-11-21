@@ -892,17 +892,23 @@ local function showEnd(st: any)
 		if vitoria then
 			UiEfeitos.faiscas(p.hold, meio, tone, 44, { vmin = 300, vmax = 900, gravidade = 620, z = 9 })
 			UiEfeitos.onda(p.hold, meio, tone, px(320, 440), 0.7, 8)
-			local vidro = p.box:FindFirstChild("Vidro")
+			-- o brilho num quadro irmão do tamanho da palavra: dentro do quadro dela (tamanho automático)
+			-- a faixa esticava a moldura até o botão (Studio)
+			local vidro = p.hold:FindFirstChild("Vidro") :: Frame?
 			if not vidro then
 				local fv = Instance.new("Frame")
 				fv.Name = "Vidro"
 				fv.BackgroundTransparency = 1
-				fv.Size = UDim2.fromScale(1, 1)
 				fv.ClipsDescendants = true
 				fv.ZIndex = 5
-				fv.Parent = p.box
+				fv.Parent = p.hold
 				UiEfeitos.varre(fv, 4, nil, 6)
+				vidro = fv
 			end
+			local v = vidro :: Frame
+			local tam = p.box.AbsoluteSize * escala
+			v.Size = UDim2.fromOffset(tam.X, tam.Y)
+			v.Position = UDim2.fromOffset(meio.X - tam.X / 2, meio.Y - tam.Y / 2)
 		elseif word == "DERROTA" then
 			UiEfeitos.tremer(p.hold, 0.35, px(10, 14))
 		end

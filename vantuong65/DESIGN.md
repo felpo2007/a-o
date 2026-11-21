@@ -9552,12 +9552,19 @@ melhor bem animado e podendo fazer comemoração que iremos vender comemoração
 **Testes:** `comemoracao.luau` (10: os 5 de antes e mais 5); `efeitos.luau` (12, com a varredura do
 UiKit).
 
-**Não testado (fica para quando o jogo do dono estiver fechado):**
-- a imagem da câmera perto do 1º;
-- a pose de "apresentar armas";
-- a chegada nos caixotes;
-- a prévia do ARMÁRIO;
-- com jogadores de verdade e no jogo publicado.
+**Conferido depois** (o jogo do dono fechado, no lote 100):
+- o pódio inteiro em vídeo:
+  - a cortina "FIM DA PARTIDA";
+  - os três chegando nos caixotes (a cena aberta mostra os caixotes);
+  - a câmera indo até o 1º;
+  - a faixa do melhor;
+  - o 1º com o fuzil apresentado à frente do peito e depois no alto
+  (`testes/lote99/podio_aberto_e_perto.jpg`);
+- a prévia do ARMÁRIO: o soldado do lobby de corpo inteiro, "PRÉVIA: VITÓRIA" e os 6 cartões, com os
+  braços erguidos (mãos a 12,8 studs, cabeça a 11,7) (`armario_comemoracoes.jpg`);
+- 0 erros de script (cliente e servidor).
+
+**Não testado:** com jogadores de verdade, no celular e no jogo publicado.
 
 ## D-215 — Lote 100: as transições das telas (a cortina, a palavra da vitória e o desfoque) (2026-11-21)
 
@@ -9613,6 +9620,19 @@ do lote 98 não havia nada.
 - o tempo, abaixo de 1 s;
 - as ligações e as reservas.
 
-**Não testado:** nada desta D foi visto no Studio, porque o jogo do dono estava aberto (GPU de 2 GB,
-CLAUDE.md). Fica para conferir antes de publicar: a cortina na saída da tela de entrada e nas fases
-do fim, a palavra da vitória e o desfoque.
+**Conferido no Studio** (com o jogo do dono fechado; janela de 839 × 656, em vídeo):
+- **da tela de entrada para o lobby:** a cortina cobriu, mostrou "STARLITE · OPERAÇÃO STARLITE ·
+  AGOSTO DE 1965" e saiu pela direita com as faixas, já com o lobby;
+- **fases do fim:**
+  - pódio → "VOTAÇÃO DO MAPA" → votação;
+  - → "PREPARANDO O CAMPO" → tela de preparo;
+  - → "A PARTIDA VAI COMEÇAR" → lobby (`testes/lote100/cortina_sequencia.jpg`);
+- **VITÓRIA DO USMC:** a palavra batendo, com as faíscas e a onda azuis. A faixa do brilho estava
+  dentro do quadro do título (tamanho automático) e esticava a moldura até o botão; foi para um quadro
+  irmão do tamanho da palavra (`vitoria_palavra.jpg`, já corrigido);
+- **confirmação:** o desfoque chegou a 14 e saiu ao fechar pelo VOLTAR (resposta "voltou");
+- **erros:** 0 de script (cliente e servidor; os "TexturePack" do Studio local de sempre).
+
+**Não testado:**
+- a derrota (o tranco);
+- o celular, a TV e o jogo publicado.

@@ -1006,8 +1006,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     - Lune 856 ok (61 arquivos), pytest 76, ruff e luau-lsp limpos, i18n 100%. Relatório:
       `testes/LOTE98_D213_2026-11-20.md`.
     - **v131 publicada** (versão 136 do place, commit 4fab88b).
-  - **Lote 99 (D-214): o pódio com os três e a câmera no melhor, e as comemorações como itens, feito
-    (falta ver a imagem no Studio).**
+  - **Lote 99 (D-214): o pódio com os três e a câmera no melhor, e as comemorações como itens, feito.**
     - **Pódio:** o 3º, o 2º e o 1º caem nos caixotes um depois do outro. Depois a câmera vai até o
       1º (de 31 para 16 studs), que faz a comemoração dele, e entra a faixa "★ MELHOR DA PARTIDA".
     - **Comemorações:** 6 no catálogo. Vitória e Apresentar armas são grátis; Grito de guerra,
@@ -1023,11 +1022,15 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
       - a câmera perto do 1º lida no cliente;
       - a imagem da câmera e da prévia ficou sem ver: o jogo do dono estava aberto (GPU de 2 GB) e os
         ViewportFrames pararam de desenhar.
+      - Conferido depois, com o jogo fechado:
+        - o pódio em vídeo: a chegada, a câmera até o 1º e "apresentar armas";
+        - a prévia do ARMÁRIO;
+        - 0 erros.
     - Lune 862 ok (61 arquivos), pytest 76, ruff limpo, i18n 100%. Relatório:
       `testes/LOTE99_D214_2026-11-21.md`.
     - Correção (lote 100): o "luau-lsp limpo" deste lote não valia (a saída de erro estava
       descartada). Ele acusava tipos no gesto do grito (`Comemoracao`), corrigidos no lote 100.
-  - **Lote 100 (D-215): as transições das telas, feito (falta ver no Studio e publicar 99 e 100).**
+  - **Lote 100 (D-215): as transições das telas, feito.**
     - **Análise das capturas do jogo de boxe** (o título não apareceu na web):
       - moldura fixa e só o conteúdo trocando;
       - modal sobre o fundo escurecido e desfocado;
@@ -1046,9 +1049,11 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
       `Comemoracao` (lote 99) e na `Cortina`, corrigidos. Código 0, sem diagnóstico.
     - Lune 866 ok (62 arquivos), pytest 76, ruff limpo, i18n 100%. Relatório:
       `testes/LOTE100_D215_2026-11-21.md`.
-    - **Pendente:**
-      - ver no Studio as imagens dos lotes 99 e 100 e publicar os dois;
-      - o jogo do dono estava aberto, com a GPU de 2 GB ocupada.
+    - **Studio** (com o jogo do dono fechado, em vídeo):
+      - a cortina da entrada e das quatro fases do fim;
+      - a VITÓRIA batendo (a moldura que esticava foi corrigida);
+      - o desfoque da confirmação;
+      - 0 erros de script.
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;
