@@ -20,6 +20,8 @@ local RunService = game:GetService("RunService")
 local Movement = require(ReplicatedStorage.Shared.Movement)
 local Bus = require(script.Parent.Bus)
 local Input = require(script.Parent.Input)
+local Toast = require(script.Parent.Toast)
+local UiKit = require(script.Parent.UiKit)
 local ViewMode = require(script.Parent.ViewMode)
 
 local player = Players.LocalPlayer
@@ -40,7 +42,12 @@ local function toggleView()
 	end
 	local on = not Input.settings.thirdPerson
 	Input.setSetting("thirdPerson", on)
-	Bus.fire("toast", if on then string.format("Câmera: 3ª pessoa (%s)", shoulderName()) else "Câmera: 1ª pessoa")
+	-- D-231: a confirmação vai no cartão da arma, sem aviso no meio do combate
+	Toast.show(
+		if on then string.format("Câmera: 3ª pessoa (%s)", shoulderName()) else "Câmera: 1ª pessoa",
+		"info",
+		{ key = "arma", duration = 1.6 }
+	)
 end
 Input.on("view_toggle", "press", toggleView) -- tecla O
 Input.on("view_toggle", "tap", toggleView) -- v43: direcional ↑ tocado
@@ -323,6 +330,10 @@ RunService:BindToRenderStep("VT65ThirdPerson", Enum.RenderPriority.Camera.Value 
 		aiming = aiming,
 		binoculars = binocs,
 	}, wasAiming)
+	-- D-231: "reduzir movimento" troca de vista sem a câmera viajar
+	if UiKit.Estilo.reduzMovimento() then
+		time = 0
+	end
 	alpha = Movement.viewStep(alpha, target, dt, time)
 	local a = Movement.ease(alpha)
 	ViewMode.alpha = a

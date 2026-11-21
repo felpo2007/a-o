@@ -1075,6 +1075,9 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     - Testes: Lune 893, pytest 76, autoteste 18 de 18; PC e simulador de celular.
     - Relatório: `testes/LOTE102_D222-230_2026-11-21.md`.
     - **v134 publicada** (versão 139 do place, commit a9ea2dc).
+  - **Lote 103 (D-231): jogabilidade do relatório, feito.** Aviso de limite com seta, câmera sem salto,
+    avisos com prioridade; a corrida continua com dano (medido). Relatório:
+    `testes/LOTE103_D231_2026-11-21.md`.
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;

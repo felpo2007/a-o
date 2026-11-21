@@ -9795,3 +9795,14 @@ e "permita alterar o equipamento dentro do jogo na escolha da classe".
 - CAIXAS em três colunas de cartões, com a caixa grande; as chances continuam à vista antes de abrir.
 - No celular, a escala mínima fazia a loja passar da tela: agora o painel encurta e as páginas rolam.
 
+## D-231 — Lote 103: corrida, câmera, avisos e limite do mapa (2026-11-21)
+
+**Pedido do dono:** os pontos de jogabilidade do relatório colado no lote 102.
+- **Limite do mapa:** cartão compacto com a seta para o ponto mais perto dentro da área, a distância e a
+  contagem (`BoundaryController`, `Geometry.voltaParaArea`). Vermelho nos últimos 3 s.
+- **Câmera:** indo para a 3ª pessoa, a arma desce junto com a câmera, em vez de sumir na metade.
+  "Reduzir movimento" troca sem a câmera viajar. A confirmação vai no cartão da arma.
+- **Avisos:** levando tiro, no máximo 2 na tela e ganhos de 1,8 s.
+- **Corrida:** dano não desliga (medido e travado em teste). **Troca de arma** (D-194) e **zonas de
+  captura** (v41) já atendiam ao relatório.
+

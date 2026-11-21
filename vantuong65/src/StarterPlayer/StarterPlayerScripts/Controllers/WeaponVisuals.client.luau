@@ -16,8 +16,10 @@ local GunModel = require(ReplicatedStorage.Shared.GunModel)
 local Pegada3P = require(ReplicatedStorage.Shared.Pegada3P)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Weapons = require(ReplicatedStorage.Shared.Weapons)
+local Movement = require(game:GetService("ReplicatedStorage").Shared.Movement)
 local Bus = require(script.Parent.Bus)
 local Input = require(script.Parent.Input)
+local ViewMode = require(script.Parent.ViewMode)
 -- faca, baioneta e coronhada em 1ª pessoa (D-94): módulo à parte (limite de locais deste script)
 local KnifeView = require(script.Parent.KnifeView)
 -- carta na mão (D-98): também em módulo à parte
@@ -598,6 +600,12 @@ RunService:BindToRenderStep("VT65ViewModel", Enum.RenderPriority.Camera.Value + 
 		pose *= CFrame.new(0, slap * 0.008 / M, pull * 0.012 / M)
 	end
 	pose *= Ferrolho.step(v) -- fuzil de ferrolho: a arma cede no ciclo e a peça "Ferrolho" abre e fecha
+	-- D-231: indo para a 3ª pessoa a arma desce junto com a câmera, em vez de sumir de repente na metade
+	-- da transição; voltando, ela sobe do mesmo jeito
+	local vista = smooth(ViewMode.alpha / Movement.VIEW_THRESHOLD)
+	if vista > 0.001 then
+		pose *= CFrame.new(0, -0.34 / M * vista, 0.08 / M * vista) * CFrame.Angles(math.rad(-20) * vista, 0, 0)
+	end
 	-- arremessando: a arma desce e sai da frente
 	local throwDown = if throwT0 >= 0 then smooth(((os.clock() - throwT0) / THROW_S) / 0.15) else 0
 	if throwT0 >= 0 then

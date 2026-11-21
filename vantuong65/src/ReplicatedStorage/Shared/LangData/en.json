@@ -3710,5 +3710,7 @@
  "ACESSÓRIO": "ACCESSORY",
  "Armário": "Locker",
  "CAPACETE": "HELMET",
- "Nada por aqui ainda.": "Nothing here yet."
+ "Nada por aqui ainda.": "Nothing here yet.",
+ "FORA DA ÁREA": "OUT OF BOUNDS",
+ "Volte: siga a seta · %d m": "Go back: follow the arrow · %d m"
 }

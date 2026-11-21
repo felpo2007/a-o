@@ -324,6 +324,32 @@ type Entry = {
 	cr: number,
 }
 
+-- D-231 (relatório do dono: "os avisos precisam de prioridade"): levando tiro, no máximo 2 avisos na
+-- tela, e os ganhos passam mais rápido; a mira e a ameaça ficam livres
+local SOB_FOGO_S = 6
+local MAX_SOB_FOGO = 2
+local LIFE_SOB_FOGO = 1.8
+local ultimoDano = -math.huge
+local function olhaDano(char: Model)
+	local h = char:WaitForChild("Humanoid", 8)
+	if h and h:IsA("Humanoid") then
+		local vida = h.Health
+		h.HealthChanged:Connect(function(v: number)
+			if v < vida then
+				ultimoDano = os.clock()
+			end
+			vida = v
+		end)
+	end
+end
+localPlayer.CharacterAdded:Connect(olhaDano)
+if localPlayer.Character then
+	task.spawn(olhaDano, localPlayer.Character)
+end
+local function sobFogo(): boolean
+	return os.clock() - ultimoDano < SOB_FOGO_S
+end
+
 local live: { Entry } = {} -- do mais velho para o mais novo
 local pool: { [string]: { Entry } } = { texto = {}, ganho = {} }
 local order = 0
@@ -625,7 +651,8 @@ local function push(e: Entry)
 	for _, o in live do
 		total += o.height + GAP
 	end
-	while #live > 1 and (#live > MAX or total > reach) do
+	local teto = if sobFogo() then MAX_SOB_FOGO else MAX
+	while #live > 1 and (#live > teto or total > reach) do
 		total -= live[1].height + GAP
 		dismiss(live[1], true)
 	end
@@ -747,7 +774,7 @@ function Toast.reward(caption: string, xp: number, cr: number, cur: string)
 		return
 	end
 	local key = "ganho|" .. caption .. "|" .. cur
-	local life = STYLE.recompensa.life
+	local life = if sobFogo() then LIFE_SOB_FOGO else STYLE.recompensa.life
 	local open = find(key)
 	if open and open.form == "ganho" then
 		fillGain(open, caption, open.xp + xp, open.cr + cr, cur)

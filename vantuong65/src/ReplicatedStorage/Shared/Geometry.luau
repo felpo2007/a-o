@@ -9,6 +9,15 @@ function Geometry.inBounds(b: Bounds, x: number, z: number): boolean
 	return x >= b.minX and x <= b.maxX and z >= b.minZ and z <= b.maxZ
 end
 
+-- D-231: o ponto mais perto dentro da área, `margem` studs para dentro da borda, e a distância até ele
+-- (o aviso de limite aponta para lá).
+function Geometry.voltaParaArea(b: Bounds, x: number, z: number, margem: number?): (number, number, number)
+	local m = margem or 0
+	local tx = math.clamp(x, b.minX + m, b.maxX - m)
+	local tz = math.clamp(z, b.minZ + m, b.maxZ - m)
+	return tx, tz, math.sqrt((tx - x) ^ 2 + (tz - z) ^ 2)
+end
+
 -- Ponto em polígono (lista plana x1, z1, x2, z2, ...), regra par-ímpar.
 function Geometry.pointInPolygon(poly: { number }, x: number, z: number): boolean
 	local inside = false
