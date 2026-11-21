@@ -9860,4 +9860,5 @@ mapa novo nem objetivo novo, preservando capturas, nascimentos e entradas.
 - **Piso dos sobrados:** some a partir de 90 m (`Shared/ExpansaoLod`). Móvel continua sempre visível.
 - **Custo aceito (precedente da D-169):** sem a forma calculada, o interior fica mais claro: +36% no
   térreo fechado, +39% em cima e +252% no chão do térreo aberto. À noite, +1%.
+- **Decisão do dono:** "Manter assim", depois de ver `testes/lote107/luz_antes_e_agora.jpg`.
 - **Medido:** -0,5% de chamadas de desenho sobre a v138. O ganho do SLIM não foi medido.

@@ -1106,6 +1106,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     - Desenho: -0,5% sobre a v138. **SLIM, celular e 60 jogadores continuam sem medida.**
     - Relatório: `testes/LOTE107_D235_2026-11-21.md`.
     - **v139 publicada** (versão 144 do place, commit add37b3).
+    - **Decisão do dono:** manter a arte fixa com o interior mais claro ("Manter assim").
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;
