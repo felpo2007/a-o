@@ -118,8 +118,23 @@ end
 -- Efeito final por chave: passes x kits (kits: multiplicadores ou somas que o equipamento já dá na
 -- mesma chave; hoje nenhum kit mexe nestas chaves, mas a soma fica pronta) com o teto. Para chaves
 -- de contagem devolve só a parte da vantagem (o kit soma por conta própria).
-function Vantagens.compute(passes: { [string]: boolean }?, kits: { [string]: number }?): { [string]: number }
+-- D-247: `arvore` são os efeitos ganhos jogando (Shared/Carreira), sob o mesmo teto.
+function Vantagens.compute(
+	passes: { [string]: boolean }?,
+	kits: { [string]: number }?,
+	arvore: { [string]: number }?
+): { [string]: number }
 	local r = raw(passes)
+	if arvore then
+		for k, v in arvore do
+			local d = Vantagens.KEYS[k]
+			if d and d.kind == "count" then
+				r[k] = (r[k] or 0) + v
+			elseif d then
+				r[k] = (r[k] or 1) * v
+			end
+		end
+	end
 	local out: { [string]: number } = {}
 	for k, v in r do
 		local d = Vantagens.KEYS[k]

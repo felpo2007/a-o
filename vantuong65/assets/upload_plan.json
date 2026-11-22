@@ -12472,5 +12472,173 @@
   "assetType": "Image",
   "name": "VT65 idioma auto",
   "description": "VAN TUONG 65 - bandeira da escolha de idioma (D-246)"
+ },
+ {
+  "key": "Carreira.med_purple_heart",
+  "file": "assets/ui/carreira/med_purple_heart.png",
+  "assetType": "Image",
+  "name": "VT65 carreira med_purple_heart",
+  "description": "VAN TUONG 65 - tela de carreira (D-247)"
+ },
+ {
+  "key": "Carreira.med_combat_action",
+  "file": "assets/ui/carreira/med_combat_action.png",
+  "assetType": "Image",
+  "name": "VT65 carreira med_combat_action",
+  "description": "VAN TUONG 65 - tela de carreira (D-247)"
+ },
+ {
+  "key": "Carreira.med_bronze_star",
+  "file": "assets/ui/carreira/med_bronze_star.png",
+  "assetType": "Image",
+  "name": "VT65 carreira med_bronze_star",
+  "description": "VAN TUONG 65 - tela de carreira (D-247)"
+ },
+ {
+  "key": "Carreira.med_navy_cross",
+  "file": "assets/ui/carreira/med_navy_cross.png",
+  "assetType": "Image",
+  "name": "VT65 carreira med_navy_cross",
+  "description": "VAN TUONG 65 - tela de carreira (D-247)"
+ },
+ {
+  "key": "Carreira.med_socorro",
+  "file": "assets/ui/carreira/med_socorro.png",
+  "assetType": "Image",
+  "name": "VT65 carreira med_socorro",
+  "description": "VAN TUONG 65 - tela de carreira (D-247)"
+ },
+ {
+  "key": "Carreira.med_heroi_libertacao",
+  "file": "assets/ui/carreira/med_heroi_libertacao.png",
+  "assetType": "Image",
+  "name": "VT65 carreira med_heroi_libertacao",
+  "description": "VAN TUONG 65 - tela de carreira (D-247)"
+ },
+ {
+  "key": "Carreira.med_unit_citation",
+  "file": "assets/ui/carreira/med_unit_citation.png",
+  "assetType": "Image",
+  "name": "VT65 carreira med_unit_citation",
+  "description": "VAN TUONG 65 - tela de carreira (D-247)"
+ },
+ {
+  "key": "Carreira.med_irmaos",
+  "file": "assets/ui/carreira/med_irmaos.png",
+  "assetType": "Image",
+  "name": "VT65 carreira med_irmaos",
+  "description": "VAN TUONG 65 - tela de carreira (D-247)"
+ },
+ {
+  "key": "Carreira.med_ordem_cumprida",
+  "file": "assets/ui/carreira/med_ordem_cumprida.png",
+  "assetType": "Image",
+  "name": "VT65 carreira med_ordem_cumprida",
+  "description": "VAN TUONG 65 - tela de carreira (D-247)"
+ },
+ {
+  "key": "Carreira.med_top10",
+  "file": "assets/ui/carreira/med_top10.png",
+  "assetType": "Image",
+  "name": "VT65 carreira med_top10",
+  "description": "VAN TUONG 65 - tela de carreira (D-247)"
+ },
+ {
+  "key": "Carreira.prestigio",
+  "file": "assets/ui/carreira/prestigio.png",
+  "assetType": "Image",
+  "name": "VT65 carreira prestigio",
+  "description": "VAN TUONG 65 - tela de carreira (D-247)"
+ },
+ {
+  "key": "Carreira.no_corrida",
+  "file": "assets/ui/carreira/no_corrida.png",
+  "assetType": "Image",
+  "name": "VT65 carreira no_corrida",
+  "description": "VAN TUONG 65 - tela de carreira (D-247)"
+ },
+ {
+  "key": "Carreira.no_municao",
+  "file": "assets/ui/carreira/no_municao.png",
+  "assetType": "Image",
+  "name": "VT65 carreira no_municao",
+  "description": "VAN TUONG 65 - tela de carreira (D-247)"
+ },
+ {
+  "key": "Carreira.no_forca",
+  "file": "assets/ui/carreira/no_forca.png",
+  "assetType": "Image",
+  "name": "VT65 carreira no_forca",
+  "description": "VAN TUONG 65 - tela de carreira (D-247)"
+ },
+ {
+  "key": "Carreira.no_vida",
+  "file": "assets/ui/carreira/no_vida.png",
+  "assetType": "Image",
+  "name": "VT65 carreira no_vida",
+  "description": "VAN TUONG 65 - tela de carreira (D-247)"
+ },
+ {
+  "key": "Carreira.no_mira",
+  "file": "assets/ui/carreira/no_mira.png",
+  "assetType": "Image",
+  "name": "VT65 carreira no_mira",
+  "description": "VAN TUONG 65 - tela de carreira (D-247)"
+ },
+ {
+  "key": "Carreira.no_mochila",
+  "file": "assets/ui/carreira/no_mochila.png",
+  "assetType": "Image",
+  "name": "VT65 carreira no_mochila",
+  "description": "VAN TUONG 65 - tela de carreira (D-247)"
+ },
+ {
+  "key": "Carreira.no_radio",
+  "file": "assets/ui/carreira/no_radio.png",
+  "assetType": "Image",
+  "name": "VT65 carreira no_radio",
+  "description": "VAN TUONG 65 - tela de carreira (D-247)"
+ },
+ {
+  "key": "Carreira.no_binoculo",
+  "file": "assets/ui/carreira/no_binoculo.png",
+  "assetType": "Image",
+  "name": "VT65 carreira no_binoculo",
+  "description": "VAN TUONG 65 - tela de carreira (D-247)"
+ },
+ {
+  "key": "Carreira.no_garrote",
+  "file": "assets/ui/carreira/no_garrote.png",
+  "assetType": "Image",
+  "name": "VT65 carreira no_garrote",
+  "description": "VAN TUONG 65 - tela de carreira (D-247)"
+ },
+ {
+  "key": "Carreira.no_recarga",
+  "file": "assets/ui/carreira/no_recarga.png",
+  "assetType": "Image",
+  "name": "VT65 carreira no_recarga",
+  "description": "VAN TUONG 65 - tela de carreira (D-247)"
+ },
+ {
+  "key": "Carreira.no_folego",
+  "file": "assets/ui/carreira/no_folego.png",
+  "assetType": "Image",
+  "name": "VT65 carreira no_folego",
+  "description": "VAN TUONG 65 - tela de carreira (D-247)"
+ },
+ {
+  "key": "Carreira.no_socorro",
+  "file": "assets/ui/carreira/no_socorro.png",
+  "assetType": "Image",
+  "name": "VT65 carreira no_socorro",
+  "description": "VAN TUONG 65 - tela de carreira (D-247)"
+ },
+ {
+  "key": "Carreira.retrato",
+  "file": "assets/ui/carreira/retrato.png",
+  "assetType": "Image",
+  "name": "VT65 carreira retrato",
+  "description": "VAN TUONG 65 - tela de carreira (D-247)"
  }
 ]

@@ -25,7 +25,7 @@ O perfil do jogador vive num DataStore e é gravado por transações atômicas (
 - Recompensa diária (DailyRewardService), missões, passe de temporada, mercado do dia, reforços, medalhas, códigos e placar semanal (CampanhaService).
 - Posse de Game Passes, Premium e assinatura, recibos de produtos (CommerceService).
 - Caixas de suprimentos, gratuitas e pagas, com sorteio só no servidor (CaixaService, CaixaRegras, Shared/Caixas).
-- Prestígio: não existe no código (busca sem resultado em src).
+- Carreira (D-247): nível do soldado de 1 a 55, árvore de 12 vantagens, vitrine de medalhas e prestígio (Shared/Carreira, CarreiraService, CarreiraTela). O nível sai de `xp - carreira.base`.
 
 ## Arquivos principais
 - ProfileSchema.luau: tipos do perfil, migrate, applySession, afterWrite, mergeCampaign, mergeSkins, newerDaily. Puro, testável no Lune.
@@ -71,5 +71,5 @@ tests/luau: f2, progressao, caixas, campanha, passe, skins, loja, conjuntos, arq
 
 ## Pendências
 - Ligar Caixas.PAGAS_LIGADAS e preencher os IDs das caixas depende do dono (questionário de classificação). Não verificado fora do código.
-- Sem prestígio planejado em código; confirmar com o dono antes de qualquer proposta.
+- Ajustar com jogadores a curva do nível, os créditos por nível e o bônus de prestígio (PLACEHOLDER).
 - Medir os números de equilíbrio (marcados como placeholder em Shared/Progression e Shared/Caixas).

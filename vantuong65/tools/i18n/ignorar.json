@@ -1770,7 +1770,22 @@
   "origem do comboio",
   "%.1f;%.1f",
   "conj",
-  "conj:"
+  "conj:",
+  "ativar",
+  "carreira",
+  "carreira:%d:%d",
+  "combate",
+  "especiais",
+  "limpar",
+  "nivel",
+  "passo",
+  "prestigiar",
+  "prestigio",
+  "prestigio maximo",
+  "sem pontos",
+  "suporte",
+  "todas",
+  "vão pequeno"
  ],
  "regex": [
   "^uni_[a-z_]+@[a-z0-9]+$"

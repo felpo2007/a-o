@@ -469,6 +469,33 @@ return {
 		m35 = 139647008641071,
 		peugeot403 = 78882368690368,
 	},
+	-- D-247: medalhas, prestígio e ícones da árvore (tools/blender/carreira_medalhas.py, tools/carreira_icones.py)
+	Carreira = {
+		retrato = 110523954373669,
+		med_purple_heart = 100610075745848,
+		med_combat_action = 91550261432342,
+		med_bronze_star = 137356201893997,
+		med_navy_cross = 93991455280250,
+		med_socorro = 128096101373819,
+		med_heroi_libertacao = 112096319223677,
+		med_unit_citation = 99631854104876,
+		med_irmaos = 95334373976182,
+		med_ordem_cumprida = 79557652291420,
+		med_top10 = 112849774706552,
+		prestigio = 84209132728939,
+		no_corrida = 121314689685549,
+		no_municao = 104528813403948,
+		no_forca = 116656318088503,
+		no_vida = 109618282723915,
+		no_mira = 122607338081932,
+		no_mochila = 80829100896953,
+		no_radio = 95093902256580,
+		no_binoculo = 86959828313374,
+		no_garrote = 108078770450281,
+		no_recarga = 128752997546926,
+		no_folego = 111694354705825,
+		no_socorro = 116008539450674,
+	},
 	-- D-246: bandeiras de pano da escolha de idioma (tools/blender/bandeiras_idioma.py). O
 	-- ReplicatedFirst/Bandeiras guarda uma cópia, porque roda antes de o ReplicatedStorage chegar.
 	Idiomas = {

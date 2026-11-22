@@ -77,6 +77,8 @@ Net.Events = {
 	-- campanha: missões, passe, mercado, reforços, medalhas, cartão, vantagens (2026-11-12)
 	"Campanha_State", -- s->c: estado inteiro (Controllers/CampanhaCliente); traz result do último pedido
 	"Campanha_Action", -- c->s { op, ... }: reroll, claim_mission, claim_level, claim_all, market_buy...
+	"Carreira_State", -- s->c: D-247: nível, árvore, medalhas e prestígio; traz o resultado do pedido
+	"Carreira_Action", -- c->s { op = "ativar" | "limpar" | "prestigiar", id? } (o servidor confere)
 	"Suprimento_Resultado", -- s->c resultado: caixa paga entregue (recibo gravado), para a abertura (D-173)
 	"Suprimento_Comprar", -- c->s caixaId: confere tudo no servidor e abre o prompt da caixa paga (D-173)
 	"Suprimento_Ganhou", -- s->c { caixa, nome }: caixa grátis guardada por um marco (D-174)
@@ -98,6 +100,7 @@ Net.Functions = {
 	"Daily_Get", -- caderneta de serviço (recompensa diária) do jogador
 	"Progress_Get", -- estado da progressão (o mesmo do Progress_State)
 	"Campanha_Get", -- estado da campanha (o mesmo do Campanha_State)
+	"Carreira_Get", -- D-247: estado da carreira (o mesmo do Carreira_State)
 	-- D-173: caixas de suprimentos (Controllers/CaixasTela + CaixaService; "Caixa_*" acima é a
 	-- caixa de munição do Suporte)
 	"Suprimento_Get", -- estado: bilhetes, fragmentos, caixas com as chances deste jogador, troca

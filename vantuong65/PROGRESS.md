@@ -7,7 +7,8 @@ O estado atual fica em `knowledge/01-CURRENT-STATE.md`. Este arquivo continua co
 ## Pedidos de 22/11 (D-246, em partes)
 - **Parte 1 (lote 115): feita.** Tanque, reanimação, mão solta, bots, rastejo, M16 antiga, bandeiras, moedas,
   promoção, nascer no mapa, portão, janelas, pele e capa.
-- **Falta:** progressão e vantagens, direção de arte geral, telas no estilo das imagens, Comboio e áudios.
+- **Parte 2 (lote 116, D-247): feita.** Carreira: nível 1 a 55, árvore de 12 vantagens, medalhas e prestígio.
+- **Falta:** direção de arte geral, telas no estilo das imagens, Comboio e áudios.
 
 ## Fase atual (2026-11-11, sessão 7: teste fase a fase no Studio, D-75)
 | Fase | Estado |

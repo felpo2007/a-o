@@ -27,6 +27,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
 local Calendario = require(ReplicatedStorage.Shared.Calendario)
+local Carreira = require(ReplicatedStorage.Shared.Carreira)
 local Codigos = require(ReplicatedStorage.Shared.Codigos)
 local Commerce = require(ReplicatedStorage.Shared.Commerce)
 local Front = require(ReplicatedStorage.Shared.Front)
@@ -256,7 +257,7 @@ function CampanhaService.state(p: Player): { [string]: any }?
 		medals = medals,
 		card = { emblem = c.card.emblem, title = c.card.title, medals = c.card.medals },
 		owned = c.owned, -- emblemas, títulos, cartões de abate, gestos, música (+ os de todo mundo)
-		perks = Vantagens.compute(ps),
+		perks = Vantagens.compute(ps, nil, Carreira.efeitos(prof.carreira.nos)),
 		recruit = {
 			owned = recruitOwned,
 			offer = not recruitOwned and matches < RECRUIT_OFFER_MATCHES and c.recruit.shown < RECRUIT_OFFER_MATCHES,
@@ -405,7 +406,7 @@ local function applyPasses(p: Player)
 	local c = prof.campaign
 	local ps = passes(p)
 	-- vantagens: atributos no jogador (quem aplica o efeito lê Vantagens.mult / Vantagens.extra)
-	local perks = Vantagens.compute(ps)
+	local perks = Vantagens.compute(ps, nil, Carreira.efeitos(prof.carreira.nos)) -- D-247: passes + árvore
 	for key in Vantagens.KEYS do
 		p:SetAttribute(Vantagens.attr(key), perks[key])
 	end

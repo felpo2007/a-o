@@ -442,14 +442,14 @@ local function livre(): boolean
 	return open and not busy
 end
 
-local NAV_Y, NAV_H = 512, 52
+local NAV_Y, NAV_H = 512, 43 -- D-247: cinco linhas no espaço das quatro
 item(
 	esq,
 	"ARSENAL",
 	"ARSENAL",
 	NAV_Y,
 	NAV_H,
-	40,
+	36,
 	"Equipamento por posto e créditos: o que vai no peso do seu kit.",
 	"trincheira",
 	"arsenal",
@@ -463,7 +463,7 @@ local itMissoes = item(
 	"MISSÕES",
 	NAV_Y + NAV_H,
 	NAV_H,
-	40,
+	36,
 	"Ordens do dia e da semana: XP, créditos e estrelas do passe.",
 	"riacho",
 	"missoes",
@@ -471,13 +471,28 @@ local itMissoes = item(
 		Bus.fire("missoes_open")
 	end
 )
+-- D-247 (dono: "criar sistema de progressao e de vantagens")
+item(
+	esq,
+	"CARREIRA",
+	"CARREIRA",
+	NAV_Y + 2 * NAV_H,
+	NAV_H,
+	36,
+	"Nível do soldado, árvore de vantagens, medalhas e prestígio.",
+	"posto",
+	"perfil",
+	function()
+		Bus.fire("carreira_open")
+	end
+)
 item(
 	esq,
 	"PERFIL",
 	"PERFIL",
-	NAV_Y + 2 * NAV_H,
+	NAV_Y + 3 * NAV_H,
 	NAV_H,
-	40,
+	36,
 	"Seu cartão: posto, medalhas, emblema e o placar da semana.",
 	"chuva",
 	"perfil",
@@ -489,9 +504,9 @@ item(
 	esq,
 	"TUTORIAL",
 	"COMO JOGAR",
-	NAV_Y + 3 * NAV_H,
+	NAV_Y + 4 * NAV_H,
 	NAV_H,
-	40,
+	36,
 	"Os comandos e o básico da partida, sem entrar em campo.",
 	"posto",
 	"tutorial",
@@ -501,13 +516,13 @@ item(
 )
 local descr = rotulo(esq, "", F.BODY, 17, V.DIM)
 descr.Name = "Descricao"
-descr.Position = UDim2.fromOffset(X0 + 22, NAV_Y + 4 * NAV_H + 6)
+descr.Position = UDim2.fromOffset(X0 + 22, NAV_Y + 5 * NAV_H + 3)
 descr.Size = UDim2.fromOffset(580, 26)
 descr.TextTruncate = Enum.TextTruncate.AtEnd
 local descrSeta = rotulo(esq, "▸", F.BODY_B, 16, V.AMBAR)
-descrSeta.Position = UDim2.fromOffset(X0, NAV_Y + 4 * NAV_H + 6)
+descrSeta.Position = UDim2.fromOffset(X0, NAV_Y + 5 * NAV_H + 3)
 descrSeta.Size = UDim2.fromOffset(18, 26)
-local SEP_Y = NAV_Y + 4 * NAV_H + 46
+local SEP_Y = NAV_Y + 5 * NAV_H + 36
 local reguaSecoes = regua(esq, X0, SEP_Y, 600)
 local SEC_Y, SEC_H = SEP_Y + 14, 48
 item(
@@ -860,12 +875,13 @@ do
 	ajuste(jogarTxt, { TextSize = Estilo.ts(46) })
 	ajuste(jogarSeta, { Size = UDim2.fromOffset(26, 62) })
 	ajuste(jogarSub, { Position = UDim2.fromOffset(18, 84), Size = UDim2.fromOffset(WC - 36, 28) })
-	local LINHA = 44
-	local ordem = { "ARSENAL", "MISSOES", "PERFIL", "TUTORIAL", "LOJA", "ARMARIO", "PASSE", "CONFIGURACOES" }
+	local LINHA = 39
+	local ordem =
+		{ "ARSENAL", "MISSOES", "CARREIRA", "PERFIL", "TUTORIAL", "LOJA", "ARMARIO", "PASSE", "CONFIGURACOES" }
 	for i, id in ordem do
 		for _, it in itens do
 			if it.id == id then
-				local y = TOPO + 130 + (i - 1) * LINHA + (if i > 4 then 6 else 0)
+				local y = TOPO + 130 + (i - 1) * LINHA + (if i > 5 then 6 else 0)
 				local h = if id == "CONFIGURACOES" then 36 else LINHA - 2
 				ajuste(it.b, { Position = UDim2.fromOffset(XC, y), Size = UDim2.fromOffset(WC, h) })
 				ajuste(it.linha, { Size = UDim2.fromOffset(0, h) })

@@ -41,6 +41,9 @@ ProgressionService.onRespawnCredit = nil :: ((player: Player) -> ())?
 -- semana, amigo no squad, Veterano) e o aviso de cada ganho (placar da semana)
 ProgressionService.mult = nil :: ((player: Player) -> (number, number))?
 ProgressionService.onGain = nil :: ((player: Player, xp: number, cr: number) -> ())?
+-- D-247 (CarreiraService): bônus de XP do prestígio e o aviso de que o XP mudou (paga os níveis)
+ProgressionService.multPrestigio = nil :: ((player: Player) -> number)?
+ProgressionService.onXp = nil :: ((player: Player) -> ())?
 
 local function passes(p: Player): { [string]: boolean }
 	return (CommerceService.ownership(p).passes :: any) or {}
@@ -205,6 +208,10 @@ local function add(p: Player, gx: number, gc: number, label: string, raw: boolea
 			gc = math.floor(gc * mc + 0.5)
 		end
 	end
+	local mp = ProgressionService.multPrestigio
+	if mp and not raw then
+		gx = math.floor(gx * mp(p) + 0.5)
+	end
 	if ProgressionService.onGain then
 		task.spawn(ProgressionService.onGain, p, gx, gc)
 	end
@@ -229,6 +236,9 @@ local function add(p: Player, gx: number, gc: number, label: string, raw: boolea
 		end
 	end
 	push(p, extra)
+	if ProgressionService.onXp and gx > 0 then
+		task.spawn(ProgressionService.onXp, p)
+	end
 	return gc
 end
 

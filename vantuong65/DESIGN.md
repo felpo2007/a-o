@@ -10192,3 +10192,20 @@ janelas e a capa. Progressão, direção de arte, telas, Comboio e áudios segue
   `marketing/capas/anteriores`.
 - **Medido:** Lune 989 ok, pytest 84, autoteste 18 de 18. M16 mirando: anel e massa a 0,18 px do centro.
   252 janelas marcadas: 175 passam dos dois lados, 63 de nenhum. Detalhes em `testes/LOTE115_D246_2026-11-22.md`.
+
+### D-247 — Lote 116: carreira, com nível, vantagens, medalhas e prestígio (2026-11-22)
+
+**Pedido do dono:** "criar sistema de progressao e de vantagens", com a imagem dos quatro quadros.
+- **Nível do soldado (`Shared/Carreira`):** 1 a 55, trilha separada da patente. Sai de `xp - base`, então não há
+  contador novo de XP no salvamento. O nível 55 pede 73.440 XP (passo de 300 + 40 por nível).
+- **Recompensa por nível:** 20 + 4 x nível em créditos, Caixa de Serviço a cada 10 níveis e 1 ponto a cada 4.
+  Perfil antigo entra no nível do XP que já tem, sem receber de uma vez o que passou.
+- **Árvore:** 12 vantagens em 3 linhas, cada uma pede a anterior, e redistribuir é grátis. Os efeitos passam pelo
+  mesmo teto de combate das compradas (`Vantagens.CAP`, 12%).
+- **Prestígio:** do nível 55, até 10 vezes. O nível volta a 1 e a árvore fica. Patente, créditos, XP e itens não
+  mudam. Cada prestígio dá +2% de XP (até +20%). O botão pede confirmação.
+- **Servidor (`CarreiraService`):** confere tudo, com um pedido a cada 0,3 s. Perfil ganhou `carreira`.
+- **Tela (`CarreiraTela`):** item CARREIRA no menu, com os quatro quadros em latão. Medalhas no Blender
+  (`tools/blender/carreira_medalhas.py`), ícones por código (`tools/carreira_icones.py`), em 4 idiomas.
+- **Números de design:** PLACEHOLDER até o teste com jogadores.
+- **Medido:** Lune 997 ok, pytest 84, autoteste 18 de 18. Detalhes em `testes/LOTE116_D247_2026-11-22.md`.

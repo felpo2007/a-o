@@ -26,6 +26,11 @@ local Missoes = require(
 		then (game :: any):GetService("ReplicatedStorage").Shared.Missoes
 		else "../../ReplicatedStorage/Shared/Missoes"
 ) :: any
+local Carreira = require(
+	if script
+		then (game :: any):GetService("ReplicatedStorage").Shared.Carreira
+		else "../../ReplicatedStorage/Shared/Carreira"
+) :: any
 local Medalhas = require(
 	if script
 		then (game :: any):GetService("ReplicatedStorage").Shared.Medalhas
@@ -93,6 +98,9 @@ export type Profile = {
 	-- D-173: caixas (bilhetes, fragmentos, resultados e recibos). Só muda por transação atômica
 	-- (PlayerData.transact); o salvamento comum mantém o que está gravado (CaixaRegras)
 	caixas: any,
+	-- D-247: nível do soldado, árvore de vantagens e prestígio (Shared/Carreira). Sem o campo, entra
+	-- no nível do XP que já tem, sem receber de uma vez o que passou
+	carreira: any,
 }
 
 -- ===== v4: campanha =====
@@ -316,6 +324,7 @@ function ProfileSchema.default(): Profile
 		skins = { owned = {}, on = { US = {}, VC = {} } },
 		campaign = ProfileSchema.defaultCampaign(),
 		caixas = CaixaRegras.padrao(),
+		carreira = Carreira.padrao(),
 	}
 end
 
@@ -457,6 +466,7 @@ function ProfileSchema.applySession(rec: Profile, stored: Profile, mem: Profile,
 	rec.campaign = ProfileSchema.mergeCampaign(stored.campaign, mem.campaign)
 	-- D-173: as caixas só mudam por transação atômica: vale sempre o que está gravado
 	rec.caixas = stored.caixas
+	rec.carreira = Carreira.mesclar(stored.carreira, mem.carreira) -- D-247
 	return { xp = xp, credits = credits, respawnCredits = rc }
 end
 
@@ -550,6 +560,7 @@ function ProfileSchema.migrate(raw: any): Profile
 	p.campaign = ProfileSchema.sanitizeCampaign(raw.campaign)
 	-- D-173: sem `caixas`, tudo zerado
 	p.caixas = CaixaRegras.sanear(raw.caixas)
+	p.carreira = Carreira.sanear(raw.carreira, p.xp) -- D-247
 	return p
 end
 

@@ -59,6 +59,7 @@ TeamService.start()
 MatchService.start()
 MedicalService.start()
 ProgressionService.start() -- D-72: XP, posto, créditos, equipamento liberado (depois dos ganchos)
+require(Modules:WaitForChild("CarreiraService")).start() -- D-247: nível, árvore e prestígio
 SpawnService.start()
 require(Modules:WaitForChild("NascerRetService")).iniciar(
 	SpawnService,
