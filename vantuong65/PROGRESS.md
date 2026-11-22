@@ -1156,6 +1156,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     - Testes: Lune 945, pytest 77, autoteste 18 de 18. Pegada de 3ª pessoa medida: direita 0,0 cm, esquerda até 1,0 cm.
     - **Sem teste:** recarga em vídeo na velocidade real, celular e servidor cheio.
     - Relatório: `testes/LOTE114_D242_2026-11-22.md`.
+    - **v146 publicada** (versão 151 do place, commit f65f217).
   - **Falta do pedido de 21/11:** refazer os modelos de soldados, casas e vegetação (hoje só a luz mudou) e as imagens
     de skin do catálogo.
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
