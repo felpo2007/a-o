@@ -440,6 +440,10 @@ O `sourcemap.json` não vai para o Git.
 - Emblemas (D-218): `tools/blender/emblemas.py -- todos --amostras 48`; caixa por língua (D-219):
   `tools/blender/caixas_loja.py -- todas --idiomas` (os PNG ficam fora do Git). Cenário do pódio
   (D-221): `uv run --group arte python tools/podio_fundo.py`.
+- Mira e mãos em 1ª pessoa (D-242): `adsEyeM`/`adsSobeM` na ficha (`Weapons`) e `ADS_MAO_BAIXA` no
+  `WeaponVisuals`. Para ver todas: `VT65DevArma` = id (Server) e `Aiming = true` a cada quadro (Client); a luneta
+  só abre pelo `VT65DevGranada = "mirar:<s>"`. Para olhar a 3ª pessoa, use bot ancorado do mesmo lado, senão ele
+  é abatido na foto.
 - Lampião das casas (D-241): `Shared/LampiaoInterior` (cor, força, altura), `Modules/InteriorLuz` e
   `Controllers/InteriorVivo`. Chega ao cliente depois do resto da arte, e a luz leva ~15 s para assentar:
   espere antes de fotografar.
@@ -503,7 +507,7 @@ O `sourcemap.json` não vai para o Git.
 - Segredos só no `.env` (no `.gitignore`), nunca no código nem no chat.
 - ForgeGUI: nunca regenerar um job em `outcome_unknown`. "failed" com `retryable` pode ser
   retomado com `generation_retry`.
-- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-242) e atualize `PROGRESS.md`.
+- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-243) e atualize `PROGRESS.md`.
 - Tetos de triângulos por modelo: vegetação ≤ 6 mil (D-135), props e herói ≤ 20 mil (`ArtBudget`,
   conferido pelo teste da F5).
 - Commits no branch acima, com mensagem em português.

@@ -9990,3 +9990,18 @@ skins.
   os 180 mapas de metal e aspereza, sem repintar as cores. A tinta de campo continua a mais fosca.
 - **Medido:** nas 9 vistas, o lampião soma 34 chamadas de desenho (2.656 para 2.690, +1,3%) e 0,4% de triângulos.
   Lune 940, pytest 77, autoteste 18 de 18. Detalhes em `testes/LOTE113_D241_2026-11-22.md`.
+
+## D-242 — Lote 114: mira de todas as armas, pegada, recarga e aviso falso (2026-11-22)
+
+**Pendências do pedido de 21/11:** "a mira n esta boa ainda", "ajuste a pegada nas armas" e a recarga.
+- **Mira, as 13 armas vistas no Studio:** a espingarda estava quebrada, com a mão direita no meio da tela. O olho
+  foi para a coronha (`adsEyeM` 0,30) e subiu 3 cm sobre a culatra (`adsSobeM`), e agora se vê o cano até a massa.
+  A M14 foi de 0,10 para 0,135 m, como a M16.
+- **Mão ao mirar:** a mão do punho desce (fuzil 5 cm, metralhadora 3,5, espingarda 7) e sai da frente da mira. Na
+  pistola as duas mãos continuam à vista.
+- **Pegada de 3ª pessoa, medida nas 12 armas de mão:** mão direita a 0,0 cm do punho, esquerda a até 1,0 cm do
+  apoio nos fuzis e 3,5 cm nas pistolas, onde ela abraça a outra mão de propósito. Não precisou de ajuste; os ~6 cm
+  citados nos relatórios anteriores não se confirmaram.
+- **Recarga:** a espingarda mostrava um carregador preto de fuzil na mão. Agora é um cartucho de latão.
+- **Tela de entrada:** o aviso "3 arquivos não baixaram" contava 3 entradas de id vazio. Nada deixava de baixar.
+- **Medido:** Lune 945, pytest 77, autoteste 18 de 18. Detalhes em `testes/LOTE114_D242_2026-11-22.md`.

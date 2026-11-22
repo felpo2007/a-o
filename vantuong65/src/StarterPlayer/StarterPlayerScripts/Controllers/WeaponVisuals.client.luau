@@ -48,6 +48,7 @@ local HIP = CFrame.new(0.12 / M, -0.15 / M, -0.23 / M) * CFrame.Angles(0, math.r
 -- lote 12, "mão escorregando"). Mirando, o punho fica a 53 cm.
 local HIP_PISTOL = CFrame.new(0.07 / M, -0.14 / M, -0.40 / M) * CFrame.Angles(0, math.rad(3), 0)
 local EYE_TO_SIGHT_M = 0.09 -- olho até a alça, mirando
+local ADS_MAO_BAIXA: { [string]: number } = { rifle = 0.05, mg = 0.035, shotgun = 0.07 }
 local view: Model? = nil
 local viewId: string? = nil
 local viewSight = Vector3.zero -- posição da alça no espaço da arma (punho na origem)
@@ -438,7 +439,8 @@ local function setView(id: string?)
 	local eye = m:GetAttribute("EyeM")
 	-- 2026-11-12: a ficha pode corrigir o olho (pistola e SKS mais perto; luneta no alívio de olho)
 	local eyeM = Weapons.adsEye(id) or (if type(eye) == "number" then eye else EYE_TO_SIGHT_M)
-	viewAlign = Pegada3P.mira1P(viewSight, if front then front.WorldPosition else nil, eyeM / M, k)
+	local olhoSobe = Vector3.new(0, (wp.adsSobeM or 0) / M * k, 0) -- D-242: a espingarda só tem massa
+	viewAlign = Pegada3P.mira1P(viewSight + olhoSobe, if front then front.WorldPosition else nil, eyeM / M, k)
 	viewHip = Pegada3P.quadril1P(if wp.kind == "pistol" then HIP_PISTOL else HIP, viewSight, k)
 	-- mãos, carregador e ferrolho (espaço da arma; a arma está na origem); desvios em m vezes k
 	local g = primary:FindFirstChild("Grip") :: Attachment?
@@ -666,7 +668,9 @@ RunService:BindToRenderStep("VT65ViewModel", Enum.RenderPriority.Camera.Value + 
 	-- braços (desvios das mãos do tamanho delas, D-108)
 	local rot = wcf.Rotation
 	local km = viewK / M
-	local handR = wcf * (gripL + Vector3.new(0.012, 0, 0.015) * km)
+	-- D-242: mirando, a mão do punho desce (m): perto do olho, ela cobria o terço de baixo da mira
+	local maoBaixa = (ADS_MAO_BAIXA[viewKind] or 0) * smooth(aimT)
+	local handR = wcf * (gripL + Vector3.new(0.012, -maoBaixa, 0.015 + maoBaixa * 0.4) * km)
 	-- D-238: a palma encosta no guarda-mão (a -0,025 a mão ficava solta embaixo da arma)
 	local handL = wcf * (supportL + Vector3.new(0.005, -0.012, -0.012) * km)
 	if reloading then

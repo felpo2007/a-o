@@ -1190,8 +1190,12 @@ local function preload(items: { any }, onStep: (done: number, total: number) -> 
 		pcall(function()
 			ContentProvider:PreloadAsync(batch, function(_id: string, status: Enum.AssetFetchStatus)
 				n += 1
-				if status == Enum.AssetFetchStatus.Failure then
+				-- D-242: o aviso "3 arquivos não baixaram" eram 3 entradas de id vazio, sem nada a baixar
+				if status == Enum.AssetFetchStatus.Failure and _id ~= "" then
 					failed += 1
+					-- quais falharam, para achar no Studio (atributo no próprio script)
+					local ja = script:GetAttribute("Falhas")
+					script:SetAttribute("Falhas", (if type(ja) == "string" then ja .. " " else "") .. _id)
 				end
 				onStep(done + math.min(n, #batch), total)
 			end)

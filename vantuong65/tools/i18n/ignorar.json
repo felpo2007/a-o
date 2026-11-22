@@ -1748,7 +1748,8 @@
   "Vitoria",
   "Arame",
   "Globo",
-  "^vila_casa_%d+$"
+  "^vila_casa_%d+$",
+  "tubo"
  ],
  "regex": [
   "^uni_[a-z_]+@[a-z0-9]+$"

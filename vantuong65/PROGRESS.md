@@ -1151,8 +1151,13 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     - **Não refeito:** os modelos de soldados, casas e vegetação (só a luz sobre eles) e as imagens de skin do catálogo.
     - Relatório: `testes/LOTE113_D241_2026-11-22.md`.
     - **v145 publicada** (versão 150 do place, commit 01c88ad).
-  - **Falta do pedido de 21/11:** a mira das outras armas além da M16 e da SKS, a pegada de 3ª pessoa (mãos a ~6 cm)
-    e ver na tela a recarga de espingarda, M60 e pistola.
+  - **Lote 114 (D-242): pendências do pedido de 21/11.** Mira das 13 armas conferida, espingarda e M14 corrigidas,
+    mão fora da mira, cartucho na recarga da espingarda e o aviso falso de arquivos removido.
+    - Testes: Lune 945, pytest 77, autoteste 18 de 18. Pegada de 3ª pessoa medida: direita 0,0 cm, esquerda até 1,0 cm.
+    - **Sem teste:** recarga em vídeo na velocidade real, celular e servidor cheio.
+    - Relatório: `testes/LOTE114_D242_2026-11-22.md`.
+  - **Falta do pedido de 21/11:** refazer os modelos de soldados, casas e vegetação (hoje só a luz mudou) e as imagens
+    de skin do catálogo.
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;

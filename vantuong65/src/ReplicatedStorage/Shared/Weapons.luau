@@ -50,6 +50,7 @@ export type Weapon = {
 	reloadS: number?, -- recarga desta arma (s); senão a do tipo (RELOAD_S)
 	zeros: { number }?, -- alça de mira (m); senão ZEROS
 	adsEyeM: number?, -- olho até o ponto Sight mirando (m); senão o da arte (WeaponArt.eyeM)
+	adsSobeM: number?, -- D-242: olho acima do ponto Sight (m), em arma só com massa na boca
 	maxFlightS: number?, -- voo máximo simulado (s); senão 2,5
 	armM: { number }?, -- lançador: distância de armar da espoleta (mín., máx.) em m
 	explosive: string?, -- lançador: tipo em Shared/Explosive
@@ -132,7 +133,7 @@ Weapons.list = {
 		enabled = true,
 		-- D-146 (pedido do dono: "aumente a distância da mira da M14"): olho a 10 cm da alça de anel (era
 		-- 4,5 cm, WeaponArt: o anel enchia a tela)
-		adsEyeM = 0.10,
+		adsEyeM = 0.135, -- D-242: como a M16; a 0,10 as orelhas da alça tapavam o terço de baixo da tela
 		src = {
 			adsEyeM = "PLACEHOLDER (pedido do dono: mira mais longe do olho)",
 			muzzleVelocity = "wiki:M14_rifle",
@@ -533,6 +534,10 @@ Weapons.list = {
 		effectiveM = 40,
 		damage = 12, -- por bago no tronco: 9 bagos = 108 de perto (tests/luau/classes: 1 tiro até ~10 m)
 		zeros = { 25 }, -- só a massa de latão na boca: sem alça
+		-- D-242: o rosto fica na coronha, atrás do punho. Com 0,12 m o olho caía depois da mão direita,
+		-- e ela cobria o meio da tela (visto no Studio)
+		adsEyeM = 0.30,
+		adsSobeM = 0.03, -- o olho acima da caixa da culatra: vê o cano inteiro até a massa
 		maxFlightS = 1.0,
 		src = {
 			uso = "Wikipedia 'Winchester Model 1912' (Marines: Coreia e começo do Vietnã; 6 + 1; sem "

@@ -834,11 +834,15 @@ local TAM_MAG: { [string]: Vector3 } = {
 	rifle = Vector3.new(0.13, 0.62, 0.3),
 	mg = Vector3.new(0.34, 0.42, 0.5),
 	pistol = Vector3.new(0.11, 0.38, 0.17),
+	cartucho = Vector3.new(0.12, 0.3, 0.12), -- D-242: a espingarda carrega um cartucho por vez
 }
+local COR_CARREGADOR = Color3.fromRGB(38, 38, 40)
+local COR_CARTUCHO = Color3.fromRGB(196, 150, 72) -- M19 de latão
 
 -- O carregador que a mão esquerda segura (só neste cliente, sem colisão). A malha da arma é uma peça
 -- só: a peça aparece na mão enquanto ele viaja entre a arma e a cartucheira.
-local function carregadorNaMao(char: Model, kind: string, ver: boolean)
+local function carregadorNaMao(char: Model, kind: string, ver: boolean, tipo: string?)
+	local forma = if tipo == "tubo" then "cartucho" else kind
 	local p = char:FindFirstChild("VT65CarregadorMao") :: BasePart?
 	if not p then
 		if not ver then
@@ -863,6 +867,12 @@ local function carregadorNaMao(char: Model, kind: string, ver: boolean)
 		p = n
 	end
 	local peca = p :: BasePart
+	-- a mesma peça serve à arma que o soldado pegar depois: a forma acompanha
+	if ver and peca:GetAttribute("Forma") ~= forma then
+		peca:SetAttribute("Forma", forma)
+		peca.Size = (TAM_MAG[forma] or TAM_MAG.rifle) * Pegada3P.G
+		peca.Color = if forma == "cartucho" then COR_CARTUCHO else COR_CARREGADOR
+	end
 	local alvo = if ver then 0 else 1
 	if peca.Transparency ~= alvo then
 		peca.Transparency = alvo
@@ -1037,7 +1047,7 @@ local function holdWeapon(char: Model, b: Blend, dt: number, far: boolean): Goal
 		}
 		local de, para, e, comMag = Recarga.mao(b.recargaTipo, rp)
 		leftGun = (pontos[de] or leftGun):Lerp(pontos[para] or leftGun, e)
-		carregadorNaMao(char, kind, comMag and not far)
+		carregadorNaMao(char, kind, comMag and not far, b.recargaTipo)
 	elseif busy > 0 and kind ~= "pistol" then
 		-- D-108: o carregador desce e avança com a arma maior (Pegada3P.G / L)
 		local mag = info.grip
