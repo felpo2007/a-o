@@ -71,6 +71,10 @@ repositório é de OUTRO projeto (estratégias de trade). Aqui vale este arquivo
 - Torretas do LVTP-5 (D-237): `gunner` na frente e `commander` atrás (`VehicleDrive.torretaDe`). O alvo de
   teste precisa ser um bot de verdade (clone não entra no `Combatants`), e quem atira não recebe o próprio
   `Combat_Tracer`.
+- Corrida, rastejo e recarga (D-238): `Shared/Passada3P` e `Shared/Recarga`. Para congelar a pose no Studio
+  (Client): no soldado, `VT65DevPassada` = `"c;<fase>;<m/s>"` ou `"r;<fase>"` e `VT65DevRecargaP` = fração;
+  em 1ª pessoa, `workspace.VT65DevRecarga1P` = fração. Fotografe um bot ancorado: o próprio vira com a câmera,
+  e o bot volta a ficar de pé se a postura não for regravada a cada quadro.
 - Prêmios da recompensa (D-236): `tools/blender/recompensas.py -- todas` (CPU, `VT65_CPU=1`).
 - Mira da M16 e da SKS (D-236): `uv run --group arte python tools/mira_limpa.py` move só os vértices
   da linha de visada no GLB e mantém o UV dos acabamentos.
@@ -489,7 +493,7 @@ O `sourcemap.json` não vai para o Git.
 - Segredos só no `.env` (no `.gitignore`), nunca no código nem no chat.
 - ForgeGUI: nunca regenerar um job em `outcome_unknown`. "failed" com `retryable` pode ser
   retomado com `generation_retry`.
-- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-238) e atualize `PROGRESS.md`.
+- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-239) e atualize `PROGRESS.md`.
 - Tetos de triângulos por modelo: vegetação ≤ 6 mil (D-135), props e herói ≤ 20 mil (`ArtBudget`,
   conferido pelo teste da F5).
 - Commits no branch acima, com mensagem em português.

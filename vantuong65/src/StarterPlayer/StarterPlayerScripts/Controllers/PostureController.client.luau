@@ -23,7 +23,9 @@ local ItemAnim = require(ReplicatedStorage.Shared.ItemAnim)
 local PaArte = require(ReplicatedStorage.Shared.PaArte)
 local Joints = require(ReplicatedStorage.Shared.Joints)
 local Movement = require(ReplicatedStorage.Shared.Movement)
+local Passada3P = require(ReplicatedStorage.Shared.Passada3P)
 local Pegada3P = require(ReplicatedStorage.Shared.Pegada3P)
+local Recarga = require(ReplicatedStorage.Shared.Recarga)
 local SoldierAnims = require(ReplicatedStorage.Shared.SoldierAnims)
 local Weapons = require(ReplicatedStorage.Shared.Weapons)
 local Inclinar = require(script.Parent.Inclinar)
@@ -403,6 +405,8 @@ type Blend = {
 	ads: number,
 	sprint: number,
 	prone: number,
+	recarga: number?, -- D-238: fração da recarga
+	recargaTipo: Recarga.Tipo,
 	speed: number,
 	phase: number,
 	yaw: number?,
@@ -431,6 +435,8 @@ local function newBlend(): Blend
 		ads = 0,
 		sprint = 0,
 		prone = 0,
+		recarga = nil,
+		recargaTipo = "caixa",
 		speed = 0,
 		phase = 0,
 		yaw = nil,
@@ -787,8 +793,31 @@ local function gunState(char: Model, b: Blend, dt: number, kind: string, info: G
 	s.ads = b.ads
 	s.sprint = b.sprint
 	s.prone = b.prone
+	local vivo = Passada3P.vivo[char]
+	if vivo then
+		s.crawl, s.braco = vivo.rastejo, vivo.braco
+	end
 	local rl = char:GetAttribute("VT65Recarga")
 	s.busy = if type(rl) == "number" then math.clamp(rl, 0, 1) else 0
+	-- D-238: a recarga vista por todos (jogadores e bots), pelo relógio do servidor
+	local devP = char:GetAttribute("VT65DevRecargaP")
+	local rp = if type(devP) == "number"
+		then devP
+		else Recarga.progresso(
+			char:GetAttribute("VT65RecargaIni"),
+			char:GetAttribute("VT65RecargaDur"),
+			workspace:GetServerTimeNow()
+		)
+	b.recarga = rp
+	if rp then
+		local arma = char:FindFirstChild("Weapon")
+		local id = arma and arma:GetAttribute("WeaponId")
+		local ficha = if type(id) == "string" then Weapons.get(id) else nil
+		local tipo = Recarga.tipo(if ficha then ficha.feed else nil, kind)
+		b.recargaTipo = tipo
+		s.busy = math.max(s.busy, Recarga.envelope(rp))
+		s.rlArfa, s.rlRola, s.rlSobe, s.rlRecua = Recarga.arma(tipo, rp)
+	end
 	s.rear = info.rear
 	s.moving = math.clamp(b.speed / 14 * 1.4, 0, 1)
 	s.swing = math.sin(b.phase)
@@ -797,6 +826,47 @@ local function gunState(char: Model, b: Blend, dt: number, kind: string, info: G
 	s.yawRate = b.yawRate
 	s.kick = if since < 0.5 then math.exp(-since * 16) else 0
 	return s
+end
+
+-- D-238: cartucheira na cintura, do lado esquerdo (espaço do UpperTorso)
+local BOLSA_UT = Vector3.new(-0.62, -0.92, -0.42) * Corpo.BLOCK_SCALE
+local TAM_MAG: { [string]: Vector3 } = {
+	rifle = Vector3.new(0.13, 0.62, 0.3),
+	mg = Vector3.new(0.34, 0.42, 0.5),
+	pistol = Vector3.new(0.11, 0.38, 0.17),
+}
+
+-- O carregador que a mão esquerda segura (só neste cliente, sem colisão). A malha da arma é uma peça
+-- só: a peça aparece na mão enquanto ele viaja entre a arma e a cartucheira.
+local function carregadorNaMao(char: Model, kind: string, ver: boolean)
+	local p = char:FindFirstChild("VT65CarregadorMao") :: BasePart?
+	if not p then
+		if not ver then
+			return
+		end
+		local hand = char:FindFirstChild("LeftHand") :: BasePart?
+		if not hand then
+			return
+		end
+		local n = Instance.new("Part")
+		n.Name = "VT65CarregadorMao"
+		n.Size = (TAM_MAG[kind] or TAM_MAG.rifle) * Pegada3P.G
+		n.Material = Enum.Material.Metal
+		n.Color = Color3.fromRGB(38, 38, 40)
+		n.CanCollide, n.CanQuery, n.CanTouch, n.CastShadow, n.Massless = false, false, false, false, true
+		local solda = Instance.new("Weld")
+		solda.Part0 = hand
+		solda.Part1 = n
+		solda.C0 = CFrame.new(0, -0.32 * Pegada3P.G, 0) * CFrame.Angles(math.rad(12), 0, 0)
+		solda.Parent = n
+		n.Parent = char
+		p = n
+	end
+	local peca = p :: BasePart
+	local alvo = if ver then 0 else 1
+	if peca.Transparency ~= alvo then
+		peca.Transparency = alvo
+	end
 end
 
 -- Arma nas mãos de um soldado (PreSimulation). Devolve os alvos das mãos (espaço da UT).
@@ -947,12 +1017,35 @@ local function holdWeapon(char: Model, b: Blend, dt: number, far: boolean): Goal
 	end
 	local busy = s.busy
 	local lw = 1
-	if busy > 0 and kind ~= "pistol" then
+	local rp = b.recarga
+	local temCarregador = kind ~= "launcher"
+	if rp and temCarregador then
+		-- D-238: a mão esquerda segue a sequência (Shared/Recarga): carregador, cartucheira, tapa, ferrolho
+		local G, L = Pegada3P.G, Pegada3P.L
+		local mag = info.grip
+			+ (if kind == "pistol" then Vector3.new(0, -0.24 * G, 0) else Vector3.new(0, -0.3 * G, -0.35 * L))
+		local topo = info.grip
+			+ (if kind == "pistol" then Vector3.new(0, 0.22 * G, 0.04) else Vector3.new(-0.1 * G, 0.34 * G, -0.08 * L))
+		local pontos: { [string]: Vector3 } = {
+			apoio = leftGun,
+			carregador = mag,
+			abaixo = mag + Vector3.new(-0.08 * G, -0.44 * G, 0.05 * L),
+			tapa = mag + Vector3.new(0, -0.06 * G, 0),
+			bolsa = hold:PointToObjectSpace(BOLSA_UT),
+			alavanca = topo,
+			alavancaAtras = topo + Vector3.new(0, 0, 0.2 * L),
+		}
+		local de, para, e, comMag = Recarga.mao(b.recargaTipo, rp)
+		leftGun = (pontos[de] or leftGun):Lerp(pontos[para] or leftGun, e)
+		carregadorNaMao(char, kind, comMag and not far)
+	elseif busy > 0 and kind ~= "pistol" then
 		-- D-108: o carregador desce e avança com a arma maior (Pegada3P.G / L)
 		local mag = info.grip
 			+ Vector3.new(0, (-0.3 - 0.12 * math.abs(math.sin(os.clock() * 5))) * Pegada3P.G, -0.35 * Pegada3P.L)
 		leftGun = leftGun:Lerp(mag, smooth(busy))
+		carregadorNaMao(char, kind, false)
 	else
+		carregadorNaMao(char, kind, false)
 		local ikL = hum:FindFirstChild("VT65IK_L") :: IKControl?
 		lw = if ikL then ikL.Weight else 1
 	end

@@ -587,8 +587,15 @@ end
 -- D-77/D-79: bot arremessa (FieldService.throwFrom) num alvo a 25 m: o braço gira (atributo
 -- Throwing), a granada sai e cai perto do alvo. É desarmada antes de explodir (não fere ninguém).
 local function botGrenade(): (string, string?)
-	local list = bots("US")
-	local e = list[1]
+	-- D-238: um bot a pé (sentado num blindado andando, a granada cai no teto e viaja com ele)
+	local e = nil
+	for _, c in bots("US") do
+		local h = Combatants.humanoid(c)
+		if h and h.SeatPart == nil then
+			e = c
+			break
+		end
+	end
 	local root = e and Combatants.root(e)
 	local folder = workspace:FindFirstChild("Granadas")
 	if not (e and root and folder) then
@@ -649,7 +656,16 @@ local function vehicles(): (string, string?)
 				seated += 1
 			end
 			local pp = m.PrimaryPart
-			local driven = seat and (seat :: any).Occupant ~= nil
+			-- D-238: quem dirige é o lugar "driver" (o primeiro assento achado pode ser o de um passageiro)
+			local driven = false
+			for _, d in m:GetDescendants() do
+				if d:IsA("Seat") or d:IsA("VehicleSeat") then
+					local id = d:GetAttribute("SeatId")
+					if (id == "driver" or id == nil) and (d :: any).Occupant ~= nil then
+						driven = true
+					end
+				end
+			end
 			if pp and not driven and pp.AssemblyLinearVelocity.Magnitude * M > 1 then
 				moving += 1
 			end

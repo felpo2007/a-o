@@ -9918,3 +9918,22 @@ avançar, duas torretas no LVTP-5, bots sem prender no arame e sem chão branco.
 - **Chão branco:** textura de terra neutralizada (`dirt_floor_neutro`) e `Ground` mais escuro.
 - **Medido:** autoteste 18 de 18, Lune 920, pytest 77; 1 de 82 bots parado 12 s ou mais junto do arame
   (pior caso 16 s, saiu sozinho). Detalhes e o que ficou sem teste em `testes/LOTE109_D237_2026-11-21.md`.
+
+## D-238 — Lote 110: corrida, rastejo, recarga, pegada e mira da M16 (2026-11-21)
+
+**Pedido do dono (2º de 4 lotes):** corrida sem saltitar, rastejo realista, recarga "perfeita e sensacional",
+pegada nas armas e a mira que "não está boa ainda".
+- **Causa do saltitar:** o clipe `correr` sobe e desce a bacia 46 cm e, nas velocidades do jogo, toca a 4,9
+  passos/s. **`Shared/Passada3P`:** cadência de 1,81 + 0,253 · v (3,0 passos/s no trote, 3,6 na corrida), o pé
+  apoiado anda na velocidade do corpo e o IK de dois ossos acha quadril e joelho. A perna do boneco tem só
+  0,70 m, então o tempo de apoio sai do que ela alcança. O `SoldierAnimations` aplica por cima dos clipes.
+- **Rastejo:** 1,3 m por ciclo, joelho aberto no plano do chão e cotovelo contrário. A Root fica na média
+  lenta do clipe, que guarda a altura do corpo deitado. A arma acompanha o braço (`Pegada3P`, `crawl`).
+- **Recarga (`Shared/Recarga`):** sequências de carregador, cinta e tubo. O servidor grava `VT65RecargaIni` e
+  `VT65RecargaDur` no soldado (jogador e bot), e cada cliente calcula o mesmo instante. A peça
+  `VT65CarregadorMao` é só local, porque a malha da arma é uma peça única.
+- **1ª pessoa:** a arma deita para a direita, com o encaixe virado para a mão, e o carregador tem latão e base.
+- **Mira da M16:** `adsEyeM` de 0,09 para 0,135. **Pegada:** palma esquerda encostada no guarda-mão.
+- **Autoteste:** a granada usa um bot a pé e a checagem de veículos olha o lugar do motorista.
+- **Medido:** Lune 928, pytest 77, autoteste 18 de 18; bacia de 6,1 a 12,9 cm em 6 bots correndo na partida
+  (na conta, 4,5 a 6 cm). Detalhes e o que ficou sem teste em `testes/LOTE110_D238_2026-11-21.md`.

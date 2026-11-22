@@ -1740,7 +1740,10 @@
   "%s|%.1f|%.1f",
   "^([pe])%d+$",
   "baque",
-  "dor"
+  "dor",
+  "Cartuchos",
+  "^(%a);([%d.]+);?([%d.]*)$",
+  "rastejar"
  ],
  "regex": [
   "^uni_[a-z_]+@[a-z0-9]+$"

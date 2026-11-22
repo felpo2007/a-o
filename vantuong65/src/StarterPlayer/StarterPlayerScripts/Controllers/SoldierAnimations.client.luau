@@ -37,6 +37,7 @@ local RunService = game:GetService("RunService")
 local ItemAnim = require(ReplicatedStorage.Shared.ItemAnim)
 local Joints = require(ReplicatedStorage.Shared.Joints)
 local Melee = require(ReplicatedStorage.Shared.Melee)
+local Passada3P = require(ReplicatedStorage.Shared.Passada3P)
 local SoldierAnims = require(ReplicatedStorage.Shared.SoldierAnims)
 local Bus = require(script.Parent.Bus)
 
@@ -593,6 +594,12 @@ type Watch = {
 	rest: { [string]: CFrame },
 	crouch: { AnimationTrack },
 	loco: { AnimationTrack },
+	run: { AnimationTrack }, -- D-238: trote e correr (as pernas saem do Passada3P)
+	crawl: { AnimationTrack }, -- D-238: rastejar
+	geo: Passada3P.Geo?,
+	fase: number, -- ciclos da passada
+	veloc: number, -- m/s, suavizada
+	baseDeitado: CFrame?, -- média lenta da Root do clipe deitado (o clipe guarda a altura do corpo)
 	stanceOf: { [AnimationTrack]: string },
 	reload: AnimationTrack?,
 	throw: AnimationTrack?,
@@ -623,6 +630,12 @@ local function newWatch(m: Model): Watch?
 		rest = {},
 		crouch = {},
 		loco = {},
+		run = {},
+		crawl = {},
+		geo = nil,
+		fase = 0,
+		veloc = 0,
+		baseDeitado = nil,
 		stanceOf = {},
 		reload = nil,
 		throw = nil,
@@ -667,6 +680,8 @@ local function scan(w: Watch)
 	w.animator = animator
 	table.clear(w.crouch)
 	table.clear(w.loco)
+	table.clear(w.run)
+	table.clear(w.crawl)
 	table.clear(w.stanceOf)
 	table.clear(w.knife)
 	w.reload, w.throw = nil, nil
@@ -680,6 +695,11 @@ local function scan(w: Watch)
 			if c.layer == "loco" then
 				table.insert(w.loco, tr)
 				w.stanceOf[tr] = c.stance
+				if name == "trote" or name == "correr" then
+					table.insert(w.run, tr)
+				elseif name == "rastejar" then
+					table.insert(w.crawl, tr)
+				end
 				if c.stance == "crouch" then
 					table.insert(w.crouch, tr)
 				end
@@ -790,6 +810,158 @@ local function legYaw(w: Watch, dt: number, locoW: number)
 	end
 end
 
+-- ===== D-238: corrida e rastejo pelo caminho do pé (Shared/Passada3P) =====
+local function c1Of(j: Instance): CFrame?
+	if j:IsA("Motor6D") then
+		return j.C1
+	elseif j:IsA("AnimationConstraint") then
+		local a = j.Attachment1
+		return if a then a.CFrame else nil
+	end
+	return nil
+end
+
+-- medidas da perna no próprio boneco (a junta guarda onde cada osso começa e termina)
+local function geoDe(w: Watch): Passada3P.Geo?
+	if w.geo then
+		return w.geo
+	end
+	local root = joint(w, "Root")
+	local hip, hipC0 = joint(w, "RightHip")
+	local knee, kneeC0 = joint(w, "RightKnee")
+	local ankle, ankleC0 = joint(w, "RightAnkle")
+	local foot = w.model:FindFirstChild("RightFoot") :: BasePart?
+	if not (root and hip and hipC0 and knee and kneeC0 and ankle and ankleC0 and foot) then
+		return nil
+	end
+	local rootC1, hipC1, kneeC1, ankleC1 = c1Of(root), c1Of(hip), c1Of(knee), c1Of(ankle)
+	if not (rootC1 and hipC1 and kneeC1 and ankleC1) then
+		return nil
+	end
+	w.geo = Passada3P.geo(
+		(kneeC0.Position - hipC1.Position).Magnitude,
+		(ankleC0.Position - kneeC1.Position).Magnitude,
+		ankleC1.Y + foot.Size.Y / 2,
+		rootC1.Y - hipC0.Y
+	)
+	return w.geo
+end
+
+local function mistura(w: Watch, nome: string, alvo: CFrame, k: number)
+	local j = joint(w, nome)
+	if j then
+		setTransform(j, if k >= 0.999 then alvo else getTransform(j):Lerp(alvo, k))
+	end
+end
+
+local function pernaCorrida(w: Watch, lado: string, p: Passada3P.Perna, k: number)
+	mistura(w, lado .. "Hip", CFrame.Angles(p.quadril, 0, 0), k)
+	mistura(w, lado .. "Knee", CFrame.Angles(p.joelho, 0, 0), k)
+	mistura(w, lado .. "Ankle", CFrame.Angles(p.tornozelo, 0, 0), k)
+end
+
+local function poseCorrida(w: Watch, fase: number, v: number, k: number)
+	local geo = geoDe(w)
+	if not geo then
+		return
+	end
+	local pose = Passada3P.pose(fase, v, geo)
+	mistura(w, "Root", CFrame.new(0, pose.y, 0) * CFrame.Angles(-pose.inclina, pose.giro, pose.rolo), k)
+	mistura(w, "Waist", CFrame.Angles(0, -pose.giro, -pose.rolo * 0.6), k)
+	mistura(w, "Neck", CFrame.identity, k * 0.8)
+	pernaCorrida(w, "Left", pose.E, k)
+	pernaCorrida(w, "Right", pose.D, k)
+end
+
+local function pernaRastejo(w: Watch, lado: string, p: Passada3P.RastejoPerna, k: number)
+	mistura(
+		w,
+		lado .. "Hip",
+		CFrame.Angles(p.dobra, 0, 0) * CFrame.Angles(0, 0, p.abre) * CFrame.Angles(0, p.gira, 0),
+		k
+	)
+	mistura(w, lado .. "Knee", CFrame.Angles(p.joelho, 0, 0), k)
+	mistura(w, lado .. "Ankle", CFrame.Angles(p.tornozelo, 0, 0), k)
+end
+
+local function poseRastejo(w: Watch, fase: number, k: number, dt: number)
+	local r = Passada3P.rastejo(fase)
+	-- a Root do clipe traz a altura do corpo deitado: fica a média dela, sem o balanço rápido do clipe
+	local rootJ = joint(w, "Root")
+	if rootJ then
+		local atual = getTransform(rootJ)
+		local base = (w.baseDeitado or atual):Lerp(atual, 1 - math.exp(-dt / 0.6))
+		w.baseDeitado = base
+		-- deitado, o Y da Root corre ao longo do corpo e o Z sai do chão
+		mistura(w, "Root", base * CFrame.Angles(0, r.rolo, r.guinada), k)
+	end
+	mistura(w, "Waist", CFrame.Angles(0, -r.rolo * 1.4, -r.guinada * 1.2), k)
+	pernaRastejo(w, "Left", r.E, k)
+	pernaRastejo(w, "Right", r.D, k)
+	local vivo = Passada3P.vivo[w.model]
+	if not vivo then
+		vivo = { rastejo = 0, braco = 0 }
+		Passada3P.vivo[w.model] = vivo
+	end
+	vivo.rastejo, vivo.braco = k, r.braco
+end
+
+-- Studio: o atributo "VT65DevPassada" no soldado (o próprio vira com a câmera: fotografe um bot) =
+-- "c;<fase>;<m/s>" (corrida) ou "r;<fase>" (rastejo) congela a pose
+local function passadaDev(w: Watch): boolean
+	if not RunService:IsStudio() then
+		return false
+	end
+	local v = w.model:GetAttribute("VT65DevPassada")
+	if type(v) ~= "string" then
+		return false
+	end
+	local tipo, a, b = string.match(v, "^(%a);([%d.]+);?([%d.]*)$")
+	local fase = tonumber(a)
+	if tipo == "c" and fase then
+		poseCorrida(w, fase, tonumber(b) or 5, 1)
+		return true
+	elseif tipo == "r" and fase then
+		poseRastejo(w, fase, 1, 1 / 60)
+		return true
+	end
+	return false
+end
+
+local function passada(w: Watch, dt: number)
+	if passadaDev(w) then
+		return
+	end
+	local kc, kr = math.clamp(playing(w.run), 0, 1), math.clamp(playing(w.crawl), 0, 1)
+	if kr < 0.01 then
+		local vivo = Passada3P.vivo[w.model]
+		if vivo then
+			vivo.rastejo = 0 -- a arma volta à pega de deitado
+		end
+	end
+	if kc < 0.01 and kr < 0.01 then
+		w.veloc = 0
+		return
+	end
+	local vel = w.root.AssemblyLinearVelocity
+	local d = drivers[w.model]
+	if d and d.bot and d.vel.Magnitude > Vector3.new(vel.X, 0, vel.Z).Magnitude then
+		vel = d.vel
+	end
+	local plano = Vector3.new(vel.X, 0, vel.Z)
+	local speed = plano.Magnitude * M
+	w.veloc += (speed - w.veloc) * (1 - math.exp(-dt / 0.12))
+	local _, tras = SoldierAnims.legYaw(yawOf(w.root.CFrame.LookVector), yawOf(plano), speed)
+	local sinal = if tras then -1 else 1
+	if kr > kc then
+		w.fase = (w.fase + sinal * Passada3P.ciclosRastejo(w.veloc) * dt) % 1
+		poseRastejo(w, w.fase, kr, dt)
+	else
+		w.fase = (w.fase + sinal * Passada3P.ciclos(w.veloc) * dt) % 1
+		poseCorrida(w, w.fase, w.veloc, kc)
+	end
+end
+
 -- recarga solta a mão esquerda do fuzil; o arremesso e a faca, a direita
 local function ikWeights(w: Watch)
 	local rw = if w.reload and w.reload.IsPlaying then w.reload.WeightCurrent else 0
@@ -838,6 +1010,7 @@ local function post(w: Watch, dt: number)
 		cancelC0(w, "RightShoulder")
 	end
 	if locoW > 0 then
+		passada(w, dt) -- D-238: antes das correções, que somam por cima
 		rootFix(w, byStance)
 		legYaw(w, dt, locoW)
 	else

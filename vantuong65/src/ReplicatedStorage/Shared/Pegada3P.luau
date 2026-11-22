@@ -157,6 +157,12 @@ export type State = {
 	breath: number, -- s (relógio da respiração)
 	yawRate: number, -- rad/s: o corpo virando (a arma atrasa)
 	kick: number, -- 0..1: coice do tiro
+	crawl: number, -- 0..1: rastejando (D-238)
+	braco: number, -- −1..1: cotovelo que puxa no rastejo
+	rlArfa: number, -- graus: a arma na recarga (Shared/Recarga)
+	rlRola: number,
+	rlSobe: number, -- studs
+	rlRecua: number,
 }
 
 function Pegada3P.state(kind: string?): State
@@ -174,6 +180,12 @@ function Pegada3P.state(kind: string?): State
 		breath = 0,
 		yawRate = 0,
 		kick = 0,
+		crawl = 0,
+		braco = 0,
+		rlArfa = 0,
+		rlRola = 0,
+		rlSobe = 0,
+		rlRecua = 0,
 	}
 end
 
@@ -210,7 +222,14 @@ function Pegada3P.gun(torso: CFrame, s: State): CFrame
 			math.rad(32) * sp + math.rad(P.pump) * s.swing * s.moving * sp
 		)
 	local R = Pegada3P.RELOAD
-	local reload = CF.new(v(R.pos, S * busy)) * rot(R.rot, busy)
+	local reload = CF.new(v(R.pos, S * busy))
+		* rot(R.rot, busy)
+		* CF.new(0, s.rlSobe * (1 - p), s.rlRecua * (1 - p))
+		* CF.Angles(math.rad(s.rlArfa) * (1 - p), 0, math.rad(s.rlRola) * (1 - p))
+	-- D-238: rastejando, a arma vai sobre os antebraços e acompanha o cotovelo que puxa
+	local cr = math.clamp(s.crawl, 0, 1) * p
+	local crawl = CF.new(0.1 * S * s.braco * cr, -0.08 * S * cr, (0.04 + 0.09 * (1 - math.abs(s.braco))) * S * cr)
+		* CF.Angles(math.rad(-5) * cr, math.rad(9) * s.braco * cr, math.rad(13) * s.braco * cr)
 	local k = math.clamp(s.kick, 0, 1)
 	local kick = CF.new(0, 0.02 * S * k, 0.14 * S * k) * CF.Angles(math.rad(5) * k, 0, 0)
 	if Pegada3P.tubo(s) then
@@ -233,6 +252,7 @@ function Pegada3P.gun(torso: CFrame, s: State): CFrame
 		* lowered
 		* port
 		* reload
+		* crawl
 		* life
 		* kick
 		* CF.new(0, -Pegada3P.BUTT_DY * Pegada3P.G, -math.max(s.rear, 0.3))

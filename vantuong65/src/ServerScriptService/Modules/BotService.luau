@@ -1108,7 +1108,14 @@ local function startReload(bot: Bot, now: number)
 		bot.dryAt = nil
 	end
 	-- mesma recarga do jogador (Weapons.reloadTime; 2026-11-13 ficou mais curta, fuzil 2,4 s)
-	bot.reloadUntil = now + Weapons.reloadTime(bot.weapon, nil, bot.mag, bot.spare)
+	local durRecarga = Weapons.reloadTime(bot.weapon, nil, bot.mag, bot.spare)
+	bot.reloadUntil = now + durRecarga
+	local corpoBot = bot.model
+	if corpoBot then
+		-- D-238: o bot agora mostra a recarga (Shared/Recarga, no PostureController de cada cliente)
+		corpoBot:SetAttribute("VT65RecargaDur", durRecarga)
+		corpoBot:SetAttribute("VT65RecargaIni", workspace:GetServerTimeNow())
+	end
 	if bot.weapon.feed == "tube" then
 		local n = Weapons.tubeShells(bot.weapon, bot.mag, bot.spare)
 		bot.spare -= n

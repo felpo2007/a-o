@@ -807,6 +807,10 @@ function CombatService.start()
 			rec.mag += n
 		end
 		rec.reloadUntil, rec.reloadT0, rec.reloadK = 0, nil, nil
+		local corpo = player.Character
+		if corpo then
+			corpo:SetAttribute("VT65RecargaIni", nil) -- D-238: a recarga vista pelos outros para aqui
+		end
 		sendAmmo(player, rec)
 	end
 
@@ -827,6 +831,12 @@ function CombatService.start()
 		local dur = Weapons.reloadTime(wp, k, rec.mag, rec.spare)
 		local untilT = os.clock() + dur
 		rec.reloadUntil, rec.reloadT0, rec.reloadK = untilT, os.clock(), k
+		local corpo = player.Character
+		if corpo then
+			-- D-238: todo cliente anima a mesma recarga (Shared/Recarga)
+			corpo:SetAttribute("VT65RecargaDur", dur)
+			corpo:SetAttribute("VT65RecargaIni", workspace:GetServerTimeNow())
+		end
 		task.delay(dur, function()
 			-- D-194: cancelada no meio (ou outra depois dela) não completa
 			if recFor(player, rec.weapon) == rec and rec.reloadUntil == untilT then

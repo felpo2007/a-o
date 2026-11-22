@@ -213,6 +213,36 @@ local function magPart(kind: string): BasePart
 	p.Material = Enum.Material.Metal
 	p.Color = STEEL
 	p.Size = (MAG_SIZE[kind] or MAG_SIZE.rifle) * viewK / M
+	-- D-238: carregador de verdade: cartuchos de latão em cima e a base mais larga embaixo
+	local function peca(nome: string, cor: Color3, tam: Vector3, y: number, mat: Enum.Material)
+		local q = Instance.new("Part")
+		q.Name = nome
+		q.Anchored, q.CanCollide, q.CanQuery, q.CanTouch, q.CastShadow, q.Massless =
+			false, false, false, false, false, true
+		q.Material = mat
+		q.Color = cor
+		q.Size = tam
+		q.CFrame = p.CFrame * CFrame.new(0, y, 0)
+		local solda = Instance.new("WeldConstraint")
+		solda.Part0, solda.Part1 = p, q
+		solda.Parent = q
+		q.Parent = p
+	end
+	local s = p.Size
+	peca(
+		"Cartuchos",
+		Color3.fromRGB(196, 150, 72),
+		Vector3.new(s.X * 0.62, s.Y * 0.1, s.Z * 0.82),
+		s.Y * 0.54,
+		Enum.Material.Metal
+	)
+	peca(
+		"Base",
+		Color3.fromRGB(26, 26, 28),
+		Vector3.new(s.X * 1.25, s.Y * 0.07, s.Z * 1.12),
+		-s.Y * 0.52,
+		Enum.Material.Metal
+	)
 	p.Parent = camera
 	return p
 end
@@ -538,6 +568,11 @@ RunService:BindToRenderStep("VT65ViewModel", Enum.RenderPriority.Camera.Value + 
 		return
 	end
 	local rp = if reloadDur > 0 then (os.clock() - reloadT0) / reloadDur else 2
+	-- Studio: workspace "VT65DevRecarga1P" = fração da recarga, parada, para conferir a pose
+	local devRp = if RunService:IsStudio() then workspace:GetAttribute("VT65DevRecarga1P") else nil
+	if type(devRp) == "number" then
+		rp = devRp
+	end
 	local reloading = rp < 1
 	if not reloading and reloadDur > 0 then
 		reloadDur = 0
@@ -592,12 +627,19 @@ RunService:BindToRenderStep("VT65ViewModel", Enum.RenderPriority.Camera.Value + 
 		pose = CFrame.identity:Lerp(tilt, w)
 	elseif reloading then
 		local w = smooth(rp / 0.12) * (1 - smooth((rp - 0.86) / 0.14))
-		local tilt = CFrame.new(0.02 / M, -0.07 / M, 0.03 / M)
-			* CFrame.Angles(math.rad(-10), math.rad(10), math.rad(30))
+		-- D-238: a arma vira para mostrar o encaixe, cede com o puxão, sobe no tapa e recua no ferrolho
+		-- a boca sobe e a arma deita para a direita: o encaixe fica virado para a mão esquerda, na tela
+		local tilt = CFrame.new(-0.035 / M, 0.018 / M, -0.02 / M)
+			* CFrame.Angles(math.rad(11), math.rad(15), math.rad(-30))
 		pose = CFrame.identity:Lerp(tilt, w)
-		local slap = math.max(0, 1 - math.abs(rp - 0.66) / 0.03)
-		local pull = smooth((rp - 0.79) / 0.06) * (1 - smooth((rp - 0.86) / 0.05))
-		pose *= CFrame.new(0, slap * 0.008 / M, pull * 0.012 / M)
+		local puxao = math.max(0, 1 - math.abs(rp - 0.2) / 0.06)
+		local slap = math.max(0, 1 - math.abs(rp - 0.66) / 0.035)
+		local pull = smooth((rp - 0.79) / 0.05) * (1 - smooth((rp - 0.86) / 0.05))
+		pose *= CFrame.new(0, (slap * 0.02 - puxao * 0.012) / M, pull * 0.03 / M) * CFrame.Angles(
+			math.rad(slap * 2.5 + pull * 3.5 - puxao * 2),
+			0,
+			math.rad(-slap * 3)
+		)
 	end
 	pose *= Ferrolho.step(v) -- fuzil de ferrolho: a arma cede no ciclo e a peça "Ferrolho" abre e fecha
 	-- D-231: indo para a 3ª pessoa a arma desce junto com a câmera, em vez de sumir de repente na metade
@@ -625,7 +667,8 @@ RunService:BindToRenderStep("VT65ViewModel", Enum.RenderPriority.Camera.Value + 
 	local rot = wcf.Rotation
 	local km = viewK / M
 	local handR = wcf * (gripL + Vector3.new(0.012, 0, 0.015) * km)
-	local handL = wcf * (supportL + Vector3.new(0, -0.025, 0) * km)
+	-- D-238: a palma encosta no guarda-mão (a -0,025 a mão ficava solta embaixo da arma)
+	local handL = wcf * (supportL + Vector3.new(0.005, -0.012, -0.012) * km)
 	if reloading then
 		local keys = reloadKeys()
 		local function world(k: Key): Vector3
