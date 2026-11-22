@@ -104,6 +104,55 @@ function ArteCatalogo.premio(kind: string?): string
 	return if k then url(k) else ""
 end
 
+-- D-239: a imagem de um visual do Armário ou de uma camuflagem (tools/blender/visuais_catalogo.py).
+-- "Sem acessório" e "sem cobertura" dividem o cabide vazio; as duas fitas da Reserva, a mesma medalha.
+local VISUAL_IGUAL = {
+	us_none = "nada",
+	vc_none = "nada",
+	vc_bare = "nada",
+	us_ribbon_reserve = "ribbon",
+	vc_ribbon_reserve = "ribbon",
+} :: { [string]: string }
+function ArteCatalogo.visual(id: string?): string
+	if type(id) ~= "string" then
+		return ""
+	end
+	return url("vis_" .. (VISUAL_IGUAL[id] or id))
+end
+
+-- D-239: a imagem de cada oferta da loja (antes as vantagens usavam todas o mesmo ícone do passe)
+local OFERTA = {
+	PASS_PERK_SPEED = "vis_perk_speed",
+	PASS_PERK_HEALTH = "vis_perk_health",
+	PASS_PERK_BREATH = "vis_perk_breath",
+	PASS_PERK_RELOAD = "equip_mag_rifle",
+	PASS_PERK_MEDIC = "equip_bandage",
+	PASS_PERK_POCKETS = "vis_perk_pockets",
+	PASS_PERK_EAGLE = "equip_binoculars",
+	PASS_PERK_ALL = "vis_perk_all",
+	PASS_UNIT = "premio_bandeira",
+	PASS_SUPPORTER = "premio_medalha",
+	PASS_KIT_VETERAN = "equip_ammo_box",
+	PASS_SEASON_S1 = "premio_estrelas",
+	PASS_RECRUIT = "premio_maleta",
+	PRODUCT_TIP_SMALL = "premio_creditos",
+	PRODUCT_TIP_LARGE = "premio_creditos",
+	PRODUCT_RESPAWN_INPLACE = "equip_radio",
+	PRODUCT_SEASON_SKIP = "premio_estrelas",
+	PRODUCT_BOOST_XP_1H = "premio_reforco",
+	PRODUCT_BOOST_XP_24H = "premio_reforco",
+	PRODUCT_BOOST_CR_1H = "premio_reforco",
+	PRODUCT_CREDITS_500 = "premio_creditos",
+	PRODUCT_CREDITS_1200 = "premio_creditos",
+	PRODUCT_CREDITS_3000 = "premio_creditos",
+	sub = "premio_relogio",
+	season = "premio_estrelas",
+} :: { [string]: string }
+function ArteCatalogo.oferta(chave: string?): string
+	local k = OFERTA[chave or ""]
+	return if k then url(k) else ""
+end
+
 -- A foto de um ponto de nascer, pelo nome do lugar (as capas do jogo)
 local LUGAR = {
 	{ "arroz", "arrozal" },

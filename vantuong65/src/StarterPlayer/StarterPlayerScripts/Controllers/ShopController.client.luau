@@ -30,7 +30,9 @@ local Net = require(ReplicatedStorage.Shared.Net)
 local Progression = require(ReplicatedStorage.Shared.Progression)
 local Roles = require(ReplicatedStorage.Shared.Roles) :: any
 local Weapons = require(ReplicatedStorage.Shared.Weapons) :: any
+local Skins = require(ReplicatedStorage.Shared.Skins) :: any
 local Acabamento = require(ReplicatedFirst:WaitForChild("Acabamento"))
+local ArteCatalogo = require(script.Parent.ArteCatalogo)
 local Bus = require(script.Parent.Bus)
 local CampanhaCliente = require(script.Parent.CampanhaCliente)
 local Input = require(script.Parent.Input)
@@ -702,7 +704,7 @@ local MARK: { [string]: { text: string, color: Color3 } } = {
 	PRODUCT_TIP_LARGE = { text = "++", color = V.KHAKI },
 	PRODUCT_RESPAWN_INPLACE = { text = "×", color = V.RED_HI },
 	SUB = { text = "R", color = V.KHAKI },
-	PREMIUM = { text = "P", color = V.TEXT },
+	PREMIUM = { text = utf8.char(0xE001), color = V.BRASS }, -- D-239: o símbolo do Premium do Roblox
 }
 
 -- D-124: imagens da loja feitas com os modelos do próprio jogo (tools/blender/loja.py, fundo
@@ -763,9 +765,16 @@ end
 local function paintThumb(t: Thumb, o: Offer)
 	t.mark.Text = o.mark
 	t.mark.TextColor3 = o.accent
+	if o.key == "premium" then
+		t.mark.TextSize = UiKit.text(px(64, 88)) -- D-239: o símbolo grande, no lugar da letra P
+	end
 	tintThumb(t, o.accent)
 	t.image.Visible = false
 	local render = lojaImage(LOJA_IMG[o.key])
+	if not render then
+		local arte = ArteCatalogo.oferta(o.key) -- D-239: a arte do catálogo vem antes do ícone do passe
+		render = if arte ~= "" then arte else nil
+	end
 	if render then
 		t.image.Image = render
 		t.image.Visible = true
@@ -1834,30 +1843,44 @@ function renderConjuntos()
 	add2Nota(p)
 end
 
--- linha do armário: um botão por item (● equipado, ○ não)
-local function lockerRow(key: string, text: string, on: boolean, onClick: () -> ())
-	order += 1
+-- D-239: cartão do armário, com a imagem do item (antes uma lista de texto: "helmet: Capa Mitchell")
+local NOME_ENCAIXE = { helmet = "Capacete", uniform = "Uniforme", extra = "Acessório" } :: { [string]: string }
+local function lockerCard(pai: Instance, n: number, c: any, on: boolean, onClick: () -> ())
 	local b = Instance.new("TextButton")
-	b.Name = key
-	b.LayoutOrder = order
-	b.Size = UDim2.new(1, -24, 0, px(40, 56))
+	b.Name = "eq:" .. tostring(c.id)
+	b.LayoutOrder = n
 	b.BackgroundColor3 = if on then V.PANEL_3 else V.PANEL_2
 	b.AutoButtonColor = false
 	b.Text = ""
 	b.Selectable = true
 	b.SelectionImageObject = UiKit.FOCUS
-	b.Parent = panel
-	UiKit.corner(b, 3)
-	UiKit.edge(b, if on then V.OLIVE_HI else V.LINE, 1, if on then 0.2 else 0.6)
-	local mark = UiKit.rotulo(b, 16, if on then V.OLIVE_HI else V.MUTED, Enum.Font.ArimoBold)
-	mark.Position = UDim2.fromOffset(px(12, 16), 0)
-	mark.Size = UDim2.new(0, px(22, 30), 1, 0)
-	mark.Text = if on then "●" else "○"
-	local t = UiKit.rotulo(b, 16, if on then V.TEXT else V.DIM, UiKit.BODY_FONT)
-	t.Position = UDim2.fromOffset(px(38, 52), 0)
-	t.Size = UDim2.new(1, -px(50, 66), 1, 0)
-	t.TextTruncate = Enum.TextTruncate.AtEnd
-	t.Text = text
+	b.Parent = pai
+	UiKit.corner(b, 4)
+	UiKit.edge(b, if on then V.OLIVE_HI else V.LINE, if on then 2 else 1, if on then 0 else 0.5)
+	local L = px(80, 108)
+	local foto = Instance.new("ImageLabel")
+	foto.Name = "Foto"
+	foto.BackgroundColor3 = Color3.fromRGB(24, 26, 20)
+	foto.BorderSizePixel = 0
+	foto.Position = UDim2.fromOffset(px(6, 8), px(6, 8))
+	foto.Size = UDim2.fromOffset(L, L)
+	foto.ScaleType = Enum.ScaleType.Fit
+	foto.Image = ArteCatalogo.visual(c.id)
+	foto.Parent = b
+	UiKit.corner(foto, 3)
+	local x = L + px(16, 22)
+	local nome = UiKit.title(b, UiKit.upper(c.name), px(16, 22))
+	nome.Position = UDim2.fromOffset(x, px(8, 12))
+	nome.Size = UDim2.new(1, -(x + px(8, 10)), 0, px(42, 58))
+	nome.TextWrapped = true
+	nome.TextYAlignment = Enum.TextYAlignment.Top
+	local tipo = UiKit.kicker(b, UiKit.upper(NOME_ENCAIXE[c.slot] or c.slot), px(12, 18))
+	tipo.Position = UDim2.fromOffset(x, px(50, 70))
+	tipo.Size = UDim2.new(1, -(x + px(8, 10)), 0, px(16, 22))
+	local estado = UiKit.rotulo(b, 15, if on then V.OLIVE_HI else V.KHAKI, UiKit.BODY_FONT)
+	estado.Position = UDim2.fromOffset(x, px(68, 94))
+	estado.Size = UDim2.new(1, -(x + px(8, 10)), 0, px(18, 24))
+	estado.Text = if on then "✓ EQUIPADO" else "EQUIPAR"
 	local r = UiKit.realce(b, b.BackgroundColor3, V.PANEL_3, 1.01)
 	b.MouseEnter:Connect(function()
 		r.set(true)
@@ -2068,14 +2091,26 @@ local function render()
 	if faction then
 		section(if faction == "US" then "Armário · EUA" else "Armário · VC")
 		local any = false
+		order += 1
+		local grade = Instance.new("Frame")
+		grade.Name = "GradeArmario"
+		grade.LayoutOrder = order
+		grade.BackgroundTransparency = 1
+		grade.Size = UDim2.new(1, -24, 0, 0)
+		grade.AutomaticSize = Enum.AutomaticSize.Y
+		grade.Parent = panel
+		local gradeL = Instance.new("UIGridLayout")
+		gradeL.CellSize = UDim2.new(1 / 3, -px(7, 10), 0, px(92, 124))
+		gradeL.CellPadding = UDim2.fromOffset(px(10, 14), px(10, 14))
+		gradeL.SortOrder = Enum.SortOrder.LayoutOrder
+		gradeL.Parent = grade
+		local nItem = 0
 		for _, c in Commerce.Cosmetics do
 			if c.faction == faction and table.find(state.unlocked, c.id) then
 				any = true
+				nItem += 1
 				local eq = state.equipped[faction] and state.equipped[faction][c.slot] == c.id
-				local text = if c.unlock == "daily"
-					then string.format("%s: %s (caderneta)", c.slot, c.name)
-					else string.format("%s: %s", c.slot, c.name)
-				lockerRow("eq:" .. c.id, text, eq == true, function()
+				lockerCard(grade, nItem, c, eq == true, function()
 					Net.event("Commerce_Equip"):FireServer(faction, c.slot, c.id)
 				end)
 			end
@@ -2217,6 +2252,8 @@ type PageItem = {
 	onClick: () -> (),
 	pay: string?, -- forma de pagar (UiKit.PAGAR: "robux", "ci"); nil = ação sem compra (oliva)
 	icon: { id: number, infoType: Enum.InfoType }?, -- D-124: o ícone publicado no passe, se houver
+	arte: string?, -- D-239: a imagem do catálogo
+	skinId: string?, -- D-239: uniforme do mercado: o soldado vestido
 }
 local ITEM_H = px(150, 206)
 local function itemCard(parent: Instance, it: PageItem, n: number): Frame
@@ -2237,8 +2274,17 @@ local function itemCard(parent: Instance, it: PageItem, n: number): Frame
 	th.mark.TextColor3 = it.accent
 	tintThumb(th, it.accent) -- D-124: o fundo na cor do item
 	local render = lojaImage(LOJA_IMG[it.key])
+	if not render then
+		local arte = if it.arte and it.arte ~= "" then it.arte else ArteCatalogo.oferta(it.key)
+		render = if arte ~= "" then arte else nil
+	end
 	local ic = it.icon
-	if render then
+	if it.skinId and not render then
+		local box = ItemArte.desenha(th.frame, { id = it.skinId }, TH, { soldado = false })
+		box.Position = UDim2.fromScale(0, 0)
+		box.Size = UDim2.fromScale(1, 1)
+		th.mark.Visible = false
+	elseif render then
 		th.image.Image = render
 		th.image.Visible = true
 		th.mark.Visible = false
@@ -2436,6 +2482,7 @@ local function renderMarket(force: boolean?)
 				else nil,
 			mark = "★",
 			accent = V.BRASS,
+			arte = ArteCatalogo.oferta("season"),
 			owned = false,
 			enabled = true,
 			price = function(set: (string) -> ())
@@ -2460,11 +2507,20 @@ local function renderMarket(force: boolean?)
 			local key = if type(mi.productKey) == "string" then mi.productKey else ""
 			-- os itens do mercado são skins: o ID mora no Skins.IDS (o robuxKey da skin); os do
 			-- Commerce ficam de reserva
-			local SkinsMod = require(ReplicatedStorage.Shared.Skins) :: any
-			local id = tonumber((Commerce.IDS :: any)[key]) or tonumber((SkinsMod.IDS or {})[key]) or 0
+			local id = tonumber((Commerce.IDS :: any)[key]) or tonumber((Skins.IDS or {})[key]) or 0
 			local isPass = string.sub(key, 1, 5) == "PASS_"
 			local infoType = if isPass then Enum.InfoType.GamePass else Enum.InfoType.Product
+			-- D-239: a imagem do próprio item, no lugar da estrela
+			local skin = Skins.get(tostring(mi.id))
+			local arteItem = if skin and skin.kind == "weapon"
+				then ArteCatalogo.acabamento(skin)
+				elseif skin and skin.kind == "camo" then ArteCatalogo.visual(skin.id)
+				elseif kind == "credits" then ArteCatalogo.oferta("PRODUCT_CREDITS_500")
+				elseif kind == "boost" then ArteCatalogo.oferta("PRODUCT_BOOST_XP_1H")
+				else ""
 			itemCard(parent, {
+				arte = arteItem,
+				skinId = if skin and skin.kind == "uniform" then skin.id else nil,
 				key = tostring(mi.id),
 				name = tostring(mi.name or mi.id),
 				kind = KIND_NAME[kind] or "Item",

@@ -1743,7 +1743,8 @@
   "dor",
   "Cartuchos",
   "^(%a);([%d.]+);?([%d.]*)$",
-  "rastejar"
+  "rastejar",
+  "ribbon"
  ],
  "regex": [
   "^uni_[a-z_]+@[a-z0-9]+$"

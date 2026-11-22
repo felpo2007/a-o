@@ -416,8 +416,30 @@ function ArmarioTela.novo(pagina: ScrollingFrame, ctx: Ctx): any
 		return out
 	end
 
-	-- visual sem imagem própria: o encaixe escrito grande, no lugar da arte
-	local function arteDoEncaixe(pai: Instance, slot: string, h: number): TextLabel
+	-- D-239: a imagem do visual; sem ela (ainda não publicada), o encaixe escrito grande
+	local function arteDoEncaixe(pai: Instance, slot: string, h: number, id: string): GuiObject
+		local img = ArteCatalogo.visual(id)
+		if img ~= "" then
+			local fundo = Instance.new("Frame")
+			fundo.BackgroundColor3 = Color3.fromRGB(24, 26, 20)
+			fundo.BorderSizePixel = 0
+			fundo.Position = UDim2.fromOffset(px(6, 8), px(6, 8))
+			fundo.Size = UDim2.new(1, -px(12, 16), 0, h)
+			fundo.Parent = pai
+			UiKit.corner(fundo, 3)
+			local brilho = Instance.new("UIGradient")
+			brilho.Rotation = 90
+			brilho.Color = ColorSequence.new(Color3.new(1.5, 1.5, 1.35), Color3.new(0.7, 0.7, 0.66))
+			brilho.Parent = fundo
+			local foto = Instance.new("ImageLabel")
+			foto.Name = "Foto"
+			foto.BackgroundTransparency = 1
+			foto.Size = UDim2.fromScale(1, 1)
+			foto.ScaleType = Enum.ScaleType.Fit
+			foto.Image = img
+			foto.Parent = fundo
+			return fundo
+		end
 		local l = letra(pai, NOME_SLOT[slot] or UiKit.upper(slot), px(22, 30), V.KHAKI, F.TITLE)
 		l.BackgroundColor3 = Color3.fromRGB(24, 26, 20)
 		l.BackgroundTransparency = 0
@@ -447,7 +469,7 @@ function ArmarioTela.novo(pagina: ScrollingFrame, ctx: Ctx): any
 			local slot = e.cos
 			fTipo.Text = NOME_SLOT[slot] or UiKit.upper(slot)
 			fDesc.Text = ""
-			arteDoEncaixe(pv, slot, px(238, 316))
+			arteDoEncaixe(pv, slot, px(238, 316), e.id)
 			fEstado.Text, fEstado.TextColor3 = if e.eq then "✓ EQUIPADO" else "SEU", V.OLIVE_HI
 			fBotaoT.Text = if e.eq then "EQUIPADO" else "EQUIPAR"
 			fBotao.BackgroundColor3 = if e.eq then V.PANEL_3 else V.AMBAR
@@ -617,7 +639,7 @@ function ArmarioTela.novo(pagina: ScrollingFrame, ctx: Ctx): any
 				local borda = UiKit.edge(c, if e.id == sel then DOURADO else V.LINE, if e.id == sel then 2 else 1, 0.1)
 				bordas[e.id] = borda
 				if e.cos then
-					arteDoEncaixe(c, e.cos, px(140, 186))
+					arteDoEncaixe(c, e.cos, px(140, 186), e.id)
 				elseif e.skin then
 					local ladoArte = if largo then px(118, 156) else px(150, 198)
 					local box = ItemArte.desenha(c, { id = e.skin.id }, ladoArte, {

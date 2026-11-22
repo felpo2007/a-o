@@ -31,6 +31,7 @@ GRUPOS = (
     ("assets/ui/premios", "*.png", "premio_"),
     ("assets/ui/skins", "*.png", "acab_"),
     ("assets/ui/horarios", "*.png", "hora_"),
+    ("assets/ui/visuais", "*.png", "vis_"),
     ("assets/ui/lobby", "lobby_*.png", ""),
     ("assets/carta", "aereo_??.png", ""),
 )

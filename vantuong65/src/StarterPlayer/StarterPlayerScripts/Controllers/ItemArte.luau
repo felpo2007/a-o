@@ -421,6 +421,22 @@ function ItemArte.desenha(parent: Instance, item: any, s: number, opts: Opcoes?)
 		if not (opts and opts.soldado and soldadoCartao(box, it.skin)) then
 			pano(box, it.skin)
 		end
+	elseif it.skin and it.skin.kind == "camo" then
+		-- D-239: o soldado com os feixes de folha (tools/blender/visuais_catalogo.py)
+		local img = ArteCatalogo.visual(it.skin.id)
+		if img ~= "" then
+			local foto = Instance.new("ImageLabel")
+			foto.Name = "Camuflagem"
+			foto.BackgroundTransparency = 1
+			foto.AnchorPoint = Vector2.new(0.5, 0.5)
+			foto.Position = UDim2.fromScale(0.5, 0.5)
+			foto.Size = UDim2.fromScale(0.98, 0.98)
+			foto.ScaleType = Enum.ScaleType.Fit
+			foto.Image = img
+			foto.Parent = box
+		else
+			pano(box, it.skin)
+		end
 	else
 		-- sem cadastro: o quadro fica só com a cor da raridade (nada de texto no lugar da imagem)
 		box.Name = "ItemSemArte"

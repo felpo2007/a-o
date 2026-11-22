@@ -9937,3 +9937,18 @@ pegada nas armas e a mira que "não está boa ainda".
 - **Autoteste:** a granada usa um bot a pé e a checagem de veículos olha o lugar do motorista.
 - **Medido:** Lune 928, pytest 77, autoteste 18 de 18; bacia de 6,1 a 12,9 cm em 6 bots correndo na partida
   (na conta, 4,5 a 6 cm). Detalhes e o que ficou sem teste em `testes/LOTE110_D238_2026-11-21.md`.
+
+## D-239 — Lote 111: imagens da loja (2026-11-21)
+
+**Pedido do dono (3º lote):** o Armário mostrava só o nome do encaixe, a camuflagem vinha em branco, o Mercado
+tinha estrelas, as Vantagens repetiam a mesma foto e os Destaques traziam uma lista crua e um "P" no Premium.
+- **`tools/blender/visuais_catalogo.py`:** 27 imagens de 512 x 512 (`assets/ui/visuais`, chave `Catalogo.vis_<id>`):
+  capacetes, fardas, acessórios, 3 camuflagens com a malha real do `tools/ghillie.py` e as vantagens.
+- **`ArteCatalogo.visual(id)` e `.oferta(chave)`:** "sem acessório" e "sem cobertura" dividem o cabide vazio, e as
+  duas fitas da Reserva a mesma medalha. A arte do catálogo vem antes do ícone do passe na miniatura.
+- **Destaques:** `lockerCard` no lugar da lista; o Premium usa o glifo U+E001 do Roblox.
+- **Autoteste:** a granada mede a que caiu mais perto do alvo, porque outros bots arremessam na mesma janela.
+- **Ambiente:** o controle fantasma do Studio (D-149) pode ficar com o analógico preso e andar com o soldado.
+  `VT65DevSemControle` só cobre a nossa camada de entrada, não a do `PlayerModule`.
+- **Medido:** Lune 932, pytest 77, autoteste 18 de 18 sem interferência. Detalhes em
+  `testes/LOTE111_D239_2026-11-21.md`.

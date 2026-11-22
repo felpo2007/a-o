@@ -12052,5 +12052,194 @@
   "assetType": "Image",
   "name": "VT65 chao dirt_floor neutro",
   "description": "VAN TUONG 65 - terra batida, cor neutra (Poly Haven dirt_floor, CC0)"
+ },
+ {
+  "key": "Catalogo.vis_camo_bamboo",
+  "file": "assets/ui/visuais/camo_bamboo.png",
+  "assetType": "Image",
+  "name": "VT65 vis camo bamboo",
+  "description": "VAN TUONG 65 - imagem de catalogo"
+ },
+ {
+  "key": "Catalogo.vis_camo_jungle",
+  "file": "assets/ui/visuais/camo_jungle.png",
+  "assetType": "Image",
+  "name": "VT65 vis camo jungle",
+  "description": "VAN TUONG 65 - imagem de catalogo"
+ },
+ {
+  "key": "Catalogo.vis_camo_rice",
+  "file": "assets/ui/visuais/camo_rice.png",
+  "assetType": "Image",
+  "name": "VT65 vis camo rice",
+  "description": "VAN TUONG 65 - imagem de catalogo"
+ },
+ {
+  "key": "Catalogo.vis_nada",
+  "file": "assets/ui/visuais/nada.png",
+  "assetType": "Image",
+  "name": "VT65 vis nada",
+  "description": "VAN TUONG 65 - imagem de catalogo"
+ },
+ {
+  "key": "Catalogo.vis_perk_all",
+  "file": "assets/ui/visuais/perk_all.png",
+  "assetType": "Image",
+  "name": "VT65 vis perk all",
+  "description": "VAN TUONG 65 - imagem de catalogo"
+ },
+ {
+  "key": "Catalogo.vis_perk_breath",
+  "file": "assets/ui/visuais/perk_breath.png",
+  "assetType": "Image",
+  "name": "VT65 vis perk breath",
+  "description": "VAN TUONG 65 - imagem de catalogo"
+ },
+ {
+  "key": "Catalogo.vis_perk_health",
+  "file": "assets/ui/visuais/perk_health.png",
+  "assetType": "Image",
+  "name": "VT65 vis perk health",
+  "description": "VAN TUONG 65 - imagem de catalogo"
+ },
+ {
+  "key": "Catalogo.vis_perk_pockets",
+  "file": "assets/ui/visuais/perk_pockets.png",
+  "assetType": "Image",
+  "name": "VT65 vis perk pockets",
+  "description": "VAN TUONG 65 - imagem de catalogo"
+ },
+ {
+  "key": "Catalogo.vis_perk_speed",
+  "file": "assets/ui/visuais/perk_speed.png",
+  "assetType": "Image",
+  "name": "VT65 vis perk speed",
+  "description": "VAN TUONG 65 - imagem de catalogo"
+ },
+ {
+  "key": "Catalogo.vis_ribbon",
+  "file": "assets/ui/visuais/ribbon.png",
+  "assetType": "Image",
+  "name": "VT65 vis ribbon",
+  "description": "VAN TUONG 65 - imagem de catalogo"
+ },
+ {
+  "key": "Catalogo.vis_us_cigarette_band",
+  "file": "assets/ui/visuais/us_cigarette_band.png",
+  "assetType": "Image",
+  "name": "VT65 vis us cigarette band",
+  "description": "VAN TUONG 65 - imagem de catalogo"
+ },
+ {
+  "key": "Catalogo.vis_us_cover_cloud",
+  "file": "assets/ui/visuais/us_cover_cloud.png",
+  "assetType": "Image",
+  "name": "VT65 vis us cover cloud",
+  "description": "VAN TUONG 65 - imagem de catalogo"
+ },
+ {
+  "key": "Catalogo.vis_us_cover_faded",
+  "file": "assets/ui/visuais/us_cover_faded.png",
+  "assetType": "Image",
+  "name": "VT65 vis us cover faded",
+  "description": "VAN TUONG 65 - imagem de catalogo"
+ },
+ {
+  "key": "Catalogo.vis_us_cover_leaf",
+  "file": "assets/ui/visuais/us_cover_leaf.png",
+  "assetType": "Image",
+  "name": "VT65 vis us cover leaf",
+  "description": "VAN TUONG 65 - imagem de catalogo"
+ },
+ {
+  "key": "Catalogo.vis_us_repellent_band",
+  "file": "assets/ui/visuais/us_repellent_band.png",
+  "assetType": "Image",
+  "name": "VT65 vis us repellent band",
+  "description": "VAN TUONG 65 - imagem de catalogo"
+ },
+ {
+  "key": "Catalogo.vis_us_towel",
+  "file": "assets/ui/visuais/us_towel.png",
+  "assetType": "Image",
+  "name": "VT65 vis us towel",
+  "description": "VAN TUONG 65 - imagem de catalogo"
+ },
+ {
+  "key": "Catalogo.vis_us_utility_down",
+  "file": "assets/ui/visuais/us_utility_down.png",
+  "assetType": "Image",
+  "name": "VT65 vis us utility down",
+  "description": "VAN TUONG 65 - imagem de catalogo"
+ },
+ {
+  "key": "Catalogo.vis_us_utility_rolled",
+  "file": "assets/ui/visuais/us_utility_rolled.png",
+  "assetType": "Image",
+  "name": "VT65 vis us utility rolled",
+  "description": "VAN TUONG 65 - imagem de catalogo"
+ },
+ {
+  "key": "Catalogo.vis_us_zippo",
+  "file": "assets/ui/visuais/us_zippo.png",
+  "assetType": "Image",
+  "name": "VT65 vis us zippo",
+  "description": "VAN TUONG 65 - imagem de catalogo"
+ },
+ {
+  "key": "Catalogo.vis_vc_green",
+  "file": "assets/ui/visuais/vc_green.png",
+  "assetType": "Image",
+  "name": "VT65 vis vc green",
+  "description": "VAN TUONG 65 - imagem de catalogo"
+ },
+ {
+  "key": "Catalogo.vis_vc_jungle_hat",
+  "file": "assets/ui/visuais/vc_jungle_hat.png",
+  "assetType": "Image",
+  "name": "VT65 vis vc jungle hat",
+  "description": "VAN TUONG 65 - imagem de catalogo"
+ },
+ {
+  "key": "Catalogo.vis_vc_khaki",
+  "file": "assets/ui/visuais/vc_khaki.png",
+  "assetType": "Image",
+  "name": "VT65 vis vc khaki",
+  "description": "VAN TUONG 65 - imagem de catalogo"
+ },
+ {
+  "key": "Catalogo.vis_vc_mess_tin",
+  "file": "assets/ui/visuais/vc_mess_tin.png",
+  "assetType": "Image",
+  "name": "VT65 vis vc mess tin",
+  "description": "VAN TUONG 65 - imagem de catalogo"
+ },
+ {
+  "key": "Catalogo.vis_vc_pith_helmet",
+  "file": "assets/ui/visuais/vc_pith_helmet.png",
+  "assetType": "Image",
+  "name": "VT65 vis vc pith helmet",
+  "description": "VAN TUONG 65 - imagem de catalogo"
+ },
+ {
+  "key": "Catalogo.vis_vc_rice_tube",
+  "file": "assets/ui/visuais/vc_rice_tube.png",
+  "assetType": "Image",
+  "name": "VT65 vis vc rice tube",
+  "description": "VAN TUONG 65 - imagem de catalogo"
+ },
+ {
+  "key": "Catalogo.vis_vc_scarf",
+  "file": "assets/ui/visuais/vc_scarf.png",
+  "assetType": "Image",
+  "name": "VT65 vis vc scarf",
+  "description": "VAN TUONG 65 - imagem de catalogo"
+ },
+ {
+  "key": "Catalogo.vis_vc_tire_sandals",
+  "file": "assets/ui/visuais/vc_tire_sandals.png",
+  "assetType": "Image",
+  "name": "VT65 vis vc tire sandals",
+  "description": "VAN TUONG 65 - imagem de catalogo"
  }
 ]

@@ -604,29 +604,63 @@ local function botGrenade(): (string, string?)
 	local params = RaycastParams.new()
 	params.FilterType = Enum.RaycastFilterType.Include
 	params.FilterDescendantsInstances = { workspace.Terrain }
-	local look = root.CFrame.LookVector * Vector3.new(1, 0, 1)
-	local aim = root.Position + look.Unit * (25 / M)
-	local g = workspace:Raycast(Vector3.new(aim.X, root.Position.Y + 300, aim.Z), Vector3.new(0, -800, 0), params)
-	if not g then
-		return "pulado", "sem chão no alvo"
+	-- D-238: a direção com o caminho livre (na base, uma barraca ou outro soldado desviava a granada e o
+	-- teste falhava sem o arremesso ter errado), e o bot parado enquanto arremessa
+	local livre = RaycastParams.new()
+	livre.FilterType = Enum.RaycastFilterType.Exclude
+	livre.FilterDescendantsInstances = { e.model }
+	local g: RaycastResult? = nil
+	for k = 0, 23 do
+		local a = k * math.pi / 12
+		local alvo = root.Position + Vector3.new(math.sin(a), 0, math.cos(a)) * (25 / M)
+		local h = workspace:Raycast(Vector3.new(alvo.X, root.Position.Y + 300, alvo.Z), Vector3.new(0, -800, 0), params)
+		if h then
+			local olho = root.Position + Vector3.new(0, 1.5, 0)
+			local topo = (olho + h.Position) / 2 + Vector3.new(0, 6 / M, 0)
+			local chegada = h.Position + Vector3.new(0, 1, 0)
+			if
+				not workspace:Raycast(olho, topo - olho, livre)
+				and not workspace:Raycast(topo, chegada - topo, livre)
+			then
+				g = h
+				break
+			end
+		end
 	end
-	local spawned: Model? = nil
+	if not g then
+		return "pulado", "sem direção livre para o arremesso"
+	end
+	local alvoChao = (g :: RaycastResult).Position
+	local preso = root.Anchored
+	root.Anchored = true
+	-- D-238: os outros bots também arremessam nesses 3,6 s: guarda todas e mede a que caiu mais perto
+	local lancadas: { Model } = {}
 	local conn = folder.ChildAdded:Connect(function(m)
 		if m:IsA("Model") then
-			spawned = m
+			table.insert(lancadas, m)
 		end
 	end)
 	local armed = false
-	local ok = FieldService.throwFrom(e.model, "US", "frag", g.Position, nil)
+	local ok = FieldService.throwFrom(e.model, "US", "frag", alvoChao, nil)
 	local t0 = os.clock()
 	while os.clock() - t0 < 3.6 do
 		armed = armed or e.model:GetAttribute("Throwing") == true
 		task.wait(0.05)
 	end
+	root.Anchored = preso
 	conn:Disconnect()
-	local m = spawned
-	local core = m and m:FindFirstChild("Nucleo") :: BasePart?
-	local miss = if core then ((core.Position - g.Position) * Vector3.new(1, 0, 1)).Magnitude * M else math.huge
+	local m: Model? = nil
+	local core: BasePart? = nil
+	local miss = math.huge
+	for _, x in lancadas do
+		local n = x:FindFirstChild("Nucleo") :: BasePart?
+		if n then
+			local d = ((n.Position - alvoChao) * Vector3.new(1, 0, 1)).Magnitude * M
+			if d < miss then
+				m, core, miss = x, n, d
+			end
+		end
+	end
 	if m then
 		m:Destroy() -- desarma antes da espoleta
 	end

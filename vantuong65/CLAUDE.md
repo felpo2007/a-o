@@ -461,6 +461,7 @@ O `sourcemap.json` não vai para o Git.
   (D-66); no de 700 m o relevo sai do `crop_world.py` (`mais_relevo` e `centraliza`). Não rode o
   `relevo_dem.py` neste mapa: ele procura cumes que não existem mais.
 - Imagens de catálogo (D-222 a D-229), CPU com `VT65_CPU=1`:
+  - `tools/blender/visuais_catalogo.py -- todas` (D-239: visuais do Armário, camuflagens e vantagens, `Catalogo.vis_*`);
   - `tools/blender/armas_catalogo.py -- todas` (armas, equipamento, classes, times, prêmios);
   - `tools/blender/skins_catalogo.py` (347 acabamentos; `--reusar` refaz só a combinação);
   - `tools/blender/lobby_fundo.py` e `uv run --group arte python tools/lobby_recorta.py <png>`;
@@ -493,7 +494,7 @@ O `sourcemap.json` não vai para o Git.
 - Segredos só no `.env` (no `.gitignore`), nunca no código nem no chat.
 - ForgeGUI: nunca regenerar um job em `outcome_unknown`. "failed" com `retryable` pode ser
   retomado com `generation_retry`.
-- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-239) e atualize `PROGRESS.md`.
+- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-240) e atualize `PROGRESS.md`.
 - Tetos de triângulos por modelo: vegetação ≤ 6 mil (D-135), props e herói ≤ 20 mil (`ArtBudget`,
   conferido pelo teste da F5).
 - Commits no branch acima, com mensagem em português.
