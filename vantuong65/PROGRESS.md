@@ -1150,6 +1150,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     - **Sem teste:** custo de GPU, celular, servidor cheio e comparação lado a lado das skins.
     - **Não refeito:** os modelos de soldados, casas e vegetação (só a luz sobre eles) e as imagens de skin do catálogo.
     - Relatório: `testes/LOTE113_D241_2026-11-22.md`.
+    - **v145 publicada** (versão 150 do place, commit 01c88ad).
   - **Falta do pedido de 21/11:** a mira das outras armas além da M16 e da SKS, a pegada de 3ª pessoa (mãos a ~6 cm)
     e ver na tela a recarga de espingarda, M60 e pistola.
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
