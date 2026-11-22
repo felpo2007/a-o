@@ -1143,6 +1143,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     - **Em aberto:** o carregamento avisa "3 arquivos não baixaram" no Studio. As 7 capas chegaram; os 3 não foram
       identificados.
     - Relatório: `testes/LOTE112_D240_2026-11-22.md`.
+    - **v144 publicada** (versão 149 do place, commit 3c646a3).
   - **Falta do pedido de 21/11:** lote 113 (gráficos, casas e interiores, terreno, vegetação, soldados, skins).
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
 - **Próximos (ideias da análise, esperando o dono):**
