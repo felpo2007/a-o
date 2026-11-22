@@ -881,7 +881,7 @@ local function tracer(shot: any, color: Color3)
 		return
 	end
 	-- sai da boca do cano, não do olho
-	local start = if shot.by then muzzleOf(shot.by) else (if view then muzzleOf(camera) else nil)
+	local start = if shot.by then muzzleOf(shot.boca or shot.by) else (if view then muzzleOf(camera) else nil)
 	if start then
 		pts[1] = start
 	end
@@ -962,7 +962,7 @@ Net.unreliable("Combat_Tracer").OnClientEvent:Connect(function(shot: any)
 	if dM < 400 then
 		local dir = Vector3.new(shot.dx, shot.dy, shot.dz).Unit
 		markShot(shot.by, dir.Y)
-		flash(muzzleOf(shot.by) or (origin + dir * (0.8 / M)))
+		flash(muzzleOf(shot.boca or shot.by) or (origin + dir * (0.8 / M)))
 	end
 	if dM < IMPACT_MAX_M + 50 then
 		local ignore: { Instance } = { fx, camera }

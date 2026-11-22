@@ -584,7 +584,10 @@ local function markArt(g: BotNav.Grid, art: Instance)
 	for _, m in art:GetChildren() do
 		if m:IsA("Model") and NAV_BLOCK[m.Name] then
 			local cf, size = m:GetBoundingBox()
-			BotNav.markBox(g, cf.X, cf.Z, size.X, size.Z, yawOf(cf), F.HOUSE)
+			-- D-237 (dono: "os bots ficam presos em arames farpados"): a concertina não se pula (1,68 m) e
+			-- como "casa" a rota passava por dentro dela; agora o bot contorna
+			local bit = if m.Name == "us_concertina" then F.BLOCK else F.HOUSE
+			BotNav.markBox(g, cf.X, cf.Z, size.X, size.Z, yawOf(cf), bit)
 		end
 		if m:IsA("Model") and not BotBrain.plantKind(m.Name) then
 			local kind = BotBrain.coverKind("MeshPart", m.Name, nil, false)

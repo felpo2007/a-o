@@ -9894,3 +9894,27 @@ veículos maiores, soldado dentro do veículo, cura melhor, miras limpas e telas
 - **Moldes como Image:** a chave `Clothing.*_v3` aponta para o arquivo v4. O ID antigo fica em `*_decal_v139`.
 - **Medido:** 276 de 276 trechos a pé, autoteste 18 de 18 e -0,8% de chamadas de desenho sobre a v139.
   Detalhes e o que ficou sem teste em `testes/LOTE108_D236_2026-11-21.md`.
+
+## D-237 — Lote 109: rosto, armário, ganhos, navegação, torretas do LVTP-5 e bots (2026-11-21)
+
+**Pedido do dono (1º de 4 lotes):** rostos estilo Roblox, o personagem do armário mudar com o time,
+símbolos de Robux e de $, moedas e patentes com som, recompensa até o dia 30, botões de menu, voltar e
+avançar, duas torretas no LVTP-5, bots sem prender no arame e sem chão branco.
+- **Rostos (`tools/rostos/make_rostos3.py`):** 12 expressões de olho oval, sobrancelha e boca de um
+  traço. O PNG é transparente e a pele vem da cabeça. Sobem como `Rostos3.f_NN`.
+- **Armário:** o soldado do lobby só vale na prévia do lado dele; no outro lado, o manequim daquele time.
+- **Preços:** `$` no lugar de CI e o glifo do Robux (`UiKit.robux`) no lugar da palavra.
+- **Recompensa (`Commerce`):** `TRACK_DAYS = 30`; depois do dia 30 repete de 8 a 30. Baús nos dias 14, 21,
+  28 e 30. Os valores dos dias 8 a 30 são PLACEHOLDER.
+- **Ganhos (`Controllers/GanhoFx`):** moeda, +$, +XP, motivo e barra até a patente seguinte; promoção com
+  faixa, raios e fanfarra. No Studio: `VT65DevGanho = "ganho"` ou `"promocao"` (Client).
+- **Navegação (`Preparacao`):** MENU e VOLTAR em todo passo e `GRUPO ►` para quem já tem lado. O cartão
+  JOGAR AGORA fica ao lado dele: por cima, o clique no avançar mandava o soldado para o campo.
+- **LVTP-5:** duas torretas giratórias com M60, a da frente (`gunner`) e a de trás (`commander`,
+  `VehicleDrive.torretaDe`). Cada uma tem mira e clarão próprios. Em 1ª pessoa a M60 montada some só para
+  quem atira. Os bots ocupam as duas (`BotVehicles`, um `Posto` por torreta). Passageiros ficam dentro.
+- **Bots:** a concertina virou `F.BLOCK` na grade (como "casa", a rota passava por dentro), e a falha de
+  rota é lida antes do novo pedido de movimento, senão a desistência nunca era vista.
+- **Chão branco:** textura de terra neutralizada (`dirt_floor_neutro`) e `Ground` mais escuro.
+- **Medido:** autoteste 18 de 18, Lune 920, pytest 77; 1 de 82 bots parado 12 s ou mais junto do arame
+  (pior caso 16 s, saiu sozinho). Detalhes e o que ficou sem teste em `testes/LOTE109_D237_2026-11-21.md`.

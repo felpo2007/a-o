@@ -60,6 +60,9 @@ return {
 		caixa_pouso = 72978580024321,
 		caixa_tremor = 94910867397830,
 		caixa_estouro = 106809902475916,
+		-- D-237: gravações da biblioteca do Roblox: moedas caindo (PSE) e o toque de metais (APM, "1812 Fanfare")
+		ganho_moeda = 9113848943,
+		ganho_promocao = 1845298676,
 		-- D-203: contagem do começo e apito de início (tools/sons_partida.py; 0 = sem som)
 		contagem_tique = 116493671686163,
 		partida_apito = 75456146464614,
@@ -489,7 +492,7 @@ return {
 		forest_ground_06_cor = 74088955875898,
 		forest_ground_06_normal = 80878862384855,
 		forest_ground_06_rugosidade = 96554687561752,
-		dirt_floor_cor = 76029631233105,
+		dirt_floor_cor = 74153801574646, -- D-237: a foto em cor neutra; o tom vem do terreno
 		dirt_floor_normal = 109768166470823,
 		dirt_floor_rugosidade = 75775835318235,
 	},

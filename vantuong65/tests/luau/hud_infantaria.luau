@@ -151,8 +151,8 @@ test("HUD novo: vida do Humanoid, estados do Medical_State, dano do Combat_Hit, 
 		assert(string.find(hi, t, 1, true), t)
 	end
 	local pr = ler(C .. "Progresso.client.luau")
-	assert(string.find(pr, 'Bus.fire(\n\t\t\t"hud_ganho"', 1, true), "em campo o ganho vai para o HUD")
-	assert(string.find(pr, "Toast.reward(", 1, true), "no lobby, o aviso de sempre")
+	assert(string.find(pr, '"ganho_fx"', 1, true), "D-237: o ganho vai para a faixa de moedas (GanhoFx)")
+	assert(string.find(pr, '"promocao_fx"', 1, true), "D-237: a promoção vai para a faixa grande")
 	local pc = ler(C .. "PainelComandos.client.luau")
 	assert(string.find(pc, 'Bus.on("esquadrao_mudou", layout)', 1, true))
 	assert(string.find(pc, "local top = reservaDoAlto()", 1, true), "a coluna começa embaixo do esquadrão")

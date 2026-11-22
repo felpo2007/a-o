@@ -52,7 +52,8 @@ local PAD = px(24, 32)
 local GAP = px(10, 14)
 local CARD_Y = px(132, 176)
 local CARD_H = px(264, 350)
-local CARD_W = math.floor((W - 2 * PAD - 6 * GAP) / Commerce.TRACK_DAYS)
+local VISIVEIS = 7 -- D-237: a trilha tem 30 dias; a tela mostra uma semana por vez
+local CARD_W = math.floor((W - 2 * PAD - 6 * GAP) / VISIVEIS)
 local BTN_H = px(76, 100)
 local ICON_D = px(108, 142)
 local OURO = Color3.fromRGB(255, 206, 60)
@@ -132,9 +133,15 @@ do -- o título em ouro, com a luz de cima
 	})
 	g.Parent = title
 end
-local rule = UiKit.body(panel, "Entre todo dia: o prêmio cresce! Pulou um dia, volta ao dia 1.", px(19, 25), V.TEXT)
+local rule = UiKit.body(
+	panel,
+	"Entre todo dia: o prêmio cresce até o dia 30! Pulou um dia, volta ao dia 1.",
+	px(19, 25),
+	V.TEXT
+)
 rule.Position = UDim2.fromOffset(PAD, px(92, 122))
-rule.Size = UDim2.new(1, -2 * PAD, 0, px(28, 36))
+rule.Size = UDim2.new(1, -2 * PAD - px(260, 340), 0, px(28, 36))
+rule.TextTruncate = Enum.TextTruncate.AtEnd
 
 -- dias seguidos, à direita do título
 local runStat = UiKit.stat(panel, "DIAS SEGUIDOS", "0", px(40, 54))
@@ -162,7 +169,7 @@ local cells: { Cell } = {}
 local function centered(t: TextLabel)
 	t.TextXAlignment = Enum.TextXAlignment.Center
 end
-for i = 1, Commerce.TRACK_DAYS do
+for i = 1, VISIVEIS do
 	local f = UiKit.panel(panel, V.PANEL_2, 0, true)
 	f.Name = "Dia" .. i
 	f.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -201,7 +208,6 @@ for i = 1, Commerce.TRACK_DAYS do
 	art.Size = UDim2.fromScale(1, 1)
 	art.ScaleType = Enum.ScaleType.Fit
 	art.Image = arteDia(i) or ""
-	art.Visible = art.Image ~= ""
 	art.Parent = icon
 	-- o ✔ de recebido fica no canto da arte; sem a imagem, este é o desenho do prêmio
 	local mark = UiKit.title(icon, "💰", px(38, 50), V.TEXT)
@@ -242,6 +248,69 @@ for i = 1, Commerce.TRACK_DAYS do
 		item = item,
 		tag = tag,
 	}
+end
+
+-- D-237: as semanas da trilha (1-7, 8-14, 15-21, 22-28 e os últimos 7 dias)
+local PAGINAS = { 1, 8, 15, 22, 24 }
+local inicio = 1
+local navegou = false
+local function paginaDe(dia: number): number
+	return if dia >= 29 then 24 else math.floor((dia - 1) / 7) * 7 + 1
+end
+local function celula(dia: number): Cell?
+	return cells[dia - inicio + 1]
+end
+local function artePara(dia: number, entry: any): string?
+	if entry.items and dia % 7 ~= 0 then
+		return arteDia(3)
+	elseif dia % 7 == 0 or Commerce.DAILY_BAU[dia] then
+		return arteDia(7)
+	end
+	return arteDia(({ 1, 2, 4, 4, 5, 6 })[(dia - 1) % 7 + 1] or 1)
+end
+local renderizar: () -> ()
+local function folhear(passo: number)
+	local i = table.find(PAGINAS, inicio) or 1
+	inicio = PAGINAS[math.clamp(i + passo, 1, #PAGINAS)]
+	navegou = true
+	renderizar()
+end
+local semanaTxt = UiKit.title(panel, "", px(19, 25), V.KHAKI)
+semanaTxt.AnchorPoint = Vector2.new(1, 0)
+semanaTxt.Position = UDim2.new(1, -PAD - px(46, 60), 0, px(92, 122))
+semanaTxt.Size = UDim2.fromOffset(px(160, 210), px(32, 42))
+semanaTxt.TextXAlignment = Enum.TextXAlignment.Center
+local function seta(nome: string, texto: string, x: number, passo: number): TextButton
+	local b = Instance.new("TextButton")
+	b.Name = nome
+	b.AutoButtonColor = false
+	b.Text = texto
+	b.FontFace = UiKit.F.TITLE
+	b.TextSize = UiKit.text(px(20, 27))
+	b.TextColor3 = V.TEXT
+	b.BackgroundColor3 = V.PANEL_3
+	b.BorderSizePixel = 0
+	b.Selectable = true
+	b.SelectionImageObject = UiKit.FOCUS
+	b.AnchorPoint = Vector2.new(1, 0)
+	b.Position = UDim2.new(1, -PAD - x, 0, px(92, 122))
+	b.Size = UDim2.fromOffset(px(42, 56), px(32, 42))
+	b.Parent = panel
+	UiKit.corner(b, 4)
+	UiKit.edge(b, V.KHAKI, 1, 0.5)
+	UiKit.bind(b, function()
+		if b.Active then
+			folhear(passo)
+		end
+	end)
+	return b
+end
+local semAnt = seta("SemanaAnterior", "◄", px(208, 274), -1)
+local semProx = seta("SemanaProxima", "►", 0, 1)
+local function ligaSeta(b: TextButton, on: boolean)
+	b.Active = on
+	b.TextTransparency = if on then 0 else 0.7
+	b.BackgroundTransparency = if on then 0 else 0.6
 end
 
 -- o que aconteceu (resgate, motivo da recusa, sequência zerada) e o aviso de sessão sem gravação
@@ -315,6 +384,7 @@ local function pulseButton(on: boolean)
 	end
 end
 local bounceDay = 0
+local bounceCell: Cell? = nil
 local bounce: Tween? = nil
 local glow: Tween? = nil
 local luzHoje: CanvasGroup? = nil -- D-236: raios, halo e cintilas do cartão de hoje (apagar para parar)
@@ -342,7 +412,7 @@ local function acendeLuz(c: Cell)
 	UiEfeitos.varre(q, 3.2, Color3.fromRGB(255, 236, 170), 6)
 end
 local function bounceToday(day: number)
-	if day == bounceDay then
+	if day == bounceDay and (day == 0 or bounceCell == celula(day)) then
 		return
 	end
 	if bounce then
@@ -354,12 +424,12 @@ local function bounceToday(day: number)
 		glow = nil
 	end
 	apagaLuz()
-	local old = cells[bounceDay]
-	if old then
-		old.iconScale.Scale = 1
+	if bounceCell then
+		bounceCell.iconScale.Scale = 1
 	end
 	bounceDay = day
-	local c = cells[day]
+	local c = celula(day)
+	bounceCell = c
 	if not c then
 		return
 	end
@@ -387,7 +457,7 @@ end
 
 -- ao receber: moedas e brilhos voam do cartão do dia e o valor sobe em letra grande
 local function burst(day: number, credits: number)
-	local c = cells[day]
+	local c = celula(day)
 	if not c then
 		return
 	end
@@ -494,11 +564,22 @@ local function render()
 	local d = daily
 	local ready = d ~= nil and d.ready == true
 	local day: number = if ready and type(d.day) == "number" then d.day else 1
+	if not navegou then
+		inicio = paginaDe(day)
+	end
+	semanaTxt.Text = string.format("DIAS %d A %d DE %d", inicio, inicio + VISIVEIS - 1, Commerce.TRACK_DAYS)
+	ligaSeta(semAnt, inicio > PAGINAS[1])
+	ligaSeta(semProx, inicio < PAGINAS[#PAGINAS])
+	local proximo = Commerce.trackDay((if ready and type(d.run) == "number" then d.run else 0) + 1)
 	local side = sideNow()
 	runStat.value.Text = if ready then tostring(d.run or 0) else "—"
 	local claimedAll = ready and d.claimedToday == true
-	for i, c in cells do
+	for j, c in cells do
+		local i = inicio + j - 1
 		local entry = Commerce.DailyTrack[i]
+		c.day.Text = "DIA " .. i
+		c.art.Image = artePara(i, entry) or ""
+		c.art.Visible = c.art.Image ~= ""
 		c.cash.Text = string.format("+$ %d", entry.credits)
 		local items = entry.items
 		if items then
@@ -510,7 +591,7 @@ local function render()
 		local claimed = claimedAll
 		local done = ready and (if claimed then i < day else (d.canClaim and i < day))
 		local today = ready and i == day
-		local last = i == Commerce.TRACK_DAYS
+		local last = i % 7 == 0 or Commerce.DAILY_BAU[i] ~= nil
 		local text, color = "", V.OLIVE
 		if today and claimed then
 			text, color = "RECEBIDO", VERDE
@@ -518,7 +599,7 @@ local function render()
 			text, color = "HOJE!", OURO
 		elseif done then
 			text, color = "✔", VERDE
-		elseif claimed and i == day % Commerce.TRACK_DAYS + 1 then
+		elseif claimed and i == proximo then
 			text, color = "AMANHÃ", V.PANEL_3
 		end
 		c.tag.Visible = text ~= ""
@@ -613,7 +694,7 @@ end
 
 -- o cartão de hoje pula ao receber
 local function pop(day: number)
-	local c = cells[day]
+	local c = celula(day)
 	if not c then
 		return
 	end
@@ -669,6 +750,9 @@ Net.event("Daily_State").OnClientEvent:Connect(function(s: any)
 			claimedNow = s.result
 			if s.result.ok then
 				local day = tonumber(s.result.day) or 1
+				navegou = false
+				inicio = paginaDe(day)
+				render()
 				pop(day)
 				local entry = Commerce.DailyTrack[day]
 				local got = if type(s.result.credits) == "number" and s.result.credits > 0
@@ -684,6 +768,8 @@ Net.event("Daily_State").OnClientEvent:Connect(function(s: any)
 	end
 end)
 
+renderizar = render
+
 -- ===== abrir e fechar =====
 setOpen = function(on: boolean)
 	if on == open then
@@ -695,6 +781,7 @@ setOpen = function(on: boolean)
 	if on then
 		claimedNow = nil
 		busy = false
+		navegou = false
 		gui.Enabled = true
 		UiKit.opened("diaria", gui.DisplayOrder)
 		Input.openMenu()

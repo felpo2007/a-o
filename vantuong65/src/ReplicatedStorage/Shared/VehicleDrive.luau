@@ -948,6 +948,8 @@ export type Art = {
 	-- D-199: quanto o assento desce além do EYE_ABOVE_SEAT (studs), por lugar. A câmera fica no olho
 	-- medido; só o corpo desce (o R15 sentado tem a cabeça 1,33 m acima do assento, Studio)
 	seatDrop: { [string]: number }?,
+	-- D-237: a segunda torreta (lugar, peças Torre2/Cano2 e os atributos da mira dela)
+	torre2: { seat: string, yaw: string, pitch: string }?,
 }
 export type Torre = { lugares: { string }, pecas: { string }, minPitch: { { number } }? }
 
@@ -1028,13 +1030,15 @@ VehicleDrive.ART = {
 		eyes = {
 			driver = { -10.79, 5.85, 3.39 },
 			gunner = { -10.44, 6.46, 0 },
-			commander = { -10.79, 5.85, -3.39 },
+			commander = { 7.95, 6.46, 0 }, -- D-237: na torreta de trás
 		},
-		-- a tropa vai sentada em cima (no Vietnã os fuzileiros andavam no teto do amtrac por causa das
-		-- minas)
+		-- D-237: a tropa vai dentro do casco (o corpo desce 7 studs e não aparece; OcupanteVeiculo)
 		riders = { x0 = -5.08, dx = 2.21, y = 6.92, z = 3.57 },
+		seatDrop = { p1 = 7, p2 = 7, p3 = 7, p4 = 7, p5 = 7, p6 = 7, p7 = 7, p8 = 7, p9 = 7, p10 = 7, p11 = 7, p12 = 7 },
 		pivots = {
 			Torre = { -10.79, 3.88, 0 },
+			Torre2 = { 7.6, 3.88, 0 },
+			Cano2 = { 6.19, 5.9, 0 },
 			Escotilha_Rampa = { -16.01, -1.05, 0 },
 			Escotilha_Tropa = { -0.79, 4.13, 2.14 },
 			Escotilha_TropaE = { 5.1, 4.13, 4.14 },
@@ -1043,7 +1047,9 @@ VehicleDrive.ART = {
 			Escotilha_Comandante = { -9.94, 4.6, -3.39 },
 		},
 		aim = { seat = "gunner", down = -15, up = 45 },
-		torre = { lugares = { "gunner" }, pecas = {} }, -- D-196: a cúpula da metralhadora
+		-- D-196: a cúpula da metralhadora; D-237: e a torreta de trás, que gira sozinha
+		torre = { lugares = { "gunner", "commander" }, pecas = {} },
+		torre2 = { seat = "commander", yaw = "Aim2Yaw", pitch = "Aim2Pitch" },
 	},
 	-- D-199: v3 (silhueta medida no desenho de três vistas): números do assets/blender/uh34d/
 	-- metricas.json (art_novo e as juntas); o teste rotor.luau confere
@@ -1132,6 +1138,19 @@ function VehicleDrive.naTorre(id: string, nome: string): boolean
 		return false
 	end
 	return table.find(t.lugares, nome) ~= nil or table.find(t.pecas, nome) ~= nil
+end
+
+-- D-237: a peça e os atributos da mira de um lugar que aponta uma torreta (nil = não aponta)
+function VehicleDrive.torretaDe(id: string, seatId: string): (string?, string?, string?)
+	local art = VehicleDrive.ART[id]
+	if art and art.aim and art.aim.seat == seatId then
+		return "Torre", "AimYaw", "AimPitch"
+	end
+	local t = art and art.torre2
+	if t and t.seat == seatId then
+		return "Torre2", t.yaw, t.pitch
+	end
+	return nil, nil, nil
 end
 
 -- Giro da torre num passo: do atual para o pedido, pelo caminho mais curto, no máximo degS por segundo

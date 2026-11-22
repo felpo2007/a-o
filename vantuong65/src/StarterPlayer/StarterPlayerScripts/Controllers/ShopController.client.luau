@@ -2697,10 +2697,15 @@ local function soldadoPrevia(lado: string): Model?
 		m.Archivable = was
 		return if ok then c else nil
 	end
+	-- D-237 (dono: "o personagem não muda no armário mesmo mudando o time"): o soldado do lobby só vale
+	-- quando é do lado escolhido na aba; do outro lado, entra o manequim dele
 	local meu = player:FindFirstChild("PlayerGui") and player.PlayerGui:FindFirstChild("VT65MeuSoldado")
-	local c = clona(meu and meu:FindFirstChild("Soldado", true))
-	if c then
-		return c
+	local soldado = meu and meu:FindFirstChild("Soldado", true)
+	if soldado and soldado:GetAttribute("Faction") == lado then
+		local c = clona(soldado)
+		if c then
+			return c
+		end
 	end
 	local pv = ReplicatedStorage:FindFirstChild("VT65Preview")
 	return clona(pv and pv:FindFirstChild(lado))

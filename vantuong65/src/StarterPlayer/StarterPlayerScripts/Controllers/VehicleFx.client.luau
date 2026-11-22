@@ -320,9 +320,19 @@ type Fx = {
 	spin: number,
 	steerAng: number,
 	-- lote _v2: juntas das peças móveis (VehicleService.artJoints)
-	joints: { torre: Motor6D?, cano: Motor6D?, rotor: Motor6D?, tail: Motor6D?, volante: Motor6D? },
+	joints: {
+		torre: Motor6D?,
+		cano: Motor6D?,
+		torre2: Motor6D?,
+		cano2: Motor6D?,
+		rotor: Motor6D?,
+		tail: Motor6D?,
+		volante: Motor6D?,
+	},
 	aimYaw: number,
 	aimPitch: number,
+	aim2Yaw: number?, -- D-237: a torreta de trás do LVTP-5
+	aim2Pitch: number?,
 	aimSent: number,
 	hubAng: number,
 	hubTail: number,
@@ -333,6 +343,8 @@ local fxs: { [Model]: Fx } = {}
 local JOINT_KEY: { [string]: string } = {
 	Torre = "torre",
 	Cano = "cano",
+	Torre2 = "torre2",
+	Cano2 = "cano2",
 	RotorPrincipal = "rotor",
 	RotorCauda = "tail",
 	Volante = "volante",
@@ -904,6 +916,40 @@ local function updateJoints(fx: Fx, dt: number)
 	local hum = char and char:FindFirstChildOfClass("Humanoid")
 	local seat = hum and hum.SeatPart
 	local mcf = meshCF(fx)
+	-- D-237: a torreta de trás anda pelos atributos dela; quem está nela manda a mira pelo mesmo remote
+	local t2 = art and art.torre2
+	if t2 and j.torre2 then
+		local meu = seat and seat:IsDescendantOf(fx.model) and seat:GetAttribute("SeatId") == t2.seat and mcf
+		local y2, p2 = fx.model:GetAttribute(t2.yaw), fx.model:GetAttribute(t2.pitch)
+		local wy = if type(y2) == "number" then y2 else 0
+		local wp = if type(p2) == "number" then p2 else 0
+		if meu then
+			local look = camera.CFrame.LookVector
+			local d = (mcf :: CFrame):VectorToObjectSpace(look)
+			local f = (mcf :: CFrame):VectorToObjectSpace(fx.chassis.CFrame.LookVector)
+			wy = math.atan2(f.Z * d.X - f.X * d.Z, f.X * d.X + f.Z * d.Z)
+			wp = math.asin(math.clamp(d.Y, -1, 1))
+			fx.aimSent -= dt
+			if fx.aimSent <= 0 then
+				fx.aimSent = 0.125
+				local pasta = ReplicatedStorage:FindFirstChild("VT65Remotes")
+				local r = pasta and pasta:FindFirstChild("Vehicle_Aim")
+				if r and r:IsA("UnreliableRemoteEvent") then
+					r:FireServer(look)
+				end
+			end
+		end
+		local gs = (fx.body and fx.body.turretDegS) or 30
+		fx.aim2Yaw = VehicleDrive.torreGira(fx.aim2Yaw or 0, wy, gs, dt)
+		local cur = fx.aim2Pitch or 0
+		local alvo = math.clamp(wp, math.rad(aim.down), math.rad(aim.up))
+		fx.aim2Pitch = cur + math.clamp(alvo - cur, -math.rad(20) * dt, math.rad(20) * dt)
+		local junta2 = j.torre2 :: Motor6D
+		junta2.Transform = CFrame.Angles(0, fx.aim2Yaw :: number, 0)
+		if j.cano2 then
+			j.cano2.Transform = CFrame.Angles(0, 0, -(fx.aim2Pitch :: number))
+		end
+	end
 	if seat and seat:IsDescendantOf(fx.model) and seat:GetAttribute("SeatId") == aim.seat and mcf then
 		-- atirador local: a câmera, no referencial da malha (com a mola)
 		local look = camera.CFrame.LookVector

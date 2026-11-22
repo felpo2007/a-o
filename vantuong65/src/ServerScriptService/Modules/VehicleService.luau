@@ -362,13 +362,23 @@ local lastAim: { [Instance]: number } = {}
 -- ela. Agora quem está na torre vai soldado a ela (addSeat) e o servidor gira as juntas no mesmo passo
 -- dos clientes (VehicleDrive.torreGira, na velocidade da ficha): o corpo que o servidor acerta é o
 -- mesmo que os outros veem na escotilha.
-type TorreState = { m6: Motor6D, cano: Motor6D?, yaw: number, pitch: number, spec: string, degS: number }
-local torres: { [Model]: TorreState } = {}
+type TorreState = {
+	model: Model,
+	m6: Motor6D,
+	cano: Motor6D?,
+	yaw: number,
+	pitch: number,
+	spec: string,
+	degS: number,
+	attrYaw: string,
+	attrPitch: string,
+}
+local torres: { [Motor6D]: TorreState } = {} -- D-237: por junta (o LVTP-5 tem duas torretas)
 local torreLoop: RBXScriptConnection? = nil
 
-local function torrePart(model: Model): BasePart?
+local function torrePart(model: Model, nome: string?): BasePart?
 	for _, d in model:GetDescendants() do
-		if d.Name == "Torre" and d:IsA("BasePart") then
+		if d.Name == (nome or "Torre") and d:IsA("BasePart") then
 			return d
 		end
 	end
@@ -376,15 +386,16 @@ local function torrePart(model: Model): BasePart?
 end
 
 local function stepTorres(dt: number)
-	for model, st in torres do
+	for junta, st in torres do
+		local model = st.model
 		if model.Parent == nil then
-			torres[model] = nil
+			torres[junta] = nil
 			continue
 		end
 		if model:GetAttribute("Destroyed") then
 			continue -- destruído: a torre para onde estava
 		end
-		local ay, ap = model:GetAttribute("AimYaw"), model:GetAttribute("AimPitch")
+		local ay, ap = model:GetAttribute(st.attrYaw), model:GetAttribute(st.attrPitch)
 		local yaw = VehicleDrive.torreGira(st.yaw, if type(ay) == "number" then ay else 0, st.degS, dt)
 		local down, up = VehicleDrive.limiteCano(st.spec, yaw)
 		local want = math.clamp(if type(ap) == "number" then ap else 0, math.rad(down), math.rad(up))
@@ -404,28 +415,51 @@ local function stepTorres(dt: number)
 end
 
 local function registrarTorre(model: Model, specId: string)
-	local m6: Motor6D?, cano: Motor6D? = nil, nil
+	local m6: Motor6D?, cano: Motor6D?, m62: Motor6D?, cano2: Motor6D? = nil, nil, nil, nil
 	for _, d in model:GetDescendants() do
 		if d:IsA("Motor6D") then
 			if d.Name == "Torre" then
 				m6 = d
 			elseif d.Name == "Cano" then
 				cano = d
+			elseif d.Name == "Torre2" then
+				m62 = d
+			elseif d.Name == "Cano2" then
+				cano2 = d
 			end
 		end
 	end
 	local spec = Vehicles.SPECS[specId]
-	if not (m6 and VehicleDrive.ART[specId] and VehicleDrive.ART[specId].aim) then
+	local art = VehicleDrive.ART[specId]
+	if not (m6 and art and art.aim) then
 		return
 	end
-	torres[model] = {
+	local degS = (spec and spec.turretDegS) or 30
+	torres[m6] = {
+		model = model,
 		m6 = m6,
 		cano = cano,
 		yaw = 0,
 		pitch = 0,
 		spec = specId,
-		degS = (spec and spec.turretDegS) or 30,
+		degS = degS,
+		attrYaw = "AimYaw",
+		attrPitch = "AimPitch",
 	}
+	local t2 = art.torre2
+	if m62 and t2 then
+		torres[m62] = {
+			model = model,
+			m6 = m62,
+			cano = cano2,
+			yaw = 0,
+			pitch = 0,
+			spec = specId,
+			degS = degS,
+			attrYaw = t2.yaw,
+			attrPitch = t2.pitch,
+		}
+	end
 	if not torreLoop then
 		torreLoop = RunService.Heartbeat:Connect(stepTorres)
 	end
@@ -433,11 +467,11 @@ end
 
 local function setAim(model: Model, seat: Seat, dir: Vector3)
 	local specId = tostring(model:GetAttribute("Spec"))
-	local art = VehicleDrive.ART[specId]
-	local aim = art and art.aim
+	-- D-237: cada torreta tem os atributos dela
+	local _, attrYaw, attrPitch = VehicleDrive.torretaDe(specId, tostring(seat:GetAttribute("SeatId")))
 	local chassis = model:FindFirstChild("Chassis") :: BasePart?
 	local mag = dir.Magnitude
-	if not (aim and chassis) or seat:GetAttribute("SeatId") ~= aim.seat or not (mag >= 0.5 and mag < 1e6) then
+	if not (attrYaw and attrPitch and chassis) or not (mag >= 0.5 and mag < 1e6) then
 		return -- (NaN do cliente falha no >=)
 	end
 	local l = (chassis :: BasePart).CFrame:VectorToObjectSpace(dir.Unit)
@@ -445,8 +479,8 @@ local function setAim(model: Model, seat: Seat, dir: Vector3)
 	-- D-196: com o mínimo do cano naquele giro (não entra no casco)
 	local down, up = VehicleDrive.limiteCano(specId, yaw)
 	local pitch = math.clamp(math.asin(math.clamp(l.Y, -1, 1)), math.rad(down), math.rad(up))
-	model:SetAttribute("AimYaw", math.floor(yaw * 200 + 0.5) / 200)
-	model:SetAttribute("AimPitch", math.floor(pitch * 200 + 0.5) / 200)
+	model:SetAttribute(attrYaw, math.floor(yaw * 200 + 0.5) / 200)
+	model:SetAttribute(attrPitch, math.floor(pitch * 200 + 0.5) / 200)
 end
 
 -- Tiro da arma de um assento (jogador ou bot, D-90): a mesma validação para os dois. Devolve true
@@ -465,7 +499,12 @@ local function fireFromSeat(seat: Seat, char: Model, player: Player?, dir: Vecto
 	local specId = tostring(model:GetAttribute("Spec"))
 	local art = VehicleDrive.ART[specId]
 	local chassis = model:FindFirstChild("Chassis") :: BasePart?
-	if art and art.aim and art.aim.seat == seat:GetAttribute("SeatId") and chassis and dir.Magnitude > 0.5 then
+	if
+		art
+		and VehicleDrive.torretaDe(specId, tostring(seat:GetAttribute("SeatId")))
+		and chassis
+		and dir.Magnitude > 0.5
+	then
 		local l = chassis.CFrame:VectorToObjectSpace(dir.Unit)
 		local yaw = math.atan2(-l.X, -l.Z)
 		local pitch = math.asin(math.clamp(l.Y, -1, 1))
@@ -477,14 +516,18 @@ local function fireFromSeat(seat: Seat, char: Model, player: Player?, dir: Vecto
 			)
 		end
 	end
-	local origin = seat.Position + Vector3.new(0, 2.5 / M, 0) + dir * (2 / M)
+	-- D-237: com a metralhadora montada na torreta, o tiro e o clarão saem da boca dela
+	local arma = model:FindFirstChild("Arma_" .. tostring(seat:GetAttribute("SeatId"))) :: Model?
+	local wm = arma and arma:FindFirstChild("Weapon") :: Model?
+	local boca = wm and wm.PrimaryPart and wm.PrimaryPart:FindFirstChild("Muzzle") :: Attachment?
+	local origin = if boca then boca.WorldPosition else seat.Position + Vector3.new(0, 2.5 / M, 0) + dir * (2 / M)
 	-- M60 do assento (porta, cúpula) e a coaxial do atirador do M48 (RB / tecla F)
 	if weapon == "m60" or (coax and weapon == "gun_90") then
 		if now - (lastShot[seat :: any] or 0) < 0.09 then
 			return false -- ~650 tiros/min no máximo (validação; a cadência real vem da ficha da M60)
 		end
 		lastShot[seat :: any] = now
-		CombatService.fire(char, "m60", origin, dir, math.floor(rng:next() * 2 ^ 31), player)
+		CombatService.fire(char, "m60", origin, dir, math.floor(rng:next() * 2 ^ 31), player, arma)
 		return true
 	end
 	if weapon == "gun_90" and model:GetAttribute("Ammo") == "heat" then
@@ -892,7 +935,9 @@ local function addSeat(model: Model, chassis: BasePart, mount: BasePart, info: V
 	end
 	-- preso à arte: quem está sentado balança com a carroceria. D-196: na torre, preso a ela (gira junto;
 	-- antes a torre passava pelo corpo do atirador, do comandante e do municiador)
-	local torre = if VehicleDrive.naTorre(tostring(model:GetAttribute("Spec")), id) then torrePart(model) else nil
+	local specS = tostring(model:GetAttribute("Spec"))
+	local peca = VehicleDrive.torretaDe(specS, id) -- D-237: a torreta de trás é outra peça
+	local torre = if VehicleDrive.naTorre(specS, id) then torrePart(model, peca) else nil
 	local w = Instance.new("WeldConstraint")
 	w.Part0, w.Part1 = torre or mount, s
 	w.Parent = s
@@ -1223,7 +1268,10 @@ local function artJoints(
 			-- D-196: o cano e as escotilhas da torre giram com ela (antes as escotilhas do comandante e do
 			-- municiador ficavam no casco e a torre passava por elas)
 			local onTorre = name == "Cano" or VehicleDrive.naTorre(specId, name)
-			local part0 = if onTorre and byName.Torre then byName.Torre else casco :: BasePart
+			local part0 = if name == "Cano2" and byName.Torre2
+				then byName.Torre2
+				elseif onTorre and byName.Torre then byName.Torre
+				else casco :: BasePart
 			local at = (mesh :: BasePart).CFrame * CFrame.new(piv[1] * s.X, piv[2] * s.Y, piv[3] * s.Z)
 			local m6 = Instance.new("Motor6D")
 			m6.Name = name
@@ -1235,6 +1283,46 @@ local function artJoints(
 			weld(mount, p)
 		end
 	end
+end
+
+-- D-237 (dono: "faça 2 torretas em cima"): as peças da torreta de trás, por código (a malha do LVTP-5 só
+-- tem a cúpula da frente): anel, berço e a M60 de verdade, com a boca e os pontos das mãos.
+local function torretaPecas(art: Model, mesh: BasePart, info: VehicleDrive.Art)
+	local s = mesh.Size / Vector3.new(info.box[1], info.box[2], info.box[3])
+	local piv = info.pivots :: { [string]: { number } }
+	local function at(n: string): CFrame
+		return mesh.CFrame * CFrame.new(piv[n][1] * s.X, piv[n][2] * s.Y, piv[n][3] * s.Z)
+	end
+	local verde = Color3.fromRGB(58, 64, 40)
+	local base = artPart(
+		"Torre2",
+		Vector3.new(1.4, 3.6, 3.6) * s.Y,
+		at("Torre2") * CFrame.new(0, 0.7 * s.Y, 0) * CFrame.Angles(0, 0, math.pi / 2),
+		verde
+	)
+	base.Shape = Enum.PartType.Cylinder
+	base.Parent = art
+	local berco = artPart("Cano2", Vector3.new(0.7, 0.45, 0.45) * s.Y, at("Cano2"), verde)
+	berco.Parent = art
+end
+
+local function montarM60(model: Model, chassis: BasePart, berco: BasePart, seatId: string, nariz: CFrame)
+	local w = AssetLoader.weaponModel("m60", "mg")
+	if not w then
+		return
+	end
+	w.Name = "Weapon"
+	w:PivotTo(nariz.Rotation + berco.Position)
+	for _, d in w:GetDescendants() do
+		if d:IsA("BasePart") then
+			d.Anchored, d.CanCollide, d.CanQuery, d.CanTouch, d.Massless = false, false, false, false, true
+			weld(berco, d)
+		end
+	end
+	local arma = Instance.new("Model")
+	arma.Name = "Arma_" .. seatId
+	w.Parent = arma
+	arma.Parent = model
 end
 
 -- Onde fica cada lugar (CFrame no mundo, na hora do nascimento). Com a arte medida: embaixo do olho
@@ -1388,8 +1476,16 @@ local function build(specId: string, at: Vector3, yaw: number, depot: number?): 
 			local shift = (mesh :: BasePart).CFrame:VectorToWorldSpace(Vector3.new(hullCenter, 0, 0))
 			art:PivotTo(CFrame.new(-shift) * art:GetPivot())
 		end
+		if mesh and info and info.torre2 then
+			torretaPecas(art, mesh, info)
+		end
 		artJoints(art, mount, chassis, mesh, info, specId)
 		art.Parent = model
+		local berco2 = art:FindFirstChild("Cano2")
+		if mesh and info and info.torre2 and berco2 and berco2:IsA("BasePart") then
+			-- a boca para a frente do veículo (nariz da malha em −X)
+			montarM60(model, chassis, berco2, info.torre2.seat, mesh.CFrame * CFrame.Angles(0, math.pi / 2, 0))
+		end
 		chassis.Transparency = 1
 		if heli then
 			heliColliders(model, chassis, art) -- D-184: apoia nas 3 rodas

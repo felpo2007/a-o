@@ -459,8 +459,7 @@ test("baixa: só os quatro botões; o RENASCER AQUI abre créditos e Robux", fun
 	end
 	local want = {
 		["RENASCER AQUI"] = true,
-		["Pagar com créditos"] = true,
-		["Pagar com Robux"] = true,
+		["Pagar com $"] = true, -- D-237: os símbolos, no lugar de "créditos" e "Robux"
 		["RENASCER COM VEÍCULO"] = true,
 		["ESCOLHER OUTRO PONTO"] = true,
 		["MENU"] = true,
@@ -470,7 +469,7 @@ test("baixa: só os quatro botões; o RENASCER AQUI abre créditos e Robux", fun
 	for _, l in labels do
 		assert(want[l], "botão a mais na tela de baixa: " .. l)
 	end
-	assert(#labels >= 7, "botões achados: " .. #labels)
+	assert(#labels >= 6, "botões achados: " .. #labels)
 	assert(string.find(src, "K.hereRow.Visible = S.hereOpen", 1, true), "a linha de pagar só depois do botão")
 	assert(not string.find(src, 'Bus.fire("passe_open")', 1, true), "sem passe na baixa")
 	assert(not string.find(src, 'Bus.fire("missoes_open")', 1, true), "sem missões na baixa")
@@ -545,13 +544,13 @@ test("cores de compra: baixa, loja, carta de inserção, passe e intendência us
 	local function has(file: string, needle: string)
 		assert(string.find(fs.readFile(C .. file), needle, 1, true), file .. ": " .. needle)
 	end
-	has("CasualtyScreen.luau", '"Pagar com Robux", "robux"')
+	has("CasualtyScreen.luau", 'UiKit.Estilo.ROBUX), "robux"')
 	has("CasualtyScreen.luau", 'setKind("ci")')
 	has("ShopController.client.luau", 'UiKit.action(f, "", "robux"')
 	has("ShopController.client.luau", 'UiKit.payPaint(bt, "robux"')
 	has("ShopController.client.luau", 'pay = if isRobux then "robux" else "ci"')
 	-- D-236: a vitrine tem um cartão por viatura, com os dois preços lado a lado
-	has("CompraVeiculo.client.luau", 'addRow(precos, "ROBUX", "robux"')
+	has("CompraVeiculo.client.luau", 'addRow(precos, UiKit.Estilo.ROBUX, "robux"')
 	has("CompraVeiculo.client.luau", 'item.credits), "ci"')
 	has("TelaPasse.client.luau", 'UiKit.action(detail, "", "robux"') -- D-124: a ficha embaixo da linha do tempo
 	has("Progresso.client.luau", "robux = { bg = UiKit.PAGAR.robux.base")

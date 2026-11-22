@@ -723,7 +723,7 @@ test("D-100: lugares — ordem, nomes, quem atira de dentro e em que ângulo", f
 	-- fechados: motorista, municiador, cabine do caminhão e da picape; abertos: jipe, caçamba, teto, porta
 	assert(Vehicles.seatInfo("m48a3", "loader").open == nil and Vehicles.seatInfo("m35", "passenger").open == nil)
 	assert(Vehicles.seatInfo("m151", "passenger").open ~= nil and Vehicles.seatInfo("m35", "p1").open ~= nil)
-	assert(Vehicles.seatInfo("lvtp5", "p12").open ~= nil and Vehicles.seatInfo("uh34d", "p1").open ~= nil)
+	assert(Vehicles.seatInfo("lvtp5", "p12").open == nil and Vehicles.seatInfo("uh34d", "p1").open ~= nil)
 	assert(Vehicles.seatInfo("peugeot403", "p1").open == nil, "sob a lona")
 	assert(Vehicles.seatInfo("peugeot403", "p6").open == nil, "D-236: a fileira de trás também fica sob a lona")
 	assert(Vehicles.seatInfo("m48a3", "commander").weapon == "m60", "M60 montada da cúpula")
@@ -737,7 +737,9 @@ test("D-100: lugares — ordem, nomes, quem atira de dentro e em que ângulo", f
 	-- volta do ângulo (179° e −179° são vizinhos)
 	local rear = { yaw = 180, half = 50, down = -25, up = 30 }
 	assert(Vehicles.inArc(rear, 179, 0) and Vehicles.inArc(rear, -179, 0) and not Vehicles.inArc(rear, 0, 0))
-	assert(Vehicles.inArc(Vehicles.seatInfo("lvtp5", "p1").open, 37, 10), "teto: para qualquer lado")
+	assert(Vehicles.seatInfo("lvtp5", "commander").weapon == "m60", "D-237: a torreta de trás")
+	assert(Vehicles.ocupanteAparece("lvtp5", "gunner") and Vehicles.ocupanteAparece("lvtp5", "commander"))
+	assert(not Vehicles.ocupanteAparece("lvtp5", "p1"), "D-237: a tropa vai dentro")
 end)
 
 test("D-236: quem atira do lugar aparece; quem vai fechado some", function()

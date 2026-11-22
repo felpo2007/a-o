@@ -11961,5 +11961,96 @@
   "assetType": "Image",
   "name": "VT65 recompensa moeda",
   "description": "VAN TUONG 65 - premio da recompensa diaria (D-236)"
+ },
+ {
+  "key": "Rostos3.f_01",
+  "file": "assets/rostos/v3/rosto_01.png",
+  "assetType": "Image",
+  "name": "VT65 rosto3 01",
+  "description": "VAN TUONG 65 - rosto estilo Roblox (D-237)"
+ },
+ {
+  "key": "Rostos3.f_02",
+  "file": "assets/rostos/v3/rosto_02.png",
+  "assetType": "Image",
+  "name": "VT65 rosto3 02",
+  "description": "VAN TUONG 65 - rosto estilo Roblox (D-237)"
+ },
+ {
+  "key": "Rostos3.f_03",
+  "file": "assets/rostos/v3/rosto_03.png",
+  "assetType": "Image",
+  "name": "VT65 rosto3 03",
+  "description": "VAN TUONG 65 - rosto estilo Roblox (D-237)"
+ },
+ {
+  "key": "Rostos3.f_04",
+  "file": "assets/rostos/v3/rosto_04.png",
+  "assetType": "Image",
+  "name": "VT65 rosto3 04",
+  "description": "VAN TUONG 65 - rosto estilo Roblox (D-237)"
+ },
+ {
+  "key": "Rostos3.f_05",
+  "file": "assets/rostos/v3/rosto_05.png",
+  "assetType": "Image",
+  "name": "VT65 rosto3 05",
+  "description": "VAN TUONG 65 - rosto estilo Roblox (D-237)"
+ },
+ {
+  "key": "Rostos3.f_06",
+  "file": "assets/rostos/v3/rosto_06.png",
+  "assetType": "Image",
+  "name": "VT65 rosto3 06",
+  "description": "VAN TUONG 65 - rosto estilo Roblox (D-237)"
+ },
+ {
+  "key": "Rostos3.f_07",
+  "file": "assets/rostos/v3/rosto_07.png",
+  "assetType": "Image",
+  "name": "VT65 rosto3 07",
+  "description": "VAN TUONG 65 - rosto estilo Roblox (D-237)"
+ },
+ {
+  "key": "Rostos3.f_08",
+  "file": "assets/rostos/v3/rosto_08.png",
+  "assetType": "Image",
+  "name": "VT65 rosto3 08",
+  "description": "VAN TUONG 65 - rosto estilo Roblox (D-237)"
+ },
+ {
+  "key": "Rostos3.f_09",
+  "file": "assets/rostos/v3/rosto_09.png",
+  "assetType": "Image",
+  "name": "VT65 rosto3 09",
+  "description": "VAN TUONG 65 - rosto estilo Roblox (D-237)"
+ },
+ {
+  "key": "Rostos3.f_10",
+  "file": "assets/rostos/v3/rosto_10.png",
+  "assetType": "Image",
+  "name": "VT65 rosto3 10",
+  "description": "VAN TUONG 65 - rosto estilo Roblox (D-237)"
+ },
+ {
+  "key": "Rostos3.f_11",
+  "file": "assets/rostos/v3/rosto_11.png",
+  "assetType": "Image",
+  "name": "VT65 rosto3 11",
+  "description": "VAN TUONG 65 - rosto estilo Roblox (D-237)"
+ },
+ {
+  "key": "Rostos3.f_12",
+  "file": "assets/rostos/v3/rosto_12.png",
+  "assetType": "Image",
+  "name": "VT65 rosto3 12",
+  "description": "VAN TUONG 65 - rosto estilo Roblox (D-237)"
+ },
+ {
+  "key": "Ground2.dirt_floor_cor",
+  "file": "assets/texturas/dirt_floor_neutro.jpg",
+  "assetType": "Image",
+  "name": "VT65 chao dirt_floor neutro",
+  "description": "VAN TUONG 65 - terra batida, cor neutra (Poly Haven dirt_floor, CC0)"
  }
 ]

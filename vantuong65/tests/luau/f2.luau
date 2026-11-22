@@ -395,7 +395,7 @@ test("diária: dia UTC vira à meia-noite e a contagem regressiva fecha com ela"
 	assert(Commerce.dayIndex(t + 30) == Commerce.dayIndex(t) + 1)
 end)
 
-test("diária: sequência de 7 dias, um resgate por dia, volta ao dia 1 depois do 7", function()
+test("diária: um resgate por dia e, depois do 7, segue para o dia 8 (D-237)", function()
 	local st = Commerce.dailyDefault()
 	local earned = {}
 	local d0 = 20400
@@ -413,7 +413,7 @@ test("diária: sequência de 7 dias, um resgate por dia, volta ao dia 1 depois d
 	end
 	assert(st.total == 7 and st.run == 7)
 	local r8 = claimOn(st, earned, d0 + 8)
-	assert(r8.ok and r8.day == 1 and r8.run == 8, "depois do dia 7 a trilha recomeça e a sequência continua")
+	assert(r8.ok and r8.day == 8 and r8.run == 8, "depois do dia 7 vem o dia 8")
 	assert(r8.state.total == 8)
 end)
 
@@ -451,10 +451,17 @@ test("diária: item novo só na primeira vez; relógio voltando não deixa resga
 			assert(c and c.unlock == "daily" and c.slot == "extra", id)
 		end
 		-- D-130: os créditos da trilha são os que o servidor paga (D-72: 30 no 1º dia, +10 por dia)
-		assert(d.credits == 30 + 10 * (d.day - 1), "créditos do dia " .. d.day)
-		week += d.credits
+		if d.day <= 7 then
+			assert(d.credits == 30 + 10 * (d.day - 1), "créditos do dia " .. d.day)
+			week += d.credits
+		end
 	end
 	assert(week == 420, "semana completa")
+	-- D-237: a trilha vai até o dia 30 e, depois, repete de 8 a 30, sem voltar ao dia 1
+	assert(#Commerce.DailyTrack == 30 and Commerce.DailyTrack[30].day == 30, "30 dias")
+	assert(Commerce.trackDay(7) == 7 and Commerce.trackDay(8) == 8 and Commerce.trackDay(30) == 30)
+	assert(Commerce.trackDay(31) == 8 and Commerce.trackDay(53) == 30 and Commerce.trackDay(54) == 8)
+	assert(Commerce.dailyView({ run = 7, lastDay = 49, total = 7 }, 50).day == 8, "depois do 7 vem o 8")
 	local none = { passes = {}, premium = false, subscription = false }
 	assert(not Commerce.canEquip("us_zippo", "US", "extra", none), "sem ganhar, não equipa")
 	local won = { passes = {}, premium = false, subscription = false, earned = { us_zippo = true } }

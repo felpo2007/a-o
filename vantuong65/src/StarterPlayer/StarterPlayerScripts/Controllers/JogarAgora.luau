@@ -429,9 +429,12 @@ local function place(): boolean
 		card.Position = UDim2.fromOffset(986, 668)
 		card.Size = UDim2.fromOffset(230, 0)
 	elseif panel == "desk" then -- o passo do lado: o lugar do botão principal está livre
+		-- D-237: com lado escolhido, o canto é do GRUPO ► e o cartão fica ao lado dele (por cima, o clique
+		-- no avançar virava JOGAR AGORA e mandava o soldado para o campo)
+		local comLado = faction() ~= nil
 		card.AnchorPoint = Vector2.new(1, 0)
-		card.Position = UDim2.fromOffset(1256, 668)
-		card.Size = UDim2.fromOffset(260, 0)
+		card.Position = UDim2.fromOffset(if comLado then 986 else 1256, 668)
+		card.Size = UDim2.fromOffset(if comLado then 230 else 260, 0)
 	else
 		return false -- grupo e classe: o jogador está escolhendo à mão
 	end

@@ -29,7 +29,7 @@ test("na torre: atirador, comandante e municiador do M48; o motorista fica no ca
 	assert(not VehicleDrive.naTorre("m48a3", "driver") and not VehicleDrive.naTorre("m48a3", "Escotilha_Motorista"))
 	assert(VehicleDrive.naTorre("ontos", "gunner") and VehicleDrive.naTorre("ontos", "Escotilha_Torre"))
 	assert(not VehicleDrive.naTorre("ontos", "loader"), "o municiador do Ontos carrega por trás, no casco")
-	assert(VehicleDrive.naTorre("lvtp5", "gunner") and not VehicleDrive.naTorre("lvtp5", "commander"))
+	assert(VehicleDrive.naTorre("lvtp5", "gunner") and VehicleDrive.naTorre("lvtp5", "commander")) -- D-237
 	assert(not VehicleDrive.naTorre("m151", "passenger") and not VehicleDrive.naTorre("nada", "gunner"))
 	-- toda peça da torre tem junta (o VehicleService a prende na Torre)
 	for id, art in VehicleDrive.ART do

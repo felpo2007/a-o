@@ -293,11 +293,11 @@ local function paintCard()
 		cardTitle.Text = UiKit.upper(specName(st.spec))
 		local item = CompraVeiculo.ITEMS[st.spec]
 		if st.state == "reserved" then
-			cardNote.Text = "Confirme a compra em Robux"
+			cardNote.Text = string.format("Confirme a compra em %s", UiKit.Estilo.ROBUX)
 		elseif st.pay == "robux" then
-			cardNote.Text = "Robux: a compra abre quando o lugar ao seu lado for achado"
+			cardNote.Text = string.format("%s: a compra abre quando o lugar ao seu lado for achado", UiKit.Estilo.ROBUX)
 		elseif item then
-			cardNote.Text = string.format("%d CI, cobrados só quando o lugar for achado", item.credits)
+			cardNote.Text = string.format("$ %d, cobrados só quando o lugar for achado", item.credits)
 		end
 	else
 		cardTitle.Text = "A PÉ"
@@ -465,7 +465,7 @@ openPanel = function()
 		end
 		n += 1
 		-- cores de compra (UiKit.PAGAR, 2026-11-13): créditos âmbar, Robux verde, apagado sem saldo
-		addRow(precos, string.format("%d CI", item.credits), "ci", 1, meia, function()
+		addRow(precos, string.format("$ %d", item.credits), "ci", 1, meia, function()
 			order(spec, "ci")
 		end, function(a: UiKit.Action)
 			marcaEscolha()
@@ -478,16 +478,16 @@ openPanel = function()
 				a.label.Text = why
 				a.enabled(false)
 			elseif myCredits() < item.credits then
-				a.label.Text = string.format("FALTAM %d CI", item.credits - myCredits())
+				a.label.Text = string.format("FALTAM $ %d", item.credits - myCredits())
 				a.enabled(false)
 			else
-				a.label.Text = string.format("%d CI", item.credits)
+				a.label.Text = string.format("$ %d", item.credits)
 				a.enabled(true)
 			end
 		end)
 		if id ~= 0 then
 			n += 1
-			addRow(precos, "ROBUX", "robux", 2, meia, function()
+			addRow(precos, UiKit.Estilo.ROBUX, "robux", 2, meia, function()
 				order(spec, "robux")
 			end, function(a: UiKit.Action)
 				local why = blockedWhy()
@@ -500,7 +500,7 @@ openPanel = function()
 					a.label.Text = why
 					a.enabled(false)
 				else
-					a.label.Text = if p then string.format("%d ROBUX", p) else "ROBUX"
+					a.label.Text = if p then UiKit.robux(p) else UiKit.Estilo.ROBUX
 					a.enabled(true)
 				end
 			end)

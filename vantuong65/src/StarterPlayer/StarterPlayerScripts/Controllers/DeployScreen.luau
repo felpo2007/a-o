@@ -214,6 +214,9 @@ local view = Preparacao.novo(root, {
 	voltar = function()
 		DeployScreen.back()
 	end,
+	menu = function()
+		Bus.fire("menu_principal_open") -- D-237: o botão MENU da barra de baixo
+	end,
 	avisar = notify,
 	primaria = primaryOf,
 	trocarPrimaria = swapPrimary,

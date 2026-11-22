@@ -427,7 +427,7 @@ local xp = { label = "", xp = 0, cr = 0, cur = "", ate = 0, token = 0 }
 local function paintXp()
 	local parts = { string.format("+%d XP", xp.xp) }
 	if xp.cr > 0 then
-		table.insert(parts, string.format("+%d %s", xp.cr, xp.cur))
+		table.insert(parts, string.format("+$ %d", xp.cr)) -- D-237: o símbolo $, em vez de "CI"
 	end
 	if xp.label ~= "" then
 		table.insert(parts, xp.label)

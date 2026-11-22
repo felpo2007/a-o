@@ -30,6 +30,7 @@ export type Ctx = {
 	escolherLado: (f: string) -> (),
 	abrir: (nome: string) -> (),
 	voltar: () -> (),
+	menu: () -> (),
 	avisar: (msg: string) -> (),
 	primaria: (f: string, rid: string) -> string?,
 	trocarPrimaria: (rid: string, arma: string) -> (),
@@ -271,17 +272,28 @@ function Preparacao.novo(root: Frame, ctx: Ctx): any
 	peFundo.Size = UDim2.new(3, 0, 0, 658)
 	peFundo.Position = UDim2.new(-1, 0, 0, 0)
 	quadro(peFundo, 0, 0, 1280, 1, DOURADO, 0.55).Size = UDim2.new(1, 0, 0, 1)
-	local voltar = botao(pe, 24, 8, 168, 42, Color3.fromRGB(34, 36, 30))
+	-- D-237 (dono: "adicione um botão para voltar ao menu"): sempre à mão, em todos os passos
+	local menu = botao(pe, 24, 8, 112, 42, Color3.fromRGB(34, 36, 30))
+	menu.Name = "Menu"
+	UiKit.corner(menu, 3)
+	UiKit.edge(menu, DOURADO, 1, 0.45)
+	letra(menu, "≡  MENU", 19, V.TEXT, F.TITLE_MED, 0, 0, 112, 42, Enum.TextXAlignment.Center)
+	liga(menu, function()
+		ctx.menu()
+	end, function(on: boolean)
+		tw(menu, RAPIDO, { BackgroundColor3 = if on then CARTAO_HI else Color3.fromRGB(34, 36, 30) })
+	end)
+	local voltar = botao(pe, 144, 8, 150, 42, Color3.fromRGB(34, 36, 30))
 	voltar.Name = "Voltar"
 	UiKit.corner(voltar, 3)
 	UiKit.edge(voltar, V.KHAKI, 1, 0.5)
-	letra(voltar, "◄  VOLTAR", 19, V.TEXT, F.TITLE_MED, 0, 0, 168, 42, Enum.TextXAlignment.Center)
+	letra(voltar, "◄  VOLTAR", 19, V.TEXT, F.TITLE_MED, 0, 0, 150, 42, Enum.TextXAlignment.Center)
 	liga(voltar, function()
 		ctx.voltar()
 	end, function(on: boolean)
 		tw(voltar, RAPIDO, { BackgroundColor3 = if on then CARTAO_HI else Color3.fromRGB(34, 36, 30) })
 	end)
-	local resumo = letra(pe, "", 18, V.DIM, F.TITLE_MED, 212, 8, 760, 42)
+	local resumo = letra(pe, "", 18, V.DIM, F.TITLE_MED, 308, 8, 676, 42)
 	local principal = botao(pe, 996, 6, 260, 46, V.AMBAR)
 	principal.Name = "Principal"
 	UiKit.corner(principal, 3)
@@ -1078,17 +1090,27 @@ function Preparacao.novo(root: Frame, ctx: Ctx): any
 		principal.Visible = false
 		acaoPrincipal = nil
 		resumo.Text = ""
-		resumo.Position = UDim2.fromOffset(if podeVoltar then 212 else 24, 8)
+		resumo.Position = UDim2.fromOffset(if podeVoltar then 308 else 148, 8)
 		if passo == "lado" then
 			mostra(pgLado)
 			pintaLado()
 			resumo.Text = "Escolha o seu lado para entrar na partida."
+			-- D-237: já tem lado (veio olhar): segue sem precisar escolher de novo
+			if f then
+				principal.Visible = true
+				principalTexto.Text = "GRUPO ►"
+				principal.BackgroundColor3, principalTexto.TextColor3 = V.AMBAR, V.AMBAR_TEXTO
+				acaoPrincipal = function()
+					ctx.abrir("squad")
+				end
+			end
 		elseif passo == "squad" and f then
 			mostra(pgGrupo)
 			pintaGrupo(f, st)
 			if ctx.temSquad() then
 				principal.Visible = true
 				principalTexto.Text = "CLASSE ►"
+				principal.BackgroundColor3, principalTexto.TextColor3 = V.AMBAR, V.AMBAR_TEXTO
 				acaoPrincipal = function()
 					ctx.abrir("role")
 				end

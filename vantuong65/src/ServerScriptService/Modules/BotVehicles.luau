@@ -18,6 +18,7 @@ local BotDriver = require(ReplicatedStorage.Shared.BotDriver)
 local BotMove = require(ReplicatedStorage.Shared.BotMove)
 local BotNav = require(ReplicatedStorage.Shared.BotNav)
 local MapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any
+local VehicleDrive = require(ReplicatedStorage.Shared.VehicleDrive)
 local Vehicles = require(ReplicatedStorage.Shared.Vehicles)
 local BotLocomotion = require(script.Parent.BotLocomotion)
 local BotSquads = require(script.Parent.BotSquads)
@@ -71,7 +72,11 @@ export type Crew = {
 	progBest: number?, -- D-161: menor distância (m) ao destino desde o último progresso
 	progDest: Vector3?, -- o destino daquela conta
 	departed: boolean, -- D-162: já teve a vez de sair da baia
+	posto2: Posto?, -- D-237: quem atira na segunda torreta (LVTP-5)
 }
+
+-- D-237: o estado de quem atira numa torreta. A principal usa os campos da própria tripulação.
+type Posto = { turret: number, target: Model?, targetSince: number, nextShot: number, firing: boolean }
 
 -- v45: sem motorista sentado por WATCH_NO_DRIVER_S (morreu, não chegou) ou o veículo parado por
 -- WATCH_STALL_S indo para o objetivo (encalhado na baia, preso no mato): a tripulação se desfaz e todo
@@ -300,6 +305,13 @@ function BotVehicles.assign(bots: { Bot }, forced: Model?)
 						if VehicleService.seat(v, sid) then
 							table.insert(seats, sid)
 						end
+					end
+					-- D-237: a segunda torreta (LVTP-5) também leva um atirador
+					if
+						VehicleDrive.torretaDe(tostring(v:GetAttribute("Spec")), "commander")
+						and VehicleService.seat(v, "commander")
+					then
+						table.insert(seats, "commander")
 					end
 					local picked = pickBots(bots, faction, #seats)
 					if #picked >= 1 then
@@ -861,6 +873,8 @@ end
 
 local function fireVolley(
 	c: Crew,
+	p: Posto,
+	sid: string,
 	bot: Bot,
 	target: Model,
 	coax: boolean,
@@ -868,7 +882,7 @@ local function fireVolley(
 	distM: number,
 	moving: boolean
 )
-	c.firing = true
+	p.firing = true
 	local n = math.floor(V.coaxVolley[1] + (V.coaxVolley[2] - V.coaxVolley[1] + 1) * bot.rng:next())
 	local life = bot.life
 	task.spawn(function()
@@ -881,12 +895,12 @@ local function fireVolley(
 				bot.diff,
 				distM,
 				{ moving = moving, stance = "crouch", shot = i, kind = "mg" }
-			) * BotBrain.settleFactor(bot.diff, os.clock() - c.targetSince)
-			VehicleService.botFire(c.vehicle, "gunner", perturb((part.Position - origin).Unit, sigma, bot.rng), coax)
+			) * BotBrain.settleFactor(bot.diff, os.clock() - p.targetSince)
+			VehicleService.botFire(c.vehicle, sid, perturb((part.Position - origin).Unit, sigma, bot.rng), coax)
 			task.wait(0.1)
 		end
-		c.firing = false
-		c.nextShot = os.clock() + BotBrain.pause(bot.diff, "mg", bot.rng:next())
+		p.firing = false
+		p.nextShot = os.clock() + BotBrain.pause(bot.diff, "mg", bot.rng:next())
 	end)
 end
 
@@ -926,10 +940,21 @@ end
 -- O atirador sentado procura e engaja. true se é um atirador sentado (o BotService não faz mais nada).
 function BotVehicles.gunner(bot: Bot, model: Model, now: number): boolean
 	local c = crewOf(bot)
-	if not c or bot.crew.seat ~= "gunner" or not seated(bot, c.vehicle) then
+	local sid: string = if bot.crew then bot.crew.seat else ""
+	if not c or not (sid == "gunner" or sid == "commander") or not seated(bot, c.vehicle) then
 		return false
 	end
-	local seat = VehicleService.seat(c.vehicle, "gunner")
+	-- D-237: cada torreta mira e atira por conta própria
+	local p: Posto = (c :: any) :: Posto
+	if sid == "commander" then
+		local segundo = c.posto2
+		if not segundo then
+			segundo = { turret = 0, target = nil, targetSince = 0, nextShot = 0, firing = false }
+			c.posto2 = segundo
+		end
+		p = segundo :: Posto
+	end
+	local seat = VehicleService.seat(c.vehicle, sid)
 	local ch = chassisOf(c.vehicle)
 	if not (seat and ch) then
 		return true
@@ -965,11 +990,11 @@ function BotVehicles.gunner(bot: Bot, model: Model, now: number): boolean
 			end
 		end
 	end
-	if target ~= c.target then
-		c.target = target
-		c.targetSince = now
+	if target ~= p.target then
+		p.target = target
+		p.targetSince = now
 	end
-	if not target or c.firing or now < c.nextShot then
+	if not target or p.firing or now < p.nextShot then
 		return true
 	end
 	local tgt = target :: Model
@@ -981,9 +1006,9 @@ function BotVehicles.gunner(bot: Bot, model: Model, now: number): boolean
 	local spec = Vehicles.SPECS[c.spec]
 	local degS = (spec and spec.turretDegS) or V.turretDegS
 	local want = BotMove.yawTo(tp.Position.X - eye.X, tp.Position.Z - eye.Z)
-	c.turret = BotDriver.turret(c.turret, want, degS, 0.3)
+	p.turret = BotDriver.turret(p.turret, want, degS, 0.3)
 	local react = V.gunReaction[1] + (V.gunReaction[2] - V.gunReaction[1]) * ((bot.id * 0.37) % 1)
-	if math.abs(BotMove.wrap(want - c.turret)) > math.rad(V.aimToleranceDeg) or now - c.targetSince < react then
+	if math.abs(BotMove.wrap(want - p.turret)) > math.rad(V.aimToleranceDeg) or now - p.targetSince < react then
 		return true
 	end
 	-- grupo perto do alvo e abrigo dele
@@ -998,7 +1023,7 @@ function BotVehicles.gunner(bot: Bot, model: Model, now: number): boolean
 	local ray = workspace:Raycast(eye, tp.Position - eye, losParams)
 	local covered = ray ~= nil and not ray.Instance:IsDescendantOf(tgt)
 	local tubes = (c.vehicle:GetAttribute("Tubes") :: number?) or 0
-	local gun = BotDriver.gunFor(weapon, tDist, near, covered, VehicleService.mainReady(c.vehicle, "gunner"), tubes)
+	local gun = BotDriver.gunFor(weapon, tDist, near, covered, VehicleService.mainReady(c.vehicle, sid), tubes)
 	local vs = VehicleService.botState(c.vehicle)
 	local moving = vs ~= nil and math.abs(vs.v) > 1
 	if gun == "main" then
@@ -1006,12 +1031,12 @@ function BotVehicles.gunner(bot: Bot, model: Model, now: number): boolean
 		local root = tgt:FindFirstChild("HumanoidRootPart") :: BasePart?
 		local aimAt = if root then root.Position - Vector3.new(0, 2.5, 0) else tp.Position
 		local sigma = BotBrain.aimError(bot.diff, tDist, { moving = moving, stance = "prone" })
-		if VehicleService.botFire(c.vehicle, "gunner", perturb((aimAt - eye).Unit, sigma, bot.rng), false) then
-			c.nextShot = now + V.mainEveryS
+		if VehicleService.botFire(c.vehicle, sid, perturb((aimAt - eye).Unit, sigma, bot.rng), false) then
+			p.nextShot = now + V.mainEveryS
 			print(string.format("[VT65] bots: %s atirou com o canhão a %.0f m", c.spec, tDist))
 		end
 	elseif gun == "coax" or gun == "m60" then
-		fireVolley(c, bot, tgt, gun == "coax", eye, tDist, moving)
+		fireVolley(c, p, sid, bot, tgt, gun == "coax", eye, tDist, moving)
 	end
 	return true
 end

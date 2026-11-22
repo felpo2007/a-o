@@ -745,9 +745,14 @@ local function renderGear(s: { [string]: any })
 		else
 			line(string.format("De graça no posto %d (%s).", t.rank, tostring(t.rankName)), 13)
 			if (tonumber(t.passId) or 0) > 0 then
-				fullButton("Liberar o nível com Robux", "robux", "tier:" .. t.key, function()
-					MarketplaceService:PromptGamePassPurchase(player, t.passId)
-				end)
+				fullButton(
+					string.format("Liberar o nível com %s", UiKit.Estilo.ROBUX),
+					"robux",
+					"tier:" .. t.key,
+					function()
+						MarketplaceService:PromptGamePassPurchase(player, t.passId)
+					end
+				)
 			end
 		end
 		for _, g in s.gear do
@@ -1176,27 +1181,12 @@ Net.event("Progress_State").OnClientEvent:Connect(function(s: any)
 	end
 	state = s
 	local g = s.gain
-	local hum = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
-	if type(g) == "table" and ((g.xp or 0) > 0 or (g.cr or 0) > 0) and hum and hum.Health > 0 then
-		-- D-210 (§13: "XP discreto" no alto à direita; "avisos de XP, assistência e eliminação curtos"):
-		-- em campo o ganho vai para a linha do HudInfantaria, não para a pilha de avisos do meio
-		Bus.fire(
-			"hud_ganho",
-			if g.label ~= nil then tostring(g.label) else "",
-			tonumber(g.xp) or 0,
-			tonumber(g.cr) or 0,
-			tostring(s.cur)
-		)
-	elseif type(g) == "table" and ((g.xp or 0) > 0 or (g.cr or 0) > 0) then
-		Toast.reward(
-			if g.label ~= nil then tostring(g.label) else "",
-			tonumber(g.xp) or 0,
-			tonumber(g.cr) or 0,
-			tostring(s.cur)
-		)
+	-- D-237 (dono: "receba dinheiro e suba patentes, com sons"): a moeda, o +$ e a barra (GanhoFx)
+	if type(g) == "table" and ((g.xp or 0) > 0 or (g.cr or 0) > 0) then
+		Bus.fire("ganho_fx", if g.label ~= nil then tostring(g.label) else "", tonumber(g.xp) or 0, tonumber(g.cr) or 0)
 	end
 	if type(s.rankUp) == "table" then
-		ceremony(s.rankUp)
+		Bus.fire("promocao_fx", s.rankUp)
 	end
 	render()
 end)

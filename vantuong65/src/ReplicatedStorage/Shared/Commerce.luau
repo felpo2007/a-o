@@ -616,7 +616,11 @@ Commerce.FunnelSteps = { "store_open", "item_view", "prompt", "purchase" }
 -- dois lados. D-130: os créditos de cada dia são os que o servidor paga desde a D-72 (30 no 1º dia,
 -- +10 por dia; antes ficavam aqui outros números, 25 a 100, que ninguém lia). Semana completa: $ 420.
 Commerce.DAY_SECONDS = 86400
-Commerce.TRACK_DAYS = 7
+-- D-237 (dono: "quando eu termino os 7 dias ele deve ir avançando até o dia 30 pelo menos, e não
+-- reiniciar para o dia 1"): a trilha tem 30 dias. Depois do 30, repete do dia 8 ao 30, sem voltar ao
+-- começo. Pular um dia continua zerando a sequência.
+Commerce.TRACK_DAYS = 30
+Commerce.TRACK_VOLTA = 8 -- o dia em que a trilha recomeça depois do 30
 Commerce.DAILY_FACTIONS = { "US", "VC" } -- ordem fixa dos itens de um dia
 
 export type DailyDay = {
@@ -647,6 +651,17 @@ Commerce.DailyTrack = {
 		items = { US = "us_cigarette_band", VC = "vc_mess_tin" },
 	},
 } :: { DailyDay }
+-- D-237: do dia 8 ao 30, $ 100 subindo $ 5 por dia, com um baú nos dias 14, 21, 28 e 30 (PLACEHOLDER)
+Commerce.DAILY_BAU = { [14] = 300, [21] = 400, [28] = 500, [30] = 1000 } :: { [number]: number }
+for d = 8, Commerce.TRACK_DAYS do
+	local diaDoMes = 17 + d
+	table.insert(Commerce.DailyTrack, {
+		day = d,
+		date = if diaDoMes <= 31 then string.format("%d AGO", diaDoMes) else string.format("%d SET", diaDoMes - 31),
+		label = if Commerce.DAILY_BAU[d] then "Baú de serviço" else "Selo de serviço",
+		credits = Commerce.DAILY_BAU[d] or (100 + 5 * (d - 8)),
+	})
+end
 
 -- run: dias seguidos até lastDay; lastDay: dia UTC do último resgate (-1 = nunca); total: selos
 export type DailyState = { run: number, lastDay: number, total: number }
@@ -684,9 +699,14 @@ function Commerce.dailyDefault(): DailyState
 	return { run = 0, lastDay = -1, total = 0 }
 end
 
--- dia da trilha (1..7) de uma sequência de `run` dias seguidos
+-- dia da trilha (1..30) de uma sequência de `run` dias seguidos; depois do 30, repete de 8 a 30
 function Commerce.trackDay(run: number): number
-	return (math.max(run, 1) - 1) % Commerce.TRACK_DAYS + 1
+	local r = math.max(run, 1)
+	if r <= Commerce.TRACK_DAYS then
+		return r
+	end
+	local volta = Commerce.TRACK_VOLTA
+	return (r - volta) % (Commerce.TRACK_DAYS - volta + 1) + volta
 end
 
 function Commerce.dailyView(s: DailyState, today: number): DailyView

@@ -463,7 +463,8 @@ function CombatService.fire(
 	origin: Vector3,
 	dir: Vector3,
 	seed: number,
-	exceptPlayer: Player?
+	exceptPlayer: Player?,
+	boca: Model? -- D-237: a arma montada de onde sai o clarão (torreta); sem ela, a do soldado
 )
 	local params = RaycastParams.new()
 	params.FilterType = Enum.RaycastFilterType.Exclude
@@ -519,6 +520,7 @@ function CombatService.fire(
 		dz = dir.Z,
 		seed = seed,
 		by = shooter, -- o clarão de boca sai da arma de quem atirou (WeaponVisuals)
+		boca = boca,
 	}
 	for _, other in Players:GetPlayers() do
 		if other ~= exceptPlayer then

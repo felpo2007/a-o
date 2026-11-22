@@ -1716,12 +1716,13 @@ local function rushStep(bot: Bot, model: Model, root: BasePart, now: number): bo
 		endRush(bot, now)
 		return false
 	end
-	setStance(model, "stand")
-	BotLocomotion.go(bot, to, "sprint", { direct = dist * M < MOVE.directM * 2, tolerance = 1.5 / M })
+	-- D-237: a falha é lida ANTES do go (o go põe o estado em "moving" e a desistência nunca era vista)
 	if BotLocomotion.status(bot) == "failed" then
 		endRush(bot, now) -- caminho fechado (água funda, cercado): procura abrigo onde está
 		return false
 	end
+	setStance(model, "stand")
+	BotLocomotion.go(bot, to, "sprint", { direct = dist * M < MOVE.directM * 2, tolerance = 1.5 / M })
 	return true
 end
 
@@ -2005,15 +2006,16 @@ local function investigate(bot: Bot, model: Model, root: BasePart, head: BasePar
 	then
 		startReload(bot, now)
 	end
+	if BotLocomotion.status(bot) == "failed" then
+		bot.invClearedAt = now -- D-237: não chega lá (água funda, cercado): volta ao objetivo
+		return false
+	end
 	setStance(model, "stand")
 	local far = dist > F44.sprintStuds and now >= bot.reloadUntil
 	if dist * M > 60 then
 		BotLocomotion.goFar(bot, pos, if far then "sprint" else "walk", { tolerance = 4 / M })
 	else
 		BotLocomotion.go(bot, pos, if far then "sprint" else "walk", { tolerance = 1.5 / M })
-	end
-	if BotLocomotion.status(bot) == "failed" then
-		bot.invClearedAt = now -- não chega lá (água funda, cercado): volta ao objetivo
 	end
 	return true
 end
@@ -2191,16 +2193,17 @@ local function calm(bot: Bot, model: Model, hum: Humanoid, root: BasePart, head:
 	end
 	-- vai para o seu lugar (cauteloso só no fim: D-107, andava os últimos 40 m)
 	bot.mode = "advance"
+	if BotLocomotion.status(bot) == "failed" then
+		-- D-237: caminho não fecha: muda o lugar (lido antes do go, que apaga a falha)
+		g += Vector3.new(bot.rng:range(-40, 40), 0, bot.rng:range(-40, 40))
+		bot.goal = g
+	end
 	local dist = flat(root.Position, g) * M
 	setStance(model, "stand")
 	if dist > 60 then
 		BotLocomotion.goFar(bot, g, "jog", { tolerance = 4 / M }) -- renasceu longe: por trechos
 	else
 		BotLocomotion.go(bot, g, if dist > 15 then "jog" else "walk", { tolerance = 2 / M })
-	end
-	if BotLocomotion.status(bot) == "failed" then
-		-- caminho não fecha: muda o lugar
-		bot.goal = g + Vector3.new(bot.rng:range(-40, 40), 0, bot.rng:range(-40, 40))
 	end
 end
 

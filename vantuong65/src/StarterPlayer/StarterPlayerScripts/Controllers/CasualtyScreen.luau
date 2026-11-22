@@ -470,11 +470,11 @@ do
 	hereWhy.TextTruncate = Enum.TextTruncate.AtEnd
 	local BH = px(46, 64)
 	local hereRow = pair(4, BH)
-	local hereCi = UiKit.action(hereRow, "Pagar com créditos", "ci", function()
+	local hereCi = UiKit.action(hereRow, "Pagar com $", "ci", function()
 		actions.here("ci")
 	end, { h = BH })
 	half(hereCi, false)
-	local hereRbx = UiKit.action(hereRow, "Pagar com Robux", "robux", function()
+	local hereRbx = UiKit.action(hereRow, string.format("Pagar com %s", UiKit.Estilo.ROBUX), "robux", function()
 		actions.here("robux")
 	end, { h = BH })
 	half(hereRbx, true)
@@ -1016,7 +1016,7 @@ local function paintVehicles(armed: boolean)
 				can = can and short <= 0
 			else
 				local p = robuxOf(CompraVeiculo.productId(o.spec))
-				b.sub.Text = if p then string.format("%d Robux", p) else "Robux"
+				b.sub.Text = if p then UiKit.robux(p) else UiKit.Estilo.ROBUX
 			end
 			b.enabled(can)
 		end
@@ -1092,7 +1092,7 @@ local function paintButtons()
 	else
 		K.ciMethod = "ci"
 		K.hereCi.setKind("ci")
-		setLabel(K.hereCi, "Pagar com créditos")
+		setLabel(K.hereCi, "Pagar com $")
 		K.hereCi.enabled(false)
 	end
 	-- Robux só com o produto criado (ID 0: o botão de créditos ocupa a linha inteira)
@@ -1100,7 +1100,10 @@ local function paintButtons()
 	K.hereRbx.button.Visible = rbxOn
 	K.hereCi.button.Size = if rbxOn then UDim2.new(0.5, -px(8, 12) // 2, 1, 0) else UDim2.fromScale(1, 1)
 	local rp = S.robuxPrice
-	setLabel(K.hereRbx, if rp then string.format("Pagar %d Robux", rp) else "Pagar com Robux")
+	setLabel(
+		K.hereRbx,
+		if rp then string.format("Pagar %s", UiKit.robux(rp)) else string.format("Pagar com %s", UiKit.Estilo.ROBUX)
+	)
 	K.hereRbx.enabled(ready and rbxOn and S.buying == nil)
 	local status: string
 	if S.buying then
@@ -1121,7 +1124,7 @@ local function paintButtons()
 	local sub = if rule and why
 		then why
 		elseif wait > 0 then string.format("pronto em %d s", math.ceil(wait))
-		else "créditos ou Robux"
+		else string.format("$ ou %s", UiKit.Estilo.ROBUX)
 	setText(K.respawn.sub, sub)
 end
 

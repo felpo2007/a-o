@@ -747,6 +747,7 @@ local cam = {
 	body = {} :: { Instance },
 	bodyOf = nil :: Model?,
 	bodyT = 0,
+	montada = nil :: Model?, -- D-237: a M60 da torreta de quem está nela
 	chaseAttr = false,
 	aimAttr = false,
 	fireAttr = false,
@@ -865,6 +866,27 @@ local function setBodyLocal(char: Model, v: number)
 	end
 end
 
+-- D-237: em 1ª pessoa a M60 já vem nas mãos (WeaponVisuals); a montada na torreta some só para quem
+-- atira, senão as duas aparecem juntas e a de fora tapa a mira. Os outros jogadores sempre a veem.
+local function mostraMontada(arma: Model?, v: number)
+	local antes = cam.montada
+	if antes and antes ~= arma then
+		for _, d in antes:GetDescendants() do
+			if d:IsA("BasePart") then
+				d.LocalTransparencyModifier = 0
+			end
+		end
+	end
+	cam.montada = arma
+	if arma then
+		for _, d in arma:GetDescendants() do
+			if d:IsA("BasePart") and d.LocalTransparencyModifier ~= v then
+				d.LocalTransparencyModifier = v
+			end
+		end
+	end
+end
+
 -- saiu do assento: o corpo como a câmera a pé espera
 local function releaseBody()
 	local char = player.Character
@@ -929,6 +951,7 @@ RunService:BindToRenderStep("VT65VehicleCam", Enum.RenderPriority.Camera.Value +
 			cam.blend, cam.boom = 0, -1
 			offAll()
 			releaseBody() -- D-187
+			mostraMontada(nil, 0)
 		end
 		return
 	end
@@ -999,6 +1022,7 @@ RunService:BindToRenderStep("VT65VehicleCam", Enum.RenderPriority.Camera.Value +
 	if player.Character then
 		setBodyLocal(player.Character, math.floor((1 - b) * 10 + 0.5) / 10)
 	end
+	mostraMontada(model:FindFirstChild("Arma_" .. seatId) :: Model?, math.floor((1 - b) * 10 + 0.5) / 10)
 	local bigGun = weapon == "gun_90" or weapon == "rr_106"
 	overlay.optic.Visible = first and state.zoom == 1 and bigGun
 	overlay.binoc.Visible = first and state.zoom == 2

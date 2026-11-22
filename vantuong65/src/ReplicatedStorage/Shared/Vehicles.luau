@@ -42,7 +42,6 @@ export type Spec = {
 }
 
 local PH = "PLACEHOLDER (sem fonte)"
-local ALL: Arc = { yaw = 0, half = 180, down = -35, up = 50 } -- em cima do casco, para qualquer lado
 
 Vehicles.SPECS = {
 	m48a3 = {
@@ -118,8 +117,10 @@ Vehicles.SPECS = {
 		waterKmh = 11,
 		seats = {
 			{ id = "driver", role = "tank_crew" },
-			{ id = "gunner", role = "tank_crew", weapon = "m60" }, -- cúpula .30: usamos a M60 como aproximação
-			{ id = "commander", role = "any", open = ALL }, -- cabeça fora da escotilha: a própria arma
+			-- D-237 (dono: "faça 2 torretas em cima"): a da frente é a cúpula .30 da malha (a M60 como
+			-- aproximação) e a de trás é uma M60 giratória. A tropa vai fechada, lá dentro
+			{ id = "gunner", role = "tank_crew", weapon = "m60" },
+			{ id = "commander", role = "any", weapon = "m60" },
 		},
 		armor = {
 			front = { mm = 16, slopeDeg = 0, src = "wiki:LVTP-5 (6–16 mm)" },
@@ -232,11 +233,15 @@ for _, s in Vehicles.SPECS do
 end
 
 -- D-236 (dono: "os soldados devem ficar dentro dos tanques e veiculos sem aparecerem para fora"): quem
--- continua à vista é quem está num lugar aberto de verdade: todo o jipe, o atirador da porta do UH-34D e
--- quem atira com a própria arma do lugar (caçamba, teto do LVTP-5, porta do helicóptero, escotilha do
--- comandante). Quem atira não pode ser invisível. O resto fica dentro (Controllers/OcupanteVeiculo).
+-- continua à vista é quem está num lugar aberto de verdade: todo o jipe, o atirador da porta do UH-34D,
+-- os dois atiradores das torretas do LVTP-5 e quem atira com a própria arma do lugar (caçamba, porta do
+-- helicóptero). Quem atira não pode ser invisível. O resto fica dentro (Controllers/OcupanteVeiculo).
 function Vehicles.ocupanteAparece(specId: string, seatId: string): boolean
-	if specId == "m151" or (specId == "uh34d" and seatId == "gunner") then
+	if
+		specId == "m151"
+		or (specId == "uh34d" and seatId == "gunner")
+		or (specId == "lvtp5" and (seatId == "gunner" or seatId == "commander"))
+	then
 		return true
 	end
 	local info = Vehicles.seatInfo(specId, seatId)
@@ -301,9 +306,7 @@ end
 local function passengerArc(specId: string, n: number): Arc?
 	local right = n % 2 == 1
 	local side = if right then -90 else 90
-	if specId == "lvtp5" then
-		return ALL -- a tropa vai no teto (as minas)
-	elseif specId == "uh34d" then
+	if specId == "uh34d" then
 		return { yaw = side, half = 70, down = -70, up = 15 } -- sentado na porta, pernas para fora
 	elseif specId == "m151" then
 		return { yaw = if right then -100 else 100, half = 125, down = -30, up = 45 }

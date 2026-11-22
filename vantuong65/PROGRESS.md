@@ -1116,6 +1116,14 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     - **Sem teste:** os sons de ouvido, celular real, servidor cheio e cura entre dois humanos.
     - Relatório: `testes/LOTE108_D236_2026-11-21.md`.
     - **v140 publicada** (versão 145 do place, commit 4de4929).
+  - **Lote 109 (D-237): 1º de 4 do pedido de 21/11, feito.** Rostos estilo Roblox, armário por time,
+    símbolos de $ e Robux, moedas e patente com som, recompensa até o dia 30, MENU/VOLTAR/avançar,
+    duas torretas no LVTP-5 (bots nas duas), bots contornando o arame e chão sem branco.
+    - Testes: Lune 920, pytest 77, autoteste 18 de 18, 1 de 82 bots parado 12 s ou mais no arame.
+    - **Sem teste:** sons de ouvido, celular real, servidor cheio e desenho nas 9 vistas.
+    - Relatório: `testes/LOTE109_D237_2026-11-21.md`.
+  - **Falta do pedido de 21/11:** lote 110 (corrida, rastejo, pegada, recarga, miras), lote 111 (imagens da
+    loja, carregamento, bandeiras, nascer, textos, comemoração) e lote 112 (gráficos, casas, terreno, skins).
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;
