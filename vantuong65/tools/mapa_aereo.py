@@ -9,10 +9,13 @@ aereo_previa.jpg.
 
 Uso (a partir de vantuong65/):
   uv run --group arte python tools/mapa_aereo.py
+  lune run tools/carta_ret.luau frente
+  uv run --group arte python tools/mapa_aereo.py --mapa frente   # D-243: aereo_frente_*.png
 """
 
 from __future__ import annotations
 
+import argparse
 import io
 import math
 import os
@@ -1300,24 +1303,49 @@ def reduz_png(arr: np.ndarray) -> tuple[bytes, int]:
     return dados, 10
 
 
-def salva(arr: np.ndarray) -> None:
+def fora_da_area(arr: np.ndarray, q: Quadro, d: Dados) -> np.ndarray:
+    """D-243: escurece o que fica fora da faixa jogável, com a borda da área bem marcada"""
+    a = d.info["area"]
+    k = LADO / (q.x1 - q.x0)
+    y0, y1 = (a["minZ"] - q.z0) * k, (a["maxZ"] - q.z0) * k
+    linhas = np.arange(LADO, dtype=F4) + 0.5
+    dentro = suave(linhas, y0 - 1.5, y0 + 1.5) * (1 - suave(linhas, y1 - 1.5, y1 + 1.5))
+    m = dentro[:, None, None]
+    v = arr.astype(F4)
+    cinza = (v * [0.3, 0.59, 0.11]).sum(-1, keepdims=True)
+    apagado = (cinza * 0.6 + v * 0.4) * 0.34
+    saida = v * m + apagado * (1 - m)
+    for yb in (y0, y1):
+        i0 = int(round(yb)) - 1
+        saida[max(i0, 0) : i0 + 2] = (216, 196, 142)
+    return np.clip(saida, 0, 255).astype(np.uint8)
+
+
+def salva(arr: np.ndarray, prefixo: str = "aereo") -> None:
     meio = LADO // 2
     SAIDA.mkdir(parents=True, exist_ok=True)
     for nome, lin, col in (("nw", 0, 0), ("ne", 0, 1), ("sw", 1, 0), ("se", 1, 1)):
         bloco = arr[lin * meio : (lin + 1) * meio, col * meio : (col + 1) * meio]
         dados, passo = reduz_png(bloco)
-        (SAIDA / f"aereo_{nome}.png").write_bytes(dados)
-        print(f"aereo_{nome}.png: {len(dados) / 1e6:.2f} MB (passo de cor {passo})")
+        (SAIDA / f"{prefixo}_{nome}.png").write_bytes(dados)
+        print(f"{prefixo}_{nome}.png: {len(dados) / 1e6:.2f} MB (passo de cor {passo})")
     Image.fromarray(arr, "RGB").resize((1600, 1600), Image.Resampling.LANCZOS).save(
-        SAIDA / "aereo_previa.jpg", quality=90, subsampling=0
+        SAIDA / f"{prefixo}_previa.jpg", quality=90, subsampling=0
     )
 
 
 def main() -> None:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--mapa", choices=("frente", "comboio"), default=None)
+    mapa = ap.parse_args().mapa
     t0 = time.perf_counter()
-    if not (DADOS / "dados.json").exists():
+    if mapa:
+        d = carrega(SAIDA / f"dados_{mapa}")
+    elif not (DADOS / "dados.json").exists():
         exporta_dados()
-    d = carrega()
+        d = carrega()
+    else:
+        d = carrega()
     q = Quadro(d)
 
     def filho(i: int) -> np.random.Generator:
@@ -1373,7 +1401,10 @@ def main() -> None:
 
     final = im.resize((LADO, LADO), Image.Resampling.LANCZOS)
     arr = acabamento(final, q, d)
-    salva(arr)
+    if mapa:
+        salva(fora_da_area(arr, q, d), f"aereo_{mapa}")
+    else:
+        salva(arr)
     print(f"total: {time.perf_counter() - t0:.1f} s")
 
 

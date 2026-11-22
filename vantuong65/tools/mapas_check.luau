@@ -81,6 +81,27 @@ local function confere(id, projeto)
 	if naAgua > 0 then
 		nota(naAgua .. " construções no rio")
 	end
+	-- conjuntos de nascer: dentro da área, em chão seco e com duas saídas em direções diferentes
+	local cs = d.layout.conjuntos
+	if #cs < 16 then
+		nota("só " .. #cs .. " conjuntos de nascer")
+	end
+	for _, c in cs do
+		if c.x < B.minX or c.x > B.maxX or c.z < B.minZ or c.z > B.maxZ then
+			nota("conjunto " .. c.id .. " fora da área")
+		end
+		local h, wl = Site.column(ctx.site, c.x, c.z)
+		if wl > h then
+			nota("conjunto " .. c.id .. " na água")
+		end
+		local ax, az = c.sx1 - c.x, c.sz1 - c.z
+		local bx, bz = c.sx2 - c.x, c.sz2 - c.z
+		local cosA = (ax * bx + az * bz) / (math.sqrt(ax * ax + az * az) * math.sqrt(bx * bx + bz * bz))
+		if math.deg(math.acos(math.clamp(cosA, -1, 1))) < 74.9 then
+			nota("conjunto " .. c.id .. ": saídas quase iguais")
+		end
+	end
+	print(string.format("  %d conjuntos de nascer, cada um com 2 saídas", #cs))
 	local nos = 0
 	local minH, maxH = math.huge, -math.huge
 	for x = B.minX, B.maxX, 16 do

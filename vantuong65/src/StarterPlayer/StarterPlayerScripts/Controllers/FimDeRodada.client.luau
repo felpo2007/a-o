@@ -233,17 +233,28 @@ local myVote: string? = nil
 local pintarHoras: () -> ()
 -- D-224 (dono: "opções de horários do dia no mapa"): os quatro horários ao lado do mapa, com a pintura
 -- de cada hora (tools/podio_fundo.py --horarios)
-type HoraCard = { b: TextButton, votes: TextLabel, edge: UIStroke, id: string }
+type HoraCard = {
+	b: TextButton,
+	votes: TextLabel,
+	edge: UIStroke,
+	id: string,
+	nome: TextLabel,
+	desc: TextLabel,
+}
 local horaCards: { HoraCard } = {}
 local myHora: string? = nil
+local gradeHoras: Frame
+local gradeLayout: UIGridLayout
 do
 	local grade = Instance.new("Frame")
+	gradeHoras = grade
 	grade.Name = "Horarios"
 	grade.BackgroundTransparency = 1
 	grade.Size = UDim2.fromOffset(px(620, 850), px(380, 520))
 	grade.LayoutOrder = 99
 	grade.Parent = voteList
 	local g = Instance.new("UIGridLayout")
+	gradeLayout = g
 	g.CellSize = UDim2.fromOffset(px(304, 418), px(184, 254))
 	g.CellPadding = UDim2.fromOffset(px(12, 14), px(12, 12))
 	g.SortOrder = Enum.SortOrder.LayoutOrder
@@ -297,7 +308,7 @@ do
 		votes.TextXAlignment = Enum.TextXAlignment.Right
 		votes.Position = UDim2.new(0.6, 0, 1, -px(42, 58))
 		votes.Size = UDim2.new(0.4, -px(14, 20), 0, px(24, 34))
-		local c: HoraCard = { b = b, votes = votes, edge = e, id = h.id }
+		local c: HoraCard = { b = b, votes = votes, edge = e, id = h.id, nome = nome, desc = desc }
 		horaCards[i] = c
 		UiKit.bind(b, function()
 			if ReplicatedStorage:GetAttribute("VT65Fase") == "votacao" then
@@ -309,12 +320,29 @@ do
 	end
 end
 
-local function mapCard(m: any): MapCard
+-- D-243: com três mapas, os cartões e a grade de horários estreitam para caber na mesma linha
+local function ajustaHoras(compacto: boolean)
+	gradeHoras.Size = UDim2.fromOffset(if compacto then px(312, 426) else px(620, 850), px(380, 520))
+	gradeLayout.CellSize = UDim2.fromOffset(if compacto then px(150, 206) else px(304, 418), px(184, 254))
+	for _, h in horaCards do
+		h.nome.TextScaled = compacto
+		h.desc.Visible = not compacto
+		h.votes.Position = if compacto
+			then UDim2.new(0, px(14, 20), 1, -px(42, 58))
+			else UDim2.new(0.6, 0, 1, -px(42, 58))
+		h.votes.Size = if compacto
+			then UDim2.new(1, -px(28, 40), 0, px(24, 34))
+			else UDim2.new(0.4, -px(14, 20), 0, px(24, 34))
+		h.votes.TextXAlignment = if compacto then Enum.TextXAlignment.Left else Enum.TextXAlignment.Right
+	end
+end
+
+local function mapCard(m: any, largura: number): MapCard
 	local b = Instance.new("TextButton")
 	b.Name = "Mapa_" .. tostring(m.id)
 	b.AutoButtonColor = false
 	b.Text = ""
-	b.Size = UDim2.fromOffset(px(420, 580), px(380, 520))
+	b.Size = UDim2.fromOffset(largura, px(380, 520))
 	b.BackgroundColor3 = V.PANEL
 	b.BorderSizePixel = 0
 	b.Selectable = true
@@ -363,6 +391,7 @@ local function mapCard(m: any): MapCard
 	name.Position = UDim2.new(0, 0, 1, -px(56, 78))
 	name.Size = UDim2.new(1, 0, 0, px(36, 50))
 	name.Text = UiKit.upper(tostring(m.nome))
+	name.TextScaled = largura < px(420, 580)
 	local votes = label(b, "Votos", px(18, 25), V.KHAKI, F.TITLE_REG)
 	votes.AnchorPoint = Vector2.new(0, 1)
 	votes.Position = UDim2.new(0, 0, 1, -px(30, 42))
@@ -379,6 +408,27 @@ local function mapCard(m: any): MapCard
 		end
 	end)
 	return c
+end
+
+-- Janela estreita: a linha de cartões encolhe na largura até caber, com os vãos intactos.
+local function cabeNaLinha()
+	game:GetService("RunService").Heartbeat:Wait()
+	local vaos = layout.Padding.Offset * #mapCards
+	local total, livre = layout.AbsoluteContentSize.X, voteList.AbsoluteSize.X - 6
+	if total <= livre or total <= vaos then
+		return
+	end
+	local k = (livre - vaos) / (total - vaos)
+	for _, c in mapCards do
+		c.b.Size = UDim2.fromOffset(math.floor(c.b.Size.X.Offset * k), c.b.Size.Y.Offset)
+	end
+	local larguraGrade = math.floor(gradeHoras.Size.X.Offset * k)
+	gradeHoras.Size = UDim2.fromOffset(larguraGrade, gradeHoras.Size.Y.Offset)
+	-- sempre duas colunas: a célula sai da largura da grade menos o vão
+	gradeLayout.CellSize = UDim2.fromOffset(
+		math.floor((larguraGrade - gradeLayout.CellPadding.X.Offset) / 2),
+		gradeLayout.CellSize.Y.Offset
+	)
 end
 
 local function decode(attr: string): any
@@ -615,9 +665,12 @@ local function showVote()
 	myHora = nil
 	local mapas = decode("VT65Mapas")
 	if type(mapas) == "table" then
+		local compacto = #mapas >= 3
+		ajustaHoras(compacto)
 		for _, m in mapas do
-			table.insert(mapCards, mapCard(m))
+			table.insert(mapCards, mapCard(m, if compacto then px(270, 372) else px(420, 580)))
 		end
+		task.spawn(cabeNaLinha)
 	end
 	refreshVotes()
 	voteHint.Text = if Input.isGamepad()

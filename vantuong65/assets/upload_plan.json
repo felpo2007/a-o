@@ -12255,5 +12255,61 @@
   "assetType": "Model",
   "name": "VT65 ret_piloto_casa",
   "description": "VAN TUONG 65 - mapas retangulares, cena-piloto de escala (Blender)"
+ },
+ {
+  "key": "Catalogo.aereo_frente_ne",
+  "file": "assets/carta/aereo_frente_ne.png",
+  "assetType": "Image",
+  "name": "VT65 aereo frente ne",
+  "description": "VAN TUONG 65 - imagem de catalogo"
+ },
+ {
+  "key": "Catalogo.aereo_frente_nw",
+  "file": "assets/carta/aereo_frente_nw.png",
+  "assetType": "Image",
+  "name": "VT65 aereo frente nw",
+  "description": "VAN TUONG 65 - imagem de catalogo"
+ },
+ {
+  "key": "Catalogo.aereo_frente_se",
+  "file": "assets/carta/aereo_frente_se.png",
+  "assetType": "Image",
+  "name": "VT65 aereo frente se",
+  "description": "VAN TUONG 65 - imagem de catalogo"
+ },
+ {
+  "key": "Catalogo.aereo_frente_sw",
+  "file": "assets/carta/aereo_frente_sw.png",
+  "assetType": "Image",
+  "name": "VT65 aereo frente sw",
+  "description": "VAN TUONG 65 - imagem de catalogo"
+ },
+ {
+  "key": "Catalogo.aereo_comboio_ne",
+  "file": "assets/carta/aereo_comboio_ne.png",
+  "assetType": "Image",
+  "name": "VT65 aereo comboio ne",
+  "description": "VAN TUONG 65 - imagem de catalogo"
+ },
+ {
+  "key": "Catalogo.aereo_comboio_nw",
+  "file": "assets/carta/aereo_comboio_nw.png",
+  "assetType": "Image",
+  "name": "VT65 aereo comboio nw",
+  "description": "VAN TUONG 65 - imagem de catalogo"
+ },
+ {
+  "key": "Catalogo.aereo_comboio_se",
+  "file": "assets/carta/aereo_comboio_se.png",
+  "assetType": "Image",
+  "name": "VT65 aereo comboio se",
+  "description": "VAN TUONG 65 - imagem de catalogo"
+ },
+ {
+  "key": "Catalogo.aereo_comboio_sw",
+  "file": "assets/carta/aereo_comboio_sw.png",
+  "assetType": "Image",
+  "name": "VT65 aereo comboio sw",
+  "description": "VAN TUONG 65 - imagem de catalogo"
  }
 ]

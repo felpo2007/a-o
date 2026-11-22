@@ -2037,5 +2037,13 @@
  "AcabM.mosin_laca_tudo": "112209949316254",
  "AcabR.mosin_laca_tudo": "119732528317345",
  "Models.ret_manequim": "129599613453320",
- "Models.ret_piloto_casa": "137269079570513"
+ "Models.ret_piloto_casa": "137269079570513",
+ "Catalogo.aereo_frente_ne": "129268793357915",
+ "Catalogo.aereo_frente_nw": "91017528353964",
+ "Catalogo.aereo_frente_se": "70377221436805",
+ "Catalogo.aereo_frente_sw": "90108409181430",
+ "Catalogo.aereo_comboio_ne": "90942565883056",
+ "Catalogo.aereo_comboio_nw": "88865789427796",
+ "Catalogo.aereo_comboio_se": "132508064156737",
+ "Catalogo.aereo_comboio_sw": "140294549066446"
 }

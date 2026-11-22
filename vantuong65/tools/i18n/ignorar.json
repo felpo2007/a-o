@@ -1767,7 +1767,10 @@
   "final",
   "imobilizado",
   "mapa retangular",
-  "origem do comboio"
+  "origem do comboio",
+  "%.1f;%.1f",
+  "conj",
+  "conj:"
  ],
  "regex": [
   "^uni_[a-z_]+@[a-z0-9]+$"

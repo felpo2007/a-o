@@ -3773,5 +3773,9 @@
  "TEMPO %s": "TIME %s",
  "Vale das Cinco Passagens": "Valley of Five Crossings",
  "Vila do Sino Baixo": "Low Bell Village",
- "Vila dos Esteios": "Stilt Village"
+ "Vila dos Esteios": "Stilt Village",
+ "COMBOIO": "CONVOY",
+ "ESCOLTAR": "ESCORT",
+ "Reforço — %s": "Reinforcement — %s",
+ "inimigo à vista": "enemy in sight"
 }

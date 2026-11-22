@@ -21,7 +21,9 @@ local Front = require(ReplicatedStorage.Shared.Front)
 local Geometry = require(ReplicatedStorage.Shared.Geometry)
 local JogarAgora = require(ReplicatedStorage.Shared.JogarAgora)
 local MapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any
+local MapaAtivo = require(ReplicatedStorage.Shared.MapaAtivo)
 local NascerPedido = require(ReplicatedStorage.Shared.NascerPedido)
+local NascerRet = require(ReplicatedStorage.Shared.NascerRet)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Progression = require(ReplicatedStorage.Shared.Progression)
 local Roles = require(ReplicatedStorage.Shared.Roles)
@@ -67,6 +69,7 @@ export type Point = {
 	sector: number?,
 	squad: string?,
 	blockM: number?, -- raio próprio de bloqueio por inimigo (túnel avançado do VC); sem setor em disputa
+	vaga: (() -> CFrame)?, -- D-243: conjunto de nascer: o lugar e o rumo exatos de quem nasce nele
 }
 
 -- o ponto vale para este jogador? (ponto de squad só para o próprio squad)
@@ -106,6 +109,10 @@ function SpawnService.points(faction: string): { Point }
 	end
 	local hq = MapConfig.HQ[faction]
 	table.insert(out, { id = "hq", name = "QG", x = hq.x, z = hq.z, kind = "hq" })
+	-- D-243: nos mapas retangulares, o reforço vem dos conjuntos (NascerRetService); o QG é a reserva
+	if MapaAtivo.retangular() then
+		return out
+	end
 	for s, sp in MatchService.points do
 		if MatchService.ownerOf(s) == faction then
 			local x, z = SpawnRules.rallyPosition(sp.x, sp.z, faction, M)
@@ -304,6 +311,10 @@ end
 local hqTurn: { [string]: number } = {}
 local baseSpawns: any = nil
 function SpawnService.hqSpot(faction: string, x: number, z: number): (number, number)
+	if MapaAtivo.retangular() then
+		hqTurn[faction] = (hqTurn[faction] or 0) + 1
+		return NascerRet.vagaBase(x, z, hqTurn[faction], M)
+	end
 	if baseSpawns == nil then
 		local data = game:GetService("ServerStorage"):FindFirstChild("VT65Build")
 		local mod = data and data:FindFirstChild("Data") and data.Data:FindFirstChild("Bases")
@@ -1004,6 +1015,11 @@ function SpawnService.start()
 				local sx, sz = pt.x, pt.z
 				if pt.kind == "hq" then
 					sx, sz = SpawnService.hqSpot(faction, sx, sz)
+				end
+				if pt.vaga then -- D-243: conjunto de nascer, com lugar e rumo próprios
+					spawnAt(player, faction, sx, sz, pt.vaga(), pt.id)
+					responde(nil)
+					return
 				end
 				spawnAt(player, faction, sx, sz, nil, pt.id)
 				responde(nil)

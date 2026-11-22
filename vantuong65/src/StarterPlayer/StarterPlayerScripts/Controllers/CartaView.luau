@@ -37,6 +37,7 @@ local FireSupport = require(ReplicatedStorage.Shared.FireSupport)
 local Front = require(ReplicatedStorage.Shared.Front)
 local InputMap = require(ReplicatedStorage.Shared.InputMap)
 local MapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any
+local MapaAtivo = require(ReplicatedStorage.Shared.MapaAtivo)
 local TunnelLinks = require(ReplicatedStorage.Shared.TunnelLinks)
 local Vantagens = require(ReplicatedStorage.Shared.Vantagens)
 local Acabamento = require(ReplicatedFirst:WaitForChild("Acabamento"))
@@ -51,7 +52,9 @@ local VozEstado = require(script.Parent.VozEstado)
 local CartaView = {}
 
 local player = Players.LocalPlayer
-local B = MapConfig.Bounds
+-- D-243: nos mapas retangulares, a folha quadrada que contém o mapa
+local B = MapConfig.CartaBounds or MapConfig.Bounds
+Carta.usaFaixa(MapConfig.CartaFaixa)
 local M = MapConfig.STUD_M
 local SIDE_M = (B.maxX - B.minX) * M -- lado da carta em metros (sempre dos Bounds de agora)
 local V, F = UiKit.V, UiKit.F
@@ -220,6 +223,26 @@ end
 local function myFaction(): string?
 	local f = player:GetAttribute("Faction")
 	return if type(f) == "string" then f else nil
+end
+
+-- D-243: no Comboio o objetivo é o próprio comboio; os outros marcos são os checkpoints da estrada
+local ROTULOS_COMBOIO = { "COMBOIO", "CP1", "CP2", "CP3", "ENTREGA" }
+local function rotuloObjetivo(s: number, nome: string): string
+	if MapaAtivo.id() ~= "comboio" then
+		return string.format("%s · %s", Front.letra(s), UiKit.upper(nome))
+	end
+	if s == 1 then
+		return ROTULOS_COMBOIO[1]
+	end
+	return string.format("%s · %s", ROTULOS_COMBOIO[s] or "", UiKit.upper(nome))
+end
+
+local function papelObjetivo(role: string): string
+	if MapaAtivo.id() == "comboio" then
+		local escolta = ReplicatedStorage:GetAttribute("VT65ComboioEscolta")
+		return if myFaction() == escolta then "ESCOLTAR" else "DEFENDER"
+	end
+	return if role == "attack" then "CAPTURAR" else "DEFENDER"
 end
 
 -- cor do dono: fixa por lado (EUA azul, VC vermelho), cinza = neutro
@@ -457,7 +480,10 @@ function CartaView.refreshImages()
 	for _, img in S.tiles do
 		local key = img:GetAttribute("Key") :: string
 		local id = (AssetIds.CartaImages or {})[key]
-		if type(id) ~= "number" or id == 0 then
+		if MapaAtivo.retangular() then
+			id = (AssetIds.Catalogo or {})["aereo_" .. MapaAtivo.id() .. "_" .. key]
+		end
+		if (type(id) ~= "number" or id == 0) and not MapaAtivo.retangular() then
 			id = ReplicatedStorage:GetAttribute("CartaImage_" .. key)
 		end
 		if type(id) == "number" and id ~= 0 then
@@ -1191,8 +1217,7 @@ local function drawObjectives(st: any)
 		list.Padding = UDim.new(0, 2)
 		list.Parent = card
 		card.Parent = layer
-		local name =
-			label(card, string.format("%s · %s", Front.letra(s), UiKit.upper(p.name)), 14, COR.tintaAtlas, TYPE)
+		local name = label(card, rotuloObjetivo(s, p.name), 14, COR.tintaAtlas, TYPE)
 		name.LayoutOrder = 1
 		if limpo then
 			-- a cor do dono numa bolinha ao lado do nome
@@ -1242,7 +1267,7 @@ local function drawObjectives(st: any)
 		-- papel do time: CAPTURAR / DEFENDER (D-210, as palavras do §13), em tarja escura no alto da
 		-- etiqueta (fora dela, cobria a etiqueta quando as duas iam para o mesmo lado)
 		if s == target and role then
-			local tag = label(card, if role == "attack" then "CAPTURAR" else "DEFENDER", 14, V.KHAKI, F.TITLE)
+			local tag = label(card, papelObjetivo(role), 14, V.KHAKI, F.TITLE)
 			tag.LayoutOrder = 0
 			tag.BackgroundTransparency = 0
 			tag.BackgroundColor3 = COR.fronteira

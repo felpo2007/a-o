@@ -4,6 +4,7 @@ local MapasRet = require("../../src/ReplicatedStorage/Shared/MapasRet")
 local LF = require("../../src/ReplicatedStorage/Shared/LinhaFrente")
 local Trajeto = require("../../src/ReplicatedStorage/Shared/Trajeto")
 local Comboio = require("../../src/ReplicatedStorage/Shared/Comboio")
+local NascerRet = require("../../src/ReplicatedStorage/Shared/NascerRet")
 local fs = require("@lune/fs")
 
 local ok, falhas = 0, 0
@@ -469,6 +470,86 @@ test("resultado: entrega, tempo, distância, captura e empate exato", function()
 	assert(q == 0 and m == "empate")
 	local q2 = Comboio.resultado(r({ entregue = true, tEntrega = 400 }), r({ entregue = true, tEntrega = 400 }))
 	assert(q2 == 0)
+end)
+
+local function conj(id, xM, zM, s)
+	local M = MapasRet.M_POR_STUD
+	return {
+		id = id,
+		x = xM / M,
+		z = zM / M,
+		s = s or 0,
+		sx1 = xM / M + 10,
+		sz1 = zM / M,
+		sx2 = xM / M,
+		sz2 = zM / M + 10,
+	}
+end
+
+test("Linha de Frente: conjuntos atrás da disputa, por flanco, dos dois lados", function()
+	local M = MapasRet.M_POR_STUD
+	local l = {
+		conj("n1", -100, -60),
+		conj("n2", -130, -70),
+		conj("n3", -160, -60),
+		conj("s1", -110, 60),
+		conj("perto", -20, -60),
+		conj("longe", -300, 60),
+		conj("leste", 100, 60),
+	}
+	local o = NascerRet.frente(l, 0, 0, true, M)
+	local ids = {}
+	for _, c in o do
+		ids[c.id] = true
+	end
+	assert(ids.n1 and ids.n2 and ids.s1, "os mais perto de cada flanco")
+	assert(not ids.n3 and not ids.perto and not ids.longe and not ids.leste)
+	local e = NascerRet.frente(l, 0, 0, false, M)
+	assert(#e == 1 and e[1].id == "leste", "o Leste só nasce do lado dele")
+end)
+
+test("Comboio: escolta 60-120 m atrás, defesa 70-150 m à frente e o anterior seguro", function()
+	local l =
+		{ conj("a", 0, 0, 100), conj("b", 0, 0, 150), conj("c", 0, 0, 280), conj("d", 0, 0, 350), conj("e", 0, 0, 60) }
+	local e = NascerRet.comboio(l, 200, true)
+	assert(#e == 2 and e[1].id == "a" and e[2].id == "e", "escolta: a janela e o anterior")
+	local d = NascerRet.comboio(l, 200, false)
+	assert(#d == 2 and d[1].id == "c" and d[2].id == "d", "defesa")
+	assert(#NascerRet.comboio(l, 20, true) == 0, "no começo a escolta usa a base de origem")
+end)
+
+test("conjunto com inimigo perto ou à vista não serve", function()
+	local M = MapasRet.M_POR_STUD
+	local c = conj("x", 0, 0)
+	assert(NascerRet.comprometido(c, { 10, 10 }, M) == "inimigo próximo")
+	assert(NascerRet.comprometido(c, { 50, 0 }, M, function()
+		return false
+	end) == nil)
+	assert(NascerRet.comprometido(c, { 50, 0 }, M, function()
+		return true
+	end) == "inimigo à vista")
+	assert(NascerRet.comprometido(c, { 90, 0 }, M, function()
+		return true
+	end) == nil)
+end)
+
+test("as vagas de um conjunto são distintas e alternam as duas saídas", function()
+	local M = MapasRet.M_POR_STUD
+	local c = conj("x", 10, 20)
+	local vistos = {}
+	local saida1, saida2 = 0, 0
+	for n = 1, 8 do
+		local x, z, sx = NascerRet.vaga(c, n, M)
+		local k = string.format("%.2f;%.2f", x, z)
+		assert(not vistos[k], k)
+		vistos[k] = true
+		if sx == c.sx1 then
+			saida1 += 1
+		else
+			saida2 += 1
+		end
+	end
+	assert(saida1 == 4 and saida2 == 4)
 end)
 
 test("todo script de servidor escolhe o mapa antes de carregar outro módulo", function()

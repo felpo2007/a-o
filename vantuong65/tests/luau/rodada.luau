@@ -78,6 +78,11 @@ test("votação: aparece com um mapa só; sem voto, o mapa que existe; voto inv�
 	assert(Rodada.apurar({ x = "b", y = "b", z = "a" }, mapas) == "b")
 	assert(Rodada.apurar({ x = "a", y = "b" }, mapas) == "a", "empate: o primeiro")
 	assert(Rodada.mapa("vantuong") ~= nil and Rodada.mapa("x") == nil)
+	local so = Rodada.mapasDaVotacao("frente", false)
+	assert(#so == 1 and so[1].id == "frente", "sem liberar, só o mapa de agora")
+	local todos = Rodada.mapasDaVotacao("comboio", true)
+	assert(#todos == 3 and todos[1].id == "comboio", "o mapa de agora vem primeiro")
+	assert(Rodada.apurar({}, todos) == "comboio", "sem voto, ninguém é levado")
 end)
 
 test("fases em ordem e a rodada velha não mexe na nova", function()

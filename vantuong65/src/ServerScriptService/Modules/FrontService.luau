@@ -18,6 +18,7 @@ local FireSupport = require(ReplicatedStorage.Shared.FireSupport)
 local Front = require(ReplicatedStorage.Shared.Front)
 local Geometry = require(ReplicatedStorage.Shared.Geometry)
 local MapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any
+local MapaAtivo = require(ReplicatedStorage.Shared.MapaAtivo)
 local Combatants = require(script.Parent.Combatants)
 local MatchService = require(script.Parent.MatchService)
 local SpawnService = require(script.Parent.SpawnService)
@@ -259,7 +260,8 @@ function FrontService.start()
 	remote("Spawn_Points")
 
 	SpawnService.addProvider(function(faction: string)
-		local out = FrontService.forwardPoints(faction)
+		-- D-243: nos mapas retangulares, o reforço vem dos conjuntos (NascerRetService); só a reunião do squad fica
+		local out = if MapaAtivo.retangular() then {} else FrontService.forwardPoints(faction)
 		for sid, r in rallies do
 			if r.faction == faction then
 				table.insert(out, {

@@ -17,9 +17,12 @@
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 
 local Comemoracao = require(ReplicatedStorage.Shared.Comemoracao)
 local Horarios = require(ReplicatedStorage.Shared.Horarios)
+local MapaAtivo = require(ReplicatedStorage.Shared.MapaAtivo)
+local MapasRet = require(ReplicatedStorage.Shared.MapasRet) :: any
 local Net = require(ReplicatedStorage.Shared.Net)
 local Rodada = require(ReplicatedStorage.Shared.Rodada)
 local LightingService = require(script.Parent.LightingService)
@@ -36,6 +39,7 @@ end
 local fase = "jogo"
 local votos: { [Player]: string } = {}
 local votosHora: { [Player]: string } = {} -- D-224: o horário da próxima partida
+local mapasAgora: { Rodada.Mapa } = Rodada.mapasDaVotacao(MapaAtivo.id(), false) -- D-243: as opções desta votação
 
 local function setFase(f: string, dur: number?)
 	fase = f
@@ -52,7 +56,7 @@ local function votosPorId(): { [string]: string }
 end
 
 local function publicarVotos()
-	local _, conta = Rodada.apurar(votosPorId())
+	local _, conta = Rodada.apurar(votosPorId(), mapasAgora)
 	ReplicatedStorage:SetAttribute("VT65Votos", HttpService:JSONEncode(conta))
 	local _, contaHora = Horarios.apurar(votosHora)
 	ReplicatedStorage:SetAttribute("VT65VotosHora", HttpService:JSONEncode(contaHora))
@@ -134,8 +138,13 @@ function RodadaService.fim(winner: string)
 	-- 2. votação (aparece com um mapa só)
 	table.clear(votos)
 	table.clear(votosHora)
+	-- D-243: servidor privado fica no mapa dele; no Studio, VT65DevVotoMapas mostra todos
+	local PrivateServer = require(script.Parent.PrivateServer) :: any
+	local liberados = (MapasRet.LIBERADOS == true and not PrivateServer.isPrivate())
+		or (RunService:IsStudio() and workspace:GetAttribute("VT65DevVotoMapas") == true)
+	mapasAgora = Rodada.mapasDaVotacao(MapaAtivo.id(), liberados)
 	local mapas = {}
-	for _, m in Rodada.MAPAS do
+	for _, m in mapasAgora do
 		table.insert(mapas, { id = m.id, nome = m.nome, carta = m.carta })
 	end
 	ReplicatedStorage:SetAttribute("VT65Mapas", HttpService:JSONEncode(mapas))
@@ -145,8 +154,15 @@ function RodadaService.fim(winner: string)
 	if not vale() then
 		return
 	end
-	local escolhido = Rodada.apurar(votosPorId())
+	local escolhido = Rodada.apurar(votosPorId(), mapasAgora)
 	ReplicatedStorage:SetAttribute("VT65MapaEscolhido", escolhido)
+	-- D-243: outro mapa é outro servidor; se a viagem falhar, a partida segue aqui
+	if escolhido ~= MapaAtivo.id() then
+		setFase("restauracao", Rodada.DUR.restauracao)
+		if (require(script.Parent.MapaViagem) :: any).levar(escolhido) then
+			return
+		end
+	end
 	-- D-224: a hora vencedora entra com a tela coberta, antes da restauração
 	LightingService.aplicarHorario((Horarios.apurar(votosHora)))
 	-- 3. restauração (o mapa é o mesmo: só há um; com mais mapas, a troca entra aqui)
@@ -251,8 +267,12 @@ function RodadaService.start()
 		end
 		local mudou = false
 		if type(id) == "string" and Rodada.mapa(id) then
-			votos[p] = id
-			mudou = true
+			for _, m in mapasAgora do
+				if m.id == id then
+					votos[p] = id
+					mudou = true
+				end
+			end
 		end
 		if type(hora) == "string" and Horarios.por(hora) then
 			votosHora[p] = hora

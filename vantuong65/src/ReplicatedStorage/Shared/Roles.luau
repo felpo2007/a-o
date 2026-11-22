@@ -14,7 +14,9 @@
 -- O papel salvo de antes vira o novo pelo Roles.migrate (perfil, jogar agora, tutorial).
 local Roles = {}
 
-Roles.TEAM_MAX = 30 -- D-122 (pedido do dono: "quero o jogo 30v30"); era 40 (D-114) e 50 (D-91)
+-- D-122 (pedido do dono: "quero o jogo 30v30"); era 40 (D-114) e 50 (D-91). D-243: 16 nos mapas retangulares
+local MapaAtivo = require(script and (script :: any).Parent.MapaAtivo or "./MapaAtivo") :: any
+Roles.TEAM_MAX = if MapaAtivo.retangular() then 16 else 30
 Roles.HEAVY_UNLOCK = 16 -- unidade pesada só com o time a partir de 16 (D-108: nenhuma unidade pesada hoje)
 
 export type RoleDef = { id: string, name: string, unit: string, maxPerSquad: number? }

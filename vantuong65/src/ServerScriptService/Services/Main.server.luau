@@ -60,6 +60,11 @@ MatchService.start()
 MedicalService.start()
 ProgressionService.start() -- D-72: XP, posto, créditos, equipamento liberado (depois dos ganchos)
 SpawnService.start()
+require(Modules:WaitForChild("NascerRetService")).iniciar(
+	SpawnService,
+	MatchService,
+	require(Modules:WaitForChild("ModoComboio"))
+)
 CombatService.start()
 LightingService.start()
 PostureService.start()

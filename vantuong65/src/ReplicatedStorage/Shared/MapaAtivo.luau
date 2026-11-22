@@ -91,6 +91,9 @@ function MapaAtivo.configPara(id: string): any
 	local lx, lz = MapaAtivo.mundo(p, p.baseLeste.x, p.baseLeste.y)
 	return {
 		Bounds = { minX = -mx, maxX = mx, minZ = -mz, maxZ = mz },
+		-- a folha da carta é quadrada e cobre a largura; o mapa é a faixa do meio dela
+		CartaBounds = { minX = -mx, maxX = mx, minZ = -mx, maxZ = mx },
+		CartaFaixa = { u0 = 0, u1 = 1, v0 = 0.5 - mz / (2 * mx), v1 = 0.5 + mz / (2 * mx) },
 		CaptureRadiusStuds = (p.regras.larguraCapturaM or 28) / 2 / s,
 		Sectors = setores,
 		Strongpoints = pontos,

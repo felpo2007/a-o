@@ -111,24 +111,35 @@ function Carta.boundary(sectors: { any }, a: number, b: number): { Segment }
 	return out
 end
 
+-- D-243: nos mapas retangulares a folha continua quadrada, mas só a faixa do mapa conta: o zoom 1 enquadra
+-- a faixa inteira na janela e o arrasto não sai dela.
+export type Faixa = { u0: number, u1: number, v0: number, v1: number }
+local FAIXA_TODA: Faixa = { u0 = 0, u1 = 1, v0 = 0, v1 = 1 }
+Carta.faixa = FAIXA_TODA
+function Carta.usaFaixa(f: Faixa?)
+	Carta.faixa = f or FAIXA_TODA
+end
+
 -- ===== janela: zoom e arrasto =====
 -- A folha (quadrada) tem lado base * zoom px; base = o maior quadrado que cabe na janela. (u, v) é o
 -- ponto da folha no centro da janela. Com a folha maior que a janela, o centro fica preso para a
 -- borda da folha não entrar; menor, ela fica centrada naquele eixo.
 function Carta.base(viewW: number, viewH: number): number
-	return math.min(viewW, viewH)
+	local f = Carta.faixa
+	return math.min(viewW / (f.u1 - f.u0), viewH / (f.v1 - f.v0))
 end
 
 function Carta.clampCenter(u: number, v: number, zoom: number, viewW: number, viewH: number): (number, number)
 	local size = Carta.base(viewW, viewH) * zoom
-	local function clamp(c: number, view: number): number
-		if size <= view + 1e-6 then
-			return 0.5
+	local f = Carta.faixa
+	local function clamp(c: number, view: number, a0: number, a1: number): number
+		if size * (a1 - a0) <= view + 1e-6 then
+			return (a0 + a1) / 2
 		end
 		local half = view / 2 / size
-		return math.clamp(c, half, 1 - half)
+		return math.clamp(c, a0 + half, a1 - half)
 	end
-	return clamp(u, viewW), clamp(v, viewH)
+	return clamp(u, viewW, f.u0, f.u1), clamp(v, viewH, f.v0, f.v1)
 end
 
 -- posição (canto superior esquerdo, px) e lado da folha na janela

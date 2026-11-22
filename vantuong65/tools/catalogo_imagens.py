@@ -34,6 +34,8 @@ GRUPOS = (
     ("assets/ui/visuais", "*.png", "vis_"),
     ("assets/ui/lobby", "lobby_*.png", ""),
     ("assets/carta", "aereo_??.png", ""),
+    ("assets/carta", "aereo_frente_??.png", ""),  # D-243: mapas retangulares
+    ("assets/carta", "aereo_comboio_??.png", ""),
 )
 
 

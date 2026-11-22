@@ -1164,8 +1164,10 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     - **Testado no Studio (2026-11-22):** Linha de Frente completa (vitória aos 190 s) e Comboio com entrega em 283 s,
       dano, reparo e troca de lado; sete falhas corrigidas. Relatório em `testes/D-243_parte2_2026-11-22.md`.
       Lune 982 ok, 73 arquivos. Soldado medido: 2,07 m.
-    - **Falta:** nascer com duas saídas, seleção de mapa, carta retangular, biblioteca do Blender, os dez lugares,
-      teste com dois jogadores, desempenho e publicação.
+    - **Nascer, carta e votação prontos (2026-11-22):** 61 conjuntos com duas saídas, 16 por lado, carta horizontal com
+      vista aérea própria e votação de mapa. Lune 986 ok, 73 arquivos.
+    - **Falta:** biblioteca do Blender, os dez lugares (começando pelo Mercado), teste do teleporte e com dois
+      jogadores, desempenho e publicação.
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;

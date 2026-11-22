@@ -33,7 +33,6 @@ local T: Trajeto.Trajeto? = nil
 local rpEstrada: RaycastParams? = nil
 local cps: { number } = {}
 local caminhoes: { Caminhao } = {}
-local candidatos: { { s: number, x: number, z: number } } = {}
 local corridas: { Comboio.Corrida } = {}
 local rodada = 1
 local escolta = "US"
@@ -86,38 +85,11 @@ local function garanteTrajeto(): Trajeto.Trajeto
 	for i, cp in P.checkpoints do
 		cps[i] = t.sNos[cp.no]
 	end
-	-- candidatos de reforço a cada 75 m, dos dois lados da estrada e fora de construções
-	candidatos = {}
-	local sv = 0
-	while sv <= t.comprimento do
-		local x, y = Trajeto.pos(t, sv)
-		local dx, dy = Trajeto.dir(t, sv)
-		for _, lado in { -1, 1 } do
-			for _, afasta in { 30, 38, 24 } do
-				local qx, qy = x - dy * lado * afasta, y + dx * lado * afasta
-				if qx > 6 and qx < P.compM - 6 and qy > 6 and qy < P.profM - 6 then
-					local wx, wz = MapaAtivo.mundo(P, qx, qy)
-					local hit = workspace:Raycast(Vector3.new(wx, 1500, wz), Vector3.new(0, -3000, 0), rp)
-					local solo = hit and hit.Material ~= Enum.Material.Water
-					local livre = #workspace:GetPartBoundsInRadius(
-						Vector3.new(wx, (hit and hit.Position.Y or 0) + 4, wz),
-						7
-					) == 0
-					if solo and livre then
-						table.insert(candidatos, { s = sv, x = wx, z = wz })
-						break
-					end
-				end
-			end
-		end
-		sv += 75
-	end
 	print(
 		string.format(
-			"[VT65] comboio: estrada de %.2f m com o relevo, raio mínimo %.1f m, %d conjuntos de reforço",
+			"[VT65] comboio: estrada de %.2f m com o relevo, raio mínimo %.1f m",
 			t.comprimento,
-			Trajeto.raioMinimo(t),
-			#candidatos
+			Trajeto.raioMinimo(t)
 		)
 	)
 	return t
@@ -364,8 +336,6 @@ function ModoComboio.iniciar(matchService: any)
 			end
 		end)
 	end
-	local SpawnService = require(script.Parent.SpawnService) :: any
-	SpawnService.addProvider(ModoComboio.conjuntos)
 	local ExplosionService = require(script.Parent.ExplosionService) :: any
 	local antes = ExplosionService.onVehicles
 	ExplosionService.onVehicles = function(pos: Vector3, id: string)
@@ -393,27 +363,13 @@ function ModoComboio.limite(decorrido: number): number
 	return decorrido + (if c then math.max(0, R.rodadaS - c.t) else R.rodadaS)
 end
 
--- Conjuntos de reforço: a escolta nasce 60-120 m atrás da referência, a defesa à frente dela, com a lateral.
-function ModoComboio.conjuntos(faction: string): { any }
-	local out = {}
+-- Onde o comboio está e se este lado escolta (os conjuntos de nascer, Modules/NascerRetService).
+function ModoComboio.situacao(faction: string): (number?, boolean)
 	local c = corrida()
-	if not c or MapaAtivo.id() ~= "comboio" then
-		return out
+	if not c then
+		return nil, false
 	end
-	local souEscolta = faction == escolta
-	for i, q in candidatos do
-		local d = q.s - c.s
-		if (souEscolta and d <= -60 and d >= -120) or (not souEscolta and d >= 45 and d <= 150) then
-			table.insert(out, {
-				id = "comboio:" .. i,
-				name = if souEscolta then "Reforço da escolta" else "Reforço da defesa",
-				x = q.x,
-				z = q.z,
-				kind = "rally",
-			})
-		end
-	end
-	return out
+	return c.s, faction == escolta
 end
 
 -- O lugar de um bot em volta do comboio, na beira da estrada e dentro do raio que conta: a escolta até 11 m do

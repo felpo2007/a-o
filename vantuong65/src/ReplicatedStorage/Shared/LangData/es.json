@@ -3767,5 +3767,9 @@
  "TEMPO %s": "TIEMPO %s",
  "Vale das Cinco Passagens": "Valle de los Cinco Pasos",
  "Vila do Sino Baixo": "Aldea de la Campana Baja",
- "Vila dos Esteios": "Aldea de los Pilotes"
+ "Vila dos Esteios": "Aldea de los Pilotes",
+ "COMBOIO": "CONVOY",
+ "ESCOLTAR": "ESCOLTAR",
+ "Reforço — %s": "Refuerzo — %s",
+ "inimigo à vista": "enemigo a la vista"
 }

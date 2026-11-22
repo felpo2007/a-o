@@ -10058,3 +10058,30 @@ coordenadas do próprio prompt, que têm a maior prioridade.
 da 2ª rodada, celular e desempenho. O equilíbrio do Comboio com bots ainda não foi avaliado.
 **Falta:** conjuntos de nascer com duas saídas, seleção de mapa, carta tática retangular, biblioteca do Blender, os dez
 lugares e a publicação.
+
+### D-243, parte 3: nascer, carta horizontal e votação de mapa (2026-11-22, sem publicar)
+
+- **Conjuntos de nascer** (`tools/mapas_ret.py`, `Shared/NascerRet`, `Modules/NascerRetService`): 30 no Vale e 31 na
+  Estrada, em chão livre, cada um com duas saídas de 22 m a pelo menos 75 graus uma da outra. Com o cenário pronto, o
+  servidor varre cada saída com o corpo do soldado e troca a que uma miudeza bloqueou (1 na Estrada).
+- **Regra:** na Linha de Frente, até dois conjuntos por flanco, atrás da disputa, a 90-155 m do setor ativo. No Comboio, a
+  escolta nasce 60-120 m atrás da referência e a defesa 70-150 m à frente, mais o conjunto anterior como alternativa
+  segura. Inimigo a menos de 30 m, ou a menos de 70 m com linha livre, bloqueia o conjunto (margens provisórias). O QG é a
+  reserva e vale sempre; ninguém vivo é movido. As bases do Comboio saíram da estrada: nascer em N1 punha o soldado entre
+  os caminhões.
+- **16 por lado** nos mapas retangulares (`Roles.TEAM_MAX`).
+- **Carta tática:** a folha continua quadrada e o mapa é a faixa do meio (`CartaBounds`, `CartaFaixa`, `Carta.usaFaixa`): o
+  zoom 1 enquadra a faixa inteira. Vista aérea própria de cada mapa (`tools/carta_ret.luau` e `mapa_aereo.py --mapa <id>`),
+  com o fora da área escurecido. No Comboio, os marcos são COMBOIO, CP1, CP2, CP3 e ENTREGA.
+- **Votação de mapa:** o mapa de agora vem primeiro (sem voto, ninguém é levado). Outro mapa é outro servidor:
+  `Modules/MapaViagem` salva o perfil e leva todos a um servidor reservado; se falhar, a partida segue onde está.
+  Só aparece com `MapasRet.LIBERADOS = true` ou, no Studio, `VT65DevVotoMapas = true`. Servidor privado fica no mapa dele.
+
+**Medido no Studio** (com o jogo do dono aberto, sem número de fps):
+- Caminho real até o objetivo, a 4,98 m/s: no Vale, 27 rotas de 23,5 a 37,0 s, 26 dentro da meta de 20-35 s. Na Estrada, 65
+  rotas de 12,9 a 42,9 s (mediana 22,0 s), 36 dentro da meta: a janela de 60-120 m do prompt dá rotas curtas.
+- Saídas varridas na cena real: 60 de 60 no Vale; 61 de 62 na Estrada antes da troca automática.
+- Nascer num conjunto pela tela de pedido, carta dos dois mapas com os marcadores no lugar e votação com 3 mapas.
+- Mapa de sempre depois destas mudanças: autoteste do Studio com 18 ok, 0 falhas e 0 pulados.
+
+**Não testado:** o teleporte para o servidor reservado (não existe no Studio), dois jogadores reais, celular e desempenho.

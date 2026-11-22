@@ -120,15 +120,15 @@ def exporta_dados() -> None:
     subprocess.run([lune, "run", "tools/carta_dados.luau"], cwd=ROOT, check=True)
 
 
-def carrega() -> Dados:
-    info = json.loads((DADOS / "dados.json").read_text("utf-8"))
+def carrega(pasta: Path = DADOS) -> Dados:
+    info = json.loads((pasta / "dados.json").read_text("utf-8"))
     g = info["grid"]
     w, h = int(g["width"]), int(g["height"])
-    alt = np.fromfile(DADOS / "alturas.bin", dtype="<u2").reshape(h, w).astype(np.float32)
+    alt = np.fromfile(pasta / "alturas.bin", dtype="<u2").reshape(h, w).astype(np.float32)
     alt = (alt - float(g["heightOffsetCm"])) / 100.0
 
     def u8(nome: str) -> np.ndarray:
-        return np.fromfile(DADOS / nome, dtype=np.uint8).reshape(h, w)
+        return np.fromfile(pasta / nome, dtype=np.uint8).reshape(h, w)
 
     return Dados(
         info=info,

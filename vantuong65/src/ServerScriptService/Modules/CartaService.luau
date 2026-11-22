@@ -37,6 +37,16 @@ local function imageOf(decalId: number): number?
 end
 
 function CartaService.start()
+	-- D-243: a imagem dos mapas retangulares, para a votação (Shared/Rodada.MAPAS)
+	local catalogo = AssetIds.Catalogo or {}
+	for _, m in { "frente", "comboio" } do
+		for _, k in KEYS do
+			local id = catalogo["aereo_" .. m .. "_" .. k]
+			if type(id) == "number" and id ~= 0 then
+				ReplicatedStorage:SetAttribute("CartaRet_" .. m .. "_" .. k, id)
+			end
+		end
+	end
 	local images = AssetIds.CartaImages or {}
 	local decals = AssetIds.Carta or {}
 	local n = 0

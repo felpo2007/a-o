@@ -44,7 +44,7 @@ export type Point = { id: string, name: string, x: number, z: number }
 
 local V, F = UiKit.V, UiKit.F
 local TV = UiKit.tv()
-local B = MapConfig.Bounds
+local B = MapConfig.CartaBounds or MapConfig.Bounds
 
 local STREAM_POINT_S = 8 -- s máximos esperando a área do ponto
 local BODY_S = 8 -- s esperando o corpo novo

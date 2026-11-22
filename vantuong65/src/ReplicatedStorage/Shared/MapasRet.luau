@@ -67,8 +67,9 @@ MapasRet.COMBOIO = {
 		{ id = "CP3", nome = "Serraria", no = 7 },
 		{ id = "ENTREGA", nome = "Engenho do Espigão", no = 10 },
 	},
-	baseOeste = { x = 40, y = 120 },
-	baseLeste = { x = 860, y = 150 },
+	-- as bases ficam fora da estrada: nascer em N1 ou N10 punha o soldado entre os caminhões
+	baseOeste = { x = 20, y = 168 },
+	baseLeste = { x = 882, y = 104 },
 	-- faixas do mapa para o resto do jogo (setores do MapConfig)
 	setores = {
 		{ id = "A", nome = "Arrozais das Comportas", x = 95, y = 150 },

@@ -36,6 +36,11 @@ ROWS_PER = 60
 MASK_M = 0.5  # resolução da máscara de ocupação
 LEITO = 2.4  # fundo do rio abaixo da margem
 CAPTURA_R = 16.0  # raio do pátio de captura mantido livre
+CONJ_LIVRE_M = 4.5  # chão livre em volta de um conjunto de nascer
+CONJ_SAIDA_M = 22.0  # comprimento conferido de cada saída
+CONJ_SEPARA_GRAUS = 75  # as duas saídas não olham para o mesmo lado
+CONJ_ENTRE_M = 24.0  # distância mínima entre dois conjuntos
+CONJ_PASSO_M = 62.0  # um par de conjuntos a cada tanto de estrada (comboio, 60-90 m)
 HEAD = "--!strict\n-- GERADO por tools/mapas_ret.py. Não editar.\n"
 NOMES_CLASSE = ("mar", "areia", "arrozal", "vila", "capim", "riacho")
 
@@ -503,7 +508,7 @@ def comboio() -> Projeto:
             ("D", 575, 200),
             ("E", 850, 150),
         ],  # fmt: skip
-        bases=[("oeste", 40, 120), ("leste", 860, 150)],
+        bases=[("oeste", 20, 168), ("leste", 882, 104)],
         rio=[
             (470, 470),
             (462, 330),
@@ -887,6 +892,124 @@ class Mapa:
         n = max(math.hypot(tx, ty), 1e-6)
         return float(c[i, 0]), float(c[i, 1]), float(-ty / n), float(tx / n)
 
+    # ----------------------------------------------------------------- conjuntos de nascer
+    def conjuntos(self) -> None:
+        """Lugares prontos para nascer, com chão livre e duas saídas a pé em direções diferentes."""
+        p = self.p
+        im = Image.new("L", (self.mw, self.mh), 0)
+        dr = ImageDraw.Draw(im)
+
+        def px(a: float, b: float) -> tuple[float, float]:
+            return (a / MASK_M, (p.prof - b) / MASK_M)
+
+        dr.line(
+            [px(float(a), float(b)) for a, b in self.rio],
+            fill=255,
+            width=int((p.rio_largura + 4) / MASK_M),
+            joint="curve",
+        )
+        for it in self.items:
+            cantos = self.caixa(it["xm"], it["ym"], it["rumo"], it["hx"] + 0.8, it["hy"] + 0.8)
+            dr.polygon([px(a, b) for a, b in cantos], fill=255)
+        # a saída a pé não atravessa o corrimão de uma ponte
+        for b in self.pontes:
+            lg = (8.0 if p.id == "comboio" else 7.0) if b["tipo"] == "rodoviaria" else 3.0
+            dr.line(
+                (px(b["a"][0], b["a"][1]), px(b["b"][0], b["b"][1])),
+                fill=255,
+                width=int((lg + 2.0) / MASK_M),
+            )
+        solido = np.array(im, dtype=np.uint8) > 0
+        soma = np.zeros((self.mh + 1, self.mw + 1), np.int64)
+        soma[1:, 1:] = (self.ocup > 0).cumsum(0).cumsum(1)
+        r = int(CONJ_LIVRE_M / MASK_M)
+
+        def livre(x: float, y: float) -> bool:
+            if not (6 <= x <= p.comp - 6 and 6 <= y <= p.prof - 6):
+                return False
+            i, j = int((p.prof - y) / MASK_M), int(x / MASK_M)
+            i0, i1 = max(i - r, 0), min(i + r + 1, self.mh)
+            j0, j1 = max(j - r, 0), min(j + r + 1, self.mw)
+            if soma[i1, j1] - soma[i0, j1] - soma[i1, j0] + soma[i0, j0] != 0:
+                return False
+            z0 = self.altura(x, y)
+            return all(
+                abs(self.altura(x + a, y + b) - z0) <= 1.6
+                for a, b in ((4, 0), (-4, 0), (0, 4), (0, -4))
+            )
+
+        def aberta(x: float, y: float, a: float) -> bool:
+            for d in np.arange(3.0, CONJ_SAIDA_M + 0.1, 1.5):
+                qx, qy = x + d * math.cos(a), y + d * math.sin(a)
+                if not (2 <= qx <= p.comp - 2 and 2 <= qy <= p.prof - 2):
+                    return False
+                if solido[int((p.prof - qy) / MASK_M), int(qx / MASK_M)]:
+                    return False
+            return True
+
+        def saidas(x: float, y: float, alvo: tuple[float, float]) -> list[tuple] | None:
+            abertas = [a for a in (2 * math.pi * k / 24 for k in range(24)) if aberta(x, y, a)]
+            rumo = math.atan2(alvo[1] - y, alvo[0] - x)
+            melhor, par = -math.inf, None
+            for i, a in enumerate(abertas):
+                for b in abertas[i + 1 :]:
+                    sep = abs((a - b + math.pi) % (2 * math.pi) - math.pi)
+                    if sep < math.radians(CONJ_SEPARA_GRAUS):
+                        continue
+                    nota = math.cos(a - rumo) + math.cos(b - rumo)
+                    if nota > melhor:
+                        melhor, par = nota, (a, b)
+            if par is None:
+                return None
+            return [(x + CONJ_SAIDA_M * math.cos(q), y + CONJ_SAIDA_M * math.sin(q)) for q in par]
+
+        def longe(x: float, y: float) -> bool:
+            if any(math.hypot(x - c["xm"], y - c["ym"]) < CONJ_ENTRE_M for c in self.conj):
+                return False
+            alvos = [(a, b) for _i, a, b in p.setores] + [(a, b) for _i, a, b in p.bases]
+            return all(math.hypot(x - a, y - b) >= 30 for a, b in alvos)
+
+        def escolhe(cands: list[tuple], alvo: tuple[float, float], s: float) -> bool:
+            for _d, qx, qy in sorted(cands):
+                if not (longe(qx, qy) and livre(qx, qy)):
+                    continue
+                sa = saidas(qx, qy, alvo)
+                if sa:
+                    self.conj.append({"xm": float(qx), "ym": float(qy), "s": s, "saidas": sa})
+                    return True
+            return False
+
+        self.conj: list[dict] = []
+        if p.id == "frente":
+            for xt in range(55, 650, 42):
+                for ya, yb, yc in ((195, 288, 232), (12, 105, 68)):
+                    cands = [
+                        (math.hypot(qx - xt, qy - yc), float(qx), float(qy))
+                        for qx in np.arange(xt - 18, xt + 18.1, 2)
+                        for qy in np.arange(ya, yb, 2)
+                    ]
+                    if not escolhe(cands, (float(xt), 150.0), 0.0):
+                        self.falhas.append(f"conjunto sem lugar em x = {xt}, y = {yc}")
+        else:
+            tr = json.loads((SAIDA_PLANTA / "comboio_trajeto.json").read_text("utf-8"))
+            g = np.array(tr["pontos"], float)
+            for sv in np.arange(30.0, tr["comprimento"] - 20, CONJ_PASSO_M):
+                i = int(round((sv + 18) / 3))
+                i = int(np.clip(i, 1, len(g) - 2))
+                tx, ty = g[i + 1] - g[i - 1]
+                n = max(math.hypot(tx, ty), 1e-6)
+                nx, ny = -ty / n, tx / n
+                for lado in (1, -1):
+                    cands = []
+                    for afasta in np.arange(24.0, 62.0, 2.0):
+                        for corre in np.arange(-22.0, 22.1, 3.0):
+                            qx = g[i, 0] + nx * lado * afasta + tx / n * corre
+                            qy = g[i, 1] + ny * lado * afasta + ty / n * corre
+                            cands.append((afasta + abs(corre) * 0.3, float(qx), float(qy)))
+                    alvo = (float(g[i, 0]), float(g[i, 1]))
+                    if not escolhe(cands, alvo, float(sv)):
+                        self.falhas.append(f"conjunto sem lugar em s = {sv:.0f}, lado {lado}")
+
     # ----------------------------------------------------------------- saída
     def grava(self) -> None:
         pasta = BUILD / f"Data_{self.p.id}"
@@ -981,12 +1104,22 @@ class Mapa:
                 f'\t\t{{ tipo = "{a["tipo"]}", x1 = {x1:.2f}, z1 = {z1:.2f}, x2 = {x2:.2f}, '
                 f"z2 = {z2:.2f}, y = {y:.2f}, largura = {lg / M:.2f} }},\n"
             )
+        conj = ""
+        for k, c in enumerate(self.conj, 1):
+            wx, wz = self.mundo(c["xm"], c["ym"])
+            s1 = self.mundo(*c["saidas"][0])
+            s2 = self.mundo(*c["saidas"][1])
+            conj += (
+                f'\t\t{{ id = "c{k:02d}", x = {wx:.2f}, z = {wz:.2f}, s = {c["s"]:.1f}, '
+                f"sx1 = {s1[0]:.2f}, sz1 = {s1[1]:.2f}, sx2 = {s2[0]:.2f}, sz2 = {s2[1]:.2f} }},\n"
+            )
         (pasta / "Layout.luau").write_text(
             HEAD + "return {\n"
             f'\tid = "{self.p.id}",\n'
             "\titems = {\n" + itens + "\t},\n"
             "\tplantas = {\n" + plantas + "\t},\n"
-            "\tpontes = {\n" + pontes + "\t},\n}\n",
+            "\tpontes = {\n" + pontes + "\t},\n"
+            "\tconjuntos = {\n" + conj + "\t},\n}\n",
             "utf-8",
             newline="\n",
         )
@@ -1046,6 +1179,11 @@ class Mapa:
             dr.ellipse(
                 (q[0] - 13, q[1] - 13, q[0] + 13, q[1] + 13), outline=(190, 240, 120), width=3
             )
+        for c in self.conj:
+            q = px(c["xm"], c["ym"])
+            for sa in c["saidas"]:
+                dr.line((q, px(*sa)), fill=(255, 150, 240), width=2)
+            dr.ellipse((q[0] - 7, q[1] - 7, q[0] + 7, q[1] + 7), fill=(255, 90, 220))
         for sid, sx, sy in p.setores:
             q = px(sx, sy)
             r = CAPTURA_R * esc
@@ -1071,13 +1209,15 @@ def gera(p: Projeto) -> None:
     m.arrozais()
     m.mascara()
     m.bairros()
+    m.conjuntos()
     m.grava()
     destino = m.planta()
     casas = sum(1 for i in m.items if i["tipo"] == "casa")
     marcos = sum(1 for i in m.items if i["tipo"] == "marco")
     print(
         f"{p.id}: grade {m.w}x{m.h}, {len(m.roads)} trechos de via, {len(m.pontes)} pontes, "
-        f"{len(m.waters) // 6} tabuleiros, {marcos} marcos, {casas} casas"
+        f"{len(m.waters) // 6} tabuleiros, {marcos} marcos, {casas} casas, "
+        f"{len(m.conj)} conjuntos de nascer"
     )
     for a in m.pontes:
         print(

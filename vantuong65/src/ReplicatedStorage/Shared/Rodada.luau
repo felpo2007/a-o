@@ -31,11 +31,13 @@ function Rodada.total(): number
 end
 Rodada.PODIO_MAX = 3
 
--- Mapas que existem (um por enquanto). carta: o prefixo dos atributos das imagens da carta tática
--- (CartaService: prefixo + nw, ne, sw, se).
+-- Mapas que existem. carta: o prefixo dos atributos das imagens da carta tática (CartaService: prefixo
+-- + nw, ne, sw, se). D-243: os retangulares só entram na votação quando liberados (Rodada.mapasDaVotacao).
 export type Mapa = { id: string, nome: string, carta: string }
 Rodada.MAPAS = {
 	{ id = "vantuong", nome = "Operação Starlite", carta = "CartaImage_" },
+	{ id = "frente", nome = "Vale das Cinco Passagens", carta = "CartaRet_frente_" },
+	{ id = "comboio", nome = "Estrada do Bambu", carta = "CartaRet_comboio_" },
 } :: { Mapa }
 
 export type Linha = {
@@ -106,6 +108,24 @@ function Rodada.mapa(id: string): Mapa?
 		end
 	end
 	return nil
+end
+
+-- D-243: as opções da votação. O mapa de agora vem primeiro: sem voto ou no empate, ninguém é levado.
+function Rodada.mapasDaVotacao(atual: string, liberados: boolean): { Mapa }
+	local out: { Mapa } = {}
+	for _, m in Rodada.MAPAS do
+		if m.id == atual then
+			table.insert(out, m)
+		end
+	end
+	if liberados then
+		for _, m in Rodada.MAPAS do
+			if m.id ~= atual then
+				table.insert(out, m)
+			end
+		end
+	end
+	return out
 end
 
 -- A fase seguinte (depois da restauração vem o jogo, com a contagem do MatchService).

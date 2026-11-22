@@ -251,6 +251,18 @@ function ArtPlan.load(world: any, data: any): Ctx
 		return Geometry.sectorAt(MC.Sectors, x, z)
 	end, SpawnRules.rallyPosition, Front.C.rallyInsetM)
 	local circles, lanes = Vegetation.spawnClearings(spots)
+	-- D-243: nos mapas retangulares, a clareira é a dos conjuntos de nascer e de suas duas saídas
+	if data.layout and data.layout.conjuntos then
+		circles, lanes = {}, {}
+		for _, hq in MC.HQ do
+			table.insert(circles, { x = hq.x, z = hq.z, r = 15 / M })
+		end
+		for _, c in data.layout.conjuntos do
+			table.insert(circles, { x = c.x, z = c.z, r = 6 / M })
+			table.insert(lanes, { x1 = c.x, z1 = c.z, x2 = c.sx1, z2 = c.sz1, w = 1.6 / M })
+			table.insert(lanes, { x1 = c.x, z1 = c.z, x2 = c.sx2, z2 = c.sz2, w = 1.6 / M })
+		end
+	end
 	-- pontos de nascer das bases (Data/Bases, SpawnService): 3 m sem planta em volta de cada um
 	if data.bases then
 		for fac, hq in MC.HQ do

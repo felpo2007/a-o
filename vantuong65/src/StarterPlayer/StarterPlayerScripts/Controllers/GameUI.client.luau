@@ -179,7 +179,7 @@ CartaView.mount(mapFrame, TS, function(p: Vector2): Vector2
 end)
 local legend = CartaView.buildLegend(stage, LEGEND_RECT.x, LEGEND_RECT.y, LEGEND_RECT.w, LEGEND_RECT.h)
 
-local B = MapConfig.Bounds
+local B = MapConfig.CartaBounds or MapConfig.Bounds
 local function fromUV(u: number, v: number): (number, number)
 	return Carta.fromUV(B, u, v)
 end

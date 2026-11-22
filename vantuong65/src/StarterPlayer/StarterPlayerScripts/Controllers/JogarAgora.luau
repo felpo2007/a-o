@@ -234,7 +234,7 @@ end
 local function focusPoint()
 	local e = entry(S.point)
 	if e and type(e.x) == "number" and type(e.z) == "number" then
-		local u, v = Carta.toUV(MapConfig.Bounds, e.x, e.z)
+		local u, v = Carta.toUV(MapConfig.CartaBounds or MapConfig.Bounds, e.x, e.z)
 		pcall(CartaView.goTo, u, v)
 	end
 end
