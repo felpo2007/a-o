@@ -709,6 +709,61 @@ function Movement.vaultPlan(p: VaultProbe): (VaultPlan?, string)
 	return { kind = kind, duration = base * tired * heavy * tall * run / agile, cost = cost }, "ok"
 end
 
+-- ===== janela das casas (D-246, dono: "faça as janelas das casas varaveis") =====
+-- Medido no Studio em 115 janelas: peitoril a 1,25-1,73 m do chão de fora e 0,52-1,46 m do de dentro,
+-- vão de 0,88 a 1,14 m. Acima do limite de transpor, por isso a janela tem regra própria.
+Movement.JANELA = {
+	TAG = "VT65Janela",
+	minM = 0.4,
+	maxM = 1.9,
+	vaoMinM = 0.6,
+	alcanceM = 0.9,
+	quedaM = 2.6,
+	s = 0.85,
+	frentes = { 0.7, 1.0, 1.35 }, -- m além da parede, onde tentar descer
+	lados = { 0, 0.4, -0.4, 0.8, -0.8 },
+}
+
+export type JanelaProbe = {
+	peitoril: number, -- m do peitoril acima dos pés
+	vao: number, -- m entre peitoril e verga
+	distancia: number, -- m até a janela
+	queda: number?, -- m do peitoril ao chão do outro lado (nil = sem chão)
+	livre: boolean, -- cabe o corpo do outro lado
+	stamina: number,
+	stance: string,
+	legImpaired: boolean,
+	loadKg: number,
+	agility: number?,
+}
+
+function Movement.janelaPlan(p: JanelaProbe): (VaultPlan?, string)
+	local J = Movement.JANELA
+	if p.stance ~= "stand" then
+		return nil, "postura"
+	elseif Movement.legLimit(p.legImpaired) then
+		return nil, "perna ferida"
+	elseif p.peitoril < J.minM then
+		return nil, "baixo"
+	elseif p.peitoril > J.maxM then
+		return nil, "alto"
+	elseif p.vao < J.vaoMinM then
+		return nil, "vão pequeno"
+	elseif p.distancia > J.alcanceM then
+		return nil, "longe"
+	elseif p.queda == nil or (p.queda :: number) > J.quedaM then
+		return nil, "queda"
+	elseif not p.livre then
+		return nil, "sem espaço"
+	elseif p.stamina <= 0.02 then
+		return nil, "sem fôlego"
+	end
+	local tired = 1 + 0.4 * (1 - math.clamp(p.stamina, 0, 1))
+	local heavy = 1 + math.max(p.loadKg - Movement.LOAD_FREE_KG, 0) / 60
+	local agile = math.clamp(p.agility or 1, 0.5, 2)
+	return { kind = "vault", duration = J.s * tired * heavy / agile, cost = Movement.COST.vault }, "ok"
+end
+
 -- ===== degrau agachado ou deitado (D-93) =====
 -- Agachado, o HumanoidRootPart fica a ~6 cm do chão (HipHeight 0,2) e batia na face do dique do
 -- arrozal (35 cm ou mais): o soldado empacava e tinha de levantar. De pé o Humanoid sobe sozinho até

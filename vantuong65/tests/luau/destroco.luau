@@ -71,6 +71,33 @@ test("quem está dentro: fechado morre; aberto se fere sem cair e sai", function
 	assert(Medical.applyHit(Medical.new(), "torso", 3000, 0.5, 0) == "downed")
 end)
 
+test("D-246: bala não alcança quem vai fechado no blindado", function()
+	local function assento(kind: string, aberto: boolean, destruido: boolean?): any
+		local m = {
+			GetAttribute = function(_, k)
+				return if k == "Kind" then kind elseif k == "Destroyed" then destruido else nil
+			end,
+		}
+		return {
+			SeatPart = {
+				GetAttribute = function(_, k)
+					return if k == "Open" then aberto else nil
+				end,
+				FindFirstAncestorWhichIsA = function()
+					return m
+				end,
+			},
+		}
+	end
+	assert(VeiculoDano.naBlindagem(assento("tracked", false)), "tanque fechado")
+	assert(VeiculoDano.naBlindagem(assento("amphibious", false)), "LVTP fechado")
+	assert(not VeiculoDano.naBlindagem(assento("tracked", true)), "escotilha aberta")
+	assert(not VeiculoDano.naBlindagem(assento("wheeled", false)), "chapa fina")
+	assert(not VeiculoDano.naBlindagem(assento("heli", false)), "helicóptero")
+	assert(not VeiculoDano.naBlindagem(assento("tracked", false, true)), "destroço")
+	assert(not VeiculoDano.naBlindagem({ SeatPart = nil }), "a pé")
+end)
+
 test("destroço: a fumaça fica, o fogo some antes, tudo acaba no fim", function()
 	local f0, g0 = VeiculoDano.queima(0, 25)
 	assert(f0 == 1 and g0 == 1)

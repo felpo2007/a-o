@@ -154,9 +154,10 @@ test("cliente: todo pedido de nascer leva a rodada (SpawnTransition.pedir)", fun
 	end
 end)
 
-test("carta: clicar e tocar só escolhem; o escolhido tem anel âmbar; A no escolhido confirma", function()
+test("carta: tocar escolhe, o mouse escolhe ao passar e nasce no clique; anel âmbar; A confirma", function()
 	local ui = ler(C .. "GameUI.client.luau")
-	assert(string.find(ui, "selecionar(pt) -- D-209: clicar ou tocar só escolhe", 1, true))
+	assert(string.find(ui, "selecionar(pt) -- D-209: tocar só escolhe", 1, true))
+	assert(string.find(ui, "CartaView.setConfirma(function()", 1, true), "clique do mouse nasce")
 	assert(not string.find(ui, "insert(pt)", 1, true), "nada insere direto")
 	assert(
 		string.find(

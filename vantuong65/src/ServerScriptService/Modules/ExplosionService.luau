@@ -6,6 +6,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Explosive = require(ReplicatedStorage.Shared.Explosive)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Rng = require(ReplicatedStorage.Shared.Rng)
+local VeiculoDano = require(ReplicatedStorage.Shared.VeiculoDano)
 local AnimalService = require(script.Parent.AnimalService)
 local Combatants = require(script.Parent.Combatants)
 local MatchService = require(script.Parent.MatchService)
@@ -143,7 +144,7 @@ function ExplosionService.ignite(pos: Vector3, heading: Vector3?, by: Player?, i
 			for _, e in Combatants.list() do
 				local root = Combatants.root(e)
 				local model = e.model
-				if root and model then
+				if root and model and not VeiculoDano.naBlindagem(Combatants.humanoid(e)) then
 					local d = (root.Position - pos) * M
 					local zone = if math.abs(d.Y) < 4 then Explosive.burnAt(b, d.X, d.Z, h.X, h.Z) else nil
 					if zone == "core" then
@@ -195,7 +196,8 @@ function ExplosionService.detonate(id: string, pos: Vector3, by: Player?, from: 
 	local origin = pos + Vector3.new(0, 1, 0)
 	for _, e in Combatants.list() do
 		local root = Combatants.root(e)
-		if root then
+		-- D-246: o estilhaço também para no casco do blindado
+		if root and not VeiculoDano.naBlindagem(Combatants.humanoid(e)) then
 			local dM = (root.Position - pos).Magnitude * M
 			if dM <= t.casualtyM then
 				local exposure = if e.model:GetAttribute("Crouched") then Explosive.CROUCH else 1

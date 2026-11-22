@@ -34,6 +34,12 @@ function ArteCatalogo.time(f: string): string
 	return url("time_" .. string.lower(f))
 end
 
+-- D-246 (dono: "prefiria o jeito de escolher as bandeiras como antes"): a escolha do time volta às
+-- imagens de antes do D-240; a bandeira ao vento segue na comemoração
+function ArteCatalogo.timeEscolha(f: string): string
+	return url("time_escolha_" .. string.lower(f))
+end
+
 -- a imagem do carregador certo para a arma (o item "Carregadores" do equipamento)
 ArteCatalogo.MUNICAO = {
 	rifle = "mag_rifle",

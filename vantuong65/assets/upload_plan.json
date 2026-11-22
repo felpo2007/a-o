@@ -12437,5 +12437,40 @@
   "assetType": "Model",
   "name": "VT65 ret_olaria_cobertura",
   "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Idiomas.pt",
+  "file": "assets/ui/idiomas/pt.png",
+  "assetType": "Image",
+  "name": "VT65 idioma pt",
+  "description": "VAN TUONG 65 - bandeira da escolha de idioma (D-246)"
+ },
+ {
+  "key": "Idiomas.en",
+  "file": "assets/ui/idiomas/en.png",
+  "assetType": "Image",
+  "name": "VT65 idioma en",
+  "description": "VAN TUONG 65 - bandeira da escolha de idioma (D-246)"
+ },
+ {
+  "key": "Idiomas.es",
+  "file": "assets/ui/idiomas/es.png",
+  "assetType": "Image",
+  "name": "VT65 idioma es",
+  "description": "VAN TUONG 65 - bandeira da escolha de idioma (D-246)"
+ },
+ {
+  "key": "Idiomas.vi",
+  "file": "assets/ui/idiomas/vi.png",
+  "assetType": "Image",
+  "name": "VT65 idioma vi",
+  "description": "VAN TUONG 65 - bandeira da escolha de idioma (D-246)"
+ },
+ {
+  "key": "Idiomas.auto",
+  "file": "assets/ui/idiomas/auto.png",
+  "assetType": "Image",
+  "name": "VT65 idioma auto",
+  "description": "VAN TUONG 65 - bandeira da escolha de idioma (D-246)"
  }
 ]

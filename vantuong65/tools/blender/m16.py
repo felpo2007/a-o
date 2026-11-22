@@ -192,22 +192,21 @@ def m16() -> tuple[list, dict]:
     # ---------------- alça de transporte (alumínio): base da alça de mira atrás, dois trilhos com
     # o vão no meio (a linha de visada passa por dentro) e a perna da frente
     g.caixa(-0.0115, 0.0115, 0.262, 0.300, 0.034, 0.056, MAT_ANOD)  # base da alça de mira
-    # D-236 (dono: "deixe ela mais limpa"): orelhas e trilhos abertos e baixos, fora do furo do anel
-    # (o GLB publicado saiu do tools/mira_limpa.py, que move só estes vértices e mantém o UV)
-    for x0, x1 in lados(0.0100, 0.0115):  # orelhas da alça de mira
-        g.caixa(x0, x1, 0.268, 0.290, 0.056, 0.075, MAT_ANOD)
-    for x0, x1 in lados(0.0125, 0.0155):  # trilhos da alça de transporte
-        g.caixa(x0, x1, 0.298, 0.437, 0.042, 0.060, MAT_ANOD)
+    # D-246 (dono: "volte a mira da m16 antiga"): desfaz a limpeza do D-236
+    for x0, x1 in lados(0.0080, 0.0110):  # orelhas da alça de mira
+        g.caixa(x0, x1, 0.268, 0.290, 0.056, 0.080, MAT_ANOD)
+    for x0, x1 in lados(0.0045, 0.0105):  # trilhos da alça de transporte
+        g.caixa(x0, x1, 0.298, 0.437, 0.052, 0.070, MAT_ANOD)
     g.caixa(-0.0105, 0.0105, 0.418, 0.437, 0.034, 0.052, MAT_ANOD)  # perna da frente
     g.cilindro_x(-0.0162, -0.0115, 0.283, 0.047, 0.0060, MAT_ANOD)  # botão de deriva (direita)
-    # o anel da alça (D-236: 8,4 mm de furo, era 5) e a haste que o prende à base
+    # o anel da alça (5 mm de furo) e a haste que o prende à base
     g.torno(
         [
-            (D_ALCA - 0.0015, 0.0042),
-            (D_ALCA - 0.0015, 0.0062),
-            (D_ALCA + 0.0015, 0.0062),
-            (D_ALCA + 0.0015, 0.0042),
-            (D_ALCA - 0.0015, 0.0042),
+            (D_ALCA - 0.0015, 0.0025),
+            (D_ALCA - 0.0015, 0.0056),
+            (D_ALCA + 0.0015, 0.0056),
+            (D_ALCA + 0.0015, 0.0025),
+            (D_ALCA - 0.0015, 0.0025),
         ],
         0,
         ZS,
@@ -279,9 +278,9 @@ def m16() -> tuple[list, dict]:
         MAT_ACO,
         k=20,
     )
-    for x0, x1 in lados(0.0078, 0.0100):  # orelhas da massa (D-236: abaixo da linha de visada)
-        g.caixa(x0, x1, fm - 0.0065, fm + 0.0065, 0.040, 0.061, MAT_ACO)
-    g.caixa(-0.0011, 0.0011, fm - 0.002, fm + 0.002, 0.044, ZS, MAT_ACO)  # poste
+    for x0, x1 in lados(0.0058, 0.0084):  # orelhas da massa
+        g.caixa(x0, x1, fm - 0.0065, fm + 0.0065, 0.040, 0.074, MAT_ACO)
+    g.caixa(-0.0009, 0.0009, fm - 0.002, fm + 0.002, 0.044, ZS, MAT_ACO)  # poste
     g.caixa(-0.0045, 0.0045, fm + 0.004, fm + 0.033, -0.024, -0.008, MAT_ACO)  # baioneta
     g.tubo(
         [

@@ -68,7 +68,7 @@ end)
 
 test("cuidar ficou mais rápido e o médico devolve a vida inteira", function()
 	local C = Medical.C
-	assert(C.bandageOther == 3 and C.medicTreat == 5 and C.reviveTime == 5)
+	assert(C.bandageOther == 3 and C.medicTreat == 5 and C.reviveTime == 2.5)
 	local s = Medical.new(false)
 	s.health = 20
 	assert(Medical.treat(s) and s.health == 100, "tratar leva a 100")

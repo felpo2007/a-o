@@ -50,3 +50,6 @@ Formato: **sintoma** → causa → correção → como evitar.
 - **`get_console_output` despeja milhares de linhas** → filtrar com `LogService:GetLogHistory()`.
 - **`execute_luau` move o personagem errado logo após nascer** → o `Character` ainda vai trocar → esperar e pegar `P.Character` de novo.
 - **Câmera dentro de uma casa na foto** → conferir a planta com `kb.py mapa <id> <setor>` antes.
+- **`ImageLabel.IsLoaded` não dispara sinal e imagem com transparência 1 não carrega** → usar `ContentProvider:PreloadAsync` e mostrar depois.
+- **Colisão da arte fixa não passa pelo `baseTemplate`** → marcar por varredura do mapa no boot.
+- **`moveTo` do mouse no Studio usa `AbsolutePosition`, sem o inset do topo** → não converter da captura.

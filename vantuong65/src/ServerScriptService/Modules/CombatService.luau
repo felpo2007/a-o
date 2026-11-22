@@ -35,6 +35,7 @@ local Net = require(ReplicatedStorage.Shared.Net)
 local Pickup = require(ReplicatedStorage.Shared.Pickup)
 local Rng = require(ReplicatedStorage.Shared.Rng)
 local Vantagens = require(ReplicatedStorage.Shared.Vantagens)
+local VeiculoDano = require(ReplicatedStorage.Shared.VeiculoDano)
 local Weapons = require(ReplicatedStorage.Shared.Weapons)
 local AssetLoader = require(script.Parent.AssetLoader)
 local Combatants = require(script.Parent.Combatants)
@@ -368,7 +369,8 @@ local function nearTargets(shooter: Model, origin: Vector3, dir: Vector3, wp: We
 		if m ~= shooter then
 			table.insert(models, m)
 			local root, hum = Combatants.root(e), Combatants.humanoid(e)
-			if root and hum and hum.Health > 0 then
+			-- D-246: dentro do blindado a bala para no casco
+			if root and hum and hum.Health > 0 and not VeiculoDano.naBlindagem(hum) then
 				local rel = root.Position - origin
 				if Hitbox.nearRay(rel.X, rel.Y, rel.Z, dir.X, dir.Y, dir.Z, wp.muzzleVelocity, extra or 0) then
 					Hitbox.fromModel(m, boxes)
@@ -590,6 +592,10 @@ local function onClaim(player: Player, c: any)
 	end
 	local hum, root = Combatants.humanoid(e), Combatants.root(e)
 	if not (hum and root) or hum.Health <= 0 then
+		return
+	end
+	if VeiculoDano.naBlindagem(hum) then
+		claimRefused(player, "dev: alvo dentro do blindado")
 		return
 	end
 	local dist, seg = Hitbox.near(k.path, x, y, z)

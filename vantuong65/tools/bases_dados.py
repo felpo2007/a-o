@@ -55,6 +55,10 @@ ESCALA = {
     "us_command_tent": 1.5,
     "vc_lean_to": 1.5,
 }
+# D-246 (dono: "aumentar portão da base americana"): cresce sem sair da estrada; as concertinas ao
+# lado dele abrem espaço (abrir_portao)
+ESCALA_FIXA = {"us_gate": 1.6}
+CONCERTINA_PORTAO_M = (9.8, 12.9)
 # entre pegadas (a pegada já conta as cordas e as estacas; com 1 m não cabia na base dos EUA)
 FOLGA_M = 0.5
 
@@ -150,6 +154,20 @@ def afastar(b: dict) -> list[str]:
     return rel
 
 
+def abrir_portao(b: dict) -> int:
+    """Afasta da estrada as duas concertinas coladas no portão maior."""
+    de, para = CONCERTINA_PORTAO_M
+    movidas = 0
+    if not any(it["chave"] in ESCALA_FIXA for it in b["itens"]):
+        return 0
+    for it in b["itens"]:
+        if it["chave"] == "us_concertina" and abs(abs(it["z_studs"]) * STUD - de) < 0.05:
+            if it["x_studs"] * STUD < -45:
+                it["z_studs"] = (1 if it["z_studs"] > 0 else -1) * para / STUD
+                movidas += 1
+    return movidas
+
+
 def n(v: float) -> str:
     return f"{v:.2f}".rstrip("0").rstrip(".") if abs(v) > 1e-9 else "0"
 
@@ -165,6 +183,8 @@ def main() -> None:
         bases[f] = json.loads((BLENDER / "bases" / arq).read_text("utf-8"))
         for linha in afastar(bases[f]):
             print(f"{f} afastada (barraca 1,5x): {linha}")
+        if abrir_portao(bases[f]):
+            print(f"{f}: concertinas abertas para o portão maior")
     chaves = sorted({it["chave"] for b in bases.values() for it in b["itens"]})
     met = {k: metricas(k) for k in chaves}
     # casas únicas da vila (Blender, 2026-11-13): colisão por nó e a porta principal
@@ -200,7 +220,9 @@ def main() -> None:
             ]
             # todos os campos em todo item (o tipo da tabela no --!strict); "" = sem
             pad = it["chave"] not in SEM_PATAMAR and not it.get("dentro_de")
-            campos.append(f"scale = {n(ESCALA.get(it['chave'], 1))}")
+            campos.append(
+                f"scale = {n(ESCALA.get(it['chave']) or ESCALA_FIXA.get(it['chave'], 1))}"
+            )
             campos.append(f"padded = {'true' if pad else 'false'}")
             campos.append(f'node = "{it.get("no") or ""}"')
             campos.append(f'inside = "{it.get("dentro_de") or ""}"')
@@ -281,7 +303,8 @@ def main() -> None:
         ex = (m or {}).get("extras") or {}
         campos = []
         if "cancela_pivo_studs" in ex:
-            p = ex["cancela_pivo_studs"]
+            kp = ESCALA_FIXA.get(k, 1)
+            p = [v * kp for v in ex["cancela_pivo_studs"]]
             campos.append(f"gatePivot = {{ {', '.join(n(v) for v in p)} }}")
             campos.append(f'gateAxis = "{ex["cancela_eixo_roblox"]}"')
         if "fumaca_saidas_studs" in ex:

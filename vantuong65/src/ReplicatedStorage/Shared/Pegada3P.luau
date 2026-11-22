@@ -228,8 +228,9 @@ function Pegada3P.gun(torso: CFrame, s: State): CFrame
 		* CF.Angles(math.rad(s.rlArfa) * (1 - p), 0, math.rad(s.rlRola) * (1 - p))
 	-- D-238: rastejando, a arma vai sobre os antebraços e acompanha o cotovelo que puxa
 	local cr = math.clamp(s.crawl, 0, 1) * p
-	local crawl = CF.new(0.1 * S * s.braco * cr, -0.08 * S * cr, (0.04 + 0.09 * (1 - math.abs(s.braco))) * S * cr)
-		* CF.Angles(math.rad(-5) * cr, math.rad(9) * s.braco * cr, math.rad(13) * s.braco * cr)
+	-- D-246: o fuzil vai de um antebraço ao outro e avança a cada puxada: os braços trabalham de verdade
+	local crawl = CF.new(0.17 * S * s.braco * cr, -0.08 * S * cr, (0.12 - 0.17 * math.abs(s.braco)) * S * cr)
+		* CF.Angles(math.rad(-5) * cr, math.rad(15) * s.braco * cr, math.rad(20) * s.braco * cr)
 	local k = math.clamp(s.kick, 0, 1)
 	local kick = CF.new(0, 0.02 * S * k, 0.14 * S * k) * CF.Angles(math.rad(5) * k, 0, 0)
 	if Pegada3P.tubo(s) then

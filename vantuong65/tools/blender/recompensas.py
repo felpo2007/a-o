@@ -133,8 +133,16 @@ def estrela_verts(raio, z, pontas=5):
     return out
 
 
+def fator_hex(a: float) -> float:
+    """D-246: raio do sextavado de pontas para cima, igual ao de tools/blender/moeda_hex.py."""
+    setor = math.pi / 3
+    u = (a - math.pi / 2 + setor / 2) % setor - setor / 2
+    reto = math.cos(setor / 2) / math.cos(u)
+    return reto * 0.94 + 0.06 * math.cos(setor / 2)
+
+
 def malha_moeda(ouro):
-    """A moeda: disco, aro alto, anel gravado e estrela em relevo nas duas faces."""
+    """A moeda sextavada (D-246): aro alto, sextavado gravado e estrela facetada nas duas faces."""
     bm = bmesh.new()
     h = ALTURA_MOEDA / 2
     # perfil girado: do centro ao aro, em cima; o aro; e de volta embaixo
@@ -157,7 +165,10 @@ def malha_moeda(ouro):
     aneis = []
     for i in range(n):
         a = 2 * math.pi * i / n
-        aneis.append([bm.verts.new((r * math.cos(a), r * math.sin(a), z)) for r, z in perfil])
+        k = fator_hex(a)
+        aneis.append(
+            [bm.verts.new((r * k * math.cos(a), r * k * math.sin(a), z)) for r, z in perfil]
+        )
     for i in range(n):
         a, b = aneis[i], aneis[(i + 1) % n]
         for j in range(len(perfil) - 1):
@@ -169,23 +180,18 @@ def malha_moeda(ouro):
                 bm.faces.new((a[j], a[j + 1], b[j + 1], b[j]))
     bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=1e-5)
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
-    # estrela em relevo, em cima e embaixo
+    # estrela de dez facetas, em cima e embaixo
     for sinal in (1, -1):
-        z0 = sinal * h * 0.62
-        z1 = sinal * h * 0.98
-        base = [bm.verts.new(v) for v in estrela_verts(0.27, z0)]
-        topo = [bm.verts.new(v) for v in estrela_verts(0.245, z1)]
+        base = [bm.verts.new(v) for v in estrela_verts(0.262, sinal * h * 0.62)]
+        topo = bm.verts.new((0, 0, sinal * h * 1.5))
         q = len(base)
         for i in range(q):
-            f = (base[i], base[(i + 1) % q], topo[(i + 1) % q], topo[i])
+            f = (base[i], base[(i + 1) % q], topo)
             bm.faces.new(f if sinal > 0 else f[::-1])
-        bm.faces.new(topo if sinal > 0 else topo[::-1])
     me = bpy.data.meshes.new("Moeda")
     bm.to_mesh(me)
     bm.free()
     me.materials.append(ouro)
-    for p in me.polygons:
-        p.use_smooth = len(p.vertices) == 4 and p.area < 0.012
     return me
 
 
@@ -358,11 +364,6 @@ def bau(c: Cena):
     c.encostada(0.5, -1.28, 1.05, -0.3)
 
 
-def moeda_so(c: Cena):
-    """A moeda sozinha: é ela que voa da tela ao receber o prêmio."""
-    c.encostada(0.0, 0.0, 1.05, -0.3)
-
-
 CENAS = {
     "r1": d1,
     "r2": d2,
@@ -371,15 +372,14 @@ CENAS = {
     "r5": d5,
     "r6": d6,
     "r7": bau,
-    "moeda": moeda_so,
-}
+}  # D-246: a moeda sozinha sai de tools/blender/moeda_hex.py
 
 
 def rebatedores(centro, raio):
     """Painéis de luz que só o reflexo vê: é deles que o ouro tira o brilho."""
     for nome, pos, tam, forca, cor in (
-        ("Teto", (-0.5, -0.5, 3.0), (5.0, 3.0), 1.05, (1.0, 0.95, 0.86)),
-        ("Frente", (-0.5, -3.2, 1.3), (4.4, 2.6), 1.5, (1.0, 0.94, 0.84)),
+        ("Teto", (-0.5, -0.5, 3.0), (5.0, 3.0), 0.5, (1.0, 0.95, 0.86)),
+        ("Frente", (-0.5, -3.2, 1.3), (4.4, 2.6), 0.85, (1.0, 0.94, 0.84)),
         ("Lado", (-3.2, -1.2, 1.0), (1.2, 4.0), 3.4, (1.0, 0.92, 0.8)),
         ("Frio", (3.2, -1.6, 1.0), (1.6, 3.2), 1.3, (0.74, 0.84, 1.0)),
     ):
@@ -405,7 +405,7 @@ def render(chave, amostras, teste):
         cena.view_settings.look = "None"
     except TypeError:
         pass
-    cena.view_settings.exposure = -0.55
+    cena.view_settings.exposure = -1.05
     CENAS[chave](c)
     bpy.context.view_layer.update()
     cam, centro, raio = L.camera_para(

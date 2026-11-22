@@ -63,6 +63,22 @@ function VeiculoDano.ferimento(aberto: boolean, heli: boolean): Ferimento
 	return { zona = "head", energiaJ = 3000, mata = true }
 end
 
+-- D-246 (dono: "estou morrendo por tiros dentro do tanque"): em lugar fechado de um blindado o soldado
+-- fica atrás do casco. Bala e estilhaço não chegam nele; o que mata a tripulação é destruir o veículo.
+-- Jipe, caminhão e helicóptero têm chapa fina e continuam sem essa proteção.
+function VeiculoDano.blindado(kind: any): boolean
+	return kind == "tracked" or kind == "amphibious"
+end
+
+function VeiculoDano.naBlindagem(hum: any): boolean
+	local seat = hum and hum.SeatPart
+	if not seat or seat:GetAttribute("Open") == true then
+		return false
+	end
+	local m = seat:FindFirstAncestorWhichIsA("Model")
+	return m ~= nil and VeiculoDano.blindado(m:GetAttribute("Kind")) and m:GetAttribute("Destroyed") ~= true
+end
+
 -- Fumaça e fogo do destroço com o tempo (1 no começo, 0 no fim de fumacaS): a fumaça preta fica, o
 -- fogo some antes.
 function VeiculoDano.queima(t: number, fumacaS: number): (number, number)

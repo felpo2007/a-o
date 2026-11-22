@@ -225,5 +225,5 @@ def limpar(chave: str) -> None:
 
 
 if __name__ == "__main__":
-    for k in REGRAS:
-        limpar(k)
+    # D-246: a M16 voltou à mira antiga (arma_m16.antes_d236.glb); só a SKS segue limpa
+    limpar("sks")

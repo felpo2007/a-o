@@ -97,7 +97,7 @@ type Driver = {
 	bot: boolean,
 	throwAt: number,
 	diveAt: number,
-	lod: string, -- "near" | "far" | "off" (bots)
+	lod: string, -- "near" | "far" | "longe" | "off" (bots)
 	acc: number, -- tempo acumulado entre passos (far)
 	lastPos: Vector3?,
 	vel: Vector3, -- velocidade estimada pela posição (bots)
@@ -568,7 +568,14 @@ local function refreshBots()
 							seenAt[m] = now
 						end
 						local visible = now - (seenAt[m] or -10) < 1
-						setLod(d, if not visible then "off" elseif dist <= LOD_NEAR then "near" else "far")
+						setLod(
+							d,
+							if not visible
+								then "off"
+								elseif dist <= LOD_NEAR then "near"
+								elseif dist <= SoldierAnims.BOT_MEDIO then "far"
+								else "longe"
+						)
 					end
 				end
 			end
@@ -893,9 +900,14 @@ local function poseRastejo(w: Watch, fase: number, k: number, dt: number)
 		local base = (w.baseDeitado or atual):Lerp(atual, 1 - math.exp(-dt / 0.6))
 		w.baseDeitado = base
 		-- deitado, o Y da Root corre ao longo do corpo e o Z sai do chão
-		mistura(w, "Root", base * CFrame.Angles(0, r.rolo, r.guinada), k)
+		mistura(w, "Root", base * CFrame.new(0, r.avanco, 0) * CFrame.Angles(0, r.rolo, r.guinada), k)
 	end
 	mistura(w, "Waist", CFrame.Angles(0, -r.rolo * 1.4, -r.guinada * 1.2), k)
+	-- D-246: a cabeça fica olhando para a frente enquanto o corpo balança
+	local pescoco = joint(w, "Neck")
+	if pescoco then
+		mistura(w, "Neck", getTransform(pescoco) * CFrame.Angles(0, r.rolo * 0.4, r.guinada * 0.7), k)
+	end
 	pernaRastejo(w, "Left", r.E, k)
 	pernaRastejo(w, "Right", r.D, k)
 	local vivo = Passada3P.vivo[w.model]
@@ -1109,9 +1121,9 @@ RunService.PreAnimation:Connect(function(dt: number)
 		if m.Parent and d.hum.Parent then
 			if d.lod == "near" then
 				stepDriver(d, dt)
-			elseif d.lod == "far" then
+			elseif d.lod == "far" or d.lod == "longe" then
 				d.acc += dt
-				if d.acc >= SoldierAnims.FAR_STEP_S then
+				if d.acc >= (if d.lod == "far" then SoldierAnims.FAR_STEP_S else SoldierAnims.LONGE_STEP_S) then
 					stepDriver(d, d.acc)
 					d.acc = 0
 				end
@@ -1138,7 +1150,7 @@ RunService.PreSimulation:Connect(function(dt: number)
 		if downedNow(w) then
 			continue -- caído (MorteFx) ou morto (boneco do servidor)
 		end
-		if lod ~= "off" and (lod == "near" or farTick or (w.throw and w.throw.IsPlaying)) then
+		if lod ~= "off" and lod ~= "longe" and (lod == "near" or farTick or (w.throw and w.throw.IsPlaying)) then
 			if rescan then
 				scan(w)
 			end

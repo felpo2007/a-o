@@ -96,9 +96,10 @@ Corpo.ROSTOS = {
 
 -- Tons de pele (cabeça e mãos), como os do Front 44 (Main.server SKIN): do claro ao escuro. Fuzileiros
 -- de 1965 de todas as origens; os do VC no tom do Sul do Vietnã, sol de campo. Escolha pela semente.
+-- D-246 (direção de arte do dono): tons mais quentes, de pele queimada de sol, como nas imagens de referência.
 Corpo.PELE = {
-	US = { { 238, 206, 178 }, { 224, 182, 148 }, { 204, 158, 120 }, { 160, 114, 82 }, { 116, 80, 56 } },
-	VC = { { 226, 184, 146 }, { 212, 168, 128 }, { 196, 150, 110 }, { 178, 132, 96 } },
+	US = { { 232, 176, 118 }, { 222, 160, 102 }, { 200, 138, 86 }, { 152, 100, 66 }, { 108, 72, 48 } },
+	VC = { { 222, 164, 108 }, { 208, 150, 96 }, { 192, 134, 84 }, { 172, 118, 74 } },
 } :: { [string]: { { number } } }
 
 -- Tom de pele e rosto de um soldado (pela semente: UserId do jogador ou número do bot).

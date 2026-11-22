@@ -4,6 +4,11 @@
 
 O estado atual fica em `knowledge/01-CURRENT-STATE.md`. Este arquivo continua como histórico lote a lote: abra por busca.
 
+## Pedidos de 22/11 (D-246, em partes)
+- **Parte 1 (lote 115): feita.** Tanque, reanimação, mão solta, bots, rastejo, M16 antiga, bandeiras, moedas,
+  promoção, nascer no mapa, portão, janelas, pele e capa.
+- **Falta:** progressão e vantagens, direção de arte geral, telas no estilo das imagens, Comboio e áudios.
+
 ## Fase atual (2026-11-11, sessão 7: teste fase a fase no Studio, D-75)
 | Fase | Estado |
 |---|---|

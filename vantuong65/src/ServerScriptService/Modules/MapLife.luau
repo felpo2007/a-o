@@ -12,6 +12,7 @@
 local CollectionService = game:GetService("CollectionService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
+local Movement = require(ReplicatedStorage.Shared.Movement)
 local RiceField = require(ReplicatedStorage.Shared.RiceField)
 local Rng = require(ReplicatedStorage.Shared.Rng)
 local Tunnels = require(ReplicatedStorage.Shared.Tunnels) :: any
@@ -1312,6 +1313,20 @@ MapLife.TOWER_TRUSS = true
 MapLife.PUNJI_COOLDOWN_S = 3
 -- fumaça rala do fogão Hoàng Cầm (o duto espalha rente ao chão)
 MapLife.KITCHEN_SMOKE_RATE = 1.2
+
+-- D-246: marca as caixas de janela do mapa (Colisao_*jan*), as de agora e as que chegarem. A colisão da
+-- arte fixa não passa pelo baseTemplate, por isso a marca sai daqui. O cliente usa em Movement.janelaPlan.
+function MapLife.marcarJanelas(map: Instance)
+	local function marca(d: Instance)
+		if d:IsA("BasePart") and string.sub(d.Name, 1, 8) == "Colisao_" and string.find(d.Name, "jan", 9, true) then
+			CollectionService:AddTag(d, Movement.JANELA.TAG)
+		end
+	end
+	for _, d in map:GetDescendants() do
+		marca(d)
+	end
+	map.DescendantAdded:Connect(marca)
+end
 
 -- Template de cada chave (uma vez; as cópias herdam): nós visuais sem colisão, consulta nem toque;
 -- Colisao_* invisíveis, com colisão e o atributo Material (consulta só onde a bala para, ou no

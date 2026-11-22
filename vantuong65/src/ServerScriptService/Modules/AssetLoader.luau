@@ -869,6 +869,7 @@ function AssetLoader.start()
 		)
 	)
 	-- arrozal (D-74): dossel dos tabuleiros plantados e ladrilhos de arroz para o cliente
+	MapLife.marcarJanelas(map) -- D-246
 	print(string.format("[VT65] arrozal: %d tabuleiros com arroz", MapLife.rice(map, AssetLoader.template)))
 	print(string.format("[VT65] animais em partes para o cliente: %d", MapLife.animalArt(AssetLoader.template)))
 	-- lâminas d'água (studs): a manada usa para saber se o ponto é arrozal alagado

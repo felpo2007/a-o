@@ -63,6 +63,8 @@ return {
 		-- D-237: gravações da biblioteca do Roblox: moedas caindo (PSE) e o toque de metais (APM, "1812 Fanfare")
 		ganho_moeda = 9113848943,
 		ganho_promocao = 1845298676,
+		ganho_fanfarra = 9042409054, -- D-246: metais da promoção (APM, 6,03 s)
+		ganho_moedas = 9113849100, -- D-246: punhado de moedas (ProSoundEffects, 1,22 s)
 		-- D-203: contagem do começo e apito de início (tools/sons_partida.py; 0 = sem som)
 		contagem_tique = 116493671686163,
 		partida_apito = 75456146464614,
@@ -154,7 +156,7 @@ return {
 		-- Arma, Telha, Culatra, Gatilho e Cartucho; 0 = arma provisória
 		win12 = 88021040446518,
 		-- M16 de 1965 (tools/blender/m16.py, D-146): nó Arma; 0 = arma provisória
-		m16 = 120210677771954,
+		m16 = 115800197069430,
 		-- caixas de munição do suporte (tools/blender/caixa_municao.py, 2026-11-13): nó Caixa e
 		-- Colisao_Caixa; 0 = o CaixaMunicaoService usa o ammo_crate ou a caixa em peças
 		caixa_municao_us = 128489958854272,
@@ -467,16 +469,25 @@ return {
 		m35 = 139647008641071,
 		peugeot403 = 78882368690368,
 	},
+	-- D-246: bandeiras de pano da escolha de idioma (tools/blender/bandeiras_idioma.py). O
+	-- ReplicatedFirst/Bandeiras guarda uma cópia, porque roda antes de o ReplicatedStorage chegar.
+	Idiomas = {
+		pt = 82520544879822,
+		en = 117179405135022,
+		es = 87317282588106,
+		vi = 124500033637461,
+		auto = 85799790254116,
+	},
 	-- D-236: a arte dos 7 dias da recompensa diária (tools/blender/recompensas.py), tipo Image
 	Recompensas = {
-		r1 = 79622806994879,
-		r2 = 98520061493541,
-		r3 = 90456755206467,
-		r4 = 126670296417123,
-		r5 = 104250709957379,
-		r6 = 136475858253665,
-		r7 = 86415546566134,
-		moeda = 133182174498653,
+		r1 = 92635334806116,
+		r2 = 131810846805462,
+		r3 = 88459571389083,
+		r4 = 118880433405514,
+		r5 = 136214794805027,
+		r6 = 131191517121410,
+		r7 = 135762829917445,
+		moeda = 133169163383510,
 	},
 	LojaImages = {
 		destaque = 77920733563788,
@@ -1060,6 +1071,8 @@ return {
 		premio_relogio = 137803752297908,
 		time_us = 102791200552422,
 		time_vc = 132579042600496,
+		time_escolha_us = 102194487366044,
+		time_escolha_vc = 72134760320472,
 		vis_camo_bamboo = 83650613762799,
 		vis_camo_jungle = 114461396352438,
 		vis_camo_rice = 135045127591592,

@@ -372,11 +372,18 @@ end)
 
 test("idioma: bandeiras desenhadas (sem imagem) para PT, EN, ES, VI e o globo do automático", function()
 	local src = fs.readFile("src/ReplicatedFirst/Bandeiras.luau")
+	-- D-246: o pano renderizado usa os mesmos IDs do AssetIds
+	local ids = fs.readFile("src/ReplicatedStorage/Shared/AssetIds.luau")
+	for _, c in { "pt", "en", "es", "vi", "auto" } do
+		local n = string.match(src, "\t" .. c .. " = (%d+),")
+		local bloco = string.match(ids, "Idiomas = (%b{})")
+		assert(n and bloco and string.find(bloco, c .. " = " .. n, 1, true), "bandeira " .. c)
+	end
 	for _, c in { "pt", "en", "es", "vi", "auto" } do
 		assert(string.find(src, '"' .. c .. '"', 1, true) or string.find(src, c .. " =", 1, true), "bandeira " .. c)
 	end
-	assert(not string.find(src, "rbxassetid://", 1, true), "bandeira com imagem")
-	assert(string.find(src, "UIGradient", 1, true), "desenho com UIGradient")
+	assert(string.find(src, "Bandeiras.IMAGENS", 1, true), "D-246: o pano renderizado")
+	assert(string.find(src, "UIGradient", 1, true), "desenho com UIGradient, enquanto a imagem carrega")
 	assert(
 		string.find(fs.readFile("src/ReplicatedFirst/Idioma.luau"), "Bandeiras", 1, true),
 		"o cartão usa as bandeiras"
@@ -819,8 +826,9 @@ test("D-130: a diária abre ao entrar, sem lugar na mesa; bandeiras na escolha d
 	assert(string.find(cena, 'id == "shop" or id == "daily"', 1, true), "calendário e caderneta só de enfeite")
 	-- D-223: a escolha do lado é a do Controllers/Preparacao
 	local prep = fs.readFile(C .. "Preparacao.luau")
-	-- D-240: a bandeira agora é a arte inteira da ficha
-	assert(string.find(prep, "imagem(b, ArteCatalogo.time(f)", 1, true), "bandeira em cada ficha de alistamento")
+	-- D-246: a ficha voltou à arte de antes do D-240, com a bandeira desenhada no canto
+	assert(string.find(prep, "imagem(b, ArteCatalogo.timeEscolha(f)", 1, true), "arte da ficha de alistamento")
+	assert(string.find(prep, "Bandeiras.of(f, b, FLAG_H, 2)", 1, true), "bandeira em cada ficha de alistamento")
 	local band = fs.readFile(C .. "Bandeiras.luau")
 	assert(string.find(band, "for row = 1, 9 do", 1, true), "EUA de 1965: 9 fileiras (50 estrelas)")
 	assert(string.find(band, "for i = 0, 12 do", 1, true), "13 listras")

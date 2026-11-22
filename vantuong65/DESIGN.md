@@ -10162,3 +10162,33 @@ em `testes/D-243_vale_2026-11-22.md`.
 - **Próprias:** `map-design` e `viewmodel`. Não há versão pública com esses nomes; estas registram o método real do jogo.
 - **Fora:** `surf-map-design` (não encontrada e de outro gênero). Lista das recusadas em `knowledge/Skills.md`.
 - **Consequência:** `kb.py check` recusa skill sem origem, sem licença ou com arquivo executável.
+
+### D-246 — Lote 115: pedidos de 22/11, parte 1 (2026-11-22)
+
+**Pedido do dono:** 22 pedidos em 16 imagens. Esta parte fecha os ajustes de jogo, as moedas, as bandeiras, as
+janelas e a capa. Progressão, direção de arte, telas, Comboio e áudios seguem nas próximas partes.
+- **Tanque:** quem vai fechado em blindado (`VeiculoDano.naBlindagem`) não leva bala nem estilhaço. Escotilha
+  aberta, jipe, caminhão e helicóptero seguem sem essa proteção.
+- **Reanimação:** de 5 para 2,5 s (`Medical.reviveTime`).
+- **Mão solta na recarga:** a manga ia só até um comprimento fixo. Agora vai até o cotovelo, e a arma fica mais
+  longe do olho durante a recarga.
+- **Bots:** a passada toca até 336 m (era 84 m), com um LOD a 4 Hz acima de 84 m. `BotMove.redeStep` resgata quem
+  passa duas janelas de 8 s sem se afastar 3 m, e não age com jogador a menos de 20 m.
+- **Rastejo:** passada de 1,15 m por ciclo, bacia e ombros em sentidos opostos, corpo avançando a cada empurrão e
+  o fuzil indo de um antebraço ao outro.
+- **M16:** voltou o modelo de antes do D-236 (`Models.m16_v139`). A versão limpa fica em `Models.m16_d236`.
+- **Bandeiras:** a ficha do time voltou ao desenho de antes do D-240 (`ArteCatalogo.timeEscolha`). A escolha de
+  idioma ganhou panos renderizados (`tools/blender/bandeiras_idioma.py`, `Idiomas.*`), com o desenho antigo só
+  enquanto a imagem carrega.
+- **Moedas:** sextavadas com estrela facetada (`tools/blender/moeda_hex.py`), também nos 7 prêmios diários.
+- **Ganho e promoção:** faixa de 420 x 92 para 290 x 62 px, moedas girando pela tela, quadro de promoção de
+  370 x 128 px (era a largura da tela x 250), brilho no latão, fanfarra APM e punhado de moedas.
+- **Nascer:** no mouse, passar sobre o ponto escolhe e o clique nasce. No toque nada mudou.
+- **Portão dos EUA:** 1,6x, com as concertinas afastadas.
+- **Janelas:** regra própria (`Movement.janelaPlan`), porque o peitoril fica a até 1,73 m do chão de fora. O pulo
+  atravessa quando há chão e lugar do outro lado. As caixas são marcadas no boot (`MapLife.marcarJanelas`).
+- **Pele:** tons mais quentes, como nas imagens de referência (`Corpo.PELE`).
+- **Capa:** ícone e primeira miniatura da página trocados pelo key art. As anteriores ficam em
+  `marketing/capas/anteriores`.
+- **Medido:** Lune 989 ok, pytest 84, autoteste 18 de 18. M16 mirando: anel e massa a 0,18 px do centro.
+  252 janelas marcadas: 175 passam dos dois lados, 63 de nenhum. Detalhes em `testes/LOTE115_D246_2026-11-22.md`.

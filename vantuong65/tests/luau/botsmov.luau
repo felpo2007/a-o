@@ -158,6 +158,25 @@ local function simulate(pts: { any }, want: number): any
 	return out
 end
 
+test("D-246: quem anda de um lado para o outro sem sair do lugar pede resgate", function()
+	local r = BotMove.newRede()
+	local pediu = 0
+	for i = 1, 200 do
+		if BotMove.redeStep(r, 0.1, math.sin(i / 3) * 1.2, 0, true) then
+			pediu += 1
+		end
+	end
+	assert(pediu >= 1, "oscilando num cômodo")
+	local r2 = BotMove.newRede()
+	for i = 1, 400 do
+		assert(not BotMove.redeStep(r2, 0.1, i * 0.3, 0, true), "andando de verdade")
+	end
+	local r3 = BotMove.newRede()
+	for _ = 1, 400 do
+		assert(not BotMove.redeStep(r3, 0.1, 0, 0, false), "parado de propósito")
+	end
+end)
+
 test("caminho: segue sem zigue-zague, sem parar no meio e para no ponto (sem girar no lugar)", function()
 	-- caminho do PathfindingService: pontos a cada 6 studs, com duas curvas de 45° e uma de 90°
 	local pts = {}

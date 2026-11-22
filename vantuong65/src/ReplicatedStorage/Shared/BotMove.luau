@@ -320,6 +320,42 @@ function BotMove.stuckStep(s: Stuck, dt: number, wantM: number, gotM: number): b
 	return stuck
 end
 
+-- D-246 (dono: "bots estao ficando presos em casa, e outros lugares"): o detector acima soma o caminho
+-- andado, então o bot que vai e volta num cômodo nunca conta como preso. A rede olha o quanto ele SE
+-- AFASTOU: `janelas` seguidas sem sair de um raio de minM, querendo ir a outro lugar, pedem o resgate.
+BotMove.REDE = { janelaS = 8, minM = 3, janelas = 2 }
+
+export type Rede = { t: number, x: number?, z: number?, ruins: number }
+
+function BotMove.newRede(): Rede
+	return { t = 0, x = nil, z = nil, ruins = 0 }
+end
+
+-- x e z em metros. Devolve true quando o bot precisa de resgate (e zera a conta).
+function BotMove.redeStep(r: Rede, dt: number, x: number, z: number, querAndar: boolean): boolean
+	if not querAndar then
+		r.t, r.x, r.z, r.ruins = 0, nil, nil, 0
+		return false
+	end
+	local x0, z0 = r.x, r.z
+	if not (x0 and z0) then
+		r.x, r.z = x, z
+		return false
+	end
+	r.t += dt
+	if r.t < BotMove.REDE.janelaS then
+		return false
+	end
+	local dx, dz = x - x0, z - z0
+	r.ruins = if math.sqrt(dx * dx + dz * dz) < BotMove.REDE.minM then r.ruins + 1 else 0
+	r.t, r.x, r.z = 0, x, z
+	if r.ruins >= BotMove.REDE.janelas then
+		r.ruins = 0
+		return true
+	end
+	return false
+end
+
 ---------------------------------------------------------------------------------------------
 -- Rastro do líder e formação
 ---------------------------------------------------------------------------------------------

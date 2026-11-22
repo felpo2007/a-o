@@ -21,6 +21,7 @@
 --   e afundada na aterrissagem. Tudo o que balança multiplica pela opção de movimento da câmera.
 -- Atributos locais (não replicam): Stamina (0..1), Exhausted, StanceBusy, Vaulting, WaterMode.
 -- Veículo: nada muda. Ganchos só no Studio: workspace "VT65DevMov" (fim do arquivo).
+local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -598,6 +599,102 @@ local function probeVault(char: Model, hum: Humanoid, root: BasePart): (Movement
 		}
 end
 
+-- D-246: a janela à frente (caixa Colisao_*jan*, marcada no MapLife). O corpo passa pelo meio do vão
+-- e desce do outro lado, onde precisa ter chão e lugar para ele.
+local function probeJanela(char: Model, hum: Humanoid, root: BasePart): (Movement.VaultPlan?, VaultRun?)
+	local J = Movement.JANELA
+	local fwd = flatLook()
+	local feetY = root.Position.Y - hum.HipHeight - root.Size.Y / 2
+	local achada: BasePart? = nil
+	local fora, melhor, esp = Vector3.zero, math.huge, 0
+	for _, inst in CollectionService:GetTagged(J.TAG) do
+		if inst:IsA("BasePart") and inst:IsDescendantOf(workspace) then
+			local rel = inst.CFrame:PointToObjectSpace(root.Position)
+			local fino = inst.Size.X < inst.Size.Z
+			local dn, lado = if fino then rel.X else rel.Z, if fino then rel.Z else rel.X
+			local e = if fino then inst.Size.X else inst.Size.Z
+			local meia = (if fino then inst.Size.Z else inst.Size.X) / 2
+			local d = math.max(math.abs(dn) - e / 2, 0)
+			if d * M <= J.alcanceM + 0.35 and math.abs(lado) <= meia + 0.15 / M and d < melhor then
+				local eixo = if fino then inst.CFrame.RightVector else inst.CFrame.LookVector
+				local n = Vector3.new(eixo.X, 0, eixo.Z).Unit * (if dn >= 0 then 1 else -1)
+				if fwd:Dot(-n) >= 0.6 then
+					achada, fora, melhor, esp = inst, n, d, e
+				end
+			end
+		end
+	end
+	local j = achada
+	if not j then
+		return nil, nil
+	end
+	vaultParams.FilterDescendantsInstances = ignoreList(char)
+	local peitorilY = j.Position.Y - j.Size.Y / 2
+	local passa = -fora
+	-- desce em frente; com móvel embaixo da janela, procura ao lado e mais para dentro
+	local ao = Vector3.new(0, 1, 0):Cross(passa)
+	local ov = OverlapParams.new()
+	ov.FilterType = Enum.RaycastFilterType.Exclude
+	ov.FilterDescendantsInstances = ignoreList(char)
+	ov.RespectCanCollide = true
+	local alvo = j.Position + passa * (esp / 2 + 0.7 / M)
+	local chao: RaycastResult? = nil
+	local livre = false
+	for _, frente in Movement.JANELA.frentes do
+		for _, lado in Movement.JANELA.lados do
+			local q = j.Position + passa * (esp / 2 + frente / M) + ao * (lado / M)
+			local r = workspace:Raycast(
+				Vector3.new(q.X, peitorilY + 0.2 / M, q.Z),
+				Vector3.new(0, -(J.quedaM + 0.4) / M, 0),
+				vaultParams
+			)
+			if r then
+				chao = chao or r
+				local meio = Vector3.new(q.X, r.Position.Y + 3.9, q.Z)
+				if #workspace:GetPartBoundsInBox(CFrame.new(meio), Vector3.new(2, 6.6, 2), ov) == 0 then
+					alvo, chao, livre = q, r, true
+					break
+				end
+			end
+		end
+		if livre then
+			break
+		end
+	end
+	local plan = Movement.janelaPlan({
+		peitoril = (peitorilY - feetY) * M,
+		vao = j.Size.Y * M,
+		distancia = melhor * M,
+		queda = if chao then (peitorilY - chao.Position.Y) * M else nil,
+		livre = livre,
+		stamina = stamina.value,
+		stance = stanceOf(char),
+		legImpaired = char:GetAttribute("LegImpaired") == true,
+		loadKg = loadKg,
+		agility = Movement.factionAgility(myFaction()),
+	})
+	if not plan or not chao then
+		return nil, nil
+	end
+	local overY = j.Position.Y
+	local pa = j.Position + fora * (esp / 2 + 0.3 / M)
+	local finalY = chao.Position.Y + root.Size.Y / 2 + hum.HipHeight
+	return plan,
+		{
+			kind = "vault",
+			t0 = os.clock(),
+			dur = plan.duration,
+			fwd = passa,
+			p0 = root.Position,
+			pa = Vector3.new(pa.X, overY, pa.Z),
+			p2 = Vector3.new(alvo.X, finalY, alvo.Z),
+			overY = overY,
+			split = 0.45,
+			face = passa,
+			exit = 1,
+		}
+end
+
 -- Degrau à frente de quem está agachado ou deitado (dir = rumo do movimento, não da câmera).
 local function probeStep(char: Model, hum: Humanoid, root: BasePart, dir: Vector3): (Movement.VaultPlan?, VaultRun?)
 	if dir.Magnitude < 1e-3 then
@@ -770,6 +867,11 @@ Input.on("jump", "press", function()
 		return
 	end
 	if h.FloorMaterial == Enum.Material.Air then
+		return
+	end
+	local planJ, runJ = probeJanela(c, h, r) -- D-246: a janela vem antes do pulo comum
+	if planJ and runJ then
+		startVault(planJ, runJ, c, h)
 		return
 	end
 	local plan, run = probeVault(c, h, r)

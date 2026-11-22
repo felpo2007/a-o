@@ -8,9 +8,9 @@
 return {
 	US = {
 		items = {
-			{ key = "us_gate", id = "portao", x = -157.14, z = 0, yaw = 1.5708, scale = 1, padded = true, node = "", inside = "" },
-			{ key = "us_concertina", id = "us_concertina_1", x = -166.07, z = -35, yaw = 1.5708, scale = 1, padded = true, node = "", inside = "" },
-			{ key = "us_concertina", id = "us_concertina_2", x = -166.07, z = 35, yaw = 1.5708, scale = 1, padded = true, node = "", inside = "" },
+			{ key = "us_gate", id = "portao", x = -157.14, z = 0, yaw = 1.5708, scale = 1.6, padded = true, node = "", inside = "" },
+			{ key = "us_concertina", id = "us_concertina_1", x = -166.07, z = -46.07, yaw = 1.5708, scale = 1, padded = true, node = "", inside = "" },
+			{ key = "us_concertina", id = "us_concertina_2", x = -166.07, z = 46.07, yaw = 1.5708, scale = 1, padded = true, node = "", inside = "" },
 			{ key = "us_concertina", id = "us_concertina_3", x = -166.07, z = -62.14, yaw = 1.5708, scale = 1, padded = true, node = "", inside = "" },
 			{ key = "us_concertina", id = "us_concertina_4", x = -166.07, z = 62.14, yaw = 1.5708, scale = 1, padded = true, node = "", inside = "" },
 			{ key = "us_concertina", id = "us_concertina_5", x = -166.07, z = -89.29, yaw = 1.5708, scale = 1, padded = true, node = "", inside = "" },
@@ -2036,7 +2036,7 @@ return {
 	},
 	-- extras do metricas.json (studs no quadro do modelo, origem no meio da base)
 	extras = {
-		us_gate = { gatePivot = { -9.73, 3.59, 0.72 }, gateAxis = "Z" },
+		us_gate = { gatePivot = { -15.57, 5.74, 1.16 }, gateAxis = "Z" },
 		vc_hoang_cam_kitchen = { smoke = { { 7.43, 0.22, 21.09 }, { -0.14, 0.22, 23.26 }, { -7.71, 0.22, 21.09 } } },
 	},
 	-- casas únicas da vila: normal para fora da porta principal (quadro do modelo, X e Z)

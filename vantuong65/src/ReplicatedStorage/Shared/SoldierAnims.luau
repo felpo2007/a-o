@@ -100,7 +100,11 @@ SoldierAnims.BAKED = {
 -- BOT_RADIUS e visível, a mistura a cada FAR_STEP_S e as correções a cada FAR_POST_S; fora da vista
 -- ou além do raio os clipes param. Custo com 58 bots: medir no Studio (não medido).
 SoldierAnims.BOTS = true
-SoldierAnims.BOT_RADIUS = 300 -- studs (~84 m)
+-- D-246 (dono: "o bot adversário parece q n se mexe quando anda"): além de 84 m o bot deslizava parado.
+-- Agora a passada toca até ~336 m; entre BOT_MEDIO e BOT_RADIUS só o clipe, a 4 Hz, sem as correções.
+SoldierAnims.BOT_RADIUS = 1200 -- studs (~336 m)
+SoldierAnims.BOT_MEDIO = 300 -- studs (~84 m)
+SoldierAnims.LONGE_STEP_S = 0.25
 SoldierAnims.BOT_NEAR = 100 -- studs (~28 m)
 SoldierAnims.FAR_STEP_S = 0.1 -- 10 Hz
 SoldierAnims.FAR_POST_S = 1 / 15

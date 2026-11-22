@@ -529,7 +529,7 @@ end
 
 CartaView.setCallbacks(function(pt: any)
 	if mode == "spawn" then
-		selecionar(pt) -- D-209: clicar ou tocar só escolhe; o NASCER confirma
+		selecionar(pt) -- D-209: tocar só escolhe; D-246: o mouse escolhe ao passar por cima
 	end
 end, function(u: number, v: number)
 	if mode == "target" and not Input.isGamepad() then
@@ -537,6 +537,10 @@ end, function(u: number, v: number)
 	elseif mode == "view" and alive() then
 		markAt(u, v)
 	end
+end)
+-- D-246: clique do mouse no ponto escolhido: nasce ali
+CartaView.setConfirma(function()
+	confirmar()
 end)
 
 -- posição da carta: à direita da ficha de inserção (morto) ou no palco inteiro (em campo / alvo)

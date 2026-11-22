@@ -24,6 +24,7 @@ local BotBrain = require(ReplicatedStorage.Shared.BotBrain)
 local BotMove = require(ReplicatedStorage.Shared.BotMove)
 local Movement = require(ReplicatedStorage.Shared.Movement)
 local BotWorld = require(script.Parent.BotWorld)
+local Players = game:GetService("Players")
 
 local Loco = {}
 local M = 0.28
@@ -56,6 +57,9 @@ export type State = {
 	reqAt: number,
 	wantReq: Vector3?, -- pedido de caminho esperando a vez (intervalo mínimo)
 	stuck: BotMove.Stuck,
+	rede: BotMove.Rede, -- D-246
+	pedidoEm: number,
+	destFalhou: Vector3?,
 	unstick: number,
 	unstickSide: number, -- v45: lado do 1º passo de lado (o 4º vai para o outro)
 	okSince: number,
@@ -302,6 +306,9 @@ function Loco.attach(bot: any, model: Model)
 		reqAt = -math.huge,
 		wantReq = nil,
 		stuck = BotMove.newStuck(),
+		rede = BotMove.newRede(),
+		pedidoEm = -math.huge,
+		destFalhou = nil,
 		unstick = 0,
 		unstickSide = 1,
 		okSince = os.clock(),
@@ -373,6 +380,7 @@ function Loco.go(bot: any, dest: Vector3, gait: string, opts: GoOpts?)
 	st.gait = gait
 	st.final = o.final ~= false
 	st.faceAt = o.face
+	st.pedidoEm = os.clock()
 	local tol = o.tolerance or 1.5 / M
 	local cur = st.dest
 	local pos = st.root.Position
@@ -561,6 +569,7 @@ local function unstick(st: State, now: number)
 		st.avoidUntil = now + 1.5
 	end
 	if st.unstick >= 5 then
+		st.destFalhou = dest
 		st.status = "failed"
 		st.mode = "idle"
 		st.path = nil
@@ -570,6 +579,69 @@ local function unstick(st: State, now: number)
 	end
 	st.reqAt = -math.huge
 	request(st, dest, now)
+end
+
+-- D-246: ponto livre mais perto do destino, em volta do bot (sem parede, sem gente, em chão seco).
+local function pontoLivre(st: State, alvo: Vector3?): Vector3?
+	local pos = st.root.Position
+	local ov = OverlapParams.new()
+	ov.FilterType = Enum.RaycastFilterType.Exclude
+	ov.FilterDescendantsInstances = { st.model, workspace.Terrain }
+	ov.RespectCanCollide = true
+	for _, raio in { 6, 10, 15, 22 } do
+		local melhor: Vector3? = nil
+		local nota = math.huge
+		for i = 0, 11 do
+			local a = i / 12 * 2 * math.pi
+			local x, z = pos.X + math.cos(a) * raio / M, pos.Z + math.sin(a) * raio / M
+			local h = BotWorld.heightAt(x, z)
+			local c = Vector3.new(x, h + 3.8, z)
+			local surf = BotWorld.surface(c)
+			if
+				surf ~= "water"
+				and #workspace:GetPartBoundsInBox(CFrame.new(c), Vector3.new(3.6, 6.6, 3.6), ov) == 0
+			then
+				local n = if alvo then flat(c, alvo) else raio
+				if n < nota then
+					melhor, nota = c, n
+				end
+			end
+		end
+		if melhor then
+			return melhor
+		end
+	end
+	return nil
+end
+
+-- D-246: tira o bot do lugar onde ele não consegue sair. Com um jogador por perto, espera a próxima janela.
+local function resgatar(st: State, now: number)
+	local pos = st.root.Position
+	for _, p in Players:GetPlayers() do
+		local c = p.Character
+		local r = c and c:FindFirstChild("HumanoidRootPart") :: BasePart?
+		if r and (r.Position - pos).Magnitude * M < 20 then
+			return
+		end
+	end
+	local alvo = st.dest or st.destFalhou
+	local livre = pontoLivre(st, alvo)
+	if not livre then
+		return
+	end
+	st.model:PivotTo(CFrame.new(livre) * st.root.CFrame.Rotation)
+	st.root.AssemblyLinearVelocity = Vector3.zero
+	st.body.vx, st.body.vz = 0, 0
+	st.lastPos = livre
+	st.unstick = 0
+	st.destFalhou = nil
+	st.stuck = BotMove.newStuck()
+	if alvo then
+		st.dest = alvo
+		st.status = "moving"
+		st.reqAt = -math.huge
+		request(st, alvo, now)
+	end
 end
 
 local function stepOne(st: State, dt: number, now: number)
@@ -757,6 +829,12 @@ local function stepOne(st: State, dt: number, now: number)
 		end
 	else
 		st.okSince = now
+	end
+	-- D-246: quer ir a outro lugar e não se afasta dali: rede de segurança
+	local alvo = st.dest or (if now - st.pedidoEm < 3 then st.destFalhou else nil)
+	local quer = alvo ~= nil and flat(pos, alvo) * M > 5
+	if BotMove.redeStep(st.rede, dt, pos.X * M, pos.Z * M, quer) then
+		resgatar(st, now)
 	end
 end
 

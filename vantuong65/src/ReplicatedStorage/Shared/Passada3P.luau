@@ -29,8 +29,20 @@ Passada3P.ALCANCE = 0.92 -- do comprimento máximo do apoio
 Passada3P.APOIO = { min = 0.14, max = 0.40 }
 
 -- rastejo: metros por ciclo (um joelho e o outro)
-Passada3P.RASTEJO =
-	{ passada = 1.3, quadril = 18, abre = 52, abreMin = 6, joelho = 88, joelhoMin = 4, rolo = 7, guinada = 5 }
+-- D-246 (dono: "o rastejamento ainda esta bugado quando o personagem movimenta"): rastejo baixo de
+-- infantaria. A passada caiu de 1,3 para 1,15 m por ciclo (1,17 ciclo/s a 1,34 m/s) para o pé escorregar
+-- menos. A bacia e os ombros giram em sentidos opostos e o corpo avança a cada empurrão.
+Passada3P.RASTEJO = {
+	passada = 1.15,
+	quadril = 18,
+	abre = 56,
+	abreMin = 6,
+	joelho = 96,
+	joelhoMin = 4,
+	rolo = 11,
+	guinada = 8,
+	avanco = 0.05, -- m: o corpo vai e vem ao longo de si a cada empurrão
+}
 
 -- estado da passada de cada soldado neste cliente (SoldierAnimations escreve, PostureController lê)
 Passada3P.vivo = (setmetatable({}, { __mode = "k" }) :: any) :: { [any]: { rastejo: number, braco: number } }
@@ -194,6 +206,7 @@ end
 export type RastejoPerna = { dobra: number, abre: number, gira: number, joelho: number, tornozelo: number }
 export type Rastejo = {
 	rolo: number, -- rad: o corpo balança em volta do próprio comprimento
+	avanco: number, -- studs: ao longo do corpo, a cada empurrão
 	guinada: number, -- rad: e serpenteia no chão
 	E: RastejoPerna,
 	D: RastejoPerna,
@@ -226,6 +239,7 @@ function Passada3P.rastejo(fase: number): Rastejo
 	local s = math.sin(2 * math.pi * (p + 0.1))
 	return {
 		rolo = math.rad(R.rolo) * s,
+		avanco = R.avanco / M * math.sin(4 * math.pi * (p - 0.12)),
 		guinada = math.rad(R.guinada) * s,
 		E = pernaRastejo(p, -1),
 		D = pernaRastejo(p + 0.5, 1),

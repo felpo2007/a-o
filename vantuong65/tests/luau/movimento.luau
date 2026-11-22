@@ -527,6 +527,45 @@ test("transpor: dique, cerca e sacos de areia transpõe; mureta com chão em cim
 	)
 end)
 
+test("D-246: passa pela janela de fora (1,7 m) e de dentro (1,3 m); recusa o que não cabe", function()
+	local function jp(over: { [string]: any }): any
+		local p: { [string]: any } = {
+			peitoril = 1.7,
+			vao = 1.14,
+			distancia = 0.3,
+			queda = 1.3,
+			livre = true,
+			stamina = 1,
+			stance = "stand",
+			legImpaired = false,
+			loadKg = 20,
+		}
+		for k, v in over do
+			p[k] = if v == NIL then nil else v
+		end
+		return p
+	end
+	local fora = Movement.janelaPlan(jp({}))
+	assert(fora and fora.kind == "vault", "de fora")
+	assert(fora.duration >= Movement.JANELA.s, "mais lento que uma mureta")
+	assert(Movement.janelaPlan(jp({ peitoril = 1.3, queda = 1.7 })), "de dentro")
+	for _, caso in
+		{
+			{ { peitoril = 2.1 }, "alto" },
+			{ { peitoril = 0.2 }, "baixo" },
+			{ { vao = 0.4 }, "vão pequeno" },
+			{ { distancia = 1.4 }, "longe" },
+			{ { queda = NIL }, "queda" },
+			{ { livre = false }, "sem espaço" },
+			{ { stamina = 0 }, "sem fôlego" },
+			{ { stance = "prone" }, "postura" },
+		} :: { any }
+	do
+		local plano, motivo = Movement.janelaPlan(jp(caso[1]))
+		assert(plano == nil and motivo == caso[2], caso[2])
+	end
+end)
+
 test("transpor: recusa alto, baixo, longe, sem espaço, queda e deitado", function()
 	local cases: { { any } } = {
 		{ { height = 1.4 }, "alto" },

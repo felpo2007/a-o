@@ -631,8 +631,9 @@ RunService:BindToRenderStep("VT65ViewModel", Enum.RenderPriority.Camera.Value + 
 		local w = smooth(rp / 0.12) * (1 - smooth((rp - 0.86) / 0.14))
 		-- D-238: a arma vira para mostrar o encaixe, cede com o puxão, sobe no tapa e recua no ferrolho
 		-- a boca sobe e a arma deita para a direita: o encaixe fica virado para a mão esquerda, na tela
-		local tilt = CFrame.new(-0.035 / M, 0.018 / M, -0.02 / M)
-			* CFrame.Angles(math.rad(11), math.rad(15), math.rad(-30))
+		-- D-246: a arma sobe e vem para o centro: o encaixe e a mão esquerda ficam dentro da tela
+		local tilt = CFrame.new(-0.07 / M, 0.015 / M, -0.17 / M)
+			* CFrame.Angles(math.rad(15), math.rad(20), math.rad(-24))
 		pose = CFrame.identity:Lerp(tilt, w)
 		local puxao = math.max(0, 1 - math.abs(rp - 0.2) / 0.06)
 		local slap = math.max(0, 1 - math.abs(rp - 0.66) / 0.035)

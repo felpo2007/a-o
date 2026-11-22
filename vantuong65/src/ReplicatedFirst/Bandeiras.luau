@@ -8,7 +8,20 @@
 --   auto: um globo simples (círculo com meridianos e paralelos).
 -- Bandeiras.criar(código, largura, altura?) devolve um Frame de w x h (padrão 3:2) que quem chama
 -- posiciona. Tudo é criado de uma vez (umas 30 peças a mais grande); nada anima aqui.
+-- D-246 (dono: "estava falando de mudar as bandeiras na escolha da lingua"): por cima do desenho entra
+-- o pano renderizado (tools/blender/bandeiras_idioma.py). O desenho só aparece enquanto a imagem carrega.
+local ContentProvider = game:GetService("ContentProvider")
+
 local Bandeiras = {}
+
+-- iguais a AssetIds.Idiomas (ReplicatedFirst roda antes de o ReplicatedStorage chegar)
+Bandeiras.IMAGENS = {
+	pt = 82520544879822,
+	en = 117179405135022,
+	es = 87317282588106,
+	vi = 124500033637461,
+	auto = 85799790254116,
+} :: { [string]: number }
 
 local function frame(parent: Instance, color: Color3, x: number, y: number, w: number, h: number): Frame
 	local f = Instance.new("Frame")
@@ -193,6 +206,42 @@ function Bandeiras.criar(code: string, w: number, h: number?): Frame
 		s.Thickness = 1
 		s.Transparency = 0.55
 		s.Parent = f
+	end
+	local id = Bandeiras.IMAGENS[code]
+	if id then
+		local pano = Instance.new("ImageLabel")
+		pano.Name = "Pano"
+		pano.BackgroundTransparency = 1
+		pano.Size = UDim2.fromScale(1, 1)
+		pano.ScaleType = Enum.ScaleType.Fit
+		pano.Image = string.format("rbxassetid://%d", id)
+		pano.Visible = false
+		pano.ZIndex = 5
+		pano.Parent = f
+		-- IsLoaded não avisa quando muda e imagem invisível não carrega: quem traz o pano é a pré-carga.
+		-- Se ela falhar, fica o desenho.
+		local function pronto()
+			pano.Visible = true
+			f.BackgroundTransparency = 1
+			for _, c in f:GetChildren() do
+				if c:IsA("UIStroke") then
+					c.Enabled = false
+				elseif c:IsA("GuiObject") and c ~= pano then
+					c.Visible = false
+				end
+			end
+		end
+		task.spawn(function()
+			local ok = false
+			pcall(function()
+				ContentProvider:PreloadAsync({ pano }, function(_, estado)
+					ok = estado == Enum.AssetFetchStatus.Success
+				end)
+			end)
+			if ok and pano.Parent then
+				pronto()
+			end
+		end)
 	end
 	return f
 end

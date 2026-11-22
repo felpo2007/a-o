@@ -10,14 +10,12 @@ verified_commit: 5f83094
 
 Substitua este arquivo ao fim de cada sessão. No máximo 25 linhas.
 
-- **Em que estávamos:** montagem da base de conhecimento (D-244).
-- **Concluído:** `knowledge/`, `tools/kb.py`, `tools/dev/`, `CLAUDE.md` compacto e 10 skills (D-245).
+- **Em que estávamos:** os 22 pedidos de 22/11 com 16 imagens (D-246).
+- **Concluído (parte 1, lote 115):** tanque, reanimação, mão solta, bots, rastejo, M16 antiga, bandeiras,
+  moedas, promoção, nascer no mapa, portão, janelas, pele e capa da página.
+- **Falta:** progressão e vantagens, direção de arte geral, telas no estilo das imagens, Comboio e áudios.
+- **Imagens de referência:** `~/.claude/uploads/0dab997e-4516-4fd5-85be-6ceb04c285b4/`.
 - **Abra a próxima sessão na pasta `vantuong65`**: só assim as skills do projeto aparecem.
-- **Falta no jogo:** as cinco cenas do Comboio (D-243). Nada foi publicado.
-- **Última validação (2026-11-22):** `tools/dev/verifica.ps1` com Lune 986 ok, pytest 84, ruff, luau-lsp e
-  a base sem erros. Sessão sem histórico respondeu 4 de 4 perguntas conferidas no código.
-- **Decisão aberta:** corrigir os riscos listados em [[01-CURRENT-STATE]] antes ou depois do Comboio.
-- **Arquivos relevantes para a próxima tarefa:** `tools/mapas_ret.py` (função `comboio`),
-  `tools/blender/ret_frente.py` (modelo de receita), `src/ReplicatedStorage/Shared/MapasRet.luau`.
-- **Próxima ação:** ler [[Estrada-do-Bambu]] e o trecho das cinco cenas em
-  `especificacao/mapas_retangulares/PROMPT.txt`, e construir a primeira cena.
+- **Última validação:** `tools/dev/verifica.ps1` com Lune 989, pytest 84, autoteste 18 de 18.
+- **Risco aberto:** os cinco itens de código em [[01-CURRENT-STATE]].
+- **Próxima ação:** sistema de progressão e vantagens, a partir de `Shared/Progression` e `Shared/Vantagens`.

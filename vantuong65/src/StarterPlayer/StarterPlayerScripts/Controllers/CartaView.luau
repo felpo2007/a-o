@@ -146,6 +146,7 @@ local S = {
 	dpad = {} :: { [string]: boolean },
 	keys = {} :: { [string]: boolean },
 	onSpawn = nil :: ((pt: any) -> ())?,
+	onConfirma = nil :: (() -> ())?, -- D-246: clique do mouse no ponto
 	onClick = nil :: ((u: number, v: number) -> ())?,
 	pulseT = 0,
 	visible = false,
@@ -918,6 +919,11 @@ function CartaView.centerOnMe()
 		local u, v = uv(root.Position.X, root.Position.Z)
 		CartaView.goTo(u, v, math.max(S.zoomT, 2.5))
 	end
+end
+
+-- D-246 (dono: "so passando em cima do quadrado no mapa ja devo conseguir selecionar e nascer ali")
+function CartaView.setConfirma(fn: () -> ())
+	S.onConfirma = fn
 end
 
 function CartaView.setCallbacks(onSpawn: (pt: any) -> (), onClick: (u: number, v: number) -> ())
@@ -1693,6 +1699,7 @@ function CartaView.drawPoints()
 			holder.Activated:Connect(function()
 				local w = S.spawnWidgets[id]
 				-- D-209: clique e toque só ESCOLHEM (o NASCER confirma); arrastar não escolhe nada
+				-- D-246: no mouse, passar por cima escolhe e o clique no ponto já nasce; no toque segue igual
 				if not (w and not S.dragged and spawnMode) then
 					return
 				end
@@ -1707,10 +1714,16 @@ function CartaView.drawPoints()
 				local cb = S.onTouch
 				if cb and ToqueUi.active() then
 					task.spawn(cb)
+				elseif S.onConfirma and not ToqueUi.active() then
+					S.onConfirma()
 				end
 			end)
 			holder.MouseEnter:Connect(function()
 				S.hoverPoint = id
+				local w = S.spawnWidgets[id]
+				if w and spawnMode and S.onSpawn and not ToqueUi.active() and not S.dragged then
+					S.onSpawn(w.pt)
+				end
 				CartaView.drawPoints()
 			end)
 			holder.MouseLeave:Connect(function()

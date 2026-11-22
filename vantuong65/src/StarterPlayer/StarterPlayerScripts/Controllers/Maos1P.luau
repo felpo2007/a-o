@@ -236,7 +236,8 @@ function Maos1P.hand(side: string, cf: CFrame, pose: string?)
 	moveGroup(group(side, want), cf)
 end
 
--- Antebraço do punho (wrist) ao cotovelo, no máximo MaosPose.FOREARM_M.
+-- Antebraço do punho (wrist) ao cotovelo.
+local FOREARM_ESTICA = 3
 function Maos1P.forearm(wrist: Vector3, elbow: Vector3, side: string)
 	local f = S.fore[side]
 	if not f then
@@ -249,7 +250,9 @@ function Maos1P.forearm(wrist: Vector3, elbow: Vector3, side: string)
 	end
 	local u = dir / len
 	local k = S.k
-	len = math.min(len, MaosPose.FOREARM_M * k / M)
+	-- D-246 (dono: "quando eu recarrego as vezes ficam mão soltas"): com o comprimento fixo, a mão longe
+	-- do cotovelo ficava com a manga cortada no meio da tela. A manga agora vai até o cotovelo, fora da vista
+	len = math.min(len, MaosPose.FOREARM_M * FOREARM_ESTICA * k / M)
 	local sl = MaosPose.SLEEVE[S.faction] or MaosPose.SLEEVE.US
 	local wl = math.min(MaosPose.WRIST.len * k / M, len * 0.3)
 	local wEnd = wrist + u * wl
