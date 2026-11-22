@@ -11,8 +11,13 @@ verified_commit: 5f83094
 Compacto de propósito. Detalhe lote a lote: `PROGRESS.md`.
 
 ## No ar
-- **v146** (versão 151 do place, lote 114, D-242), publicada no commit `87de647`.
+- **v147** (versão 152 do place, lote 115, D-246 parte 1), do commit `72a48f5`.
+- A capa da página é o key art STARLITE: Vietnã 1965 (ícone e primeira miniatura).
 - O jogo publicado usa só o [[Mapa-Principal]] de 700 × 700 m.
+
+## Em andamento: pedidos de 22/11 (D-246)
+Feito na v147: jogo, moedas, bandeiras, janelas e capa. Falta: progressão e vantagens, direção de arte geral,
+telas no estilo das imagens, Comboio e áudios da Toolbox.
 
 ## Em andamento: D-243, dois mapas retangulares (sem publicar)
 `MapasRet.LIBERADOS = false`: só abrem no Studio, com `VT65DevMapa`.
