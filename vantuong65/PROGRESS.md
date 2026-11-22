@@ -1159,6 +1159,9 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     - **v146 publicada** (versão 151 do place, commit f65f217).
   - **Falta do pedido de 21/11:** refazer os modelos de soldados, casas e vegetação (hoje só a luz mudou) e as imagens
     de skin do catálogo.
+  - **Mapas retangulares (D-243), em andamento, sem publicar:** dados dos dois mapas, regras dos dois modos, HUD e
+    cena-piloto de 2,00 m no Blender (já no Roblox). Lune 980.
+    - **Sem teste no Studio ainda.** Falta a biblioteca do Blender, os dez lugares, a seleção de mapa e a publicação.
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;

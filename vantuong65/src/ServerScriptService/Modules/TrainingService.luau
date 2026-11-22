@@ -455,6 +455,10 @@ function TrainingService.start()
 		local folder = Instance.new("Folder")
 		folder.Name = "CampoDeTiro"
 		folder.Parent = workspace
+		-- D-243: os mapas retangulares não têm campo de tiro; a pasta vazia avisa quem espera por ela
+		if (require(ReplicatedStorage.Shared.MapaAtivo) :: any).retangular() then
+			return
+		end
 		for _, f in { "US", "VC" } do
 			local sub = Instance.new("Folder")
 			sub.Name = f

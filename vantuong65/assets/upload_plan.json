@@ -12241,5 +12241,19 @@
   "assetType": "Image",
   "name": "VT65 vis vc tire sandals",
   "description": "VAN TUONG 65 - imagem de catalogo"
+ },
+ {
+  "key": "Models.ret_manequim",
+  "file": "assets/blender/ret_manequim/ret_manequim.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_manequim",
+  "description": "VAN TUONG 65 - mapas retangulares, cena-piloto de escala (Blender)"
+ },
+ {
+  "key": "Models.ret_piloto_casa",
+  "file": "assets/blender/ret_piloto_casa/ret_piloto_casa.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_piloto_casa",
+  "description": "VAN TUONG 65 - mapas retangulares, cena-piloto de escala (Blender)"
  }
 ]

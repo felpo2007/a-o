@@ -146,6 +146,7 @@ export type Ctx = {
 	spawnLanes: { any },
 	pending: { any },
 	small: { Item }, -- objetos pequenos sem patamar (planta não cai em cima)
+	layout: any?, -- D-243: Data/Layout dos mapas retangulares
 	objectiveCount: { [string]: number }?, -- peças postas em cada objetivo (lote 26b)
 	annexSkipped: number?, -- anexos de quintal fora por cair no terraço vizinho (lote 27)
 }
@@ -193,6 +194,15 @@ function ArtPlan.load(world: any, data: any): Ctx
 		for _, h in V.houses do
 			table.insert(housesXZ, h[1])
 			table.insert(housesXZ, h[2])
+		end
+	end
+	-- D-243: as casas do Layout contam como as da carta (lavoura e quintais em volta)
+	if data.layout then
+		for _, it in data.layout.items do
+			if it.tipo == "casa" then
+				table.insert(housesXZ, it.x)
+				table.insert(housesXZ, it.z)
+			end
 		end
 	end
 	local landscape = Landscape.new(world, MC, housesXZ, V, F.waters)
@@ -269,6 +279,7 @@ function ArtPlan.load(world: any, data: any): Ctx
 		spawnLanes = lanes,
 		pending = {},
 		small = {},
+		layout = data.layout,
 	}
 end
 
@@ -571,7 +582,44 @@ end
 -- ===== construções =====
 -- has(key): o modelo está publicado (AssetIds.Models diferente de 0). Põe o patamar de cada
 -- construção no Site (o TerrainBuilder abre no terreno) e devolve a lista.
+-- D-243: construções de um mapa retangular, direto do Data/Layout (tools/mapas_ret.py). Cada uma assenta
+-- num patamar de terra batida, e as árvores-marco de cada bairro vão com as plantas.
+function ArtPlan.estruturasLayout(ctx: Ctx, has: (string) -> boolean): { Item }
+	local out: { Item } = {}
+	for _, it in ctx.layout.items do
+		if has(it.key) then
+			local hx, hz = half(it.key, it.scale)
+			local pad = Site.addPad(ctx.site, it.x, it.z, it.yaw, hx, hz, true)
+			table.insert(
+				out,
+				{
+					key = it.key,
+					x = it.x,
+					z = it.z,
+					yaw = it.yaw,
+					scale = it.scale,
+					hx = hx,
+					hz = hz,
+					base = pad.level,
+					group = if it.tipo == "casa" then "house" else "prop",
+					foliage = false,
+					shadow = true,
+					padded = true,
+					home = it.tipo == "casa",
+				} :: any
+			)
+		end
+	end
+	for i, p in ctx.layout.plantas do
+		table.insert(ctx.pending, { key = p.key, x = p.x, z = p.z, yaw = i * 2.4, scale = p.scale })
+	end
+	return out
+end
+
 function ArtPlan.structures(ctx: Ctx, has: (string) -> boolean): { Item }
+	if ctx.layout then
+		return ArtPlan.estruturasLayout(ctx, has)
+	end
 	local out: { Item } = {}
 	local MC = ctx.mapConfig
 	local F = ctx.features
@@ -1805,6 +1853,9 @@ end
 -- D-232: caixas de terreno a escavar (abrigo, trincheira, fundo da comporta). env: { Vector3, CFrame }.
 -- Só o volume de cada peça, depois de o terreno pronto (Build.terrain): nada de limpeza global.
 function ArtPlan.expansaoEscavar(ctx: Ctx, env: any): { any }
+	if ctx.layout then
+		return {}
+	end
 	local out = {}
 	if not Expansao.LIGADA then
 		return out
@@ -1837,7 +1888,7 @@ function ArtPlan.plants(
 	has: (string) -> boolean,
 	yield: (() -> ())?
 ): { Item }
-	if not Expansao.LIGADA then
+	if not Expansao.LIGADA or ctx.layout then
 		return plantasBase(ctx, structures, corridors, has, yield)
 	end
 	local site = ctx.site

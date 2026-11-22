@@ -440,6 +440,10 @@ O `sourcemap.json` não vai para o Git.
 - Emblemas (D-218): `tools/blender/emblemas.py -- todos --amostras 48`; caixa por língua (D-219):
   `tools/blender/caixas_loja.py -- todas --idiomas` (os PNG ficam fora do Git). Cenário do pódio
   (D-221): `uv run --group arte python tools/podio_fundo.py`.
+- Mapas retangulares (D-243): `Shared/MapasRet` (medidas e regras), `uv run --group arte python tools/mapas_ret.py`
+  (dados e planta; antes, `lune run tools/trajeto_amostra.luau`), `lune run tools/mapas_check.luau` e, no Blender,
+  `tools/blender/ret.py`. Para abrir no Studio: no modo Edit, `workspace:SetAttribute("VT65DevMapa", "frente")`
+  (ou `"comboio"`) e dê Play. `MapasRet.LIBERADOS = false` segura os servidores publicados.
 - Mira e mãos em 1ª pessoa (D-242): `adsEyeM`/`adsSobeM` na ficha (`Weapons`) e `ADS_MAO_BAIXA` no
   `WeaponVisuals`. Para ver todas: `VT65DevArma` = id (Server) e `Aiming = true` a cada quadro (Client); a luneta
   só abre pelo `VT65DevGranada = "mirar:<s>"`. Para olhar a 3ª pessoa, use bot ancorado do mesmo lado, senão ele
@@ -507,7 +511,7 @@ O `sourcemap.json` não vai para o Git.
 - Segredos só no `.env` (no `.gitignore`), nunca no código nem no chat.
 - ForgeGUI: nunca regenerar um job em `outcome_unknown`. "failed" com `retryable` pode ser
   retomado com `generation_retry`.
-- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-243) e atualize `PROGRESS.md`.
+- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-244) e atualize `PROGRESS.md`.
 - Tetos de triângulos por modelo: vegetação ≤ 6 mil (D-135), props e herói ≤ 20 mil (`ArtBudget`,
   conferido pelo teste da F5).
 - Commits no branch acima, com mensagem em português.

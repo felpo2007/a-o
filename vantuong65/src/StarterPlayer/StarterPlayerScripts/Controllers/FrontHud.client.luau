@@ -345,6 +345,11 @@ end
 
 -- ===== faixa =====
 local function render(st: any)
+	-- D-243: o Comboio tem a barra de percurso (HudModos) no lugar da faixa de setores
+	if st.comboio then
+		strip.Visible = false
+		return
+	end
 	local f = mine()
 	local t = math.max(0, math.floor(st.timeLeft or 0))
 	clockMode.Text = UiKit.upper(st.mode or "")

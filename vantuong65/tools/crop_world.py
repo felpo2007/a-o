@@ -758,7 +758,9 @@ def write_mapconfig(box) -> None:
         "MapConfig.Locations = {\n" + "\n".join(loc_txt) + "\n}\n"
         "-- D-123: o VC começa com o S1, os EUA com o último, o do meio neutro\n"
         "MapConfig.InitialOwner = { " + ", ".join(f'"{o}"' for o in INICIAL) + " }\n\n"
-        "return MapConfig\n",
+        "-- D-243: nos mapas retangulares, os campos vêm de Shared/MapaAtivo\n"
+        'return (require(script and (script :: any).Parent.MapaAtivo or "./MapaAtivo") :: any)'
+        ".aplicar(MapConfig)\n",
     )
 
 

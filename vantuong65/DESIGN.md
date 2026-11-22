@@ -10005,3 +10005,24 @@ skins.
 - **Recarga:** a espingarda mostrava um carregador preto de fuzil na mão. Agora é um cartucho de latão.
 - **Tela de entrada:** o aviso "3 arquivos não baixaram" contava 3 entradas de id vazio. Nada deixava de baixar.
 - **Medido:** Lune 945, pytest 77, autoteste 18 de 18. Detalhes em `testes/LOTE114_D242_2026-11-22.md`.
+
+## D-243 — Mapas retangulares: Vale das Cinco Passagens e Estrada do Bambu (em andamento, 2026-11-22)
+
+**Pedido do dono:** dois mapas novos (700 x 300 m, Linha de Frente; 900 x 300 m, Comboio), com biblioteca no
+Blender, escala de 2,00 m e dez lugares marcantes. O prompt e as imagens ficam em `especificacao/mapas_retangulares`
+(fora do Git). O JSON de geometria, o memorial e o `build_plans.py` citados nele não vieram no pacote: valem as
+coordenadas do próprio prompt, que têm a maior prioridade.
+- **Um place só, com o mapa escolhido quando o servidor sobe** (`Modules/MapaBoot`, `Shared/MapaAtivo`). O terreno
+  já é montado em tempo de jogo: nos mapas novos, a pasta `VT65Build/Data_<id>` entra no lugar de `Data`, e o resto do
+  jogo (terreno, plano da arte, bots, carta) lê os mesmos formatos. O mapa de sempre não muda.
+  `MapasRet.LIBERADOS = false`: nenhum servidor publicado abre os mapas novos enquanto não estiverem prontos.
+- **Escala:** continua 1 stud = 0,28 m (2,00 m = 7,14 studs). A medida do boneco real no Studio ainda falta.
+- **Planta -> mundo:** X = (x - comp / 2) / 0,28 e Z = -(y - prof / 2) / 0,28. Oeste = VC, Leste = EUA.
+- **Dados:** `tools/mapas_ret.py` gera relevo, rio, três travessias, arrozais, vias, bairros e a planta
+  (`assets/mapas`). `tools/mapas_check.luau` confere sem o Studio.
+- **Regras puras e testadas:** `Shared/LinhaFrente`, `Shared/Comboio`, `Shared/Trajeto`, com a configuração central
+  em `Shared/MapasRet`. Escolhas provisórias estão marcadas lá (retorno da barra, reparo retido, reparo sob
+  contestação, integridade no limite, altura da presença).
+- **Na partida:** `Modules/ModoFrente`, `Modules/ModoComboio`, `Controllers/HudModos`, ondas de 10 s e 16 contra 16.
+- **Medido:** Lune 980; curva do comboio com 1.011,30 m (polilinha 990,11 m, igual ao prompt) e raio mínimo de 20,5 m.
+- **Falta:** teste no Studio, biblioteca do Blender, os dez lugares, seleção de mapa e publicação.

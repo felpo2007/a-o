@@ -621,6 +621,10 @@ BotBrain.OFFENSIVE = {
 
 -- fill do lado neste modo: no Offensive o VC (defensor) completa até defenderShare
 function BotBrain.modeFill(fill: number, mode: string?, faction: string): number
+	-- D-243: os mapas retangulares começam em 16 contra 16
+	if mode == "LinhaFrente" or mode == "Comboio" then
+		return math.min(fill, 16)
+	end
 	if mode == "Offensive" and faction == "VC" then
 		return math.floor(fill * BotBrain.OFFENSIVE.defenderShare + 0.5)
 	end

@@ -3,6 +3,9 @@
 local ServerScriptService = game:GetService("ServerScriptService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
+-- D-243: o mapa deste servidor, antes de qualquer módulo ler o MapConfig
+require(ServerScriptService:WaitForChild("Modules"):WaitForChild("MapaBoot")).iniciar()
+
 local Net = require(ReplicatedStorage.Shared.Net)
 Net.server()
 

@@ -331,6 +331,10 @@ end
 -- D-200: o projétil do lançador (LancadorService) bateu em `inst`: se for um veículo, a penetração e
 -- o dano dele, como o do canhão. Devolve se era um veículo.
 function VehicleService.projectileHit(inst: Instance, penKey: string, step: Vector3): boolean
+	-- D-243: os caminhões do comboio têm a integridade da unidade lógica
+	if (require(script.Parent.ModoComboio) :: any).impacto(inst) then
+		return true
+	end
 	local chassis = chassisOf(inst)
 	if chassis and chassis.Parent and not (chassis.Parent :: Model):GetAttribute("Destroyed") then
 		hitVehicle(chassis.Parent :: Model, chassis, penKey, step)

@@ -23,6 +23,12 @@ SpawnRules.C = {
 	rallyBehindM = 30, -- atrás do ponto forte (D-114: mapa de 500 m; D-95: 60 no de 1 km; antes 100)
 }
 
+-- D-243: os mapas retangulares nascem em ondas de 10 s (a espera vai de 0 a 10 s)
+if (require(script and (script :: any).Parent.MapaAtivo or "./MapaAtivo") :: any).retangular() then
+	SpawnRules.C.minWait = 0
+	SpawnRules.C.wave = 10
+end
+
 -- "squad": nascer junto de um companheiro do squad (espera igual à da reunião, sem extra)
 export type Kind = "hq" | "rally" | "rally_captured" | "garrison" | "squad"
 

@@ -54,4 +54,9 @@ function Tunnels.length(): number
 	return total
 end
 
+-- D-243: os mapas retangulares não têm túneis
+if (require(script and (script :: any).Parent.MapaAtivo or "./MapaAtivo") :: any).retangular() then
+	Tunnels.nodes, Tunnels.edges, Tunnels.trench = {} :: any, {} :: any, {} :: any
+end
+
 return Tunnels

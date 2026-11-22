@@ -294,7 +294,11 @@ function BotSquads.tick(now: number, objective: (string) -> (Vector3?, number?))
 			point, sector = objective(s.faction)
 		end
 		if point and sector then
-			if s.sector ~= sector or not s.goal then
+			-- D-243: o objetivo do Comboio anda; o squad refaz a rota quando ele se afasta do destino
+			local andou = MatchService.mode == "Comboio"
+				and s.goal ~= nil
+				and flat(s.goal, point) * M > BotBrain.C.objectiveSpreadM + 10
+			if s.sector ~= sector or not s.goal or andou then
 				s.sector = sector
 				local a = (idx * 2.399) % (2 * math.pi) -- ângulo de ouro: squads em volta
 				local r = BotBrain.C.objectiveSpreadM * 0.6 / M

@@ -35,4 +35,5 @@ MapConfig.Locations = {
 -- D-123: o VC começa com o S1, os EUA com o último, o do meio neutro
 MapConfig.InitialOwner = { "VC", "VC", "Neutral", "US", "US" }
 
-return MapConfig
+-- D-243: nos mapas retangulares, os campos vêm de Shared/MapaAtivo
+return (require(script and (script :: any).Parent.MapaAtivo or "./MapaAtivo") :: any).aplicar(MapConfig)

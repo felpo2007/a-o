@@ -33,6 +33,7 @@ function Build.data(): any
 		village = opt("Village"),
 		roads = opt("Roads"),
 		bases = opt("Bases"), -- 2026-11-13: as bases dos dois lados (tools/bases_dados.py)
+		layout = opt("Layout"), -- D-243: construções e plantas dos mapas retangulares
 		mapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any,
 	}
 end

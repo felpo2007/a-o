@@ -1749,7 +1749,25 @@
   "Arame",
   "Globo",
   "^vila_casa_%d+$",
-  "tubo"
+  "tubo",
+  "Cheia",
+  "Corrimao",
+  "Integridade",
+  "Marco",
+  "Montante",
+  "Setor",
+  "Tabuleiro",
+  "Trilho",
+  "base leste",
+  "base oeste",
+  "checkpoint",
+  "comboio",
+  "comboio:",
+  "defesa do destino",
+  "final",
+  "imobilizado",
+  "mapa retangular",
+  "origem do comboio"
  ],
  "regex": [
   "^uni_[a-z_]+@[a-z0-9]+$"

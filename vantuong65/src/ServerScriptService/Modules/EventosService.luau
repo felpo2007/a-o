@@ -984,7 +984,7 @@ end
 -- ===== contra-ataque =====
 local function startCounter(sector: number, loser: string): Ev?
 	local sp = MatchService.points[sector]
-	if not sp or MatchService.mode == "Offensive" then
+	if not sp or MatchService.mode ~= "Warfare" and MatchService.mode ~= "Skirmish" then
 		return nil -- no Offensive o setor tomado pelos EUA fica travado
 	end
 	for _, e in active do

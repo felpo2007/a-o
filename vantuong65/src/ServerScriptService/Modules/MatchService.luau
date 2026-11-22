@@ -19,6 +19,8 @@ local AfterAction = require(ReplicatedStorage.Shared.AfterAction)
 local Capture = require(ReplicatedStorage.Shared.Capture)
 local Front = require(ReplicatedStorage.Shared.Front)
 local Geometry = require(ReplicatedStorage.Shared.Geometry)
+local LinhaFrente = require(ReplicatedStorage.Shared.LinhaFrente)
+local MapaAtivo = require(ReplicatedStorage.Shared.MapaAtivo)
 local MapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any
 local Net = require(ReplicatedStorage.Shared.Net)
 local Offensive = require(ReplicatedStorage.Shared.Offensive)
@@ -26,6 +28,8 @@ local Rodada = require(ReplicatedStorage.Shared.Rodada)
 local Weather = require(ReplicatedStorage.Shared.Weather)
 local Rng = require(ReplicatedStorage.Shared.Rng)
 local Combatants = require(script.Parent.Combatants)
+local ModoComboio = require(script.Parent.ModoComboio)
+local ModoFrente = require(script.Parent.ModoFrente)
 
 export type Strongpoint = { sector: number, name: string, x: number, z: number, real: boolean }
 
@@ -149,6 +153,13 @@ local pendingMode: string? = nil
 local fixedMode = false -- servidor privado: o dono escolheu o modo
 
 local function limitSeconds(): number
+	local lf = (MatchService :: any).frente
+	if lf then
+		return ModoFrente.limite(lf)
+	end
+	if MatchService.mode == "Comboio" then
+		return ModoComboio.limite(math.max(0, os.clock() - MatchService.startedAt))
+	end
 	local o = MatchService.offensive
 	if MatchService.mode == "Offensive" and o then
 		return o.deadline -- cresce a cada setor tomado
@@ -298,6 +309,11 @@ function MatchService.newMatch(mode: string?)
 	MatchService.rodada += 1
 	ReplicatedStorage:SetAttribute("VT65Rodada", MatchService.rodada)
 	MatchService.mode = mode or pendingMode or Capture.nextMode(MatchService.mode, fixedMode, MatchService.rotation)
+	-- D-243: nos mapas retangulares, o modo é o do mapa
+	local doMapa = MapaAtivo.projeto()
+	if doMapa then
+		MatchService.mode = doMapa.modo
+	end
 	pendingMode = nil
 	local rng = Rng.new(os.time())
 	local bySector: { [number]: { any } } = {}
@@ -318,8 +334,25 @@ function MatchService.newMatch(mode: string?)
 	end
 	MatchService.score = if MatchService.mode == "Warfare" then Capture.newScore() else nil
 	MatchService.winner = nil
-	MatchService.offensive = nil
-	if MatchService.mode == "Offensive" then
+	MatchService.offensive = nil;
+	(MatchService :: any).frente = nil
+	if MatchService.mode == "Comboio" then
+		-- o HUD e os bots leem um setor ativo: o ponto 1 acompanha o comboio (ModoComboio)
+		local nS = #MapConfig.Sectors
+		local initial = table.create(nS, "Neutral")
+		local active = table.create(nS, false)
+		active[1] = true
+		MatchService.state = Capture.new(initial, active)
+		MatchService.initialOwner = initial
+		ModoComboio.novaPartida()
+	elseif MatchService.mode == "LinhaFrente" then
+		local f = LinhaFrente.novo()
+		local initial = table.clone(MapConfig.InitialOwner)
+		MatchService.state = Capture.new(initial, table.create(#MapConfig.Sectors, false))
+		MatchService.initialOwner = initial
+		ModoFrente.sincroniza(MatchService.state, f);
+		(MatchService :: any).frente = f
+	elseif MatchService.mode == "Offensive" then
 		local o = Offensive.new(#MapConfig.Sectors)
 		MatchService.offensive = o
 		MatchService.state = o.capture
@@ -388,11 +421,21 @@ function MatchService.enemiesIn(sector: number, faction: string): number
 	return if faction == "US" then c.VC elseif faction == "VC" then c.US else 0
 end
 
+local pisoSetor: { [number]: number } = {} -- D-243: chão de cada objetivo (volume de captura)
 local function counts(): { { US: number, VC: number } }
 	local out = {}
 	local r2 = MapConfig.CaptureRadiusStuds ^ 2
 	for s = 1, #MapConfig.Sectors do
 		out[s] = { US = 0, VC = 0 }
+	end
+	local lf = (MatchService :: any).frente
+	if lf then
+		local sp = MatchService.points[lf.ativo]
+		if sp then
+			pisoSetor[lf.ativo] = pisoSetor[lf.ativo] or groundAt(sp.x, sp.z)
+			out[lf.ativo] = ModoFrente.conta(sp, pisoSetor[lf.ativo], MapConfig.CaptureRadiusStuds)
+		end
+		return out
 	end
 	for _, e in Combatants.list() do
 		local root = Combatants.root(e)
@@ -447,6 +490,8 @@ local function publish()
 		prep = math.ceil(MatchService.prepLeft()),
 		ended = MatchService.ended,
 		front = if MatchService.offensive then MatchService.offensive.front else nil,
+		linha = if (MatchService :: any).frente then ModoFrente.publica((MatchService :: any).frente) else nil,
+		comboio = if MatchService.mode == "Comboio" then ModoComboio.publica() else nil,
 		capturing = capturing,
 		contested = contested,
 		inArea = inArea,
@@ -550,6 +595,9 @@ function MatchService.start()
 	-- D-193: o ciclo do fim de partida (comemoração, votação, restauração, partida nova)
 	local RodadaService = require(script.Parent:WaitForChild("RodadaService")) :: any
 	RodadaService.start()
+	if MapaAtivo.id() == "comboio" then
+		ModoComboio.iniciar(MatchService)
+	end
 	task.spawn(function()
 		while true do
 			task.wait(1)
@@ -572,9 +620,20 @@ function MatchService.start()
 				local override = MatchService.countsOverride
 				lastCounts = if override and RunService:IsStudio() then override() else counts()
 				local o = MatchService.offensive
-				local events: { Offensive.Event } = if o
-					then Offensive.step(o, lastCounts, 1)
-					else Capture.step(st, lastCounts, 1) :: any
+				local lf = (MatchService :: any).frente
+				local vFrente: string? = nil
+				local events: { Offensive.Event }
+				local noComboio = MatchService.mode == "Comboio"
+				if lf then
+					local evs, v = ModoFrente.passo(st, lf, lastCounts[lf.ativo] or { US = 0, VC = 0 }, 1)
+					events, vFrente = evs :: any, v
+				elseif noComboio then
+					events = {} -- o passo do comboio é dele, 10 vezes por segundo
+				elseif o then
+					events = Offensive.step(o, lastCounts, 1)
+				else
+					events = Capture.step(st, lastCounts, 1) :: any
+				end
 				local rep = MatchService.report
 				for _, ev in events do
 					if rep then
@@ -612,7 +671,16 @@ function MatchService.start()
 				if score then
 					Capture.bleed(score, st, 1) -- atrito: quem tem menos setores sangra reforços
 				end
-				local w = if o then Offensive.winner(o, elapsed) else Capture.winner(st, elapsed, limitSeconds(), score)
+				local w: string?
+				if lf then
+					w = vFrente
+				elseif noComboio then
+					w = ModoComboio.vencedor()
+				elseif o then
+					w = Offensive.winner(o, elapsed)
+				else
+					w = Capture.winner(st, elapsed, limitSeconds(), score)
+				end
 				if w then
 					endMatch(w)
 				end
