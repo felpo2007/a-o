@@ -109,7 +109,13 @@ local bases: any = nil
 local function baseData(): any
 	if bases == nil then
 		local ok, m = pcall(function(): any
-			local data = ServerStorage:WaitForChild("VT65Build"):WaitForChild("Data"):FindFirstChild("Bases")
+			local b = ServerStorage:WaitForChild("VT65Build")
+			local data = b:WaitForChild("Data"):FindFirstChild("Bases")
+			-- D-243: nos mapas retangulares, as regras de colisão das casas vêm dos dados do mapa de sempre
+			if not data then
+				local velho = b:FindFirstChild("Data_vantuong")
+				data = if velho then velho:FindFirstChild("Bases") else nil
+			end
 			return if data then (require :: any)(data) else false
 		end)
 		bases = if ok then m else false
@@ -255,6 +261,10 @@ function AssetLoader.template(key: string): Model?
 	-- Colisao_* invisíveis com o Material, Zona_* só toque (MapLife.baseTemplate)
 	local data = baseData()
 	local rules = data and data.nodes and data.nodes[key]
+	if not rules and string.sub(key, 1, 4) == "ret_" then
+		local nos = ServerStorage:WaitForChild("VT65Build"):FindFirstChild("NosRet")
+		rules = if nos then ((require :: any)(nos))[key] else nil
+	end
 	if rules then
 		local rangeM: number? = nil
 		if key == "us_range_target" then

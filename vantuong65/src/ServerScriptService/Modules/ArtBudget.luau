@@ -155,6 +155,15 @@ ArtBudget.KIND = {
 	exp_telheiro = "prop",
 	exp_trincheira = "prop",
 	-- D-232 (fim)
+	-- D-243 (mapas retangulares): gerado por tools/ret_registrar.py
+	ret_merc_banca_a = "prop",
+	ret_merc_banca_b = "prop",
+	ret_merc_banca_c = "prop",
+	ret_merc_cozinha = "prop",
+	ret_merc_galeria = "prop",
+	ret_merc_oficina = "prop",
+	ret_merc_sobrado = "prop",
+	-- D-243 (fim)
 	m60 = "hero",
 	rpd = "hero",
 	sks = "hero",
@@ -309,6 +318,15 @@ ArtBudget.TRIS = {
 	exp_telheiro = 2526,
 	exp_trincheira = 796,
 	-- D-232 (fim)
+	-- D-243 (mapas retangulares): gerado por tools/ret_registrar.py
+	ret_merc_banca_a = 4344,
+	ret_merc_banca_b = 2838,
+	ret_merc_banca_c = 1912,
+	ret_merc_cozinha = 3924,
+	ret_merc_galeria = 11784,
+	ret_merc_oficina = 4602,
+	ret_merc_sobrado = 18406,
+	-- D-243 (fim)
 	us_m1_helmet = 3000,
 	us_m1955_vest = 3999,
 	vc_pith_helmet = 2999,
@@ -458,6 +476,15 @@ ArtBudget.DIMS = {
 	exp_telheiro = { 24.71, 11.27, 15.34 },
 	exp_trincheira = { 8.57, 5.86, 21.43 },
 	-- D-232 (fim)
+	-- D-243 (mapas retangulares): gerado por tools/ret_registrar.py
+	ret_merc_banca_a = { 16.07, 10.57, 12.33 },
+	ret_merc_banca_b = { 16.08, 10.59, 12.33 },
+	ret_merc_banca_c = { 16.08, 10.59, 12.33 },
+	ret_merc_cozinha = { 20.37, 11.79, 17.42 },
+	ret_merc_galeria = { 54.64, 18.87, 37.74 },
+	ret_merc_oficina = { 31.21, 15.85, 24.97 },
+	ret_merc_sobrado = { 54.89, 29.95, 41.13 },
+	-- D-243 (fim)
 } :: { [string]: { number } }
 
 -- Raio do pé de cada planta no chão (studs, escala 1): o tronco das árvores, a touceira do bambu e o

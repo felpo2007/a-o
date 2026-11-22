@@ -126,6 +126,8 @@ class Bairro:
     marcos: list[tuple] = field(default_factory=list)  # chave, dx, dy, rumo (graus), escala
     tipos: tuple[str, ...] = ()
     arvores: list[tuple] = field(default_factory=list)  # chave, dx, dy, escala
+    praca: tuple[float, float, float] | None = None  # dx, dy, raio: terra batida, sem planta
+    miolo: list[tuple] = field(default_factory=list)  # marcos dentro do pátio de captura
 
 
 @dataclass
@@ -253,17 +255,35 @@ def frente() -> Projeto:
             58,
             22,
             [
-                ("exp_telheiro", -14, 22, 170, 1.15),
-                ("exp_telheiro", 12, 24, 190, 1.15),
-                ("exp_telheiro", 26, 3, -80, 1.15),
-                ("exp_telheiro", -6, -16, 15, 1.15),
-                ("exp_sobrado_a", 2, 42, 180, 1.1),
-                ("exp_sobrado_c", 38, 28, -120, 1.1),
-                ("exp_casas_ligadas", 40, -8, -90, 1.15),
-                ("exp_deposito", -24, 40, 150, 1.15),
+                # a praça das coberturas: o sobrado fecha o norte, a galeria o leste, e as bancas
+                # em volta do pátio criam as aproximações diagonais
+                ("ret_merc_sobrado", 5, 33, 180, 1.0),
+                ("ret_merc_galeria", 35, 10, -90, 1.0),
+                # anel de bancas em volta do pátio, com vãos nas diagonais
+                ("ret_merc_banca_a", -15, 19, 135, 1.0),
+                ("ret_merc_banca_c", -22, 8, 105, 1.0),
+                ("ret_merc_banca_b", -22, -6, 75, 1.0),
+                ("ret_merc_banca_a", -15, -18, 45, 1.0),
+                ("ret_merc_banca_b", 15, -19, -45, 1.0),
+                ("ret_merc_banca_c", 23, -9, -70, 1.0),
+                ("ret_merc_banca_a", 24, 4, -100, 1.0),
+                ("ret_merc_banca_b", 19, 21, -135, 1.0),
+                ("ret_merc_cozinha", -13, 35, 160, 1.0),
+                # a oficina fica na cabeceira da ponte, do outro lado da estrada
+                ("ret_merc_oficina", -10, -38, 0, 1.0),
+                ("exp_sobrado_c", 62, -4, -90, 1.1),
+                ("exp_deposito", 8, 52, 180, 1.15),
             ],
             SOB + RES[5:] + ("exp_casas_ligadas", "exp_deposito"),
-            [("canopy_tree", 22, 44, 1.0)],
+            [("exp_figueira", 28, 31, 1.25)],
+            praca=(4, 4, 31),
+            # cobertura dentro da captura, com o centro e as diagonais livres
+            miolo=[
+                ("ret_merc_banca_b", -9, 8, 130, 1.0),
+                ("ret_merc_banca_a", 9, 9, -130, 1.0),
+                ("ret_merc_banca_c", 9, -9, -50, 1.0),
+                ("exp_carroca", -9, -9, 40, 1.0),
+            ],
         ),
         Bairro(
             "D",
@@ -846,6 +866,8 @@ class Mapa:
                         break
                 if not ok:
                     self.falhas.append(f"{b.id}: marco {chave} sem lugar")
+            for chave, dx, dy, rumo, escala in b.miolo:
+                self.poe(chave, b.x + dx, b.y + dy, 90 - rumo, escala, "marco", forca=True)
             for chave, dx, dy, escala in b.arvores:
                 self.plantas.append({"key": chave, "x": b.x + dx, "y": b.y + dy, "scale": escala})
             postos = 0
@@ -1104,6 +1126,11 @@ class Mapa:
                 f'\t\t{{ tipo = "{a["tipo"]}", x1 = {x1:.2f}, z1 = {z1:.2f}, x2 = {x2:.2f}, '
                 f"z2 = {z2:.2f}, y = {y:.2f}, largura = {lg / M:.2f} }},\n"
             )
+        pracas = ""
+        for b in self.p.bairros:
+            if b.praca:
+                wx, wz = self.mundo(b.x + b.praca[0], b.y + b.praca[1])
+                pracas += f"\t\t{{ x = {wx:.2f}, z = {wz:.2f}, r = {b.praca[2] / M:.2f} }},\n"
         conj = ""
         for k, c in enumerate(self.conj, 1):
             wx, wz = self.mundo(c["xm"], c["ym"])
@@ -1119,6 +1146,7 @@ class Mapa:
             "\titems = {\n" + itens + "\t},\n"
             "\tplantas = {\n" + plantas + "\t},\n"
             "\tpontes = {\n" + pontes + "\t},\n"
+            "\tpracas = {\n" + pracas + "\t},\n"
             "\tconjuntos = {\n" + conj + "\t},\n}\n",
             "utf-8",
             newline="\n",

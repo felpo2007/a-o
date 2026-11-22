@@ -68,12 +68,19 @@ local acesas: { [PointLight]: boolean } = {}
 
 -- a cor e a força da chama na hora da partida (o lampião que chega pelo streaming também)
 local corAgora, brilhoAgora = Lampiao.daHora(ReplicatedStorage:GetAttribute("VT65Hora"))
+-- D-243: as lojas têm vários lampiões por cômodo, cada um com a sua força
+local function forcaDe(luz: PointLight): number
+	local g = luz.Parent
+	local f = if g then g:GetAttribute("Forca") else nil
+	return if type(f) == "number" then f else 1
+end
+
 local function pinta(g: Instance)
 	if g:IsA("BasePart") then
 		local luz = g:FindFirstChildOfClass("PointLight")
 		if luz then
 			luz.Color = Color3.fromRGB(corAgora[1], corAgora[2], corAgora[3])
-			luz.Brightness = brilhoAgora
+			luz.Brightness = brilhoAgora * forcaDe(luz)
 		end
 	end
 end
@@ -123,7 +130,7 @@ local function atualiza()
 	end
 	for luz in acesas do
 		if not ficam[luz] and luz.Parent then
-			luz.Brightness = brilhoAgora
+			luz.Brightness = brilhoAgora * forcaDe(luz)
 		end
 	end
 	acesas = ficam
@@ -153,7 +160,7 @@ RunService.Heartbeat:Connect(function()
 	local t = os.clock()
 	for _, f in chamas do
 		if f.luz.Parent then
-			f.luz.Brightness = brilhoAgora * Lampiao.chama(t, f.semente)
+			f.luz.Brightness = brilhoAgora * forcaDe(f.luz) * Lampiao.chama(t, f.semente)
 		end
 	end
 end)

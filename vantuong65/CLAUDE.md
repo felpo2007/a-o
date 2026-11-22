@@ -448,6 +448,8 @@ O `sourcemap.json` não vai para o Git.
   `"reparo:1"` ou `"reparo:0"` (ponha nil antes de repetir). Conjuntos de nascer: `Shared/NascerRet`. Carta aérea de um
   mapa: `lune run tools/carta_ret.luau <id>` e `uv run --group arte python tools/mapa_aereo.py --mapa <id>`; suba com
   `catalogo_imagens.py`. Votação com os três mapas no Studio: `VT65DevVotoMapas = true` (no Edit).
+  Modelo novo dos mapas: receita em `tools/blender/ret_*.py`, `ret.py -- <chave>`, `tools/ret_registrar.py plano`,
+  `upload-assets Models.ret_`, `ret_registrar.py jogo` (gera `VT65Build/NosRet`, a colisão por nó) e `mapas_ret.py`.
 - Mira e mãos em 1ª pessoa (D-242): `adsEyeM`/`adsSobeM` na ficha (`Weapons`) e `ADS_MAO_BAIXA` no
   `WeaponVisuals`. Para ver todas: `VT65DevArma` = id (Server) e `Aiming = true` a cada quadro (Client); a luneta
   só abre pelo `VT65DevGranada = "mirar:<s>"`. Para olhar a 3ª pessoa, use bot ancorado do mesmo lado, senão ele

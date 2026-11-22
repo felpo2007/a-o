@@ -10085,3 +10085,23 @@ lugares e a publicação.
 - Mapa de sempre depois destas mudanças: autoteste do Studio com 18 ok, 0 falhas e 0 pulados.
 
 **Não testado:** o teleporte para o servidor reservado (não existe no Studio), dois jogadores reais, celular e desempenho.
+
+### D-243, parte 4: Mercado das Duas Margens, o primeiro trecho de qualidade (2026-11-22, sem publicar)
+
+- **Sete modelos novos no Blender** (`tools/blender/ret_mercado.py`, 1.912 a 18.406 triângulos): casa de comércio de dois
+  andares, galeria de três lojas ligadas por dentro, três bancas (frutas, potes e cestos, tecidos), oficina de bicicletas e
+  cozinha de rua. Registro em `tools/ret_registrar.py`, que também gera a colisão por nó (`VT65Build/NosRet`).
+- **Praça:** terra batida (`pracas` no Layout), sem planta solta, com a figueira como marco. As bancas fecham o pátio em
+  anel e quatro peças ficam dentro da captura como cobertura, com o centro e as diagonais livres.
+- **Falha grave corrigida:** nos mapas novos, as regras de colisão não eram lidas. As caixas de colisão de todas as casas
+  apareciam como blocos brancos e as peças visuais também colidiam. Agora valem as regras de cada modelo.
+- **Lampiões:** as lojas têm vários, com força própria (`Forca`, 0,42), porque cinco no mesmo cômodo estouravam a luz.
+
+**Medido no Studio** (qualidade baixa ou média, com o jogo do dono aberto; sem número de fps):
+- Soldado real atravessou a galeria, das duas portas de dentro à saída: 12 de 12 pontos. Subiu a escada de 1,40 m do
+  sobrado até a varanda (3,14 m).
+- Com bots, a praça foi tomada aos 128 s, retomada depois, e a frente andou nos dois sentidos, sem bot preso nas bancas.
+- Mapa de sempre: autoteste com 18 ok, 0 falhas e 0 pulados.
+
+**Falta no Mercado:** frente para o canal (cais e fachadas estreitas na margem), conferir em qualidade alta, medir
+desempenho e o cruzamento de dois jogadores. A ficha está em `testes/D-243_mercado_2026-11-22.md`.

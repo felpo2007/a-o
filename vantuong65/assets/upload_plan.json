@@ -12311,5 +12311,54 @@
   "assetType": "Image",
   "name": "VT65 aereo comboio sw",
   "description": "VAN TUONG 65 - imagem de catalogo"
+ },
+ {
+  "key": "Models.ret_merc_banca_a",
+  "file": "assets/blender/ret_merc_banca_a/ret_merc_banca_a.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_merc_banca_a",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_merc_banca_b",
+  "file": "assets/blender/ret_merc_banca_b/ret_merc_banca_b.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_merc_banca_b",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_merc_banca_c",
+  "file": "assets/blender/ret_merc_banca_c/ret_merc_banca_c.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_merc_banca_c",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_merc_cozinha",
+  "file": "assets/blender/ret_merc_cozinha/ret_merc_cozinha.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_merc_cozinha",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_merc_galeria",
+  "file": "assets/blender/ret_merc_galeria/ret_merc_galeria.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_merc_galeria",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_merc_oficina",
+  "file": "assets/blender/ret_merc_oficina/ret_merc_oficina.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_merc_oficina",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_merc_sobrado",
+  "file": "assets/blender/ret_merc_sobrado/ret_merc_sobrado.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_merc_sobrado",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
  }
 ]

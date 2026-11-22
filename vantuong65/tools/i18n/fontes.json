@@ -291,7 +291,7 @@
  "%d:%d": [
   "src/ServerScriptService/Modules/CampanhaService.luau:810",
   "src/ServerScriptService/Modules/FieldWorkService.luau:78",
-  "src/ServerScriptService/Modules/InteriorLuz.luau:107",
+  "src/ServerScriptService/Modules/InteriorLuz.luau:161",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Marcadores.luau:208"
  ],
  "%dD %dH": [
@@ -603,7 +603,7 @@
   "src/ReplicatedStorage/Shared/SomArmas.luau:176"
  ],
  "%s|%.1f|%.1f": [
-  "src/ServerScriptService/Modules/ArtPlan.luau:428"
+  "src/ServerScriptService/Modules/ArtPlan.luau:454"
  ],
  "%s|%d": [
   "src/ReplicatedStorage/Shared/JogarAgora.luau:329"
@@ -1628,7 +1628,7 @@
   "src/ReplicatedStorage/Shared/Cosmeticos.luau:361"
  ],
  "Alvo": [
-  "src/ServerScriptService/Modules/AssetLoader.luau:1052",
+  "src/ServerScriptService/Modules/AssetLoader.luau:1062",
   "src/ServerScriptService/Modules/TrainingService.luau:360"
  ],
  "Alvo de %d m: %d cm %s, %d cm %s do centro": [
@@ -2972,7 +2972,7 @@
   "src/ReplicatedStorage/Shared/Medical.luau:377"
  ],
  "Cemitério": [
-  "src/ServerScriptService/Modules/ArtPlan.luau:302"
+  "src/ServerScriptService/Modules/ArtPlan.luau:328"
  ],
  "Centro": [
   "src/ReplicatedStorage/Shared/GrenadeArt.luau:228",
@@ -3101,7 +3101,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ArquivoTela.client.luau:687"
  ],
  "Colina": [
-  "src/ServerScriptService/Modules/ArtPlan.luau:1609"
+  "src/ServerScriptService/Modules/ArtPlan.luau:1645"
  ],
  "Colocacao": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/FimDeRodada.client.luau:131"
@@ -3265,7 +3265,7 @@
  ],
  "Concrete": [
   "src/ReplicatedStorage/Shared/VehicleDrive.luau:114",
-  "src/ServerScriptService/Modules/AssetLoader.luau:238"
+  "src/ServerScriptService/Modules/AssetLoader.luau:244"
  ],
  "Conferindo…": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:478"
@@ -5181,7 +5181,7 @@
  ],
  "Folhas": [
   "src/ReplicatedStorage/Shared/ExpansaoLod.luau:37",
-  "src/ServerScriptService/Modules/AssetLoader.luau:200",
+  "src/ServerScriptService/Modules/AssetLoader.luau:206",
   "src/ServerScriptService/Modules/MapLife.luau:826",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Ambiente.client.luau:65",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Progresso.client.luau:1297"
@@ -5580,7 +5580,8 @@
  ],
  "Ground": [
   "src/ReplicatedStorage/Shared/VehicleDrive.luau:99",
-  "src/ServerScriptService/Modules/ArtPlan.luau:180",
+  "src/ServerScriptService/Modules/ArtPlan.luau:194",
+  "src/ServerScriptService/Modules/ArtPlan.luau:202",
   "src/ServerScriptService/Modules/PostureService.luau:57"
  ],
  "Grupo cheio: escolha outro ou forme um novo.": [
@@ -7110,7 +7111,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/AudioController.client.luau:264"
  ],
  "Nam Yên (4)": [
-  "src/ServerScriptService/Modules/ArtPlan.luau:1766",
+  "src/ServerScriptService/Modules/ArtPlan.luau:1802",
   "src/ServerScriptService/Modules/AssetLoader.luau:45"
  ],
  "Napalm": [
@@ -8361,9 +8362,9 @@
  ],
  "Ponte e Cais": [
   "src/ReplicatedStorage/Shared/MapConfig.luau:24",
-  "src/ServerScriptService/Modules/ArtPlan.luau:373",
   "src/ServerScriptService/Modules/ArtPlan.luau:399",
-  "src/ServerScriptService/Modules/ArtPlan.luau:409"
+  "src/ServerScriptService/Modules/ArtPlan.luau:425",
+  "src/ServerScriptService/Modules/ArtPlan.luau:435"
  ],
  "Ponto": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Luneta.luau:77"
@@ -9075,7 +9076,7 @@
   "src/ReplicatedStorage/Shared/Caixas.luau:134"
  ],
  "Riacho": [
-  "src/ServerScriptService/Modules/ArtPlan.luau:1090"
+  "src/ServerScriptService/Modules/ArtPlan.luau:1119"
  ],
  "Right": [
   "src/ReplicatedStorage/Shared/Comemoracao.luau:58",
@@ -10757,7 +10758,7 @@
   "src/ReplicatedStorage/Shared/Weapons.luau:514",
   "src/ReplicatedStorage/Shared/Weapons.luau:771",
   "src/ReplicatedStorage/Shared/Weapons.luau:780",
-  "src/ServerScriptService/Modules/ArtPlan.luau:807",
+  "src/ServerScriptService/Modules/ArtPlan.luau:836",
   "src/ServerScriptService/Modules/BotEscolta.luau:133",
   "src/ServerScriptService/Modules/BotEscolta.luau:251",
   "src/ServerScriptService/Modules/BotService.luau:288",
@@ -11229,7 +11230,7 @@
   "src/ReplicatedStorage/Shared/Weapons.luau:456",
   "src/ReplicatedStorage/Shared/Weapons.luau:789",
   "src/ReplicatedStorage/Shared/Weapons.luau:796",
-  "src/ServerScriptService/Modules/ArtPlan.luau:807",
+  "src/ServerScriptService/Modules/ArtPlan.luau:836",
   "src/ServerScriptService/Modules/BotEscolta.luau:133",
   "src/ServerScriptService/Modules/BotEscolta.luau:251",
   "src/ServerScriptService/Modules/BotService.luau:288",
@@ -11687,7 +11688,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaoJogador.luau:211"
  ],
  "Vidro": [
-  "src/ServerScriptService/Modules/AssetLoader.luau:210"
+  "src/ServerScriptService/Modules/AssetLoader.luau:216"
  ],
  "Vidro vulcânico negro com reflexo roxo.": [
   "src/ReplicatedStorage/Shared/Cosmeticos.luau:651"
@@ -11945,7 +11946,7 @@
  "Wood": [
   "src/ReplicatedStorage/Shared/BotBrain.luau:1228",
   "src/ServerScriptService/Modules/AssetLoader.luau:104",
-  "src/ServerScriptService/Modules/AssetLoader.luau:238",
+  "src/ServerScriptService/Modules/AssetLoader.luau:244",
   "src/ServerScriptService/Modules/CaixaMunicaoService.luau:175",
   "src/ServerScriptService/Modules/Gear.luau:537",
   "src/ServerScriptService/Modules/Gear.luau:722",
@@ -12130,8 +12131,8 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/AfterActionController.client.luau:195"
  ],
  "^Trim_%u$": [
-  "src/ServerScriptService/Modules/AssetLoader.luau:139",
-  "src/ServerScriptService/Modules/AssetLoader.luau:148"
+  "src/ServerScriptService/Modules/AssetLoader.luau:145",
+  "src/ServerScriptService/Modules/AssetLoader.luau:154"
  ],
  "^Tunnel_%d+_floor$": [
   "src/ServerScriptService/Modules/MapLife.luau:506"
@@ -12214,7 +12215,7 @@
   "src/ServerScriptService/Modules/Flutua.luau:137"
  ],
  "^vila_casa_%d+$": [
-  "src/ServerScriptService/Modules/InteriorLuz.luau:105"
+  "src/ServerScriptService/Modules/InteriorLuz.luau:159"
  ],
  "a %.0f m": [
   "src/ServerScriptService/Modules/VehicleService.luau:2110"
@@ -15642,7 +15643,8 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Interagir.client.luau:51",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Interagir.client.luau:248",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Interagir.client.luau:248",
-  "src/StarterPlayer/StarterPlayerScripts/Controllers/InteriorVivo.client.luau:133",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/InteriorVivo.client.luau:75",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/InteriorVivo.client.luau:140",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ItemArte.luau:234",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ItemArte.luau:257",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ItemArte.luau:257",
@@ -15782,7 +15784,7 @@
   "src/ReplicatedStorage/Shared/FieldWork.luau:58"
  ],
  "não, terreno antigo": [
-  "src/ServerScriptService/Modules/AssetLoader.luau:856"
+  "src/ServerScriptService/Modules/AssetLoader.luau:866"
  ],
  "o efeito é o da granada de mão grenade_us (5 m letal), PLACEHOLDER": [
   "src/ReplicatedStorage/Shared/Weapons.luau:263"
@@ -15956,58 +15958,58 @@
   "src/ServerScriptService/Modules/CaixaService.luau:752"
  ],
  "parts": [
-  "src/ServerScriptService/Modules/ArtPlan.luau:901",
-  "src/ServerScriptService/Modules/ArtPlan.luau:1274",
+  "src/ServerScriptService/Modules/ArtPlan.luau:930",
   "src/ServerScriptService/Modules/ArtPlan.luau:1303",
-  "src/ServerScriptService/Modules/ArtPlan.luau:1401",
-  "src/ServerScriptService/Modules/AssetLoader.luau:680",
-  "src/ServerScriptService/Modules/AssetLoader.luau:916"
+  "src/ServerScriptService/Modules/ArtPlan.luau:1332",
+  "src/ServerScriptService/Modules/ArtPlan.luau:1430",
+  "src/ServerScriptService/Modules/AssetLoader.luau:690",
+  "src/ServerScriptService/Modules/AssetLoader.luau:926"
  ],
  "parts:": [
-  "src/ServerScriptService/Modules/ArtPlan.luau:901",
-  "src/ServerScriptService/Modules/ArtPlan.luau:1274",
+  "src/ServerScriptService/Modules/ArtPlan.luau:930",
   "src/ServerScriptService/Modules/ArtPlan.luau:1303",
-  "src/ServerScriptService/Modules/ArtPlan.luau:1401",
-  "src/ServerScriptService/Modules/AssetLoader.luau:680",
-  "src/ServerScriptService/Modules/AssetLoader.luau:916"
+  "src/ServerScriptService/Modules/ArtPlan.luau:1332",
+  "src/ServerScriptService/Modules/ArtPlan.luau:1430",
+  "src/ServerScriptService/Modules/AssetLoader.luau:690",
+  "src/ServerScriptService/Modules/AssetLoader.luau:926"
  ],
  "parts:barco": [
-  "src/ServerScriptService/Modules/ArtPlan.luau:327",
-  "src/ServerScriptService/Modules/ArtPlan.luau:1036",
-  "src/ServerScriptService/Modules/ArtPlan.luau:1041"
+  "src/ServerScriptService/Modules/ArtPlan.luau:353",
+  "src/ServerScriptService/Modules/ArtPlan.luau:1065",
+  "src/ServerScriptService/Modules/ArtPlan.luau:1070"
  ],
  "parts:cais": [
-  "src/ServerScriptService/Modules/ArtPlan.luau:326",
-  "src/ServerScriptService/Modules/ArtPlan.luau:1021",
-  "src/ServerScriptService/Modules/ArtPlan.luau:1034"
+  "src/ServerScriptService/Modules/ArtPlan.luau:352",
+  "src/ServerScriptService/Modules/ArtPlan.luau:1050",
+  "src/ServerScriptService/Modules/ArtPlan.luau:1063"
  ],
  "parts:caldeira": [
-  "src/ServerScriptService/Modules/ArtPlan.luau:325"
+  "src/ServerScriptService/Modules/ArtPlan.luau:351"
  ],
  "parts:horta": [
-  "src/ServerScriptService/Modules/ArtPlan.luau:319",
-  "src/ServerScriptService/Modules/ArtPlan.luau:1238",
+  "src/ServerScriptService/Modules/ArtPlan.luau:345",
+  "src/ServerScriptService/Modules/ArtPlan.luau:1267",
   "src/ServerScriptService/Modules/Expansao.luau:111",
   "src/ServerScriptService/Modules/Expansao.luau:211",
   "src/ServerScriptService/Modules/Expansao.luau:212"
  ],
  "parts:moenda": [
-  "src/ServerScriptService/Modules/ArtPlan.luau:324"
+  "src/ServerScriptService/Modules/ArtPlan.luau:350"
  ],
  "parts:ponte": [
-  "src/ServerScriptService/Modules/ArtPlan.luau:1005"
+  "src/ServerScriptService/Modules/ArtPlan.luau:1034"
  ],
  "parts:serraria": [
-  "src/ServerScriptService/Modules/ArtPlan.luau:321"
+  "src/ServerScriptService/Modules/ArtPlan.luau:347"
  ],
  "parts:tabuas": [
-  "src/ServerScriptService/Modules/ArtPlan.luau:323"
+  "src/ServerScriptService/Modules/ArtPlan.luau:349"
  ],
  "parts:toras": [
-  "src/ServerScriptService/Modules/ArtPlan.luau:322"
+  "src/ServerScriptService/Modules/ArtPlan.luau:348"
  ],
  "parts:varanda": [
-  "src/ServerScriptService/Modules/ArtPlan.luau:1210"
+  "src/ServerScriptService/Modules/ArtPlan.luau:1239"
  ],
  "pass": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Progresso.client.luau:456",

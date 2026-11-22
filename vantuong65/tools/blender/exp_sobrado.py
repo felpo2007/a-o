@@ -194,7 +194,9 @@ def _sobrado(chave: str) -> V.Receita:
     par = c["parede"]()
     ngoi = V.mat_ngoi("ngoi", *c["telha"])
     yv = -W / 2 - VARANDA
-    xv = L / 2 + 1.35 if aberto else L / 2 + 0.05  # ponta da varanda (no aberto, chega à escada)
+    larg_esc = c.get("escada", 1.1)  # D-243: os mapas novos usam 1,40 m
+    # ponta da varanda (no aberto, chega à escada)
+    xv = L / 2 + 0.25 + larg_esc if aberto else L / 2 + 0.05
 
     # escada de dentro (só no fechado): ao longo da parede do fundo
     esp_t = 0.2
@@ -367,13 +369,18 @@ def _sobrado(chave: str) -> V.Receita:
                 "Estrutura",
             )
         # escada de fora: sobe ao longo do oitão direito até a ponta da varanda
-        xe = L / 2 + 0.7
+        xe = L / 2 + 0.15 + larg_esc / 2
         E.escada(
-            rec, "escada", (xe, -W / 2 + ESCADA + 0.02, 0.1), (xe, -W / 2 + 0.02, Z2), 1.1, mats
+            rec,
+            "escada",
+            (xe, -W / 2 + ESCADA + 0.02, 0.1),
+            (xe, -W / 2 + 0.02, Z2),
+            larg_esc,
+            mats,
         )
         sol = V.bloco(
             "soleira",
-            (1.3, 0.44, 0.1),
+            (larg_esc + 0.2, 0.44, 0.1),
             (xe, -W / 2 + ESCADA + 0.12, 0.05),
             mats.pedra,
             chanfro=0.015,
@@ -383,10 +390,10 @@ def _sobrado(chave: str) -> V.Receita:
         X._col(
             rec,
             "soleira",
-            xe - 0.65,
+            xe - (larg_esc + 0.2) / 2,
             -W / 2 + ESCADA - 0.1,
             0.0,
-            xe + 0.65,
+            xe + (larg_esc + 0.2) / 2,
             -W / 2 + ESCADA + 0.34,
             0.1,
             "para",

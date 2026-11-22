@@ -273,6 +273,15 @@ return {
 		exp_telheiro = 117150838380052,
 		exp_trincheira = 101090654004213,
 		-- D-232 (fim)
+		-- D-243 (mapas retangulares): gerado por tools/ret_registrar.py
+		ret_merc_banca_a = 81082925948323,
+		ret_merc_banca_b = 82962069002505,
+		ret_merc_banca_c = 82949504881666,
+		ret_merc_cozinha = 117702748789250,
+		ret_merc_galeria = 96919137249468,
+		ret_merc_oficina = 85399362806951,
+		ret_merc_sobrado = 114812980983153,
+		-- D-243 (fim)
 		vila_casa_11 = 0,
 		vila_casa_12 = 0,
 		-- D-159: portador da trim sheet da vila (um cubo por folha); o AssetLoader clona a
@@ -973,10 +982,10 @@ return {
 		aereo_comboio_nw = 88865789427796,
 		aereo_comboio_se = 132508064156737,
 		aereo_comboio_sw = 140294549066446,
-		aereo_frente_ne = 129268793357915,
-		aereo_frente_nw = 91017528353964,
-		aereo_frente_se = 70377221436805,
-		aereo_frente_sw = 90108409181430,
+		aereo_frente_ne = 116136421732685,
+		aereo_frente_nw = 120958431875974,
+		aereo_frente_se = 138795799949382,
+		aereo_frente_sw = 128883746814969,
 		aereo_ne = 110144589007418,
 		aereo_nw = 131688770113300,
 		aereo_se = 139092681089087,

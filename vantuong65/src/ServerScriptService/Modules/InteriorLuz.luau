@@ -27,7 +27,7 @@ local function peca(pai: Instance, nome: string, tam: Vector3, cf: CFrame, cor: 
 	return p
 end
 
-local function monta(pasta: Instance, pos: Vector3, tetoY: number, comLuz: boolean)
+local function monta(pasta: Instance, pos: Vector3, tetoY: number, comLuz: boolean, forca: number?)
 	local m = Instance.new("Model")
 	m.Name = "Lampiao"
 	m.ModelStreamingMode = Enum.ModelStreamingMode.Atomic
@@ -52,10 +52,13 @@ local function monta(pasta: Instance, pos: Vector3, tetoY: number, comLuz: boole
 	if comLuz then
 		local luz = Instance.new("PointLight")
 		luz.Color = cor
-		luz.Brightness = Lampiao.BRILHO
+		luz.Brightness = Lampiao.BRILHO * (forca or 1)
 		luz.Range = Lampiao.ALCANCE
 		luz.Shadows = false
 		luz.Parent = globo
+	end
+	if forca then
+		globo:SetAttribute("Forca", forca) -- o InteriorVivo respeita ao animar a chama
 	end
 	m.PrimaryPart = globo
 	CollectionService:AddTag(globo, Lampiao.TAG)
@@ -95,6 +98,57 @@ local function ponto(m: Model): (Vector3?, number?)
 	return nil, nil
 end
 
+-- D-243: as construções do mercado têm vários cômodos: um lampião a cada tanto, nos pontos cobertos.
+local MAX_MERCADO: { [string]: number } = {
+	ret_merc_sobrado = 3,
+	ret_merc_galeria = 4,
+	ret_merc_oficina = 2,
+	ret_merc_cozinha = 1,
+}
+local ENTRE_LAMPIOES = 20 -- studs
+local FORCA_MERCADO = 0.42
+
+local function pontosMercado(m: Model, maximo: number): { { pos: Vector3, teto: number } }
+	local cf, sz = m:GetBoundingBox()
+	local base = cf.Position.Y - sz.Y / 2
+	local rp = RaycastParams.new()
+	rp.FilterType = Enum.RaycastFilterType.Include
+	rp.FilterDescendantsInstances = { m }
+	local out: { { pos: Vector3, teto: number } } = {}
+	for ix = -3, 3 do
+		for iz = -3, 3 do
+			if #out >= maximo then
+				return out
+			end
+			local q = cf * CFrame.new(ix / 7 * sz.X, 0, iz / 7 * sz.Z)
+			local origem = Vector3.new(q.X, base + 2, q.Z)
+			local piso = workspace:Raycast(origem, Vector3.new(0, -3, 0), rp)
+			local cima = workspace:Raycast(origem, Vector3.new(0, sz.Y, 0), rp)
+			-- o térreo das lojas é mais baixo que o das casas (9,6 studs livres): o globo fica junto do teto
+			local vao = if piso and cima then cima.Position.Y - piso.Position.Y else 0
+			local y = if vao >= 9.6 then math.max(vao - 1.1, 8.5) else nil
+			if piso and cima and y then
+				local pos = Vector3.new(q.X, piso.Position.Y + y, q.Z)
+				local livre = true
+				for _, d in { Vector3.xAxis, -Vector3.xAxis, Vector3.zAxis, -Vector3.zAxis } do
+					if workspace:Raycast(pos, d * Lampiao.LADO_LIVRE, rp) then
+						livre = false
+					end
+				end
+				for _, o in out do
+					if (o.pos - pos).Magnitude < ENTRE_LAMPIOES then
+						livre = false
+					end
+				end
+				if livre then
+					table.insert(out, { pos = pos, teto = cima.Position.Y })
+				end
+			end
+		end
+	end
+	return out
+end
+
 -- Devolve quantas casas ganharam lampião, quantas ficaram sem lugar e quantos globos a expansão ganhou.
 function InteriorLuz.instalar(map: Instance): (number, number, number)
 	local pasta = Instance.new("Folder")
@@ -114,6 +168,16 @@ function InteriorLuz.instalar(map: Instance): (number, number, number)
 				else
 					semLugar += 1
 				end
+			end
+		elseif d:IsA("Model") and MAX_MERCADO[d.Name] then
+			local lista = pontosMercado(d, MAX_MERCADO[d.Name])
+			for _, q in lista do
+				monta(pasta, q.pos, q.teto, true, FORCA_MERCADO)
+			end
+			if #lista > 0 then
+				feitas += 1
+			else
+				semLugar += 1
 			end
 		elseif d:IsA("Attachment") and string.sub(d.Name, 1, 8) == "Lampiao_" then
 			-- a luz da expansão continua onde está; o globo sobe para junto do teto do cômodo

@@ -169,8 +169,30 @@ end
 -- manchas de terra nua (ruído de ~40 m) no meio do capim baixo. D-116: 0,8 (era 0,62): com a terra
 -- batida clara (D-115) as manchas tomavam o lugar do capim; agora são poucas e pequenas.
 ArtPlan.ROCA_EARTH = 0.8
+-- D-243: dentro de uma praça do Layout, com a borda irregular.
+function ArtPlan.naPraca(ctx: Ctx, x: number, z: number): boolean
+	local lista = (ctx :: any).pracas
+	if not lista then
+		return false
+	end
+	for _, p in lista do
+		local d = math.sqrt((x - p.x) ^ 2 + (z - p.z) ^ 2)
+		if d < p.r + 6 / M then
+			local borda = (Vegetation.noise(x, z, 14 / M, 8181) - 0.5) * 12 / M
+			if d < p.r + borda then
+				return true
+			end
+		end
+	end
+	return false
+end
+
 function ArtPlan.column(ctx: Ctx, x: number, z: number): (number, number, number, string?)
 	local h, wl, c, mat = Site.column(ctx.site, x, z)
+	-- D-243: a praça é de terra batida (o chão de quintal, de folhas, fica escuro em área grande)
+	if mat == nil and c ~= 5 and c ~= 2 and ArtPlan.naPraca(ctx, x, z) then
+		return h, wl, c, "Ground"
+	end
 	if
 		mat == nil
 		and c == 2
@@ -262,6 +284,9 @@ function ArtPlan.load(world: any, data: any): Ctx
 			table.insert(lanes, { x1 = c.x, z1 = c.z, x2 = c.sx1, z2 = c.sz1, w = 1.6 / M })
 			table.insert(lanes, { x1 = c.x, z1 = c.z, x2 = c.sx2, z2 = c.sz2, w = 1.6 / M })
 		end
+		for _, p in data.layout.pracas or {} do
+			table.insert(circles, { x = p.x, z = p.z, r = p.r })
+		end
 	end
 	-- pontos de nascer das bases (Data/Bases, SpawnService): 3 m sem planta em volta de cada um
 	if data.bases then
@@ -292,6 +317,7 @@ function ArtPlan.load(world: any, data: any): Ctx
 		pending = {},
 		small = {},
 		layout = data.layout,
+		pracas = if data.layout then data.layout.pracas else nil,
 	}
 end
 
@@ -623,7 +649,10 @@ function ArtPlan.estruturasLayout(ctx: Ctx, has: (string) -> boolean): { Item }
 		end
 	end
 	for i, p in ctx.layout.plantas do
-		table.insert(ctx.pending, { key = p.key, x = p.x, z = p.z, yaw = i * 2.4, scale = p.scale })
+		table.insert(
+			ctx.pending,
+			{ key = p.key, x = p.x, z = p.z, yaw = i * 2.4, scale = p.scale, marco = true } :: any
+		)
 	end
 	return out
 end
@@ -1500,7 +1529,10 @@ function ArtPlan.groundProblem(ctx: Ctx, x: number, z: number, r: number): strin
 	then
 		return "riacho"
 	end
-	if Vegetation.blocked({ exclude = ctx.spawnCircles, corridors = ctx.spawnLanes } :: any, x, z) then
+	if
+		not (ctx :: any).marcoLivre
+		and Vegetation.blocked({ exclude = ctx.spawnCircles, corridors = ctx.spawnLanes } :: any, x, z)
+	then
 		return "clareira"
 	end
 	if not site.semExp and Site.expAt(site, x, z, r) then
@@ -1598,9 +1630,13 @@ local function plantasBase(
 		return true
 	end
 	-- quintais das casas da carta
+	local ctxLivre: any = ctx
 	for _, p in ctx.pending do
 		if inBounds(p.x, p.z) then
+			-- D-243: a árvore-marco de um bairro é escolhida a dedo e pode ficar na beira da praça
+			ctxLivre.marcoLivre = (p :: any).marco == true
 			add(p.key, p.x, p.z, p.yaw, p.scale)
+			ctxLivre.marcoLivre = false
 		end
 	end
 	local rng = Rng.new(19650818 + 7)
