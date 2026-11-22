@@ -110,6 +110,16 @@ local MAX_MERCADO: { [string]: number } = {
 	ret_escola_ala = 2,
 	ret_engenho_galpao = 6,
 	ret_esteio_comunal = 3,
+	-- D-251: as cinco cenas do Comboio
+	ret_comp_bomba = 1,
+	ret_comp_celeiro = 2,
+	ret_sino_salao = 3,
+	ret_sino_loja_a = 2,
+	ret_sino_loja_b = 2,
+	ret_canal_oficina = 2,
+	ret_serra_galpao = 4,
+	ret_esp_armazem = 5,
+	ret_esp_chamine = 1,
 }
 local ENTRE_LAMPIOES = 20 -- studs
 local FORCA_MERCADO = 0.42
@@ -120,6 +130,11 @@ local FORCA_MODELO: { [string]: number } = {
 	ret_escola_ala = 0.6,
 	ret_esteio_comunal = 0.7,
 	ret_olaria_galpao = 0.6,
+	ret_comp_celeiro = 0.45,
+	ret_sino_salao = 0.45,
+	ret_canal_oficina = 0.6,
+	ret_serra_galpao = 0.45,
+	ret_esp_armazem = 0.6,
 }
 local LAMPIAO_ALTURA_MAX = 12.5 -- studs do piso: abaixo da linha das treliças
 

@@ -193,6 +193,11 @@ function ArtPlan.column(ctx: Ctx, x: number, z: number): (number, number, number
 	if mat == nil and c ~= 5 and c ~= 2 and ArtPlan.naPraca(ctx, x, z) then
 		return h, wl, c, "Ground"
 	end
+	-- D-251: nos mapas retangulares o quintal é de capim, com manchas de folhas secas. Só com folhas o
+	-- bairro inteiro ficava da cor da terra na luz de fim de tarde.
+	if mat == nil and c == 3 and (ctx :: any).pracas and Vegetation.noise(x, z, 11 / M, 6161) < 0.66 then
+		return h, wl, c, "Grass"
+	end
 	if
 		mat == nil
 		and c == 2

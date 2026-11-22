@@ -6,7 +6,7 @@ source_paths:
   - src/ReplicatedStorage/Shared/MapasRet.luau
   - tools/mapas_ret.py
 last_verified: 2026-11-22
-verified_commit: 5f83094
+verified_commit: 5d59912
 ---
 # Estrada do Bambu (Comboio)
 
@@ -25,10 +25,20 @@ por segundo; integridade 100; imobilizado 15 s; reparo 6 s por pessoa, até 2; r
 ## Medido no Studio (`testes/D-243_parte2_2026-11-22.md`)
 Trajeto de 1.011,91 m; entrega em 283 s; caminhões a 17,5-18,2 m entre si.
 
-## Cenas planejadas (ainda não construídas)
-Arrozais das Comportas, Vila do Sino Baixo, Ponte do Canal Torto, Serraria e Engenho do Espigão.
-Especificação: `especificacao/mapas_retangulares/PROMPT.txt` (fora do Git). Hoje o mapa usa casas
-genéricas. Reaproveite o método do [[Vale-das-Cinco-Passagens]].
+## Cenas (D-251)
+| Setor | Lugar | Marcos (`tools/blender/ret_comboio.py`) |
+|---|---|---|
+| A | Arrozais das Comportas | `ret_comp_bomba`, `ret_comp_celeiro`, `exp_comporta` |
+| B | Vila do Sino Baixo | `ret_sino_salao`, `ret_sino_loja_a`, `ret_sino_loja_b` |
+| C | Ponte do Canal Torto | `ret_canal_ponte`, `ret_canal_oficina`, `ret_comp_bomba` |
+| D | Serraria | `ret_serra_galpao`, `ret_serra_portico`, `ret_serra_toras`, `ret_serra_secagem` |
+| E | Engenho do Espigão | `ret_esp_armazem`, `ret_esp_chamine` |
+
+- Monte perto da estrada com `na_rua` (`u` ao longo da pista, `lado`, `folga`). Na curva em U, o prédio
+  grande vai do lado de fora.
+- A ponte é só arte: a colisão fica no `MapaPontes` (`arte = true`).
+- Medido: entrega em cerca de 290 s; 16 de 16 e 18 de 18 bots andando. Fichas em
+  `testes/LOTE120_D251-252_2026-11-22.md`.
 
 ## Avisos atuais do gerador
-CP2 com 10 de 13 casas, ENT com 11 de 13, e um conjunto de nascer sem lugar em s = 278, lado -1.
+Um conjunto de nascer sem lugar em s = 712, lado -1 (restam 31, o mínimo é 16).

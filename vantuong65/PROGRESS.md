@@ -11,7 +11,8 @@ O estado atual fica em `knowledge/01-CURRENT-STATE.md`. Este arquivo continua co
 - **Parte 3 (lote 117, D-248): feita.** Luz de fim de tarde como padrão, com relógio parado.
 - **Parte 4 (lote 118, D-249): feita.** Uniformes sujos, armas e veículos gastos, janelas sem grade.
 - **Parte 5 (lote 119, D-250): feita.** Paleta preto e latão, logo e fundo do key art, menu em ladrilhos.
-- **Falta:** Comboio e áudios.
+- **Parte 6 (lote 120, D-251 e D-252): feita.** Cinco cenas do Comboio (sem liberar) e áudios da biblioteca.
+- **Falta:** teste do Comboio com duas pessoas e teleporte, antes de liberar o mapa.
 
 ## Fase atual (2026-11-11, sessão 7: teste fase a fase no Studio, D-75)
 | Fase | Estado |

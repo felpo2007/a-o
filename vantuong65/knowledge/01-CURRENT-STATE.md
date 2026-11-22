@@ -17,8 +17,8 @@ Compacto de propósito. Detalhe lote a lote: `PROGRESS.md`.
 
 ## Em andamento: pedidos de 22/11 (D-246)
 Feito: jogo, moedas, bandeiras, janelas e capa (v147), carreira (D-247), luz (D-248), materiais (D-249) e
-telas em preto e latão (D-250).
-Falta: Comboio e áudios da Toolbox.
+telas em preto e latão (D-250), cenas do Comboio (D-251) e áudios da biblioteca (D-252).
+Falta: liberar o Comboio, depois do teste com duas pessoas e do teleporte.
 
 ## Em andamento: D-243, dois mapas retangulares (sem publicar)
 `MapasRet.LIBERADOS = false`: só abrem no Studio, com `VT65DevMapa`.
@@ -27,14 +27,14 @@ Falta: Comboio e áudios da Toolbox.
 |---|---|
 | Regras, modos, HUD, nascer, carta, votação | Feitas e testadas no Studio |
 | [[Vale-das-Cinco-Passagens]]: cinco lugares | 1ª versão no commit `5f83094` |
-| [[Estrada-do-Bambu]]: cinco cenas | **Pendente** (hoje usa casas genéricas) |
+| [[Estrada-do-Bambu]]: cinco cenas | 1ª versão (D-251), fichas em `testes/LOTE120_D251-252_2026-11-22.md` |
 | Teleporte entre mapas, dois jogadores, celular | **Não testado** |
 | Qualidade alta e fps | **Não medido** |
 
 ## Prioridades
-1. Cinco cenas do Comboio, no padrão do Vale.
+1. Teste com dois jogadores, teleporte e desempenho, antes de liberar os mapas.
 2. Corrigir o que as fichas do Vale marcaram (`testes/D-243_vale_2026-11-22.md`).
-3. Teste com dois jogadores, teleporte e desempenho, antes de liberar os mapas.
+3. Andar pelas portas e escadas dos prédios novos do Comboio e medir visadas.
 
 ## Bloqueios e dependências do dono
 - Itens em `TODO_USUARIO.md`.

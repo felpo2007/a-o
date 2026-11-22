@@ -25,7 +25,7 @@ import vila_casas as VC  # noqa: E402
 import vila_comum as V  # noqa: E402
 import vila_trim as VT  # noqa: E402
 
-MODULOS = ("ret_piloto", "ret_mercado", "ret_frente")
+MODULOS = ("ret_piloto", "ret_mercado", "ret_frente", "ret_comboio")
 PORTA_LARG = 1.40
 PORTA_ALT = 2.50
 

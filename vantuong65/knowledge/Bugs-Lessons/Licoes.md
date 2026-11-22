@@ -55,3 +55,6 @@ Formato: **sintoma** → causa → correção → como evitar.
 - **`moveTo` do mouse no Studio usa `AbsolutePosition`, sem o inset do topo** → não converter da captura.
 - **Modelo novo com textura fica branco por alguns minutos** ("content representation is being generated") → espere antes de julgar.
 - **Script que parte do arquivo do plano pode gastar o que já foi gasto** → guarde `file_limpo` e parta dele.
+- **Foto longe do personagem sai sem prédio** (streaming) → mova o personagem até o lugar antes.
+- **Gravação da biblioteca tem outro nível** (até 30 vezes mais baixa) → meça `PlaybackLoudness` e dê ganho.
+- **`AssetService:SearchAudio`: o `Artist` não identifica a Pro Sound Effects** → filtre pela `Description`.

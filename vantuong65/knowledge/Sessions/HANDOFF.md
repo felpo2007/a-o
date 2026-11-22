@@ -17,9 +17,10 @@ Substitua este arquivo ao fim de cada sessão. No máximo 25 linhas.
 - **Concluído (parte 3, lote 117, D-248):** fim de tarde dourado como luz padrão.
 - **Concluído (parte 4, lote 118, D-249):** uniformes, armas e veículos gastos e janelas sem grade.
 - **Concluído (parte 5, lote 119, D-250):** paleta preto e latão, logo e fundo do key art, menu em ladrilhos.
-- **Falta:** Comboio e áudios.
+- **Concluído (parte 6, lote 120, D-251 e D-252):** cinco cenas do Comboio, sem liberar, e áudios da biblioteca.
+- **Falta:** teste com duas pessoas e teleporte, antes de `MapasRet.LIBERADOS = true`.
 - **Imagens de referência:** `~/.claude/uploads/0dab997e-4516-4fd5-85be-6ceb04c285b4/`.
 - **Abra a próxima sessão na pasta `vantuong65`**: só assim as skills do projeto aparecem.
 - **Última validação:** `tools/dev/verifica.ps1` com Lune 997, pytest 84, autoteste 18 de 18.
 - **Risco aberto:** os cinco itens de código em [[01-CURRENT-STATE]].
-- **Próxima ação:** as cinco cenas do Comboio (`knowledge/World/Estrada-do-Bambu.md`, skill `map-design`).
+- **Próxima ação:** nenhuma pendente dos pedidos de 22/11; aguardar o dono.

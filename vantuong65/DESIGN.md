@@ -10249,3 +10249,28 @@ janelas e a capa. Progressão, direção de arte, telas, Comboio e áudios segue
   (`tools/marca_icones.py`). LOJA e PASSE seguem chamativos (D-217). A descrição foi para baixo da lista.
 - **Moeda:** a hexagonal no rodapé do menu e no saldo da loja.
 - **Studio:** `VT65DevMenuPC = true` no workspace mostra o arranjo de PC na janela baixa.
+
+### D-251 — Lote 120: as cinco cenas do Comboio (2026-11-22)
+
+**Pedido do dono:** "crie o comboio mais bonito perfeito e absurdo, com esse estilo para o modo".
+- **13 modelos novos (`tools/blender/ret_comboio.py`):** casa de bomba com canaleta e comporta, celeiro, salão com
+  sineira, duas lojas de varanda, ponte de treliça, oficina, galpão da serraria com trilho e serra, pórtico, toras,
+  secagem, armazém em dois níveis e casa da caldeira com chaminé de 19,5 m. Janelas sem grade (estilo `aberta`).
+- **Planta (`tools/mapas_ret.py`):** cada cena é montada no referencial da estrada (`na_rua`). O gerador avisa se um
+  prédio posto à mão invade a pista ou outro prédio (`confere_miolo`).
+- **Ponte:** o modelo é só arte; a colisão continua nas peças do `MapaPontes`, agora invisíveis (`arte = true`).
+- **Chão:** `Ground` de (158, 114, 78) para (134, 110, 84), em todos os mapas: na luz de fim de tarde a laterita saía
+  vermelha. Nos mapas retangulares o quintal passa a ter capim (`ArtPlan.column`).
+- **Interiores:** lampiões nos nove prédios com cômodo (`InteriorLuz`).
+- **Medido:** caminhões do início à entrega em cerca de 290 s, deck da ponte a 15,76 m; 16 de 16 e 18 de 18 bots se
+  moveram em duas janelas de 75-80 s. `MapasRet.LIBERADOS` continua `false`.
+
+### D-252 — Lote 120: áudios da biblioteca licenciada (2026-11-22)
+
+**Pedido do dono:** "use tool box from roblox for audios".
+- **Só Pro Sound Effects:** envios de outros usuários podem não tocar no jogo publicado e muitos são cópias de outros
+  jogos, o que a regra do projeto proíbe.
+- **Trocados (`Shared/SonsBiblioteca`):** ambiência de arrozal e de vila, saída do morteiro, artilharia distante, faca
+  saindo da bainha e pano da bandagem. O ID anterior fica em `Sounds.<nome>_sintese`.
+- **Ganho:** as gravações têm outro nível; o ganho sai do `PlaybackLoudness` medido no Studio.
+- **Mantidos:** passos, motores e rotor. A busca não achou gravação limpa em laço nem passo humano por piso.

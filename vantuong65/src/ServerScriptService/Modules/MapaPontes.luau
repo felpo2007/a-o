@@ -39,12 +39,22 @@ function MapaPontes.montar(map: Instance, layout: any): number
 		local comp = (fim - inicio).Magnitude
 		local base = CFrame.lookAt((inicio + fim) / 2, fim)
 		local esp = 0.3 / M
-		peca(m, "Tabuleiro", Vector3.new(b.largura, esp, comp), base * CFrame.new(0, -esp / 2, 0), MADEIRA, true)
+		-- D-251: com o modelo do Blender por cima, as peças ficam só como colisão
+		local comArte = b.arte == true
+		local tab =
+			peca(m, "Tabuleiro", Vector3.new(b.largura, esp, comp), base * CFrame.new(0, -esp / 2, 0), MADEIRA, true)
+		if comArte then
+			tab.Transparency = 1
+		end
 		local alt = 1.05 / M
 		for _, lado in { -1, 1 } do
 			local x = lado * (b.largura / 2 - 0.08 / M)
-			peca(m, "Corrimao", Vector3.new(0.12 / M, 0.12 / M, comp), base * CFrame.new(x, alt, 0), ESCURA, true)
-			local n = math.max(2, math.floor(comp * M / 2.5))
+			local corr =
+				peca(m, "Corrimao", Vector3.new(0.12 / M, 0.12 / M, comp), base * CFrame.new(x, alt, 0), ESCURA, true)
+			if comArte then
+				corr.Transparency = 1
+			end
+			local n = if comArte then -1 else math.max(2, math.floor(comp * M / 2.5))
 			for k = 0, n do
 				local z = -comp / 2 + comp * k / n
 				peca(

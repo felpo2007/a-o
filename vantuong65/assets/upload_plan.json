@@ -12789,5 +12789,96 @@
   "assetType": "Image",
   "name": "VT65 marca menu_configuracoes",
   "description": "VAN TUONG 65 - marca e menu principal (D-250)"
+ },
+ {
+  "key": "Models.ret_canal_oficina",
+  "file": "assets/blender/ret_canal_oficina/ret_canal_oficina.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_canal_oficina",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_canal_ponte",
+  "file": "assets/blender/ret_canal_ponte/ret_canal_ponte.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_canal_ponte",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_comp_bomba",
+  "file": "assets/blender/ret_comp_bomba/ret_comp_bomba.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_comp_bomba",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_comp_celeiro",
+  "file": "assets/blender/ret_comp_celeiro/ret_comp_celeiro.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_comp_celeiro",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_esp_armazem",
+  "file": "assets/blender/ret_esp_armazem/ret_esp_armazem.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_esp_armazem",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_esp_chamine",
+  "file": "assets/blender/ret_esp_chamine/ret_esp_chamine.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_esp_chamine",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_serra_galpao",
+  "file": "assets/blender/ret_serra_galpao/ret_serra_galpao.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_serra_galpao",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_serra_portico",
+  "file": "assets/blender/ret_serra_portico/ret_serra_portico.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_serra_portico",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_serra_secagem",
+  "file": "assets/blender/ret_serra_secagem/ret_serra_secagem.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_serra_secagem",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_serra_toras",
+  "file": "assets/blender/ret_serra_toras/ret_serra_toras.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_serra_toras",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_sino_loja_a",
+  "file": "assets/blender/ret_sino_loja_a/ret_sino_loja_a.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_sino_loja_a",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_sino_loja_b",
+  "file": "assets/blender/ret_sino_loja_b/ret_sino_loja_b.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_sino_loja_b",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_sino_salao",
+  "file": "assets/blender/ret_sino_salao/ret_sino_salao.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_sino_salao",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
  }
 ]

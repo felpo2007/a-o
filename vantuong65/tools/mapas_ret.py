@@ -38,6 +38,9 @@ LEITO = 2.4  # fundo do rio abaixo da margem
 CAPTURA_R = 16.0  # raio do pátio de captura mantido livre
 # cais: (metros do muro à frente do pivô, comprimento), medidos no metricas.json do modelo
 CAIS = {"ret_merc_cais": (-0.11, 22.0)}
+PISTA_M = 8.5  # largura da pista do comboio, com a beirada
+PONTE_ARTE = "ret_canal_ponte"  # D-251: a arte da ponte rodoviária do Comboio
+PONTE_DECK_M = 3.4  # do fundo do modelo até o tabuleiro
 # construções cujo piso fica na altura do pátio, mesmo com o chão mais baixo atrás delas
 NIVEL_DO_PATIO = {"ret_engenho_galpao"}
 CAIS_ALTURA_M = 2.94  # do fundo do modelo até o deck
@@ -517,89 +520,222 @@ def comboio() -> Projeto:
         Via("rua", [(814, 132), (832, 110), (866, 118)]),
         Via("rua", [(808, 180), (834, 196), (872, 186)]),
     ]
+    # D-251: cada cena é montada no referencial da estrada, para a frente dos prédios acompanhar a
+    # curva: `u` anda pela estrada a partir do setor, `lado` +1 é a esquerda de quem vai para leste
+    # e `folga` é o chão livre entre a beira da pista e a frente do prédio.
+    trilha = np.array(guia)
+    acum = np.concatenate(([0.0], np.cumsum(np.hypot(*np.diff(trilha, axis=0).T))))
+
+    def na_rua(cx, cy, chave, u, lado, folga, giro=0.0, escala=1.0):
+        i0 = int(np.argmin(np.hypot(trilha[:, 0] - cx, trilha[:, 1] - cy)))
+        i = int(np.searchsorted(acum, acum[i0] + u))
+        i = min(max(i, 1), len(trilha) - 2)
+        tx, ty = trilha[i + 1] - trilha[i - 1]
+        n = max(math.hypot(tx, ty), 1e-6)
+        nx, ny = -ty / n, tx / n
+        d = DIMS.get(chave, (30.0, 0.0, 30.0))
+        v = lado * (PISTA_M / 2 + folga + d[2] * M * escala / 2)
+        px, py = trilha[i, 0] + nx * v, trilha[i, 1] + ny * v
+        ang = math.degrees(math.atan2(-lado * ny, -lado * nx)) + giro
+        return (chave, round(px - cx, 2), round(py - cy, 2), round(90 - ang, 1), escala)
+
+    def cena(cx, cy, itens):
+        return [na_rua(cx, cy, *i) for i in itens]
+
     bairros = [
         Bairro(
             "R",
             "Arrozais das Comportas",
-            100,
+            95,
             150,
-            58,
-            10,
+            44,
+            4,
+            [("exp_comporta", -14, -40, 0, 1.0)],
+            ("vila_casa_01", "vila_casa_05", "vila_casa_09"),
             [
-                ("exp_celeiro", -38, 30, 150, 1.15),
-                ("exp_celeiro", 30, 36, 200, 1.15),
-                ("exp_comporta", -14, -46, 0, 1.0),
-                ("exp_telheiro", 4, -30, 10, 1.15),
-                ("us_tent_gp_large", -60, -6, 90, 1.0),
+                ("canopy_tree", 40, -24, 1.0),
+                ("coconut_palm", -30, 30, 1.0),
+                ("coconut_palm", 30, 34, 1.0),
+                ("banana", 25, -30, 1.0),
             ],
-            ("vila_casa_01", "vila_casa_05", "vila_casa_09", "exp_celeiro"),
-            [("canopy_tree", 56, -22, 1.0)],
+            praca=(0, 0, 12),
+            # aberto de propósito: a casa de bomba e o celeiro emolduram os campos
+            miolo=cena(
+                95,
+                150,
+                [
+                    ("ret_comp_bomba", -2, 1, 2.0),
+                    ("ret_comp_celeiro", 14, -1, 20.0),
+                    ("exp_telheiro", -22, -1, 19.0, 0.0, 1.15),
+                    ("exp_celeiro", 26, 1, 3.0, 0.0, 1.15),
+                    ("straw_stack", 6, -1, 2.0),
+                    ("straw_stack", -8, -1, 3.0),
+                    ("exp_carroca", 0, -1, 7.5, 35.0),
+                    ("bamboo_clothesline", -14, 1, 1.5),
+                    ("rice_sack", 11, 1, 1.0, 20.0, 1.6),
+                ],
+            ),
+            muros=[("bamboo_fence", -36, -14, -22, -28), ("bamboo_fence", 20, -32, 36, -18)],
         ),
         Bairro(
             "CP1",
             "Vila do Sino Baixo",
-            262,
-            150,
-            74,
-            26,
-            [
-                ("exp_sobrado_a", -36, -8, 40, 1.1),
-                ("exp_palafita_a", 14, -28, 25, 1.2),
-                ("exp_telheiro", -22, -42, 20, 1.15),
-                ("shrine", -44, -30, 45, 1.0),
-            ],
+            215,
+            115,
+            62,
+            13,
+            [("shrine", -40, -30, 45, 1.0), ("exp_telheiro", 42, -34, 20, 1.15)],
             PAL + RES + ("exp_casas_ligadas",),
-            [("exp_figueira", -28, -26, 1.1)],
+            [
+                ("exp_figueira", 20, 32, 1.1),
+                ("banana", -30, 34, 1.0),
+                ("banana", 8, 26, 0.9),
+                ("banana", -14, -26, 1.0),
+                ("coconut_palm", -40, -8, 1.0),
+                ("coconut_palm", 44, 22, 1.0),
+            ],
+            praca=(0, 0, 12),
+            # a rua das varandas: o salão com o sino ao norte e as lojas de frente para ele
+            miolo=cena(
+                215,
+                115,
+                [
+                    ("ret_sino_salao", 0, -1, 4.0),
+                    ("ret_sino_loja_a", -19, 1, 3.0),
+                    ("ret_sino_loja_b", 20, 1, 3.0),
+                    ("exp_sobrado_a", -29, -1, 3.5, 0.0, 1.1),
+                    ("exp_sobrado_b", 30, -1, 3.5, 0.0, 1.1),
+                    ("exp_casas_ligadas", -40, 1, 3.5, 0.0, 1.15),
+                    ("ret_merc_cozinha", 39, 1, 3.0),
+                    ("exp_carroca", -4, 1, 3.2, 30.0),
+                    ("water_jar", 6, 1, 1.0),
+                    ("water_jar", 7.2, 1, 1.2, 40.0),
+                    ("straw_stack", 3, 1, 3.0, 0.0, 0.8),
+                    ("bamboo_clothesline", -14, -1, 1.2),
+                    ("rice_sack", 13, -1, 0.9, 10.0, 1.6),
+                    ("rice_sack", 14.2, -1, 1.2, -25.0, 1.6),
+                    ("water_jar", 16, -1, 0.9),
+                    ("straw_stack", -11, 1, 2.0, 0.0, 0.8),
+                ],
+            ),
+            muros=[
+                ("bamboo_fence", -44, 20, -30, 30),
+                ("bamboo_fence", 30, 30, 44, 18),
+                ("bamboo_fence", -34, -22, -18, -28),
+                ("bamboo_fence", 18, -28, 34, -22),
+            ],
         ),
         Bairro(
             "CP2",
             "Ponte do Canal Torto",
-            482,
-            96,
-            52,
-            13,
-            [
-                ("exp_galpao", 22, -22, -20, 1.25),
-                ("exp_deposito", 44, -8, -70, 1.15),
-                ("exp_telheiro", -2, -32, 0, 1.15),
-                ("exp_casa_vala", 30, 20, 200, 1.15),
-            ],
+            480,
+            105,
+            50,
+            4,
+            [("exp_telheiro", 8, -34, 0, 1.15)],
             RES[3:9] + ("exp_deposito",),
-            [("ph_island_tree_02", -8, -44, 1.0)],
+            [
+                ("ph_island_tree_02", 34, 28, 1.0),
+                ("melaleuca_grove", -8, -40, 0.9),
+                ("banana", 16, 22, 1.0),
+                ("coconut_palm", 38, -22, 1.0),
+            ],
+            praca=(0, 0, 12),
+            # depois da ponte: a oficina fecha o norte e a casa de bomba olha para a água
+            miolo=cena(
+                480,
+                105,
+                [
+                    ("ret_canal_oficina", 5, -1, 5.5),
+                    ("ret_comp_bomba", -17, -1, 4.0),
+                    ("exp_deposito", 24, 1, 3.0, 0.0, 1.15),
+                    ("exp_galpao", -18, 1, 3.0, 0.0, 1.1),
+                    ("exp_casa_vala", 27, -1, 3.5, 0.0, 1.15),
+                    ("exp_carroca", -3, 1, 3.2, 30.0),
+                    ("rice_sack", 6, 1, 1.2, 20.0, 1.6),
+                    ("rice_sack", 7.2, 1, 1.5, -30.0, 1.6),
+                    ("straw_stack", 11, 1, 2.0, 0.0, 0.8),
+                    ("water_jar", -8, -1, 1.0),
+                    ("rice_sack", -6.6, -1, 1.1, 15.0, 1.6),
+                ],
+            ),
+            muros=[("bamboo_fence", 18, 24, 34, 18), ("exp_muro", -20, 22, -6, 26)],
         ),
         Bairro(
             "CP3",
             "Serraria",
-            590,
-            186,
-            60,
-            13,
-            [
-                ("exp_galpao", -28, 28, 170, 1.25),
-                ("exp_galpao", 16, 34, 190, 1.25),
-                ("exp_telheiro", 42, 12, -90, 1.15),
-                ("exp_telheiro", -44, 2, 80, 1.15),
-                ("exp_deposito", 34, -24, -40, 1.15),
-            ],
+            575,
+            200,
+            54,
+            8,
+            [("exp_telheiro", -40, 26, 80, 1.15)],
             RES[1:7] + ("exp_celeiro",),
-            [("canopy_tree", -6, 54, 1.0)],
+            [
+                ("canopy_tree", -6, 48, 1.0),
+                ("melaleuca_grove", 42, 30, 0.9),
+                ("melaleuca_grove", -42, -22, 0.9),
+                ("banana", 34, -30, 1.0),
+            ],
+            praca=(0, 0, 14),
+            # o pátio das treliças: galpão ao norte, pórtico e secagem ao sul, toras no meio
+            miolo=cena(
+                575,
+                200,
+                [
+                    ("ret_serra_galpao", 0, 1, 5.5),
+                    ("ret_serra_secagem", -24, -1, 3.0),
+                    ("ret_serra_portico", 21, -1, 3.0),
+                    ("ret_serra_toras", 1, -1, 1.4),
+                    ("ret_serra_toras", -27, 1, 2.5, 12.0),
+                    ("ret_serra_toras", 38, -1, 3.0, -10.0),
+                    ("ret_serra_secagem", 29, 1, 3.0),
+                    ("exp_deposito", -34, -1, 3.5, 0.0, 1.15),
+                    ("exp_carroca", -11, -1, 5.0, 25.0),
+                    ("straw_stack", 11, -1, 1.2, 0.0, 0.7),
+                    ("rice_sack", 9, -1, 1.0, 15.0, 1.6),
+                    ("water_jar", -14, 1, 0.6),
+                ],
+            ),
+            muros=[("bamboo_fence", -36, -20, -20, -28), ("bamboo_fence", 22, -28, 38, -20)],
         ),
         Bairro(
             "ENT",
             "Engenho do Espigão",
-            845,
-            165,
-            56,
-            13,
-            [
-                ("exp_sobrado_d", 8, 34, 180, 1.1),
-                ("exp_galpao", -28, 26, 160, 1.25),
-                ("exp_galpao", 34, -2, -90, 1.25),
-                ("exp_deposito", -36, -18, 70, 1.15),
-                ("exp_celeiro", 22, -36, -20, 1.15),
-            ],
+            850,
+            150,
+            46,
+            4,
+            [],
             RES[2:8] + ("exp_deposito",),
-            [("exp_figueira", -40, 40, 1.0)],
+            [
+                ("exp_figueira", -34, -28, 1.0),
+                ("coconut_palm", 30, 40, 1.0),
+                ("coconut_palm", -38, 26, 1.0),
+                ("banana", 34, -6, 1.0),
+            ],
+            praca=(0, 0, 15),
+            # o grande conjunto final: armazém ao norte, caldeira e chaminé ao sul
+            miolo=cena(
+                850,
+                150,
+                [
+                    ("ret_esp_armazem", -8, 1, 5.0),
+                    ("ret_esp_chamine", -16, -1, 7.0),
+                    ("exp_sobrado_d", -38, 1, 2.5, 0.0, 1.1),
+                    ("exp_galpao", -40, -1, 3.0, 0.0, 1.1),
+                    ("exp_carroca", -2, -1, 2.0, 30.0),
+                    ("rice_sack", -6, -1, 1.2, 20.0, 1.6),
+                    ("rice_sack", -4.8, -1, 1.5, -30.0, 1.6),
+                    ("rice_sack", -10, -1, 1.0, 5.0, 1.6),
+                    ("water_jar", -12, -1, 1.0),
+                ],
+            )
+            + [
+                ("exp_celeiro", 29, -19, -60, 1.15),
+                ("exp_deposito", 10, -32, -20, 1.15),
+                ("straw_stack", 6, -15, 0, 0.9),
+            ],
+            muros=[("exp_muro", -8, -30, 8, -33), ("exp_muro", 28, 8, 32, 24)],
         ),
     ]
     return Projeto(
@@ -636,8 +772,8 @@ def comboio() -> Projeto:
         vias=vias,
         bairros=bairros,
         campos=[
-            (20, 196, 230, 280),
-            (20, 18, 190, 96),
+            (24, 182, 230, 282),
+            (24, 18, 190, 112),
             (240, 262, 400, 288),
             (490, 16, 690, 48),
             (660, 232, 830, 286),
@@ -1007,6 +1143,17 @@ class Mapa:
         rng = np.random.default_rng(1965)
         for c in self.caises:
             self.poe(c["chave"], c["x"], c["y"], c["rumo"], 1.0, "marco", True, c["base"])
+        if self.p.id == "comboio" and PONTE_ARTE in DIMS:
+            for a in self.pontes:
+                if a["tipo"] != "rodoviaria":
+                    continue
+                (x1, y1, deck), (x2, y2, _) = a["a"], a["b"]
+                dx, dy = x2 - x1, y2 - y1
+                # o comprimento do modelo corre ao longo da ponte
+                rumo = math.degrees(math.atan2(dx, -dy))
+                base = (deck - PONTE_DECK_M) / M
+                self.poe(PONTE_ARTE, (x1 + x2) / 2, (y1 + y2) / 2, rumo, 1.0, "marco", True, base)
+                a["arte"] = True
         for b in self.p.bairros:
             for chave, dx, dy, rumo, escala in b.marcos:
                 ok = False
@@ -1025,6 +1172,8 @@ class Mapa:
             for chave, dx, dy, rumo, escala in b.miolo:
                 nivel = self.altura(b.x, b.y) if chave in NIVEL_DO_PATIO else None
                 self.poe(chave, b.x + dx, b.y + dy, 90 - rumo, escala, "marco", True, None, nivel)
+                if self.p.id == "comboio":
+                    self.confere_miolo(b, chave)
             for chave, dx, dy, escala in b.arvores:
                 self.plantas.append({"key": chave, "x": b.x + dx, "y": b.y + dy, "scale": escala})
             postos = 0
@@ -1055,6 +1204,53 @@ class Mapa:
             # muros e cercas por último: onde já há casa, o trecho vira passagem
             for chave, dx1, dy1, dx2, dy2 in b.muros:
                 self.linha(chave, b.x + dx1, b.y + dy1, b.x + dx2, b.y + dy2)
+
+    def confere_miolo(self, b: Bairro, chave: str) -> None:
+        """Comboio: prédio posto à mão não pode invadir a pista nem outro prédio do miolo."""
+        it = self.items[-1]
+        cantos = self.caixa(it["xm"], it["ym"], it["rumo"], it["hx"], it["hy"])
+        n = 7
+        xs, ys = [], []
+        for i in range(n):
+            for j in range(n):
+                a, c = i / (n - 1), j / (n - 1)
+                p0 = (
+                    cantos[0][0] * (1 - a) + cantos[1][0] * a,
+                    cantos[0][1] * (1 - a) + cantos[1][1] * a,
+                )
+                p1 = (
+                    cantos[3][0] * (1 - a) + cantos[2][0] * a,
+                    cantos[3][1] * (1 - a) + cantos[2][1] * a,
+                )
+                xs.append(p0[0] * (1 - c) + p1[0] * c)
+                ys.append(p0[1] * (1 - c) + p1[1] * c)
+        via = self.p.vias[0].amostrada
+        assert via is not None
+        d = float(dist_polilinha(np.array(xs), np.array(ys), via).min())
+        if d < PISTA_M / 2 + 0.3:
+            self.falhas.append(f"{b.id}: {chave} a {d:.1f} m do eixo da pista")
+        for o in self.items[:-1]:
+            if o["tipo"] != "marco" or not str(o["key"]).startswith(("ret_", "exp_")):
+                continue
+            if str(o["key"]) in ("exp_muro", "bamboo_fence") or o["key"] == PONTE_ARTE:
+                continue
+            if (
+                math.hypot(o["xm"] - it["xm"], o["ym"] - it["ym"])
+                > o["hx"] + o["hy"] + it["hx"] + it["hy"]
+            ):
+                continue
+            ca = np.array(self.caixa(o["xm"], o["ym"], o["rumo"], o["hx"], o["hy"]))
+            cb = np.array(cantos)
+            sep = False
+            for pol in (ca, cb):
+                for k in range(2):
+                    e = pol[k + 1] - pol[k]
+                    eixo = np.array((-e[1], e[0]))
+                    pa, pb = ca @ eixo, cb @ eixo
+                    if pa.max() < pb.min() or pb.max() < pa.min():
+                        sep = True
+            if not sep:
+                self.falhas.append(f"{b.id}: {chave} sobre {o['key']}")
 
     def via_perto(self, b: Bairro, rng) -> tuple[float, float, float, float] | None:
         cand = []
@@ -1287,7 +1483,9 @@ class Mapa:
             lg = (8.0 if self.p.id == "comboio" else 7.0) if a["tipo"] == "rodoviaria" else 3.0
             pontes += (
                 f'\t\t{{ tipo = "{a["tipo"]}", x1 = {x1:.2f}, z1 = {z1:.2f}, x2 = {x2:.2f}, '
-                f"z2 = {z2:.2f}, y = {y:.2f}, largura = {lg / M:.2f} }},\n"
+                f"z2 = {z2:.2f}, y = {y:.2f}, largura = {lg / M:.2f}"
+                + (", arte = true" if a.get("arte") else "")
+                + " },\n"
             )
         pracas = ""
         for b in self.p.bairros:

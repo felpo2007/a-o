@@ -963,7 +963,8 @@ def janela(
             mats.go,
         )
     )
-    n = max(3, int(w / 0.11))
+    # D-251: estilo "aberta" é o vão com moldura, sem barras (pedido do dono, D-246)
+    n = 0 if estilo == "aberta" else max(3, int(w / 0.11))
     for k in range(n):
         u = c - w / 2 + (k + 0.5) * w / n
         if estilo == "tre":

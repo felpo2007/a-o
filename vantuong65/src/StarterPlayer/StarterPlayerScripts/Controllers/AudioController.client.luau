@@ -24,6 +24,7 @@ local MapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any
 local Net = require(ReplicatedStorage.Shared.Net)
 local SomArmas = require(ReplicatedStorage.Shared.SomArmas)
 local SomGravacoes = require(ReplicatedStorage.Shared.SomGravacoes)
+local SonsBiblioteca = require(ReplicatedStorage.Shared.SonsBiblioteca)
 local Superficie = require(ReplicatedStorage.Shared.Superficie)
 local Weapons = require(ReplicatedStorage.Shared.Weapons)
 local Weather = require(ReplicatedStorage.Shared.Weather)
@@ -197,7 +198,7 @@ local function play(
 	local function go()
 		local s = Instance.new("Sound")
 		s.SoundId = id
-		s.Volume = volume
+		s.Volume = volume * SonsBiblioteca.ganho(key)
 		s.PlaybackSpeed = pitch or 1
 		if grave then
 			local eq = Instance.new("EqualizerSoundEffect")
@@ -357,7 +358,7 @@ task.spawn(function()
 			lugar = measurePlace(camera.CFrame.Position, zone)
 		end
 		for z, s in loops do
-			local target = if z == zone then 0.2 else 0
+			local target = if z == zone then 0.2 * SonsBiblioteca.ganho(AMB[z]) else 0
 			s.Volume += (target - s.Volume) * 0.35
 			quiet(s, target)
 		end

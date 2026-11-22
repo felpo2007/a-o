@@ -79,30 +79,38 @@ local function confere(id, projeto)
 	if foraDaArea > 0 then
 		nota(foraDaArea .. " construções fora da área")
 	end
-	if id == "frente" then
-		-- D-243: cada lugar tem os seus marcos perto do centro
-		local MARCOS: { [string]: { string } } = {
+	-- D-243 e D-251: cada lugar tem os seus marcos perto do centro
+	local MARCOS: { [string]: { string } } = if id == "frente"
+		then {
 			A = { "ret_olaria_fornos", "ret_olaria_galpao", "ret_olaria_secagem", "ret_olaria_cobertura" },
 			B = { "ret_escola_principal", "ret_escola_ala" },
 			C = { "ret_merc_sobrado", "ret_merc_galeria", "ret_merc_cais", "ret_merc_fachadas" },
 			D = { "ret_engenho_galpao", "exp_comporta" },
 			E = { "ret_esteio_comunal", "exp_palafita_a", "exp_palafita_b" },
 		}
-		for i, st in projeto.setores do
-			local sp = mc.Strongpoints[i]
-			for _, chave in MARCOS[st.id] do
-				local achou = false
-				for _, it in estruturas do
-					local dx, dz = it.x - sp.x, it.z - sp.z
-					if it.key == chave and math.sqrt(dx * dx + dz * dz) * M < 50 then
-						achou = true
-					end
-				end
-				if not achou then
-					nota(st.id .. ": falta " .. chave)
+		else {
+			A = { "ret_comp_bomba", "ret_comp_celeiro", "exp_comporta" },
+			B = { "ret_sino_salao", "ret_sino_loja_a", "ret_sino_loja_b" },
+			C = { "ret_canal_ponte", "ret_canal_oficina", "ret_comp_bomba" },
+			D = { "ret_serra_galpao", "ret_serra_portico", "ret_serra_toras", "ret_serra_secagem" },
+			E = { "ret_esp_armazem", "ret_esp_chamine" },
+		}
+	for i, st in projeto.setores do
+		local sp = mc.Strongpoints[i]
+		for _, chave in MARCOS[st.id] do
+			local achou = false
+			for _, it in estruturas do
+				local dx, dz = it.x - sp.x, it.z - sp.z
+				if it.key == chave and math.sqrt(dx * dx + dz * dz) * M < 50 then
+					achou = true
 				end
 			end
+			if not achou then
+				nota(st.id .. ": falta " .. chave)
+			end
 		end
+	end
+	if id == "frente" then
 		-- o chão logo atrás do cais fica na altura do deck, e o piso do Engenho na altura do pátio
 		local maiorCais = 0
 		for _, it in estruturas do
