@@ -1128,6 +1128,7 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     - Testes: Lune 928, pytest 77, autoteste 18 de 18. Bacia de 6,1 a 12,9 cm em bots correndo (antes 46 cm no clipe).
     - **Sem teste:** vídeo em velocidade real, recarga de espingarda, M60 e pistola na tela, celular e servidor cheio.
     - Relatório: `testes/LOTE110_D238_2026-11-21.md`.
+    - **v142 publicada** (versão 147 do place, commit a0d5837).
   - **Falta do pedido de 21/11:** lote 111 (imagens da
     loja, carregamento, bandeiras, nascer, textos, comemoração) e lote 112 (gráficos, casas, terreno, skins).
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
