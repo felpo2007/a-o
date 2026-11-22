@@ -254,3 +254,9 @@ Esta sessão não pode criar repositórios. Se quiser o jogo fora do `a-o`:
 
 Hoje tudo está no branch `claude/bold-albattani-67hga9` do `felpo2007/a-o`. Se quiser, abro um PR
 para o `main`.
+
+## 8. Obsidian (opcional, D-244)
+A base de conhecimento já funciona sem ele. Para navegar pelas notas e ver os links:
+1. Instale o Obsidian pelo site oficial (`obsidian.md`).
+2. Escolha **Abrir pasta como cofre** e selecione `vantuong65/knowledge`.
+3. As configurações dele (`knowledge/.obsidian`) ficam fora do Git.

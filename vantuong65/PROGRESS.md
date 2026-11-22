@@ -1,5 +1,9 @@
 # VẠN TƯỜNG '65 — Progresso
 
+## Base de conhecimento (2026-11-22, D-244)
+
+O estado atual fica em `knowledge/01-CURRENT-STATE.md`. Este arquivo continua como histórico lote a lote: abra por busca.
+
 ## Fase atual (2026-11-11, sessão 7: teste fase a fase no Studio, D-75)
 | Fase | Estado |
 |---|---|

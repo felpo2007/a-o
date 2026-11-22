@@ -10134,3 +10134,19 @@ desempenho e o cruzamento de dois jogadores. A ficha está em `testes/D-243_merc
 
 **Falta no Vale:** qualidade alta, fps, dois jogadores, visadas medidas e textura própria do chão de cada lugar. As fichas estão
 em `testes/D-243_vale_2026-11-22.md`.
+
+### D-244 — Base de conhecimento do projeto (2026-11-22)
+
+- **Problema:** o `CLAUDE.md` tinha 527 linhas (40 KB) e entrava em toda sessão, e a instrução de início mandava ler o
+  `PROGRESS.md` (173 KB). Cada sessão redescobria sistemas e dependia do histórico da conversa.
+- **Alternativas:** MCP de Obsidian, busca vetorial ou notas em Markdown no repositório. O Obsidian não está instalado e o
+  acesso direto aos arquivos já resolve; MCP e embeddings só somariam ferramentas, sem ganho medido.
+- **Escolha:** `knowledge/` dentro da pasta do jogo, em Markdown puro (abre como cofre do Obsidian), mais `tools/kb.py`, que
+  responde sobre módulos, remotes, decisões, ativos e mapas **lendo o código na hora**.
+- **Consequências:**
+  - `CLAUDE.md` virou um mapa; as receitas foram para as notas no texto original, com status `stale` até serem reconferidas.
+  - `DESIGN.md` continua sendo o registro de decisões (ADR). Não há segunda lista.
+  - Nota `verified` guarda o commit; `kb.py velhas` aponta as que o código já ultrapassou.
+  - O repositório é público: `kb.py check` procura segredos e e-mails nas notas.
+  - Os ajudantes de build e teste saíram da pasta temporária para `tools/dev`.
+- **Sistemas afetados:** só documentação e ferramentas. Nenhum arquivo em `src/` mudou.

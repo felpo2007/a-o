@@ -60,3 +60,6 @@ assets/clothing/v4/
 assets/rostos/v2/
 assets/rostos/v3/
 assets/mapas/*.png
+
+# configurações locais do Obsidian (D-244)
+knowledge/.obsidian/
