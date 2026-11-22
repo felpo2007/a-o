@@ -10026,3 +10026,35 @@ coordenadas do próprio prompt, que têm a maior prioridade.
 - **Na partida:** `Modules/ModoFrente`, `Modules/ModoComboio`, `Controllers/HudModos`, ondas de 10 s e 16 contra 16.
 - **Medido:** Lune 980; curva do comboio com 1.011,30 m (polilinha 990,11 m, igual ao prompt) e raio mínimo de 20,5 m.
 - **Falta:** teste no Studio, biblioteca do Blender, os dez lugares, seleção de mapa e publicação.
+
+### D-243, parte 2: os dois modos testados no Studio (2026-11-22, sem publicar)
+
+**Falhas achadas e corrigidas:**
+- **Ordem dos scripts:** cinco scripts de servidor sobem em ordem não garantida; quando outro lia o `MapConfig` antes do
+  `Main`, o servidor ficava com o QG do mapa antigo e o soldado nascia fora do mapa e caía. Agora todos chamam
+  `MapaBoot.iniciar()` antes do primeiro módulo (o teste `modos_mapas` cobra).
+- **Veículos:** o `VehicleService` esperava para sempre por `Data/Bases`, que os mapas novos não têm. As bases dos mapas
+  retangulares ficam só com transporte leve, M151 e Peugeot 403 (provisório).
+- **Captura:** a altura do chão do objetivo era guardada antes de o terreno existir (0) e ninguém contava na área.
+- **Teto de dano do comboio:** dependia do passo do servidor, e um foguete tirava 1 ponto. Agora são 10 em qualquer janela
+  de 1 s; o que passa disso se perde (leitura provisória do prompt).
+- **Bots no Comboio:** cada bot tem um lugar na beira da estrada que anda com o comboio; na ponte, em cima do tabuleiro.
+  Quem está mais de 1,5 m abaixo da estrada (sob a ponte) não conta (`alturaPresencaAbaixoM`, provisório).
+- **Eventos aleatórios** (helicóptero de reforço etc.) ficam desligados nos mapas retangulares.
+- **Casa-piloto:** um poste da varanda ficava no meio do vão da escada e travava o soldado. A escada abre entre dois postes.
+
+**Medido no Studio** (com o jogo do dono aberto; por isso nenhum número de fps vale):
+- **Escala:** o soldado mede 2,07 m na medida do próprio jogo (7,51 studs na caixa das peças, 2,10 m). A escala continua
+  0,28 m por stud e a altura do boneco não mudou, para não mexer em mira, animação e acerto do jogo publicado.
+- **Casa-piloto com o boneco real:** escada, duas portas de 1,40 m, interior e saída pelos fundos, andando e correndo, nos
+  dois sentidos: 6 de 6 pontos em cada sentido.
+- **Linha de Frente:** C, B e A tomados em 50 s cada, com 15 s de transição; vitória dos EUA aos 190 s, rodada nova com C
+  ativo e o corpo de volta ao QG. Com bots (16 contra 16), a barra ficou parada nas amostras contestadas.
+- **Comboio:** estrada de 1.011,91 m, entrega em 283 s com um escoltador. Caminhões a 17,5-18,2 m um do outro, a até 9 cm do
+  chão e no máximo 1,7 grau fora do rumo. Imobilização de 15 s, recuperação com 25, reparo em 6 s e troca de lado funcionam,
+  por entrega e por tempo. Com bots, o comboio chegou à ponte (460 m aos 204 s) e a luta o segurou ali: 474 m aos 340 s, quando parei de observar.
+
+**Não testado:** dois jogadores reais, o botão Reparar com o teclado (usei o gancho `VT65DevComboio`), o fim da partida depois
+da 2ª rodada, celular e desempenho. O equilíbrio do Comboio com bots ainda não foi avaliado.
+**Falta:** conjuntos de nascer com duas saídas, seleção de mapa, carta tática retangular, biblioteca do Blender, os dez
+lugares e a publicação.

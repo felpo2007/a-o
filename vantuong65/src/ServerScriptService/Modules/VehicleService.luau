@@ -27,6 +27,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
 local MapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any
+local MapaAtivo = require(ReplicatedStorage.Shared.MapaAtivo)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Rng = require(ReplicatedStorage.Shared.Rng)
 local Roles = require(ReplicatedStorage.Shared.Roles)
@@ -112,6 +113,11 @@ local PAINT: { [string]: Color3 } = {
 	tire = Color3.fromRGB(28, 27, 25),
 	wood = Color3.fromRGB(110, 92, 66),
 }
+-- D-243: nos mapas retangulares, as bases só têm transporte leve (provisório, DESIGN D-243)
+local LEVES: { [string]: boolean } = { m151 = true, peugeot403 = true }
+local function depotNoMapa(spec: string): boolean
+	return not MapaAtivo.retangular() or LEVES[spec] == true
+end
 local RESPAWN_S = 180 -- design
 -- Giro da arte em relação ao chassi (frente do chassi = -Z). Os GLBs dos veículos têm o eixo longo
 -- em X com a frente em +X, mas o importador do Roblox gira o modelo 180° em Y: no Studio (teste com a
@@ -1619,8 +1625,8 @@ end
 local function buildCauseways()
 	local okB, bases = pcall(function(): any
 		local data = game:GetService("ServerStorage"):WaitForChild("VT65Build"):WaitForChild("Data")
-		local mod = data:WaitForChild("Bases")
-		return require(mod :: ModuleScript) :: any
+		local mod = data:FindFirstChild("Bases") -- os mapas retangulares não têm
+		return if mod then require(mod :: ModuleScript) :: any else nil
 	end)
 	if not okB or type(bases) ~= "table" then
 		return
@@ -2270,7 +2276,7 @@ function VehicleService.restaurar(): number
 	end
 	local n = 0
 	for i, d in DEPOTS do
-		if (VehicleService :: any).spawn(d.spec, i) then
+		if depotNoMapa(d.spec) and (VehicleService :: any).spawn(d.spec, i) then
 			n += 1
 		end
 	end
@@ -2538,7 +2544,9 @@ function VehicleService.start()
 			warn("[VT65] aterro da saída da base falhou:", errC)
 		end
 		for i, d in DEPOTS do
-			VehicleService.spawn(d.spec, i)
+			if depotNoMapa(d.spec) then
+				VehicleService.spawn(d.spec, i)
+			end
 		end
 	end)
 	local acc = 0

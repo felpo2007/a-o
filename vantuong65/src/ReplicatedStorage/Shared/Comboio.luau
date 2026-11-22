@@ -21,6 +21,7 @@ export type Corrida = {
 	imobNoTrecho: number,
 	reparo: number, -- pessoa-segundos
 	danoPendente: number,
+	janelaDano: { { t: number, v: number } }, -- dano aplicado no último segundo
 	vistos: { [any]: number },
 	entregue: boolean,
 	tEntrega: number?,
@@ -44,6 +45,7 @@ function Comboio.nova(cps: { number }, comprimento: number, regras: any?): Corri
 		imobNoTrecho = 0,
 		reparo = 0,
 		danoPendente = 0,
+		janelaDano = {},
 		vistos = {},
 		entregue = false,
 		tEntrega = nil,
@@ -62,8 +64,18 @@ function Comboio.dano(c: Corrida, id: any, valor: number)
 	c.danoPendente += valor
 end
 
-local function aplicaDano(c: Corrida, dt: number, r: any)
-	local efetivo = math.min(c.danoPendente, r.danoPorS * dt)
+-- O teto vale em qualquer janela de 1 s, seja qual for o passo do servidor; o que passa dele se perde.
+local function aplicaDano(c: Corrida, r: any)
+	local usado = 0
+	for i = #c.janelaDano, 1, -1 do
+		local q = c.janelaDano[i]
+		if q.t <= c.t - 1 + EPS then
+			table.remove(c.janelaDano, i)
+		else
+			usado += q.v
+		end
+	end
+	local efetivo = math.min(c.danoPendente, math.max(0, r.danoPorS - usado))
 	c.danoPendente = 0
 	for id, quando in c.vistos do
 		if c.t - quando > 5 then
@@ -73,6 +85,7 @@ local function aplicaDano(c: Corrida, dt: number, r: any)
 	if efetivo <= 0 or c.t < c.protegidoAte or c.imobilizadoAte then
 		return
 	end
+	table.insert(c.janelaDano, { t = c.t, v = efetivo })
 	local resta = c.integridade - efetivo
 	if resta > EPS then
 		c.integridade = resta
@@ -100,7 +113,7 @@ function Comboio.passo(c: Corrida, dt: number, e: Presenca, regras: any?)
 		return
 	end
 	local r = regras or MapasRet.COMBOIO.regras
-	aplicaDano(c, dt, r)
+	aplicaDano(c, r)
 	local pode = e.escolta > 0 and e.defesa == 0
 	local resta = dt
 	while resta > EPS and not c.entregue do

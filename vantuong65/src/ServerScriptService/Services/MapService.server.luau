@@ -2,6 +2,9 @@
 -- MapService: limites da área de combate (servidor autoritativo).
 -- Fora da área: aviso no cliente (atributo "OOBSecondsLeft") e morte após 10 s (prompt, Parte 3).
 -- Também publica o setor atual do jogador (atributo "Sector") para o HUD de depuração da F1.
+-- D-243: o mapa deste servidor, antes de qualquer módulo ler o MapConfig (a ordem dos scripts não é garantida)
+require(game:GetService("ServerScriptService"):WaitForChild("Modules"):WaitForChild("MapaBoot")).iniciar()
+
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 

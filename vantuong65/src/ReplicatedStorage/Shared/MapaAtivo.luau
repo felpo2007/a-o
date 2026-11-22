@@ -31,7 +31,7 @@ function MapaAtivo.id(): string
 	if v == nil and game:GetService("RunService"):IsClient() then
 		-- o cliente pode rodar antes de o atributo chegar: o servidor sempre o grava ao subir
 		local t0 = os.clock()
-		while v == nil and os.clock() - t0 < 5 do
+		while v == nil and os.clock() - t0 < 20 do
 			task.wait()
 			v = workspace:GetAttribute(MapaAtivo.ATRIBUTO)
 		end

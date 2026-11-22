@@ -37,7 +37,7 @@ local function escolhe(): string
 	return MapaAtivo.PADRAO
 end
 
-function MapaBoot.iniciar()
+local function monta()
 	local id = escolhe()
 	workspace:SetAttribute(MapaAtivo.ATRIBUTO, id)
 	if id == MapaAtivo.PADRAO then
@@ -56,6 +56,26 @@ function MapaBoot.iniciar()
 		require(script.Parent.MapaPontes).montar(map, require(novo:WaitForChild("Layout")) :: any)
 	end
 	print(string.format("[VT65] mapa %s montado em %.1f s", id, os.clock() - t0))
+end
+
+-- Todo script de servidor chama isto na primeira linha: o primeiro monta, os outros esperam ele acabar.
+local estado = "novo"
+function MapaBoot.iniciar()
+	if estado == "novo" then
+		estado = "montando"
+		local ok, erro = pcall(function(): any
+			monta()
+			return nil
+		end)
+		estado = "pronto"
+		if not ok then
+			error(erro)
+		end
+		return
+	end
+	while estado ~= "pronto" do
+		task.wait()
+	end
 end
 
 return MapaBoot

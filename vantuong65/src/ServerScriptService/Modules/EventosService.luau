@@ -23,6 +23,7 @@ local AssetIds = require(ReplicatedStorage.Shared.AssetIds) :: any
 local Eventos = require(ReplicatedStorage.Shared.Eventos)
 local Explosive = require(ReplicatedStorage.Shared.Explosive)
 local FieldWork = require(ReplicatedStorage.Shared.FieldWork)
+local MapaAtivo = require(ReplicatedStorage.Shared.MapaAtivo)
 local FireSupport = require(ReplicatedStorage.Shared.FireSupport)
 local Front = require(ReplicatedStorage.Shared.Front)
 local Logistics = require(ReplicatedStorage.Shared.Logistics)
@@ -249,8 +250,10 @@ end
 
 -- ===== alvos =====
 local function stateOk(): boolean
+	-- D-243: os eventos aleatórios são do mapa de sempre; nos retangulares o objetivo é um só (frente ou comboio)
 	return MatchService.state ~= nil
 		and not MatchService.ended
+		and not MapaAtivo.retangular()
 		and ReplicatedStorage:GetAttribute("TerrainReady") ~= false
 end
 

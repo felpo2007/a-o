@@ -15,6 +15,7 @@ local Animals = require(ReplicatedStorage.Shared.Animals)
 local Geometry = require(ReplicatedStorage.Shared.Geometry)
 local GunModel = require(ReplicatedStorage.Shared.GunModel)
 local MapConfig = require(ReplicatedStorage.Shared.MapConfig) :: any
+local MapaAtivo = require(ReplicatedStorage.Shared.MapaAtivo)
 local MapLife = require(script.Parent.MapLife)
 local Rng = require(ReplicatedStorage.Shared.Rng)
 local StaticArt = require(script.Parent.StaticArt)
@@ -1208,7 +1209,7 @@ function AssetLoader.start()
 			)
 		end
 	end
-	if #StaticArt.items > 0 then
+	if #StaticArt.items > 0 and not MapaAtivo.retangular() then
 		print(
 			string.format(
 				"[VT65] arte fixa (SLIM, D-155): %d modelos no arquivo; %d cópias do plano puladas",

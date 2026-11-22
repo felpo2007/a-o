@@ -432,8 +432,14 @@ local function counts(): { { US: number, VC: number } }
 	if lf then
 		local sp = MatchService.points[lf.ativo]
 		if sp then
-			pisoSetor[lf.ativo] = pisoSetor[lf.ativo] or groundAt(sp.x, sp.z)
-			out[lf.ativo] = ModoFrente.conta(sp, pisoSetor[lf.ativo], MapConfig.CaptureRadiusStuds)
+			-- só guarda o chão depois de o terreno existir: antes, o raio não acha nada e a altura ficaria 0
+			if not pisoSetor[lf.ativo] and ReplicatedStorage:GetAttribute("TerrainReady") == true then
+				pisoSetor[lf.ativo] = groundAt(sp.x, sp.z)
+			end
+			local piso = pisoSetor[lf.ativo]
+			if piso then
+				out[lf.ativo] = ModoFrente.conta(sp, piso, MapConfig.CaptureRadiusStuds)
+			end
 		end
 		return out
 	end

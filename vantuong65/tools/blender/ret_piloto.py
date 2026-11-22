@@ -190,7 +190,10 @@ def receita_ret_piloto_casa() -> V.Receita:
     # varanda: viga a 2,62 m do piso
     z_baixo = Z_PISO + 2.62
     z_alto = Hp + H - 0.04
-    for x in xs:
+    # a escada abre entre dois postes: um poste no meio do vão travava o boneco na subida
+    meia = ESCADA_L / 2 + 0.06
+    livres = [x for x in xs if abs(x - x_porta) > meia + 0.3]
+    for x in [*livres, x_porta - meia - 0.04, x_porta + meia + 0.04]:
         V.poste(rec, f"p_var{int(x * 10)}", x, yv + 0.05, z_baixo, mats.go, r=0.07)
     E.telhado_varanda(
         rec,
@@ -204,7 +207,6 @@ def receita_ret_piloto_casa() -> V.Receita:
         mats,
         sem,
     )
-    meia = ESCADA_L / 2 + 0.06
     E.guarda_corpo(rec, "gc_f_a", (-L / 2, yv), (x_porta - meia, yv), Z_PISO, mats)
     E.guarda_corpo(rec, "gc_f_b", (x_porta + meia, yv), (L / 2, yv), Z_PISO, mats)
     E.guarda_corpo(rec, "gc_esq", (-L / 2, yv), (-L / 2, -W / 2), Z_PISO, mats)

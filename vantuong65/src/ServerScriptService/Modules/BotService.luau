@@ -55,6 +55,7 @@ local Characters = require(script.Parent.Characters)
 local CombatService = require(script.Parent.CombatService)
 local Combatants = require(script.Parent.Combatants)
 local MatchService = require(script.Parent.MatchService)
+local ModoComboio = require(script.Parent.ModoComboio)
 local MedicalService = require(script.Parent.MedicalService)
 local PostureService = require(script.Parent.PostureService)
 local SpawnService = require(script.Parent.SpawnService)
@@ -2110,6 +2111,25 @@ local function calm(bot: Bot, model: Model, hum: Humanoid, root: BasePart, head:
 	-- humano; vai com o squad de bots dele)
 	if BotEscolta.calm(bot, model, root, now) then
 		return
+	end
+	-- D-243: no Comboio o objetivo anda e só conta quem está a poucos metros: cada bot vai ao seu lugar na estrada
+	if MatchService.mode == "Comboio" then
+		local posto = ModoComboio.postoBot(bot.faction, bot.id)
+		if posto then
+			bot.cover, bot.coverSector = nil, nil
+			bot.mode = "advance"
+			setStance(model, "stand")
+			local dist = flat(root.Position, posto) * M
+			if dist > 60 then
+				BotLocomotion.goFar(bot, posto, "jog", { tolerance = 4 / M })
+			elseif dist > 1.5 then
+				-- o comboio anda a 3,8 m/s e a marcha a 4,7: quem ficou para trás corre para alcançar
+				BotLocomotion.go(bot, posto, if dist > 9 then "sprint" else "jog", { tolerance = 1.5 / M })
+			else
+				BotLocomotion.stop(bot, enemyHQ(bot, root))
+			end
+			return
+		end
 	end
 	-- em marcha com o squad
 	if BotSquads.phase(bot) == "move" then

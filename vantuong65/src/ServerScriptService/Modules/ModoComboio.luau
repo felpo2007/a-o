@@ -24,11 +24,13 @@ local PASSO_S = 0.1
 local ALCANCE_REPARO_M = 5 -- PROVISÓRIO: distância do reparador à caixa do caminhão
 local INTERVALO_S = 12 -- PROVISÓRIO: entre as duas rodadas
 local ARTE_GIRO = -90 -- a frente da arte do M35 (Vehicles.ART.m35.artYawDeg)
+local LATERAL_PONTE_M = 2.9 -- em cima do tabuleiro, ao lado do caminhão
 
 type Caminhao = { modelo: Model, caixa: BasePart, prompt: ProximityPrompt }
 
 local ms: any = nil
 local T: Trajeto.Trajeto? = nil
+local rpEstrada: RaycastParams? = nil
 local cps: { number } = {}
 local caminhoes: { Caminhao } = {}
 local candidatos: { { s: number, x: number, z: number } } = {}
@@ -72,6 +74,7 @@ local function garanteTrajeto(): Trajeto.Trajeto
 	end
 	rp.FilterDescendantsInstances = alvos
 	rp.IgnoreWater = true
+	rpEstrada = rp
 	local t = Trajeto.novo(P.nos, R.extensaoM, function(x: number, y: number): number
 		local wx, wz = MapaAtivo.mundo(P, x, y)
 		local hit = workspace:Raycast(Vector3.new(wx, 1500, wz), Vector3.new(0, -3000, 0), rp)
@@ -211,6 +214,7 @@ end
 local function novaCorrida()
 	local t = garanteTrajeto()
 	corridas[rodada] = Comboio.nova(table.clone(cps), t.comprimento)
+	presenca = { escolta = 0, defesa = 0, reparadores = 0 } -- sem isto, a rodada nova mostrava "Avançando" parada
 	table.clear(reparando)
 	montaCaminhoes()
 	posicionar()
@@ -221,12 +225,13 @@ local function medePresenca(c: Comboio.Corrida): Comboio.Presenca
 	local x, y, z = Trajeto.pos(t, c.s)
 	local ref = mundo(x, y, z)
 	local e2, d2 = (R.escoltaM / M) ^ 2, (R.contestaM / M) ^ 2
-	local hMax = R.alturaPresencaM / M
+	local hMax, hBaixo = R.alturaPresencaM / M, R.alturaPresencaAbaixoM / M
 	local nE, nD = 0, 0
 	for _, e in Combatants.list() do
 		local root = Combatants.root(e)
 		local hum = Combatants.humanoid(e)
-		if root and hum and Combatants.active(e) and not hum.SeatPart and math.abs(root.Position.Y - ref.Y) <= hMax then
+		local alt = if root then root.Position.Y - ref.Y else 0
+		if root and hum and Combatants.active(e) and not hum.SeatPart and alt <= hMax and alt >= -hBaixo then
 			local dx, dz = root.Position.X - ref.X, root.Position.Z - ref.Z
 			local q = dx * dx + dz * dz
 			if e.faction == escolta and q <= e2 then
@@ -335,6 +340,30 @@ function ModoComboio.iniciar(matchService: any)
 	Players.PlayerRemoving:Connect(function(p: Player)
 		reparando[p] = nil
 	end)
+	-- Só no Studio: "dano:<n>" fere o comboio e "reparo:1" / "reparo:0" segura o reparo do primeiro jogador
+	-- (o teclado do MCP não aperta o ProximityPrompt). Para repetir o mesmo valor, ponha nil antes.
+	if RunService:IsStudio() then
+		workspace:GetAttributeChangedSignal("VT65DevComboio"):Connect(function()
+			local v = workspace:GetAttribute("VT65DevComboio")
+			local c = corrida()
+			if type(v) ~= "string" or not c then
+				return
+			end
+			local op, arg = string.match(v, "^(%a+):(.*)$")
+			local n = tonumber(arg)
+			if op == "dano" and n then
+				contadorEvento += 1
+				Comboio.dano(c, "dev" .. contadorEvento, n)
+			elseif op == "reparo" then
+				local pl = Players:GetPlayers()[1]
+				if pl and n == 0 then
+					reparando[pl] = nil
+				elseif pl then
+					reparando[pl] = true
+				end
+			end
+		end)
+	end
 	local SpawnService = require(script.Parent.SpawnService) :: any
 	SpawnService.addProvider(ModoComboio.conjuntos)
 	local ExplosionService = require(script.Parent.ExplosionService) :: any
@@ -385,6 +414,32 @@ function ModoComboio.conjuntos(faction: string): { any }
 		end
 	end
 	return out
+end
+
+-- O lugar de um bot em volta do comboio, na beira da estrada e dentro do raio que conta: a escolta até 11 m do
+-- ponto médio, um pouco à frente para acompanhar o movimento, e a defesa até 7,5 m. Sem corrida, nil.
+function ModoComboio.postoBot(faction: string, id: number): Vector3?
+	local t, c = T, corrida()
+	if not (t and c) or c.entregue then
+		return nil
+	end
+	local frac = (id * 0.618034) % 1
+	local lado = if id % 2 == 0 then 1 else -1
+	local daEscolta = faction == escolta
+	local lateral = if daEscolta then 4.5 + 2.5 * frac else 3.5 + 2.5 * frac
+	local longo = (frac - 0.5) * 9 + (if daEscolta then 4 else 0)
+	local sAlvo = math.clamp(c.s + longo, 0, c.comprimento)
+	local x, y, zEstrada = Trajeto.pos(t, sAlvo)
+	local dx, dy = Trajeto.dir(t, sAlvo)
+	local wx, wz = MapaAtivo.mundo(P, x - dy * lado * lateral, y + dx * lado * lateral)
+	-- na ponte, a beira da estrada é o vazio: o lugar fica em cima do tabuleiro
+	local hit = if rpEstrada
+		then workspace:Raycast(Vector3.new(wx, 1500, wz), Vector3.new(0, -3000, 0), rpEstrada)
+		else nil
+	if not hit or hit.Position.Y * M < zEstrada - 1.2 then
+		wx, wz = MapaAtivo.mundo(P, x - dy * lado * LATERAL_PONTE_M, y + dx * lado * LATERAL_PONTE_M)
+	end
+	return Vector3.new(wx, 0, wz)
 end
 
 -- Sopro de explosão: um evento só, mesmo pegando os dois caminhões.

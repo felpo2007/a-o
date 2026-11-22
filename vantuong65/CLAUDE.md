@@ -443,7 +443,9 @@ O `sourcemap.json` não vai para o Git.
 - Mapas retangulares (D-243): `Shared/MapasRet` (medidas e regras), `uv run --group arte python tools/mapas_ret.py`
   (dados e planta; antes, `lune run tools/trajeto_amostra.luau`), `lune run tools/mapas_check.luau` e, no Blender,
   `tools/blender/ret.py`. Para abrir no Studio: no modo Edit, `workspace:SetAttribute("VT65DevMapa", "frente")`
-  (ou `"comboio"`) e dê Play. `MapasRet.LIBERADOS = false` segura os servidores publicados.
+  (ou `"comboio"`) e dê Play. `MapasRet.LIBERADOS = false` segura os servidores publicados. Script de servidor novo:
+  chame `MapaBoot.iniciar()` antes do primeiro `require`. No Comboio, `VT65DevComboio` (Server) = `"dano:<n>"`,
+  `"reparo:1"` ou `"reparo:0"` (ponha nil antes de repetir).
 - Mira e mãos em 1ª pessoa (D-242): `adsEyeM`/`adsSobeM` na ficha (`Weapons`) e `ADS_MAO_BAIXA` no
   `WeaponVisuals`. Para ver todas: `VT65DevArma` = id (Server) e `Aiming = true` a cada quadro (Client); a luneta
   só abre pelo `VT65DevGranada = "mirar:<s>"`. Para olhar a 3ª pessoa, use bot ancorado do mesmo lado, senão ele

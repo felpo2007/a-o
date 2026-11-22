@@ -100,7 +100,8 @@ MapasRet.COMBOIO = {
 		reparoRetido = true, -- o progresso do reparo fica ao interromper, até o conjunto voltar a andar
 		reparoContestado = true, -- dá para reparar sob contestação (o avanço continua parado)
 		integridadeNoLimite = 1, -- depois da 2ª imobilização do trecho, o dano não passa daqui
-		alturaPresencaM = 4, -- raios em distância horizontal, com este limite de altura
+		alturaPresencaM = 4, -- raios em distância horizontal, com este limite de altura para cima
+		alturaPresencaAbaixoM = 1.5, -- PROVISÓRIO: para baixo; quem está sob a ponte não conta
 	},
 }
 

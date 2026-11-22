@@ -4,6 +4,7 @@ local MapasRet = require("../../src/ReplicatedStorage/Shared/MapasRet")
 local LF = require("../../src/ReplicatedStorage/Shared/LinhaFrente")
 local Trajeto = require("../../src/ReplicatedStorage/Shared/Trajeto")
 local Comboio = require("../../src/ReplicatedStorage/Shared/Comboio")
+local fs = require("@lune/fs")
 
 local ok, falhas = 0, 0
 local function test(nome, fn)
@@ -337,6 +338,24 @@ test("o teto de dano é 10 por segundo e um evento não conta duas vezes", funct
 	assert(perto(d.integridade, 96, 1e-6), "evento repetido")
 end)
 
+test("o teto de 10 por segundo não depende do passo do servidor", function()
+	local c = corrida()
+	Comboio.dano(c, "foguete", 40)
+	Comboio.passo(c, 0.1, NADA)
+	assert(perto(c.integridade, 90, 1e-6), "um golpe tira 10 na hora: " .. c.integridade)
+	for i = 1, 8 do
+		Comboio.dano(c, "seguido" .. i, 40)
+		Comboio.passo(c, 0.1, NADA)
+	end
+	assert(perto(c.integridade, 90, 1e-6), "passou do teto na mesma janela: " .. c.integridade)
+	for _ = 1, 3 do
+		Comboio.passo(c, 0.1, NADA)
+	end
+	Comboio.dano(c, "depois", 40)
+	Comboio.passo(c, 0.1, NADA)
+	assert(perto(c.integridade, 80, 1e-6), "a janela seguinte vale: " .. c.integridade)
+end)
+
 local function imobiliza(c)
 	while not c.imobilizadoAte do
 		Comboio.dano(c, tostring(c.t) .. ":" .. math.random(), 100)
@@ -450,6 +469,23 @@ test("resultado: entrega, tempo, distância, captura e empate exato", function()
 	assert(q == 0 and m == "empate")
 	local q2 = Comboio.resultado(r({ entregue = true, tEntrega = 400 }), r({ entregue = true, tEntrega = 400 }))
 	assert(q2 == 0)
+end)
+
+test("todo script de servidor escolhe o mapa antes de carregar outro módulo", function()
+	local pasta = "src/ServerScriptService/Services"
+	local vistos = 0
+	for _, nome in fs.readDir(pasta) do
+		if string.find(nome, "%.server%.luau$") then
+			vistos += 1
+			local texto = fs.readFile(pasta .. "/" .. nome)
+			local primeiro = string.find(texto, "require(", 1, true)
+			assert(primeiro, nome .. " sem require")
+			local fimLinha = string.find(texto, "\n", primeiro, true) or #texto
+			local linha = string.sub(texto, primeiro, fimLinha)
+			assert(string.find(linha, '"MapaBoot")).iniciar()', 1, true), nome .. ": o 1º require não é o MapaBoot")
+		end
+	end
+	assert(vistos >= 5, "scripts de servidor: " .. vistos)
 end)
 
 print(string.format("%d ok, %d falhas", ok, falhas))

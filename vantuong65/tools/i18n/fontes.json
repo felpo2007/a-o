@@ -343,7 +343,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DebugHud.client.luau:88"
  ],
  "%s %02d": [
-  "src/ServerScriptService/Modules/BotService.luau:341"
+  "src/ServerScriptService/Modules/BotService.luau:342"
  ],
  "%s %02d:%02d": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameUI.client.luau:844"
@@ -354,7 +354,7 @@
  "%s %s": [
   "src/ReplicatedFirst/Estilo.luau:81",
   "src/ReplicatedStorage/Shared/AfterAction.luau:157",
-  "src/ServerScriptService/Modules/EventosService.luau:101",
+  "src/ServerScriptService/Modules/EventosService.luau:102",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CaixasTela.client.luau:416",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CaixasTela.client.luau:1589",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/FrontHud.client.luau:259",
@@ -435,7 +435,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/HudCampo.client.luau:579"
  ],
  "%s retomado no contra-ataque.": [
-  "src/ServerScriptService/Modules/EventosService.luau:1020"
+  "src/ServerScriptService/Modules/EventosService.luau:1023"
  ],
  "%s sob ataque": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/FrontHud.client.luau:311"
@@ -471,7 +471,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehiclePrompt.client.luau:128"
  ],
  "%s · %s · %s\n%s · %.1f m/s · %s": [
-  "src/ServerScriptService/Modules/BotService.luau:2289"
+  "src/ServerScriptService/Modules/BotService.luau:2309"
  ],
  "%s · %s · %s · %s": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CaixasTela.client.luau:371"
@@ -585,9 +585,9 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaView.luau:1585"
  ],
  "%s_%d": [
-  "src/ServerScriptService/Modules/EventosService.luau:183",
+  "src/ServerScriptService/Modules/EventosService.luau:184",
   "src/ServerScriptService/Modules/MapaPontes.luau:33",
-  "src/ServerScriptService/Modules/VehicleService.luau:1251"
+  "src/ServerScriptService/Modules/VehicleService.luau:1257"
  ],
  "%s_%s": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CaixaImagem.luau:44",
@@ -1268,7 +1268,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/FimDeRodada.client.luau:624"
  ],
  "A-4 em mergulho sobre %s (%s) em %d s! As bombas pegam todo mundo: saia da fumaça violeta.": [
-  "src/ServerScriptService/Modules/EventosService.luau:360"
+  "src/ServerScriptService/Modules/EventosService.luau:363"
  ],
  "ABATES": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CasualtyScreen.luau:407"
@@ -1569,7 +1569,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CasualtyScreen.luau:1110"
  ],
  "Aguardando escolta": [
-  "src/ReplicatedStorage/Shared/Comboio.luau:161"
+  "src/ReplicatedStorage/Shared/Comboio.luau:174"
  ],
  "Aguarde a virada do dia (UTC).": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DiariaEntrada.client.luau:557"
@@ -1624,7 +1624,7 @@
   "src/ReplicatedStorage/Shared/Cosmeticos.luau:361"
  ],
  "Alvo": [
-  "src/ServerScriptService/Modules/AssetLoader.luau:1051",
+  "src/ServerScriptService/Modules/AssetLoader.luau:1052",
   "src/ServerScriptService/Modules/TrainingService.luau:360"
  ],
  "Alvo de %d m: %d cm %s, %d cm %s do centro": [
@@ -1944,7 +1944,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:755"
  ],
  "Avançando": [
-  "src/ReplicatedStorage/Shared/Comboio.luau:162"
+  "src/ReplicatedStorage/Shared/Comboio.luau:175"
  ],
  "Aviso": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Toast.luau:74"
@@ -1953,7 +1953,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/AudioController.client.luau:961"
  ],
  "Aviões! Bombas em %s (%s) em %d s. Saia da área marcada.": [
-  "src/ServerScriptService/Modules/EventosService.luau:371"
+  "src/ServerScriptService/Modules/EventosService.luau:374"
  ],
  "Azul de noite gelada com geada nas manchas e neve no que fica para cima. Vale em qualquer arma.": [
   "src/ReplicatedStorage/Shared/Skins.luau:1479"
@@ -2113,7 +2113,7 @@
  ],
  "Bamboo": [
   "src/ReplicatedStorage/Shared/BotBrain.luau:1232",
-  "src/ServerScriptService/Modules/AssetLoader.luau:103",
+  "src/ServerScriptService/Modules/AssetLoader.luau:104",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/AudioController.client.luau:758",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponVisuals.client.luau:836"
  ],
@@ -2155,7 +2155,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/LobbyScene.luau:747"
  ],
  "Barragem terminou: tome %s agora (%d s).": [
-  "src/ServerScriptService/Modules/EventosService.luau:436"
+  "src/ServerScriptService/Modules/EventosService.luau:439"
  ],
  "Barrel": [
   "src/ReplicatedStorage/Shared/GunModel.luau:134"
@@ -2245,7 +2245,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/HudInfantaria.client.luau:693"
  ],
  "Bot_%s_%02d": [
-  "src/ServerScriptService/Modules/BotService.luau:334"
+  "src/ServerScriptService/Modules/BotService.luau:335"
  ],
  "Botão CÂMERA: 1ª / 3ª pessoa": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ThirdPerson.client.luau:84"
@@ -2806,8 +2806,8 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleHudView.luau:84"
  ],
  "Cano": [
-  "src/ServerScriptService/Modules/VehicleService.luau:427",
-  "src/ServerScriptService/Modules/VehicleService.luau:1274"
+  "src/ServerScriptService/Modules/VehicleService.luau:433",
+  "src/ServerScriptService/Modules/VehicleService.luau:1280"
  ],
  "Canteiro": [
   "src/ServerScriptService/Modules/MapLife.luau:823"
@@ -2878,13 +2878,13 @@
   "src/ReplicatedStorage/Shared/Arquivo.luau:32"
  ],
  "Carga desarmada. Segure o depósito.": [
-  "src/ServerScriptService/Modules/EventosService.luau:933"
+  "src/ServerScriptService/Modules/EventosService.luau:936"
  ],
  "Carga no depósito %s! Desarme ou afaste-se: %d s.": [
-  "src/ServerScriptService/Modules/EventosService.luau:921"
+  "src/ServerScriptService/Modules/EventosService.luau:924"
  ],
  "Carga plantada no depósito: explode em %d s. Afaste-se.": [
-  "src/ServerScriptService/Modules/EventosService.luau:914"
+  "src/ServerScriptService/Modules/EventosService.luau:917"
  ],
  "Carona": [
   "src/ReplicatedStorage/Shared/Vehicles.luau:279"
@@ -3139,10 +3139,10 @@
  ],
  "Combatants": [
   "src/ServerScriptService/Modules/BotVehicles.luau:606",
-  "src/ServerScriptService/Modules/EventosService.luau:515",
+  "src/ServerScriptService/Modules/EventosService.luau:518",
   "src/ServerScriptService/Modules/Flutua.luau:211",
   "src/ServerScriptService/Modules/SmokeService.luau:31",
-  "src/ServerScriptService/Modules/VehicleService.luau:700"
+  "src/ServerScriptService/Modules/VehicleService.luau:706"
  ],
  "Combate mais pesado: %s (%d mortos).": [
   "src/ReplicatedStorage/Shared/AfterAction.luau:137"
@@ -3153,12 +3153,13 @@
  "Comboio": [
   "src/ReplicatedStorage/Shared/BotBrain.luau:625",
   "src/ReplicatedStorage/Shared/MapasRet.luau:47",
+  "src/ServerScriptService/Modules/BotService.luau:2116",
   "src/ServerScriptService/Modules/BotSquads.luau:298",
   "src/ServerScriptService/Modules/MatchService.luau:160",
   "src/ServerScriptService/Modules/MatchService.luau:339",
-  "src/ServerScriptService/Modules/MatchService.luau:494",
-  "src/ServerScriptService/Modules/MatchService.luau:626",
-  "src/ServerScriptService/Modules/ModoComboio.luau:184",
+  "src/ServerScriptService/Modules/MatchService.luau:500",
+  "src/ServerScriptService/Modules/MatchService.luau:632",
+  "src/ServerScriptService/Modules/ModoComboio.luau:187",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/HudModos.client.luau:125"
  ],
  "Comemoracao": [
@@ -3249,14 +3250,14 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Wheel.luau:691"
  ],
  "Concluindo checkpoint": [
-  "src/ReplicatedStorage/Shared/Comboio.luau:166"
+  "src/ReplicatedStorage/Shared/Comboio.luau:179"
  ],
  "Concluir o treinamento de um papel ou a primeira partida (uma vez por conta).": [
   "src/ReplicatedStorage/Shared/Caixas.luau:171"
  ],
  "Concrete": [
   "src/ReplicatedStorage/Shared/VehicleDrive.luau:114",
-  "src/ServerScriptService/Modules/AssetLoader.luau:237"
+  "src/ServerScriptService/Modules/AssetLoader.luau:238"
  ],
  "Conferindo…": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:478"
@@ -3316,7 +3317,7 @@
   "src/ReplicatedStorage/Shared/Comms.luau:13"
  ],
  "Contestado": [
-  "src/ReplicatedStorage/Shared/Comboio.luau:163"
+  "src/ReplicatedStorage/Shared/Comboio.luau:176"
  ],
  "Conteudo": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/MenuPrincipal.client.luau:186"
@@ -3325,10 +3326,10 @@
   "src/ReplicatedStorage/Shared/Eventos.luau:163"
  ],
  "Contra-ataque contido em %s.": [
-  "src/ServerScriptService/Modules/EventosService.luau:1027"
+  "src/ServerScriptService/Modules/EventosService.luau:1030"
  ],
  "Contra-ataque: retome %s em %d s (recompensa de retomada).": [
-  "src/ServerScriptService/Modules/EventosService.luau:1001"
+  "src/ServerScriptService/Modules/EventosService.luau:1004"
  ],
  "Controle": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:202",
@@ -3406,7 +3407,7 @@
   "src/ReplicatedStorage/Shared/Progression.luau:79"
  ],
  "Corpos": [
-  "src/ServerScriptService/Modules/EventosService.luau:515",
+  "src/ServerScriptService/Modules/EventosService.luau:518",
   "src/ServerScriptService/Modules/Flutua.luau:211"
  ],
  "Corra para chegar antes do inimigo. Pule para passar por cima de muretas e sebes.": [
@@ -3740,7 +3741,7 @@
   "src/ServerScriptService/Modules/PostureService.luau:65"
  ],
  "Defenda o depósito de munição em %s por %d s.": [
-  "src/ServerScriptService/Modules/EventosService.luau:945"
+  "src/ServerScriptService/Modules/EventosService.luau:948"
  ],
  "Defender": [
   "src/ReplicatedStorage/Shared/Comms.luau:41"
@@ -3779,23 +3780,23 @@
  ],
  "Depósito de munição do VC": [
   "src/ReplicatedStorage/Shared/Eventos.luau:150",
-  "src/ServerScriptService/Modules/EventosService.luau:886",
+  "src/ServerScriptService/Modules/EventosService.luau:889",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/EventosVisual.luau:179"
  ],
  "Depósito de munição do VC achado em %s: plante a carga (segure a interação).": [
-  "src/ServerScriptService/Modules/EventosService.luau:941"
+  "src/ServerScriptService/Modules/EventosService.luau:944"
  ],
  "Depósito defendido": [
   "src/ReplicatedStorage/Shared/Eventos.luau:156"
  ],
  "Depósito defendido: +60 de suprimento para o time.": [
-  "src/ServerScriptService/Modules/EventosService.luau:975"
+  "src/ServerScriptService/Modules/EventosService.luau:978"
  ],
  "Depósito do VC destruído": [
   "src/ReplicatedStorage/Shared/Eventos.luau:157"
  ],
  "Depósito do VC destruído.": [
-  "src/ServerScriptService/Modules/EventosService.luau:966"
+  "src/ServerScriptService/Modules/EventosService.luau:969"
  ],
  "Derrota": [
   "src/ReplicatedStorage/Shared/Progression.luau:183"
@@ -3807,7 +3808,7 @@
   "src/ServerScriptService/Modules/TrapService.luau:67"
  ],
  "Desarmar carga": [
-  "src/ServerScriptService/Modules/EventosService.luau:906"
+  "src/ServerScriptService/Modules/EventosService.luau:909"
  ],
  "Desc": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/FimDeRodada.client.luau:291"
@@ -3869,7 +3870,7 @@
   "src/ReplicatedStorage/Shared/Movement.luau:217",
   "src/ReplicatedStorage/Shared/Superficie.luau:79",
   "src/ReplicatedStorage/Shared/VehicleDrive.luau:97",
-  "src/ServerScriptService/Modules/BotService.luau:617"
+  "src/ServerScriptService/Modules/BotService.luau:618"
  ],
  "Dikes": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Movement.client.luau:1274"
@@ -4198,7 +4199,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:719"
  ],
  "Effects": [
-  "src/ServerScriptService/Modules/VehicleService.luau:700"
+  "src/ServerScriptService/Modules/VehicleService.luau:706"
  ],
  "Eight": [
   "src/ReplicatedStorage/Shared/Equipar.luau:25",
@@ -4473,7 +4474,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:742"
  ],
  "Entrar": [
-  "src/ServerScriptService/Modules/VehicleService.luau:1545",
+  "src/ServerScriptService/Modules/VehicleService.luau:1551",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ComoJogar.luau:113"
  ],
  "Entrar no veículo: {a}, perto dele.": [
@@ -4489,7 +4490,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:1026"
  ],
  "Entregue": [
-  "src/ReplicatedStorage/Shared/Comboio.luau:167"
+  "src/ReplicatedStorage/Shared/Comboio.luau:180"
  ],
  "Entrou no seu saldo.": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CaixasTela.client.luau:625"
@@ -5166,7 +5167,7 @@
  ],
  "Folhas": [
   "src/ReplicatedStorage/Shared/ExpansaoLod.luau:37",
-  "src/ServerScriptService/Modules/AssetLoader.luau:199",
+  "src/ServerScriptService/Modules/AssetLoader.luau:200",
   "src/ServerScriptService/Modules/MapLife.luau:826",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Ambiente.client.luau:65",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Progresso.client.luau:1297"
@@ -5422,7 +5423,7 @@
   "src/ReplicatedStorage/Shared/Skins.luau:1571"
  ],
  "Galveston e Orleck vão bater em %s (%s) em %d s. Fique fora da fumaça vermelha e assalte depois.": [
-  "src/ServerScriptService/Modules/EventosService.luau:338"
+  "src/ServerScriptService/Modules/EventosService.luau:341"
  ],
  "Gamepad": [
   "src/ReplicatedFirst/Idioma.luau:158",
@@ -5538,11 +5539,11 @@
  "Granadas": [
   "src/ReplicatedStorage/Shared/Kit.luau:14",
   "src/ReplicatedStorage/Shared/Vantagens.luau:34",
-  "src/ServerScriptService/Modules/BotService.luau:560",
+  "src/ServerScriptService/Modules/BotService.luau:561",
   "src/ServerScriptService/Modules/Flutua.luau:211",
   "src/ServerScriptService/Modules/RodadaService.luau:197",
   "src/ServerScriptService/Modules/SmokeService.luau:31",
-  "src/ServerScriptService/Modules/VehicleService.luau:700",
+  "src/ServerScriptService/Modules/VehicleService.luau:706",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaoJogador.luau:218",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:2642"
  ],
@@ -5643,7 +5644,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/KnifeView.luau:259"
  ],
  "Helicóptero": [
-  "src/ServerScriptService/Modules/EventosService.luau:1191",
+  "src/ServerScriptService/Modules/EventosService.luau:1194",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:213",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehiclePrompt.client.luau:34"
  ],
@@ -5652,13 +5653,13 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/EventosVisual.luau:180"
  ],
  "Helicóptero inimigo pousando perto de %s: ataque antes que os reforços saiam!": [
-  "src/ServerScriptService/Modules/EventosService.luau:670"
+  "src/ServerScriptService/Modules/EventosService.luau:673"
  ],
  "Helicóptero perto de %s": [
-  "src/ServerScriptService/Modules/EventosService.luau:1190"
+  "src/ServerScriptService/Modules/EventosService.luau:1193"
  ],
  "Helicóptero pousando perto de %s: você pode nascer nele!": [
-  "src/ServerScriptService/Modules/EventosService.luau:663"
+  "src/ServerScriptService/Modules/EventosService.luau:666"
  ],
  "Herói de Starlite": [
   "src/ReplicatedStorage/Shared/Temporada.luau:65"
@@ -5775,7 +5776,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/EmblemaImagem.luau:59"
  ],
  "Imobilizado": [
-  "src/ReplicatedStorage/Shared/Comboio.luau:164"
+  "src/ReplicatedStorage/Shared/Comboio.luau:177"
  ],
  "Inclinar": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:895"
@@ -5825,7 +5826,7 @@
   "src/ServerScriptService/Modules/CombatService.luau:584",
   "src/ServerScriptService/Modules/FieldWorkService.luau:256",
   "src/ServerScriptService/Modules/MedicalService.luau:565",
-  "src/ServerScriptService/Modules/VehicleService.luau:1940",
+  "src/ServerScriptService/Modules/VehicleService.luau:1946",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CasualtyScreen.luau:196",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/KnifeView.luau:578",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponVisuals.client.luau:973",
@@ -6262,7 +6263,7 @@
  ],
  "Longe demais": [
   "src/ReplicatedStorage/Shared/Vehicles.luau:564",
-  "src/ServerScriptService/Modules/VehicleService.luau:1824"
+  "src/ServerScriptService/Modules/VehicleService.luau:1830"
  ],
  "Loop": [
   "src/ReplicatedStorage/Shared/KnifeModel.luau:220"
@@ -6631,7 +6632,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaoJogador.luau:158"
  ],
  "Medevac: UH-34D pousado em %s por %d s. Feridos a até %d m são atendidos; caídos, evacuados.": [
-  "src/ServerScriptService/Modules/EventosService.luau:765"
+  "src/ServerScriptService/Modules/EventosService.luau:768"
  ],
  "Medium": [
   "src/ReplicatedFirst/Estilo.luau:154"
@@ -6881,7 +6882,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/EventosVisual.luau:178"
  ],
  "Morteiro! Granadas caindo em %s (%s) em %d s. Abrigue-se fora da área.": [
-  "src/ServerScriptService/Modules/EventosService.luau:394"
+  "src/ServerScriptService/Modules/EventosService.luau:397"
  ],
  "Morto em ação — origem não identificada": [
   "src/ReplicatedStorage/Shared/Casualty.luau:88"
@@ -7096,7 +7097,7 @@
  ],
  "Nam Yên (4)": [
   "src/ServerScriptService/Modules/ArtPlan.luau:1754",
-  "src/ServerScriptService/Modules/AssetLoader.luau:44"
+  "src/ServerScriptService/Modules/AssetLoader.luau:45"
  ],
  "Napalm": [
   "src/ServerScriptService/Modules/RodadaService.luau:207"
@@ -7307,7 +7308,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/FrontHud.client.luau:749"
  ],
  "O VC desarmou a carga no depósito.": [
-  "src/ServerScriptService/Modules/EventosService.luau:934"
+  "src/ServerScriptService/Modules/EventosService.luau:937"
  ],
  "O ano da operação em latão sobre o verde-escuro.": [
   "src/ReplicatedStorage/Shared/Cosmeticos.luau:927"
@@ -7332,10 +7333,10 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:509"
  ],
  "O depósito de munição foi destruído.": [
-  "src/ServerScriptService/Modules/EventosService.luau:967"
+  "src/ServerScriptService/Modules/EventosService.luau:970"
  ],
  "O depósito do VC ficou de pé.": [
-  "src/ServerScriptService/Modules/EventosService.luau:976"
+  "src/ServerScriptService/Modules/EventosService.luau:979"
  ],
  "O galpão na mata fechada, objetivo B.": [
   "src/ReplicatedStorage/Shared/Cosmeticos.luau:93"
@@ -7348,7 +7349,7 @@
   "src/ReplicatedStorage/Shared/Vantagens.luau:80"
  ],
  "O inimigo vai contra-atacar %s: segure por %d s.": [
-  "src/ServerScriptService/Modules/EventosService.luau:1008"
+  "src/ServerScriptService/Modules/EventosService.luau:1011"
  ],
  "O mercado abre quando o servidor mandar a lista do dia.": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:1451",
@@ -7521,7 +7522,7 @@
   "src/ServerScriptService/Modules/MatchService.luau:48",
   "src/ServerScriptService/Modules/MatchService.luau:164",
   "src/ServerScriptService/Modules/MatchService.luau:355",
-  "src/ServerScriptService/Modules/MatchService.luau:545",
+  "src/ServerScriptService/Modules/MatchService.luau:551",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaView.luau:1066",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaView.luau:1279",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaView.luau:2427",
@@ -7645,7 +7646,7 @@
   "src/ReplicatedStorage/Shared/Arquivo.luau:128"
  ],
  "Os tubos de 82 mm abriram fogo sobre %s (%s): impacto em %d s. Avance depois.": [
-  "src/ServerScriptService/Modules/EventosService.luau:383"
+  "src/ServerScriptService/Modules/EventosService.luau:386"
  ],
  "Os uniformes de época ficam no armário da loja.": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Progresso.client.luau:1002"
@@ -8235,8 +8236,8 @@
   "src/ReplicatedStorage/Shared/Medalhas.luau:83"
  ],
  "Plantar carga": [
-  "src/ServerScriptService/Modules/EventosService.luau:885",
-  "src/ServerScriptService/Modules/EventosService.luau:927"
+  "src/ServerScriptService/Modules/EventosService.luau:888",
+  "src/ServerScriptService/Modules/EventosService.luau:930"
  ],
  "Plaqueta do cartão": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CaixasTela.client.luau:96"
@@ -8428,7 +8429,7 @@
   "src/ServerScriptService/Modules/LogisticsService.luau:250"
  ],
  "Posto de socorro aberto em %s por %d s: feridos a até %d m são atendidos.": [
-  "src/ServerScriptService/Modules/EventosService.luau:779"
+  "src/ServerScriptService/Modules/EventosService.luau:782"
  ],
  "Posto fortificado": [
   "src/ReplicatedStorage/Shared/NascerPedido.luau:77"
@@ -8943,10 +8944,10 @@
   "src/ServerScriptService/Modules/CommanderService.luau:217"
  ],
  "Reforço da defesa": [
-  "src/ServerScriptService/Modules/ModoComboio.luau:380"
+  "src/ServerScriptService/Modules/ModoComboio.luau:409"
  ],
  "Reforço da escolta": [
-  "src/ServerScriptService/Modules/ModoComboio.luau:380"
+  "src/ServerScriptService/Modules/ModoComboio.luau:409"
  ],
  "Reforço pelo túnel": [
   "src/ReplicatedStorage/Shared/FireSupport.luau:196"
@@ -8980,10 +8981,10 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:1051"
  ],
  "Reparando": [
-  "src/ReplicatedStorage/Shared/Comboio.luau:165"
+  "src/ReplicatedStorage/Shared/Comboio.luau:178"
  ],
  "Reparar": [
-  "src/ServerScriptService/Modules/ModoComboio.luau:183"
+  "src/ServerScriptService/Modules/ModoComboio.luau:186"
  ],
  "Repelente na tira do capacete": [
   "src/ReplicatedStorage/Shared/Commerce.luau:414"
@@ -9763,11 +9764,11 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:2154"
  ],
  "Skirmish": [
-  "src/ServerScriptService/Modules/EventosService.luau:987",
+  "src/ServerScriptService/Modules/EventosService.luau:990",
   "src/ServerScriptService/Modules/MatchService.luau:167",
   "src/ServerScriptService/Modules/MatchService.luau:365",
   "src/ServerScriptService/Modules/MatchService.luau:385",
-  "src/ServerScriptService/Modules/MatchService.luau:545",
+  "src/ServerScriptService/Modules/MatchService.luau:551",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:204"
  ],
  "Skirmish (1 setor, 20 min)": [
@@ -9777,7 +9778,7 @@
   "src/ReplicatedStorage/Shared/GunModel.luau:126"
  ],
  "Smoke": [
-  "src/ServerScriptService/Modules/BotService.luau:560",
+  "src/ServerScriptService/Modules/BotService.luau:561",
   "src/ServerScriptService/Modules/Flutua.luau:211",
   "src/ServerScriptService/Modules/RodadaService.luau:197",
   "src/ServerScriptService/Modules/SmokeService.luau:31"
@@ -10301,7 +10302,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/AudioController.client.luau:849"
  ],
  "Tiro naval chegando em %s (%s)! Saia da área marcada: %d s.": [
-  "src/ServerScriptService/Modules/EventosService.luau:349"
+  "src/ServerScriptService/Modules/EventosService.luau:352"
  ],
  "Tiro principal": [
   "src/ReplicatedStorage/Shared/InputMap.luau:132"
@@ -10408,8 +10409,8 @@
  ],
  "Torre": [
   "src/ReplicatedStorage/Shared/VehicleDrive.luau:1147",
-  "src/ServerScriptService/Modules/VehicleService.luau:385",
-  "src/ServerScriptService/Modules/VehicleService.luau:425"
+  "src/ServerScriptService/Modules/VehicleService.luau:391",
+  "src/ServerScriptService/Modules/VehicleService.luau:431"
  ],
  "Torso": [
   "src/ServerScriptService/Modules/RadioService.luau:87"
@@ -10748,14 +10749,14 @@
   "src/ServerScriptService/Modules/ArtPlan.luau:795",
   "src/ServerScriptService/Modules/BotEscolta.luau:133",
   "src/ServerScriptService/Modules/BotEscolta.luau:251",
-  "src/ServerScriptService/Modules/BotService.luau:287",
-  "src/ServerScriptService/Modules/BotService.luau:287",
-  "src/ServerScriptService/Modules/BotService.luau:432",
-  "src/ServerScriptService/Modules/BotService.luau:1403",
-  "src/ServerScriptService/Modules/BotService.luau:1403",
-  "src/ServerScriptService/Modules/BotService.luau:2269",
-  "src/ServerScriptService/Modules/BotService.luau:2614",
-  "src/ServerScriptService/Modules/BotService.luau:2742",
+  "src/ServerScriptService/Modules/BotService.luau:288",
+  "src/ServerScriptService/Modules/BotService.luau:288",
+  "src/ServerScriptService/Modules/BotService.luau:433",
+  "src/ServerScriptService/Modules/BotService.luau:1404",
+  "src/ServerScriptService/Modules/BotService.luau:1404",
+  "src/ServerScriptService/Modules/BotService.luau:2289",
+  "src/ServerScriptService/Modules/BotService.luau:2634",
+  "src/ServerScriptService/Modules/BotService.luau:2762",
   "src/ServerScriptService/Modules/BotSquads.luau:182",
   "src/ServerScriptService/Modules/BotSquads.luau:182",
   "src/ServerScriptService/Modules/BotSquads.luau:253",
@@ -10775,22 +10776,22 @@
   "src/ServerScriptService/Modules/CompraVeiculoService.luau:223",
   "src/ServerScriptService/Modules/CompraVeiculoService.luau:223",
   "src/ServerScriptService/Modules/Comunicacao.luau:171",
-  "src/ServerScriptService/Modules/EventosService.luau:759",
-  "src/ServerScriptService/Modules/EventosService.luau:837",
-  "src/ServerScriptService/Modules/EventosService.luau:904",
-  "src/ServerScriptService/Modules/EventosService.luau:912",
-  "src/ServerScriptService/Modules/EventosService.luau:934",
-  "src/ServerScriptService/Modules/EventosService.luau:939",
-  "src/ServerScriptService/Modules/EventosService.luau:954",
-  "src/ServerScriptService/Modules/EventosService.luau:959",
-  "src/ServerScriptService/Modules/EventosService.luau:963",
+  "src/ServerScriptService/Modules/EventosService.luau:762",
+  "src/ServerScriptService/Modules/EventosService.luau:840",
+  "src/ServerScriptService/Modules/EventosService.luau:907",
+  "src/ServerScriptService/Modules/EventosService.luau:915",
+  "src/ServerScriptService/Modules/EventosService.luau:937",
+  "src/ServerScriptService/Modules/EventosService.luau:942",
+  "src/ServerScriptService/Modules/EventosService.luau:957",
+  "src/ServerScriptService/Modules/EventosService.luau:962",
   "src/ServerScriptService/Modules/EventosService.luau:966",
-  "src/ServerScriptService/Modules/EventosService.luau:976",
-  "src/ServerScriptService/Modules/EventosService.luau:1062",
-  "src/ServerScriptService/Modules/EventosService.luau:1145",
-  "src/ServerScriptService/Modules/EventosService.luau:1240",
-  "src/ServerScriptService/Modules/EventosService.luau:1246",
-  "src/ServerScriptService/Modules/EventosService.luau:1246",
+  "src/ServerScriptService/Modules/EventosService.luau:969",
+  "src/ServerScriptService/Modules/EventosService.luau:979",
+  "src/ServerScriptService/Modules/EventosService.luau:1065",
+  "src/ServerScriptService/Modules/EventosService.luau:1148",
+  "src/ServerScriptService/Modules/EventosService.luau:1243",
+  "src/ServerScriptService/Modules/EventosService.luau:1249",
+  "src/ServerScriptService/Modules/EventosService.luau:1249",
   "src/ServerScriptService/Modules/FieldService.luau:160",
   "src/ServerScriptService/Modules/FieldService.luau:306",
   "src/ServerScriptService/Modules/FieldService.luau:457",
@@ -10816,18 +10817,18 @@
   "src/ServerScriptService/Modules/MatchService.luau:203",
   "src/ServerScriptService/Modules/MatchService.luau:214",
   "src/ServerScriptService/Modules/MatchService.luau:421",
-  "src/ServerScriptService/Modules/MatchService.luau:442",
-  "src/ServerScriptService/Modules/MatchService.luau:500",
-  "src/ServerScriptService/Modules/MatchService.luau:557",
-  "src/ServerScriptService/Modules/MatchService.luau:558",
-  "src/ServerScriptService/Modules/MatchService.luau:571",
+  "src/ServerScriptService/Modules/MatchService.luau:448",
+  "src/ServerScriptService/Modules/MatchService.luau:506",
+  "src/ServerScriptService/Modules/MatchService.luau:563",
+  "src/ServerScriptService/Modules/MatchService.luau:564",
+  "src/ServerScriptService/Modules/MatchService.luau:577",
   "src/ServerScriptService/Modules/MedicalService.luau:285",
   "src/ServerScriptService/Modules/MeleeService.luau:480",
-  "src/ServerScriptService/Modules/ModoComboio.luau:37",
-  "src/ServerScriptService/Modules/ModoComboio.luau:45",
-  "src/ServerScriptService/Modules/ModoComboio.luau:45",
-  "src/ServerScriptService/Modules/ModoComboio.luau:272",
-  "src/ServerScriptService/Modules/ModoComboio.luau:351",
+  "src/ServerScriptService/Modules/ModoComboio.luau:39",
+  "src/ServerScriptService/Modules/ModoComboio.luau:47",
+  "src/ServerScriptService/Modules/ModoComboio.luau:47",
+  "src/ServerScriptService/Modules/ModoComboio.luau:277",
+  "src/ServerScriptService/Modules/ModoComboio.luau:380",
   "src/ServerScriptService/Modules/ModoFrente.luau:23",
   "src/ServerScriptService/Modules/ModoFrente.luau:37",
   "src/ServerScriptService/Modules/ModoFrente.luau:57",
@@ -11220,15 +11221,15 @@
   "src/ServerScriptService/Modules/ArtPlan.luau:795",
   "src/ServerScriptService/Modules/BotEscolta.luau:133",
   "src/ServerScriptService/Modules/BotEscolta.luau:251",
-  "src/ServerScriptService/Modules/BotService.luau:287",
-  "src/ServerScriptService/Modules/BotService.luau:447",
-  "src/ServerScriptService/Modules/BotService.luau:1403",
-  "src/ServerScriptService/Modules/BotService.luau:1751",
-  "src/ServerScriptService/Modules/BotService.luau:2147",
-  "src/ServerScriptService/Modules/BotService.luau:2457",
-  "src/ServerScriptService/Modules/BotService.luau:2614",
-  "src/ServerScriptService/Modules/BotService.luau:2704",
-  "src/ServerScriptService/Modules/BotService.luau:2742",
+  "src/ServerScriptService/Modules/BotService.luau:288",
+  "src/ServerScriptService/Modules/BotService.luau:448",
+  "src/ServerScriptService/Modules/BotService.luau:1404",
+  "src/ServerScriptService/Modules/BotService.luau:1752",
+  "src/ServerScriptService/Modules/BotService.luau:2167",
+  "src/ServerScriptService/Modules/BotService.luau:2477",
+  "src/ServerScriptService/Modules/BotService.luau:2634",
+  "src/ServerScriptService/Modules/BotService.luau:2724",
+  "src/ServerScriptService/Modules/BotService.luau:2762",
   "src/ServerScriptService/Modules/BotSquads.luau:182",
   "src/ServerScriptService/Modules/BotSquads.luau:253",
   "src/ServerScriptService/Modules/BotTunnels.luau:128",
@@ -11245,18 +11246,18 @@
   "src/ServerScriptService/Modules/CommanderService.luau:251",
   "src/ServerScriptService/Modules/CompraVeiculoService.luau:223",
   "src/ServerScriptService/Modules/Comunicacao.luau:171",
-  "src/ServerScriptService/Modules/EventosService.luau:844",
-  "src/ServerScriptService/Modules/EventosService.luau:854",
-  "src/ServerScriptService/Modules/EventosService.luau:919",
-  "src/ServerScriptService/Modules/EventosService.luau:925",
-  "src/ServerScriptService/Modules/EventosService.luau:933",
-  "src/ServerScriptService/Modules/EventosService.luau:945",
-  "src/ServerScriptService/Modules/EventosService.luau:967",
-  "src/ServerScriptService/Modules/EventosService.luau:971",
-  "src/ServerScriptService/Modules/EventosService.luau:972",
+  "src/ServerScriptService/Modules/EventosService.luau:847",
+  "src/ServerScriptService/Modules/EventosService.luau:857",
+  "src/ServerScriptService/Modules/EventosService.luau:922",
+  "src/ServerScriptService/Modules/EventosService.luau:928",
+  "src/ServerScriptService/Modules/EventosService.luau:936",
+  "src/ServerScriptService/Modules/EventosService.luau:948",
+  "src/ServerScriptService/Modules/EventosService.luau:970",
+  "src/ServerScriptService/Modules/EventosService.luau:974",
   "src/ServerScriptService/Modules/EventosService.luau:975",
-  "src/ServerScriptService/Modules/EventosService.luau:1063",
-  "src/ServerScriptService/Modules/EventosService.luau:1246",
+  "src/ServerScriptService/Modules/EventosService.luau:978",
+  "src/ServerScriptService/Modules/EventosService.luau:1066",
+  "src/ServerScriptService/Modules/EventosService.luau:1249",
   "src/ServerScriptService/Modules/FieldService.luau:257",
   "src/ServerScriptService/Modules/FieldService.luau:319",
   "src/ServerScriptService/Modules/FieldWorkService.luau:272",
@@ -11268,11 +11269,11 @@
   "src/ServerScriptService/Modules/MatchService.luau:72",
   "src/ServerScriptService/Modules/MatchService.luau:203",
   "src/ServerScriptService/Modules/MatchService.luau:421",
-  "src/ServerScriptService/Modules/MatchService.luau:442",
-  "src/ServerScriptService/Modules/MatchService.luau:500",
-  "src/ServerScriptService/Modules/MatchService.luau:557",
-  "src/ServerScriptService/Modules/MatchService.luau:558",
-  "src/ServerScriptService/Modules/MatchService.luau:571",
+  "src/ServerScriptService/Modules/MatchService.luau:448",
+  "src/ServerScriptService/Modules/MatchService.luau:506",
+  "src/ServerScriptService/Modules/MatchService.luau:563",
+  "src/ServerScriptService/Modules/MatchService.luau:564",
+  "src/ServerScriptService/Modules/MatchService.luau:577",
   "src/ServerScriptService/Modules/MedicalService.luau:285",
   "src/ServerScriptService/Modules/MedicalService.luau:285",
   "src/ServerScriptService/Modules/MedicalService.luau:321",
@@ -11281,8 +11282,8 @@
   "src/ServerScriptService/Modules/MeleeService.luau:480",
   "src/ServerScriptService/Modules/MeleeService.luau:506",
   "src/ServerScriptService/Modules/MeleeService.luau:535",
-  "src/ServerScriptService/Modules/ModoComboio.luau:45",
-  "src/ServerScriptService/Modules/ModoComboio.luau:272",
+  "src/ServerScriptService/Modules/ModoComboio.luau:47",
+  "src/ServerScriptService/Modules/ModoComboio.luau:277",
   "src/ServerScriptService/Modules/ModoFrente.luau:21",
   "src/ServerScriptService/Modules/ModoFrente.luau:37",
   "src/ServerScriptService/Modules/ModoFrente.luau:57",
@@ -11565,7 +11566,7 @@
  ],
  "Vehicles": [
   "src/ServerScriptService/Modules/BotVehicles.luau:606",
-  "src/ServerScriptService/Modules/EventosService.luau:515",
+  "src/ServerScriptService/Modules/EventosService.luau:518",
   "src/ServerScriptService/Modules/Flutua.luau:211"
  ],
  "Velocidade": [
@@ -11650,7 +11651,7 @@
   "src/ReplicatedStorage/Shared/Vehicles.luau:560"
  ],
  "Veículo desvirado": [
-  "src/ServerScriptService/Modules/VehicleService.luau:1879"
+  "src/ServerScriptService/Modules/VehicleService.luau:1885"
  ],
  "Veículo do outro lado": [
   "src/ReplicatedStorage/Shared/Vehicles.luau:558"
@@ -11673,7 +11674,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaoJogador.luau:211"
  ],
  "Vidro": [
-  "src/ServerScriptService/Modules/AssetLoader.luau:209"
+  "src/ServerScriptService/Modules/AssetLoader.luau:210"
  ],
  "Vidro vulcânico negro com reflexo roxo.": [
   "src/ReplicatedStorage/Shared/Cosmeticos.luau:651"
@@ -11727,7 +11728,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaView.luau:2366"
  ],
  "Você agora é %s neste combate": [
-  "src/ServerScriptService/Modules/VehicleService.luau:1982"
+  "src/ServerScriptService/Modules/VehicleService.luau:1988"
  ],
  "Você deixa o squad e escolhe outro antes de voltar ao campo.": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:975"
@@ -11861,12 +11862,12 @@
   "src/ReplicatedStorage/Shared/BotBrain.luau:1234"
  ],
  "Warfare": [
-  "src/ServerScriptService/Modules/EventosService.luau:987",
+  "src/ServerScriptService/Modules/EventosService.luau:990",
   "src/ServerScriptService/Modules/MatchService.luau:37",
   "src/ServerScriptService/Modules/MatchService.luau:48",
   "src/ServerScriptService/Modules/MatchService.luau:335",
-  "src/ServerScriptService/Modules/MatchService.luau:538",
-  "src/ServerScriptService/Modules/MatchService.luau:545",
+  "src/ServerScriptService/Modules/MatchService.luau:544",
+  "src/ServerScriptService/Modules/MatchService.luau:551",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/AfterActionController.client.luau:435",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/FrontHud.client.luau:1127",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:204",
@@ -11930,8 +11931,8 @@
  ],
  "Wood": [
   "src/ReplicatedStorage/Shared/BotBrain.luau:1228",
-  "src/ServerScriptService/Modules/AssetLoader.luau:103",
-  "src/ServerScriptService/Modules/AssetLoader.luau:237",
+  "src/ServerScriptService/Modules/AssetLoader.luau:104",
+  "src/ServerScriptService/Modules/AssetLoader.luau:238",
   "src/ServerScriptService/Modules/CaixaMunicaoService.luau:175",
   "src/ServerScriptService/Modules/Gear.luau:537",
   "src/ServerScriptService/Modules/Gear.luau:722",
@@ -12085,7 +12086,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Toast.luau:133"
  ],
  "^Pa_%d+$": [
-  "src/ServerScriptService/Modules/VehicleService.luau:1269",
+  "src/ServerScriptService/Modules/VehicleService.luau:1275",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleFx.client.luau:673"
  ],
  "^Pancada de chuva": [
@@ -12116,8 +12117,8 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/AfterActionController.client.luau:195"
  ],
  "^Trim_%u$": [
-  "src/ServerScriptService/Modules/AssetLoader.luau:138",
-  "src/ServerScriptService/Modules/AssetLoader.luau:147"
+  "src/ServerScriptService/Modules/AssetLoader.luau:139",
+  "src/ServerScriptService/Modules/AssetLoader.luau:148"
  ],
  "^Tunnel_%d+_floor$": [
   "src/ServerScriptService/Modules/MapLife.luau:506"
@@ -12203,13 +12204,13 @@
   "src/ServerScriptService/Modules/InteriorLuz.luau:105"
  ],
  "a %.0f m": [
-  "src/ServerScriptService/Modules/VehicleService.luau:2104"
+  "src/ServerScriptService/Modules/VehicleService.luau:2110"
  ],
  "a partida acabou": [
   "src/ServerScriptService/Modules/CommanderService.luau:77"
  ],
  "a área marcada": [
-  "src/ServerScriptService/Modules/EventosService.luau:103"
+  "src/ServerScriptService/Modules/EventosService.luau:104"
  ],
  "a:reset": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:915"
@@ -12551,7 +12552,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/GameMenu.client.luau:888"
  ],
  "avançando": [
-  "src/ServerScriptService/Modules/BotService.luau:2244"
+  "src/ServerScriptService/Modules/BotService.luau:2264"
  ],
  "aviso": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/EventosVisual.luau:112",
@@ -12628,7 +12629,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/EventoCartao.luau:120"
  ],
  "barragem chegando": [
-  "src/ServerScriptService/Modules/EventosService.luau:1176"
+  "src/ServerScriptService/Modules/EventosService.luau:1179"
  ],
  "base": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ArteCatalogo.luau:166"
@@ -13088,10 +13089,10 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:2696"
  ],
  "comboio": [
-  "src/ServerScriptService/Modules/ModoComboio.luau:379"
+  "src/ServerScriptService/Modules/ModoComboio.luau:408"
  ],
  "comboio:": [
-  "src/ServerScriptService/Modules/ModoComboio.luau:379"
+  "src/ServerScriptService/Modules/ModoComboio.luau:408"
  ],
  "comemoracao": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ArmarioTela.luau:45",
@@ -13240,7 +13241,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/EventoCartao.luau:100"
  ],
  "contra-ataque": [
-  "src/ServerScriptService/Modules/BotService.luau:2822"
+  "src/ServerScriptService/Modules/BotService.luau:2842"
  ],
  "controle": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ComoJogar.luau:179",
@@ -13402,7 +13403,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Movement.client.luau:1280"
  ],
  "de olho": [
-  "src/ServerScriptService/Modules/BotService.luau:2248"
+  "src/ServerScriptService/Modules/BotService.luau:2268"
  ],
  "debris": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/VehicleFx.client.luau:192",
@@ -13418,7 +13419,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Progresso.client.luau:949"
  ],
  "defesa do destino": [
-  "src/ServerScriptService/Modules/ModoComboio.luau:207"
+  "src/ServerScriptService/Modules/ModoComboio.luau:210"
  ],
  "demo": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/SpawnTransition.luau:725",
@@ -13650,7 +13651,7 @@
   "src/ReplicatedStorage/Shared/SpawnRules.luau:212"
  ],
  "em contato": [
-  "src/ServerScriptService/Modules/BotService.luau:2839"
+  "src/ServerScriptService/Modules/BotService.luau:2859"
  ],
  "em veículo": [
   "src/ReplicatedStorage/Shared/SpawnRules.luau:204"
@@ -13829,10 +13830,10 @@
   "src/ReplicatedStorage/Shared/Eventos.luau:146"
  ],
  "evento": [
-  "src/ServerScriptService/Modules/EventosService.luau:114"
+  "src/ServerScriptService/Modules/EventosService.luau:115"
  ],
  "evento:": [
-  "src/ServerScriptService/Modules/EventosService.luau:114"
+  "src/ServerScriptService/Modules/EventosService.luau:115"
  ],
  "eventos": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaView.luau:336",
@@ -14447,7 +14448,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/TutorialController.client.luau:74"
  ],
  "homem %d": [
-  "src/ServerScriptService/Modules/BotService.luau:2283"
+  "src/ServerScriptService/Modules/BotService.luau:2303"
  ],
  "hq": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaView.luau:1764"
@@ -14503,7 +14504,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/UiKit.luau:1478"
  ],
  "indo ao abrigo": [
-  "src/ServerScriptService/Modules/BotService.luau:2245"
+  "src/ServerScriptService/Modules/BotService.luau:2265"
  ],
  "infantry": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/DeployScreen.luau:405",
@@ -15041,18 +15042,18 @@
  ],
  "lz": [
   "src/ReplicatedStorage/Shared/NascerPedido.luau:66",
-  "src/ServerScriptService/Modules/EventosService.luau:1187",
+  "src/ServerScriptService/Modules/EventosService.luau:1190",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaView.luau:502",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaView.luau:1321"
  ],
  "lz:": [
   "src/ReplicatedStorage/Shared/NascerPedido.luau:66",
-  "src/ServerScriptService/Modules/EventosService.luau:1187",
+  "src/ServerScriptService/Modules/EventosService.luau:1190",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaView.luau:502",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CartaView.luau:1321"
  ],
  "líder (atraso %.0f m)": [
-  "src/ServerScriptService/Modules/BotService.luau:2282"
+  "src/ServerScriptService/Modules/BotService.luau:2302"
  ],
  "m/s": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Preparacao.luau:840"
@@ -15760,7 +15761,7 @@
   "src/ReplicatedStorage/Shared/FieldWork.luau:58"
  ],
  "não, terreno antigo": [
-  "src/ServerScriptService/Modules/AssetLoader.luau:855"
+  "src/ServerScriptService/Modules/AssetLoader.luau:856"
  ],
  "o efeito é o da granada de mão grenade_us (5 m letal), PLACEHOLDER": [
   "src/ReplicatedStorage/Shared/Weapons.luau:263"
@@ -15821,7 +15822,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/HudCampo.client.luau:1324"
  ],
  "origem do comboio": [
-  "src/ServerScriptService/Modules/ModoComboio.luau:206"
+  "src/ServerScriptService/Modules/ModoComboio.luau:209"
  ],
  "other": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:122",
@@ -15938,16 +15939,16 @@
   "src/ServerScriptService/Modules/ArtPlan.luau:1262",
   "src/ServerScriptService/Modules/ArtPlan.luau:1291",
   "src/ServerScriptService/Modules/ArtPlan.luau:1389",
-  "src/ServerScriptService/Modules/AssetLoader.luau:679",
-  "src/ServerScriptService/Modules/AssetLoader.luau:915"
+  "src/ServerScriptService/Modules/AssetLoader.luau:680",
+  "src/ServerScriptService/Modules/AssetLoader.luau:916"
  ],
  "parts:": [
   "src/ServerScriptService/Modules/ArtPlan.luau:889",
   "src/ServerScriptService/Modules/ArtPlan.luau:1262",
   "src/ServerScriptService/Modules/ArtPlan.luau:1291",
   "src/ServerScriptService/Modules/ArtPlan.luau:1389",
-  "src/ServerScriptService/Modules/AssetLoader.luau:679",
-  "src/ServerScriptService/Modules/AssetLoader.luau:915"
+  "src/ServerScriptService/Modules/AssetLoader.luau:680",
+  "src/ServerScriptService/Modules/AssetLoader.luau:916"
  ],
  "parts:barco": [
   "src/ServerScriptService/Modules/ArtPlan.luau:315",
@@ -16934,7 +16935,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CaixaMunicao.client.luau:276"
  ],
  "sem contato": [
-  "src/ServerScriptService/Modules/BotService.luau:2839"
+  "src/ServerScriptService/Modules/BotService.luau:2859"
  ],
  "sem espaço": [
   "src/ReplicatedStorage/Shared/CaixaMunicao.luau:130",
@@ -18327,7 +18328,7 @@
   "src/ServerScriptService/Modules/CompraVeiculoService.luau:321"
  ],
  "túnel %s": [
-  "src/ServerScriptService/Modules/BotService.luau:2285"
+  "src/ServerScriptService/Modules/BotService.luau:2305"
  ],
  "u_%d": [
   "src/ServerScriptService/Modules/CampanhaService.luau:470",
