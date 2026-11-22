@@ -10209,3 +10209,16 @@ janelas e a capa. Progressão, direção de arte, telas, Comboio e áudios segue
   (`tools/blender/carreira_medalhas.py`), ícones por código (`tools/carreira_icones.py`), em 4 idiomas.
 - **Números de design:** PLACEHOLDER até o teste com jogadores.
 - **Medido:** Lune 997 ok, pytest 84, autoteste 18 de 18. Detalhes em `testes/LOTE116_D247_2026-11-22.md`.
+
+### D-248 — Lote 117: direção de arte, parte 1: a luz do key art (2026-11-22)
+
+**Pedido do dono:** "quero esse estilo igual das imagens de vibe, textura, graficos, iluminação, coloração".
+- **Padrão:** a partida agora nasce no fim de tarde (`Horarios.PADRAO = "tarde"`). Manhã, meio-dia e noite seguem
+  na votação, com a luz de antes.
+- **Luz:** sol a 7,8°, ambiente quente, atmosfera com horizonte alaranjado, brilho e raios mais fortes, saturação
+  +0,18. Valores escolhidos no Studio, comparando com o key art.
+- **Relógio parado nesse horário:** o sol se põe em 40 min e a partida dura 75: sem isso, ela escureceria.
+- **Pele:** tons quentes (D-246).
+- **O que a direção de arte ainda pede:** materiais e texturas sujas em soldados, armas e veículos; casas e
+  vegetação; telas no estilo latão; Comboio; áudios da Toolbox.
+- **Medido:** autoteste 18 de 18, sem erro de script. Detalhes em `testes/LOTE117_D248_2026-11-22.md`.

@@ -14,8 +14,24 @@ export type Luz = {
 	exposicao: number,
 	tinta: { number },
 	saturacao: number,
+	-- D-248: o que faz o fim de tarde das imagens do dono (sem estes campos, valem os do place)
+	ambiente: { number }?,
+	externo: { number }?,
+	contraste: number?,
+	atm: Atm?,
+	bloom: { i: number, s: number, t: number }?,
+	raios: { i: number, s: number }?,
 }
-export type Horario = { id: string, nome: string, desc: string, hora: number, luz: Luz }
+export type Atm = {
+	densidade: number,
+	deslocamento: number,
+	haze: number,
+	brilho: number,
+	cor: { number },
+	decai: { number },
+}
+-- `parado`: o relógio não anda (a partida dura mais que a luz dourada, que acaba em 40 min)
+export type Horario = { id: string, nome: string, desc: string, hora: number, parado: boolean?, luz: Luz }
 
 Horarios.LISTA = {
 	{
@@ -51,13 +67,29 @@ Horarios.LISTA = {
 		nome = "FIM DE TARDE",
 		desc = "Luz dourada, sombras longas",
 		hora = 18.5, -- às 17h20 o sol ainda estava alto (medido no Studio); o pôr do sol é perto das 19h10
+		parado = true,
+		-- D-248 (dono: "quero esse estilo igual das imagens"): sol baixo, céu azul e horizonte quente,
+		-- pele e madeira douradas. Valores escolhidos no Studio, olhando o key art.
 		luz = {
 			cor = { 168, 118, 92 },
 			mistura = 0.15,
-			brilho = 1,
+			brilho = 1.086,
 			exposicao = 0.05,
-			tinta = { 255, 226, 190 },
-			saturacao = 0.06,
+			tinta = { 255, 232, 196 },
+			saturacao = 0.18,
+			ambiente = { 84, 62, 46 },
+			externo = { 150, 116, 92 },
+			contraste = 0.05,
+			atm = {
+				densidade = 0.3,
+				deslocamento = 0.2,
+				haze = 1.75,
+				brilho = 0.3,
+				cor = { 255, 198, 142 },
+				decai = { 196, 120, 92 },
+			},
+			bloom = { i = 0.72, s = 34, t = 1.05 },
+			raios = { i = 0.16, s = 0.8 },
 		},
 	},
 	{
@@ -76,7 +108,7 @@ Horarios.LISTA = {
 	},
 } :: { Horario }
 
-Horarios.PADRAO = "manha"
+Horarios.PADRAO = "tarde" -- D-248: a luz das imagens do dono
 
 function Horarios.por(id: any): Horario?
 	for _, h in Horarios.LISTA do
