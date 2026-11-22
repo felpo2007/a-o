@@ -11,7 +11,7 @@ verified_commit: 5f83094
 Compacto de propósito. Detalhe lote a lote: `PROGRESS.md`.
 
 ## No ar
-- **v151** (versão 156 do place, lote 119, D-250), do commit `eda9cf1`.
+- **v152** (versão 157 do place, lote 120, D-251 e D-252), do commit `d373747`.
 - A capa da página é o key art STARLITE: Vietnã 1965 (ícone e primeira miniatura).
 - O jogo publicado usa só o [[Mapa-Principal]] de 700 × 700 m.
 
