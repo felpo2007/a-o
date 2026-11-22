@@ -55,4 +55,4 @@ partida, não proibição.
 ## Não entra aqui
 Código copiado, logs, conversa, segredos, IDs de conta. **O repositório é público.**
 
-Índice dos sistemas: [[02-SYSTEM-INDEX]].
+Índice dos sistemas: [[02-SYSTEM-INDEX]]. Skills e quando usar: [[Skills]].

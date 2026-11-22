@@ -31,6 +31,7 @@ KB = RAIZ / "knowledge"
 SRC = RAIZ / "src"
 DESIGN = RAIZ / "DESIGN.md"
 CLAUDE = RAIZ / "CLAUDE.md"
+SKILLS = RAIZ / ".claude" / "skills"
 ORCA = SRC / "ServerScriptService" / "Modules" / "ArtBudget.luau"
 NET = SRC / "ReplicatedStorage" / "Shared" / "Net.luau"
 MAPAS = SRC / "ReplicatedStorage" / "Shared" / "MapasRet.luau"
@@ -471,6 +472,29 @@ def cmd_mapa(args: list[str]) -> int:
     return 0
 
 
+def problemas_skills() -> list[str]:
+    """Skill instalada: nome igual ao da pasta, origem e licença, e nenhum arquivo executável."""
+    erros: list[str] = []
+    if not SKILLS.is_dir():
+        return erros
+    proprias = {"map-design", "viewmodel"}
+    for d in sorted(p for p in SKILLS.iterdir() if p.is_dir()):
+        arq = d / "SKILL.md"
+        if not arq.is_file():
+            erros.append(f"skill {d.name}: sem SKILL.md")
+            continue
+        if frontmatter(ler(arq)).get("name") != d.name:
+            erros.append(f"skill {d.name}: name diferente da pasta")
+        if d.name not in proprias:
+            for x in ("LICENSE", "UPSTREAM.md"):
+                if not (d / x).is_file():
+                    erros.append(f"skill {d.name}: falta {x}")
+        for f in d.rglob("*"):
+            if f.is_file() and f.suffix.lower() not in {".md", ".luau", ".txt", ""}:
+                erros.append(f"skill {d.name}: arquivo não permitido: {f.name}")
+    return erros
+
+
 def problemas() -> tuple[list[str], list[str]]:
     erros: list[str] = []
     avisos: list[str] = []
@@ -507,6 +531,7 @@ def problemas() -> tuple[list[str], list[str]]:
                     erros.append(f"{nome}: possível segredo ({m[0][:12]}...)")
         if t.count("\n") > LIMITE_NOTA:
             avisos.append(f"{nome}: {t.count(chr(10))} linhas (acima de {LIMITE_NOTA})")
+    erros += problemas_skills()
     return erros, avisos
 
 

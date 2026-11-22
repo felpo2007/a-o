@@ -27,3 +27,4 @@ Só o que existe no código. Para achar um módulo: `uv run python tools/kb.py o
 | Desempenho | [[Performance-Baseline]], [[Arte-Fixa-e-Texturas]] | `src/ServerScriptService/Modules/ArtBudget.luau` |
 | Testes | [[Test-Strategy]], [[Studio-Metodo]], [[Studio-Ganchos]], [[Ferramentas]] | `tools/dev/verifica.ps1` |
 | Erros resolvidos | [[Licoes]] | |
+| Skills | [[Skills]] | `.claude/skills` |

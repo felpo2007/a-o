@@ -10,6 +10,7 @@ Este arquivo é um mapa: o conhecimento fica em `knowledge/` (abre como cofre do
 2. **Busque antes de ler:** `uv run python tools/kb.py onde <termos>`. Abra de 1 a 3 notas, só o trecho.
 3. **Verifique no código.** A nota pode estar velha: código e testes são a verdade do que existe.
 4. **Amplie só se faltar.** Nunca leia `knowledge/`, `DESIGN.md` ou `PROGRESS.md` inteiros.
+5. **Use uma skill quando ela trouxer ganho** (`knowledge/Skills.md`). Skill nova só depois de revisar.
 
 Consultas que leem o código na hora (`uv run python tools/kb.py ...`):
 `modulo <Nome>`, `remote <Nome>`, `decisao D-243 [--texto]`, `ativo <termo>`, `mapa frente C`,
@@ -35,6 +36,7 @@ Consultas que leem o código na hora (`uv run python tools/kb.py ...`):
 | Desempenho | `Optimization/Performance-Baseline.md` |
 | Erros já resolvidos | `Bugs-Lessons/Licoes.md` |
 | Decisões D-xxx | `DESIGN.md`, por `kb.py decisao` |
+| Skills e quando usar cada uma | `Skills.md` |
 | O que só o dono faz | `TODO_USUARIO.md` |
 
 ## Convenções
@@ -76,7 +78,7 @@ sem perguntar a cada passo: pergunte só o que for mesmo dele. Publicar só quan
 - Segredos só no `.env` (no `.gitignore`), nunca no código nem no chat.
 - ForgeGUI: nunca regenerar um job em `outcome_unknown`. "failed" com `retryable` pode ser
   retomado com `generation_retry`.
-- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-245) e atualize `PROGRESS.md`.
+- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-246) e atualize `PROGRESS.md`.
 - Tetos de triângulos por modelo: vegetação ≤ 6 mil (D-135), props e herói ≤ 20 mil (`ArtBudget`,
   conferido pelo teste da F5).
 - Commits no branch acima, com mensagem em português.

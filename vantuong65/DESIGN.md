@@ -10150,3 +10150,15 @@ em `testes/D-243_vale_2026-11-22.md`.
   - O repositório é público: `kb.py check` procura segredos e e-mails nas notas.
   - Os ajudantes de build e teste saíram da pasta temporária para `tools/dev`.
 - **Sistemas afetados:** só documentação e ferramentas. Nenhum arquivo em `src/` mudou.
+
+### D-245 — Skills do projeto (2026-11-22)
+
+- **Problema:** o dono pediu as skills `roblox-dev`, `map-design`, `surf-map-design` e `viewmodel`, e outras que ajudem no jogo.
+  Skill vira instrução do agente nas sessões seguintes, então a origem e o conteúdo precisam ser conferidos.
+- **Escolha:** `.claude/skills/` na pasta do jogo, só com arquivos de texto, commit fixo, licença e `UPSTREAM.md`. Os instaladores
+  dos repositórios **não foram executados**.
+- **Instaladas:** `roblox-dev` (MSayib, MIT) e, do catálogo `gamedev-skills` (Apache-2.0): `fps-shooter`, `level-design`,
+  `performance-optimization`, `game-ai`, `game-feel`, `game-ui-ux` e `input-systems`.
+- **Próprias:** `map-design` e `viewmodel`. Não há versão pública com esses nomes; estas registram o método real do jogo.
+- **Fora:** `surf-map-design` (não encontrada e de outro gênero). Lista das recusadas em `knowledge/Skills.md`.
+- **Consequência:** `kb.py check` recusa skill sem origem, sem licença ou com arquivo executável.
