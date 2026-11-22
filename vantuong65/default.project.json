@@ -73,36 +73,36 @@
         "GlobalShadows": true,
         "EnvironmentDiffuseScale": 1,
         "EnvironmentSpecularScale": 1,
-        "Brightness": 3.2,
-        "ExposureCompensation": 0.1,
-        "ShadowSoftness": 0.18,
+        "Brightness": 3.5,
+        "ExposureCompensation": 0.06,
+        "ShadowSoftness": 0.14,
         "OutdoorAmbient": [
-          0.55,
-          0.48,
-          0.38
+          0.46,
+          0.45,
+          0.45
         ],
         "Ambient": [
-          0.16,
-          0.15,
-          0.13
+          0.2,
+          0.175,
+          0.145
         ]
       },
       "Atmosphere": {
         "$className": "Atmosphere",
         "$properties": {
           "Density": 0.3,
-          "Offset": 0.3,
+          "Offset": 0.16,
           "Haze": 1.1,
           "Glare": 0.4,
           "Color": [
-            0.86,
-            0.8,
-            0.7
+            0.84,
+            0.82,
+            0.78
           ],
           "Decay": [
-            0.62,
+            0.55,
             0.52,
-            0.4
+            0.5
           ]
         }
       },
@@ -123,29 +123,29 @@
       "ColorCorrection": {
         "$className": "ColorCorrectionEffect",
         "$properties": {
-          "Saturation": -0.05,
-          "Contrast": 0.15,
-          "Brightness": 0.01,
+          "Saturation": 0.02,
+          "Contrast": 0.2,
+          "Brightness": 0,
           "TintColor": [
             1.0,
-            0.93,
-            0.83
+            0.955,
+            0.89
           ]
         }
       },
       "Bloom": {
         "$className": "BloomEffect",
         "$properties": {
-          "Intensity": 0.35,
-          "Size": 24,
-          "Threshold": 1.4
+          "Intensity": 0.5,
+          "Size": 28,
+          "Threshold": 1.2
         }
       },
       "SunRays": {
         "$className": "SunRaysEffect",
         "$properties": {
-          "Intensity": 0.05,
-          "Spread": 0.6
+          "Intensity": 0.09,
+          "Spread": 0.7
         }
       }
     }

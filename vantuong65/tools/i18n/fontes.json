@@ -287,6 +287,7 @@
  "%d:%d": [
   "src/ServerScriptService/Modules/CampanhaService.luau:810",
   "src/ServerScriptService/Modules/FieldWorkService.luau:78",
+  "src/ServerScriptService/Modules/InteriorLuz.luau:107",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Marcadores.luau:208"
  ],
  "%dD %dH": [
@@ -1726,6 +1727,9 @@
  "Aqui só visual, apoio e os kits (que também saem jogando). Vantagens: aba própria, com teto.": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ShopController.client.luau:2089"
  ],
+ "Arame": [
+  "src/ServerScriptService/Modules/InteriorLuz.luau:51"
+ ],
  "Arimo": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Traducao.client.luau:45"
  ],
@@ -2139,6 +2143,7 @@
   "src/ReplicatedStorage/Shared/GrenadeArt.luau:130",
   "src/ReplicatedStorage/Shared/KnifeModel.luau:162",
   "src/ReplicatedStorage/Shared/KnifeModel.luau:233",
+  "src/ServerScriptService/Modules/InteriorLuz.luau:48",
   "src/ServerScriptService/Modules/MapLife.luau:869",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/WeaponVisuals.client.luau:240"
  ],
@@ -5407,6 +5412,9 @@
  ],
  "Glifo": [
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Toast.luau:444"
+ ],
+ "Globo": [
+  "src/ServerScriptService/Modules/InteriorLuz.luau:37"
  ],
  "Golf": [
   "src/ReplicatedStorage/Shared/Roles.luau:47"
@@ -9964,6 +9972,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/EditorHud.client.luau:459"
  ],
  "Tampa": [
+  "src/ServerScriptService/Modules/InteriorLuz.luau:42",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CaixasTela.client.luau:702",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/CenaComemoracao.luau:222",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/LobbyScene.luau:919",
@@ -12020,6 +12029,9 @@
  ],
  "^vila_casa": [
   "src/ServerScriptService/Modules/Flutua.luau:137"
+ ],
+ "^vila_casa_%d+$": [
+  "src/ServerScriptService/Modules/InteriorLuz.luau:105"
  ],
  "a %.0f m": [
   "src/ServerScriptService/Modules/VehicleService.luau:2100"
@@ -15410,6 +15422,7 @@
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Interagir.client.luau:51",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Interagir.client.luau:248",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/Interagir.client.luau:248",
+  "src/StarterPlayer/StarterPlayerScripts/Controllers/InteriorVivo.client.luau:133",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ItemArte.luau:234",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ItemArte.luau:257",
   "src/StarterPlayer/StarterPlayerScripts/Controllers/ItemArte.luau:257",

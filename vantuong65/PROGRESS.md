@@ -1144,7 +1144,14 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
       identificados.
     - Relatório: `testes/LOTE112_D240_2026-11-22.md`.
     - **v144 publicada** (versão 149 do place, commit 3c646a3).
-  - **Falta do pedido de 21/11:** lote 113 (gráficos, casas e interiores, terreno, vegetação, soldados, skins).
+  - **Lote 113 (D-241): 5º do pedido de 21/11, feito.** Luz nova nos 4 horários, lampião aceso nas 38 casas da vila,
+    poeira na luz e 180 mapas novos de reflexo nas skins.
+    - Testes: Lune 940, pytest 77, autoteste 18 de 18. O lampião soma 1,3% de chamadas de desenho nas 9 vistas.
+    - **Sem teste:** custo de GPU, celular, servidor cheio e comparação lado a lado das skins.
+    - **Não refeito:** os modelos de soldados, casas e vegetação (só a luz sobre eles) e as imagens de skin do catálogo.
+    - Relatório: `testes/LOTE113_D241_2026-11-22.md`.
+  - **Falta do pedido de 21/11:** a mira das outras armas além da M16 e da SKS, a pegada de 3ª pessoa (mãos a ~6 cm)
+    e ver na tela a recarga de espingarda, M60 e pistola.
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;

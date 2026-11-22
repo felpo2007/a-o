@@ -1601,16 +1601,18 @@ CLASSE = {
     "porcelana": "laca",
     "jade_ouro": "pedra",
 }
+# D-241 (dono: "melhore a qualidade visual das skins, com mais brilho, reflexos, textura"): todas as
+# classes refletem mais o céu; a tinta de campo continua a mais fosca de todas.
 CLASSES = {  # metal, aspereza
-    "cristal": (0.25, 0.08),
-    "metal": (1.0, 0.16),
-    "gelo": (0.05, 0.12),
-    "pedra": (0.0, 0.3),
-    "espelho": (1.0, 0.1),
-    "laca": (0.05, 0.1),  # verniz brilhante (laca, esmalte de porcelana)
-    "carbono": (0.15, 0.3),
-    "pintura": (0.08, 0.38),  # pintura acetinada
-    "fosca": (0.02, 0.65),  # tinta de campo
+    "cristal": (0.35, 0.05),
+    "metal": (1.0, 0.11),
+    "gelo": (0.12, 0.07),
+    "pedra": (0.05, 0.14),
+    "espelho": (1.0, 0.05),
+    "laca": (0.12, 0.05),  # verniz brilhante (laca, esmalte de porcelana)
+    "carbono": (0.3, 0.18),
+    "pintura": (0.22, 0.2),  # pintura envernizada
+    "fosca": (0.05, 0.42),  # tinta de campo
 }
 # quanto do relevo fino da arte original some debaixo do acabamento (a gema é lisa)
 ATENUA = {"cristal": 0.6, "metal": 0.5, "gelo": 0.3}
@@ -2073,6 +2075,37 @@ def cmd_resolver(specs: list[dict], saida: Path) -> None:
     print(f"{len(pares)} decais em {saida}")
 
 
+def cmd_classes(specs: list[dict]) -> None:
+    """D-241: refaz só os mapas de metal e aspereza de cada classe, sem repintar as cores."""
+    por_arma: dict[str, list[dict]] = {}
+    for s in specs:
+        if s["arma"] in ARMAS:
+            por_arma.setdefault(s["arma"], []).append(s)
+    total = 0
+    for arma, lista in por_arma.items():
+        mapa = mapa_da_arma(arma)
+        reg = regioes(textura_original(arma), mapa, arma)
+        pbr = pbr_original(arma)
+        feitas: set[str] = set()
+        for s in lista:
+            rec = s["arte"]["receita"] if s.get("arte") else "tinta"
+            if rec not in CLASSE:
+                continue
+            sel, alvo, _av = selecao(s, mapa, reg)
+            if sel is None:
+                continue
+            ck = f"{arma}_{CLASSE[rec]}_{alvo}"
+            if ck in feitas:
+                continue
+            feitas.add(ck)
+            metal, rugo = mapas_classe(CLASSE[rec], sel, pbr[1], pbr[2])
+            _png(metal, SAIDA / "classes" / f"{ck}_m.png", TAM_CLASSE)
+            _png(rugo, SAIDA / "classes" / f"{ck}_r.png", TAM_CLASSE)
+        total += len(feitas)
+        print(f"{arma}: {len(feitas)} classes")
+    print(f"{total} classes refeitas ({total * 2} mapas)")
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
@@ -2084,12 +2117,16 @@ def main() -> None:
         "--previas", action="store_true", help="só as folhas de prévia (sem regravar PNG)"
     )
     ap.add_argument("--mascaras", action="store_true", help="prévia de madeira, metal e latão")
+    ap.add_argument("--so-classes", action="store_true", help="só os mapas de metal e aspereza")
     ap.add_argument("--plano", action="store_true")
     ap.add_argument("--luau", action="store_true")
     ap.add_argument("--resolver", help="escreve o Luau de resolver decal -> imagem no Studio")
     a = ap.parse_args()
 
     specs = catalogo()
+    if a.so_classes:
+        cmd_classes(specs)
+        return
     if a.plano:
         cmd_plano(specs)
         return

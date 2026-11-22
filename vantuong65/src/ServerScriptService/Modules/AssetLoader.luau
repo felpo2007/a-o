@@ -1240,6 +1240,8 @@ function AssetLoader.start()
 			)
 		)
 	end
+	-- D-241: o lampião aceso dentro das casas (antes da contagem de peças da tela de entrada)
+	require(script.Parent.InteriorLuz).instalar(map)
 	-- D-117 (pedido do dono: "a tela de carregamento inicial deve ficar ali até carregar o jogo e o mapa
 	-- inteiro"): quantas peças o mapa tem; a tela de entrada espera chegar quase todas pelo streaming
 	local nMapParts = 0

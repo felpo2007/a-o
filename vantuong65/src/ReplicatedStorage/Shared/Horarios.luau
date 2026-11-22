@@ -69,7 +69,7 @@ Horarios.LISTA = {
 			cor = { 78, 96, 142 },
 			mistura = 0.75,
 			brilho = 0.7,
-			exposicao = 0.45,
+			exposicao = 0.62, -- D-241: o contraste novo fechava as sombras; o campo segue jogável de noite
 			tinta = { 170, 192, 255 },
 			saturacao = -0.28,
 		},

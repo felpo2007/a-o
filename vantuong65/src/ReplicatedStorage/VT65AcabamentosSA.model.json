@@ -26,12 +26,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://72929199952940",
     "NormalMap": "rbxassetid://137319188999077",
-    "MetalnessMap": "rbxassetid://94337521014657",
-    "RoughnessMap": "rbxassetid://93362932390811",
+    "MetalnessMap": "rbxassetid://95682929969044",
+    "RoughnessMap": "rbxassetid://137013734962507",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "72929199952940,137319188999077,94337521014657,93362932390811"
+       "String": "72929199952940,137319188999077,95682929969044,137013734962507"
       }
      }
     }
@@ -44,12 +44,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://96316291939076",
     "NormalMap": "rbxassetid://112650500223996",
-    "MetalnessMap": "rbxassetid://88167310721881",
-    "RoughnessMap": "rbxassetid://74977373512492",
+    "MetalnessMap": "rbxassetid://117709595764736",
+    "RoughnessMap": "rbxassetid://103345161536011",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "96316291939076,112650500223996,88167310721881,74977373512492"
+       "String": "96316291939076,112650500223996,117709595764736,103345161536011"
       }
      }
     }
@@ -62,12 +62,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://130144294496739",
     "NormalMap": "rbxassetid://134784512884234",
-    "MetalnessMap": "rbxassetid://127139917787384",
-    "RoughnessMap": "rbxassetid://102393323972307",
+    "MetalnessMap": "rbxassetid://107529637583254",
+    "RoughnessMap": "rbxassetid://136386546754132",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "130144294496739,134784512884234,127139917787384,102393323972307"
+       "String": "130144294496739,134784512884234,107529637583254,136386546754132"
       }
      }
     }
@@ -98,12 +98,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://125006743637083",
     "NormalMap": "rbxassetid://116934510797674",
-    "MetalnessMap": "rbxassetid://122910400149549",
-    "RoughnessMap": "rbxassetid://134938204258866",
+    "MetalnessMap": "rbxassetid://101843372118034",
+    "RoughnessMap": "rbxassetid://135581469901891",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "125006743637083,116934510797674,122910400149549,134938204258866"
+       "String": "125006743637083,116934510797674,101843372118034,135581469901891"
       }
      }
     }
@@ -116,12 +116,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://72692366126771",
     "NormalMap": "rbxassetid://116934510797674",
-    "MetalnessMap": "rbxassetid://129430449447516",
-    "RoughnessMap": "rbxassetid://104781940154012",
+    "MetalnessMap": "rbxassetid://70932399288910",
+    "RoughnessMap": "rbxassetid://94229978971240",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "72692366126771,116934510797674,129430449447516,104781940154012"
+       "String": "72692366126771,116934510797674,70932399288910,94229978971240"
       }
      }
     }
@@ -152,12 +152,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://79484181280882",
     "NormalMap": "rbxassetid://116934510797674",
-    "MetalnessMap": "rbxassetid://122910400149549",
-    "RoughnessMap": "rbxassetid://134938204258866",
+    "MetalnessMap": "rbxassetid://101843372118034",
+    "RoughnessMap": "rbxassetid://135581469901891",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "79484181280882,116934510797674,122910400149549,134938204258866"
+       "String": "79484181280882,116934510797674,101843372118034,135581469901891"
       }
      }
     }
@@ -188,12 +188,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://116479051970153",
     "NormalMap": "rbxassetid://120889293624258",
-    "MetalnessMap": "rbxassetid://130051604242963",
-    "RoughnessMap": "rbxassetid://92533590880128",
+    "MetalnessMap": "rbxassetid://86849678340363",
+    "RoughnessMap": "rbxassetid://116223616435014",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "116479051970153,120889293624258,130051604242963,92533590880128"
+       "String": "116479051970153,120889293624258,86849678340363,116223616435014"
       }
      }
     }
@@ -206,12 +206,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://101962460845794",
     "NormalMap": "rbxassetid://120889293624258",
-    "MetalnessMap": "rbxassetid://128592975805089",
-    "RoughnessMap": "rbxassetid://78320884134900",
+    "MetalnessMap": "rbxassetid://132814440002340",
+    "RoughnessMap": "rbxassetid://95735699685968",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "101962460845794,120889293624258,128592975805089,78320884134900"
+       "String": "101962460845794,120889293624258,132814440002340,95735699685968"
       }
      }
     }
@@ -224,12 +224,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://140520555776801",
     "NormalMap": "rbxassetid://70535911260465",
-    "MetalnessMap": "rbxassetid://128592975805089",
-    "RoughnessMap": "rbxassetid://78320884134900",
+    "MetalnessMap": "rbxassetid://132814440002340",
+    "RoughnessMap": "rbxassetid://95735699685968",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "140520555776801,70535911260465,128592975805089,78320884134900"
+       "String": "140520555776801,70535911260465,132814440002340,95735699685968"
       }
      }
     }
@@ -242,12 +242,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://133314766870770",
     "NormalMap": "rbxassetid://120889293624258",
-    "MetalnessMap": "rbxassetid://87227862494411",
-    "RoughnessMap": "rbxassetid://128521310271632",
+    "MetalnessMap": "rbxassetid://94478072153810",
+    "RoughnessMap": "rbxassetid://115534597126911",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "133314766870770,120889293624258,87227862494411,128521310271632"
+       "String": "133314766870770,120889293624258,94478072153810,115534597126911"
       }
      }
     }
@@ -260,12 +260,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://113096093807212",
     "NormalMap": "rbxassetid://120889293624258",
-    "MetalnessMap": "rbxassetid://130051604242963",
-    "RoughnessMap": "rbxassetid://92533590880128",
+    "MetalnessMap": "rbxassetid://86849678340363",
+    "RoughnessMap": "rbxassetid://116223616435014",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "113096093807212,120889293624258,130051604242963,92533590880128"
+       "String": "113096093807212,120889293624258,86849678340363,116223616435014"
       }
      }
     }
@@ -278,12 +278,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://77843984207558",
     "NormalMap": "rbxassetid://120889293624258",
-    "MetalnessMap": "rbxassetid://128592975805089",
-    "RoughnessMap": "rbxassetid://78320884134900",
+    "MetalnessMap": "rbxassetid://132814440002340",
+    "RoughnessMap": "rbxassetid://95735699685968",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "77843984207558,120889293624258,128592975805089,78320884134900"
+       "String": "77843984207558,120889293624258,132814440002340,95735699685968"
       }
      }
     }
@@ -314,12 +314,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://75663638886521",
     "NormalMap": "rbxassetid://124554897289679",
-    "MetalnessMap": "rbxassetid://86967779620722",
-    "RoughnessMap": "rbxassetid://99998723114364",
+    "MetalnessMap": "rbxassetid://104053211720931",
+    "RoughnessMap": "rbxassetid://103257145090542",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "75663638886521,124554897289679,86967779620722,99998723114364"
+       "String": "75663638886521,124554897289679,104053211720931,103257145090542"
       }
      }
     }
@@ -332,12 +332,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://100223847724560",
     "NormalMap": "rbxassetid://118327654867383",
-    "MetalnessMap": "rbxassetid://126778897348054",
-    "RoughnessMap": "rbxassetid://137391063261923",
+    "MetalnessMap": "rbxassetid://96822806252204",
+    "RoughnessMap": "rbxassetid://134987386744379",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "100223847724560,118327654867383,126778897348054,137391063261923"
+       "String": "100223847724560,118327654867383,96822806252204,134987386744379"
       }
      }
     }
@@ -350,12 +350,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://118834064780922",
     "NormalMap": "rbxassetid://83031564783495",
-    "MetalnessMap": "rbxassetid://104985135664465",
-    "RoughnessMap": "rbxassetid://103319170093160",
+    "MetalnessMap": "rbxassetid://118953441722249",
+    "RoughnessMap": "rbxassetid://115798364270433",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "118834064780922,83031564783495,104985135664465,103319170093160"
+       "String": "118834064780922,83031564783495,118953441722249,115798364270433"
       }
      }
     }
@@ -386,12 +386,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://76385041850045",
     "NormalMap": "rbxassetid://124386647834980",
-    "MetalnessMap": "rbxassetid://116340631045703",
-    "RoughnessMap": "rbxassetid://73360312281284",
+    "MetalnessMap": "rbxassetid://72982442733913",
+    "RoughnessMap": "rbxassetid://100485584013166",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "76385041850045,124386647834980,116340631045703,73360312281284"
+       "String": "76385041850045,124386647834980,72982442733913,100485584013166"
       }
      }
     }
@@ -404,12 +404,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://90914355310296",
     "NormalMap": "rbxassetid://124386647834980",
-    "MetalnessMap": "rbxassetid://116340631045703",
-    "RoughnessMap": "rbxassetid://73360312281284",
+    "MetalnessMap": "rbxassetid://72982442733913",
+    "RoughnessMap": "rbxassetid://100485584013166",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "90914355310296,124386647834980,116340631045703,73360312281284"
+       "String": "90914355310296,124386647834980,72982442733913,100485584013166"
       }
      }
     }
@@ -422,12 +422,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://116252475747501",
     "NormalMap": "rbxassetid://137657987095724",
-    "MetalnessMap": "rbxassetid://87012037450917",
-    "RoughnessMap": "rbxassetid://87832150574166",
+    "MetalnessMap": "rbxassetid://92321842452465",
+    "RoughnessMap": "rbxassetid://86571551062373",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "116252475747501,137657987095724,87012037450917,87832150574166"
+       "String": "116252475747501,137657987095724,92321842452465,86571551062373"
       }
      }
     }
@@ -440,12 +440,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://74530870916583",
     "NormalMap": "rbxassetid://108560323749087",
-    "MetalnessMap": "rbxassetid://118471817867283",
-    "RoughnessMap": "rbxassetid://124190010324699",
+    "MetalnessMap": "rbxassetid://125175449380703",
+    "RoughnessMap": "rbxassetid://139290924795545",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "74530870916583,108560323749087,118471817867283,124190010324699"
+       "String": "74530870916583,108560323749087,125175449380703,139290924795545"
       }
      }
     }
@@ -476,12 +476,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://114664082484106",
     "NormalMap": "rbxassetid://95065066508320",
-    "MetalnessMap": "rbxassetid://101168409871554",
-    "RoughnessMap": "rbxassetid://104868987365996",
+    "MetalnessMap": "rbxassetid://108858499127329",
+    "RoughnessMap": "rbxassetid://108025663736384",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "114664082484106,95065066508320,101168409871554,104868987365996"
+       "String": "114664082484106,95065066508320,108858499127329,108025663736384"
       }
      }
     }
@@ -494,12 +494,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://74259079491056",
     "NormalMap": "rbxassetid://108317889733503",
-    "MetalnessMap": "rbxassetid://75495161022012",
-    "RoughnessMap": "rbxassetid://127730247976480",
+    "MetalnessMap": "rbxassetid://117899916402822",
+    "RoughnessMap": "rbxassetid://92895066460439",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "74259079491056,108317889733503,75495161022012,127730247976480"
+       "String": "74259079491056,108317889733503,117899916402822,92895066460439"
       }
      }
     }
@@ -530,12 +530,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://102921704195667",
     "NormalMap": "rbxassetid://108317889733503",
-    "MetalnessMap": "rbxassetid://118471817867283",
-    "RoughnessMap": "rbxassetid://124190010324699",
+    "MetalnessMap": "rbxassetid://125175449380703",
+    "RoughnessMap": "rbxassetid://139290924795545",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "102921704195667,108317889733503,118471817867283,124190010324699"
+       "String": "102921704195667,108317889733503,125175449380703,139290924795545"
       }
      }
     }
@@ -566,12 +566,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://120947736916610",
     "NormalMap": "rbxassetid://85730609362188",
-    "MetalnessMap": "rbxassetid://106171568398183",
-    "RoughnessMap": "rbxassetid://128278625015900",
+    "MetalnessMap": "rbxassetid://99233467358911",
+    "RoughnessMap": "rbxassetid://99043872953052",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "120947736916610,85730609362188,106171568398183,128278625015900"
+       "String": "120947736916610,85730609362188,99233467358911,99043872953052"
       }
      }
     }
@@ -584,12 +584,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://89451361437042",
     "NormalMap": "rbxassetid://137237947338997",
-    "MetalnessMap": "rbxassetid://126793815173700",
-    "RoughnessMap": "rbxassetid://125152222934030",
+    "MetalnessMap": "rbxassetid://131462791124896",
+    "RoughnessMap": "rbxassetid://75023784621033",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "89451361437042,137237947338997,126793815173700,125152222934030"
+       "String": "89451361437042,137237947338997,131462791124896,75023784621033"
       }
      }
     }
@@ -602,12 +602,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://80346990121359",
     "NormalMap": "rbxassetid://71389923975915",
-    "MetalnessMap": "rbxassetid://126793815173700",
-    "RoughnessMap": "rbxassetid://125152222934030",
+    "MetalnessMap": "rbxassetid://131462791124896",
+    "RoughnessMap": "rbxassetid://75023784621033",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "80346990121359,71389923975915,126793815173700,125152222934030"
+       "String": "80346990121359,71389923975915,131462791124896,75023784621033"
       }
      }
     }
@@ -620,12 +620,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://96782656102830",
     "NormalMap": "rbxassetid://77674552280317",
-    "MetalnessMap": "rbxassetid://71707091407738",
-    "RoughnessMap": "rbxassetid://80528053460781",
+    "MetalnessMap": "rbxassetid://128012593009728",
+    "RoughnessMap": "rbxassetid://133114959898786",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "96782656102830,77674552280317,71707091407738,80528053460781"
+       "String": "96782656102830,77674552280317,128012593009728,133114959898786"
       }
      }
     }
@@ -638,12 +638,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://115791673752371",
     "NormalMap": "rbxassetid://71389923975915",
-    "MetalnessMap": "rbxassetid://106160168291978",
-    "RoughnessMap": "rbxassetid://97851566697665",
+    "MetalnessMap": "rbxassetid://121694064407763",
+    "RoughnessMap": "rbxassetid://101390852150357",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "115791673752371,71389923975915,106160168291978,97851566697665"
+       "String": "115791673752371,71389923975915,121694064407763,101390852150357"
       }
      }
     }
@@ -656,12 +656,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://89045760482154",
     "NormalMap": "rbxassetid://125210263892017",
-    "MetalnessMap": "rbxassetid://118002789204722",
-    "RoughnessMap": "rbxassetid://131506048678700",
+    "MetalnessMap": "rbxassetid://116111270216911",
+    "RoughnessMap": "rbxassetid://121084678889205",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "89045760482154,125210263892017,118002789204722,131506048678700"
+       "String": "89045760482154,125210263892017,116111270216911,121084678889205"
       }
      }
     }
@@ -674,12 +674,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://91752928698184",
     "NormalMap": "rbxassetid://101123329944131",
-    "MetalnessMap": "rbxassetid://133720000002571",
-    "RoughnessMap": "rbxassetid://107749062992603",
+    "MetalnessMap": "rbxassetid://123332623529701",
+    "RoughnessMap": "rbxassetid://102592686392510",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "91752928698184,101123329944131,133720000002571,107749062992603"
+       "String": "91752928698184,101123329944131,123332623529701,102592686392510"
       }
      }
     }
@@ -692,12 +692,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://92711959213585",
     "NormalMap": "rbxassetid://134063506143051",
-    "MetalnessMap": "rbxassetid://133146615273588",
-    "RoughnessMap": "rbxassetid://76880926099474",
+    "MetalnessMap": "rbxassetid://96474053070346",
+    "RoughnessMap": "rbxassetid://113211731331991",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "92711959213585,134063506143051,133146615273588,76880926099474"
+       "String": "92711959213585,134063506143051,96474053070346,113211731331991"
       }
      }
     }
@@ -710,12 +710,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://93881336690094",
     "NormalMap": "rbxassetid://101123329944131",
-    "MetalnessMap": "rbxassetid://80833278186289",
-    "RoughnessMap": "rbxassetid://130430968488339",
+    "MetalnessMap": "rbxassetid://80947647226585",
+    "RoughnessMap": "rbxassetid://79157484279718",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "93881336690094,101123329944131,80833278186289,130430968488339"
+       "String": "93881336690094,101123329944131,80947647226585,79157484279718"
       }
      }
     }
@@ -728,12 +728,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://81547607530133",
     "NormalMap": "rbxassetid://101123329944131",
-    "MetalnessMap": "rbxassetid://133720000002571",
-    "RoughnessMap": "rbxassetid://107749062992603",
+    "MetalnessMap": "rbxassetid://123332623529701",
+    "RoughnessMap": "rbxassetid://102592686392510",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "81547607530133,101123329944131,133720000002571,107749062992603"
+       "String": "81547607530133,101123329944131,123332623529701,102592686392510"
       }
      }
     }
@@ -782,12 +782,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://113961912247250",
     "NormalMap": "rbxassetid://71844007806127",
-    "MetalnessMap": "rbxassetid://87969200024799",
-    "RoughnessMap": "rbxassetid://81947316495247",
+    "MetalnessMap": "rbxassetid://125458170194783",
+    "RoughnessMap": "rbxassetid://128614864847210",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "113961912247250,71844007806127,87969200024799,81947316495247"
+       "String": "113961912247250,71844007806127,125458170194783,128614864847210"
       }
      }
     }
@@ -800,12 +800,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://118661483861469",
     "NormalMap": "rbxassetid://120517361989577",
-    "MetalnessMap": "rbxassetid://87969200024799",
-    "RoughnessMap": "rbxassetid://81947316495247",
+    "MetalnessMap": "rbxassetid://125458170194783",
+    "RoughnessMap": "rbxassetid://128614864847210",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "118661483861469,120517361989577,87969200024799,81947316495247"
+       "String": "118661483861469,120517361989577,125458170194783,128614864847210"
       }
      }
     }
@@ -818,12 +818,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://137567233032783",
     "NormalMap": "rbxassetid://96178291073684",
-    "MetalnessMap": "rbxassetid://140402757224107",
-    "RoughnessMap": "rbxassetid://100183973110046",
+    "MetalnessMap": "rbxassetid://88806383451548",
+    "RoughnessMap": "rbxassetid://123394699744153",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "137567233032783,96178291073684,140402757224107,100183973110046"
+       "String": "137567233032783,96178291073684,88806383451548,123394699744153"
       }
      }
     }
@@ -836,12 +836,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://107594077309658",
     "NormalMap": "rbxassetid://84412771743668",
-    "MetalnessMap": "rbxassetid://87969200024799",
-    "RoughnessMap": "rbxassetid://81947316495247",
+    "MetalnessMap": "rbxassetid://125458170194783",
+    "RoughnessMap": "rbxassetid://128614864847210",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "107594077309658,84412771743668,87969200024799,81947316495247"
+       "String": "107594077309658,84412771743668,125458170194783,128614864847210"
       }
      }
     }
@@ -854,12 +854,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://113887070441076",
     "NormalMap": "rbxassetid://84412771743668",
-    "MetalnessMap": "rbxassetid://110581945694401",
-    "RoughnessMap": "rbxassetid://135553649837422",
+    "MetalnessMap": "rbxassetid://92354538022360",
+    "RoughnessMap": "rbxassetid://136308417753111",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "113887070441076,84412771743668,110581945694401,135553649837422"
+       "String": "113887070441076,84412771743668,92354538022360,136308417753111"
       }
      }
     }
@@ -872,12 +872,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://132467228583692",
     "NormalMap": "rbxassetid://84412771743668",
-    "MetalnessMap": "rbxassetid://87969200024799",
-    "RoughnessMap": "rbxassetid://81947316495247",
+    "MetalnessMap": "rbxassetid://125458170194783",
+    "RoughnessMap": "rbxassetid://128614864847210",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "132467228583692,84412771743668,87969200024799,81947316495247"
+       "String": "132467228583692,84412771743668,125458170194783,128614864847210"
       }
      }
     }
@@ -908,12 +908,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://75054098915804",
     "NormalMap": "rbxassetid://86012443557457",
-    "MetalnessMap": "rbxassetid://102921147610431",
-    "RoughnessMap": "rbxassetid://127995013640305",
+    "MetalnessMap": "rbxassetid://95721055497744",
+    "RoughnessMap": "rbxassetid://137582740790111",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "75054098915804,86012443557457,102921147610431,127995013640305"
+       "String": "75054098915804,86012443557457,95721055497744,137582740790111"
       }
      }
     }
@@ -926,12 +926,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://82354557135204",
     "NormalMap": "rbxassetid://90252108198849",
-    "MetalnessMap": "rbxassetid://122584989772082",
-    "RoughnessMap": "rbxassetid://101184628752857",
+    "MetalnessMap": "rbxassetid://138330595063897",
+    "RoughnessMap": "rbxassetid://77390827315650",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "82354557135204,90252108198849,122584989772082,101184628752857"
+       "String": "82354557135204,90252108198849,138330595063897,77390827315650"
       }
      }
     }
@@ -962,12 +962,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://125567813422983",
     "NormalMap": "rbxassetid://71385618375215",
-    "MetalnessMap": "rbxassetid://101579800686610",
-    "RoughnessMap": "rbxassetid://115991927522395",
+    "MetalnessMap": "rbxassetid://125678575785307",
+    "RoughnessMap": "rbxassetid://76057346088361",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "125567813422983,71385618375215,101579800686610,115991927522395"
+       "String": "125567813422983,71385618375215,125678575785307,76057346088361"
       }
      }
     }
@@ -980,12 +980,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://79521599719638",
     "NormalMap": "rbxassetid://129030175475876",
-    "MetalnessMap": "rbxassetid://132803705401671",
-    "RoughnessMap": "rbxassetid://118177500703577",
+    "MetalnessMap": "rbxassetid://102124217667604",
+    "RoughnessMap": "rbxassetid://79974450893317",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "79521599719638,129030175475876,132803705401671,118177500703577"
+       "String": "79521599719638,129030175475876,102124217667604,79974450893317"
       }
      }
     }
@@ -998,12 +998,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://131829336298975",
     "NormalMap": "rbxassetid://90252108198849",
-    "MetalnessMap": "rbxassetid://122584989772082",
-    "RoughnessMap": "rbxassetid://101184628752857",
+    "MetalnessMap": "rbxassetid://138330595063897",
+    "RoughnessMap": "rbxassetid://77390827315650",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "131829336298975,90252108198849,122584989772082,101184628752857"
+       "String": "131829336298975,90252108198849,138330595063897,77390827315650"
       }
      }
     }
@@ -1016,12 +1016,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://84925890392889",
     "NormalMap": "rbxassetid://90252108198849",
-    "MetalnessMap": "rbxassetid://122584989772082",
-    "RoughnessMap": "rbxassetid://101184628752857",
+    "MetalnessMap": "rbxassetid://138330595063897",
+    "RoughnessMap": "rbxassetid://77390827315650",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "84925890392889,90252108198849,122584989772082,101184628752857"
+       "String": "84925890392889,90252108198849,138330595063897,77390827315650"
       }
      }
     }
@@ -1070,12 +1070,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://86390594542865",
     "NormalMap": "rbxassetid://74742967699023",
-    "MetalnessMap": "rbxassetid://97498995149167",
-    "RoughnessMap": "rbxassetid://110199336364770",
+    "MetalnessMap": "rbxassetid://95361923394259",
+    "RoughnessMap": "rbxassetid://124786862625623",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "86390594542865,74742967699023,97498995149167,110199336364770"
+       "String": "86390594542865,74742967699023,95361923394259,124786862625623"
       }
      }
     }
@@ -1088,12 +1088,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://96653743485423",
     "NormalMap": "rbxassetid://88258833142501",
-    "MetalnessMap": "rbxassetid://97498995149167",
-    "RoughnessMap": "rbxassetid://110199336364770",
+    "MetalnessMap": "rbxassetid://95361923394259",
+    "RoughnessMap": "rbxassetid://124786862625623",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "96653743485423,88258833142501,97498995149167,110199336364770"
+       "String": "96653743485423,88258833142501,95361923394259,124786862625623"
       }
      }
     }
@@ -1106,12 +1106,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://82177393172975",
     "NormalMap": "rbxassetid://74742967699023",
-    "MetalnessMap": "rbxassetid://102243690269472",
-    "RoughnessMap": "rbxassetid://94863279232982",
+    "MetalnessMap": "rbxassetid://110665381181777",
+    "RoughnessMap": "rbxassetid://120944901953097",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "82177393172975,74742967699023,102243690269472,94863279232982"
+       "String": "82177393172975,74742967699023,110665381181777,120944901953097"
       }
      }
     }
@@ -1124,12 +1124,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://87622256725872",
     "NormalMap": "rbxassetid://99982143221747",
-    "MetalnessMap": "rbxassetid://95179807975161",
-    "RoughnessMap": "rbxassetid://125240790389195",
+    "MetalnessMap": "rbxassetid://76229575619995",
+    "RoughnessMap": "rbxassetid://81887893964957",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "87622256725872,99982143221747,95179807975161,125240790389195"
+       "String": "87622256725872,99982143221747,76229575619995,81887893964957"
       }
      }
     }
@@ -1142,12 +1142,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://107123015333516",
     "NormalMap": "rbxassetid://74742967699023",
-    "MetalnessMap": "rbxassetid://102243690269472",
-    "RoughnessMap": "rbxassetid://94863279232982",
+    "MetalnessMap": "rbxassetid://110665381181777",
+    "RoughnessMap": "rbxassetid://120944901953097",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "107123015333516,74742967699023,102243690269472,94863279232982"
+       "String": "107123015333516,74742967699023,110665381181777,120944901953097"
       }
      }
     }
@@ -1214,12 +1214,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://121003595685351",
     "NormalMap": "rbxassetid://131088011732386",
-    "MetalnessMap": "rbxassetid://125134589290652",
-    "RoughnessMap": "rbxassetid://84223392239566",
+    "MetalnessMap": "rbxassetid://92128318772429",
+    "RoughnessMap": "rbxassetid://77387917699885",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "121003595685351,131088011732386,125134589290652,84223392239566"
+       "String": "121003595685351,131088011732386,92128318772429,77387917699885"
       }
      }
     }
@@ -1232,12 +1232,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://107505035925485",
     "NormalMap": "rbxassetid://133701758832831",
-    "MetalnessMap": "rbxassetid://97159265580033",
-    "RoughnessMap": "rbxassetid://76930887874737",
+    "MetalnessMap": "rbxassetid://92940560893240",
+    "RoughnessMap": "rbxassetid://83777314524861",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "107505035925485,133701758832831,97159265580033,76930887874737"
+       "String": "107505035925485,133701758832831,92940560893240,83777314524861"
       }
      }
     }
@@ -1250,12 +1250,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://138397423225274",
     "NormalMap": "rbxassetid://131088011732386",
-    "MetalnessMap": "rbxassetid://114108572520177",
-    "RoughnessMap": "rbxassetid://89403599907629",
+    "MetalnessMap": "rbxassetid://72354663717890",
+    "RoughnessMap": "rbxassetid://70777826013683",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "138397423225274,131088011732386,114108572520177,89403599907629"
+       "String": "138397423225274,131088011732386,72354663717890,70777826013683"
       }
      }
     }
@@ -1268,12 +1268,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://134359609401634",
     "NormalMap": "rbxassetid://131088011732386",
-    "MetalnessMap": "rbxassetid://125134589290652",
-    "RoughnessMap": "rbxassetid://84223392239566",
+    "MetalnessMap": "rbxassetid://92128318772429",
+    "RoughnessMap": "rbxassetid://77387917699885",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "134359609401634,131088011732386,125134589290652,84223392239566"
+       "String": "134359609401634,131088011732386,92128318772429,77387917699885"
       }
      }
     }
@@ -1286,12 +1286,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://74631339581026",
     "NormalMap": "rbxassetid://81380178316913",
-    "MetalnessMap": "rbxassetid://125134589290652",
-    "RoughnessMap": "rbxassetid://84223392239566",
+    "MetalnessMap": "rbxassetid://92128318772429",
+    "RoughnessMap": "rbxassetid://77387917699885",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "74631339581026,81380178316913,125134589290652,84223392239566"
+       "String": "74631339581026,81380178316913,92128318772429,77387917699885"
       }
      }
     }
@@ -1322,12 +1322,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://96012716083888",
     "NormalMap": "rbxassetid://131088011732386",
-    "MetalnessMap": "rbxassetid://125134589290652",
-    "RoughnessMap": "rbxassetid://84223392239566",
+    "MetalnessMap": "rbxassetid://92128318772429",
+    "RoughnessMap": "rbxassetid://77387917699885",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "96012716083888,131088011732386,125134589290652,84223392239566"
+       "String": "96012716083888,131088011732386,92128318772429,77387917699885"
       }
      }
     }
@@ -1358,12 +1358,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://82369882541615",
     "NormalMap": "rbxassetid://111458662792748",
-    "MetalnessMap": "rbxassetid://132400000108036",
-    "RoughnessMap": "rbxassetid://107867952956669",
+    "MetalnessMap": "rbxassetid://96472201871924",
+    "RoughnessMap": "rbxassetid://97987696891358",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "82369882541615,111458662792748,132400000108036,107867952956669"
+       "String": "82369882541615,111458662792748,96472201871924,97987696891358"
       }
      }
     }
@@ -1376,12 +1376,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://81500021886655",
     "NormalMap": "rbxassetid://111458662792748",
-    "MetalnessMap": "rbxassetid://73437843604209",
-    "RoughnessMap": "rbxassetid://104780522644891",
+    "MetalnessMap": "rbxassetid://137881249774476",
+    "RoughnessMap": "rbxassetid://117117619744223",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "81500021886655,111458662792748,73437843604209,104780522644891"
+       "String": "81500021886655,111458662792748,137881249774476,117117619744223"
       }
      }
     }
@@ -1394,12 +1394,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://95498936415838",
     "NormalMap": "rbxassetid://111458662792748",
-    "MetalnessMap": "rbxassetid://73437843604209",
-    "RoughnessMap": "rbxassetid://104780522644891",
+    "MetalnessMap": "rbxassetid://137881249774476",
+    "RoughnessMap": "rbxassetid://117117619744223",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "95498936415838,111458662792748,73437843604209,104780522644891"
+       "String": "95498936415838,111458662792748,137881249774476,117117619744223"
       }
      }
     }
@@ -1412,12 +1412,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://103132625477113",
     "NormalMap": "rbxassetid://111458662792748",
-    "MetalnessMap": "rbxassetid://95411281640275",
-    "RoughnessMap": "rbxassetid://92858259654613",
+    "MetalnessMap": "rbxassetid://89843759871062",
+    "RoughnessMap": "rbxassetid://81846127854144",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "103132625477113,111458662792748,95411281640275,92858259654613"
+       "String": "103132625477113,111458662792748,89843759871062,81846127854144"
       }
      }
     }
@@ -1430,12 +1430,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://97525910738945",
     "NormalMap": "rbxassetid://111458662792748",
-    "MetalnessMap": "rbxassetid://132400000108036",
-    "RoughnessMap": "rbxassetid://107867952956669",
+    "MetalnessMap": "rbxassetid://96472201871924",
+    "RoughnessMap": "rbxassetid://97987696891358",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "97525910738945,111458662792748,132400000108036,107867952956669"
+       "String": "97525910738945,111458662792748,96472201871924,97987696891358"
       }
      }
     }
@@ -1448,12 +1448,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://132954447022920",
     "NormalMap": "rbxassetid://125672868961592",
-    "MetalnessMap": "rbxassetid://126446088987680",
-    "RoughnessMap": "rbxassetid://110044057919211",
+    "MetalnessMap": "rbxassetid://73334906209129",
+    "RoughnessMap": "rbxassetid://126042943585561",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "132954447022920,125672868961592,126446088987680,110044057919211"
+       "String": "132954447022920,125672868961592,73334906209129,126042943585561"
       }
      }
     }
@@ -1466,12 +1466,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://120109867831742",
     "NormalMap": "rbxassetid://92317176729103",
-    "MetalnessMap": "rbxassetid://97429022324439",
-    "RoughnessMap": "rbxassetid://76529794597443",
+    "MetalnessMap": "rbxassetid://107797325754838",
+    "RoughnessMap": "rbxassetid://124348902261398",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "120109867831742,92317176729103,97429022324439,76529794597443"
+       "String": "120109867831742,92317176729103,107797325754838,124348902261398"
       }
      }
     }
@@ -1484,12 +1484,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://140281012310233",
     "NormalMap": "rbxassetid://107260180147221",
-    "MetalnessMap": "rbxassetid://111396782797715",
-    "RoughnessMap": "rbxassetid://80698614735643",
+    "MetalnessMap": "rbxassetid://130685202799156",
+    "RoughnessMap": "rbxassetid://84501918201966",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "140281012310233,107260180147221,111396782797715,80698614735643"
+       "String": "140281012310233,107260180147221,130685202799156,84501918201966"
       }
      }
     }
@@ -1502,12 +1502,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://105046571575998",
     "NormalMap": "rbxassetid://102700707392992",
-    "MetalnessMap": "rbxassetid://127700339846504",
-    "RoughnessMap": "rbxassetid://125212583538847",
+    "MetalnessMap": "rbxassetid://135260112290064",
+    "RoughnessMap": "rbxassetid://114876622692967",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "105046571575998,102700707392992,127700339846504,125212583538847"
+       "String": "105046571575998,102700707392992,135260112290064,114876622692967"
       }
      }
     }
@@ -1520,12 +1520,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://93973403576323",
     "NormalMap": "rbxassetid://130562145510734",
-    "MetalnessMap": "rbxassetid://139165587808499",
-    "RoughnessMap": "rbxassetid://135239115881602",
+    "MetalnessMap": "rbxassetid://101622218543524",
+    "RoughnessMap": "rbxassetid://132749001688504",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "93973403576323,130562145510734,139165587808499,135239115881602"
+       "String": "93973403576323,130562145510734,101622218543524,132749001688504"
       }
      }
     }
@@ -1538,12 +1538,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://94518284121781",
     "NormalMap": "rbxassetid://115670912267671",
-    "MetalnessMap": "rbxassetid://72747855783787",
-    "RoughnessMap": "rbxassetid://138066607794853",
+    "MetalnessMap": "rbxassetid://81514293794450",
+    "RoughnessMap": "rbxassetid://114455692540272",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "94518284121781,115670912267671,72747855783787,138066607794853"
+       "String": "94518284121781,115670912267671,81514293794450,114455692540272"
       }
      }
     }
@@ -1556,12 +1556,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://118782125037210",
     "NormalMap": "rbxassetid://96668958154521",
-    "MetalnessMap": "rbxassetid://127330376796133",
-    "RoughnessMap": "rbxassetid://95853980268478",
+    "MetalnessMap": "rbxassetid://102535244826397",
+    "RoughnessMap": "rbxassetid://132945961603064",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "118782125037210,96668958154521,127330376796133,95853980268478"
+       "String": "118782125037210,96668958154521,102535244826397,132945961603064"
       }
      }
     }
@@ -1574,12 +1574,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://134756904453745",
     "NormalMap": "rbxassetid://131416045875392",
-    "MetalnessMap": "rbxassetid://78814677811971",
-    "RoughnessMap": "rbxassetid://114418845371556",
+    "MetalnessMap": "rbxassetid://132884730586079",
+    "RoughnessMap": "rbxassetid://109423991814205",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "134756904453745,131416045875392,78814677811971,114418845371556"
+       "String": "134756904453745,131416045875392,132884730586079,109423991814205"
       }
      }
     }
@@ -1592,12 +1592,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://120226416084520",
     "NormalMap": "rbxassetid://118620152343332",
-    "MetalnessMap": "rbxassetid://102091048628134",
-    "RoughnessMap": "rbxassetid://97655165340169",
+    "MetalnessMap": "rbxassetid://82499453937782",
+    "RoughnessMap": "rbxassetid://114458247311101",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "120226416084520,118620152343332,102091048628134,97655165340169"
+       "String": "120226416084520,118620152343332,82499453937782,114458247311101"
       }
      }
     }
@@ -1610,12 +1610,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://84293787838729",
     "NormalMap": "rbxassetid://135737388938416",
-    "MetalnessMap": "rbxassetid://97472726447100",
-    "RoughnessMap": "rbxassetid://115441046988905",
+    "MetalnessMap": "rbxassetid://125705201523831",
+    "RoughnessMap": "rbxassetid://102447640695967",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "84293787838729,135737388938416,97472726447100,115441046988905"
+       "String": "84293787838729,135737388938416,125705201523831,102447640695967"
       }
      }
     }
@@ -1628,12 +1628,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://115260165074340",
     "NormalMap": "rbxassetid://129876740555620",
-    "MetalnessMap": "rbxassetid://75953982824610",
-    "RoughnessMap": "rbxassetid://75379559784893",
+    "MetalnessMap": "rbxassetid://129398877746983",
+    "RoughnessMap": "rbxassetid://98000054775893",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "115260165074340,129876740555620,75953982824610,75379559784893"
+       "String": "115260165074340,129876740555620,129398877746983,98000054775893"
       }
      }
     }
@@ -1646,12 +1646,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://106692596063939",
     "NormalMap": "rbxassetid://78253518405664",
-    "MetalnessMap": "rbxassetid://126446088987680",
-    "RoughnessMap": "rbxassetid://110044057919211",
+    "MetalnessMap": "rbxassetid://73334906209129",
+    "RoughnessMap": "rbxassetid://126042943585561",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "106692596063939,78253518405664,126446088987680,110044057919211"
+       "String": "106692596063939,78253518405664,73334906209129,126042943585561"
       }
      }
     }
@@ -1664,12 +1664,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://102351918105435",
     "NormalMap": "rbxassetid://107661806439150",
-    "MetalnessMap": "rbxassetid://97429022324439",
-    "RoughnessMap": "rbxassetid://76529794597443",
+    "MetalnessMap": "rbxassetid://107797325754838",
+    "RoughnessMap": "rbxassetid://124348902261398",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "102351918105435,107661806439150,97429022324439,76529794597443"
+       "String": "102351918105435,107661806439150,107797325754838,124348902261398"
       }
      }
     }
@@ -1682,12 +1682,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://128049144524799",
     "NormalMap": "rbxassetid://98623269169512",
-    "MetalnessMap": "rbxassetid://111396782797715",
-    "RoughnessMap": "rbxassetid://80698614735643",
+    "MetalnessMap": "rbxassetid://130685202799156",
+    "RoughnessMap": "rbxassetid://84501918201966",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "128049144524799,98623269169512,111396782797715,80698614735643"
+       "String": "128049144524799,98623269169512,130685202799156,84501918201966"
       }
      }
     }
@@ -1700,12 +1700,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://72356986073268",
     "NormalMap": "rbxassetid://90384969311144",
-    "MetalnessMap": "rbxassetid://127700339846504",
-    "RoughnessMap": "rbxassetid://125212583538847",
+    "MetalnessMap": "rbxassetid://135260112290064",
+    "RoughnessMap": "rbxassetid://114876622692967",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "72356986073268,90384969311144,127700339846504,125212583538847"
+       "String": "72356986073268,90384969311144,135260112290064,114876622692967"
       }
      }
     }
@@ -1718,12 +1718,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://106741110789659",
     "NormalMap": "rbxassetid://80132852263335",
-    "MetalnessMap": "rbxassetid://139165587808499",
-    "RoughnessMap": "rbxassetid://135239115881602",
+    "MetalnessMap": "rbxassetid://101622218543524",
+    "RoughnessMap": "rbxassetid://132749001688504",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "106741110789659,80132852263335,139165587808499,135239115881602"
+       "String": "106741110789659,80132852263335,101622218543524,132749001688504"
       }
      }
     }
@@ -1736,12 +1736,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://78137502047798",
     "NormalMap": "rbxassetid://121562493762113",
-    "MetalnessMap": "rbxassetid://72747855783787",
-    "RoughnessMap": "rbxassetid://138066607794853",
+    "MetalnessMap": "rbxassetid://81514293794450",
+    "RoughnessMap": "rbxassetid://114455692540272",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "78137502047798,121562493762113,72747855783787,138066607794853"
+       "String": "78137502047798,121562493762113,81514293794450,114455692540272"
       }
      }
     }
@@ -1754,12 +1754,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://118901681101021",
     "NormalMap": "rbxassetid://127147505254730",
-    "MetalnessMap": "rbxassetid://127330376796133",
-    "RoughnessMap": "rbxassetid://95853980268478",
+    "MetalnessMap": "rbxassetid://102535244826397",
+    "RoughnessMap": "rbxassetid://132945961603064",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "118901681101021,127147505254730,127330376796133,95853980268478"
+       "String": "118901681101021,127147505254730,102535244826397,132945961603064"
       }
      }
     }
@@ -1772,12 +1772,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://139787340214915",
     "NormalMap": "rbxassetid://84947229249394",
-    "MetalnessMap": "rbxassetid://78814677811971",
-    "RoughnessMap": "rbxassetid://114418845371556",
+    "MetalnessMap": "rbxassetid://132884730586079",
+    "RoughnessMap": "rbxassetid://109423991814205",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "139787340214915,84947229249394,78814677811971,114418845371556"
+       "String": "139787340214915,84947229249394,132884730586079,109423991814205"
       }
      }
     }
@@ -1790,12 +1790,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://73319438735737",
     "NormalMap": "rbxassetid://75451072037057",
-    "MetalnessMap": "rbxassetid://102091048628134",
-    "RoughnessMap": "rbxassetid://97655165340169",
+    "MetalnessMap": "rbxassetid://82499453937782",
+    "RoughnessMap": "rbxassetid://114458247311101",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "73319438735737,75451072037057,102091048628134,97655165340169"
+       "String": "73319438735737,75451072037057,82499453937782,114458247311101"
       }
      }
     }
@@ -1808,12 +1808,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://127870987870303",
     "NormalMap": "rbxassetid://122021969134441",
-    "MetalnessMap": "rbxassetid://97472726447100",
-    "RoughnessMap": "rbxassetid://115441046988905",
+    "MetalnessMap": "rbxassetid://125705201523831",
+    "RoughnessMap": "rbxassetid://102447640695967",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "127870987870303,122021969134441,97472726447100,115441046988905"
+       "String": "127870987870303,122021969134441,125705201523831,102447640695967"
       }
      }
     }
@@ -1826,12 +1826,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://101296556504018",
     "NormalMap": "rbxassetid://90443265178851",
-    "MetalnessMap": "rbxassetid://75953982824610",
-    "RoughnessMap": "rbxassetid://75379559784893",
+    "MetalnessMap": "rbxassetid://129398877746983",
+    "RoughnessMap": "rbxassetid://98000054775893",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "101296556504018,90443265178851,75953982824610,75379559784893"
+       "String": "101296556504018,90443265178851,129398877746983,98000054775893"
       }
      }
     }
@@ -1844,12 +1844,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://119335495921357",
     "NormalMap": "rbxassetid://84177023403372",
-    "MetalnessMap": "rbxassetid://126446088987680",
-    "RoughnessMap": "rbxassetid://110044057919211",
+    "MetalnessMap": "rbxassetid://73334906209129",
+    "RoughnessMap": "rbxassetid://126042943585561",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "119335495921357,84177023403372,126446088987680,110044057919211"
+       "String": "119335495921357,84177023403372,73334906209129,126042943585561"
       }
      }
     }
@@ -1862,12 +1862,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://79813099103498",
     "NormalMap": "rbxassetid://97891531164512",
-    "MetalnessMap": "rbxassetid://97429022324439",
-    "RoughnessMap": "rbxassetid://76529794597443",
+    "MetalnessMap": "rbxassetid://107797325754838",
+    "RoughnessMap": "rbxassetid://124348902261398",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "79813099103498,97891531164512,97429022324439,76529794597443"
+       "String": "79813099103498,97891531164512,107797325754838,124348902261398"
       }
      }
     }
@@ -1880,12 +1880,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://86812631195982",
     "NormalMap": "rbxassetid://113616246062175",
-    "MetalnessMap": "rbxassetid://111396782797715",
-    "RoughnessMap": "rbxassetid://80698614735643",
+    "MetalnessMap": "rbxassetid://130685202799156",
+    "RoughnessMap": "rbxassetid://84501918201966",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "86812631195982,113616246062175,111396782797715,80698614735643"
+       "String": "86812631195982,113616246062175,130685202799156,84501918201966"
       }
      }
     }
@@ -1898,12 +1898,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://104111615911698",
     "NormalMap": "rbxassetid://91852659783646",
-    "MetalnessMap": "rbxassetid://127700339846504",
-    "RoughnessMap": "rbxassetid://125212583538847",
+    "MetalnessMap": "rbxassetid://135260112290064",
+    "RoughnessMap": "rbxassetid://114876622692967",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "104111615911698,91852659783646,127700339846504,125212583538847"
+       "String": "104111615911698,91852659783646,135260112290064,114876622692967"
       }
      }
     }
@@ -1916,12 +1916,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://120873598195776",
     "NormalMap": "rbxassetid://73193207031561",
-    "MetalnessMap": "rbxassetid://139165587808499",
-    "RoughnessMap": "rbxassetid://135239115881602",
+    "MetalnessMap": "rbxassetid://101622218543524",
+    "RoughnessMap": "rbxassetid://132749001688504",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "120873598195776,73193207031561,139165587808499,135239115881602"
+       "String": "120873598195776,73193207031561,101622218543524,132749001688504"
       }
      }
     }
@@ -1934,12 +1934,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://84447352305997",
     "NormalMap": "rbxassetid://85529568888056",
-    "MetalnessMap": "rbxassetid://72747855783787",
-    "RoughnessMap": "rbxassetid://138066607794853",
+    "MetalnessMap": "rbxassetid://81514293794450",
+    "RoughnessMap": "rbxassetid://114455692540272",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "84447352305997,85529568888056,72747855783787,138066607794853"
+       "String": "84447352305997,85529568888056,81514293794450,114455692540272"
       }
      }
     }
@@ -1952,12 +1952,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://110362003167696",
     "NormalMap": "rbxassetid://121071586054674",
-    "MetalnessMap": "rbxassetid://127330376796133",
-    "RoughnessMap": "rbxassetid://95853980268478",
+    "MetalnessMap": "rbxassetid://102535244826397",
+    "RoughnessMap": "rbxassetid://132945961603064",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "110362003167696,121071586054674,127330376796133,95853980268478"
+       "String": "110362003167696,121071586054674,102535244826397,132945961603064"
       }
      }
     }
@@ -1970,12 +1970,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://110510030727293",
     "NormalMap": "rbxassetid://111803916901463",
-    "MetalnessMap": "rbxassetid://78814677811971",
-    "RoughnessMap": "rbxassetid://114418845371556",
+    "MetalnessMap": "rbxassetid://132884730586079",
+    "RoughnessMap": "rbxassetid://109423991814205",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "110510030727293,111803916901463,78814677811971,114418845371556"
+       "String": "110510030727293,111803916901463,132884730586079,109423991814205"
       }
      }
     }
@@ -1988,12 +1988,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://97762266874814",
     "NormalMap": "rbxassetid://88854888502109",
-    "MetalnessMap": "rbxassetid://102091048628134",
-    "RoughnessMap": "rbxassetid://97655165340169",
+    "MetalnessMap": "rbxassetid://82499453937782",
+    "RoughnessMap": "rbxassetid://114458247311101",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "97762266874814,88854888502109,102091048628134,97655165340169"
+       "String": "97762266874814,88854888502109,82499453937782,114458247311101"
       }
      }
     }
@@ -2006,12 +2006,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://138661776863452",
     "NormalMap": "rbxassetid://94787044466492",
-    "MetalnessMap": "rbxassetid://97472726447100",
-    "RoughnessMap": "rbxassetid://115441046988905",
+    "MetalnessMap": "rbxassetid://125705201523831",
+    "RoughnessMap": "rbxassetid://102447640695967",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "138661776863452,94787044466492,97472726447100,115441046988905"
+       "String": "138661776863452,94787044466492,125705201523831,102447640695967"
       }
      }
     }
@@ -2024,12 +2024,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://91482361313508",
     "NormalMap": "rbxassetid://70835177181160",
-    "MetalnessMap": "rbxassetid://75953982824610",
-    "RoughnessMap": "rbxassetid://75379559784893",
+    "MetalnessMap": "rbxassetid://129398877746983",
+    "RoughnessMap": "rbxassetid://98000054775893",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "91482361313508,70835177181160,75953982824610,75379559784893"
+       "String": "91482361313508,70835177181160,129398877746983,98000054775893"
       }
      }
     }
@@ -2042,12 +2042,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://85798891744878",
     "NormalMap": "rbxassetid://114784218123036",
-    "MetalnessMap": "rbxassetid://126446088987680",
-    "RoughnessMap": "rbxassetid://110044057919211",
+    "MetalnessMap": "rbxassetid://73334906209129",
+    "RoughnessMap": "rbxassetid://126042943585561",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "85798891744878,114784218123036,126446088987680,110044057919211"
+       "String": "85798891744878,114784218123036,73334906209129,126042943585561"
       }
      }
     }
@@ -2060,12 +2060,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://75064346866853",
     "NormalMap": "rbxassetid://82808061560584",
-    "MetalnessMap": "rbxassetid://97429022324439",
-    "RoughnessMap": "rbxassetid://76529794597443",
+    "MetalnessMap": "rbxassetid://107797325754838",
+    "RoughnessMap": "rbxassetid://124348902261398",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "75064346866853,82808061560584,97429022324439,76529794597443"
+       "String": "75064346866853,82808061560584,107797325754838,124348902261398"
       }
      }
     }
@@ -2078,12 +2078,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://124131327315407",
     "NormalMap": "rbxassetid://97954637986945",
-    "MetalnessMap": "rbxassetid://111396782797715",
-    "RoughnessMap": "rbxassetid://80698614735643",
+    "MetalnessMap": "rbxassetid://130685202799156",
+    "RoughnessMap": "rbxassetid://84501918201966",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "124131327315407,97954637986945,111396782797715,80698614735643"
+       "String": "124131327315407,97954637986945,130685202799156,84501918201966"
       }
      }
     }
@@ -2096,12 +2096,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://74749429966140",
     "NormalMap": "rbxassetid://108450278623021",
-    "MetalnessMap": "rbxassetid://127700339846504",
-    "RoughnessMap": "rbxassetid://125212583538847",
+    "MetalnessMap": "rbxassetid://135260112290064",
+    "RoughnessMap": "rbxassetid://114876622692967",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "74749429966140,108450278623021,127700339846504,125212583538847"
+       "String": "74749429966140,108450278623021,135260112290064,114876622692967"
       }
      }
     }
@@ -2114,12 +2114,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://81356480543033",
     "NormalMap": "rbxassetid://113363858059054",
-    "MetalnessMap": "rbxassetid://139165587808499",
-    "RoughnessMap": "rbxassetid://135239115881602",
+    "MetalnessMap": "rbxassetid://101622218543524",
+    "RoughnessMap": "rbxassetid://132749001688504",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "81356480543033,113363858059054,139165587808499,135239115881602"
+       "String": "81356480543033,113363858059054,101622218543524,132749001688504"
       }
      }
     }
@@ -2132,12 +2132,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://117096073306555",
     "NormalMap": "rbxassetid://88399008269989",
-    "MetalnessMap": "rbxassetid://72747855783787",
-    "RoughnessMap": "rbxassetid://138066607794853",
+    "MetalnessMap": "rbxassetid://81514293794450",
+    "RoughnessMap": "rbxassetid://114455692540272",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "117096073306555,88399008269989,72747855783787,138066607794853"
+       "String": "117096073306555,88399008269989,81514293794450,114455692540272"
       }
      }
     }
@@ -2150,12 +2150,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://137274060953748",
     "NormalMap": "rbxassetid://131672850217145",
-    "MetalnessMap": "rbxassetid://127330376796133",
-    "RoughnessMap": "rbxassetid://95853980268478",
+    "MetalnessMap": "rbxassetid://102535244826397",
+    "RoughnessMap": "rbxassetid://132945961603064",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "137274060953748,131672850217145,127330376796133,95853980268478"
+       "String": "137274060953748,131672850217145,102535244826397,132945961603064"
       }
      }
     }
@@ -2168,12 +2168,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://81952648784721",
     "NormalMap": "rbxassetid://116831120270012",
-    "MetalnessMap": "rbxassetid://78814677811971",
-    "RoughnessMap": "rbxassetid://114418845371556",
+    "MetalnessMap": "rbxassetid://132884730586079",
+    "RoughnessMap": "rbxassetid://109423991814205",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "81952648784721,116831120270012,78814677811971,114418845371556"
+       "String": "81952648784721,116831120270012,132884730586079,109423991814205"
       }
      }
     }
@@ -2186,12 +2186,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://76196967125537",
     "NormalMap": "rbxassetid://114076030913820",
-    "MetalnessMap": "rbxassetid://102091048628134",
-    "RoughnessMap": "rbxassetid://97655165340169",
+    "MetalnessMap": "rbxassetid://82499453937782",
+    "RoughnessMap": "rbxassetid://114458247311101",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "76196967125537,114076030913820,102091048628134,97655165340169"
+       "String": "76196967125537,114076030913820,82499453937782,114458247311101"
       }
      }
     }
@@ -2204,12 +2204,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://70737979258982",
     "NormalMap": "rbxassetid://100731939955825",
-    "MetalnessMap": "rbxassetid://97472726447100",
-    "RoughnessMap": "rbxassetid://115441046988905",
+    "MetalnessMap": "rbxassetid://125705201523831",
+    "RoughnessMap": "rbxassetid://102447640695967",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "70737979258982,100731939955825,97472726447100,115441046988905"
+       "String": "70737979258982,100731939955825,125705201523831,102447640695967"
       }
      }
     }
@@ -2222,12 +2222,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://119799457486170",
     "NormalMap": "rbxassetid://83966129624906",
-    "MetalnessMap": "rbxassetid://75953982824610",
-    "RoughnessMap": "rbxassetid://75379559784893",
+    "MetalnessMap": "rbxassetid://129398877746983",
+    "RoughnessMap": "rbxassetid://98000054775893",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "119799457486170,83966129624906,75953982824610,75379559784893"
+       "String": "119799457486170,83966129624906,129398877746983,98000054775893"
       }
      }
     }
@@ -2240,12 +2240,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://81998029532795",
     "NormalMap": "rbxassetid://135028251436332",
-    "MetalnessMap": "rbxassetid://126446088987680",
-    "RoughnessMap": "rbxassetid://110044057919211",
+    "MetalnessMap": "rbxassetid://73334906209129",
+    "RoughnessMap": "rbxassetid://126042943585561",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "81998029532795,135028251436332,126446088987680,110044057919211"
+       "String": "81998029532795,135028251436332,73334906209129,126042943585561"
       }
      }
     }
@@ -2258,12 +2258,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://135842119134840",
     "NormalMap": "rbxassetid://127085168891502",
-    "MetalnessMap": "rbxassetid://97429022324439",
-    "RoughnessMap": "rbxassetid://76529794597443",
+    "MetalnessMap": "rbxassetid://107797325754838",
+    "RoughnessMap": "rbxassetid://124348902261398",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "135842119134840,127085168891502,97429022324439,76529794597443"
+       "String": "135842119134840,127085168891502,107797325754838,124348902261398"
       }
      }
     }
@@ -2276,12 +2276,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://86860344293768",
     "NormalMap": "rbxassetid://115660798796442",
-    "MetalnessMap": "rbxassetid://111396782797715",
-    "RoughnessMap": "rbxassetid://80698614735643",
+    "MetalnessMap": "rbxassetid://130685202799156",
+    "RoughnessMap": "rbxassetid://84501918201966",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "86860344293768,115660798796442,111396782797715,80698614735643"
+       "String": "86860344293768,115660798796442,130685202799156,84501918201966"
       }
      }
     }
@@ -2294,12 +2294,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://89594368414828",
     "NormalMap": "rbxassetid://132007301393379",
-    "MetalnessMap": "rbxassetid://127700339846504",
-    "RoughnessMap": "rbxassetid://125212583538847",
+    "MetalnessMap": "rbxassetid://135260112290064",
+    "RoughnessMap": "rbxassetid://114876622692967",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "89594368414828,132007301393379,127700339846504,125212583538847"
+       "String": "89594368414828,132007301393379,135260112290064,114876622692967"
       }
      }
     }
@@ -2312,12 +2312,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://111060518776907",
     "NormalMap": "rbxassetid://100621062945326",
-    "MetalnessMap": "rbxassetid://139165587808499",
-    "RoughnessMap": "rbxassetid://135239115881602",
+    "MetalnessMap": "rbxassetid://101622218543524",
+    "RoughnessMap": "rbxassetid://132749001688504",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "111060518776907,100621062945326,139165587808499,135239115881602"
+       "String": "111060518776907,100621062945326,101622218543524,132749001688504"
       }
      }
     }
@@ -2330,12 +2330,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://96927027517133",
     "NormalMap": "rbxassetid://107209777233212",
-    "MetalnessMap": "rbxassetid://72747855783787",
-    "RoughnessMap": "rbxassetid://138066607794853",
+    "MetalnessMap": "rbxassetid://81514293794450",
+    "RoughnessMap": "rbxassetid://114455692540272",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "96927027517133,107209777233212,72747855783787,138066607794853"
+       "String": "96927027517133,107209777233212,81514293794450,114455692540272"
       }
      }
     }
@@ -2348,12 +2348,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://128984564120637",
     "NormalMap": "rbxassetid://132129074494321",
-    "MetalnessMap": "rbxassetid://127330376796133",
-    "RoughnessMap": "rbxassetid://95853980268478",
+    "MetalnessMap": "rbxassetid://102535244826397",
+    "RoughnessMap": "rbxassetid://132945961603064",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "128984564120637,132129074494321,127330376796133,95853980268478"
+       "String": "128984564120637,132129074494321,102535244826397,132945961603064"
       }
      }
     }
@@ -2366,12 +2366,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://128182298727554",
     "NormalMap": "rbxassetid://135345514839957",
-    "MetalnessMap": "rbxassetid://78814677811971",
-    "RoughnessMap": "rbxassetid://114418845371556",
+    "MetalnessMap": "rbxassetid://132884730586079",
+    "RoughnessMap": "rbxassetid://109423991814205",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "128182298727554,135345514839957,78814677811971,114418845371556"
+       "String": "128182298727554,135345514839957,132884730586079,109423991814205"
       }
      }
     }
@@ -2384,12 +2384,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://106824010107963",
     "NormalMap": "rbxassetid://136707060580873",
-    "MetalnessMap": "rbxassetid://102091048628134",
-    "RoughnessMap": "rbxassetid://97655165340169",
+    "MetalnessMap": "rbxassetid://82499453937782",
+    "RoughnessMap": "rbxassetid://114458247311101",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "106824010107963,136707060580873,102091048628134,97655165340169"
+       "String": "106824010107963,136707060580873,82499453937782,114458247311101"
       }
      }
     }
@@ -2402,12 +2402,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://120888810567327",
     "NormalMap": "rbxassetid://70925118397946",
-    "MetalnessMap": "rbxassetid://97472726447100",
-    "RoughnessMap": "rbxassetid://115441046988905",
+    "MetalnessMap": "rbxassetid://125705201523831",
+    "RoughnessMap": "rbxassetid://102447640695967",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "120888810567327,70925118397946,97472726447100,115441046988905"
+       "String": "120888810567327,70925118397946,125705201523831,102447640695967"
       }
      }
     }
@@ -2420,12 +2420,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://73960799928494",
     "NormalMap": "rbxassetid://80979859887659",
-    "MetalnessMap": "rbxassetid://75953982824610",
-    "RoughnessMap": "rbxassetid://75379559784893",
+    "MetalnessMap": "rbxassetid://129398877746983",
+    "RoughnessMap": "rbxassetid://98000054775893",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "73960799928494,80979859887659,75953982824610,75379559784893"
+       "String": "73960799928494,80979859887659,129398877746983,98000054775893"
       }
      }
     }
@@ -2438,12 +2438,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://137002649753796",
     "NormalMap": "rbxassetid://132141011393850",
-    "MetalnessMap": "rbxassetid://78232401941717",
-    "RoughnessMap": "rbxassetid://101478952683431",
+    "MetalnessMap": "rbxassetid://70542481869055",
+    "RoughnessMap": "rbxassetid://91692072896972",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "137002649753796,132141011393850,78232401941717,101478952683431"
+       "String": "137002649753796,132141011393850,70542481869055,91692072896972"
       }
      }
     }
@@ -2456,12 +2456,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://139784225670249",
     "NormalMap": "rbxassetid://98717385721587",
-    "MetalnessMap": "rbxassetid://124614105214698",
-    "RoughnessMap": "rbxassetid://107600898102567",
+    "MetalnessMap": "rbxassetid://109526259242138",
+    "RoughnessMap": "rbxassetid://73484774514407",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "139784225670249,98717385721587,124614105214698,107600898102567"
+       "String": "139784225670249,98717385721587,109526259242138,73484774514407"
       }
      }
     }
@@ -2474,12 +2474,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://121418854900467",
     "NormalMap": "rbxassetid://103910470587739",
-    "MetalnessMap": "rbxassetid://125764307456914",
-    "RoughnessMap": "rbxassetid://131294811215087",
+    "MetalnessMap": "rbxassetid://70830991864175",
+    "RoughnessMap": "rbxassetid://127886530183509",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "121418854900467,103910470587739,125764307456914,131294811215087"
+       "String": "121418854900467,103910470587739,70830991864175,127886530183509"
       }
      }
     }
@@ -2492,12 +2492,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://79109941450381",
     "NormalMap": "rbxassetid://89418070791012",
-    "MetalnessMap": "rbxassetid://117235928292746",
-    "RoughnessMap": "rbxassetid://116606892476861",
+    "MetalnessMap": "rbxassetid://82341841902316",
+    "RoughnessMap": "rbxassetid://86652462048475",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "79109941450381,89418070791012,117235928292746,116606892476861"
+       "String": "79109941450381,89418070791012,82341841902316,86652462048475"
       }
      }
     }
@@ -2510,12 +2510,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://88186858942365",
     "NormalMap": "rbxassetid://123647907748409",
-    "MetalnessMap": "rbxassetid://107473940737809",
-    "RoughnessMap": "rbxassetid://129547894049982",
+    "MetalnessMap": "rbxassetid://137229248231227",
+    "RoughnessMap": "rbxassetid://135999277843887",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "88186858942365,123647907748409,107473940737809,129547894049982"
+       "String": "88186858942365,123647907748409,137229248231227,135999277843887"
       }
      }
     }
@@ -2528,12 +2528,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://111031826348287",
     "NormalMap": "rbxassetid://133157616576567",
-    "MetalnessMap": "rbxassetid://102287212292007",
-    "RoughnessMap": "rbxassetid://79012708748587",
+    "MetalnessMap": "rbxassetid://97680760214677",
+    "RoughnessMap": "rbxassetid://87190852859038",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "111031826348287,133157616576567,102287212292007,79012708748587"
+       "String": "111031826348287,133157616576567,97680760214677,87190852859038"
       }
      }
     }
@@ -2546,12 +2546,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://124663585034588",
     "NormalMap": "rbxassetid://126679495859000",
-    "MetalnessMap": "rbxassetid://107750758999095",
-    "RoughnessMap": "rbxassetid://86909655494601",
+    "MetalnessMap": "rbxassetid://100444117676915",
+    "RoughnessMap": "rbxassetid://77416397255393",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "124663585034588,126679495859000,107750758999095,86909655494601"
+       "String": "124663585034588,126679495859000,100444117676915,77416397255393"
       }
      }
     }
@@ -2564,12 +2564,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://97390849203514",
     "NormalMap": "rbxassetid://80812938669983",
-    "MetalnessMap": "rbxassetid://79737371911227",
-    "RoughnessMap": "rbxassetid://78246878913388",
+    "MetalnessMap": "rbxassetid://124420986285734",
+    "RoughnessMap": "rbxassetid://140682921263592",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "97390849203514,80812938669983,79737371911227,78246878913388"
+       "String": "97390849203514,80812938669983,124420986285734,140682921263592"
       }
      }
     }
@@ -2582,12 +2582,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://106952533601859",
     "NormalMap": "rbxassetid://98174143156798",
-    "MetalnessMap": "rbxassetid://106030613384279",
-    "RoughnessMap": "rbxassetid://106383862095844",
+    "MetalnessMap": "rbxassetid://92087445097450",
+    "RoughnessMap": "rbxassetid://84075671708376",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "106952533601859,98174143156798,106030613384279,106383862095844"
+       "String": "106952533601859,98174143156798,92087445097450,84075671708376"
       }
      }
     }
@@ -2600,12 +2600,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://123468949228663",
     "NormalMap": "rbxassetid://97120057835181",
-    "MetalnessMap": "rbxassetid://70895545431306",
-    "RoughnessMap": "rbxassetid://74319652974021",
+    "MetalnessMap": "rbxassetid://125850785530798",
+    "RoughnessMap": "rbxassetid://102454100136525",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "123468949228663,97120057835181,70895545431306,74319652974021"
+       "String": "123468949228663,97120057835181,125850785530798,102454100136525"
       }
      }
     }
@@ -2618,12 +2618,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://121947638589607",
     "NormalMap": "rbxassetid://117648826172882",
-    "MetalnessMap": "rbxassetid://117880391907103",
-    "RoughnessMap": "rbxassetid://89782928208089",
+    "MetalnessMap": "rbxassetid://121364469302481",
+    "RoughnessMap": "rbxassetid://98235416315906",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "121947638589607,117648826172882,117880391907103,89782928208089"
+       "String": "121947638589607,117648826172882,121364469302481,98235416315906"
       }
      }
     }
@@ -2636,12 +2636,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://136163253019874",
     "NormalMap": "rbxassetid://108565833884505",
-    "MetalnessMap": "rbxassetid://126446088987680",
-    "RoughnessMap": "rbxassetid://110044057919211",
+    "MetalnessMap": "rbxassetid://73334906209129",
+    "RoughnessMap": "rbxassetid://126042943585561",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "136163253019874,108565833884505,126446088987680,110044057919211"
+       "String": "136163253019874,108565833884505,73334906209129,126042943585561"
       }
      }
     }
@@ -2654,12 +2654,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://128085131341341",
     "NormalMap": "rbxassetid://96466714947281",
-    "MetalnessMap": "rbxassetid://97429022324439",
-    "RoughnessMap": "rbxassetid://76529794597443",
+    "MetalnessMap": "rbxassetid://107797325754838",
+    "RoughnessMap": "rbxassetid://124348902261398",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "128085131341341,96466714947281,97429022324439,76529794597443"
+       "String": "128085131341341,96466714947281,107797325754838,124348902261398"
       }
      }
     }
@@ -2672,12 +2672,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://99354674035347",
     "NormalMap": "rbxassetid://113061475228569",
-    "MetalnessMap": "rbxassetid://111396782797715",
-    "RoughnessMap": "rbxassetid://80698614735643",
+    "MetalnessMap": "rbxassetid://130685202799156",
+    "RoughnessMap": "rbxassetid://84501918201966",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "99354674035347,113061475228569,111396782797715,80698614735643"
+       "String": "99354674035347,113061475228569,130685202799156,84501918201966"
       }
      }
     }
@@ -2690,12 +2690,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://105007637574250",
     "NormalMap": "rbxassetid://108757527481440",
-    "MetalnessMap": "rbxassetid://127700339846504",
-    "RoughnessMap": "rbxassetid://125212583538847",
+    "MetalnessMap": "rbxassetid://135260112290064",
+    "RoughnessMap": "rbxassetid://114876622692967",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "105007637574250,108757527481440,127700339846504,125212583538847"
+       "String": "105007637574250,108757527481440,135260112290064,114876622692967"
       }
      }
     }
@@ -2708,12 +2708,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://100069061921129",
     "NormalMap": "rbxassetid://125677848619954",
-    "MetalnessMap": "rbxassetid://139165587808499",
-    "RoughnessMap": "rbxassetid://135239115881602",
+    "MetalnessMap": "rbxassetid://101622218543524",
+    "RoughnessMap": "rbxassetid://132749001688504",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "100069061921129,125677848619954,139165587808499,135239115881602"
+       "String": "100069061921129,125677848619954,101622218543524,132749001688504"
       }
      }
     }
@@ -2726,12 +2726,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://128118772706049",
     "NormalMap": "rbxassetid://138681766801956",
-    "MetalnessMap": "rbxassetid://72747855783787",
-    "RoughnessMap": "rbxassetid://138066607794853",
+    "MetalnessMap": "rbxassetid://81514293794450",
+    "RoughnessMap": "rbxassetid://114455692540272",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "128118772706049,138681766801956,72747855783787,138066607794853"
+       "String": "128118772706049,138681766801956,81514293794450,114455692540272"
       }
      }
     }
@@ -2744,12 +2744,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://97830862898963",
     "NormalMap": "rbxassetid://117118939286636",
-    "MetalnessMap": "rbxassetid://127330376796133",
-    "RoughnessMap": "rbxassetid://95853980268478",
+    "MetalnessMap": "rbxassetid://102535244826397",
+    "RoughnessMap": "rbxassetid://132945961603064",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "97830862898963,117118939286636,127330376796133,95853980268478"
+       "String": "97830862898963,117118939286636,102535244826397,132945961603064"
       }
      }
     }
@@ -2762,12 +2762,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://74145252700840",
     "NormalMap": "rbxassetid://135363692694859",
-    "MetalnessMap": "rbxassetid://78814677811971",
-    "RoughnessMap": "rbxassetid://114418845371556",
+    "MetalnessMap": "rbxassetid://132884730586079",
+    "RoughnessMap": "rbxassetid://109423991814205",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "74145252700840,135363692694859,78814677811971,114418845371556"
+       "String": "74145252700840,135363692694859,132884730586079,109423991814205"
       }
      }
     }
@@ -2780,12 +2780,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://80899814097319",
     "NormalMap": "rbxassetid://79928673453854",
-    "MetalnessMap": "rbxassetid://102091048628134",
-    "RoughnessMap": "rbxassetid://97655165340169",
+    "MetalnessMap": "rbxassetid://82499453937782",
+    "RoughnessMap": "rbxassetid://114458247311101",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "80899814097319,79928673453854,102091048628134,97655165340169"
+       "String": "80899814097319,79928673453854,82499453937782,114458247311101"
       }
      }
     }
@@ -2798,12 +2798,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://111567181156179",
     "NormalMap": "rbxassetid://121451397611472",
-    "MetalnessMap": "rbxassetid://97472726447100",
-    "RoughnessMap": "rbxassetid://115441046988905",
+    "MetalnessMap": "rbxassetid://125705201523831",
+    "RoughnessMap": "rbxassetid://102447640695967",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "111567181156179,121451397611472,97472726447100,115441046988905"
+       "String": "111567181156179,121451397611472,125705201523831,102447640695967"
       }
      }
     }
@@ -2816,12 +2816,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://114116310525524",
     "NormalMap": "rbxassetid://103195377232672",
-    "MetalnessMap": "rbxassetid://75953982824610",
-    "RoughnessMap": "rbxassetid://75379559784893",
+    "MetalnessMap": "rbxassetid://129398877746983",
+    "RoughnessMap": "rbxassetid://98000054775893",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "114116310525524,103195377232672,75953982824610,75379559784893"
+       "String": "114116310525524,103195377232672,129398877746983,98000054775893"
       }
      }
     }
@@ -2834,12 +2834,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://104321684262075",
     "NormalMap": "rbxassetid://117618804547906",
-    "MetalnessMap": "rbxassetid://126446088987680",
-    "RoughnessMap": "rbxassetid://110044057919211",
+    "MetalnessMap": "rbxassetid://73334906209129",
+    "RoughnessMap": "rbxassetid://126042943585561",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "104321684262075,117618804547906,126446088987680,110044057919211"
+       "String": "104321684262075,117618804547906,73334906209129,126042943585561"
       }
      }
     }
@@ -2852,12 +2852,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://100308366271257",
     "NormalMap": "rbxassetid://99565494443808",
-    "MetalnessMap": "rbxassetid://97429022324439",
-    "RoughnessMap": "rbxassetid://76529794597443",
+    "MetalnessMap": "rbxassetid://107797325754838",
+    "RoughnessMap": "rbxassetid://124348902261398",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "100308366271257,99565494443808,97429022324439,76529794597443"
+       "String": "100308366271257,99565494443808,107797325754838,124348902261398"
       }
      }
     }
@@ -2870,12 +2870,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://131943465949765",
     "NormalMap": "rbxassetid://105648268905588",
-    "MetalnessMap": "rbxassetid://111396782797715",
-    "RoughnessMap": "rbxassetid://80698614735643",
+    "MetalnessMap": "rbxassetid://130685202799156",
+    "RoughnessMap": "rbxassetid://84501918201966",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "131943465949765,105648268905588,111396782797715,80698614735643"
+       "String": "131943465949765,105648268905588,130685202799156,84501918201966"
       }
      }
     }
@@ -2888,12 +2888,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://76221622525714",
     "NormalMap": "rbxassetid://83699308469979",
-    "MetalnessMap": "rbxassetid://127700339846504",
-    "RoughnessMap": "rbxassetid://125212583538847",
+    "MetalnessMap": "rbxassetid://135260112290064",
+    "RoughnessMap": "rbxassetid://114876622692967",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "76221622525714,83699308469979,127700339846504,125212583538847"
+       "String": "76221622525714,83699308469979,135260112290064,114876622692967"
       }
      }
     }
@@ -2906,12 +2906,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://129433839860696",
     "NormalMap": "rbxassetid://103260680942452",
-    "MetalnessMap": "rbxassetid://139165587808499",
-    "RoughnessMap": "rbxassetid://135239115881602",
+    "MetalnessMap": "rbxassetid://101622218543524",
+    "RoughnessMap": "rbxassetid://132749001688504",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "129433839860696,103260680942452,139165587808499,135239115881602"
+       "String": "129433839860696,103260680942452,101622218543524,132749001688504"
       }
      }
     }
@@ -2924,12 +2924,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://129934210047752",
     "NormalMap": "rbxassetid://120926563544303",
-    "MetalnessMap": "rbxassetid://72747855783787",
-    "RoughnessMap": "rbxassetid://138066607794853",
+    "MetalnessMap": "rbxassetid://81514293794450",
+    "RoughnessMap": "rbxassetid://114455692540272",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "129934210047752,120926563544303,72747855783787,138066607794853"
+       "String": "129934210047752,120926563544303,81514293794450,114455692540272"
       }
      }
     }
@@ -2942,12 +2942,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://139621283886304",
     "NormalMap": "rbxassetid://136767901570574",
-    "MetalnessMap": "rbxassetid://127330376796133",
-    "RoughnessMap": "rbxassetid://95853980268478",
+    "MetalnessMap": "rbxassetid://102535244826397",
+    "RoughnessMap": "rbxassetid://132945961603064",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "139621283886304,136767901570574,127330376796133,95853980268478"
+       "String": "139621283886304,136767901570574,102535244826397,132945961603064"
       }
      }
     }
@@ -2960,12 +2960,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://131737354808877",
     "NormalMap": "rbxassetid://89369772055706",
-    "MetalnessMap": "rbxassetid://78814677811971",
-    "RoughnessMap": "rbxassetid://114418845371556",
+    "MetalnessMap": "rbxassetid://132884730586079",
+    "RoughnessMap": "rbxassetid://109423991814205",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "131737354808877,89369772055706,78814677811971,114418845371556"
+       "String": "131737354808877,89369772055706,132884730586079,109423991814205"
       }
      }
     }
@@ -2978,12 +2978,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://124556370651137",
     "NormalMap": "rbxassetid://79265942925956",
-    "MetalnessMap": "rbxassetid://102091048628134",
-    "RoughnessMap": "rbxassetid://97655165340169",
+    "MetalnessMap": "rbxassetid://82499453937782",
+    "RoughnessMap": "rbxassetid://114458247311101",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "124556370651137,79265942925956,102091048628134,97655165340169"
+       "String": "124556370651137,79265942925956,82499453937782,114458247311101"
       }
      }
     }
@@ -2996,12 +2996,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://133756881347675",
     "NormalMap": "rbxassetid://73261425817556",
-    "MetalnessMap": "rbxassetid://97472726447100",
-    "RoughnessMap": "rbxassetid://115441046988905",
+    "MetalnessMap": "rbxassetid://125705201523831",
+    "RoughnessMap": "rbxassetid://102447640695967",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "133756881347675,73261425817556,97472726447100,115441046988905"
+       "String": "133756881347675,73261425817556,125705201523831,102447640695967"
       }
      }
     }
@@ -3014,12 +3014,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://116494268399597",
     "NormalMap": "rbxassetid://90296345478927",
-    "MetalnessMap": "rbxassetid://75953982824610",
-    "RoughnessMap": "rbxassetid://75379559784893",
+    "MetalnessMap": "rbxassetid://129398877746983",
+    "RoughnessMap": "rbxassetid://98000054775893",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "116494268399597,90296345478927,75953982824610,75379559784893"
+       "String": "116494268399597,90296345478927,129398877746983,98000054775893"
       }
      }
     }
@@ -3032,12 +3032,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://127262282814862",
     "NormalMap": "rbxassetid://118507367306287",
-    "MetalnessMap": "rbxassetid://122910400149549",
-    "RoughnessMap": "rbxassetid://134938204258866",
+    "MetalnessMap": "rbxassetid://101843372118034",
+    "RoughnessMap": "rbxassetid://135581469901891",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "127262282814862,118507367306287,122910400149549,134938204258866"
+       "String": "127262282814862,118507367306287,101843372118034,135581469901891"
       }
      }
     }
@@ -3050,12 +3050,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://78944490552787",
     "NormalMap": "rbxassetid://131701091814338",
-    "MetalnessMap": "rbxassetid://128592975805089",
-    "RoughnessMap": "rbxassetid://78320884134900",
+    "MetalnessMap": "rbxassetid://132814440002340",
+    "RoughnessMap": "rbxassetid://95735699685968",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "78944490552787,131701091814338,128592975805089,78320884134900"
+       "String": "78944490552787,131701091814338,132814440002340,95735699685968"
       }
      }
     }
@@ -3068,12 +3068,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://85311733107722",
     "NormalMap": "rbxassetid://73568290134082",
-    "MetalnessMap": "rbxassetid://119202369885055",
-    "RoughnessMap": "rbxassetid://106650490599519",
+    "MetalnessMap": "rbxassetid://100412264007203",
+    "RoughnessMap": "rbxassetid://99692681138469",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "85311733107722,73568290134082,119202369885055,106650490599519"
+       "String": "85311733107722,73568290134082,100412264007203,99692681138469"
       }
      }
     }
@@ -3086,12 +3086,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://112791666462403",
     "NormalMap": "rbxassetid://118305890225058",
-    "MetalnessMap": "rbxassetid://118471817867283",
-    "RoughnessMap": "rbxassetid://124190010324699",
+    "MetalnessMap": "rbxassetid://125175449380703",
+    "RoughnessMap": "rbxassetid://139290924795545",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "112791666462403,118305890225058,118471817867283,124190010324699"
+       "String": "112791666462403,118305890225058,125175449380703,139290924795545"
       }
      }
     }
@@ -3104,12 +3104,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://74039925141067",
     "NormalMap": "rbxassetid://134543902403801",
-    "MetalnessMap": "rbxassetid://106160168291978",
-    "RoughnessMap": "rbxassetid://97851566697665",
+    "MetalnessMap": "rbxassetid://121694064407763",
+    "RoughnessMap": "rbxassetid://101390852150357",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "74039925141067,134543902403801,106160168291978,97851566697665"
+       "String": "74039925141067,134543902403801,121694064407763,101390852150357"
       }
      }
     }
@@ -3122,12 +3122,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://115516897025022",
     "NormalMap": "rbxassetid://72136108526455",
-    "MetalnessMap": "rbxassetid://80833278186289",
-    "RoughnessMap": "rbxassetid://130430968488339",
+    "MetalnessMap": "rbxassetid://80947647226585",
+    "RoughnessMap": "rbxassetid://79157484279718",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "115516897025022,72136108526455,80833278186289,130430968488339"
+       "String": "115516897025022,72136108526455,80947647226585,79157484279718"
       }
      }
     }
@@ -3140,12 +3140,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://115596405710931",
     "NormalMap": "rbxassetid://117936319880733",
-    "MetalnessMap": "rbxassetid://87969200024799",
-    "RoughnessMap": "rbxassetid://81947316495247",
+    "MetalnessMap": "rbxassetid://125458170194783",
+    "RoughnessMap": "rbxassetid://128614864847210",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "115596405710931,117936319880733,87969200024799,81947316495247"
+       "String": "115596405710931,117936319880733,125458170194783,128614864847210"
       }
      }
     }
@@ -3158,12 +3158,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://94601749154163",
     "NormalMap": "rbxassetid://137730082412351",
-    "MetalnessMap": "rbxassetid://122584989772082",
-    "RoughnessMap": "rbxassetid://101184628752857",
+    "MetalnessMap": "rbxassetid://138330595063897",
+    "RoughnessMap": "rbxassetid://77390827315650",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "94601749154163,137730082412351,122584989772082,101184628752857"
+       "String": "94601749154163,137730082412351,138330595063897,77390827315650"
       }
      }
     }
@@ -3176,12 +3176,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://136495912073691",
     "NormalMap": "rbxassetid://132127476932846",
-    "MetalnessMap": "rbxassetid://100871639656138",
-    "RoughnessMap": "rbxassetid://124945413962063",
+    "MetalnessMap": "rbxassetid://78823035197509",
+    "RoughnessMap": "rbxassetid://77742005649430",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "136495912073691,132127476932846,100871639656138,124945413962063"
+       "String": "136495912073691,132127476932846,78823035197509,77742005649430"
       }
      }
     }
@@ -3194,12 +3194,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://96791996982692",
     "NormalMap": "rbxassetid://98792467568583",
-    "MetalnessMap": "rbxassetid://125134589290652",
-    "RoughnessMap": "rbxassetid://84223392239566",
+    "MetalnessMap": "rbxassetid://92128318772429",
+    "RoughnessMap": "rbxassetid://77387917699885",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "96791996982692,98792467568583,125134589290652,84223392239566"
+       "String": "96791996982692,98792467568583,92128318772429,77387917699885"
       }
      }
     }
@@ -3212,12 +3212,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://112703507533012",
     "NormalMap": "rbxassetid://134179941842284",
-    "MetalnessMap": "rbxassetid://132400000108036",
-    "RoughnessMap": "rbxassetid://107867952956669",
+    "MetalnessMap": "rbxassetid://96472201871924",
+    "RoughnessMap": "rbxassetid://97987696891358",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "112703507533012,134179941842284,132400000108036,107867952956669"
+       "String": "112703507533012,134179941842284,96472201871924,97987696891358"
       }
      }
     }
@@ -3230,12 +3230,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://72786227121391",
     "NormalMap": "rbxassetid://98889709628277",
-    "MetalnessMap": "rbxassetid://78232401941717",
-    "RoughnessMap": "rbxassetid://101478952683431",
+    "MetalnessMap": "rbxassetid://70542481869055",
+    "RoughnessMap": "rbxassetid://91692072896972",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "72786227121391,98889709628277,78232401941717,101478952683431"
+       "String": "72786227121391,98889709628277,70542481869055,91692072896972"
       }
      }
     }
@@ -3248,12 +3248,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://125487458536216",
     "NormalMap": "rbxassetid://92758420797129",
-    "MetalnessMap": "rbxassetid://124614105214698",
-    "RoughnessMap": "rbxassetid://107600898102567",
+    "MetalnessMap": "rbxassetid://109526259242138",
+    "RoughnessMap": "rbxassetid://73484774514407",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "125487458536216,92758420797129,124614105214698,107600898102567"
+       "String": "125487458536216,92758420797129,109526259242138,73484774514407"
       }
      }
     }
@@ -3266,12 +3266,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://125024432834459",
     "NormalMap": "rbxassetid://127699451236654",
-    "MetalnessMap": "rbxassetid://125764307456914",
-    "RoughnessMap": "rbxassetid://131294811215087",
+    "MetalnessMap": "rbxassetid://70830991864175",
+    "RoughnessMap": "rbxassetid://127886530183509",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "125024432834459,127699451236654,125764307456914,131294811215087"
+       "String": "125024432834459,127699451236654,70830991864175,127886530183509"
       }
      }
     }
@@ -3284,12 +3284,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://85771640564548",
     "NormalMap": "rbxassetid://134717295654517",
-    "MetalnessMap": "rbxassetid://117235928292746",
-    "RoughnessMap": "rbxassetid://116606892476861",
+    "MetalnessMap": "rbxassetid://82341841902316",
+    "RoughnessMap": "rbxassetid://86652462048475",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "85771640564548,134717295654517,117235928292746,116606892476861"
+       "String": "85771640564548,134717295654517,82341841902316,86652462048475"
       }
      }
     }
@@ -3302,12 +3302,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://70784120566997",
     "NormalMap": "rbxassetid://101381750062501",
-    "MetalnessMap": "rbxassetid://107473940737809",
-    "RoughnessMap": "rbxassetid://129547894049982",
+    "MetalnessMap": "rbxassetid://137229248231227",
+    "RoughnessMap": "rbxassetid://135999277843887",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "70784120566997,101381750062501,107473940737809,129547894049982"
+       "String": "70784120566997,101381750062501,137229248231227,135999277843887"
       }
      }
     }
@@ -3320,12 +3320,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://77805609964509",
     "NormalMap": "rbxassetid://82623879815746",
-    "MetalnessMap": "rbxassetid://102287212292007",
-    "RoughnessMap": "rbxassetid://79012708748587",
+    "MetalnessMap": "rbxassetid://97680760214677",
+    "RoughnessMap": "rbxassetid://87190852859038",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "77805609964509,82623879815746,102287212292007,79012708748587"
+       "String": "77805609964509,82623879815746,97680760214677,87190852859038"
       }
      }
     }
@@ -3338,12 +3338,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://91643111896126",
     "NormalMap": "rbxassetid://124786839349937",
-    "MetalnessMap": "rbxassetid://107750758999095",
-    "RoughnessMap": "rbxassetid://86909655494601",
+    "MetalnessMap": "rbxassetid://100444117676915",
+    "RoughnessMap": "rbxassetid://77416397255393",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "91643111896126,124786839349937,107750758999095,86909655494601"
+       "String": "91643111896126,124786839349937,100444117676915,77416397255393"
       }
      }
     }
@@ -3356,12 +3356,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://99172382939997",
     "NormalMap": "rbxassetid://119713303208851",
-    "MetalnessMap": "rbxassetid://79737371911227",
-    "RoughnessMap": "rbxassetid://78246878913388",
+    "MetalnessMap": "rbxassetid://124420986285734",
+    "RoughnessMap": "rbxassetid://140682921263592",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "99172382939997,119713303208851,79737371911227,78246878913388"
+       "String": "99172382939997,119713303208851,124420986285734,140682921263592"
       }
      }
     }
@@ -3374,12 +3374,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://95548348997162",
     "NormalMap": "rbxassetid://131953620374205",
-    "MetalnessMap": "rbxassetid://106030613384279",
-    "RoughnessMap": "rbxassetid://106383862095844",
+    "MetalnessMap": "rbxassetid://92087445097450",
+    "RoughnessMap": "rbxassetid://84075671708376",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "95548348997162,131953620374205,106030613384279,106383862095844"
+       "String": "95548348997162,131953620374205,92087445097450,84075671708376"
       }
      }
     }
@@ -3392,12 +3392,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://111962065784066",
     "NormalMap": "rbxassetid://111244667958825",
-    "MetalnessMap": "rbxassetid://70895545431306",
-    "RoughnessMap": "rbxassetid://74319652974021",
+    "MetalnessMap": "rbxassetid://125850785530798",
+    "RoughnessMap": "rbxassetid://102454100136525",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "111962065784066,111244667958825,70895545431306,74319652974021"
+       "String": "111962065784066,111244667958825,125850785530798,102454100136525"
       }
      }
     }
@@ -3410,12 +3410,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://134511040001855",
     "NormalMap": "rbxassetid://104688664152706",
-    "MetalnessMap": "rbxassetid://117880391907103",
-    "RoughnessMap": "rbxassetid://89782928208089",
+    "MetalnessMap": "rbxassetid://121364469302481",
+    "RoughnessMap": "rbxassetid://98235416315906",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "134511040001855,104688664152706,117880391907103,89782928208089"
+       "String": "134511040001855,104688664152706,121364469302481,98235416315906"
       }
      }
     }
@@ -3428,12 +3428,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://135167086264008",
     "NormalMap": "rbxassetid://70883634503519",
-    "MetalnessMap": "rbxassetid://78232401941717",
-    "RoughnessMap": "rbxassetid://101478952683431",
+    "MetalnessMap": "rbxassetid://70542481869055",
+    "RoughnessMap": "rbxassetid://91692072896972",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "135167086264008,70883634503519,78232401941717,101478952683431"
+       "String": "135167086264008,70883634503519,70542481869055,91692072896972"
       }
      }
     }
@@ -3446,12 +3446,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://85036983499304",
     "NormalMap": "rbxassetid://119678530365041",
-    "MetalnessMap": "rbxassetid://124614105214698",
-    "RoughnessMap": "rbxassetid://107600898102567",
+    "MetalnessMap": "rbxassetid://109526259242138",
+    "RoughnessMap": "rbxassetid://73484774514407",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "85036983499304,119678530365041,124614105214698,107600898102567"
+       "String": "85036983499304,119678530365041,109526259242138,73484774514407"
       }
      }
     }
@@ -3464,12 +3464,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://116652921043780",
     "NormalMap": "rbxassetid://78802956913231",
-    "MetalnessMap": "rbxassetid://125764307456914",
-    "RoughnessMap": "rbxassetid://131294811215087",
+    "MetalnessMap": "rbxassetid://70830991864175",
+    "RoughnessMap": "rbxassetid://127886530183509",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "116652921043780,78802956913231,125764307456914,131294811215087"
+       "String": "116652921043780,78802956913231,70830991864175,127886530183509"
       }
      }
     }
@@ -3482,12 +3482,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://76202341370024",
     "NormalMap": "rbxassetid://74086057952923",
-    "MetalnessMap": "rbxassetid://117235928292746",
-    "RoughnessMap": "rbxassetid://116606892476861",
+    "MetalnessMap": "rbxassetid://82341841902316",
+    "RoughnessMap": "rbxassetid://86652462048475",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "76202341370024,74086057952923,117235928292746,116606892476861"
+       "String": "76202341370024,74086057952923,82341841902316,86652462048475"
       }
      }
     }
@@ -3500,12 +3500,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://76610980774653",
     "NormalMap": "rbxassetid://113858440938292",
-    "MetalnessMap": "rbxassetid://107473940737809",
-    "RoughnessMap": "rbxassetid://129547894049982",
+    "MetalnessMap": "rbxassetid://137229248231227",
+    "RoughnessMap": "rbxassetid://135999277843887",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "76610980774653,113858440938292,107473940737809,129547894049982"
+       "String": "76610980774653,113858440938292,137229248231227,135999277843887"
       }
      }
     }
@@ -3518,12 +3518,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://99036136485537",
     "NormalMap": "rbxassetid://89254216890694",
-    "MetalnessMap": "rbxassetid://102287212292007",
-    "RoughnessMap": "rbxassetid://79012708748587",
+    "MetalnessMap": "rbxassetid://97680760214677",
+    "RoughnessMap": "rbxassetid://87190852859038",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "99036136485537,89254216890694,102287212292007,79012708748587"
+       "String": "99036136485537,89254216890694,97680760214677,87190852859038"
       }
      }
     }
@@ -3536,12 +3536,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://123957913539480",
     "NormalMap": "rbxassetid://121874335573868",
-    "MetalnessMap": "rbxassetid://107750758999095",
-    "RoughnessMap": "rbxassetid://86909655494601",
+    "MetalnessMap": "rbxassetid://100444117676915",
+    "RoughnessMap": "rbxassetid://77416397255393",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "123957913539480,121874335573868,107750758999095,86909655494601"
+       "String": "123957913539480,121874335573868,100444117676915,77416397255393"
       }
      }
     }
@@ -3554,12 +3554,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://89873308023358",
     "NormalMap": "rbxassetid://114087762617493",
-    "MetalnessMap": "rbxassetid://79737371911227",
-    "RoughnessMap": "rbxassetid://78246878913388",
+    "MetalnessMap": "rbxassetid://124420986285734",
+    "RoughnessMap": "rbxassetid://140682921263592",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "89873308023358,114087762617493,79737371911227,78246878913388"
+       "String": "89873308023358,114087762617493,124420986285734,140682921263592"
       }
      }
     }
@@ -3572,12 +3572,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://117987474570932",
     "NormalMap": "rbxassetid://129132023019066",
-    "MetalnessMap": "rbxassetid://106030613384279",
-    "RoughnessMap": "rbxassetid://106383862095844",
+    "MetalnessMap": "rbxassetid://92087445097450",
+    "RoughnessMap": "rbxassetid://84075671708376",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "117987474570932,129132023019066,106030613384279,106383862095844"
+       "String": "117987474570932,129132023019066,92087445097450,84075671708376"
       }
      }
     }
@@ -3590,12 +3590,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://102650881711902",
     "NormalMap": "rbxassetid://70583098539600",
-    "MetalnessMap": "rbxassetid://70895545431306",
-    "RoughnessMap": "rbxassetid://74319652974021",
+    "MetalnessMap": "rbxassetid://125850785530798",
+    "RoughnessMap": "rbxassetid://102454100136525",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "102650881711902,70583098539600,70895545431306,74319652974021"
+       "String": "102650881711902,70583098539600,125850785530798,102454100136525"
       }
      }
     }
@@ -3608,12 +3608,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://95818326598070",
     "NormalMap": "rbxassetid://76439670216655",
-    "MetalnessMap": "rbxassetid://117880391907103",
-    "RoughnessMap": "rbxassetid://89782928208089",
+    "MetalnessMap": "rbxassetid://121364469302481",
+    "RoughnessMap": "rbxassetid://98235416315906",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "95818326598070,76439670216655,117880391907103,89782928208089"
+       "String": "95818326598070,76439670216655,121364469302481,98235416315906"
       }
      }
     }
@@ -3626,12 +3626,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://135745181690617",
     "NormalMap": "rbxassetid://127872296565066",
-    "MetalnessMap": "rbxassetid://83537475117299",
-    "RoughnessMap": "rbxassetid://126396229008311",
+    "MetalnessMap": "rbxassetid://109764682237071",
+    "RoughnessMap": "rbxassetid://102974065369627",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "135745181690617,127872296565066,83537475117299,126396229008311"
+       "String": "135745181690617,127872296565066,109764682237071,102974065369627"
       }
      }
     }
@@ -3644,12 +3644,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://82684665372036",
     "NormalMap": "rbxassetid://102247754991513",
-    "MetalnessMap": "rbxassetid://134419799253771",
-    "RoughnessMap": "rbxassetid://103786401336736",
+    "MetalnessMap": "rbxassetid://134912664723935",
+    "RoughnessMap": "rbxassetid://137615058597842",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "82684665372036,102247754991513,134419799253771,103786401336736"
+       "String": "82684665372036,102247754991513,134912664723935,137615058597842"
       }
      }
     }
@@ -3662,12 +3662,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://91299864793846",
     "NormalMap": "rbxassetid://84833696530621",
-    "MetalnessMap": "rbxassetid://86967779620722",
-    "RoughnessMap": "rbxassetid://99998723114364",
+    "MetalnessMap": "rbxassetid://104053211720931",
+    "RoughnessMap": "rbxassetid://103257145090542",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "91299864793846,84833696530621,86967779620722,99998723114364"
+       "String": "91299864793846,84833696530621,104053211720931,103257145090542"
       }
      }
     }
@@ -3680,12 +3680,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://111337149641594",
     "NormalMap": "rbxassetid://99759805574246",
-    "MetalnessMap": "rbxassetid://101168409871554",
-    "RoughnessMap": "rbxassetid://104868987365996",
+    "MetalnessMap": "rbxassetid://108858499127329",
+    "RoughnessMap": "rbxassetid://108025663736384",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "111337149641594,99759805574246,101168409871554,104868987365996"
+       "String": "111337149641594,99759805574246,108858499127329,108025663736384"
       }
      }
     }
@@ -3698,12 +3698,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://134353910404464",
     "NormalMap": "rbxassetid://81463618857460",
-    "MetalnessMap": "rbxassetid://71707091407738",
-    "RoughnessMap": "rbxassetid://80528053460781",
+    "MetalnessMap": "rbxassetid://128012593009728",
+    "RoughnessMap": "rbxassetid://133114959898786",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "134353910404464,81463618857460,71707091407738,80528053460781"
+       "String": "134353910404464,81463618857460,128012593009728,133114959898786"
       }
      }
     }
@@ -3716,12 +3716,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://134949519781722",
     "NormalMap": "rbxassetid://73191872427734",
-    "MetalnessMap": "rbxassetid://85114698556928",
-    "RoughnessMap": "rbxassetid://120498054617800",
+    "MetalnessMap": "rbxassetid://82665735267692",
+    "RoughnessMap": "rbxassetid://96308776971595",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "134949519781722,73191872427734,85114698556928,120498054617800"
+       "String": "134949519781722,73191872427734,82665735267692,96308776971595"
       }
      }
     }
@@ -3734,12 +3734,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://115505971660753",
     "NormalMap": "rbxassetid://125080255121713",
-    "MetalnessMap": "rbxassetid://140402757224107",
-    "RoughnessMap": "rbxassetid://100183973110046",
+    "MetalnessMap": "rbxassetid://88806383451548",
+    "RoughnessMap": "rbxassetid://123394699744153",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "115505971660753,125080255121713,140402757224107,100183973110046"
+       "String": "115505971660753,125080255121713,88806383451548,123394699744153"
       }
      }
     }
@@ -3752,12 +3752,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://130036602937832",
     "NormalMap": "rbxassetid://113049860946331",
-    "MetalnessMap": "rbxassetid://132803705401671",
-    "RoughnessMap": "rbxassetid://118177500703577",
+    "MetalnessMap": "rbxassetid://102124217667604",
+    "RoughnessMap": "rbxassetid://79974450893317",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "130036602937832,113049860946331,132803705401671,118177500703577"
+       "String": "130036602937832,113049860946331,102124217667604,79974450893317"
       }
      }
     }
@@ -3770,12 +3770,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://74657983652041",
     "NormalMap": "rbxassetid://91562076157101",
-    "MetalnessMap": "rbxassetid://125978778691397",
-    "RoughnessMap": "rbxassetid://139003257244059",
+    "MetalnessMap": "rbxassetid://101546422151277",
+    "RoughnessMap": "rbxassetid://97696101280308",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "74657983652041,91562076157101,125978778691397,139003257244059"
+       "String": "74657983652041,91562076157101,101546422151277,97696101280308"
       }
      }
     }
@@ -3788,12 +3788,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://79622282306620",
     "NormalMap": "rbxassetid://98176851782258",
-    "MetalnessMap": "rbxassetid://97159265580033",
-    "RoughnessMap": "rbxassetid://76930887874737",
+    "MetalnessMap": "rbxassetid://92940560893240",
+    "RoughnessMap": "rbxassetid://83777314524861",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "79622282306620,98176851782258,97159265580033,76930887874737"
+       "String": "79622282306620,98176851782258,92940560893240,83777314524861"
       }
      }
     }
@@ -3806,12 +3806,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://84047960187654",
     "NormalMap": "rbxassetid://75432620391482",
-    "MetalnessMap": "rbxassetid://90696927498788",
-    "RoughnessMap": "rbxassetid://120542411644811",
+    "MetalnessMap": "rbxassetid://137411039540679",
+    "RoughnessMap": "rbxassetid://112351340457451",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "84047960187654,75432620391482,90696927498788,120542411644811"
+       "String": "84047960187654,75432620391482,137411039540679,112351340457451"
       }
      }
     }
@@ -3824,12 +3824,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://122649660434515",
     "NormalMap": "rbxassetid://132006442181400",
-    "MetalnessMap": "rbxassetid://122910400149549",
-    "RoughnessMap": "rbxassetid://134938204258866",
+    "MetalnessMap": "rbxassetid://101843372118034",
+    "RoughnessMap": "rbxassetid://135581469901891",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "122649660434515,132006442181400,122910400149549,134938204258866"
+       "String": "122649660434515,132006442181400,101843372118034,135581469901891"
       }
      }
     }
@@ -3842,12 +3842,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://74333130303245",
     "NormalMap": "rbxassetid://117091056647880",
-    "MetalnessMap": "rbxassetid://128592975805089",
-    "RoughnessMap": "rbxassetid://78320884134900",
+    "MetalnessMap": "rbxassetid://132814440002340",
+    "RoughnessMap": "rbxassetid://95735699685968",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "74333130303245,117091056647880,128592975805089,78320884134900"
+       "String": "74333130303245,117091056647880,132814440002340,95735699685968"
       }
      }
     }
@@ -3860,12 +3860,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://83732879965648",
     "NormalMap": "rbxassetid://111412627487949",
-    "MetalnessMap": "rbxassetid://119202369885055",
-    "RoughnessMap": "rbxassetid://106650490599519",
+    "MetalnessMap": "rbxassetid://100412264007203",
+    "RoughnessMap": "rbxassetid://99692681138469",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "83732879965648,111412627487949,119202369885055,106650490599519"
+       "String": "83732879965648,111412627487949,100412264007203,99692681138469"
       }
      }
     }
@@ -3878,12 +3878,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://84816669939575",
     "NormalMap": "rbxassetid://115936020488826",
-    "MetalnessMap": "rbxassetid://118471817867283",
-    "RoughnessMap": "rbxassetid://124190010324699",
+    "MetalnessMap": "rbxassetid://125175449380703",
+    "RoughnessMap": "rbxassetid://139290924795545",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "84816669939575,115936020488826,118471817867283,124190010324699"
+       "String": "84816669939575,115936020488826,125175449380703,139290924795545"
       }
      }
     }
@@ -3896,12 +3896,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://137750498346639",
     "NormalMap": "rbxassetid://115293923166082",
-    "MetalnessMap": "rbxassetid://106160168291978",
-    "RoughnessMap": "rbxassetid://97851566697665",
+    "MetalnessMap": "rbxassetid://121694064407763",
+    "RoughnessMap": "rbxassetid://101390852150357",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "137750498346639,115293923166082,106160168291978,97851566697665"
+       "String": "137750498346639,115293923166082,121694064407763,101390852150357"
       }
      }
     }
@@ -3914,12 +3914,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://115860516203233",
     "NormalMap": "rbxassetid://92667974157704",
-    "MetalnessMap": "rbxassetid://80833278186289",
-    "RoughnessMap": "rbxassetid://130430968488339",
+    "MetalnessMap": "rbxassetid://80947647226585",
+    "RoughnessMap": "rbxassetid://79157484279718",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "115860516203233,92667974157704,80833278186289,130430968488339"
+       "String": "115860516203233,92667974157704,80947647226585,79157484279718"
       }
      }
     }
@@ -3932,12 +3932,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://130725601665193",
     "NormalMap": "rbxassetid://119016444871762",
-    "MetalnessMap": "rbxassetid://87969200024799",
-    "RoughnessMap": "rbxassetid://81947316495247",
+    "MetalnessMap": "rbxassetid://125458170194783",
+    "RoughnessMap": "rbxassetid://128614864847210",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "130725601665193,119016444871762,87969200024799,81947316495247"
+       "String": "130725601665193,119016444871762,125458170194783,128614864847210"
       }
      }
     }
@@ -3950,12 +3950,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://78694290356429",
     "NormalMap": "rbxassetid://86487338078540",
-    "MetalnessMap": "rbxassetid://122584989772082",
-    "RoughnessMap": "rbxassetid://101184628752857",
+    "MetalnessMap": "rbxassetid://138330595063897",
+    "RoughnessMap": "rbxassetid://77390827315650",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "78694290356429,86487338078540,122584989772082,101184628752857"
+       "String": "78694290356429,86487338078540,138330595063897,77390827315650"
       }
      }
     }
@@ -3968,12 +3968,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://119480370275312",
     "NormalMap": "rbxassetid://120345739942041",
-    "MetalnessMap": "rbxassetid://100871639656138",
-    "RoughnessMap": "rbxassetid://124945413962063",
+    "MetalnessMap": "rbxassetid://78823035197509",
+    "RoughnessMap": "rbxassetid://77742005649430",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "119480370275312,120345739942041,100871639656138,124945413962063"
+       "String": "119480370275312,120345739942041,78823035197509,77742005649430"
       }
      }
     }
@@ -3986,12 +3986,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://73756111846471",
     "NormalMap": "rbxassetid://98519002199899",
-    "MetalnessMap": "rbxassetid://125134589290652",
-    "RoughnessMap": "rbxassetid://84223392239566",
+    "MetalnessMap": "rbxassetid://92128318772429",
+    "RoughnessMap": "rbxassetid://77387917699885",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "73756111846471,98519002199899,125134589290652,84223392239566"
+       "String": "73756111846471,98519002199899,92128318772429,77387917699885"
       }
      }
     }
@@ -4004,12 +4004,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://88037068807287",
     "NormalMap": "rbxassetid://95531608658458",
-    "MetalnessMap": "rbxassetid://132400000108036",
-    "RoughnessMap": "rbxassetid://107867952956669",
+    "MetalnessMap": "rbxassetid://96472201871924",
+    "RoughnessMap": "rbxassetid://97987696891358",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "88037068807287,95531608658458,132400000108036,107867952956669"
+       "String": "88037068807287,95531608658458,96472201871924,97987696891358"
       }
      }
     }
@@ -4022,12 +4022,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://122132944056050",
     "NormalMap": "rbxassetid://110402607250922",
-    "MetalnessMap": "rbxassetid://126446088987680",
-    "RoughnessMap": "rbxassetid://110044057919211",
+    "MetalnessMap": "rbxassetid://73334906209129",
+    "RoughnessMap": "rbxassetid://126042943585561",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "122132944056050,110402607250922,126446088987680,110044057919211"
+       "String": "122132944056050,110402607250922,73334906209129,126042943585561"
       }
      }
     }
@@ -4040,12 +4040,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://121083493939586",
     "NormalMap": "rbxassetid://93934862002125",
-    "MetalnessMap": "rbxassetid://97429022324439",
-    "RoughnessMap": "rbxassetid://76529794597443",
+    "MetalnessMap": "rbxassetid://107797325754838",
+    "RoughnessMap": "rbxassetid://124348902261398",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "121083493939586,93934862002125,97429022324439,76529794597443"
+       "String": "121083493939586,93934862002125,107797325754838,124348902261398"
       }
      }
     }
@@ -4058,12 +4058,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://128883230863186",
     "NormalMap": "rbxassetid://80259412076626",
-    "MetalnessMap": "rbxassetid://111396782797715",
-    "RoughnessMap": "rbxassetid://80698614735643",
+    "MetalnessMap": "rbxassetid://130685202799156",
+    "RoughnessMap": "rbxassetid://84501918201966",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "128883230863186,80259412076626,111396782797715,80698614735643"
+       "String": "128883230863186,80259412076626,130685202799156,84501918201966"
       }
      }
     }
@@ -4076,12 +4076,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://132823814697953",
     "NormalMap": "rbxassetid://95208724969348",
-    "MetalnessMap": "rbxassetid://127700339846504",
-    "RoughnessMap": "rbxassetid://125212583538847",
+    "MetalnessMap": "rbxassetid://135260112290064",
+    "RoughnessMap": "rbxassetid://114876622692967",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "132823814697953,95208724969348,127700339846504,125212583538847"
+       "String": "132823814697953,95208724969348,135260112290064,114876622692967"
       }
      }
     }
@@ -4094,12 +4094,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://86386526247174",
     "NormalMap": "rbxassetid://101078771511609",
-    "MetalnessMap": "rbxassetid://139165587808499",
-    "RoughnessMap": "rbxassetid://135239115881602",
+    "MetalnessMap": "rbxassetid://101622218543524",
+    "RoughnessMap": "rbxassetid://132749001688504",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "86386526247174,101078771511609,139165587808499,135239115881602"
+       "String": "86386526247174,101078771511609,101622218543524,132749001688504"
       }
      }
     }
@@ -4112,12 +4112,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://124547976000753",
     "NormalMap": "rbxassetid://116704195742947",
-    "MetalnessMap": "rbxassetid://72747855783787",
-    "RoughnessMap": "rbxassetid://138066607794853",
+    "MetalnessMap": "rbxassetid://81514293794450",
+    "RoughnessMap": "rbxassetid://114455692540272",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "124547976000753,116704195742947,72747855783787,138066607794853"
+       "String": "124547976000753,116704195742947,81514293794450,114455692540272"
       }
      }
     }
@@ -4130,12 +4130,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://129289243776895",
     "NormalMap": "rbxassetid://126940577320457",
-    "MetalnessMap": "rbxassetid://127330376796133",
-    "RoughnessMap": "rbxassetid://95853980268478",
+    "MetalnessMap": "rbxassetid://102535244826397",
+    "RoughnessMap": "rbxassetid://132945961603064",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "129289243776895,126940577320457,127330376796133,95853980268478"
+       "String": "129289243776895,126940577320457,102535244826397,132945961603064"
       }
      }
     }
@@ -4148,12 +4148,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://136356456214131",
     "NormalMap": "rbxassetid://109877333952966",
-    "MetalnessMap": "rbxassetid://78814677811971",
-    "RoughnessMap": "rbxassetid://114418845371556",
+    "MetalnessMap": "rbxassetid://132884730586079",
+    "RoughnessMap": "rbxassetid://109423991814205",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "136356456214131,109877333952966,78814677811971,114418845371556"
+       "String": "136356456214131,109877333952966,132884730586079,109423991814205"
       }
      }
     }
@@ -4166,12 +4166,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://127840180866065",
     "NormalMap": "rbxassetid://109002272244785",
-    "MetalnessMap": "rbxassetid://102091048628134",
-    "RoughnessMap": "rbxassetid://97655165340169",
+    "MetalnessMap": "rbxassetid://82499453937782",
+    "RoughnessMap": "rbxassetid://114458247311101",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "127840180866065,109002272244785,102091048628134,97655165340169"
+       "String": "127840180866065,109002272244785,82499453937782,114458247311101"
       }
      }
     }
@@ -4184,12 +4184,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://103901361524738",
     "NormalMap": "rbxassetid://114917600803617",
-    "MetalnessMap": "rbxassetid://97472726447100",
-    "RoughnessMap": "rbxassetid://115441046988905",
+    "MetalnessMap": "rbxassetid://125705201523831",
+    "RoughnessMap": "rbxassetid://102447640695967",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "103901361524738,114917600803617,97472726447100,115441046988905"
+       "String": "103901361524738,114917600803617,125705201523831,102447640695967"
       }
      }
     }
@@ -4202,12 +4202,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://94962920783622",
     "NormalMap": "rbxassetid://122439110261548",
-    "MetalnessMap": "rbxassetid://75953982824610",
-    "RoughnessMap": "rbxassetid://75379559784893",
+    "MetalnessMap": "rbxassetid://129398877746983",
+    "RoughnessMap": "rbxassetid://98000054775893",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "94962920783622,122439110261548,75953982824610,75379559784893"
+       "String": "94962920783622,122439110261548,129398877746983,98000054775893"
       }
      }
     }
@@ -4220,12 +4220,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://115608322772863",
     "NormalMap": "rbxassetid://110534650993679",
-    "MetalnessMap": "rbxassetid://126446088987680",
-    "RoughnessMap": "rbxassetid://110044057919211",
+    "MetalnessMap": "rbxassetid://73334906209129",
+    "RoughnessMap": "rbxassetid://126042943585561",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "115608322772863,110534650993679,126446088987680,110044057919211"
+       "String": "115608322772863,110534650993679,73334906209129,126042943585561"
       }
      }
     }
@@ -4238,12 +4238,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://128883605081821",
     "NormalMap": "rbxassetid://79872870907842",
-    "MetalnessMap": "rbxassetid://97429022324439",
-    "RoughnessMap": "rbxassetid://76529794597443",
+    "MetalnessMap": "rbxassetid://107797325754838",
+    "RoughnessMap": "rbxassetid://124348902261398",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "128883605081821,79872870907842,97429022324439,76529794597443"
+       "String": "128883605081821,79872870907842,107797325754838,124348902261398"
       }
      }
     }
@@ -4256,12 +4256,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://93454573752913",
     "NormalMap": "rbxassetid://94834843989112",
-    "MetalnessMap": "rbxassetid://111396782797715",
-    "RoughnessMap": "rbxassetid://80698614735643",
+    "MetalnessMap": "rbxassetid://130685202799156",
+    "RoughnessMap": "rbxassetid://84501918201966",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "93454573752913,94834843989112,111396782797715,80698614735643"
+       "String": "93454573752913,94834843989112,130685202799156,84501918201966"
       }
      }
     }
@@ -4274,12 +4274,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://137623198063861",
     "NormalMap": "rbxassetid://138074748378639",
-    "MetalnessMap": "rbxassetid://127700339846504",
-    "RoughnessMap": "rbxassetid://125212583538847",
+    "MetalnessMap": "rbxassetid://135260112290064",
+    "RoughnessMap": "rbxassetid://114876622692967",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "137623198063861,138074748378639,127700339846504,125212583538847"
+       "String": "137623198063861,138074748378639,135260112290064,114876622692967"
       }
      }
     }
@@ -4292,12 +4292,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://85804405793881",
     "NormalMap": "rbxassetid://111027340917294",
-    "MetalnessMap": "rbxassetid://139165587808499",
-    "RoughnessMap": "rbxassetid://135239115881602",
+    "MetalnessMap": "rbxassetid://101622218543524",
+    "RoughnessMap": "rbxassetid://132749001688504",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "85804405793881,111027340917294,139165587808499,135239115881602"
+       "String": "85804405793881,111027340917294,101622218543524,132749001688504"
       }
      }
     }
@@ -4310,12 +4310,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://126606471153588",
     "NormalMap": "rbxassetid://132028370121542",
-    "MetalnessMap": "rbxassetid://72747855783787",
-    "RoughnessMap": "rbxassetid://138066607794853",
+    "MetalnessMap": "rbxassetid://81514293794450",
+    "RoughnessMap": "rbxassetid://114455692540272",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "126606471153588,132028370121542,72747855783787,138066607794853"
+       "String": "126606471153588,132028370121542,81514293794450,114455692540272"
       }
      }
     }
@@ -4328,12 +4328,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://115915329209294",
     "NormalMap": "rbxassetid://108993859565100",
-    "MetalnessMap": "rbxassetid://127330376796133",
-    "RoughnessMap": "rbxassetid://95853980268478",
+    "MetalnessMap": "rbxassetid://102535244826397",
+    "RoughnessMap": "rbxassetid://132945961603064",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "115915329209294,108993859565100,127330376796133,95853980268478"
+       "String": "115915329209294,108993859565100,102535244826397,132945961603064"
       }
      }
     }
@@ -4346,12 +4346,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://122837412805288",
     "NormalMap": "rbxassetid://90439116715368",
-    "MetalnessMap": "rbxassetid://78814677811971",
-    "RoughnessMap": "rbxassetid://114418845371556",
+    "MetalnessMap": "rbxassetid://132884730586079",
+    "RoughnessMap": "rbxassetid://109423991814205",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "122837412805288,90439116715368,78814677811971,114418845371556"
+       "String": "122837412805288,90439116715368,132884730586079,109423991814205"
       }
      }
     }
@@ -4364,12 +4364,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://124088079609618",
     "NormalMap": "rbxassetid://108055829716889",
-    "MetalnessMap": "rbxassetid://102091048628134",
-    "RoughnessMap": "rbxassetid://97655165340169",
+    "MetalnessMap": "rbxassetid://82499453937782",
+    "RoughnessMap": "rbxassetid://114458247311101",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "124088079609618,108055829716889,102091048628134,97655165340169"
+       "String": "124088079609618,108055829716889,82499453937782,114458247311101"
       }
      }
     }
@@ -4382,12 +4382,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://89164751075638",
     "NormalMap": "rbxassetid://128696109997100",
-    "MetalnessMap": "rbxassetid://97472726447100",
-    "RoughnessMap": "rbxassetid://115441046988905",
+    "MetalnessMap": "rbxassetid://125705201523831",
+    "RoughnessMap": "rbxassetid://102447640695967",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "89164751075638,128696109997100,97472726447100,115441046988905"
+       "String": "89164751075638,128696109997100,125705201523831,102447640695967"
       }
      }
     }
@@ -4400,12 +4400,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://80009413828634",
     "NormalMap": "rbxassetid://140476829949295",
-    "MetalnessMap": "rbxassetid://75953982824610",
-    "RoughnessMap": "rbxassetid://75379559784893",
+    "MetalnessMap": "rbxassetid://129398877746983",
+    "RoughnessMap": "rbxassetid://98000054775893",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "80009413828634,140476829949295,75953982824610,75379559784893"
+       "String": "80009413828634,140476829949295,129398877746983,98000054775893"
       }
      }
     }
@@ -4418,12 +4418,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://126021245146853",
     "NormalMap": "rbxassetid://88016760918517",
-    "MetalnessMap": "rbxassetid://126446088987680",
-    "RoughnessMap": "rbxassetid://110044057919211",
+    "MetalnessMap": "rbxassetid://73334906209129",
+    "RoughnessMap": "rbxassetid://126042943585561",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "126021245146853,88016760918517,126446088987680,110044057919211"
+       "String": "126021245146853,88016760918517,73334906209129,126042943585561"
       }
      }
     }
@@ -4436,12 +4436,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://126839444441652",
     "NormalMap": "rbxassetid://115262611238521",
-    "MetalnessMap": "rbxassetid://97429022324439",
-    "RoughnessMap": "rbxassetid://76529794597443",
+    "MetalnessMap": "rbxassetid://107797325754838",
+    "RoughnessMap": "rbxassetid://124348902261398",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "126839444441652,115262611238521,97429022324439,76529794597443"
+       "String": "126839444441652,115262611238521,107797325754838,124348902261398"
       }
      }
     }
@@ -4454,12 +4454,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://137575349994582",
     "NormalMap": "rbxassetid://133421758680897",
-    "MetalnessMap": "rbxassetid://111396782797715",
-    "RoughnessMap": "rbxassetid://80698614735643",
+    "MetalnessMap": "rbxassetid://130685202799156",
+    "RoughnessMap": "rbxassetid://84501918201966",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "137575349994582,133421758680897,111396782797715,80698614735643"
+       "String": "137575349994582,133421758680897,130685202799156,84501918201966"
       }
      }
     }
@@ -4472,12 +4472,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://107641821273206",
     "NormalMap": "rbxassetid://81765981415510",
-    "MetalnessMap": "rbxassetid://127700339846504",
-    "RoughnessMap": "rbxassetid://125212583538847",
+    "MetalnessMap": "rbxassetid://135260112290064",
+    "RoughnessMap": "rbxassetid://114876622692967",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "107641821273206,81765981415510,127700339846504,125212583538847"
+       "String": "107641821273206,81765981415510,135260112290064,114876622692967"
       }
      }
     }
@@ -4490,12 +4490,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://116675522973826",
     "NormalMap": "rbxassetid://131015710829028",
-    "MetalnessMap": "rbxassetid://139165587808499",
-    "RoughnessMap": "rbxassetid://135239115881602",
+    "MetalnessMap": "rbxassetid://101622218543524",
+    "RoughnessMap": "rbxassetid://132749001688504",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "116675522973826,131015710829028,139165587808499,135239115881602"
+       "String": "116675522973826,131015710829028,101622218543524,132749001688504"
       }
      }
     }
@@ -4508,12 +4508,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://74749622723612",
     "NormalMap": "rbxassetid://103505816946490",
-    "MetalnessMap": "rbxassetid://72747855783787",
-    "RoughnessMap": "rbxassetid://138066607794853",
+    "MetalnessMap": "rbxassetid://81514293794450",
+    "RoughnessMap": "rbxassetid://114455692540272",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "74749622723612,103505816946490,72747855783787,138066607794853"
+       "String": "74749622723612,103505816946490,81514293794450,114455692540272"
       }
      }
     }
@@ -4526,12 +4526,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://89106498180303",
     "NormalMap": "rbxassetid://128739244441619",
-    "MetalnessMap": "rbxassetid://127330376796133",
-    "RoughnessMap": "rbxassetid://95853980268478",
+    "MetalnessMap": "rbxassetid://102535244826397",
+    "RoughnessMap": "rbxassetid://132945961603064",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "89106498180303,128739244441619,127330376796133,95853980268478"
+       "String": "89106498180303,128739244441619,102535244826397,132945961603064"
       }
      }
     }
@@ -4544,12 +4544,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://110087869004080",
     "NormalMap": "rbxassetid://121182151095283",
-    "MetalnessMap": "rbxassetid://78814677811971",
-    "RoughnessMap": "rbxassetid://114418845371556",
+    "MetalnessMap": "rbxassetid://132884730586079",
+    "RoughnessMap": "rbxassetid://109423991814205",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "110087869004080,121182151095283,78814677811971,114418845371556"
+       "String": "110087869004080,121182151095283,132884730586079,109423991814205"
       }
      }
     }
@@ -4562,12 +4562,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://116685135912673",
     "NormalMap": "rbxassetid://135057402086287",
-    "MetalnessMap": "rbxassetid://102091048628134",
-    "RoughnessMap": "rbxassetid://97655165340169",
+    "MetalnessMap": "rbxassetid://82499453937782",
+    "RoughnessMap": "rbxassetid://114458247311101",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "116685135912673,135057402086287,102091048628134,97655165340169"
+       "String": "116685135912673,135057402086287,82499453937782,114458247311101"
       }
      }
     }
@@ -4580,12 +4580,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://82724461299458",
     "NormalMap": "rbxassetid://98802217337174",
-    "MetalnessMap": "rbxassetid://97472726447100",
-    "RoughnessMap": "rbxassetid://115441046988905",
+    "MetalnessMap": "rbxassetid://125705201523831",
+    "RoughnessMap": "rbxassetid://102447640695967",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "82724461299458,98802217337174,97472726447100,115441046988905"
+       "String": "82724461299458,98802217337174,125705201523831,102447640695967"
       }
      }
     }
@@ -4598,12 +4598,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://98966105870638",
     "NormalMap": "rbxassetid://124588113134557",
-    "MetalnessMap": "rbxassetid://75953982824610",
-    "RoughnessMap": "rbxassetid://75379559784893",
+    "MetalnessMap": "rbxassetid://129398877746983",
+    "RoughnessMap": "rbxassetid://98000054775893",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "98966105870638,124588113134557,75953982824610,75379559784893"
+       "String": "98966105870638,124588113134557,129398877746983,98000054775893"
       }
      }
     }
@@ -4616,12 +4616,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://95054643961116",
     "NormalMap": "rbxassetid://118376915210951",
-    "MetalnessMap": "rbxassetid://122910400149549",
-    "RoughnessMap": "rbxassetid://134938204258866",
+    "MetalnessMap": "rbxassetid://101843372118034",
+    "RoughnessMap": "rbxassetid://135581469901891",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "95054643961116,118376915210951,122910400149549,134938204258866"
+       "String": "95054643961116,118376915210951,101843372118034,135581469901891"
       }
      }
     }
@@ -4634,12 +4634,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://80515555581314",
     "NormalMap": "rbxassetid://100783009439281",
-    "MetalnessMap": "rbxassetid://128592975805089",
-    "RoughnessMap": "rbxassetid://78320884134900",
+    "MetalnessMap": "rbxassetid://132814440002340",
+    "RoughnessMap": "rbxassetid://95735699685968",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "80515555581314,100783009439281,128592975805089,78320884134900"
+       "String": "80515555581314,100783009439281,132814440002340,95735699685968"
       }
      }
     }
@@ -4652,12 +4652,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://114718367812914",
     "NormalMap": "rbxassetid://101143958441585",
-    "MetalnessMap": "rbxassetid://119202369885055",
-    "RoughnessMap": "rbxassetid://106650490599519",
+    "MetalnessMap": "rbxassetid://100412264007203",
+    "RoughnessMap": "rbxassetid://99692681138469",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "114718367812914,101143958441585,119202369885055,106650490599519"
+       "String": "114718367812914,101143958441585,100412264007203,99692681138469"
       }
      }
     }
@@ -4670,12 +4670,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://112545296978303",
     "NormalMap": "rbxassetid://88472842594365",
-    "MetalnessMap": "rbxassetid://118471817867283",
-    "RoughnessMap": "rbxassetid://124190010324699",
+    "MetalnessMap": "rbxassetid://125175449380703",
+    "RoughnessMap": "rbxassetid://139290924795545",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "112545296978303,88472842594365,118471817867283,124190010324699"
+       "String": "112545296978303,88472842594365,125175449380703,139290924795545"
       }
      }
     }
@@ -4688,12 +4688,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://101374769464846",
     "NormalMap": "rbxassetid://138740186161099",
-    "MetalnessMap": "rbxassetid://106160168291978",
-    "RoughnessMap": "rbxassetid://97851566697665",
+    "MetalnessMap": "rbxassetid://121694064407763",
+    "RoughnessMap": "rbxassetid://101390852150357",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "101374769464846,138740186161099,106160168291978,97851566697665"
+       "String": "101374769464846,138740186161099,121694064407763,101390852150357"
       }
      }
     }
@@ -4706,12 +4706,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://121025496410072",
     "NormalMap": "rbxassetid://124644568162135",
-    "MetalnessMap": "rbxassetid://80833278186289",
-    "RoughnessMap": "rbxassetid://130430968488339",
+    "MetalnessMap": "rbxassetid://80947647226585",
+    "RoughnessMap": "rbxassetid://79157484279718",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "121025496410072,124644568162135,80833278186289,130430968488339"
+       "String": "121025496410072,124644568162135,80947647226585,79157484279718"
       }
      }
     }
@@ -4724,12 +4724,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://79739321327277",
     "NormalMap": "rbxassetid://71591403505140",
-    "MetalnessMap": "rbxassetid://87969200024799",
-    "RoughnessMap": "rbxassetid://81947316495247",
+    "MetalnessMap": "rbxassetid://125458170194783",
+    "RoughnessMap": "rbxassetid://128614864847210",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "79739321327277,71591403505140,87969200024799,81947316495247"
+       "String": "79739321327277,71591403505140,125458170194783,128614864847210"
       }
      }
     }
@@ -4742,12 +4742,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://125410124777408",
     "NormalMap": "rbxassetid://76098822619211",
-    "MetalnessMap": "rbxassetid://122584989772082",
-    "RoughnessMap": "rbxassetid://101184628752857",
+    "MetalnessMap": "rbxassetid://138330595063897",
+    "RoughnessMap": "rbxassetid://77390827315650",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "125410124777408,76098822619211,122584989772082,101184628752857"
+       "String": "125410124777408,76098822619211,138330595063897,77390827315650"
       }
      }
     }
@@ -4760,12 +4760,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://77930899280347",
     "NormalMap": "rbxassetid://111835631047887",
-    "MetalnessMap": "rbxassetid://100871639656138",
-    "RoughnessMap": "rbxassetid://124945413962063",
+    "MetalnessMap": "rbxassetid://78823035197509",
+    "RoughnessMap": "rbxassetid://77742005649430",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "77930899280347,111835631047887,100871639656138,124945413962063"
+       "String": "77930899280347,111835631047887,78823035197509,77742005649430"
       }
      }
     }
@@ -4778,12 +4778,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://125876554827829",
     "NormalMap": "rbxassetid://79295900081222",
-    "MetalnessMap": "rbxassetid://125134589290652",
-    "RoughnessMap": "rbxassetid://84223392239566",
+    "MetalnessMap": "rbxassetid://92128318772429",
+    "RoughnessMap": "rbxassetid://77387917699885",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "125876554827829,79295900081222,125134589290652,84223392239566"
+       "String": "125876554827829,79295900081222,92128318772429,77387917699885"
       }
      }
     }
@@ -4796,12 +4796,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://77390509493613",
     "NormalMap": "rbxassetid://123257336026221",
-    "MetalnessMap": "rbxassetid://132400000108036",
-    "RoughnessMap": "rbxassetid://107867952956669",
+    "MetalnessMap": "rbxassetid://96472201871924",
+    "RoughnessMap": "rbxassetid://97987696891358",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "77390509493613,123257336026221,132400000108036,107867952956669"
+       "String": "77390509493613,123257336026221,96472201871924,97987696891358"
       }
      }
     }
@@ -4814,12 +4814,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://87649914467702",
     "NormalMap": "rbxassetid://137005670812927",
-    "MetalnessMap": "rbxassetid://126446088987680",
-    "RoughnessMap": "rbxassetid://110044057919211",
+    "MetalnessMap": "rbxassetid://73334906209129",
+    "RoughnessMap": "rbxassetid://126042943585561",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "87649914467702,137005670812927,126446088987680,110044057919211"
+       "String": "87649914467702,137005670812927,73334906209129,126042943585561"
       }
      }
     }
@@ -4832,12 +4832,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://137767314751792",
     "NormalMap": "rbxassetid://85658456374648",
-    "MetalnessMap": "rbxassetid://97429022324439",
-    "RoughnessMap": "rbxassetid://76529794597443",
+    "MetalnessMap": "rbxassetid://107797325754838",
+    "RoughnessMap": "rbxassetid://124348902261398",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "137767314751792,85658456374648,97429022324439,76529794597443"
+       "String": "137767314751792,85658456374648,107797325754838,124348902261398"
       }
      }
     }
@@ -4850,12 +4850,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://97575279757868",
     "NormalMap": "rbxassetid://85408438369751",
-    "MetalnessMap": "rbxassetid://111396782797715",
-    "RoughnessMap": "rbxassetid://80698614735643",
+    "MetalnessMap": "rbxassetid://130685202799156",
+    "RoughnessMap": "rbxassetid://84501918201966",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "97575279757868,85408438369751,111396782797715,80698614735643"
+       "String": "97575279757868,85408438369751,130685202799156,84501918201966"
       }
      }
     }
@@ -4868,12 +4868,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://129786399378579",
     "NormalMap": "rbxassetid://76756960275716",
-    "MetalnessMap": "rbxassetid://127700339846504",
-    "RoughnessMap": "rbxassetid://125212583538847",
+    "MetalnessMap": "rbxassetid://135260112290064",
+    "RoughnessMap": "rbxassetid://114876622692967",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "129786399378579,76756960275716,127700339846504,125212583538847"
+       "String": "129786399378579,76756960275716,135260112290064,114876622692967"
       }
      }
     }
@@ -4886,12 +4886,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://124174915189713",
     "NormalMap": "rbxassetid://80676748096095",
-    "MetalnessMap": "rbxassetid://139165587808499",
-    "RoughnessMap": "rbxassetid://135239115881602",
+    "MetalnessMap": "rbxassetid://101622218543524",
+    "RoughnessMap": "rbxassetid://132749001688504",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "124174915189713,80676748096095,139165587808499,135239115881602"
+       "String": "124174915189713,80676748096095,101622218543524,132749001688504"
       }
      }
     }
@@ -4904,12 +4904,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://118714138948468",
     "NormalMap": "rbxassetid://117044557606027",
-    "MetalnessMap": "rbxassetid://72747855783787",
-    "RoughnessMap": "rbxassetid://138066607794853",
+    "MetalnessMap": "rbxassetid://81514293794450",
+    "RoughnessMap": "rbxassetid://114455692540272",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "118714138948468,117044557606027,72747855783787,138066607794853"
+       "String": "118714138948468,117044557606027,81514293794450,114455692540272"
       }
      }
     }
@@ -4922,12 +4922,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://74473275962208",
     "NormalMap": "rbxassetid://134357894034910",
-    "MetalnessMap": "rbxassetid://127330376796133",
-    "RoughnessMap": "rbxassetid://95853980268478",
+    "MetalnessMap": "rbxassetid://102535244826397",
+    "RoughnessMap": "rbxassetid://132945961603064",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "74473275962208,134357894034910,127330376796133,95853980268478"
+       "String": "74473275962208,134357894034910,102535244826397,132945961603064"
       }
      }
     }
@@ -4940,12 +4940,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://129518920795607",
     "NormalMap": "rbxassetid://107295429726736",
-    "MetalnessMap": "rbxassetid://78814677811971",
-    "RoughnessMap": "rbxassetid://114418845371556",
+    "MetalnessMap": "rbxassetid://132884730586079",
+    "RoughnessMap": "rbxassetid://109423991814205",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "129518920795607,107295429726736,78814677811971,114418845371556"
+       "String": "129518920795607,107295429726736,132884730586079,109423991814205"
       }
      }
     }
@@ -4958,12 +4958,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://84221472783454",
     "NormalMap": "rbxassetid://135029507411177",
-    "MetalnessMap": "rbxassetid://102091048628134",
-    "RoughnessMap": "rbxassetid://97655165340169",
+    "MetalnessMap": "rbxassetid://82499453937782",
+    "RoughnessMap": "rbxassetid://114458247311101",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "84221472783454,135029507411177,102091048628134,97655165340169"
+       "String": "84221472783454,135029507411177,82499453937782,114458247311101"
       }
      }
     }
@@ -4976,12 +4976,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://86600300365086",
     "NormalMap": "rbxassetid://75712203593759",
-    "MetalnessMap": "rbxassetid://97472726447100",
-    "RoughnessMap": "rbxassetid://115441046988905",
+    "MetalnessMap": "rbxassetid://125705201523831",
+    "RoughnessMap": "rbxassetid://102447640695967",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "86600300365086,75712203593759,97472726447100,115441046988905"
+       "String": "86600300365086,75712203593759,125705201523831,102447640695967"
       }
      }
     }
@@ -4994,12 +4994,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://114357196534067",
     "NormalMap": "rbxassetid://73063377543500",
-    "MetalnessMap": "rbxassetid://75953982824610",
-    "RoughnessMap": "rbxassetid://75379559784893",
+    "MetalnessMap": "rbxassetid://129398877746983",
+    "RoughnessMap": "rbxassetid://98000054775893",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "114357196534067,73063377543500,75953982824610,75379559784893"
+       "String": "114357196534067,73063377543500,129398877746983,98000054775893"
       }
      }
     }
@@ -5012,12 +5012,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://111187499116759",
     "NormalMap": "rbxassetid://93105984667698",
-    "MetalnessMap": "rbxassetid://83537475117299",
-    "RoughnessMap": "rbxassetid://126396229008311",
+    "MetalnessMap": "rbxassetid://109764682237071",
+    "RoughnessMap": "rbxassetid://102974065369627",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "111187499116759,93105984667698,83537475117299,126396229008311"
+       "String": "111187499116759,93105984667698,109764682237071,102974065369627"
       }
      }
     }
@@ -5030,12 +5030,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://109152088513290",
     "NormalMap": "rbxassetid://90730767809540",
-    "MetalnessMap": "rbxassetid://134419799253771",
-    "RoughnessMap": "rbxassetid://103786401336736",
+    "MetalnessMap": "rbxassetid://134912664723935",
+    "RoughnessMap": "rbxassetid://137615058597842",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "109152088513290,90730767809540,134419799253771,103786401336736"
+       "String": "109152088513290,90730767809540,134912664723935,137615058597842"
       }
      }
     }
@@ -5048,12 +5048,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://107658568031316",
     "NormalMap": "rbxassetid://74365346542906",
-    "MetalnessMap": "rbxassetid://86967779620722",
-    "RoughnessMap": "rbxassetid://99998723114364",
+    "MetalnessMap": "rbxassetid://104053211720931",
+    "RoughnessMap": "rbxassetid://103257145090542",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "107658568031316,74365346542906,86967779620722,99998723114364"
+       "String": "107658568031316,74365346542906,104053211720931,103257145090542"
       }
      }
     }
@@ -5066,12 +5066,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://112843653077025",
     "NormalMap": "rbxassetid://71387103847274",
-    "MetalnessMap": "rbxassetid://101168409871554",
-    "RoughnessMap": "rbxassetid://104868987365996",
+    "MetalnessMap": "rbxassetid://108858499127329",
+    "RoughnessMap": "rbxassetid://108025663736384",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "112843653077025,71387103847274,101168409871554,104868987365996"
+       "String": "112843653077025,71387103847274,108858499127329,108025663736384"
       }
      }
     }
@@ -5084,12 +5084,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://125971806664528",
     "NormalMap": "rbxassetid://94363611234628",
-    "MetalnessMap": "rbxassetid://71707091407738",
-    "RoughnessMap": "rbxassetid://80528053460781",
+    "MetalnessMap": "rbxassetid://128012593009728",
+    "RoughnessMap": "rbxassetid://133114959898786",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "125971806664528,94363611234628,71707091407738,80528053460781"
+       "String": "125971806664528,94363611234628,128012593009728,133114959898786"
       }
      }
     }
@@ -5102,12 +5102,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://80720551320409",
     "NormalMap": "rbxassetid://93773474921858",
-    "MetalnessMap": "rbxassetid://85114698556928",
-    "RoughnessMap": "rbxassetid://120498054617800",
+    "MetalnessMap": "rbxassetid://82665735267692",
+    "RoughnessMap": "rbxassetid://96308776971595",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "80720551320409,93773474921858,85114698556928,120498054617800"
+       "String": "80720551320409,93773474921858,82665735267692,96308776971595"
       }
      }
     }
@@ -5120,12 +5120,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://81970458794464",
     "NormalMap": "rbxassetid://108501204389056",
-    "MetalnessMap": "rbxassetid://140402757224107",
-    "RoughnessMap": "rbxassetid://100183973110046",
+    "MetalnessMap": "rbxassetid://88806383451548",
+    "RoughnessMap": "rbxassetid://123394699744153",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "81970458794464,108501204389056,140402757224107,100183973110046"
+       "String": "81970458794464,108501204389056,88806383451548,123394699744153"
       }
      }
     }
@@ -5138,12 +5138,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://78214673938966",
     "NormalMap": "rbxassetid://119531839498241",
-    "MetalnessMap": "rbxassetid://132803705401671",
-    "RoughnessMap": "rbxassetid://118177500703577",
+    "MetalnessMap": "rbxassetid://102124217667604",
+    "RoughnessMap": "rbxassetid://79974450893317",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "78214673938966,119531839498241,132803705401671,118177500703577"
+       "String": "78214673938966,119531839498241,102124217667604,79974450893317"
       }
      }
     }
@@ -5156,12 +5156,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://77169615481485",
     "NormalMap": "rbxassetid://77881671685758",
-    "MetalnessMap": "rbxassetid://125978778691397",
-    "RoughnessMap": "rbxassetid://139003257244059",
+    "MetalnessMap": "rbxassetid://101546422151277",
+    "RoughnessMap": "rbxassetid://97696101280308",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "77169615481485,77881671685758,125978778691397,139003257244059"
+       "String": "77169615481485,77881671685758,101546422151277,97696101280308"
       }
      }
     }
@@ -5174,12 +5174,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://82919442759497",
     "NormalMap": "rbxassetid://122974667440275",
-    "MetalnessMap": "rbxassetid://97159265580033",
-    "RoughnessMap": "rbxassetid://76930887874737",
+    "MetalnessMap": "rbxassetid://92940560893240",
+    "RoughnessMap": "rbxassetid://83777314524861",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "82919442759497,122974667440275,97159265580033,76930887874737"
+       "String": "82919442759497,122974667440275,92940560893240,83777314524861"
       }
      }
     }
@@ -5192,12 +5192,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://109710246669666",
     "NormalMap": "rbxassetid://118402990359829",
-    "MetalnessMap": "rbxassetid://90696927498788",
-    "RoughnessMap": "rbxassetid://120542411644811",
+    "MetalnessMap": "rbxassetid://137411039540679",
+    "RoughnessMap": "rbxassetid://112351340457451",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "109710246669666,118402990359829,90696927498788,120542411644811"
+       "String": "109710246669666,118402990359829,137411039540679,112351340457451"
       }
      }
     }
@@ -5210,12 +5210,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://111847271568310",
     "NormalMap": "rbxassetid://134574643707547",
-    "MetalnessMap": "rbxassetid://75849556269246",
-    "RoughnessMap": "rbxassetid://119621317144988",
+    "MetalnessMap": "rbxassetid://78107290938140",
+    "RoughnessMap": "rbxassetid://114463139120861",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "111847271568310,134574643707547,75849556269246,119621317144988"
+       "String": "111847271568310,134574643707547,78107290938140,114463139120861"
       }
      }
     }
@@ -5228,12 +5228,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://85970645394974",
     "NormalMap": "rbxassetid://89043798205882",
-    "MetalnessMap": "rbxassetid://87441273738432",
-    "RoughnessMap": "rbxassetid://108276361741374",
+    "MetalnessMap": "rbxassetid://121510561443995",
+    "RoughnessMap": "rbxassetid://91659666259532",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "85970645394974,89043798205882,87441273738432,108276361741374"
+       "String": "85970645394974,89043798205882,121510561443995,91659666259532"
       }
      }
     }
@@ -5246,12 +5246,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://127458367500188",
     "NormalMap": "rbxassetid://138640364331243",
-    "MetalnessMap": "rbxassetid://92480381276680",
-    "RoughnessMap": "rbxassetid://75785535291664",
+    "MetalnessMap": "rbxassetid://109038193408683",
+    "RoughnessMap": "rbxassetid://102463000851321",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "127458367500188,138640364331243,92480381276680,75785535291664"
+       "String": "127458367500188,138640364331243,109038193408683,102463000851321"
       }
      }
     }
@@ -5264,12 +5264,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://72471358872063",
     "NormalMap": "rbxassetid://84742783350881",
-    "MetalnessMap": "rbxassetid://122537597692491",
-    "RoughnessMap": "rbxassetid://74646899946253",
+    "MetalnessMap": "rbxassetid://122999161216566",
+    "RoughnessMap": "rbxassetid://129107807609985",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "72471358872063,84742783350881,122537597692491,74646899946253"
+       "String": "72471358872063,84742783350881,122999161216566,129107807609985"
       }
      }
     }
@@ -5282,12 +5282,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://116545911491958",
     "NormalMap": "rbxassetid://94887339152315",
-    "MetalnessMap": "rbxassetid://97874738317718",
-    "RoughnessMap": "rbxassetid://103373198588007",
+    "MetalnessMap": "rbxassetid://136446441705352",
+    "RoughnessMap": "rbxassetid://96890791871967",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "116545911491958,94887339152315,97874738317718,103373198588007"
+       "String": "116545911491958,94887339152315,136446441705352,96890791871967"
       }
      }
     }
@@ -5300,12 +5300,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://113439787797734",
     "NormalMap": "rbxassetid://85497484303467",
-    "MetalnessMap": "rbxassetid://98375651279709",
-    "RoughnessMap": "rbxassetid://129508439051909",
+    "MetalnessMap": "rbxassetid://133107372582700",
+    "RoughnessMap": "rbxassetid://128948668934316",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "113439787797734,85497484303467,98375651279709,129508439051909"
+       "String": "113439787797734,85497484303467,133107372582700,128948668934316"
       }
      }
     }
@@ -5318,12 +5318,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://98285021674743",
     "NormalMap": "rbxassetid://74488567279452",
-    "MetalnessMap": "rbxassetid://124964721948117",
-    "RoughnessMap": "rbxassetid://91965537422067",
+    "MetalnessMap": "rbxassetid://109814980961926",
+    "RoughnessMap": "rbxassetid://79736537425200",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "98285021674743,74488567279452,124964721948117,91965537422067"
+       "String": "98285021674743,74488567279452,109814980961926,79736537425200"
       }
      }
     }
@@ -5336,12 +5336,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://78705414722047",
     "NormalMap": "rbxassetid://83957715292598",
-    "MetalnessMap": "rbxassetid://130544578478649",
-    "RoughnessMap": "rbxassetid://124607832533658",
+    "MetalnessMap": "rbxassetid://75832043419385",
+    "RoughnessMap": "rbxassetid://94985152910615",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "78705414722047,83957715292598,130544578478649,124607832533658"
+       "String": "78705414722047,83957715292598,75832043419385,94985152910615"
       }
      }
     }
@@ -5354,12 +5354,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://71291061858157",
     "NormalMap": "rbxassetid://120893528503883",
-    "MetalnessMap": "rbxassetid://83275373322349",
-    "RoughnessMap": "rbxassetid://90575998278342",
+    "MetalnessMap": "rbxassetid://138486365929655",
+    "RoughnessMap": "rbxassetid://114012754607545",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "71291061858157,120893528503883,83275373322349,90575998278342"
+       "String": "71291061858157,120893528503883,138486365929655,114012754607545"
       }
      }
     }
@@ -5372,12 +5372,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://116653000766767",
     "NormalMap": "rbxassetid://126736173322388",
-    "MetalnessMap": "rbxassetid://121154438661054",
-    "RoughnessMap": "rbxassetid://133963661529475",
+    "MetalnessMap": "rbxassetid://115593043672131",
+    "RoughnessMap": "rbxassetid://80736554716572",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "116653000766767,126736173322388,121154438661054,133963661529475"
+       "String": "116653000766767,126736173322388,115593043672131,80736554716572"
       }
      }
     }
@@ -5390,12 +5390,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://127079496981405",
     "NormalMap": "rbxassetid://71298096148919",
-    "MetalnessMap": "rbxassetid://99579298141982",
-    "RoughnessMap": "rbxassetid://110799579896221",
+    "MetalnessMap": "rbxassetid://97963586738275",
+    "RoughnessMap": "rbxassetid://88911631030191",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "127079496981405,71298096148919,99579298141982,110799579896221"
+       "String": "127079496981405,71298096148919,97963586738275,88911631030191"
       }
      }
     }
@@ -5408,12 +5408,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://137870014463531",
     "NormalMap": "rbxassetid://88725605057899",
-    "MetalnessMap": "rbxassetid://75849556269246",
-    "RoughnessMap": "rbxassetid://119621317144988",
+    "MetalnessMap": "rbxassetid://78107290938140",
+    "RoughnessMap": "rbxassetid://114463139120861",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "137870014463531,88725605057899,75849556269246,119621317144988"
+       "String": "137870014463531,88725605057899,78107290938140,114463139120861"
       }
      }
     }
@@ -5426,12 +5426,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://75269842020338",
     "NormalMap": "rbxassetid://126840283074761",
-    "MetalnessMap": "rbxassetid://87441273738432",
-    "RoughnessMap": "rbxassetid://108276361741374",
+    "MetalnessMap": "rbxassetid://121510561443995",
+    "RoughnessMap": "rbxassetid://91659666259532",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "75269842020338,126840283074761,87441273738432,108276361741374"
+       "String": "75269842020338,126840283074761,121510561443995,91659666259532"
       }
      }
     }
@@ -5444,12 +5444,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://110107860848188",
     "NormalMap": "rbxassetid://82769403740284",
-    "MetalnessMap": "rbxassetid://92480381276680",
-    "RoughnessMap": "rbxassetid://75785535291664",
+    "MetalnessMap": "rbxassetid://109038193408683",
+    "RoughnessMap": "rbxassetid://102463000851321",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "110107860848188,82769403740284,92480381276680,75785535291664"
+       "String": "110107860848188,82769403740284,109038193408683,102463000851321"
       }
      }
     }
@@ -5462,12 +5462,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://119644820218312",
     "NormalMap": "rbxassetid://113143871714109",
-    "MetalnessMap": "rbxassetid://122537597692491",
-    "RoughnessMap": "rbxassetid://74646899946253",
+    "MetalnessMap": "rbxassetid://122999161216566",
+    "RoughnessMap": "rbxassetid://129107807609985",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "119644820218312,113143871714109,122537597692491,74646899946253"
+       "String": "119644820218312,113143871714109,122999161216566,129107807609985"
       }
      }
     }
@@ -5480,12 +5480,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://76125666664894",
     "NormalMap": "rbxassetid://136658064764571",
-    "MetalnessMap": "rbxassetid://97874738317718",
-    "RoughnessMap": "rbxassetid://103373198588007",
+    "MetalnessMap": "rbxassetid://136446441705352",
+    "RoughnessMap": "rbxassetid://96890791871967",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "76125666664894,136658064764571,97874738317718,103373198588007"
+       "String": "76125666664894,136658064764571,136446441705352,96890791871967"
       }
      }
     }
@@ -5498,12 +5498,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://91973014125947",
     "NormalMap": "rbxassetid://86945986453006",
-    "MetalnessMap": "rbxassetid://98375651279709",
-    "RoughnessMap": "rbxassetid://129508439051909",
+    "MetalnessMap": "rbxassetid://133107372582700",
+    "RoughnessMap": "rbxassetid://128948668934316",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "91973014125947,86945986453006,98375651279709,129508439051909"
+       "String": "91973014125947,86945986453006,133107372582700,128948668934316"
       }
      }
     }
@@ -5516,12 +5516,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://102398071355429",
     "NormalMap": "rbxassetid://130104598939030",
-    "MetalnessMap": "rbxassetid://124964721948117",
-    "RoughnessMap": "rbxassetid://91965537422067",
+    "MetalnessMap": "rbxassetid://109814980961926",
+    "RoughnessMap": "rbxassetid://79736537425200",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "102398071355429,130104598939030,124964721948117,91965537422067"
+       "String": "102398071355429,130104598939030,109814980961926,79736537425200"
       }
      }
     }
@@ -5534,12 +5534,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://118929374928073",
     "NormalMap": "rbxassetid://114219393133252",
-    "MetalnessMap": "rbxassetid://130544578478649",
-    "RoughnessMap": "rbxassetid://124607832533658",
+    "MetalnessMap": "rbxassetid://75832043419385",
+    "RoughnessMap": "rbxassetid://94985152910615",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "118929374928073,114219393133252,130544578478649,124607832533658"
+       "String": "118929374928073,114219393133252,75832043419385,94985152910615"
       }
      }
     }
@@ -5552,12 +5552,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://72577387525294",
     "NormalMap": "rbxassetid://78352666491584",
-    "MetalnessMap": "rbxassetid://83275373322349",
-    "RoughnessMap": "rbxassetid://90575998278342",
+    "MetalnessMap": "rbxassetid://138486365929655",
+    "RoughnessMap": "rbxassetid://114012754607545",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "72577387525294,78352666491584,83275373322349,90575998278342"
+       "String": "72577387525294,78352666491584,138486365929655,114012754607545"
       }
      }
     }
@@ -5570,12 +5570,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://113357851957367",
     "NormalMap": "rbxassetid://117619468573231",
-    "MetalnessMap": "rbxassetid://121154438661054",
-    "RoughnessMap": "rbxassetid://133963661529475",
+    "MetalnessMap": "rbxassetid://115593043672131",
+    "RoughnessMap": "rbxassetid://80736554716572",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "113357851957367,117619468573231,121154438661054,133963661529475"
+       "String": "113357851957367,117619468573231,115593043672131,80736554716572"
       }
      }
     }
@@ -5588,12 +5588,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://133235576875266",
     "NormalMap": "rbxassetid://115128619678006",
-    "MetalnessMap": "rbxassetid://99579298141982",
-    "RoughnessMap": "rbxassetid://110799579896221",
+    "MetalnessMap": "rbxassetid://97963586738275",
+    "RoughnessMap": "rbxassetid://88911631030191",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "133235576875266,115128619678006,99579298141982,110799579896221"
+       "String": "133235576875266,115128619678006,97963586738275,88911631030191"
       }
      }
     }
@@ -5606,12 +5606,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://94903453361811",
     "NormalMap": "rbxassetid://78691894925378",
-    "MetalnessMap": "rbxassetid://86752563702875",
-    "RoughnessMap": "rbxassetid://96538808962996",
+    "MetalnessMap": "rbxassetid://119409744142651",
+    "RoughnessMap": "rbxassetid://113739153858758",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "94903453361811,78691894925378,86752563702875,96538808962996"
+       "String": "94903453361811,78691894925378,119409744142651,113739153858758"
       }
      }
     }
@@ -5624,12 +5624,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://130692954292475",
     "NormalMap": "rbxassetid://120764917425556",
-    "MetalnessMap": "rbxassetid://87568532111947",
-    "RoughnessMap": "rbxassetid://125716881717322",
+    "MetalnessMap": "rbxassetid://108012320904713",
+    "RoughnessMap": "rbxassetid://104605738913404",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "130692954292475,120764917425556,87568532111947,125716881717322"
+       "String": "130692954292475,120764917425556,108012320904713,104605738913404"
       }
      }
     }
@@ -5642,12 +5642,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://138580662711998",
     "NormalMap": "rbxassetid://74717473343566",
-    "MetalnessMap": "rbxassetid://104985135664465",
-    "RoughnessMap": "rbxassetid://103319170093160",
+    "MetalnessMap": "rbxassetid://118953441722249",
+    "RoughnessMap": "rbxassetid://115798364270433",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "138580662711998,74717473343566,104985135664465,103319170093160"
+       "String": "138580662711998,74717473343566,118953441722249,115798364270433"
       }
      }
     }
@@ -5660,12 +5660,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://110973190437048",
     "NormalMap": "rbxassetid://117462690071873",
-    "MetalnessMap": "rbxassetid://108969107507381",
-    "RoughnessMap": "rbxassetid://90591821614445",
+    "MetalnessMap": "rbxassetid://126299915871809",
+    "RoughnessMap": "rbxassetid://85614604032348",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "110973190437048,117462690071873,108969107507381,90591821614445"
+       "String": "110973190437048,117462690071873,126299915871809,85614604032348"
       }
      }
     }
@@ -5678,12 +5678,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://96656162439076",
     "NormalMap": "rbxassetid://133667158415279",
-    "MetalnessMap": "rbxassetid://101078381661630",
-    "RoughnessMap": "rbxassetid://127756776243664",
+    "MetalnessMap": "rbxassetid://109595250983568",
+    "RoughnessMap": "rbxassetid://75354606648899",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "96656162439076,133667158415279,101078381661630,127756776243664"
+       "String": "96656162439076,133667158415279,109595250983568,75354606648899"
       }
      }
     }
@@ -5696,12 +5696,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://115057362297142",
     "NormalMap": "rbxassetid://139026408573095",
-    "MetalnessMap": "rbxassetid://78777028298269",
-    "RoughnessMap": "rbxassetid://87517812975422",
+    "MetalnessMap": "rbxassetid://112209949316254",
+    "RoughnessMap": "rbxassetid://119732528317345",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "115057362297142,139026408573095,78777028298269,87517812975422"
+       "String": "115057362297142,139026408573095,112209949316254,119732528317345"
       }
      }
     }
@@ -5714,12 +5714,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://91630349347301",
     "NormalMap": "rbxassetid://79201911127336",
-    "MetalnessMap": "rbxassetid://124453776487609",
-    "RoughnessMap": "rbxassetid://114570532725186",
+    "MetalnessMap": "rbxassetid://93785413279941",
+    "RoughnessMap": "rbxassetid://127117850359449",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "91630349347301,79201911127336,124453776487609,114570532725186"
+       "String": "91630349347301,79201911127336,93785413279941,127117850359449"
       }
      }
     }
@@ -5732,12 +5732,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://84331495195619",
     "NormalMap": "rbxassetid://99277245603718",
-    "MetalnessMap": "rbxassetid://90514549056228",
-    "RoughnessMap": "rbxassetid://73621492199401",
+    "MetalnessMap": "rbxassetid://115692274305825",
+    "RoughnessMap": "rbxassetid://100112334091304",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "84331495195619,99277245603718,90514549056228,73621492199401"
+       "String": "84331495195619,99277245603718,115692274305825,100112334091304"
       }
      }
     }
@@ -5750,12 +5750,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://81622382801376",
     "NormalMap": "rbxassetid://125759798362133",
-    "MetalnessMap": "rbxassetid://96644166353645",
-    "RoughnessMap": "rbxassetid://118189547922217",
+    "MetalnessMap": "rbxassetid://137259035062808",
+    "RoughnessMap": "rbxassetid://98759742927085",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "81622382801376,125759798362133,96644166353645,118189547922217"
+       "String": "81622382801376,125759798362133,137259035062808,98759742927085"
       }
      }
     }
@@ -5768,12 +5768,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://76862713293370",
     "NormalMap": "rbxassetid://123189562687870",
-    "MetalnessMap": "rbxassetid://140449898652350",
-    "RoughnessMap": "rbxassetid://103491205200664",
+    "MetalnessMap": "rbxassetid://116348476375430",
+    "RoughnessMap": "rbxassetid://119174598372479",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "76862713293370,123189562687870,140449898652350,103491205200664"
+       "String": "76862713293370,123189562687870,116348476375430,119174598372479"
       }
      }
     }
@@ -5786,12 +5786,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://112047578989356",
     "NormalMap": "rbxassetid://81046606725214",
-    "MetalnessMap": "rbxassetid://132899386611654",
-    "RoughnessMap": "rbxassetid://107986745028113",
+    "MetalnessMap": "rbxassetid://103122005039674",
+    "RoughnessMap": "rbxassetid://132578632331742",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "112047578989356,81046606725214,132899386611654,107986745028113"
+       "String": "112047578989356,81046606725214,103122005039674,132578632331742"
       }
      }
     }
@@ -5804,12 +5804,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://123728209062764",
     "NormalMap": "rbxassetid://83531818429024",
-    "MetalnessMap": "rbxassetid://126446088987680",
-    "RoughnessMap": "rbxassetid://110044057919211",
+    "MetalnessMap": "rbxassetid://73334906209129",
+    "RoughnessMap": "rbxassetid://126042943585561",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "123728209062764,83531818429024,126446088987680,110044057919211"
+       "String": "123728209062764,83531818429024,73334906209129,126042943585561"
       }
      }
     }
@@ -5822,12 +5822,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://83868050241517",
     "NormalMap": "rbxassetid://121989050845382",
-    "MetalnessMap": "rbxassetid://97429022324439",
-    "RoughnessMap": "rbxassetid://76529794597443",
+    "MetalnessMap": "rbxassetid://107797325754838",
+    "RoughnessMap": "rbxassetid://124348902261398",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "83868050241517,121989050845382,97429022324439,76529794597443"
+       "String": "83868050241517,121989050845382,107797325754838,124348902261398"
       }
      }
     }
@@ -5840,12 +5840,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://99662522364658",
     "NormalMap": "rbxassetid://91912045103406",
-    "MetalnessMap": "rbxassetid://111396782797715",
-    "RoughnessMap": "rbxassetid://80698614735643",
+    "MetalnessMap": "rbxassetid://130685202799156",
+    "RoughnessMap": "rbxassetid://84501918201966",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "99662522364658,91912045103406,111396782797715,80698614735643"
+       "String": "99662522364658,91912045103406,130685202799156,84501918201966"
       }
      }
     }
@@ -5858,12 +5858,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://108110460600547",
     "NormalMap": "rbxassetid://122582810122761",
-    "MetalnessMap": "rbxassetid://127700339846504",
-    "RoughnessMap": "rbxassetid://125212583538847",
+    "MetalnessMap": "rbxassetid://135260112290064",
+    "RoughnessMap": "rbxassetid://114876622692967",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "108110460600547,122582810122761,127700339846504,125212583538847"
+       "String": "108110460600547,122582810122761,135260112290064,114876622692967"
       }
      }
     }
@@ -5876,12 +5876,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://111784110285351",
     "NormalMap": "rbxassetid://97531689630830",
-    "MetalnessMap": "rbxassetid://139165587808499",
-    "RoughnessMap": "rbxassetid://135239115881602",
+    "MetalnessMap": "rbxassetid://101622218543524",
+    "RoughnessMap": "rbxassetid://132749001688504",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "111784110285351,97531689630830,139165587808499,135239115881602"
+       "String": "111784110285351,97531689630830,101622218543524,132749001688504"
       }
      }
     }
@@ -5894,12 +5894,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://86459103811378",
     "NormalMap": "rbxassetid://77274061800831",
-    "MetalnessMap": "rbxassetid://72747855783787",
-    "RoughnessMap": "rbxassetid://138066607794853",
+    "MetalnessMap": "rbxassetid://81514293794450",
+    "RoughnessMap": "rbxassetid://114455692540272",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "86459103811378,77274061800831,72747855783787,138066607794853"
+       "String": "86459103811378,77274061800831,81514293794450,114455692540272"
       }
      }
     }
@@ -5912,12 +5912,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://125318811246651",
     "NormalMap": "rbxassetid://109894216608021",
-    "MetalnessMap": "rbxassetid://127330376796133",
-    "RoughnessMap": "rbxassetid://95853980268478",
+    "MetalnessMap": "rbxassetid://102535244826397",
+    "RoughnessMap": "rbxassetid://132945961603064",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "125318811246651,109894216608021,127330376796133,95853980268478"
+       "String": "125318811246651,109894216608021,102535244826397,132945961603064"
       }
      }
     }
@@ -5930,12 +5930,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://99710033343460",
     "NormalMap": "rbxassetid://131118416977318",
-    "MetalnessMap": "rbxassetid://78814677811971",
-    "RoughnessMap": "rbxassetid://114418845371556",
+    "MetalnessMap": "rbxassetid://132884730586079",
+    "RoughnessMap": "rbxassetid://109423991814205",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "99710033343460,131118416977318,78814677811971,114418845371556"
+       "String": "99710033343460,131118416977318,132884730586079,109423991814205"
       }
      }
     }
@@ -5948,12 +5948,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://96164637505318",
     "NormalMap": "rbxassetid://74789723129767",
-    "MetalnessMap": "rbxassetid://102091048628134",
-    "RoughnessMap": "rbxassetid://97655165340169",
+    "MetalnessMap": "rbxassetid://82499453937782",
+    "RoughnessMap": "rbxassetid://114458247311101",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "96164637505318,74789723129767,102091048628134,97655165340169"
+       "String": "96164637505318,74789723129767,82499453937782,114458247311101"
       }
      }
     }
@@ -5966,12 +5966,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://107269697510268",
     "NormalMap": "rbxassetid://115501133101632",
-    "MetalnessMap": "rbxassetid://97472726447100",
-    "RoughnessMap": "rbxassetid://115441046988905",
+    "MetalnessMap": "rbxassetid://125705201523831",
+    "RoughnessMap": "rbxassetid://102447640695967",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "107269697510268,115501133101632,97472726447100,115441046988905"
+       "String": "107269697510268,115501133101632,125705201523831,102447640695967"
       }
      }
     }
@@ -5984,12 +5984,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://117755161006631",
     "NormalMap": "rbxassetid://106100387647139",
-    "MetalnessMap": "rbxassetid://75953982824610",
-    "RoughnessMap": "rbxassetid://75379559784893",
+    "MetalnessMap": "rbxassetid://129398877746983",
+    "RoughnessMap": "rbxassetid://98000054775893",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "117755161006631,106100387647139,75953982824610,75379559784893"
+       "String": "117755161006631,106100387647139,129398877746983,98000054775893"
       }
      }
     }
@@ -6002,12 +6002,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://131914800904632",
     "NormalMap": "rbxassetid://76719429032015",
-    "MetalnessMap": "rbxassetid://122910400149549",
-    "RoughnessMap": "rbxassetid://134938204258866",
+    "MetalnessMap": "rbxassetid://101843372118034",
+    "RoughnessMap": "rbxassetid://135581469901891",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "131914800904632,76719429032015,122910400149549,134938204258866"
+       "String": "131914800904632,76719429032015,101843372118034,135581469901891"
       }
      }
     }
@@ -6020,12 +6020,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://138350860435735",
     "NormalMap": "rbxassetid://107588614432040",
-    "MetalnessMap": "rbxassetid://128592975805089",
-    "RoughnessMap": "rbxassetid://78320884134900",
+    "MetalnessMap": "rbxassetid://132814440002340",
+    "RoughnessMap": "rbxassetid://95735699685968",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "138350860435735,107588614432040,128592975805089,78320884134900"
+       "String": "138350860435735,107588614432040,132814440002340,95735699685968"
       }
      }
     }
@@ -6038,12 +6038,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://105738236471159",
     "NormalMap": "rbxassetid://137041852968717",
-    "MetalnessMap": "rbxassetid://119202369885055",
-    "RoughnessMap": "rbxassetid://106650490599519",
+    "MetalnessMap": "rbxassetid://100412264007203",
+    "RoughnessMap": "rbxassetid://99692681138469",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "105738236471159,137041852968717,119202369885055,106650490599519"
+       "String": "105738236471159,137041852968717,100412264007203,99692681138469"
       }
      }
     }
@@ -6056,12 +6056,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://104836954840551",
     "NormalMap": "rbxassetid://113515555405031",
-    "MetalnessMap": "rbxassetid://118471817867283",
-    "RoughnessMap": "rbxassetid://124190010324699",
+    "MetalnessMap": "rbxassetid://125175449380703",
+    "RoughnessMap": "rbxassetid://139290924795545",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "104836954840551,113515555405031,118471817867283,124190010324699"
+       "String": "104836954840551,113515555405031,125175449380703,139290924795545"
       }
      }
     }
@@ -6074,12 +6074,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://107675595152755",
     "NormalMap": "rbxassetid://128034352339531",
-    "MetalnessMap": "rbxassetid://106160168291978",
-    "RoughnessMap": "rbxassetid://97851566697665",
+    "MetalnessMap": "rbxassetid://121694064407763",
+    "RoughnessMap": "rbxassetid://101390852150357",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "107675595152755,128034352339531,106160168291978,97851566697665"
+       "String": "107675595152755,128034352339531,121694064407763,101390852150357"
       }
      }
     }
@@ -6092,12 +6092,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://99105762885161",
     "NormalMap": "rbxassetid://102113972992684",
-    "MetalnessMap": "rbxassetid://80833278186289",
-    "RoughnessMap": "rbxassetid://130430968488339",
+    "MetalnessMap": "rbxassetid://80947647226585",
+    "RoughnessMap": "rbxassetid://79157484279718",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "99105762885161,102113972992684,80833278186289,130430968488339"
+       "String": "99105762885161,102113972992684,80947647226585,79157484279718"
       }
      }
     }
@@ -6110,12 +6110,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://140025506883414",
     "NormalMap": "rbxassetid://71311069793107",
-    "MetalnessMap": "rbxassetid://87969200024799",
-    "RoughnessMap": "rbxassetid://81947316495247",
+    "MetalnessMap": "rbxassetid://125458170194783",
+    "RoughnessMap": "rbxassetid://128614864847210",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "140025506883414,71311069793107,87969200024799,81947316495247"
+       "String": "140025506883414,71311069793107,125458170194783,128614864847210"
       }
      }
     }
@@ -6128,12 +6128,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://85212558410645",
     "NormalMap": "rbxassetid://77430333367295",
-    "MetalnessMap": "rbxassetid://122584989772082",
-    "RoughnessMap": "rbxassetid://101184628752857",
+    "MetalnessMap": "rbxassetid://138330595063897",
+    "RoughnessMap": "rbxassetid://77390827315650",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "85212558410645,77430333367295,122584989772082,101184628752857"
+       "String": "85212558410645,77430333367295,138330595063897,77390827315650"
       }
      }
     }
@@ -6146,12 +6146,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://118094667601329",
     "NormalMap": "rbxassetid://78428983169654",
-    "MetalnessMap": "rbxassetid://100871639656138",
-    "RoughnessMap": "rbxassetid://124945413962063",
+    "MetalnessMap": "rbxassetid://78823035197509",
+    "RoughnessMap": "rbxassetid://77742005649430",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "118094667601329,78428983169654,100871639656138,124945413962063"
+       "String": "118094667601329,78428983169654,78823035197509,77742005649430"
       }
      }
     }
@@ -6164,12 +6164,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://84477271575463",
     "NormalMap": "rbxassetid://118061840854975",
-    "MetalnessMap": "rbxassetid://125134589290652",
-    "RoughnessMap": "rbxassetid://84223392239566",
+    "MetalnessMap": "rbxassetid://92128318772429",
+    "RoughnessMap": "rbxassetid://77387917699885",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "84477271575463,118061840854975,125134589290652,84223392239566"
+       "String": "84477271575463,118061840854975,92128318772429,77387917699885"
       }
      }
     }
@@ -6182,12 +6182,12 @@
     "AlphaMode": "Overlay",
     "ColorMap": "rbxassetid://134492141041383",
     "NormalMap": "rbxassetid://115625455752363",
-    "MetalnessMap": "rbxassetid://132400000108036",
-    "RoughnessMap": "rbxassetid://107867952956669",
+    "MetalnessMap": "rbxassetid://96472201871924",
+    "RoughnessMap": "rbxassetid://97987696891358",
     "Attributes": {
      "Attributes": {
       "Mapas": {
-       "String": "134492141041383,115625455752363,132400000108036,107867952956669"
+       "String": "134492141041383,115625455752363,96472201871924,97987696891358"
       }
      }
     }

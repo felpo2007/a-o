@@ -1745,7 +1745,10 @@
   "^(%a);([%d.]+);?([%d.]*)$",
   "rastejar",
   "ribbon",
-  "Vitoria"
+  "Vitoria",
+  "Arame",
+  "Globo",
+  "^vila_casa_%d+$"
  ],
  "regex": [
   "^uni_[a-z_]+@[a-z0-9]+$"

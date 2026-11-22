@@ -21,7 +21,8 @@ TerrainLook.COLORS = {
 	-- D-237 (dono: "o chão de alguns lugares ainda está branco"): quando a foto não carrega sobra só a
 	-- cor do terreno, e (190, 172, 148) era um bege quase branco. A foto agora é neutra (média 200) e a
 	-- cor mora aqui: com a foto continua ~(136, 94, 58); sem ela, laterita (173, 120, 74).
-	Ground = Color3.fromRGB(173, 120, 74), -- terra batida das ruas, becos, praça e quintais
+	-- D-241: menos laranja com a luz nova (a grama fica como o dono escolheu na D-127)
+	Ground = Color3.fromRGB(158, 114, 78), -- terra batida das ruas, becos, praça e quintais
 	Mud = Color3.fromRGB(90, 80, 64), -- barranco de riacho (D-123: menos vermelho)
 	Sand = Color3.fromRGB(188, 168, 126),
 	Rock = Color3.fromRGB(112, 104, 92),

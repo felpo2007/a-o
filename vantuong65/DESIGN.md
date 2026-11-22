@@ -9972,3 +9972,21 @@ carregamento, tela de nascer à altura e textos, caixas e layouts mais épicos.
   Parar e dar Play não resolveu; reabrir o Studio resolveu.
 - **Medido:** Lune 933, pytest 77, autoteste 18 de 18, i18n 2.985 de 2.985. Detalhes em
   `testes/LOTE112_D240_2026-11-22.md`.
+
+## D-241 — Lote 113: luz do mapa, lampião nas casas e reflexo das skins (2026-11-22)
+
+**Pedido do dono (5º lote):** estilo épico nos gráficos, nas casas por dentro e mais brilho, reflexo e textura nas
+skins.
+- **Luz do mapa:** sol mais forte, sombra mais neutra, mais contraste, menos véu laranja e brilho só no que é muito
+  claro. Continua em ShadowMap: o Future foi retirado antes por peso, e a GPU do dono tem 2 GB.
+- **Terra:** a cor das ruas ficou menos laranja. A grama segue a escolha do dono na D-127.
+- **Noite:** a exposição subiu de 0,45 para 0,62, porque o contraste novo fechava as sombras.
+- **Lampião (`Shared/LampiaoInterior`, `Modules/InteriorLuz`):** um lampião aceso no teto de cada uma das 38 casas da
+  vila, no ponto com piso, teto e sem parede encostada, e o globo nos 33 lampiões da expansão. Não colide, não recebe
+  tiro e não faz sombra, e fica em `Map.LuzInterior`, porque a arte fixa (SLIM) não pode ser mexida.
+- **Interior vivo (`Controllers/InteriorVivo`):** a chama respira nos 6 lampiões mais perto e a poeira flutua nos 4
+  mais perto (sem poeira no detalhe baixo). À noite a luz fica mais laranja e mais forte.
+- **Skins:** as 9 classes de material refletem mais (`CLASSES` no `tools/acabamentos.py`). `--so-classes` refaz só
+  os 180 mapas de metal e aspereza, sem repintar as cores. A tinta de campo continua a mais fosca.
+- **Medido:** nas 9 vistas, o lampião soma 34 chamadas de desenho (2.656 para 2.690, +1,3%) e 0,4% de triângulos.
+  Lune 940, pytest 77, autoteste 18 de 18. Detalhes em `testes/LOTE113_D241_2026-11-22.md`.
