@@ -1131,9 +1131,10 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     - **v142 publicada** (versão 147 do place, commit a0d5837).
   - **Lote 111 (D-239): 3º do pedido de 21/11, feito.** 27 imagens novas: Armário, camuflagem, Mercado, Vantagens
     e Destaques sem texto no lugar de imagem.
-    - Testes: Lune 932, pytest 77, autoteste 18 de 18 sem o controle fantasma interferir.
+    - Testes: Lune 932, pytest 77, autoteste 18 de 18 numa rodada e 17 na outra ("deitado", pelo controle fantasma do Studio).
     - **Sem teste:** clique nos cartões de Destaques, celular e TV.
     - Relatório: `testes/LOTE111_D239_2026-11-21.md`.
+    - **v143 publicada** (versão 148 do place, commit 14c58a1).
   - **Falta do pedido de 21/11:** lote 112 (carregamento, bandeiras, nascer, textos, comemoração) e lote 113
     (gráficos, casas, terreno, skins).
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
