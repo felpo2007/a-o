@@ -450,6 +450,9 @@ O `sourcemap.json` não vai para o Git.
   `catalogo_imagens.py`. Votação com os três mapas no Studio: `VT65DevVotoMapas = true` (no Edit).
   Modelo novo dos mapas: receita em `tools/blender/ret_*.py`, `ret.py -- <chave>`, `tools/ret_registrar.py plano`,
   `upload-assets Models.ret_`, `ret_registrar.py jogo` (gera `VT65Build/NosRet`, a colisão por nó) e `mapas_ret.py`.
+  No `Bairro`: `miolo` (forçado, pode entrar na captura), `muros` (em trechos, depois das casas), `cais` (base no fundo do
+  rio) e `pracas_extra`; `canais` fica no projeto e `NIVEL_DO_PATIO` prende o piso à altura do pátio. O pivô do modelo é o
+  centro da caixa: confira a posição pelas colisões do `metricas.json`.
 - Mira e mãos em 1ª pessoa (D-242): `adsEyeM`/`adsSobeM` na ficha (`Weapons`) e `ADS_MAO_BAIXA` no
   `WeaponVisuals`. Para ver todas: `VT65DevArma` = id (Server) e `Aiming = true` a cada quadro (Client); a luneta
   só abre pelo `VT65DevGranada = "mirar:<s>"`. Para olhar a 3ª pessoa, use bot ancorado do mesmo lado, senão ele

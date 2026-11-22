@@ -10105,3 +10105,32 @@ lugares e a publicação.
 
 **Falta no Mercado:** frente para o canal (cais e fachadas estreitas na margem), conferir em qualidade alta, medir
 desempenho e o cruzamento de dois jogadores. A ficha está em `testes/D-243_mercado_2026-11-22.md`.
+
+### D-243, parte 5: os cinco lugares do Vale (2026-11-22, sem publicar)
+
+- **Onze modelos novos no Blender** (`tools/blender/ret_frente.py`, de 2.112 a 12.482 triângulos): lojas estreitas e cais de
+  pedra do Mercado; fornos, galpão, secagem, cobertura e pilhas da Olaria; ala principal e ala lateral da Escola; galpão do
+  Engenho; casa comunal dos Esteios.
+- **Pátios em anel:** a primeira montagem, com as construções a 25-30 m do centro, ficou vazia. Agora elas fecham a captura a
+  12-18 m, com o centro livre e proteção baixa perto dele (`miolo`). Muros e cercas entram por último (`muros`); o trecho que
+  cairia numa via ou casa vira passagem.
+- **Cais:** o modelo desce até o fundo do rio, com altura vinda do gerador (`base` no Layout, sem patamar). O chão atrás do
+  deck sobe até ele (no máximo 0,19 m de diferença, conferido no `mapas_check`).
+- **Canal do Engenho:** vala curta com água rasa atrás do galpão (`canais` no projeto). O piso do galpão fica na altura do
+  pátio (`nivel` no Layout), senão o canal o rebaixava 0,8 m.
+- **Reboco:** o material de barro fazia manchas de "vaca" nas paredes caiadas. O reboco novo tem falhas pequenas com tijolo
+  de verdade por baixo. A chapa do Engenho e da Olaria ficou mais enferrujada, com menos remendo cinza.
+- **Lampiões:** ficavam acima das treliças e amontoados numa ponta. Agora ficam abaixo delas, espalhados, com força por
+  modelo; o piso elevado da casa comunal passou a ser encontrado.
+- **Falha corrigida:** a escada da passarela do Engenho atravessava uma divisória e a passarela deixava a cabeça do soldado
+  na treliça. A passarela desceu para 2,25 m e a escada mudou de lado.
+
+**Medido no Studio** (qualidade baixa ou média, sem número de fps):
+- Soldado a pé: pátio e as três salas da Escola, 39 de 39 pontos; as três lojas, da frente aos fundos; galpão da Olaria, 20 de
+  22 pontos e chegada a 0,4 m do alvo; escada da plataforma do Engenho (0,70 m) e passarela (sobe 2,10 m, anda e desce);
+  escada da casa comunal (0,70 m); deck do cais, 13 de 13.
+- Bots no Vale, 30 vivos: nenhum parado em duas janelas de mais de 80 s, com a frente indo do Mercado à Escola.
+- Mapa de sempre: autoteste com 18 ok, 0 falhas e 0 pulados.
+
+**Falta no Vale:** qualidade alta, fps, dois jogadores, visadas medidas e textura própria do chão de cada lugar. As fichas estão
+em `testes/D-243_vale_2026-11-22.md`.

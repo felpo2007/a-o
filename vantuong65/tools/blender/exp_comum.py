@@ -362,9 +362,11 @@ def telhado_chapa(
         rec.transformar(marca, m_lugar)
 
 
-def telhado_varanda(rec, nome, x0, x1, y_alto, z_alto, y_baixo, z_baixo, mats: Mats, sem=0):
+def telhado_varanda(
+    rec, nome, x0, x1, y_alto, z_alto, y_baixo, z_baixo, mats: Mats, sem=0, ferrugem=0.75
+):
     """Meia-água de chapa encostada na parede (de y_alto/z_alto ao beiral y_baixo/z_baixo)."""
-    m1 = mat_chapa(f"chapa_{nome}_a", 0.75)
+    m1 = mat_chapa(f"chapa_{nome}_a", ferrugem)
     m2 = mat_chapa(f"chapa_{nome}_b", 0.15)
     n = max(2, round((x1 - x0) / 1.1))
     passo = (x1 - x0) / n

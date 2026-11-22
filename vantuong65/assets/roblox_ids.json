@@ -2049,8 +2049,19 @@
  "Models.ret_merc_galeria": "96919137249468",
  "Models.ret_merc_oficina": "85399362806951",
  "Models.ret_merc_sobrado": "114812980983153",
- "Catalogo.aereo_frente_ne": "116136421732685",
- "Catalogo.aereo_frente_nw": "120958431875974",
- "Catalogo.aereo_frente_se": "138795799949382",
- "Catalogo.aereo_frente_sw": "128883746814969"
+ "Models.ret_esteio_comunal": "90015622262455",
+ "Models.ret_merc_cais": "98276510496763",
+ "Models.ret_olaria_fornos": "76101892661214",
+ "Models.ret_olaria_pilhas": "85104268600853",
+ "Models.ret_olaria_secagem": "119940563891254",
+ "Models.ret_olaria_cobertura": "130303466120628",
+ "Models.ret_escola_ala": "101810913470391",
+ "Models.ret_escola_principal": "83423809528180",
+ "Models.ret_merc_fachadas": "81455860234686",
+ "Models.ret_olaria_galpao": "86365711736445",
+ "Models.ret_engenho_galpao": "103188625735541",
+ "Catalogo.aereo_frente_ne": "99725265170842",
+ "Catalogo.aereo_frente_nw": "85144892238134",
+ "Catalogo.aereo_frente_se": "128915730897732",
+ "Catalogo.aereo_frente_sw": "121272479715504"
 }

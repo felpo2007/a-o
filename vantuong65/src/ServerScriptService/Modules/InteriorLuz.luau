@@ -104,9 +104,24 @@ local MAX_MERCADO: { [string]: number } = {
 	ret_merc_galeria = 4,
 	ret_merc_oficina = 2,
 	ret_merc_cozinha = 1,
+	ret_merc_fachadas = 3,
+	ret_olaria_galpao = 2,
+	ret_escola_principal = 3,
+	ret_escola_ala = 2,
+	ret_engenho_galpao = 6,
+	ret_esteio_comunal = 3,
 }
 local ENTRE_LAMPIOES = 20 -- studs
 local FORCA_MERCADO = 0.42
+-- salões de pé-direito alto, sem forro: a luz precisa de mais força para chegar ao chão
+local FORCA_MODELO: { [string]: number } = {
+	ret_engenho_galpao = 0.62,
+	ret_escola_principal = 0.6,
+	ret_escola_ala = 0.6,
+	ret_esteio_comunal = 0.7,
+	ret_olaria_galpao = 0.6,
+}
+local LAMPIAO_ALTURA_MAX = 12.5 -- studs do piso: abaixo da linha das treliças
 
 local function pontosMercado(m: Model, maximo: number): { { pos: Vector3, teto: number } }
 	local cf, sz = m:GetBoundingBox()
@@ -114,19 +129,17 @@ local function pontosMercado(m: Model, maximo: number): { { pos: Vector3, teto: 
 	local rp = RaycastParams.new()
 	rp.FilterType = Enum.RaycastFilterType.Include
 	rp.FilterDescendantsInstances = { m }
-	local out: { { pos: Vector3, teto: number } } = {}
+	local cands: { { pos: Vector3, teto: number } } = {}
 	for ix = -3, 3 do
 		for iz = -3, 3 do
-			if #out >= maximo then
-				return out
-			end
 			local q = cf * CFrame.new(ix / 7 * sz.X, 0, iz / 7 * sz.Z)
-			local origem = Vector3.new(q.X, base + 2, q.Z)
-			local piso = workspace:Raycast(origem, Vector3.new(0, -3, 0), rp)
+			-- 1,1 m acima da base: acha também o piso elevado da casa comunal
+			local origem = Vector3.new(q.X, base + 4, q.Z)
+			local piso = workspace:Raycast(origem, Vector3.new(0, -6, 0), rp)
 			local cima = workspace:Raycast(origem, Vector3.new(0, sz.Y, 0), rp)
 			-- o térreo das lojas é mais baixo que o das casas (9,6 studs livres): o globo fica junto do teto
 			local vao = if piso and cima then cima.Position.Y - piso.Position.Y else 0
-			local y = if vao >= 9.6 then math.max(vao - 1.1, 8.5) else nil
+			local y = if vao >= 9.6 then math.min(math.max(vao - 1.1, 8.5), LAMPIAO_ALTURA_MAX) else nil
 			if piso and cima and y then
 				local pos = Vector3.new(q.X, piso.Position.Y + y, q.Z)
 				local livre = true
@@ -135,16 +148,35 @@ local function pontosMercado(m: Model, maximo: number): { { pos: Vector3, teto: 
 						livre = false
 					end
 				end
-				for _, o in out do
-					if (o.pos - pos).Magnitude < ENTRE_LAMPIOES then
-						livre = false
-					end
-				end
 				if livre then
-					table.insert(out, { pos = pos, teto = cima.Position.Y })
+					table.insert(cands, { pos = pos, teto = cima.Position.Y })
 				end
 			end
 		end
+	end
+	-- espalha: o primeiro fica perto do centro e cada novo, o mais longe possível dos outros
+	local out: { { pos: Vector3, teto: number } } = {}
+	while #out < maximo do
+		local melhor, nota = nil, -math.huge
+		for _, c in cands do
+			local n = -(c.pos - cf.Position).Magnitude
+			if #out > 0 then
+				n = math.huge
+				for _, o in out do
+					n = math.min(n, (o.pos - c.pos).Magnitude)
+				end
+				if n < ENTRE_LAMPIOES then
+					n = -math.huge
+				end
+			end
+			if n > nota then
+				melhor, nota = c, n
+			end
+		end
+		if not melhor then
+			break
+		end
+		table.insert(out, melhor)
 	end
 	return out
 end
@@ -172,7 +204,7 @@ function InteriorLuz.instalar(map: Instance): (number, number, number)
 		elseif d:IsA("Model") and MAX_MERCADO[d.Name] then
 			local lista = pontosMercado(d, MAX_MERCADO[d.Name])
 			for _, q in lista do
-				monta(pasta, q.pos, q.teto, true, FORCA_MERCADO)
+				monta(pasta, q.pos, q.teto, true, FORCA_MODELO[d.Name] or FORCA_MERCADO)
 			end
 			if #lista > 0 then
 				feitas += 1

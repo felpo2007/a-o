@@ -1168,8 +1168,10 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
       vista aérea própria e votação de mapa. Lune 986 ok, 73 arquivos.
     - **Mercado das Duas Margens, 1ª versão (2026-11-22):** 7 modelos novos, praça, lojas com interior e lampiões. Ficha
       em `testes/D-243_mercado_2026-11-22.md`. Lune 986 ok, 73 arquivos.
-    - **Falta:** frente do Mercado para o canal, os outros nove lugares, teste do teleporte e com dois jogadores,
-      desempenho e publicação.
+    - **Os cinco lugares do Vale, 1ª versão (2026-11-22):** 11 modelos novos, cais nas duas margens, canal do Engenho e
+      pátios em anel. Fichas em `testes/D-243_vale_2026-11-22.md`. Lune 986 ok em 73 arquivos.
+    - **Falta:** as cinco cenas do Comboio, teste do teleporte e com dois jogadores, qualidade alta, desempenho e
+      publicação.
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;

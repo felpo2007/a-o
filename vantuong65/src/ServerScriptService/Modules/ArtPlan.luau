@@ -627,7 +627,11 @@ function ArtPlan.estruturasLayout(ctx: Ctx, has: (string) -> boolean): { Item }
 	for _, it in ctx.layout.items do
 		if has(it.key) then
 			local hx, hz = half(it.key, it.scale)
-			local pad = Site.addPad(ctx.site, it.x, it.z, it.yaw, hx, hz, true)
+			-- o cais desce até o fundo do rio: a altura vem do gerador, sem patamar
+			local baseFixa: number? = it.base
+			local nivel = if baseFixa
+				then baseFixa
+				else Site.addPad(ctx.site, it.x, it.z, it.yaw, hx, hz, true, it.nivel).level
 			table.insert(
 				out,
 				{
@@ -638,7 +642,8 @@ function ArtPlan.estruturasLayout(ctx: Ctx, has: (string) -> boolean): { Item }
 					scale = it.scale,
 					hx = hx,
 					hz = hz,
-					base = pad.level,
+					base = nivel,
+					baseFixa = baseFixa ~= nil,
 					group = if it.tipo == "casa" then "house" else "prop",
 					foliage = false,
 					shadow = true,

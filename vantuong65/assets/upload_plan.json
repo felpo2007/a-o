@@ -12360,5 +12360,82 @@
   "assetType": "Model",
   "name": "VT65 ret_merc_sobrado",
   "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_engenho_galpao",
+  "file": "assets/blender/ret_engenho_galpao/ret_engenho_galpao.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_engenho_galpao",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_escola_ala",
+  "file": "assets/blender/ret_escola_ala/ret_escola_ala.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_escola_ala",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_escola_principal",
+  "file": "assets/blender/ret_escola_principal/ret_escola_principal.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_escola_principal",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_esteio_comunal",
+  "file": "assets/blender/ret_esteio_comunal/ret_esteio_comunal.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_esteio_comunal",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_merc_cais",
+  "file": "assets/blender/ret_merc_cais/ret_merc_cais.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_merc_cais",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_merc_fachadas",
+  "file": "assets/blender/ret_merc_fachadas/ret_merc_fachadas.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_merc_fachadas",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_olaria_fornos",
+  "file": "assets/blender/ret_olaria_fornos/ret_olaria_fornos.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_olaria_fornos",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_olaria_galpao",
+  "file": "assets/blender/ret_olaria_galpao/ret_olaria_galpao.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_olaria_galpao",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_olaria_pilhas",
+  "file": "assets/blender/ret_olaria_pilhas/ret_olaria_pilhas.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_olaria_pilhas",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_olaria_secagem",
+  "file": "assets/blender/ret_olaria_secagem/ret_olaria_secagem.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_olaria_secagem",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_olaria_cobertura",
+  "file": "assets/blender/ret_olaria_cobertura/ret_olaria_cobertura.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_olaria_cobertura",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
  }
 ]

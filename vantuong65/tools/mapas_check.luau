@@ -71,12 +71,57 @@ local function confere(id, projeto)
 		if it.x < B.minX or it.x > B.maxX or it.z < B.minZ or it.z > B.maxZ then
 			foraDaArea += 1
 		end
-		if w:classAt(it.x, it.z) == 5 then
+		-- o cais e a comporta ficam na água de propósito
+		if w:classAt(it.x, it.z) == 5 and not (it :: any).baseFixa and it.key ~= "exp_comporta" then
 			naAgua += 1
 		end
 	end
 	if foraDaArea > 0 then
 		nota(foraDaArea .. " construções fora da área")
+	end
+	if id == "frente" then
+		-- D-243: cada lugar tem os seus marcos perto do centro
+		local MARCOS: { [string]: { string } } = {
+			A = { "ret_olaria_fornos", "ret_olaria_galpao", "ret_olaria_secagem", "ret_olaria_cobertura" },
+			B = { "ret_escola_principal", "ret_escola_ala" },
+			C = { "ret_merc_sobrado", "ret_merc_galeria", "ret_merc_cais", "ret_merc_fachadas" },
+			D = { "ret_engenho_galpao", "exp_comporta" },
+			E = { "ret_esteio_comunal", "exp_palafita_a", "exp_palafita_b" },
+		}
+		for i, st in projeto.setores do
+			local sp = mc.Strongpoints[i]
+			for _, chave in MARCOS[st.id] do
+				local achou = false
+				for _, it in estruturas do
+					local dx, dz = it.x - sp.x, it.z - sp.z
+					if it.key == chave and math.sqrt(dx * dx + dz * dz) * M < 50 then
+						achou = true
+					end
+				end
+				if not achou then
+					nota(st.id .. ": falta " .. chave)
+				end
+			end
+		end
+		-- o chão logo atrás do cais fica na altura do deck, e o piso do Engenho na altura do pátio
+		local maiorCais = 0
+		for _, it in estruturas do
+			if (it :: any).baseFixa then
+				local px, pz = ArtPlan.rot(it.x, it.z, it.yaw, 0, 4 / M)
+				local h = Site.column(ctx.site, px, pz)
+				maiorCais = math.max(maiorCais, math.abs(h - (it.base + 2.94 / M)) * M)
+			elseif it.key == "ret_engenho_galpao" then
+				local sp = mc.Strongpoints[4]
+				local patio = Site.column(ctx.site, sp.x, sp.z)
+				if math.abs(it.base - patio) * M > 0.15 then
+					nota(string.format("piso do Engenho %.2f m fora do pátio", (it.base - patio) * M))
+				end
+			end
+		end
+		if maiorCais > 0.35 then
+			nota(string.format("chão atrás do cais a %.2f m do deck", maiorCais))
+		end
+		print(string.format("  cais: chão atrás do deck a no máximo %.2f m", maiorCais))
 	end
 	if naAgua > 0 then
 		nota(naAgua .. " construções no rio")

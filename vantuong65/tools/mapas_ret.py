@@ -36,6 +36,13 @@ ROWS_PER = 60
 MASK_M = 0.5  # resolução da máscara de ocupação
 LEITO = 2.4  # fundo do rio abaixo da margem
 CAPTURA_R = 16.0  # raio do pátio de captura mantido livre
+# cais: (metros do muro à frente do pivô, comprimento), medidos no metricas.json do modelo
+CAIS = {"ret_merc_cais": (-0.11, 22.0)}
+# construções cujo piso fica na altura do pátio, mesmo com o chão mais baixo atrás delas
+NIVEL_DO_PATIO = {"ret_engenho_galpao"}
+CAIS_ALTURA_M = 2.94  # do fundo do modelo até o deck
+CAIS_BARCO_M = 0.62  # altura do casco dos barcos no modelo
+CAIS_CASCO_M = 0.10  # quanto o casco fica dentro d'água
 CONJ_LIVRE_M = 4.5  # chão livre em volta de um conjunto de nascer
 CONJ_SAIDA_M = 22.0  # comprimento conferido de cada saída
 CONJ_SEPARA_GRAUS = 75  # as duas saídas não olham para o mesmo lado
@@ -128,6 +135,9 @@ class Bairro:
     arvores: list[tuple] = field(default_factory=list)  # chave, dx, dy, escala
     praca: tuple[float, float, float] | None = None  # dx, dy, raio: terra batida, sem planta
     miolo: list[tuple] = field(default_factory=list)  # marcos dentro do pátio de captura
+    cais: list[tuple] = field(default_factory=list)  # chave, y na margem, lado (+1 = leste)
+    muros: list[tuple] = field(default_factory=list)  # chave, dx1, dy1, dx2, dy2
+    pracas_extra: list[tuple] = field(default_factory=list)  # dx, dy, raio
 
 
 @dataclass
@@ -145,6 +155,7 @@ class Projeto:
     bairros: list[Bairro]
     campos: list[tuple[float, float, float, float]]
     lombada: tuple[float, float, float, float, float] | None = None
+    canais: list[tuple] = field(default_factory=list)  # pontos, largura, fundo (m)
 
 
 RES = tuple(f"vila_casa_{i:02d}" for i in range(1, 11))
@@ -201,12 +212,12 @@ def frente() -> Projeto:
         # ruas internas: a frente das casas acompanha estas linhas, sem fileira reta
         Via("rua", [(98, 158), (116, 176), (150, 182), (178, 168)]),
         Via("rua", [(150, 124), (168, 104), (150, 92)]),
-        Via("rua", [(208, 176), (216, 208), (252, 222), (282, 204)]),
+        Via("rua", [(208, 176), (212, 208), (232, 222), (258, 226), (282, 204)]),
         Via("rua", [(232, 146), (226, 122), (250, 104), (276, 118), (276, 140)]),
         Via("rua", [(336, 176), (360, 188), (396, 180)]),
         Via("rua", [(362, 124), (384, 142), (396, 166)]),
         Via("rua", [(344, 118), (352, 98), (372, 96)]),
-        Via("rua", [(420, 134), (416, 106), (432, 84), (470, 78), (498, 100)]),
+        Via("rua", [(420, 134), (414, 106), (416, 84), (430, 69)]),
         Via("rua", [(470, 138), (486, 158), (476, 176), (446, 172), (432, 140)]),
         Via("rua", [(526, 166), (548, 186), (586, 188), (610, 166)]),
         Via("rua", [(532, 122), (556, 100), (596, 106)]),
@@ -218,17 +229,36 @@ def frente() -> Projeto:
             135,
             150,
             62,
-            16,
+            13,
             [
-                ("exp_galpao", -24, 18, 180, 1.25),
-                ("exp_galpao", 24, 22, 180, 1.25),
-                ("exp_telheiro", -26, -6, 90, 1.15),
-                ("exp_telheiro", 27, -4, -90, 1.15),
-                ("exp_deposito", 0, 31, 180, 1.15),
-                ("exp_carroca", -10, -19, 20, 1.0),
+                ("ret_olaria_cobertura", 29, -14, -70, 1.0),
             ],
             RES[:8] + ("exp_celeiro",),
             [("exp_figueira", 41, 30, 1.0), ("coconut_palm", -42, 24, 1.0)],
+            praca=(0, 2, 21),
+            # o anel do pátio: fornos ao norte, galpão a leste, secagem a oeste; a estrada entra
+            # pelo sul e as pilhas de tijolo dão a proteção baixa perto do centro
+            miolo=[
+                ("ret_olaria_fornos", -1, 16.5, 180, 1.0),
+                ("ret_olaria_galpao", 18.5, 3, -90, 1.0),
+                ("ret_olaria_secagem", -17.5, -1, 90, 1.0),
+                ("ret_olaria_cobertura", 13, -14, -45, 1.0),
+                ("ret_olaria_cobertura", -14.5, 12.5, 140, 1.0),
+                ("exp_telheiro", -15, -16, 45, 1.15),
+                ("exp_deposito", -25.5, 13.5, 110, 1.15),
+                ("exp_carroca", -27, -11, 70, 1.0),
+                ("ret_olaria_pilhas", -6, 4, 35, 1.0),
+                ("ret_olaria_pilhas", 6.5, -5, -25, 1.0),
+                ("ret_olaria_pilhas", 7, 6.5, 100, 1.0),
+                ("water_jar", 11.5, -3.5, 0, 1.0),
+                ("water_jar", 12.2, -2.2, 50, 1.0),
+            ],
+            muros=[
+                ("exp_muro", 9, 21, 19, 15),
+                ("exp_muro", 12, -23, 3, -26),
+                ("bamboo_fence", 31, -8, 38, -22),
+                ("bamboo_fence", -36, -8, -40, 8),
+            ],
         ),
         Bairro(
             "B",
@@ -238,14 +268,36 @@ def frente() -> Projeto:
             60,
             15,
             [
-                ("exp_sobrado_b", 0, 24, 180, 1.1),
-                ("exp_sobrado_d", -27, 2, 90, 1.1),
-                ("exp_sobrado_d", 27, 2, -90, 1.1),
-                ("well", 0, -21, 0, 1.0),
                 ("exp_telheiro", -34, 27, 135, 1.15),
+                ("exp_deposito", 35, 24, -135, 1.15),
             ],
             RES[2:] + ("exp_casa_verde",),
-            [("exp_figueira", -3, 2, 1.1), ("ph_island_tree_01", 44, 26, 1.0)],
+            [
+                ("exp_figueira", -3, 2, 1.1),
+                ("ph_island_tree_01", 44, 26, 1.0),
+                # o pomar, a sudeste do pátio
+                ("banana", 14, -15, 1.0),
+                ("banana", -15, -16, 1.0),
+                ("banana", 33, -24, 1.0),
+                ("banana", 38, -30, 1.0),
+                ("coconut_palm", 30, -33, 1.0),
+            ],
+            praca=(0, 0, 20),
+            # o U da escola em volta da figueira, aberto para o sul; a varanda entra na captura
+            miolo=[
+                ("ret_escola_principal", 0, 17.2, 180, 1.0),
+                ("ret_escola_ala", -18.6, 2, 90, 1.0),
+                ("ret_escola_ala", 18.6, 2, -90, 1.0),
+                ("well", 8.5, -7, 0, 1.0),
+                ("water_jar", 10.2, -6.4, 30, 1.0),
+            ],
+            # caminhos entre muros na entrada do pátio e a cerca do pomar
+            muros=[
+                ("exp_muro", -28, -13, -8, -19),
+                ("exp_muro", 8, -19, 28, -13),
+                ("bamboo_fence", 27, -19, 46, -21),
+                ("bamboo_fence", 46, -21, 46, -38),
+            ],
         ),
         Bairro(
             "C",
@@ -253,7 +305,7 @@ def frente() -> Projeto:
             350,
             150,
             58,
-            22,
+            6,
             [
                 # a praça das coberturas: o sobrado fecha o norte, a galeria o leste, e as bancas
                 # em volta do pátio criam as aproximações diagonais
@@ -261,7 +313,6 @@ def frente() -> Projeto:
                 ("ret_merc_galeria", 35, 10, -90, 1.0),
                 # anel de bancas em volta do pátio, com vãos nas diagonais
                 ("ret_merc_banca_a", -15, 19, 135, 1.0),
-                ("ret_merc_banca_c", -22, 8, 105, 1.0),
                 ("ret_merc_banca_b", -22, -6, 75, 1.0),
                 ("ret_merc_banca_a", -15, -18, 45, 1.0),
                 ("ret_merc_banca_b", 15, -19, -45, 1.0),
@@ -277,12 +328,17 @@ def frente() -> Projeto:
             SOB + RES[5:] + ("exp_casas_ligadas", "exp_deposito"),
             [("exp_figueira", 28, 31, 1.25)],
             praca=(4, 4, 31),
+            # as duas margens: cais de pedra dos dois lados e lojas estreitas a oeste
+            cais=[("ret_merc_cais", 151, 1), ("ret_merc_cais", 160, -1)],
+            pracas_extra=[(-42, 10, 25)],  # a margem oeste, das lojas estreitas até o cais
             # cobertura dentro da captura, com o centro e as diagonais livres
             miolo=[
                 ("ret_merc_banca_b", -9, 8, 130, 1.0),
                 ("ret_merc_banca_a", 9, 9, -130, 1.0),
                 ("ret_merc_banca_c", 9, -9, -50, 1.0),
                 ("exp_carroca", -9, -9, 40, 1.0),
+                ("ret_merc_fachadas", -43, 8, 90, 1.0),
+                ("ret_merc_fachadas", -40, 30, 84, 1.0),
             ],
         ),
         Bairro(
@@ -293,15 +349,27 @@ def frente() -> Projeto:
             60,
             15,
             [
-                ("exp_galpao", -2, -22, 0, 1.25),
-                ("exp_galpao", 26, -24, 0, 1.25),
-                ("exp_deposito", -28, -6, 90, 1.15),
-                ("exp_celeiro", 28, 1, -90, 1.15),
-                ("exp_telheiro", 2, 4, 180, 1.15),
-                ("exp_comporta", -30, -36, 0, 1.0),
+                ("exp_galpao", 38, -22, 0, 1.1),
             ],
             RES[:6] + ("exp_celeiro", "exp_deposito"),
-            [("melaleuca_grove", 42, -30, 1.0)],
+            [("melaleuca_grove", 42, -30, 1.0), ("melaleuca_grove", -44, -26, 0.9)],
+            praca=(0, 0, 20),
+            # a plataforma de carga do galpão entra na captura; atrás dele corre o canal
+            miolo=[
+                ("ret_engenho_galpao", 6, -19.5, 0, 1.0),
+                ("exp_comporta", -31, -30, 0, 1.0),
+                ("exp_deposito", -17.5, -6, 90, 1.15),
+                ("exp_celeiro", 18.5, 2, -90, 1.15),
+                ("exp_telheiro", -17, 11, 110, 1.15),
+                ("exp_carroca", -7, 9, 40, 1.0),
+                ("straw_stack", 10, 9, 0, 1.0),
+                ("rice_sack", -3, -8.5, 20, 1.6),
+                ("rice_sack", -2.4, -9.2, -30, 1.6),
+            ],
+            muros=[
+                ("bamboo_fence", -20, 20, -7, 24),
+                ("bamboo_fence", 8, 24, 20, 19),
+            ],
         ),
         Bairro(
             "E",
@@ -309,16 +377,32 @@ def frente() -> Projeto:
             565,
             150,
             62,
-            20,
+            14,
             [
-                ("exp_sobrado_a", 0, 30, 180, 1.1),
-                ("exp_palafita_a", -26, 14, 110, 1.2),
-                ("exp_palafita_b", 26, 16, -110, 1.2),
-                ("exp_palafita_a", -24, -14, 60, 1.2),
-                ("exp_palafita_b", 25, -13, -60, 1.2),
+                ("ret_merc_cozinha", -31, 2, 90, 1.0),
             ],
             PAL + PAL + RES[7:] + ("exp_casa_vala",),
-            [("exp_figueira", 12, 8, 1.15), ("banana", -38, 30, 1.0)],
+            [("exp_figueira", 10, 7, 1.15), ("banana", -38, 30, 1.0)],
+            praca=(0, 0, 19),
+            # a casa comunal em chão firme fecha o norte do terreiro; as palafitas, os lados
+            miolo=[
+                ("ret_esteio_comunal", 0, 17.5, 180, 1.0),
+                ("exp_palafita_a", -19.5, 9, 110, 1.2),
+                ("exp_palafita_b", 19.5, 11, -110, 1.2),
+                ("exp_palafita_a", -18.5, -11, 60, 1.2),
+                ("exp_palafita_b", 18.5, -10, -60, 1.2),
+                ("water_jar", -9, 8, 0, 1.0),
+                ("water_jar", -10.2, 6.6, 40, 1.0),
+                ("straw_stack", -14, -15, 0, 0.8),
+                ("bamboo_clothesline", 7, -11, 15, 1.0),
+            ],
+            # cercas de bambu entre as casas, com três entradas para o terreiro
+            muros=[
+                ("bamboo_fence", -19, -23, -5, -25),
+                ("bamboo_fence", 6, -25, 19, -23),
+                ("bamboo_fence", -33, -3, -26, -1),
+                ("bamboo_fence", 26, 1, 34, -2),
+            ],
         ),
     ]
     return Projeto(
@@ -364,6 +448,7 @@ def frente() -> Projeto:
             (70, 232, 170, 280),
             (372, 196, 450, 228),
         ],  # fmt: skip
+        canais=[([(424, 80), (445, 77), (470, 77), (492, 82)], 5.5, 1.5)],
     )
 
 
@@ -586,6 +671,7 @@ class Mapa:
         self.items: list[dict] = []
         self.plantas: list[dict] = []
         self.falhas: list[str] = []
+        self.caises: list[dict] = []
 
     def mundo(self, x: float, y: float) -> tuple[float, float]:
         return (x - self.p.comp / 2) / M, -(y - self.p.prof / 2) / M
@@ -643,6 +729,12 @@ class Mapa:
         c[d <= meio] = 5
         self.dist_rio = d
         self.c = c
+        # canais de serviço: valas curtas com água rasa, que não cruzam via
+        for pts, larg, fundo in p.canais:
+            dc = dist_polilinha(x, y, catmull(pts, 2.0))
+            t = liso((dc - larg / 2) / 3.2)
+            self.z = (self.z - fundo) * (1 - t) + self.z * t
+            self.c[dc <= larg / 2] = 5
 
     def altura(self, x: float, y: float) -> float:
         fx = ((x - self.p.comp / 2) / M - self.ox) / CELL - 0.5
@@ -656,6 +748,46 @@ class Mapa:
         return (h(c0, r0) * (1 - tx) + h(c0 + 1, r0) * tx) * (1 - tz) + (
             h(c0, r0 + 1) * (1 - tx) + h(c0 + 1, r0 + 1) * tx
         ) * tz
+
+    # ----------------------------------------------------------------- cais de pedra
+    def margens(self) -> None:
+        """O muro do cais fica na beira d'água e o chão atrás dele sobe até o deck."""
+        for b in self.p.bairros:
+            for chave, yr, lado in b.cais:
+                frente_m, comp = CAIS[chave]
+                i = int(np.argmin(np.abs(self.rio[:, 1] - yr)))
+                tx, ty = self.rio[min(i + 3, len(self.rio) - 1)] - self.rio[max(i - 3, 0)]
+                n = max(math.hypot(tx, ty), 1e-6)
+                nx, ny = -ty / n, tx / n
+                if nx * lado < 0:
+                    nx, ny = -nx, -ny
+                # o muro entra 0,5 m na água; a frente do modelo olha para o rio
+                mx = float(self.rio[i, 0]) + nx * (self.p.rio_largura / 2 - 0.5)
+                my = float(self.rio[i, 1]) + ny * (self.p.rio_largura / 2 - 0.5)
+                fx, fy = -nx, -ny
+                dx, dy = self.xm - mx, self.ym - my
+                v, u = dx * fx + dy * fy, dx * fy - dy * fx
+                agua = (self.c == 5) & (np.hypot(dx, dy) < 12)
+                leitos = np.floor(self.z[agua] / M / 4) * 4
+                nivel = float(np.median(leitos)) + 0.6 / M  # lâmina d'água, em studs
+                base = nivel - (CAIS_BARCO_M + CAIS_CASCO_M) / M
+                topo = base * M + CAIS_ALTURA_M - 0.03
+                lados = liso((np.abs(u) - comp / 2) / 5.0)
+                frente = liso((v + 0.4) / 2.6)
+                fundo = liso((-v - 9.0) / 6.0)
+                peso = (1 - lados) * (1 - frente) * (1 - fundo)
+                self.z = self.z * (1 - peso) + topo * peso
+                self.c[(peso > 0.5) & (self.c == 5)] = 3
+                self.caises.append(
+                    {
+                        "bairro": b.id,
+                        "chave": chave,
+                        "x": mx - fx * frente_m,
+                        "y": my - fy * frente_m,
+                        "rumo": math.degrees(math.atan2(fy, fx)),
+                        "base": base,
+                    }
+                )
 
     # ----------------------------------------------------------------- estradas e pontes
     def estradas(self) -> None:
@@ -768,6 +900,9 @@ class Mapa:
             dr.line(pts, fill=255, width=int((larg[v.tipo] + 2.4) / MASK_M), joint="curve")
         rio = [px(a) for a in self.rio]
         dr.line(rio, fill=255, width=int((p.rio_largura + 7) / MASK_M), joint="curve")
+        for pts, larg, _fundo in p.canais:
+            canal = [px(a) for a in catmull(pts, 2.0)]
+            dr.line(canal, fill=255, width=int((larg + 2.5) / MASK_M), joint="curve")
         for _sid, sx, sy in p.setores:
             r = CAPTURA_R / MASK_M
             cx, cy = px((sx, sy))
@@ -818,7 +953,9 @@ class Mapa:
         ImageDraw.Draw(im).polygon(pts, fill=255)
         self.ocup = np.array(im, dtype=np.uint8)
 
-    def poe(self, chave, x, y, rumo_graus, escala, tipo, forca=False) -> bool:
+    def poe(
+        self, chave, x, y, rumo_graus, escala, tipo, forca=False, base=None, nivel=None
+    ) -> bool:
         d = DIMS.get(chave)
         if d is None:
             self.falhas.append(f"sem dimensão: {chave}")
@@ -844,13 +981,32 @@ class Mapa:
                 "hx": hx,
                 "hy": hy,
                 "rumo": rumo,
+                "base": base,
+                "nivel": nivel,
             }
         )
         return True
 
+    def linha(self, chave: str, x1: float, y1: float, x2: float, y2: float) -> None:
+        """Muro ou cerca em trechos: o trecho que cairia numa via ou construção vira passagem."""
+        d = DIMS[chave]
+        passo = max(d[0], d[2]) * M
+        n = max(1, round(math.hypot(x2 - x1, y2 - y1) / passo))
+        ang = math.degrees(math.atan2(y2 - y1, x2 - x1))
+        rumo = ang + 90 if d[0] >= d[2] else ang
+        hx, hy = d[0] * M / 2, d[2] * M / 2
+        pontos = [
+            (x1 + (x2 - x1) * (k + 0.5) / n, y1 + (y2 - y1) * (k + 0.5) / n) for k in range(n)
+        ]
+        livres = [q for q in pontos if self.cabe(q[0], q[1], math.radians(rumo), hx, hy)]
+        for qx, qy in livres:
+            self.poe(chave, qx, qy, rumo, 1.0, "marco", forca=True)
+
     # ----------------------------------------------------------------- bairros
     def bairros(self) -> None:
         rng = np.random.default_rng(1965)
+        for c in self.caises:
+            self.poe(c["chave"], c["x"], c["y"], c["rumo"], 1.0, "marco", True, c["base"])
         for b in self.p.bairros:
             for chave, dx, dy, rumo, escala in b.marcos:
                 ok = False
@@ -867,7 +1023,8 @@ class Mapa:
                 if not ok:
                     self.falhas.append(f"{b.id}: marco {chave} sem lugar")
             for chave, dx, dy, rumo, escala in b.miolo:
-                self.poe(chave, b.x + dx, b.y + dy, 90 - rumo, escala, "marco", forca=True)
+                nivel = self.altura(b.x, b.y) if chave in NIVEL_DO_PATIO else None
+                self.poe(chave, b.x + dx, b.y + dy, 90 - rumo, escala, "marco", True, None, nivel)
             for chave, dx, dy, escala in b.arvores:
                 self.plantas.append({"key": chave, "x": b.x + dx, "y": b.y + dy, "scale": escala})
             postos = 0
@@ -895,6 +1052,9 @@ class Mapa:
                     postos += 1
             if postos < b.casas:
                 self.falhas.append(f"{b.id}: {postos} de {b.casas} casas")
+            # muros e cercas por último: onde já há casa, o trecho vira passagem
+            for chave, dx1, dy1, dx2, dy2 in b.muros:
+                self.linha(chave, b.x + dx1, b.y + dy1, b.x + dx2, b.y + dy2)
 
     def via_perto(self, b: Bairro, rng) -> tuple[float, float, float, float] | None:
         cand = []
@@ -1107,7 +1267,10 @@ class Mapa:
         )
         itens = "".join(
             f'\t\t{{ key = "{i["key"]}", x = {i["x"]}, z = {i["z"]}, yaw = {i["yaw"]}, '
-            f'scale = {i["scale"]}, tipo = "{i["tipo"]}" }},\n'
+            f'scale = {i["scale"]}, tipo = "{i["tipo"]}"'
+            + (f", base = {i['base']:.2f}" if i["base"] is not None else "")
+            + (f", nivel = {i['nivel'] / M:.2f}" if i["nivel"] is not None else "")
+            + " },\n"
             for i in self.items
         )
         plantas = ""
@@ -1128,9 +1291,9 @@ class Mapa:
             )
         pracas = ""
         for b in self.p.bairros:
-            if b.praca:
-                wx, wz = self.mundo(b.x + b.praca[0], b.y + b.praca[1])
-                pracas += f"\t\t{{ x = {wx:.2f}, z = {wz:.2f}, r = {b.praca[2] / M:.2f} }},\n"
+            for q in ([b.praca] if b.praca else []) + b.pracas_extra:
+                wx, wz = self.mundo(b.x + q[0], b.y + q[1])
+                pracas += f"\t\t{{ x = {wx:.2f}, z = {wz:.2f}, r = {q[2] / M:.2f} }},\n"
         conj = ""
         for k, c in enumerate(self.conj, 1):
             wx, wz = self.mundo(c["xm"], c["ym"])
@@ -1233,6 +1396,7 @@ class Mapa:
 def gera(p: Projeto) -> None:
     m = Mapa(p)
     m.relevo()
+    m.margens()
     m.estradas()
     m.arrozais()
     m.mascara()

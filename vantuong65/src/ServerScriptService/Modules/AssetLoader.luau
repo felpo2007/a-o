@@ -726,6 +726,8 @@ function AssetLoader.placeItem(it: any, parent: Instance, planned: boolean): Mod
 		elseif not planned then
 			base = groundY(it.x, it.z)
 		end
+	elseif (it :: any).baseFixa then
+		base = it.base -- D-243: o cais assenta no fundo do rio, na altura do gerador
 	elseif planned and not it.padded and not OVER_HOLE[it.key] and not it.expansao then
 		-- objeto sem patamar (caixote, saco, toca, cerca de arame, ponte): o menor entre o plano e o
 		-- chão real sob a pegada
