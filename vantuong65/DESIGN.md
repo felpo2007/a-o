@@ -9952,3 +9952,23 @@ tinha estrelas, as Vantagens repetiam a mesma foto e os Destaques traziam uma li
   `VT65DevSemControle` só cobre a nossa camada de entrada, não a do `PlayerModule`.
 - **Medido:** Lune 932, pytest 77, autoteste 18 de 18 sem interferência. Detalhes em
   `testes/LOTE111_D239_2026-11-21.md`.
+
+## D-240 — Lote 112: bandeiras, carregamento, nascer, textos e comemoração (2026-11-22)
+
+**Pedido do dono (4º lote):** bandeiras incríveis na escolha do time, comemoração épica, outra tela de
+carregamento, tela de nascer à altura e textos, caixas e layouts mais épicos.
+- **Bandeiras:** `tools/blender/bandeiras_epicas.py` faz o pano ao vento no pôr do sol, com palmeiras, bambu e
+  sacos de areia, e uma máscara do pano. `tools/bandeiras_pos.py` põe sol, raios, fumaça, brasas e vinheta fora
+  da máscara, para a cor da bandeira não lavar. Saem em `assets/ui/times` (`Catalogo.time_us` e `time_vc`).
+- **Carregamento:** as 7 capas (`ReplicatedFirst/CapasEntrada`) em tela cheia, com aproximação lenta, troca
+  suave e faixas de cinema. Imagem 100% transparente não é baixada: a capa fica em 0,995 até o `PreloadAsync`.
+- **Nascer:** cantoneiras na carta e na ficha, véu na foto do destino e brilho preso dentro do NASCER.
+- **Textos e caixas:** `Estilo.title` ganhou contorno e degradê de metal, `Estilo.panel` um filete de latão, e
+  há `Estilo.cantoneiras` (não use em quadro com `UIListLayout`).
+- **Comemoração (`Controllers/PodioEpico`):** VITÓRIA cai na tela com clarão, tremor, onda, faíscas, raios e
+  fanfarra, e os fogos seguem até 16 s. O fundo é a bandeira do vencedor, sem o mastro 3D, que a repetia. No
+  empate fica o cenário antigo com os dois mastros.
+- **Ambiente:** numa sessão longa do Studio, os ViewportFrames pararam de desenhar, até um cubo num quadro novo.
+  Parar e dar Play não resolveu; reabrir o Studio resolveu.
+- **Medido:** Lune 933, pytest 77, autoteste 18 de 18, i18n 2.985 de 2.985. Detalhes em
+  `testes/LOTE112_D240_2026-11-22.md`.

@@ -17,7 +17,6 @@ local Net = require(ReplicatedStorage.Shared.Net)
 local Roles = require(ReplicatedStorage.Shared.Roles)
 local Weapons = require(ReplicatedStorage.Shared.Weapons)
 local ArteCatalogo = require(script.Parent.ArteCatalogo)
-local Bandeiras = require(script.Parent.Bandeiras)
 local UiKit = require(script.Parent.UiKit)
 
 local player = Players.LocalPlayer
@@ -341,14 +340,10 @@ function Preparacao.novo(root: Frame, ctx: Ctx): any
 		UiKit.corner(b, 4)
 		local borda = UiKit.edge(b, corLado(f), 2, 0.35)
 		local im = imagem(b, ArteCatalogo.time(f), -12, -8, 634, 590, true)
-		degrade(b, 90, 0.78, 0.02, 0.62)
-		degrade(b, 0, 0.2, 1, 0.75)
+		-- D-240: a bandeira ao vento enche o cartão; a sombra fica só embaixo, onde vai o texto
+		degrade(b, 90, 0.9, 0.02, 0.6)
 		quadro(b, 0, 0, 6, 574, corLado(f))
 		letra(b, info.kicker, 19, corLado(f):Lerp(Color3.new(1, 1, 1), 0.35), F.TITLE_MED, 32, 24, 380, 26)
-		local FLAG_H = 72
-		local flag = Bandeiras.of(f, b, FLAG_H, 2)
-		flag.AnchorPoint = Vector2.new(1, 0)
-		flag.Position = UDim2.fromOffset(586, 24)
 		letra(b, info.titulo, 46, V.TEXT, F.TITLE, 32, 372, 546, 58)
 		letra(b, info.linha, 19, V.DIM, F.BODY, 32, 430, 546, 26)
 		letra(b, "JOGADORES", 15, V.DIM, F.TITLE_MED, 32, 470, 180, 20)

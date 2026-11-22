@@ -1135,8 +1135,15 @@ jogo: vale só a ideia (objetivos espalhados), nada da tela.
     - **Sem teste:** clique nos cartões de Destaques, celular e TV.
     - Relatório: `testes/LOTE111_D239_2026-11-21.md`.
     - **v143 publicada** (versão 148 do place, commit 14c58a1).
-  - **Falta do pedido de 21/11:** lote 112 (carregamento, bandeiras, nascer, textos, comemoração) e lote 113
-    (gráficos, casas, terreno, skins).
+  - **Lote 112 (D-240): 4º do pedido de 21/11, feito.** Bandeiras ao pôr do sol, carregamento em tela cheia com
+    7 capas, tela de nascer, títulos e caixas com metal e latão, e comemoração com VITÓRIA, clarão e fogos.
+    - Testes: Lune 933, pytest 77, autoteste 18 de 18, i18n 2.985 de 2.985.
+    - **Sem teste:** pódio do Viet Cong e do empate na tela, som da fanfarra (não dá para ouvir), celular, TV e
+      vídeo em velocidade real.
+    - **Em aberto:** o carregamento avisa "3 arquivos não baixaram" no Studio. As 7 capas chegaram; os 3 não foram
+      identificados.
+    - Relatório: `testes/LOTE112_D240_2026-11-22.md`.
+  - **Falta do pedido de 21/11:** lote 113 (gráficos, casas e interiores, terreno, vegetação, soldados, skins).
   - Em aberto do lote 65: os 134 erros "PBR textures may not be visible" no jogo publicado.
 - **Próximos (ideias da análise, esperando o dono):**
   - desempenho medido num celular e num servidor do Roblox (fps, Hz, teto de bots), aliviando a mata;

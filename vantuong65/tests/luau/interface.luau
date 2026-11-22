@@ -819,7 +819,8 @@ test("D-130: a diária abre ao entrar, sem lugar na mesa; bandeiras na escolha d
 	assert(string.find(cena, 'id == "shop" or id == "daily"', 1, true), "calendário e caderneta só de enfeite")
 	-- D-223: a escolha do lado é a do Controllers/Preparacao
 	local prep = fs.readFile(C .. "Preparacao.luau")
-	assert(string.find(prep, "Bandeiras.of(f, b, FLAG_H", 1, true), "bandeira em cada ficha de alistamento")
+	-- D-240: a bandeira agora é a arte inteira da ficha
+	assert(string.find(prep, "imagem(b, ArteCatalogo.time(f)", 1, true), "bandeira em cada ficha de alistamento")
 	local band = fs.readFile(C .. "Bandeiras.luau")
 	assert(string.find(band, "for row = 1, 9 do", 1, true), "EUA de 1965: 9 fileiras (50 estrelas)")
 	assert(string.find(band, "for i = 0, 12 do", 1, true), "13 listras")

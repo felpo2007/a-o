@@ -238,6 +238,17 @@ end
 function Estilo.title(parent: Instance?, text: string, size: number, color: Color3?): TextLabel
 	local t = Estilo.text(parent, text, size, color, Estilo.headFont(text))
 	t.TextTruncate = Enum.TextTruncate.AtEnd
+	-- D-240 (dono: "deixe as escritas mais épicas"): letra de metal gravado, com a luz vindo de cima
+	t.TextStrokeColor3 = Color3.fromRGB(8, 8, 6)
+	t.TextStrokeTransparency = 0.62
+	local brilho = Instance.new("UIGradient")
+	brilho.Rotation = 90
+	brilho.Color = ColorSequence.new({
+		ColorSequenceKeypoint.new(0, Color3.new(1, 1, 1)),
+		ColorSequenceKeypoint.new(0.55, Color3.fromRGB(255, 247, 228)),
+		ColorSequenceKeypoint.new(1, Color3.fromRGB(196, 178, 140)),
+	})
+	brilho.Parent = t
 	return t
 end
 
@@ -264,10 +275,45 @@ function Estilo.panel(parent: Instance?, color: Color3?, tr: number?, edge: bool
 	f.BorderSizePixel = 0
 	Estilo.corner(f, 4)
 	if edge ~= false then
-		Estilo.stroke(f, Estilo.V.LINE, 1, 0.55)
+		-- D-240: filete de latão que acende nos cantos (no contorno: não entra nas listas do painel)
+		local filete = Estilo.stroke(f, Color3.new(1, 1, 1), 1, 0.12)
+		local metal = Instance.new("UIGradient")
+		metal.Rotation = 32
+		metal.Color = ColorSequence.new({
+			ColorSequenceKeypoint.new(0, Color3.fromRGB(226, 186, 96)),
+			ColorSequenceKeypoint.new(0.22, Color3.fromRGB(84, 80, 62)),
+			ColorSequenceKeypoint.new(0.78, Color3.fromRGB(70, 68, 54)),
+			ColorSequenceKeypoint.new(1, Color3.fromRGB(176, 140, 70)),
+		})
+		metal.Parent = filete
 	end
 	f.Parent = parent
 	return f
+end
+
+-- D-240: cantoneiras de latão nos quatro cantos de um quadro (não use num quadro com UIListLayout)
+function Estilo.cantoneiras(o: GuiObject, cor: Color3?, tam: number?, z: number?): Frame
+	local box = Instance.new("Frame")
+	box.Name = "Cantoneiras"
+	box.BackgroundTransparency = 1
+	box.Size = UDim2.fromScale(1, 1)
+	box.ZIndex = z or (o.ZIndex + 1)
+	local t = tam or 22
+	local tinta = cor or Color3.fromRGB(226, 186, 96)
+	for _, c in { { 0, 0 }, { 1, 0 }, { 0, 1 }, { 1, 1 } } do
+		for _, s in { Vector2.new(t, 2), Vector2.new(2, t) } do
+			local f = Instance.new("Frame")
+			f.BackgroundColor3 = tinta
+			f.BorderSizePixel = 0
+			f.AnchorPoint = Vector2.new(c[1], c[2])
+			f.Position = UDim2.fromScale(c[1], c[2])
+			f.Size = UDim2.fromOffset(s.X, s.Y)
+			f.ZIndex = box.ZIndex
+			f.Parent = box
+		end
+	end
+	box.Parent = o
+	return box
 end
 
 -- fundo de tela cheia: cor única escura, com a luz caindo de cima à esquerda

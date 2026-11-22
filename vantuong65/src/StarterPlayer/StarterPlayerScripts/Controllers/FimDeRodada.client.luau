@@ -23,8 +23,10 @@ local Comemoracao = require(ReplicatedStorage.Shared.Comemoracao)
 local Horarios = require(ReplicatedStorage.Shared.Horarios)
 local Net = require(ReplicatedStorage.Shared.Net)
 local Cortina = require(game:GetService("ReplicatedFirst"):WaitForChild("Cortina"))
+local ArteCatalogo = require(script.Parent.ArteCatalogo)
 local CenaComemoracao = require(script.Parent.CenaComemoracao)
 local PodioEfeitos = require(script.Parent.PodioEfeitos)
+local PodioEpico = require(script.Parent.PodioEpico)
 local Input = require(script.Parent.Input)
 local UiEfeitos = require(script.Parent.UiEfeitos)
 local UiKit = require(script.Parent.UiKit)
@@ -102,6 +104,7 @@ podium:GetPropertyChangedSignal("Visible"):Connect(syncPalco)
 local cena = CenaComemoracao.nova(stage)
 -- D-221: os efeitos em volta da cena: cada pouso acende o facho e dispara poeira e faíscas
 local efeitos = PodioEfeitos.novo(stage, cena)
+local epico = PodioEpico.novo(stage) -- D-240: VITÓRIA, os raios e os fogos
 cena.aoPousar = function(lugar: number)
 	efeitos:impacto(lugar)
 end
@@ -441,10 +444,15 @@ local function showPodium()
 		title.Text = if winner == "US" then "VITÓRIA · FUZILEIROS DOS EUA" else "VITÓRIA · VIET CONG"
 		-- D-221: mais claro: agora o título fica sobre o céu da cena
 		title.TextColor3 = (if winner == "US" then V.US else V.VC):Lerp(Color3.new(1, 1, 1), 0.5)
-		cena:bandeira(
-			{ if winner == "US" then V.US else V.VC },
-			{ if winner == "US" then "bandeira_eua" else "bandeira_frente" }
-		)
+		-- D-240: a bandeira do vencedor já é a arte do fundo; um mastro 3D na frente dela a repetiria
+		if ArteCatalogo.time(winner) ~= "" then
+			cena:bandeira({})
+		else
+			cena:bandeira(
+				{ if winner == "US" then V.US else V.VC },
+				{ if winner == "US" then "bandeira_eua" else "bandeira_frente" }
+			)
+		end
 	else
 		title.Text = "EMPATE"
 		title.TextColor3 = V.TEXT
@@ -453,6 +461,23 @@ local function showPodium()
 	end
 	cena:reiniciar()
 	efeitos:reiniciar(if winner == "US" then V.US elseif winner == "VC" then V.VC else V.BRASS)
+	-- D-240: a bandeira do vencedor ao pôr do sol atrás do pódio; no empate, o cenário de sempre
+	local artePalco = if winner == "US" or winner == "VC" then ArteCatalogo.time(winner) else ""
+	if artePalco ~= "" then
+		cena.cenario.Image = artePalco
+	else
+		local fundoPodio = ReplicatedStorage:GetAttribute("Img_podio_fundo")
+		cena.cenario.Image = if type(fundoPodio) == "number" and fundoPodio ~= 0
+			then string.format("rbxassetid://%d", fundoPodio)
+			else ""
+	end
+	if winner == "US" then
+		epico:reiniciar("VITÓRIA", "FUZILEIROS DOS EUA", V.US)
+	elseif winner == "VC" then
+		epico:reiniciar("VITÓRIA", "VIET CONG", V.VC)
+	else
+		epico:reiniciar("EMPATE", "NINGUÉM RECUOU", V.BRASS)
+	end
 	destaque.Visible = false
 	destaqueFeito = false
 	local linhas = if type(data) == "table" and type(data.linhas) == "table" then data.linhas else {}
@@ -524,12 +549,16 @@ local function frameCards()
 	local topo = (math.max(sp.Y + sa.Y * 0.085, gp.Y + 4) - rp.Y) / k
 	kicker.Position = UDim2.fromOffset(0, topo)
 	title.Position = UDim2.fromOffset(0, topo + px(26, 36))
-	clock.Position = UDim2.fromOffset(0, topo + px(92, 128))
+	-- D-240: o relógio vai para a faixa de cinema, e o letreiro grande fica sozinho no céu
+	clock.Position = UDim2.fromOffset(0, topo - px(38, 52))
 	local some = math.clamp((t - P.zoom) / 0.6, 0, 1)
-	for _, o in { kicker, title, clock } do
+	for _, o in { kicker, clock } do
 		o.TextTransparency = some
 		o.TextStrokeTransparency = 0.4 + 0.6 * some
 	end
+	-- D-240: quem diz o resultado no pódio é o letreiro grande (Controllers/PodioEpico)
+	title.TextTransparency, title.TextStrokeTransparency = 1, 1
+	kicker.TextTransparency, kicker.TextStrokeTransparency = 1, 1
 	local pe = (math.min(sp.Y + sa.Y * 0.985, gp.Y + ga.Y - 4) - (pp.Y + pa.Y)) / k
 	for i, c in cards do
 		c.f.Visible = temLinha[i] and (i == 1 or t < P.zoom + 0.25)
@@ -683,6 +712,7 @@ RunService.RenderStepped:Connect(function(dt: number)
 	if podium.Visible then
 		cena:passo(dt)
 		efeitos:passo(dt)
+		epico:passo(cena:tempo())
 		frameCards()
 	end
 end)

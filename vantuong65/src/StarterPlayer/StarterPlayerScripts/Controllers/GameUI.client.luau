@@ -43,6 +43,7 @@ local SpawnTransition = require(script.Parent.SpawnTransition)
 local Toast = require(script.Parent.Toast)
 local ToqueTelas = require(script.Parent.ToqueTelas)
 local ToqueUi = require(script.Parent.ToqueUi)
+local UiEfeitos = require(script.Parent.UiEfeitos)
 local UiKit = require(script.Parent.UiKit)
 local VirtualCursor = require(script.Parent.VirtualCursor)
 
@@ -96,6 +97,7 @@ mapFrame.Parent = stage
 UiKit.corner(mapFrame, 4)
 local mapEdge = UiKit.stroke(mapFrame, UiKit.V.LINE, 1, 0.3)
 mapEdge.Name = "Borda"
+UiKit.Estilo.cantoneiras(mapFrame, UiKit.V.BRASS, 30, 12) -- D-240: a carta numa moldura de latão
 -- título da carta em campo, em cima da janela (fora do mapFrame, que corta os filhos); na inserção
 -- quem dá o título é o painel de inserção da DeployScreen
 local mapTab = Instance.new("Frame")
@@ -255,6 +257,7 @@ painel.ClipsDescendants = true
 painel.Parent = stage
 UiKit.corner(painel, 4)
 local painelBorda = UiKit.stroke(painel, UiKit.V.LINE, 1, 0.2)
+UiKit.Estilo.cantoneiras(painel, UiKit.V.BRASS, 26, 13)
 local pFoto = Instance.new("ImageLabel")
 pFoto.Name = "Foto"
 pFoto.BackgroundColor3 = UiKit.V.BG
@@ -265,6 +268,24 @@ pFoto.Size = UDim2.fromOffset(PAINEL_W - 20, 158)
 pFoto.ZIndex = 11
 pFoto.Parent = painel
 UiKit.corner(pFoto, 3)
+do -- D-240: a foto do lugar como um quadro de cinema, escurecendo para o nome
+	local veu = Instance.new("Frame")
+	veu.Name = "Veu"
+	veu.BackgroundColor3 = Color3.new(0, 0, 0)
+	veu.BorderSizePixel = 0
+	veu.Size = UDim2.fromScale(1, 1)
+	veu.ZIndex = 12
+	veu.Parent = pFoto
+	UiKit.corner(veu, 3)
+	local g = Instance.new("UIGradient")
+	g.Rotation = 90
+	g.Transparency = NumberSequence.new({
+		NumberSequenceKeypoint.new(0, 0.78),
+		NumberSequenceKeypoint.new(0.45, 1),
+		NumberSequenceKeypoint.new(1, 0.22),
+	})
+	g.Parent = veu
+end
 local pFaixa = Instance.new("Frame")
 pFaixa.Name = "Faixa"
 pFaixa.Position = UDim2.fromOffset(10, 168)
@@ -345,6 +366,8 @@ nascerBtn.button.Selectable = false -- na carta o controle navega pela carta (LB
 nascerBtn.button.Visible = false
 nascerBtn.button.ZIndex = 11
 nascerBtn.label.TextXAlignment = Enum.TextXAlignment.Center
+nascerBtn.button.ClipsDescendants = true -- o brilho não passa da borda do botão
+UiEfeitos.varre(nascerBtn.button, 2.8, nil, 13) -- D-240: o brilho que corre no botão de nascer
 for _, d in nascerBtn.button:GetDescendants() do
 	if d:IsA("GuiObject") then
 		d.ZIndex = 12

@@ -57,6 +57,7 @@ pcall(function()
 end)
 
 local Acabamento = require(script.Parent:WaitForChild("Acabamento"))
+local CapasEntrada = require(script.Parent:WaitForChild("CapasEntrada"))
 local Cortina = require(script.Parent:WaitForChild("Cortina"))
 local Idioma = require(script.Parent:WaitForChild("Idioma"))
 require(script.Parent:WaitForChild("TextoCabe")).iniciar() -- D-216: nenhum texto passa da caixa
@@ -231,12 +232,106 @@ do -- lona: mais clara em cima, onde bate o lampião
 	g.Parent = bg
 end
 
-local film =
-	Acabamento.filme(gui, { vinheta = 1, grao = 0.6, poeira = 32, riscos = 2, tremor = 0.6, lampiao = 0.55, z = 40 })
+local film = Acabamento.filme(
+	gui,
+	{ vinheta = 0.45, grao = 0.28, poeira = 14, riscos = 1, tremor = 0.2, lampiao = 0.12, z = 40 }
+)
 Acabamento.luz(film, UDim2.fromScale(0.16, 0.08), 1.7)
+
+-- D-240 (dono: "mude a tela de carregamento, faça algo épico"): as cenas do jogo em tela cheia, com
+-- a câmera andando devagar e uma passando para a outra. Sem a imagem, fica a lona de antes.
+local arte = Instance.new("Frame")
+arte.Name = "Arte"
+arte.BackgroundTransparency = 1
+arte.ClipsDescendants = true
+arte.Size = UDim2.fromScale(1, 1)
+arte.ZIndex = 1
+arte.Parent = bg
+local function camadaArte(): ImageLabel
+	local im = Instance.new("ImageLabel")
+	im.BackgroundTransparency = 1
+	im.ImageTransparency = 1
+	im.ScaleType = Enum.ScaleType.Crop
+	im.AnchorPoint = Vector2.new(0.5, 0.5)
+	im.Position = UDim2.fromScale(0.5, 0.5)
+	im.Size = UDim2.fromScale(1.06, 1.06)
+	im.ZIndex = 1
+	im.Parent = arte
+	return im
+end
+local function sombraArte(rot: number, a: number, b: number, c: number)
+	local f = Instance.new("Frame")
+	f.BackgroundColor3 = Color3.fromRGB(6, 6, 5)
+	f.BorderSizePixel = 0
+	f.Size = UDim2.fromScale(1, 1)
+	f.ZIndex = 2
+	f.Parent = arte
+	local g = Instance.new("UIGradient")
+	g.Rotation = rot
+	g.Transparency = NumberSequence.new({
+		NumberSequenceKeypoint.new(0, a),
+		NumberSequenceKeypoint.new(0.5, b),
+		NumberSequenceKeypoint.new(1, c),
+	})
+	g.Parent = f
+end
+sombraArte(0, 0.22, 0.8, 1) -- à esquerda, onde vai o título e o briefing
+sombraArte(90, 0.86, 1, 0.14) -- embaixo, onde vai o progresso
+for _, emCima in { true, false } do -- faixas de cinema
+	local faixa = Instance.new("Frame")
+	faixa.BackgroundColor3 = Color3.new(0, 0, 0)
+	faixa.BorderSizePixel = 0
+	faixa.AnchorPoint = Vector2.new(0, if emCima then 0 else 1)
+	faixa.Position = UDim2.fromScale(0, if emCima then 0 else 1)
+	faixa.Size = UDim2.fromScale(1, 0.055)
+	faixa.ZIndex = 3
+	faixa.Parent = arte
+end
+task.spawn(function()
+	local a, b = camadaArte(), camadaArte()
+	local i = 1 + (os.time() % #CapasEntrada)
+	local lado = 1
+	while bg.Parent do
+		if not (gui.Parent and gui.Enabled) then
+			task.wait(0.5)
+			continue
+		end
+		a.Image = string.format("rbxassetid://%d", CapasEntrada[i])
+		-- imagem 100% transparente o Roblox não baixa: fica quase invisível enquanto carrega
+		a.ImageTransparency = math.min(a.ImageTransparency, 0.995)
+		task.spawn(function()
+			pcall(function()
+				ContentProvider:PreloadAsync({ a })
+			end)
+		end)
+		local t0 = os.clock()
+		while not a.IsLoaded and os.clock() - t0 < 5 do
+			task.wait(0.1)
+		end
+		if a.IsLoaded then
+			local fixo = Estilo.reduzMovimento()
+			lado = -lado
+			a.ZIndex, b.ZIndex = 1, 1
+			a.Size = UDim2.fromScale(1.06, 1.06)
+			a.Position = UDim2.fromScale(0.5 - lado * 0.012, 0.5)
+			tween(a, 1.6, { ImageTransparency = 0 }, Enum.EasingStyle.Sine, INOUT)
+			tween(b, 1.6, { ImageTransparency = 1 }, Enum.EasingStyle.Sine, INOUT)
+			if not fixo then
+				TweenService:Create(a, TweenInfo.new(9.5, Enum.EasingStyle.Linear), {
+					Size = UDim2.fromScale(1.18, 1.18),
+					Position = UDim2.fromScale(0.5 + lado * 0.022, 0.49),
+				}):Play()
+			end
+			task.wait(7.6)
+			a, b = b, a
+		end
+		i = i % #CapasEntrada + 1
+	end
+end)
 
 -- palco de 1280 x 720 que escala com a tela
 local stage = Instance.new("Frame")
+stage.ZIndex = 5
 stage.Name = "Palco"
 stage.AnchorPoint = Vector2.new(0.5, 0.5)
 stage.Position = UDim2.fromScale(0.5, 0.5)
@@ -247,7 +342,7 @@ local stageScale = Instance.new("UIScale")
 stageScale.Parent = stage
 
 -- ----- título (o nome novo do jogo, v37; o resto como antes) -----
-local kicker = label(stage, TYPE, 16, KHAKI, 92, 104, 700, 22)
+local kicker = label(stage, TYPE, 16, BRASS_LIGHT, 92, 104, 700, 22)
 kicker.Text = "III MAF · CHU LAI · ORDEM DE OPERAÇÃO"
 local title = label(stage, HEAD, 92, CARD, 86, 122, 700, 112)
 title.Text = "STARLITE: VIETNÃ 1965"
@@ -262,6 +357,18 @@ do
 end
 local titleScale = Instance.new("UIScale")
 titleScale.Parent = title
+do -- D-240: o título em latão, com a luz de cima e contorno escuro
+	local g = Instance.new("UIGradient")
+	g.Rotation = 90
+	g.Color = ColorSequence.new({
+		ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 246, 216)),
+		ColorSequenceKeypoint.new(0.5, Color3.fromRGB(246, 214, 136)),
+		ColorSequenceKeypoint.new(1, Color3.fromRGB(176, 124, 52)),
+	})
+	g.Parent = title
+	title.TextStrokeColor3 = Color3.fromRGB(10, 8, 4)
+	title.TextStrokeTransparency = 0.25
+end
 local rule = box(stage, STAMP, 92, 238, 0, 3)
 local hair = box(stage, BRASS, 92, 245, 0, 1, 0.35)
 local sub = label(stage, BODY, 20, KHAKI, 92, 256, 700, 26)
@@ -389,6 +496,10 @@ edge(clip, Color3.fromRGB(170, 172, 168), 2, 0.05)
 local clipIn = box(clip, Color3.fromRGB(150, 150, 146), 3, 8, 8, 30, 1)
 corner(clipIn, 4)
 edge(clipIn, Color3.fromRGB(150, 152, 148), 2, 0.1)
+
+-- D-240: a carta sai da frente da cena (a imagem do jogo é o destaque agora)
+map.Visible = false
+mapShadow.Visible = false
 
 -- ----- pontilha de filme (círculo com ponteiro girando) -----
 local leader = box(stage, Color3.fromRGB(56, 58, 46), 92, 520, 92, 92)
