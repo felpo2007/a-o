@@ -10,7 +10,8 @@ O estado atual fica em `knowledge/01-CURRENT-STATE.md`. Este arquivo continua co
 - **Parte 2 (lote 116, D-247): feita.** Carreira: nível 1 a 55, árvore de 12 vantagens, medalhas e prestígio.
 - **Parte 3 (lote 117, D-248): feita.** Luz de fim de tarde como padrão, com relógio parado.
 - **Parte 4 (lote 118, D-249): feita.** Uniformes sujos, armas e veículos gastos, janelas sem grade.
-- **Falta:** telas no estilo das imagens, Comboio e áudios.
+- **Parte 5 (lote 119, D-250): feita.** Paleta preto e latão, logo e fundo do key art, menu em ladrilhos.
+- **Falta:** Comboio e áudios.
 
 ## Fase atual (2026-11-11, sessão 7: teste fase a fase no Studio, D-75)
 | Fase | Estado |

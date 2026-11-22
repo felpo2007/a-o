@@ -10235,3 +10235,17 @@ janelas e a capa. Progressão, direção de arte, telas, Comboio e áudios segue
 - **Pele:** tons refeitos, porque os do D-246 saíam laranja na luz de fim de tarde.
 - **Studio:** com `VT65DevSemControle`, o analógico do controle fantasma não anda mais (ele derrubava o autoteste).
 - **Medido:** autoteste 18 de 18. Numa rodada anterior a pá falhou uma vez, sem relação com este lote.
+
+### D-250 — Lote 119: direção de arte, parte 3: telas em preto quente e latão (2026-11-22)
+
+**Pedido do dono:** loja, armário, lobby e demais telas no estilo dourado das imagens.
+- **Paleta (`Estilo.V`):** fundos e painéis saem do verde-acinzentado para o preto quente, filetes em latão e âmbar
+  mais forte. As chaves são as mesmas, então todas as telas mudam juntas.
+- **Marca (`tools/marca_lobby.py`):** o título STARLITE VIETNÃ 1965 recortado do key art vira o logo do menu. O texto
+  antigo fica de reserva se a imagem não tiver ID.
+- **Fundo do lobby:** a cena do key art, sem o título, em 16:9 e quatro blocos (`AssetIds.Marca.fundo_*`). Continua
+  imagem parada na frente do palco 3D (D-222); sem ela, volta o arrozal.
+- **Menu principal:** coluna de 430 com o JOGAR e nove ladrilhos escuros, filete de latão e ícone dourado
+  (`tools/marca_icones.py`). LOJA e PASSE seguem chamativos (D-217). A descrição foi para baixo da lista.
+- **Moeda:** a hexagonal no rodapé do menu e no saldo da loja.
+- **Studio:** `VT65DevMenuPC = true` no workspace mostra o arranjo de PC na janela baixa.

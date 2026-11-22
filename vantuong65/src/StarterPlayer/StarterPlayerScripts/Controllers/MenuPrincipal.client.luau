@@ -97,10 +97,10 @@ end
 local sombraEsq = sombra(
 	"Esquerda",
 	0,
-	UDim2.fromScale(0.62, 1),
+	UDim2.fromScale(0.36, 1),
 	UDim2.fromScale(0, 0),
 	Vector2.zero,
-	{ { 0, 0.02 }, { 0.45, 0.2 }, { 0.78, 0.72 }, { 1, 1 } }
+	{ { 0, 0.3 }, { 0.6, 0.55 }, { 1, 1 } }
 )
 local sombraBaixo =
 	sombra("Baixo", -90, UDim2.fromScale(1, 0.32), UDim2.fromScale(0, 1), Vector2.new(0, 1), { { 0, 0.25 }, { 1, 1 } })
@@ -133,6 +133,10 @@ local escalas: { UIScale } = {}
 local COMPACTO_ALTURA, COMPACTO_H, COMPACTO_W = 620, 600, 1180
 local aplicarCompacto: (boolean) -> () = function() end
 local function ehCompacto(): boolean
+	-- D-250: no Studio, a janela é baixa; este gancho mostra o arranjo de PC
+	if game:GetService("RunService"):IsStudio() and workspace:GetAttribute("VT65DevMenuPC") == true then
+		return false
+	end
 	local cam = workspace.CurrentCamera
 	return cam ~= nil and cam.ViewportSize.Y < COMPACTO_ALTURA
 end
@@ -144,7 +148,9 @@ local function escalaAgora(): number
 	end
 	return math.clamp(math.min(v.Y / 1080, v.X / 1640), 0.42, 1.3)
 end
--- o soldado fica no meio do espaço livre entre o que está escrito à esquerda (72 + 600 do projeto)
+-- D-250 (imagens do dono): a coluna de ladrilhos, mais estreita, deixa o soldado do fundo à vista
+local COL_X, COL_W = 56, 430
+-- o soldado fica no meio do espaço livre entre o que está escrito à esquerda (COL_X + COL_W)
 -- e os quadros da direita (que começam 34 depois da borda do bloco de 560)
 local function ajustarAlvo()
 	local w = gui.AbsoluteSize.X
@@ -153,7 +159,7 @@ local function ajustarAlvo()
 		w = if cam then cam.ViewportSize.X else 1920
 	end
 	local k = escalaAgora()
-	local l = (if ehCompacto() then 16 + 440 else 72 + 600) * k
+	local l = (if ehCompacto() then 16 + 440 else COL_X + COL_W) * k
 	local r = w - (560 - 34) * k
 	LobbyPalco.telaX = math.clamp((l + r) / 2 / math.max(w, 1), 0.4, 0.8)
 end
@@ -237,13 +243,13 @@ local function barra(parent: Instance, x: number, y: number, w: number, h: numbe
 end
 
 -- ===== esquerda =====
-local X0 = 72
+local X0 = COL_X
 -- ----- marca -----
 local marca = Instance.new("Frame")
 marca.Name = "Marca"
 marca.BackgroundTransparency = 1
-marca.Position = UDim2.fromOffset(X0, 50)
-marca.Size = UDim2.fromOffset(620, 170)
+marca.Position = UDim2.fromOffset(X0, 26)
+marca.Size = UDim2.fromOffset(COL_W, 140)
 marca.Parent = esq
 local m1 = rotulo(marca, "STARLITE", F.TITLE, 74, V.TEXT)
 m1.Size = UDim2.fromOffset(620, 80)
@@ -259,19 +265,33 @@ m3.Parent = marca
 local m4 = rotulo(marca, "OPERAÇÃO STARLITE · AGOSTO DE 1965", F.BODY, 16, V.DIM)
 m4.Position = UDim2.fromOffset(4, 134)
 m4.Size = UDim2.fromOffset(620, 24)
+-- D-250: o título do key art; o texto acima fica de reserva se a imagem não tiver ID
+local MARCA = AssetIds.Marca or {}
+if img(MARCA.logo) ~= "" then
+	m1.Visible, m2.Visible, m3.Visible, m4.Visible = false, false, false, false
+	local logo = Instance.new("ImageLabel")
+	logo.Name = "Logo"
+	logo.BackgroundTransparency = 1
+	logo.Image = img(MARCA.logo)
+	logo.ScaleType = Enum.ScaleType.Fit
+	logo.Size = UDim2.fromOffset(400, 134)
+	logo.Parent = marca
+end
 
 -- ----- cartão grande: JOGAR -----
 local k1 = rotulo(esq, "PARTIDA", F.TITLE_REG, 16, V.DIM)
 k1.Position = UDim2.fromOffset(X0, 236)
 k1.Size = UDim2.fromOffset(300, 22)
-local reguaPartida = regua(esq, X0, 262, 600)
+local reguaPartida = regua(esq, X0, 262, COL_W)
+k1.Visible = false
+reguaPartida.Visible = false
 
-local CARD_W, CARD_H = 600, 214
+local CARD_W, CARD_H = COL_W, 132
 local card = Instance.new("TextButton")
 card.Name = "JOGAR"
 card.AutoButtonColor = false
 card.Text = ""
-card.Position = UDim2.fromOffset(X0, 276)
+card.Position = UDim2.fromOffset(X0, 176)
 card.Size = UDim2.fromOffset(CARD_W, CARD_H)
 card.BackgroundColor3 = V.BG
 card.BorderSizePixel = 0
@@ -313,31 +333,31 @@ local jogarBox = Instance.new("Frame")
 jogarBox.Name = "Botao"
 jogarBox.BackgroundColor3 = V.AMBAR
 jogarBox.BorderSizePixel = 0
-jogarBox.Position = UDim2.fromOffset(28, 30)
-jogarBox.Size = UDim2.fromOffset(250, 78)
+jogarBox.Position = UDim2.fromOffset(12, 10)
+jogarBox.Size = UDim2.fromOffset(CARD_W - 24, 66)
 jogarBox.Parent = card
 UiKit.corner(jogarBox, 3)
 UiKit.edge(jogarBox, V.AMBAR_TEXTO, 2, 0.55)
-local jogarTxt = rotulo(jogarBox, "JOGAR", F.TITLE, 54, V.AMBAR_TEXTO)
+local jogarTxt = rotulo(jogarBox, "JOGAR", F.TITLE, 46, V.AMBAR_TEXTO)
 jogarTxt.Name = "Texto"
 jogarTxt.Position = UDim2.fromOffset(22, 0)
 jogarTxt.Size = UDim2.new(1, -60, 1, 0)
 local jogarSeta = rotulo(jogarBox, "›", F.TITLE, 50, V.AMBAR_TEXTO)
 jogarSeta.AnchorPoint = Vector2.new(1, 0)
 jogarSeta.Position = UDim2.new(1, -18, 0, -2)
-jogarSeta.Size = UDim2.fromOffset(26, 78)
-local jogarSub = rotulo(card, "Escolha o lado, o squad, o papel e onde nascer.", F.BODY, 17, V.TEXT)
-jogarSub.Position = UDim2.fromOffset(30, 124)
-jogarSub.Size = UDim2.fromOffset(CARD_W - 60, 24)
-local jogarModo = rotulo(card, "", F.TITLE_MED, 16, V.KHAKI)
+jogarSeta.Size = UDim2.fromOffset(26, 66)
+local jogarSub = rotulo(card, "Escolha o lado, o squad, o papel e onde nascer.", F.BODY, 15, V.TEXT)
+jogarSub.Position = UDim2.fromOffset(16, 82)
+jogarSub.Size = UDim2.fromOffset(CARD_W - 32, 20)
+local jogarModo = rotulo(card, "", F.TITLE_MED, 15, V.KHAKI)
 jogarModo.Name = "Modo"
-jogarModo.Position = UDim2.fromOffset(30, 156)
-jogarModo.Size = UDim2.fromOffset(CARD_W - 60, 22)
+jogarModo.Position = UDim2.fromOffset(16, 104)
+jogarModo.Size = UDim2.fromOffset(CARD_W - 32, 20)
 local jogarTecla = Instance.new("ImageLabel")
 jogarTecla.Name = "Tecla"
 jogarTecla.BackgroundTransparency = 1
 jogarTecla.AnchorPoint = Vector2.new(0, 0.5)
-jogarTecla.Position = UDim2.new(1, 12, 0.5, 0)
+jogarTecla.Position = UDim2.new(1, -60, 0.5, 0)
 jogarTecla.Size = UDim2.fromOffset(34, 34)
 jogarTecla.Visible = false
 jogarTecla.Parent = jogarBox
@@ -349,6 +369,7 @@ type Item = {
 	label: TextLabel,
 	linha: Frame, -- o texto e a etiqueta, lado a lado (desliza no foco)
 	bar: Frame,
+	borda: UIStroke, -- D-250: o filete de latão do ladrilho
 	tag: TextLabel?,
 	desc: string,
 	capa: string,
@@ -357,6 +378,7 @@ type Item = {
 	big: boolean,
 }
 local itens: { Item } = {}
+local ICONE_X = 60 -- onde o texto começa, depois do ícone dourado
 local focoAtual: Item? = nil
 
 local function item(
@@ -371,14 +393,16 @@ local function item(
 	quadro: string,
 	acao: () -> ()
 ): Item
+	local alto = h - 5 -- D-250: o vão entre os ladrilhos
 	local b = Instance.new("TextButton")
 	b.Name = id
 	b.AutoButtonColor = false
 	b.Text = ""
-	b.BackgroundTransparency = 1
+	b.BackgroundColor3 = V.PANEL
+	b.BackgroundTransparency = Estilo.fundo(0.14)
 	b.BorderSizePixel = 0
 	b.Position = UDim2.fromOffset(X0, y)
-	b.Size = UDim2.fromOffset(600, h)
+	b.Size = UDim2.fromOffset(COL_W, alto)
 	b.Selectable = true
 	b.SelectionImageObject = UiKit.FOCUS
 	b.Parent = parent
@@ -390,18 +414,31 @@ local function item(
 	bar.Position = UDim2.new(0, 0, 0.5, 0)
 	bar.Size = UDim2.new(0, 0, 0.72, 0)
 	bar.Parent = b
+	local borda = UiKit.edge(b, V.LINE, 1, 0.2)
+	local icone = Instance.new("ImageLabel")
+	icone.Name = "Icone"
+	icone.BackgroundTransparency = 1
+	icone.AnchorPoint = Vector2.new(0, 0.5)
+	icone.Position = UDim2.new(0, 14, 0.5, 0)
+	icone.Size = UDim2.fromScale(0.66, 0.66)
+	icone.SizeConstraint = Enum.SizeConstraint.RelativeYY
+	icone.ScaleType = Enum.ScaleType.Fit
+	icone.Image = img(MARCA["menu_" .. string.lower(id)])
+	icone.ZIndex = 2
+	icone.Parent = b
 	local linha = Instance.new("Frame")
 	linha.Name = "Linha"
 	linha.BackgroundTransparency = 1
+	linha.Position = UDim2.fromOffset(ICONE_X, 0)
 	linha.AutomaticSize = Enum.AutomaticSize.X
-	linha.Size = UDim2.fromOffset(0, h)
+	linha.Size = UDim2.fromOffset(0, alto)
 	linha.Parent = b
 	local lay = Estilo.list(linha, true, 14)
 	lay.VerticalAlignment = Enum.VerticalAlignment.Center
 	local l = rotulo(linha, text, F.TITLE, size, V.TEXT)
 	l.Name = "Texto"
 	l.AutomaticSize = Enum.AutomaticSize.X
-	l.Size = UDim2.fromOffset(0, h)
+	l.Size = UDim2.fromOffset(0, alto)
 	l.LayoutOrder = 1
 	local it: Item = {
 		id = id,
@@ -409,6 +446,7 @@ local function item(
 		label = l,
 		linha = linha,
 		bar = bar,
+		borda = borda,
 		tag = nil,
 		desc = desc,
 		capa = capa,
@@ -442,14 +480,18 @@ local function livre(): boolean
 	return open and not busy
 end
 
-local NAV_Y, NAV_H = 512, 43 -- D-247: cinco linhas no espaço das quatro
+-- D-250: nove ladrilhos iguais, como na imagem do dono; a descrição vai embaixo da lista
+local NAV_Y, NAV_H = 322, 58
+local SEP_Y = NAV_Y + 5 * NAV_H + 2
+local SEC_Y, SEC_H = SEP_Y + 6, 58
+local DESC_Y = SEC_Y + 4 * SEC_H + 4
 item(
 	esq,
 	"ARSENAL",
 	"ARSENAL",
 	NAV_Y,
 	NAV_H,
-	36,
+	30,
 	"Equipamento por posto e créditos: o que vai no peso do seu kit.",
 	"trincheira",
 	"arsenal",
@@ -463,7 +505,7 @@ local itMissoes = item(
 	"MISSÕES",
 	NAV_Y + NAV_H,
 	NAV_H,
-	36,
+	30,
 	"Ordens do dia e da semana: XP, créditos e estrelas do passe.",
 	"riacho",
 	"missoes",
@@ -478,7 +520,7 @@ item(
 	"CARREIRA",
 	NAV_Y + 2 * NAV_H,
 	NAV_H,
-	36,
+	30,
 	"Nível do soldado, árvore de vantagens, medalhas e prestígio.",
 	"posto",
 	"perfil",
@@ -492,7 +534,7 @@ item(
 	"PERFIL",
 	NAV_Y + 3 * NAV_H,
 	NAV_H,
-	36,
+	30,
 	"Seu cartão: posto, medalhas, emblema e o placar da semana.",
 	"chuva",
 	"perfil",
@@ -506,7 +548,7 @@ item(
 	"COMO JOGAR",
 	NAV_Y + 4 * NAV_H,
 	NAV_H,
-	36,
+	30,
 	"Os comandos e o básico da partida, sem entrar em campo.",
 	"posto",
 	"tutorial",
@@ -514,24 +556,24 @@ item(
 		ComoJogar.open()
 	end
 )
-local descr = rotulo(esq, "", F.BODY, 17, V.DIM)
+local descr = rotulo(esq, "", F.BODY, 16, V.TEXT)
 descr.Name = "Descricao"
-descr.Position = UDim2.fromOffset(X0 + 22, NAV_Y + 5 * NAV_H + 3)
-descr.Size = UDim2.fromOffset(580, 26)
+descr.Position = UDim2.fromOffset(X0 + 20, DESC_Y)
+descr.Size = UDim2.fromOffset(COL_W - 20, 44)
+descr.TextWrapped = true
+descr.TextYAlignment = Enum.TextYAlignment.Top
 descr.TextTruncate = Enum.TextTruncate.AtEnd
 local descrSeta = rotulo(esq, "▸", F.BODY_B, 16, V.AMBAR)
-descrSeta.Position = UDim2.fromOffset(X0, NAV_Y + 5 * NAV_H + 3)
+descrSeta.Position = UDim2.fromOffset(X0, DESC_Y - 3)
 descrSeta.Size = UDim2.fromOffset(18, 26)
-local SEP_Y = NAV_Y + 5 * NAV_H + 36
-local reguaSecoes = regua(esq, X0, SEP_Y, 600)
-local SEC_Y, SEC_H = SEP_Y + 14, 48
+local reguaSecoes = regua(esq, X0, SEP_Y, COL_W)
 item(
 	esq,
 	"LOJA",
 	"LOJA",
 	SEC_Y,
 	SEC_H,
-	34,
+	30,
 	"Uniformes, acabamentos de arma, conjuntos e caixas.",
 	"loja",
 	"loja",
@@ -547,7 +589,7 @@ item(
 	"ARMÁRIO",
 	SEC_Y + SEC_H,
 	SEC_H,
-	34,
+	30,
 	"Sua arma principal por papel (M14, M16, espingarda...) e o que você já tem para vestir.",
 	"armario",
 	"arsenal",
@@ -561,7 +603,7 @@ local itPasse = item(
 	"PASSE DE CAMPANHA",
 	SEC_Y + 2 * SEC_H,
 	SEC_H,
-	34,
+	30,
 	"A trilha da temporada: recompensas por estrelas de partidas e ordens.",
 	"bambu",
 	"passe",
@@ -574,8 +616,8 @@ item(
 	"CONFIGURACOES",
 	"CONFIGURAÇÕES",
 	SEC_Y + 3 * SEC_H,
-	40,
-	24,
+	SEC_H,
+	30,
 	"Controles, mira, som, gráficos, idioma e acessibilidade.",
 	"vila",
 	"config",
@@ -785,18 +827,15 @@ local function sep(x: number)
 	s.Parent = perfil
 	table.insert(seps, s)
 end
-local moeda = Instance.new("TextLabel")
+-- D-250: a moeda hexagonal do jogo, no lugar do círculo com o símbolo
+local moeda = Instance.new("ImageLabel")
 moeda.Name = "Moeda"
-moeda.BackgroundColor3 = V.AMBAR
-moeda.BorderSizePixel = 0
-moeda.Position = UDim2.fromOffset(18, 21)
-moeda.Size = UDim2.fromOffset(28, 28)
-moeda.FontFace = F.TITLE
-moeda.TextSize = 18
-moeda.TextColor3 = V.AMBAR_TEXTO
-moeda.Text = Progression.CUR
+moeda.BackgroundTransparency = 1
+moeda.Position = UDim2.fromOffset(10, 13)
+moeda.Size = UDim2.fromOffset(44, 44)
+moeda.ScaleType = Enum.ScaleType.Fit
+moeda.Image = img((AssetIds.Recompensas or {}).moeda)
 moeda.Parent = perfil
-UiKit.corner(moeda, 14)
 local rCred = rotulo(perfil, "–", F.TITLE, 24, V.TEXT)
 rCred.Name = "Creditos"
 rCred.Position = UDim2.fromOffset(54, 17)
@@ -1236,7 +1275,15 @@ for _, it in itens do
 		cg.Parent = c
 		cor = c
 		it.label.TextColor3 = d.texto
-		UiKit.edge(it.b, d.cor, 2, 0)
+		if d.texto == V.AMBAR_TEXTO then -- ícone dourado não lê sobre a faixa âmbar
+			local ic = it.b:FindFirstChild("Icone") :: ImageLabel?
+			if ic then
+				ic.ImageColor3 = Color3.fromRGB(62, 42, 14)
+			end
+		end
+		it.borda.Color = d.cor
+		it.borda.Thickness = 2
+		it.borda.Transparency = 0
 		UiEfeitos.varre(it.b, 4.5, nil, 5, d.atraso)
 	end
 	fundos[it] = { imagem = im, cor = cor }
@@ -1300,10 +1347,15 @@ end
 
 local function pintarItem(it: Item, on: boolean)
 	UiKit.tween(it.bar, UiKit.QUICK, { Size = UDim2.new(0, if on then 5 else 0, 0.72, 0) })
-	UiKit.tween(it.linha, UiKit.QUICK, { Position = UDim2.fromOffset(if on then 18 else 0, 0) })
+	UiKit.tween(it.linha, UiKit.QUICK, { Position = UDim2.fromOffset(ICONE_X + (if on then 8 else 0), 0) })
 	local d = DESTAQUE[it.id]
 	if not d then
 		UiKit.tween(it.label, UiKit.QUICK, { TextColor3 = if on then V.AMBAR_HI else V.TEXT })
+		UiKit.tween(
+			it.borda,
+			UiKit.QUICK,
+			{ Color = if on then V.AMBAR_HI else V.LINE, Transparency = if on then 0 else 0.2 }
+		)
 	end
 	-- D-217: a imagem da entrada acende e cresce um pouco no foco
 	local f = fundos[it]

@@ -498,6 +498,23 @@ return {
 	},
 	-- D-246: bandeiras de pano da escolha de idioma (tools/blender/bandeiras_idioma.py). O
 	-- ReplicatedFirst/Bandeiras guarda uma cópia, porque roda antes de o ReplicatedStorage chegar.
+	-- D-250: o título e a cena do key art e os ícones do menu principal
+	Marca = {
+		logo = 101688262953204,
+		fundo_nw = 126941007097632,
+		fundo_ne = 131567193099728,
+		fundo_sw = 121093602720636,
+		fundo_se = 93711646160986,
+		menu_arsenal = 136981911386936,
+		menu_missoes = 131423601915674,
+		menu_carreira = 82502557991917,
+		menu_perfil = 95099717247715,
+		menu_tutorial = 72758522602396,
+		menu_loja = 123939649093672,
+		menu_armario = 106101996578098,
+		menu_passe = 120231909391803,
+		menu_configuracoes = 133116682354036,
+	},
 	Idiomas = {
 		pt = 82520544879822,
 		en = 117179405135022,

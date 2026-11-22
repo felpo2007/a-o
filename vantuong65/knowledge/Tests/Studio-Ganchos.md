@@ -150,3 +150,4 @@ código antes de confiar. Depois de usar e confirmar, rode `uv run python tools/
     `VT65DevTela = "arquivo"` abre a aba. No Studio o dono tem os Game Passes de uniforme.
   - Clicar na tela pelo MCP: o `user_mouse_input` com `instance_path` funciona mesmo com o Studio
     atrás. Antes, dê nome único ao botão e aos pais (há muitos `Frame` e `Botao` iguais).
+  - Lote 119: `VT65DevMenuPC = true` (workspace, no Edit antes do Play) mostra o menu no arranjo de PC. Não aperte Return no menu: ele aciona o JOGAR.

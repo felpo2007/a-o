@@ -216,9 +216,19 @@ saldo.BorderSizePixel = 0
 saldo.Parent = folder
 UiKit.corner(saldo, 4)
 UiKit.edge(saldo, V.AMBAR, 1, 0.3)
+-- D-250: a moeda hexagonal do jogo ao lado do número
+local saldoMoeda = Instance.new("ImageLabel")
+saldoMoeda.Name = "Moeda"
+saldoMoeda.BackgroundTransparency = 1
+saldoMoeda.AnchorPoint = Vector2.new(0, 0.5)
+saldoMoeda.Position = UDim2.new(0, px(5, 7), 0.5, 0)
+saldoMoeda.Size = UDim2.fromOffset(px(32, 44), px(32, 44))
+saldoMoeda.ScaleType = Enum.ScaleType.Fit
+saldoMoeda.Image = string.format("rbxassetid://%d", (AssetIds.Recompensas or {}).moeda or 0)
+saldoMoeda.Parent = saldo
 local saldoTxt = UiKit.text2(saldo, "", px(20, 28), V.TEXT, F.TITLE)
-saldoTxt.Position = UDim2.fromOffset(px(12, 16), 0)
-saldoTxt.Size = UDim2.new(1, -px(56, 74), 1, 0)
+saldoTxt.Position = UDim2.fromOffset(px(42, 56), 0)
+saldoTxt.Size = UDim2.new(1, -px(86, 114), 1, 0)
 local saldoMais = Instance.new("TextButton")
 saldoMais.Name = "Mais"
 saldoMais.AnchorPoint = Vector2.new(1, 0.5)
@@ -235,7 +245,7 @@ saldoMais.Parent = saldo
 UiKit.corner(saldoMais, 3)
 local function pintarSaldo()
 	local cr = player:GetAttribute("Credits")
-	saldoTxt.Text = if type(cr) == "number" then Progression.money(cr) else "–"
+	saldoTxt.Text = if type(cr) == "number" then (string.gsub(Progression.money(cr), "^%$%s*", "")) else "–"
 end
 player:GetAttributeChangedSignal("Credits"):Connect(pintarSaldo)
 pintarSaldo()

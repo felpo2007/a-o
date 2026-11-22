@@ -19,33 +19,34 @@ local Estilo = {}
 -- ===== cores =====
 Estilo.V = {
 	-- fundos de tela cheia (cor única, escura e saturada)
-	BG = Color3.fromRGB(14, 16, 12), -- quase preto, verde
-	BG_OLIVE = Color3.fromRGB(26, 34, 20), -- lobby, vitória
+	-- D-250 (imagens do dono): preto quente com latão, no lugar do verde-acinzentado
+	BG = Color3.fromRGB(14, 12, 8), -- quase preto, quente
+	BG_OLIVE = Color3.fromRGB(28, 23, 14), -- lobby, vitória
 	BG_RED = Color3.fromRGB(54, 12, 10), -- baixa, derrota
-	BG_NIGHT = Color3.fromRGB(14, 18, 24), -- carregamento, mapa
+	BG_NIGHT = Color3.fromRGB(18, 15, 12), -- carregamento, mapa
 	-- painéis
-	PANEL = Color3.fromRGB(22, 25, 19), -- painel sólido
-	PANEL_2 = Color3.fromRGB(32, 36, 27), -- painel dentro de painel, linha de lista
-	PANEL_3 = Color3.fromRGB(46, 51, 38), -- realce (mouse, foco)
-	LINE = Color3.fromRGB(84, 90, 68), -- filete
+	PANEL = Color3.fromRGB(22, 18, 12), -- painel sólido
+	PANEL_2 = Color3.fromRGB(34, 28, 18), -- painel dentro de painel, linha de lista
+	PANEL_3 = Color3.fromRGB(54, 43, 26), -- realce (mouse, foco)
+	LINE = Color3.fromRGB(110, 86, 46), -- filete
 	-- texto
 	TEXT = Color3.fromRGB(238, 234, 220), -- principal
-	DIM = Color3.fromRGB(156, 156, 138), -- secundário, rótulos
-	MUTED = Color3.fromRGB(104, 106, 92), -- apagado, desabilitado
+	DIM = Color3.fromRGB(176, 162, 128), -- secundário, rótulos
+	MUTED = Color3.fromRGB(116, 106, 84), -- apagado, desabilitado
 	-- acentos de época
 	OLIVE = Color3.fromRGB(104, 124, 64), -- ação principal (botão cheio)
 	OLIVE_HI = Color3.fromRGB(130, 152, 82), -- ação principal com o foco
 	KHAKI = Color3.fromRGB(206, 190, 142), -- destaque, números de ganho
 	RED = Color3.fromRGB(176, 46, 34), -- perigo, baixa, inimigo
 	RED_HI = Color3.fromRGB(212, 70, 52),
-	BRASS = Color3.fromRGB(214, 172, 72), -- recompensa, foco
+	BRASS = Color3.fromRGB(224, 178, 74), -- recompensa, foco
 	-- lados
 	US = Color3.fromRGB(86, 120, 186),
 	VC = Color3.fromRGB(190, 64, 48),
 	-- D-205 (prompt de interface §3: "âmbar ou amarelo para foco, seleção e ações importantes;
 	-- verde-oliva e tons de papel, lona e metal como apoio"): as cores por função
-	AMBAR = Color3.fromRGB(226, 166, 46), -- ação principal (botão cheio), seleção
-	AMBAR_HI = Color3.fromRGB(244, 190, 72), -- ação principal com o foco
+	AMBAR = Color3.fromRGB(236, 176, 52), -- ação principal (botão cheio), seleção
+	AMBAR_HI = Color3.fromRGB(252, 204, 92), -- ação principal com o foco
 	AMBAR_TEXTO = Color3.fromRGB(24, 20, 10), -- texto sobre o âmbar (contraste 9:1)
 	FOCO = Color3.fromRGB(255, 206, 64), -- moldura do foco (mouse, controle, toque)
 	PAPEL = Color3.fromRGB(214, 203, 170), -- apoio: papel
@@ -280,10 +281,10 @@ function Estilo.panel(parent: Instance?, color: Color3?, tr: number?, edge: bool
 		local metal = Instance.new("UIGradient")
 		metal.Rotation = 32
 		metal.Color = ColorSequence.new({
-			ColorSequenceKeypoint.new(0, Color3.fromRGB(226, 186, 96)),
-			ColorSequenceKeypoint.new(0.22, Color3.fromRGB(84, 80, 62)),
-			ColorSequenceKeypoint.new(0.78, Color3.fromRGB(70, 68, 54)),
-			ColorSequenceKeypoint.new(1, Color3.fromRGB(176, 140, 70)),
+			ColorSequenceKeypoint.new(0, Color3.fromRGB(246, 206, 112)),
+			ColorSequenceKeypoint.new(0.22, Color3.fromRGB(122, 96, 52)),
+			ColorSequenceKeypoint.new(0.78, Color3.fromRGB(104, 82, 44)),
+			ColorSequenceKeypoint.new(1, Color3.fromRGB(206, 160, 78)),
 		})
 		metal.Parent = filete
 	end

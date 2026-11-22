@@ -16,8 +16,9 @@ Compacto de propósito. Detalhe lote a lote: `PROGRESS.md`.
 - O jogo publicado usa só o [[Mapa-Principal]] de 700 × 700 m.
 
 ## Em andamento: pedidos de 22/11 (D-246)
-Feito: jogo, moedas, bandeiras, janelas e capa (v147), carreira (D-247), luz (D-248) e materiais (D-249).
-Falta: telas no estilo das imagens, Comboio e áudios da Toolbox.
+Feito: jogo, moedas, bandeiras, janelas e capa (v147), carreira (D-247), luz (D-248), materiais (D-249) e
+telas em preto e latão (D-250).
+Falta: Comboio e áudios da Toolbox.
 
 ## Em andamento: D-243, dois mapas retangulares (sem publicar)
 `MapasRet.LIBERADOS = false`: só abrem no Studio, com `VT65DevMapa`.

@@ -11,10 +11,10 @@ local FundoLobby = {}
 
 FundoLobby.ASPECTO = 16 / 9
 local BLOCOS = {
-	{ "lobby_nw", 0, 0 },
-	{ "lobby_ne", 0.5, 0 },
-	{ "lobby_sw", 0, 0.5 },
-	{ "lobby_se", 0.5, 0.5 },
+	{ "lobby_nw", 0, 0, "fundo_nw" },
+	{ "lobby_ne", 0.5, 0, "fundo_ne" },
+	{ "lobby_sw", 0, 0.5, "fundo_sw" },
+	{ "lobby_se", 0.5, 0.5, "fundo_se" },
 } :: { { any } }
 
 -- O tamanho que cobre uma tela de `w` x `h` mantendo a proporção da imagem (pura, para o teste)
@@ -30,6 +30,12 @@ end
 
 local function url(id: any): string
 	return if type(id) == "number" and id ~= 0 then string.format("rbxassetid://%d", id) else ""
+end
+
+-- D-250 (imagens do dono): a cena do key art, sem o título; sem ela, o arrozal do D-222
+local function urlBloco(b: { any }): string
+	local m = url((AssetIds.Marca or {})[b[4]])
+	return if m ~= "" then m else url((AssetIds.Catalogo or {})[b[1]])
 end
 
 -- Fundo em tela cheia dentro de `pai`. `escuro` (0 a 1): véu por cima, para o que vem na frente.
@@ -49,7 +55,7 @@ function FundoLobby.novo(pai: Instance, escuro: number?, z: number?): Frame
 	miolo.Parent = holder
 	local temBlocos = true
 	for _, b in BLOCOS do
-		if url((AssetIds.Catalogo or {})[b[1]]) == "" then
+		if urlBloco(b) == "" then
 			temBlocos = false
 		end
 	end
@@ -58,7 +64,7 @@ function FundoLobby.novo(pai: Instance, escuro: number?, z: number?): Frame
 			local i = Instance.new("ImageLabel")
 			i.Name = b[1]
 			i.BackgroundTransparency = 1
-			i.Image = url(AssetIds.Catalogo[b[1]])
+			i.Image = urlBloco(b)
 			i.Position = UDim2.fromScale(b[2], b[3])
 			-- um fio a mais: a emenda dos blocos não aparece em nenhuma escala
 			i.Size = UDim2.fromScale(0.5015, 0.5015)

@@ -2190,5 +2190,19 @@
  "Models.ret_escola_ala": "76409843169397",
  "Models.ret_escola_principal": "139867401383518",
  "Models.ret_merc_fachadas": "104955190335358",
- "Models.ret_olaria_galpao": "77655517136844"
+ "Models.ret_olaria_galpao": "77655517136844",
+ "Marca.logo": "101688262953204",
+ "Marca.fundo_nw": "126941007097632",
+ "Marca.fundo_ne": "131567193099728",
+ "Marca.fundo_sw": "121093602720636",
+ "Marca.fundo_se": "93711646160986",
+ "Marca.menu_arsenal": "136981911386936",
+ "Marca.menu_missoes": "131423601915674",
+ "Marca.menu_carreira": "82502557991917",
+ "Marca.menu_perfil": "95099717247715",
+ "Marca.menu_tutorial": "72758522602396",
+ "Marca.menu_loja": "123939649093672",
+ "Marca.menu_armario": "106101996578098",
+ "Marca.menu_passe": "120231909391803",
+ "Marca.menu_configuracoes": "133116682354036"
 }

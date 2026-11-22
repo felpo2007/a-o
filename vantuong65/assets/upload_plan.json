@@ -12691,5 +12691,103 @@
   "assetType": "Image",
   "name": "VT65 carreira retrato",
   "description": "VAN TUONG 65 - tela de carreira (D-247)"
+ },
+ {
+  "key": "Marca.logo",
+  "file": "assets/ui/marca/logo.png",
+  "assetType": "Image",
+  "name": "VT65 marca logo",
+  "description": "VAN TUONG 65 - marca e menu principal (D-250)"
+ },
+ {
+  "key": "Marca.fundo_nw",
+  "file": "assets/ui/marca/fundo_nw.png",
+  "assetType": "Image",
+  "name": "VT65 marca fundo_nw",
+  "description": "VAN TUONG 65 - marca e menu principal (D-250)"
+ },
+ {
+  "key": "Marca.fundo_ne",
+  "file": "assets/ui/marca/fundo_ne.png",
+  "assetType": "Image",
+  "name": "VT65 marca fundo_ne",
+  "description": "VAN TUONG 65 - marca e menu principal (D-250)"
+ },
+ {
+  "key": "Marca.fundo_sw",
+  "file": "assets/ui/marca/fundo_sw.png",
+  "assetType": "Image",
+  "name": "VT65 marca fundo_sw",
+  "description": "VAN TUONG 65 - marca e menu principal (D-250)"
+ },
+ {
+  "key": "Marca.fundo_se",
+  "file": "assets/ui/marca/fundo_se.png",
+  "assetType": "Image",
+  "name": "VT65 marca fundo_se",
+  "description": "VAN TUONG 65 - marca e menu principal (D-250)"
+ },
+ {
+  "key": "Marca.menu_arsenal",
+  "file": "assets/ui/marca/menu_arsenal.png",
+  "assetType": "Image",
+  "name": "VT65 marca menu_arsenal",
+  "description": "VAN TUONG 65 - marca e menu principal (D-250)"
+ },
+ {
+  "key": "Marca.menu_missoes",
+  "file": "assets/ui/marca/menu_missoes.png",
+  "assetType": "Image",
+  "name": "VT65 marca menu_missoes",
+  "description": "VAN TUONG 65 - marca e menu principal (D-250)"
+ },
+ {
+  "key": "Marca.menu_carreira",
+  "file": "assets/ui/marca/menu_carreira.png",
+  "assetType": "Image",
+  "name": "VT65 marca menu_carreira",
+  "description": "VAN TUONG 65 - marca e menu principal (D-250)"
+ },
+ {
+  "key": "Marca.menu_perfil",
+  "file": "assets/ui/marca/menu_perfil.png",
+  "assetType": "Image",
+  "name": "VT65 marca menu_perfil",
+  "description": "VAN TUONG 65 - marca e menu principal (D-250)"
+ },
+ {
+  "key": "Marca.menu_tutorial",
+  "file": "assets/ui/marca/menu_tutorial.png",
+  "assetType": "Image",
+  "name": "VT65 marca menu_tutorial",
+  "description": "VAN TUONG 65 - marca e menu principal (D-250)"
+ },
+ {
+  "key": "Marca.menu_loja",
+  "file": "assets/ui/marca/menu_loja.png",
+  "assetType": "Image",
+  "name": "VT65 marca menu_loja",
+  "description": "VAN TUONG 65 - marca e menu principal (D-250)"
+ },
+ {
+  "key": "Marca.menu_armario",
+  "file": "assets/ui/marca/menu_armario.png",
+  "assetType": "Image",
+  "name": "VT65 marca menu_armario",
+  "description": "VAN TUONG 65 - marca e menu principal (D-250)"
+ },
+ {
+  "key": "Marca.menu_passe",
+  "file": "assets/ui/marca/menu_passe.png",
+  "assetType": "Image",
+  "name": "VT65 marca menu_passe",
+  "description": "VAN TUONG 65 - marca e menu principal (D-250)"
+ },
+ {
+  "key": "Marca.menu_configuracoes",
+  "file": "assets/ui/marca/menu_configuracoes.png",
+  "assetType": "Image",
+  "name": "VT65 marca menu_configuracoes",
+  "description": "VAN TUONG 65 - marca e menu principal (D-250)"
  }
 ]
