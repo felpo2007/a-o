@@ -51,7 +51,7 @@
      "Name": "Trim_M",
      "ClassName": "MeshPart",
      "Properties": {
-      "MeshId": "rbxassetid://127383309970348",
+      "MeshId": "rbxassetid://101220875457189",
       "InitialSize": [
        27.5,
        23.86,
@@ -120,7 +120,7 @@
      "Name": "Trim_O",
      "ClassName": "MeshPart",
      "Properties": {
-      "MeshId": "rbxassetid://109505938464376",
+      "MeshId": "rbxassetid://113825563259678",
       "InitialSize": [
        26.336,
        23.75,

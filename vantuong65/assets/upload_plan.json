@@ -145,15 +145,17 @@
  },
  {
   "key": "Models.m14",
-  "file": "assets/forgegui/models/m14_studs_parker.glb",
+  "file": "assets/desgaste/m14.glb",
   "assetType": "Model",
-  "name": "VT65 m14 aco"
+  "name": "VT65 m14 aco",
+  "file_limpo": "assets/forgegui/models/m14_studs_parker.glb"
  },
  {
   "key": "Models.type56",
-  "file": "assets/forgegui/models/type56_studs_parker.glb",
+  "file": "assets/desgaste/type56.glb",
   "assetType": "Model",
-  "name": "VT65 type56 aco"
+  "name": "VT65 type56 aco",
+  "file_limpo": "assets/forgegui/models/type56_studs_parker.glb"
  },
  {
   "key": "Models.hut_thatch",
@@ -239,9 +241,10 @@
  },
  {
   "key": "Models.rpd",
-  "file": "assets/forgegui/models/rpd_studs_parker.glb",
+  "file": "assets/desgaste/rpd.glb",
   "assetType": "Model",
-  "name": "VT65 rpd aco"
+  "name": "VT65 rpd aco",
+  "file_limpo": "assets/forgegui/models/rpd_studs_parker.glb"
  },
  {
   "key": "Models.sks_gerador",
@@ -312,69 +315,79 @@
  },
  {
   "key": "Models.m1911",
-  "file": "assets/forgegui/models/m1911_studs_parker.glb",
+  "file": "assets/desgaste/m1911.glb",
   "assetType": "Model",
-  "name": "VT65 m1911 aco"
+  "name": "VT65 m1911 aco",
+  "file_limpo": "assets/forgegui/models/m1911_studs_parker.glb"
  },
  {
   "key": "Models.type54",
-  "file": "assets/forgegui/models/type54_studs_parker.glb",
+  "file": "assets/desgaste/type54.glb",
   "assetType": "Model",
-  "name": "VT65 type54 aco"
+  "name": "VT65 type54 aco",
+  "file_limpo": "assets/forgegui/models/type54_studs_parker.glb"
  },
  {
   "key": "Models.m79",
-  "file": "assets/forgegui/models/m79_studs_parker.glb",
+  "file": "assets/desgaste/m79.glb",
   "assetType": "Model",
-  "name": "VT65 m79 aco"
+  "name": "VT65 m79 aco",
+  "file_limpo": "assets/forgegui/models/m79_studs_parker.glb"
  },
  {
   "key": "Models.rpg2",
-  "file": "assets/forgegui/models/rpg2_studs_parker.glb",
+  "file": "assets/desgaste/rpg2.glb",
   "assetType": "Model",
-  "name": "VT65 rpg2 aco"
+  "name": "VT65 rpg2 aco",
+  "file_limpo": "assets/forgegui/models/rpg2_studs_parker.glb"
  },
  {
   "key": "Models.m70",
-  "file": "assets/blender/arma_m70_unertl/arma_m70_unertl.glb",
+  "file": "assets/desgaste/m70.glb",
   "assetType": "Model",
   "name": "VT65 m70 Unertl",
-  "description": "VAN TUONG 65 - Winchester Model 70 com luneta Unertl 8x (USMC, 1965), modelado no Blender (tools/blender/armas.py)"
+  "description": "VAN TUONG 65 - Winchester Model 70 com luneta Unertl 8x (USMC, 1965), modelado no Blender (tools/blender/armas.py)",
+  "file_limpo": "assets/blender/arma_m70_unertl/arma_m70_unertl.glb"
  },
  {
   "key": "Models.mosin",
-  "file": "assets/blender/arma_mosin_pu/arma_mosin_pu.glb",
+  "file": "assets/desgaste/mosin.glb",
   "assetType": "Model",
   "name": "VT65 mosin PU",
-  "description": "VAN TUONG 65 - Mosin-Nagant 91/30 com luneta PU 3,5x, modelado no Blender (tools/blender/armas.py)"
+  "description": "VAN TUONG 65 - Mosin-Nagant 91/30 com luneta PU 3,5x, modelado no Blender (tools/blender/armas.py)",
+  "file_limpo": "assets/blender/arma_mosin_pu/arma_mosin_pu.glb"
  },
  {
   "key": "Models.win12",
-  "file": "assets/blender/arma_win12/arma_win12.glb",
+  "file": "assets/desgaste/win12.glb",
   "assetType": "Model",
   "name": "VT65 win12 Trench",
-  "description": "VAN TUONG 65 - Winchester Model 12 Trench Gun (calibre 12, USMC 1965), modelada no Blender (tools/blender/espingarda.py)"
+  "description": "VAN TUONG 65 - Winchester Model 12 Trench Gun (calibre 12, USMC 1965), modelada no Blender (tools/blender/espingarda.py)",
+  "file_limpo": "assets/blender/arma_win12/arma_win12.glb"
  },
  {
   "key": "Models.m16",
-  "file": "assets/blender/arma_m16/arma_m16.glb",
+  "file": "assets/desgaste/m16.glb",
   "assetType": "Model",
   "name": "VT65 m16",
-  "description": "VAN TUONG 65 - fuzil M16 de 1965 (guarda-mao triangular, alca de transporte, quebra-chamas de tres dentes), modelado no Blender (tools/blender/m16.py)"
+  "description": "VAN TUONG 65 - fuzil M16 de 1965 (guarda-mao triangular, alca de transporte, quebra-chamas de tres dentes), modelado no Blender (tools/blender/m16.py)",
+  "file_limpo": "assets/blender/arma_m16/arma_m16.glb"
  },
  {
   "key": "Models.sks",
-  "file": "assets/blender/arma_sks/arma_sks.glb",
+  "file": "assets/desgaste/sks.glb",
   "assetType": "Model",
   "name": "VT65 sks Tipo 56",
-  "description": "VAN TUONG 65 - SKS (carabina Tipo 56 chinesa, baioneta de espigao dobrada), modelada no Blender (tools/blender/sks.py)"
+  "description": "VAN TUONG 65 - SKS (carabina Tipo 56 chinesa, baioneta de espigao dobrada), modelada no Blender (tools/blender/sks.py)",
+  "file_limpo": "assets/blender/arma_sks/arma_sks.glb"
  },
  {
   "key": "Models.m60",
-  "file": "assets/blender/arma_m60/arma_m60.glb",
+  "file": "assets/desgaste/m60.glb",
   "assetType": "Model",
   "name": "VT65 m60 blender",
-  "description": "VAN TUONG 65 - metralhadora M60 de 1965 (alca de folha com furo, massa em lamina, bipe dobrado), modelada no Blender (tools/blender/m60.py)"
+  "description": "VAN TUONG 65 - metralhadora M60 de 1965 (alca de folha com furo, massa em lamina, bipe dobrado), modelada no Blender (tools/blender/m60.py)",
+  "file_limpo": "assets/blender/arma_m60/arma_m60.glb"
  },
  {
   "key": "Models.caixa_municao_us",
@@ -704,55 +717,55 @@
  },
  {
   "key": "Clothing.us_shirt_v3",
-  "file": "assets/clothing/v4/us_shirt_v3.png",
+  "file": "assets/clothing/v5/us_shirt_v3.png",
   "assetType": "Image",
   "name": "VT65 us_shirt_v3"
  },
  {
   "key": "Clothing.us_shirt_rolled_v3",
-  "file": "assets/clothing/v4/us_shirt_rolled_v3.png",
+  "file": "assets/clothing/v5/us_shirt_rolled_v3.png",
   "assetType": "Image",
   "name": "VT65 us_shirt_rolled_v3"
  },
  {
   "key": "Clothing.us_pants_v3",
-  "file": "assets/clothing/v4/us_pants_v3.png",
+  "file": "assets/clothing/v5/us_pants_v3.png",
   "assetType": "Image",
   "name": "VT65 us_pants_v3"
  },
  {
   "key": "Clothing.vc_khaki_shirt_v3",
-  "file": "assets/clothing/v4/vc_khaki_shirt_v3.png",
+  "file": "assets/clothing/v5/vc_khaki_shirt_v3.png",
   "assetType": "Image",
   "name": "VT65 vc_khaki_shirt_v3"
  },
  {
   "key": "Clothing.vc_khaki_pants_v3",
-  "file": "assets/clothing/v4/vc_khaki_pants_v3.png",
+  "file": "assets/clothing/v5/vc_khaki_pants_v3.png",
   "assetType": "Image",
   "name": "VT65 vc_khaki_pants_v3"
  },
  {
   "key": "Clothing.vc_green_shirt_v3",
-  "file": "assets/clothing/v4/vc_green_shirt_v3.png",
+  "file": "assets/clothing/v5/vc_green_shirt_v3.png",
   "assetType": "Image",
   "name": "VT65 vc_green_shirt_v3"
  },
  {
   "key": "Clothing.vc_green_pants_v3",
-  "file": "assets/clothing/v4/vc_green_pants_v3.png",
+  "file": "assets/clothing/v5/vc_green_pants_v3.png",
   "assetType": "Image",
   "name": "VT65 vc_green_pants_v3"
  },
  {
   "key": "Clothing.vc_black_shirt_v3",
-  "file": "assets/clothing/v4/vc_black_shirt_v3.png",
+  "file": "assets/clothing/v5/vc_black_shirt_v3.png",
   "assetType": "Image",
   "name": "VT65 vc_black_shirt_v3"
  },
  {
   "key": "Clothing.vc_black_pants_v3",
-  "file": "assets/clothing/v4/vc_black_pants_v3.png",
+  "file": "assets/clothing/v5/vc_black_pants_v3.png",
   "assetType": "Image",
   "name": "VT65 vc_black_pants_v3"
  },
@@ -898,42 +911,42 @@
  },
  {
   "key": "Clothing.us_faded_shirt_v3",
-  "file": "assets/clothing/v4/us_faded_shirt_v3.png",
+  "file": "assets/clothing/v5/us_faded_shirt_v3.png",
   "assetType": "Image",
   "name": "VT65 us_faded_shirt_v3",
   "description": "VAN TUONG 65 - skin OG-107 desbotado, camisa (tools/make_clothing_skins.py)"
  },
  {
   "key": "Clothing.us_faded_pants_v3",
-  "file": "assets/clothing/v4/us_faded_pants_v3.png",
+  "file": "assets/clothing/v5/us_faded_pants_v3.png",
   "assetType": "Image",
   "name": "VT65 us_faded_pants_v3",
   "description": "VAN TUONG 65 - skin OG-107 desbotado, calca (tools/make_clothing_skins.py)"
  },
  {
   "key": "Clothing.us_tiger_shirt_v3",
-  "file": "assets/clothing/v4/us_tiger_shirt_v3.png",
+  "file": "assets/clothing/v5/us_tiger_shirt_v3.png",
   "assetType": "Image",
   "name": "VT65 us_tiger_shirt_v3",
   "description": "VAN TUONG 65 - skin tiger stripe, camisa (tools/make_clothing_skins.py)"
  },
  {
   "key": "Clothing.us_tiger_pants_v3",
-  "file": "assets/clothing/v4/us_tiger_pants_v3.png",
+  "file": "assets/clothing/v5/us_tiger_pants_v3.png",
   "assetType": "Image",
   "name": "VT65 us_tiger_pants_v3",
   "description": "VAN TUONG 65 - skin tiger stripe, calca (tools/make_clothing_skins.py)"
  },
  {
   "key": "Clothing.us_duck_shirt_v3",
-  "file": "assets/clothing/v4/us_duck_shirt_v3.png",
+  "file": "assets/clothing/v5/us_duck_shirt_v3.png",
   "assetType": "Image",
   "name": "VT65 us_duck_shirt_v3",
   "description": "VAN TUONG 65 - skin duck hunter, camisa (tools/make_clothing_skins.py)"
  },
  {
   "key": "Clothing.us_duck_pants_v3",
-  "file": "assets/clothing/v4/us_duck_pants_v3.png",
+  "file": "assets/clothing/v5/us_duck_pants_v3.png",
   "assetType": "Image",
   "name": "VT65 us_duck_pants_v3",
   "description": "VAN TUONG 65 - skin duck hunter, calca (tools/make_clothing_skins.py)"
@@ -1122,24 +1135,27 @@
  },
  {
   "key": "Models.m48a3_v2",
-  "file": "assets/blender/m48a3/m48a3.glb",
+  "file": "assets/desgaste/m48a3_v2.glb",
   "assetType": "Model",
   "name": "VT65 m48a3_v2",
-  "description": "VAN TUONG 65 - veiculo na medida real, feito no Blender"
+  "description": "VAN TUONG 65 - veiculo na medida real, feito no Blender",
+  "file_limpo": "assets/blender/m48a3/m48a3.glb"
  },
  {
   "key": "Models.ontos_v2",
-  "file": "assets/blender/ontos/ontos.glb",
+  "file": "assets/desgaste/ontos_v2.glb",
   "assetType": "Model",
   "name": "VT65 ontos_v2",
-  "description": "VAN TUONG 65 - veiculo na medida real, feito no Blender"
+  "description": "VAN TUONG 65 - veiculo na medida real, feito no Blender",
+  "file_limpo": "assets/blender/ontos/ontos.glb"
  },
  {
   "key": "Models.lvtp5_v2",
-  "file": "assets/blender/lvtp5/lvtp5.glb",
+  "file": "assets/desgaste/lvtp5_v2.glb",
   "assetType": "Model",
   "name": "VT65 lvtp5_v2",
-  "description": "VAN TUONG 65 - veiculo na medida real, feito no Blender"
+  "description": "VAN TUONG 65 - veiculo na medida real, feito no Blender",
+  "file_limpo": "assets/blender/lvtp5/lvtp5.glb"
  },
  {
   "key": "Models.uh34d_v2",
@@ -1150,10 +1166,11 @@
  },
  {
   "key": "Models.uh34d_v3",
-  "file": "assets/blender/uh34d/uh34d.glb",
+  "file": "assets/desgaste/uh34d_v3.glb",
   "assetType": "Model",
   "name": "VT65 uh34d_v3",
-  "description": "VAN TUONG 65 - UH-34D refeito: silhueta medida, vidro, interior, cubo e pas com perfil"
+  "description": "VAN TUONG 65 - UH-34D refeito: silhueta medida, vidro, interior, cubo e pas com perfil",
+  "file_limpo": "assets/blender/uh34d/uh34d.glb"
  },
  {
   "key": "Images.rotor_borrao",
@@ -1163,24 +1180,27 @@
  },
  {
   "key": "Models.m151",
-  "file": "assets/blender/m151/m151.glb",
+  "file": "assets/desgaste/m151.glb",
   "assetType": "Model",
   "name": "VT65 m151",
-  "description": "VAN TUONG 65 - veiculo na medida real, feito no Blender"
+  "description": "VAN TUONG 65 - veiculo na medida real, feito no Blender",
+  "file_limpo": "assets/blender/m151/m151.glb"
  },
  {
   "key": "Models.m35",
-  "file": "assets/blender/m35/m35.glb",
+  "file": "assets/desgaste/m35.glb",
   "assetType": "Model",
   "name": "VT65 m35",
-  "description": "VAN TUONG 65 - veiculo na medida real, feito no Blender"
+  "description": "VAN TUONG 65 - veiculo na medida real, feito no Blender",
+  "file_limpo": "assets/blender/m35/m35.glb"
  },
  {
   "key": "Models.peugeot403",
-  "file": "assets/blender/peugeot403/peugeot403.glb",
+  "file": "assets/desgaste/peugeot403.glb",
   "assetType": "Model",
   "name": "VT65 peugeot403",
-  "description": "VAN TUONG 65 - veiculo na medida real, feito no Blender"
+  "description": "VAN TUONG 65 - veiculo na medida real, feito no Blender",
+  "file_limpo": "assets/blender/peugeot403/peugeot403.glb"
  },
  {
   "key": "Rostos.us_01",
@@ -1555,73 +1575,83 @@
  },
  {
   "key": "Models.vila_casa_01",
-  "file": "assets/blender/vila_casa_01/vila_casa_01_trim.glb",
+  "file": "assets/janelas/vila_casa_01.glb",
   "assetType": "Model",
   "name": "VT65 vila_casa_01",
-  "description": "VAN TUONG 65 - casa unica da vila Xom Go (Blender, trim sheet)"
+  "description": "VAN TUONG 65 - casa unica da vila Xom Go (Blender, trim sheet)",
+  "file_limpo": "assets/blender/vila_casa_01/vila_casa_01_trim.glb"
  },
  {
   "key": "Models.vila_casa_02",
-  "file": "assets/blender/vila_casa_02/vila_casa_02_trim.glb",
+  "file": "assets/janelas/vila_casa_02.glb",
   "assetType": "Model",
   "name": "VT65 vila_casa_02",
-  "description": "VAN TUONG 65 - casa unica da vila Xom Go (Blender, trim sheet)"
+  "description": "VAN TUONG 65 - casa unica da vila Xom Go (Blender, trim sheet)",
+  "file_limpo": "assets/blender/vila_casa_02/vila_casa_02_trim.glb"
  },
  {
   "key": "Models.vila_casa_03",
-  "file": "assets/blender/vila_casa_03/vila_casa_03_trim.glb",
+  "file": "assets/janelas/vila_casa_03.glb",
   "assetType": "Model",
   "name": "VT65 vila_casa_03",
-  "description": "VAN TUONG 65 - casa unica da vila Xom Go (Blender, trim sheet)"
+  "description": "VAN TUONG 65 - casa unica da vila Xom Go (Blender, trim sheet)",
+  "file_limpo": "assets/blender/vila_casa_03/vila_casa_03_trim.glb"
  },
  {
   "key": "Models.vila_casa_04",
-  "file": "assets/blender/vila_casa_04/vila_casa_04_trim.glb",
+  "file": "assets/janelas/vila_casa_04.glb",
   "assetType": "Model",
   "name": "VT65 vila_casa_04",
-  "description": "VAN TUONG 65 - casa unica da vila Xom Go (Blender, trim sheet)"
+  "description": "VAN TUONG 65 - casa unica da vila Xom Go (Blender, trim sheet)",
+  "file_limpo": "assets/blender/vila_casa_04/vila_casa_04_trim.glb"
  },
  {
   "key": "Models.vila_casa_05",
-  "file": "assets/blender/vila_casa_05/vila_casa_05_trim.glb",
+  "file": "assets/janelas/vila_casa_05.glb",
   "assetType": "Model",
   "name": "VT65 vila_casa_05",
-  "description": "VAN TUONG 65 - casa unica da vila Xom Go (Blender, trim sheet)"
+  "description": "VAN TUONG 65 - casa unica da vila Xom Go (Blender, trim sheet)",
+  "file_limpo": "assets/blender/vila_casa_05/vila_casa_05_trim.glb"
  },
  {
   "key": "Models.vila_casa_06",
-  "file": "assets/blender/vila_casa_06/vila_casa_06_trim.glb",
+  "file": "assets/janelas/vila_casa_06.glb",
   "assetType": "Model",
   "name": "VT65 vila_casa_06",
-  "description": "VAN TUONG 65 - casa unica da vila Xom Go (Blender, trim sheet)"
+  "description": "VAN TUONG 65 - casa unica da vila Xom Go (Blender, trim sheet)",
+  "file_limpo": "assets/blender/vila_casa_06/vila_casa_06_trim.glb"
  },
  {
   "key": "Models.vila_casa_07",
-  "file": "assets/blender/vila_casa_07/vila_casa_07_trim.glb",
+  "file": "assets/janelas/vila_casa_07.glb",
   "assetType": "Model",
   "name": "VT65 vila_casa_07",
-  "description": "VAN TUONG 65 - casa unica da vila Xom Go (Blender, trim sheet)"
+  "description": "VAN TUONG 65 - casa unica da vila Xom Go (Blender, trim sheet)",
+  "file_limpo": "assets/blender/vila_casa_07/vila_casa_07_trim.glb"
  },
  {
   "key": "Models.vila_casa_08",
-  "file": "assets/blender/vila_casa_08/vila_casa_08_trim.glb",
+  "file": "assets/janelas/vila_casa_08.glb",
   "assetType": "Model",
   "name": "VT65 vila_casa_08",
-  "description": "VAN TUONG 65 - casa unica da vila Xom Go (Blender, trim sheet)"
+  "description": "VAN TUONG 65 - casa unica da vila Xom Go (Blender, trim sheet)",
+  "file_limpo": "assets/blender/vila_casa_08/vila_casa_08_trim.glb"
  },
  {
   "key": "Models.vila_casa_09",
-  "file": "assets/blender/vila_casa_09/vila_casa_09_trim.glb",
+  "file": "assets/janelas/vila_casa_09.glb",
   "assetType": "Model",
   "name": "VT65 vila_casa_09",
-  "description": "VAN TUONG 65 - casa unica da vila Xom Go (Blender, trim sheet)"
+  "description": "VAN TUONG 65 - casa unica da vila Xom Go (Blender, trim sheet)",
+  "file_limpo": "assets/blender/vila_casa_09/vila_casa_09_trim.glb"
  },
  {
   "key": "Models.vila_casa_10",
-  "file": "assets/blender/vila_casa_10/vila_casa_10_trim.glb",
+  "file": "assets/janelas/vila_casa_10.glb",
   "assetType": "Model",
   "name": "VT65 vila_casa_10",
-  "description": "VAN TUONG 65 - casa unica da vila Xom Go (Blender, trim sheet)"
+  "description": "VAN TUONG 65 - casa unica da vila Xom Go (Blender, trim sheet)",
+  "file_limpo": "assets/blender/vila_casa_10/vila_casa_10_trim.glb"
  },
  {
   "key": "Models.vila_trim",
@@ -1723,56 +1753,56 @@
  },
  {
   "key": "Clothing.us_tadpole_shirt_v3",
-  "file": "assets/clothing/v4/us_tadpole_shirt_v3.png",
+  "file": "assets/clothing/v5/us_tadpole_shirt_v3.png",
   "assetType": "Image",
   "name": "VT65 us_tadpole_shirt_v3",
   "description": "VAN TUONG 65 - skin tiger stripe tadpole, camisa (tools/make_clothing_skins.py)"
  },
  {
   "key": "Clothing.us_tadpole_pants_v3",
-  "file": "assets/clothing/v4/us_tadpole_pants_v3.png",
+  "file": "assets/clothing/v5/us_tadpole_pants_v3.png",
   "assetType": "Image",
   "name": "VT65 us_tadpole_pants_v3",
   "description": "VAN TUONG 65 - skin tiger stripe tadpole, calça (tools/make_clothing_skins.py)"
  },
  {
   "key": "Clothing.us_lizard_shirt_v3",
-  "file": "assets/clothing/v4/us_lizard_shirt_v3.png",
+  "file": "assets/clothing/v5/us_lizard_shirt_v3.png",
   "assetType": "Image",
   "name": "VT65 us_lizard_shirt_v3",
   "description": "VAN TUONG 65 - skin lagarto (paraquedistas), camisa (tools/make_clothing_skins.py)"
  },
  {
   "key": "Clothing.us_lizard_pants_v3",
-  "file": "assets/clothing/v4/us_lizard_pants_v3.png",
+  "file": "assets/clothing/v5/us_lizard_pants_v3.png",
   "assetType": "Image",
   "name": "VT65 us_lizard_pants_v3",
   "description": "VAN TUONG 65 - skin lagarto (paraquedistas), calça (tools/make_clothing_skins.py)"
  },
  {
   "key": "Clothing.vc_brown_shirt_v3",
-  "file": "assets/clothing/v4/vc_brown_shirt_v3.png",
+  "file": "assets/clothing/v5/vc_brown_shirt_v3.png",
   "assetType": "Image",
   "name": "VT65 vc_brown_shirt_v3",
   "description": "VAN TUONG 65 - skin áo bà ba marrom, camisa (tools/make_clothing_skins.py)"
  },
  {
   "key": "Clothing.vc_brown_pants_v3",
-  "file": "assets/clothing/v4/vc_brown_pants_v3.png",
+  "file": "assets/clothing/v5/vc_brown_pants_v3.png",
   "assetType": "Image",
   "name": "VT65 vc_brown_pants_v3",
   "description": "VAN TUONG 65 - skin áo bà ba marrom, calça (tools/make_clothing_skins.py)"
  },
  {
   "key": "Clothing.vc_tiger_shirt_v3",
-  "file": "assets/clothing/v4/vc_tiger_shirt_v3.png",
+  "file": "assets/clothing/v5/vc_tiger_shirt_v3.png",
   "assetType": "Image",
   "name": "VT65 vc_tiger_shirt_v3",
   "description": "VAN TUONG 65 - skin tiger stripe capturado, camisa (tools/make_clothing_skins.py)"
  },
  {
   "key": "Clothing.vc_tiger_pants_v3",
-  "file": "assets/clothing/v4/vc_tiger_pants_v3.png",
+  "file": "assets/clothing/v5/vc_tiger_pants_v3.png",
   "assetType": "Image",
   "name": "VT65 vc_tiger_pants_v3",
   "description": "VAN TUONG 65 - skin tiger stripe capturado, calça (tools/make_clothing_skins.py)"
@@ -1800,84 +1830,84 @@
  },
  {
   "key": "Clothing.us_hbt_shirt_v3",
-  "file": "assets/clothing/v4/us_hbt_shirt_v3.png",
+  "file": "assets/clothing/v5/us_hbt_shirt_v3.png",
   "assetType": "Image",
   "name": "VT65 us_hbt_shirt_v3",
   "description": "VAN TUONG 65 - skin HBT verde-sálvia, camisa (tools/make_clothing_skins.py, D-176)"
  },
  {
   "key": "Clothing.us_hbt_pants_v3",
-  "file": "assets/clothing/v4/us_hbt_pants_v3.png",
+  "file": "assets/clothing/v5/us_hbt_pants_v3.png",
   "assetType": "Image",
   "name": "VT65 us_hbt_pants_v3",
   "description": "VAN TUONG 65 - skin HBT verde-sálvia, calça (tools/make_clothing_skins.py, D-176)"
  },
  {
   "key": "Clothing.us_goldtiger_shirt_v3",
-  "file": "assets/clothing/v4/us_goldtiger_shirt_v3.png",
+  "file": "assets/clothing/v5/us_goldtiger_shirt_v3.png",
   "assetType": "Image",
   "name": "VT65 us_goldtiger_shirt_v3",
   "description": "VAN TUONG 65 - skin tigrado dourado, camisa (tools/make_clothing_skins.py, D-176)"
  },
  {
   "key": "Clothing.us_goldtiger_pants_v3",
-  "file": "assets/clothing/v4/us_goldtiger_pants_v3.png",
+  "file": "assets/clothing/v5/us_goldtiger_pants_v3.png",
   "assetType": "Image",
   "name": "VT65 us_goldtiger_pants_v3",
   "description": "VAN TUONG 65 - skin tigrado dourado, calça (tools/make_clothing_skins.py, D-176)"
  },
  {
   "key": "Clothing.vc_oliva_shirt_v3",
-  "file": "assets/clothing/v4/vc_oliva_shirt_v3.png",
+  "file": "assets/clothing/v5/vc_oliva_shirt_v3.png",
   "assetType": "Image",
   "name": "VT65 vc_oliva_shirt_v3",
   "description": "VAN TUONG 65 - skin áo bà ba verde-oliva, camisa (tools/make_clothing_skins.py, D-176)"
  },
  {
   "key": "Clothing.vc_oliva_pants_v3",
-  "file": "assets/clothing/v4/vc_oliva_pants_v3.png",
+  "file": "assets/clothing/v5/vc_oliva_pants_v3.png",
   "assetType": "Image",
   "name": "VT65 vc_oliva_pants_v3",
   "description": "VAN TUONG 65 - skin áo bà ba verde-oliva, calça (tools/make_clothing_skins.py, D-176)"
  },
  {
   "key": "Clothing.vc_anil_shirt_v3",
-  "file": "assets/clothing/v4/vc_anil_shirt_v3.png",
+  "file": "assets/clothing/v5/vc_anil_shirt_v3.png",
   "assetType": "Image",
   "name": "VT65 vc_anil_shirt_v3",
   "description": "VAN TUONG 65 - skin áo bà ba anil, camisa (tools/make_clothing_skins.py, D-176)"
  },
  {
   "key": "Clothing.vc_anil_pants_v3",
-  "file": "assets/clothing/v4/vc_anil_pants_v3.png",
+  "file": "assets/clothing/v5/vc_anil_pants_v3.png",
   "assetType": "Image",
   "name": "VT65 vc_anil_pants_v3",
   "description": "VAN TUONG 65 - skin áo bà ba anil, calça (tools/make_clothing_skins.py, D-176)"
  },
  {
   "key": "Clothing.us_fundador_shirt_v3",
-  "file": "assets/clothing/v4/us_fundador_shirt_v3.png",
+  "file": "assets/clothing/v5/us_fundador_shirt_v3.png",
   "assetType": "Image",
   "name": "VT65 us_fundador_shirt_v3",
   "description": "VAN TUONG 65 - skin fundador (EUA), camisa (tools/make_clothing_skins.py, D-176)"
  },
  {
   "key": "Clothing.us_fundador_pants_v3",
-  "file": "assets/clothing/v4/us_fundador_pants_v3.png",
+  "file": "assets/clothing/v5/us_fundador_pants_v3.png",
   "assetType": "Image",
   "name": "VT65 us_fundador_pants_v3",
   "description": "VAN TUONG 65 - skin fundador (EUA), calça (tools/make_clothing_skins.py, D-176)"
  },
  {
   "key": "Clothing.vc_fundador_shirt_v3",
-  "file": "assets/clothing/v4/vc_fundador_shirt_v3.png",
+  "file": "assets/clothing/v5/vc_fundador_shirt_v3.png",
   "assetType": "Image",
   "name": "VT65 vc_fundador_shirt_v3",
   "description": "VAN TUONG 65 - skin fundador (Frente), camisa (tools/make_clothing_skins.py, D-176)"
  },
  {
   "key": "Clothing.vc_fundador_pants_v3",
-  "file": "assets/clothing/v4/vc_fundador_pants_v3.png",
+  "file": "assets/clothing/v5/vc_fundador_pants_v3.png",
   "assetType": "Image",
   "name": "VT65 vc_fundador_pants_v3",
   "description": "VAN TUONG 65 - skin fundador (Frente), calça (tools/make_clothing_skins.py, D-176)"
@@ -11600,31 +11630,35 @@
  },
  {
   "key": "Models.exp_casa_vala",
-  "file": "assets/blender/exp_casa_vala/exp_casa_vala_trim.glb",
+  "file": "assets/janelas/exp_casa_vala.glb",
   "assetType": "Model",
   "name": "VT65 exp_casa_vala",
-  "description": "VAN TUONG 65 - expansao da Vila e do Arrozal (Blender)"
+  "description": "VAN TUONG 65 - expansao da Vila e do Arrozal (Blender)",
+  "file_limpo": "assets/blender/exp_casa_vala/exp_casa_vala_trim.glb"
  },
  {
   "key": "Models.exp_casas_ligadas",
-  "file": "assets/blender/exp_casas_ligadas/exp_casas_ligadas_trim.glb",
+  "file": "assets/janelas/exp_casas_ligadas.glb",
   "assetType": "Model",
   "name": "VT65 exp_casas_ligadas",
-  "description": "VAN TUONG 65 - expansao da Vila e do Arrozal (Blender)"
+  "description": "VAN TUONG 65 - expansao da Vila e do Arrozal (Blender)",
+  "file_limpo": "assets/blender/exp_casas_ligadas/exp_casas_ligadas_trim.glb"
  },
  {
   "key": "Models.exp_palafita_a",
-  "file": "assets/blender/exp_palafita_a/exp_palafita_a_trim.glb",
+  "file": "assets/janelas/exp_palafita_a.glb",
   "assetType": "Model",
   "name": "VT65 exp_palafita_a",
-  "description": "VAN TUONG 65 - expansao da Vila e do Arrozal (Blender)"
+  "description": "VAN TUONG 65 - expansao da Vila e do Arrozal (Blender)",
+  "file_limpo": "assets/blender/exp_palafita_a/exp_palafita_a_trim.glb"
  },
  {
   "key": "Models.exp_palafita_b",
-  "file": "assets/blender/exp_palafita_b/exp_palafita_b_trim.glb",
+  "file": "assets/janelas/exp_palafita_b.glb",
   "assetType": "Model",
   "name": "VT65 exp_palafita_b",
-  "description": "VAN TUONG 65 - expansao da Vila e do Arrozal (Blender)"
+  "description": "VAN TUONG 65 - expansao da Vila e do Arrozal (Blender)",
+  "file_limpo": "assets/blender/exp_palafita_b/exp_palafita_b_trim.glb"
  },
  {
   "key": "Models.exp_prancha",
@@ -11642,31 +11676,35 @@
  },
  {
   "key": "Models.exp_casa_verde",
-  "file": "assets/blender/exp_casa_verde/exp_casa_verde_trim.glb",
+  "file": "assets/janelas/exp_casa_verde.glb",
   "assetType": "Model",
   "name": "VT65 exp_casa_verde",
-  "description": "VAN TUONG 65 - expansao da Vila e do Arrozal (Blender)"
+  "description": "VAN TUONG 65 - expansao da Vila e do Arrozal (Blender)",
+  "file_limpo": "assets/blender/exp_casa_verde/exp_casa_verde_trim.glb"
  },
  {
   "key": "Models.exp_celeiro",
-  "file": "assets/blender/exp_celeiro/exp_celeiro_trim.glb",
+  "file": "assets/janelas/exp_celeiro.glb",
   "assetType": "Model",
   "name": "VT65 exp_celeiro",
-  "description": "VAN TUONG 65 - expansao da Vila e do Arrozal (Blender)"
+  "description": "VAN TUONG 65 - expansao da Vila e do Arrozal (Blender)",
+  "file_limpo": "assets/blender/exp_celeiro/exp_celeiro_trim.glb"
  },
  {
   "key": "Models.exp_comporta",
-  "file": "assets/blender/exp_comporta/exp_comporta_trim.glb",
+  "file": "assets/janelas/exp_comporta.glb",
   "assetType": "Model",
   "name": "VT65 exp_comporta",
-  "description": "VAN TUONG 65 - expansao da Vila e do Arrozal (Blender)"
+  "description": "VAN TUONG 65 - expansao da Vila e do Arrozal (Blender)",
+  "file_limpo": "assets/blender/exp_comporta/exp_comporta_trim.glb"
  },
  {
   "key": "Models.exp_deposito",
-  "file": "assets/blender/exp_deposito/exp_deposito_trim.glb",
+  "file": "assets/janelas/exp_deposito.glb",
   "assetType": "Model",
   "name": "VT65 exp_deposito",
-  "description": "VAN TUONG 65 - expansao da Vila e do Arrozal (Blender)"
+  "description": "VAN TUONG 65 - expansao da Vila e do Arrozal (Blender)",
+  "file_limpo": "assets/blender/exp_deposito/exp_deposito_trim.glb"
  },
  {
   "key": "Models.exp_galpao",
@@ -11712,31 +11750,35 @@
  },
  {
   "key": "Models.exp_sobrado_a",
-  "file": "assets/blender/exp_sobrado_a/exp_sobrado_a_trim.glb",
+  "file": "assets/janelas/exp_sobrado_a.glb",
   "assetType": "Model",
   "name": "VT65 exp_sobrado_a",
-  "description": "VAN TUONG 65 - expansao da Vila e do Arrozal (Blender)"
+  "description": "VAN TUONG 65 - expansao da Vila e do Arrozal (Blender)",
+  "file_limpo": "assets/blender/exp_sobrado_a/exp_sobrado_a_trim.glb"
  },
  {
   "key": "Models.exp_sobrado_b",
-  "file": "assets/blender/exp_sobrado_b/exp_sobrado_b_trim.glb",
+  "file": "assets/janelas/exp_sobrado_b.glb",
   "assetType": "Model",
   "name": "VT65 exp_sobrado_b",
-  "description": "VAN TUONG 65 - expansao da Vila e do Arrozal (Blender)"
+  "description": "VAN TUONG 65 - expansao da Vila e do Arrozal (Blender)",
+  "file_limpo": "assets/blender/exp_sobrado_b/exp_sobrado_b_trim.glb"
  },
  {
   "key": "Models.exp_sobrado_c",
-  "file": "assets/blender/exp_sobrado_c/exp_sobrado_c_trim.glb",
+  "file": "assets/janelas/exp_sobrado_c.glb",
   "assetType": "Model",
   "name": "VT65 exp_sobrado_c",
-  "description": "VAN TUONG 65 - expansao da Vila e do Arrozal (Blender)"
+  "description": "VAN TUONG 65 - expansao da Vila e do Arrozal (Blender)",
+  "file_limpo": "assets/blender/exp_sobrado_c/exp_sobrado_c_trim.glb"
  },
  {
   "key": "Models.exp_sobrado_d",
-  "file": "assets/blender/exp_sobrado_d/exp_sobrado_d_trim.glb",
+  "file": "assets/janelas/exp_sobrado_d.glb",
   "assetType": "Model",
   "name": "VT65 exp_sobrado_d",
-  "description": "VAN TUONG 65 - expansao da Vila e do Arrozal (Blender)"
+  "description": "VAN TUONG 65 - expansao da Vila e do Arrozal (Blender)",
+  "file_limpo": "assets/blender/exp_sobrado_d/exp_sobrado_d_trim.glb"
  },
  {
   "key": "Rostos2.us_01",
@@ -12251,10 +12293,11 @@
  },
  {
   "key": "Models.ret_piloto_casa",
-  "file": "assets/blender/ret_piloto_casa/ret_piloto_casa.glb",
+  "file": "assets/janelas/ret_piloto_casa.glb",
   "assetType": "Model",
   "name": "VT65 ret_piloto_casa",
-  "description": "VAN TUONG 65 - mapas retangulares, cena-piloto de escala (Blender)"
+  "description": "VAN TUONG 65 - mapas retangulares, cena-piloto de escala (Blender)",
+  "file_limpo": "assets/blender/ret_piloto_casa/ret_piloto_casa.glb"
  },
  {
   "key": "Catalogo.aereo_frente_ne",
@@ -12342,45 +12385,51 @@
  },
  {
   "key": "Models.ret_merc_galeria",
-  "file": "assets/blender/ret_merc_galeria/ret_merc_galeria.glb",
+  "file": "assets/janelas/ret_merc_galeria.glb",
   "assetType": "Model",
   "name": "VT65 ret_merc_galeria",
-  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)",
+  "file_limpo": "assets/blender/ret_merc_galeria/ret_merc_galeria.glb"
  },
  {
   "key": "Models.ret_merc_oficina",
-  "file": "assets/blender/ret_merc_oficina/ret_merc_oficina.glb",
+  "file": "assets/janelas/ret_merc_oficina.glb",
   "assetType": "Model",
   "name": "VT65 ret_merc_oficina",
-  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)",
+  "file_limpo": "assets/blender/ret_merc_oficina/ret_merc_oficina.glb"
  },
  {
   "key": "Models.ret_merc_sobrado",
-  "file": "assets/blender/ret_merc_sobrado/ret_merc_sobrado.glb",
+  "file": "assets/janelas/ret_merc_sobrado.glb",
   "assetType": "Model",
   "name": "VT65 ret_merc_sobrado",
-  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)",
+  "file_limpo": "assets/blender/ret_merc_sobrado/ret_merc_sobrado.glb"
  },
  {
   "key": "Models.ret_engenho_galpao",
-  "file": "assets/blender/ret_engenho_galpao/ret_engenho_galpao.glb",
+  "file": "assets/janelas/ret_engenho_galpao.glb",
   "assetType": "Model",
   "name": "VT65 ret_engenho_galpao",
-  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)",
+  "file_limpo": "assets/blender/ret_engenho_galpao/ret_engenho_galpao.glb"
  },
  {
   "key": "Models.ret_escola_ala",
-  "file": "assets/blender/ret_escola_ala/ret_escola_ala.glb",
+  "file": "assets/janelas/ret_escola_ala.glb",
   "assetType": "Model",
   "name": "VT65 ret_escola_ala",
-  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)",
+  "file_limpo": "assets/blender/ret_escola_ala/ret_escola_ala.glb"
  },
  {
   "key": "Models.ret_escola_principal",
-  "file": "assets/blender/ret_escola_principal/ret_escola_principal.glb",
+  "file": "assets/janelas/ret_escola_principal.glb",
   "assetType": "Model",
   "name": "VT65 ret_escola_principal",
-  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)",
+  "file_limpo": "assets/blender/ret_escola_principal/ret_escola_principal.glb"
  },
  {
   "key": "Models.ret_esteio_comunal",
@@ -12398,10 +12447,11 @@
  },
  {
   "key": "Models.ret_merc_fachadas",
-  "file": "assets/blender/ret_merc_fachadas/ret_merc_fachadas.glb",
+  "file": "assets/janelas/ret_merc_fachadas.glb",
   "assetType": "Model",
   "name": "VT65 ret_merc_fachadas",
-  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)",
+  "file_limpo": "assets/blender/ret_merc_fachadas/ret_merc_fachadas.glb"
  },
  {
   "key": "Models.ret_olaria_fornos",
@@ -12412,10 +12462,11 @@
  },
  {
   "key": "Models.ret_olaria_galpao",
-  "file": "assets/blender/ret_olaria_galpao/ret_olaria_galpao.glb",
+  "file": "assets/janelas/ret_olaria_galpao.glb",
   "assetType": "Model",
   "name": "VT65 ret_olaria_galpao",
-  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)",
+  "file_limpo": "assets/blender/ret_olaria_galpao/ret_olaria_galpao.glb"
  },
  {
   "key": "Models.ret_olaria_pilhas",

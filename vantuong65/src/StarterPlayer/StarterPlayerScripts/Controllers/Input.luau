@@ -805,6 +805,19 @@ task.spawn(function()
 				local mv = Input.move()
 				vec, rel = Vector3.new(mv.X, 0, -mv.Y), true
 			end
+			-- D-249 (só no Studio): com "VT65DevSemControle", o analógico do controle fantasma não anda
+			if
+				RunService:IsStudio()
+				and workspace:GetAttribute("VT65DevSemControle") == true
+				and not (
+					UserInputService:IsKeyDown(Enum.KeyCode.W)
+					or UserInputService:IsKeyDown(Enum.KeyCode.A)
+					or UserInputService:IsKeyDown(Enum.KeyCode.S)
+					or UserInputService:IsKeyDown(Enum.KeyCode.D)
+				)
+			then
+				vec = Vector3.zero
+			end
 			if not InputMap.acceptsGame(Input.state) or Input.state.downed then
 				vec = Vector3.zero
 			end

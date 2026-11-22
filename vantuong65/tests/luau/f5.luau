@@ -630,7 +630,11 @@ test("trim sheet da vila (D-159): as 10 casas sobem com as folhas comuns e o por
 		local key = string.match(item.key, "^Models%.(vila_casa_%d+)$")
 		if key then
 			casas += 1
-			assert(string.find(item.file, key .. "_trim%.glb$"), key .. ": o plano não sobe o GLB da trim sheet")
+			-- D-249: o que sobe é a trim sem as grades (assets/janelas); a origem segue em file_limpo
+			assert(
+				string.find(item.file_limpo or item.file, key .. "_trim%.glb$"),
+				key .. ": o plano não sobe o GLB da trim sheet"
+			)
 		elseif item.key == "Models.vila_trim" then
 			portador = true
 		end

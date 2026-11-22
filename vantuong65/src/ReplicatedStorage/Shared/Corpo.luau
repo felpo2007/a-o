@@ -98,8 +98,8 @@ Corpo.ROSTOS = {
 -- de 1965 de todas as origens; os do VC no tom do Sul do Vietnã, sol de campo. Escolha pela semente.
 -- D-246 (direção de arte do dono): tons mais quentes, de pele queimada de sol, como nas imagens de referência.
 Corpo.PELE = {
-	US = { { 232, 176, 118 }, { 222, 160, 102 }, { 200, 138, 86 }, { 152, 100, 66 }, { 108, 72, 48 } },
-	VC = { { 222, 164, 108 }, { 208, 150, 96 }, { 192, 134, 84 }, { 172, 118, 74 } },
+	US = { { 222, 180, 138 }, { 210, 165, 124 }, { 190, 143, 104 }, { 146, 103, 74 }, { 104, 73, 53 } },
+	VC = { { 212, 169, 128 }, { 198, 155, 114 }, { 182, 139, 100 }, { 164, 123, 88 } },
 } :: { [string]: { { number } } }
 
 -- Tom de pele e rosto de um soldado (pela semente: UserId do jogador ou número do bot).

@@ -10222,3 +10222,16 @@ janelas e a capa. Progressão, direção de arte, telas, Comboio e áudios segue
 - **O que a direção de arte ainda pede:** materiais e texturas sujas em soldados, armas e veículos; casas e
   vegetação; telas no estilo latão; Comboio; áudios da Toolbox.
 - **Medido:** autoteste 18 de 18, sem erro de script. Detalhes em `testes/LOTE117_D248_2026-11-22.md`.
+
+### D-249 — Lote 118: direção de arte, parte 2: materiais e janelas (2026-11-22)
+
+**Pedido do dono:** soldados, armas, veículos e casas no estilo das imagens.
+- **Uniformes (`tools/make_clothing_v5.py`):** os 35 moldes ficaram mais escuros, com lama nas pernas, joelhos,
+  cotovelos e barra, poeira e pano gasto. A chave segue `Clothing.*_v3`; o ID anterior fica em `*_v3_img4`.
+- **Armas e veículos (`tools/desgaste.py`):** 13 armas e 7 veículos com quinas gastas, ferrugem, graxa e barro, na
+  cor e no ORM. Malha e UV iguais. O GLB limpo fica em `file_limpo` no plano e o ID antigo em `Models.*_limpo`.
+- **Janelas (`tools/janelas_abertas.py`):** as barras saíram de 31 modelos (19.760 triângulos a menos), sem refazer
+  as casas. A arte fixa recebeu as malhas novas em `assets/estatico`.
+- **Pele:** tons refeitos, porque os do D-246 saíam laranja na luz de fim de tarde.
+- **Studio:** com `VT65DevSemControle`, o analógico do controle fantasma não anda mais (ele derrubava o autoteste).
+- **Medido:** autoteste 18 de 18. Numa rodada anterior a pá falhou uma vez, sem relação com este lote.

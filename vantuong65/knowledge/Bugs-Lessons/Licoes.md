@@ -53,3 +53,5 @@ Formato: **sintoma** → causa → correção → como evitar.
 - **`ImageLabel.IsLoaded` não dispara sinal e imagem com transparência 1 não carrega** → usar `ContentProvider:PreloadAsync` e mostrar depois.
 - **Colisão da arte fixa não passa pelo `baseTemplate`** → marcar por varredura do mapa no boot.
 - **`moveTo` do mouse no Studio usa `AbsolutePosition`, sem o inset do topo** → não converter da captura.
+- **Modelo novo com textura fica branco por alguns minutos** ("content representation is being generated") → espere antes de julgar.
+- **Script que parte do arquivo do plano pode gastar o que já foi gasto** → guarde `file_limpo` e parta dele.
