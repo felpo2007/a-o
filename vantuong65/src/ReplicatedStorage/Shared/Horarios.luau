@@ -39,13 +39,15 @@ Horarios.LISTA = {
 		nome = "MANHÃ",
 		desc = "Sol baixo e névoa leve",
 		hora = 8.5,
+		parado = true, -- D-254: a luz da manhã fica a partida inteira
 		luz = {
 			cor = { 255, 255, 255 },
 			mistura = 0,
-			brilho = 1,
-			exposicao = 0,
-			tinta = { 255, 255, 255 },
-			saturacao = 0,
+			brilho = 1.02,
+			exposicao = 0.03,
+			tinta = { 255, 247, 234 }, -- sol tropical, sem o alaranjado do fim de tarde
+			saturacao = 0.1,
+			contraste = 0.04,
 		},
 	},
 	{
@@ -108,7 +110,7 @@ Horarios.LISTA = {
 	},
 } :: { Horario }
 
-Horarios.PADRAO = "tarde" -- D-248: a luz das imagens do dono
+Horarios.PADRAO = "manha" -- D-254 (prompt V5, §16): manhã tropical, com céu claro
 
 function Horarios.por(id: any): Horario?
 	for _, h in Horarios.LISTA do

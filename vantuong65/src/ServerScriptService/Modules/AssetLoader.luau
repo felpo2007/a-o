@@ -1254,6 +1254,13 @@ function AssetLoader.start()
 			)
 		)
 	end
+	-- D-254: a área piloto da Vila entra antes dos lampiões, que acendem nos prédios novos
+	if not MapaAtivo.retangular() then
+		local Piloto = require(script.Parent.VilaPilotoService) :: any
+		if Piloto.ativa() then
+			Piloto.montar(map, AssetLoader)
+		end
+	end
 	-- D-241: o lampião aceso dentro das casas (antes da contagem de peças da tela de entrada)
 	require(script.Parent.InteriorLuz).instalar(map)
 	-- D-117 (pedido do dono: "a tela de carregamento inicial deve ficar ali até carregar o jogo e o mapa

@@ -307,6 +307,20 @@ return {
 		ret_sino_loja_a = 140477661592012,
 		ret_sino_loja_b = 72156656730445,
 		ret_sino_salao = 85597556948322,
+		ret_vila_capim = 113378259611458,
+		ret_vila_carga = 105429882255826,
+		ret_vila_cerca = 94642387854419,
+		ret_vila_detritos = 99718967680023,
+		ret_vila_dinh = 119008876566197,
+		ret_vila_palafita_a = 128279811715114,
+		ret_vila_palafita_b = 118010616206508,
+		ret_vila_passarela = 96960290417727,
+		ret_vila_poca = 126564286703535,
+		ret_vila_posto = 132231703592408,
+		ret_vila_sacos = 81587349783261,
+		ret_vila_terra = 75564168564646,
+		ret_vila_torre = 82529998720270,
+		ret_vila_trilha = 82488753059309,
 		-- D-243 (fim)
 		vila_casa_11 = 0,
 		vila_casa_12 = 0,
@@ -508,6 +522,11 @@ return {
 		no_recarga = 128752997546926,
 		no_folego = 111694354705825,
 		no_socorro = 116008539450674,
+	},
+	-- D-254: marcas do chão da Vila com borda suave (tools/vila_decais.py)
+	ChaoVila = {
+		poca_halo = 97795256491443,
+		trilha = 125120976012967,
 	},
 	-- D-246: bandeiras de pano da escolha de idioma (tools/blender/bandeiras_idioma.py). O
 	-- ReplicatedFirst/Bandeiras guarda uma cópia, porque roda antes de o ReplicatedStorage chegar.

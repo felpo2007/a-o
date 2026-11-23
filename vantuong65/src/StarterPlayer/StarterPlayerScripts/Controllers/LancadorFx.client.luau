@@ -168,7 +168,7 @@ local function disparo(pos: Vector3, dir: Vector3)
 	nuvem.RotSpeed = NumberRange.new(-15, 15)
 	nuvem.SpreadAngle = Vector2.new(180, 180)
 	nuvem.Acceleration = Vector3.new(0, 1.2, 0)
-	nuvem.WindAffectsDrag = true
+	nuvem.WindAffectsDrag = false
 	nuvem.Parent = a
 	nuvem:Emit(10)
 	-- sopro para trás: jato de fumaça e poeira saindo da culatra (~1 m atrás da boca)

@@ -1286,18 +1286,8 @@ player:GetAttributeChangedSignal("WeaponSkins"):Connect(function()
 	end
 end)
 
--- Camuflagem de mato: as soldas "Folhas" de cada peça (Characters) balançam o C0 em poucos graus.
--- Só perto da câmera e a 30 Hz. A própria camuflagem não faz sombra (só neste cliente).
-type Leaf = { w: Weld, base: CFrame, ph: number }
-local SWAY_RANGE = 70 / 0.28 -- studs
-local ghillies: { [Instance]: { Leaf } } = {}
+-- Camuflagem de mato: parada (D-253, sem vento). A própria camuflagem não faz sombra (só neste cliente).
 local function addGhillie(folder: Instance)
-	local list: { Leaf } = {}
-	for _, d in folder:GetDescendants() do
-		if d:IsA("Weld") and d.Name == "Folhas" then
-			table.insert(list, { w = d, base = d.C0, ph = #list * 1.37 + #folder:GetFullName() * 0.11 })
-		end
-	end
 	local char = player.Character
 	if char and folder:IsDescendantOf(char) then
 		for _, d in folder:GetDescendants() do
@@ -1306,42 +1296,11 @@ local function addGhillie(folder: Instance)
 			end
 		end
 	end
-	ghillies[folder] = list
 end
 CollectionService:GetInstanceAddedSignal(Skins.GHILLIE_TAG):Connect(addGhillie)
-CollectionService:GetInstanceRemovedSignal(Skins.GHILLIE_TAG):Connect(function(f)
-	ghillies[f] = nil
-end)
 for _, f in CollectionService:GetTagged(Skins.GHILLIE_TAG) do
 	addGhillie(f)
 end
-local swayAcc = 0
-RunService.Heartbeat:Connect(function(dt: number)
-	swayAcc += dt
-	if swayAcc < 1 / 30 or next(ghillies) == nil then
-		return
-	end
-	swayAcc = 0
-	local cam = workspace.CurrentCamera
-	if not cam then
-		return
-	end
-	local camPos = cam.CFrame.Position
-	local wind = workspace.GlobalWind.Magnitude
-	local t = os.clock()
-	for folder, list in ghillies do
-		local model = folder.Parent
-		local rootPart = if model then model:FindFirstChild("HumanoidRootPart") else nil
-		if not model then
-			ghillies[folder] = nil
-		elseif rootPart and rootPart:IsA("BasePart") and (rootPart.Position - camPos).Magnitude < SWAY_RANGE then
-			for _, it in list do
-				local ax, az = Skins.swayAngles(t, it.ph, wind)
-				it.w.C0 = it.base * CFrame.Angles(ax, 0, az)
-			end
-		end
-	end
-end)
 
 -- gancho de teste (só no Studio): workspace:SetAttribute("VT65DevToast", "promocao") mostra a ficha
 -- de promoção (os outros valores ficam no Toast)

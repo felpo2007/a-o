@@ -10,17 +10,17 @@ verified_commit: 5f83094
 
 Substitua este arquivo ao fim de cada sessão. No máximo 25 linhas.
 
-- **Em que estávamos:** os 22 pedidos de 22/11 com 16 imagens (D-246).
-- **Concluído (parte 1, lote 115):** tanque, reanimação, mão solta, bots, rastejo, M16 antiga, bandeiras,
-  moedas, promoção, nascer no mapa, portão, janelas, pele e capa da página.
-- **Concluído (parte 2, lote 116, D-247):** carreira com nível, árvore, medalhas e prestígio.
-- **Concluído (parte 3, lote 117, D-248):** fim de tarde dourado como luz padrão.
-- **Concluído (parte 4, lote 118, D-249):** uniformes, armas e veículos gastos e janelas sem grade.
-- **Concluído (parte 5, lote 119, D-250):** paleta preto e latão, logo e fundo do key art, menu em ladrilhos.
-- **Concluído (parte 6, lote 120, D-251 e D-252):** cinco cenas do Comboio, sem liberar, e áudios da biblioteca.
-- **Falta:** teste com duas pessoas e teleporte, antes de `MapasRet.LIBERADOS = true`.
-- **Imagens de referência:** `~/.claude/uploads/0dab997e-4516-4fd5-85be-6ceb04c285b4/`.
+- **Foco:** prompt V5, área piloto da Vila (Objetivo C). **Não expandir sem a aprovação visual do dono.**
+- **No ar:** v152, sem nada da V5. O lote 121 (D-253 e D-254) está no Git e não foi publicado.
+- **Ver o piloto:** no Edit, `workspace:SetAttribute("VT65DevPiloto", true)` e Play. Para o capim parado valer,
+  rode `workspace.Terrain.Decoration = false` no cliente.
+- **Passou:** autoteste 18 de 18 com bots, captura pelo VC, escada e porta, vento zero, Lune 1.014, pytest 84.
+- **Não testado:** fps real, duas pessoas, celular, controle, SLIM, streaming andando, captura pelos EUA.
+- **Custo:** a Vila ficou de 25% a 38% mais cara em chamadas e de 65% a 125% em triângulos. Maior parte a mais de 130 m.
+- **Defeitos:** janela lateral escura por dentro (aba de bambu); grama nativa ainda se mexe no build normal.
+- **Decisões do dono:** visual; lados das bases; desligar a grama nativa no mapa inteiro.
+- **Antes e depois:** `testes/lote121/antes_depois.jpg`. Relatório: `testes/LOTE121_D253-254_2026-11-22.md`.
+- **Foto no Studio:** dispare o spawn logo após `TerrainReady`; com o menu aberto o sol fica preso às 17 h.
+- **Comboio:** continua fechado (`MapasRet.LIBERADOS = false`).
 - **Abra a próxima sessão na pasta `vantuong65`**: só assim as skills do projeto aparecem.
-- **Última validação:** `tools/dev/verifica.ps1` com Lune 997, pytest 84, autoteste 18 de 18.
-- **Risco aberto:** os cinco itens de código em [[01-CURRENT-STATE]].
-- **Próxima ação:** nenhuma pendente dos pedidos de 22/11; aguardar o dono.
+- **Próxima ação:** esperar a resposta do dono sobre o piloto.

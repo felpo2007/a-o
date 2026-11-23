@@ -72,13 +72,17 @@ sem perguntar a cada passo: pergunte só o que for mesmo dele. Publicar só quan
 - Antes do commit: `kb.py check` passa. Nada de código copiado, log ou segredo nas notas.
 
 ## Regras
+- **Não existe vento no jogo** (D-253): nada de `GlobalWind`, grama, pano, poeira ou som movidos por vento.
+  Só o dono pode reverter. Spec em `docs/WIND_DISABLED_SPEC.md`.
+- **Prompt V5:** mapa-alvo de 700 × 600 m e arte nova só se expandem depois da aprovação visual do piloto da
+  Vila (`docs/PILOT_ACCEPTANCE.md`). `VilaPiloto.LIGADA` fica `false` até lá.
 - Nunca invente número: todo valor medido sai de código executado ou do Studio. Diga o que não
   foi testado.
 - Não use nome, interface, sons nem layout de Hell Let Loose ou de outro jogo.
 - Segredos só no `.env` (no `.gitignore`), nunca no código nem no chat.
 - ForgeGUI: nunca regenerar um job em `outcome_unknown`. "failed" com `retryable` pode ser
   retomado com `generation_retry`.
-- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-253) e atualize `PROGRESS.md`.
+- Mudou regra ou número de design? Registre em `DESIGN.md` (próximo: D-255) e atualize `PROGRESS.md`.
 - Tetos de triângulos por modelo: vegetação ≤ 6 mil (D-135), props e herói ≤ 20 mil (`ArtBudget`,
   conferido pelo teste da F5).
 - Commits no branch acima, com mensagem em português.

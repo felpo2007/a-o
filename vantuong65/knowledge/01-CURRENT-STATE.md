@@ -15,6 +15,10 @@ Compacto de propósito. Detalhe lote a lote: `PROGRESS.md`.
 - A capa da página é o key art STARLITE: Vietnã 1965 (ícone e primeira miniatura).
 - O jogo publicado usa só o [[Mapa-Principal]] de 700 × 700 m.
 
+## Foco atual: prompt V5, piloto da Vila (D-253 e D-254)
+Lote 121 no Git, **sem publicar**. `VilaPiloto.LIGADA = false`; no Studio, `VT65DevPiloto = true`.
+Aguarda a aprovação visual do dono antes de qualquer expansão. Situação em `docs/PILOT_ACCEPTANCE.md`.
+
 ## Em andamento: pedidos de 22/11 (D-246)
 Feito: jogo, moedas, bandeiras, janelas e capa (v147), carreira (D-247), luz (D-248), materiais (D-249) e
 telas em preto e latão (D-250), cenas do Comboio (D-251) e áudios da biblioteca (D-252).

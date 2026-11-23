@@ -10274,3 +10274,25 @@ janelas e a capa. Progressão, direção de arte, telas, Comboio e áudios segue
   saindo da bainha e pano da bandagem. O ID anterior fica em `Sounds.<nome>_sintese`.
 - **Ganho:** as gravações têm outro nível; o ganho sai do `PlaybackLoudness` medido no Studio.
 - **Mantidos:** passos, motores e rotor. A busca não achou gravação limpa em laço nem passo humano por piso.
+
+### D-253 — Lote 121: o jogo não tem vento (2026-11-22)
+
+**Pedido do dono (prompt V5):** "NÃO DEVE EXISTIR VENTO NO JOGO".
+- **`Shared/SemVento`:** zera `GlobalWind` e `AirTurbulenceIntensity` no servidor e no cliente e volta a zerar se
+  alguém mudar. Ondas da água em 0.
+- **Saíram:** poeira e folhas no ar, balanço da camuflagem, som de vento na cabine, arrasto de partícula pelo vento e
+  a ondulação da bandeira da comemoração.
+- **Continuam:** poeira de veículo, impacto, fumaça de tiro e de incêndio, respingos, rotor e animais.
+- **Luz padrão:** manhã com relógio parado, como o prompt pede.
+- **Pendente:** a grama de `Terrain.Decoration` se mexe mesmo com vento zero e só o arquivo do place a desliga. Sai
+  junto com a expansão do capim parado, depois da aprovação do piloto. Ver `docs/WIND_DISABLED_SPEC.md`.
+
+### D-254 — Lote 121: área piloto da Vila, Objetivo C (2026-11-22)
+
+**Pedido do dono (prompt V5, §19):** transformar uma área e validar antes de expandir.
+- **Ligar:** `VilaPiloto.LIGADA` fica `false` até a aprovação. No Studio, `VT65DevPiloto = true`.
+- **Raio de 72 m:** 18 construções trocadas no mesmo lugar, 13 modelos novos, 720 tufos de capim parado.
+- **Chão:** terra e capim por distância da rua, sem `Mud` em voxel; sulcos e terra molhada em `Decal`, porque o alfa
+  parcial da `SurfaceAppearance` sai cortado.
+- **Custo medido:** de 25% a 38% mais chamadas e de 65% a 125% mais triângulos nas vistas da Vila.
+- **Fora do escopo até aprovar:** resto do mapa, 700 × 600 m e lados das bases.

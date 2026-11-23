@@ -1,7 +1,7 @@
 --!strict
 -- Skins (pedido do dono, 2026-11-11): acabamento de arma, uniforme e camuflagem de mato (ghillie).
 -- Catálogo e regras PUROS (testados no Lune: tests/luau/skins.luau). As funções que mexem em
--- Instance (applyWeapon) e o balanço das folhas (swayAngles, usado pelo cliente) não rodam no teste.
+-- Instance (applyWeapon) não rodam no teste.
 --
 -- Compra (decisão do dono): com o dinheiro do jogo ($, Shared/Progression) ou com Robux. Em $ é
 -- MUITO caro (dezenas de partidas por skin; a camuflagem é a mais cara); em Robux é barato e na
@@ -1999,7 +1999,7 @@ end
 -- Uma MeshPart por parte do corpo R15, com o nome "Ghillie_<parte>" no modelo publicado
 -- (AssetIds.Accessories.ghillie). A malha foi feita em volta de uma parte de referência (`ref`,
 -- studs: largura, altura, profundidade); o Characters escala cada peça pela parte real do soldado
--- (Size da parte / ref, por eixo) e solda com uma Weld (o C0 balança no cliente).
+-- (Size da parte / ref, por eixo) e solda com uma Weld (parada: não há vento no jogo).
 -- `size` e `offset` são a caixa da peça no espaço da parte (x direita, y cima, z costas).
 -- O importador do Roblox gira o GLB 180° em Y (D-58): GHILLIE_YAW desfaz. CONFERIR NO STUDIO.
 Skins.GHILLIE_YAW = math.pi
@@ -2039,15 +2039,5 @@ Skins.GHILLIE = {
 	tris = 1900,
 } :: GhillieFit
 -- END GHILLIE
-
--- ===== balanço das folhas (cliente) =====
--- Ângulos (rad) de balanço do C0 da solda de uma peça: base parada + vento (workspace.GlobalWind, em
--- studs/s). Dois senos fora de fase por peça. PLACEHOLDER de visual.
-Skins.SWAY = { baseDeg = 0.8, windDeg = 3.2, fullWind = 25, freq = 2.1 }
-function Skins.swayAngles(t: number, phase: number, wind: number): (number, number)
-	local c = Skins.SWAY
-	local amp = math.rad(c.baseDeg + c.windDeg * math.clamp(wind / c.fullWind, 0, 1))
-	return amp * math.sin(t * c.freq + phase), amp * 0.6 * math.sin(t * c.freq * 1.37 + phase * 1.7)
-end
 
 return Skins

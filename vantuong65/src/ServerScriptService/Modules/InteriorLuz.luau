@@ -120,7 +120,14 @@ local MAX_MERCADO: { [string]: number } = {
 	ret_serra_galpao = 4,
 	ret_esp_armazem = 5,
 	ret_esp_chamine = 1,
+	-- D-254: a área piloto da Vila
+	ret_vila_palafita_a = 2,
+	ret_vila_palafita_b = 2,
+	ret_vila_terra = 2,
+	ret_vila_dinh = 3,
 }
+-- casa sobre esteios: a busca do piso começa acima do assoalho, não no chão de baixo
+local ORIGEM_STUDS: { [string]: number } = { ret_vila_palafita_a = 13, ret_vila_palafita_b = 13 }
 local ENTRE_LAMPIOES = 20 -- studs
 local FORCA_MERCADO = 0.42
 -- salões de pé-direito alto, sem forro: a luz precisa de mais força para chegar ao chão
@@ -135,6 +142,11 @@ local FORCA_MODELO: { [string]: number } = {
 	ret_canal_oficina = 0.6,
 	ret_serra_galpao = 0.45,
 	ret_esp_armazem = 0.6,
+	-- D-254: casas de palha, sem janela de vidro; de dia o interior ainda precisa ser legível
+	ret_vila_palafita_a = 1.1,
+	ret_vila_palafita_b = 1.1,
+	ret_vila_terra = 1,
+	ret_vila_dinh = 0.9,
 }
 local LAMPIAO_ALTURA_MAX = 12.5 -- studs do piso: abaixo da linha das treliças
 
@@ -149,7 +161,7 @@ local function pontosMercado(m: Model, maximo: number): { { pos: Vector3, teto: 
 		for iz = -3, 3 do
 			local q = cf * CFrame.new(ix / 7 * sz.X, 0, iz / 7 * sz.Z)
 			-- 1,1 m acima da base: acha também o piso elevado da casa comunal
-			local origem = Vector3.new(q.X, base + 4, q.Z)
+			local origem = Vector3.new(q.X, base + (ORIGEM_STUDS[m.Name] or 4), q.Z)
 			local piso = workspace:Raycast(origem, Vector3.new(0, -6, 0), rp)
 			local cima = workspace:Raycast(origem, Vector3.new(0, sz.Y, 0), rp)
 			-- o térreo das lojas é mais baixo que o das casas (9,6 studs livres): o globo fica junto do teto

@@ -25,7 +25,8 @@ TerrainLook.COLORS = {
 	-- D-251 (imagens do dono): na luz de fim de tarde (D-248) a laterita saía vermelha e chapada; este
 	-- tom dá o marrom de barro das referências
 	Ground = Color3.fromRGB(134, 110, 84), -- terra batida das ruas, becos, praça e quintais
-	Mud = Color3.fromRGB(90, 80, 64), -- barranco de riacho (D-123: menos vermelho)
+	-- D-254: o barro da rua e do barranco (com 90, 80, 64 a textura saía quase preta)
+	Mud = Color3.fromRGB(132, 120, 100),
 	Sand = Color3.fromRGB(188, 168, 126),
 	Rock = Color3.fromRGB(112, 104, 92),
 }
@@ -41,6 +42,7 @@ local function set(obj: Instance, prop: string, value: any)
 end
 
 function TerrainLook.apply()
+	require(game:GetService("ReplicatedStorage").Shared.SemVento).aplicar()
 	local terrain = workspace.Terrain
 	for name, color in TerrainLook.COLORS do
 		local mat = (Enum.Material :: any)[name]
@@ -54,8 +56,9 @@ function TerrainLook.apply()
 	set(terrain, "WaterColor", Color3.fromRGB(62, 70, 46))
 	set(terrain, "WaterTransparency", 0.55)
 	set(terrain, "WaterReflectance", 0.7)
-	set(terrain, "WaterWaveSize", 0.04)
-	set(terrain, "WaterWaveSpeed", 3)
+	-- D-253 (sem vento): água parada, sem as ondinhas; o arrozal vira espelho
+	set(terrain, "WaterWaveSize", 0)
+	set(terrain, "WaterWaveSpeed", 0)
 	-- Sem nuvens dinâmicas (D-69): o usuário viu o céu "pixelando muito e trocando conforme eu
 	-- olho". As nuvens volumétricas do Roblox são desenhadas em baixa resolução, com ruído que
 	-- muda com o giro da câmera; com a névoa da Atmosphere ficava pior. As nuvens vêm do Sky.

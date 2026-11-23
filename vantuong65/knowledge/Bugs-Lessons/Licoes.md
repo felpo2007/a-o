@@ -58,3 +58,8 @@ Formato: **sintoma** → causa → correção → como evitar.
 - **Foto longe do personagem sai sem prédio** (streaming) → mova o personagem até o lugar antes.
 - **Gravação da biblioteca tem outro nível** (até 30 vezes mais baixa) → meça `PlaybackLoudness` e dê ganho.
 - **`AssetService:SearchAudio`: o `Artist` não identifica a Pro Sound Effects** → filtre pela `Description`.
+- **Alfa parcial em `SurfaceAppearance` sai cortado** → marca de borda suave vai em `Decal` sobre peça invisível.
+- **`Mud` em voxel vira mancha angulosa escura** → na Vila o terreno fica em `Ground` e a lama vai em decal.
+- **Grama de `Terrain.Decoration` se mexe com `GlobalWind` zero** → compare dois quadros parados antes de dizer "sem vento".
+- **Com o menu aberto o sol fica preso às 17 h** → na foto, peça o spawn logo depois de `TerrainReady`.
+- **Tirar um modelo pode aumentar os triângulos** → ele tampava a mata. Compare com o que está longe removido.

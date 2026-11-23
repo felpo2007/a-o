@@ -61,6 +61,9 @@ end, "./Expansao")
 local CasasEscala = mod(function()
 	return (script :: any).Parent.CasasEscala
 end, "./CasasEscala")
+local VilaPiloto = mod(function()
+	return (game :: any):GetService("ReplicatedStorage").Shared.VilaPiloto
+end, "../../ReplicatedStorage/Shared/VilaPiloto")
 
 local M = 0.28
 ArtPlan.VERSION = 3 -- o terreno gerado guarda isto (atributo SitePlan): base pelo plano só se bater
@@ -189,6 +192,18 @@ end
 
 function ArtPlan.column(ctx: Ctx, x: number, z: number): (number, number, number, string?)
 	local h, wl, c, mat = Site.column(ctx.site, x, z)
+	-- D-254: o chão da área piloto da Vila (barro nas ruas; capim, folhas e terra nos quintais)
+	local piloto = (ctx :: any).piloto
+	if piloto then
+		local d = math.sqrt((x - piloto.x) ^ 2 + (z - piloto.z) ^ 2) * M
+		if d < VilaPiloto.RAIO_M + 6 then
+			local r1 = Vegetation.noise(x, z, 7 / M, 7171)
+			local r2 = Vegetation.noise(x, z, 2.4 / M, 7272)
+			local px, pz = (x - piloto.x) * M, (z - piloto.z) * M
+			local dRua = VilaPiloto.distRua(px, pz)
+			return h, wl, c, VilaPiloto.solo(d, mat, c, r1, r2, dRua, VilaPiloto.sobConstrucao(px, pz))
+		end
+	end
 	-- D-243: a praça é de terra batida (o chão de quintal, de folhas, fica escuro em área grande)
 	if mat == nil and c ~= 5 and c ~= 2 and ArtPlan.naPraca(ctx, x, z) then
 		return h, wl, c, "Ground"
@@ -207,6 +222,23 @@ function ArtPlan.column(ctx: Ctx, x: number, z: number): (number, number, number
 		mat = "Ground"
 	end
 	return h, wl, c, mat
+end
+
+-- D-254: o centro da área piloto, quando ela está ligada (nunca nos mapas retangulares)
+local function pilotoDe(mc: any): { x: number, z: number }?
+	local ligada = VilaPiloto.LIGADA
+	if not ligada and IS_ROBLOX and (game :: any):GetService("RunService"):IsStudio() then
+		ligada = (workspace :: any):GetAttribute("VT65DevPiloto") == true
+	end
+	if not ligada then
+		return nil
+	end
+	for _, sp in mc.Strongpoints do
+		if sp.name == VilaPiloto.SETOR then
+			return { x = sp.x, z = sp.z }
+		end
+	end
+	return nil
 end
 
 -- data: { features, village?, roads?, mapConfig }. world: WorldData.
@@ -323,6 +355,7 @@ function ArtPlan.load(world: any, data: any): Ctx
 		small = {},
 		layout = data.layout,
 		pracas = if data.layout then data.layout.pracas else nil,
+		piloto = pilotoDe(data.mapConfig),
 	}
 end
 

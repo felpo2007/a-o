@@ -12880,5 +12880,117 @@
   "assetType": "Model",
   "name": "VT65 ret_sino_salao",
   "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_vila_carga",
+  "file": "assets/blender/ret_vila_carga/ret_vila_carga.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_vila_carga",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_vila_cerca",
+  "file": "assets/blender/ret_vila_cerca/ret_vila_cerca.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_vila_cerca",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_vila_dinh",
+  "file": "assets/blender/ret_vila_dinh/ret_vila_dinh_trim.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_vila_dinh",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_vila_palafita_a",
+  "file": "assets/blender/ret_vila_palafita_a/ret_vila_palafita_a_trim.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_vila_palafita_a",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_vila_palafita_b",
+  "file": "assets/blender/ret_vila_palafita_b/ret_vila_palafita_b_trim.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_vila_palafita_b",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_vila_passarela",
+  "file": "assets/blender/ret_vila_passarela/ret_vila_passarela.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_vila_passarela",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_vila_poca",
+  "file": "assets/blender/ret_vila_poca/ret_vila_poca.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_vila_poca",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_vila_posto",
+  "file": "assets/blender/ret_vila_posto/ret_vila_posto.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_vila_posto",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_vila_sacos",
+  "file": "assets/blender/ret_vila_sacos/ret_vila_sacos.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_vila_sacos",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_vila_terra",
+  "file": "assets/blender/ret_vila_terra/ret_vila_terra_trim.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_vila_terra",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_vila_torre",
+  "file": "assets/blender/ret_vila_torre/ret_vila_torre.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_vila_torre",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_vila_detritos",
+  "file": "assets/blender/ret_vila_detritos/ret_vila_detritos.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_vila_detritos",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_vila_trilha",
+  "file": "assets/blender/ret_vila_trilha/ret_vila_trilha.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_vila_trilha",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "ChaoVila.poca_halo",
+  "file": "assets/blender/vila_chao/poca_halo.png",
+  "assetType": "Image",
+  "name": "VT65 chao vila poca_halo",
+  "description": "VAN TUONG 65 - marca do chao da Vila (D-254)"
+ },
+ {
+  "key": "ChaoVila.trilha",
+  "file": "assets/blender/vila_chao/trilha.png",
+  "assetType": "Image",
+  "name": "VT65 chao vila trilha",
+  "description": "VAN TUONG 65 - marca do chao da Vila (D-254)"
+ },
+ {
+  "key": "Models.ret_vila_capim",
+  "file": "assets/blender/ret_vila_capim/ret_vila_capim.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_vila_capim",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
  }
 ]

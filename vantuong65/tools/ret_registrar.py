@@ -58,7 +58,7 @@ def plano(so: list[str]) -> None:
         lista.append(
             {
                 "key": k,
-                "file": f"assets/blender/{c}/{c}.glb",
+                "file": medida(c).get("arquivo") or f"assets/blender/{c}/{c}.glb",
                 "assetType": "Model",
                 "name": f"VT65 {c}"[:50],
                 "description": "VAN TUONG 65 - mapas retangulares (Blender)",

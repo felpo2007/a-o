@@ -498,20 +498,6 @@ test("vegetação do lugar: arrozal, bambu, mata, capim e aberto", function()
 	assert(BotBrain.plantKind("elephant_grass") == "grass" and BotBrain.plantKind("hut_thatch") == nil)
 end)
 
-test("balanço ao vento: pequeno, cresce com o vento e tem limite", function()
-	local function amp(wind: number): number
-		local m = 0
-		for i = 0, 400 do
-			local ax, az = Skins.swayAngles(i * 0.05, 0.3, wind)
-			m = math.max(m, math.abs(ax), math.abs(az))
-		end
-		return m
-	end
-	local calm, gale = amp(0), amp(1000)
-	assert(calm > 0 and calm < math.rad(1.5), "parado: quase nada")
-	assert(gale > calm and gale <= math.rad(Skins.SWAY.baseDeg + Skins.SWAY.windDeg) + 1e-9, "teto")
-end)
-
 print(string.format("%d ok, %d falhas", passed, failed))
 if failed > 0 then
 	process.exit(1)

@@ -238,7 +238,7 @@ end
 
 -- ===== D-198: a explosão grande (bomba do A-4, tiro naval) =====
 -- Clarão curto (luz e tela), bola de fogo em lóbulos que sobe e escurece, anel de poeira rasteira
--- que corre pelo chão, coluna de fumaça que pende com o vento, poucos detritos com física e o tremor
+-- que corre pelo chão, coluna de fumaça reta (sem vento, D-253), poucos detritos com física e o tremor
 -- pela distância. A superfície muda a cor e os pedaços (terra, vegetação, estrutura, água). Cada
 -- uma varia um pouco (lóbulos, giro, ritmo, tamanho, inclinação). Detalhe pela distância e pela
 -- qualidade gráfica, e um teto de explosões, luzes e pedaços ao mesmo tempo.
@@ -413,9 +413,8 @@ local function explodeGrande(id: string, pos: Vector3)
 			Rotation = NumberRange.new(0, 360),
 		}):Emit(math.floor(30 * s * det))
 	end
-	-- 4) coluna de fumaça: sai por um tempo, sobe e pende com o vento (a inclinação da variação)
+	-- 4) coluna de fumaça: sai por um tempo e sobe reta (D-253: não há vento para incliná-la)
 	local col = Instance.new("Attachment")
-	col.CFrame = CFrame.Angles(v.inclina, 0, v.inclina * 0.6)
 	col.Parent = anchor
 	local smoke = emitter(col, {
 		Texture = if agua then TEX.dust else TEX.escura,
@@ -429,7 +428,7 @@ local function explodeGrande(id: string, pos: Vector3)
 		Lifetime = NumberRange.new(10, 15),
 		Speed = NumberRange.new(5 / M, 9 / M),
 		SpreadAngle = Vector2.new(12, 12),
-		Acceleration = Vector3.new(0.5 / M, 0.6 / M, 0.25 / M),
+		Acceleration = Vector3.new(0, 0.6 / M, 0),
 		Drag = 0.6,
 		Rotation = NumberRange.new(0, 360),
 		RotSpeed = NumberRange.new(-8, 8),

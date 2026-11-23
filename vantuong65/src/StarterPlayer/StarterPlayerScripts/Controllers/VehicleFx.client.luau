@@ -11,7 +11,7 @@
 --   disco inclina com a aceleração; downwash de poeira, capim ou água debaixo dele;
 -- - poeira na terra seca e na areia, capim e folhas, barro na lama, respingo no arrozal, esteira e
 --   espuma na água, fumaça de escapamento que engrossa na aceleração e solta um bafo na partida;
---   tudo levado pelo vento (WindAffectsDrag + workspace.GlobalWind do Ambiente.client);
+--   sem vento (D-253);
 -- - som do motor com tom e volume pela rotação e pela carga (AssetIds.Sounds); o laço antigo do
 --   AudioController é calado no veículo para não tocarem dois motores.
 -- - v39 (dono: "helicóptero está sem som"): o UH-34D era mudo porque o laço dele (uh34d_loop) nunca
@@ -81,7 +81,6 @@ local CFG = {
 		motor_jipe = 0.6,
 		motor_caminhao = 0.6,
 		lagarta = 0.5,
-		vento_cabine = 0.8,
 	} :: { [string]: number },
 	-- alcance de cada camada (studs): mínimo (volume cheio) e máximo (some)
 	engineMin = 14,
@@ -177,7 +176,7 @@ local function emitter(parent: Instance, kind: string): ParticleEmitter
 	e.EmissionDirection = Enum.NormalId.Front
 	e.LightInfluence = 1
 	e.Rotation = NumberRange.new(0, 360)
-	e.WindAffectsDrag = true
+	e.WindAffectsDrag = false
 	if kind == "dust" then
 		-- poeira de lagarta: nuvem que cresce, sobe um pouco e vai com o vento
 		e.Texture = CFG.smoke
@@ -1353,58 +1352,6 @@ local function updateSound(fx: Fx, dt: number, inside: boolean)
 	end
 end
 
--- Vento da cabine para quem está sentado (2D, só deste cliente): porta aberta do UH-34D, jipe sem
--- teto e lugares abertos (caçamba, escotilha). Cresce com a velocidade; no helicóptero, o
--- downwash do rotor já sopra parado.
-local wind = { s = nil :: Sound? }
-local function updateWind(seated: Model?, dt: number)
-	local fx = seated and fxs[seated]
-	local k = 0
-	local v = 0
-	if fx then
-		local char = player.Character
-		local hum = char and char:FindFirstChildOfClass("Humanoid")
-		local seat = hum and hum.SeatPart
-		local open = seat ~= nil and seat:GetAttribute("Open") == true
-		if fx.kind == "heli" then
-			k = if seat and seat:GetAttribute("SeatId") == "driver" then 0.45 else 1
-		elseif open or fx.id == "m151" then
-			k = 0.7
-		end
-		v = fx.chassis.AssemblyLinearVelocity.Magnitude * M
-		if fx.kind == "heli" then
-			v = math.max(v, 14 * fx.rotor * fx.rotor) -- downwash entrando pela porta
-		end
-	end
-	local target = k * math.clamp((v - 3) / 40, 0, 1) ^ 1.2
-	local s = wind.s
-	if not s then
-		if target < 0.01 then
-			return
-		end
-		local id = soundId("vento_cabine")
-		if not id then
-			return
-		end
-		local snd = Instance.new("Sound")
-		snd.Name = "VT65VentoCabine"
-		snd.SoundId = id
-		snd.Looped = true
-		snd.Volume = 0
-		snd.Parent = SoundService
-		snd:Play()
-		wind.s = snd
-		s = snd
-	end
-	local w = s :: Sound
-	w.Volume += (target * CFG.soundGain.vento_cabine - w.Volume) * (1 - math.exp(-dt / 0.4))
-	w.PlaybackSpeed = 0.8 + 0.45 * math.clamp(v / 50, 0, 1)
-	if target < 0.01 and w.Volume < 0.005 then
-		w:Destroy()
-		wind.s = nil
-	end
-end
-
 -- ===== laço =====
 local scan = { t = 0 }
 
@@ -1505,7 +1452,6 @@ RunService.PreRender:Connect(function(dt: number)
 	local rainAttr = ReplicatedStorage:GetAttribute("Rain")
 	local rain = if type(rainAttr) == "number" then math.clamp(rainAttr, 0, 1) else 0
 	local seated = seatedModel()
-	updateWind(seated, dt)
 	for _, fx in fxs do
 		if not fx.chassis.Parent then
 			continue

@@ -4,6 +4,12 @@
 
 O estado atual fica em `knowledge/01-CURRENT-STATE.md`. Este arquivo continua como histórico lote a lote: abra por busca.
 
+## Prompt V5: transformação gráfica (lote 121, D-253 e D-254)
+- **Sem vento:** feito no código; falta tirar a grama nativa do terreno, que vale para o mapa inteiro.
+- **Piloto da Vila:** montado e testado no Studio, **desligado** e **sem publicar**, aguardando o dono.
+- **Medido:** autoteste 18 de 18, Lune 1.014, pytest 84; a Vila ficou de 65% a 125% mais pesada em triângulos.
+- **Não medido:** fps real, duas pessoas, celular e SLIM. Detalhe em `docs/QA_RESULTS.md`.
+
 ## Pedidos de 22/11 (D-246, em partes)
 - **Parte 1 (lote 115): feita.** Tanque, reanimação, mão solta, bots, rastejo, M16 antiga, bandeiras, moedas,
   promoção, nascer no mapa, portão, janelas, pele e capa.

@@ -633,11 +633,11 @@ function Cena.passo(self: any, dt: number)
 	local luz = if self.soloId then 1 else 0.24 + 0.76 * self.acesa
 	self.vp.Ambient = Color3.fromRGB(46, 46, 66):Lerp(Color3.fromRGB(150, 138, 128), luz)
 	self.vp.LightColor = Color3.fromRGB(150, 146, 176):Lerp(Color3.fromRGB(255, 222, 180), luz)
-	-- o pano: tiras estreitas com a onda correndo do mastro para a ponta; a dobra escurece
+	-- o pano fica parado (D-253, sem vento): tiras estreitas com dobras fixas; a dobra escurece
 	for i, segs in self.panos do
 		local cf = CFrame.new(self.topos[i])
 		for k, p in segs do
-			local onda = math.sin(2 * math.pi * 0.85 * self.t - k * 0.62)
+			local onda = math.sin(k * 0.62)
 			local a = RAD((6 + k * 1.5) * onda + 2)
 			cf = cf * CFrame.Angles(0, a, 0)
 			p.CFrame = cf * CFrame.new(Cena.LARGURA_TIRA / 2, -2.1 + 0.05 * k * onda, 0)
