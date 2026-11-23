@@ -129,16 +129,28 @@ end
 -- 10 casas usam as mesmas 3 folhas de 1024 e o piso de 512, em vez de um atlas por casa. Script do
 -- jogo não pode trocar o ColorMap, mas pode clonar a SurfaceAppearance pronta.
 AssetLoader.TRIM_KEY = "vila_trim"
+-- D-255: o setor piloto usa a mesma grade com paredes envelhecidas; o resto do mapa não muda
+AssetLoader.TRIM_POV = "ret_pov_trim"
 AssetLoader.trimParts = 0 -- peças que receberam a folha comum (no template)
 AssetLoader.trimMissing = 0 -- peças Trim_ sem folha (portador sem ID ou sem a imagem)
-local trimCache: { [string]: SurfaceAppearance }? = nil
-local function trimSheets(): { [string]: SurfaceAppearance }
-	if trimCache then
-		return trimCache
+local trimCache: { [string]: { [string]: SurfaceAppearance } } = {}
+local function portadorDe(key: string): string
+	if string.sub(key, 1, 8) == "ret_pov_" or string.sub(key, 1, 9) == "ret_vila_" then
+		local id = AssetIds.Models[AssetLoader.TRIM_POV]
+		if type(id) == "number" and id ~= 0 then
+			return AssetLoader.TRIM_POV
+		end
+	end
+	return AssetLoader.TRIM_KEY
+end
+local function trimSheets(portador: string): { [string]: SurfaceAppearance }
+	local pronto = trimCache[portador]
+	if pronto then
+		return pronto
 	end
 	local out: { [string]: SurfaceAppearance } = {}
-	trimCache = out
-	local tpl = AssetLoader.template(AssetLoader.TRIM_KEY)
+	trimCache[portador] = out
+	local tpl = AssetLoader.template(portador)
 	if tpl then
 		for _, d in tpl:GetDescendants() do
 			local sa = if d:IsA("MeshPart") then d:FindFirstChildOfClass("SurfaceAppearance") else nil
@@ -149,10 +161,11 @@ local function trimSheets(): { [string]: SurfaceAppearance }
 	end
 	return out
 end
-local function applyTrim(tpl: Model)
+local function applyTrim(tpl: Model, key: string)
+	local portador = portadorDe(key)
 	for _, d in tpl:GetDescendants() do
 		if d:IsA("MeshPart") and string.match(d.Name, "^Trim_%u$") then
-			local sa = trimSheets()[d.Name]
+			local sa = trimSheets(portador)[d.Name]
 			if sa then
 				for _, c in d:GetChildren() do
 					if c:IsA("SurfaceAppearance") then
@@ -274,8 +287,8 @@ function AssetLoader.template(key: string): Model?
 		end
 		MapLife.baseTemplate(tpl, rules, rangeM)
 	end
-	if key ~= AssetLoader.TRIM_KEY then
-		applyTrim(tpl)
+	if key ~= AssetLoader.TRIM_KEY and key ~= AssetLoader.TRIM_POV then
+		applyTrim(tpl, key)
 	end
 	cache[key] = tpl
 	return tpl
@@ -342,6 +355,10 @@ local PLATFORM: { [string]: boolean } = {
 	sandbags = true,
 }
 local SINK_LOW: { [string]: boolean } = { bamboo_fence = true }
+-- D-255: as construções do povoado da Vila assentam com patamar de terra, como as casas do plano
+function AssetLoader.comPatamar(key: string)
+	PLATFORM[key] = true
+end
 local rayParams = RaycastParams.new()
 rayParams.FilterType = Enum.RaycastFilterType.Include
 local function groundAt(x: number, z: number): number?

@@ -15,11 +15,12 @@ BLENDER = RAIZ / "assets" / "blender"
 
 
 def usos() -> dict[str, int]:
-    """Quantas cópias fixas de cada modelo a área piloto usa (o mesmo MeshId)."""
-    t = (RAIZ / "src/ReplicatedStorage/Shared/VilaPiloto.luau").read_text("utf-8")
+    """Quantas cópias fixas de cada modelo o setor piloto usa (o mesmo MeshId)."""
     n: dict[str, int] = {}
-    for k in re.findall(r'para = "(\w+)"', t):
+    planta = (RAIZ / "src/ReplicatedStorage/Shared/VilaPovoado.luau").read_text("utf-8")
+    for k in re.findall(r'key = "(\w+)"', planta):
         n[k] = n.get(k, 0) + 1
+    t = (RAIZ / "src/ReplicatedStorage/Shared/VilaPiloto.luau").read_text("utf-8")
     for k in re.findall(r'P\("(\w+)"', t):
         n[k] = n.get(k, 0) + 1
     n["ret_vila_poca"] = len(re.findall(r"\bpoca\(-?\d", t))
@@ -30,7 +31,7 @@ def principal() -> None:
     ids = json.loads((RAIZ / "assets/roblox_ids.json").read_text("utf-8"))
     n = usos()
     linhas = [
-        "# Manifesto de assets: área piloto da Vila",
+        "# Manifesto de assets: setor piloto da Vila",
         "",
         "Gerado por `tools/manifesto_assets.py`.",
         "Tamanhos, triângulos e colisões saem do `metricas.json`.",
@@ -40,7 +41,8 @@ def principal() -> None:
         "|---|---|---|---:|---:|---|---:|",
     ]
     total = 0
-    for pasta in sorted(BLENDER.glob("ret_vila_*")):
+    pastas = [BLENDER / k for k in n if (BLENDER / k).is_dir()]
+    for pasta in sorted(pastas):
         arq = pasta / "metricas.json"
         if not arq.is_file():
             continue

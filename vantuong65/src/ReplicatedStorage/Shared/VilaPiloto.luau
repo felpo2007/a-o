@@ -1,18 +1,24 @@
 --!strict
--- D-254 (prompt V5, §19): a área piloto do Objetivo C (Vila). Módulo PURO: só dados e regras.
--- A montagem fica em Modules/VilaPilotoService. Posições em metros a partir do centro do objetivo.
---   - TROCAS: a construção antiga sai e a nova entra no mesmo lugar e giro (mesmo patamar, mesma rua);
---   - PECAS: o que é novo (posto, torre, sacos, carga, poças e plantas).
+-- D-254 e D-255: o setor piloto do Objetivo C (Vila). Módulo PURO: só dados e regras.
+-- A planta é gerada por tools/vila_piloto_plano.py (Shared/VilaPovoado) e a montagem fica em
+-- Modules/VilaPilotoService. Posições em metros a partir do centro do objetivo.
 -- Só entra no jogo publicado com LIGADA = true, depois da aprovação do dono. No Studio: atributo
 -- VT65DevPiloto = true no workspace, no modo Edit, antes do Play.
+local Povoado = require(script and (script :: any).Parent.VilaPovoado or "./VilaPovoado") :: any
+
 local VilaPiloto = {}
 
 VilaPiloto.LIGADA = false
 VilaPiloto.SETOR = "Vila"
-VilaPiloto.RAIO_M = 72 -- até onde o chão é repintado
-VilaPiloto.RAIO_CERCA_M = 72 -- cercas antigas trocadas pela leve
+VilaPiloto.MEIO_M = Povoado.MEIO :: number -- metade do lado do setor
+VilaPiloto.POVOADO = Povoado.CONSTRUCOES :: { any }
+VilaPiloto.VIELAS = Povoado.VIELAS :: { { { number } } }
+VilaPiloto.LAGOA = Povoado.LAGOA :: { x: number, z: number, a: number, b: number, giro: number }
+VilaPiloto.PASSARELAS = Povoado.PASSARELAS :: { any }
+VilaPiloto.CENA = Povoado.CENA :: { any }
+VilaPiloto.PLANTAS = Povoado.PLANTAS :: { any }
+VilaPiloto.CERCAS = Povoado.CERCAS :: { any }
 
-export type Troca = { de: string, x: number, z: number, para: string }
 export type Peca = {
 	key: string,
 	x: number,
@@ -25,109 +31,19 @@ export type Peca = {
 	soDecal: boolean?, -- não põe a malha, só o decal
 }
 
-VilaPiloto.TROCAS = {
-	{ de = "Vila_dinh", x = -17.6, z = -17.6, para = "ret_vila_dinh" },
-	{ de = "Vila_chua", x = 18.5, z = 18.5, para = "ret_sino_salao" },
-	{ de = "Vila_banca", x = -15.6, z = -8.3, para = "ret_merc_banca_a" },
-	{ de = "Vila_banca", x = -6.4, z = -17.5, para = "ret_merc_banca_b" },
-	{ de = "Vila_banca", x = -24.8, z = 0.9, para = "ret_merc_banca_c" },
-	{ de = "Vila_banca", x = 2.8, z = -26.7, para = "ret_merc_banca_a" },
-	{ de = "vila_casa_03", x = 3.5, z = -38.1, para = "ret_vila_palafita_a" },
-	{ de = "vila_casa_04", x = 37.5, z = -20.5, para = "ret_vila_palafita_b" },
-	{ de = "vila_casa_02", x = -43.4, z = -13.0, para = "ret_vila_terra" },
-	{ de = "vila_casa_03", x = 44.2, z = 11.9, para = "ret_vila_palafita_a" },
-	{ de = "vila_casa_03", x = -39.7, z = 24.0, para = "ret_vila_palafita_b" },
-	{ de = "vila_casa_04", x = 35.5, z = 31.9, para = "ret_vila_terra" },
-	{ de = "vila_casa_10", x = 51.6, z = -11.0, para = "ret_vila_palafita_b" },
-	{ de = "vila_casa_06", x = 28.4, z = -46.9, para = "ret_vila_terra" },
-	{ de = "vila_casa_03", x = 19.1, z = 51.4, para = "ret_vila_palafita_a" },
-	{ de = "vila_casa_05", x = -32.7, z = 57.8, para = "ret_vila_palafita_b" },
-	{ de = "vila_casa_09", x = 50.5, z = 40.4, para = "ret_vila_palafita_a" },
-	{ de = "vila_casa_08", x = 8.3, z = -63.5, para = "ret_vila_palafita_b" },
-} :: { Troca }
-
 local function P(key: string, x: number, z: number, giro: number, escala: number?): Peca
 	return { key = key, x = x, z = z, giro = giro, escala = escala }
 end
-local function poca(x: number, z: number, giro: number, escala: number): Peca
-	return { key = "ret_vila_poca", x = x, z = z, giro = giro, escala = escala, plano = true, decal = "poca_halo" }
-end
-local function planta(key: string, x: number, z: number, giro: number, escala: number?): Peca
-	return { key = key, x = x, z = z, giro = giro, escala = escala, planta = true }
-end
-
+-- O que não vem da planta: a entrada sul, a cobertura baixa do cruzamento e a lama da rua
 VilaPiloto.PECAS = {
-	-- a entrada sul e a torre que vigia o pátio
 	P("ret_vila_posto", -1.5, 47, 0),
-	P("ret_vila_torre", 30, -11, 90),
-	-- cobertura baixa nos quatro cantos do cruzamento, sem fechar a pista
 	P("ret_vila_sacos", 9.5, 8, -45),
-	P("ret_vila_sacos", -9.5, 18, 45),
-	P("ret_vila_sacos", 21, -9, 20),
+	P("ret_vila_sacos", -9.5, 14.5, 45),
+	P("ret_vila_sacos", 14, -8.5, 20),
 	P("ret_vila_sacos", -8, -5, 135),
-	P("ret_vila_carga", 27, 7, -10),
-	P("ret_vila_carga", -9, 28, 80),
-	P("ret_vila_carga", 14, -24, 40),
-	P("ret_vila_carga", -29, 11, 120),
-	-- a lama da rua
-	poca(3, 11, 20, 0.72),
-	poca(-2, 25, 75, 0.9),
-	poca(14, -2, 130, 0.65),
-	poca(27, 0.5, 10, 0.83),
-	poca(-19, 19.5, 45, 0.72),
-	poca(12, -11, 45, 0.58),
-	poca(-1, 37, 100, 0.65),
-	poca(38, -1, 170, 0.76),
-	poca(23, -22, 50, 0.86),
-	poca(-33, 33, 40, 0.65),
-	poca(-1, 60, 90, 0.79),
-	poca(58, 0, 0, 0.72),
-	-- quintais: samambaia e bananeira junto das casas, fora das ruas
-	planta("exp_samambaia", 12, -33, 10),
-	planta("exp_samambaia", -4, -31, 80),
-	planta("exp_samambaia", 30, -14, 140),
-	planta("exp_samambaia", 46, -2.5, 30),
-	planta("exp_samambaia", 33, 20, 200),
-	planta("exp_samambaia", 26, 30, 260),
-	planta("exp_samambaia", 10, 34, 40),
-	planta("exp_samambaia", -12, 40, 110),
-	planta("exp_samambaia", -30, 18, 300),
-	planta("exp_samambaia", -36, 6, 170),
-	planta("exp_samambaia", -33, -8, 60),
-	planta("exp_samambaia", -29, -27, 220),
-	planta("banana", 22, -35, 30, 1.0),
-	planta("banana", 42, 22, 140, 1.1),
-	planta("banana", -24, 40, 200, 0.95),
-	planta("banana", -50, 8, 75, 1.05),
-	planta("banana", 58, 23, 300, 1.0),
-	planta("shrub", 8, 30, 15, 1.2),
-	planta("shrub", -22, 31, 95, 1.1),
-	planta("shrub", 39, -8, 160, 1.15),
-	planta("shrub", 34, 44, 240, 1.2),
-	planta("elephant_grass", -12, 26, 30, 0.8),
-	planta("elephant_grass", 11, 40, 120, 0.8),
-	planta("elephant_grass", 33, 9, 210, 0.75),
-	planta("elephant_grass", -26, 22, 300, 0.8),
-	planta("exp_samambaia", -12, 34, 20),
-	planta("exp_samambaia", 10, 26, 150),
-	planta("exp_samambaia", 41, 8, 70),
-	planta("exp_samambaia", 62, 9, 240),
-	planta("exp_samambaia", -6, 56, 330),
-	planta("exp_samambaia", 12, 60, 100),
-	-- a vida da rua: carroça, palha e potes junto das casas
-	P("exp_carroca", -11.5, 44, 20),
-	P("straw_stack", 30, 18, 0, 0.85),
-	P("straw_stack", -25, 12, 40, 0.8),
-	P("water_jar", 33.5, 6, 0),
-	P("water_jar", 34.5, 7, 60),
-	P("water_jar", -13, 25, 30),
-	P("ret_vila_sacos", 12, 43, 90),
-	P("ret_vila_carga", 11, 49, 15),
-	-- mais cobertura no pátio, fora das pistas
-	P("ret_vila_sacos", 15, 6.5, 12),
-	P("ret_vila_sacos", -14, 9, 70),
+	P("ret_vila_carga", 21, 5, -10),
 	P("ret_vila_carga", 7, -14, 35),
-	P("exp_carroca", 24, -5.5, 200),
+	P("exp_carroca", 18, 7.5, 200),
 } :: { Peca }
 
 -- As vias que passam pela área (medidas em Data/Roads, metros a partir do centro)
@@ -138,45 +54,120 @@ VilaPiloto.RUAS = {
 	{ { 8, -4 }, { 17, -1 }, { 26, 0 }, { 53, 0 }, { 85, 0 } },
 } :: { { { number } } }
 
--- Distância (m) até o eixo da via mais próxima
-function VilaPiloto.distRua(x: number, z: number): number
+function VilaPiloto.noSetor(x: number, z: number, folga: number?): boolean
+	local m = VilaPiloto.MEIO_M + (folga or 0)
+	return math.abs(x) <= m and math.abs(z) <= m
+end
+
+local function distVias(vias: { { { number } } }, x: number, z: number): number
 	local melhor = math.huge
-	for _, via in VilaPiloto.RUAS do
+	for _, via in vias do
 		for i = 1, #via - 1 do
 			local a, b = via[i], via[i + 1]
 			local ux, uz = b[1] - a[1], b[2] - a[2]
 			local t = math.clamp(((x - a[1]) * ux + (z - a[2]) * uz) / (ux * ux + uz * uz), 0, 1)
 			local dx, dz = x - (a[1] + t * ux), z - (a[2] + t * uz)
-			melhor = math.min(melhor, math.sqrt(dx * dx + dz * dz))
+			melhor = math.min(melhor, dx * dx + dz * dz)
 		end
 	end
-	return melhor
+	return math.sqrt(melhor)
 end
 
--- O piso fica sob a construção: ali não pode nascer capim, que atravessaria o assoalho
-local RAIO_PISO: { [string]: number } = {
-	ret_vila_dinh = 12,
-	ret_sino_salao = 11,
-	ret_vila_palafita_a = 7.5,
-	ret_vila_palafita_b = 6.5,
-	ret_vila_terra = 7.5,
-	ret_merc_banca_a = 2.2,
-	ret_merc_banca_b = 2.2,
-	ret_merc_banca_c = 2.2,
-}
-function VilaPiloto.sobConstrucao(x: number, z: number): boolean
-	for _, t in VilaPiloto.TROCAS do
-		local r = RAIO_PISO[t.para] or 6
-		if (x - t.x) ^ 2 + (z - t.z) ^ 2 < r * r then
-			return true
+-- Distância (m) até o eixo da via mais próxima. A viela é estreita: conta como 1,7 m mais longe
+function VilaPiloto.distRua(x: number, z: number): number
+	return math.min(distVias(VilaPiloto.RUAS, x, z), distVias(VilaPiloto.VIELAS, x, z) + 1.7)
+end
+
+-- O piso fica sob a construção: ali não nasce capim nem cai peça solta
+local RAIOS2: { number } = {}
+for k, c in VilaPiloto.POVOADO do
+	RAIOS2[k] = ((c.lx / 2 + 3) ^ 2 + (c.lz / 2 + 3) ^ 2)
+end
+function VilaPiloto.sobConstrucao(x: number, z: number, folga: number?): boolean
+	local f = folga or 0.6
+	for k, c in VilaPiloto.POVOADO do
+		local dx, dz = x - c.x, z - c.z
+		if dx * dx + dz * dz < RAIOS2[k] then
+			local a = math.rad(c.giro)
+			local ca, sa = math.cos(a), math.sin(a)
+			if math.abs(dx * ca - dz * sa) < c.lx / 2 + f and math.abs(dx * sa + dz * ca) < c.lz / 2 + f then
+				return true
+			end
 		end
 	end
 	return false
 end
 
--- O material do chão dentro da área. d: metros do centro; base: o que o mapa daria (nil = o da classe);
--- r1 e r2: ruídos de 0 a 1 (mancha grande e pequena); dRua: metros até o eixo da via; sob: há construção.
--- Pista de terra com as duas trilhas de roda em barro, beira gasta e quintal de capim.
+-- Trechos afundados na rua: depressões rasas do próprio terreno, sem água e sem Mud. O voxel
+-- de 1,1 m faz da poça um polígono claro, e o Mud deste mapa é quase preto (Studio, lote 122)
+VilaPiloto.POCAS = {
+	{ x = -0.8, z = 12, a = 2.6, b = 1.7, giro = 80 },
+	{ x = -2, z = 25, a = 3.0, b = 1.8, giro = 75 },
+	{ x = 14, z = -2, a = 2.2, b = 1.5, giro = 130 },
+	{ x = 27, z = 0.5, a = 2.8, b = 1.6, giro = 10 },
+	{ x = -19, z = 19.5, a = 2.4, b = 1.6, giro = 45 },
+	{ x = 23, z = -22, a = 2.8, b = 1.7, giro = 50 },
+} :: { { x: number, z: number, a: number, b: number, giro: number } }
+
+-- 0 no meio do trecho afundado mais próximo, 1 na beira
+function VilaPiloto.pocaE(x: number, z: number): number
+	local melhor = math.huge
+	for _, q in VilaPiloto.POCAS do
+		local dx, dz = x - q.x, z - q.z
+		if dx * dx + dz * dz < 25 then
+			local a = math.rad(q.giro)
+			local u = dx * math.cos(a) - dz * math.sin(a)
+			local v = dx * math.sin(a) + dz * math.cos(a)
+			melhor = math.min(melhor, math.sqrt((u / q.a) ^ 2 + (v / q.b) ^ 2))
+		end
+	end
+	return melhor
+end
+
+-- 0 no meio da lagoa, 1 na margem, mais de 1 fora dela
+function VilaPiloto.lagoa(x: number, z: number): number
+	local l = VilaPiloto.LAGOA
+	local a = math.rad(l.giro)
+	local dx, dz = x - l.x, z - l.z
+	local u = dx * math.cos(a) - dz * math.sin(a)
+	local v = dx * math.sin(a) + dz * math.cos(a)
+	return math.sqrt((u / l.a) ^ 2 + (v / l.b) ^ 2)
+end
+
+local function suave(a: number, b: number, x: number): number
+	local t = math.clamp((x - a) / (b - a), 0, 1)
+	return t * t * (3 - 2 * t)
+end
+
+-- Relevo do setor, em metros: ondulação dos quintais, vala na beira das ruas e a bacia da lagoa.
+-- n1 e n2: ruídos de 0 a 1. Devolve a soma na altura e o nível da água em relação ao chão original.
+function VilaPiloto.relevo(x: number, z: number, n1: number, n2: number, sob: boolean): (number, number?)
+	local borda = 1 - suave(VilaPiloto.MEIO_M, VilaPiloto.MEIO_M + 9, math.max(math.abs(x), math.abs(z)))
+	if borda <= 0 then
+		return 0, nil
+	end
+	local e = VilaPiloto.lagoa(x, z)
+	if e < 1 then
+		return -1.3 * (1 - e * e) - 0.06, -0.26
+	end
+	if sob then
+		return 0, nil
+	end
+	local ep = VilaPiloto.pocaE(x, z)
+	if ep < 1 then
+		return -0.14 * (1 - ep * ep), nil
+	end
+	local dReal = distVias(VilaPiloto.RUAS, x, z)
+	local fora = suave(2.6, 5.0, dReal)
+	local dh = ((n1 - 0.5) * 0.85 + (n2 - 0.5) * 0.2) * fora
+	dh -= 0.32 * math.exp(-(((dReal - 3.7) / 0.7) ^ 2))
+	dh *= suave(1, 1.5, e)
+	return dh * borda, nil
+end
+
+-- O material do chão. d: distância em quadrado ao centro; base: o do mapa (nil = o da classe);
+-- r1 e r2: ruídos de 0 a 1; dRua: metros até a via; sob: há construção; e: a escala da lagoa.
+-- Sem LeafyGrass: neste mapa ele fica quase preto e fazia uma faixa escura na beira da rua.
 function VilaPiloto.solo(
 	d: number,
 	base: string?,
@@ -184,25 +175,25 @@ function VilaPiloto.solo(
 	r1: number,
 	r2: number,
 	dRua: number,
-	sob: boolean
+	sob: boolean,
+	e: number?
 ): string?
-	if d > VilaPiloto.RAIO_M + (r1 - 0.5) * 12 or classe == 5 or classe == 2 then
+	if d > VilaPiloto.MEIO_M + 5 + (r1 - 0.5) * 8 or classe == 5 or classe == 2 then
 		return base
 	end
-	-- sem Mud aqui: em voxel ele vira mancha angulosa; os sulcos e a lama ficam nos decais
-	if dRua < 4.4 then
+	if e and e < 0.98 then
+		return "Mud"
+	end
+	if e and e < 1.4 then
+		return if r2 > 0.45 then "Grass" else "Ground"
+	end
+	if dRua < 2.7 or sob then
 		return "Ground"
 	end
-	if sob then
-		return "Ground"
+	if dRua < 3.9 then
+		return if r2 > 0.42 then "Grass" else "Ground"
 	end
-	if dRua < 6.2 then
-		return if r2 > 0.52 then "LeafyGrass" else "Ground"
-	end
-	if r1 < 0.62 then
-		return "Grass"
-	end
-	return if r1 < 0.8 and r2 <= 0.62 then "LeafyGrass" else "Ground"
+	return if r1 < 0.8 then "Grass" else "Ground"
 end
 
 -- As marcas do chão (2 triângulos cada): trilhas de roda ao longo das vias e folhas nos quintais
@@ -213,11 +204,11 @@ function VilaPiloto.marcas(): { Peca }
 			local a, b = via[i], via[i + 1]
 			local ux, uz = b[1] - a[1], b[2] - a[2]
 			local comp = math.sqrt(ux * ux + uz * uz)
-			local n = math.max(1, math.floor(comp / 5.2))
+			local n = math.max(1, math.floor(comp / 8))
 			for k = 0, n - 1 do
 				local f = (k + 0.5) / n
 				local x, z = a[1] + ux * f, a[2] + uz * f
-				if math.sqrt(x * x + z * z) < VilaPiloto.RAIO_M - 4 then
+				if VilaPiloto.noSetor(x, z, 2) then
 					local giro = math.deg(math.atan2(-uz, ux))
 					table.insert(out, {
 						key = "ret_vila_trilha",
@@ -239,10 +230,11 @@ function VilaPiloto.marcas(): { Peca }
 		return s / 2147483647
 	end
 	local postas = 0
-	for _ = 1, 160 do
-		local ang, raio, giro, esc = r() * math.pi * 2, 8 + r() * 56, r() * 360, 0.75 + r() * 0.5
-		local x, z = math.cos(ang) * raio, math.sin(ang) * raio
-		if postas < 34 and VilaPiloto.distRua(x, z) > 5.2 and not VilaPiloto.sobConstrucao(x, z) then
+	for _ = 1, 400 do
+		local x, z = (r() - 0.5) * 2 * VilaPiloto.MEIO_M, (r() - 0.5) * 2 * VilaPiloto.MEIO_M
+		local giro, esc = r() * 360, 0.75 + r() * 0.5
+		local fora = VilaPiloto.distRua(x, z) <= 3.9 or VilaPiloto.sobConstrucao(x, z) or VilaPiloto.lagoa(x, z) < 1.2
+		if postas < 46 and not fora then
 			table.insert(out, { key = "ret_vila_detritos", x = x, z = z, giro = giro, escala = esc, plano = true })
 			postas += 1
 		end
@@ -251,7 +243,7 @@ function VilaPiloto.marcas(): { Peca }
 end
 
 -- Capim parado (regra de vento zero): a grama nativa do terreno se mexe mesmo com GlobalWind 0
-VilaPiloto.MAX_CAPIM = 720
+VilaPiloto.MAX_CAPIM = 620
 function VilaPiloto.capimPontos(): { { x: number, z: number, giro: number, escala: number } }
 	local out = {}
 	local s = 1971
@@ -259,14 +251,14 @@ function VilaPiloto.capimPontos(): { { x: number, z: number, giro: number, escal
 		s = (s * 16807) % 2147483647
 		return s / 2147483647
 	end
-	local passo = 3
-	local n = math.floor(VilaPiloto.RAIO_M / passo)
+	local passo = 3.1
+	local n = math.floor(VilaPiloto.MEIO_M / passo)
 	for i = -n, n do
 		for j = -n, n do
-			local x, z = i * passo + (r() - 0.5) * 2.2, j * passo + (r() - 0.5) * 2.2
-			local giro, escala = r() * 360, 0.85 + r() * 0.4
-			local fora = math.sqrt(x * x + z * z) >= VilaPiloto.RAIO_M
-			if not fora and VilaPiloto.distRua(x, z) > 5.4 and not VilaPiloto.sobConstrucao(x, z) then
+			local x, z = i * passo + (r() - 0.5) * 2.4, j * passo + (r() - 0.5) * 2.4
+			local giro, escala = r() * 360, 0.8 + r() * 0.45
+			local ok = VilaPiloto.noSetor(x, z) and VilaPiloto.distRua(x, z) > 3.9 and VilaPiloto.lagoa(x, z) > 1.15
+			if ok and not VilaPiloto.sobConstrucao(x, z) then
 				table.insert(out, { x = x, z = z, giro = giro, escala = escala })
 			end
 		end
@@ -274,19 +266,42 @@ function VilaPiloto.capimPontos(): { { x: number, z: number, giro: number, escal
 	return out
 end
 
--- Trechos de cerca de bambu ao longo das vias (x1, z1, x2, z2); o que cairia numa construção fica de fora
-VilaPiloto.CERCAS = {
-	{ -8.5, 22, -8.5, 42 },
-	{ 6.8, 30, 6.8, 42 },
-	{ -9, 52, -9, 70 },
-	{ 7, 54, 7, 70 },
-	{ 30, 6.5, 40, 6.5 },
-	{ 60, 6.5, 72, 6.5 },
-	{ 60, -6.5, 74, -6.5 },
-	{ -33, 40, -48, 55 },
-	{ -44, 36, -56, 48 },
-	{ 22, -38, 40, -56 },
-	{ -22, 28, -30, 36 },
-} :: { { number } }
+-- A beira das ruas: tufos de capim e pedras soltas, para o chão não terminar numa linha reta
+function VilaPiloto.bordaPontos(): { { key: string, x: number, z: number, giro: number, escala: number } }
+	local out = {}
+	local s = 1973
+	local function r(): number
+		s = (s * 16807) % 2147483647
+		return s / 2147483647
+	end
+	for _, via in VilaPiloto.RUAS do
+		for i = 1, #via - 1 do
+			local a, b = via[i], via[i + 1]
+			local ux, uz = b[1] - a[1], b[2] - a[2]
+			local comp = math.sqrt(ux * ux + uz * uz)
+			local nx, nz = -uz / comp, ux / comp
+			local passos = math.max(1, math.floor(comp / 1.7))
+			for k = 0, passos do
+				local f = (k + r()) / passos
+				for _, lado in { -1, 1 } do
+					local d = 3.0 + r()
+					local x = a[1] + ux * f + nx * lado * d
+					local z = a[2] + uz * f + nz * lado * d
+					local sorte, giro, esc = r(), r() * 360, 0.52 + r() * 0.3
+					local livre = VilaPiloto.noSetor(x, z)
+						and not VilaPiloto.sobConstrucao(x, z, 0.3)
+						and VilaPiloto.lagoa(x, z) > 1.15
+						and VilaPiloto.pocaE(x, z) > 1.3
+						and distVias(VilaPiloto.RUAS, x, z) >= 2.9
+					if livre and sorte < 0.72 then
+						local key = if sorte < 0.18 then "ret_pov_p_pedras" else "ret_vila_capim"
+						table.insert(out, { key = key, x = x, z = z, giro = giro, escala = esc })
+					end
+				end
+			end
+		end
+	end
+	return out
+end
 
 return VilaPiloto

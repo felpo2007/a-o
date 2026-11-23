@@ -10,6 +10,12 @@ O estado atual fica em `knowledge/01-CURRENT-STATE.md`. Este arquivo continua co
 - **Medido:** autoteste 18 de 18, Lune 1.014, pytest 84; a Vila ficou de 65% a 125% mais pesada em triângulos.
 - **Não medido:** fps real, duas pessoas, celular e SLIM. Detalhe em `docs/QA_RESULTS.md`.
 
+## Reconstrução artística da Vila (lote 122, D-255)
+- **Setor piloto de 88 x 88 m:** montado e testado no Studio, **desligado** e **sem publicar**, aguardando o dono.
+- **Medido:** captura pelos EUA, caminhada, bots, 0 erro de script; de 35% a 59% mais chamadas na Vila.
+- **Falta:** chão nu de 62% (meta 35%), granada de bot intermitente, fps, celular e duas pessoas.
+- Relatório: `testes/LOTE122_D255_2026-11-23.md`.
+
 ## Pedidos de 22/11 (D-246, em partes)
 - **Parte 1 (lote 115): feita.** Tanque, reanimação, mão solta, bots, rastejo, M16 antiga, bandeiras, moedas,
   promoção, nascer no mapa, portão, janelas, pele e capa.

@@ -22,8 +22,9 @@ com medida em `docs/QA_RESULTS.md`.
 | 15 | Scripts | Usada | Saíram os laços de poeira, folhas e balanço da camuflagem |
 
 ## Resultado medido
-A Vila ficou mais pesada: de 25% a 38% mais chamadas e de 65% a 125% mais triângulos (`docs/QA_RESULTS.md`). A maior
-parte vem de geometria a mais de 130 m. A próxima otimização é cortar essa visão.
+Com o setor de 88 x 88 m, as vistas da Vila têm de 35% a 59% mais chamadas e de 49% a 87% mais triângulos
+(`docs/QA_RESULTS.md`). Os gargalos a atacar, nesta ordem: variedade de malhas no setor (48 chaves), chamadas extras
+na vista de controle (causa não isolada) e geometria distante. Fps ainda não foi medido.
 
 ## Descartado por enquanto
 - Sistema próprio de LOD ou culling: o motor já faz.

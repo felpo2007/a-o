@@ -125,6 +125,22 @@ local MAX_MERCADO: { [string]: number } = {
 	ret_vila_palafita_b = 2,
 	ret_vila_terra = 2,
 	ret_vila_dinh = 3,
+	-- D-255: o povoado da Vila
+	ret_pov_chua = 3,
+	ret_pov_mercado = 3,
+	ret_pov_mercearia = 1,
+	ret_pov_cha = 1,
+	ret_pov_pho = 2,
+	ret_pov_alfaiate = 1,
+	ret_pov_barbearia = 1,
+	ret_pov_carpintaria = 2,
+	ret_pov_ferraria = 1,
+	ret_pov_laterita = 2,
+	ret_pov_patio = 2,
+	ret_pov_armazem = 3,
+	ret_pov_medico = 2,
+	ret_pov_moinho = 1,
+	ret_pov_defensiva = 1,
 }
 -- casa sobre esteios: a busca do piso começa acima do assoalho, não no chão de baixo
 local ORIGEM_STUDS: { [string]: number } = { ret_vila_palafita_a = 13, ret_vila_palafita_b = 13 }
@@ -147,6 +163,10 @@ local FORCA_MODELO: { [string]: number } = {
 	ret_vila_palafita_b = 1.1,
 	ret_vila_terra = 1,
 	ret_vila_dinh = 0.9,
+	ret_pov_chua = 0.9,
+	ret_pov_armazem = 0.8,
+	ret_pov_laterita = 1,
+	ret_pov_patio = 1,
 }
 local LAMPIAO_ALTURA_MAX = 12.5 -- studs do piso: abaixo da linha das treliças
 

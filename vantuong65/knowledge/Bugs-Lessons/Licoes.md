@@ -63,3 +63,7 @@ Formato: **sintoma** → causa → correção → como evitar.
 - **Grama de `Terrain.Decoration` se mexe com `GlobalWind` zero** → compare dois quadros parados antes de dizer "sem vento".
 - **Com o menu aberto o sol fica preso às 17 h** → na foto, peça o spawn logo depois de `TerrainReady`.
 - **Tirar um modelo pode aumentar os triângulos** → ele tampava a mata. Compare com o que está longe removido.
+- **`SurfaceAppearance.Color` em cartão com alfa deixa manchas pretas** → a cor da folhagem vai na textura.
+- **Folha com `DoubleSided` estoura em branco contra o sol** → gere a face de trás com a normal invertida e confira o giro.
+- **Poça em voxel vira polígono claro; `Mud` e `LeafyGrass` ficam quase pretos neste mapa** → não use na rua da Vila.
+- **`VT65SelfTest` repetido na mesma sessão invalida a granada (`arremessou=false`)** → use um Play novo por rodada.

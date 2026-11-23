@@ -667,11 +667,13 @@ local function botGrenade(): (string, string?)
 	local good = ok and armed and core ~= nil and miss < 5
 	return if good then "ok" else "FALHA",
 		string.format(
-			"arremessou=%s, braço=%s, granada=%s, caiu a %.1f m do alvo de 25 m",
+			"arremessou=%s, braço=%s, granada=%s, caiu a %.1f m do alvo de 25 m; bot em (%.0f, %.0f)",
 			tostring(ok),
 			tostring(armed),
 			tostring(core ~= nil),
-			miss
+			miss,
+			root.Position.X,
+			root.Position.Z
 		)
 end
 

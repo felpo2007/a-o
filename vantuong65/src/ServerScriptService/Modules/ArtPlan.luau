@@ -195,13 +195,16 @@ function ArtPlan.column(ctx: Ctx, x: number, z: number): (number, number, number
 	-- D-254: o chão da área piloto da Vila (barro nas ruas; capim, folhas e terra nos quintais)
 	local piloto = (ctx :: any).piloto
 	if piloto then
-		local d = math.sqrt((x - piloto.x) ^ 2 + (z - piloto.z) ^ 2) * M
-		if d < VilaPiloto.RAIO_M + 6 then
+		local px, pz = (x - piloto.x) * M, (z - piloto.z) * M
+		local d = math.max(math.abs(px), math.abs(pz))
+		if d < VilaPiloto.MEIO_M + 10 and c ~= 5 and c ~= 2 then
 			local r1 = Vegetation.noise(x, z, 7 / M, 7171)
 			local r2 = Vegetation.noise(x, z, 2.4 / M, 7272)
-			local px, pz = (x - piloto.x) * M, (z - piloto.z) * M
-			local dRua = VilaPiloto.distRua(px, pz)
-			return h, wl, c, VilaPiloto.solo(d, mat, c, r1, r2, dRua, VilaPiloto.sobConstrucao(px, pz))
+			local sob = VilaPiloto.sobConstrucao(px, pz)
+			local dh, agua = VilaPiloto.relevo(px, pz, r1, r2, sob)
+			local nivel = if agua then h + agua / M else wl
+			local solo = VilaPiloto.solo(d, mat, c, r1, r2, VilaPiloto.distRua(px, pz), sob, VilaPiloto.lagoa(px, pz))
+			return h + dh / M, nivel, c, solo
 		end
 	end
 	-- D-243: a praça é de terra batida (o chão de quintal, de folhas, fica escuro em área grande)

@@ -106,6 +106,16 @@ ATLAS_PADRAO = {
         "forca_ao": 0.35,
         "amostras_ao": 64,
     },
+    # D-255: as mechas do beiral não passam pela redução: a silhueta é o motivo de existirem
+    "Franja": {
+        "tex": 512,
+        "teto": 9000,
+        "visibilidade": False,
+        "suave": 25,
+        "fracoes": (1.0,),
+        "forca_ao": 0.3,
+        "amostras_ao": 4,
+    },
 }
 
 

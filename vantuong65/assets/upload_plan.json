@@ -12992,5 +12992,362 @@
   "assetType": "Model",
   "name": "VT65 ret_vila_capim",
   "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_pov_abandonada",
+  "file": "assets/blender/ret_pov_abandonada/ret_pov_abandonada_trim.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_pov_abandonada",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_pov_alfaiate",
+  "file": "assets/blender/ret_pov_alfaiate/ret_pov_alfaiate_trim.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_pov_alfaiate",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_pov_armazem",
+  "file": "assets/blender/ret_pov_armazem/ret_pov_armazem_trim.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_pov_armazem",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_pov_armazem_ruina",
+  "file": "assets/blender/ret_pov_armazem_ruina/ret_pov_armazem_ruina_trim.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_pov_armazem_ruina",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_pov_banca_d",
+  "file": "assets/blender/ret_pov_banca_d/ret_pov_banca_d_trim.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_pov_banca_d",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_pov_banca_e",
+  "file": "assets/blender/ret_pov_banca_e/ret_pov_banca_e_trim.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_pov_banca_e",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_pov_banca_f",
+  "file": "assets/blender/ret_pov_banca_f/ret_pov_banca_f_trim.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_pov_banca_f",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_pov_banca_g",
+  "file": "assets/blender/ret_pov_banca_g/ret_pov_banca_g_trim.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_pov_banca_g",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_pov_barbearia",
+  "file": "assets/blender/ret_pov_barbearia/ret_pov_barbearia_trim.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_pov_barbearia",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_pov_barricada",
+  "file": "assets/blender/ret_pov_barricada/ret_pov_barricada_trim.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_pov_barricada",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_pov_bufalos",
+  "file": "assets/blender/ret_pov_bufalos/ret_pov_bufalos_trim.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_pov_bufalos",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_pov_carpintaria",
+  "file": "assets/blender/ret_pov_carpintaria/ret_pov_carpintaria_trim.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_pov_carpintaria",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_pov_cemiterio",
+  "file": "assets/blender/ret_pov_cemiterio/ret_pov_cemiterio.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_pov_cemiterio",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_pov_cestos",
+  "file": "assets/blender/ret_pov_cestos/ret_pov_cestos_trim.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_pov_cestos",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_pov_cha",
+  "file": "assets/blender/ret_pov_cha/ret_pov_cha_trim.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_pov_cha",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_pov_chua",
+  "file": "assets/blender/ret_pov_chua/ret_pov_chua.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_pov_chua",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_pov_d_cestos",
+  "file": "assets/blender/ret_pov_d_cestos/ret_pov_d_cestos.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_pov_d_cestos",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_pov_d_esteira",
+  "file": "assets/blender/ret_pov_d_esteira/ret_pov_d_esteira.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_pov_d_esteira",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_pov_d_feno",
+  "file": "assets/blender/ret_pov_d_feno/ret_pov_d_feno.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_pov_d_feno",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_pov_d_horta",
+  "file": "assets/blender/ret_pov_d_horta/ret_pov_d_horta.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_pov_d_horta",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_pov_d_lenha",
+  "file": "assets/blender/ret_pov_d_lenha/ret_pov_d_lenha.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_pov_d_lenha",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_pov_d_muro",
+  "file": "assets/blender/ret_pov_d_muro/ret_pov_d_muro.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_pov_d_muro",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_pov_d_potes",
+  "file": "assets/blender/ret_pov_d_potes/ret_pov_d_potes.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_pov_d_potes",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_pov_d_varal",
+  "file": "assets/blender/ret_pov_d_varal/ret_pov_d_varal.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_pov_d_varal",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_pov_defensiva",
+  "file": "assets/blender/ret_pov_defensiva/ret_pov_defensiva_trim.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_pov_defensiva",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_pov_destruida",
+  "file": "assets/blender/ret_pov_destruida/ret_pov_destruida_trim.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_pov_destruida",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_pov_escola",
+  "file": "assets/blender/ret_pov_escola/ret_pov_escola.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_pov_escola",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_pov_escola_ala",
+  "file": "assets/blender/ret_pov_escola_ala/ret_pov_escola_ala.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_pov_escola_ala",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_pov_esconderijo",
+  "file": "assets/blender/ret_pov_esconderijo/ret_pov_esconderijo.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_pov_esconderijo",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_pov_ferraria",
+  "file": "assets/blender/ret_pov_ferraria/ret_pov_ferraria_trim.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_pov_ferraria",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_pov_galinheiro",
+  "file": "assets/blender/ret_pov_galinheiro/ret_pov_galinheiro_trim.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_pov_galinheiro",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_pov_guarda",
+  "file": "assets/blender/ret_pov_guarda/ret_pov_guarda_trim.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_pov_guarda",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_pov_laterita",
+  "file": "assets/blender/ret_pov_laterita/ret_pov_laterita.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_pov_laterita",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_pov_lavagem",
+  "file": "assets/blender/ret_pov_lavagem/ret_pov_lavagem.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_pov_lavagem",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_pov_medico",
+  "file": "assets/blender/ret_pov_medico/ret_pov_medico_trim.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_pov_medico",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_pov_mercado",
+  "file": "assets/blender/ret_pov_mercado/ret_pov_mercado_trim.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_pov_mercado",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_pov_mercearia",
+  "file": "assets/blender/ret_pov_mercearia/ret_pov_mercearia_trim.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_pov_mercearia",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_pov_moinho",
+  "file": "assets/blender/ret_pov_moinho/ret_pov_moinho_trim.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_pov_moinho",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_pov_patio",
+  "file": "assets/blender/ret_pov_patio/ret_pov_patio.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_pov_patio",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_pov_pho",
+  "file": "assets/blender/ret_pov_pho/ret_pov_pho_trim.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_pov_pho",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_pov_poco",
+  "file": "assets/blender/ret_pov_poco/ret_pov_poco.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_pov_poco",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_pov_santuario",
+  "file": "assets/blender/ret_pov_santuario/ret_pov_santuario.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_pov_santuario",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_pov_socorro",
+  "file": "assets/blender/ret_pov_socorro/ret_pov_socorro_trim.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_pov_socorro",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_pov_p_arvore_a",
+  "file": "assets/blender/ret_pov_p_arvore_a/ret_pov_p_arvore_a.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_pov_p_arvore_a",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_pov_p_arvore_b",
+  "file": "assets/blender/ret_pov_p_arvore_b/ret_pov_p_arvore_b.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_pov_p_arvore_b",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_pov_p_coqueiro_a",
+  "file": "assets/blender/ret_pov_p_coqueiro_a/ret_pov_p_coqueiro_a.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_pov_p_coqueiro_a",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_pov_p_coqueiro_b",
+  "file": "assets/blender/ret_pov_p_coqueiro_b/ret_pov_p_coqueiro_b.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_pov_p_coqueiro_b",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_pov_trim",
+  "file": "assets/blender/ret_pov_trim/ret_pov_trim.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_pov_trim",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_pov_p_pedras",
+  "file": "assets/blender/ret_pov_p_pedras/ret_pov_p_pedras.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_pov_p_pedras",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_pov_p_arbusto_a",
+  "file": "assets/blender/ret_pov_p_arbusto_a/ret_pov_p_arbusto_a.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_pov_p_arbusto_a",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
+ },
+ {
+  "key": "Models.ret_pov_p_arbusto_b",
+  "file": "assets/blender/ret_pov_p_arbusto_b/ret_pov_p_arbusto_b.glb",
+  "assetType": "Model",
+  "name": "VT65 ret_pov_p_arbusto_b",
+  "description": "VAN TUONG 65 - mapas retangulares (Blender)"
  }
 ]

@@ -25,7 +25,17 @@ import vila_casas as VC  # noqa: E402
 import vila_comum as V  # noqa: E402
 import vila_trim as VT  # noqa: E402
 
-MODULOS = ("ret_piloto", "ret_mercado", "ret_frente", "ret_comboio", "ret_vila")
+MODULOS = (
+    "ret_piloto",
+    "ret_mercado",
+    "ret_frente",
+    "ret_comboio",
+    "ret_vila",
+    "ret_pov_a",
+    "ret_pov_b",
+    "ret_pov_c",
+    "ret_pov_d",
+)
 PORTA_LARG = 1.40
 PORTA_ALT = 2.50
 
@@ -50,6 +60,7 @@ def registrar() -> list[str]:
 def main() -> None:
     a = C.argumentos()
     chaves = registrar()
+    V.FRANJA_PALHA = bool(a) and a[0].startswith(("ret_vila_", "ret_pov_"))
     if not a or a[0] not in chaves:
         raise SystemExit(f"chave desconhecida: {a[:1]}; há {chaves}")
     leve = "--so-montar" in a or "--previa-alta" in a

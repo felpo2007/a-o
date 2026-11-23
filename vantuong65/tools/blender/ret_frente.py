@@ -736,11 +736,11 @@ def _quadro(rec, nome, x, y, mats: Mats, comp=2.6):
         )
 
 
-def _ala(chave, L, W, salas, sem):
+def _ala(chave, L, W, salas, sem, cal="#ded4b6"):
     rec = V.Receita()
     mats = Mats(sem)
     H, esp, VAR = 3.2, 0.18, 2.5
-    par = _reboco("cal_escola", "#ded4b6", 0.16)
+    par = _reboco("cal_escola", cal, 0.16)
     ngoi = _ngoi("#99593d", "#6f3e2b", "#b4714d")
     passo = L / salas
     xs = [-L / 2 + (i + 0.5) * passo for i in range(salas)]

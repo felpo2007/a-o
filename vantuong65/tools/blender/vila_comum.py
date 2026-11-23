@@ -1128,6 +1128,45 @@ def cumeeira(nome, p0, p1, tipo, mats_tel, r=0.15, sem=0):
     return o
 
 
+# D-255: só o povoado da Vila liga o beiral desfiado; as outras casas continuam iguais
+FRANJA_PALHA = False
+
+
+def franja_palha(nome, A, B, Cc, D, nrm, mat, sem=0, passo=0.17, queda=0.62):
+    """Três fileiras de mechas finas e desencontradas no beiral, com as duas faces."""
+    A, B = Vector(A), Vector(B)
+    topo = (Vector(Cc) + Vector(D)) / 2
+    comp = (B - A).length
+    if comp < 0.5:
+        return None
+    u = (B - A) / comp
+    desce = ((A + B) / 2 - topo).normalized()
+    rr = np.random.default_rng(sem + 77)
+    bm = bmesh.new()
+    n = max(3, int(comp / passo))
+    for recuo, sobe, kq in ((0.12, 0.035, 1.0), (0.34, 0.085, 0.82), (0.6, 0.135, 0.66)):
+        for i in range(n):
+            c = (i + float(rr.uniform(0.0, 1.0))) / n * comp
+            meia = passo * float(rr.uniform(0.75, 1.25))
+            q = queda * kq * float(rr.uniform(0.5, 1.3))
+            lado_p = float(rr.uniform(-0.65, 0.65)) * passo
+            b0 = A + u * max(0.0, c - meia) - desce * recuo + nrm * sobe
+            b1 = A + u * min(comp, c + meia) - desce * recuo + nrm * sobe
+            ponta = A + u * max(0.0, min(comp, c + lado_p)) + desce * (q - recuo * 0.25)
+            ponta += nrm * (sobe - 0.05 * q) - Vector((0, 0, 0.2 * q))
+            for fator, d in ((1, 0.0), (-1, -0.012)):
+                vs = [bm.verts.new(q2 + nrm * d) for q2 in (b0, b1, ponta)]
+                f = bm.faces.new(vs)
+                f.normal_update()
+                if f.normal.dot(nrm) * fator < 0:
+                    f.normal_flip()
+    bm.normal_update()
+    o = M.de_bmesh(nome, bm)
+    gravar_uv_local(o, lambda p: ((p - A).dot(u), -(p - A).dot(desce) * 2.0 + 0.1, 0.0), float(sem))
+    M.material(o, mat)
+    return M.suave(o, 25)
+
+
 def telhado(
     rec,
     nome,
@@ -1202,6 +1241,10 @@ def telhado(
     for k, (A, B, Cc, D) in enumerate(planos):
         ob, nrm = placa(f"{nome}_agua{k}", A, B, Cc, D, esp, tipo, mat_tel, sem=sem * 10 + k)
         rec.add(ob, grupo, "Telhado")
+        if FRANJA_PALHA and tipo in ("tranh", "la"):
+            fr = franja_palha(f"{nome}_fr{k}", A, B, Cc, D, nrm, mat_tel, sem=sem * 10 + k)
+            if fr is not None:
+                rec.add(fr, "Franja", "Franja")
         Ac, Bc, Ccc, Dc = planos_col[k]
         cantos = [Ac, Bc, Ccc] if Vector(Ccc) == Vector(Dc) else [Ac, Bc, Ccc, Dc]
         _prisma_placa(rec, f"{nome}_agua{k}", cantos, nrm, 0.06, bala, material)
@@ -1332,6 +1375,10 @@ def agua_unica(
     D = (A[0], y_alto, z_alto)
     ob, nrm = placa(f"{nome}_agua", A, B, Cc, D, esp, tipo, mat_tel, sem=sem)
     rec.add(ob, grupo, "Telhado")
+    if FRANJA_PALHA and tipo in ("tranh", "la"):
+        fr = franja_palha(f"{nome}_fr", A, B, Cc, D, nrm, mat_tel, sem=sem + 3, queda=0.5)
+        if fr is not None:
+            rec.add(fr, "Franja", "Franja")
     bala = "passa" if tipo in ("tranh", "la") else "para"
     # colisão rente à face de cima (0,05 m): quem passa embaixo do beiral da varanda não esbarra
     _prisma_placa(

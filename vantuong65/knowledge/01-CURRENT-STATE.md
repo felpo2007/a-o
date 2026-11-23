@@ -3,8 +3,8 @@ project: STARLITE
 type: state
 status: verified
 source_paths:
-last_verified: 2026-11-22
-verified_commit: 5f83094
+last_verified: 2026-11-23
+verified_commit: 2e9fa42
 ---
 # Estado atual
 
@@ -15,9 +15,9 @@ Compacto de propósito. Detalhe lote a lote: `PROGRESS.md`.
 - A capa da página é o key art STARLITE: Vietnã 1965 (ícone e primeira miniatura).
 - O jogo publicado usa só o [[Mapa-Principal]] de 700 × 700 m.
 
-## Foco atual: prompt V5, piloto da Vila (D-253 e D-254)
-Lote 121 no Git, **sem publicar**. `VilaPiloto.LIGADA = false`; no Studio, `VT65DevPiloto = true`.
-Aguarda a aprovação visual do dono antes de qualquer expansão. Situação em `docs/PILOT_ACCEPTANCE.md`.
+## Foco atual: reconstrução da Vila, setor piloto (D-253 a D-255)
+Lotes 121 e 122 no Git, **sem publicar**. `VilaPiloto.LIGADA = false`; no Studio, `VT65DevPiloto = true`.
+Setor de 88 x 88 m pronto para o dono ver. Não expandir antes da aprovação. Situação em `docs/PILOT_ACCEPTANCE.md`.
 
 ## Em andamento: pedidos de 22/11 (D-246)
 Feito: jogo, moedas, bandeiras, janelas e capa (v147), carreira (D-247), luz (D-248), materiais (D-249) e

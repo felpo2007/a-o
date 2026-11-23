@@ -645,7 +645,11 @@ test("trim sheet da vila (D-159): as 10 casas sobem com as folhas comuns e o por
 	-- o AssetLoader troca a SurfaceAppearance só dos nós Trim_<letra> e nunca no próprio portador
 	local src = fs.readFile("src/ServerScriptService/Modules/AssetLoader.luau")
 	assert(string.find(src, 'TRIM_KEY = "vila_trim"', 1, true), "AssetLoader sem a chave do portador")
-	assert(string.find(src, "if key ~= AssetLoader.TRIM_KEY then", 1, true), "o portador não pode receber a folha")
+	-- D-255: o setor piloto tem um segundo portador, com a mesma grade
+	assert(
+		string.find(src, "if key ~= AssetLoader.TRIM_KEY and key ~= AssetLoader.TRIM_POV then", 1, true),
+		"o portador não pode receber a folha"
+	)
 	if not haveBlender then
 		return
 	end

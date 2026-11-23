@@ -1,49 +1,67 @@
-# Resultados de QA: área piloto da Vila
+# Resultados de QA: setor piloto da Vila
 
-Medido em 2026-11-22 numa cópia local no Studio, com o piloto ligado por `VT65DevPiloto`. Nada foi publicado.
-O PC estava com outro jogo aberto, por isso nenhum número de fps ou de tempo de quadro entra aqui.
+Medido em 2026-11-23 numa cópia local no Studio, com `VT65DevPiloto`. Nada foi publicado.
+O jogo do dono estava aberto em segundo plano, por isso nenhum número de fps entra aqui.
 
 ## Passou
 | Teste | Resultado |
 |---|---|
-| Lune, mapas, pytest, ruff, luau-lsp, notas (`verifica.ps1`) | 1.014 testes Lune, 84 pytest, 0 erros |
-| Autoteste do jogo com 52 bots e o piloto | 18 ok, 0 falhas, 0 pulados |
+| `verifica.ps1` | Lune, mapas, pytest, ruff, luau-lsp e notas sem erro |
+| Montagem | 32 construções (24 + 8 bancas), 19 cercas, 166 plantas, 254 capim, 134 peças, 0 falhas |
 | Erros de script na partida | 0 |
-| Montagem | 18 trocas, 50 cercas, 720 tufos de capim, 5 árvores afastadas, 143 peças, 0 falhas |
-| Captura do Objetivo C | Passou de neutro para VC com os bots |
-| Bots na Vila | 10 observados por 48 s: nenhum preso |
-| Escada, varanda e porta da casa | Andando: subiu 2,5 m e entrou |
-| Vento em jogo | `GlobalWind` 0, turbulência 0, ondas 0, no servidor e no cliente |
-| Vento depois de respawn e em outro mapa | Continua 0 |
-| Script tentando ligar o vento | Volta a 0 |
-| Capim parado | Semelhança entre quadros de 0,95 (a casa dá 0,96). Com a grama nativa dava 0,5 |
+| Captura do Objetivo C | Neutro para EUA, com um jogador parado no centro, em menos de 90 s |
+| Bots | 14 observados por 80 s: 3 no setor, nenhum preso nele |
+| Caminhada | Portão do pagode, mercearia, casa de chá, casa comunal, entrada sul e fundos do mercado |
+| Troncos | 31 com colisão; 29 de 30 raios pararam neles |
+| Vento | `GlobalWind`, ondas e velocidade das ondas em 0 |
 
-## Desempenho: mesmo build, piloto desligado e ligado
-Câmera a 1,7 m, FOV 70, sem bots. Cada linha é chamadas de desenho / milhões de triângulos.
+## Falha intermitente
+**Granada de bot no autoteste.** Com o setor: 2 rodadas com 18 de 18 e 2 com 17 de 18, com a granada a 13,8 m e 5,3 m do
+alvo (o limite é 5 m). Sem o setor: 1 rodada válida, 18 de 18. Nas rodadas com a posição registrada, o bot estava na base
+dos EUA, a mais de 200 m do setor. Isso sugere que o setor não é a causa, mas **a causa não foi isolada**.
 
-| Vista | Qualidade | Sem piloto | Com piloto | Diferença |
+## Desempenho: mesmo build, setor desligado e ligado
+Câmera a 1,7 m, FOV 70, sem bots. Cada célula é chamadas de desenho / milhões de triângulos.
+
+| Vista | Qualidade | Sem setor | Com setor | Diferença |
 |---|---:|---:|---:|---|
-| Coração da Vila | 3 | 224 / 2,05 | 292 / 3,39 | +30% / +65% |
-| Vila, olhando a mata | 3 | 152 / 1,82 | 209 / 3,73 | +38% / +105% |
-| Mata B (controle) | 3 | 210 / 2,82 | 226 / 2,74 | +8% / -3% |
-| Coração da Vila | 10 | 306 / 3,32 | 384 / 5,85 | +25% / +76% |
-| Vila, olhando a mata | 10 | 187 / 2,09 | 255 / 4,71 | +36% / +125% |
-| Mata B (controle) | 10 | 315 / 5,33 | 321 / 5,19 | +2% / -3% |
+| Coração da Vila | 3 | 229 / 2,10 | 318 / 3,22 | +39% / +53% |
+| Vila, olhando a mata | 3 | 151 / 1,85 | 240 / 2,95 | +59% / +59% |
+| Mata B (controle) | 3 | 212 / 2,85 | 275 / 2,86 | +30% / 0% |
+| Coração da Vila | 10 | 304 / 3,42 | 410 / 5,09 | +35% / +49% |
+| Vila, olhando a mata | 10 | 188 / 2,12 | 298 / 3,96 | +59% / +87% |
+| Mata B (controle) | 10 | 316 / 5,34 | 380 / 5,36 | +20% / 0% |
 
-**O piloto ficou mais pesado na Vila.** Antes do capim, com tudo a mais de 130 m removido, ele somava só de 0,18 a
-0,25 milhão de triângulos e de 59 a 84 chamadas. O resto vem de geometria distante. A causa provável é a casa sobre
-esteios, que deixa ver a mata por baixo, mas isso não foi isolado.
+- **O setor é mais caro.** Nas vistas da Vila, de 35% a 59% mais chamadas e de 49% a 87% mais triângulos.
+- **A vista de controle subiu 20% a 30% em chamadas** com os mesmos triângulos. A causa não foi isolada.
+- Na qualidade 1, o coração da Vila com o setor deu 192 chamadas e 0,66 milhão de triângulos, sem comparação.
+
+## Chão nu (critério 1 da direção de arte)
+Fração de pixels cor de terra abaixo do horizonte, por classificação de cor. É uma medida aproximada. A meta é 35%.
+
+| Câmera | Antes | Depois |
+|---|---:|---:|
+| Entrada | 73% | 74% |
+| Pátio do objetivo | 97% | 85% |
+| Residências | 70% | 14% |
+| Vista aérea | 40% | 41% |
+| Rua leste | 63% | 90% |
+| Rua oeste | 73% | 64% |
+| **Média** | **69%** | **62%** |
+
+**Não atingido.** Só a câmera das residências fica abaixo da meta.
 
 ## Não testado
-- **Fps, 1% low, tempo de quadro de CPU e GPU:** exigem o PC sem outro jogo e a janela em primeiro plano.
-- **Dois jogadores reais, celular, tablet e controle.**
-- **Captura pelos EUA:** só a captura pelo VC foi vista.
+- **Fps, 1% low e tempo de quadro:** exigem o PC sem outro jogo e a janela em primeiro plano.
+- **Duas pessoas, celular, tablet e controle.**
 - **SLIM:** só existe depois que o modelo entra no arquivo do place.
-- **Streaming andando pela Vila:** só testado levando o personagem até o lugar.
-- **Memória:** variou de 1,4 a 2,3 GB entre sessões, sem comparação confiável.
+- **Streaming andando de longe até a Vila:** o personagem foi levado até o lugar.
+- **Escadas das casas sobre esteios neste lote.**
+- **Memória:** variou entre sessões, sem comparação confiável.
 
-## Defeitos conhecidos
-- A janela lateral da casa parece um retângulo preto por dentro: é o lado de baixo da aba de bambu.
-- A grama nativa do terreno ainda existe no build normal. Ela se mexe mesmo com vento zero e só foi desligada por
-  comando no teste. Tirá-la vale para o mapa inteiro.
-- Telhados vermelhos antigos continuam em parte da Vila, porque só 18 construções foram trocadas.
+## Riscos e defeitos conhecidos
+- O Studio registrou até cerca de 500 avisos `Failed to upload TexturePack (429)` por sessão. Em uma sessão as texturas do
+  pagode não carregaram; nas seguintes, sim. Não se sabe se isso acontece no jogo publicado.
+- A grama nativa ainda existe no build normal e se mexe mesmo com vento zero.
+- Janela lateral escura por dentro nas casas sobre esteios (lado de baixo da aba de bambu).
+- Casas e coqueiros fora do setor continuam no padrão antigo, e a transição aparece na vista aérea.

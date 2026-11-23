@@ -10296,3 +10296,16 @@ janelas e a capa. Progressão, direção de arte, telas, Comboio e áudios segue
   parcial da `SurfaceAppearance` sai cortado.
 - **Custo medido:** de 25% a 38% mais chamadas e de 65% a 125% mais triângulos nas vistas da Vila.
 - **Fora do escopo até aprovar:** resto do mapa, 700 × 600 m e lados das bases.
+
+### D-255 — Lote 122: reconstrução artística do setor piloto da Vila (2026-11-23)
+- **Pedido:** reconstruir a Vila com arquitetura, densidade, materiais, terreno e organização novos, começando por um
+  setor de cerca de 80 x 80 m, sem expandir antes da aprovação.
+- **Setor:** 88 x 88 m em volta do Objetivo C. Planta gerada por `tools/vila_piloto_plano.py`; `VilaPiloto.LIGADA = false`.
+- **Conteúdo:** 24 construções, 8 bancas, 54 objetos de cena, 19 cercas, 166 plantas, vielas, lagoa e passarela.
+- **Folha do setor:** `ret_pov_trim` usa a grade da `vila_trim`, com paredes envelhecidas. Só `ret_pov_*` e `ret_vila_*`.
+- **Vegetação:** coqueiro, árvore e arbusto em cartões com alfa; tronco invisível (`TroncosPov`) para bala e soldado.
+- **Chão:** sem `Mud` na rua e sem `LeafyGrass` (quase pretos neste mapa); poça em voxel descartada.
+- **Geração por IA:** `generate_scene` e `generate_mesh` testados e descartados; ForgeGUI não foi usado.
+- **Custo medido:** de 35% a 59% mais chamadas e de 49% a 87% mais triângulos nas vistas da Vila.
+- **Não atingido:** chão nu de 62% contra a meta de 35%. Fps, celular e duas pessoas não medidos.
+- **Fora do escopo até aprovar:** resto do mapa, 700 × 600 m e lados das bases.

@@ -130,7 +130,7 @@ def capim_tex(rng) -> np.ndarray:
     lado = PX * 2
     img = Image.new("RGBA", (lado, lado), (0, 0, 0, 0))
     d = ImageDraw.Draw(img)
-    base = [(70, 92, 38), (84, 104, 42), (98, 112, 46), (62, 84, 36), (112, 118, 54)]
+    base = [(82, 92, 44), (96, 102, 50), (110, 110, 56), (74, 86, 42), (128, 120, 64)]
     for _ in range(150):
         x = rng.uniform(0, lado)
         alto = rng.uniform(0.55, 0.98) * lado
@@ -148,18 +148,18 @@ def capim_tex(rng) -> np.ndarray:
         d.polygon(esq + dir_[::-1], fill=(*(int(np.clip(c, 0, 255)) for c in cor), 255))
     a = np.asarray(img.resize((PX, PX), Image.LANCZOS), np.float32).copy()
     y = np.linspace(0, 1, PX, dtype=np.float32)[:, None, None]  # 0 no topo, 1 na base
-    a[..., :3] *= 1.12 - 0.42 * y
+    a[..., :3] *= 1.1 - 0.2 * y
     return a
 
 
 def capim_malha(rng):
-    """Tufo de 3 m com 34 cartões dobrados (4 triângulos cada), sem animação nenhuma."""
+    """Tufo de 3 m com 46 cartões estreitos e dobrados (4 triângulos cada), sem animação."""
     pos, uv, idx = [], [], []
-    for _ in range(34):
+    for _ in range(46):
         ang, r = rng.uniform(0, 2 * np.pi), 1.5 * np.sqrt(rng.random())
         cx, cz = r * np.cos(ang), r * np.sin(ang)
         giro = rng.uniform(0, np.pi)
-        w, h = rng.uniform(0.7, 1.1), rng.uniform(0.6, 0.95)
+        w, h = rng.uniform(0.38, 0.72), rng.uniform(0.55, 0.95)
         inclina = rng.uniform(-0.16, 0.16)
         ux, uz = np.cos(giro) * w / 2, np.sin(giro) * w / 2
         nx, nz = -np.sin(giro), np.cos(giro)

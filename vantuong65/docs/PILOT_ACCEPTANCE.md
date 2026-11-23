@@ -1,30 +1,30 @@
-# Aceite da área piloto (prompt V5, §19)
+# Aceite do setor piloto (prompt V5, §19, e reconstrução da Vila)
 
-Situação em 2026-11-22. **Aguardando a aprovação visual do dono. O resto do mapa não foi tocado.**
-Comparação com as mesmas câmeras: `testes/lote121/antes_depois.jpg`. Números: `docs/QA_RESULTS.md`.
+Situação em 2026-11-23. **Aguardando a aprovação visual do dono. O resto do mapa não foi tocado e nada foi publicado.**
+Comparação com as mesmas câmeras: `testes/lote122/antes_depois.jpg`. Números: `docs/QA_RESULTS.md`.
 
-| # | Entrega | Situação | Evidência |
+## Critérios visuais (`docs/ART_DIRECTION.md`, §9)
+| # | Critério | Situação | Evidência |
 |---:|---|---|---|
-| 1 | Casa vietnamita em Blender | Feita | `ret_vila_palafita_a` e `_b`, 15,7 mil e 11,6 mil triângulos |
-| 2 | Interior explorável | Feita | Subiu a escada e entrou andando |
-| 3 | PBR | Feita | `SurfaceAppearance` com cor, normal e ORM |
-| 4 | Trim sheets | Feita | 4 modelos de casa |
-| 5 | Baking | Feita | Atlas com AO por modelo |
-| 6 | Vegetação própria | Parcial | Capim novo; bananeira, samambaia e arbustos são reaproveitados |
-| 7 | Chão refeito | Feita | Terra, capim e folhas por distância da rua |
-| 8 | Estrada detalhada | Feita | Sulcos de roda, poças e terra molhada |
-| 9 | Set dressing | Feita | Sacos, carga, carroça, potes, palha, cercas |
-| 10 | Iluminação final | Aguarda o dono | Manhã, relógio parado |
-| 11 | SLIM | **Pendente** | Só depois de entrar no arquivo do place |
-| 12 | LOD e RenderFidelity | Feita | `Automatic`, LOD do motor |
-| 13 | Instancing | Feita | Mesmo MeshId nas repetições |
-| 14 | Colisões otimizadas | Feita | Caixas; marcas e capim sem colisão |
-| 15 | Streaming | Parcial | Carrega no lugar; não testado andando |
-| 16 | Ausência de vento | Parcial | Zero em jogo; a grama nativa só sai no teste |
-| 17 | Captura funcional | Feita | Neutro para VC; EUA não testado |
-| 18 | Multiplayer | **Pendente** | 52 bots e 1 jogador; faltam 2 pessoas |
-| 19 | Benchmark | Parcial | Chamadas e triângulos; fps inválido neste PC agora |
-| 20 | Fotos antes e depois | Feita | Mesmas câmeras |
+| 1 | Chão vazio até 35% abaixo do horizonte | **Não atingido** | Média de 62% (antes, 69%); só as residências passam |
+| 2 | Três tipos de construção por vista | Atingido | Avaliação visual das seis câmeras |
+| 3 | Palha sem beiral reto | Parcial | Franja nos modelos novos; de longe ainda parece reta |
+| 4 | Objetos em volta de toda construção | Parcial | 54 objetos de cena; não conferido casa a casa |
+| 5 | Vegetação em três alturas | Atingido | Capim, arbusto e bananeira, bambu, coqueiro e árvore |
+| 6 | Relevo, umidade e mais de um material | **Parcial** | Relevo e valas existem; falta chão molhado convincente |
+| 7 | Portas, escadas e interiores percorridos | Parcial | Quatro interiores andando; escadas não retestadas |
+| 8 | Antes e depois claramente diferentes | **Decisão do dono** | `testes/lote122/antes_depois.jpg` |
+
+## Entregas técnicas
+| Entrega | Situação | Evidência |
+|---|---|---|
+| Biblioteca de modelos em Blender | Feita | 51 pastas `ret_pov_*` |
+| Vegetação própria | Feita | Coqueiros, árvores, arbustos, pedras e capim |
+| PBR e folha de paredes envelhecidas | Feita | `ret_pov_trim`, só no setor |
+| Captura, bots e caminhada | Feita | `docs/QA_RESULTS.md` |
+| Autoteste | **Intermitente** | Granada de bot falhou em 2 de 4 rodadas |
+| Fps, celular e duas pessoas | **Pendente** | Não medidos |
+| SLIM | **Pendente** | Só depois de entrar no arquivo do place |
 
 ## Decisões do dono
 1. Aprovar o visual da Vila ou dizer o que mudar.
