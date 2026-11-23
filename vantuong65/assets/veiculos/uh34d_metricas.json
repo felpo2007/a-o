@@ -1,0 +1,650 @@
+{
+ "chave": "uh34d",
+ "tipo": "refeito",
+ "nome": "UH-34D Seahorse (HMM-361, 1965)",
+ "classe": "hero",
+ "meta_triangulos": 20000,
+ "faccao": "US",
+ "medidas_reais": {
+  "comprimento_fuselagem_m": [
+   14.25,
+   "flugzeuginfo e Sikorsky Archives: 46 ft 9 in (https://www.flugzeuginfo.net/acdata_php/acdata_s58_en.php; https://sikorskyarchives.com/?p=4968); a Wikipedia dá 47 ft 2 in (14,38 m)"
+  ],
+  "rotor_principal_diametro_m": [
+   17.07,
+   "flugzeuginfo: 56 ft, 4 pás (https://www.flugzeuginfo.net/acdata_php/acdata_s58_en.php)"
+  ],
+  "rotor_cauda_diametro_m": [
+   2.9,
+   "flugzeuginfo: 9 ft 6 in, 4 pás (https://www.flugzeuginfo.net/acdata_php/acdata_s58_en.php)"
+  ],
+  "perfil_pa": [
+   null,
+   "NACA 0012 nas pás do rotor principal e do de cauda (Army Aviation Magazine, armyaviationmagazine.com/ch-34-choctaw; Sikorsky Archives). Corda de 0,41 m: PLACEHOLDER (sem fonte)"
+  ],
+  "altura_cubo_m": [
+   4.53,
+   "topo do cubo medido no desenho (https://the-blueprints.com/blueprints/helicopters/sikorsky/33517/view/sikorsky_s-58_uh-34d_choctaw): 4,53 m; a Wikipedia dá 14 ft 3,5 in (4,36 m) de altura; flugzeuginfo e Sikorsky, 15 ft 11 in (4,85 m)"
+  ],
+  "silhueta": [
+   null,
+   "perfil (topo e base por coluna), planta e frente medidos por código no desenho de três vistas (https://the-blueprints.com/blueprints/helicopters/sikorsky/33517/view/sikorsky_s-58_uh-34d_choctaw), escala do comprimento da fuselagem: cabine alta (teto a 3,86 m; no modelo 4,08 m, para o soldado R15 sentado caber), carenagem até o mastro, cone fundo e estreito, deriva inclinada, rotor de cauda a 3,83 m e 0,55 m à esquerda, roda principal em x = 5,03 m (Ø 0,76 m) e bequilha em x = -3,92 m"
+  ],
+  "bitola_trem_m": [
+   4.27,
+   "NATOPS citado em popasmoke.com/notam/aircraft-38/uh-34d-shipboad-folded: 14 ft no trem de perna em V (12 ft no de perna curva; o desenho mostra ~12 ft)"
+  ],
+  "motor_no_nariz": [
+   null,
+   "usmcmuseum.com/sikorsky-uh-34d.html: motor baixo no nariz; portas em concha (Sikorsky Archives)"
+  ],
+  "porta_e_m60": [
+   null,
+   "M60 na porta da direita (shootingillustrated.com/articles/2020/10/14/fightin-iron-how-the-h-34-helicopter-changed-the-face-of-combat); medidas da porta: PLACEHOLDER"
+  ],
+  "cor": [
+   null,
+   "Field Green FS 34097 com letreiro preto: popasmoke.com/notam/aircraft-4/marine-helicopter-colors (Monogram Color Guide; relato do HMM-161 em 1965: branco repintado de preto antes de entrar no país). Tom sRGB: aproximação"
+  ],
+  "ponta_das_pas": [
+   null,
+   "faixa laranja-amarela nos 6 in de fora (popasmoke, marine-helicopter-colors, pelo resumo da busca: a página não abriu). Cor da pá: PLACEHOLDER (escura)"
+  ],
+  "marcas": [
+   null,
+   "'YN' = HMM-361 (en.wikipedia.org/wiki/HMH-361); BuNo 150570 'YN-19' voou na Starlite (usmcmuseum.com/sikorsky-uh-34d.html). Posição de 'MARINES' e da insígnia nacional no cone: PLACEHOLDER (sem fonte textual)"
+  ],
+  "rodas_m": [
+   null,
+   "roda principal Ø 0,76 m e bequilha Ø 0,40 m, medidas no desenho"
+  ]
+ },
+ "novo": {
+  "arquivo": "assets/blender/uh34d/uh34d.glb",
+  "triangulos": 13648,
+  "malhas_unicas": 10,
+  "texturas_px": {
+   "cor": [
+    1024,
+    1024
+   ],
+   "normal": [
+    1024,
+    1024
+   ],
+   "metal_rug": [
+    512,
+    512
+   ]
+  },
+  "atlas": {
+   "casco": {
+    "ilhas": 936,
+    "uso_uv": 0.587,
+    "partes": [
+     "Casco"
+    ],
+    "tempos_s": {
+     "cor": 16.9,
+     "normal": 16.8,
+     "rug": 17.0,
+     "metal": 11.7,
+     "ao": 172.3
+    },
+    "fracao_texels_sem_cor": 0.0,
+    "cobertura_uv_texels": 0.6152,
+    "extrusao_m": 0.02
+   },
+   "interior": {
+    "ilhas": 474,
+    "uso_uv": 0.592,
+    "partes": [
+     "Interior",
+     "Vidro",
+     "Escotilha_Porta"
+    ],
+    "tempos_s": {
+     "cor": 18.7,
+     "normal": 18.8,
+     "rug": 19.7,
+     "metal": 17.3,
+     "ao": 131.5
+    },
+    "fracao_texels_sem_cor": 0.0,
+    "cobertura_uv_texels": 0.6272,
+    "extrusao_m": 0.02
+   },
+   "cauda": {
+    "ilhas": 289,
+    "uso_uv": 0.633,
+    "partes": [
+     "Cauda",
+     "RotorPrincipal",
+     "Pa_1",
+     "RotorCauda",
+     "Roda_E",
+     "Roda_Cauda"
+    ],
+    "tempos_s": {
+     "cor": 21.1,
+     "normal": 20.8,
+     "rug": 20.7,
+     "metal": 16.6,
+     "ao": 172.0
+    },
+    "fracao_texels_sem_cor": 0.0,
+    "cobertura_uv_texels": 0.6551,
+    "extrusao_m": 0.025
+   }
+  },
+  "texturas": 3,
+  "mb": 3.21,
+  "dim_m_xyz": [
+   17.718,
+   5.231,
+   12.434
+  ],
+  "dim_studs_xyz": [
+   63.28,
+   18.68,
+   44.41
+  ],
+  "partes": {
+   "Casco": {
+    "triangulos": 5468,
+    "dim_studs": [
+     23.04,
+     14.54,
+     15.11
+    ],
+    "pivo_studs_roblox": [
+     -11.49,
+     -1.29,
+     0.0
+    ],
+    "atlas": "casco"
+   },
+   "Interior": {
+    "triangulos": 2792,
+    "dim_studs": [
+     15.93,
+     11.95,
+     9.54
+    ],
+    "pivo_studs_roblox": [
+     -9.65,
+     -0.87,
+     -1.73
+    ],
+    "atlas": "interior"
+   },
+   "Vidro": {
+    "triangulos": 272,
+    "dim_studs": [
+     9.1,
+     3.7,
+     6.24
+    ],
+    "pivo_studs_roblox": [
+     -14.91,
+     2.87,
+     -0.0
+    ],
+    "atlas": "interior"
+   },
+   "Cauda": {
+    "triangulos": 1282,
+    "dim_studs": [
+     28.2,
+     13.95,
+     6.86
+    ],
+    "pivo_studs_roblox": [
+     14.13,
+     -1.74,
+     -0.43
+    ],
+    "atlas": "cauda"
+   },
+   "Escotilha_Porta": {
+    "triangulos": 234,
+    "dim_studs": [
+     9.82,
+     4.57,
+     0.62
+    ],
+    "pivo_studs_roblox": [
+     -7.03,
+     -3.51,
+     -3.12
+    ],
+    "atlas": "interior"
+   },
+   "RotorPrincipal": {
+    "triangulos": 1024,
+    "dim_studs": [
+     5.15,
+     1.26,
+     5.15
+    ],
+    "pivo_studs_roblox": [
+     -9.44,
+     6.34,
+     0.0
+    ],
+    "atlas": "cauda"
+   },
+   "Pa_1": {
+    "triangulos": 248,
+    "dim_studs": [
+     20.05,
+     1.57,
+     19.83
+    ],
+    "pivo_studs_roblox": [
+     -9.44,
+     6.34,
+     0.0
+    ],
+    "atlas": "cauda"
+   },
+   "RotorCauda": {
+    "triangulos": 616,
+    "dim_studs": [
+     10.01,
+     10.01,
+     0.71
+    ],
+    "pivo_studs_roblox": [
+     26.64,
+     4.34,
+     1.96
+    ],
+    "atlas": "cauda"
+   },
+   "Roda_E": {
+    "triangulos": 400,
+    "dim_studs": [
+     2.71,
+     2.71,
+     0.82
+    ],
+    "pivo_studs_roblox": [
+     -14.54,
+     -7.98,
+     7.62
+    ],
+    "atlas": "cauda"
+   },
+   "Roda_Cauda": {
+    "triangulos": 168,
+    "dim_studs": [
+     1.43,
+     1.39,
+     0.36
+    ],
+    "pivo_studs_roblox": [
+     17.42,
+     -8.63,
+     0.0
+    ],
+    "atlas": "cauda"
+   },
+   "Pa_2": {
+    "triangulos": 248,
+    "dim_studs": [
+     20.05,
+     1.57,
+     19.83
+    ],
+    "pivo_studs_roblox": [
+     -9.44,
+     6.34,
+     0.0
+    ],
+    "atlas": "cauda",
+    "instancia_de": "Pa_1",
+    "giro_z_graus": 90.0
+   },
+   "Pa_3": {
+    "triangulos": 248,
+    "dim_studs": [
+     20.05,
+     1.57,
+     19.83
+    ],
+    "pivo_studs_roblox": [
+     -9.44,
+     6.34,
+     0.0
+    ],
+    "atlas": "cauda",
+    "instancia_de": "Pa_1",
+    "giro_z_graus": 180.0
+   },
+   "Pa_4": {
+    "triangulos": 248,
+    "dim_studs": [
+     20.05,
+     1.57,
+     19.83
+    ],
+    "pivo_studs_roblox": [
+     -9.44,
+     6.34,
+     0.0
+    ],
+    "atlas": "cauda",
+    "instancia_de": "Pa_1",
+    "giro_z_graus": 270.0
+   },
+   "Roda_D": {
+    "triangulos": 400,
+    "dim_studs": [
+     2.71,
+     2.71,
+     0.82
+    ],
+    "pivo_studs_roblox": [
+     -14.54,
+     -7.98,
+     -7.62
+    ],
+    "atlas": "cauda",
+    "instancia_de": "Roda_E",
+    "giro_z_graus": 180.0
+   }
+  }
+ },
+ "art_novo": {
+  "box": [
+   63.28,
+   18.68,
+   44.41
+  ],
+  "rotor": {
+   "x": -9.44,
+   "y": 6.34,
+   "z": 0.0,
+   "r": 30.48
+  },
+  "tail": {
+   "x": 26.64,
+   "y": 4.34,
+   "z": 1.96,
+   "r": 5.18
+  },
+  "eyes": {
+   "driver": [
+    -13.9,
+    3.41,
+    -1.5
+   ],
+   "copilot": [
+    -13.9,
+    3.41,
+    1.5
+   ],
+   "gunner": [
+    -9.97,
+    -3.2,
+    -3.71
+   ]
+  },
+  "riders": {
+   "x0": -11.04,
+   "dx": 1.29,
+   "y": -3.56,
+   "z": 2.86
+  }
+ },
+ "conferencia": {
+  "olhos_novos": {
+   "driver": {
+    "dentro_da_malha": false,
+    "dist_superficie_m": 0.32,
+    "altura_sobre_o_casco_m": 0.99
+   },
+   "copilot": {
+    "dentro_da_malha": false,
+    "dist_superficie_m": 0.32,
+    "altura_sobre_o_casco_m": 0.99
+   },
+   "gunner": {
+    "dentro_da_malha": false,
+    "dist_superficie_m": 0.363,
+    "altura_sobre_o_casco_m": null
+   }
+  },
+  "olhos_de_hoje_escalados": {
+   "driver": {
+    "escalado_studs": [
+     -20.4,
+     5.96,
+     -1.61
+    ],
+    "dentro_da_malha": false,
+    "dist_superficie_m": 1.28,
+    "altura_sobre_o_casco_m": 1.645
+   },
+   "copilot": {
+    "escalado_studs": [
+     -20.4,
+     5.96,
+     1.61
+    ],
+    "dentro_da_malha": false,
+    "dist_superficie_m": 1.28,
+    "altura_sobre_o_casco_m": 1.645
+   },
+   "gunner": {
+    "escalado_studs": [
+     -7.9,
+     -0.95,
+     -5.1
+    ],
+    "dentro_da_malha": false,
+    "dist_superficie_m": 0.524,
+    "altura_sobre_o_casco_m": null
+   }
+  },
+  "assentos_do_chassi": [
+   {
+    "assento": "driver",
+    "malha_studs": [
+     -12.32,
+     -0.78,
+     2.86
+    ],
+    "cai_sobre_o_casco": true,
+    "altura_do_assento_m": 2.4,
+    "topo_do_casco_ali_m": 4.42
+   },
+   {
+    "assento": "copilot",
+    "malha_studs": [
+     -9.47,
+     -0.78,
+     -2.86
+    ],
+    "cai_sobre_o_casco": true,
+    "altura_do_assento_m": 2.4,
+    "topo_do_casco_ali_m": 3.19
+   },
+   {
+    "assento": "gunner",
+    "malha_studs": [
+     -9.47,
+     -0.78,
+     2.86
+    ],
+    "cai_sobre_o_casco": true,
+    "altura_do_assento_m": 2.4,
+    "topo_do_casco_ali_m": 3.19
+   },
+   {
+    "assento": "p1",
+    "malha_studs": [
+     2.05,
+     -0.78,
+     3.57
+    ],
+    "cai_sobre_o_casco": false,
+    "altura_do_assento_m": 2.4,
+    "topo_do_casco_ali_m": null
+   },
+   {
+    "assento": "p2",
+    "malha_studs": [
+     2.05,
+     -0.78,
+     -3.57
+    ],
+    "cai_sobre_o_casco": false,
+    "altura_do_assento_m": 2.4,
+    "topo_do_casco_ali_m": null
+   },
+   {
+    "assento": "p3",
+    "malha_studs": [
+     4.55,
+     -0.78,
+     3.57
+    ],
+    "cai_sobre_o_casco": false,
+    "altura_do_assento_m": 2.4,
+    "topo_do_casco_ali_m": null
+   },
+   {
+    "assento": "p4",
+    "malha_studs": [
+     4.55,
+     -0.78,
+     -3.57
+    ],
+    "cai_sobre_o_casco": false,
+    "altura_do_assento_m": 2.4,
+    "topo_do_casco_ali_m": null
+   },
+   {
+    "assento": "p5",
+    "malha_studs": [
+     7.05,
+     -0.78,
+     3.57
+    ],
+    "cai_sobre_o_casco": false,
+    "altura_do_assento_m": 2.4,
+    "topo_do_casco_ali_m": null
+   },
+   {
+    "assento": "p6",
+    "malha_studs": [
+     7.05,
+     -0.78,
+     -3.57
+    ],
+    "cai_sobre_o_casco": false,
+    "altura_do_assento_m": 2.4,
+    "topo_do_casco_ali_m": null
+   },
+   {
+    "assento": "p7",
+    "malha_studs": [
+     9.55,
+     -0.78,
+     3.57
+    ],
+    "cai_sobre_o_casco": false,
+    "altura_do_assento_m": 2.4,
+    "topo_do_casco_ali_m": null
+   },
+   {
+    "assento": "p8",
+    "malha_studs": [
+     9.55,
+     -0.78,
+     -3.57
+    ],
+    "cai_sobre_o_casco": false,
+    "altura_do_assento_m": 2.4,
+    "topo_do_casco_ali_m": null
+   }
+  ],
+  "soldado_2m": {
+   "estatura_m": 2.0,
+   "olho_sentado_m": 0.9,
+   "cabeca_acima_do_olho_m": 0.12,
+   "ombros_m": 0.53,
+   "olhos": {
+    "driver": {
+     "olho_2m": [
+      -13.9,
+      3.09,
+      -1.5
+     ],
+     "subiu_m": -0.09,
+     "folga_cabeca_ao_teto_m": 0.407,
+     "dentro_da_malha": false
+    },
+    "copilot": {
+     "olho_2m": [
+      -13.9,
+      3.09,
+      1.5
+     ],
+     "subiu_m": -0.09,
+     "folga_cabeca_ao_teto_m": 0.407,
+     "dentro_da_malha": false
+    },
+    "gunner": {
+     "olho_2m": [
+      -9.97,
+      -2.81,
+      -3.71
+     ],
+     "subiu_m": 0.11,
+     "folga_cabeca_ao_teto_m": null,
+     "dentro_da_malha": false
+    }
+   },
+   "escotilhas": {
+    "Escotilha_Porta (vão)": {
+     "abertura_m": [
+      1.2999999999999998,
+      1.2000000000000002
+     ],
+     "passa_ombros_de_2m": true,
+     "folga_m": 0.67
+    }
+   }
+  }
+ },
+ "notas": [
+  "v3 (D-199): silhueta medida no desenho de três vistas (cabine alta, mastro curto, cone fundo, deriva inclinada, trem principal à frente e bequilha atrás).",
+  "Vidro: nó próprio; o jogo deixa transparente, nos dois lados e sem colisão.",
+  "Cabine e porão com forro por dentro: o olho do piloto e do copiloto fica DENTRO da cabine (a casca de fora é face única e some por dentro).",
+  "Pás do rotor principal: Pa_1..Pa_4 são a mesma malha em 4 nós (giro de 90° em Y do GLB); o jogo deve soldar as 4 no RotorPrincipal (cubo) e girar o cubo.",
+  "Rotor de cauda no lado esquerdo da deriva (0,55 m, medido na planta).",
+  "Passageiros: na porta da direita (pernas para fora) e no banco de lona da esquerda.",
+  "v45: o porão também é aberto à esquerda (x 2,15 a 4,25 m), liberdade de jogo."
+ ],
+ "tempo_total_s": 755.6,
+ "antigo": {
+  "arquivo_jogo": "assets/forgegui/models/uh34d_studs.glb",
+  "triangulos": 15061,
+  "mb": 10.595,
+  "texturas_px": {
+   "cor": [
+    4096,
+    4096
+   ]
+  },
+  "imagens": 3,
+  "dim_studs_xyz": [
+   48.09,
+   19.76,
+   47.01
+  ]
+ }
+}

@@ -1,0 +1,20 @@
+nome,tipo,grade_1965,E_ing,N_ing,lat,lon,E_wgs84_utm49,N_wgs84_utm49,x_local_m,z_local_m,x_studs,z_studs,na_area_jogavel,precisao_m,fonte,obs
+Colina 43 (cume),colina,BS 685916,268545,1691655,15.293985,108.839706,268025.0,1691996.4,-1655.0,745.0,-5910.8,2660.7,True,15,AMS L7014 6739 I ed.003,cota 43; FF p.26: 'small knoll... ~400 m SW' da LZ Blue
+LZ Blue,lz,BS 688919,268850,1691950,15.296678,108.842518,268330.0,1692291.4,-1350.0,450.0,-4821.5,1607.1,True,120,"The First Fight (USMC History Division, 2015), p.26 + mapa p.25",estimada: Nam Yên (3) 100-200 m ao N e Colina 43 ~400 m a SW (FF p.26)
+Nam Yên (3),vila,BS 689921,268950,1692150,15.298494,108.84343,268430.0,1692491.4,-1250.0,250.0,-4464.3,892.9,True,80,AMS L7014 6739 I ed.003,bloco de casas a NE da LZ Blue
+Athletic field,campo,BS 684921,268400,1692170,15.298625,108.838309,267880.0,1692511.4,-1800.0,230.0,-6428.6,821.4,True,30,AMS L7014 6739 I ed.003,retângulo tracejado 'Athletic field'
+Lạc Sơn (1),vila,BS 684914,268420,1691480,15.292393,108.838559,267900.0,1691821.4,-1780.0,920.0,-6357.2,3285.7,True,80,AMS L7014 6739 I ed.003,casas em arco na encosta S/SW da Colina 43
+Nam Yên (4),vila,BS 693928,269350,1692870,15.305035,108.847087,268830.0,1693211.4,-850.0,-470.0,-3035.7,-1678.6,True,80,AMS L7014 6739 I ed.003,
+An Cường (2),vila,BS 700928,270030,1692850,15.304915,108.853419,269510.0,1693191.4,-170.0,-450.0,-607.1,-1607.2,True,60,AMS L7014 6739 I ed.003,FF: 'heavily wooded village fortified with trench lines'
+Riacho a leste de An Cường (2),riacho,BS 702929,270260,1692900,15.305387,108.855555,269740.0,1693241.4,60.0,-500.0,214.3,-1785.7,True,30,AMS L7014 6739 I ed.003,FF p.29: 'the streambed just east of An Cuong (2)'
+Colina 30 (cume),colina,BS 702934,270205,1693420,15.31008,108.854995,269685.0,1693761.4,5.0,-1020.0,17.9,-3642.9,True,30,AMS L7014 6739 I ed.003,"anel interno da curva 30; FF p.26: 'Hill 30, just north of An Cuong (2)'"
+An Thới (2),vila,BS 695932,269530,1693200,15.308032,108.848732,269010.0,1693541.4,-670.0,-800.0,-2392.9,-2857.2,True,80,AMS L7014 6739 I ed.003,
+An Thới (1),vila,BS 700936,270050,1693690,15.312506,108.853527,269530.0,1694031.4,-150.0,-1290.0,-535.7,-4607.2,False,100,AMS L7014 6739 I ed.003,
+An Phước (1),vila,BS 705916,270560,1691600,15.293669,108.858467,270040.0,1691941.4,360.0,800.0,1285.7,2857.2,True,80,AMS L7014 6739 I ed.003,
+An Cường (1),vila,BS 715923,271550,1692360,15.300623,108.867612,271030.0,1692701.4,1350.0,40.0,4821.5,142.9,True,60,AMS L7014 6739 I ed.003,vila de pescadores junto à praia
+Green Beach (centro provisório),praia,BS 718925,271800,1692500,15.30191,108.869927,271280.0,1692841.4,1600.0,-100.0,5714.3,-357.1,True,200,"AMS L7014 6739 I ed.003 + The First Fight (USMC History Division, 2015), p.25",FF: desembarque em 'Green Beach at An Cuong (2)' [sic] / tanques na praia de An Cuong (1); extensão exata pendente do AAR do RLT-7
+Cota trigonométrica 22,controle,BS 716927,271630,1692740,15.304064,108.868322,271110.0,1693081.4,1430.0,-340.0,5107.2,-1214.3,True,10,AMS L7014 6739 I ed.003,△22 ao N de An Cường (1)
+Cota trigonométrica 10,controle,BS 721913,272132,1691394,15.291947,108.873118,271612.0,1691735.4,1932.0,1006.0,6900.0,3592.9,True,10,AMS L7014 6739 I ed.003,△10 ao S da praia
+Cota trigonométrica 45 (Núi Đầm Tre),controle,BS 720937,272057,1693790,15.313588,108.872201,271537.0,1694131.4,1857.0,-1390.0,6632.2,-4964.3,False,10,AMS L7014 6739 I ed.003,fora da área
+Marco da Rota 523,estrada,BS 686911,268600,1691133,15.289274,108.840267,268080.0,1691474.4,-1600.0,1267.0,-5714.3,4525.0,False,20,AMS L7014 6739 I ed.003,círculo '523'
+Vạn Tường (1),vila,BS 702957,270200,1695700,15.330679,108.854739,269680.0,1696041.5,0.0,-3300.0,0.0,-11785.8,False,150,AMS L7014 6739 I ed.003,fora da área proposta; referência para a trincheira VC (HistoryNet)

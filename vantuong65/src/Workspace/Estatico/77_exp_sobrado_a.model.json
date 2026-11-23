@@ -1,0 +1,323 @@
+{
+ "ClassName": "Model",
+ "Properties": {
+  "LevelOfDetail": {
+   "Enum": 4
+  },
+  "ModelStreamingMode": "Atomic",
+  "WorldPivotData": {
+   "OptionalCFrame": {
+    "position": [
+     -1473.243,
+     60.793,
+     -2221.43
+    ],
+    "orientation": [
+     [
+      -1.0,
+      0,
+      0.0
+     ],
+     [
+      0,
+      1,
+      0
+     ],
+     [
+      -0.0,
+      0,
+      -1.0
+     ]
+    ]
+   }
+  },
+  "Attributes": {
+   "Attributes": {
+    "VT65Estatico": {
+     "Bool": true
+    },
+    "VT65Chave": {
+     "String": "exp_sobrado_a"
+    }
+   }
+  }
+ },
+ "Children": [
+  {
+   "Name": "Trim_M_Node",
+   "ClassName": "Model",
+   "Children": [
+    {
+     "Name": "Trim_M",
+     "ClassName": "MeshPart",
+     "Properties": {
+      "MeshId": "rbxassetid://113458972438007",
+      "InitialSize": [
+       51.054,
+       28.536,
+       33.814
+      ],
+      "Size": [
+       63.8175,
+       35.67,
+       42.2675
+      ],
+      "CFrame": {
+       "CFrame": {
+        "position": [
+         -1473.633,
+         78.628,
+         -2220.6237
+        ],
+        "orientation": [
+         [
+          -1.0,
+          0,
+          0.0
+         ],
+         [
+          0,
+          1,
+          0
+         ],
+         [
+          -0.0,
+          0,
+          -1.0
+         ]
+        ]
+       }
+      },
+      "Anchored": true,
+      "CanCollide": false,
+      "CanQuery": false,
+      "CanTouch": false,
+      "CastShadow": true,
+      "Transparency": 0,
+      "CollisionFidelity": "Default"
+     },
+     "Children": [
+      {
+       "Name": "SurfaceAppearance",
+       "ClassName": "SurfaceAppearance",
+       "Properties": {
+        "AlphaMode": "Overlay",
+        "ColorMap": "rbxassetid://134979674313261",
+        "NormalMap": "rbxassetid://116858274661487",
+        "RoughnessMap": "rbxassetid://120767651982064",
+        "MetalnessMap": "rbxassetid://109994254315822"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "Name": "Mobilia_Node",
+   "ClassName": "Model",
+   "Children": [
+    {
+     "Name": "Mobilia",
+     "ClassName": "MeshPart",
+     "Properties": {
+      "MeshId": "rbxassetid://108303993309035",
+      "InitialSize": [
+       43.188,
+       18.714,
+       25.36
+      ],
+      "Size": [
+       53.985,
+       23.3925,
+       31.7
+      ],
+      "CFrame": {
+       "CFrame": {
+        "position": [
+         -1475.5693,
+         73.1592,
+         -2225.5675
+        ],
+        "orientation": [
+         [
+          -1.0,
+          0,
+          0.0
+         ],
+         [
+          0,
+          1,
+          0
+         ],
+         [
+          -0.0,
+          0,
+          -1.0
+         ]
+        ]
+       }
+      },
+      "Anchored": true,
+      "CanCollide": false,
+      "CanQuery": false,
+      "CanTouch": false,
+      "CastShadow": true,
+      "Transparency": 0,
+      "CollisionFidelity": "Default"
+     },
+     "Children": [
+      {
+       "Name": "SurfaceAppearance",
+       "ClassName": "SurfaceAppearance",
+       "Properties": {
+        "AlphaMode": "Overlay",
+        "ColorMap": "rbxassetid://96057380774495",
+        "NormalMap": "rbxassetid://92433122614300",
+        "RoughnessMap": "rbxassetid://88231236477017",
+        "MetalnessMap": "rbxassetid://129344284981059"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "Name": "Telhado_Node",
+   "ClassName": "Model",
+   "Children": [
+    {
+     "Name": "Telhado",
+     "ClassName": "MeshPart",
+     "Properties": {
+      "MeshId": "rbxassetid://101641385626559",
+      "InitialSize": [
+       51.679,
+       9.802,
+       35.957
+      ],
+      "Size": [
+       64.5987,
+       12.2525,
+       44.9462
+      ],
+      "CFrame": {
+       "CFrame": {
+        "position": [
+         -1473.243,
+         91.2067,
+         -2221.4275
+        ],
+        "orientation": [
+         [
+          -1.0,
+          0,
+          0.0
+         ],
+         [
+          0,
+          1,
+          0
+         ],
+         [
+          -0.0,
+          0,
+          -1.0
+         ]
+        ]
+       }
+      },
+      "Anchored": true,
+      "CanCollide": false,
+      "CanQuery": false,
+      "CanTouch": false,
+      "CastShadow": true,
+      "Transparency": 0,
+      "CollisionFidelity": "Default"
+     },
+     "Children": [
+      {
+       "Name": "SurfaceAppearance",
+       "ClassName": "SurfaceAppearance",
+       "Properties": {
+        "AlphaMode": "Overlay",
+        "ColorMap": "rbxassetid://130114629533755",
+        "NormalMap": "rbxassetid://114416807793940",
+        "RoughnessMap": "rbxassetid://98942095964851",
+        "MetalnessMap": "rbxassetid://75925926980507"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "Name": "Trim_O_Node",
+   "ClassName": "Model",
+   "Children": [
+    {
+     "Name": "Trim_O",
+     "ClassName": "MeshPart",
+     "Properties": {
+      "MeshId": "rbxassetid://137200956585986",
+      "InitialSize": [
+       51.679,
+       28.729,
+       35.586
+      ],
+      "Size": [
+       64.5987,
+       35.9112,
+       44.4825
+      ],
+      "CFrame": {
+       "CFrame": {
+        "position": [
+         -1473.243,
+         78.7493,
+         -2221.3038
+        ],
+        "orientation": [
+         [
+          -1.0,
+          0,
+          0.0
+         ],
+         [
+          0,
+          1,
+          0
+         ],
+         [
+          -0.0,
+          0,
+          -1.0
+         ]
+        ]
+       }
+      },
+      "Anchored": true,
+      "CanCollide": false,
+      "CanQuery": false,
+      "CanTouch": false,
+      "CastShadow": true,
+      "Transparency": 0,
+      "CollisionFidelity": "Default"
+     },
+     "Children": [
+      {
+       "Name": "SurfaceAppearance",
+       "ClassName": "SurfaceAppearance",
+       "Properties": {
+        "AlphaMode": "Overlay",
+        "ColorMap": "rbxassetid://98817676281040",
+        "NormalMap": "rbxassetid://97059026021565",
+        "RoughnessMap": "rbxassetid://70521593518624",
+        "MetalnessMap": "rbxassetid://109994254315822"
+       }
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

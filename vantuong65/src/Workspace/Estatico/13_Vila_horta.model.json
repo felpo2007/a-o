@@ -1,0 +1,307 @@
+{
+ "ClassName": "Model",
+ "Properties": {
+  "LevelOfDetail": {
+   "Enum": 4
+  },
+  "ModelStreamingMode": "Atomic",
+  "WorldPivotData": {
+   "OptionalCFrame": {
+    "position": [
+     -1341.197,
+     50.603,
+     -2261.085
+    ],
+    "orientation": [
+     [
+      -0.812948,
+      0,
+      -0.582336
+     ],
+     [
+      0,
+      1,
+      0
+     ],
+     [
+      0.582336,
+      0,
+      -0.812948
+     ]
+    ]
+   }
+  },
+  "Attributes": {
+   "Attributes": {
+    "VT65Estatico": {
+     "Bool": true
+    },
+    "VT65Chave": {
+     "String": "Vila_horta"
+    }
+   }
+  }
+ },
+ "Children": [
+  {
+   "Name": "Canteiro",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     13.929,
+     0.714,
+     9.286
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1341.197,
+       50.781,
+       -2261.085
+      ],
+      "orientation": [
+       [
+        -0.812952,
+        0.0,
+        -0.582331
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.582331,
+        0.0,
+        -0.812952
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": false,
+    "CanQuery": false,
+    "CanTouch": false,
+    "CastShadow": false,
+    "Transparency": 0,
+    "Material": "Ground",
+    "Color": [
+     0.4078,
+     0.3216,
+     0.2275
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block"
+   }
+  },
+  {
+   "Name": "Folhas",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     12.536,
+     0.714,
+     0.893
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1339.395,
+       51.496,
+       -2258.569
+      ],
+      "orientation": [
+       [
+        -0.812952,
+        0.0,
+        -0.582331
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.582331,
+        0.0,
+        -0.812952
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": false,
+    "CanQuery": false,
+    "CanTouch": false,
+    "CastShadow": false,
+    "Transparency": 0,
+    "Material": "LeafyGrass",
+    "Color": [
+     0.2745,
+     0.4078,
+     0.1804
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block"
+   }
+  },
+  {
+   "Name": "Folhas",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     12.536,
+     0.714,
+     0.893
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1340.597,
+       51.496,
+       -2260.246
+      ],
+      "orientation": [
+       [
+        -0.812952,
+        0.0,
+        -0.582331
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.582331,
+        0.0,
+        -0.812952
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": false,
+    "CanQuery": false,
+    "CanTouch": false,
+    "CastShadow": false,
+    "Transparency": 0,
+    "Material": "LeafyGrass",
+    "Color": [
+     0.2745,
+     0.4078,
+     0.1804
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block"
+   }
+  },
+  {
+   "Name": "Folhas",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     12.536,
+     0.714,
+     0.893
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1341.798,
+       51.496,
+       -2261.924
+      ],
+      "orientation": [
+       [
+        -0.812952,
+        0.0,
+        -0.582331
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.582331,
+        0.0,
+        -0.812952
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": false,
+    "CanQuery": false,
+    "CanTouch": false,
+    "CastShadow": false,
+    "Transparency": 0,
+    "Material": "LeafyGrass",
+    "Color": [
+     0.2745,
+     0.4078,
+     0.1804
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block"
+   }
+  },
+  {
+   "Name": "Folhas",
+   "ClassName": "Part",
+   "Properties": {
+    "Size": [
+     12.536,
+     0.714,
+     0.893
+    ],
+    "CFrame": {
+     "CFrame": {
+      "position": [
+       -1343.0,
+       51.496,
+       -2263.601
+      ],
+      "orientation": [
+       [
+        -0.812952,
+        0.0,
+        -0.582331
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.582331,
+        0.0,
+        -0.812952
+       ]
+      ]
+     }
+    },
+    "Anchored": true,
+    "CanCollide": false,
+    "CanQuery": false,
+    "CanTouch": false,
+    "CastShadow": false,
+    "Transparency": 0,
+    "Material": "LeafyGrass",
+    "Color": [
+     0.2745,
+     0.4078,
+     0.1804
+    ],
+    "TopSurface": "Smooth",
+    "BottomSurface": "Smooth",
+    "Shape": "Block"
+   }
+  }
+ ]
+}

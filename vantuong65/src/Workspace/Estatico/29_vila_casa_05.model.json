@@ -1,0 +1,2099 @@
+{
+ "ClassName": "Model",
+ "Properties": {
+  "LevelOfDetail": {
+   "Enum": 4
+  },
+  "ModelStreamingMode": "Atomic",
+  "WorldPivotData": {
+   "OptionalCFrame": {
+    "position": [
+     -1483.01,
+     47.43,
+     -1793.506
+    ],
+    "orientation": [
+     [
+      0.9359,
+      0,
+      -0.352266
+     ],
+     [
+      0,
+      1,
+      0
+     ],
+     [
+      0.352266,
+      0,
+      0.9359
+     ]
+    ]
+   }
+  },
+  "Attributes": {
+   "Attributes": {
+    "VT65Estatico": {
+     "Bool": true
+    },
+    "VT65Chave": {
+     "String": "vila_casa_05"
+    }
+   }
+  }
+ },
+ "Children": [
+  {
+   "Name": "Colisao_jarro_Node",
+   "ClassName": "Model",
+   "Children": [
+    {
+     "Name": "Colisao_jarro",
+     "ClassName": "MeshPart",
+     "Properties": {
+      "MeshId": "rbxassetid://125116276726775",
+      "InitialSize": [
+       2.1431,
+       2.5,
+       2.1431
+      ],
+      "Size": [
+       3.3432,
+       3.9,
+       3.3432
+      ],
+      "CFrame": {
+       "CFrame": {
+        "position": [
+         -1478.7932,
+         49.4628,
+         -1813.084
+        ],
+        "orientation": [
+         [
+          0.9359,
+          0,
+          -0.352266
+         ],
+         [
+          0,
+          1,
+          0
+         ],
+         [
+          0.352266,
+          0,
+          0.9359
+         ]
+        ]
+       }
+      },
+      "Anchored": true,
+      "CanCollide": true,
+      "CanQuery": true,
+      "CanTouch": false,
+      "CastShadow": false,
+      "Transparency": 1,
+      "CollisionFidelity": "Box",
+      "Attributes": {
+       "Attributes": {
+        "Material": {
+         "String": "Ceramic"
+        }
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "Name": "Colisao_cerca2_Node",
+   "ClassName": "Model",
+   "Children": [
+    {
+     "Name": "Colisao_cerca2",
+     "ClassName": "MeshPart",
+     "Properties": {
+      "MeshId": "rbxassetid://111534623082748",
+      "InitialSize": [
+       8.5715,
+       3.5715,
+       0.2854
+      ],
+      "Size": [
+       13.3716,
+       5.5716,
+       0.4452
+      ],
+      "CFrame": {
+       "CFrame": {
+        "position": [
+         -1480.1588,
+         50.2992,
+         -1816.5736
+        ],
+        "orientation": [
+         [
+          0.9359,
+          0,
+          -0.352266
+         ],
+         [
+          0,
+          1,
+          0
+         ],
+         [
+          0.352266,
+          0,
+          0.9359
+         ]
+        ]
+       }
+      },
+      "Anchored": true,
+      "CanCollide": true,
+      "CanQuery": true,
+      "CanTouch": false,
+      "CastShadow": false,
+      "Transparency": 1,
+      "CollisionFidelity": "Box",
+      "Attributes": {
+       "Attributes": {
+        "Material": {
+         "String": "Bamboo"
+        }
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "Name": "Colisao_cerca0_Node",
+   "ClassName": "Model",
+   "Children": [
+    {
+     "Name": "Colisao_cerca0",
+     "ClassName": "MeshPart",
+     "Properties": {
+      "MeshId": "rbxassetid://84202503210797",
+      "InitialSize": [
+       4.2854,
+       3.5715,
+       0.2854
+      ],
+      "Size": [
+       6.6852,
+       5.5716,
+       0.4452
+      ],
+      "CFrame": {
+       "CFrame": {
+        "position": [
+         -1464.5156,
+         50.2992,
+         -1810.6864
+        ],
+        "orientation": [
+         [
+          0.9359,
+          0,
+          -0.352266
+         ],
+         [
+          0,
+          1,
+          0
+         ],
+         [
+          0.352266,
+          0,
+          0.9359
+         ]
+        ]
+       }
+      },
+      "Anchored": true,
+      "CanCollide": true,
+      "CanQuery": true,
+      "CanTouch": false,
+      "CastShadow": false,
+      "Transparency": 1,
+      "CollisionFidelity": "Box",
+      "Attributes": {
+       "Attributes": {
+        "Material": {
+         "String": "Bamboo"
+        }
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "Name": "Colisao_abrigo_Node",
+   "ClassName": "Model",
+   "Children": [
+    {
+     "Name": "Colisao_abrigo",
+     "ClassName": "MeshPart",
+     "Properties": {
+      "MeshId": "rbxassetid://137596788644787",
+      "InitialSize": [
+       9.2854,
+       2.6785,
+       7.8569
+      ],
+      "Size": [
+       14.4852,
+       4.1784,
+       12.2568
+      ],
+      "CFrame": {
+       "CFrame": {
+        "position": [
+         -1490.8676,
+         49.602,
+         -1778.6356
+        ],
+        "orientation": [
+         [
+          0.9359,
+          0,
+          -0.352266
+         ],
+         [
+          0,
+          1,
+          0
+         ],
+         [
+          0.352266,
+          0,
+          0.9359
+         ]
+        ]
+       }
+      },
+      "Anchored": true,
+      "CanCollide": true,
+      "CanQuery": true,
+      "CanTouch": false,
+      "CastShadow": false,
+      "Transparency": 1,
+      "CollisionFidelity": "Box",
+      "Attributes": {
+       "Attributes": {
+        "Material": {
+         "String": "Ground"
+        }
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "Name": "Colisao_lu1_Node",
+   "ClassName": "Model",
+   "Children": [
+    {
+     "Name": "Colisao_lu1",
+     "ClassName": "MeshPart",
+     "Properties": {
+      "MeshId": "rbxassetid://102605595410020",
+      "InitialSize": [
+       1.5177,
+       1.7854,
+       1.5177
+      ],
+      "Size": [
+       2.3676,
+       2.7852,
+       2.3676
+      ],
+      "CFrame": {
+       "CFrame": {
+        "position": [
+         -1491.7244,
+         49.7412,
+         -1797.7096
+        ],
+        "orientation": [
+         [
+          0.9359,
+          0,
+          -0.352266
+         ],
+         [
+          0,
+          1,
+          0
+         ],
+         [
+          0.352266,
+          0,
+          0.9359
+         ]
+        ]
+       }
+      },
+      "Anchored": true,
+      "CanCollide": true,
+      "CanQuery": true,
+      "CanTouch": false,
+      "CastShadow": false,
+      "Transparency": 1,
+      "CollisionFidelity": "Box",
+      "Attributes": {
+       "Attributes": {
+        "Material": {
+         "String": "Ceramic"
+        }
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "Name": "Colisao_lu0_Node",
+   "ClassName": "Model",
+   "Children": [
+    {
+     "Name": "Colisao_lu0",
+     "ClassName": "MeshPart",
+     "Properties": {
+      "MeshId": "rbxassetid://122083483771469",
+      "InitialSize": [
+       1.67,
+       1.9646,
+       1.67
+      ],
+      "Size": [
+       2.6052,
+       3.0648,
+       2.6052
+      ],
+      "CFrame": {
+       "CFrame": {
+        "position": [
+         -1490.7428,
+         49.8804,
+         -1800.3172
+        ],
+        "orientation": [
+         [
+          0.9359,
+          0,
+          -0.352266
+         ],
+         [
+          0,
+          1,
+          0
+         ],
+         [
+          0.352266,
+          0,
+          0.9359
+         ]
+        ]
+       }
+      },
+      "Anchored": true,
+      "CanCollide": true,
+      "CanQuery": true,
+      "CanTouch": false,
+      "CastShadow": false,
+      "Transparency": 1,
+      "CollisionFidelity": "Box",
+      "Attributes": {
+       "Attributes": {
+        "Material": {
+         "String": "Ceramic"
+        }
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "Name": "Colisao_bep_Node",
+   "ClassName": "Model",
+   "Children": [
+    {
+     "Name": "Colisao_bep",
+     "ClassName": "MeshPart",
+     "Properties": {
+      "MeshId": "rbxassetid://130588590496089",
+      "InitialSize": [
+       2.6785,
+       1.4285,
+       3.5715
+      ],
+      "Size": [
+       4.1784,
+       2.2284,
+       5.5716
+      ],
+      "CFrame": {
+       "CFrame": {
+        "position": [
+         -1486.106,
+         49.4628,
+         -1806.3112
+        ],
+        "orientation": [
+         [
+          0.9359,
+          0,
+          -0.352266
+         ],
+         [
+          0,
+          1,
+          0
+         ],
+         [
+          0.352266,
+          0,
+          0.9359
+         ]
+        ]
+       }
+      },
+      "Anchored": true,
+      "CanCollide": true,
+      "CanQuery": true,
+      "CanTouch": false,
+      "CastShadow": false,
+      "Transparency": 1,
+      "CollisionFidelity": "Box",
+      "Attributes": {
+       "Attributes": {
+        "Material": {
+         "String": "Ground"
+        }
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "Name": "Colisao_c_dir_2_Node",
+   "ClassName": "Model",
+   "Children": [
+    {
+     "Name": "Colisao_c_dir_2",
+     "ClassName": "MeshPart",
+     "Properties": {
+      "MeshId": "rbxassetid://115283053515675",
+      "InitialSize": [
+       0.5,
+       3.3931,
+       1.9646
+      ],
+      "Size": [
+       0.78,
+       5.2932,
+       3.0648
+      ],
+      "CFrame": {
+       "CFrame": {
+        "position": [
+         -1491.7124,
+         59.91,
+         -1802.17
+        ],
+        "orientation": [
+         [
+          0.9359,
+          0,
+          -0.352266
+         ],
+         [
+          0,
+          1,
+          0
+         ],
+         [
+          0.352266,
+          0,
+          0.9359
+         ]
+        ]
+       }
+      },
+      "Anchored": true,
+      "CanCollide": true,
+      "CanQuery": true,
+      "CanTouch": false,
+      "CastShadow": false,
+      "Transparency": 1,
+      "CollisionFidelity": "Box",
+      "Attributes": {
+       "Attributes": {
+        "Material": {
+         "String": "Earth"
+        }
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "Name": "Colisao_tel_agua1_Node",
+   "ClassName": "Model",
+   "Children": [
+    {
+     "Name": "Colisao_tel_agua1",
+     "ClassName": "MeshPart",
+     "Properties": {
+      "MeshId": "rbxassetid://103820009002754",
+      "InitialSize": [
+       16.6431,
+       5.7892,
+       7.0285
+      ],
+      "Size": [
+       25.9632,
+       9.0312,
+       10.9644
+      ],
+      "CFrame": {
+       "CFrame": {
+        "position": [
+         -1481.5484,
+         66.954,
+         -1793.9032
+        ],
+        "orientation": [
+         [
+          0.9359,
+          0,
+          -0.352266
+         ],
+         [
+          0,
+          1,
+          0
+         ],
+         [
+          0.352266,
+          0,
+          0.9359
+         ]
+        ]
+       }
+      },
+      "Anchored": true,
+      "CanCollide": true,
+      "CanQuery": true,
+      "CanTouch": false,
+      "CastShadow": false,
+      "Transparency": 1,
+      "CollisionFidelity": "Box",
+      "Attributes": {
+       "Attributes": {
+        "Material": {
+         "String": "Thatch"
+        }
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "Name": "Colisao_c_porta0_batente0_Node",
+   "ClassName": "Model",
+   "Children": [
+    {
+     "Name": "Colisao_c_porta0_batente0",
+     "ClassName": "MeshPart",
+     "Properties": {
+      "MeshId": "rbxassetid://71753932416694",
+      "InitialSize": [
+       0.2146,
+       8.9646,
+       0.6069
+      ],
+      "Size": [
+       0.3348,
+       13.9848,
+       0.9468
+      ],
+      "CFrame": {
+       "CFrame": {
+        "position": [
+         -1470.2072,
+         54.5052,
+         -1806.1612
+        ],
+        "orientation": [
+         [
+          0.9359,
+          0,
+          -0.352266
+         ],
+         [
+          0,
+          1,
+          0
+         ],
+         [
+          0.352266,
+          0,
+          0.9359
+         ]
+        ]
+       }
+      },
+      "Anchored": true,
+      "CanCollide": true,
+      "CanQuery": true,
+      "CanTouch": false,
+      "CastShadow": false,
+      "Transparency": 1,
+      "CollisionFidelity": "Box",
+      "Attributes": {
+       "Attributes": {
+        "Material": {
+         "String": "Wood"
+        }
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "Name": "Colisao_c_frente_2_Node",
+   "ClassName": "Model",
+   "Children": [
+    {
+     "Name": "Colisao_c_frente_2",
+     "ClassName": "MeshPart",
+     "Properties": {
+      "MeshId": "rbxassetid://77024703598396",
+      "InitialSize": [
+       8.3569,
+       9.6431,
+       0.5
+      ],
+      "Size": [
+       13.0368,
+       15.0432,
+       0.78
+      ],
+      "CFrame": {
+       "CFrame": {
+        "position": [
+         -1481.9924,
+         55.0344,
+         -1810.5964
+        ],
+        "orientation": [
+         [
+          0.9359,
+          0,
+          -0.352266
+         ],
+         [
+          0,
+          1,
+          0
+         ],
+         [
+          0.352266,
+          0,
+          0.9359
+         ]
+        ]
+       }
+      },
+      "Anchored": true,
+      "CanCollide": true,
+      "CanQuery": true,
+      "CanTouch": false,
+      "CastShadow": false,
+      "Transparency": 1,
+      "CollisionFidelity": "Box",
+      "Attributes": {
+       "Attributes": {
+        "Material": {
+         "String": "Earth"
+        }
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "Name": "Colisao_tel_oitao1_Node",
+   "ClassName": "Model",
+   "Children": [
+    {
+     "Name": "Colisao_tel_oitao1",
+     "ClassName": "MeshPart",
+     "Properties": {
+      "MeshId": "rbxassetid://131236934134753",
+      "InitialSize": [
+       0.5,
+       4.6069,
+       13.5715
+      ],
+      "Size": [
+       0.78,
+       7.1868,
+       21.1716
+      ],
+      "CFrame": {
+       "CFrame": {
+        "position": [
+         -1491.32,
+         66.15,
+         -1803.2128
+        ],
+        "orientation": [
+         [
+          0.9359,
+          0,
+          -0.352266
+         ],
+         [
+          0,
+          1,
+          0
+         ],
+         [
+          0.352266,
+          0,
+          0.9359
+         ]
+        ]
+       }
+      },
+      "Anchored": true,
+      "CanCollide": true,
+      "CanQuery": true,
+      "CanTouch": false,
+      "CastShadow": false,
+      "Transparency": 1,
+      "CollisionFidelity": "Box",
+      "Attributes": {
+       "Attributes": {
+        "Material": {
+         "String": "Earth"
+        }
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "Name": "Colisao_tel_agua0_Node",
+   "ClassName": "Model",
+   "Children": [
+    {
+     "Name": "Colisao_tel_agua0",
+     "ClassName": "MeshPart",
+     "Properties": {
+      "MeshId": "rbxassetid://129764435422464",
+      "InitialSize": [
+       16.6431,
+       5.7892,
+       7.0285
+      ],
+      "Size": [
+       25.9632,
+       9.0312,
+       10.9644
+      ],
+      "CFrame": {
+       "CFrame": {
+        "position": [
+         -1477.8344,
+         66.954,
+         -1803.7696
+        ],
+        "orientation": [
+         [
+          0.9359,
+          0,
+          -0.352266
+         ],
+         [
+          0,
+          1,
+          0
+         ],
+         [
+          0.352266,
+          0,
+          0.9359
+         ]
+        ]
+       }
+      },
+      "Anchored": true,
+      "CanCollide": true,
+      "CanQuery": true,
+      "CanTouch": false,
+      "CastShadow": false,
+      "Transparency": 1,
+      "CollisionFidelity": "Box",
+      "Attributes": {
+       "Attributes": {
+        "Material": {
+         "String": "Thatch"
+        }
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "Name": "Trim_P_Node",
+   "ClassName": "Model",
+   "Children": [
+    {
+     "Name": "Trim_P",
+     "ClassName": "MeshPart",
+     "Properties": {
+      "MeshId": "rbxassetid://97594806545449",
+      "InitialSize": [
+       18.2146,
+       0.5354,
+       15.3569
+      ],
+      "Size": [
+       28.4148,
+       0.8352,
+       23.9568
+      ],
+      "CFrame": {
+       "CFrame": {
+        "position": [
+         -1479.692,
+         47.9304,
+         -1798.8364
+        ],
+        "orientation": [
+         [
+          0.9359,
+          0,
+          -0.352266
+         ],
+         [
+          0,
+          1,
+          0
+         ],
+         [
+          0.352266,
+          0,
+          0.9359
+         ]
+        ]
+       }
+      },
+      "Anchored": true,
+      "CanCollide": false,
+      "CanQuery": false,
+      "CanTouch": false,
+      "CastShadow": true,
+      "Transparency": 0,
+      "CollisionFidelity": "Default"
+     },
+     "Children": [
+      {
+       "Name": "SurfaceAppearance",
+       "ClassName": "SurfaceAppearance",
+       "Properties": {
+        "AlphaMode": "Overlay",
+        "ColorMap": "rbxassetid://100696626532955",
+        "NormalMap": "rbxassetid://71715211798756",
+        "RoughnessMap": "rbxassetid://85548114651624",
+        "MetalnessMap": "rbxassetid://138924186174796"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "Name": "Colisao_c_porta0_batente1_Node",
+   "ClassName": "Model",
+   "Children": [
+    {
+     "Name": "Colisao_c_porta0_batente1",
+     "ClassName": "MeshPart",
+     "Properties": {
+      "MeshId": "rbxassetid://130259607219454",
+      "InitialSize": [
+       0.2146,
+       8.9646,
+       0.6069
+      ],
+      "Size": [
+       0.3348,
+       13.9848,
+       0.9468
+      ],
+      "CFrame": {
+       "CFrame": {
+        "position": [
+         -1475.7344,
+         54.5052,
+         -1808.2408
+        ],
+        "orientation": [
+         [
+          0.9359,
+          0,
+          -0.352266
+         ],
+         [
+          0,
+          1,
+          0
+         ],
+         [
+          0.352266,
+          0,
+          0.9359
+         ]
+        ]
+       }
+      },
+      "Anchored": true,
+      "CanCollide": true,
+      "CanQuery": true,
+      "CanTouch": false,
+      "CastShadow": false,
+      "Transparency": 1,
+      "CollisionFidelity": "Box",
+      "Attributes": {
+       "Attributes": {
+        "Material": {
+         "String": "Wood"
+        }
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "Name": "Telhado_Node",
+   "ClassName": "Model",
+   "Children": [
+    {
+     "Name": "Telhado",
+     "ClassName": "MeshPart",
+     "Properties": {
+      "MeshId": "rbxassetid://109743311155389",
+      "InitialSize": [
+       18.6062,
+       8.3038,
+       17.2308
+      ],
+      "Size": [
+       29.0256,
+       12.954,
+       26.88
+      ],
+      "CFrame": {
+       "CFrame": {
+        "position": [
+         -1479.6968,
+         65.7012,
+         -1798.8148
+        ],
+        "orientation": [
+         [
+          0.9359,
+          0,
+          -0.352266
+         ],
+         [
+          0,
+          1,
+          0
+         ],
+         [
+          0.352266,
+          0,
+          0.9359
+         ]
+        ]
+       }
+      },
+      "Anchored": true,
+      "CanCollide": false,
+      "CanQuery": false,
+      "CanTouch": false,
+      "CastShadow": true,
+      "Transparency": 0,
+      "CollisionFidelity": "Default"
+     },
+     "Children": [
+      {
+       "Name": "SurfaceAppearance",
+       "ClassName": "SurfaceAppearance",
+       "Properties": {
+        "AlphaMode": "Overlay",
+        "ColorMap": "rbxassetid://75273959589477",
+        "NormalMap": "rbxassetid://133554794845398",
+        "RoughnessMap": "rbxassetid://70685504398225",
+        "MetalnessMap": "rbxassetid://109994254315822"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "Name": "Colisao_c_jan0_Node",
+   "ClassName": "Model",
+   "Children": [
+    {
+     "Name": "Colisao_c_jan0",
+     "ClassName": "MeshPart",
+     "Properties": {
+      "MeshId": "rbxassetid://85391600852357",
+      "InitialSize": [
+       0.5,
+       2.5,
+       1.9646
+      ],
+      "Size": [
+       0.78,
+       3.9,
+       3.0648
+      ],
+      "CFrame": {
+       "CFrame": {
+        "position": [
+         -1491.7124,
+         55.3128,
+         -1802.17
+        ],
+        "orientation": [
+         [
+          0.9359,
+          0,
+          -0.352266
+         ],
+         [
+          0,
+          1,
+          0
+         ],
+         [
+          0.352266,
+          0,
+          0.9359
+         ]
+        ]
+       }
+      },
+      "Anchored": true,
+      "CanCollide": true,
+      "CanQuery": false,
+      "CanTouch": false,
+      "CastShadow": false,
+      "Transparency": 1,
+      "CollisionFidelity": "Box",
+      "Attributes": {
+       "Attributes": {
+        "Material": {
+         "String": "Wood"
+        }
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "Name": "Colisao_c_dir_3_Node",
+   "ClassName": "Model",
+   "Children": [
+    {
+     "Name": "Colisao_c_dir_3",
+     "ClassName": "MeshPart",
+     "Properties": {
+      "MeshId": "rbxassetid://82413872081254",
+      "InitialSize": [
+       0.5,
+       9.6431,
+       4.5892
+      ],
+      "Size": [
+       0.78,
+       15.0432,
+       7.1592
+      ],
+      "CFrame": {
+       "CFrame": {
+        "position": [
+         -1493.5124,
+         55.0344,
+         -1797.3868
+        ],
+        "orientation": [
+         [
+          0.9359,
+          0,
+          -0.352266
+         ],
+         [
+          0,
+          1,
+          0
+         ],
+         [
+          0.352266,
+          0,
+          0.9359
+         ]
+        ]
+       }
+      },
+      "Anchored": true,
+      "CanCollide": true,
+      "CanQuery": true,
+      "CanTouch": false,
+      "CastShadow": false,
+      "Transparency": 1,
+      "CollisionFidelity": "Box",
+      "Attributes": {
+       "Attributes": {
+        "Material": {
+         "String": "Earth"
+        }
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "Name": "Colisao_cho_Node",
+   "ClassName": "Model",
+   "Children": [
+    {
+     "Name": "Colisao_cho",
+     "ClassName": "MeshPart",
+     "Properties": {
+      "MeshId": "rbxassetid://88970376905248",
+      "InitialSize": [
+       6.7854,
+       1.6069,
+       3.5715
+      ],
+      "Size": [
+       10.5852,
+       2.5068,
+       5.5716
+      ],
+      "CFrame": {
+       "CFrame": {
+        "position": [
+         -1476.5912,
+         49.602,
+         -1790.4664
+        ],
+        "orientation": [
+         [
+          0.9359,
+          0,
+          -0.352266
+         ],
+         [
+          0,
+          1,
+          0
+         ],
+         [
+          0.352266,
+          0,
+          0.9359
+         ]
+        ]
+       }
+      },
+      "Anchored": true,
+      "CanCollide": true,
+      "CanQuery": true,
+      "CanTouch": false,
+      "CastShadow": false,
+      "Transparency": 1,
+      "CollisionFidelity": "Box",
+      "Attributes": {
+       "Attributes": {
+        "Material": {
+         "String": "Wood"
+        }
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "Name": "Colisao_c_dir_1_Node",
+   "ClassName": "Model",
+   "Children": [
+    {
+     "Name": "Colisao_c_dir_1",
+     "ClassName": "MeshPart",
+     "Properties": {
+      "MeshId": "rbxassetid://119470857331466",
+      "InitialSize": [
+       0.5,
+       3.75,
+       1.9646
+      ],
+      "Size": [
+       0.78,
+       5.85,
+       3.0648
+      ],
+      "CFrame": {
+       "CFrame": {
+        "position": [
+         -1491.7124,
+         50.4384,
+         -1802.17
+        ],
+        "orientation": [
+         [
+          0.9359,
+          0,
+          -0.352266
+         ],
+         [
+          0,
+          1,
+          0
+         ],
+         [
+          0.352266,
+          0,
+          0.9359
+         ]
+        ]
+       }
+      },
+      "Anchored": true,
+      "CanCollide": true,
+      "CanQuery": true,
+      "CanTouch": false,
+      "CastShadow": false,
+      "Transparency": 1,
+      "CollisionFidelity": "Box",
+      "Attributes": {
+       "Attributes": {
+        "Material": {
+         "String": "Earth"
+        }
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "Name": "Colisao_tel_oitao-1_Node",
+   "ClassName": "Model",
+   "Children": [
+    {
+     "Name": "Colisao_tel_oitao-1",
+     "ClassName": "MeshPart",
+     "Properties": {
+      "MeshId": "rbxassetid://127669841139293",
+      "InitialSize": [
+       0.5,
+       4.6069,
+       13.5715
+      ],
+      "Size": [
+       0.78,
+       7.1868,
+       21.1716
+      ],
+      "CFrame": {
+       "CFrame": {
+        "position": [
+         -1468.064,
+         66.15,
+         -1794.46
+        ],
+        "orientation": [
+         [
+          0.9359,
+          0,
+          -0.352266
+         ],
+         [
+          0,
+          1,
+          0
+         ],
+         [
+          0.352266,
+          0,
+          0.9359
+         ]
+        ]
+       }
+      },
+      "Anchored": true,
+      "CanCollide": true,
+      "CanQuery": true,
+      "CanTouch": false,
+      "CastShadow": false,
+      "Transparency": 1,
+      "CollisionFidelity": "Box",
+      "Attributes": {
+       "Attributes": {
+        "Material": {
+         "String": "Earth"
+        }
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "Name": "Colisao_c_fundo_0_Node",
+   "ClassName": "Model",
+   "Children": [
+    {
+     "Name": "Colisao_c_fundo_0",
+     "ClassName": "MeshPart",
+     "Properties": {
+      "MeshId": "rbxassetid://82163400469837",
+      "InitialSize": [
+       16.4285,
+       9.6431,
+       0.5
+      ],
+      "Size": [
+       25.6284,
+       15.0432,
+       0.78
+      ],
+      "CFrame": {
+       "CFrame": {
+        "position": [
+         -1483.2836,
+         55.0344,
+         -1789.294
+        ],
+        "orientation": [
+         [
+          0.9359,
+          0,
+          -0.352266
+         ],
+         [
+          0,
+          1,
+          0
+         ],
+         [
+          0.352266,
+          0,
+          0.9359
+         ]
+        ]
+       }
+      },
+      "Anchored": true,
+      "CanCollide": true,
+      "CanQuery": true,
+      "CanTouch": false,
+      "CastShadow": false,
+      "Transparency": 1,
+      "CollisionFidelity": "Box",
+      "Attributes": {
+       "Attributes": {
+        "Material": {
+         "String": "Earth"
+        }
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "Name": "Colisao_c_nen0_Node",
+   "ClassName": "Model",
+   "Children": [
+    {
+     "Name": "Colisao_c_nen0",
+     "ClassName": "MeshPart",
+     "Properties": {
+      "MeshId": "rbxassetid://95682079712294",
+      "InitialSize": [
+       18.2146,
+       0.5354,
+       15.3569
+      ],
+      "Size": [
+       28.4148,
+       0.8352,
+       23.9568
+      ],
+      "CFrame": {
+       "CFrame": {
+        "position": [
+         -1479.692,
+         47.9304,
+         -1798.8364
+        ],
+        "orientation": [
+         [
+          0.9359,
+          0,
+          -0.352266
+         ],
+         [
+          0,
+          1,
+          0
+         ],
+         [
+          0.352266,
+          0,
+          0.9359
+         ]
+        ]
+       }
+      },
+      "Anchored": true,
+      "CanCollide": true,
+      "CanQuery": true,
+      "CanTouch": false,
+      "CastShadow": false,
+      "Transparency": 1,
+      "CollisionFidelity": "Box",
+      "Attributes": {
+       "Attributes": {
+        "Material": {
+         "String": "Ground"
+        }
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "Name": "Colisao_c_frente_1_Node",
+   "ClassName": "Model",
+   "Children": [
+    {
+     "Name": "Colisao_c_frente_1",
+     "ClassName": "MeshPart",
+     "Properties": {
+      "MeshId": "rbxassetid://86679982347704",
+      "InitialSize": [
+       4.0,
+       0.6785,
+       0.5
+      ],
+      "Size": [
+       6.24,
+       1.0584,
+       0.78
+      ],
+      "CFrame": {
+       "CFrame": {
+        "position": [
+         -1472.9708,
+         62.0268,
+         -1807.2016
+        ],
+        "orientation": [
+         [
+          0.9359,
+          0,
+          -0.352266
+         ],
+         [
+          0,
+          1,
+          0
+         ],
+         [
+          0.352266,
+          0,
+          0.9359
+         ]
+        ]
+       }
+      },
+      "Anchored": true,
+      "CanCollide": true,
+      "CanQuery": true,
+      "CanTouch": false,
+      "CastShadow": false,
+      "Transparency": 1,
+      "CollisionFidelity": "Box",
+      "Attributes": {
+       "Attributes": {
+        "Material": {
+         "String": "Earth"
+        }
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "Name": "Trim_W_Node",
+   "ClassName": "Model",
+   "Children": [
+    {
+     "Name": "Trim_W",
+     "ClassName": "MeshPart",
+     "Properties": {
+      "MeshId": "rbxassetid://73431341079554",
+      "InitialSize": [
+       16.4285,
+       14.25,
+       13.5715
+      ],
+      "Size": [
+       25.6284,
+       22.23,
+       21.1716
+      ],
+      "CFrame": {
+       "CFrame": {
+        "position": [
+         -1479.692,
+         58.6284,
+         -1798.8364
+        ],
+        "orientation": [
+         [
+          0.9359,
+          0,
+          -0.352266
+         ],
+         [
+          0,
+          1,
+          0
+         ],
+         [
+          0.352266,
+          0,
+          0.9359
+         ]
+        ]
+       }
+      },
+      "Anchored": true,
+      "CanCollide": false,
+      "CanQuery": false,
+      "CanTouch": false,
+      "CastShadow": true,
+      "Transparency": 0,
+      "CollisionFidelity": "Default"
+     },
+     "Children": [
+      {
+       "Name": "SurfaceAppearance",
+       "ClassName": "SurfaceAppearance",
+       "Properties": {
+        "AlphaMode": "Overlay",
+        "ColorMap": "rbxassetid://138474947442823",
+        "NormalMap": "rbxassetid://106766477323311",
+        "RoughnessMap": "rbxassetid://91053727063098",
+        "MetalnessMap": "rbxassetid://109994254315822"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "Name": "Mobilia_Node",
+   "ClassName": "Model",
+   "Children": [
+    {
+     "Name": "Mobilia",
+     "ClassName": "MeshPart",
+     "Properties": {
+      "MeshId": "rbxassetid://94892282475916",
+      "InitialSize": [
+       15.6885,
+       6.9562,
+       12.9715
+      ],
+      "Size": [
+       24.474,
+       10.8516,
+       20.2356
+      ],
+      "CFrame": {
+       "CFrame": {
+        "position": [
+         -1479.9704,
+         53.754,
+         -1798.4596
+        ],
+        "orientation": [
+         [
+          0.9359,
+          0,
+          -0.352266
+         ],
+         [
+          0,
+          1,
+          0
+         ],
+         [
+          0.352266,
+          0,
+          0.9359
+         ]
+        ]
+       }
+      },
+      "Anchored": true,
+      "CanCollide": false,
+      "CanQuery": false,
+      "CanTouch": false,
+      "CastShadow": true,
+      "Transparency": 0,
+      "CollisionFidelity": "Default"
+     },
+     "Children": [
+      {
+       "Name": "SurfaceAppearance",
+       "ClassName": "SurfaceAppearance",
+       "Properties": {
+        "AlphaMode": "Overlay",
+        "ColorMap": "rbxassetid://111852017614016",
+        "NormalMap": "rbxassetid://116558573560559",
+        "RoughnessMap": "rbxassetid://113539383538969",
+        "MetalnessMap": "rbxassetid://109994254315822"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "Name": "Colisao_c_dir_0_Node",
+   "ClassName": "Model",
+   "Children": [
+    {
+     "Name": "Colisao_c_dir_0",
+     "ClassName": "MeshPart",
+     "Properties": {
+      "MeshId": "rbxassetid://114899765980958",
+      "InitialSize": [
+       0.5,
+       9.6431,
+       6.0177
+      ],
+      "Size": [
+       0.78,
+       15.0432,
+       9.3876
+      ],
+      "CFrame": {
+       "CFrame": {
+        "position": [
+         -1489.5188,
+         55.0344,
+         -1807.9972
+        ],
+        "orientation": [
+         [
+          0.9359,
+          0,
+          -0.352266
+         ],
+         [
+          0,
+          1,
+          0
+         ],
+         [
+          0.352266,
+          0,
+          0.9359
+         ]
+        ]
+       }
+      },
+      "Anchored": true,
+      "CanCollide": true,
+      "CanQuery": true,
+      "CanTouch": false,
+      "CastShadow": false,
+      "Transparency": 1,
+      "CollisionFidelity": "Box",
+      "Attributes": {
+       "Attributes": {
+        "Material": {
+         "String": "Earth"
+        }
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "Name": "Colisao_c_frente_0_Node",
+   "ClassName": "Model",
+   "Children": [
+    {
+     "Name": "Colisao_c_frente_0",
+     "ClassName": "MeshPart",
+     "Properties": {
+      "MeshId": "rbxassetid://75485679582170",
+      "InitialSize": [
+       4.0715,
+       9.6431,
+       0.5
+      ],
+      "Size": [
+       6.3516,
+       15.0432,
+       0.78
+      ],
+      "CFrame": {
+       "CFrame": {
+        "position": [
+         -1467.0788,
+         55.0344,
+         -1804.9828
+        ],
+        "orientation": [
+         [
+          0.9359,
+          0,
+          -0.352266
+         ],
+         [
+          0,
+          1,
+          0
+         ],
+         [
+          0.352266,
+          0,
+          0.9359
+         ]
+        ]
+       }
+      },
+      "Anchored": true,
+      "CanCollide": true,
+      "CanQuery": true,
+      "CanTouch": false,
+      "CastShadow": false,
+      "Transparency": 1,
+      "CollisionFidelity": "Box",
+      "Attributes": {
+       "Attributes": {
+        "Material": {
+         "String": "Earth"
+        }
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "Name": "Colisao_c_esq_0_Node",
+   "ClassName": "Model",
+   "Children": [
+    {
+     "Name": "Colisao_c_esq_0",
+     "ClassName": "MeshPart",
+     "Properties": {
+      "MeshId": "rbxassetid://115252784139104",
+      "InitialSize": [
+       0.5,
+       9.6431,
+       12.5715
+      ],
+      "Size": [
+       0.78,
+       15.0432,
+       19.6116
+      ],
+      "CFrame": {
+       "CFrame": {
+        "position": [
+         -1468.064,
+         55.0344,
+         -1794.46
+        ],
+        "orientation": [
+         [
+          0.9359,
+          0,
+          -0.352266
+         ],
+         [
+          0,
+          1,
+          0
+         ],
+         [
+          0.352266,
+          0,
+          0.9359
+         ]
+        ]
+       }
+      },
+      "Anchored": true,
+      "CanCollide": true,
+      "CanQuery": true,
+      "CanTouch": false,
+      "CastShadow": false,
+      "Transparency": 1,
+      "CollisionFidelity": "Box",
+      "Attributes": {
+       "Attributes": {
+        "Material": {
+         "String": "Earth"
+        }
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "Name": "Trim_O_Node",
+   "ClassName": "Model",
+   "Children": [
+    {
+     "Name": "Trim_O",
+     "ClassName": "MeshPart",
+     "Properties": {
+      "MeshId": "rbxassetid://138565020942119",
+      "InitialSize": [
+       9.2631,
+       3.5846,
+       8.2338
+      ],
+      "Size": [
+       14.4504,
+       5.592,
+       12.8448
+      ],
+      "CFrame": {
+       "CFrame": {
+        "position": [
+         -1490.8028,
+         50.3088,
+         -1778.8936
+        ],
+        "orientation": [
+         [
+          0.9359,
+          0,
+          -0.352266
+         ],
+         [
+          0,
+          1,
+          0
+         ],
+         [
+          0.352266,
+          0,
+          0.9359
+         ]
+        ]
+       }
+      },
+      "Anchored": true,
+      "CanCollide": false,
+      "CanQuery": false,
+      "CanTouch": false,
+      "CastShadow": true,
+      "Transparency": 0,
+      "CollisionFidelity": "Default"
+     },
+     "Children": [
+      {
+       "Name": "SurfaceAppearance",
+       "ClassName": "SurfaceAppearance",
+       "Properties": {
+        "AlphaMode": "Overlay",
+        "ColorMap": "rbxassetid://98817676281040",
+        "NormalMap": "rbxassetid://97059026021565",
+        "RoughnessMap": "rbxassetid://70521593518624",
+        "MetalnessMap": "rbxassetid://109994254315822"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "Name": "Colisao_altar_Node",
+   "ClassName": "Model",
+   "Children": [
+    {
+     "Name": "Colisao_altar",
+     "ClassName": "MeshPart",
+     "Properties": {
+      "MeshId": "rbxassetid://81530328303997",
+      "InitialSize": [
+       2.8569,
+       3.3931,
+       1.5
+      ],
+      "Size": [
+       4.4568,
+       5.2932,
+       2.34
+      ],
+      "CFrame": {
+       "CFrame": {
+        "position": [
+         -1488.1496,
+         50.9952,
+         -1792.972
+        ],
+        "orientation": [
+         [
+          0.9359,
+          0,
+          -0.352266
+         ],
+         [
+          0,
+          1,
+          0
+         ],
+         [
+          0.352266,
+          0,
+          0.9359
+         ]
+        ]
+       }
+      },
+      "Anchored": true,
+      "CanCollide": true,
+      "CanQuery": true,
+      "CanTouch": false,
+      "CastShadow": false,
+      "Transparency": 1,
+      "CollisionFidelity": "Box",
+      "Attributes": {
+       "Attributes": {
+        "Material": {
+         "String": "Wood"
+        }
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "Name": "Trim_M_Node",
+   "ClassName": "Model",
+   "Children": [
+    {
+     "Name": "Trim_M",
+     "ClassName": "MeshPart",
+     "Properties": {
+      "MeshId": "rbxassetid://97904804697086",
+      "InitialSize": [
+       20.1785,
+       14.4123,
+       24.4562
+      ],
+      "Size": [
+       31.4784,
+       22.4832,
+       38.1516
+      ],
+      "CFrame": {
+       "CFrame": {
+        "position": [
+         -1481.7056,
+         58.6716,
+         -1797.0424
+        ],
+        "orientation": [
+         [
+          0.9359,
+          0,
+          -0.352266
+         ],
+         [
+          0,
+          1,
+          0
+         ],
+         [
+          0.352266,
+          0,
+          0.9359
+         ]
+        ]
+       }
+      },
+      "Anchored": true,
+      "CanCollide": false,
+      "CanQuery": false,
+      "CanTouch": false,
+      "CastShadow": true,
+      "Transparency": 0,
+      "CollisionFidelity": "Default"
+     },
+     "Children": [
+      {
+       "Name": "SurfaceAppearance",
+       "ClassName": "SurfaceAppearance",
+       "Properties": {
+        "AlphaMode": "Overlay",
+        "ColorMap": "rbxassetid://134979674313261",
+        "NormalMap": "rbxassetid://116858274661487",
+        "RoughnessMap": "rbxassetid://120767651982064",
+        "MetalnessMap": "rbxassetid://109994254315822"
+       }
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,29 @@
+{
+ "fonte": "Copernicus GLO-30 DSM",
+ "centro_wgs84_utm49": [
+  269680.0,
+  1692741.4
+ ],
+ "tamanho_m": [
+  14000,
+  14000
+ ],
+ "tamanho_studs": [
+  50000,
+  50000
+ ],
+ "metros_por_px": 30.0,
+ "studs_por_px": 107.14,
+ "uso": "anel de terreno distante em baixa resolução (fora da área jogável)",
+ "arquivo": "heightmap_horizonte_v0.png",
+ "bits": 16,
+ "largura_px": 467,
+ "altura_px": 467,
+ "altura_min_m": -0.01,
+ "altura_max_m": 150.3,
+ "altura_min_studs": -0.0,
+ "altura_max_studs": 536.8,
+ "valor_0": "altura_min",
+ "valor_65535": "altura_max",
+ "orientacao": "norte para cima (-Z no Roblox), leste para a direita (+X)"
+}

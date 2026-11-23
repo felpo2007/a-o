@@ -1,0 +1,141 @@
+--!strict
+-- D-212 (dono: "imagens brilhantes e realistas", "modifique as imagens das caixas"): a imagem de cada
+-- caixa de suprimentos (tools/blender/caixas_loja.py: madeira, metal ou laca, latão, estêncil e a luz
+-- da raridade) numa ImageLabel. O ID da imagem vem do servidor (Modules/ImagensUi, atributo
+-- "ImgCaixa_<id>" no ReplicatedStorage). Enquanto não chega (ou se o decal não abriu), fica o caixote
+-- 3D de antes (ReplicatedStorage.VT65CaixasArte) num ViewportFrame; quando chega, troca sozinho.
+-- Usado pela vitrine da loja (ShopController), pela aba CAIXAS e pela abertura (CaixasTela).
+local ReplicatedFirst = game:GetService("ReplicatedFirst")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local Idioma = require(ReplicatedFirst:WaitForChild("Idioma")) :: any
+
+local CaixaImagem = {}
+
+-- a luz de cada caixa (a do `acento` do caixas_loja.py): o filete e o brilho da vitrine e a luz da
+-- abertura (D-213: a abertura usa a cor da CAIXA, nunca a do item sorteado)
+CaixaImagem.ACENTO = {
+	gratuita = Color3.fromRGB(255, 158, 30),
+	recruta = Color3.fromRGB(115, 242, 89),
+	servico = Color3.fromRGB(140, 255, 140),
+	batalhao = Color3.fromRGB(89, 153, 255),
+	campanha = Color3.fromRGB(64, 242, 217),
+	veterano = Color3.fromRGB(255, 199, 64),
+	suprimentos = Color3.fromRGB(255, 128, 30),
+	especiais = Color3.fromRGB(38, 217, 255),
+	elite = Color3.fromRGB(255, 184, 46),
+	historica = Color3.fromRGB(255, 82, 51),
+} :: { [string]: Color3 }
+
+local function atributo(chave: string): number?
+	local v = ReplicatedStorage:GetAttribute(string.format("ImgCaixa_%s", chave))
+	return if type(v) == "number" and v ~= 0 then v else nil
+end
+
+-- D-219: a língua da tela (a escolhida ou, no automático, a da conta)
+local function lingua(): string
+	local a = Idioma.atual()
+	return if a == "auto" then Idioma.daConta() else a
+end
+
+-- A chave da imagem na língua (pura, para o teste): o nome em português é a imagem sem sufixo, e a
+-- tampa não tem nome.
+function CaixaImagem.chave(caixaId: string, camada: string?, idioma: string?): string
+	local base = if camada then string.format("%s_%s", caixaId, camada) else caixaId
+	if idioma and idioma ~= "pt" and camada ~= "tampa" then
+		return string.format("%s_%s", base, idioma)
+	end
+	return base
+end
+
+-- o ID da imagem da caixa, ou nil enquanto o servidor não resolveu. D-213: `camada` "corpo" (aberta,
+-- com a luz) ou "tampa" (solta), no mesmo enquadramento da fechada. D-219: na língua do jogador; se a
+-- palavra é igual à do português (ELITE em inglês), não há imagem própria e vale a original.
+function CaixaImagem.id(caixaId: string, camada: string?): number?
+	return atributo(CaixaImagem.chave(caixaId, camada, lingua())) or atributo(CaixaImagem.chave(caixaId, camada))
+end
+
+-- o caixote 3D de antes (a reserva), enquadrado de três quartos
+local function caixote3d(parent: Instance, modelo: string?): ViewportFrame
+	local vp = Instance.new("ViewportFrame")
+	vp.Name = "Caixote3D"
+	vp.Size = UDim2.fromScale(1, 1)
+	vp.BackgroundTransparency = 1
+	vp.Ambient = Color3.fromRGB(150, 146, 130)
+	vp.LightColor = Color3.fromRGB(255, 240, 214)
+	vp.LightDirection = Vector3.new(-1, -1.4, -0.6)
+	vp.Parent = parent
+	local cam = Instance.new("Camera")
+	cam.FieldOfView = 30
+	cam.Parent = vp
+	vp.CurrentCamera = cam
+	local folder = ReplicatedStorage:FindFirstChild("VT65CaixasArte")
+	local src = folder and modelo and folder:FindFirstChild(modelo)
+	local m: Model
+	if src and src:IsA("Model") then
+		m = src:Clone()
+	else
+		m = Instance.new("Model")
+		local p = Instance.new("Part")
+		p.Size = Vector3.new(2.6, 1.6, 1.6)
+		p.Color = Color3.fromRGB(96, 92, 58)
+		p.Material = Enum.Material.WoodPlanks
+		p.Anchored = true
+		p.Parent = m
+		m.PrimaryPart = p
+	end
+	m.Parent = vp
+	local cf, size = m:GetBoundingBox()
+	local d = size.Magnitude * 1.7
+	cam.CFrame = CFrame.lookAt(cf.Position + Vector3.new(d * 0.55, d * 0.42, d * 0.72), cf.Position)
+	return vp
+end
+
+-- A caixa dentro de `parent`, ocupando o pai inteiro (o pai decide o tamanho). Devolve o quadro.
+function CaixaImagem.desenha(parent: Instance, caixaId: string, modelo: string?): Frame
+	local holder = Instance.new("Frame")
+	holder.Name = "CaixaImagem"
+	holder.BackgroundTransparency = 1
+	holder.Size = UDim2.fromScale(1, 1)
+	local img = Instance.new("ImageLabel")
+	img.Name = "Imagem"
+	img.BackgroundTransparency = 1
+	img.Size = UDim2.fromScale(1, 1)
+	img.ScaleType = Enum.ScaleType.Fit
+	img.Visible = false
+	img.Parent = holder
+	local reserva: ViewportFrame? = nil
+	local function pinta()
+		local id = CaixaImagem.id(caixaId)
+		if id then
+			img.Image = string.format("rbxassetid://%d", id)
+			img.Visible = true
+			local r = reserva
+			if r then
+				r:Destroy()
+				reserva = nil
+			end
+		elseif not reserva then
+			reserva = caixote3d(holder, modelo)
+		end
+	end
+	-- D-219: repinta quando chega a imagem desta caixa (em qualquer língua) ou quando a língua muda
+	local prefixo = string.format("ImgCaixa_%s", caixaId)
+	local conn = ReplicatedStorage.AttributeChanged:Connect(function(nome: string)
+		if string.sub(nome, 1, #prefixo) == prefixo then
+			pinta()
+		end
+	end)
+	local connLingua = Idioma.Mudou:Connect(function()
+		pinta()
+	end)
+	holder.Destroying:Connect(function()
+		conn:Disconnect()
+		connLingua:Disconnect()
+	end)
+	pinta()
+	holder.Parent = parent
+	return holder
+end
+
+return CaixaImagem
